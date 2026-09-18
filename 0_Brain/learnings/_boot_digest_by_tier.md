@@ -7,7 +7,7 @@ status: live
 
 # Boot digest BY TIER — W whole, M rules-only, every project case a handle
 
-Generated 2026-09-18 10:05 from 182 lesson files (908,493 B). M 33 · MIXED 5 · W 144. 28 project CASE sections inside MIXED files are reduced to one line each: the heading and the path to read it at. W blocks are exactly what the default digest carries; M blocks drop the section index and keep the rules; a P file is a single handle. The CASES behind every rule live only in the lesson files — open one the moment its rule fires.
+Generated 2026-09-18 10:17 from 185 lesson files (918,295 B). M 33 · MIXED 5 · W 147. 28 project CASE sections inside MIXED files are reduced to one line each: the heading and the path to read it at. W blocks are exactly what the default digest carries; M blocks drop the section index and keep the rules; a P file is a single handle. The CASES behind every rule live only in the lesson files — open one the moment its rule fires.
 
 ## The T9 SSD is the master — Wednesday must be fully portable
 `2026-07-31_fully-portable-drive.md` · principle · 2026-07-31 · status: superseded — the "T9 is the master" half by [[2026-08-25_one-drive-devmaster-is-master]] (2026-08-25); the portability principle itself still lives · tier: W
@@ -6116,6 +6116,29 @@ sections (open the file for these): How to apply
 **Family:** [[2026-08-13_establish-authority-before-reconciling]] (reconciliation destroys evidence) · [[2026-09-07_a-rule-for-creation-is-not-a-mandate-to-retrofit]] (enumerate what already occupies the slot) · [[2026-09-16_what-keeps-a-seat-correct-is-not-all-in-git]] · [[2026-09-14_the-coordinator-adds-value-or-it-is-waste-three-duties-not-watching]] (duty 2: check the output as a manager).
 
 
+## An authorised sweep does not authorise what the API cascades to
+`2026-09-18_an-authorised-sweep-does-not-authorise-its-cascade.md` · principle · 2026-09-18 · status: live · tier: W
+
+**The lesson:** Kam authorising an action on a NAMED SET authorises it on that set and
+nothing else. If the API silently extends the action to related objects, the extension is
+**unauthorised** — it is a separate act that nobody approved, and it must be enumerated and
+consented to before the sweep runs, not discovered after.
+
+**How to apply:**
+1. **Before any bulk mutation, enumerate the true blast radius and compare it to the named
+   set.** For Linear: list each target's `children` first and **archive leaves only**, parents
+   last and individually. The difference between the two lists is the part nobody approved.
+2. **Re-read the set AFTER the sweep** and diff it against the intended set. Seat A caught
+   this only because it verified the outcome — treat the post-check as part of the action,
+   not as optional diligence.
+3. **A cascade that touches anything In Progress, or anything on a security/auth surface, is
+   a stop-and-report**, not a restore-and-continue. Restoring is right; staying silent about
+   it is not.
+4. **When briefing a sweep to any agent, name the cascade risk in the brief.** Do not rely on
+   the receiving seat rediscovering it — this one did, and that was good judgement rather
+   than a mechanism.
+
+
 ## STANDING RULE: minimise gate DUPLICATION — batch gates, and never spend a second session on a round the first one should have carried
 `2026-09-18_minimise-gate-duplication-batch-them.md` · grant · 2026-09-18 · status: live · tier: W
 
@@ -6162,6 +6185,27 @@ sections (open the file for these): Why this is not just "the 90% rule again" ·
 **Family:** [[2026-09-14_at-90pct-weekly-usage-no-new-agents-wednesday-plus-local-model]] (superseded in the strict direction, for these three days) · [[2026-09-15_ornith-q4-only-volume-week-qa-sunday-merge-once]] (same expiry, same Sunday QA) · [[2026-09-13_as-many-agents-as-possible-partitioned-by-code]] (the standing rule this suspends) · [[2026-09-06_a-scoped-override-carries-its-own-expiry]] · [[2026-09-14_kams-instruction-stands-until-he-withdraws-it]] (my unanswered question does not soften it).
 
 
+## Ornith is free; the BRIEF is the cost — a brief-less input cannot red-prove
+`2026-09-18_ornith-is-cheap-the-brief-is-the-cost.md` · correction · 2026-09-18 · status: live · tier: W
+
+**The lesson:** The local model's run costs nothing, so the temptation is to fill its queue fast.
+**Do not.** `build_input.sh` will happily build an input from a bare ticket description, and that
+input will fail `A4 RED-FIRST` almost every time — the model writes a test that is green before the
+fix as well as after, which proves no defect. **A queue line without a `night/briefs/<id>.md` behind
+it is not work, it is a wasted round and a misleading FAIL.**
+
+**How to apply:**
+1. **Never queue an input whose `build_input.sh` output says `prompt source: the ticket description
+   (no night/briefs/<ticket>.md)`.** That line is the warning; treat it as a refusal.
+2. **Feeding Ornith is brief-writing, not queue-filling.** Budget accordingly: a handful of good
+   briefs beats a full queue of brief-less ones, which return FAILs that look like model weakness and
+   are not.
+3. **A FAIL on A4 RED-FIRST is a BRIEF defect until proven otherwise** — do not spend the one allowed
+   rebrief re-running the same brief-less input.
+4. **Delegate the brief-writing** — reading a file at the tip and deriving the cell is exactly a
+   subagent's job, and Kam's 2026-09-16 grant covers spinning them up.
+
+
 ## STANDING RULE: the local agent works CONSTANTLY on the tickets it can — an idle Ornith is a rule being broken, not a gap to notice later
 `2026-09-18_ornith-works-constantly-standing-rule.md` · grant · 2026-09-18 · status: live · tier: W
 
@@ -6178,4 +6222,23 @@ sections (open the file for these): How to apply
 4. **If the queue must be empty, write WHY where the next reader lands** — the reason is the artefact, and "I didn't find anything" is not one.
 
 **Family:** [[2026-09-15_never-idle-the-gatekeeper-widens-the-harness-when-the-pool-runs-dry]] (the correction this promotes) · [[2026-09-16_local-model-is-long-term-and-claude-takes-what-it-cannot-do]] (the router: Claude takes what Ornith cannot) · [[2026-09-16_if-something-blocks-move-on-to-the-next]] (a blocked item is skipped, never waited on) · [[2026-09-14_ornith-runs-at-night-in-the-downtime-a-standing-rule]] (the night shape this widens to all hours).
+
+
+## A boot read that outgrows the window is not a thorough boot, it is a dead seat
+`2026-09-18_the-boot-spec-outgrew-the-context-window.md` · principle · 2026-09-18 · status: live · tier: W
+
+**The lesson:** Every file the boot prompt says to read WHOLE is a file that grows. Measure the
+boot's total cost at every boot, and when the sum approaches the window, **fix the files — do not
+obey the instruction into a dead seat, and do not quietly skim and call it a boot.** Say which
+reads were bounded and why.
+
+**How to apply:**
+1. **Measure before reading.** `stat -f%z` every mandated whole-read and sum it FIRST. Bytes ÷ 4 ≈
+   tokens. If the sum is a large fraction of the window, stop and bound the reads deliberately.
+2. **Bound by structure, not by truncation.** Read the live head of a superseded-block file, the
+   headline index of a digest, the newest rows of a ledger — then say exactly what you bounded.
+3. **Report the measurement in the boot note**, as WED-139 asks. A boot cost that is asserted rather
+   than measured is how this grew to 220 KB over the window unnoticed.
+4. **A file whose own frontmatter states a discipline is evidence that discipline is not running.**
+   Check the file against its own rule before obeying an instruction to read it whole.
 
