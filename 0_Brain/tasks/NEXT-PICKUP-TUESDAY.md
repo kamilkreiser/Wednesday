@@ -10,6 +10,9 @@ supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s
 
 ---
 
+## 🔵 DELTA 16 — 2026-09-18 15:0x: the Partner Center download is WITH KAM
+- The tab's JavaScript is still blocked (-1712) at the 15:00 retry. He was asked on the panel to download the published 2.1.0 and 2.0.0 zips himself before **24 Sep**, or to close the dialog and say so. **Do not script that tab again until he answers.** If he says it is cleared, finish it: role=tab "Previously published packages", "Load more" until it is gone (check with a count, not a blind loop), then each file button.
+
 ## 🔵 DELTA 15 — 2026-09-18 14:0x: KAM'S STANDING INSTRUCTION, AN OWED ACTION (terminal, verbatim; processing time from date)
 > "Thanks. In that case, please email me the zip file that needs to be uploaded to the marketplace. I only email the package zip, not any of the assets."
 - **The zip does NOT exist yet** (measured 14:0x: no *2.2.0*.zip under the NexusAI project; control: 2 older plan zips found). He was told on the panel and in the terminal.
