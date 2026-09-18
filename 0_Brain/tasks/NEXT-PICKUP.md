@@ -12,6 +12,20 @@ supersede: replace wholesale at the next pickup; do not append
 
 **⚙ This file was SPLIT at 10:0x 2026-09-18** — 600 lines of self-declared superseded blocks moved verbatim to `NEXT-PICKUP-archive.md` under this file's own `supersede:` rule (it had reached 220 KB, of which 19 KB was live, and every seat was ordered to read it WHOLE at boot). **Keep replacing, never append.** The archive is read on demand, never at boot.
 
+## 🟢 UPDATE 10:5x 2026-09-18 (the 10:0x seat, ctx ~38%, usage 15%) — READ FIRST, supersedes every block below where they disagree
+
+**FLOOR:** `%0` wednesday · `%98` seat A (kintsugi rebuild, phase 2, holding with a watcher; its idle wake is ACKED) · **`%99` #1037 KS-1101 TIER 1 gate LIVE** · **`%100` #922 KS-679 TIER 2 gate LIVE** · `%1` monitor. **Ornith: RUNNING KS-1125** (briefed, test-only, direct call).
+
+**🔴 #922 HAS AN OPEN REVIEW HOLD FROM PETER.** PeterObeden, 2026-09-09: *"Review — not approving yet"*, three asks. The seat answered all three on 09-14 and **he has not replied.** It shows 0 FORMAL reviews only because he held it with a comment. **#922 does NOT merge on my signed GO alone, even if the gate passes.** Kam has been told, and seat A has been told. **When the #922 verdict mails in, put the merge-over-Peter decision to Kam** (options: merge over him, nudge Peter to read the answers, or wait). Never contact Peter directly.
+
+**🔴 w=3 REGRESSION TODAY — READ THE LESSON BEFORE YOU TELL KAM ANYTHING:** twice I turned an **unmeasured ABSENCE into a fact** for Kam (TND "not on kintsugi"; #922 "waiting on nothing"). `learnings/2026-09-18_a-premise-under-a-question-to-kam-is-load-bearing-verify-it.md`. **Before any negative claim to Kam, name the measurement that covers the WHOLE space it asserts about.** Enforcement OWED: an advisory absence-phrase check in `tools/chat_reply.sh`, with arms (a real absence that flags, a harmless negative that flags, a positive that doesn't).
+
+**#922 GATE (tier 2, drafter's ruling, accepted):** it leads with the **E7 secret-detector WIDENING** (`/^[a-z]+_<uuid>$/i` now exempts ANY lower-case prefix + uuid). It must search EVERY `<prefix>_<uuid>` producer and classify each as record id or secret; any credential in that shape is a Blocker. The PR body's Test Evidence and the "12/15 legs, 3 SKIPPED" preflight line are from the **09-14 push at `e60a24c50`, not this head**. `Closes KS-679` in the body goes against the no-closing-phrase convention; the gate grades it. Not batched with #1036: they share dependency trees (lockfiles, `packages/shared`). **If #1036 lands first, #922's launcher refuses with exit 18 by design, and it needs a deliberate re-pin.**
+
+**Minor, noted by the drafter, not acted on:** the live #1037 launcher's comment at line 107 says "eighteen files" but it judges twenty. It's only a comment in a launched file, so leave it until the next regeneration.
+
+**KS-1222 EXHAUSTED for Ornith** (control red at the tip means the harness never reached `proxy.ts`), so it goes to a Claude seat if pursued. Rule from it: **pick Ornith tickets whose red cell reaches the defect by a DIRECT call.** Rejected with reasons in `candidates.md`: KS-1175 (writes to the immutable Cardano record, so it needs Kam), KS-678 (already fixed at tip), KS-1145 (bash plus real Postgres), KS-947 (MFA = auth).
+
 ## 🟢 UPDATE 10:4x 2026-09-18 (the 10:0x seat, ctx ~31%, usage 12%) — READ FIRST, supersedes every block below where they disagree
 
 **FLOOR:** `%0` wednesday · `%98` seat A — **KINTSUGI REBUILD RUNNING** (Kam ruled 10:27; phase 1 done, phase 2 = the ~2 h build) · **`%99` QA/Secuura-1037 — #1037 KS-1101 TIER 1 GATE LIVE** · `%1` monitor. **`%97` CLOSED** (the #1034 gate finished: verdict mailed, 82 evidence files + report on disk, scored). **Ornith: RUNNING** KS-1222 (briefed).
