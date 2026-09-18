@@ -10,6 +10,11 @@ supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s
 
 ---
 
+## 🔵 DELTA 20 — 2026-09-19 08:3x: KAM RULED ROUND 4 = (a) BY EMAIL. READ FIRST.
+- Verbatim (reply to "Progress", kreiser.org@me.com, DKIM pass, text in the HTML part): "Thank you for the update. Please go with option a." = fix first on rd-436-452-501-s64, then merge. The card is ruled. **Mark it --delivered once S67 mails the C-number.**
+- S67 is EXECUTING the round-4 brief (merge 6b8ca5b + a8f61b8, the four items, one batched gate with RD-561 + RD-503 r2 @ 5700df5). **A Major at that gate comes to Tuesday; a further round is Kam's again (C-62).**
+- **Kam's standing ask today: email him only when the zip is ready or on a stop-class issue** (his 22:15Z email asked "do you need me for anything? If so, reply on email"). **Rulings arrive by email: check auth + read the HTML part.**
+
 ## 🔵 DELTA 19 — 2026-09-19 05:4x: NexusAI SEATS ROTATED. S67 is live; S65 and S66 are closed. READ FIRST; DELTA 18 still holds for the card.
 - **S65 wrapped (scored 0.92)**: HANDOVER-S65.md is at the project root; history is on `s65-history-docs @ fb2f64d`; RD-503 r2 PASSED and was pushed at `rd-503-shipped-docs-s64 @ 5700df5` (3233/178; awaits tier-2 gate). Pane closed only AFTER its verify finished (pane_close had correctly refused rc 5 while jest ran).
 - **S66 wrapped (scored 0.95)**: HANDOVER-S66.md; `s66-history-docs @ d0cd5c5`. Pane closed.
