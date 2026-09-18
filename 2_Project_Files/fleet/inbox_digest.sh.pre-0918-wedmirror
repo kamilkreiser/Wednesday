@@ -123,13 +123,7 @@ for m in show:
         continue
     preview = (m.get('preview') or '').replace('\n', ' ')[:180]
     print(f\"[{tag}] {m['timestamp'][:16]} | {client} | {subj[:90]}\")
-    # WEDNESDAY-SEAT MIRROR of the Tuesday tag filter (2026-09-18, the 10:0x seat): this seat reads Datasec mail by
-    # SUBJECT ONLY (its boot scope). The shared bus carries every client, so on coagent@ a Datasec-tagged row keeps
-    # its subject line (routing needs it) and its BODY PREVIEW is withheld. Tuesday's seat is untouched by this branch.
-    if seat == 'wednesday' and inbox == 'coagent@agentmail.to' and re.search(r'datasec/', subj, re.I):
-        print('        (preview withheld: Datasec mail, subject only for the Wednesday seat)')
-    else:
-        print(f'        {preview}')
+    print(f'        {preview}')
     print(f\"        id: {m['message_id']}\")
 
 # digest / --inbound mark what they just processed as seen (own outbound copies included)
