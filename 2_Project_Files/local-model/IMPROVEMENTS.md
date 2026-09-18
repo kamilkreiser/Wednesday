@@ -590,3 +590,15 @@ Making `task.md`'s example reasons shape-only, I first wrote the rationale INTO 
 Caught before commit, by asking what the MODEL sees rather than what a maintainer sees. The rationale now describes the instance without restating it, and says so in-line (*"the worked instance is deliberately NOT restated here, because this file is itself the prompt"*). The full record, with the literal clause, lives here in IMPROVEMENTS — which the model never reads.
 
 **Rule kept: before writing an explanation into a task file, ask whether the reader is the model or the maintainer. A cautionary example inside a prompt is still an example.** Verified with a positive control: the clause is now 0 occurrences in `task.md` while `predicate` is 8, so the zero is real and not a broken grep.
+
+## 2026-09-18 12:1x — first-attempt A2b "placeholder test file" on the vitest tier, 2 of 2 (the 10:0x Wednesday seat)
+**Observed, not yet diagnosed.** Briefed runs today, by tier and first-attempt outcome:
+| ticket | tier | first attempt | final |
+|---|---|---|---|
+| KS-1233 | vitest code_patch | PASS | PASS 7/7 |
+| KS-1125 | vitest code_patch (test-only) | **FAIL A2b, placeholder test file** | PASS 7/7 on the harness RETRY |
+| KS-1248 | vitest code_patch | **FAIL A2b, placeholder test file** | PASS 7/7 on the harness RETRY |
+| KS-1209 | bash_patch | PASS | PASS 7/7 |
+| KS-1250 | bash_patch | PASS | PASS 7/7 (strict apply) |
+| KS-1222 | vitest code_patch | FAIL A4 (control red at the tip, **unreachable**) | exhausted, sent to a Claude seat |
+**The retry recovers it, so it costs ~30-40 s of local compute and no Claude tokens, and it isn't urgent.** But 2 of the last 3 vitest first attempts produced a stub, while 0 of 2 bash runs did. Candidate causes to test, NOT findings: the vitest prompts are larger (KS-1125 ~22K tokens) and the new test file sits LAST in a long diff; or `task.md`'s vitest section models the test file less concretely than the bash one does. **Arms before any change:** re-run KS-1125's exact input 3× and count the stubs, then again with the brief's test file moved first. **Report honestly as "passed on retry"** in every READY; the first-attempt rate is the real capability number.
