@@ -73,6 +73,21 @@ a safety rule with his name on it, not a build preference.
 - [ ] The listing folds — RD-465 O-4, RD-454 O-4
 
 ### The two additions the dependency measurement turned up
+- [ ] ⏳ **RD-549 — PENDING A MEASUREMENT, may join the minimum set. Do not close this line by assuming.**
+      An anonymous caller in the open window can persist an Azure-suffixed endpoint **plus an
+      encrypted key** (measured: 200, read-back confirms; a literal RFC1918 value is refused 400).
+      **RD-516 does NOT cover it** — it refuses PRIVATE addresses, and a planted host that passes the
+      sourced suffix list resolves public, so layer 3 pins it and the guard faithfully dials the
+      attacker. S65 accepted that its 'RD-516 refuses the dial' sentence implied coverage it does not
+      have. **C-42's accept covered takeover of an UNCONFIGURED deployment, not data leaving a
+      CONFIGURED one** — so this is outside it. RD-474's family, different field.
+      **The measurement running now:** plant anonymously → complete first-run as an admin would →
+      configure sign-in → sign in → trigger a real chat call and whatever `tools.js` sends job rows
+      through → observe where the request goes and whether the planted key travels with it, proven at
+      the listener with the diagnostics_channel oracle and its positive control.
+      **Verdict shape agreed:** YES → blocker, joins the minimum set, remedy is clear-at-setup or
+      surface-to-admin, **never RD-516's host policy**. NO → withdrawn to a ticket, with the
+      measurement and the file:line of whatever stops it.
 - [x] **RD-529 O-8 — MERGED to main 2026-09-18 01:04:46Z as `d881f953`** (merge of `470510e`; one file, one line, verified wording-only by Tuesday at source before and after). **RD-529 O-8** — the one-line placeholder wording fix in `DEPLOYMENT_GUIDE.md`, **which IS shipped
       in the image**. Ruled by Tuesday: it lands on main BEFORE the push rather than being baked in.
 - [x] **The release version string is `2.2.0` — RULED BY KAM.**
