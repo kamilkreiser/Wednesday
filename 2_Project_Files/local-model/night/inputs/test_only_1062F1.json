@@ -1,0 +1,164 @@
+{
+ "ticket": {
+  "identifier": "KS-1062",
+  "title": "KS-1062 F-1 PIN WHAT THE TENANT LOOP LOGS WHEN A TENANT FAILS (the INCOMPLETE summary, and the FIRST error) — Wednesday's task for Ornith, TEST_ONLY, **ONE NEW vitest test file, no product file** (wri",
+  "description": "# KS-1062 F-1 PIN WHAT THE TENANT LOOP LOGS WHEN A TENANT FAILS (the INCOMPLETE summary, and the FIRST error) — Wednesday's task for Ornith, TEST_ONLY, **ONE NEW vitest test file, no product file** (written 2026-09-19, round 5)\n\nFile: `Blockchain/Dev/services/api-gateway/src/__tests__/ks1062-startup-migrations-tenant-summary-first-error.test.ts`\nTip: `59412d0575dff3243f5f0ccd1e50608ddb920d6c`\n\nWritten from develop `59412d0575dff3243f5f0ccd1e50608ddb920d6c` (read with `git ls-remote origin refs/heads/develop`; #932 / KS-1062 is merged there as `0f69129b3`, #973 / KS-950 as `818002259`, #1040 / KS-1125 as `b4bb34a89`). The test file does NOT exist at that tip: you CREATE it. The product the cells pin is `Blockchain/Dev/services/api-gateway/src/startup-migrations.ts` (blob `ed3e52142`, 1227 lines). This service runs **VITEST**.\n\n## THE MODE — read this twice\n\n**TEST_ONLY, NEW FILE.** Your diff touches EXACTLY ONE file: the new test file above (`--- /dev/null` / `+++ b/<path>`, the path exactly as written above, ONE hunk `@@ -0,0 +1,86 @@`). You never touch `startup-migrations.ts` or any other product file, and you never touch `ks1125-api-gateway-startup-migrations-the-tenant.test.ts`: the behaviour is already right at the tip, and these cells PIN it.\n\n## What the cells pin (one paragraph)\n\n`runStartupMigrations()` migrates every tenant database through `migrateDatabase()`, which never throws: it counts failed statements and keeps the FIRST non-benign error (`:836`, `if (firstError === undefined) firstError = ...`). Since #932 a tenant with any failed statement is counted FAILED and logged as `Tenant <slug> migrations FAILED` with that first error (`:1189-1196`); since #973 the tenant summary is a `[WARN]` headed `Tenant DB migrations INCOMPLETE — N tenant(s) FAILED` whenever a tenant failed, and `[INFO] ... complete` only for a clean run (`:1208-1214`). The #932 gate (`2026-09-13-ks1062-932-c72607d58-tier1-r1`, finding **F-1**, Minor, test coverage) MEASURED that its tampers left the repository's own suite green; `ks1125` (#1040) later pinned the counter, but three edits still redden nothing at the tip (measured: 0 red of 613 each): the summary level forced to `'info'` (the gate's T3), the INCOMPLETE headline forced to `complete`, and the first-error guard dropped so the LAST error is logged (the gate's T6). The new file drives the real `runStartupMigrations()` with `pg` redirected at Node's resolver, ONLY for the product file, to a fake Pool (the ks1125 idiom, re-stated in this file so ks1125 is not touched): `qa_ghost` rejects every statement with one message, `qa_two_errors` numbers each rejection (`qa statement 1 refused`, `qa statement 2 refused`, ...). A control cell proves the redirect and pins the clean-run summary.\n\n## The exact change — ONE new file\n\nCopy every line byte for byte. All 86 `+` lines are ASCII only (the product's em dash is matched by a regex `.`, never typed). There is no blank line anywhere in the fence. Keep the header exactly as shown. **Your diff MUST begin with the two file-header lines, above the `@@` line: `--- /dev/null` then `+++ b/Blockchain/Dev/services/api-gateway/src/__tests__/ks1062-startup-migrations-tenant-summary-first-error.test.ts` (a diff with no file header touches no file and is refused at T2).**\n\n```\n@@ -0,0 +1,86 @@\n+/**\n+ * KS-1062 (#932) / KS-950 (#973) - what the tenant loop logs when a tenant's migrations fail.\n+ * The #932 gate (2026-09-13-ks1062-932-c72607d58-tier1-r1, F-1) measured that its tampers left the\n+ * repository's own suite green; ks1125 later pinned the counter. Three edits still redden nothing:\n+ * the tenant summary's level forced to info (the gate's T3), its INCOMPLETE headline forced to\n+ * \"complete\", and the first-error guard dropped so the LAST error is logged (the gate's T6).\n+ * runStartupMigrations() is called DIRECTLY with pg redirected, ONLY for the product file, to the\n+ * fake Pool below (the ks1125 idiom); the control cell proves the redirect before any cell is believed.\n+ */\n+import { describe, it, expect, beforeAll, afterAll, vi } from 'vitest';\n+import * as fs from 'fs';\n+import * as os from 'os';\n+import * as path from 'path';\n+import Module from 'module';\n+const PRODUCT = path.join(__dirname, '..', 'startup-migrations.ts');\n+const SCRATCH = fs.mkdtempSync(path.join(os.tmpdir(), 'ks1062-'));\n+const FAKE = path.join(SCRATCH, 'fake-pg.cjs');\n+const EMPTY_MIGRATIONS_DIR = path.join(SCRATCH, 'migrations');\n+const TENANT_SCAN = 'FROM tenants t LEFT JOIN tenant_config tc';\n+let TENANTS: Array<Record<string, unknown>> = [];\n+let lines: string[] = [];\n+let product: { runStartupMigrations: () => Promise<void> };\n+const origResolve = (Module as any)._resolveFilename;\n+function dbOf(connStr: string): string {\n+  try { return new URL(connStr).pathname.replace(/^\\//, ''); } catch { return '?'; }\n+}\n+/** No I/O. qa_ghost rejects every statement with one message; qa_two_errors numbers each rejection. */\n+class FakePool {\n+  private db: string;\n+  private refused = 0;\n+  constructor(opts: { connectionString: string }) { this.db = dbOf(opts.connectionString); }\n+  async query(text: string): Promise<{ rows: unknown[]; rowCount: number }> {\n+    if (this.db === 'qa_ghost') throw new Error('database \"qa_ghost\" does not exist');\n+    if (this.db === 'qa_two_errors') throw new Error('qa statement ' + (++this.refused) + ' refused');\n+    if (String(text).includes(TENANT_SCAN)) return { rows: TENANTS, rowCount: TENANTS.length };\n+    return { rows: [], rowCount: 0 };\n+  }\n+  async end(): Promise<void> { /* nothing to close */ }\n+}\n+const tenant = (slug: string, db: string) => ({ id: 't-' + slug, slug, db_name: db, db_host: null, db_port: null });\n+async function boot(tenants: Array<Record<string, unknown>>): Promise<void> {\n+  TENANTS = tenants;\n+  lines = [];\n+  const spy = vi.spyOn(console, 'log').mockImplementation((...a: unknown[]) => { lines.push(a.map(String).join(' ')); });\n+  try { await product.runStartupMigrations(); } finally { spy.mockRestore(); }\n+}\n+const summary = () => lines.find((l) => l.includes('[startup-migrations] Tenant DB migrations')) || '';\n+const metaOf = (line: string) => JSON.parse(line.replace(/^[^{]*/, '') || '{}');\n+beforeAll(async () => {\n+  fs.mkdirSync(EMPTY_MIGRATIONS_DIR);\n+  fs.writeFileSync(FAKE, 'module.exports = globalThis.__KS1062_FAKE_PG;\\n');\n+  (globalThis as any).__KS1062_FAKE_PG = { Pool: FakePool };\n+  (Module as any)._resolveFilename = function (request: string, parent: any, ...rest: unknown[]) {\n+    if (request === 'pg' && parent && parent.filename === PRODUCT) return FAKE;\n+    return origResolve.call(this, request, parent, ...rest);\n+  };\n+  vi.stubEnv('DATABASE_URL', 'postgresql://qauser:qapass@qa-main.invalid:5432/qa_main');\n+  vi.stubEnv('PLATFORM_DATABASE_URL', 'postgresql://qauser:qapass@qa-platform.invalid:5432/qa_platform');\n+  vi.stubEnv('MULTI_TENANCY_ENABLED', 'true');\n+  vi.stubEnv('MIGRATIONS_DIR', EMPTY_MIGRATIONS_DIR);\n+  delete process.env.MIGRATION_DATABASE_URL;\n+  delete process.env.MIGRATION_PLATFORM_DATABASE_URL;\n+  delete process.env.APP_DB_PASSWORD;\n+  product = await import('../startup-migrations');\n+});\n+afterAll(() => {\n+  (Module as any)._resolveFilename = origResolve;\n+  vi.unstubAllEnvs();\n+  fs.rmSync(SCRATCH, { recursive: true, force: true });\n+});\n+describe('KS-1062: what the tenant loop logs when a tenant fails', () => {\n+  it('control: pg resolves to the fake, and a clean run is summarised at INFO as complete', async () => {\n+    expect(Module.createRequire(PRODUCT).resolve('pg')).toBe(FAKE);\n+    await boot([tenant('qa-one', 'qa_t1'), tenant('qa-two', 'qa_t2')]);\n+    expect([/^\\[INFO\\] \\[startup-migrations\\] Tenant DB migrations complete \\{/.test(summary()), metaOf(summary())]).toEqual([true, { migrated: 2, failed: 0, skipped: 0, total: 2 }]);\n+  });\n+  it('a failed tenant makes the tenant summary a WARN that says INCOMPLETE, never complete', async () => {\n+    await boot([tenant('qa-one', 'qa_t1'), tenant('qa-ghost', 'qa_ghost')]);\n+    expect([/^\\[WARN\\] \\[startup-migrations\\] Tenant DB migrations INCOMPLETE . 1 tenant\\(s\\) FAILED \\{/.test(summary()), metaOf(summary())]).toEqual([true, { migrated: 1, failed: 1, skipped: 0, total: 2 }]);\n+  });\n+  it('a FAILED tenant line carries the FIRST statement error, not the last', async () => {\n+    await boot([tenant('qa-two-errors', 'qa_two_errors')]);\n+    const meta = metaOf(lines.find((l) => l.includes('Tenant qa-two-errors migrations FAILED')) || '');\n+    expect([meta.failed > 1, meta.error]).toEqual([true, 'qa statement 1 refused']);\n+  });\n+});\n```\n\n## Cells\n\n- `control` = `control: pg resolves to the fake, and a clean run is summarised at INFO as complete`\n- `summary` = `a failed tenant makes the tenant summary a WARN that says INCOMPLETE, never complete`\n- `firsterr` = `a FAILED tenant line carries the FIRST statement error, not the last`\n\n## Tampers\n\n### FIRSTERRORLAST — the first-error guard is dropped: the LAST failed statement's error is logged\nFile: `Blockchain/Dev/services/api-gateway/src/startup-migrations.ts`\nLine: 836\nFrom:\n```\n          if (firstError === undefined) firstError = err?.message?.substring(0, 200);\n```\nTo:\n```\n          firstError = err?.message?.substring(0, 200);\n```\nReds: `firsterr`\n\n### SUMMARYINFO — the tenant summary is logged at info even when a tenant FAILED\nFile: `Blockchain/Dev/services/api-gateway/src/startup-migrations.ts`\nLine: 1209\nFrom:\n```\n          failedTenants > 0 ? 'warn' : 'info',\n```\nTo:\n```\n          'info',\n```\nReds: `summary`\n\n### SUMMARYCOMPLETE — the tenant summary says complete even when a tenant FAILED\nFile: `Blockchain/Dev/services/api-gateway/src/startup-migrations.ts`\nLine: 1210\nFrom:\n```\n          failedTenants > 0\n```\nTo:\n```\n          false\n```\nReds: `summary`\n\n## Controls\n\n- `control: pg resolves to the fake, and a clean run is summarised at INFO as complete`\n\n## THE CELLS — state it to yourself before you write a line\n\nAt the untouched tip all three cells pass: pg resolves to the fake; two clean tenants give `[INFO] ... Tenant DB migrations complete {\"migrated\":2,\"failed\":0,\"skipped\":0,\"total\":2}`; one clean tenant plus `qa_ghost` give `[WARN] ... Tenant DB migrations INCOMPLETE — 1 tenant(s) FAILED {\"migrated\":1,\"failed\":1,...}`; `qa_two_errors` fails every statement and its FAILED line carries `\"error\":\"qa statement 1 refused\"`. Under FIRSTERRORLAST the error becomes the last statement's (`qa statement 39 refused`), so `firsterr` fails by assertion; the summaries do not move. Under SUMMARYINFO the failed run's summary starts `[INFO]`, and under SUMMARYCOMPLETE it says `complete`, so `summary` fails by assertion in both; the counts JSON is unchanged (which is why ks1125 cannot see either). The control passes under every tamper: a clean run is `[INFO] ... complete` in all three.\n\n**MEASURED, not predicted** (`--shared` scratch clone at `59412d057`, the harness's `prepare_clone.sh` farm, the service's own `npx vitest run`): see `## Measurements` below.\n\n## Measurements\n\nMeasured 2026-09-19 by the round-5 search subagent at `59412d057` (the product restored by bytes after each tamper, sha256 `623a99b9531e7c2c…` equal to the tip blob; the new file moved aside after, never deleted; clone porcelain 0 after):\n- the new file at the tip: 3/3 pass. Whole api-gateway suite with it: 616/616.\n- WITHOUT the new file, each tamper: whole suite 613/613, **0 red** (FIRSTERRORLAST, SUMMARYINFO, SUMMARYCOMPLETE) — the gate's F-1 gap reproduced at the tip for all three.\n- WITH the new file: FIRSTERRORLAST → exactly 1 red of 616, `firsterr` (`AssertionError: expected [ true, 'qa statement 39 refused' ] to deeply equal [ true, 'qa statement 1 refused' ]`); SUMMARYINFO → exactly 1 red of 616, `summary` (AssertionError, `[ false, … ]`); SUMMARYCOMPLETE → exactly 1 red of 616, `summary` (AssertionError, `[ false, … ]`). `control` green under all three.\n\n## Output\n\nExactly ONE ```diff block, nothing outside it: `--- /dev/null` / `+++ b/Blockchain/Dev/services/api-gateway/src/__tests__/ks1062-startup-migrations-tenant-summary-first-error.test.ts`, then the ONE hunk above exactly as shown (`@@ -0,0 +1,86 @@`).\n\n## Notes for the raise (not for the model)\n\n- Test-only. **Raise tier: TIER 2. Refs KS-1062** (F-1 of the #932 gate: T3 and T6 still 0-red after ks1125) **and KS-950** (the INCOMPLETE headline, #973). #932 / #973 / #1040 are merged. Never Closes. New file only; ks1125's file is not touched (its READY is marked held-for-QA although #1040 is merged). `api-gateway` suite count 613 → 616.\n- Not run: `ks949_main_seed_idempotence.test.sh` (needs PostgreSQL + the node install); READ: it greps only the FILE-based main-DB lines, never the tenant summary or `firstError`.\n\n## Build line (not for the model)\n\n```\nbash tasks/test_only/build_test_only_input.sh KS-1062 night/inputs/test_only_1062F1.json night/briefs/KS-1062-F1.md ctx=65536\n```\n"
+ },
+ "repo": {
+  "source_checkout": "/Volumes/DevMASTER/!CODING/Secuura/Blockchain/2_Project_Files",
+  "tip": "59412d0575dff3243f5f0ccd1e50608ddb920d6c",
+  "branch": "develop",
+  "test_runner": "vitest (run one file with `npx vitest run <file>` from Blockchain/Dev/services/api-gateway)"
+ },
+ "task_type": "test_only",
+ "tip": "59412d0575dff3243f5f0ccd1e50608ddb920d6c",
+ "source_checkout": "/Volumes/DevMASTER/!CODING/Secuura/Blockchain/2_Project_Files",
+ "repo_subdir": "Blockchain/Dev",
+ "service_dir": "services/api-gateway",
+ "shared_pkg_dir": "packages/shared",
+ "shared_pkg_name": "@secuura/shared",
+ "test_file": "Blockchain/Dev/services/api-gateway/src/__tests__/ks1062-startup-migrations-tenant-summary-first-error.test.ts",
+ "test_file_rel_to_service": "src/__tests__/ks1062-startup-migrations-tenant-summary-first-error.test.ts",
+ "test_mode": "new",
+ "runner": "vitest",
+ "expected_plus": [
+  "/**",
+  " * KS-1062 (#932) / KS-950 (#973) - what the tenant loop logs when a tenant's migrations fail.",
+  " * The #932 gate (2026-09-13-ks1062-932-c72607d58-tier1-r1, F-1) measured that its tampers left the",
+  " * repository's own suite green; ks1125 later pinned the counter. Three edits still redden nothing:",
+  " * the tenant summary's level forced to info (the gate's T3), its INCOMPLETE headline forced to",
+  " * \"complete\", and the first-error guard dropped so the LAST error is logged (the gate's T6).",
+  " * runStartupMigrations() is called DIRECTLY with pg redirected, ONLY for the product file, to the",
+  " * fake Pool below (the ks1125 idiom); the control cell proves the redirect before any cell is believed.",
+  " */",
+  "import { describe, it, expect, beforeAll, afterAll, vi } from 'vitest';",
+  "import * as fs from 'fs';",
+  "import * as os from 'os';",
+  "import * as path from 'path';",
+  "import Module from 'module';",
+  "const PRODUCT = path.join(__dirname, '..', 'startup-migrations.ts');",
+  "const SCRATCH = fs.mkdtempSync(path.join(os.tmpdir(), 'ks1062-'));",
+  "const FAKE = path.join(SCRATCH, 'fake-pg.cjs');",
+  "const EMPTY_MIGRATIONS_DIR = path.join(SCRATCH, 'migrations');",
+  "const TENANT_SCAN = 'FROM tenants t LEFT JOIN tenant_config tc';",
+  "let TENANTS: Array<Record<string, unknown>> = [];",
+  "let lines: string[] = [];",
+  "let product: { runStartupMigrations: () => Promise<void> };",
+  "const origResolve = (Module as any)._resolveFilename;",
+  "function dbOf(connStr: string): string {",
+  "  try { return new URL(connStr).pathname.replace(/^\\//, ''); } catch { return '?'; }",
+  "}",
+  "/** No I/O. qa_ghost rejects every statement with one message; qa_two_errors numbers each rejection. */",
+  "class FakePool {",
+  "  private db: string;",
+  "  private refused = 0;",
+  "  constructor(opts: { connectionString: string }) { this.db = dbOf(opts.connectionString); }",
+  "  async query(text: string): Promise<{ rows: unknown[]; rowCount: number }> {",
+  "    if (this.db === 'qa_ghost') throw new Error('database \"qa_ghost\" does not exist');",
+  "    if (this.db === 'qa_two_errors') throw new Error('qa statement ' + (++this.refused) + ' refused');",
+  "    if (String(text).includes(TENANT_SCAN)) return { rows: TENANTS, rowCount: TENANTS.length };",
+  "    return { rows: [], rowCount: 0 };",
+  "  }",
+  "  async end(): Promise<void> { /* nothing to close */ }",
+  "}",
+  "const tenant = (slug: string, db: string) => ({ id: 't-' + slug, slug, db_name: db, db_host: null, db_port: null });",
+  "async function boot(tenants: Array<Record<string, unknown>>): Promise<void> {",
+  "  TENANTS = tenants;",
+  "  lines = [];",
+  "  const spy = vi.spyOn(console, 'log').mockImplementation((...a: unknown[]) => { lines.push(a.map(String).join(' ')); });",
+  "  try { await product.runStartupMigrations(); } finally { spy.mockRestore(); }",
+  "}",
+  "const summary = () => lines.find((l) => l.includes('[startup-migrations] Tenant DB migrations')) || '';",
+  "const metaOf = (line: string) => JSON.parse(line.replace(/^[^{]*/, '') || '{}');",
+  "beforeAll(async () => {",
+  "  fs.mkdirSync(EMPTY_MIGRATIONS_DIR);",
+  "  fs.writeFileSync(FAKE, 'module.exports = globalThis.__KS1062_FAKE_PG;\\n');",
+  "  (globalThis as any).__KS1062_FAKE_PG = { Pool: FakePool };",
+  "  (Module as any)._resolveFilename = function (request: string, parent: any, ...rest: unknown[]) {",
+  "    if (request === 'pg' && parent && parent.filename === PRODUCT) return FAKE;",
+  "    return origResolve.call(this, request, parent, ...rest);",
+  "  };",
+  "  vi.stubEnv('DATABASE_URL', 'postgresql://qauser:qapass@qa-main.invalid:5432/qa_main');",
+  "  vi.stubEnv('PLATFORM_DATABASE_URL', 'postgresql://qauser:qapass@qa-platform.invalid:5432/qa_platform');",
+  "  vi.stubEnv('MULTI_TENANCY_ENABLED', 'true');",
+  "  vi.stubEnv('MIGRATIONS_DIR', EMPTY_MIGRATIONS_DIR);",
+  "  delete process.env.MIGRATION_DATABASE_URL;",
+  "  delete process.env.MIGRATION_PLATFORM_DATABASE_URL;",
+  "  delete process.env.APP_DB_PASSWORD;",
+  "  product = await import('../startup-migrations');",
+  "});",
+  "afterAll(() => {",
+  "  (Module as any)._resolveFilename = origResolve;",
+  "  vi.unstubAllEnvs();",
+  "  fs.rmSync(SCRATCH, { recursive: true, force: true });",
+  "});",
+  "describe('KS-1062: what the tenant loop logs when a tenant fails', () => {",
+  "  it('control: pg resolves to the fake, and a clean run is summarised at INFO as complete', async () => {",
+  "    expect(Module.createRequire(PRODUCT).resolve('pg')).toBe(FAKE);",
+  "    await boot([tenant('qa-one', 'qa_t1'), tenant('qa-two', 'qa_t2')]);",
+  "    expect([/^\\[INFO\\] \\[startup-migrations\\] Tenant DB migrations complete \\{/.test(summary()), metaOf(summary())]).toEqual([true, { migrated: 2, failed: 0, skipped: 0, total: 2 }]);",
+  "  });",
+  "  it('a failed tenant makes the tenant summary a WARN that says INCOMPLETE, never complete', async () => {",
+  "    await boot([tenant('qa-one', 'qa_t1'), tenant('qa-ghost', 'qa_ghost')]);",
+  "    expect([/^\\[WARN\\] \\[startup-migrations\\] Tenant DB migrations INCOMPLETE . 1 tenant\\(s\\) FAILED \\{/.test(summary()), metaOf(summary())]).toEqual([true, { migrated: 1, failed: 1, skipped: 0, total: 2 }]);",
+  "  });",
+  "  it('a FAILED tenant line carries the FIRST statement error, not the last', async () => {",
+  "    await boot([tenant('qa-two-errors', 'qa_two_errors')]);",
+  "    const meta = metaOf(lines.find((l) => l.includes('Tenant qa-two-errors migrations FAILED')) || '');",
+  "    expect([meta.failed > 1, meta.error]).toEqual([true, 'qa statement 1 refused']);",
+  "  });",
+  "});"
+ ],
+ "must_remove": [],
+ "cells": {
+  "control": "control: pg resolves to the fake, and a clean run is summarised at INFO as complete",
+  "summary": "a failed tenant makes the tenant summary a WARN that says INCOMPLETE, never complete",
+  "firsterr": "a FAILED tenant line carries the FIRST statement error, not the last"
+ },
+ "tampers": [
+  {
+   "id": "FIRSTERRORLAST",
+   "file": "Blockchain/Dev/services/api-gateway/src/startup-migrations.ts",
+   "line": 836,
+   "from": "          if (firstError === undefined) firstError = err?.message?.substring(0, 200);",
+   "to": "          firstError = err?.message?.substring(0, 200);",
+   "reds": [
+    "a FAILED tenant line carries the FIRST statement error, not the last"
+   ],
+   "reds_as_written": [
+    "firsterr"
+   ]
+  },
+  {
+   "id": "SUMMARYINFO",
+   "file": "Blockchain/Dev/services/api-gateway/src/startup-migrations.ts",
+   "line": 1209,
+   "from": "          failedTenants > 0 ? 'warn' : 'info',",
+   "to": "          'info',",
+   "reds": [
+    "a failed tenant makes the tenant summary a WARN that says INCOMPLETE, never complete"
+   ],
+   "reds_as_written": [
+    "summary"
+   ]
+  },
+  {
+   "id": "SUMMARYCOMPLETE",
+   "file": "Blockchain/Dev/services/api-gateway/src/startup-migrations.ts",
+   "line": 1210,
+   "from": "          failedTenants > 0",
+   "to": "          false",
+   "reds": [
+    "a failed tenant makes the tenant summary a WARN that says INCOMPLETE, never complete"
+   ],
+   "reds_as_written": [
+    "summary"
+   ]
+  }
+ ],
+ "controls": [
+  "control: pg resolves to the fake, and a clean run is summarised at INFO as complete"
+ ],
+ "files": {},
+ "_night_num_ctx": 65536
+}
