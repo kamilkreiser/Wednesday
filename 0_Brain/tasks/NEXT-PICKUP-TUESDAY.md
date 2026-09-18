@@ -176,6 +176,26 @@ in a shared repo where both files exist. Flagged to her in the 20:0x STATUS mail
 
 ## OWED — actions with a named owner, carried until done or withdrawn
 
+0. 🔴 **KAM — THE ZIP IS THE NAMED DELIVERABLE (his words, 2026-09-18 ~10:2x, verbatim):**
+   *"I will do the submission once you prepare the zip for me. Tell me when it's ready."*
+   **This is an INSTRUCTION, not a question, and it stands until his own words withdraw it**
+   ([[../learnings/2026-09-14_kams-instruction-stands-until-he-withdraws-it]]). He does the
+   submission; this seat produces the zip and tells him when it exists.
+   **THE SAFE FORM, so no successor turns this back into an open question:** drive the chain to a
+   built, checked zip and hand it over; where a step is HIS (the release image push, anything with
+   money or production attached), hand him that step with the exact command or link on its own line
+   and keep going on everything either side of it. Never wait silently.
+   *Commissioned 00:19:54Z:* S65 asked for the ORDERED chain to the zip, each item measured at source
+   today and marked OURS or KAM'S, plus the minimum set the zip must carry and the longest pole
+   (subject `S65 QUESTION: the ordered chain to the ZIP`, verified at destination, tap delivered).
+   **Wake:** the mail runner fires this seat on S65's reply — that is the mechanism, not an intention.
+   ⚠ **UNMEASURED, and do not repeat it as fact:** whether `nexusaireleaseacr` holds a release image.
+   This seat's anonymous `GET /v2/_catalog` returned 401, **and so did the same probe against the dev
+   registry, which is known to require auth** — the control did not discriminate, so that reading says
+   nothing. Anonymous pull permits pulling a known repo, not listing the catalogue. The registry's
+   "no images" line in CLARIFICATIONS is from its creation at ~02:00Z on 2026-09-17 and is a claim with
+   a date on it. S65 holds the identity; it is measuring it.
+
 1. ~~**KAM — Full Disk Access**~~ — **CLOSED 2026-09-16 20:45. Granted, measured, card marked
    delivered.** Kam added the row at 20:33: *"it was not there. now added"* — it had been ABSENT,
    not switched off, which is why six days of "ruled grant" never took effect. Measured, not
