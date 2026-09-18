@@ -44,3 +44,23 @@ that until it can read a file at the tip and derive the red-first cell itself.
    subagent's job, and Kam's 2026-09-16 grant covers spinning them up.
 
 **Related:** [[2026-09-14_ornith-runs-at-night-in-the-downtime-a-standing-rule]], [[2026-09-18_the-boot-spec-outgrew-the-context-window]], [[2026-08-03_mental-model-not-source-of-truth]]
+
+## Refinement 10:4x, same day — a good brief is necessary but not sufficient: pick tickets whose code a cell REACHES DIRECTLY
+
+Within the hour two briefed runs came back, and the difference between them is a **selection rule**:
+- **KS-1233 PASSED 7/7.** Its red-first cell **called the real `redis.ts` helper directly** over a fake
+  `ioredis`. The defect was one call away from the assertion.
+- **KS-1222 FAILED A4, with its CONTROL red at the tip too.** A harmless `report.pdf` upload wasn't
+  forwarded either, so **the harness never reached `proxy.ts`**. Its cell needed a request to cross the
+  real app's whole middleware stack (`index.ts:421` json mount → `:1094` proxy → `authenticateToken(true)`).
+  The brief-writer named this exact residual risk *before* the run. The checker refused correctly: a red
+  with a red control proves nothing.
+
+**Rule:** when choosing Ornith candidates, **rank by how directly a cell can reach the defect.** A
+pure function, a service helper, a repository method, or one route handler called directly: good.
+A red that only appears after a request crosses the real app's middleware: poor, however good the
+brief. **Reachability failure looks like model failure and isn't.** A red control at the tip is the
+signature. Diagnose it as a harness problem, never as "the model couldn't do it".
+
+**Also confirmed:** the one-rebrief rule held. KS-1222 used its retry, so it goes to a Claude seat,
+and it was not queued a third time.
