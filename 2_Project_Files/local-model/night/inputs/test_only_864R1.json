@@ -1,0 +1,134 @@
+{
+ "ticket": {
+  "identifier": "KS-864",
+  "title": "KS-864 R-1 (Q-nullish) PIN THAT AN EMPTY PORTAL ENV VAR FALLS BACK TO ITS COMPOSE DEFAULT — Wednesday's task for Ornith, TEST_ONLY, **ONE NEW test file, no product file** (written 2026-09-19, round 3)",
+  "description": "# KS-864 R-1 (Q-nullish) PIN THAT AN EMPTY PORTAL ENV VAR FALLS BACK TO ITS COMPOSE DEFAULT — Wednesday's task for Ornith, TEST_ONLY, **ONE NEW test file, no product file** (written 2026-09-19, round 3)\n\nFile: `Blockchain/Dev/services/api-gateway/src/__tests__/ks864d-empty-portal-env-var-falls-back.test.ts`\nTip: `59412d0575dff3243f5f0ccd1e50608ddb920d6c`\n\nWritten from develop `59412d0575dff3243f5f0ccd1e50608ddb920d6c` (read with `git ls-remote origin refs/heads/develop`; #1007 (`0308b7a04`) and #1009 (`d067725ff`), both KS-864, are merged there). The test file does NOT exist at that tip: you CREATE it. The product the cells pin is `Blockchain/Dev/services/api-gateway/src/routes/system-status.ts` (blob `e911ce1fd`, 629 lines). This service runs **VITEST**.\n\n## THE MODE — read this twice\n\n**TEST_ONLY, NEW FILE.** Your diff touches EXACTLY ONE file: the new test file above (`--- /dev/null` / `+++ b/<path>`, the path exactly as written above, ONE hunk `@@ -0,0 +1,55 @@`). You never touch `system-status.ts` or any other product file, and you never touch the other ks864 test files: the behaviour is already right at the tip, and these cells PIN it.\n\n## What the cells pin (one paragraph)\n\n#1007 set the three portal URLs in `system-status.ts` to `process.env.<X>_PORTAL_URL || '<compose default>'` (`:228` issuer, `:237` verifier, `:246` admin). `||` means an EMPTY var (for example a compose `${X:-}` that renders `''`) falls back to the compose default. The #1009 gate (`2026-09-17-ks864-1009-6ec0cb198-tier2-r1`, section 3, record **R-1**) MEASURED that nothing pins this arm: its row 17 **Q-nullish** (`||` -> `??`, an empty var served as the url) reddened **0** cells, because \"no cell sets `''`\". The new file loads a FRESH `system-status` module under `NODE_ENV=dev` (a live gateway value; R-1 also notes no cell runs a live NODE_ENV) with all three portal vars and `BILLING_SERVICE_URL` set to `''`, reads `/api/system/status` once, and asserts each portal's served url is its compose default. It copies the ks864c harness shape (redis mocked, `fetch` stubbed offline, the router on `listen(0)`, env restored in `afterAll`).\n\n## The exact change — ONE new file\n\nCopy every line byte for byte. All 55 `+` lines are ASCII only. There is no blank line anywhere in the fence. Keep the header exactly as shown.\n\n```\n@@ -0,0 +1,55 @@\n+// KS-864 (QA gate on PR #1009, R-1 row Q-nullish): #1007 set each portal URL in routes/system-status.ts to\n+// process.env.<X>_PORTAL_URL || '<compose default>'. No cell set a portal var to the EMPTY string, so the\n+// tamper || -> ?? (an empty var served as the url) reddened 0 cells. An empty var must fall back to the\n+// compose default. The module reads the vars at load, so the env is set before a fresh import.\n+import { describe, it, expect, vi, beforeAll, afterAll } from 'vitest';\n+import http from 'node:http';\n+import express from 'express';\n+vi.mock('../services/redis', () => ({ getRedisHealth: vi.fn(async () => ({ status: 'healthy' })) }));\n+const PORTALS = ['ISSUER_PORTAL_URL', 'VERIFIER_PORTAL_URL', 'ADMIN_PORTAL_URL'];\n+const savedEnv = { ...process.env };\n+let server: ReturnType<ReturnType<typeof express>['listen']>;\n+let urls: Record<string, string | undefined> = {};\n+beforeAll(async () => {\n+  vi.resetModules();\n+  vi.stubGlobal('fetch', vi.fn(async () => { throw new Error('offline in test'); }));\n+  process.env.NODE_ENV = 'dev';\n+  for (const v of PORTALS) process.env[v] = '';\n+  process.env.BILLING_SERVICE_URL = '';\n+  const router = (await import('../routes/system-status')).default;\n+  const app = express();\n+  app.use('/api/system', router);\n+  const port = await new Promise<number>((r) => { server = app.listen(0, '127.0.0.1', () => r((server.address() as any).port)); });\n+  const body = await new Promise<any>((resolve, reject) => {\n+    http.get({ hostname: '127.0.0.1', port, path: '/api/system/status' }, (res) => {\n+      let data = '';\n+      res.on('data', (c) => (data += c));\n+      res.on('end', () => { try { resolve(JSON.parse(data)); } catch (e) { reject(e); } });\n+    }).on('error', reject);\n+  });\n+  const services = Object.values(body.services).flat() as Array<{ name?: string; url?: string }>;\n+  urls = Object.fromEntries(services.map((s) => [s.name, s.url]));\n+}, 10_000);\n+afterAll(async () => {\n+  await new Promise<void>((r) => server.close(() => r()));\n+  for (const k of Object.keys(process.env)) if (!(k in savedEnv)) delete process.env[k];\n+  Object.assign(process.env, savedEnv);\n+  vi.unstubAllGlobals();\n+});\n+describe('KS-864 an EMPTY portal env var falls back to its compose default (NODE_ENV=dev)', () => {\n+  it('KS-864 R-1: issuer-portal reports http://issuer-frontend:80 when ISSUER_PORTAL_URL is empty', () => {\n+    expect(urls['issuer-portal']).toBe('http://issuer-frontend:80');\n+  });\n+  it('KS-864 R-1: verifier-portal reports http://verifier-frontend:80 when VERIFIER_PORTAL_URL is empty', () => {\n+    expect(urls['verifier-portal']).toBe('http://verifier-frontend:80');\n+  });\n+  it('KS-864 R-1: admin-portal reports http://admin-frontend:80 when ADMIN_PORTAL_URL is empty', () => {\n+    expect(urls['admin-portal']).toBe('http://admin-frontend:80');\n+  });\n+  it('control: billing reports its localhost default when BILLING_SERVICE_URL is empty', () => {\n+    expect(urls['billing']).toBe('http://localhost:4019');\n+  });\n+  it('control: the three portal rows are served', () => {\n+    expect(['issuer-portal', 'verifier-portal', 'admin-portal'].map((n) => n in urls)).toEqual([true, true, true]);\n+  });\n+});\n```\n\n## Cells\n\n- `issuer` = `KS-864 R-1: issuer-portal reports http://issuer-frontend:80 when ISSUER_PORTAL_URL is empty`\n- `verifier` = `KS-864 R-1: verifier-portal reports http://verifier-frontend:80 when VERIFIER_PORTAL_URL is empty`\n- `admin` = `KS-864 R-1: admin-portal reports http://admin-frontend:80 when ADMIN_PORTAL_URL is empty`\n\n## Tampers\n\n### ISSUERNULLISH — an empty ISSUER_PORTAL_URL is served as the url\nFile: `Blockchain/Dev/services/api-gateway/src/routes/system-status.ts`\nLine: 228\nFrom:\n```\n    url: process.env.ISSUER_PORTAL_URL || 'http://issuer-frontend:80',\n```\nTo:\n```\n    url: process.env.ISSUER_PORTAL_URL ?? 'http://issuer-frontend:80',\n```\nReds: `issuer`\n\n### VERIFIERNULLISH — an empty VERIFIER_PORTAL_URL is served as the url\nFile: `Blockchain/Dev/services/api-gateway/src/routes/system-status.ts`\nLine: 237\nFrom:\n```\n    url: process.env.VERIFIER_PORTAL_URL || 'http://verifier-frontend:80',\n```\nTo:\n```\n    url: process.env.VERIFIER_PORTAL_URL ?? 'http://verifier-frontend:80',\n```\nReds: `verifier`\n\n### ADMINNULLISH — an empty ADMIN_PORTAL_URL is served as the url\nFile: `Blockchain/Dev/services/api-gateway/src/routes/system-status.ts`\nLine: 246\nFrom:\n```\n    url: process.env.ADMIN_PORTAL_URL || 'http://admin-frontend:80',\n```\nTo:\n```\n    url: process.env.ADMIN_PORTAL_URL ?? 'http://admin-frontend:80',\n```\nReds: `admin`\n\n## Controls\n\n- `control: billing reports its localhost default when BILLING_SERVICE_URL is empty`\n- `control: the three portal rows are served`\n\n## THE CELLS — state it to yourself before you write a line\n\nAt the untouched tip all five cells pass: `''` is falsy, so each portal takes its compose default, and billing (read through `getServiceUrl`, `:41-50`, `if (envUrl)`) takes `http://localhost:4019`. Under each NULLISH tamper exactly that portal's url becomes `''` (`expected '' to be 'http://issuer-frontend:80'`), so exactly its cell fails by assertion; the other two portal cells read unchanged lines. The two controls pass under every tamper: billing is not a portal line, and the tampered rows are still served (with an empty url).\n\n**MEASURED, not predicted** (`--shared` scratch clone at `59412d057`, the harness's `prepare_clone.sh` farm, the service's own `npx vitest run`): see `## Measurements` below.\n\n## Measurements\n\nMeasured 2026-09-19 by the round-3 search subagent at `59412d057` (whole api-gateway suite = `npx vitest run` in `services/api-gateway`; every run restored by bytes, sha256 equal, porcelain 0 after; the new file moved aside, never deleted):\n- the new file at the tip: 5/5 pass. Whole suite: 613/613 without it, 618/618 with it.\n- ISSUERNULLISH / VERIFIERNULLISH / ADMINNULLISH with the file: each exactly 1 red of 5, its own portal cell, `AssertionError: expected '' to be 'http://<portal>-frontend:80'`; both controls green under all three. Whole suite under ISSUERNULLISH with the file: 1 red of 618, the issuer cell.\n- All three tampers WITHOUT the file: 0 red of 613 (whole suite) — the gate's row 17 reproduced at the tip.\n\n## Output\n\nExactly ONE ```diff block, nothing outside it: `--- /dev/null` / `+++ b/Blockchain/Dev/services/api-gateway/src/__tests__/ks864d-empty-portal-env-var-falls-back.test.ts`, then the ONE hunk above exactly as shown (`@@ -0,0 +1,55 @@`).\n\n## Notes for the raise (not for the model)\n\n- Test-only. **Raise tier: TIER 2. Refs KS-864** (the #1009 gate's R-1 record, row 17 Q-nullish). Never Closes: KS-864 stays open. New file only; `ks864c` is HELD by READY_KS-864-F1009 and is not touched.\n\n## Build line (not for the model)\n\n```\nbash tasks/test_only/build_test_only_input.sh KS-864 night/inputs/test_only_864R1.json night/briefs/KS-864-R1.md ctx=65536\n```\n"
+ },
+ "repo": {
+  "source_checkout": "/Volumes/DevMASTER/!CODING/Secuura/Blockchain/2_Project_Files",
+  "tip": "59412d0575dff3243f5f0ccd1e50608ddb920d6c",
+  "branch": "develop",
+  "test_runner": "vitest (run one file with `npx vitest run <file>` from Blockchain/Dev/services/api-gateway)"
+ },
+ "task_type": "test_only",
+ "tip": "59412d0575dff3243f5f0ccd1e50608ddb920d6c",
+ "source_checkout": "/Volumes/DevMASTER/!CODING/Secuura/Blockchain/2_Project_Files",
+ "repo_subdir": "Blockchain/Dev",
+ "service_dir": "services/api-gateway",
+ "shared_pkg_dir": "packages/shared",
+ "shared_pkg_name": "@secuura/shared",
+ "test_file": "Blockchain/Dev/services/api-gateway/src/__tests__/ks864d-empty-portal-env-var-falls-back.test.ts",
+ "test_file_rel_to_service": "src/__tests__/ks864d-empty-portal-env-var-falls-back.test.ts",
+ "test_mode": "new",
+ "runner": "vitest",
+ "expected_plus": [
+  "// KS-864 (QA gate on PR #1009, R-1 row Q-nullish): #1007 set each portal URL in routes/system-status.ts to",
+  "// process.env.<X>_PORTAL_URL || '<compose default>'. No cell set a portal var to the EMPTY string, so the",
+  "// tamper || -> ?? (an empty var served as the url) reddened 0 cells. An empty var must fall back to the",
+  "// compose default. The module reads the vars at load, so the env is set before a fresh import.",
+  "import { describe, it, expect, vi, beforeAll, afterAll } from 'vitest';",
+  "import http from 'node:http';",
+  "import express from 'express';",
+  "vi.mock('../services/redis', () => ({ getRedisHealth: vi.fn(async () => ({ status: 'healthy' })) }));",
+  "const PORTALS = ['ISSUER_PORTAL_URL', 'VERIFIER_PORTAL_URL', 'ADMIN_PORTAL_URL'];",
+  "const savedEnv = { ...process.env };",
+  "let server: ReturnType<ReturnType<typeof express>['listen']>;",
+  "let urls: Record<string, string | undefined> = {};",
+  "beforeAll(async () => {",
+  "  vi.resetModules();",
+  "  vi.stubGlobal('fetch', vi.fn(async () => { throw new Error('offline in test'); }));",
+  "  process.env.NODE_ENV = 'dev';",
+  "  for (const v of PORTALS) process.env[v] = '';",
+  "  process.env.BILLING_SERVICE_URL = '';",
+  "  const router = (await import('../routes/system-status')).default;",
+  "  const app = express();",
+  "  app.use('/api/system', router);",
+  "  const port = await new Promise<number>((r) => { server = app.listen(0, '127.0.0.1', () => r((server.address() as any).port)); });",
+  "  const body = await new Promise<any>((resolve, reject) => {",
+  "    http.get({ hostname: '127.0.0.1', port, path: '/api/system/status' }, (res) => {",
+  "      let data = '';",
+  "      res.on('data', (c) => (data += c));",
+  "      res.on('end', () => { try { resolve(JSON.parse(data)); } catch (e) { reject(e); } });",
+  "    }).on('error', reject);",
+  "  });",
+  "  const services = Object.values(body.services).flat() as Array<{ name?: string; url?: string }>;",
+  "  urls = Object.fromEntries(services.map((s) => [s.name, s.url]));",
+  "}, 10_000);",
+  "afterAll(async () => {",
+  "  await new Promise<void>((r) => server.close(() => r()));",
+  "  for (const k of Object.keys(process.env)) if (!(k in savedEnv)) delete process.env[k];",
+  "  Object.assign(process.env, savedEnv);",
+  "  vi.unstubAllGlobals();",
+  "});",
+  "describe('KS-864 an EMPTY portal env var falls back to its compose default (NODE_ENV=dev)', () => {",
+  "  it('KS-864 R-1: issuer-portal reports http://issuer-frontend:80 when ISSUER_PORTAL_URL is empty', () => {",
+  "    expect(urls['issuer-portal']).toBe('http://issuer-frontend:80');",
+  "  });",
+  "  it('KS-864 R-1: verifier-portal reports http://verifier-frontend:80 when VERIFIER_PORTAL_URL is empty', () => {",
+  "    expect(urls['verifier-portal']).toBe('http://verifier-frontend:80');",
+  "  });",
+  "  it('KS-864 R-1: admin-portal reports http://admin-frontend:80 when ADMIN_PORTAL_URL is empty', () => {",
+  "    expect(urls['admin-portal']).toBe('http://admin-frontend:80');",
+  "  });",
+  "  it('control: billing reports its localhost default when BILLING_SERVICE_URL is empty', () => {",
+  "    expect(urls['billing']).toBe('http://localhost:4019');",
+  "  });",
+  "  it('control: the three portal rows are served', () => {",
+  "    expect(['issuer-portal', 'verifier-portal', 'admin-portal'].map((n) => n in urls)).toEqual([true, true, true]);",
+  "  });",
+  "});"
+ ],
+ "must_remove": [],
+ "cells": {
+  "issuer": "KS-864 R-1: issuer-portal reports http://issuer-frontend:80 when ISSUER_PORTAL_URL is empty",
+  "verifier": "KS-864 R-1: verifier-portal reports http://verifier-frontend:80 when VERIFIER_PORTAL_URL is empty",
+  "admin": "KS-864 R-1: admin-portal reports http://admin-frontend:80 when ADMIN_PORTAL_URL is empty"
+ },
+ "tampers": [
+  {
+   "id": "ISSUERNULLISH",
+   "file": "Blockchain/Dev/services/api-gateway/src/routes/system-status.ts",
+   "line": 228,
+   "from": "    url: process.env.ISSUER_PORTAL_URL || 'http://issuer-frontend:80',",
+   "to": "    url: process.env.ISSUER_PORTAL_URL ?? 'http://issuer-frontend:80',",
+   "reds": [
+    "KS-864 R-1: issuer-portal reports http://issuer-frontend:80 when ISSUER_PORTAL_URL is empty"
+   ],
+   "reds_as_written": [
+    "issuer"
+   ]
+  },
+  {
+   "id": "VERIFIERNULLISH",
+   "file": "Blockchain/Dev/services/api-gateway/src/routes/system-status.ts",
+   "line": 237,
+   "from": "    url: process.env.VERIFIER_PORTAL_URL || 'http://verifier-frontend:80',",
+   "to": "    url: process.env.VERIFIER_PORTAL_URL ?? 'http://verifier-frontend:80',",
+   "reds": [
+    "KS-864 R-1: verifier-portal reports http://verifier-frontend:80 when VERIFIER_PORTAL_URL is empty"
+   ],
+   "reds_as_written": [
+    "verifier"
+   ]
+  },
+  {
+   "id": "ADMINNULLISH",
+   "file": "Blockchain/Dev/services/api-gateway/src/routes/system-status.ts",
+   "line": 246,
+   "from": "    url: process.env.ADMIN_PORTAL_URL || 'http://admin-frontend:80',",
+   "to": "    url: process.env.ADMIN_PORTAL_URL ?? 'http://admin-frontend:80',",
+   "reds": [
+    "KS-864 R-1: admin-portal reports http://admin-frontend:80 when ADMIN_PORTAL_URL is empty"
+   ],
+   "reds_as_written": [
+    "admin"
+   ]
+  }
+ ],
+ "controls": [
+  "control: billing reports its localhost default when BILLING_SERVICE_URL is empty",
+  "control: the three portal rows are served"
+ ],
+ "files": {},
+ "_night_num_ctx": 65536
+}
