@@ -73,7 +73,32 @@ a safety rule with his name on it, not a build preference.
 - [ ] The listing folds — RD-465 O-4, RD-454 O-4
 
 ### The two additions the dependency measurement turned up
-- [ ] ⏳ **RD-549 — PENDING A MEASUREMENT, may join the minimum set. Do not close this line by assuming.**
+- [ ] 🔴 **RD-549 — CONFIRMED AND IN THE MINIMUM SET. Data exfiltration, measured end-to-end on BOTH heads.**
+      A stranger anonymously saves their own Azure-suffixed endpoint and key during the open window; it
+      survives setup; the admin configures Entra and enforces sign-in (the window genuinely shuts —
+      anonymous GET then 401); **and the next chat a SIGNED-IN admin sends goes to the attacker.**
+      Captured on the wire, identical on `e0ea198` and `2d83967`: 21,855-byte POST to the attacker's
+      host with the attacker's api-key, carrying **38 distinct REAL user names** plus real usage
+      figures — extracted from the captured prompt, not inferred. Dial proven with the
+      `diagnostics_channel` oracle and its positive control.
+      **NO DNS CONTROL NEEDED** — the attacker creates their own Azure OpenAI resource, Microsoft issues
+      the hostname and certificate, so it is on RD-516's sourced list BY CONSTRUCTION, resolves public,
+      and layer 3 PINS and dials it. **RD-516 allows this correctly by its own rule; it is a different
+      property and RD-516 is not the remedy.**
+      `first-run-setup.js:282-296` paints a GREEN 'Configured' badge for the attacker's settings, so an
+      admin completes setup without touching the AI step. No provenance is recorded anywhere.
+      **REMEDY SHAPE RULED (Tuesday):** write-time provenance, then anonymously-written config is
+      PERSISTED BUT INERT until an authenticated admin positively confirms it, and no green badge until
+      then. **Not warn-and-continue** — a warning whose default leaves the attacker active is a notice,
+      not a control.
+      ⏳ **OUTSTANDING AND KAM IS WAITING ON IT: does the LIVE 2.1.1 listing carry this?** Measuring at
+      head `6fb497d`. **Report it to him whichever way it goes — a NO is as urgent as a YES.** Anything
+      about the live listing or telling anyone outside is HIS signature class; state facts only.
+- [ ] **RD-550 — tier pending ONE measurement:** which data-source path a MARKETPLACE deployment takes.
+      Local-database path → saved AI config is lost on every restart for every customer we ship to, which
+      is blocker/minimum-set. Log Analytics → a real defect on a path our customers do not take, ticket.
+      It only ACCIDENTALLY bounds RD-549 on the local path — **luck, not a control; never counted as
+      mitigation.**
       An anonymous caller in the open window can persist an Azure-suffixed endpoint **plus an
       encrypted key** (measured: 200, read-back confirms; a literal RFC1918 value is refused 400).
       **RD-516 does NOT cover it** — it refuses PRIVATE addresses, and a planted host that passes the
