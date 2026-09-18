@@ -1,5 +1,8 @@
 # READY — KS-1233 (Ornith, briefed) — PASS 7/7, HELD for QA
 
+
+> ⚠ **CANONICAL PATCH = `/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/runs/2026-09-18_ks1233-ornith35b-night2/out.md.checker/section_N.diff`, each applied with its `section_N.opts`.** That is exactly what the checker graded PASS 7/7. **Never apply the embedded ```diff block below.** **TRUNCATED: the embedded diff below is only 40 of the model's 70 output lines** (the 10:0x seat's writer capped it; its test file stops partway). (Corrected 2026-09-18 12:4x after seat A 10th measured that none of the embedded blocks applied as patches.)
+
 **Held 2026-09-18 10:3x by the 10:0x Wednesday seat.** Source-read done (below) — this is not a
 bare checker pass.
 

@@ -1,5 +1,8 @@
 # READY — KS-1248 (Ornith, briefed, vitest code_patch) — PASS 7/7 on the harness RETRY — HELD for QA
 
+
+> ⚠ **CANONICAL PATCH = `/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/runs/2026-09-18_ks1248-ornith35b-night/retry/out.md.checker/section_N.diff`, each applied with its `section_N.opts`.** That is exactly what the checker graded PASS 7/7. **Never apply the embedded ```diff block below.** The embedded diff below is COMPLETE, but it's the model's RAW output: it only applies with the checker's accommodations (`--directory=Blockchain/Dev`, a synthesized new-file header). (Corrected 2026-09-18 12:4x after seat A 10th measured that none of the embedded blocks applied as patches.)
+
 **Held 2026-09-18 12:1x by the 10:0x Wednesday seat after a source read.** Run `runs/2026-09-18_ks1248-ornith35b-night` (**the pass is `retry/`**; the first attempt failed A2b with a placeholder test file). Tip `207716440`.
 Product `services/api-gateway/src/routes/system-status.ts`. It's a follow-up to #1037's N-1: `/system/status` troubleshooting called a DEGRADED required service **critical** and told operators to **restart** it.
 

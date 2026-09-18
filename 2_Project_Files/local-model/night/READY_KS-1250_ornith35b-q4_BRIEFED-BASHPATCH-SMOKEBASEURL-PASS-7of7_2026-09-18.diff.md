@@ -1,5 +1,8 @@
 # READY — KS-1250 (Ornith, briefed, BASH tier) — PASS 7/7 FIRST attempt, strict apply — HELD, and ⚠ DO NOT RAISE WITHOUT KAM
 
+
+> ⚠ **CANONICAL PATCH = `/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/runs/2026-09-18_ks1250-ornith35b-night/out.md.checker/section_N.diff`, each applied with its `section_N.opts`.** That is exactly what the checker graded PASS 7/7. **Never apply the embedded ```diff block below.** The embedded diff below is COMPLETE; the checker applied it in strict mode. (Corrected 2026-09-18 12:4x after seat A 10th measured that none of the embedded blocks applied as patches.)
+
 **Held 2026-09-18 12:1x by the 10:0x Wednesday seat after a source read.** Run `runs/2026-09-18_ks1250-ornith35b-night`, tip `207716440`.
 Product `Blockchain/Dev/scripts/smoke-test.sh` (+4 lines after :15). New test `smoke_test_honours_smoke_base_url.test.sh` (`curl` is a PATH stub, so there's no network).
 

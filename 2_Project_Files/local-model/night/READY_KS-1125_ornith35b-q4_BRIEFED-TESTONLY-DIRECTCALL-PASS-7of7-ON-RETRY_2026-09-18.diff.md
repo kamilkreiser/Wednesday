@@ -1,5 +1,8 @@
 # READY — KS-1125 (Ornith, briefed, TEST-ONLY) — PASS 7/7 on the harness retry, HELD for QA
 
+
+> ⚠ **CANONICAL PATCH = `/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/runs/2026-09-18_ks1125-ornith35b-night/retry/out.md.checker/section_N.diff`, each applied with its `section_N.opts`.** That is exactly what the checker graded PASS 7/7. **Never apply the embedded ```diff block below.** The embedded diff below is COMPLETE, but it's the model's RAW output: it only applies with the checker's accommodations (strict `git apply` gives rc 128). (Corrected 2026-09-18 12:4x after seat A 10th measured that none of the embedded blocks applied as patches.)
+
 **Held 2026-09-18 11:0x by the 10:0x Wednesday seat, after a source read** (below). This isn't a bare checker pass.
 
 | field | value |
