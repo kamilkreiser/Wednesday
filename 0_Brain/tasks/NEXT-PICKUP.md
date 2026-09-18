@@ -12,6 +12,14 @@ supersede: replace wholesale at the next pickup; do not append
 
 **⚙ This file was SPLIT at 10:0x 2026-09-18** — 600 lines of self-declared superseded blocks moved verbatim to `NEXT-PICKUP-archive.md` under this file's own `supersede:` rule (it had reached 220 KB, of which 19 KB was live, and every seat was ordered to read it WHOLE at boot). **Keep replacing, never append.** The archive is read on demand, never at boot.
 
+## 🟢 UPDATE 11:5x 2026-09-18 (the 10:0x seat, ctx ~48%) — READ FIRST
+
+**ORNITH FED FROM A NEW SOURCE:** the tickets the QA gates filed TODAY (KS-1238..1250) weren't in the 06:51 `candidates.md`. The brief-writer (4 for 4 on reachability predictions so far) wrote **KS-1248** (vitest: `/system/status` troubleshooting calls a degraded required service *critical* and says *restart*; red and green measured with the repo's esbuild, vitest itself not run) and **KS-1250** (bash: `smoke-test.sh` ignores `SMOKE_BASE_URL`; red and green FULLY measured on bash 3.2.57). **Both queued, runner live.**
+
+**⚠ KS-1250: DO NOT RAISE IT WITHOUT KAM'S NOD, even if it passes 7/7.** Today, RUNBOOK §2.2's command silently smoke-tests *localhost*. After this fix, a full (non-`--quick`) run against a named gateway will **log in with the demo credentials, POST a `Smoke-Test` document and try to ANCHOR it there** (`smoke-test.sh :147-214`). Anchoring writes to the chain. That's presumably what the runbook always meant, but **nobody could have been doing it until now**, so honouring the variable changes what a smoke run does to a real server. The ticket offered *"honour the variable, or fix the runbook"*; the brief-writer chose honour. **Queueing is safe** (the harness only talks to a `curl` stub). **Raising it is a behaviour change on real servers, so it's Kam's call.**
+
+**Rejected from the new pool (reasons in the brief-writer's report):** 6 auth-adjacent (KS-1238/1239/1240/1241/1242/1244), 5 decisions (KS-1243/1245/1246/1249, and KS-1203 as "owner's choice" on an allow-list), KS-1247 (no code, an inventory). **The gate's "N-3" (servicesOnline cells) was NEVER FILED as a ticket**, so it's a loose end from the #1037 gate. **NEXT BEST: KS-1228** (jest, `originate/src/routes/documents.ts`), reachable directly, but slice it to `/version` only; it fell to the two-brief limit.
+
 ## 🟢 UPDATE 11:2x 2026-09-18 (the 10:0x seat, ctx ~50%, usage 19%) — READ FIRST
 
 **FLOOR:** `%0` wednesday · `%98` seat A (**ctx 50%, at its checkpoint**; rebuild phase 2) · `%1` monitor. **Both gate panes CLOSED** (#1037 `%99`, #922 `%100`; reports on disk, scored). **Ornith: IDLE** (the direct-reachable pool is nearly dry, see below).
