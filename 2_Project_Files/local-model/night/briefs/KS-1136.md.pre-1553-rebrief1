@@ -1,0 +1,234 @@
+# KS-1136 (ITEM 1) A FAILED TRIVY SCAN IS NOT A CLEAN IMAGE — Wednesday's task for Ornith, BASH_PATCH, **ONE script (three hunks) + ONE NEW `*.test.sh`** (written 15:29 on 2026-09-18 from the file at develop `8b9c3f022bee76b79a47f1b8c5de8ad3ddb4a0ae` — `04-container-trivy.sh` read whole, 123 lines)
+
+Written from origin develop `8b9c3f022bee76b79a47f1b8c5de8ad3ddb4a0ae` (measured by `git ls-remote origin develop` at 14:5x AEST 2026-09-18).
+`Blockchain/Testing/jobs/04-container-trivy.sh` at that tip: blob `4312a79f5292ed3a4cab07e0486dd2fd1dbe4763`, **123 lines** (`wc -l`). In `:86-122` no line carries a non-ASCII character; `:123` does (the arrow in the summary echo), and NO hunk touches or quotes `:123`.
+
+## THE MODE — read this twice
+
+**BASH_PATCH.** Your diff contains EXACTLY TWO files:
+1. `Blockchain/Testing/jobs/04-container-trivy.sh` — THREE hunks.
+2. `Blockchain/Dev/scripts/__tests__/container_trivy_failed_scan_is_loud.test.sh` — ONE NEW file (`--- /dev/null`).
+
+**In THIS tier the paths are FULL repository paths** (`Blockchain/Testing/...`, `Blockchain/Dev/...`) — the checker applies with `git apply -p1` from the repository root. Nothing else changes: not `09-aggregate-report.sh`, not `container_trivy_image_filter.test.sh`, not any other job.
+
+## What is wrong (one paragraph)
+
+Job 04 scans each `dev-*:latest` image with `trivy image` (`:86-93`) and normalises the report with jq (`:96-112`). The scan line ends `"$img" 2>/dev/null || echo '{}')"` (`:93`): when trivy exits non-zero with no output, `raw` becomes `{}`, jq writes `counts: {}` / `vulns: []` for that image, and the job prints `across N image(s)` and exits 0 — **a failed scan reads as a scanned, clean image.** With partial output on one of two images, jq cannot parse `raw`, `norm` is empty, and the artefact itself comes out unparseable, still rc 0. Measured by the #974 tier-2 gate (R-2) and again below. **This task (KS-1136 item 1, the gate's fix shape): keep trivy's own exit code, record a failed image as `{"image": …, "error": "scan-failed", "counts": {}, "vulns": []}`, and make a run with any failed scan exit 1 BEFORE it prints the clean-run `across N` summary.**
+
+NOT in this task: item 2 (the other jobs' artefact reads in `09-aggregate-report.sh`) — a different file, its own brief later; teaching 09 to emit a per-image finding for `.error`; the docker/trivy-missing SKIP paths (`:20-29`); the image filter (`:59-62`); the no-images alarm (`:72-81`).
+
+## WHY THE TEST CALLS THE CODE DIRECTLY
+
+docker and trivy never run. The new suite copies `container_trivy_image_filter.test.sh`'s fixture: it copies the REAL job into a temp tree, puts a `docker` stub and a `trivy` stub on a private `PATH`, and runs the job the way the orchestrator does (`SELF`, `RUN_DIR` exported). The trivy stub reads `$root/fail.txt` and fails the named image's scan in one of the two ways the gate measured (`empty`: exit 1, no output; `partial`: print `{"Results":[` and exit 1); every other image gets `{}` with exit 0. No network, no daemon, no stack.
+
+## Where (every **must change** line must appear as a `-` line in your diff)
+
+- `:91` — (correct) `    --vuln-type os,library \` — leading context of hunk 1. Stays.
+- `:92` — (correct) `    --skip-db-update \` — leading context of hunk 1. Stays.
+- `:93` — **must change** `    "$img" 2>/dev/null || echo '{}')"` — the `|| echo '{}'` arm is what turns a failed scan into an empty report.
+- `:95` — (correct) `  # extract just the high-signal subset` — trailing context of hunk 1. Stays.
+- `:96` — (correct) `  norm=$(echo "$raw" | jq --arg img "$img" '{` — trailing context of hunk 1. Stays.
+- `:114` — (correct) `  [ "$first" -eq 1 ] || printf ',\n' >> "$OUT"` — hunk 2 inserts immediately BEFORE it. Stays.
+- `:115` — (correct) `  first=0` — trailing context of hunk 2. Stays.
+- `:116` — (correct) `  echo "$norm" >> "$OUT"` — trailing context of hunk 2. Stays.
+- `:121` — (correct) `crit=$(jq '[.images[].counts.CRITICAL // 0] | add' "$OUT")` — hunk 3 inserts immediately BEFORE it. Stays.
+- `:122` — (correct) `high=$(jq '[.images[].counts.HIGH // 0] | add' "$OUT")` — trailing context of hunk 3. Stays.
+
+Line `:94` is BLANK. Hunk 1 REMOVES it (a `-` line with nothing after the `-`) and puts one comment line in its place, so that hunk 1 has non-blank context on both sides. Every other line in all three hunks is non-blank.
+
+## The exact change — THREE hunks in `Blockchain/Testing/jobs/04-container-trivy.sh`
+
+Every context line is copied byte for byte, including the trailing ` \` on `:91`/`:92` and the `,\n` inside `:114`. Do not re-indent. The `+` lines are ASCII only (a plain `-` hyphen, never a dash character, and `->` never an arrow).
+
+**Hunk 1** — keep trivy's exit code (two `-`, two `+`):
+
+```
+@@ -91,6 +91,6 @@
+     --vuln-type os,library \
+     --skip-db-update \
+-    "$img" 2>/dev/null || echo '{}')"
+-
++    "$img" 2>/dev/null)"; trc=$?
++  # KS-1136: trc is trivy's own exit code - a failed scan is no longer turned into an empty, clean-looking report.
+   # extract just the high-signal subset
+   norm=$(echo "$raw" | jq --arg img "$img" '{
+```
+
+`raw="$(… )"; trc=$?` — the exit status of an assignment whose value is a command substitution IS that substitution's status, so `trc` is trivy's own exit code. `raw` is now empty when trivy printed nothing.
+
+**Hunk 2** — a failed or unreadable scan is written as `scan-failed` (4 `+` lines, inserted BEFORE `:114`; the header's new-start stays 114 because hunk 1 changed no line count):
+
+```
+@@ -114,3 +114,7 @@
++  # KS-1136: a trivy that exited non-zero, or output jq could not read, is a FAILED scan - never a clean image.
++  if [ "$trc" -ne 0 ] || [ -z "$norm" ]; then
++    norm="$(jq -n --arg img "$img" '{image: $img, error: "scan-failed", counts: {}, vulns: []}')"
++  fi
+   [ "$first" -eq 1 ] || printf ',\n' >> "$OUT"
+   first=0
+   echo "$norm" >> "$OUT"
+```
+
+**Hunk 3** — a run with any failed scan exits 1 before the clean-run summary (6 `+` lines, inserted BEFORE `:121`; new-start 125 because hunk 2 added four lines):
+
+```
+@@ -121,2 +125,8 @@
++# KS-1136: a run with a failed scan exits 1 and never prints the clean-run "across N image(s)" summary.
++failed=$(jq '[.images[] | select(.error)] | length' "$OUT")
++if [ "$failed" -gt 0 ]; then
++  echo "  -> FAILED: trivy could not scan $failed of ${#IMAGES[@]} image(s) - a failed scan is not a clean image"
++  exit 1
++fi
+ crit=$(jq '[.images[].counts.CRITICAL // 0] | add' "$OUT")
+ high=$(jq '[.images[].counts.HIGH // 0] | add' "$OUT")
+```
+
+Why this is correct, so you do not "improve" it:
+- The failure count is read back from the artefact (`select(.error)`), so no counter variable has to be declared before the loop.
+- `counts: {}` and `vulns: []` stay on the failed entry on purpose: `:121-122` and `09-aggregate-report.sh` read `.images[].counts` and `.images[].vulns`, and must keep parsing.
+- A clean scan (trivy exit 0 and a non-empty `norm`) is written exactly as before.
+
+## The test — CREATE THE NEW FILE
+
+File: `Blockchain/Dev/scripts/__tests__/container_trivy_failed_scan_is_loud.test.sh`
+
+**Reference suite (READ-ONLY, do not modify, do not add it to your diff):** `Blockchain/Dev/scripts/__tests__/container_trivy_image_filter.test.sh` (blob `dec2db8de`). This file copies its `HERE`/`REPO_ROOT`/`JOB` lines, the jq precondition, `WORK` + `trap`, the `ok`/`bad` counters, `build_fixture`'s docker stub and `run_job` exactly, and its last three lines. The trivy stub is written with a quoted heredoc (`<<'STUB'`) and `sed` puts the fixture root in place of `@ROOT@`, so no line needs a backslash escape.
+
+Write EXACTLY this file (93 lines) — one CONTROL, then two 🔴. It is bash 3.2: no `mapfile`, no `declare -A`, no `timeout`. Write 🔴 as the literal character.
+
+```
+#!/usr/bin/env bash
+# =============================================================================
+# TESTS for Blockchain/Testing/jobs/04-container-trivy.sh - a FAILED per-image
+# scan must never read as a CLEAN image (KS-1136 item 1, R-2)
+# =============================================================================
+# The defect: each image's scan was `raw="$(trivy image ... || echo '{}')"`, so a
+# trivy that exited non-zero with no output became `{}`, and the jq that follows
+# wrote `counts: {}` / `vulns: []` for that image - scanned and clean - with the
+# job exiting 0. With partial output on one of two images, the artefact itself
+# came out unparseable, still rc 0.
+#
+# docker and trivy are NEVER run here (no stack, no daemon): both are STUBS on
+# a private PATH, in the shape of container_trivy_image_filter.test.sh. The
+# trivy stub reads $root/fail.txt ("<image> empty|partial" per line) and fails
+# that image's scan the way the gate measured; every other image gets `{}`.
+#
+# Usage: bash Blockchain/Dev/scripts/__tests__/container_trivy_failed_scan_is_loud.test.sh
+# =============================================================================
+set -uo pipefail
+
+HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_ROOT="$(cd "$HERE/../../../.." && pwd)"
+JOB="$REPO_ROOT/Blockchain/Testing/jobs/04-container-trivy.sh"
+[ -f "$JOB" ] || { echo "FATAL: 04-container-trivy.sh not found at $JOB" >&2; exit 2; }
+command -v jq >/dev/null 2>&1 || { echo "FATAL: jq is not on PATH - the subject cannot run, so nothing here can be graded" >&2; exit 2; }
+
+WORK="$(mktemp -d "${TMPDIR:-/tmp}/ks1136.XXXXXX")"
+trap 'rm -rf "$WORK"' EXIT
+
+pass=0; fail=0
+ok()  { printf '  ok   %s\n' "$1"; pass=$((pass + 1)); }
+bad() { printf '  FAIL %s\n     %s\n' "$1" "$2"; fail=$((fail + 1)); }
+
+# Build a fixture around the job under test.
+#   $1 = dir   $2 = corpus text (what `docker images` prints)   $3 = fail list ("<image> empty|partial" lines)
+build_fixture() {
+  local root="$1" corpus="$2" fails="${3:-}"
+  rm -rf "$root"; mkdir -p "$root/Testing/jobs" "$root/bin" "$root/run"
+  cp "$JOB" "$root/Testing/jobs/04-container-trivy.sh"
+  printf '%s\n' "$corpus" > "$root/images.txt"
+  printf '%s\n' "$fails" > "$root/fail.txt"
+  { printf '#!/bin/bash\n'
+    printf 'case "${1:-}" in\n'
+    printf '  info) exit 0 ;;\n'
+    printf '  images) cat "%s/images.txt" ;;\n' "$root"
+    printf 'esac\nexit 0\n'
+  } > "$root/bin/docker"
+  sed "s#@ROOT@#$root#g" > "$root/bin/trivy" <<'STUB'
+#!/bin/bash
+for last; do :; done
+echo "$last" >> "@ROOT@/trivy_scanned.txt"
+mode="$(awk -v i="$last" '$1 == i { print $2 }' "@ROOT@/fail.txt")"
+case "$mode" in
+  empty) exit 1 ;;
+  partial) printf '{"Results":['; exit 1 ;;
+esac
+echo '{}'
+STUB
+  chmod +x "$root/bin/docker" "$root/bin/trivy"
+}
+
+# Run the job the way the orchestrator / audit runner do. Prints rc.
+run_job() {
+  local root="$1"
+  ( export PATH="$root/bin:/usr/bin:/bin" SELF="$root/Testing" RUN_DIR="$root/run"
+    cd "$SELF" && bash jobs/04-container-trivy.sh ) >"$root/out.txt" 2>&1
+  echo $?
+}
+art() { jq -r "$2" "$1/run/04-container-trivy.json" 2>/dev/null || echo unparseable; }
+
+# CONTROL - every scan succeeds: rc 0, two images, no image carries an error.
+build_fixture "$WORK/clean" 'dev-auth:latest
+dev-api-gateway:latest'
+rc="$(run_job "$WORK/clean")"
+got="$rc $(art "$WORK/clean" '.images | length') $(art "$WORK/clean" '[.images[] | select(.error)] | length')"
+if [ "$got" = "0 2 0" ]; then ok "CONTROL - two clean scans: rc 0, 2 images, 0 errors"; else bad "CONTROL - two clean scans: rc 0, 2 images, 0 errors" "want 0 2 0, got $got"; fi
+
+# RED - the ONLY image's trivy exits 1 with NO output.
+build_fixture "$WORK/empty" 'dev-auth:latest' 'dev-auth:latest empty'
+rc="$(run_job "$WORK/empty")"
+got="$rc $(art "$WORK/empty" '.images[0].error // "none"')"
+if [ "$got" = "1 scan-failed" ]; then ok "🔴 a trivy that exits 1 with no output is recorded as scan-failed and the job exits 1"; else bad "🔴 a trivy that exits 1 with no output is recorded as scan-failed and the job exits 1" "want 1 scan-failed, got $got"; fi
+
+# RED - one of two images fails with PARTIAL output; the other scans clean.
+build_fixture "$WORK/partial" 'dev-auth:latest
+dev-api-gateway:latest' 'dev-auth:latest partial'
+rc="$(run_job "$WORK/partial")"
+got="$rc $(art "$WORK/partial" '[.images[] | .error // "none"] | sort | join(",")')"
+if [ "$got" = "1 none,scan-failed" ]; then ok "🔴 a partial-output failure on one of two images is recorded as scan-failed, the other stays clean, and the job exits 1"; else bad "🔴 a partial-output failure on one of two images is recorded as scan-failed, the other stays clean, and the job exits 1" "want 1 none,scan-failed, got $got"; fi
+
+printf '\n  %d passed, %d failed\n' "$pass" "$fail"
+[ "$fail" -eq 0 ] || exit 1
+exit 0
+```
+
+## THE RED-FIRST CELLS — state it to yourself before you write a line
+
+**At the untouched tip, BOTH 🔴 cells FAIL, by assertion:**
+- `🔴 a trivy that exits 1 with no output …` reads `0 none` against `1 scan-failed`: the job wrote a clean entry for the failed image and exited 0.
+- `🔴 a partial-output failure on one of two images …` reads `0 unparseable` against `1 none,scan-failed`: jq could not parse the partial output, `norm` was empty, and the artefact is not valid JSON — still rc 0.
+After your three hunks both read as wanted — GREEN.
+
+The CONTROL is green on BOTH trees: two clean scans still give rc 0, 2 images and 0 errors, so a "fix" that marked every image failed or broke the clean path goes RED. The reference suite (4 cells: the digit-tag filter, the non-dev tags staying out, the no-images alarm, the docker-down SKIP) must stay green too.
+
+**MEASURED, not predicted** (brief-writer 15:2x, macOS `/bin/bash` 3.2.57, `/usr/bin/jq`, the tip's job and reference suite byte for byte in a scratch tree outside any repository): this exact test at the tip → `1 passed, 2 failed`, rc 1, the two failures being the 🔴 cells with exactly the readings above. The three hunks applied with `patch -p1 -F0` (zero fuzz), `bash -n` passed, and the test → `3 passed, 0 failed`, rc 0. The reference suite read `4 passed, 0 failed` on BOTH trees.
+
+## Red cells
+
+- 🔴 a trivy that exits 1 with no output is recorded as scan-failed and the job exits 1
+- 🔴 a partial-output failure on one of two images is recorded as scan-failed, the other stays clean, and the job exits 1
+
+## Output
+
+Exactly ONE ```diff block, nothing outside it, with TWO sections in this order:
+1. `--- a/Blockchain/Testing/jobs/04-container-trivy.sh` / `+++ b/Blockchain/Testing/jobs/04-container-trivy.sh`, the THREE hunks above with the headers exactly as shown: `@@ -91,6 +91,6 @@`, `@@ -114,3 +114,7 @@`, `@@ -121,2 +125,8 @@`.
+2. `--- /dev/null` / `+++ b/Blockchain/Dev/scripts/__tests__/container_trivy_failed_scan_is_loud.test.sh`, ONE hunk `@@ -0,0 +1,N @@` where N is the number of lines you emit, every line a `+`.
+
+## Premises (measured)
+
+- **P1 tip.** origin develop `8b9c3f022bee76b79a47f1b8c5de8ad3ddb4a0ae`, read verbs only.
+- **P2 the file at the tip.** blob `4312a79f5`, 123 lines. Every context line quoted above occurs ONCE in the file (counted); `:94` is one of 12 blank lines, which is why hunk 1 replaces it rather than using it as context.
+- **P3 the other suites.** `container_trivy_image_filter.test.sh` RUNS the job (stubs that print `{}` with exit 0): 4/4 on both trees, measured. `aggregate_report_trivy_artefact.test.sh` writes its own artefacts and never runs 04. `orchestrate_jobs.test.sh` replaces 04 with a stub. So no existing cell runs the changed lines with a failing trivy.
+- **P4 exclusions (the coordinator's round-3 list).** Not preflight.sh or smoke-test.sh; not a file any of the four raising PRs touch; no deploy, no demo, no live stack or network (both tools are stubs); not auth or credentials.
+
+## Notes for the raise (not for the model)
+
+- **Behaviour change:** job 04 now exits 1 when trivy fails on any image, and the artefact names that image `error: scan-failed` instead of a clean entry. A clean run is byte-identical except that the loop now also sets `trc`. 09 does not yet emit a per-image finding for `.error`, so the loud signal is 04's exit code (the orchestrator reports a Stage-1 job that exited non-zero). Teaching 09 to read it belongs with item 2.
+- **Raise tier: TIER 2. Refs KS-1136, NOT Closes** — item 2 (`09-aggregate-report.sh`, seven artefact reads) is not in this diff.
+
+## Build line (not for the model)
+
+```
+bash tasks/bash_patch/build_bash_input.sh KS-1136 night/inputs/bash_1136.json night/briefs/KS-1136.md product=Blockchain/Testing/jobs/04-container-trivy.sh ref=Blockchain/Dev/scripts/__tests__/container_trivy_image_filter.test.sh
+```
+Queue with `task=tasks/bash_patch/task.md` (NOT code_patch) and `ctx=49152`.
