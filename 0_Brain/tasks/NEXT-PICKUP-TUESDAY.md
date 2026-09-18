@@ -176,6 +176,20 @@ in a shared repo where both files exist. Flagged to her in the 20:0x STATUS mail
 
 ## OWED — actions with a named owner, carried until done or withdrawn
 
+0⚠. 🔴 **KAM'S INSTRUCTIONS TODAY CAME BY TERMINAL, NOT PANEL — THEY ARE IN NO TOOL. Verbatim, here, because nothing else holds them:**
+   - *"I will do the submission once you prepare the zip for me. Tell me when it's ready."*
+   - *"keep going and let me know when the push is unblocked"*
+   - *"2.2.0 is fine, keep going"*  → the release version is **HIS RULING**, not Tuesday's call.
+   **None of these is in `chat_kam.json`.** `kam_rulings_today.sh`, `reconcile_rulings.py` and every
+   panel-derived instrument are blind to them. A successor that checks the panel and finds nothing must
+   **not** conclude he was silent — this is the ledger's 2026-09-13 w=4 class (a channel the tools
+   cannot see), and it has now fired three times in one morning.
+   **The mechanism that catches it is the w=4 rule and it is NOT optional at this seat:** before any
+   rotation, re-read this seat's own transcript for human-origin lines newer than the last pickup write,
+   and carry them here verbatim. Timestamps on terminal lines are this seat's PROCESSING time, generated
+   from `date` — his send time is unobservable from here and must never be typed as though it were known.
+
+
 0a. 🔴 **KAM — "let me know when the push is unblocked" (his words, 2026-09-18 ~10:3x).**
    **The predicate is written down so this is a CHECKLIST, not a judgement:**
    `0_Brain/reference/2026-09-18_nexusai-zip-chain/UNBLOCK-PREDICATE.md`. Evaluate it line by line on

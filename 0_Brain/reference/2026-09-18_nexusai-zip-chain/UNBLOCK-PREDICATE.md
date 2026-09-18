@@ -62,12 +62,19 @@ a safety rule with his name on it, not a build preference.
 ### The two additions the dependency measurement turned up
 - [ ] **RD-529 O-8** — the one-line placeholder wording fix in `DEPLOYMENT_GUIDE.md`, **which IS shipped
       in the image**. Ruled by Tuesday: it lands on main BEFORE the push rather than being baked in.
-- [ ] **The release version string is agreed: `2.2.0`.** No prior ruling existed (C-24 and C-39 fix only
-      that 2.1.1 is live/submitted), so this is Tuesday's call: a minor bump, not a patch, because the
-      release carries new behaviour and new guards. **The build checker requires the image tag to EQUAL
-      the package version**, so it must be settled before the push, not after. **It is baked in by the
-      push, so it goes to Kam in the same message that tells him he is unblocked, labelled as Tuesday's
-      call with the correction invited — that is the last moment it is free to change.**
+- [x] **The release version string is `2.2.0` — RULED BY KAM.**
+      **His words, verbatim, TERMINAL channel (not the panel): *"2.2.0 is fine, keep going"*.**
+      Received and receipted by this seat at 2026-09-18 10:43 AEST; that stamp is this seat's PROCESSING time,
+      generated from the clock, **not his send time, which this seat cannot observe.**
+      ⚠ **It is NOT in `chat_kam.json`** — he typed it in the terminal, which is invisible to
+      `kam_rulings_today.sh`, `reconcile_rulings.py` and every panel-derived instrument
+      (this seat's ledger, 2026-09-13, w=4). **A successor looking for it on the panel will find
+      nothing and must not conclude it was never said.**
+      **This supersedes Tuesday's own call.** It was mine under v1.3 sequencing until 10:4x; it is
+      now his ruling, so the push message NO LONGER offers a correction on it — it states it.
+      The build checker requires the image tag to EQUAL the package version; both are pinned to
+      `2.2.0` before anything is built.
+- [ ] ~~The release version string is agreed~~ — superseded by the line above.
 
 ### The telling
 - [ ] Every box above ticked and **re-read on `origin/main` in the same action as writing to him**
