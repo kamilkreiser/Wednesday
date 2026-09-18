@@ -1,0 +1,24 @@
+mode: test_only (modify Blockchain/Dev/packages/shared/src/__tests__/ks256-spec-example-contract.test.ts; runner vitest in Blockchain/Dev/packages/shared; 2 tamper(s))
+diff_blocks=1 all_blocks=1 prose_outside_chars=0
+PASS T1 output is exactly one fenced ```diff block, nothing outside it
+clone clean at pinned tip 8b9c3f022bee76b79a47f1b8c5de8ad3ddb4a0ae (test dir + 1 tamper file(s))
+touched: Blockchain/Dev/packages/shared/src/__tests__/ks256-spec-example-contract.test.ts
+PASS T2 touched-file set == { Blockchain/Dev/packages/shared/src/__tests__/ks256-spec-example-contract.test.ts } — no product file, no second file
+PASS T3 diff applies at the tip — with an accommodation: --recount (miscounted header: hunk @@ -506,12 +506,17 @@ describe('KS-679 — the E7 benign-shape widening is pinned (the seven-case control)', () => { declared old=12 new=17 actual old=10 new=15 ); every line byte-exact
+SUMMARY brief '+' 5 (5 present byte-exact) · brief '-' 0 · diff '+' 5 '-' 0 · '+' lines beyond the brief (INFO, not gated): 0
+PASS T4 every '+' line the brief adds is in the diff byte for byte (indent included), every brief '-' is removed, nothing else of the tip is removed, and no tip line is re-added
+green_tip rc=0 total=83 passed=83 failed=0 load_errors=0
+PASS T5 GREEN AT THE TIP: src/__tests__/ks256-spec-example-contract.test.ts passes with no tamper (83/83 cells; every declared cell present) — the cells pin EXISTING behaviour
+tamper M2: planted M2 at Blockchain/Dev/scripts/spec-examples/check/contract.mjs:246 (17115 -> 17117 bytes; sha256 24b24c8a27ce)
+PASS T8[M2] Blockchain/Dev/scripts/spec-examples/check/contract.mjs restored by bytes: sha256 72a863745f21 == tip blob, git diff --quiet rc 0
+PASS T6[M2] red set == declared exactly: {the boundary run is live: one E7 per firing row, on exactly , variantUpperA}, every red an assertion failure
+PASS T7[M2] every control green under the tamper
+tamper M6: planted M6 at Blockchain/Dev/scripts/spec-examples/check/contract.mjs:246 (17115 -> 17115 bytes; sha256 b7bf2eab7cce)
+PASS T8[M6] Blockchain/Dev/scripts/spec-examples/check/contract.mjs restored by bytes: sha256 72a863745f21 == tip blob, git diff --quiet rc 0
+PASS T6[M6] red set == declared exactly: {credit, the boundary run is live: one E7 per firing row, on exactly }, every red an assertion failure
+PASS T7[M6] every control green under the tamper
+T6 summary: 2/2 tamper(s) red exactly their declared set
+T7 summary: controls green under all 2 tamper(s)
+T8 summary: all 2 tamper file(s) restored by bytes
+SUMMARY test_only file=Blockchain/Dev/packages/shared/src/__tests__/ks256-spec-example-contract.test.ts mode=modify runner=vitest cells=83 tampers=2 apply=--recount (miscounted header: hunk @@ -506,12 +506,17 @@ describe('KS-679 — the E7 benign-shape widening is pinned (the seven-case control)', () => { declared old=12 new=17 actual old=10 new=15 )
+RESULT: PASS (8/8)

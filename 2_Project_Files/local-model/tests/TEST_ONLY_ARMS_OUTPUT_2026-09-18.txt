@@ -1,0 +1,30 @@
+test_only arms 2026-09-18 17:09:36 · checker /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/tasks/test_only/checker.sh (5c67029500d8) · builder (e7507f1114ea) · runs /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/9b05af00-d7be-4a1b-951b-52959709cae5/scratchpad/to/arms/arms_20260918-170936
+fixtures ok
+--- ARM1 GOLDEN PASS
+  ok   ARM1 rc 0, RESULT: PASS (8/8), M2 {variantUpperA, liveness}, M6 {credit, liveness}, 83 cells
+  ok   ARM1 planted bytes hash to the r2 gate's landed blobs: M2=31973b68c M6=dc88518e7
+--- ARM2 declared-set strictness (M2 declared {variantUpperA} only)
+  ok   ARM2 rc 1: FAIL T6[M2] red set != declared: red but NOT declared ['the boundary run is live: one E7 per firing row, on exactly '] (red {the boundary run is live: one E7 pe
+--- ARM3 a cell that does not reach (credit row removed)
+  ok   ARM3 rc 1: FAIL T6[M6] reds NOTHING (0 of 82 cells failed) — the cells do not reach the tampered code (red {})
+  ok   ARM3c rc 1: the brief still declaring credit -> FAIL T5 (declared cell not in the run), no tamper planted
+  ok   ARM3b rc 1: FAIL T4 names the missing credit row
+--- ARM4 a product-file touch
+  ok   ARM4 rc 1: FAIL T2 names Blockchain/Dev/scripts/spec-examples/check/contract.mjs
+--- ARM5 restore guard (TO_TEST_SKIP_RESTORE=M2)
+  ok   ARM5 rc 1: FAIL T8[M2] RESTORE FAILED, run stopped before M6; the clone's contract.mjs really is tampered (24b24c8a27ce != tip 72a863745f21)
+  ok   ARM5b rc 0: the next run's reset restored the tampered clone and the golden PASSES; contract.mjs == tip
+--- ARM6 NEW behaviour (red at the untouched tip)
+  ok   ARM6 rc 1: FAIL T5 (variantUpperA red at the tip), no tamper planted
+--- ARM7 JEST PASS (originate, new file)
+  ok   ARM7 rc 0: jest RESULT: PASS (8/8)
+  ok   ARM7b rc 1: FAIL T6[J1] declared but GREEN ['leaves OWNER out'] (a declared SUPERSET fails too)
+--- ARM8 every red is an assertion (M2 = a syntax error)
+  ok   ARM8 rc 1: FAIL T6[M2] NON-ASSERTION red(s): fires every one of the nine rules on a planted lea -> SyntaxError: Unexpected end of JSON input | never echoes a suspected secret in full -> SyntaxError: Unexpected e
+--- ARM9 builder refusals
+  ok   ARM9a builder rc 2: build_test_only_input: REFUSED — tamper M2: Blockchain/Dev/scripts/spec-examples/check/contract.mjs:245 at the tip is 'export const PREFIXED_UUID_RE =
+  ok   ARM9b builder rc 2: build_test_only_input: REFUSED — fence 1 line 7: a BLANK line in a modify-in-place fence (context or '+') — the model will not reproduce it (IMPROVEME
+  ok   ARM9c builder rc 2: build_test_only_input: REFUSED — tamper M6: Reds is empty — a tamper that should red nothing grades nothing
+  ok   ARM9d builder rc 2: build_test_only_input: REFUSED — control(s) also declared red under a tamper: ['credit']
+  ok   ARM9 control: the golden brief builds (rc 0)
+arms: 18 ok, 0 failed (runs in /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/9b05af00-d7be-4a1b-951b-52959709cae5/scratchpad/to/arms/arms_20260918-170936)

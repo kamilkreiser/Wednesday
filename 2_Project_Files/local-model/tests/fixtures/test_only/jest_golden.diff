@@ -1,0 +1,20 @@
+--- /dev/null
++++ b/Blockchain/Dev/services/originate/src/__tests__/to-arms-document-write-roles.test.ts
+@@ -0,0 +1,17 @@
++import { DOCUMENT_WRITE_ROLES } from '../middleware/documentWriteRoles';
++
++// test_only tier ARMS fixture (jest runner) - never raised, never queued.
++describe('test_only arms - the document-write allow-list is pinned', () => {
++  it('lists ISSUER_ADMIN', () => {
++    expect(DOCUMENT_WRITE_ROLES).toContain('ISSUER_ADMIN');
++  });
++  it('lists SUPER_ADMIN', () => {
++    expect(DOCUMENT_WRITE_ROLES).toContain('SUPER_ADMIN');
++  });
++  it('leaves OWNER out', () => {
++    expect(DOCUMENT_WRITE_ROLES).not.toContain('OWNER');
++  });
++  it('has exactly four roles', () => {
++    expect(DOCUMENT_WRITE_ROLES).toHaveLength(4);
++  });
++});

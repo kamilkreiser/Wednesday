@@ -1,0 +1,353 @@
+#!/bin/bash
+# checker.sh <input.json> <out.md> <clone-dir> — test_only (2026-09-18)
+#
+# The mechanical verdict on a model-produced TEST-ONLY diff: cells that PIN EXISTING behaviour, graded by N NAMED
+# TAMPERS on product code (any path, `scripts/**/*.mjs` included). Built for the KS-1254 / KS-1137 / KS-1110 class that
+# code_patch refuses (it needs a product hunk and plants ONE tamper). It never edits the diff, never judges style, never
+# hand-fixes anything: it applies the diff in a scratch clone pinned at the input's tip and measures.
+#
+#   T1 output is exactly one fenced ```diff block, nothing outside it
+#   T2 touched set == { input.test_file } — no product file, no second file (read from the diff's own headers)
+#   T3 the diff applies at the tip STRICTLY (`git apply --check`); the ONE accommodation is --recount for a hunk whose
+#      header counts are wrong while every line is right (named in the verdict, never silent)
+#   T4 brief lines: every brief '+' line is a '+' line of the diff BYTE FOR BYTE (indent included — the A3c + A3i twin);
+#      every brief '-' line is removed; no other tip line is removed unless re-added (a rewrite); no tip line is re-added
+#      as a '+' that the brief does not add (the A3d twin)
+#   T5 GREEN AT THE TIP: with the diff applied and NO tamper, every cell of the file passes (the cells pin EXISTING
+#      behaviour), and every cell the brief names (reds and controls) exists in the run
+#   T6 for EACH tamper: planted byte for byte (the tip line must be the brief's From), the file run, and the set of red
+#      cells EQUALS the declared set — not a superset, not a subset; every red is an ASSERTION failure (no load/type
+#      error, the same cell count as T5); a tamper that reds NOTHING fails (the cells do not reach the code)
+#   T7 every control passes under every tamper
+#   T8 after each tamper the file is restored BY BYTES and its sha256 equals the tip blob's (and `git diff --quiet`);
+#      an unrestored tamper is a HARD FAIL — the run stops there
+#
+# Prints PASS/FAIL per gate (T6/T7/T8 once per tamper, then a summary line each); rc 0 only when ALL pass, printed as
+# `RESULT: PASS (8/8)`. Runner: input.runner (vitest | jest), run from <repo_subdir>/<service_dir> exactly as
+# tasks/code_patch/checker.sh does, JSON report per run. Every write verb runs inside <clone-dir>; the source checkout
+# is never touched. Reports land in <out.md>.checker/. No rm (a previous run's untracked test file is QUARANTINED).
+# Test hook (arms only, never set by night_run.sh): TO_TEST_SKIP_RESTORE=<tamper id> skips that tamper's restore so
+# the T8 guard can be proven to fire. stderr never discarded. bash 3.2.
+set -uo pipefail
+
+INPUT="${1:-}"; OUT="${2:-}"; CLONE="${3:-}"
+if [ -z "$INPUT" ] || [ -z "$OUT" ] || [ -z "$CLONE" ] || [ ! -f "$INPUT" ] || [ ! -f "$OUT" ] || [ ! -d "$CLONE/.git" ]; then
+  echo "usage: checker.sh <input.json> <out.md> <clone-dir>" >&2
+  exit 1
+fi
+HERE="$(cd "$(dirname "$0")" && pwd)"
+field() { python3 -c 'import json,sys; print(json.load(open(sys.argv[1]))[sys.argv[2]])' "$INPUT" "$1"; }
+TIP="$(field tip)"; SUBDIR="$(field repo_subdir)"; SERVICE="$(field service_dir)"
+TEST_FILE="$(field test_file)"; RUNNER="$(field runner)"; MODE_T="$(field test_mode)"
+TEST_REL="${TEST_FILE#$SUBDIR/$SERVICE/}"
+SVC="$CLONE/$SUBDIR/$SERVICE"
+REP="$OUT.checker"; mkdir -p "$REP"
+DIFF="$REP/patch.diff"
+N_TAMPER="$(python3 -c 'import json,sys; print(len(json.load(open(sys.argv[1]))["tampers"]))' "$INPUT")"
+echo "mode: test_only ($MODE_T $TEST_FILE; runner $RUNNER in $SUBDIR/$SERVICE; $N_TAMPER tamper(s))"
+case "$RUNNER" in vitest|jest) ;; *) echo "checker: unknown runner '$RUNNER' — refusing" >&2; exit 1;; esac
+
+FAILS=0
+pass() { echo "PASS $1"; }
+fail() { echo "FAIL $1"; FAILS=$((FAILS+1)); }
+stop() { echo "RESULT: FAIL ($FAILS failed) — stopped at $1"; exit 1; }
+
+# ---------------------------------------------------------------- T1 extract (the code_patch A1 extractor, loop detection kept)
+python3 - "$OUT" "$DIFF" > "$REP/extract.out" 2>&1 <<'PYEOF'
+import re, sys
+out_path, diff_path = sys.argv[1], sys.argv[2]
+text = open(out_path, encoding="utf-8").read()
+blocks = re.findall(r"```diff[^\n]*\n(.*?)```", text, flags=re.DOTALL)
+allblocks = re.findall(r"```[^\n]*\n.*?```", text, flags=re.DOTALL)
+tail0 = [l for l in text.split("\n") if l.strip()][-41:]
+for tail in (tail0, tail0[:-1]):
+    if len(tail) >= 12:
+        for k in (1, 2, 3, 4, 5, 6):
+            cyc = tail[-k:]; n = min(len(tail), 8 * k)
+            if all(tail[-(i + 1)] == cyc[-(i % k + 1)] for i in range(n)):
+                print(f"REPETITION LOOP: the output's last {n} non-blank lines repeat a {k}-line cycle starting {cyc[0][:60]!r}")
+                sys.exit(4)
+outside = re.sub(r"```[^\n]*\n.*?```", "", text, flags=re.DOTALL).strip()
+print(f"diff_blocks={len(blocks)} all_blocks={len(allblocks)} prose_outside_chars={len(outside)}")
+if outside: print("prose_outside_head=" + repr(outside[:200]))
+if blocks:
+    body = blocks[0]
+    if not body.endswith("\n"): body += "\n"
+    lines = body.split("\n")
+    # a file header written with a leading space (KS-1073 q8) is a header, not a context line — stripped and named
+    for i, l in enumerate(lines):
+        if re.match(r"^ (--- (/dev/null|a/)|\+\+\+ b/)", l):
+            print(f"line {i+1}: file header written with a leading space — stripped"); lines[i] = l[1:]
+    while len(lines) > 1 and lines[-1] == "" and lines[-2] == "": lines.pop()
+    open(diff_path, "w", encoding="utf-8").write("\n".join(lines))
+    sys.exit(0 if (len(blocks) == 1 and len(allblocks) == 1 and not outside) else 3)
+try:
+    import json
+    if json.load(open(out_path + ".meta.json")).get("done_reason") == "length":
+        print("TOKEN BUDGET CUT: done_reason=length and no closed diff fence"); sys.exit(4)
+except Exception:
+    pass
+sys.exit(2)
+PYEOF
+rc=$?
+cat "$REP/extract.out"
+if [ "$rc" -eq 4 ]; then fail "T1 REPETITION LOOP / TOKEN CUT — a runaway generation, not a diff: $(tail -1 "$REP/extract.out" | cut -c1-140)"; stop "T1 (sampler loop)"
+elif [ "$rc" -eq 2 ]; then fail "T1 output contains no \`\`\`diff block — nothing to apply"; stop "T1"
+elif [ "$rc" -eq 3 ]; then fail "T1 output is not exactly one fenced diff block with nothing outside it (see extract.out) — continuing with the first block"
+else pass "T1 output is exactly one fenced \`\`\`diff block, nothing outside it"; fi
+
+# ---------------------------------------------------------------- reset the clone (the test file + every tamper file)
+HEAD_SHA="$(git -C "$CLONE" rev-parse HEAD)"
+[ "$HEAD_SHA" = "$TIP" ] || { echo "checker: clone HEAD $HEAD_SHA != pinned tip $TIP — refusing (prepare the clone first)" >&2; exit 1; }
+TAMPER_FILES="$(python3 -c 'import json,sys; print("\n".join(sorted({t["file"] for t in json.load(open(sys.argv[1]))["tampers"]})))' "$INPUT")"
+Q="$CLONE/../quarantine/$(date +%Y%m%d-%H%M%S)"
+git -C "$CLONE" status --porcelain --untracked-files=all -- "$(dirname "$TEST_FILE")" > "$REP/pre_status.out" 2>&1
+while IFS= read -r line; do
+  [ -z "$line" ] && continue
+  st="${line:0:2}"; p="${line:3}"
+  case "$st" in "??") mkdir -p "$Q/$(dirname "$p")"; mv "$CLONE/$p" "$Q/$p"; echo "quarantined untracked $p -> $Q" ;; esac
+done < "$REP/pre_status.out"
+[ "$MODE_T" = modify ] && git -C "$CLONE" checkout -- "$TEST_FILE" >> "$REP/reset.out" 2>&1
+while IFS= read -r tfile; do [ -n "$tfile" ] && git -C "$CLONE" checkout -- "$tfile" >> "$REP/reset.out" 2>&1; done <<< "$TAMPER_FILES"
+n_dirty="$(git -C "$CLONE" status --porcelain --untracked-files=all -- "$(dirname "$TEST_FILE")" $TAMPER_FILES | wc -l | tr -d ' ')"
+[ "$n_dirty" -eq 0 ] || { echo "checker: clone not clean after reset ($n_dirty entries)" >&2; git -C "$CLONE" status --porcelain -- "$(dirname "$TEST_FILE")" $TAMPER_FILES >&2; exit 1; }
+echo "clone clean at pinned tip $TIP (test dir + $(echo "$TAMPER_FILES" | /usr/bin/grep -c .) tamper file(s))"
+
+# ---------------------------------------------------------------- T2 touched set (from the diff's own headers)
+python3 - "$DIFF" "$TEST_FILE" "$SUBDIR" "$REP" > "$REP/touched.out" 2>&1 <<'PYT2'
+import re, sys, json
+diff, want, sub, rep = sys.argv[1:5]
+paths = []
+lines = open(diff, encoding="utf-8").read().split("\n")
+for i, l in enumerate(lines):
+    for pre in ("--- ", "+++ "):
+        if l.startswith(pre):
+            p = l[4:].split("\t")[0].strip()
+            if p == "/dev/null": continue
+            p = re.sub(r"^[ab]/", "", p)
+            full = p if p.startswith(sub + "/") else sub + "/" + p
+            paths.append(full)
+touched = sorted(set(paths))
+json.dump({"touched": touched}, open(rep + "/touched.json", "w"))
+print("touched: " + " ".join(touched) if touched else "touched: (no file header in the diff)")
+sys.exit(0 if touched == [want] else 1)
+PYT2
+rc=$?
+cat "$REP/touched.out"
+if [ "$rc" -eq 0 ]; then pass "T2 touched-file set == { $TEST_FILE } — no product file, no second file"
+else fail "T2 touched-file set must be exactly { $TEST_FILE }: the diff's headers name $(sed 's/^touched: //' "$REP/touched.out" | head -1) — a test_only diff never touches a product file"; stop "T2 (touched set)"; fi
+# a path written without the repo subdir applies with --directory (the code_patch 2026-09-15 accommodation)
+DIROPT=""; /usr/bin/grep -q -E "^\+\+\+ b/$SUBDIR/" "$DIFF" || DIROPT="--directory=$SUBDIR"
+
+# ---------------------------------------------------------------- T3 applies strictly
+git -C "$CLONE" apply --check -p1 $DIROPT "$DIFF" > "$REP/apply_strict.out" 2>&1; rc_s=$?
+APPLY_OPTS="$DIROPT"; T3_NOTE=""
+if [ "$rc_s" -eq 0 ]; then
+  pass "T3 diff applies at the tip (strict git apply --check${DIROPT:+, $DIROPT})"
+else
+  # the ONE accommodation: header arithmetic. Every line must still match byte for byte (no --ignore-whitespace, no -C).
+  MIS="$(python3 - "$DIFF" <<'PYC'
+import re, sys
+L = open(sys.argv[1], encoding="utf-8").read().split("\n"); n = 0; i = 0
+while i < len(L):
+    m = re.match(r"^@@ -\d+(?:,(\d+))? \+\d+(?:,(\d+))? @@", L[i])
+    if not m: i += 1; continue
+    b = int(m.group(1) or 1); d = int(m.group(2) or 1); j = i + 1; o = w = 0
+    while j < len(L) and L[j][:1] in (" ", "+", "-", "\\") and not L[j].startswith("@@"):
+        c = L[j][:1]; o += c in " -"; w += c in " +"; j += 1
+    if (o, w) != (b, d): n += 1; print(f"hunk {L[i]} declared old={b} new={d} actual old={o} new={w}")
+    i = j
+PYC
+)"
+  git -C "$CLONE" apply --check -p1 $DIROPT --recount "$DIFF" > "$REP/apply_recount.out" 2>&1; rc_r=$?
+  if [ -n "$MIS" ] && [ "$rc_r" -eq 0 ]; then
+    APPLY_OPTS="$DIROPT --recount"; T3_NOTE="--recount (miscounted header: $(echo "$MIS" | head -2 | tr '\n' ' '))"
+    pass "T3 diff applies at the tip — with an accommodation: $T3_NOTE; every line byte-exact"
+  else
+    fail "T3 diff does NOT apply strictly at the tip: $(head -2 "$REP/apply_strict.out" | tr '\n' ' ')${MIS:+ | miscounted: $(echo "$MIS" | head -1)} | recount rc=$rc_r"
+    stop "T3 (the diff does not apply)"
+  fi
+fi
+
+# ---------------------------------------------------------------- T4 brief lines
+git -C "$CLONE" show "$TIP:$TEST_FILE" > "$REP/test_tip.txt" 2>/dev/null || : > "$REP/test_tip.txt"
+python3 - "$INPUT" "$DIFF" "$REP/test_tip.txt" > "$REP/t4.out" 2>&1 <<'PYT4'
+import json, sys
+d = json.load(open(sys.argv[1], encoding="utf-8"))
+L = open(sys.argv[2], encoding="utf-8").read().split("\n")
+tip = [l for l in open(sys.argv[3], encoding="utf-8").read().split("\n")]
+plus = [l[1:] for l in L if l.startswith("+") and not l.startswith("+++")]
+minus = [l[1:] for l in L if l.startswith("-") and not l.startswith("---")]
+rs = lambda s: s.rstrip(" \t\r")
+exp = [rs(e) for e in d.get("expected_plus", [])]; rem = [rs(e) for e in d.get("must_remove", [])]
+P = [rs(p) for p in plus]; M = [rs(m) for m in minus]
+bad = False
+missing = [e for e in exp if e.strip() and e not in P]
+for e in missing:
+    near = [p for p in P if p.strip() == e.strip()]
+    print(f"MISSING '+' {e.strip()[:90]!r}" + (f" (present with DIFFERENT indent: {len(near[0]) - len(near[0].lstrip())} vs {len(e) - len(e.lstrip())})" if near else ""))
+    bad = True
+notrem = [r for r in rem if r.strip() and r not in M]
+for r in notrem: print(f"NOT REMOVED '-' {r.strip()[:90]!r}"); bad = True
+# a '-' line the brief does not remove is a tip line (maybe a cell) deleted — unless the diff re-adds it (a rewrite)
+extra_minus = [m for m in M if m.strip() and m not in rem and m not in P]
+for m in extra_minus: print(f"REMOVED BEYOND THE BRIEF '-' {m.strip()[:90]!r}"); bad = True
+# A3d twin: a '+' line the brief does not add, equal to a tip line, not also removed = a context line marked '+'
+tipset = {t.strip() for t in tip if len(t.strip()) >= 8}
+ctx_plus = [p for p in P if len(p.strip()) >= 8 and p not in exp and p.strip() in tipset and p not in M]
+for p in ctx_plus: print(f"RE-ADDED TIP LINE '+' {p.strip()[:90]!r}"); bad = True
+extra_plus = [p for p in P if p.strip() and p not in exp and p not in ctx_plus]
+print(f"SUMMARY brief '+' {len(exp)} ({len(exp) - len(missing)} present byte-exact) · brief '-' {len(rem)} · diff '+' {len(P)} '-' {len(M)} · '+' lines beyond the brief (INFO, not gated): {len(extra_plus)}")
+for p in extra_plus[:5]: print(f"INFO extra '+' {p.strip()[:90]!r}")
+sys.exit(1 if bad else 0)
+PYT4
+rc=$?
+cat "$REP/t4.out"
+if [ "$rc" -eq 0 ]; then pass "T4 every '+' line the brief adds is in the diff byte for byte (indent included), every brief '-' is removed, nothing else of the tip is removed, and no tip line is re-added"
+else fail "T4 BRIEF LINES — $(/usr/bin/grep -v -E '^(SUMMARY|INFO)' "$REP/t4.out" | head -3 | tr '\n' '·' | cut -c1-600)"; stop "T4 (the diff is not the brief's lines; no test is run)"; fi
+
+# ---------------------------------------------------------------- the runner
+run_one() {
+  # run_one <label> -> $REP/<label>.json + .out; echoes rc
+  local label="$1"
+  if [ "$RUNNER" = jest ]; then
+    ( cd "$SVC" && npx jest "$TEST_REL" --cacheDirectory="$REP/jest_cache" --json --outputFile="$REP/$label.json" ) > "$REP/$label.out" 2>&1
+  else
+    ( cd "$SVC" && npx vitest run "$TEST_REL" --reporter=json --outputFile="$REP/$label.json" ) > "$REP/$label.out" 2>&1
+  fi
+  echo $?
+}
+# cells <label> -> one JSON object on stdout: {total, loaded, load_errors, cells:[{full,title,status,assert,nonassert,msg}]}
+cells_of() {
+  python3 - "$REP/$1.json" <<'PYC'
+import json, os, re, sys
+p = sys.argv[1]
+if not os.path.exists(p): print(json.dumps({"total": 0, "load_errors": ["no json report written"], "cells": []})); sys.exit()
+j = json.load(open(p)); cells = []; le = []
+for r in j.get("testResults", []):
+    if r.get("status") == "failed" and not r.get("assertionResults"):
+        le.append(os.path.basename(r.get("name", "?")) + ": " + (r.get("message") or "")[:200].replace("\n", " "))
+    for a in r.get("assertionResults", []):
+        msgs = " ".join(a.get("failureMessages") or [])
+        # an ASSERTION is the runner's own matcher failure: vitest/chai `AssertionError: expected …`, jest `expect(received)…`.
+        # NOT `"expected" in msgs.lower()` (the code_patch A4 heuristic): "Unexpected end of JSON input" contains it, and a
+        # SyntaxError from a guard that could not load was read as an assertion red (found by ARM8, 2026-09-18).
+        is_assert = ("AssertionError" in msgs) or bool(re.search(r"\bexpect\(", msgs))
+        nonassert = not is_assert
+        cells.append({"full": " ".join((a.get("fullName") or a.get("title") or "").split()), "title": " ".join((a.get("title") or "").split()),
+                      "status": a.get("status"), "assert": is_assert and not nonassert, "msg": msgs.strip().split("\n")[0][:160]})
+print(json.dumps({"total": j.get("numTotalTests", 0), "load_errors": le, "cells": cells}))
+PYC
+}
+
+# ---------------------------------------------------------------- T5 green at the tip (diff applied, no tamper)
+git -C "$CLONE" apply -p1 $APPLY_OPTS "$DIFF" > "$REP/apply.out" 2>&1 || { fail "T5 the diff did not apply for the run: $(head -2 "$REP/apply.out" | tr '\n' ' ')"; stop "T5"; }
+rc_g="$(run_one green_tip)"
+cells_of green_tip > "$REP/green_tip.cells.json"
+python3 - "$INPUT" "$REP/green_tip.cells.json" "$rc_g" > "$REP/t5.out" 2>&1 <<'PYT5'
+import json, sys
+d = json.load(open(sys.argv[1], encoding="utf-8")); c = json.load(open(sys.argv[2])); rc = int(sys.argv[3])
+cells = c["cells"]; failed = [x for x in cells if x["status"] == "failed"]; passed = [x for x in cells if x["status"] == "passed"]
+names = set(); [names.update(t["reds"]) for t in d["tampers"]]; names.update(d["controls"])
+missing = sorted(n for n in names if not any(n in (x["title"], x["full"]) for x in cells))
+print(f"green_tip rc={rc} total={c['total']} passed={len(passed)} failed={len(failed)} load_errors={len(c['load_errors'])}")
+for x in failed[:6]: print(f"RED AT THE TIP: {x['title'][:90]} -> {x['msg'][:120]}")
+for l in c["load_errors"][:3]: print(f"LOAD ERROR: {l}")
+for n in missing: print(f"DECLARED CELL NOT IN THE RUN: {n[:100]}")
+ok = rc == 0 and c["total"] > 0 and not failed and not c["load_errors"] and not missing and len(passed) == c["total"]
+sys.exit(0 if ok else 1)
+PYT5
+rc=$?
+cat "$REP/t5.out"
+N_GREEN="$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1]))["total"])' "$REP/green_tip.cells.json")"
+if [ "$rc" -eq 0 ]; then pass "T5 GREEN AT THE TIP: $TEST_REL passes with no tamper ($N_GREEN/$N_GREEN cells; every declared cell present) — the cells pin EXISTING behaviour"
+else fail "T5 GREEN AT THE TIP: $(/usr/bin/grep -v '^green_tip' "$REP/t5.out" | head -3 | tr '\n' '·' | cut -c1-500) ($(head -1 "$REP/t5.out")) — a red at the untouched tip asserts NEW behaviour (a test_only diff pins what the code ALREADY does); a load error or a declared cell missing from the run cannot be graded"; stop "T5 (not green at the tip; no tamper is planted)"; fi
+
+# ---------------------------------------------------------------- T6/T7/T8 per tamper
+T6_BAD=0; T7_BAD=0; k=0
+while [ "$k" -lt "$N_TAMPER" ]; do
+  TID="$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1]))["tampers"][int(sys.argv[2])]["id"])' "$INPUT" "$k")"
+  TF_="$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1]))["tampers"][int(sys.argv[2])]["file"])' "$INPUT" "$k")"
+  TABS="$CLONE/$TF_"
+  TIP_SHA="$(git -C "$CLONE" show "$TIP:$TF_" | shasum -a 256 | cut -c1-64)"
+  cp -p "$TABS" "$REP/tamper_${TID}.orig"
+  # plant: the tip line must be the brief's From byte for byte; the rest of the file's bytes are untouched
+  python3 - "$INPUT" "$k" "$TABS" "$TIP_SHA" > "$REP/tamper_${TID}.plant.out" 2>&1 <<'PYP'
+import hashlib, json, sys
+d = json.load(open(sys.argv[1], encoding="utf-8")); t = d["tampers"][int(sys.argv[2])]; p = sys.argv[3]
+raw = open(p, "rb").read()
+if hashlib.sha256(raw).hexdigest() != sys.argv[4]: print(f"REFUSED: {t['file']} is not the tip blob before planting"); sys.exit(2)
+lines = raw.split(b"\n"); i = t["line"] - 1
+if not (0 <= i < len(lines)) or lines[i] != t["from"].encode("utf-8"):
+    print(f"REFUSED: {t['file']}:{t['line']} is {lines[i][:120] if 0 <= i < len(lines) else b'(out of range)'!r}, the brief's From is {t['from'][:120]!r}"); sys.exit(2)
+lines[i] = t["to"].encode("utf-8"); new = b"\n".join(lines)
+open(p, "wb").write(new)
+print(f"planted {t['id']} at {t['file']}:{t['line']} ({len(raw)} -> {len(new)} bytes; sha256 {hashlib.sha256(new).hexdigest()[:12]})")
+PYP
+  rc_p=$?
+  echo "tamper $TID: $(cat "$REP/tamper_${TID}.plant.out")"
+  if [ "$rc_p" -ne 0 ]; then
+    fail "T6[$TID] the tamper could not be planted: $(tr '\n' ' ' < "$REP/tamper_${TID}.plant.out")"
+    T6_BAD=1; k=$((k+1)); continue
+  fi
+  rc_t="$(run_one "tamper_$TID")"
+  cells_of "tamper_$TID" > "$REP/tamper_$TID.cells.json"
+  # restore BY BYTES, then prove it (T8) before anything else is read
+  if [ "${TO_TEST_SKIP_RESTORE:-}" = "$TID" ]; then
+    echo "TEST HOOK: TO_TEST_SKIP_RESTORE=$TID — the restore of $TF_ is SKIPPED (arms only)"
+  else
+    cp -p "$REP/tamper_${TID}.orig" "$TABS"
+  fi
+  NOW_SHA="$(shasum -a 256 "$TABS" | cut -c1-64)"
+  git -C "$CLONE" diff --quiet -- "$TF_"; rc_dq=$?
+  if [ "$NOW_SHA" = "$TIP_SHA" ] && [ "$rc_dq" -eq 0 ]; then
+    pass "T8[$TID] $TF_ restored by bytes: sha256 ${NOW_SHA:0:12} == tip blob, git diff --quiet rc 0"
+  else
+    fail "T8[$TID] RESTORE FAILED — $TF_ sha256 ${NOW_SHA:0:12} != tip ${TIP_SHA:0:12} (git diff --quiet rc $rc_dq): the clone still carries a tamper, so NOTHING after this point can be trusted"
+    echo "RESULT: FAIL ($FAILS failed) — stopped at T8 (an unrestored tamper; hard fail)"
+    exit 1
+  fi
+  python3 - "$INPUT" "$k" "$REP/tamper_$TID.cells.json" "$rc_t" "$N_GREEN" > "$REP/tamper_$TID.verdict.out" 2>&1 <<'PYV'
+import json, sys
+d = json.load(open(sys.argv[1], encoding="utf-8")); t = d["tampers"][int(sys.argv[2])]
+c = json.load(open(sys.argv[3])); rc = int(sys.argv[4]); n0 = int(sys.argv[5])
+cells = c["cells"]
+def resolve(n): return {x["full"] for x in cells if n in (x["title"], x["full"])}
+declared = set(); [declared.update(resolve(n)) for n in t["reds"]]
+red = {x["full"] for x in cells if x["status"] == "failed"}
+title = {x["full"]: x["title"] for x in cells}
+short = lambda s: sorted(title.get(f, f)[:60] for f in s)
+problems = []
+if c["load_errors"]: problems.append("LOAD ERROR under the tamper: " + " | ".join(c["load_errors"][:2]))
+if c["total"] != n0: problems.append(f"cell count {c['total']} under the tamper != {n0} at the tip (a cell did not run)")
+nonassert = [x for x in cells if x["status"] == "failed" and not x["assert"]]
+if nonassert: problems.append("NON-ASSERTION red(s): " + " | ".join(f"{x['title'][:50]} -> {x['msg'][:90]}" for x in nonassert[:3]))
+if not red:
+    problems.append(f"reds NOTHING (0 of {c['total']} cells failed) — the cells do not reach the tampered code")
+elif red != declared:
+    extra = red - declared; miss = declared - red
+    problems.append("red set != declared: " + (f"red but NOT declared {short(extra)}" if extra else "") + (" · " if extra and miss else "") + (f"declared but GREEN {short(miss)}" if miss else ""))
+ctrl_bad = []
+for n in d["controls"]:
+    got = [x for x in cells if n in (x["title"], x["full"])]
+    if not got or any(x["status"] != "passed" for x in got): ctrl_bad.append(n)
+print(json.dumps({"rc": rc, "red": short(red), "declared": short(declared), "problems": problems, "ctrl_bad": ctrl_bad}))
+PYV
+  V="$(tail -1 "$REP/tamper_$TID.verdict.out")"
+  RED_S="$(python3 -c 'import json,sys; v=json.loads(sys.argv[1]); print("{" + ", ".join(v["red"]) + "}")' "$V")"
+  PROB="$(python3 -c 'import json,sys; print(" ; ".join(json.loads(sys.argv[1])["problems"]))' "$V")"
+  CB="$(python3 -c 'import json,sys; print(", ".join(json.loads(sys.argv[1])["ctrl_bad"]))' "$V")"
+  if [ -z "$PROB" ]; then pass "T6[$TID] red set == declared exactly: $RED_S, every red an assertion failure"
+  else fail "T6[$TID] $PROB (red $RED_S)"; T6_BAD=1; fi
+  if [ -z "$CB" ]; then pass "T7[$TID] every control green under the tamper"
+  else fail "T7[$TID] control(s) NOT green under the tamper: $CB"; T7_BAD=1; fi
+  k=$((k+1))
+done
+[ "$T6_BAD" -eq 0 ] && echo "T6 summary: $N_TAMPER/$N_TAMPER tamper(s) red exactly their declared set" || echo "T6 summary: at least one tamper did NOT red exactly its declared set"
+[ "$T7_BAD" -eq 0 ] && echo "T7 summary: controls green under all $N_TAMPER tamper(s)" || echo "T7 summary: a control went red"
+echo "T8 summary: all $N_TAMPER tamper file(s) restored by bytes"
+echo "SUMMARY test_only file=$TEST_FILE mode=$MODE_T runner=$RUNNER cells=$N_GREEN tampers=$N_TAMPER apply=${T3_NOTE:-strict}"
+if [ "$FAILS" -eq 0 ]; then echo "RESULT: PASS (8/8)"; exit 0; fi
+if [ "$T6_BAD" -ne 0 ]; then echo "RESULT: FAIL ($FAILS failed) — stopped at T6 (a tamper's red set is not the declared set)"; exit 1; fi
+echo "RESULT: FAIL ($FAILS failed)"
+exit 1
