@@ -14,7 +14,6 @@ tip, and the ticket asks for test cells that PIN that behaviour, so that a later
   `check`, `expect`): use that helper, never a new one; it runs under /bin/bash 3.2 (no mapfile, no `declare -A`, no
   `${x,,}`, no `timeout`).
 - `tampers`, `controls`, `expected_plus` — the same facts as the brief, as data. You never change a tamper's file.
-- `diff_file_headers` — the EXACT two file-header lines your diff opens with (rule 3).
 
 Produce the change as ONE unified diff, and nothing else.
 
@@ -22,9 +21,7 @@ Produce the change as ONE unified diff, and nothing else.
    no second block.
 2. The diff touches EXACTLY ONE file: `test_file`. Never a product file, never a config, never a second test file.
    A tamper's file is the code the cells PIN — you read about it, you never edit it.
-3. The diff is `git apply -p1` applicable from the repository root at the tip, STRICTLY. Your diff's first two lines
-   are the two lines in `diff_file_headers`, verbatim (the brief's fence starts at `@@` and does NOT show them — a diff
-   without them touches no file and is refused). Then:
+3. The diff is `git apply -p1` applicable from the repository root at the tip, STRICTLY:
    - `modify`: `--- a/<test_file>` then `+++ b/<test_file>` (the SAME path on both lines), then the brief's `@@` hunk(s)
      with the header exactly as the brief prints it.
    - `new`: `--- /dev/null` then `+++ b/<test_file>`, ONE hunk `@@ -0,0 +1,N @@` where N is the number of `+` lines.

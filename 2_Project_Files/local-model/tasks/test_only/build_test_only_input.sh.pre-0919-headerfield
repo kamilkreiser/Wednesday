@@ -33,8 +33,6 @@
 # cell name that is not literally in the suite's text, or carries `$`, a backtick or a backslash (it would not be
 # printed as written); a tamper on a shell file whose tampered text does not parse (a tamper that breaks parsing reds
 # while executing none of the logic — the Secuura suites' own assert_parses rule); a tamper on a test file.
-# HEADER FIELD (2026-09-19): the JSON carries `diff_file_headers` = the two lines the diff must open with (modify:
-# `--- a/<test_file>` / `+++ b/<test_file>`; new: `--- /dev/null` / `+++ b/<test_file>`), named by task.md rule 3.
 # rc 0 ok · 2 refused · 1 usage/error. bash 3.2. stderr never discarded.
 set -uo pipefail
 ID="${1:-}"; OUT="${2:-}"; BRIEF="${3:-}"; shift 3 2>/dev/null
@@ -239,12 +237,7 @@ inp = {"ticket": {"identifier": ident, "title": text.splitlines()[0].lstrip("# "
        "task_type": "test_only", "tip": tip, "source_checkout": src_repo, "repo_subdir": subdir,
        "service_dir": service_dir, "shared_pkg_dir": ("" if runner == "bash" else pins.get("shared_pkg_dir", "packages/shared")),
        "shared_pkg_name": pins.get("shared_pkg_name", "@secuura/shared"),
-       "test_file": tf, "test_file_rel_to_service": test_rel, "test_mode": mode,
-       # 2026-09-19 (IMPROVEMENTS 08:06, KS-739 F1 r1 FAIL T2): the EXACT two file-header lines the diff must open with,
-       # derived from test_file + test_mode (never from the brief text) — the fence cannot carry them (the validator above
-       # refuses a body line before the first @@), and a model given only a bare @@ fence can drop them. task.md rule 3.
-       "diff_file_headers": ([f"--- a/{tf}", f"+++ b/{tf}"] if mode == "modify" else ["--- /dev/null", f"+++ b/{tf}"]),
-       "runner": runner,
+       "test_file": tf, "test_file_rel_to_service": test_rel, "test_mode": mode, "runner": runner,
        "expected_plus": expected_plus, "must_remove": must_remove, "cells": alias,
        "tampers": tampers, "controls": controls, "files": {}}
 if ttext is not None: inp["files"][tf] = ttext
