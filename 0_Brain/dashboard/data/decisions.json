@@ -11565,7 +11565,7 @@
   "client_project": "Datasec/NexusAI",
   "title": "The LIVE 2.1.1 listing leaks a customer's user names to a third party — stop new acquisitions, and does anyone already deployed get told?",
   "bluf": "MEASURED, not theorised, identical on all three heads including the live listing at 6fb497d: a stranger anonymously saves their own Azure OpenAI endpoint and key during the pre-sign-in window, it survives setup, and a signed-in admin's next chat sends 38 distinct REAL user names plus usage figures to the attacker's host with the attacker's key. No DNS control needed — the attacker uses their own Azure OpenAI resource, so Microsoft issues a legitimate hostname and certificate and every check we have passes correctly. NEW, AND IT MAKES THIS WORSE: the plant is RESTORED ON EVERY BOOT for a real customer. The Marketplace template sets USE_AZURE_LOG_ANALYTICS unconditionally (mainTemplate.json:547), so deployments take the path where AI config is re-hydrated at startup — a restart does NOT clear it, and an admin who suspects something and reboots gets it back. THE FACT THAT DECIDES IT: every NEW download starts in the vulnerable state, because a fresh deployment is unconfigured by definition and a new Container Apps instance is publicly reachable and findable via certificate transparency within minutes. So the live listing is not only a question about existing customers — it manufactures newly exposed deployments for as long as it stays up. OVERRIDE OF A PRIOR RULING, STATED: C-43 accepted not warning the live listing when the exposure was a lockout or takeover INSIDE the customer's own tenant. This sends customer data OUT to a third party, and it persists across reboots. Tuesday does not believe that is the same class.",
-  "default_action": "NONE — this one does not default. Tuesday is deliberately not carrying C-43 forward onto a different class of harm; it waits for Kam's word.",
+  "default_action": "NONE — this one does not default, and the case for option (a) has got stronger twice since it was written. Tuesday is deliberately not carrying C-43 forward onto a different class of harm; it waits for Kam's word.",
   "options": [
    {
     "key": "a",
@@ -11605,8 +11605,61 @@
     "before": {
      "bluf": "MEASURED, not theorised, and identical on all three heads including the live listing at 6fb497d: a stranger anonymously saves their own Azure OpenAI endpoint and key during the pre-sign-in window, it survives setup, and a signed-in admin's next chat sends 38 distinct REAL user names plus usage figures to the attacker's host with the attacker's key. No DNS control needed — the attacker uses their own Azure OpenAI resource, so Microsoft issues a legitimate hostname and certificate and every check we have passes correctly. THE FACT THAT DECIDES IT: every NEW download starts in the vulnerable state, because a fresh deployment is unconfigured by definition and a new Container Apps instance is publicly reachable and findable via certificate transparency within minutes. So the live listing is not only a question about existing customers — it manufactures newly exposed deployments for as long as it stays up. OVERRIDE OF A PRIOR RULING, STATED: C-43 accepted not warning the live listing when the exposure was a lockout or a takeover INSIDE the customer's own tenant. This sends customer data OUT to a third party. Tuesday does not believe that is the same class and is not applying the old decision to a different kind of harm."
     }
+   },
+   {
+    "ts": "2026-09-18T12:30:22.980323+10:00",
+    "reason": "A THIRD measured exposure on the live 2.1.1 landed after this card was written (RD-554), and it is worse in kind than the two already on it: it hands an anonymous stranger an ADMIN ACCOUNT on a CONFIGURED deployment.",
+    "changed": [
+     "default_action"
+    ],
+    "before": {
+     "default_action": "NONE — this one does not default. Tuesday is deliberately not carrying C-43 forward onto a different class of harm; it waits for Kam's word."
+    }
    }
   ],
-  "amended_ts": "2026-09-18T11:41:20.308204+10:00"
+  "amended_ts": "2026-09-18T12:30:22.980336+10:00"
+ },
+ {
+  "id": "nexusai-rd436-round3-authorise",
+  "client_project": "Datasec/NexusAI",
+  "title": "RD-436+535 came back NO GO with a Blocker that is on main AND live today — authorise a scoped round 3? (C-62: a third round needs your word)",
+  "bluf": "OVERRIDE OF THE PRIOR-RULING GATE, reason measured: it matched three cards where you ruled 'round3' — nexusai-rd369, nexusai-marketplace-package-round3 and hpsm-composer-round3-approver-guard. I opened the closest (the package one): it was the listing's screenshots, PDFs and Log Analytics wiring, ruled 2026-09-11 and DELIVERED 2026-09-12. None of the three covers a CODE Blocker in the auth-restore path. Noting for speed, not as authority: you have authorised a scoped round 3 three times when the scope was named and the alternative was shipping a hole. THE GATE EVERYTHING WAITS ON FAILED. RD-436+RD-535 @ 0b910a2 is NO GO — one Blocker (RD-554), two Majors (RD-555) — at round 2 of 2, and C-62 reserves a third round to you. NOTHING merges meanwhile: RD-486, RD-490 and RD-491 are all gated GO and all blocked behind it. THE BLOCKER, measured and replicated twice: a boot restore that KEEPS the tenant and client IDs but LOSES the 'enforced' flag returns a CONFIGURED, sign-in-enforcing deployment to anonymous open access — dashboard and APIs answer 200, and the anonymous caller can then rewrite the Entra config to their own tenant AND CREATE AN ADMIN ACCOUNT. Two reachable shapes, one being ANY environment-variable-configured deployment restored from ANY pre-enforce copy. PRE-EXISTING — identical on two older heads, so it is on main today and in the live 2.1.1 — but it is the EXACT outcome RD-535 was commissioned to prevent: our fix closed the 'lost the group' shape and left the 'lost the enforcement' shape open, because the marker records what the restored copy LACKS and never what the restore LOST. The suite's own control stayed green because it asserts the wrong field. WHY NOT THE CAP'S NORMAL PATH: 'ship what closed, ticket the residue' assumes the residue is incidental — here the residue IS the commission. And splitting the Blocker to its own branch does not decouple cleanly, because its fix touches the same two files as this branch. It must be fixed before the zip in any case, since it is on main; round 3 is not extra work, it is the same work done where it belongs. COST: one builder, one narrow re-gate.",
+  "default_action": "NOTHING PROCEEDS — the branch stays unmerged, RD-486/RD-490/RD-491 stay blocked, no round 3 starts. C-62 reserves a third round to you, so silence stops the chain rather than starting anything. Safe, but not free: the Blocker is on main and must be fixed before the zip regardless, so a silent day costs the resubmission.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Authorise a scoped round 3 on this branch (Recommended)",
+    "detail": "Three items only: (1) the restore marker records what the restore LOST including the enforcement flag, and a lost enforcement state is treated as unproven rather than 'not configured'; (2) the login page names the real state and the marker file by path, with a red cell — today it shows the wrong message and its instruction is actively FALSE, telling the operator the settings store is unreadable when it is readable and valid; (3) red cells on the guard funnel and the published code string, which currently stay 294/294 green even when the funnel is neutered."
+   },
+   {
+    "key": "b",
+    "label": "Merge nothing, split the Blocker to its own branch, unblock RD-490/RD-491 sooner",
+    "detail": "Faster for the queue, but it merges a round that leaves its own commissioned hole open, and the split branch collides with this one on the same two files. Not recommended."
+   },
+   {
+    "key": "c",
+    "label": "Ship what closed under C-62 and ticket the Blocker as residue",
+    "detail": "What the cap normally does. Not recommended here: the residue is the thing the round was commissioned to close."
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-09-18T12:30:00.363895+10:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "2026-09-03 21:20",
+   "2026-09-07 18:58",
+   "2026-09-07 19:56",
+   "2026-09-07 20:55",
+   "2026-09-14 21:52",
+   "CARD secuura-ks843-half2-round3",
+   "CARD secuura-ks949-round3-cap-and-the-cutoff",
+   "CARD secuura-892-round3-nogo-blocker-still-open",
+   "CARD nexusai-rd361-round3-blocker-survives",
+   "CARD nexusai-rd369-round3-or-ship-at-the-cap",
+   "CARD nexusai-marketplace-package-round3",
+   "CARD hpsm-composer-round3-approver-guard"
+  ]
  }
 ]
