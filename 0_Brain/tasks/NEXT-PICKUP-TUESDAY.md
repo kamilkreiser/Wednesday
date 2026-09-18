@@ -10,6 +10,12 @@ supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s
 
 ---
 
+## 🔵 DELTA 19 — 2026-09-19 05:4x: NexusAI SEATS ROTATED. S67 is live; S65 and S66 are closed. READ FIRST; DELTA 18 still holds for the card.
+- **S65 wrapped (scored 0.92)**: HANDOVER-S65.md is at the project root; history is on `s65-history-docs @ fb2f64d`; RD-503 r2 PASSED and was pushed at `rd-503-shipped-docs-s64 @ 5700df5` (3233/178; awaits tier-2 gate). Pane closed only AFTER its verify finished (pane_close had correctly refused rc 5 while jest ran).
+- **S66 wrapped (scored 0.95)**: HANDOVER-S66.md; `s66-history-docs @ d0cd5c5`. Pane closed.
+- **S67 LAUNCHED in %12** (brief_and_launch: brief verified at destination 19:45:33Z). It HOLDS for Kam's card after a plan confirmation. **Owed by Tuesday: verify S67's plan confirmation (rung 6).** When Kam rules, relay by mail; S67 runs round 4 and batches RD-561 + RD-503 into one re-gate.
+- **RD-562 (new, S65):** the session scratchpad is not isolated between seats (a commit-message file was overwritten by another seat's text). The rule is in S67's brief: mktemp-named files, read back before use. **This applies to THIS seat too.**
+
 ## 🔵 DELTA 18 — 2026-09-18 18:4x (Tuesday ctx 70% CHECKPOINT; band 80-90). READ FIRST; supersedes DELTA 17 on round 3.
 - **ROUND 3 CAME BACK NO GO (06:37Z) and it is WITH KAM:** card `nexusai-round3-nogo-round4-or-merge`, rec (b) merge round 3 now and run round 4 alongside, before the zip; (a) S65's rec, round 4 first; (c) accept the ~60 s race. **Default: NOTHING PROCEEDS.** It is unruled as of 18:4x (reconcile: 0). Kam was told on the panel (verified at origin). **Do not chase.**
 - **When he rules (a) or (b):** S65's round-4 brief is WRITTEN (`qa-briefs/2026-09-18_nexusai-rd436-round4-BRIEF-READY.md`): B-1 enforce writes the stamp; F-1 status ordering; F-3 fail-open cell; RD-561 as a tier-2 section. **The rd554 merge input is `rd-554-cells-s66 @ 6b8ca5b`** (F-2 identity cells; the M6 run proved it: 3 red vs 46/46 on fc8ba61; verified 8 rd554 files only). On (b): S65 merges fc8ba61 plus 6b8ca5b to main first (narrow re-verify, 13 cells named, R3d-NOSTAMP "removed >= 1" or STOP), then RD-486, and round 4 runs alongside. Relay his ruling to S65 by mail in the same action, and mark the card delivered once S65 records it.
