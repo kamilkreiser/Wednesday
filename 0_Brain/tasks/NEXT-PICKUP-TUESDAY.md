@@ -10,7 +10,59 @@ supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s
 
 ---
 
-## 🔵 DELTA 10 — 2026-09-18 11:52 (Tuesday 65% checkpoint, NOT a rotation; band is 80-90). READ FIRST.
+## 🔵 DELTA 11 — 2026-09-18 12:12 (Tuesday 70% CHECKPOINT; band is 80-90, NOT rotating). READ FIRST; DELTA 10 is superseded by this.
+
+### The one sentence
+**Kam's deliverable is the ZIP. 2 of 3 push preconditions are MET; only the MINIMUM SET remains, and the
+entire minimum set is behind ONE running gate: RD-436+RD-535.** Nothing else blocks anything.
+
+### On Kam's desk — 3 open cards, 2 on the same artefact, and they are LINKED
+- 🔴 **`nexusai-rd549-live-211-exfiltration` — NO DEFAULT, deliberately.** Measured data exfiltration on the
+  LIVE listing; C-43 overridden with the reason stated. **Do not default it and do not chase him.**
+- **`nexusai-rd535-live-listing-restore-reopen` — SUBORDINATED to RD-549** (same artefact; a ruling on
+  RD-549 disposes of it). Its "nothing changes" default must NOT be read as pre-answering RD-549.
+- `tuesday-mini-vault-three-unpushed-commits` — WED housekeeping, rec a, default = nothing pushed.
+- **Kam is genuinely QUIET on this tab since 09:49** — settled at this checkpoint by pulling and re-running
+  `kam_rulings_today.sh` (Already up to date), not inferred from an empty tail.
+
+### Push predicate — `0_Brain/reference/2026-09-18_nexusai-zip-chain/UNBLOCK-PREDICATE.md`
+- ✅ version **2.2.0 = KAM'S ruling** (given in the TERMINAL, not the panel — invisible to every panel tool)
+- ✅ **RD-529 O-8 on main** (`d881f953`, CI all green: Build 35293779197 / Gitleaks 35293779244 / npm-audit 35293779237)
+- ⬜ **the minimum set** — RD-436+535 · RD-486+523 · RD-516 · RD-518 · RD-503+442 · RD-464 r3 **+ RD-545** · listing folds · **RD-549**
+- **Evaluate on `origin/main`, never a branch. Push waits on step 10 ONLY — step 11 gates the ZIP and overlaps his round trip.**
+
+### Gated work — DO NOT RE-GATE ANY OF THIS
+- **RD-486+523 @ `2d83967` = GO (worst Low).** Held behind RD-436 **because the release image is built from main.**
+- **RD-490 @ `23efec8` = GO.** **RD-491 @ `0c8db0c` = GO WITH FINDINGS + re-verification PASSED (B6 red at the new head).**
+  **Both AUTHORISED to merge under the recipe when RD-436/452 lands — no further word from me.**
+- **RD-464 r3 @ `1f27b4d` verify PASS**, re-gate running; **coupled to RD-545, which does not exist on main and is created by the C-70 collapse** — r3 does NOT merge without it.
+- **RD-505 removal @ `a643fe1`** (package branch) READY; **folded into the release gate**, whose three required
+  cells are recorded in the predicate and in `qa-briefs/RELEASE-GATE-package-REQUIREMENTS.md`.
+- RD-503 r2 verify queued on the FIFO lock. RD-516 design complete.
+
+### Live panes
+`%10` S65 · `%11` S66 · `%3` fleet-monitor. **`%8` wednesday is a bare shell BY DESIGN — never a fault.**
+Usage 7d **24%** (was 13% at 10:0x) — climbing but nowhere near the 90% cut.
+
+### The wake — it fired once today and worked
+`2_Project_Files/fleet/watch_nexusai_main.sh <head> 60 180`, armed on **`d881f953`**. It EXITS when main
+moves and the harness re-invokes. **If it has expired, RE-ARM FROM THE CURRENT HEAD.** Never replace it
+with an intention to check.
+
+### Rules this session earned, which bind the next seat too
+- **An explanation of why a fix works is a CLAIM** — red proof or marked UNVERIFIED; its author is the last
+  person who can catch it. (Two of my own today, incl. a load-bearing security premise.)
+- **"main moved" ≠ "main moved in a way that reaches my cells"** — the discriminator is the DIFF, not the SHA.
+- **Verify every push at ORIGIN** — on this repo `panel_sync` commits every minute, so a push is a RACE and
+  "Everything up-to-date" looks identical to a rejection.
+- **In a mail to one agent, "you" is reserved for what THAT agent did** — the addressee is the actor you are
+  most likely to mis-name.
+
+### DECLARED DEFAULT if this seat dies or rotates
+Read OWED 0 / 0a / 0⚠ → re-arm the watcher from the current head → answer agent mail →
+**tell Kam nothing about the push until the predicate ticks**, and do not chase his cards.
+
+## 🔵 DELTA 10 (SUPERSEDED by DELTA 11) — 2026-09-18 11:52 (Tuesday 65% checkpoint, NOT a rotation; band is 80-90). READ FIRST.
 
 - 🔴 **THE DAY TURNED ON RD-549 AND IT IS WITH KAM.** Measured data exfiltration, live 2.1.1 affected:
   a stranger anonymously plants their own Azure-suffixed endpoint + key in the pre-sign-in window, it
