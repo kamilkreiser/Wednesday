@@ -10,6 +10,11 @@ supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s
 
 ---
 
+## 🔵 DELTA 14 — 2026-09-18 13:4x: KAM RULED BOTH CARDS. READ FIRST; DELTA 13 still holds for everything else.
+- **Round 3 = (a)** (panel tap 13:42:46, plus Tuesday's TERMINAL line "Go with your recommendation."; the terminal line is in no panel tool). **Live listing RD-549 = (b)** (panel tap 13:43:05): the listing stays up and the fix ships in the resubmission; no notice goes out. Both cards were ruled in decision_queue by this seat. **Mark each `--delivered` only once S65 mails the C-numbers and the ticket comments** (RD-554 and RD-549).
+- **S65 briefed 03:44:45Z** (verified at the inbox, tapped): record both rulings, then round 3 per the amended scope, with S66's RD-554 cells as acceptance. S65 was at ctx 74%: its plan line says whether it uses a builder subagent or hands over (then launch the successor from HANDOVER-S65). A Major at the round-3 re-gate comes to Tuesday; the round cap is now spent.
+- **Nothing of Kam's gates the zip any more.** Next time to tell him anything: when the UNBLOCK-PREDICATE ticks (his push), or on a stop-class finding.
+
 ## 🔵 DELTA 13 — 2026-09-18 13:0x (Tuesday ~55% CHECKPOINT after the 12:41 rotation boot; band 80-90, NOT rotating). READ FIRST, then DELTA 12, which still holds for NexusAI.
 
 - **NexusAI unchanged: everything main-side waits on KAM's two cards** (`nexusai-rd436-round3-authorise`, default NOTHING PROCEEDS; `nexusai-rd549-live-211-exfiltration`, NO default). Do not chase. `origin/main = d881f953`.
