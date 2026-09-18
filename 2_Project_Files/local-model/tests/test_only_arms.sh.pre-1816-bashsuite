@@ -40,8 +40,7 @@ set -u
 LM=/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model
 TD=$LM/tasks/test_only
 CK="${TO_CHECKER:-$TD/checker.sh}"
-BLD="${TO_BUILDER:-$TD/build_test_only_input.sh}"   # TO_BUILDER / TO_PREPARE: arm a .new before a swap (2026-09-18 bash runner)
-PREP="${TO_PREPARE:-$TD/prepare_clone.sh}"
+BLD=$TD/build_test_only_input.sh
 FX=$LM/tests/fixtures/test_only
 SRC="/Volumes/DevMASTER/!CODING/Secuura/Blockchain/2_Project_Files"
 TIP=8b9c3f022bee76b79a47f1b8c5de8ad3ddb4a0ae
@@ -75,10 +74,10 @@ rc=$?
 bash "$BLD" TO-ARMS-JEST "$RUNS/in_jest.json" "$FX/jest_brief.md" > "$RUNS/build_jest.out" 2>&1
 rc=$?
 [ "$rc" -eq 0 ] || { echo "FATAL: the jest fixture brief did not build (rc $rc): $(cat "$RUNS/build_jest.out")"; exit 2; }
-bash "$PREP" "$RUNS/in_golden.json" "$CLONE" > "$RUNS/prepare_shared.out" 2>&1
+bash "$TD/prepare_clone.sh" "$RUNS/in_golden.json" "$CLONE" > "$RUNS/prepare_shared.out" 2>&1
 rc=$?
 [ "$rc" -eq 0 ] || { echo "FATAL: prepare_clone (packages/shared) rc $rc"; exit 2; }
-bash "$PREP" "$RUNS/in_jest.json" "$CLONE" > "$RUNS/prepare_originate.out" 2>&1
+bash "$TD/prepare_clone.sh" "$RUNS/in_jest.json" "$CLONE" > "$RUNS/prepare_originate.out" 2>&1
 rc=$?
 [ "$rc" -eq 0 ] || { echo "FATAL: prepare_clone (services/originate) rc $rc"; exit 2; }
 

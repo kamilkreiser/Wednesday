@@ -24,15 +24,6 @@
 # a '+' line byte-identical to a '-' line of the same fence (context marked as addition); a tamper whose file is the
 # test file, whose From is not the tip's line at that number, whose To equals From or spans lines, or whose Reds is
 # empty; a control also declared red; no tamper at all.
-# BASH SUITES (2026-09-18 18:xx): a `File:` ending `.test.sh` selects runner `bash` (run by the checker as `/bin/bash
-# <file>` from the clone root; bash 3.2.57). Cell names in Reds:/Controls are LITERAL PREFIXES of the description the
-# suite prints on its `ok …` / `FAIL …` line (see tasks/test_only/checker.sh, BASH RUNNER). Extra refusals for a bash
-# brief, each one a thing the checker could not grade fairly: the suite after the fence does not parse under /bin/bash
-# (`bash -n`); a '+' line uses a bash-4 idiom bash 3.2 lacks (mapfile/readarray, declare -A/-n, ${x,,} ${x^^}, `timeout`,
-# `|&`, `&>>`, coproc); the suite prints no `ok`/`PASS` AND `FAIL` cell line (no per-check verdict to read); a declared
-# cell name that is not literally in the suite's text, or carries `$`, a backtick or a backslash (it would not be
-# printed as written); a tamper on a shell file whose tampered text does not parse (a tamper that breaks parsing reds
-# while executing none of the logic — the Secuura suites' own assert_parses rule); a tamper on a test file.
 # rc 0 ok · 2 refused · 1 usage/error. bash 3.2. stderr never discarded.
 set -uo pipefail
 ID="${1:-}"; OUT="${2:-}"; BRIEF="${3:-}"; shift 3 2>/dev/null
@@ -78,15 +69,12 @@ fence_re = re.compile(r"^```[^\n]*\n(.*?)^```", re.M | re.S)
 m = re.search(r"^File:\s*`([^`]+)`", text, re.M)
 if not m: refuse("no `File: \\`<test file>\\`` line before the first ## heading")
 tf = m.group(1).strip()
-is_bash = tf.endswith(".test.sh")
-if not is_bash and not re.search(r"\.(test|spec)\.[cm]?[jt]sx?$", tf): refuse(f"{tf} is not a *.test.* / *.spec.* (js/ts) file nor a *.test.sh bash suite")
+if not re.search(r"\.(test|spec)\.[cm]?[jt]sx?$", tf): refuse(f"{tf} is not a *.test.* / *.spec.* file")
 if not tf.startswith(subdir + "/"): refuse(f"{tf} is not under repo_subdir {subdir}/")
 ttext = show(tf); mode = "modify" if ttext is not None else "new"
 
 # ---- the service (package) that runs it: nearest ancestor with a runner config or a package.json naming one
 d = os.path.dirname(tf); svc = None; runner = None; why = ""
-if is_bash:   # a bash suite needs no package: it runs from the clone root; service_dir is only its directory
-    svc = d; runner = "bash"; why = "bash suite"; d = subdir
 while d.startswith(subdir + "/") and d != subdir:
     names = ls(d)
     jest = [n for n in names if n.startswith("jest.config.")]; vit = [n for n in names if n.startswith("vitest.config.")]
@@ -190,52 +178,13 @@ if not controls: refuse("`## Controls` lists no cell — a control must stay gre
 clash = sorted({c for c in controls for t in tampers if c in t["reds"]})
 if clash: refuse(f"control(s) also declared red under a tamper: {clash}")
 
-if runner == "bash":
-    # ---- the suite as it will run: the tip file with the fence applied (modify), or the fence's '+' lines (new)
-    if mode == "new":
-        after = expected_plus[:]
-    else:
-        after = tip_lines[:]; off = 0
-        for blk in blocks:
-            body = blk.split("\n")
-            if body and body[-1] == "": body.pop()
-            cur = None; hs = []
-            for ln in body:
-                mh = re.match(r"^@@ -(\d+)", ln)
-                if mh: cur = {"start": int(mh.group(1)), "lines": []}; hs.append(cur); continue
-                cur["lines"].append((ln[0], ln[1:]))
-            for h in hs:
-                old = [t for k, t in h["lines"] if k in " -"]; new = [t for k, t in h["lines"] if k in " +"]
-                s0 = h["start"] - 1 + off; after[s0:s0 + len(old)] = new; off += len(new) - len(old)
-    atext = "\n".join(after) + "\n"
-    r = subprocess.run(["/bin/bash", "-n"], input=atext.encode("utf-8"), capture_output=True)
-    if r.returncode: refuse(f"the suite after the fence does not parse under /bin/bash (bash -n): {r.stderr.decode('utf-8', 'replace').strip()[:200]}")
-    B4 = re.compile(r"\b(mapfile|readarray|coproc)\b|\bdeclare\s+-[a-zA-Z]*[An]|\$\{[A-Za-z_][A-Za-z0-9_]*(,,?|\^\^?)[}]|(^|[\s;&|(])timeout\s|\|&|&>>")
-    b4 = [p for p in expected_plus if B4.search(p) and not p.lstrip().startswith("#")]
-    if b4: refuse(f"a '+' line uses a bash-4 idiom /bin/bash 3.2 lacks: {b4[0].strip()[:90]!r}")
-    if not (re.search(r"""(printf|echo)\s+(-e\s+)?['"]\s{0,3}(ok|PASS)\b""", atext) and re.search(r"""(printf|echo)\s+(-e\s+)?['"]\s{0,3}FAIL\b""", atext)):
-        refuse("the suite prints no `ok`/`PASS` AND `FAIL` cell line (printf/echo) — the checker reads one verdict line per check and this suite gives none to read")
-    allnames = sorted({n for t in tampers for n in t["reds"]} | set(controls))
-    for n in allnames:
-        if re.search(r"[$`\\]", n): refuse(f"cell name {n[:80]!r} carries `$`, a backtick or a backslash — the suite prints it expanded, so the name would not match what runs")
-        if n not in atext: refuse(f"cell name {n[:80]!r} is not literally in the suite's text — a bash cell is named by a literal prefix of the description its ok/FAIL line prints")
-    for t in tampers:
-        f = t["file"]
-        if re.search(r"(^|/)__tests__/|\.test\.sh$", f): refuse(f"tamper {t['id']}: {f} is a test file — a tamper mutates PRODUCT code")
-        ftext = show(f); fl = ftext.split("\n")
-        shelly = f.endswith((".sh", ".bash", ".command")) or (fl and re.match(r"^#!.*\b(ba)?sh\b", fl[0]))
-        if shelly:
-            fl2 = fl[:]; fl2[t["line"] - 1] = t["to"]
-            r = subprocess.run(["/bin/bash", "-n"], input="\n".join(fl2).encode("utf-8"), capture_output=True)
-            if r.returncode: refuse(f"tamper {t['id']}: {f} does not parse with the tamper planted (bash -n: {r.stderr.decode('utf-8', 'replace').strip()[:140]}) — a tamper that breaks parsing reds while executing none of the logic")
 src_repo = os.path.abspath(src)
-cmd = "npx jest <file>" if runner == "jest" else ("npx vitest run <file>" if runner == "vitest" else "/bin/bash <repo path> (bash 3.2) from the repo root")
+cmd = "npx jest <file>" if runner == "jest" else "npx vitest run <file>"
 inp = {"ticket": {"identifier": ident, "title": text.splitlines()[0].lstrip("# ").strip()[:200], "description": text},
        "repo": {"source_checkout": src_repo, "tip": tip, "branch": "develop",
-                "test_runner": (f"{runner} (run one file with `{cmd}` from {subdir}/{service_dir})" if runner != "bash" else
-                                f"bash (the suite runs as `{cmd}`; a cell is one `ok <desc>` / `FAIL <desc>` line the suite's own helper prints; bash 3.2: no mapfile, no declare -A, no ${{x,,}}, no timeout)")},
+                "test_runner": f"{runner} (run one file with `{cmd}` from {subdir}/{service_dir})"},
        "task_type": "test_only", "tip": tip, "source_checkout": src_repo, "repo_subdir": subdir,
-       "service_dir": service_dir, "shared_pkg_dir": ("" if runner == "bash" else pins.get("shared_pkg_dir", "packages/shared")),
+       "service_dir": service_dir, "shared_pkg_dir": pins.get("shared_pkg_dir", "packages/shared"),
        "shared_pkg_name": pins.get("shared_pkg_name", "@secuura/shared"),
        "test_file": tf, "test_file_rel_to_service": test_rel, "test_mode": mode, "runner": runner,
        "expected_plus": expected_plus, "must_remove": must_remove, "cells": alias,

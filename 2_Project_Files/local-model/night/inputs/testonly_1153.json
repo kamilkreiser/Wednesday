@@ -1,0 +1,92 @@
+{
+ "ticket": {
+  "identifier": "KS-1153",
+  "title": "KS-1153 R-918-A: pin run-code-guards.sh's `--check-unreached` advisory-skip arm (a non-git tree skips the census, rc 0)",
+  "description": "# KS-1153 R-918-A: pin run-code-guards.sh's `--check-unreached` advisory-skip arm (a non-git tree skips the census, rc 0)\n\nFile: `Blockchain/Dev/scripts/__tests__/run_code_guards.test.sh`\nTip: `52df64f844b7b3aabf7df57284c5f4e2ab8a07a2`\n\nKS-1153's first \"Done when\" item: \"R-918-A: one cell pins the advisory-skip arm (a non-git tree -> `SKIP (advisory)` line\n+ rc 0)\". The arm is `Blockchain/Dev/scripts/run-code-guards.sh:145-148` at develop `52df64f84`, and no cell of\n`run_code_guards.test.sh` reaches it: every fixture there is a real `git init` tree. This adds CASE 9, a fixture that is\nNOT a git checkout (the runner copied into a plain directory, git's upward search stopped at the suite's own temp dir),\nand two cells through the suite's own `check` helper. Test-only: the product script is never edited.\n\n## The exact change\n\n```diff\n@@ -156,1 +156,10 @@\n+echo \"=== CASE 9 - ADVISORY SKIP: a tree that is NOT a git checkout skips the census with rc 0 (KS-1153 R-918-A) ===\"\n+# Preflight leg 15 runs --check-unreached. From an export with no .git the census cannot enumerate tracked guards; it\n+# must say so and step aside with rc 0 (run-code-guards.sh:145-148). Every fixture above is a git tree, so nothing\n+# reached that arm. GIT_CEILING_DIRECTORIES stops git's upward search at $TMP, so the fixture is never inside a repo.\n+F=\"$TMP/c9\"; mkdir -p \"$F/Blockchain/Dev/scripts\"\n+cp \"$RUNNER\" \"$F/Blockchain/Dev/scripts/run-code-guards.sh\"\n+out9=$( cd \"$F/Blockchain/Dev\" && GIT_CEILING_DIRECTORIES=\"$TMP\" bash scripts/run-code-guards.sh --check-unreached 2>&1; echo \"rc=$?\" )\n+check \"a non-git tree: the census exits 0\" \"rc=0\" \"$(printf '%s\\n' \"$out9\" | tail -1)\"\n+check \"a non-git tree: the census prints the advisory SKIP line\" \"yes\" \"$(printf '%s\\n' \"$out9\" | grep -q '^SKIP (advisory)' && echo yes || echo no)\"\n echo\n```\n\n## Cells\n\n- `skip-rc` = `a non-git tree: the census exits 0`\n- `skip-line` = `a non-git tree: the census prints the advisory SKIP line`\n\n## Tampers\n\n### RC the advisory arm exits 1 instead of 0\nFile: `Blockchain/Dev/scripts/run-code-guards.sh`\nLine: 147\nFrom:\n```\n    exit 0\n```\nTo:\n```\n    exit 1\n```\nReds: `skip-rc`\n\n### MSG the advisory arm stops saying SKIP (advisory)\nFile: `Blockchain/Dev/scripts/run-code-guards.sh`\nLine: 146\nFrom:\n```\n    echo \"SKIP (advisory) — not a git checkout, cannot enumerate tracked guards\"\n```\nTo:\n```\n    echo \"not a git checkout, cannot enumerate tracked guards\"\n```\nReds: `skip-line`\n\n### ARM the non-git test is dropped (a non-git tree falls through to the census)\nFile: `Blockchain/Dev/scripts/run-code-guards.sh`\nLine: 145\nFrom:\n```\n  if ! command -v git >/dev/null 2>&1 || ! git -C \"$REPO_ROOT\" rev-parse --git-dir >/dev/null 2>&1; then\n```\nTo:\n```\n  if ! command -v git >/dev/null 2>&1; then\n```\nReds: `skip-rc`, `skip-line`\n\n## Controls\n\n- `census on a clean fixture`\n- `census sees the orphan`\n- `census with 0 tracked guards fails loudly`\n"
+ },
+ "repo": {
+  "source_checkout": "/Volumes/DevMASTER/!CODING/Secuura/Blockchain/2_Project_Files",
+  "tip": "52df64f844b7b3aabf7df57284c5f4e2ab8a07a2",
+  "branch": "develop",
+  "test_runner": "bash (the suite runs as `/bin/bash <repo path> (bash 3.2) from the repo root`; a cell is one `ok <desc>` / `FAIL <desc>` line the suite's own helper prints; bash 3.2: no mapfile, no declare -A, no ${x,,}, no timeout)"
+ },
+ "task_type": "test_only",
+ "tip": "52df64f844b7b3aabf7df57284c5f4e2ab8a07a2",
+ "source_checkout": "/Volumes/DevMASTER/!CODING/Secuura/Blockchain/2_Project_Files",
+ "repo_subdir": "Blockchain/Dev",
+ "service_dir": "scripts/__tests__",
+ "shared_pkg_dir": "",
+ "shared_pkg_name": "@secuura/shared",
+ "test_file": "Blockchain/Dev/scripts/__tests__/run_code_guards.test.sh",
+ "test_file_rel_to_service": "run_code_guards.test.sh",
+ "test_mode": "modify",
+ "runner": "bash",
+ "expected_plus": [
+  "echo \"=== CASE 9 - ADVISORY SKIP: a tree that is NOT a git checkout skips the census with rc 0 (KS-1153 R-918-A) ===\"",
+  "# Preflight leg 15 runs --check-unreached. From an export with no .git the census cannot enumerate tracked guards; it",
+  "# must say so and step aside with rc 0 (run-code-guards.sh:145-148). Every fixture above is a git tree, so nothing",
+  "# reached that arm. GIT_CEILING_DIRECTORIES stops git's upward search at $TMP, so the fixture is never inside a repo.",
+  "F=\"$TMP/c9\"; mkdir -p \"$F/Blockchain/Dev/scripts\"",
+  "cp \"$RUNNER\" \"$F/Blockchain/Dev/scripts/run-code-guards.sh\"",
+  "out9=$( cd \"$F/Blockchain/Dev\" && GIT_CEILING_DIRECTORIES=\"$TMP\" bash scripts/run-code-guards.sh --check-unreached 2>&1; echo \"rc=$?\" )",
+  "check \"a non-git tree: the census exits 0\" \"rc=0\" \"$(printf '%s\\n' \"$out9\" | tail -1)\"",
+  "check \"a non-git tree: the census prints the advisory SKIP line\" \"yes\" \"$(printf '%s\\n' \"$out9\" | grep -q '^SKIP (advisory)' && echo yes || echo no)\""
+ ],
+ "must_remove": [],
+ "cells": {
+  "skip-rc": "a non-git tree: the census exits 0",
+  "skip-line": "a non-git tree: the census prints the advisory SKIP line"
+ },
+ "tampers": [
+  {
+   "id": "RC",
+   "file": "Blockchain/Dev/scripts/run-code-guards.sh",
+   "line": 147,
+   "from": "    exit 0",
+   "to": "    exit 1",
+   "reds": [
+    "a non-git tree: the census exits 0"
+   ],
+   "reds_as_written": [
+    "skip-rc"
+   ]
+  },
+  {
+   "id": "MSG",
+   "file": "Blockchain/Dev/scripts/run-code-guards.sh",
+   "line": 146,
+   "from": "    echo \"SKIP (advisory) — not a git checkout, cannot enumerate tracked guards\"",
+   "to": "    echo \"not a git checkout, cannot enumerate tracked guards\"",
+   "reds": [
+    "a non-git tree: the census prints the advisory SKIP line"
+   ],
+   "reds_as_written": [
+    "skip-line"
+   ]
+  },
+  {
+   "id": "ARM",
+   "file": "Blockchain/Dev/scripts/run-code-guards.sh",
+   "line": 145,
+   "from": "  if ! command -v git >/dev/null 2>&1 || ! git -C \"$REPO_ROOT\" rev-parse --git-dir >/dev/null 2>&1; then",
+   "to": "  if ! command -v git >/dev/null 2>&1; then",
+   "reds": [
+    "a non-git tree: the census exits 0",
+    "a non-git tree: the census prints the advisory SKIP line"
+   ],
+   "reds_as_written": [
+    "skip-rc",
+    "skip-line"
+   ]
+  }
+ ],
+ "controls": [
+  "census on a clean fixture",
+  "census sees the orphan",
+  "census with 0 tracked guards fails loudly"
+ ],
+ "files": {
+  "Blockchain/Dev/scripts/__tests__/run_code_guards.test.sh": "#!/usr/bin/env bash\n# =============================================================================\n# TESTS for run-code-guards.sh (KS-926)\n# =============================================================================\n# run-code-guards.sh exists because seventeen guards ran from no entry point —\n# checks that could not fail. Shipping its census WITHOUT assertions would\n# reproduce that defect one level up: a census that cannot fail is worth exactly\n# as much as the guards it is meant to account for. So every case here asserts\n# an EXIT CODE, which is what the preflight branches on.\n#\n# Each negative case carries a RED-PROOF that actually RUNS: the tampered copy is\n# `bash -n`-checked before it is executed, because a tamper that breaks parsing\n# reddens while executing zero of the logic under test — a green-looking red.\n#\n# Fixture is a REAL `git init` tree: the census enumerates via `git ls-files`, so\n# without a git checkout it self-SKIPs and every verdict below is unreachable.\n#\n# bash 3.2 (macOS, and what the pre-push hook runs): no mapfile, no associative\n# arrays, empty arrays expanded with the +alternate form.\n#\n# Usage: bash Blockchain/Dev/scripts/__tests__/run_code_guards.test.sh\n# =============================================================================\nset -uo pipefail\n\nHERE=\"$(cd \"$(dirname \"${BASH_SOURCE[0]}\")\" && pwd)\"\nRUNNER=\"${CODE_GUARDS_SH:-$HERE/../run-code-guards.sh}\"\n[ -f \"$RUNNER\" ] || { echo \"FATAL: run-code-guards.sh not found at $RUNNER\" >&2; exit 2; }\n\nTMP=\"$(mktemp -d)\"; trap 'rm -rf \"$TMP\"' EXIT\nPASS=0; FAIL=0\ncheck() {\n  if [ \"$2\" = \"$3\" ]; then echo \"  ok   $1 (=$3)\"; PASS=$((PASS+1))\n  else echo \"  FAIL $1 — expected $2, got $3\"; FAIL=$((FAIL+1)); fi\n}\n\n# Build a fixture repo. $1 = dir. Creates a git tree with three guards, all of\n# which exit 0, and a copy of the runner whose buckets name exactly those three.\nmake_fixture() {\n  local root=\"$1\"\n  mkdir -p \"$root/Blockchain/Dev/scripts\"\n  ( cd \"$root\" && git init -q . && git config user.email t@t && git config user.name t )\n  local g\n  for g in check-alpha check-beta check-gamma; do\n    printf '#!/usr/bin/env bash\\nexit 0\\n' > \"$root/Blockchain/Dev/scripts/$g.sh\"\n  done\n  # The runner, with its three buckets rewritten to the fixture's guards.\n  python3 - \"$RUNNER\" \"$root/Blockchain/Dev/scripts/run-code-guards.sh\" <<'PY'\nimport re,sys\nsrc,dst=sys.argv[1],sys.argv[2]\ns=open(src,encoding='utf-8').read()\ns=re.sub(r'^WIRED=\\(.*?^\\)$', 'WIRED=(\\n  check-alpha.sh\\n  check-beta.sh\\n)', s, flags=re.S|re.M)\ns=re.sub(r'^HOMED_ELSEWHERE=\\(.*?^\\)$', 'HOMED_ELSEWHERE=(\\n  \"check-gamma.sh|fixture entry point\"\\n)', s, flags=re.S|re.M)\ns=re.sub(r'^DEFERRED=\\(.*?^\\)$', 'DEFERRED=(\\n)', s, flags=re.S|re.M)\nopen(dst,'w',encoding='utf-8').write(s)\nPY\n  ( cd \"$root\" && git add -A && git commit -qm fixture )\n}\n\n# Run a fixture's runner. $1 = root, $2.. = args. Echoes exit code.\nrun_fx() { local root=\"$1\"; shift; ( cd \"$root/Blockchain/Dev\" && bash scripts/run-code-guards.sh \"$@\" >/dev/null 2>&1; echo $?; ); }\n\n# A tamper must still PARSE, or its red proves nothing.\nassert_parses() { bash -n \"$1\" 2>/dev/null || { echo \"  FAIL tamper broke parsing: $1\"; FAIL=$((FAIL+1)); return 1; }; }\n\necho \"=== CASE 1 — a fully bucketed tree: census OK, guards run green ===\"\nF=\"$TMP/c1\"; make_fixture \"$F\"\ncheck \"census on a clean fixture\" 0 \"$(run_fx \"$F\" --check-unreached)\"\ncheck \"run of two green guards\"   0 \"$(run_fx \"$F\")\"\ncheck \"--list\"                    0 \"$(run_fx \"$F\" --list)\"\n\necho \"=== CASE 2 — RED-PROOF: a tracked guard in NO bucket must fail the census ===\"\nF=\"$TMP/c2\"; make_fixture \"$F\"\nprintf '#!/usr/bin/env bash\\nexit 0\\n' > \"$F/Blockchain/Dev/scripts/check-orphan.sh\"\n( cd \"$F\" && git add -A && git commit -qm orphan )\ncheck \"census sees the orphan\" 1 \"$(run_fx \"$F\" --check-unreached)\"\n# and the same tree is otherwise fine, so the 1 is attributable to the orphan\ncheck \"control: run path unaffected by an unbucketed guard\" 0 \"$(run_fx \"$F\")\"\n\necho \"=== CASE 3 — RED-PROOF: a bucket naming a guard NOT in the tree must fail ===\"\nF=\"$TMP/c3\"; make_fixture \"$F\"\nR=\"$F/Blockchain/Dev/scripts/run-code-guards.sh\"\nsed -i.bak 's/^  check-beta\\.sh$/  check-beta.sh\\n  check-ghost.sh/' \"$R\" && rm -f \"$R.bak\"\nif assert_parses \"$R\"; then\n  check \"census sees the ghost\" 1 \"$(run_fx \"$F\" --check-unreached)\"\nfi\n\necho \"=== CASE 4 — POSITIVE CONTROL: enumerating ZERO guards must FAIL, not pass ===\"\n# This is the defect KS-926 is about, reproduced inside its own fix: if the\n# pathspec stops matching, `comm` finds no orphans and the census would report a\n# clean bill of health having examined nothing.\nF=\"$TMP/c4\"; make_fixture \"$F\"\nR=\"$F/Blockchain/Dev/scripts/run-code-guards.sh\"\nsed -i.bak \"s|ls-files 'Blockchain/Dev/scripts/check-\\*.sh'|ls-files 'no/such/path/check-*.sh'|\" \"$R\" && rm -f \"$R.bak\"\nif assert_parses \"$R\"; then\n  check \"census with 0 tracked guards fails loudly\" 1 \"$(run_fx \"$F\" --check-unreached)\"\nfi\n\necho \"=== CASE 5 — RED-PROOF: a wired guard that FAILS must fail the run ===\"\nF=\"$TMP/c5\"; make_fixture \"$F\"\nprintf '#!/usr/bin/env bash\\nexit 1\\n' > \"$F/Blockchain/Dev/scripts/check-beta.sh\"\n( cd \"$F\" && git add -A && git commit -qm redden )\ncheck \"run reports a red guard\" 1 \"$(run_fx \"$F\")\"\ncheck \"control: census still OK (bucketing unchanged)\" 0 \"$(run_fx \"$F\" --check-unreached)\"\n\necho \"=== CASE 6 — POSITIVE CONTROL: running ZERO guards must FAIL, not pass ===\"\nF=\"$TMP/c6\"; make_fixture \"$F\"\nR=\"$F/Blockchain/Dev/scripts/run-code-guards.sh\"\npython3 - \"$R\" <<'PY'\nimport re,sys\np=sys.argv[1]; s=open(p,encoding='utf-8').read()\ns=re.sub(r'^WIRED=\\(.*?^\\)$','WIRED=(\\n)',s,flags=re.S|re.M)\nopen(p,'w',encoding='utf-8').write(s)\nPY\nif assert_parses \"$R\"; then\n  check \"run with an empty WIRED list fails loudly\" 1 \"$(run_fx \"$F\")\"\nfi\n\necho \"=== CASE 7 — a wired guard missing from the tree must fail the run ===\"\nF=\"$TMP/c7\"; make_fixture \"$F\"\n( cd \"$F\" && git rm -q Blockchain/Dev/scripts/check-beta.sh && git commit -qm remove )\ncheck \"run reports a missing wired guard\" 1 \"$(run_fx \"$F\")\"\n\necho \"=== CASE 8 — the HOOK'S GIT ENV must not reach the guards (KS-926, found by wiring) ===\"\n# Git exports GIT_DIR to hooks. Under it, `rev-parse --show-toplevel` returns the\n# directory asked from rather than the repo root, so guards resolve repo-root\n# paths one level too deep and call present files MISSING. Measured on\n# check-stack-safety.sh: exit 0 without GIT_DIR, exit 1 with it.\nF=\"$TMP/c8\"; make_fixture \"$F\"\n# A guard that fails iff its repo root resolves wrongly — the defect, in miniature.\ncat > \"$F/Blockchain/Dev/scripts/check-alpha.sh\" <<'GUARD'\n#!/usr/bin/env bash\nROOT=\"$(cd \"$(dirname \"$0\")/..\" && pwd)\"\nREPO=\"$(git -C \"$ROOT\" rev-parse --show-toplevel 2>/dev/null || (cd \"$ROOT/../..\" && pwd))\"\n[ -f \"$REPO/marker.txt\" ] || { echo \"::error::marker.txt missing (REPO=$REPO)\"; exit 1; }\nexit 0\nGUARD\necho marker > \"$F/marker.txt\"\n( cd \"$F\" && git add -A && git commit -qm hookenv )\nGD=\"$(cd \"$F\" && git rev-parse --absolute-git-dir)\"\n# The guard alone, under the hook's env, must FAIL — otherwise this case proves nothing.\nraw=$( cd \"$F/Blockchain/Dev\" && GIT_DIR=\"$GD\" bash scripts/check-alpha.sh >/dev/null 2>&1; echo $? )\ncheck \"RED-PROOF: the guard alone under GIT_DIR does fail\" 1 \"$raw\"\nraw0=$( cd \"$F/Blockchain/Dev\" && bash scripts/check-alpha.sh >/dev/null 2>&1; echo $? )\ncheck \"control: the same guard without GIT_DIR passes\" 0 \"$raw0\"\n# Through the runner, which unsets it, the same guard must pass.\nviarunner=$( cd \"$F/Blockchain/Dev\" && GIT_DIR=\"$GD\" bash scripts/run-code-guards.sh >/dev/null 2>&1; echo $? )\ncheck \"the runner shields guards from the hook env\" 0 \"$viarunner\"\n# And removing the unset must bring the failure back — so the fix is load-bearing.\nR=\"$F/Blockchain/Dev/scripts/run-code-guards.sh\"\nsed -i.bak 's/^unset GIT_DIR .*$/: # unset removed by the test/; s/^      GIT_OBJECT_DIRECTORY.*$/: # continuation removed/' \"$R\" && rm -f \"$R.bak\"\nif assert_parses \"$R\"; then\n  back=$( cd \"$F/Blockchain/Dev\" && GIT_DIR=\"$GD\" bash scripts/run-code-guards.sh >/dev/null 2>&1; echo $? )\n  check \"RED-PROOF: removing the unset brings the failure back\" 1 \"$back\"\nfi\n\necho\necho \"run_code_guards.test.sh — $PASS passed, $FAIL failed\"\n[ \"$FAIL\" -eq 0 ] || exit 1\n"
+ },
+ "_night_num_ctx": 65536
+}

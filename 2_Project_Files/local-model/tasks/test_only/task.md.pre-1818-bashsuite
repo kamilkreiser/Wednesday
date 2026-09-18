@@ -9,10 +9,7 @@ tip, and the ticket asks for test cells that PIN that behaviour, so that a later
   (`## Controls`).
 - `test_file` — the ONE file your diff touches (path from the repository root). When `test_mode` is `modify`, its FULL
   current content is in `files[test_file]`: you MODIFY it in place. When `test_mode` is `new`, you create it.
-- `repo.test_runner` — vitest, jest, or bash. Your cells run under it. Do not change the file's imports or its runner idiom.
-  For a bash suite (`*.test.sh`) a cell is ONE `ok …` / `FAIL …` line printed by the suite's OWN helper (`ok`/`bad`,
-  `check`, `expect`): use that helper, never a new one; it runs under /bin/bash 3.2 (no mapfile, no `declare -A`, no
-  `${x,,}`, no `timeout`).
+- `repo.test_runner` — vitest or jest. Your cells run under it. Do not change the file's imports or its runner idiom.
 - `tampers`, `controls`, `expected_plus` — the same facts as the brief, as data. You never change a tamper's file.
 
 Produce the change as ONE unified diff, and nothing else.

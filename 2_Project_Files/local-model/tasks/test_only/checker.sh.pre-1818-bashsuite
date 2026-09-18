@@ -23,25 +23,9 @@
 #      an unrestored tamper is a HARD FAIL — the run stops there
 #
 # Prints PASS/FAIL per gate (T6/T7/T8 once per tamper, then a summary line each); rc 0 only when ALL pass, printed as
-# `RESULT: PASS (8/8)`. Runner: input.runner (vitest | jest | bash). vitest/jest run from <repo_subdir>/<service_dir>
-# exactly as tasks/code_patch/checker.sh does, JSON report per run.
-#
-# BASH RUNNER (2026-09-18 18:xx, commissioned by Wednesday — KS-1137 / KS-939 / KS-1153 / KS-1209 N41-3 were refused
-# because their cells live in a *.test.sh suite). The file is run as `/bin/bash <test_file>` (bash 3.2.57, the machine's
-# default — never a PATH bash) from the CLONE ROOT, as tasks/bash_patch/checker.sh runs suites, 300 s budget via python.
-# A CELL is one line the suite prints for one check, in the convention the Secuura suites (and bash_patch B4/B5) use:
-#   `ok <desc>` / `PASS: <desc>` = the cell passed;  `FAIL <desc>` / `FAIL: <desc>` / `FAIL — <desc>` = it failed
-# at an indent of 0-3 spaces (detail lines under a FAIL are indented further and are not cells). A brief names a cell by
-# a LITERAL PREFIX of its description that ends at a word boundary (the suites print `(rc=$x)` / `— expected A, got B`
-# after the fixed text, and the FAIL wording often differs from the ok wording after a shared stem) — each declared
-# name must match exactly ONE cell line (else T5/T6 fail: ambiguous). An assertion red = a FAIL line the suite printed.
-# A NON-ASSERTION red = the run carries a bash diagnostic (`<file>: line N: … syntax error | command not found |
-# unbound variable | bad substitution | invalid option | No such file or directory`, bash_patch B4's classes plus the
-# two bash-3.2 idiom failures) that the green-at-tip run did not: the suite could not run the check. At the tip a
-# diagnostic naming the TEST FILE itself is a load error (T5). A suite that prints FAIL lines but exits 0 is refused
-# (a runner reading its rc would call it green). The clone is NOT node-farmed for bash (prepare_clone.sh skips it).
-# Every write verb runs inside <clone-dir>; the source checkout is never touched. Reports land in <out.md>.checker/.
-# No rm (a previous run's untracked test file is QUARANTINED).
+# `RESULT: PASS (8/8)`. Runner: input.runner (vitest | jest), run from <repo_subdir>/<service_dir> exactly as
+# tasks/code_patch/checker.sh does, JSON report per run. Every write verb runs inside <clone-dir>; the source checkout
+# is never touched. Reports land in <out.md>.checker/. No rm (a previous run's untracked test file is QUARANTINED).
 # Test hook (arms only, never set by night_run.sh): TO_TEST_SKIP_RESTORE=<tamper id> skips that tamper's restore so
 # the T8 guard can be proven to fire. stderr never discarded. bash 3.2.
 set -uo pipefail
@@ -56,13 +40,12 @@ field() { python3 -c 'import json,sys; print(json.load(open(sys.argv[1]))[sys.ar
 TIP="$(field tip)"; SUBDIR="$(field repo_subdir)"; SERVICE="$(field service_dir)"
 TEST_FILE="$(field test_file)"; RUNNER="$(field runner)"; MODE_T="$(field test_mode)"
 TEST_REL="${TEST_FILE#$SUBDIR/$SERVICE/}"
-[ "$RUNNER" = bash ] && TEST_REL="$TEST_FILE"   # a bash suite runs from the clone root by its repo path
 SVC="$CLONE/$SUBDIR/$SERVICE"
 REP="$OUT.checker"; mkdir -p "$REP"
 DIFF="$REP/patch.diff"
 N_TAMPER="$(python3 -c 'import json,sys; print(len(json.load(open(sys.argv[1]))["tampers"]))' "$INPUT")"
 echo "mode: test_only ($MODE_T $TEST_FILE; runner $RUNNER in $SUBDIR/$SERVICE; $N_TAMPER tamper(s))"
-case "$RUNNER" in vitest|jest|bash) ;; *) echo "checker: unknown runner '$RUNNER' — refusing" >&2; exit 1;; esac
+case "$RUNNER" in vitest|jest) ;; *) echo "checker: unknown runner '$RUNNER' — refusing" >&2; exit 1;; esac
 
 FAILS=0
 pass() { echo "PASS $1"; }
@@ -227,23 +210,6 @@ else fail "T4 BRIEF LINES — $(/usr/bin/grep -v -E '^(SUMMARY|INFO)' "$REP/t4.o
 run_one() {
   # run_one <label> -> $REP/<label>.json + .out; echoes rc
   local label="$1"
-  if [ "$RUNNER" = bash ]; then
-    # /bin/bash (3.2) by absolute path, from the clone root, 300 s budget (macOS has no `timeout`); stdout+stderr
-    # interleaved into <label>.out, {rc, timeout} into <label>.json. The rc echoed is the suite's.
-    python3 - "$CLONE" "$TEST_FILE" "$REP/$label" <<'PYR'
-import json, subprocess, sys
-clone, test, prefix = sys.argv[1:4]
-try:
-    r = subprocess.run(["/bin/bash", test], cwd=clone, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, timeout=300)
-    rc, out, to = r.returncode, r.stdout, False
-except subprocess.TimeoutExpired as e:
-    rc, out, to = 124, (e.stdout or b""), True
-open(prefix + ".out", "wb").write(out)
-json.dump({"rc": rc, "timeout": to}, open(prefix + ".json", "w"))
-print(rc)
-PYR
-    return
-  fi
   if [ "$RUNNER" = jest ]; then
     ( cd "$SVC" && npx jest "$TEST_REL" --cacheDirectory="$REP/jest_cache" --json --outputFile="$REP/$label.json" ) > "$REP/$label.out" 2>&1
   else
@@ -253,7 +219,6 @@ PYR
 }
 # cells <label> -> one JSON object on stdout: {total, loaded, load_errors, cells:[{full,title,status,assert,nonassert,msg}]}
 cells_of() {
-  if [ "$RUNNER" = bash ]; then cells_of_bash "$1"; return; fi
   python3 - "$REP/$1.json" <<'PYC'
 import json, os, re, sys
 p = sys.argv[1]
@@ -274,75 +239,6 @@ for r in j.get("testResults", []):
 print(json.dumps({"total": j.get("numTotalTests", 0), "load_errors": le, "cells": cells}))
 PYC
 }
-# cells_of_bash <label> -> the SAME JSON shape from a bash suite's printed lines (see the header: BASH RUNNER), plus
-# `ambiguous` (a declared name matching != 1 cell, or a cell matching two names), `problems` (FAIL lines with rc 0, a
-# timeout) and `diag_keys` (the run's normalised bash diagnostics; the tamper runs are compared against green_tip's).
-# A cell's `title` is the DECLARED name it matches (so T5/T6/T7's `n in (title, full)` reads it unchanged); `full` is
-# its printed description plus its ordinal, so two cells printing the same text stay two cells.
-cells_of_bash() {
-  python3 - "$REP/$1" "$INPUT" "$REP/green_tip.cells.json" "$1" "$TEST_FILE" <<'PYB'
-import json, os, re, sys
-prefix, inp, basep, label, tf = sys.argv[1:6]
-if not os.path.exists(prefix + ".json"):
-    print(json.dumps({"total": 0, "load_errors": ["the suite did not run (no run record)"], "cells": []})); sys.exit()
-r = json.load(open(prefix + ".json")); rc = r["rc"]
-out = open(prefix + ".out", encoding="utf-8", errors="replace").read()
-d = json.load(open(inp, encoding="utf-8"))
-norm = lambda s: " ".join(s.split())
-declared = {}
-for t in d["tampers"]:
-    for n in t["reds"]: declared[norm(n)] = n
-for n in d["controls"]: declared[norm(n)] = n
-CELL = re.compile(r"^ {0,3}(ok|PASS|FAIL)(?::[ \t]*|[ \t]+)(?:[—–-][ \t]+)?(\S.*)$")
-KINDS = r"(syntax error|command not found|unbound variable|bad substitution|invalid option|No such file or directory)"
-DIAG1 = re.compile(r"(?:^|[\s(])((?:/bin/)?bash|[^\s:()]+): line (\d+): .*?" + KINDS)
-DIAG2 = re.compile(r"(?:^|[\s(])(?:/bin/)?bash: .*?" + KINDS)
-def matches(desc, n):
-    return desc == n or (desc.startswith(n) and not (desc[len(n)].isalnum() or desc[len(n)] == "_"))
-cells, diags, diag_lines = [], [], []
-for ln in out.split("\n"):
-    m = CELL.match(ln)
-    if m:
-        desc = norm(m.group(2)); hit = [n for n in declared if matches(desc, n)]
-        hit.sort(key=len, reverse=True)
-        cells.append({"full": f"{desc} [cell {len(cells) + 1}]", "title": declared[hit[0]] if hit else desc,
-                      "status": "passed" if m.group(1) in ("ok", "PASS") else "failed", "assert": True,
-                      "msg": desc[:160], "_hits": hit})
-    for m1 in DIAG1.finditer(ln):
-        k = f"{os.path.basename(m1.group(1))}:{m1.group(2)}:{m1.group(3)}"
-        if k not in diags: diags.append(k); diag_lines.append(re.sub(r"[^\s:()]*/", "", ln[m1.start(1):]).strip()[:200])
-    if not DIAG1.search(ln):
-        m2 = DIAG2.search(ln)
-        if m2:
-            k = f"bash::{m2.group(1)}"
-            if k not in diags: diags.append(k); diag_lines.append(re.sub(r"[^\s:()]*/", "", ln[m2.start():]).strip()[:200])
-amb = []
-for n, raw in declared.items():
-    k = sum(1 for c in cells if n in c["_hits"])
-    if k > 1: amb.append(f"the declared name {raw[:70]!r} matches {k} cells — name a longer prefix")
-for c in cells:
-    if len(c["_hits"]) > 1: amb.append(f"the cell {c['full'][:70]!r} matches {len(c['_hits'])} declared names")
-    del c["_hits"]
-le, problems = [], []
-tfb = os.path.basename(tf)
-if r.get("timeout"): le.append("the suite did not finish in 300 s (a hang, not a red)")
-if not cells: le.append(f"the suite printed no cell line (rc {rc}) — nothing to grade: {out.strip()[-200:]!r}")
-if label == "green_tip":
-    for k, l in zip(diags, diag_lines):
-        if k.split(":")[0] == tfb: le.append(f"bash diagnostic IN THE SUITE at the tip: {l}")
-else:
-    base = set(json.load(open(basep)).get("diag_keys", [])) if os.path.exists(basep) else set()
-    new = [(k, l) for k, l in zip(diags, diag_lines) if k not in base]
-    failed = [c for c in cells if c["status"] == "failed"]
-    if new and failed:
-        for c in failed: c["assert"] = False; c["msg"] = "bash diagnostic: " + new[0][1][:140]
-    elif new:
-        le.append("bash diagnostic under the tamper (the suite could not run a check): " + new[0][1])
-    if failed and rc == 0: problems.append(f"the suite printed {len(failed)} FAIL line(s) but EXITED 0 — a runner reading its exit code calls it green")
-print(json.dumps({"total": len(cells), "load_errors": le, "cells": cells, "ambiguous": amb, "problems": problems,
-                  "diag_keys": diags, "diag_lines": diag_lines, "rc": rc}))
-PYB
-}
 
 # ---------------------------------------------------------------- T5 green at the tip (diff applied, no tamper)
 git -C "$CLONE" apply -p1 $APPLY_OPTS "$DIFF" > "$REP/apply.out" 2>&1 || { fail "T5 the diff did not apply for the run: $(head -2 "$REP/apply.out" | tr '\n' ' ')"; stop "T5"; }
@@ -358,9 +254,7 @@ print(f"green_tip rc={rc} total={c['total']} passed={len(passed)} failed={len(fa
 for x in failed[:6]: print(f"RED AT THE TIP: {x['title'][:90]} -> {x['msg'][:120]}")
 for l in c["load_errors"][:3]: print(f"LOAD ERROR: {l}")
 for n in missing: print(f"DECLARED CELL NOT IN THE RUN: {n[:100]}")
-for a in c.get("ambiguous", []): print(f"AMBIGUOUS CELL NAME: {a}")
-for a in c.get("problems", []): print(f"SUITE PROBLEM: {a}")
-ok = rc == 0 and c["total"] > 0 and not failed and not c["load_errors"] and not missing and len(passed) == c["total"] and not c.get("ambiguous") and not c.get("problems")
+ok = rc == 0 and c["total"] > 0 and not failed and not c["load_errors"] and not missing and len(passed) == c["total"]
 sys.exit(0 if ok else 1)
 PYT5
 rc=$?
@@ -425,8 +319,6 @@ title = {x["full"]: x["title"] for x in cells}
 short = lambda s: sorted(title.get(f, f)[:60] for f in s)
 problems = []
 if c["load_errors"]: problems.append("LOAD ERROR under the tamper: " + " | ".join(c["load_errors"][:2]))
-if c.get("ambiguous"): problems.append("AMBIGUOUS cell name(s) under the tamper: " + " | ".join(c["ambiguous"][:2]))
-problems.extend(c.get("problems", []))
 if c["total"] != n0: problems.append(f"cell count {c['total']} under the tamper != {n0} at the tip (a cell did not run)")
 nonassert = [x for x in cells if x["status"] == "failed" and not x["assert"]]
 if nonassert: problems.append("NON-ASSERTION red(s): " + " | ".join(f"{x['title'][:50]} -> {x['msg'][:90]}" for x in nonassert[:3]))

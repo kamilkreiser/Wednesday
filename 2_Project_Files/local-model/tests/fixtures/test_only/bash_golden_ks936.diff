@@ -1,0 +1,59 @@
+--- a/Blockchain/Dev/scripts/__tests__/orchestrate_jobs.test.sh
++++ b/Blockchain/Dev/scripts/__tests__/orchestrate_jobs.test.sh
+@@ -59,3 +59,3 @@
+ build_fixture() {
+-  # $2 = all | one-missing | one-unreadable   (Stage-1 job condition)
++  # $2 = all | one-missing | one-unreadable | post-api-unreadable   (job condition)
+   # $3 = exec | noexec | absent | failing | badshebang | unreadable  (Stage-2 tool)
+@@ -111,2 +111,8 @@
+       chmod 000 "$root/Testing/jobs/$j.sh"
++    # KS-936: `post-api-unreadable` makes 06-tenant-isolation mode-000. That job
++    # is reachable ONLY from the post-API loop (orchestrate.sh:125); Stage 1's
++    # list at :104 does not contain it. So this fixture drives the post-API path
++    # and nothing else - the path CELL 11 left inferred.
++    elif [ "$mode" = post-api-unreadable ] && [ "$j" = 06-tenant-isolation ]; then
++      chmod 000 "$root/Testing/jobs/$j.sh"
+     else
+@@ -351,1 +357,42 @@
++# ---------------------------------------------------------------------------
++# CELL 13 - KS-936. THE GATE MUST NOT PASS on the post-API path.
++#
++# Why this is not a restatement of CELLS 10 and 11. `require_job` delegates to
++# the same `require_script`, so the CODE is shared and CELL 11 already drives it
++# on Stage 1. What differs is the OBSERVABLE, and it is the one that matters:
++#
++#   Stage 1 pre-fix      -> rc NON-ZERO. CELL 11 pins that refusal.
++#   post-API loop pre-fix -> rc 0. A GATE PASS, with "06-tenant-isolation exited
++#                            non-zero (continuing)" said about a job that never
++#                            ran. Nothing pinned that.
++#
++# A future change that stopped the post-API loop refusing would leave CELLS 10
++# and 11 green while a run that could not start a security job reported success.
++# That is KS-868, the parent defect, exactly. So this cell asserts THE GATE DOES
++# NOT PASS - not merely that a refusal appears somewhere in the output.
++#
++# It sits after CELL 12 rather than beside CELLS 10/11 so the existing cell
++# numbers keep their meaning; KS-941 cites CELL 12 by number.
++# ---------------------------------------------------------------------------
++build_fixture "$WORK/postapiunread" post-api-unreadable
++PA_UNREAD_JOB="$WORK/postapiunread/Testing/jobs/06-tenant-isolation.sh"
++if [ -r "$PA_UNREAD_JOB" ]; then
++  # Same precondition guard CELLS 10 and 11 carry: root defeats mode-000, and a
++  # cell that cannot discriminate must not report a pass.
++  bad "an UNREADABLE post-API job makes the GATE NOT PASS" \
++      "the mode-000 fixture is STILL READABLE (running as root?) - this cell cannot discriminate and is not reporting a pass"
++else
++  rc_pa="$(run_orchestrator "$WORK/postapiunread")"
++  out_pa="$(cat "$WORK/postapiunread/out.txt")"
++  if [ "$rc_pa" != 0 ] \
++     && printf '%s' "$out_pa" | grep -q 'NOT READABLE' \
++     && printf '%s' "$out_pa" | grep -q '06-tenant-isolation' \
++     && ! printf '%s' "$out_pa" | grep -q '06-tenant-isolation exited non-zero'; then
++    ok "an UNREADABLE post-API job makes the GATE NOT PASS (rc=$rc_pa), REFUSES by name, and does NOT claim the job ran - the path CELL 11 left inferred is now DRIVEN"
++  else
++    bad "an UNREADABLE post-API job makes the GATE NOT PASS, REFUSES by name, and claims nothing about having run" \
++        "rc=$rc_pa (rc=0 here is the pre-fix GATE PASS this cell exists to catch), output: $(tail -5 "$WORK/postapiunread/out.txt" | tr '\n' ' ')"
++  fi
++fi
++chmod 644 "$PA_UNREAD_JOB" 2>/dev/null
+ printf '\n  %d passed, %d failed\n' "$pass" "$fail"

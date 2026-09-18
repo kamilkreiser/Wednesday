@@ -1,0 +1,35 @@
+test_only BASH arms 2026-09-18 18:19:10 · checker /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/tasks/test_only/checker.sh (52381b5f784c) · builder /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/tasks/test_only/build_test_only_input.sh (163dec9c0123) · /bin/bash 3.2.57(1)-release · runs /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/9b05af00-d7be-4a1b-951b-52959709cae5/scratchpad/tob/bash_arms_20260918-181910
+fixtures ok
+--- B1 GOLDEN PASS (brief fence as the answer)
+  ok   B1 rc 0, RESULT: PASS (8/8), P1 {cell13}, S1 {cell4, cell11}, 13 cells
+--- B1r the REAL #875 diff, byte for byte
+  ok   B1r rc 0: the merged #875 change itself grades PASS (8/8) with the same red sets
+--- B2 / B2b declared-set strictness
+  ok   B2 rc 1: FAIL T6[S1] red set != declared: red but NOT declared ['an UNREADABLE Stage-1 job REFUSES by name and exits non-zero'] (red {a missing job makes the r
+  ok   B2b rc 1: FAIL T6[P1] declared but GREEN (a superset fails too)
+--- B3 a tamper no cell reaches
+  ok   B3 rc 1: FAIL T6[Z] reds NOTHING (0 of 13 cells failed) — the cells do not reach the tampered code (red {})
+--- B4a / B4b non-assertion reds
+  ok   B4a rc 1: FAIL T6[P1] LOAD ERROR under the tamper: bash diagnostic under the tamper (the suite could not run a check): orchestrate_jobs.test.sh: line 393: badd: command not found ; cell count 12 under the tamper != 13 at the tip (a cell did
+  ok   B4b rc 1: FAIL T6[P1] NON-ASSERTION red(s): an UNREADABLE post-API job makes the GATE NOT PASS -> bash diagnostic: orchestrate_jobs.test.sh: line 393: tailx: command not found (red {an UNREADABLE post-API job makes the GATE NOT PASS})
+--- B5 a product-file touch
+  ok   B5 rc 1: FAIL T2 names Blockchain/Testing/ci/orchestrate.sh
+--- B6 NEW behaviour (red at the untouched tip)
+  ok   B6 rc 1: FAIL T5 (cell13 red at the tip), no tamper planted
+--- B7 restore guard
+  ok   B7 rc 1: FAIL T8[P1], stopped before S1; orchestrate.sh really is tampered (ff4d2fd8ffcd != 54bf812d9df3)
+  ok   B7b rc 0: the next run's reset restored the clone and the golden PASSES
+--- B8 an ambiguous cell name
+  ok   B8 rc 1: FAIL T5 AMBIGUOUS CELL NAME: the declared name 'an UNREADABLE' matches 3 cells — name a longer prefix
+--- B9 FAIL lines with rc 0
+  ok   B9 rc 1: FAIL T6[P1] the suite printed FAIL but EXITED 0
+--- B10 builder refusals
+  ok   B10a builder rc 2: build_test_only_input: REFUSED — a '+' line uses a bash-4 idiom /bin/bash 3.2 lacks: 'mapfile -t _x < /dev/null; rc_pa="$(run_orchestrator "$WORK/postapiunread")"'
+  ok   B10b builder rc 2: build_test_only_input: REFUSED — cell name 'an UNREADABLE post-API job makes the GATE FAIL' is not literally in the suite's text — a bash cell is named by a literal prefi
+  ok   B10c builder rc 2: build_test_only_input: REFUSED — tamper P1: Blockchain/Testing/ci/orchestrate.sh does not parse with the tamper planted (bash -n: /bin/bash: line 135: syntax error near u
+  ok   B10d builder rc 2: build_test_only_input: REFUSED — cell name 'a missing job makes the run REFUSE loudly, BY NAME, and exit non-zero (rc=$rc_mi' carries `$`, a backtick or a backslash — the
+  ok   B10e builder rc 2: build_test_only_input: REFUSED — tamper S1: Blockchain/Dev/scripts/__tests__/stack_env.test.sh is a test file — a tamper mutates PRODUCT code
+  ok   B10f builder rc 2: build_test_only_input: REFUSED — the suite after the fence does not parse under /bin/bash (bash -n): /bin/bash: line 118: syntax error near unexpected token `else'
+  ok   B10g builder rc 2: build_test_only_input: REFUSED — the suite prints no `ok`/`PASS` AND `FAIL` cell line (printf/echo) — the checker reads one verdict line per check and this suite gives no
+  ok   B10 control: the golden bash brief builds (rc 0)
+bash arms: 21 ok, 0 failed (runs in /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/9b05af00-d7be-4a1b-951b-52959709cae5/scratchpad/tob/bash_arms_20260918-181910)
