@@ -10,6 +10,41 @@ supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s
 
 ---
 
+## 🔵 DELTA 10 — 2026-09-18 11:52 (Tuesday 65% checkpoint, NOT a rotation; band is 80-90). READ FIRST.
+
+- 🔴 **THE DAY TURNED ON RD-549 AND IT IS WITH KAM.** Measured data exfiltration, live 2.1.1 affected:
+  a stranger anonymously plants their own Azure-suffixed endpoint + key in the pre-sign-in window, it
+  survives setup, it is **RESTORED ON EVERY BOOT** on the Marketplace path, and a signed-in admin's chat
+  sends **38 distinct REAL user names** to the attacker. **No DNS control needed.** Identical on all
+  three heads. RD-516 allows it correctly by its own rule — it is a different property.
+  **Card `nexusai-rd549-live-211-exfiltration`, deliberately NO DEFAULT**, C-43 overridden with the
+  reason stated (C-43 covered harm inside the customer's tenant; this sends data OUT).
+  **Card `nexusai-rd535-live-listing-restore-reopen` is now SUBORDINATED to it** — same artefact, and a
+  ruling on RD-549 disposes of it. Do not let its "nothing changes" default read as pre-answering RD-549.
+- **Kam's standing instruction, unchanged:** *"keep going and let me know when the push is unblocked"*.
+  **The predicate is `0_Brain/reference/2026-09-18_nexusai-zip-chain/UNBLOCK-PREDICATE.md`** — evaluate it
+  on `origin/main`, never a branch. **RD-549 is IN the minimum set.** Version **2.2.0 is Kam's ruling**
+  (terminal). Push waits on step 10 ONLY; step 11 overlaps his round trip.
+- **WAKE ARMED:** `2_Project_Files/fleet/watch_nexusai_main.sh <head> 60 180`, currently on `d881f953`.
+  It EXITS when main moves and the harness re-invokes. **It already fired once today and worked.**
+  If expired, RE-ARM from the current head — never replace it with an intention to check.
+- **`origin/main` = `d881f953`** (RD-529 O-8 only). **Nothing else has merged.**
+- **RD-486+RD-523 @ `2d83967` is GATED GO (worst Low) and DELIBERATELY QUEUED behind RD-436+RD-535.
+  DO NOT RE-GATE IT.** Reason: the release image is built from `main`, so merging it before RD-516
+  exists puts a worse intermediate state on the ref we build the customer image from.
+- **RD-491 r2 @ `7f6c395` GO WITH FINDINGS; B6 proved S66's self-correction real.** Its fix commit is
+  not comment-only, so a NARROW seat-level re-verification is owed — **and B6 must redden at the NEW
+  head**, else the fix weakened the guard and it becomes a real round.
+- **Live panes:** `%10` S65 (RD-436+535 re-gate RUNNING — everything waits on it; RD-464 r3 re-gate;
+  RD-505 removal; RD-503 r2; RD-516 design), `%11` S66, `%3` fleet-monitor. `%8` wednesday is a bare
+  shell BY DESIGN.
+- **Ledger today: six rows**, incl. two of my own tidy absolutes. **The standing line adopted from S66
+  binds me too:** an explanation of why a fix works is a CLAIM — red proof or marked UNVERIFIED — and
+  its author is the last person who can catch it.
+- **DECLARED DEFAULT if this seat dies or rotates:** read OWED 0 / 0a / 0⚠, re-arm the watcher from the
+  current head, answer agent mail, and **tell Kam nothing about the push until the predicate ticks.**
+  His two live-listing cards wait for him; neither is chased.
+
 ## 🔵 DELTA 9 — 2026-09-18 10:46 (Tuesday 50% CHECKPOINT, not a rotation). READ FIRST, then DELTA 8.
 
 - **THE ONE THING THAT MATTERS: Kam's deliverable is the ZIP, and his push waits on STEP 10 ONLY.** The

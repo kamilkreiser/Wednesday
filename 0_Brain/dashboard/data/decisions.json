@@ -11513,7 +11513,7 @@
   "id": "nexusai-rd535-live-listing-restore-reopen",
   "client_project": "Datasec/NexusAI",
   "title": "The LIVE 2.1.1 listing reopens a configured deployment after the documented restore - warn, pull, or ship the fix in today's resubmission (RD-535)",
-  "bluf": "Your call on the live listing only; the fix itself is already in flight and costs you nothing. MEASURED by the NexusAI agent (S65) at head 6fb497d, the commit in the submitted 2.1.1 package name, run locally, nothing live touched: a deployment that WAS configured and enforcing Entra sign-in, restored from a settings backup taken BEFORE the Entra save, comes back after one restart as open - anonymous GET / served the 51,813-byte dashboard, an anonymous dashboard API answered 200, and on current code an anonymous POST can rewrite tenant, client and group. The admin API still refuses. The control (a backup taken AFTER the Entra save) stays enforced, so the trigger is specifically an older restore source - and that file-share restore is the recovery we document for operators. This is a takeover of a CONFIGURED deployment, so your 2026-09-17 accept ('this will be within their tenant, acceptable') does not cover it: that ruling was about the open first-run window on deployments not yet set up. Exposure depends on a fact only you hold: whether any deployment of ours exists that we do not control.",
+  "bluf": "⚠ READ nexusai-rd549-live-211-exfiltration FIRST — IT SUPERSEDES THIS CARD IN SCOPE AND A RULING ON IT DISPOSES OF THIS ONE. Same artefact (the live 2.1.1 listing), strictly worse finding: RD-549 is measured DATA EXFILTRATION — a stranger's endpoint and key planted anonymously in the pre-sign-in window survives setup, is restored on every boot, and a signed-in admin's chat sends 38 real user names to the attacker. If Kam stops new acquisitions on RD-549, this card is moot; if he leaves the listing up, this card's question returns and its recommendation (a) still stands. ORIGINAL QUESTION, unchanged and still true: the LIVE 2.1.1 listing reopens a configured deployment to anonymous takeover after the documented restore path (RD-535) — warn, pull, or ship the fix in the resubmission. THIS CARD KEEPS ITS DEFAULT; RD-549 deliberately has none. Do not read this card's 'nothing changes' default as pre-answering RD-549: it was written before RD-549 existed and against a lesser harm inside the customer's own tenant.",
   "default_action": "Nothing changes on the live listing, the fix ships with today's resubmission, and Tuesday raises this again only if a deployment we do not control is found.",
   "options": [
    {
@@ -11545,7 +11545,20 @@
    "CARD secuura-ks1011-stack-marker-unknown-on-restore",
    "CARD nexusai-live-listing-lockout-warn-now",
    "CARD hpsm-live-release-verification-unprovable"
-  ]
+  ],
+  "amendments": [
+   {
+    "ts": "2026-09-18T11:52:32.278265+10:00",
+    "reason": "A strictly worse finding on the SAME artefact landed after this card was written (RD-549, data exfiltration, live listing affected, measured). Two cards on one decision surface pointing different ways is how a wrong ruling happens, so this one is explicitly subordinated rather than left to be read independently.",
+    "changed": [
+     "bluf"
+    ],
+    "before": {
+     "bluf": "Your call on the live listing only; the fix itself is already in flight and costs you nothing. MEASURED by the NexusAI agent (S65) at head 6fb497d, the commit in the submitted 2.1.1 package name, run locally, nothing live touched: a deployment that WAS configured and enforcing Entra sign-in, restored from a settings backup taken BEFORE the Entra save, comes back after one restart as open - anonymous GET / served the 51,813-byte dashboard, an anonymous dashboard API answered 200, and on current code an anonymous POST can rewrite tenant, client and group. The admin API still refuses. The control (a backup taken AFTER the Entra save) stays enforced, so the trigger is specifically an older restore source - and that file-share restore is the recovery we document for operators. This is a takeover of a CONFIGURED deployment, so your 2026-09-17 accept ('this will be within their tenant, acceptable') does not cover it: that ruling was about the open first-run window on deployments not yet set up. Exposure depends on a fact only you hold: whether any deployment of ours exists that we do not control."
+    }
+   }
+  ],
+  "amended_ts": "2026-09-18T11:52:32.278283+10:00"
  },
  {
   "id": "nexusai-rd549-live-211-exfiltration",
