@@ -10,6 +10,20 @@ supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s
 
 ---
 
+## 🔵 DELTA 21 — 2026-09-19 08:5x ROTATION HANDOVER (Tuesday ctx 80%, safe boundary). READ FIRST; DELTA 20 still holds.
+### THE STATE IN ONE LINE
+**Kam ruled round 4 = (a) by EMAIL (C-82, delivered). S67 (%12) is EXECUTING round 4 on rd-436-452-501-s64. Nothing is owed to Kam until the zip exists, or on a stop-class finding.**
+### S67, round 4, where it is (its 22:47Z mail)
+- af36474 (local) = 6b8ca5b merged into fc8ba61; the a8f61b8 counts conflict is being resolved by C-57; round-4 cells in `__tests__/rd436-r4-enforce-stamp-and-status.test.js` (wip snapshot `wip/s67-rd436-r4-1 @ 2a3310b`); red run queued on the lock; fix staged. **Nothing pushed to the branch yet; fc8ba61 is still its origin head.**
+- **Ruled by Tuesday, still operative:** the F-1 real-browser check STAYS STANDALONE (tests/e2e/rd436-r4-login-after-selfheal.browser.js): red on fc8ba61 and green at the head, both themes, attached to READY, and re-run by the gate's tester. The fix shape is ratified as a SHAPE only. ONE batched gate (round 4 tier 1 + RD-561 + RD-503 r2 @ 5700df5 tier 2). R3d-NOSTAMP "removed >= 1" or STOP. A Major comes to Tuesday; a further round is Kam's (C-62).
+- **Next for Tuesday:** S67's READY FOR QA, then the gate verdict, then the MERGED mail(s) with the 13 rd554 cells named. Then the rest of the minimum set (UNBLOCK-PREDICATE.md). **Tell Kam ONLY when the push is unblocked** (one message, carrying RD-536 row 14's two defaults) and when the zip exists (EMAIL the zip to kreiser.org@me.com).
+### RE-ARM AT BOOT (they die with this session)
+- `2_Project_Files/fleet/watch_nexusai_main.sh <current main> 60 180` (last baseline d881f953).
+### OWED BY TUESDAY (not Kam)
+- The FETCH_HEAD race fix across 4 shared scripts: recipe in `0_Brain/reference/2026-09-18_fetch-head-race/README.md`, claimed in wed_claim. Do it early in a fresh seat, never with live panel_sync/chat_sync edits in place (stop, edit, run once, re-arm).
+### AT THIS SEAT'S WRAP
+S65 scored 0.92, S66 0.95. Ledger rows this seat: R0 digest w=4 (fixed), digest swallowing replies (fixed), R1-CTL endorsed without its mutation (closed by S66's M6 proof). The Datasec INDEX cards are stale (NexusAI 09-12, HPSM 09-10).
+
 ## 🔵 DELTA 20 — 2026-09-19 08:3x: KAM RULED ROUND 4 = (a) BY EMAIL. READ FIRST.
 - Verbatim (reply to "Progress", kreiser.org@me.com, DKIM pass, text in the HTML part): "Thank you for the update. Please go with option a." = fix first on rd-436-452-501-s64, then merge. The card is ruled. **Mark it --delivered once S67 mails the C-number.**
 - S67 is EXECUTING the round-4 brief (merge 6b8ca5b + a8f61b8, the four items, one batched gate with RD-561 + RD-503 r2 @ 5700df5). **A Major at that gate comes to Tuesday; a further round is Kam's again (C-62).**
