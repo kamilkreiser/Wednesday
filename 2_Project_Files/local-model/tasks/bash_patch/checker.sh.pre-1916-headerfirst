@@ -127,61 +127,26 @@ done
 # new-file hunk's header count is wrong and then reports the PREVIOUS file's hunk as "patch failed" — each section
 # alone applies. code_patch applies per section for the same reason.)
 APPLY_OPTS=""; B2_NOTE=""
-# 2026-09-18 19:0x HEADER FIRST (the test_only T3 fix of 18:37, KS-1153 r1, carried to B2; IMPROVEMENTS 18:50 OWED row):
-# a hunk whose HEADER disagrees with its BODY can pass strict `git apply --check` and land in the WRONG place — measured
-# on a planted `@@ -94,0 +95,3 @@` (3 '+' lines + 1 trailing context line) over preflight.sh: git reads 0 old lines,
-# drops the context line as trailing garbage, and with no trailing context it anchors the hunk at END OF FILE (:774 for
-# an insertion the brief puts after :95). B2 said "(strict)". So each section's headers are measured FIRST; a miscounted
-# section never takes the strict path, even when strict "succeeds" — it takes the named byte-exact `--recount` path
-# (then the older lenient/reanchor paths). Trailing EMPTY lines at a hunk's end are ambiguous (git reads them only when
-# the declared count asks for them — the KS-1163 r2 trailing blank context): a header is consistent if it matches the
-# body with any number of them counted. Arms: tests/bash_patch_header_first_arms.sh.
-hdr_mis() {  # <section.diff> -> one line per hunk whose header counts disagree with its body; nothing when all agree
-  python3 - "$1" <<'PYH'
-import re, sys
-L = open(sys.argv[1], encoding="utf-8").read().split("\n"); i = 0
-while i < len(L):
-    m = re.match(r"^@@ -\d+(?:,(\d+))? \+\d+(?:,(\d+))? @@", L[i])
-    if not m: i += 1; continue
-    b = int(m.group(1)) if m.group(1) is not None else 1; d = int(m.group(2)) if m.group(2) is not None else 1
-    j = i + 1; o = w = 0; tail = 0
-    while j < len(L) and not L[j].startswith(("@@", "diff ", "--- ", "+++ ")) and L[j][:1] in (" ", "+", "-", "\\", ""):
-        c = L[j][:1]
-        if c == "": tail += 1
-        else:
-            o += tail; w += tail; tail = 0   # an empty line followed by more body is a blank context line
-            o += c in " -"; w += c in " +"
-        j += 1
-    if not any((o + k, w + k) == (b, d) for k in range(tail + 1)):
-        print(f"hunk {L[i][:40]} declared old={b} new={d} actual old={o} new={w}" + (f" (+{tail} trailing empty)" if tail else ""))
-    i = j
-PYH
-}
 for sf in "$REP"/section_*.diff; do
   # 2026-09-16 (KS-1163 r2): apply options are PER SECTION — a lenient need on the test section used to force
   # --recount onto the script section too, and --recount turned a harmless trailing blank context line into a
   # mismatch (B5 "patch does not apply" on a section B2 had passed strictly). Each section records its own opts.
   : > "$sf.opts"
-  MIS="$(hdr_mis "$sf")"; printf '%s\n' "$MIS" > "$sf.header_measure.out"
-  git -C "$CLONE" apply --check -p1 "$sf" > "$sf.check.out" 2>&1; rc_s=$?
-  if [ "$rc_s" -eq 0 ] && [ -z "$MIS" ]; then :
-  elif [ -n "$MIS" ] && git -C "$CLONE" apply --check -p1 --recount "$sf" > "$sf.check_recount.out" 2>&1; then
-    APPLY_OPTS="${APPLY_OPTS:---recount}"; printf '%s' "--recount" > "$sf.opts"
-    B2_NOTE="$B2_NOTE $(basename "$sf"): --recount (MISCOUNTED header, measured first — strict rc=$rc_s is not trusted with a miscount: $(printf '%s' "$MIS" | head -2 | tr '\n' ' ')); every line byte-exact;"
-  elif git -C "$CLONE" apply --check -p1 --recount --ignore-whitespace "$sf" > "$sf.check_lenient.out" 2>&1; then APPLY_OPTS="--recount --ignore-whitespace"; printf '%s' "--recount --ignore-whitespace" > "$sf.opts"; B2_NOTE="$B2_NOTE $(basename "$sf"): --recount --ignore-whitespace needed${MIS:+ (miscounted header: $(printf '%s' "$MIS" | head -1))};"
+  if git -C "$CLONE" apply --check -p1 "$sf" > "$sf.check.out" 2>&1; then :
+  elif git -C "$CLONE" apply --check -p1 --recount --ignore-whitespace "$sf" > "$sf.check_lenient.out" 2>&1; then APPLY_OPTS="--recount --ignore-whitespace"; printf '%s' "--recount --ignore-whitespace" > "$sf.opts"; B2_NOTE="$B2_NOTE $(basename "$sf"): --recount --ignore-whitespace needed;"
   else
     # third mode (as code_patch A2 / doc D2): hunks REBUILT from the model's -/+ lines at the file's real location —
     # KS-865 r1 (00:44): four `@@ -N,1 +N,1 @@` micro-hunks, line numbers off by three, a trailing blank context line
     # on each; every -/+ line byte-exact. Only a section that EDITS an existing file can be re-anchored.
     spath="$(python3 -c 'import json,sys; [print(o["path"]) for o in json.load(open(sys.argv[1])) if o["file"]==sys.argv[2]]' "$REP/sections.json" "$sf" | head -1)"
-    if /usr/bin/grep -q -E '^--- (a/|"a/)' "$sf" && [ -f "$CLONE/$spath" ] && python3 "$CODE_DIR/reanchor.py" "$sf" "$CLONE/$spath" "$sf.reanchored" > "$sf.reanchor.out" 2>&1 && [ -z "$(hdr_mis "$sf.reanchored")" ] && git -C "$CLONE" apply --check -p1 "$sf.reanchored" > "$sf.check_rean.out" 2>&1; then
+    if /usr/bin/grep -q -E '^--- (a/|"a/)' "$sf" && [ -f "$CLONE/$spath" ] && python3 "$CODE_DIR/reanchor.py" "$sf" "$CLONE/$spath" "$sf.reanchored" > "$sf.reanchor.out" 2>&1 && git -C "$CLONE" apply --check -p1 "$sf.reanchored" > "$sf.check_rean.out" 2>&1; then
       cp "$sf" "$sf.as-written"; cp "$sf.reanchored" "$sf"; B2_NOTE="$B2_NOTE $(basename "$sf"): REANCHORED ($(tr '\n' ';' < "$sf.reanchor.out" | cut -c1-160));"
     else fail "B2 $(basename "$sf") does NOT apply at the tip: strict: $(head -2 "$sf.check.out" | tr '\n' ' ') | reanchored: $(head -2 "$sf.reanchor.out" 2>/dev/null | tr '\n' ' ') $(head -1 "$sf.check_rean.out" 2>/dev/null)"; echo "RESULT: FAIL ($FAILS failed) — stopped at B2"; exit 1; fi
   fi
 done
 if [ -z "$APPLY_OPTS$B2_NOTE$NF_NOTE" ]; then pass "B2 every section applies at the tip (strict)"; else pass "B2 every section applies at the tip — with an accommodation:$B2_NOTE$NF_NOTE"; fi
-# B3 (2026-09-18 19:0x: numstat with each section's OWN opts — B2 records them per section since KS-1163 r2)
-TOUCHED="$(for sf in "$REP"/section_*.diff; do git -C "$CLONE" apply --numstat -p1 $(cat "$sf.opts" 2>/dev/null) "$sf" 2>/dev/null | awk '{print $3}'; done | sort -u)"
+# B3
+TOUCHED="$(for sf in "$REP"/section_*.diff; do git -C "$CLONE" apply --numstat -p1 $APPLY_OPTS "$sf" 2>/dev/null | awk '{print $3}'; done | sort -u)"
 N_TOUCHED="$(printf '%s\n' "$TOUCHED" | /usr/bin/grep -c .)"
 HAS_PRODUCT="$(printf '%s\n' "$TOUCHED" | /usr/bin/grep -c -x -F "$PRODUCT")"; HAS_TEST="$(printf '%s\n' "$TOUCHED" | /usr/bin/grep -c -x -F "$TEST_FILE")"
 TEST_MODE="$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1])).get("test_mode","new"))' "$INPUT")"
