@@ -2553,3 +2553,7 @@ INCLUDED until he says otherwise.
 > In the meantime, I have a question. Tell me when you're ready.
 
 **What was done with them:** the 09:12 challenge was answered with a measured breakdown of all 340 board tickets (and a correction issued minutes later when Wednesday's own path-extraction check proved faulty — see the daily note). 09:15 supersedes the "QA Sunday night, merge all at once" half of the 2026-09-15 Ornith grant. 09:16 **LIFTS the 06:37 no-Claude-agents restriction after 2 h 39 min** (it never reached its Sunday expiry; `usage_gate.sh` re-checked OK at 5%) and creates a new STANDING RULE recorded as `learnings/2026-09-18_ornith-works-constantly-standing-rule.md`. Receipted on the panel within the minute each time. Wednesday held one reading back for Kam rather than assuming it: **demo still waits for Peter's nod**, since "deploy everything that's ready" was not read as cutting across his own standing UAT rule.
+
+## 2026-09-18 14:14 — Kam, panel (view=wednesday)
+> "I'm going to be away for the next two days, so please keep going with tickets and activity while I'm away. Push merge and deploy whatever is ready. Whenever it's ready."
+- Done with it: receipted within the minute with the reading said back (Sat 19 + Sun 20, lapses at the end of Sunday; merge on Wednesday's GO after a gate; deploy kintsugi only; NOT demo; the signature classes still pause). WEEK-INSTRUCTION.md set LIVE; EXPIRING-GRANTS row added.
