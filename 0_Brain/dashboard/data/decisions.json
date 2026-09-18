@@ -11680,5 +11680,66 @@
   "amended_ts": "2026-09-18T13:23:28.884083+10:00",
   "delivered_artefact": "NexusAI CLARIFICATIONS C-78 + RD-554 comment 37802 (S65 mail 03:46Z)",
   "delivered_ts": "2026-09-18T13:47:36.537000+10:00"
+ },
+ {
+  "id": "nexusai-round3-nogo-round4-or-merge",
+  "client_project": "Datasec/NexusAI",
+  "title": "Round 3 fixed the takeover but came back NO GO on four smaller defects. Merge it now and fix those in parallel, or fix first?",
+  "bluf": "WHY THIS IS NOT ALREADY RULED: the prior-ruling gate matched nexusai-rd436-round3-authorise, which you ruled (a) at 13:42. That ruling authorised ROUND 3 ONLY (recorded as C-78); this card asks what happens after it. The other matches are a Marketplace registry card and two Secuura merges, different subjects. Round 3 did its main job. Measured single-worker, twice: every restore shape that used to reopen a configured deployment (7 of 8 rows, plus the env and witness rows) is now REFUSED, with zero files written. The login page names the state, the file and the guide section in Chrome, both themes. But the re-test is NO GO on four smaller defects. (1) BLOCKER RD-558: 'enforce' never writes the new stamp itself, so a deployment stopped in the next ~60 seconds and then restored from an old copy can still be taken over. The tester measured the window and retracted its own over-statement; it is a ~60 s race on a path that already needs a restore. (2) MAJOR: after a restore that heals itself, the login page wrongly says the site 'is refusing every request' instead of showing Microsoft sign-in. (3) and (4) MAJORS: two of our own guard tests don't catch what they claim to; one of them was a guard I named in the brief. Round 3 was the last round you authorised, so another round needs your word. Everything else waits on this branch: RD-486, RD-490 and RD-491 are tested and ready to merge, and RD-516, the longest remaining item, cannot start until RD-486 merges.",
+  "default_action": "NOTHING PROCEEDS. Round 3 stays unmerged, nothing behind it merges, and no round 4 starts. C-62 reserves further rounds on this class to you, so silence stops the chain rather than starting anything. The zip waits.",
+  "options": [
+   {
+    "key": "b",
+    "label": "Merge round 3 now; fix the four in a round 4 that must land before the zip (Recommended)",
+    "detail": "Fastest to the zip. Main gets the far better security state today, the queued merges and RD-516 start at once, and round 4 runs alongside. Cost, stated plainly: until round 4 lands, main shows the wrong login message after a self-healing restore, and the 60-second race exists on main. Main does not reach customers (the demo deploy is off, per the 09-17 check, relayed); the release image is built only at the end, after round 4. Nothing ships with these defects."
+   },
+   {
+    "key": "a",
+    "label": "Fix first, round 4 on this branch, then merge (S65's recommendation)",
+    "detail": "The cleanest record: nothing with a known Blocker ever reaches main. Cost: about two more hours before RD-486 can merge, and RD-516, the longest pole, waits the whole time."
+   },
+   {
+    "key": "c",
+    "label": "Accept the 60-second race; round 4 fixes only the login message and the two guard tests",
+    "detail": "The tester says the likelihood call is yours and that the measurement supports either choice. It can be combined with a or b. Cost: a known, narrow takeover window ships in the product until a later fix."
+   }
+  ],
+  "recommended": "b",
+  "ts": "2026-09-18T16:38:54.746530+10:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "2026-08-21 09:47",
+   "2026-09-03 09:56",
+   "2026-09-04 08:33",
+   "2026-09-10 09:01",
+   "2026-09-10 09:08",
+   "2026-09-10 09:08",
+   "2026-09-14 21:52",
+   "2026-09-15 16:36",
+   "CARD secuura-568-merge",
+   "CARD secuura-780-owner-merge",
+   "CARD secuura-ks764-merge-order-2026-09-03",
+   "CARD secuura-ps-759-760-merge-owner",
+   "CARD secuura-ks843-half2-round3",
+   "CARD secuura-ks949-round3-cap-and-the-cutoff",
+   "CARD secuura-891-workflow-scope-merge",
+   "CARD nexusai-rd361-blocker-vs-nogo-cap",
+   "CARD secuura-892-round3-nogo-blocker-still-open",
+   "CARD nexusai-rd361-round3-blocker-survives",
+   "CARD secuura-892-round4-passed-but-introduced-two-majors",
+   "CARD nexusai-rd369-round3-or-ship-at-the-cap",
+   "CARD secuura-merge-914-without-reviewer-approval",
+   "CARD secuura-develop-merge-frozen-branch-protection",
+   "CARD nexusai-marketplace-package-round3",
+   "CARD hpsm-composer-round3-approver-guard",
+   "CARD hpsm-composer-round4-commit-guard-and-forged-release",
+   "CARD nexusai-marketplace-round4-gpt-only-product",
+   "CARD nexusai-marketplace-b2-registry-after-round4",
+   "CARD secuura-880-merge-kam-platform-s-cutover",
+   "CARD secuura-ks1194-1032-round2-merge-tap",
+   "CARD nexusai-rd436-round3-authorise"
+  ]
  }
 ]
