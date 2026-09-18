@@ -160,6 +160,17 @@ a safety rule with his name on it, not a build preference.
 
 ## NOT in the predicate — gates the ZIP, runs in parallel with his push
 
+⚠ **THE RELEASE GATE BRIEF MUST CARRY THESE THREE, ruled 2026-09-18 ~12:0x when RD-505's READY was
+folded into it rather than given its own session** (Kam's 09:22 minimise-duplication rule). The release
+gate runs on the package branch **with main merged in and the real digest**, so it is a DIFFERENT TREE
+from `a643fe1` and none of these survive the fold by themselves:
+1. **The 18 wizard arm-ttk tests re-asserted AT THE RELEASE HEAD** — not the 49/49 measured at `a643fe1`.
+2. **The one-step revert re-verified at the release head.** This is the property promised to Kam in his
+   own terms; merging main in is exactly what could break it.
+3. **The fail-closed (C-40) proof re-run, not cited** — at the release head the old run is evidence
+   about a tree that no longer exists.
+
+
 main merged into the package branch · the RD-505 removal on that branch · the dev scripts ·
 the listing folds in `azure-marketplace/**` · RD-526..RD-528 · RD-543.
 
