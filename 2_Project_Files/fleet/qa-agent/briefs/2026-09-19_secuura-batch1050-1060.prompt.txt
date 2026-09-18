@@ -1,0 +1,316 @@
+ultrathink
+
+You are the fleet QA agent running ONE BATCHED ROUND 1 gate, at the TIER 1 floor, over ELEVEN file-disjoint Secuura/Blockchain PRs raised by Seat B
+2nd successor. Every one is a local-model (ornith:35b) patch applied verbatim from Wednesday's checker records, except #1059's second commit (pin-cell
+titles, a hand edit) and third commit (the regenerated OpenAPI yaml). They are batched under Kam's 09:22 rule (minimise gate duplication; batch
+disjoint changes). They are ELEVEN PRs, not one: you give ELEVEN verdicts, one per head, and one PR failing must not block or colour the others.
+A VERDICT IS VALID ONLY AT ITS HEAD: if any refs/pull/N/head moves under you, STOP grading THAT PR and say so; the others continue.
+
+  #1050 KS-1261        head 6f6c6ed306f35aea0ca4f1e51fb785d8b1cf77b8  scripts/preflight/preflight.sh +3 (FAILED_LEGS="" / fail_total=0 under fail=0),
+                                                                   new scripts/__tests__/preflight_state_is_initialised.test.sh (5 cells)
+  #1051 KS-1136 item 1 head 58e2fb66bd5ed5138f700cd58433e82e25ba9b82  Blockchain/Testing/jobs/04-container-trivy.sh +12/-2,
+                                                                   new scripts/__tests__/container_trivy_failed_scan_is_loud.test.sh (3 cells)
+  #1052 KS-1267 Q1     head cd791b8214999427b645364e666ca215dc4e7c39  originate ks1228 jest test +6 (TEST-ONLY)
+  #1053 KS-1258 N44-1  head baf651460a46dff3c5bd52e19ab3f64e681ab6df  api-gateway ks1258 vitest test +7 (TEST-ONLY)
+  #1054 KS-1230 N45-5  head 1ea5c7b7eb955d146d935447572e28d8f48a12cf  api-gateway ks1230 vitest test +4 (TEST-ONLY)
+  #1055 KS-1202 N-B    head 31d55923d35669959413aba8e533661282608e18  originate ks1202 jest test +6 (TEST-ONLY)
+  #1056 KS-1153 R-918-A head 7eb4dbad51958c0c814a77e3263b54a84b1d0edc scripts/__tests__/run_code_guards.test.sh +9 (TEST-ONLY, bash suite, applied --recount)
+  #1057 KS-1209 N41-3  head b3b90db4d19818ed580cbc98a199a5f145e7f064  scripts/__tests__/preflight_verdict_names_real_failures.test.sh +3 (TEST-ONLY, bash suite)
+  #1058 KS-1134        head 2e212047d66d15ca8551e8fdd9d4ea772d5ab085  scripts/__tests__/orchestrate_jobs.test.sh +6 (TEST-ONLY, bash suite)
+  #1059 KS-1172+KS-1173 head f22ec785ea0dcc620e0e4bf53987a0da7a03e104  THREE commits: 8a1bdf1df verbatim (originate lifecycleActions.ts +6 and its
+                                                                   test, anchoring anchorSchema.ts +6 and its test, docs/VOCABULARY.md +9) / 1a3e27ee5
+                                                                   the two pin-cell titles / f22ec785e docs/openapi/secuura-api.yaml +6 (regenerated)
+  #1060 KS-1264        head 3743e57eac6050056df87cbfc8724ae642d1ff6c  originate routes/documents.ts +4/-14 (/revoke: checkOnBehalfOf, then updateDocument,
+                                                                   then recordOnBehalfOf; handleOnBehalfOf DELETED), new ks1264 jest test (3 cells)
+
+TIER PER PR (the drafter's ruling, against Kam's 2026-09-05 tier grant; overturn any with a measured reason, and say so first):
+  #1050 KS-1261: TIER 2 — a runtime change to the pre-push gate every author runs (.githooks/pre-push -> preflight.sh). Tier 2 by the batch, but it
+    reaches every push: grade the verdict path through code AND through the real script (item #1050 below).
+  #1051 KS-1136: TIER 2 — a runtime change to audit job 04 (a failed per-image scan now exits 1). Not product code; it changes what the audit reports.
+  #1052 KS-1267: TIER 2 — test-only.   #1053 KS-1258: TIER 2 — test-only.   #1054 KS-1230: TIER 2 — test-only.   #1055 KS-1202: TIER 2 — test-only.
+  #1056 KS-1153: TIER 2 — test-only.   #1057 KS-1209: TIER 2 — test-only.   #1058 KS-1134: TIER 2 — test-only.
+  #1059 KS-1172+KS-1173: TIER 1 — widens the ANCHORED lifecycle vocabulary on both paths (originate /lifecycle-events, anchoring flat-anchor
+    metadata.documentType) and the published OpenAPI contract. It sets the batch floor.
+  #1060 KS-1264: TIER 1 — a runtime change to WHEN the /revoke action_provenance row (email_enc / display_name_enc / email_hash) is written.
+  One session carries all eleven at the TIER 1 floor: tier is a floor per PR, the verdicts are per PR. Time-box 180 minutes. The nine tier-2 items get
+  the through-code weight (below); the two tier-1 items get the full weight. Budget the tier-1 items first if time runs short, and say what you cut.
+
+MERGE AUTHORITY for all eleven: WEDNESDAY'S signed GO naming each head, under Kam's TESTED grant. The seat's plan on merge (relayed, grade it): the
+seven test-only tickets (KS-1267, KS-1258, KS-1230, KS-1202, KS-1153, KS-1209, KS-1134) go Done and archived AS THE GATE RULES; KS-1261, KS-1136,
+KS-1172, KS-1173 and KS-1264 stay In Progress (§5f). Say per ticket whether you agree. Give a MERGE ORDER for the eleven, with the reason for each
+constraint you impose (the seat merges one at a time, sha-pinned, re-predicting the tree over the then-current develop before each merge).
+
+THE SHAPE (drafter-measured 07:59:10 AEST 2026-09-19 = 21:59:10Z by git ls-remote of refs/heads/develop, every refs/pull/N/head AND every branch; the
+launcher re-asserts it at every run, head by branch AND by refs/pull/N/head):
+  - develop = 59412d0575dff3243f5f0ccd1e50608ddb920d6c. Ten PRs are ONE commit whose parent IS 59412d057; #1059 is THREE commits, first parent chain
+    f22ec785e -> 1a3e27ee5 -> 8a1bdf1df -> 59412d057. merge_base = 59412d057 for all eleven; ahead 1 (x10) / 3 (#1059); files 2/2/1/1/1/1/1/1/1/6/2.
+    Pairwise file overlap among the eleven: 0 (19 distinct files).
+  - Each PR over develop is a FAST-FORWARD: its merged tree over 59412d057 IS its head tree (the launcher's --check prints all eleven). ALL ELEVEN
+    TOGETHER: tree cb7860d61b27cc41aa5865d850f2424884d1b8e0. The seat predicted cb7860d61 with a local-only commit 23c379dcd (parent 69405d95b, its
+    all-ten commit; never pushed; in its s-b2-batch worktree, which you do NOT enter). The drafter re-derived cb7860d61 WITHOUT any git write (pure
+    tree-object hashing from `git cat-file` reads, controlled by re-deriving each of the eleven head trees the same way) and it matches, as does
+    23c379dcd's tree read with cat-file. Re-derive it yourself in your clones AND build it by real 3-way merges there, in more than one order.
+  - CANONICAL-PATCH identity (drafter, re-applied onto develop's blobs as plain files in a scratch dir, not a repo; every result hashed with
+    `git hash-object` without -w): all eleven heads' product and test blobs equal their canonical local-model patches — #1059 at its FIRST commit
+    8a1bdf1df, since its second and third commits are the seat's (titles; generator output). #1056's --recount is load-bearing: a STRICT apply of the
+    same patch succeeds but yields a DIFFERENT blob (the seat: CASE 9 lands after the suite's tally) — the drafter measured both. The runs:
+    /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/runs/ 2026-09-18_ks1261-ornith35b-night · 2026-09-18_ks1136-ornith35b-night2 ·
+    2026-09-18_ks1267-ornith35b-night · 2026-09-18_ks1258-ornith35b-night2 · 2026-09-18_ks1230-ornith35b-night2 · 2026-09-18_ks1202-ornith35b-night ·
+    2026-09-18_ks1153-ornith35b-night2 · 2026-09-18_ks1209-ornith35b-night2 · 2026-09-18_ks1134-ornith35b-night · 2026-09-15_ks1172-ornith35b-night9 /
+    -night10 / -night11 · 2026-09-19_ks1264-ornith35b-night. Each run's input.json carries the tampers (id, file, line, from, to, reds) you re-plant.
+  - Re-read develop at start, mid and close; if it has moved, judge the move by content, name it, and grade each PR on its merged tree over it too.
+
+Read your source document FIRST and in full — the seat's READY mail (21:56:17Z, spf/dkim/dmarc pass), captured verbatim by message id from
+wednesday-agent@ at 21:58:50Z:
+/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/gatesets/2026-09-19_gate1050to1060/mail_batch1050_ready.md
+Then:
+- the seat's handover, READ-ONLY: /Volumes/DevMASTER/!CODING/Secuura/Blockchain/5_Project_History/HANDOVER-seatB-2nd-successor-2026-09-19.md
+- each PR's body as raised, READ-ONLY: /Volumes/DevMASTER/!CODING/Secuura/Blockchain/5_Project_History/2026-09-19_seatB-2nd/raise/KS-<n>-body.md
+  (KS-1261, KS-1136, KS-1267, KS-1258, KS-1230, KS-1202, KS-1153, KS-1209, KS-1134, KS-1172, KS-1264), and re-read the LIVE body with a GitHub GET —
+  the records are the seat's copy, the PR is the claim.
+- Wednesday's source reads, one per local-model patch (each carries its CANONICAL PATCH header and the checker's verdict):
+  /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/READY_KS-<n>_*.diff.md (KS-1261, KS-1136-item1, KS-1267-Q1, KS-1258-N44-1,
+  KS-1230-N45-5, KS-1202-NB, KS-1153-R918A, KS-1209-N41-3, KS-1134, KS-1172-A3 / -B3 / -D3, KS-1264). Challenge them; they are claims.
+- the PRIOR REPORT — the batch gate over #1042-#1045 yesterday: same batch shape, same originate jest and api-gateway vitest harnesses, farm recipe and
+  listener discipline, and the SOURCE of four of these items (N43-1 -> #1052 Q1; N43-3 -> #1060; N44-1 -> #1053; N45-5 -> #1054):
+  /Volumes/DevMASTER/!CODING/Testing Agent MAIN/projects/secuura/reports/2026-09-18-batch1042-1045-tier1-r1/
+- and, READ-ONLY, the other source gates: N41-3 (#1057) in /Volumes/DevMASTER/!CODING/Testing Agent MAIN/projects/secuura/reports/2026-09-18-batch1038-1041-tier1-r1/ ;
+  N-B (#1055) in /Volumes/DevMASTER/!CODING/Testing Agent MAIN/projects/secuura/reports/2026-09-17-ks1202-1024-d1a328088-tier1-r1/ ;
+  R-918-A (#1056) in /Volumes/DevMASTER/!CODING/Testing Agent MAIN/projects/secuura/reports/2026-09-14-L7-918r2-924-925-b54487216-b85f1db24-5341b1dae-tier2/ .
+  Say for each source finding: CLOSED by this batch or STILL OPEN.
+- the QA charter: /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/QA_AGENT_CHARTER.md
+- the seat's records, READ-ONLY: /Volumes/DevMASTER/!CODING/Secuura/Blockchain/5_Project_History/2026-09-19_seatB-2nd/ (raise/, raise/batch/,
+  raise/batch11/).
+
+Never enter any seat worktree (worktrees/s-b2-<ks> for every item, s-b2-batch, seat A 12th's s-a12-deploy, or any other; the checkout's local branch
+refs of these names are NOT to be used — pin by SHA from origin), and never write anywhere under
+/Volumes/DevMASTER/!CODING/Secuura/Blockchain/5_Project_History/2026-09-19_seatB-2nd/ (raise/ included), nor under 5_Project_History/quarantine/.
+Seat A 12th may be LIVE in the same checkout (a kintsugi rebuild, no code): your reads of the checkout are MOVING readings; take them as such.
+Repo:    /Volumes/DevMASTER/!CODING/Secuura/Blockchain/2_Project_Files  (READ-ONLY)
+  - git clone --shared --no-checkout by SHA into your own fresh mktemp -d, ONE clone per tree you run (eleven heads, develop, the all-eleven tree);
+    git write verbs there only, from a script file. Never merge-tree --write-tree, worktree, fetch, checkout or git apply in the checkout. A new
+    develop is fetched by SHA into YOUR clone over https, GH_TOKEN via a GIT_ASKPASS helper reading an env var, never on a command line. Never run
+    vitest, jest, a bash suite or preflight in the checkout.
+  - Record the checkout's porcelain count and .git/worktrees count before and after: they must be equal.
+Farm node_modules per ENTRY in each clone (the #1009 gate's R-6): Blockchain/Dev/node_modules, services/api-gateway/node_modules,
+  services/originate/node_modules, services/anchoring/node_modules and packages/shared/node_modules, each PER ENTRY, .vite/.vitest/.cache and jest
+  caches skipped, @secuura/* relinked into your tree, shared dist built per tree. NEVER link a node_modules tree wholesale. VITEST for api-gateway =
+  develop's lock (the prior report: 4.1.11); anchoring has its OWN lock (services/anchoring/package-lock.json) — print the vitest it resolves.
+  JEST for originate: print the jest, ts-jest and typescript versions resolved in YOUR tree beside every count, and run with --cache=false (or a
+  cacheDirectory inside your mktemp) so no jest cache is written outside your tree. BASH SUITES: run them with /bin/bash (3.2 here), from the clone's
+  repo root, exactly as run-shell-suites.sh does; print `/bin/bash --version | head -1` beside every count.
+
+You are FINDINGS-ONLY. You never fix, never merge, never push, never deploy, never comment, never file, never tick a box, never `@`, never write to
+Linear or GitHub (GET and query only), and nothing goes to Peter or Stuart or any other human. Nothing to demo; no deploy of any kind.
+
+NEVER run a push, the real pre-push hook, or preflight.sh inside the Secuura checkout or any of its worktrees. #1050 REQUIRES real preflight.sh runs:
+ONLY inside YOUR own clones, ALWAYS with GATEWAY_URL=http://127.0.0.1:<a closed loopback port you chose and proved closed, NOT on the Fetch bad-port
+list> exported (the script's default is localhost:6882, the shared stack slot, which you must never reach), and under the listener rules below.
+
+NEVER print a credential value, and never open, read or copy a secrets file into output. A script may read GH_TOKEN / LINEAR_API_KEY by NAME from
+/Volumes/DevMASTER/!CODING/Secuura/Blockchain/4_Credentials/.env, and AGENTMAIL_API_KEY by NAME from /Volumes/DevMASTER/WEDNESDAY/4_Credentials/.env,
+only for GitHub GET + by-SHA fetches into your clones, a Linear query and the one verdict mail. Count, never echo.
+
+NO shared docker stack, no :6882 / :7082 slot, no kintsugi, no demo, no az, NEVER the wallet mnemonic (KS-535 HOLD). No container, no real Redis, no
+real Postgres, no real trivy scan: job 04 runs ONLY under its suite's stubbed PATH (prove `command -v trivy` / `command -v docker` inside the harness
+resolve to the stubs, not to any host binary). Run `docker info` ONCE and print its rc on its own line (UP is NOT permission). LOOPBACK ONLY: every
+listener binds 127.0.0.1:0.
+LISTENERS — KS-1201: every in-hook preflight leaves 4 orphaned login_stub listeners (ppid 1); the seat SIGTERM'd 4 per push, 44 across this batch.
+Your real preflight runs will start them too. You END EVERY LISTENER YOUR RUNS START, BY PID: identify each by port + argv + cwd, SIGTERM that pid, never
+a pattern kill, never pid 1, and recount. Quote an lsof TCP LISTEN census (+ cwd and argv per node pid + the login_stub count) BEFORE your first run,
+after every suite run and every preflight run, and at close. A listener you leave behind is a finding against you.
+No Akto, no k6, no Playwright, no Schemathesis run — rule on each per PR with the measured reason (#1059 widens two published enums, which Schemathesis
+would now fuzz: say what that run would add and that it was not made).
+
+NOT-TESTED.written-first.md is written FIRST, BEFORE any run, and opens with these at full prominence, none softened into a pass:
+  - The seat's in-hook preflight on every one of the eleven pushes: 12/15; Legs 3/4/8 were skipped (no stack; NOT a pass). Three skipped legs are NOT
+    a pass, and your own preflight runs will skip the same three.
+  - GitHub mergeable_state reads "unstable" on all eleven: the retired Actions fire on pull_request and fail at ~6 s with 0 steps. No CI signal
+    exists for any head; everything is measured here or not at all.
+  - #1059: no live anchor, no live lifecycle event with a new verb, nothing on-chain, and Platform S's side of the contract is UNREAD from here.
+    Whether S agreed the vocabulary change (VOCABULARY.md "Changing the vocabulary" step 1, PS-138) is RELAYED from the tickets, not measured.
+  - #1060: no real Postgres. action_provenance rows are counted through the test's recordActionProvenance double; the DB row, its encryption and the
+    no-FK property (migrations/041) are READ, not measured.
+  - #1051: no real trivy, no real image set, no real audit run; job 04's exit is measured under stubs only.
+  - No live deployment, nothing served.
+
+THE SEAT'S THREE GATE FINDINGS — MEASURE, not conclude. Each is the seat's claim; report what you measured, then rule:
+  G1 (#1060): services/originate/src/routes/documents.ts:2327 at the head, inside /revoke, still reads "handleOnBehalfOf writes an action_provenance
+     row ..." and its PLACEMENT note ("Writing it here means a row exists only for a call that was going to succeed") describes the old position before
+     updateDocument; the function no longer exists. The seat: :121 is past tense and accurate; a declaration-or-call search reads 0 after, 2 at develop.
+     Measure the line and hunt the CLASS: census every comment at the head that names handleOnBehalfOf or describes where a provenance row is written
+     (drafter's lead: the KS-480 §6 docblock above checkOnBehalfOf, :60-66 at the head, still says the hook "appends the provenance row" and lists
+     lifecycle-events, which has been on the connector pattern since KS-566). Rule each: SHIPS-WITH, TICKET, or harmless.
+  G2 (all tiers): tamper line numbers move on the batch tree. The seat: #1060 deletes 12 lines at documents.ts:115-127, so KS-1267 Q1 (develop :2063)
+     sits at :2051 on the all-eleven tree (its `from` text also occurs at :2762 and :2955; the first is /version's) and KS-1202 DOCTYPEONLY / CASEFOLD
+     (develop :595) at :583. Measure every tamper of this batch on the all-eleven tree, not only these: the DRAFTER'S LEAD is that G2 is INCOMPLETE —
+     #1050 inserts 3 lines at preflight.sh:96-98, so KS-1209's T7 (develop preflight.sh:696) sits at :699 at #1050's head and on the batch tree, and the
+     seat's list does not name it. Re-plant every tamper by its `from` TEXT (asserting the anchor count), never by line number, and report the line
+     table develop -> head -> all-eleven for each.
+  G3 (#1051): job 04 now exits 1 on a failed scan; item 2 (09-aggregate-report.sh reading .error at 7 sites) is NOT in this PR. Measure what the rest
+     of the pipeline does with a job-04 run that exits 1 and writes an image carrying `error: "scan-failed"`: Blockchain/Testing/ci/orchestrate.sh
+     (does a non-zero Stage-1 job stop the run, or is it logged and continued?), jobs/09-aggregate-report.sh and ci/aggregate.ts (does a scan-failed
+     image read as ZERO findings, i.e. clean, in the aggregate?). If the aggregate still reads a failed image as clean, say whether #1051 alone is
+     SHIPS-WITH item 2 or safe to merge without it, and why.
+
+What Wednesday requires — per PR, each MEASURED, none inherited. For EVERY PR: tsc rc where TypeScript is touched, `bash -n` where bash is touched;
+eslint by rule and message with a firing control (TS files); `Refs KS-<n>` in the body, 0 closing phrases in title, body and every commit message
+(planted controls); attachmentsForURL(pull/N) = the ticket (#1059: BOTH KS-1172 and KS-1173), linkKind `contributes`; the ticket state; the diff name
+list (a TEST-ONLY PR changes NO product file — prove it from the name list and the paths, not from the body).
+
+THE NINE TIER-2 ITEMS — THE THROUGH-CODE WEIGHT. For each test-only PR (#1052-#1058): verify the new cell pins what it claims. Re-plant EACH named
+tamper from its run's input.json at the HEAD in your clone (anchor count asserted = 1 by `from` text, the planted line proven derived from exactly the
+develop line, restored by blob sha) and confirm it reds EXACTLY the declared cells, as AssertionErrors, with every named control green; then the same
+tamper at DEVELOP reds 0 (the gap the finding named). Count the cells each run (a red that never ran is not a red). Then ask the complement: a tamper
+the finding implies but the patch does not pin. Any tamper that stays green at the head is NOT-PINNED — list them.
+  #1052 KS-1267 Q1: tamper Q1 (the /version record moved above saveDocument, documents.ts:2063 develop / :2051 batch). Q3 (/transfer-custody, record
+     between the custody INSERT and the owner flip) is NOT in this PR (waits for KS-1263): re-plant Q3 anyway and report it NOT-PINNED if green.
+     ks1228 file 26 -> 27 cells; with #1060 on the tree, 27/27 (seat).
+  #1053 KS-1258 N44-1: tampers NPMSTART and COMPOSE (system-status.ts:592). The cell title claims ANY common shape; N44-1 named four (npm start, docker
+     compose up, systemctl start, pm2 start): plant all four, plus `yarn start` and `pnpm start`, and say which red. 3 -> 4 cells.
+  #1054 KS-1230 N45-5: tamper NULLREFUSED (admin.ts:1132). 6 -> 7 cells. Also plant a tamper that STORES null as [] (deny-all at a reader that reads
+     [] as a restriction) and say whether the cell sees it.
+  #1055 KS-1202 N-B: tampers DOCTYPEONLY and CASEFOLD (documents.ts:595 develop / :583 batch), each inside describe.each(PRINCIPALS): each must red
+     exactly its 3 runs. 19 -> 25 cells. The PR body's sentence "each reds exactly its 3 runs, reds 0 there" is garbled — read it against the numbers.
+  #1056 KS-1153 R-918-A: tampers RC (:147), MSG (:146), ARM (:145) on run-code-guards.sh. 15 -> 17 cells. Prove CASE 9 sits BEFORE the suite's tally
+     line at the head (the --recount placement), and that the suite's final tally counts CASE 9's two cells.
+  #1057 KS-1209 N41-3: tamper T7 (preflight.sh:696 develop, :699 with #1050). 4 -> 5 cells. Measure it WITHOUT #1050 (its own head) and WITH #1050
+     (the all-eleven tree): the suite builds its harness from preflight.sh's own lines, so #1050's three lines are inside what it extracts.
+  #1058 KS-1134: tamper Tg (the bare bash-4 `"${stage1_pids[@]}"` at Blockchain/Testing/ci/orchestrate.sh:119). 17 -> 18 cells. Run under /bin/bash 3.2
+     (the crash IS the red) and say whether the cell would still red under bash 5, i.e. whether it pins the fix or the shell.
+  #1050 KS-1261 (runtime, tier 2 — the pre-push gate everyone runs). PROVE THE VERDICT, WITH AND WITHOUT AN EXPORTED FAILED_LEGS / fail_total:
+     A. The new suite at develop: 2 of 5 red (assertions), 3 controls green; at the head 5/5. The five sibling suites that drive preflight.sh
+        (check_slot_credentials 32, no_tracked_credentials_root 15, pre_push_hook_base 28, preflight_deps 56, preflight_verdict_names_real_failures 4
+        at develop) unchanged at the head. Tamper: remove each of the two new lines in turn — each must red exactly its own cell.
+     B. The REAL script, in your own clones, GATEWAY_URL on your closed loopback port: at DEVELOP with FAILED_LEGS=7 exported the verdict must be
+        FAILED naming leg 7 and exit 1 (the defect, reproduced); at the HEAD with FAILED_LEGS=7, with fail_total=abc, with both, and with nothing
+        exported, the verdict line and exit code must be IDENTICAL to one another (quote them). Also at the head: a genuinely failing leg (plant one,
+        in your clone) with FAILED_LEGS=7 exported must still name ONLY the real leg. Minimum five real runs; run them in parallel clones if you
+        must, each listener census taken.
+     C. HUNT THE CLASS: census every variable preflight.sh READS that the environment could supply (every `${X:-`, every accumulator `X="$X ..."`,
+        every arithmetic operand), and say which are initialised before first read at the head. PREFLIGHT_STRICT_LEGS and GATEWAY_URL are meant to
+        come from the environment; name any other. Read .githooks/pre-push: does it export anything into preflight's environment?
+  #1051 KS-1136 item 1 (runtime, tier 2 — audit job 04). A FAILED PER-IMAGE SCAN EXITS 1:
+     A. The new suite: 2 of 3 red at develop, 3/3 at the head; the sibling container_trivy_image_filter.test.sh 4/4 before and after.
+     B. Under the suite's stubs, measure every trivy outcome: rc 1 no output; rc 1 partial JSON; rc 0 with empty output; rc 0 with non-JSON; rc 0
+        with `{}`; rc 0 with valid Results. State for each: the artefact row (error / counts / vulns), the job's exit code, and whether the clean
+        "across N image(s)" summary printed. Then one image failing among three: the other two rows intact, exit 1.
+     C. The exit path: `raw="$(trivy ...)"; trc=$?` — prove trc is trivy's status (not an assignment's), and that `set -uo pipefail` plus the jq pipe
+        cannot turn a trivy failure into a clean row. What happens if the caller's environment carries TRIVY_EXIT_CODE (or trivy.yaml sets
+        exit-code): does an image WITH findings now read as scan-failed? Measure with the stub honouring it.
+     D. G3 above.
+
+THE TWO TIER-1 ITEMS — THE FULL WEIGHT.
+#1059 KS-1172+KS-1173 (TIER 1) — note / certified / verified accepted on BOTH paths:
+  A. END TO END, on the REAL routers in-process (the prior reports' originate harness; anchoring's own app or route with its schema, loopback
+     stubs you control): POST /api/documents/:id/lifecycle-events with action note, certified, verified -> 201, a lifecycle row with that action, ONE
+     connector provenance row `lifecycle:<verb>`, and the emitter called with that eventType; an out-of-vocabulary verb (e.g. `attested`, `Certified`,
+     ` note`, `certify`, `declare`) -> 400 with nothing written. Anchoring flat path: POST /api/anchors with metadata.documentType each new verb ->
+     accepted and what is stored/anchored; `attested` -> 400. Red-first: each new verb 400 at develop on both paths.
+  B. TRANSITIONAL `certify` UNTOUCHED: `certify` still accepted on the flat path (TRANSITIONAL_LIFECYCLE_VERBS unchanged at the head), still NOT in
+     LIFECYCLE_VERBS, still NOT accepted on /lifecycle-events; and a simulated retirement (empty the tuple, in your clone) must not remove
+     `certified`. Name every place that matches `certif` by prefix or regex at the head (drafter: none found in services by a quoted-literal search;
+     confirm with your own instrument and a positive control).
+  C. THE YAML MATCHES THE GENERATOR: in your clone at the head AND on the all-eleven tree, `npm run generate-openapi -- --check` rc 0 and
+     `npm run check:openapi` rc 0; control: one enum line removed from the yaml -> --check fails; and at develop with #1059's TS but WITHOUT commit 3
+     -> --check fails (the seat's control, re-derived). Prove commit 3 touches ONLY the yaml and is byte-identical to the generator's output.
+  D. NO OTHER VOCABULARY COPY. The seat's evidence is `git grep -F share-attach-consent` -> 0 files outside the six. That instrument cannot see a copy
+     that never listed share-attach-consent. DRAFTER'S LEAD (READ ONLY): services/originate/src/originate.openapi.ts:1849-1853, the published
+     /lifecycle-events DESCRIPTION, enumerates the accepted verbs in prose and lists neither share-attach-consent, protect/unprotect nor the three new
+     verbs — a stale prose copy in the published spec. Census every copy by a different instrument (every file naming >= 3 of the verbs, docs,
+     frontends, services/mcp-server, packages/shared, migrations — 037 declares action VARCHAR(50) with no CHECK, confirm) and rule each.
+  E. WHAT ANCHORING A NEW VERB COMMITS (the immutable-record contract). Read, then measure where you can: (1) which path puts the verb ON-CHAIN —
+     the drafter's read is that originate's own hop (emitLifecycleAnchor, documents.ts ~:1260) sends documentId + contentHash + network and NO
+     documentType, so only Platform S's flat-anchor path writes the verb into anchored metadata: confirm or refute, and name the file and line where
+     anchoring writes metadata.documentType into the Cardano metadata; (2) once a verb is anchored it can never be renamed or retired — KS-661's
+     certify -> declare needed a transitional alias for exactly this reason: say what a later rename of `certified` would cost, and whether
+     `certified` beside the transitional `certify` is a near-homograph an S author or a reader could confuse; (3) every READER of anchored metadata
+     (GET /api/anchors/{id}, verification, explorers, analytics) — does any enumerate verbs and fail or mislabel an unknown one? (4) PII: `note`
+     carries noteSha256 / noteLength only — a SHA-256 of a SHORT plain-text note is a brute-forceable commitment; where does that payload go (the
+     lifecycle row; is any of it anchored?), and is it salted/keyed? The seat's body says lifecycle payload is "stored as unencrypted JSONB";
+     originate.openapi.ts's payload description says "KS-537: payloads are encrypted at rest" — they contradict; measure which is true at the head.
+  F. NAME COLLISIONS (drafter's lead, READ ONLY): `certified` / `verified` are also status and event names elsewhere — billing
+     chargeable-events.ts:293-296 (status transitions -> charge events), analytics metricsCollector.ts:278 (`action === 'certified'`), webhookEvents in
+     api-gateway admin.ts, the m365 events default. Census whether ANY consumer can receive a lifecycle action or an anchored documentType named
+     `certified` / `verified` (money: a lifecycle `certified` must never become a charge or a certification count). Evidence class on each.
+  G. SUITES: originate 767 -> 768 (seat, on #1059's head), anchoring 238 -> 242 with the same ONE pre-existing red on both sides (threadTokenMint
+     emulator round-trip, "Could not serialize the data: Unsupported type", BACKLOG.md:182 — confirm it is not an assertion and not new), api-gateway
+     613 (it reads the spec). tsc rc 0 in originate and anchoring; eslint 0/0 on the four TS files. The pin-cell titles commit changes titles only
+     (no assertion) — prove it from the diff.
+#1060 KS-1264 (TIER 1) — /revoke records its provenance row only AFTER updateDocument:
+  A. THE ROW LAW, measured on the REAL documentsRouter (the ks1228 / ks1264 harness, rows counted at one tick AND again at +250 ms): a successful
+     connector revoke with onBehalfOf writes EXACTLY ONE row (action `revoke`, the resolved user); a JWT revoke writes NONE; each refusal —
+     404 NOT_FOUND (getDocument null, and the "does not exist" throw), 403 not-owner, 400 already-revoked, a bad onBehalfOf shape 400, a cross-org
+     onBehalfOf 403 — writes NONE and never calls updateDocument; updateDocument throws -> 500, NONE (the red cell); emitLifecycleAnchor failing
+     (best-effort) -> 200 with ONE row. Develop vs head for every row, in a table.
+  B. THE CHECK STILL REFUSES BEFORE ANY WRITE: checkOnBehalfOf sits exactly where handleOnBehalfOf's check was (after the 404 / 403 / already-revoked
+     400), so a bad onBehalfOf on a revocable document refuses with no updateDocument call and no row; and a bad onBehalfOf on a NON-revocable
+     document still answers the earlier refusal (precedence unchanged, develop = head). Tamper: move the check below updateDocument — must red.
+     Tamper: move recordOnBehalfOf back above updateDocument — must red exactly the 🔴 cell. Tamper: drop the record call — which cell reds?
+     If none, NOT-PINNED.
+  C. COMPARE WITH THE MERGED KS-1228 SPLIT on the other three handlers at the head: /version (record after saveDocument), /share (after the
+     createShare loop), /transfer-custody (after the custody event AND the owner flip). Table: handler / check line / action line / record line /
+     emitLifecycleAnchor line. Is /revoke's record placed the same way relative to its action AND to emitLifecycleAnchor? Is the fire-and-forget count
+     sound — recordOnBehalfOf is synchronous up to recordActionProvenance's promise (planted delayed record as the control)?
+  D. handleOnBehalfOf DELETED: 0 declarations and 0 calls at the head (and 1 + 1 at develop — the seat's control), tsc rc 0 with noUnusedLocals; no
+     other file imported it. G1 above.
+  E. REPLAY / CONCURRENCY: two concurrent revokes of the same document (both pass the already-revoked read before either update): rows and updates at
+     develop and head. A double-submit: second answer and row count. Pre-existing or not, name it.
+  F. SUITES: originate 767 -> 770 (seat, on #1060's head), the new file 1 of 3 red at develop (assertion), 3/3 at the head; the ks1228 file 26/26 on
+     #1060's head and 27/27 on the all-eleven tree (with #1052's cell). tsc rc 0; eslint 0/0 on both files.
+
+SUITES, at each head AND on the ALL-ELEVEN tree (cb7860d61), default ceilings AND 60 s, load beside each: originate jest (seat: 66 files / 778 on the
+batch tree = 767 + 1 + 6 + 1 + 3), api-gateway vitest (65 / 615 = 613 + 1 + 1), anchoring vitest (16 / 242, 1 pre-existing red), shared vitest,
+tsc x3, check:openapi, and run-shell-suites.sh (38 = 36 + the two new suites). Measure each and name any interaction; the seat's all-nine tree
+c57c0b786 was built but never measured — say whether that matters.
+
+CARRY-FORWARD per PR: CLOSED / STILL OPEN / NEW per finding, each SHIPS-WITH or TICKET; plus KS-1201 (the orphaned listeners) as a standing item;
+plus the source findings above (N43-1, N43-3, N44-1, N45-5, N41-3, N-B, R-918-A) — CLOSED by this batch or STILL OPEN (N43-1's Q3 half stays open
+by design); plus the seat's slips S1-S4 (relayed; S1 = its own writes inside KS-1261's push window, ruled carry-on by Wednesday at 20:39:03Z —
+read the pushq-KS-1261 snapshot and say whether any of those writes could have reached #1050's pushed head). Report the checkout bounds and NOT
+TESTED at equal prominence. Also: the PR bodies of #1050-#1058 say "One of ten" in a batch of eleven — Polish, say so once.
+
+LEAD WITH #1060 A-C and #1059 D-F, then G2, then #1050 B, then #1051 B + G3.
+
+Hygiene:
+- /bin/bash here is 3.2: write YOUR runners in Python (the repo's bash suites are run with /bin/bash, as the repo runs them).
+- zsh: no PIPESTATUS, no timeout, `set -- $var` does not word-split, write `"${VAR}:path"`, never begin a line with `=====`.
+- Your tool shell's grep may be a function: use /usr/bin/grep -i with a same-file positive control.
+- File lists: split git output on NEWLINES, never on whitespace — some repo paths contain spaces.
+- `git grep -c` prints nothing for a zero (silence is unread, not 0); `rev-parse` of a missing path echoes its argument (use cat-file -e).
+- Never `cd` in your own tool calls; absolute paths; git write verbs only inside script files.
+- stderr is never discarded. Clocks from `date`, never estimated. rc on its own line, never `echo "$(date) rc=$?"` (the seat's S2). Every scripted
+  edit asserts its anchor count = 1 and a marker; a tamper that did not land is not a green.
+- Quote at start, mid and close as THREE timestamped readings: the Secuura checkout's porcelain count, .git/config sha256, for-each-ref count,
+  .git/worktrees count, the checkout branch, origin develop SHA, all eleven refs/pull/N/head, api-gateway's node_modules/.vite reading, originate's
+  jest cache reading, and the login_stub listener count.
+- Never `rm`: fresh mktemp -d per attempt; quarantine by MOVE. No container is created; never touch a secuura-* container.
+Do no memory maintenance of your own project's memory store inside this session.
+
+Report FOUND / TESTED / HOW, with controls, into
+/Volumes/DevMASTER/!CODING/Testing Agent MAIN/projects/secuura/reports/2026-09-19-batch1050-1060-tier1-r1/
+NOT-TESTED.written-first.md is written FIRST, BEFORE any run (its opening items are fixed above); then report.md and evidence/, with ONE SECTION PER PR,
+a G1 / G2 / G3 section, and a NOT-PINNED section: every tamper that stayed green at a head, as a list of `PR | ticket | tamper id or your name |
+file:line at the head | from -> to | the cell it should have red` (this list feeds the local model's next briefs, so make each row self-contained).
+Every finding carries its PR, evidence class (MEASURED AT RUNTIME / PROBED / READ ONLY / RELAYED), severity, target (PR or TICKET), SHIPS-WITH or
+TICKET, disposition and oracle. Name every prediction slip against its predictor (the READY mail, the seat, the PR bodies, Wednesday's source reads,
+the checker, the drafter — including the drafter's leads above, each CONFIRMED or REFUTED).
+Client-facing communication = ticket comments only, and not from you. Never delete; cleanup means quarantine.
+Verdict: ELEVEN lines, one per PR, each GO, GO WITH FINDINGS, or NO GO, each on its head as the delta over develop AND on its merged tree (name the
+then-current develop and each merged-tree OID) AND on the all-eleven tree. Round 1 of 2: a NO GO goes back to the seat for one fix round, for THAT PR
+only. Then the MERGE ORDER, one line.
+Give the merge seat ONE MERGE ADDENDUM line PER PR: "#N KS-n on WEDNESDAY'S signed GO naming <head>: squash onto develop <then-current> (merged tree
+<OID>); attaches to KS-n only, linkKind contributes, no closes; KS-n <state on merge + reason>; equality targets: <each file's head blob>; suites <n/n at
+develop -> n/n at head -> n/n merged, runner + version>; SHIPS-WITH: <verbatim>; dispositions: <per finding>; NEW: <yours>".
+Equality targets are each file's blob at its head — read them yourself (git rev-parse <head>:<path> in your clone) and quote them in full.
+
+MAIL YOUR VERDICT to wednesday-agent@agentmail.to when the pass is complete. Your pane holds ~19 lines of alternate screen with no scrollback, so a
+verdict that stays in the pane is one pane-close from being lost -- this is not a formality, it is the only durable copy; the verdict MAIL is the END
+STATE and the wait signal. Send it FROM coagent@agentmail.to. Subject, EXACTLY this prefix, then the eleven verdicts:
+[QA -> Wednesday] BATCH GATE #1050-#1060 (eleven PRs; tier 1 = #1059 KS-1172+KS-1173, #1060 KS-1264) — #1050 <v> · #1051 <v> · #1052 <v> · #1053 <v> · #1054 <v> · #1055 <v> · #1056 <v> · #1057 <v> · #1058 <v> · #1059 <v> · #1060 <v>
+The body carries the ELEVEN lines, one per PR, then the merge order, the NOT-PINNED list, G1 / G2 / G3 as measured, and the eleven MERGE ADDENDUM lines.
+- POST https://api.agentmail.to/v0/inboxes/coagent@agentmail.to/messages/send with JSON {"to": ["wednesday-agent@agentmail.to"], "subject": "...",
+  "text": "..."} and Authorization: Bearer $AGENTMAIL_API_KEY, the key by NAME from Wednesday's .env, never echoed.
+- Build the body from a template file with no shell interpolation and assert the backtick spans survived.
+- Confirm the API answered 2xx and quote the message id in your final pane line. Timestamps in the mail come from `date`, never estimated.
+The MAIL is the end state.
