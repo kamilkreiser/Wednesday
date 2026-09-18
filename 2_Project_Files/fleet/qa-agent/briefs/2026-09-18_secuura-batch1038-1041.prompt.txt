@@ -1,0 +1,194 @@
+ultrathink
+
+You are the fleet QA agent running ONE BATCHED ROUND 1 gate, at the TIER 1 floor, over FOUR file-disjoint Secuura/Blockchain PRs (Seat A 10th
+successor). Each is a local-model (ornith:35b) fix, checker-graded, source-read by Wednesday, raised verbatim. They are batched under Kam's 09:22 rule
+(minimise gate duplication; batch disjoint changes). They are FOUR PRs, not one: you give FOUR verdicts, one per head, and one PR failing must not block
+or colour the other three. A VERDICT IS VALID ONLY AT ITS HEAD: if any of the four refs/pull/N/head moves under you, STOP grading THAT PR and say so; the
+others continue.
+
+  #1038 KS-1233 head 2122b4af748e3395b7e7b76fd6542c1988674de8  services/api-gateway/src/services/redis.ts +3/-1, new ks1233 test +56
+  #1039 KS-1248 head 6faaacf6256984ac501fa86c3efa3b5efa5faea5  services/api-gateway/src/routes/system-status.ts +18/-1, new ks1248 test +84
+  #1040 KS-1125 head b01ffba0a59457910fae92406c71eb5170270bb6  new ks1125 test +104 (TEST-ONLY; product untouched)
+  #1041 KS-1209 head 900344f398c4c59fdf9663a36a646f336e0f60b2  Blockchain/Dev/scripts/preflight/preflight.sh +20/-0, new bash suite +74
+
+TIER PER PR (the drafter's ruling, against Kam's 2026-09-05 tier grant; overturn any with a measured reason, and say so first):
+  #1038 KS-1233: TIER 1 — the connector allow-list lives in platform-settings; the defect made it fail OPEN. An auth-door policy, runtime product code.
+  #1039 KS-1248: TIER 2 — operator advice text and severity on /system/status troubleshooting: a follow-up on a route the #1037 tier 1 gate measured today.
+  #1040 KS-1125: TIER 2 — test-only; the product file is untouched.
+  #1041 KS-1209: TIER 1 — it changes the EXIT DECISION of the pre-push gate every developer runs (Peter and Stuart included), and that decision sits
+    above every security leg (secret scan, SCA, the credential guards). A slip that turned a failing run into a pass would silently disable them all.
+  One session carries all four at the TIER 1 floor: tier is a floor per PR, the verdicts are per PR, and the two suites (api-gateway vitest, the
+  preflight bash suites) share nothing that needs a split. Time-box 90 minutes.
+
+MERGE AUTHORITY for all four: WEDNESDAY'S signed GO naming each head, under Kam's TESTED grant. There is no reviewer hold on these tickets.
+
+THE SHAPE (drafter-measured 13:30:10–13:40:33 AEST 2026-09-18; the launcher re-asserts it at every run):
+  - Each PR is ONE commit whose parent IS 207716440e2a6282b90ed2a118614d9cf98bee1e (#1037). merge_base = 207716440, ahead 1, files 2 / 2 / 1 / 2.
+    Pairwise file overlap among the four: 0 (7 distinct files).
+  - EVERY PR FILE IS BYTE-IDENTICAL TO ITS CANONICAL PATCH. The drafter applied each local-model run's out.md.checker/section_N.diff with its
+    section_N.opts (--directory=Blockchain/Dev; --recount --ignore-whitespace where the checker used them) onto develop in a scratch index: all 7 blobs
+    equal the PR heads' blobs, and no canonical path is missing from a PR. The READY_KS files' embedded "verbatim" diffs are NOT the patch — the
+    CANONICAL PATCH header in each READY_KS file names the real one. Re-derive this yourself.
+  - DEVELOP MOVED WHILE THIS GATE WAS DRAFTED: #922 (KS-679) landed at 13:39 AEST as 570ea002d7d3d171a4da2f95ad0d600a2fe5f55d. The drafter
+    measured it: tree a1b4b6536 on parent 207716440 — EXACTLY the #922 squash the drafter had simulated — and its five files (contract.mjs, the
+    ks256 test, fixtures.ts, secuura-api.yaml, anchoring.openapi.ts) overlap NONE of the four PRs' files. The launcher is RE-PINNED to 570ea002d.
+    Each PR still merges CLEAN over it (read-only merge-tree, 03:40:33Z): #1038 0c67581f1, #1039 883fb942d, #1040 027a366c5, #1041 f25be2d11,
+    0 conflicts each; all four together dd54cab00. Over 207716440 alone each merged tree is the PR's own head tree (a fast-forward); all four d69d10e35.
+    So the PR heads sit ONE develop-move behind: grade each at its head AND on its merged tree over the then-current develop, and name each OID.
+    Re-read develop at start, mid and close; if it has moved again, judge the move by content and name it.
+
+Read your source document FIRST and in full — the seat's READY mail, captured verbatim by message id from wednesday-agent@ at 03:31:18Z:
+/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/gatesets/2026-09-18_gate1038to1041/mail_batch4_ready.md
+Then:
+- Wednesday's source reads, one per PR (each carries its CANONICAL PATCH header):
+  /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/READY_KS-1233_ornith35b-q4_BRIEFED-REDIS-NOTTL-PASS-7of7_2026-09-18.diff.md
+  /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/READY_KS-1248_ornith35b-q4_BRIEFED-DEGRADEDADVICE-PASS-7of7-ON-RETRY_2026-09-18.diff.md
+  /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/READY_KS-1125_ornith35b-q4_BRIEFED-TESTONLY-DIRECTCALL-PASS-7of7-ON-RETRY_2026-09-18.diff.md
+  /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/READY_KS-1209_ornith35b-q4_BRIEFED-BASHPATCH-FAILCLOSED-PASS-7of7_2026-09-18.diff.md
+- the PRIOR REPORT — the #1037 tier 1 gate over the same api-gateway service and the same /system/status route #1039 changes; reuse its real-app harness,
+  farm recipe and listener discipline:
+  /Volumes/DevMASTER/!CODING/Testing Agent MAIN/projects/secuura/reports/2026-09-18-ks1101-1037-f87506f47-tier1-r1/
+- the QA charter: /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/QA_AGENT_CHARTER.md
+- the seat's raise logs, READ-ONLY: /Volumes/DevMASTER/!CODING/Secuura/Blockchain/5_Project_History/2026-09-18_seatA-10th/raise/
+
+Never enter any seat worktree (none holds these four branches; the checkout's local branch refs of these names are NOT to be used — pin by SHA from origin),
+and never write in the seat's raise/ directory.
+Repo:    /Volumes/DevMASTER/!CODING/Secuura/Blockchain/2_Project_Files  (READ-ONLY)
+  - git clone --shared --no-checkout by SHA into your own fresh mktemp -d, ONE clone per tree you run (four heads, develop, the merged trees); git write
+    verbs there only, from a script file. Never merge-tree --write-tree, worktree, fetch, checkout or git apply in the checkout. A new develop is fetched
+    by SHA into YOUR clone over https, GH_TOKEN via a GIT_ASKPASS helper reading an env var, never on a command line. Never run vitest in the checkout.
+  - Record the checkout's porcelain count and .git/worktrees count before and after: they must be equal.
+Farm node_modules per ENTRY in each clone (the #1009 gate's R-6): Blockchain/Dev/node_modules, services/api-gateway/node_modules and
+  packages/shared/node_modules, each PER ENTRY, .vite/.vitest/.cache skipped, @secuura/* relinked into your tree, shared dist built per tree. NEVER link a
+  node_modules tree wholesale. VITEST = develop's lock, 4.1.11 (checkout install 4.1.10): the side install and farm pattern of the #1037 gate. Print the
+  version beside every count. The bash suites need no node_modules unless a leg you run calls node: then farm per entry the same way.
+
+You are FINDINGS-ONLY. You never fix, never merge, never push, never deploy, never comment, never file, never tick a box, never `@`, never write to
+Linear or GitHub, and nothing goes to Peter or Stuart.
+
+NEVER run a push, the real pre-push hook, or preflight.sh inside the Secuura checkout or any of its worktrees. For #1041 you MAY run preflight.sh inside
+YOUR OWN clone, invoked exactly as .githooks/pre-push:278 invokes it (`bash scripts/preflight/preflight.sh` from Blockchain/Dev of your tree). You never
+execute .githooks/pre-push itself.
+
+NEVER print a credential value, and never open, read or copy a secrets file into output. A script may read GH_TOKEN / LINEAR_API_KEY by NAME from
+/Volumes/DevMASTER/!CODING/Secuura/Blockchain/4_Credentials/.env, and AGENTMAIL_API_KEY by NAME from /Volumes/DevMASTER/WEDNESDAY/4_Credentials/.env,
+only for GitHub GET + by-SHA fetches into your clones, a Linear query and the one verdict mail. Count, never echo.
+
+NO shared docker stack, no :6882 / :7082 slot, no kintsugi, no demo, no az, NEVER the wallet mnemonic (KS-535 HOLD). No container. Run `docker info`
+ONCE and print its rc on its own line (UP is NOT permission). LOOPBACK ONLY: every listener binds 127.0.0.1:0.
+LISTENERS — KS-1201 BITES HERE: every in-hook preflight leaves 4 orphaned login_stub.mjs listeners (ppid 1); the seat SIGTERM'd 24 today. If any leg you
+run starts a listener, you END EVERY LISTENER YOUR RUNS START, BY PID: identify each by port + argv + cwd, SIGTERM that pid, never a pattern kill, never
+pid 1, and recount. Quote an lsof TCP LISTEN census (+ cwd and argv per node pid + the login_stub.mjs count) BEFORE your first run, after EVERY preflight
+invocation, and at close. A listener you leave behind is a finding against you.
+No Akto, no k6, no Playwright, no Schemathesis run — rule on each per PR with the measured reason.
+
+NOT-TESTED.written-first.md is written FIRST, BEFORE any run, and opens with these at full prominence, none softened into a pass:
+  - The seat's in-hook preflight on every one of these pushes: "12/15, legs 3/4/8 SKIPPED (no stack; not a pass)". Three skipped legs are NOT a pass.
+  - #1038: no real Redis. There is no container in this gate, so Redis TTL semantics are measured only through the test's client double and by READ;
+    say exactly what the double can and cannot show about SET vs SETEX vs an existing key's TTL.
+  - No live deployment, nothing served; the demo and kintsugi Redis contents are unread.
+
+What Wednesday requires — per PR, each MEASURED, none inherited. For EVERY PR: red-first then green AT THE PR HEAD (the seat measured each at develop
+207716440 — re-measure at the head and, for each, name which cell reds with the product hunk withdrawn and that it is an AssertionError with a green
+control); tsc rc; eslint by rule and message with a firing control; `Refs KS-<n>` in the body, 0 closing phrases in title, body and commit (planted
+controls), attachmentsForURL(pull/N) = the ticket, linkKind `contributes` (the seat read all four back as contributes; re-read), and the ticket state.
+
+#1038 KS-1233 (TIER 1) — platform-settings in Redis mode is written with SET, no TTL:
+  A. The write path. redis.ts setNotificationSettings: `platform-settings` -> set() (no expiry); every other key still setex(TTL.privacy). Prove a
+     non-platform key still gets its TTL (the control) and the platform key gets none.
+  B. THE DEPLOY CAVEAT (the PR body's "Deploy caveat" section; the seat's mail calls it the KS-1233 deploy caveat) — Wednesday's source-read concern: the fix covers the WRITE path only. A Redis that already holds
+     `platform-settings` WITH a TTL keeps it, so on an existing deployment the key expires ONCE after this ships and the connector allow-list fails OPEN
+     until the next admin write. The drafter found NO PERSIST and NO startup re-write anywhere in api-gateway src (git grep, both 0 outside tests).
+     GRADE IT: a deploy-time action (a one-time `PERSIST` on the key, or a startup re-write) as a SHIPS-WITH condition, or a TICKET. Say which, why, and
+     what the deploy seat must run, in one line.
+  C. WIDER THAN THE ALLOW-LIST: `platform-settings` is READ at routes/admin.ts:1110, :1125, :1135, routes/verification.ts:1214, :1260 and
+     services/health.ts:47 (drafter, at the head). Census each reader: what does a MISSING key mean there — fail open, fail closed, or a default?
+  D. A LEAD THE DRAFTER FOUND, measure it: admin.ts:1125-1127 is a read-merge-write onto `existing || {}`. After the key has expired once, the next admin
+     write of ONE field saves a PARTIAL settings object — and after this PR that partial object persists with NO TTL, where before it expired in 24 h.
+     Does this PR turn a transient loss into a permanent one? If yes, that is a finding on this PR (or a precondition for B's deploy action).
+
+#1039 KS-1248 (TIER 2) — /system/status troubleshooting for a DEGRADED required service:
+  A. A degraded REQUIRED service gets severity `warning`, a read-only `curl -s <url><healthPath>` and "Do not restart it" — no restart command.
+  B. THE CONTROL: a DOWN required service must STILL get `critical` and a restart command. Unhealthy / unknown statuses: say what each gets now vs develop.
+  C. Degraded OPTIONAL services go through the unchanged optional branch: prove the output is identical to develop for them.
+  D. On the REAL app (the #1037 harness: index.ts in-process, loopback stubs you control), GET /system/status and /api/system/status with a degraded
+     required service: the troubleshooting array, at the head vs develop. `service.url` + `service.healthPath` must never render `undefined`.
+
+#1040 KS-1125 (TIER 2) — test-only, the startup-migrations tenant-failure guard gets a cell:
+  A. The product file is untouched (blob ed3e52142 at develop and at the head).
+  B. The checker's tamper: startup-migrations.ts:1189 `if (outcome.failed > 0) {` -> `if (false) {` (the KS-1062 defect restored; the drafter confirmed
+     the anchor is unique, count 1, at :1189 at develop) must red the ghost cell, control green; restore by blob sha.
+  C. THE LEAK QUESTION: the test overrides `Module._resolveFilename` (saved at :32, replaced in beforeAll :73, restored in afterAll :88), "scoped to the
+     product". VERIFY IT CANNOT LEAK into other files in the same vitest worker: run the WHOLE api-gateway suite at the head (default pool AND a
+     single-worker / no-isolate run), order the ks1125 file first and last, and plant a tamper that skips the afterAll restore — that plant must red
+     something else or you must say that NOTHING would see a leak.
+
+#1041 KS-1209 (TIER 1) — preflight's closing verdict names legs that failed for REAL:
+  A. FAIL-CLOSED BY CONSTRUCTION: `fail_total` is folded back (`fail=$(( ${fail_total:-0} | fail ))`) before the original verdict, and the new block can
+     only ADD an earlier `exit 1`, never turn a failing run into a pass. Prove it by reading every path to exit, AND by TAMPERS: e.g. drop the final fold,
+     drop the fold in step(), invert the new block's test — each must red a cell or be shown harmless with its consequence written out.
+  B. THE ONE-READ PREMISE: the per-leg `fail=0` reset in step() is safe only if nothing mid-run READS `$fail`. Drafter's count: at develop exactly ONE read
+     (:688) and 26 assignments; at the head FOUR reads — :154 (_leg_concluded, new), :168 (the fold in step, new), :693 (the final fold, new), :708 (the
+     original verdict) — and 28 assignments. Re-count at the head yourself, with a planted read as the control, and prove each new read is inside the fold
+     machinery only. Check also: any leg that sets fail inside a subshell or pipeline (never propagated — pre-existing, but name it), and any non-numeric
+     value `fail` can take (the arithmetic fold would then error).
+  C. THE VERDICT WORDING CHANGED, AND THE ORIGINAL SUMMARY IS NOW SKIPPED ON A REAL FAILURE: the new block prints "PREFLIGHT FAILED on leg(s)..." and
+     exits BEFORE the original verdict lines (e.g. "PREFLIGHT FAILED — fix the above before pushing. (N/15 legs ran)" and the "legs ran" summaries).
+     CENSUS EVERY in-repo grepper of the old verdict text — hooks, CI, runbooks, other suites. Drafter: .githooks/pre-push:278 invokes preflight.sh and
+     acts on its exit code; .github workflows only mention preflight in comments; the only suite grepper is preflight_deps.test.sh:427, which keys on
+     `PREFLIGHT PASSED\|Nothing failed` (success texts); 0 markdown runbooks carry a verdict string; plus the new suite itself. Re-derive it repo-wide
+     (not only Blockchain/Dev) with a positive control, and confirm none breaks.
+  D. THE REAL PROCESS: run the real preflight.sh in YOUR clone at the head with legs forced to fail (a planted failing leg), with only the leg-1
+     no-workspace env_fail, and with nothing failing: the exit code and the verdict line of each, head vs develop. Only the wording may differ, never an
+     exit code that goes 1 -> 0. Then the KS-1201 listener census.
+  E. SUITES: the new suite 4/4 (red-first 3/4 at develop, the leg-7 case); and the sibling suites at the head AND merged: check_slot_credentials (seat
+     32/32), no_tracked_credentials_root (15/15), pre_push_hook_base (28/28), preflight_deps (56/56); and leg 14's shell-suite count (seat: 36/36 on the
+     branch, 35 at develop). `bash -n` rc 0. The new suite is mode 100644 at the head (drafter): say whether ROOTS discovery runs it regardless.
+
+SUITES FOR THE THREE api-gateway PRs, at each head AND merged over the then-current develop, default ceilings AND 60 s, load beside each, vitest 4.1.11:
+  the seat measured api-gateway 596/596 (60 files) at develop, 599/599 (61) at #1038 and #1039, 598/598 (61) at #1040. Run all four together too (the
+  drafter's combined tree): 604 tests / 63 files is the arithmetic expectation — measure it and name any interaction.
+
+CARRY-FORWARD per PR: CLOSED / STILL OPEN / NEW per finding, each SHIPS-WITH or TICKET; plus KS-1201 (the orphaned listeners) as a standing item; plus
+the seat's question on #1040 ("Refs" vs "Closes KS-1125" for a test-only ticket — rule on it). Report the checkout bounds and NOT TESTED at equal
+prominence.
+
+LEAD WITH #1041 A-C and #1038 B-D, then #1039 B and #1040 C.
+
+Hygiene:
+- /bin/bash here is 3.2: write runners in Python. preflight.sh itself is `#!/usr/bin/env bash`: say which bash ran it (version) beside every exit code.
+- zsh: no PIPESTATUS, no timeout, `set -- $var` does not word-split, write `"${VAR}:path"`, never begin a line with `=====`.
+- Your tool shell's grep may be a function: use /usr/bin/grep -i with a same-file positive control.
+- File lists: split git output on NEWLINES, never on whitespace — some repo paths contain spaces.
+- `git grep -c` prints nothing for a zero (silence is unread, not 0); `rev-parse` of a missing path echoes its argument (use cat-file -e).
+- Never `cd` in your own tool calls; absolute paths; git write verbs only inside script files.
+- stderr is never discarded. Clocks from `date`, never estimated. Every scripted edit asserts its anchor count = 1 and a marker.
+- Quote at start, mid and close as THREE timestamped readings: the Secuura checkout's porcelain count, .git/config sha256, for-each-ref count,
+  .git/worktrees count, origin develop SHA, all four refs/pull/N/head, the checkout branch, api-gateway's node_modules/.vite reading, and the
+  login_stub.mjs listener count.
+- Never `rm`: fresh mktemp -d per attempt; quarantine by MOVE. No container is created; never touch a secuura-* container.
+Do no memory maintenance of your own project's memory store inside this session.
+
+Report FOUND / TESTED / HOW, with controls, into
+/Volumes/DevMASTER/!CODING/Testing Agent MAIN/projects/secuura/reports/2026-09-18-batch1038-1041-tier1-r1/
+NOT-TESTED.written-first.md is written FIRST, BEFORE any run (its opening items are fixed above); then report.md and evidence/, with ONE SECTION PER PR.
+Every finding carries its PR, evidence class (MEASURED AT RUNTIME / PROBED / READ ONLY / RELAYED), severity, target (PR or TICKET), SHIPS-WITH or TICKET,
+disposition and oracle. Name every prediction slip against its predictor (the READY mail, the seat, Wednesday's source reads, the checker, the drafter).
+Client-facing communication = ticket comments only, and not from you. Never delete; cleanup means quarantine.
+Verdict: FOUR lines, one per PR, each GO, GO WITH FINDINGS, or NO GO, each on its head as the delta over develop AND on its merged tree (name the
+then-current develop and each merged-tree OID). Round 1 of 2: a NO GO goes back to the seat for one fix round, for THAT PR only.
+Give the merge seat ONE MERGE ADDENDUM line PER PR: "#N KS-n on WEDNESDAY'S signed GO naming <head>: squash onto develop <then-current> (merged tree
+<OID>); attaches to KS-n only, linkKind contributes, no closes; KS-n <state on merge + reason>; equality targets: <each file's head blob>; suites <n/n at
+develop -> n/n at head -> n/n merged, vitest version>; SHIPS-WITH: <e.g. #1038's deploy action, verbatim>; dispositions: <per finding>; NEW: <yours>".
+Equality targets from the drafter: #1038 redis.ts fbb74be7c / ks1233 test a887e2c06; #1039 system-status.ts 0b0a4af82 / ks1248 test 6dbf8f1e0;
+#1040 ks1125 test cc728138f; #1041 preflight.sh f24fa9631 / the new suite a3d5efe68.
+
+MAIL YOUR VERDICT to wednesday-agent@agentmail.to when the pass is complete. Your pane holds ~19 lines of alternate screen with no scrollback, so a
+verdict that stays in the pane is one pane-close from being lost -- this is not a formality, it is the only durable copy; the verdict MAIL is the END
+STATE and the wait signal. Send it FROM coagent@agentmail.to. Subject, EXACTLY this prefix, then the four verdicts:
+[QA -> Wednesday] BATCH GATE #1038 #1039 #1040 #1041 (KS-1233 KS-1248 KS-1125 KS-1209) — #1038 <v> · #1039 <v> · #1040 <v> · #1041 <v>
+- POST https://api.agentmail.to/v0/inboxes/coagent@agentmail.to/messages/send with JSON {"to": ["wednesday-agent@agentmail.to"], "subject": "...",
+  "text": "..."} and Authorization: Bearer $AGENTMAIL_API_KEY, the key by NAME from Wednesday's .env, never echoed.
+- Build the body from a template file with no shell interpolation and assert the backtick spans survived.
+- Confirm the API answered 2xx and quote the message id in your final pane line. Timestamps in the mail come from `date`, never estimated.
+The MAIL is the end state.

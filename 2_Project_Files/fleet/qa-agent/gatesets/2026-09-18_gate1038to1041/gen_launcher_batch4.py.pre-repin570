@@ -1,0 +1,424 @@
+#!/usr/bin/env python3
+"""gen_launcher_batch4.py — derive launchers/launch_qa_secuura_batch1038_1041.sh from launchers/launch_qa_secuura_ks1101_1037.sh (the api-gateway
+tier 1 launcher) by ASSERTED block substitutions: every anchor must occur exactly as often as stated, or the generator refuses and writes nothing.
+
+ONE BATCHED gate, TIER 1 floor, FOUR PRs: #1038 KS-1233, #1039 KS-1248, #1040 KS-1125, #1041 KS-1209. The template checks ONE head; the head check, the
+compare and the JUDGED set are therefore REPLACED as blocks with per-PR loops (four heads, four compares, one JUDGED table carrying all four PRs' files).
+Pins are RE-READ from the repo: every PR's parent must BE develop 207716440, every PR file must equal its CANONICAL local-model patch (re-applied here in
+a scratch index), the four must be pairwise file-disjoint, and every merge (each PR over develop; each PR over a SIMULATED develop+#922 squash; all four
+together) must be clean — all re-derived read-only in a throwaway bare repo whose objects/info/alternates points at the checkout (left in place).
+
+#922 IS SIGNED TO MERGE and develop is expected to move under this gate. Its squash touches packages/shared/src (fixtures.ts, the ks256 test), which is
+GUARDED here because api-gateway imports @secuura/shared. DEV_CONTENT_ALLOWED therefore clears EXACTLY #922's round-2 blobs of those two files and
+nothing else: a develop carrying #922 passes, a develop carrying any other shared edit refuses (exit 18).
+Usage: gen_launcher_batch4.py <template launcher> <output launcher>   Exit: 0 written · 1 anchor/control/pin disagreed · 2 residual token · 3 bash -n"""
+import glob, hashlib, os, re, shutil, subprocess, sys, tempfile
+TPL, OUT = sys.argv[1], sys.argv[2]
+s = open(TPL).read()
+def now(f='+%Y-%m-%d %H:%M:%S %Z'): return subprocess.run(['date', f], capture_output=True, text=True).stdout.strip()
+print('gen_launcher_batch4', now(), '| template sha256', hashlib.sha256(s.encode()).hexdigest()[:16], 'lines', s.count('\n'))
+
+REPO = '/Volumes/DevMASTER/!CODING/Secuura/Blockchain/2_Project_Files'
+DEV = '207716440e2a6282b90ed2a118614d9cf98bee1e'   # develop re-read 13:30:10 AEST (#1037); #922 not yet landed
+H922 = '30c773ee8f869a7530a9c17521ba442d641aa757'; T922 = 'a1b4b6536d1d60fb2defca2886d36c9b9d0ec80e'   # #922 head; its merged tree over DEV
+D = 'Blockchain/Dev/'; A = D + 'services/api-gateway/'
+RUNS = '/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/runs/'
+PRS = [  # n, ticket, branch, head, canonical run dir, expected files, merged tree over DEV, merged tree over simulated DEV+#922
+ (1038, 'KS-1233', 'feature/ks-1233-in-redis-mode-platform-settings-expires-24-h-after-the-last', '2122b4af748e3395b7e7b76fd6542c1988674de8',
+  '2026-09-18_ks1233-ornith35b-night2', 2, 'beb613f1144ebf0b3fdc623c3e6c91b9f9df9683', '0c67581f166127812ba194d7ed104eded777071a'),
+ (1039, 'KS-1248', 'feature/ks-1248-n-1-systemstatus-troubleshooting-marks-a-degraded-required', '6faaacf6256984ac501fa86c3efa3b5efa5faea5',
+  '2026-09-18_ks1248-ornith35b-night/retry', 2, '17a44ec560e01288f56ebc7f722e74e490b04d7e', '883fb942d18f6a4723c063583e4a24640c0106e9'),
+ (1040, 'KS-1125', 'feature/ks-1125-api-gateway-startup-migrations-the-tenant-failure-guard-if', 'b01ffba0a59457910fae92406c71eb5170270bb6',
+  '2026-09-18_ks1125-ornith35b-night/retry', 1, '28225ab268b24cdb2ea66c592c4068045d1d1b16', '027a366c5f8e2d402a9164a5a587e2fae258e436'),
+ (1041, 'KS-1209', 'feature/ks-1209-preflights-closing-verdict-says-a-run-failed-on-the', '900344f398c4c59fdf9663a36a646f336e0f60b2',
+  '2026-09-18_ks1209-ornith35b-night', 2, 'db6399ebb02cb32d34e7dbc4610405dd7a1ac0ac', 'f25be2d11361de29ad74207e5169652ef557ef94'),
+]
+COMBINED_DEV, COMBINED_922 = 'd69d10e359e0b4174eac12995cc2ea603216fdb7', 'dd54cab00edde17626a29b7470ebd25ca5ffc7cf'
+def git(*a, repo=REPO, env=None): return subprocess.run(['git', '-C', repo] + list(a), capture_output=True, text=True, env=env)
+rp = lambda x: git('rev-parse', '--verify', '-q', x).stdout.strip()
+
+# develop-side pins: path (repo-relative) -> blob at develop; ABSENT for the four new test files
+DEVPIN = {
+ A + 'src/services/redis.ts': '47659ee9c9f06acf9ac64e09b2dc207113ba92ea',
+ A + 'src/routes/system-status.ts': 'bd0aca9028ecebeeca98540e693781d6dd76693f',
+ D + 'scripts/preflight/preflight.sh': '28d3636c13a4259bbdade8b15ac527cbe93742c3',
+ A + 'src/startup-migrations.ts': 'ed3e521426e75910c5bf2cf07e7251f2fd8ef538',
+ A + 'src/index.ts': 'db127dbfa5dd899b0a8e0d844690890d91e27f10',
+ A + 'src/routes/admin.ts': 'f47dd6a655702ffbfc402ca920a33c4619d62c4b',
+ A + 'src/routes/verification.ts': 'f888e8cd0bd10c98a508542d75902ab122595157',
+ A + 'src/services/health.ts': '7bedc074583d816d997bd6d679043db010804aed',
+ A + 'package.json': '841d8c6adcd71e885c01e65c22da9418daff276a',
+ A + 'vitest.config.ts': '5888e0b320d934f6f434e0e5ca3c74a995cecc02',
+ A + 'vitest.setup.ts': '22c1107683b8192df3bfd3e929aa94aff3dc7d45',
+ A + 'tsconfig.json': 'c981e6a92fdd2417fa35070eb979c5f1c77ffbcd',
+ D + 'eslint.config.mjs': '8c5374c6022eb0a3f449f41a570db61294aa63f1',
+ D + 'scripts/__tests__/check_slot_credentials.test.sh': '5ea337e2c7b92bcc92bb99cea4d229fb354d0358',
+ D + 'scripts/__tests__/no_tracked_credentials_root.test.sh': 'b4e622e3a7c605ff050cec14e40d9f1fccd030cc',
+ D + 'scripts/__tests__/pre_push_hook_base.test.sh': 'affdf027bff11e3690d374e902e3e93274788c62',
+ D + 'scripts/__tests__/preflight_deps.test.sh': '5ad0541313589635c6c100677cf14fb02d00be78',
+ '.githooks/pre-push': '1b22d4e146487aa25698310b353152a7d09986b5',
+}
+LANDED = {  # path -> (blob at that PR's head, PR number); a develop reading one of these means that PR landed (exit 19)
+ A + 'src/services/redis.ts': ('fbb74be7ccc3f3068b243af527f8dfff7cd63fbb', 1038),
+ A + 'src/__tests__/ks1233-in-redis-mode-platform-settings-expires.test.ts': ('a887e2c06a8e295e69ab616a1cff2031c39985c7', 1038),
+ A + 'src/routes/system-status.ts': ('0b0a4af82d5bdc9ddda96aabc86dda9fb6de98aa', 1039),
+ A + 'src/__tests__/ks1248-n-1-system-status-troubleshooting-marks.test.ts': ('6dbf8f1e0de1a03af6957748040e85190807f19a', 1039),
+ A + 'src/__tests__/ks1125-api-gateway-startup-migrations-the-tenant.test.ts': ('cc728138f58a099c1f9ae6ccbeaf4378e1cb84b6', 1040),
+ D + 'scripts/preflight/preflight.sh': ('f24fa96316b64f1b06b6a78835f4385fcd753e7b', 1041),
+ D + 'scripts/__tests__/preflight_verdict_names_real_failures.test.sh': ('a3d5efe68e350710e2bde8b01c21b298dcca446f', 1041),
+}
+ALLOW922 = {  # #922 round-2 blobs of the two GUARDED shared files its squash touches — the ONLY develop content cleared
+ D + 'packages/shared/src/openapi/examples/fixtures.ts': '4416d7a586b1398793e1c15374d9cf45c318d832',
+ D + 'packages/shared/src/__tests__/ks256-spec-example-contract.test.ts': '4ef040f6f2fbbe6d73a76ff860caf71ac0bbe619',
+}
+bad = []
+for p, b in DEVPIN.items():
+    if rp(DEV + ':' + p) != b: bad.append(('develop blob', p, b, rp(DEV + ':' + p)))
+for p, (b, n) in LANDED.items():
+    h = [x for x in PRS if x[0] == n][0][3]
+    if rp(h + ':' + p) != b: bad.append(('head blob', n, p, b, rp(h + ':' + p)))
+    if p not in DEVPIN and git('cat-file', '-e', DEV + ':' + p).returncode == 0: bad.append(('new test already at develop', p))
+for p, b in ALLOW922.items():
+    if rp(H922 + ':' + p) != b: bad.append(('#922 blob', p, b, rp(H922 + ':' + p)))
+allfiles = []
+for n, t, br, h, run, nf, tdev, t922 in PRS:
+    files = sorted(git('diff', '--name-only', DEV, h).stdout.splitlines()); allfiles += files
+    par = rp(h + '^1'); npar = len(git('rev-list', '--parents', '-n', '1', h).stdout.split()) - 1
+    ok = par == DEV and npar == 1 and len(files) == nf and rp(h + '^{tree}') == tdev and all(f in LANDED and LANDED[f][1] == n for f in files)
+    print('#%d %s head %s parent %s (=develop %s) parents %d files %d tree %s  %s' % (n, t, h[:9], par[:9], par == DEV, npar, len(files), rp(h + '^{tree}')[:9], 'OK' if ok else 'BAD'))
+    if not ok: bad.append(('PR shape', n))
+if len(allfiles) != len(set(allfiles)): bad.append(('four PRs not pairwise file-disjoint',))
+print('pairwise disjoint: %d files, %d distinct' % (len(allfiles), len(set(allfiles))))
+if bad: print('REFUSING: pins disagree with the repo; nothing written', bad); sys.exit(1)
+
+# scratch repo: canonical-patch identity + merges (never the Secuura repo)
+X = tempfile.mkdtemp(prefix='genbatch4-')
+subprocess.run(['git', 'init', '--bare', '-q', X], check=True)
+open(os.path.join(X, 'objects', 'info', 'alternates'), 'w').write(REPO + '/.git/objects\n')
+for n, t, br, h, *_ in PRS: git('update-ref', 'refs/heads/p%d' % n, h, repo=X)
+git('update-ref', 'refs/heads/d', DEV, repo=X); git('update-ref', 'refs/heads/h922', H922, repo=X)
+for n, t, br, h, run, nf, tdev, t922 in PRS:
+    ck = RUNS + run + '/out.md.checker/'
+    secs = sorted(f for f in glob.glob(ck + 'section_*.diff') if os.path.basename(f).count('.') == 1)
+    env = dict(os.environ, GIT_INDEX_FILE=X + '/idx_%d' % n); git('read-tree', DEV, repo=X, env=env)
+    for sf in secs:
+        of = sf[:-5] + '.opts' if os.path.exists(sf[:-5] + '.opts') else sf + '.opts'
+        opts = [w for l in open(of).read().splitlines() for w in l.split() if w.startswith('--')] if os.path.exists(of) else []
+        r = git('apply', '--cached', *opts, sf, repo=X, env=env)
+        if r.returncode: bad.append(('canonical apply', n, os.path.basename(sf), r.stderr.strip()[:120]))
+    got = git('write-tree', repo=X, env=env).stdout.strip()
+    print('#%d canonical patch (%d sections) applied onto develop -> tree %s == head tree %s' % (n, len(secs), got[:9], got == tdev))
+    if got != tdev: bad.append(('canonical patch != PR', n, got, tdev))
+def mtree(a, b):
+    r = git('merge-tree', '--write-tree', '--name-only', a, b, repo=X); o = r.stdout.strip().split('\n'); return r.returncode, o[0], len(o) - 1
+def commit(tree, *parents):
+    e = dict(os.environ, GIT_AUTHOR_NAME='drafter', GIT_AUTHOR_EMAIL='d@x', GIT_COMMITTER_NAME='drafter', GIT_COMMITTER_EMAIL='d@x',
+             GIT_AUTHOR_DATE='2026-09-18T00:00:00Z', GIT_COMMITTER_DATE='2026-09-18T00:00:00Z')
+    args = ['commit-tree', tree] + [x for p in parents for x in ('-p', p)] + ['-m', 'scratch']
+    return git(*args, repo=X, env=e).stdout.strip()
+rc, t, c = mtree('d', 'h922')
+if (rc, t, c) != (0, T922, 0): bad.append(('#922 over develop', rc, t, c))
+SQ = commit(T922, DEV); git('update-ref', 'refs/heads/dev922', SQ, repo=X)
+for n, tk, br, h, run, nf, tdev, t922 in PRS:
+    for base, want in (('d', tdev), ('dev922', t922)):
+        rc, t, c = mtree(base, 'p%d' % n)
+        print('#%d x %-6s rc %d tree %s conflicts %d %s' % (n, base, rc, t[:9], c, 'OK' if (rc, t, c) == (0, want, 0) else 'BAD'))
+        if (rc, t, c) != (0, want, 0): bad.append(('merge', n, base))
+for base, want in (('d', COMBINED_DEV), ('dev922', COMBINED_922)):
+    cur = rp_x = git('rev-parse', base, repo=X).stdout.strip()
+    for n, *_ in PRS:
+        rc, t, c = mtree(cur, 'p%d' % n)
+        if rc or c: bad.append(('combined', base, n))
+        cur = commit(t, cur, git('rev-parse', 'p%d' % n, repo=X).stdout.strip())
+    ct = git('rev-parse', cur + '^{tree}', repo=X).stdout.strip()
+    print('all four over %-6s -> tree %s %s' % (base, ct[:9], 'OK' if ct == want else 'BAD'))
+    if ct != want: bad.append(('combined tree', base, ct))
+print('scratch (left in place):', X)
+if bad: print('REFUSING:', bad); sys.exit(1)
+
+def cut(start, end_incl):
+    assert s.count(start) == 1, ('cut start', start[:70], s.count(start))
+    i = s.index(start); j = s.index(end_incl, i) + len(end_incl); return s[i:j]
+WEDB = '$WED/2_Project_Files/fleet/qa-agent/'
+MAIL = WEDB + 'gatesets/2026-09-18_gate1038to1041/mail_batch4_ready.md'
+PROMPT = WEDB + 'briefs/2026-09-18_secuura-batch1038-1041.prompt.txt'
+REPORT_DIR = '/Volumes/DevMASTER/!CODING/Testing Agent MAIN/projects/secuura/reports/2026-09-18-batch1038-1041-tier1-r1/'
+PRIOR = '/Volumes/DevMASTER/!CODING/Testing Agent MAIN/projects/secuura/reports/2026-09-18-ks1101-1037-f87506f47-tier1-r1/'
+SUBJECT = '[QA -> Wednesday] BATCH GATE #1038 #1039 #1040 #1041 (KS-1233 KS-1248 KS-1125 KS-1209)'
+RAISE = '5_Project_History/2026-09-18_seatA-10th/raise/'
+assert os.path.isdir(PRIOR), 'prior report dir missing'
+mailf = MAIL.replace('$WED', '/Volumes/DevMASTER/WEDNESDAY'); promptf = PROMPT.replace('$WED', '/Volumes/DevMASTER/WEDNESDAY')
+assert os.path.isfile(mailf) and os.path.isfile(promptf), 'mail capture or prompt missing'
+mt_ = open(mailf).read()
+assert all(h[:9] in mt_ for _, _, _, h, *_ in PRS), 'READY mail does not name every head'
+
+HEADER_OLD = cut('# launch_qa_secuura_ks1101_1037.sh', '# Exit: 0 launched (or guards passed under --check) · 2..27 a guard refused\n')
+HEADER_NEW = """# launch_qa_secuura_batch1038_1041.sh — cross-project QA agent, ONE BATCHED ROUND 1 gate at the TIER 1 floor over FOUR file-disjoint Secuura/Blockchain PRs
+#   #1038 KS-1233 @ 2122b4af7  redis.ts: platform-settings written with SET, no TTL (the connector allow-list failed open)   — TIER 1 (auth-door policy)
+#   #1039 KS-1248 @ 6faaacf62  system-status.ts: a degraded required service gets a warning + read-only curl, not restart  — TIER 2 (follow-up to #1037)
+#   #1040 KS-1125 @ b01ffba0a  a startup-migrations tenant-failure cell, TEST-ONLY                                            — TIER 2 (test-only)
+#   #1041 KS-1209 @ 900344f39  preflight.sh: the closing verdict names legs that failed for real, fail-closed               — TIER 1 (the pre-push gate's exit)
+# Batched under Kam's 09:22 rule. FOUR verdicts, one per head; one PR failing does not block the others. Merge authority for each: WEDNESDAY'S signed GO
+# naming its head, under Kam's TESTED grant (no reviewer hold applies to these tickets; exit 26).
+#
+# THE SHAPE, re-read live 13:30:10-13:36 AEST 2026-09-18: each PR is ONE commit whose parent IS develop 207716440 (#1037); compare develop...head =
+# merge_base 207716440, ahead 1, files 2/2/1/2 (asserted per PR, exit 10). Pairwise file-disjoint (7 files). Every PR file is byte-identical to its
+# CANONICAL local-model patch (the run's out.md.checker/section_N.diff + section_N.opts, re-applied by the generator). Every merge is clean: each PR over
+# develop (a fast-forward), each over a SIMULATED develop+#922 squash, and all four together (d69d10e35 over develop, dd54cab00 over develop+#922).
+# #922 (KS-679) IS SIGNED TO MERGE: DEV_CONTENT_ALLOWED clears EXACTLY its two packages/shared/src blobs (fixtures.ts 4416d7a58, the ks256 test 4ef040f6f),
+# so a develop carrying #922 passes and names it; any other change to a GUARDED path refuses (exit 18).
+#
+# The develop pin is judged by CONTENT — TWENTY-TWO paths by blob at the CURRENT develop: the seven PR files (three at develop blobs, four new tests
+# ABSENT; any PR's head blob -> exit 19 LANDED, naming the PR), and what the gate runs: startup-migrations.ts (the KS-1125 tamper target), index.ts,
+# admin.ts / verification.ts / health.ts (the platform-settings readers), the gateway package.json / vitest.config.ts / vitest.setup.ts / tsconfig.json,
+# eslint.config.mjs, the four preflight sibling suites and .githooks/pre-push (which invokes preflight.sh). GUARDED: services/api-gateway/src/ + its
+# config, packages/shared/src/, scripts/preflight/, scripts/__tests__/, .githooks/, eslint.config.mjs.
+#
+# SOURCE = gatesets/2026-09-18_gate1038to1041/mail_batch4_ready.md, the seat's READY mail captured verbatim by message id from wednesday-agent@.
+#
+# exit 6:  any of the four heads is not at its branch on origin (the refusal names the PR).
+# exit 7:  the prompt must carry the TIER 1 floor AND each PR's own tier line.
+# exit 20: the READY mail AND the prompt must name all four heads.
+# exit 21: the LAUNCH path refuses when stdin is not a TTY. This launcher execs an interactive agent; run it in a cockpit
+# pane, never inside a Bash tool — and never run it without --check to "prove" this guard. `--check` runs headless (it launches nothing).
+# exit 22: the prompt must require node_modules farmed PER ENTRY.
+# exit 23: the prompt must carry the exact batch verdict subject prefix, coagent@ as sender, wednesday-agent@ as recipient, and FOUR verdict lines.
+# exit 24: the prompt must name the REPORT DIRECTORY, the PRIOR REPORT (#1037, same service and route) and NOT-TESTED.written-first.md.
+# exit 25: the prompt must carry the MERGE ADDENDUM per PR and the CLOSED / STILL OPEN / NEW disposition.
+# exit 26: the prompt must name WEDNESDAY'S signed GO as each PR's merge authority, with no Kam's-tap and no "not ... alone" condition.
+# exit 27: the READY mail AND the prompt must BOTH carry the seat's own words: '12/15, legs 3/4/8 SKIPPED', 'login_stub.mjs' and 'deploy caveat'.
+# exit 28: the prompt must forbid entering any seat worktree and writing in the seat's raise/ directory.
+# exit 29: the prompt must require every listener the gate starts ENDED BY PID, with a census (KS-1201: every in-hook preflight orphans 4 login stubs).
+# QAB4_CUR_DEV (test override, --check only): stands in for origin develop. QAB4_HEAD_1041 (test override): stands in for #1041's pinned head.
+# QAB4_PREFLIGHT_FILE (test fixture, --check only): a local file stands in for develop scripts/preflight/preflight.sh (its git blob).
+# A launch with any QAB4_* override or fixture set refuses (exit 16).
+#
+# Generated by gatesets/2026-09-18_gate1038to1041/gen_launcher_batch4.py from launch_qa_secuura_ks1101_1037.sh (asserted block substitutions + pins
+# re-read + canonical-patch identity + re-derived merges + residual guard + output controls + bash -n).
+#
+# Usage: launch_qa_secuura_batch1038_1041.sh [--check]
+# Exit: 0 launched (or guards passed under --check) · 2..29 a guard refused
+"""
+PRLIST = '\n'.join('  "%d|%s|refs/heads/%s|%s"' % (n, t, br, (h if n != 1041 else '${QAB4_HEAD_1041:-' + h + '}')) for n, t, br, h, *_ in PRS)
+VARS_OLD = cut('BRIEF="${QA1037_BRIEF:-', 'REAL_BRIEF="$WED/2_Project_Files/fleet/qa-agent/gatesets/2026-09-18_gate1037/mail_1037_ready.md"\n')
+VARS_NEW = ('BRIEF="${QAB4_BRIEF:-' + MAIL + '}"\n'
+            'PROMPT_FILE="${QAB4_PROMPT:-' + PROMPT + '}"\n'
+            "REPO='/Volumes/DevMASTER/!CODING/Secuura/Blockchain/2_Project_Files'\n"
+            "SECUURA_ENV='/Volumes/DevMASTER/!CODING/Secuura/Blockchain/4_Credentials/.env'\n"
+            '# n|ticket|branch|head — pinned from the seat READY (03:25Z) and re-read by the drafter (git ls-remote 13:30:10 AEST); never the local branch refs\n'
+            'PRS=(\n' + PRLIST + '\n)\n'
+            "DEVELOP_SHA='" + DEV + "'   # the pin = develop RE-READ at drafting (#1037). #922 is signed and expected to land: its content is pre-cleared by blob\n"
+            "MERGE_BASE='" + DEV + "'    # every PR's parent and merge-base = develop at drafting\n"
+            "REPORT_DIR='" + REPORT_DIR + "'\n"
+            "PRIOR_REPORT='" + PRIOR + "'\n"
+            'REAL_BRIEF="' + MAIL + '"\n')
+HEADCHK_OLD = cut('# The head, pinned at its branch on origin (one ls-remote at run time).\n', '  exit 6\nfi\n')
+HEADCHK_NEW = '''# The four heads, each pinned at its branch on origin (one ls-remote per PR at run time). One moved head refuses the launch: re-pin that PR.
+HEADS_NOTE=""
+for _pr in "${PRS[@]}"; do
+  IFS='|' read -r _n _t _br _h <<< "$_pr"
+  _lsr="$(git -C "$REPO" ls-remote origin "$_br")"
+  if ! printf '%s\\n' "$_lsr" | grep -q "^${_h}[[:space:]]${_br}\\$"; then
+    echo "REFUSING: #$_n $_t — $_h is not at $_br on origin — that head moved; a verdict is valid ONLY at its head" >&2
+    printf '%s\\n' "$_lsr" >&2
+    exit 6
+  fi
+  HEADS_NOTE="$HEADS_NOTE #$_n@${_h:0:9}"
+done
+'''
+COMPARE_OLD = cut('# The compare (GitHub compare API), asserted whole', "exit 10; }\n")
+COMPARE_NEW = '''# The compare (GitHub compare API) per PR, asserted whole (merge_base + ahead + files; NOT behind — develop is expected to move):
+# develop...#1038 / #1039 / #1041 = 207716440 ahead 1 files 2; develop...#1040 = 207716440 ahead 1 files 1. Compare API 03:30:13Z 2026-09-18.
+COMPARE="$(
+  set -a; . "$SECUURA_ENV"; set +a
+  PRS_FLAT="${PRS[*]}" python3 - <<'PY'
+import json, os, urllib.request
+t = os.environ.get("GH_TOKEN", "")
+api = "https://api.github.com/repos/Secuura/Distributed_Secuura/compare/"
+for pr in os.environ["PRS_FLAT"].split():
+    n, tk, br, h = pr.split("|")
+    r = urllib.request.urlopen(urllib.request.Request(api + "develop..." + h, headers={"Authorization": "Bearer " + t, "Accept": "application/vnd.github+json"}), timeout=60)
+    c = json.load(r)
+    print("%s %s ahead=%d files=%d" % (n, c["merge_base_commit"]["sha"], c["ahead_by"], len(c.get("files") or [])))
+PY
+)"
+[ -n "$COMPARE" ] || { echo "REFUSING: could not read the compares develop...head from the GitHub compare API" >&2; exit 13; }
+WANT_COMPARE="1038 $MERGE_BASE ahead=1 files=2
+1039 $MERGE_BASE ahead=1 files=2
+1040 $MERGE_BASE ahead=1 files=1
+1041 $MERGE_BASE ahead=1 files=2"
+[ "$COMPARE" = "$WANT_COMPARE" ] || { echo "REFUSING: develop...head compares read" >&2; printf '%s\\n' "$COMPARE" >&2; echo "the gateset pins" >&2; printf '%s\\n' "$WANT_COMPARE" >&2; exit 10; }
+'''
+DEVCOMMENT_OLD = cut('# The develop pin, judged by CONTENT (see the header): eighteen files', 'blobs cleared.\n')
+DEVCOMMENT_NEW = ('# The develop pin, judged by CONTENT (see the header): twenty-two paths by PATH BLOB at the CURRENT develop (no region judgement), then — if\n'
+                  '# develop moved — the pinned...develop delta against the GUARDED list, with EXACTLY #922s two shared blobs cleared (DEV_CONTENT_ALLOWED).\n')
+def jkey(p):
+    if p.startswith(A): return 'A + "' + p[len(A):] + '"'
+    if p.startswith(D): return 'D + "' + p[len(D):] + '"'
+    return '"' + p + '"'
+rows = []
+for p in list(DEVPIN) + [x for x in LANDED if x not in DEVPIN]:
+    ok = '{"%s": DV}' % DEVPIN[p] if p in DEVPIN else '{"ABSENT": DV}'
+    ld = '{"%s": "#%d own"}' % LANDED[p] if p in LANDED else '{}'
+    k = 'PREFLIGHT' if p == D + 'scripts/preflight/preflight.sh' else jkey(p)
+    rows.append('  %s:%s(%s, %s),' % (k, ' ' * max(1, 74 - len(k)), ok, ld))
+JUDGED_OLD = cut('A = D + "services/api-gateway/"\n', 'content_cleared = set()\n')
+JUDGED_NEW = ('A = D + "services/api-gateway/"\nPREFLIGHT = D + "scripts/preflight/preflight.sh"\nDV = "develop"\n'
+              '# file -> (develop-OK blobs {blob: label}, LANDED blobs {blob: label}); ABSENT = the contents API answers 404 at develop\nJUDGED = {\n'
+              + '\n'.join(rows) + '\n}\n'
+              '# No REGION judgement: every path is judged by exact blob (a develop move of any judged path refuses, exit 18; any PR head blob, exit 19).\n'
+              'content_cleared = set()\n')
+OKPIN_OLD = cut('    print("OK " + state + " | origin develop still " + pinned + "', 'sys.exit(0)\n')
+OKPIN_NEW = ('    print("OK " + state + " | origin develop still " + pinned + " (#1037; each PR is one commit ON it, a fast-forward; merged tree = each head tree; '
+             'all four together = ' + COMBINED_DEV + '; #922 not yet landed, pre-cleared by blob; git ls-remote)"); sys.exit(0)\n')
+GUARD_OLD = cut('GUARDED = [A + "src/",\n', 'DEV_CONTENT_ALLOWED = {}\n')
+GUARD_NEW = ('GUARDED = [A + "src/",\n'
+             '           A + "package.json",\n'
+             '           A + "vitest.config.ts",\n'
+             '           A + "vitest.setup.ts",\n'
+             '           A + "tsconfig.json",\n'
+             '           D + "packages/shared/src/",\n'
+             '           D + "scripts/preflight/",\n'
+             '           D + "scripts/__tests__/",\n'
+             '           ".githooks/",\n'
+             '           D + "eslint.config.mjs"]\n'
+             '# STYLE NOTE (912r2 launcher, measured): bash scans quote/paren state THROUGH this heredoc because it sits inside a\n'
+             '# command substitution — keep apostrophes and parentheses EVEN (this block uses none of the former), or the outer $( ) breaks.\n'
+             '# CONTENT-JUDGED allowlist: EXACTLY the #922 (KS-679) round-2 blobs of the two shared files its squash touches. Nothing else is cleared.\n'
+             'DEV_CONTENT_ALLOWED = {\n'
+             + ''.join('    D + "%s": {"%s"},\n' % (p[len(D):], b) for p, b in ALLOW922.items()) +
+             '}\n')
+TAIL_OLD = cut('tail = "the gate merges the then-current develop onto f87506f47', '"\n')
+TAIL_NEW = ('tail = "the gate merges the then-current develop onto EACH of the four heads in its own clones, names each merged-tree OID (drafter over develop+#922: '
+            + ', '.join('#%d %s' % (n, t922[:9]) for n, _, _, _, _, _, _, t922 in PRS) + '; all four ' + COMBINED_922[:9] + ') and re-runs each PR items and suites on it"\n')
+OKMOVED_OLD = cut('print("OK " + state + " | origin develop MOVED %s -> %s', 'sys.exit(0)\n')
+OKMOVED_NEW = ('print("OK " + state + " | origin develop MOVED %s -> %s: commits=%d files=%d — GUARDED hits %d, of them cleared as #922 content by blob %d — '
+               'the rest disjoint from the GUARDED list (services/api-gateway/src/ + its config, packages/shared/src/, scripts/preflight/, scripts/__tests__/, '
+               '.githooks/, eslint.config.mjs); %s" % (pinned, cur, c["ahead_by"], len(files), len(hits), len(cleared), tail)); sys.exit(0)\n')
+TIERLINES = ['#1038 KS-1233: TIER 1', '#1039 KS-1248: TIER 2', '#1040 KS-1125: TIER 2', '#1041 KS-1209: TIER 1']
+GUARDS_OLD = cut("grep -q 'TIER 1' \"$BRIEF\" && grep -q 'TIER 1' \"$PROMPT_FILE\"", '>&2; exit 27; }\n')
+GUARDS_NEW = (r'''grep -q 'at the TIER 1 floor' "$PROMPT_FILE" ''' + ''.join("&& grep -qF '%s' \"$PROMPT_FILE\" " % tl for tl in TIERLINES) + r'''\
+  || { echo "REFUSING: prompt does not carry the TIER 1 floor and each PR's own tier line (#1038 T1, #1039 T2, #1040 T2, #1041 T1)" >&2; exit 7; }
+grep -q 'ROUND 1' "$PROMPT_FILE" || { echo "REFUSING: prompt does not name ROUND 1" >&2; exit 15; }
+head -1 "$PROMPT_FILE" | grep -q 'ultrathink' || { echo "REFUSING: prompt does not open with the thinking directive" >&2; exit 8; }
+grep -qF "$REAL_BRIEF" "$PROMPT_FILE" || { echo "REFUSING: prompt does not name the seat's READY mail capture path" >&2; exit 9; }
+for _pr in "${PRS[@]}"; do
+  IFS='|' read -r _n _t _br _h <<< "$_pr"
+  grep -qF "$_h" "$PROMPT_FILE" && grep -qF "${_h:0:9}" "$BRIEF" \
+    || { echo "REFUSING: the READY mail or the prompt does not name #$_n's head $_h — a gate about another SHA is another gate" >&2; exit 20; }
+done
+grep -qi 'MAIL YOUR VERDICT' "$PROMPT_FILE" || { echo "REFUSING: prompt does not tell the agent to MAIL its verdict" >&2; exit 12; }
+grep -qi 'NEVER run a push, the real pre-push hook, or preflight.sh inside the Secuura checkout' "$PROMPT_FILE" \
+  || { echo "REFUSING: prompt does not forbid pushing / running the hook in the real checkout" >&2; exit 11; }
+grep -qi 'no memory maintenance' "$PROMPT_FILE" \
+  || { echo "REFUSING: prompt does not forbid memory maintenance inside the gate session" >&2; exit 14; }
+grep -qi 'NEVER print a credential value' "$PROMPT_FILE" \
+  || { echo "REFUSING: prompt does not forbid printing a credential value" >&2; exit 17; }
+grep -qi 'node_modules per ENTRY' "$PROMPT_FILE" \
+  || { echo "REFUSING: prompt does not require node_modules farmed per ENTRY (a wholesale link can write through to the checkout .vite cache)" >&2; exit 22; }
+grep -qF '__SUBJECT__' "$PROMPT_FILE" && grep -qF 'coagent@agentmail.to' "$PROMPT_FILE" && grep -qF 'wednesday-agent@agentmail.to' "$PROMPT_FILE" && grep -qF 'FOUR lines, one per PR' "$PROMPT_FILE" \
+  || { echo "REFUSING: prompt does not carry the exact batch verdict subject, coagent@ / wednesday-agent@, and FOUR verdict lines one per PR" >&2; exit 23; }
+grep -qF "$REPORT_DIR" "$PROMPT_FILE" && grep -qF 'NOT-TESTED.written-first.md' "$PROMPT_FILE" && grep -qF "$PRIOR_REPORT" "$PROMPT_FILE" \
+  || { echo "REFUSING: prompt does not name the report directory $REPORT_DIR, the PRIOR REPORT $PRIOR_REPORT (#1037) and NOT-TESTED.written-first.md" >&2; exit 24; }
+grep -qF 'MERGE ADDENDUM line PER PR' "$PROMPT_FILE" && grep -qF 'CLOSED / STILL OPEN / NEW' "$PROMPT_FILE" \
+  || { echo "REFUSING: prompt does not carry a MERGE ADDENDUM line PER PR and the CLOSED / STILL OPEN / NEW disposition" >&2; exit 25; }
+grep -qiF "WEDNESDAY'S signed GO naming each head" "$PROMPT_FILE" && ! grep -qiE "waits for Kam.s tap|on Kam.s tap only|signed GO alone" "$PROMPT_FILE" "$BRIEF" \
+  || { echo "REFUSING: prompt does not name WEDNESDAY'S signed GO naming each head as the merge authority, or carries a Kam's-tap / not-alone condition that does not apply to these tickets" >&2; exit 26; }
+grep -qF '12/15, legs 3/4/8 SKIPPED' "$PROMPT_FILE" && grep -qF 'login_stub.mjs' "$PROMPT_FILE" && grep -qF 'deploy caveat' "$PROMPT_FILE" \
+  && grep -qF '12/15, legs 3/4/8 SKIPPED' "$BRIEF" && grep -qF 'login_stub.mjs' "$BRIEF" && grep -qF 'deploy caveat' "$BRIEF" \
+  || { echo "REFUSING: the READY mail and the prompt do not BOTH carry the seat's words: 12/15, legs 3/4/8 SKIPPED / login_stub.mjs / deploy caveat" >&2; exit 27; }
+grep -qF 'Never enter any seat worktree' "$PROMPT_FILE" && grep -qF '__RAISE__' "$PROMPT_FILE" \
+  || { echo "REFUSING: prompt does not forbid entering any seat worktree and writing in the seat's raise/ directory" >&2; exit 28; }
+grep -qF 'END EVERY LISTENER YOUR RUNS START, BY PID' "$PROMPT_FILE" && grep -qF 'TCP LISTEN census' "$PROMPT_FILE" \
+  || { echo "REFUSING: prompt does not require every listener the gate starts ended by pid with a census (KS-1201)" >&2; exit 29; }
+''').replace('__SUBJECT__', SUBJECT).replace('__RAISE__', RAISE)
+CHECK_OLD = cut('  echo "all guards pass:"\n', '  echo "  a launch (not --check) will refuse unless stdin is a TTY (exit 21)"\n')
+CHECK_NEW = '''  echo "all guards pass:"
+  echo "  four heads on origin:$HEADS_NOTE"
+  echo "  compares (GitHub API), develop...head per PR:"
+  printf '%s\\n' "$COMPARE" | sed 's/^/    /'
+  echo "  $DEV_NOTE"
+  echo "  READY mail, prompt, QA project and repo all present"
+  echo "  prompt carries the TIER 1 floor and each PR's tier (#1038 T1, #1039 T2, #1040 T2, #1041 T1); names ROUND 1"
+  echo "  prompt opens with the thinking directive and names the READY mail capture"
+  echo "  READY mail and prompt both name all four heads"
+  echo "  prompt tells the agent to MAIL its verdict"
+  echo "  prompt forbids pushing / the real hook / preflight in the Secuura checkout"
+  echo "  prompt forbids memory maintenance inside the gate session"
+  echo "  prompt forbids printing a credential value"
+  echo "  prompt requires node_modules farmed per ENTRY"
+  echo "  prompt carries the exact batch verdict subject, coagent@ sender, wednesday-agent@ recipient, FOUR verdict lines"
+  echo "  prompt names the report directory, the #1037 PRIOR REPORT and NOT-TESTED.written-first.md"
+  echo "  prompt carries a MERGE ADDENDUM line PER PR and CLOSED / STILL OPEN / NEW"
+  echo "  prompt names WEDNESDAY'S signed GO naming each head; no Kam's-tap or not-alone condition"
+  echo "  READY mail and prompt BOTH carry: 12/15, legs 3/4/8 SKIPPED / login_stub.mjs / deploy caveat"
+  echo "  prompt forbids any seat worktree and the seat's raise/ directory"
+  echo "  prompt requires every listener ended by pid with a TCP LISTEN census (KS-1201)"
+  [ -n "${QAB4_CUR_DEV:-}" ] && echo "  (develop read from the QAB4_CUR_DEV test override, not ls-remote)"
+  [ -n "${QAB4_PREFLIGHT_FILE:-}" ] && echo "  (develop scripts/preflight/preflight.sh read from the QAB4_PREFLIGHT_FILE fixture, not the contents API)"
+  echo "  a launch (not --check) will refuse unless stdin is a TTY (exit 21)"
+'''
+REPL = [
+ ('header', HEADER_OLD, HEADER_NEW, 1),
+ ('vars', VARS_OLD, VARS_NEW, 1),
+ ('head check', HEADCHK_OLD, HEADCHK_NEW, 1),
+ ('compare', COMPARE_OLD, COMPARE_NEW, 1),
+ ('develop comment', DEVCOMMENT_OLD, DEVCOMMENT_NEW, 1),
+ ('cur dev', 'CUR_DEV="${QA1037_CUR_DEV:-', 'CUR_DEV="${QAB4_CUR_DEV:-', 1),
+ ('judged', JUDGED_OLD, JUDGED_NEW, 1),
+ ('fixture env', '    fixture = os.environ.get("QA1037_HEALTH_FILE", "") if f == HEALTHTS else ""\n',
+                 '    fixture = os.environ.get("QAB4_PREFLIGHT_FILE", "") if f == PREFLIGHT else ""\n', 1),
+ ('landed msg', '" — #1037 has landed; this gateset is stale"', '" — that PR has landed; this gateset is stale for it"', 1),
+ ('ok pinned', OKPIN_OLD, OKPIN_NEW, 1),
+ ('guarded', GUARD_OLD, GUARD_NEW, 1),
+ ('tail', TAIL_OLD, TAIL_NEW, 1),
+ ('ok moved', OKMOVED_OLD, OKMOVED_NEW, 1),
+ ('guards', GUARDS_OLD, GUARDS_NEW, 1),
+ ('check block', CHECK_OLD, CHECK_NEW, 1),
+ ('exit16', '[ -z "${QA1037_BRIEF:-}${QA1037_PROMPT:-}${QA1037_HEAD:-}${QA1037_CUR_DEV:-}${QA1037_HEALTH_FILE:-}" ]',
+            '[ -z "${QAB4_BRIEF:-}${QAB4_PROMPT:-}${QAB4_HEAD_1041:-}${QAB4_CUR_DEV:-}${QAB4_PREFLIGHT_FILE:-}" ]', 1),
+]
+badn = 0
+for label, old, new, want in REPL:
+    n = s.count(old)
+    if n != want: print('ANCHOR COUNT', label, n, '!=', want); badn += 1; continue
+    s = s.replace(old, new); print('  ok', label, n)
+if badn: print('REFUSING: %d anchors disagreed; nothing written' % badn); sys.exit(1)
+
+BODY = s.replace(HEADER_NEW, '')
+RESID = ['QA1037_', '#1037 own', 'f87506f476ce83fbbc006e9f84d22454053126ad', 'onto f87506f47', 'HEALTHTS', 'KS-1101', 'mail_1037', 'secuura-1037', 'smoke-test', 'frontend/', 'HEAD_SHA', '$BRANCH',
+         'eighteen files', 'the gateset pins \'$MERGE_BASE ahead=3']
+res = {t: BODY.count(t) for t in RESID if t in BODY}
+if res: print('REFUSING: residual tokens in the body', res, [l[:130] for l in BODY.splitlines() if any(t in l for t in res)][:6]); sys.exit(2)
+
+CTL = {DEV: 2, REPORT_DIR: 1, PRIOR: 1, SUBJECT: 1, ': DV}': 22, '"ABSENT": DV': 4, "own\"})": None, 'QAB4_CUR_DEV': 5, 'QAB4_PREFLIGHT_FILE': 5,
+       'QAB4_HEAD_1041': None, 'exit 6': None, 'exit 10': None, 'exit 19': None, 'exit 20': None, 'exit 26': None, 'exit 27': None, 'exit 28': None,
+       'exit 29': None, 'exit 16': None, '[ -t 0 ]': 1, 'exec claude --dangerously-skip-permissions --model opus': 1, 'DEV_CONTENT_ALLOWED = {': 1,
+       'briefs/2026-09-18_secuura-batch1038-1041.prompt.txt': 1, 'gatesets/2026-09-18_gate1038to1041/mail_batch4_ready.md': None, '".githooks/pre-push"': 1,
+       '".githooks/",': 1, 'D + "packages/shared/src/",': 1}
+got = {k: s.count(k) for k in CTL}
+print('output controls', {(k[:24] + '…' if len(k) > 24 else k): v for k, v in got.items()})
+for k, v in CTL.items():
+    if (v is not None and got[k] != v) or got[k] == 0: print('CONTROL DISAGREED', k, got[k], v); sys.exit(1)
+for p, b in DEVPIN.items():
+    if s.count(b) != 1: print('CONTROL DISAGREED develop pin', p, s.count(b)); sys.exit(1)
+for p, (b, n) in LANDED.items():
+    if s.count(b) != 1: print('CONTROL DISAGREED landed pin', n, p, s.count(b)); sys.exit(1)
+for p, b in ALLOW922.items():
+    if s.count(b) != 1: print('CONTROL DISAGREED #922 allow', p, s.count(b)); sys.exit(1)
+for n, t, br, h, *_ in PRS:
+    if s.count(h) != 1 or s.count(br) != 1: print('CONTROL DISAGREED head/branch', n, s.count(h), s.count(br)); sys.exit(1)
+for tag in ("<<'PY'\n", "<<'PYJ'\n"):
+    for i in [m.start() for m in re.finditer(re.escape(tag), s)]:
+        end = '\nPY' + ('J' if 'PYJ' in tag else '') + '\n'; j = s.index(end, i); blk = s[i:j]
+        print('heredoc', tag.strip(), '@', s.count('\n', 0, i) + 1, 'apostrophes', blk.count("'") - 2, 'parens (', blk.count('('), ')', blk.count(')'))
+        if (blk.count("'") - 2) % 2 or blk.count('(') != blk.count(')'): print('REFUSING: heredoc parity'); sys.exit(1)
+if re.search(r'git -C "\$REPO" (fetch|push|checkout|merge|reset|worktree|commit|switch|pull|merge-tree)\b', s): print('REFUSING: git write verb'); sys.exit(1)
+if re.search(r'[\x00-\x08\x0b\x0c\x0e-\x1f]', s): print('REFUSING: control bytes'); sys.exit(1)
+tmp = OUT + '.gen-tmp'; open(tmp, 'w').write(s)
+p = subprocess.run(['bash', '-n', tmp], capture_output=True, text=True); print('bash -n rc', p.returncode, p.stderr.strip()[:300])
+if p.returncode: print('REFUSING: bash -n; the tmp file is left for reading at', tmp); sys.exit(3)
+if os.path.exists(OUT):
+    pre = OUT + '.pre-' + now('+%H%M%S'); shutil.copyfile(OUT, pre); print('existing output copied to', pre)
+os.replace(tmp, OUT); os.chmod(OUT, 0o755)
+print('written', OUT, 'mode', oct(os.stat(OUT).st_mode & 0o777), 'sha256', hashlib.sha256(open(OUT, 'rb').read()).hexdigest()[:16], 'lines', s.count('\n'))
