@@ -90,6 +90,14 @@ a safety rule with his name on it, not a build preference.
 - [ ] ~~The release version string is agreed~~ — superseded by the line above.
 
 ### The telling
+- [ ] **ONE LINE OF INFORMATION HE IS OWED AT THE PUSH, not a question:** an Azure OpenAI host on a
+      suffix we could not SOURCE is refused by the RD-516 policy. **Commercial and Government are
+      unaffected** (`openai.azure.com`, `cognitiveservices.azure.com`, `services.ai.azure.com`,
+      `cognitiveservices.azure.us` are all sourced). What is refused is any unsourced form —
+      the unconfirmed `openai.azure.us`, and China, which has no CognitiveServices row at all.
+      The admin-extendable allow-list is TICKETED, not built. **He should not learn this from a
+      customer**, and stating it narrowly matters: 'Gov and China are refused' overstates it and
+      an overstated record gets discounted wholesale.
 - [ ] Every box above ticked and **re-read on `origin/main` in the same action as writing to him**
 - [ ] His push steps from 2026-09-17 23:23:47Z re-confirmed as still correct. **S65 confirms they are,
       with TWO AMENDMENTS that must reach him or the message is wrong:**
