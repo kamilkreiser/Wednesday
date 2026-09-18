@@ -21,6 +21,7 @@ supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s
 - `2_Project_Files/fleet/watch_nexusai_main.sh <current main> 60 180` (last baseline d881f953).
 ### OWED BY TUESDAY (not Kam)
 - The FETCH_HEAD race fix across 4 shared scripts: recipe in `0_Brain/reference/2026-09-18_fetch-head-race/README.md`, claimed in wed_claim. Do it early in a fresh seat, never with live panel_sync/chat_sync edits in place (stop, edit, run once, re-arm).
+- The 23:00 close ritual (scheduler) reported `wednesday-agent@` inbox counts on the TUESDAY seat. Likely a hardcoded seat name (the 09-09 resolver family); check `scheduler/close_wednesday.sh`, claim it with Wednesday, and fix with arms.
 ### AT THIS SEAT'S WRAP
 S65 scored 0.92, S66 0.95. Ledger rows this seat: R0 digest w=4 (fixed), digest swallowing replies (fixed), R1-CTL endorsed without its mutation (closed by S66's M6 proof). The Datasec INDEX cards are stale (NexusAI 09-12, HPSM 09-10).
 
