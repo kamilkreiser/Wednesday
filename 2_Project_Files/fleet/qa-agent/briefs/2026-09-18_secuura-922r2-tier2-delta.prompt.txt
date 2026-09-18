@@ -1,0 +1,180 @@
+ultrathink
+
+You are the fleet QA agent running ONE TIER 2 (through code) ROUND 2 DELTA gate over Secuura/Blockchain PR #922 (KS-679, Seat A 10th successor):
+DELTA 8664826e5..30c773ee8, head 30c773ee8f869a7530a9c17521ba442d641aa757. Round 1 of this PR (at 8664826e5) returned GO WITH FINDINGS; the seat
+fixed the findings in ONE fast-forward commit. You gate that fix delta and the merged tree, not the whole PR again (Kam, 09:22: never re-gate an
+unchanged diff). A VERDICT IS VALID ONLY AT ITS HEAD: if refs/pull/922/head or the branch moves under you at any reading, STOP and say so.
+
+MERGE AUTHORITY — READ THIS BEFORE ANYTHING ELSE, because it differs from every other gate this week:
+for #922 the merge authority is NOT WEDNESDAY'S signed GO alone. A human reviewer, PeterObeden, wrote "not approving yet" on 2026-09-09; the seat answered his three asks on 2026-09-14; he has not
+replied, and there are 0 formal reviews. Whether #922 merges over that open review is KAM'S decision. Your GO is a gate verdict on the code at this
+head and nothing more. You never contact Peter; you report the review state as READ / RELAYED.
+
+THE DELTA (drafter-measured 13:00:24–13:02:42 AEST; the launcher re-asserts it at every run):
+  8664826e5 -> 30c773ee8 is a FAST-FORWARD: one commit, "KS-679 round 2: bound the E7 <prefix>_<uuid> exemption to the minted form", parent 8664826e5.
+  Head tree 7aa549d70. Three files, +153 / -17:
+  - scripts/spec-examples/check/contract.mjs (db726db29 -> 07d4e9ab6): the round-1 BENIGN_SHAPES entry /^[a-z]+_<uuid>$/i is replaced by an exported
+    PREFIXED_UUID_RE — a 2-12 lower-case letter prefix, a lower-case v4 uuid with the RFC variant, anchored, NO /i, and two negative lookaheads: a
+    secret-NAMED prefix (substring token / secret / key / passw / passphrase / pwd / credential / bearer / session / private; exact sk / pk / pat /
+    auth / cred / jwt / otp) is refused;
+  - packages/shared/src/__tests__/ks256-spec-example-contract.test.ts (72533d3b0 -> 4ef040f6f): 36 -> 80 cells (the seat's count);
+  - packages/shared/src/openapi/examples/fixtures.ts (b54d26929 -> 4416d7a58): COMMENT ONLY — the mint citations :423 / :727 -> :473 / :806 (F5).
+  The spec yaml and anchoring.openapi.ts are unchanged by the delta (16ac8aa78 / 29c089bb0, as at round 1).
+  merge-base with develop = f6669623c (unchanged). DEVELOP MOVED SINCE ROUND 1: it is now 207716440e2a6282b90ed2a118614d9cf98bee1e = #1037 (KS-1101),
+  api-gateway + frontend files only; ZERO overlap with #922's five files. compare develop...head = merge_base f6669623c, ahead 5, behind 2, files 5.
+  MERGE AGAINST CURRENT DEVELOP IS CLEAN: the drafter's read-only merge-tree of 30c773ee8 against 207716440 at 03:00:36Z = merged tree
+  a1b4b6536d1d60fb2defca2886d36c9b9d0ec80e, 0 conflicted paths. Re-derive it in YOUR clone, name it, and run items 1, 2 and 7 on it. Not clean = NO GO.
+  THE LOCAL BRANCH REF IS STALE (refs/heads/kamilkreiser/ks-679-anchor-id-format-false = 2b5075e9f in the checkout): pin by SHA from origin only.
+
+Read your source document FIRST and in full — the seat's READY mail (captured verbatim by message id from wednesday-agent@ at 03:02:05Z):
+/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/gatesets/2026-09-18_gate922r2/mail_922r2_ready.md
+Then:
+- the PRIOR REPORT — round 1 of this PR, whose F1-F8 you disposition and whose S / Q rows you re-run:
+  /Volumes/DevMASTER/!CODING/Testing Agent MAIN/projects/secuura/reports/2026-09-18-ks679-922-8664826e5-tier2-r1/
+- the seat's evidence, READ-ONLY files in its project: /Volumes/DevMASTER/!CODING/Secuura/Blockchain/5_Project_History/2026-09-18_seatA-10th/ks679/
+  (tamper.py, tamper.out, tamper-results.json, the per-row tamper-*.json, push.out). Parse; NEVER execute the seat's tamper.py (it names the seat's
+  worktree). Copy its ROWS into your own runner, as gatesets/2026-09-17_gate1034/repin_tamper_1034.py did.
+- the QA charter: /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/QA_AGENT_CHARTER.md
+
+DO NOT ENTER EITHER WORKTREE THAT HOLDS THIS BRANCH — never read into, run in or write to:
+  - /Volumes/DevMASTER/!CODING/Secuura/Blockchain/5_Project_History/quarantine/2026-09-15-s233/worktree-ks679 (QUARANTINED; on the stale branch name);
+  - /Volumes/DevMASTER/!CODING/Secuura/Blockchain/worktrees/s-a9-ks679 (seat A's, detached AT 30c773ee8; the seat may be using it).
+Repo:    /Volumes/DevMASTER/!CODING/Secuura/Blockchain/2_Project_Files  (READ-ONLY)
+  - git clone --shared --no-checkout by SHA into your own fresh mktemp -d; git write verbs there only, from a script file.
+  - Never run merge-tree --write-tree, worktree, fetch, checkout or git apply in the checkout. A new develop is fetched by SHA into YOUR clone over
+    https, GH_TOKEN via a GIT_ASKPASS helper reading an env var, never on a command line. Never run vitest inside the checkout.
+  - Record the checkout's porcelain count and .git/worktrees count before and after: they must be equal.
+Farm node_modules per ENTRY in your clone (the #1009 gate's R-6), exactly as round 1 did: Blockchain/Dev/node_modules and
+  packages/shared/node_modules each PER ENTRY (services/anchoring only if you run anything there), .vite/.vitest/.cache skipped, @secuura/* relinked
+  into your tree, shared dist built per tree. NEVER link a node_modules tree wholesale. VITEST = develop's lock, 4.1.11 (checkout install 4.1.10):
+  the side install and farm pattern of round 1. Print the version beside every count.
+
+You are FINDINGS-ONLY. You never fix, never merge, never push, never deploy, never comment, never file, never tick a box, never `@`, never write to
+Linear or GitHub, and nothing goes to Peter or Stuart.
+
+NEVER run a push, the real pre-push hook, or preflight.sh inside the Secuura checkout or any of its worktrees.
+
+NEVER print a credential value, and never open, read or copy a secrets file into output. A script may read GH_TOKEN / LINEAR_API_KEY by NAME from
+/Volumes/DevMASTER/!CODING/Secuura/Blockchain/4_Credentials/.env, and AGENTMAIL_API_KEY by NAME from /Volumes/DevMASTER/WEDNESDAY/4_Credentials/.env,
+only for GitHub GET + a by-SHA fetch into your clone, a Linear query and the one verdict mail. Count, never echo. The deny-list cells build
+secret-SHAPED strings: never print one whole, never write or mail a string that matches a real provider key pattern.
+
+NO docker stack, no kintsugi, no demo, no az, NEVER the wallet mnemonic (KS-535 HOLD). No container, no listener, no live service. Run `docker info`
+ONCE and print its rc on its own line (UP is NOT permission). Quote an lsof TCP LISTEN census before your first run and at close.
+No Akto, no k6, no Playwright, no Schemathesis run. Rule on Schemathesis/Akto for the DELTA with the measured reason. Time-box 40 minutes.
+
+NOT-TESTED.written-first.md is written FIRST, BEFORE any run, and opens with these at full prominence, none softened into a pass:
+  - THE PRE-PUSH PREFLIGHT AT 30c773ee8 WAS INCOMPLETE (the seat's words): "PREFLIGHT INCOMPLETE - 12/15 legs ran, 3 SKIPPED. Nothing failed."
+    Legs 3, 4 and 8 SKIPPED (no local stack). Three skipped legs are NOT a pass; "Nothing failed" does not cover them. It is RELAYED (push.out:1028 in
+    the seat's evidence) — read it there, say whether legs 3 / 4 / 8 bear on these three files, and do not run preflight yourself.
+  - The seat now cites a preflight record at 8664826e5 too (its mail: "F7 corrected (push.out:1009-1031 at 8664826e5 ...)"). Round 1's F7 said no
+    such record existed. Read the push logs and say WHICH push each record belongs to. The drafter read push.out:1009-1012 in the seat-A-10th
+    directory: those lines are leg 15's output (labelled "15/15") inside THAT directory's push log, whose summary the mail cites at push.out:1028 for
+    30c773ee8. A record at 8664826e5 would be in a different push's log: find it, or say it is not on disk. Do not let two pushes' records be read as one.
+  - No stack, nothing live, no served spec from a running service. External consumers of the old `anc_` literal: still unmeasured, carried.
+
+What Wednesday requires — exactly the seat's claims, each MEASURED, none inherited:
+
+1. F1 — THE E7 EXEMPTION IS NOW BOUNDED. Re-run round 1's S3 and Q1-Q5 loosenings AS ROUND 1 DEFINED THEM (the prior report's tamper table,
+   S3 / Q1 / Q2 / Q3 / Q4 / Q5), transposed onto PREFIXED_UUID_RE: each must now go RED. NOTE THE SEAT'S RE-INTERPRETATION: round 1's Q1 was "/i
+   dropped"; the seat's Q1 is "/i ADDED" (the inverse, since the new pattern has no /i). Run BOTH and say which one is the loosening. Then re-run the
+   seat's whole table — BASE 0 | OLD 32 (round-1 regex restored = the red-first proof) | S3 5 | Q1 3 | Q2 2 | Q3 2 | Q4 3 | Q5 5 | N1 17 | N2 8 | N3 2 |
+   N4 2 | N5 1 | N6 2 | N7 2 | N8 4 | N9 6 — and NAME ANY ROW THAT MOVES. The seat ran every row on the ks256 FILE ALONE (total 80 per row): you run
+   each row on the WHOLE packages/shared suite (44 files) and say whether any other file reds. Every red must be an AssertionError; restore by blob
+   sha + `git diff --quiet`. N4 ({2,12} -> {2,11}) is a TIGHTENING, not a loosening: say what its 2 reds prove. Add your own rows aimed at what no
+   seat row sees — at least: a digit inside the uuid's version nibble position, an upper-case variant nibble, a 13-letter prefix, a prefix that
+   CONTAINS a deny word only as a suffix (e.g. ends in `key`), and the batch form `anchor_<uuid>_<i>`.
+
+2. THE DENY LIST MUST NOT REDDEN A LEGITIMATE PUBLISHED VALUE. Run the guard (check-spec-examples.mjs --json) over the WHOLE generated spec at the
+   head, AND at the merged tree, AND at round 1's head 8664826e5; diff the verdict sets. Only intended changes may appear (the drafter expects NONE
+   between 8664826e5 and 30c773ee8 on the real spec: the spec is byte-unchanged and its one prefixed value is admitted by both regexes — measure it).
+   Check the seat's `cred` reasoning against the spec: `cred` is exact-prefix so `credit_` stays benign (drafter probe: credit_<v4> admitted, cred_<v4>
+   refused, `credit_` occurs 0 times in the spec). Say also which LEGITIMATE minted prefixes a substring deny word would catch (e.g. any containing
+   `key`, `pat`h-like words are exact-only) and whether any is published.
+
+3. `key_` REFUSED, NOT ALLOWLISTED — the seat's words: "key_ is REFUSED, not allowlisted." The seat's claim: the guard reads ONLY the published spec, which holds 0 `key_` values and exactly ONE
+   `<prefix>_<uuid>` value (components.schemas.Anchor.example.id). VERIFY BOTH COUNTS FROM THE GENERATED SPEC (drafter, from the committed yaml at the
+   head: 0 `key_`, 1 prefixed-uuid value `anchor_00000000-0000-4000-8000-000000000032`). Verify the guard reads nothing else (READ collect.mjs /
+   check-spec-examples.mjs inputs). Refusing `key_` must redden nothing today: show it.
+
+4. `/i` DROPPED, v4 NIBBLE + RFC VARIANT REQUIRED. The seat's claim: all 21 minters (14 prefixes, 12 locations — round 1's census) print lower-case v4.
+   VERIFY AGAINST THE CENSUS, site by site: randomUUID() / uuidv4() / v4() print lower-case v4; any site using uuid v1 / v5, a custom generator, a
+   .toUpperCase(), or a DB-generated id would now trip E7 on a legitimate value the moment it is published. Name each site's generator.
+
+5. THE ORDERING CLAIM: "E7 returns before BENIGN_SHAPES for values under 40 chars" — why short prefixes and sk_/pk_ + uuid get PATTERN cells, not guard
+   cells. VERIFY BY READING: drafter read scripts/spec-examples/check/rules-example.mjs:87-88 — `if (!HIGH_ENTROPY_RE.test(text)) return;` then the
+   BENIGN_SHAPES test — and contract.mjs:277 `HIGH_ENTROPY_RE = /^[A-Za-z0-9+/=_-]{40,}$/`. Consequence you must state plainly: a 38-39 char value
+   (`sk_<uuid>`, `pk_<uuid>`, any 1-2 letter prefix) is NEVER an E7 finding at all, deny list or not — so the regex's sk / pk / 1-letter bounds are
+   unreachable through E7 today and are pinned only as pattern properties. Is that the right instrument, and is a 39-char secret-shaped published
+   value a real gap (pre-existing, not #922's)? Grade it; do not fix it.
+
+6. F3. Read the PR body: `Refs KS-679`, 0 closing phrases (drafter, GitHub API 03:00Z: `Closes KS-679` absent, `Refs KS-679` present, 0 matches of
+   close/fix/resolve + KS-n). Read the Linear attachment for pull/922: link kind (drafter: `contributes`, KS-679 In Review) — AND its updatedAt, which
+   the drafter read as 2026-09-09T07:58:22Z, i.e. UNCHANGED although round 1 read the kind as `closes`. The seat says the integration re-parsed the
+   body and it made no API write. Reconcile: which field carries the kind, when did it change, and is the record consistent. Controls: pull/1037,
+   pull/99999. Planted closing-phrase control on a scratch string.
+
+7. SUITES. packages/shared vitest on 4.1.11 at the head AND at the merged tree, default ceilings AND 60 s, load beside each: the seat's 904/904,
+   44 files (baseline 860/860, 44 files at 8664826e5 — round 1's count); the ks256 file 80/80 (36 at 8664826e5). The merged tree adds no shared file
+   (develop 207716440 touched none): if its shared count differs from the head's, stop and find out why. tsc -p packages/shared rc 0; check:openapi rc 0
+   and check:spec-examples rc 0 with their counts (seat: 405 example blocks); eslint by rule and message with a firing control — and restate round 1's
+   F6 (eslint applies `rules: {}` to scripts/**/*.mjs, so "0/0" on contract.mjs checks nothing; the seat filed it as KS-1251).
+
+8. PREFLIGHT AT 30c773ee8 — NOT-TESTED, written first (above). Not a pass.
+
+9. PETER'S REVIEW — the seat's words: "Not merging; Peter's review is still open." (09-09 "not approving yet"; 0 formal reviews; no reply since the seat's 09-14 answer — re-read at run time). Report it
+   READ / RELAYED; never contact him. Restate the MERGE AUTHORITY above in your verdict: NOT Wednesday's GO alone; Kam decides on merging over Peter.
+
+CARRY-FORWARD: every round-1 finding F1-F8 gets CLOSED / STILL OPEN / NEW with its evidence at THIS head (the seat claims F1, F2, F3, F4, F5, F7 done;
+F6 filed as KS-1251). Plus the seat's NEW KS-1252 (Medium, pre-existing on develop: the ULID-ish BENIGN_SHAPES entry /^(?:[a-z]+_)?[0-9A-Z]{20,32}$/
+has the same unbounded, name-blind prefix; the seat says it exempts nothing E7 reads today) — verify the seat's measurement READ-ONLY and rule
+whether it is correctly a TICKET outside #922. Report the checkout bounds and NOT TESTED at equal prominence.
+
+TIER: tier 2 DELTA. The delta is a test file, a CI guard regex and a comment; no route, schema, handler or mint path moves. If you find otherwise,
+that changes the tier: stop and report it first.
+
+LEAD WITH item 1, then items 2 and 3: is the exemption bounded (does every round-1 loosening now red, does any seat row move), and does the bound
+redden anything legitimate on the real spec.
+
+Hygiene:
+- /bin/bash here is 3.2: write runners in Python.
+- zsh: no PIPESTATUS, no timeout, `set -- $var` does not word-split, write `"${VAR}:path"`, never begin a line with `=====`.
+- Your tool shell's grep may be a function: use /usr/bin/grep -i with a same-file positive control.
+- File lists: split git output on NEWLINES, never on whitespace — two paths in this repo contain spaces (the round-1 drafter's 236-vs-234 slip).
+- `git grep -c` prints nothing for a zero (silence is unread, not 0); `rev-parse` of a missing path echoes its argument (use cat-file -e).
+- Never `cd` in your own tool calls; absolute paths; git write verbs only inside script files.
+- stderr is never discarded. Clocks from `date`, never estimated. Every scripted edit asserts its anchor count = 1 and a marker.
+- Quote at start, mid and close as THREE timestamped readings: the Secuura checkout's porcelain count, .git/config sha256, for-each-ref count,
+  .git/worktrees count, origin develop SHA, refs/pull/922/head, the checkout branch, and packages/shared's node_modules/.vite reading.
+- Never `rm`: fresh mktemp -d per attempt; quarantine by MOVE. No container is created.
+Do no memory maintenance of your own project's memory store inside this session.
+
+Report FOUND / TESTED / HOW, with controls, into
+/Volumes/DevMASTER/!CODING/Testing Agent MAIN/projects/secuura/reports/2026-09-18-ks679-922-30c773ee8-tier2-r2/
+NOT-TESTED.written-first.md is written FIRST, BEFORE any run (its opening items are fixed above); then report.md and evidence/. The report covers:
+the delta and the merge-in proof with OIDs; the full tamper table (seat rows + round-1 rows transposed + yours) on the whole shared suite with the
+rows that moved; the guard verdict diff over the whole spec (8664826e5 vs 30c773ee8 vs merged); the two spec counts; the minter census by generator;
+the E7 ordering read and its consequence; F3 body + Linear; suites at both ceilings with load and vitest version; the CLOSED / STILL OPEN / NEW table
+for F1-F8 and KS-1252; what you did NOT test at the same prominence.
+Every finding carries its evidence class (MEASURED AT RUNTIME / PROBED / READ ONLY / RELAYED), severity, target (PR or TICKET), SHIPS-WITH or TICKET,
+disposition and its oracle. Name every prediction slip against its predictor (the READY mail, the seat, round 1's report, the drafter, Wednesday).
+Client-facing communication = ticket comments only, and not from you. Never delete; cleanup means quarantine.
+Verdict: ONE line — GO, GO WITH FINDINGS, or NO GO — on 30c773ee8f869a7530a9c17521ba442d641aa757 as the delta over 8664826e5, AND on the merged tree
+(name the then-current develop and the merged-tree OID). ROUND 2 of 2 under the cap: a NO GO here ships the closed instances and tickets the residue;
+a third round on this class needs Kam's word. Then plain statements on items 1-9 and the CLOSED / STILL OPEN / NEW table.
+Give the merge seat its MERGE ADDENDUM line: "#922 does NOT merge on WEDNESDAY'S signed GO alone — Kam rules on merging over Peter's open 09-09 review;
+IF he rules yes: squash 30c773ee8 onto develop <then-current; 207716440 at drafting> (merged tree <OID>; drafter a1b4b6536); #922 attaches to KS-679,
+linkKind <as read>, no closes; KS-679 <state on merge, with the reason>; equality targets after the squash: contract.mjs 07d4e9ab6 / ks256 test
+4ef040f6f / fixtures.ts 4416d7a58 / secuura-api.yaml 16ac8aa78 / anchoring.openapi.ts 29c089bb0; packages/shared <n/n> at develop -> 904/904 at head
+(re-measure) -> <merged n/n> on vitest <version>; dispositions: <per finding>; NEW: <yours>; Records for KS-679's facts comment: F1 <ruling + rows>, the
+three SKIPPED preflight legs, KS-1251, KS-1252 <ruling>, the review state, <yours>".
+
+MAIL YOUR VERDICT to wednesday-agent@agentmail.to when the pass is complete. Your pane holds ~19 lines of alternate screen with no scrollback, so a
+verdict that stays in the pane is one pane-close from being lost -- this is not a formality, it is the only durable copy; the verdict MAIL is the END
+STATE and the wait signal. Send it FROM coagent@agentmail.to. Subject, EXACTLY:
+[QA -> Wednesday] TIER 2 DELTA GATE #922 (KS-679) 30c773ee8 — <GO | GO WITH FINDINGS | NO GO>
+- POST https://api.agentmail.to/v0/inboxes/coagent@agentmail.to/messages/send with JSON {"to": ["wednesday-agent@agentmail.to"], "subject": "...",
+  "text": "..."} and Authorization: Bearer $AGENTMAIL_API_KEY, the key by NAME from Wednesday's .env, never echoed.
+- Build the body from a template file with no shell interpolation and assert the backtick spans survived.
+- Confirm the API answered 2xx and quote the message id in your final pane line. Timestamps in the mail come from `date`, never estimated.
+The MAIL is the end state.
