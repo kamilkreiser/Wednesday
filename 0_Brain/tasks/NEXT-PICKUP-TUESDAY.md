@@ -10,6 +10,31 @@ supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s
 
 ---
 
+## 🔵 DELTA 9 — 2026-09-18 10:46 (Tuesday 50% CHECKPOINT, not a rotation). READ FIRST, then DELTA 8.
+
+- **THE ONE THING THAT MATTERS: Kam's deliverable is the ZIP, and his push waits on STEP 10 ONLY.** The
+  predicate is `0_Brain/reference/2026-09-18_nexusai-zip-chain/UNBLOCK-PREDICATE.md` — evaluate it line
+  by line on `origin/main`, never on a branch. **Do not tell him anything until every box ticks.**
+- **His three instructions today came by TERMINAL and are in NO tool** — see OWED 0⚠ for all three
+  verbatim. `chat_kam.json` holds none of them; the panel shows only his 09:49 Key Vault line.
+- **`origin/main` = `e0ea198a` and has not moved all morning.** The whole chain is behind the
+  RD-436+RD-535 and RD-486 re-gates, both running.
+- **WAKE ARMED:** `2_Project_Files/fleet/watch_nexusai_main.sh e0ea198a… 60 180` running in the
+  background; it EXITS when main moves and the harness re-invokes this seat. **If it has expired or the
+  seat rotated, RE-ARM IT from the current head — do not replace it with an intention to check.**
+- **Live panes:** `%10` S65 (six lanes: RD-436+535 re-gate, RD-486 re-gate, RD-464 r3, RD-503 r2,
+  RD-505 removal, RD-516 design), `%11` S66 (RD-491 r2 re-gate on 7f6c395; RD-490 GO'd, waits on
+  RD-436/452), `%3` fleet-monitor. `%8` wednesday is a bare shell BY DESIGN — never raise it as a fault.
+- **Settled today, do not re-open:** version **2.2.0 is KAM'S ruling** (terminal) · build from **main** at
+  the merged head, **never** the package branch — it would re-add the `ADMIN_RESET_KEY` route he himself
+  ruled removed (C-48) · RD-529 O-8 lands on main before the push · RD-505 removed, RD-542 filed for the
+  redesign, RD-536 row 2 closed · RD-543 filed for the checker's misleading refusal · S66's absolute
+  worktree-path rule is in C-67 and in this seat's `fleet/STANDING_LINES.md`.
+- **No agent question is open.** Last inbound 00:34:50Z, answered 00:36:57Z. Tree clean, HEAD == origin.
+- **THE DECLARED DEFAULT if this seat dies or rotates before main moves:** the successor reads OWED
+  0 / 0a / 0⚠ first, re-arms the watcher from the current head, answers agent mail, and **tells Kam
+  nothing about the push until the predicate ticks.** Nothing else is owed to him.
+
 ## 🔵 DELTA 8 — 2026-09-18 10:04 ROTATION HANDOVER (Tuesday ctx 80%, rotating at a safe boundary). READ FIRST.
 - **ONE THING IS WITH KAM AND NOTHING ELSE BLOCKS: RD-505.** He said on the Tuesday tab 09:49:55, verbatim: *"Keep key vault in the client's tenant. This is not only acceptable, it's a deliberate choice."* That describes what the product ALREADY does (a per-deployment vault created in the CUSTOMER's tenant/RG). RD-505 is the narrower wizard option to use a customer's EXISTING vault, measured undeployable. Tuesday put ONE question back to him — remove for this submission, or redesign — with the stated default: **silence is read as REMOVE, and the record must say that is Tuesday's reading of his words, not his literal ruling.** If he has answered by your boot, brief S65 accordingly; if not, brief REMOVE and say so plainly in the brief.
 - **Kam's standing target, his words today:** *"Don't pause anything. I need to resubmit today."* and *"At the moment we have something in the store no one can use."* Tell him ONLY when everything is tested and it can be resubmitted (his 09:1x instruction), plus anything that needs his hands.
