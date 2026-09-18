@@ -1,7 +1,7 @@
 ---
 date: 2026-09-18
 type: principle
-source: "Measured at the 10:0x Wednesday boot: the files the boot prompt orders read WHOLE total ~886 KB ≈ 220K tokens — more than a whole context window. The boot as specified cannot be executed by the seat it is written for."
+source: "Re-measured at the 10:0x Wednesday boot: ~886 KB ≈ 220K tokens of mandated whole-reads, more than a context window. NOT a discovery — card `wed-boot-read-exceeds-the-context-window` raised this on 2026-09-09 at 229K tokens and is STILL OPEN, unruled. This lesson exists because the measurement recurred and two of its three causes turned out to be fixable without him."
 status: live
 supersedes: ""
 tier: W
@@ -13,6 +13,14 @@ tier: W
 boot's total cost at every boot, and when the sum approaches the window, **fix the files — do not
 obey the instruction into a dead seat, and do not quietly skim and call it a boot.** Say which
 reads were bounded and why.
+
+**⚠ THIS WAS ALREADY KNOWN AND IS ALREADY CARDED.** An earlier seat raised
+`wed-boot-read-exceeds-the-context-window` on 2026-09-09 with the same measurement (229K tokens
+then, 220K now) and the same improvised response (bounded reads, ctx 14%). **It is still open and
+unruled.** The 10:0x seat measured it fresh, believed it had found something, and was stopped from
+filing a duplicate card only by `decision_queue.sh`'s prior-rulings gate. **Check the decision queue
+before treating a measurement as a discovery** — a recurring finding is evidence that the FIRST card
+never got ruled, not that nobody noticed.
 
 **Context (measured 2026-09-18 10:0x, not estimated):**
 
@@ -45,7 +53,9 @@ by obedience rather than by neglect. This seat instead booted bounded and finish
 lesson corpus it exists to summarise**, because 144 of 182 lesson files are tier **W** (carried at
 full digest-block width) against 33 tier M. WED-139 built the digest to cut boot cost; at a 53%
 compression ratio it has stopped doing that. Tiering more lessons down is a judgement about which
-lessons must fire cold, which is his call, not a seat's.
+lessons must fire cold, which is his call, not a seat's — and it is **already option `digest-headlines`
+on the open card**. Do not raise a new card; the open one now needs only that one decision, because
+the other two causes are fixed.
 
 **How to apply:**
 1. **Measure before reading.** `stat -f%z` every mandated whole-read and sum it FIRST. Bytes ÷ 4 ≈
