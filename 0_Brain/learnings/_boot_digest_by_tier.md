@@ -7,7 +7,7 @@ status: live
 
 # Boot digest BY TIER — W whole, M rules-only, every project case a handle
 
-Generated 2026-09-18 10:19 from 185 lesson files (919,244 B). M 33 · MIXED 5 · W 147. 28 project CASE sections inside MIXED files are reduced to one line each: the heading and the path to read it at. W blocks are exactly what the default digest carries; M blocks drop the section index and keep the rules; a P file is a single handle. The CASES behind every rule live only in the lesson files — open one the moment its rule fires.
+Generated 2026-09-18 10:23 from 186 lesson files (922,861 B). M 33 · MIXED 5 · W 148. 28 project CASE sections inside MIXED files are reduced to one line each: the heading and the path to read it at. W blocks are exactly what the default digest carries; M blocks drop the section index and keep the rules; a P file is a single handle. The CASES behind every rule live only in the lesson files — open one the moment its rule fires.
 
 ## The T9 SSD is the master — Wednesday must be fully portable
 `2026-07-31_fully-portable-drive.md` · principle · 2026-07-31 · status: superseded — the "T9 is the master" half by [[2026-08-25_one-drive-devmaster-is-master]] (2026-08-25); the portability principle itself still lives · tier: W
@@ -6241,4 +6241,25 @@ reads were bounded and why.
    than measured is how this grew to 220 KB over the window unnoticed.
 4. **A file whose own frontmatter states a discipline is evidence that discipline is not running.**
    Check the file against its own rule before obeying an instruction to read it whole.
+
+
+## Before doing a fleet action by hand, check whether the fleet already has a tool for it
+`2026-09-18_use-the-fleets-own-tool-before-rebuilding-its-behaviour.md` · correction · 2026-09-18 · status: live · tier: W
+
+**The lesson:** When about to do something operational — tap a pane, read Kam's messages, raise a
+card, count a board, send a brief — **look for the existing script first.** The fleet's tools are not
+conveniences; each one encodes a failure that already happened and its ledger weight. Doing the
+action by hand does not just skip the convenience, it **silently re-opens the incident the tool was
+built to close.**
+
+**How to apply:**
+1. **`ls` the tool directory before hand-rolling an operational action.** `2_Project_Files/fleet/`,
+   `fleet/cockpit/`, `2_Project_Files/tools/`. It costs one call.
+2. **Taps go through `cockpit.sh say <pane> '<pointer>' --mail '<subject substring>'`** — never raw
+   `send-keys`. A tap is a pointer; the content goes by mail, and the mail is verified at the
+   destination before the tap.
+3. **If a hook or a gate refuses me, that is the answer, not an obstacle.** Two of these three were
+   caught by gates built for exactly them, and both refusals were correct.
+4. **A tool's header comment names the incident and the ledger weight.** Read it — it tells you what
+   breaks when you skip it.
 
