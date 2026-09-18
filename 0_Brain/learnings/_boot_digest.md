@@ -7,7 +7,7 @@ status: live
 
 # Boot digest — headline + rules of every lesson (open the file when it fires)
 
-Generated 2026-09-18 10:55 from 187 lesson files (928,767 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 9 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
+Generated 2026-09-18 12:35 from 188 lesson files (930,984 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 9 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
 
 ## The T9 SSD is the master — Wednesday must be fully portable
 `2026-07-31_fully-portable-drive.md` · principle · 2026-07-31 · status: superseded — the "T9 is the master" half by [[2026-08-25_one-drive-devmaster-is-master]] (2026-08-25); the portability principle itself still lives
@@ -6621,6 +6621,27 @@ sections (open the file for these): How to apply
 4. **If the queue must be empty, write WHY where the next reader lands** — the reason is the artefact, and "I didn't find anything" is not one.
 
 **Family:** [[2026-09-15_never-idle-the-gatekeeper-widens-the-harness-when-the-pool-runs-dry]] (the correction this promotes) · [[2026-09-16_local-model-is-long-term-and-claude-takes-what-it-cannot-do]] (the router: Claude takes what Ornith cannot) · [[2026-09-16_if-something-blocks-move-on-to-the-next]] (a blocked item is skipped, never waited on) · [[2026-09-14_ornith-runs-at-night-in-the-downtime-a-standing-rule]] (the night shape this widens to all hours).
+
+
+## `cockpit.sh rotate` is for a seat that has NOT wrapped; retire a wrapped seat by hand
+`2026-09-18_rotate-is-for-an-unwrapped-seat.md` · principle · 2026-09-18 · status: live
+
+**The lesson:** `rotate` does tap → **wait for a wrap mail NEWER than the tap** → kill → relaunch. On a
+seat that has **already** wrapped, it forces a **second** end-of-session ritual. A Secuura seat's ritual
+posts the rule-7 comments, so that means **double-posting to Peter and Stuart**. If no fresh wrap mail
+comes within the timeout, it also force-kills with a false `!!!! ROTATE FORCED WITHOUT WRAP !!!!` alarm.
+
+**How to apply:**
+1. **Ask first: has this seat already sent its wrap mail?**
+   - **No** → `cockpit.sh rotate <Client/Project>` (the tool's intended case).
+   - **Yes** → retire it **by hand**. Verify the wrap landed ON DISK (handover file, the top history entry,
+     repo porcelain against that project's known baseline), then `tmux kill-pane` and `cockpit.sh launch <Client/Project>`.
+2. **A wrap MAIL is a claim; the handover and history entry are the evidence.** Check them before killing
+   the pane, because killing loses everything that wasn't written.
+3. **Never run two sessions on one project**: confirm the old Claude process is gone (its cwd) before launching.
+4. **Owed (a mechanism, not just this lesson):** `rotate` should REFUSE when the pane's project already has
+   a wrap mail since the pane's own boot, and say "already wrapped, retire by hand". It needs arms: a wrapped
+   seat that must refuse, and an unwrapped one that must rotate normally.
 
 
 ## A boot read that outgrows the window is not a thorough boot, it is a dead seat
