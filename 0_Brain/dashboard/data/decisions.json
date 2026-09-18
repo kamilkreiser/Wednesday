@@ -11546,5 +11546,41 @@
    "CARD nexusai-live-listing-lockout-warn-now",
    "CARD hpsm-live-release-verification-unprovable"
   ]
+ },
+ {
+  "id": "nexusai-rd549-live-211-exfiltration",
+  "client_project": "Datasec/NexusAI",
+  "title": "The LIVE 2.1.1 listing leaks a customer's user names to a third party — stop new acquisitions, and does anyone already deployed get told?",
+  "bluf": "MEASURED, not theorised, and identical on all three heads including the live listing at 6fb497d: a stranger anonymously saves their own Azure OpenAI endpoint and key during the pre-sign-in window, it survives setup, and a signed-in admin's next chat sends 38 distinct REAL user names plus usage figures to the attacker's host with the attacker's key. No DNS control needed — the attacker uses their own Azure OpenAI resource, so Microsoft issues a legitimate hostname and certificate and every check we have passes correctly. THE FACT THAT DECIDES IT: every NEW download starts in the vulnerable state, because a fresh deployment is unconfigured by definition and a new Container Apps instance is publicly reachable and findable via certificate transparency within minutes. So the live listing is not only a question about existing customers — it manufactures newly exposed deployments for as long as it stays up. OVERRIDE OF A PRIOR RULING, STATED: C-43 accepted not warning the live listing when the exposure was a lockout or a takeover INSIDE the customer's own tenant. This sends customer data OUT to a third party. Tuesday does not believe that is the same class and is not applying the old decision to a different kind of harm.",
+  "default_action": "NONE — this one does not default. Tuesday is deliberately not carrying C-43 forward onto a different class of harm; it waits for Kam's word.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Stop new acquisitions of 2.1.1 now, fix ships in the resubmission (Recommended)",
+    "detail": "Removes the manufacture of new exposed deployments. Cost: the listing is dark until the resubmission, which makes 'something in the store no one can use' literally true for a while. Kam's hands in Partner Center."
+   },
+   {
+    "key": "b",
+    "label": "Leave the listing up; the fix ships in the resubmission",
+    "detail": "C-43's default carried forward. Cost: every download between now and then creates a freshly exposed deployment."
+   },
+   {
+    "key": "c",
+    "label": "Stop new acquisitions AND notify whoever has already deployed",
+    "detail": "Needs the acquisition count from Partner Center, which only Kam can see. A deployed customer CAN self-check: the product writes an audit entry whenever AI config is saved, so they can look for one they did not make."
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-09-18T11:38:09.014174+10:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "CARD nexusai-scim-deploy-live-ab",
+   "CARD secrev-live-pass-blocked-on-tenant",
+   "CARD hpsm-composer-live-demo-upgrade-after-c12",
+   "CARD nexusai-live-listing-lockout-warn-now",
+   "CARD hpsm-live-release-verification-unprovable"
+  ]
  }
 ]
