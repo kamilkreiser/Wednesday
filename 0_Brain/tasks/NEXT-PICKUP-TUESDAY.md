@@ -176,6 +176,26 @@ in a shared repo where both files exist. Flagged to her in the 20:0x STATUS mail
 
 ## OWED — actions with a named owner, carried until done or withdrawn
 
+0a. 🔴 **KAM — "let me know when the push is unblocked" (his words, 2026-09-18 ~10:3x).**
+   **The predicate is written down so this is a CHECKLIST, not a judgement:**
+   `0_Brain/reference/2026-09-18_nexusai-zip-chain/UNBLOCK-PREDICATE.md`. Evaluate it line by line on
+   `origin/main` — never on a branch — at every MERGED mail and every checkpoint. **A seat that cannot
+   tick every applicable box does not tell him.**
+   **THE WAKE, and it is a mechanism rather than an intention:**
+   `2_Project_Files/fleet/watch_nexusai_main.sh <baseline-sha> <poll-s> <max-min>` reads `origin/main`
+   directly and EXITS when it moves; the harness re-invokes the seat on a background job's exit.
+   **Armed at 10:3x with baseline `e0ea198a420d4189b3745b6bdec6a94a137675f8`, poll 60s, max 180m.**
+   It is INDEPENDENT of every agent's liveness — a seat that dies quietly produces no merge and no
+   mail, and this still reports. Both branches exercised before arming (fire rc 0 with the SHAs; quiet
+   rc 3 after a full minute of real polling, no false fire). **If it has expired, re-arm it from the
+   current head; do not replace it with an intention to check.**
+   ⚠ **OPEN QUESTION THAT COULD UNBLOCK HIM A STEP EARLIER, asked of S65 at 00:33:16Z:** S65's chain is
+   drawn LINEAR (push waits for steps 10 AND 11), but step 11 is package/template work that does not
+   change the image's bytes. If the image is built from `main`, the push needs only step 10 and step 11
+   overlaps his round trip. **Until S65 answers, use the STRICT reading when TELLING him** — the one
+   thing that must never happen is telling him he is unblocked when he is not — **but do not plan as
+   though strict is settled.**
+
 0. 🔴 **KAM — THE ZIP IS THE NAMED DELIVERABLE (his words, 2026-09-18 ~10:2x, verbatim):**
    *"I will do the submission once you prepare the zip for me. Tell me when it's ready."*
    **This is an INSTRUCTION, not a question, and it stands until his own words withdraw it**
