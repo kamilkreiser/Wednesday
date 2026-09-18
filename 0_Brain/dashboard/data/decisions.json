@@ -11551,7 +11551,7 @@
   "id": "nexusai-rd549-live-211-exfiltration",
   "client_project": "Datasec/NexusAI",
   "title": "The LIVE 2.1.1 listing leaks a customer's user names to a third party — stop new acquisitions, and does anyone already deployed get told?",
-  "bluf": "MEASURED, not theorised, and identical on all three heads including the live listing at 6fb497d: a stranger anonymously saves their own Azure OpenAI endpoint and key during the pre-sign-in window, it survives setup, and a signed-in admin's next chat sends 38 distinct REAL user names plus usage figures to the attacker's host with the attacker's key. No DNS control needed — the attacker uses their own Azure OpenAI resource, so Microsoft issues a legitimate hostname and certificate and every check we have passes correctly. THE FACT THAT DECIDES IT: every NEW download starts in the vulnerable state, because a fresh deployment is unconfigured by definition and a new Container Apps instance is publicly reachable and findable via certificate transparency within minutes. So the live listing is not only a question about existing customers — it manufactures newly exposed deployments for as long as it stays up. OVERRIDE OF A PRIOR RULING, STATED: C-43 accepted not warning the live listing when the exposure was a lockout or a takeover INSIDE the customer's own tenant. This sends customer data OUT to a third party. Tuesday does not believe that is the same class and is not applying the old decision to a different kind of harm.",
+  "bluf": "MEASURED, not theorised, identical on all three heads including the live listing at 6fb497d: a stranger anonymously saves their own Azure OpenAI endpoint and key during the pre-sign-in window, it survives setup, and a signed-in admin's next chat sends 38 distinct REAL user names plus usage figures to the attacker's host with the attacker's key. No DNS control needed — the attacker uses their own Azure OpenAI resource, so Microsoft issues a legitimate hostname and certificate and every check we have passes correctly. NEW, AND IT MAKES THIS WORSE: the plant is RESTORED ON EVERY BOOT for a real customer. The Marketplace template sets USE_AZURE_LOG_ANALYTICS unconditionally (mainTemplate.json:547), so deployments take the path where AI config is re-hydrated at startup — a restart does NOT clear it, and an admin who suspects something and reboots gets it back. THE FACT THAT DECIDES IT: every NEW download starts in the vulnerable state, because a fresh deployment is unconfigured by definition and a new Container Apps instance is publicly reachable and findable via certificate transparency within minutes. So the live listing is not only a question about existing customers — it manufactures newly exposed deployments for as long as it stays up. OVERRIDE OF A PRIOR RULING, STATED: C-43 accepted not warning the live listing when the exposure was a lockout or takeover INSIDE the customer's own tenant. This sends customer data OUT to a third party, and it persists across reboots. Tuesday does not believe that is the same class.",
   "default_action": "NONE — this one does not default. Tuesday is deliberately not carrying C-43 forward onto a different class of harm; it waits for Kam's word.",
   "options": [
    {
@@ -11581,6 +11581,19 @@
    "CARD hpsm-composer-live-demo-upgrade-after-c12",
    "CARD nexusai-live-listing-lockout-warn-now",
    "CARD hpsm-live-release-verification-unprovable"
-  ]
+  ],
+  "amendments": [
+   {
+    "ts": "2026-09-18T11:41:20.308185+10:00",
+    "reason": "RD-550's measurement changed how bad this is: a planted config is RESTORED ON EVERY BOOT on the Marketplace path, so the exposure is durable rather than transient.",
+    "changed": [
+     "bluf"
+    ],
+    "before": {
+     "bluf": "MEASURED, not theorised, and identical on all three heads including the live listing at 6fb497d: a stranger anonymously saves their own Azure OpenAI endpoint and key during the pre-sign-in window, it survives setup, and a signed-in admin's next chat sends 38 distinct REAL user names plus usage figures to the attacker's host with the attacker's key. No DNS control needed — the attacker uses their own Azure OpenAI resource, so Microsoft issues a legitimate hostname and certificate and every check we have passes correctly. THE FACT THAT DECIDES IT: every NEW download starts in the vulnerable state, because a fresh deployment is unconfigured by definition and a new Container Apps instance is publicly reachable and findable via certificate transparency within minutes. So the live listing is not only a question about existing customers — it manufactures newly exposed deployments for as long as it stays up. OVERRIDE OF A PRIOR RULING, STATED: C-43 accepted not warning the live listing when the exposure was a lockout or a takeover INSIDE the customer's own tenant. This sends customer data OUT to a third party. Tuesday does not believe that is the same class and is not applying the old decision to a different kind of harm."
+    }
+   }
+  ],
+  "amended_ts": "2026-09-18T11:41:20.308204+10:00"
  }
 ]
