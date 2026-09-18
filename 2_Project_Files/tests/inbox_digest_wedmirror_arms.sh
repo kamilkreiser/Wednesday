@@ -4,7 +4,7 @@
 # and each run gets a DISTINCT seen-file (a shared one makes the second run show 0 new, which is a vacuous pass;
 # $RANDOM in sibling $(...) subshells repeats). The STRONG controls assert "3 new", not just the section header.
 set -u
-S=$(mktemp -d /private/tmp/claude-501/digest_arms.XXXX); mkdir -p "$S/bin"
+S=$(mktemp -d "${TMPDIR:-/tmp}/digest_arms.XXXX"); mkdir -p "$S/bin"   # portable scratch
 cat > "$S/bin/curl" <<'C'
 #!/bin/bash
 case "$*" in
@@ -13,7 +13,7 @@ case "$*" in
 esac
 C
 chmod +x "$S/bin/curl"
-D=/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet
+D="$(cd -P "$(dirname "${BASH_SOURCE[0]}")/../fleet" && pwd)"   # SELF-LOCATING: DevMASTER is not mounted on the mini (Tuesday, 2026-09-18)
 run(){ PATH="$S/bin:$PATH" AGENTMAIL_API_KEY=dummy WED_AGENT=$2 INBOX_DIGEST_SEEN_FILE="$S/seen_$3.txt" bash "$1" 2>&1; }
 W_NEW="$(run $D/inbox_digest.sh wednesday a)"; W_OLD="$(run $D/inbox_digest.sh.pre-0918-wedmirror wednesday b)"
 T_NEW="$(run $D/inbox_digest.sh tuesday c)";   T_OLD="$(run $D/inbox_digest.sh.pre-0918-wedmirror tuesday d)"
@@ -26,6 +26,8 @@ chk "M2  new withholds Datasec preview"  "$(c "$W_NEW" DATASEC-PREVIEW-TOKEN)" 0
 chk "M3  new keeps Datasec subject"      "$(c "$W_NEW" 'Datasec/NexusAI')" 1
 chk "M4  Secuura preview unchanged"      "$(c "$W_NEW" SECUURA-PREVIEW-TOKEN)" 1
 chk "M5  general preview unchanged"      "$(c "$W_NEW" GENERAL-PREVIEW-TOKEN)" 1
-chk "M7  Tuesday byte-identical"  "$([ "$T_NEW" = "$T_OLD" ] && echo same || echo differs)" same
+# M7 was a byte-identical snapshot against .pre-0918-wedmirror; Tuesday's own later rounds (6b470ba9c) legitimately change
+# its output, so the snapshot rotted. The DURABLE property is: the Wednesday mirror NEVER fires for the Tuesday seat.
+chk "M7  the Wednesday mirror never fires for Tuesday" "$(c "$T_NEW" 'preview withheld')" 0
 chk "M8  Tuesday never sees Secuura preview" "$(c "$T_NEW" SECUURA-PREVIEW-TOKEN)" 0
 exit $F
