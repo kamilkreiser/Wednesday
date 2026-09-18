@@ -7,7 +7,7 @@ status: live
 
 # Boot digest — headline + rules of every lesson (open the file when it fires)
 
-Generated 2026-09-18 10:42 from 187 lesson files (926,551 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 9 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
+Generated 2026-09-18 10:55 from 187 lesson files (928,767 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 9 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
 
 ## The T9 SSD is the master — Wednesday must be fully portable
 `2026-07-31_fully-portable-drive.md` · principle · 2026-07-31 · status: superseded — the "T9 is the master" half by [[2026-08-25_one-drive-devmaster-is-master]] (2026-08-25); the portability principle itself still lives
@@ -6478,12 +6478,14 @@ sections (open the file for these): How to apply
 
 
 ## A premise under a question to Kam is load-bearing — verify it like a fact in a brief
-`2026-09-18_a-premise-under-a-question-to-kam-is-load-bearing-verify-it.md` · correction · 2026-09-18 · status: live
+`2026-09-18_a-premise-under-a-question-to-kam-is-load-bearing-verify-it.md` · correction · 2026-09-18 · status: live — REGRESSION w=3 same day (second instance 10:5x); enforcement OWED
 
 **The lesson:** `send_brief.sh` refuses a brief whose facts have no provenance. **The same standard
 applies to anything I put under a question to Kam** — arguably more, because a brief goes to an agent
 who will check it, and a question goes to a principal who will *act on it*. **Never pass a receiving
 agent's summary into a decision for Kam without validating it at the source first.**
+
+sections (open the file for these): ⚠ REGRESSION, same day (w=3, 10:5x): the second instance names the exact shape
 
 **How to apply:**
 1. **Before any question to Kam, list its load-bearing premises and name the source of each.** If a
@@ -6497,6 +6499,18 @@ agent's summary into a decision for Kam without validating it at the source firs
 4. This is [[2026-08-03_mental-model-not-source-of-truth]] failing to fire on an *inbound agent
    report*. The rule's order — read the model, **validate against the source**, then act — applies to
    what an agent tells me, not only to what I have stored.
+
+**The rule, stated so it can fire:** **before sending Kam a negative claim, name the measurement that
+covers the WHOLE space it asserts about. If you can't, say what was actually measured ("GitHub shows 0
+formal reviews") instead of what it seems to imply ("nobody is holding it").**
+
+**Enforcement OWED (w≥3 → failing-test treatment):** an ADVISORY check in `tools/chat_reply.sh`, the
+panel-mirror path every message to Kam takes. It would flag absence phrases (`nothing`, `never`, `no one`,
+`wasn't`, `isn't waiting`, `not on`, `no review`) and print *"absence claim: name the measurement that
+covers the whole space"*. **Advisory, not blocking**, because plain English is full of harmless negatives.
+Needs arms before arming: one real absence claim that flags, a harmless negative that flags (so it stays
+advisory), and a positive claim that doesn't flag. **Not built in this seat. Raised with Kam in the 10:5x
+correction.**
 
 
 ## An authorised sweep does not authorise what the API cascades to

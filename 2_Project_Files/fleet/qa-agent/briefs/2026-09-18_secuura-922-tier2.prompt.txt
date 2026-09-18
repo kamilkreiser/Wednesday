@@ -1,0 +1,209 @@
+ultrathink
+
+You are the fleet QA agent running ONE TIER 2 (through code) ROUND 1 gate (round 1 of 2 under the cap) over Secuura/Blockchain PR #922 (KS-679,
+Seat A) at head 8664826e53cc47d4dd69c784926c9c14af444cec. A VERDICT IS VALID ONLY AT ITS HEAD: everything below is about that SHA and no other. If
+refs/pull/922/head or the branch moves under you at any reading, STOP and say so — a verdict carried onto a moved head is a fabricated verdict.
+
+KS-679: the published OpenAPI example Anchor.id was `anc_01HC9ZN4ANCHORFIXTURE1`, a format the anchoring service has never minted (it mints
+`anchor_<uuid>`). Because the false value sat in the canonical fixture set, guard rule E8 CERTIFIED it. #922 makes it format-true
+(`anchor_00000000-0000-4000-8000-000000000032`), and because the true shape is 43 chars it crossed secret-detector E7's 40-char threshold — so the PR
+also WIDENS `BENIGN_SHAPES` in scripts/spec-examples/check/contract.mjs with `/^[a-z]+_<exact uuid>$/i`. Five files, four commits:
+docs/openapi/secuura-api.yaml (+1 -1, regenerated), packages/shared/src/openapi/examples/fixtures.ts (+18 -1), packages/shared/src/__tests__/
+ks256-spec-example-contract.test.ts (+139: a pinning cell + a seven-case E7 control), scripts/spec-examples/check/contract.mjs (+13 -1), and
+services/anchoring/src/anchoring.openapi.ts (+3, claimed COMMENT-ONLY).
+
+WHY TIER 2 AND NOT TIER 1 (the drafter's ruling — overturn it if you measure otherwise, and say so first): no route, schema, status code, handler or
+mint path moves; the one runtime-visible change is an example VALUE in the served spec, which is derivable from code. Nothing in this PR needs a
+running stack to measure. The risk is in a GUARD being loosened, which is measured through code and the guard's own runner. If you find a runtime
+path the PR changes, that alone turns this into a tier 1 question: stop and report it.
+
+MERGE AUTHORITY: a GO is a gate verdict, not a merge. #922 merges on WEDNESDAY'S signed GO naming the head (the TESTED grant) and on nothing else.
+No other tap merges it. You never merge it yourself.
+
+Read your source document FIRST and in full — there is NO seat READY mail at this head, so the source is the PR body and its three comments,
+captured verbatim from the GitHub API at 2026-09-18T00:45:15Z:
+/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/gatesets/2026-09-18_gate922/pr922_snapshot.md
+READ IT KNOWING: its Test Evidence and its PREFLIGHT line were written at e60a24c50 (the 2026-09-14 push, against develop 852e1fff7) — NOT at this
+head. The body never mentions 8664826e5. Every number in it (844 passed / 43 files, the mint lines :423 / :727) is a claim about a DIFFERENT tree.
+Re-measure; never copy. Then read:
+- the QA charter: /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/QA_AGENT_CHARTER.md
+- the PRIOR REPORT — not the same finding lineage (no gate has ever graded the spec-example guard's E7 widening) but the tier 2 method bar the fleet's
+  recent tier 2 prompts cite; match its rigour and its evidence classes:
+  /Volumes/DevMASTER/!CODING/Testing Agent MAIN/projects/secuura/reports/2026-09-17-ks1211-1027-d7fc6cc55-tier2-r1/
+
+PINS, re-read live at drafting 2026-09-18 10:37:46–10:45:15 AEST (git ls-remote + the GitHub PR and compare APIs agree; the launcher re-asserts all of it
+at every run and REFUSES, exit 18, if develop has moved again):
+  #922 head 8664826e53cc47d4dd69c784926c9c14af444cec = refs/pull/922/head = refs/heads/kamilkreiser/ks-679-anchor-id-format-false ON ORIGIN.
+    Head tree 92224cca7; first parent e60a24c50, second parent f6669623c. History: 2b5075e9f (the change, reviewed 09-09) -> a7d9e2943 (develop
+    852e1fff7 merged in, 09-14) -> e60a24c50 (the seven-case control as cells) -> 8664826e5 (develop f6669623c merged in, this morning).
+  merge-base with develop = f6669623ccae5ab445be6e0e73fb4f19ae2c89d1 (the head's second parent).
+  #922 IS ALREADY ONE DEVELOP-MOVE BEHIND: develop is now a105cd32b1ed9c6927ae6e797f8259224d8480c6 = PR #1034 (KS-1215) merged this morning. It changes
+    three files, ALL services/api-gateway (middleware/auth.ts, routes/platform.ts, the ks1215 test). ZERO overlap with #922's five files — measured by the
+    drafter, not reasoned. compare develop...head reads merge_base f6669623c, ahead 4, behind 1, files 5.
+  MERGE AGAINST CURRENT DEVELOP IS CLEAN: the drafter's read-only merge-tree of 8664826e5 against a105cd32b at 00:38:43Z returned merged tree
+    5c56e26fee8cffc3497eae5cc6433a81914d3931 with ZERO conflicted paths. Re-derive that OID in YOUR clone, name it, and run L0 and items 1-3 and 6 on the
+    MERGED tree as well as on the head. If your merge is not clean, that alone is a NO GO: stop and say so.
+  THE LOCAL BRANCH REF IS STALE: in the Secuura checkout, refs/heads/kamilkreiser/ks-679-anchor-id-format-false still reads 2b5075e9f (the 09-09 head).
+    NEVER resolve the head by its local branch name. Pin by SHA, from origin.
+DO NOT ENTER EITHER WORKTREE THAT HOLDS THIS BRANCH. Both are live checkout state that a gate must never touch, read into, run in or write to:
+  - /Volumes/DevMASTER/!CODING/Secuura/Blockchain/5_Project_History/quarantine/2026-09-15-s233/worktree-ks679 — QUARANTINED, and checked out ON the
+    branch name (its HEAD is `ref: refs/heads/kamilkreiser/ks-679-anchor-id-format-false`, so it reads the stale local 2b5075e9f);
+  - /Volumes/DevMASTER/!CODING/Secuura/Blockchain/worktrees/s-a9-ks679 — seat A's worktree, detached AT the head. The seat may be using it.
+  Your trees are your own clones, and only those.
+Repo:    /Volumes/DevMASTER/!CODING/Secuura/Blockchain/2_Project_Files  (READ-ONLY)
+  - git clone --shared --no-checkout by SHA into your own fresh mktemp -d; git write verbs there only, from a script file.
+  - Never run merge-tree --write-tree, worktree, fetch, checkout or git apply in the checkout.
+  - A new develop is fetched by SHA into YOUR clone over https, with GH_TOKEN handed to git by a GIT_ASKPASS helper reading an env var, never on a
+    command line.
+  - Never enter any seat's worktree or another gate's clone (the #1037 gate is live in pane %99); never run vitest inside the checkout.
+  - Record the checkout's porcelain count and .git/worktrees count before and after: they must be equal.
+Farm node_modules per ENTRY in your clone (the #1009 gate's R-6). This is a DIFFERENT service and suite from the #1037 gate: what runs here is
+  packages/shared (vitest), the scripts/spec-examples guard (node), and generate-openapi (tsx, after `npm run build --workspace=packages/shared`).
+  Blockchain/Dev/node_modules (988 entries in the checkout) and packages/shared/node_modules (9) each PER ENTRY; services/anchoring/node_modules (9)
+  ONLY if you run anything in anchoring; .vite/.vitest/.cache skipped, @secuura/* relinked into your tree. Build the shared dist per tree and assert
+  @secuura/shared resolves IN TREE. NEVER link a node_modules tree wholesale — a wholesale link can write through to the real checkout's .vite cache;
+  create no node_modules where nothing runs.
+VITEST = develop's lock, 4.1.11 (the checkout install is 4.1.10): a side install OUTSIDE Blockchain/Dev pinned to the lock closure (--ignore-scripts),
+  the hoisted vitest entries farmed from it. Print the version beside every count. Pattern: gatesets/2026-09-17_gate1034/repin_vitest41111_1034.py.
+
+You are FINDINGS-ONLY. You never fix, never merge, never push, never deploy, never comment, never file, never tick an ack box or the PII boxes, never
+`@`, never write to Linear or GitHub, and nothing goes to Peter or Stuart.
+
+NEVER run a push, the real pre-push hook, or preflight.sh inside the Secuura checkout or any of its worktrees.
+
+NEVER print a credential value, and never open, read or copy a secrets file into output. A script may read GH_TOKEN / LINEAR_API_KEY by NAME from
+/Volumes/DevMASTER/!CODING/Secuura/Blockchain/4_Credentials/.env, and AGENTMAIL_API_KEY by NAME from /Volumes/DevMASTER/WEDNESDAY/4_Credentials/.env,
+only for the calls this prompt allows (GitHub GET + a by-SHA fetch into your clone, Linear query, the one verdict mail), and never echoes them. Copy
+gatesets/2026-09-17_gate1034/api_read_1034.py. Count, never echo. The seven-case control assembles key-SHAPED strings from fragments at run time:
+never print one whole, and never commit, write or mail a string that matches a real provider key pattern.
+
+NO shared docker stack, no :6882 / :7082 slot, no kintsugi, no demo, no az, NEVER the wallet mnemonic (KS-535 HOLD). This gate needs NO container,
+NO listener and NO live service. Run `docker info` ONCE and print its rc on its own line (UP is NOT permission; create no container). If anything you
+run opens a listener, identify it by port + argv + cwd, SIGTERM that pid (never a pattern kill), and recount; quote an lsof TCP LISTEN census before
+your first run and at close.
+No Akto, no k6, no Playwright, no Schemathesis run (NOT COMMISSIONED) — YOU rule whether Schemathesis/Akto are REQUIRED, with the measured reason. The
+PR's reviewer wrote that no system suite is owed ("a documentation example plus a guard shape; Anchor.id carries no format or pattern; no route, schema
+or status code moves") — that is RELAYED, not measured: test it. Time-box 45 minutes of work.
+
+NOT-TESTED.written-first.md is written FIRST, BEFORE any run, and it MUST open with these, each at full prominence, none softened into a pass:
+  - THE PRE-PUSH PREFLIGHT WAS INCOMPLETE: "PREFLIGHT INCOMPLETE — 12/15 legs ran, 3 SKIPPED. Nothing failed." Legs 3, 4 and 8 were SKIPPED (no local
+    stack). Three skipped legs are NOT a pass and "Nothing failed" does not cover them. Name what each of legs 3 / 4 / 8 checks (READ the preflight
+    source in your clone) and say whether any of them bears on this PR's five files.
+  - THAT PREFLIGHT RECORD IS FROM THE 2026-09-14 PUSH AT e60a24c50 (10:26:50Z -> 10:32:47Z per the body). No preflight record at 8664826e5 exists in
+    anything the drafter could read. The relayed claim that this morning's push ran the same 12/15 is RELAYED ONLY. You do not run preflight: record the
+    gap, do not fill it.
+  - Schemathesis / Akto / Playwright / k6: not run by the seat, not commissioned here.
+  - Nothing live: no stack request, no served spec from a running anchoring service.
+  - External consumers hard-coding the old `anc_` literal: not visible from the repo — the body says so itself. Carry it, never close it.
+
+What Wednesday requires (L0 + items 1-9):
+
+L0. THE E7 WIDENING — THE LEAD, because a secret detector is being loosened. `/^[a-z]+_<exact uuid>$/i` now exempts ANY lower-case prefix + uuid.
+   (a) CENSUS every producer of a `<prefix>_<uuid>` value in the repo at head — ALL forms: `${crypto.randomUUID()}`, `${require('crypto').randomUUID()}`,
+       uuid v4 / uuidv4 / v4(), string concatenation, and any helper that wraps them. The seat claims 13 prefixes across 9 services at 17 sites; the drafter's
+       template-literal-only grep found 2 and MISSED anchoring's `require('crypto')` form, so a partial grep is known to undercount. Positive controls:
+       anchoring index.ts `anchor_` (now at :473 and the batch :806 at this head — the body's :423 / :727 are stale) and security index.ts `key_`.
+   (b) CLASSIFY each: a RECORD ID, or a SECRET / TOKEN / CREDENTIAL / BEARER / SESSION / RESET / INVITE / SIGNING value. The drafter read one: security
+       index.ts `key_${crypto.randomUUID()}` is an API key's internal RECORD id (its own comment: "not a secret"; keyHash / keyPrefix are separate
+       fields). Verify that and every other one. ANY value that is a credential in the `<prefix>_<uuid>` shape is a Blocker: the widening would certify
+       it the moment it appears in an example. A uuid is not a credential only because nobody used one as a credential — find out.
+   (c) DIFF THE GUARD'S VERDICTS over the WHOLE generated spec at develop, head and merged: which findings does develop's guard raise that head's does
+       not? Exactly one change is intended (the anchor id). Any other finding that disappears is a finding.
+   (d) Re-run the seat's seven-case control and its three red-proofs (the line deleted -> 2 red; loosened to `/^[a-z]+_.+$/i` -> 3 red; `[a-z]+_` ->
+       `[a-z]*_?` -> 0 red, which the seat says admits only a bare uuid already exempt — CHECK that claim, do not inherit it). PLUS your own, aimed at
+       what the seven cases cannot see: an upper-case prefix, a multi-underscore prefix, a prefix of digits, a uuid with no hyphens, a v1 / nil uuid.
+
+1. THE EXAMPLE VALUE. In the generated spec at head AND merged: `anc_` 0 occurrences outside history comments, `anchor_…0032` exactly where
+   FX.anchor.id publishes, `anchorId: example-anchorId` 4 (pre-existing, unchanged). check:openapi rc 0 (regenerated yaml byte-equal to the committed
+   one). anchoring.openapi.ts COMMENT-ONLY: prove it by a comment-stripped token diff, not by reading. `…0032` collides with no other FX value.
+
+2. THE ks256 CELLS. The new pinning cell must red on the old literal and green on the new (plant both). The shared suite at develop, head and merged, at
+   DEFAULT and 60 s ceilings on vitest 4.1.11 with load beside every run. Denominators: 44 test files at head AND at develop (drafter's count, READ);
+   the body's "844 passed / 43 files" is at e60a24c50 and is STALE — measure yours and name the slip.
+
+3. TAMPER, on the shared suite at HEAD, each row restored by blob sha + `git diff --quiet`, anchor count 1 + marker: the seat's three rows exactly, the
+   FX.anchor.id value reverted to `anc_…` (the pinning cell must red), FIXTURE_ID_VALUES entry removed (E8 must stop certifying — measure what reds),
+   and L0(d)'s own rows. Every zero-red row gets its consequence written out.
+
+4. THE SURVIVAL CONTROL the seat claims — RE-DERIVE it, do not accept it: diff e60a24c50..8664826e5 must equal develop 852e1fff7..f6669623c, BY NAME
+   (the drafter: 234 = 234 files) AND BY CONTENT (the drafter: `git patch-id --stable` equal); and the KS-679 delta 852e1fff7..e60a24c50 must equal
+   f6669623c..8664826e5 by patch-id (the drafter: equal). If any of the three differs, the merge changed KS-679's own work: that is a NO GO.
+
+5. MERGE-IN over the then-current develop (drafter: a105cd32b -> 5c56e26fee8cffc3497eae5cc6433a81914d3931, 0 conflicts). Assert #1034's three
+   api-gateway files are disjoint from #922's five. If develop has moved again, judge the move by content and name it.
+
+6. CHECKS at head AND merged: `npm run check:openapi` rc 0 and `npm run check:spec-examples` rc 0 with their counts (the body: 405 example blocks, at
+   e60a24c50); tsc for packages/shared rc 0 with --listFilesOnly proof the ks256 test is or is not in the program (say which); eslint by rule AND message
+   on the changed .ts / .mjs files, both trees, with a firing control.
+
+7. LINEAR / GITHUB at run time and immediately before the mail:
+   - THE BODY SAYS "Closes KS-679." That is a closing phrase. The fleet's recent gates asserted the opposite convention for their PRs (the PR attaches
+     `contributes` only, 0 closing phrases, and the ticket stays In Progress on merge while anything is unmeasured). This PR's own NOT-run list keeps
+     external consumers unmeasured. Grade it: severity, target, SHIPS-WITH or TICKET. You do not edit the body.
+   - attachmentsForURL(pull/922) (controls pull/1037, pull/99999); closing phrases in title, body and all 4 commit messages (planted controls); the
+     KS-679 state now (the drafter's relayed reading: In Review).
+   - REVIEW STATE, READ AND RELAYED ONLY: 0 formal reviews. A human reviewer (PeterObeden, 2026-09-09) wrote "not approving yet" with three asks; the
+     seat answered all three on 2026-09-14; there has been no reviewer reply since. You never contact him. Report whether each ask is LANDED at THIS
+     head, and state plainly that a human reviewer's withheld approval is open on the record — merging over it is Wednesday's and Kam's call, not yours.
+
+8. SCHEMATHESIS / AKTO ruling, with the measured reason.
+
+9. CARRY-FORWARD per finding CLOSED / STILL OPEN / NEW, each SHIPS-WITH or TICKET: the E7 widening (L0); "Closes KS-679"; the stale Test Evidence
+   (written at e60a24c50); the three SKIPPED preflight legs; the batch shape `anchor_<uuid>_<i>` still tripping E7 (the seat: out of scope — is that
+   true, does anything publish it?); the four `anchorId: example-anchorId` blocks; the external consumers of `anc_`; the moved line citations; the
+   reviewer's open "not approving yet". Report the checkout bounds and NOT TESTED at equal prominence.
+
+LEAD WITH L0, then items 4 and 1:
+- can any credential in the repo take the `<prefix>_<uuid>` shape that the widening now exempts;
+- did the develop merge-in leave KS-679's own work byte-identical;
+- is the published example now exactly the shape the service mints, with nothing else in the spec changed.
+
+Hygiene:
+- /bin/bash here is 3.2: write runners in Python.
+- zsh: no PIPESTATUS, no timeout, `set -- $var` does not word-split, write `"${VAR}:path"`, never begin a line with `=====`.
+- Your tool shell's grep may be a function: use /usr/bin/grep -i with a same-file positive control.
+- `git grep -c` prints nothing for a zero (silence is unread, not 0); `rev-parse` of a missing path echoes its argument (use cat-file -e).
+- A scripted edit can comment out the rest of a Python line; a phrase your guard greps must stay on one line: assert the file.
+- Never `cd` in your own tool calls; absolute paths; git write verbs only inside script files.
+- stderr is never discarded. Clocks from `date`, never estimated. Every scripted edit asserts its anchor count = 1 and a marker.
+- Quote at start, mid and close as THREE timestamped readings: the Secuura checkout's porcelain count, .git/config sha256, for-each-ref count,
+  .git/worktrees count, origin develop SHA, refs/pull/922/head, the checkout branch, and packages/shared's node_modules/.vite reading. If
+  refs/pull/922/head moves, STOP: a verdict is valid only at its head. develop moving is expected: judge it by content and name it.
+- Never `rm`: fresh mktemp -d per attempt; quarantine by MOVE. No container is created; never touch a secuura-* container.
+Do no memory maintenance of your own project's memory store inside this session.
+
+Report FOUND / TESTED / HOW, with controls, into
+/Volumes/DevMASTER/!CODING/Testing Agent MAIN/projects/secuura/reports/2026-09-18-ks679-922-8664826e5-tier2-r1/
+NOT-TESTED.written-first.md is written FIRST, BEFORE any run (its opening items are fixed above); then report.md and evidence/. The report covers:
+- the trees with OIDs, the merge-in proof and the survival control;
+- the L0 census table (every `<prefix>_<uuid>` producer, file:line at this head, RECORD ID or SECRET, with the evidence for each);
+- the guard's verdict diff over the whole spec, develop vs head vs merged;
+- the full tamper table with forms and the consequence of every zero-red row;
+- suites at both ceilings with load and the vitest version, check:openapi / check:spec-examples, tsc and eslint;
+- Linear and GitHub (the closing phrase, the review state); the Schemathesis/Akto ruling; the listener census before / close;
+- the CLOSED / STILL OPEN / NEW table;
+- what you did NOT test, at the same prominence as the findings.
+Every finding carries its evidence class (MEASURED AT RUNTIME / PROBED / READ ONLY / RELAYED), severity, target (PR or TICKET), SHIPS-WITH or TICKET,
+disposition, and its oracle. Name every prediction slip against its predictor (the PR body, the seat, the reviewer, the drafter, Wednesday).
+Client-facing communication = ticket comments only, and not from you; anything needing a push goes to Wednesday as an escalation candidate.
+Never delete; cleanup means quarantine.
+Verdict: ONE line — GO, GO WITH FINDINGS, or NO GO — on 8664826e53cc47d4dd69c784926c9c14af444cec, as the delta over develop, AND on the merged tree
+(name the then-current develop and the merged-tree OID). A verdict is valid ONLY at that head. Round 1 of 2: a NO GO goes back to the seat for one fix
+round. Then plain statements on items 1-9 and the CLOSED / STILL OPEN / NEW table.
+Give the merge seat its MERGE ADDENDUM line: "on WEDNESDAY'S signed GO naming the head: squash 8664826e5 onto develop <then-current; a105cd32b at
+drafting> (merged tree <OID>; drafter 5c56e26fe); #922 attaches to KS-679 <your ruling on `Closes KS-679`: contributes / closes>; KS-679 <state on
+merge, with the reason>; equality targets after the squash: fixtures.ts b54d26929 / contract.mjs db726db29 / ks256 test 72533d3b0 / anchoring.openapi.ts
+29c089bb0 / secuura-api.yaml 16ac8aa78; packages/shared <n/n> at develop -> <n/n> at head -> <merged n/n> on vitest <version> (re-measure); the review
+state <open / answered>; dispositions: <per finding, SHIPS-WITH or TICKET>; NEW: <yours>; Records for KS-679's facts comment at merge: the E7 widening
+<ruling + census count>, the three SKIPPED preflight legs, the external consumers of anc_ <ruling>, <yours>" — plus any finding with its target.
+
+MAIL YOUR VERDICT to wednesday-agent@agentmail.to when the pass is complete. Your pane holds ~19 lines of alternate screen with no scrollback, so a
+verdict that stays in the pane is one pane-close from being lost -- this is not a formality, it is the only durable copy; the verdict MAIL is the END
+STATE and the wait signal. Send it FROM coagent@agentmail.to. Subject, EXACTLY:
+[QA -> Wednesday] TIER 2 GATE #922 (KS-679) 8664826e5 — <GO | GO WITH FINDINGS | NO GO>
+- The QA project has no send_brief.sh of its own: POST https://api.agentmail.to/v0/inboxes/coagent@agentmail.to/messages/send with JSON
+  {"to": ["wednesday-agent@agentmail.to"], "subject": "...", "text": "..."} and Authorization: Bearer $AGENTMAIL_API_KEY, the key by NAME from
+  Wednesday's .env, never echoed.
+- Build the body from a template file with no shell interpolation and assert the backtick spans survived.
+- Confirm the API answered 2xx and quote the message id in your final pane line. Timestamps in the mail come from `date`, never estimated.
+The MAIL is the end state.

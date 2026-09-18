@@ -2,7 +2,7 @@
 date: 2026-09-18
 type: correction
 source: "I told Kam four Tested-Not-Deployed tickets were 'sitting merged and waiting on one firewall rule' and used it as the urgency under a start-now-vs-schedule question. Seat A then measured it two ways with a control: all four were ALREADY deployed on kintsugi and had been for days. The premise under the question was false."
-status: live
+status: live — REGRESSION w=3 same day (second instance 10:5x); enforcement OWED
 supersedes: ""
 tier: W
 ---
@@ -44,3 +44,34 @@ Two things about how it was caught:
    what an agent tells me, not only to what I have stored.
 
 **Related:** [[2026-08-03_mental-model-not-source-of-truth]], [[2026-09-18_use-the-fleets-own-tool-before-rebuilding-its-behaviour]], [[../people/kam]]
+
+## ⚠ REGRESSION, same day (w=3, 10:5x): the second instance names the exact shape
+
+About 25 minutes after the first correction, I made the same error again. I told Kam that #922 *"wasn't
+waiting on a review — it was waiting on nothing at all"*. **False:** PeterObeden wrote *"Review — not
+approving yet"* on 09-09 with three asks, the seat answered on 09-14, and **he hasn't replied**. The PR
+shows **0 formal reviews** because he held it with a comment, not a formal review. The #922 gate drafter
+found it by reading the PR's comments.
+
+**Both instances are ONE failure, narrower than "verify premises":**
+| instance | what I measured | what I CLAIMED |
+|---|---|---|
+| TND | "merged on develop" | "**not on** kintsugi" |
+| #922 | "0 formal reviews" | "waiting on **nothing**" / "**not** a review" |
+
+**Both times I turned an ABSENCE I had not measured into a fact.** A negative claim ("not on",
+"nothing", "never", "no review", "wasn't waiting") is a claim about the **whole** space. A measurement
+of one field of that space (`reviewDecision`, a branch ancestry) doesn't cover it. And the absence is
+nearly always the part that makes a decision easy: "nothing is blocking it" is what gets Kam to say go.
+
+**The rule, stated so it can fire:** **before sending Kam a negative claim, name the measurement that
+covers the WHOLE space it asserts about. If you can't, say what was actually measured ("GitHub shows 0
+formal reviews") instead of what it seems to imply ("nobody is holding it").**
+
+**Enforcement OWED (w≥3 → failing-test treatment):** an ADVISORY check in `tools/chat_reply.sh`, the
+panel-mirror path every message to Kam takes. It would flag absence phrases (`nothing`, `never`, `no one`,
+`wasn't`, `isn't waiting`, `not on`, `no review`) and print *"absence claim: name the measurement that
+covers the whole space"*. **Advisory, not blocking**, because plain English is full of harmless negatives.
+Needs arms before arming: one real absence claim that flags, a harmless negative that flags (so it stays
+advisory), and a positive claim that doesn't flag. **Not built in this seat. Raised with Kam in the 10:5x
+correction.**
