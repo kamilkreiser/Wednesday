@@ -12,6 +12,15 @@ supersede: replace wholesale at the next pickup; do not append
 
 **⚙ This file was SPLIT at 10:0x 2026-09-18** — 600 lines of self-declared superseded blocks moved verbatim to `NEXT-PICKUP-archive.md` under this file's own `supersede:` rule (it had reached 220 KB, of which 19 KB was live, and every seat was ordered to read it WHOLE at boot). **Keep replacing, never append.** The archive is read on demand, never at boot.
 
+## 🟢 UPDATE 11:0x 2026-09-18 (the 10:0x seat, ctx ~44%, usage ~16%) — READ FIRST
+
+**#1037 (KS-1101) MERGED** at `207716440e2a6282b90ed2a118614d9cf98bee1e`. **I verified it independently:** `ls-remote` develop = `207716440`, and `rev-parse 207716440^{tree}` = `6e8e62231`, **exactly the gate's predicted merged tree.** The api-gateway suite is at 60/596, as predicted (not 59). Follow-ups filed as KS-1245..1250. KS-1101 stays In Progress. **Develop is now `207716440`.**
+**`%99` CLOSED** (the #1037 gate finished; report + NOT-TESTED + 41 evidence files on disk; scored 1.00).
+**FLOOR:** `%0` wednesday · `%98` seat A (rebuild phase 2, 9/36 at 01:05Z; end now ~02:30Z = 12:30 AEST) · **`%100` #922 tier-2 gate LIVE** · `%1` monitor. **Ornith: IDLE**, pending the brief-writer (resumed for the BASH tier: one script plus a `*.test.sh`, reachable directly).
+**Develop moved under the running #922 gate** (a105cd32b → 207716440). Its prompt says to expect that and judge by content, and #1037's 6 files don't overlap #922's 5, so **don't re-gate over it.** Its predicted merged tree `5c56e26fe` (against a105cd32b) is now stale; the gate re-derives against the then-current develop.
+**O-1, told to Kam 11:0x, no decision asked:** CI jobs never start (0 steps, no runner, ~3 s) on #1037, #1034 and develop. Cause UNMEASURED (spending limit or disabled runners would fit, neither checked). It's his account setting. **Don't read red CI as a signal either way.**
+**Held for QA (Ornith):** KS-1233 (write-path only; the existing key's TTL persists, which is a deploy concern) and **KS-1125 (passed on the harness RETRY; the resolver patch is scoped and restored)**.
+
 ## 🟢 UPDATE 10:5x 2026-09-18 (the 10:0x seat, ctx ~38%, usage 15%) — READ FIRST, supersedes every block below where they disagree
 
 **FLOOR:** `%0` wednesday · `%98` seat A (kintsugi rebuild, phase 2, holding with a watcher; its idle wake is ACKED) · **`%99` #1037 KS-1101 TIER 1 gate LIVE** · **`%100` #922 KS-679 TIER 2 gate LIVE** · `%1` monitor. **Ornith: RUNNING KS-1125** (briefed, test-only, direct call).
