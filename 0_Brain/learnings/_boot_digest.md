@@ -7,7 +7,7 @@ status: live
 
 # Boot digest — headline + rules of every lesson (open the file when it fires)
 
-Generated 2026-09-18 12:40 from 188 lesson files (930,984 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 9 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
+Generated 2026-09-18 13:30 from 188 lesson files (933,012 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 9 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
 
 ## The T9 SSD is the master — Wednesday must be fully portable
 `2026-07-31_fully-portable-drive.md` · principle · 2026-07-31 · status: superseded — the "T9 is the master" half by [[2026-08-25_one-drive-devmaster-is-master]] (2026-08-25); the portability principle itself still lives
@@ -6478,14 +6478,14 @@ sections (open the file for these): How to apply
 
 
 ## A premise under a question to Kam is load-bearing — verify it like a fact in a brief
-`2026-09-18_a-premise-under-a-question-to-kam-is-load-bearing-verify-it.md` · correction · 2026-09-18 · status: live — REGRESSION w=3 same day (second instance 10:5x); enforcement OWED
+`2026-09-18_a-premise-under-a-question-to-kam-is-load-bearing-verify-it.md` · correction · 2026-09-18 · status: live — REGRESSION w=5 same day; ENFORCED (advisory) 12:5x for absence claims; the authority-claim instance (w=5) is NOT covered by it
 
 **The lesson:** `send_brief.sh` refuses a brief whose facts have no provenance. **The same standard
 applies to anything I put under a question to Kam** — arguably more, because a brief goes to an agent
 who will check it, and a question goes to a principal who will *act on it*. **Never pass a receiving
 agent's summary into a decision for Kam without validating it at the source first.**
 
-sections (open the file for these): ⚠ REGRESSION, same day (w=3, 10:5x): the second instance names the exact shape
+sections (open the file for these): ⚠ REGRESSION, same day (w=3, 10:5x): the second instance names the exact shape · ENFORCED 12:5x, same day, at w=4 · w=5, 13:3x: the authority costume
 
 **How to apply:**
 1. **Before any question to Kam, list its load-bearing premises and name the source of each.** If a
@@ -6511,6 +6511,19 @@ covers the whole space"*. **Advisory, not blocking**, because plain English is f
 Needs arms before arming: one real absence claim that flags, a harmless negative that flags (so it stays
 advisory), and a positive claim that doesn't flag. **Not built in this seat. Raised with Kam in the 10:5x
 correction.**
+
+## ENFORCED 12:5x, same day, at w=4
+A fourth instance came 1 h after the w=3 row: I told seat A 10th that KS-1125's READY diff was "truncated
+through a 140-line window". **Measured: it was complete (107/109). Only KS-1233 was truncated.** I had
+reconstructed the claim from memory of the COMMAND, not the FILE. At w=4 the "owed" line isn't enough, so I built:
+- **`2_Project_Files/tools/absence_claim_check.sh`**, ADVISORY: it flags absence phrases on stderr, **never blocks,
+  always exits 0**. It's wired into `tools/chat_reply.sh` (the channel to Kam; `SELF_DIR` resolves, so the advisory fires).
+- **Arms `2_Project_Files/tests/absence_claim_check_arms.sh`, 6/6 PASS**, including **the two REAL false claims from
+  today (the #922 "waiting on nothing" and the TND "not on kintsugi"), which now flag**; a harmless negative flags
+  (so it stays advisory), and a positive claim does not.
+**Honest limit:** it covers the Kam-facing panel only. The KS-1125 instance went to a SEAT through `send_brief.sh
+--kind answer`, which this doesn't touch. And it catches ABSENCE words, not an unmeasured POSITIVE claim like "it was
+truncated". The deeper rule stays behavioural: **measure the thing, not your memory of the command that made it.**
 
 
 ## An authorised sweep does not authorise what the API cascades to
