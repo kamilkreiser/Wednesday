@@ -9,7 +9,7 @@ source: 1_Project_Definition/Architecture/2026-09-16_unattended-week-loop.md (pi
 
 # The week's standing instruction (read at every boot — the launcher names this file)
 
-**status: LIVE until the END of SUNDAY 2026-09-20.** Given Friday 2026-09-18 14:14; weekdays DERIVED with `date -j` (Sat 19, Sun 20, Mon 21), not assumed. Receipted on the panel at 14:1x with this reading said back to him.
+**status: LIVE until the END of SUNDAY 2026-09-20.** Given Friday 2026-09-18 14:14; weekdays DERIVED with `date -j` (Sat 19, Sun 20, Mon 21), not assumed. Receipted on the panel at 14:1x with this reading said back to him. **Kam acknowledged at 14:16:22 (view=wednesday): *"Thank you very much."*, with NO correction to the reading.** So the scope below (kintsugi only, NOT demo, the signature classes still pause) stands as read back to him; it is not just Wednesday's interpretation.
 
 ## When Kam gives one (expected Monday 2026-09-21, before he leaves that night)
 1. Receipt it on the panel within the minute (first person).
