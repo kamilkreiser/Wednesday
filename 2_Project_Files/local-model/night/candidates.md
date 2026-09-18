@@ -3,11 +3,11 @@
 A CENSUS for the coordinator to brief from, easy → hard (Kam 2026-09-15 16:40 / 18:19). A ticket here is a candidate, not a task: read it, read the file at the tip, write `night/briefs/<id>.md`, then queue it. Auth-shaped titles are excluded (LAST); Peter/Stuart tickets and PR-attached tickets are excluded outright.
 
 ## T1 services (vitest, one file) — 30
-- KS-1175 (P2) [resolved:basename, a HINT — read the file] Anchor / originate / lifecycle-event — `services/anchoring/src/anchorSchema.ts`
+- ~~KS-1175~~ ⛔ **REJECTED for Ornith 2026-09-18 10:4x: it's a FEATURE, not a defect, and it writes to an IMMUTABLE PUBLIC LEDGER.** It adds seven identity fields to the Cardano anchor record across eight endpoints and asks for a design choice (`metadata.identity` or flat). The on-chain contract belongs to PS-869, and KS-721's similar field needed Kam's ruling plus a deploy gate. It would also redden the existing exact-key-set cells in `anchorSchema.test.ts`. **Signature class: irreversible, so it needs Kam.** (was: KS-1175 (P2) [resolved:basename, a HINT — read the file] Anchor / originate / lifecycle-event — `services/anchoring/src/anchorSchema.ts`
 - KS-1233 (P2) In Redis mode platform-settings expires 24 h after the last admin write, which e — `services/api-gateway/src/services/redis.ts`
-- KS-678 (P2) [resolved:basename, a HINT — read the file] #568 publishes 17 URLs on secuura.io — `scripts/openapi-examples/synthesize.ts`
+- ~~KS-678~~ ⛔ **REJECTED 10:4x: the named defect is ALREADY FIXED at the tip** (`synthesize.ts:203` now returns `https://example.com/resource`). What's left is a new rule in `scripts/spec-examples/check/rules-global.mjs`, a directory with no tests, plus two questions only PeterD can answer (whether we own `secuura.io`, and which host is acceptable). (was: KS-678 (P2) [resolved:basename, a HINT — read the file] #568 publishes 17 URLs on secuura.io — `scripts/openapi-examples/synthesize.ts`
 - KS-683 (P2) Anchor-status standoff: a consumer repolls anchors K reports as terminally faile — `services/anchoring/src/index.ts`
-- KS-947 (P2) [resolved:basename, a HINT — read the file] KS-733 gate blindness (F3+F4): the p — `services/api-gateway/src/routes/proxy.ts`
+- ~~KS-947~~ ⛔ **REJECTED 10:4x: it's about rate-limit parity on nine MFA operations, so it's AUTH (last)**, and it needs a static read of `index.ts` mount order, which is poor on reachability. (was: KS-947 (P2) [resolved:basename, a HINT — read the file] KS-733 gate blindness (F3+F4): the p — `services/api-gateway/src/routes/proxy.ts`
 - KS-953 (P2) CLASS: editing api-gateway/src/index.ts silently reddens packages/shared, and no — `services/api-gateway/src/index.ts`
 - KS-955 (P2) [resolved:basename, a HINT — read the file] A fresh clone cannot run the four pl — `services/auth/src/services/accountLockout.ts`
 - KS-987 (P2) [resolved:route, a HINT — read the file] A deploy that rsyncs the OpenAPI spec a — `services/api-gateway/src/index.ts`
@@ -30,7 +30,7 @@ A CENSUS for the coordinator to brief from, easy → hard (Kam 2026-09-15 16:40 
 - KS-934 (P3) [resolved:route, a HINT — read the file] m365 /api/teams/notify: a serial per-ro — `services/m365-integration/src/index.ts`
 - KS-986 (P3) [resolved:basename, a HINT — read the file] The published admin credential survi — `services/auth/src/repositories/userRepo.ts`
 - KS-1125 (P4) api-gateway startup-migrations: the tenant-failure guard `if (outcome.failed > 0 — `services/api-gateway/src/startup-migrations.ts`
-- KS-1145 (P4) ks949 suite coverage (KS-950 / KS-962, #973): ID3's capture half has no size ass — `services/api-gateway/src/startup-migrations.ts`
+- ~~KS-1145~~ ⛔ **REJECTED 10:4x: the fix is a bash suite against a real PostgreSQL** (`ks949_main_seed_idempotence.test.sh`). It's not vitest and has no direct call. (was: KS-1145 (P4) ks949 suite coverage (KS-950 / KS-962, #973): ID3's capture half has no size ass — `services/api-gateway/src/startup-migrations.ts`
 - KS-1197 (P4) [resolved:basename, a HINT — read the file] A non-string verificationLevel claim — `services/auth/src/repositories/userRepo.ts`
 - KS-748 (P4) [resolved:route, a HINT — read the file] svc_api_keys.organization_id is not a t — `services/security/src/index.ts`
 
