@@ -10,6 +10,11 @@ supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s
 
 ---
 
+## 🔵 DELTA 15 — 2026-09-18 14:0x: KAM'S STANDING INSTRUCTION, AN OWED ACTION (terminal, verbatim; processing time from date)
+> "Thanks. In that case, please email me the zip file that needs to be uploaded to the marketplace. I only email the package zip, not any of the assets."
+- **The zip does NOT exist yet** (measured 14:0x: no *2.2.0*.zip under the NexusAI project; control: 2 older plan zips found). He was told on the panel and in the terminal.
+- **SAFE FORM, carried until done (never an open question):** the moment the release gate passes and the 2.2.0 package zip is built, email THAT ONE FILE, the package zip only, no screenshots, PDFs or other listing assets, to **kamil.kreiser@datasec.com.au** (Datasec work goes to the Datasec address; that is Tuesday's reading, stated to him). Send from tuesday-agent@ with the file name, its sha256 and the head it was built from in the body, and check the attachment arrived by reading the message back. It is also step "zip exists" in UNBLOCK-PREDICATE.md.
+
 ## 🔵 DELTA 14 — 2026-09-18 13:4x: KAM RULED BOTH CARDS. READ FIRST; DELTA 13 still holds for everything else.
 - **Round 3 = (a)** (panel tap 13:42:46, plus Tuesday's TERMINAL line "Go with your recommendation."; the terminal line is in no panel tool). **Live listing RD-549 = (b)** (panel tap 13:43:05): the listing stays up and the fix ships in the resubmission; no notice goes out. Both cards were ruled in decision_queue by this seat. **Mark each `--delivered` only once S65 mails the C-numbers and the ticket comments** (RD-554 and RD-549).
 - **S65 briefed 03:44:45Z** (verified at the inbox, tapped): record both rulings, then round 3 per the amended scope, with S66's RD-554 cells as acceptance. S65 was at ctx 74%: its plan line says whether it uses a builder subagent or hands over (then launch the successor from HANDOVER-S65). A Major at the round-3 re-gate comes to Tuesday; the round cap is now spent.
