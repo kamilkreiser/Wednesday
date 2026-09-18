@@ -202,19 +202,19 @@ if command -v git >/dev/null 2>&1 && [ -d "$PROJECT_DIR/.git" ]; then
     # the one that runs every time: Tuesday's tree was found 382 commits behind on a seat Kam
     # had been calling broken. A skipped pull that says nothing is indistinguishable from a
     # pull that happened. So: fetch (read-only, safe on a dirty tree) and say the number.
-    git -C "$PROJECT_DIR" fetch -q origin 2>/dev/null
+    git -C "$PROJECT_DIR" fetch -q --no-write-fetch-head origin 2>/dev/null
     BEHIND="$(git -C "$PROJECT_DIR" rev-list --count HEAD..@{upstream} 2>/dev/null || echo "")"
     if [ -n "$BEHIND" ] && [ "$BEHIND" -gt 0 ] 2>/dev/null; then
       echo "🔴 THIS SEAT IS $BEHIND COMMIT(S) BEHIND origin AND THE BOOT PULL WAS SKIPPED."
       echo "   You are reading a stale brain, stale lessons and a stale pickup. Before trusting"
       echo "   any of them: commit the generated dashboard data, then"
-      echo "   git -C \"$PROJECT_DIR\" pull --rebase   — and say in the session that you did."
+      echo "   git -C \"$PROJECT_DIR\" fetch -q --no-write-fetch-head origin main && git -C \"$PROJECT_DIR\" rebase origin/main   — and say in the session that you did."
     else
       echo "  (up to date with origin — the skipped pull cost nothing)"
     fi
   else
     echo "→ pulling $PROJECT_DIR before the boot reads…"
-    if git -C "$PROJECT_DIR" pull --rebase 2>&1; then
+    if { { git -C "$PROJECT_DIR" fetch -q --no-write-fetch-head origin main || { sleep 1; git -C "$PROJECT_DIR" fetch -q --no-write-fetch-head origin main; }; } && git -C "$PROJECT_DIR" rebase origin/main; } 2>&1; then  # 2026-09-19 FETCH_HEAD race: never `pull`
       echo "✓ boot pull ok — HEAD $(git -C "$PROJECT_DIR" rev-parse --short HEAD)"
     else
       echo "⚠ BOOT PULL FAILED (rc=$?). This seat may be reading a STALE brain."

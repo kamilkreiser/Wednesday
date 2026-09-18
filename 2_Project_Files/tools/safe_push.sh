@@ -98,7 +98,8 @@ fi
 # 4. Pull, resolving each conflict by the file's OWN rule. Never by side,
 #    never by directory.
 for round in 1 2 3 4 5 6 7 8; do
-  OUT="$(git -C "$W" -c rebase.autoStash=true pull --rebase 2>&1)"
+  # 2026-09-19 FETCH_HEAD race: fetch without writing FETCH_HEAD, then rebase onto the ref (never `pull`).
+  OUT="$( { { git -C "$W" fetch -q --no-write-fetch-head origin main || { sleep 1; git -C "$W" fetch -q --no-write-fetch-head origin main; }; } && git -C "$W" rebase --autostash origin/main; } 2>&1)"
   case "$OUT" in
     *"Successfully rebased"*|*"up to date"*|*"Fast-forward"*) break ;;
   esac

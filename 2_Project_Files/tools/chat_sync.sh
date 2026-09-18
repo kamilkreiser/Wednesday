@@ -76,7 +76,7 @@ fi
 # (2) Pull WITHOUT autostash. A dirty tree makes this fail, and that is the intended
 #     behaviour — we skip rather than touching the working tree.
 PRE_HEAD="$(git -C "$ROOT" rev-parse HEAD 2>&1)"
-OUT="$(git -C "$ROOT" pull --rebase 2>&1)"; rc=$?
+OUT="$( { { git -C "$ROOT" fetch -q --no-write-fetch-head origin main || { sleep 1; git -C "$ROOT" fetch -q --no-write-fetch-head origin main; }; } && git -C "$ROOT" rebase origin/main; } 2>&1)"; rc=$?  # 2026-09-19 FETCH_HEAD race: never `pull`
 if [ $rc -ne 0 ]; then
   RDIR=""
   [ -d "$ROOT/.git/rebase-merge" ] && RDIR="$ROOT/.git/rebase-merge"

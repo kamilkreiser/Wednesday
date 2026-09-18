@@ -113,5 +113,5 @@ if stale:
     print("#    only when the other seat pushes the log and THIS seat pulls. An empty tail may mean")
     print("#    'he said nothing' OR 'this copy has not caught up' — those are different facts.")
     print("#    Settle it before concluding he is quiet:")
-    print("#      git -C <this repo> pull --rebase --autostash   then re-run this script.")
+    print("#      git -C <this repo> fetch -q --no-write-fetch-head origin main && git -C <this repo> rebase --autostash origin/main   then re-run this script.")
 PY

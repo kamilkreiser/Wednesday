@@ -51,7 +51,7 @@ sync_in() {
   # a conflict you commit. stderr is kept, and the two irreplaceable files are
   # checked AFTER the pull, every time.
   local out rc
-  out="$(git -C "$PROJECT_DIR" pull --rebase --autostash 2>&1)"; rc=$?
+  out="$( { { git -C "$PROJECT_DIR" fetch -q --no-write-fetch-head origin main || { sleep 1; git -C "$PROJECT_DIR" fetch -q --no-write-fetch-head origin main; }; } && git -C "$PROJECT_DIR" rebase --autostash origin/main; } 2>&1)"; rc=$?  # 2026-09-19 FETCH_HEAD race: never `pull`
   if [ $rc -ne 0 ]; then
     echo "wed_claim: WARNING — pull failed; this view may be stale and a claim may race" >&2
     printf '%s\n' "$out" | tail -5 >&2

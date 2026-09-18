@@ -40,7 +40,7 @@ store_guard() {
 
   # (1) staleness — measured against origin, without pulling
   local root; root="$(cd -P "$(dirname "$f")" && git rev-parse --show-toplevel 2>/dev/null)" || return 0
-  git -C "$root" fetch -q origin 2>/dev/null || { echo "store_guard: could not reach origin; proceeding (offline)" >&2; return 0; }
+  git -C "$root" fetch -q --no-write-fetch-head origin 2>/dev/null || { echo "store_guard: could not reach origin; proceeding (offline)" >&2; return 0; }
   local rel; rel="$(git -C "$root" ls-files --full-name -- "$f" 2>/dev/null | head -1)"
   [ -n "$rel" ] || return 0                    # untracked: nothing to be stale against
   local behind; behind="$(git -C "$root" rev-list --count HEAD..origin/main -- "$rel" 2>/dev/null || echo 0)"

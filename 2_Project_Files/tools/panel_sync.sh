@@ -54,7 +54,7 @@ advance_other_streams(){
     tuesday) mine="chat_tuesday.json";   other="chat_wednesday.json" ;;
     *)       mine="chat_wednesday.json"; other="chat_tuesday.json" ;;
   esac
-  git fetch -q origin 2>/dev/null || { say "  advance: fetch failed, nothing taken"; return 0; }
+  git fetch -q --no-write-fetch-head origin 2>/dev/null || { say "  advance: fetch failed, nothing taken"; return 0; }
   f="0_Brain/dashboard/data/$other"
   before=$(python3 -c "
 import json,sys
@@ -184,7 +184,9 @@ cycle(){
     git commit -q -m "dashboard: generated data (panel_sync)" >/dev/null 2>&1 \
       && say "committed generated dashboard data" || say "WARN commit of dashboard data failed"
   fi
-  if ! out=$(git pull --rebase 2>&1); then
+  # 2026-09-19 FETCH_HEAD race (0_Brain/reference/2026-09-18_fetch-head-race): never `pull` here —
+  # pull READS FETCH_HEAD, which every concurrent fetch/pull on this clone rewrites (85-149/150 fails).
+  if ! out=$( { { git fetch -q --no-write-fetch-head origin main || { sleep 1; git fetch -q --no-write-fetch-head origin main; }; } && git rebase origin/main; } 2>&1); then
     say "PULL FAILED: $(printf '%s' "$out" | tr '\n' ' ' | cut -c1-200)"
     # MEASURED 2026-09-10: the old code logged and RETURNED here, leaving the
     # rebase in progress — so the guard at the top of cycle() skipped every
