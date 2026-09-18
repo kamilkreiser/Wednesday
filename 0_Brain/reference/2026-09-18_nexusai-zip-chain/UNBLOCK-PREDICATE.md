@@ -56,7 +56,20 @@ a safety rule with his name on it, not a build preference.
 - [ ] RD-516 — anonymous SSRF via ai-test (same class as RD-486; one without the other half-closes it)
 - [ ] RD-518 — `KEYVAULT_NAME` vs `KEY_VAULT_NAME`: Key Vault silently does nothing in every deployment
 - [ ] RD-503 + 442 — SUPPORT.md's only AI-settings fix does nothing on a real deployment
-- [ ] RD-464 round 3 — kept in (Kam approved it, it is built; first drop candidate if he shortens)
+- [ ] RD-464 round 3 — kept in (Kam approved it, it is built)
+      ⚠ **NO LONGER A DROP CANDIDATE, and it is now COUPLED.** See RD-545 below.
+- [ ] 🔴 **RD-545 — lands WITH or BEFORE RD-464 round 3; r3 does not merge without it.**
+      **This is a regression OUR OWN work introduces, not a pre-existing defect.** It does not
+      exist on `e0ea198`: the C-70 one-limiter collapse is what removes the surviving limiter.
+      An anonymous caller in the open window POSTs `/api/setup/ai-config {aiEnabled:false}`,
+      RD-464 r3's limiter then SKIPS under the C-59 AI-off rule, and the boot metadata call still
+      runs because `aiReadiness.js` calls `healthcheck()` before consulting the gate — so
+      **AI off = unlimited anonymous outbound to any caller-named host.** Every component is
+      correct; the pair is the hole. Measured by S65's RD-516 design pass, 2026-09-18.
+      **Closed by BOTH:** RD-516's host policy (WHERE it can connect) and a limiter keyed to the
+      REQUEST rather than to the AI-enabled state (HOW MANY). C-59 permits the metadata call; it
+      says nothing about its VOLUME, and reading 'permitted' as 'unlimited' is the gap.
+      If they must merge as one change, merge them as one change.
 - [ ] The listing folds — RD-465 O-4, RD-454 O-4
 
 ### The two additions the dependency measurement turned up
