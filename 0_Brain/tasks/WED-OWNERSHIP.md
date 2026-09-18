@@ -64,3 +64,4 @@ sees the claim rather than discovering it in a conflict.
 | 2026-09-18 16:51 | Kamils-Mac-Studio | local-model: test_only tier (N named tampers, cells-red-per-tamper) with arms; golden = KS-1254 | CLOSED |  2026-09-18 17:12 built, arms 18/18 re-run by Wednesday, e2e golden PASS 8/8 |
 | 2026-09-18 17:28 | Kamils-Mac-Studio | local-model code_patch A4: classify reds by AssertionError/expect(, not the substring 'expected'; arms + spot-check today's PASSes | CLOSED |  2026-09-18 17:40 fixed, arms 14/14 re-run by Wednesday, audit 0/55 affected |
 | 2026-09-18 18:02 | Kamils-Mac-Studio | local-model test_only: add a bash-suite runner (*.test.sh) with arms | CLOSED |  2026-09-18 18:25 built, arms 18/18 + 21/21 re-run by Wednesday, swapped 18:18 |
+| 2026-09-18 18:48 | Kamils-Mac-mini | pull race: 'Cannot rebase onto multiple branches' (safe_push rc 24 / wed_claim / chat_sync) - reproduce FETCH_HEAD concurrency in a scratch clone, then minimal fix with arms | OPEN | |
