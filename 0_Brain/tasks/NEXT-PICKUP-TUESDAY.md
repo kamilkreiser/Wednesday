@@ -10,7 +10,50 @@ supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s
 
 ---
 
-## 🔵 DELTA 11 — 2026-09-18 12:12 (Tuesday 70% CHECKPOINT; band is 80-90, NOT rotating). READ FIRST; DELTA 10 is superseded by this.
+## 🔵 DELTA 12 — 2026-09-18 12:38 ROTATION HANDOVER (Tuesday ~80%, rotating at a safe boundary). READ FIRST; DELTA 11 superseded.
+
+### THE WHOLE DAY IN ONE LINE
+**Everything main-side is blocked on KAM. Two cards on his desk, no agent question open, nothing else gates anything.**
+
+### 🔴 HIS TWO CARDS — do not chase, do not default
+1. **`nexusai-rd436-round3-authorise`** — RD-436+535 came back **NO GO** (Blocker RD-554 + 2 Majors RD-555).
+   **C-62 reserves a third round to him** (`CLARIFICATIONS.md:573`, read at source). Rec (a) scoped round 3.
+   **Default = NOTHING PROCEEDS.** Prior-ruling gate refused it first; the closest prior card was opened
+   (different class, delivered) and the override reason is in the BLUF.
+2. **`nexusai-rd549-live-211-exfiltration`** — **NO DEFAULT, deliberately.** Amended twice today: the plant
+   is **restored on every boot** (Marketplace path), and **RD-554 is a THIRD live exposure, worse in kind —
+   an anonymous stranger gets an ADMIN ACCOUNT on a CONFIGURED deployment.**
+   `nexusai-rd535-…` is SUBORDINATED to it; its "nothing changes" default must not be read as pre-answering.
+- **Kam is genuinely quiet on this tab since 09:49** — settled by pulling and re-running the rulings check, not inferred.
+
+### THE ZIP (his named deliverable) — `reference/2026-09-18_nexusai-zip-chain/UNBLOCK-PREDICATE.md`
+- ✅ version **2.2.0 = his ruling** (TERMINAL, invisible to every panel tool) · ✅ **RD-529 O-8 on main, CI all green**
+- ⬜ **the minimum set** — and **RD-549 + RD-545 are IN it**; RD-464 r3 is coupled to RD-545, so **there is no safe drop candidate left.**
+- **Push waits on step 10 ONLY.** Evaluate on `origin/main`, never a branch. **Tell him nothing until every box ticks.**
+
+### STATE — `origin/main = d881f953` (RD-529 O-8 only)
+- **GATED GO, DO NOT RE-GATE:** RD-486+523 @ `2d83967` (held behind RD-436 — *the release image is built from main*) ·
+  RD-490 @ `23efec8` · RD-491 @ `0c8db0c` (re-verification passed, B6 red at the new head) ·
+  **RD-464 r3 @ `1f27b4d` GO WITH FINDINGS** (4 Minors RD-556; merges after RD-486, never before RD-545).
+- **Not main-side, still moving:** RD-503 r2 verify on the lock · RD-505 removal @ `a643fe1` folded into the
+  release gate (its 3 required cells are in the predicate + `qa-briefs/RELEASE-GATE-package-REQUIREMENTS.md`) ·
+  RD-516 design done · **RD-549 cell design C1-C9 delivered**, C2's expected-red commissioned as a measurement.
+- **Both seats know the chain is on Kam and neither is pre-empting him.**
+
+### THE WAKE — armed, and it fired once today and worked
+`2_Project_Files/fleet/watch_nexusai_main.sh <head> 60 180` on **`d881f953`**. **If expired, RE-ARM FROM THE CURRENT HEAD.**
+
+### RULES THIS SESSION EARNED — they bind the next seat
+- **An explanation of why a fix works is a CLAIM** — red proof or marked UNVERIFIED; **its author is the last person who can catch it.** (Two were mine; one was a load-bearing security premise.)
+- **"main moved" ≠ "main moved in a way that reaches my cells"** — the discriminator is the DIFF, not the SHA.
+- **Verify every push AT ORIGIN** — `panel_sync` commits every minute, so a push is a RACE and "Everything up-to-date" is indistinguishable from a rejection.
+- **In a mail to one agent, "you" is reserved for what THAT agent did.**
+- **A guard built from "what is missing here?" cannot see "what used to be here and is gone."**
+
+### DEFAULT IF THIS SEAT DIES
+Read OWED 0 / 0a / 0⚠ → re-arm the watcher → answer agent mail → **tell Kam nothing about the push until the predicate ticks, and do not chase his cards.**
+
+## 🔵 DELTA 11 (SUPERSEDED by DELTA 12) — 2026-09-18 12:12 (Tuesday 70% CHECKPOINT; band is 80-90, NOT rotating). READ FIRST; DELTA 10 is superseded by this.
 
 ### The one sentence
 **Kam's deliverable is the ZIP. 2 of 3 push preconditions are MET; only the MINIMUM SET remains, and the
