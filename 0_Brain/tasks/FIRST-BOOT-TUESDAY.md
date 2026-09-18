@@ -2,7 +2,7 @@
 date: 2026-09-08
 type: first-boot brief
 source: Kam's 2026-09-08 commission (11:41 → 12:53) + Wednesday's build, same day
-status: live — read this ONCE, at your first boot, then replace it with your own NEXT-PICKUP
+status: superseded 2026-09-19 by NEXT-PICKUP-TUESDAY.md (the seat has booted many times; this brief is history, kept verbatim — the launcher still names it, so it is not moved)
 audience: TUESDAY (the Datasec seat) only
 ---
 
