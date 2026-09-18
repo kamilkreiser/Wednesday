@@ -73,7 +73,7 @@ a safety rule with his name on it, not a build preference.
 - [ ] The listing folds — RD-465 O-4, RD-454 O-4
 
 ### The two additions the dependency measurement turned up
-- [ ] **RD-529 O-8** — the one-line placeholder wording fix in `DEPLOYMENT_GUIDE.md`, **which IS shipped
+- [x] **RD-529 O-8 — MERGED to main 2026-09-18 01:04:46Z as `d881f953`** (merge of `470510e`; one file, one line, verified wording-only by Tuesday at source before and after). **RD-529 O-8** — the one-line placeholder wording fix in `DEPLOYMENT_GUIDE.md`, **which IS shipped
       in the image**. Ruled by Tuesday: it lands on main BEFORE the push rather than being baked in.
 - [x] **The release version string is `2.2.0` — RULED BY KAM.**
       **His words, verbatim, TERMINAL channel (not the panel): *"2.2.0 is fine, keep going"*.**
