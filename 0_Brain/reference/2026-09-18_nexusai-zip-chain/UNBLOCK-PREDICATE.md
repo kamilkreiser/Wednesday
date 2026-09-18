@@ -181,3 +181,5 @@ the listing folds in `azure-marketplace/**` · RD-526..RD-528 · RD-543.
 RD-524, 525, 531, 537, RD-495, RD-497, RD-510, 492, 519, 471/472/475/487/457/438, lock v3, HISTORY
 entries. All real, all ticketed, none deploy-blocking. **Do not let them creep into the gate** — they are
 the difference between telling him today and telling him next week.
+
+**OBSERVATION for the push message (Tuesday, 2026-09-18 13:0x; read from Partner Center's "Previously published packages" tab by Chrome's own AppleScript, not from memory):** the listing reads `2.1.0 | 9/15/26 | NexusAI_plan-managed-ai_2.1.1_6fb497d.zip` and `2.0.0 | 5/12/26 | plan-managed-ai.zip`, plus a "Load more". **The VERSION column says 2.1.0 beside a file named 2.1.1**, so Partner Center's version field may be entered separately from the package. When Kam uploads the 2.2.0 zip, the push message should tell him to set that field to **2.2.0** (his ruling) and check it matches the file. UNMEASURED: whether "Load more" lists older packages; the tab stopped answering scripted reads after the list was expanded.
