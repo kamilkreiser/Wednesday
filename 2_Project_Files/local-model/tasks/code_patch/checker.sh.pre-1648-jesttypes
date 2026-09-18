@@ -917,49 +917,10 @@ else
   fail "A7 tsc --noEmit for $SERVICE: rc=$rc_tsc after the patch (baseline rc=$rc_base_tsc): $(head -5 "$REP/after_tsc.out" | tr '\n' ' ')"
 fi
 # Informational: the test file is excluded from the service tsconfig, so
-# type-check it on its own (vitest/ts-jest-isolated runs transpile without checking types).
-# 2026-09-18 16:xx (IMPROVEMENTS 15:53 OWED row): the --types list was the constant node,vitest/globals, so a JEST
-# service (originate, governance) had no @types/jest and every jest.mock/jest.fn gave TS2708 (measured 64 on the
-# passing ks1213 reference test; 0 with node,jest). Pick it from the SERVICE'S OWN runner markers: jest.config.* /
-# scripts.test naming jest / jest|ts-jest dependency vs vitest.config.* / scripts.test naming vitest / vitest
-# dependency. Exactly one side seen -> that list; neither or both -> today's node,vitest/globals plus one INFO line.
-# BEGIN tsc_test_types (cut out verbatim by tests/checker_tsc_types_by_runner_arms.sh)
-tsc_test_types() {
-  # tsc_test_types <svc_dir> -> one line "<types>\t<why>"; <types> is empty when the runner could not be told
-  python3 - "$1" <<'PYEOF'
-import json, os, sys
-d = sys.argv[1]; jest = []; vit = []
-names = sorted(os.listdir(d)) if os.path.isdir(d) else []
-jest += [f for f in names if f.startswith("jest.config.")]
-vit += [f for f in names if f.startswith("vitest.config.")]
-p = os.path.join(d, "package.json")
-if os.path.isfile(p):
-    try:
-        j = json.load(open(p))
-    except Exception:
-        j = {}
-    toks = str((j.get("scripts") or {}).get("test") or "").replace("&&", " ").split()
-    if "jest" in toks: jest.append("scripts.test=jest")
-    if "vitest" in toks: vit.append("scripts.test=vitest")
-    deps = {**(j.get("dependencies") or {}), **(j.get("devDependencies") or {})}
-    jest += [k for k in ("jest", "ts-jest") if k in deps]
-    vit += [k for k in ("vitest",) if k in deps]
-why = f"jest:{jest or '-'} vitest:{vit or '-'}".replace("'", "")
-if jest and not vit: print("node,jest\t" + why)
-elif vit and not jest: print("node,vitest/globals\t" + why)
-else: print("\t" + why)
-PYEOF
-}
-# END tsc_test_types
-TSC_T_LINE="$(tsc_test_types "$SVC")"
-TSC_TYPES="${TSC_T_LINE%%	*}"; TSC_T_WHY="${TSC_T_LINE#*	}"
-if [ -z "$TSC_TYPES" ]; then
-  TSC_TYPES="node,vitest/globals"
-  echo "INFO tsc test-file types: could not tell $SERVICE's test runner ($TSC_T_WHY) — kept the old default --types $TSC_TYPES"
-fi
-( cd "$SVC" && npx tsc --noEmit --strict --esModuleInterop --skipLibCheck --target ES2022 --module commonjs --moduleResolution node --types "$TSC_TYPES" "$TEST_REL" ) > "$REP/after_tsc_testfile.out" 2>&1
+# type-check it on its own (vitest transpiles without checking types).
+( cd "$SVC" && npx tsc --noEmit --strict --esModuleInterop --skipLibCheck --target ES2022 --module commonjs --moduleResolution node --types node,vitest/globals "$TEST_REL" ) > "$REP/after_tsc_testfile.out" 2>&1
 rc_tsc_t=$?
-echo "INFO tsc on the test file alone (--types $TSC_TYPES): rc=$rc_tsc_t ($(wc -l < "$REP/after_tsc_testfile.out" | tr -d ' ') lines; not gated — the runner does not type-check and the service tsconfig excludes __tests__)"
+echo "INFO tsc on the test file alone: rc=$rc_tsc_t ($(wc -l < "$REP/after_tsc_testfile.out" | tr -d ' ') lines; not gated — vitest does not type-check and the service tsconfig excludes __tests__)"
 
 echo "SUMMARY files=$N_TOUCHED +$ADDS/-$DELS test=$TEST_REL red_first=$([ "$rc_red" -ne 0 ] && [ "$red_failed" -ge 1 ] && echo yes || echo no) apply_mode=$A2_MODE"
 if [ "$FAILS" -eq 0 ]; then
