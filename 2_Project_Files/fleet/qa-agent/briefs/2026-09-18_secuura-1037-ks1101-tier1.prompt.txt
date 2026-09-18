@@ -1,0 +1,208 @@
+ultrathink
+
+You are the fleet QA agent running ONE TIER 1 ROUND 1 gate (round 1 of 2 under the cap) over Secuura/Blockchain PR #1037 (KS-1101, Seat A) at
+head f87506f476ce83fbbc006e9f84d22454053126ad. A VERDICT IS VALID ONLY AT ITS HEAD: everything below is about that SHA and no other. If
+refs/pull/1037/head or the branch moves under you at any reading, STOP and say so — a verdict carried onto a moved head is a fabricated verdict.
+
+KS-1101, shape O-SURFACE (Wednesday's ruling 13:30:57Z): the gateway health AGGREGATES must show a probed service that answers 2xx with a body
+{status:'degraded'} as `degraded`, never as `up` — on /health/deep, on /system/status and /api/system/status (including the /status/simple body) and
+on /api/system/health/dashboard. READINESS IS UNCHANGED: /health/ready and /status/simple keep their 200 / 503 rules, with degraded counted as
+NOT-down. Two in-repo consumers were fixed in the same PR: the admin dashboard's servicesOnline (healthy + degraded) and the status page's degraded
+style. Six files, three commits: services/api-gateway/src/services/health.ts, src/routes/system-status.ts, src/routes/health-dashboard.ts, the new
+src/__tests__/ks1101-health-aggregates-surface-degraded.test.ts, frontend/admin/src/services/api.ts, frontend/status/index.html.
+
+MERGE AUTHORITY: a GO is a gate verdict, not a merge. #1037 merges on WEDNESDAY'S signed GO naming the head (the TESTED grant) and on nothing else.
+No other tap merges it. You never merge it yourself.
+
+Read your source document FIRST and in full — the seat's READY FOR QA mail, which is this gate's brief:
+/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/gatesets/2026-09-18_gate1037/mail_1037_ready.md
+Then read:
+- the QA charter: /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/QA_AGENT_CHARTER.md
+- Wednesday's receipt: gatesets/2026-09-18_gate1037/receipt_1037.md
+- the PRIOR REPORT — the #1034 (KS-1215) tier 1 gate over the SAME service, run this morning, whose harness style, farm recipe and listener
+  discipline you reuse:
+  /Volumes/DevMASTER/!CODING/Testing Agent MAIN/projects/secuura/reports/2026-09-18-ks1215-1034-e4624218b-tier1-r1/
+- that gate's drafting set for the reusable patterns only: gatesets/2026-09-17_gate1034/ (api_read_1034.py for credential-by-name API reads,
+  repin_farm_1034.py for the per-entry farm, repin_tamper_1034.py for parsing a seat's ROWS literals without executing them).
+
+PINS, re-read live at drafting 2026-09-18 10:10:45–10:26:59 AEST, INCLUDING a forced re-pin at 10:25 when develop moved under the first draft
+(git ls-remote + the GitHub compare and PR APIs agree; the launcher re-asserts all of it at every run and REFUSES, exit 18, if develop has moved again):
+  #1037 head f87506f476ce83fbbc006e9f84d22454053126ad = refs/pull/1037/head = refs/heads/feature/ks-1101-gateway-health-aggregates-read-anchorings-http-status-only
+    UNCHANGED since the seat's READY (16:18:10Z) — the head did NOT move. Head tree 4f7ce40b4; first parent 7f10aa1d8, second parent 34cdcfb26.
+    History: e4ef504a3 (the O-SURFACE edits + the 11-cell test, on 732c13459) -> 7f10aa1d8 (develop 3961c2add merged in) -> f87506f47 (develop 34cdcfb26 merged in).
+  merge-base with develop = 34cdcfb2663b9e4c31025044e6f842ad2c5a10a3 (the head's second parent; develop when the seat pushed).
+  DEVELOP MOVED TWICE WHILE THIS GATE WAS BEING DRAFTED, and the second move is load-bearing for you:
+    34cdcfb26 (the READY mail) -> f6669623c (PR #1032, KS-1194: three files, all services/auth) -> a105cd32b1ed9c6927ae6e797f8259224d8480c6
+    (PR #1034, KS-1215, MERGED mid-draft: three files, ALL api-gateway src — middleware/auth.ts, routes/platform.ts and the ks1215 test).
+    DEVELOP IS NOW a105cd32b1ed9c6927ae6e797f8259224d8480c6. Re-read it yourself before you start; if it has moved again, judge the move by content
+    and name it. ZERO overlap with #1037's six files, measured by the drafter, not reasoned. compare develop...head reads merge_base 34cdcfb26,
+    ahead 3, behind 2, files 6.
+  #1034 IS NOW IN DEVELOP. That is the gate whose report is your PRIOR REPORT, and its change is in the app you run: authenticateToken's connector
+    branch now deletes the caller's Authorization. It does not touch any health path, but it IS in every tree you build from develop onward. Do not
+    attribute anything it does to #1037.
+  MERGE AGAINST CURRENT DEVELOP IS CLEAN: the drafter's read-only merge-tree of f87506f47 against a105cd32b at 00:26:59Z returned merged tree
+    6e8e62231f1454268a35292b8a279fbc6faa4d9b with ZERO conflicted paths. Re-derive that OID in YOUR clone, name it, and run the L0 lead and items
+    1, 3 and 6 on the MERGED tree as well as on the head. If your merge is not clean, that alone is a NO GO and you stop and say so.
+  DENOMINATOR WARNING: the api-gateway suite is 59 test files at the head AND 59 at develop — but SIXTY on the merged tree, because the merged tree
+    holds #1037's ks1101 test AND #1034's ks1215 test. A merged-tree run that still reports 59 files has not picked #1034 up: stop and find out why.
+Repo:    /Volumes/DevMASTER/!CODING/Secuura/Blockchain/2_Project_Files  (READ-ONLY)
+  - git clone --shared --no-checkout by SHA into your own fresh mktemp -d; git write verbs there only, from a script file.
+  - Never run merge-tree --write-tree, worktree, fetch, checkout or git apply in the checkout.
+  - A new develop is fetched by SHA into YOUR clone over https, with GH_TOKEN handed to git by a GIT_ASKPASS helper reading an env var, never on a
+    command line.
+  - Never enter any seat's worktree or another gate's clone (other gates are live); never run vitest inside the checkout; pin by SHA, never origin/*.
+  - The seat's records under Blockchain/5_Project_History/ are READ-ONLY files: parse any ROWS literals, never execute them (they hard-code a seat
+    worktree). Pattern: gatesets/2026-09-17_gate1034/repin_tamper_1034.py.
+  - Record the checkout's porcelain count and .git/worktrees count before and after: they must be equal.
+Farm node_modules per ENTRY in your clone (the #1009 gate's R-6): Blockchain/Dev/node_modules, services/api-gateway/node_modules and
+  packages/shared/node_modules, each PER ENTRY, .vite/.vitest/.cache skipped, @secuura/* relinked into your tree. Build the shared dist per tree and
+  assert @secuura/shared IN TREE from api-gateway/src. NEVER link a node_modules tree wholesale — a wholesale link can write through to the real
+  checkout's .vite cache; create no node_modules where nothing runs.
+VITEST = develop's lock, 4.1.11 (the checkout install is 4.1.10): a side install OUTSIDE Blockchain/Dev pinned to the lock closure (--ignore-scripts,
+  optional deps left to npm), the 8 hoisted entries (vitest + 7 @vitest/*) farmed from it, run via node <tree>/Blockchain/Dev/node_modules/vitest/vitest.mjs
+  (.bin/vitest still points at 4.1.10). Print the version beside every count. Pattern: gatesets/2026-09-17_gate1034/repin_vitest41111_1034.py.
+PROBE, HARNESS AND SCRATCH FILES LIVE OUTSIDE services/api-gateway/ (the #1018 round-2 gate's F-3; #1029's R-1029-7):
+  - the real-app probe at <tree>/Blockchain/Dev/qa_probe_1037/, with a scratch vitest config beside it (root = the service dir, setupFiles = its
+    vitest.setup.ts, include = the probe only), passed with --config;
+  - the test-including tsconfig at <tree>/Blockchain/Dev/qa_tsc_1037/.
+  Before your first tamper row, PROVE the probe is out of both collectors: `vitest list --filesOnly` lists 0 qa_probe (control: the ks1101 test is
+  listed) and `tsc -p . --listFilesOnly` lists 0 qa_probe (control: services/health.ts is listed).
+
+You are FINDINGS-ONLY. You never fix, never merge, never push, never deploy, never comment, never file, never tick an ack box, never `@`, never
+write to Linear or GitHub, and nothing goes to Peter or Stuart.
+
+NEVER run a push, the real pre-push hook, or preflight.sh inside the Secuura checkout or any of its worktrees.
+
+NEVER print a credential value, and never open, read or copy a secrets file into output. A script may read GH_TOKEN / LINEAR_API_KEY by NAME from
+/Volumes/DevMASTER/!CODING/Secuura/Blockchain/4_Credentials/.env, and AGENTMAIL_API_KEY by NAME from /Volumes/DevMASTER/WEDNESDAY/4_Credentials/.env,
+only for the calls this prompt allows (GitHub GET + a by-SHA fetch into your clone, Linear query, the one verdict mail), and never echoes them. Copy
+gatesets/2026-09-17_gate1034/api_read_1034.py. Count, never echo.
+
+NO shared docker stack, no :6882 / :7082 slot, no kintsugi, no demo, no az, NEVER the wallet mnemonic (KS-535 HOLD). This gate needs NO container and
+NO real upstream: the REAL index.ts app in-process over loopback recorders that YOU control the bodies of. Run `docker info` ONCE and print its rc on
+its own line (UP is NOT permission; create no container).
+LOOPBACK ONLY: every listener binds 127.0.0.1:0. ANY LISTENER, CHILD PROCESS OR STUB YOUR RUNS START, YOU END: identify it by port + argv + cwd,
+SIGTERM that pid, never a pattern kill, never pid 1, and recount after. Quote an lsof TCP LISTEN census (+ cwd and argv per node pid) BEFORE your
+first run and at close.
+No Akto, no k6, no Playwright, no Schemathesis run (NOT COMMISSIONED) — YOU rule whether Schemathesis/Akto are REQUIRED, with the measured reason.
+The seat ruled Schemathesis out at 13:20:51Z; its reason is in the READY mail's Test Evidence. Time-box 45 minutes of work.
+
+What Wednesday requires (L0 + items 1-9):
+
+L0. THE O-SURFACE LEAD, on the REAL gateway (index.ts, real mount order), per tree (develop a105cd32b, head f87506f47, merged 6e8e62231). Stand up a
+   probed service that answers 200 with {status:'degraded'} and census EVERY aggregate the PR touches: /health/deep, /system/status, /api/system/status,
+   /api/system/health/dashboard, and /status/simple's body. For each: the per-service status string, the overall status, and the HTTP code. Must hold at
+   head: the degraded service reads `degraded` and NEVER `up` on all five. Must hold at develop: at least one of them reads `up` (the bug), or the PR
+   fixes nothing — a positive control on the claim itself. Vary the body: {status:'degraded'}, degraded with a 503, degraded nested under a key, an
+   unknown status string, a non-JSON 200, an empty 200, a 2xx with no body. Say which of those the PR classifies and which it silently treats as up.
+   Mounted paths to confirm on the real app (the seat claims them): /health/deep = /health/ready (ONE handler), the system-status router mounted at
+   BOTH /system and /api/system with /status and /status/simple, and /api/system/health/dashboard.
+
+1. READINESS IS UNCHANGED — the regression risk of this PR. /health/ready and /status/simple must keep their 200 / 503 rules with degraded counted as
+   NOT-down, at head exactly as at develop. Census every combination of {all up, one degraded, one down, degraded + down, all down} x {both readiness
+   endpoints} x {both trees}. FAIL (Blocker): any cell where head's readiness HTTP code differs from develop's for a non-degraded input, or where a
+   degraded-only input turns 503. The seat's tamper row READINESS-DEGRADED-AS-DOWN (2 cells at 7f10aa1d8) is the ruled tamper for this: re-run it.
+
+2. THE THREE FINDINGS THE SEAT DECLARED AND DID NOT FIX. These are IN the PR body, NOT fixed, and you GRADE each one — severity, target (PR or
+   TICKET), SHIPS-WITH or TICKET, and whether it should block:
+   - F-1: `scripts/smoke-test.sh:107` passes a /health/deep check only when it reads `up`, so a service this PR now reports as `degraded` FAILS the
+     smoke test. MEASURE it: run the smoke-test parse against a degraded /health/deep body from both trees and show the pass/fail flip. Say who runs
+     smoke-test.sh and when (READ: CI workflows, deploy scripts, runbooks) — a green PR that reddens the deploy smoke test is a SHIPS-WITH at least.
+   - F-2: `/health/services` (opt-in, 404 by default) still reads `response.ok` only, so it still shows a degraded service as up. Confirm it is really
+     404 by default at head, name the flag that opts it in, and say whether anything in-repo or in deploy config turns it on.
+   - out-of-repo consumers of these bodies are UNMEASURED. You cannot close this by reading the repo. Say plainly what class of consumer would break
+     (anything asserting status === 'up'), what evidence would be needed, and carry it as a TICKET, not as a closed item. Do NOT report it as tested.
+
+3. TAMPER, on the WHOLE api-gateway suite at HEAD (vitest 4.1.11, --testTimeout=60000 --hookTimeout=60000 unless the row says default; denominator
+   asserted — the seat measured 59 files / 576 tests, 0 failed, 0 pending at f87506f47; project tsc rc per row, non-zero = VOID; anchor count 1 +
+   marker; restored by blob sha + `git diff --quiet`).
+   - The seat's 11 rows EXACTLY, as listed in the READY mail's Test Evidence at 7f10aa1d8: RP-DEV 4; READINESS-DEGRADED-AS-DOWN 2; READY-DEEP-ONLY 1;
+     READY-SIMPLE-ONLY 1; DEEP-BODY-IGNORED 1; STATUS-BODY-IGNORED 2; DASH-BODY-IGNORED 1; T0 / T0-DEFAULT / TI 0. Every red must be an AssertionError.
+     The seat measured these at 7f10aa1d8, NOT at the head: re-measure at f87506f47 and name any row that moves.
+   - PLUS your own, aimed at what the seat's table does not pin: the dashboard aggregate, the /api/system mount (as distinct from /system), the
+     /status/simple BODY as distinct from its code, and the admin/status-page consumers. Say which property NO cell sees.
+
+4. THE IN-REPO CONSUMERS the PR also changed. admin servicesOnline must count healthy + degraded; the status page must have a degraded style that
+   actually renders. Census (READ, case-insensitive git grep, positive controls) of every in-repo reader of these bodies — anything comparing to
+   'up', 'healthy', 'degraded', or reading response.ok — and say which ones this PR updated and which it left. A legitimate consumer that breaks is a
+   finding. `npx tsc --noEmit -p frontend/admin` rc 0 with --listFilesOnly proof that src/services/api.ts is in the program. The status page and the
+   admin dashboard were NOT opened in a browser by the seat: say in one line whether the real-browser half of tier 1 applies here, and if it does and
+   you do not run it, that is a NOT TESTED at full prominence.
+
+5. MERGE-IN. Re-derive the merged tree of f87506f47 over the then-current develop in YOUR clone (drafter: a105cd32b -> 6e8e62231f1454268a35292b8a279fbc6faa4d9b,
+   0 conflicts). Assert 34cdcfb26..head is exactly the six files. Assert that the six files develop has added since (three from #1032 in services/auth,
+   three from #1034 in api-gateway src) are disjoint from #1037's six. Assert the merged tree carries BOTH the ks1101 and the ks1215 tests. If develop
+   has moved again, judge the new move by content and name it.
+
+6. CHECKS: the api-gateway suite at develop AND at head AND on the merged tree, at DEFAULT ceilings and at 60 s, on vitest 4.1.11, with 1-min load
+   beside every run (seat at head: 59 files / 576, 0 failed, load 17.77 and 20.71). tsc --noEmit -p . rc 0 each; THE TEST-INCLUDING tsc PROGRAM from a
+   scratch tsconfig OUTSIDE services/ with --listFilesOnly proof the ks1101 test is in it and not in the project program, plus a plant. eslint by rule
+   AND message on the three source files and the test, both trees, with a firing control (seat: 0 / 0). `npm run check:openapi` rc 0 — the seat ran it
+   at 7f10aa1d8, not at the head: re-run it at the head and say whether the spec is still in sync.
+
+7. LINEAR / GITHUB at run time and immediately before the mail: attachmentsForURL(pull/1037) = KS-1101 `contributes` only (controls pull/1034,
+   pull/99999); 0 closing phrases in title, body and all 3 commit messages (planted controls); `Refs KS-1101` in the body; KS-1101 stays In Progress on
+   merge (§5f). The seat cites comment ee2bc417 naming the PR: confirm it.
+
+8. SCHEMATHESIS / AKTO ruling, with the measured reason.
+
+9. CARRY-FORWARD per finding CLOSED / STILL OPEN / NEW, each SHIPS-WITH or TICKET: F-1 smoke-test.sh:107; F-2 /health/services; the unmeasured
+   out-of-repo consumers; readiness unchanged; the dashboard aggregate; the two in-repo consumers; the browser-unverified surfaces; anything the
+   #1034 gate left open on this service. Report the checkout bounds and NOT TESTED at equal prominence.
+
+LEAD WITH L0, then item 1 and item 2:
+- does every aggregate the PR touches show a 2xx degraded body as degraded at head, and did it show up at develop;
+- is readiness genuinely unchanged;
+- and what do the three declared-but-unfixed findings actually cost.
+
+Hygiene:
+- /bin/bash here is 3.2: write runners in Python.
+- zsh: no PIPESTATUS, no timeout, `set -- $var` does not word-split, write `"${VAR}:path"`, never begin a line with `=====`.
+- Your tool shell's grep may be a function: use /usr/bin/grep -i with a same-file positive control.
+- `git grep -c` prints nothing for a zero (silence is unread, not 0); `rev-parse` of a missing path echoes its argument (use cat-file -e).
+- A scripted edit can comment out the rest of a Python line; a phrase your guard greps must stay on one line: assert the file.
+- Never `cd` in your own tool calls; absolute paths; git write verbs only inside script files.
+- stderr is never discarded. Clocks from `date`, never estimated. Every scripted edit asserts its anchor count = 1 and a marker.
+- Quote at start, mid and close as THREE timestamped readings: the Secuura checkout's porcelain count, .git/config sha256, for-each-ref count,
+  .git/worktrees count, origin develop SHA, refs/pull/1037/head, the checkout branch, and api-gateway's node_modules/.vite reading. If
+  refs/pull/1037/head moves, STOP: a verdict is valid only at its head. develop moving is expected: judge it by content and name it.
+- Never `rm`: fresh mktemp -d per attempt; quarantine by MOVE. No container is created; never touch a secuura-* container.
+Do no memory maintenance of your own project's memory store inside this session.
+
+Report FOUND / TESTED / HOW, with controls, into
+/Volumes/DevMASTER/!CODING/Testing Agent MAIN/projects/secuura/reports/2026-09-18-ks1101-1037-f87506f47-tier1-r1/
+NOT-TESTED.written-first.md is written FIRST, BEFORE any run; then report.md and evidence/. The report covers:
+- the trees with OIDs and the merge-in proof;
+- the real-app aggregate census per endpoint per body shape per tree, with the head vs develop difference table;
+- readiness: the full code matrix, both trees;
+- the three declared findings, each MEASURED where measurable and each graded;
+- the full tamper table with forms, tsc rc and VOID rows, and the consequence of every zero-red row;
+- suites at both ceilings with load and the vitest version, both tsc programs, eslint and check:openapi; the in-repo consumer census;
+- Linear; the Schemathesis/Akto ruling; the listener census before / close;
+- the CLOSED / STILL OPEN / NEW table;
+- what you did NOT test, at the same prominence as the findings.
+Every finding carries its evidence class (MEASURED AT RUNTIME / PROBED / READ ONLY / RELAYED), severity, target (PR or TICKET), SHIPS-WITH or TICKET,
+disposition, and its oracle. Name every prediction slip against its predictor (the READY mail, the seat, the drafter, Wednesday).
+Client-facing communication = ticket comments only, and not from you; anything needing a push goes to Wednesday as an escalation candidate.
+Never delete; cleanup means quarantine.
+Verdict: ONE line — GO, GO WITH FINDINGS, or NO GO — on f87506f476ce83fbbc006e9f84d22454053126ad, as the delta over develop, AND on the merged tree
+(name the then-current develop and the merged-tree OID). A verdict is valid ONLY at that head. Round 1 of 2: a NO GO goes back to the seat for one fix
+round. Then plain statements on items 1-9 and the CLOSED / STILL OPEN / NEW table.
+Give the merge seat its MERGE ADDENDUM line: "on WEDNESDAY'S signed GO naming the head: squash f87506f47 onto develop <then-current; a105cd32b at
+drafting> (merged tree <OID>; drafter 6e8e62231); #1037 attaches to KS-1101 only, linkKind contributes, no closes; KS-1101 stays In Progress on merge
+(§5f: real degraded upstreams, the browser surfaces and the out-of-repo consumers are unmeasured); equality targets after the squash: health.ts
+7bedc0745 / system-status.ts bd0aca902 / health-dashboard.ts 95114beac / ks1101 test e03f600d5 / admin api.ts f45661617 / status index.html b23554a12;
+api-gateway <n/n> at develop -> 59/576 at head -> <merged n/n, 60 files> on vitest <version> (re-measure); dispositions: <per finding, SHIPS-WITH or TICKET>;
+NEW: <yours>; Records for KS-1101's facts comment at merge: <per aggregate CLOSED / STILL OPEN>, F-1 scripts/smoke-test.sh:107 <ruling>, F-2
+/health/services <ruling>, the out-of-repo consumers <ruling>, readiness <ruling>, <yours>" — plus any finding with its target.
+
+MAIL YOUR VERDICT to wednesday-agent@agentmail.to when the pass is complete. Your pane holds ~19 lines of alternate screen with no scrollback, so a
+verdict that stays in the pane is one pane-close from being lost -- this is not a formality, it is the only durable copy; the verdict MAIL is the END
+STATE and the wait signal. Send it FROM coagent@agentmail.to. Subject, EXACTLY:
+[QA -> Wednesday] TIER 1 GATE #1037 (KS-1101) f87506f47 — <GO | GO WITH FINDINGS | NO GO>
+- The QA project has no send_brief.sh of its own: POST https://api.agentmail.to/v0/inboxes/coagent@agentmail.to/messages/send with JSON
+  {"to": ["wednesday-agent@agentmail.to"], "subject": "...", "text": "..."} and Authorization: Bearer $AGENTMAIL_API_KEY, the key by NAME from
+  Wednesday's .env, never echoed.
+- Build the body from a template file with no shell interpolation and assert the backtick spans survived.
+- Confirm the API answered 2xx and quote the message id in your final pane line. Timestamps in the mail come from `date`, never estimated.
+The MAIL is the end state.

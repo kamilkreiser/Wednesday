@@ -1,0 +1,271 @@
+#!/bin/bash
+# launch_qa_secuura_ks1101_1037.sh — cross-project QA agent, ONE TIER 1 ROUND 1 gate over Secuura/Blockchain PR #1037 (KS-1101, Seat A)
+# @ f87506f476ce83fbbc006e9f84d22454053126ad — services/api-gateway: the health AGGREGATES show a probed service that answers 2xx {status:degraded} as
+# degraded, never as up, on /health/deep, on /system/status and /api/system/status (including the /status/simple body) and on /api/system/health/dashboard.
+# READINESS IS UNCHANGED: /health/ready and /status/simple keep their 200 / 503 rules with degraded counted as NOT-down. Shape O-SURFACE, ruled 13:30:57Z.
+# Three commits: e4ef504a3 (the O-SURFACE edits + the 11-cell test, on 732c13459) -> 7f10aa1d8 (develop 3961c2add merged in) -> f87506f47 (develop 34cdcfb26
+# merged in). Head tree 4f7ce40b4. Six files: services/health.ts, routes/system-status.ts, routes/health-dashboard.ts, the new ks1101 test,
+# frontend/admin/src/services/api.ts (servicesOnline counts healthy + degraded) and frontend/status/index.html (the degraded style).
+# TIER 1: the gateway health surface every deploy check and dashboard reads. A GO is a gate verdict: #1037 merges on WEDNESDAY'S signed GO naming the head
+# (the TESTED grant) and on nothing else (exit 26 guards it).
+#
+# THE SHAPE, re-read live 10:10:45-10:26:59 AEST 2026-09-18 (git ls-remote + the GitHub compare and PR APIs agree): the head has NOT moved since the seat's
+# READY at 16:18:10Z. DEVELOP MOVED TWICE DURING DRAFTING: 34cdcfb26 (the READY mail) -> f6669623c (#1032 KS-1194, three files, all services/auth) ->
+# a105cd32b (#1034 KS-1215 MERGED mid-draft; three files, ALL api-gateway src: middleware/auth.ts, routes/platform.ts and the ks1215 test). The FIRST
+# generated launcher refused with exit 18 on that second move; this is the re-pin. So the merge-base 34cdcfb26 is the head's second parent but two commits
+# behind develop, and compare develop...head = merge_base 34cdcfb26, status diverged, ahead 3, files 6, behind 2 (ahead and files asserted, exit 10; behind
+# NOT asserted). MEASURED, not reasoned: 0 shared files between #1037's six and the six develop has added since, and the read-only merge-tree of f87506f47
+# against a105cd32b is CLEAN — merged tree 6e8e62231f1454268a35292b8a279fbc6faa4d9b, 0 conflicted paths.
+# CONSEQUENCE THE GATE MUST CARRY: the merged tree contains #1034's auth.ts, platform.ts AND its ks1215 test, so the api-gateway suite is 59 test files at
+# the head and 59 at develop but SIXTY on the merged tree. A merged-tree run still reporting 59 has not picked #1034 up.
+#
+# The develop pin is judged by CONTENT — PATH BLOBS — never by develop's SHA: (a) TWENTY files by blob at the CURRENT develop — the PR six (health.ts
+# f43052734, system-status.ts 956083916, health-dashboard.ts 94a1c8063, admin api.ts bd8ddb32f, status index.html 714fcac6c, the ks1101 test ABSENT; at a
+# #1037 blob -> exit 19 LANDED), and what the gate runs and reads: index.ts (the real mount order for /health/*, /system and /api/system), health.ts's whole
+# import closure (config/services.ts, middleware/auth.ts, db.ts), #1034's platform.ts and ks1215 test (develop is AHEAD of the head on those three: each is
+# pinned at BOTH ends, so a revert of #1034 refuses too), gateway package.json / vitest.config.ts / vitest.setup.ts / tsconfig.json, scripts/
+# smoke-test.sh (finding F-1 lives at line 107), frontend/admin tsconfig.json + package.json (the admin tsc program), Dev eslint.config.mjs — any blob
+# nobody pinned -> exit 18; (b) if develop moves past a105cd32b, the compare pinned...develop REFUSES (exit 18) when the delta touches a GUARDED path —
+# services/api-gateway/src/ and its package.json / vitest.config.ts / vitest.setup.ts / tsconfig.json, frontend/admin/src/ and its tsconfig.json /
+# package.json, frontend/status/, scripts/smoke-test.sh, eslint.config.mjs — or the move cannot be judged. WHY these paths: they are the code and
+# configuration the gate runs in-process (the real index.ts app, the health service and its imports), the two consumers the PR also changed, and the smoke
+# test finding F-1 is about; a develop merge elsewhere (other services, other frontends, lockfiles) cannot change what the gate measures, so it must not
+# refuse. packages/shared/ is deliberately NOT judged and NOT guarded: measured, health.ts imports nothing from it. DEV_CONTENT_ALLOWED is EMPTY.
+#
+# NO SEPARATE BRIEF. This gate's source document is the seat's READY FOR QA mail (gatesets/2026-09-18_gate1037/mail_1037_ready.md) and BRIEF points at it.
+# Three cross-document assertions are real and kept: TIER 1 in both (exit 7), the head SHA in both (exit 20), and exit 27 — the READY mail AND the prompt
+# must BOTH name the three findings the seat declared and did NOT fix. The requirements only Wednesday can state (report directory, prior report, MERGE
+# ADDENDUM, CLOSED / STILL OPEN / NEW, the signed-GO merge authority, ROUND 1) are asserted against the PROMPT alone: the seat's mail cannot carry them, and
+# a grep that can never fail is not an assertion.
+#
+# exit 21: the LAUNCH path refuses when stdin is not a TTY. This launcher execs an interactive agent; run it in a cockpit
+# pane, never inside a Bash tool — and never run it without --check to "prove" this guard. `--check` runs headless (it launches nothing).
+# exit 22: the prompt must require node_modules farmed PER ENTRY (the #1009 gate R-6: a wholesale link can write through to the checkout .vite).
+# exit 23: the prompt must carry the exact #1037 verdict subject and name coagent@ as the sender and wednesday-agent@ as the recipient.
+# exit 24: the prompt must name the REPORT DIRECTORY, the PRIOR REPORT (#1034, KS-1215: the same api-gateway service, gated this morning) and
+#          NOT-TESTED.written-first.md (written FIRST, before any run). The QA agent has no inbox.
+# exit 25: the prompt must carry the MERGE ADDENDUM and require the per-finding CLOSED / STILL OPEN / NEW disposition.
+# exit 26: the prompt must name WEDNESDAY'S signed GO as #1037's merge authority and carry no copied Kam's-tap merge condition (that is #1032's).
+# exit 27: the seat's READY mail AND the prompt must BOTH name the three NOT-fixed findings — F-1 scripts/smoke-test.sh:107 (a degraded service now FAILS
+#          the smoke test), F-2 /health/services (opt-in, still response.ok only), and the UNMEASURED out-of-repo consumers. The gate exists to grade them.
+# QA1037_CUR_DEV (test override, --check only): stands in for origin develop so the LANDED / GUARDED refusals can be proven.
+# QA1037_HEALTH_FILE (test fixture, --check only): a local file stands in for develop services/health.ts (its git blob) so the LANDED and GUARDED
+# arms can be proven without a real develop commit.
+# A launch with any QA1037_* override or fixture set refuses (exit 16).
+#
+# Generated by gatesets/2026-09-18_gate1037/gen_launcher_1037.py from launch_qa_secuura_ks1215_1034.sh (asserted substitutions + pins re-read from the repo +
+# a re-derived merged tree + residual guard + output controls + bash -n): same guard set and exit codes 2..26 (19 = LANDED), plus exit 27, re-pointed at
+# #1037 ROUND 1, no content-cleared blob.
+#
+# Usage: launch_qa_secuura_ks1101_1037.sh [--check]
+# Exit: 0 launched (or guards passed under --check) · 2..27 a guard refused
+set -u
+
+QA_DIR='/Volumes/DevMASTER/!CODING/Testing Agent MAIN'
+WED='/Volumes/DevMASTER/WEDNESDAY'
+BRIEF="${QA1037_BRIEF:-$WED/2_Project_Files/fleet/qa-agent/gatesets/2026-09-18_gate1037/mail_1037_ready.md}"
+PROMPT_FILE="${QA1037_PROMPT:-$WED/2_Project_Files/fleet/qa-agent/briefs/2026-09-18_secuura-1037-ks1101-tier1.prompt.txt}"
+REPO='/Volumes/DevMASTER/!CODING/Secuura/Blockchain/2_Project_Files'
+SECUURA_ENV='/Volumes/DevMASTER/!CODING/Secuura/Blockchain/4_Credentials/.env'
+BRANCH='refs/heads/feature/ks-1101-gateway-health-aggregates-read-anchorings-http-status-only'
+HEAD_SHA="${QA1037_HEAD:-f87506f476ce83fbbc006e9f84d22454053126ad}"
+MERGE_BASE='34cdcfb2663b9e4c31025044e6f842ad2c5a10a3'   # the merge-base of the head with develop = the head second parent (#1035s squash; develop when the seat pushed, NOT develop now)
+DEVELOP_SHA='a105cd32b1ed9c6927ae6e797f8259224d8480c6'   # the pin = develop RE-READ at drafting, after #1032 AND #1034 landed (NOT the merge-base 34cdcfb26; moves judged by PATH BLOB and GUARDED paths: git ls-remote 10:25:39 AEST 2026-09-18)
+REPORT_DIR='/Volumes/DevMASTER/!CODING/Testing Agent MAIN/projects/secuura/reports/2026-09-18-ks1101-1037-f87506f47-tier1-r1/'
+PRIOR_REPORT='/Volumes/DevMASTER/!CODING/Testing Agent MAIN/projects/secuura/reports/2026-09-18-ks1215-1034-e4624218b-tier1-r1/'
+REAL_BRIEF="$WED/2_Project_Files/fleet/qa-agent/gatesets/2026-09-18_gate1037/mail_1037_ready.md"
+
+[ -d "$QA_DIR" ]         || { echo "QA project missing: $QA_DIR" >&2; exit 2; }
+[ -s "$BRIEF" ]          || { echo "brief missing or empty: $BRIEF" >&2; exit 3; }
+[ -s "$PROMPT_FILE" ]    || { echo "prompt file missing or empty: $PROMPT_FILE" >&2; exit 4; }
+[ -d "$REPO" ]           || { echo "repo under test missing: $REPO" >&2; exit 5; }
+
+# The head, pinned at its branch on origin (one ls-remote at run time).
+LSR="$(git -C "$REPO" ls-remote origin "$BRANCH")"
+if ! printf '%s\n' "$LSR" | grep -q "^${HEAD_SHA}[[:space:]]${BRANCH}\$"; then
+  echo "REFUSING: #1037 — $HEAD_SHA is not at $BRANCH on origin — the head moved; a verdict is valid ONLY at its head" >&2
+  printf '%s\n' "$LSR" >&2
+  exit 6
+fi
+
+# The compare (GitHub compare API), asserted whole (merge_base + ahead + files; NOT behind — see the header):
+# develop...#1037 = 34cdcfb26 ahead 3 files 6 (behind 2: develop moved to f6669623c then a105cd32b after the seat pushed; behind deliberately NOT asserted). Compare API 00:25:55Z 2026-09-18.
+COMPARE="$(
+  set -a; . "$SECUURA_ENV"; set +a
+  HEAD_SHA="$HEAD_SHA" python3 - <<'PY'
+import json, os, urllib.request
+t = os.environ.get("GH_TOKEN", "")
+api = "https://api.github.com/repos/Secuura/Distributed_Secuura/compare/"
+r = urllib.request.urlopen(urllib.request.Request(api + "develop..." + os.environ["HEAD_SHA"], headers={"Authorization": "Bearer " + t, "Accept": "application/vnd.github+json"}), timeout=60)
+c = json.load(r)
+print("%s ahead=%d files=%d" % (c["merge_base_commit"]["sha"], c["ahead_by"], len(c.get("files") or [])))
+PY
+)"
+[ -n "$COMPARE" ] || { echo "REFUSING: could not read the compare develop...head from the GitHub compare API" >&2; exit 13; }
+[ "$COMPARE" = "$MERGE_BASE ahead=3 files=6" ] || { echo "REFUSING: #1037 develop...head reads '$COMPARE', the gateset pins '$MERGE_BASE ahead=3 files=6'" >&2; exit 10; }
+
+# The develop pin, judged by CONTENT (see the header): eighteen files by PATH BLOB at the CURRENT develop (no region judgement), then — if develop
+# moved — the pinned...develop delta against the GUARDED list with the DEV_CONTENT_ALLOWED blobs cleared.
+CUR_DEV="${QA1037_CUR_DEV:-$(git -C "$REPO" ls-remote origin refs/heads/develop | cut -f1)}"
+[ -n "$CUR_DEV" ] || { echo "REFUSING: could not read origin develop (git ls-remote)" >&2; exit 18; }
+DEV_JUDGEMENT="$(
+  set -a; . "$SECUURA_ENV"; set +a
+  DEVELOP_SHA="$DEVELOP_SHA" CUR_DEV="$CUR_DEV" python3 - <<'PYJ'
+import hashlib, json, os, sys, urllib.request, urllib.error
+t = os.environ.get("GH_TOKEN", "")
+api = "https://api.github.com/repos/Secuura/Distributed_Secuura"
+def get(p):
+    return json.load(urllib.request.urlopen(urllib.request.Request(api + p, headers={"Authorization": "Bearer " + t, "Accept": "application/vnd.github+json"}), timeout=60))
+def raw(path, ref):
+    return urllib.request.urlopen(urllib.request.Request(api + "/contents/" + path + "?ref=" + ref, headers={"Authorization": "Bearer " + t, "Accept": "application/vnd.github.raw"}), timeout=60).read().decode("utf-8")
+cur = os.environ["CUR_DEV"]; pinned = os.environ["DEVELOP_SHA"]
+D = "Blockchain/Dev/"
+A = D + "services/api-gateway/"
+HEALTHTS = A + "src/services/health.ts"
+DV = "develop"
+# file -> (develop-OK blobs {blob: label}, LANDED blobs {blob: label}); ABSENT = the contents API answers 404 at develop
+JUDGED = {
+  HEALTHTS:                                                             ({"f43052734a10d0b891db11b49aa49b08f66c1ea8": DV}, {"7bedc074583d816d997bd6d679043db010804aed": "#1037 own"}),
+  A + "src/routes/system-status.ts":                                     ({"956083916a7a1a0bbf16252017cbe8f5f90f6436": DV}, {"bd0aca9028ecebeeca98540e693781d6dd76693f": "#1037 own"}),
+  A + "src/routes/health-dashboard.ts":                                  ({"94a1c8063eb71a9ebf0b00eed09bb567806a47a6": DV}, {"95114beac3fb04d5d2aa0328c119d15fd00f0f04": "#1037 own"}),
+  D + "frontend/admin/src/services/api.ts":                              ({"bd8ddb32fd5b778aeb5b4fd109e65464fb3cf2ae": DV}, {"f456616177cfabfa3df127d55133fb05e94741d3": "#1037 own"}),
+  D + "frontend/status/index.html":                                      ({"714fcac6c915fae88d46ce43b9f228859416a6ec": DV}, {"b23554a126103c63e1f434dc47c9f0e3bf8bb214": "#1037 own"}),
+  A + "src/__tests__/ks1101-health-aggregates-surface-degraded.test.ts": ({"ABSENT": DV}, {"e03f600d51d441ca42aff15d92e8391bcc66e2cb": "#1037 own"}),
+  A + "src/middleware/auth.ts":                                          ({"bf09d315a64443b7f02bc27a74366b7a7f1dae81": DV}, {}),
+  A + "src/routes/platform.ts":                                          ({"b80a8cd8d4e1af5a944817227f5ee6612c793954": DV}, {}),
+  A + "src/__tests__/ks1215-the-connector-branch-never-carries-the-callers-bearer.test.ts": ({"75006b5cf50fb8b42a5e7588a1d622b9168c1b07": DV}, {}),
+  A + "src/index.ts":                                                    ({"db127dbfa5dd899b0a8e0d844690890d91e27f10": DV}, {}),
+  A + "src/config/services.ts":                                          ({"6110888aac8c834c291b5385710943f9b6adf57b": DV}, {}),
+  A + "src/db.ts":                                                       ({"9144c532bca9911da6cedd569e575c5aa6bc6c52": DV}, {}),
+  A + "package.json":                                                    ({"841d8c6adcd71e885c01e65c22da9418daff276a": DV}, {}),
+  A + "vitest.config.ts":                                                ({"5888e0b320d934f6f434e0e5ca3c74a995cecc02": DV}, {}),
+  A + "vitest.setup.ts":                                                 ({"22c1107683b8192df3bfd3e929aa94aff3dc7d45": DV}, {}),
+  A + "tsconfig.json":                                                   ({"c981e6a92fdd2417fa35070eb979c5f1c77ffbcd": DV}, {}),
+  D + "scripts/smoke-test.sh":                                           ({"d5d34357a0e4dd36d1ed951367a9ee189a337214": DV}, {}),
+  D + "frontend/admin/tsconfig.json":                                    ({"08cdcb2c535d7086d61f4df504ce3cc6202e8534": DV}, {}),
+  D + "frontend/admin/package.json":                                     ({"a7fd91ccf3a553d7a2d619caf9cfd4de7ea9d7ac": DV}, {}),
+  D + "eslint.config.mjs":                                               ({"8c5374c6022eb0a3f449f41a570db61294aa63f1": DV}, {}),
+}
+# No REGION judgement: every file is judged by exact blob (a develop move of health.ts, system-status.ts, health-dashboard.ts, index.ts
+# or smoke-test.sh refuses, exit 18; a #1037 blob, exit 19).
+content_cleared = set()
+state = []
+for f, (ok, landed) in JUDGED.items():
+    fixture = os.environ.get("QA1037_HEALTH_FILE", "") if f == HEALTHTS else ""
+    try:
+        if fixture:
+            data = open(fixture, "rb").read()
+            blob = hashlib.sha1(b"blob " + str(len(data)).encode() + b"\0" + data).hexdigest()
+        else:
+            blob = get("/contents/" + f + "?ref=" + cur)["sha"]
+    except urllib.error.HTTPError as e:
+        if e.code != 404:
+            print("UNJUDGEABLE develop blob unreadable for " + f.split("/")[-1] + ": HTTP " + str(e.code)); sys.exit(0)
+        blob = "ABSENT"
+    except Exception as e:
+        print("UNJUDGEABLE develop blob unreadable for " + f.split("/")[-1] + ": " + type(e).__name__); sys.exit(0)
+    short = f.replace(D, "")
+    if blob in landed:
+        print("LANDED develop " + short + " blob " + blob[:9] + " = " + landed[blob] + " — #1037 has landed; this gateset is stale"); sys.exit(0)
+    if blob not in ok:
+        print("GUARDED develop " + short + " blob " + blob[:9] + " — a version nobody pinned"); sys.exit(0)
+    state.append(f.split("/")[-1] + " " + blob[:9] + " = " + ok[blob])
+state = "; ".join(state)
+if cur == pinned:
+    print("OK " + state + " | origin develop still " + pinned + " (#1032 KS-1194 then #1034 KS-1215, 0 #1037 files, NOT an ancestor of the head: merged tree f87506f47 x a105cd32b = 6e8e62231f1454268a35292b8a279fbc6faa4d9b, 0 conflicts, drafter merge-tree 00:26:59Z; the merged api-gateway suite gains #1034s ks1215 test, 59 -> 60 files; git ls-remote)"); sys.exit(0)
+try:
+    c = get("/compare/" + pinned + "..." + cur)
+except Exception as e:
+    print("UNJUDGEABLE compare unreadable: " + type(e).__name__); sys.exit(0)
+files = c.get("files") or []
+if c.get("status") != "ahead" or len(files) > 250:
+    print("UNJUDGEABLE status=%s files=%d" % (c.get("status"), len(files))); sys.exit(0)
+GUARDED = [A + "src/",
+           A + "package.json",
+           A + "vitest.config.ts",
+           A + "vitest.setup.ts",
+           A + "tsconfig.json",
+           D + "frontend/admin/src/",
+           D + "frontend/admin/tsconfig.json",
+           D + "frontend/admin/package.json",
+           D + "frontend/status/",
+           D + "scripts/smoke-test.sh",
+           D + "eslint.config.mjs"]
+# STYLE NOTE (912r2 launcher, measured): bash scans quote/paren state THROUGH this heredoc because it sits inside a
+# command substitution — keep apostrophes and parentheses EVEN (this block uses none of the former), or the outer $( ) breaks.
+# CONTENT-JUDGED allowlist: EMPTY. No lockfile is guarded: the gate names the vitest version it ran against develops lock. Re-pin deliberately.
+# packages/shared/src/ is deliberately absent: measured, health.ts imports only config/services, middleware/auth and db, all in-gateway.
+DEV_CONTENT_ALLOWED = {}
+hits = sorted({x["filename"] for x in files for g in GUARDED if x["filename"] == g or (g.endswith("/") and x["filename"].startswith(g))})
+by_name = {x["filename"]: x for x in files}
+cleared = sorted(h for h in hits if (h in DEV_CONTENT_ALLOWED and by_name.get(h, {}).get("sha") in DEV_CONTENT_ALLOWED[h]) or h in content_cleared)
+remaining = sorted(h for h in hits if h not in cleared)
+if remaining:
+    print("GUARDED " + " ".join(remaining)); sys.exit(0)
+tail = "the gate merges the then-current develop onto f87506f47 in its own clone, asserts the merged services/api-gateway/src, frontend/admin/src and frontend/status subtrees equal the head, or re-runs the aggregate census, the readiness matrix, the tamper table and the suites on the MERGED tree; names the merged-tree OID, drafter a105cd32b -> 6e8e62231 (prompt L0 and items 1, 3, 5, 6); the merged api-gateway suite is 60 test files, not 59"
+print("OK " + state + " | origin develop MOVED %s -> %s: commits=%d files=%d — GUARDED hits %d — disjoint from the GUARDED list (services/api-gateway/src/ + its package.json / vitest.config.ts / vitest.setup.ts / tsconfig.json, frontend/admin/src/ + its tsconfig.json / package.json, frontend/status/, scripts/smoke-test.sh, eslint.config.mjs); %s" % (pinned, cur, c["ahead_by"], len(files), len(hits), tail)); sys.exit(0)
+PYJ
+)"
+case "$DEV_JUDGEMENT" in
+  OK*) DEV_NOTE="${DEV_JUDGEMENT#OK }" ;;
+  LANDED*) echo "REFUSING: ${DEV_JUDGEMENT#LANDED } (develop $CUR_DEV) — re-pin deliberately: a different brief" >&2; exit 19 ;;
+  *) echo "REFUSING: origin develop is at $CUR_DEV (pinned $DEVELOP_SHA) and the move is not provably disjoint: ${DEV_JUDGEMENT:-no judgement} — confirm the delta, then re-pin deliberately (launcher DEVELOP_SHA / JUDGED blobs + brief TARGET + prompt)" >&2
+     exit 18 ;;
+esac
+grep -q 'TIER 1' "$BRIEF" && grep -q 'TIER 1' "$PROMPT_FILE" || { echo "REFUSING: the READY mail and the prompt disagree about the tier" >&2; exit 7; }
+grep -q 'ROUND 1' "$PROMPT_FILE" || { echo "REFUSING: prompt does not name ROUND 1 — this gate has no separate brief; its source document is the seat's READY mail, which carries no round" >&2; exit 15; }
+head -1 "$PROMPT_FILE" | grep -q 'ultrathink' || { echo "REFUSING: prompt does not open with the thinking directive" >&2; exit 8; }
+grep -qF "$REAL_BRIEF" "$PROMPT_FILE" || { echo "REFUSING: prompt does not name the seat's READY mail path" >&2; exit 9; }
+grep -qF "$HEAD_SHA" "$PROMPT_FILE" && grep -qF "$HEAD_SHA" "$BRIEF" \
+  || { echo "REFUSING: the READY mail or the prompt does not name the head SHA $HEAD_SHA — a gate about another SHA is another gate" >&2; exit 20; }
+grep -qi 'MAIL YOUR VERDICT' "$PROMPT_FILE" || { echo "REFUSING: prompt does not tell the agent to MAIL its verdict" >&2; exit 12; }
+grep -qi 'NEVER run a push, the real pre-push hook, or preflight.sh inside the Secuura checkout' "$PROMPT_FILE" \
+  || { echo "REFUSING: prompt does not forbid pushing / running the hook in the real checkout" >&2; exit 11; }
+grep -qi 'no memory maintenance' "$PROMPT_FILE" \
+  || { echo "REFUSING: prompt does not forbid memory maintenance inside the gate session" >&2; exit 14; }
+grep -qi 'NEVER print a credential value' "$PROMPT_FILE" \
+  || { echo "REFUSING: prompt does not forbid printing a credential value" >&2; exit 17; }
+grep -qi 'node_modules per ENTRY' "$PROMPT_FILE" \
+  || { echo "REFUSING: prompt does not require node_modules farmed per ENTRY (a wholesale link can write through to the checkout .vite cache)" >&2; exit 22; }
+grep -qF '[QA -> Wednesday] TIER 1 GATE #1037 (KS-1101) f87506f47' "$PROMPT_FILE" && grep -qF 'coagent@agentmail.to' "$PROMPT_FILE" && grep -qF 'wednesday-agent@agentmail.to' "$PROMPT_FILE" \
+  || { echo "REFUSING: prompt does not carry the exact #1037 verdict subject, the coagent@ sender and the wednesday-agent@ recipient" >&2; exit 23; }
+grep -qF "$REPORT_DIR" "$PROMPT_FILE" && grep -qF 'NOT-TESTED.written-first.md' "$PROMPT_FILE" && grep -qF "$PRIOR_REPORT" "$PROMPT_FILE" \
+  || { echo "REFUSING: prompt does not name the report directory $REPORT_DIR, the PRIOR REPORT $PRIOR_REPORT (#1034, KS-1215: the same api-gateway service, gated this morning) and NOT-TESTED.written-first.md — the QA agent has no inbox" >&2; exit 24; }
+grep -qF 'MERGE ADDENDUM' "$PROMPT_FILE" && grep -qF 'CLOSED / STILL OPEN / NEW' "$PROMPT_FILE" \
+  || { echo "REFUSING: prompt does not carry the MERGE ADDENDUM and the per-finding CLOSED / STILL OPEN / NEW disposition — the merge seat equality targets and the In Progress hold ride on it" >&2; exit 25; }
+grep -qiF "WEDNESDAY'S signed GO" "$PROMPT_FILE" && ! grep -qiE "waits for Kam.s tap|on Kam.s tap only" "$PROMPT_FILE" "$BRIEF" \
+  || { echo "REFUSING: prompt does not name WEDNESDAY'S signed GO as the #1037 merge authority, or a copied Kam's-tap merge condition survives (that is #1032's, not this PR's)" >&2; exit 26; }
+grep -qF 'scripts/smoke-test.sh:107' "$PROMPT_FILE" && grep -qF '/health/services' "$PROMPT_FILE" && grep -qiF 'out-of-repo consumers' "$PROMPT_FILE" \
+  && grep -qF 'scripts/smoke-test.sh:107' "$BRIEF" && grep -qF '/health/services' "$BRIEF" && grep -qiF 'out-of-repo consumers' "$BRIEF" \
+  || { echo "REFUSING: the seat's READY mail and the prompt do not BOTH name the three NOT-fixed findings (F-1 scripts/smoke-test.sh:107, F-2 /health/services, the UNMEASURED out-of-repo consumers) — the gate exists to grade them" >&2; exit 27; }
+
+if [ "${1:-}" = "--check" ]; then
+  echo "all guards pass:"
+  echo "  head on origin: #1037 $HEAD_SHA at $BRANCH"
+  echo "  compare (GitHub API): develop...#1037 = $COMPARE"
+  echo "  $DEV_NOTE"
+  echo "  READY mail, prompt, QA project and repo all present"
+  echo "  READY mail and prompt agree on TIER 1; prompt names ROUND 1"
+  echo "  prompt opens with the thinking directive and names the seat READY mail"
+  echo "  READY mail and prompt both name the head SHA"
+  echo "  prompt tells the agent to MAIL its verdict"
+  echo "  prompt forbids pushing / the real hook / preflight in the Secuura checkout"
+  echo "  prompt forbids memory maintenance inside the gate session"
+  echo "  prompt forbids printing a credential value"
+  echo "  prompt requires node_modules farmed per ENTRY"
+  echo "  prompt carries the exact #1037 verdict subject, coagent@ sender, wednesday-agent@ recipient"
+  echo "  prompt names the report directory, the #1034 PRIOR REPORT (KS-1215, same service) and NOT-TESTED.written-first.md"
+  echo "  prompt carries the MERGE ADDENDUM and requires CLOSED / STILL OPEN / NEW per finding"
+  echo "  prompt names WEDNESDAY'S signed GO as the merge authority; no copied Kam's-tap merge condition survives"
+  echo "  READY mail and prompt BOTH name the three NOT-fixed findings (smoke-test.sh:107, /health/services, out-of-repo consumers)"
+  [ -n "${QA1037_CUR_DEV:-}" ] && echo "  (develop read from the QA1037_CUR_DEV test override, not ls-remote)"
+  [ -n "${QA1037_HEALTH_FILE:-}" ] && echo "  (develop api-gateway services/health.ts read from the QA1037_HEALTH_FILE fixture, not the contents API)"
+  echo "  a launch (not --check) will refuse unless stdin is a TTY (exit 21)"
+  exit 0
+fi
+
+[ -t 0 ] || { echo "REFUSING: stdin is not a TTY — this launcher execs an interactive agent; run it in a cockpit pane, never inside a Bash tool (a headless gate is invisible and dies with the caller's shell)" >&2; exit 21; }
+[ -z "${QA1037_BRIEF:-}${QA1037_PROMPT:-}${QA1037_HEAD:-}${QA1037_CUR_DEV:-}${QA1037_HEALTH_FILE:-}" ] || { echo "REFUSING: a launch with test overrides set" >&2; exit 16; }
+echo "$DEV_NOTE" >&2
+cd "$QA_DIR" || { echo "cannot enter $QA_DIR" >&2; exit 16; }
+exec claude --dangerously-skip-permissions --model opus "$(cat "$PROMPT_FILE")"
