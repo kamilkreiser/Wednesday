@@ -85,7 +85,7 @@ if [ -f "$ENV_FILE" ]; then
   if [ -n "${AGENTMAIL_API_KEY:-}" ]; then
     # Errors go to the LOG, never /dev/null — the 08-05 "unreachable" close
     # left no diagnosable trace (WED-16 defect). 3 tries/inbox rides out blips.
-    COUNTS="$(python3 - "$TODAY" <<'PYEOF' 2>>"$LOG"
+    COUNTS="$(CLOSE_SEAT="$SEAT_NOTE_SEAT" python3 - "$TODAY" <<'PYEOF' 2>>"$LOG"
 import json, sys, time, urllib.request, os
 from datetime import datetime
 today = sys.argv[1]
@@ -114,9 +114,15 @@ BACKOFF = (7, 21, 55)          # seconds, before attempts 2, 3, 4
 # AGENT-AWARE (2026-09-09). This tuple was hardcoded to wednesday-agent@. Once the
 # installer became agent-aware, a `com.tuesday.close` firing here would have read
 # WEDNESDAY'S inbox from Tuesday's machine — the 2026-08-13 cross-client shape, which is
-# Kam's severity-max class. The seat's OWN inbox is derived from WED_AGENT, which the
-# plist now carries; the shared coagent@ bus is read by both and stays.
-_agent = os.environ.get("WED_AGENT", "wednesday")
+# Kam's severity-max class. The seat's OWN inbox is derived from the TREE-RESOLVED seat
+# (CLOSE_SEAT = SEAT_NOTE_SEAT from seat_note.sh, the same resolver the note path uses);
+# the shared coagent@ bus is read by both and stays.
+# 2026-09-19 (Tuesday): this line read WED_AGENT with a "wednesday" default, and the comment
+# said "the plist now carries" WED_AGENT. The installed com.tuesday.close.plist did NOT, so
+# every 23:00 close on the Tuesday seat counted the WEDNESDAY inbox. A default that names one
+# seat is a guess; the tree is the discriminator (learnings/2026-09-09_the-seat-resolver-...).
+# NO apostrophes in new lines here: bash 3.2 miscounts quotes in a heredoc inside a command substitution.
+_agent = os.environ.get("CLOSE_SEAT") or os.environ.get("WED_AGENT", "wednesday")
 if _agent not in ("wednesday", "tuesday"):
     print(f"close: WED_AGENT={_agent!r} is not a known agent — reading only the shared bus", flush=True)
     _inboxes = ("coagent@agentmail.to",)
