@@ -1,0 +1,112 @@
+{
+ "ticket": {
+  "identifier": "KS-1258",
+  "title": "KS-1258 N53-1 WIDEN THE N44-1 CELL SO NO yarn / node START SHAPE PASSES — Wednesday's task for Ornith, TEST_ONLY, **ONE existing test file, one line of one cell changed, no product file** (written 202",
+  "description": "# KS-1258 N53-1 WIDEN THE N44-1 CELL SO NO yarn / node START SHAPE PASSES — Wednesday's task for Ornith, TEST_ONLY, **ONE existing test file, one line of one cell changed, no product file** (written 2026-09-19, round 6)\n\nFile: `Blockchain/Dev/services/api-gateway/src/__tests__/ks1258-degraded-optional-service-advice.test.ts`\nTip: `3c447abc7714e98fbba596aa1045b7bb47a6d215`\n\nWritten from develop `3c447abc7714e98fbba596aa1045b7bb47a6d215` (read with `git ls-remote origin refs/heads/develop`; #1053 / KS-1258 N44-1 is merged there). The test file at that tip is 91 lines; its full content is in `files[...]` of your input. The product the cell pins is `Blockchain/Dev/services/api-gateway/src/routes/system-status.ts`. This service runs **VITEST**.\n\n## THE MODE — read this twice\n\n**TEST_ONLY.** Your diff touches EXACTLY ONE file: the test file above, MODIFIED IN PLACE (`--- a/<path>` / `+++ b/<path>`, the path exactly as written above). You never touch `system-status.ts` or any other product file: the behaviour is already right at the tip, and this cell PINS it.\n\n## What the cell pins (one paragraph)\n\nSince #1053, a DEGRADED optional service (billing answers 200 `{status: 'degraded'}`) gets the read-first advice block in `system-status.ts` (after the comment `// KS-1258: a DEGRADED optional service is already up`): a `# Read what the service reports as degraded` comment and a `curl -s`, never a start command. The cell `KS-1258 N44-1: the degraded optional advice carries no start command in ANY common shape` filters that advice's commands through a start-command pattern and expects none. The batch #1050-#1060 gate (finding **N53-1**, Polish) planted `yarn start`, `yarn dev` and `node services/<x>/dist/index.js` in place of the comment and the cell stayed GREEN: its pattern has no yarn and no node shape, so \"ANY common shape\" over-claims. This change widens that ONE pattern line to add `yarn start|yarn dev|yarn run|node services`. The cell keeps its name; every other cell is unchanged.\n\n## The exact change — ONE hunk in the test file\n\nLine 88 is replaced; lines 87 and 89 are context. Copy every line byte for byte. The one `+` line is ASCII only. There is no blank line anywhere in the fence. Keep the header exactly as shown.\n\n```\n@@ -87,3 +87,3 @@\n     const b = await adviceFor('billing');\n-    const starts = (b[0]?.commands ?? []).filter((c: string) => /npm start|npm --prefix|npm run|docker compose up|docker-compose up|systemctl start|pm2 start|restart/i.test(c));\n+    const starts = (b[0]?.commands ?? []).filter((c: string) => /npm start|npm --prefix|npm run|yarn start|yarn dev|yarn run|node services|docker compose up|docker-compose up|systemctl start|pm2 start|restart/i.test(c));\n     expect([b.length, starts]).toEqual([1, []]);\n```\n\nThe only difference between the `-` and the `+` line is the text `yarn start|yarn dev|yarn run|node services|` inserted after `npm run|`.\n\n## Cells\n\n- `widened` = `KS-1258 N44-1: the degraded optional advice carries no start command in ANY common shape`\n\n## Tampers\n\nEach tamper replaces line 592 of `system-status.ts`: the FIRST command of the degraded-OPTIONAL block, the line right after `commands: [` below the comment `// KS-1258: a DEGRADED optional service is already up`. The same `From` text also sits at `:576`, in the degraded-REQUIRED (KS-1248) block, and is NOT touched. Under each tamper EXACTLY the named cell must fail, by assertion.\n\n### YARN — the degraded optional advice regresses to `yarn start`\nFile: `Blockchain/Dev/services/api-gateway/src/routes/system-status.ts`\nLine: 592\nFrom:\n```\n          '# Read what the service reports as degraded',\n```\nTo:\n```\n          'cd services/' + service.name + ' && yarn start',\n```\nReds: `widened`\n\n### YARNDEV — the degraded optional advice regresses to `yarn dev`\nFile: `Blockchain/Dev/services/api-gateway/src/routes/system-status.ts`\nLine: 592\nFrom:\n```\n          '# Read what the service reports as degraded',\n```\nTo:\n```\n          'cd services/' + service.name + ' && yarn dev',\n```\nReds: `widened`\n\n### NODE — the degraded optional advice regresses to `node services/<x>/dist/index.js`\nFile: `Blockchain/Dev/services/api-gateway/src/routes/system-status.ts`\nLine: 592\nFrom:\n```\n          '# Read what the service reports as degraded',\n```\nTo:\n```\n          'node services/' + service.name + '/dist/index.js',\n```\nReds: `widened`\n\n### NPMSTART — no regression: the original N44-1 tamper still reds the widened cell\nFile: `Blockchain/Dev/services/api-gateway/src/routes/system-status.ts`\nLine: 592\nFrom:\n```\n          '# Read what the service reports as degraded',\n```\nTo:\n```\n          'cd services/' + service.name + ' && npm start',\n```\nReds: `widened`\n\n### COMPOSE — no regression: the original N44-1 tamper still reds the widened cell\nFile: `Blockchain/Dev/services/api-gateway/src/routes/system-status.ts`\nLine: 592\nFrom:\n```\n          '# Read what the service reports as degraded',\n```\nTo:\n```\n          'docker compose up -d ' + service.name,\n```\nReds: `widened`\n\n## Controls\n\n- `control: with every service up there is no advice for billing or staking`\n- `control: a DOWN optional service (staking answers 503) is still a warning and still told to start it`\n\n## THE CELLS — state it to yourself before you write a line\n\nAt the untouched tip every cell passes, the widened one included: the degraded billing item's commands are `# Read what the service reports as degraded` and `curl -s …`, and neither matches the widened pattern. Under YARN, YARNDEV or NODE the first command becomes `cd services/billing && yarn start` / `… && yarn dev` / `node services/billing/dist/index.js`, which the widened pattern matches (`yarn start`, `yarn dev`, `node services`), so the cell fails by assertion (`[1, ['…']]` against `[1, []]`). Under NPMSTART and COMPOSE it still fails, as before (`npm start`, `docker compose up` are still in the pattern). The 🔴 cell (its pattern is `npm run dev|restart`) stays green under all five, as it did at the tip. The two controls pass: all-up gives no advice, and the DOWN optional branch is a different block.\n\n## Measurements\n\nMeasured 2026-09-19 by the round-6 search subagent at `3c447abc7` (`git clone --shared` scratch clone, the harness's `prepare_clone.sh` farm, the service's own `npx vitest run` on this ONE file; every plant written by line after checking `From` byte for byte, restored by bytes, porcelain clean after):\n- untouched file: 4/4 pass. With this hunk: 4/4.\n- WITH the hunk, each of YARN, YARNDEV, NODE, NPMSTART, COMPOSE: exactly 1 red of 4, the widened cell, `AssertionError: expected [ 1, …(1) ] to deeply equal [ 1, [] ]`; both controls green.\n- WITHOUT the hunk: YARN, YARNDEV, NODE 0 red of 4 (the gate's N53-1 gap reproduced at the tip); NPMSTART, COMPOSE 1 red (the N44-1 cell, as merged).\n- Scope proof: `From` occurs at `:576` and `:592`. The nearest `// KS-` comment above `:592` is `:581` `// KS-1258: a DEGRADED optional service is already up…`, so the plant is in the optional block. Control: YARN planted at `:576` instead (nearest comment `:564` `// KS-1248: a DEGRADED required service…`) reds 0 of 4 WITH the hunk. The wrong block grades nothing, so the line pin matters.\n- The real `tasks/test_only/checker.sh` on this brief's own diff: `RESULT: PASS (8/8)` (T6 5/5 tampers red exactly the widened cell, T7 controls green under all 5, T8 all restored).\n\n## Output\n\nExactly ONE ```diff block, nothing outside it: `--- a/Blockchain/Dev/services/api-gateway/src/__tests__/ks1258-degraded-optional-service-advice.test.ts` / `+++ b/Blockchain/Dev/services/api-gateway/src/__tests__/ks1258-degraded-optional-service-advice.test.ts`, then the hunk above exactly as shown (`@@ -87,3 +87,3 @@`).\n\n## Notes for the raise (not for the model)\n\n- Test-only. **Raise tier: TIER 2. Refs KS-1258** (N53-1 Polish, from the batch #1050-#1060 gate `2026-09-19-batch1050-1060-tier1-r1`, NOT-PINNED YARN / YARNDEV / NODE). #1053 is merged.\n- Why WIDEN rather than add a new cell: one cell then reds under all five start-shape tampers (the three new ones and the two original ones). A separate yarn/node-only cell would not red under NPMSTART/COMPOSE, and the old cell would still over-claim \"ANY common shape\". It is also a single `-`/`+` line pair between two context lines, the smallest diff the model can copy.\n- Tamper scope: the test_only builder and checker locate a tamper by `Line:` plus an exact `From:` check. They have NO scope-anchor field. The line is pinned at 592, measured AT THE TIP `3c447abc7`, and the plant is proven to land in the optional block (see Measurements). If `system-status.ts` moves before this runs, rebuild and re-measure: the `From` check will refuse a moved line, but only if nothing identical takes its place. The same text at :576 is exactly what could take its place.\n\n## Build line (not for the model)\n\n```\nbash tasks/test_only/build_test_only_input.sh KS-1258 night/inputs/test_only_1258N53-1.json night/briefs/KS-1258-N53-1.md ctx=65536\n```\n"
+ },
+ "repo": {
+  "source_checkout": "/Volumes/DevMASTER/!CODING/Secuura/Blockchain/2_Project_Files",
+  "tip": "3c447abc7714e98fbba596aa1045b7bb47a6d215",
+  "branch": "develop",
+  "test_runner": "vitest (run one file with `npx vitest run <file>` from Blockchain/Dev/services/api-gateway)"
+ },
+ "task_type": "test_only",
+ "tip": "3c447abc7714e98fbba596aa1045b7bb47a6d215",
+ "source_checkout": "/Volumes/DevMASTER/!CODING/Secuura/Blockchain/2_Project_Files",
+ "repo_subdir": "Blockchain/Dev",
+ "service_dir": "services/api-gateway",
+ "shared_pkg_dir": "packages/shared",
+ "shared_pkg_name": "@secuura/shared",
+ "test_file": "Blockchain/Dev/services/api-gateway/src/__tests__/ks1258-degraded-optional-service-advice.test.ts",
+ "test_file_rel_to_service": "src/__tests__/ks1258-degraded-optional-service-advice.test.ts",
+ "test_mode": "modify",
+ "diff_file_headers": [
+  "--- a/Blockchain/Dev/services/api-gateway/src/__tests__/ks1258-degraded-optional-service-advice.test.ts",
+  "+++ b/Blockchain/Dev/services/api-gateway/src/__tests__/ks1258-degraded-optional-service-advice.test.ts"
+ ],
+ "runner": "vitest",
+ "expected_plus": [
+  "    const starts = (b[0]?.commands ?? []).filter((c: string) => /npm start|npm --prefix|npm run|yarn start|yarn dev|yarn run|node services|docker compose up|docker-compose up|systemctl start|pm2 start|restart/i.test(c));"
+ ],
+ "must_remove": [
+  "    const starts = (b[0]?.commands ?? []).filter((c: string) => /npm start|npm --prefix|npm run|docker compose up|docker-compose up|systemctl start|pm2 start|restart/i.test(c));"
+ ],
+ "cells": {
+  "widened": "KS-1258 N44-1: the degraded optional advice carries no start command in ANY common shape"
+ },
+ "tampers": [
+  {
+   "id": "YARN",
+   "file": "Blockchain/Dev/services/api-gateway/src/routes/system-status.ts",
+   "line": 592,
+   "from": "          '# Read what the service reports as degraded',",
+   "to": "          'cd services/' + service.name + ' && yarn start',",
+   "reds": [
+    "KS-1258 N44-1: the degraded optional advice carries no start command in ANY common shape"
+   ],
+   "reds_as_written": [
+    "widened"
+   ]
+  },
+  {
+   "id": "YARNDEV",
+   "file": "Blockchain/Dev/services/api-gateway/src/routes/system-status.ts",
+   "line": 592,
+   "from": "          '# Read what the service reports as degraded',",
+   "to": "          'cd services/' + service.name + ' && yarn dev',",
+   "reds": [
+    "KS-1258 N44-1: the degraded optional advice carries no start command in ANY common shape"
+   ],
+   "reds_as_written": [
+    "widened"
+   ]
+  },
+  {
+   "id": "NODE",
+   "file": "Blockchain/Dev/services/api-gateway/src/routes/system-status.ts",
+   "line": 592,
+   "from": "          '# Read what the service reports as degraded',",
+   "to": "          'node services/' + service.name + '/dist/index.js',",
+   "reds": [
+    "KS-1258 N44-1: the degraded optional advice carries no start command in ANY common shape"
+   ],
+   "reds_as_written": [
+    "widened"
+   ]
+  },
+  {
+   "id": "NPMSTART",
+   "file": "Blockchain/Dev/services/api-gateway/src/routes/system-status.ts",
+   "line": 592,
+   "from": "          '# Read what the service reports as degraded',",
+   "to": "          'cd services/' + service.name + ' && npm start',",
+   "reds": [
+    "KS-1258 N44-1: the degraded optional advice carries no start command in ANY common shape"
+   ],
+   "reds_as_written": [
+    "widened"
+   ]
+  },
+  {
+   "id": "COMPOSE",
+   "file": "Blockchain/Dev/services/api-gateway/src/routes/system-status.ts",
+   "line": 592,
+   "from": "          '# Read what the service reports as degraded',",
+   "to": "          'docker compose up -d ' + service.name,",
+   "reds": [
+    "KS-1258 N44-1: the degraded optional advice carries no start command in ANY common shape"
+   ],
+   "reds_as_written": [
+    "widened"
+   ]
+  }
+ ],
+ "controls": [
+  "control: with every service up there is no advice for billing or staking",
+  "control: a DOWN optional service (staking answers 503) is still a warning and still told to start it"
+ ],
+ "files": {
+  "Blockchain/Dev/services/api-gateway/src/__tests__/ks1258-degraded-optional-service-advice.test.ts": "/**\n * =============================================================================\n * KS-1258 - /system/status never tells an operator to START a DEGRADED optional\n * service that is already up\n * =============================================================================\n * KS-1248 gave a degraded REQUIRED service its own advice. A degraded OPTIONAL\n * service still fell into the not-healthy optional branch of\n * generateTroubleshooting, whose advice is \"Start the service locally\" and\n * \"npm run dev\". The service is up with a sick dependency; starting it is wrong.\n * Harness: the ks1248 pattern - the system-status router mounted alone, fetch\n * stubbed per host, the redis health read mocked.\n * =============================================================================\n */\nimport { describe, it, expect, vi, beforeAll, afterAll } from 'vitest';\nimport http from 'node:http';\nimport express from 'express';\n\nconst savedEnv = { ...process.env };\nprocess.env.BILLING_SERVICE_URL = 'http://billing.ks1258:1';\nprocess.env.STAKING_SERVICE_URL = 'http://staking.ks1258:1';\n\n/** What each probed host answers in the current cell. A host not listed answers healthy. */\nconst answers: Record<string, 'up' | 'degraded' | 'down'> = {};\n\nvi.mock('../services/redis', () => ({ getRedisHealth: vi.fn(async () => ({ status: 'healthy' })) }));\nvi.stubGlobal('fetch', vi.fn(async (url: string) => {\n  const kind = answers[new URL(String(url)).hostname] ?? 'up';\n  if (kind === 'down') return new Response(JSON.stringify({ status: 'unhealthy' }), { status: 503 });\n  if (kind === 'degraded') return new Response(JSON.stringify({ status: 'degraded', degradedReasons: ['ks1258: dependency unreachable'] }), { status: 200 });\n  return new Response(JSON.stringify({ status: 'healthy' }), { status: 200 });\n}));\n\nlet server: ReturnType<ReturnType<typeof express>['listen']>; let port = 0;\nbeforeAll(async () => {\n  const router = (await import('../routes/system-status')).default;\n  const app = express(); app.use('/system', router);\n  await new Promise<void>((r) => { server = app.listen(0, '127.0.0.1', () => { port = (server.address() as any).port; r(); }); });\n}, 10_000);\nafterAll(async () => {\n  await new Promise<void>((r) => server.close(() => r()));\n  for (const k of Object.keys(process.env)) if (!(k in savedEnv)) delete process.env[k];\n  Object.assign(process.env, savedEnv);\n  vi.unstubAllGlobals();\n});\n\nfunction getJson(path: string): Promise<any> {\n  return new Promise((resolve, reject) => {\n    http.get({ hostname: '127.0.0.1', port, path }, (res) => {\n      let data = ''; res.on('data', (c) => (data += c));\n      res.on('end', () => { try { resolve(JSON.parse(data)); } catch (e) { reject(e); } });\n    }).on('error', reject);\n  });\n}\n\n/** The troubleshooting items GET /system/status emits for one component. */\nasync function adviceFor(component: string): Promise<any[]> {\n  const body = await getJson('/system/status');\n  return (body.troubleshooting ?? []).filter((i: any) => i.component === component);\n}\nconst startsOrRestarts = (item: any): boolean => (item?.commands ?? []).some((c: string) => /npm run dev|restart/i.test(c));\n\ndescribe('KS-1258: /system/status troubleshooting for a degraded optional service', () => {\n  it('control: with every service up there is no advice for billing or staking', async () => {\n    answers['billing.ks1258'] = 'up';\n    answers['staking.ks1258'] = 'up';\n    const b = await adviceFor('billing');\n    const s = await adviceFor('staking');\n    expect([b.length, s.length]).toEqual([0, 0]);\n  });\n\n  it('control: a DOWN optional service (staking answers 503) is still a warning and still told to start it', async () => {\n    answers['billing.ks1258'] = 'up';\n    answers['staking.ks1258'] = 'down';\n    const s = await adviceFor('staking');\n    expect([s.length, s[0]?.severity, startsOrRestarts(s[0])]).toEqual([1, 'warning', true]);\n  });\n\n  it('\\ud83d\\udd34 a DEGRADED optional service (billing answers 200 degraded) gets one warning and no start or restart command', async () => {\n    answers['billing.ks1258'] = 'degraded';\n    answers['staking.ks1258'] = 'up';\n    const b = await adviceFor('billing');\n    expect([b.length, b[0]?.severity, startsOrRestarts(b[0])]).toEqual([1, 'warning', false]);\n  });\n  it('KS-1258 N44-1: the degraded optional advice carries no start command in ANY common shape', async () => {\n    answers['billing.ks1258'] = 'degraded';\n    answers['staking.ks1258'] = 'up';\n    const b = await adviceFor('billing');\n    const starts = (b[0]?.commands ?? []).filter((c: string) => /npm start|npm --prefix|npm run|docker compose up|docker-compose up|systemctl start|pm2 start|restart/i.test(c));\n    expect([b.length, starts]).toEqual([1, []]);\n  });\n});\n"
+ },
+ "_night_num_ctx": 65536
+}
