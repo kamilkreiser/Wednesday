@@ -672,6 +672,23 @@ else
   warn "WEEK-INSTRUCTION.md missing" "the launcher's boot step 4 names it; restore it from git"
 fi
 
+# ── NEXT-PICKUP stays ONE live block (added 2026-09-18, ledger w=2 "I regressed my own fix") ──
+# The 10:0x seat split NEXT-PICKUP 220 KB → 8 KB under its own `replace wholesale; do not append`
+# rule, then re-appended 14 UPDATE blocks by 13:4x (40 KB). The rule lives in the file's frontmatter,
+# which nobody re-reads while appending, so it is checked here instead. WED_PICKUP_FILE is a test seam.
+NP="${WED_PICKUP_FILE:-$PROJECT_DIR/0_Brain/tasks/NEXT-PICKUP.md}"
+if [ -f "$NP" ]; then
+  NP_BLOCKS=$(/usr/bin/grep -c '^## ' "$NP")
+  NP_BYTES=$(stat -f%z "$NP")
+  if [ "$NP_BLOCKS" -gt 1 ] || [ "$NP_BYTES" -gt 15360 ]; then
+    warn "NEXT-PICKUP.md has regrown ($NP_BLOCKS live ## blocks, $NP_BYTES B)" "its own rule is 'replace wholesale; do not append': consolidate to ONE block, archive the rest verbatim to NEXT-PICKUP-archive.md (conservation asserted)"
+  else
+    ok "NEXT-PICKUP.md is one live block ($NP_BYTES B)"
+  fi
+else
+  warn "NEXT-PICKUP.md missing" "boot step 4 names it; restore it from git"
+fi
+
 # ── Tailscale remote-access leg (added 2026-08-20; DORMANT-BY-DEFAULT per Kam
 # 2026-08-20 ruling 17: "case by case. I will ask or turn it on when I need.
 # Keep it dormant in the meantime."). Down is the EXPECTED state — report it
