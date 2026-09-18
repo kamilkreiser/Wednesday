@@ -474,3 +474,20 @@ Tip `8b9c3f022bee76b79a47f1b8c5de8ad3ddb4a0ae` (ls-remote 14:5x). Read-only on L
 - KS-986 — REJECTED: demo seeding + a published credential; needs Kam's decision (his signature class).
 - KS-1257 — REJECTED for now: same PUT handler as KS-1230 (overlapping context) and a choice (merge over defaults vs over the current value) touching GET defaults too; a gate SHIPS-WITH item for #1038.
 - KS-683, KS-953, KS-579, KS-581, KS-627, KS-915, KS-746 — not re-read: already rejected with reasons in `queue.md` (lines 91-102: Platform S side / CLASS ticket / features / design / services/security).
+
+### Search round 2, 2026-09-18 afternoon (subagent for the 14:4x Wednesday seat)
+Tip `8b9c3f022`. Same method as round 1 (read-only; red/green measured in a scratch copy). File-collision check against the four in-flight PRs (ks256 test, originate documents.ts + certifications.ts, system-status.ts, admin.ts) applied before choosing. Nothing queued. **One fit this round.**
+- KS-1261 — **FIT, BASH_PATCH tier** (`night/briefs/KS-1261.md`): initialise `FAILED_LEGS=""` / `fail_total=0` under `fail=0` in `scripts/preflight/preflight.sh` (one insert-only hunk, :94-96). The new suite reuses the KS-1209 harness under a poisoned caller env; 2 🔴 + 3 controls. Measured: tip 3 pass / 2 fail (both 🔴), patched 5/5; the KS-1209 suite 4/4 on both trees. `build_bash_input.sh` rc 0. No collision.
+- KS-1260 — REJECTED for now: the same file as KS-1261 (the verdict region :693-705). Only one per file per round; brief it after KS-1261 lands. It's also a choice (print the ratio on the new path, or fold the message into the closing block).
+- KS-1257 — SKIPPED per the coordinator: the same PUT handler as KS-1230, which is being raised now.
+- KS-1251 — REJECTED: eslint config + a test tsconfig (config/tooling, two files, no product file under services/*/src).
+- KS-1252 — REJECTED: the product is `scripts/spec-examples/check/contract.mjs`, which the harness can't express (the same block as KS-1254), and its cells would live in the ks256 test, a file collision with an in-flight PR.
+- KS-1253 — REJECTED: the same file and harness block as KS-1252, and the ALLOW-list is a design change.
+- KS-1255 — REJECTED: a decision ("decide the floor from the key formats … or add a second rule").
+- KS-1259 — REJECTED: suite-wide isolation hygiene across many test files, with no product file.
+- KS-1231 — REJECTED: two readers (verification.ts + health.ts) plus the admin portal; it widens connector authorisation (escalation candidate, "the owner's fix").
+- KS-1232 — REJECTED: one line (health.ts:58), but what to report is an open choice that changes the published contract (`array of string`) and the MCP relay.
+- KS-598 — REJECTED (triaged row): an architecture choice (re-key the registry or remove the upsert) in originate verification.ts plus a DB constraint.
+- KS-1134 — REJECTED (triaged row): the fix lives inside a test file (`orchestrate_jobs.test.sh` CELL 14/15), and the red-proof needs a bash-4-only idiom tamper in `Blockchain/Testing/ci/orchestrate.sh`.
+- KS-872 — REJECTED (triaged row): a type-only error (vitest can't red it) in `packages/shared/src/crypto/jwks.ts`, a JWKS/auth crypto surface.
+- Rejected from the title and census row, not re-read: KS-1019 ([Question]), KS-1203 (originate `documents.ts`, a **file collision with an in-flight PR**), KS-759 and KS-1084 (auth middleware / gateway→originate auth, LAST), KS-965 (87 doc sites of a retired credential). KS-998, KS-1163 and KS-789 are not re-read: each already has ≥2 FAIL runs in done.md.
