@@ -7,7 +7,7 @@ status: live
 
 # Boot digest — headline + rules of every lesson (open the file when it fires)
 
-Generated 2026-09-18 10:23 from 186 lesson files (921,895 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 9 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
+Generated 2026-09-18 10:27 from 187 lesson files (925,080 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 9 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
 
 ## The T9 SSD is the master — Wednesday must be fully portable
 `2026-07-31_fully-portable-drive.md` · principle · 2026-07-31 · status: superseded — the "T9 is the master" half by [[2026-08-25_one-drive-devmaster-is-master]] (2026-08-25); the portability principle itself still lives
@@ -6475,6 +6475,28 @@ sections (open the file for these): How to apply
 5. **Scope:** Tuesday's seat and the Datasec projects, as he addressed it on the Tuesday tab. Whether Wednesday adopts it is hers and Kam's (a board message is not a fleet rule).
 
 **Family:** [[2026-08-13_establish-authority-before-reconciling]] (reconciliation destroys evidence) · [[2026-09-07_a-rule-for-creation-is-not-a-mandate-to-retrofit]] (enumerate what already occupies the slot) · [[2026-09-16_what-keeps-a-seat-correct-is-not-all-in-git]] · [[2026-09-14_the-coordinator-adds-value-or-it-is-waste-three-duties-not-watching]] (duty 2: check the output as a manager).
+
+
+## A premise under a question to Kam is load-bearing — verify it like a fact in a brief
+`2026-09-18_a-premise-under-a-question-to-kam-is-load-bearing-verify-it.md` · correction · 2026-09-18 · status: live
+
+**The lesson:** `send_brief.sh` refuses a brief whose facts have no provenance. **The same standard
+applies to anything I put under a question to Kam** — arguably more, because a brief goes to an agent
+who will check it, and a question goes to a principal who will *act on it*. **Never pass a receiving
+agent's summary into a decision for Kam without validating it at the source first.**
+
+**How to apply:**
+1. **Before any question to Kam, list its load-bearing premises and name the source of each.** If a
+   premise came from an agent's prose rather than a measurement, either verify it or state it as
+   "reported, unverified" — never as the reason he should decide one way.
+2. **Urgency is itself a claim and the most dangerous one**, because it is what makes him decide
+   quickly. "X is blocked on Y" gets measured before it is said.
+3. **Correct it the moment it is known, before he rules** — and say plainly where it came from, that a
+   guard caught it rather than my judgement, and what the true framing now is. A corrected premise
+   often reverses the answer: here it turns "do it now" into "schedule it".
+4. This is [[2026-08-03_mental-model-not-source-of-truth]] failing to fire on an *inbound agent
+   report*. The rule's order — read the model, **validate against the source**, then act — applies to
+   what an agent tells me, not only to what I have stored.
 
 
 ## An authorised sweep does not authorise what the API cascades to
