@@ -12,6 +12,14 @@ supersede: replace wholesale at the next pickup; do not append
 
 **⚙ This file was SPLIT at 10:0x 2026-09-18** — 600 lines of self-declared superseded blocks moved verbatim to `NEXT-PICKUP-archive.md` under this file's own `supersede:` rule (it had reached 220 KB, of which 19 KB was live, and every seat was ordered to read it WHOLE at boot). **Keep replacing, never append.** The archive is read on demand, never at boot.
 
+## 🟢 UPDATE 12:5x 2026-09-18 (the 10:0x seat, ctx ~58%) — READ FIRST
+
+**SEAT A 10th: plan CONFIRMED 12:4x, now working.** Q1: apply `runs/<run>/out.md.checker/section_N.diff` with its `section_N.opts`, NEVER the READY file's embedded diff (only KS-1233's was truncated, 40/70; the others are raw model output that needs the checker's accommodations; all 5 READY files now carry a CANONICAL PATCH header). Q2: the 3-open-PR cap is lifted for this batch. Q3: the #922 fix goes straight onto `8664826e5`, with no develop merge-in, so the delta gate sees only the fix. **Await: #922's new head, then ONE mail with 4 PR heads → gate as ONE batch.**
+**Route to Kam at a gap:** seat A's launcher F-02 (no SSH identity in the keychain; git works via the on-disk deploy key). Seeding it is Kam's machine setup: `ssh-add --apple-use-keychain ~/.ssh/secuura_blockchain_deploy_rw`.
+**KS-1228 → a CLAUDE SEAT** (full four-handler fix; the product hunk was correct; the TS2708 cause is undiagnosed, so the rebrief was NOT spent on a guess). See `candidates.md`.
+**ENFORCED (w=4):** `tools/absence_claim_check.sh`, an advisory in `chat_reply.sh`, 6/6 arms. **It prints on stderr when a panel message makes an absence claim. Read it; it's there because the willpower version failed four times today.**
+**ORNITH: IDLE, the pool is dry.** 5 briefed passes are held (KS-1233/1125/1209/1248/1250, the first four being raised now by seat A 10th). Don't refill it brief-less.
+
 ## 🟢 UPDATE 12:4x 2026-09-18 (the 10:0x seat, ctx ~57%) — READ FIRST
 
 **SEAT A 10th LAUNCHED (`%101`)**, brief `fleet/briefs_staged/2026-09-18_raise_seat_A_successor10.md` (it passed the provenance and self-check gates on the second send; the first was REFUSED for a placeholder `12:3x` attestation, and the real re-read found two relative paths plus a hedged KS-679 state). Its queue: **(1) the #922 fix round**, then **(2) raise KS-1233/1125/1209/1248 as four PRs, with all heads in ONE mail so I gate them as ONE batch.** **HOLDS:** #922 no merge (Peter, with Kam); **KS-1250 not raised**; no kintsugi deploy this session (#1037 gets batched with later merges); nothing to demo. **Await its plan-confirmation mail.**
