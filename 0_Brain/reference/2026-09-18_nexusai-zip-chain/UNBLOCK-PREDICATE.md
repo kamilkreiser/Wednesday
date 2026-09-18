@@ -71,7 +71,14 @@ a safety rule with his name on it, not a build preference.
 
 ### The telling
 - [ ] Every box above ticked and **re-read on `origin/main` in the same action as writing to him**
-- [ ] His push steps from 2026-09-17 23:23:47Z re-confirmed as still correct (S65 said they are)
+- [ ] His push steps from 2026-09-17 23:23:47Z re-confirmed as still correct. **S65 confirms they are,
+      with TWO AMENDMENTS that must reach him or the message is wrong:**
+      1. **The registry is measured empty again today, so his step 3 is a FIRST push, not a re-push.**
+         Wording that implies an existing image will read as wrong on his screen
+         ([[../../learnings/2026-09-10_steps-to-kam-are-a-claim-about-his-screen]]).
+      2. **His step 5's anonymous-pull proof is now the ONLY thing that proves the customer path**,
+         because he has ruled there is no pre-submission test deploy. Say that, so he knows the check
+         is load-bearing rather than ceremonial, and does not skip it to save a minute.
 - [ ] Told on the panel, **action first**, steps on their own lines, **the version named**, no date attached
 
 ## NOT in the predicate — gates the ZIP, runs in parallel with his push
