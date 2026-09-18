@@ -2,7 +2,7 @@
 date: 2026-09-18
 type: correction
 source: "I told Kam four Tested-Not-Deployed tickets were 'sitting merged and waiting on one firewall rule' and used it as the urgency under a start-now-vs-schedule question. Seat A then measured it two ways with a control: all four were ALREADY deployed on kintsugi and had been for days. The premise under the question was false."
-status: live — REGRESSION w=3 same day (second instance 10:5x); enforcement OWED
+status: live — REGRESSION w=4 same day; ENFORCED 2026-09-18 12:5x (advisory, tools/absence_claim_check.sh wired into chat_reply.sh, 6/6 arms)
 supersedes: ""
 tier: W
 ---
@@ -75,3 +75,16 @@ covers the whole space"*. **Advisory, not blocking**, because plain English is f
 Needs arms before arming: one real absence claim that flags, a harmless negative that flags (so it stays
 advisory), and a positive claim that doesn't flag. **Not built in this seat. Raised with Kam in the 10:5x
 correction.**
+
+## ENFORCED 12:5x, same day, at w=4
+A fourth instance came 1 h after the w=3 row: I told seat A 10th that KS-1125's READY diff was "truncated
+through a 140-line window". **Measured: it was complete (107/109). Only KS-1233 was truncated.** I had
+reconstructed the claim from memory of the COMMAND, not the FILE. At w=4 the "owed" line isn't enough, so I built:
+- **`2_Project_Files/tools/absence_claim_check.sh`**, ADVISORY: it flags absence phrases on stderr, **never blocks,
+  always exits 0**. It's wired into `tools/chat_reply.sh` (the channel to Kam; `SELF_DIR` resolves, so the advisory fires).
+- **Arms `2_Project_Files/tests/absence_claim_check_arms.sh`, 6/6 PASS**, including **the two REAL false claims from
+  today (the #922 "waiting on nothing" and the TND "not on kintsugi"), which now flag**; a harmless negative flags
+  (so it stays advisory), and a positive claim does not.
+**Honest limit:** it covers the Kam-facing panel only. The KS-1125 instance went to a SEAT through `send_brief.sh
+--kind answer`, which this doesn't touch. And it catches ABSENCE words, not an unmeasured POSITIVE claim like "it was
+truncated". The deeper rule stays behavioural: **measure the thing, not your memory of the command that made it.**
