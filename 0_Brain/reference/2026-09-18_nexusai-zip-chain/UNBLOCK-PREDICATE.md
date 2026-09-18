@@ -186,3 +186,6 @@ the difference between telling him today and telling him next week.
 
 
 **DELIVERY OF THE ZIP (Kam, terminal 2026-09-18 ~14:0x, verbatim):** "please email me the zip file that needs to be uploaded to the marketplace. I only email the package zip, not any of the assets." When the 2.2.0 package zip exists: email ONLY that zip to kreiser.org@me.com (SUPERSEDES the Datasec address: Kam, terminal ~14:0x, verbatim "This time, send it to kreiserr.org", read as kreiser.org@me.com, his address on record; stated to him) (Tuesday's reading of "me" for Datasec work), with its sha256 and source head, read back at the destination. Owed action: pickup DELTA 15.
+
+
+**TWO ASKS TO CARRY IN THE PUSH-UNBLOCKED MESSAGE (Tuesday, 2026-09-19 05:5x; from S67's RD-460 read, the C-55 "Not covered" sentence):** (i) pre-built image vs build-from-zip, default PRE-BUILT; (ii) the certification risk (containers are unsupported for Solution templates per Microsoft Learn; policy 300.4.7 says every deployment artefact goes in the zip): ask Partner Center support first, or accept, default ACCEPT (the live 2.1.1 carries the same shape and passed certification). Both go on RD-536 as one row (S67 mails the number). Put them to Kam in the SAME message as the push, as one ask.
