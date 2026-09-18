@@ -92,22 +92,12 @@ if seat == 'tuesday' and inbox == 'coagent@agentmail.to':
     keep = [m for m in show if re.search(r'datasec/', m.get('subject') or '', re.I)]
     withheld = len(show) - len(keep)
     show = keep
-# OWN-OUTBOUND is decided by the SENDER on the Tuesday seat (2026-09-18 round 2). The subject prefix
-# '[Wednesday -> ' is what send_brief.sh writes on EVERY send, and it is also how Wednesday titles mail TO
-# Tuesday, so on this seat the prefix absorbed her replies as if they were ours and marked them seen, never
-# shown (learnings/2026-08-04_never-blanket-markseen-mid-monitoring: a handled-marker may only advance over
-# what reached the processor). Wednesday's seat keeps the subject rule, byte-identical.
-SEAT_NAME = 'Tuesday' if seat == 'tuesday' else 'Wednesday'
-def is_out(m):
-    if seat == 'tuesday':
-        return 'tuesday-agent@agentmail.to' in str(m.get('from', ''))
-    return bool(re.match(r'\[Wednesday -> ', m.get('subject', '')))
 LIMIT = 50
 if len(msgs) >= LIMIT and len(new) == len(msgs):
     print(f'⚠ CAP: {inbox} — every one of the {len(msgs)} fetched messages is NEW; the listing may be TRUNCATED at the fetch limit — paginate before trusting it')
 
 if mode == '--inbound':
-    n_in = sum(1 for m in (show if withheld else new) if not is_out(m))
+    n_in = sum(1 for m in (show if withheld else new) if not re.match(r'\[Wednesday -> ', m.get('subject','')))
     print(f'===== {inbox} — {len(new)} new ({n_in} inbound shown; own outbound copies absorbed) =====')
 else:
     print(f'===== {inbox} — {len(new)} new =====')
@@ -118,14 +108,14 @@ for m in show:
     # Routing classification from the subject convention
     tag = 'OTHER'
     client = '-'
-    mm = re.match(r'\[([^\]]+) -> ' + SEAT_NAME + r'\]\s*(.*)', subj)
+    mm = re.match(r'\[([^\]]+) -> Wednesday\]\s*(.*)', subj)
     if mm:
         client = mm.group(1)
         rest = mm.group(2)
         if rest.upper().startswith('QUESTION'): tag = 'QUESTION'
         elif rest.lower().startswith('session wrap'): tag = 'WRAP'
         else: tag = 'INBOUND'
-    elif is_out(m):
+    elif re.match(r'\[Wednesday -> ', subj):
         tag = 'OUTBOUND'
         mo = re.match(r'\[Wednesday -> ([^\]]+)\]', subj)
         if mo: client = mo.group(1)
