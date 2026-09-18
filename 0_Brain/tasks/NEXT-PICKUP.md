@@ -12,6 +12,13 @@ supersede: replace wholesale at the next pickup; do not append
 
 **⚙ This file was SPLIT at 10:0x 2026-09-18** — 600 lines of self-declared superseded blocks moved verbatim to `NEXT-PICKUP-archive.md` under this file's own `supersede:` rule (it had reached 220 KB, of which 19 KB was live, and every seat was ordered to read it WHOLE at boot). **Keep replacing, never append.** The archive is read on demand, never at boot.
 
+## 🟢 UPDATE 13:3x 2026-09-18 (the 10:0x seat, ctx ~68%) — READ FIRST, supersedes the #922 lines below
+
+**#922 SIGNED, MERGING.** The r2 delta gate returned GO WITH FINDINGS at `30c773ee8` (no row of the seat's tamper table moved; nothing legitimate reddens). **⚠ THE WHOLE AFTERNOON'S 'merging over Peter is Kam's call' WAS WRONG (w=5).** Secuura `CLAUDE.md` (the merge section, 09-11) says *"Wednesday's GO, naming the head SHA, is the approval"* and RETIRES Peter as the per-PR approver. His 09-09 note was a comment made before that (0 formal reviews). **The Kam question is WITHDRAWN** (13:3x panel); **there is no #922 decision card** (the prior-rulings gate refused it, rightly). F9 (the leaky deny list) is **Polish → TICKET, not a third round** (a bare uuid was already exempt pre-#922). **Seat A has the signed GO + addendum:** squash onto `207716440` → merged tree `a1b4b6536`; KS-679 stays In Review; file F9/F10/F11; add the KS-1201 orphan-listener count. **Expect its MERGED mail.**
+**BATCH GATE for #1038-#1041 being DRAFTED** (the drafter was resumed; it re-pins develop live because #922 is landing). One verdict line PER PR; my signed GO per head; no Peter/Kam condition. **KS-1233 has a deploy-time concern** (an existing Redis key keeps its TTL, so it expires once and the allow-list fails open until an admin writes): the gate grades it SHIPS-WITH-condition vs TICKET. **KS-1209 changes the pre-push gate for everyone**, so the drafter rules on whether that makes it tier 1.
+**`%102` CLOSED** (scored 1.00). The FLOOR is `%0` + `%101` seat A + `%1`.
+**Known display bug:** `decision_queue.sh`'s refusal prints the RECOMMENDED key as if it were the ruling ('ALREADY RULED dismiss' on an unruled card). **Read the card's JSON before trusting that line.** Not fixed.
+
 ## 🟢 UPDATE 13:1x 2026-09-18 (the 10:0x seat, ctx 65% — a light checkpoint; the rotation band is 80-90) — READ FIRST
 
 **FLOOR:** `%0` wednesday · **`%101` seat A 10th** (did the #922 fix round, now on item 2: raising KS-1233/1125/1209/1248) · **`%102` QA/Secuura-922r2 — the #922 ROUND-2 DELTA gate LIVE** · `%1` monitor. Usage 28% of 90. **Ornith: idle BY DECISION** (the pool is dry, recorded in `candidates.md`; the G7 taps are expected).
