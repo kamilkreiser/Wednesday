@@ -38,6 +38,7 @@ KS-1250, KS-1175 Kam's · nothing to demo · no contact with Peter/Stuart beyond
 7. From 09-18: seat A's launcher F-02 (no keychain SSH identity), the open card `wed-boot-read-exceeds-the-context-window`, O-1 (CI jobs never start), the NSG's dynamic IP.
 8. report-796 F-01/F-03 (`scripts/audit/*.mjs`): open at the tip; F-01 needs a new env seam and F-03 contradicts the code's own SKIP comment → a ruling, not a local-model ticket.
 9. KS-1269-U + N84-1: should `/unrevoke` refuse `index < 0`? And its index check sits AFTER its 404 (/revoke: before) — should the order match? (the #1084-1091 gate, question only). KS-662 lists `/unrevoke {index:-1} → 200` as NON-RULED; the held fix leaves it unchanged.
+12. The audit-baseline.json fuse expires 2026-09-24 (two rows, :180 and :187; Seat B 7th flagged it 2026-09-20).
 11. Ruleset 18499832 (develop) carries `require_extra_approval_for_unattributed_changes: true` — seen by Seat B 5th 2026-09-19; it blocked nothing; whether it is new is unmeasured.
 10. **Wednesday's reading to confirm:** with the non-auth pool exhausted (rounds 8-9), round 10 opened AUTH surfaces to TEST-ONLY local-model work (tamper-pinned cells, zero product bytes changed), on the recorded rule 'auth product EDITS stay out'. Default: it continues unless he says auth means tests too.
 
