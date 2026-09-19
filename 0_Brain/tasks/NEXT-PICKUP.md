@@ -14,7 +14,7 @@ supersede: replace wholesale at the next pickup; do not append
 **Kam is AWAY Sat 19 + Sun 20.** `tasks/WEEK-INSTRUCTION.md` is LIVE to the end of Sun 2026-09-20: merge on Wednesday's signed GO after a QA gate (Secuura CLAUDE.md line 238: "Wednesday's GO, naming the head SHA, is the approval"); deploy KINTSUGI ONLY; NOT demo; the signature classes still pause (KS-1250, KS-1175; money; external comms beyond rule-7); auth last. He leaves again MONDAY NIGHT 2026-09-21. `fleet/USAGE_STOP` = 90; gauge 47% at 08:1x. `local-model/night/ALLOW_SEATS` is armed to Sun 2026-09-20 23:00 (epoch 1789909200).
 
 ### FLOOR at 10:1x
-`%0` wednesday · `%110` **Seat B 3rd** (raise nine held local-model fixes; brief `2_Project_Files/fleet/briefs_staged/2026-09-19_raise_seatB_successor3.md`; pane NAME `Secuura/Blockchain-B`; plan confirmation OWED) · `%1` monitor. Seat A 13th WRAPPED + retired + scored 1.00: **kintsugi = develop 3c447abc7** (every merge through #1060, incl. the KS-1172/1173 verbs), verified V1-V9.
+`%0` wednesday · `%110` **Seat B 3rd** (raise nine held local-model fixes; brief `2_Project_Files/fleet/briefs_staged/2026-09-19_raise_seatB_successor3.md`; pane NAME `Secuura/Blockchain-B`; plan CONFIRMED 00:15Z → ANSWER D1-D8 (KS-1260 branch renamed off `ks-1209`; archived three get Refs in the body only; KS-864 → Backlog after merge); next = its ONE READY) · `%1` monitor. Seat A 13th WRAPPED + retired + scored 1.00: **kintsugi = develop 3c447abc7** (every merge through #1060, incl. the KS-1172/1173 verbs), verified V1-V9.
 
 ### 🔴 FIRST ACTS for whoever holds this seat next
 1. (done) seat A 13th's deploy.
