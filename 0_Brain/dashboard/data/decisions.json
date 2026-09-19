@@ -11796,5 +11796,57 @@
   ],
   "delivered_artefact": "NexusAI 1_Project_Definition/CLARIFICATIONS.md C-85 (lines 796-804), both emails verbatim with Message-IDs",
   "delivered_ts": "2026-09-19T12:29:11.193840+10:00"
+ },
+ {
+  "id": "tuesday-t9-disk-full-spotlight-and-temp-file",
+  "client_project": "Datasec/NexusAI",
+  "title": "T9 drive full: remove the 649 GiB sync temp file, and stop Spotlight indexing the T9",
+  "bluf": "OVERRIDE of the prior-ruling gate, measured: your 14 Sep ruling exclude-coding (studio-spotlight-indexing-devmaster-load) covered /Volumes/DevMASTER/!CODING on the STUDIO; the T9 is now on the Mac mini, where nothing is excluded (mdutil -s: indexing enabled, read 02:2x). The other hits share only the words disk/tuesday. I need you to do two things on the Mac mini. (1) Move this ONE file to the Trash and empty it: '/Volumes/KK_T9_External_HDD/!CODING/Docker - Containers/DockerDesktop/.unison.Docker.raw.48a24bf168f2243345f0dbcd8c638461.unison.tmp' (649 GiB, a half-finished copy my own sync job wrote on 19 Sep; NOT Docker's live disk, which is on the internal drive; emailed to you 01:2x). (2) Exclude /Volumes/KK_T9_External_HDD/!CODING from Spotlight the same way you did for DevMASTER on 14 Sep (your note then: the Siri & Spotlight privacy page is not on 26.6.2). Why: the drive holds 1.2-2.0 GiB free and Spotlight rewrites 1.2-1.6 GB index files on it (.Spotlight-V100 mtimes 02:17-02:23), swinging free space by over a gigabyte a minute. NexusAI S69 stopped under its 400 MB rule at 16:22Z with the RD-567 merge built but unverified.",
+  "default_action": "Nothing changes: the RD-567 merge stays built and uncommitted, no NexusAI verify or gate runs until free space holds at 4 GiB or more over 5 minutes, and the nightly sync job stays unloaded.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Both: delete the temp file and exclude T9 !CODING from Spotlight",
+    "detail": "frees ~649 GiB and stops the swing; NexusAI resumes at once"
+   },
+   {
+    "key": "b",
+    "label": "Delete the temp file only",
+    "detail": "frees the space; Spotlight keeps indexing, which is harmless once there is room"
+   },
+   {
+    "key": "c",
+    "label": "Neither for now",
+    "detail": "NexusAI verifies and gates wait; the merge stays built and held"
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-09-20T02:28:17.824269+10:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "2026-09-08 11:59",
+   "2026-09-08 12:53",
+   "2026-09-08 14:57",
+   "2026-09-10 09:47",
+   "2026-09-10 09:47",
+   "2026-09-10 09:47",
+   "2026-09-10 09:48",
+   "2026-09-10 09:48",
+   "2026-09-10 09:48",
+   "2026-09-14 13:06",
+   "2026-09-14 13:08",
+   "2026-09-14 13:21",
+   "2026-09-16 14:00",
+   "2026-09-16 14:19",
+   "2026-09-16 18:42",
+   "2026-09-16 19:41",
+   "2026-09-17 07:41",
+   "CARD tuesday-mac-mini-scheduler-full-disk-access",
+   "CARD tuesday-seat-self-rotate-with-liveness-check",
+   "CARD studio-spotlight-indexing-devmaster-load",
+   "CARD tuesday-one-launch-on-the-mini"
+  ]
  }
 ]

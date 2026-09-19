@@ -10,6 +10,12 @@ supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s
 
 ---
 
+## 🔴 DELTA 29 — 2026-09-20 02:3x (Tuesday rotation boot, session d63db5d0). READ FIRST; DELTA 28 still holds except where named.
+- **S69 had stalled at its prompt waiting for a GO** (its mail said no reply needed; its pane said 'Say go'). GO sent 16:17Z; RD-545 ANSWER 16:20Z (guard cells + trial-collapse red proof + an AI toggle cell). **Rule: always answer a new seat's plan with a GO mail + tap, and read its pane before rotating.**
+- **S69 is ON A DISK HOLD (its STOP 16:22Z).** RD-567 merge built UNCOMMITTED in `worktrees/s68-history`; do NOT let it abort. Swing cause = **Spotlight indexing the T9** (measured). **Resume rule sent 16:27Z:** min of 5 one-minute `df -m` samples >= its measured verify footprint + 1,600 MiB (4,096 MiB if unmeasured). S69 owes: the footprint number + the RD-545 cell design as text.
+- **Card `tuesday-t9-disk-full-spotlight-and-temp-file` is with Kam** (rec a: delete the 649 GiB temp file + exclude T9 `!CODING` from Spotlight; default nothing changes). He is AWAY until Monday 2026-09-21; do not chase. When `df` holds high, tell S69 to resume under the rule.
+- Main watcher armed on 246f23a (60 s, 180 min).
+
 ## 🔵 DELTA 28 — 2026-09-20 02:1x ROTATION HANDOVER (Tuesday ctx ~80%). READ FIRST; DELTA 27 (disk + paused sync) still holds.
 - **S68 WRAPPED, scored 0.91, pane closed.** **S69 LIVE in `%14`** (brief verified 16:08:14Z). Its queue: merge RD-567 @ 3211022 (re-gate GO/Low) -> RD-545 red-first (releases RD-464 r3, C-74) -> RD-549 -> RD-516. S69's PLAN CONFIRMATION (16:12:15Z) VERIFIED = rung 6 (see today's note). Next from S69: MERGED RD-567, then RD-545 READY FOR QA (Tuesday GOs its tier-1 gate after a source check).
 - **NexusAI main = `246f23a`.** Predicate NOT met; all remaining minimum-set work is ours. Nothing owed to Kam on NexusAI until the zip exists.
