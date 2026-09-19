@@ -1,3 +1,12 @@
+## 2026-09-20 05:31 AEST — the 03:3x Wednesday seat (overnight successor, 03:33 → the 05:30 shift change), Secuura scope — Kam away
+
+- Booted from the 18:0x seat's rotation; brain read whole (ctx 27% → 42%).
+- Raised the five held local-model test-only fixes as Seat B 8th: brief drafted (subagent), read whole, sent and verified, seat launched `%121`; plan answered (a connection census added, then its STOP predicate superseded by the seat's baseline-delta version); READY #1097-#1099 (all-three tree 706de830 green, 671/671) receipted; batch gate drafted and launched `%122` after re-pinning the heads. Both are running at handover; nothing merged by this seat.
+- Carded `wed-allowance-pace-before-week-away` (usage 72% → 75%; renewal Fri 25 Sep 8am; default pace-reserve).
+- Rule 3c: 55 ledger rows (09-16) archived, conserved 1104 = 1104; both digests regenerated.
+- Ledger: 4 rows (a drafted count passed unread; a new rule absolute over a suite; a relayed set in a predicate; a composed PR count).
+- Handover: NEXT-PICKUP replaced wholesale; mail [Wednesday-overnight -> Wednesday-morning].
+
 ## 2026-09-19 (Sat) — the 06:0x Wednesday seat (Kam away; WEEK-INSTRUCTION live)
 - **Kintsugi:** rebuilt to 59412d057 (seat A 12th, 29 images), then a scoped deploy to 3c447abc7 (seat A 13th: anchoring/originate/api-gateway). Both verified by behaviour; nothing pruned; demo untouched.
 - **Merged:** eleven PRs #1050-#1060 (Seat B 2nd), gated as ONE tier-1 batch (report 2026-09-19-batch1050-1060-tier1-r1), GOs per head. #1052 held until a Linear `closes` link was re-derived as contributes (verified read-only). KS-1134 Done; KS-1273..1278 filed.
