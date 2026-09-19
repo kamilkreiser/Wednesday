@@ -35,12 +35,6 @@
 # while executing none of the logic — the Secuura suites' own assert_parses rule); a tamper on a test file.
 # HEADER FIELD (2026-09-19): the JSON carries `diff_file_headers` = the two lines the diff must open with (modify:
 # `--- a/<test_file>` / `+++ b/<test_file>`; new: `--- /dev/null` / `+++ b/<test_file>`), named by task.md rule 3.
-# RUNNER PIN (2026-09-19, KS-1269 N71-1: vc-issuer's package.json lists jest/ts-jest beside vitest, so detection refused
-# "cannot tell the runner"): a `runner=<jest|vitest>` argument, else a `Runner: \`<jest|vitest>\`` line in the brief's
-# header (before the first `## `), names the runner — the pin wins over the line, as tip= wins over Tip:. It is honoured
-# ONLY when the named runner is in the service's own package.json (dependencies/devDependencies, or a token of a scripts
-# command); otherwise REFUSED. Never for a *.test.sh suite (runner bash is fixed). With no pin and no Runner: line the
-# build is byte-for-byte what it was, the ambiguous-service refusal included. A pinned build carries `runner_pin`.
 # rc 0 ok · 2 refused · 1 usage/error. bash 3.2. stderr never discarded.
 set -uo pipefail
 ID="${1:-}"; OUT="${2:-}"; BRIEF="${3:-}"; shift 3 2>/dev/null
@@ -111,23 +105,6 @@ while d.startswith(subdir + "/") and d != subdir:
         break
     d = os.path.dirname(d)
 if not svc: refuse(f"no package.json / runner config above {tf} inside {subdir}")
-# ---- RUNNER PIN (2026-09-19): runner= arg, else the brief header's `Runner:` line; honoured only if package.json has it
-rpin = pins.get("runner"); rsrc = "the runner= pin"; runner_pin = ""
-if rpin is None:
-    hm = re.search(r"^Runner:[ \t]*`?([^`\s]+)`?[ \t]*$", re.split(r"^##\s", text, maxsplit=1, flags=re.M)[0], re.M)
-    rpin = hm.group(1) if hm else None; rsrc = "the brief's Runner: line"
-if rpin is not None:
-    if is_bash: refuse(f"runner pin {rpin!r} ({rsrc}) on a *.test.sh suite — a bash suite's runner is bash, never pinned")
-    if rpin not in ("jest", "vitest"): refuse(f"runner pin {rpin!r} ({rsrc}) is not jest or vitest")
-    pjt = show(svc + "/package.json")
-    if pjt is None: refuse(f"runner pin {rpin} ({rsrc}): {svc} has no package.json to confirm it against")
-    try: pj = json.loads(pjt)
-    except Exception: refuse(f"runner pin {rpin} ({rsrc}): {svc}/package.json does not parse")
-    deps = {**(pj.get("dependencies") or {}), **(pj.get("devDependencies") or {})}
-    stoks = set(" ".join(str(v) for v in (pj.get("scripts") or {}).values()).replace("&&", " ").replace(";", " ").split())
-    if rpin not in deps and rpin not in stoks:
-        refuse(f"runner pin {rpin} ({rsrc}) is NOT in {svc}/package.json (no {rpin} in dependencies/devDependencies, no scripts command running it) — a pin must name a runner the service actually has (detected {why})")
-    runner = rpin; runner_pin = f"{rpin} by {rsrc}; detected {why}"
 if not runner: refuse(f"cannot tell the runner of {svc} ({why}) — exactly one of jest / vitest must be marked")
 service_dir = svc[len(subdir) + 1:]
 test_rel = tf[len(svc) + 1:]
@@ -271,8 +248,7 @@ inp = {"ticket": {"identifier": ident, "title": text.splitlines()[0].lstrip("# "
        "expected_plus": expected_plus, "must_remove": must_remove, "cells": alias,
        "tampers": tampers, "controls": controls, "files": {}}
 if ttext is not None: inp["files"][tf] = ttext
-if runner_pin: inp["runner_pin"] = runner_pin
 if "ctx" in pins: inp["_night_num_ctx"] = int(pins["ctx"])
 json.dump(inp, open(out, "w", encoding="utf-8"), indent=1, ensure_ascii=False)
-print(f"wrote {out}: test_only {mode} {tf} ({runner}, service {service_dir}) at {tip[:9]}; '+' {len(expected_plus)} '-' {len(must_remove)} in {hunks} hunk(s); tampers {len(tampers)} ({', '.join(t['id'] + '->' + str(len(t['reds'])) for t in tampers)}); controls {len(controls)}" + (f"; RUNNER PINNED {runner_pin}" if runner_pin else ""))
+print(f"wrote {out}: test_only {mode} {tf} ({runner}, service {service_dir}) at {tip[:9]}; '+' {len(expected_plus)} '-' {len(must_remove)} in {hunks} hunk(s); tampers {len(tampers)} ({', '.join(t['id'] + '->' + str(len(t['reds'])) for t in tampers)}); controls {len(controls)}")
 PY
