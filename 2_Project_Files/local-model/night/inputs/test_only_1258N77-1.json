@@ -1,0 +1,128 @@
+{
+ "ticket": {
+  "identifier": "KS-1258",
+  "title": "KS-1258 N77-1 PIN THAT THE DEGRADED REQUIRED-SERVICE ADVICE IS EXACTLY THE READ-FIRST COMMENT AND ONE CURL — Wednesday's task for Ornith, TEST_ONLY, **ONE existing test file, one cell added, no produc",
+  "description": "# KS-1258 N77-1 PIN THAT THE DEGRADED REQUIRED-SERVICE ADVICE IS EXACTLY THE READ-FIRST COMMENT AND ONE CURL — Wednesday's task for Ornith, TEST_ONLY, **ONE existing test file, one cell added, no product file** (written 2026-09-19, round 14; test-only)\n\nFile: `Blockchain/Dev/services/api-gateway/src/__tests__/ks1248-n-1-system-status-troubleshooting-marks.test.ts`\nTip: `ba1210afcab7ddf127cccb270b1c341360261cee`\n\nWritten from develop `ba1210afcab7ddf127cccb270b1c341360261cee` (read with `git ls-remote origin refs/heads/develop` and `git rev-parse origin/develop` in the Secuura checkout, read-only, at the start of this brief; #1077-#1083 are merged there, #1077 = KS-1258 N68-1/N68-2). The test file at that tip is 91 lines; its full content is in `files[...]` of your input. The product the cell pins is `Blockchain/Dev/services/api-gateway/src/routes/system-status.ts` (`generateTroubleshooting`, the degraded REQUIRED-service block `:567-580`). This service runs **VITEST**.\n\n## THE MODE — read this twice\n\n**TEST_ONLY.** Your diff touches EXACTLY ONE file: the test file above, MODIFIED IN PLACE (`--- a/<path>` / `+++ b/<path>`, the path exactly as written above). You never touch `system-status.ts` or any other product file: the behaviour is already right at the tip, and this cell PINS it.\n\n## What the cell pins (one paragraph)\n\nSince KS-1248 a REQUIRED service that answers 200 `{status:'degraded'}` gets one warning whose commands are exactly two lines: the comment `'# Read what the service reports as degraded'` and `'curl -s ' + service.url + service.healthPath` (`:575-578`) — never a start or restart command. #1077's N68-1 cell pins this with a DENY-list regex (`/npm start|npm --prefix|npm run|yarn start|…|restart/i`). The #1077-#1083 gate (report `2026-09-19-batch1077-1083-tier1-r1`, finding **N77-1**, Minor) planted six other start shapes on the comment line `:576` (`docker run`, `bun run dev`, `make up`, `node dist/index.js`, `pnpm dev`, `npx tsx watch`) and every cell stayed GREEN (0 of 635 each): none of them matches the regex. The gate's fix is the ALLOW-list form #1077's N68-2 cell already uses for the optional block (`:592`): assert the exact commands array. This change adds that one cell for the REQUIRED block. The N68-1 regex cell and every other cell are unchanged.\n\n## The exact change — ONE hunk in the test file\n\nThe new cell goes INSIDE the `describe(...)` block, directly above the existing cell `  it('RED KS-1258 N68-1: the degraded required advice carries no start command in ANY common shape', async () => {` (`:84`, the ONE trailing context line; it occurs once in the file). There is NO leading context. Copy every line byte for byte. Every `+` line is ASCII only. There is no blank line anywhere in the fence. Keep the header exactly as shown. **Your diff MUST begin with the two file-header lines, above the `@@` line: `--- a/Blockchain/Dev/services/api-gateway/src/__tests__/ks1248-n-1-system-status-troubleshooting-marks.test.ts` then `+++ b/Blockchain/Dev/services/api-gateway/src/__tests__/ks1248-n-1-system-status-troubleshooting-marks.test.ts`.**\n\n```\n@@ -84,1 +84,6 @@\n+  it('RED KS-1258 N77-1: the degraded required advice is exactly the read-first comment and one curl', async () => {\n+    Object.assign(answers, { 'anchoring.ks1248': 'degraded', 'originate.ks1248': 'up' });\n+    const advice = await adviceFor('anchoring');\n+    expect([advice.length, advice[0]?.commands]).toEqual([1, ['# Read what the service reports as degraded', 'curl -s http://anchoring.ks1248:1/health']]);\n+  });\n   it('RED KS-1258 N68-1: the degraded required advice carries no start command in ANY common shape', async () => {\n```\n\n`answers`, `adviceFor` (`:22-59`: the system-status router mounted alone, `fetch` stubbed per host, `ANCHORING_SERVICE_URL` = `http://anchoring.ks1248:1`) are the file's own.\n\n## Cells\n\n- `exact576` = `RED KS-1258 N77-1: the degraded required advice is exactly the read-first comment and one curl`\n\n## Tampers\n\nAll six plant `:576`. Its `From` text (`          '# Read what the service reports as degraded',`) occurs TWICE in `system-status.ts` at the tip, at `:576` and `:592`; `:576` is the one in the REQUIRED block, scope-anchored by `    .filter(s => s.required && s.status === 'degraded')` (`:568`, x1) eight lines above it (`:592` is under `    .filter(s => !s.required && s.status === 'degraded')`, `:584`). `Line:` is the locator; the checker refuses a plant whose line is not the `From`.\n\n### C576_DOCKERRUN\nFile: `Blockchain/Dev/services/api-gateway/src/routes/system-status.ts`\nLine: 576\nFrom:\n```\n          '# Read what the service reports as degraded',\n```\nTo:\n```\n          'docker run -d secuura/' + service.name,\n```\nReds: `exact576`\n\n### C576_BUNRUN\nFile: `Blockchain/Dev/services/api-gateway/src/routes/system-status.ts`\nLine: 576\nFrom:\n```\n          '# Read what the service reports as degraded',\n```\nTo:\n```\n          'cd services/' + service.name + ' && bun run dev',\n```\nReds: `exact576`\n\n### C576_MAKEUP\nFile: `Blockchain/Dev/services/api-gateway/src/routes/system-status.ts`\nLine: 576\nFrom:\n```\n          '# Read what the service reports as degraded',\n```\nTo:\n```\n          'make up SERVICE=' + service.name,\n```\nReds: `exact576`\n\n### C576_NODEDIST\nFile: `Blockchain/Dev/services/api-gateway/src/routes/system-status.ts`\nLine: 576\nFrom:\n```\n          '# Read what the service reports as degraded',\n```\nTo:\n```\n          'cd services/' + service.name + ' && node dist/index.js',\n```\nReds: `exact576`\n\n### C576_PNPMDEV\nFile: `Blockchain/Dev/services/api-gateway/src/routes/system-status.ts`\nLine: 576\nFrom:\n```\n          '# Read what the service reports as degraded',\n```\nTo:\n```\n          'cd services/' + service.name + ' && pnpm dev',\n```\nReds: `exact576`\n\n### C576_TSXWATCH\nFile: `Blockchain/Dev/services/api-gateway/src/routes/system-status.ts`\nLine: 576\nFrom:\n```\n          '# Read what the service reports as degraded',\n```\nTo:\n```\n          'npx tsx watch services/' + service.name + '/src/index.ts',\n```\nReds: `exact576`\n\n## Controls\n\n- `control: with every service up there is no advice for anchoring or originate`\n- `control: a DOWN required service (originate answers 503) is still critical and still told to restart`\n- `RED KS-1258 N68-1: the degraded required advice carries no start command in ANY common shape`\n\n## THE CELLS — state it to yourself before you write a line\n\nAt the untouched tip the new cell passes: anchoring answers 200 degraded, so the REQUIRED-degraded block emits one item whose commands are the comment and `curl -s http://anchoring.ks1248:1/health`: `[1, ['# Read what the service reports as degraded', 'curl -s http://anchoring.ks1248:1/health']]`. Under each tamper the comment line becomes a start command (e.g. `'docker run -d secuura/anchoring'`), so the commands array differs in its first element — a failure by assertion. None of the six shapes contains `restart` or any alternative of the N68-1 regex, so the N68-1 cell and the `:78` no-restart cell stay green (that is the gate's N77-1 gap: measured 0 red without this cell). `:592` (the OPTIONAL block, the ks1258 file's N68-2 / N44-1 cells) is never planted, so that file stays green.\n\n## Premises (measured)\n\nMeasured 2026-09-19 by the round-14 brief subagent at `ba1210afc` (a `git clone --shared` scratch clone, the harness's own `prepare_clone.sh` farm, the service's own `npx vitest run`, JSON report; every plant by line after an exact `From` check, restored by bytes).\n- **Premise: the tamper line.** `grep -nFx` of the `From` text over `system-status.ts` at the tip: `:576` and `:592`; `:576` is 8 lines under `    .filter(s => s.required && s.status === 'degraded')` (`:568`, x1). The six `To` lines are the gate's six shapes (its NOT-PINNED row NOTINELEVEN576, `C576_*`) verbatim.\n- **No ruling is decided here.** The gate filed N77-1 as a TICKET NOT-PINNED row and N77-2 (the N68-1 regex false-reds a benign reword of the `:576` comment) as a SHIPS-WITH Polish on #1077; N68-3 (the same at `:592`) is STILL OPEN. This brief ADDS the allow-list cell the gate named and deletes nothing: whether the N68-1 regex cell is then retired (N77-2) is left open. Note for that ruling: an exact-array cell reds on ANY wording change of the comment by design (the gate says so of N68-2).\n- **No `+` line re-adds a tip line.** Every `+` line except the closing `  });` occurs 0 times in the file at the tip (`grep -cFx` per line; control: `  });` occurs 5 times). The cell sets both hosts in one `Object.assign(answers, …)` and names its result `advice`, so it does not repeat the other cells' `answers[...] = …` / `const a = await adviceFor(...)` lines. The trailing context line (`:84`) is non-blank and occurs once.\n\n## Measured results\n\n- Whole api-gateway suite (vitest 4.1.11) at `ba1210afc`: untouched tip **640/640**; tip + this hunk **641/641**, 0 red.\n- WITHOUT the hunk: each of the six tampers **0 red of 640** (the gate's N77-1 gap reproduced).\n- WITH the hunk: each of the six **exactly 1 red of 641**, `exact576` (`expected [ 1, [ …(2) ] ] to deeply equal [ 1, [ …(2) ] ]`), an AssertionError; the N68-1 regex cell, the `:78` no-restart cell, both controls and the whole ks1258 file green. Only this file fails. Plant sha256s: DOCKERRUN `5368693c3af8`, BUNRUN `5a42a26570fb`, MAKEUP `fe3a2ffc12a6`, NODEDIST `625a4737b5f0`, PNPMDEV `d86506e6bc6b`, TSXWATCH `7d9a32d14dc5`.\n- **The real `tasks/test_only/checker.sh` on this brief's own diff** (input `night/inputs/test_only_1258N77-1.json`): **`RESULT: PASS (8/8)`**, strict apply, at `ba1210afc` (T5 5/5 cells; T6 exact for all six; T7 the 3 controls green under each; T8 `system-status.ts` restored by bytes, sha256 `d01feb648979` = tip blob, after each).\n- **Product bytes unchanged (TEST-ONLY):** the diff's only file headers are the test file's (checker T2); 5 `+`, 0 `-`. After every leg `system-status.ts` sha256 `d01feb648979` = the tip blob and the clone's `git diff --quiet HEAD` is clean.\n\n## Output\n\nExactly ONE ```diff block, nothing outside it: `--- a/Blockchain/Dev/services/api-gateway/src/__tests__/ks1248-n-1-system-status-troubleshooting-marks.test.ts` / `+++ b/Blockchain/Dev/services/api-gateway/src/__tests__/ks1248-n-1-system-status-troubleshooting-marks.test.ts`, then the hunk above exactly as shown (`@@ -84,1 +84,6 @@`).\n\n## Notes for the raise (not for the model)\n\n- Test-only. **Raise tier: TIER 2. Refs KS-1258** (N77-1 Minor, from the batch #1077-#1083 gate `2026-09-19-batch1077-1083-tier1-r1`, NOT-PINNED NOTINELEVEN576 widened to six shapes). NEVER Closes. KS-1258 stays In Progress (N77-2 / N68-3 remain).\n\n## Build line (not for the model)\n\n```\nbash tasks/test_only/build_test_only_input.sh KS-1258 night/inputs/test_only_1258N77-1.json night/briefs/KS-1258-N77-1.md ctx=65536\n```\n"
+ },
+ "repo": {
+  "source_checkout": "/Volumes/DevMASTER/!CODING/Secuura/Blockchain/2_Project_Files",
+  "tip": "ba1210afcab7ddf127cccb270b1c341360261cee",
+  "branch": "develop",
+  "test_runner": "vitest (run one file with `npx vitest run <file>` from Blockchain/Dev/services/api-gateway)"
+ },
+ "task_type": "test_only",
+ "tip": "ba1210afcab7ddf127cccb270b1c341360261cee",
+ "source_checkout": "/Volumes/DevMASTER/!CODING/Secuura/Blockchain/2_Project_Files",
+ "repo_subdir": "Blockchain/Dev",
+ "service_dir": "services/api-gateway",
+ "shared_pkg_dir": "packages/shared",
+ "shared_pkg_name": "@secuura/shared",
+ "test_file": "Blockchain/Dev/services/api-gateway/src/__tests__/ks1248-n-1-system-status-troubleshooting-marks.test.ts",
+ "test_file_rel_to_service": "src/__tests__/ks1248-n-1-system-status-troubleshooting-marks.test.ts",
+ "test_mode": "modify",
+ "diff_file_headers": [
+  "--- a/Blockchain/Dev/services/api-gateway/src/__tests__/ks1248-n-1-system-status-troubleshooting-marks.test.ts",
+  "+++ b/Blockchain/Dev/services/api-gateway/src/__tests__/ks1248-n-1-system-status-troubleshooting-marks.test.ts"
+ ],
+ "runner": "vitest",
+ "expected_plus": [
+  "  it('RED KS-1258 N77-1: the degraded required advice is exactly the read-first comment and one curl', async () => {",
+  "    Object.assign(answers, { 'anchoring.ks1248': 'degraded', 'originate.ks1248': 'up' });",
+  "    const advice = await adviceFor('anchoring');",
+  "    expect([advice.length, advice[0]?.commands]).toEqual([1, ['# Read what the service reports as degraded', 'curl -s http://anchoring.ks1248:1/health']]);",
+  "  });"
+ ],
+ "must_remove": [],
+ "cells": {
+  "exact576": "RED KS-1258 N77-1: the degraded required advice is exactly the read-first comment and one curl"
+ },
+ "tampers": [
+  {
+   "id": "C576_DOCKERRUN",
+   "file": "Blockchain/Dev/services/api-gateway/src/routes/system-status.ts",
+   "line": 576,
+   "from": "          '# Read what the service reports as degraded',",
+   "to": "          'docker run -d secuura/' + service.name,",
+   "reds": [
+    "RED KS-1258 N77-1: the degraded required advice is exactly the read-first comment and one curl"
+   ],
+   "reds_as_written": [
+    "exact576"
+   ]
+  },
+  {
+   "id": "C576_BUNRUN",
+   "file": "Blockchain/Dev/services/api-gateway/src/routes/system-status.ts",
+   "line": 576,
+   "from": "          '# Read what the service reports as degraded',",
+   "to": "          'cd services/' + service.name + ' && bun run dev',",
+   "reds": [
+    "RED KS-1258 N77-1: the degraded required advice is exactly the read-first comment and one curl"
+   ],
+   "reds_as_written": [
+    "exact576"
+   ]
+  },
+  {
+   "id": "C576_MAKEUP",
+   "file": "Blockchain/Dev/services/api-gateway/src/routes/system-status.ts",
+   "line": 576,
+   "from": "          '# Read what the service reports as degraded',",
+   "to": "          'make up SERVICE=' + service.name,",
+   "reds": [
+    "RED KS-1258 N77-1: the degraded required advice is exactly the read-first comment and one curl"
+   ],
+   "reds_as_written": [
+    "exact576"
+   ]
+  },
+  {
+   "id": "C576_NODEDIST",
+   "file": "Blockchain/Dev/services/api-gateway/src/routes/system-status.ts",
+   "line": 576,
+   "from": "          '# Read what the service reports as degraded',",
+   "to": "          'cd services/' + service.name + ' && node dist/index.js',",
+   "reds": [
+    "RED KS-1258 N77-1: the degraded required advice is exactly the read-first comment and one curl"
+   ],
+   "reds_as_written": [
+    "exact576"
+   ]
+  },
+  {
+   "id": "C576_PNPMDEV",
+   "file": "Blockchain/Dev/services/api-gateway/src/routes/system-status.ts",
+   "line": 576,
+   "from": "          '# Read what the service reports as degraded',",
+   "to": "          'cd services/' + service.name + ' && pnpm dev',",
+   "reds": [
+    "RED KS-1258 N77-1: the degraded required advice is exactly the read-first comment and one curl"
+   ],
+   "reds_as_written": [
+    "exact576"
+   ]
+  },
+  {
+   "id": "C576_TSXWATCH",
+   "file": "Blockchain/Dev/services/api-gateway/src/routes/system-status.ts",
+   "line": 576,
+   "from": "          '# Read what the service reports as degraded',",
+   "to": "          'npx tsx watch services/' + service.name + '/src/index.ts',",
+   "reds": [
+    "RED KS-1258 N77-1: the degraded required advice is exactly the read-first comment and one curl"
+   ],
+   "reds_as_written": [
+    "exact576"
+   ]
+  }
+ ],
+ "controls": [
+  "control: with every service up there is no advice for anchoring or originate",
+  "control: a DOWN required service (originate answers 503) is still critical and still told to restart",
+  "RED KS-1258 N68-1: the degraded required advice carries no start command in ANY common shape"
+ ],
+ "files": {
+  "Blockchain/Dev/services/api-gateway/src/__tests__/ks1248-n-1-system-status-troubleshooting-marks.test.ts": "/**\n * =============================================================================\n * KS-1248 - /system/status troubleshooting never tells an operator to restart a\n * DEGRADED required service\n * =============================================================================\n * After #1037 (KS-1101) a required service that answers 200 {status:'degraded'}\n * reaches generateTroubleshooting, which classified every required service that\n * was not 'healthy' as critical and printed restart commands for it. Degraded\n * means up and serving with a sick dependency; a restart can turn a partial\n * outage into a full one. Harness: the ks864a pattern - the system-status\n * router mounted alone, fetch stubbed per host, the redis health read mocked.\n * =============================================================================\n */\nimport { describe, it, expect, vi, beforeAll, afterAll } from 'vitest';\nimport http from 'node:http';\nimport express from 'express';\n\nconst savedEnv = { ...process.env };\nprocess.env.ANCHORING_SERVICE_URL = 'http://anchoring.ks1248:1';\nprocess.env.ORIGINATE_SERVICE_URL = 'http://originate.ks1248:1';\n\n/** What each probed host answers in the current cell. A host not listed answers healthy. */\nconst answers: Record<string, 'up' | 'degraded' | 'down'> = {};\n\nvi.mock('../services/redis', () => ({ getRedisHealth: vi.fn(async () => ({ status: 'healthy' })) }));\nvi.stubGlobal('fetch', vi.fn(async (url: string) => {\n  const kind = answers[new URL(String(url)).hostname] ?? 'up';\n  if (kind === 'down') return new Response(JSON.stringify({ status: 'unhealthy' }), { status: 503 });\n  if (kind === 'degraded') return new Response(JSON.stringify({ status: 'degraded', degradedReasons: ['ks1248: dependency unreachable'] }), { status: 200 });\n  return new Response(JSON.stringify({ status: 'healthy' }), { status: 200 });\n}));\n\nlet server: ReturnType<ReturnType<typeof express>['listen']>; let port = 0;\nbeforeAll(async () => {\n  const router = (await import('../routes/system-status')).default;\n  const app = express(); app.use('/system', router);\n  await new Promise<void>((r) => { server = app.listen(0, '127.0.0.1', () => { port = (server.address() as any).port; r(); }); });\n}, 10_000);\nafterAll(async () => {\n  await new Promise<void>((r) => server.close(() => r()));\n  for (const k of Object.keys(process.env)) if (!(k in savedEnv)) delete process.env[k];\n  Object.assign(process.env, savedEnv);\n  vi.unstubAllGlobals();\n});\n\nfunction getJson(path: string): Promise<any> {\n  return new Promise((resolve, reject) => {\n    http.get({ hostname: '127.0.0.1', port, path }, (res) => {\n      let data = ''; res.on('data', (c) => (data += c));\n      res.on('end', () => { try { resolve(JSON.parse(data)); } catch (e) { reject(e); } });\n    }).on('error', reject);\n  });\n}\n\n/** The troubleshooting items GET /system/status emits for one component. */\nasync function adviceFor(component: string): Promise<any[]> {\n  const body = await getJson('/system/status');\n  return (body.troubleshooting ?? []).filter((i: any) => i.component === component);\n}\nconst restarts = (item: any): boolean => (item?.commands ?? []).some((c: string) => /restart/i.test(c));\n\ndescribe('KS-1248: /system/status troubleshooting for a degraded required service', () => {\n  it('control: with every service up there is no advice for anchoring or originate', async () => {\n    answers['anchoring.ks1248'] = 'up';\n    answers['originate.ks1248'] = 'up';\n    const a = await adviceFor('anchoring');\n    const o = await adviceFor('originate');\n    expect([a.length, o.length]).toEqual([0, 0]);\n  });\n\n  it('control: a DOWN required service (originate answers 503) is still critical and still told to restart', async () => {\n    answers['anchoring.ks1248'] = 'up';\n    answers['originate.ks1248'] = 'down';\n    const o = await adviceFor('originate');\n    expect([o.length, o[0]?.severity, restarts(o[0])]).toEqual([1, 'critical', true]);\n  });\n\n  it('\\ud83d\\udd34 a DEGRADED required service (anchoring answers 200 degraded) gets one warning and no restart command', async () => {\n    answers['anchoring.ks1248'] = 'degraded';\n    answers['originate.ks1248'] = 'up';\n    const a = await adviceFor('anchoring');\n    expect([a.length, a[0]?.severity, restarts(a[0])]).toEqual([1, 'warning', false]);\n  });\n  it('RED KS-1258 N68-1: the degraded required advice carries no start command in ANY common shape', async () => {\n    answers['anchoring.ks1248'] = 'degraded';\n    answers['originate.ks1248'] = 'up';\n    const a = await adviceFor('anchoring');\n    const starts = (a[0]?.commands ?? []).filter((c: string) => /npm start|npm --prefix|npm run|yarn start|yarn dev|yarn run|node services|docker compose up|docker-compose up|systemctl start|pm2 start|restart/i.test(c));\n    expect([a.length, starts]).toEqual([1, []]);\n  });\n});\n"
+ },
+ "_night_num_ctx": 65536
+}
