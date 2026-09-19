@@ -10,6 +10,15 @@ supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s
 
 ---
 
+## 🔵 DELTA 26 — 2026-09-19 20:3x (Tuesday ctx 70% CHECKPOINT; band 80-90). READ FIRST; supersedes DELTA 25 on the queue.
+- **NexusAI main = `7589489`** (counts 3502/198 read at origin). On main today: RD-436 r4 (1571cbb) · RD-490 (c163db6 + counts fix 9f91eaf) · RD-491 (1a9ada3) · RD-568 harness (acec3ec) · RD-566 recipe (7589489). Every push was preceded by green CI on the previous main (quoted in S68's MERGED mails; 1a9ada3 went red on a port race and passed on ONE measurement re-run).
+- **Next, in order (S68, %13):** RD-571 bindable ports (gate GO WITH FINDINGS, worst Minor) merges fresh onto 7589489 after its Build is green -> **merge 2 RD-486 redone fresh** (C-87 BACKLOG union; C-90 if RD-491's renames show) -> RD-503 -> RD-567 (tier-2 gate first) -> history docs merge. **RD-464 r3 HELD** (C-74).
+- **Band move (RD-573 F-A2: the 39000 test band sits inside Linux's ephemeral range):** AFTER the queue, UNLESS main's CI shows another bind race - then it jumps the queue.
+- **Rules added today in NexusAI CLARIFICATIONS:** C-85/C-86 (Kam: merge everything else; RD-564 deliberate hole, round 5 cancelled) · C-87 BACKLOG add-only union · C-89 pre-push content check · C-90 pass 3 with parents swapped. zsh: always "${sha}:refs/..." / "${H}:path".
+- **Scores today:** S67 0.90 · round-4 gate 1.00 · tier-2 RD-568/566 gate 1.00 · RD-571 gate 1.00. **S68 to score at its wrap** (strong disclosure; three self-caught instrument errors: unstaged counts, unlocked c57, stale red-proof claim).
+- **OWED TO KAM:** one email when the submission zip exists (zip only, sha256 + head, kreiser.org@me.com), naming the RD-464 r3 hold. Nothing else unless stop-class.
+- **Re-arm at boot:** `2_Project_Files/fleet/watch_nexusai_main.sh <current main> 60 180` (armed on 7589489 ~20:34).
+
 ## 🔵 DELTA 25 — 2026-09-19 16:2x (Tuesday ctx 65% CHECKPOINT; band 80-90, NOT rotating). READ FIRST; supersedes DELTA 22-24 on the queue.
 ### NexusAI S68 (%13), queue state — every head below was read at origin by Tuesday
 - **main = `9f91eaf`** (counts 3490/196, CONTENT read at origin). Merged: **1** RD-436 r4 (+RD-561) `1571cbb` · **3a** RD-490 `c163db6` (committed with PLACEHOLDER counts - S68's error - fixed forward by `9f91eaf`).
