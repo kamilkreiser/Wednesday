@@ -10,6 +10,11 @@ supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s
 
 ---
 
+## 🔵 DELTA 24 — 2026-09-19 12:3x. READ FIRST; supersedes DELTA 23 on ROUND 5.
+- **KAM 02:29:33Z (email, auth pass): "Leave it as a deliberate hole"** = RD-564 ACCEPTED, **ROUND 5 CANCELLED** (Tuesday's reading, read back to him in a reply; his word reverses it). S68 told by SUPERSEDES mail: record **C-86** (supersedes C-85's round-5 clause), RD-564 to accepted-risk with his words, predicate re-evaluated WITHOUT RD-564, RD-566+567 get ONE tier-2 gate after merge 4.
+- **Merge queue unchanged** (1 RD-436 r4 -> 2 RD-486 -> 3 RD-490/491 -> 4 RD-503 -> 5 RD-566/567 after their gate -> 6 history docs). RD-464 r3 HELD (C-74). **Owed: verify C-86 at source; score merges as MERGED mails land; the package email names the RD-464 hold.**
+- Kam praised by email 02:28:18Z ("amazing job being so thorough") - ledger positive row.
+
 ## 🔵 DELTA 23 — 2026-09-19 12:2x. READ FIRST; supersedes DELTA 22's "round 5 is with Kam".
 - **KAM RULED BY EMAIL** (Re: Progress, both spf/dkim/dmarc pass, text in the HTML part): 02:20:20Z *"Do not enforce setting up sign in. This is optional but highly encouraged. Merge every other thing."* and 02:21:21Z *"Do round 5 and get it ready for submission."* Card `nexusai-round4-nogo-selfheal-round5` ruled b by hand; **mark `--delivered` once S68 mails the C-number.**
 - **S68 LIVE in `%13`** (brief verified at datasec-nexusai@ 02:25:13Z). **OWED: verify its PLAN CONFIRMATION (rung 6).** Queue: RD-436 r4 (+RD-561) -> RD-486 -> RD-490/491 -> RD-503 -> one tier-2 gate RD-566+RD-567 then merge -> history docs merge. **RD-464 r3 HELD** (C-74 line 710: RD-545 has no branch; merging it ships our own regression). Round 5 = plan option (b) off the new main, with a cell proving a no-sign-in deployment stays open (his "optional" constraint); tier-1 gate; Major comes to Tuesday.
