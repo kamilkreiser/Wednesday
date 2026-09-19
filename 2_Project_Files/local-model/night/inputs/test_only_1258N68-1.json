@@ -1,0 +1,116 @@
+{
+ "ticket": {
+  "identifier": "KS-1258",
+  "title": "KS-1258 N68-1 PIN THAT THE DEGRADED REQUIRED ADVICE CARRIES NO START COMMAND IN ANY COMMON SHAPE — Wednesday's task for Ornith, TEST_ONLY, **ONE existing test file, one cell added, no product file** (",
+  "description": "# KS-1258 N68-1 PIN THAT THE DEGRADED REQUIRED ADVICE CARRIES NO START COMMAND IN ANY COMMON SHAPE — Wednesday's task for Ornith, TEST_ONLY, **ONE existing test file, one cell added, no product file** (written 2026-09-19, round 11)\n\nFile: `Blockchain/Dev/services/api-gateway/src/__tests__/ks1248-n-1-system-status-troubleshooting-marks.test.ts`\nTip: `51dbedd39ade43cc511278502b2e1e190de641c7`\n\nWritten from develop `51dbedd39ade43cc511278502b2e1e190de641c7` (read with `git ls-remote origin refs/heads/develop`; #1068 / KS-1258 N53-1 is merged there). The test file at that tip is 84 lines; its full content is in `files[...]` of your input. The product the cell pins is `Blockchain/Dev/services/api-gateway/src/routes/system-status.ts`. This service runs **VITEST**.\n\n## THE MODE — read this twice\n\n**TEST_ONLY.** Your diff touches EXACTLY ONE file: the test file above, MODIFIED IN PLACE (`--- a/<path>` / `+++ b/<path>`, the path exactly as written above). You never touch `system-status.ts` or any other product file: the behaviour is already right at the tip, and this cell PINS it.\n\n## What the cell pins (one paragraph)\n\nSince #1039 (KS-1248), a DEGRADED required service (anchoring answers 200 `{status: 'degraded'}`) gets the read-first advice block in `system-status.ts` (after the comment `// KS-1248: a DEGRADED required service is up and serving…`, `:564`): a `# Read what the service reports as degraded` comment (`:576`) and a `curl -s` (`:577`), never a start or restart command. The file's existing 🔴 cell checks only `/restart/`. The optional twin of this block (`:592`, KS-1258) is pinned for every common start shape by the ks1258 file's N44-1 cell (widened at #1068). The #1061-#1069 gate (report `2026-09-19-batch1061-1069-tier1-r1`, finding **N68-1**, Minor, lead G-4) planted `yarn start`, `yarn dev`, `node services/<x>/dist/index.js`, `npm start` and `docker compose up` at `:576` and **every api-gateway cell stayed GREEN** (0 of 615). The new cell is the KS-1248 twin of N44-1: anchoring degraded, its advice commands filtered by the same start-command pattern, expect one item and no start command: `[1, []]`. Every existing cell is unchanged.\n\n## The exact change — ONE hunk in the test file\n\nThe new cell goes at the end of the `describe(...)` block: after the 🔴 cell's closing line `  });` (`:83`, leading context) and before the block's closing line `});` (`:84`, trailing context). Copy every line byte for byte. Every `+` line is ASCII only. There is no blank line anywhere in the fence. Keep the header exactly as shown. **Your diff MUST begin with the two file-header lines, above the `@@` line: `--- a/Blockchain/Dev/services/api-gateway/src/__tests__/ks1248-n-1-system-status-troubleshooting-marks.test.ts` then `+++ b/Blockchain/Dev/services/api-gateway/src/__tests__/ks1248-n-1-system-status-troubleshooting-marks.test.ts`.**\n\n```\n@@ -83,2 +83,9 @@\n   });\n+  it('RED KS-1258 N68-1: the degraded required advice carries no start command in ANY common shape', async () => {\n+    answers['anchoring.ks1248'] = 'degraded';\n+    answers['originate.ks1248'] = 'up';\n+    const a = await adviceFor('anchoring');\n+    const starts = (a[0]?.commands ?? []).filter((c: string) => /npm start|npm --prefix|npm run|yarn start|yarn dev|yarn run|node services|docker compose up|docker-compose up|systemctl start|pm2 start|restart/i.test(c));\n+    expect([a.length, starts]).toEqual([1, []]);\n+  });\n });\n```\n\n`answers` (`:23`), the per-host `fetch` stub (`:26-31`) and `adviceFor` (`:56-59`) are the file's own. `anchoring` is a REQUIRED service (`required: true`) whose URL is `http://anchoring.ks1248:1` (`:19`).\n\n## Cells\n\n- `reqstarts` = `RED KS-1258 N68-1: the degraded required advice carries no start command in ANY common shape`\n\n(The red cell is marked `RED` in its `it(` title, not with an emoji: the test_only builder refuses a non-ASCII `+` line, KS-1133 / KS-1180.)\n\n## Tampers\n\nEach tamper replaces line 576 of `system-status.ts`: the FIRST command of the degraded-REQUIRED block, the line right after `commands: [` below the comment `// KS-1248: a DEGRADED required service is up…` (`:564`). The same `From` text also sits at `:592`, in the degraded-OPTIONAL (KS-1258) block, and is NOT touched. Under each tamper EXACTLY the named cell must fail, by assertion.\n\n### YARN — the degraded required advice regresses to `yarn start`\nFile: `Blockchain/Dev/services/api-gateway/src/routes/system-status.ts`\nLine: 576\nFrom:\n```\n          '# Read what the service reports as degraded',\n```\nTo:\n```\n          'cd services/' + service.name + ' && yarn start',\n```\nReds: `reqstarts`\n\n### YARNDEV — the degraded required advice regresses to `yarn dev`\nFile: `Blockchain/Dev/services/api-gateway/src/routes/system-status.ts`\nLine: 576\nFrom:\n```\n          '# Read what the service reports as degraded',\n```\nTo:\n```\n          'cd services/' + service.name + ' && yarn dev',\n```\nReds: `reqstarts`\n\n### NODE — the degraded required advice regresses to `node services/<x>/dist/index.js`\nFile: `Blockchain/Dev/services/api-gateway/src/routes/system-status.ts`\nLine: 576\nFrom:\n```\n          '# Read what the service reports as degraded',\n```\nTo:\n```\n          'node services/' + service.name + '/dist/index.js',\n```\nReds: `reqstarts`\n\n### NPMSTART — the degraded required advice regresses to `npm start`\nFile: `Blockchain/Dev/services/api-gateway/src/routes/system-status.ts`\nLine: 576\nFrom:\n```\n          '# Read what the service reports as degraded',\n```\nTo:\n```\n          'cd services/' + service.name + ' && npm start',\n```\nReds: `reqstarts`\n\n### COMPOSE — the degraded required advice regresses to `docker compose up`\nFile: `Blockchain/Dev/services/api-gateway/src/routes/system-status.ts`\nLine: 576\nFrom:\n```\n          '# Read what the service reports as degraded',\n```\nTo:\n```\n          'docker compose up -d ' + service.name,\n```\nReds: `reqstarts`\n\n## Controls\n\n- `control: with every service up there is no advice for anchoring or originate`\n- `control: a DOWN required service (originate answers 503) is still critical and still told to restart`\n\n## THE CELLS — state it to yourself before you write a line\n\nAt the untouched tip every cell passes, the new one included: the degraded anchoring item's commands are `# Read what the service reports as degraded` and `curl -s http://anchoring.ks1248:1/health`, and neither matches the pattern: `[1, []]`. Under YARN, YARNDEV, NODE, NPMSTART or COMPOSE the first command becomes `cd services/anchoring && yarn start` / `… && yarn dev` / `node services/anchoring/dist/index.js` / `… && npm start` / `docker compose up -d anchoring`, which the pattern matches, so the cell fails by assertion (`[1, ['…']]` against `[1, []]`). The 🔴 cell (its pattern is `/restart/`) stays green under all five: none of the five shapes says restart. The two controls pass: all-up gives no advice, and the DOWN required branch is a different block (`:527-544`).\n\n## Premises (measured)\n\nMeasured 2026-09-19 by the round-11 brief subagent at `51dbedd39` (origin develop by `ls-remote`, object local; a `git clone --shared` scratch clone, the harness's own `prepare_clone.sh` farm, the service's own `npx vitest run` over the WHOLE api-gateway suite, JSON report per run; every plant by line after an exact `From` check, restored by bytes, sha256 equal, porcelain clean after).\n- **Premise: the `From` text sits twice, and :576 is the REQUIRED block.** `grep -nFx` of the `From` text over `system-status.ts` at the tip: exactly two hits, `:576` and `:592`. The nearest `// KS-` comment above `:576` is `:564` `// KS-1248: a DEGRADED required service is up…` (its filter `s.required && s.status === 'degraded'`, `:568`); above `:592` it is `:581` `// KS-1258: a DEGRADED optional service…`. Instrument: the scope control below (the same plant at `:592` reds the OPTIONAL cell, not this one).\n- **Premise: nothing pins the required block for these five shapes.** READ both files: the ks1248 🔴 cell's pattern is `/restart/` (`:60`); the ks1258 N44-1 cell reads `billing` (optional) only. Instrument: all five planted at :576 WITHOUT the hunk red 0 (below).\n- **Premise: the ks1248 harness reaches the required block.** `anchoring` is `required: true` (`system-status.ts:101`), its URL comes from `ANCHORING_SERVICE_URL`, set to `http://anchoring.ks1248:1` at `:19` before the router import; the fetch stub answers that host by `answers[...]`. Instrument: the new cell is green at the tip with `a.length == 1` and reds under every plant (below).\n- **Premise: TEST FILES ONLY.** The diff's only file headers are the test file's (`diff_file_headers` in the input; checker T2); `git apply --numstat` on the brief's own diff names ONE path, `…/__tests__/ks1248-n-1-system-status-troubleshooting-marks.test.ts`, 7 added, 0 removed.\n\n## Measured results\n\n- Untouched tip, whole api-gateway suite: **624/624**, 0 red. Tip + this hunk: **625/625**, 0 red.\n- WITHOUT the hunk, each of YARN, YARNDEV, NODE, NPMSTART, COMPOSE planted at :576: **0 red of 624** (the gate's G-4 / N68-1 gap reproduced at develop).\n- WITH the hunk, each of the five at :576: **exactly 1 red of 625**, `reqstarts`, `AssertionError: expected [ 1, …(1) ] to deeply equal [ 1, [] ]`; only this file fails in vitest's JSON report; both controls and the 🔴 cell green.\n- Scope control, WITH the hunk: YARN and NPMSTART planted at **:592** instead each red exactly 1 of 625, the ks1258 N44-1 cell (optional block), and `reqstarts` stays GREEN. The line pin separates the two blocks.\n- **The real `tasks/test_only/checker.sh` on this brief's own diff**: **`RESULT: PASS (8/8)`** at `51dbedd39` (T1 one diff block; T2 touched set = the test file only; T3 strict `git apply --check`, no recount; T4 7/7 `+` lines byte-exact, 0 `-`; T5 4/4 green at the tip; T6 5/5 tampers red exactly `reqstarts`, assertions; T7 both controls green under all 5; T8 all 5 restored by bytes).\n\n## Output\n\nExactly ONE ```diff block, nothing outside it: `--- a/Blockchain/Dev/services/api-gateway/src/__tests__/ks1248-n-1-system-status-troubleshooting-marks.test.ts` / `+++ b/Blockchain/Dev/services/api-gateway/src/__tests__/ks1248-n-1-system-status-troubleshooting-marks.test.ts`, then the hunk above exactly as shown (`@@ -83,2 +83,9 @@`).\n\n## Notes for the raise (not for the model)\n\n- Test-only. **Raise tier: TIER 2. Refs KS-1258** (N68-1 Minor, from the batch #1061-#1069 gate `2026-09-19-batch1061-1069-tier1-r1`, lead G-4, NOT-PINNED YARN / YARNDEV / NODE / NPMSTART / COMPOSE at :576). NEVER Closes. #1068 is merged.\n- Why the ks1248 file and not the ks1258 file: the cell pins the KS-1248 block (`:564-580`), and the ks1248 file's harness already points a REQUIRED service at a stubbed host (`ANCHORING_SERVICE_URL = http://anchoring.ks1248:1`, `:19`) and already owns the \"degraded required\" 🔴 cell. The ks1258 file stubs only the OPTIONAL services billing and staking (`:19-20`); a required-service cell there would need a new env line above the router import, i.e. a second hunk. Here it is one pure insertion between two context lines. Neither file carries a COMPLETENESS/RAN ledger, so there is no expected list to edit.\n- Tamper scope: the test_only builder and checker locate a tamper by `Line:` plus an exact `From:` check. They have NO scope-anchor field. The line is pinned at 576, measured AT THE TIP `51dbedd39`, and the plant is proven to land in the required block (see Premises). If `system-status.ts` moves before this runs, rebuild and re-measure: the `From` check will refuse a moved line, but only if nothing identical takes its place. The same text at :592 is exactly what could take its place.\n\n## Build line (not for the model)\n\n```\nbash tasks/test_only/build_test_only_input.sh KS-1258 night/inputs/test_only_1258N68-1.json night/briefs/KS-1258-N68-1.md ctx=65536\n```\n"
+ },
+ "repo": {
+  "source_checkout": "/Volumes/DevMASTER/!CODING/Secuura/Blockchain/2_Project_Files",
+  "tip": "51dbedd39ade43cc511278502b2e1e190de641c7",
+  "branch": "develop",
+  "test_runner": "vitest (run one file with `npx vitest run <file>` from Blockchain/Dev/services/api-gateway)"
+ },
+ "task_type": "test_only",
+ "tip": "51dbedd39ade43cc511278502b2e1e190de641c7",
+ "source_checkout": "/Volumes/DevMASTER/!CODING/Secuura/Blockchain/2_Project_Files",
+ "repo_subdir": "Blockchain/Dev",
+ "service_dir": "services/api-gateway",
+ "shared_pkg_dir": "packages/shared",
+ "shared_pkg_name": "@secuura/shared",
+ "test_file": "Blockchain/Dev/services/api-gateway/src/__tests__/ks1248-n-1-system-status-troubleshooting-marks.test.ts",
+ "test_file_rel_to_service": "src/__tests__/ks1248-n-1-system-status-troubleshooting-marks.test.ts",
+ "test_mode": "modify",
+ "diff_file_headers": [
+  "--- a/Blockchain/Dev/services/api-gateway/src/__tests__/ks1248-n-1-system-status-troubleshooting-marks.test.ts",
+  "+++ b/Blockchain/Dev/services/api-gateway/src/__tests__/ks1248-n-1-system-status-troubleshooting-marks.test.ts"
+ ],
+ "runner": "vitest",
+ "expected_plus": [
+  "  it('RED KS-1258 N68-1: the degraded required advice carries no start command in ANY common shape', async () => {",
+  "    answers['anchoring.ks1248'] = 'degraded';",
+  "    answers['originate.ks1248'] = 'up';",
+  "    const a = await adviceFor('anchoring');",
+  "    const starts = (a[0]?.commands ?? []).filter((c: string) => /npm start|npm --prefix|npm run|yarn start|yarn dev|yarn run|node services|docker compose up|docker-compose up|systemctl start|pm2 start|restart/i.test(c));",
+  "    expect([a.length, starts]).toEqual([1, []]);",
+  "  });"
+ ],
+ "must_remove": [],
+ "cells": {
+  "reqstarts": "RED KS-1258 N68-1: the degraded required advice carries no start command in ANY common shape"
+ },
+ "tampers": [
+  {
+   "id": "YARN",
+   "file": "Blockchain/Dev/services/api-gateway/src/routes/system-status.ts",
+   "line": 576,
+   "from": "          '# Read what the service reports as degraded',",
+   "to": "          'cd services/' + service.name + ' && yarn start',",
+   "reds": [
+    "RED KS-1258 N68-1: the degraded required advice carries no start command in ANY common shape"
+   ],
+   "reds_as_written": [
+    "reqstarts"
+   ]
+  },
+  {
+   "id": "YARNDEV",
+   "file": "Blockchain/Dev/services/api-gateway/src/routes/system-status.ts",
+   "line": 576,
+   "from": "          '# Read what the service reports as degraded',",
+   "to": "          'cd services/' + service.name + ' && yarn dev',",
+   "reds": [
+    "RED KS-1258 N68-1: the degraded required advice carries no start command in ANY common shape"
+   ],
+   "reds_as_written": [
+    "reqstarts"
+   ]
+  },
+  {
+   "id": "NODE",
+   "file": "Blockchain/Dev/services/api-gateway/src/routes/system-status.ts",
+   "line": 576,
+   "from": "          '# Read what the service reports as degraded',",
+   "to": "          'node services/' + service.name + '/dist/index.js',",
+   "reds": [
+    "RED KS-1258 N68-1: the degraded required advice carries no start command in ANY common shape"
+   ],
+   "reds_as_written": [
+    "reqstarts"
+   ]
+  },
+  {
+   "id": "NPMSTART",
+   "file": "Blockchain/Dev/services/api-gateway/src/routes/system-status.ts",
+   "line": 576,
+   "from": "          '# Read what the service reports as degraded',",
+   "to": "          'cd services/' + service.name + ' && npm start',",
+   "reds": [
+    "RED KS-1258 N68-1: the degraded required advice carries no start command in ANY common shape"
+   ],
+   "reds_as_written": [
+    "reqstarts"
+   ]
+  },
+  {
+   "id": "COMPOSE",
+   "file": "Blockchain/Dev/services/api-gateway/src/routes/system-status.ts",
+   "line": 576,
+   "from": "          '# Read what the service reports as degraded',",
+   "to": "          'docker compose up -d ' + service.name,",
+   "reds": [
+    "RED KS-1258 N68-1: the degraded required advice carries no start command in ANY common shape"
+   ],
+   "reds_as_written": [
+    "reqstarts"
+   ]
+  }
+ ],
+ "controls": [
+  "control: with every service up there is no advice for anchoring or originate",
+  "control: a DOWN required service (originate answers 503) is still critical and still told to restart"
+ ],
+ "files": {
+  "Blockchain/Dev/services/api-gateway/src/__tests__/ks1248-n-1-system-status-troubleshooting-marks.test.ts": "/**\n * =============================================================================\n * KS-1248 - /system/status troubleshooting never tells an operator to restart a\n * DEGRADED required service\n * =============================================================================\n * After #1037 (KS-1101) a required service that answers 200 {status:'degraded'}\n * reaches generateTroubleshooting, which classified every required service that\n * was not 'healthy' as critical and printed restart commands for it. Degraded\n * means up and serving with a sick dependency; a restart can turn a partial\n * outage into a full one. Harness: the ks864a pattern - the system-status\n * router mounted alone, fetch stubbed per host, the redis health read mocked.\n * =============================================================================\n */\nimport { describe, it, expect, vi, beforeAll, afterAll } from 'vitest';\nimport http from 'node:http';\nimport express from 'express';\n\nconst savedEnv = { ...process.env };\nprocess.env.ANCHORING_SERVICE_URL = 'http://anchoring.ks1248:1';\nprocess.env.ORIGINATE_SERVICE_URL = 'http://originate.ks1248:1';\n\n/** What each probed host answers in the current cell. A host not listed answers healthy. */\nconst answers: Record<string, 'up' | 'degraded' | 'down'> = {};\n\nvi.mock('../services/redis', () => ({ getRedisHealth: vi.fn(async () => ({ status: 'healthy' })) }));\nvi.stubGlobal('fetch', vi.fn(async (url: string) => {\n  const kind = answers[new URL(String(url)).hostname] ?? 'up';\n  if (kind === 'down') return new Response(JSON.stringify({ status: 'unhealthy' }), { status: 503 });\n  if (kind === 'degraded') return new Response(JSON.stringify({ status: 'degraded', degradedReasons: ['ks1248: dependency unreachable'] }), { status: 200 });\n  return new Response(JSON.stringify({ status: 'healthy' }), { status: 200 });\n}));\n\nlet server: ReturnType<ReturnType<typeof express>['listen']>; let port = 0;\nbeforeAll(async () => {\n  const router = (await import('../routes/system-status')).default;\n  const app = express(); app.use('/system', router);\n  await new Promise<void>((r) => { server = app.listen(0, '127.0.0.1', () => { port = (server.address() as any).port; r(); }); });\n}, 10_000);\nafterAll(async () => {\n  await new Promise<void>((r) => server.close(() => r()));\n  for (const k of Object.keys(process.env)) if (!(k in savedEnv)) delete process.env[k];\n  Object.assign(process.env, savedEnv);\n  vi.unstubAllGlobals();\n});\n\nfunction getJson(path: string): Promise<any> {\n  return new Promise((resolve, reject) => {\n    http.get({ hostname: '127.0.0.1', port, path }, (res) => {\n      let data = ''; res.on('data', (c) => (data += c));\n      res.on('end', () => { try { resolve(JSON.parse(data)); } catch (e) { reject(e); } });\n    }).on('error', reject);\n  });\n}\n\n/** The troubleshooting items GET /system/status emits for one component. */\nasync function adviceFor(component: string): Promise<any[]> {\n  const body = await getJson('/system/status');\n  return (body.troubleshooting ?? []).filter((i: any) => i.component === component);\n}\nconst restarts = (item: any): boolean => (item?.commands ?? []).some((c: string) => /restart/i.test(c));\n\ndescribe('KS-1248: /system/status troubleshooting for a degraded required service', () => {\n  it('control: with every service up there is no advice for anchoring or originate', async () => {\n    answers['anchoring.ks1248'] = 'up';\n    answers['originate.ks1248'] = 'up';\n    const a = await adviceFor('anchoring');\n    const o = await adviceFor('originate');\n    expect([a.length, o.length]).toEqual([0, 0]);\n  });\n\n  it('control: a DOWN required service (originate answers 503) is still critical and still told to restart', async () => {\n    answers['anchoring.ks1248'] = 'up';\n    answers['originate.ks1248'] = 'down';\n    const o = await adviceFor('originate');\n    expect([o.length, o[0]?.severity, restarts(o[0])]).toEqual([1, 'critical', true]);\n  });\n\n  it('\\ud83d\\udd34 a DEGRADED required service (anchoring answers 200 degraded) gets one warning and no restart command', async () => {\n    answers['anchoring.ks1248'] = 'degraded';\n    answers['originate.ks1248'] = 'up';\n    const a = await adviceFor('anchoring');\n    expect([a.length, a[0]?.severity, restarts(a[0])]).toEqual([1, 'warning', false]);\n  });\n});\n"
+ },
+ "_night_num_ctx": 65536
+}
