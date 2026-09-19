@@ -36,6 +36,7 @@ KS-1250, KS-1175 Kam's · nothing to demo · no contact with Peter/Stuart beyond
 5. KS-1262 (High) test-token severity check: unowned.
 6. The drive sync keeps making `(conflict_on_…)` copies (27 untracked in WEDNESDAY; they make panel_sync SKIP its rebase every cycle), 9 in the vault; not removed.
 7. From 09-18: seat A's launcher F-02 (no keychain SSH identity), the open card `wed-boot-read-exceeds-the-context-window`, O-1 (CI jobs never start), the NSG's dynamic IP.
+9. KS-1269-U: should `/unrevoke` refuse `index < 0`? KS-662 lists `/unrevoke {index:-1} → 200` as NON-RULED; the held fix leaves it unchanged.
 8. report-796 F-01/F-03 (`scripts/audit/*.mjs`): open at the tip; F-01 needs a new env seam and F-03 contradicts the code's own SKIP comment → a ruling, not a local-model ticket.
 
 ### OWED (tooling, mine, none urgent)
