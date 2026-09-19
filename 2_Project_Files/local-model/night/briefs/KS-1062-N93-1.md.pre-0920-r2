@@ -15,7 +15,7 @@ The file boots `runStartupMigrations()` against a fake `pg` whose `qa_skip` data
 
 ## The exact change — ONE hunk in the test file
 
-The two new cells go at the end of the `describe(...)` block, directly above the block's closing line `});` (`:103`, the ONE trailing context line; the file's last line). There is NO leading context: the line above (`:102`, `  });`) stays and is not written. Copy every line byte for byte. No `+` line contains a backslash or a regex: the headline is checked with plain strings (`startsWith` / `includes`), whose brackets and parentheses are ordinary characters and are written exactly once each, never escaped. The product's dash between `INCOMPLETE` and `2` is not written; the two strings stop on either side of it. Every `+` line is ASCII only. There is no blank line anywhere in the fence. Keep the header exactly as shown. **Your diff MUST begin with the two file-header lines, above the first `@@` line: `--- a/Blockchain/Dev/services/api-gateway/src/__tests__/ks1062-startup-migrations-tenant-summary-first-error.test.ts` then `+++ b/Blockchain/Dev/services/api-gateway/src/__tests__/ks1062-startup-migrations-tenant-summary-first-error.test.ts`.**
+The two new cells go at the end of the `describe(...)` block, directly above the block's closing line `});` (`:103`, the ONE trailing context line; the file's last line). There is NO leading context: the line above (`:102`, `  });`) stays and is not written. Copy every line byte for byte (the regex's `\[`, `\]`, `\(`, `\)`, `\{` backslashes included; the ` . ` in it is one ASCII dot standing for the product's dash). Every `+` line is ASCII only. There is no blank line anywhere in the fence. Keep the header exactly as shown. **Your diff MUST begin with the two file-header lines, above the first `@@` line: `--- a/Blockchain/Dev/services/api-gateway/src/__tests__/ks1062-startup-migrations-tenant-summary-first-error.test.ts` then `+++ b/Blockchain/Dev/services/api-gateway/src/__tests__/ks1062-startup-migrations-tenant-summary-first-error.test.ts`.**
 
 ```
 @@ -103,1 +103,9 @@
@@ -25,7 +25,7 @@ The two new cells go at the end of the `describe(...)` block, directly above the
 +  });
 +  it('RED KS-1062 N93-1: when every tenant FAILS, the summary is an INCOMPLETE WARN counting all of them failed', async () => {
 +    await boot([tenant('qa-ghost-a', 'qa_ghost'), tenant('qa-ghost-b', 'qa_ghost')]);
-+    expect([summary().startsWith('[WARN] [startup-migrations] Tenant DB migrations INCOMPLETE '), summary().includes(' 2 tenant(s) FAILED {'), metaOf(summary())]).toEqual([true, true, { migrated: 0, failed: 2, skipped: 0, total: 2 }]);
++    expect([/^\[WARN\] \[startup-migrations\] Tenant DB migrations INCOMPLETE . 2 tenant\(s\) FAILED \{/.test(summary()), metaOf(summary())]).toEqual([true, { migrated: 0, failed: 2, skipped: 0, total: 2 }]);
 +  });
  });
 ```
