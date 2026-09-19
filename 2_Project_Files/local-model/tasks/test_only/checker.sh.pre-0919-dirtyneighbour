@@ -122,13 +122,7 @@ git -C "$CLONE" status --porcelain --untracked-files=all -- "$(dirname "$TEST_FI
 while IFS= read -r line; do
   [ -z "$line" ] && continue
   st="${line:0:2}"; p="${line:3}"
-  case "$st" in
-    "??") mkdir -p "$Q/$(dirname "$p")"; mv "$CLONE/$p" "$Q/$p"; echo "quarantined untracked $p -> $Q" ;;
-    # 2026-09-19: a PREVIOUS run's modify-mode test file (same ticket clone, another brief) left tracked-modified
-    # in the test dir made every later run refuse "clone not clean" (KS-1258 N68-2 after N68-1). Save the diff to
-    # the quarantine (never delete), then restore that file to the pinned tip.
-    " M"|"M "|"MM") mkdir -p "$Q/$(dirname "$p")"; git -C "$CLONE" diff HEAD -- "$p" > "$Q/$p.diff"; git -C "$CLONE" checkout HEAD -- "$p" >> "$REP/reset.out" 2>&1; echo "restored a previous run's modified $p (its diff saved to $Q/$p.diff)" ;;
-  esac
+  case "$st" in "??") mkdir -p "$Q/$(dirname "$p")"; mv "$CLONE/$p" "$Q/$p"; echo "quarantined untracked $p -> $Q" ;; esac
 done < "$REP/pre_status.out"
 [ "$MODE_T" = modify ] && git -C "$CLONE" checkout -- "$TEST_FILE" >> "$REP/reset.out" 2>&1
 while IFS= read -r tfile; do [ -n "$tfile" ] && git -C "$CLONE" checkout -- "$tfile" >> "$REP/reset.out" 2>&1; done <<< "$TAMPER_FILES"
