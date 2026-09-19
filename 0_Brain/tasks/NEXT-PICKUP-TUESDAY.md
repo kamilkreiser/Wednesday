@@ -10,6 +10,17 @@ supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s
 
 ---
 
+## 🔵 DELTA 30 — 2026-09-20 08:3x (Tuesday ctx 65% checkpoint; band 80-90, NOT rotating). READ FIRST; DELTA 29 superseded on state.
+- **NexusAI main = `fdf2483`** (RD-567 merged, CI green, 3624/205). **S69 wrapped, scored 0.94, pane closed. S70 LIVE in `%15`** (rung 6 verified 22:11Z).
+- 🔴 **THE DRIVE IS THE ONLY BLOCKER: ~1,560 MiB free, flat.** Spotlight's index on the T9 = 12.3 GiB and growing (measured). The 649 GiB abandoned Unison temp is LOCATED and confirmed alone in its directory (S70, 22:1xZ). **Both ways out are Kam's and both are on his desk:** cards `tuesday-t9-disk-full-spotlight-and-temp-file` and `nexusai-reclaim-old-qa-worktrees-33gib` (33,651 MiB, a phone tap), plus the email of 21:3xZ (verified at origin). Do NOT chase him; he is away until Monday 2026-09-21.
+- **THRESHOLDS (not yours to widen):** 1,700 MiB (min of 5 one-minute samples) for a worktree or the C-57 control · 1,640 for a verify/jest batch in an existing worktree · 400 MB mid-run stop · ENOSPC = VOID. S69's one-run 1,450 allowance is SPENT.
+- **AUTO-TRIGGERS ARMED at S70, no further word needed:** at 1,700 -> the RD-545 narrow re-gate @ `f008d86` (round 2 of 2, C-62; mutations prepared) -> then the RD-549 tier-1 gate @ `2edde62` (round 1 of 2; its changed-older-test requirement stands) -> then OT1-OT6.
+- **UNVERIFIED, say it that way:** RD-545 round 2's green/RS1/M4 are S69's own claims — its re-gate was NOT RUN (disk). RD-549 @ 2edde62 is built + verified (3695/208) but ungated.
+- **New this session:** C-92 (open-mode confirm, reset as a predicate at every use) · C-93 (upgrade fail-closed) · C-94 · RD-574 filed (RD-516 reddens RD-523's open-window cells — fixture changes, never the policy) · R14 rides RD-464 r3 on C-77's re-run list (nothing asserts the billed probe stays SKIPPED).
+- **Five old NexusAI rulings were marked `--delivered`** after checking each at source (4 in CLARIFICATIONS by card id; RD-454 delivered as code at 784b831). Their marks were stale, not the deliveries.
+- **A seat with no human at its pane must NOT use a modal**: S70 blocked itself on one at 22:1xZ; the detector called it MODAL, Tuesday pressed ESC (never selected an option) and tapped the pointer to mail. Put "no interactive prompts — card or mail it" in every brief.
+- **Kam's open cards (5):** the two disk ones above, `wed-allowance-pace-before-week-away` (Wednesday's), and two others. All carry defaults; silence changes nothing.
+
 ## 🔴 DELTA 29 — 2026-09-20 02:3x (Tuesday rotation boot, session d63db5d0). READ FIRST; DELTA 28 still holds except where named.
 - **S69 had stalled at its prompt waiting for a GO** (its mail said no reply needed; its pane said 'Say go'). GO sent 16:17Z; RD-545 ANSWER 16:20Z (guard cells + trial-collapse red proof + an AI toggle cell). **Rule: always answer a new seat's plan with a GO mail + tap, and read its pane before rotating.**
 - **S69 is ON A DISK HOLD (its STOP 16:22Z).** RD-567 merge built UNCOMMITTED in `worktrees/s68-history`; do NOT let it abort. Swing cause = **Spotlight indexing the T9** (measured). **Resume rule sent 16:27Z:** min of 5 one-minute `df -m` samples >= its measured verify footprint + 1,600 MiB (4,096 MiB if unmeasured). S69 owes: the footprint number + the RD-545 cell design as text.
