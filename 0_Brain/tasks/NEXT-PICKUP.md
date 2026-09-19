@@ -20,7 +20,7 @@ supersede: replace wholesale at the next pickup; do not append
 1. `kam_rulings_today.sh` + `reconcile_rulings.py` (0 panel lines today as of 10:5x).
 2. **On Seat B 3rd's READY:** draft ONE batch gate over the nine PRs (model: `fleet/qa-agent/gatesets/2026-09-19_gate1050to1060/` + its generator); tier 1 = KS-1260 (pre-push gate) and KS-1206 (the null/0 → 400 caller question); re-pin by `ls-remote` + `--check` IMMEDIATELY before launch; then GO per head; the seat merges one at a time, re-reading develop after each.
 3. **Ornith: queue EMPTY WITH A MEASURED REASON.** Search rounds 8 (2 fits) and 9 (0 fits, 30 read) are in `local-model/night/candidates.md`; the pool is exhausted at grep depth. Its next feed is the NOT-PINNED list from that batch gate's report. Brief from it the moment the report lands.
-4. **Held for the NEXT raise (after the nine): 2** — `READY_KS-1276` (doc: VOCABULARY.md PII caveat; premise re-measured by Wednesday at 3c447abc7) · `READY_KS-1269` (vc-issuer `/revoke` rejects a non-integer `index`; `/unrevoke` residual; the -1 exception is carried from the ticket's KS-662 quote — the raising seat reads KS-662 first). Both raise as **Refs**.
+4. **Held for the NEXT raise (after the nine): 2, +1 running** — `READY_KS-1276` (doc: VOCABULARY.md PII caveat; premise re-measured by Wednesday at 3c447abc7) · `READY_KS-1269` (vc-issuer `/revoke` rejects a non-integer `index`; `/unrevoke` residual; KS-662's -1 allowance covers /revoke — read by the KS-1269-U subagent) · **`READY_KS-1269-U` when it passes** (the `/unrevoke` twin, same file 62 lines lower, both orders apply clean; pins nothing about -1). All raise as **Refs**.
 
 ### Reallocated to a Claude seat (Kam's 09-16 counter; do NOT queue at the local model)
 KS-1168, KS-1163, KS-998, KS-866 (from 09-16/17) · **the KS-871 remnant** (round 9): `services/api-gateway/src/middleware/audit.ts:333` still logs `path: req.path` on a failed audit write (on a refused erasure that is the trimmed `/`); KS-871 is In Progress, so the builder refuses it → a line for whichever seat next takes KS-871.
@@ -36,8 +36,8 @@ KS-1250, KS-1175 Kam's · nothing to demo · no contact with Peter/Stuart beyond
 5. KS-1262 (High) test-token severity check: unowned.
 6. The drive sync keeps making `(conflict_on_…)` copies (27 untracked in WEDNESDAY; they make panel_sync SKIP its rebase every cycle), 9 in the vault; not removed.
 7. From 09-18: seat A's launcher F-02 (no keychain SSH identity), the open card `wed-boot-read-exceeds-the-context-window`, O-1 (CI jobs never start), the NSG's dynamic IP.
-9. KS-1269-U: should `/unrevoke` refuse `index < 0`? KS-662 lists `/unrevoke {index:-1} → 200` as NON-RULED; the held fix leaves it unchanged.
 8. report-796 F-01/F-03 (`scripts/audit/*.mjs`): open at the tip; F-01 needs a new env seam and F-03 contradicts the code's own SKIP comment → a ruling, not a local-model ticket.
+9. KS-1269-U: should `/unrevoke` refuse `index < 0`? KS-662 lists `/unrevoke {index:-1} → 200` as NON-RULED; the held fix leaves it unchanged.
 
 ### OWED (tooling, mine, none urgent)
 `brief_and_launch.sh` prints "launched" after cockpit SKIPS a same-name pane (false receipt; ledger 09-19) — needs `--pane-name` + rc 1 on skip · `cockpit.sh say %<id>` fails silently (use the NAME form) · `inbox_digest.sh` shows Datasec previews in the wednesday-agent@ section · a wake-turn Ornith print · `note_entry.sh` warn on a typed clock later than its stamp · a UTC-bound helper for commissions (ledger 09-19, the one-day-late cutoff).
