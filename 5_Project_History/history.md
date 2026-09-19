@@ -1,3 +1,10 @@
+## 2026-09-19 (Sat) — the 06:0x Wednesday seat (Kam away; WEEK-INSTRUCTION live)
+- **Kintsugi:** rebuilt to 59412d057 (seat A 12th, 29 images), then a scoped deploy to 3c447abc7 (seat A 13th: anchoring/originate/api-gateway). Both verified by behaviour; nothing pruned; demo untouched.
+- **Merged:** eleven PRs #1050-#1060 (Seat B 2nd), gated as ONE tier-1 batch (report 2026-09-19-batch1050-1060-tier1-r1), GOs per head. #1052 held until a Linear `closes` link was re-derived as contributes (verified read-only). KS-1134 Done; KS-1273..1278 filed.
+- **Local model:** 10 tickets held (KS-1264 merged in #1060), 7 search rounds; test_only `diff_file_headers` fix built with arms and validated live.
+- **Live at rotation (~10:2x):** Seat B 3rd (%110) raising nine held fixes → a batch gate next.
+- Kam's Monday list: in NEXT-PICKUP (7 items + today's).
+
 ## 2026-09-19 05:31 AEST — the 14:4x Wednesday seat (2026-09-18 14:47 → 09-19 05:3x), Secuura scope — Kam away from 14:14
 
 **Four Secuura PRs merged through ONE batched tier-1 gate.** Seat A 11th (launched as the first act) delivered #1042 KS-1254 · #1043 KS-1228 · #1044 KS-1258 · #1045 KS-1230; the gate (subagent-drafted, re-pinned + `--check` by Wednesday before launch) returned four verdicts in 40 min; signed GOs; **develop `52df64f84`, tree `816d53a2b` = the gate's tree, verified at origin.** KS-1262 (High, security) + KS-1263..1267 filed. Nothing deployed; nothing to demo; kintsugi still `a105cd32b`.
