@@ -10,6 +10,18 @@ supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s
 
 ---
 
+## 🔵 DELTA 25 — 2026-09-19 16:2x (Tuesday ctx 65% CHECKPOINT; band 80-90, NOT rotating). READ FIRST; supersedes DELTA 22-24 on the queue.
+### NexusAI S68 (%13), queue state — every head below was read at origin by Tuesday
+- **main = `9f91eaf`** (counts 3490/196, CONTENT read at origin). Merged: **1** RD-436 r4 (+RD-561) `1571cbb` · **3a** RD-490 `c163db6` (committed with PLACEHOLDER counts - S68's error - fixed forward by `9f91eaf`).
+- **3b RD-491:** committed LOCALLY `c0f45bf` (quiet locked re-run PASS 3495/196, the 10 earlier-failed cells named); pushes only after the Build on 9f91eaf (35423848380) is green.
+- **Tier-2 gate RUNNING:** RD-568 harness fix @ `6890738` + RD-566 @ `50d46e5`; its verdict must list and re-run every run that overlapped S68's unlocked windows (04:21:59-04:40:54Z; ~05:2x-06:01:52Z).
+- **Then:** RD-568 merges -> **merge 2 RD-486 REDONE FRESH** (BACKLOG union per C-87) -> **4** RD-503 -> RD-567 (needs its tier-2 gate; after RD-503) -> **6** history docs merge. **RD-464 r3 HELD** (C-74, no RD-545). **Round 5 CANCELLED; RD-564 Declined/accepted-risk** (Kam 02:29:33Z, C-86).
+- **Rules adopted today (NexusAI C-numbers):** C-87 BACKLOG.md add-only union · C-89 before every push: `git diff --quiet HEAD` + `git show HEAD:scripts/verify-expected-counts.json` = regenerated numbers · c57 control REFUSES without the jest lock (seat tooling, exit 64, red both ways). **Tuesday's side:** check generated files by CONTENT at origin, never a diff stat (ledger row today).
+- **Tickets new today:** RD-563 (Medium) · RD-564 Declined · RD-565..567 · RD-568 (harness; item 2 = the leaking test file) · RD-569 (Low hardening) · RD-570 (c57 control).
+- **OWED TO KAM:** one email when the submission package zip exists (zip only, sha256 + head, to kreiser.org@me.com), naming the RD-464 r3 hold. Nothing before unless stop-class.
+- **Re-arm at boot:** `2_Project_Files/fleet/watch_nexusai_main.sh <current main> 60 180` (armed on 9f91eaf ~15:25).
+- **S68 score so far (for its wrap):** strong verification and disclosure; two self-caught instrument errors (unstaged counts on 3a; unlocked c57 runs).
+
 ## 🔵 DELTA 24 — 2026-09-19 12:3x. READ FIRST; supersedes DELTA 23 on ROUND 5.
 - **KAM 02:29:33Z (email, auth pass): "Leave it as a deliberate hole"** = RD-564 ACCEPTED, **ROUND 5 CANCELLED** (Tuesday's reading, read back to him in a reply; his word reverses it). S68 told by SUPERSEDES mail: record **C-86** (supersedes C-85's round-5 clause), RD-564 to accepted-risk with his words, predicate re-evaluated WITHOUT RD-564, RD-566+567 get ONE tier-2 gate after merge 4.
 - **Merge queue unchanged** (1 RD-436 r4 -> 2 RD-486 -> 3 RD-490/491 -> 4 RD-503 -> 5 RD-566/567 after their gate -> 6 history docs). RD-464 r3 HELD (C-74). **Owed: verify C-86 at source; score merges as MERGED mails land; the package email names the RD-464 hold.**
