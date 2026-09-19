@@ -10,6 +10,13 @@ supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s
 
 ---
 
+## 🔵 DELTA 28 — 2026-09-20 02:1x ROTATION HANDOVER (Tuesday ctx ~80%). READ FIRST; DELTA 27 (disk + paused sync) still holds.
+- **S68 WRAPPED, scored 0.91, pane closed.** **S69 LIVE in `%14`** (brief verified 16:08:14Z). Its queue: merge RD-567 @ 3211022 (re-gate GO/Low) -> RD-545 red-first (releases RD-464 r3, C-74) -> RD-549 -> RD-516. **Owed by Tuesday: verify S69's PLAN CONFIRMATION (rung 6)** if it has not been verified in the note.
+- **NexusAI main = `246f23a`.** Predicate NOT met; all remaining minimum-set work is ours. Nothing owed to Kam on NexusAI until the zip exists.
+- **Disk:** T9 at ~1.2 GiB free until Kam deletes the 649 GiB sync temp (emailed 01:2x). S69 has a stop-under-400-MB rule. `com.tuesday.nassync` PAUSED; its fix is claimed (seat resolution + Docker disk ignore) - do it with arms before re-arming.
+- **Re-arm at boot:** `2_Project_Files/fleet/watch_nexusai_main.sh <current main> 60 180` (armed on 246f23a).
+- **Today's scores:** S67 0.90, S68 0.91; gates 1.00 x4. Ledger rows this seat (09-19): typed clock caught pre-send; diff-stat read as content (merge 3a); Kam's praise.
+
 ## 🔴 DELTA 27 — 2026-09-20 01:2x. READ FIRST.
 - **T9 DRIVE FULL** (1.0 GiB free of 931). Cause: a 649 GiB Unison temp copy of Docker's disk at `!CODING/Docker - Containers/DockerDesktop/.unison.Docker.raw.<hash>.unison.tmp`, written by THIS seat's `com.tuesday.nassync` on 09-19. NOT Docker's live disk (that is on the internal drive). **Kam emailed 01:2x to delete it (his hands; no-delete rule). Check `df -h /Volumes/KK_T9_External_HDD` at boot.**
 - **`com.tuesday.nassync` is PAUSED (unloaded, plist kept).** Do NOT re-arm until (1) it resolves THIS seat (it ran as agent=wednesday: same family as the close-ritual fix 6c360618a) and (2) it ignores Docker's disk image. Claimed in wed_claim. Re-arm: `launchctl bootstrap gui/$(id -u) ~/Library/LaunchAgents/com.tuesday.nassync.plist`.
