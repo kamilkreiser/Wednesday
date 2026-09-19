@@ -1,0 +1,134 @@
+{
+ "ticket": {
+  "identifier": "KS-1206",
+  "title": "KS-1206 N61-1 PIN NULL, 0, A FRACTION, A NUMERIC STRING AND THE LOWER BOUND 1 ON THE ADMIN API-KEY MINT — Wednesday's task for Ornith, TEST_ONLY, **ONE existing test file, five cells added, no product",
+  "description": "# KS-1206 N61-1 PIN NULL, 0, A FRACTION, A NUMERIC STRING AND THE LOWER BOUND 1 ON THE ADMIN API-KEY MINT — Wednesday's task for Ornith, TEST_ONLY, **ONE existing test file, five cells added, no product file** (written 2026-09-19, round 11)\n\nFile: `Blockchain/Dev/services/originate/src/__tests__/ks1206-admin-api-key-mint-bounds-rate-limit.test.ts`\nTip: `51dbedd39ade43cc511278502b2e1e190de641c7`\n\nWritten from develop `51dbedd39ade43cc511278502b2e1e190de641c7` (read with `git ls-remote origin refs/heads/develop` at the start of round 11; #1061 / KS-1206 and the rest of #1061-#1069 are merged there). The test file at that tip is 107 lines; its full content is in `files[...]` of your input. The product the cells pin is `Blockchain/Dev/services/originate/src/routes/adminConfig.ts` (the `POST /api-keys` handler, its KS-1206 guard at `:905`). This service runs **JEST**.\n\n## THE MODE — read this twice\n\n**TEST_ONLY.** Your diff touches EXACTLY ONE file: the test file above, MODIFIED IN PLACE (`--- a/<path>` / `+++ b/<path>`, the path exactly as written above). You never touch `adminConfig.ts` or any other product file: the behaviour is already right at the tip, and these cells PIN it.\n\n## What the cells pin (one paragraph)\n\nSince KS-1206 (#1061) the mint refuses any `rateLimit` that is present and is not an integer from 1 to 10000, with 400 `BAD_REQUEST` and no INSERT (`adminConfig.ts:905`). Before it, `null` and `0` reached `${d.rateLimit || 1000}` and minted 1000, and `1.5` and `\"100\"` reached the INSERT raw. The file's three red cells send only `-1`, `10001` and `'abc'`, and its controls send absent and `10000`. The #1061-#1069 gate (report `2026-09-19-batch1061-1069-tier1-r1`, finding **N61-1**, Minor) planted five one-token edits of the guard and every one of them stayed GREEN: NULLPASSES, ZEROPASSES, FLOATPASSES, LOWEROFFBYONE, NUMSTRPASSES. This change adds one cell per value the gate named: `null`, `0`, `1.5` and `'100'` are refused, and the lower bound `1` still mints. Every existing cell is unchanged.\n\n## The exact change — ONE hunk in the test file\n\nThe five new cells go at the end of the `describe(...)` block: after the last cell's closing line `  });` (`:106`, leading context) and before the block's closing line `});` (`:107`, trailing context). Copy every line byte for byte. Every `+` line is ASCII only. There is no blank line anywhere in the fence. Keep the header exactly as shown. **Your diff MUST begin with the two file-header lines, above the `@@` line: `--- a/Blockchain/Dev/services/originate/src/__tests__/ks1206-admin-api-key-mint-bounds-rate-limit.test.ts` then `+++ b/Blockchain/Dev/services/originate/src/__tests__/ks1206-admin-api-key-mint-bounds-rate-limit.test.ts`.**\n\n```\n@@ -106,2 +106,22 @@\n   });\n+  it('RED KS-1206 N61-1: rateLimit null is refused 400 before the INSERT', async () => {\n+    const r = await mint({ name: 'ks1206', rateLimit: null });\n+    expect([r.status, r.code, r.inserts]).toEqual([400, 'BAD_REQUEST', 0]);\n+  });\n+  it('RED KS-1206 N61-1: rateLimit 0 is refused 400 before the INSERT', async () => {\n+    const r = await mint({ name: 'ks1206', rateLimit: 0 });\n+    expect([r.status, r.code, r.inserts]).toEqual([400, 'BAD_REQUEST', 0]);\n+  });\n+  it('RED KS-1206 N61-1: a fractional rateLimit (1.5) is refused 400 before the INSERT', async () => {\n+    const r = await mint({ name: 'ks1206', rateLimit: 1.5 });\n+    expect([r.status, r.code, r.inserts]).toEqual([400, 'BAD_REQUEST', 0]);\n+  });\n+  it('RED KS-1206 N61-1: a numeric-string rateLimit (100 as a string) is refused 400 before the INSERT', async () => {\n+    const r = await mint({ name: 'ks1206', rateLimit: '100' });\n+    expect([r.status, r.code, r.inserts]).toEqual([400, 'BAD_REQUEST', 0]);\n+  });\n+  it('RED KS-1206 N61-1: rateLimit 1, the lower bound, still mints, one INSERT', async () => {\n+    const r = await mint({ name: 'ks1206', rateLimit: 1 });\n+    expect([r.status, r.inserts]).toEqual([201, 1]);\n+  });\n });\n```\n\n`mint` is the file's own helper (`:67-75`): it POSTs the body as the platform admin and returns the status, the error code and how many INSERTs (`$queryRaw` calls) ran. `beforeEach` resets that count for every cell.\n\n## Cells\n\n- `nullcell` = `RED KS-1206 N61-1: rateLimit null is refused 400 before the INSERT`\n- `zerocell` = `RED KS-1206 N61-1: rateLimit 0 is refused 400 before the INSERT`\n- `floatcell` = `RED KS-1206 N61-1: a fractional rateLimit (1.5) is refused 400 before the INSERT`\n- `numstrcell` = `RED KS-1206 N61-1: a numeric-string rateLimit (100 as a string) is refused 400 before the INSERT`\n- `lowercell` = `RED KS-1206 N61-1: rateLimit 1, the lower bound, still mints, one INSERT`\n\n(The red cells are marked `RED` in their `it(` titles, not with an emoji: the test_only builder refuses a non-ASCII `+` line, KS-1133 / KS-1180. `lowercell` passes at the tip like the rest; it is RED because LOWEROFFBYONE reds it.)\n\n## Tampers\n\n### NULLPASSES — null counts as absent, so it reaches `|| 1000` and mints\nFile: `Blockchain/Dev/services/originate/src/routes/adminConfig.ts`\nLine: 905\nFrom:\n```\n    if (d.rateLimit !== undefined && !(Number.isInteger(d.rateLimit) && d.rateLimit >= 1 && d.rateLimit <= 10000)) {\n```\nTo:\n```\n    if (d.rateLimit != null && !(Number.isInteger(d.rateLimit) && d.rateLimit >= 1 && d.rateLimit <= 10000)) {\n```\nReds: `nullcell`\n\n### ZEROPASSES — the lower bound is 0, so 0 reaches `|| 1000` and mints\nFile: `Blockchain/Dev/services/originate/src/routes/adminConfig.ts`\nLine: 905\nFrom:\n```\n    if (d.rateLimit !== undefined && !(Number.isInteger(d.rateLimit) && d.rateLimit >= 1 && d.rateLimit <= 10000)) {\n```\nTo:\n```\n    if (d.rateLimit !== undefined && !(Number.isInteger(d.rateLimit) && d.rateLimit >= 0 && d.rateLimit <= 10000)) {\n```\nReds: `zerocell`\n\n### FLOATPASSES — any number passes the type test, so 1.5 reaches the INSERT\nFile: `Blockchain/Dev/services/originate/src/routes/adminConfig.ts`\nLine: 905\nFrom:\n```\n    if (d.rateLimit !== undefined && !(Number.isInteger(d.rateLimit) && d.rateLimit >= 1 && d.rateLimit <= 10000)) {\n```\nTo:\n```\n    if (d.rateLimit !== undefined && !(typeof d.rateLimit === 'number' && d.rateLimit >= 1 && d.rateLimit <= 10000)) {\n```\nReds: `floatcell`\n\n### LOWEROFFBYONE — the lower bound 1 is refused\nFile: `Blockchain/Dev/services/originate/src/routes/adminConfig.ts`\nLine: 905\nFrom:\n```\n    if (d.rateLimit !== undefined && !(Number.isInteger(d.rateLimit) && d.rateLimit >= 1 && d.rateLimit <= 10000)) {\n```\nTo:\n```\n    if (d.rateLimit !== undefined && !(Number.isInteger(d.rateLimit) && d.rateLimit > 1 && d.rateLimit <= 10000)) {\n```\nReds: `lowercell`\n\n### NUMSTRPASSES — the integer test coerces, so the string \"100\" reaches the INSERT\nFile: `Blockchain/Dev/services/originate/src/routes/adminConfig.ts`\nLine: 905\nFrom:\n```\n    if (d.rateLimit !== undefined && !(Number.isInteger(d.rateLimit) && d.rateLimit >= 1 && d.rateLimit <= 10000)) {\n```\nTo:\n```\n    if (d.rateLimit !== undefined && !(Number.isInteger(Number(d.rateLimit)) && d.rateLimit >= 1 && d.rateLimit <= 10000)) {\n```\nReds: `numstrcell`\n\n## Controls\n\n- `control: no rateLimit still mints with the default, one INSERT`\n- `control: rateLimit 10000, the upper bound, still mints, one INSERT`\n- `control: a missing name is still refused 400 with no INSERT`\n\n## THE CELLS — state it to yourself before you write a line\n\nAt the untouched tip every cell passes, the five new ones included: `null`, `0`, `1.5` and `'100'` each fail the guard and answer `[400, 'BAD_REQUEST', 0]`; `1` passes it and mints, `[201, 1]`. Each tamper opens exactly one of those doors. NULLPASSES lets `null` skip the guard, so it mints: `[201, null, 1]` against `[400, 'BAD_REQUEST', 0]`. ZEROPASSES lets `0` through: the same failure on `zerocell`. FLOATPASSES lets `1.5` through; `null` (typeof object) and the strings are still refused. LOWEROFFBYONE refuses `1`: `[400, 0]` against `[201, 1]`. NUMSTRPASSES lets `'100'` through (`Number('100')` is an integer and `'100' >= 1` coerces); `'abc'` still fails `Number.isInteger(NaN)`, `null` fails `>= 1`, `1.5` fails the integer test. Every failure is an assertion. The existing cells send absent, `10000`, `100` with no name, `-1`, `10001` and `'abc'`; none of the five tampers changes the answer for any of them, so the three controls and the three existing red cells stay green.\n\n## Premises (measured)\n\nMeasured 2026-09-19 by the round-11 brief subagent at `51dbedd39` (a `git clone --shared` scratch clone, the harness's own `prepare_clone.sh` farm, the service's own jest; every plant by the real `tasks/test_only/checker.sh`, which checks `From` byte for byte and restores by bytes).\n- **Premise: the guard line exists once.** `grep -nFx` of the `From` text over `adminConfig.ts` at the tip: exactly one hit, `:905` (control: the same grep is the one that names the line). The `from` text of the gate's :905 is unchanged at develop.\n- **Premise: no cell at the tip sends null, 0, a fraction, a numeric string or 1.** READ the file (107 lines): the bodies are `{name}`, `rateLimit: 10000`, `{rateLimit: 100}` (no name), `-1`, `10001`, `'abc'`. Instrument: the five tampers red 0 of 785 without the hunk (below).\n- **Premise: the insertion point is inside the `describe` block.** READ `:106` `  });` closes the `'abc'` cell, `:107` `});` closes the block opened at `:77`; the builder's old-side check matched both lines at the tip (rc 0).\n- Untouched tip, whole originate suite: **785/785 pass**, 0 red. Tip + this hunk: **790/790** (785 + 5), 0 red.\n- WITHOUT the hunk, each of the five tampers planted alone: **0 red of 785**, all five (the gate's N61-1 gap reproduced at develop). Control on those zeros: WITH the hunk the same five tampers red 1 each (next line), and the no-tamper runs are 0 red.\n- WITH the hunk, whole originate suite, each tamper alone: **exactly 1 red of 790**, the declared cell, a jest `expect(received).toEqual(expected)` failure: NULLPASSES `nullcell` got `[201, null, 1]`; ZEROPASSES `zerocell` `[201, null, 1]`; FLOATPASSES `floatcell` `[201, null, 1]`; LOWEROFFBYONE `lowercell` `[400, 0]`; NUMSTRPASSES `numstrcell` `[201, null, 1]`. 0 red in every other file; `adminConfig.ts` restored by bytes after each (sha256 equal).\n- **The real `tasks/test_only/checker.sh` on this brief's own diff** (the fence wrapped in the two header lines): **`RESULT: PASS (8/8)`** at `51dbedd39` (T2 touched set == the test file only; T3 strict apply; T5 11/11; T6 5/5 tampers red exactly their declared cell, each an assertion; T7 the 3 controls green under all 5; T8 restored by bytes, sha256 == tip blob).\n- **Product bytes unchanged (TEST-ONLY):** the diff's only file headers are `--- a/…/ks1206-admin-api-key-mint-bounds-rate-limit.test.ts` / `+++ b/…` (checker T2), and `git apply --numstat` names that one path (20 added, 0 removed).\n\n## Output\n\nExactly ONE ```diff block, nothing outside it: `--- a/Blockchain/Dev/services/originate/src/__tests__/ks1206-admin-api-key-mint-bounds-rate-limit.test.ts` / `+++ b/Blockchain/Dev/services/originate/src/__tests__/ks1206-admin-api-key-mint-bounds-rate-limit.test.ts`, then the hunk above exactly as shown (`@@ -106,2 +106,22 @@`).\n\n## Notes for the raise (not for the model)\n\n- Test-only. **Raise tier: TIER 2. Refs KS-1206** (N61-1 Minor, from the batch #1061-#1069 gate `2026-09-19-batch1061-1069-tier1-r1`, NOT-PINNED NULLPASSES / ZEROPASSES / FLOATPASSES / LOWEROFFBYONE / NUMSTRPASSES). NEVER Closes. #1061 is merged.\n- Five of the gate's fifteen NOT-PINNED rows in one brief: one file, 20 lines added.\n- Tamper scope: the builder and checker locate a tamper by `Line:` plus an exact `From:` check. At tip `51dbedd39` this `From` occurs once in `adminConfig.ts`, at :905.\n\n## Build line (not for the model)\n\n```\nbash tasks/test_only/build_test_only_input.sh KS-1206 night/inputs/test_only_1206N61-1.json night/briefs/KS-1206-N61-1.md ctx=65536\n```\n"
+ },
+ "repo": {
+  "source_checkout": "/Volumes/DevMASTER/!CODING/Secuura/Blockchain/2_Project_Files",
+  "tip": "51dbedd39ade43cc511278502b2e1e190de641c7",
+  "branch": "develop",
+  "test_runner": "jest (run one file with `npx jest <file>` from Blockchain/Dev/services/originate)"
+ },
+ "task_type": "test_only",
+ "tip": "51dbedd39ade43cc511278502b2e1e190de641c7",
+ "source_checkout": "/Volumes/DevMASTER/!CODING/Secuura/Blockchain/2_Project_Files",
+ "repo_subdir": "Blockchain/Dev",
+ "service_dir": "services/originate",
+ "shared_pkg_dir": "packages/shared",
+ "shared_pkg_name": "@secuura/shared",
+ "test_file": "Blockchain/Dev/services/originate/src/__tests__/ks1206-admin-api-key-mint-bounds-rate-limit.test.ts",
+ "test_file_rel_to_service": "src/__tests__/ks1206-admin-api-key-mint-bounds-rate-limit.test.ts",
+ "test_mode": "modify",
+ "diff_file_headers": [
+  "--- a/Blockchain/Dev/services/originate/src/__tests__/ks1206-admin-api-key-mint-bounds-rate-limit.test.ts",
+  "+++ b/Blockchain/Dev/services/originate/src/__tests__/ks1206-admin-api-key-mint-bounds-rate-limit.test.ts"
+ ],
+ "runner": "jest",
+ "expected_plus": [
+  "  it('RED KS-1206 N61-1: rateLimit null is refused 400 before the INSERT', async () => {",
+  "    const r = await mint({ name: 'ks1206', rateLimit: null });",
+  "    expect([r.status, r.code, r.inserts]).toEqual([400, 'BAD_REQUEST', 0]);",
+  "  });",
+  "  it('RED KS-1206 N61-1: rateLimit 0 is refused 400 before the INSERT', async () => {",
+  "    const r = await mint({ name: 'ks1206', rateLimit: 0 });",
+  "    expect([r.status, r.code, r.inserts]).toEqual([400, 'BAD_REQUEST', 0]);",
+  "  });",
+  "  it('RED KS-1206 N61-1: a fractional rateLimit (1.5) is refused 400 before the INSERT', async () => {",
+  "    const r = await mint({ name: 'ks1206', rateLimit: 1.5 });",
+  "    expect([r.status, r.code, r.inserts]).toEqual([400, 'BAD_REQUEST', 0]);",
+  "  });",
+  "  it('RED KS-1206 N61-1: a numeric-string rateLimit (100 as a string) is refused 400 before the INSERT', async () => {",
+  "    const r = await mint({ name: 'ks1206', rateLimit: '100' });",
+  "    expect([r.status, r.code, r.inserts]).toEqual([400, 'BAD_REQUEST', 0]);",
+  "  });",
+  "  it('RED KS-1206 N61-1: rateLimit 1, the lower bound, still mints, one INSERT', async () => {",
+  "    const r = await mint({ name: 'ks1206', rateLimit: 1 });",
+  "    expect([r.status, r.inserts]).toEqual([201, 1]);",
+  "  });"
+ ],
+ "must_remove": [],
+ "cells": {
+  "nullcell": "RED KS-1206 N61-1: rateLimit null is refused 400 before the INSERT",
+  "zerocell": "RED KS-1206 N61-1: rateLimit 0 is refused 400 before the INSERT",
+  "floatcell": "RED KS-1206 N61-1: a fractional rateLimit (1.5) is refused 400 before the INSERT",
+  "numstrcell": "RED KS-1206 N61-1: a numeric-string rateLimit (100 as a string) is refused 400 before the INSERT",
+  "lowercell": "RED KS-1206 N61-1: rateLimit 1, the lower bound, still mints, one INSERT"
+ },
+ "tampers": [
+  {
+   "id": "NULLPASSES",
+   "file": "Blockchain/Dev/services/originate/src/routes/adminConfig.ts",
+   "line": 905,
+   "from": "    if (d.rateLimit !== undefined && !(Number.isInteger(d.rateLimit) && d.rateLimit >= 1 && d.rateLimit <= 10000)) {",
+   "to": "    if (d.rateLimit != null && !(Number.isInteger(d.rateLimit) && d.rateLimit >= 1 && d.rateLimit <= 10000)) {",
+   "reds": [
+    "RED KS-1206 N61-1: rateLimit null is refused 400 before the INSERT"
+   ],
+   "reds_as_written": [
+    "nullcell"
+   ]
+  },
+  {
+   "id": "ZEROPASSES",
+   "file": "Blockchain/Dev/services/originate/src/routes/adminConfig.ts",
+   "line": 905,
+   "from": "    if (d.rateLimit !== undefined && !(Number.isInteger(d.rateLimit) && d.rateLimit >= 1 && d.rateLimit <= 10000)) {",
+   "to": "    if (d.rateLimit !== undefined && !(Number.isInteger(d.rateLimit) && d.rateLimit >= 0 && d.rateLimit <= 10000)) {",
+   "reds": [
+    "RED KS-1206 N61-1: rateLimit 0 is refused 400 before the INSERT"
+   ],
+   "reds_as_written": [
+    "zerocell"
+   ]
+  },
+  {
+   "id": "FLOATPASSES",
+   "file": "Blockchain/Dev/services/originate/src/routes/adminConfig.ts",
+   "line": 905,
+   "from": "    if (d.rateLimit !== undefined && !(Number.isInteger(d.rateLimit) && d.rateLimit >= 1 && d.rateLimit <= 10000)) {",
+   "to": "    if (d.rateLimit !== undefined && !(typeof d.rateLimit === 'number' && d.rateLimit >= 1 && d.rateLimit <= 10000)) {",
+   "reds": [
+    "RED KS-1206 N61-1: a fractional rateLimit (1.5) is refused 400 before the INSERT"
+   ],
+   "reds_as_written": [
+    "floatcell"
+   ]
+  },
+  {
+   "id": "LOWEROFFBYONE",
+   "file": "Blockchain/Dev/services/originate/src/routes/adminConfig.ts",
+   "line": 905,
+   "from": "    if (d.rateLimit !== undefined && !(Number.isInteger(d.rateLimit) && d.rateLimit >= 1 && d.rateLimit <= 10000)) {",
+   "to": "    if (d.rateLimit !== undefined && !(Number.isInteger(d.rateLimit) && d.rateLimit > 1 && d.rateLimit <= 10000)) {",
+   "reds": [
+    "RED KS-1206 N61-1: rateLimit 1, the lower bound, still mints, one INSERT"
+   ],
+   "reds_as_written": [
+    "lowercell"
+   ]
+  },
+  {
+   "id": "NUMSTRPASSES",
+   "file": "Blockchain/Dev/services/originate/src/routes/adminConfig.ts",
+   "line": 905,
+   "from": "    if (d.rateLimit !== undefined && !(Number.isInteger(d.rateLimit) && d.rateLimit >= 1 && d.rateLimit <= 10000)) {",
+   "to": "    if (d.rateLimit !== undefined && !(Number.isInteger(Number(d.rateLimit)) && d.rateLimit >= 1 && d.rateLimit <= 10000)) {",
+   "reds": [
+    "RED KS-1206 N61-1: a numeric-string rateLimit (100 as a string) is refused 400 before the INSERT"
+   ],
+   "reds_as_written": [
+    "numstrcell"
+   ]
+  }
+ ],
+ "controls": [
+  "control: no rateLimit still mints with the default, one INSERT",
+  "control: rateLimit 10000, the upper bound, still mints, one INSERT",
+  "control: a missing name is still refused 400 with no INSERT"
+ ],
+ "files": {
+  "Blockchain/Dev/services/originate/src/__tests__/ks1206-admin-api-key-mint-bounds-rate-limit.test.ts": "/**\n * KS-1206 - the originate admin API-key mint refuses a rateLimit outside 1..10000.\n *\n * POST /api/admin/api-keys stored d.rateLimit || 1000 with no bounds, so a key minted with rateLimit -1\n * answered 429 on every request once the per-key limiter fired (KS-1195). The security service bounds\n * the same field on its own create path to an integer from 1 to 10000. This mint now does the same and\n * answers 400 BAD_REQUEST before the INSERT. An absent rateLimit still gets the 1000 default.\n *\n * Harness: the ks764 suite's pattern. The real adminConfigRouter and the real requireRole,\n * authenticate stubbed, the database stubbed ($queryRaw is the INSERT ... RETURNING, counted).\n */\nprocess.env.NODE_ENV = 'development';\nprocess.env.DATABASE_URL = process.env.DATABASE_URL || 'postgresql://test:test@localhost:5432/test';\n\nconst mockQueryRaw = jest.fn();\n\njest.mock('../db', () => ({\n  prisma: { $queryRaw: mockQueryRaw, $executeRaw: jest.fn() },\n  refreshTenantConfigs: jest.fn(),\n  withTenant: (_t: unknown, fn: () => unknown) => fn(),\n  getTenantManager: () => null,\n}));\njest.mock('../middleware/auth', () => {\n  const actual = jest.requireActual('../middleware/auth');\n  return {\n    ...actual,\n    authenticate: () => (req: any, _res: unknown, next: () => void) => {\n      const principal = JSON.parse(String(req.headers['x-test-principal'] || '{}'));\n      req._secuuraUser = principal;\n      req.user = principal;\n      if (principal.tenantId) req.tenantId = principal.tenantId;\n      next();\n    },\n  };\n});\njest.mock('@secuura/shared', () =>\n  require('./helpers/sharedModuleMock').makeSharedMock({\n    ...(jest.requireActual('@secuura/shared') as Record<string, unknown>),\n    runWithPlatformScope: (fn: () => unknown) => fn(),\n    queryWithTenantGuc: jest.fn(),\n  }),\n);\n\nimport express from 'express';\nimport { adminConfigRouter } from '../routes/adminConfig';\n\nconst TENANT = 'a0000000-0000-4000-8000-000000001206';\nconst PLATFORM = { userId: 'u1206', role: 'super_admin', tenantId: TENANT };\n\nconst app = express();\napp.use(express.json());\napp.use('/api/admin', adminConfigRouter);\nlet base = '';\nlet server: ReturnType<typeof app.listen>;\nbeforeAll(async () => {\n  await new Promise<void>((r) => { server = app.listen(0, '127.0.0.1', () => r()); });\n  const a = server.address();\n  base = 'http://127.0.0.1:' + String(typeof a === 'object' && a ? a.port : 0);\n});\nafterAll(() => { server?.close(); });\nbeforeEach(() => {\n  mockQueryRaw.mockReset();\n  mockQueryRaw.mockResolvedValue([{ id: 'key_1206', key_prefix: 'sk_120600000', name: 'ks1206', scopes: ['read'], rate_limit: 1000, is_active: true, expires_at: null, created_at: '2026-09-19T00:00:00Z' }]);\n});\n\n/** POST /api/admin/api-keys as the platform admin; returns the status, the error code and how many INSERTs ran. */\nasync function mint(body: Record<string, unknown>) {\n  const res = await fetch(base + '/api/admin/api-keys', {\n    method: 'POST',\n    headers: { 'content-type': 'application/json', 'x-test-principal': JSON.stringify(PLATFORM) },\n    body: JSON.stringify(body),\n  });\n  const j: any = await res.json().catch(() => null);\n  return { status: res.status, code: j?.error?.code ?? null, inserts: mockQueryRaw.mock.calls.length };\n}\n\ndescribe('KS-1206 the admin API-key mint bounds rateLimit to an integer from 1 to 10000', () => {\n  it('control: no rateLimit still mints with the default, one INSERT', async () => {\n    const r = await mint({ name: 'ks1206' });\n    expect([r.status, r.inserts]).toEqual([201, 1]);\n  });\n\n  it('control: rateLimit 10000, the upper bound, still mints, one INSERT', async () => {\n    const r = await mint({ name: 'ks1206', rateLimit: 10000 });\n    expect([r.status, r.inserts]).toEqual([201, 1]);\n  });\n\n  it('control: a missing name is still refused 400 with no INSERT', async () => {\n    const r = await mint({ rateLimit: 100 });\n    expect([r.status, r.code, r.inserts]).toEqual([400, 'BAD_REQUEST', 0]);\n  });\n\n  it('🔴 KS-1206: rateLimit -1 is refused 400 before the INSERT', async () => {\n    const r = await mint({ name: 'ks1206', rateLimit: -1 });\n    expect([r.status, r.code, r.inserts]).toEqual([400, 'BAD_REQUEST', 0]);\n  });\n\n  it('🔴 KS-1206: rateLimit 10001, above the bound, is refused 400 before the INSERT', async () => {\n    const r = await mint({ name: 'ks1206', rateLimit: 10001 });\n    expect([r.status, r.code, r.inserts]).toEqual([400, 'BAD_REQUEST', 0]);\n  });\n\n  it('🔴 KS-1206: a string rateLimit is refused 400 before the INSERT', async () => {\n    const r = await mint({ name: 'ks1206', rateLimit: 'abc' });\n    expect([r.status, r.code, r.inserts]).toEqual([400, 'BAD_REQUEST', 0]);\n  });\n});\n"
+ },
+ "_night_num_ctx": 65536
+}
