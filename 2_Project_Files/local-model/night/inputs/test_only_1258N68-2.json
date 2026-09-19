@@ -1,0 +1,128 @@
+{
+ "ticket": {
+  "identifier": "KS-1258",
+  "title": "KS-1258 N68-2 PIN THE DEGRADED OPTIONAL ADVICE AS AN ALLOW-LIST — Wednesday's task for Ornith, TEST_ONLY, **ONE existing test file, one cell added, no product file** (written 2026-09-19, round 12)",
+  "description": "# KS-1258 N68-2 PIN THE DEGRADED OPTIONAL ADVICE AS AN ALLOW-LIST — Wednesday's task for Ornith, TEST_ONLY, **ONE existing test file, one cell added, no product file** (written 2026-09-19, round 12)\n\nFile: `Blockchain/Dev/services/api-gateway/src/__tests__/ks1258-degraded-optional-service-advice.test.ts`\nTip: `51dbedd39ade43cc511278502b2e1e190de641c7`\n\nWritten from develop `51dbedd39ade43cc511278502b2e1e190de641c7` (read with `git ls-remote origin refs/heads/develop`; #1068 / KS-1258 N53-1 is merged there). The test file at that tip is 91 lines; its full content is in `files[...]` of your input. The product the cell pins is `Blockchain/Dev/services/api-gateway/src/routes/system-status.ts`. This service runs **VITEST**.\n\n## THE MODE — read this twice\n\n**TEST_ONLY.** Your diff touches EXACTLY ONE file: the test file above, MODIFIED IN PLACE (`--- a/<path>` / `+++ b/<path>`, the path exactly as written above). You never touch `system-status.ts` or any other product file: the behaviour is already right at the tip, and this cell PINS it.\n\n## What the cell pins (one paragraph)\n\nSince #1044 (KS-1258), a DEGRADED optional service (billing answers 200 `{status: 'degraded'}`) gets the read-first advice block in `system-status.ts` (after the comment `// KS-1258: a DEGRADED optional service is already up…`, `:581`): exactly two commands, a `# Read what the service reports as degraded` comment (`:592`) and a `curl -s` of the service's health URL (`:593`). The file's N44-1 cell filters those commands through a DENY pattern of start shapes. The #1061-#1069 gate (report `2026-09-19-batch1061-1069-tier1-r1`, finding **N68-2**, Polish) planted six more start shapes at `:592` (`docker run`, `bun run dev`, `make up`, `node dist/index.js`, `pnpm dev`, `tsx watch`) and **every api-gateway cell stayed GREEN**; its N68-3 showed that widening the deny pattern reds on harmless free text instead. So this cell is the ALLOW-LIST form the gate proposed: the degraded billing item's commands must EQUAL the two lines the code emits today, so ANY replacement of the read-first comment reds it, whatever shape the start command takes. Every existing cell is unchanged.\n\n## The exact change — ONE hunk in the test file\n\nThe new cell goes at the end of the `describe(...)` block: after the N44-1 cell's closing line `  });` (`:90`, leading context) and before the block's closing line `});` (`:91`, trailing context). Copy every line byte for byte. Every `+` line is ASCII only. There is no blank line anywhere in the fence. Keep the header exactly as shown. **Your diff MUST begin with the two file-header lines, above the `@@` line: `--- a/Blockchain/Dev/services/api-gateway/src/__tests__/ks1258-degraded-optional-service-advice.test.ts` then `+++ b/Blockchain/Dev/services/api-gateway/src/__tests__/ks1258-degraded-optional-service-advice.test.ts`.**\n\n```\n@@ -90,2 +90,8 @@\n   });\n+  it('RED KS-1258 N68-2: the degraded optional advice is exactly the read-first comment and one curl', async () => {\n+    answers['billing.ks1258'] = 'degraded';\n+    answers['staking.ks1258'] = 'up';\n+    const b = await adviceFor('billing');\n+    expect([b.length, b[0]?.commands]).toEqual([1, ['# Read what the service reports as degraded', 'curl -s http://billing.ks1258:1/health']]);\n+  });\n });\n```\n\n`answers` (`:23`), the per-host `fetch` stub (`:26-31`) and `adviceFor` (`:56-59`) are the file's own. `billing` is an OPTIONAL service (`required: false`) whose URL is `http://billing.ks1258:1` (`:19`) and whose `healthPath` is `/health` (`system-status.ts:146`).\n\n## Cells\n\n- `allowlist` = `RED KS-1258 N68-2: the degraded optional advice is exactly the read-first comment and one curl`\n\n(The red cell is marked `RED` in its `it(` title, not with an emoji: the test_only builder refuses a non-ASCII `+` line, KS-1133 / KS-1180.)\n\n## Tampers\n\nEach tamper replaces line 592 of `system-status.ts`: the FIRST command of the degraded-OPTIONAL block, the line right after `commands: [` below the comment `// KS-1258: a DEGRADED optional service is already up…` (`:581`). The same `From` text also sits at `:576`, in the degraded-REQUIRED (KS-1248) block, and is NOT touched. Under each tamper EXACTLY the named cell must fail, by assertion.\n\n### DOCKERRUN — the degraded optional advice regresses to `docker run`\nFile: `Blockchain/Dev/services/api-gateway/src/routes/system-status.ts`\nLine: 592\nFrom:\n```\n          '# Read what the service reports as degraded',\n```\nTo:\n```\n          'docker run -d secuura/' + service.name,\n```\nReds: `allowlist`\n\n### BUNRUN — the degraded optional advice regresses to `bun run dev`\nFile: `Blockchain/Dev/services/api-gateway/src/routes/system-status.ts`\nLine: 592\nFrom:\n```\n          '# Read what the service reports as degraded',\n```\nTo:\n```\n          'cd services/' + service.name + ' && bun run dev',\n```\nReds: `allowlist`\n\n### MAKEUP — the degraded optional advice regresses to `make up`\nFile: `Blockchain/Dev/services/api-gateway/src/routes/system-status.ts`\nLine: 592\nFrom:\n```\n          '# Read what the service reports as degraded',\n```\nTo:\n```\n          'make up SERVICE=' + service.name,\n```\nReds: `allowlist`\n\n### NODEDIST — the degraded optional advice regresses to `node dist/index.js`\nFile: `Blockchain/Dev/services/api-gateway/src/routes/system-status.ts`\nLine: 592\nFrom:\n```\n          '# Read what the service reports as degraded',\n```\nTo:\n```\n          'cd services/' + service.name + ' && node dist/index.js',\n```\nReds: `allowlist`\n\n### PNPMDEV — the degraded optional advice regresses to `pnpm dev`\nFile: `Blockchain/Dev/services/api-gateway/src/routes/system-status.ts`\nLine: 592\nFrom:\n```\n          '# Read what the service reports as degraded',\n```\nTo:\n```\n          'cd services/' + service.name + ' && pnpm dev',\n```\nReds: `allowlist`\n\n### TSXWATCH — the degraded optional advice regresses to `tsx watch`\nFile: `Blockchain/Dev/services/api-gateway/src/routes/system-status.ts`\nLine: 592\nFrom:\n```\n          '# Read what the service reports as degraded',\n```\nTo:\n```\n          'npx tsx watch services/' + service.name + '/src/index.ts',\n```\nReds: `allowlist`\n\n## Controls\n\n- `control: with every service up there is no advice for billing or staking`\n- `control: a DOWN optional service (staking answers 503) is still a warning and still told to start it`\n\n## THE CELLS — state it to yourself before you write a line\n\nAt the untouched tip every cell passes, the new one included: the degraded billing item's commands are exactly `# Read what the service reports as degraded` and `curl -s http://billing.ks1258:1/health`, so the cell reads `[1, [those two]]`. Under each of the six tampers the first command becomes a start command (`docker run -d secuura/billing`, `cd services/billing && bun run dev`, `make up SERVICE=billing`, `cd services/billing && node dist/index.js`, `cd services/billing && pnpm dev`, `npx tsx watch services/billing/src/index.ts`), the array no longer equals the allow-list, and the cell fails by assertion. The N44-1 cell and the file's other red-marked cell stay green under all six (their patterns do not match these shapes: that is the gap). The two controls pass: all-up gives no advice, and the DOWN optional branch is a different block (`:598-610`).\n\n## Premises (measured)\n\nMeasured 2026-09-19 by the round-12 brief subagent at `51dbedd39` (origin develop by `ls-remote`, object local; a `git clone --shared` scratch clone, the harness's own `prepare_clone.sh` farm, the service's own `npx vitest run` over the WHOLE api-gateway suite, JSON report per run; every plant by line after an exact `From` check, restored by bytes, sha256 equal, porcelain clean after).\n- **Premise: the `From` text sits twice, and :592 is the OPTIONAL block.** The `From` line is whole-line x2 in `system-status.ts` at the tip, `:576` and `:592` (the N68-1 subagent's `grep -nFx`, re-read here: `:581` is `// KS-1258: a DEGRADED optional service…`, filter `!s.required && s.status === 'degraded'` at `:584`). Instrument: the scope control below.\n- **Premise: nothing pins the six shapes at :592.** READ: the N44-1 deny pattern has no `docker run`, `bun run`, `make up`, `node dist`, `pnpm dev` or `tsx watch`; the other red-marked cell matches `npm run dev|restart` only. Instrument: all six planted at :592 WITHOUT the hunk red **0 of 624** (below).\n- **Premise: the code emits exactly the two allow-listed commands at the tip.** Instrument: the new cell is GREEN at the tip (625/625), so `b[0].commands` deep-equals `['# Read what the service reports as degraded', 'curl -s http://billing.ks1258:1/health']`.\n- **Premise: TEST FILES ONLY.** The diff's only file headers are the test file's (`diff_file_headers` in the input; checker T2); `git apply --numstat` on the brief's own diff names ONE path, `…/__tests__/ks1258-degraded-optional-service-advice.test.ts`, 6 added, 0 removed.\n\n## Measured results\n\n- Untouched tip, whole api-gateway suite: **624/624**, 0 red. Tip + this hunk: **625/625**, 0 red.\n- WITHOUT the hunk, each of DOCKERRUN, BUNRUN, MAKEUP, NODEDIST, PNPMDEV, TSXWATCH planted at :592: **0 red of 624** (the gate's N68-2 gap reproduced at develop).\n- WITH the hunk, each of the six at :592: **exactly 1 red of 625**, `allowlist`, `AssertionError: expected [ 1, [ …(2) ] ] to deeply equal [ 1, [ …(2) ] ]`; no file-level failure; controls, N44-1 and the other red-marked cell green.\n- Scope control, WITH the hunk: DOCKERRUN and BUNRUN planted at **:576** instead each red **0 of 625**: `allowlist` stays GREEN, so the line pin separates the two blocks (and the :576 gap is N68-1's, held separately).\n- **The real `tasks/test_only/checker.sh` on this brief's own diff**: **`RESULT: PASS (8/8)`** at `51dbedd39` (T1 one diff block; T2 touched set = the test file only; T3 strict `git apply --check`, no recount; T4 6/6 `+` lines byte-exact, 0 `-`; T5 5/5 green at the tip; T6 6/6 tampers red exactly `allowlist`, assertions; T7 both controls green under all 6; T8 all 6 restored by bytes, sha256 `d01feb648979` = tip blob).\n\n## Output\n\nExactly ONE ```diff block, nothing outside it: `--- a/Blockchain/Dev/services/api-gateway/src/__tests__/ks1258-degraded-optional-service-advice.test.ts` / `+++ b/Blockchain/Dev/services/api-gateway/src/__tests__/ks1258-degraded-optional-service-advice.test.ts`, then the hunk above exactly as shown (`@@ -90,2 +90,8 @@`).\n\n## Notes for the raise (not for the model)\n\n- Test-only. **Raise tier: TIER 2. Refs KS-1258** (N68-2 Polish, from the batch #1061-#1069 gate `2026-09-19-batch1061-1069-tier1-r1`, NOT-PINNED DOCKERRUN / BUNRUN / MAKEUP / NODEDIST / PNPMDEV / TSXWATCH at :592). NEVER Closes.\n- Why the allow-list, not a wider regex: the gate's N68-3 planted a benign comment (`'# Read what the node services report as degraded'`) and the widened N44-1 pattern redded on it. An allow-list keys on the whole command list, so it reds on every start shape, known or not. Its cost, stated: ANY wording change to the two degraded-optional commands (the comment text or the curl form) reds this cell too, by design; whoever changes that advice updates the cell in the same PR. The N44-1 deny cell is left as it is.\n- Collision check at write time: this file is NOT among Seat B 4th's seven open PR files (VOCABULARY.md, vc-issuer status.ts + its two ks1269 suites, the ks1215 test, the new ks1238 test, proxy.ts, auth.ts, the ks1206 / ks864d / ks1230 / ks739 test files) and is not the held N68-1 file (`ks1248-n-1-system-status-troubleshooting-marks.test.ts`). The N68-1 READY tampers :576; this one tampers :592, and the two diffs touch different test files.\n- Tamper scope: the test_only builder and checker locate a tamper by `Line:` plus an exact `From:` check, with NO scope-anchor field. The line is pinned at 592, measured AT THE TIP `51dbedd39`. If `system-status.ts` moves before this runs, rebuild and re-measure: the same text at :576 is exactly what could take its place.\n\n## Build line (not for the model)\n\n```\nbash tasks/test_only/build_test_only_input.sh KS-1258 night/inputs/test_only_1258N68-2.json night/briefs/KS-1258-N68-2.md ctx=65536\n```\n"
+ },
+ "repo": {
+  "source_checkout": "/Volumes/DevMASTER/!CODING/Secuura/Blockchain/2_Project_Files",
+  "tip": "51dbedd39ade43cc511278502b2e1e190de641c7",
+  "branch": "develop",
+  "test_runner": "vitest (run one file with `npx vitest run <file>` from Blockchain/Dev/services/api-gateway)"
+ },
+ "task_type": "test_only",
+ "tip": "51dbedd39ade43cc511278502b2e1e190de641c7",
+ "source_checkout": "/Volumes/DevMASTER/!CODING/Secuura/Blockchain/2_Project_Files",
+ "repo_subdir": "Blockchain/Dev",
+ "service_dir": "services/api-gateway",
+ "shared_pkg_dir": "packages/shared",
+ "shared_pkg_name": "@secuura/shared",
+ "test_file": "Blockchain/Dev/services/api-gateway/src/__tests__/ks1258-degraded-optional-service-advice.test.ts",
+ "test_file_rel_to_service": "src/__tests__/ks1258-degraded-optional-service-advice.test.ts",
+ "test_mode": "modify",
+ "diff_file_headers": [
+  "--- a/Blockchain/Dev/services/api-gateway/src/__tests__/ks1258-degraded-optional-service-advice.test.ts",
+  "+++ b/Blockchain/Dev/services/api-gateway/src/__tests__/ks1258-degraded-optional-service-advice.test.ts"
+ ],
+ "runner": "vitest",
+ "expected_plus": [
+  "  it('RED KS-1258 N68-2: the degraded optional advice is exactly the read-first comment and one curl', async () => {",
+  "    answers['billing.ks1258'] = 'degraded';",
+  "    answers['staking.ks1258'] = 'up';",
+  "    const b = await adviceFor('billing');",
+  "    expect([b.length, b[0]?.commands]).toEqual([1, ['# Read what the service reports as degraded', 'curl -s http://billing.ks1258:1/health']]);",
+  "  });"
+ ],
+ "must_remove": [],
+ "cells": {
+  "allowlist": "RED KS-1258 N68-2: the degraded optional advice is exactly the read-first comment and one curl"
+ },
+ "tampers": [
+  {
+   "id": "DOCKERRUN",
+   "file": "Blockchain/Dev/services/api-gateway/src/routes/system-status.ts",
+   "line": 592,
+   "from": "          '# Read what the service reports as degraded',",
+   "to": "          'docker run -d secuura/' + service.name,",
+   "reds": [
+    "RED KS-1258 N68-2: the degraded optional advice is exactly the read-first comment and one curl"
+   ],
+   "reds_as_written": [
+    "allowlist"
+   ]
+  },
+  {
+   "id": "BUNRUN",
+   "file": "Blockchain/Dev/services/api-gateway/src/routes/system-status.ts",
+   "line": 592,
+   "from": "          '# Read what the service reports as degraded',",
+   "to": "          'cd services/' + service.name + ' && bun run dev',",
+   "reds": [
+    "RED KS-1258 N68-2: the degraded optional advice is exactly the read-first comment and one curl"
+   ],
+   "reds_as_written": [
+    "allowlist"
+   ]
+  },
+  {
+   "id": "MAKEUP",
+   "file": "Blockchain/Dev/services/api-gateway/src/routes/system-status.ts",
+   "line": 592,
+   "from": "          '# Read what the service reports as degraded',",
+   "to": "          'make up SERVICE=' + service.name,",
+   "reds": [
+    "RED KS-1258 N68-2: the degraded optional advice is exactly the read-first comment and one curl"
+   ],
+   "reds_as_written": [
+    "allowlist"
+   ]
+  },
+  {
+   "id": "NODEDIST",
+   "file": "Blockchain/Dev/services/api-gateway/src/routes/system-status.ts",
+   "line": 592,
+   "from": "          '# Read what the service reports as degraded',",
+   "to": "          'cd services/' + service.name + ' && node dist/index.js',",
+   "reds": [
+    "RED KS-1258 N68-2: the degraded optional advice is exactly the read-first comment and one curl"
+   ],
+   "reds_as_written": [
+    "allowlist"
+   ]
+  },
+  {
+   "id": "PNPMDEV",
+   "file": "Blockchain/Dev/services/api-gateway/src/routes/system-status.ts",
+   "line": 592,
+   "from": "          '# Read what the service reports as degraded',",
+   "to": "          'cd services/' + service.name + ' && pnpm dev',",
+   "reds": [
+    "RED KS-1258 N68-2: the degraded optional advice is exactly the read-first comment and one curl"
+   ],
+   "reds_as_written": [
+    "allowlist"
+   ]
+  },
+  {
+   "id": "TSXWATCH",
+   "file": "Blockchain/Dev/services/api-gateway/src/routes/system-status.ts",
+   "line": 592,
+   "from": "          '# Read what the service reports as degraded',",
+   "to": "          'npx tsx watch services/' + service.name + '/src/index.ts',",
+   "reds": [
+    "RED KS-1258 N68-2: the degraded optional advice is exactly the read-first comment and one curl"
+   ],
+   "reds_as_written": [
+    "allowlist"
+   ]
+  }
+ ],
+ "controls": [
+  "control: with every service up there is no advice for billing or staking",
+  "control: a DOWN optional service (staking answers 503) is still a warning and still told to start it"
+ ],
+ "files": {
+  "Blockchain/Dev/services/api-gateway/src/__tests__/ks1258-degraded-optional-service-advice.test.ts": "/**\n * =============================================================================\n * KS-1258 - /system/status never tells an operator to START a DEGRADED optional\n * service that is already up\n * =============================================================================\n * KS-1248 gave a degraded REQUIRED service its own advice. A degraded OPTIONAL\n * service still fell into the not-healthy optional branch of\n * generateTroubleshooting, whose advice is \"Start the service locally\" and\n * \"npm run dev\". The service is up with a sick dependency; starting it is wrong.\n * Harness: the ks1248 pattern - the system-status router mounted alone, fetch\n * stubbed per host, the redis health read mocked.\n * =============================================================================\n */\nimport { describe, it, expect, vi, beforeAll, afterAll } from 'vitest';\nimport http from 'node:http';\nimport express from 'express';\n\nconst savedEnv = { ...process.env };\nprocess.env.BILLING_SERVICE_URL = 'http://billing.ks1258:1';\nprocess.env.STAKING_SERVICE_URL = 'http://staking.ks1258:1';\n\n/** What each probed host answers in the current cell. A host not listed answers healthy. */\nconst answers: Record<string, 'up' | 'degraded' | 'down'> = {};\n\nvi.mock('../services/redis', () => ({ getRedisHealth: vi.fn(async () => ({ status: 'healthy' })) }));\nvi.stubGlobal('fetch', vi.fn(async (url: string) => {\n  const kind = answers[new URL(String(url)).hostname] ?? 'up';\n  if (kind === 'down') return new Response(JSON.stringify({ status: 'unhealthy' }), { status: 503 });\n  if (kind === 'degraded') return new Response(JSON.stringify({ status: 'degraded', degradedReasons: ['ks1258: dependency unreachable'] }), { status: 200 });\n  return new Response(JSON.stringify({ status: 'healthy' }), { status: 200 });\n}));\n\nlet server: ReturnType<ReturnType<typeof express>['listen']>; let port = 0;\nbeforeAll(async () => {\n  const router = (await import('../routes/system-status')).default;\n  const app = express(); app.use('/system', router);\n  await new Promise<void>((r) => { server = app.listen(0, '127.0.0.1', () => { port = (server.address() as any).port; r(); }); });\n}, 10_000);\nafterAll(async () => {\n  await new Promise<void>((r) => server.close(() => r()));\n  for (const k of Object.keys(process.env)) if (!(k in savedEnv)) delete process.env[k];\n  Object.assign(process.env, savedEnv);\n  vi.unstubAllGlobals();\n});\n\nfunction getJson(path: string): Promise<any> {\n  return new Promise((resolve, reject) => {\n    http.get({ hostname: '127.0.0.1', port, path }, (res) => {\n      let data = ''; res.on('data', (c) => (data += c));\n      res.on('end', () => { try { resolve(JSON.parse(data)); } catch (e) { reject(e); } });\n    }).on('error', reject);\n  });\n}\n\n/** The troubleshooting items GET /system/status emits for one component. */\nasync function adviceFor(component: string): Promise<any[]> {\n  const body = await getJson('/system/status');\n  return (body.troubleshooting ?? []).filter((i: any) => i.component === component);\n}\nconst startsOrRestarts = (item: any): boolean => (item?.commands ?? []).some((c: string) => /npm run dev|restart/i.test(c));\n\ndescribe('KS-1258: /system/status troubleshooting for a degraded optional service', () => {\n  it('control: with every service up there is no advice for billing or staking', async () => {\n    answers['billing.ks1258'] = 'up';\n    answers['staking.ks1258'] = 'up';\n    const b = await adviceFor('billing');\n    const s = await adviceFor('staking');\n    expect([b.length, s.length]).toEqual([0, 0]);\n  });\n\n  it('control: a DOWN optional service (staking answers 503) is still a warning and still told to start it', async () => {\n    answers['billing.ks1258'] = 'up';\n    answers['staking.ks1258'] = 'down';\n    const s = await adviceFor('staking');\n    expect([s.length, s[0]?.severity, startsOrRestarts(s[0])]).toEqual([1, 'warning', true]);\n  });\n\n  it('\\ud83d\\udd34 a DEGRADED optional service (billing answers 200 degraded) gets one warning and no start or restart command', async () => {\n    answers['billing.ks1258'] = 'degraded';\n    answers['staking.ks1258'] = 'up';\n    const b = await adviceFor('billing');\n    expect([b.length, b[0]?.severity, startsOrRestarts(b[0])]).toEqual([1, 'warning', false]);\n  });\n  it('KS-1258 N44-1: the degraded optional advice carries no start command in ANY common shape', async () => {\n    answers['billing.ks1258'] = 'degraded';\n    answers['staking.ks1258'] = 'up';\n    const b = await adviceFor('billing');\n    const starts = (b[0]?.commands ?? []).filter((c: string) => /npm start|npm --prefix|npm run|yarn start|yarn dev|yarn run|node services|docker compose up|docker-compose up|systemctl start|pm2 start|restart/i.test(c));\n    expect([b.length, starts]).toEqual([1, []]);\n  });\n});\n"
+ },
+ "_night_num_ctx": 65536
+}
