@@ -28,6 +28,8 @@ supersede: replace wholesale at the next pickup; do not append
 ### Reallocated to a Claude seat (Kam's 09-16 counter; do NOT queue at the local model)
 KS-1168, KS-1163, KS-998, KS-866 (from 09-16/17) · the KS-871 remnant (`services/api-gateway/src/middleware/audit.ts:333` logs `path: req.path` on a failed audit write; KS-871 In Progress) · KS-1279 / N62-3 (preflight leg-1 accounting; a product fix).
 
+**Commission rule (ledger 2026-09-20, w=3):** a commission that forbids a port or service names the READ-ONLY control instrument (`lsof -nP -iTCP:<port> -sTCP:LISTEN`) and forbids `nc`/`curl`/any client against it BY NAME.
+
 ### HOLDS
 KS-1250, KS-1175 Kam's · nothing to demo · no contact with Peter/Stuart beyond rule-7 facts · auth last · never delete · Tuesday owns Datasec.
 
@@ -48,6 +50,7 @@ KS-1250, KS-1175 Kam's · nothing to demo · no contact with Peter/Stuart beyond
 14. KS-1282: with #1099 merged, all 11 previously-unpinned requireSuperAdmin guards carry a cell (plus :222/:239 from #1096/#1091). Is the ticket complete? His call.
 15. **The allowance pace** (card `wed-allowance-pace-before-week-away`): ~1.3 points/hour over the weekend; renewal Fri 25 Sep 8am; what he wants for his week away.
 16. KS-1238: ruled COMPLETE by the #1097-#1099 gate (Done + archived after #1099 merges). For KS-1282 the gate offered OPTIONAL facts text (13 of 13 guards pinned; a role widening reds 0 of 671, row N99-1), in its report's BY-NAME 6. Wednesday did NOT post it: that ticket is his call.
+18. A Wednesday brief-writing subagent (round 19) made three brief contacts with the live local Postgres on :5432 (two port probes and one stray connection, closed by the server) while proving its isolation; no test reached it. Whose database that is on the Studio is unmeasured. Disclosed, and the commission rule is fixed.
 17. Gate records R-2/R-3 (pre-existing): `run-shell-suites.sh` reaches registry.npmjs.org (174 HTTPS per pass) and tries localhost:6882/:6982/:7082 despite the env overrides; clone-to-tenant's tenant-provisioning lookup carries no Authorization; six platform routes (tenant-key ×3, templates ×3) are missing from the published OpenAPI spec. No tickets filed.
 
 ### OWED (tooling, mine, none urgent)
