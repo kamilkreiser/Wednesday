@@ -18,8 +18,6 @@
 #   T6 for EACH tamper: planted byte for byte (the tip line must be the brief's From), the file run, and the set of red
 #      cells EQUALS the declared set — not a superset, not a subset; every red is an ASSERTION failure (no load/type
 #      error, the same cell count as T5); a tamper that reds NOTHING fails (the cells do not reach the code)
-#      A BLOCK tamper (input `block: true`, 2026-09-19) is planted only when its multi-line From occurs EXACTLY ONCE as
-#      whole lines and starts at the input's `line`; the matched lines are replaced by To; restored by bytes as below
 #   T7 every control passes under every tamper
 #   T8 after each tamper the file is restored BY BYTES and its sha256 equals the tip blob's (and `git diff --quiet`);
 #      an unrestored tamper is a HARD FAIL — the run stops there
@@ -396,16 +394,6 @@ d = json.load(open(sys.argv[1], encoding="utf-8")); t = d["tampers"][int(sys.arg
 raw = open(p, "rb").read()
 if hashlib.sha256(raw).hexdigest() != sys.argv[4]: print(f"REFUSED: {t['file']} is not the tip blob before planting"); sys.exit(2)
 lines = raw.split(b"\n"); i = t["line"] - 1
-if t.get("block"):
-    # BLOCK TAMPER (2026-09-19): the From block must occur EXACTLY ONCE as whole lines, starting at the input's line
-    bl = t["from"].encode("utf-8").split(b"\n"); n = len(bl)
-    hits = [j for j in range(len(lines) - n + 1) if lines[j:j + n] == bl]
-    if hits != [i]:
-        print(f"REFUSED: {t['file']}: the {n}-line From block starts at line(s) {[j + 1 for j in hits][:8] or 'none'}, the input says exactly once at {t['line']}"); sys.exit(2)
-    lines[i:i + n] = t["to"].encode("utf-8").split(b"\n"); new = b"\n".join(lines)
-    open(p, "wb").write(new)
-    print(f"planted {t['id']} (block {n} -> {t['to'].count(chr(10)) + 1} lines) at {t['file']}:{t['line']}-{t['line'] + n - 1} ({len(raw)} -> {len(new)} bytes; sha256 {hashlib.sha256(new).hexdigest()[:12]})")
-    sys.exit(0)
 if not (0 <= i < len(lines)) or lines[i] != t["from"].encode("utf-8"):
     print(f"REFUSED: {t['file']}:{t['line']} is {lines[i][:120] if 0 <= i < len(lines) else b'(out of range)'!r}, the brief's From is {t['from'][:120]!r}"); sys.exit(2)
 lines[i] = t["to"].encode("utf-8"); new = b"\n".join(lines)

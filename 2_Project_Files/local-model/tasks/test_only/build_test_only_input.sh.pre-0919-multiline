@@ -41,14 +41,6 @@
 # ONLY when the named runner is in the service's own package.json (dependencies/devDependencies, or a token of a scripts
 # command); otherwise REFUSED. Never for a *.test.sh suite (runner bash is fixed). With no pin and no Runner: line the
 # build is byte-for-byte what it was, the ambiguous-service refusal included. A pinned build carries `runner_pin`.
-# BLOCK TAMPER (2026-09-19, the #1070-#1076 gate's REVOKEGUARDAFTER404 / REVOKEGUARDBELOWREASON: 4-line guard MOVES that a
-# one-line From/To cannot express): a tamper whose From fence holds TWO OR MORE lines is a block tamper. The From block
-# must occur EXACTLY ONCE, as whole consecutive lines, in the product file at the tip (0 matches or 2+ matches is REFUSED,
-# naming the count and the lines); its To fence (one or more lines, != From) replaces it. `Line:` is optional for a block
-# and, when given, must be the line the block starts at (a cross-check, not the locator). A block tamper's JSON carries
-# `block: true`, `line` = the matched start, `from_lines`, `to_lines`; the checker plants it after the same exact-and-
-# unique check and restores by bytes (T8) as for a line. A single-line From is handled EXACTLY as before (Line: required,
-# To one line) — its JSON is byte-for-byte unchanged.
 # rc 0 ok · 2 refused · 1 usage/error. bash 3.2. stderr never discarded.
 set -uo pipefail
 ID="${1:-}"; OUT="${2:-}"; BRIEF="${3:-}"; shift 3 2>/dev/null
@@ -204,24 +196,6 @@ for p in parts:
     mf = re.search(r"^File:\s*`([^`]+)`", p, re.M); ml = re.search(r"^Line:[ \t]*`?(\d+)`?", p, re.M)
     mfrom = re.search(r"^From:\s*\n```[^\n]*\n(.*?)\n```", p, re.M | re.S); mto = re.search(r"^To:\s*\n```[^\n]*\n(.*?)\n```", p, re.M | re.S)
     mr = re.search(r"^Reds:[ \t]*(.*)$", p, re.M)
-    if mf and mfrom and mto and mr and "\n" in mfrom.group(1):
-        # ---- BLOCK TAMPER (2026-09-19): From spans 2+ lines; located by an exact, unique whole-line match at the tip
-        f = mf.group(1).strip(); frm = mfrom.group(1); to = mto.group(1)
-        if f == tf: refuse(f"tamper {tid}: its file is the test file — a tamper mutates PRODUCT code the cells pin")
-        if frm == to: refuse(f"tamper {tid}: To equals From — nothing is tampered")
-        ftext = show(f)
-        if ftext is None: refuse(f"tamper {tid}: {f} is not at {tip[:9]}")
-        fl = ftext.split("\n"); bl = frm.split("\n"); n = len(bl)
-        hits = [i + 1 for i in range(len(fl) - n + 1) if fl[i:i + n] == bl]
-        if not hits: refuse(f"tamper {tid}: the {n}-line From block does not occur in {f} at {tip[:9]} (whole lines, byte for byte); its first line {bl[0]!r} occurs at line(s) {[i + 1 for i, x in enumerate(fl) if x == bl[0]][:8] or 'none'}")
-        if len(hits) > 1: refuse(f"tamper {tid}: the {n}-line From block occurs {len(hits)} times in {f} at {tip[:9]} (starting at lines {hits[:8]}) — a block tamper must match EXACTLY ONCE; widen the block until it is unique")
-        if ml and int(ml.group(1)) != hits[0]: refuse(f"tamper {tid}: Line: {ml.group(1)} but the From block starts at {f}:{hits[0]} at {tip[:9]}")
-        reds = [res(x) for x in re.findall(r"`([^`]+)`", mr.group(1))]
-        if not reds: refuse(f"tamper {tid}: Reds is empty — a tamper that should red nothing grades nothing")
-        tampers.append({"id": tid, "file": f, "line": hits[0], "from": frm, "to": to, "reds": reds,
-                        "reds_as_written": re.findall(r"`([^`]+)`", mr.group(1)),
-                        "block": True, "from_lines": n, "to_lines": len(to.split("\n"))})
-        continue
     if not (mf and ml and mfrom and mto and mr): refuse(f"tamper {tid}: needs File:, Line:, From: (fenced), To: (fenced) and Reds: — missing {[n for n, x in (('File', mf), ('Line', ml), ('From', mfrom), ('To', mto), ('Reds', mr)) if not x]}")
     f = mf.group(1).strip(); ln = int(ml.group(1)); frm = mfrom.group(1); to = mto.group(1)
     if f == tf: refuse(f"tamper {tid}: its file is the test file — a tamper mutates PRODUCT code the cells pin")
@@ -276,9 +250,7 @@ if runner == "bash":
         ftext = show(f); fl = ftext.split("\n")
         shelly = f.endswith((".sh", ".bash", ".command")) or (fl and re.match(r"^#!.*\b(ba)?sh\b", fl[0]))
         if shelly:
-            fl2 = fl[:]
-            if t.get("block"): fl2[t["line"] - 1:t["line"] - 1 + t["from_lines"]] = t["to"].split("\n")
-            else: fl2[t["line"] - 1] = t["to"]
+            fl2 = fl[:]; fl2[t["line"] - 1] = t["to"]
             r = subprocess.run(["/bin/bash", "-n"], input="\n".join(fl2).encode("utf-8"), capture_output=True)
             if r.returncode: refuse(f"tamper {t['id']}: {f} does not parse with the tamper planted (bash -n: {r.stderr.decode('utf-8', 'replace').strip()[:140]}) — a tamper that breaks parsing reds while executing none of the logic")
 src_repo = os.path.abspath(src)
