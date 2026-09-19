@@ -107,17 +107,6 @@ _g2_allow_seats() {
   [ -n "$exp" ] && [ "$exp" -gt "$now" ]
 }
 tmuxc() { if [ -n "$NIGHT_TMUX_SOCKET" ]; then "$TMUX_BIN" -L "$NIGHT_TMUX_SOCKET" "$@"; else "$TMUX_BIN" "$@"; fi; }
-# _g7_foreign_pane — true when a LIVE non-coordinator pane exists on the fleet session.
-# (2026-09-20, ledger: the BUSY leg fired on ALLOW_SEATS alone and its pointer said "with seats live"
-# while the floor held only wednesday + fleet-monitor — a claim the guard never measured. A drought with
-# no seat live is the 2 h panel leg's business, not a pane tap.)
-_g7_foreign_pane() {
-  tmuxc has-session -t fleet 2>/dev/null || return 1
-  local c
-  c="$(tmuxc list-panes -s -t fleet -F '#{@cockpit_name}|#{pane_dead}' 2>/dev/null \
-       | awk -F'|' '$2!="1" && $1!="wednesday" && $1!="fleet-monitor" {print $1}')"
-  [ -n "$c" ]
-}
 
 TICKETS_RUN=0; TICKETS_ATTEMPTED=0; VERDICTS=""
 write_state() {
@@ -382,7 +371,7 @@ if [ -z "$(next_ticket)" ]; then
     # bare pointer (cockpit.sh say, no authorising verb), at any hour, at most once per NIGHT_IDLE_BUSY_MIN.
     # It never posts to the panel (Kam's surface keeps the 2 h leg). Arms: local-model/tests/g7_busy_leg_arms.sh.
     _tapped="$_idle_dir/.queue_empty_tapped"; _busy_min="${NIGHT_IDLE_BUSY_MIN:-20}"
-    if _g2_allow_seats && _g7_foreign_pane; then
+    if _g2_allow_seats; then
       _last_tap=$(cat "$_tapped" 2>/dev/null || echo 0)
       if [ $((_now - _since)) -ge $((_busy_min * 60)) ] && [ $((_now - _last_tap)) -ge $((_busy_min * 60)) ]; then
         _since_hm=$(date -r "$_since" +%H:%M 2>/dev/null || echo "?")

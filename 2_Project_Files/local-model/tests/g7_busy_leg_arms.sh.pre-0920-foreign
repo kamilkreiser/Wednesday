@@ -15,16 +15,12 @@
 #   ARM 5  RATE LIMIT: allowance live, last tap 5 min ago  -> no tap
 #   ARM 6  RE-FIRE: allowance live, last tap 25 min ago    -> tap
 #   ARM 7  NEGATIVE: the OLD runner on ARM 1's state       -> no tap (proves the arms discriminate)
-#   ARM 9  QUIET: allowance live, 60-min drought, NO foreign pane -> no tap (2026-09-20)
-#   ARM 10 CONTROL: the OLD runner on ARM 9's state       -> taps (proves ARM 9 discriminates)
 #   ARM 8  the pointer the runner builds passes cockpit.sh say's OWN no-mail guards (length + the
 #          authorising-verb pattern read out of cockpit.sh, not re-implemented)
 # Usage: bash g7_busy_leg_arms.sh <new night_run.sh> <old night_run.sh>
 set -u
 HERE="$(cd -P "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-NEW="${1:?new runner}"; OLD="${2:?old runner (PRE-BUSY-LEG, e.g. night_run.sh.pre-0917-g7busy)}"
-# $3 = the PRE-FOREIGN-PANE runner (busy leg present, ungated) for ARM 10; defaults to the 09-20 backup.
-OLDF="${3:-$HERE/../night/night_run.sh.pre-0920-g7foreign}"
+NEW="${1:?new runner}"; OLD="${2:?old runner}"
 COCKPIT="$HERE/../../fleet/cockpit/cockpit.sh"
 TMUX_BIN="$(command -v tmux || echo /opt/homebrew/bin/tmux)"
 W="$(mktemp -d "${TMPDIR:-/tmp}/g7busy.XXXXXX")"
@@ -69,24 +65,14 @@ expect_quiet() {
 
 "$TMUX_BIN" -L "$SOCK" new-session -d -s fleet -x 80 -y 20 'sleep 600'
 "$TMUX_BIN" -L "$SOCK" set-option -p -t fleet:0.0 @cockpit_name wednesday
-"$TMUX_BIN" -L "$SOCK" split-window -d -t fleet:0.0 'sleep 600'
-"$TMUX_BIN" -L "$SOCK" set-option -p -t fleet:0.1 @cockpit_name Secuura/Blockchain
 
-# --- with a FOREIGN pane live (a seat beside the model): the busy leg's own subject ---
 run_arm a1 "$NEW" live 25 -;     expect_tap   a1 "ARM1 FIRE live allowance, 25-min drought"
 run_arm a2 "$NEW" live 5 -;      expect_quiet a2 "ARM2 QUIET 5-min drought"
-run_arm a5 "$NEW" live 60 5;     expect_quiet a5 "ARM5 RATE LIMIT last tap 5 min ago"
-run_arm a6 "$NEW" live 60 25;    expect_tap   a6 "ARM6 RE-FIRE last tap 25 min ago"
-run_arm a7 "$OLD" live 25 -;     expect_quiet a7 "ARM7 NEGATIVE pre-busy-leg runner"
-# --- no foreign pane (G2 needs no allowance to pass, and the busy leg must be quiet) ---
-"$TMUX_BIN" -L "$SOCK" kill-pane -t fleet:0.1
 run_arm a3 "$NEW" none 60 -;     expect_quiet a3 "ARM3 QUIET no allowance"
 run_arm a4 "$NEW" expired 60 -;  expect_quiet a4 "ARM4 QUIET expired allowance"
-
-# ARMS 9/10 (2026-09-20) — the floor holds ONLY the coordinator + monitor: the BUSY leg must be quiet,
-# because its pointer claims "with seats live". The OLD runner on the same state is the negative control.
-run_arm a9  "$NEW"  live 60 -;   expect_quiet a9  "ARM9 QUIET no foreign pane (allowance live, 60-min drought)"
-run_arm a10 "$OLDF" live 60 -;   expect_tap   a10 "ARM10 CONTROL pre-foreign runner taps on the same no-pane state"
+run_arm a5 "$NEW" live 60 5;     expect_quiet a5 "ARM5 RATE LIMIT last tap 5 min ago"
+run_arm a6 "$NEW" live 60 25;    expect_tap   a6 "ARM6 RE-FIRE last tap 25 min ago"
+run_arm a7 "$OLD" live 25 -;     expect_quiet a7 "ARM7 NEGATIVE old runner"
 
 # ARM 8 — the real pointer text from ARM 1 against cockpit.sh's own guards
 PTR="$(head -1 "$W/a1/tap.txt" 2>/dev/null | sed 's/^say wednesday //')"
