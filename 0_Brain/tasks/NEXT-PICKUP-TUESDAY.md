@@ -11,7 +11,7 @@ supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s
 ---
 
 ## 🔵 DELTA 28 — 2026-09-20 02:1x ROTATION HANDOVER (Tuesday ctx ~80%). READ FIRST; DELTA 27 (disk + paused sync) still holds.
-- **S68 WRAPPED, scored 0.91, pane closed.** **S69 LIVE in `%14`** (brief verified 16:08:14Z). Its queue: merge RD-567 @ 3211022 (re-gate GO/Low) -> RD-545 red-first (releases RD-464 r3, C-74) -> RD-549 -> RD-516. **Owed by Tuesday: verify S69's PLAN CONFIRMATION (rung 6)** if it has not been verified in the note.
+- **S68 WRAPPED, scored 0.91, pane closed.** **S69 LIVE in `%14`** (brief verified 16:08:14Z). Its queue: merge RD-567 @ 3211022 (re-gate GO/Low) -> RD-545 red-first (releases RD-464 r3, C-74) -> RD-549 -> RD-516. S69's PLAN CONFIRMATION (16:12:15Z) VERIFIED = rung 6 (see today's note). Next from S69: MERGED RD-567, then RD-545 READY FOR QA (Tuesday GOs its tier-1 gate after a source check).
 - **NexusAI main = `246f23a`.** Predicate NOT met; all remaining minimum-set work is ours. Nothing owed to Kam on NexusAI until the zip exists.
 - **Disk:** T9 at ~1.2 GiB free until Kam deletes the 649 GiB sync temp (emailed 01:2x). S69 has a stop-under-400-MB rule. `com.tuesday.nassync` PAUSED; its fix is claimed (seat resolution + Docker disk ignore) - do it with arms before re-arming.
 - **Re-arm at boot:** `2_Project_Files/fleet/watch_nexusai_main.sh <current main> 60 180` (armed on 246f23a).
