@@ -11882,5 +11882,34 @@
    "2026-09-16 13:35",
    "2026-09-18 06:37"
   ]
+ },
+ {
+  "id": "nexusai-reclaim-old-qa-worktrees-33gib",
+  "client_project": "Datasec/NexusAI",
+  "title": "NexusAI: let its agent remove old QA gate checkouts (33 GiB) to free the full T9 - a tap you can give from your phone",
+  "bluf": "I need one tap from you: may the NexusAI agent remove its OWN old QA checkouts under NexusAI/qa-worktrees/? Measured by Tuesday 05:2x: 216 folders, 33,651 MiB total (du -sm); one sample 90 MiB, another 274 MiB. They are gate checkouts from past sessions (s36 to s68), each made from a commit. The T9 has ~1.8 GiB free, and every NexusAI test run is throttled by it; this is the one fix that does not need your hands at the Mac mini (the 649 GiB temp file on card tuesday-t9-disk-full-spotlight-and-temp-file does). Removal is a delete, which is your rule (never delete; cleanup means quarantine), so it is yours to grant. UNMEASURED by Tuesday: which of the 216 are clean and pushed. So the grant is conditional per checkout, checked by the agent: its commit is on origin, git status is empty, and it is not in use; anything else is listed and kept. Gate EVIDENCE lives in qa-reports/ and is not touched.",
+  "default_action": "Nothing is removed. NexusAI keeps working under the disk rule (start only if the 5-minute minimum is at least 1,700 MiB).",
+  "options": [
+   {
+    "key": "a",
+    "label": "Yes: remove each old checkout that is clean and whose commit is on origin; keep and list the rest",
+    "detail": "frees up to ~33 GiB; each removal logged with its path and SHA; qa-reports untouched; recreatable from origin"
+   },
+   {
+    "key": "b",
+    "label": "Only the ones older than this week (before 2026-09-14)",
+    "detail": "keeps recent gate checkouts for re-runs; frees less"
+   },
+   {
+    "key": "c",
+    "label": "No, keep everything",
+    "detail": "NexusAI keeps working under the 1,700 MiB disk rule until the temp file goes"
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-09-20T05:19:09.852378+10:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null
  }
 ]
