@@ -10,6 +10,11 @@ supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s
 
 ---
 
+## 🔴 DELTA 27 — 2026-09-20 01:2x. READ FIRST.
+- **T9 DRIVE FULL** (1.0 GiB free of 931). Cause: a 649 GiB Unison temp copy of Docker's disk at `!CODING/Docker - Containers/DockerDesktop/.unison.Docker.raw.<hash>.unison.tmp`, written by THIS seat's `com.tuesday.nassync` on 09-19. NOT Docker's live disk (that is on the internal drive). **Kam emailed 01:2x to delete it (his hands; no-delete rule). Check `df -h /Volumes/KK_T9_External_HDD` at boot.**
+- **`com.tuesday.nassync` is PAUSED (unloaded, plist kept).** Do NOT re-arm until (1) it resolves THIS seat (it ran as agent=wednesday: same family as the close-ritual fix 6c360618a) and (2) it ignores Docker's disk image. Claimed in wed_claim. Re-arm: `launchctl bootstrap gui/$(id -u) ~/Library/LaunchAgents/com.tuesday.nassync.plist`.
+- **NexusAI:** main `154206b` (all merges today + history docs). Predicate NOT met; next builds (ours): RD-545 -> RD-549 -> RD-516. RD-567 r2 re-gate running. **S68 at ctx 81%, wrapping** -> verify its wrap on disk, score, close %13, launch S69 from HANDOVER-S68.
+
 ## 🔵 DELTA 26 — 2026-09-19 20:3x (Tuesday ctx 70% CHECKPOINT; band 80-90). READ FIRST; supersedes DELTA 25 on the queue.
 - **NexusAI main = `7589489`** (counts 3502/198 read at origin). On main today: RD-436 r4 (1571cbb) · RD-490 (c163db6 + counts fix 9f91eaf) · RD-491 (1a9ada3) · RD-568 harness (acec3ec) · RD-566 recipe (7589489). Every push was preceded by green CI on the previous main (quoted in S68's MERGED mails; 1a9ada3 went red on a port race and passed on ONE measurement re-run).
 - **Next, in order (S68, %13):** RD-571 bindable ports (gate GO WITH FINDINGS, worst Minor) merges fresh onto 7589489 after its Build is green -> **merge 2 RD-486 redone fresh** (C-87 BACKLOG union; C-90 if RD-491's renames show) -> RD-503 -> RD-567 (tier-2 gate first) -> history docs merge. **RD-464 r3 HELD** (C-74).
