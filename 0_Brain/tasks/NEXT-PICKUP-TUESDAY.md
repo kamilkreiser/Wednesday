@@ -10,6 +10,15 @@ supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s
 
 ---
 
+## 🔵 DELTA 22 — 2026-09-19 11:0x (Tuesday ctx 50% CHECKPOINT; band 80-90, NOT rotating). READ FIRST; DELTA 21 still holds for everything not named here.
+### THE STATE IN ONE LINE
+**Round-4 gate: A NO GO on Blocker RD-564 (pre-existing self-heal ~60 s window); B and C GO WITH FINDINGS (Low). NOTHING MERGED. Round 5 is KAM'S (C-82 line 783) — asked by EMAIL (Re: Progress, 2026-09-19T01:05:30Z) and card `nexusai-round4-nogo-selfheal-round5`: rec (b) merge round 4 now + round 5 after; (a) fix first; (c) accept. DEFAULT: nothing merges, round 5 not built.**
+- Heads: main d881f953 · rd-436-452-501-s64 d5e781f · rd-503-shipped-docs-s64 5700df5 (ls-remote 11:0x). Report: NexusAI `qa-reports/2026-09-19-rd436-r4-d5e781f-batched-gate-report.md`.
+- **When Kam answers (email: DKIM + read the HTML part; or a tap: reconcile_rulings.py):** relay to S67 by mail; card `--delivered` once S67 mails the C-number. (b) = S67 merges round 4 under the recipe (13 rd554 cells named, C-57 counts), B rides it, then round 5 from a fresh branch off main; C (RD-503) merges only after RD-436 AND RD-486 are on main. (a) = round 5 on d5e781f's branch, then merge all.
+- **S67 interim (01:06:43Z answer):** round-5 PLAN written not built; RD-566 B-3 (JIRA.md recipe) + RD-567 C-1 (test:external bash 3.2) fixed on own branches, HELD for the next gate session (no own gate, no merge).
+- **Done this seat (receipts in today's note):** FETCH_HEAD race fix 4fc780e24 (+launcher + _store_guard; Wednesday restarted her loop); close ritual reads the tree-resolved seat inbox 6c360618a (read tonight's `~/Library/Logs/tuesday_close.out` for tuesday-agent@ — the full 23:00 run is UNTESTED); the Studio's stray Datasec__HPSM entry quarantined by Wednesday at DevMASTER/WEDNESDAY/5_Project_History/_quarantine_2026-09-19/ (compare with HPSM's latest wrap when it syncs here; low priority).
+- **Re-arm at boot:** `2_Project_Files/fleet/watch_nexusai_main.sh <current main> 60 180` (armed 09:0x on d881f953, expires ~12:0x).
+
 ## 🔵 DELTA 21 — 2026-09-19 08:5x ROTATION HANDOVER (Tuesday ctx 80%, safe boundary). READ FIRST; DELTA 20 still holds.
 ### THE STATE IN ONE LINE
 **Kam ruled round 4 = (a) by EMAIL (C-82, delivered). S67 (%12) is EXECUTING round 4 on rd-436-452-501-s64. Nothing is owed to Kam until the zip exists, or on a stop-class finding.**
