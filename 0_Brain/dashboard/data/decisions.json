@@ -11897,8 +11897,8 @@
   "id": "nexusai-reclaim-old-qa-worktrees-33gib",
   "client_project": "Datasec/NexusAI",
   "title": "NexusAI: let its agent remove old QA gate checkouts (33 GiB) to free the full T9 - a tap you can give from your phone",
-  "bluf": "I need one tap from you: may the NexusAI agent remove its OWN old QA checkouts under NexusAI/qa-worktrees/? Measured by Tuesday 05:2x: 216 folders, 33,651 MiB total (du -sm); one sample 90 MiB, another 274 MiB. They are gate checkouts from past sessions (s36 to s68), each made from a commit. The T9 has ~1.8 GiB free, and every NexusAI test run is throttled by it; this is the one fix that does not need your hands at the Mac mini (the 649 GiB temp file on card tuesday-t9-disk-full-spotlight-and-temp-file does). Removal is a delete, which is your rule (never delete; cleanup means quarantine), so it is yours to grant. UNMEASURED by Tuesday: which of the 216 are clean and pushed. So the grant is conditional per checkout, checked by the agent: its commit is on origin, git status is empty, and it is not in use; anything else is listed and kept. Gate EVIDENCE lives in qa-reports/ and is not touched.",
-  "default_action": "Nothing is removed. NexusAI keeps working under the disk rule (start only if the 5-minute minimum is at least 1,700 MiB).",
+  "bluf": "ONE TAP UNBLOCKS EVERY HELD GATE, and it is now tiny: option (a) authorises the NexusAI agent to remove FOUR old test checkouts totalling 354 MiB (s46qa-5e6077e, s46qa-731aa6e, s64-rd477-r2-dockeragree-19a479f, s64-rd477-r2-red-75ea59e). All four are git-registered (removal is 'git worktree remove', never rm -rf), each tree is clean, and each HEAD is an ancestor of origin/main - so every byte is reproducible with one command at the same commit. Free space goes 1,561 -> 1,915 MiB, clearing both the 1,700 (worktree/control) and 1,640 (verify) thresholds with 215 MiB to spare. The other 212 directories are KEPT and listed with reasons: 97 are dirty gate-mutation trees (the dirt IS the mutation, several in flight), and 115 are unresolvable after the drive rename - git cannot check them at all, so they do NOT meet this card's condition and are a separate decision, not part of this tap. Staged, not executed: NexusAI 5_Project_History/2026-09-20_S70_qa-worktrees-reclaim-staged.md. The 649 GiB file (other card) is still the permanent fix; this is the cheap one.",
+  "default_action": "Nothing is removed and all three gates stay blocked: the RD-545 re-gate, the RD-549 tier-1 gate and the six older-test runs keep returning NOT RUN (disk).",
   "options": [
    {
     "key": "a",
@@ -11920,6 +11920,21 @@
   "ts": "2026-09-20T05:19:09.852378+10:00",
   "status": "open",
   "ruled_choice": null,
-  "ruled_ts": null
+  "ruled_ts": null,
+  "amendments": [
+   {
+    "ts": "2026-09-20T08:53:21.316363+10:00",
+    "reason": "S70's read-only census (2026-09-20 22:51Z) measured the set: only FOUR directories, 354 MiB, unambiguously meet this card's condition, and they are enough to clear the 1,700 MiB gate threshold. The 33 GiB framing overstated what a tap on (a) would do and understated how cheap it is.",
+    "changed": [
+     "bluf",
+     "default_action"
+    ],
+    "before": {
+     "bluf": "I need one tap from you: may the NexusAI agent remove its OWN old QA checkouts under NexusAI/qa-worktrees/? Measured by Tuesday 05:2x: 216 folders, 33,651 MiB total (du -sm); one sample 90 MiB, another 274 MiB. They are gate checkouts from past sessions (s36 to s68), each made from a commit. The T9 has ~1.8 GiB free, and every NexusAI test run is throttled by it; this is the one fix that does not need your hands at the Mac mini (the 649 GiB temp file on card tuesday-t9-disk-full-spotlight-and-temp-file does). Removal is a delete, which is your rule (never delete; cleanup means quarantine), so it is yours to grant. UNMEASURED by Tuesday: which of the 216 are clean and pushed. So the grant is conditional per checkout, checked by the agent: its commit is on origin, git status is empty, and it is not in use; anything else is listed and kept. Gate EVIDENCE lives in qa-reports/ and is not touched.",
+     "default_action": "Nothing is removed. NexusAI keeps working under the disk rule (start only if the 5-minute minimum is at least 1,700 MiB)."
+    }
+   }
+  ],
+  "amended_ts": "2026-09-20T08:53:21.316376+10:00"
  }
 ]
