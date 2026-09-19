@@ -16,6 +16,12 @@ supersede: replace wholesale at the next pickup; do not append
 ### FLOOR at 10:1x
 `%0` wednesday · `%110` **Seat B 3rd** (raise nine held local-model fixes; brief `2_Project_Files/fleet/briefs_staged/2026-09-19_raise_seatB_successor3.md`; pane NAME `Secuura/Blockchain-B`; plan CONFIRMED 00:15Z → ANSWER D1-D8 (KS-1260 branch renamed off `ks-1209`; archived three get Refs in the body only; KS-864 → Backlog after merge); next = its ONE READY) · `%1` monitor. Seat A 13th WRAPPED + retired + scored 1.00: **kintsugi = develop 3c447abc7** (every merge through #1060, incl. the KS-1172/1173 verbs), verified V1-V9.
 
+### 🔴 ROTATION NOTE (the 06:0x seat, rotating at ctx ~80%, 10:2x)
+- **Live:** ONLY Seat B 3rd (%110, pane name `Secuura/Blockchain-B`), raising nine PRs; it mails ONE READY (nine heads + the all-nine tree + the archived-ticket before/after reads). Its wake = that mail. Nothing else is owed to any agent.
+- **Your first acts:** read this block, then `kam_rulings_today.sh`; then on Seat B 3rd's READY: draft ONE batch gate (the model is `fleet/qa-agent/gatesets/2026-09-19_gate1050to1060/` + its generator), re-pin by ls-remote + `--check`, launch, GO per head.
+- **Ornith:** queue empty by decision; 7 search rounds today. The next feed is that gate's NOT-PINNED list.
+- **Resolved at 10:19:** the Datasec__HPSM working copy was quarantined per Tuesday's ruling (`5_Project_History/_quarantine_2026-09-19/`); the tree is clean.
+
 ### 🔴 FIRST ACTS for whoever holds this seat next
 1. (done) seat A 13th's deploy.
 2. **Seat B 3rd's plan confirmation:** check its ARCHIVED-ticket ruling (KS-991 / KS-739 / KS-1062 are Done+archived: a pin must NOT reopen them; its default is branch names without the archived key, Refs in the body; or ONE follow-up ticket) and its per-item "target unchanged since pinned tip" checks (KS-739's tamper moved −12 with #1060). Then READY → draft ONE batch gate (the drafter prompt of 09:5x is the model: `fleet/qa-agent/gatesets/2026-09-19_gate1050to1060/`) → re-pin by ls-remote + `--check` → launch → GOs per head. Tier 1 = KS-1260 (pre-push gate) and KS-1206 (the null/0 → 400 caller question).
