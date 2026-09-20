@@ -197,3 +197,63 @@ Measured, not argued:
 2. **"KS-1277 ... collides with the held READY_KS-1264 product patch on `documents.ts`" — that patch is MERGED, not held.** KS-1264 went up as **#1060** and merged on 2026-09-19 (develop 3c447abc7 at the time). The `READY_KS-1264_…_2026-09-19.diff.md` file is a spent hold left on disk, not a pending change. **So `documents.ts` carries no held patch and KS-1277 is NOT blocked by one** — it stands or falls on being comment-mode work (its own words: "No behaviour change"), which is the `comment` tier, not `test_only`.
 3. Item (1) of that list — the NEXT batch gate's NOT-PINNED list — stands and is the near-term feed (the Seat B 9th raise of the two held fixes is being briefed now).
 **The rule this earns for every search commission: a "what would reopen this" list is a set of CLAIMS, and each is checked against the artefact before anyone acts on it** (a held READY on disk is not evidence the change is unmerged; a missing capability is not evidence it was never built).
+
+---
+
+## round 22 (2026-09-21, widened past the 88) — 19 read, 1 fit
+
+**Verdict: 1 FIT, briefed and golden-measured — KS-1283 (`KS-1283-PROVADMIN-1`, PASS 8/8 twice, fresh
+clones).** Tip `778e6cfe2b6061d60ffcf3a57a951c84dc152b67` by `ls-remote` at start and at close (unchanged;
+the #1104 merge). Source checkout tracked-modified 0 throughout; no port touched; Linear read-only, key
+sourced transiently. Artefacts: `runs/2026-09-21_search-widen-drafter-precheck/` (`sweep/` holds the pull
+and the 270-row triage list).
+
+**Population (paginated, `first:250` + `hasNextPage`, 2 pages):** KS Backlog+Todo = **358** (333 Backlog,
+25 Todo, 0 archived). Minus the 88 file-named tickets of
+`runs/2026-09-20_ks1223WALLET-1-drafter-precheck/board_sweep_88_named_files.txt` = **270** (190 on Kam, 61
+unassigned, 13 Peter, 6 Stuart). Cross-reference: 264 of the 270 already carry a row in the 2026-09-19
+archive (mostly title-level "names no product file" / "auth-shaped title" excludes, or code_patch-tier
+"needs a product edit" rejects — which is exactly what a test-only PIN can take, so they were re-read on
+the DESCRIPTION here); 56 carry a brief and 58 a held READY under other rounds (skipped as HELD).
+**19 read with the full description** (below); the remaining ~250 triaged at title + state + assignee +
+label, excluded by predicate (Peter/Stuart, shell/CI/docs/scripts, DB/migration, decision-shaped, jest,
+held, or no product behaviour a vitest cell can drive).
+
+| id | title (≤60) | verdict | one-line reason |
+|---|---|---|---|
+| KS-1283 | platform.ts: a widened SUPER_ROLES would admit a tenant ADMIN r | **FIT** | guard `requireOrgProvisioner` driven in-process by `ks480-org-provisioner-gate.test.ts` (no held READY on it); tamper `:64` (ticket's) + `:97`; briefed `KS-1283-PROVADMIN-1`, PASS 8/8; connector-key half already held as KS-1282-N96-1a/1b, GET /tenants role half as N99-1 |
+| KS-1190 | api-gateway meetsVerificationLevel fails open on an unknown REQ | REJECTED-ALREADY-PINNED | ticket says KS-1176's PR carries a cell pinning it at base; `enforcement.ts` is the KS-1203 READYs' product file and the ticket's own "two measurements come first" |
+| KS-1244 | A duplicated x-api-key header defeats key authentication via he | REJECTED-NO-ONE-LINE-TAMPER | fix shape is an INSERTED refusal before the joined-value lookup in `middleware/auth.ts`; no tip line whose one-line replacement reds a pin of today's fall-through (next-best 1) |
+| KS-1246 | F-2: /health/services still reads response.ok only — a degrade | REJECTED-NO-DRIVER | `services/health.ts` has no importing test outside `ks480-connector-auth.test.ts` (Seat B 11th's file, and the held KS-1232 pattern); opt-in 404 by default |
+| KS-1249 | N-2: a 2xx whose body is not exactly top-level 'degraded' — inc | DECISION | "decide the vocabulary the aggregates accept"; same no-driver problem as KS-1246 |
+| KS-811 | Nothing asserts #815's 403 code SET against what the route actu | REJECTED-NEW-FILE-SHAPE | the owed test derives two SETS (spec vs route) — a spec-walking new cell/file, not a one-line tamper pin; auth service social-callback |
+| KS-1198 | A connector JWT presented directly as Bearer skips the gateway' | REJECTED-LIVE-LANE | pin lives in the RS256 branch of `middleware/auth.ts`; the driving files (`ks480-connector-auth`, `ks1041-vouch-header-strip`) are Seat B 11th's; needs a minted connector JWT fixture (next-best 2) |
+| KS-1240 | T-2: the connector-token / key-validate fetch has no timeout — | REJECTED-NO-ONE-LINE-TAMPER | "no timeout" pins a hang; the fix is an AbortController insertion, and the driving file is Seat B's |
+| KS-1242 | T-1: authenticateToken is an async express-4 middleware with no | REJECTED-NOT-REACHABLE | ticket: not request-reachable; the fix is a wrapper, not a line |
+| KS-1241 | T-4: POST /api/v1/documents never answers an authenticated requ | REJECTED-LIVE-LANE | mount order in `api-gateway/src/index.ts` (Seat B 11th); pinning a hang needs a timer cell |
+| KS-1243 | T-3: /api/batch/* is a dead route family — 401 to every caller, | REJECTED-LIVE-LANE | `index.ts` mounts; decision (remove or wire) |
+| KS-1102 | Unauthenticated /system/status, /api/system/status and /api/sys | REJECTED-HELD-FILE | `routes/system-status.ts` and both its test files carry the held KS-1248/KS-1258 READYs; fix is an auth mount (insertion) |
+| KS-1144 | ks781 J2 (KS-900 half): the default-only factory pin has no in- | REJECTED-TEST-IS-PRODUCT | the "product" is the ks781 guard test itself; a control cell, no product tamper |
+| KS-1147 | ks860 loopback guard boundary (R-5, #980 delta gate): a listen | REJECTED-TEST-IS-PRODUCT | packages/shared guard test; fix shape is the gate's proposal, not ratified |
+| KS-1256 | Connector allow-list still fails OPEN when Redis closes or erro | REJECTED-HELD-FILE | reader is the KS-1231/1233 allow-list in `enforcement.ts`; its suite `ks501-enforcement-non-string-doctype.test.ts` is owned by the two KS-1203 READYs; stateful Redis double needed |
+| KS-1280 | POST /api/certifications/:id/verify forwards a revoked session' | REJECTED-HELD-FILE | `routes/verification.ts` + a revoked-session store double; the file carries held KS-1238-N76-1; ticket's own next step is a measurement on originate (next-best 3) |
+| KS-805 | POST /api/oauth/authorize deny emits `Location: undefined?error | REJECTED-OAUTH-PRODUCT | Q3 is a one-line product fix in the deny branch; a pin of `Location: undefined` is pinning a regression the ticket says to fix, and the driver is the 4,700-line ks781 suite |
+| KS-840 | The OAuth error code travels in error.message and the contract | DECISION | RFC-redirect vs JSON is "a design question"; half 1 is a contract-doc change |
+| KS-1116 | KS-1020 item 2: which subject OWNS a presentation (and a creden | DECISION | "a decision for Kam, not a build" (vc-issuer) |
+
+**Title-level excludes worth naming (not re-read):** KS-598 / KS-758 / KS-1178 / KS-1028-1031 — originate
+(jest, REJECTED-JEST class; KS-598's MULTI_TENANCY upsert would be the strongest jest fit, `registry`
+upsert, for a Claude seat); KS-607 / KS-1074 / KS-1129 / KS-1171 — `services/anchoring/**` (Seat A 15th);
+KS-1239 — `index.ts:347` dead code (Seat B, 0 readers = no red); KS-1265 / KS-1263 / KS-1278 — originate
+documents.ts, DB-transactional, jest; KS-1197 — pins a 500/async hang; KS-1257 — decision over a stateful
+Redis double; KS-934 — m365 loop bound (insertion); KS-1131 / KS-1143 / KS-1145 — guard-test polish
+(test-is-product / bash suite); KS-1115 / KS-748 / KS-699 / KS-1200 / KS-1023 — schema/DB; KS-1177 —
+`index.ts` middleware order (Seat B); everything on Peter or Stuart (19); the 58 with a held READY.
+
+**Next-best THREE if KS-1283 is refused:** (1) **KS-1244** — needs a driving file that is not Seat B's
+(`auth.test.ts` imports `authenticateToken` at the tip: check it) and a tamper line whose replacement
+refuses a joined `x-api-key` in one line (e.g. the `const apiKey = …` read at the `sk_` branch, replaced by
+a comma-guarded read); (2) **KS-1198** — same file constraint plus a minted `type: 'connector'` RS256 JWT
+fixture (the KS-753 brief's keypair idiom); (3) **KS-1280** — after the held KS-1238-N76-1 merges, a cell
+in the same verification.ts suite with a revoked-session double, tamper = the `Authorization` forward at
+`verification.ts:788`.
