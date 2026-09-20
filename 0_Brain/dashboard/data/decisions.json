@@ -12213,5 +12213,48 @@
    }
   ],
   "amended_ts": "2026-09-20T18:22:08.474258+10:00"
+ },
+ {
+  "id": "nexusai-degraded-flip-and-live-deployments",
+  "client_project": "Datasec/NexusAI",
+  "title": "Fixing the Key Vault defect will flip any affected LIVE deployment to DEGRADED - and one unknown decides this AND the privacy card",
+  "bluf": "ONE QUESTION SETTLES TWO ITEMS ON YOUR DESK: are there live customer deployments of NexusAI, and roughly how many? Nothing is blocked tonight; the default is safe.\n\nTHE SITUATION. RD-518 is a real, silent defect: Key Vault encryption never engages (the permission is on one identity, the code authenticates as another), so the encryption key is derived from the machine instead. The data IS still strongly encrypted - it is the Key Vault part that is not true.\n\nTHE POINT OF THE FIX is to stop it being silent. Today a broken deployment looks perfectly healthy: the one warning that should fire is skipped by a flag set too early, and the log then says 'default path' on a deployment that explicitly asked for Key Vault. We want it to report itself as DEGRADED instead.\n\nTHE CONSEQUENCE, AND IT IS YOURS NOT OURS: the moment that ships, ANY live deployment currently in this state flips to DEGRADED - visibly, to whoever is watching it. If that number is zero, the change is free and I will ship it without troubling you again. If it is not zero, it is a customer-visible event and the timing is a business call, not a technical one.\n\nWHY IT IS THE SAME QUESTION AS THE PRIVACY CARD: `nexusai-privacy-keyvault-claim-rd518` asks whether the live 2.1.1 listing carries the PRIVACY.md claim that secrets are encrypted 'with a Key Vault-managed key'. Both items turn on whether real deployments exist. Answer this once and both resolve.\n\nWE ARE NOT BLOCKED. The agent is building everything except the status flip. Nothing touches the stored-key path - that is a hard stop, because a deployment already using Key Vault properly could be made unreadable by it, and the one-time re-encryption sweep does not exist.",
+  "default_action": "The agent builds the credential fix, the state distinction and the loud logging. The DEGRADED status flip is NOT shipped. Nothing touches the stored-key path. Both this and the privacy card stay open until you answer, and neither blocks the submission package, which is gated on the fix landing anyway.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Tell me the deployment count and I decide from there (Recommended)",
+    "detail": "Cheapest for you - one number. Zero means I ship the whole fix immediately and close both items. Non-zero and I come back with the customer-visible options, costed."
+   },
+   {
+    "key": "b",
+    "label": "Ship the full fix including DEGRADED, whatever the count",
+    "detail": "Honest and immediate: a deployment in this state IS degraded and saying so is the correct behaviour. Accepts that anyone watching a live deployment sees it change state without warning."
+   },
+   {
+    "key": "c",
+    "label": "Ship the fix, hold the DEGRADED flip until you say",
+    "detail": "The credential is fixed and the logs get loud, but health keeps reporting normally. Removes the surprise and keeps the dashboard quiet - at the cost that the only honest signal stays off until you turn it on."
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-09-20T18:34:20.509305+10:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "2026-08-17 20:01",
+   "2026-08-21 19:49",
+   "2026-09-10 09:01",
+   "2026-09-10 09:08",
+   "2026-09-10 09:08",
+   "2026-09-17 08:34",
+   "CARD nexusai-scim-deploy-live-ab",
+   "CARD secrev-live-pass-blocked-on-tenant",
+   "CARD hpsm-composer-live-demo-upgrade-after-c12",
+   "CARD nexusai-live-listing-lockout-warn-now",
+   "CARD hpsm-live-release-verification-unprovable",
+   "CARD nexusai-rd549-live-211-exfiltration"
+  ]
  }
 ]
