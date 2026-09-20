@@ -7,7 +7,7 @@ status: live
 
 # Boot digest — headline + rules of every lesson (open the file when it fires)
 
-Generated 2026-09-20 21:41 from 197 lesson files (914,282 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 9 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
+Generated 2026-09-20 23:00 from 197 lesson files (915,495 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 9 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
 
 ## The T9 SSD is the master — Wednesday must be fully portable
 `2026-07-31_fully-portable-drive.md` · principle · 2026-07-31 · status: superseded — the "T9 is the master" half by [[2026-08-25_one-drive-devmaster-is-master]] (2026-08-25); the portability principle itself still lives
@@ -6005,6 +6005,9 @@ watcher.
 **Expiry:** none stated. It is tied to "this account" having context. When the usage gate trips, or he switches accounts, re-read before relying on it.
 
 **Family:** [[2026-09-11_secuura-we-approve-and-merge-our-own-tested-work]] · [[2026-09-13_as-many-agents-as-possible-partitioned-by-code]] · [[2026-09-15_ornith-q4-only-volume-week-qa-sunday-merge-once]] · [[2026-09-14_at-90pct-weekly-usage-no-new-agents-wednesday-plus-local-model]] · [[2026-08-03_go-slow-earn-autonomy]] (rule 5).
+
+## SECOND INSTANCE 2026-09-20 21:5x — same shape, his words after `/login`: *"keep going and once you fix the launch screen, keep going with secuura tickets using both claude and local agents"*
+The 90% cut had tripped at 21:15 on the previous account (statusline `7d:91%`); he signed the seat into a new account and the statusline read `7d:0% renews 6d 14h`. Wednesday's reading, said back on the panel at 21:5x and not corrected: fresh allowance; Claude seats to raise, gate and merge while Ornith works the backlog; merges one at a time on Wednesday's signed GO under the open-ended TESTED grant; kintsugi only, never demo; the signature classes pause (KS-1250 his); the away-week's 23:00 merge cut-off does not apply now he is here. **What it adds to the 09-16 clauses:** "fix the launch screen" was an instruction to make the cockpit fix TONIGHT (it answered a question Wednesday had put to him with a Monday default — his word moved it); and drafter subagents, forbidden at the 90% cut, are allowed again on the new account. Expiry: none stated — tied to this account having context, as on 09-16. Kept in this file rather than a new one: Kam ruled `b` on the boot digest at 16:44 (shrink the corpus).
 
 
 ## What keeps a seat CORRECT is not all in git — and every mechanism that checks a tree checks only the part that is
