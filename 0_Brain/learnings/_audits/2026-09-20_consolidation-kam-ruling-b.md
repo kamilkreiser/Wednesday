@@ -92,6 +92,51 @@ Finding 1 warns about, at three times the scale.
 remaining is the merge work in the clusters above — which is what Finding 2 predicted, and which is
 held for Kam's look. **A future seat should not re-explore case-splitting; this table is the answer.**
 
+## 🔴 FINDING 4 (added 19:1x) — WHAT I ACTUALLY DID TO THE CORPUS ON THE DAY KAM RULED TO SHRINK IT
+
+Measured rather than assumed, because the ruling was about SIZE and an audit that reports only the
+tidy half is not an audit.
+
+| | bytes |
+|---|---|
+| `_boot_digest_by_tier.md` at boot, before any of today's work | **511,178** |
+| the same file now | **505,845** |
+| **net change across the whole day** | **−5,333 (−1.0%)** |
+
+**And the composition of that −5,333 is the finding:**
+
+- **The one case-split removed 67,573 B** from `a-check-that-cannot-fail`'s lesson file.
+- **I then wrote FOUR new lesson files totalling 27,469 B** — `a-control-in-the-wrong-scan-mode`
+  (9,745), `refuting-a-mechanism-is-not-refuting-the-defect` (7,255), `an-absence-goes-stale`
+  (5,889), `most-of-a-project-folder-is-outside-its-git-repo` (4,580). Three more were filed by the
+  earlier Tuesday seat before this one booted.
+- Source went 960,266 → 902,400 B; the corpus is now **196 lesson files**, up from 191 at boot.
+
+**So: I spent the day ADDING to a corpus I had been told to shrink, and finished net-negative only
+because one split happened to remove more than I wrote.** A 1% reduction. **That is not executing
+(b); it is treading water while executing (b) once.**
+
+**What kept it from being worse, and it is the practice to keep:** three times today a new lesson
+was folded into an EXISTING file instead of becoming its own — the w=3 root and the canary
+sharpening into `a-control-in-the-wrong-scan-mode`, and the RD-550 mirror into
+`refuting-a-mechanism`. Without that it would have been seven new files, not four.
+
+### THE TRAJECTORY, WHICH IS THE ACTUAL ANSWER TO HIS RULING
+
+**New lessons arrive faster than case-splitting removes bytes**, and Finding 3 already established
+that the safe mechanical work is exhausted after one file. A day this eventful produced ~27 KB of
+genuinely load-bearing new rules — none of which I would delete, because each caught or explained a
+real defect the same day.
+
+**Therefore: the merge clusters are not one option among three for delivering (b). They are the only
+mechanism that changes the direction of travel.** Everything else is a one-off that a single busy
+day undoes. That sharpens the proposal Kam is holding: the question is not *whether* to merge the
+clusters but whether the corpus is allowed to keep growing between merges — and if it is, the
+consolidation has to be a CADENCE, not an event.
+
+**Stated plainly for his review: on the day of his ruling, this seat's net contribution to the
+problem was −1%.**
+
 ## The merge clusters this seat can already see (proposal, not executed)
 
 From the 322-handle index, these say overlapping things and are the real candidates:
