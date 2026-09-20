@@ -10,6 +10,30 @@ supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s
 
 ---
 
+## 🔴 DELTA 38 — 2026-09-20 19:3x. **r3 IS READY FOR QA. THE TIER-1 GATE IS THE NEXT ACTION AND ITS MATERIAL IS ALL HERE — do not re-derive it.**
+
+### STATE
+**`rd-464-r3-merged-main-s72` @ `60c76d7`, PUSHED to origin. `VERDICT: PASS — 3772/3772 across 214 suites.`** On RD-464 as comment 37876. **NOT on main; nothing goes there without Tuesday's GO.**
+**SOURCE-CHECKED BY TUESDAY at that sha, not read back from the mail:** `1f27b4d` and `34ad321` both ancestors (C-68 both ways) · counts **3772/214 by content**, `_updated 2026-09-20T09:19:47.049Z` · `getLLMAdapter()` **0** · `getUsableLLMAdapter()` **9** · `namedAoaiError` **7** · `AiEndpointRedirectError` **7** · `readiness:'not-checked'` **3** · main untouched at `34ad321`. **Nothing S72 claimed failed to reproduce.**
+**The push was RATIFIED** — S72 inferred it from what a gate REQUIRES (a gate cannot run against a sha on one disk), flagged the inference, and offered to reverse it. Tuesday's GO should have said "push and gate"; that gap is Tuesday's.
+
+### 🔴 THE GATE BRIEF'S MATERIAL — S72 supplied it; USE IT RATHER THAN REBUILDING IT
+1. **THE DRIVABLE SURFACE IS A LOCAL RUN AT `60c76d7`, NOT THE DEMO.** RD-76 is real: the demo's `/login` carries **zero `<form>` and zero `<input>`**, so no test account opens it. A local run against a fresh data dir serves every page and API in open mode by design (`isAuthEnforced()`), no auth shim, no test-only branch. **Say this in the verdict so nobody records a demo pass that did not happen.**
+2. **THE MERGE INTRODUCES NO NEW VISUAL BEHAVIOUR OF ITS OWN.** It unions two separately-gated changes. **The gate's actual subject is their INTERACTION — the one thing neither parent could have tested.**
+3. **NO before/after screenshots, and that is correct** — there is no visual delta introduced BY THE MERGE to photograph. Inventing one would be theatre.
+4. **The two places carrying the interaction risk:**
+   - **`static/js/first-run-setup.js` AUTO-MERGED although both sides changed it** (main +217/-25, r3 +21/-3). S72 checked rather than trusted: base ranges disjoint (r3 318-347; main 289-298 then 371+), both sides' symbols present after the merge — r3's `_aoaiResultBox` **17**, main's `_aoaiPendingAct` and `_renderAoaiPending` **3** each — and RD-549's `d.pending` branch surviving; *"Active immediately."* is pre-existing at the merge-base and remains the fallback for the NOT-pending case only. **Verbatim for the brief: "A clean auto-merge is an absence of textual disagreement, never a verdict. A browser is what settles it."**
+   - **The AI Setup step end to end:** save an unconfirmed config, confirm it, clear it; and the Test action's result box across notChecked / throttled / reachable-but-deployment-not-ready. **r3 rewrote that box and main rewrote the confirmation UI around it.**
+5. **ALREADY MEASURED — the gate need not redo it:** the seven rd545 cells by name 7/7 · **M4 at the merge head STILL REDDENS** (5 failed / 2 passed; K-switch and K-addr correctly green) · counts read from the file · both predictions exact.
+
+### ⚠ THE OPEN QUESTION THAT SHAPES THE BRIEF — ASKED 09:34Z, ANSWER OWED
+**Is a DRIVEN browser proven working on this machine tonight, or is Playwright merely "connected"?** S72 reported `claude-bridge` MCP failing `CONNECTION_CLOSED` at its boot while Playwright connected. **The gate's whole subject is an interaction only a browser settles — so if a driven browser is not proven, the verdict is BOUNDED and that must be known before it starts, not discovered in its report.** **Do not write the gate brief before this is answered.**
+
+### MECHANISM (so it is not re-discovered)
+QA tree: `/Volumes/KK_T9_External_HDD/!CODING/Testing Agent MAIN` (exists on THIS drive). Template `2_Project_Files/fleet/qa-agent/BRIEF_TEMPLATE.md` (178 lines, 13 sections) · `gen_launcher_from_template.py <template launcher> <output launcher>` · prior launchers in `fleet/launch_qa_nexusai_*.sh`. ⚠ **Older launchers hardcode `/Volumes/.../WEDNESDAY/...` paths — this is the TUESDAY seat; check every path before running one.** Usage gate at the time of writing: **88% < 95% (this seat's stop, per Kam's "bump yours to 95%")**, so a launch is permitted.
+
+---
+
 ## ⏳ GRANT EXPIRY TONIGHT — 2026-09-20 18:5x. **FIRST ACT FOR THE MONDAY SEAT.**
 
 **TWO rows in `tasks/EXPIRING-GRANTS.md` die at MIDNIGHT tonight** (both dated *end of SUNDAY 2026-09-20*; today is **Sunday 2026-09-20**, weekday and date checked against each other):
