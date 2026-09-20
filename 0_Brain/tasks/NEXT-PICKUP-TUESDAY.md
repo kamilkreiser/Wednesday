@@ -10,6 +10,37 @@ supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s
 
 ---
 
+## 🟢 DELTA 37 — 2026-09-20 18:5x (Tuesday ctx ~70% CHECKPOINT; band 80-90, NOT rotating). **CURRENT STATE — supersedes DELTA 36 on everything named.**
+
+### WHERE r3 ACTUALLY IS — merge RESOLVED and UNCOMMITTED in `worktrees/s72-rd464-r3`
+**Every acceptance criterion PASSED, reported as numbers, nothing traded away.**
+- Adapter six-symbol: `namedAoaiError` **7** · `AiEndpointRedirectError` **7** · `AOAI_FETCH_OPTIONS` **3** · `startDeadline` **4** · `HEALTH_PROBE_TIMEOUT_MS` **3** · `readiness:'not-checked'` **3** — all at their exact thresholds. `node --check` clean.
+- `server.js`: `getLLMAdapter()` **0** · `getUsableLLMAdapter()` **9**. **S72 found a SECOND mirror itself** — `getActiveLLMConfig` **0** / `getUsableActiveLLMConfig` **3** — and applied the same discipline unprompted.
+- **rd523 suite IMPORT confirmed before anything else ran** (the union on `module.exports` makes it load; taking either side alone makes it fail at import, which reads as "the merge broke the tests" and is not).
+- **Counts prediction COMMITTED IN ADVANCE: 3770 tests / 213 suites.** Not yet regenerated. **If it disagrees, the disagreement IS the finding — never reconcile the file to the prediction.**
+
+### 🔴 MY HALT RULE WAS WRONG AND IS AMENDED — USE THE AMENDED ONE
+I wrote *"exactly THREE files conflict; a FOURTH means STOP"*. **Three conflicted — but NOT my three.** `static/js/first-run-setup.js` auto-merged and **`backend/llm/azureOpenAIAdapter.js` took its place**, carrying RD-486/RD-523's redirect refusal. **A count-keyed check cannot see a substitution.**
+> **AMENDED: STOP when a conflicting file is NOT IN THE NAMED SET, regardless of how many. A file LEAVING the set is as much a signal as one joining it.** Named set: `backend/server.js`, `static/js/first-run-setup.js`, `scripts/verify-expected-counts.json`, `backend/llm/azureOpenAIAdapter.js`.
+**An acceptance criterion names the SET, never the CARDINALITY.**
+
+### 🔴 R14 — MY SPECIFIED VERSION IS DROPPED; S72's REPLACEMENT IS ADOPTED
+**My premise was FALSE and I carried it from S70's record unmeasured.** S72 measured: mutate `aiReadiness.check` → **R4 RED**; mutate `aiGate.gateAdapter().checkDeployment` → **R5 RED**; control 18/18; restore 18/18, sha256 matches. **Two layers, each already covered — so my R14 was DUPLICATION.**
+**The adopted R14:** at the merge head, AI configured but **UNCONFIRMED** under RD-549, a readiness read must NOT probe — `getUsableLLMAdapter()` drops the unconfirmed config **before** `aiReadiness` sees an adapter. Red proof: force it to return the unconfirmed adapter, assert a billed completion appears, the cell must go red. **`getUsableLLMAdapter()` exists only on main and `aiReadiness` only on r3, so their INTERACTION exists only at the merge head and no cell on either parent could have tested it.** Still authored BEFORE the gate.
+**R1 gets a COMMENT, not a ticket** (it is green under BOTH single-layer mutations, so it only proves at least one layer works — a mis-read waiting for whoever greps for "the billing cell").
+
+### RD-518 — SHAPE APPROVED, ONE PART HELD, FIX NOT STARTED
+Approved: UAI clientId via a NEW env var **`KEYVAULT_IDENTITY_CLIENT_ID`** (never `AZURE_CLIENT_ID` — it would collide with the printer SP and recreate the bug), credential built **OUTSIDE** the chain; system-assigned identity dropped as a **separate** change; the four-part loudness work; six red proofs, all provable **without a deployment**.
+🔴 **REQUIREMENT: the public `degradedReason` names NO vault and NO URL** — *"making a security failure loud must not itself leak"*.
+🔴 **HARD STOP, outranks the ticket: nothing touches `wrappedDekPath`, the vault URL construction or the wrapping key name.** A deployment already on `kv-wrapped` would find its wrapped DEK unreadable and the one-time re-encrypt sweep is **NOT implemented**.
+🔴 **HELD PENDING KAM: the DEGRADED flip.** Card `nexusai-degraded-flip-and-live-deployments` — it shares ONE unknown with `nexusai-privacy-keyvault-claim-rd518` (**are there live customer deployments**), so one answer settles both. **Build everything else; the flip lands behind his word.**
+**Two findings that changed the ticket:** the obvious `managedIdentityClientId` fix is a **NO-OP** (EnvironmentCredential is first and the printer SP env activates it — it would have shipped, passed review and changed nothing); and `encryptionDrift` **cannot detect this by construction** (it fires only on a decrypt FAILURE, and a deployment that only ever used the fallback decrypts fine — **zero drift forever is not evidence Key Vault works**).
+
+### GREEN / CLOSED
+**Build `35497286467` SUCCESS at 46m15s — main `34ad321` green on all three.** S71's owed item closed with a conclusion. **C-103 landed; relay closed.** (DELTA 35's snapshot trap still applies.)
+
+---
+
 ## 🟢 DELTA 36 — 2026-09-20 18:3x (Tuesday ctx 65% light checkpoint; band 80-90, NOT rotating). **THE FLOOR STATE — READ THIS BEFORE ANY OTHER DELTA.**
 
 ### WHO IS ACTUALLY ON THE FLOOR RIGHT NOW
