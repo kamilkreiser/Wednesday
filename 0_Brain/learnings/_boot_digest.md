@@ -7,7 +7,7 @@ status: live
 
 # Boot digest — headline + rules of every lesson (open the file when it fires)
 
-Generated 2026-09-20 17:25 from 195 lesson files (899,650 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 9 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
+Generated 2026-09-20 17:37 from 195 lesson files (902,190 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 9 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
 
 ## The T9 SSD is the master — Wednesday must be fully portable
 `2026-07-31_fully-portable-drive.md` · principle · 2026-07-31 · status: superseded — the "T9 is the master" half by [[2026-08-25_one-drive-devmaster-is-master]] (2026-08-25); the portability principle itself still lives
@@ -6328,7 +6328,26 @@ built to close.**
 
 **The lesson, in the agent's own words, adopted verbatim:**
 
-sections (open the file for these): The case · Two properties worth keeping on their own · The coordinator's half, which is where this actually started · Why the existing lessons did not catch it · 🔴 THE w=3 ROOT — three of Tuesday's errors in ONE session, and they are one mistake · How to apply
+sections (open the file for these): The case · Two properties worth keeping on their own · The coordinator's half, which is where this actually started · Why the existing lessons did not catch it · SHARPENED THE SAME DAY BY THE SAME AGENT — a canary the ruleset does not TARGET is not a control, and a FAILED control is ambiguous · 🔴 THE w=3 ROOT — three of Tuesday's errors in ONE session, and they are one mistake · How to apply
+
+## SHARPENED THE SAME DAY BY THE SAME AGENT — a canary the ruleset does not TARGET is not a control, and a FAILED control is ambiguous
+Kept here rather than in a new file (Kam's ruling (b), 2026-09-20: shrink the corpus).
+
+**The rule, in the agent's words:** *"A canary the ruleset does not target is not a control. A
+control has to be a value the instrument is KNOWN to detect, or its silence means nothing — and a
+failed control is ambiguous between 'instrument dead' and 'canary wrong', so it has to be
+RESOLVED, not reported."*
+
+**What this adds to the existing family.** [[2026-09-08_a-false-absence-is-usually-my-own-instrument]]
+already says a control drawn from the wrong family agrees with the wrong answer, and that a control
+which FIRES can still be the wrong instrument. This is the third face: **a control that does NOT
+fire is not a verdict on the instrument — it is an unresolved question with two candidate causes,
+and reporting either one without resolving it is a guess.** Same shape as
+[[2026-09-10_a-two-answer-question-hides-a-third-state]], turned on the control itself.
+
+**How to apply:** before a canary counts, name the RULE you expect it to trip and check that rule
+exists. If the canary comes back clean, you have learned nothing yet — resolve which of the two
+causes it is before you write a sentence either way.
 
 ## How to apply
 

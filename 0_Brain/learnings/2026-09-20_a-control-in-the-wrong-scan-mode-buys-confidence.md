@@ -73,6 +73,44 @@ The nearest neighbour is [[2026-08-06_local-proof-is-not-target-evidence]] — a
 not evidence about an environment that differs by design. This is its sharper sibling: **the
 environments need not differ at all; only the INVOCATION MODE needs to.**
 
+## SHARPENED THE SAME DAY BY THE SAME AGENT — a canary the ruleset does not TARGET is not a control, and a FAILED control is ambiguous
+
+Kept here rather than in a new file (Kam's ruling (b), 2026-09-20: shrink the corpus).
+
+**The case, hours after the one above, and it happened WHILE obeying a warning about the one
+above.** Commissioned to scan a 143 KB file before committing it, the agent controlled its scanner
+by planting `AKIAIOSFODNN7EXAMPLEKEY12345` and re-scanning. **Gitleaks reported clean on a file it
+had just put a credential-looking string into.** First reading: *"so gitleaks is dead on this
+file"*. Wrong. That string is not a valid AWS key shape, so **no rule targets it**. The canary was
+invalid, not the scanner.
+
+**Both available conclusions were false, and they fail in opposite directions:**
+- Had it not controlled at all, it would have cited "gitleaks: no leaks found" as evidence — which
+  is exactly the error that reddened main that morning.
+- Had it stopped at the failed control, it would have reported the scanner broken — also false, and
+  it would have blocked a correct commit.
+
+It resolved instead: re-ran with a value this ruleset **demonstrably detects** (an
+`azureOpenAIApiKey:"…"` assignment, the same rule that fired on the design doc that morning) —
+canary → `leaks found: 1`, unmodified file → `no leaks found`. **Only then was the clean result
+evidence.**
+
+**The rule, in the agent's words:** *"A canary the ruleset does not target is not a control. A
+control has to be a value the instrument is KNOWN to detect, or its silence means nothing — and a
+failed control is ambiguous between 'instrument dead' and 'canary wrong', so it has to be
+RESOLVED, not reported."*
+
+**What this adds to the existing family.** [[2026-09-08_a-false-absence-is-usually-my-own-instrument]]
+already says a control drawn from the wrong family agrees with the wrong answer, and that a control
+which FIRES can still be the wrong instrument. This is the third face: **a control that does NOT
+fire is not a verdict on the instrument — it is an unresolved question with two candidate causes,
+and reporting either one without resolving it is a guess.** Same shape as
+[[2026-09-10_a-two-answer-question-hides-a-third-state]], turned on the control itself.
+
+**How to apply:** before a canary counts, name the RULE you expect it to trip and check that rule
+exists. If the canary comes back clean, you have learned nothing yet — resolve which of the two
+causes it is before you write a sentence either way.
+
 ## 🔴 THE w=3 ROOT — three of Tuesday's errors in ONE session, and they are one mistake
 
 Recorded here rather than in a fourth file, because Kam's ruling (b) of 2026-09-20 says shrink the
