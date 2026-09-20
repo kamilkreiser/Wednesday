@@ -12159,7 +12159,7 @@
   "client_project": "Datasec/NexusAI (and every project on this layout)",
   "title": "103 settled rulings live OUTSIDE version control - a snapshot bought time today, but the durable home is your call",
   "bluf": "SAFE ALREADY, NOT SOLVED. Today's finding: NexusAI's CLARIFICATIONS.md - 142,981 bytes, 103 settled rulings C-1..C-103, the file every session is instructed to read FIRST - is NOT in version control. Measured: 0 tracked files match it on main, against a privacy.md control returning 1. It sits in 1_Project_Definition/, which is a SIBLING of the git repo (2_Project_Files/), so no git command from inside the repo can ever reach it.\n\nMITIGATED TODAY, no decision needed for that: a dated, byte-identical SNAPSHOT is now committed (sha256 matches the live file exactly). The live file was NOT moved and NOTHING about where a session looks has changed.\n\nWHY IT IS STILL YOUR CALL: a snapshot is a point-in-time copy, not a home. C-104 onward will live on one disk again until someone remembers to take another. Eighteen hours ago that disk had 1.0 GiB free. And this is not a NexusAI quirk - EVERY project here has 1_Project_Definition/ and 5_Project_History/ outside its repo, so whatever you rule probably applies fleet-wide.\n\nIt is a record of YOUR decisions, most of which exist in that form nowhere else. A rulings file with no history means nobody can ever ask when C-57 was added or what it replaced.",
-  "default_action": "Today's snapshot stands and nothing else changes. New rulings from C-104 on live on the disk only. I will take another snapshot at each wrap while this is open, and re-raise only if the count of unprotected rulings gets large.",
+  "default_action": "Today's snapshot stands. New rulings from C-104 on live on the disk only. I take another snapshot at each wrap - BUT NOT NAIVELY: C-103's text now quotes two credential-shaped canary strings (AKIA-style x2, an azureOpenAIApiKey line), and CLARIFICATIONS is untracked so CI has never scanned it. The next snapshot MUST be scanned with 'gitleaks git .' - the mode CI judges in, NOT 'gitleaks dir' - before it is pushed, and any finding suppressed BY FINGERPRINT in COMMIT form with the suppression proved narrow by a canary drawn FROM the ruleset. A snapshot taken without that step reddens main exactly as the RD-516 rescue did.",
   "options": [
    {
     "key": "a",
@@ -12199,6 +12199,19 @@
    "CARD nexusai-live-listing-lockout-warn-now",
    "CARD hpsm-live-release-verification-unprovable",
    "CARD nexusai-rd549-live-211-exfiltration"
-  ]
+  ],
+  "amendments": [
+   {
+    "ts": "2026-09-20T18:22:08.474242+10:00",
+    "reason": "C-103 landed in CLARIFICATIONS at 08:20Z and its text quotes two credential-shaped canary strings. That turns this card's own default action into a trap: the next snapshot carries them into git history, where the history scan DOES apply - the exact mechanism that reddened main this morning. Amending the default so the trap is disarmed rather than remembered.",
+    "changed": [
+     "default_action"
+    ],
+    "before": {
+     "default_action": "Today's snapshot stands and nothing else changes. New rulings from C-104 on live on the disk only. I will take another snapshot at each wrap while this is open, and re-raise only if the count of unprotected rulings gets large."
+    }
+   }
+  ],
+  "amended_ts": "2026-09-20T18:22:08.474258+10:00"
  }
 ]
