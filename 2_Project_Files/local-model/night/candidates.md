@@ -1,4 +1,4 @@
-# Ornith candidates — derived 2026-09-19 22:13 from 361 KS Backlog/Todo tickets (read-only, unpaginated)
+# Ornith candidates — derived 2026-09-20 09:46 from 362 KS Backlog/Todo tickets (read-only, unpaginated)
 
 A CENSUS for the coordinator to brief from, easy → hard (Kam 2026-09-15 16:40 / 18:19). A ticket here is a candidate, not a task: read it, read the file at the tip, write `night/briefs/<id>.md`, then queue it. Auth-shaped titles are excluded (LAST); Peter/Stuart tickets and PR-attached tickets are excluded outright.
 
@@ -116,7 +116,7 @@ A CENSUS for the coordinator to brief from, easy → hard (Kam 2026-09-15 16:40 
 - KS-966 — named in READY_KS-972_ornith35b-q4_BASHPATCH-REANCHORED-PASS-7of7_2026-09-16.diff.md
 - KS-999 — named in READY_KS-1186_ornith35b-q4_AUTH-5SITE-LINEKEYED-PASS-7of7_2026-09-17.diff.md
 
-## HELD (READY_* or done.md PASS) — 82
+## HELD (READY_* or done.md PASS) — 83
 - KS-1009 Security: GET /api/auth/wallet/status returns userId + role to ANY anonymous cal
 - KS-1011 KS-666 stack marker reads "unknown" for owner/branch/commit/started_at whenever 
 - KS-1028 KS-754 gate F-1 (MAJOR): a step-12 throw skips the USER_ERASED fan-out AFTER the
@@ -173,6 +173,7 @@ A CENSUS for the coordinator to brief from, easy → hard (Kam 2026-09-15 16:40 
 - KS-1229 ks1213 cells: ten tampers stay green - a refused issue can mint a holder stub or
 - KS-1237 ks1204 cells: three tampers stay green - the array-like allow-list, the refusal 
 - KS-1250 O-2: RUNBOOK §2.2 documents SMOKE_BASE_URL, but scripts/smoke-test.sh ignores it
+- KS-1282 GET /api/platform/tenants: the requireSuperAdmin guard (platform.ts:222) is pinn
 - KS-623 Test-token env guard is asymmetric: the gateway fails closed on an unset NODE_EN
 - KS-629 kyc `livenessVideo` is accepted by spec and runtime, then silently discarded — n
 - KS-692 Security: /api/status revoke/unrevoke has no tenant ownership check — an ISSUER_
