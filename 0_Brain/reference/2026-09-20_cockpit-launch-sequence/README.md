@@ -125,3 +125,8 @@ directory, never a rename in place (2026-09-09).
    must WARN on both strays, and a clean root must stay ✓.
 3. **D3/D2 strays:** move the conflict copies into a dated quarantine directory the
    sync engine ignores — a move, verified at every replica, never a rename.
+
+## STATUS 2026-09-20 22:0x — D1 and D2 FIXED the same night, on Kam's "once you fix the launch screen"
+- D2: commit a4433df73, arms `2_Project_Files/tests/doctor_root_check_arms.sh` 10/10. Directories are judged by gitignore (a recorded decision), not a name list — `logs/` and `.playwright-mcp/` are both deliberately ignored and would otherwise have warned every launch.
+- D1: commit 1d8ce6321, arms `2_Project_Files/fleet/tests/cockpit_pane0_rebase_gate_arms.sh` 5/5 (negative control: the pre-fix script starts pane 0 into a planted rebase). Pane 0 is NOT usage-gated, by design. **Not yet exercised by a real boot.**
+- Both harnesses had a defect of Wednesday's own on first run (hollow passes on a syntax error; a variable named `TMUX`) — caught by running, fixed before reliance.
