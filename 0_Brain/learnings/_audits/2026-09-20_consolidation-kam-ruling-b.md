@@ -71,6 +71,27 @@ cheap, safe and nearly free in digest terms. **The digest is dominated by RULES 
 archiving evidence. It requires genuinely MERGING lessons whose rules overlap, so that N rules
 become one rule with N sub-clauses.
 
+## 🔴 FINDING 3 (added 17:4x) — THE SAFE MECHANICAL WORK IS EXHAUSTED AFTER ONE FILE. Measured, so nobody re-explores it.
+
+Blocked on CI and looking for more work inside (b), I checked whether the other accreted giants
+share the safe shape of the 77 KB file — dated INSTANCE sections that can be moved without touching
+a rule. **They do not. Not one of them.**
+
+| file | size | its `##` sections are |
+|---|---|---|
+| `2026-08-14_i-read-representations-they-read-sources` | 28,808 B | *"Sharpened 2026-08-15: the variable is not WHOSE claim it is"*, *"Sharpened again 2026-08-16: the third switch is EXPECTATION"* — **rule changes** |
+| `2026-09-08_a-false-absence-is-usually-my-own-instrument` | 21,888 B | *"EXTENSION … a SEMANTIC control is what catches it"*, *"SHARPENED … A CONTROL DRAWN FROM THE SAME FAMILY … AGREES WITH THE WRONG ANSWER"* — **rule changes** |
+| `2026-08-06_ghost-suggestions-in-panes` | 17,636 B | *"THE ESCALATION LADDER (consolidated 2026-08-23 — **read this first when triaging any prompt line**)"* — an explicitly load-bearing operative rule |
+
+**`2026-08-07_a-check-that-cannot-fail` was the exception, not the pattern.** Its sections were
+genuinely dated instances (`### A failure-only log going quiet is not recovery (2026-08-22,
+Secuura s61)`); these are the lesson's own evolution. Splitting any of them would do precisely what
+Finding 1 warns about, at three times the scale.
+
+**So: the cheap, safe, mechanical half of (b) is DONE and it bought 10.5 KB of digest.** Everything
+remaining is the merge work in the clusters above — which is what Finding 2 predicted, and which is
+held for Kam's look. **A future seat should not re-explore case-splitting; this table is the answer.**
+
 ## The merge clusters this seat can already see (proposal, not executed)
 
 From the 322-handle index, these say overlapping things and are the real candidates:
