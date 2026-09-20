@@ -10,6 +10,20 @@ supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s
 
 ---
 
+## ⏳ GRANT EXPIRY TONIGHT — 2026-09-20 18:5x. **FIRST ACT FOR THE MONDAY SEAT.**
+
+**TWO rows in `tasks/EXPIRING-GRANTS.md` die at MIDNIGHT tonight** (both dated *end of SUNDAY 2026-09-20*; today is **Sunday 2026-09-20**, weekday and date checked against each other):
+1. **"AWAY 2 DAYS: keep going; push, merge and deploy whatever is ready"** — Kam, panel 2026-09-18 14:14:27.
+2. **"Ornith q4 ONLY; volume across the whole KS Backlog/Todo"** — Kam, panel 2026-09-15 16:36:04.
+
+⚠ **THE FIRST ONE'S PREMISE IS ALREADY GONE, AHEAD OF ITS DATE.** It was granted *because he would be away*. **He came back EARLY — he has been on the panel and in this seat's terminal since ~15:25 today** (the rulings on `tuesday-boot-digest-outgrew-the-window` and `tuesday-mini-vault-three-unpushed-commits`, and the direct zip instruction at 17:3x). **A grant whose stated condition has ended does not need to wait for its date.** Both are largely WEDNESDAY/SECUURA-scoped (Ornith, KS tickets, kintsugi) rather than Datasec, so they change little here — but the file is read at every boot and the rule is the rule.
+
+**ACTION, per that file's own rule 3 — *"never leave a dead grant looking live"*:** move both rows below the `## Expired` heading with the date they lapsed. **Do not renew either by inference** — a grant given for one week is evidence about that week. If the work wants either of them, ASK.
+
+**Nothing in this seat's current queue depends on either row.** RD-516 / RD-518 / RD-464 r3 all run on Tuesday's own merge authority after a gate, which is open-ended and unaffected.
+
+---
+
 ## 🟢 DELTA 37 — 2026-09-20 18:5x (Tuesday ctx ~70% CHECKPOINT; band 80-90, NOT rotating). **CURRENT STATE — supersedes DELTA 36 on everything named.**
 
 ### WHERE r3 ACTUALLY IS — merge RESOLVED and UNCOMMITTED in `worktrees/s72-rd464-r3`
