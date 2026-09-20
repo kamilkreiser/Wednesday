@@ -7,7 +7,7 @@ status: live
 
 # Boot digest — headline + rules of every lesson (open the file when it fires)
 
-Generated 2026-09-20 19:45 from 196 lesson files (910,550 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 9 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
+Generated 2026-09-20 21:17 from 197 lesson files (914,282 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 9 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
 
 ## The T9 SSD is the master — Wednesday must be fully portable
 `2026-07-31_fully-portable-drive.md` · principle · 2026-07-31 · status: superseded — the "T9 is the master" half by [[2026-08-25_one-drive-devmaster-is-master]] (2026-08-25); the portability principle itself still lives
@@ -6361,6 +6361,24 @@ causes it is before you write a sentence either way.
    exposed this before the push.
 4. This generalises past scanners: test runners with different collection roots, linters in
    `--fix` vs check mode, CI matrices that differ from local, `npm ci` vs `npm install`.
+
+
+## A guard that only executes while its subject is HEALTHY cannot report the subject being unhealthy — put the watcher OUTSIDE the thing it watches
+`2026-09-20_a-guard-inside-the-thing-it-guards.md` · principle · 2026-09-20 · status: live
+
+**The operative case, so the headline matches it:** you are about to add a check, an alarm or an expiry to a system — and the check is going to live *inside* that system's own code path. **Ask one question: in the failure state this guard exists to catch, does the code containing the guard still RUN?** If the answer is no, the guard is decoration, and it will be decoration in exactly the circumstance you built it for.
+
+sections (open the file for these): The case, measured · Why the existing lessons did not fire · How to apply
+
+## How to apply
+
+1. **Name the failure state, then ask whether the guard's host executes in it.** "Queue empty" → the queue-consumer does not run. "Process dead" → the process cannot report it. "Disk full" → the writer cannot write its own log. **Three of the commonest alarms are all this shape.**
+2. **Put the watcher in something that runs on ITS OWN clock** — the scheduler, `doctor.sh` at boot, a launchd job — not in the worker. `doctor.sh` is the proven home in this project: it already surfaces a stale `rotate_pending_*` marker for exactly this reason.
+3. **An expiry is only half a mechanism. The other half is the observer.** When you write a marker with a date in it, write down in the same action what will read it after that date, and prove that reader runs when the system is idle.
+4. **Suspect this hardest right after you have improved the guard**, because the improvement consumes the attention that would have asked the question. The sanity bound, the arms and the negative control were all correct — and all inside a leg that could not fire.
+5. **Test by its handle:** *if the thing I am guarding stops completely, does my guard still have a heartbeat?* If it borrows the subject's heartbeat, it is not a guard.
+
+**Family:** [[2026-09-07_an-instruction-to-wait-must-name-what-wakes]] · [[2026-09-08_a-new-rule-is-most-dangerous-just-after-adoption]] · [[2026-09-10_a-refusal-nobody-reads-is-indistinguishable-from-working]] (a refusal nobody reads; this is an alarm that cannot sound) · [[2026-09-06_a-scoped-override-carries-its-own-expiry]] · [[2026-08-09_an-enforcement-you-must-arm-is-not-one]].
 
 
 ## An absence is measured at one moment and ASSERTED at another — and the more carefully you write the complaint, the staler its premise
