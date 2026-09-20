@@ -12110,8 +12110,48 @@
   ],
   "recommended": "a",
   "ts": "2026-09-20T17:28:57.814711+10:00",
+  "status": "withdrawn",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "withdrawn_at": "2026-09-20T17:29:13.596129+10:00",
+  "withdrawn_reason": "Placeholder created in error by Tuesday 2026-09-20 17:2x while diagnosing an add failure; never shown to Kam, never a real question. Replaced in the same action by the real card, same id."
+ },
+ {
+  "id": "nexusai-privacy-keyvault-claim-rd518",
+  "client_project": "Datasec/NexusAI",
+  "title": "PRIVACY.md claims secrets are encrypted with a Key Vault-managed key - RD-518 means that key is machine-derived instead",
+  "bluf": "NOTE ON THE PRIOR-RULINGS GATE: it refused this card on a substring match - 'Key Vault' hit Kam's DEVMASTER VAULT rulings. Different subject; overridden with the reason recorded. Kam has ruled nothing on NexusAI encryption or PRIVACY.md.\n\nFACTS ONLY, AND THE DEFAULT IS ALREADY SAFE. This is for your awareness plus one question about EXISTING customers.\n\nPRIVACY.md line 129 - customer-facing, and presented as AUDITED ('audited under docs/SECURITY-AND-COMMERCIAL-READINESS-AUDIT.md re-baseline (2026-05-20)') - states, verbatim, read by me at source on main today:\n  'Secrets stored in NexusAI's own state are additionally AES-256-GCM-encrypted with a Key Vault-managed key (per audit finding H-2 / PT-014).'\n\nRD-518, confirmed this afternoon, means that Key Vault path does not engage. The Crypto User grant is on the user-assigned identity; the code builds its credential with no options; no managed-identity client id reaches the container; and AZURE_CLIENT_ID is bound to the printer-data service principal. In BOTH deployment shapes the credential used lacks the grant, and encryption falls back to a machine-id-derived key with only a WARN.\n\nSo the AES-256-GCM half stays TRUE and the clause 'with a Key Vault-managed key' becomes false. It degrades into a half-truth instead of failing loudly, which is the worst shape for a privacy representation.\n\nNOT IMPLICATED, checked separately so this is not overstated: README's Key Vault lines describe a DIFFERENT mechanism (Container Apps secrets[].keyVaultUrl, resolved by the Azure platform, never through our code's credential). TERMS_OF_SERVICE's 'AES-256 at rest' stays true. The marketplace listing text makes no Key Vault claim. NOTHING WAS CHANGED - PRIVACY.md and TERMS are never edited by agents (C-65).\n\nWHY THE DEFAULT IS SAFE: RD-518 is already a minimum-set blocker, so the package cannot ship until it is fixed, and fixing it makes the sentence true again. The submission is not the exposure.\n\nTHE REAL QUESTION: whether the LIVE 2.1.1 listing already carries this claim with the same defect, which would mean EXISTING customers. I have commissioned that measurement and will report it either way, unasked.",
+  "default_action": "Nothing changes and nothing ships: RD-518 already blocks the package, so the submission cannot go out with the claim false, and no document is edited. I report the live-2.1.1 measurement to you when it lands and raise that separately if existing customers are affected.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Fix RD-518 before submission; change no documents (Recommended)",
+    "detail": "Already the plan - RD-518 is in the minimum set and blocks the package. The claim becomes true again when the defect is fixed, and no customer-facing wording changes. Costs nothing extra."
+   },
+   {
+    "key": "b",
+    "label": "Amend PRIVACY.md to describe the actual behaviour",
+    "detail": "Your hands only (C-65 - agents never edit PRIVACY or TERMS). Makes the document accurate immediately regardless of the fix, but weakens a claim you may prefer to keep and make true."
+   },
+   {
+    "key": "c",
+    "label": "Both - fix it AND soften the wording to what the product guarantees under failure",
+    "detail": "Belt and braces. The sentence stops depending on a control that can silently disengage, which is the property that made this possible at all."
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-09-20T17:29:58.578467+10:00",
   "status": "open",
   "ruled_choice": null,
-  "ruled_ts": null
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "2026-08-17 20:23",
+   "2026-09-05 16:40",
+   "2026-09-08 07:09",
+   "2026-09-08 08:09",
+   "2026-09-08 11:50",
+   "2026-09-08 14:57",
+   "2026-09-15 10:51"
+  ]
  }
 ]
