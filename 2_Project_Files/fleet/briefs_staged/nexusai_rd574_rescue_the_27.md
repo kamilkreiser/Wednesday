@@ -1,4 +1,4 @@
-# BRIEF (STAGED, NOT SENT) — RD-574: rescue the 27 seam-dependent cells on their OWN branch
+# BRIEF (STAGED, NOT SENT) — RD-574: rescue the 28 seam-dependent cells on their OWN branch
 
 > 🔴 **RE-VERIFY BEFORE SENDING. Four things move and this brief is written ahead of time on purpose:**
 > 1. **`main`'s head** and **RD-516's branch head** — read `git ls-remote origin` in the same action as the send.
@@ -10,7 +10,7 @@
 
 **Rescue the 27 seam-dependent test cells named in §6 of the gate brief, on a NEW branch off current `main`, which merges BEFORE RD-516.** They pass on `main` today and break the moment RD-516's endpoint policy merges, so they are a **MERGE BLOCKER, not follow-up** — and because each fixture change is **inert** (it passes with and without the policy), the branch lands on `main` harmlessly ahead of the policy.
 
-**RD-516's own acceptance clause depends on this work:** *"The seam-dependent cells listed in §6 are on `main`."*
+**RD-516's own acceptance clause depends on this work:** *"The seam-dependent cells listed in §6 are on `main`."* **Read that as 28: S73 classified NEW-1 by reading it after the brief was committed, and deliberately did NOT edit §8 because committing would have moved the head the gate was measuring. The §8 "unclassified" line is a ONE-LINE FIX OWED after the verdict.**
 
 ## THE RECIPE — do not re-derive it; it is proven on R7 in RD-516's branch
 
@@ -21,6 +21,13 @@ Read it from §6 of `docs/rd516/RD-516-gate-brief.md` rather than from this brie
 4. point the boot/cell at that NAME.
 
 🔴 **CHANGE NOTHING ELSE. THE ASSERTION DOES NOT MOVE.** Only the endpoint's spelling changes.
+
+## 🟢 THE 28th — NEW-1, AND IT IS THE LIGHTEST OF THE SET
+**`ai-config-aoai-save.test.js:160-161`** drives ai-test anonymously with `azureOpenAIEndpoint: http://127.0.0.1:${refusing}` plus a key, and asserts `status 200` / `provider azure-openai`. **A caller-named loopback literal, so the policy refuses it `ADDRESS_LOOPBACK` → 400. It IS in the set.**
+
+🟢 **It needs `RD516_HOSTS` ONLY — NO `RD516_INTERCEPT`, no listener, no seam.** Its subject is *which provider was tested*, not whether the endpoint answered; the port it names is **deliberately a refusing one**, so the cell already tolerates a failed dial and a refused connection still returns `200 success:false`. **It only needs the endpoint to PASS the policy.** Do not add an interception it does not need.
+
+⚠️ **AND IT WILL LOOK DIFFERENT FROM THE OTHER FOUR FILES:** that suite **spawns the server itself** (`spawn(process.execPath, [SERVER])` at `:62`) instead of using `bootServer`. **So the preload is wired by adding `-r <preload>` to the spawn ARGS, not by a `preload:` option.** Expect that difference; it is not a mistake.
 
 ## ACCEPTANCE — inertness, per suite, measured not asserted
 
