@@ -40,6 +40,17 @@ supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s
 - **(c) THEY PASS ON MAIN — PROVED:** policy neutralised → **105/105 PASS**; policy on → **exactly 27 red. The host policy is the SOLE cause**, and rd464's and rd486's test files are **byte-identical** between `60c76d7` and `f4264e5`, so their 18 failures cannot be blamed on fixture churn.
 
 ### WHAT THE NEXT SEAT DOES, IN ORDER
+### 🟢 THE FLOOR IS EMPTY — both panes closed, and NEW-1's loop is closed too
+- **%20 (S73) closed** after its wrap, scored 0.99. **%21 (the gate) closed** after its verdict, scored 1.00 — *"Crunched for 33m 0s"*, listeners unchanged. **No Datasec seat is live. Nothing is waiting on a seat; everything is waiting on Kam's usage word.**
+- 🟢 **NEW-1: the two agents disagreed and the one who READ the file was right.** The gate inferred *"it boots no server, so it's unlikely to be seam-dependent — but unlikely isn't checked"*; **S73 read `ai-config-aoai-save.test.js:62` and found `spawn(process.execPath, [SERVER])` — it DOES run a server, just not through `bootServer`.** So it IS in the set (28), and it needs `RD516_HOSTS` only. **The keeper: an absence of the EXPECTED MECHANISM is not an absence of the BEHAVIOUR** — "no `bootServer` call" was read as "no server", and a direct `spawn` was sitting one line away.
+
+### 🔴 EVERYTHING IN DELTA 46's QUEUE IS PARKED ON THE USAGE CUT — measured 01:06, and BOTH reasons agree
+- **`usage_gate.sh --check` → REFUSED rc 3: weekly usage 95% >= 95%** (gauge age 2 min). **No Claude launch can proceed** — not a seat, not a gate, not a drafter.
+- **AND Kam's lift of the 95% stop was scoped to "tonight", its own row saying re-ask before Monday. It is Monday 01:06.** So the lift is past its stated scope **and** the gauge is at the cut. **Two independent reasons, same direction — this is not a judgement call and must not be re-derived as one.**
+- 🔴 **DO NOT renew the lift by inference.** His words: *"If the credits run out, I'll sign in to a new account in the morning."* **The unblock is HIS — a fresh lift or a new account.** It is item three of the morning report and it is now BLOCKING, not a courtesy re-ask.
+- **Nothing is half-done.** The fix round is fully specified below; the 28's brief is staged and re-verifiable. **A successor launches both the moment his word or the gauge allows, with no re-derivation.**
+- ⚠️ **Noted not actioned: `usage_gate.sh`'s refusal MESSAGE still says "no new agents at 90%" while the cut it applies is 95%** (Kam's "bump yours to 95%"). **The measurement is right; the message has rotted** — the 2026-08-17 shape. Shared tooling, so claimed with Wednesday before touching.
+
 1. **FIX ROUND (round 2 of 2 — a third is Kam's, C-62)** on `rd-516-ai-test-ssrf-s73`: the F-1 header correction · the F-2 IPv6 one-liner · the F-3/F-4 table corrections · **and the §8 NEW-1 line S73 deferred for the gate's benefit.** Small, well-specified, all on one branch.
 2. **THEN the 28** on their own test-side branch, carrying the preload helper, per `fleet/briefs_staged/nexusai_rd574_rescue_the_27.md` (content says 28; **re-verify its RE-VERIFY block first**).
 3. **R16 stays owed** with its three conjunct flips; **R3 stays unwritten** and must never be built on the interception seam.
