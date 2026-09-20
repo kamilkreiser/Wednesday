@@ -7,7 +7,7 @@ status: live
 
 # Boot digest BY TIER — W whole, M rules-only, every project case a handle
 
-Generated 2026-09-20 16:31 from 193 lesson files (955,107 B). M 35 · MIXED 5 · W 153. 28 project CASE sections inside MIXED files are reduced to one line each: the heading and the path to read it at. W blocks are exactly what the default digest carries; M blocks drop the section index and keep the rules; a P file is a single handle. The CASES behind every rule live only in the lesson files — open one the moment its rule fires.
+Generated 2026-09-20 16:48 from 193 lesson files (887,534 B). M 35 · MIXED 5 · W 153. 5 project CASE sections inside MIXED files are reduced to one line each: the heading and the path to read it at. W blocks are exactly what the default digest carries; M blocks drop the section index and keep the rules; a P file is a single handle. The CASES behind every rule live only in the lesson files — open one the moment its rule fires.
 
 ## The T9 SSD is the master — Wednesday must be fully portable
 `2026-07-31_fully-portable-drive.md` · principle · 2026-07-31 · status: superseded — the "T9 is the master" half by [[2026-08-25_one-drive-devmaster-is-master]] (2026-08-25); the portability principle itself still lives · tier: W
@@ -1038,7 +1038,7 @@ reported anything else — because it measured the wrong thing, errored and
 swallowed it, or asked a question whose answer was fixed in advance. It is worse
 than no check, because it converts an open question into a settled one.
 
-sections (open the file for these): A KEYWORD SEARCH OVER A CORPUS THAT CONTAINS THE SEARCH TERM AS VOCABULARY (2026-09-04 — three instances in one evening) · `timeout N cmd | wc -l` PRINTS 0 WHEN THE COMMAND IS KILLED — and no `||` can catch it (2026-09-04, twice in one evening) · THE DELIVERY MEMBER, and it is the sharpest one yet because the failing check IS this family's own enforcement (2026-09-07, W-tier, agent-caught in two minutes) · THE MEMBER THAT NAMES THE RIGHT PROPERTY AND OBSERVES THE WRONG WRITE (2026-09-08, Secuura s152 — twice in one seat, both caught by RUNNING)
+sections (open the file for these): The cases — moved 2026-09-20, read on demand
 
 **How to apply — one question, asked of the check rather than the result:**
 
@@ -1060,93 +1060,9 @@ sections (open the file for these): A KEYWORD SEARCH OVER A CORPUS THAT CONTAINS
 5. **When a check surprises you by passing, be as suspicious as when it fails.**
    Three of these four looked like good news.
 
-**How to apply:**
-1. **Search for the tool's OWN marker, not the English word.** Unison signals a conflict with
-   `<-?->`, not with "conflict". Find the machine's token before grepping for the human's.
-2. **Prove the search can find the real thing: plant it and search for it.** A `<-?->` written into
-   a scratch file, searched with the same command, is a one-line positive control — and it is what
-   turned "3 conflicts" into "zero conflicts, and here is why the 3 were not".
-3. **When a hit lands, READ IT before counting it.** A count is a claim about events; the lines are
-   the evidence. Every one of the three above dissolved on being read.
-4. **Scan for the SECRET, not the FORMAT** — the token body, never the vendor prefix, or the tool
-   fires on your own write-up of the incident.
-
-**How to apply:** never let a bounded command's output be the sole evidence for a count — capture
-the rc on its own line (`timeout N find … > out; rc=$?`) and branch on `124` (timed out) before
-reading the file. And **a zero from a bounded command is a suspect until its rc is read**, which is
-this whole file's rule pointed at the shell.
-
-**The rule this adds:**
-1. **A delivery check must measure CONTENT, not existence.** "It is at the destination" and "it says
-   what I wrote" are different claims, and every mail/webhook/queue/file-copy verification tends to
-   answer the first while being read as the second. Ask of any delivery check: *what would this print
-   if the payload were empty?*
-2. **Measure the artefact you produced before you hand it to the tool that sends it.** `wc -c` on the
-   body file costs nothing. The failure was visible on disk for the whole interval.
-3. **Pick the discriminator by testing it against a known-bad instance.** Here `text` is 0 in a LIST
-   response for *every* message, good or bad, so it cannot discriminate; `preview` is null only for
-   the empty one. The agent found this with a **same-read control** — the messages either side in the
-   same listing carried previews. That control is the technique, not the field.
-4. **Enforcement in the path, not a rule about writing files.** `send_brief.sh` now refuses a body
-   under 40 non-space characters, with no `--force`, and names the truncate-before-read cause in the
-   refusal text. Four branches exercised before arming: empty, whitespace-only and 37-char all refuse;
-   a long body passes through to be refused by the *next* gate, proving no over-fire.
-
-**Residual, stated rather than quietly carried:** `cockpit.sh say --mail` still verifies by subject.
-Wiring the `preview` discriminator into it is the promotion if this recurs.
-
-**The agent's half, credited:** it proved the body was empty **at signing time** from the DKIM body
-hash — `bh=` matched simple-canonicalisation of an empty body and was discriminated against by both a
-relaxed-canonicalisation control and a non-empty control — which rules out both transit stripping and
-its own retrieval failing. Then it **did not block and did not invent the missing criterion**: it
-started the one measurement that was correct under every reading of the surviving subject line, and
-asked for exactly the sentence it lacked. A counterpart that can prove *which* side of the wire lost
-the data turns an ambiguous incident into a fixed one.
-
-**Family:** [[2026-09-01_a-tap-is-a-pointer-not-a-message]] (the enforcement that passed) ·
-[[2026-08-29_unquoted-heredoc-executes-backticks]] (the sibling: prose destroyed on its way through a
-tool, with `bash -n` clean) · [[2026-08-14_i-read-representations-they-read-sources]] (a "sent" exit
-code is a representation of a delivery).
-
-**How to apply:**
-1. **Ask which WRITE produced the value the assertion reads.** If more than one write can put it
-   there, the test measures whichever one ran, not the one it names.
-2. **When a harness swallows or intercepts a write, prove the selector cannot match the OTHER
-   writes** — two writes sharing a status, a null field or a timestamp will both match a loose
-   condition. Find a discriminator that exists only on the intended one.
-3. **The check is a red-proof against a build with the property REMOVED**, not a green run. Twice on
-   2026-09-08 a test could not reach the case it named, **and both were caught by running rather than
-   reading** — the seat's own verdict: *"the single most productive check I have."*
-4. **Family note:** this is the sibling of the LOOSE MOCK (a mock that returns more than the product
-   would, so the suite is green on a branch that never executes). Both are false GREENS, and a false
-   green ships.
-
-project CASE sections lifted to their own tier (24, read them in the file):
+project CASE sections lifted to their own tier (1, read them in the file):
 
 - **P-Secuura/Blockchain** · The concrete remedy, added 2026-08-13 (Secuura/Blockchain s28) — cases in the file: `0_Brain/learnings/2026-08-07_a-check-that-cannot-fail.md`
-- **P-Secuura/Blockchain** · A failure-only log going quiet is not recovery (2026-08-22, Secuura s61) — cases in the file: `0_Brain/learnings/2026-08-07_a-check-that-cannot-fail.md`
-- **P-Secuura/Blockchain** · The third member: a check that MISREPORTS what it saw (2026-08-14, same agent) — cases in the file: `0_Brain/learnings/2026-08-07_a-check-that-cannot-fail.md`
-- **P-Secuura/Blockchain** · A test that cannot CLEAN UP starts asserting against live data (2026-08-15, Secuura s35) — cases in the file: `0_Brain/learnings/2026-08-07_a-check-that-cannot-fail.md`
-- **P-Secuura/Blockchain** · A positive control proves the suite it RAN IN, and nothing about its neighbour (2026-08-15, Secuura s35) — cases in the file: `0_Brain/learnings/2026-08-07_a-check-that-cannot-fail.md`
-- **P-Datasec/NexusAI** · The inverse: a REPRODUCTION that cannot reproduce (2026-08-15, Datasec/NexusAI) — cases in the file: `0_Brain/learnings/2026-08-07_a-check-that-cannot-fail.md`
-- **P-Secuura/Blockchain** · The refinement that makes the positive-control rule actually work (2026-08-16, Secuura s37) — cases in the file: `0_Brain/learnings/2026-08-07_a-check-that-cannot-fail.md`
-- **P-Datasec/NexusAI** · An indicator that can MISS its own event (2026-08-24, Datasec/NexusAI) — cases in the file: `0_Brain/learnings/2026-08-07_a-check-that-cannot-fail.md`
-- **P-Datasec/NexusAI** · The control needs its own control (2026-08-23, Datasec/NexusAI) — cases in the file: `0_Brain/learnings/2026-08-07_a-check-that-cannot-fail.md`
-- **P-Secuura/Blockchain** · The condition we had not stated: on a side-effecting system, the positive control IS an action (2026-08-14, Secuura s34) — cases in the file: `0_Brain/learnings/2026-08-07_a-check-that-cannot-fail.md`
-- **P-Secuura/Blockchain** · The mirror: an ABSENCE claim needs a positive control too (2026-08-14) — cases in the file: `0_Brain/learnings/2026-08-07_a-check-that-cannot-fail.md`
-- **P-Datasec/NexusAI** · Three "cannot see" members from one micro-session (2026-08-25, Datasec/NexusAI s5) — and a derivation lesson from its neighbour — cases in the file: `0_Brain/learnings/2026-08-07_a-check-that-cannot-fail.md`
-- **P-Secuura/Blockchain** · A test's NAME is not its coverage (2026-09-03, Secuura s119 — the member that let an AUTH BYPASS survive a suite that appears to test it) — cases in the file: `0_Brain/learnings/2026-08-07_a-check-that-cannot-fail.md`
-- **P-Datasec/NexusAI** · A census, a writer and a verifier that descend from ONE parse are one view rendered three times (2026-09-04, Datasec/NexusAI S29 — its own diagnosis, then its own correction to that diagnosis) — cases in the file: `0_Brain/learnings/2026-08-07_a-check-that-cannot-fail.md`
-- **P-Datasec/NexusAI** · THE ALL-FAIL RED-PROOF: a tamper that destroys the SUBJECT, so the failure set stops discriminating (2026-09-04, Datasec/NexusAI — self-caught and self-reported) — cases in the file: `0_Brain/learnings/2026-08-07_a-check-that-cannot-fail.md`
-- **P-Datasec/NexusAI** · A FIXTURE THAT CANNOT REACH THE PRODUCT'S PATH — the entry-point member (2026-09-04, Datasec/NexusAI RD-245; a BLOCKER found under a green suite the tester re-derived) — cases in the file: `0_Brain/learnings/2026-08-07_a-check-that-cannot-fail.md`
-- **P-Datasec/NexusAI** · CORRECTED the same session, by the same agent, and the correction is the better lesson — cases in the file: `0_Brain/learnings/2026-08-07_a-check-that-cannot-fail.md`
-- **P-Secuura/Blockchain** · A red-proof proves a check CAN fail; only a GREEN BASELINE proves it can pass for the right reason (2026-09-04, Secuura s120 — a guard defeated by its own doc comment) — cases in the file: `0_Brain/learnings/2026-08-07_a-check-that-cannot-fail.md`
-- **P-Datasec/NexusAI** · The AXIS a guard is blind on is not the axis it was designed for (2026-09-04, Datasec/NexusAI — a perfectly-implemented guard, green on a defect it could never see) — cases in the file: `0_Brain/learnings/2026-08-07_a-check-that-cannot-fail.md`
-- **P-Secuura/Blockchain** · THE OTHER END OF IT: a red-proof on a subject that did not COMPILE is not a red-proof (2026-09-04, Secuura s121 — the pair to the green-baseline rule above) — cases in the file: `0_Brain/learnings/2026-08-07_a-check-that-cannot-fail.md`
-- **P-Datasec/NexusAI** · A MULTI-CLAUSE guard red-proofed with a fixture that trips BOTH clauses has measured the pair and learned nothing about the parts (2026-09-04, Datasec/NexusAI S31 — the builder found its OWN guard was decoration) — cases in the file: `0_Brain/learnings/2026-08-07_a-check-that-cannot-fail.md`
-- **P-Datasec/NexusAI** · THE SECOND HALF, added hours later by the TESTER that verified the fix (2026-09-04, QA re-gate on `aad37da`) — cases in the file: `0_Brain/learnings/2026-08-07_a-check-that-cannot-fail.md`
-- **P-Datasec/NexusAI** · AN ELIMINATION SET THAT IS EXHAUSTIVE WITHIN ONE CATEGORY AND SILENT ABOUT THE OTHERS (2026-09-04, Datasec/NexusAI S32 — it disproved its OWN filed finding) — cases in the file: `0_Brain/learnings/2026-08-07_a-check-that-cannot-fail.md`
-- **P-Secuura/Blockchain** · A TEST HELPER THAT REIMPLEMENTS THE PRODUCT IS A MOCK THE MOMENT THE PRODUCT MOVES (2026-09-05, Secuura s128 — found by its own red-proof, not by reading) — cases in the file: `0_Brain/learnings/2026-08-07_a-check-that-cannot-fail.md`
 
 
 ## A promise is not a mechanism — unsupervised work needs a trigger, not an intention
