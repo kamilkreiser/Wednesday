@@ -10,6 +10,43 @@ supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s
 
 ---
 
+## 🔴 DELTA 46 — 2026-09-21 01:0x. **THE TIER-1 VERDICT IS IN. SECURITY PROPERTY CLOSED AND PROVED; THE MERGE IS NOT CLEARED.** Gate scored 1.00, pane %21 done. **No NexusAI seat is live, so THESE RULINGS LIVE HERE — there is no mail to inherit them.**
+
+### THE VERDICT, in the gate's own frame
+> **The security property is CLOSED and proved. The branch is NOT CLEARED TO MERGE — its own §5 acceptance clause is unsatisfied, measured. NO READER MAY RECORD THIS AS CLEARING THE MERGE.**
+- **26 refusal classes driven anonymously with the gate's OWN driver** (each from its own X-Forwarded-For so the limiter could not answer first; each with a caller key so the key rule could not): **400 on all 26 · 0 dials · 0 contact at a listener bound on the host's real RFC1918 · 0 echo · exactly ONE distinct response body.**
+- **The control reproduced the ORIGINAL DEFECT intact in the same window** (sourced NAME → TEST-NET-1: 200, 6 dials, GET **and** POST both carrying the api-key, content echoed into `details.sampleModels`), **re-run LAST as well as first.** So every zero above is a measurement.
+- **Absence clause HOLDS:** adapter diff `60c76d7..HEAD` is EMPTY; no `dispatcher`/`setGlobalDispatcher`/`ProxyAgent`/`new Agent`/`fetch:`/`undici`/`axios` anywhere in the branch's backend additions; `AOAI_FETCH_OPTIONS` still `{redirect:'error'}` and **M-R7b proves it load-bearing** (deleting `fetchOptions` reddens R7b + 8 rd523 cells including the containment claim itself).
+
+### 🔴 A FIFTH WAY A ZERO CAN LIE — ADD IT TO §9 AND TO THE BRIEF TEMPLATE'S STANDING LINES
+**The gate's FIRST full battery returned 0 dials / no echo on all 29 calls and it THREW IT AWAY.** Every call had been answered **403 `CSRF_INVALID`** and never reached the route — `bootServer` deletes `CSRF_ENFORCE`, so CSRF is enforced and an anonymous caller must first `GET /api/csrf-token`. **It caught this only because its positive control was supposed to be 200 and came back 403.** Its own sentence, and it is the keeper: ***refusal cells alone would have reported a clean pass for a build never exercised.*** (Shared tooling — the standing-lines edit is CLAIMED with Wednesday before touching.)
+
+### 🔴 F-1 (MAJOR) — RULED. **VERIFIED INDEPENDENTLY BY TUESDAY AT SOURCE, not accepted from the report.**
+`aiEndpointPolicy.js`'s own header says ai-config's Azure branch *"calls it too, so (C-54) holds BY CONSTRUCTION"*. **Nothing calls it.** Measured at `f4264e5`: the **only** require in the whole backend is `server.js:16580` inside ai-test · `checkEndpointName` has **zero external callers** (its 3 hits are its definition `:180`, its own internal use `:222`, its export `:251`) · **ai-config still runs its inline regex** `^https://[a-zA-Z0-9-]+\.openai\.azure\.com/?$` at `server.js:~16414` — **one suffix, https only, no port.**
+**Concrete consequence, and it is real: a Gov customer on `cognitiveservices.azure.us` (on the policy's sourced list) can TEST successfully and can NEVER SAVE through the wizard.** Not a security regression — the dial-time policy runs on every ai-test call however the value was stored.
+**RULING, three parts:**
+1. 🔴 **CORRECT THE HEADER BEFORE MERGE.** A false claim stated as holding *by construction*, in a tier-1 security module's own header, is what the next reviewer will rely on. Cheapest fix, highest value, and it is what gates the merge.
+2. 🔴 **DO NOT widen ai-config inside RD-516.** Wiring it changes what a SAVE path accepts (1 suffix → 4, https-only → the policy's rule) — a behaviour change on a different route, needing its own cells and its own gate. **That is scope this ticket was not given, and it is the same shape as the limiter collapse S73 correctly refused.**
+3. **FILE IT: the ai-config wiring + the Gov-customer save defect as its own ticket**, citing C-41's "ONE PLACE" as still unachieved (the rule is written twice and can drift — RD-462's shape) and **C-54 as now known-false in BOTH directions and untested.** ⚠️ **C-54 also needs a CLARIFICATIONS correction — supersede, never delete — and that is the PROJECT agent's action, not this seat's.**
+
+### THE OTHER FINDINGS — RULED
+- **F-2 (Minor, IPv6):** `http://[::1]/`, `[fc00::1]`, `[::ffff:192.168.8.37]` all audit `HOST_NOT_ON_SOURCED_LIST` instead of their address class, because `new URL().hostname` keeps the brackets and `net.isIP('[::1]')` is 0. **Refusal is still correct in every case (zero dials, identical body) — the loss is purely the operator's audit log**, i.e. exactly the defect this branch just fixed for IPv4. **RULED: FIX IT — one replace, `net.isIP(url.hostname.replace(/^\[|\]$/g,''))`** — and note it makes `unmap()` reachable on that path again.
+- **F-3 / F-4 (Minor, the brief's §4 table):** M-R12 reddens **3** cells (R12, R12-provenance, R10ii), not one; **M-R8's direction is INVERTED today** because R8 is already red for RD-541, so deleting a mount takes it red→**GREEN**. **RULED: correct the table.** A later reader applying M-R8, seeing green and recording a failed mutation is a real trap.
+- **F-5 (Informational):** the R16 mutant SURVIVES — the Private Link relaxation can gain a fourth conjunct and the whole 31-cell suite is indistinguishable from baseline. **§7 already owned R16 as unwritten; it now has a number on it.** Stays owed.
+
+### 🔴 §5 IS UNSATISFIED AND THE GATE PROVED THE DIRECTION
+- **(a) The 28 are NOT on main and CANNOT be as a fixture-only change** — the recipe needs `__tests__/helpers/rd516-net-harness-preload.js`, **absent at `60c76d7`** (as is the policy module). **This CORRECTS my own sequencing ruling: the 28's branch must carry the TEST HELPER TOO** — test-side only, no `backend/` file, still inert. **The staged brief is updated with this.**
+- **(b) 27 is exactly right, cell for cell** — four suites on the branch: 27 failed / 78 passed / 105 total = rd464 10 + rd486 8 + rd523 5 + rd545 4. **(+ NEW-1 = 28, classified after the brief was committed.)**
+- **(c) THEY PASS ON MAIN — PROVED:** policy neutralised → **105/105 PASS**; policy on → **exactly 27 red. The host policy is the SOLE cause**, and rd464's and rd486's test files are **byte-identical** between `60c76d7` and `f4264e5`, so their 18 failures cannot be blamed on fixture churn.
+
+### WHAT THE NEXT SEAT DOES, IN ORDER
+1. **FIX ROUND (round 2 of 2 — a third is Kam's, C-62)** on `rd-516-ai-test-ssrf-s73`: the F-1 header correction · the F-2 IPv6 one-liner · the F-3/F-4 table corrections · **and the §8 NEW-1 line S73 deferred for the gate's benefit.** Small, well-specified, all on one branch.
+2. **THEN the 28** on their own test-side branch, carrying the preload helper, per `fleet/briefs_staged/nexusai_rd574_rescue_the_27.md` (content says 28; **re-verify its RE-VERIFY block first**).
+3. **R16 stays owed** with its three conjunct flips; **R3 stays unwritten** and must never be built on the interception seam.
+4. **File the ai-config/Gov-customer ticket** per F-1 part 3.
+
+---
+
 ## 🟢 DELTA 45 — 2026-09-21 00:2x (s74, ctx 66% LIGHT CHECKPOINT; band 80-90, NOT rotating). **THE WHOLE FLOOR IN ONE READ. Supersedes DELTA 44's state; 44's RULINGS all stand.**
 
 ### 🟢 AMENDED 00:4x — **S73 HAS WRAPPED (scored 0.99, pane %20 CLOSED, listeners 23→23). THE SET IS 28, NOT 27.**
