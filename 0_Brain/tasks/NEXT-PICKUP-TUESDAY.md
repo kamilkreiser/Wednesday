@@ -10,6 +10,20 @@ supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s
 
 ---
 
+## 🟢 THE TIER-1 GATE BRIEF IS ALREADY WRITTEN — 2026-09-20 19:4x. **DO NOT REWRITE IT.**
+
+**PATH: `2_Project_Files/fleet/qa-agent/briefs/2026-09-20_nexusai-rd464-r3-tier1.md`** — 92 lines, committed and pushed in THIS repo (tracked, not a scratchpad). **Tuesday wrote it; only the LAUNCH remains.**
+
+**It already carries everything that cost this seat a session to assemble:** the target `60c76d7` with both parents verified as ancestors · **why the demo CANNOT test this** (RD-76: `/login` has ZERO `<form>` and ZERO `<input>`, so no test account opens it — and the instruction to say so in the verdict so nobody records a demo pass that did not happen) · **the gate's actual subject is the SEAM**, not either parent's work, because `getUsableLLMAdapter()` exists only on main and `aiReadiness` only on r3 · the two places carrying it with S72's measurements · **what is ALREADY measured so the gate does not redo it** (7/7 cells, M4 still reddens, counts 3772/214 read from the file, all eight symbol counts) · three known-fragile traps including the `module.exports` union and the C-104 multiple-of-3 tell.
+
+🔴 **WHY IT IS NOT LAUNCHED, and it is a mechanism problem not a decision:** **every existing QA launcher points at `/Volumes/DevMASTER/!CODING/Testing Agent MAIN`, and DevMASTER is NOT MOUNTED.** The T9 copy EXISTS at `/Volumes/KK_T9_External_HDD/!CODING/Testing Agent MAIN`. **A T9-pathed launcher must be generated first** — `fleet/qa-agent/gen_launcher_from_template.py <template> <output>`, then `--check` before any real launch. The newest existing launcher (`qa-agent/launchers/launch_qa_secuura_batch1097_1099.sh`) is Wednesday's Secuura one with eleven guard exits — **read it for the shape, do not run it.**
+
+**Tuesday split here deliberately: the brief is the THINKING (material only that seat held), the launcher is MECHANICS (fifteen minutes and a path substitution).** Rotating mid-launch would have left exactly the half-done state this seat spent the day telling agents is worse than unstarted.
+
+**Usage at the split: 89% against this seat's 95% stop (Kam, "bump yours to 95%"). A launch is permitted.**
+
+---
+
 ## 🔴 KAM RULED TWO THINGS AT 19:40-19:41 — 2026-09-20. **READ BEFORE ANY CARD OR BRIEF.**
 
 Both delivered **by the panel directly to `tuesday-agent@`**, NOT relayed — and **the local `chat_kam.json` was 66 MINUTES STALE at the time**, so `kam_rulings_today.sh` showed neither. The prescribed fetch+rebase did NOT help (the other seat had not pushed). **The mail had them; the panel log did not. When the tool warns it is stale, CHECK THE MAIL — an empty tail is not silence.**
