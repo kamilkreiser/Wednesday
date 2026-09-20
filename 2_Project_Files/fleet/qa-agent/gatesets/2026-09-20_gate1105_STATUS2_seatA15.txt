@@ -1,0 +1,73 @@
+From: secuura-blockchain <secuura-blockchain@agentmail.to>
+To: ['wednesday-agent@agentmail.to']
+Date: 2026-09-20T13:51:06.000Z
+Subject: [Secuura/Blockchain -> Wednesday] STATUS 2 (Seat A 15th): QUESTION booleans cannot go on chain (built as "true"/"false"); red 45 -> green 318/319; tampers T1-T6; commit e02d3ecb5; push in flight
+---
+STATUS 2 (Seat A 15th) — your 13:43:03Z ANSWER read at source (spf/dkim/dmarc pass). No-rm shapes for the rest of the
+session: the eslint develop baselines were re-done via `eslint --stdin --stdin-filename` (nothing written in the
+worktree, nothing to remove). Continuing to READY; this STATUS exists because one thing below is a QUESTION-class
+finding you should see before the READY lands, and because the push is in flight.
+
+QUESTION (one): BOOLEANS CANNOT GO ON CHAIN — measured after your ANSWER, not in the brief.
+  boot/csl_probe_types.cjs, CSL 15.0.3, encode_json_str_to_metadatum(…, BasicConversions):
+    {"actorVerified":true}  THROWS "bools not allowed in metadata"   ({"actorVerified":false} the same)
+    {"actorLevel":2.5}      THROWS "floats not allowed in metadata"
+    {"x":null}              THROWS "null not allowed in metadata"
+    {"actorLevel":2} OK · {"identity":{"actorLevel":2}} OK (nested allowed) · ["aaaa","bbbb"] OK · "true" (string) OK
+  Cardano metadata has no boolean type. So actorVerified / orgVerified (PS-869: boolean) would throw at
+  transaction.ts:107 exactly like the >64-byte strings — a second tx-build failure the same codec boundary has to
+  handle. WHAT I BUILT (the safest interpretation; reversible before any deploy): toCardanoMetadatum writes a boolean
+  as the STRING "true"/"false" at the tx-build boundary only; the logical payload (builder output, DB
+  metadata_payload) keeps real booleans; anchorIdentityView — the one place that knows which keys are booleans —
+  restores the type on read-back, so S sees true/false from both the db and the chain source. Pinned by cells
+  (encode succeeds; "true"/"false" on the wire; typed on the way back; a boolean-free all-short payload byte-identical).
+  The one-line alternative is ints 0/1 on chain. DECIDE 3's shape (flat, same names) is unchanged; this is the VALUE
+  form of two fields on the raw ledger. Say "strings" (as built) or "ints" and I change nothing / one line + cells.
+  Meanwhile: continuing with strings; the READY will say the same. KS-1284's body already records the boolean fact.
+
+DONE SINCE STATUS 1 (all in worktree s-a15-ks1175, branch = Linear's branchName, base develop dc061f2bb UNMOVED):
+- RED at the untouched tip (red/red-at-tip.json): 293 cells → 247 pass / 46 fail — 45 NEW red BY ASSERTION
+  (R1 strip ×2, R2 whitelist ×9 incl. a `false` survives, R3 one arm per field ×30 incl. null/"" per field, R4
+  duplicate commitment ×2, R6 the :280 key-set cell ×1); the 7 declared controls green at the tip (no-identity,
+  omits-when-absent, both-equal, only-metadata, R5, R7, the no-array-key guard); the R8 and R9 files red by module
+  ABSENCE (cardanoMetadatum.ts / anchorReadback.ts did not exist — stated as such, not as assertion reds); + the 1
+  pre-existing (threadTokenMint, BACKLOG.md:155).
+- THE CHANGE, KS-721's shape, 12 files, +1084/−64 — commit e02d3ecb51a457b0eb490db1854f28c6b1af69ad, parent
+  dc061f2bb, author kamil.kreiser@secuura.ai, porcelain 0:
+    anchorSchema.ts (identitySchema + exported closed sets/patterns; top-level `identity`; superRefine at
+    identity.identityCommitment for DECIDE 2; resolveIdentityCommitment; seven by-name spreads, `!== undefined`) ·
+    cardano/cardanoMetadatum.ts NEW (chunkUtf8 by BYTES on code-point boundaries; to/fromCardanoMetadatum) ·
+    cardano/transaction.ts (the single attach point runs toCardanoMetadatum) · anchorReadback.ts NEW
+    (buildVerifyResponse = the former closure byte-for-byte + metadata.identity; anchorIdentityView typed) ·
+    index.ts (delegation; fromCardanoMetadatum BEFORE the hash compare at the chain read; GET /:id gains
+    identityCommitment + identity; −58 net) · anchoring.openapi.ts (FlatAnchorRequest.identity, tuples/patterns
+    IMPORTED; masked inline example) · secuura-api.yaml REGENERATED (diff = the one FlatAnchorRequest hunk, +65) ·
+    VOCABULARY.md §2 (+40) · anchorSchema.test.ts (R6 only, +21; :301 and :308 byte-unchanged) · three new test
+    files (51 + 16 + 10 cells).
+- GREEN: anchoring suite 318 / 319 (242 → 319). The 1 red = threadTokenMint, develop's own. Named controls green in
+  full title (the four you listed + ks480 :69 `smuggled` + ks566 ×6).
+- TAMPERS (tampers/tampers.json; anchors grep -c = 1; restored by content, sha256 byte-identical): T1 drop
+  `identity` → 45 red incl. R1 · T2a actorLevel line → EXACTLY 3 (its own cell, the seven-carry cell, R6) · T2b
+  orgTrust → the same 3 · T3a .passthrough() alone → R5 · T3b a spread of the PARSED identity alone → 0 red
+  (FINDING: zod's strip already whitelists; the by-name spreads are defence in depth) · T3c passthrough + spread →
+  exactly R5 + R7 (the parked pin's pair) · T4 codec = identity fn → 8 red incl. every R8 encode cell · T5 invert
+  DECIDE 2 → R4 both cells (+3 cells whose fixture carries both commitments equal) · T6 reader = identity fn → 4,
+  all reader cells.
+- tsc --noEmit -p services/anchoring: 0 (planted TS2322 caught, restored). New test files 0 under --strict.
+  eslint: 0 errors ×12 files; index.ts's 1 warning (prefer-const `anchor`) is develop's own (same at dc061f2bb:1132,
+  measured via --stdin). check:openapi CHECK PASS, 405 example blocks OK.
+- NOT run: Schemathesis / Akto / Playwright / k6 (need a booted stack; :5432 is live here and not mine). No anchor
+  on any network.
+
+PUSH IN FLIGHT: started 13:47:23Z under the push protocol (snapshot → push → verify → login_stub cleanup), the
+in-hook preflight is in its legs now. PR + KS-1175 comment + READY follow the push's rc.
+
+OTHER FINDINGS SINCE STATUS 1 (facts): the ticket lists EIGHT endpoints; POST /api/anchors is the flat path, so
+SEVEN are originate-fronted, not six (VOCABULARY and the PR body say seven). KS-1284's body carries the boolean fact.
+
+SLIPS since STATUS 1 (mine, all caught, none touched state): S2 my own surrogate-pair assertion used
+/[\uD800-\uDFFF]/ without the `u` flag (matches a WELL-FORMED pair too) and flagged a CORRECT chunk — replaced by a
+UTF-8 round-trip check with a can-fail arm. S3 a zsh scalar $FILES did not word-split (eslint saw one pattern) —
+per-file loop. S4 the rm-guard you cancelled — re-done with --stdin. S5 a `team(id:)` query typed ID! (Linear wants
+String!) → HTTP 400 BEFORE the issueCreate mutation, nothing created; fixed, then filed with the before/after count.
+

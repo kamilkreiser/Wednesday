@@ -542,31 +542,6 @@ else
   fi
 fi
 
-# ── PAUSE_QUEUE EXPIRED: a deliberate Ornith pause whose expiry nothing observed ──
-# 2026-09-20: a pause written with an expiry (20:05) ran out and Ornith sat idle 70 min,
-# then 83 min again at the next boot — the G7 busy leg lives INSIDE night_run.sh, which
-# does not run while the queue is empty, so the alarm could not fire in exactly the state
-# it guards (learnings/2026-09-20_a-guard-inside-the-thing-it-guards.md). The observer
-# must live OUTSIDE the paused system: this check, on doctor's own clock.
-# Overrides for the arms: NIGHT_PAUSE_FILE (the file), DOCTOR_NOW_EPOCH (the clock).
-_PQ="${NIGHT_PAUSE_FILE:-$PROJECT_DIR/2_Project_Files/local-model/night/PAUSE_QUEUE}"
-if [ -f "$_PQ" ]; then
-  _pq_epoch="$(head -1 "$_PQ" | tr -dc 0-9)"
-  _pq_now="${DOCTOR_NOW_EPOCH:-$(date +%s)}"
-  # a 10-digit epoch only: a date string's digits (202609202331) would read as an epoch
-  # that never expires — the 2026-09-17 ALLOW_SEATS defect, caught here by arm A3
-  if [ -z "$_pq_epoch" ] || [ "${#_pq_epoch}" -ne 10 ]; then
-    warn "PAUSE_QUEUE has NO 10-digit epoch on line 1 (read: '${_pq_epoch:-empty}')" "night_run.sh reads line 1's digits as an expiry; a pause without one never expires — rewrite it as \$(date -j ... +%s) or move it aside (never rm)"
-  elif [ "$_pq_epoch" -lt "$_pq_now" ]; then
-    warn "!!! PAUSE_QUEUE EXPIRED $(( (_pq_now - _pq_epoch) / 60 )) min ago and Ornith may be idle" \
-         "expired $(date -r "$_pq_epoch" '+%F %H:%M' 2>/dev/null): $(sed -n 2p "$_PQ" | cut -c1-120) — run fleet/ornith_status.py, queue the next brief, and move the pause file aside (never rm)"
-  else
-    ok "Ornith pause live until $(date -r "$_pq_epoch" '+%F %H:%M' 2>/dev/null) (deliberate, unexpired)"
-  fi
-else
-  ok "no Ornith pause file (queue not deliberately paused)"
-fi
-
 # --- panel_sync loop alive (2026-09-13): Kam's ONE chat page is kept current by
 # `panel_sync.sh loop` (60 s cycles, detached, outside tmux). It died with the 09-12
 # 16:27 reboot and nothing noticed until a seat read the log at 08:45 the next morning
