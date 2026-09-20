@@ -7,7 +7,7 @@ status: live
 
 # Boot digest BY TIER — W whole, M rules-only, every project case a handle
 
-Generated 2026-09-21 09:02 from 197 lesson files (917,563 B). M 36 · MIXED 5 · W 156. 5 project CASE sections inside MIXED files are reduced to one line each: the heading and the path to read it at. W blocks are exactly what the default digest carries; M blocks drop the section index and keep the rules; a P file is a single handle. The CASES behind every rule live only in the lesson files — open one the moment its rule fires.
+Generated 2026-09-21 09:27 from 198 lesson files (921,005 B). M 36 · MIXED 5 · W 157. 5 project CASE sections inside MIXED files are reduced to one line each: the heading and the path to read it at. W blocks are exactly what the default digest carries; M blocks drop the section index and keep the rules; a P file is a single handle. The CASES behind every rule live only in the lesson files — open one the moment its rule fires.
 
 ## The T9 SSD is the master — Wednesday must be fully portable
 `2026-07-31_fully-portable-drive.md` · principle · 2026-07-31 · status: superseded — the "T9 is the master" half by [[2026-08-25_one-drive-devmaster-is-master]] (2026-08-25); the portability principle itself still lives · tier: W
@@ -6473,4 +6473,30 @@ sections (open the file for these): The case — I was one instrument away from 
 5. **A feature that cannot announce its own absence is a defect in itself** — cousin of
    [[2026-08-07_a-check-that-cannot-fail]]. Where a control silently falls back, the fix includes
    making the fallback loud, not only wiring the path.
+
+
+## A partition table must identify seats by what they can MEASURE about themselves — naming the rows by WORK lets a confused seat pick its row by what it has read
+`2026-09-21_a-partition-table-must-identify-seats-by-what-they-can-measure.md` · correction · 2026-09-21 · status: live · tier: W
+
+**The lesson:** I put three seats on one project, sharing one inbox, and gave each a
+disjointness table whose rows were named by WORK — *"S74 / RD-574"*, *"RD-516 fix round"*,
+*"RD-518 fix round 2"*. **A seat that is uncertain which seat it is cannot use that table.** It
+picks the row whose work it recognises, and the work it recognises is whatever it read in the
+shared inbox — which is the LOUDEST thread, not its own.
+
+sections (open the file for these): The rule · Why it generalises past this floor
+
+## The rule
+
+1. **Every partition row carries the identity facts a seat can measure about ITSELF** — pane id,
+   cockpit name, launcher pid, launch time — **before it carries the work.** Work is what the row
+   is *for*; identity is what makes the row *findable by its owner*.
+2. **State the instrument, not just the fact:** *"establish your seat from the process table, never
+   from which conversation looks like yours."* A seat under ambiguity needs to be told what to
+   measure, not merely asserted at.
+3. **A brief addressed to a suffixed name is not addressed to the bare name.** Say so explicitly
+   when seats share an inbox — `Datasec/NexusAI-C` is not `Datasec/NexusAI`, and the resemblance is
+   the trap.
+4. **Never write "you (S74)" in a mail that lands in a shared inbox.** A second-person label
+   addressed to one seat reads as an invitation to every seat that finds it.
 
