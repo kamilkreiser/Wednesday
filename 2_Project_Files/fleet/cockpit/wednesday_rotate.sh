@@ -180,25 +180,94 @@ BEFORE_FILE="$STATE_DIR/rotate_before_${BEFORE_TS}.txt"
 log "pane inventory BEFORE respawn ($(grep -c . "$BEFORE_FILE") panes) -> $BEFORE_FILE"
 while IFS= read -r _row; do log "  before: $_row"; done < "$BEFORE_FILE"
 LIVENESS="$HERE/rotate_liveness.sh"
+# -- D1, 2026-09-20: the checker armed 40 times against the real `fleet` and logged a
+# verdict 15 times; since 2026-09-15 it was 1 in 25, and since 09-18 00:54:09 zero --
+# nine armings, nine "respawned OK" lines proving the log was still being written,
+# and not one verdict. Nothing anywhere said so for two days.
+#
+# What the measurement showed (command + output in the session report; arms below):
+#   - the checker ALWAYS logs its own "armed for ..." line, so it starts every time;
+#   - there is no traceback and no bash error anywhere in the log, so it is signalled,
+#     not failing;
+#   - a setsid+nohup child of a PLAIN pane shell survives `respawn-pane -k` of that
+#     pane and reaches its verdict -- measured directly in a scratch session, so the
+#     old "it dies with the pane's tty" theory is RULED OUT;
+#   - under the test hooks (scratch session, trivial respawn command) the verdict rate
+#     is 20/20; against the real fleet it is 15/40;
+#   - and in 21 of the 25 real failures the ROTATE SCRIPT ITSELF also stopped: its own
+#     post-respawn chat_reply/speak output is absent from the log too. So whatever
+#     happens at `respawn-pane -k` reaches the seat's whole descendant TREE, not the
+#     checker specifically -- and setsid alone does not escape it, because setsid
+#     changes the session, not the parentage.
+# The exact killer was NOT established. The fix therefore attacks the property that
+# was measured -- descendancy -- rather than a mechanism that was guessed:
+#
+#   DOUBLE FORK. After os.setsid() the process forks again and the intermediate
+#   parent exits, so the checker reparents to launchd (ppid 1) BEFORE the respawn
+#   happens. It is then not a descendant of this script, of the seat's Claude
+#   process, or of the pane -- so a tree walk cannot enumerate it, and a process-group
+#   or session kill cannot reach it. `ppid == 1` is what the arm asserts.
+#   (Consequence: $! is the FIRST fork, which exits immediately, so "is it alive one
+#   second later" can no longer use $!. The daemon publishes its own pid to a file
+#   and that is what is checked -- a pidfile that never appears is itself a warning.)
+#
+#   PENDING MARKER. A process-survival fix cannot be *proved* in production, so the
+#   absence of a verdict is made loud instead of silent: a marker is written here,
+#   before the respawn, and rotate_liveness.sh is the only thing that clears it --
+#   on every path that logs a verdict. A marker left behind therefore means exactly
+#   "a checker armed and never reported". doctor.sh warns on a stale one, so the
+#   successor lands on it at its next boot. Two days of silence become one boot.
 if [ -x "$LIVENESS" ]; then
   LIVENESS_TEST=0; LIVENESS_STUB_DIR=""
   if [ -n "${ROTATE_TMUX_SESSION:-}" ]; then LIVENESS_TEST=1; LIVENESS_STUB_DIR="${ROTATE_LIVENESS_STUB_DIR:-}"; fi
+  # Both names carry BEFORE_TS, so they are unique per rotation and never need
+  # clearing out of the way (2026-08-26 never-delete: nothing here removes a file).
+  LIVE_PIDFILE="$STATE_DIR/rotate_liveness_${BEFORE_TS}.pid"
+  PENDING_FILE="$STATE_DIR/rotate_pending_${BEFORE_TS}.txt"
+  # First line shape matches ROTATE_LOSS_*.txt so doctor.sh can tell a real-fleet
+  # marker from a scratch-session one with the same `session '<name>'` read.
+  {
+    echo "ROTATE_PENDING - $(date '+%F %T') - seat $SEAT - session '$FLEET' - coordinator $PANE_ID"
+    echo "A liveness checker was armed for this rotation and has NOT logged a verdict."
+    echo "before-file: $BEFORE_FILE"
+    echo "checker pidfile: $LIVE_PIDFILE"
+    echo "If this file is more than a few minutes old the checker died before reporting:"
+    echo "the rotation went UNVERIFIED - check the fleet session and its agent panes BY HAND,"
+    echo "then quarantine this file (move, never rm)."
+  } > "$PENDING_FILE" 2>>"$LOG"
   LIVENESS_LAUNCH_CMD="$LAUNCH_CMD" LIVENESS_TEST="$LIVENESS_TEST" LIVENESS_STUB_DIR="$LIVENESS_STUB_DIR" \
-    python3 -c 'import os,sys; os.setsid(); os.execvp(sys.argv[1], sys.argv[1:])' \
-      nohup bash "$LIVENESS" "$FLEET" "$BEFORE_FILE" "$PANE_ID" </dev/null >>"$LOG" 2>&1 &
-  LIVE_PID=$!
+  LIVENESS_PENDING_FILE="$PENDING_FILE" \
+    python3 -c 'import os,sys
+pidfile = sys.argv[1]; cmd = sys.argv[2:]
+os.setsid()                       # new session, no controlling tty
+if os.fork() > 0: os._exit(0)     # double fork: the child reparents to launchd (ppid 1)
+open(pidfile, "w").write(str(os.getpid()))
+os.execvp(cmd[0], cmd)' \
+      "$LIVE_PIDFILE" nohup bash "$LIVENESS" "$FLEET" "$BEFORE_FILE" "$PANE_ID" </dev/null >>"$LOG" 2>&1 &
+  wait $! 2>/dev/null || true     # reap the first fork; the daemon is not our child
   sleep 1
-  LIVE_PS="$(ps -o pid=,ppid=,sess=,tty= -p "$LIVE_PID" 2>/dev/null | tr -s ' ')"
-  LIVE_TTY="$(printf '%s' "$LIVE_PS" | awk '{print $4}')"
-  if [ -z "$LIVE_PS" ]; then
-    log "WARNING: liveness checker pid $LIVE_PID is NOT running one second after spawn — respawning UNGUARDED (see log above)"
-  elif [ "$LIVE_TTY" != "??" ]; then
-    log "WARNING: liveness checker pid $LIVE_PID has a tty ($LIVE_PS) — it may die with this pane; respawning anyway"
+  LIVE_PID=""
+  [ -s "$LIVE_PIDFILE" ] && LIVE_PID="$(tr -dc '0-9' < "$LIVE_PIDFILE")"
+  if [ -z "$LIVE_PID" ]; then
+    log "WARNING: the liveness checker wrote no pidfile ($LIVE_PIDFILE) one second after spawn - respawning UNGUARDED (see log above); the pending marker $(basename "$PENDING_FILE") makes this visible at the next boot"
   else
-    log "liveness checker spawned detached: pid/ppid/sess/tty =$LIVE_PS (fires in ~25 s)"
+    LIVE_PS="$(ps -o pid=,ppid=,sess=,tty= -p "$LIVE_PID" 2>/dev/null | tr -s ' ')"
+    LIVE_PPID="$(printf '%s' "$LIVE_PS" | awk '{print $2}')"
+    LIVE_TTY="$(printf '%s' "$LIVE_PS" | awk '{print $4}')"
+    if [ -z "$LIVE_PS" ]; then
+      log "WARNING: liveness checker pid $LIVE_PID is NOT running one second after spawn - respawning UNGUARDED (see log above)"
+    elif [ "$LIVE_TTY" != "??" ]; then
+      log "WARNING: liveness checker pid $LIVE_PID has a tty ($LIVE_PS) - it may die with this pane; respawning anyway"
+    elif [ "$LIVE_PPID" != "1" ]; then
+      # The whole point of the double fork. ppid != 1 means it is still a descendant
+      # of this seat and is exposed to whatever killed 25 of the last 40 checkers.
+      log "WARNING: liveness checker pid $LIVE_PID did NOT reparent (ppid $LIVE_PPID, expected 1) - it is still in this seat's process tree and may die at the respawn; respawning anyway ($LIVE_PS)"
+    else
+      log "liveness checker spawned detached + reparented: pid/ppid/sess/tty =$LIVE_PS (fires in ~25 s; pending marker $(basename "$PENDING_FILE"))"
+    fi
   fi
 else
-  log "WARNING: $LIVENESS missing or not executable — respawning UNGUARDED (doctor.sh should have failed on this)"
+  log "WARNING: $LIVENESS missing or not executable - respawning UNGUARDED (doctor.sh should have failed on this)"
 fi
 
 log "respawning $SEAT pane $PANE_ID in '$FLEET' ($MODE): $REASON"

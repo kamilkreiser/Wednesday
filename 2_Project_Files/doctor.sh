@@ -511,6 +511,37 @@ else
   fi
 fi
 
+# ── ROTATE_PENDING: a rotation armed a liveness checker that never reported ──
+# 2026-09-20. The checker armed 40 times against the real fleet and logged a verdict
+# 15 times; from 09-18 00:54 it was nine armings and zero verdicts. NOTHING said so —
+# the rotate log recorded "respawned OK — liveness verdict follows in ~25 s" and the
+# verdict simply never came, and no file, warning or tap existed to notice. Two days.
+# wednesday_rotate.sh now writes state/rotate_pending_<ts>.txt BEFORE the respawn and
+# rotate_liveness.sh is the ONLY thing that clears it (by rename to consumed_*), on
+# every path that logs a verdict. So a marker still here = a rotation that went
+# UNVERIFIED, and this leg is where the successor lands on it at its next boot.
+# -mmin +5 is the grace window: a rotation in flight has a marker ~25 s old and must
+# not warn. Real-fleet vs scratch is the same first-line read the ROTATE_LOSS leg uses.
+ROTATE_PENDING_ALL="$(find "$PROJECT_DIR/2_Project_Files/fleet/cockpit/state" -maxdepth 1 -name 'rotate_pending_*.txt' -mmin +5 2>/dev/null | sort)"
+ROTATE_PENDING_FILES=""; ROTATE_PENDING_TEST=0
+for _rp in $ROTATE_PENDING_ALL; do
+  if head -1 "$_rp" 2>/dev/null | /usr/bin/grep -q -i -- "session 'fleet'"; then
+    ROTATE_PENDING_FILES="$ROTATE_PENDING_FILES $_rp"
+  else
+    ROTATE_PENDING_TEST=$((ROTATE_PENDING_TEST + 1))
+  fi
+done
+if [ -n "${ROTATE_PENDING_FILES// /}" ]; then
+  warn "!!! ROTATION WENT UNVERIFIED: liveness checker armed and never reported: $(printf '%s\n' $ROTATE_PENDING_FILES | xargs -n1 basename | tr '\n' ' ')" \
+       "the rotation's liveness check produced NO verdict, so nothing confirmed the fleet session or its agent panes survived that respawn — check the fleet session and every agent pane BY HAND now, then QUARANTINE the file(s) (move under 0_Brain/reference/<date>_rotation-unverified/; never rm)"
+else
+  if [ "$ROTATE_PENDING_TEST" -gt 0 ]; then
+    ok "no unverified rotations ($ROTATE_PENDING_TEST pending marker(s) from a scratch/test session, ignored)"
+  else
+    ok "no unverified rotations (every armed liveness checker logged a verdict)"
+  fi
+fi
+
 # --- panel_sync loop alive (2026-09-13): Kam's ONE chat page is kept current by
 # `panel_sync.sh loop` (60 s cycles, detached, outside tmux). It died with the 09-12
 # 16:27 reboot and nothing noticed until a seat read the log at 08:45 the next morning

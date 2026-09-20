@@ -30,10 +30,30 @@
 # Waits LIVENESS_DELAY (25 s) then checks:
 #   (a) `tmux has-session -t <session>`
 #   (b) every pane id in the before-file except the coordinator's still exists
-#   (c) the coordinator pane exists, is not pane_dead, and its process is alive
-# QUIET path: logs `LIVENESS OK: session alive, N/N agent panes present,
+#   (c) every one of those panes still has a LIVE AGENT in it — pane_agent_live.sh
+#       (2026-09-20; see below). PRESENCE IS NOT ALIVENESS.
+#   (d) the coordinator pane exists, is not pane_dead, and its process is alive
+# QUIET path: logs `LIVENESS OK: session alive, N/N agent panes present, M agent-live,
 #   coordinator pid P`. Nothing else.
-# FIRE path (session gone, or any agent pane missing, or coordinator dead):
+#
+# (c) — ADDED 2026-09-20, the second defect of the day. Until today this script
+# compared the before-file's pane ids against the ids present after and called that
+# aliveness. It is not. At 16:03:26 the before-file recorded
+#     %124 [Secuura/Blockchain-BOARD] Kamils-Mac-Studio.local 49466
+# — a pane whose agent had exited ~15 minutes earlier, leaving a bare shell — and the
+# rotation logged OK and moved on. Every pane in the before-file that is neither the
+# coordinator nor a DECLARED SHELL ROLE must now prove a live agent, via the
+# two-source predicate in pane_agent_live.sh (no claude process under the pane's pid
+# AND no `✳` activity marker in its title ⇒ NOT LIVE). A pane that fails that is a
+# FIRE, on the same alarm + speak + panel path as a missing pane.
+#   LIVENESS_SHELL_ROLES — space-separated @cockpit_name values that are ALLOWED to
+#   be bare shells; default `fleet-monitor`, which is legitimately a shell (measured
+#   2026-09-20: %1 fleet-monitor title `Kamils-Mac-Studio.local`, no claude process)
+#   and must never alarm. The COORDINATOR is exempt implicitly — it was just
+#   respawned and is still booting, so it has no claude process yet; it keeps its own
+#   check (d), which asks only that its pane and process exist.
+# FIRE path (session gone, or any agent pane missing or fallen to a shell, or
+# coordinator dead):
 #   - logs `LIVENESS FAIL …` naming what is missing
 #   - writes state/ROTATE_LOSS_<ts>.txt (before-list + after-list); doctor.sh
 #     WARNS on that file until the seat quarantines it — never deleted here
@@ -64,6 +84,18 @@
 #                        the action is SKIPPED and logged (08-17 rule: a test hook
 #                        never defaults to the production action).
 #   LIVENESS_STUB_DIR    directory of the two stubs (test mode only)
+#   LIVENESS_PENDING_FILE  the marker wednesday_rotate.sh wrote BEFORE the respawn.
+#                        THIS SCRIPT IS THE ONLY THING THAT CLEARS IT — on every
+#                        exit path that logs a verdict. A marker still on disk
+#                        therefore means "a rotation armed a checker and no verdict
+#                        was ever logged", which is exactly the 2026-09-20 D1 defect
+#                        (25 real armings, 0 verdicts, and nothing anywhere said so).
+#                        doctor.sh warns on a stale one, so the SUCCESSOR lands on it
+#                        at its next boot instead of the silence lasting two days.
+#                        Cleared by RENAME (…/consumed_<name>), never rm — 2026-08-26
+#                        never-delete; cleanup means quarantine.
+#   LIVENESS_SHELL_ROLES  @cockpit_name values allowed to be bare shells
+#                        (default: fleet-monitor)
 # macOS bash 3.2 — no declare -A, no timeout. Never discards stderr.
 # Logs to cockpit/logs/rotate_wednesday.log (the rotate script's log), tagged
 # [liveness]. rc 0 = OK, 1 = usage, 10 = LIVENESS FAIL (after the alarm actions).
@@ -86,6 +118,25 @@ LAUNCH_CMD="${LIVENESS_LAUNCH_CMD:-}"
 DELAY="${LIVENESS_DELAY:-25}"
 TEST_MODE="${LIVENESS_TEST:-0}"
 STUB_DIR="${LIVENESS_STUB_DIR:-}"
+PENDING="${LIVENESS_PENDING_FILE:-}"
+SHELL_ROLES="${LIVENESS_SHELL_ROLES:-fleet-monitor}"
+AGENTLIVE="$HERE/pane_agent_live.sh"
+
+# Clear the "a checker armed and never reported" marker. Called on EVERY path that
+# logs a verdict, and on no other path.
+clear_pending() {
+  [ -n "$PENDING" ] || return 0
+  [ -e "$PENDING" ] || return 0
+  if mv "$PENDING" "$(dirname "$PENDING")/consumed_$(basename "$PENDING")" 2>>"$LOG"; then
+    log "pending marker cleared (verdict logged): $(basename "$PENDING")"
+  else
+    log "WARNING: could not clear the pending marker $PENDING — doctor.sh will warn on it although a verdict WAS logged"
+  fi
+}
+is_shell_role() {  # $1 = @cockpit_name
+  for _r in $SHELL_ROLES; do [ "$1" = "$_r" ] && return 0; done
+  return 1
+}
 
 # ── seat resolution (once) ─────────────────────────────────────────────────
 _tree_seat=wednesday
@@ -108,13 +159,32 @@ AFTER=""
 if [ "$SESSION_ALIVE" = 1 ]; then
   AFTER="$("$TMUX_BIN" list-panes -s -t "=$SESSION" -F '#{pane_id} [#{@cockpit_name}] #{pane_title} #{pane_pid} dead=#{pane_dead}' 2>>"$LOG")"
 fi
-EXPECTED=0; PRESENT=0; MISSING=""
-while read -r pid_ rest_; do
+EXPECTED=0; PRESENT=0; MISSING=""; DEADAGENTS=""; AGENTLIVE_OK=0
+if [ ! -x "$AGENTLIVE" ]; then
+  # A check that silently does not run is the defect this whole file exists to stop.
+  log "WARNING: $AGENTLIVE missing or not executable — the agent-LIVENESS half of the check is NOT running; presence only (doctor.sh should have failed on this)"
+fi
+while read -r pid_ name_ rest_; do
   [ -n "$pid_" ] || continue
   [ "$pid_" = "$COORD" ] && continue
+  # Never hand anything but a real pane id to tmux: an empty or malformed -t target
+  # is NOT a no-op, it applies to the caller's own pane (2026-09-17, the arm that
+  # renamed the live coordinator pane and blinded the watcher for ten minutes).
+  case "$pid_" in %[0-9]*) : ;; *) log "  skipping malformed before-file row (pane id '$pid_')"; continue ;; esac
   EXPECTED=$((EXPECTED+1))
   if printf '%s\n' "$AFTER" | awk -v p="$pid_" '$1==p{f=1} END{exit !f}'; then
     PRESENT=$((PRESENT+1))
+    _nm="$(printf '%s' "${name_:-}" | tr -d '[]')"
+    if is_shell_role "${_nm:-?}"; then
+      :   # a declared shell role (fleet-monitor): present is all that is asked of it
+    elif [ -x "$AGENTLIVE" ]; then
+      # </dev/null so the helper can never swallow this loop's stdin (the before-file).
+      if TMUX_BIN="$TMUX_BIN" bash "$AGENTLIVE" "${pid_:?}" </dev/null 2>>"$LOG"; then
+        AGENTLIVE_OK=$((AGENTLIVE_OK+1))
+      else
+        DEADAGENTS="$DEADAGENTS ${pid_}[${_nm:-?}]"
+      fi
+    fi
   else
     MISSING="$MISSING $pid_"
   fi
@@ -131,20 +201,25 @@ if [ "$SESSION_ALIVE" = 1 ]; then
 fi
 
 # ── quiet path ─────────────────────────────────────────────────────────────
-if [ "$SESSION_ALIVE" = 1 ] && [ -z "$MISSING" ] && [ "$COORD_STATE" = "live" ]; then
-  log "LIVENESS OK: session alive, $PRESENT/$EXPECTED agent panes present, coordinator pid $COORD_PID"
+if [ "$SESSION_ALIVE" = 1 ] && [ -z "$MISSING" ] && [ -z "$DEADAGENTS" ] && [ "$COORD_STATE" = "live" ]; then
+  log "LIVENESS OK: session alive, $PRESENT/$EXPECTED agent panes present, $AGENTLIVE_OK agent-live, coordinator pid $COORD_PID"
+  clear_pending
   exit 0
 fi
 
 # ── fire path ──────────────────────────────────────────────────────────────
 if [ "$SESSION_ALIVE" = 0 ]; then
   WHAT="tmux session '$SESSION' is GONE (all $EXPECTED agent pane(s) + coordinator lost)"
-elif [ -n "$MISSING" ]; then
-  WHAT="session alive but agent pane(s) MISSING:${MISSING} ($PRESENT/$EXPECTED present); coordinator $COORD $COORD_STATE"
+elif [ -n "$MISSING" ] || [ -n "$DEADAGENTS" ]; then
+  WHAT="session alive"
+  [ -n "$MISSING" ]    && WHAT="$WHAT but agent pane(s) MISSING:${MISSING}"
+  [ -n "$DEADAGENTS" ] && WHAT="$WHAT; agent pane(s) PRESENT BUT DEAD (fallen to a shell):${DEADAGENTS}"
+  WHAT="$WHAT ($PRESENT/$EXPECTED present, $AGENTLIVE_OK agent-live); coordinator $COORD $COORD_STATE"
 else
   WHAT="session alive, $PRESENT/$EXPECTED agent panes present, but coordinator $COORD is $COORD_STATE"
 fi
 log "LIVENESS FAIL: $WHAT"
+clear_pending
 ALARM="$STATE_DIR/ROTATE_LOSS_${TS}.txt"
 {
   echo "ROTATE_LOSS — $(date '+%F %T') — seat $SEAT — session '$SESSION' — coordinator $COORD"
@@ -158,6 +233,12 @@ log "alarm file written: $ALARM"
 if [ "$SESSION_ALIVE" = 0 ]; then
   SPOKEN="Kam — the fleet session died during my rotation. Relaunch needed: I am bringing the coordinator back; the agents must be relaunched from the pickup file."
   PANEL="${SEAT_NAME}: the fleet tmux session DIED during my rotation ($(date '+%H:%M')) — every agent pane was lost. Coordinator relaunch attempted automatically; agents need relaunching from the pickup file. Alarm: $(basename "$ALARM")."
+elif [ -n "$DEADAGENTS" ] && [ -z "$MISSING" ]; then
+  # The 2026-09-20 failure mode: nothing vanished, but an agent pane is a bare shell.
+  # It gets the SAME alarm file + speak + panel path as a lost pane — a new failure
+  # mode that only reaches the log is the defect being fixed, not a fix.
+  SPOKEN="Kam — an agent pane is alive but empty: its agent has exited and left a shell. The fleet session is fine; that project is doing nothing."
+  PANEL="${SEAT_NAME}: agent pane(s) PRESENT BUT DEAD at my rotation ($(date '+%H:%M')) —${DEADAGENTS} had exited, leaving a bare shell. Nothing was lost by the rotation; that work is simply stopped. Relaunch from the pickup file. Alarm: $(basename "$ALARM")."
 else
   SPOKEN="Kam — a pane was lost during my rotation. The fleet session is alive; check the alarm file."
   PANEL="${SEAT_NAME}: pane loss during my rotation ($(date '+%H:%M')) — $WHAT. No relaunch (session alive). Alarm: $(basename "$ALARM")."
