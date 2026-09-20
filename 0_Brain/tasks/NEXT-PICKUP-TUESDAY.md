@@ -10,6 +10,23 @@ supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s
 
 ---
 
+## 🔴 KAM, DIRECT TO THIS SEAT, 2026-09-20 17:3x — VERBATIM, AND IT IS AN OWED ACTION WITH A TRIGGER
+
+> **"please email kreiser.org@me.com with the zip when its ready for submission"**
+
+**RE-CONFIRMED TODAY, so it no longer rests on the 2026-09-18 terminal instruction.** Receipted on the panel within the minute. This does not change what was already owed — it removes any staleness doubt about it, and it is the single thing he is waiting on.
+
+**THE EMAIL, when the zip exists:** to **kreiser.org@me.com**, **the package zip ONLY** (no assets — his words, 09-18), with its **sha256** and the **source head**, read back at the destination. It must also carry, because he needs them BEFORE he uploads:
+1. **The RD-464 r3 HOLD and why** — it is deliberately not in the package.
+2. **RD-549's behaviour change**, in S71's already-written Kam-facing wording, carried verbatim in DELTA 33 — do NOT reconstruct it from a ticket.
+3. **The open-mode confirm (C-92)** and **RD-549's upgrade change (C-93)**.
+4. Partner Center: set the VERSION field to **2.2.0** and check it matches the file (the live row reads `2.1.0` beside a file named `2.1.1`, so that field is entered separately).
+5. RD-536 row 14's two asks (pre-built image vs build-from-zip, default PRE-BUILT; the certification risk, default ACCEPT) go in the SAME message, as one ask.
+
+**IT IS NOT READY AND HE HAS BEEN TOLD SO PLAINLY.** Three minimum-set lines remain — RD-516, RD-518, RD-464 r3 — and RD-518's fix is not started. **Do not send a partial package.**
+
+---
+
 ## 🔵 DELTA 34 — 2026-09-20 17:3x (Tuesday ctx 51% CHECKPOINT; band 80-90, NOT rotating). READ FIRST; DELTA 33 holds except where named.
 
 ### 🟢 THE MINIMUM SET WENT FROM SEVEN TO **THREE** TODAY
