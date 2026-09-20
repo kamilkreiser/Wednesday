@@ -49,6 +49,37 @@ configured" is `server.js`, which reads the *unset* `KEY_VAULT_NAME` and therefo
 `not_configured` **unconditionally** — so it carries no signal at all. The smaller defect I had
 correctly identified was the thing suppressing the larger one I had dismissed.
 
+## THE MIRROR, same day, same pair of tickets — a CORRECT conclusion resting on a reason that answered a NEIGHBOURING question
+
+RD-518 was this lesson's forward case: **I refuted the mechanism and nearly killed a true
+conclusion.** RD-550 is its mirror, and it landed on a ruling I had already made.
+
+I ruled RD-550 out of the minimum set citing the agent's argument that the ticket "conflates two
+stores" — AI config on the persistent volume, the SQLite store ephemeral. **Both halves were true.
+Neither was operative.** Persistence on disk would not help if the boot hydration never ran: the
+data would survive and still be unusable after a restart. **The evidence answered "is the data
+DESTROYED" while the ticket asked "is the data APPLIED at boot."** Two adjacent questions, one
+answer, and it fitted well enough that neither of us noticed.
+
+The agent caught it **by re-reading the ticket's own words in order to rewrite it** — the ticket
+said the *hydration* sits in the wrong branch, not that the store is lost. The real reason turned
+out to be narrower and the ruling survived on better grounds.
+
+**The rule: a ruling inherits the quality of the reasoning under it. Before accepting a reason,
+check it answers THE QUESTION THE TICKET ASKED, not a neighbouring one that happens to be true.**
+A true statement about an adjacent property is the most convincing wrong answer available, because
+nothing about it is false.
+
+**And the tell to watch for:** I accepted it because it was *well-measured*. It was — file paths,
+volume mounts, all correct. **Rigour in the evidence is not relevance of the evidence**, and I have
+no habit that checks the second once the first is satisfied. That habit is: restate the ticket's
+question in one sentence, then ask whether the evidence is about THAT.
+
+Same session, same pair: [[2026-09-20_a-control-in-the-wrong-scan-mode-buys-confidence]]'s w=3 root
+is *I specify using a property I measured, and the property that governs is one I did not.* This is
+its judgement-side twin: **I ACCEPT a property someone else measured, and the property that governs
+is one neither of us checked.**
+
 ## The rule
 
 1. **A ticket's conclusion and its mechanism are two claims. Kill them separately.** "The stated

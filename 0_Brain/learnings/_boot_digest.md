@@ -7,7 +7,7 @@ status: live
 
 # Boot digest — headline + rules of every lesson (open the file when it fires)
 
-Generated 2026-09-20 17:37 from 195 lesson files (902,190 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 9 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
+Generated 2026-09-20 18:01 from 195 lesson files (904,324 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 9 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
 
 ## The T9 SSD is the master — Wednesday must be fully portable
 `2026-07-31_fully-portable-drive.md` · principle · 2026-07-31 · status: superseded — the "T9 is the master" half by [[2026-08-25_one-drive-devmaster-is-master]] (2026-08-25); the portability principle itself still lives
@@ -6477,7 +6477,7 @@ Y"). They fail independently. Disproving Y disproves Y. **The conclusion has to 
 own terms, and it usually has more than one route to being true.** When the conclusion is a
 security property, assume it survives until measured otherwise.
 
-sections (open the file for these): The case — I was one instrument away from shipping it · Why it was nearly fatal rather than merely wrong · The rule · What saved it, so the practice is kept
+sections (open the file for these): The case — I was one instrument away from shipping it · Why it was nearly fatal rather than merely wrong · THE MIRROR, same day, same pair of tickets — a CORRECT conclusion resting on a reason that answered a NEIGHBOURING question · The rule · What saved it, so the practice is kept
 
 ## The rule
 
