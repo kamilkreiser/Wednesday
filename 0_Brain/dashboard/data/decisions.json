@@ -12264,5 +12264,41 @@
    "CARD hpsm-live-release-verification-unprovable",
    "CARD nexusai-rd549-live-211-exfiltration"
   ]
+ },
+ {
+  "id": "secuura-ks721-commitment-cannot-reach-a-real-chain",
+  "client_project": "Secuura/Blockchain",
+  "title": "KS-721's on-chain identityCommitment has never been able to reach a real chain — CSL caps metadata strings at 64 bytes, and KS-1175's DIDs inherit it",
+  "bluf": "OVERRIDE of the prior-rulings gate, reason measured: your 'yes-with-shred' on card secuura-ks721-identity-commitment ruled WHETHER to anchor the commitment (a trust shift). This card is about the DELIVERY of that ruling: the shipped #763 attaches the payload via add_json_metadatum_with_schema, and on the pinned CSL 15.0.3 wasm that method throws 'Max metadata string too long' for ANY string over 64 bytes (measured 22:00 AEST tonight, no chain, no port: 64 OK, 65 throws, the minimal valid commitment at 69 bytes throws, a 512-byte DID throws, an array of short chunks is OK). KS-721 was proven in mock mode only (history.md:8886) and S's switch is default-off, so no real anchor has hit it yet — but it is archived 'Deployed to UAT' with a latent defect, and the KS-1175 fix cannot anchor without addressing it. Seat A 15th is briefed to search the board, file ONE new ticket (never reopen KS-721), and build a chunk/unchunk helper at the tx-build boundary IN the KS-1175 PR as its own test block — gated, NOT deployed, NOT anchored. The on-chain FORMAT of long strings is a contract S must read back, so it should reach Stuart via you before any anchor is made.",
+  "default_action": "a — the seat builds it in the PR; the gate judges it; no anchor happens until you rule the deploy step, so nothing irreversible rests on this default",
+  "options": [
+   {
+    "key": "a",
+    "label": "Proceed as briefed (Recommended)",
+    "detail": "the chunking helper lands in the KS-1175 PR, tier-1 gated; nothing deploys or anchors; the format goes to Stuart via a WhatsApp text Wednesday drafts once the PR exists"
+   },
+   {
+    "key": "b",
+    "label": "Separate PR",
+    "detail": "the KS-1175 PR ships without the helper (and therefore cannot anchor a commitment); the 64-byte fix is its own PR on the new ticket"
+   },
+   {
+    "key": "c",
+    "label": "Hold",
+    "detail": "stop the KS-1175 build until you and Stuart agree the on-chain format"
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-09-20T22:14:22.710039+10:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "2026-09-10 09:01",
+   "2026-09-10 09:08",
+   "2026-09-10 09:08",
+   "CARD secuura-ks721-identity-commitment",
+   "CARD hpsm-composer-remediate-high-reach"
+  ]
  }
 ]
