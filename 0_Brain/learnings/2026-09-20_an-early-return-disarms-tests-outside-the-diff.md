@@ -22,3 +22,26 @@ tier: M
 5. **It generalises past early returns:** anything that short-circuits a shared path — a new cache, a feature flag checked first, a fail-fast validation, a middleware mounted earlier — can leave downstream assertions unreached while green.
 
 **Family:** [[2026-08-07_a-check-that-cannot-fail]] (the parent: here the check exists, runs, passes, and no longer tests its subject) · [[2026-09-08_the-check-ran-and-was-not-checking-the-thing]] · [[2026-09-07_a-census-complete-over-a-frame-that-is-not]] (the diff is the frame) · [[2026-09-20_a-closure-inherits-the-scope-of-its-measurement]].
+
+## SHARPENED the same day by the same seat (S71), and it is what makes the sweep FINISHABLE
+
+**Disarmament is SILENT only where the cell asserts a NEGATIVE** — *refused · ignored · absent · falls
+through · returns null*. A cell asserting a POSITIVE goes **red loudly** when an earlier gate catches it,
+so it is noticed the same day by whoever ran the suite. **So the population to check is not "all cells on
+the callers" but "the NEGATIVE-ASSERTING cells on the callers"** — which is why this class came back as
+three sites rather than an unbounded audit.
+
+**And the population is wider than literal early returns:** a call site **SWITCHED to a different function
+that carries an extra gate** is the same shape as a gate added in place. RD-549 moved 14 adapter/config
+call sites to `getUsable*`; excluding them would have left the larger half of the class unswept. S71
+extended the scope on its own judgement and flagged that it had — which is how a scope extension should
+arrive.
+
+**Two exclusions that are sound BY CONSTRUCTION, not by inspection** (worth copying, because they are what
+keeps such a sweep honest): returns inside a function with **no pre-existing callers**, and returns inside
+**newly added routes** — no existing cell can reach either. State the reason as "by construction"; it is
+checkable, where "looked fine" is not.
+
+**The sweep gets a SELF-TEST that aborts rather than emit a list** ([[2026-09-20_a-closure-inherits-the-scope-of-its-measurement]]):
+a positive control (a known-changed path IS in the diff), a negative control (a known-unchanged path is
+NOT), and a non-empty population — because an empty list makes the sweep pass by checking nothing.
