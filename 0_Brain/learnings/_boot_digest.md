@@ -7,7 +7,7 @@ status: live
 
 # Boot digest — headline + rules of every lesson (open the file when it fires)
 
-Generated 2026-09-20 16:21 from 192 lesson files (949,561 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 9 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
+Generated 2026-09-20 16:31 from 193 lesson files (954,141 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 9 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
 
 ## The T9 SSD is the master — Wednesday must be fully portable
 `2026-07-31_fully-portable-drive.md` · principle · 2026-07-31 · status: superseded — the "T9 is the master" half by [[2026-08-25_one-drive-devmaster-is-master]] (2026-08-25); the portability principle itself still lives
@@ -6769,6 +6769,38 @@ through · returns null*. A cell asserting a POSITIVE goes **red loudly** when a
 so it is noticed the same day by whoever ran the suite. **So the population to check is not "all cells on
 the callers" but "the NEGATIVE-ASSERTING cells on the callers"** — which is why this class came back as
 three sites rather than an unbounded audit.
+
+
+## In this workspace's layout the git repo is ONE subdirectory of the project folder — so most of where an agent works is outside version control, and agents put deliverables there
+`2026-09-20_most-of-a-project-folder-is-outside-its-git-repo.md` · correction · 2026-09-20 · status: live
+
+**The lesson:** every project here is `<Project>/` with the git repo at
+`<Project>/2_Project_Files/`. Everything beside it — `1_Project_Definition/`,
+`5_Project_History/`, `session-tools/`, `qa-worktrees/`, and any scratch directory a session
+invents — is a **sibling of the repo, not an untracked path inside it.** No `git add`, no
+`git status`, no pre-commit hook and no push from inside the repo can ever reach them. A file
+there is protected by the drive and nothing else.
+
+sections (open the file for these): Why the existing lesson did not cover it · The rule · The part that generalises past this workspace
+
+## The rule
+
+1. **Before calling any ticket "not started", run the prior-work check across the PROJECT folder,
+   not the repo.** `find <Project> -iname "*<TICKET>*"` and a grep of the sibling directories, not
+   only `git log --grep`. A git-only search answers "is it committed", and the question is "does
+   it exist" ([[2026-09-07_a-census-complete-over-a-frame-that-is-not]] — the instrument answered
+   about the frame).
+2. **Any deliverable found outside `2_Project_Files/` is rescued the same session** — committed to
+   a branch by the project's own agent, keeping whatever NOT-RUN/ungated labelling it carries. A
+   rescue branch is not a change to the suite: do not regenerate counts on it.
+3. **A rescue is the project agent's action, never mine** — hard rule 1, and the git hooks enforce
+   it. My job is to find it, measure it, and commission the commit.
+4. **When commissioning anything that produces an artefact, name where it lands** — a repo path,
+   not "prepare X". "Prepared" with no tracked path is the failure this file and
+   [[2026-09-20_prepared-in-a-scratchpad-is-lost]] both describe, from opposite ends.
+5. **Check with a control.** "Nothing tracks it" is an absence claim: run the same search for a
+   ticket you know IS tracked, in the same command
+   ([[2026-09-08_a-false-absence-is-usually-my-own-instrument]]).
 
 
 ## Work called "PREPARED" that lives in a SCRATCHPAD is not prepared — it is lost, and the handover sentence is a claim about a PATH
