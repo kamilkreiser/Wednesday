@@ -798,37 +798,10 @@ fi
 # 0_Brain/reference/<date>_<topic>/, session artefacts to 5_Project_History/,
 # scratch to the session scratchpad. A backup of a root script may sit beside it
 # (the cockpit precedent: cockpit.sh.pre-0902-*). Anything else is a filing miss.
-# 2026-09-20 21:4x — TWO holes found by measurement while this check printed OK:
-#  (1) `Launch_*.command` in the allow-list MATCHED a unison conflict copy,
-#      `Launch_Wednesday (conflict_on_2026-09-18).command` — a stale duplicate of
-#      the launcher sitting unflagged in the root. A conflict copy is a NEW file
-#      that matches the same glob as the real one (learnings/2026-09-10_a-sync-
-#      conflict-copy-is-an-input-to-every-glob). So conflict copies are tested
-#      FIRST, before any allow-list can swallow them.
-#  (2) `[ -f "$f" ] || continue` skipped DIRECTORIES outright, so a stray `logs/`
-#      in the root was invisible to the one check whose job is stray root entries.
-#      Directories are now checked against their own allow-list.
 ROOT_STRAYS=""
 for f in "$PROJECT_DIR"/* "$PROJECT_DIR"/.[!.]*; do
-  [ -e "$f" ] || continue
+  [ -f "$f" ] || continue
   b=$(basename "$f")
-  case "$b" in *conflict_on*) ROOT_STRAYS="$ROOT_STRAYS $b"; continue ;; esac
-  if [ -d "$f" ]; then
-    case "$b" in
-      0_Brain|1_Project_Definition|2_Project_Files|3_Access_Keys|4_Credentials|5_Project_History|.git|.claude) ;;
-      *)
-        # A directory someone deliberately GITIGNORED is a state drawer by a recorded
-        # decision (logs/, .playwright-mcp/ — .gitignore:161 and :49), not a filing
-        # miss. Keying on that decision instead of on a name list means a new tool
-        # drawer needs no edit here, and a guard that fires every launch on something
-        # legitimate is a guard nobody reads (2026-09-10 rule 4). Conflict copies are
-        # tested ABOVE this, so a gitignored one is still caught.
-        if git -C "$PROJECT_DIR" check-ignore -q "$b" 2>/dev/null; then :
-        else ROOT_STRAYS="$ROOT_STRAYS $b/"; fi
-        ;;
-    esac
-    continue
-  fi
   case "$b" in
     CLAUDE.md|PORTABILITY.md|.gitignore|.DS_Store|Launch_*.command|Launch_*.command.pre-*|Launch_*.command.bak*) ;;
     *) ROOT_STRAYS="$ROOT_STRAYS $b" ;;
