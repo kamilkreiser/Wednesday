@@ -10,6 +10,28 @@ supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s
 
 ---
 
+## 🟢 DELTA 47 — 2026-09-21 08:3x. **KAM IS BACK AND RULED TWO THINGS. THE DEPLOYMENT COUNT IS RELEASED. TWO ASKS STILL OPEN.**
+
+### HIS WORDS, VERBATIM, both delivered by the panel directly to `tuesday-agent@` (not relayed)
+1. **08:31:55** — *"Decision nexusai-rd516-undici-dependency-for-address-pinning: c — Ship WITHOUT pinning; ticket the rebinding window (Recommended - already in force tonight)"*
+2. **~08:32** — *"And don't worry how many people have downloaded Nexus AI through the marketplace so far. These would have all been testers."*
+3. **~08:30** — *"I answered one ticket. Is there anything else that you need from me?"* and *"Thanks for all the work over the Night."*
+
+### 🟢 (1) THE UNDICI CARD IS RULED (c) — AND IT WAS ALREADY IN FORCE, so nothing is redone
+**Ruled + marked `--delivered`.** The artefact it lives in: RD-516 ships layers 0-2 with no pinning (`b2dea38`/`f4264e5`, the tier-1 gate PASSED the security property at 15:02Z); **RD-584** carries the rebinding window with the agent's reasoning and Tuesday's corrected step; **option (2) — undici internals — stays REFUSED PERMANENTLY.** His tap confirmed the recommendation rather than changing anything.
+
+### 🟢 (2) THE DEPLOYMENT COUNT IS RELEASED — STOP CHASING PARTNER CENTER
+**This closes the question that gated `nexusai-degraded-flip-and-live-deployments` (ruled (a) 21:14: "tell me the count and I decide from there"). His 08:32 words supersede that requirement: the count is not needed.**
+🔴 **TUESDAY'S READING, STATED BACK TO HIM ON THE PANEL FOR CORRECTION — do not harden it without his word:** if the downloads were all testers, **nobody real is flipped to DEGRADED by the Key Vault fix, so the DEGRADED FLIP IS UNBLOCKED.**
+⚠️ **The residual, named rather than glossed: a TESTER deployment that is still running WOULD still flip.** So the blast radius is not zero — it is **not customer-facing**, which is a different claim. **He was asked to say if any of those testers is someone he would not want broken.** Until he answers that, treat the flip as unblocked-but-not-zero-risk.
+**Consequence for the work: this widens RD-518's fix round to include the DEGRADED flip** — which was the one part of RD-518 held pending his word. **RD-518's round is still PARKED on the usage cut, so this unblocks the DESIGN, not the launch.**
+
+### 🔴 STILL OWED BY KAM — both put to him on the panel at 08:3x
+1. 🔴 **A WEEK INSTRUCTION FOR THIS SEAT, before he leaves tonight.** `tasks/WEEK-INSTRUCTION-TUESDAY.md` is `status: none`, `valid_until: 2026-09-16`. **Without one, Datasec has no standing authority for the week and this seat must STOP rather than keep working.** He was told that in those terms and asked to say the words on the Tuesday tab so the scope can be read back before he goes.
+2. 🔴 **THE USAGE CALL — this is the live blocker.** `usage_gate.sh` REFUSES at **95% >= 95%** (renews in ~3d 23h) and his lift was scoped to last night. **Nothing Datasec can launch until he lifts it again or signs into the new account he mentioned.** Both next pieces are written and waiting: the RD-516 fix round (DELTA 46) and the 28 test moves (`fleet/briefs_staged/nexusai_rd574_rescue_the_27.md`). **Minutes of work once he says go — do not re-derive either.**
+
+---
+
 ## 🔴 DELTA 46 — 2026-09-21 01:0x. **THE TIER-1 VERDICT IS IN. SECURITY PROPERTY CLOSED AND PROVED; THE MERGE IS NOT CLEARED.** Gate scored 1.00, pane %21 done. **No NexusAI seat is live, so THESE RULINGS LIVE HERE — there is no mail to inherit them.**
 
 ### THE VERDICT, in the gate's own frame
