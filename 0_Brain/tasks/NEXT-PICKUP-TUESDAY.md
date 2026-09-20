@@ -10,6 +10,38 @@ supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s
 
 ---
 
+## 🔴 DELTA 43 — 2026-09-20 22:4x ROTATION HANDOVER (Tuesday ctx 80%, safe boundary). **READ THIS, THEN 42, THEN 41 (the overnight contract + the MORNING REPORT you owe Kam).**
+
+### THE ONE RULING THAT MUST NOT BE RE-OPENED BY A FRESH SEAT
+🔴 **S73 proposed re-keying RD-516's RFC1918/loopback relaxation on PROVENANCE OF THE WRITE (deployment ENV vs settings store) instead of Q2b's TRUSTED-STORED. IT IS HELD, NOT ADOPTED.** Its argument is good and its axis may be right — **but its premise is measurably FALSE, and a fresh seat reading only its mail will find the argument persuasive.**
+
+**MEASURED BY TUESDAY at `60c76d7`, `backend/server.js:4433` AND `:4684` (identical):**
+```
+const endpoint = await jsonStorage.getSetting('azureOpenAIEndpoint');   // FROM THE STORE
+const aiLoaderStatus = await aiProvenance.readStatus(jsonStorage);
+if (!(aiLoaderStatus.state === 'confirmed' && aiLoaderStatus.mode === 'admin')) { ...warn... }
+else { if (endpoint && !process.env.AZURE_OPENAI_ENDPOINT) process.env.AZURE_OPENAI_ENDPOINT = endpoint; ... }
+```
+**The settings store IS copied into `process.env.AZURE_OPENAI_ENDPOINT` at boot.** So env is **deploy-time OR store-promoted**, not the untouchable fact the proposed rule would trust.
+
+🔴 **Why that is the dangerous direction: C-92 lets anyone confirm pending AI config while sign-in is unconfigured, and S73 proved that chain tonight (plant → `aoaiPending.fingerprint` → confirm → test, dialsToPlanted 3). IF an anonymous confirm can reach `mode: 'admin'`, the planted endpoint is promoted into env at the next boot and the proposed rule ALLOWS it — the SSRF reopens one restart later AND LOOKS CLOSED.**
+
+**COMMISSIONED, answer owed in S73's READY either way: can an anonymous caller in the open window produce `state: confirmed, mode: admin`?** With a control. **If yes, it is a ticket ABOVE RD-516 in severity.**
+
+**And the point that stands whichever way it lands:** `process.env.AZURE_OPENAI_ENDPOINT` cannot distinguish deploy-time from promoted **because the promotion writes the same key**, so `endpointSource === 'env'` would be *true and misleading*. A provenance rule needs provenance that survives the promotion — a third value, or the loader stamping origin as it writes.
+
+⚠ **Honest limit, stated to S73 and repeated here: Tuesday measured `server.js` ONLY. The tree-wide grep returned nothing for the pattern AND for its positive control, so it was BROKEN and the tree-wide claim is UNMEASURED.** There may be other promotion sites.
+
+### FLOOR AT ROTATION
+- **`%20` `Datasec/NexusAI` (S73) — the only live seat, untouched by this rotation.** RD-516, branch `8aaafd9`, 26 cells / 11 green / 15 red, **no product code yet**. Doing the CHANGE-1 fixture work (inertness criterion) and the anonymous-confirm measurement. **ctx was ~38% at last read — re-read it, do not inherit that number.**
+- **`main` = `60c76d7`. Minimum set: RD-516 · RD-518.** RD-518's fix round staged at `fleet/briefs_staged/nexusai_rd518_fix_round2.md`, **round 2 of 2, a third is Kam's**, queued behind RD-516 (both touch `server.js`).
+- Usage **92%**; Kam lifted the 95% stop **for tonight only**, no stated date — **re-ask before Monday.**
+
+### THE TAP RULE THIS SEAT LEARNED THE HARD WAY — USE IT
+**Read the pane state IN THE SAME ACTION as the send/no-send decision.** A running seat reads its inbox at its own checkpoint and needs no tap; a seat at a bare prompt reads nothing until tapped. **I left S73 idle TWICE by getting this wrong, the second time from a six-minute-old reading.** The check: `tmux capture-pane -p -t %20 | tail -6 | grep -cE '✻|✳|✽|✢'` — zero means STOPPED, tap required.
+
+---
+
 ## 🌙 DELTA 42 — 2026-09-20 22:3x. **STATE SINCE 41. The overnight contract in DELTA 41 STILL GOVERNS — read it too, especially the morning report.**
 
 ### THE FLOOR
