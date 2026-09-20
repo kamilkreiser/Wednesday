@@ -89,7 +89,8 @@ show = msgs if mode == '--all' else new
 seat = os.environ.get('SEAT', 'wednesday')
 withheld = 0
 if seat == 'tuesday' and inbox == 'coagent@agentmail.to':
-    keep = [m for m in show if re.search(r'datasec/', m.get('subject') or '', re.I)]
+    # 2026-09-21 01:4x: the old pattern datasec/ missed [QA/Datasec-NexusAI -> Tuesday] (no slash) - a QA gate verdict for HER seat would have been DROPPED. Any datasec keeps.
+    keep = [m for m in show if re.search(r'datasec', m.get('subject') or '', re.I)]
     withheld = len(show) - len(keep)
     show = keep
 # OWN-OUTBOUND is decided by the SENDER on the Tuesday seat (2026-09-18 round 2). The subject prefix
@@ -136,8 +137,11 @@ for m in show:
     # WEDNESDAY-SEAT MIRROR of the Tuesday tag filter (2026-09-18, the 10:0x seat): this seat reads Datasec mail by
     # SUBJECT ONLY (its boot scope). The shared bus carries every client, so on coagent@ a Datasec-tagged row keeps
     # its subject line (routing needs it) and its BODY PREVIEW is withheld. Tuesday's seat is untouched by this branch.
-    if seat == 'wednesday' and inbox == 'coagent@agentmail.to' and re.search(r'datasec/', subj, re.I):
-        print('        (preview withheld: Datasec mail, subject only for the Wednesday seat)')
+    # 2026-09-21 01:4x (ledger w=3 of the preview-leak costume, REGRESSION → this is the enforcement): the withhold now covers
+    # EVERY inbox (the 09-20 ATTIO digest reached wednesday-agent@ addressed -> Wednesday) and matches datasec anywhere in the
+    # subject OR a -> Tuesday] addressee ([QA/Datasec-NexusAI -> Tuesday] has no slash and leaked a gate-verdict preview at 01:3x).
+    if seat == 'wednesday' and re.search(r'datasec|->\s*tuesday\]', subj, re.I):
+        print('        (preview withheld: Datasec/Tuesday-scope mail, subject only for the Wednesday seat)')
     else:
         print(f'        {preview}')
     print(f\"        id: {m['message_id']}\")
