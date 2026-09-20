@@ -1,0 +1,117 @@
+2026-09-20T13:07:29Z
+--- enforcement.ts at develop: blob, bytes, sha256
+be466fbf444178bbb41293fb1d811957e55e1d2d
+   10708
+69709f07956e295d7ba6aa6ddcc51f80295819f6edd7caa89e2e6a6a9dcc9cd3  -
+       1	export async function enforceDocumentTypeRules(
+       2	  body: Record<string, unknown>,
+       3	  user: UserPayload | undefined,
+       4	): Promise<EnforcementResult> {
+       5	  const typeRefRaw = body.documentType || body.type || '';
+       6	  // KS-501: `as string` was a compile-time cast, not a runtime coercion — a
+       7	  const typeRef = (typeRefRaw || '') as string;
+       8	  if (!typeRef) {
+       9	    return { ok: true, docType: {} };
+      10	  }
+      11	      };
+      12	    }
+      13	    return { ok: true, docType: {} };
+      14	  }
+count of 'return { ok: true, docType: {} };':
+116:    return { ok: true, docType: {} };
+136:    return { ok: true, docType: {} };
+--- enforcement.test.ts:148 at develop
+
+  // -----------------------------------------------------------------------
+  // enforceDocumentTypeRules
+  // -----------------------------------------------------------------------
+
+  describe('enforceDocumentTypeRules', () => {
+    it('returns ok:true with empty docType when no typeRef is provided', async () => {
+      const result = await enforceDocumentTypeRules({}, makeUser());
+      expect(result).toEqual({ ok: true, docType: {} });
+    });
+
+--- lifecycleActions.ts at originate develop (locate)
+Blockchain/Dev/services/originate/src/lifecycleActions.ts
+aa1c8434d5a55ad035e1ee62755ace7379af69fb
+    3423
+1fabaf50e7a7f84dd84397163272418a90fbf2f95565d626828d9788f408d854  -
+     1	export const LIFECYCLE_EVENT_ACTIONS = [
+     2	  'rights-unassign',
+     3	  'share-revoke',
+     4	  'share-permission-change',
+     5	  'note',
+     6	  'certified',
+     7	  'verified',
+     8	] as const;
+--- startup-migrations.ts develop vs PR3 head
+diff --git a/Blockchain/Dev/services/api-gateway/src/startup-migrations.ts b/Blockchain/Dev/services/api-gateway/src/startup-migrations.ts
+index ed3e52142..cf371028f 100644
+--- a/Blockchain/Dev/services/api-gateway/src/startup-migrations.ts
++++ b/Blockchain/Dev/services/api-gateway/src/startup-migrations.ts
+@@ -1074,7 +1074,7 @@ export async function runStartupMigrations(): Promise<void> {
+         // UNIQUE index the verification.ts ON CONFLICT clause errors.
+         `DELETE FROM platform_document_registry a USING platform_document_registry b
+          WHERE a.id > b.id AND a.content_hash = b.content_hash
+-           AND COALESCE(a.tenant_id, '') = COALESCE(b.tenant_id, '')`,
++           AND a.tenant_id IS NOT DISTINCT FROM b.tenant_id`,
+         `CREATE UNIQUE INDEX IF NOT EXISTS uq_pdr_hash_tenant ON platform_document_registry(content_hash, tenant_id)`,
+         `CREATE TABLE IF NOT EXISTS platform_document_type_templates (
+           id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+:473 at develop:
+     AND COALESCE(a.tenant_id, '') = COALESCE(b.tenant_id, '')`,
+:473 at PR3 head:
+     AND COALESCE(a.tenant_id, '') = COALESCE(b.tenant_id, '')`,
+:1077 at develop:
+           AND COALESCE(a.tenant_id, '') = COALESCE(b.tenant_id, '')`,
+:1077 at PR3 head:
+           AND a.tenant_id IS NOT DISTINCT FROM b.tenant_id`,
+COALESCE(tenant_id count develop / head:
+0
+1
+--- PR3 test file: lines, 'summary' in code
+      85
+9: * statement is exactly what the platform summary counts, and pin that the MAIN list is not touched.
+72:  it('control: pg resolves to the fake, and ONE refused platform statement (the unique index) is what the platform summary counts as 1 FAILED', async () => {
+77:  it('control: the MAIN list keeps exactly one COALESCE de-dup on tenant_id (NULL and empty equal on its TEXT column) and the main summary is complete', async () => {
+81:  it('🔴 KS-1272: on a platform database whose tenant_id is uuid, the de-dup DELETE is accepted and the platform summary is complete with 0 FAILED', async () => {
+--- PR3 test file it() titles
+71:describe('KS-1272: the platform de-dup DELETE on a uuid-typed tenant_id', () => {
+72:  it('control: pg resolves to the fake, and ONE refused platform statement (the unique index) is what the platform summary counts as 1 FAILED', async () => {
+77:  it('control: the MAIN list keeps exactly one COALESCE de-dup on tenant_id (NULL and empty equal on its TEXT column) and the main summary is complete', async () => {
+81:  it('🔴 KS-1272: on a platform database whose tenant_id is uuid, the de-dup DELETE is accepted and the platform summary is complete with 0 FAILED', async () => {
+--- PR1 patch
+diff --git a/Blockchain/Dev/services/originate/src/__tests__/lifecycleEventRepo.test.ts b/Blockchain/Dev/services/originate/src/__tests__/lifecycleEventRepo.test.ts
+index 994abf9ff..c4aad2122 100644
+--- a/Blockchain/Dev/services/originate/src/__tests__/lifecycleEventRepo.test.ts
++++ b/Blockchain/Dev/services/originate/src/__tests__/lifecycleEventRepo.test.ts
+@@ -79,6 +79,10 @@ describe('LIFECYCLE_EVENT_ACTIONS vocabulary pin', () => {
+     // CONTROL — green on both trees: a verb WITH a dedicated K route is never accepted here.
+     expect(LIFECYCLE_EVENT_ACTIONS).not.toContain('declare');
+   });
++  it('RED KS-1275 ORDER-1: LIFECYCLE_EVENT_ACTIONS is declared in ONE order, the order z.enum publishes and the 400 message joins', () => {
++    const declaredOrder = [...LIFECYCLE_EVENT_ACTIONS].join(',');
++    expect(declaredOrder).toEqual('rights-unassign,share-revoke,share-permission-change,rename,delete,restore,share-recipient-change,share-expiry-change,share-token-rotate,share-resend,share-attach-consent,protect,unprotect,note,certified,verified');
++  });
+ });
+ 
+ describe('createLifecycleEvent', () => {
+--- PR2 patch
+diff --git a/Blockchain/Dev/services/api-gateway/src/__tests__/ks501-enforcement-non-string-doctype.test.ts b/Blockchain/Dev/services/api-gateway/src/__tests__/ks501-enforcement-non-string-doctype.test.ts
+index 4f993ee7a..e05c6bd21 100644
+--- a/Blockchain/Dev/services/api-gateway/src/__tests__/ks501-enforcement-non-string-doctype.test.ts
++++ b/Blockchain/Dev/services/api-gateway/src/__tests__/ks501-enforcement-non-string-doctype.test.ts
+@@ -61,4 +61,12 @@ describe('KS-501 non-string documentType', () => {
+     // Redis is never consulted for a value that cannot be a type ref.
+     expect(redisService.getAllDocumentTypes).not.toHaveBeenCalled();
+   });
++  it('RED KS-1203: a body carrying no resolvable documentType admits with an EMPTY docType and never consults the catalogue', async () => {
++    const untypedShapes = [{}, { documentType: '' }, { type: '' }, { DocumentType: 'SSD_DOCUMENT' }, { document_type: 'SSD_DOCUMENT' }, { Type: 'SSD_DOCUMENT' }, { data: { title: 'no type here' } }];
++    for (const body of untypedShapes) {
++      const result = await enforceDocumentTypeRules(body, undefined);
++      expect([result.ok, (result as { docType?: unknown }).docType]).toEqual([true, {}]);
++    }
++    expect(redisService.getAllDocumentTypes).not.toHaveBeenCalled();
++  });
+ });

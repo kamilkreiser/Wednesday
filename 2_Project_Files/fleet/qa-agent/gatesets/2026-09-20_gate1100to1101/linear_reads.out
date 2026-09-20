@@ -1,0 +1,64 @@
+2026-09-20T06:43:16Z
+KS-1238 | F-1: four properties the KS-1215 connector-Bearer fix relies on that no cell pins | state Done | archivedAt 2026-09-19T19:55:22.135Z | branchName feature/ks-1238-f-1-four-properties-the-ks-1215-connector-bearer-fix-relies | attachments [('1099', 'contributes'), ('1096', 'contributes'), ('1095', 'contributes'), ('1091', 'contributes'), ('1090', 'contributes'), ('1083', 'contributes'), ('1076', 'contributes')] | comments 5 (newest 0326a38f 2026-09-19T19:55:12.043Z)
+   state change 2026-09-19T15:06:40.161Z Backlog -> In Progress bot GitHub
+   state change 2026-09-19T16:37:25.801Z In Progress -> Backlog bot None
+   state change 2026-09-19T18:35:57.380Z Backlog -> In Progress bot GitHub
+   state change 2026-09-19T19:55:19.914Z In Progress -> Done bot None
+   --- DESCRIPTION KS-1238 ---
+The #1034 fix (the connector branch never carries the caller's Bearer) is correct and its 20 cells are green, but the gate identified **four properties the change relies on that no cell pins**. Graded **Minor / test coverage** by the gate, and marked SHIPS-WITH, so it is owed now rather than someday.
+
+## The four unpinned properties
+
+1. **A non-canonical bearer scheme** — e.g. a differently-cased or oddly-spaced `Authorization` value on the connector branch.
+2. **The two hand-forwarded fetch routes** — they now send `Authorization: ''` where develop sent the caller's Bearer. Measured on both routes and both trees, but no cell holds it.
+3. `platform.ts:254`**.**
+4. **A** `rawAuthorization` **fallback for a LIVE caller on a refused exchange.**
+
+## What to do
+
+Add cells for each of the four. They are the properties that would silently regress if someone reworked `authHeaders` or the connector branch, because today nothing reddens.
+
+Related: KS-1215 (the fix), and R-1 (the now-dead `rawAuthorization` capture).
+
+---
+
+Filed from the #1034 / KS-1215 tier-1 gate report `2026-09-18-ks1215-1034-e4624218b-tier1-r1`, at merge of `a105cd32b1ed9c6927ae6e797f8259224d8480c6`. Pre-existing unless stated; **not** introduced by #1034.
+   --- END ---
+   --- COMMENT 77f4ec90-d30c-4185-a8f6-815b2924d57e 2026-09-19T16:37:27.931Z ---
+#1095 and #1096 are merged: test files only, zero product bytes. The batch gate (2026-09-20-batch1092-1096-tier1-r1) graded KS-1238 NOT-COMPLETE, so the ticket goes back to Backlog. Every item listed after #1091 is now pinned, each measured over the whole api-gateway suite: the anchoring-verify forward verification.ts:597-598 by #1095 (RAW598 reds exactly its found-document cell, 1 of 648 at its head and 1 of 654 with all five merged, 0 of 646 before); POST /api/documents at verification.ts:1297 by #1095 (RAW1297 reds exactly its create cell, 1 of 648 and 1 of 654, 0 of 646 before); (iii) the F-1 super-admin cell for the kept platform.ts:254 by #1096 (the refresh-tenants Authorization dropped reds exactly that cell, 1 of 649 and 1 of 654, 0 of 646 before; a raw-header swap there reds 0 of 654 because every caller that reaches :254 has raw equal to the post-auth header, and every connector is refused 403 at :239, whose removal reds 1); (iv) the register-connector cell with a LIVE JWT on a REFUSED exchange by #1096 (a LIVE-only fallback in the handler reds exactly that cell, 1 of 649 and 1 of 654, 0 of 646 before; the auth-layer fallback reds 15). (i), (ii), :516 and :521 stay pinned. Still open, measured with all five merged (654 cells): POST /api/users/admin/create and PATCH /api/users/admin/:id in routes/proxy.ts (:472 / :504, authenticateToken(true), hand-forwarding the Authorization at :475 / :507) are unreachable only because routes/admin.ts registers the same two paths first; renaming either admin.ts path reds 0 of 654, and with a path unshadowed plus a raw read at :475 or :507 a revoked session's Bearer reaches the upstream (in-process). One cell per path pinning that a connector key alone gets 401 there closes it. KS-1280 is outside this ticket.
+   --- END ---
+KS-1282 | GET /api/platform/tenants: the requireSuperAdmin guard (platform.ts:222) is pinned by no connector cell | state In Progress | archivedAt None | branchName feature/ks-1282-get-apiplatformtenants-the-requiresuperadmin-guard | attachments [('1101', 'contributes'), ('1099', 'contributes'), ('1096', 'contributes')] | comments 0 (newest None)
+   state change 2026-09-19T16:37:24.002Z In Progress -> Backlog bot None
+   state change 2026-09-19T18:35:57.433Z Backlog -> In Progress bot GitHub
+   state change 2026-09-19T19:55:24.156Z In Progress -> Backlog bot None
+   state change 2026-09-20T06:23:40.667Z Backlog -> In Progress bot GitHub
+   --- DESCRIPTION KS-1282 ---
+## BLUF
+
+The `requireSuperAdmin` guard on `GET /api/platform/tenants` (api-gateway `routes/platform.ts:222`) is pinned by no connector cell. With that one line deleted, 0 of 646 api-gateway cells go red, and a connector key then lists tenants: 200, with `GET /api/tenants` called using the connector JWT (in-process probe). Surfaced by the #1084-#1091 gate.
+
+## Recommendation
+
+Add one connector cell that expects 403 FORBIDDEN on `GET /api/platform/tenants` and no upstream call, then measure the other `requireSuperAdmin` guards in platform.ts the same way. Not urgent: nothing here shows the guard is wrong today, only that no test would catch its removal.
+
+## Detail
+
+* **Measured by the batch gate** `2026-09-19-batch1084-1091-tier1-r1` **(row N91-2, tamper TENANTSGETUNGUARDED):** the `    requireSuperAdmin,` line of the 4-line block `  router.get(` / `    '/api/platform/tenants',` / `    authenticateToken(),` / `    requireSuperAdmin,` (block at :219, guard at :222) deleted: 0 of 641 red at #1091's head, 0 of 646 with all eight merged (develop `4273adfac`).
+* The line text `    requireSuperAdmin,` occurs 13 times in platform.ts. :239 (`POST /api/platform/tenants`) is now pinned by #1091's cell. :222 is the one measured here. **The other 11 are unmeasured.** Any tamper on this text must be located by a scope anchor, never by the first occurrence: the first occurrence IS :222.
+* It is an authorisation gap (who may list tenants), not a Bearer-forwarding one: the GET forwards the connector JWT, not the caller's Bearer. That is why it sits outside the connector-Bearer ticket it was found beside.
+* Filed by Seat B 6th on 2026-09-19, as Wednesday ruled (one ticket, facts only).
+   --- END ---
+KS-1230 | PUT /api/admin/settings stores a connector's allowedDocumentTypes in any shape - validate it as an array of strings at write time | state In Progress | archivedAt None | branchName feature/ks-1230-put-apiadminsettings-stores-a-connectors | attachments [('1100', 'contributes'), ('1097', 'contributes'), ('1092', 'contributes'), ('1086', 'contributes'), ('1080', 'contributes'), ('1074', 'contributes'), ('1069', 'contributes'), ('1054', 'contributes'), ('1045', 'contributes')] | comments 2 (newest e88c785f 2026-09-18T07:00:00.492Z)
+   state change 2026-09-18T05:48:25.709Z Backlog -> In Progress bot GitHub
+KS-1215 | api-gateway: a revoked-session JWT plus a VALID key whose connector-token exchange fails is forwarded with the revoked Bearer and no session check (plus the fall-through cells no suite has) | state In Progress | archivedAt None | branchName feature/ks-1215-api-gateway-a-revoked-session-jwt-plus-a-valid-key-whose | attachments [('1034', 'contributes')] | comments 3 (newest 11ca0342 2026-09-18T00:17:34.416Z)
+   state change 2026-09-17T12:59:35.436Z Backlog -> In Progress bot GitHub
+KS-1248 | N-1: /system/status troubleshooting marks a degraded required service critical and tells operators to restart it | state In Progress | archivedAt None | branchName feature/ks-1248-n-1-systemstatus-troubleshooting-marks-a-degraded-required | attachments [('1039', 'contributes')] | comments 1 (newest 42afebb2 2026-09-18T04:39:11.581Z)
+   state change 2026-09-18T03:11:20.143Z Backlog -> In Progress bot GitHub
+KS-1062 | F-928-4: the tenant-migration counter cannot report a failure — a tenant whose database does not exist is logged as migrated | state Done | archivedAt 2026-09-13T05:35:48.754Z | branchName feature/ks-1062-f-928-4-the-tenant-migration-counter-cannot-report-a-failure | attachments [('932', 'closes')] | comments 3 (newest dab11bed 2026-09-13T05:35:44.223Z)
+   state change 2026-09-09T14:03:07.499Z In Progress -> In Review bot None
+   state change 2026-09-13T05:35:48.346Z In Review -> Done bot None
+attachmentsForURL pull/1100 -> [('KS-1230', 'contributes')]
+attachmentsForURL pull/1101 -> [('KS-1282', 'contributes')]
+namespace KS-1100: state Backlog archivedAt None attachments []
+namespace KS-1101: state In Progress archivedAt None attachments ['1063', '1037']
+rc=0

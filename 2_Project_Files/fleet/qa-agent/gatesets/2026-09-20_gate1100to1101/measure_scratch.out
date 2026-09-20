@@ -1,0 +1,44 @@
+scratch (plain files, not a repo): /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/8db19eb7-a2f7-4e99-92e8-a56e13cd7e9c/scratchpad/meas1100-wpckyps6
+1. CANONICAL-PATCH IDENTITY (develop blob as a plain file; git apply strict; git hash-object without -w)
+  #1100 N97-1 apply rc 0 
+  #1100 N97-1 over develop -> blob                               893879a1995031a13d4a1969d24f3aa0c60e5d21 | want 893879a1995031a13d4a1969d24f3aa0c60e5d21: True
+  #1100 head blob in the repo                                    893879a1995031a13d4a1969d24f3aa0c60e5d21 | want 893879a1995031a13d4a1969d24f3aa0c60e5d21: True
+    patch sha256 0e279b4e0f45 | + lines 10 | - lines 0
+  CONTROL #1100 N97-1 --reverse onto the develop blob refuses: rc 1 (want non-zero)
+  #1101 N99-1 apply rc 0 
+  #1101 N99-1 over develop -> blob                               50298953359ead9f947ac9f20f455a529dd2543a | want 50298953359ead9f947ac9f20f455a529dd2543a: True
+  #1101 head blob in the repo                                    50298953359ead9f947ac9f20f455a529dd2543a | want 50298953359ead9f947ac9f20f455a529dd2543a: True
+    patch sha256 2c44142a1067 | + lines 7 | - lines 0
+  CONTROL #1101 N99-1 --reverse onto the develop blob refuses: rc 1 (want non-zero)
+  CONTROL crossed: N99-1 into the ks1230 develop blob refuses: rc 1 (want non-zero)
+2. THE FOUR TAMPER PLANTS, re-planted by TEXT from the DEVELOP blob (each ALONE, never stacked)
+  admin.ts at develop: blob 20c8a088f5dc34fc1563b3907e7c816e1b9fa3d3 sha256 6a733afc58fd bytes 74087
+  platform.ts at develop: blob b80a8cd8d4e1af5a944817227f5ee6612c793954 sha256 7d04a92ca724 bytes 44888
+  LASTOF2NULLMIXED   admin.ts:1132 | whole-line matches 1 (raw substring 1) landed [1132] | plant sha256 47724925d360 | bytes 74087 -> 74229 | checker plant.out sha (none in plant.out)
+     verdict.out tail: {"rc": 1, "red": ["RED KS-1230 N97-1: a NULL allow-list LAST of two integration"], "declared": ["RED KS-1230 N97-1: a NULL allow-list LAST of two inte
+  LASTOF4NULL        admin.ts:1132 | whole-line matches 1 (raw substring 1) landed [1132] | plant sha256 3e08ce6b879e | bytes 74087 -> 74179 | checker plant.out sha (none in plant.out)
+     verdict.out tail: {"rc": 1, "red": ["RED KS-1230 N97-1: a NULL allow-list LAST of four integratio"], "declared": ["RED KS-1230 N97-1: a NULL allow-list LAST of four int
+  SUPERROLESWIDEN    platform.ts:64 | whole-line matches 1 (raw substring 1) landed [64] | plant sha256 0acfe0d608fd | bytes 44888 -> 44906 | checker plant.out sha (none in plant.out)
+     verdict.out tail: {"rc": 1, "red": ["RED: a tenant ADMIN JWT is refused 403 on GET /api/platform/"], "declared": ["RED: a tenant ADMIN JWT is refused 403 on GET /api/pl
+  SUPERADMITSANYUSER platform.ts:68 | whole-line matches 1 (raw substring 1) landed [68] | plant sha256 b83e48fdbe83 | bytes 44888 -> 44881 | checker plant.out sha (none in plant.out)
+     verdict.out tail: {"rc": 1, "red": ["RED: a tenant ADMIN JWT is refused 403 on GET /api/platform/"], "declared": ["RED: a tenant ADMIN JWT is refused 403 on GET /api/pl
+3. THE :67 -> :68 CORRECTION, re-read at develop (Wednesday brief said :67; the seat says :68)
+  platform.ts:64 "const SUPER_ROLES = ['super_admin', 'SUPER_ADMIN', 'platform_admin', 'SYSTEM_ADMIN'];"
+  platform.ts:66 'function requireSuperAdmin(req: Request, res: Response, next: NextFunction): void {'
+  platform.ts:67 '  const user = req.user;'
+  platform.ts:68 '  if (!user || !SUPER_ROLES.includes(user.role)) {'
+  platform.ts:69 "    res.status(403).json({ success: false, error: { code: 'FORBIDDEN', message: 'Super-admin access required' } });"
+  platform.ts:67 is the const user line                            const user = req.user; | want   const user = req.user;: True
+  platform.ts:68 is the guard line                                 if (!user || !SUPER_ROLES.includes(user.role)) { | want   if (!user || !SUPER_ROLES.includes(user.role)) {: True
+  platform.ts:64 is the SUPER_ROLES line                         const SUPER_ROLES = ['super_admin', 'SUPER_ADMIN', 'platform_admin', 'SYSTEM_ADMIN']; | want const SUPER_ROLES = ['super_admin', 'SUPER_ADMIN', 'platform_admin', 'SYSTEM_ADMIN'];: True
+  admin.ts:1132 '        if (types === undefined || types === null) continue;'
+  admin.ts:1132 is the KS-1230 continue line                             if (types === undefined || types === null) continue; | want         if (types === undefined || types === null) continue;: True
+  bare "    requireSuperAdmin," whole-line count in platform.ts: 13
+4. THE FINDING FILE db.retry.test.ts — blob at develop and at each head (the seat says byte-identical)
+  db.retry.test.ts at develop                                    5933da41ed3dcf37f415000c4da4a717ea8d7eba | want 5933da41ed3dcf37f415000c4da4a717ea8d7eba: True
+  db.retry.test.ts at #1100 head                                 5933da41ed3dcf37f415000c4da4a717ea8d7eba | want 5933da41ed3dcf37f415000c4da4a717ea8d7eba: True
+  db.retry.test.ts at #1101 head                                 5933da41ed3dcf37f415000c4da4a717ea8d7eba | want 5933da41ed3dcf37f415000c4da4a717ea8d7eba: True
+  "db.retry" occurrences in N97-1 patch.diff: 0 (want 0)
+  "db.retry" occurrences in N99-1 patch.diff: 0 (want 0)
+ALL OK
+rc=0

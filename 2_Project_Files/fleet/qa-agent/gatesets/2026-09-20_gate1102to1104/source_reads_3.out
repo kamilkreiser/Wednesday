@@ -1,0 +1,33 @@
+2026-09-20T13:08:06Z
+--- platform schema sql files at develop:
+Blockchain/Dev/docker/init-platform/01-platform-schema.sql
+Blockchain/Dev/docker/init-platform/02-seed-default-tenant.sql
+Blockchain/Dev/docker/init/00-init-platform-db.sh
+== Blockchain/Dev/docker/init-platform/01-platform-schema.sql
+43:    tenant_id       UUID NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
+52:CREATE INDEX idx_tenant_contacts_tenant ON tenant_contacts (tenant_id);
+59:    tenant_id           UUID PRIMARY KEY REFERENCES tenants(id) ON DELETE CASCADE,
+103:    tenant_id       UUID NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
+112:CREATE UNIQUE INDEX idx_vault_token      ON vault_entries (tenant_id, token);
+113:CREATE INDEX        idx_vault_tenant     ON vault_entries (tenant_id);
+209:CREATE TABLE IF NOT EXISTS platform_document_registry (
+213:    tenant_id UUID NOT NULL REFERENCES tenants(id),
+223:CREATE INDEX IF NOT EXISTS idx_doc_registry_hash ON platform_document_registry(content_hash);
+224:CREATE INDEX IF NOT EXISTS idx_doc_registry_doc_id ON platform_document_registry(document_id);
+225:CREATE UNIQUE INDEX IF NOT EXISTS idx_doc_registry_unique ON platform_document_registry(content_hash, tenant_id);
+== Blockchain/Dev/docker/init-platform/02-seed-default-tenant.sql
+22:INSERT INTO tenant_config (tenant_id, db_name, db_host, db_port, token_location_type, settings)
+30:) ON CONFLICT (tenant_id) DO NOTHING;
+32:INSERT INTO tenant_contacts (tenant_id, name, email, role, is_primary)
+--- runs dir for ks1272:
+/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/runs/2026-09-20_ks1203-ornith35b-night
+/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/runs/2026-09-20_ks1272-ornith35b-night
+/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/runs/2026-09-20_ks1275-ornith35b-night
+/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/runs/2026-09-20_ks1275-ornith35b-night2
+/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/runs/2026-09-20_ks1275-ornith35b-night3
+/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/runs/2026-09-20_ks1275-ornith35b-night4
+--- READY source reads in night/:
+READY_KS-1203-UNTYPED-1_ornith35b-q4_BRIEFED-TESTONLY-UNRESOLVABLE-DOCTYPE-PASS-8of8_2026-09-20.diff.md
+READY_KS-1203-UNTYPED-1_ornith35b-q4_BRIEFED-TESTONLY-UNTYPEDBYPASS-PASS-8of8_2026-09-20.diff.md
+READY_KS-1272_ornith35b-q4_BRIEFED-CODEPATCH-UUID-TENANT-DEDUP-PASS-7of7_2026-09-20.diff.md
+READY_KS-1275-ORDER-1_ornith35b-q4_BRIEFED-TESTONLY-DECLAREDORDER-PASS-8of8-REBRIEF1_2026-09-20.diff.md

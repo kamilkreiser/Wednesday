@@ -1,9 +1,10 @@
-# Ornith candidates — derived 2026-09-20 09:46 from 362 KS Backlog/Todo tickets (read-only, unpaginated)
+# Ornith candidates — derived 2026-09-20 22:07 from 362 KS Backlog/Todo tickets (read-only, unpaginated)
 
 A CENSUS for the coordinator to brief from, easy → hard (Kam 2026-09-15 16:40 / 18:19). A ticket here is a candidate, not a task: read it, read the file at the tip, write `night/briefs/<id>.md`, then queue it. Auth-shaped titles are excluded (LAST); Peter/Stuart tickets and PR-attached tickets are excluded outright.
 
-## T1 services (vitest, one file) — 29
+## T1 services (vitest, one file) — 30
 - KS-1175 (P2) [resolved:basename, a HINT — read the file] Anchor / originate / lifecycle-event — `services/anchoring/src/anchorSchema.ts`
+- KS-1283 (P2) [resolved:basename, a HINT — read the file] platform.ts: a widened SUPER_ROLES w — `services/api-gateway/src/routes/platform.ts`
 - KS-678 (P2) [resolved:basename, a HINT — read the file] #568 publishes 17 URLs on secuura.io — `scripts/openapi-examples/synthesize.ts`
 - KS-683 (P2) Anchor-status standoff: a consumer repolls anchors K reports as terminally faile — `services/anchoring/src/index.ts`
 - KS-947 (P2) [resolved:basename, a HINT — read the file] KS-733 gate blindness (F3+F4): the p — `services/api-gateway/src/routes/proxy.ts`
@@ -43,14 +44,11 @@ A CENSUS for the coordinator to brief from, easy → hard (Kam 2026-09-15 16:40 
 - KS-630 (P3) Wire the status-page XSS probe into preflight (or decide not to) — it runs today — `scripts/preflight/preflight.sh`
 - KS-789 (P3) CONTRIBUTING.md justifies the hook's degradation and its --no-verify bypass with — `.githooks/pre-push`
 
-## T3 jest services (originate, governance) — 8
+## T3 jest services (originate, governance) — 5
 - KS-1019 (P3) [Question] The document's whole `blockchain` block is published as z.unknown() — — `services/originate/src/originate.openapi.ts`
-- KS-1203 (P3) A connector restricted by allowedDocumentTypes can still create the default DOCU — `services/originate/src/routes/documents.ts`
 - KS-1263 (P3) A partly-completed /share or /transfer-custody is now unattributed: the multi-wr — `services/originate/src/routes/documents.ts`
 - KS-1265 (P3) POST /api/documents saves the document and its provenance row, then answers 400  — `services/originate/src/routes/documents.ts`
-- KS-1275 (P3) Published POST /lifecycle-events description still enumerates an old verb list ( — `services/originate/src/originate.openapi.ts`
 - KS-759 (P3) tenantId is read through two `as unknown as` casts because it is not on JwtPaylo — `services/originate/src/middleware/auth.ts`
-- KS-1277 (P4) documents.ts: two stale comments about on-behalf-of recording (:2327-2334 inside — `services/originate/src/routes/documents.ts`
 - KS-1084 (P0) READ ONLY / unverified: the gateway's own Authorization-only calls to originate  — `services/originate/src/index.ts`
 
 ## T4 docs (doc_patch) — 1
@@ -116,7 +114,7 @@ A CENSUS for the coordinator to brief from, easy → hard (Kam 2026-09-15 16:40 
 - KS-966 — named in READY_KS-972_ornith35b-q4_BASHPATCH-REANCHORED-PASS-7of7_2026-09-16.diff.md
 - KS-999 — named in READY_KS-1186_ornith35b-q4_AUTH-5SITE-LINEKEYED-PASS-7of7_2026-09-17.diff.md
 
-## HELD (READY_* or done.md PASS) — 83
+## HELD (READY_* or done.md PASS) — 85
 - KS-1009 Security: GET /api/auth/wallet/status returns userId + role to ANY anonymous cal
 - KS-1011 KS-666 stack marker reads "unknown" for owner/branch/commit/started_at whenever 
 - KS-1028 KS-754 gate F-1 (MAJOR): a step-12 throw skips the USER_ERASED fan-out AFTER the
@@ -163,6 +161,7 @@ A CENSUS for the coordinator to brief from, easy → hard (Kam 2026-09-15 16:40 
 - KS-1196 admin POST /api/admin/document-types ids are dt-${Date.now()}: two creates in on
 - KS-1199 ks1072 verify cells pin no verdict on a tie whose rows differ in status: a compa
 - KS-1201 bootstrap_login_diagnosis.test.sh leaks its 4 login stubs on every run: start_st
+- KS-1203 A connector restricted by allowedDocumentTypes can still create the default DOCU
 - KS-1205 api-gateway per-key limiter follow-up (KS-1195 gates): a JWT claim can name a ke
 - KS-1212 ks1187 tests: no cell pins that the erasure door reads its own router's caseSens
 - KS-1217 ks1050 C1 pins only the helper message prefix plus a 3-phrase denylist - a not-a
@@ -173,7 +172,8 @@ A CENSUS for the coordinator to brief from, easy → hard (Kam 2026-09-15 16:40 
 - KS-1229 ks1213 cells: ten tampers stay green - a refused issue can mint a holder stub or
 - KS-1237 ks1204 cells: three tampers stay green - the array-like allow-list, the refusal 
 - KS-1250 O-2: RUNBOOK §2.2 documents SMOKE_BASE_URL, but scripts/smoke-test.sh ignores it
-- KS-1282 GET /api/platform/tenants: the requireSuperAdmin guard (platform.ts:222) is pinn
+- KS-1275 Published POST /lifecycle-events description still enumerates an old verb list (
+- KS-1277 documents.ts: two stale comments about on-behalf-of recording (:2327-2334 inside
 - KS-623 Test-token env guard is asymmetric: the gateway fails closed on an unset NODE_EN
 - KS-629 kyc `livenessVideo` is accepted by spec and runtime, then silently discarded — n
 - KS-692 Security: /api/status revoke/unrevoke has no tenant ownership check — an ISSUER_

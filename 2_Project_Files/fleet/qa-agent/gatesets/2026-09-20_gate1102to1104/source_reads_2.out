@@ -1,0 +1,140 @@
+2026-09-20T13:07:51Z
+--- platform_document_registry CREATE (platform list) + tenant_id column lines, develop:
+158:export const CORE_MIGRATIONS = [
+256:    tenant_id UUID,
+308:    tenant_id UUID,
+351:    tenant_id VARCHAR(255), client_id VARCHAR(255),
+370:    tenant_id UUID,
+402:    tenant_id UUID, connector_id TEXT,
+446:  `CREATE TABLE IF NOT EXISTS platform_document_registry (
+450:    tenant_id TEXT,
+486:    organization_id UUID, tenant_id UUID,
+506:    app_id UUID, organization_id UUID, tenant_id UUID,
+578:         tenant_id UUID NOT NULL,
+618:         tenant_id UUID NOT NULL,
+661:     default_tenant_id UUID := 'a0000000-0000-4000-8000-000000000001';
+672:       ALTER TABLE documents ADD COLUMN tenant_id UUID;
+726:     default_tenant_id UUID := 'a0000000-0000-4000-8000-000000000001';
+759:         EXECUTE format('ALTER TABLE %I ADD COLUMN tenant_id UUID', tbl);
+1060:      const platformMigrations = [
+1063:        `CREATE TABLE IF NOT EXISTS platform_document_registry (
+1066:          document_id TEXT, tenant_id TEXT, tenant_slug TEXT,
+--- lines 1060-1080 develop:
+      const platformMigrations = [
+        `CREATE EXTENSION IF NOT EXISTS "uuid-ossp"`,
+        // Cross-tenant document hash lookup
+        `CREATE TABLE IF NOT EXISTS platform_document_registry (
+          id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+--- the :473 block context (466-475):
+  // every fresh /api/documents create failed to register in the
+  // cross-tenant registry and was therefore invisible to subsequent
+  // GET /api/documents/:id / revoke calls.
+  // De-dupe first (idempotent), then add the UNIQUE index that ON
+  // CONFLICT needs.
+  `DELETE FROM platform_document_registry a USING platform_document_registry b
+   WHERE a.id > b.id AND a.content_hash = b.content_hash
+     AND COALESCE(a.tenant_id, '') = COALESCE(b.tenant_id, '')`,
+  `CREATE UNIQUE INDEX IF NOT EXISTS uq_pdr_hash_tenant ON platform_document_registry(content_hash, tenant_id)`,
+
+--- IS NOT DISTINCT FROM (case-insensitive) develop/head with positive control COALESCE:
+0
+1
+2
+--- PR3 head: startup-migrations.ts blob, bytes; test blob
+cf371028fb564ca0e55d9d9501c3efa1211b5bd0
+2b91446416f826b69dbd5a0ab6f4123c96d06349
+ed3e521426e75910c5bf2cf07e7251f2fd8ef538
+--- the test file at PR3 head, lines 1-30 + 60-85:
+/**
+ * KS-1272 - the platform-DB de-dup DELETE in startup-migrations fails 22P02 on every boot where
+ * platform_document_registry.tenant_id is uuid (docker/init-platform/01-platform-schema.sql declares it so):
+ * the statement compares COALESCE(a.tenant_id, ''), and '' cannot be cast to uuid, so the gateway logs
+ * "Migration FAILED on platform" and "Platform DB migrations INCOMPLETE - 1 FAILED" at every boot.
+ * runStartupMigrations() is called DIRECTLY with pg redirected, ONLY for the product file, to the fake Pool
+ * below (the ks1062 / ks1125 idiom); the fake behaves like a uuid-typed platform database: it refuses any
+ * statement that coalesces tenant_id with ''. The controls prove the redirect, prove that ONE refused platform
+ * statement is exactly what the platform summary counts, and pin that the MAIN list is not touched.
+ */
+import { describe, it, expect, beforeAll, afterAll, vi } from 'vitest';
+import * as fs from 'fs';
+import * as os from 'os';
+import * as path from 'path';
+import Module from 'module';
+const PRODUCT = path.join(__dirname, '..', 'startup-migrations.ts');
+const SCRATCH = fs.mkdtempSync(path.join(os.tmpdir(), 'ks1272-'));
+const FAKE = path.join(SCRATCH, 'fake-pg.cjs');
+const EMPTY_MIGRATIONS_DIR = path.join(SCRATCH, 'migrations');
+const PLATFORM_URL_BASE = 'postgresql://qauser:qapass@qa-platform.invalid:5432/';
+/** What a uuid-typed tenant_id column refuses: the empty string cannot be cast to uuid. */
+const UUID_COALESCE = "COALESCE(a.tenant_id, '')";
+const UNIQUE_INDEX = 'CREATE UNIQUE INDEX IF NOT EXISTS uq_pdr_hash_tenant';
+let lines: string[] = [];
+let product: { runStartupMigrations: () => Promise<void>; CORE_MIGRATIONS: string[] };
+const origResolve = (Module as any)._resolveFilename;
+function dbOf(connStr: string): string {
+  try { return new URL(connStr).pathname.replace(/^\//, ''); } catch { return '?'; }
+}
+/** No I/O. qa_platform_uuid is a platform database whose tenant_id is uuid; qa_platform_index refuses one other statement. */
+  delete process.env.MIGRATION_DATABASE_URL;
+  delete process.env.MIGRATION_PLATFORM_DATABASE_URL;
+  delete process.env.MULTI_TENANCY_ENABLED;
+  delete process.env.APP_DB_PASSWORD;
+  product = await import('../startup-migrations');
+});
+afterAll(() => {
+  (Module as any)._resolveFilename = origResolve;
+  vi.unstubAllEnvs();
+  fs.rmSync(SCRATCH, { recursive: true, force: true });
+});
+describe('KS-1272: the platform de-dup DELETE on a uuid-typed tenant_id', () => {
+  it('control: pg resolves to the fake, and ONE refused platform statement (the unique index) is what the platform summary counts as 1 FAILED', async () => {
+    expect(Module.createRequire(PRODUCT).resolve('pg')).toBe(FAKE);
+    await boot('qa_platform_index');
+    expect([platformSummary().startsWith('[WARN] [startup-migrations] Platform DB migrations INCOMPLETE '), metaOf(platformSummary())]).toEqual([true, { applied: 6, failed: 1 }]);
+  });
+  it('control: the MAIN list keeps exactly one COALESCE de-dup on tenant_id (NULL and empty equal on its TEXT column) and the main summary is complete', async () => {
+    await boot('qa_platform_index');
+    expect([product.CORE_MIGRATIONS.filter((s) => s.includes(UUID_COALESCE)).length, mainSummary().startsWith('[INFO] [startup-migrations] Main DB migrations complete '), metaOf(mainSummary()).failed]).toEqual([1, true, 0]);
+  });
+  it('🔴 KS-1272: on a platform database whose tenant_id is uuid, the de-dup DELETE is accepted and the platform summary is complete with 0 FAILED', async () => {
+    await boot('qa_platform_uuid');
+    expect([platformSummary().startsWith('[INFO] [startup-migrations] Platform DB migrations complete '), metaOf(platformSummary())]).toEqual([true, { applied: 7, failed: 0 }]);
+  });
+});
+--- PR3 commit message
+KS-1272 UUID-DEDUP-1: make the platform de-dup DELETE type-agnostic (IS NOT DISTINCT FROM)
+
+One product line and one new test file. In startup-migrations.ts the
+platformMigrations de-dup statement (:1077) compared
+COALESCE(a.tenant_id, '') = COALESCE(b.tenant_id, ''), which a uuid-typed
+platform_document_registry.tenant_id refuses with 22P02 (invalid input
+syntax for type uuid: "") on every api-gateway boot, leaving the platform
+summary at "INCOMPLETE - 1 FAILED". It now reads
+a.tenant_id IS NOT DISTINCT FROM b.tenant_id: type-agnostic, NULL = NULL.
+The same statement in CORE_MIGRATIONS (:473, the MAIN db, TEXT column) is
+deliberately unchanged - there COALESCE treats NULL and '' as equal where
+IS NOT DISTINCT FROM would not - and the new test's second control pins
+that CORE_MIGRATIONS still holds exactly one COALESCE de-dup.
+New test file ks1272-platform-dedup-uuid-tenant-id.test.ts (3 cells): a
+fake pg Pool, redirected only for the product file, refuses any statement
+that coalesces tenant_id with '' on a uuid-typed platform database.
+Red-first at develop with the test section alone: exactly the red cell
+red, both controls green; with the product line 3/3 green.
+whole api-gateway suite 674 -> 677, all green. A real Postgres was NOT exercised: the fake
+reproduces 22P02 by matching the ticket's quoted text.
+NOT DONE: the ticket's third item - which tenant_id declaration is canonical
+(TEXT in the in-code CREATE vs UUID in
+docker/init-platform/01-platform-schema.sql) - is a ruling for Kam, not this
+change.
+
+Applied verbatim from the local-model run runs/2026-09-20_ks1272-ornith35b-night
+(checker PASS 7/7, strict; the canonical patch.diff's 85-line test, not the
+checker's 86-line spliced variant, which differs by one unused declaration).
+
+Refs KS-1272
+
+Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>
+
+--- PR1/PR2 commit subjects
+KS-1275 ORDER-1: pin the declared order of LIFECYCLE_EVENT_ACTIONS
+KS-1203 UNTYPED-1: pin that an untyped body resolves no document type at all

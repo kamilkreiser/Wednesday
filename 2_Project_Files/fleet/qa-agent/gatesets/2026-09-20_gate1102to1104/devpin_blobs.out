@@ -1,0 +1,106 @@
+2026-09-20T13:11:34Z
+originate config files:
+Blockchain/Dev/services/originate/.env.example Blockchain/Dev/services/originate/Dockerfile Blockchain/Dev/services/originate/jest.config.js Blockchain/Dev/services/originate/jest.integration.config.js Blockchain/Dev/services/originate/package-lock.json Blockchain/Dev/services/originate/package.json Blockchain/Dev/services/originate/src Blockchain/Dev/services/originate/tsconfig.json 
+994abf9ffd17a59acdcabedff4b2db8e5e1423fb Blockchain/Dev/services/originate/src/__tests__/lifecycleEventRepo.test.ts
+4f993ee7aefb3abc857436a07cdd5f2b3fa4f80f Blockchain/Dev/services/api-gateway/src/__tests__/ks501-enforcement-non-string-doctype.test.ts
+ABSENT Blockchain/Dev/services/api-gateway/src/__tests__/ks1272-platform-dedup-uuid-tenant-id.test.ts
+ed3e521426e75910c5bf2cf07e7251f2fd8ef538 Blockchain/Dev/services/api-gateway/src/startup-migrations.ts
+be466fbf444178bbb41293fb1d811957e55e1d2d Blockchain/Dev/services/api-gateway/src/services/enforcement.ts
+79043184542cf64f9fa32583e5b8eba2e01555a2 Blockchain/Dev/services/api-gateway/src/__tests__/enforcement.test.ts
+aa1c8434d5a55ad035e1ee62755ace7379af69fb Blockchain/Dev/services/originate/src/lifecycleActions.ts
+5933da41ed3dcf37f415000c4da4a717ea8d7eba Blockchain/Dev/services/api-gateway/src/__tests__/db.retry.test.ts
+841d8c6adcd71e885c01e65c22da9418daff276a Blockchain/Dev/services/api-gateway/package.json
+5888e0b320d934f6f434e0e5ca3c74a995cecc02 Blockchain/Dev/services/api-gateway/vitest.config.ts
+22c1107683b8192df3bfd3e929aa94aff3dc7d45 Blockchain/Dev/services/api-gateway/vitest.setup.ts
+c981e6a92fdd2417fa35070eb979c5f1c77ffbcd Blockchain/Dev/services/api-gateway/tsconfig.json
+d4435238d3ece7f7da42f043f56ca7739a611132 Blockchain/Dev/services/originate/package.json
+735183662feea56d39f664eb6379cae1a2eec957 Blockchain/Dev/services/originate/jest.config.js
+ABSENT Blockchain/Dev/services/originate/jest.config.ts
+ABSENT Blockchain/Dev/services/originate/jest.config.cjs
+d1b46ece71ad5b2559ccad3648c23a5231e43b09 Blockchain/Dev/services/originate/tsconfig.json
+712f895362e2c8d1ead6fd09ac257d7bce212948 Blockchain/Dev/scripts/preflight/preflight.sh
+bf766bb54828cf6abad817f0f21a0c2f674d783f Blockchain/Dev/scripts/run-shell-suites.sh
+1b22d4e146487aa25698310b353152a7d09986b5 .githooks/pre-push
+773443a9faa0a2eb7caf01c313b880fbe3251922 Blockchain/Dev/package.json
+646c19f6f7f735ba32bfb20bef8b936835184949 Blockchain/Dev/package-lock.json
+8c5374c6022eb0a3f449f41a570db61294aa63f1 Blockchain/Dev/eslint.config.mjs
+59a1928dc56d9921dbdf2e8d36667e2df6af4024 BACKLOG.md
+64fb44c68ea55825c4ad2c2c2f199c8c7746ab87 Blockchain/Dev/docker/init-platform/01-platform-schema.sql
+b80a8cd8d4e1af5a944817227f5ee6612c793954 Blockchain/Dev/services/api-gateway/src/routes/platform.ts
+20c8a088f5dc34fc1563b3907e7c816e1b9fa3d3 Blockchain/Dev/services/api-gateway/src/routes/admin.ts
+db.retry blob at heads:
+5933da41ed3dcf37f415000c4da4a717ea8d7eba
+5933da41ed3dcf37f415000c4da4a717ea8d7eba
+5933da41ed3dcf37f415000c4da4a717ea8d7eba
+cells in PR2 test file (it( count, it.each) at develop/head — grep only, the runner counts):
+4
+5
+PR1 test file it( count develop/head:
+7
+8
+lifecycleEventRepo.test.ts lines 76-90 at head:
+        'share-token-rotate',
+      ].sort(),
+    );
+  });
+
+  it('🔴 KS-1172 / KS-1173 — accepts note, certified and verified (Stuart 2026-09-15); declare keeps its dedicated route', () => {
+    expect(LIFECYCLE_EVENT_ACTIONS).toContain('note');
+    expect(LIFECYCLE_EVENT_ACTIONS).toContain('certified');
+    expect(LIFECYCLE_EVENT_ACTIONS).toContain('verified');
+    // CONTROL — green on both trees: a verb WITH a dedicated K route is never accepted here.
+    expect(LIFECYCLE_EVENT_ACTIONS).not.toContain('declare');
+  });
+  it('RED KS-1275 ORDER-1: LIFECYCLE_EVENT_ACTIONS is declared in ONE order, the order z.enum publishes and the 400 message joins', () => {
+    const declaredOrder = [...LIFECYCLE_EVENT_ACTIONS].join(',');
+    expect(declaredOrder).toEqual('rights-unassign,share-revoke,share-permission-change,rename,delete,restore,share-recipient-change,share-expiry-change,share-token-rotate,share-resend,share-attach-consent,protect,unprotect,note,certified,verified');
+  });
+});
+
+describe('createLifecycleEvent', () => {
+  it('inserts and returns the stored record shape (payload defaulted to {})', async () => {
+    mockExecuteRaw.mockResolvedValueOnce(1);
+ks501 test at head: lines 50-72
+/**
+ * KS-501 — a non-string documentType must be rejected, never crash the gateway.
+ *
+ * `enforceDocumentTypeRules` read `(body.documentType || body.type || '') as
+ * string` — a compile-time cast, not a runtime coercion — so a truthy
+ * non-string (123, [...], {...}) passed the falsy guard and reached
+ * `typeRef.toUpperCase()` inside `resolveDocumentType`, throwing a TypeError
+ * that escaped as an unhandled rejection and crashed the WHOLE gateway
+ * process (restart → a measured 66-operation 502 cascade in the
+ * full-2026-07-24 sweep). These tests pin the fix: a 400 VALIDATION_ERROR
+ * result, and a total (null-returning) resolver.
+ */
+
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { resolveDocumentType, enforceDocumentTypeRules } from '../services/enforcement';
+
+vi.mock('../services/redis', () => ({
+  getAllDocumentTypes: vi.fn(),
+  getWorkflow: vi.fn(),
+  setWorkflowInstance: vi.fn(),
+    expect((result as { status?: number }).status).toBe(400);
+  });
+
+  it('still passes through an absent/empty documentType', async () => {
+    const result = await enforceDocumentTypeRules({}, undefined);
+    expect(result.ok).toBe(true);
+  });
+
+  it('resolveDocumentType is total: a non-string returns null rather than throwing', async () => {
+    await expect(resolveDocumentType(123 as unknown as string)).resolves.toBeNull();
+    await expect(resolveDocumentType({} as unknown as string)).resolves.toBeNull();
+    // Redis is never consulted for a value that cannot be a type ref.
+    expect(redisService.getAllDocumentTypes).not.toHaveBeenCalled();
+  });
+  it('RED KS-1203: a body carrying no resolvable documentType admits with an EMPTY docType and never consults the catalogue', async () => {
+    const untypedShapes = [{}, { documentType: '' }, { type: '' }, { DocumentType: 'SSD_DOCUMENT' }, { document_type: 'SSD_DOCUMENT' }, { Type: 'SSD_DOCUMENT' }, { data: { title: 'no type here' } }];
+    for (const body of untypedShapes) {
+      const result = await enforceDocumentTypeRules(body, undefined);
+      expect([result.ok, (result as { docType?: unknown }).docType]).toEqual([true, {}]);
+    }
+    expect(redisService.getAllDocumentTypes).not.toHaveBeenCalled();
+  });
+});
