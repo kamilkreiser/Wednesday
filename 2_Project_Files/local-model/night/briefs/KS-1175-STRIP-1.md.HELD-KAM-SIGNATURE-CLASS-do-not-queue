@@ -1,0 +1,121 @@
+# KS-1175 STRIP-1 PIN THAT THE PS-869 ACTOR/ORG IDENTITY FIELDS ARE STRIPPED FROM metadata AND NEVER REACH THE ANCHORED PAYLOAD — Wednesday's task for Ornith, TEST_ONLY, **ONE existing test file, one hunk, one cell added, no product file** (written 2026-09-20, round 23)
+
+File: `Blockchain/Dev/services/anchoring/src/__tests__/anchorSchema.test.ts`
+Tip: `e470198783bcb1ef0eac94780f87579974051423`
+Runner: `vitest`
+
+Written from develop `e470198783bcb1ef0eac94780f87579974051423` (`git -C "/Volumes/DevMASTER/!CODING/Secuura/Blockchain/2_Project_Files" log -1 e47019878`, read verbs only; the tip of the #1097-#1099 merge, 2026-09-20 05:54:10 +1000). The test file at that tip is **319 lines**, read whole; its full content is in `files[...]` of your input. The product the cell pins is `Blockchain/Dev/services/anchoring/src/anchorSchema.ts` (**221 lines**, read whole): the `metadata` sub-object declared at `:116-153` and the whitelist payload builder `buildFlatAnchorMetadataPayload` at `:181-221`. This service runs **VITEST** (`anchoring/package.json` at the tip: `"test": "vitest run"`, `vitest ^4.1.9` in devDependencies, no jest anywhere).
+
+## THE MODE — read this twice
+
+**TEST_ONLY.** Your diff touches EXACTLY ONE file: the test file above, MODIFIED IN PLACE (`--- a/<path>` / `+++ b/<path>`, the path exactly as written above). You never touch `anchorSchema.ts` or any other product file: the behaviour is already right at the tip, and this cell PINS it.
+
+## What the cell pins (one paragraph)
+
+`anchorSchema.ts` is the flat-anchor request contract for `POST /api/anchors` — extracted from `index.ts` precisely so it can be unit-tested without booting the service, so a cell that imports it reaches the product code with no app boot, no port and no mock. KS-1175 (PS-869 / PS-864) asks K to ACCEPT and ANCHOR seven new non-PII identity fields — `actorDid`, `actorLevel`, `actorSource`, `actorVerified`, `orgDid`, `orgTrust`, `orgVerified` — under `metadata`, and its whole deploy ordering rests on one stated premise: *"Today `anchorSchema.ts` strips unknown keys, so S will not send until K is live."* That premise is unpinned. The `metadata` object at `:116-153` declares exactly three keys (`documentType`, `timestamp`, `identityCommitment`) and relies on zod's DEFAULT `.strip()` for everything else, and `buildFlatAnchorMetadataPayload` (`:181-221`) is a fixed-field whitelist with no object spread of caller input — two independent guards, neither of which any cell in this file exercises against an undeclared `metadata` key. The suite's existing key-set cells (`:280`, `:301`) pin the PAYLOAD's key set only; the two `onBehalfOf` cells that pin the TOP-LEVEL strip live in other files (`ks480-provenance-exclusion.test.ts:28`, `ks566-connector-attribution.test.ts:33`) and say nothing about `metadata`. So today a change that made `metadata` permissive, or that opened the payload whitelist to a spread of caller metadata, would ship green. This change adds ONE cell that (a) sends all seven PS-869 fields inside `metadata` and asserts the parse SUCCEEDS with exactly `{ documentType: 'sign' }` surviving — stripped, not rejected — and (b) hands the builder an object that still carries `actorDid` and asserts no `did:` reaches the anchored payload. Every existing cell is unchanged. **It pins TODAY's behaviour and decides nothing about KS-1175's own work** (accepting the block on eight endpoints, carrying it on-chain, returning it in provenance/verify, the OpenAPI + Schemathesis/Akto update): that is a many-file feature and is NOT this task.
+
+## The exact change — ONE hunk in the test file
+
+The new cell goes at the very end of the `describe('buildFlatAnchorMetadataPayload — KS-721 exact anchored key set', ...)` block opened at `:260`, directly above that block's closing line `});` (`:319`, the file's LAST line and the ONE trailing context line). There is NO leading context: the line above (`:318`, `  });`) stays and is not written. Copy every line byte for byte. Every `+` line is ASCII only. There is no blank line anywhere in the fence. Keep the header exactly as shown. **Your diff MUST begin with the two file-header lines, above the `@@` line: `--- a/Blockchain/Dev/services/anchoring/src/__tests__/anchorSchema.test.ts` then `+++ b/Blockchain/Dev/services/anchoring/src/__tests__/anchorSchema.test.ts`.**
+
+```
+@@ -319,1 +319,10 @@
++  it('RED KS-1175: the PS-869 actor and organisation identity fields are STRIPPED from metadata and never reach the anchored payload', () => {
++    const withIdentity = { ...BASE_BODY, metadata: { documentType: 'sign', actorDid: 'did:key:z6MkKS1175actor', actorLevel: 2, actorSource: 'platform', actorVerified: true, orgDid: 'did:web:org.example', orgTrust: 'domain', orgVerified: true } };
++    const result = anchorDocumentSchema.safeParse(withIdentity);
++    expect(result.success).toBe(true);
++    expect(result.success ? result.data.metadata : null).toEqual({ documentType: 'sign' });
++    const parsedSign = anchorDocumentSchema.parse({ ...BASE_BODY, metadata: { documentType: 'sign' } });
++    const leaky = { ...parsedSign, metadata: { ...parsedSign.metadata, actorDid: 'did:key:z6MkKS1175actor' } };
++    expect(JSON.stringify(buildFlatAnchorMetadataPayload(leaky, 'preview'))).not.toContain('did:');
++  });
+ });
+```
+
+`anchorDocumentSchema`, `buildFlatAnchorMetadataPayload` and `BASE_BODY` are all already in scope: the file imports the two from `../anchorSchema` at `:23-29` and declares `BASE_BODY` at `:32-35`. **You add NO import.** The cell needs no mock, no app boot and no database: `anchorSchema.ts` is a pure module (a zod schema and a pure function), which is exactly why it was extracted from `index.ts` (its own header comment, `:2-4`). `'sign'` is a canonical `LIFECYCLE_VERBS` member (`:21`), so the parse succeeds at the tip. `safeParse` is used deliberately rather than `parse`, so a schema that REJECTED the unknown keys instead of stripping them reds this cell by assertion rather than by a thrown error.
+
+## Cells
+
+- `stripsidentity` = `RED KS-1175: the PS-869 actor and organisation identity fields are STRIPPED from metadata and never reach the anchored payload`
+
+## Red cells
+
+The cell below is a GENUINE assertion-red: it fails under each tamper and passes at the tip. It is declared here rather than with a red glyph in its title because every `+` line in this diff must be ASCII only.
+
+- RED KS-1175: the PS-869 actor and organisation identity fields are STRIPPED from metadata and never reach the anchored payload
+
+## Tampers
+
+Two single-line tampers, one per guard the cell pins, on two DIFFERENT lines of `anchorSchema.ts`. Each `From` is the tip's line at that number, byte for byte, and each also occurs EXACTLY ONCE in the whole file (counted); each `To` is valid TypeScript and valid zod 3 (`zod` resolves to 3.25.76 in `anchoring/package-lock.json`), so nothing fails to load and no cell reds for the wrong reason.
+
+### METADATAPASSTHROUGH — the metadata sub-object stops stripping unknown keys
+File: `Blockchain/Dev/services/anchoring/src/anchorSchema.ts`
+Line: 153
+From:
+```
+  }).optional(),
+```
+To:
+```
+  }).passthrough().optional(),
+```
+Reds: `stripsidentity`
+
+### PAYLOADSPREADSMETADATA — the anchored-payload whitelist is opened to a spread of caller metadata
+File: `Blockchain/Dev/services/anchoring/src/anchorSchema.ts`
+Line: 202
+From:
+```
+      ...(data.metadata?.documentType ? { documentType: data.metadata.documentType } : {}),
+```
+To:
+```
+      ...(data.metadata ? { ...data.metadata } : {}),
+```
+Reds: `stripsidentity`
+
+## Controls
+
+- `anchors EXACTLY these keys when every optional field is supplied`
+- `anchors EXACTLY these keys when nothing optional is supplied`
+- `omits occurredAt entirely when no event time is asserted`
+- `omits identityCommitment entirely when none is asserted`
+
+*(All four are FULL `it(...)` titles, copied byte for byte from the file at the tip — `:280`, `:301`, `:203`, `:249` — and each occurs exactly once in the file and is not a prefix of any other title. For a VITEST or JEST suite the checker matches a declared cell by its FULL title, never by a prefix; the prefix rule in `build_test_only_input.sh`'s header is documented for BASH suites. Measured 2026-09-20 on the KS-1275 round-1 FAIL: two controls declared as prefixes came back `DECLARED CELL NOT IN THE RUN`. The last two controls are chosen because they run the PAYLOAD BUILDER, so they prove the run is live on the exact line PAYLOADSPREADSMETADATA mutates. The file's three other payload cells — `anchors the renamed verb through the flat payload builder unchanged` (`:165`), `anchors the asserted time as occurredAt, normalised to UTC, alongside the anchoring timestamp` (`:191`) and `still excludes issuerName and the onBehalfOf triplet with the new field present (KS-240 / KS-480 §6)` (`:308`) — are ALSO green under both tampers, but the last two carry non-ASCII characters in their titles and are left undeclared rather than risk the encoding.)*
+
+## THE CELLS — state it to yourself before you write a line
+
+At the untouched tip the new cell passes. `metadata` is a plain `z.object({...})`, so zod's default `.strip()` discards `actorDid`, `actorLevel`, `actorSource`, `actorVerified`, `orgDid`, `orgTrust` and `orgVerified` while the parse SUCCEEDS — `result.success` is `true` and `result.data.metadata` is `{ documentType: 'sign' }`. Then `leaky` carries `actorDid` into `buildFlatAnchorMetadataPayload`, whose body is a fixed-field whitelist with no spread of caller input, so the serialised payload contains no `did:`.
+
+Under **METADATAPASSTHROUGH** the parse still succeeds but `result.data.metadata` now carries all eight keys, so `toEqual({ documentType: 'sign' })` fails by assertion. Under **PAYLOADSPREADSMETADATA** the parse leg is unchanged and green, and the builder spreads `leaky.metadata` into `secuura`, so the serialised payload contains `did:key:z6MkKS1175actor` and `not.toContain('did:')` fails by assertion. Under BOTH tampers every existing cell stays green: no other cell in this file ever sends an undeclared `metadata` key (so passthrough changes nothing for them), and under the spread the only metadata keys any existing fixture carries are `documentType`, `timestamp` and `identityCommitment` — all three are already whitelisted key names, so the two exact-key-set cells (`:280`, `:301`) see an unchanged key set, `:191` still reads a `timestamp` that is a string and still differs from `occurredAt`, and `:165`, `:243`, `:203`, `:249`, `:308` are untouched in value.
+
+## Premises (measured — by reading the tip, NOT by running anything)
+
+- **Premise: the two `From` lines.** `anchorSchema.ts` at `e47019878`, line 153 is `  }).optional(),` and line 202 is `      ...(data.metadata?.documentType ? { documentType: data.metadata.documentType } : {}),`, byte for byte. Each occurs **exactly once** in the file (`grep -c -Fx` = 1 for both).
+- **Premise: the anchor.** The test file is **319** lines; `:319` is `});` (column 0, the file's last line, closing the `describe` opened at `:260`) and `:318` is `  });`. The trailing context line is non-blank and the insertion is pure, so no blank line is asked of you anywhere.
+- **Premise: nothing in this file pins the metadata strip today.** `grep -n onBehalfOf` over `anchoring/src/__tests__/` returns the top-level strip cells in `ks480-provenance-exclusion.test.ts` (`:28`, `:33`) and `ks566-connector-attribution.test.ts` (`:33`, `:38`) — different files, and about the TOP-LEVEL key, not `metadata`. `grep -n actorDid` over the whole repo at the tip returns **0** occurrences: the seven PS-869 field names are nowhere in the tree.
+- **Premise: no `+` line re-adds a tip line.** `withIdentity`, `parsedSign`, `leaky`, `actorDid`, `KS-1175` and `safeParse(withIdentity)` occur **0** times in the test file at the tip. The only `+` line that also occurs at the tip is the closing `  });` (unavoidable for a new cell).
+- **No backslash** in any `+` line (0, counted). **No non-ASCII** in any `+` line (0, counted).
+- **Premise: the runner.** `anchoring/package.json` at the tip has `"test": "vitest run"` and `vitest ^4.1.9` in devDependencies, with no `jest` / `ts-jest` anywhere — the builder auto-detects vitest and the `Runner:` line above agrees with it. `vitest.config.ts` includes `src/__tests__/**/*.test.ts`, which this file matches.
+- **Premise: no live-seat collision.** The live Secuura seat is on PRs #1100/#1101 in `services/api-gateway/src/__tests__/ks1230*` and `ks1215*`; this brief touches only `services/anchoring`. The one held READY that ever carried a hunk in `anchorSchema.test.ts` (`READY_KS-1172-B3_…_2026-09-15`) is a SPENT hold — its content is AT the tip (`anchorSchema.ts:63-68`, the `:86` cell, the `:65-67` pin entries).
+
+## NOT MEASURED — state this in the READY
+
+**No suite was run for this brief and no scratch clone was made.** The writing seat was barred from running any test suite and from touching any local port (a live PostgreSQL of unknown ownership sits on 127.0.0.1:5432), so this brief carries **no** tip-suite count, **no** per-tamper red count and **no** checker pre-run. Everything above is read from the blobs at `e47019878`. **Before this is queued, run the real checker on the brief's own diff in a `--shared` scratch clone at the tip** — the expected result is the anchoring `anchorSchema.test.ts` green at the tip with one extra cell, and each tamper reding exactly `stripsidentity` and nothing else.
+
+## Output
+
+Exactly ONE ```diff block, nothing outside it: `--- a/Blockchain/Dev/services/anchoring/src/__tests__/anchorSchema.test.ts` / `+++ b/Blockchain/Dev/services/anchoring/src/__tests__/anchorSchema.test.ts`, then the hunk above exactly as shown (`@@ -319,1 +319,10 @@`).
+
+## Notes for the raise (not for the model)
+
+- Test-only, zero product bytes. **Raise tier: TIER 2. Refs KS-1175** (and KS-721 / KS-566 / KS-240, whose minimisation posture this pins). **NEVER Closes** — KS-1175's own work (accepting `metadata.identity` on all eight anchoring endpoints, carrying it on-chain, returning it in provenance/verify/anchor-status, the OpenAPI + Schemathesis/Akto examples, and item 4's PII audit of `holderEmail` / `recipients[].email` / `newHolderEmail` / `onBehalfOf`) is untouched here and stays Backlog.
+- **Not from a gate.** This is a completeness pin in the N97-1 / N99-1 / KS-1275 species: the ticket's stated ordering premise ("K deploys first *because* K strips unknown keys today") is load-bearing for Platform-S and provably invisible to the suite. Pinning it is exactly what makes the KS-1175 widening safe to review later: the day the fields are declared, this cell is the one that must be consciously changed.
+- **Surface note for Wednesday:** the field names are identity-flavoured (`actorDid`, `actorLevel`, `actorVerified`) but the surface is the flat-anchor REQUEST SCHEMA and the on-chain minimisation whitelist — not authentication, authorization, tokens or MFA. No auth guard, no session, no credential is touched. Flagging it so the auth-goes-last order is applied with the facts.
+- **Collision: none.** No held `READY_*` carries a live hunk in `anchorSchema.test.ts` or `anchorSchema.ts`; the only one that ever did is spent (see the premise above). `anchorSchema.ts` is not touched by this diff at all.
+
+## Build line (not for the model)
+
+```
+bash tasks/test_only/build_test_only_input.sh KS-1175 night/inputs/test_only_1175STRIP-1.json night/briefs/KS-1175-STRIP-1.md ctx=65536
+```
