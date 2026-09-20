@@ -1,0 +1,19 @@
+# READY — KS-1234-ALIASOTHERROUTES-1 (Ornith, briefed, test_only, modify · vitest) — PASS 8/8 — HELD for QA
+
+> ⚠ **CANONICAL PATCH = `/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/runs/2026-09-21_ks1234-ornith35b-night/out.md.checker/patch.diff`** (from `ls` at 04:44 2026-09-21). Checker T3: strict `git apply --check` at the tip PASS; the run's patch is BYTE-IDENTICAL to the drafter's golden (`cmp -s /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/runs/2026-09-21_ks1234-ornith35b-night/out.md.checker/patch.diff /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/runs/2026-09-21_gate1106rows-drafter-precheck/ALIASWIDENINGOTHERROUTES/out.md.checker/patch.diff` rc 0, the 04:3x Wednesday seat).
+
+**Held 04:44 2026-09-21 by the 04:3x Wednesday seat after a source read (hold_ready.py — every clause below is built from the checker's own artefacts in `/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/runs/2026-09-21_ks1234-ornith35b-night/out.md.checker`, not typed).** Tip `362e51fe0db7e73d5557924902763fe3f10fd8c7`. Touches ONE file: `Blockchain/Dev/services/api-gateway/src/__tests__/ks1234-v1-documents-json-create-never-answers.test.ts` (modify). `+` lines 4 ordered-equal to the brief's `expected_plus` (ASCII); `-` lines 0 == `must_remove`. Green at the tip: 4/4 cells. Tampers (1), each red exactly its declared set with controls green and the product file restored by bytes (T6/T7/T8):
+- `ALIASNARROWED` → red exactly ['RED KS-1234: POST /api/v1/timestamps as application/json - t']
+
+**PR NOTES for the raise seat:** TEST-ONLY — zero product bytes; one file, apply `patch.diff` strictly at the tip (re-check `git ls-remote origin develop` first; if develop moved, re-run `git apply --check` and state it). Input: `/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/runs/2026-09-21_ks1234-ornith35b-night/input.json`. Brief: `night/briefs/KS-1234-ALIASOTHERROUTES-1.md`. Verdict source: `/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/runs/2026-09-21_ks1234-ornith35b-night/checker.out`.
+
+```diff
+--- a/Blockchain/Dev/services/api-gateway/src/__tests__/ks1234-v1-documents-json-create-never-answers.test.ts
++++ b/Blockchain/Dev/services/api-gateway/src/__tests__/ks1234-v1-documents-json-create-never-answers.test.ts
+@@ -88,1 +88,5 @@
++  it('RED KS-1234: POST /api/v1/timestamps as application/json - the alias of a proxyPaths route OTHER than documents - answers 200 and the upstream receives the body unparsed, a title the sanitizer would rewrite arriving byte-equal', async () => {
++    const [status, upstreamHits] = await send('POST', '/api/v1/timestamps', JSON.stringify({ title: '<b>ks1234</b>', contentHash: 'b'.repeat(64) }));
++    expect([status, upstreamHits.map((h) => h.split(' ')[2])]).toEqual([200, ['<b>ks1234</b>']]);
++  }, 15000);
+   it('control: the /api/v1 alias itself is live - GET /api/v1/signatories answers 200 and reaches originate at /api/signatories', async () => {
+```
