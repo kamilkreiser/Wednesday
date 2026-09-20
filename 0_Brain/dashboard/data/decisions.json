@@ -12300,5 +12300,41 @@
    "CARD secuura-ks721-identity-commitment",
    "CARD hpsm-composer-remediate-high-reach"
   ]
+ },
+ {
+  "id": "nexusai-rd516-undici-dependency-for-address-pinning",
+  "client_project": "Datasec/NexusAI",
+  "title": "RD-516: closing the DNS-rebinding window needs an undici dependency on a security path — add it, or ship without pinning and ticket the gap?",
+  "bluf": "OVERRIDE REASON, AS A MEASUREMENT RATHER THAN AN ASSERTION: the gate refused on 5 prior messages sharing the word \"address\". Each was read and none governs this subject. (1) 2026-08-17 20:15 - Purview analysis progress, no decision. (2) 2026-09-02 - card secuura-ks229-securitymd-codeowners, a SECURITY.md DISCLOSURE address for Secuura. (3) 2026-09-10 11:25 - formatting of the security review document. (4) 2026-09-17 08:04 - card nexusai-rd454-enforced-without-group, Entra security groups being optional. (5) card secuura-audit-row-ip-address-high-override, ALREADY RULED - a Cardano SDK pin in the Secuura issuer portal. Three are Secuura, one is document formatting, one is Entra group access; NONE is about a Node dependency or DNS rebinding. This is the tool's substring matcher firing on a common English word - the SECOND recorded instance after \"vault\" on 2026-09-20 (DELTA 34). --- RD-516's design closes a DNS-rebinding window by pinning the approved IP through an undici Agent. Measured: undici is NOT installed (not a dep, direct or transitive) and node:undici does not exist, so the design's method is not implementable as written. Three ways out. The agent REFUSED one of them outright and it was right to: reaching the Agent class through undocumented Node internals fails open silently on a Node upgrade, which is a security control that stops working and says nothing. Tuesday has ruled option (3) for tonight so nothing is blocked and the layers that DO exist ship. This card is the durable decision on the dependency, because it has a maintenance tail you own: an explicit undici dep must track Node's built-in version or the process carries two copies, and if built-in fetch will not accept a separately-installed Agent then (1) is not a dependency line at all - it means moving the adapter onto undici.fetch, which puts RD-523's redirect:'error' guard (the api-key-to-another-origin refusal) onto a different implementation. That measurement has NOT been taken and must be, before anyone prices (1) as cheap.",
+  "default_action": "Option (c) stands: RD-516 ships with layers 0-2 and the rebinding window is a ticket carrying the agent's reasoning. Nothing waits on this card - it is here so the dependency call is yours rather than made by default.",
+  "options": [
+   {
+    "key": "c",
+    "label": "Ship WITHOUT pinning; ticket the rebinding window (Recommended - already in force tonight)",
+    "detail": "Layers 0-2 ship: type + sourced single-label host allow-list (openai.azure.com, cognitiveservices.azure.com, services.ai.azure.com, cognitiveservices.azure.us, each with an MS-doc citation) + resolved ADDRESS class on every record. The residual is a resolver-level attacker: to rebind they need control of the RESOLUTION for a Microsoft-managed suffix, which is a far larger compromise than the SSRF this ticket closes. Note an attacker CAN own a NAME under the allow-list (their own Azure OpenAI resource) - what they cannot control is the ADDRESS behind it."
+   },
+   {
+    "key": "a",
+    "label": "Add undici as an explicit dependency and pin as designed",
+    "detail": "Closes the rebinding window properly. Costs: a dependency on a security path that must track Node's built-in version; two undici instances in-process; and possibly moving the adapter off global fetch onto undici.fetch, which re-hosts RD-523's redirect guard. Take the built-in-fetch-accepts-a-foreign-Agent measurement FIRST."
+   },
+   {
+    "key": "b",
+    "label": "Reach undici's Agent through Node internals",
+    "detail": "REFUSED by the agent and by Tuesday, permanently. Undocumented Symbol + prototype walk; a Node upgrade silently stops the pinning while every check stays green. Listed only so the record shows it was considered and rejected."
+   }
+  ],
+  "recommended": "c",
+  "ts": "2026-09-20T23:36:29.248844+10:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "2026-08-17 20:15",
+   "2026-09-02 19:35",
+   "2026-09-10 11:25",
+   "2026-09-17 08:04",
+   "CARD secuura-audit-row-ip-address-high-override"
+  ]
  }
 ]
