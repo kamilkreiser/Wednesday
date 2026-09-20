@@ -10,6 +10,50 @@ supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s
 
 ---
 
+## 🟢 DELTA 45 — 2026-09-21 00:2x (s74, ctx 66% LIGHT CHECKPOINT; band 80-90, NOT rotating). **THE WHOLE FLOOR IN ONE READ. Supersedes DELTA 44's state; 44's RULINGS all stand.**
+
+### THE FLOOR
+- **`%20` `Datasec/NexusAI` (S73) — the only live seat, ctx 64%.** Turn ended; **the FULL-SUITE run is live** (`jest --maxWorkers=2` → `$SP/full-FINAL.txt`, pid 53566 at 09:34 elapsed when measured). **That is a LEGITIMATE hold — the pending work IS that run's output — so it was ACKED (`wake_ack.sh %20`), not tapped.** Its next mail is the number, then **READY FOR QA**.
+- **`main` = `60c76d7`** (unchanged tonight — none of RD-516 has merged). **Minimum set still RD-516 · RD-518.**
+- **Usage 94%.** ⏳ **Kam's lift of the 95% stop was for the NIGHT OF 2026-09-20 ONLY, undated. RE-ASK before treating headroom as granted — it is item three of the morning report.**
+
+### RD-516 — WHERE IT ACTUALLY IS
+| piece | head | state |
+|---|---|---|
+| CHANGE 1 (fixtures, 3 cells) | `f09836d` + `f4ef7a7` | done, inertness pairs EMPTY-diff |
+| CHANGE 2 (the policy, provenance out of band, red proof) | `b2dea38` | done |
+| The seam + SEAM-2 permanent control + R7 rescued | `315061a` | done |
+| R6, DEPLOYMENT_GUIDE, **the gate brief** | `4422325`, `f4264e5` | done |
+- **28 passed · 2 failed · 1 skipped** at last report. The 2 are **R7 (RD-585, naming only — containment green)** and **R8 (RD-541/C-106, not taken here)**; the skip is **R10(i) (RD-583)**.
+- 🔴 **THE DELIVERABLE IS IN GIT, NOT IN THE HANDOVER: `docs/rd516/RD-516-gate-brief.md`, 186 lines at `f4264e5`.** That is the IN-REPO path — the repo root IS `2_Project_Files`, so `git show <sha>:2_Project_Files/docs/...` returns "does not exist" and a successor may wrongly conclude it is uncommitted. **It carries §5 (the acceptance clause), §6 (the named 27 + the proven recipe) and §7 (the honest NOT-TESTED list).**
+- **Filed tonight:** RD-583 (§3.3 scheme rule unimplemented) · RD-584 (rebinding window) · RD-585 (R7's unnamed refusal). **Comments:** RD-516 c.37882 + c.37886, RD-583 c.37884, RD-585/RD-584 c.37885.
+
+### 🔴 THE NEXT PIECE IS WRITTEN AND STAGED — DO NOT RE-DERIVE IT
+**`2_Project_Files/fleet/briefs_staged/nexusai_rd574_rescue_the_27.md`** (53 lines, committed): rescue the **27** (not 26) seam-dependent cells on their **OWN branch merging BEFORE RD-516**, per §6's four-step recipe, acceptance = **INERTNESS per suite** (before/after at current main, empty per-cell diff). **It opens with a RE-VERIFY block: the heads, §6 at the then-current head, the gauge, and whether any of the 27 were already taken.** Six hard stops in it, including the http-only seam limit and "do not tidy `SEAM_OFF` into the intercept map".
+🔴 **DO NOT LAUNCH IT WHILE S73 IS LIVE: the 27 span rd464, rd486, rd523, rd545 and S73's branch holds rd523 + rd545.** The partition forbids it. **It goes to S73's SUCCESSOR after its wrap.**
+
+### OWED TO KAM — and the first one is time-critical because he leaves TONIGHT
+1. 🔴 **THE MORNING REPORT, drafted at `5_Project_History/2026-09-21_morning-report-draft.md`** with a RE-VERIFY list. **ITEM ONE IS THE WEEK INSTRUCTION FOR THIS SEAT:** `tasks/WEEK-INSTRUCTION-TUESDAY.md` is `status: none`, `valid_until: 2026-09-16`, and per the unattended-week design **he leaves Monday night 2026-09-21**. **Without one, Datasec has NO standing authority for the week and this seat must stop rather than keep working.** Wednesday's shared copy is now `lapsed` (her seat marked it, correctly).
+2. **The deployment count** — ruled (a) 21:14; the answer (it is his, and why, measured) is ON HIS PANEL since 23:02.
+3. **The usage re-ask** (see above).
+- **Cards open:** `nexusai-rd516-undici-dependency-for-address-pinning` (default **c**, safe, already in force) · `nexusai-degraded-flip-and-live-deployments` (ruled a, awaiting his count) · `nexusai-rd535-live-listing-restore-reopen`.
+
+### 🔴 NINE THINGS NOT TO RE-OPEN
+1. The **provenance re-key** (Q2b's TRUSTED-STORED stays) — HELD, measured.
+2. **Option (2)**, reaching undici's `Agent` through `Symbol.for(...)` + a prototype walk — **REFUSED PERMANENTLY.**
+3. **§3.3's scheme rule** — not narrowed, not implemented; RD-583.
+4. **The limiter collapse** inside RD-516 — C-106 says it is not symmetric.
+5. **R3 on the interception seam** — it would test the harness against itself.
+6. **Rescuing the 27 inside RD-516's branch** — rebuilds the mixed diff the split avoids.
+7. **The vault** (`tuesday-mini-vault-three-unpushed-commits`, ruled (a) 16:44: leave it, nothing pushes from the mini).
+8. **The Spotlight card** — withdrawn; the measured answer (exclusion absent, index 13.01 GiB, `!CODING` holds 1,802,024 indexed `.js`) is in the morning report.
+9. **The decision-records move** — authorised (a) 19:39 but **the move is the PROJECT agent's action, never this seat's**; the gitleaks constraints are in DELTA 42 item 5.
+
+### NEW TOOLING THIS SEAT
+**`2_Project_Files/fleet/pane_wake_check.sh`** — `--selftest` (4 arms, all PASS) after the inline wake check failed four ways in one session. **Use it instead of composing a `ps`/glyph check:** `pane_wake_check.sh <pane> <pattern>`, rc 0 = wake pending (mail suffices), rc 3 = tap required. **The glyph arm PROVES `✻` matches the live AND the done marker, so DELTA 43's check is unusable — do not revive it.**
+
+---
+
 ## 🌙 DELTA 44 — 2026-09-20 23:0x (s74 boot; ctx 29% after the WHOLE brain load). **THE HELD QUESTION IS ANSWERED AND RD-574 IS RULED. SUPERSEDES DELTA 43 on the provenance hold and on the tap-rule instrument.**
 
 ### THE FLOOR

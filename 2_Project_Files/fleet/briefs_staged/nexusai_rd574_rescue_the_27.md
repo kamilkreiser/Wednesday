@@ -1,0 +1,53 @@
+# BRIEF (STAGED, NOT SENT) — RD-574: rescue the 27 seam-dependent cells on their OWN branch
+
+> 🔴 **RE-VERIFY BEFORE SENDING. Four things move and this brief is written ahead of time on purpose:**
+> 1. **`main`'s head** and **RD-516's branch head** — read `git ls-remote origin` in the same action as the send.
+> 2. **The 27 themselves** — re-read §6 of `docs/rd516/RD-516-gate-brief.md` **at the then-current head**. That is the IN-REPO path (the repo root IS `2_Project_Files`); a `git show <sha>:2_Project_Files/docs/...` returns "does not exist".
+> 3. **The usage gauge** — `fleet/usage_gate.sh --check` in the same action as the launch decision. Kam's lift of the 95% stop was for the night of 2026-09-20 only, undated; it is RE-ASKED, never assumed.
+> 4. **Whether S73 or a successor already took some of them.** The three already done (rd545 `A4`, rd523 `E2`, `E2-happy`) are NOT in scope; check nothing else has been.
+
+## BLUF — what this seat does, and why it merges FIRST
+
+**Rescue the 27 seam-dependent test cells named in §6 of the gate brief, on a NEW branch off current `main`, which merges BEFORE RD-516.** They pass on `main` today and break the moment RD-516's endpoint policy merges, so they are a **MERGE BLOCKER, not follow-up** — and because each fixture change is **inert** (it passes with and without the policy), the branch lands on `main` harmlessly ahead of the policy.
+
+**RD-516's own acceptance clause depends on this work:** *"The seam-dependent cells listed in §6 are on `main`."*
+
+## THE RECIPE — do not re-derive it; it is proven on R7 in RD-516's branch
+
+Read it from §6 of `docs/rd516/RD-516-gate-brief.md` rather than from this brief, so there is one copy and it cannot drift. In outline, per cell:
+1. load `__tests__/helpers/rd516-net-harness-preload.js` as the boot's `preload`;
+2. `RD516_HOSTS` → map the allowed Azure NAME to a **TEST-NET-1** address (`192.0.2.x`) — the policy reads it as PUBLIC and allows it on the strict branch;
+3. `RD516_INTERCEPT` → map the same NAME to `127.0.0.1:<that suite's existing listener port>`;
+4. point the boot/cell at that NAME.
+
+🔴 **CHANGE NOTHING ELSE. THE ASSERTION DOES NOT MOVE.** Only the endpoint's spelling changes.
+
+## ACCEPTANCE — inertness, per suite, measured not asserted
+
+**For every suite you touch: run it BEFORE and AFTER at current `main`, and show identical results with an EMPTY per-cell diff.** If any result moves, the fixture changed behaviour and **that is a finding, not a fixture** — stop and mail it. This is the criterion the three completed cells were held to (`f09836d`, `f4ef7a7`); match it.
+
+## HARD STOPS — mail and STOP, do not work around
+
+1. 🔴 **A cell whose SUBJECT really is the loopback address** cannot have its endpoint moved with its assertion intact. **Stop and name it.** It is not yours to convert into something else.
+2. 🔴 **Do NOT touch `backend/services/aiEndpointPolicy.js`, `backend/server.js`, or `backend/services/aiTestCredentials.js`.** The policy is RD-516's and **RD-518's fix round (round 2 of 2 — a third is Kam's, C-62) is queued on `server.js`.** Your scope is the four test suites' fixtures.
+3. 🔴 **Do NOT "tidy up" `SEAM_OFF` into `RD516_INTERCEPT`.** Its ABSENCE is SEAM-2's control. Adding it destroys the only thing that makes a silently-inactive interception loud. The cell says so; believe it.
+4. 🔴 **The seam serves `http://` only.** It redirects a TCP socket to a plain-HTTP listener, so an `https://` endpoint fails the TLS handshake (measured: it presents as a boot hang). Every affected harness uses `http://` today. **A cell that needs `https` is RD-583's TLS work — stop and say so; the two are one dependency.**
+5. **Do NOT write `R3`.** Its subject is the address pinning that does not exist (RD-584), and **it must never be built on the interception seam** — the harness's interception is the same manoeuvre R3 exists to detect, so such a cell tests the harness against itself.
+6. **Do NOT fix `R7`, `R8` or `R10(i)`.** They are ticketed elsewhere (RD-585, RD-541/C-106, RD-583) and are deliberately left failing or skipped so the gaps stay visible.
+
+## THE PARTITION, from both sides
+
+**Yours:** `__tests__/rd464-aoai-health-routes.test.js`, `__tests__/rd486-ai-test-key-forwarding.test.js`, `__tests__/rd523-aoai-redirect-refused.test.js`, `__tests__/rd545-ai-test-limit-survives-ai-off.test.js` — fixtures only.
+**NOT yours, and another seat may be live in it:** RD-516's branch and every `backend/` path above. **If you need a change there, mail me — do not reach in.**
+
+## PRIOR-WORK CHECK (standing line, and it is in-path here)
+
+Before changing any cell, read what it was built to prove — `git log -S` on the assertion, the suite's own header, and `1_Project_Definition/CLARIFICATIONS.md` for the ticket ids it names. **Your READY must carry a PRIOR WORK section or it comes back.** Three cells are already done to this standard; read one of them first as the worked example.
+
+## REPORTING
+
+Mail `tuesday-agent@agentmail.to`, subject `[Datasec/NexusAI -> Tuesday] ...`. **Your first mail precedes your first hold; a turn never ends on an unmailed report.** Send the per-suite inertness pairs as numbers, the cells done by name, and anything you stopped on. **Ends at READY FOR QA** — the gate is mine to commission.
+
+## PROVENANCE OF EVERY FACT IN THIS BRIEF
+
+The 27, the recipe and the acceptance clause: `docs/rd516/RD-516-gate-brief.md` §5/§6 at `f4264e5`, read by Tuesday at source 2026-09-21 00:1x. The three completed cells: `f09836d`, `f4ef7a7`. The seam's http-only limit and the `SEAM_OFF` control: S73's mails of 2026-09-20 14:00Z and 14:10Z, spf/dkim/dmarc pass. The merge-blocker ruling: Tuesday, 2026-09-20T14:03:09Z, quoted in §5 of that brief.
