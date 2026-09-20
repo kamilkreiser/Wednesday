@@ -10,6 +10,43 @@ supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s
 
 ---
 
+## 🌙 DELTA 41 — 2026-09-20 21:4x. **KAM HAS TURNED IN. THIS IS THE OVERNIGHT CONTRACT. READ THIS FIRST.**
+
+### HIS WORDS, VERBATIM (panel, ~21:43)
+> *"Thanks, perfect. I'm going to turn in for now. Please keep going through the night and let me know how you go."*
+And earlier, which governs how the work is done: *"No problem if it's not ready in the morning. **I would much rather it done properly than quickly.**"*
+And on spend: *"Don't hold depending on the count, just keep going. If the credits run out, I'll sign in to a new account in the morning."*
+
+### 🔴 THE ONE THING THIS SEAT OWES THAT A ROTATION COULD LOSE — THE MORNING REPORT
+**"Let me know how you go" is a PROMISE until a mechanism produces it. This section is the mechanism**, because the boot prompt makes the pickup's OWED items the first work of any session.
+**WHOEVER IS AWAKE WHEN KAM SURFACES WRITES A REPORT TO HIS PANEL** (`tools/chat_reply.sh`), not a mail. He was told it would be on the panel. Shape, in this order:
+1. **What LANDED** — merges, verdicts, tickets closed, with the head SHAs. Leads with product, not mechanics.
+2. **What NEEDS HIM** — the deployment count for `nexusai-degraded-flip-and-live-deployments`; anything that hit a signature class; the usage/account state if the allowance ran out.
+3. **What was LEFT ALONE and why** — explicitly, so silence is never read as completion.
+4. **The honest state of the package**: it does not go until RD-516 and RD-518 both land, and it is built fresh from the new main with the version field set to **2.2.0**.
+**If the night produced little, say that plainly.** He priced it himself: properly beats quickly, and a thin honest report is worth more than a padded one.
+
+### THE FLOOR AT HANDOVER (21:44)
+- **`%19` `QA/NexusAI-RD518`** — tier-1 gate on `6ea15a0`, ~22 min in, working. Its two must-measures are **M-A** (drive `/api/admin/health` ANONYMOUSLY in the open window, **paired with a control** so a 403 proves the instrument can see a refusal) and **M-B** (force `jsonStorage` falsy). Verdict comes to `tuesday-agent@`, subject `[QA/Datasec-NexusAI -> Tuesday] GATE VERDICT — RD-518 @ 6ea15a0 (tier 1)`.
+- **`%20` `Datasec/NexusAI` (S73)** — RD-516, the `ai-test` SSRF. Plan confirmed; ctx 23% at handover. Its four questions are answered in the 11:35Z ANSWER mail: **Q1 my error (C-28 forbids pulling that tree — its fetch+worktree approach is ratified), Q2 RD-574 rides inside its branch on candidate (a) with the fixture changing and NEVER the policy, Q3 take only the cells and reference the design by `89fbea5:<path>`, Q4 re-ruled because I could not find the ruling it cited.**
+- **`main` = `60c76d7`.** RD-464 r3 merged tonight. **Minimum set is TWO: RD-516 · RD-518.**
+- **Usage 92% at handover, climbing.** Kam lifted the 95% stop **for tonight only** — see EXPIRING-GRANTS; it has no stated date and is **re-asked before Monday**, not assumed.
+
+### WHAT TO DO WITH EACH OUTCOME, so no seat has to invent a policy at 3am
+- **Gate returns GO / GO WITH FINDINGS** → verify the head at origin in the same action, **GO the merge** (v1.3, reversible, inside commissioned work), have the *project* seat merge it — never this seat's hands — then file any Major as its own ticket.
+- **Gate returns NO GO** → that is round 1 of 2 on this class. Commission the fix round on the same branch; **a third round is Kam's (C-62)**, so if round 2 also fails, STOP and card it.
+- **S73 reaches READY FOR QA** → it needs its own tier-1 gate. Launch it (the RD-518 launcher is the pattern; **check the gauge in the same action as the decision — do not inherit 92%**).
+- **Either seat goes idle** → it is NOT holding by design unless its mail says so. Read the pane, then its inbox. **A pane is not a channel** and the watcher is the backstop, not the plan.
+- **Anything signature-class** → production, money, external comms, irreversible: **it waits for Kam**, whatever the hour. The spend grant lifted a ceiling, not a boundary.
+
+### STILL OPEN AND NOT STARTED
+- **`where-should-project-decision-records-live` — Kam ruled (a) at 19:39: *"Move it into the repo and update the boot contract."*** Recovered from the reconciler bug tonight and **not yet actioned.** It is real work and it is this seat's.
+- **The `[Wednesday -> …]` subject prefix** on mail from this seat. **Deliberately not fixed** — `send_brief.sh:608-618` explains it is the fleet's routing key and flipping it blinds this seat's own agents until their boot prompts accept the tag. **The sequencing is ours to drive:** agents accept `[Tuesday -> …]` first, prefix flips second.
+- **RD-578** (azure-ad name fix changes AUTH behaviour) — filed, its provisioning question stands, explicitly not tonight's.
+- **The deployment count** — Kam ruled (a) "tell me the count". Likely Partner Center under his login, **unconfirmed**; establish reachability and hand him either the number or a straight "this one is yours".
+
+---
+
 ## 🟢 DELTA 40 — 2026-09-20 20:3x (s73; ctx 54% CHECKPOINT, band 80-90, NOT rotating). **r3 IS ON MAIN. THE FLOOR IS CLEAR. SUPERSEDES DELTA 39 on state.**
 
 ### WHERE EVERYTHING IS
