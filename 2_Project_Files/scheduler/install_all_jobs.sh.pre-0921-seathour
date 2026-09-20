@@ -72,18 +72,7 @@ for t in "$JOBS"/*.plist.template; do
   # the templates hardcoded /Users/kam_code/Library/Logs/wednesday_*, which is the Studio's home and
   # does not exist on the mini. All nine jobs loaded and died with EX_CONFIG(78) before running a line,
   # writing no log — so the FDA failure underneath them was invisible. A log path is a travel pointer too.
-  # @NASHOUR@/@NASMIN@ (2026-09-21, Tuesday): the nassync template hardcoded 03:30 for EVERY seat,
-  # and this renderer substituted only PROJECT_DIR/SEAT/HOME — so installing nassync on Tuesday's
-  # machine scheduled her leg at the SAME MINUTE as Wednesday's. That contradicts Kam's instruction
-  # of 2026-09-08 14:57 ("Get Tuesday to sync at 11pm, and I think you should sync at 3 or 4am") and
-  # puts TWO concurrent unison legs on the same NAS replicas with confirmbigdel = false. A schedule
-  # is a per-seat fact and a template that cannot express it is a template that collides silently.
-  case "$SEAT" in
-    tuesday)   NASHOUR=23; NASMIN=0  ;;
-    wednesday) NASHOUR=3;  NASMIN=30 ;;
-    *)         NASHOUR=3;  NASMIN=30 ;;
-  esac
-  rendered="$(sed -e "s|@PROJECT_DIR@|$PROJECT_DIR|g" -e "s|@SEAT@|$SEAT|g" -e "s|@HOME@|$HOME|g" -e "s|@NASHOUR@|$NASHOUR|g" -e "s|@NASMIN@|$NASMIN|g" "$t")"
+  rendered="$(sed -e "s|@PROJECT_DIR@|$PROJECT_DIR|g" -e "s|@SEAT@|$SEAT|g" -e "s|@HOME@|$HOME|g" "$t")"
 
   loaded=0
   launchctl list 2>/dev/null | /usr/bin/grep -q "	$label\$" && loaded=1
