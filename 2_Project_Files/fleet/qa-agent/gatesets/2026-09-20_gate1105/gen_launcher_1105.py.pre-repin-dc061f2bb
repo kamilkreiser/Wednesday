@@ -1,4 +1,152 @@
-#!/bin/bash
+#!/usr/bin/env python3
+"""gen_launcher_1105.py — write launchers/launch_qa_secuura_1105.sh (ONE tier-1 round-1 gate over PR #1105, KS-1175 real fix + KS-1284 codec,
+Seat A 15th, READY 2026-09-20T13:55:07Z) in the SHAPE of launchers/launch_qa_secuura_batch1100_1101.sh (the most recent tier-1 gate launcher, which
+ran cleanly): the same guard ladder and exit codes (6 head moved · 10 compare · 18/19 develop pin judged by CONTENT with LANDED detection · 7/15/8/9
+/20/12/11/14/17/22/23/24/25/26/27/28/29/30/31/32/33 prompt + READY greps · 16 overrides at launch · 21 TTY), the same test overrides (QAB1105_*),
+the same --check block. The data changed: ONE PR, a PRODUCT change (12 files under services/anchoring/** + the yaml + VOCABULARY.md), so the
+"zero product bytes" guard of the template becomes "nothing OUTSIDE the allowed paths" and the LANDED detection covers 12 blobs (5 of them ABSENT
+at develop).
+Pins are RE-READ at generation, READ-ONLY throughout — no git write verb in the Secuura checkout:
+  * origin: git ls-remote of refs/heads/develop, refs/pull/1105/head AND the branch — all must equal the pins;
+  * local objects (rev-list / rev-parse / diff --raw / ls-tree): the head is ONE commit whose parent IS develop; the 12 (path, develop blob, head
+    blob) triples as pinned; the 5 ADDED paths absent at develop; every "unchanged read" path has the SAME blob at develop and head; the CSL pin
+    "15.0.3" in both lockfiles at both trees; the yaml diff has exactly ONE hunk.
+  * every value the launcher carries is asserted present in its output exactly as often as intended (output controls), heredoc quote/paren
+    parity is checked, and `bash -n` must pass, or nothing is written.
+Usage: gen_launcher_1105.py <output launcher>
+Exit: 0 written · 1 pin/control disagreed · 2 residual token · 3 bash -n"""
+import hashlib, os, re, subprocess, sys, tempfile
+OUT = sys.argv[1]
+def now(f='+%Y-%m-%d %H:%M:%S %Z'): return subprocess.run(['date', f], capture_output=True, text=True).stdout.strip()
+print('gen_launcher_1105', now())
+REPO = '/Volumes/DevMASTER/!CODING/Secuura/Blockchain/2_Project_Files'
+DEV = 'dc061f2bb6dff9180a0724b1d1d5c50b9a0173fa'
+HEAD = 'e02d3ecb51a457b0eb490db1854f28c6b1af69ad'
+HEAD_TREE = '8f066a81784c89ae3531938a006c7ae69bdb4ba1'
+DEV_TREE = '1ccb80e0d66ab0ff12d5dbb61753b8c0c274e923'
+BRANCH = 'refs/heads/feature/ks-1175-anchor-originate-lifecycle-event-schemas-accept-and-anchor'
+D = 'Blockchain/Dev/'; A = D + 'services/anchoring/'
+def git(*a): return subprocess.run(['git', '-C', REPO] + list(a), capture_output=True, text=True)
+def out(*a):
+    p = git(*a)
+    if p.returncode: print('REFUSING: git', a[:3], p.stderr.strip()[:200]); sys.exit(1)
+    return p.stdout
+# 1. origin
+lsr = out('ls-remote', 'origin', 'refs/heads/develop', 'refs/pull/1105/head', BRANCH)
+print('ls-remote', now(), '|', len(lsr.strip().splitlines()), 'refs read')
+refs = dict((l.split('\t')[1], l.split('\t')[0]) for l in lsr.strip().splitlines())
+for ref, want in (('refs/heads/develop', DEV), ('refs/pull/1105/head', HEAD), (BRANCH, HEAD)):
+    print('  %-90s %s %s' % (ref, refs.get(ref, '?')[:9], 'OK' if refs.get(ref) == want else 'MOVED'))
+    if refs.get(ref) != want: print('REFUSING: pin moved at origin'); sys.exit(1)
+# 2. local objects
+par = out('rev-list', '--parents', '-n1', HEAD).split()
+print('head parents', par[1:], '| ONE parent == develop:', par[1:] == [DEV])
+if par[1:] != [DEV]: sys.exit(1)
+ht, dt = out('rev-parse', HEAD + '^{tree}').strip(), out('rev-parse', DEV + '^{tree}').strip()
+print('head tree', ht, '==', HEAD_TREE, ht == HEAD_TREE, '| develop tree', dt, '==', DEV_TREE, dt == DEV_TREE)
+if ht != HEAD_TREE or dt != DEV_TREE: sys.exit(1)
+ahead = out('rev-list', '--count', DEV + '..' + HEAD).strip()
+print('ahead', ahead, '(want 1)')
+if ahead != '1': sys.exit(1)
+# the 12 changed paths: (path, develop blob or ABSENT, head blob)
+raw = out('diff', '--raw', '--abbrev=40', DEV, HEAD).strip().splitlines()
+CHANGED = {}
+for l in raw:
+    meta, path = l.split('\t', 1)
+    m1, m2, b1, b2, st = meta.split()
+    CHANGED[path] = ('ABSENT' if b1 == '0' * 40 else b1, b2, st, m2)
+print('changed paths', len(CHANGED), '(want 12) | added', sum(1 for v in CHANGED.values() if v[2] == 'A'), '(want 5) | deleted/renamed', sum(1 for v in CHANGED.values() if v[2] not in 'AM'), '(want 0)')
+if len(CHANGED) != 12 or sum(1 for v in CHANGED.values() if v[2] == 'A') != 5 or any(v[2] not in 'AM' for v in CHANGED.values()): sys.exit(1)
+ALLOWED_EXACT = {D + 'docs/openapi/secuura-api.yaml', D + 'docs/VOCABULARY.md'}
+outside = [p for p in CHANGED if not (p.startswith(A) or p in ALLOWED_EXACT)]
+print('outside services/anchoring/** + yaml + VOCABULARY.md:', outside, '(want [])')
+if outside: sys.exit(1)
+if any(v[3] != '100644' for v in CHANGED.values()): print('REFUSING: a non-100644 mode'); sys.exit(1)
+PINNED = {  # the drafter's shape_1.out reads, asserted against the live objects
+  D + 'docs/VOCABULARY.md': ('7b7072b4e1da', '75633ef85930'), D + 'docs/openapi/secuura-api.yaml': ('a34b59363b81', '1871025e2c11'),
+  A + 'src/__tests__/anchorSchema.test.ts': ('c1a3e865a101', '570d21683504'), A + 'src/__tests__/ks1175-anchor-readback.test.ts': ('ABSENT', '05793d925400'),
+  A + 'src/__tests__/ks1175-identity-anchoring.test.ts': ('ABSENT', 'c3f430d783ba'), A + 'src/__tests__/ks1284-cardano-metadatum.test.ts': ('ABSENT', '33cf6608e6a4'),
+  A + 'src/anchorReadback.ts': ('ABSENT', 'f49ffb6afaaf'), A + 'src/anchorSchema.ts': ('8341c8221b50', 'af95458d00b7'), A + 'src/anchoring.openapi.ts': ('29c089bb0abc', '5d0a1b9eb19b'),
+  A + 'src/cardano/cardanoMetadatum.ts': ('ABSENT', 'aaaec6c63655'), A + 'src/cardano/transaction.ts': ('3a86936bef0b', 'e047630ea004'), A + 'src/index.ts': ('da4abd432921', 'b6386f402a4b')}
+for p, (b1, b2) in PINNED.items():
+    if p not in CHANGED or not CHANGED[p][0].startswith(b1) or not CHANGED[p][1].startswith(b2): print('REFUSING: pinned blob disagrees for', p, CHANGED.get(p)); sys.exit(1)
+print('the 12 pinned (develop blob, head blob) pairs agree with the live objects: True')
+# unchanged paths the gate reads or runs: same blob at develop and head
+UNCHANGED = [A + 'package.json', A + 'package-lock.json', A + 'tsconfig.json', A + 'vitest.config.ts', A + 'src/verifyAnchorStatus.ts',
+             A + 'src/__tests__/ks480-provenance-exclusion.test.ts', A + 'src/__tests__/ks566-connector-attribution.test.ts',
+             A + 'src/__tests__/threadTokenMint.test.ts', A + 'src/__tests__/db.retry.test.ts', A + 'src/cardano/provider.ts', A + 'src/cardano/wallet.ts',
+             D + 'package.json', D + 'package-lock.json', D + 'eslint.config.mjs', 'BACKLOG.md', '.githooks/pre-push',
+             D + 'scripts/generate-openapi.ts', D + 'scripts/spec-examples/check-spec-examples.mjs', D + 'scripts/preflight/preflight.sh',
+             D + 'services/originate/src/routes/documents.ts', D + 'services/originate/src/routes/anchors.ts',
+             D + 'services/api-gateway/src/routes/proxy.ts', D + 'services/api-gateway/src/routes/verification.ts']
+UBLOB = {}
+for p in UNCHANGED:
+    b1 = out('rev-parse', DEV + ':' + p).strip(); b2 = out('rev-parse', HEAD + ':' + p).strip()
+    if b1 != b2 or not re.fullmatch(r'[0-9a-f]{40}', b1): print('REFUSING: unchanged-read path differs or missing', p, b1, b2); sys.exit(1)
+    UBLOB[p] = b1
+print('unchanged-read paths', len(UNCHANGED), 'all same blob at develop and head: True')
+# CSL pin in both lockfiles at both trees; one yaml hunk
+for tree in (DEV, HEAD):
+    for lock in (A + 'package-lock.json', D + 'package-lock.json'):
+        txt = out('show', tree + ':' + lock)
+        m = re.search(r'"node_modules/@emurgo/cardano-serialization-lib-nodejs": \{\s*"version": "([^"]+)"', txt)
+        if not m or m.group(1) != '15.0.3': print('REFUSING: CSL pin', tree[:9], lock, m and m.group(1)); sys.exit(1)
+print('CSL 15.0.3 pinned in both lockfiles at develop and head: True')
+hunks = out('diff', DEV, HEAD, '--', D + 'docs/openapi/secuura-api.yaml').count('\n@@')
+print('yaml hunks', hunks, '(want 1)')
+if hunks != 1: sys.exit(1)
+# BACKLOG.md line of the threadTokenMint entry at develop (the drafter's lead D1)
+bl = out('show', DEV + ':BACKLOG.md').splitlines()
+tl = [i + 1 for i, l in enumerate(bl) if 'threadTokenMint.test.ts` fails on develop' in l]
+print('BACKLOG.md threadTokenMint entry at develop: lines', tl, '| :155 is', bl[154][:60])
+
+# 3. the launcher
+GS = '/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/gatesets'
+BRIEF = GS + '/2026-09-20_gate1105_READY_seatA15.txt'
+STATUS = GS + '/2026-09-20_gate1105_STATUS2_seatA15.txt'
+PROMPT = '/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/briefs/2026-09-20_secuura-1105.prompt.txt'
+REPORT = '/Volumes/DevMASTER/!CODING/Testing Agent MAIN/projects/secuura/reports/2026-09-20-pr1105-tier1-r1/'
+PRIOR = '/Volumes/DevMASTER/!CODING/Testing Agent MAIN/projects/secuura/reports/2026-09-20-batch1100-1101-tier1-r1/'
+EXEMPLAR = '/Volumes/DevMASTER/!CODING/Testing Agent MAIN/projects/secuura/reports/2026-09-18-ks1215-1034-e4624218b-tier1-r1/'
+INDEXTS = A + 'src/index.ts'
+def jline(path, ok, landed):
+    short = path.replace(D, '')
+    return '  %-84s (%s, %s),' % ('"' + path + '":', '{"%s": DV}' % ok, ('{"%s": "#1105 own"}' % landed) if landed else '{}')
+judged = []
+for p, (b1, b2, st, m) in CHANGED.items():
+    judged.append(jline(p, b1, b2))
+for p in UNCHANGED:
+    judged.append(jline(p, UBLOB[p], ''))
+JUDGED_BLOCK = '\n'.join(judged)
+# the by-name keyword ladder (exit 33): one or more exact phrases per item, all must be in the prompt
+BYNAME = [
+ ('1', ['parent of e02d3ecb5 is dc061f2bb', 'two instruments']),
+ ('2', ['red by ASSERTION', 'red by MODULE ABSENCE', 'TWO DIFFERENT KINDS OF RED', 'BACKLOG.md:155', 'threadTokenMint']),
+ ('3', ['tampers/tampers.json', 'T3b', '0 red', 'FINDING to re-measure and grade', 'WHOLE anchoring suite']),
+ ('4', ['BYTE-IDENTICAL NO-OP', 'UTF-8 BYTES ON CODE-POINT BOUNDARIES', 'STRADDLING byte 64', '"true"/"false"', 'FLOATS / NULL are rejected UPSTREAM']),
+ ('5', ['VERIFY-BY-HASH ORDER', 'REORDERED copy', 'prove the check can fail']),
+ ('6', ['DECIDE 2 superRefine', 'MEASURE the anchored key set']),
+ ('7', ['WHITELIST / STRIP', 'smuggled', 'ks566 ×6', '!== undefined']),
+ ('8', ['GET /api/anchors/verify/:hash', 'GET /api/anchors/:id', 'buildVerifyResponse', 'byte-for-byte', 'DIFF IT']),
+ ('9', ['check:openapi', 'check:spec-examples', 'ONE FlatAnchorRequest hunk', 'MASKED', '405']),
+ ('10', ['FILES API', 'CSL 15.0.3', 'no migration', 'no dependency change']),
+ ('11', ['SEVEN-not-six', 'documents.ts:1263-1285', 'anchors.ts:282-297']),
+ ('12', ['3 SKIPPED', 'NOT RUN, never as passes', ':6882']),
+ ('13', ['NOT DONE ITEMS (six)', '21af3285-0a40-490c-bfff-bc3466b6066b', '4999', 'BY LENGTH ONLY']),
+ ('14', ['NOT-PINNED', 'one-line tamper', "local model's next feed", 'proposed cell']),
+ ('15', ['DKIM-VERIFY', 'NOT-TESTED.written-first.md', 'census', 'GO / GO WITH FINDINGS / NO GO', 'Majors/Minors', 'prediction slips named BY NAME']),
+]
+def shq(kw):  # a keyword with an apostrophe is double-quoted (none carries $, a backtick or a backslash — asserted)
+    assert not re.search(r'[$`\\]', kw), kw
+    return ('"' + kw + '"') if "'" in kw else ("'" + kw + "'")
+BYNAME_GREP = ' && '.join('grep -qF -- %s "$PROMPT_FILE"' % shq(kw) for _, kws in BYNAME for kw in kws)
+# the seat items BOTH the READY and the prompt must carry (exit 30) — the builder's own figures and words
+BOTH = ['318 / 319', '242', '293', '247 / 46', 'T1', 'T2a', 'T2b', 'T3a', 'T3b', 'T3c', 'T4', 'T5', 'T6', '0 red', '21af3285-0a40-490c-bfff-bc3466b6066b', '4999/4999',
+        'CSL 15.0.3', 'dc061f2bb6dff9180a0724b1d1d5c50b9a0173fa', ':6882', ':5432', 'BACKLOG.md:155', '+65', '405', 'documents.ts:1263-1285', 'anchors.ts:282-297',
+        'transaction.ts:107', 'SEVEN', 'login_stub', '12/15', 'SKIPPED', 'threadTokenMint', 'R8', 'R9', 'MODULE ABSENCE', 'superRefine', 'NOT DONE']
+BOTH_GREP = ' && '.join('grep -qF -- %s "$PROMPT_FILE" && grep -qF -- %s "$BRIEF"' % (("'" + t + "'"), ("'" + t + "'")) for t in BOTH)
+
+L = r'''#!/bin/bash
 # launch_qa_secuura_1105.sh — cross-project QA agent, ONE TIER 1 ROUND 1 gate over ONE Secuura/Blockchain PRODUCT PR
 #   #1105 KS-1175 (+ KS-1284 codec, Refs KS-721) @ e02d3ecb5 — the KS-1175 REAL FIX: the flat-anchor schema accepts a top-level `identity` block
 #   (seven non-PII fields + identityCommitment), the KS-1284 Cardano metadatum codec at the ONE tx-build attach point and its inverse at the
@@ -15,20 +163,16 @@
 # MERGE AUTHORITY: WEDNESDAY'S signed GO naming e02d3ecb5 (exit 26). THE DEPLOY AND THE ANCHOR ARE KAM'S — the gate rules nothing about either.
 #
 # THE SHAPE, re-read live by the generator (git ls-remote develop + refs/pull/1105/head + the branch; rev-list --parents; diff --raw): the head is
-# ONE commit whose parent IS dc061f2bb (tree 1ccb80e0d = the #1100-#1101 batch gate's both-PRs tree, landed); head tree 8f066a817. DEVELOP MOVED
-# after the READY: origin develop = 778e6cfe2 (tree d0c8bfd09) = dc061f2bb + THREE squashes by Seat B 10th on Wednesday's GO (6e2fbc234 KS-1275 #1102,
-# 3232656cb KS-1203 #1103, 778e6cfe2 KS-1272 #1104), touching 4 paths DISJOINT from the 12 (originate lifecycleEventRepo.test.ts, api-gateway
-# ks501 test, startup-migrations.ts + ks1272 test). So the merge is NOT a fast-forward: MERGED TREE 1f2bc512a, predicted by a REAL 3-way merge in a
-# --shared --no-checkout scratch clone (both orders, clean rc 0, predict_merge_scratch.out) AND re-derived by pure tree hashing in the generator;
-# compare develop...head = merge_base dc061f2bb, ahead 1, BEHIND 3, files 12 (exit 10 — a fourth squash changes the figure and refuses).
+# ONE commit whose parent IS develop dc061f2bb (tree 1ccb80e0d = the #1100-#1101 batch gate's both-PRs tree, landed); head tree 8f066a817. Over the
+# pin the merge is a fast-forward: merged tree = head tree. compare develop...head = merge_base dc061f2bb, ahead 1, files 12 (exit 10).
 #
-# The develop pin is judged by CONTENT — THIRTY-NINE paths by blob at the CURRENT develop: the 12 PR paths (7 at develop blobs, 5 ABSENT; any at its
-# head blob -> exit 19 LANDED), the 4 squash paths at their 778e6cfe2 blobs, and what the gate runs or reads: anchoring package.json + lock + tsconfig + vitest.config, verifyAnchorStatus.ts,
+# The develop pin is judged by CONTENT — THIRTY-FIVE paths by blob at the CURRENT develop: the 12 PR paths (7 at develop blobs, 5 ABSENT; any at its
+# head blob -> exit 19 LANDED), and what the gate runs or reads: anchoring package.json + lock + tsconfig + vitest.config, verifyAnchorStatus.ts,
 # the control test files (ks480, ks566, threadTokenMint, db.retry), cardano/provider.ts + wallet.ts, the Dev package.json + lock, eslint.config.mjs,
 # BACKLOG.md, the pre-push hook, generate-openapi.ts, check-spec-examples.mjs, preflight.sh, originate documents.ts + anchors.ts (the SEVEN-endpoint
 # count), api-gateway proxy.ts + verification.ts (NOT DONE 2).
 # GUARDED: services/anchoring/, docs/openapi/, docs/VOCABULARY.md, scripts/, packages/shared src/, .githooks/, the Dev package.json + lock,
-# eslint.config.mjs, BACKLOG.md, the two originate route files, the two api-gateway route files, api-gateway startup-migrations.ts.
+# eslint.config.mjs, BACKLOG.md, the two originate route files, the two api-gateway route files.
 #
 # SOURCE = gatesets/2026-09-20_gate1105_READY_seatA15.txt (the READY, 13:55:07Z) + gatesets/2026-09-20_gate1105_STATUS2_seatA15.txt (STATUS 2,
 # 13:51:06Z), both captured verbatim by Wednesday from wednesday-agent@ and re-listed by message id by the drafter (list_ready_mail.out).
@@ -51,7 +195,7 @@
 #          facts comment id and 4999/4999; CSL 15.0.3; develop in full; :6882 and :5432; BACKLOG.md:155; the +65 hunk and 405 blocks; the two
 #          originate line ranges; transaction.ts:107; SEVEN; R8/R9 by MODULE ABSENCE; superRefine; NOT DONE), and the prompt must ask the gate to
 #          MEASURE, not conclude, and to RULE WHETHER IT BLOCKS.
-# exit 31: the prompt must name the MERGED tree 1f2bc512a in full AND develop 778e6cfe2 in full, the NOT-PINNED list with a proposed cell per row, and a loopback GATEWAY_URL for any
+# exit 31: the prompt must name the head tree in full, the NOT-PINNED list with a proposed cell per row, and a loopback GATEWAY_URL for any
 #          preflight run.
 # exit 32: the READY mail AND the prompt must BOTH state that PR #1105 is KS-1175 (KS-1105 is another ticket).
 # exit 33: the prompt must carry Wednesday's FIFTEEN BY-NAME items, each by its own keywords (see the ladder below): head/base re-read by two
@@ -73,24 +217,23 @@ set -u
 
 QA_DIR='/Volumes/DevMASTER/!CODING/Testing Agent MAIN'
 WED='/Volumes/DevMASTER/WEDNESDAY'
-BRIEF="${QAB1105_BRIEF:-/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/gatesets/2026-09-20_gate1105_READY_seatA15.txt}"
-STATUS2="/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/gatesets/2026-09-20_gate1105_STATUS2_seatA15.txt"
-PROMPT_FILE="${QAB1105_PROMPT:-/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/briefs/2026-09-20_secuura-1105.prompt.txt}"
+BRIEF="${QAB1105_BRIEF:-__BRIEF__}"
+STATUS2="__STATUS__"
+PROMPT_FILE="${QAB1105_PROMPT:-__PROMPT__}"
 REPO='/Volumes/DevMASTER/!CODING/Secuura/Blockchain/2_Project_Files'
 SECUURA_ENV='/Volumes/DevMASTER/!CODING/Secuura/Blockchain/4_Credentials/.env'
 # n|ticket|branch|head — pinned from the builder's READY (13:55:07Z) and re-read by the drafter (git ls-remote 13:59:46Z and 14:13:57Z, branch AND
-# refs/pull/1105/head; the pulls API 14:03:26Z; re-pinned to the MOVED develop at 14:27:16Z). NAMESPACE TRAP: KS-1105 is another ticket; the ticket column is the truth (exit 32)
+# refs/pull/1105/head; the pulls API 14:03:26Z). NAMESPACE TRAP: KS-1105 is another ticket; the ticket column is the truth (exit 32)
 PRS=(
-  "1105|KS-1175|refs/heads/feature/ks-1175-anchor-originate-lifecycle-event-schemas-accept-and-anchor|${QAB1105_HEAD:-e02d3ecb51a457b0eb490db1854f28c6b1af69ad}"
+  "1105|KS-1175|__BRANCH__|${QAB1105_HEAD:-__HEAD__}"
 )
-DEVELOP_SHA='778e6cfe2b6061d60ffcf3a57a951c84dc152b67'   # the pin = develop at 14:27:16Z (MOVED off dc061f2bb by the three squashes)
-MERGE_BASE='dc061f2bb6dff9180a0724b1d1d5c50b9a0173fa'    # the head's parent = merge-base = the develop the builder READY'd against
-HEAD_TREE='8f066a81784c89ae3531938a006c7ae69bdb4ba1'     # the head tree; over dc061f2bb it was a fast-forward
-MERGED_TREE='1f2bc512aee2a55d74142d9ba8206a795b0c975c'  # the predicted 3-way merge over the pin (scratch clone, both orders, clean; generator tree-hash)
-REPORT_DIR='/Volumes/DevMASTER/!CODING/Testing Agent MAIN/projects/secuura/reports/2026-09-20-pr1105-tier1-r1/'
-PRIOR_REPORT='/Volumes/DevMASTER/!CODING/Testing Agent MAIN/projects/secuura/reports/2026-09-20-batch1100-1101-tier1-r1/'
-EXEMPLAR_REPORT='/Volumes/DevMASTER/!CODING/Testing Agent MAIN/projects/secuura/reports/2026-09-18-ks1215-1034-e4624218b-tier1-r1/'
-REAL_BRIEF="/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/gatesets/2026-09-20_gate1105_READY_seatA15.txt"
+DEVELOP_SHA='__DEV__'   # the pin = develop at 13:59:46Z and 14:13:57Z; the head's parent and merge-base
+MERGE_BASE="$DEVELOP_SHA"    # the head sits on the pin itself — the compare is asserted against it
+HEAD_TREE='__HEADTREE__'     # over the pin the merge is a fast-forward: merged tree = head tree
+REPORT_DIR='__REPORT__'
+PRIOR_REPORT='__PRIOR__'
+EXEMPLAR_REPORT='__EXEMPLAR__'
+REAL_BRIEF="__BRIEF__"
 
 [ -d "$QA_DIR" ]         || { echo "QA project missing: $QA_DIR" >&2; exit 2; }
 [ -s "$BRIEF" ]          || { echo "brief (READY capture) missing or empty: $BRIEF" >&2; exit 3; }
@@ -112,7 +255,7 @@ for _pr in "${PRS[@]}"; do
 done
 
 # The compare (GitHub compare API), asserted whole (merge_base + ahead + files; NOT behind — develop is expected to move):
-# develop...head = merge_base dc061f2bb ahead 1 BEHIND 3 files 12 (git rev-list --left-right, drafter 14:27Z; the launcher reads the compare API).
+# develop...head = dc061f2bb ahead 1 files 12 (git rev-list + diff --raw, drafter 13:59Z; the launcher reads the compare API).
 COMPARE="$(
   set -a; . "$SECUURA_ENV"; set +a
   PRS_FLAT="${PRS[*]}" python3 - <<'PY'
@@ -123,71 +266,33 @@ for pr in os.environ["PRS_FLAT"].split():
     n, tk, br, h = pr.split("|")
     r = urllib.request.urlopen(urllib.request.Request(api + "develop..." + h, headers={"Authorization": "Bearer " + t, "Accept": "application/vnd.github+json"}), timeout=60)
     c = json.load(r)
-    print("%s %s ahead=%d behind=%d files=%d" % (n, c["merge_base_commit"]["sha"], c["ahead_by"], c["behind_by"], len(c.get("files") or [])))
+    print("%s %s ahead=%d files=%d" % (n, c["merge_base_commit"]["sha"], c["ahead_by"], len(c.get("files") or [])))
 PY
 )"
 [ -n "$COMPARE" ] || { echo "REFUSING: could not read the compare develop...head from the GitHub compare API" >&2; exit 13; }
-WANT_COMPARE="1105 $MERGE_BASE ahead=1 behind=3 files=12"
+WANT_COMPARE="1105 $MERGE_BASE ahead=1 files=12"
 [ "$COMPARE" = "$WANT_COMPARE" ] || { echo "REFUSING: develop...head compare read" >&2; printf '%s\n' "$COMPARE" >&2; echo "the gateset pins" >&2; printf '%s\n' "$WANT_COMPARE" >&2; exit 10; }
 
-# The develop pin, judged by CONTENT (see the header): thirty-nine paths by PATH BLOB at the CURRENT develop (no region judgement), then — if
+# The develop pin, judged by CONTENT (see the header): thirty-five paths by PATH BLOB at the CURRENT develop (no region judgement), then — if
 # develop moved — the pinned...develop delta against the GUARDED list, with NOTHING cleared by content (DEV_CONTENT_ALLOWED is empty).
 CUR_DEV="${QAB1105_CUR_DEV:-$(git -C "$REPO" ls-remote origin refs/heads/develop | cut -f1)}"
 [ -n "$CUR_DEV" ] || { echo "REFUSING: could not read origin develop (git ls-remote)" >&2; exit 18; }
 DEV_JUDGEMENT="$(
   set -a; . "$SECUURA_ENV"; set +a
-  DEVELOP_SHA="$DEVELOP_SHA" CUR_DEV="$CUR_DEV" MERGED_TREE="$MERGED_TREE" python3 - <<'PYJ'
+  DEVELOP_SHA="$DEVELOP_SHA" CUR_DEV="$CUR_DEV" HEAD_TREE="$HEAD_TREE" python3 - <<'PYJ'
 import hashlib, json, os, sys, urllib.request, urllib.error
 t = os.environ.get("GH_TOKEN", "")
 api = "https://api.github.com/repos/Secuura/Distributed_Secuura"
 def get(p):
     return json.load(urllib.request.urlopen(urllib.request.Request(api + p, headers={"Authorization": "Bearer " + t, "Accept": "application/vnd.github+json"}), timeout=60))
-cur = os.environ["CUR_DEV"]; pinned = os.environ["DEVELOP_SHA"]; merged_tree = os.environ["MERGED_TREE"]
+cur = os.environ["CUR_DEV"]; pinned = os.environ["DEVELOP_SHA"]; head_tree = os.environ["HEAD_TREE"]
 D = "Blockchain/Dev/"
 A = D + "services/anchoring/"
 INDEXTS = A + "src/index.ts"
 DV = "develop"
 # file -> (develop-OK blobs {blob: label}, LANDED blobs {blob: label}); ABSENT = the contents API answers 404 at develop
 JUDGED = {
-  "Blockchain/Dev/docs/VOCABULARY.md":                                                 ({"7b7072b4e1da0532f477d3e7f5ad60752fc76c71": DV}, {"75633ef85930dda5afb4ce6cad07f6e225a5d014": "#1105 own"}),
-  "Blockchain/Dev/docs/openapi/secuura-api.yaml":                                      ({"a34b59363b81dc3f69cc11a238ff9369deefa9d9": DV}, {"1871025e2c1196aeb6ff33e9bc74b916d3eb9e9e": "#1105 own"}),
-  "Blockchain/Dev/services/anchoring/src/__tests__/anchorSchema.test.ts":              ({"c1a3e865a101f865f045ef3dfa8252b266ad04d3": DV}, {"570d2168350452e0e500e2ad2feed27713b54983": "#1105 own"}),
-  "Blockchain/Dev/services/anchoring/src/__tests__/ks1175-anchor-readback.test.ts":    ({"ABSENT": DV}, {"05793d9254002f951e46d882510ec39e3d38dd37": "#1105 own"}),
-  "Blockchain/Dev/services/anchoring/src/__tests__/ks1175-identity-anchoring.test.ts": ({"ABSENT": DV}, {"c3f430d783ba0d8594d962ceef13ad27325f402b": "#1105 own"}),
-  "Blockchain/Dev/services/anchoring/src/__tests__/ks1284-cardano-metadatum.test.ts":  ({"ABSENT": DV}, {"33cf6608e6a472293b7116a81a304dad446071a1": "#1105 own"}),
-  "Blockchain/Dev/services/anchoring/src/anchorReadback.ts":                           ({"ABSENT": DV}, {"f49ffb6afaafabefe4dfbe8d897623bb2e5b3fc7": "#1105 own"}),
-  "Blockchain/Dev/services/anchoring/src/anchorSchema.ts":                             ({"8341c8221b5008b5f6a0a6a6d7887198f71b02f5": DV}, {"af95458d00b776f7427f367d0ca834ef33430aa7": "#1105 own"}),
-  "Blockchain/Dev/services/anchoring/src/anchoring.openapi.ts":                        ({"29c089bb0abcd65d42fe8fca2d6beaff0368fa98": DV}, {"5d0a1b9eb19b116abc0c9739a714439adad7bc35": "#1105 own"}),
-  "Blockchain/Dev/services/anchoring/src/cardano/cardanoMetadatum.ts":                 ({"ABSENT": DV}, {"aaaec6c63655340bb864dc3aaa395a5707c9a6fb": "#1105 own"}),
-  "Blockchain/Dev/services/anchoring/src/cardano/transaction.ts":                      ({"3a86936bef0b657bd0375b7d1838c3ee22f15bce": DV}, {"e047630ea0048b7d9e5d29793558a59eb5e437e4": "#1105 own"}),
-  "Blockchain/Dev/services/anchoring/src/index.ts":                                    ({"da4abd43292186da45c1533017fe042fa512bd43": DV}, {"b6386f402a4bc1572574c14e4925a96fd7811a39": "#1105 own"}),
-  "Blockchain/Dev/services/anchoring/package.json":                                    ({"a7eed73550b40aa2d968872817fa22e933373831": DV}, {}),
-  "Blockchain/Dev/services/anchoring/package-lock.json":                               ({"7ef3f65a35b48bec2591df4b2859bab9aa237334": DV}, {}),
-  "Blockchain/Dev/services/anchoring/tsconfig.json":                                   ({"f593300cac7c9c3073f15a1287323cf5b9dd478d": DV}, {}),
-  "Blockchain/Dev/services/anchoring/vitest.config.ts":                                ({"2e1d21f130f8aa80a1c71987f920181dafaf6b90": DV}, {}),
-  "Blockchain/Dev/services/anchoring/src/verifyAnchorStatus.ts":                       ({"b8b73078e456916c9d3d47c350046758975a1208": DV}, {}),
-  "Blockchain/Dev/services/anchoring/src/__tests__/ks480-provenance-exclusion.test.ts": ({"a87ee027668cd0f56fe2886ceb116a12920eb61f": DV}, {}),
-  "Blockchain/Dev/services/anchoring/src/__tests__/ks566-connector-attribution.test.ts": ({"b7c1013b8836bc4e3ef247a82d088f2c0d149294": DV}, {}),
-  "Blockchain/Dev/services/anchoring/src/__tests__/threadTokenMint.test.ts":           ({"b88b3a43ec5dcb8651b91d5df90e9dec42a1795f": DV}, {}),
-  "Blockchain/Dev/services/anchoring/src/__tests__/db.retry.test.ts":                  ({"0367a32466a4a555186385fd6798548f04a8d923": DV}, {}),
-  "Blockchain/Dev/services/anchoring/src/cardano/provider.ts":                         ({"9232d4d0a8a5950a1096cfa473da6705751da77e": DV}, {}),
-  "Blockchain/Dev/services/anchoring/src/cardano/wallet.ts":                           ({"f2160e51817c4a752a1dbb77eb6207f3f56bb65a": DV}, {}),
-  "Blockchain/Dev/package.json":                                                       ({"773443a9faa0a2eb7caf01c313b880fbe3251922": DV}, {}),
-  "Blockchain/Dev/package-lock.json":                                                  ({"646c19f6f7f735ba32bfb20bef8b936835184949": DV}, {}),
-  "Blockchain/Dev/eslint.config.mjs":                                                  ({"8c5374c6022eb0a3f449f41a570db61294aa63f1": DV}, {}),
-  "BACKLOG.md":                                                                        ({"59a1928dc56d9921dbdf2e8d36667e2df6af4024": DV}, {}),
-  ".githooks/pre-push":                                                                ({"1b22d4e146487aa25698310b353152a7d09986b5": DV}, {}),
-  "Blockchain/Dev/scripts/generate-openapi.ts":                                        ({"e84acdc9e1be073751fcd6a8bb95504e23688019": DV}, {}),
-  "Blockchain/Dev/scripts/spec-examples/check-spec-examples.mjs":                      ({"e9c14a4dedf103850dc1c93fb1c5c67b8489b2a3": DV}, {}),
-  "Blockchain/Dev/scripts/preflight/preflight.sh":                                     ({"712f895362e2c8d1ead6fd09ac257d7bce212948": DV}, {}),
-  "Blockchain/Dev/services/originate/src/routes/documents.ts":                         ({"3f837fc6e656d5a10f9cc349b1cb2a876a2be09b": DV}, {}),
-  "Blockchain/Dev/services/originate/src/routes/anchors.ts":                           ({"d30620bffae3931c242104501299564d785ed8fb": DV}, {}),
-  "Blockchain/Dev/services/api-gateway/src/routes/proxy.ts":                           ({"795ae7ca3bdc76be3e563e87fc34a8cc221e5632": DV}, {}),
-  "Blockchain/Dev/services/api-gateway/src/routes/verification.ts":                    ({"f888e8cd0bd10c98a508542d75902ab122595157": DV}, {}),
-  "Blockchain/Dev/services/api-gateway/src/__tests__/ks1272-platform-dedup-uuid-tenant-id.test.ts": ({"2b91446416f826b69dbd5a0ab6f4123c96d06349": DV}, {}),
-  "Blockchain/Dev/services/api-gateway/src/__tests__/ks501-enforcement-non-string-doctype.test.ts": ({"e05c6bd21f64ad766083c72d0fc070ebeb478b7f": DV}, {}),
-  "Blockchain/Dev/services/api-gateway/src/startup-migrations.ts":                     ({"cf371028fb564ca0e55d9d9501c3efa1211b5bd0": DV}, {}),
-  "Blockchain/Dev/services/originate/src/__tests__/lifecycleEventRepo.test.ts":        ({"c4aad21223cc59bf5b8c70dc9e8fa65a875d92a3": DV}, {}),
+__JUDGED__
 }
 # No REGION judgement: every path is judged by exact blob (a develop move of any judged path refuses, exit 18; the PR head blob, exit 19).
 state = []
@@ -213,7 +318,7 @@ for f, (ok, landed) in JUDGED.items():
     state.append(f.split("/")[-1] + " " + blob[:9] + " = " + ok[blob])
 state = "; ".join(state)
 if cur == pinned:
-    print("OK " + state + " | origin develop still " + pinned + " (dc061f2bb + three squashes; merge-base dc061f2bb; predicted merged tree " + merged_tree + " by a real 3-way merge, both orders, clean; git ls-remote)"); sys.exit(0)
+    print("OK " + state + " | origin develop still " + pinned + " (the parent and merge-base of the head: the merged tree = the head tree " + head_tree + ", a fast-forward; git ls-remote)"); sys.exit(0)
 try:
     c = get("/compare/" + pinned + "..." + cur)
 except Exception as e:
@@ -234,8 +339,7 @@ GUARDED = [A,
            D + "services/originate/src/routes/documents.ts",
            D + "services/originate/src/routes/anchors.ts",
            D + "services/api-gateway/src/routes/proxy.ts",
-           D + "services/api-gateway/src/routes/verification.ts",
-           D + "services/api-gateway/src/startup-migrations.ts"]
+           D + "services/api-gateway/src/routes/verification.ts"]
 # STYLE NOTE (912r2 launcher, measured): bash scans quote/paren state THROUGH this heredoc because it sits inside a
 # command substitution — keep apostrophes and parentheses EVEN (this block uses none of the former), or the outer $( ) breaks.
 # CONTENT-JUDGED allowlist: EMPTY. Nothing is pre-cleared for this gate; any GUARDED move refuses: re-pin deliberately.
@@ -246,8 +350,8 @@ cleared = sorted(h for h in hits if h in DEV_CONTENT_ALLOWED and by_name.get(h, 
 remaining = sorted(h for h in hits if h not in cleared)
 if remaining:
     print("GUARDED " + " ".join(remaining)); sys.exit(0)
-tail = "the gate merges the then-current develop onto the head in its own clone, names the merged-tree OID (drafter over the pin: 1f2bc512a) and re-runs every item and suite on it"
-print("OK " + state + " | origin develop MOVED %s -> %s: commits=%d files=%d — GUARDED hits %d, cleared by content %d — the rest disjoint from the GUARDED list (services/anchoring/, docs/openapi/, VOCABULARY.md, scripts/, packages/shared src/, .githooks/, the Dev package.json + lock, eslint.config.mjs, BACKLOG.md, the two originate and two api-gateway route files, startup-migrations.ts); %s" % (pinned, cur, c["ahead_by"], len(files), len(hits), len(cleared), tail)); sys.exit(0)
+tail = "the gate merges the then-current develop onto the head in its own clone, names the merged-tree OID (drafter over the pin: = the head tree) and re-runs every item and suite on it"
+print("OK " + state + " | origin develop MOVED %s -> %s: commits=%d files=%d — GUARDED hits %d, cleared by content %d — the rest disjoint from the GUARDED list (services/anchoring/, docs/openapi/, VOCABULARY.md, scripts/, packages/shared src/, .githooks/, the Dev package.json + lock, eslint.config.mjs, BACKLOG.md, the two originate and two api-gateway route files); %s" % (pinned, cur, c["ahead_by"], len(files), len(hits), len(cleared), tail)); sys.exit(0)
 PYJ
 )"
 case "$DEV_JUDGEMENT" in
@@ -290,13 +394,13 @@ grep -qF 'Never enter any seat worktree' "$PROMPT_FILE" && grep -qF 's-a15-ks117
   || { echo "REFUSING: prompt does not forbid entering any seat worktree (s-a15-ks1175) and writing in the builder's 2026-09-20_seatA-15th history" >&2; exit 28; }
 grep -qF 'END EVERY LISTENER YOUR RUNS START, BY PID' "$PROMPT_FILE" && grep -qF 'TCP LISTEN census' "$PROMPT_FILE" \
   || { echo "REFUSING: prompt does not require every listener the gate starts ended by pid with a census (KS-1201)" >&2; exit 29; }
-grep -qF -- '318 / 319' "$PROMPT_FILE" && grep -qF -- '318 / 319' "$BRIEF" && grep -qF -- '242' "$PROMPT_FILE" && grep -qF -- '242' "$BRIEF" && grep -qF -- '293' "$PROMPT_FILE" && grep -qF -- '293' "$BRIEF" && grep -qF -- '247 / 46' "$PROMPT_FILE" && grep -qF -- '247 / 46' "$BRIEF" && grep -qF -- 'T1' "$PROMPT_FILE" && grep -qF -- 'T1' "$BRIEF" && grep -qF -- 'T2a' "$PROMPT_FILE" && grep -qF -- 'T2a' "$BRIEF" && grep -qF -- 'T2b' "$PROMPT_FILE" && grep -qF -- 'T2b' "$BRIEF" && grep -qF -- 'T3a' "$PROMPT_FILE" && grep -qF -- 'T3a' "$BRIEF" && grep -qF -- 'T3b' "$PROMPT_FILE" && grep -qF -- 'T3b' "$BRIEF" && grep -qF -- 'T3c' "$PROMPT_FILE" && grep -qF -- 'T3c' "$BRIEF" && grep -qF -- 'T4' "$PROMPT_FILE" && grep -qF -- 'T4' "$BRIEF" && grep -qF -- 'T5' "$PROMPT_FILE" && grep -qF -- 'T5' "$BRIEF" && grep -qF -- 'T6' "$PROMPT_FILE" && grep -qF -- 'T6' "$BRIEF" && grep -qF -- '0 red' "$PROMPT_FILE" && grep -qF -- '0 red' "$BRIEF" && grep -qF -- '21af3285-0a40-490c-bfff-bc3466b6066b' "$PROMPT_FILE" && grep -qF -- '21af3285-0a40-490c-bfff-bc3466b6066b' "$BRIEF" && grep -qF -- '4999/4999' "$PROMPT_FILE" && grep -qF -- '4999/4999' "$BRIEF" && grep -qF -- 'CSL 15.0.3' "$PROMPT_FILE" && grep -qF -- 'CSL 15.0.3' "$BRIEF" && grep -qF -- 'dc061f2bb6dff9180a0724b1d1d5c50b9a0173fa' "$PROMPT_FILE" && grep -qF -- 'dc061f2bb6dff9180a0724b1d1d5c50b9a0173fa' "$BRIEF" && grep -qF -- ':6882' "$PROMPT_FILE" && grep -qF -- ':6882' "$BRIEF" && grep -qF -- ':5432' "$PROMPT_FILE" && grep -qF -- ':5432' "$BRIEF" && grep -qF -- 'BACKLOG.md:155' "$PROMPT_FILE" && grep -qF -- 'BACKLOG.md:155' "$BRIEF" && grep -qF -- '+65' "$PROMPT_FILE" && grep -qF -- '+65' "$BRIEF" && grep -qF -- '405' "$PROMPT_FILE" && grep -qF -- '405' "$BRIEF" && grep -qF -- 'documents.ts:1263-1285' "$PROMPT_FILE" && grep -qF -- 'documents.ts:1263-1285' "$BRIEF" && grep -qF -- 'anchors.ts:282-297' "$PROMPT_FILE" && grep -qF -- 'anchors.ts:282-297' "$BRIEF" && grep -qF -- 'transaction.ts:107' "$PROMPT_FILE" && grep -qF -- 'transaction.ts:107' "$BRIEF" && grep -qF -- 'SEVEN' "$PROMPT_FILE" && grep -qF -- 'SEVEN' "$BRIEF" && grep -qF -- 'login_stub' "$PROMPT_FILE" && grep -qF -- 'login_stub' "$BRIEF" && grep -qF -- '12/15' "$PROMPT_FILE" && grep -qF -- '12/15' "$BRIEF" && grep -qF -- 'SKIPPED' "$PROMPT_FILE" && grep -qF -- 'SKIPPED' "$BRIEF" && grep -qF -- 'threadTokenMint' "$PROMPT_FILE" && grep -qF -- 'threadTokenMint' "$BRIEF" && grep -qF -- 'R8' "$PROMPT_FILE" && grep -qF -- 'R8' "$BRIEF" && grep -qF -- 'R9' "$PROMPT_FILE" && grep -qF -- 'R9' "$BRIEF" && grep -qF -- 'MODULE ABSENCE' "$PROMPT_FILE" && grep -qF -- 'MODULE ABSENCE' "$BRIEF" && grep -qF -- 'superRefine' "$PROMPT_FILE" && grep -qF -- 'superRefine' "$BRIEF" && grep -qF -- 'NOT DONE' "$PROMPT_FILE" && grep -qF -- 'NOT DONE' "$BRIEF" && grep -qF 'MEASURE, not conclude' "$PROMPT_FILE" && grep -qF 'RULE WHETHER IT BLOCKS' "$PROMPT_FILE" \
+__BOTH_GREP__ && grep -qF 'MEASURE, not conclude' "$PROMPT_FILE" && grep -qF 'RULE WHETHER IT BLOCKS' "$PROMPT_FILE" \
   || { echo "REFUSING: the READY mail and the prompt do not BOTH carry the builder's items, or the prompt does not say MEASURE, not conclude and RULE WHETHER IT BLOCKS" >&2; exit 30; }
-grep -qF "$MERGED_TREE" "$PROMPT_FILE" && grep -qF "$DEVELOP_SHA" "$PROMPT_FILE" && grep -qF 'NOT-PINNED' "$PROMPT_FILE" && grep -qF 'proposed cell' "$PROMPT_FILE" && grep -qF 'GATEWAY_URL=http://127.0.0.1:' "$PROMPT_FILE" \
-  || { echo "REFUSING: prompt does not name the merged tree 1f2bc512a and develop 778e6cfe2 in full, the NOT-PINNED list with a proposed cell per row, or a loopback GATEWAY_URL for preflight" >&2; exit 31; }
+grep -qF "$HEAD_TREE" "$PROMPT_FILE" && grep -qF 'NOT-PINNED' "$PROMPT_FILE" && grep -qF 'proposed cell' "$PROMPT_FILE" && grep -qF 'GATEWAY_URL=http://127.0.0.1:' "$PROMPT_FILE" \
+  || { echo "REFUSING: prompt does not name the head tree in full, the NOT-PINNED list with a proposed cell per row, or a loopback GATEWAY_URL for preflight" >&2; exit 31; }
 grep -qF 'PR #1105 is KS-1175.' "$PROMPT_FILE" && grep -qF 'KS-1105' "$PROMPT_FILE" && grep -F 'PR #1105' "$BRIEF" | grep -qF 'KS-1175' \
   || { echo "REFUSING: the READY mail and the prompt do not BOTH state that PR #1105 is KS-1175 (KS-1105 is another ticket) — the PR number is another ticket's number too" >&2; exit 32; }
-grep -qF -- 'parent of e02d3ecb5 is dc061f2bb' "$PROMPT_FILE" && grep -qF -- 'two instruments' "$PROMPT_FILE" && grep -qF -- 'red by ASSERTION' "$PROMPT_FILE" && grep -qF -- 'red by MODULE ABSENCE' "$PROMPT_FILE" && grep -qF -- 'TWO DIFFERENT KINDS OF RED' "$PROMPT_FILE" && grep -qF -- 'BACKLOG.md:155' "$PROMPT_FILE" && grep -qF -- 'threadTokenMint' "$PROMPT_FILE" && grep -qF -- 'tampers/tampers.json' "$PROMPT_FILE" && grep -qF -- 'T3b' "$PROMPT_FILE" && grep -qF -- '0 red' "$PROMPT_FILE" && grep -qF -- 'FINDING to re-measure and grade' "$PROMPT_FILE" && grep -qF -- 'WHOLE anchoring suite' "$PROMPT_FILE" && grep -qF -- 'BYTE-IDENTICAL NO-OP' "$PROMPT_FILE" && grep -qF -- 'UTF-8 BYTES ON CODE-POINT BOUNDARIES' "$PROMPT_FILE" && grep -qF -- 'STRADDLING byte 64' "$PROMPT_FILE" && grep -qF -- '"true"/"false"' "$PROMPT_FILE" && grep -qF -- 'FLOATS / NULL are rejected UPSTREAM' "$PROMPT_FILE" && grep -qF -- 'VERIFY-BY-HASH ORDER' "$PROMPT_FILE" && grep -qF -- 'REORDERED copy' "$PROMPT_FILE" && grep -qF -- 'prove the check can fail' "$PROMPT_FILE" && grep -qF -- 'DECIDE 2 superRefine' "$PROMPT_FILE" && grep -qF -- 'MEASURE the anchored key set' "$PROMPT_FILE" && grep -qF -- 'WHITELIST / STRIP' "$PROMPT_FILE" && grep -qF -- 'smuggled' "$PROMPT_FILE" && grep -qF -- 'ks566 ×6' "$PROMPT_FILE" && grep -qF -- '!== undefined' "$PROMPT_FILE" && grep -qF -- 'GET /api/anchors/verify/:hash' "$PROMPT_FILE" && grep -qF -- 'GET /api/anchors/:id' "$PROMPT_FILE" && grep -qF -- 'buildVerifyResponse' "$PROMPT_FILE" && grep -qF -- 'byte-for-byte' "$PROMPT_FILE" && grep -qF -- 'DIFF IT' "$PROMPT_FILE" && grep -qF -- 'check:openapi' "$PROMPT_FILE" && grep -qF -- 'check:spec-examples' "$PROMPT_FILE" && grep -qF -- 'ONE FlatAnchorRequest hunk' "$PROMPT_FILE" && grep -qF -- 'MASKED' "$PROMPT_FILE" && grep -qF -- '405' "$PROMPT_FILE" && grep -qF -- 'FILES API' "$PROMPT_FILE" && grep -qF -- 'CSL 15.0.3' "$PROMPT_FILE" && grep -qF -- 'no migration' "$PROMPT_FILE" && grep -qF -- 'no dependency change' "$PROMPT_FILE" && grep -qF -- 'SEVEN-not-six' "$PROMPT_FILE" && grep -qF -- 'documents.ts:1263-1285' "$PROMPT_FILE" && grep -qF -- 'anchors.ts:282-297' "$PROMPT_FILE" && grep -qF -- '3 SKIPPED' "$PROMPT_FILE" && grep -qF -- 'NOT RUN, never as passes' "$PROMPT_FILE" && grep -qF -- ':6882' "$PROMPT_FILE" && grep -qF -- 'NOT DONE ITEMS (six)' "$PROMPT_FILE" && grep -qF -- '21af3285-0a40-490c-bfff-bc3466b6066b' "$PROMPT_FILE" && grep -qF -- '4999' "$PROMPT_FILE" && grep -qF -- 'BY LENGTH ONLY' "$PROMPT_FILE" && grep -qF -- 'NOT-PINNED' "$PROMPT_FILE" && grep -qF -- 'one-line tamper' "$PROMPT_FILE" && grep -qF -- "local model's next feed" "$PROMPT_FILE" && grep -qF -- 'proposed cell' "$PROMPT_FILE" && grep -qF -- 'DKIM-VERIFY' "$PROMPT_FILE" && grep -qF -- 'NOT-TESTED.written-first.md' "$PROMPT_FILE" && grep -qF -- 'census' "$PROMPT_FILE" && grep -qF -- 'GO / GO WITH FINDINGS / NO GO' "$PROMPT_FILE" && grep -qF -- 'Majors/Minors' "$PROMPT_FILE" && grep -qF -- 'prediction slips named BY NAME' "$PROMPT_FILE" && grep -qF -- 'round 1 of 2' "$PROMPT_FILE" \
+__BYNAME_GREP__ && grep -qF -- 'round 1 of 2' "$PROMPT_FILE" \
   || { echo "REFUSING: the prompt does not carry Wednesday's fifteen by-name items (head/base by two instruments; red-first as TWO kinds of red; the six tampers with T3b's 0 red as a finding; the codec's four; the verify-by-hash order with the reorder control; DECIDE 2; whitelist/strip; the two read-backs with the byte-for-byte diff; the spec; nothing outside the allowed paths; SEVEN-not-six; the 3 SKIPPED legs NOT RUN; the six NOT DONE with the facts comment by length only; NOT-PINNED as the local model's feed; the standard closing) or round 1 of 2" >&2; exit 33; }
 
 if [ "${1:-}" = "--check" ]; then
@@ -322,7 +426,7 @@ if [ "${1:-}" = "--check" ]; then
   echo "  prompt forbids any seat worktree (s-a15-ks1175) and the builder's 2026-09-20_seatA-15th history"
   echo "  prompt requires every listener ended by pid with a TCP LISTEN census (KS-1201)"
   echo "  READY mail and prompt BOTH carry the builder's items; the prompt says MEASURE, not conclude, and RULE WHETHER IT BLOCKS"
-  echo "  prompt names the merged tree 1f2bc512a and develop 778e6cfe2 in full, the NOT-PINNED list with a proposed cell per row and a loopback GATEWAY_URL"
+  echo "  prompt names the head tree, the NOT-PINNED list with a proposed cell per row and a loopback GATEWAY_URL"
   echo "  READY mail and prompt BOTH state that PR #1105 is KS-1175 (namespace trap; KS-1105 is another ticket)"
   echo "  prompt carries Wednesday's fifteen by-name items and round 1 of 2"
   [ -n "${QAB1105_CUR_DEV:-}" ] && echo "  (develop read from the QAB1105_CUR_DEV test override, not ls-remote)"
@@ -336,3 +440,38 @@ fi
 echo "$DEV_NOTE" >&2
 cd "$QA_DIR" || { echo "cannot enter $QA_DIR" >&2; exit 16; }
 exec claude --dangerously-skip-permissions --model opus "$(cat "$PROMPT_FILE")"
+'''
+s = L
+SUBS = {'__BRIEF__': BRIEF, '__STATUS__': STATUS, '__PROMPT__': PROMPT, '__BRANCH__': BRANCH, '__HEAD__': HEAD, '__DEV__': DEV, '__HEADTREE__': HEAD_TREE,
+        '__REPORT__': REPORT, '__PRIOR__': PRIOR, '__EXEMPLAR__': EXEMPLAR, '__JUDGED__': JUDGED_BLOCK, '__BOTH_GREP__': BOTH_GREP, '__BYNAME_GREP__': BYNAME_GREP}
+for k, v in SUBS.items():
+    n = s.count(k)
+    if n == 0: print('REFUSING: token absent', k); sys.exit(1)
+    s = s.replace(k, v)
+if re.search(r'__[A-Z]+__', s): print('REFUSING: residual token', re.findall(r'__[A-Z]+__', s)); sys.exit(2)
+# 4. output controls: every carried value present as often as intended
+# counts explained (run1): HEAD full only in PRS (the header, exit 26 and the subject use the short form); DEV full in DEVELOP_SHA + the BOTH grep x2;
+# exit 18 = PYJ comment + empty-CUR_DEV refusal + case; exit 32 = 3 header mentions + code; QAB1105_HEAD = header + PRS + launch guard;
+# 'PR #1105 is KS-1175.' = header NAMESPACE line + the exit-32 grep.
+want = {HEAD: 1, DEV: 3, HEAD_TREE: 1, BRIEF: 2, STATUS: 1, PROMPT: 1, REPORT: 1, PRIOR: 1, EXEMPLAR: 1, 'exit 6': 2, 'exit 10': 2, 'exit 19': 3, 'exit 18': 3,
+        'exit 30': 2, 'exit 32': 4, 'exit 33': 2, 'exit 16': 3, 'exit 21': 3, '[ -t 0 ]': 1, 'exec claude --dangerously-skip-permissions': 1, 'DEV_CONTENT_ALLOWED = {}': 1,
+        ': DV}': 35, '"ABSENT": DV': 5, '"#1105 own"': 12, 'QAB1105_CUR_DEV': 5, 'QAB1105_INDEXTS_FILE': 5, 'QAB1105_HEAD': 3, 'refs/pull/$_n/head': 2,
+        'ahead=1 files=12': 1, "[QA/Secuura-1105 -> Wednesday] TIER 1 GATE #1105 (KS-1175 + KS-1284) @ e02d3ecb5": 1, 'PR #1105 is KS-1175.': 2}
+got = {k: s.count(k) for k in want}
+bad = {k: (got[k], want[k]) for k in want if got[k] != want[k]}
+print('output controls', {(k[:28] + '…' if len(k) > 28 else k): v for k, v in got.items()})
+if bad: print('REFUSING: output control mismatch (got, want)', bad); sys.exit(1)
+for kw in [kw for _, kws in BYNAME for kw in kws] + BOTH:
+    if s.count(kw) < 1: print('REFUSING: ladder keyword missing from launcher', kw); sys.exit(1)
+print('by-name ladder keywords', sum(len(k) for _, k in BYNAME), 'across 15 items; BOTH-list tokens', len(BOTH))
+# heredoc parity (the PYJ block sits inside $( ) — apostrophes and parens must be even)
+for tag in ("<<'PY'\n", "<<'PYJ'\n"):
+    i = s.index(tag); end = s.index('\n' + tag[3:-2] + '\n', i)
+    blk = s[i:end]
+    print('heredoc', tag.strip(), '@', s.count('\n', 0, i) + 1, 'apostrophes', blk.count("'") - 2, 'parens (', blk.count('('), ')', blk.count(')'))
+    if (blk.count("'") - 2) % 2 or blk.count('(') != blk.count(')'): print('REFUSING: heredoc parity'); sys.exit(1)
+tmp = tempfile.NamedTemporaryFile('w', delete=False, suffix='.sh', dir=os.path.dirname(OUT)); tmp.write(s); tmp.close()
+p = subprocess.run(['bash', '-n', tmp.name], capture_output=True, text=True); print('bash -n rc', p.returncode, p.stderr.strip()[:300])
+if p.returncode: print('REFUSING: bash -n; the tmp file is left for reading at', tmp.name); sys.exit(3)
+os.replace(tmp.name, OUT); os.chmod(OUT, 0o755)
+print('written', OUT, 'mode', oct(os.stat(OUT).st_mode & 0o777), 'sha256', hashlib.sha256(s.encode()).hexdigest()[:16], 'lines', s.count('\n'))

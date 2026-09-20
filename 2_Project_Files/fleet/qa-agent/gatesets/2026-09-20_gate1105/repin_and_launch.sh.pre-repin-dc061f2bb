@@ -9,9 +9,7 @@
 set -u
 GS='/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/gatesets/2026-09-20_gate1105'
 L='/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/launchers/launch_qa_secuura_1105.sh'
-DEV=778e6cfe2b6061d60ffcf3a57a951c84dc152b67   # re-pinned 2026-09-21 00:3x AEST: dc061f2bb + the three #1102-#1104 squashes (Seat B 10th on Wednesday's GO); first launch attempt refused rc 10 on the move, correctly
-BASE=dc061f2bb6dff9180a0724b1d1d5c50b9a0173fa  # the head's parent = merge-base
-MERGED=1f2bc512aee2a55d74142d9ba8206a795b0c975c  # predicted 3-way merge over $DEV (predict_merge_scratch.out + generator tree-hash)
+DEV=dc061f2bb6dff9180a0724b1d1d5c50b9a0173fa
 H1105=e02d3ecb51a457b0eb490db1854f28c6b1af69ad
 BR='refs/heads/feature/ks-1175-anchor-originate-lifecycle-event-schemas-accept-and-anchor'
 PANE='QA/Secuura-1105'
@@ -47,9 +45,9 @@ A1105="$(awk '/^API #1105 head /{print $4}' "$GS/api_heads_launch.out")"
 ASTATE="$(awk '/^API #1105 head /{print $NF}' "$GS/api_heads_launch.out")"
 
 echo "--- 3. the pins, judged"
-echo "  develop   ls-remote $CUR_DEV | pinned $DEV (base $BASE, predicted merged tree $MERGED) | $([ "$CUR_DEV" = "$DEV" ] && echo UNMOVED || echo MOVED)"
+echo "  develop   ls-remote $CUR_DEV | pinned $DEV | $([ "$CUR_DEV" = "$DEV" ] && echo UNMOVED || echo MOVED)"
 echo "  #1105     ls-remote pull/head $P1105 | branch $B1105 | API $A1105 (state $ASTATE) | pinned $H1105"
-[ "$CUR_DEV" = "$DEV" ] || { echo "REFUSING TO LAUNCH: origin develop has MOVED off $DEV to $CUR_DEV — the merged-tree prediction $MERGED (over $DEV, base $BASE) is unverified at the new base. Re-pin deliberately (gen_launcher_1105.py + the prompt + this DEV)."; exit 10; }
+[ "$CUR_DEV" = "$DEV" ] || { echo "REFUSING TO LAUNCH: origin develop has MOVED off $DEV to $CUR_DEV — the fast-forward claim (merged tree = head tree 8f066a817) is unverified at the new base. Re-pin deliberately."; exit 10; }
 [ "$P1105" = "$H1105" ] && [ "$B1105" = "$H1105" ] && [ "$A1105" = "$H1105" ] || { echo "REFUSING TO LAUNCH: #1105's head moved"; exit 11; }
 [ "$ASTATE" = "open" ] || { echo "REFUSING TO LAUNCH: #1105 is not open ($ASTATE)"; exit 11; }
 echo "  BOTH INSTRUMENTS AGREE with the pins."

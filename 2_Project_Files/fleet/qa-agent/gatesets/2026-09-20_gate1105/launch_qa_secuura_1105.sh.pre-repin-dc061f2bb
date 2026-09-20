@@ -15,20 +15,16 @@
 # MERGE AUTHORITY: WEDNESDAY'S signed GO naming e02d3ecb5 (exit 26). THE DEPLOY AND THE ANCHOR ARE KAM'S — the gate rules nothing about either.
 #
 # THE SHAPE, re-read live by the generator (git ls-remote develop + refs/pull/1105/head + the branch; rev-list --parents; diff --raw): the head is
-# ONE commit whose parent IS dc061f2bb (tree 1ccb80e0d = the #1100-#1101 batch gate's both-PRs tree, landed); head tree 8f066a817. DEVELOP MOVED
-# after the READY: origin develop = 778e6cfe2 (tree d0c8bfd09) = dc061f2bb + THREE squashes by Seat B 10th on Wednesday's GO (6e2fbc234 KS-1275 #1102,
-# 3232656cb KS-1203 #1103, 778e6cfe2 KS-1272 #1104), touching 4 paths DISJOINT from the 12 (originate lifecycleEventRepo.test.ts, api-gateway
-# ks501 test, startup-migrations.ts + ks1272 test). So the merge is NOT a fast-forward: MERGED TREE 1f2bc512a, predicted by a REAL 3-way merge in a
-# --shared --no-checkout scratch clone (both orders, clean rc 0, predict_merge_scratch.out) AND re-derived by pure tree hashing in the generator;
-# compare develop...head = merge_base dc061f2bb, ahead 1, BEHIND 3, files 12 (exit 10 — a fourth squash changes the figure and refuses).
+# ONE commit whose parent IS develop dc061f2bb (tree 1ccb80e0d = the #1100-#1101 batch gate's both-PRs tree, landed); head tree 8f066a817. Over the
+# pin the merge is a fast-forward: merged tree = head tree. compare develop...head = merge_base dc061f2bb, ahead 1, files 12 (exit 10).
 #
-# The develop pin is judged by CONTENT — THIRTY-NINE paths by blob at the CURRENT develop: the 12 PR paths (7 at develop blobs, 5 ABSENT; any at its
-# head blob -> exit 19 LANDED), the 4 squash paths at their 778e6cfe2 blobs, and what the gate runs or reads: anchoring package.json + lock + tsconfig + vitest.config, verifyAnchorStatus.ts,
+# The develop pin is judged by CONTENT — THIRTY-FIVE paths by blob at the CURRENT develop: the 12 PR paths (7 at develop blobs, 5 ABSENT; any at its
+# head blob -> exit 19 LANDED), and what the gate runs or reads: anchoring package.json + lock + tsconfig + vitest.config, verifyAnchorStatus.ts,
 # the control test files (ks480, ks566, threadTokenMint, db.retry), cardano/provider.ts + wallet.ts, the Dev package.json + lock, eslint.config.mjs,
 # BACKLOG.md, the pre-push hook, generate-openapi.ts, check-spec-examples.mjs, preflight.sh, originate documents.ts + anchors.ts (the SEVEN-endpoint
 # count), api-gateway proxy.ts + verification.ts (NOT DONE 2).
 # GUARDED: services/anchoring/, docs/openapi/, docs/VOCABULARY.md, scripts/, packages/shared src/, .githooks/, the Dev package.json + lock,
-# eslint.config.mjs, BACKLOG.md, the two originate route files, the two api-gateway route files, api-gateway startup-migrations.ts.
+# eslint.config.mjs, BACKLOG.md, the two originate route files, the two api-gateway route files.
 #
 # SOURCE = gatesets/2026-09-20_gate1105_READY_seatA15.txt (the READY, 13:55:07Z) + gatesets/2026-09-20_gate1105_STATUS2_seatA15.txt (STATUS 2,
 # 13:51:06Z), both captured verbatim by Wednesday from wednesday-agent@ and re-listed by message id by the drafter (list_ready_mail.out).
@@ -51,7 +47,7 @@
 #          facts comment id and 4999/4999; CSL 15.0.3; develop in full; :6882 and :5432; BACKLOG.md:155; the +65 hunk and 405 blocks; the two
 #          originate line ranges; transaction.ts:107; SEVEN; R8/R9 by MODULE ABSENCE; superRefine; NOT DONE), and the prompt must ask the gate to
 #          MEASURE, not conclude, and to RULE WHETHER IT BLOCKS.
-# exit 31: the prompt must name the MERGED tree 1f2bc512a in full AND develop 778e6cfe2 in full, the NOT-PINNED list with a proposed cell per row, and a loopback GATEWAY_URL for any
+# exit 31: the prompt must name the head tree in full, the NOT-PINNED list with a proposed cell per row, and a loopback GATEWAY_URL for any
 #          preflight run.
 # exit 32: the READY mail AND the prompt must BOTH state that PR #1105 is KS-1175 (KS-1105 is another ticket).
 # exit 33: the prompt must carry Wednesday's FIFTEEN BY-NAME items, each by its own keywords (see the ladder below): head/base re-read by two
@@ -79,14 +75,13 @@ PROMPT_FILE="${QAB1105_PROMPT:-/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/flee
 REPO='/Volumes/DevMASTER/!CODING/Secuura/Blockchain/2_Project_Files'
 SECUURA_ENV='/Volumes/DevMASTER/!CODING/Secuura/Blockchain/4_Credentials/.env'
 # n|ticket|branch|head — pinned from the builder's READY (13:55:07Z) and re-read by the drafter (git ls-remote 13:59:46Z and 14:13:57Z, branch AND
-# refs/pull/1105/head; the pulls API 14:03:26Z; re-pinned to the MOVED develop at 14:27:16Z). NAMESPACE TRAP: KS-1105 is another ticket; the ticket column is the truth (exit 32)
+# refs/pull/1105/head; the pulls API 14:03:26Z). NAMESPACE TRAP: KS-1105 is another ticket; the ticket column is the truth (exit 32)
 PRS=(
   "1105|KS-1175|refs/heads/feature/ks-1175-anchor-originate-lifecycle-event-schemas-accept-and-anchor|${QAB1105_HEAD:-e02d3ecb51a457b0eb490db1854f28c6b1af69ad}"
 )
-DEVELOP_SHA='778e6cfe2b6061d60ffcf3a57a951c84dc152b67'   # the pin = develop at 14:27:16Z (MOVED off dc061f2bb by the three squashes)
-MERGE_BASE='dc061f2bb6dff9180a0724b1d1d5c50b9a0173fa'    # the head's parent = merge-base = the develop the builder READY'd against
-HEAD_TREE='8f066a81784c89ae3531938a006c7ae69bdb4ba1'     # the head tree; over dc061f2bb it was a fast-forward
-MERGED_TREE='1f2bc512aee2a55d74142d9ba8206a795b0c975c'  # the predicted 3-way merge over the pin (scratch clone, both orders, clean; generator tree-hash)
+DEVELOP_SHA='dc061f2bb6dff9180a0724b1d1d5c50b9a0173fa'   # the pin = develop at 13:59:46Z and 14:13:57Z; the head's parent and merge-base
+MERGE_BASE="$DEVELOP_SHA"    # the head sits on the pin itself — the compare is asserted against it
+HEAD_TREE='8f066a81784c89ae3531938a006c7ae69bdb4ba1'     # over the pin the merge is a fast-forward: merged tree = head tree
 REPORT_DIR='/Volumes/DevMASTER/!CODING/Testing Agent MAIN/projects/secuura/reports/2026-09-20-pr1105-tier1-r1/'
 PRIOR_REPORT='/Volumes/DevMASTER/!CODING/Testing Agent MAIN/projects/secuura/reports/2026-09-20-batch1100-1101-tier1-r1/'
 EXEMPLAR_REPORT='/Volumes/DevMASTER/!CODING/Testing Agent MAIN/projects/secuura/reports/2026-09-18-ks1215-1034-e4624218b-tier1-r1/'
@@ -112,7 +107,7 @@ for _pr in "${PRS[@]}"; do
 done
 
 # The compare (GitHub compare API), asserted whole (merge_base + ahead + files; NOT behind — develop is expected to move):
-# develop...head = merge_base dc061f2bb ahead 1 BEHIND 3 files 12 (git rev-list --left-right, drafter 14:27Z; the launcher reads the compare API).
+# develop...head = dc061f2bb ahead 1 files 12 (git rev-list + diff --raw, drafter 13:59Z; the launcher reads the compare API).
 COMPARE="$(
   set -a; . "$SECUURA_ENV"; set +a
   PRS_FLAT="${PRS[*]}" python3 - <<'PY'
@@ -123,26 +118,26 @@ for pr in os.environ["PRS_FLAT"].split():
     n, tk, br, h = pr.split("|")
     r = urllib.request.urlopen(urllib.request.Request(api + "develop..." + h, headers={"Authorization": "Bearer " + t, "Accept": "application/vnd.github+json"}), timeout=60)
     c = json.load(r)
-    print("%s %s ahead=%d behind=%d files=%d" % (n, c["merge_base_commit"]["sha"], c["ahead_by"], c["behind_by"], len(c.get("files") or [])))
+    print("%s %s ahead=%d files=%d" % (n, c["merge_base_commit"]["sha"], c["ahead_by"], len(c.get("files") or [])))
 PY
 )"
 [ -n "$COMPARE" ] || { echo "REFUSING: could not read the compare develop...head from the GitHub compare API" >&2; exit 13; }
-WANT_COMPARE="1105 $MERGE_BASE ahead=1 behind=3 files=12"
+WANT_COMPARE="1105 $MERGE_BASE ahead=1 files=12"
 [ "$COMPARE" = "$WANT_COMPARE" ] || { echo "REFUSING: develop...head compare read" >&2; printf '%s\n' "$COMPARE" >&2; echo "the gateset pins" >&2; printf '%s\n' "$WANT_COMPARE" >&2; exit 10; }
 
-# The develop pin, judged by CONTENT (see the header): thirty-nine paths by PATH BLOB at the CURRENT develop (no region judgement), then — if
+# The develop pin, judged by CONTENT (see the header): thirty-five paths by PATH BLOB at the CURRENT develop (no region judgement), then — if
 # develop moved — the pinned...develop delta against the GUARDED list, with NOTHING cleared by content (DEV_CONTENT_ALLOWED is empty).
 CUR_DEV="${QAB1105_CUR_DEV:-$(git -C "$REPO" ls-remote origin refs/heads/develop | cut -f1)}"
 [ -n "$CUR_DEV" ] || { echo "REFUSING: could not read origin develop (git ls-remote)" >&2; exit 18; }
 DEV_JUDGEMENT="$(
   set -a; . "$SECUURA_ENV"; set +a
-  DEVELOP_SHA="$DEVELOP_SHA" CUR_DEV="$CUR_DEV" MERGED_TREE="$MERGED_TREE" python3 - <<'PYJ'
+  DEVELOP_SHA="$DEVELOP_SHA" CUR_DEV="$CUR_DEV" HEAD_TREE="$HEAD_TREE" python3 - <<'PYJ'
 import hashlib, json, os, sys, urllib.request, urllib.error
 t = os.environ.get("GH_TOKEN", "")
 api = "https://api.github.com/repos/Secuura/Distributed_Secuura"
 def get(p):
     return json.load(urllib.request.urlopen(urllib.request.Request(api + p, headers={"Authorization": "Bearer " + t, "Accept": "application/vnd.github+json"}), timeout=60))
-cur = os.environ["CUR_DEV"]; pinned = os.environ["DEVELOP_SHA"]; merged_tree = os.environ["MERGED_TREE"]
+cur = os.environ["CUR_DEV"]; pinned = os.environ["DEVELOP_SHA"]; head_tree = os.environ["HEAD_TREE"]
 D = "Blockchain/Dev/"
 A = D + "services/anchoring/"
 INDEXTS = A + "src/index.ts"
@@ -184,10 +179,6 @@ JUDGED = {
   "Blockchain/Dev/services/originate/src/routes/anchors.ts":                           ({"d30620bffae3931c242104501299564d785ed8fb": DV}, {}),
   "Blockchain/Dev/services/api-gateway/src/routes/proxy.ts":                           ({"795ae7ca3bdc76be3e563e87fc34a8cc221e5632": DV}, {}),
   "Blockchain/Dev/services/api-gateway/src/routes/verification.ts":                    ({"f888e8cd0bd10c98a508542d75902ab122595157": DV}, {}),
-  "Blockchain/Dev/services/api-gateway/src/__tests__/ks1272-platform-dedup-uuid-tenant-id.test.ts": ({"2b91446416f826b69dbd5a0ab6f4123c96d06349": DV}, {}),
-  "Blockchain/Dev/services/api-gateway/src/__tests__/ks501-enforcement-non-string-doctype.test.ts": ({"e05c6bd21f64ad766083c72d0fc070ebeb478b7f": DV}, {}),
-  "Blockchain/Dev/services/api-gateway/src/startup-migrations.ts":                     ({"cf371028fb564ca0e55d9d9501c3efa1211b5bd0": DV}, {}),
-  "Blockchain/Dev/services/originate/src/__tests__/lifecycleEventRepo.test.ts":        ({"c4aad21223cc59bf5b8c70dc9e8fa65a875d92a3": DV}, {}),
 }
 # No REGION judgement: every path is judged by exact blob (a develop move of any judged path refuses, exit 18; the PR head blob, exit 19).
 state = []
@@ -213,7 +204,7 @@ for f, (ok, landed) in JUDGED.items():
     state.append(f.split("/")[-1] + " " + blob[:9] + " = " + ok[blob])
 state = "; ".join(state)
 if cur == pinned:
-    print("OK " + state + " | origin develop still " + pinned + " (dc061f2bb + three squashes; merge-base dc061f2bb; predicted merged tree " + merged_tree + " by a real 3-way merge, both orders, clean; git ls-remote)"); sys.exit(0)
+    print("OK " + state + " | origin develop still " + pinned + " (the parent and merge-base of the head: the merged tree = the head tree " + head_tree + ", a fast-forward; git ls-remote)"); sys.exit(0)
 try:
     c = get("/compare/" + pinned + "..." + cur)
 except Exception as e:
@@ -234,8 +225,7 @@ GUARDED = [A,
            D + "services/originate/src/routes/documents.ts",
            D + "services/originate/src/routes/anchors.ts",
            D + "services/api-gateway/src/routes/proxy.ts",
-           D + "services/api-gateway/src/routes/verification.ts",
-           D + "services/api-gateway/src/startup-migrations.ts"]
+           D + "services/api-gateway/src/routes/verification.ts"]
 # STYLE NOTE (912r2 launcher, measured): bash scans quote/paren state THROUGH this heredoc because it sits inside a
 # command substitution — keep apostrophes and parentheses EVEN (this block uses none of the former), or the outer $( ) breaks.
 # CONTENT-JUDGED allowlist: EMPTY. Nothing is pre-cleared for this gate; any GUARDED move refuses: re-pin deliberately.
@@ -246,8 +236,8 @@ cleared = sorted(h for h in hits if h in DEV_CONTENT_ALLOWED and by_name.get(h, 
 remaining = sorted(h for h in hits if h not in cleared)
 if remaining:
     print("GUARDED " + " ".join(remaining)); sys.exit(0)
-tail = "the gate merges the then-current develop onto the head in its own clone, names the merged-tree OID (drafter over the pin: 1f2bc512a) and re-runs every item and suite on it"
-print("OK " + state + " | origin develop MOVED %s -> %s: commits=%d files=%d — GUARDED hits %d, cleared by content %d — the rest disjoint from the GUARDED list (services/anchoring/, docs/openapi/, VOCABULARY.md, scripts/, packages/shared src/, .githooks/, the Dev package.json + lock, eslint.config.mjs, BACKLOG.md, the two originate and two api-gateway route files, startup-migrations.ts); %s" % (pinned, cur, c["ahead_by"], len(files), len(hits), len(cleared), tail)); sys.exit(0)
+tail = "the gate merges the then-current develop onto the head in its own clone, names the merged-tree OID (drafter over the pin: = the head tree) and re-runs every item and suite on it"
+print("OK " + state + " | origin develop MOVED %s -> %s: commits=%d files=%d — GUARDED hits %d, cleared by content %d — the rest disjoint from the GUARDED list (services/anchoring/, docs/openapi/, VOCABULARY.md, scripts/, packages/shared src/, .githooks/, the Dev package.json + lock, eslint.config.mjs, BACKLOG.md, the two originate and two api-gateway route files); %s" % (pinned, cur, c["ahead_by"], len(files), len(hits), len(cleared), tail)); sys.exit(0)
 PYJ
 )"
 case "$DEV_JUDGEMENT" in
@@ -292,8 +282,8 @@ grep -qF 'END EVERY LISTENER YOUR RUNS START, BY PID' "$PROMPT_FILE" && grep -qF
   || { echo "REFUSING: prompt does not require every listener the gate starts ended by pid with a census (KS-1201)" >&2; exit 29; }
 grep -qF -- '318 / 319' "$PROMPT_FILE" && grep -qF -- '318 / 319' "$BRIEF" && grep -qF -- '242' "$PROMPT_FILE" && grep -qF -- '242' "$BRIEF" && grep -qF -- '293' "$PROMPT_FILE" && grep -qF -- '293' "$BRIEF" && grep -qF -- '247 / 46' "$PROMPT_FILE" && grep -qF -- '247 / 46' "$BRIEF" && grep -qF -- 'T1' "$PROMPT_FILE" && grep -qF -- 'T1' "$BRIEF" && grep -qF -- 'T2a' "$PROMPT_FILE" && grep -qF -- 'T2a' "$BRIEF" && grep -qF -- 'T2b' "$PROMPT_FILE" && grep -qF -- 'T2b' "$BRIEF" && grep -qF -- 'T3a' "$PROMPT_FILE" && grep -qF -- 'T3a' "$BRIEF" && grep -qF -- 'T3b' "$PROMPT_FILE" && grep -qF -- 'T3b' "$BRIEF" && grep -qF -- 'T3c' "$PROMPT_FILE" && grep -qF -- 'T3c' "$BRIEF" && grep -qF -- 'T4' "$PROMPT_FILE" && grep -qF -- 'T4' "$BRIEF" && grep -qF -- 'T5' "$PROMPT_FILE" && grep -qF -- 'T5' "$BRIEF" && grep -qF -- 'T6' "$PROMPT_FILE" && grep -qF -- 'T6' "$BRIEF" && grep -qF -- '0 red' "$PROMPT_FILE" && grep -qF -- '0 red' "$BRIEF" && grep -qF -- '21af3285-0a40-490c-bfff-bc3466b6066b' "$PROMPT_FILE" && grep -qF -- '21af3285-0a40-490c-bfff-bc3466b6066b' "$BRIEF" && grep -qF -- '4999/4999' "$PROMPT_FILE" && grep -qF -- '4999/4999' "$BRIEF" && grep -qF -- 'CSL 15.0.3' "$PROMPT_FILE" && grep -qF -- 'CSL 15.0.3' "$BRIEF" && grep -qF -- 'dc061f2bb6dff9180a0724b1d1d5c50b9a0173fa' "$PROMPT_FILE" && grep -qF -- 'dc061f2bb6dff9180a0724b1d1d5c50b9a0173fa' "$BRIEF" && grep -qF -- ':6882' "$PROMPT_FILE" && grep -qF -- ':6882' "$BRIEF" && grep -qF -- ':5432' "$PROMPT_FILE" && grep -qF -- ':5432' "$BRIEF" && grep -qF -- 'BACKLOG.md:155' "$PROMPT_FILE" && grep -qF -- 'BACKLOG.md:155' "$BRIEF" && grep -qF -- '+65' "$PROMPT_FILE" && grep -qF -- '+65' "$BRIEF" && grep -qF -- '405' "$PROMPT_FILE" && grep -qF -- '405' "$BRIEF" && grep -qF -- 'documents.ts:1263-1285' "$PROMPT_FILE" && grep -qF -- 'documents.ts:1263-1285' "$BRIEF" && grep -qF -- 'anchors.ts:282-297' "$PROMPT_FILE" && grep -qF -- 'anchors.ts:282-297' "$BRIEF" && grep -qF -- 'transaction.ts:107' "$PROMPT_FILE" && grep -qF -- 'transaction.ts:107' "$BRIEF" && grep -qF -- 'SEVEN' "$PROMPT_FILE" && grep -qF -- 'SEVEN' "$BRIEF" && grep -qF -- 'login_stub' "$PROMPT_FILE" && grep -qF -- 'login_stub' "$BRIEF" && grep -qF -- '12/15' "$PROMPT_FILE" && grep -qF -- '12/15' "$BRIEF" && grep -qF -- 'SKIPPED' "$PROMPT_FILE" && grep -qF -- 'SKIPPED' "$BRIEF" && grep -qF -- 'threadTokenMint' "$PROMPT_FILE" && grep -qF -- 'threadTokenMint' "$BRIEF" && grep -qF -- 'R8' "$PROMPT_FILE" && grep -qF -- 'R8' "$BRIEF" && grep -qF -- 'R9' "$PROMPT_FILE" && grep -qF -- 'R9' "$BRIEF" && grep -qF -- 'MODULE ABSENCE' "$PROMPT_FILE" && grep -qF -- 'MODULE ABSENCE' "$BRIEF" && grep -qF -- 'superRefine' "$PROMPT_FILE" && grep -qF -- 'superRefine' "$BRIEF" && grep -qF -- 'NOT DONE' "$PROMPT_FILE" && grep -qF -- 'NOT DONE' "$BRIEF" && grep -qF 'MEASURE, not conclude' "$PROMPT_FILE" && grep -qF 'RULE WHETHER IT BLOCKS' "$PROMPT_FILE" \
   || { echo "REFUSING: the READY mail and the prompt do not BOTH carry the builder's items, or the prompt does not say MEASURE, not conclude and RULE WHETHER IT BLOCKS" >&2; exit 30; }
-grep -qF "$MERGED_TREE" "$PROMPT_FILE" && grep -qF "$DEVELOP_SHA" "$PROMPT_FILE" && grep -qF 'NOT-PINNED' "$PROMPT_FILE" && grep -qF 'proposed cell' "$PROMPT_FILE" && grep -qF 'GATEWAY_URL=http://127.0.0.1:' "$PROMPT_FILE" \
-  || { echo "REFUSING: prompt does not name the merged tree 1f2bc512a and develop 778e6cfe2 in full, the NOT-PINNED list with a proposed cell per row, or a loopback GATEWAY_URL for preflight" >&2; exit 31; }
+grep -qF "$HEAD_TREE" "$PROMPT_FILE" && grep -qF 'NOT-PINNED' "$PROMPT_FILE" && grep -qF 'proposed cell' "$PROMPT_FILE" && grep -qF 'GATEWAY_URL=http://127.0.0.1:' "$PROMPT_FILE" \
+  || { echo "REFUSING: prompt does not name the head tree in full, the NOT-PINNED list with a proposed cell per row, or a loopback GATEWAY_URL for preflight" >&2; exit 31; }
 grep -qF 'PR #1105 is KS-1175.' "$PROMPT_FILE" && grep -qF 'KS-1105' "$PROMPT_FILE" && grep -F 'PR #1105' "$BRIEF" | grep -qF 'KS-1175' \
   || { echo "REFUSING: the READY mail and the prompt do not BOTH state that PR #1105 is KS-1175 (KS-1105 is another ticket) — the PR number is another ticket's number too" >&2; exit 32; }
 grep -qF -- 'parent of e02d3ecb5 is dc061f2bb' "$PROMPT_FILE" && grep -qF -- 'two instruments' "$PROMPT_FILE" && grep -qF -- 'red by ASSERTION' "$PROMPT_FILE" && grep -qF -- 'red by MODULE ABSENCE' "$PROMPT_FILE" && grep -qF -- 'TWO DIFFERENT KINDS OF RED' "$PROMPT_FILE" && grep -qF -- 'BACKLOG.md:155' "$PROMPT_FILE" && grep -qF -- 'threadTokenMint' "$PROMPT_FILE" && grep -qF -- 'tampers/tampers.json' "$PROMPT_FILE" && grep -qF -- 'T3b' "$PROMPT_FILE" && grep -qF -- '0 red' "$PROMPT_FILE" && grep -qF -- 'FINDING to re-measure and grade' "$PROMPT_FILE" && grep -qF -- 'WHOLE anchoring suite' "$PROMPT_FILE" && grep -qF -- 'BYTE-IDENTICAL NO-OP' "$PROMPT_FILE" && grep -qF -- 'UTF-8 BYTES ON CODE-POINT BOUNDARIES' "$PROMPT_FILE" && grep -qF -- 'STRADDLING byte 64' "$PROMPT_FILE" && grep -qF -- '"true"/"false"' "$PROMPT_FILE" && grep -qF -- 'FLOATS / NULL are rejected UPSTREAM' "$PROMPT_FILE" && grep -qF -- 'VERIFY-BY-HASH ORDER' "$PROMPT_FILE" && grep -qF -- 'REORDERED copy' "$PROMPT_FILE" && grep -qF -- 'prove the check can fail' "$PROMPT_FILE" && grep -qF -- 'DECIDE 2 superRefine' "$PROMPT_FILE" && grep -qF -- 'MEASURE the anchored key set' "$PROMPT_FILE" && grep -qF -- 'WHITELIST / STRIP' "$PROMPT_FILE" && grep -qF -- 'smuggled' "$PROMPT_FILE" && grep -qF -- 'ks566 ×6' "$PROMPT_FILE" && grep -qF -- '!== undefined' "$PROMPT_FILE" && grep -qF -- 'GET /api/anchors/verify/:hash' "$PROMPT_FILE" && grep -qF -- 'GET /api/anchors/:id' "$PROMPT_FILE" && grep -qF -- 'buildVerifyResponse' "$PROMPT_FILE" && grep -qF -- 'byte-for-byte' "$PROMPT_FILE" && grep -qF -- 'DIFF IT' "$PROMPT_FILE" && grep -qF -- 'check:openapi' "$PROMPT_FILE" && grep -qF -- 'check:spec-examples' "$PROMPT_FILE" && grep -qF -- 'ONE FlatAnchorRequest hunk' "$PROMPT_FILE" && grep -qF -- 'MASKED' "$PROMPT_FILE" && grep -qF -- '405' "$PROMPT_FILE" && grep -qF -- 'FILES API' "$PROMPT_FILE" && grep -qF -- 'CSL 15.0.3' "$PROMPT_FILE" && grep -qF -- 'no migration' "$PROMPT_FILE" && grep -qF -- 'no dependency change' "$PROMPT_FILE" && grep -qF -- 'SEVEN-not-six' "$PROMPT_FILE" && grep -qF -- 'documents.ts:1263-1285' "$PROMPT_FILE" && grep -qF -- 'anchors.ts:282-297' "$PROMPT_FILE" && grep -qF -- '3 SKIPPED' "$PROMPT_FILE" && grep -qF -- 'NOT RUN, never as passes' "$PROMPT_FILE" && grep -qF -- ':6882' "$PROMPT_FILE" && grep -qF -- 'NOT DONE ITEMS (six)' "$PROMPT_FILE" && grep -qF -- '21af3285-0a40-490c-bfff-bc3466b6066b' "$PROMPT_FILE" && grep -qF -- '4999' "$PROMPT_FILE" && grep -qF -- 'BY LENGTH ONLY' "$PROMPT_FILE" && grep -qF -- 'NOT-PINNED' "$PROMPT_FILE" && grep -qF -- 'one-line tamper' "$PROMPT_FILE" && grep -qF -- "local model's next feed" "$PROMPT_FILE" && grep -qF -- 'proposed cell' "$PROMPT_FILE" && grep -qF -- 'DKIM-VERIFY' "$PROMPT_FILE" && grep -qF -- 'NOT-TESTED.written-first.md' "$PROMPT_FILE" && grep -qF -- 'census' "$PROMPT_FILE" && grep -qF -- 'GO / GO WITH FINDINGS / NO GO' "$PROMPT_FILE" && grep -qF -- 'Majors/Minors' "$PROMPT_FILE" && grep -qF -- 'prediction slips named BY NAME' "$PROMPT_FILE" && grep -qF -- 'round 1 of 2' "$PROMPT_FILE" \
@@ -322,7 +312,7 @@ if [ "${1:-}" = "--check" ]; then
   echo "  prompt forbids any seat worktree (s-a15-ks1175) and the builder's 2026-09-20_seatA-15th history"
   echo "  prompt requires every listener ended by pid with a TCP LISTEN census (KS-1201)"
   echo "  READY mail and prompt BOTH carry the builder's items; the prompt says MEASURE, not conclude, and RULE WHETHER IT BLOCKS"
-  echo "  prompt names the merged tree 1f2bc512a and develop 778e6cfe2 in full, the NOT-PINNED list with a proposed cell per row and a loopback GATEWAY_URL"
+  echo "  prompt names the head tree, the NOT-PINNED list with a proposed cell per row and a loopback GATEWAY_URL"
   echo "  READY mail and prompt BOTH state that PR #1105 is KS-1175 (namespace trap; KS-1105 is another ticket)"
   echo "  prompt carries Wednesday's fifteen by-name items and round 1 of 2"
   [ -n "${QAB1105_CUR_DEV:-}" ] && echo "  (develop read from the QAB1105_CUR_DEV test override, not ls-remote)"

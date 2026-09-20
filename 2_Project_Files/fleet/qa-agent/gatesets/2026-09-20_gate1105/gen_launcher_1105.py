@@ -20,10 +20,14 @@ OUT = sys.argv[1]
 def now(f='+%Y-%m-%d %H:%M:%S %Z'): return subprocess.run(['date', f], capture_output=True, text=True).stdout.strip()
 print('gen_launcher_1105', now())
 REPO = '/Volumes/DevMASTER/!CODING/Secuura/Blockchain/2_Project_Files'
-DEV = 'dc061f2bb6dff9180a0724b1d1d5c50b9a0173fa'
+DEV = '778e6cfe2b6061d60ffcf3a57a951c84dc152b67'   # origin develop after Seat B 10th merged #1102-#1104 (re-pin 2026-09-21 00:3x AEST)
+BASE = 'dc061f2bb6dff9180a0724b1d1d5c50b9a0173fa'  # the head's parent = merge-base = the develop the builder READY'd against
+SQUASHES = ['6e2fbc234788b23c446490efb6cb20fcc16ae629', '3232656cb13be8220a911edaac974123e62e6ee2', '778e6cfe2b6061d60ffcf3a57a951c84dc152b67']
+MERGED_TREE = '1f2bc512aee2a55d74142d9ba8206a795b0c975c'   # predict_merge_scratch.out (real 3-way merge, both orders, clean); re-derived below by pure tree hashing
 HEAD = 'e02d3ecb51a457b0eb490db1854f28c6b1af69ad'
 HEAD_TREE = '8f066a81784c89ae3531938a006c7ae69bdb4ba1'
-DEV_TREE = '1ccb80e0d66ab0ff12d5dbb61753b8c0c274e923'
+DEV_TREE = 'd0c8bfd095b65861efc1a4e8524017235b42e382'
+BASE_TREE = '1ccb80e0d66ab0ff12d5dbb61753b8c0c274e923'
 BRANCH = 'refs/heads/feature/ks-1175-anchor-originate-lifecycle-event-schemas-accept-and-anchor'
 D = 'Blockchain/Dev/'; A = D + 'services/anchoring/'
 def git(*a): return subprocess.run(['git', '-C', REPO] + list(a), capture_output=True, text=True)
@@ -40,16 +44,22 @@ for ref, want in (('refs/heads/develop', DEV), ('refs/pull/1105/head', HEAD), (B
     if refs.get(ref) != want: print('REFUSING: pin moved at origin'); sys.exit(1)
 # 2. local objects
 par = out('rev-list', '--parents', '-n1', HEAD).split()
-print('head parents', par[1:], '| ONE parent == develop:', par[1:] == [DEV])
-if par[1:] != [DEV]: sys.exit(1)
-ht, dt = out('rev-parse', HEAD + '^{tree}').strip(), out('rev-parse', DEV + '^{tree}').strip()
-print('head tree', ht, '==', HEAD_TREE, ht == HEAD_TREE, '| develop tree', dt, '==', DEV_TREE, dt == DEV_TREE)
-if ht != HEAD_TREE or dt != DEV_TREE: sys.exit(1)
-ahead = out('rev-list', '--count', DEV + '..' + HEAD).strip()
-print('ahead', ahead, '(want 1)')
+print('head parents', par[1:], '| ONE parent == BASE dc061f2bb:', par[1:] == [BASE])
+if par[1:] != [BASE]: sys.exit(1)
+mb = out('merge-base', DEV, HEAD).strip(); print('merge-base develop..head', mb[:9], '== BASE:', mb == BASE)
+if mb != BASE: sys.exit(1)
+lr = out('rev-list', '--left-right', '--count', DEV + '...' + HEAD).split(); print('develop...head behind/ahead', lr, '(want 3 1)')
+if lr != ['3', '1']: sys.exit(1)
+sq = out('rev-list', '--reverse', BASE + '..' + DEV).split(); print('the squashes BASE..develop', [x[:9] for x in sq], '== pinned:', sq == SQUASHES)
+if sq != SQUASHES: sys.exit(1)
+ht, dt, bt = out('rev-parse', HEAD + '^{tree}').strip(), out('rev-parse', DEV + '^{tree}').strip(), out('rev-parse', BASE + '^{tree}').strip()
+print('head tree', ht, '==', HEAD_TREE, ht == HEAD_TREE, '| develop tree', dt, '==', DEV_TREE, dt == DEV_TREE, '| base tree', bt[:9], '==', BASE_TREE[:9], bt == BASE_TREE)
+if ht != HEAD_TREE or dt != DEV_TREE or bt != BASE_TREE: sys.exit(1)
+ahead = out('rev-list', '--count', BASE + '..' + HEAD).strip()
+print('ahead of BASE', ahead, '(want 1)')
 if ahead != '1': sys.exit(1)
 # the 12 changed paths: (path, develop blob or ABSENT, head blob)
-raw = out('diff', '--raw', '--abbrev=40', DEV, HEAD).strip().splitlines()
+raw = out('diff', '--raw', '--abbrev=40', BASE, HEAD).strip().splitlines()
 CHANGED = {}
 for l in raw:
     meta, path = l.split('\t', 1)
@@ -61,6 +71,15 @@ ALLOWED_EXACT = {D + 'docs/openapi/secuura-api.yaml', D + 'docs/VOCABULARY.md'}
 outside = [p for p in CHANGED if not (p.startswith(A) or p in ALLOWED_EXACT)]
 print('outside services/anchoring/** + yaml + VOCABULARY.md:', outside, '(want [])')
 if outside: sys.exit(1)
+# the develop blob of each of the 12 must be UNCHANGED by the three squashes (the squash paths are disjoint from the 12)
+SQPATHS = out('diff', '--name-only', BASE, DEV).strip().splitlines()
+print('squash paths', len(SQPATHS), [x.split('/')[-1] for x in SQPATHS], '| overlap with the 12:', sorted(set(SQPATHS) & set(CHANGED)), '(want [])')
+if len(SQPATHS) != 4 or set(SQPATHS) & set(CHANGED): sys.exit(1)
+for p_ in CHANGED:
+    b_dev = git('rev-parse', '-q', '--verify', DEV + ':' + p_).stdout.strip() or 'ABSENT'
+    if b_dev != CHANGED[p_][0]: print('REFUSING: develop blob of', p_, 'changed by the squashes', b_dev, CHANGED[p_][0]); sys.exit(1)
+print('the 12 develop-side blobs identical at BASE and at develop 778e6cfe2: True')
+SQBLOB = {p_: out('rev-parse', DEV + ':' + p_).strip() for p_ in SQPATHS}
 if any(v[3] != '100644' for v in CHANGED.values()): print('REFUSING: a non-100644 mode'); sys.exit(1)
 PINNED = {  # the drafter's shape_1.out reads, asserted against the live objects
   D + 'docs/VOCABULARY.md': ('7b7072b4e1da', '75633ef85930'), D + 'docs/openapi/secuura-api.yaml': ('a34b59363b81', '1871025e2c11'),
@@ -92,13 +111,55 @@ for tree in (DEV, HEAD):
         m = re.search(r'"node_modules/@emurgo/cardano-serialization-lib-nodejs": \{\s*"version": "([^"]+)"', txt)
         if not m or m.group(1) != '15.0.3': print('REFUSING: CSL pin', tree[:9], lock, m and m.group(1)); sys.exit(1)
 print('CSL 15.0.3 pinned in both lockfiles at develop and head: True')
-hunks = out('diff', DEV, HEAD, '--', D + 'docs/openapi/secuura-api.yaml').count('\n@@')
+hunks = out('diff', BASE, HEAD, '--', D + 'docs/openapi/secuura-api.yaml').count('\n@@')
 print('yaml hunks', hunks, '(want 1)')
 if hunks != 1: sys.exit(1)
 # BACKLOG.md line of the threadTokenMint entry at develop (the drafter's lead D1)
-bl = out('show', DEV + ':BACKLOG.md').splitlines()
+bl = out('show', BASE + ':BACKLOG.md').splitlines()
+assert out('rev-parse', DEV + ':BACKLOG.md') == out('rev-parse', BASE + ':BACKLOG.md')
 tl = [i + 1 for i, l in enumerate(bl) if 'threadTokenMint.test.ts` fails on develop' in l]
 print('BACKLOG.md threadTokenMint entry at develop: lines', tl, '| :155 is', bl[154][:60])
+
+# 2b. the MERGED TREE re-derived WITHOUT any git write: develop's tree with the 12 head entries composed in, hashed in Python from
+# `git ls-tree` reads; must equal the scratch-clone 3-way merge (predict_merge_scratch.out). Control: composing the 12 into BASE's tree = the head tree.
+def ls_tree(oid):
+    ents = []
+    for l in out('ls-tree', oid).strip().splitlines():
+        meta, name = l.split('\t', 1); mode, typ, sha = meta.split()
+        ents.append([mode, typ, sha, name])
+    return ents
+def hash_tree(ents):
+    def key(e): return e[3] + ('/' if e[1] == 'tree' else '')
+    # git stores the mode WITHOUT the leading zero that ls-tree prints (040000 -> 40000)
+    body = b''.join((e[0].lstrip('0') + ' ' + e[3]).encode() + b'\0' + bytes.fromhex(e[2]) for e in sorted(ents, key=key))
+    return hashlib.sha1(b'tree ' + str(len(body)).encode() + b'\0' + body).hexdigest()
+def compose(tree_oid, changes):
+    ents = ls_tree(tree_oid)
+    for e in ents:
+        assert hash_tree(ls_tree(e[2])) == e[2] if e[1] == 'tree' and e[3] in {c.split('/', 1)[0] for c in changes} else True
+    groups = {}
+    for path, (mode, blob) in changes.items():
+        top, rest = (path.split('/', 1) + [None])[:2]
+        groups.setdefault(top, {})[rest] = (mode, blob)
+    byname = {e[3]: e for e in ents}
+    for top, sub in groups.items():
+        if None in sub:
+            mode, blob = sub[None]
+            if top in byname: byname[top][0], byname[top][2] = mode, blob
+            else: ents.append([mode, 'blob', blob, top]); byname[top] = ents[-1]
+        else:
+            byname[top][2] = compose(byname[top][2], sub)
+    return hash_tree(ents)
+ctrl = hash_tree(ls_tree(DEV_TREE)); print('tree-hash control: re-hashing develop root tree ->', ctrl[:9], '==', DEV_TREE[:9], ctrl == DEV_TREE)
+if ctrl != DEV_TREE: sys.exit(1)
+twelve = {p_: (v[3], v[1]) for p_, v in CHANGED.items()}
+ff = compose(BASE_TREE, twelve); print('CONTROL compose(the 12 into BASE tree) ->', ff[:9], '== head tree', ff == HEAD_TREE)
+if ff != HEAD_TREE: sys.exit(1)
+mt = compose(DEV_TREE, twelve); print('compose(the 12 into develop 778e6cfe2 tree) ->', mt, '== MERGED_TREE', mt == MERGED_TREE)
+if mt != MERGED_TREE: sys.exit(1)
+pm = open(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'predict_merge_scratch.out')).read()
+print('predict_merge_scratch.out names MERGED TREE', MERGED_TREE, ':', ('MERGED TREE ' + MERGED_TREE) in pm, '| clean rc=0:', 'x head rc=0' in pm, '| both orders same:', 'same: True' in pm, '| 12 head blobs + 4 squash blobs:', 'carry the head blobs: True' in pm and "carry develop's blobs: True" in pm)
+if not (('MERGED TREE ' + MERGED_TREE) in pm and 'x head rc=0' in pm and 'same: True' in pm): sys.exit(1)
 
 # 3. the launcher
 GS = '/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/gatesets'
@@ -117,6 +178,8 @@ for p, (b1, b2, st, m) in CHANGED.items():
     judged.append(jline(p, b1, b2))
 for p in UNCHANGED:
     judged.append(jline(p, UBLOB[p], ''))
+for p in SQPATHS:  # the three squashes' paths, at their develop blobs (what the merged tree carries)
+    judged.append(jline(p, SQBLOB[p], ''))
 JUDGED_BLOCK = '\n'.join(judged)
 # the by-name keyword ladder (exit 33): one or more exact phrases per item, all must be in the prompt
 BYNAME = [
@@ -163,16 +226,20 @@ L = r'''#!/bin/bash
 # MERGE AUTHORITY: WEDNESDAY'S signed GO naming e02d3ecb5 (exit 26). THE DEPLOY AND THE ANCHOR ARE KAM'S — the gate rules nothing about either.
 #
 # THE SHAPE, re-read live by the generator (git ls-remote develop + refs/pull/1105/head + the branch; rev-list --parents; diff --raw): the head is
-# ONE commit whose parent IS develop dc061f2bb (tree 1ccb80e0d = the #1100-#1101 batch gate's both-PRs tree, landed); head tree 8f066a817. Over the
-# pin the merge is a fast-forward: merged tree = head tree. compare develop...head = merge_base dc061f2bb, ahead 1, files 12 (exit 10).
+# ONE commit whose parent IS dc061f2bb (tree 1ccb80e0d = the #1100-#1101 batch gate's both-PRs tree, landed); head tree 8f066a817. DEVELOP MOVED
+# after the READY: origin develop = 778e6cfe2 (tree d0c8bfd09) = dc061f2bb + THREE squashes by Seat B 10th on Wednesday's GO (6e2fbc234 KS-1275 #1102,
+# 3232656cb KS-1203 #1103, 778e6cfe2 KS-1272 #1104), touching 4 paths DISJOINT from the 12 (originate lifecycleEventRepo.test.ts, api-gateway
+# ks501 test, startup-migrations.ts + ks1272 test). So the merge is NOT a fast-forward: MERGED TREE 1f2bc512a, predicted by a REAL 3-way merge in a
+# --shared --no-checkout scratch clone (both orders, clean rc 0, predict_merge_scratch.out) AND re-derived by pure tree hashing in the generator;
+# compare develop...head = merge_base dc061f2bb, ahead 1, BEHIND 3, files 12 (exit 10 — a fourth squash changes the figure and refuses).
 #
-# The develop pin is judged by CONTENT — THIRTY-FIVE paths by blob at the CURRENT develop: the 12 PR paths (7 at develop blobs, 5 ABSENT; any at its
-# head blob -> exit 19 LANDED), and what the gate runs or reads: anchoring package.json + lock + tsconfig + vitest.config, verifyAnchorStatus.ts,
+# The develop pin is judged by CONTENT — THIRTY-NINE paths by blob at the CURRENT develop: the 12 PR paths (7 at develop blobs, 5 ABSENT; any at its
+# head blob -> exit 19 LANDED), the 4 squash paths at their 778e6cfe2 blobs, and what the gate runs or reads: anchoring package.json + lock + tsconfig + vitest.config, verifyAnchorStatus.ts,
 # the control test files (ks480, ks566, threadTokenMint, db.retry), cardano/provider.ts + wallet.ts, the Dev package.json + lock, eslint.config.mjs,
 # BACKLOG.md, the pre-push hook, generate-openapi.ts, check-spec-examples.mjs, preflight.sh, originate documents.ts + anchors.ts (the SEVEN-endpoint
 # count), api-gateway proxy.ts + verification.ts (NOT DONE 2).
 # GUARDED: services/anchoring/, docs/openapi/, docs/VOCABULARY.md, scripts/, packages/shared src/, .githooks/, the Dev package.json + lock,
-# eslint.config.mjs, BACKLOG.md, the two originate route files, the two api-gateway route files.
+# eslint.config.mjs, BACKLOG.md, the two originate route files, the two api-gateway route files, api-gateway startup-migrations.ts.
 #
 # SOURCE = gatesets/2026-09-20_gate1105_READY_seatA15.txt (the READY, 13:55:07Z) + gatesets/2026-09-20_gate1105_STATUS2_seatA15.txt (STATUS 2,
 # 13:51:06Z), both captured verbatim by Wednesday from wednesday-agent@ and re-listed by message id by the drafter (list_ready_mail.out).
@@ -195,7 +262,7 @@ L = r'''#!/bin/bash
 #          facts comment id and 4999/4999; CSL 15.0.3; develop in full; :6882 and :5432; BACKLOG.md:155; the +65 hunk and 405 blocks; the two
 #          originate line ranges; transaction.ts:107; SEVEN; R8/R9 by MODULE ABSENCE; superRefine; NOT DONE), and the prompt must ask the gate to
 #          MEASURE, not conclude, and to RULE WHETHER IT BLOCKS.
-# exit 31: the prompt must name the head tree in full, the NOT-PINNED list with a proposed cell per row, and a loopback GATEWAY_URL for any
+# exit 31: the prompt must name the MERGED tree 1f2bc512a in full AND develop 778e6cfe2 in full, the NOT-PINNED list with a proposed cell per row, and a loopback GATEWAY_URL for any
 #          preflight run.
 # exit 32: the READY mail AND the prompt must BOTH state that PR #1105 is KS-1175 (KS-1105 is another ticket).
 # exit 33: the prompt must carry Wednesday's FIFTEEN BY-NAME items, each by its own keywords (see the ladder below): head/base re-read by two
@@ -223,13 +290,14 @@ PROMPT_FILE="${QAB1105_PROMPT:-__PROMPT__}"
 REPO='/Volumes/DevMASTER/!CODING/Secuura/Blockchain/2_Project_Files'
 SECUURA_ENV='/Volumes/DevMASTER/!CODING/Secuura/Blockchain/4_Credentials/.env'
 # n|ticket|branch|head — pinned from the builder's READY (13:55:07Z) and re-read by the drafter (git ls-remote 13:59:46Z and 14:13:57Z, branch AND
-# refs/pull/1105/head; the pulls API 14:03:26Z). NAMESPACE TRAP: KS-1105 is another ticket; the ticket column is the truth (exit 32)
+# refs/pull/1105/head; the pulls API 14:03:26Z; re-pinned to the MOVED develop at 14:27:16Z). NAMESPACE TRAP: KS-1105 is another ticket; the ticket column is the truth (exit 32)
 PRS=(
   "1105|KS-1175|__BRANCH__|${QAB1105_HEAD:-__HEAD__}"
 )
-DEVELOP_SHA='__DEV__'   # the pin = develop at 13:59:46Z and 14:13:57Z; the head's parent and merge-base
-MERGE_BASE="$DEVELOP_SHA"    # the head sits on the pin itself — the compare is asserted against it
-HEAD_TREE='__HEADTREE__'     # over the pin the merge is a fast-forward: merged tree = head tree
+DEVELOP_SHA='__DEV__'   # the pin = develop at 14:27:16Z (MOVED off dc061f2bb by the three squashes)
+MERGE_BASE='__BASE__'    # the head's parent = merge-base = the develop the builder READY'd against
+HEAD_TREE='__HEADTREE__'     # the head tree; over dc061f2bb it was a fast-forward
+MERGED_TREE='__MERGEDTREE__'  # the predicted 3-way merge over the pin (scratch clone, both orders, clean; generator tree-hash)
 REPORT_DIR='__REPORT__'
 PRIOR_REPORT='__PRIOR__'
 EXEMPLAR_REPORT='__EXEMPLAR__'
@@ -255,7 +323,7 @@ for _pr in "${PRS[@]}"; do
 done
 
 # The compare (GitHub compare API), asserted whole (merge_base + ahead + files; NOT behind — develop is expected to move):
-# develop...head = dc061f2bb ahead 1 files 12 (git rev-list + diff --raw, drafter 13:59Z; the launcher reads the compare API).
+# develop...head = merge_base dc061f2bb ahead 1 BEHIND 3 files 12 (git rev-list --left-right, drafter 14:27Z; the launcher reads the compare API).
 COMPARE="$(
   set -a; . "$SECUURA_ENV"; set +a
   PRS_FLAT="${PRS[*]}" python3 - <<'PY'
@@ -266,26 +334,26 @@ for pr in os.environ["PRS_FLAT"].split():
     n, tk, br, h = pr.split("|")
     r = urllib.request.urlopen(urllib.request.Request(api + "develop..." + h, headers={"Authorization": "Bearer " + t, "Accept": "application/vnd.github+json"}), timeout=60)
     c = json.load(r)
-    print("%s %s ahead=%d files=%d" % (n, c["merge_base_commit"]["sha"], c["ahead_by"], len(c.get("files") or [])))
+    print("%s %s ahead=%d behind=%d files=%d" % (n, c["merge_base_commit"]["sha"], c["ahead_by"], c["behind_by"], len(c.get("files") or [])))
 PY
 )"
 [ -n "$COMPARE" ] || { echo "REFUSING: could not read the compare develop...head from the GitHub compare API" >&2; exit 13; }
-WANT_COMPARE="1105 $MERGE_BASE ahead=1 files=12"
+WANT_COMPARE="1105 $MERGE_BASE ahead=1 behind=3 files=12"
 [ "$COMPARE" = "$WANT_COMPARE" ] || { echo "REFUSING: develop...head compare read" >&2; printf '%s\n' "$COMPARE" >&2; echo "the gateset pins" >&2; printf '%s\n' "$WANT_COMPARE" >&2; exit 10; }
 
-# The develop pin, judged by CONTENT (see the header): thirty-five paths by PATH BLOB at the CURRENT develop (no region judgement), then — if
+# The develop pin, judged by CONTENT (see the header): thirty-nine paths by PATH BLOB at the CURRENT develop (no region judgement), then — if
 # develop moved — the pinned...develop delta against the GUARDED list, with NOTHING cleared by content (DEV_CONTENT_ALLOWED is empty).
 CUR_DEV="${QAB1105_CUR_DEV:-$(git -C "$REPO" ls-remote origin refs/heads/develop | cut -f1)}"
 [ -n "$CUR_DEV" ] || { echo "REFUSING: could not read origin develop (git ls-remote)" >&2; exit 18; }
 DEV_JUDGEMENT="$(
   set -a; . "$SECUURA_ENV"; set +a
-  DEVELOP_SHA="$DEVELOP_SHA" CUR_DEV="$CUR_DEV" HEAD_TREE="$HEAD_TREE" python3 - <<'PYJ'
+  DEVELOP_SHA="$DEVELOP_SHA" CUR_DEV="$CUR_DEV" MERGED_TREE="$MERGED_TREE" python3 - <<'PYJ'
 import hashlib, json, os, sys, urllib.request, urllib.error
 t = os.environ.get("GH_TOKEN", "")
 api = "https://api.github.com/repos/Secuura/Distributed_Secuura"
 def get(p):
     return json.load(urllib.request.urlopen(urllib.request.Request(api + p, headers={"Authorization": "Bearer " + t, "Accept": "application/vnd.github+json"}), timeout=60))
-cur = os.environ["CUR_DEV"]; pinned = os.environ["DEVELOP_SHA"]; head_tree = os.environ["HEAD_TREE"]
+cur = os.environ["CUR_DEV"]; pinned = os.environ["DEVELOP_SHA"]; merged_tree = os.environ["MERGED_TREE"]
 D = "Blockchain/Dev/"
 A = D + "services/anchoring/"
 INDEXTS = A + "src/index.ts"
@@ -318,7 +386,7 @@ for f, (ok, landed) in JUDGED.items():
     state.append(f.split("/")[-1] + " " + blob[:9] + " = " + ok[blob])
 state = "; ".join(state)
 if cur == pinned:
-    print("OK " + state + " | origin develop still " + pinned + " (the parent and merge-base of the head: the merged tree = the head tree " + head_tree + ", a fast-forward; git ls-remote)"); sys.exit(0)
+    print("OK " + state + " | origin develop still " + pinned + " (dc061f2bb + three squashes; merge-base dc061f2bb; predicted merged tree " + merged_tree + " by a real 3-way merge, both orders, clean; git ls-remote)"); sys.exit(0)
 try:
     c = get("/compare/" + pinned + "..." + cur)
 except Exception as e:
@@ -339,7 +407,8 @@ GUARDED = [A,
            D + "services/originate/src/routes/documents.ts",
            D + "services/originate/src/routes/anchors.ts",
            D + "services/api-gateway/src/routes/proxy.ts",
-           D + "services/api-gateway/src/routes/verification.ts"]
+           D + "services/api-gateway/src/routes/verification.ts",
+           D + "services/api-gateway/src/startup-migrations.ts"]
 # STYLE NOTE (912r2 launcher, measured): bash scans quote/paren state THROUGH this heredoc because it sits inside a
 # command substitution — keep apostrophes and parentheses EVEN (this block uses none of the former), or the outer $( ) breaks.
 # CONTENT-JUDGED allowlist: EMPTY. Nothing is pre-cleared for this gate; any GUARDED move refuses: re-pin deliberately.
@@ -350,8 +419,8 @@ cleared = sorted(h for h in hits if h in DEV_CONTENT_ALLOWED and by_name.get(h, 
 remaining = sorted(h for h in hits if h not in cleared)
 if remaining:
     print("GUARDED " + " ".join(remaining)); sys.exit(0)
-tail = "the gate merges the then-current develop onto the head in its own clone, names the merged-tree OID (drafter over the pin: = the head tree) and re-runs every item and suite on it"
-print("OK " + state + " | origin develop MOVED %s -> %s: commits=%d files=%d — GUARDED hits %d, cleared by content %d — the rest disjoint from the GUARDED list (services/anchoring/, docs/openapi/, VOCABULARY.md, scripts/, packages/shared src/, .githooks/, the Dev package.json + lock, eslint.config.mjs, BACKLOG.md, the two originate and two api-gateway route files); %s" % (pinned, cur, c["ahead_by"], len(files), len(hits), len(cleared), tail)); sys.exit(0)
+tail = "the gate merges the then-current develop onto the head in its own clone, names the merged-tree OID (drafter over the pin: 1f2bc512a) and re-runs every item and suite on it"
+print("OK " + state + " | origin develop MOVED %s -> %s: commits=%d files=%d — GUARDED hits %d, cleared by content %d — the rest disjoint from the GUARDED list (services/anchoring/, docs/openapi/, VOCABULARY.md, scripts/, packages/shared src/, .githooks/, the Dev package.json + lock, eslint.config.mjs, BACKLOG.md, the two originate and two api-gateway route files, startup-migrations.ts); %s" % (pinned, cur, c["ahead_by"], len(files), len(hits), len(cleared), tail)); sys.exit(0)
 PYJ
 )"
 case "$DEV_JUDGEMENT" in
@@ -396,8 +465,8 @@ grep -qF 'END EVERY LISTENER YOUR RUNS START, BY PID' "$PROMPT_FILE" && grep -qF
   || { echo "REFUSING: prompt does not require every listener the gate starts ended by pid with a census (KS-1201)" >&2; exit 29; }
 __BOTH_GREP__ && grep -qF 'MEASURE, not conclude' "$PROMPT_FILE" && grep -qF 'RULE WHETHER IT BLOCKS' "$PROMPT_FILE" \
   || { echo "REFUSING: the READY mail and the prompt do not BOTH carry the builder's items, or the prompt does not say MEASURE, not conclude and RULE WHETHER IT BLOCKS" >&2; exit 30; }
-grep -qF "$HEAD_TREE" "$PROMPT_FILE" && grep -qF 'NOT-PINNED' "$PROMPT_FILE" && grep -qF 'proposed cell' "$PROMPT_FILE" && grep -qF 'GATEWAY_URL=http://127.0.0.1:' "$PROMPT_FILE" \
-  || { echo "REFUSING: prompt does not name the head tree in full, the NOT-PINNED list with a proposed cell per row, or a loopback GATEWAY_URL for preflight" >&2; exit 31; }
+grep -qF "$MERGED_TREE" "$PROMPT_FILE" && grep -qF "$DEVELOP_SHA" "$PROMPT_FILE" && grep -qF 'NOT-PINNED' "$PROMPT_FILE" && grep -qF 'proposed cell' "$PROMPT_FILE" && grep -qF 'GATEWAY_URL=http://127.0.0.1:' "$PROMPT_FILE" \
+  || { echo "REFUSING: prompt does not name the merged tree 1f2bc512a and develop 778e6cfe2 in full, the NOT-PINNED list with a proposed cell per row, or a loopback GATEWAY_URL for preflight" >&2; exit 31; }
 grep -qF 'PR #1105 is KS-1175.' "$PROMPT_FILE" && grep -qF 'KS-1105' "$PROMPT_FILE" && grep -F 'PR #1105' "$BRIEF" | grep -qF 'KS-1175' \
   || { echo "REFUSING: the READY mail and the prompt do not BOTH state that PR #1105 is KS-1175 (KS-1105 is another ticket) — the PR number is another ticket's number too" >&2; exit 32; }
 __BYNAME_GREP__ && grep -qF -- 'round 1 of 2' "$PROMPT_FILE" \
@@ -426,7 +495,7 @@ if [ "${1:-}" = "--check" ]; then
   echo "  prompt forbids any seat worktree (s-a15-ks1175) and the builder's 2026-09-20_seatA-15th history"
   echo "  prompt requires every listener ended by pid with a TCP LISTEN census (KS-1201)"
   echo "  READY mail and prompt BOTH carry the builder's items; the prompt says MEASURE, not conclude, and RULE WHETHER IT BLOCKS"
-  echo "  prompt names the head tree, the NOT-PINNED list with a proposed cell per row and a loopback GATEWAY_URL"
+  echo "  prompt names the merged tree 1f2bc512a and develop 778e6cfe2 in full, the NOT-PINNED list with a proposed cell per row and a loopback GATEWAY_URL"
   echo "  READY mail and prompt BOTH state that PR #1105 is KS-1175 (namespace trap; KS-1105 is another ticket)"
   echo "  prompt carries Wednesday's fifteen by-name items and round 1 of 2"
   [ -n "${QAB1105_CUR_DEV:-}" ] && echo "  (develop read from the QAB1105_CUR_DEV test override, not ls-remote)"
@@ -442,7 +511,7 @@ cd "$QA_DIR" || { echo "cannot enter $QA_DIR" >&2; exit 16; }
 exec claude --dangerously-skip-permissions --model opus "$(cat "$PROMPT_FILE")"
 '''
 s = L
-SUBS = {'__BRIEF__': BRIEF, '__STATUS__': STATUS, '__PROMPT__': PROMPT, '__BRANCH__': BRANCH, '__HEAD__': HEAD, '__DEV__': DEV, '__HEADTREE__': HEAD_TREE,
+SUBS = {'__BRIEF__': BRIEF, '__STATUS__': STATUS, '__PROMPT__': PROMPT, '__BRANCH__': BRANCH, '__HEAD__': HEAD, '__DEV__': DEV, '__BASE__': BASE, '__HEADTREE__': HEAD_TREE, '__MERGEDTREE__': MERGED_TREE,
         '__REPORT__': REPORT, '__PRIOR__': PRIOR, '__EXEMPLAR__': EXEMPLAR, '__JUDGED__': JUDGED_BLOCK, '__BOTH_GREP__': BOTH_GREP, '__BYNAME_GREP__': BYNAME_GREP}
 for k, v in SUBS.items():
     n = s.count(k)
@@ -453,10 +522,10 @@ if re.search(r'__[A-Z]+__', s): print('REFUSING: residual token', re.findall(r'_
 # counts explained (run1): HEAD full only in PRS (the header, exit 26 and the subject use the short form); DEV full in DEVELOP_SHA + the BOTH grep x2;
 # exit 18 = PYJ comment + empty-CUR_DEV refusal + case; exit 32 = 3 header mentions + code; QAB1105_HEAD = header + PRS + launch guard;
 # 'PR #1105 is KS-1175.' = header NAMESPACE line + the exit-32 grep.
-want = {HEAD: 1, DEV: 3, HEAD_TREE: 1, BRIEF: 2, STATUS: 1, PROMPT: 1, REPORT: 1, PRIOR: 1, EXEMPLAR: 1, 'exit 6': 2, 'exit 10': 2, 'exit 19': 3, 'exit 18': 3,
+want = {HEAD: 1, DEV: 1, BASE: 3, HEAD_TREE: 1, MERGED_TREE: 1, 'behind=3': 1, 'startup-migrations.ts': 5, BRIEF: 2, STATUS: 1, PROMPT: 1, REPORT: 1, PRIOR: 1, EXEMPLAR: 1, 'exit 6': 2, 'exit 10': 2, 'exit 19': 3, 'exit 18': 3,
         'exit 30': 2, 'exit 32': 4, 'exit 33': 2, 'exit 16': 3, 'exit 21': 3, '[ -t 0 ]': 1, 'exec claude --dangerously-skip-permissions': 1, 'DEV_CONTENT_ALLOWED = {}': 1,
-        ': DV}': 35, '"ABSENT": DV': 5, '"#1105 own"': 12, 'QAB1105_CUR_DEV': 5, 'QAB1105_INDEXTS_FILE': 5, 'QAB1105_HEAD': 3, 'refs/pull/$_n/head': 2,
-        'ahead=1 files=12': 1, "[QA/Secuura-1105 -> Wednesday] TIER 1 GATE #1105 (KS-1175 + KS-1284) @ e02d3ecb5": 1, 'PR #1105 is KS-1175.': 2}
+        ': DV}': 39, '"ABSENT": DV': 5, '"#1105 own"': 12, 'QAB1105_CUR_DEV': 5, 'QAB1105_INDEXTS_FILE': 5, 'QAB1105_HEAD': 3, 'refs/pull/$_n/head': 2,
+        'ahead=1 behind=3 files=12': 1, "[QA/Secuura-1105 -> Wednesday] TIER 1 GATE #1105 (KS-1175 + KS-1284) @ e02d3ecb5": 1, 'PR #1105 is KS-1175.': 2}
 got = {k: s.count(k) for k in want}
 bad = {k: (got[k], want[k]) for k in want if got[k] != want[k]}
 print('output controls', {(k[:28] + '…' if len(k) > 28 else k): v for k, v in got.items()})
