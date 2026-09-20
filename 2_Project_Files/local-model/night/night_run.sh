@@ -111,6 +111,33 @@ tmuxc() { if [ -n "$NIGHT_TMUX_SOCKET" ]; then "$TMUX_BIN" -L "$NIGHT_TMUX_SOCKE
 # (2026-09-20, ledger: the BUSY leg fired on ALLOW_SEATS alone and its pointer said "with seats live"
 # while the floor held only wednesday + fleet-monitor — a claim the guard never measured. A drought with
 # no seat live is the 2 h panel leg's business, not a pane tap.)
+# _g7_pause_live — true when night/PAUSE_QUEUE records a DELIBERATE, UNEXPIRED pause.
+# (2026-09-20, Wednesday: the BUSY leg tapped correctly and repeatedly while the queue was empty BY
+# DECISION — the allowance was reserved for a running QA gate. A guard that fires repeatedly is a
+# finding about the guard: its condition had become NORMAL. So the DECISION now lives in a file the
+# leg reads, instead of a coordinator learning to ignore a correct alarm.)
+# FORMAT, deliberately the same as ALLOW_SEATS: line 1 = an EPOCH (digits), line 2+ = the reason.
+# A human-readable date on line 1 becomes a huge integer and would never expire — that exact defect
+# was filed 2026-09-17. Write it with `date -j ... +%s`.
+# It suppresses ONLY the coordinator TAP. The 2 h panel leg to Kam is untouched: a pause is mine to
+# take and his to see, and a pause that outlives its reason must still reach him.
+_g7_pause_live() {
+  _pf="${NIGHT_PAUSE_FILE:-$SELF_DIR/PAUSE_QUEUE}"
+  [ -f "$_pf" ] || return 1
+  _pe=$(head -1 "$_pf" 2>/dev/null | tr -dc 0-9)
+  [ -n "$_pe" ] || return 1
+  _now_s=$(date +%s)
+  # SANITY BOUND, and it is the point: a HUMAN date on line 1 ("2026-09-20 23:00") survives
+  # `tr -dc 0-9` as 202609202300 — an integer larger than any real epoch, so a naive
+  # `-gt now` would make the pause permanent. That is the 2026-09-17 ALLOW_SEATS defect
+  # exactly, and writing the hazard in a comment does not stop it. So: an expiry beyond
+  # NIGHT_PAUSE_MAX_S (default 7 days) ahead is REFUSED as malformed and the leg taps as
+  # normal. Removing the failure beats detecting it.
+  _max=$(( _now_s + ${NIGHT_PAUSE_MAX_S:-604800} ))
+  [ "$_pe" -gt "$_now_s" ] 2>/dev/null || return 1
+  [ "$_pe" -le "$_max" ] 2>/dev/null || return 1
+  return 0
+}
 _g7_foreign_pane() {
   tmuxc has-session -t fleet 2>/dev/null || return 1
   local c
@@ -382,7 +409,11 @@ if [ -z "$(next_ticket)" ]; then
     # bare pointer (cockpit.sh say, no authorising verb), at any hour, at most once per NIGHT_IDLE_BUSY_MIN.
     # It never posts to the panel (Kam's surface keeps the 2 h leg). Arms: local-model/tests/g7_busy_leg_arms.sh.
     _tapped="$_idle_dir/.queue_empty_tapped"; _busy_min="${NIGHT_IDLE_BUSY_MIN:-20}"
-    if _g2_allow_seats && _g7_foreign_pane; then
+    if _g2_allow_seats && _g7_foreign_pane && _g7_pause_live; then
+      _pe_hm=$(date -r "$(head -1 "${NIGHT_PAUSE_FILE:-$SELF_DIR/PAUSE_QUEUE}" | tr -dc 0-9)" '+%F %H:%M' 2>/dev/null || echo '?')
+      log "G7 BUSY TAP: SKIPPED — a deliberate pause is live until $_pe_hm: $(sed -n '2,3p' "${NIGHT_PAUSE_FILE:-$SELF_DIR/PAUSE_QUEUE}" 2>/dev/null | tr '\n' ' ')"
+    fi
+    if _g2_allow_seats && _g7_foreign_pane && ! _g7_pause_live; then
       _last_tap=$(cat "$_tapped" 2>/dev/null || echo 0)
       if [ $((_now - _since)) -ge $((_busy_min * 60)) ] && [ $((_now - _last_tap)) -ge $((_busy_min * 60)) ]; then
         _since_hm=$(date -r "$_since" +%H:%M 2>/dev/null || echo "?")
