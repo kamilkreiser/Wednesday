@@ -6,8 +6,6 @@ permanent change nobody decided to make. Every seat reads this at boot; an entry
 
 | grant | given | EXPIRES | scope, exactly |
 |---|---|---|---|
-| **AWAY 2 DAYS: keep going; push, merge and deploy whatever is ready** | Kam, panel 2026-09-18 14:14:27 *"I'm going to be away for the next two days, so please keep going with tickets and activity while I'm away. Push merge and deploy whatever is ready. Whenever it's ready."* | **end of SUNDAY 2026-09-20** (derived with `date -j`: Fri 18 → Sat 19, Sun 20; back Mon 21) | Tickets and activity continue; merges on Wednesday's signed GO after a gate (the TESTED grant); **deploy = KINTSUGI only** (the weekend suits the rebuild); **NOT demo** (Kam 10:27, only proven + Peter's nod); the signature classes still pause (irreversible: KS-1250, KS-1175; money; external comms beyond rule-7). Full reading: `tasks/WEEK-INSTRUCTION.md`. |
-| **Ornith q4 ONLY; volume across the whole KS Backlog/Todo** — ⚠ **the "QA Sunday night, merge all at once" HALF IS SUPERSEDED by Kam 2026-09-18 09:15:10:** *"Okay, don't wait until Sunday. Merge, push, and deploy everything that's ready and archive all the items that have been done."* The q4-only and volume halves stand. | Kam, panel 2026-09-15 16:36:04 *"lets use the smaller model for the rest of the week. complete as many tickets as possible. work with the local LLM. we will do QA on these Sunday night and merge / commit all at once"* | **end of SUNDAY 2026-09-20** (derived: 2026-09-20 is a Sunday) | held diffs only until Sunday's QA; auth/MFA/OAuth product edits stay out until he names them (Wednesday's reading 16:37). Lesson: `learnings/2026-09-15_ornith-q4-only-volume-week-qa-sunday-merge-once.md` |
 | **We approve and merge our own TESTED Platform K work** | Kam, panel 2026-09-11 16:56:00 *"For the time being, I / you will approve our own elements"* + 16:56:44 *"based on this.  FIx and merge all tickets after they are tested"* (on Stuart's forwarded proposal) | **OPEN-ENDED — "for the time being"; stands until Kam withdraws it** | Approval = Kam or Wednesday's GO after the QA gate at head + Test Evidence; squash, author merges; kintsugi gets merged work; **demo = UAT, waits for Peter's formal test and nod (narrows the week deploy grant's demo half — told to Kam)**; raise-to-1 stays unapplied. Platform K only. `learnings/2026-09-11_secuura-we-approve-and-merge-our-own-tested-work.md` |
 
 ⚠ **ASSUMPTION ON THE DATE, FLAGGED TO KAM 2026-09-10 15:2x AND NOT YET CORRECTED:** "end of the
@@ -25,6 +23,21 @@ this file says. **Ask before relying on it on the 12th or 13th.**
    a dead grant looking live.
 
 ## Expired
+
+### Lapsed end of SUNDAY 2026-09-20 — moved here by the 19:5x Tuesday seat, per rule 3 above
+
+**Both rows reached their stated date tonight (weekday and date checked against each other with
+`date -j`: 2026-09-20 IS a Sunday).** The first one's PREMISE had already ended ahead of its date —
+it was granted *because he would be away*, and he came back early, ruling cards on the panel from
+~15:25 and again at 19:39–19:41 today. **Neither is renewed by inference.** Both are largely
+Wednesday/Secuura-scoped (Ornith, KS tickets, kintsugi) rather than Datasec, and **nothing in this
+seat's queue depended on either**: RD-516 / RD-518 / RD-464 r3 all run on the open-ended TESTED
+grant, which is unaffected. If work wants either of these back, ASK.
+
+| grant | given | EXPIRED | scope, exactly |
+|---|---|---|---|
+| **AWAY 2 DAYS: keep going; push, merge and deploy whatever is ready** | Kam, panel 2026-09-18 14:14:27 *"I'm going to be away for the next two days, so please keep going with tickets and activity while I'm away. Push merge and deploy whatever is ready. Whenever it's ready."* | **end of SUNDAY 2026-09-20** (derived with `date -j`: Fri 18 → Sat 19, Sun 20; back Mon 21) | Tickets and activity continue; merges on Wednesday's signed GO after a gate (the TESTED grant); **deploy = KINTSUGI only** (the weekend suits the rebuild); **NOT demo** (Kam 10:27, only proven + Peter's nod); the signature classes still pause (irreversible: KS-1250, KS-1175; money; external comms beyond rule-7). Full reading: `tasks/WEEK-INSTRUCTION.md`. |
+| **Ornith q4 ONLY; volume across the whole KS Backlog/Todo** — ⚠ the "QA Sunday night, merge all at once" HALF was already SUPERSEDED by Kam 2026-09-18 09:15:10: *"Okay, don't wait until Sunday. Merge, push, and deploy everything that's ready and archive all the items that have been done."* The q4-only and volume halves stood until tonight. | Kam, panel 2026-09-15 16:36:04 *"lets use the smaller model for the rest of the week. complete as many tickets as possible. work with the local LLM. we will do QA on these Sunday night and merge / commit all at once"* | **end of SUNDAY 2026-09-20** (derived: 2026-09-20 is a Sunday) | held diffs only until Sunday's QA; auth/MFA/OAuth product edits stay out until he names them (Wednesday's reading 16:37). Lesson: `learnings/2026-09-15_ornith-q4-only-volume-week-qa-sunday-merge-once.md` |
 
 **LIFTED AFTER 2 h 39 min — Kam, panel 2026-09-18 09:16:16, verbatim:** *"The credits have reset, so please start up all agents and continue the work."* The 06:37 no-Claude-agents restriction is **DEAD**; it never reached its Sunday expiry. `usage_gate.sh` re-checked at 09:17: **OK — weekly usage 5% < 90%, gauge age 3 min** (the reset landed and the gauge is publishing again). The four parked launches (#1034 gate · #1037 KS-1101 drafter · seat A 9th successor · #1036 + Seat B) are UNPARKED.
 

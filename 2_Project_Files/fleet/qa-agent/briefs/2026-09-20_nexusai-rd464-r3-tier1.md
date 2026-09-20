@@ -42,8 +42,13 @@ is whether the UI agrees with the cells.**
 dir** serves every page and API in open mode by design (`isAuthEnforced()`), with **no auth shim and
 no test-only branch** — the same commit, not the demo image.
 **SAY THIS IN YOUR VERDICT so nobody later records a demo pass that did not happen.**
-- Recipe: the builder's local-run recipe — **ask it for the in-repo path; it was written to
-  `session-tools/`, which is OUTSIDE version control, and has been told to move it.**
+- Recipe: **`docs/runbooks/local-run-for-qa.md` on branch `docs-local-run-runbook-s72` @
+  `853e5498765936fa537383ab90a3c87ac4c0ff4b`** (83 lines, tracked, pushed — verified by Tuesday in
+  the object store at 19:5x, not read back from the mail). It is **off main, so `60c76d7` is
+  untouched by it**; check it out separately or read it with `git show
+  853e5498765936fa537383ab90a3c87ac4c0ff4b:docs/runbooks/local-run-for-qa.md`.
+  *(This replaces the earlier "ask the builder" line: its first copy lived in `session-tools/`,
+  outside version control, and the builder moved it on being told.)*
 - Expect at boot: `🚀 Printer Dashboard API running on port <N>` and **`🚨 AUTH NOT ENFORCED at boot`**.
 - `GET /api/health` → 200. **`build: unknown` is CORRECT for a local run** (`BUILD_DIGEST` is set at
   image build) — do not file it.
@@ -78,15 +83,30 @@ no test-only branch** — the same commit, not the demo image.
   believing it.**
 
 ## 8. Output boundary
-Verdict to **tuesday-agent@agentmail.to**, subject `[QA -> Tuesday] TIER-1 GATE RD-464 r3 @ 60c76d7 — <GO | GO WITH FINDINGS | NO GO>`.
+**Write your report to:**
+`/Volumes/KK_T9_External_HDD/!CODING/Testing Agent MAIN/projects/nexusai/reports/2026-09-20-rd464-r3-60c76d7-tier1/report.md`
+
+**MAIL YOUR VERDICT** to **tuesday-agent@agentmail.to** with the subject line exactly:
+`[QA/Datasec-NexusAI -> Tuesday] GATE VERDICT — RD-464 r3 @ 60c76d7 (tier 1)`
+and open the body with one of **GO** / **GO WITH FINDINGS** / **NO GO**.
+
 **Every finding carries its evidence class.** A Major comes to Tuesday; **a further round is Kam's
 (C-62)**. Cap: two NO GO rounds on this class — this is round 1.
 **You do not merge, push to main, or edit product code.**
 
-## LOGISTICS — NOT YET LAUNCHED, AND WHY
-🔴 **The existing QA launchers point at `/Volumes/DevMASTER/!CODING/Testing Agent MAIN`, and
-DevMASTER is NOT MOUNTED on this machine.** The T9 copy exists at
-`/Volumes/KK_T9_External_HDD/!CODING/Testing Agent MAIN`. **A T9-pathed launcher must be generated
-before this brief can run** — `fleet/qa-agent/gen_launcher_from_template.py <template> <output>`,
-then `--check` before any real launch.
-**Usage gate at writing: 88% < 95% (this seat's stop). A launch is permitted.**
+## LOGISTICS — RESOLVED 2026-09-20 19:5x
+**The earlier note here said every QA launcher points at an unmounted DevMASTER. That was a census
+over the WRONG FRAME** — it was true of the newest launcher, which is Wednesday's Secuura one. **The
+NexusAI launchers are already T9-pathed**: `launch_qa_nexusai_rd327_67c2992.sh` carries
+`QA_DIR='/Volumes/KK_T9_External_HDD/!CODING/Testing Agent MAIN'` and `TUE='/Volumes/KK_T9_External_HDD/TUESDAY'`.
+This gate's launcher is derived from it: `launchers/launch_qa_nexusai_rd464_r3_60c76d7.sh`.
+
+**Measured by Tuesday at 19:5x, in the worktree, before the launch:**
+- Worktree `/Volumes/KK_T9_External_HDD/!CODING/Datasec/NexusAI/worktrees/s72-rd464-r3`,
+  HEAD `60c76d76350321ad8f51324e042052a8a9f49a96`, branch `rd-464-r3-merged-main-s72`, clean
+  (only untracked `node_modules`).
+- **Parents read from `rev-list --parents`:** `1f27b4dadac61f8ab305e5a25f1acd2f92d4bafa` (r3) and
+  `34ad321ee18401c1f965244e5c4e06438aae01d0` (main). **This is a MERGE commit — a single-parent
+  commit-count guard does not apply to it, and the launcher asserts both parents instead.**
+- `git ls-remote origin rd-464-r3-merged-main-s72` = `60c76d7…` — the head is at origin.
+- Usage gate at launch: **89% < 95%** (this seat's stop, per Kam's "bump yours to 95%").

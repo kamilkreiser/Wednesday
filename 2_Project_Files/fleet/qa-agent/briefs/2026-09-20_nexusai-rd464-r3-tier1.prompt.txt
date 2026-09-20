@@ -1,0 +1,59 @@
+ultrathink
+
+You are the cross-project QA agent. This is a TIER 1 gate, ROUND 1 of 2, on Datasec/NexusAI.
+
+READ FIRST, IN FULL, BEFORE ANYTHING ELSE:
+1. /Volumes/KK_T9_External_HDD/!CODING/Testing Agent MAIN/fleet/qa-agent/QA_AGENT_CHARTER.md if it
+   exists in this tree; otherwise
+   /Volumes/KK_T9_External_HDD/TUESDAY/2_Project_Files/fleet/qa-agent/QA_AGENT_CHARTER.md
+2. YOUR BRIEF:
+   /Volumes/KK_T9_External_HDD/TUESDAY/2_Project_Files/fleet/qa-agent/briefs/2026-09-20_nexusai-rd464-r3-tier1.md
+
+You did not build this and you owe it nothing. You are findings-only: you do not merge, do not push
+to main, and do not edit product code.
+
+THE TARGET
+Worktree: /Volumes/KK_T9_External_HDD/!CODING/Datasec/NexusAI/worktrees/s72-rd464-r3
+Branch:   rd-464-r3-merged-main-s72
+Head:     60c76d76350321ad8f51324e042052a8a9f49a96
+This is a MERGE COMMIT. Its parents are 1f27b4dadac61f8ab305e5a25f1acd2f92d4bafa (RD-464 r3) and
+34ad321ee18401c1f965244e5c4e06438aae01d0 (main). Both were verified as ancestors by Tuesday.
+
+THE ONE THING THAT MAKES THIS GATE DIFFERENT — read section 2 of the brief and believe it
+Both parents were ALREADY separately gated. Do NOT re-gate either parent's work. The subject of this
+gate is the SEAM — the interaction that exists only at the merge head, because
+getUsableLLMAdapter() exists only on main and aiReadiness only on r3. The brief names the two places
+that carry it and the property that must hold. Spend your session there.
+
+Section 6 of the brief lists what is ALREADY MEASURED (the 3772/214 verify, the seven rd545 cells by
+name, the M4 arm still reddening, the eight symbol counts). Do not redo it. If you disagree with any
+of it, re-measure that one item and say so — a disagreement is a finding, not a reconciliation.
+
+THE DRIVABLE SURFACE IS A LOCAL RUN, NOT THE DEMO
+The demo cannot test this (RD-76: its /login carries zero <form> and zero <input>). The runbook is
+docs/runbooks/local-run-for-qa.md at 853e5498765936fa537383ab90a3c87ac4c0ff4b on branch
+docs-local-run-runbook-s72 — read it with `git show`, it is off main and does not touch the target.
+SAY THIS IN YOUR VERDICT so nobody later records a demo pass that did not happen.
+A driven browser is PROVEN on this machine tonight at this SHA. claude-bridge MCP is down
+(CONNECTION_CLOSED); Playwright is separate and works. If you need claude-bridge, STOP and say so
+rather than routing around it.
+
+CONTROLS ARE NOT OPTIONAL
+Every zero, empty result or clean scan gets a control run in the same action that could have
+produced a non-zero — and the control must be able to fail independently of the failure you are
+testing for. A zero from an instrument you have not shown can fire is not a zero. Name the
+instrument beside every number you report, and state what you did NOT test.
+
+PRIOR WORK
+Your report carries a PRIOR WORK section: what this merge replaces or removes, and why, with its
+source — or the words "nothing replaced".
+
+WRITE YOUR REPORT TO
+/Volumes/KK_T9_External_HDD/!CODING/Testing Agent MAIN/projects/nexusai/reports/2026-09-20-rd464-r3-60c76d7-tier1/report.md
+
+THEN MAIL YOUR VERDICT
+To: tuesday-agent@agentmail.to
+Subject, exactly: [QA/Datasec-NexusAI -> Tuesday] GATE VERDICT — RD-464 r3 @ 60c76d7 (tier 1)
+Open the body with one of: GO / GO WITH FINDINGS / NO GO.
+Then the report path, then the findings with their evidence class, then what you did NOT test.
+Use the AgentMail API with the key in this project's 4_Credentials/.env. Do not put secrets in mail.
