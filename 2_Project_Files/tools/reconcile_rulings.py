@@ -27,7 +27,7 @@ Usage:
   reconcile_rulings.py --apply    # rule the cards in THIS seat's scope
   reconcile_rulings.py --all      # widen to every client (say why, out loud)
 """
-import json, re, subprocess, sys
+import json, os, re, subprocess, sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -40,22 +40,47 @@ DQ_TOOL    = ROOT / "2_Project_Files" / "tools" / "decision_queue.sh"
 # 2026-09-06 ledger w=107: copy the letter from the card, never from the wording).
 TAP = re.compile(r"^Decision\s+(?P<id>[A-Za-z0-9][A-Za-z0-9_.-]*)\s*:\s*(?P<key>[A-Za-z0-9][A-Za-z0-9_-]*)\s*(?:—|-{1,2}|$)")
 
-# This seat coordinates Secuura + Wednesday's own work + general/unlabelled.
-# Every DATASEC card belongs to the other coordinator (Kam named the split
-# 2026-09-08). Matching is on the client half of "Client/Project", case-folded.
-OUT_OF_SCOPE_CLIENTS = {"datasec"}
+# WHOSE CARDS THIS SEAT MAY RULE — derived from WED_AGENT, never hardcoded.
+#
+# Until 2026-09-20 this block read `OUT_OF_SCOPE_CLIENTS = {"datasec"}` with no
+# seat check at all: it was written from the WEDNESDAY seat's point of view and
+# was simply wrong on Tuesday's, where Datasec is the ONLY thing in scope. The
+# effect was silent and one-directional — Tuesday ran the reconciler, it reported
+# "skipped: OUT OF SCOPE ... the other coordinator's card" for its OWN client, and
+# Kam's taps on Datasec cards never reached them. Measured twice on 2026-09-20
+# (nexusai-degraded-flip-and-live-deployments, tapped 21:14, skipped on both a
+# report and an --apply run). A reconciler that silently drops the principal's
+# rulings for its own client is worse than none, because the seat believes it ran.
+#
+# Matching is on the client half of "Client/Project", case-folded, with an
+# id-prefix fallback for cards whose client_project is missing or odd.
+DATASEC_CLIENTS  = {"datasec"}
+DATASEC_PREFIXES = ("nexusai-", "datasec-", "vision-", "mypki-", "cypherkey-", "leadbot-")
 
-def in_scope(card):
+SEAT = os.environ.get("WED_AGENT", "").strip().lower()
+if SEAT not in ("tuesday", "wednesday"):
+    # A guess-by-default must become a REFUSAL (2026-09-09, the seat-resolver
+    # lesson; Kam's own words in Launch_Tuesday.command: "a seat that guesses its
+    # own client is precisely the failure the two-agent split exists to prevent").
+    sys.stderr.write(
+        "reconcile_rulings: WED_AGENT is %r, which is neither 'tuesday' nor 'wednesday'.\n"
+        "  This tool RULES CARDS, so a guessed seat would rule another client's decisions.\n"
+        "  Fix: launch through Launch_Tuesday.command / Launch_Wednesday.command, or export\n"
+        "  WED_AGENT=tuesday|wednesday in this shell. REFUSING.\n" % (SEAT or None))
+    sys.exit(2)
+
+def _is_datasec(card):
     cp = str(card.get("client_project", "")).strip()
     client = cp.split("/", 1)[0].strip().lower() if cp else ""
-    if client in OUT_OF_SCOPE_CLIENTS:
-        return False
-    # An id-prefix fallback for cards whose client_project is missing or odd:
-    # a bare "nexusai-"/"datasec-" id is Datasec's regardless of the field.
-    cid = str(card.get("id", "")).lower()
-    if cid.startswith(("nexusai-", "datasec-", "vision-", "mypki-", "cypherkey-", "leadbot-")):
-        return False
-    return True
+    if client in DATASEC_CLIENTS:
+        return True
+    return str(card.get("id", "")).lower().startswith(DATASEC_PREFIXES)
+
+def in_scope(card):
+    # Tuesday rules Datasec and nothing else; Wednesday rules everything else.
+    # The two seats are exact complements, so no card is rulable by both and none
+    # is rulable by neither.
+    return _is_datasec(card) if SEAT == "tuesday" else not _is_datasec(card)
 
 def load(p, what):
     try:
