@@ -1,9 +1,7 @@
-# RD-518 FIX ROUND (round 2 of 2)
+# STAGED — RD-518 FIX ROUND (round 2 of 2). NOT YET SENT.
 
-**The staging condition on this brief is DISCHARGED and measured: S73 has wrapped and its pane is
-closed, and no live seat holds `backend/server.js`.** Two other NexusAI seats are live this session
-and both are outside your files — see the DISJOINTNESS table near the end, and read it before your
-first commit.
+**Do not launch this while a seat is live in `backend/server.js`.** RD-516's seat (S73) is in that
+file; one seat per file. This goes to S73 when RD-516 reaches READY, or to its successor.
 
 # BLUF
 
@@ -79,64 +77,18 @@ the producer. No consumer, no test. The new three-value `keyVaultStatus` has no 
 
 # WHAT IS NOT IN SCOPE
 
-- 🔴 **THE DEGRADED HEALTH FLIP — THIS CHANGED ON 2026-09-21 AND THE CHANGE IS NARROW. READ IT EXACTLY.**
-  Kam ruled (a) on `nexusai-degraded-flip-and-live-deployments` at 21:14 on 09-20 — *"Tell me the
-  deployment count and I decide from there."* **He superseded that requirement the next morning**,
-  panel, ~08:32, verbatim: *"And don't worry how many people have downloaded Nexus AI through the
-  marketplace so far. These would have all been testers."*
-  - **So the count is no longer needed and nobody is to go back to Partner Center for it.**
-  - **DESIGN THE FLIP. DO NOT SHIP IT.** Tuesday's reading — that if the downloads were all testers
-    then no customer is flipped to DEGRADED by the Key Vault fix — **was stated back to Kam on the
-    panel for correction and he has not yet answered.** That unblocks the DESIGN, not the shipping.
-  - ⚠️ **The residual, named rather than glossed: a TESTER deployment that is still running WOULD
-    still flip.** 🔴 **I HAVE NOT ESTABLISHED HOW MANY SUCH DEPLOYMENTS EXIST, OR WHETHER ANY IS
-    RUNNING — and the instrument that would tell me (the Partner Center deployment count) is the
-    very thing Kam just told us to stop chasing.** So the honest statement of scope is: *the
-    population is UNMEASURED and I am not going to measure it.* What I can say is narrower and is
-    all I am asserting — **Kam's words put the population in the TESTER class, not the customer
-    class.** That is a claim about WHO, not about HOW MANY.
-    **Write it that way in your READY. Do not round it to "no impact", and do not round it up to a
-    number either.** If your design needs the population size to be safe, that is a finding — stop
-    and mail me, because the answer is not available and the design must not depend on it.
-  - **Concretely: the flip is in scope for design and for cells. It is NOT in scope for merge or
-    deploy, and this round ends at READY FOR QA anyway.**
+- **The DEGRADED health flip stays unshipped** — Kam ruled (a) on `nexusai-degraded-flip-and-live-deployments`
+  at 21:14: *"Tell me the deployment count and I decide from there."* He has not had the count.
 - **Hard stops unchanged:** nothing touches `wrappedDekPath`, the vault URL construction or the
   wrapping key name — the one-time re-encrypt sweep does not exist. PRIVACY.md and TERMS are never
   edited (C-65). No deploy, no merge to main, no real Azure.
 - **Do not re-run section 6's measurements.** 3709/210, the 7/7 red-proofs and M5→R5 all reproduce
   and the gate said so explicitly. The finding is reach, not correctness.
 
-# 🔴 DISJOINTNESS — THREE NEXUSAI SEATS ARE LIVE. THE FLOOR IS PARTITIONED BY FILE.
-
-| seat | branch | owns |
-|---|---|---|
-| **you** | its own, off current `main` | `backend/server.js` · `backend/encryptionService.js` · `docs/runbooks/local-run-for-qa.md` + your OWN test cells |
-| S74 / RD-574 | new, off `main @ 60c76d7` | `__tests__/` for rd464, rd486, rd523, rd545, ai-config-aoai-save + `__tests__/helpers/rd516-net-harness-preload.js` |
-| RD-516 fix round | `rd-516-ai-test-ssrf-s73` | `backend/services/aiEndpointPolicy.js` + the in-repo gate brief |
-
-🔴 **F-03 makes you write test cells, so this constraint is live for you specifically: STAY OFF those
-five suites and STAY OFF the preload helper.** They are S74's, mid-flight, and a collision there
-lands on a tier-1 acceptance clause.
-
-**You share an INBOX with the other two seats.** Mail addressed to them will appear in it. **Read the
-addressee line before acting on anything; a commission that does not name your branch is not yours.**
-If you want a file in another row of that table, stop and mail me — it is never worth one line.
-
-# RULED BY KAM, NOT YET IN AN ARTEFACT
-
-- **The marketplace deployment count is RELEASED** (~08:32 on 2026-09-21, quoted in full above).
-  This brief is where it lands for you; it supersedes his 21:14 ruling (a) on the same card.
-- **The undici dependency: ruled (c) — ship without pinning, ticket the rebinding window** (08:31:55
-  on 2026-09-21). **Not your ticket**, recorded so it is not re-opened from your side.
-
 PROVENANCE:
 - the gate returned NO GO with F-01 Blocker, F-02/F-03 Major, F-04/F-05 Minor, and M-B refuted | its verdict mail 2026-09-20T11:47:00Z to tuesday-agent@, and the report path above | read 2026-09-20 21:4x by Tuesday
 - `const { credential, how }` is at :316 inside the try; `how` is read at :350 and :351 inside the catch | git show 6ea15a0:backend/encryptionService.js, read by Tuesday in your own tree /Volumes/KK_T9_External_HDD/!CODING/Datasec/NexusAI/2_Project_Files | read 2026-09-20 21:4x by Tuesday
 - Kam ruled the DEGRADED flip card (a) "Tell me the deployment count and I decide from there" | his panel message, Tuesday tab, 2026-09-20T21:14:57 AEST | read 2026-09-20 by Tuesday
 - this is round 2 of 2 on this class and a third round is Kam's | C-62, the tiered-gate cap | read 2026-09-20 by Tuesday
-- Kam released the marketplace deployment count and said the downloads would all have been testers | his panel message on the Tuesday tab, 2026-09-21 approximately 08:32 | read 2026-09-21 by Tuesday
-- Tuesday's reading that no customer is flipped to DEGRADED was stated back to Kam for correction and is UNANSWERED | the same panel exchange, Tuesday tab | read 2026-09-21 by Tuesday
-- the population of still-running TESTER deployments is UNMEASURED and deliberately so | Kam told us to stop chasing the Partner Center count on 2026-09-21 approximately 08:32; no other instrument was run | read 2026-09-21 by Tuesday
-- no live seat holds backend server.js — S73 wrapped and its pane is closed | cockpit status and the fleet pane list, read at launch time | read 2026-09-21 by Tuesday
 
-SELF-CHECK: re-read end-to-end for contradictions | 2026-09-21 09:11
+SELF-CHECK: re-read end-to-end for contradictions | 2026-09-20 21:50
