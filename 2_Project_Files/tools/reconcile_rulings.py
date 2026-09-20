@@ -16,7 +16,8 @@ WHAT IT DOES NOT DO, ON PURPOSE:
   * It never rules a card that is not `open`. A ruled card is Kam's record and a
     re-rule would overwrite his choice and its timestamp.
   * It never guesses. A tap naming an unknown card id, or an option key the card
-    does not offer, is REPORTED and skipped — never fuzzy-matched.
+    does not offer, is REPORTED and skipped — never fuzzy-matched. A `note:` tap
+    (free text, no key) is REPORTED LOUDLY and counted, never applied — see NOTE_TAP.
   * It never rules ANOTHER SEAT'S CLIENT. decisions.json is shared between the
     coordinators; hard rule 2 (no cross-client contamination) applies to the
     bookkeeping too. Out-of-scope taps are REPORTED so the other seat can act,
@@ -31,14 +32,28 @@ import json, os, re, subprocess, sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
-KAM_STREAM = ROOT / "0_Brain" / "dashboard" / "data" / "chat_kam.json"
-DECISIONS  = ROOT / "0_Brain" / "dashboard" / "data" / "decisions.json"
+# RECONCILE_DECISIONS / RECONCILE_CHAT (2026-09-21): point the tool at fixtures so
+# the arms in tests/reconcile_rulings_arms.sh never read or rule the live store.
+# DECISIONS is also handed to decision_queue.sh as DQ_FILE, so an --apply against
+# a fixture rules THAT fixture and can never reach the live file by the back door.
+KAM_STREAM = Path(os.environ.get("RECONCILE_CHAT") or ROOT / "0_Brain" / "dashboard" / "data" / "chat_kam.json")
+DECISIONS  = Path(os.environ.get("RECONCILE_DECISIONS") or ROOT / "0_Brain" / "dashboard" / "data" / "decisions.json")
 DQ_TOOL    = ROOT / "2_Project_Files" / "tools" / "decision_queue.sh"
 
 # "Decision <id>: <key> — <label>[ | note: ...]".  The id and key are taken from
 # the text; the label is deliberately IGNORED (the key is what rules the card —
 # 2026-09-06 ledger w=107: copy the letter from the card, never from the wording).
 TAP = re.compile(r"^Decision\s+(?P<id>[A-Za-z0-9][A-Za-z0-9_.-]*)\s*:\s*(?P<key>[A-Za-z0-9][A-Za-z0-9_-]*)\s*(?:—|-{1,2}|$)")
+
+# "Decision <id> note: <free text>" — Kam's OTHER ruling form, typed on the panel.
+# Until 2026-09-21 (ledger w=2, measured 2026-09-20 19:4x) these matched nothing:
+# the run said "taps found: 2 · to rule: 0" and both rulings — "actioned. remove
+# card" and "remove the rule and make the fix" — were dropped without a line.
+# A note is NEVER turned into an option key (that would be a guess); it is printed
+# LOUDLY, counted in the summary, and handed to a human with the exact
+# `decision_queue.sh withdraw` call ready — because "discuss this with me further"
+# and "delete this card" are both notes, and only a reader can tell which closes.
+NOTE_TAP = re.compile(r"^Decision\s+(?P<id>[A-Za-z0-9][A-Za-z0-9_.-]*)\s*:?\s*note\s*:\s*(?P<note>.+)$", re.S)
 
 # WHOSE CARDS THIS SEAT MAY RULE — derived from WED_AGENT, never hardcoded.
 #
@@ -105,28 +120,46 @@ def main():
 
     # Newest tap per card wins: Kam re-tapping is him correcting himself, and the
     # LAST thing he said is what he meant. Sorted by timestamp, not file order.
+    # taps[cid] = (key, ts, note): a <key> tap has note=None, a note: tap has key=None.
     taps = {}
     for m in msgs:
         if not isinstance(m, dict):
             continue
-        mt = TAP.match(str(m.get("text", "")).strip())
-        if not mt:
-            continue
+        text = str(m.get("text", "")).strip()
+        mt = TAP.match(text)
+        if mt:
+            key, note = mt.group("key"), None
+        else:
+            mt = NOTE_TAP.match(text)
+            if not mt:
+                continue
+            key, note = None, " ".join(mt.group("note").split())
         ts = str(m.get("ts", ""))
-        cid, key = mt.group("id"), mt.group("key")
+        cid = mt.group("id")
         if cid not in taps or ts >= taps[cid][1]:
-            taps[cid] = (key, ts)
+            taps[cid] = (key, ts, note)
 
-    todo, skipped = [], []
-    for cid, (key, ts) in sorted(taps.items(), key=lambda kv: kv[1][1]):
+    todo, skipped, notes = [], [], []
+    for cid, (key, ts, note) in sorted(taps.items(), key=lambda kv: kv[1][1]):
         card = by_id.get(cid)
         if card is None:
-            skipped.append((cid, key, ts, "no such card — NOT fuzzy-matched"))
+            skipped.append((cid, key, ts, "UNKNOWN CARD — no such card — NOT fuzzy-matched"))
             continue
         status = card.get("status")
         if status != "open":
             # already ruled (by a seat, or by an earlier run) — leave it alone
-            if card.get("ruled_choice") != key:
+            if note is not None:
+                # a note on a closed card is still Kam's words. If it PREDATES the
+                # close, the seat that closed the card had it in front of it (the
+                # 09-20 pair were withdrawn by hand within a minute of the note);
+                # if it is NEWER than the close, Kam wrote on a closed card and
+                # nobody may have read it — say so. Same isoformat on both sides.
+                closed_at = str(card.get("ruled_ts") or card.get("withdrawn_at") or "")
+                if ts > closed_at and card.get("withdrawn_reason") != note:
+                    skipped.append((cid, key, ts,
+                                    f"card is {status!r} since {closed_at[:16]} but this note is NEWER "
+                                    f"— {note!r} — read it, it is recorded nowhere"))
+            elif card.get("ruled_choice") != key:
                 skipped.append((cid, key, ts,
                                 f"card is {status!r} with choice {card.get('ruled_choice')!r}, "
                                 f"tap says {key!r} — CONFLICT, left for a human"))
@@ -136,24 +169,38 @@ def main():
                             f"OUT OF SCOPE for this seat ({card.get('client_project')!r}) — "
                             f"the other coordinator's card, reported not ruled"))
             continue
+        if note is not None:
+            notes.append((cid, ts, note))
+            continue
         keys = [o.get("key") for o in card.get("options", []) if isinstance(o, dict)]
         if key not in keys:
             skipped.append((cid, key, ts, f"option {key!r} not offered by the card (has {keys}) — NOT guessed"))
             continue
         todo.append((cid, key, ts))
 
-    print(f"taps found: {len(taps)} · to rule: {len(todo)} · skipped: {len(skipped)}")
+    print(f"taps found: {len(taps)} · to rule: {len(todo)} · notes: {len(notes)} "
+          f"(flagged, NOT applied) · skipped: {len(skipped)}")
     for cid, key, ts, why in skipped:
-        print(f"  SKIP  {cid} -> {key}  ({ts[:16]})  {why}")
+        print(f"  SKIP  {cid} -> {key or 'note'}  ({ts[:16]})  {why}")
+    for cid, ts, note in notes:
+        # LOUD on purpose: this is a principal's ruling the tool cannot apply
+        # mechanically. The withdraw line is ready to paste IF the note closes the
+        # card; if it is a question, answer it on the panel and leave the card open.
+        print(f"  UNPARSEABLE-KEY RULING — {cid} — {note}   (tapped {ts[:16]})")
+        print(f"      if this CLOSES the card:  bash {DQ_TOOL} withdraw {cid} {json.dumps(note)}")
     if not todo:
-        print("nothing to reconcile" if not skipped else "nothing applied")
+        if notes:
+            print(f"nothing applied — {len(notes)} note ruling(s) above need a human")
+        else:
+            print("nothing to reconcile" if not skipped else "nothing applied")
         return 0
     for cid, key, ts in todo:
         if not apply_:
             print(f"  WOULD RULE  {cid} -> {key}   (tapped {ts[:16]})")
             continue
         r = subprocess.run(["bash", str(DQ_TOOL), "rule", cid, key],
-                           capture_output=True, text=True)
+                           capture_output=True, text=True,
+                           env={**os.environ, "DQ_FILE": str(DECISIONS)})
         # never discard stderr — a failure you cannot diagnose costs more than it saves
         out = (r.stdout or "").strip() or (r.stderr or "").strip()
         print(f"  {'RULED' if r.returncode == 0 else 'FAILED'}  {cid} -> {key}   {out}")
