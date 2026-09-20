@@ -1,0 +1,394 @@
+2026-09-20T20:41:07Z
+=== TAMPER FROM LINES at develop: exact-line count (want 1 each) + the line as read
+  count=1 enforcement.ts:100 |   const typeRefRaw = body.documentType || body.type || '';
+  count=1 enforcement.ts:114 |   const typeRef = (typeRefRaw || '') as string;
+  count=1 platform.ts:64 | const SUPER_ROLES = ['super_admin', 'SUPER_ADMIN', 'platform_admin', 'SYSTEM_ADMIN'];
+  count=1 platform.ts:97 |   if (SUPER_ROLES.includes(user.role)) {
+  count=1 auth.ts:276 |     const apiKey = req.headers['x-api-key'] as string | undefined;
+  count=1 auth.ts:279 |     if (presentedKey && !meta && required) {
+  count=1 auth.ts:322 |       (req as any).connectorMeta = meta;
+  count=0 originate.openapi.ts:1740 |       action: z.enum(LIFECYCLE_EVENT_ACTIONS).openapi({
+  count=1 originate.openapi.ts:1765 |     action: z.enum(LIFECYCLE_EVENT_ACTIONS),
+  count=1 anchorReadback.ts:52 |     identity: Object.keys(identity).length > 0 ? identity : null,
+  count=1 anchorReadback.ts:74 |   const explorerBase = ctx.network === 'mainnet'
+  count=1 anchorReadback.ts:75 |     ? 'https://cardanoscan.io/transaction'
+  count=0 anchorReadback.ts:111 |       documentId: sec.documentId || row?.document_id || null,
+  count=0 anchorReadback.ts:112 |       certId: sec.certId || sec.documentId || row?.document_id || null,
+  count=0 cardanoMetadatum.ts:81 |       return (value as string[]).join('');
+  count=0 index.ts:890 |     ...anchorIdentityView((anchor.metadataPayload as any)?.secuura),
+  count=1 index.ts:699 |         const sec: any = fromCardanoMetadatum(secEntry?.json_metadata?.secuura);
+  count=1 index.ts:701 |         const onChainHash = String(sec.hash || '').replace(/^sha256:/i, '').toLowerCase();
+  count=1 transaction.ts:114 |   const metadataJson = JSON.stringify(toCardanoMetadatum(metadataPayload));
+  count=1 users.ts:1105 |     if (user.mfaSecret && !verifyTOTP(user.mfaSecret, code)) {
+  count=1 users.ts:1267 |     if (targetIndex <= currentIndex) {
+--- 04-container-trivy.sh :60-64 at develop (the :62 grep line; the seat's S5 was a TYPED anchor)
+while IFS= read -r _img; do
+  [ -n "$_img" ] && IMAGES+=("$_img")
+done < <(docker images --format '{{.Repository}}:{{.Tag}}' | grep -E '^dev-[A-Za-z0-9._-]+:latest$' | sort -u)
+# KS-867 — the class above was `[a-z-]`, which admits no digit: `dev-auth2:latest`
+# was never scanned, and because SOME images matched, the list was non-empty
+--- 04-container-trivy.sh: count of lines containing "grep -E '^dev-" :
+1
+--- positive controls (substring counts at develop): SUPER_ROLES.includes / x-api-key / connectormeta -i / LIFECYCLE_EVENT_ACTIONS / anchorIdentityView / toCardanoMetadatum / verifyTOTP / LEVEL_ORDER / latest
+  SUPER_ROLES.includes 2
+  x-api-key 3
+  connectormeta -i 5
+  LIFECYCLE_EVENT_ACTIONS 3
+  anchorIdentityView (index.ts) 2
+  toCardanoMetadatum (transaction.ts) 2
+  verifyTOTP (users.ts) 3
+  LEVEL_ORDER (users.ts) 3
+  latest (04-container-trivy.sh) 3
+  tenantId: (security index.ts, a same-file duplicate control from the previous gate) 9
+=== where anchorIdentityView is DEFINED (T11's target; drafter's shape_1 guessed a file that does not exist)
+Blockchain/Dev/services/anchoring/src/anchorReadback.ts:38:export function anchorIdentityView(secuura: unknown): AnchorIdentityView {
+=== the scope anchors (exact-line counts at develop)
+  enforceDocumentTypeRules( : 1
+  requireOrgProvisioner : 2
+  export function rowToApiKey( (security index.ts, control from the previous gate): 1
+  handleAnchorVerifyByHash : 2
+  app.get('/api/anchors/:id' : 1
+--- platform.ts :60-66 and :90-100 at develop
+// ---------------------------------------------------------------------------
+// Helpers
+// ---------------------------------------------------------------------------
+
+const SUPER_ROLES = ['super_admin', 'SUPER_ADMIN', 'platform_admin', 'SYSTEM_ADMIN'];
+
+function requireSuperAdmin(req: Request, res: Response, next: NextFunction): void {
+ */
+export function requireOrgProvisioner(req: Request, res: Response, next: NextFunction): void {
+  const user = req.user;
+  if (!user) {
+    res.status(401).json({ success: false, error: { code: 'UNAUTHORIZED', message: 'Authentication required' } });
+    return;
+  }
+  if (SUPER_ROLES.includes(user.role)) {
+    (req as { provisionerKind?: string }).provisionerKind = 'admin';
+    next();
+    return;
+--- platform.ts :485-492 (the :489 mount)
+
+  router.post(
+    '/api/platform/organizations/register-connector',
+    authenticateToken(),
+    requireOrgProvisioner,
+    async (req: Request, res: Response) => {
+      const body = (req.body || {}) as Record<string, unknown>;
+      // KS-480 §4 amendment: a connector-authorised registration is provisioning
+--- middleware/auth.ts :270-284 and :318-326
+ * When `required` is true (default) unauthenticated requests receive 401.
+ * When false the request proceeds without a user context.
+ */
+export function authenticateToken(required: boolean = true): RequestHandler {
+  return async (req: Request, res: Response, next: NextFunction) => {
+    // --- API key path ---
+    const apiKey = req.headers['x-api-key'] as string | undefined;
+    const presentedKey = Boolean(apiKey && apiKey.startsWith('sk_'));
+    const meta = apiKey && presentedKey ? await validateApiKey(apiKey) : null;
+    if (presentedKey && !meta && required) {
+      res.status(401).json({ success: false, error: { code: 'UNAUTHORIZED', message: 'Invalid API key' } });
+      return;
+    }
+    // KS-1207: a key that fails validation on an OPTIONAL mount falls through to
+    // the Bearer path below instead of calling next(). It used to call next()
+        tenantId: meta.tenantId || undefined,
+        tenantSlug: meta.tenantSlug || undefined,
+      };
+      req.user = connectorUser;
+      (req as any).connectorMeta = meta;
+      // KS-480: exchange the key for a short-lived connector JWT so downstream
+      // Bearer-only services (originate documents, anchoring — pen-test H2)
+      // accept the proxied request. On exchange failure the header is left
+      // unset and Bearer-only upstreams 401 (fail closed, loudly logged above).
+--- users.ts :1100-1108 and :1262-1270
+
+    if (!code || typeof code !== 'string' || code.length !== 6) {
+      throw new BadRequestError('Valid 6-digit verification code required');
+    }
+
+    if (user.mfaSecret && !verifyTOTP(user.mfaSecret, code)) {
+      throw new BadRequestError('Invalid verification code');
+    }
+
+
+    const LEVEL_ORDER = ['BASIC', 'STANDARD', 'ENHANCED', 'HIGH', 'GOVERNMENT'];
+    const currentIndex = LEVEL_ORDER.indexOf(user.verificationLevel);
+    const targetIndex = LEVEL_ORDER.indexOf(data.targetLevel);
+
+    if (targetIndex <= currentIndex) {
+      throw new BadRequestError(
+        `Cannot request ${data.targetLevel} — current level is already ${user.verificationLevel}`
+      );
+--- anchorReadback.ts :48-56, :72-78, :108-114
+    }
+  }
+  return {
+    identityCommitment: typeof sec.identityCommitment === 'string' ? sec.identityCommitment : null,
+    identity: Object.keys(identity).length > 0 ? identity : null,
+  };
+}
+
+export interface VerifyResponseContext {
+  ctx: VerifyResponseContext,
+) {
+  const explorerBase = ctx.network === 'mainnet'
+    ? 'https://cardanoscan.io/transaction'
+    : `https://${ctx.network}.cardanoscan.io/transaction`;
+  const sec = onChain?.secuura || {};
+  const rawTxHash = onChain?.txHash || row?.transaction_hash;
+      environment: sec.environment || null,
+      issuerOrgId: sec.issuerOrgId || null,
+      issuerName: sec.issuerName || null,
+      documentId: sec.documentId || row?.document_id || null,
+      certId: sec.certId || sec.documentId || row?.document_id || null,
+      contentHash: sec.hash || ctx.hash,
+      documentType: sec.documentType || null,
+--- cardanoMetadatum.ts :76-84
+
+/** Chain form → logical strings. Booleans stay as "true"/"false" here; anchorReadback.ts types them by key. */
+export function fromCardanoMetadatum(value: unknown): unknown {
+  if (Array.isArray(value)) {
+    if (value.length > 0 && value.every((el) => typeof el === 'string')) {
+      return (value as string[]).join('');
+    }
+    return value.map(fromCardanoMetadatum);
+  }
+--- anchoring index.ts :695-703 and :886-892
+      for (const { tx, md } of metas) {
+        const secEntry = (md || []).find((m: any) => String(m.label) === '674');
+        // KS-1284: undo the tx-build codec BEFORE anything reads a value — including the hash compare below. The hash
+        // is exactly 64 bytes and never chunked, but the comparison must not depend on that coincidence.
+        const sec: any = fromCardanoMetadatum(secEntry?.json_metadata?.secuura);
+        if (!sec) continue;
+        const onChainHash = String(sec.hash || '').replace(/^sha256:/i, '').toLowerCase();
+        if (onChainHash !== hash) continue;
+
+    verified: !txView.simulated && anchor.status === 'confirmed',
+    // KS-1175: what S records into DocumentTransaction.AnchorIdentityJson on confirmation (PS-871) — the anchored
+    // identityCommitment (KS-721) and the seven non-PII identity fields, from the row's metadata_payload (logical
+    // form). null / null for an anchor that predates the fields. This route returned neither before KS-1175.
+    ...anchorIdentityView((anchor.metadataPayload as any)?.secuura),
+    // KS-535: surfaced so originate's poller/reconciler can record WHY a
+    // terminal failure happened on the document (KS-520 `error` field), and
+--- transaction.ts :110-116
+  // KS-1175's DIDs / verified flags cannot pass raw, so the logical payload is run through the codec at this boundary
+  // only: long strings become arrays of ≤64-byte chunks, booleans become "true"/"false". The DB row keeps the logical
+  // form; verify-by-hash's chain read applies the inverse (index.ts). For every payload anchored to date (all-short,
+  // boolean-free) the codec is a byte-identical no-op — pinned in __tests__/ks1284-cardano-metadatum.test.ts.
+  const metadataJson = JSON.stringify(toCardanoMetadatum(metadataPayload));
+  txBuilder.add_json_metadatum_with_schema(
+    CSL.BigNum.from_str(metadataLabel.toString()),
+--- originate.openapi.ts :1738-1742 and :1763-1767
+  z
+    .object({
+      action: z.enum(LIFECYCLE_EVENT_ACTIONS).openapi({
+        description:
+          'Lifecycle verb to record. Only verbs WITHOUT a dedicated endpoint are ' +
+    documentId: z.string(),
+    eventId: z.string(),
+    action: z.enum(LIFECYCLE_EVENT_ACTIONS),
+    recordedAt: z.string(),
+    anchorId: z.string().nullable().openapi({
+=== NEW CELLS at each head (it(/test( titles the patches add) — diff lines starting with '+' that carry it( or test(
+--- PR A 3a28d2a3c4d030cb73b7775bb19c5844ce190e56
++  it('RED KS-1203: a whitespace-only documentType is a type reference, not an absent one - it is refused 400 UNKNOWN_DOCUMENT_TYPE against a registered catalogue', async () => {
++  it('RED KS-1203: a NESTED data.documentType is not a type reference - it admits with an EMPTY docType and never consults the catalogue', async () => {
+--- PR B abf8321a9ca426a1d623a54a41453824dce34def
++  it('RED KS-1283: refuses a tenant ADMIN role (ADMIN and admin) with 403 and marks no provisionerKind - the widened SUPER_ROLES shape that would let register-connector mint a key', () => {
++    const outcomes = ['ADMIN', 'admin'].map((role) => { const r = harness({ role }); return [role, r.passed, r.status, /platform-admin role/.test(r.body?.error?.message ?? ''), r.kind]; });
+--- PR C 762a70117c6cf40545f8a4ac5f24708e7fcd91fe
++    it('RED KS-1198: an sk_ key validated on the API-key path attaches the validated key metadata as req.connectorMeta, scopes intact, for the connector gates to read', async () => {
++    it('RED KS-1244: a repeated x-api-key (two individually valid keys joined by Node) on a required mount is refused 401 with no principal and no Bearer fall-through, in either order', async () => {
+--- PR D b008489e4fbc72bb8b68cb3bb925557978399780
++  it('RED KS-1275 ORDERTHROUGHSPEC: the REGISTERED LifecycleEventRequest and LifecycleEventResponse schemas publish action in the declared order of LIFECYCLE_EVENT_ACTIONS', async () => {
+--- PR E 9a485cfe77406f47103ed6ab65c14ec01144cb68
++  it('RED KS-1284: chain source: a 76-char documentId and certId that chunked on chain read back joined under metadata.documentId and metadata.certId', () => {
++  it('RED KS-1175: cardanoScanUrl: mainnet has no subdomain, every other network is prefixed with its own name', () => {
++describe('KS-1175 GET /api/anchors/:id carries the identity view (source guard: index.ts is bootless)', () => {
++  it('RED KS-1175: the GET /api/anchors/:id handler spreads anchorIdentityView of the row metadata_payload secuura block into res.json', () => {
++  it('CONTROL: the located block is ONE handler, the anchor-by-id route (contentHash and the KS-535 errorMessage are in it)', () => {
++  it('RED KS-1175: identity: {} on the request anchors no identity key and reads back identity: null on the view, never {}', async () => {
++describe('KS-1284 buildAnchorTransaction encodes through the codec at the ONE attach point', () => {
++  it('RED KS-1284: a 90-byte identityCommitment and a boolean reach label 674 as chunks and the string "true", nothing throws', async () => {
++  it('RED KS-1284: the batch label 675 goes through the same attach point', async () => {
++  it('CONTROL: a payload that is already chain-legal (all-short, boolean-free) is anchored byte-identical under label 674', async () => {
++describe('KS-1284 verify-by-hash chain read: decode before compare (source guard + behavioural twin)', () => {
++  it('RED KS-1284: the six loop lines of handleAnchorVerifyByHash are present once, in order, with the decode before the hash compare', () => {
++  it('CONTROL: a chunked sha256:-prefixed hash on chain is found through the decode and never without it', () => {
+--- PR G b3f94f14a0cf3e0236284481b85781417fd233f3
++  ok "KS-1137 F-2 - the estate's real digit-bearing image (dev-m365-integration:latest) IS scanned, once, and the artefact names it (rc=$rc_estate)"
+--- PR F f132c92147b5005c36e405d0116faa541d978a67
++describe('KS-1006 - POST /me/mfa/disable verifies the code against a stored secret before disabling the factor', () => {
++  it('RED KS-1006: with MFA enabled and a secret stored, a six-character code that cannot be a TOTP is refused 400 Invalid verification code', async () => {
++  it('RED KS-1236: a target level EQUAL to the current level is refused 400 BAD_REQUEST before any store read or INSERT', async () => {
++  it('RED KS-1236: a target level BELOW the current level (a downgrade) is refused 400 BAD_REQUEST before any store read or INSERT', async () => {
+=== DEVELOP CELLS the three measured covers name (F1 / F2 / F3) — exact titles at develop
+--- F1: ks1215-the-connector-branch-never-carries-the-callers-bearer.test.ts (tenant ADMIN 403 cell)
+319:  it('RED: a tenant ADMIN JWT is refused 403 on GET /api/platform/tenants and nothing is forwarded', async () => {
+320:    RAN.add('platform tenants GET refuses a tenant ADMIN');
+520:      'platform tenants GET refuses a tenant ADMIN',
+--- F2: ks480-connector-auth.test.ts (the #1106 INFOEMPTY cell)
+135:  it('RED KS-1232: GET /api/connector/info answers allowedDocumentTypes [] for a stored "", 0 or false - the three shapes every create refuses', async () => {
+--- F3: ks1175-anchor-readback.test.ts cells (chain source / CONTROL / absent-identity) at develop
+52:  it('returns identityCommitment and the seven as a typed object from a logical (DB-form) payload', () => {
+55:  it('returns null / null for a legacy row that predates both fields', () => {
+58:  it('returns null / null for a missing or empty payload (a pending row, or a row with no secuura block)', () => {
+62:  it('a partial identity block returns only the fields anchored (absent stays absent, never null-filled)', () => {
+66:  it('restores the two booleans from the chain form ("true"/"false") and leaves real booleans alone', () => {
+72:  it('never invents a key: an unknown key under secuura (e.g. a future field) is not surfaced as identity', () => {
+80:  it('db source: metadata.identity beside metadata.identityCommitment, from the logical payload', () => {
+88:  it('chain source: the same object from a chunked chain payload once the reader has joined it', () => {
+101:  it('an anchor that predates the field reads identity: null and identityCommitment: null (both sources)', () => {
+107:  it('CONTROL: the rest of the KS-522/KS-726 shape is unchanged by the extraction', () => {
+--- F3: ks1284-cardano-metadatum.test.ts cells at develop
+83:  it('CSL 15.0.3 refuses the raw logical payload: a 90-byte commitment throws Max metadata string too long', () => {
+86:  it('CSL 15.0.3 refuses a boolean: bools not allowed in metadata', () => {
+89:  it('CSL 15.0.3 accepts exactly 64 bytes (the bound is 64, not 63)', () => {
+97:  it('the every-optional KS-1175 payload (90-byte commitment, 512-byte DID, two booleans) encodes without throwing', () => {
+102:  it('splits the long strings into arrays of chunks no longer than 64 BYTES and leaves short ones as strings', () => {
+113:  it('encodes booleans as the strings "true"/"false" (Cardano metadata has no boolean type) and leaves ints alone', () => {
+120:  it('CONTROL: an all-short, boolean-free payload encodes to a BYTE-IDENTICAL metadatum with and without the codec', () => {
+130:  it('does not mutate its input', () => {
+138:  it('a 65-char string of 3-byte characters (195 bytes) yields chunks of ≤ 64 bytes that join back exactly', () => {
+149:  it('never splits a surrogate pair (4-byte emoji) and never produces a lone surrogate', () => {
+163:  it('returns a single element for a string of exactly 64 bytes and an empty array for ""', () => {
+170:  it('from(to(x)) deep-equals x for the every-optional payload, except booleans which come back as "true"/"false" (the typed view restores them)', () => {
+177:  it('a chain payload with only short strings passes the reader UNCHANGED (every anchor confirmed to date)', () => {
+181:  it('joins a chunked commitment as Blockfrost would return it (json_metadata, arrays of strings)', () => {
+193:  it('leaves a non-string array alone and tolerates undefined', () => {
+198:  it('CSL round-trip: decode(encode(to(x))) then from() gives the logical strings back through the real wasm', () => {
+--- anchoring: the pre-existing red (threadTokenMint) — where it lives at develop
+Blockchain/Dev/services/anchoring/src/__tests__/threadTokenMint.test.ts:18:    'parameterises mint + spend with a deterministic per-seed policyId',
+=== identity test at head E: the new cell (it( titles with KS-1175)
+176:  it('RED KS-1175: identity: {} on the request anchors no identity key and reads back identity: null on the view, never {}', async () => {
+=== the three NEW anchoring files at head E: line counts + it( counts
+  ks1175-getid-view-wired lines 26 it( 2
+  ks1284-chain-read-order lines 43 it( 2
+  ks1284-attach-point lines 43 it( 3
+--- T13 imports / mocks (attach-point) at head E
+2: * KS-1284 - the ONE attach point: buildAnchorTransaction runs the logical payload through toCardanoMetadatum before
+3: * add_json_metadatum_with_schema (the #1105 gate's T13-ATTACHPOINT seam: no test imported cardano/transaction.ts, so
+9:import { describe, it, expect, vi } from 'vitest';
+10:import * as CSL from '@emurgo/cardano-serialization-lib-nodejs';
+11:vi.mock('../cardano/provider', () => ({
+14:import { buildAnchorTransaction } from '../cardano/transaction';
+20:async function anchored(label: number, secuura: object): Promise<any> {
+22:    const built = await buildAnchorTransaction(wallet as any, params as any, label, { secuura });
+23:    const metadata = CSL.Transaction.from_hex(built.txCborHex).auxiliary_data()!.metadata()!.get(CSL.BigNum.from_str(String(label)))!;
+33:describe('KS-1284 buildAnchorTransaction encodes through the codec at the ONE attach point', () => {
+34:  it('RED KS-1284: a 90-byte identityCommitment and a boolean reach label 674 as chunks and the string "true", nothing throws', async () => {
+37:  it('RED KS-1284: the batch label 675 goes through the same attach point', async () => {
+40:  it('CONTROL: a payload that is already chain-legal (all-short, boolean-free) is anchored byte-identical under label 674', async () => {
+--- T11 (getid-view-wired) at head E: what it reads
+2: * KS-1175 - GET /api/anchors/:id is wired to anchorIdentityView (the #1105 gate's T11-GETID-VIEW seam).
+3: * index.ts calls app.listen on import, so no test imports it and the route body cannot be driven in-process.
+4: * This is a SOURCE-TEXT guard: it reads index.ts and asserts the app.get('/api/anchors/:id') handler still spreads
+5: * anchorIdentityView(...) over the row's metadata_payload secuura block into its res.json. It stops the spread being
+10:import { readFileSync } from 'fs';
+12:const SRC = readFileSync(resolve(__dirname, '..', 'index.ts'), 'utf8');
+18:const GET_BY_ID = handlerBlock("app.get('/api/anchors/:id',", 'retryCount: anchor.retryCount ?? 0,');
+19:describe('KS-1175 GET /api/anchors/:id carries the identity view (source guard: index.ts is bootless)', () => {
+20:  it('RED KS-1175: the GET /api/anchors/:id handler spreads anchorIdentityView of the row metadata_payload secuura block into res.json', () => {
+21:    expect([GET_BY_ID.length > 0, GET_BY_ID.includes('...anchorIdentityView((anchor.metadataPayload as any)?.secuura),')]).toEqual([true, true]);
+23:  it('CONTROL: the located block is ONE handler, the anchor-by-id route (contentHash and the KS-535 errorMessage are in it)', () => {
+24:    expect([GET_BY_ID.split('app.get(').length, GET_BY_ID.includes('contentHash: anchor.contentHash,'), GET_BY_ID.includes('errorMessage: anchor.errorMessage || null,')]).toEqual([2, true, true]);
+--- T12 (chain-read-order) at head E: what it reads
+3: * seam). The loop lives in index.ts's handleAnchorVerifyByHash, and index.ts calls app.listen on import, so it cannot be
+5: * fromCardanoMetadatum decode on the line before the hash compare; and a behavioural twin that copies those lines into a
+6: * local scan() and shows WHY the order matters - a chunked sha256:-prefixed hash is found only through the decode.
+9:import { readFileSync } from 'fs';
+11:import { toCardanoMetadatum, fromCardanoMetadatum } from '../cardano/cardanoMetadatum';
+12:const SRC = readFileSync(resolve(__dirname, '..', 'index.ts'), 'utf8');
+16:  'const sec: any = fromCardanoMetadatum(secEntry?.json_metadata?.secuura);',
+22:function scan(metas: Meta[], hash: string, decode: (v: unknown) => unknown): string | null {
+34:  it('RED KS-1284: the six loop lines of handleAnchorVerifyByHash are present once, in order, with the decode before the hash compare', () => {
+38:  it('CONTROL: a chunked sha256:-prefixed hash on chain is found through the decode and never without it', () => {
+41:    expect([scan(metas, h, fromCardanoMetadatum), scan(metas, h, (v) => v)]).toEqual(['a'.repeat(64), null]);
+=== the trivy suite at head G: the new cell (:140-:160) and the TRIVY_JOB_SH / jq lines
+4:# (KS-867)
+7:# which admits no digit, so `dev-auth2:latest` was never scanned — and because
+19:#        TRIVY_JOB_SH=/path/to/other/04-container-trivy.sh bash …   (red-proof)
+26:if [ "${TRIVY_JOB_SH+set}" = set ] && [ -z "$TRIVY_JOB_SH" ]; then
+27:  echo "FATAL: TRIVY_JOB_SH is set but EMPTY — refusing to silently grade the shipped job." >&2
+30:JOB="${TRIVY_JOB_SH-$REPO_ROOT/Blockchain/Testing/jobs/04-container-trivy.sh}"
+32:[ -r "$JOB" ] || { echo "FATAL: TRIVY_JOB_SH is not readable at $JOB" >&2; exit 2; }
+33:command -v jq >/dev/null 2>&1 || { echo "FATAL: jq is not on PATH — the subject cannot run, so nothing here can be graded" >&2; exit 2; }
+49:dev-auth2:latest
+95:# CELL 1 — KS-867. THE REGRESSION. A dev image whose name carries a DIGIT must
+96:# be scanned. Measured at base: `dev-auth2:latest` scanned 0 times while the
+101:if [ "$rc_digit" = 0 ] && [ "$(scanned_times "$WORK/digit" dev-auth2:latest)" -eq 1 ] \
+102:   && [ "$(jq '.images | length' "$WORK/digit/run/04-container-trivy.json" 2>/dev/null)" = 3 ]; then
+103:  ok "KS-867 — a digit-bearing dev image (dev-auth2:latest) IS scanned, once, and the artefact names 3 images (rc=$rc_digit)"
+105:  bad "KS-867 — a digit-bearing dev image (dev-auth2:latest) is scanned" \
+106:      "rc=$rc_digit, dev-auth2:latest scanned $(scanned_times "$WORK/digit" dev-auth2:latest) times of $(scanned_total "$WORK/digit") total, artefact images=$(jq '.images | length' "$WORK/digit/ru
+132:if [ "$rc_none" = 1 ] && [ "$(jq -r '.reason' "$WORK/none/run/04-container-trivy.json" 2>/dev/null)" = no-images ] \
+137:      "rc=$rc_none, reason=$(jq -r '.reason' "$WORK/none/run/04-container-trivy.json" 2>/dev/null), scans=$(scanned_total "$WORK/none")"
+141:# CELL 3b - KS-1137 F-2. The ESTATE's real digit-bearing image. dev-auth2 is a
+143:# dev-m365-integration:latest (docker-compose.yml's m365-integration build:
+149:CORPUS_ESTATE='dev-m365-integration:latest
+154:if [ "$rc_estate" = 0 ] && [ "$(scanned_times "$WORK/estate" dev-m365-integration:latest)" -eq 1 ] && [ "$(jq -r '.images[].image' "$WORK/estate/run/04-container-trivy.json" 2>/dev/null | grep -cx
+155:  ok "KS-1137 F-2 - the estate's real digit-bearing image (dev-m365-integration:latest) IS scanned, once, and the artefact names it (rc=$rc_estate)"
+157:  bad "KS-1137 F-2 - the estate's real digit-bearing image (dev-m365-integration:latest) is scanned" "rc=$rc_estate, scanned $(scanned_times "$WORK/estate" dev-m365-integration:latest) times of $(
+168:if [ "$rc_down" = 0 ] && [ "$(jq -r '.reason' "$WORK/down/run/04-container-trivy.json" 2>/dev/null)" = docker-unreachable ] \
+173:      "rc=$rc_down, reason=$(jq -r '.reason' "$WORK/down/run/04-container-trivy.json" 2>/dev/null), scans=$(scanned_total "$WORK/down"), docker calls: $(tr '\n' ' ' < "$WORK/down/docker_calls.txt"
+=== file line counts (develop -> head)
+  ks501-enforcement-non-string-doctype.test.ts: 72 -> 80
+  ks480-org-provisioner-gate.test.ts: 83 -> 87
+  auth.test.ts: 285 -> 309
+  ks978-published-contract-organizationuuid.test.ts: 143 -> 149
+  ks1175-anchor-readback.test.ts: 121 -> 133
+  ks1175-identity-anchoring.test.ts: 220 -> 227
+  container_trivy_image_filter.test.sh: 159 -> 178
+  ks1194-a-failed-verification-request-save-is-never-acknowledged.test.ts: 220 -> 244
+=== .githooks/pre-push at develop: which preflight.sh a push runs (grep preflight)
+2:# .githooks/pre-push (KS-380) — run the preflight gate before a push leaves the machine.
+6:# out of the way. The preflight itself skips any leg whose deps aren't up (Docker
+70:# the Blockchain/Dev one on the next line (which decides the preflight) and the
+88:# success BEFORE leg 1 — no preflight, and no line saying so.
+99:#   2. when NO base can be computed, RUN the preflight and say why. An empty
+103:#      preflight run in a rare configuration; failing open costs the gate.
+113:# `[pre-push]` lines, preflight never invoked, while `origin/develop` still
+153:    # Blockchain/Dev preflight on branches touching no Blockchain/Dev file —
+195:        echo "[pre-push]   the tree is clean. Running the preflight UNCONDITIONALLY." >&2
+203:        echo "[pre-push]   Running the preflight UNCONDITIONALLY: an uncomputable base is not" >&2
+225:# The same KS-854/KS-882 rule applies to it as to the preflight: when no
+229:_toplevel=$(git rev-parse --show-toplevel 2>/dev/null)
+256:echo "[pre-push] Blockchain/Dev changes detected → running preflight gate (bypass: --no-verify)"
+257:# Invoke with `bash`, NOT `sh`. preflight.sh is `#!/usr/bin/env bash` and opens with
+260:# the preflight could never run on the Ubuntu VM, and every push there either failed
+263:# Naming the interpreter (rather than the bare path) is deliberate: preflight.sh is
+269:# THIS slot's gateway. preflight.sh defaults GATEWAY to localhost:6882 (slot 1),
+274:# which must not leak into anything the preflight runs (KS-666).
+276:    cd "$(git rev-parse --show-toplevel)" || exit 1
+278:    cd Blockchain/Dev && bash scripts/preflight/preflight.sh
+280:    echo "[pre-push] preflight failed — fix the above, or bypass with: git push --no-verify" >&2
+=== preflight.sh skip_stack call sites at develop (the three skipped legs 3/4/8)
+210:skip_stack() {
+277:step "3/15  Spec-auth conformance (unauth requests to bearer-authed ops must 401/403)"
+296:    skip_stack
+299:step "4/15  Path resolvability (every spec'd path must route — KS-473 class)"
+310:    skip_stack
+478:step "8/15  Served-spec consistency (/api/docs/openapi.json vs .yaml — KS-656)"
+495:    skip_stack
+=== originate jest config (runner) + anchoring/auth vitest versions in locks
+10:    "test": "jest",
+45:    "jest": "^29.7.0",
+  anchoring lock vitest: "version": "4.1.11"
+  auth lock vitest: "version": "4.1.11"
+  api-gateway lock vitest: "version": "4.1.11"
+  originate lock jest: "version": "29.7.0"
+=== CSL dependency in anchoring package.json
+14:    "@emurgo/cardano-serialization-lib-nodejs": "15.0.3",
+=== checkout porcelain / worktrees / for-each-ref (a moving reading)
+  porcelain 17 | .git/worktrees 204 | s-b12-* 8 | for-each-ref 1102 | branch feature/ks-597-b-caller-scoped-externalref
+2026-09-20T20:41:09Z
+=== ADDENDUM 2026-09-20T20:41:37Z: DRAFTER SLIP S1 — five 'from' lines above read count=0 because the drafter TYPED them with the brief's (unindented) leading whitespace; the sed line beside each shows the real indentation. Re-counted with the exact bytes read from the tip (the same class as the seat's S1/S5 — a typed anchor; the seat's READYs count 1 for all 27, which these confirm):
+  count=1 originate.openapi.ts:1740 | leading spaces 6 |       action: z.enum(LIFECYCLE_EVENT_ACTIONS).openapi({
+  count=1 anchorReadback.ts:111 | leading spaces 6 |       documentId: sec.documentId || row?.document_id || null,
+  count=1 anchorReadback.ts:112 | leading spaces 6 |       certId: sec.certId || sec.documentId || row?.document_id || null,
+  count=1 cardanoMetadatum.ts:81 | leading spaces 6 |       return (value as string[]).join('');
+  count=1 index.ts:890 | leading spaces 4 |     ...anchorIdentityView((anchor.metadataPayload as any)?.secuura),
+  control (a line that occurs twice by design, previous gate): unindented n_ran=$(printf …) in preflight.sh: 1
+  the 04-container-trivy.sh :62 line, exact-line count: 1
+  the trivy suite's '# ----' rule line at develop occurs: 8 times (the seat's plan mail says 8; the brief says 'more than once')
