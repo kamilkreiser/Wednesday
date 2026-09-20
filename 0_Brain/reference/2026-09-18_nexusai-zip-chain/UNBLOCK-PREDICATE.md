@@ -72,10 +72,10 @@ dead grep ([[../../learnings/2026-09-08_a-false-absence-is-usually-my-own-instru
 | RD-529 O-8 | `d881f95` | already ticked below |
 | version string `2.2.0` | Kam's ruling | terminal, not the panel — already ticked below |
 
-### OUTSTANDING — seven lines, and THREE are in flight at S71 right now
+### OUTSTANDING — SIX lines (RD-545 merged 2026-09-20; its row is kept below, struck through, so the tick is auditable)
 | line | measured | state |
 |---|---|---|
-| **RD-545** | 0 commits on main | 🟢 **GATE PASSED TODAY (round 2 of 2, f008d86) AND MERGE GO'd by Tuesday**, sequenced after stage A. Imminent. |
+| ~~**RD-545**~~ | ✅ **MERGED to main at `58f87d9`, 2026-09-20 ~16:1x** | **DONE.** Gate passed round 2 of 2 at `f008d86` (7/7 cells, full verify 3631/3631 across 206, exit 0); merged by S71 under Tuesday's GO. Verified at source by Tuesday AFTER the push: counts 3631/206 BY CONTENT at the new head, scope fdf2483..58f87d9 = the two pre-verified files (267 insertions). `354d9ff` rides on top — ONE file, 15 insertions, **comment only**, recording the measured F-2 blind spot (firstFiveEachReached and sixthRequests:0 are a PAIR) as Tuesday ruled; counts untouched. ⚠ **ONE CONDITION STILL UNEVIDENCED:** condition 1, CI green on `fdf2483` read at source with its run id, before the push. Asked for 06:16Z; not a stop. |
 | **RD-464 round 3** | no r3 commit (5 incidental mentions) | 🔴 **STILL HELD — and NOT released by the RD-545 merge. Tuesday got this wrong at 16:0x and S71 corrected it at 16:00.** C-74's gate clears when RD-545 lands, but r3 sits on TWO further counts, neither of them C-74's: (1) the RD-545 brief requires r3 to REBASE and re-run every rd545 cell BY NAME in its MERGED mail (C-68, C-74); (2) **R14 is merge-blocking on r3** (RD-464 comment 37858) — it cannot be authored against main because `readiness:'not-checked'` exists only on `1f27b4d`, so it rides r3. **"Coupled" was read as "released"; it means r3 cannot merge WITHOUT RD-545, not that it merges WITH it.** |
 | **RD-549** | 1 mention, and it is a HISTORY doc (`fb2f64d`) — **no code** | 🟡 tier-1 gate RUNNING at S71 now (`2edde62`, stage A) |
 | **RD-516** | 0 | 🔴 **NOT STARTED on main** |
@@ -84,7 +84,7 @@ dead grep ([[../../learnings/2026-09-08_a-false-absence-is-usually-my-own-instru
 | the listing folds — RD-465 O-4, RD-454 O-4 | ❓ **UNKNOWN, and named as such** | The TICKETS are merged (RD-465 `3c4760a`+`69a6365`, RD-454 `784b831`), and RD-491 `1a9ada3` closed RD-465 gaps N20/N21/O-1 — **but O-4 is a gate OBSERVATION and a commit log cannot settle it.** Closing instrument: the O-4 rows on the RD-465 and RD-454 Jira tickets, or the `azure-marketplace/**` listing files at main. Not a guess either way. |
 
 ### THE ONE-LINE READING
-**The predicate is NOT met, and the shape is now specific: two of the seven are moving at S71 this
+**The predicate is NOT met. main = `354d9ff` as of 2026-09-20 16:1x. The shape is now specific: two of the seven are moving at S71 this
 hour (RD-545 merging, RD-549 gating) and RD-464 r3 is held on its own two counts, and the genuinely unheld work is RD-516, RD-518 and RD-550 plus the O-4 unknown.** RD-518 in
 particular is a name-mismatch defect with zero commits and no owner — size it before assuming it is
 large. Nothing here changes what Kam is told: he is told when every box is ticked, re-read on

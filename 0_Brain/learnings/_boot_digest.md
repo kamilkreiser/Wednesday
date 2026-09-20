@@ -7,7 +7,7 @@ status: live
 
 # Boot digest — headline + rules of every lesson (open the file when it fires)
 
-Generated 2026-09-20 16:15 from 191 lesson files (943,672 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 9 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
+Generated 2026-09-20 16:21 from 192 lesson files (949,561 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 9 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
 
 ## The T9 SSD is the master — Wednesday must be fully portable
 `2026-07-31_fully-portable-drive.md` · principle · 2026-07-31 · status: superseded — the "T9 is the master" half by [[2026-08-25_one-drive-devmaster-is-master]] (2026-08-25); the portability principle itself still lives
@@ -6710,6 +6710,41 @@ built to close.**
 5. Same shape in reverse for us: when a gate is NOT RUN, its items are unverified CLAIMS, not results — a verdict inherits the scope of the run that produced it.
 
 **Family:** [[2026-09-07_a-census-complete-over-a-frame-that-is-not]] (the parent — this is its CLOSURE half: there the census was misread while fresh, here it was inherited after closing) · [[2026-08-16_a-recorded-blocker-is-not-a-boundary]] (a recorded claim with a date) · [[2026-09-06_a-retraction-inherits-the-scope-of-its-measurement]] (its mirror: a withdrawal inherits its measurement's scope too) · [[2026-08-07_a-check-that-cannot-fail]].
+
+
+## An absence is measured at one moment and ASSERTED at another — and the more carefully you write the complaint, the staler its premise
+`2026-09-20_an-absence-goes-stale-while-you-compose-the-complaint.md` · correction · 2026-09-20 · status: live
+
+**The lesson:** a claim that someone has NOT done something is not a fact you hold, it is a
+reading with a timestamp. Every minute between the read and the send is a minute the world has
+to make it false. And the failure is self-inflicted in a way that feels like diligence: the
+longer and more evidenced the reproach, the more time it spends going stale. **Care is what
+invalidates it.**
+
+sections (open the file for these): The rule · SHARPENED THE SAME HOUR BY S71, THE AGENT I GOT IT WRONG ABOUT — and its rule is better than mine · The half worth keeping
+
+## The rule
+
+1. **Anything whose BLUF is "you have not done X" re-reads the source IN THE SAME COMMAND THAT
+   SENDS IT.** Not in the same turn, not "just before" — the same action. A listing taken
+   minutes ago is a representation of an inbox, not the inbox
+   ([[2026-08-14_i-read-representations-they-read-sources]]).
+2. **For a "you have not" message, draft LAST.** Compose the body, then verify, then send, as one
+   step. Inverting that order is what created the twelve seconds.
+3. **The cost is asymmetric and lands on someone else.** A stale absence sent to a human or an
+   agent spends THEIR credibility for MY staleness. Being late to notice something costs nothing;
+   accusing someone of a gap they have already closed costs them the benefit of the doubt next
+   time.
+4. **Withdraw in full, naming both timestamps, in the next action.** Not "as I mentioned" — the
+   reproach was a distinct artefact and its withdrawal is too
+   ([[2026-09-06_a-retraction-inherits-the-scope-of-its-measurement]]: withdraw exactly what was
+   refuted, and here that was the whole premise, not the standing rule about reporting).
+5. **This is not only about agents.** It covers "no reply yet" to Kam, "the board shows nothing",
+   "nobody has picked this up" — every sentence whose subject is something that did not happen.
+
+## SHARPENED THE SAME HOUR BY S71, THE AGENT I GOT IT WRONG ABOUT — and its rule is better than mine
+**It refused the absolution.** Handed a full withdrawal, it declined to file the episode under
+"our mails crossed" and took the harder reading instead, verbatim:
 
 
 ## An EARLY RETURN added to a shared function silently disarms existing tests — and by definition they are NOT in the diff
