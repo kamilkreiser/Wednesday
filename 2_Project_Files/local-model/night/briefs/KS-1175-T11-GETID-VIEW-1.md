@@ -1,0 +1,147 @@
+# KS-1175 T11-GETID-VIEW-1 PIN THAT GET /api/anchors/:id STILL SPREADS anchorIdentityView(...secuura) INTO ITS res.json — a SOURCE-TEXT guard on the one route no test can boot (index.ts calls app.listen on import) — Wednesday's task for Ornith, TEST_ONLY, **ONE NEW vitest test file, no product file** (written 02:23 on 2026-09-21, #1105 gate NOT-PINNED row T11-GETID-VIEW)
+
+File: `Blockchain/Dev/services/anchoring/src/__tests__/ks1175-getid-view-wired.test.ts`
+Tip: `cbae988dbe90ebe556459ada2cb437eaf80e2402`
+Runner: `vitest`
+
+Written from develop `cbae988dbe90ebe556459ada2cb437eaf80e2402` (`git -C "/Volumes/DevMASTER/!CODING/Secuura/Blockchain/2_Project_Files" ls-remote origin refs/heads/develop` at 02:23 on 2026-09-21, read verbs only; the #1105 squash-merge of KS-1175 + KS-1284). The test file does NOT exist at that tip: you CREATE it. The product the cells read is `Blockchain/Dev/services/anchoring/src/index.ts` (blob `b6386f402a4b`, **2063 lines**): the route `app.get('/api/anchors/:id', async (req: Request, res: Response) => {` at `:827`, its `res.json({` at `:875-897` (the handler closes at `:898`), and inside it **`:890` `    ...anchorIdentityView((anchor.metadataPayload as any)?.secuura),`** — the ONE line that puts KS-1175's `identityCommitment` + `identity` on the GET /:id response (the comment above it, `:887-889`, says what S records from it). `index.ts:42` says it: "this module calls app.listen on import" — no test imports it (0 at the tip), so the route cannot be driven in-process. This service runs **VITEST** (`package.json` `"test": "vitest run"`, `vitest ^4.1.9`, `vitest.config.ts` with `globals: true`; no jest).
+
+## THE MODE — read this twice
+
+**TEST_ONLY, NEW FILE.** Your diff touches EXACTLY ONE file: the new test file above (`--- /dev/null` / `+++ b/<path>`, the path exactly as written above, ONE hunk `@@ -0,0 +1,26 @@`). You never touch `index.ts`, `anchorReadback.ts` or any other product file, and you never touch an existing test file: the behaviour is already what it is at the tip, and these cells PIN it.
+
+## What the cells pin (one paragraph)
+
+The #1105 gate planted T11 — `:890` replaced by a comment — in its head clone and ran the whole 319-cell suite: **0 red**. GET /api/anchors/:id silently returned to its pre-KS-1175 shape (no `identityCommitment`, no `identity`) with every cell green, because the route needs a boot and `index.ts` boots on import. The honest bootless pin is a SOURCE-TEXT extraction guard, and this file is exactly that: it reads `index.ts` with `fs`, cuts the handler block from the opener `app.get('/api/anchors/:id',` (occurs once in the file) to the handler's last response property `retryCount: anchor.retryCount ?? 0,` (occurs once), and asserts the block contains the `:890` spread byte for byte. The CONTROL proves the block is ONE handler (exactly one `app.get(` in it) and is THIS route (it carries `contentHash: anchor.contentHash,` and the KS-535 `errorMessage: anchor.errorMessage || null,`) — so a red on the RED cell is about the spread, never about the block having gone missing. The file's own header says the REAL pin is the section 5f live sweep (GET /:id on the correct host returning `identity` for a confirmed anchor); this guard only stops the spread being dropped or re-pointed without a test going red. **It pins TODAY's wiring of the view into the route.**
+
+## The exact change — ONE new file
+
+Copy every line byte for byte. All 26 `+` lines are ASCII only (the product's em dashes are never quoted; every quoted product line is plain ASCII). There is no blank line anywhere in the fence. Keep the header exactly as shown. **Your diff MUST begin with the two file-header lines, above the `@@` line: `--- /dev/null` then `+++ b/Blockchain/Dev/services/anchoring/src/__tests__/ks1175-getid-view-wired.test.ts`.**
+
+```
+@@ -0,0 +1,26 @@
++/**
++ * KS-1175 - GET /api/anchors/:id is wired to anchorIdentityView (the #1105 gate's T11-GETID-VIEW seam).
++ * index.ts calls app.listen on import, so no test imports it and the route body cannot be driven in-process.
++ * This is a SOURCE-TEXT guard: it reads index.ts and asserts the app.get('/api/anchors/:id') handler still spreads
++ * anchorIdentityView(...) over the row's metadata_payload secuura block into its res.json. It stops the spread being
++ * dropped or re-pointed silently (every cell of the suite stayed green under both at the #1105 gate); the REAL pin is
++ * the section 5f live sweep (GET /:id on the correct host returning identity for a confirmed anchor).
++ */
++import { describe, it, expect } from 'vitest';
++import { readFileSync } from 'fs';
++import { resolve } from 'path';
++const SRC = readFileSync(resolve(__dirname, '..', 'index.ts'), 'utf8');
++function handlerBlock(opener: string, lastLine: string): string {
++  const from = SRC.indexOf(opener);
++  const end = from < 0 ? -1 : SRC.indexOf(lastLine, from);
++  return from < 0 || end < 0 ? '' : SRC.slice(from, end + lastLine.length);
++}
++const GET_BY_ID = handlerBlock("app.get('/api/anchors/:id',", 'retryCount: anchor.retryCount ?? 0,');
++describe('KS-1175 GET /api/anchors/:id carries the identity view (source guard: index.ts is bootless)', () => {
++  it('RED KS-1175: the GET /api/anchors/:id handler spreads anchorIdentityView of the row metadata_payload secuura block into res.json', () => {
++    expect([GET_BY_ID.length > 0, GET_BY_ID.includes('...anchorIdentityView((anchor.metadataPayload as any)?.secuura),')]).toEqual([true, true]);
++  });
++  it('CONTROL: the located block is ONE handler, the anchor-by-id route (contentHash and the KS-535 errorMessage are in it)', () => {
++    expect([GET_BY_ID.split('app.get(').length, GET_BY_ID.includes('contentHash: anchor.contentHash,'), GET_BY_ID.includes('errorMessage: anchor.errorMessage || null,')]).toEqual([2, true, true]);
++  });
++});
+```
+
+`__dirname` is provided by vitest to a TS test module (the suite's own `threadTokenMint.test.ts:44` uses it); `readFileSync` / `resolve` are node built-ins; nothing else is imported. The cells need no mock, no app boot, no port, no chain and no database: one file read and three string operations.
+
+## Cells
+
+- `spread` = `RED KS-1175: the GET /api/anchors/:id handler spreads anchorIdentityView of the row metadata_payload secuura block into res.json`
+- `control` = `CONTROL: the located block is ONE handler, the anchor-by-id route (contentHash and the KS-535 errorMessage are in it)`
+
+## Red cells
+
+The cell below is a GENUINE assertion-red: it fails under each tamper and passes at the tip. It is declared here rather than with a red glyph in its title because every `+` line in this diff must be ASCII only.
+
+- RED KS-1175: the GET /api/anchors/:id handler spreads anchorIdentityView of the row metadata_payload secuura block into res.json
+
+## Tampers
+
+Two single-line tampers on `index.ts:890` (the ONE spread line; it occurs EXACTLY ONCE in the file — `grep -c -F -x`, 1; positive control `grep -c -i 'anchorIdentityView'` over the same file: 2, the import at `:45` plus this line). GETIDVIEWDROPPED is the gate's own T11 (the spread replaced by a comment — the response silently loses both fields); GETIDVIEWWRONGSOURCE re-points the view at the whole `metadataPayload` instead of its `secuura` block (the seven fields live under `secuura`, so the view finds none and every anchor reads `null` / `null` — the same silent loss with the keys still present). `From` is the tip's line at that number, byte for byte; each `To` is valid TypeScript (a comment; a spread of the same function over a different expression). The checker plants each and restores the file by bytes. **Frame, stated plainly:** no cell of the existing suite reads `index.ts` (0 imports at the tip), so each tamper reds exactly the new RED cell and nothing else — measured over the whole 326-cell suite (319 + this file's 2 + the two sibling briefs' 5): the only other red is develop's own `threadTokenMint` cell, red at the untouched tip too.
+
+### GETIDVIEWDROPPED — the anchorIdentityView spread dropped from the GET /:id response
+File: `Blockchain/Dev/services/anchoring/src/index.ts`
+Line: 890
+From:
+```
+    ...anchorIdentityView((anchor.metadataPayload as any)?.secuura),
+```
+To:
+```
+    // T11-GETID-VIEW: the anchorIdentityView spread dropped from the response
+```
+Reds: `spread`
+
+### GETIDVIEWWRONGSOURCE — the view re-pointed at the whole payload, not its secuura block
+File: `Blockchain/Dev/services/anchoring/src/index.ts`
+Line: 890
+From:
+```
+    ...anchorIdentityView((anchor.metadataPayload as any)?.secuura),
+```
+To:
+```
+    ...anchorIdentityView((anchor.metadataPayload as any)),
+```
+Reds: `spread`
+
+## Controls
+
+- `CONTROL: the located block is ONE handler, the anchor-by-id route (contentHash and the KS-535 errorMessage are in it)`
+
+*(The FULL `it(...)` title of the file's second cell, byte for byte. For a VITEST suite the checker matches a declared cell by its FULL title, never by a prefix; the two titles share no prefix. Under both tampers the block is still located — the opener and `retryCount` line are untouched — so the control stays green while the RED cell's `includes` turns false.)*
+
+## THE CELLS — state it to yourself before you write a line
+
+At the untouched tip both cells pass: `SRC.indexOf("app.get('/api/anchors/:id',")` finds `:827`; `SRC.indexOf('retryCount: anchor.retryCount ?? 0,', from)` finds `:896`; the slice between them holds `:890` byte for byte (measured: `[true, true]`), contains exactly one `app.get(` (split length 2) and both control strings (measured: `[2, true, true]`).
+
+Under **GETIDVIEWDROPPED** the slice holds the comment instead: `includes` is false — `expected [ true, false ] to deeply equal [ true, true ]` (measured). Under **GETIDVIEWWRONGSOURCE** the slice holds `...anchorIdentityView((anchor.metadataPayload as any)),` — the asserted string (with `?.secuura`) is absent, the same red (measured). The CONTROL is green under both (measured).
+
+## Premises (measured — by reading the tip, NOT by running anything, except where the MEASURED section below says so)
+
+- **Premise: the From line.** `index.ts` at `cbae988db`, line 890 is `    ...anchorIdentityView((anchor.metadataPayload as any)?.secuura),` (4-space indent), byte for byte; it occurs **exactly once** (`grep -c -F -x`, 1). The checker plants and restores it (T8 by sha256 after; tip blob `b6386f402a4b`, sha256 `31422a6ab3c74804...` measured after every restore).
+- **Premise: the anchors the cells cut on.** `app.get('/api/anchors/:id',` occurs once (`:827`; the only `app.get(` between `:827` and `:898`); `retryCount: anchor.retryCount ?? 0,` occurs once (`:896`); `errorMessage: anchor.errorMessage || null,` occurs once (`:895`); `contentHash: anchor.contentHash,` occurs 3 times in the file, once inside this block (`:885`) — the control asserts `includes` on the block, not a count.
+- **Premise: the gate's claim, re-derived.** The #1105 gate's row T11-GETID-VIEW: "no cell: 0 of 319 — GET /api/anchors/:id silently loses identityCommitment and identity with every cell green". Re-read at the tip: `git grep` of the anchoring tests for an import of `../index`: 0 files; `index.ts:42` and `:2028` (`const server = app.listen(PORT, ...)`) confirm the boot-on-import. The gate's proposed cell shape (locate the block, `includes` the spread, a positive control on `contentHash`) is what this file does, with the block's END cut on the handler's last property instead of "the next `^});`" (which needs a newline escape the model must not type, and would stop early at `:863`'s inline `});`).
+- **Premise: new file.** The path is absent at the tip (`git ls-tree` of `src/__tests__/`: 19 files, none by this name), so the input's `test_mode` is `new` and the headers are `--- /dev/null` / `+++ b/<path>`. No `-` line anywhere.
+- **No backslash** in any `+` line (0, counted). **No non-ASCII** in any `+` line (0, counted). **No template literal** in any `+` line (no backtick). **No blank line** (0, counted). The RED title uses `/`, `:` and plain words, no em dash.
+- **Premise: the runner.** `vitest` is in `services/anchoring/package.json`; no jest. The checker runs `npx vitest run src/__tests__/ks1175-getid-view-wired.test.ts` from `Blockchain/Dev/services/anchoring`.
+- **Premise: the surface.** One `fs` read of a source file and string operations. No user store, no session, no JWT, no chain, no db, no port, no product bytes. ANCHORING route wiring, test-only pin (allowed).
+
+## Collision
+
+**NEW file — no hunk overlap is possible with anything**: the three held anchoring READYs modify `ks1175-anchor-readback.test.ts` (`:80`, `:107`) and `ks1175-identity-anchoring.test.ts` (`:176`), the two sibling briefs of this wave create `ks1284-chain-read-order.test.ts` and `ks1284-attach-point.test.ts`; none of the six touches this path, so every application order gives the same tree (measured in the MEASURED section: the combined tree with all six applied). Tamper file shared with sibling T12 (`index.ts`, lines `:699` / `:701` vs this brief's `:890`) — different lines, each planted-and-restored, none moves the other; the held READYs plant `anchorReadback.ts` (`:52`, `:74`, `:75`, `:111`, `:112`) and `cardanoMetadatum.ts:81` — no shared file. `grep` of every `night/READY_*` for `services/anchoring/src/index.ts`, `cardano/transaction.ts` or this file name: 0. Sequencing needed: none.
+
+## MEASURED by the writing seat (2026-09-21, `--shared` scratch clone at `cbae988db`, node_modules farmed from the source checkout via the harness's `prepare_clone.sh`, source tracked-modified count 0 before and after; artefacts under `2_Project_Files/local-model/runs/2026-09-21_wave3-drafter-precheck/`, this row's under `T11-GETID-VIEW/`)
+
+- This file at the tip: **2/2 green** (`probe_tip_anchoring_verbose.out`, 1 ms + 0 ms). Whole anchoring suite with this file and the two sibling files: **326 cells, 325 passed, 1 failed** — the 1 red is `threadTokenMint.test.ts` "parameterises mint + spend with a deterministic per-seed policyId" (develop's own; the gate's count at the bare tip is 318/319 with the same red). `full_suite_all3.out`.
+- Tampers planted by bytes (`tamper_probe_anchoring.log`, the three new files = 7 cells): GETIDVIEWDROPPED → 6 passed, **1 red = `spread`** (`AssertionError: expected [ true, false ] to deeply equal [ true, true ]`), planted sha256 `a74ffc54d18e`; GETIDVIEWWRONGSOURCE → the same, planted sha256 `0985651aa15c`. `index.ts` restored (`git diff --quiet` rc 0, sha256 `31422a6ab3c74804`) after each. Whole 326-cell suite under each (`tamper_whole_anchoring.log`, `whole_<ID>.json`): 324 passed, 2 failed = `spread` + the develop-own `threadTokenMint` red — 0 existing cells newly red.
+- (the golden checker run and the combined tree are appended below after the run)
+
+## Output
+
+Exactly ONE ```diff block, nothing outside it: `--- /dev/null` / `+++ b/Blockchain/Dev/services/anchoring/src/__tests__/ks1175-getid-view-wired.test.ts`, then the ONE hunk above exactly as shown (`@@ -0,0 +1,26 @@`).
+
+## Notes for the raise (not for the model)
+
+- Test-only, zero product bytes, new file. **Raise tier: TIER 1 at the gate (anchoring GET /:id wiring, test-only source guard — allowed; the gate itself asked for this shape). Refs KS-1175. NEVER Closes** — KS-1175 stays In Progress (the section 5f live sweep is the REAL pin and is owed; deploy/anchor are Kam's).
+- **From the #1105 gate's NOT-PINNED table** (report `2026-09-20-pr1105-tier1-r1/report.md`, row T11-GETID-VIEW; its tamper `:890` -> `// T11` is GETIDVIEWDROPPED here, planted and measured; GETIDVIEWWRONGSOURCE added as the re-pointing regression the same guard catches).
+- **Not pinned here, said plainly:** the route's RUNTIME response (a source-text guard proves the line is there, not that it runs — a boot-based route test or the 5f sweep does that); `anchorIdentityView`'s own behaviour (pinned by `ks1175-anchor-readback.test.ts`); the verify surfaces.
+- **A source-text guard is brittle by design:** any reformat of `:890` (a wrapped line, a renamed local) reds it and the fix is to update the asserted string — the file's header says so. The raise notes must say the same.
+
+## Build line (not for the model)
+
+```
+bash tasks/test_only/build_test_only_input.sh KS-1175 night/inputs/test_only_1175T11-GETID-VIEW-1.json night/briefs/KS-1175-T11-GETID-VIEW-1.md ctx=65536
+```
+
+## MEASURED — appended after the golden run (02:30, artefacts `runs/2026-09-21_wave3-drafter-precheck/T11-GETID-VIEW/`)
+
+- Golden checker (`tasks/test_only/checker.sh` on the golden `out.md`, fresh `--shared` clone at `cbae988db`, `drafter2_clone_4`, farmed by the harness's `prepare_clone.sh`): **RESULT: PASS (8/8)** — T1 one fenced block; T2 touched set == the new file only; T3 strict apply of the `--- /dev/null` diff; T4 every `+` line byte-exact; T5 green at the tip 2/2 cells; T6 GETIDVIEWDROPPED and GETIDVIEWWRONGSOURCE each red set == {spread}, an assertion failure; T7 the control green under both; T8 `index.ts` restored to sha256 `31422a6ab3c7` after each. Source tracked-modified count 0 before and after (`prepare.log`).
+- All-orders apply with the three held READYs and the two sibling new-file briefs (`collision_all_orders.log`, 8 orders incl. all 6 permutations of the held three): every apply rc 0 in every order; after EVERY order `ks1175-anchor-readback.test.ts` is **133 lines, sha256 `431b51cb378e933c`** and `ks1175-identity-anchoring.test.ts` **227 lines, sha256 `ee1cbe52ea87bc02`** (identical to the prior drafter's measurement) and this file is sha256 **`f73eabc6b2b8a7ca`** (identical to the file the checker graded).
+- Whole anchoring suite with all six applied (`full_suite_all6.out`): **329 cells, 328 passed, 1 failed** — the same develop-own `threadTokenMint` red as at the tip (319/318/1).

@@ -1,0 +1,163 @@
+# KS-1284 T12-CHAINREAD-DECODE-1 PIN THAT verify-by-hash's CHAIN READ DECODES THE PAYLOAD (fromCardanoMetadatum) BEFORE IT COMPARES THE HASH — a SOURCE-TEXT guard on the six loop lines of handleAnchorVerifyByHash plus a behavioural twin that shows why the order matters — Wednesday's task for Ornith, TEST_ONLY, **ONE NEW vitest test file, no product file** (written 02:23 on 2026-09-21, #1105 gate NOT-PINNED row T12-CHAINREAD-DECODE)
+
+File: `Blockchain/Dev/services/anchoring/src/__tests__/ks1284-chain-read-order.test.ts`
+Tip: `cbae988dbe90ebe556459ada2cb437eaf80e2402`
+Runner: `vitest`
+
+Written from develop `cbae988dbe90ebe556459ada2cb437eaf80e2402` (`git -C "/Volumes/DevMASTER/!CODING/Secuura/Blockchain/2_Project_Files" ls-remote origin refs/heads/develop` at 02:23 on 2026-09-21, read verbs only; the #1105 squash-merge of KS-1175 + KS-1284). The test file does NOT exist at that tip: you CREATE it. The products the cells drive are `Blockchain/Dev/services/anchoring/src/index.ts` (blob `b6386f402a4b`, **2063 lines**) — inside `handleAnchorVerifyByHash`, the `for (const { tx, md } of metas) {` loop at `:695-702`: `:696` finds the label-674 entry, `:697-698` is the KS-1284 comment ("undo the tx-build codec BEFORE anything reads a value — including the hash compare below"), **`:699` `        const sec: any = fromCardanoMetadatum(secEntry?.json_metadata?.secuura);`**, `:700` `if (!sec) continue;`, **`:701`** the `onChainHash` normalisation, `:702` the compare — and `Blockchain/Dev/services/anchoring/src/cardano/cardanoMetadatum.ts` (`toCardanoMetadatum` at `:59`, `fromCardanoMetadatum` at `:78`, pure). `index.ts` calls `app.listen` on import (`:42`, `:2028`); no test imports it. This service runs **VITEST** (`package.json` `"test": "vitest run"`, `vitest ^4.1.9`, `vitest.config.ts` with `globals: true`; no jest).
+
+## THE MODE — read this twice
+
+**TEST_ONLY, NEW FILE.** Your diff touches EXACTLY ONE file: the new test file above (`--- /dev/null` / `+++ b/<path>`, the path exactly as written above, ONE hunk `@@ -0,0 +1,43 @@`). You never touch `index.ts`, `cardanoMetadatum.ts` or any other product file, and you never touch an existing test file: the behaviour is already what it is at the tip, and these cells PIN it.
+
+## What the cells pin (one paragraph)
+
+The #1105 gate planted T12 — `:699` reading the raw `secEntry?.json_metadata?.secuura` with no decode — and ran the whole 319-cell suite: **0 red**. Without the decode a chain payload whose `identityCommitment` chunked into an array reads back an ARRAY (the typed view then returns `null` for it), and a chunked `sha256:`-prefixed hash is never found — silently, because the loop cannot be imported. Two cells: the RED cell is a SOURCE-TEXT guard — it reads `index.ts` with `fs` and asserts the six loop lines (`:695`, `:696`, `:699`, `:700`, `:701`, `:702`, each quoted byte for byte without its indent) are all present, each exactly once, and in that order — so the decode (`:699`) sits before the compare (`:702`). The CONTROL is the behavioural twin: it copies the loop into a local `scan(metas, hash, decode)` and shows that a chunked `'sha256:' + 64 hex` hash on chain is found through `fromCardanoMetadatum` and NOT through an identity decode — the reason the order matters, green at the tip and under every tamper (it never reads `index.ts`). A refactor that reorders or drops the decode reds the guard; the twin is what carries the meaning. **It pins TODAY's decode-before-compare order.**
+
+## The exact change — ONE new file
+
+Copy every line byte for byte. All 43 `+` lines are ASCII only (the product's em dash in the `:697` comment is never quoted; the six quoted lines are plain ASCII). There is no blank line anywhere in the fence. Keep the header exactly as shown. **Your diff MUST begin with the two file-header lines, above the `@@` line: `--- /dev/null` then `+++ b/Blockchain/Dev/services/anchoring/src/__tests__/ks1284-chain-read-order.test.ts`.**
+
+```
+@@ -0,0 +1,43 @@
++/**
++ * KS-1284 - verify-by-hash decodes the chain payload BEFORE it compares the hash (the #1105 gate's T12-CHAINREAD-DECODE
++ * seam). The loop lives in index.ts's handleAnchorVerifyByHash, and index.ts calls app.listen on import, so it cannot be
++ * imported here. Two cells: a SOURCE-TEXT guard that the five loop lines are still there, in that order, with the
++ * fromCardanoMetadatum decode on the line before the hash compare; and a behavioural twin that copies those lines into a
++ * local scan() and shows WHY the order matters - a chunked sha256:-prefixed hash is found only through the decode.
++ */
++import { describe, it, expect } from 'vitest';
++import { readFileSync } from 'fs';
++import { resolve } from 'path';
++import { toCardanoMetadatum, fromCardanoMetadatum } from '../cardano/cardanoMetadatum';
++const SRC = readFileSync(resolve(__dirname, '..', 'index.ts'), 'utf8');
++const LOOP = [
++  'for (const { tx, md } of metas) {',
++  "const secEntry = (md || []).find((m: any) => String(m.label) === '674');",
++  'const sec: any = fromCardanoMetadatum(secEntry?.json_metadata?.secuura);',
++  'if (!sec) continue;',
++  "const onChainHash = String(sec.hash || '').replace(/^sha256:/i, '').toLowerCase();",
++  'if (onChainHash !== hash) continue;',
++];
++type Meta = { tx: { tx_hash: string }; md: any[] | null };
++function scan(metas: Meta[], hash: string, decode: (v: unknown) => unknown): string | null {
++  for (const { tx, md } of metas) {
++    const secEntry = (md || []).find((m: any) => String(m.label) === '674');
++    const sec: any = decode(secEntry?.json_metadata?.secuura);
++    if (!sec) continue;
++    const onChainHash = String(sec.hash || '').replace(/^sha256:/i, '').toLowerCase();
++    if (onChainHash !== hash) continue;
++    return tx.tx_hash;
++  }
++  return null;
++}
++describe('KS-1284 verify-by-hash chain read: decode before compare (source guard + behavioural twin)', () => {
++  it('RED KS-1284: the six loop lines of handleAnchorVerifyByHash are present once, in order, with the decode before the hash compare', () => {
++    const at = LOOP.map((l) => SRC.indexOf(l));
++    expect([at.every((i) => i > 0), at.every((i, k) => k === 0 || i > at[k - 1]), LOOP.every((l) => SRC.indexOf(l) === SRC.lastIndexOf(l))]).toEqual([true, true, true]);
++  });
++  it('CONTROL: a chunked sha256:-prefixed hash on chain is found through the decode and never without it', () => {
++    const h = 'c'.repeat(64);
++    const metas: Meta[] = [{ tx: { tx_hash: 'a'.repeat(64) }, md: [{ label: '674', json_metadata: toCardanoMetadatum({ secuura: { hash: 'sha256:' + h } }) }] }];
++    expect([scan(metas, h, fromCardanoMetadatum), scan(metas, h, (v) => v)]).toEqual(['a'.repeat(64), null]);
++  });
++});
+```
+
+`__dirname` is provided by vitest to a TS test module (the suite's own `threadTokenMint.test.ts:44` uses it); `readFileSync` / `resolve` are node built-ins; `toCardanoMetadatum` / `fromCardanoMetadatum` are the two pure codec functions `ks1284-cardano-metadatum.test.ts` already imports the same way. The `LOOP` strings are the six product lines WITHOUT their leading indent (`indexOf` finds them inside the indented line); the two that carry single quotes are written in double quotes. The cells need no mock, no app boot, no port, no chain and no database.
+
+## Cells
+
+- `order` = `RED KS-1284: the six loop lines of handleAnchorVerifyByHash are present once, in order, with the decode before the hash compare`
+- `twin` = `CONTROL: a chunked sha256:-prefixed hash on chain is found through the decode and never without it`
+
+## Red cells
+
+The cell below is a GENUINE assertion-red: it fails under each tamper and passes at the tip. It is declared here rather than with a red glyph in its title because every `+` line in this diff must be ASCII only.
+
+- RED KS-1284: the six loop lines of handleAnchorVerifyByHash are present once, in order, with the decode before the hash compare
+
+## Tampers
+
+Two single-line tampers on `index.ts`, one per line of the decode-then-compare pair (each line occurs EXACTLY ONCE in the file — `grep -c -F -x`, 1 and 1; positive control `grep -c -i 'fromCardanoMetadatum'` over the same file: 2, the import at `:47` plus `:699`). CHAINREADNODECODE is the gate's own T12 (the decode dropped: `sec` is the raw chain object). HASHCOMPARERAW keeps the decode for `sec` but reads the compared hash from the RAW entry — the exact coincidence the `:697-698` comment forbids ("the comparison must not depend on that"). `From` is the tip's line at that number, byte for byte; each `To` is valid TypeScript (under CHAINREADNODECODE the `:47` import becomes unused — a `tsc --noEmit` nit under `noUnusedLocals`, not a load error; vitest does not type-check and this file never imports `index.ts`). The checker plants each and restores the file by bytes. **Frame, stated plainly:** no cell of the existing suite reads `index.ts` (0 imports at the tip), so each tamper reds exactly the new RED cell — measured over the whole 326-cell suite: the only other red is develop's own `threadTokenMint` cell, red at the untouched tip too. The CONTROL never reads `index.ts` and stays green under both by construction (measured).
+
+### CHAINREADNODECODE — the chain payload is read raw, the codec is not undone
+File: `Blockchain/Dev/services/anchoring/src/index.ts`
+Line: 699
+From:
+```
+        const sec: any = fromCardanoMetadatum(secEntry?.json_metadata?.secuura);
+```
+To:
+```
+        const sec: any = secEntry?.json_metadata?.secuura;
+```
+Reds: `order`
+
+### HASHCOMPARERAW — the compared hash is read from the raw entry, bypassing the decode
+File: `Blockchain/Dev/services/anchoring/src/index.ts`
+Line: 701
+From:
+```
+        const onChainHash = String(sec.hash || '').replace(/^sha256:/i, '').toLowerCase();
+```
+To:
+```
+        const onChainHash = String(secEntry?.json_metadata?.secuura?.hash || '').replace(/^sha256:/i, '').toLowerCase();
+```
+Reds: `order`
+
+## Controls
+
+- `CONTROL: a chunked sha256:-prefixed hash on chain is found through the decode and never without it`
+
+*(The FULL `it(...)` title of the file's second cell, byte for byte. For a VITEST suite the checker matches a declared cell by its FULL title, never by a prefix; the two titles share no prefix.)*
+
+## THE CELLS — state it to yourself before you write a line
+
+At the untouched tip both cells pass: each of the six `LOOP` strings is found in `index.ts` (`indexOf` > 0), at strictly increasing offsets (`:695` < `:696` < `:699` < `:700` < `:701` < `:702`), and `indexOf === lastIndexOf` for each (exactly once) — measured `[true, true, true]`. The twin: `toCardanoMetadatum({ secuura: { hash: 'sha256:' + 64 c's } })` chunks the 71-byte string into `['sha256:' + 57 c's, 7 c's]`; through `fromCardanoMetadatum` it is joined, `sha256:` is stripped, and `scan` returns the tx hash; through the identity decode `String([...])` is the two chunks joined with a comma, never equal to the hash, and `scan` returns `null` — measured `['aaaa...', null]`.
+
+Under **CHAINREADNODECODE** `LOOP[2]` (the decode line) is absent: its `indexOf` is -1, so the first slot (`every i > 0`) and the second (increasing) are false — `expected [ false, false, true ] to deeply equal [ true, true, true ]` (measured). Under **HASHCOMPARERAW** `LOOP[4]` is absent — the same red (measured). The CONTROL is green under both (measured).
+
+## Premises (measured — by reading the tip, NOT by running anything, except where the MEASURED section below says so)
+
+- **Premise: the From lines.** `index.ts` at `cbae988db`, line 699 is `        const sec: any = fromCardanoMetadatum(secEntry?.json_metadata?.secuura);` and line 701 is `        const onChainHash = String(sec.hash || '').replace(/^sha256:/i, '').toLowerCase();` (8-space indent), byte for byte; each occurs **exactly once** (`grep -c -F -x`, 1 and 1), as do `:695`, `:696`, `:700` and `:702` (1 each). The checker plants and restores (T8 by sha256 after; tip blob `b6386f402a4b`, sha256 `31422a6ab3c74804...` measured after every restore).
+- **Premise: the gate's claim, re-derived.** The #1105 gate's row T12-CHAINREAD-DECODE: "no cell: 0 of 319 — index.ts is bootless-untested". Re-read at the tip: 0 test files import `../index`; `index.ts:42` says "this module calls app.listen on import". The gate's proposed shape (five-line extraction guard + a `scan` twin with a compare-first copy) is what this file does, with the loop's opening line added as a sixth anchor and the twin parameterised by its decode instead of duplicated.
+- **Premise: new file.** The path is absent at the tip (`git ls-tree` of `src/__tests__/`: 19 files, none by this name), so the input's `test_mode` is `new` and the headers are `--- /dev/null` / `+++ b/<path>`. No `-` line anywhere.
+- **No backslash** in any `+` line (0, counted — the regex `/^sha256:/i` has none). **No non-ASCII** in any `+` line (0, counted). **No template literal** in any `+` line (no backtick). **No blank line** (0, counted).
+- **Premise: the runner.** `vitest` is in `services/anchoring/package.json`; no jest. The checker runs `npx vitest run src/__tests__/ks1284-chain-read-order.test.ts` from `Blockchain/Dev/services/anchoring`.
+- **Premise: the surface.** One `fs` read, string operations, and the two pure codec functions. No user store, no session, no JWT, no chain, no db, no port, no product bytes. ANCHORING verify-by-hash chain read, test-only pin (allowed).
+
+## Collision
+
+**NEW file — no hunk overlap is possible with anything**: the three held anchoring READYs modify `ks1175-anchor-readback.test.ts` (`:80`, `:107`) and `ks1175-identity-anchoring.test.ts` (`:176`); the two sibling briefs of this wave create `ks1175-getid-view-wired.test.ts` and `ks1284-attach-point.test.ts`; none of the six touches this path, so every application order gives the same tree (measured in the MEASURED section). Tamper file shared with sibling T11 (`index.ts:890` vs this brief's `:699` / `:701`) — different lines, each planted-and-restored, none moves the other; the held READYs plant `anchorReadback.ts` and `cardanoMetadatum.ts:81` (`CODECJOINDROPPED`, in the sibling CHUNKED brief) — that sibling tamper ALSO reds this file's CONTROL (the twin calls `fromCardanoMetadatum`) — measured: planted `cardanoMetadatum.ts:81` -> `return value;` and ran the three new files, 6 passed, 1 red = `twin`, the RED guard and the siblings' cells green (`codecjoin_cross.log`) — which is the codec being pinned twice, not a collision; the checker never runs the two files together, and under THIS brief's two tampers the twin is green. `grep` of every `night/READY_*` for `services/anchoring/src/index.ts`, `cardano/transaction.ts` or this file name: 0. Sequencing needed: none.
+
+## MEASURED by the writing seat (2026-09-21, `--shared` scratch clone at `cbae988db`, node_modules farmed from the source checkout via the harness's `prepare_clone.sh`, source tracked-modified count 0 before and after; artefacts under `2_Project_Files/local-model/runs/2026-09-21_wave3-drafter-precheck/`, this row's under `T12-CHAINREAD-DECODE/`)
+
+- This file at the tip: **2/2 green** (`probe_tip_anchoring_verbose.out`). Whole anchoring suite with this file and the two sibling files: **326 cells, 325 passed, 1 failed** — the 1 red is `threadTokenMint.test.ts` "parameterises mint + spend with a deterministic per-seed policyId" (develop's own; the gate's count at the bare tip is 318/319 with the same red). `full_suite_all3.out`.
+- Tampers planted by bytes (`tamper_probe_anchoring.log`, the three new files = 7 cells): CHAINREADNODECODE → 6 passed, **1 red = `order`** (`AssertionError: expected [ false, false, true ] to deeply equal [ true, true, true ]`), planted sha256 `9ad29c680e4e`; HASHCOMPARERAW → the same, planted sha256 `6fd45f79c76f`. `index.ts` restored (`git diff --quiet` rc 0, sha256 `31422a6ab3c74804`) after each. Whole 326-cell suite under each (`tamper_whole_anchoring.log`, `whole_<ID>.json`): 324 passed, 2 failed = `order` + the develop-own `threadTokenMint` red — 0 existing cells newly red.
+- (the golden checker run and the combined tree are appended below after the run)
+
+## Output
+
+Exactly ONE ```diff block, nothing outside it: `--- /dev/null` / `+++ b/Blockchain/Dev/services/anchoring/src/__tests__/ks1284-chain-read-order.test.ts`, then the ONE hunk above exactly as shown (`@@ -0,0 +1,43 @@`).
+
+## Notes for the raise (not for the model)
+
+- Test-only, zero product bytes, new file. **Raise tier: TIER 1 at the gate (anchoring verify-by-hash chain read, test-only source guard + pure-codec twin — allowed; the gate asked for this shape). Refs KS-1284 (and KS-721 for the codec's origin). NEVER Closes** — KS-1284 stays In Progress (Blockfrost's real `json_metadata` shape for a chunked string is unobserved until the live sweep; the ticket body does not yet record the boolean fact — M-3).
+- **From the #1105 gate's NOT-PINNED table** (report `2026-09-20-pr1105-tier1-r1/report.md`, row T12-CHAINREAD-DECODE; its tamper `:699` raw read is CHAINREADNODECODE here, planted and measured; HASHCOMPARERAW added as the partial regression the `:697-698` comment names).
+- **Not pinned here, said plainly:** the RUNTIME behaviour of `handleAnchorVerifyByHash` (a source-text guard proves the lines are there and ordered, not that they run — the 5f live sweep does that); Blockfrost's real chunked-string shape (unobserved); the identityCommitment array-vs-string read-back on the view (pinned by `ks1175-anchor-readback.test.ts`).
+- **A source-text guard is brittle by design:** any reformat of `:695-702` reds it and the fix is to update the six strings — the file's header says so. The raise notes must say the same.
+
+## Build line (not for the model)
+
+```
+bash tasks/test_only/build_test_only_input.sh KS-1284 night/inputs/test_only_1284T12-CHAINREAD-DECODE-1.json night/briefs/KS-1284-T12-CHAINREAD-DECODE-1.md ctx=65536
+```
+
+## MEASURED — appended after the golden run (02:30, artefacts `runs/2026-09-21_wave3-drafter-precheck/T12-CHAINREAD-DECODE/`)
+
+- Golden checker (`tasks/test_only/checker.sh` on the golden `out.md`, fresh `--shared` clone at `cbae988db`, `drafter2_clone_5`, farmed by the harness's `prepare_clone.sh`): **RESULT: PASS (8/8)** — T1 one fenced block; T2 touched set == the new file only; T3 strict apply of the `--- /dev/null` diff; T4 every `+` line byte-exact; T5 green at the tip 2/2 cells; T6 CHAINREADNODECODE and HASHCOMPARERAW each red set == {order}, an assertion failure; T7 the twin green under both; T8 `index.ts` restored to sha256 `31422a6ab3c7` after each. Source tracked-modified count 0 before and after (`prepare.log`).
+- All-orders apply with the three held READYs and the two sibling new-file briefs (`collision_all_orders.log`, 8 orders incl. all 6 permutations of the held three): every apply rc 0 in every order; after EVERY order `ks1175-anchor-readback.test.ts` is **133 lines, sha256 `431b51cb378e933c`** and `ks1175-identity-anchoring.test.ts` **227 lines, sha256 `ee1cbe52ea87bc02`** (identical to the prior drafter's measurement) and this file is sha256 **`0ddbc335fe785a28`** (identical to the file the checker graded).
+- Whole anchoring suite with all six applied (`full_suite_all6.out`): **329 cells, 328 passed, 1 failed** — the same develop-own `threadTokenMint` red as at the tip (319/318/1).

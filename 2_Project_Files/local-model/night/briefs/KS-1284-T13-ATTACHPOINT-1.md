@@ -1,0 +1,153 @@
+# KS-1284 T13-ATTACHPOINT-1 PIN THAT buildAnchorTransaction RUNS THE PAYLOAD THROUGH THE CODEC AT THE ONE ATTACH POINT — a 90-byte identityCommitment and a boolean reach labels 674 AND 675 as chunks and "true", built IN-PROCESS with a mocked provider and a CSL-generated wallet — Wednesday's task for Ornith, TEST_ONLY, **ONE NEW vitest test file, no product file** (written 02:23 on 2026-09-21, #1105 gate NOT-PINNED row T13-ATTACHPOINT)
+
+File: `Blockchain/Dev/services/anchoring/src/__tests__/ks1284-attach-point.test.ts`
+Tip: `cbae988dbe90ebe556459ada2cb437eaf80e2402`
+Runner: `vitest`
+
+Written from develop `cbae988dbe90ebe556459ada2cb437eaf80e2402` (`git -C "/Volumes/DevMASTER/!CODING/Secuura/Blockchain/2_Project_Files" ls-remote origin refs/heads/develop` at 02:23 on 2026-09-21, read verbs only; the #1105 squash-merge of KS-1175 + KS-1284). The test file does NOT exist at that tip: you CREATE it. The product the cells drive is `Blockchain/Dev/services/anchoring/src/cardano/transaction.ts` (blob `e047630ea004`, **148 lines**, read whole): `buildAnchorTransaction(wallet, protocolParams, metadataLabel, metadataPayload)` at `:22-148` — fetches UTxOs through `fetchUtxos` from `./provider` (`:29`), builds a CSL `TransactionBuilder` from the params (`:35-49`), adds inputs, sets TTL, and at **`:114` `  const metadataJson = JSON.stringify(toCardanoMetadatum(metadataPayload));`** feeds the codec's output to `add_json_metadatum_with_schema(label, metadataJson, BasicConversions)` (`:115-119`) — the ONE attach point for both labels (the `:108-113` comment says so); then change, build, sign, hex. `toCardanoMetadatum` is `cardano/cardanoMetadatum.ts:59`. CSL is `@emurgo/cardano-serialization-lib-nodejs` **15.0.3** (the lock). This service runs **VITEST** (`package.json` `"test": "vitest run"`, `vitest ^4.1.9`, `vitest.config.ts` with `globals: true`; no jest).
+
+## THE MODE — read this twice
+
+**TEST_ONLY, NEW FILE.** Your diff touches EXACTLY ONE file: the new test file above (`--- /dev/null` / `+++ b/<path>`, the path exactly as written above, ONE hunk `@@ -0,0 +1,43 @@`). You never touch `transaction.ts`, `cardanoMetadatum.ts`, `provider.ts` or any other product file, and you never touch an existing test file: the behaviour is already what it is at the tip, and these cells PIN it.
+
+## What the cells pin (one paragraph)
+
+The #1105 gate planted T13 — `:114` stringifying the RAW payload, the codec removed at the ONE attach point — and ran the whole 319-cell suite: **0 red**, because no test file imports `cardano/transaction.ts` (one comment mentions it). With the codec gone every >64-byte string and every boolean throws inside CSL at tx build again — KS-721's original defect — while the codec's own 16 cells (`ks1284-cardano-metadatum.test.ts`, counted) stay green (they test the functions, not the call site). This file drives the REAL builder in-process: `vi.mock('../cardano/provider')` replaces the Blockfrost provider module with one `fetchUtxos` returning a single 20-ADA lovelace UTxO (no network, no key, no client constructed); the wallet is a fresh CSL ed25519 key with an enterprise testnet address; the protocol params are fabricated numbers of the `ProtocolParams` shape (`provider.ts:241-254`). Two RED cells build a tx whose `secuura` carries a 90-byte `identityCommitment` and `actorVerified: true` under label 674 and under label 675, decode the built tx's auxiliary metadata back with CSL, and assert the commitment arrived as an ARRAY that joins to the original and the boolean as the string `"true"`; the helper CATCHES a throw at build and returns it as text, so under the tamper the assertion reads `[false, 'bools not allowed in metadata', undefined]` — an assertion red, never an uncaught error. The CONTROL anchors an all-short, boolean-free payload and asserts it decodes byte-identical (the codec is a no-op for it — green under the tamper too, proving the build path itself still runs). **It pins TODAY's codec-at-the-attach-point for both labels.**
+
+## The exact change — ONE new file
+
+Copy every line byte for byte. All 43 `+` lines are ASCII only. There is no blank line anywhere in the fence. Keep the header exactly as shown. **Your diff MUST begin with the two file-header lines, above the `@@` line: `--- /dev/null` then `+++ b/Blockchain/Dev/services/anchoring/src/__tests__/ks1284-attach-point.test.ts`.**
+
+```
+@@ -0,0 +1,43 @@
++/**
++ * KS-1284 - the ONE attach point: buildAnchorTransaction runs the logical payload through toCardanoMetadatum before
++ * add_json_metadatum_with_schema (the #1105 gate's T13-ATTACHPOINT seam: no test imported cardano/transaction.ts, so
++ * the codec removed at that line left all 319 cells green while every >64-byte string and every boolean threw at
++ * tx build again - KS-721's original defect). Runs in-process: the provider is mocked (no Blockfrost, no network),
++ * the wallet is generated from CSL, and the protocol parameters are fabricated numbers a fee algorithm accepts.
++ * A throw at tx build is CAUGHT and returned as text so every red below is an assertion, never an uncaught error.
++ */
++import { describe, it, expect, vi } from 'vitest';
++import * as CSL from '@emurgo/cardano-serialization-lib-nodejs';
++vi.mock('../cardano/provider', () => ({
++  fetchUtxos: vi.fn(async () => [{ tx_hash: '0'.repeat(64), output_index: 0, amount: [{ unit: 'lovelace', quantity: '20000000' }] }]),
++}));
++import { buildAnchorTransaction } from '../cardano/transaction';
++const key = CSL.PrivateKey.generate_ed25519();
++const keyHash = key.to_public().hash();
++const wallet = { address: CSL.EnterpriseAddress.new(0, CSL.Credential.from_keyhash(keyHash)).to_address().to_bech32(), paymentKey: key, paymentKeyHash: keyHash, networkId: 0 };
++const params = { minFeeA: '44', minFeeB: '155381', poolDeposit: '500000000', keyDeposit: '2000000', maxValSize: 5000, maxTxSize: 16384, coinsPerUtxoByte: '4310', priceMem: 0.0577, priceStep: 0.0000721, collateralPercent: 150, maxCollateralInputs: 3, slot: 1000 };
++const COMMITMENT = 'identity-commitment-l2.v1:' + 'b'.repeat(64);
++async function anchored(label: number, secuura: object): Promise<any> {
++  try {
++    const built = await buildAnchorTransaction(wallet as any, params as any, label, { secuura });
++    const metadata = CSL.Transaction.from_hex(built.txCborHex).auxiliary_data()!.metadata()!.get(CSL.BigNum.from_str(String(label)))!;
++    return JSON.parse(CSL.decode_metadatum_to_json_str(metadata, CSL.MetadataJsonSchema.BasicConversions));
++  } catch (err: any) {
++    return { threw: String(err) };
++  }
++}
++function shape(anchoredPayload: any): unknown[] {
++  const commitment = anchoredPayload?.secuura?.identityCommitment;
++  return [Array.isArray(commitment), Array.isArray(commitment) ? commitment.join('') : anchoredPayload?.threw, anchoredPayload?.secuura?.actorVerified];
++}
++describe('KS-1284 buildAnchorTransaction encodes through the codec at the ONE attach point', () => {
++  it('RED KS-1284: a 90-byte identityCommitment and a boolean reach label 674 as chunks and the string "true", nothing throws', async () => {
++    expect(shape(await anchored(674, { hash: 'c'.repeat(64), identityCommitment: COMMITMENT, actorVerified: true }))).toEqual([true, COMMITMENT, 'true']);
++  });
++  it('RED KS-1284: the batch label 675 goes through the same attach point', async () => {
++    expect(shape(await anchored(675, { hash: 'c'.repeat(64), identityCommitment: COMMITMENT, actorVerified: true }))).toEqual([true, COMMITMENT, 'true']);
++  });
++  it('CONTROL: a payload that is already chain-legal (all-short, boolean-free) is anchored byte-identical under label 674', async () => {
++    expect(await anchored(674, { hash: 'c'.repeat(64), version: '1.0' })).toEqual({ secuura: { hash: 'c'.repeat(64), version: '1.0' } });
++  });
++});
+```
+
+`vi.mock` is hoisted by vitest above the imports, so `../cardano/transaction`'s own `import { ProtocolParams, fetchUtxos } from './provider'` resolves to the factory's object (`ProtocolParams` is a type, erased); `provider.ts` — and with it `@blockfrost/blockfrost-js` and the logger — is never loaded. `transaction.ts` also imports `./wallet` for the `PlatformWallet` type only (erased) and `./cardanoMetadatum` (pure). `CSL.PrivateKey.generate_ed25519()`, `EnterpriseAddress.new(0, Credential.from_keyhash(...))` and `Transaction.from_hex(...).auxiliary_data().metadata().get(BigNum)` are CSL 15 API as the builder itself uses (`:55`, `:85`, `:128-136`). The cells need no port, no chain, no key material and no database.
+
+## Cells
+
+- `label674` = `RED KS-1284: a 90-byte identityCommitment and a boolean reach label 674 as chunks and the string "true", nothing throws`
+- `label675` = `RED KS-1284: the batch label 675 goes through the same attach point`
+- `control` = `CONTROL: a payload that is already chain-legal (all-short, boolean-free) is anchored byte-identical under label 674`
+
+## Red cells
+
+The two cells below are GENUINE assertion-reds: they fail under the tamper and pass at the tip. They are declared here rather than with a red glyph in their titles because every `+` line in this diff must be ASCII only.
+
+- RED KS-1284: a 90-byte identityCommitment and a boolean reach label 674 as chunks and the string "true", nothing throws
+- RED KS-1284: the batch label 675 goes through the same attach point
+
+## Tampers
+
+One single-line tamper on `transaction.ts:114` (the ONE attach point; it occurs EXACTLY ONCE in the file — `grep -c -F -x`, 1; positive control `grep -c -i 'toCardanoMetadatum'` over the same file: 2, the import at `:13` plus this line). It is the gate's own T13: the codec removed, the raw logical payload handed to CSL. `From` is the tip's line at that number, byte for byte; `To` is valid TypeScript (the `:13` import becomes unused — a `tsc --noEmit` nit under `noUnusedLocals`, not a load error; measured: the file loads and runs 3 cells under the tamper). The checker plants it and restores the file by bytes. **Frame, stated plainly:** no cell of the existing suite imports `cardano/transaction.ts` (0 at the tip), so the tamper reds exactly the two RED cells — measured over the whole 326-cell suite: the only other red is develop's own `threadTokenMint` cell, red at the untouched tip too. CSL rejects the boolean BEFORE the long string on this payload, so the caught text is `bools not allowed in metadata` (measured), not the `Max metadata string too long: 90` the gate predicted — the same throw class at the same attach point.
+
+### ATTACHPOINTRAW — the codec removed at the ONE attach point, the raw payload handed to CSL
+File: `Blockchain/Dev/services/anchoring/src/cardano/transaction.ts`
+Line: 114
+From:
+```
+  const metadataJson = JSON.stringify(toCardanoMetadatum(metadataPayload));
+```
+To:
+```
+  const metadataJson = JSON.stringify(metadataPayload);
+```
+Reds: `label674`, `label675`
+
+## Controls
+
+- `CONTROL: a payload that is already chain-legal (all-short, boolean-free) is anchored byte-identical under label 674`
+
+*(The FULL `it(...)` title of the file's third cell, byte for byte. For a VITEST suite the checker matches a declared cell by its FULL title, never by a prefix; no title is a prefix of another. Under the tamper the control's payload has no >64-byte string and no boolean, so CSL accepts it raw and the decode is byte-identical — the control proves the mocked build path still runs while the RED cells red.)*
+
+## THE CELLS — state it to yourself before you write a line
+
+At the untouched tip all three cells pass: the mocked `fetchUtxos` returns one 20,000,000-lovelace UTxO at `tx_hash` `0` x 64; the builder computes a fee (measured: 175489 lovelace, a 906-hex-char signed tx, address `addr_test1v...`), attaches `toCardanoMetadatum({ secuura: {...} })` under the label, and the decoded auxiliary metadata reads `identityCommitment: ['identity-commitment-l2.v1:' + 38 b's, 26 b's]` (two chunks of at most 64 bytes, joining to the 90-byte original), `actorVerified: "true"`, `hash` unchanged — measured for 674 and 675: `[true, COMMITMENT, 'true']`. The control's `{ hash, version: '1.0' }` decodes to itself.
+
+Under **ATTACHPOINTRAW** `add_json_metadatum_with_schema` receives the raw JSON: CSL throws `bools not allowed in metadata`, the helper returns `{ threw: 'bools not allowed in metadata' }`, and `shape()` yields `[false, 'bools not allowed in metadata', undefined]` — `expected [ false, ...(2) ] to deeply equal [ true, ...(2) ]` for BOTH labels (measured). The CONTROL is green under it (measured).
+
+## Premises (measured — by reading the tip, NOT by running anything, except where the MEASURED section below says so)
+
+- **Premise: the From line.** `transaction.ts` at `cbae988db`, line 114 is `  const metadataJson = JSON.stringify(toCardanoMetadatum(metadataPayload));` (2-space indent), byte for byte; it occurs **exactly once** (`grep -c -F -x`, 1). The checker plants and restores it (T8 by sha256 after; tip blob `e047630ea004`, sha256 `68ddee40814d8698...` measured after every restore).
+- **Premise: the gate's claim, re-derived.** The #1105 gate's row T13-ATTACHPOINT: "no cell: 0 of 319 — no test file imports cardano/transaction.ts". Re-read at the tip: `git grep 'cardano/transaction'` over the anchoring tests finds one COMMENT line (`ks1284-cardano-metadatum.test.ts:8`) and no import. The gate's proposed cell (mocked provider, CSL wallet, fabricated params, decode the built tx) is what this file does, plus the 675 sibling it asked for and the caught-throw helper the checker's assertion rule requires.
+- **Premise: the mock is complete.** `transaction.ts:12` imports `{ ProtocolParams, fetchUtxos }` from `./provider` — `fetchUtxos` is the ONLY runtime import; the factory supplies it. `provider.ts`'s own imports (`@blockfrost/blockfrost-js`, `../utils/logger`) are never evaluated. The params object carries all twelve `ProtocolParams` fields (`provider.ts:241-254`); the builder reads eight of them (`:38-46`, `:103`).
+- **Premise: new file.** The path is absent at the tip (`git ls-tree` of `src/__tests__/`: 19 files, none by this name), so the input's `test_mode` is `new` and the headers are `--- /dev/null` / `+++ b/<path>`. No `-` line anywhere.
+- **No backslash** in any `+` line (0, counted). **No non-ASCII** in any `+` line (0, counted). **No template literal** in any `+` line (no backtick — `'identity-commitment-l2.v1:' + 'b'.repeat(64)` is concatenation). **No blank line** (0, counted). The 674 title carries the double-quoted `"true"` inside a single-quoted string — copy it as written.
+- **Premise: the runner.** `vitest` is in `services/anchoring/package.json`; no jest. The checker runs `npx vitest run src/__tests__/ks1284-attach-point.test.ts` from `Blockchain/Dev/services/anchoring`. CSL's WASM loads in-process (the codec suite already does).
+- **Premise: the surface.** A mocked provider, a throwaway in-memory key, no submission (the built tx is decoded, never sent). No user store, no session, no JWT, no chain, no db, no port, no product bytes. ANCHORING tx-build codec attach point, test-only pin (allowed).
+
+## Collision
+
+**NEW file — no hunk overlap is possible with anything**: the three held anchoring READYs modify `ks1175-anchor-readback.test.ts` (`:80`, `:107`) and `ks1175-identity-anchoring.test.ts` (`:176`); the two sibling briefs of this wave create `ks1175-getid-view-wired.test.ts` and `ks1284-chain-read-order.test.ts`; none of the six touches this path, so every application order gives the same tree (measured in the MEASURED section). Tamper file shared with nobody (`transaction.ts:114`; the siblings plant `index.ts`, the held READYs `anchorReadback.ts` and `cardanoMetadatum.ts:81`). The held CHUNKED brief's `CODECJOINDROPPED` (`cardanoMetadatum.ts:81`, the decode's join) does not touch `toCardanoMetadatum`'s encode path, which is all this file drives on the way in; the decode here is CSL's, not the codec's. `grep` of every `night/READY_*` for `cardano/transaction.ts`, `services/anchoring/src/index.ts` or this file name: 0. Sequencing needed: none.
+
+## MEASURED by the writing seat (2026-09-21, `--shared` scratch clone at `cbae988db`, node_modules farmed from the source checkout via the harness's `prepare_clone.sh`, source tracked-modified count 0 before and after; artefacts under `2_Project_Files/local-model/runs/2026-09-21_wave3-drafter-precheck/`, this row's under `T13-ATTACHPOINT/`)
+
+- This file at the tip: **3/3 green** (`T13-ATTACHPOINT/probe_tip.out`; a verbose probe of the same build, `probe_tip_anchoring_verbose.out`, printed fee 175489, a 906-hex-char tx, and the decoded `identityCommitment` as two chunks — and that the same 90-byte string handed to CSL directly throws `Max metadata string too long: 90, max = 64`). Whole anchoring suite with this file and the two sibling files: **326 cells, 325 passed, 1 failed** — the 1 red is `threadTokenMint.test.ts` "parameterises mint + spend with a deterministic per-seed policyId" (develop's own; the gate's count at the bare tip is 318/319 with the same red). `full_suite_all3.out`.
+- Tamper planted by bytes (`tamper_probe_anchoring.log`, the three new files = 7 cells): ATTACHPOINTRAW → 5 passed, **2 red = `label674` + `label675`** (`AssertionError: expected [ false, ...(2) ] to deeply equal [ true, ...(2) ]`; received `[false, 'bools not allowed in metadata', undefined]`, `T13-ATTACHPOINT/tamper_received.out`), planted sha256 `a60da6728991`. `transaction.ts` restored (`git diff --quiet` rc 0, sha256 `68ddee40814d8698`) after. Whole 326-cell suite under it (`tamper_whole_anchoring.log`, `whole_ATTACHPOINTRAW.json`): 323 passed, 3 failed = the two RED cells + the develop-own `threadTokenMint` red — 0 existing cells newly red.
+- (the golden checker run and the combined tree are appended below after the run)
+
+## Output
+
+Exactly ONE ```diff block, nothing outside it: `--- /dev/null` / `+++ b/Blockchain/Dev/services/anchoring/src/__tests__/ks1284-attach-point.test.ts`, then the ONE hunk above exactly as shown (`@@ -0,0 +1,43 @@`).
+
+## Notes for the raise (not for the model)
+
+- Test-only, zero product bytes, new file. **Raise tier: TIER 1 at the gate (anchoring tx-build codec attach point, in-process with a mocked provider — allowed; the gate asked for this shape). Refs KS-1284 (and KS-721 for the original defect). NEVER Closes** — KS-1284 stays In Progress (Blockfrost's real `json_metadata` shape for a chunked string is unobserved until the live sweep; M-3).
+- **From the #1105 gate's NOT-PINNED table** (report `2026-09-20-pr1105-tier1-r1/report.md`, row T13-ATTACHPOINT; its tamper `:114` raw stringify is ATTACHPOINTRAW here, planted and measured; the gate's predicted throw text differs — the boolean is refused first — recorded in Tampers).
+- **Not pinned here, said plainly:** submission (`submitTransaction`) and the live chain's acceptance of the built tx; the DB row keeping the logical form (the builder's caller, `index.ts`, bootless); the decode half (`fromCardanoMetadatum` at the chain read — sibling brief T12 and the held CHUNKED cell).
+- **Non-determinism, said plainly:** the wallet key is generated per run, so the tx hash and address differ run to run; nothing asserted depends on them (only the decoded metadata and the fee's existence).
+
+## Build line (not for the model)
+
+```
+bash tasks/test_only/build_test_only_input.sh KS-1284 night/inputs/test_only_1284T13-ATTACHPOINT-1.json night/briefs/KS-1284-T13-ATTACHPOINT-1.md ctx=65536
+```
+
+## MEASURED — appended after the golden run (02:30, artefacts `runs/2026-09-21_wave3-drafter-precheck/T13-ATTACHPOINT/`)
+
+- Golden checker (`tasks/test_only/checker.sh` on the golden `out.md`, fresh `--shared` clone at `cbae988db`, `drafter2_clone_6`, farmed by the harness's `prepare_clone.sh`): **RESULT: PASS (8/8)** — T1 one fenced block; T2 touched set == the new file only; T3 strict apply of the `--- /dev/null` diff; T4 every `+` line byte-exact; T5 green at the tip 3/3 cells; T6 ATTACHPOINTRAW red set == {label674, label675}, both assertion failures; T7 the control green; T8 `transaction.ts` restored to sha256 `68ddee40814d`. Source tracked-modified count 0 before and after (`prepare.log`).
+- All-orders apply with the three held READYs and the two sibling new-file briefs (`collision_all_orders.log`, 8 orders incl. all 6 permutations of the held three): every apply rc 0 in every order; after EVERY order `ks1175-anchor-readback.test.ts` is **133 lines, sha256 `431b51cb378e933c`** and `ks1175-identity-anchoring.test.ts` **227 lines, sha256 `ee1cbe52ea87bc02`** (identical to the prior drafter's measurement) and this file is sha256 **`358829c474f0a2ae`** (identical to the file the checker graded).
+- Whole anchoring suite with all six applied (`full_suite_all6.out`): **329 cells, 328 passed, 1 failed** — the same develop-own `threadTokenMint` red as at the tip (319/318/1).
