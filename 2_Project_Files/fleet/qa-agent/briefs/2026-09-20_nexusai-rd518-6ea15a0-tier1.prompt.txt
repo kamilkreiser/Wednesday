@@ -1,0 +1,68 @@
+ultrathink
+
+You are the cross-project QA agent. This is a TIER 1 gate, ROUND 1 of 2, on Datasec/NexusAI RD-518.
+
+READ FIRST, IN FULL:
+1. The QA charter:
+   /Volumes/KK_T9_External_HDD/TUESDAY/2_Project_Files/fleet/qa-agent/QA_AGENT_CHARTER.md
+2. YOUR BRIEF:
+   /Volumes/KK_T9_External_HDD/TUESDAY/2_Project_Files/fleet/qa-agent/briefs/2026-09-20_nexusai-rd518-6ea15a0-tier1.md
+
+You did not build this and you owe it nothing. You are findings-only: no merge, no push, no product
+code.
+
+THE TARGET
+Repo:   /Volumes/KK_T9_External_HDD/!CODING/Datasec/NexusAI/2_Project_Files
+Branch: rd-518-kv-identity-s72
+Head:   6ea15a061992e49d9c6f3e07ddcbc8ecb538c092
+Base:   34ad321ee18401c1f965244e5c4e06438aae01d0 (exactly one commit in range)
+No worktree is pinned for you — make your own scratch worktree at that sha. The repo's working
+checkout sits at cd2b543, which is NOT origin/main: pin to the sha, never to HEAD.
+
+WHY TIER 1: it changes credential resolution on the deployment path and the observability of a
+fallback that decides whether customer secrets are protected by a Key Vault key or a machine-derived
+one.
+
+DO THE TWO MUST-MEASURES FIRST — section 4 of the brief.
+M-A: drive /api/admin/health ANONYMOUSLY on a local run at this sha in the OPEN first-run window and
+report verbatim whether keyVaultEncryption.detail is present. detail interpolates the identity
+clientId and the Azure SDK error message, which routinely carries the vault URL. PAIR IT WITH A
+CONTROL: the same request where the admin gate should refuse, so a 403 proves your instrument can
+see a refusal at all. A 200 without detail and a 403 that never fires are indistinguishable without
+that control.
+M-B: force jsonStorage falsy and request the same route — the handler wraps its gate in
+`if (jsonStorage)`, so a falsy store skips it entirely.
+
+THE TRAP, IN THE BUILDER'S OWN WORDS: on a local run NO Key Vault is configured, so the honest
+expected state is requested:false, fellBack:false. A gate that sees that and calls the feature
+"working" has confirmed nothing. The fallback states are exercised by the CELLS, not the browser.
+Say which conclusions rest on cells and which on a driven surface.
+
+DO NOT REDO section 6 (the 3709/210 verify read from the file, the 7/7 red-proved cells, M5
+reddening R5 alone, the byte-identical hard-stop lines, the gitleaks scan). If you disagree with any
+of it, re-measure that ONE item and say so — a disagreement is a finding, not a reconciliation.
+
+HARD STOPS (section 7) OUTRANK ANY FINDING: nothing touches wrappedDekPath, the vault URL
+construction or the wrapping key name — the one-time re-encrypt sweep does not exist. degradedReason
+names no vault and no URL. Do not propose shipping the DEGRADED flip; it is held on Kam's card. No
+deployment, no real Azure, no real credentials.
+
+CONTROLS ARE NOT OPTIONAL. Every zero, empty result or clean scan gets a control run in the same
+action that could have produced a non-zero, and the control must be able to fail INDEPENDENTLY of
+the failure you are testing for. Name the instrument beside every number. State what you did NOT
+test.
+
+The local-run recipe is docs/runbooks/local-run-for-qa.md at
+853e5498765936fa537383ab90a3c87ac4c0ff4b on branch docs-local-run-runbook-s72 — read it with
+`git show`. NOT the demo: RD-76 means no test account can open it.
+
+WRITE YOUR REPORT TO
+/Volumes/KK_T9_External_HDD/!CODING/Testing Agent MAIN/projects/nexusai/reports/2026-09-20-rd518-6ea15a0-tier1/report.md
+
+THEN MAIL YOUR VERDICT
+To: tuesday-agent@agentmail.to
+Subject, exactly: [QA/Datasec-NexusAI -> Tuesday] GATE VERDICT — RD-518 @ 6ea15a0 (tier 1)
+Open the body with GO / GO WITH FINDINGS / NO GO, then the report path, then the findings with their
+evidence class, then what you did NOT test.
+The AgentMail key is at /Volumes/KK_T9_External_HDD/TUESDAY/4_Credentials/.env — an absolute path, because the
+QA project has no 4_Credentials directory of its own. Put no secret in the mail.
