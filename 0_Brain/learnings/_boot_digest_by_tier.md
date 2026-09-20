@@ -7,7 +7,7 @@ status: live
 
 # Boot digest BY TIER — W whole, M rules-only, every project case a handle
 
-Generated 2026-09-20 07:48 from 188 lesson files (933,978 B). M 33 · MIXED 5 · W 150. 28 project CASE sections inside MIXED files are reduced to one line each: the heading and the path to read it at. W blocks are exactly what the default digest carries; M blocks drop the section index and keep the rules; a P file is a single handle. The CASES behind every rule live only in the lesson files — open one the moment its rule fires.
+Generated 2026-09-20 16:01 from 191 lesson files (944,638 B). M 35 · MIXED 5 · W 151. 28 project CASE sections inside MIXED files are reduced to one line each: the heading and the path to read it at. W blocks are exactly what the default digest carries; M blocks drop the section index and keep the rules; a P file is a single handle. The CASES behind every rule live only in the lesson files — open one the moment its rule fires.
 
 ## The T9 SSD is the master — Wednesday must be fully portable
 `2026-07-31_fully-portable-drive.md` · principle · 2026-07-31 · status: superseded — the "T9 is the master" half by [[2026-08-25_one-drive-devmaster-is-master]] (2026-08-25); the portability principle itself still lives · tier: W
@@ -6334,4 +6334,56 @@ built to close.**
    caught by gates built for exactly them, and both refusals were correct.
 4. **A tool's header comment names the incident and the ledger weight.** Read it — it tells you what
    breaks when you skip it.
+
+
+## A CLOSURE inherits the scope of the measurement that produced it — a census written to settle a disagreement is not a census of the world
+`2026-09-20_a-closure-inherits-the-scope-of-its-measurement.md` · principle · 2026-09-20 · status: live · tier: M
+
+**The operative case, so the headline matches it:** you are about to rely on a closed ticket, a completed census, a "verified complete" list or a signed-off audit — or to write one. **Ask what QUESTION it was asked, not whether it was done well.** A measurement made to settle a dispute between two lists establishes which list was right. It establishes nothing about a third thing that was in neither.
+
+**How to apply:**
+1. **Read a closed item's SCOPE SENTENCE before citing it as coverage.** "Reconciled the two lists" and "enumerated every store" are different claims that close the same ticket.
+2. **When you close something, write the frame INTO the closure** — what was measured, over what set, and what was deliberately not looked at. One line, and it is the line that stops the next reader inheriting a guarantee nobody made.
+3. **The dangerous inheritance is a LIST**: a store, a route, a field, a file class that was never in either candidate set is invisible to a reconciliation and to everyone who trusts it afterwards.
+4. **A fix that makes the list SAY it is covered is the failure mode** — RD-575's own trap: adding the directory to the file list would fail on `EISDIR` and the per-name handler would swallow it, so the record would claim coverage while nothing was removed. **Assert the effect (the data is gone), never the bookkeeping.**
+5. Same shape in reverse for us: when a gate is NOT RUN, its items are unverified CLAIMS, not results — a verdict inherits the scope of the run that produced it.
+
+**Family:** [[2026-09-07_a-census-complete-over-a-frame-that-is-not]] (the parent — this is its CLOSURE half: there the census was misread while fresh, here it was inherited after closing) · [[2026-08-16_a-recorded-blocker-is-not-a-boundary]] (a recorded claim with a date) · [[2026-09-06_a-retraction-inherits-the-scope-of-its-measurement]] (its mirror: a withdrawal inherits its measurement's scope too) · [[2026-08-07_a-check-that-cannot-fail]].
+
+
+## An EARLY RETURN added to a shared function silently disarms existing tests — and by definition they are NOT in the diff
+`2026-09-20_an-early-return-disarms-tests-outside-the-diff.md` · principle · 2026-09-20 · status: live · tier: M
+
+**The operative case, so the headline matches it:** a change adds a guard, a mode check or any other **early return** near the top of a function that other code already calls. **Before accepting it, enumerate the function's CALLERS and the existing cells that exercise them, and ask of each: does this cell still reach the check it is NAMED for?** A review scoped to the changed set cannot see this by construction — the weakened tests are in files the commit never touched, they still pass, and they keep their names.
+
+**How to apply:**
+1. **The population to check is "callers of the mutated function", not "files the commit touched".** Enumerate them; do not sample.
+2. **For each existing cell on that path, ask whether it still reaches the check it is named for** — and where it does not, the fix is usually one line in the FIXTURE (give it what the new guard demands), never a change to the policy ([[2026-09-20_a-closure-inherits-the-scope-of-its-measurement]]'s sibling rule: repair the fixture, not the guard).
+3. **Prove the disarmament with a paired mutation:** delete the LATER check and expect the suspect cell GREEN plus a known-good cell RED. Both red means the diagnosis is wrong; both green means the instrument is dead and the run proved nothing.
+4. **Severity: the product may be perfectly correct** — this is a COVERAGE defect, and saying both halves ("the product is right" and "the guard is now unexercised") stops the next reader over- or under-reading it.
+5. **It generalises past early returns:** anything that short-circuits a shared path — a new cache, a feature flag checked first, a fail-fast validation, a middleware mounted earlier — can leave downstream assertions unreached while green.
+
+**Family:** [[2026-08-07_a-check-that-cannot-fail]] (the parent: here the check exists, runs, passes, and no longer tests its subject) · [[2026-09-08_the-check-ran-and-was-not-checking-the-thing]] · [[2026-09-07_a-census-complete-over-a-frame-that-is-not]] (the diff is the frame) · [[2026-09-20_a-closure-inherits-the-scope-of-its-measurement]].
+
+## SHARPENED the same day by the same seat (S71), and it is what makes the sweep FINISHABLE
+**Disarmament is SILENT only where the cell asserts a NEGATIVE** — *refused · ignored · absent · falls
+through · returns null*. A cell asserting a POSITIVE goes **red loudly** when an earlier gate catches it,
+so it is noticed the same day by whoever ran the suite. **So the population to check is not "all cells on
+the callers" but "the NEGATIVE-ASSERTING cells on the callers"** — which is why this class came back as
+three sites rather than an unbounded audit.
+
+
+## Work called "PREPARED" that lives in a SCRATCHPAD is not prepared — it is lost, and the handover sentence is a claim about a PATH
+`2026-09-20_prepared-in-a-scratchpad-is-lost.md` · correction · 2026-09-20 · status: live · tier: W
+
+**The operative case, so the headline matches it:** you are writing a handover, a wrap or a pickup and the sentence says **prepared · staged · ready · queued · built · waiting**. **Name the durable path the thing lives at, or do not use the word.** A successor cannot tell "written and safe" from "written and gone" — both read identically in prose, and only one survives the session.
+
+**How to apply:**
+1. **Every "prepared/staged/ready" sentence carries its path**, and the path is inside the project tree (or another synced, committed location) — never `/private/tmp`, never a session scratchpad, never "in my worktree" without saying which and whether it is pushed.
+2. **This binds the COORDINATOR's handovers too**, not only the seats'. A pickup line promising staged work is the same claim.
+3. **If the artefact is not yet durable, say what it IS:** *"drafted in this session's scratchpad and will not survive it — re-derivable from X"*. That is honest and it tells the successor to budget the work.
+4. **Test by its reader:** could a cold successor `ls` the thing from the sentence alone? If not, the sentence is a promise about something nobody can reach.
+5. **The generalisation:** an artefact with no durable location **reports its own absence as readiness** — the same shape as a census whose closure is read as completeness ([[2026-09-20_a-closure-inherits-the-scope-of-its-measurement]]), one layer down in the filesystem.
+
+**Family:** [[2026-09-07_a-mechanism-is-recorded-by-its-path-not-its-runtime-id]] (the parent — a mechanism is recorded by its PATH; this is the same rule for a PRODUCT of work rather than a tool) · [[2026-08-07_a-promise-is-not-a-mechanism]] · [[2026-09-20_a-closure-inherits-the-scope-of-its-measurement]] · [[2026-08-26_never-delete-cleanup-means-quarantine]] (what survives is decided before you need it).
 
