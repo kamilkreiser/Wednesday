@@ -10,6 +10,36 @@ supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s
 
 ---
 
+## 🔴 DELTA 48 — 2026-09-21 08:5x ROTATION HANDOVER (Tuesday ctx 88%, safe boundary: work delegated first). **KAM LIFTED THE USAGE GATE AND NAMED THE PRIORITY. ONE SEAT IS LAUNCHED; TWO MORE ARE READY AND NOT STARTED.**
+
+### HIS WORDS, VERBATIM (panel, 2026-09-21 ~08:3x)
+> *"Don't worry about the usage gate. I will log in as a new account as we get close to 100%. Please do everything you can to get Nexus AI ready for resubmission."*
+- **Recorded in `tasks/EXPIRING-GRANTS.md`** with its scope and expiry reading: **it lifts the 95% STOP only**, is tied to the ALLOWANCE not the clock, and **is re-asked if he goes quiet AND the gauge crosses ~99% with no new account** (at that point the premise — that he is there to switch — has gone). **The signature classes, the QA gate, and RD-516's own §5 acceptance clause are all UNCHANGED.**
+- 🔴 **THE MECHANISM, so the override is visible rather than silent: every launch passes `WED_USAGE_STOP=100`, with his quote as the recorded authority.** The bare gate still refuses at 95% by design — do not edit it.
+
+### 🟢 LAUNCHED — `%22` `Datasec/NexusAI`, the 28 (THE MERGE BLOCKER)
+- **Brief sent through the gate and VERIFIED AT DESTINATION `datasec-nexusai@` 2026-09-20T22:57:30Z.** Body: `fleet/briefs_staged/nexusai_rd574_rescue_the_27.md` (content says 28).
+- ⚠️ **VERIFY AT RUNG 5 AS YOUR FIRST ACT.** At my last read it was at **rung 4 only** — a turn was running (ctx 7%, doing its git orientation) but the pane had not yet named the commission. **Grep its pane for `RD-574` / `rd516-net-harness-preload` / the suite names before believing it is on the right work.**
+- Its scope: test-side only, its own branch off current `main`, carrying the preload helper, acceptance = **INERTNESS per suite**. Six hard stops in the brief including *do not tidy `SEAM_OFF` into the intercept map* and *the seam serves `http://` only*.
+
+### 🔴 TWO MORE, FULLY SPECIFIED, NOT STARTED — **launch both; they are disjoint by file from %22 and from each other**
+1. **RD-516's FIX ROUND** on `rd-516-ai-test-ssrf-s73`: the F-1 header correction (the false *"BY CONSTRUCTION"* claim — **RULED: correct it before merge; do NOT widen ai-config here; file the Gov-customer save defect separately**) · the F-2 IPv6 one-liner (`net.isIP(url.hostname.replace(/^\[|\]$/g,''))`) · the F-3/F-4 mutation-table corrections · **and the §8 NEW-1 line S73 deferred to protect the gate's pin.** Touches `backend/services/aiEndpointPolicy.js` + the in-repo brief. **All of it is in DELTA 46 — do not re-derive it.**
+2. **RD-518's FIX ROUND, round 2 of 2 (a third is Kam's, C-62):** `fleet/briefs_staged/nexusai_rd518_fix_round2.md`. Touches `backend/server.js`. 🟢 **NOW WIDER than when it was staged: the DEGRADED flip is unblocked** (DELTA 47 — his count release), so the flip is in scope. **Re-read that brief against DELTA 47 before sending it.**
+
+### 🔴 FOUR GATE REFUSALS I HIT GETTING %22 OUT — do not rediscover them
+`brief_and_launch.sh` refused four times and each refusal was correct:
+1. **No `PROVENANCE:` block** — it wants the literal heading with `- <fact> | <source> | read YYYY-MM-DD` lines, not a prose section.
+2. **A slash-bearing phrase read as a relative path** — `spf/dkim/dmarc pass` in a source field trips it. Write **DKIM-verified** instead.
+3. **No `SELF-CHECK` attestation** — and running `fleet/self_check_view.sh <body>` **found a REAL contradiction**: the title said 28 while the BLUF said 27. **Do the read; it earns its keep.** Attest with a GENERATED clock (`date`), never a typed one.
+4. **No `RULED BY KAM, NOT YET IN AN ARTEFACT` section** — an empty one is valid, an absent one is not.
+⚠️ **And `decision_queue.sh --delivered` REFUSED while the repo was behind origin** (*"PULL FIRST… on this file that means losing Kam's rulings"*). **Pull before any card write.** Re-applied after rebasing.
+
+### 🔴 STILL OWED BY KAM — ONE ITEM, AND IT IS TIME-CRITICAL
+**A WEEK INSTRUCTION FOR THIS SEAT, before he leaves TONIGHT.** `tasks/WEEK-INSTRUCTION-TUESDAY.md` is `status: none`, `valid_until: 2026-09-16`. **Without one, Datasec has no standing authority for the week and this seat must STOP rather than keep working.** Put to him twice on the panel (08:3x and 08:5x). **Ask again if he has not answered by the time you check.**
+**Closed, do not re-ask:** the deployment count (released) · the undici card (ruled (c), already in force) · the usage stop (lifted).
+
+---
+
 ## 🟢 DELTA 47 — 2026-09-21 08:3x. **KAM IS BACK AND RULED TWO THINGS. THE DEPLOYMENT COUNT IS RELEASED. TWO ASKS STILL OPEN.**
 
 ### HIS WORDS, VERBATIM, both delivered by the panel directly to `tuesday-agent@` (not relayed)

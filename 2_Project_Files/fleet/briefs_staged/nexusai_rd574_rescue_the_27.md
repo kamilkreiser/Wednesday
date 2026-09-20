@@ -2,13 +2,13 @@
 
 > 🔴 **RE-VERIFY BEFORE SENDING. Four things move and this brief is written ahead of time on purpose:**
 > 1. **`main`'s head** and **RD-516's branch head** — read `git ls-remote origin` in the same action as the send.
-> 2. **The 27 themselves** — re-read §6 of `docs/rd516/RD-516-gate-brief.md` **at the then-current head**. That is the IN-REPO path (the repo root IS `2_Project_Files`); a `git show <sha>:2_Project_Files/docs/...` returns "does not exist".
+> 2. **The 27 named in §6 (plus NEW-1 = 28 in total)** — re-read §6 of `docs/rd516/RD-516-gate-brief.md` **at the then-current head**. That is the IN-REPO path (the repo root IS `2_Project_Files`); a `git show <sha>:2_Project_Files/docs/...` returns "does not exist".
 > 3. **The usage gauge** — `fleet/usage_gate.sh --check` in the same action as the launch decision. Kam's lift of the 95% stop was for the night of 2026-09-20 only, undated; it is RE-ASKED, never assumed.
 > 4. **Whether S73 or a successor already took some of them.** The three already done (rd545 `A4`, rd523 `E2`, `E2-happy`) are NOT in scope; check nothing else has been.
 
 ## BLUF — what this seat does, and why it merges FIRST
 
-**Rescue the 27 seam-dependent test cells named in §6 of the gate brief, on a NEW branch off current `main`, which merges BEFORE RD-516.** They pass on `main` today and break the moment RD-516's endpoint policy merges, so they are a **MERGE BLOCKER, not follow-up** — and because each fixture change is **inert** (it passes with and without the policy), the branch lands on `main` harmlessly ahead of the policy.
+**Rescue the 28 seam-dependent test cells — the 27 named in §6 of the gate brief PLUS NEW-1 (the 28th, classified after that file was committed; see its own section below), on a NEW branch off current `main`, which merges BEFORE RD-516.** They pass on `main` today and break the moment RD-516's endpoint policy merges, so they are a **MERGE BLOCKER, not follow-up** — and because each fixture change is **inert** (it passes with and without the policy), the branch lands on `main` harmlessly ahead of the policy.
 
 **RD-516's own acceptance clause depends on this work:** *"The seam-dependent cells listed in §6 are on `main`."* **Read that as 28: S73 classified NEW-1 by reading it after the brief was committed, and deliberately did NOT edit §8 because committing would have moved the head the gate was measuring. The §8 "unclassified" line is a ONE-LINE FIX OWED after the verdict.**
 
@@ -66,6 +66,25 @@ Before changing any cell, read what it was built to prove — `git log -S` on th
 
 Mail `tuesday-agent@agentmail.to`, subject `[Datasec/NexusAI -> Tuesday] ...`. **Your first mail precedes your first hold; a turn never ends on an unmailed report.** Send the per-suite inertness pairs as numbers, the cells done by name, and anything you stopped on. **Ends at READY FOR QA** — the gate is mine to commission.
 
-## PROVENANCE OF EVERY FACT IN THIS BRIEF
 
-The 27, the recipe and the acceptance clause: `docs/rd516/RD-516-gate-brief.md` §5/§6 at `f4264e5`, read by Tuesday at source 2026-09-21 00:1x. The three completed cells: `f09836d`, `f4ef7a7`. The seam's http-only limit and the `SEAM_OFF` control: S73's mails of 2026-09-20 14:00Z and 14:10Z, spf/dkim/dmarc pass. The merge-blocker ruling: Tuesday, 2026-09-20T14:03:09Z, quoted in §5 of that brief.
+RULED BY KAM, NOT YET IN AN ARTEFACT
+- rd104-gh-identity-acceptance-false-premise: "(ruled; see the card for his words)" -> must land in the RD-104 ticket as a comment. NOT this brief's subject and NOT yours to action — carried here because the gate is right that you should know an undelivered ruling exists on your project. If you touch RD-104 for any reason, land it first and mail me the comment id.
+
+(Discharged since the last brief, for completeness: nexusai-degraded-flip-and-live-deployments — his 2026-09-21 08:32 words released the deployment-count requirement, and nexusai-rd516-undici-dependency-for-address-pinning — ruled (c), already in force.)
+
+PROVENANCE:
+- The named 27 cells in §6, by suite and cell (NEW-1 is the 28th and is NOT in that file) | `docs/rd516/RD-516-gate-brief.md` §6 at `f4264e5` (in-repo path; the repo root IS `2_Project_Files`) | read 2026-09-21
+- The four-step rescue recipe, proven on R7 | same file, §6 | read 2026-09-21
+- The acceptance clause "the seam-dependent cells are on main" | same file, §5 | read 2026-09-21
+- The three cells already done (rd545 A4; rd523 E2, E2-happy) | commits `f09836d` and `f4ef7a7` | read 2026-09-21
+- `rd516-net-harness-preload.js` is ABSENT at `60c76d7`, so your branch must carry it | tier-1 GATE VERDICT §5(a), mail `[QA/Datasec-NexusAI -> Tuesday]` 2026-09-20T15:02:12Z, DKIM-verified | read 2026-09-21
+- The §6 27 pass on main with the policy neutralised (105/105 across the four suites) and exactly 27 red with it on | same gate verdict, §5(c) | read 2026-09-21
+- The seam serves `http://` only; an `https://` endpoint fails the TLS handshake | S73 mail 2026-09-20T14:00:41Z, DKIM-verified | read 2026-09-21
+- `SEAM_OFF`'s ABSENCE from `RD516_INTERCEPT` is SEAM-2's control — do not "tidy" it in | same mail | read 2026-09-21
+- NEW-1 is the 28th, needs `RD516_HOSTS` only, and its suite SPAWNS its own server (`spawn(process.execPath,[SERVER])` at `:62`) so the preload wires as `-r` | S73 wrap mail 2026-09-20T14:33:25Z, DKIM-verified | read 2026-09-21
+- `main` = `60c76d7`; `rd-516-ai-test-ssrf-s73` = `f4264e5`; no rd574/rescue branch exists at origin | `git ls-remote origin` | read 2026-09-21 08:3x
+- The 28 are a MERGE BLOCKER on their own branch merging BEFORE RD-516 | Tuesday's ruling 2026-09-20T14:03:09Z, quoted verbatim in the gate brief §5 | read 2026-09-21
+- The usage stop is lifted and the priority is resubmission | Kam, panel 2026-09-21 ~08:3x: "Don't worry about the usage gate... Please do everything you can to get Nexus AI ready for resubmission." | read 2026-09-21
+- RD-518's fix round is queued on `backend/server.js` (round 2 of 2; a third is Kam's, C-62), which is why your scope is test-side only | `fleet/briefs_staged/nexusai_rd518_fix_round2.md` + NEXT-PICKUP DELTA 46 | read 2026-09-21
+
+SELF-CHECK: re-read end-to-end for contradictions | 2026-09-21 08:57
