@@ -136,6 +136,48 @@ guess wearing a measurement's clothes.**
 All three were caught by the receiving agent, not by me. That is the system working, and it is not
 a substitute for the blank being filled.
 
+## THE SECOND LAYER, same day: "I verified the part of the control I REMEMBERED" — twice, on one remedy
+
+**The agent's own sentence, and it is the sharpest summary of this whole family:** *"I verified the
+part of the control I remembered, twice."*
+
+Having bypassed a pre-commit hook, it remedied the gap by running the leak scan over the commit
+range — `gitleaks git . --log-opts <base>..HEAD` — and reported **"3 commits scanned"**. Asked
+separately to enumerate what the hook actually did, it checked that number against `git log`, which
+lists **FOUR**. **`git log` omits merge diffs by default, so the MERGE COMMIT was never scanned** —
+and the merge commit was the only one containing its hand-written conflict resolutions. **The
+content most likely to carry something new was exactly what the remedy skipped.**
+
+**Two rules out of it:**
+1. **A scan's COMMIT COUNT is checked against `git log`'s count.** A merge commit is assumed
+   UNSCANNED until the flags say otherwise.
+2. **A remedy for a skipped control is itself a control, and inherits every failure mode of one** —
+   including covering the part you remembered. Ask what the ORIGINAL control's population was, and
+   whether the remedy's population matches it.
+
+## THE POPULATION IS THE TELL — `0 commits scanned` twice, once hollow and once correct
+
+The same string appeared twice in one hour and meant opposite things. Post-commit, re-running a
+`--staged` hook: `no leaks found`, **`0 commits scanned`** — an instrument with nothing to look at.
+Pre-commit, running the same hook properly: `no leaks found`, `0 commits scanned` **and
+`~1,108,039 bytes across 119 staged files`** — correct, because `--staged` scans the INDEX, not
+commits.
+
+**The words were identical; only the POPULATION SIZE distinguished them.** So: **a clean result is
+only as good as the population it looked at, and a byte or file count is the cheapest way to see
+that population.** Read it before believing a green.
+
+## AND A NOTE ON INSTRUCTIONS BUILT ON A WRONG PREMISE
+
+The instruction that exposed all of the above was **wrong**: the coordinator asserted the hook must
+do more than gitleaks (lint, mode checks, a counts guard). **It does not — it is entirely a gitleaks
+wrapper.** The instruction paid anyway, because it commissioned a **MEASUREMENT** ("read it, list
+what it checks") rather than an **ACTION** ("it does Y, so do Z").
+
+**Rule: when unsure, commission the measurement, never the action.** A wrong premise that sends
+someone to look still returns the world; a wrong premise that sends them to DO returns wasted work
+and a false sense that the gap is closed.
+
 ## How to apply
 
 1. Before trusting any control, write down the **exact command the judge runs**, and run that.
