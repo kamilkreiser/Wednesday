@@ -2557,3 +2557,8 @@ INCLUDED until he says otherwise.
 ## 2026-09-18 14:14 — Kam, panel (view=wednesday)
 > "I'm going to be away for the next two days, so please keep going with tickets and activity while I'm away. Push merge and deploy whatever is ready. Whenever it's ready."
 - Done with it: receipted within the minute with the reading said back (Sat 19 + Sun 20, lapses at the end of Sunday; merge on Wednesday's GO after a gate; deploy kintsugi only; NOT demo; the signature classes still pause). WEEK-INSTRUCTION.md set LIVE; EXPIRING-GRANTS row added.
+
+## 2026-09-21 09:53 — Kam (panel (view=wednesday) 09:52:34, verbatim)
+> Been thinking, and I would like to build this dashboard in a way that is externally accessible to me, and both you and Tuesday interact with it through APIs. This will be hosted in the Chrysler.org Azure tenant and secured by MFA, so it's an external website. Depending on the overhead and speed, one approach will be to tokenize all data and to have de-tokenization based on certificates that live on my machine or multiple machines. Please look what would be required to do this.
+
+*Note:* Receipted 09:5x; 'Chrysler.org' read as kreiser.org (dictation). Requirements study commissioned to a research subagent → 1_Project_Definition/Architecture/2026-09-21_external-dashboard-requirements.md; nothing provisioned.
