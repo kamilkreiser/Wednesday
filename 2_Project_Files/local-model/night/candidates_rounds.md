@@ -257,3 +257,95 @@ a comma-guarded read); (2) **KS-1198** — same file constraint plus a minted `t
 fixture (the KS-753 brief's keypair idiom); (3) **KS-1280** — after the held KS-1238-N76-1 merges, a cell
 in the same verification.ts suite with a revoked-session double, tamper = the `Authorization` forward at
 `verification.ts:788`.
+
+---
+
+## round 23 (2026-09-21, board widening past rounds 20-22) — 43 read, 3 fits
+
+**Verdict: 3 FITs, briefed and golden-measured, all test-only, PASS 8/8 twice each on fresh clones — KS-1236
+(`KS-1236-SUBMITLEVEL-1`, auth vitest), KS-1006 (`KS-1006-WRONGCODE-1`, auth vitest, same test file as KS-1236 —
+disjoint hunks, both orders measured) and KS-1137 (`KS-1137-F2-ESTATEIMAGE-1`, bash suite).** Tip
+`cbae988dbe90ebe556459ada2cb437eaf80e2402` by `ls-remote` at start and at close (unchanged; the #1105 merge). Source
+checkout tracked-modified 0 throughout; no port touched (the auth harness's own `127.0.0.1:0` listener is the file's,
+not the drafter's); Linear read-only, key sourced transiently. Artefacts: `runs/2026-09-21_round23-drafter-precheck/`
+(`sweep/` holds the pull, the 352-row triage and the 223-row eligible list; `KS-1236/`, `KS-1006/`, `KS-1137/` the
+goldens, `golden_runs.log` all six checker runs).
+
+**Population (cursor-paginated, `first:250` + `endCursor`, 2 pages, `hasNextPage=false` on page 2):** KS Backlog+Todo =
+**352** (327 Backlog, 25 Todo, 0 archived; 259 Kam, 74 unassigned, 13 Peter, 6 Stuart) — 6 fewer than round 22's 358.
+Excluded by predicate: 85 with an id in a `night/READY_*` filename, 84 in `done.md` as PASS/held (overlapping), 19
+Peter/Stuart, 14 PR-attached (13 of those PRs merged by `git log --grep '(#N)'`; KS-964's #888 not found locally —
+excluded as PR-attached anyway) → **239 eligible**, of which 223 carry no round 20-22 row. **43 read with the full
+description** (below; 37 not read in any prior round by description + KS-1257/KS-1239/KS-934-class title-excludes of
+round 22 now read, + the KS-1280 re-check); the rest triaged at title + archive reason (rounds 1-13's `names no
+product file` / `auth-shaped title` rows), excluded by class (CI/workflow/compose/docs/DB/e2e/systemTest (Peter's
+authority)/decision/design/review-stream).
+
+| id | title (≤60) | verdict | one-line reason |
+|---|---|---|---|
+| KS-1236 | Approving a stale PENDING verification request after the subj | **FIT** | submit-side guard `users.ts:1267` unpinned (0 test hits for `Cannot request`/`targetIndex`); 2 cells in `ks1194-…test.ts` via its harness; tampers `<=`→`<` and `<=currentIndex`→`< 0`; briefed `KS-1236-SUBMITLEVEL-1`, PASS 8/8 ×2 |
+| KS-1006 | POST /api/users/me/mfa/disable skips code verification when mf | **FIT** | the with-secret refusal at `users.ts:1105` unpinned (`me/mfa` 0 hits in auth tests); 1 cell + 1 mock line in the SAME ks1194 file (hunks above KS-1236's; both orders one sha); tampers `!verifyTOTP`→`verifyTOTP`, `mfaSecret &&`→`!mfaSecret &&`; briefed `KS-1006-WRONGCODE-1`, PASS 8/8 ×2 |
+| KS-1137 | KS-878/867 suites: no cell names the real digit-bearing image | **FIT** (item 1) | CELL 3b in `container_trivy_image_filter.test.sh` feeds `dev-m365-integration:latest` (compose's 33rd `build:` service) through the stubs; tampers job04 `:62` `[a-z-]+[0-9]?` (reds only the new cell) and `[a-z-]+` (reds it + KS-867's); briefed `KS-1137-F2-ESTATEIMAGE-1`, PASS 8/8 ×2; item 2 (F-4 `jq` PATH) untouched |
+| KS-1280 | POST /api/certifications/:id/verify forwards a revoked session | REJECTED-NOT-A-PIN (re-check) | HELD-FILE no longer holds: KS-1238 Done+archived, its N76-1 READY modified only the ks1238 TEST file; the only unmerged product hold on `routes/verification.ts` is KS-1185-F1 (other lines). But no behaviour of the route is "right today": it is a `for test compatibility` stub (`:783`), KS-834's public/auth decision is open, and a pin of the `:788` Bearer forward pins what KS-1238's direction removes; the ticket's own next step is a measurement on originate |
+| KS-1174 | api-gateway collapses every API-key failure into 401 'Invalid A | REJECTED-ALREADY-PINNED | `auth.test.ts:240` pins `valid:false → null`, `:279` pins fetch-throws → null (the behaviour ask 2 changes to 503); asks 1-3 are product |
+| KS-1262 | Security: PUT /api/settings/notifications writes the same key | REJECTED-ALREADY-PINNED | `ks719-settings-write-auth.test.ts:191-200` already asserts the write lands in the caller's key (`user-beta`) — the collapse tamper reds it today; fix (own key space / refuse reserved id) is product |
+| KS-1253 | Spec-example guard E7: the secret-name deny list in PREFIXED_UU | REJECTED-ALREADY-PINNED | `ks256-…test.ts:522-529` `SECRET_NAMED` rows pin all 20 deny words through the real guard; the admitted `tok_/sess_/…` are the defect; allow-list is a DECISION |
+| KS-1252 | Spec-example guard E7: the ULID-ish benign shape exempts any p | REJECTED-PRODUCT | the fix bounds a BENIGN_SHAPES entry; the two controls (`sk_live_`, lower-case) are already the KS-679 rows; a pin of the silent rows pins the bug |
+| KS-1255 | Spec-example guard E7: the 40-char floor means a 38-39-char se | DECISION | "decide the floor from the key formats"; the floor itself is pinned by the KS-679 block |
+| KS-1189 | Audit log (KS-871 gate R-3/R-5): H29 attemptedEmail is never w | DECISION | R-3 "decide whether the capture should work at all"; R-5 is a blast-radius check |
+| KS-1222 | POST /api/documents/upload never reaches the gateway's blocked | DECISION | "the owners decide what the route should be"; the screen is unreachable (415/405 first) — nothing to drive |
+| KS-1210 | OAuth app registration accepts any scope list, and any authent | DECISION | three owner questions before any build; OAuth product surface |
+| KS-1208 | A verified token without a role or userId claim still 500s eve | DECISION | "a shape decision first"; a pin of the 500 pins the leak |
+| KS-1231 | A connector allow-list fails open when platform-settings integ | REJECTED-HELD-FILE | readers `verification.ts:1212` + `health.ts:45` (KS-1232 INFOEMPTY held on health.ts); the `[entry] → 403` control is KS-1204/1230's; fix is fail-closed product |
+| KS-1257 | After platform-settings has expired, a partial admin write now | DECISION | "merge the write over the defaults" is the product change; stateful Redis double |
+| KS-1245 | F-1: scripts/smoke-test.sh:107 fails any /health/deep check th | DECISION | "decide what the smoke test should assert for degraded" |
+| KS-1274 | Job 04: a trivy that exits 0 with a bare `{}` still reads as c | REJECTED-CODE-PATCH-TIER | fix shape given (a `Results`-key check in the `-z $norm` guard) but it is a product+cell bash_patch (7/7 tier), and the image-filter suite's stub prints `{}` — landing it changes every cell's instrument (noted in the KS-1137 brief); next-best 1 for a bash_patch round |
+| KS-1273 | Job 04: a TRIVY_EXIT_CODE (or trivy.yaml exit-code) in the env | REJECTED-CODE-PATCH-TIER | one-line product fix (`--exit-code 0`) + a cell in `container_trivy_failed_scan_is_loud.test.sh`: bash_patch tier, not test-only; next-best 2 |
+| KS-998 | KS-989 gate residue: the formatting gate fails OPEN on missing | DECISION | four items, item 1 "should be settled deliberately" (options costed) |
+| KS-967 | Neither credential guard can see a value in a .env.example — o | DECISION | the self-test asserts the exclusion; any fix changes it consciously |
+| KS-1168 | userRepo.ts: ILIKE search on encrypted PII columns can never m | REJECTED-PRODUCT | the ILIKE can never match — a pin would pin the defect; fix needs a search strategy (HMAC/plaintext index) |
+| KS-870 | Every ADMITTED erasure authenticates twice — the door's chain a | DECISION | two fix shapes, the second "wants its own measurement"; the refused=1 half has no one-line loosening |
+| KS-807 | The control-byte guard cannot see a raw body — findNulBytePath | DECISION | "(A) scan raw bodies / (B) declare them out — decide first" |
+| KS-954 | KS-858 residue: the repeated-slash collapse does not complete f | REJECTED-NOT-REPRODUCED | "Mechanism NOT determined … Reproduce before fixing"; `proxy.ts` mounts |
+| KS-934 | m365 /api/teams/notify: a serial per-row loop with no LIMIT an | REJECTED-NO-ONE-LINE-TAMPER | the fix is an aggregate bound (insertion); a pin needs N rows against a never-answering destination + timers |
+| KS-759 | tenantId is read through two `as unknown as` casts because it | REJECTED-TYPE-ONLY | a shared `JwtPayload` type change; no runtime red exists |
+| KS-746 | Security events carry no tenant at all — KS-743 had to gate th | REJECTED-DATA-MODEL | migration + backfill decision |
+| KS-1197 | A non-string verificationLevel claim: POST /api/documents answ | REJECTED-PINS-A-500 | a 500 and an async hang; "not client-forgeable"; fix is a coercion in `middleware/auth.ts` |
+| KS-1239 | R-1: the index.ts:347 rawAuthorization capture is dead code — | REJECTED-LIVE-LANE | `index.ts` (Seat B 11th); 0 readers = 0 red |
+| KS-1084 | READ ONLY / unverified: the gateway's own Authorization-only ca | REJECTED-MEASURE-FIRST | "Measure before any fix" on a two-tenant stack |
+| KS-1082 | The Playwright env guard added in #896 reads config/ only — th | REJECTED-PETER-AUTHORITY | `systemTest/` is Peter's; the guard is on an unmerged branch |
+| KS-1214 | mcp-server POST /hash hashes any server-local file named by a | REJECTED-MEASURE-FIRST | "measure the deployed exposure first"; the fix drops the branch (product) |
+| KS-1107 | POST /api/auth/register accepts a client-supplied organization | REJECTED-TRACE-FIRST | "trace every consumer of organizationId before choosing a fix"; the register schema is the product |
+| KS-947 | KS-733 gate blindness (F3+F4): the parity cell misses skip:() | REJECTED-LIVE-LANE | the mounts are in `index.ts` (Seat B); the "product" is the parity test file |
+| KS-1091 | KS-1041 residual: the cross-tenant JWT probe on originate's di | REJECTED-NOT-COMMISSIONED | "no action until Kam rules" |
+| KS-1124 | originate: a non-prod certification whose anchoring submission | REJECTED-JEST-PRODUCT | originate (jest) blob writers; two product fixes, READ ONLY findings |
+| KS-1110 | Two k6 unit tests parse config/scenarios.yml with js-yaml dire | REJECTED-TEST-IS-PRODUCT | the change is to two test files + a source-text guard; systemTest/performance |
+| KS-951 | The default-password CI gate catches one shape and calls it cl | DECISION | "widen the scope, or state the scope"; a bash guard with no suite of its own |
+| KS-939 | Launcher: the assembled boot prompt is asserted by no cell — K | REJECTED-PRODUCT-EDIT | the prompt is not printed under dry-run today — the fix emits a `DRY_RUN_INITIAL_PROMPT` marker (product) and "do not fix the launcher while two seats are live" |
+| KS-1145 | ks949 suite coverage (KS-950 / KS-962, #973): ID3's capture ha | REJECTED-TEST-IS-PRODUCT | a real-PostgreSQL suite's own assertions; the gate's proposals are not ratified |
+| KS-896 | KS-881's CONTROL is satisfied when the branch does not exist — | REJECTED-TEST-IS-PRODUCT | the CONTROL cell of `pre_push_hook_base.test.sh` is the subject; no product tamper |
+| KS-902 | no-tracked-credentials.sh cites two scripts as "structurally i | REJECTED-COMMENT-TIER | a load-bearing comment correction (comment_patch tier, not test-only); "either fix their derivations or reference the audit ticket" is a decision |
+| KS-1119 | Security (multi-tenant only): POST /api/verification/verify ca | REJECTED-MEASURE-FIRST | "prove it first, live" with multi-tenancy enabled; `verification.ts` fix is product |
+
+**Title-level excludes worth naming (not re-read):** KS-1265 / KS-1263 / KS-1278 / KS-1178 — originate jest,
+DB-transactional (round 22); KS-1266 / KS-1259 / KS-1155 / KS-1225 / KS-1226 — test-infra (DNS in tests, isolation,
+timeouts, a file that cannot load); KS-1235 / KS-1200 / KS-1115 / KS-1054 / KS-1030 / KS-1023 / KS-699 / KS-748 — DB /
+migration; KS-1281 / KS-1224 / KS-1218 / KS-1216 / KS-1154 / KS-918 / KS-530 — boot/deps/lockfile; KS-1247 / KS-1251 /
+KS-1162 / KS-1148 / KS-1138 / KS-1051 / KS-1012 — CI / workflows / consumers outside the repo; KS-1163 / KS-1161 / KS-1149 /
+KS-1146 (preflight.sh, Seat B) / KS-1085 / KS-940 / KS-925 — shell / launcher / compose; KS-1177 / KS-1003 — `index.ts`
+(Seat B); KS-1132 / KS-1114 / KS-1111 / KS-1088 / KS-1063 / KS-980 / KS-889 / KS-808 / KS-1019 / KS-1141 — decision /
+question; KS-1106 / KS-1105 / KS-1104 — frontend; KS-1113 / KS-1039 / KS-1038 / KS-1010 / KS-1076 — e2e / Playwright;
+KS-1131 / KS-1143 / KS-1142 / KS-906 / KS-897 — guard-test polish (test-is-product); KS-1128 (needs a real PostgreSQL
+boot); KS-1005 / KS-1032 / KS-1157 / KS-756 / KS-1006-class MFA product asks other than the pinned half — auth product;
+everything on Peter or Stuart (19); the 85 with a READY-named id.
+
+**Instrument slips caught in this round's own work:** (1) one Bash call carried a stray `cd /dev/null` and was REFUSED by
+`pretooluse_no_cd.sh` — re-issued without it; (2) one later call used `(cd "$CL/…" || true)` inside a subshell, which the
+hook did not catch — a `cd` all the same, not repeated; (3) the first KS-1236 draft's anchor premise carried a half-written
+sentence ("wait: …") — corrected by measuring the six `});` lines before the build; (4) a zsh loop over `"a b c"` strings did
+not word-split — rewritten as a function; nothing was mis-stated to the file by any of the four.
+
+**Next-best if a FIT is refused:** (1) **KS-1274 / KS-1273** — bash_patch tier on job 04 (one-line fixes + a cell in the
+`failed_scan_is_loud` suite; note the image-filter suite's `{}` stub, which KS-1274's fix would turn into `scan-failed` for
+every cell); (2) **KS-1236's `already pending` refusal** (`users.ts:1274`) — a third cell in the same file, same harness;
+(3) **KS-1006's `MFA is not enabled` / shape refusals** (`:1099`, `:1102`) — same file, same harness.
