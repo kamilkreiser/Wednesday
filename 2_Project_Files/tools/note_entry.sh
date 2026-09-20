@@ -44,7 +44,25 @@ else
   exit 2
 fi
 [ -n "$TEXT" ] || { echo "note_entry: refusing empty text" >&2; exit 2; }
-STAMP="$(date +%H:%M)"
+STAMP="${NOTE_ENTRY_TEST_STAMP:-$(date +%H:%M)}"   # the test seam exists only for the arms below
+# TYPED-CLOCK ADVISORY (2026-09-21; ledger w>=3 on 2026-09-19 — three typed clocks in one day, all
+# "felt near-future" times for acts already done, written into bodies this script stamps but does
+# not read). Any LOCAL HH:MM or HH:Mx in the body that is LATER than this line's own stamp is
+# printed to stderr. Advisory, never blocking: an expiry or a schedule is a legitimate future time.
+# Excluded on purpose: ISO/UTC forms (…T22:32, 22:32Z) — the fleet's mail clocks are UTC and
+# routinely "later" than the local stamp without being typed clocks.
+python3 - "$STAMP" "$TEXT" <<'PYCLK' >&2
+import re, sys
+stamp, text = sys.argv[1], sys.argv[2]
+sh, sm = map(int, stamp.split(':'))
+later = []
+for m in re.finditer(r'(?<![\dT:])([01]\d|2[0-3]):([0-5](?:\d|x))(?![\dZ:])', text):
+    h = int(m.group(1)); mm = m.group(2); mi = int(mm.replace('x', '0'))
+    if (h, mi) > (sh, sm) and (h - sh) < 12:
+        later.append(m.group(0))
+if later:
+    print("note_entry ADVISORY: body carries a time LATER than this line's stamp %s: %s — an expiry or a schedule is fine; a clock for an act already done is a typed clock (write 'just before this line' or copy the artefact's own stamp)." % (stamp, ", ".join(later)))
+PYCLK
 case $MODE in
   line) printf -- '- %s — %s\n' "$STAMP" "$TEXT" >> "$NOTE" ;;
   h3)   printf -- '### %s — %s\n' "$STAMP" "$TEXT" >> "$NOTE" ;;
