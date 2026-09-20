@@ -1,0 +1,158 @@
+# KS-1232 HTTPSERVERINFOEMPTY-1 PIN THAT THE MCP REST MIRROR'S POST /generate-package DEFAULTS A FALSY allowedDocumentTypes ("", 0, false) TO [] AND PASSES A STORED LIST THROUGH — the second site that shapes the field (http-server.ts:258), the real express stack driven over loopback on an ephemeral port with the package generator stubbed to RECORD its config — Wednesday's task for Ornith, TEST_ONLY, **ONE NEW vitest test file, no product file** (written 05:2x on 2026-09-21, the #1106-#1111 batch gate's NOT-PINNED row HTTPSERVERINFOEMPTY)
+
+File: `Blockchain/Dev/services/mcp-server/src/__tests__/ks1232-generate-package-doctypes-default.test.ts`
+Tip: `362e51fe0db7e73d5557924902763fe3f10fd8c7`
+Runner: `vitest`
+
+Written from develop `362e51fe0db7e73d5557924902763fe3f10fd8c7` (`git -C "/Volumes/DevMASTER/!CODING/Secuura/Blockchain/2_Project_Files" ls-remote origin refs/heads/develop` at 05:0x on 2026-09-21, read verbs only; the tree that carries the six #1106-#1111 squashes, #1106 = KS-1232 INFOEMPTY-1 included). The test file does NOT exist at that tip: you CREATE it (`git ls-tree` of `services/mcp-server/src/__tests__/`: ONE file, `smoke.test.ts`, a placeholder). The product the cells drive is `Blockchain/Dev/services/mcp-server/src/http-server.ts` (blob `fce4a31793b3`, **280 lines**, read whole): a top-level express app (`:28`) with `express.json({ limit: '1mb' })` (`:29`) and `rejectNulBytes()` (`:33`), `const PORT = parseInt(process.env.MCP_HTTP_PORT || '7890', 10)` (`:35`), the `/generate-package` handler at `:222-270` — it destructures `agentType, apiKey, apiUrl, connectorName, connectorId, scopes, allowedDocumentTypes, workflowPolicy, rateLimit` from `req.body` (`:224-227`), 400s an unknown `agentType` (`:229-235`, `VALID_AGENT_TYPES` `:217-220`) or a missing `apiKey` (`:236-239`), sets the zip headers (`:244-248`) and calls `generatePackage({ ..., allowedDocumentTypes: allowedDocumentTypes || [], ... }, res)` (`:250-263`, **`        allowedDocumentTypes: allowedDocumentTypes || [],` at `:258`**) — and a TOP-LEVEL `const server = app.listen(PORT, ...)` at `:272`. `enforceProductionConfig` (`:22-26`, `@secuura/shared`'s `production-guard.ts:10`) returns at once unless `NODE_ENV === 'production'`. `app` and `server` are NOT exported, which is why the file below captures the server by wrapping `http.createServer` before the import. This service is ESM (`"type": "module"`) and runs **VITEST** (`"test": "vitest run"`, `vitest ^4.1.11`, no jest; `vitest.config.ts` `globals: true`, `environment: 'node'`).
+
+## THE MODE — read this twice
+
+**TEST_ONLY, NEW FILE.** Your diff touches EXACTLY ONE file: the new test file above (`--- /dev/null` / `+++ b/<path>`, the path exactly as written above, ONE hunk `@@ -0,0 +1,50 @@`). You never touch `http-server.ts`, `package-generator.ts`, `api-client.ts` or any other product file, and you never touch `smoke.test.ts`: the behaviour is already what it is at the tip, and these cells PIN it.
+
+## What the cells pin (one paragraph)
+
+KS-1232 is the gateway's `/api/connector/info` answering `[]` for a stored empty-string / `0` / `false` `allowedDocumentTypes` (the merged #1106 INFOEMPTY-1 cell pins that). The #1106-#1111 gate's row HTTPSERVERINFOEMPTY names the SECOND site that gives the field that shape: the MCP REST mirror's `/generate-package`, which hands the package generator `allowedDocumentTypes || []` (`:258`) — a client that sends the gateway's raw stored value (or nothing) gets a package whose config says `[]`, and `package-generator.ts` then reads `.length` / `.join` on it (`:106`, `:398-399`). Nothing pins it (mcp-server's one test is a placeholder). This file imports the REAL `http-server.ts` with `MCP_HTTP_PORT=0` stubbed first (so its top-level `app.listen` binds `127.0.0.1:0`-style ephemeral port, never `:7890`), captures the server it creates by wrapping `http.createServer` for the duration of the import, stubs `../package-generator.js` with a `generatePackage` that RECORDS its `config` and ends the response, stubs `../api-client.js` (imported by the module, unused by this route), and drives `POST /generate-package` over loopback with `agentType: 'generic_http'` and `apiKey: 'sk_ks1232'`. The RED cell sends `allowedDocumentTypes` as `""`, `0` and `false` and asserts each answered 200 and reached the generator as `[]`; the CONTROL sends `['contract']` and asserts it reached the generator unchanged — green under the tamper too, proving the route, the parse, the guards and the stub all still run while the RED cell reds on the one default. **It pins TODAY's default at this site as a characterisation**: if the owners decide the mirror should relay the raw value (or reject a non-array), this cell goes red on purpose and is rewritten with that decision.
+
+## The exact change — ONE new file
+
+Copy every line byte for byte. All 50 `+` lines are ASCII only. There is no blank line anywhere in the fence. Keep the header exactly as shown. **Your diff MUST begin with the two file-header lines, above the `@@` line: `--- /dev/null` then `+++ b/Blockchain/Dev/services/mcp-server/src/__tests__/ks1232-generate-package-doctypes-default.test.ts`.**
+
+```
+@@ -0,0 +1,50 @@
++/**
++ * KS-1232 - the SECOND site that shapes allowedDocumentTypes: the REST mirror's POST /generate-package (http-server.ts)
++ * hands the package generator allowedDocumentTypes || [] (http-server.ts:258), so a stored "", 0 or false becomes [] and a stored list
++ * passes through. The #1106-#1111 gate found nothing pins it (mcp-server has one placeholder test). The real
++ * http-server module is imported with MCP_HTTP_PORT=0 (its top-level listen then binds an ephemeral port, captured by
++ * wrapping http.createServer), the package generator is stubbed to RECORD its config, and the real express stack is
++ * driven over loopback. A characterisation pin of TODAY's default at this site.
++ */
++import { describe, it, expect, beforeAll, afterAll, vi } from 'vitest';
++import http from 'http';
++import type { AddressInfo } from 'net';
++const rec = vi.hoisted(() => ({ configs: [] as Array<Record<string, unknown>> }));
++vi.mock('../package-generator.js', () => ({
++  generatePackage: vi.fn(async (config: Record<string, unknown>, output: { end: (s: string) => void }) => { rec.configs.push(config); output.end('zip'); }),
++}));
++vi.mock('../api-client.js', () => ({
++  registerDocument: vi.fn(), verifyDocument: vi.fn(), listDocuments: vi.fn(), getWorkflowInstance: vi.fn(), getConnectorInfo: vi.fn(), getVerificationPolicy: vi.fn(),
++}));
++const servers: http.Server[] = [];
++const realCreateServer = http.createServer;
++let baseUrl = '';
++beforeAll(async () => {
++  vi.stubEnv('MCP_HTTP_PORT', '0');
++  vi.stubEnv('NODE_ENV', 'test');
++  (http as unknown as { createServer: unknown }).createServer = (...args: unknown[]) => { const s = (realCreateServer as (...a: unknown[]) => http.Server)(...args); servers.push(s); return s; };
++  await import('../http-server.js');
++  const server = servers[0];
++  if (!server.listening) await new Promise<void>((r) => server.once('listening', () => r()));
++  baseUrl = 'http://127.0.0.1:' + String((server.address() as AddressInfo).port);
++}, 30000);
++afterAll(async () => {
++  (http as unknown as { createServer: unknown }).createServer = realCreateServer;
++  for (const s of servers) { s.closeAllConnections(); await new Promise<void>((r) => s.close(() => r())); }
++  vi.unstubAllEnvs();
++});
++/** POST /generate-package with the given allowedDocumentTypes; returns [status, the allowedDocumentTypes the generator received] */
++async function generate(allowedDocumentTypes: unknown): Promise<[number, unknown]> {
++  const before = rec.configs.length;
++  const res = await fetch(baseUrl + '/generate-package', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ agentType: 'generic_http', apiKey: 'sk_ks1232', allowedDocumentTypes }) });
++  await res.arrayBuffer();
++  return [res.status, rec.configs.length === before + 1 ? rec.configs[before].allowedDocumentTypes : 'generatePackage not called once'];
++}
++describe('KS-1232: POST /generate-package defaults a falsy allowedDocumentTypes to [] and passes a list through', () => {
++  it('RED KS-1232: allowedDocumentTypes "", 0 and false each reach the package generator as [] with status 200', async () => {
++    expect([await generate(''), await generate(0), await generate(false)]).toEqual([[200, []], [200, []], [200, []]]);
++  });
++  it('CONTROL: a stored list ["contract"] reaches the package generator unchanged with status 200', async () => {
++    expect(await generate(['contract'])).toEqual([200, ['contract']]);
++  });
++});
+```
+
+Both `vi.mock` calls are hoisted by vitest above the imports, and `vi.hoisted` lifts `rec` with them, so `http-server.ts`'s own `import { generatePackage } from './package-generator.js'` and `import { ... } from './api-client.js'` resolve to the stubs (the same files, by the same `.js` specifiers from one directory deeper). `beforeAll` stubs `MCP_HTTP_PORT=0` and `NODE_ENV=test` BEFORE the dynamic `import('../http-server.js')` (a static import would run the module first), swaps `http.createServer` for a wrapper that pushes every server it creates onto `servers` — express's `app.listen` is `http.createServer(app).listen(...)`, so the module's top-level listen lands in `servers[0]` — waits for `'listening'` if the bind is still pending, and reads the port from `server.address()`. `afterAll` puts `http.createServer` back, closes every captured server (`closeAllConnections()` then `close()`) and `vi.unstubAllEnvs()`. `generate(x)` POSTs the JSON body, drains the response and returns `[status, the allowedDocumentTypes of the ONE config the generator recorded for this request]` (or the string `'generatePackage not called once'` if the count did not rise by exactly one). The cells need no fixed port, no database, no env beyond the two stubs and no product bytes.
+
+## Cells
+
+- `default` = `RED KS-1232: allowedDocumentTypes "", 0 and false each reach the package generator as [] with status 200`
+- `control` = `CONTROL: a stored list ["contract"] reaches the package generator unchanged with status 200`
+
+## Red cells
+
+The cell below is a GENUINE assertion-red: it fails under the tamper and passes at the tip. It is declared here rather than with a red glyph in its title because every `+` line in this diff must be ASCII only.
+
+- RED KS-1232: allowedDocumentTypes "", 0 and false each reach the package generator as [] with status 200
+
+## Tampers
+
+One single-line tamper on `http-server.ts:258` — the gate's own HTTPSERVERINFOEMPTY, byte for byte its `from -> to`: `allowedDocumentTypes || []` -> `allowedDocumentTypes` (raw). The From line is unique in the file (python whole-line scan: hits `[258]`; `allowedDocumentTypes` occurs on exactly two lines, `:226` the destructure and `:258`; positive control `workflowPolicy`: `:226`, `:259`). `From` is the tip's line at that number, byte for byte (8-space indent); `To` is valid TypeScript (measured: the file loads and runs 2 cells under it — the stubbed generator does not read `.length`, so a raw `""`/`0`/`false` reaches it without throwing). The checker plants it and restores the file by bytes.
+
+### RAWDOCTYPES — the [] default removed; the client's raw allowedDocumentTypes handed to the package generator
+File: `Blockchain/Dev/services/mcp-server/src/http-server.ts`
+Line: 258
+From:
+```
+        allowedDocumentTypes: allowedDocumentTypes || [],
+```
+To:
+```
+        allowedDocumentTypes: allowedDocumentTypes,
+```
+Reds: `default`
+
+## Controls
+
+- `CONTROL: a stored list ["contract"] reaches the package generator unchanged with status 200`
+
+*(The FULL `it(...)` title of the file's second cell, byte for byte. For a VITEST suite the checker matches a declared cell by its FULL title, never by a prefix; no title is a prefix of another. Under the tamper `['contract']` is truthy at the tip and raw under the tamper — the same array either way — so the control proves the module import, the ephemeral listen, the JSON parse, the agentType / apiKey guards and the recording stub all still run while the RED cell reds on the one default.)*
+
+## THE CELLS — state it to yourself before you write a line
+
+At the untouched tip both cells pass. `beforeAll`: env stubbed, `http.createServer` wrapped, the module imported — `enforceProductionConfig` returns (not production), `express.json` and `rejectNulBytes` mount, the routes register, `app.listen(0, ...)` creates the server the wrapper captures and prints `listening on port 0` to stderr (measured, the literal text) — the port is read from `address()`. RED: three POSTs; each passes the guards (`'generic_http'` is in `VALID_AGENT_TYPES`, `apiKey` set), `:258` turns `""`, `0`, `false` into `[]`, the stub records the config and ends the response; `[[200, []], [200, []], [200, []]]` (measured). CONTROL: `['contract'] || []` is `['contract']`; `[200, ['contract']]` (measured).
+
+Under **RAWDOCTYPES** `:258` hands the raw value through: `expected [ [ 200, '' ], [ 200, +0 ], ...(1) ] to deeply equal [ [ 200, [] ], [ 200, [] ], ...(1) ]`, an assertion red (measured). The CONTROL is unchanged (measured). `smoke.test.ts` and the sibling relay file are unaffected (measured: whole 5-cell suite under the tamper, 1 red — this cell).
+
+## Premises (measured — by reading the tip, NOT by running anything, except where the MEASURED section below says so)
+
+- **Premise: the From line.** `http-server.ts` at `362e51fe0`, line 258 is `        allowedDocumentTypes: allowedDocumentTypes || [],` (8 spaces), byte for byte; it occurs **once**. The checker plants it and restores it (T8 by sha256 after; tip blob `fce4a31793b3`, file sha256 `cad302fa71b83a05` measured before the plant and after the restore). `git blame` at the tip: `:258` last touched by `794db1c856` (2026-03-09); `git log -1` on the file: `0f6854cc7` (2026-09-05, KS-800).
+- **Premise: the gate's claim, re-derived.** The batch gate's row: "`allowedDocumentTypes || []` -> `allowedDocumentTypes` (raw) ... drive that handler with `allowedDocumentTypes: ""`, `0`, `false` and assert `[]` each time". Re-read at the tip: `:258` is exactly that line inside the `/generate-package` handler (`:222`), NOT a connector-info echo — the row's "INFOEMPTY" name is the gate's, kept for traceability; the file is named after what it pins. `src/__tests__/` holds `smoke.test.ts` alone; `grep -c -i alloweddocumenttypes` over it: 0 (positive control `describe`: 1).
+- **Premise: the ephemeral port.** `:35` reads `MCP_HTTP_PORT` at module load; `parseInt('0', 10)` is `0`; `app.listen(0, cb)` binds an ephemeral port on all interfaces (measured: the module's own log line says `port 0`, and `lsof -nP -iTCP:7890 -sTCP:LISTEN` after the runs: 0 node listeners). The wrapper on `http.createServer` is the only way to reach a server the module does not export; it is restored in `afterAll`.
+- **Premise: the stubs.** `package-generator.ts` exports `generatePackage(config: PackageConfig, output: Writable)` (`:742`); the stub honours the shape (records `config`, calls `output.end`). `api-client.ts` reads `SECUURA_API_URL` / `SECUURA_API_KEY` at load and exports the six functions `http-server.ts` imports (`:9-16`); the stub exports the same six names as bare `vi.fn()` so the import resolves without a gateway. `@secuura/shared` is NOT stubbed: it resolves through the workspace root `node_modules` to the shared package built in the clone (the harness's `prepare_clone.sh`), and `enforceProductionConfig` is inert outside production.
+- **Premise: the runner.** `services/mcp-server/package.json` at the tip: `"test": "vitest run"`, `vitest ^4.1.11`, no jest / ts-jest — the builder auto-detects vitest and the `Runner:` line agrees. `"type": "module"`: the test's `.js` specifiers match the product's.
+- **Premise: `+` lines that also occur at the tip.** None — the file is new. **No backslash** in any `+` line (0, counted). **No non-ASCII** in any `+` line (0, counted). **No template literal** in any `+` line (no backtick; the URL is built with `+`). **No blank line** (0, counted). Titles use `:`, `"`, `[` and `,`, no em dash.
+- **Premise: no live-lane collision.** NEW file; `services/mcp-server` is named by NO READY on disk (`grep -il mcp-server night/READY_*.md`: 0; positive control `index.ts`: 21 files) and by none of the four running #1106-#1111 briefs. The sibling brief `KS-1232-MCPINFORAWECHO-1` creates a DIFFERENT new file in the same directory and plants `tools/info.ts:144`; this brief plants `http-server.ts:258` — no shared file, no shared line; both files together: 3 files, 5/5 (measured).
+- **Premise: the surface.** The real REST mirror over loopback on an ephemeral port, the generator and API client stubbed. No auth surface (`/generate-package` has none), no db, no fixed port, no product bytes. MCP REST-mirror input-shaping surface, test-only pin (allowed).
+
+## Collision
+
+**NEW file — no hunk overlap is possible with anything.** Sequencing needed: none. (Sibling: `KS-1232-MCPINFORAWECHO-1`, a second new file in the same directory; both present: **3 files, 5/5** at the tip, `mcp_full_suite_after_both.out`.)
+
+## MEASURED by the writing seat (2026-09-21 05:2x, `--shared` scratch clone `m_clone_1` at `362e51fe0`, node_modules farmed from the source checkout via the harness's `prepare_clone.sh` (root + `@secuura/shared` built in the clone), source tracked-modified count 0 before and after; artefacts under `2_Project_Files/local-model/runs/2026-09-21_gate1106rows-drafter-precheck-b/HTTPSERVERINFOEMPTY/` and the run root)
+
+- mcp-server suite at the bare tip: **1 file, 1/1** (`mcp_full_suite_before.out`). This file at the tip: **2/2 green** (`file_tip.out`; `listening on port 0` in `file_tip.raw`). Whole suite with this file AND the sibling: **3 files, 5/5** (`mcp_full_suite_after_both.out`).
+- RAWDOCTYPES planted by bytes (hits `[258]`) -> this file **1 failed / 1 passed of 2**, the red = `default`, `expected [ [ 200, '' ], [ 200, +0 ], ...(1) ] to deeply equal [ [ 200, [] ], [ 200, [] ], ...(1) ]` (`tamper_RAWDOCTYPES.out`); whole suite under it **1 failed / 4 passed of 5** (`whole_under_RAWDOCTYPES.out`). Restored, sha256 `cad302fa71b83a05`, `git diff --quiet` rc 0 on `services/mcp-server` (`measure_mcp_tampers.log`). `lsof -nP -iTCP:7890 -sTCP:LISTEN` after all runs: 0 node listeners.
+- (the golden checker run is appended below after the run)
+
+## Output
+
+Exactly ONE ```diff block, nothing outside it: `--- /dev/null` / `+++ b/Blockchain/Dev/services/mcp-server/src/__tests__/ks1232-generate-package-doctypes-default.test.ts`, then the ONE hunk above exactly as shown (`@@ -0,0 +1,50 @@`).
+
+## Notes for the raise (not for the model)
+
+- Test-only, zero product bytes, new file. **Raise tier: TIER 2 at the gate (mcp-server REST mirror, loopback on an ephemeral port, no auth surface). Refs KS-1232. NEVER Closes** — KS-1232 is the gateway's shape; this cell pins the mirror's own default.
+- **From the #1106-#1111 batch gate's NOT-PINNED table** (report `2026-09-21-batch1106-1111-tier1-r1/report.md`, row HTTPSERVERINFOEMPTY). The gate proposed "the same new mcp-server test file" as MCPINFORAWECHO; two briefs cannot both create one file at one tip, so this is its own file.
+- **Harness note for the gate, said plainly:** the module under test listens at import (a top-level `app.listen`, the same class as timestamping's `:4006` the gate recorded as pre-existing); this file neutralises it with `MCP_HTTP_PORT=0` and captures the server through `http.createServer` — a wrapper the file installs and removes itself. No fixed port is ever bound by the test (measured).
+- **Not pinned here, said plainly:** what `package-generator.ts` writes for `[]` vs a list (stubbed); the `/register`, `/verify`, `/policy` mirrors; the MCP tool relay (the sibling brief).
+
+## Build line (not for the model)
+
+```
+bash tasks/test_only/build_test_only_input.sh KS-1232 night/inputs/test_only_1232HTTPSERVERINFOEMPTY-1.json night/briefs/KS-1232-HTTPSERVERINFOEMPTY-1.md tip=362e51fe0db7e73d5557924902763fe3f10fd8c7 ctx=65536
+```
+
+## MEASURED — appended after the golden run (artefacts `runs/2026-09-21_gate1106rows-drafter-precheck-b/HTTPSERVERINFOEMPTY/`)
+
+- Golden checker (`tasks/test_only/checker.sh` on the golden `out.md` = the brief's own file, fresh `--shared` clone at `362e51fe0`, `gb_clone_3`, farmed by the harness's `prepare_clone.sh`): **RESULT: PASS (8/8)** — T1 one fenced block; T2 touched set == the new file only; T3 strict apply of the `--- /dev/null` diff; T4 every `+` line byte-exact; T5 green at the tip 2/2; T6 RAWDOCTYPES red set == {default}, an assertion failure; T7 the control green; T8 `http-server.ts` restored to sha256 `cad302fa71b8`. Source tracked-modified count 0 before and after (`prepare.out.log`, `checker.out.log`).
+- Wrong variants REFUSED (fresh clone each, `golden_runs.log`): A — one `+` line altered (`201`): **FAIL T4**. B — the CONTROL cell's three lines dropped: **FAIL T4**. C — the RED cell weakened to the three statuses only, built into its OWN input (`input_variant_C_weak.json`): **FAIL T6 "reds NOTHING (0 of 2 cells failed)"**.
