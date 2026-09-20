@@ -12,6 +12,17 @@
 
 **RD-516's own acceptance clause depends on this work:** *"The seam-dependent cells listed in §6 are on `main`."* **Read that as 28: S73 classified NEW-1 by reading it after the brief was committed, and deliberately did NOT edit §8 because committing would have moved the head the gate was measuring. The §8 "unclassified" line is a ONE-LINE FIX OWED after the verdict.**
 
+## 🔴 YOUR BRANCH MUST CARRY THE TEST HELPER TOO — the gate PROVED this and it corrects the earlier ruling
+**The rescue recipe needs `__tests__/helpers/rd516-net-harness-preload.js`, and that file does NOT EXIST at `60c76d7`** — it is added by RD-516's branch, along with `backend/services/aiEndpointPolicy.js`. The tier-1 gate measured this as §5(a).
+
+**So "the 28 merge first" is not executable as a fixture-only change.** The shape that works, and it keeps every property the split was for:
+
+> **Your branch = the TEST-SIDE additions only: `rd516-net-harness-preload.js` (and any helper it needs) PLUS the 28 fixture edits. No `backend/` product file. All of it inert.**
+
+**Why that is still inert, and how you prove it:** nothing in the product imports the preload — it is loaded only by a suite that asks for it (`-r` or `preload:`), and the suites that ask for it are in your own branch. **The acceptance criterion is unchanged: each affected suite run BEFORE and AFTER at current `main`, identical results, empty per-cell diff.** The gate's own control is your reference point — with the policy absent, all 105 cells across the four suites PASS.
+
+⚠️ **Tell me if RD-516's branch and yours both add the preload** — they will, and the resolution (same content, one of them becomes a no-op at merge) is mine to sequence, not yours to improvise.
+
 ## THE RECIPE — do not re-derive it; it is proven on R7 in RD-516's branch
 
 Read it from §6 of `docs/rd516/RD-516-gate-brief.md` rather than from this brief, so there is one copy and it cannot drift. In outline, per cell:
