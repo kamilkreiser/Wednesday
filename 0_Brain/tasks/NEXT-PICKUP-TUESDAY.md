@@ -50,14 +50,16 @@ Kam ruled **(a) at 21:14**, applied to the card at 21:38: *"Tell me the deployme
 - **The NexusAI seat IS authed and to the wrong place for this question:** tenant `d500ebad-cf53-4f2a-a501-f831289e67fc`, sub `0c57ab37…`, a service principal, scoped by design to NexusAI's own resource groups. **Customers deploy into THEIR OWN subscriptions — no identity we hold can enumerate them.** This is structural, not a permissions gap to fix.
 - **Authoritative source: Partner Center analytics under his Datasec publishing account.** Offer **`printer-dashboard-managed-app`**, publisher **`datasecau`** — both read from the repo at HEAD. **The URL recorded in the repo is `https://partner.microsoft.com/dashboard/commercial-marketplace/overview`. Do NOT compose a deeper analytics link — nobody here has opened one.**
 
-### 🔴 AMENDED Mon 2026-09-21 00:0x — **THE 26 ARE A MERGE BLOCKER. THIS CORRECTS THE SPLIT RULING ABOVE. READ IT BEFORE SEQUENCING ANYTHING.**
+### 🔴 AMENDED Mon 2026-09-21 00:0x — **the 27 ARE A MERGE BLOCKER. THIS CORRECTS THE SPLIT RULING ABOVE. READ IT BEFORE SEQUENCING ANYTHING.**
 - 🟢 **SEAM USABLE = YES, measured at the wired policy. `315061a`: 27 passed / 2 failed / 1 skipped.** All four conditions hold on the STRICT branch. **SEAM-2 is the permanent control and its control is the ABSENCE of `SEAM_OFF` from the intercept map** (one policy verdict both arms; the cell says not to "tidy up" by adding it). **R7 RESCUED, left FAILING for RD-585 only** — containment green (`sinkRequests 0`, `redirectorWasReached true`), naming absent.
 - 🔴 **THE CORRECTION: those 26 cells PASS ON MAIN TODAY AND BREAK THE MOMENT RD-516's POLICY MERGES.** So they are NOT follow-up work — **RD-516 CANNOT MERGE while they are unfixed**, or main is knowingly red (`no-skip-on-failure`).
-- ✅ **RESOLUTION, no redesign needed — the inertness criterion already does it: the 26 go on their OWN branch, which merges BEFORE RD-516.** They are inert by construction (each fixture passes with and without the policy — that is what the before/after pairs prove), so they land on main independently and harmlessly.
-- 🔴 **RD-516's MERGE CONDITION GAINS A CLAUSE: "the 26 are on main."** It belongs in the gate brief's acceptance section so the GATE reports on it and nobody merges past it.
+- ✅ **RESOLUTION, no redesign needed — the inertness criterion already does it: the 27 go on their OWN branch, which merges BEFORE RD-516.** They are inert by construction (each fixture passes with and without the policy — that is what the before/after pairs prove), so they land on main independently and harmlessly.
+- 🔴 **RD-516's MERGE CONDITION GAINS A CLAUSE: "the 27 are on main."** It belongs in the gate brief's acceptance section so the GATE reports on it and nobody merges past it.
 - 🔴 **DO NOT rescue them inside RD-516's branch** (rebuilds the mixed diff the split avoids) **and DO NOT launch a parallel seat for them while S73 is live: they span rd464, rd486, rd523, rd545, ai-config and S73 holds rd523 + rd545.** Two of five — the partition forbids it. **They go to S73's SUCCESSOR with a brief Tuesday writes.**
 - ✅ **RATIFIED, S73's cross-ticket find: the seam redirects TCP to a PLAIN-HTTP listener, so it serves `http://` and NOT `https://`.** **RD-583's scheme rule and the seam's TLS limitation are ONE dependency, priced together** (`NODE_EXTRA_CA_CERTS` local TLS listener answers both). On both tickets.
-- **Asked of S73 and owed in its handover: the NAMED list of the 26 with what each needs, at a durable path.** That is what makes the successor brief writable in minutes.
+
+🔴 **NUMBER CORRECTED 00:1x — IT IS 27, NOT 26, AND THE ERROR WAS TUESDAY'S STALENESS.** S73's 13:25 mail said *"Seam-dependent is 27, not 26"* when it reclassified rd523's **E3** (the wizard TYPES the endpoint, so `endpointSource: 'request'` and the STRICT branch applies). **Tuesday then quoted 26 in five places across the rulings and this pickup, after its author had already superseded it in the same thread.** Same root as tonight's "5 commits behind" row: a figure carried forward after its referent moved. **S73 used 27 throughout its brief and said why, in the brief. Its number is the record.**
+- **Asked of S73 and owed in its handover: the NAMED list of the 27 with what each needs, at a durable path.** That is what makes the successor brief writable in minutes.
 
 ### 🟢 AMENDED 23:4x — CHANGE 2 IS BUILT AND ACCEPTED (`b2dea38`), AND RULING (3) UNBLOCKED THE 27
 - **`b2dea38` verified at origin** (`refs/heads/rd-516-ai-test-ssrf-s73`). **24 passed / 3 failed / 1 skipped**, every failure accounted for. **RD-584** (rebinding window, carrying Tuesday's corrected step) and **RD-585** (R7's unnamed refusal) filed.
@@ -1569,7 +1571,7 @@ engagements 404 while the kept one answered 200, approvals 0 decisions over 2 ex
 gap inside it: the auditor audit-events read was INFO-only (3 × 404), so that step did not verify.**
 
 **Still unverifiable and genuinely lost** (that half ran from the Mac through a tunnel): both stacks'
-upgrade verification — postcheck 21/0, kept-stale 11/0, walk-fresh A2/B2, the browser gate, the 26
+upgrade verification — postcheck 21/0, kept-stale 11/0, walk-fresh A2/B2, the browser gate, the 27
 probes — and the pc-lane-a purge 115/0. **Unverified, not shown unsafe.** Kam's call, can wait.
 **The toolkit is rebuilt before any NEXT live run regardless.**
 
