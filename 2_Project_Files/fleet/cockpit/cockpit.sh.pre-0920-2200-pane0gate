@@ -102,25 +102,6 @@ apply_layout() {
   "$TMUX_BIN" set-option -t "$SESSION" status-interval 5 2>/dev/null
 }
 
-wait_tree_settled() { # <verb> <name> — block while THIS repo is mid-rebase/merge; rc 7 on timeout.
-  # A launcher that reads tracked files must not start into a moving tree (2026-09-14: a gate
-  # launcher read its brief one second after panel_sync's rebase fired and sat as a bare shell
-  # for 45 min). Hoisted out of add_pane on 2026-09-20 22:0x because `up` created pane 0 — the
-  # coordinator seat, the HEAVIEST reader of tracked files in the system (~660 KB at boot) — with
-  # `tmux new-session` directly and so never ran this wait. COCKPIT_REBASE_WAIT_MAX (default 90 s)
-  # exists so the arms can exercise the refusal without waiting a minute and a half.
-  local verb="$1" name="$2" waited=0 max="${COCKPIT_REBASE_WAIT_MAX:-90}"
-  while [ -d "$PROJECT_DIR/.git/rebase-merge" ] || [ -d "$PROJECT_DIR/.git/rebase-apply" ] || [ -f "$PROJECT_DIR/.git/MERGE_HEAD" ]; do
-    if [ "$waited" -ge "$max" ]; then
-      echo "cockpit $verb: REFUSED — $PROJECT_DIR is mid-rebase/merge after ${waited}s (panel_sync stuck? see 2_Project_Files/tools/logs/panel_sync.log); a launcher that reads tracked files must not start into a moving tree. Retry when .git/rebase-merge is gone." >&2
-      return 7
-    fi
-    [ "$waited" -eq 0 ] && echo "cockpit $verb: repo mid-rebase/merge — waiting for the sync loop before launching '$name'…"
-    sleep 3; waited=$((waited + 3))
-  done
-  return 0
-}
-
 add_pane() { # name, cmd
   local name="$1" cmd="$2"
   if pane_exists "$name"; then echo "pane '$name' already present — skip"; return 0; fi
@@ -141,7 +122,15 @@ add_pane() { # name, cmd
     # (usage_gate prints that it proceeded on the override); rc 3 (at/over the cut) still refuses.
     USAGE_GATE_ALLOW_STALE="${COCKPIT_UP_ALLOW_STALE:-${USAGE_GATE_ALLOW_STALE:-0}}" bash "$SCRIPT_DIR/../usage_gate.sh" || die "cockpit add: REFUSED by usage_gate (rc $?) — no new pane"
   fi
-  wait_tree_settled "add" "$name" || return $?
+  local waited=0
+  while [ -d "$PROJECT_DIR/.git/rebase-merge" ] || [ -d "$PROJECT_DIR/.git/rebase-apply" ] || [ -f "$PROJECT_DIR/.git/MERGE_HEAD" ]; do
+    if [ "$waited" -ge 90 ]; then
+      echo "cockpit add: REFUSED — $PROJECT_DIR is mid-rebase/merge after ${waited}s (panel_sync stuck? see 2_Project_Files/tools/logs/panel_sync.log); a launcher that reads tracked files must not start into a moving tree. Retry when .git/rebase-merge is gone." >&2
+      return 7
+    fi
+    [ "$waited" -eq 0 ] && echo "cockpit add: repo mid-rebase/merge — waiting for the sync loop before launching '$name'…"
+    sleep 3; waited=$((waited + 3))
+  done
   local pane_id
   pane_id=$("$TMUX_BIN" split-window -t "$SESSION:0" -P -F '#{pane_id}' -d "$cmd; echo; echo '[cockpit] $name exited — pane stays for inspection'; exec bash")
   "$TMUX_BIN" set-option -p -t "$pane_id" @cockpit_name "$name"
@@ -190,13 +179,6 @@ case "${1:-}" in
         case "$name" in ''|\#*) continue;; esac
         cmd="${cmd//'${PROJECT_DIR}'/$PROJECT_DIR}"
         if [ $first -eq 1 ]; then
-          # 2026-09-20 22:0x: pane 0 (the coordinator seat) now waits for the tree to settle,
-          # exactly as every add_pane does. It is deliberately NOT usage-gated: the 90% cut is
-          # about NEW AGENTS, and at 90% the mandated shape is "Wednesday + the local model" —
-          # which needs this seat to exist. A usage refusal here would deadlock the relaunch it
-          # follows (the 2026-09-17 Tuesday case). A rebase refusal cannot deadlock: the sync
-          # loop finishes on its own clock and the retry is one launch.
-          wait_tree_settled "up" "$name" || die "cockpit up: pane 0 ('$name') not started — the tree is mid-rebase/merge (rc $?)"
           "$TMUX_BIN" new-session -d -s "$SESSION" -n main "$cmd; echo; echo '[cockpit] $name exited — pane stays for inspection'; exec bash"
           pid=$("$TMUX_BIN" list-panes -t "$SESSION:0" -F '#{pane_id}' | head -1)
           "$TMUX_BIN" set-option -p -t "$pid" @cockpit_name "$name"
