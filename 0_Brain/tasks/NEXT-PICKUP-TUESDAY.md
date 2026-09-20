@@ -10,6 +10,30 @@ supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s
 
 ---
 
+## 🌙 DELTA 42 — 2026-09-20 22:3x. **STATE SINCE 41. The overnight contract in DELTA 41 STILL GOVERNS — read it too, especially the morning report.**
+
+### THE FLOOR
+- **`%20` `Datasec/NexusAI` (S73) — the ONLY live seat.** RD-516, ctx ~38%. Branch **`8aaafd9`** pushed; 26 cells, 11 green, 15 red. **No product code written yet** — the fix comes after the cells are honest.
+- **`main` = `60c76d7`.** Minimum set is **TWO: RD-516 · RD-518.**
+- **RD-518 was GATED NO GO** (Blocker). Fix round **STAGED, NOT LAUNCHED**: `fleet/briefs_staged/nexusai_rd518_fix_round2.md`. 🔴 **Round 2 of 2 — a third is Kam's (C-62).** Held behind RD-516: both touch `backend/server.js`.
+- Usage **92%**. Kam lifted the 95% stop **for tonight only** — no stated date, **re-ask before Monday**.
+
+### RULINGS THIS SEAT MADE THAT THE NEXT ONE MUST NOT RE-OPEN
+1. **RD-574's scope: SPLIT BY INERTNESS.** The collision is structural across ~5 suites, not just rd523. **Fixture change FIRST as its own change, acceptance criterion INERTNESS** (run each affected suite before and after at current main; identical results, or the fixture changed behaviour and that is a finding). **Policy second, on top.** Green at both points — no red main, no mixed diff. **If the measured break set is small, S73 may fold it in and say so; that judgement is its own.** For every borrowed cell: **the assertion is unchanged, only the endpoint moves.**
+2. **R8 goes SOURCE-LEVEL with a mutation** — headers are byte-identical between one mount and two (measured), so nothing at response level can discriminate. **The REASON must be written in the cell** or the next reader "improves" it back into an unfalsifiable form.
+3. **R3 and R6 move to after the fix** (S73's call, ratified): neither can be red-proved against code that does not exist.
+4. **C-106 filed** — the C-70 collapse is not symmetric; the limiter that must survive is the one with **no `skip`**. Tuesday verified it at source with a positive control.
+5. **The CLARIFICATIONS move is AUTHORISED but NOT DUE.** Kam ruled (a) 19:39. **The card's own words: "deliberately, not by a seat mid-task."** 🔴 **And it carries a hazard — C-103 quotes credential-shaped canaries and CI has never scanned that file, so the move needs `gitleaks git .` (CI's mode, NOT `gitleaks dir`), suppression by fingerprint in COMMIT form, canary drawn from the ruleset.** Marked `--delivered`; queued as its own piece of work.
+
+### THE PATTERN THIS SEAT KEEPS MEETING, AND S73 FOUND EVERY INSTANCE
+**A green that means NOT OBSERVED rather than DID NOT HAPPEN** — five tonight: the `dialsTo()` matcher comparing an authority to a bare host so every zero was matcher-satisfied · the counter watching `connected`/`connectError` so a black-holed dial reads 0 while in flight · a dial appearing under two keys · undici pooling by origin · R2 green on the word *"image"*. Plus its sharper sequels: **`?.()` turns a missing method into a silent success path**, and **a wrong-reason RED becomes a wrong-reason GREEN the moment the product starts refusing things** (CTRL-5 exists for exactly that).
+
+### 🔴 THIS SEAT'S OWN FAILURE MODE TONIGHT, STATED SO THE NEXT ONE DOES BETTER
+**Four staleness failures on four different subjects, all the same sentence: a measurement was true when taken and false when asserted.** The 12-second reproach to S71 · "5 commits behind current main" measured against a referent I then moved by authorising the merge · a NOT-TESTED list from one run asserted to Kam as coverage over all runs · a six-minute-old pane state asserted as "mid-turn", which left S73 idle twice.
+**The countermeasure is ORDERING, not knowledge: decide first, measure last, send in the same breath.** It worked once it was applied — the last send read the pane in the same action and the tool queued the tap behind a turn that had just started.
+
+---
+
 ## 🌙 DELTA 41 — 2026-09-20 21:4x. **KAM HAS TURNED IN. THIS IS THE OVERNIGHT CONTRACT. READ THIS FIRST.**
 
 ### HIS WORDS, VERBATIM (panel, ~21:43)
