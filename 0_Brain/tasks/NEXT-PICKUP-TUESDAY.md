@@ -10,6 +10,41 @@ supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s
 
 ---
 
+## 🔵 DELTA 33 — 2026-09-20 16:5x (Tuesday ctx ~45%, NOT rotating; band is 80-90). READ FIRST; DELTA 32 holds except where named.
+
+### 🔴 KAM RULED TUESDAY'S CARD — AND HE RULED AGAINST THE RECOMMENDATION
+**`tuesday-boot-digest-outgrew-the-window`: (b) — "Keep the whole read, shrink the corpus to fit"** (panel 16:41:18, tagged `view: wednesday` but naming THIS seat's card by id — **the card id is the routing, not the tab**). Also **`tuesday-mini-vault-three-unpushed-commits`: (a)** — leave it, nothing pushes from the mini. Both recorded in decision_queue, receipted on the panel inside the minute.
+**(b) IS NOW THIS SEAT'S STANDING INSTRUCTION.** The boot prompt's whole-digest read STAYS; the lesson corpus must come down until it fits. **Do NOT re-raise the subject** — he has ruled it, and decision_queue refuses a card on a ruled subject.
+
+### 🔴 TWO MEASURED FINDINGS THAT CHANGE HOW (b) MUST BE DONE — both in `learnings/_audits/2026-09-20_consolidation-kam-ruling-b.md`, which is HIS review point
+1. **A MECHANICAL SPLIT WOULD DEMOTE LIVE RULES OUT OF THE BOOT.** "Move every dated section to a cases file" would have buried `## SUPERSEDED AGAIN 2026-09-07 10:49 — Kam: "the Wednesday window is between 80 and 90% context"` — **that dated section IS the live rotation band.** Same shape in `2026-09-01_qa-gate-before-my-verification.md`'s `## REFINED 2026-09-05` section. Accreted sections are a MIX of cases and rule-amendments and **only reading tells them apart.** **Every file is split BY HAND, or not at all.**
+2. **THE DIGEST IS NOT LINEAR IN CORPUS SIZE.** Corpus 960,266 → 887,534 B (−72,732); by-tier digest 511,178 → 500,655 B (**−10,523 only**) = a **14% return**. The by-tier rendering already omits most case text; it is dominated by **RULES rendered verbatim**, which is what must survive. **So archiving evidence CANNOT deliver (b).** Only genuinely MERGING overlapping lessons can — N rules becoming one rule with N sub-clauses.
+
+### WHAT WAS DONE, AND WHAT IS DELIBERATELY NOT DONE
+- **DONE (worked example):** `2026-08-07_a-check-that-cannot-fail.md`, which was **8% of the corpus alone**, split 77,770 → 10,197 B. Its **27 case sections moved VERBATIM** to `_cases_2026-08-07_a-check-that-cannot-fail.md` (the `_` prefix keeps it out of `boot_digest.py`'s `2026-*.md` glob). All 27 headings kept as an index — a heading IS the retrieval handle. **Conservation asserted: 77,770 in → 82,592 out; it GREW, nothing removed.** Precedent: the `_ledger_archive.md` pattern Kam himself ruled 2026-09-04.
+- **NOT DONE ON PURPOSE:** the four merge clusters (false-zeros/controls · representation-vs-source · mechanism-vs-intention · superseded-in-place rotation rules). **Tuesday told Kam on the panel they are written up "for you to look at before I touch them" — HONOUR THAT.** They are a proposal in the audit note, not an action. The rotation cluster is highest-risk: do it LAST, by hand, with the live number quoted in the audit.
+- More case-splitting is **near-worthless for the goal** (finding 2). Do not do it to look busy.
+
+### NexusAI — RD-545 MERGED, RD-549 GO'd AND HOLDING ON CI
+- 🟢 **RD-545 r2 IS ON MAIN** (`58f87d9`, + the F-2 comment `354d9ff`). Four push conditions met with CI run ids quoted. **main = `354d9ff`.** Watcher re-armed on it (dies with the session — RE-ARM AT BOOT).
+- 🟢 **RD-549 tier-1 gate round 1 of 2: GO.** 70/70 cells, verify PASS 3695/3695 across 208. Merge-forward built at **`2c973b3`** on branch `rd-549-merged-main-s71`: one conflict (counts only), **counts measured 3702/209 = Tuesday's prediction exactly**, both `2edde62` and `354d9ff` confirmed ancestors. **M4 against the merge head = OUTCOME (1), STILL REDDENS** — so the 7/7 green is a REAL green, not a disarmed one.
+- **MERGE TO MAIN IS GO'd** (4 conditions). **S71 is HOLDING on condition 1: Build `35493756985` on `354d9ff` was still `in_progress`.** It pushes on green, STOPS and mails on red. **That hold is correct — do not push it.** Cap reading confirmed by S71 against C-62's text incl. the tier-1 carve-out: rounds are consumed by NO GOs, not GOs; merge-eligible.
+- 🔴 **RD-464 r3 IS STILL HELD** on its own two counts (rebase-and-re-run-every-rd545-cell-by-name, C-68/C-74; and R14 riding it). **Two merges in a row is exactly the momentum that would sweep it through. It does not go.**
+- 🟢 **RD-516's work was OUTSIDE VERSION CONTROL and is now RESCUED:** branch `rd-516-cells-s70-recovered` @ `89fbea5` at origin, verified by Tuesday. Design → `docs/rd516/`, cells → `__tests__/helpers/rd516-cells-s70-NOT-RUN/`. **Cells are authored, NOT RUN, un-gated** — moving them into the suite is a deliberate later step.
+- 🟡 **RD-518's premise is REFUTED** and it may leave the minimum set. Only ONE tracked `mainTemplate.json` exists and it sets `KEYVAULT_NAME`, which `encryptionService.js` reads; every `KEY_VAULT_NAME` is in UNTRACKED build output. Real defect is narrower: `server.js` reads the unset name so KV reports `not_configured` always. **OPEN, queued to S71: does the KV path WORK end to end?** WORKS → RD-518 leaves the minimum set. Told S71 NOT to build a deployment for it.
+
+### 🔴 OWED TO KAM — carry this verbatim into the package email when the zip exists
+S71's Kam-facing wording for RD-549's behaviour change, **already written, use it rather than reconstructing it**:
+> *"When someone sets up NexusAI's AI connection, those settings are now saved but not used until an administrator signs in and confirms them. Until that happens the AI features stay switched off and the setup page shows the connection as pending rather than as a green tick. This closes a gap where anyone who could reach a newly deployed dashboard — before sign-in was configured — could point its AI at a server of their choosing and have the customer's own data sent there. Existing deployments are unaffected in normal use: an administrator confirms once, and it behaves as before."*
+Plus, if the operator detail is wanted: *"the only visible change to an admin who already had AI working is a one-time confirm prompt; nothing needs re-entering."*
+The package email still names the **RD-464 r3 hold** and the open-mode confirm. Email the **zip only**, sha256 + head, to **kreiser.org@me.com**.
+
+### LESSONS + LEDGER THIS SEAT (09-20 afternoon)
+- Filed: `2026-09-20_an-absence-goes-stale-while-you-compose-the-complaint.md` (**sharpened by S71 into a better rule than mine: mail BEFORE push, not after, on anything that changes a shared head**) · `2026-09-20_most-of-a-project-folder-is-outside-its-git-repo.md`.
+- Ledger rows: necessary-condition-read-as-sufficient (RD-464 r3) · the 12-second stale reproach · **a placement instruction is a claim about what the TOOLING will do with that location** (my `__tests__/`-or-staging suggestion would have armed ~30 un-run cells; this project sets NO `testMatch`/`roots`). Rule 3c archive run, conservation 1073 = 1073.
+
+---
+
 ## 🔵 DELTA 32 — 2026-09-20 15:5x ROTATION HANDOVER (Tuesday ctx 80%, safe boundary). READ FIRST; DELTAs 29-31 are history now.
 - 🟢 **THE DRIVE IS CLEAR. KAM DELETED THE 649 GiB FILE HIMSELF at ~15:2x** (he asked for the command; Tuesday's first answer was WRONG — double quotes do NOT protect `!` in zsh, single quotes do — corrected in one line). **Free: 650 GiB.** Everything below is running again. **Do not re-raise the disk.**
 - **S71 IS LIVE in `%16`** (launched 05:24:51Z, rung 6 verified), executing S70's run-book. Score it at its wrap; S70 scored 0.95, S69 0.94.
