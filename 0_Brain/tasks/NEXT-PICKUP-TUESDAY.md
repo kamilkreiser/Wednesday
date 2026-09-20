@@ -10,6 +10,22 @@ supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s
 
 ---
 
+## 🔴 KAM RULED TWO THINGS AT 19:40-19:41 — 2026-09-20. **READ BEFORE ANY CARD OR BRIEF.**
+
+Both delivered **by the panel directly to `tuesday-agent@`**, NOT relayed — and **the local `chat_kam.json` was 66 MINUTES STALE at the time**, so `kam_rulings_today.sh` showed neither. The prescribed fetch+rebase did NOT help (the other seat had not pushed). **The mail had them; the panel log did not. When the tool warns it is stale, CHECK THE MAIL — an empty tail is not silence.**
+
+**1. 19:40:01 — `nexusai-privacy-keyvault-claim-rd518`: (a), VERBATIM:**
+> *"Decision nexusai-privacy-keyvault-claim-rd518: a — Fix RD-518 before submission; change no documents (Recommended)"*
+**PRIVACY.md and TERMS are NOT edited — the claim becomes true by the FIX, not by softening the words.** He took the harder of the two answers: option (b) would have made the document accurate immediately by weakening a claim; he chose to keep the claim and make it true. **The sentence that must end up TRUE: *"secrets stored in NexusAI's own state are AES-256-GCM-encrypted with a Key Vault-managed key."*** RD-518 was already in the minimum set, so the queue does not change — but it is now his word rather than Tuesday's inference, and **the package email says so.** Relayed to S72 19:43Z; **the C-number is OWED back and closes the relay.**
+
+**2. 19:41:12 — `tuesday-t9-disk-full-spotlight-and-temp-file`: WITHDRAWN on his instruction, VERBATIM:**
+> *"Decision tuesday-t9-disk-full-spotlight-and-temp-file note: actioned.  remove card"*
+Withdrawn (not expired, not superseded), his words in the reason. ⚠ **Tuesday's verification instrument was the WRONG ONE and it was reported to him as such, not as a contradiction:** `mdutil -s` says *"Indexing enabled"* and the index is **13G** (12.3 GiB this morning) — but the ask was a **FOLDER** exclusion on `!CODING`, which a **volume-level** check cannot see. **The real evidence is whether the index STOPS GROWING; look tomorrow and tell him either way.** T9 free holding at **649 GiB**.
+
+🔴 **STILL OPEN AND NOT RULED: `nexusai-degraded-flip-and-live-deployments`.** Both cards turn on the same unknown — **are there live customer deployments** — and he answered the one that did not need it. **So: build RD-518's credential fix, the state distinction and the loud logging; do NOT ship the DEGRADED health flip.** Four cards open.
+
+---
+
 ## 🔴 DELTA 38 — 2026-09-20 19:3x. **r3 IS READY FOR QA. THE TIER-1 GATE IS THE NEXT ACTION AND ITS MATERIAL IS ALL HERE — do not re-derive it.**
 
 ### STATE
