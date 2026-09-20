@@ -51,7 +51,15 @@ Approved: UAI clientId via a NEW env var **`KEYVAULT_IDENTITY_CLIENT_ID`** (neve
 **Two findings that changed the ticket:** the obvious `managedIdentityClientId` fix is a **NO-OP** (EnvironmentCredential is first and the printer SP env activates it — it would have shipped, passed review and changed nothing); and `encryptionDrift` **cannot detect this by construction** (it fires only on a decrypt FAILURE, and a deployment that only ever used the fallback decrypts fine — **zero drift forever is not evidence Key Vault works**).
 
 ### GREEN / CLOSED
-**Build `35497286467` SUCCESS at 46m15s — main `34ad321` green on all three.** S71's owed item closed with a conclusion. **C-103 landed; relay closed.** (DELTA 35's snapshot trap still applies.)
+**Build `35497286467` SUCCESS at 46m15s — main `34ad321` green on all three.** S71's owed item closed with a conclusion. **C-103 AND C-104 landed; both relays closed (Tuesday holds both numbers).** (DELTA 35's snapshot trap still applies — and it now covers C-104's text too.)
+
+### r3 PROGRESS SINCE DELTA 37's WRITING
+- **Counts prediction 1 was EXACT: 3770/213**, committed before the merge was touched, and the +68/+4 half independently confirmed (r3's four suites ran 68/68 against the merged tree).
+- **4 red were a FALSE ALARM from an UNSTAGED index** — `git ls-files` emits each conflicted path once per stage, so a one-site census counted three (829 entries / 823 unique). `git add` → 823/823 → 37/37. **Filed as C-104**, with a general tell worth knowing: **compare `git ls-files | wc -l` with `git ls-files | sort -u | wc -l` — unequal means the frame is not the world.**
+- **R14 authored and RED-PROVES:** unmutated 2/2 with control; M-R14 → property cell RED (Expected [] / Received 4 requests to the planted endpoint) with the **CONTROL GREEN**; post-restore 2/2, sha256 matching origin/main.
+- **Merge resolved and STAGED, not committed.** R14 staged. R1 comment applied.
+- **Prediction 2 on record before the run: 3772 tests / 214 suites.**
+- 🔴 **STANDING RULE ADOPTED TODAY: a regeneration is verified by READING THE FILE, never by the exit of the command meant to write it.** `--update-counts` does NOT write on a failed run — S72 caught that its counts file still held main's 3702/209 after a failed verify, when it was entitled to report "counts regenerated".
 
 ---
 
