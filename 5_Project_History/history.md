@@ -1,3 +1,16 @@
+## 2026-09-21 — s74 (Tuesday, overnight seat 22:47 → 05:3x). RD-516 taken from mid-build to a passed tier-1 gate; everything now parked on Kam's usage word.
+
+**Delivered.** RD-516's endpoint policy built and gated: CHANGE 1 (fixtures, `f09836d`+`f4ef7a7`), CHANGE 2 (the policy, provenance out of band, `b2dea38`), the interception seam with a permanent control (`315061a`), R6 + DEPLOYMENT_GUIDE + the gate brief in git (`4422325`, `f4264e5`). **Tier-1 gate verdict: the security property is CLOSED and PROVED — 26 refusal classes driven anonymously, 0 dials, the original defect reproduced in the same window as the control. Merge NOT cleared: §5 measured unsatisfied.** Two seats scored and closed (S73 0.99, the gate 1.00).
+
+**Rulings made.** The provenance re-key HELD (measured) · option (2) for the address pinning REFUSED PERMANENTLY (undici internals whose failure mode is a silent fail-open) · §3.3's scheme rule kept and ticketed rather than narrowed · the limiter collapse refused inside RD-516 · **the 28 are a MERGE BLOCKER on their own branch merging FIRST, and that branch must carry the test helper** (the gate proved the helper is absent at main) · **F-1: correct the false "BY CONSTRUCTION" header before merge, do NOT widen ai-config here, file the Gov-customer save defect separately.**
+
+**Built.** `fleet/pane_wake_check.sh` (4-arm selftest, all pass) after an inline wake check failed four ways in one session · the RD-516 gate launcher with two new guards red-proofed to their exact exit codes · the successor brief for the 28, staged and re-verifiable · the morning report drafted at a durable path.
+
+**Got wrong, and all seven are in the ledger.** A false completion report to Kam (`HEAD == origin` cannot fail on uncommitted work) · an `az` write into another project's credentials dir · a process misattributed by directory rather than identity, which nearly sent a seat hunting my own live gate · a worktree held on HEAD when the hazard was execution · a superseded count quoted five times · three tool-interface guesses against a documented header · a truncated classifier that nearly interrupted a commissioned run. **Root, once: I conclude from the visible property when the governing one is unexamined.**
+
+**State at wrap.** Floor empty, both panes closed. `main` = `60c76d7`; minimum set RD-516 · RD-518. **`usage_gate.sh` REFUSES at 95% ≥ 95% and Kam's lift was scoped to "tonight" — two independent reasons, so nothing launches until his word or a new account.** Owed to him, in order: **a week instruction for this seat (he leaves tonight; my copy is `status: none`, without which Datasec has no standing authority)**, the deployment count, the usage call. Ledger archived per rule 3c with conservation asserted.
+
+
 ## 2026-09-20 05:31 AEST — the 03:3x Wednesday seat (overnight successor, 03:33 → the 05:30 shift change), Secuura scope — Kam away
 
 - Booted from the 18:0x seat's rotation; brain read whole (ctx 27% → 42%).
