@@ -10,44 +10,6 @@ supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s
 
 ---
 
-## 🟢 DELTA 40 — 2026-09-20 20:3x (s73; ctx 54% CHECKPOINT, band 80-90, NOT rotating). **r3 IS ON MAIN. THE FLOOR IS CLEAR. SUPERSEDES DELTA 39 on state.**
-
-### WHERE EVERYTHING IS
-- 🟢 **`main` = `60c76d7` — RD-464 r3 IS MERGED.** Verified by Tuesday at origin: `60c76d7`, `1f27b4d` and `34ad321` all contained. **RD-464 → Release Ready.**
-- 🟢 **RD-518 built and pushed: `rd-518-kv-identity-s72` @ `6ea15a0`.** PASS 3709/210, prediction exact **read from the file**, 7/7 cells red-proved, **M5 reddens R5 alone**. **AWAITING ITS TIER-1 GATE.**
-- **Filed tonight: RD-578** (azure-ad name fix changes AUTH behaviour — S72 reverted it out of its own work) · **RD-579** (F-1, High). **RD-577 corrected** (comment 37878 + description panel, original wording kept as the evidence).
-- **BOTH PANES CLOSED**, listeners 11 → 11 each. **Gate scored 1.00, S72 scored 0.97.** Nothing is live but this seat and fleet-monitor.
-- **MINIMUM SET IS NOW TWO: RD-516 · RD-518.** (r3 is done.) **The package zip still does not go until both land.**
-
-### 🔴 THE RD-518 GATE'S TWO MUST-MEASURES — put these in its brief BY NAME
-S72 asked whether to fix the `detail` residual before the gate. **RULED: no — measure first, then fix against what was measured.**
-- **M-A.** Drive `/api/admin/health` **ANONYMOUSLY** on a local run at `6ea15a0` in the **open first-run window** and report verbatim whether `keyVaultEncryption.detail` is present. **Pair it with a control** — the same request where the gate should refuse — so a 403 proves the instrument can see a refusal at all.
-- **M-B.** Force `jsonStorage` falsy and request the same route: it wraps its gate in `if (jsonStorage)`, so a falsy store skips the gate entirely.
-- **If M-A is clean, the deliverable is ONE honest line:** change the comment from *"NOT public"* to **admin-gated and unredacted**. **A comment asserting a property the code does not enforce is the defect being corrected, not the exposure.**
-- Why not fix blind: `detail` interpolates `how` (the identity clientId) and `e.message` (the SDK error, which routinely carries the vault URL). Whether that matters depends on reachability, which is a measurement. Fixing first spends a round on an unsized remedy — the shape that produced the `managedIdentityClientId` no-op.
-
-### 🔴 THE VAULT — ALREADY RULED, DO NOT RE-CARD IT
-**`tuesday-mini-vault-three-unpushed-commits` was ruled (a) by Kam at 16:44 TODAY: *"Leave it; nothing pushes from the mini."*** `decision_queue.sh add` refused a new card on the prior ruling and **`amend` refused too** — *"a ruling records what Kam decided against what he was SHOWN, so amending it rewrites his reasoning."* **Both refusals were correct and `--override-prior-rulings` was the wrong answer.** Measured tonight and recorded here instead:
-- **516 behind / 5 ahead**, four stranded Datasec daily sections (S46 09-07, S48 09-16, S67 09-19, S72 09-20), each **disjoint** from upstream's copy — zero token hits upstream, positive control fires.
-- **Five of the seven dirty files are BYTE-IDENTICAL to upstream**; they read as modified only because local HEAD is ancient. The "other sessions' uncommitted work" premise is largely a stale-HEAD artefact.
-- 🔴 **THE HAZARD NOBODY HAD NAMED: `daily/2026-09-19.md` is a 2,545 B stub locally vs 39,449 B upstream — 319 lines exist ONLY upstream. Letting the LOCAL side win destroys other seats' work.** The old card named only the push hazard. **Kam's ruling already prevents this, which is exactly why it needs no new card.**
-- Trend, from the stranded commits' own messages: **484 (09-16) → 509 (09-19) → 516 (09-20)**. Three sessions recorded it in local commit messages nobody reads.
-
-### WHAT THE NEXT SEAT DOES, IN ORDER
-1. **RD-516** — cells rescued on `rd-516-cells-s70-recovered` @ `89fbea5`, **authored, NOT RUN, un-gated**; `testPathIgnorePatterns` is why they are inert. Moving them into the suite is a deliberate step.
-2. **The RD-518 tier-1 gate** at `6ea15a0` carrying M-A and M-B. ⚠ **Weekly usage was 90% at this seat's checkpoint against a 95% stop — read the gauge in the same action as the launch decision, do not inherit this number.**
-3. **RD-578** — its own first question stands: are `azure-ad-client-id` and `azure-ad-client-secret` provisioned into the vault by the template at all?
-
-### 🔴 A LAUNCHER FIX OWED — MY GATE BRIEF POINTED AT A DIRECTORY THAT DOES NOT EXIST
-The QA prompt said to read the AgentMail key from *"this project's `4_Credentials/.env`"*. **`Testing Agent MAIN` has no `4_Credentials` at all** (measured; NexusAI's does exist, which is the control). The gate found the key in `TUESDAY/4_Credentials/.env` and **reported it as O-3 rather than routing around it silently**. **My launcher's identity guard PASSED while the prompt was wrong, because it asserted NexusAI's credentials root — a neighbouring fact, not the claim.** **Next QA brief names the ABSOLUTE key path, never "this project's".**
-
-### THREE THINGS FROM TONIGHT WORTH CARRYING
-- **"A 204 says the server accepted a request; it does not say what it kept."** (S72) — read back at the destination, assert the properties, never trust the status code.
-- **A census names a POPULATION, and the NAME is a claim that nothing in the count checks.** (S72, from RD-577's three reads being three different KINDS.) Folded into C-104 on Tuesday's ruling, not filed separately — Kam's (b) ruling says shrink the corpus.
-- **In a guard CHAIN, a red arm proves guard N only if every guard before N provably PASSES on that arm's input.** Two of my four red arms tonight fired an upstream guard and looked like successes.
-
----
-
 ## 🟢 DELTA 39 — 2026-09-20 19:5x (s73 boot; ctx 29% after the WHOLE brain load). **THE GATE IS LAUNCHED AND S72 IS BUILDING. SUPERSEDES the "not launched" block below and the grant-expiry block.**
 
 ### WHAT IS RUNNING RIGHT NOW
