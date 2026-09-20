@@ -452,3 +452,208 @@ merged and its stub can be re-pointed in the same change (both suites' stubs to 
 red exists to brief; (3) the board's remaining unread eligible rows are all title-excluded classes — a further test_only
 round on this population is unlikely to find a fit until the 12th's fifteen merge and their siblings (KS-1236 `already
 pending`, KS-1006 `MFA is not enabled`) leave the live lane.
+
+## round 25 (2026-09-21, the descriptions round 24 only title-triaged; test_only + bash_patch tiers) — 141 read, 1 fit
+
+**Verdict: 1 FIT, briefed and golden-measured — KS-957 (`KS-957-F4-TOOLINGTOKENS-1`, TEST_ONLY, ONE NEW bash suite
+`check_shared_relink_tooling_tokens.test.sh`: 3 red cells + 3 controls pin the re-link guard's tooling clause token by
+token; PASS 8/8 on two fresh clones, four wrong variants refused, both apply orders with the held KS-958 READY one sha).
+Every OTHER remaining description was read in full this round (141 of 141 — remaining un-read descriptions: 0) and
+each is a row below with its measured reason; after this round the KS Backlog+Todo population has NO ticket without a
+round 20-25 row, a READY, a done row, a PR, a Peter/Stuart assignee or a live-lane hold — the pool is dry for
+test_only / bash_patch / doc-tier shapes until the live lane merges or new tickets land.** Tip
+`362e51fe0db7e73d5557924902763fe3f10fd8c7` by `ls-remote` at start (06:08:27) and at close (06:28:51, unchanged; the
+#1111 merge). Source checkout tracked-modified 0 throughout; no port touched; Linear read-only, key sourced
+transiently. Artefacts: `runs/2026-09-21_round25-drafter-precheck/` (`sweep/` the pull, the 349-row triage, the 141-row
+eligible-unrowed list and the per-batch read log; `KS-957/` the measurement, the golden, the variants and the collision
+orders; `golden_runs.log` all six checker runs; `REPORT.md`).
+
+**Population (re-derived at source; cursor-paginated, `first:250` + `endCursor`, 2 pages 250 + 99, `hasNextPage=false`
+on page 2):** KS Backlog+Todo = **349** (324 Backlog, 25 Todo, 0 archived; 258 Kam, 72 unassigned, 13 Peter, 6 Stuart)
+— 3 fewer than round 24's 352: KS-1198, KS-1244 (both now `In Progress`, PR #1114) and KS-1283 (`In Progress`, #1113)
+left the population; nothing new. Excluded by predicate (each re-checked at source): **86** with an id in a
+`night/READY_*` filename (253 READY files on disk; KS-1273 now among them), **85** in `done.md` as PASS/held
+(overlapping), **19** Peter/Stuart, **14** PR-attached, and the live lanes — of the fifteen + ten named, **3** remain in
+this population (KS-1236, KS-1137, KS-1006 — every one READY+done-flagged) and the rest are `In Progress` with a PR
+(`sweep/states_live.log`: KS-1203 #1112/#1103, KS-1275 #1115/#1102, KS-1284 #1105, KS-1175 #1105, KS-880 #1110,
+KS-753 #1107, KS-1234 #1108, KS-1223 #1111, KS-1232 #1106, KS-1283 #1113, KS-1244 #1114, KS-1198 #1114; KS-1273 /
+KS-1274 Backlog, no PR — excluded by READY-name and by the brief respectively) → **235 eligible**, of which **141
+carry no round 20-24 row** (`sweep/eligible.tsv`, 141 rows + N line; 181 − the 40 rows round 24 added). **All 141
+read with the full description** (19 batches, `sweep/read_so_far.txt`; `comm` of eligible ids vs read ids: 0 unread).
+
+| id | title (≤60) | verdict | one-line reason |
+|---|---|---|---|
+| KS-957 | KS-930 round-2 gate residue: the guard and its suite write th | **FIT** (F4, test_only) | T9 (`npm\|yarn\|pnpm` deleted from `check-shared-relink.sh:338`) leaves the main suite **106/106** at THIS tip (measured; `npm\|` alone 106/106, `yarn\|` alone 106/106); the ticket's own discriminator `RUN npm run build` is now judged by clause A (`pm_writes`, #879) so a `CMD ["npm", "start"]` final stage is the surviving one (rc 1 `names a JavaScript runtime or its tooling` at tip → rc 0 EXEMPT under T9); NEW suite, 6 cells; briefed `KS-957-F4-TOOLINGTOKENS-1`, PASS 8/8 ×2; F5/F6 are guard edits, not touched |
+| KS-808 | run-migrations.sh exits 0 even when a migration failed, and a | REJECTED-HELD-FILE (next-best 1) | item 2 (`applied_count` counts skips, `:97` `return 0` on the skip path, `:138-139`) is a bash_patch with a NEW psql/pg_isready-stub suite — but the held `READY_KS-1031_…_2026-09-16` (bash_patch PASS 7/7, KS-1031 still Backlog, unmerged) already modifies this file at `:148-154` (item 1's exit semantics, decided as exit 3) and ships exactly that stub suite; item 2 sequences behind it |
+| KS-1111 | k6 echo mask reads one argument of lookbehind — a flag value t | REJECTED-OUTSIDE-DEV (next-best 3) | QA-961-2 IS test_only-shaped (rows `-Pe NAME=VALUE` / `-diteNAME=VALUE` green today, red under the gate's Q1/Q2 tampers) but `systemTest/performance/runner/k6_docker.ts` lives at the REPO ROOT, outside `Blockchain/Dev` (the builder's `repo_subdir`), and systemTest changes run Peter's four-gate rule (KS-1226's own words) |
+| KS-1143 | ks781 LEG F guard walk: a MENTION of a guard-bound local reads | REJECTED-TEST-IS-PRODUCT | `routerParserAnalysis` `:2318` lives INSIDE the test file; the fix and its regression cells are one file — no product tamper |
+| KS-1142 | Entrypoint corpus is pinned by TWO hand-maintained literals in | REJECTED-TEST-IS-PRODUCT | two test-file literals (`CORPUS`, K1's package set); the gate's shape is a cross-file test assertion; nothing in product |
+| KS-1131 | ks963 structural cells count raw text — a comment naming consu | REJECTED-TEST-IS-PRODUCT | the three cells' raw-text reads ARE the defect; `stripCommentsAndStrings` is a test helper; product correct on all five callers |
+| KS-1159 | L3b gate record F-931-G1: the ks1061 shared-mock completeness | REJECTED-TEST-IS-PRODUCT | the guard is `ks1061-shared-mock-completeness.test.ts` itself (single-quote regex, non-recursive walk); no product line to tamper |
+| KS-1141 | QUESTION: are `crypto-agility.guard.test.ts:44` SCAN_DIRS and | QUESTION | a scope ruling (docblock sentence OR widen) — "either answer closes this ticket" |
+| KS-1138 | CI shell-suite step (`pr-security-gates.yml` step 11): `manife | REJECTED-CI+UBUNTU-ONLY | ubuntu-only red of `manifest_readers_agree.test.sh` (green on macOS 26/26) + a workflow comment; `.github/workflows/` is Kam's scope |
+| KS-982 | pre_suite.test.sh silently quarantines a developer's live mani | REJECTED-UNMERGED-BRANCH | the file exists ONLY on frozen `feature/ks-969-…` (#892); `develop`'s `systemTest/__tests__/` has no `pre_suite.test.sh` |
+| KS-981 | The round-4 quarantine call throws out of a "Never throws" fun | REJECTED-UNMERGED-BRANCH | same branch scope (#892 frozen); TOCTOU fix in `manifest.ts` + `pre-suite.ts` — systemTest product |
+| KS-977 | `setup`/`install` are exempt from the pre-suite step on a fals | DECISION | "split the command" OR "make the justification true" — schemathesis `run.py` (python, systemTest) |
+| KS-955 | A fresh clone cannot run the four platform suites, and fails i | DECISION | three fix shapes (precondition assert / `.env.example` vs compose default / lockout reset), none chosen; live-stack |
+| KS-953 | CLASS: editing api-gateway/src/index.ts silently reddens packa | DECISION | "needs a decision" between three shapes; `index.ts` line pins in a `packages/shared` test |
+| KS-1149 | A push whose pre-push gate runs past ~6 min dies with rc 141 a | REJECTED-LAUNCHER | the fix is `Launch_Claude.command`'s `core.sshCommand` keepalive — carded to Kam (`secuura-launcher-ssh-keepalive`) |
+| KS-1161 | redis healthcheck passes REDIS_PASSWORD as a `-a` argv — reada | REJECTED-COMPOSE-DECISION | three fix options on `docker-compose.yml:228`; the red→green is a static compose-render check RED at the tip (not a pin) |
+| KS-785 | Compose resolves the SHELL over .env while the checker resolve | DECISION | (a) `start-environment.sh` sources `.env` OR (b) the checker reads compose's precedence — a start-path behaviour change |
+| KS-752 | Schemathesis baseline gate is unreachable: run.py skips it whe | REJECTED-PETER-AUTHORITY | schemathesis `run.py:533` (python); needs "an invalid-run rehearsal"; Peter's triage input wanted |
+| KS-738 | schemathesis run.py bootstrap can os.execv-loop forever on a s | REJECTED-PYTHON-TIER | a python loop guard in `run.py:124-131` + a pytest cell — no bash/vitest/jest tier admits it; systemTest |
+| KS-760 | The GitHub integration walks Linear tickets on branch names an | REJECTED-OPS | a Linear↔GitHub integration setting; nothing in the repo |
+| KS-562 | anchoring threadTokenMint test fails only under root-visible n | REJECTED-INSTALL-LAYOUT | duplicate `@lucid-evolution/plutus` instance under one npm layout; a dedupe/pin or a docs statement |
+| KS-846 | `@secuura/shared` `main` points at an untracked, never-built ` | DECISION | `prepare` script / `main` → `src` / `exports` — "each has consequences for the Docker builds" |
+| KS-872 | packages/shared project tsc is RED on develop — crypto.JsonWeb | REJECTED-TYPE-ONLY | a `@types/node` 26 import fix in `jwks.ts:129`; no runtime red (vitest 709/709 either way) |
+| KS-1146 | The push preflight has no `services/auth` unit-suite leg — 14  | DECISION | "decide whether a service unit-suite leg belongs in the preflight"; preflight.sh is Seat B's file |
+| KS-1226 | systemTest performance `unitSuiteSlotIndependence.test.ts`: th | REJECTED-TEST-IS-PRODUCT | a timeout budget and a summary regex INSIDE a systemTest harness test file; "the change goes through the systemTest rules" |
+| KS-1155 | packages/shared tree-walking guards exceed vitest's 5 s defaul | REJECTED-TEST-INFRA | per-file `testTimeout` / a shared walk — vitest config, a load class |
+| KS-1051 | develop is RED on the services/originate jest suite and NOTHIN | DECISION | "Kam or Wednesday to pick a fix shape"; the red itself is #926's |
+| KS-1032 | Security: 9 trust-header reads outside auth middleware (pen-te | REJECTED-TRIAGE-PER-SITE | "do not bulk-annotate"; each of 9 sites is a forwarding-vs-trust ruling; `metering.ts:42-45` is auth-shaped product |
+| KS-1177 | v1 verify family refused for cookie-bearing callers in product | DECISION | "owner decision on the intended behaviour" (exempt v1 / reorder versioning vs CSRF / publish); `index.ts:530` (Seat B) |
+| KS-1003 | The OAuth token endpoint is outside the credential-stuffing ra | REJECTED-NGINX-CONFIG | an nginx `map` line in `nginx-demo.conf` + "check all three configs"; no suite |
+| KS-1157 | Add an OAuth marker to sessions minted by the OAuth grants (so | REJECTED-AUTH-PRODUCT | a new `ClientType`/`Session` field at `routes/oauth.ts:965`/`:1074` + eviction-cohort decision — OAuth product |
+| KS-756 | Wire up the opaque refresh token that createSession already mi | REJECTED-AUTH-PRODUCT | 1-2 days of refresh-path redesign (7 scope items, a transition window) |
+| KS-1106 | Verifier shows 'Verification Failed' / 'INVALID' for an id tha | REJECTED-FRONTEND | verifier portal UX copy for a "not in the registry" result; no vitest harness on the page |
+| KS-1105 | Admin login placeholder shows the SYSTEM_ADMIN seed address ad | REJECTED-FRONTEND | a one-attribute change in `frontend/admin/src/pages/Login.tsx:81`; frontend, no suite drives it; code_patch-tier at best |
+| KS-1104 | Verifier mode tabs (Upload File / Enter ID / Scan QR) lose the | REJECTED-FRONTEND | `aria-label` on three tabs at phone width; browser-measured, no unit harness |
+| KS-648 | Frontend CSP quality: issuer alone carries 'unsafe-eval', and  | REJECTED-CONFIG+MEASURE | "establish whether the issuer's `unsafe-eval` is load-bearing" — nginx.conf per portal, a live render check |
+| KS-1281 | vc-issuer boot warns 'Could not ensure vc_credentials_store ta | REJECTED-CODE-PATCH-TIER | remove/reduce `credentialRepo.ensureTable()` (6 call sites) — a product edit, "no rush" |
+| KS-1278 | Two concurrent POST /documents/:id/revoke both succeed: 2 upda | REJECTED-DB-ATOMICITY | a conditional UPDATE / row lock in originate; needs a concurrency harness |
+| KS-1265 | POST /api/documents saves the document and its provenance row, | REJECTED-RED-AT-TIP | move the `issuerName` `@` check above the save (`documents.ts:845-851` → above `:699`) — the regression cell is RED today, a product reorder |
+| KS-1263 | A partly-completed /share or /transfer-custody is now unattrib | REJECTED-DB-TRANSACTION | wrap the per-recipient loop / custody flip in a transaction |
+| KS-1200 | anchor_store's (document_id, network) unique is declared only  | DECISION | "the owner decides which schema source is authoritative" (10 sources) |
+| KS-1235 | Under multi-tenancy, auth's tenant-pool statements carry no te | REJECTED-PRODUCT+CENSUS | route the tenant-pool branch through the GUC path; "census every caller first"; overlaps KS-174 |
+| KS-1055 | Per-tenant databases never receive the file migrations — CORE_ | REJECTED-PRODUCT+REAL-PG | a tenant arm for `applyFileMigrations` + KS-1054's ordering; measured on a real Postgres |
+| KS-1054 | Fresh databases are FAIL-OPEN until the second boot — 039_rls_ | DECISION+REAL-PG | stage ordering / visibility / provisioning assertion — "not a ruling"; real-PG driven |
+| KS-1023 | Substrate: data_subject_requests is defined in THREE files tha | SURVEY | "sweep the three files against each other" — unstarted, then a decision |
+| KS-1030 | KS-754 gate F-3 (MINOR): migration 048 ships with ZERO automat | REJECTED-MIGRATION-HARNESS | parametrise `test:migrations` (hard-wired to 044) + 048 scenarios on a real DB |
+| KS-699 | No table references `users`: 0 of the database's 29 foreign ke | SURVEY | "not a migration — an inventory" of 52 columns first |
+| KS-748 | svc_api_keys.organization_id is not a tenancy boundary and not | DECISION | FK + trigger OR a written "descriptive metadata" ruling |
+| KS-889 | KS-869's COALESCE backfill has an EMPTY window — the 39 pre-ex | REJECTED-MEASURE-FIRST | "does anything on the row determine the connector?" — a data measurement on 39 rows, then a re-mint (Kam's call) |
+| KS-1251 | Spec-example guard: eslint runs `rules: {}` on scripts/**/*.mj | REJECTED-LINT-CONFIG | eslint flat config + a test tsconfig; planted-violation controls — config, not a cell |
+| KS-1247 | KS-1101 follow-up: the out-of-repo consumers of the gateway he | REJECTED-OUT-OF-REPO | "inventory who reads these endpoints outside the repo" |
+| KS-1224 | Root-of-service `overrides.postcss: "8.5.23"` (KS-531) now ove | DECISION | "is the exact KS-531 pin now stale?" — 18 lockfiles |
+| KS-1218 | Schemathesis: constraints.txt's documented install line skips  | REJECTED-DOCS+PYTHON | a documented pip line vs `dependencies.py`; systemTest/schemathesis |
+| KS-1216 | Bundled js-yaml copies ship in service runtime images and are  | REJECTED-MEASURE-FIRST | "a measurement, not a fix" (runtime load trace in a built image) |
+| KS-1162 | Three retired GitHub workflows bake slot-2/3/4 port literals ( | REJECTED-WORKFLOWS | derive-or-delete three retired `.github/workflows/*.yml` — Kam's scope; the red→green is a `KNOWN_EXCEPTIONS` removal |
+| KS-1154 | Root package-lock.json carries only rollup-darwin-arm64 — npm  | REJECTED-LOCKFILE | a root lock regeneration verified on a Linux runner |
+| KS-1148 | CI-runner environment gaps (one class, two jobs): `Security Sc | REJECTED-WORKFLOWS | install/build steps in two `.github/workflows/` jobs — Kam-class |
+| KS-1113 | e2e gdpr-compliance.prelaunch.spec.ts 15.2.5 PATCHes a DSR wit | REJECTED-E2E | a Playwright spec's own body (`'processed'` → an enum value) against a local stack; Peter's authority |
+| KS-1100 | Kintsugi deploy 4554b25e2: four live changes have no QA gate r | REJECTED-QA-PROCESS | commission four gates; a QA credential on kintsugi is Kam's call |
+| KS-1083 | GATEWAY_VOUCH_SECRET: nothing provisions it and no deploy orde | DECISION | provisioning source / deploy order / rotation / production REQUIRE — "needs decisions before code" |
+| KS-1080 | SECURITY (local test stack): akto-autoheal runs as root with / | DECISION | "no fix, no privilege change, no compose edit — the remedy is a decision" |
+| KS-1079 | kintsugi lost demo-service to the KS-641 fail-closed gate — th | DECISION | a per-box `.env` flag with no owner; "not a request to flip the flag" |
+| KS-1076 | No Playwright e2e test has run on any PR since 2026-09-07 — th | REJECTED-E2E-LINT | four jsdoc errors in `systemTest/playwright/global-setup.ts` + "confirm the suite actually runs" (CI, retired) |
+| KS-1048 | CLAUDE.md's "rebuild local after any merge to develop" needs i | REJECTED-DOC-RULE | a CLAUDE.md rule rewording in TWO copies (project root + repo) — the root copy is outside the checkout; doc_patch's checker grades one file |
+| KS-1044 | No independent liveness signal for our own VMs — kintsugi was  | REJECTED-OPS | an external synthetic monitor per VM; "the approach is open" |
+| KS-1039 | tests/e2e 2.4.6 'SQL injection in registration name is saniti | REJECTED-E2E | re-aim an e2e assertion (`auth-exhaustive.spec.ts:751`); needs a live stack; Peter's authority |
+| KS-1038 | tests/e2e auth-exhaustive races its OWN lockout — same commit  | REJECTED-E2E | serialise the file OR a dedicated brute-force account; live stack + redis |
+| KS-1025 | Reshape the advisory gate: it is NON-DETERMINISTIC on an uncha | DESIGN | warn-then-fail keyed on reach + severity; "the window length is Kam's" |
+| KS-1022 | CLASS: the id-format contract seam — 79 of 83 path params are  | DESIGN | "a structural guard at the router, keyed off the spec" — not per-route `.uuid()` |
+| KS-1019 | [Question] The document's whole `blockchain` block is publishe | QUESTION | "should it be typed?" — a discriminated union is the shape IF yes |
+| KS-1017 | Test-estate CLASS: a fixture that cannot discriminate certifie | SURVEY | "sweep the auth suites for fixture values the product cannot produce" — a class sweep, then per-file edits |
+| KS-1015 | Sweeps 2026-09-08: 28 check/operation pairs have no live owner | REJECTED-SCHEMATHESIS-TRIAGE | 28 baseline pairs + a `run.py` docstring contradiction "resolve first"; Peter's authority |
+| KS-1014 | Eight containers ran images their own tag no longer pointed at | DECISION | close KS-1011's marker OR a boot check comparing image ids — live docker |
+| KS-1012 | The `require-pr-gates` ruleset survived the Actions retirement | REJECTED-GITHUB-SETTINGS | a repository ruleset; nothing in the tree |
+| KS-1010 | e2e: "CIP-30 API availability check" calls a route that does n | REJECTED-E2E+INTENT | "establish the intent first" (typo vs unbuilt route); e2e spec |
+| KS-997 | Re-triage four npm advisories that landed in the audit baselin | REJECTED-ADVISORY-TRIAGE | re-scan four GHSAs against today's tree; `audit-baseline.json` is hand-maintained data |
+| KS-996 | 95 archived tickets sit in NON-TERMINAL states — measure wheth | REJECTED-BOARD-MEASURE | a Linear parent/timestamp measurement over 95 archived tickets; "do NOT unarchive" |
+| KS-995 | Archiving a ticket silently archives its sub-issues, including | REJECTED-BOARD-PROCEDURE | an archive-procedure rule + a Linear question; nothing in the repo |
+| KS-990 | `npm run quality` cannot pass in systemTest/performance or sys | REJECTED-TYPE+KNIP | a TS2540 in `actor_manifest.ts:140` ("deciding which is the work") + two knip exports; systemTest |
+| KS-987 | A deploy that rsyncs the OpenAPI spec and does not restart api | REJECTED-RUNBOOK+DEPLOY | a runbook step + a post-deploy md5 assertion on the VM; docs + ops |
+| KS-986 | The published admin credential survives in USER_TESTING docs w | DECISION | "correct the doc, or restore the account deliberately"; item 3 is a seeder product change |
+| KS-980 | The KS-597 integration suite claims two RLS-permissive paths a | DECISION+REAL-PG | make P1 real (a second, non-BYPASSRLS connection) OR correct the header; a real-PG integration suite |
+| KS-965 | 87 documentary sites still publish the retired admin credentia | REJECTED-DOC-SWEEP | 87 occurrences in 55 files, "do after KS-964's code items" — not one file |
+| KS-956 | KS-930 residue: a whole app tree copied into a stage that name | DESIGN | row 1d: "both are decisions, not cleanups" (an exemption by name OR removing the arm) |
+| KS-925 | Launcher boot step tells every agent session to POST /api/seen | REJECTED-LAUNCHER | `Launch_Claude.command:522` + the extranet skill — "decide at the template level" |
+| KS-918 | vite is a production dependency of services/auth — esbuild and | REJECTED-DEPS | move `vite` to devDependencies + lock regen + runtime tree re-measure |
+| KS-851 | KS-386 residues from the round-2 gate: G-1 column ordinal drif | REJECTED-SCHEMA+KYC-PRODUCT | four advisory Minors: a column ordinal in `init.sql`, an orphan-attestation 500, a docstring, two write spellings — real-PG + kyc product |
+| KS-837 | Published prose drifts from the routes it describes and nothin | REJECTED-RULED-DO-NOT-BUILD | Wednesday's standing ruling "DO NOT BUILD IT NOW" (line 1); lines 2/5 unsized |
+| KS-834 | [Decision] POST /api/certifications/:id/verify has no auth han | DECISION | "leave it public, or gate it?" — Kam's; default leave public |
+| KS-789 | CONTRIBUTING.md justifies the hook's degradation and its --no- | REJECTED-DOC-DECISION | replacing "CI is the hard gate" with a stated obligation is a wording decision across two files + `.githooks/pre-push:12`; doc_patch's checker refuses a multi-file change and cannot judge the obligation's wording |
+| KS-787 | S revokes that emit no lifecycle event, or emit share-permissi | DESIGN | an S↔K contract question (sequence numbers / reconciliation); no K-side one-line change |
+| KS-784 | POST /api/teams/webhook-config fails the Schemathesis pr sweep | REJECTED-INVESTIGATE-FIRST | "not investigated beyond establishing that it is real, stable and unowned"; Schemathesis |
+| KS-783 | A platform admin who loses their TOTP device has no self-servi | DECISION | three recovery options, "none chosen"; MFA product |
+| KS-782 | [Decision] OAuth consent: a proper two-step MFA challenge on / | DESIGN | a two-step OAuth consent flow with open questions (challenge state, PKCE) |
+| KS-772 | Review stream: S<->K integration contract | REVIEW-STREAM | Stuart's review, "one test pass, 20 tickets" from Platform S |
+| KS-770 | Review stream: API contract and the four platform suites | REVIEW-STREAM | Peter's review, the four suites on a live stack |
+| KS-767 | Decide the 17 baseline entries that carry no `expires` — perma | DECISION | 17 GHSA rows: permanent acceptance or dated — a data decision |
+| KS-757 | Connector erasure re-drive is unbounded against concurrency —  | REJECTED-ALL-FIXES-BLOCKED | "all THREE prescribed fixes are blocked by something measurable" (data, SKIP LOCKED semantics, pool deadlock) |
+| KS-735 | Verify results show the user nothing about what was registered | DECISION | flat-vs-nested contract "is Peter's call" before any code; verifier frontend `ResultPage.tsx:423` |
+| KS-725 | test:pr never re-imports the OpenAPI spec, so Akto scans a col | REJECTED-AKTO | re-import mutates the shared Akto collection (Peter's live work) |
+| KS-724 | A scan that logs in more than ten times as one user revokes it | REJECTED-AKTO-HARNESS | a scan-trust defect in the Akto harness; product session cap "plausibly intended" |
+| KS-723 | Declare the remaining ~157 routed-but-undocumented /api operat | REJECTED-SPEC-BULK | ~157 OpenAPI declarations "wants its own PR and its own review" |
+| KS-716 | The whole super-admin surface is silently unscanned — no syste | REJECTED-AKTO-CONFIG | a `system_admin` block in the gitignored `secrets.yml` + a detector; Akto |
+| KS-709 | Akto reports a PASS for a test that executed NOTHING — 'clean  | REJECTED-AKTO-VERDICT | a new `NO COVERAGE` verdict in `src/scan/runTiming.ts` consumers; systemTest/akto (Peter's) |
+| KS-696 | Akto pr-scan is non-deterministic — three runs on near-identic | REJECTED-AKTO-FLAKE | three runs, three answers; nothing deterministic to pin |
+| KS-683 | Anchor-status standoff: a consumer repolls anchors K reports a | REJECTED-S-SIDE | "the actual fix, PS-side (Stuart's)"; K's layer 2 already done |
+| KS-678 | #568 publishes 17 URLs on secuura.io — an unresolving, seeming | REJECTED-SPEC-DATA+OWNERSHIP | 17 example URLs across 7 files + "confirm ownership before this is closed" |
+| KS-668 | Compose seeds published *123 credentials by default, and the 1 | REJECTED-COMPOSE-DEMO-POSTURE | flip `ALLOW_DEFAULT_SEED_PASSWORDS` default + 11 interpolations in `docker-compose.yml` — every compose deploy's posture |
+| KS-658 | The demo VM runs every service as NODE_ENV=development while t | DECISION | "establish which artefact is authoritative before reconciling"; demo-affecting |
+| KS-651 | [Decision] @secuura/shared is imported by 24 services and decl | DECISION | the symlink-vs-declaration design for 22 services |
+| KS-638 | The extranet test board has never shown a green run — 0 passed | REJECTED-OTHER-REPO | `secuura-extranet/ci/build-dashboard.mjs:181` — the extranet repo, not this checkout; plus an Actions-state question |
+| KS-630 | Wire the status-page XSS probe into preflight (or decide not t | DECISION | "decide whether it joins preflight.sh as a 7th check" — the shared pre-push gate (Seat B's file) |
+| KS-627 | Implement real wallet signature verification (CIP-8/COSE + add | REJECTED-FEATURE | a breaking contract change + new crypto deps + real-wallet vectors |
+| KS-624 | prism issues VCs with random bytes as the Ed25519 proof and ve | REJECTED-NOT-COMMISSIONED | "the by-design-or-remediate ruling is Kam's"; a pin of `passed: true` pins the fraud pattern |
+| KS-621 | Document reads are scoped by tenant and owner, never by organi | TRACKING | "deliberately NOT a fix spec"; the security model is undecided |
+| KS-618 | Client IP is invisible platform-wide on demo: every IP-keyed c | REJECTED-EDGE-CONFIG | nginx `real_ip` + `trust proxy` hops on the demo edge; live |
+| KS-598 | Architecture P1: defuse the MULTI_TENANCY registry upsert — it | REJECTED-ARCHITECTURE | re-key the registry or remove the upsert — "inside P1", a phase item |
+| KS-595 | Three undeclared-verb catalogue skips cite CLOSED tickets (KS- | QUESTION | "are the defects still live?" — a platform question over a schemathesis pytest catalogue |
+| KS-591 | positive_data_acceptance recurs at scale — 734 failures across | REJECTED-SCHEMATHESIS-CLASS | 734 failures across 64 ops from a full sweep; spec/schema drift at scale |
+| KS-583 | DR rehearsal: lose a key → re-key → read-back survives on pre- | REJECTED-LIVE-REHEARSAL | a four-step rehearsal on a live stack; step 4 blocked on KS-577 |
+| KS-582 | [Decision] Approval shape for bulk re-key — two approvers for  | DECISION | blocked on KS-579; "the shape needs deciding" |
+| KS-581 | register-connector: volume alerting, rate limit, and correlati | REJECTED-FEATURE | alerting + rate limit + `externalRef` GUID validation on the platform route — a build with its own done-when |
+| KS-580 | Append-only recovery audit held outside the estate being recov | REJECTED-FEATURE | "3-5 days" — an out-of-estate append-only audit |
+| KS-579 | Per-person platform-admin identities — the shared seeded admin | REJECTED-FEATURE | per-person platform-admin identity model |
+| KS-576 | Bulk re-key: one admin-authorised rotate across a named set of | REJECTED-FEATURE | "must not ship before KS-577"; a new bulk route + spec |
+| KS-530 | @hono/node-server v1->v2 major bump (GHSA-frvp) - originate +  | REJECTED-DEPS-MAJOR | a semver-major bump in two standalone locks + API verification |
+| KS-526 | KMS: move platform wallet mnemonic to Key Vault (KS-326 follow | REJECTED-FEATURE | Key Vault loading + rotation for the anchoring mnemonic |
+| KS-491 | Review F — Edge, WAF, DDoS & anti-automation | REVIEW-STREAM | the strategic WAF gap + an absent Caddyfile; edge review |
+| KS-485 | Security review — plan, methodology & handover (Platform K) | REVIEW-HUB | the coordination hub / living plan |
+| KS-339 | Grant Phil + Steve extranet access (evolve toward company sour | REJECTED-OPS | SWA app settings on the extranet |
+| KS-329 | Phase 2 — JWT RS256 → hybrid (RS256 + ML-DSA-65) | REJECTED-DESIGN-RULING | "Kam's ruling needed on a design change" (refresh-token size vs the cookie cap); KS-756 is the prerequisite |
+| KS-305 | State the M365 source-document controller boundary in the cus | REJECTED-LEGAL-DOC | "belongs in the DPA legal doc, not the platform repo" |
+| KS-263 | Enable Code Security / GHAS so security scans populate the Sec | REJECTED-GITHUB-SETTINGS | a repository security setting (403 on `upload-sarif`) |
+| KS-605 | Terminology definitions for stakeholders + lawyers — certifica | REJECTED-STAKEHOLDER-DOC | definitions for lawyers/stakeholders; BM-1/BM-2 dependent |
+| KS-604 | BM-5: System-details document for Peter & Stuart — the technic | REJECTED-STAKEHOLDER-DOC | a system-information document Kam owes; not a repo doc with a checker |
+| KS-603 | BM-2: Verification is a configurable workflow via smart contra | REJECTED-BUSINESS-MODEL | a business-model clarification (workflow path recording) |
+| KS-602 | BM-1: Certification model — certification = attestation + sign | REJECTED-BUSINESS-MODEL | "likely an epic" (data model + lineage + re-certification triggers) |
+| KS-655 | KS-78 drift check is wrong three ways — reports 7 commits of d | REJECTED-LAUNCHER | three defects in `Launch_Claude.command:465-481` — "NOT under version control", 16 copies; Kam's call |
+| KS-903 | Audit the eleven cwd- and script-relative repo-root derivation | SURVEY | "a survey, not a defect: the deliverable is the classification plus a ticket per blind site" |
+| KS-825 | Gate integrity: the auth suite's green is not deterministic —  | REJECTED-FLAKE | a 1-in-3 `fetch failed` on `app.listen(0)`-per-request files; "prove it by reproducing a red first" |
+| KS-636 | node:24-alpine carries a CRITICAL (CVE-2026-59873) — our own b | REJECTED-OPS | re-run the watch workflow, read the advisory, rebuild every image behind the Kintsugi hold |
+
+**Doc tiers, read before proposing (none proposed):** `tasks/doc_patch/task.md` (ONE `product_file`, the brief's exact
+lines; checker arms D0 subject / D2 applies at the tip / D3 touched-file set == the one file / D5 apply / D9 vacuous on
+a blank anchor), `tasks/comment_patch/task.md` (comment text ONLY on `comment.ranges`; the checker compares every code
+token before and after — one changed token fails), `tasks/facts_comment/task.md` (a facts-only Linear comment body from a
+`facts` array — not a repo change at all). The doc-shaped tickets read this round are all multi-file or decision-shaped:
+KS-1048 (two CLAUDE.md copies, one outside the checkout), KS-789 (CONTRIBUTING.md + `.githooks/pre-push:12` + an
+obligation still to be worded), KS-965 (55 files), KS-987 (a runbook step + a VM md5 assertion), KS-305 / KS-604 /
+KS-605 (documents outside the repo). The arm that would refuse each: doc_patch **D3** (touched-file set is not the one
+file) for KS-1048 / KS-789 / KS-965; no doc_patch subject exists (D0) for a document that is not in the tree (KS-305 /
+KS-604 / KS-605 / KS-987's VM half); comment_patch has no candidate (no ticket read this round asks for a comment-only
+change in one source file — KS-902's comment correction was round 23's row and is not in this population's unrowed set).
+
+**Instrument slips caught in this round's own work:** (1) the first `measure.sh` carried `rm -rf "$d"` on a variable
+and was REFUSED by `pretooluse_no_rm.sh` before it ran — rewritten to leave fixture dirs under the scratchpad
+(`fx_957/case_N`), nothing was deleted or touched; (2) the first `cmp` of the golden body against the suite file used
+the wrong line range (4-77 instead of 5-78) and printed a false "differ" — re-run with the right range, byte-equal;
+(3) one `show.py` batch exceeded the tool's 30 KB output cap and was persisted to a file, read back in full with the
+Read tool (KS-1235 … KS-889) — nothing skipped; batches were capped by characters after that. Nothing was mis-stated to
+any file by any of the three.
+
+**Not mine, seen:** `night/candidates.md` (GENERATED) shows as modified in `git status` at session start and close — the
+running `com.wednesday.ornith-loop` regenerates it; this round did not touch it, `queue.md`, `done.md` or `PAUSE_QUEUE`.
+
+**Next-best if the FIT is refused:** (1) **KS-808 item 2** (`applied_count` counts skips) — a bash_patch on
+`run-migrations.sh` with a NEW psql/pg_isready-stub suite, sequenced AFTER the held `READY_KS-1031` lands (its hunk sits
+at `:148-154`, item 2's at `:97` + `:138-145`; KS-1031's new suite is the stub harness to reuse); (2) **KS-957 F5**
+(`if (nm ~ /\$/) return 0` at `:486` — a clause that cannot change an outcome) is NOT briefable as test_only (no cell
+can red on a clause that changes nothing) and as a bash_patch is a deletion the owner should rule on; (3) **KS-1111
+QA-961-2** rows are test_only-shaped but live under `systemTest/performance` (repo root, Peter's four-gate rule) — only
+if the harness is pointed at `repo_subdir=systemTest/performance` and Wednesday accepts the authority; (4) **remaining
+un-read descriptions: 0** — a further round on this population finds nothing new until the live lane's PRs merge (their
+siblings: KS-1236 `already pending`, KS-1006 `MFA is not enabled`) or new tickets land.
