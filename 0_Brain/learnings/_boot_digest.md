@@ -7,7 +7,7 @@ status: live
 
 # Boot digest — headline + rules of every lesson (open the file when it fires)
 
-Generated 2026-09-20 16:48 from 193 lesson files (887,324 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 9 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
+Generated 2026-09-20 17:17 from 194 lesson files (894,529 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 9 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
 
 ## The T9 SSD is the master — Wednesday must be fully portable
 `2026-07-31_fully-portable-drive.md` · principle · 2026-07-31 · status: superseded — the "T9 is the master" half by [[2026-08-25_one-drive-devmaster-is-master]] (2026-08-25); the portability principle itself still lives
@@ -6321,6 +6321,27 @@ built to close.**
 5. Same shape in reverse for us: when a gate is NOT RUN, its items are unverified CLAIMS, not results — a verdict inherits the scope of the run that produced it.
 
 **Family:** [[2026-09-07_a-census-complete-over-a-frame-that-is-not]] (the parent — this is its CLOSURE half: there the census was misread while fresh, here it was inherited after closing) · [[2026-08-16_a-recorded-blocker-is-not-a-boundary]] (a recorded claim with a date) · [[2026-09-06_a-retraction-inherits-the-scope-of-its-measurement]] (its mirror: a withdrawal inherits its measurement's scope too) · [[2026-08-07_a-check-that-cannot-fail]].
+
+
+## A control that runs in a different MODE from the one that will judge you proves less than it appears to — and it is worse than no control, because it buys the confidence to ship
+`2026-09-20_a-control-in-the-wrong-scan-mode-buys-confidence.md` · correction · 2026-09-20 · status: live
+
+**The lesson, in the agent's own words, adopted verbatim:**
+
+sections (open the file for these): The case · Two properties worth keeping on their own · The coordinator's half, which is where this actually started · Why the existing lessons did not catch it · 🔴 THE w=3 ROOT — three of Tuesday's errors in ONE session, and they are one mistake · How to apply
+
+## How to apply
+
+1. Before trusting any control, write down the **exact command the judge runs**, and run that.
+   `protect --staged` vs `git .` vs `dir .` are three instruments wearing one tool's name.
+2. When a suppression, ignore-file or allowlist is involved, **check its key format against the
+   mode that will read it** — history findings, staged findings and directory findings are keyed
+   differently by the same tool.
+3. **A control's report names its mode.** "I proved the suppression narrow" is not a claim; "I
+   proved it narrow under `gitleaks protect --staged`" is, and it is the version that would have
+   exposed this before the push.
+4. This generalises past scanners: test runners with different collection roots, linters in
+   `--fix` vs check mode, CI matrices that differ from local, `npm ci` vs `npm install`.
 
 
 ## An absence is measured at one moment and ASSERTED at another — and the more carefully you write the complaint, the staler its premise
