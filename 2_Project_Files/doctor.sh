@@ -926,6 +926,31 @@ else
        "bash 2_Project_Files/scheduler/install_all_jobs.sh (from this seat's own tree, WED_AGENT unset) — a missing job is a mechanism that silently never fires"
 fi
 
+# ── PYTHON TOOLS REFERENCE ONLY NAMES THEY BIND (2026-09-20, Tuesday) ─────────
+# Patching reconcile_rulings.py I added os.environ to a module whose imports read
+# "import json, re, subprocess, sys", and verified it with ast.parse — which
+# printed "syntax OK" on a module that could not load. Measured the same night:
+# `python3 -m py_compile` PASSES on that exact defect too. A syntax check cannot
+# fail on a missing name, so both were checks that could not catch what they were
+# pointed at. Running the tool caught it; this makes the catch a mechanism.
+# WARNS rather than FAILS: it reads module scope only (stated limit in the
+# checker), so it is a real signal, not a proof, and a false positive must not
+# stop a boot. Armed both ways before wiring: a fixture using os without
+# importing it is flagged; the same file with the import passes; all 9 tools pass.
+UNDEF="$PROJECT_DIR/2_Project_Files/tools/check_undefined_names.py"
+if [ ! -f "$UNDEF" ]; then
+  warn "tools/check_undefined_names.py missing" \
+       "restore it from git — without it a tool can reference an unimported name and every syntax check still passes"
+else
+  UNDEF_OUT="$(python3 "$UNDEF" "$PROJECT_DIR"/2_Project_Files/tools/*.py 2>&1)"
+  if [ $? -eq 0 ]; then
+    ok "python tools: $(printf '%s' "$UNDEF_OUT" | tail -1)"
+  else
+    warn "python tool references an unbound name: $(printf '%s' "$UNDEF_OUT" | head -1)" \
+         "python3 2_Project_Files/tools/check_undefined_names.py 2_Project_Files/tools/*.py — a syntax check will NOT show this"
+  fi
+fi
+
 echo
 if [ "$HARD_FAIL" = "1" ]; then
 
