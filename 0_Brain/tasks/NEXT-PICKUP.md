@@ -25,6 +25,17 @@ supersede: replace wholesale at the next pickup; do not append
 6. **A follow-up TICKET is owed, and it is NOT this batch's:** the gate found six NOT-PINNED role-dimension rows — a widened `SUPER_ROLES` would newly admit a role-ADMIN JWT on all 13 `requireSuperAdmin` routes and on `requireOrgProvisioner`, with only `GET /api/platform/tenants` pinned; one unpinned row, **`POST /api/platform/organizations/register-connector`, returns 201 and MINTS A KEY**. A COVERAGE gap, not a live defect. File it with the gate's evidence, one ticket per logical path, stating KS-1282's own cell is unaffected. VITEST-1 / SHELL-1 / LOAD-1 / LINT-1 are pre-existing and recorded, not fixed.
 7. **ORNITH IS PAUSED DELIBERATELY, AND THE PAUSE IS A MECHANISM, NOT A HABIT.** Two fixes banked and held: **KS-1275** (`Refs KS-1275`, never a closing word) and **KS-1203** (`Refs KS-1203`; ⚠ its diff applies `--recount`, NOT strict — the model miscounts its own hunk header, so apply the canonical `patch.diff`, never the quoted text). `night/PAUSE_QUEUE` holds an EPOCH expiry (**20:48 today**) + the reason; `night/QUEUE_EMPTY_WHY.md` holds the full reasoning. The G7 busy leg now reads that file and SKIPS its tap while the pause is live, **logging why** — and still lets the 2 h panel alert reach Kam, because a pause is mine to take and his to see. Arms `local-model/tests/g7_pause_arms.sh` **6/6**, including a negative control on the pre-fix script and the human-date-on-line-1 shape that would otherwise have made the pause permanent. **When it expires, either brief the next ticket or write a new reason — do not re-set the marker without one.**
 
+### 🔴 KAM LIFTED KS-1175's HOLD AND REDIRECTED THE WORK — 19:42:44, view=wednesday
+> *"Decision secuura-ks1175-testonly-pin-on-a-held-ticket note: remove the rule and make the fix"*
+
+**He answered OUTSIDE the three options the card offered.** The hold on **KS-1175 comes off**, and the work moves from the test-only pin to **the ticket's real fix** — `anchorSchema.ts` accepting and anchoring the non-PII actor/organisation identifiers instead of stripping them. Full reading: `learnings/2026-09-20_ks1175-hold-lifted-make-the-fix.md`.
+
+- **KS-1250 is UNTOUCHED and still his.** He lifted one named ticket, not the class.
+- **The deploy/anchor step is NOT lifted** — he did not name it, and a new field reaches the immutable record only when something is deployed and an anchor is made. Stated back to him on the panel at 19:43; his word widens it, not my reading.
+- **The parked brief is SUPERSEDED, not resurrected** (`night/briefs/KS-1175-STRIP-1.md.HELD-…`): it was written to PIN the stripping behaviour he has now asked to CHANGE.
+- **This is a Claude seat's job, not the local model's** — multi-file product change; the round-22 writer rejected it as such, correctly.
+- **Allowance, put to him at 19:43 and unanswered:** a seat + gate at 87% most likely reaches the 90% cut, and the allowance does not renew until **Fri 25 Sep** while he leaves **Mon night 21 Sep**. **Default stated to him: write the brief now, START IT MONDAY MORNING while he is still here**, rather than spend his away-week's budget tonight. If he says otherwise, run it.
+
 ### 🔴 KAM RULED THE BOOT DIGEST — Fleet/BOTH SEATS, and it binds THIS seat
 **Card `tuesday-boot-digest-outgrew-the-window`, scope `Fleet/both seats`, RULED `b` at 2026-09-20T16:44:**
 > **b — Keep the whole read, shrink the corpus to fit**

@@ -7,7 +7,7 @@ status: live
 
 # Boot digest — headline + rules of every lesson (open the file when it fires)
 
-Generated 2026-09-20 19:30 from 195 lesson files (906,958 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 9 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
+Generated 2026-09-20 19:45 from 196 lesson files (910,550 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 9 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
 
 ## The T9 SSD is the master — Wednesday must be fully portable
 `2026-07-31_fully-portable-drive.md` · principle · 2026-07-31 · status: superseded — the "T9 is the master" half by [[2026-08-25_one-drive-devmaster-is-master]] (2026-08-25); the portability principle itself still lives
@@ -6420,6 +6420,24 @@ through · returns null*. A cell asserting a POSITIVE goes **red loudly** when a
 so it is noticed the same day by whoever ran the suite. **So the population to check is not "all cells on
 the callers" but "the NEGATIVE-ASSERTING cells on the callers"** — which is why this class came back as
 three sites rather than an unbounded audit.
+
+
+## KS-1175's hold is LIFTED and the answer was "make the fix", not the test — a card answered OUTSIDE its own options
+`2026-09-20_ks1175-hold-lifted-make-the-fix.md` · grant · 2026-09-20 · status: live
+
+**His words, verbatim:**
+> *"Decision secuura-ks1175-testonly-pin-on-a-held-ticket note: remove the rule and make the fix"*
+
+sections (open the file for these): What is lifted, and what is NOT · The work it redirects · How to apply
+
+## How to apply
+
+1. **Read the scope field, not the option list.** When Kam answers a card with a `note:` instead of a key, the note IS the ruling and it may be wider than anything offered. Record it verbatim before interpreting it.
+2. **State the reading back in the same action** (done, 19:43 panel), with the part being treated as still-his named explicitly. He corrects in seconds; a silent wide reading corrects in incidents.
+3. **A lifted hold lifts ONE ticket.** KS-1250 is still named and still pauses. Do not generalise "he lifted a hold" into "the class is open".
+4. **The mechanism could not record it** — see the ledger row of the same date: `reconcile_rulings.py` parses `Decision <id>: <key>` and his `note:` form is not a key, so his ruling did not reach the card and would have evaporated. Recorded by hand into this file, the card's withdrawal reason and the pickup. **The reconciler fix is OWED.**
+
+**Family:** [[2026-09-06_a-scoped-override-carries-its-own-expiry]] (no expiry stated here — said so rather than assumed) · [[2026-08-07_protocol-v1.3-signed-delegation]] (what a grant does and does not reach) · [[2026-09-14_kams-instruction-stands-until-he-withdraws-it]] · [[2026-08-16_an-ask-without-a-default-is-an-indefinite-hold]] (the card carried a default; he answered past it) · [[2026-09-05_a-relayed-ruling-is-delivered-only-when-it-is-in-the-artefact]].
 
 
 ## In this workspace's layout the git repo is ONE subdirectory of the project folder — so most of where an agent works is outside version control, and agents put deliverables there
