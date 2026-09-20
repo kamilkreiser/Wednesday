@@ -1,0 +1,629 @@
+ultrathink
+
+You are the fleet QA agent running ONE BATCHED ROUND 1 gate, at the TIER 1 floor, over SIX file-disjoint Secuura/Blockchain PRs raised by Seat B
+11th. They carry SIX local-model (ornith:35b) patches applied from Wednesday's checker records and HELD after a checker PASS: four TEST-ONLY
+(#1106 api-gateway/VITEST, #1107 timestamping/VITEST, #1110 security/VITEST, #1111 api-gateway/VITEST), one CODE PATCH (#1108 api-gateway/VITEST:
+ONE product line in index.ts's shouldParseBody plus ONE new red-first test file) and one BASH PATCH (#1109: ONE script line + ONE comment line in
+scripts/preflight/preflight.sh plus ONE new bash test). Zero product bytes on #1106, #1107, #1110 and #1111 is a claim you PROVE per PR from the
+PR files API AND from `git diff --name-only` in your clone, never inherited; ONE product line on #1108 (numstat `1 1` index.ts + `94 0` the new
+test, nothing else) and ONE script edit on #1109 (numstat `2 1` preflight.sh + `83 0` the new test, nothing else) are claims you prove the same
+way. THREE are TIER 1: #1108 (Wednesday's ruling 15:03:15Z — a middleware-skip WIDENING on every `/api/v1/<proxyPath>` alias: express.json /
+urlencoded / sanitizeInput / detectSuspiciousRequests are skipped for the alias exactly as for its `/api/` twin — a security-surface middleware
+chain, not a parser detail), #1110 (the security service) and #1111 (the gateway's trust-header strip, auth-adjacent). They are batched under
+Kam's 2026-09-18 standing rule (batch disjoint changes by default; never spend a second gate session on a round the first could have carried).
+They are SIX PRs, not one: you give SIX verdicts, one per head, and one PR failing must not block or colour the others. A VERDICT IS VALID ONLY
+AT ITS HEAD: if any refs/pull/N/head moves under you, STOP grading THAT PR and say so; the others continue.
+
+EVERY NUMBER BELOW IS THE SEAT'S MEASUREMENT (or the drafter's re-derivation of it), NOT AN ESTABLISHED FACT. You re-derive it or refute it.
+Nothing in this prompt, in the READY mails, in the STATUS mail, or in any PR body is evidence — they are claims with an author. Name every
+prediction slip against its predictor. GRADE THE HEADS: the patches, the checker's records and the seat's worktrees are provenance; the bytes at
+refs/pull/N/head are the PR.
+
+NAMESPACE NOTE — the PR numbers #1106-#1111 are ALSO the numbers of six real, unrelated Linear tickets (drafter, linear_reads.out 16:19:55Z:
+KS-1106 Backlog, KS-1107 Backlog, KS-1108 Backlog, KS-1109 Done + ARCHIVED 2026-09-13 with attachment #963, KS-1110 Backlog, KS-1111 Backlog).
+None of the six PRs is its own-numbered ticket. PR #1106 is KS-1232. PR #1107 is KS-753. PR #1108 is KS-1234. PR #1109 is KS-1279.
+PR #1110 is KS-880. PR #1111 is KS-1223. Every table, finding, tamper id and MERGE ADDENDUM line names BOTH the PR and the ticket (and the item:
+INFOEMPTY-1, MOCKVERIFIED-1, V1-ALIAS-BODYPARSE, RATIO-ENVFAIL, DEADCONV-1, WALLET-1), and your Linear reads assert that none of KS-1106 … KS-1111
+gained an attachment for pull/1106 … pull/1111 (KS-1109 is archived: read it with includeArchived).
+
+  #1106 KS-1232 INFOEMPTY-1        head 2abc82d11014f00567b75a6b8fab5ec5e78f9df2  api-gateway src/__tests__/ks480-connector-auth.test.ts +16/-0
+                                   (+1 cell: GET /api/connector/info answers allowedDocumentTypes [] for a stored "", 0 or false — createHealthRoutes
+                                   driven in-process, health.ts:58 `|| []`) — TEST-ONLY, VITEST, pushed FIRST. TIER 2.
+  #1107 KS-753 MOCKVERIFIED-1      head 7e7da2f88f9ef8dcf571a5720bb7bffcd700aa30  timestamping src/__tests__/ks740-bounded-fanout.test.ts +31/-0
+                                   (+1 cell: POST /api/timestamps and /api/timestamps/batch answer 201 with verified true for the mock TSA fallback
+                                   when no TSA is reachable — fetch stubbed 503, the REAL mock fallback, PORT=0, routes driven app(req,res,next)) —
+                                   TEST-ONLY, VITEST. TIER 2. It pins TODAY's behaviour and decides NOTHING on the ticket's 503-vs-verified:false
+                                   design question (the body says so in those words — grade that it does).
+  #1108 KS-1234 V1-ALIAS-BODYPARSE head 4904c081c4f9be776acef78349bc10384f10de35  api-gateway src/index.ts (1 1) + NEW
+                                   src/__tests__/ks1234-v1-documents-json-create-never-answers.test.ts (94 0), +95/-1 — ONE PRODUCT LINE at :413:
+                                   `const shouldParseBody = (req: Request): boolean => !proxyPaths.some(p => req.path.startsWith(p));` ->
+                                   `… !proxyPaths.some(p => req.path.replace(/^\/api\/v1\//, '/api/').startsWith(p)); // KS-1234: judge the
+                                   /api/v1 alias by the path the rewrite below gives it` — CODE PATCH, VITEST + packages/shared. TIER 1
+                                   (Wednesday's ruling). The ticket's SECOND symptom (the production-boot 307) is a separate mechanism, OUT OF
+                                   SCOPE, stays open.
+  #1109 KS-1279 RATIO-ENVFAIL      head f592268af36b282029e50ff2fa1ebe2614304b81  scripts/preflight/preflight.sh (2 1) + NEW
+                                   scripts/__tests__/preflight_ratio_excludes_leg1_no_install.test.sh (83 0), +85/-1 — the indented `n_ran=` at
+                                   :704 inside the real-failure branch becomes a `# KS-1279:` comment (:704) + `n_ran=$(( $(printf '%s' "$RAN_LEGS"
+                                   | wc -w | tr -d ' ') - ${env_fail:-0} ))` (:705); the column-0 twin at :711 (now :712) UNCHANGED — BASH PATCH,
+                                   /bin/bash 3.2 harness. TIER 2. The ticket's option 1 (`_note_skip SKIPPED_ADVISORY 1` at :236-237) is NOT this PR.
+  #1110 KS-880 DEADCONV-1          head a2a7d7845e75dac2df5c6ad0c4109d5f63394d4c  security src/__tests__/row-converters.test.ts +10/-0
+                                   (+1 cell: the DEAD converters.ts rowToApiKey maps NEITHER tenantId NOR connectorId — `[k.organizationId,
+                                   'tenantId' in k, 'connectorId' in k]` equals `['org_1', false, false]`; a characterisation pin of the defect
+                                   KS-880 describes; the product fix — quarantine or reconcile the dead copy — is NOT this PR) — TEST-ONLY,
+                                   VITEST. TIER 1 (the security service).
+  #1111 KS-1223 WALLET-1           head 3d1ea289a0c367af5cd0d060322e46fc900a1c76  api-gateway src/__tests__/ks1041-vouch-header-strip.test.ts +6/-0
+                                   (+1 cell: `isStrippedTrustHeader('x-wallet-address')` is false and a client-sent x-wallet-address SURVIVES
+                                   stripTrustHeaders while x-user-id is removed and authorization kept — a characterisation pin, not an
+                                   endorsement; the ticket's referral half, services/referral/src/routes/referrals.ts:55, is NOT pinned by design)
+                                   — TEST-ONLY, VITEST, pushed LAST. TIER 1 (the trust-header strip).
+
+TIER PER PR (Wednesday's rulings, against Kam's 2026-09-05 tier grant; overturn any with a measured reason, and say so first):
+  #1108 KS-1234: TIER 1 — a middleware-skip widening on every /api/v1/ alias (index.ts:413 shouldParseBody; its uses :416 express.json, :417
+    urlencoded, :458 sanitizeInput, :459 detectSuspiciousRequests; the /api/v1/ -> /api/ rewrite at :561, which runs AFTER those four).
+  #1110 KS-880: TIER 1 — the security service (converters.ts rowToApiKey; the LIVE copy at security/src/index.ts:418).
+  #1111 KS-1223: TIER 1 — the trust-header strip (utils/trustHeaders.ts:39-56 TRUST_HEADER_PATTERN / isStrippedTrustHeader / stripTrustHeaders).
+  #1106 KS-1232: TIER 2 — test-only.  #1107 KS-753: TIER 2 — test-only.  #1109 KS-1279: TIER 2 — a preflight script line + a bash test.
+  One session carries all six at the TIER 1 floor: tier is a floor per PR, the verdicts are per PR. Round 1 of 2 (round 1 of 2). Time-box 180
+  minutes. Budget #1108 first if time runs short, then #1111, then #1110, then #1109 (the script line), then #1106, then #1107, and say what you cut.
+
+MERGE AUTHORITY for all six: WEDNESDAY'S signed GO naming each head, under Kam's TESTED grant. The seat's plan on merge (its own words in the
+READYs and STATUS; grade it): ruleset 18499832 re-read FIRST and STOP on a change; targets.json with ALL SIX keys before the first merge, built by
+raise/targets12.py from YOUR report.md's `## MERGE ADDENDUM` section VERBATIM — MG-1: exactly ONE equality target PER PR FILE (1 / 1 / 2 / 2 / 1 / 1;
+merge12.py:69 STOPs otherwise; every MERGED line reads "N gate equality target(s)"); MG-2: targets12.py:26 parses the targets with
+re.search(r"equality targets: (.*?);") — NON-GREEDY to the FIRST semicolon — so the two-file lines (#1108, #1109) carry their two per-file targets
+COMMA-separated, and the seat copies your lines verbatim and asserts the count per PR before any merge; merge12.py one at a time in Wednesday's
+order, sha-pinned squash, re-predicting the tree over the then-current develop before each merge, blob-gated against your addendum. All six
+tickets are LIVE and stay open: `Refs` only, linkKind contributes, no closing word anywhere; KS-1232, KS-753, KS-1234, KS-1279, KS-880 and KS-1223
+were each walked Backlog -> In Progress by the linear[bot] (actor GitHub) on PR open (15:34:36Z, 15:41:21Z, 15:48:02Z, 15:54:09Z, 16:00:35Z,
+16:07:29Z — drafter, linear_reads.out); Wednesday's ruling: all six STAY where they are — the GO handles it; the gate does NOT touch tickets, and
+recommends no move. Give a MERGE ORDER for the six with the reason for each constraint you impose. The seat pushed 1 -> 2 -> 3 -> 4 -> 5 -> 6 and
+the drafter suggests merging in that push order (#1108 — the only gateway product line — sits third; the two tier-1 test-only surfaces last);
+accept it or change it with a reason (the tree is order-independent: measure that, then rule). No GO cut-off is yours: never trade a measurement
+for the clock.
+
+THE SHAPE (drafter-measured 2026-09-20T16:14:39Z-16:19:24Z by `git ls-remote` of refs/heads/develop, all six refs/pull/N/head and all six
+branches, by local object reads in the read-only checkout (shape_1.out, devpin_blobs.out) and by REAL 3-way merges in a --shared --no-checkout
+scratch clone (predict_batch_scratch.out); the launcher re-asserts it at every run, head by branch AND by refs/pull/N/head):
+  - The heads' parent = 778e6cfe2b6061d60ffcf3a57a951c84dc152b67 (tree d0c8bfd095b65861efc1a4e8524017235b42e382 — the #1102-#1104 batch tree,
+    landed). origin develop NOW = cbae988dbe90ebe556459ada2cb437eaf80e2402 (tree 1f2bc512aee2a55d74142d9ba8206a795b0c975c) = 778e6cfe2 + ONE
+    squash: #1105 (KS-1175 + KS-1284, Seat A 15th, merged 15:2xZ on Wednesday's GO), 12 files +1084/-64 ALL under services/anchoring/** plus
+    docs/openapi/secuura-api.yaml and docs/VOCABULARY.md. The seat measured its twelve paths (the 8 PR paths + the 4 tamper files) DISJOINT from
+    those 12 and called the move a NON-EVENT (STATUS 15:28Z, "re-measured"); the drafter re-derived it: the 12 #1105 paths ∩ the 8 PR paths =
+    NONE, and every PR-side develop blob is byte-identical at 778e6cfe2 and at cbae988db. YOU RE-DERIVE IT (`git diff --name-only 778e6cfe2
+    cbae988db` against the eight paths and the four tamper files, and the blob equality) — "develop moved" and "develop moved in a way that
+    reaches these cells" are different facts.
+  - Each PR is ONE commit whose parent IS 778e6cfe2 (rev-list --parents; compare API develop...head = merge_base 778e6cfe2b6061d60ffcf3a57a951c84dc152b67,
+    ahead 1, BEHIND 1, files 1 / 1 / 2 / 2 / 1 / 1 — drafter 16:16:35Z; the launcher asserts merge_base + ahead + behind + files per PR, exit 10).
+    Pairwise file overlap 0 (8 distinct paths: 4 modified test files, 1 modified product file, 1 modified script, 2 NEW test files; 2 deleted
+    lines in total, one in index.ts and one in preflight.sh). Four lanes: api-gateway vitest (#1106, #1108, #1111), timestamping vitest (#1107),
+    security vitest (#1110), the scripts bash harness (#1109); #1108 also runs packages/shared vitest. originate is untouched (no originate run owed).
+    Branches: #1106 feature/ks-1232-get-apiconnectorinfo-tells-a-connector-all-types-permitted-infoempty-1; #1107
+    feature/ks-753-timestamping-fail-closed-a-mock-tsa-fallback-must-not-report-mockverified-1; #1108
+    feature/ks-1234-post-apiv1documents-with-applicationjson-never-answers-and-v1-alias-bodyparse-1; #1109
+    feature/ks-1279-preflights-legs-ran-ratio-counts-leg-1-as-run-on-a-no-ratio-envfail-1; #1110
+    feature/ks-880-quarantine-or-reconcile-the-dead-converters-copy-a-second-deadconv-1; #1111
+    feature/ks-1223-a-client-x-wallet-address-is-forwarded-past-the-gateway-wallet-1.
+  - Each PR over 778e6cfe2 is a FAST-FORWARD: its merged tree over 778e6cfe2 IS its head tree (#1106 50eb9b8683ec332b1d7caa4ee2b73552da6c6765,
+    #1107 ceb6bdc7e2f101919ff81750ec6594f906680006, #1108 83bd05b8033f2a8d15bf5af72b67d4afcd9004ff, #1109 a33bde818f2e790fd81610fa3abe9fe2f2a1c705,
+    #1110 04659f893122a9b5c1edd5b98160eee90ef881db, #1111 4a0792982a1bd8451b834d02cbe3013ee8fd2987). Each PR over the CURRENT develop cbae988db is
+    a REAL 3-way merge (clean, rc 0, both orders): #1106 4de60c4def27c21ceeb1c24843cdb8e0c0355b68, #1107 f6e218ea6fabee3fb4b78977b3fdc775dbcba0fa,
+    #1108 3d91c935f41ff9059a89a8456a713dcb42114f4f, #1109 44ba2d430d333130b218fe5a628e39f121b636d5, #1110 42641a11669e2890bc9d2baea0782b2388a8f521,
+    #1111 1d877179f20c8a550b5ddca5599cf5f75e0895b1 (= the seat's item 0b twelve-hex prefixes, all six).
+    ALL SIX TOGETHER: over 778e6cfe2 tree a785e7cb93b46ac4253a13932aab0f10206cdc61 (8 files +243/-2; the seat's s-b11-batch octopus 91752bc2f970,
+    never pushed; every suite green on it by the seat); over cbae988db tree 2e981e7779dc9bcabecd099c6e93da21345a8ed0 (8 files +243/-2 over
+    develop's tree; the seat's item 0b `2e981e7779dc`). The drafter built both by chained real 3-way merges in SIX orders each (forward, reverse
+    and four others) — identical every time; controls: read-tree back to 778e6cfe2 -> d0c8bfd095b6…, back to cbae988db -> 1f2bc512aee2…; every PR
+    path in the all-six tree carries its head blob and the 12 #1105 paths carry develop's blobs; a numstat from an empty repo rc 128. The seat
+    argues two orders suffice by pairwise disjointness (720 orders commute); re-derive the trees yourself in YOUR clones by real 3-way merges, in
+    at least both orders over cbae988db (all six of your own choosing if cheap), and prove overlap 0 from the name lists — the disjointness is a
+    measurement, not an argument. THE TREE THAT MATTERS FOR THE MERGE is the one over cbae988db (or over whatever develop is when the seat
+    merges — merge12.py re-predicts); grade each PR on its head as the delta over 778e6cfe2 AND on its merged tree over cbae988db AND on the
+    all-six tree 2e981e7779dc…; run the suites on the all-six tree over cbae988db (the seat ran them on a785e7cb… over 778e6cfe2 — say whether
+    the counts agree).
+  - CANONICAL-PATCH identity (every apply STRICT this round; the seat: "Deviation from verbatim: NONE" on all six; head blobs = the checker
+    GROUPING):
+      #1106 = runs/2026-09-21_ks1232-ornith35b-night/out.md.checker/patch.diff (sha256 1512cf278927f192cf784b23c30d5c5095c1b1ed634f007701739d2b71b6df03,
+        +16/-0, hunk @@ -135,1 +135,17 @@) -> head blob 16e88d9b7e00d816e6a93bfb4359e6bdc43fcb43 (develop eca492723115531d8daa52d1d8b52b1b9b99970a).
+      #1107 = runs/2026-09-21_ks753-ornith35b-night/out.md.checker/patch.diff (sha256 6f4deaef82335a01c46b3f87b44044dc9497a2944ff7caddd6b8ba72e451385b,
+        +31/-0, hunk @@ -122,1 +122,32 @@) -> head blob 6fdf0e80a46ce75c0e0f4c5540aea443779d944c (develop a36eaa20ef8e96504a1844ba2eb16e3098f5ad0f).
+      #1108 = runs/2026-09-20_ks1234-ornith35b-night/out.md.checker/patch.diff (sha256 c55d7a9c496ea66b20ac8be18a613fea8f29dd869215584040cefbdc0483fa89,
+        = section_1.diff + section_2.diff byte-for-byte; two `+++`, ONE `-` line; the patch's FIVE bare `+` lines at patch lines 27/32/39/50/86 are
+        ALL in the test hunk, ZERO in the index.ts hunk — Wednesday's Q3 correction of the drafter's "three") -> head blobs
+        4e7fc1174d5453f9d6f71e3a69f166fc6a08db49 (index.ts; develop db127dbfa5dd899b0a8e0d844690890d91e27f10) and
+        3f85887f7268a9a19fd61d73e6178bf7f6c892dc (the new test; ABSENT at develop). index.ts stays 1279 lines by `wc -l` (the seat says 1280 —
+        a line-count convention; measure both trees the same way and say so).
+      #1109 = TWO section files applied strict in order: runs/2026-09-20_ks1279-ornith35b-night/out.md.checker/section_1.diff (sha256
+        5eea5506681b8a93968f5744c1124e9da5aab7ce1a9e3350848d977eb413d17c, numstat `2 1` preflight.sh, hunk @@ -701,7 +701,8 @@) then section_2.diff
+        (sha256 0bed60d9209b952128464e2e322ee2beef42d19a9223ba42e363887e7b835f5c, `83 0` the new test) -> head blobs
+        fe29676b7073d4b6b9a71d492de962777cf5bdf8 (preflight.sh; develop 712f895362e2c8d1ead6fd09ac257d7bce212948) and
+        42f43cd4393f57ece8d24ad122b5c02a438ebf17 (the new test; ABSENT at develop). The same dir's patch.diff is CORRUPT (strict `git apply --check`
+        rc 1 "patch failed: preflight.sh:702"; `--numstat` reports 86 2 on ONE file) and was NEVER applied — reproduce the rc 1 so the deviation is
+        measured. The checker REANCHORED section_1: as written @@ -702,6 +702,7 @@ with a blank trailing context line (section_1.diff.as-written),
+        rewritten to @@ -701,7 +701,8 @@ (section_1.diff.reanchor.out "reanchored at 704"); `-`/`+` bytes identical in both. The PR body discloses it
+        (grade that it does). The seat's S3: the two dangling blobs its run-1 wrote into the shared object store are exactly these two head blobs —
+        record only (Wednesday's Q2).
+      #1110 = runs/2026-09-20_ks880-ornith35b-night/out.md.checker/patch.diff (sha256 7a9beac0240005e709ab158a9f6d19b101ca6d8d351902e1e2f5077c06812033,
+        +10/-0, hunk @@ -154,1 +154,11 @@) -> head blob bde8ae21f66cdf34ae2342222cbfc6c281bec3fc (develop 17930b12b97344d23f7833dcc6de5705dde48be2).
+      #1111 = runs/2026-09-20_ks1223-ornith35b-night/out.md.checker/patch.diff (sha256 655474c444fc798a0314896e43f52e109c90cbf0eb8388671255d9cc1cb75854,
+        +6/-0, hunk @@ -113,1 +113,7 @@) -> head blob c92a7f85516b6b185e13ec14eec868d27f070244 (develop a3e1631f4046288339898170bdaa1f2faff347d5).
+    Reverse controls are yours (each patch `-R --check` at develop must refuse rc 1). Every run's input.json carries tip dc061f2bb (the develop
+    BEFORE #1102-#1104 AND before #1105); the seat applied at 778e6cfe2; you apply at cbae988db too — all four tamper files (health.ts 10234 B
+    sha256 453ae70084d5… blob 7bedc074583d816d997bd6d679043db010804aed; timestamping index.ts 32630 B e4f525efcb43… blob
+    1d2f109f644d01915f720e1894741794c91f4338; converters.ts 4496 B 1ba9a9050c92… blob 04b9952eb7e4695c687f35791707b5866f26e55a; trustHeaders.ts
+    2731 B c6cd7b504ea1… blob 15626e80f6caea4866abd1bb9ad171c79e12e788) are byte-unchanged from dc061f2bb through cbae988db (drafter): confirm it,
+    since every tamper record was made against the older tip.
+  - Re-read develop at start, mid and close; if it has moved AGAIN, judge the move by content, name it, and grade each PR on its merged tree
+    over it too. Open PR #995 (KS-741) touches trustHeaders.ts (#1111's TAMPER file, not a target): if it lands mid-gate, re-verify the `from`
+    lines by text.
+
+Read your source document FIRST and in full — the seat's SIX READY mails and its 15:28:28Z STATUS mail ("all SIX RAISED", spf/dkim/dmarc pass),
+captured verbatim by message id from wednesday-agent@ (READY 1 15:36:16Z, READY 2 15:42:39Z, READY 3 15:48:56Z, READY 4 15:55:05Z, READY 5
+16:02:01Z, READY 6 16:09:59Z; captures 16:13:56Z), combined in PR order then the STATUS:
+/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/gatesets/2026-09-21_gate1106to1111/mail_batch1106_ready.md
+(the per-mail captures sit beside it: mail_seatB11_ready1_ks-1232.md, mail_seatB11_ready2_ks-753.md, mail_seatB11_ready3_ks-1234.md,
+mail_seatB11_ready4_ks-1279.md, mail_seatB11_ready5_ks-880.md, mail_seatB11_ready6_ks-1223.md, mail_seatB11_status_1528.md). READY 6 carries the
+round's HOLD table (six heads, tiers, file counts, MG-2 target counts). Note the STATUS's "All six tickets stay Backlog" (NEXT block) against each
+READY's "now In Progress — the linear[bot] walked it": the READYs are later and measured; report it as a lead, not a finding, unless a ticket
+moved AGAIN.
+Then:
+- Wednesday's rulings to this seat, READ-ONLY: /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/briefs_staged/2026-09-21_raise_seatB_successor11.md
+  (the raise brief — its BLUF 1-5, GROUPING, QUEUE with every scope anchor and plant sha, the census section; it is ALSO a claim: it predicted
+  packages/shared "231/231", api-gateway 679/681/683, timestamping 43, security UNMEASURED, and "three bare + lines"), 2026-09-21_seatB11_answer_plan.md
+  (Q3 the bare-`+` correction; Q4 PR 3 TIER 1; Q5 the :4006 rule; Q6 the census REPORT rule for timestamping / security / packages/shared; Q7 the
+  KS-753 subject) and 2026-09-21_seatB11_all_six_read_hold.md (the HOLD; the GO discriminator).
+- each PR's body as raised, READ-ONLY: /Volumes/DevMASTER/!CODING/Secuura/Blockchain/5_Project_History/2026-09-21_seatB-11th/raise/<k>-body.md and
+  <k>-commit-msg.txt, k in ks1232 (#1106), ks753 (#1107), ks1234 (#1108), ks1279 (#1109), ks880 (#1110), ks1223 (#1111). Re-read the LIVE body with
+  a GitHub GET — the records are the seat's copy, the PR is the claim. Read raise/merge12.py, raise/targets12.py and raise/bodies12.py (READ-ONLY;
+  never run any) and say what squash title and message merge12.py will write for each PR (each must carry Refs KS-<its own key> with no closing
+  word before it; merge12.py never writes an ARCHIVED or foreign key as Refs) and whether targets12.py parses TWO targets for #1108 and for #1109
+  from your addendum lines (replicate its :26 regex on your own lines before you mail: 1 target with ';' between them, 2 with ',').
+- the seat's raise method, READ-ONLY: raise/raise12.py (the cover-aware predicate reds == declared ∪ measured cover; the four-lane SPEC),
+  raise/typecheck12.py, raise/batch_build12.sh, raise/batch_suites12.sh, raise/push12.sh, raise/lanes12.sh, and the pre-fix copies of its slips
+  S4-S6 (raise/msgs12.py.S4-ks953-in-message, raise/batch_suites12.sh.S5-lsof-rc-after-substitution, raise/bodies12.py.S6-foreign-keys-in-drafts);
+  its census records raise/netlog.cjs (the preload), raise/net/, raise/census_total.py; its item 0 / 0b: boot/measure12.py, boot/measure12b.py.
+- Wednesday's source reads, one per local-model patch (each carries its CANONICAL PATCH header, the checker's verdict and Wednesday's question),
+  under /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/:
+  READY_KS-1232-INFOEMPTY-1_ornith35b-q4_BRIEFED-TESTONLY-CONNECTOR-INFO-EMPTY-LIST-PASS-8of8_2026-09-21.diff.md,
+  READY_KS-753-MOCKVERIFIED-1_ornith35b-q4_BRIEFED-TESTONLY-MOCK-TSA-REPORTED-VERIFIED-PASS-8of8_2026-09-21.diff.md,
+  READY_KS-1234_ornith35b-q4_BRIEFED-CODEPATCH-V1-ALIAS-BODYPARSE-PASS-7of7_2026-09-20.diff.md,
+  READY_KS-1279_ornith35b-q4_BRIEFED-BASHPATCH-RATIO-EXCLUDES-ENVFAIL-PASS-7of7_2026-09-20.diff.md,
+  READY_KS-880-DEADCONV-1_ornith35b-q4_BRIEFED-TESTONLY-ROWTOAPIKEY-TENANT-CONNECTOR-PASS-8of8_2026-09-20.diff.md,
+  READY_KS-1223-WALLET-1_ornith35b-q4_BRIEFED-TESTONLY-WALLET-OUTSIDE-STRIP-PASS-8of8_2026-09-20.diff.md. Challenge them; they are claims
+  ("PASS 8of8" / "7of7" count the checker's gates, not cells). The run dirs under /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/runs/
+  (2026-09-21_ks1232-ornith35b-night, 2026-09-21_ks753-ornith35b-night, 2026-09-20_ks1234-ornith35b-night, 2026-09-20_ks1279-ornith35b-night,
+  2026-09-20_ks880-ornith35b-night, 2026-09-20_ks1223-ornith35b-night) hold input.json (tampers: id, file, line, from, to, reds) and
+  out.md.checker/ (patch.diff / section_*.diff, tamper_<ID>.orig / .plant.out / .verdict.out / .cells.json, green_tip.json, red_first.json,
+  green_after.json, numstat.out, sib1..8_before/after.out). The 2026-09-18 ks1234 run is an earlier FAIL and is NOT canonical.
+- the PRIOR REPORT — the #1102-#1104 batch gate (three PRs, the same api-gateway harness, the same Postgres isolation recipe, its BY-NAME 5 ruling
+  on db.retry (LOAD-1), its MG-2 finding, its NOT-PINNED rows NESTEDTYPEHONOURED / WHITESPACETYPETRIMMED / ORDERTHROUGHSPEC, CHK-1, BRITTLE-1,
+  SEM-1; its report.md was written AFTER its verdict mail and is on disk now):
+  /Volumes/DevMASTER/!CODING/Testing Agent MAIN/projects/secuura/reports/2026-09-20-batch1102-1104-tier1-r1/
+- the DEVELOP-MOVE REPORT — the #1105 tier-1 gate (the squash that IS the develop move under these six heads; anchoring only; its harness note:
+  `npm ci` per clone gave vitest 4.1.11 on every count, so VITEST-1 was avoided there; its M-1..M-7 and its KS-1201 finding against
+  run-shell-suites.sh: 8 login_stub listeners left behind by two runs, ppid 1):
+  /Volumes/DevMASTER/!CODING/Testing Agent MAIN/projects/secuura/reports/2026-09-20-pr1105-tier1-r1/
+- the EARLIER REPORT — the #1100-#1101 batch gate (the Postgres isolation recipe's origin; LOAD-1; VITEST-1 / SHELL-1 / LINT-1; R-2: shell suites
+  reach registry.npmjs.org:443):
+  /Volumes/DevMASTER/!CODING/Testing Agent MAIN/projects/secuura/reports/2026-09-20-batch1100-1101-tier1-r1/
+  Read all three reports' NOT-PINNED sections and CLOSED / STILL OPEN / NEW tables. NONE of this batch's six items claims a PRIOR, DEVELOP-MOVE or
+  EARLIER NOT-PINNED row (their sources are the six tickets' own descriptions): confirm that by reading, and carry every row STILL OPEN.
+- KS-1232, KS-753, KS-1234, KS-1279, KS-880, KS-1223 from Linear (their own text, attachments and comments — each had 0 comments at READY and 0
+  now; each carries exactly one attachment, its PR, contributes), the namespace tickets KS-1106 … KS-1111 (KS-1109 with includeArchived), the
+  mentioned-only keys KS-256 and KS-1201 (every body mentions them; none may gain an attachment), the ten ARCHIVED keys with includeArchived —
+  KS-1062, KS-1238, KS-1282, KS-501, KS-480 (PR 1's file is ks480-…), KS-740 (PR 2's file is ks740-…), KS-1041 (PR 6's file is ks1041-…), KS-523
+  (named in KS-753's own title), KS-1046 (the `# KS-1260:` context line's neighbour in preflight.sh), KS-781 (the ks781 shared test) — none
+  reopened, none attached, none in any branch / title / commit subject; and the four LIVE-but-foreign keys KS-1260, KS-1209, KS-953, KS-741
+  (in no branch / title / subject, no new attachment).
+- the QA charter: /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/QA_AGENT_CHARTER.md
+
+Never enter any seat worktree (worktrees/s-b11-ks1232, s-b11-ks753, s-b11-ks1234, s-b11-ks1279, s-b11-ks880, s-b11-ks1223, s-b11-batch, s-a15-ks1175,
+or any other seat's; the checkout's local branch refs of these names are NOT to be used — pin by SHA from origin), and never write anywhere under
+/Volumes/DevMASTER/!CODING/Secuura/Blockchain/5_Project_History/2026-09-21_seatB-11th/ (raise/, boot/, gate/, mail/, tickets/ included), nor under
+5_Project_History/quarantine/. Seat B 11th is LIVE in the same checkout, HOLDING (pane Secuura/Blockchain-B); Seat A 15th may still be: your reads
+of the checkout are MOVING readings; take them as such.
+Repo:    /Volumes/DevMASTER/!CODING/Secuura/Blockchain/2_Project_Files  (READ-ONLY)
+  - git clone --shared --no-checkout by SHA into your own fresh mktemp -d, ONE clone per tree you run (the six heads, develop cbae988db, the six
+    per-PR merged trees over it, the all-six tree); git write verbs there only, from a script file. Never merge-tree --write-tree, worktree,
+    fetch, checkout or git apply in the checkout. A new develop is fetched by SHA into YOUR clone over https, GH_TOKEN via a GIT_ASKPASS helper
+    reading an env var, never on a command line. Never run vitest, a bash suite or preflight in the checkout.
+  - Record the checkout's porcelain count and .git/worktrees count before and after: they must be equal (drafter 16:15:59Z: porcelain 17,
+    worktrees 196 — a moving reading).
+Farm node_modules per ENTRY in each clone (the #1009 gate's R-6): Blockchain/Dev/node_modules, services/api-gateway/node_modules,
+  services/timestamping/node_modules, services/security/node_modules and packages/shared/node_modules, each PER ENTRY, .vite/.vitest/.cache
+  skipped, @secuura/* relinked into your tree, shared dist built per tree. NEVER link a node_modules tree wholesale. VITEST = develop's lock
+  (4.1.11 in the api-gateway, timestamping, security AND root locks — drafter; the PRIOR REPORT farmed 4.1.10 — VITEST-1; the DEVELOP-MOVE REPORT
+  avoided it by `npm ci` per clone: choose one, print the version resolved in YOUR tree beside every count and say whether VITEST-1 recurs).
+  BASH SUITES: run them with /bin/bash (3.2 here), from the clone's repo root, exactly as run-shell-suites.sh does; print `/bin/bash --version |
+  head -1` beside every count. shellcheck is NOT installed here: NOT RUN, said so.
+
+You are FINDINGS-ONLY. You never fix, never merge, never push, never deploy, never comment, never file, never tick a box, never `@`, never write to
+Linear or GitHub (GET and query only), never write to the repo, and nothing goes to Peter or Stuart or any other human. Nothing to demo; no deploy of
+any kind; no kintsugi step. Datasec is out of scope entirely. Never delete anything anywhere.
+
+NEVER run a push, the real pre-push hook, or preflight.sh inside the Secuura checkout or any of its worktrees. #1109 CHANGES preflight.sh and #1109's
+new test and the sibling `preflight_deps.test.sh` DRIVE preflight code (the new test builds a harness from preflight.sh's own lines and drives
+step() only — no leg body runs; preflight_deps' "leg 14" cell runs a NESTED real preflight in a fixture); every such run is ONLY inside YOUR own
+clones, and any real preflight.sh run (nested or whole) is ALWAYS with GATEWAY_URL=http://127.0.0.1:<a closed loopback port you chose and proved
+closed, NOT on the Fetch bad-port list> exported (the script's default is localhost:6882, the shared stack slot, which you must never reach), under
+the listener rules below. run-shell-suites.sh (once at develop and once on the all-six tree, as the batch control; the PRIOR REPORT found it
+40/40 rc 0 — SHELL-1 did NOT recur there; the DEVELOP-MOVE REPORT found it leaves 4 login_stub listeners per run) is ONLY inside your clones.
+
+NEVER print a credential value, and never open, read or copy a secrets file into output. A script may read GH_TOKEN / LINEAR_API_KEY by NAME from
+/Volumes/DevMASTER/!CODING/Secuura/Blockchain/4_Credentials/.env, and AGENTMAIL_API_KEY by NAME from /Volumes/DevMASTER/WEDNESDAY/4_Credentials/.env,
+only for GitHub GET + by-SHA fetches into your clones, a Linear query and the one verdict mail. Count, never echo.
+
+NO shared docker stack, no :6882 / :7082 slot, no kintsugi, no demo, no az, NEVER the wallet mnemonic (KS-535 HOLD). No container, no real Redis, no
+real chain, and NO REAL POSTGRES: a real Postgres listens on 127.0.0.1:5432 on this machine (`lsof -nP -iTCP:5432 -sTCP:LISTEN`, the ONLY permitted
+port instrument; also `[::1]:5432` per the raise brief). No PR in this batch touches a database pool: #1107's cell `vi.doMock('../db')` (initDb
+false, no pool); #1110's converters.ts is pure mapping; #1108's test starts its OWN loopback listeners on 127.0.0.1:0 (a fake originate + the real
+gateway app) and drives them with fetch; `db.retry.test.ts` sets DATABASE_URL to a :5432 URL in its own setup (pool mocked, never dials). You MUST
+stub or isolate so no run of yours can reach the real database, and SAY HOW, before your first run, in NOT-TESTED.written-first.md and in the
+report — the PRIOR and EARLIER REPORTS' recipe is proven: a connect-census preload of YOUR OWN, outside the repo, reached by NODE_OPTIONS only, that
+records every connect attempt (host, port, test file) AND refuses any connect to port 5432 on any host before the socket opens (fail-closed), plus
+PGHOST / PGPORT / DATABASE_URL-class variables pointed at a loopback port you proved closed for EVERY run whose code could open a pool. Prove the
+block with a control that does NOT touch the real database, prove the census records (a planted connect to a closed loopback port appears), and
+prove a run with the preload removed records 0. Never "test" the block by connecting to 5432. Never connect to :5432 or to any service yourself.
+CENSUS RULE v2 (Wednesday, 2026-09-20 18:03Z AEST) + the REPORT extension (12:26:37Z, extended to this round's three new lanes by the raise brief):
+STOP on any attempt OR connection to :5432 on any host; STOP on any ESTABLISHED connection whose peer is not 127.0.0.1; api-gateway: STOP on any
+attempt whose (host, port, test file) is not in develop's baseline set — the seat RE-RECORDED it this round as anchoring:4005 ks1072 x5,
+anchoring:4005 ks815 x1, localhost:6000 ks815 x4 per whole run + the 127.0.0.1:1 positive control the instrument plants (the PRIOR
+REPORT's three keys, different multiplicities — measure yours); timestamping, security and packages/shared: the :5432 and non-loopback-ESTABLISHED
+legs STOP, the baseline leg REPORTS only (host, port, test file per unestablished external attempt) — the seat's reported sets, which become the
+next seat's baselines and which you reproduce or refute: timestamping EMPTY (0 attempts in every run: the cells drive app(req,res,next) in-process
+and stub fetch; the :4006 bind is a LISTEN the recorder does not log); security 10 attempts / 10 established, all 127.0.0.1, external none (name
+the test files that make them); packages/shared 203.0.113.7:443 ks914-shipped-path x4, fast.example:443 + slow.example:443
+ks932-timeout-bounds-dns, *.invalid on ephemeral ports ks914-pinned-address x4 — all unestablished, documentation/invalid names by design.
+The seat's census (STATUS + READYs): STOP-class 0 over every run of every lane, every established peer 127.0.0.1, ZERO attempts or connections
+to :5432 on any host. Reproduce it or refute it with YOUR instrument, per service, and state BY NAME whether any run of yours, tamper or clean,
+attempted :5432 or established a connection to any non-127.0.0.1 peer. Run `docker info` ONCE and print its rc on its own line (UP is NOT
+permission). LOOPBACK ONLY: every listener binds 127.0.0.1:0.
+THE :4006 LISTENER (#1107; Wednesday's Q5, the seat's PR-2 SPECIFICS): ks740-bounded-fanout.test.ts:16 imports ../index at TOP LEVEL and
+timestamping/src/index.ts:40 reads `PORT || 4006` with an unconditional `app.listen(PORT, …)` at :838 — so the timestamping SUITE itself listens
+on :4006 for the life of its vitest worker (the cell's `process.env.PORT = '0'` is set inside the cell, after the file-level import). Quote
+`lsof -nP -iTCP:4006 -sTCP:LISTEN` (rc on its own line) BEFORE every timestamping run (the seat: rc 1, nothing listening, before every run), and
+AFTER (0 remaining — the worker's exit ends it; if one remains it is YOURS to end by PID); never run two timestamping suites concurrently
+(EADDRINUSE would red the FILE, not the cell); if a listener you did not start appears on :4006, STOP that PR's runs and say so — never kill it,
+never retry against it. Say whether the seat's "the :4006 bind is a listen, which the recorder does not log" is right about YOUR instrument.
+LISTENERS — KS-1201 stands: END EVERY LISTENER YOUR RUNS START, BY PID: identify each by port + argv + cwd, SIGTERM that pid, never a pattern kill,
+never pid 1, and recount; scope each cleanup to the caller's own process tree (stubs are BORN with ppid 1); a login_stub.mjs listener is cleared
+by its exact path. The seat reports 4 login_stub listeners per push (`stubs=4 remaining=0`; 24 over six pushes), each cleared by exact worktree path and ppid
+1; and 0 after each of its 18 shell-suite runs. #1108's test starts TWO listeners per run (the fake originate and the real gateway on
+127.0.0.1:0): confirm its afterAll closes both (read the file; count LISTEN sockets after a file-alone run). Quote an lsof TCP LISTEN census (+ cwd
+and argv per node pid + the login_stub count + the :4006 state) BEFORE your first run, after every suite run and every tamper sweep, and at close.
+A listener you leave behind is a finding against you.
+No Akto, no k6, no Playwright, no Schemathesis run — rule on each per PR with the measured reason. #1108 DOES change an HTTP surface (which
+requests on the /api/v1/ aliases reach the four middlewares); its own test drives the real gateway over loopback with a fake upstream, and your
+value table (below) covers the surface in-process; say what a Schemathesis pass against a booted gateway would add for the aliases and that it was
+not made.
+
+NOT-TESTED.written-first.md is written FIRST, BEFORE any run, and opens with these at full prominence, none softened into a pass:
+  - The seat's in-hook preflight on all six pushes: PREFLIGHT INCOMPLETE — 12/15 legs ran, 3 SKIPPED, "Nothing failed" ("skips are not a pass" —
+    the seat's own words). WHICH three: the hook output names them (`legs 3 4 8 — local stack not up`; drafter, raise/KS-1232-push.out :1078-1080,
+    and preflight.sh's skip_stack call sites under step 3/15 Spec-auth conformance, 4/15 Path resolvability, 8/15 Served-spec consistency — all
+    three need a live gateway at GATEWAY_URL). NAME THEM in your own words from the six push logs (raise/KS-<key>-push.out, read-only), and say
+    whether any of the three would have EXERCISED these changes had a stack been up: #1108 changes what the gateway does on /api/v1/ aliases —
+    legs 3 and 4 drive the live gateway over the spec's paths (read docs/openapi/secuura-api.yaml at develop: does it list ANY /api/v1/ path? if
+    not, the skipped legs would not have touched the alias either way — say which); #1109 changes preflight.sh's own verdict arithmetic — the
+    hook that printed 12/15 ran the DEVELOP preflight.sh, not #1109's (the hook runs the tree being pushed: check `.githooks/pre-push` at develop
+    to say WHICH preflight.sh a push of #1109's branch executed, and whether the 12/15 line on that push came from the patched script).
+  - GitHub mergeable_state: unstable on all six heads (no checks run; no CI signal exists for any head; the ruleset 18499832 has no
+    required_status_checks rule — three rules: deletion, non_fast_forward, pull_request); everything is measured here or not at all.
+  - #1108: the middleware-skip widening is measured in-process and over loopback only; no booted stack; the production-boot 307 (the ticket's
+    second symptom) is out of scope and stays open; the red cell's red is a 3-second TIMEOUT (`AbortSignal.timeout(3000)` -> 'no-answer'), not an
+    assertion on a value — a load-sensitive class; how you bound it.
+  - #1109: no real preflight over a real tree with env_fail=1 was run by the seat (the harness drives step() only); shellcheck NOT RUN (not
+    installed); the ticket's option 1 is not this PR.
+  - #1107: pins TODAY's `verified: true` for the mock fallback; decides nothing on 503-vs-verified:false; the persisted verified column, the GET
+    read-back, the requireEidas 503 control and the other timestamp types are UNMEASURED (the drafter's carried claims).
+  - #1110: the DEAD copy is pinned; the LIVE rowToApiKey (security/src/index.ts:418, which maps tenantId with a default and connectorId) is not
+    this PR; the product fix (quarantine or reconcile) is not done.
+  - #1111: the strip is pinned; the two places that READ or FORWARD x-wallet-address today (api-gateway routes/verification.ts:1296 forwards it
+    upstream; services/referral/src/routes/referrals.ts:55 reads it as a fallback after authUser.walletAddress) are NOT pinned and NOT this PR.
+  - #1106: the ticket's raw-echo half and the MCP relays (services/mcp-server/src/tools/info.ts:144, http-server.ts:258 — both exist at develop,
+    both relay allowedDocumentTypes; drafter-read) are NOT pinned.
+  - How YOU isolate from the real Postgres on 127.0.0.1:5432 (above), stated before any run.
+  - The db.retry.test.ts intermittent (BY-NAME 11) — PRE-EXISTING and CLOSED by the EARLIER REPORT (LOAD-1: load-driven, reds at develop too;
+    0/20 in the PRIOR REPORT); if it reds here, re-run serial and report the ratio. It does not block. Say so up front.
+  - INT-1 (the seat's): preflight_deps' leg-14 cell read 1 FAIL once under load; cause not captured (the harness discards the nested output).
+  - No live deployment, nothing served.
+
+PUT TO THE GATE BY NAME (Wednesday's sixteen). MEASURE, not conclude. Each carries the seat's claim; report what you measured, then rule:
+  1 TIER AND ROUND: tier 1 floor on #1108, #1110, #1111; #1106, #1107, #1109 tier 2; round 1 of 2. ZERO product bytes on #1106, #1107, #1110 and
+    #1111 verified FIRST from the PR files API AND the diff name list in your clone (drafter, gh_pr_reads.out 16:16:35Z: one modified test file
+    each, +16 / +31 / +10 / +6, 0 deletions, 0 outside __tests__/); ONE product line on #1108 (2 files: index.ts modified +1 -1, the new test added
+    +94 -0; deletions total 1) and ONE script edit on #1109 (2 files: preflight.sh modified +2 -1, the new bash test added +83 -0; deletions total
+    1) verified the same way.
+  2 DISJOINTNESS AND THE TREES, RE-DERIVED — the seat's central claim (THE SHAPE above): overlap 0 from the name lists (15 pairs); the 12 #1105
+    paths disjoint from the 8 and from the 4 tamper files; each head alone over 778e6cfe2 = its head tree; each head alone over cbae988db = the
+    six 3-way trees above (both orders); the all-six over 778e6cfe2 = a785e7cb93b46ac4253a13932aab0f10206cdc61 and over cbae988db =
+    2e981e7779dc9bcabecd099c6e93da21345a8ed0 in every order you try (at least forward and exact reverse; say why two suffice and then show a third).
+    Confirm or REFUTE. Controls: read-tree back to each develop returns its tree; any PR alone differs from the all-six tree; a numstat run OUTSIDE
+    the temp object dir fails rc 128. Then run the suites on the all-six tree over cbae988db yourself (seat, on a785e7cb over 778e6cfe2: api-gateway
+    683/683 = 678 + 1 + 3 + 1, timestamping 43/43 = 42 + 1, security 214/214 = 213 + 1, packages/shared 907/907 whole, tsc 0 x3, the new bash test
+    6 ok / 0 FAIL, the 8 sibling bash suites 8/8 0 FAIL after INT-1's re-runs; per head api-gateway 678 -> 679 (#1106) / 681 (#1108) / 679 (#1111),
+    timestamping 42 -> 43, security 213 -> 214; per file ks480 4 -> 5, ks740 7 -> 8, the ks1234 test 0 -> 3, row-converters 13 -> 14, ks1041 8 -> 9;
+    every count from the RUNNER, never a grep). The security develop baseline 213 is the FIRST measurement by any seat (STATUS): yours is the
+    second — agree or name the delta, with and without the preload, as the seat did.
+  3 THE THREE SKIPPED LEGS (NOT-TESTED, restated as a by-name item): name legs 3, 4, 8 from the push logs; say which of the six changes they
+    would reach; grade the seat's "skips are not a pass" as carried correctly into every PR body (each body carries `12/15`, `SKIPPED`,
+    `INCOMPLETE` — drafter's body reads; #1109's body twice).
+  4 RED-FIRST PER TEST-ONLY PR — the declared cell green at the head and red under each tamper, whole-suite runs, and every tamper the READYs name
+    re-planted by YOU by TEXT from the DEVELOP blob (at cbae988db), each ALONE and never stacked, located by SCOPE ANCHOR + `from` text (never a
+    bare line number), the `to` text from each run's input.json, each `from` count asserted, each landed line printed, each file restored by
+    content + sha256 afterwards; plant sha256 = the checker's; the DEVELOP COVER measured (each tamper at develop with no patch over the WHOLE
+    suite — the seat: 0 NEW reds, cover EMPTY, for all eight); with the patch reds == exactly the new cell, nothing else; both tampers of a PR red
+    the SAME single cell (the cell's design). The eight:
+      #1106 (health.ts — services/api-gateway/src/services/health.ts, NOT routes/; scope anchor `router.get('/api/connector/info',` at :38; the
+        `from` `      allowedDocumentTypes: connectorConfig.allowedDocumentTypes || [],` at :58 matches ONCE): NULLISHRAW (10234 -> 10234 B, plant
+        sha256 ffc1ee73959b) and NOTALIST (10234 -> 10289 B, plant 518f4001c9db). File 4/4 -> 5/5; whole 678 -> 679.
+      #1107 (timestamping/src/index.ts; `verified: true` appears on FOUR lines :516 / :573 / :603 / :612 — the `from` `    verified: true, // Mock
+        timestamps are pre-verified` at :516 matches ONCE by its comment; anchor it by the enclosing mock-fallback builder and print the landed
+        line; a plant on any other `verified: true` is VOID): VERIFIEDEQEIDAS (32630 -> 32662 B, plant 987e9d341057) and VERIFIEDNOTMOCK (32630 ->
+        32674 B, plant 9811ba5fe34f). File 7/7 -> 8/8; whole 42 -> 43. Say for the RIGHT cause: which element of the cell's shape
+        `[t.eidasQualified, proof.mock, t.verified]` reds under each.
+      #1110 (security/src/converters.ts; scope anchor `export function rowToApiKey(` at :122): TENANTMAPPED (`from` `    organizationId:
+        r.organization_id as string,` :125, ONCE; 4496 -> 4529 B, plant 734ef5eda655) and CONNECTORMAPPED (`from` `    expiresAt: r.expires_at ?
+        new Date(r.expires_at as string) : undefined,` :135, ONCE; 4496 -> 4557 B, plant 178c3b24f478). File 13/13 -> 14/14; whole 213 -> 214. Say
+        which element (`'tenantId' in k` / `'connectorId' in k`) reds under each.
+      #1111 (api-gateway/src/utils/trustHeaders.ts; scope anchors `export const TRUST_HEADER_PATTERN =` at :39 and `export function
+        stripTrustHeaders(` at :50): WALLETINPATTERN (`from` `  /^x-(user|tenant|organization|org|role|roles?|auth-user|policy|emitter|gateway-vouch)(-|$)/i;`
+        :40, ONCE; 2731 -> 2738 B, plant 793e0a42939a) and BAGDELETESWALLET (`from` `    if (isStrippedTrustHeader(header)) {` :52, ONCE; 2731 ->
+        2778 B, plant 6e9106afb9a5). File 8/8 -> 9/9; whole 678 -> 679. Under WALLETINPATTERN the existing pattern cells (the T7 controls) must
+        stay green — say whether adding `wallet` to the family reds ANY pre-existing cell (the seat: cover EMPTY).
+      #1108 and #1109: NO block-swap tampers — the red-first / green of the new file IS the proof (items 5 and 10).
+  5 #1108 KS-1234 V1-ALIAS-BODYPARSE (TIER 1) — THE FULL WEIGHT:
+    A. ONE PRODUCT LINE, FIRST: files API + `git diff --name-only` + numstat `1 1` index.ts / `94 0` the test in your clone; the `-`/`+` pair is
+       EXACTLY the pair above; index.ts line count unchanged; ZERO bare `+` lines in the index.ts hunk (the packages/shared KS-953 class: an extra
+       blank line in index.ts passes the checker and reds ks781-p3-3 in packages/shared — that is WHY packages/shared runs).
+    B. RED-FIRST: apply the canonical patch's TEST section alone (`git apply --include` of the test path, strict) onto develop in your clone: 3
+       cells, exactly the 🔴 cell `KS-1234: POST /api/v1/documents as application/json answers 200 within the bound and originate receives the
+       same body` red as `['no-answer', []]` (a 3 s timeout red — say so), both `control:` cells green (= the checker's red_first.json 3 / 2 / 1);
+       then the PRODUCT section: 3/3 green (= green_after.json); whole api-gateway 678 -> 681. Re-run the file 3x serial and once under your
+       4-way load arm and report the ratio (a timeout-class red can false-red the CONTROLS under load — rule whether the cell is load-safe).
+    C. THE WIDENING, MEASURED: a VALUE TABLE of `shouldParseBody(req)` at develop vs head, built in-process with the file's own harness or a
+       one-file probe that imports nothing but the predicate's inputs: for EVERY entry p of proxyPaths (index.ts:400-412 — read the list, count
+       it, quote it) the rows `p`, `/api/v1/` + p.slice(5), `/api/v1/` + p.slice(5) + `/x`, plus `/api/v1/documents`, `/api/documents`,
+       `/api/v1/signatories`, `/api/v1` (no trailing slash), `/api/v10/documents`, `/api/v1/v2/verification`, and a set of NON-proxy paths (`/api/auth/login`,
+       `/health`, `/api/docs/openapi.json`, `/api/v1/auth/login`). Expected (drafter, READ ONLY): every `/api/v1/<proxyPath>` row flips
+       true -> false (the widening); every `/api/<proxyPath>` row false -> false; every non-proxy row true -> true; `/api/v1` alone and
+       `/api/v10/…` unchanged. Name every route whose alias changes — that is the surface Wednesday tiered — and the four middlewares it now skips
+       (:416, :417, :458, :459). Prove by READ that the predicate's regex `/^\/api\/v1\//` and the :561 rewrite `req.path.startsWith('/api/v1/')`
+       + `req.url.replace('/api/v1/', '/api/')` select the SAME requests (and name any request they would not: e.g. a query string, a
+       double-slash, a `/api/v1/` inside the path but not at its start), and that :561 runs AFTER :416-:459 (the mount order — the mechanism of
+       the defect). Whether the widened alias also skips `uploadBodyParser` (:420) and `requestFingerprint` / `bruteForceProtection` (:460-:461):
+       read and say (the drafter's read: those are NOT gated by shouldParseBody).
+    D. THE TEST PINS THE ALIAS ONLY: read all 94 lines. Which paths it drives (`/api/documents`, `/api/v1/signatories`, `/api/v1/documents`), what
+       it asserts (status + the fake originate's hits), whether ANY cell pins the widening on an alias other than /api/v1/documents (drafter's
+       read: none — a NOT-PINNED candidate, ALIASWIDENINGOTHERROUTES), whether it asserts that sanitizeInput / detectSuspiciousRequests are skipped
+       (drafter: it does not — it asserts the answer and the body arriving; the skip of the two security middlewares is INFERRED from the
+       predicate, not pinned — a NOT-PINNED candidate, SECURITYMIDDLEWARESKIPUNPINNED), whether its listeners are closed in afterAll, what it
+       deletes from process.env (JWT_JWKS_URL) and how it mints CREATE_KEY (the __TEST_JWT_PRIVATE_PEM harness), and whether the 3 s bound is the
+       gate's or the cell's.
+    E. SUITES: api-gateway 678 at develop -> 681 at #1108's head -> 683 on the all-six tree; packages/shared WHOLE 907/907 at develop, head and
+       all-six (the seat's F2: the READY's "231/231" is the ks781-p3-3-body-parser-order.test.ts FILE alone — report BOTH the file count and the
+       package count; the raise brief predicted 231 for the package: a Wednesday slip, name it); tsc rc 0 with index.ts IN the program and the
+       test file OUT (tsconfig excludes src/__tests__ — NT-1); eslint: index.ts 0 errors and TWO warnings that are develop's own (no-namespace :116,
+       an unused eslint-disable :918 — run eslint on develop's index.ts to prove they pre-exist), the new test 0 errors and ONE warning
+       (no-useless-assignment, line 76: "The value assigned to 'status' is not used") — LINT-1, Polish, kept verbatim by the seat: confirm the
+       line and the rule, and say whether the assignment is dead (read :73-:82).
+    F. The 307: out of scope; say in one line what it is and that nothing here measures it.
+  6 #1111 KS-1223 WALLET-1 (TIER 1): item 4's two tampers; the cell pins EXACTLY the strip and nothing else — prove it by the complement: read
+    where x-wallet-address is READ or FORWARDED at develop (`git grep -n -i x-wallet-address` over services/ and packages/: drafter finds exactly
+    TWO — api-gateway/src/routes/verification.ts:1296 `if (req.headers['x-wallet-address']) forwardHeaders['x-wallet-address'] = …` and
+    services/referral/src/routes/referrals.ts:55 `(authUser?.walletAddress as string) || (req.headers['x-wallet-address'] as string)`); say whether
+    ANY cell at the head reds if :1296's forward is removed or :55's fallback is removed (plant each in your clone; the drafter expects 0 of 679 /
+    0 of the referral suite — NOT-PINNED rows WALLETFORWARDUNPINNED and REFERRALFALLBACKUNPINNED; the referral half is NOT pinned BY DESIGN — a
+    row, never a ticket); state what the pattern's `(-|$)` suffix does with `x-wallet-address` vs `x-user-id` (READ), and whether `x-tenant-override`
+    (the allow-list) is still honoured (the existing cells).
+  7 #1110 KS-880 DEADCONV-1 (TIER 1): PROVE THE COPY IS DEAD — `git grep` for every import of converters in services/security at develop (drafter:
+    ONLY src/__tests__/row-converters.test.ts:13 imports '../converters'; the LIVE rowToApiKey is security/src/index.ts:418, used at :347, :473,
+    :1306, and maps `tenantId: (r.tenant_id as string) || 'a0000000-0000-4000-8000-000000000001'` and `connectorId: (r.connector_id as string |
+    null) ?? undefined`); say whether any product code path can reach converters.ts (READ, plus a Module-load probe if cheap); item 4's two tampers
+    and the cell's `[k.organizationId, 'tenantId' in k, 'connectorId' in k]` shape; the security develop baseline 213 (first measured this
+    round) -> 214; the security census (10 attempts / 10 established, all 127.0.0.1 — name the files); whether the LIVE copy's tenantId DEFAULT
+    ('a0000000-…0001' when tenant_id is absent) is pinned by any cell (ks869-connector-id-persisted.test.ts pins the connectorId READ half — read
+    it; the drafter expects the default UNPINNED — a NOT-PINNED candidate LIVETENANTDEFAULT); and say in one line what the ticket's fix would do to
+    this cell (a quarantine removes the file — the cell's import fails, a red by MODULE ABSENCE; a reconcile adds the keys — the cell reds by
+    assertion): either way the pin is fix-robust in the sense that the fix cannot land silently.
+  8 #1107 KS-753 MOCKVERIFIED-1: item 4's two tampers; the cell drives BOTH routes in-process with fetch stubbed 503 and the REAL mock fallback;
+    it pins TODAY's `verified: true` (shape `[false, true, true]` per timestamp) and DECIDES NOTHING on the 503-vs-verified:false question — the
+    body says so in those words (read it); grade that the pin is FIX-ROBUST in that sense: under a 503 fix the cell reds on status (201 -> 503),
+    under a verified:false fix it reds on the shape's third element — say which assertion catches which; the :4006 listener discipline above;
+    `vi.doMock('../db')` -> no pool, 0 connect attempts; tsc rc 0 (the checker did NOT run it; the seat did; the test file is outside the program).
+  9 #1106 KS-1232 INFOEMPTY-1: item 4's two tampers; the cell drives createHealthRoutes in-process for stored '', 0, false with a redisLike stub
+    and pins `[id, []]` x3; the complement: the ticket's raw-echo half and the two MCP relays (tools/info.ts:144 relays connector.allowedDocumentTypes
+    as-is; http-server.ts:258 `allowedDocumentTypes || []`) are NOT pinned — read both lines and say which of the two would echo a stored "" / 0 /
+    false RAW today (NOT-PINNED rows MCPINFORAWECHO / HTTPSERVERINFOEMPTY, with the measured behaviour); the stale collision flag ("health.ts
+    carries unmerged READYs KS-1248/KS-1258") is FALSE per the raise brief — confirm from the open-PR file lists.
+ 10 #1109 KS-1279 RATIO-ENVFAIL (bash): the two-section strict apply in your clone (section_1 -> tree 97a20e3bfc36…, section_2 -> da415776c876…,
+    both -> a33bde818f2e…); the corrupt patch.diff rc 1 reproduced; the reanchor disclosure present in the body; :704 the comment, :705 the new
+    `n_ran=$(( … - ${env_fail:-0} ))`, develop's :711 twin byte-unchanged at :712 (the unindented `n_ran=$(printf …)` text matches TWICE at develop —
+    :704 inside :711's prefix-free form — so anchor by the 4-space indent and the `# KS-1260:` line above; print both landed lines); `bash -n` on
+    both files; RED-FIRST the new test alone at develop: rc 1, 2 FAIL / 4 ok (checker B4) -> GREEN with section_1: rc 0, 6 ok / 0 FAIL (B5); the
+    8 siblings (the B6 rule: every scripts/__tests__/*.test.sh naming preflight.sh, minus the new one — drafter reproduces exactly 8 at the head:
+    check_slot_credentials, no_tracked_credentials_root, pre_push_hook_base, pre_push_hook_current_develop, preflight_deps,
+    preflight_failure_verdict_keeps_ratio, preflight_state_is_initialised, preflight_verdict_names_real_failures) at develop AND on the all-six
+    tree, each with its ok/FAIL counts (seat: 32/15/28/4/56/8/5/5 ok, 0 FAIL, identical both sides). INT-1: re-run preflight_deps on the all-six
+    tree at least 3x serial AND once under your load arm; report the ratio per condition; read its "leg 14: suites green -> preflight passes" cell
+    (it runs a NESTED real preflight in a fixture and discards the output — say what that nested preflight reaches: the network? registry.npmjs.org
+    — R-2 class — or a GATEWAY_URL? and whether it honours YOUR closed-port GATEWAY_URL) and rule whether INT-1 is load-driven (LOAD-1 class), a
+    fixture race, or this batch's. The ratio line `($n_ran/$TOTAL_LEGS legs ran)`: show with the harness that env_fail=1 now subtracts one
+    (the ticket's symptom) and that env_fail=0 is unchanged (the control). Also: does the in-hook preflight run on the seat's #1109 push execute
+    develop's preflight.sh or the branch's (read .githooks/pre-push at develop) — the 12/15 line on that push is evidence about ONE of them.
+ 11 THE db.retry INTERMITTENT — PRE-EXISTING, CLOSED by the EARLIER REPORT (BY-NAME 5 there: `services/api-gateway/src/__tests__/db.retry.test.ts`
+    first cell, "reports available immediately when the probe succeeds at boot", blob 5933da41ed3dcf37f415000c4da4a717ea8d7eba at develop
+    cbae988db and at ALL SIX heads — drafter, seven rev-parse reads; LOAD-1: load-driven, 3/3 at develop under 4-way parallel load, 0/6 serial;
+    0/20 in the PRIOR REPORT). If it reds in ANY of your runs, re-run that suite SERIAL and report the ratio (reds / runs, per tree) — never a
+    quantifier; it does NOT block any PR here (no PR touches it; say so in one line in each verdict as "the db.retry intermittent does NOT block
+    <PR>" with the reason, or "it BLOCKS <PR>" with what changed). RULE WHETHER IT BLOCKS explicitly, either way; nothing new is filed for it.
+ 12 THE CONNECTION CENSUS (above): the seat's claims measured against your own instrument, per service, and every run of yours stated by name;
+    #1108's two loopback listeners per run and their peers (127.0.0.1 only); #1107's 0 attempts; the security 10/10; the packages/shared reported
+    set; the api-gateway baseline set with YOUR multiplicities; the db.retry :5432 URL question (0 attempts to 5432 in every run).
+ 13 LINEAR LINK HYGIENE: attachmentsForURL for each PR is exactly #1106 {KS-1232}, #1107 {KS-753}, #1108 {KS-1234}, #1109 {KS-1279}, #1110 {KS-880},
+    #1111 {KS-1223}, each `contributes` (control — the same reader returns {KS-1272} for the merged #1104; attachmentsForURL is blind to ARCHIVED
+    issues, so read the ten archived keys and KS-1109 with includeArchived and confirm none was reopened or gained anything). `ks480` / `ks740` /
+    `ks1041` / `KS-523` / `KS-1238` / `KS-1046` / `ks781` and the four live-foreign keys in NO branch, NO PR title and NO commit subject, any case
+    (the filenames appear in the bodies only as paths). No closing phrase before any key in title, body, commit or merge12.py's squash message (a
+    detector with controls: "Completes KS-1234" must fire, "Whether KS-1234 is now complete" must not; drafter's detector 0/0/0 on all six —
+    beware `PREFLIGHT INCOMPLETE` and "12/15" in every body: log text, not a closing phrase). KS-256 and KS-1201 (mentioned in every body) carry
+    no new attachment. All six tickets In Progress by actor GitHub at the timestamps above, none moved back, 0 comments each: quote it and
+    recommend nothing.
+ 14 NOT-PINNED: see the end of this prompt — a section, in the SAME ROW FORMAT as the PRIOR REPORT's, of properties you find unpinned in these
+    files, for the local model's next round. TEST-ONLY cells, ONE test file per row, tampers located by SCOPE ANCHORS, never by line numbers alone.
+    No tickets are filed for them — not by you and not on your recommendation.
+ 15 THE MERGE ADDENDUM: ONE MERGE ADDENDUM line PER PR, each with exactly ONE equality target PER PR FILE (#1106 one, #1107 one, #1108 TWO, #1109
+    TWO, #1110 one, #1111 one — the head's blobs, read by you with their modes), COMMA-separated on the two-file lines (MG-2), and the merge order —
+    format at the end of this prompt; written into report.md under a `## MERGE ADDENDUM` heading BEFORE the mail (targets12.py reads report.md,
+    not the mail).
+ 16 THE SEAT'S SLIPS S1 / S2 / S3 / S4 / S5 / S6 (plan mail + STATUS): confirm none reached a pushed byte or a link; S3's dangling blobs are #1109's
+    head blobs (record only); S5's `echo "$(ts) lsof … rc=$?"` (the substitution's rc, not lsof's) — check the seat's fixed copy captures rc on its
+    own line and that your own scripts never do it.
+
+THE SEAT'S "FOR THE GATE TO MEASURE" ITEMS map onto the above: per-PR trees over both develops, disjointness, forward + reverse -> BY-NAME 2; tamper
+match counts, plant shas, develop cover EMPTY, "both tampers red the same single cell" -> 4; #1108's numstat `1 1` + `94 0`, zero bare `+` in the
+index.ts hunk, packages/shared 907 (and the 231 file) -> 5; #1109's two sections, the corrupt patch.diff rc 1, the reanchor, :711 unchanged, the
+harness/sibling ratios, INT-1 -> 10; that #1107 decides nothing -> 8; that #1106/#1110/#1111 pin today's behaviour and claim nothing about their
+fixes -> 6, 7, 9; that #1108 states the widening -> 5; no archived/foreign key anywhere -> 13; "Deviation from verbatim: NONE" x6 -> measure (each
+head blob vs its canonical patch applied by YOU at cbae988db; name any byte that differs); the targeted per-file type-check (0 errors at head and
+develop in-file, delta +0, a planted TS2322 control CAUGHT; the ks480 temp program's 4-vs-3 out-of-file errors = Request.user augmentation errors
+the temp program lacks, the +1 health.ts:40 pulled in by the new cell's import — say whether that reading is right) -> reproduce in YOUR clone.
+
+What Wednesday requires — per PR, each MEASURED, none inherited. For EVERY TS PR: the service's tsc rc (each program excludes src/__tests__ and
+carries noUnusedLocals — check with --listFilesOnly; #1108's index.ts IS in the program); the targeted type-check of each changed file with a
+planted TS2322 control; eslint by rule and message with a firing control; `Refs KS-<n>` in the body and commit for its own key only, 0 closing
+phrases in title, body, commit message AND the squash message merge12.py will write; attachmentsForURL as BY-NAME 13; the ticket state (In
+Progress, bot-walked); the diff name list. For #1109: `bash -n` both files, the harness and sibling ratios, /bin/bash version beside every count.
+
+SUITES, at each head AND on the ALL-SIX tree over cbae988db (2e981e7779dc9bcabecd099c6e93da21345a8ed0), default ceilings AND 60 s, load beside each:
+api-gateway vitest (seat 678 -> 679 / 681 / 679 per head; 683 all-six), timestamping vitest (42 -> 43), security vitest (213 -> 214),
+packages/shared vitest (907 -> 907; the ks781 file 231 -> 231), tsc x3, the new bash test + the 8 siblings under /bin/bash, run-shell-suites.sh at
+develop and on the all-six tree (with --check-unreached; #1109 ADDS a suite it must REACH — the seat's push-4 hook read 41/41 vs 40/40 on the
+other five: reproduce 41 on the all-six tree). Every run under your Postgres isolation. Measure each and name any interaction.
+
+CARRY-FORWARD per PR: CLOSED / STILL OPEN / NEW per finding, each SHIPS-WITH or TICKET; plus KS-1201 (the orphaned listeners; the DEVELOP-MOVE
+REPORT's new evidence against run-shell-suites.sh) as a standing item; plus the PRIOR / DEVELOP-MOVE / EARLIER REPORTS' still-open rows (VITEST-1,
+SHELL-1, LOAD-1, LINT-1, R-2, N77-2, N85-1, N79-1, N72-2, N62-3, NT-1, MG-1, MG-2, VC-1, KS-1280, CHK-1, BRITTLE-1, SEM-1, M-1..M-7, their NOT-PINNED
+rows NESTEDTYPEHONOURED / WHITESPACETYPETRIMMED / ORDERTHROUGHSPEC / T11-T13 / VIEW-NONSTRING-ARRAY / CHUNKED-DOCUMENTID-ROUNDTRIP /
+EXPLORERBASE-PER-NETWORK / IDENTITY-EMPTY-OBJECT / ROLEWIDEN-* / ORGPROVISIONERROLE / ENDSOF4BOTHNULL / REPEATEDIDNULL / NULLOF5; O-1, N71-3 and
+N84-1 carried AS THEY STAND, never pinned or proposed) — none is claimed by this batch: carry each STILL OPEN, and re-measure VITEST-1 and SHELL-1
+since your farm reproduces them. Report the checkout bounds and NOT TESTED at equal prominence.
+
+LEAD WITH BY-NAME item 2 (the trees over BOTH develops and the disjointness, re-derived) and item 5 for #1108 (the widening measured and the
+red-first — the only gateway product line), then 6 (#1111) and 7 (#1110), then 10 (#1109) and 3 (the skipped legs), then 4, 8, 9, then 1, 11, 12,
+13, 16, then NOT-PINNED and the MERGE ADDENDUM.
+
+Hygiene:
+- /bin/bash here is 3.2: write YOUR runners in Python.
+- zsh: no PIPESTATUS, no timeout, `set -- $var` does not word-split, write `"${VAR}:path"`, never begin a line with `=====`.
+- Capture the true exit code of every refusable command on its OWN line (`cmd > out 2>&1; rc=$?`), never through a pipe and never inside a
+  substitution (`echo "$(x) rc=$?"` prints the substitution's rc — the seat's S5).
+- Your tool shell's grep may be a function: use /usr/bin/grep -i with a same-file positive control.
+- File lists: split git output on NEWLINES, never on whitespace — some repo paths contain spaces.
+- `git grep -c` prints nothing for a zero (silence is unread, not 0); `rev-parse` of a missing path echoes its argument (use cat-file -e).
+- Never `cd` in your own tool calls; absolute paths; git write verbs only inside script files.
+- stderr is never discarded. Clocks from `date`, never estimated. rc on its own line, never `echo "$(date) rc=$?"` and never `echo rc; echo $?`.
+  Every scripted edit asserts its anchor count and a marker; a tamper that did not land is not a green. A plant on the FIRST of duplicate lines is
+  VOID — every duplicate-text plant (`verified: true` x4; the unindented `n_ran=` x2) is scope-anchored and its landed line number printed.
+- Quote at start, mid and close as THREE timestamped readings: the Secuura checkout's porcelain count, .git/config sha256, for-each-ref count,
+  .git/worktrees count, the checkout branch, origin develop SHA, all six refs/pull/N/head, api-gateway's node_modules/.vite reading, and the
+  listener count (login_stub and :4006 included).
+- Never `rm`: fresh mktemp -d per attempt; quarantine by MOVE. No container is created; never touch a secuura-* container.
+Do no memory maintenance of your own project's memory store inside this session.
+
+Report FOUND / TESTED / HOW, with controls, into
+/Volumes/DevMASTER/!CODING/Testing Agent MAIN/projects/secuura/reports/2026-09-21-batch1106-1111-tier1-r1/
+NOT-TESTED.written-first.md is written FIRST, BEFORE any run (its opening items are fixed above); then report.md and evidence/, with ONE SECTION PER
+PR (headed "#<PR> KS-<ticket>"), a BY-NAME ITEMS 1-16 section, the seat's items as measured, a `## MERGE ADDENDUM` section (six lines, one per PR,
+each beginning `- #<PR>` — targets12.py parses exactly this shape: `naming <head40>`, `merged tree <tree40>`, `equality targets: <path> <blob40>
+(<mode>)[, <path> <blob40> (<mode>)];` — the targets list ends at the FIRST `;` — then `SHIPS-WITH: "<verbatim>"`; no line beginning `---` inside
+the section before the sixth line), and a NOT-PINNED section: EVERY tamper or seam you find that NO test catches at the head — the named tampers,
+yours, the drafter's candidates and any seam you find — as a list, in the PRIOR REPORT's row format exactly: `PR | ticket | tamper id or your
+name | file:line at the head (+ its scope anchor) | from -> to | the cell it should have red | proposed cell (one line: title + the one assertion
+that would red it)`. This list feeds the local model's next briefs, so make each row self-contained: a model that reads only that row must be
+able to write the cell, in ONE test file, test-only. The drafter's candidate rows, each to be MEASURED and then kept (with its proposed cell as
+written or corrected) or struck with the measured reason:
+  - #1108 | KS-1234 | ALIASWIDENINGOTHERROUTES (drafter; item 5D) | index.ts:413 (scope anchor: the line after `];` closing `const proxyPaths = [`
+    at :400) | `req.path.replace(/^\/api\/v1\//, '/api/')` -> `req.path.replace(/^\/api\/v1\/documents/, '/api/documents')` (the widening
+    narrowed to the one route the test drives; every OTHER alias reverts to parsing) | the new 🔴 cell — it does NOT red it (it drives
+    /api/v1/documents only; the GET /api/v1/signatories control carries no body) | a cell in the ks1234 file: `POST /api/v1/<another proxyPath,
+    e.g. signatories or verification>` as application/json answers within the bound and originate receives the same body — or, cheaper and
+    in-process, a cell that imports nothing but a copy of the predicate is NOT acceptable (the predicate is not exported): say whether
+    shouldParseBody can be reached in-process without booting the app, and propose the loopback cell if not.
+  - #1108 | KS-1234 | SECURITYMIDDLEWARESKIPUNPINNED (drafter; item 5D) | index.ts:458-459 (scope anchor: the two `app.use((req, res, next) => {
+    if (shouldParseBody(req)) sanitizeInput…` / `…detectSuspiciousRequests…` lines after `const bruteForceProtection =` at :456) | remove the
+    `shouldParseBody(req)` guard on :458 (sanitizeInput runs on every request, aliases included) | none at the head (drafter's read: no cell
+    asserts a proxied body arrives UNSANITISED; the 🔴 cell's body is plain JSON that sanitizeInput would pass through) | a cell whose body
+    carries a payload sanitizeInput would alter (read sanitizeInput to choose it) and asserts originate receives it BYTE-EQUAL on /api/v1/documents
+    and on /api/documents — strike if the widening's security half is already pinned elsewhere (name the cell).
+  - #1111 | KS-1223 | WALLETFORWARDUNPINNED (drafter; item 6) | api-gateway/src/routes/verification.ts:1296 (scope anchor: the `forwardHeaders`
+    block inside the handler that builds it — read :1280-1300 for the enclosing route) | `if (req.headers['x-wallet-address']) forwardHeaders[…] =
+    …` -> the line deleted | none (drafter expects 0 of 679) | a cell in ks1041-vouch-header-strip.test.ts or a verification route test that
+    drives that route with `x-wallet-address: addr_client` and asserts the upstream receives it (today's behaviour — a characterisation pin, the
+    ticket's forward half); strike if a cell reds the deletion.
+  - #1111 | KS-1223 | REFERRALFALLBACKUNPINNED (drafter; item 6 — the referral half, NOT pinned BY DESIGN per the READY) | services/referral/src/routes/referrals.ts:55
+    (scope anchor: the `const authUser = (req as any).user;` line at :53 inside the handler) | `(authUser?.walletAddress as string) ||
+    (req.headers['x-wallet-address'] as string)` -> `(authUser?.walletAddress as string)` | none (drafter expects 0 of the referral suite — run it
+    once at develop if the farm reaches it cheaply; else READ ONLY and say so) | a cell in the referral service's own tests driving the route with
+    no authUser.walletAddress and a client x-wallet-address, asserting today's fallback — a row for the local model, never a ticket.
+  - #1110 | KS-880 | LIVETENANTDEFAULT (drafter; item 7) | security/src/index.ts:424 (scope anchor: the `tenantId:` line inside `export function
+    rowToApiKey(` at :418) | `(r.tenant_id as string) || 'a0000000-0000-4000-8000-000000000001'` -> `(r.tenant_id as string)` | none (drafter
+    expects 0 of 214; ks869 pins connectorId only) | a cell in ks869-connector-id-persisted.test.ts: `rowToApiKey({ ...base })` with no
+    tenant_id answers tenantId 'a0000000-0000-4000-8000-000000000001' (the default is a behaviour someone relies on or a defect — a
+    characterisation pin either way); strike if a cell reds it.
+  - #1106 | KS-1232 | MCPINFORAWECHO (drafter; item 9) | services/mcp-server/src/tools/info.ts:144 (scope anchor: the object literal that relays
+    `connector.allowedDocumentTypes`) | not a tamper of health.ts — a cell question: does the MCP relay echo a stored "" / 0 / false RAW where the
+    gateway answers []? | none | a cell in the mcp-server's own tests (name the file that already drives tools/info) asserting today's relay
+    value for the three stored shapes; keep as a row if no cell pins it; strike with the cell that does. Same for HTTPSERVERINFOEMPTY at
+    http-server.ts:258 (`|| []` — the gateway's shape; say whether it is pinned).
+  - #1107 | KS-753 | VERIFIEDPERSISTED (drafter's carried claim; item 8) | timestamping/src/index.ts (scope anchor: the INSERT / persistence path
+    after the mock fallback — read it) | not a tamper — a cell question: is the persisted `verified` column for a mock timestamp pinned by any
+    cell? | none | a cell with a recording db mock asserting the INSERT's verified parameter for a mock fallback; keep if unpinned.
+  - #1109 | KS-1279 | ENVFAILONLYSUBTRACTSONE (drafter; item 10) | preflight.sh:705 (scope anchor: the `# KS-1279:` comment at :704 inside `if [ -n
+    "$real_failed" ]; then` at :702) | `- ${env_fail:-0}` -> `- 1` (unconditional) | the new test's env_fail=0 control cell — it SHOULD red it
+    (the control must be able to fail); strike with the count if it does; else a row.
+  - EITHER | the intermittent (BY-NAME 11) | DBRETRYTIMEOUT | db.retry.test.ts first cell | not a tamper — CLOSED as LOAD-1 | none | keep ONLY if
+    your measurement contradicts LOAD-1 (reds without load, or a rate that differs by tree); else strike with the ratio.
+No row, cell or finding asks for anything on O-1 or /unrevoke (NOTHING ABOUT O-1: the gate must not recommend pinning either).
+Every finding carries its PR AND ticket, evidence class (MEASURED AT RUNTIME / PROBED / READ ONLY / RELAYED), severity, target (PR or TICKET),
+SHIPS-WITH or TICKET, disposition and oracle. Name every prediction slip against its predictor (the READY mails, the STATUS mail, the seat, the PR
+bodies, the tickets' text, Wednesday's raise brief — including its "231/231" packages/shared prediction and its "three bare + lines" — Wednesday's
+answer plan, Wednesday's source reads, the checker (including the KS-1279 reanchor), the drafter, including the drafter's leads above, each
+CONFIRMED or REFUTED).
+Client-facing communication = ticket comments only, and not from you. Never delete; cleanup means quarantine.
+Verdict: SIX lines, one per PR, each GO, GO WITH FINDINGS, or NO GO, each on its head as the delta over 778e6cfe2 AND on its merged tree over the
+then-current develop (name the develop and each merged-tree OID) AND on the all-six tree. EACH line carries, in one clause, your ruling on the
+db.retry intermittent (does NOT block / BLOCKS, with the reason) — BY-NAME 11 — and its Majors <n> / Minors <m> count. Round 1 of 2: a NO GO goes
+back to the seat for one fix round, for THAT PR only. Then the MERGE ORDER, one line, then a batch verdict line (all six / which subset merge
+together).
+Give the merge seat ONE MERGE ADDENDUM line PER PR: "- #N KS-n on WEDNESDAY'S signed GO naming <head40>: squash onto develop <then-current40> (merged
+tree <OID40>); attaches to KS-n only, linkKind contributes, no closes; KS-n <state on merge + reason>; equality targets: <path> <blob40> (<mode>)[,
+<path> <blob40> (<mode>)]; suites <n/n at develop -> n/n at head -> n/n merged, runner + version>; SHIPS-WITH: "<verbatim>"; dispositions: <per
+finding>; NEW: <yours>". Exactly ONE equality target PER PR FILE (MG-1: targets12.py builds one entry per file of the PR and STOPs if the set
+differs from the PR's own files or the count is not 1/1/2/2/1/1; merge12.py STOPs unless the count equals the PR's file count), the two targets
+COMMA-separated on the #1108 and #1109 lines (MG-2: targets12.py:26 stops at the first `;`). Drafter's reads for you to verify, not adopt:
+#1106 Blockchain/Dev/services/api-gateway/src/__tests__/ks480-connector-auth.test.ts 16e88d9b7e00d816e6a93bfb4359e6bdc43fcb43 (100644);
+#1107 Blockchain/Dev/services/timestamping/src/__tests__/ks740-bounded-fanout.test.ts 6fdf0e80a46ce75c0e0f4c5540aea443779d944c (100644);
+#1108 Blockchain/Dev/services/api-gateway/src/__tests__/ks1234-v1-documents-json-create-never-answers.test.ts 3f85887f7268a9a19fd61d73e6178bf7f6c892dc (100644),
+Blockchain/Dev/services/api-gateway/src/index.ts 4e7fc1174d5453f9d6f71e3a69f166fc6a08db49 (100644);
+#1109 Blockchain/Dev/scripts/__tests__/preflight_ratio_excludes_leg1_no_install.test.sh 42f43cd4393f57ece8d24ad122b5c02a438ebf17 (100644),
+Blockchain/Dev/scripts/preflight/preflight.sh fe29676b7073d4b6b9a71d492de962777cf5bdf8 (100644);
+#1110 Blockchain/Dev/services/security/src/__tests__/row-converters.test.ts bde8ae21f66cdf34ae2342222cbfc6c281bec3fc (100644);
+#1111 Blockchain/Dev/services/api-gateway/src/__tests__/ks1041-vouch-header-strip.test.ts c92a7f85516b6b185e13ec14eec868d27f070244 (100644).
+Read them yourself (git rev-parse <head>:<path> and git ls-tree <head> <path> in your clone) and quote them in full. The seat's targets12.py
+requires the PR's own file SET to equal the targets' path set — the two NEW files are PR files too (mode 100644).
+
+WRITE report.md BEFORE THE MAIL. The #1102-#1104 gate's report.md was absent from its directory when Wednesday read it minutes after the verdict
+mail (it appeared later); targets12.py reads report.md's `## MERGE ADDENDUM`, so a mail without the report on disk is a GO the seat cannot act
+on. Order: NOT-TESTED.written-first.md -> evidence/ -> report.md (complete, with the addendum) -> the mail; quote report.md's sha256 and byte
+count in the mail.
+MAIL YOUR VERDICT to wednesday-agent@agentmail.to when the pass is complete. Your pane holds ~19 lines of alternate screen with no scrollback, so a
+verdict that stays in the pane is one pane-close from being lost -- this is not a formality, it is the only durable copy; the verdict MAIL is the END
+STATE and the wait signal. Send it FROM coagent@agentmail.to. Subject, EXACTLY this prefix, then the six verdicts:
+[QA -> Wednesday] BATCH GATE #1106-#1111 (six PRs; tier 1 = #1108, #1110, #1111) — #1106 <v> · #1107 <v> · #1108 <v> · #1109 <v> · #1110 <v> · #1111 <v> (db.retry <BLOCKS|does not block>)
+The body carries the SIX lines, one per PR, then the merge order and the batch verdict line, the NOT-PINNED list, BY-NAME items 1-16 and the
+seat's items as measured, and the six MERGE ADDENDUM lines VERBATIM from report.md.
+- POST https://api.agentmail.to/v0/inboxes/coagent@agentmail.to/messages/send with JSON {"to": ["wednesday-agent@agentmail.to"], "subject": "...",
+  "text": "..."} and Authorization: Bearer $AGENTMAIL_API_KEY, the key by NAME from Wednesday's .env, never echoed.
+- Build the body from a template file with no shell interpolation and assert the backtick spans survived.
+- Confirm the API answered 2xx and quote the message id in your final pane line. Timestamps in the mail come from `date`, never estimated.
+The MAIL is the end state.

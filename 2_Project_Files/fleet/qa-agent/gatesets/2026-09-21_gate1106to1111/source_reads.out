@@ -1,0 +1,372 @@
+2026-09-20T16:18:36Z
+=== api-gateway index.ts at develop: shouldParseBody decl + uses + proxyPaths + the /api/v1 rewrite
+31:  sanitizeInput,
+32:  createDetectSuspiciousRequests,
+400:const proxyPaths = [
+413:const shouldParseBody = (req: Request): boolean => !proxyPaths.some(p => req.path.startsWith(p));
+416:app.use((req, res, next) => { if (shouldParseBody(req)) express.json({ limit: '1mb' })(req, res, next); else next(); });
+417:app.use((req, res, next) => { if (shouldParseBody(req)) express.urlencoded({ extended: true, limit: '1mb' })(req, res, next); else next(); });
+420:const uploadBodyParser = express.json({ limit: '10mb' });
+431:// sit on a `proxyPaths` prefix: `POST /api/documents/:id/verify` and
+449://     `proxyPaths` prefix, at that router's own mount (KS-815). Today that is
+455:const detectSuspiciousRequests = createDetectSuspiciousRequests(SECURITY_CONFIG);
+458:app.use((req, res, next) => { if (shouldParseBody(req)) sanitizeInput(req, res, next); else next(); });
+459:app.use((req, res, next) => { if (shouldParseBody(req)) detectSuspiciousRequests(req, res, next); else next(); });
+561:  if (req.path.startsWith('/api/v1/')) req.url = req.url.replace('/api/v1/', '/api/');
+802:app.get(['/api', '/api/v1'], (_req: Request, res: Response) => {
+842:  const mockBodyParser = express.json({ limit: '1mb' });
+883:  const mockBodyParser = express.json({ limit: '1mb' });
+--- :405-420
+  '/api/staking', '/api/referral', '/api/governance',
+  '/api/analytics', '/api/billing', '/api/transfers',
+  '/api/delegations', '/api/kyc',
+  '/api/gdpr', '/api/verification', '/api/v2/verification', '/api/nft', '/webhooks',
+  '/api/admin', '/api/signatories', '/api/system-errors',
+  '/api/onedrive', '/api/teams',
+  '/api/users', '/api/sessions', '/api/issuer-certs',
+];
+const shouldParseBody = (req: Request): boolean => !proxyPaths.some(p => req.path.startsWith(p));
+
+// Default 1MB body limit; file upload routes get 10MB via their own middleware
+app.use((req, res, next) => { if (shouldParseBody(req)) express.json({ limit: '1mb' })(req, res, next); else next(); });
+app.use((req, res, next) => { if (shouldParseBody(req)) express.urlencoded({ extended: true, limit: '1mb' })(req, res, next); else next(); });
+
+// 10MB limit for file upload paths
+const uploadBodyParser = express.json({ limit: '10mb' });
+--- :455-462
+const detectSuspiciousRequests = createDetectSuspiciousRequests(SECURITY_CONFIG);
+const bruteForceProtection = createBruteForceProtection(SECURITY_CONFIG);
+
+app.use((req, res, next) => { if (shouldParseBody(req)) sanitizeInput(req, res, next); else next(); });
+app.use((req, res, next) => { if (shouldParseBody(req)) detectSuspiciousRequests(req, res, next); else next(); });
+app.use(requestFingerprint);
+app.use(bruteForceProtection);
+
+--- :555-565
+  res.setHeader('X-API-Version', (req as any).apiVersion);
+  res.setHeader('X-API-Supported-Versions', SUPPORTED_VERSIONS.join(', '));
+  next();
+});
+
+app.use((req, _res, next) => {
+  if (req.path.startsWith('/api/v1/')) req.url = req.url.replace('/api/v1/', '/api/');
+  next();
+});
+
+// BACKLOG H1: audit-log middleware. Captures business events with actor
+--- line count develop / #1108 head
+    1279
+    1279
+--- #1108 index.ts diff
+diff --git a/Blockchain/Dev/services/api-gateway/src/index.ts b/Blockchain/Dev/services/api-gateway/src/index.ts
+index db127dbfa..4e7fc1174 100644
+--- a/Blockchain/Dev/services/api-gateway/src/index.ts
++++ b/Blockchain/Dev/services/api-gateway/src/index.ts
+@@ -410,7 +410,7 @@ const proxyPaths = [
+   '/api/onedrive', '/api/teams',
+   '/api/users', '/api/sessions', '/api/issuer-certs',
+ ];
+-const shouldParseBody = (req: Request): boolean => !proxyPaths.some(p => req.path.startsWith(p));
++const shouldParseBody = (req: Request): boolean => !proxyPaths.some(p => req.path.replace(/^\/api\/v1\//, '/api/').startsWith(p)); // KS-1234: judge the /api/v1 alias by the path the rewrite below gives it
+ 
+ // Default 1MB body limit; file upload routes get 10MB via their own middleware
+ app.use((req, res, next) => { if (shouldParseBody(req)) express.json({ limit: '1mb' })(req, res, next); else next(); });
+=== trustHeaders.ts at develop :30-60 (blob 15626e80f6caea4866abd1bb9ad171c79e12e788)
+ * EXCEPTION: `x-tenant-override` is intentional super-admin functionality (the
+ * admin portal's tenant selector). It is a *request* — auth middleware decides
+ * whether to honour it based on the verified JWT's role, gating on
+ * SUPER_ADMIN_ROLES before doing so. The blanket strip added 2026-04-25
+ * (c796138f0) was matching it too, which broke the override path silently for
+ * two weeks and made KS-4 untestable.
+ */
+export const TRUST_HEADER_ALLOW_LIST = new Set(['x-tenant-override']);
+
+export const TRUST_HEADER_PATTERN =
+  /^x-(user|tenant|organization|org|role|roles?|auth-user|policy|emitter|gateway-vouch)(-|$)/i;
+
+/** True when the header must be removed from an inbound client request. */
+export function isStrippedTrustHeader(header: string): boolean {
+  return (
+    TRUST_HEADER_PATTERN.test(header) && !TRUST_HEADER_ALLOW_LIST.has(header.toLowerCase())
+  );
+}
+
+/** Mutates `headers` in place, removing every client-supplied trust header. */
+export function stripTrustHeaders(headers: Record<string, unknown>): void {
+  for (const header of Object.keys(headers)) {
+    if (isStrippedTrustHeader(header)) {
+      delete headers[header];
+    }
+  }
+}
+=== referrals.ts :50-60 (grep x-wallet-address)
+fatal: path 'Blockchain/Dev/services/api-gateway/src/routes/referrals.ts' does not exist in 'cbae988dbe90ebe556459ada2cb437eaf80e2402'
+fatal: path 'Blockchain/Dev/services/api-gateway/src/routes/referrals.ts' does not exist in 'cbae988dbe90ebe556459ada2cb437eaf80e2402'
+=== x-wallet-address across api-gateway src (develop)
+Blockchain/Dev/services/api-gateway/src/routes/verification.ts:1296:      if (req.headers['x-wallet-address']) forwardHeaders['x-wallet-address'] = req.headers['x-wallet-address'] as string;
+=== converters.ts at develop :118-140 (blob 04b9952eb7e4695c687f35791707b5866f26e55a)
+    createdAt: new Date(r.created_at as string),
+  };
+}
+
+export function rowToApiKey(r: Record<string, unknown>): ApiKey {
+  return {
+    id: r.id as string,
+    organizationId: r.organization_id as string,
+    name: r.name as string,
+    keyHash: r.key_hash as string,
+    keyPrefix: r.key_prefix as string,
+    scopes: parseJsonArray(r.scopes),
+    rateLimit: Number(r.rate_limit),
+    rateLimitWindow: Number(r.rate_limit_window),
+    lastUsedAt: r.last_used_at ? new Date(r.last_used_at as string) : undefined,
+    usageCount: Number(r.usage_count),
+    isActive: Boolean(r.is_active),
+    expiresAt: r.expires_at ? new Date(r.expires_at as string) : undefined,
+    createdAt: new Date(r.created_at as string),
+  };
+}
+--- who imports converters (security src)
+Blockchain/Dev/services/security/src/__tests__/row-converters.test.ts:13:} from '../converters';
+=== timestamping index.ts :510-520 (blob 1d2f109f644d01915f720e1894741794c91f4338)
+    timestampType: data.timestampType,
+    timestamp: now,
+    proof,
+    tsaUrl,
+    chainId,
+    transactionHash,
+    verified: true, // Mock timestamps are pre-verified
+    verifiedAt: now,
+    createdAt: now,
+    eidasQualified,
+    tsaName,
+--- verified: true lines
+516:    verified: true, // Mock timestamps are pre-verified
+573:          verified: true,
+603:              verified: true,
+612:              verified: true,
+--- PORT / listen
+40:const PORT = process.env.PORT || 4006;
+838:const server = app.listen(PORT, async () => {
+840:  log('info', 'Timestamping Service started', { port: PORT, dbConnected: isDbAvailable(), tsa: tsaUrl });
+845:║  Port:      ${PORT}                                              ║
+850:║  API Info:  http://localhost:${PORT}/api                          ║
+851:║  Health:    http://localhost:${PORT}/health                       ║
+fatal: path 'Blockchain/Dev/services/api-gateway/src/routes/health.ts' does not exist in 'cbae988dbe90ebe556459ada2cb437eaf80e2402'
+=== health.ts :55-60 (blob cbae988dbe90ebe556459ada2cb437eaf80e2402:Blockchain/Dev/services/api-gateway/src/routes/health.ts)
+fatal: path 'Blockchain/Dev/services/api-gateway/src/routes/health.ts' does not exist in 'cbae988dbe90ebe556459ada2cb437eaf80e2402'
+=== preflight.sh :700-712 at develop
+    real_failed="$real_failed $_leg"
+done
+if [ -n "$real_failed" ]; then
+    # KS-1260: this early exit keeps KS-1046's ratio, so a real failure still names the legs that ran.
+    n_ran=$(printf '%s' "$RAN_LEGS" | wc -w | tr -d ' ')
+    echo "PREFLIGHT FAILED on leg(s)$real_failed - fix the above before pushing. ($n_ran/$TOTAL_LEGS legs ran)"
+    if [ "${env_fail:-0}" -ne 0 ]; then
+        echo "  Leg 1 also could not RUN (no workspace install): run npm ci in Blockchain/Dev as well."
+    fi
+    exit 1
+fi
+n_ran=$(printf '%s' "$RAN_LEGS" | wc -w | tr -d ' ')
+
+--- at #1109 head :700-713
+    real_failed="$real_failed $_leg"
+done
+if [ -n "$real_failed" ]; then
+    # KS-1260: this early exit keeps KS-1046's ratio, so a real failure still names the legs that ran.
+    # KS-1279: a leg 1 that could not RUN (no workspace install, env_fail) is not a leg that ran - the next line says so.
+    n_ran=$(( $(printf '%s' "$RAN_LEGS" | wc -w | tr -d ' ') - ${env_fail:-0} ))
+    echo "PREFLIGHT FAILED on leg(s)$real_failed - fix the above before pushing. ($n_ran/$TOTAL_LEGS legs ran)"
+    if [ "${env_fail:-0}" -ne 0 ]; then
+        echo "  Leg 1 also could not RUN (no workspace install): run npm ci in Blockchain/Dev as well."
+    fi
+    exit 1
+fi
+n_ran=$(printf '%s' "$RAN_LEGS" | wc -w | tr -d ' ')
+
+--- preflight.sh SKIPPED / legs / _note_skip lines at develop
+99:env_fail=0   # KS-991: leg 1 could not RUN (no workspace install) vs a real finding
+102:# `PREFLIGHT PASSED.` used to be printed identically whether 13 legs ran or 10:
+128:# named an escape `PREFLIGHT_ALLOW_INCOMPLETE=1`. Neither was ever true — that
+134:SKIPPED_STACK=""      # space-separated leg numbers
+135:SKIPPED_ADVISORY=""   # space-separated leg numbers
+139:# KS-1046 / QA F-925-2: `n_ran` used to be TOTAL_LEGS - n_skipped. That is a
+158:    case " $SKIPPED_STACK $SKIPPED_ADVISORY " in
+161:    _note_skip RAN_LEGS "$CURRENT_LEG"    # dedupes; the list is what it appends to
+196:            _note_skip SKIPPED_ADVISORY "$CURRENT_LEG"
+197:            echo "  ^ leg $CURRENT_LEG counted as SKIPPED (advisory), not run: $_rd_reason"
+204:_note_skip() {  # $1 = list-var name, $2 = leg
+212:    _note_skip SKIPPED_STACK "$CURRENT_LEG"
+216:    _note_skip SKIPPED_ADVISORY "$CURRENT_LEG"
+219:step "1/15  OpenAPI spec drift (generated spec vs Zod source)"
+237:    env_fail=1
+269:step "2/15  Lockfile clean-room (npm ci --dry-run per standalone lock)"
+277:step "3/15  Spec-auth conformance (unauth requests to bearer-authed ops must 401/403)"
+299:step "4/15  Path resolvability (every spec'd path must route — KS-473 class)"
+341:step "5/15  Audit-contract suites (the validator BOTH gates import — KS-763)"
+414:step "6/15  npm-audit gate (advisories vs triaged baseline — KS-470)"
+437:step "7/15  standalone-lock advisories (each service's OWN lock — KS-531)"
+478:step "8/15  Served-spec consistency (/api/docs/openapi.json vs .yaml — KS-656)"
+498:step "9/15  No tracked credentials (KS-646 — negation made the hardening unable to hold)"
+503:step "10/15  Bare-path shell scripts must be executable in the INDEX (KS-667 F-16 / KS-751)"
+508:step "11/15  Pinned actions must say what is pinned (KS-751 ask 4)"
+513:step "12/15  Every shell test suite must be REACHED by the runner (KS-731 / QA F-800-07)"
+532:step "13/15  The runtime stage must re-link @secuura/shared (KS-921 + the KS-490 sibling)"
+551:step "14/15  Every shell test suite must actually RUN (KS-731 / QA FR-800-03)"
+644:step "15/15  Every check-*.sh guard must have a HOME, and the wired ones must pass (KS-926)"
+688:n_stack=$(printf '%s' "$SKIPPED_STACK" | wc -w | tr -d ' ')
+689:n_adv=$(printf '%s' "$SKIPPED_ADVISORY" | wc -w | tr -d ' ')
+695:# (env_fail); a run whose ONLY failure is that keeps the environment verdict below.
+699:    if [ "$_leg" = "1" ] && [ "${env_fail:-0}" -ne 0 ]; then continue; fi
+704:    n_ran=$(printf '%s' "$RAN_LEGS" | wc -w | tr -d ' ')
+705:    echo "PREFLIGHT FAILED on leg(s)$real_failed - fix the above before pushing. ($n_ran/$TOTAL_LEGS legs ran)"
+706:    if [ "${env_fail:-0}" -ne 0 ]; then
+711:n_ran=$(printf '%s' "$RAN_LEGS" | wc -w | tr -d ' ')
+718:    if [ "${env_fail:-0}" -ne 0 ]; then
+729:    echo "PREFLIGHT FAILED — fix the above before pushing. ($n_ran/$TOTAL_LEGS legs ran)"
+733:if [ "$n_skipped" -eq 0 ] && [ "$n_ran" -eq "$TOTAL_LEGS" ]; then
+734:    echo "PREFLIGHT PASSED — $TOTAL_LEGS/$TOTAL_LEGS legs ran."
+742:    echo "PREFLIGHT INCOMPLETE — $n_ran/$TOTAL_LEGS legs ran and NONE declared a skip."
+751:echo "PREFLIGHT INCOMPLETE — $n_ran/$TOTAL_LEGS legs ran, $n_skipped SKIPPED. Nothing failed."
+753:    echo "  legs$SKIPPED_STACK — local stack not up; you can clear this by starting it."
+756:    echo "  legs$SKIPPED_ADVISORY — environment (offline / registry unreachable / deps missing)."
+758:echo "  This is NOT a pass. Do not quote it as one — say which legs ran."
+=== the 8 sibling bash suites + the new one (scripts/__tests__ naming preflight.sh) at #1109 head
+  Blockchain/Dev/scripts/__tests__/check_slot_credentials.test.sh
+  Blockchain/Dev/scripts/__tests__/no_tracked_credentials_root.test.sh
+  Blockchain/Dev/scripts/__tests__/pre_push_hook_base.test.sh
+  Blockchain/Dev/scripts/__tests__/pre_push_hook_current_develop.test.sh
+  Blockchain/Dev/scripts/__tests__/preflight_deps.test.sh
+  Blockchain/Dev/scripts/__tests__/preflight_failure_verdict_keeps_ratio.test.sh
+  Blockchain/Dev/scripts/__tests__/preflight_ratio_excludes_leg1_no_install.test.sh
+  Blockchain/Dev/scripts/__tests__/preflight_state_is_initialised.test.sh
+  Blockchain/Dev/scripts/__tests__/preflight_verdict_names_real_failures.test.sh
+=== new test file #1108 (94 lines) — it( titles
+19:const PRIV = process.env.__TEST_JWT_PRIVATE_PEM as string;
+29:async function listen(server: http.Server): Promise<string> {
+30:  await new Promise<void>((resolve) => server.listen(0, '127.0.0.1', () => resolve()));
+31:  return 'http://127.0.0.1:' + String((server.address() as AddressInfo).port);
+43:    const json = (status: number, payload: unknown) => { res.writeHead(status, { 'content-type': 'application/json' }); res.end(JSON.stringify(payload)); };
+57:  const upstreamUrl = await listen(upstream);
+62:  delete process.env.JWT_JWKS_URL;
+66:  gatewayUrl = await listen(gateway);
+73:/** Send the request through the real gateway with a 3 s bound (the gate's); returns [status or 'no-answer', originate hits]. */
+76:  let status: number | string = 'no-answer';
+80:    status = res.status;
+81:  } catch { status = 'no-answer'; }
+82:  return [status, hits.slice(mark)];
+84:describe('KS-1234: a JSON create on the /api/v1/documents alias must answer', () => {
+85:  it('control: POST /api/documents as application/json answers 200 and originate receives the body', async () => {
+88:  it('control: the /api/v1 alias itself is live - GET /api/v1/signatories answers 200 and reaches originate at /api/signatories', async () => {
+91:  it('🔴 KS-1234: POST /api/v1/documents as application/json answers 200 within the bound and originate receives the same body', async () => {
+--- :70-80 (LINT-1 line 76)
+  vi.unstubAllEnvs();
+});
+
+/** Send the request through the real gateway with a 3 s bound (the gate's); returns [status or 'no-answer', originate hits]. */
+async function send(method: string, path: string, body?: string): Promise<[number | string, string[]]> {
+  const mark = hits.length;
+  let status: number | string = 'no-answer';
+  try {
+    const res = await fetch(gatewayUrl + path, { method, headers: { 'content-type': 'application/json', 'x-api-key': CREATE_KEY }, body, signal: AbortSignal.timeout(3000) });
+    await res.text();
+    status = res.status;
+=== #1111 ks1041 test head :113-119
+      expect(TRUST_HEADER_PATTERN.test(header)).toBe(true);
+    }
+  });
+  it('RED KS-1223: x-wallet-address is OUTSIDE the edge strip - a client-sent value survives stripTrustHeaders while the trust family is removed', () => {
+    expect(isStrippedTrustHeader('x-wallet-address')).toBe(false);
+    const headers: Record<string, unknown> = { 'x-wallet-address': 'addr_client_supplied', 'x-user-id': 'user-1', authorization: 'Bearer real-token' };
+    stripTrustHeaders(headers);
+    expect([headers['x-wallet-address'], headers['x-user-id'], headers.authorization]).toEqual(['addr_client_supplied', undefined, 'Bearer real-token']);
+  });
+});
+=== #1110 row-converters head :150-164
+    expect(k.usageCount).toBe(0);
+    expect(k.isActive).toBe(true);
+    expect(k.lastUsedAt).toBeUndefined();
+  });
+  it('RED KS-880: the dead converters.ts rowToApiKey maps NEITHER tenantId NOR connectorId - a row carrying both columns comes back without either key', () => {
+    const row = {
+      id: 'key_2', organization_id: 'org_1', tenant_id: 'a0000000-0000-4000-8000-000000000002', connector_id: 'conn_1',
+      name: 'connector-2', key_hash: 'h', key_prefix: 'sk_t_', scopes: '["read:docs"]',
+      rate_limit: '100', rate_limit_window: '60', last_used_at: null, usage_count: '0', is_active: true,
+      expires_at: null, created_at: '2026-04-01T00:00:00Z',
+    };
+    const k = rowToApiKey(row);
+    expect([k.organizationId, 'tenantId' in k, 'connectorId' in k]).toEqual(['org_1', false, false]);
+  });
+});
+--- its imports
+6:import { describe, it, expect } from 'vitest';
+7:import {
+=== #1107 ks740 test head :120-153
+    expect(res.error).toContain('tsa.example.test');
+  });
+  it('RED KS-753: POST /api/timestamps and /api/timestamps/batch answer 201 with verified true for the mock TSA fallback when no TSA is reachable - the mock is reported as verified today', async () => {
+    vi.stubGlobal('fetch', async () => ({ ok: false, status: 503, statusText: 'unavailable' } as Response));
+    const nodeCrypto = await import('crypto');
+    const { privateKey, publicKey } = nodeCrypto.generateKeyPairSync('rsa', { modulusLength: 2048 });
+    const b64url = (s: string | Buffer) => Buffer.from(s).toString('base64url');
+    const signingInput = b64url(JSON.stringify({ alg: 'RS256', typ: 'JWT' })) + '.' + b64url(JSON.stringify({ userId: 'u-ks753', email: 'ks753@secuura.io', role: 'user', verificationLevel: 'email', exp: Math.floor(Date.now() / 1000) + 300 }));
+    const bearer = 'Bearer ' + signingInput + '.' + b64url(nodeCrypto.sign('sha256', Buffer.from(signingInput), privateKey));
+    const savedEnv = { JWT_PUBLIC_KEY: process.env.JWT_PUBLIC_KEY, PORT: process.env.PORT };
+    process.env.JWT_PUBLIC_KEY = Buffer.from(publicKey.export({ type: 'spki', format: 'pem' }).toString()).toString('base64');
+    process.env.PORT = '0';
+    vi.doMock('../db', () => ({ initDb: async () => false, isDbAvailable: () => false, query: async () => ({ rows: [], rowCount: 0 }), closeDb: async () => undefined }));
+    vi.resetModules();
+    const { default: app } = await import('../index');
+    const drive = (url: string, body: unknown) => new Promise<any>((resolve) => {
+      const headers: Record<string, unknown> = {};
+      const req: any = { method: 'POST', url, headers: { authorization: bearer }, body };
+      const res: any = { statusCode: 200, locals: {}, on: () => res, status: (c: number) => { res.statusCode = c; return res; }, json: (b: unknown) => { resolve({ status: res.statusCode, body: b }); return res; } };
+      res.send = res.json;
+      res.end = () => res.json(null);
+      res.setHeader = (k: string, v: unknown) => { headers[k.toLowerCase()] = v; return res; };
+      res.getHeader = (k: string) => headers[k.toLowerCase()];
+      res.removeHeader = (k: string) => { delete headers[k.toLowerCase()]; };
+      app(req, res, () => resolve({ status: -1, body: null }));
+    });
+    const single = await drive('/api/timestamps', { hash: 'a'.repeat(64), timestampType: 'rfc3161' });
+    const batch = await drive('/api/timestamps/batch', { hashes: [{ hash: 'b'.repeat(64) }, { hash: 'c'.repeat(64) }], timestampType: 'rfc3161' });
+    for (const k of ['JWT_PUBLIC_KEY', 'PORT'] as const) { if (savedEnv[k] === undefined) delete process.env[k]; else process.env[k] = savedEnv[k]; }
+    const shape = (t: any) => [t.eidasQualified, JSON.parse(Buffer.from(t.proof, 'base64').toString()).mock, t.verified];
+    expect([single.status, single.body.error, batch.status, batch.body.error]).toEqual([201, undefined, 201, undefined]);
+    expect([shape(single.body.data), batch.body.data.timestamps.map(shape)]).toEqual([[false, true, true], [[false, true, true], [false, true, true]]]);
+  });
+});
+=== #1106 ks480 test head :133-151
+    expect(res._status).toBe(401);
+  });
+  it('RED KS-1232: GET /api/connector/info answers allowedDocumentTypes [] for a stored "", 0 or false - the three shapes every create refuses', async () => {
+    const META = { connectorId: 'platform-s:ext-1', scopes: ['documents:write'], organizationId: 'org-1', tenantId: 'ten-1', rateLimit: 100, rateLimitWindow: 60 };
+    apiKeyCache.set('sk_ks1232', { result: META, expiresAt: Date.now() + 60000 });
+    connectorBearerCache.set('sk_ks1232', { token: 'connector.jwt.token', expiresAt: Date.now() + 60000 });
+    const { createHealthRoutes } = await import('../services/health');
+    const answers: unknown[] = [];
+    for (const stored of ['', 0, false]) {
+      const redisLike = { getNotificationSettings: async () => ({ integrations: [{ id: META.connectorId, config: { allowedDocumentTypes: stored } }] }), getRedisClient: () => null };
+      const router = createHealthRoutes({}, redisLike as any);
+      const req = Object.assign(makeReq({ 'x-api-key': 'sk_ks1232' }), { method: 'GET', url: '/api/connector/info' });
+      const res: any = Object.assign(makeRes(), { setHeader: () => undefined });
+      const body = await new Promise<any>((resolve) => { res.json = (b: unknown) => { resolve(b); return res; }; router(req, res, () => resolve({ fellThrough: true })); });
+      answers.push([body.id, body.allowedDocumentTypes]);
+    }
+    expect(answers).toEqual([['platform-s:ext-1', []], ['platform-s:ext-1', []], ['platform-s:ext-1', []]]);
+  });
+});
+=== file line counts (develop -> head)
+  ks480-connector-auth.test.ts: 135 -> 151
+  ks740-bounded-fanout.test.ts: 122 -> 153
+  row-converters.test.ts: 154 -> 164
+  ks1041-vouch-header-strip.test.ts: 113 -> 119
+=== sizes+sha256 of the four tamper files at develop
+fatal: path 'Blockchain/Dev/services/api-gateway/src/routes/health.ts' does not exist in 'cbae988dbe90ebe556459ada2cb437eaf80e2402'
+fatal: path 'Blockchain/Dev/services/api-gateway/src/routes/health.ts' does not exist in 'cbae988dbe90ebe556459ada2cb437eaf80e2402'
+fatal: path 'Blockchain/Dev/services/api-gateway/src/routes/health.ts' does not exist in 'cbae988dbe90ebe556459ada2cb437eaf80e2402'
+  health.ts 0 bytes sha256 e3b0c44298fc blob cbae988dbe90
+  index.ts 32630 bytes sha256 e4f525efcb43 blob 1d2f109f644d
+  converters.ts 4496 bytes sha256 1ba9a9050c92 blob 04b9952eb7e4
+  trustHeaders.ts 2731 bytes sha256 c6cd7b504ea1 blob 15626e80f6ca
+2026-09-20T16:18:37Z
