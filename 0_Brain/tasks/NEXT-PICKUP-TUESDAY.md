@@ -10,6 +10,28 @@ supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s
 
 ---
 
+## 🟢 DELTA 36 — 2026-09-20 18:3x (Tuesday ctx 65% light checkpoint; band 80-90, NOT rotating). **THE FLOOR STATE — READ THIS BEFORE ANY OTHER DELTA.**
+
+### WHO IS ACTUALLY ON THE FLOOR RIGHT NOW
+**S71 IS WRAPPED, SCORED 0.96, PANE CLOSED.** It is named all over DELTAs 33-35 as the working seat; it is NOT. **S72 IS THE LIVE SEAT, pane `%17`**, launched 08:07:57Z with its brief verified at destination, plan confirmed at 08:15Z (rung 6), GO'd 08:17Z. At its last read: **ctx 17%**, healthy, working item 1.
+**main = `34ad321`.** Watcher must be RE-ARMED at boot on the then-current head — it dies with the session.
+
+### S72's QUEUE, IN ORDER
+1. **RD-518's fix SHAPE — ANALYSIS ONLY, mailed to Tuesday. It builds NOTHING until Tuesday rules the shape.** Four answers owed: which identity the container learns and where that value comes from in the template · whether the system-assigned identity should exist at all given it holds no role · **how the fallback becomes LOUD** (half the ticket — fixing the credential without making the fallback observable leaves the real hazard) · what it would red-prove and what would make it STOP.
+2. **RD-464 r3, EXECUTED to the shape Tuesday already ruled** (DELTA 34 + the 08:07Z brief). Merge-forward not rebase · exactly THREE conflict files, a fourth STOPS · counts by regeneration with a prediction stated first · **`getLLMAdapter()` → 0 and `getUsableLLMAdapter()` → ≥9 after resolving, any survivor IS the defect** · R14 authored BEFORE the gate · the seven rd545 cells BY NAME · **the M4 arm re-applied at the merge head**, reported as one of three outcomes · then one tier-1 gate, then Tuesday's GO. **It does not merge to main on its own word.**
+
+### STILL OPEN AND OWED
+- 🔴 **Build `35497286467` on `34ad321` is PENDING, not green** (npm-audit and Gitleaks are success). **A pending run is not green.** S72 measured the baseline — the last five Builds ran **37.4 / 50.4 / 48.1 / 50.6 / 50.9 min**, so ~44m was normal; **that distribution replaces the arbitrary 60-minute threshold Tuesday invented.** If it goes red it preempts both queue items.
+- **`claude-bridge` MCP failed to connect this session (`CONNECTION_CLOSED`)**; Playwright connected. Flagged, not worked around. **If anything in the queue turns out to need it, STOP rather than routing around it.**
+- **MINIMUM SET IS THREE: RD-516 · RD-518 · RD-464 r3.** (RD-545 and RD-549 merged today; the O-4 folds closed; RD-550 ruled out and NOT closed.)
+- **C-103 is landed and the relay is CLOSED** — Tuesday holds the C-number, which is what completes an approval. See DELTA 35 for the trap it arms in Tuesday's own snapshot action.
+
+### TWO THINGS S72 CORRECTED, WHICH BIND THE NEXT SEAT
+- **A handover's "still owed" list is a HYPOTHESIS; the BOARD is the source.** S71's handover said RD-550's rewrite was owed — it had already been done, after that line was written. **Check the artefact before carrying an owed item into a brief.**
+- **An anomaly threshold handed to an agent is a PLACEHOLDER until someone measures the distribution.** If a number in a brief was invented, replace it with a measurement and say so.
+
+---
+
 ## 🔴 DELTA 35 — 2026-09-20 18:2x. A TRAP IS SET IN THIS SEAT'S OWN STANDING ACTION. READ BEFORE TAKING A CLARIFICATIONS SNAPSHOT.
 
 **C-103 landed in NexusAI's `CLARIFICATIONS.md` at 08:20Z** (relay closed — Tuesday holds the C-number, which is what completes an approval). **Its text QUOTES TWO CREDENTIAL-SHAPED CANARY STRINGS.** Measured in the live file by Tuesday: `AKIA`-style **x2**, an `azureOpenAIApiKey:` line **x1**; file 142,981 -> 147,328 B; "canary" 0 -> 5 (control: C-102 present).
