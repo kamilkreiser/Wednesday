@@ -7,7 +7,7 @@ status: live
 
 # Boot digest BY TIER — W whole, M rules-only, every project case a handle
 
-Generated 2026-09-20 17:17 from 194 lesson files (894,739 B). M 35 · MIXED 5 · W 154. 5 project CASE sections inside MIXED files are reduced to one line each: the heading and the path to read it at. W blocks are exactly what the default digest carries; M blocks drop the section index and keep the rules; a P file is a single handle. The CASES behind every rule live only in the lesson files — open one the moment its rule fires.
+Generated 2026-09-20 17:25 from 195 lesson files (899,860 B). M 35 · MIXED 5 · W 155. 5 project CASE sections inside MIXED files are reduced to one line each: the heading and the path to read it at. W blocks are exactly what the default digest carries; M blocks drop the section index and keep the rules; a P file is a single handle. The CASES behind every rule live only in the lesson files — open one the moment its rule fires.
 
 ## The T9 SSD is the master — Wednesday must be fully portable
 `2026-07-31_fully-portable-drive.md` · principle · 2026-07-31 · status: superseded — the "T9 is the master" half by [[2026-08-25_one-drive-devmaster-is-master]] (2026-08-25); the portability principle itself still lives · tier: W
@@ -6390,4 +6390,31 @@ sections (open the file for these): Why the existing lesson did not cover it · 
 5. **The generalisation:** an artefact with no durable location **reports its own absence as readiness** — the same shape as a census whose closure is read as completeness ([[2026-09-20_a-closure-inherits-the-scope-of-its-measurement]]), one layer down in the filesystem.
 
 **Family:** [[2026-09-07_a-mechanism-is-recorded-by-its-path-not-its-runtime-id]] (the parent — a mechanism is recorded by its PATH; this is the same rule for a PRODUCT of work rather than a tool) · [[2026-08-07_a-promise-is-not-a-mechanism]] · [[2026-09-20_a-closure-inherits-the-scope-of-its-measurement]] · [[2026-08-26_never-delete-cleanup-means-quarantine]] (what survives is decided before you need it).
+
+
+## Refuting a defect's stated MECHANISM does not refute the DEFECT — the sentence can be right and its explanation wrong, and removing the line is the expensive half
+`2026-09-20_refuting-a-mechanism-is-not-refuting-the-defect.md` · correction · 2026-09-20 · status: live · tier: W
+
+**The lesson:** a ticket carries two things — a CONCLUSION ("X is broken") and a MECHANISM ("because
+Y"). They fail independently. Disproving Y disproves Y. **The conclusion has to be killed on its
+own terms, and it usually has more than one route to being true.** When the conclusion is a
+security property, assume it survives until measured otherwise.
+
+sections (open the file for these): The case — I was one instrument away from shipping it · Why it was nearly fatal rather than merely wrong · The rule · What saved it, so the practice is kept
+
+## The rule
+
+1. **A ticket's conclusion and its mechanism are two claims. Kill them separately.** "The stated
+   cause is wrong" is a finding about the ticket's TEXT, never about the world.
+2. **Before removing a line from a critical path, ask: could this conclusion be true by another
+   route?** Name the routes you checked. "I refuted the only route I thought of" is not a refutation.
+3. **Asymmetry governs the effort.** Being slow costs an hour. Being wrong here ships silent
+   fallback encryption to every customer. **When a measurement would let you REMOVE a blocker, take
+   one more measurement** — the direction of the error is not symmetric and neither is its cost.
+4. **Suspect a "the ticket is wrong" finding most when it is convenient.** Mine arrived exactly when
+   I wanted the minimum set smaller and Kam's package sooner. That is when to slow down, not speed
+   up ([[2026-08-14_i-read-representations-they-read-sources]]'s third switch: EXPECTATION).
+5. **A feature that cannot announce its own absence is a defect in itself** — cousin of
+   [[2026-08-07_a-check-that-cannot-fail]]. Where a control silently falls back, the fix includes
+   making the fallback loud, not only wiring the path.
 
