@@ -71,3 +71,4 @@ sees the claim rather than discovering it in a conflict.
 | 2026-09-20 01:20 | Kamils-Mac-mini | nas_sync on the Tuesday seat: runs as agent=wednesday (seat-resolver, like the close ritual) and syncs Docker.raw (filled the T9 to 100%) - fix both with arms; job com.tuesday.nassync PAUSED until then | OPEN | |
 | 2026-09-20 07:46 | Kamils-Mac-Studio | night_run.sh G7 busy leg: require a live non-coordinator pane, not just ALLOW_SEATS | CLOSED |  2026-09-20 07:48 done |
 | 2026-09-20 08:34 | Kamils-Mac-mini | panel_sync RECOVER leg: quarantine a stale rebase-merge husk (no head-name) and escalate after N identical failures - arms: husk / genuine in-progress / conflicted | OPEN | |
+| 2026-09-20 16:15 | Kamils-Mac-Studio | rotate_liveness.sh + wednesday_rotate.sh liveness leg — 0 verdicts in 9 armings since 2026-09-18; and the check measures pane PRESENCE not agent ALIVENESS (a dead board seat passed it today) | OPEN | |
