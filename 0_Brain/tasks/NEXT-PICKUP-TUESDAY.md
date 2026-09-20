@@ -10,6 +10,34 @@ supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s
 
 ---
 
+## 🔵 DELTA 34 — 2026-09-20 17:3x (Tuesday ctx 51% CHECKPOINT; band 80-90, NOT rotating). READ FIRST; DELTA 33 holds except where named.
+
+### 🟢 THE MINIMUM SET WENT FROM SEVEN TO **THREE** TODAY
+**MERGED:** RD-545 (`58f87d9`) · RD-549 (`c56f946`). **CLOSED:** the RD-465/RD-454 O-4 listing folds — both DONE, verified in the listing artefact itself, the predicate's last UNKNOWN. **RULED OUT (not closed):** RD-550.
+**REMAINING: RD-516 · RD-518 · RD-464 r3.** **main = `8df469f`** (RD-549 + a gitleaks CI fix). Watcher must be RE-ARMED at boot on the then-current head.
+
+### 🔴 RD-518 — I WAS WRONG AND THE PREDICATE NOW SAYS SO. DO NOT RE-DERIVE MY ERROR.
+I measured the `KEYVAULT_NAME` vs `KEY_VAULT_NAME` names, found they MATCH, wrote "premise refuted, likely leaves the minimum set", and **told Kam that on the panel**. **The ticket's CONCLUSION was right by a route nobody had written down.** The Crypto User grant is on the **user-assigned** identity only; `backend/encryptionService.js:232` calls `new DefaultAzureCredential()` with **no options**; **none of the container's 21 env names is a managed-identity client id**; `AZURE_CLIENT_ID` is bound to the **printer-data SP**. `hasPrinterData` TRUE → EnvironmentCredential authenticates as that SP (no KV role); FALSE → ManagedIdentityCredential resolves to the **system-assigned** identity (no role anywhere in the template). **In BOTH shapes the credential lacks the grant, and the path falls back to machine-id-derived encryption with only a WARN — a broken deployment looks fine.** The reporting bug (`server.js:631/:642/:17733` reading the unset name) is what HID it: the only surface that would warn says `not_configured` unconditionally, so it carries no signal.
+**Lesson filed: `2026-09-20_refuting-a-mechanism-is-not-refuting-the-defect.md`.** A ticket's CONCLUSION and its MECHANISM fail independently. **When a measurement would let you REMOVE a blocker, take one more measurement** — slow costs an hour, wrong ships silent fallback encryption to every customer. **Suspect a "the ticket is wrong" finding most when it is convenient.**
+**RD-518's FIX IS NOT STARTED and the shape comes to Tuesday first** — it touches credential resolution on the deployment path.
+
+### 🔴 ON KAM'S DESK — `nexusai-privacy-keyvault-claim-rd518` (carded 17:2x, DEFAULT IS SAFE)
+**PRIVACY.md:129**, customer-facing and framed as AUDITED, says secrets are AES-256-GCM encrypted *"with a Key Vault-managed key"*. RD-518 makes that clause FALSE while the AES half stays true — **a half-truth, not a loud failure.** Read at source by Tuesday. **NOT implicated, checked separately:** README's KV lines are a DIFFERENT mechanism (Container Apps `secrets[].keyVaultUrl`, resolved by the platform, never through our credential); TERMS' AES-256 stays true; the listing text makes no KV claim. **NOTHING WAS CHANGED — PRIVACY.md and TERMS are never edited by agents (C-65).**
+**Why the default is safe: RD-518 already blocks the package, so the submission cannot ship with the sentence false.** Rec (a) fix RD-518, change no documents.
+🔴 **COMMISSIONED, ANSWER OWED TO KAM UNASKED: does the LIVE 2.1.1 (`6fb497d`) carry BOTH the claim and the defect?** That decides existing-customers vs future. A NO is as urgent as a YES (his 09-19 standing line). **Anything touching the live listing or telling anyone outside is HIS signature class — measure and report only.**
+
+### S71 — at 50%, given a CHECKPOINT plan; it has corrected Tuesday FOUR times today and been right every time
+Its queue, deliberately small so nothing is half-done: the live-2.1.1 measurement · Build `35496305924` on `8df469f` (**still owed, green or red — gitleaks green is not the whole board**) · RD-518's rewrite · then its handover. **Explicitly told NOT to start RD-464 r3's shape** — a half-done one is worse than unstarted, because the next seat cannot tell which rd545 cells were re-run and which were merely rebased.
+Its four catches: the C-74 coupling; my placement that would have armed ~30 un-run cells; **"mail BEFORE push, not after"**, which it coined and I adopted; and RD-518. Each raised when agreeing was easier.
+
+### TOOLING NOTE — `decision_queue.sh add` has a substring FALSE MATCH on "vault"
+"Azure **Key Vault**" matched Kam's **DEVMASTER VAULT** rulings and the card was refused. Different subject entirely. Overridden with `_override_prior` and the reason recorded IN the card. **Also: a long `--bluf` with apostrophes fails through the shell — use `add --json < file` for anything substantial.** A placeholder card was created and withdrawn in the same action while diagnosing this; it never reached Kam.
+
+### LESSONS FILED THIS SEAT TODAY (4) + LEDGER (30 rows, 3c archive run, conservation 1073 = 1073)
+`an-absence-goes-stale-while-you-compose-the-complaint` (S71 sharpened it into *mail before push*) · `most-of-a-project-folder-is-outside-its-git-repo` · `a-control-in-the-wrong-scan-mode-buys-confidence` (S71's case, and it carries **the w=3 root: I specify using a property I measured, and the property that governs is one I did not**) · `refuting-a-mechanism-is-not-refuting-the-defect`.
+
+---
+
 ## 🔵 DELTA 33 — 2026-09-20 16:5x (Tuesday ctx ~45%, NOT rotating; band is 80-90). READ FIRST; DELTA 32 holds except where named.
 
 ### 🔴 KAM RULED TUESDAY'S CARD — AND HE RULED AGAINST THE RECOMMENDATION
