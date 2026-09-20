@@ -349,3 +349,106 @@ not word-split — rewritten as a function; nothing was mis-stated to the file b
 `failed_scan_is_loud` suite; note the image-filter suite's `{}` stub, which KS-1274's fix would turn into `scan-failed` for
 every cell); (2) **KS-1236's `already pending` refusal** (`users.ts:1274`) — a third cell in the same file, same harness;
 (3) **KS-1006's `MFA is not enabled` / shape refusals** (`:1099`, `:1102`) — same file, same harness.
+
+## round 24 (2026-09-21, board widening past round 23; bash_patch tier admitted) — 42 read, 1 fit
+
+**Verdict: 1 FIT, briefed and golden-measured — KS-1273 (`KS-1273-EXITCODEENV-1`, BASH_PATCH: job 04 passes `--exit-code 0`
+to trivy + ONE NEW bash suite, PASS 7/7 on three fresh clones, four wrong variants refused). No test_only FIT among the
+40 newly-read tickets: every one is a decision, a product change, a DB/boot/infra item, or a pin that would pin the defect.**
+Tip `362e51fe0db7e73d5557924902763fe3f10fd8c7` by `ls-remote` at start (05:38:29) and at close (unchanged; the #1111
+merge). Source checkout tracked-modified 0 throughout; no port touched (the real-trivy precedence measurement was a local
+`trivy fs --scanners secret --offline-scan --skip-version-check` on a scratch directory — no image, no DB, no daemon);
+Linear read-only, key sourced transiently. Artefacts: `runs/2026-09-21_round24-drafter-precheck/` (`sweep/` the pull, the
+352-row triage and the 181-row eligible-unrowed list; `KS-1273/` the measurement, the golden, the variants and the
+collision orders; `golden_runs.log` all seven checker runs; `REPORT.md`).
+
+**Population (cursor-paginated, `first:250` + `endCursor`, 2 pages, `hasNextPage=false` on page 2):** KS Backlog+Todo =
+**352** (327 Backlog, 25 Todo, 0 archived; 261 Kam, 72 unassigned, 13 Peter, 6 Stuart) — the same 352 as round 23 (two
+unassigned → Kam). Excluded by predicate: 88 with an id in a `night/READY_*` filename, 87 in `done.md` as PASS/held
+(overlapping), 19 Peter/Stuart, 14 PR-attached, and the live lanes — of the fifteen named (the 12th's ten + the nine held
+today) 6 are in this population (KS-1283, KS-1244, KS-1236, KS-1198, KS-1137, KS-1006 — every one also READY+done-flagged)
+and 9 are `In Progress` with a PR attached (KS-1203 #1112/#1103, KS-1275 #1102, KS-1284 #1105, KS-1175 #1105, KS-880 #1110,
+KS-753 #1107, KS-1234 #1108, KS-1223 #1111, KS-1232 #1106) → **236 eligible**, of which **181 carry no round 20-23 row**.
+**42 read with the full description** (40 not read in any prior round + KS-1274/KS-1273, round 23's NEXT-BEST, re-read
+for the bash_patch tier); the rest triaged at title + round-23 class (CI/workflow/compose/docs/DB/e2e/systemTest/decision/
+design/review-stream/frontend/launcher). Round 23's next-best (2)/(3) — KS-1236's `already pending` refusal and KS-1006's
+shape refusals in the same `ks1194-…` file — are OUT: both tickets are in the 12th's lane and that test file is being
+raised by it.
+
+| id | title (≤60) | verdict | one-line reason |
+|---|---|---|---|
+| KS-1273 | Job 04: a TRIVY_EXIT_CODE (or trivy.yaml exit-code) in the env | **FIT** (bash_patch) | one `-`/two `+` at `04-container-trivy.sh:93` (`--exit-code 0 "$img"`) + NEW `container_trivy_exit_code_env_keeps_findings.test.sh` (3 CONTROL, 2 🔴); RED at tip `3 passed, 2 failed` (`got 1 scan-failed 0 0`), GREEN after `5 passed`; real trivy 0.71.0 MEASURED: env=1+findings rc 1, `--exit-code 0` rc 0; siblings 3/4 unchanged; briefed `KS-1273-EXITCODEENV-1`, PASS 7/7 ×3 |
+| KS-1274 | Job 04: a trivy that exits 0 with a bare `{}` still reads as c | REJECTED-THIRD-FILE | any guard that turns `{}` into `scan-failed` reds the clean stub of BOTH existing suites (`failed_scan_is_loud.test.sh:57` prints `{}`, its CONTROL asserts `0 2 0`; `image_filter.test.sh:76` prints `{}`, CELL 1 asserts `rc=0`) — the fix needs the image_filter stub changed too: a third file the bash checker refuses (B3) and a file the held KS-1137-F2 READY modifies (`@@ -140,1 +140,20 @@`) |
+| KS-619 | Gateway tenant resolution falls through to the caller's x-tena | REJECTED-PINS-THE-DEFECT | the ticket's ask REMOVES the `auth.ts:387` header fall-through (fail closed); a KS-1223-style characterisation pin would pin what the owner wants gone (the KS-1280 rule); the fix is auth-middleware product |
+| KS-1191 | Audit log records the caller's spelling: case splits the actio | DECISION | "a design decision for the audit trail's owner, not a one-line fix" — two owner choices before any build |
+| KS-1112 | PATCH /api/gdpr/dsr/{dsrId} answers "DSR not found" with 200 f | DECISION | "one decision, then one small change" (align to 404 OR document the split); originate jest route with a DB call behind it |
+| KS-766 | base-image-watch self-test cannot red the DB-age PRODUCER — th | REJECTED-PRODUCT-REFACTOR | done-means item 1 extracts the inline `python3 -c` age block into a callable unit — a product refactor, then the cells |
+| KS-1063 | A gate that examined NOTHING exits 0 — check-package-format re | DESIGN | "the design question comes first" — whether a gate that examined nothing may exit 0 at all (three instruments) |
+| KS-812 | connectors/whatsapp-bot prints the DEAD Container Apps API URL | REJECTED-CODE-PATCH-TIER | a one-line TS default in `connectors/whatsapp-bot/src/index.ts:21` (repoint OR drop — a choice); code_patch tier, not this round's; no suite drives the file |
+| KS-849 | KYC mock document flow: a 1.5s timer writes back a STALE verif | REJECTED-PRODUCT | "both change concurrency behaviour, so this wants its own gate"; a pin needs fake timers + a `dbSaveVerification` double on the kyc service |
+| KS-1114 | POST /api/verification/verify refuses a title-only body with 4 | DECISION | "decide the contract first … a product call" (implement a title strategy OR drop `title` from the spec) |
+| KS-625 | /presentations/verify reports a presentation verified without | REJECTED-NOT-COMMISSIONED | "the by-design-or-remediate ruling is Kam's"; a pin of `presentations.ts:316-322` pins the missing signature check |
+| KS-758 | Connector erasure: three permanent failures present as retryab | DESIGN | "a dead-letter path is a design, not a line" |
+| KS-1132 | getPlatformAdmin swallows an infrastructure failure to null — | DECISION | "needs its own ruling before a build"; auth login product; the branch was never driven |
+| KS-838 | Make the authorize rules DATA the resolver iterates, so the GE | REJECTED-REFACTOR | "a route refactor of `resolveAuthorizeClient`, not a change to the suite" |
+| KS-959 | KS-597 fallback: resolve the issuer org from the authenticated | BLOCKED | "cannot be built today, and the blocker is data" (`organization_members` 0 rows); Wednesday ruled it must not be written unexercisable |
+| KS-607 | GET /api/anchors/{id} and verify report different statuses for | REJECTED-MEASURE-FIRST | "one authenticated call settles this" on UAT — a live measurement, not a pin |
+| KS-1184 | workflow-approve persists the instance approved before the for | DESIGN | "a design call beside KS-1087 item 2" (persist after 2xx OR a re-forward path); the gate's regression needs a stateful store |
+| KS-836 | Publish a `request:` block for POST /api/oauth/token — the end | REJECTED-SPEC+SCHEMATHESIS | an OpenAPI `request:` block "with the suite actually run" before/after — not a test tier |
+| KS-765 | Merge helper must refuse a non-read SHA and have no fallback t | REJECTED-NEW-SCRIPT | done-means is a NEW committed merge helper under `scripts/` — a build, not a one-line bash_patch |
+| KS-829 | Audit gate baseline data model: an unvalidated `scope` lets a | REJECTED-HYPOTHESIS | "fix-shapes are the tester's, quoted as hypotheses — run each against the unfixed instrument"; `.mjs` product |
+| KS-761 | similarity-undiscriminating FP entries have no staleness detec | DECISION | "a decision in its own right" (a live re-measure rule for the similarity arm); systemTest |
+| KS-768 | audit-locks scans 35 of 45 lockfiles — 3 vulnerable locks have | REJECTED-PRODUCT+DECISION | widening `findStandaloneLocks()` changes the baseline rows the gates compare (`#794`'s 5→7); `.mjs` product |
+| KS-755 | akto unit suite has a standing red: runDir resolveRunId ignore | REJECTED-ISOLATE-FIRST | "I did not finish isolating which — that is the first step"; systemTest/akto |
+| KS-1128 | The platform tenant seed's catch logs `Platform tenant seed sk | REJECTED-NEEDS-REAL-PG | the owed cell boots `runStartupMigrations()` against a socket-only PostgreSQL (the ks949 driver) |
+| KS-1115 | anchor_store.status has no CHECK constraint — an out-of-union | REJECTED-MIGRATION | a new migration + a live census on every environment first |
+| KS-824 | OAuth app_type: a CASED row is neither normalised by 047 nor r | REJECTED-MIGRATION | DDL (047's predicate + an unnamed CHECK) "a HYPOTHESIS until run against the unfixed product" |
+| KS-1005 | Security/defect: POST /api/users/me/change-password returns 40 | REJECTED-AUTH-PRODUCT | the fix is `getUserByIdWithPasswordHash` at `users.ts:939` (auth product); a pin of the 404 pins the defect |
+| KS-919 | Demo platform-admin account has mfa_enabled = false — delibera | DECISION | "carries the measurement only … nothing changes until it is ruled on" |
+| KS-915 | A clean stack has no supported way to obtain its first privile | DECISION | docs / bootstrap command / operator decision — three shapes, none a test |
+| KS-1053 | FLAKE (3rd occurrence, first with a name): ks949 seed-site enu | REJECTED-FLAKE | intermittent in the full auth suite, timeout hypothesis refuted; nothing deterministic to pin |
+| KS-1225 | auth `ks799-consent-script-csp-and-execution.test.ts:116` cann | REJECTED-LOCKFILE | a member lock missing `jsdom` — a lockfile/deps change, not a cell |
+| KS-1266 | Four originate unit test files make a real DNS lookup and TCP | REJECTED-TEST-INFRA | four test files' `ANCHORING_SERVICE_URL` hygiene; no product tamper exists, so test_only cannot grade it |
+| KS-1259 | api-gateway vitest suite is not isolation-safe: --no-isolate r | REJECTED-TEST-INFRA | "bisect the leaking files" across 30 runs; no cell |
+| KS-1178 | Document row keeps the originating persona's email (createdOnB | REJECTED-DATA-MODEL | an erasure-propagation design between S and K's document row |
+| KS-1135 | run-shell-suites.sh fails 6 of 25 suites under a long TMPDIR — | REJECTED-DECISION+HEAVY | "the builder's call" between two shapes; a red needs a 123-char TMPDIR driving `tsx`'s IPC socket (node + tsx in the cell) |
+| KS-1088 | run-shell-suites.sh restores git discovery but does not isolat | DECISION | "decide whether the runner should enforce isolation"; "no current suite does this" — nothing red today |
+| KS-1163 | start-secuura.sh never waits for five default-profile, healthc | REJECTED-BOOT-PATH | adding five services to `EXPECTED_SUFFIXES` changes the demo VM's boot wait; the existing suite carries them as `KNOWN_UNWAITED` (`:49-:53`) by design until a live-stack measurement shows all five reach `healthy` — a wait a stack cannot satisfy times out every boot |
+| KS-940 | Launcher suite: four side-effect and guarded-surface gaps from | REJECTED-LAUNCHER | `Launch_Claude.command` findings — outside `Blockchain/Dev`, "do not fix the launcher while seats are live" (KS-939's rule) |
+| KS-1085 | Launcher preflight: four findings — a concurrent seat clobbers | REJECTED-LAUNCHER | same file, same rule; item 2's mechanism "is not verified" |
+| KS-897 | build_fixture swallows its own failure — `>/dev/null 2>&1` mak | REJECTED-TEST-IS-PRODUCT | the change is to `pre_push_hook_base.test.sh`'s own fixture builder; no product script, no product tamper |
+| KS-906 | CASE 6's `cd /tmp` is inert — the leg uses `git -C "$DEV_DIR"` | REJECTED-TEST-IS-PRODUCT | a test cell's precondition + rename; Polish |
+| KS-777 | QA pass F-1/F-3/F-4/F-7: two vacuous guards, an unasserted sta | REJECTED-TRACKER | "All four are FIXED on #795 … exists so they are findable" — nothing to build |
+
+**Title-level excludes worth naming (not re-read; round 23's classes hold):** KS-1281 / KS-1278 / KS-1265 / KS-1263 /
+KS-1235 / KS-1200 / KS-1054 / KS-1055 / KS-1030 / KS-1023 / KS-699 / KS-748 / KS-889 — DB / migration / originate
+transactional; KS-1226 / KS-1155 / KS-1149 / KS-1146 (preflight, Seat B) / KS-1138 / KS-1051 / KS-1148 / KS-1162 / KS-1247 /
+KS-1251 / KS-1012 / KS-997 / KS-996 / KS-995 — CI / workflows / test-infra / board hygiene; KS-1224 / KS-1218 / KS-1216 /
+KS-1154 / KS-918 / KS-872 / KS-846 / KS-530 — deps / lockfile / tsc; KS-1177 / KS-1003 / KS-1032 / KS-1157 / KS-756 /
+KS-783 / KS-782 / KS-329 — auth / OAuth / gateway `index.ts` product; KS-1161 / KS-925 / KS-785 / KS-668 / KS-658 /
+KS-1014 / KS-1079 / KS-1080 — compose / VM / demo posture; KS-1106 / KS-1105 / KS-1104 / KS-648 / KS-735 — frontend;
+KS-1113 / KS-1039 / KS-1038 / KS-1010 / KS-1076 / KS-1017 / KS-1022 / KS-1111 / KS-990 / KS-981 / KS-982 / KS-977 /
+KS-957 / KS-956 / KS-955 / KS-953 / KS-752 / KS-738 / KS-725 / KS-724 / KS-723 / KS-716 / KS-709 / KS-696 / KS-591 /
+KS-595 / KS-784 — e2e / Playwright / systemTest / Schemathesis / Akto (Peter's authority); KS-1141 / KS-1143 / KS-1142 /
+KS-1131 / KS-1159 — guard-test polish (test-is-product); KS-1019 / KS-834 / KS-651 / KS-598 / KS-582 / KS-767 / KS-630 /
+KS-1048 / KS-789 / KS-986 / KS-965 / KS-678 — decision / question / docs; KS-683 / KS-627 / KS-624 / KS-621 / KS-618 /
+KS-787 / KS-757 / KS-1100 / KS-1044 / KS-1015 / KS-987 / KS-655 / KS-638 / KS-636 / KS-562 / KS-526 / KS-263 / KS-339 /
+KS-305 / KS-491 / KS-485 / KS-583 / KS-581 / KS-580 / KS-579 / KS-576 / KS-605 / KS-604 / KS-603 / KS-602 / KS-772 /
+KS-770 / KS-903 / KS-808 / KS-837 / KS-825 / KS-851 / KS-1083 / KS-1025 — ops / review-stream / chain /
+design / audit; everything on Peter or Stuart (19); the 88 with a READY-named id.
+
+**Instrument slips caught in this round's own work:** (1) the first attempt to write the new suite went through a Bash
+heredoc and was REFUSED by `pretooluse_no_cd.sh` (the suite's own `HERE="$(cd …)"` / `cd "$SELF"` lines are the reference
+shape) — written with the Write tool instead; (2) the first collision script tried to pull the KS-1137 READY's diff from a
+```` ```diff ```` fence the READY file does not carry (its patch is a separate canonical `patch.diff`, named in the file's
+header) and, because its clones were reused, printed one false "patch does not apply" — rewritten with fresh clones per
+order and the canonical patch, both orders one sha; (3) a `sed -i ''` edit of that script failed under macOS sed and was
+replaced by rewriting the file; (4) `triage.py`'s print label still says `r20-22 rows` where the flag now means rounds
+20-23 — cosmetic, counts correct. Nothing was mis-stated to any file by any of the four.
+
+**Next-best if the FIT is refused:** (1) **KS-1274** only if the tier admits a THREE-file diff or the KS-1137-F2 READY has
+merged and its stub can be re-pointed in the same change (both suites' stubs to `{"Results":[]}` + the `Results`-key guard);
+(2) a **test_only pin on job 04's KS-1136 arm from the NEW suite's harness** (the `empty` control) is already green — no
+red exists to brief; (3) the board's remaining unread eligible rows are all title-excluded classes — a further test_only
+round on this population is unlikely to find a fit until the 12th's fifteen merge and their siblings (KS-1236 `already
+pending`, KS-1006 `MFA is not enabled`) leave the live lane.
