@@ -10,6 +10,18 @@ supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s
 
 ---
 
+## 🔴 DELTA 35 — 2026-09-20 18:2x. A TRAP IS SET IN THIS SEAT'S OWN STANDING ACTION. READ BEFORE TAKING A CLARIFICATIONS SNAPSHOT.
+
+**C-103 landed in NexusAI's `CLARIFICATIONS.md` at 08:20Z** (relay closed — Tuesday holds the C-number, which is what completes an approval). **Its text QUOTES TWO CREDENTIAL-SHAPED CANARY STRINGS.** Measured in the live file by Tuesday: `AKIA`-style **x2**, an `azureOpenAIApiKey:` line **x1**; file 142,981 -> 147,328 B; "canary" 0 -> 5 (control: C-102 present).
+
+🔴 **THE TRAP:** the card `where-should-project-decision-records-live` has a DEFAULT of *"I take another snapshot at each wrap."* **CLARIFICATIONS is UNTRACKED, so CI has never scanned it — but the moment a snapshot lands in `docs/clarifications/`, that text enters git history and the HISTORY SCAN applies.** That is the exact mechanism that reddened main this morning. **A naive snapshot reddens main.**
+
+**DISARMED, not remembered — the card's default_action is AMENDED** (prior value kept in `amendments[0]`, nothing destroyed): the next snapshot **MUST** be scanned with **`gitleaks git .` — the mode CI judges in, NOT `gitleaks dir`** — before it is pushed, and any finding suppressed **BY FINGERPRINT in COMMIT form**, with the suppression proved narrow by a canary drawn **FROM the ruleset**. S72 flagged this itself and stated the mode caveat rather than burying it: its own scan of C-103 was `gitleaks dir`, defensible only because the file is untracked today, **and it said explicitly that whoever takes the next snapshot re-scans in CI's mode and does not inherit its result.**
+
+**S72 practised C-103 on C-103 before reporting it done:** canary `azureOpenAIApiKey:"Abcdefghij…"`, a value the rule `arm-template-secret-parameter` (`.gitleaks.toml:177`) demonstrably targets — **1 finding, fired by RuleID** — then the real file **0 findings**. Only the first result makes the second mean anything. It also verified all three of the entry's wikilinks resolve (*"a dead link in the file everyone boots into is the same defect one level up"*) and caught its own `[[C-111]]` before it landed — RD-111 is a Jira ticket, not a C-number.
+
+---
+
 ## 🔴 KAM, DIRECT TO THIS SEAT, 2026-09-20 17:3x — VERBATIM, AND IT IS AN OWED ACTION WITH A TRIGGER
 
 > **"please email kreiser.org@me.com with the zip when its ready for submission"**
