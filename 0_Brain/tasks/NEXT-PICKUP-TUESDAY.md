@@ -10,6 +10,42 @@ supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s
 
 ---
 
+## 🟢 DELTA 39 — 2026-09-20 19:5x (s73 boot; ctx 29% after the WHOLE brain load). **THE GATE IS LAUNCHED AND S72 IS BUILDING. SUPERSEDES the "not launched" block below and the grant-expiry block.**
+
+### WHAT IS RUNNING RIGHT NOW
+- **`%18` `QA/NexusAI-RD464r3` — the TIER-1 gate on `60c76d7`, round 1 of 2. LAUNCHED 19:53.** Verified at **rung 5**, not on "launched": the pane was reading `backend/llm/index.js` inside `worktrees/s72-rd464-r3`. Verdict comes to `tuesday-agent@` with subject `[QA/Datasec-NexusAI -> Tuesday] GATE VERDICT — RD-464 r3 @ 60c76d7 (tier 1)`. Report at `Testing Agent MAIN/projects/nexusai/reports/2026-09-20-rd464-r3-60c76d7-tier1/report.md`.
+- **`%17` `Datasec/NexusAI` (S72) — BUILDING RD-518.** GO mailed 09:50:23Z, verified at `datasec-nexusai@`, then tapped. It was **idle waiting on that word** for ~10 minutes; its own pane said so.
+- **r3 STILL DOES NOT MERGE** on anyone's word until that verdict lands.
+
+### 🔴 TWO CLAIMS IN THE BLOCK BELOW WERE WRONG — DO NOT RE-DERIVE THEM
+1. **"Every existing QA launcher points at an unmounted DevMASTER."** A census over the wrong frame: true of the NEWEST launcher (Wednesday's Secuura one), **false of the NexusAI ones**. `launch_qa_nexusai_rd327_67c2992.sh` already carries `QA_DIR='/Volumes/KK_T9_External_HDD/!CODING/Testing Agent MAIN'` and `TUE='/Volumes/KK_T9_External_HDD/TUESDAY'`. **Check the frame before calling a class broken.**
+2. **"`gen_launcher_from_template.py <template> <output>`" is not a general tool.** It is hardcoded to one past Secuura substitution (966 → 932) with asserted anchor counts; it would have REFUSED. The pickup named a mechanism by a shape it does not have.
+
+### THE LAUNCHER, AND THE TWO GUARDS THAT ARE DIFFERENT
+`fleet/qa-agent/launchers/launch_qa_nexusai_rd464_r3_60c76d7.sh`, derived from the RD-327 one.
+- **The target is a MERGE COMMIT**, so the single-parent `rev-list --count BASE..HEAD == 1` guard is **replaced** by an assertion of the exact two parents from `rev-list --parents` (**exit 8**), and the ancestry guard runs for **both** parents (exit 7). A commit-count guard on a merge asks a question with no meaningful answer.
+- **NEW exit 18:** the head must be at `refs/heads/<branch>` on ORIGIN. A gate cannot run against a sha that lives on one disk.
+
+### 🔴 THE RED-PROOF LESSON WORTH CARRYING: TWO ARMS FIRED THE WRONG GUARD
+A nonexistent parent trips **ancestry (7)** before the merge-shape guard (8), and a brief copied to a scratchpad trips **the brief-path guard (14)** before the subject guard (15). **Both arms "went red" and neither proved what it was cut to prove.** Re-cut against a **real ancestor that is not a parent** → 8 ✓ and by mutating `SUBJECT` in the script rather than moving the brief → 15 ✓. Plus: wrong branch → 18 ✓, head override → 6 ✓, **and the pass arm re-run AFTER the red arms → rc 0** ✓.
+> **A red arm proves a guard only if you read WHICH guard refused. An exit code you expected and did not check is a control that agreed with you for the wrong reason.**
+
+### DONE THIS SEAT
+- **Both expiring grants moved below `## Expired`** (AWAY-2-DAYS, Ornith-q4-only). Weekday/date cross-derived; rows conserved (lines 39, 40 vs the heading at 25; the live TESTED row untouched at 9). **The AWAY grant's PREMISE had already ended ahead of its date** — he came back early. Neither renewed by inference.
+- **The gate brief now carries the runbook's DURABLE path** — `docs/runbooks/local-run-for-qa.md` @ `853e5498765936fa537383ab90a3c87ac4c0ff4b` on `docs-local-run-runbook-s72`, verified in the object store — replacing "ask the builder", whose first copy was in `session-tools/`, outside version control.
+- Panel receipt to Kam sent (no action asked of him).
+
+### ⚠ THIS SEAT'S WEEK-INSTRUCTION FILE IS LAPSED AND WAS NOT ACTED ON
+`tasks/WEEK-INSTRUCTION-TUESDAY.md` is `status: none`, `valid_until: 2026-09-16`. **Per the boot rule, a lapsed file is not authority.** The shared `WEEK-INSTRUCTION.md` is live-to-tonight but its `given:` is a `view=wednesday` line and its scope is Secuura/kintsugi. **Kam is expected to give a new week instruction Monday 2026-09-21 before he leaves that night** — that is the seat's copy to fill.
+
+### STILL OPEN
+- **Minimum set is still THREE: RD-516 · RD-518 · RD-464 r3.** The package zip is NOT ready and a partial one does not go.
+- **Four cards on Kam's desk**, incl. `nexusai-degraded-flip-and-live-deployments` — unruled, and it gates the DEGRADED flip.
+- **Owed to Kam on a trigger:** the package email to `kreiser.org@me.com`, zip only, sha256 + head, carrying the r3 hold, RD-549's already-written wording (DELTA 33), C-92/C-93, the Partner Center 2.2.0 version field and RD-536 row 14's two asks.
+- **The Spotlight exclusion:** his card was withdrawn as "actioned", but Tuesday's instrument was the wrong one (`mdutil -s` is volume-level; the ask was a FOLDER exclusion). **The real evidence is whether the index STOPS GROWING — look tomorrow and tell him either way.** Index 13G, T9 free 649 GiB.
+
+---
+
 ## 🟢 THE TIER-1 GATE BRIEF IS ALREADY WRITTEN — 2026-09-20 19:4x. **DO NOT REWRITE IT.**
 
 **PATH: `2_Project_Files/fleet/qa-agent/briefs/2026-09-20_nexusai-rd464-r3-tier1.md`** — 92 lines, committed and pushed in THIS repo (tracked, not a scratchpad). **Tuesday wrote it; only the LAUNCH remains.**
