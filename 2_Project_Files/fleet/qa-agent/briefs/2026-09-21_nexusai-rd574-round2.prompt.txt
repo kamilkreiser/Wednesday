@@ -1,0 +1,30 @@
+ultrathink
+
+You are the fleet QA/testing agent running a THROUGH-CODE gate on Datasec/NexusAI.
+
+READ YOUR COMMISSION FIRST: /Volumes/KK_T9_External_HDD/TUESDAY/2_Project_Files/fleet/qa-agent/briefs/2026-09-21_nexusai-rd574-round2.md
+
+Target: branch rd-574-seam-cells-s74 at 7728d692f1561fe537960efc5431940e45722cf5 (short 7728d69). Base 6ec3606 — round 1's head, which round 1's gate returned NO-GO on — exactly one commit in range. Verified at commission: zero backend files across the whole branch, and nothing outside __tests__/ except scripts/verify-expected-counts.json.
+
+This is ROUND 2 of 2. Round 1 (tier 1) returned NO-GO with two Majors: F-1 (the "refusing" port was the server's own port) and F-2 (RD-590: the key-release check lost its only protection — the V2 mutation stayed green across the whole suite). Round 1's report is at /Volumes/KK_T9_External_HDD/!CODING/Testing Agent MAIN/projects/nexusai/reports/2026-09-21-rd574-6ec3606-tier1/report.md — READ IT FIRST. Composition, inertness, W-1, the hashes and the seam control all HELD in round 1: do not re-drive them.
+
+RD-516 IS BLOCKED ON THIS BRANCH. Say in your verdict what your result means for RD-516's merge.
+
+YOUR FIRST WORK:
+  F-2: re-run the mutations yourself. The bar is V2 (hostname only) killed on at least 3 cells and V3 (origin only) on at least 1. Claimed: V2 3 red (dPath, dScheme, dPort), V3 1 red (dPath). Confirm each red cell reddens for the RIGHT reason. dAlias was included by the builder's judgement — judge whether its label is still true and whether a cell carrying none of the proof earns its place.
+  F-1: reproduce the mutant (holder removed). Claimed 10 failed in 1 second. The builder says its first mutant HUNG for 6.5 minutes and exposed a second defect — an orphaned server when a throw left beforeAll early. Test that hardest: kill a guard mid-beforeAll, confirm red in about a second AND zero surviving server processes afterwards.
+
+NO WORKTREE IS PINNED. Build your own from the object store at the sha. The repo's working checkout is elsewhere and dirty — pin to the sha, never HEAD, never clean or stash it. You are findings-only: do not commit, do not move any branch.
+
+FLOOR DISCIPLINE CHANGED TODAY — FOLLOW SECTION 8 OF THE BRIEF, NOT ANY OLDER BRIEF. Every jest run through session-tools/nexusai-lock.sh, lock held once per measurement, a zero reportable only beside a control that fired in the same window. The old foreign-server count (a grep over whole command lines) OVER-REPORTS because it matches QA agents' prompts; count only processes whose EXECUTABLE is node and whose script argument is the server entry point (RD-591 comment 37901). Reap every server you start.
+
+DRIVABLE SURFACE IS A LOCAL RUN, NOT THE DEMO (RD-76).
+
+Write your report to: /Volumes/KK_T9_External_HDD/!CODING/Testing Agent MAIN/projects/nexusai/reports/2026-09-21-rd574-7728d69-round2/report.md
+
+MAIL YOUR VERDICT to tuesday-agent@agentmail.to with the subject exactly:
+[QA/Datasec-NexusAI -> Tuesday] GATE VERDICT — RD-574 round 2 @ 7728d69 (through-code)
+
+The AgentMail key is AGENTMAIL_API_KEY in /Volumes/KK_T9_External_HDD/TUESDAY/4_Credentials/.env — an absolute path; the QA project has no 4_Credentials directory of its own.
+
+Round 2 of 2: if you find a Major, C-62 says it is ticketed, not escalated — a third round is Kam's call, so say so and stop. Rule 2 stands: what you did NOT test is first-class output.
