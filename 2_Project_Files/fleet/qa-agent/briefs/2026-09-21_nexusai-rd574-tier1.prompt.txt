@@ -1,0 +1,35 @@
+ultrathink
+
+You are the fleet QA/testing agent running a TIER 1 gate on Datasec/NexusAI.
+
+READ YOUR COMMISSION FIRST: /Volumes/KK_T9_External_HDD/TUESDAY/2_Project_Files/fleet/qa-agent/briefs/2026-09-21_nexusai-rd574-tier1.md
+
+Target: branch rd-574-seam-cells-s74 at 6ec36065eeadb9d445d9c32c3d13826748bab651 (short 6ec3606). Base 60c76d7 (main), ancestor confirmed, exactly 6 commits in range. Verified at commission from the tree: 6 files changed, ALL under __tests__/, ZERO backend/ files.
+
+WHO IS WAITING ON YOU: this branch is the acceptance clause of ANOTHER ticket. RD-516's round-2 gate returned GO but said the GO does NOT clear its merge, because RD-516 section 5 needs these seam-dependent cells ON MAIN. Say explicitly in your verdict what your result means for RD-516's blocked merge.
+
+NO WORKTREE IS PINNED. Build your own from the object store at the sha. The repo's working checkout is elsewhere and dirty — pin to the sha, never to HEAD, and never clean or stash it. You are findings-only: do not commit, do not move any branch.
+
+THE CORE CLAIM IS INERTNESS: every cell is "fixtures only, inert" — adding them changes no existing suite's result, evidenced by EMPTY per-cell diffs with the BEFORE taken in a pristine second worktree at 60c76d7. AN EMPTY DIFF IS ONLY EVIDENCE IF A NON-EMPTY DIFF WAS REACHABLE BY THE SAME INSTRUMENT. Perturb a cell deliberately, confirm your diff method goes non-empty, and only then accept the EMPTYs. RD-518 round 1 failed on exactly this class.
+
+THE BUILDER DECLARED THREE THINGS AGAINST ITSELF AND THEY ARE YOUR FIRST WORK, NOT YOUR LAST:
+  W-1: the 105/105 five-suite baseline was taken UNLOCKED and must NOT be quoted as a constant. The suites are claimed re-measured on a quiet floor. Verify the re-measured numbers. The RD-516 gate independently said this control still owes a clean replacement.
+  W-2: RD-590 — rd486's four d-nomatch cells each isolate ONE variable today and will ALSO differ in HOST after this change, so they pass for a WEAKER REASON while staying GREEN, and inertness structurally cannot see it. Decide explicitly whether a change that silently weakens four existing cells may land on the strength of an inertness argument that cannot detect the weakening. Scope is a reason not to FIX; it is not a reason for a gate not to JUDGE.
+  W-3: RD-591 (High) — test runs are NOT isolated across seats, which the builder says outranks the branch. Confirm the measurements your verdict rests on are the quiet ones, and say what RD-591 means for every number in your report, including your own.
+
+THE SET IS 31, NOT THE 28 ORIGINALLY COMMISSIONED: 27 from the RD-516 gate brief section 6 at f4264e5, plus NEW-1, plus A4/E2/E2-happy added by a ruling of 2026-09-20T23:23:24Z (option b). Verify the COMPOSITION, not just the count.
+
+NEW-1 was a remedy taken on a TIMING trigger, so the timing is the evidence: pristine 21.222/21.606s, RD516_HOSTS only 25.213s, HOSTS+INTERCEPT 20.602s. Re-measure it — wall time returning to baseline is the only thing separating a remedy from a coincidence, and as stated it is a single sample.
+
+DRIVABLE SURFACE IS A LOCAL RUN, NOT THE DEMO (RD-76). No demo pass for RD-574 happened and none must be recorded.
+
+FLOOR DISCIPLINE IS LOAD-BEARING HERE BECAUSE OF W-3. Every jest invocation through session-tools/nexusai-lock.sh, hold the lock once across a multi-run measurement, assert the foreign backend/server.js count by ps and never by EADDRINUSE, and treat a zero as reportable only if a control fired in the same window. Another gate may still be finishing on this project — queueing is the mechanism working, not a stall. Run bash -n on anything you write before running it.
+
+Write your report to: /Volumes/KK_T9_External_HDD/!CODING/Testing Agent MAIN/projects/nexusai/reports/2026-09-21-rd574-6ec3606-tier1/report.md
+
+MAIL YOUR VERDICT to tuesday-agent@agentmail.to with the subject exactly:
+[QA/Datasec-NexusAI -> Tuesday] GATE VERDICT — RD-574 @ 6ec3606 (tier 1)
+
+The AgentMail key is AGENTMAIL_API_KEY in /Volumes/KK_T9_External_HDD/TUESDAY/4_Credentials/.env — an absolute path; the QA project has no 4_Credentials directory of its own.
+
+Rule 2 stands: what you did NOT test is first-class output.
