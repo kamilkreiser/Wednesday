@@ -182,7 +182,7 @@ window.WED = (function () {
   function utcNow() { return new Date().toISOString(); }               // 2026-09-21T01:23:45.678Z — the API's ts format
   function newId() { const u = crypto.getRandomValues(new Uint8Array(6)); return "kam-" + [...u].map(x => x.toString(16).padStart(2, "0")).join(""); }
   /* Kam types on a tab -> view -> partition. Encrypted here; POSTed as an envelope; refused by the server if it carries text. */
-  async function postKamMessage(text, view, _retried) {
+  async function postKamMessage(text, view) {
     const client = VIEW_TO_CLIENT[view]; if (!client) throw new Error("view " + view);
     const clear = { client, kind: "message", id: newId(), ts: utcNow(), view };
     const envelope = await encryptText(text, clear);
@@ -190,17 +190,7 @@ window.WED = (function () {
       body: JSON.stringify({ client, view, id: clear.id, ts: clear.ts, envelope }) });
     if (r.status === 401 || r.redirected) throw new Error("session expired — reload to sign in");
     const j = await r.json().catch(() => ({}));
-    if (!r.ok) {
-      const detail = (j && j.detail) || ("HTTP " + r.status);
-      // 2026-09-21 17:5x (Kam's screenshot, Tuesday tab): the server refused a reply not wrapped to the addressed seat's
-      // key — the page's key ring was older than the server's (a tab open across a deploy, or a seat key added since the
-      // page loaded). The ring is a cache; on THIS refusal drop it, refetch /api/pubkeys, re-encrypt and retry ONCE.
-      if (r.status === 400 && /wrapped to the addressed seat/i.test(String(detail)) && !_retried) {
-        pubCache = null;
-        return postKamMessage(text, view, true);
-      }
-      throw new Error(detail);
-    }
+    if (!r.ok) throw new Error((j && j.detail) || ("HTTP " + r.status));
     return j;
   }
 
