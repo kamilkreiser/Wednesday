@@ -12436,5 +12436,47 @@
   "status": "ruled",
   "ruled_choice": "b",
   "ruled_ts": "2026-09-21T10:28:44.884426+10:00"
+ },
+ {
+  "id": "rd518-round3",
+  "client_project": "Datasec/NexusAI",
+  "title": "RD-518 round 2 is NO GO — do you authorise a third round on the F-02 class?",
+  "bluf": "The gate drove a VIEWER (lowest role) to an HTTP 200 carrying the Key Vault identity clientId and the vault hostname, in two reachable states. Nothing is merged and nothing is deployed, so there is no live exposure. C-62 says a third round on this class is YOUR call, which is why this is here. Two things make it cheap to say yes: the fix is ONE expression (ask for role==='admin', which the gate's own next line already does), and the suite structurally cannot see the defect - zero of 215 suites mention keyVaultEncryption - so without a test cell the next change reintroduces it. The honest counter-argument, which the tester made itself: in both leak states the admin gate already refuses nobody at all nine of its call sites, so that viewer can already reach the whole admin surface and the MARGINAL exposure of the detail field is low. That wider admin-gate weakness is PRE-EXISTING, is not RD-518's to fix, and today has no owner - I am ticketing it regardless of what you decide here, because it is the larger item. PRIOR-RULINGS OVERRIDE, stated: the guard matched on the shared words 'round3' and 'rd518'. None of those cards is this question - RD-436, RD-369, #892, the marketplace package and HPSM were different tickets and different defects, and nexusai-privacy-keyvault-claim-rd518 was about PRIVACY.md's wording, not this branch. What they do establish is your pattern on this exact shape: you ruled 'a' on nexusai-rd436-round3-authorise and 'round3' on nexusai-rd369, i.e. authorise when the NO GO has a small well-scoped fix. That is why 'a' is recommended rather than 'b'.",
+  "default_action": "Hold the branch unmerged. G-01, G-02 and the pre-existing admin-gate weakness are ticketed regardless. No third round starts without your word.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Authorise round 3, scoped to G-01 + G-02",
+    "detail": "One-expression fix plus the missing test cell. Branch stays unmerged until it passes."
+   },
+   {
+    "key": "b",
+    "label": "Hold - ticket only, no round 3",
+    "detail": "G-01 and G-02 are filed and RD-518 sits unmerged until you say otherwise."
+   },
+   {
+    "key": "c",
+    "label": "Round 3 AND treat the pre-existing admin gate as urgent",
+    "detail": "Adds a second commissioned round on adminGateRefuses (two branches that refuse nobody, nine call sites)."
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-09-21T12:28:09.210578+10:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "2026-09-09 12:09",
+   "CARD secuura-ks843-half2-round3",
+   "CARD secuura-ks949-round3-cap-and-the-cutoff",
+   "CARD secuura-892-round3-nogo-blocker-still-open",
+   "CARD nexusai-rd361-round3-blocker-survives",
+   "CARD nexusai-rd369-round3-or-ship-at-the-cap",
+   "CARD nexusai-marketplace-package-round3",
+   "CARD hpsm-composer-round3-approver-guard",
+   "CARD nexusai-rd436-round3-authorise",
+   "CARD nexusai-round3-nogo-round4-or-merge",
+   "CARD nexusai-privacy-keyvault-claim-rd518"
+  ]
  }
 ]
