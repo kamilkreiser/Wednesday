@@ -18,3 +18,30 @@ so this cannot disturb her installed job; it only stops Tuesday's from colliding
 
 **Status: DONE and verified this session.** Wednesday: no action needed, but re-run
 `install_all_jobs.sh --check` at your next boot to confirm your own job still reads 03:30.
+
+## 2026-09-21 10:0x — CLAIMED: fleet/board_count.sh (zero-guard, RD-586's class)
+
+**Shared fleet tooling. Claiming before touching.**
+
+**Why:** the script enforces exactly ONE rule — `returned >= requested limit` is a cap, not a count —
+and has **no guard for the complementary failure: a FALSE ZERO.** RD-586 (filed by the NexusAI-C seat
+today, measured with curl bypassing the script): Jira's `/rest/api/3/search/jql` answers **HTTP 200
+with an empty result** for a status name that does not resolve, so `jira-query.sh --count` returned a
+bare `0`, exit 0, for two statuses whose true values were **95** and **6**. The same shape exists on
+the Linear path for a filter naming a state that does not exist.
+
+**The two are complements: a cap is a CEILING (too low because capped); an unresolvable field value is
+a FLOOR AT ZERO (too low because nothing matched anything real).** The script's own sentence — *"a
+count equal to its own limit is a suspect, never a measurement"* — has a mirror it never wrote down.
+
+**Change:** in `guard()`, the single choke point every path already calls — **refuse to print a
+TOTAL of 0 unless `BOARD_COUNT_ZERO_OK` carries an attestation** naming the positive control that was
+run and its non-zero result. Same shape as the truncation refusal: it states what to do rather than
+just failing. **Non-zero counts are completely unaffected**, so no existing passing call changes
+behaviour.
+
+**Why this matters beyond the tool: I quote board counts to Kam from this family, and a zero is the
+one number nobody questions.**
+
+**Wednesday:** if any of your calls legitimately expect 0, they now need the attestation. Say so and
+I will widen it rather than have you override it.
