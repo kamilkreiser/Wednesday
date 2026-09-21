@@ -61,20 +61,6 @@ if [ "$AGENT" = "wednesday" ] && [ -z "${DEVNAS_IGNORE_NAMES:-}" ]; then
   DEVNAS_IGNORE_NAMES="Datasec TUESDAY node_modules worktrees .venv __pycache__ .next .turbo .pytest_cache"
 fi
 export DEVNAS_IGNORE_NAMES="${DEVNAS_IGNORE_NAMES:-}"
-# TUESDAY'S LEG — Kam's rulings on what it covers:
-#   nas-shared-folders-owner = wednesday: "Tuesday's leg syncs only Datasec and its own tree";
-#   narrow-hard: no node_modules / worktrees / regenerable bulk; 2026-09-16 15:00: "exclude qa worktrees".
-# ENFORCED BY PATH, so it FAILS CLOSED (card t9-nas-leg-scope-mechanism = a, Kam 2026-09-21 16:10): the engine's
-# DEVNAS_PATHS restricts unison to exactly these subtrees, and a new top-level folder is never swept in.
-# Until 2026-09-21 this leg had NO branch here: its plist set no WED_AGENT, so it ran AS WEDNESDAY on 09-17/18/19
-# with her ignore set — the reverse of the ruling (it skipped Datasec and TUESDAY).
-# Globs (qa-worktrees*, wt-*) rely on the engine's unquoted `for _n in $DEVNAS_IGNORE_NAMES` running with CWD=/
-# (launchd's default), where they match nothing and stay literal for unison. Re-check if a WorkingDirectory is added.
-if [ "$AGENT" = "tuesday" ]; then
-  [ -n "${DEVNAS_PATHS:-}" ] || DEVNAS_PATHS=$'!CODING/Datasec\nTUESDAY\nNotes (MASTER)/Datasec'
-  [ -n "${DEVNAS_IGNORE_NAMES:-}" ] || DEVNAS_IGNORE_NAMES="node_modules worktrees qa-worktrees* deploy-worktrees wt-* .venv __pycache__ .next .turbo .pytest_cache"
-fi
-export DEVNAS_PATHS="${DEVNAS_PATHS:-}"
 # <<< ruled-ignores
 
 ENGINE="$WORKSPACE/!SYNC FILES/devnas-sync.sh"
