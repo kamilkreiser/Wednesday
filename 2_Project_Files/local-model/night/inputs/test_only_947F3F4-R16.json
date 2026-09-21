@@ -1,0 +1,150 @@
+{
+ "ticket": {
+  "identifier": "KS-947",
+  "title": "KS-947 R16-F3F4 - test-only PIN of the KS-733 parity gate's two blind spots (F3 option set + mount order, F4 spec binding) at develop 64ab10513 (written 01:58 on 2026-09-22 by Wednesday's feed3 drafte",
+  "description": "# KS-947 R16-F3F4 - test-only PIN of the KS-733 parity gate's two blind spots (F3 option set + mount order, F4 spec binding) at develop 64ab10513 (written 01:58 on 2026-09-22 by Wednesday's feed3 drafter from ks733-users-mfa-rate-limit-mount.test.ts, 99 lines read whole, index.ts:985-1021 and :1094, and the 9 mfa-policy blocks of docs/openapi/secuura-api.yaml)\nFile: `Blockchain/Dev/services/api-gateway/src/__tests__/ks733-users-mfa-rate-limit-mount.test.ts`\nTip: `64ab105132eada0621622acf4d6053bc59926780`\nRunner: `vitest`\n\n## Premises (measured by the feed3 drafter at 01:58:37 AEST, in a `--shared` scratchpad clone detached at 64ab10513; Wednesday re-derives before queueing)\n- Ticket KS-947 (P2, Backlog, kamil.kreiser@secuura.ai, no PR attachment): \"the parity cell compares only windowMs and max ... and is purely relative\". Both fix shapes are the ticket's own: (F3) compare the WHOLE option set of the users mount against the auth mount and assert the users mount precedes `app.use(createProxyRoutes`; (F4) bind the spec's `x-ratelimit-*` to the mount values. Nothing in the product changes - the mounts are right at the tip; this task pins them.\n- The test file reads `index.ts` as TEXT (`GATEWAY_SRC`, :33) and extracts a mount by balanced parentheses (`mountCall`, :43-58) and its `windowMs`/`max` text (`limiterShape`, :61-65). The new cells reuse those three file-scope names and add nothing at file scope: every new declaration sits INSIDE the existing describe, after its last cell.\n- At the tip: the auth mount is index.ts:991-996 (`app.use('/api/auth/mfa', rateLimit({` ... `max: isNonProd ? 100 : 10,` at :993, `standardHeaders: true, legacyHeaders: false,` at :995); the users mount is :1016-1021 (same body: :1018 max, :1020 standardHeaders); `app.use(createProxyRoutes({ services, authenticateToken, log }));` is :1094 - the users mount PRECEDES it. The spec `docs/openapi/secuura-api.yaml` carries exactly 9 `x-ratelimit-policy: mfa` lines, each followed by `x-ratelimit-window-ms: 900000` then `x-ratelimit-max: 10` (control: `x-ratelimit-policy: global` blocks carry 60000/300). `15 * 60 * 1000` = 900000 and the production arm of `isNonProd ? 100 : 10` is 10, so every F4 cell is GREEN at the tip.\n- Reachability of each tamper from the declared cells: F3SKIP appends `skip: () => true,` to the users mount's :1020 - `optionKeys` reads that line's keys, so the F3 option-set cell reds (`extra` = ['skip']); the existing PARITY cell stays green (windowMs/max untouched). F4AUTH changes the auth mount's :993 production max 10 -> 5000: the F4-auth cell reds (spec says 10) AND the existing PARITY cell reds (users max text no longer equals auth max text). F4USERS does the same to the users mount's :1018: the F4-users cell and PARITY red. The F3 ORDER cell is a CONTROL: a mount MOVE is two edits and no one-site tamper expresses it, so it is pinned green on both trees and stated as such.\n- Golden precheck fix (feed3 drafter): the first golden's F4USERS tamper redded the F3 option-set cell too, because a `// TAMPER: ...` comment reads as an option key `TAMPER`. `optionKeys` now drops `//` line comments (a real mount comment would otherwise false-red the cell) and the three tamper comments carry no colon.\n- The fence is ASCII-only and backslash-free in every `+` line (LF is `String.fromCharCode(10)`, character classes are bracket expressions) - the KS-887 / KS-1133 escape rule. No blank `+` line and no blank context line (the 09-18 06:2x rule); the insertion ends with trailing context (:99 `});`).\n\n## What is wrong (one paragraph)\n`ks733-users-mfa-rate-limit-mount.test.ts` pins that `/api/users/me/mfa` carries a limiter with the SAME `windowMs`/`max` as `/api/auth/mfa` - and only that. Two behaviour-destroying edits keep it 4/4 green: adding `skip: () => true` to the users mount (no 429 at all, keys not compared) and moving the mount below `app.use(createProxyRoutes` (a limiter registered after the proxy never sees the request); and because the cell is purely relative, both mounts can drift to `max: 5000` while the spec advertises `x-ratelimit-max: 10` on nine MFA operations. This task is the PIN, test-only: six new cells appended inside the existing describe - an option-set cell (red under F3SKIP), an order control, a spec-walk control, one spec-binding cell per mount (each red under its own max tamper, alongside the existing PARITY cell), and a window-binding control. The product is untouched.\n\n## THE MODE - read this twice\nTEST-ONLY, MODIFY IN PLACE: your diff contains EXACTLY ONE file, the EXISTING test file above, as the ONE hunk below (context lines byte-for-byte from the tip; no blank context line; no blank `+` line; the `+` lines end with the trailing context `});` at :99). No product hunk. The hunk header is `@@ -96,4 +96,66 @@` - copy it.\n\n## The exact change\n```\n@@ -96,4 +96,66 @@\n     expect(usersShape.windowMs).toBe(authShape.windowMs);\n     expect(usersShape.max).toBe(authShape.max);\n   });\n+  // KS-947 F3 + F4 - the parity gate's blind spots. Titles are plain ASCII (the checker matches the rendered title).\n+  const SPEC_YAML = readFileSync(join(__dirname, '..', '..', '..', '..', 'docs', 'openapi', 'secuura-api.yaml'), 'utf8');\n+  const LF = String.fromCharCode(10);\n+  /** Every option key written in a mount call (nested keys included); string literals blanked and line comments dropped first. */\n+  const optionKeys = (call: string): Set<string> => {\n+    const blanked = call.replace(/'[^']*'/g, \"''\").split(LF).map((line) => line.split('//')[0]).join(LF);\n+    const keys = new Set<string>();\n+    const re = /([A-Za-z_$][A-Za-z0-9_$]*) *:/g;\n+    let m = re.exec(blanked);\n+    while (m !== null) { keys.add(m[1]); m = re.exec(blanked); }\n+    return keys;\n+  };\n+  /** The production arm of `max: isNonProd ? <nonprod> : <prod>`, as a number. */\n+  const productionMax = (shape: { max: string }): number => Number(/[?] *[0-9]+ *: *([0-9]+)/.exec(shape.max)?.[1]);\n+  /** `15 * 60 * 1000` evaluated as a product of integers. */\n+  const windowMsValue = (shape: { windowMs: string }): number => shape.windowMs.split('*').map((n) => Number(n.trim())).reduce((a, b) => a * b, 1);\n+  /** x-ratelimit-window-ms / x-ratelimit-max of every operation the spec files under the mfa policy (the two lines that follow it). */\n+  const specMfaLimits = (): Array<{ max: number; windowMs: number }> => {\n+    const out: Array<{ max: number; windowMs: number }> = [];\n+    const lines = SPEC_YAML.split(LF);\n+    for (let i = 0; i < lines.length - 2; i++) {\n+      if (lines[i].trim() !== 'x-ratelimit-policy: mfa') continue;\n+      out.push({ windowMs: Number(lines[i + 1].split(':')[1]), max: Number(lines[i + 2].split(':')[1]) });\n+    }\n+    return out;\n+  };\n+  it('RED KS-947 F3 - the users MFA mount declares no limiter option the auth MFA mount does not', () => {\n+    // A `skip: () => true` on the users mount alone keeps the PARITY cell green (windowMs and max unchanged)\n+    // while switching the limiter off: the whole option set is compared, not two values.\n+    const authKeys = optionKeys(mountCall('/api/auth/mfa') as string);\n+    const usersKeys = optionKeys(mountCall('/api/users/me/mfa') as string);\n+    const extra = Array.from(usersKeys).filter((k) => !authKeys.has(k));\n+    expect(extra, 'options on the users mount that the auth mount does not declare').toEqual([]);\n+  });\n+  it('KS-947 F3 control - the users MFA limiter is mounted before the createProxyRoutes mount', () => {\n+    // routes/proxy.ts mounts /api/users/me inside createProxyRoutes; a limiter registered after it never sees the request.\n+    const usersAt = GATEWAY_SRC.indexOf(\"app.use('/api/users/me/mfa'\");\n+    const proxyAt = GATEWAY_SRC.indexOf('app.use(createProxyRoutes');\n+    expect(usersAt, 'the users MFA mount was not found').toBeGreaterThan(-1);\n+    expect(proxyAt, 'the createProxyRoutes mount was not found').toBeGreaterThan(-1);\n+    expect(usersAt, 'the users MFA limiter must precede the proxy mount').toBeLessThan(proxyAt);\n+  });\n+  it('KS-947 F4 control - the spec files at least one operation under the mfa rate-limit policy', () => {\n+    expect(specMfaLimits().length, 'no x-ratelimit-policy: mfa operation in secuura-api.yaml').toBeGreaterThan(0);\n+  });\n+  it('RED KS-947 F4 - every mfa-policy operation publishes x-ratelimit-max equal to the auth MFA production max', () => {\n+    const authMax = productionMax(limiterShape(mountCall('/api/auth/mfa') as string));\n+    const limits = specMfaLimits();\n+    expect(limits.map((l) => l.max), 'published max vs the /api/auth/mfa mount').toEqual(limits.map(() => authMax));\n+  });\n+  it('RED KS-947 F4 - every mfa-policy operation publishes x-ratelimit-max equal to the users MFA production max', () => {\n+    const usersMax = productionMax(limiterShape(mountCall('/api/users/me/mfa') as string));\n+    const limits = specMfaLimits();\n+    expect(limits.map((l) => l.max), 'published max vs the /api/users/me/mfa mount').toEqual(limits.map(() => usersMax));\n+  });\n+  it('KS-947 F4 control - every mfa-policy operation publishes x-ratelimit-window-ms equal to both mounts windowMs', () => {\n+    const authWindow = windowMsValue(limiterShape(mountCall('/api/auth/mfa') as string));\n+    const usersWindow = windowMsValue(limiterShape(mountCall('/api/users/me/mfa') as string));\n+    expect(usersWindow, 'the two mounts share one window').toBe(authWindow);\n+    const limits = specMfaLimits();\n+    expect(limits.map((l) => l.windowMs), 'published window vs the mounts').toEqual(limits.map(() => authWindow));\n+  });\n });\n```\n\n## Cells (every cell RED or CONTROL; the names below are the EXACT it() titles - literal ASCII strings)\n- `RED KS-947 F3 - the users MFA mount declares no limiter option the auth MFA mount does not`\n- `KS-947 F3 control - the users MFA limiter is mounted before the createProxyRoutes mount`  (CONTROL - green on both trees: a move is not a one-site tamper)\n- `KS-947 F4 control - the spec files at least one operation under the mfa rate-limit policy`  (CONTROL - green on both trees)\n- `RED KS-947 F4 - every mfa-policy operation publishes x-ratelimit-max equal to the auth MFA production max`\n- `RED KS-947 F4 - every mfa-policy operation publishes x-ratelimit-max equal to the users MFA production max`\n- `KS-947 F4 control - every mfa-policy operation publishes x-ratelimit-window-ms equal to both mounts windowMs`  (CONTROL - green on both trees)\n(Existing cells: `PARITY — the users MFA limiter has the SAME window and max as the auth one` is declared RED under F4AUTH and F4USERS - a one-mount max change is exactly the asymmetry it pins; `CONTROL — the extractor finds the existing /api/auth/mfa limiter` is a declared control; the NEGATIVE CONTROL and the `carries a path-scoped rate limiter` cells are untouched by every tamper and stay green on both trees.)\n\n## Tampers\n### F3SKIP\nFile: `Blockchain/Dev/services/api-gateway/src/index.ts`\nLine: 1020\nFrom:\n```\n  standardHeaders: true, legacyHeaders: false,\n```\nTo:\n```\n  standardHeaders: true, legacyHeaders: false, skip: () => true, // TAMPER - the users limiter switched off, windowMs/max untouched\n```\nReds: `RED KS-947 F3 - the users MFA mount declares no limiter option the auth MFA mount does not`\n(The same text sits at :995 in the auth mount and at :988 - the tamper is by LINE 1020, the users mount's line; `optionKeys` over the users mount then yields `skip`, which the auth mount does not declare. PARITY stays green: windowMs and max unchanged.)\n\n### F4AUTH\nFile: `Blockchain/Dev/services/api-gateway/src/index.ts`\nLine: 993\nFrom:\n```\n  max: isNonProd ? 100 : 10,\n```\nTo:\n```\n  max: isNonProd ? 100 : 5000, // TAMPER - the auth MFA production max drifts off the published 10\n```\nReds: `RED KS-947 F4 - every mfa-policy operation publishes x-ratelimit-max equal to the auth MFA production max`, `PARITY — the users MFA limiter has the SAME window and max as the auth one`\n(Reachability: the F4-auth cell parses the production arm of the auth mount's max text (5000) against the spec's nine `x-ratelimit-max: 10`; PARITY compares the two mounts' max TEXT, now unequal.)\n\n### F4USERS\nFile: `Blockchain/Dev/services/api-gateway/src/index.ts`\nLine: 1018\nFrom:\n```\n  max: isNonProd ? 100 : 10,\n```\nTo:\n```\n  max: isNonProd ? 100 : 5000, // TAMPER - the users MFA production max drifts off the published 10\n```\nReds: `RED KS-947 F4 - every mfa-policy operation publishes x-ratelimit-max equal to the users MFA production max`, `PARITY — the users MFA limiter has the SAME window and max as the auth one`\n(Reachability: as F4AUTH, on the users mount's line.)\n\n## Controls\n- `KS-947 F3 control - the users MFA limiter is mounted before the createProxyRoutes mount`\n- `KS-947 F4 control - the spec files at least one operation under the mfa rate-limit policy`\n- `KS-947 F4 control - every mfa-policy operation publishes x-ratelimit-window-ms equal to both mounts windowMs`\n- `CONTROL — the extractor finds the existing /api/auth/mfa limiter`\n\n## Output\nExactly ONE ```diff block; paths repo-relative (`Blockchain/Dev/services/api-gateway/src/__tests__/ks733-users-mfa-rate-limit-mount.test.ts`); the hunk header as written above; no `\\$` / `\\u` / backslash escapes in a `+` line; the `+` lines byte for byte; the cell titles EXACTLY as listed (the checker matches the full title).\n"
+ },
+ "repo": {
+  "source_checkout": "/Volumes/DevMASTER/!CODING/Secuura/Blockchain/2_Project_Files",
+  "tip": "64ab105132eada0621622acf4d6053bc59926780",
+  "branch": "develop",
+  "test_runner": "vitest (run one file with `npx vitest run <file>` from Blockchain/Dev/services/api-gateway)"
+ },
+ "task_type": "test_only",
+ "tip": "64ab105132eada0621622acf4d6053bc59926780",
+ "source_checkout": "/Volumes/DevMASTER/!CODING/Secuura/Blockchain/2_Project_Files",
+ "repo_subdir": "Blockchain/Dev",
+ "service_dir": "services/api-gateway",
+ "shared_pkg_dir": "packages/shared",
+ "shared_pkg_name": "@secuura/shared",
+ "test_file": "Blockchain/Dev/services/api-gateway/src/__tests__/ks733-users-mfa-rate-limit-mount.test.ts",
+ "test_file_rel_to_service": "src/__tests__/ks733-users-mfa-rate-limit-mount.test.ts",
+ "test_mode": "modify",
+ "diff_file_headers": [
+  "--- a/Blockchain/Dev/services/api-gateway/src/__tests__/ks733-users-mfa-rate-limit-mount.test.ts",
+  "+++ b/Blockchain/Dev/services/api-gateway/src/__tests__/ks733-users-mfa-rate-limit-mount.test.ts"
+ ],
+ "runner": "vitest",
+ "expected_plus": [
+  "  // KS-947 F3 + F4 - the parity gate's blind spots. Titles are plain ASCII (the checker matches the rendered title).",
+  "  const SPEC_YAML = readFileSync(join(__dirname, '..', '..', '..', '..', 'docs', 'openapi', 'secuura-api.yaml'), 'utf8');",
+  "  const LF = String.fromCharCode(10);",
+  "  /** Every option key written in a mount call (nested keys included); string literals blanked and line comments dropped first. */",
+  "  const optionKeys = (call: string): Set<string> => {",
+  "    const blanked = call.replace(/'[^']*'/g, \"''\").split(LF).map((line) => line.split('//')[0]).join(LF);",
+  "    const keys = new Set<string>();",
+  "    const re = /([A-Za-z_$][A-Za-z0-9_$]*) *:/g;",
+  "    let m = re.exec(blanked);",
+  "    while (m !== null) { keys.add(m[1]); m = re.exec(blanked); }",
+  "    return keys;",
+  "  };",
+  "  /** The production arm of `max: isNonProd ? <nonprod> : <prod>`, as a number. */",
+  "  const productionMax = (shape: { max: string }): number => Number(/[?] *[0-9]+ *: *([0-9]+)/.exec(shape.max)?.[1]);",
+  "  /** `15 * 60 * 1000` evaluated as a product of integers. */",
+  "  const windowMsValue = (shape: { windowMs: string }): number => shape.windowMs.split('*').map((n) => Number(n.trim())).reduce((a, b) => a * b, 1);",
+  "  /** x-ratelimit-window-ms / x-ratelimit-max of every operation the spec files under the mfa policy (the two lines that follow it). */",
+  "  const specMfaLimits = (): Array<{ max: number; windowMs: number }> => {",
+  "    const out: Array<{ max: number; windowMs: number }> = [];",
+  "    const lines = SPEC_YAML.split(LF);",
+  "    for (let i = 0; i < lines.length - 2; i++) {",
+  "      if (lines[i].trim() !== 'x-ratelimit-policy: mfa') continue;",
+  "      out.push({ windowMs: Number(lines[i + 1].split(':')[1]), max: Number(lines[i + 2].split(':')[1]) });",
+  "    }",
+  "    return out;",
+  "  };",
+  "  it('RED KS-947 F3 - the users MFA mount declares no limiter option the auth MFA mount does not', () => {",
+  "    // A `skip: () => true` on the users mount alone keeps the PARITY cell green (windowMs and max unchanged)",
+  "    // while switching the limiter off: the whole option set is compared, not two values.",
+  "    const authKeys = optionKeys(mountCall('/api/auth/mfa') as string);",
+  "    const usersKeys = optionKeys(mountCall('/api/users/me/mfa') as string);",
+  "    const extra = Array.from(usersKeys).filter((k) => !authKeys.has(k));",
+  "    expect(extra, 'options on the users mount that the auth mount does not declare').toEqual([]);",
+  "  });",
+  "  it('KS-947 F3 control - the users MFA limiter is mounted before the createProxyRoutes mount', () => {",
+  "    // routes/proxy.ts mounts /api/users/me inside createProxyRoutes; a limiter registered after it never sees the request.",
+  "    const usersAt = GATEWAY_SRC.indexOf(\"app.use('/api/users/me/mfa'\");",
+  "    const proxyAt = GATEWAY_SRC.indexOf('app.use(createProxyRoutes');",
+  "    expect(usersAt, 'the users MFA mount was not found').toBeGreaterThan(-1);",
+  "    expect(proxyAt, 'the createProxyRoutes mount was not found').toBeGreaterThan(-1);",
+  "    expect(usersAt, 'the users MFA limiter must precede the proxy mount').toBeLessThan(proxyAt);",
+  "  });",
+  "  it('KS-947 F4 control - the spec files at least one operation under the mfa rate-limit policy', () => {",
+  "    expect(specMfaLimits().length, 'no x-ratelimit-policy: mfa operation in secuura-api.yaml').toBeGreaterThan(0);",
+  "  });",
+  "  it('RED KS-947 F4 - every mfa-policy operation publishes x-ratelimit-max equal to the auth MFA production max', () => {",
+  "    const authMax = productionMax(limiterShape(mountCall('/api/auth/mfa') as string));",
+  "    const limits = specMfaLimits();",
+  "    expect(limits.map((l) => l.max), 'published max vs the /api/auth/mfa mount').toEqual(limits.map(() => authMax));",
+  "  });",
+  "  it('RED KS-947 F4 - every mfa-policy operation publishes x-ratelimit-max equal to the users MFA production max', () => {",
+  "    const usersMax = productionMax(limiterShape(mountCall('/api/users/me/mfa') as string));",
+  "    const limits = specMfaLimits();",
+  "    expect(limits.map((l) => l.max), 'published max vs the /api/users/me/mfa mount').toEqual(limits.map(() => usersMax));",
+  "  });",
+  "  it('KS-947 F4 control - every mfa-policy operation publishes x-ratelimit-window-ms equal to both mounts windowMs', () => {",
+  "    const authWindow = windowMsValue(limiterShape(mountCall('/api/auth/mfa') as string));",
+  "    const usersWindow = windowMsValue(limiterShape(mountCall('/api/users/me/mfa') as string));",
+  "    expect(usersWindow, 'the two mounts share one window').toBe(authWindow);",
+  "    const limits = specMfaLimits();",
+  "    expect(limits.map((l) => l.windowMs), 'published window vs the mounts').toEqual(limits.map(() => authWindow));",
+  "  });"
+ ],
+ "must_remove": [],
+ "cells": {},
+ "tampers": [
+  {
+   "id": "F3SKIP",
+   "file": "Blockchain/Dev/services/api-gateway/src/index.ts",
+   "line": 1020,
+   "from": "  standardHeaders: true, legacyHeaders: false,",
+   "to": "  standardHeaders: true, legacyHeaders: false, skip: () => true, // TAMPER - the users limiter switched off, windowMs/max untouched",
+   "reds": [
+    "RED KS-947 F3 - the users MFA mount declares no limiter option the auth MFA mount does not"
+   ],
+   "reds_as_written": [
+    "RED KS-947 F3 - the users MFA mount declares no limiter option the auth MFA mount does not"
+   ]
+  },
+  {
+   "id": "F4AUTH",
+   "file": "Blockchain/Dev/services/api-gateway/src/index.ts",
+   "line": 993,
+   "from": "  max: isNonProd ? 100 : 10,",
+   "to": "  max: isNonProd ? 100 : 5000, // TAMPER - the auth MFA production max drifts off the published 10",
+   "reds": [
+    "RED KS-947 F4 - every mfa-policy operation publishes x-ratelimit-max equal to the auth MFA production max",
+    "PARITY — the users MFA limiter has the SAME window and max as the auth one"
+   ],
+   "reds_as_written": [
+    "RED KS-947 F4 - every mfa-policy operation publishes x-ratelimit-max equal to the auth MFA production max",
+    "PARITY — the users MFA limiter has the SAME window and max as the auth one"
+   ]
+  },
+  {
+   "id": "F4USERS",
+   "file": "Blockchain/Dev/services/api-gateway/src/index.ts",
+   "line": 1018,
+   "from": "  max: isNonProd ? 100 : 10,",
+   "to": "  max: isNonProd ? 100 : 5000, // TAMPER - the users MFA production max drifts off the published 10",
+   "reds": [
+    "RED KS-947 F4 - every mfa-policy operation publishes x-ratelimit-max equal to the users MFA production max",
+    "PARITY — the users MFA limiter has the SAME window and max as the auth one"
+   ],
+   "reds_as_written": [
+    "RED KS-947 F4 - every mfa-policy operation publishes x-ratelimit-max equal to the users MFA production max",
+    "PARITY — the users MFA limiter has the SAME window and max as the auth one"
+   ]
+  }
+ ],
+ "controls": [
+  "KS-947 F3 control - the users MFA limiter is mounted before the createProxyRoutes mount",
+  "KS-947 F4 control - the spec files at least one operation under the mfa rate-limit policy",
+  "KS-947 F4 control - every mfa-policy operation publishes x-ratelimit-window-ms equal to both mounts windowMs",
+  "CONTROL — the extractor finds the existing /api/auth/mfa limiter"
+ ],
+ "files": {
+  "Blockchain/Dev/services/api-gateway/src/__tests__/ks733-users-mfa-rate-limit-mount.test.ts": "/**\n * KS-733 — /api/users/me/mfa/* verified the SAME TOTP secret as /api/auth/mfa/*\n * but carried no path-scoped limiter, so in production it fell through to the\n * global 300/min: 4,500 attempts per 15 minutes against a secret the twin\n * surface caps at 10.\n *\n * This reads the mount table rather than issuing requests, following the KS-689\n * precedent: the property that failed is \"is a limiter attached to this prefix\",\n * and no gateway test boots index.ts. A behavioural test here would mostly be\n * exercising express-rate-limit, not our wiring.\n *\n * WHAT MAKES THIS MORE THAN A GREP. Three cells, and the parity cell is the one\n * that carries the ticket:\n *   - the CONTROL proves the extractor can find a mount that exists;\n *   - the NEGATIVE CONTROL proves it can say NO, so \"found\" is information;\n *   - the PARITY cell asserts the two surfaces carry the SAME window and max,\n *     which is the actual defect. A mount with max: 5000 would satisfy \"is a\n *     limiter attached\" and leave the asymmetry exactly where it was.\n *\n * WHAT IT IS BLIND TO, stated because the KS-689 header states its own bound:\n * this asserts the mount exists in source, not that express applies it to a\n * given request path, and not that the two limiters keep separate stores. The\n * separate-store property is load-bearing (a shared store would make the two\n * surfaces consume ONE budget, so traffic on one could lock out the other) and\n * it is guaranteed here only by the two rateLimit({...}) calls being distinct\n * object literals — which this file checks structurally and does not drive.\n */\n\nimport { describe, it, expect } from 'vitest';\nimport { readFileSync } from 'node:fs';\nimport { join } from 'node:path';\n\nconst GATEWAY_SRC = readFileSync(join(__dirname, '..', 'index.ts'), 'utf8');\n\n/**\n * Return the full `app.use('<path>', ...)` call for a prefix, bounded by\n * balancing the call's own parentheses — the KS-689 lesson: slicing to the next\n * delimiter runs past the end and swallows the following mount, which makes a\n * negative control read as a pass.\n *\n * Returns null when there is no such mount, so the caller can assert absence.\n */\nfunction mountCall(path: string): string | null {\n  const needle = `app.use('${path}'`;\n  const at = GATEWAY_SRC.indexOf(needle);\n  if (at === -1) return null;\n  const open = GATEWAY_SRC.indexOf('(', at);\n  let depth = 0;\n  for (let i = open; i < GATEWAY_SRC.length; i++) {\n    const ch = GATEWAY_SRC[i];\n    if (ch === '(') depth++;\n    else if (ch === ')') {\n      depth--;\n      if (depth === 0) return GATEWAY_SRC.slice(at, i + 1);\n    }\n  }\n  throw new Error(`unbalanced mount: app.use('${path}'`);\n}\n\n/** windowMs / max as written, so a drift between the two surfaces is visible. */\nfunction limiterShape(call: string): { windowMs: string; max: string } {\n  const windowMs = /windowMs:\\s*([^,\\n]+)/.exec(call)?.[1]?.trim() ?? '';\n  const max = /max:\\s*([^,\\n]+)/.exec(call)?.[1]?.trim() ?? '';\n  return { windowMs, max };\n}\n\ndescribe('KS-733 — the users MFA surface is rate-limited, at parity with the auth surface', () => {\n  it('CONTROL — the extractor finds the existing /api/auth/mfa limiter', () => {\n    // If this stops holding, every cell below is asserting nothing.\n    const call = mountCall('/api/auth/mfa');\n    expect(call, 'the /api/auth/mfa limiter mount was not found at all').not.toBeNull();\n    expect(call).toContain('rateLimit(');\n    const shape = limiterShape(call as string);\n    expect(shape.windowMs).not.toBe('');\n    expect(shape.max).not.toBe('');\n  });\n\n  it('NEGATIVE CONTROL — the extractor returns null for a prefix that carries no limiter mount', () => {\n    // Without this, a matcher that reported \"found\" for anything would pass the\n    // cell below, and \"a limiter is mounted\" would carry no information.\n    expect(mountCall('/api/definitely-not-a-mounted-prefix-ks733')).toBeNull();\n  });\n\n  it('/api/users/me/mfa carries a path-scoped rate limiter', () => {\n    const call = mountCall('/api/users/me/mfa');\n    expect(call, 'no app.use rate-limit mount for /api/users/me/mfa').not.toBeNull();\n    expect(call).toContain('rateLimit(');\n  });\n\n  it('PARITY — the users MFA limiter has the SAME window and max as the auth one', () => {\n    // The defect was an ASYMMETRY, not an absence of any limit: production fell\n    // through to the global 300/min. A mount with a laxer max would satisfy the\n    // cell above and leave the 450x gap open.\n    const authShape = limiterShape(mountCall('/api/auth/mfa') as string);\n    const usersShape = limiterShape(mountCall('/api/users/me/mfa') as string);\n    expect(usersShape.windowMs).toBe(authShape.windowMs);\n    expect(usersShape.max).toBe(authShape.max);\n  });\n});\n"
+ },
+ "runner_pin": "vitest by the brief's Runner: line; detected jest:- vitest:['vitest.config.ts', 'package.json']",
+ "_night_num_ctx": 65536
+}
