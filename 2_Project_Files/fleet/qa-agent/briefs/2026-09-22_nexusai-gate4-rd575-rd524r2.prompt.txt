@@ -1,0 +1,46 @@
+ultrathink
+
+You are the fleet QA/testing agent running ONE BATCHED gate (gate 4) on Datasec/NexusAI: two targets in one session. TARGET A is TIER 1 (data erasure). TARGET B is a NARROW RE-GATE: round 2 of 2 for RD-524, scoped by the gate-3 report's section 6.5.
+
+READ YOUR COMMISSION FIRST: /Volumes/KK_T9_External_HDD/TUESDAY/2_Project_Files/fleet/qa-agent/briefs/2026-09-22_nexusai-gate4-rd575-rd524r2.md
+
+TARGET A — RD-575 (TIER 1). Branch rd-575-purge-reaches-attachments-s76e at 6a32426a7aa7b847cd2ec0ab89f0ec3bdc2fe71e (short 6a32426): a forward merge whose parents are E's head bcb438d1cabb9ef855a024ff93c59048034e6ce8 and main 982a84f2d0c72596a2d389897439e1d8d3425068. RD-575's delta over main is six files: the new rd575 test, the zip-entries helper, customerDataFiles.js, dataErasure.js, dataExport.js and the counts file (3868/220).
+  - The purge removes a directory-shaped store (feedback-attachments) as a tree, one ledger entry per path; a partial tree is a failed erasure (P-2); a symlink is removed as a link, never followed, and a removed link whose target survives is a failure (P-6).
+  - The export streams the tree, skips .incoming upload parts, never follows a symlink.
+  - The builder who pushed 6a32426 did NOT re-run the red-proof. You re-derive it: REVERTED (the three product files from 982a84f) must give 6 red (C1, C1b, C2, C3, C4, X1) and 22 green (CTRL-1, CTRL-2 and all 20 RD-525 cells) of 28; FIX 28/28. Report the exact split — "6 red / 28 green" in the builder's READY is a paraphrase.
+  - Measure on a real server, populated through the product's own upload route: every attachment purged, status purged, nothing back after a restart; a partial tree gives purged_incomplete; symlinks inside the tree AND the store name itself as a symlink never cause a read or a delete outside the data directory; the export carries each attachment and no symlink target.
+  - The coexist cell gate 2 asked for (a redacted store and the directory store in ONE export) does not exist — measure it yourself and report the missing cell.
+  - C-68 re-runs on 6a32426, whole files: rd575 (C1 C1b C2 C3 C4 X1 CTRL-1 CTRL-2), rd525 (E1, E1-R, E2-LIVE, N1, S1, S2, S2-CTL, AB0-AB2), erasure-partial-purge, customer-data-lists-agree, the feedback-attachments suite. Then a full verify (predicted 3868/220).
+
+TARGET B — RD-524 (+RD-404 +RD-441) ROUND 2, NARROW RE-GATE. Branch rd-524-404-441-s77f. B's head is B_HEAD = @B_HEAD@, the forward merge of main onto the round-2 fix 3931e2b10b4774f8275d08365ece0a032084a604 (one test-only commit on round 1's f42217844bde4fd07952a3d1ec7f165d0957790d: A3 moves any legacy home machine-id file aside for its call; new cell A3b plants that file itself). Round 1 (gate 3) was NO-GO on F-A0: A3 red whenever auth-gate-fail-closed ran earlier in the same jest worker. Its report is on disk: /Volumes/KK_T9_External_HDD/!CODING/Testing Agent MAIN/projects/nexusai/reports/2026-09-22-gate3-rd524-r10i/report.md — read it whole.
+  - WARNING: the builder's own LEAKER FIRST run and its M-A3 leaker-first run never executed (both logs are only "Cannot find module '@jest/test-sequencer'"). Do not credit them. Use gate 3's sequencer (evidence/qa-order-sequencer.js, with QA_NM set to your tree's node_modules) and prove every ordered run executed both suites in order.
+  - Confirm the round is narrow: the product arrives line-for-line as gated in round 1. If not, say so and do not carry gate 3's runtime results.
+  - Measure: rd404 alone (23/23); LEAKER FIRST in one process (auth-gate-fail-closed then rd404, --runInBand) green, twice, with the gate-3 control order once; the old A3 on the round-2 harness red (M-A3: move-aside removed — leaker-first A3 AND A3b red; alone A3b red), and round 1's A3 swapped in, red leaker-first; A3b honest (refuses outside the contained HOME, restores byte-for-byte, what it leaves behind); R0 rd404 + rd441 42/42; a full verify of B_HEAD.
+  - Round 2 of 2 under the cap (C-62): a NO-GO of the same class ships nothing new and is ticketed. Say whether any NO-GO is the same class.
+
+ACROSS TARGETS: quote git merge-tree --write-tree for A against origin main, and for B_HEAD against 6a32426 (RD-575 lands first, so that is the tree RD-524 will land on), using your OWN object directory: GIT_OBJECT_DIRECTORY=<your own mktemp -d> GIT_ALTERNATE_OBJECT_DIRECTORIES=<repo>/.git/objects. On the B_HEAD x 6a32426 merge result (PROBED): the 42 rd404/rd441 cells, the 28 rd575/rd525 cells, customer-data-lists-agree, erasure-partial-purge, the leaker-first order, and one cross-target measurement — an erasure that purges a populated attachments tree, then a restart, must read intact, not missing-with-evidence.
+
+Build your own trees INSIDE YOUR OWN PROJECT from the object store (git archive <sha> into a fresh mktemp dir). Never worktree, checkout, fetch, stash, clean or commit in the NexusAI repo, and never work in its 2_Project_Files checkout. You are findings-only: no commits, no branch moves, no tickets, no writes inside NexusAI. Never rm: quarantine.
+
+FLOOR DISCIPLINE — follow section 7 of the brief exactly. The jest lock is SHARED with two live seats: NexusAI-F (pane %34) and NexusAI-G (pane %36, lane C release gate). QUEUE, NEVER TAKE OVER: never kill, signal or move another seat's process, lock or ticket.
+  - Every jest run goes through session-tools/nexusai-lock.sh, with the lock held once per multi-run measurement, as a tracked child of your seat.
+  - Count foreign servers the RD-606 way: basename(argv[0]) == node AND the server entry point anywhere in argv, read from the kernel. Ours means the ancestor chain CONTAINS YOUR OWN claude pid; a shared ancestor (tmux, launchd, a login shell) proves nothing. Negative controls: BOTH seats' claude pids (re-read them; the brief has the pids at drafting) must classify foreign in the same run. Never by EADDRINUSE, a whole-command-line grep, or raw comm.
+  - A zero is reportable only beside a control that fired in the same window.
+  - Reap every server you start.
+
+DRIVABLE SURFACE IS A LOCAL RUN, NOT THE DEMO (RD-76).
+
+QUESTIONS: your sender QA/Datasec-NexusAI has no inbox routing line, so you cannot count on an answer. If you must ask, mail tuesday-agent@agentmail.to with subject "[QA/Datasec-NexusAI -> Tuesday] QUESTION: <topic>", then PROCEED ON THE SAFEST READING without waiting, and record both in the report.
+
+Write your report to: /Volumes/KK_T9_External_HDD/!CODING/Testing Agent MAIN/projects/nexusai/reports/2026-09-22-gate4-rd575-rd524r2/report.md
+
+GIVE THE VERDICT SEPARATELY PER TARGET: A GO/NO-GO, B GO/NO-GO. Then say what the verdicts mean for the merge queue RD-575 -> RD-524, each forward-merged and verified green (C-68, C-89), each Tuesday's GO under C-127. A GO is a statement about the gated SHA only: name the cells that must be re-run on the merged tree.
+
+MAIL YOUR VERDICT to tuesday-agent@agentmail.to with the subject exactly:
+[QA/Datasec-NexusAI -> Tuesday] GATE VERDICT — gate 4: RD-575 @ 6a32426 (tier 1) + RD-524 round 2 (narrow re-gate)
+
+The AgentMail key is AGENTMAIL_API_KEY in /Volumes/KK_T9_External_HDD/TUESDAY/4_Credentials/.env. It is an absolute path because the QA project has no 4_Credentials directory of its own. Never put the key or any secret in a mail or the report.
+
+Report each target's head, and main's, as three timestamped readings (start / mid / end) with the branch name beside each.
+
+Rule 2 stands: what you did NOT test is first-class output — a NOT TESTED section, and every action recommendation labelled MEASURED AT RUNTIME, PROBED or READ ONLY.
