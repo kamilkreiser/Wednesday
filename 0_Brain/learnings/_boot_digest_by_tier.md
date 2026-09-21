@@ -7,7 +7,7 @@ status: live
 
 # Boot digest BY TIER — W whole, M rules-only, every project case a handle
 
-Generated 2026-09-22 02:57 from 198 lesson files (921,005 B). M 36 · MIXED 5 · W 157. 5 project CASE sections inside MIXED files are reduced to one line each: the heading and the path to read it at. W blocks are exactly what the default digest carries; M blocks drop the section index and keep the rules; a P file is a single handle. The CASES behind every rule live only in the lesson files — open one the moment its rule fires.
+Generated 2026-09-22 03:34 from 198 lesson files (924,637 B). M 36 · MIXED 5 · W 157. 5 project CASE sections inside MIXED files are reduced to one line each: the heading and the path to read it at. W blocks are exactly what the default digest carries; M blocks drop the section index and keep the rules; a P file is a single handle. The CASES behind every rule live only in the lesson files — open one the moment its rule fires.
 
 ## The T9 SSD is the master — Wednesday must be fully portable
 `2026-07-31_fully-portable-drive.md` · principle · 2026-07-31 · status: superseded — the "T9 is the master" half by [[2026-08-25_one-drive-devmaster-is-master]] (2026-08-25); the portability principle itself still lives · tier: W
@@ -4623,7 +4623,7 @@ sections (open the file for these): The case · Why the existing lessons did not
 **His words, verbatim:**
 > *"Keep working through the secure tickets if you need to run multiple agents so we can close as many of them off as possible."*
 
-sections (open the file for these): The operative case · What it does NOT relax · How to apply · ⚠ THE PART THAT BIT ON THE FIRST RUN: TWO SEATS SHARE ONE INBOX · Related
+sections (open the file for these): The operative case · What it does NOT relax · How to apply · ⚠ THE PART THAT BIT ON THE FIRST RUN: TWO SEATS SHARE ONE INBOX · Related · EXTENSION 2026-09-22 03:3x — the 16th round: partition by DIRECTORY is complete over the WORKING TREE and silent about THREE other shared resources — the `.git` ref namespace, the process table, and the board's attachment guard
 
 ## How to apply
 
@@ -4654,6 +4654,21 @@ sections (open the file for these): The operative case · What it does NOT relax
   back at the destination before it types anything.
 - The structural fix is a per-seat inbox. **Not built:** it is shared tooling and the first
   parallel run is not the moment to arm it ([[2026-09-08_a-new-rule-is-most-dangerous-just-after-adoption]]).
+
+## EXTENSION 2026-09-22 03:3x — the 16th round: partition by DIRECTORY is complete over the WORKING TREE and silent about THREE other shared resources — the `.git` ref namespace, the process table, and the board's attachment guard
+**The cases (one night, two seats on one checkout, every one found by a seat before it cost anything — ledger 2026-09-22):**
+1. **The ref layer.** Each seat's push protocol snapshots EVERY ref and worktree HEAD; the other seat's `worktree add` / commit / branch read as a foreign diff → NOT PROTOCOL-CLEAN, symmetrically (Seat B 16th, QUESTION 16:16Z).
+2. **The process table.** Two seats run the same tooling under the same basenames; `ps | grep <name> | head -1` picked the OTHER seat's sender and SIGTERMed it (Seat C 16th, 16:55Z; nothing lost).
+3. **The board.** The post-push Linear attachment guard ("the guarded tickets' attachment lists must not change under my push") STOPs on the other seat's own PR attaching to the other seat's own ticket (Seat B, 17:24Z) — and the first attribution rule Wednesday wrote forbade the bot's Backlog → In Progress walk on PR open, the very state change every PR triggers (Seat C, 17:29Z — a rule shipped without its exception).
+
+**The rule, extended — every parallel-seat brief on ONE checkout carries this STANDING BLOCK, verbatim, from both seats' sides:**
+- **PUSH-WINDOW LOCK:** an advisory `mkdir` lock OUTSIDE every worktree (`<Project>/worktrees/.push-lock-<round>/`; `holder` file + a 60-s `heartbeat`); taken before `snapshot`, released after `verify` (the holder's rmdir is the one delete); the other seat makes NO ref write while it is held; a bounded wait (20 min) then STOP-and-mail; a stale lock (heartbeat > 5 min AND dead pid) is reported, never removed by the non-holder. Built into the push tool, not remembered.
+- **ATTRIBUTION BY NAMESPACE, both conditions:** a foreign diff line is attributed to the other seat only when it matches the other seat's namespace by NAME (its `s-<seat>-*` worktrees; `feature/ks-<one of ITS keys>-…-r15-…`) AND origin holds my branch at my sha. Anything else is a STOP.
+- **THE BOARD GUARD, same rule, four conditions:** a NEW attachment on the OTHER seat's key is attributed when the URL is a project PR ∧ its head ref is `feature/ks-<that SAME key>-…` ∧ the author is the board login inside the round ∧ the change is addition-only — where the ONLY tolerated state change is the bot's Backlog → In Progress walk coincident with the PR open. A guard condition enters a binding mail only after the round's own ordinary events (a PR open, the bot walk, a squash) have been put through it and the exception written ([[2026-09-08_a-new-rule-is-most-dangerous-just-after-adoption]]).
+- **PROCESS NAMESPACE:** kills by ancestry (`ps -o pid=,ppid=` filtered on the seat's own claude pid) or by port + cwd, never a basename; long-running scripts carry the seat's suffix in their argv where the tooling allows.
+- **Test by its handle:** for every resource the two seats SHARE — the inbox, `.git`, the process table, the board, the machine's load — name the instrument each seat uses to tell "mine" from "the other seat's" BEFORE the launch. A partition that names only the files has named one of five.
+
+**Family, extended:** [[2026-09-07_a-census-complete-over-a-frame-that-is-not]] (the partition was complete over the working tree) · [[2026-09-03_a-pane-close-is-a-session-kill]] (the kill-list rule) · [[2026-09-08_a-new-rule-is-most-dangerous-just-after-adoption]] (condition (4)) · [[2026-08-09_an-enforcement-you-must-arm-is-not-one]] (the lock lives in the push tool).
 
 
 ## Quarantine by RENAME is not a removal on any additively-synced tree — the replica keeps both names, and the next restore ships the thing you quarantined
