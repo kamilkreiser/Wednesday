@@ -12666,5 +12666,45 @@
    "2026-09-21 15:24",
    "2026-09-21 15:25"
   ]
+ },
+ {
+  "id": "nexusai-rd516-merge-two-known-reds",
+  "client_project": "Datasec/NexusAI",
+  "title": "RD-574 is on main (green). RD-516's merge stopped on 2 KNOWN red tests — I've held it so main stays green. Land it anyway?",
+  "bluf": "PRIOR-RULINGS OVERRIDE, STATED, and a correction I owe you: you said 'merge RD-574 and RD-516'. RD-574 IS on main, green: 3773/3773, commit 16f05ea. When I asked you, I said they 'merge together cleanly with all 31 test cells passing'. That was true, but I left out that RD-516 still carries 2 red test cells its own gate listed as owed. The merge seat did exactly the right thing: 'any red → STOP', nothing pushed. THE TWO REDS, both deliberate and ticketed: R7 — the SSRF block WORKS (0 connections escape), only the error's NAME is missing (RD-585). R8 — two rate limiters are mounted where the test asserts one: MORE protection, not less (RD-541). Everything else checked out, including all 115 seam cells green on the merged code. I've ruled HOLD, under the merge authority you gave me (C-32): main stays green. A red main would make every later check fail, including RD-518's merge, which is on the resubmission path, and every seat would have to learn to step over red. THE COST OF HOLDING: RD-516's SSRF fix stays off main (and the demo) until RD-585 and RD-541 are done. The hole isn't new, but it's real.",
+  "default_action": "Held: RD-574 stays on main (green), RD-516 stays off main, and nothing is commissioned for RD-585/RD-541 until you say.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Keep holding; fix the two small tickets first",
+    "detail": "Commission RD-585 (the error name) and RD-541 (the limiter collapse), gate them, then merge RD-516 onto a green main. Main never goes red."
+   },
+   {
+    "key": "b",
+    "label": "Land RD-516 now with the 2 known reds",
+    "detail": "The SSRF fix reaches main and the demo today; main's test check reads FAIL until RD-585/RD-541 land, and every seat must treat those 2 as known. If you choose this, type 'land RD-516 with the two reds' in the Tuesday terminal."
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-09-21T17:15:51.748918+10:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "2026-09-10 09:01",
+   "2026-09-10 09:08",
+   "2026-09-10 09:08",
+   "CARD secuura-568-merge",
+   "CARD secuura-780-owner-merge",
+   "CARD secuura-ks764-merge-order-2026-09-03",
+   "CARD secuura-ps-759-760-merge-owner",
+   "CARD secuura-891-workflow-scope-merge",
+   "CARD secuura-merge-914-without-reviewer-approval",
+   "CARD secuura-develop-merge-frozen-branch-protection",
+   "CARD secuura-880-merge-kam-platform-s-cutover",
+   "CARD secuura-ks1194-1032-round2-merge-tap",
+   "CARD nexusai-round3-nogo-round4-or-merge",
+   "CARD nexusai-rd516-undici-dependency-for-address-pinning"
+  ]
  }
 ]
