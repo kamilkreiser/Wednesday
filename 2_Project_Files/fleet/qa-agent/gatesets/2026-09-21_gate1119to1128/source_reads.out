@@ -1,0 +1,127 @@
+2026-09-21T02:34:09Z
+2026-09-21_ks753-ornith35b-night2 | VERIFIEDFALSE | Blockchain/Dev/services/timestamping/src/index.ts:539
+   from: '      timestamp.verified,'
+   to:   '      false,'
+2026-09-21_ks753-ornith35b-night2 | VERIFIEDATDROPPED | Blockchain/Dev/services/timestamping/src/index.ts:540
+   from: '      timestamp.verifiedAt || null,'
+   to:   '      null,'
+   controls: ['RED KS-753: POST /api/timestamps and /api/timestamps/batch answer 201 with verified true for the mock TSA fallback when no TSA is reachable - the mock is reported as verified today', 'passes an AbortSignal to fetch — the bare-fetch shape is the defect', 'never exceeds the limit, and that is measured at the peak, not inferred']
+2026-09-21_ks1232-ornith35b-night3 | RELAYDROPPED | Blockchain/Dev/services/mcp-server/src/tools/info.ts:144
+   from: '                        allowedDocumentTypes: connector.allowedDocumentTypes,'
+   to:   '                        // KS-1232 tamper: allowedDocumentTypes is NOT relayed'
+2026-09-21_ks1232-ornith35b-night3 | RELAYWRONGFIELD | Blockchain/Dev/services/mcp-server/src/tools/info.ts:144
+   from: '                        allowedDocumentTypes: connector.allowedDocumentTypes,'
+   to:   '                        allowedDocumentTypes: connector.scopes,'
+   controls: ['CONTROL: when the gateway does not answer ok the tool relays the not-available note instead of a connector']
+2026-09-21_ks1232-ornith35b-night2 | RAWDOCTYPES | Blockchain/Dev/services/mcp-server/src/http-server.ts:258
+   from: '        allowedDocumentTypes: allowedDocumentTypes || [],'
+   to:   '        allowedDocumentTypes: allowedDocumentTypes,'
+   controls: ['CONTROL: a stored list ["contract"] reaches the package generator unchanged with status 200']
+2026-09-21_ks957-ornith35b-night | TOOLINGTOKENSGONE | Blockchain/Dev/scripts/check-shared-relink.sh:338
+   from: '        if (L ~ /node_modules|npm|npx|yarn|pnpm/) {'
+   to:   '        if (L ~ /node_modules|npx/) {'
+2026-09-21_ks957-ornith35b-night | NPMGONE | Blockchain/Dev/scripts/check-shared-relink.sh:338
+   from: '        if (L ~ /node_modules|npm|npx|yarn|pnpm/) {'
+   to:   '        if (L ~ /node_modules|npx|yarn|pnpm/) {'
+2026-09-21_ks957-ornith35b-night | YARNGONE | Blockchain/Dev/scripts/check-shared-relink.sh:338
+   from: '        if (L ~ /node_modules|npm|npx|yarn|pnpm/) {'
+   to:   '        if (L ~ /node_modules|npm|npx|pnpm/) {'
+   controls: ['CONTROL npx', 'CONTROL none', 'CONTROL install verb']
+2026-09-21_ks1275-ornith35b-night2 | VERBLISTSTALE | Blockchain/Dev/services/originate/src/originate.openapi.ts:1743
+   from: "          'accepted — share/transfer-custody/revoke etc. must use their own routes.',"
+   to:   "          'accepted — share/transfer-custody/revoke/rename etc. must use their own routes.',"
+2026-09-21_ks1275-ornith35b-night2 | VERBWITHOUTROUTE | Blockchain/Dev/services/originate/src/originate.openapi.ts:1743
+   from: "          'accepted — share/transfer-custody/revoke etc. must use their own routes.',"
+   to:   "          'accepted — share/transfer-custody/certify etc. must use their own routes.',"
+   controls: ['RED KS-1275 ORDERTHROUGHSPEC: the REGISTERED LifecycleEventRequest and LifecycleEventResponse schemas publish action in the declared order of LIFECYCLE_EVENT_ACTIONS', 'the POST /api/documents route is registered at all', 'CONTROL: userUuid still says it is NOT an authorization input']
+2026-09-21_ks880-ornith35b-night | LIVETENANTRAW | Blockchain/Dev/services/security/src/index.ts:424
+   from: "    tenantId: (r.tenant_id as string) || 'a0000000-0000-4000-8000-000000000001',\n    name: r.name as string,"
+   to:   '    tenantId: (r.tenant_id as string),\n    name: r.name as string,'
+   controls: ['CONTROL — the mapper is importable and maps a row at all, or every cell below is vacuous', '🔴 READ half — rowToApiKey maps connector_id onto connectorId', '🔴 READ half — a row with no connector_id yields undefined, not the string "null"']
+2026-09-21_ks1223-ornith35b-night | WALLETNOTFORWARDED | Blockchain/Dev/services/api-gateway/src/routes/verification.ts:1296
+   from: "      if (req.headers['x-wallet-address']) forwardHeaders['x-wallet-address'] = req.headers['x-wallet-address'] as string;"
+   to:   '      // KS-1223 tamper: the inbound x-wallet-address is NOT forwarded to originate'
+   controls: ['CONTROL: POST /api/documents without the header answers 200 and originate receives no x-wallet-address']
+2026-09-21_ks1223-ornith35b-night2 | HEADERFALLBACKREMOVED | Blockchain/Dev/services/referral/src/routes/referrals.ts:55
+   from: "    const walletAddress = (authUser?.walletAddress as string) || (req.headers['x-wallet-address'] as string);"
+   to:   '    const walletAddress = (authUser?.walletAddress as string);'
+   controls: ['CONTROL: a principal WITH walletAddress wins over the header - generateCode receives addr_user']
+2026-09-21_ks1283-ornith35b-night2 | PROVMOUNTUNGUARDED | Blockchain/Dev/services/api-gateway/src/routes/platform.ts:489
+   from: '    requireOrgProvisioner,'
+   to:   '    // requireOrgProvisioner, -- PROVMOUNTUNPINNED: the mount runs with no provisioner guard'
+2026-09-21_ks1283-ornith35b-night2 | WIDENROLES | Blockchain/Dev/services/api-gateway/src/routes/platform.ts:64
+   from: "const SUPER_ROLES = ['super_admin', 'SUPER_ADMIN', 'platform_admin', 'SYSTEM_ADMIN'];"
+   to:   "const SUPER_ROLES = ['super_admin', 'SUPER_ADMIN', 'platform_admin', 'SYSTEM_ADMIN', 'ADMIN', 'admin'];"
+   controls: ["control, register-connector: a JWT-only platform admin still succeeds, and all three upstream calls carry the admin's own Bearer", 'RED: a connector key is refused 403 on GET /api/platform/tenants and nothing is forwarded', 'RED KS-1238 (iii): a connector key carrying organizations:register is refused 403 on POST /api/platform/tenants, and neither tenant-provisioning nor refresh-tenants is called']
+2026-09-21_ks1244-ornith35b-night2 | REFUSALMESSAGECHANGED | Blockchain/Dev/services/api-gateway/src/middleware/auth.ts:280
+   from: "      res.status(401).json({ success: false, error: { code: 'UNAUTHORIZED', message: 'Invalid API key' } });"
+   to:   "      res.status(401).json({ success: false, error: { code: 'UNAUTHORIZED', message: 'nope' } });"
+   controls: ['RED KS-1244: a repeated x-api-key (two individually valid keys joined by Node) on a required mount is refused 401 with no principal and no Bearer fall-through, in either order', 'rejects with 401 when required=true and no token is present', 'RED KS-1198: an sk_ key validated on the API-key path attaches the validated key metadata as req.connectorMeta, scopes intact, for the connector gates to read']
+2026-09-21_ks1234-ornith35b-night | ALIASNARROWED | Blockchain/Dev/services/api-gateway/src/index.ts:413
+   from: "const shouldParseBody = (req: Request): boolean => !proxyPaths.some(p => req.path.replace(/^\\/api\\/v1\\//, '/api/').startsWith(p)); // KS-1234: judge the /api/v1 alias by the path the rewrite below gives it"
+   to:   "const shouldParseBody = (req: Request): boolean => !proxyPaths.some(p => req.path.replace(/^\\/api\\/v1\\/documents/, '/api/documents').startsWith(p)); // KS-1234: judge the /api/v1 alias by the path the rewrite below gives it"
+   controls: ['control: POST /api/documents as application/json answers 200 and originate receives the body', 'control: the /api/v1 alias itself is live - GET /api/v1/signatories answers 200 and reaches originate at /api/signatories', '🔴 KS-1234: POST /api/v1/documents as application/json answers 200 within the bound and originate receives the same body']
+2026-09-21_ks1234-ornith35b-night2 | SANITIZEEVERYWHERE | Blockchain/Dev/services/api-gateway/src/index.ts:458
+   from: 'app.use((req, res, next) => { if (shouldParseBody(req)) sanitizeInput(req, res, next); else next(); });'
+   to:   'app.use((req, res, next) => { sanitizeInput(req, res, next); });'
+   controls: ['CONTROL KS-1234: the same title on the hand-parsed POST /api/documents and on its /api/v1 alias arrives byte-equal whether or not sanitizeInput is guarded - neither stream is ever parsed, so the sanitizer has nothing to rewrite', 'control: POST /api/documents as application/json answers 200 and originate receives the body']
+2026-09-21_ks1234-ornith35b-night3 | PARSERONNFTALIAS | Blockchain/Dev/services/api-gateway/src/index.ts:422
+   from: "app.use('/api/nft/upload', uploadBodyParser);"
+   to:   "app.use(['/api/nft/upload', '/api/v1/nft/upload'], uploadBodyParser);"
+2026-09-21_ks1234-ornith35b-night3 | NFTPARSERUNMOUNTED | Blockchain/Dev/services/api-gateway/src/index.ts:422
+   from: "app.use('/api/nft/upload', uploadBodyParser);"
+   to:   '// KS-1234 tamper: the 10 MB upload parser is NOT mounted on /api/nft/upload'
+   controls: ['control: POST /api/documents as application/json answers 200 and originate receives the body', 'control: the /api/v1 alias itself is live - GET /api/v1/signatories answers 200 and reaches originate at /api/signatories']
+--- scope anchors at the tip
+   services/timestamping/src/index.ts:526 '    `INSERT INTO ts_timestamps (id, document_id, hash, hash_algorithm, timestamp_type, tsa_url, chain_id, transaction_hash, proof, verified, verified_at, created_at, eidas_qualified, tsa_name)'
+   services/timestamping/src/index.ts:539 '      timestamp.verified,'
+   services/timestamping/src/index.ts:540 '      timestamp.verifiedAt || null,'
+   services/mcp-server/src/tools/info.ts:144 '                        allowedDocumentTypes: connector.allowedDocumentTypes,'
+   services/mcp-server/src/http-server.ts:258 '        allowedDocumentTypes: allowedDocumentTypes || [],'
+   scripts/check-shared-relink.sh:338 '        if (L ~ /node_modules|npm|npx|yarn|pnpm/) {'
+   scripts/check-shared-relink.sh:342 '        else if (L ~ /(^|[^A-Za-z0-9_.-])(node|nodejs|bun|deno)([0-9._-]|[^A-Za-z0-9_.-]|$)/) {'
+   services/originate/src/originate.openapi.ts:1740 '      action: z.enum(LIFECYCLE_EVENT_ACTIONS).openapi({'
+   services/originate/src/originate.openapi.ts:1743 "          'accepted — share/transfer-custody/revoke etc. must use their own routes.',"
+   services/security/src/index.ts:383 "    tenantId: (r.tenant_id as string) || 'a0000000-0000-4000-8000-000000000001',"
+   services/security/src/index.ts:423 '    // belt-and-braces guard for a hand-edited row that somehow lost it.'
+   services/security/src/index.ts:424 "    tenantId: (r.tenant_id as string) || 'a0000000-0000-4000-8000-000000000001',"
+   services/security/src/index.ts:425 '    name: r.name as string,'
+   services/api-gateway/src/routes/verification.ts:1296 "      if (req.headers['x-wallet-address']) forwardHeaders['x-wallet-address'] = req.headers['x-wallet-address'] as string;"
+   services/referral/src/routes/referrals.ts:55 "    const walletAddress = (authUser?.walletAddress as string) || (req.headers['x-wallet-address'] as string);"
+   services/api-gateway/src/routes/platform.ts:64 "const SUPER_ROLES = ['super_admin', 'SUPER_ADMIN', 'platform_admin', 'SYSTEM_ADMIN'];"
+   services/api-gateway/src/routes/platform.ts:66 'function requireSuperAdmin(req: Request, res: Response, next: NextFunction): void {'
+   services/api-gateway/src/routes/platform.ts:97 '  if (SUPER_ROLES.includes(user.role)) {'
+   services/api-gateway/src/routes/platform.ts:486 '  router.post('
+   services/api-gateway/src/routes/platform.ts:487 "    '/api/platform/organizations/register-connector',"
+   services/api-gateway/src/routes/platform.ts:489 '    requireOrgProvisioner,'
+   services/api-gateway/src/middleware/auth.ts:279 '    if (presentedKey && !meta && required) {'
+   services/api-gateway/src/middleware/auth.ts:280 "      res.status(401).json({ success: false, error: { code: 'UNAUTHORIZED', message: 'Invalid API key' } });"
+   services/api-gateway/src/index.ts:413 "const shouldParseBody = (req: Request): boolean => !proxyPaths.some(p => req.path.replace(/^\\/api\\/v1\\//, '/api/').startsWith(p)); // KS-1234: judge the /api/v1 alias by the path the rewrite below gives it"
+   services/api-gateway/src/index.ts:422 "app.use('/api/nft/upload', uploadBodyParser);"
+   services/api-gateway/src/index.ts:458 'app.use((req, res, next) => { if (shouldParseBody(req)) sanitizeInput(req, res, next); else next(); });'
+platform.ts: `    requireSuperAdmin,` lines 13 | `requireOrgProvisioner,` lines 1 | SUPER_ROLES.includes 2
+middleware/auth.ts: res.status(401) lines 4
+check-shared-relink.sh: tolower(L) ~ count 0
+04-container-trivy.sh :92-:94 at develop: ['    --skip-db-update \\', '    "$img" 2>/dev/null)"; trc=$?', "  # KS-1136: trc is trivy's own exit code - a failed scan is no longer turned into an empty, clean-looking report."]
+04-container-trivy.sh :92-:95 at F head: ['    --skip-db-update \\', '    --exit-code 0 "$img" 2>/dev/null)"; trc=$?', '  # KS-1273: --exit-code 0 keeps trc meaning "the scan ran" - a TRIVY_EXIT_CODE (or a trivy.yaml exit-code) in the caller\'s environment would otherwise make findings read as a failed scan and drop them.', "  # KS-1136: trc is trivy's own exit code - a failed scan is no longer turned into an empty, clean-looking report."]
+ks1207 test path at tip: 70 api-gateway test files in tree
+security: *.test.* files in tree at develop: 17
+timestamping: *.test.* files in tree at develop: 5
+api-gateway: *.test.* files in tree at develop: 70
+referral: *.test.* files in tree at develop: 5
+mcp-server: *.test.* files in tree at develop: 1
+originate: *.test.* files in tree at develop: 70
+security lock vitest version: 4.1.11
+timestamping lock vitest version: 4.1.11
+api-gateway lock vitest version: 4.1.11
+referral lock vitest version: 4.1.11
+mcp-server lock vitest version: 4.1.11
+originate lock jest version: 29.7.0
+referral package.json test script: vitest run
+mcp-server package.json test script: vitest run
+preflight skip_stack sites: [210, 296, 310, 495] | leg 14 line(s): [551]
+run-shell-suites.sh mentions systemTest: 1
+manifest_quarantine.test.sh lines 200 | `it`/cell markers: 2 | drive.ts mentions 8 | 2>/dev/null or stderr redirect lines: [52, 53, 60, 66, 70, 82, 119, 131]
+--- checkout counts (read)
+porcelain non-untracked 0 | worktrees 215 | for-each-ref 1122
+2026-09-21T02:34:09Z
