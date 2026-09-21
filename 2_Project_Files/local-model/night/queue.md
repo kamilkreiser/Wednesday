@@ -236,3 +236,7 @@
 # 09-22 01:16 - KS-1227 rebrief 1 of 1 (Kam 09-16 counter): same input re-queued after a model serialisation FAIL at T3 (IMPROVEMENTS row of this stamp)
 # 09-22 02:12 - FEED 3 (two goldens PASS; the FEED 3 drafter, proposal briefs_staged/2026-09-22_ornith_feed3_queue_proposal.md; 36 candidates skipped — the easy tiers are thin)
 # 09-22 02:35 - KS-947 REBRIEF 1 of 1 (Kam 09-16 counter; the original round-1 FAILed T4 on model quoting of a mixed-quote line; proposal briefs_staged/2026-09-22_ks947_rebrief_proposal.md, golden PASS 8/8)
+# 09-22 03:58 - REBRIEF 3 (round 2 of 2, Kam 09-16 counter): KS-1171 8j TSFIX + KS-1171 GUARD3S TSFIX (Seat B 16th's seven TS errors) + KS-1123 F3b CAST (Seat C 16th's TS18046) — goldens PASS 8/8 x3, typecheck r2 0/0/0 (r1 controls 3/4/1), key sets == 947F3F4b, dq/bs/non-ASCII 0; proposal 2_Project_Files/fleet/briefs_staged/2026-09-22_ornith_rebrief3_queue_proposal.md
+KS-1171 input=/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/inputs/test_only_1171TSFIX8J-R16.json task=/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/tasks/test_only/task.md ctx=65536
+KS-1171 input=/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/inputs/test_only_1171TSFIXGUARD3S-R16.json task=/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/tasks/test_only/task.md ctx=65536
+KS-1123 input=/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/inputs/test_only_1123F3bCAST-R16.json task=/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/tasks/test_only/task.md ctx=65536
