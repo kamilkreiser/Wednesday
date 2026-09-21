@@ -50,16 +50,10 @@ if __name__ == "__main__":
     ap.add_argument("--tenant", default=ids.get("TENANT_ID")); ap.add_argument("--api-appid", default=ids.get("API_APPID", ""))
     ap.add_argument("--since", default=None); ap.add_argument("--limit", type=int, default=200); ap.add_argument("--json", action="store_true")
     ap.add_argument("--client", default=None, help="one partition (must be in the seat's roles or ALL)")
-    ap.add_argument("--include-synthetic", action="store_true", help="keep rows marked synthetic=true (probe rows); by default they are SKIPPED and counted on stderr — a probe row wearing role=kam is never Kam's word")
     ap.add_argument("--decrypt", action="store_true", help="Phase 3: open the text with this seat's private key (<seat>-seat.pem)")
     a = ap.parse_args()
     d = fetch(a, ids)
     rows = d.get("messages", [])
-    if not a.include_synthetic:
-        _syn = [r for r in rows if r.get("synthetic") in (True, "true", "True")]
-        if _syn:
-            sys.stderr.write(f"get_kam_messages: {len(_syn)} synthetic (probe) row(s) skipped — not Kam's word (--include-synthetic keeps them)\n")
-        rows = [r for r in rows if r.get("synthetic") not in (True, "true", "True")]
     # The API caps `limit` PER PARTITION and Table storage returns rows OLDEST-FIRST after `since`: a partition that hits
     # the cap has had its NEWEST rows cut off. Say so loudly (this is how the 02:48Z rows vanished from a 14-day read).
     import collections

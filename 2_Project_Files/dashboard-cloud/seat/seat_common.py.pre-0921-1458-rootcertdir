@@ -21,16 +21,10 @@ def load_ids():
             k, v = line.split("=", 1); ids[k] = v
     return ids
 
-# The seat's credentials dir is derived from THIS FILE's location, never a Studio literal: seat/ -> dashboard-cloud/ ->
-# 2_Project_Files/ -> <tree root>/4_Credentials/dashboard-cloud. On the Studio this resolves to the old literal byte for byte;
-# on the mini it resolves to Tuesday's tree. Third instance of the literal in one day (card path 13:17, the readers 14:4x,
-# the poller 14:5x — Tuesday's 04:54Z mail named the root). Wednesday, 2026-09-21 15:0x.
-DEFAULT_CERT_DIR = os.path.normpath(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "..", "4_Credentials", "dashboard-cloud"))
-
 def common_args(p: argparse.ArgumentParser):
     ids = load_ids()
     p.add_argument("--seat", choices=["wednesday", "tuesday"], required=True, help="which seat identity")
-    p.add_argument("--cert-dir", default=DEFAULT_CERT_DIR, help="dir holding <seat>-seat.pem (private) + <seat>-seat.crt (public)")
+    p.add_argument("--cert-dir", default="/Volumes/DevMASTER/WEDNESDAY/4_Credentials/dashboard-cloud", help="dir holding <seat>-seat.pem (private) + <seat>-seat.crt (public)")
     p.add_argument("--client", required=True, choices=["Secuura", "Datasec", "WED"], help="partition; must be within the seat's roles or the API refuses 403")
     p.add_argument("--pubkey", default=None, help="(Phase 2 compat) ONE public key to wrap to instead of the Phase 3 recipient set (Kam's whole ring + the partition's seat)")
     p.add_argument("--base", default=f"https://{ids.get('WEBAPP','')}.azurewebsites.net")

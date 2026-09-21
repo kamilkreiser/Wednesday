@@ -1,4 +1,4 @@
-# Ornith candidates — derived 2026-09-21 05:53 from 351 KS Backlog/Todo tickets (read-only, unpaginated)
+# Ornith candidates — derived 2026-09-21 14:57 from 344 KS Backlog/Todo tickets (read-only, unpaginated)
 
 A CENSUS for the coordinator to brief from, easy → hard (Kam 2026-09-15 16:40 / 18:19). A ticket here is a candidate, not a task: read it, read the file at the tip, write `night/briefs/<id>.md`, then queue it. Auth-shaped titles are excluded (LAST); Peter/Stuart tickets and PR-attached tickets are excluded outright.
 
@@ -105,8 +105,7 @@ A CENSUS for the coordinator to brief from, easy → hard (Kam 2026-09-15 16:40 
 - KS-966 — named in READY_KS-972_ornith35b-q4_BASHPATCH-REANCHORED-PASS-7of7_2026-09-16.diff.md
 - KS-999 — named in READY_KS-1186_ornith35b-q4_AUTH-5SITE-LINEKEYED-PASS-7of7_2026-09-17.diff.md
 
-## HELD (READY_* or done.md PASS) — 88
-- KS-1006 POST /api/users/me/mfa/disable skips code verification when mfaSecret is falsy —
+## HELD (READY_* or done.md PASS) — 83
 - KS-1009 Security: GET /api/auth/wallet/status returns userId + role to ANY anonymous cal
 - KS-1011 KS-666 stack marker reads "unknown" for owner/branch/commit/started_at whenever 
 - KS-1028 KS-754 gate F-1 (MAJOR): a step-12 throw skips the USER_ERASED fan-out AFTER the
@@ -134,7 +133,6 @@ A CENSUS for the coordinator to brief from, easy → hard (Kam 2026-09-15 16:40 
 - KS-1123 api-gateway verify: an empty-string / 0 / false anchor status is one edit (`??`→
 - KS-1127 run-shell-suites.sh counts an exit-0 SKIP as `passed` — a suite that ran 0 of it
 - KS-1133 verify-hash precedence: v1 hash-LAST, v2 hash-FIRST — document the split on both
-- KS-1137 KS-878/867 suites: no cell names the real digit-bearing image (`dev-m365-integra
 - KS-1139 Bare arithmetic-command `((X++))` under `set -e` — exits 1 at 0 and bash ≥ 4.1 e
 - KS-1140 ks879 guard: the 🔴 cell walks the tree on its own (`offendersUnder(DEV_ROOT)` :1
 - KS-1152 L5 gate records (#799/#880/#985): jwt.ts citation ×5, security log title, dist t
@@ -152,7 +150,6 @@ A CENSUS for the coordinator to brief from, easy → hard (Kam 2026-09-15 16:40 
 - KS-1192 ks871-real-app-canonical-audit-rows production cell does not pin production mode
 - KS-1193 #1015 gate findings (KS-1018): the message-form pool timeout, the review route's
 - KS-1196 admin POST /api/admin/document-types ids are dt-${Date.now()}: two creates in on
-- KS-1198 A connector JWT presented directly as Bearer skips the gateway's connector gates
 - KS-1199 ks1072 verify cells pin no verdict on a tie whose rows differ in status: a compa
 - KS-1201 bootstrap_login_diagnosis.test.sh leaks its 4 login stubs on every run: start_st
 - KS-1205 api-gateway per-key limiter follow-up (KS-1195 gates): a JWT claim can name a ke
@@ -163,9 +160,7 @@ A CENSUS for the coordinator to brief from, easy → hard (Kam 2026-09-15 16:40 
 - KS-1221 ks744 cells never test a falsy claim - a verificationLevel of '' or null must fo
 - KS-1227 ks1072 postTier2's anchor-store witness counts every stub request, leaks its lis
 - KS-1229 ks1213 cells: ten tampers stay green - a refused issue can mint a holder stub or
-- KS-1236 Approving a stale PENDING verification request after the subject's level rose an
 - KS-1237 ks1204 cells: three tampers stay green - the array-like allow-list, the refusal 
-- KS-1244 A duplicated x-api-key header defeats key authentication via header joining
 - KS-1250 O-2: RUNBOOK §2.2 documents SMOKE_BASE_URL, but scripts/smoke-test.sh ignores it
 - KS-1277 documents.ts: two stale comments about on-behalf-of recording (:2327-2334 inside
 - KS-623 Test-token env guard is asymmetric: the gateway fails closed on an unset NODE_EN
@@ -228,7 +223,7 @@ A CENSUS for the coordinator to brief from, easy → hard (Kam 2026-09-15 16:40 
 - KS-980 — decision-class (a second DB role or a claim correction) (updated 2026-09-07)
 - KS-981 — lives only on the frozen #892 branch (updated 2026-09-07)
 
-## EXCLUDED by predicate — 166
+## EXCLUDED by predicate — 164
 - KS-1000 — has a PR attached
 - KS-1003 — auth-shaped title (LAST, Kam 16:40)
 - KS-1005 — auth-shaped title (LAST, Kam 16:40)
@@ -296,7 +291,6 @@ A CENSUS for the coordinator to brief from, easy → hard (Kam 2026-09-15 16:40 
 - KS-1257 — names no product file (after basename/docs/route resolution)
 - KS-1259 — names no product file (after basename/docs/route resolution)
 - KS-1266 — names no product file (after basename/docs/route resolution)
-- KS-1273 — names no product file (after basename/docs/route resolution)
 - KS-1274 — names no product file (after basename/docs/route resolution)
 - KS-1278 — names no product file (after basename/docs/route resolution)
 - KS-1280 — auth-shaped title (LAST, Kam 16:40)
@@ -383,7 +377,6 @@ A CENSUS for the coordinator to brief from, easy → hard (Kam 2026-09-15 16:40 
 - KS-948 — has a PR attached
 - KS-951 — auth-shaped title (LAST, Kam 16:40)
 - KS-956 — names no product file (after basename/docs/route resolution)
-- KS-957 — names no product file (after basename/docs/route resolution)
 - KS-959 — names no product file (after basename/docs/route resolution)
 - KS-964 — has a PR attached
 - KS-977 — auth-shaped title (LAST, Kam 16:40)

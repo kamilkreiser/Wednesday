@@ -35,9 +35,6 @@ while [ $# -gt 0 ]; do case "$1" in
 case "$SEAT" in wednesday|tuesday) ;; *) echo "live_chat_poll: seat '$SEAT' is neither wednesday nor tuesday — REFUSING (a guessed seat polls the wrong tab)" >&2; exit 2 ;; esac
 PY="$ROOT/2_Project_Files/dashboard-cloud/.venv/bin/python"; GET="$ROOT/2_Project_Files/dashboard-cloud/seat/get_kam_messages.py"
 STATE="${LIVE_POLL_STATE:-$HERE/state/live_chat_polled_through}"; TAP="${LIVE_POLL_TAP:-$ROOT/2_Project_Files/tools/tap_wednesday.sh}"
-CERT_DIR="${LIVE_POLL_CERT_DIR:-$ROOT/4_Credentials/dashboard-cloud}"   # from THIS tree, never the tool's default (the 13:17 / 14:4x / 14:5x class); the env is a test seam
-FAILMARK="${LIVE_POLL_FAILMARK:-$HERE/state/live_chat_poll.health}"   # content FAILING… on the 3rd consecutive fetch failure, OK… on recovery; read by doctor.sh — a refusal nobody reads is indistinguishable from working
-FAILS="$(cat "$FAILMARK.count" 2>/dev/null || echo 0)"; case "$FAILS" in ''|*[!0-9]*) FAILS=0;; esac   # persists across --once ticks
 LOG="$HERE/logs/live_chat_poll.log"; mkdir -p "$(dirname "$STATE")" "$(dirname "$LOG")"
 log() { echo "$(date '+%F %T') $*" >> "$LOG"; [ "$DRY" = 1 ] && echo "$*"; }
 [ -x "$PY" ] || { echo "live_chat_poll: no venv python at $PY (PORTABILITY.md)" >&2; exit 2; }
@@ -46,23 +43,14 @@ log() { echo "$(date '+%F %T') $*" >> "$LOG"; [ "$DRY" = 1 ] && echo "$*"; }
 tick() {
   local wm; wm="$(cat "$STATE" 2>/dev/null || echo "")"
   local out rc
-  if [ -z "$wm" ]; then out="$("$PY" "$GET" --seat "$SEAT" --cert-dir "$CERT_DIR" --json --limit 1000 --since "$(date -u -v-1d +%Y-%m-%dT%H:%M 2>/dev/null || date -u +%Y-%m-%dT00:00)" 2>>"$LOG")"; rc=$?
-  else out="$("$PY" "$GET" --seat "$SEAT" --cert-dir "$CERT_DIR" --json --limit 1000 --since "$wm" 2>>"$LOG")"; rc=$?; fi
-  if [ $rc -ne 0 ]; then
-    FAILS=$((FAILS+1)); printf '%s\n' "$FAILS" > "$FAILMARK.count"; log "fetch failed rc=$rc (consecutive $FAILS): $(printf '%s' "$out" | tr '\n' ' ' | cut -c1-200) — tick skipped, watermark untouched"
-    if [ "$FAILS" -ge 3 ]; then
-      # the 3rd failure in a row is a DEAD poller, not a bad tick: say so where a reader lands (the pane + a health file doctor reads), then keep trying
-      printf 'FAILING %s seat=%s consecutive_failures=%s rc=%s\n' "$(date '+%F %T')" "$SEAT" "$FAILS" "$rc" > "$FAILMARK"
-      if [ $((FAILS % 10)) -eq 3 ] && [ "$DRY" != 1 ]; then "$TAP" "[live-board] 🔴 POLLER FETCH FAILING x$FAILS (rc=$rc) — Kam's live replies are NOT reaching this seat; read $LOG" || true; fi
-    fi
-    return 1
-  fi
-  if [ "$FAILS" -gt 0 ]; then log "fetch recovered after $FAILS failure(s)"; fi; FAILS=0; printf '0\n' > "$FAILMARK.count"; printf 'OK %s seat=%s\n' "$(date '+%F %T')" "$SEAT" > "$FAILMARK"
+  if [ -z "$wm" ]; then out="$("$PY" "$GET" --seat "$SEAT" --json --limit 1000 --since "$(date -u -v-1d +%Y-%m-%dT%H:%M 2>/dev/null || date -u +%Y-%m-%dT00:00)" 2>&1)"; rc=$?
+  else out="$("$PY" "$GET" --seat "$SEAT" --json --limit 1000 --since "$wm" 2>&1)"; rc=$?; fi
+  if [ $rc -ne 0 ]; then log "fetch failed rc=$rc: $(printf '%s' "$out" | tr '\n' ' ' | cut -c1-200) — tick skipped, watermark untouched"; return 1; fi
   # new live-typed rows above the watermark: "<count>\t<newest row_key>\t<newest any>\t<summary>" (JSON handed via env, not argv)
   local parsed; parsed="$(POLL_OUT="$out" POLL_WM="$wm" python3 - <<'PYEOF'
 import json, sys, os, datetime
 wm = os.environ["POLL_WM"]; d = json.loads(os.environ["POLL_OUT"])
-rows = [r for r in d.get("messages", []) if str(r.get("written_by", "")).startswith("easyauth:") and r.get("row_key", "") > wm and r.get("synthetic") not in (True, "true", "True")]
+rows = [r for r in d.get("messages", []) if str(r.get("written_by", "")).startswith("easyauth:") and r.get("row_key", "") > wm]
 rows.sort(key=lambda r: r["row_key"])
 def loc(ts):
     try: return datetime.datetime.fromisoformat(ts.replace("Z", "+00:00")).astimezone().strftime("%H:%M:%S")
