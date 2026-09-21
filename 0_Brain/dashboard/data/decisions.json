@@ -12628,5 +12628,43 @@
    "CARD nexusai-demo-deploy-finish-scope",
    "CARD secuura-ks839-oauth-wildcard-scope-grants-everything"
   ]
+ },
+ {
+  "id": "t9-nas-leg-direction",
+  "client_project": "Datasec/NexusAI",
+  "title": "Portable-drive backup: the preview found 137,309 old NAS files that the first run would copy INTO the live Datasec work — make it one-way (drive → NAS only)?",
+  "bluf": "PRIOR-RULINGS OVERRIDE, STATED: your ruling t9-nas-leg-scope-mechanism = (a) STANDS and is BUILT. The engine has the 'only these folders' option, and this drive's leg is scoped to Datasec + the Tuesday tree. It is NOT switched on, because the read-only preview (rsync dry run, nothing changed) found two things no earlier look could see. (1) SECRETS: the scope would have pushed live Azure token caches, a service-principal secrets file, a GitHub token and two PRIVATE keys onto the NAS. I've excluded 4_Credentials and 3_Access_Keys from this leg (hard rule 3); they're re-creatable by re-login and can't be un-leaked. (2) DIRECTION: your sync engine is TWO-WAY, and it has no history for these folders, because every earlier run skipped them. So its first run would copy every NAS-only file INTO the live working trees: 137,309 files. 51,021 are one abandoned unison temp folder (junk, now excluded); about 65,000 are old myPKI/CypherKey copies; the rest are HPSM and Security Review. Three NexusAI seats are working in those trees right now. Going the other way it would back up 23,331 changed files, plus the whole Tuesday tree, which isn't on the NAS at all yet.",
+  "default_action": "Stays OFF: nothing syncs from the portable drive, so its Datasec work is not backed up to the NAS until you rule.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Make this drive's backup ONE-WAY, drive to NAS, additive",
+    "detail": "Never writes into the live work and never deletes on the NAS; the 137k old NAS files are left exactly where they are. Your engine gets one more opt-in flag, as before. Then it goes on for 23:00."
+   },
+   {
+    "key": "b",
+    "label": "Quarantine the old NAS files first, then run two-way as designed",
+    "detail": "I move the NAS-only files into a dated _quarantine folder on the NAS (nothing deleted), then the normal two-way sync runs. Slower, and it changes the NAS."
+   },
+   {
+    "key": "c",
+    "label": "Leave it off",
+    "detail": "Nothing backs up from this drive meanwhile; its Datasec work stays off the NAS."
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-09-21T16:33:46.733932+10:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "2026-09-08 11:50",
+   "2026-09-08 11:59",
+   "2026-09-16 14:00",
+   "2026-09-16 19:41",
+   "2026-09-21 14:49",
+   "2026-09-21 15:24",
+   "2026-09-21 15:25"
+  ]
  }
 ]
