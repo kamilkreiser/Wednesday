@@ -72,7 +72,11 @@ export DEVNAS_IGNORE_NAMES="${DEVNAS_IGNORE_NAMES:-}"
 # (launchd's default), where they match nothing and stay literal for unison. Re-check if a WorkingDirectory is added.
 if [ "$AGENT" = "tuesday" ]; then
   [ -n "${DEVNAS_PATHS:-}" ] || DEVNAS_PATHS=$'!CODING/Datasec\nTUESDAY\nNotes (MASTER)/Datasec'
-  [ -n "${DEVNAS_IGNORE_NAMES:-}" ] || DEVNAS_IGNORE_NAMES="node_modules worktrees qa-worktrees* deploy-worktrees wt-* .venv __pycache__ .next .turbo .pytest_cache"
+  # 4_Credentials + 3_Access_Keys: NEVER replicated to the NAS (workspace hard rule 3). The 2026-09-21 preview showed
+  # this scope would have pushed msal token caches, service_principal_entries.json, a gh hosts.yml, a private signing
+  # .pem and a private deploy key onto the share. They are re-creatable by re-login; they cannot be un-leaked.
+  # .unison*: unison's own temp dirs — 51,021 of the NAS's stale Datasec files were one abandoned .unison.*.tmp.
+  [ -n "${DEVNAS_IGNORE_NAMES:-}" ] || DEVNAS_IGNORE_NAMES="4_Credentials 3_Access_Keys .unison* node_modules worktrees qa-worktrees* deploy-worktrees wt-* .venv __pycache__ .next .turbo .pytest_cache"
 fi
 export DEVNAS_PATHS="${DEVNAS_PATHS:-}"
 # <<< ruled-ignores
