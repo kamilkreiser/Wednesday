@@ -26,6 +26,12 @@ Kam asked 15:24 (both tabs): "How's the sync going with the portable drive?" Mea
 - **WHEN HE RULES:** add `WED_AGENT=tuesday` (plus the paths) to the plist, preview, then `launchctl bootstrap gui/$(id -u) ~/Library/LaunchAgents/com.tuesday.nassync.plist`. **Never re-load the plist as it stands.**
 - The case-fold hazard is cleared: the NAS shows `!CODING/Datasec` in the correct case.
 
+### 🟢 17:4x — RD-518 MERGE RELEASED on Kam's terminal word ("merge RD-518"); a FRESH SEAT is running
+- **Kam 17:3x: "It looks like all the agents have stopped. What's the progress like?"** They had: I had left commissionable work waiting on cards. **Restarted:** fresh seat **`Datasec/NexusAI-D` (pane %30, transcript 2aef58e8)**, launched via `cockpit.sh add` with the T9 launcher. **`rotate Datasec/NexusAI` REFUSES on the mini: the launchers.conf entry points at unmounted DevMASTER.** Do not "fix" the registry to a T9 path; it would break the Studio. A routing line was added for -D (7a937e4b1).
+- **D's order:** (1) **RD-518 merge FIRST** (RELEASE mail 07:41Z): 4230d23 onto 16f05ea. The ONLY overlap is `scripts/verify-expected-counts.json`, so C-57 applies. It must be fully GREEN, since RD-518 carries no known reds. (2) the batch: **RD-585 + RD-541** (on RD-516's branch, to make it green), then **RD-463**, then **RD-505**. Each gets a READY FOR QA to Tuesday. **Tuesday commissions each gate.**
+- **EXPECT from D:** the RD-518 merge report (the pushed sha + the verdict), then READY mails. **An RD-518 merge that goes red → STOP; read it and never re-release blind.**
+- Still Kam's: RD-460 (ACR), the Key Vault success-path real-Azure test, cards `nexusai-rd516-merge-two-known-reds` and `t9-nas-leg-direction`.
+
 ### 🔴 17:1x — MERGES: RD-574 LANDED (green), RD-516 HELD on 2 known reds — card `nexusai-rd516-merge-two-known-reds`
 - **RD-574 is ON MAIN** @ `16f05ea` (parents 60c76d7 + 7728d69), PASS 3773/3773, zero conflicts. Verified independently by Tuesday.
 - **RD-516 merge 2 STOPPED by S74 (correctly), NOTHING PUSHED.** The verify on the merged tree reads 3801/3804, 2 failed. The merge itself is exactly the gated tree `18483a0`; §5 is 115/115 green; the dup-const check is clean.
