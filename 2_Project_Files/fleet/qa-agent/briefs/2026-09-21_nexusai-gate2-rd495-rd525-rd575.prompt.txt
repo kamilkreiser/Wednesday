@@ -1,0 +1,49 @@
+ultrathink
+
+You are the fleet QA/testing agent running ONE BATCHED gate (gate 2) on Datasec/NexusAI: up to three targets in one session. ALL THREE ARE TIER 1. They are NOT disjoint: A and B both touch the server entry point, and B and C both touch the customer-data declaration, the erasure module and the export module.
+
+READ YOUR COMMISSION FIRST: /Volumes/KK_T9_External_HDD/TUESDAY/2_Project_Files/fleet/qa-agent/briefs/2026-09-21_nexusai-gate2-rd495-rd525-rd575.md
+
+TARGET A — RD-495 (+RD-498 folded). Branch rd-495-csp-violations-hard-gate-s71 at 179bf603cf563013ac9f89dbc7b1e216e8a9d385 (short 179bf60). Chain from main aae041a: 5ce2b62 (hard check) -> dd90e8b (forward merge of main) -> d0d252c (fix + 12 cells) -> 179bf60 (counts 3809/217).
+  - GET /api/admin/csp-violations moved below the requireAuth gate (C-129): anonymous 401, viewer 403, admin 200.
+  - POST /api/csp-report stays pre-auth with a 16 KB cap, a lazily built per-address limiter (60/min), query and fragment stripped in the buffer AND the log (RD-498), and a warning instead of an empty catch.
+
+TARGET B — RD-525. Branch rd-525-export-erasure-coverage-s76e at @RD525_SHA@: E's last push 91f5b73 plus ONE lane-A commit by NexusAI-D in the server entry point only, the onPurge('audit-buffer') registration. Ten more stores exported and erased (11 -> 21); onPurge hooks run before the first unlink; the export redacts session ids always and password hashes and mail secrets unless includeSecrets.
+
+TARGET C — RD-575. Branch rd-575-purge-reaches-attachments-s76e at @RD575_SHA@, off main aae041a. The purge removes the attachment directory as a tree and removes symlinks without following them; the export streams the tree file by file without .incoming.
+RD-575 STATUS: IN THIS GATE
+
+THE QUESTIONS, each by measurement (the brief's sections 3 to 6 carry the full list):
+  - A: is every other pre-gate admin route byte-unchanged (the move decides ONE route)? Is the lazy limiter applied from the first request, one instance under concurrency, and keyed per address behind the proxy (READ ONLY acceptable, labelled)? Does stripping cover both report formats (report-uri and the Reporting API) and every URI field? Does anything still log the raw body? Readout exposure beyond query strings is reported, not a blocker.
+  - B: is each of the ten stores really exported AND erased on a populated run? Search the export ZIP bytes for planted session ids, password hashes and mail secrets. Re-drive S1, S2 and S2-CTL, and report E's finding that a plain restart after erasure answers 503 to everyone as a possible product defect with its fix-shape. AB0-AB2 including the SIGTERM flush; the throwing onPurge hook path; the mail-configuration purge side effect stated. E3 is held out by C-65: not a gate item.
+  - C: C-98, cell by cell. Symlink escape: a link outside the volume, a link to a directory, a link loop, and the store itself as a symlink; the target survives and the run says failed. TOCTOU (READ ONLY acceptable, labelled). Export of a large tree.
+
+Re-run the builder's red-proofs yourself:
+  - A: M1 (readout above the gate again), M2 (stripping reverted), M3 (report limiter removed), M4 (body cap removed).
+  - B: the reverted tree (10 red, S2-CTL green), the lane-A registration reverted (AB1 and AB2 red), and E's destroyed-names mutant on the edited existing test. Add your own: make the session redactor a no-op.
+  - C: E's reverted tree (6 red, CTRL-1/2 green); E had not run it when the brief was drafted.
+
+Quote git merge-tree --write-tree for A vs B-head, A vs RD-516's head b9666342f50646fbe44aefcdeeaa732dea10dccb, and B-head vs C-head, using your OWN object directory as section 1 says. At the drafting heads B vs C CONFLICTED in the export module: re-measure and say what it means for C's verdict. Run a full verify per target and account for every failure and every counts mismatch.
+
+Build your own trees INSIDE YOUR OWN PROJECT from the object store: git archive <sha> into a fresh mktemp dir. Never worktree, checkout, fetch, stash, clean or commit in the NexusAI repo; its working checkout is dirty. You are findings-only: no commits, no branch moves, no tickets, no writes inside NexusAI.
+
+FLOOR DISCIPLINE — follow section 7 of the brief exactly. NexusAI-D and NexusAI-E are live on the floor and share the jest lock; gate 1 may still be running.
+  - Every jest run goes through session-tools/nexusai-lock.sh, with the lock held once per multi-run measurement.
+  - Count foreign servers by basename(argv[0]) == node AND the server entry point anywhere in argv. Tell yours from foreign by ancestry: ours means the chain CONTAINS YOUR OWN seat pid; a shared ancestor (tmux, launchd, a login shell) proves nothing. Carry a negative control: a pid you know is foreign must classify foreign in the same run. Never by EADDRINUSE, a whole-command-line grep, or raw comm.
+  - A zero is reportable only beside a control that fired in the same window.
+  - Reap every server you start.
+
+DRIVABLE SURFACE IS A LOCAL RUN, NOT THE DEMO (RD-76).
+
+Write your report to: /Volumes/KK_T9_External_HDD/!CODING/Testing Agent MAIN/projects/nexusai/reports/2026-09-21-gate2-rd495-rd525-rd575/report.md
+
+GIVE THE VERDICT SEPARATELY PER TARGET: A GO/NO-GO, B GO/NO-GO, C GO/NO-GO (or "C: not in this gate"). Then say what the verdicts mean for the merge queue RD-604 -> RD-516 -> RD-495 -> RD-525 -> RD-575, each forward-merged and verified green (C-68, C-89), each Tuesday's GO under C-127. A GO is a statement about the gated SHA only.
+
+MAIL YOUR VERDICT to tuesday-agent@agentmail.to with the subject exactly:
+[QA/Datasec-NexusAI -> Tuesday] GATE VERDICT — gate 2: RD-495 @ 179bf60 + RD-525 + RD-575 (batched, tier 1)
+
+The AgentMail key is AGENTMAIL_API_KEY in /Volumes/KK_T9_External_HDD/TUESDAY/4_Credentials/.env. It is an absolute path because the QA project has no 4_Credentials directory of its own.
+
+Report each target's head, and main's, as three timestamped readings (start / mid / end) with the branch name beside each.
+
+Rule 2 stands: what you did NOT test is first-class output.
