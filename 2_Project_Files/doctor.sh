@@ -333,6 +333,33 @@ for job in "com.${_DOC_AGENT}.shiftchange" "com.${_DOC_AGENT}.wake" "com.${_DOC_
   fi
 done
 
+# --- NAS replica staleness (added 2026-09-21, Kam 09:48 "build it today") ---
+# The nassync job above being LOADED with a last exit of 2 was true for six nights while the
+# files that change every night — history.md, the ledger, NEXT-PICKUP.md, the daily note —
+# sat on the NAS days old: unison aborts a transfer when the source changes under it, and the
+# fleet writes those files all night. A green job line is not a landed file
+# (2026-08-05_verify-the-chain-not-the-legs). nas_staleness.sh compares the key files on both
+# sides by sha256 (read-only). Not mounted is a stated SKIP, not a pass and not a warning: a
+# laptop without the NAS in reach has nothing to measure. The 36 h threshold is one missed
+# night plus a working day — a single bad night self-heals at the next 03:30; two do not.
+NS="$PROJECT_DIR/2_Project_Files/scheduler/nas_staleness.sh"
+if [ -f "$NS" ]; then
+  NS_OUT="$(bash "$NS" --warn-hours 36 2>&1)"; NS_RC=$?
+  NS_SUM="$(printf '%s\n' "$NS_OUT" | /usr/bin/grep -i '^staleness:' | tail -1)"
+  if printf '%s\n' "$NS_OUT" | /usr/bin/grep -qi '^SKIP'; then
+    ok "NAS staleness not measured — $(printf '%s\n' "$NS_OUT" | /usr/bin/grep -i '^SKIP' | head -1 | cut -c1-90)"
+  elif [ "$NS_RC" -eq 0 ] && [ -n "$NS_SUM" ]; then
+    ok "NAS replica key files current ($NS_SUM)"
+  elif [ -n "$NS_SUM" ]; then
+    warn "NAS replica STALE >36h or MISSING ($NS_SUM)" \
+         "$(printf '%s\n' "$NS_OUT" | /usr/bin/grep -iE '^(STALE|MISSING)' | awk '{print $NF}' | xargs | cut -c1-160) — read scheduler/state/nas_sync_last_${_DOC_AGENT}.txt: its 'retry: A → B' says whether the retry pass carried them"
+  else
+    warn "nas_staleness.sh produced no summary line" "bash 2_Project_Files/scheduler/nas_staleness.sh — $(printf '%s\n' "$NS_OUT" | head -1 | cut -c1-120)"
+  fi
+else
+  warn "scheduler/nas_staleness.sh missing" "restore it from git — without it a stale NAS replica is invisible until someone diffs a file by hand"
+fi
+
 # --- Executable bits on on-drive scripts (added 2026-08-06) ---
 # Drive syncs move CONTENT but not always MODES. This bit twice in one day:
 # wake_watch.sh failed to arm ("Permission denied") and serve.sh could not
