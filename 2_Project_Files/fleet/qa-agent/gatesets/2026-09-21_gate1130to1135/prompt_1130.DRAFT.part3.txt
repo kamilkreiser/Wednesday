@@ -1,0 +1,162 @@
+
+Never enter any seat worktree (worktrees/s-b14-ks1273, s-b14-ks1135, s-b14-ks958, s-b14-ks880, s-b14-ks887, s-b14-ks1236, s-b14-batch, the kept
+s-b10-* / s-b11-* / s-b12-* / s-b13-* / s-a11-* / s-a12-deploy / s-a13-deploy / s-a14-deploy / s-a15-ks1175, or any other seat's; the checkout's local
+branch refs of these names are NOT to be used — pin by SHA from origin), and never write anywhere under
+/Volumes/DevMASTER/!CODING/Secuura/Blockchain/5_Project_History/2026-09-21_seatB-14th/ (raise/, boot/, mail/, tickets/, gate/ included), nor under
+5_Project_History/quarantine/. Seat B 14th is LIVE in the same checkout, HOLDING (pane Secuura/Blockchain-B, %18): your reads of the checkout are
+MOVING readings; take them as such (the drafter's own counts moved between its reads as the seat committed: count-objects 8495 -> 8564, worktrees
+215 -> 222, for-each-ref 1122 -> 1131). The checkout's local `develop` sits at 362e51fe0 (17 behind origin — Wednesday's Q5: left deliberately;
+nothing of yours reads it).
+Repo:    /Volumes/DevMASTER/!CODING/Secuura/Blockchain/2_Project_Files  (READ-ONLY)
+  - git clone --shared --no-checkout by SHA into your own fresh mktemp -d, ONE clone per tree you run (the six heads, develop 9f0265eb0, the
+    all-six tree, the PAIR tree); git write verbs there only, from a script file. Never merge-tree --write-tree, worktree, fetch, checkout or git
+    apply in the checkout. A new develop is fetched by SHA into YOUR clone over https, GH_TOKEN via a GIT_ASKPASS helper reading an env var, never
+    on a command line. Never run vitest, a bash suite, `npx tsx` or preflight in the checkout.
+  - Record the checkout's porcelain count and .git/worktrees count before and after: they must be equal (drafter 09:06:57Z: porcelain
+    non-untracked 0, porcelain total 17, worktrees 222 (215 + the seat's seven s-b14-*), for-each-ref 1131, count-objects 8564 / in-pack 101422 /
+    packs 47 — a moving reading).
+Farm node_modules per ENTRY in each clone (the #1009 gate's R-6): Blockchain/Dev/node_modules, services/security/node_modules,
+  services/auth/node_modules and packages/shared/node_modules, each PER ENTRY, .vite/.vitest/.cache skipped, @secuura/* relinked into your tree,
+  shared dist built per tree (`npm run build -w packages/shared`; the seat ran `npm ci --offline` from the warm cache + `fix-libsodium-symlink.js`)
+  — AND in the bash-lane clones too: the in-hook preflight's ks949_main_seed_idempotence suite reds without `packages/shared/dist/index.js` (the
+  seat's S6: `FAIL — packages/shared is not built (…/dist/index.js missing)`, `0 passed, 1 failed (of 27 cells) — aborted`); reproduce that red
+  ONCE in a clone WITHOUT the dist as the positive control of the seat's diagnosis, then with the dist `27 passed, 0 failed (of 27 cells)`.
+  NEVER link a node_modules tree wholesale. VITEST = the locks (security's and auth's package-lock.json — print the version resolved in YOUR tree
+  beside every count and say whether VITEST-1 recurs; the auth lane is VITEST by `vitest.config.ts` + `package.json`, not jest — BLUF 7). BASH
+  SUITES: run them with /bin/bash (3.2.57 here), from the clone's repo root, exactly as run-shell-suites.sh does; print `/bin/bash --version |
+  head -1` beside every count; `jq` is /usr/bin/jq 1.7.1 (PR 1's suite FATALs rc 2 without it — run that control; PR 6's suite and the relink
+  reference do not call jq — say so). The systemTest suite: `bash systemTest/__tests__/manifest_quarantine.test.sh` from the clone root with
+  `npm_config_offline=true` exported — every cell spawns `npx tsx` from `systemTest/fixtures`; prove `npx --offline tsx --version` resolves from
+  the npx cache (tsx v4.23.15 — the seat; never a registry) BEFORE that lane; the suite prints `FAIL harness: the tsx driver did not run` and
+  exits 1 if it cannot — run THAT as the negative control (an empty `npm_config_cache` on a private path). shellcheck is NOT installed here: NOT
+  RUN, said so.
+
+You are FINDINGS-ONLY. You never fix, never merge, never push, never deploy, never comment, never file, never tick a box, never `@`, never write to
+Linear or GitHub (GET and query only), never write to the repo, and nothing goes to Peter or Stuart or any other human. Nothing to demo; no deploy of
+any kind; no kintsugi step. Datasec is out of scope entirely. Never delete anything anywhere.
+
+NEVER run a push, the real pre-push hook, or preflight.sh inside the Secuura checkout or any of its worktrees. No PR in this batch touches
+preflight.sh or the hook — but #1132 changes the GUARD every push runs as preflight LEG 13 (`preflight.sh:547 if ! bash
+scripts/check-shared-relink.sh` — the hook never names the guard; it runs `bash scripts/preflight/preflight.sh` at `.githooks/pre-push:278` and
+`run-code-guards.sh:99` lists the guard as "preflight/preflight.sh, leg 13" — the drafter's read at 9f0265eb0; confirm, and say whether the
+copy of the guard a push runs is the BRANCH's or develop's — on a push of #1132 itself the hook ran the branch's `tolower(L)` guard); the bash lanes are #1130's suite
+(`/bin/bash Blockchain/Dev/scripts/__tests__/container_trivy_exit_code_env_keeps_findings.test.sh` from the clone's repo root — it cp's the job
+into a fixture, runs docker/trivy as STUBS on a private PATH, the stub now reads `$PWD/trivy.yaml`), #1132's NEW suite
+(`/bin/bash Blockchain/Dev/scripts/__tests__/check_shared_relink_case.test.sh` — it self-locates the REAL guard from `HERE/..`, drives it on
+fixture Dockerfiles under mktemp, nothing real) and #1131's suite (`bash systemTest/__tests__/manifest_quarantine.test.sh`, the OFFLINE `npx tsx`
+driver), plus the siblings that name the job or the guard (container_trivy_image_filter 5 ok, container_trivy_failed_scan_is_loud 3 ok,
+check_shared_relink `106 passed, 0 failed`, check_shared_relink_tooling_tokens 6 ok, preflight_deps `56 passed, 0 failed`, ks949_main_seed_idempotence
+`27 passed, 0 failed (of 27 cells)` — seat, rc 0 each); every such run is ONLY inside YOUR own clones, and any real preflight.sh run (none is
+owed) would be ALWAYS with GATEWAY_URL=http://127.0.0.1:<a closed loopback port you chose and proved closed> exported, under the listener rules
+below. run-shell-suites.sh (once at develop and once on the all-six tree, as the batch control; #1132 ADDS a suite, #1131's is under systemTest/
+and already counted — the drafter PREDICTS reachability 43 at develop -> 44 on the all-six tree (the seat's in-hook read `43 passed, 0 failed
+(of 43)` on PRs 1 and 3 and `44 passed, 0 failed (of 44)` on PR 6 — measure, do not adopt); the PRIOR REPORT found it leaves 4 login_stub
+listeners per run) is ONLY inside your clones. `--check-unreached` both sides. AND THE HOOK'S TRIGGER (LEAD, READY 2): `.githooks/pre-push` :4
+"Fires only when the push includes changes under Blockchain/Dev" and :76 `changed=$(printf '%s\n' "$all_changed" | grep '^Blockchain/Dev/' || true)`
+— a push touching ONLY `systemTest/` ran NO preflight legs (the seat's #1131 push: `NO PREFLIGHT VERDICT — the pre-push hook ran NO legs on this
+push`); read the hook, confirm the mechanism from its bytes, and say whether that is a design (systemTest is not platform code) or a gap
+(systemTest's suites ARE in run-shell-suites.sh's 43) — a Polish / ticket CANDIDATE for Wednesday, filed by nobody here.
+
+NEVER print a credential value, and never open, read or copy a secrets file into output. A script may read GH_TOKEN / LINEAR_API_KEY by NAME from
+/Volumes/DevMASTER/!CODING/Secuura/Blockchain/4_Credentials/.env, and AGENTMAIL_API_KEY by NAME from /Volumes/DevMASTER/WEDNESDAY/4_Credentials/.env,
+only for GitHub GET + by-SHA fetches into your clones, a Linear query and the one verdict mail. Count, never echo.
+
+NO shared docker stack, no :6882 / :7082 slot, no kintsugi, no demo, no az, NEVER the wallet mnemonic (KS-535 HOLD). No container, no real Redis, no
+real chain, and NO REAL POSTGRES: a real Postgres listens on 127.0.0.1:5432 AND [::1]:5432 on this machine (`lsof -nP -iTCP:5432 -sTCP:LISTEN`, the
+ONLY permitted port instrument — never `nc`, `curl`, `psql` or any client against a forbidden port). No PR in this batch touches a database pool;
+the security and auth suites are in-process vitest with mocked stores (the seat's census: security 10 attempts / 10 established per whole run,
+auth 21 rows, every established peer 127.0.0.1 ephemeral, zero :5432); the ks949 seed-idempotence sibling "binds no TCP — a socket-only postgres,
+`PGPORT_NAME=54329` is a socket file name" (the seat's QUESTION — read its header and say whether that is right BEFORE you run it). You MUST stub
+or isolate so no run of yours can reach the real database, and SAY HOW, before your first run, in NOT-TESTED.written-first.md and in the report —
+the PRIOR REPORT's recipe is proven: a connect-census preload of YOUR OWN, outside the repo, reached by NODE_OPTIONS only, that records every
+connect attempt (host, port, test file) AND refuses any connect to port 5432 on any host before the socket opens (fail-closed), plus PGHOST /
+PGPORT / DATABASE_URL-class variables pointed at a loopback port you proved closed for EVERY run whose code could open a pool. Prove the block with
+a control that does NOT touch the real database, prove the census records (a planted connect to a closed loopback port appears), and prove a run
+with the preload removed records 0. Never "test" the block by connecting to 5432. Never connect to :5432 or to any service yourself. Read the
+:5432 census leg as the JSON field WITH its delimiter — `"port":5432,` — never bare digits (the 12th's drafter S1: bare `5432` matched a
+timestamp field; `"port":5432` without the comma matched `"port":54324`).
+CENSUS RULE v2 (Wednesday, 2026-09-20 18:03Z AEST) + the REPORT extension (12:26:37Z; extended to security at the 13th and to auth by the
+08:03:24Z ANSWER Q7 — "that is the whole census rule this round"): STOP on any attempt OR connection to :5432 on any host; STOP on any ESTABLISHED
+connection whose peer is not 127.0.0.1; security and auth: the baseline leg REPORTS only — security's REPORT set is the 13th's EMPTY set (the seat's
+second reading: EMPTY again, 7 runs, 10 attempts / 10 established per run all 127.0.0.1 ephemeral); auth's is the FIRST recorded set by any raise
+seat (EMPTY — 21 rows, all loopback; the seat's STOP-class 0 on both node lanes) and becomes the next seat's baseline. LEAD: those two EMPTY sets are the seat's instrument's reading —
+reproduce or refute each with YOUR instrument, per service, with a positive control each (a zero that needs its control), and state BY NAME whether
+any run of yours, tamper or clean, attempted :5432 or established a connection to any non-127.0.0.1 peer. LEAD: READY 3's evidence block prints
+"attempts 30, established 30" over "7 runs" while its PR-3 SPECIFICS print "10 attempts / 10 established" — say how the multiplicity scales with
+whole-suite runs and whether both lines are one reading. Run `docker info` ONCE and print its rc on its own line (UP is NOT permission). LOOPBACK
+ONLY: every listener binds 127.0.0.1:0. The bash suites are NOT instrumented (PR 1 / PR 6: no node process; PR 2's `npx tsx` children ARE node but
+are spawned per cell by bash — say NOT instrumented, and say whether a NODE_OPTIONS preload WOULD reach them if you exported it, then do NOT rely
+on it for the STOP legs: use lsof before / after).
+LISTENERS OF THE SERVICES THEMSELVES: security index.ts:83 `PORT || 4004` (`app.listen` at :1571) and auth index.ts:65 `PORT || 4003`
+(`app.listen` at :276) — no cell here imports a listener on its default port (the ks1194 file and the ks869 file drive
+route stacks / functions in-process — read each file's setup and say so); quote `lsof -nP -iTCP:4004 -sTCP:LISTEN` and
+`lsof -nP -iTCP:4003 -sTCP:LISTEN` (rc on its own line) BEFORE and AFTER the security and auth runs; quote `lsof -nP -iTCP:4005 -sTCP:LISTEN` and `lsof -nP -iTCP:4006
+-sTCP:LISTEN` once each at open and close (no lane here reaches anchoring or timestamping; a listener you did not start on them is still a
+finding). Never run two suites of the SAME service concurrently; if a listener you did not start appears on :4003 / :4004 / :4005 / :4006, STOP
+that lane's runs and say so — never kill it, never retry against it. Say whether "a listen is not logged by the recorder" is right about YOUR
+instrument (the PRIOR REPORT: right; it wraps Socket.prototype.connect).
+LISTENERS — KS-1201 stands: END EVERY LISTENER YOUR RUNS START, BY PID: identify each by port + argv + cwd, SIGTERM that pid, never a pattern kill,
+never pid 1, and recount; scope each cleanup to the caller's own process tree (stubs are BORN with ppid 1); a login_stub.mjs listener is cleared
+by its exact path. The seat reports 4 login_stub listeners per push that ran the preflight (`stubs=4 remaining=0` on #1130, #1132, #__N3__ … ; 0
+on #1131 whose push ran no legs), each cleared by exact worktree path and ppid 1; 0 started by any of the three bash suites. Quote an lsof
+TCP LISTEN census (+ cwd and argv per node pid + the login_stub count + the :4003 / :4004 / :4005 / :4006 state) BEFORE your first run, after every
+suite run and every tamper sweep, and at close. A listener you leave behind is a finding against you.
+No Akto, no k6, no Playwright, no Schemathesis run — rule on each per PR with the measured reason: no PR here changes an HTTP surface (five
+test-only; #1132's bytes are a push-guard's awk classifier), so none is owed; say so per PR in one line.
+
+NOT-TESTED.written-first.md is written FIRST, BEFORE any run, and opens with these at full prominence, none softened into a pass:
+  - The seat's in-hook preflight on the FIVE pushes that ran it: PREFLIGHT INCOMPLETE — 12/15 legs ran, 3 SKIPPED, "Nothing failed"
+    ("skips are not a pass" — the seat's own words); shell suites `43 passed, 0 failed (of 43)` on #1130 / #__N3__ / #__N5__ / #__N4__ and `44 passed, 0 failed (of
+    44)` on #1132 (its branch adds one); push protocol PROTOCOL-CLEAN on every push that reached origin (a first push: the tracking ref added at
+    origin's head). WHICH three: legs 3/15 Spec-auth conformance, 4/15 Path resolvability, 8/15 Served-spec consistency (preflight.sh's skip_stack
+    call sites at :296 / :310 / :495 under steps "3/15", "4/15", "8/15" — all three need a live gateway at GATEWAY_URL; the #1119-#1128 drafter
+    read them at 7be81d5c9 and preflight.sh is byte-identical at 9f0265eb0 — fe29676b7073). NAME THEM in your own words from the six push logs
+    (raise/KS-<key>-push.out, read-only), and say whether any of the three would have EXERCISED these changes had a stack been up (drafter's read:
+    NONE — five test files and a push guard the preflight never reads as product; the hook ran the BRANCH's preflight.sh per `.githooks/pre-push`,
+    which is develop's byte for byte on every one of these heads).
+  - The SIXTH push (#1131, systemTest/ only) ran NO preflight legs at all: `NO PREFLIGHT VERDICT — the pre-push hook ran NO legs on this push (a
+    FINDING, stated): its trigger is a change under Blockchain/Dev, and this PR touches only systemTest/` — the seat ran its suite standalone 14/14
+    and on the batch tree 14/14 instead. The hook's trigger is the LEAD above (BY-NAME 10).
+  - PR 1's FIRST push (08:34:17Z -> 08:39:37Z) was REFUSED at leg 14 — `shell suites: 42 passed, 1 failed (of 43)`, `FAILED:
+    Blockchain/Dev/scripts/__tests__/ks949_main_seed_idempotence.test.sh`, its own line `FAIL — packages/shared is not built
+    (…/worktrees/s-b14-ks1273/Blockchain/Dev/packages/shared/dist/index.js missing) — run: npm run build -w packages/shared`, `0 passed, 1 failed
+    (of 27 cells) — aborted`, `PREFLIGHT FAILED on leg(s) 14 (11/15 legs ran)`; push rc 1, PROTOCOL-DIFF tracking ref ABSENT, nothing at origin
+    (raise/pr1-attempt1/). The seat's diagnosis S6: deps15.sh built node_modules + the shared dist in the three node-lane worktrees only, but the
+    in-hook preflight runs its 43 shell suites INSIDE the pushing worktree and ks949's suite needs the dist — a HARNESS fault, environment-only,
+    zero repo bytes (deps15b.sh fixed the three bash-lane worktrees, rc 0 ×3, dist=yes ×3; the reddened suite standalone `27 passed, 0 failed (of
+    27 cells)` ×2 in s-b14-ks1273 and once each in -ks1135 / -ks958). Wednesday's 08:44:55Z ruling: a harness fault RESUMES the round, it does not
+    spend one; "the gate does not grade this as a finding on the product" — carry it as a RECORDED FACT with its instrument; reproduce the red
+    (a clone without the dist) and the green (with) as the seat's positive control; manifest_quarantine was GREEN in that run (42 of 43) — NOT the
+    leg-14 intermittent (the 13th's F6), say so explicitly and say whether the SAME class as INT-1 or a third class (a missing build artefact).
+  - GitHub mergeable_state: unstable on all six heads (no checks run; no CI signal exists for any head; the ruleset 18499832 "require-pr-gates",
+    active, has no required_status_checks rule — three rules: deletion, non_fast_forward, pull_request with required_approving_review_count 0 and
+    require_extra_approval_for_unattributed_changes true; conditions develop + main; unchanged since 2026-09-10); everything is measured here or
+    not at all.
+  - #1132: the guard's two product lines are exercised by the NEW suite's fixture Dockerfiles and by the reference sibling's 106 cells + #1121's 6
+    — NOT by a real push (the hook is never run here); "latent, closed" is the TICKET's reachability claim ("every real class Dockerfile writes
+    node_modules in its final stage"), quoted in the body — say what you measured of it (read the guard's classifier: which stage is judged, what
+    the uppercase spellings did BEFORE); shellcheck NOT RUN; the branch's mode for the new suite is 100644 (LEAD: at develop the 31 `scripts/__tests__/*.test.sh` are 16 × 100644 + 15 × 100755 — the drafter's ls-tree; run-shell-suites.sh invokes them how?); whether KS-958 is complete is
+    NOT this gate's (Refs, never a closing word; the READY file's "-> Done" is stale and the seat refused it).
+  - #1130: the stub's trivy.yaml arm is a FIXTURE claim (the stub reads `$PWD/trivy.yaml`; the real tool's config-file precedence is UNMEASURED
+    here unless trivy is on this Mac — `which trivy`; rc on its own line; if present reproduce flag > env > config OFFLINE against a local tarball,
+    never a registry pull; if absent, NOT RUN, said so); the job itself is UNCHANGED (touched only as the planted-and-restored EXITCODEFLAGGONE);
+    shellcheck NOT RUN; not instrumented; S6 above.
+  - #1131: a DIAGNOSTIC, not a pin — NO cell; 14 ok / 0 FAIL bare and patched (the suite's own tally); its evidence is the stderr tail printed
+    under DRIVERTHROWS (the change exists for the NEXT leg-14 red, which nobody here can reproduce on demand — say so); KS-1135's own ask (the
+    long-TMPDIR IPC socket path) is NOT addressed; the fixture manifest.ts is unchanged; shellcheck NOT RUN; NOT instrumented; NO in-hook preflight
+    ran on its push.
+  - #__N3__: a characterisation pin on a tenant-isolation surface; whether an audit-log row with NO tenant should answer the default tenant at all
+    is KS-880's question, NOT decided; the security whole-suite baseline 215 with its REPORT set EMPTY (the seat's second reading).
+  - #__N5__: a modify-in-place of an EXISTING cell (no new cell; the file stays 8; security 216/216 with PR 3) — its red proof is the tamper
+    CONNECTORIDDROPPED at develop (0 reds over 215 — the ticket's defect) vs with the patch (exactly the WRITE-half cell); the `--directory`
+    accommodation is a deviation from verbatim the seat declared; the SAME-FILE overlap with #__N3__ is a merge-order fact, not a defect.
+  - #__N4__: characterisation pins of TODAY's guards; KS-1236's stale-approval question and KS-1006's falsy-`mfaSecret` defect (the EARLIER
+    REPORT's STALEAPPROVALPATH / FALSYMFASECRETDOOR BY DESIGN rows) are NOT decided; auth's FIRST census REPORT set (EMPTY) becomes a baseline.
+  - How YOU isolate from the real Postgres on 127.0.0.1:5432 / [::1]:5432 (above), stated before any run.
+  - The intermittents (BY-NAME 11): the db.retry / ks1248 / ks1258 LOAD-1 / LOAD-2 cells are api-gateway's — NOT a lane this round (say so in one
+    line; run nothing of api-gateway); the manifest_quarantine leg-14 red (the 13th's F6, 1/14 under 41 parallel shell suites, never serial) —
+    #1131 is its DIAGNOSTIC, not its fix; if any shell suite reds under YOUR run-shell-suites.sh runs, re-run it standalone 3× serial and report
+    the ratio, and if the red is manifest_quarantine's, QUOTE the tail #1131 prints (the diagnostic's first real use); INT-1 (preflight_deps'
+    leg-14 flake, the 11th's) and F6 are the SAME CLASS (a shell suite red once under the hook's parallel load, never serial) and S6 is NOT (a
+    deterministic missing artefact) — say whether they are one finding, two or three.
+  - No live deployment, nothing served.

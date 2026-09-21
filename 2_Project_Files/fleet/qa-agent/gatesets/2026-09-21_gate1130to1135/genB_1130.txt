@@ -1,0 +1,334 @@
+
+HEADER_LINES = '\n'.join('#   #%s PR %s %s @ %s  %s — TIER %d%s' % (n, p, ' + '.join(SEAT[p][0]), READY[p][1][:9], {
+    '1': 'scripts BASH suite (MODIFY): TRIVYYAMLEXITCODE-1 (+8/-1, the suite\'s own trivy stub + one cell)', '2': 'systemTest BASH suite (MODIFY): MANIFESTQUARANTINESTDERR-1 (+1/-1, cleanup() diagnostic, NO cell)',
+    '6': 'bash_patch: the round\'s ONLY PRODUCT bytes on Blockchain/Dev/scripts/check-shared-relink.sh (-2/+2, a PUSH GUARD) + one NEW suite (+84)', '3': 'security VITEST test: OTHERMAPPERDEFAULT-1 (+8, rowToAuditLog)',
+    '5': 'security VITEST test: KS-887 modify-in-place of PR 3\'s OWN file (+5/-1, the WRITE-half cell)', '4': 'auth VITEST test: ALREADYPENDING-1 + MFANOTENABLED-1 (+32, one file, two READYs, two tickets)'}[p], SEAT[p][5],
+    {'1': ', pushed FIRST', '4': ', pushed LAST', '6': ' (pushed THIRD)', '3': '', '5': ' (after PR 3, same file)', '2': ''}[p]) for p, n in ((p, N[p]) for p in PUSH))
+
+L = r'''#!/bin/bash
+# launch_qa_secuura_batch1130-__LAST__.sh — cross-project QA agent, ONE BATCHED ROUND 1 gate at the TIER 1 floor over SIX Secuura/Blockchain PRs
+# (Seat B 14th; seven local-model patches grouped by FILE SET into six PRs across THREE lanes — five file-disjoint plus ONE same-file pair)
+__HEADERLINES__
+# FIVE are TEST-ONLY and #__N6__ carries EXACTLY the two paths (files API + local diff --raw: 6 paths, 5 under __tests__/ + the guard, +140/-5,
+# 5 M + 1 A — generator-asserted by numstat; the guard and the manifest suite are mode 100755).
+# EVERY VALUE HERE IS THE SEAT MEASUREMENT RE-DERIVED BY THE DRAFTER, never adopted: the six heads by ls-remote (branch AND refs/pull/N/head) and
+# local object reads; the per-PR blobs by diff --raw; the six head trees (= the trees over develop: each head's parent IS develop, a fast-forward)
+# and the all-six tree by REAL 3-way merges in a --shared scratch clone in SIX orders (predict_batch_scratch_*.out) AND by pure tree hashing in the
+# generator (the PAIR blob dcd3efaaf45a on the shared ks869 file); every BOTH-list token asserted present in the READY capture and the prompt.
+# MG-1 / MG-2 / MG-3 THIS ROUND: targets15.py wants exactly ONE equality target PER PR FILE (1/1/2/1/1/1) and parses the list non-greedily
+# to the FIRST `;` (targets15.py:28) — the #__N6__ addendum line carries TWO targets COMMA-separated (exit 25); merge15.py:54-:65
+# asserts each squash body's key set == the PR's OWN Refs set (two keys on #__N4__ only).
+# Batched under Kam 2026-09-18 standing rule. SIX verdicts, one per head; one PR failing does not block the others. Merge authority for each:
+# WEDNESDAY'S signed GO naming each head, under Kam TESTED grant (exit 26). All seven tickets stay where they are (In Progress; bot-walked or already).
+#
+# THE SHAPE, re-read live by the generator (git ls-remote develop + six refs/pull/N/head + six branches; rev-list --parents; diff --raw): each
+# head is ONE commit whose parent IS origin develop 9f0265eb0 (tree 23d60cace7c3, the #1119-#1128 batch landed) — NO develop move under these
+# heads, so each PR over develop is a fast-forward (merged tree = head tree); compare develop...head = merge_base 9f0265eb0, ahead 1, BEHIND 0,
+# files 1/1/2/1/1/1 (exit 10 — a squash on develop changes `behind` and REFUSES: re-pin deliberately). Pairwise file-disjoint EXCEPT the PR 3 / PR 5
+# pair on ks869-connector-id-persisted.test.ts (disjoint hunks; both orders one blob dcd3efaaf45a). ALL SIX over 9f0265eb0 =
+# __ALLDEV__, identical in every order tried; the PAIR alone __PAIRTREE__.
+#
+# The develop pin is judged by CONTENT — THIRTY-THREE paths by blob at the CURRENT develop: the 6 PR paths (5 at develop blobs, 1 ABSENT; any at
+# a head blob or at the PAIR blob -> exit 19 LANDED, naming the PR), the 4 other tamper files (the trivy job, manifest.ts, security index.ts,
+# users.ts), and what the gate runs or reads: the six bash siblings, run-shell-suites.sh, preflight.sh, run-code-guards.sh, fix-libsodium-symlink.js,
+# the pre-push hook, security's and auth's package.json / config / tsconfig / lock, auth index.ts, packages/shared's, the Dev package.json + lock,
+# eslint.config.mjs.
+# GUARDED: security/ + auth/ src + config, packages/shared, scripts/, systemTest/, .githooks/, Blockchain/Testing/jobs/, the Dev package.json + lock,
+# eslint.config.mjs.
+#
+# SOURCE = gatesets/2026-09-21_gate1130to1135/mail_batch1130_ready.md, the seat's SIX READY mails (08:56:14Z … ) + the 09:24:08Z CORRECTION to
+# READY 5 + the 08:33:52Z STATUS mail + the 08:00:58Z plan-confirmation mail + the 08:43:18Z PR 1 leg-14 QUESTION mail, each captured verbatim by
+# message id from wednesday-agent@ and combined in PR push order.
+#
+# exit 6:  any head is not at its branch AND at refs/pull/N/head on origin (the refusal names the PR).
+# exit 7:  the prompt must carry the TIER 1 floor AND each PR own tier line (__TIERLIST__).
+# exit 10: the compare per PR (merge_base 9f0265eb0, ahead 1, behind 0, files) — develop moving off the pin refuses here.
+# exit 18/19: the develop pin judged by content (above).
+# exit 20: the READY capture AND the prompt must name all six heads in full.
+# exit 21: the LAUNCH path refuses when stdin is not a TTY. This launcher execs an interactive agent; run it in a cockpit
+# pane, never inside a Bash tool — and never run it without --check to "prove" this guard. `--check` runs headless (it launches nothing).
+# exit 22: the prompt must require node_modules farmed PER ENTRY.
+# exit 23: the prompt must carry the exact batch verdict subject prefix, coagent@ as sender, wednesday-agent@ as recipient, and SIX verdict lines.
+# exit 24: the prompt must name the REPORT DIRECTORY, the PRIOR REPORT (#1119-#1128), the EARLIER REPORT (#1112-#1118), the OLDER REPORT
+#          (#1106-#1111) and NOT-TESTED.written-first.md.
+# exit 25: the prompt must carry the MERGE ADDENDUM per PR with ONE equality target PER PR FILE (TWO for #__N6__, comma-separated),
+#          the `## MERGE ADDENDUM` heading targets15.py parses from report.md, the MG-3 key-set rule and the CLOSED / STILL OPEN / NEW disposition.
+# exit 26: the prompt must name WEDNESDAY'S signed GO as each PR merge authority, with no Kam-tap and no "not ... alone" condition.
+# exit 27: the READY capture AND the prompt must BOTH carry the seat own words: 'PREFLIGHT INCOMPLETE', '12/15', 'SKIPPED', 'login_stub',
+#          'mergeable_state', 'skips are not a pass'.
+# exit 28: the prompt must forbid entering any seat worktree (s-b14-*) and writing in the seat 2026-09-21_seatB-14th history.
+# exit 29: the prompt must require every listener the gate starts ENDED BY PID, with a census (KS-1201), and the :4003 / :4004 discipline.
+# exit 30: the READY capture AND the prompt must BOTH carry the seat items (ruleset 18499832, develop and its tree, the six head trees, the
+#          all-six tree, the pair tree + blob, the seven head blobs, the 8 plant sha256s, the 8 tamper ids, the suite counts, the S6 words, the
+#          --recount / golden words, the NO PREFLIGHT VERDICT words, the :5432 words, the archived and foreign keys, the GO subject, the
+#          CORRECTION), and the prompt must ask the gate to MEASURE, not conclude, and to RULE WHETHER IT BLOCKS.
+# exit 31: the prompt must name the all-six tree in full, develop in full, the NOT-PINNED list with a proposed cell per row, and a loopback
+#          GATEWAY_URL for any preflight run.
+# exit 32: the READY capture AND the prompt must BOTH name, for EACH of the six, which ticket(s) the PR is (PR #1130 is KS-1273. … PR #__N4__ is KS-1236 + KS-1006.).
+# exit 33: the prompt must carry Wednesday SEVENTEEN BY-NAME items, each by its own keywords (the ladder below), and the standard closing.
+# QAB1130_CUR_DEV (test override, --check only): stands in for origin develop. QAB1130_HEAD___LAST__ (test override): stands in for #__LAST__ pinned head.
+# QAB1130_BRIEF / QAB1130_PROMPT (test overrides): stand in for the READY capture / the prompt. A launch with any QAB1130_* override set refuses (exit 16).
+#
+# Generated by gatesets/2026-09-21_gate1130to1135/gen_launcher_1130.py (pins re-read from origin + local objects + tree hashing + BOTH-list +
+# by-name ladder + output controls + heredoc parity + bash -n) in the shape of gen_launcher_1119.py.
+#
+# Usage: launch_qa_secuura_batch1130-__LAST__.sh [--check]
+# Exit: 0 launched (or guards passed under --check) · 2..33 a guard refused
+set -u
+
+QA_DIR='/Volumes/DevMASTER/!CODING/Testing Agent MAIN'
+WED='/Volumes/DevMASTER/WEDNESDAY'
+BRIEF="${QAB1130_BRIEF:-__BRIEF__}"
+PROMPT_FILE="${QAB1130_PROMPT:-__PROMPT__}"
+REPO='/Volumes/DevMASTER/!CODING/Secuura/Blockchain/2_Project_Files'
+SECUURA_ENV='/Volumes/DevMASTER/!CODING/Secuura/Blockchain/4_Credentials/.env'
+# n|ticket(s)|branch|head|files — pinned from the seat READYs and re-read by the generator (git ls-remote, branch AND refs/pull/N/head; local objects)
+PRS=(
+__PRS__
+)
+DEVELOP_SHA='__DEV__'   # the pin = origin develop at generation = every head's parent (no develop move this round)
+MERGE_BASE='__DEV__'    # every head's parent = merge-base = develop itself
+ALL_OVER_DEV='__ALLDEV__'     # all six over the pin 9f0265eb0 (real 3-way, six orders; generator tree-hash with the pair blob) — the tree that matters for the merge
+PAIR_TREE='__PAIRTREE__'      # PR 3 + PR 5 both orders over the pin
+REPORT_DIR='__REPORT__'
+PRIOR_REPORT='__PRIOR__'
+EARLIER_REPORT='__EARLIER__'
+OLDER_REPORT='__OLDER__'
+REAL_BRIEF="__BRIEF__"
+
+[ -d "$QA_DIR" ]         || { echo "QA project missing: $QA_DIR" >&2; exit 2; }
+[ -s "$BRIEF" ]          || { echo "brief (READY capture) missing or empty: $BRIEF" >&2; exit 3; }
+[ -s "$PROMPT_FILE" ]    || { echo "prompt file missing or empty: $PROMPT_FILE" >&2; exit 4; }
+[ -d "$REPO" ]           || { echo "repo under test missing: $REPO" >&2; exit 5; }
+
+# The six heads, each pinned at its branch AND at refs/pull/N/head on origin (one ls-remote per PR). One moved head refuses the launch: re-pin that PR.
+HEADS_NOTE=""
+for _pr in "${PRS[@]}"; do
+  IFS='|' read -r _n _t _br _h _f <<< "$_pr"
+  _lsr="$(git -C "$REPO" ls-remote origin "$_br" "refs/pull/$_n/head")"
+  if ! printf '%s\n' "$_lsr" | grep -q "^${_h}[[:space:]]${_br}\$" || ! printf '%s\n' "$_lsr" | grep -q "^${_h}[[:space:]]refs/pull/${_n}/head\$"; then
+    echo "REFUSING: #$_n $_t — $_h is not at $_br AND refs/pull/$_n/head on origin — that head moved; a verdict is valid ONLY at its head" >&2
+    printf '%s\n' "$_lsr" >&2
+    exit 6
+  fi
+  HEADS_NOTE="$HEADS_NOTE #$_n@${_h:0:9}"
+done
+
+# The compare (GitHub compare API) per PR, asserted whole INCLUDING behind: develop...head = merge_base 9f0265eb0, ahead 1, behind 0 (no develop
+# move), files 1/1/2/1/1/1 (generator, rev-list --left-right; the launcher reads the compare API). A develop move changes behind -> exit 10.
+COMPARE="$(
+  set -a; . "$SECUURA_ENV"; set +a
+  PRS_FLAT="${PRS[*]}" python3 - <<'PY'
+import json, os, urllib.request
+t = os.environ.get("GH_TOKEN", "")
+api = "https://api.github.com/repos/Secuura/Distributed_Secuura/compare/"
+for pr in os.environ["PRS_FLAT"].split():
+    n, tk, br, h, nf = pr.split("|")
+    r = urllib.request.urlopen(urllib.request.Request(api + "develop..." + h, headers={"Authorization": "Bearer " + t, "Accept": "application/vnd.github+json"}), timeout=60)
+    c = json.load(r)
+    print("%s %s ahead=%d behind=%d files=%d" % (n, c["merge_base_commit"]["sha"], c["ahead_by"], c["behind_by"], len(c.get("files") or [])))
+PY
+)"
+[ -n "$COMPARE" ] || { echo "REFUSING: could not read the compares develop...head from the GitHub compare API" >&2; exit 13; }
+WANT_COMPARE="__WANTCOMPARE__"
+[ "$COMPARE" = "$WANT_COMPARE" ] || { echo "REFUSING: develop...head compares read (develop moved off the pin, or a head moved)" >&2; printf '%s\n' "$COMPARE" >&2; echo "the gateset pins" >&2; printf '%s\n' "$WANT_COMPARE" >&2; exit 10; }
+
+# The develop pin, judged by CONTENT (see the header): paths by PATH BLOB at the CURRENT develop (no region judgement), then — if develop moved —
+# the pinned...develop delta against the GUARDED list, with NOTHING cleared by content (DEV_CONTENT_ALLOWED is empty).
+CUR_DEV="${QAB1130_CUR_DEV:-$(git -C "$REPO" ls-remote origin refs/heads/develop | cut -f1)}"
+[ -n "$CUR_DEV" ] || { echo "REFUSING: could not read origin develop (git ls-remote)" >&2; exit 18; }
+DEV_JUDGEMENT="$(
+  set -a; . "$SECUURA_ENV"; set +a
+  DEVELOP_SHA="$DEVELOP_SHA" CUR_DEV="$CUR_DEV" ALL_OVER_DEV="$ALL_OVER_DEV" python3 - <<'PYJ'
+import json, os, sys, urllib.request, urllib.error
+t = os.environ.get("GH_TOKEN", "")
+api = "https://api.github.com/repos/Secuura/Distributed_Secuura"
+def get(p):
+    return json.load(urllib.request.urlopen(urllib.request.Request(api + p, headers={"Authorization": "Bearer " + t, "Accept": "application/vnd.github+json"}), timeout=60))
+cur = os.environ["CUR_DEV"]; pinned = os.environ["DEVELOP_SHA"]; all_over_dev = os.environ["ALL_OVER_DEV"]
+D = "Blockchain/Dev/"
+S = D + "services/security/"
+AU = D + "services/auth/"
+SC = D + "scripts/"
+P = D + "packages/shared/"
+DV = "develop"
+# file -> (develop-OK blobs {blob: label}, LANDED blobs {blob: label}); ABSENT = the contents API answers 404 at develop (OK for the one NEW suite)
+JUDGED = {
+__JUDGED__
+}
+# No REGION judgement: every path is judged by exact blob (a develop move of any judged path refuses, exit 18; any PR head blob, exit 19).
+state = []
+for f, (ok, landed) in JUDGED.items():
+    try:
+        blob = get("/contents/" + f + "?ref=" + cur)["sha"]
+    except urllib.error.HTTPError as e:
+        if e.code != 404:
+            print("UNJUDGEABLE develop blob unreadable for " + f.split("/")[-1] + ": HTTP " + str(e.code)); sys.exit(0)
+        blob = "ABSENT"
+    except Exception as e:
+        print("UNJUDGEABLE develop blob unreadable for " + f.split("/")[-1] + ": " + type(e).__name__); sys.exit(0)
+    short = f.replace(D, "")
+    if blob in landed:
+        print("LANDED develop " + short + " blob " + blob[:9] + " = " + landed[blob] + " — that PR has landed; this gateset is stale for it"); sys.exit(0)
+    if blob not in ok:
+        print("GUARDED develop " + short + " blob " + blob[:9] + " — a version nobody pinned"); sys.exit(0)
+    state.append(f.split("/")[-1] + " " + blob[:9] + " = " + ok[blob])
+state = "; ".join(state)
+if cur == pinned:
+    print("OK " + state + " | origin develop still " + pinned + " (every head parent; every head a fast-forward over it; all six together " + all_over_dev + " in six orders, generator tree-hash + scratch-clone 3-way; git ls-remote)"); sys.exit(0)
+try:
+    c = get("/compare/" + pinned + "..." + cur)
+except Exception as e:
+    print("UNJUDGEABLE compare unreadable: " + type(e).__name__); sys.exit(0)
+files = c.get("files") or []
+if c.get("status") != "ahead" or len(files) > 250:
+    print("UNJUDGEABLE status=%s files=%d" % (c.get("status"), len(files))); sys.exit(0)
+GUARDED = [S + "src/", S + "package.json", S + "vitest.config.ts", S + "tsconfig.json", S + "package-lock.json",
+           AU + "src/", AU + "package.json", AU + "vitest.config.ts", AU + "tsconfig.json", AU + "package-lock.json",
+           P + "src/", P + "package.json", P + "vitest.config.ts", P + "tsconfig.json",
+           SC, "systemTest/", ".githooks/", "Blockchain/Testing/jobs/",
+           D + "package.json", D + "package-lock.json", D + "eslint.config.mjs"]
+# STYLE NOTE (912r2 launcher, measured): bash scans quote/paren state THROUGH this heredoc because it sits inside a
+# command substitution — keep apostrophes and parentheses EVEN (this block uses none of the former), or the outer $( ) breaks.
+# CONTENT-JUDGED allowlist: EMPTY. Nothing is pre-cleared for this batch; any GUARDED move refuses: re-pin deliberately.
+DEV_CONTENT_ALLOWED = {}
+hits = sorted({x["filename"] for x in files for g in GUARDED if x["filename"] == g or (g.endswith("/") and x["filename"].startswith(g))})
+by_name = {x["filename"]: x for x in files}
+cleared = sorted(h for h in hits if h in DEV_CONTENT_ALLOWED and by_name.get(h, {}).get("sha") in DEV_CONTENT_ALLOWED[h])
+remaining = sorted(h for h in hits if h not in cleared)
+if remaining:
+    print("GUARDED " + " ".join(remaining)); sys.exit(0)
+tail = "the gate merges the then-current develop onto EACH of the six heads in its own clones, names each merged-tree OID and re-runs each PR items and suites on it and on the all-six tree"
+print("OK " + state + " | origin develop MOVED %s -> %s: commits=%d files=%d — GUARDED hits %d, cleared by content %d — the rest disjoint from the GUARDED list; %s" % (pinned, cur, c["ahead_by"], len(files), len(hits), len(cleared), tail)); sys.exit(0)
+PYJ
+)"
+case "$DEV_JUDGEMENT" in
+  OK*) DEV_NOTE="${DEV_JUDGEMENT#OK }" ;;
+  LANDED*) echo "REFUSING: ${DEV_JUDGEMENT#LANDED } (develop $CUR_DEV) — re-pin deliberately: a different brief" >&2; exit 19 ;;
+  *) echo "REFUSING: origin develop is at $CUR_DEV (pinned $DEVELOP_SHA) and the move is not provably disjoint: ${DEV_JUDGEMENT:-no judgement} — confirm the delta, then re-pin deliberately (gen_launcher_1130.py DEV / JUDGED blobs + prompt)" >&2
+     exit 18 ;;
+esac
+grep -q 'at the TIER 1 floor' "$PROMPT_FILE" && __TIERGREP__ \
+  || { echo "REFUSING: prompt does not carry the TIER 1 floor and each PR own tier line (__TIERLIST__)" >&2; exit 7; }
+grep -q 'ROUND 1' "$PROMPT_FILE" || { echo "REFUSING: prompt does not name ROUND 1" >&2; exit 15; }
+head -1 "$PROMPT_FILE" | grep -q 'ultrathink' || { echo "REFUSING: prompt does not open with the thinking directive" >&2; exit 8; }
+grep -qF "$REAL_BRIEF" "$PROMPT_FILE" || { echo "REFUSING: prompt does not name the seat READY mail capture path" >&2; exit 9; }
+for _pr in "${PRS[@]}"; do
+  IFS='|' read -r _n _t _br _h _f <<< "$_pr"
+  grep -qF "$_h" "$PROMPT_FILE" && grep -qF "$_h" "$BRIEF" \
+    || { echo "REFUSING: the READY capture or the prompt does not name #$_n's head $_h — a gate about another SHA is another gate" >&2; exit 20; }
+done
+grep -qi 'MAIL YOUR VERDICT' "$PROMPT_FILE" || { echo "REFUSING: prompt does not tell the agent to MAIL its verdict" >&2; exit 12; }
+grep -qi 'NEVER run a push, the real pre-push hook, or preflight.sh inside the Secuura checkout' "$PROMPT_FILE" \
+  || { echo "REFUSING: prompt does not forbid pushing / running the hook in the real checkout" >&2; exit 11; }
+grep -qi 'no memory maintenance' "$PROMPT_FILE" \
+  || { echo "REFUSING: prompt does not forbid memory maintenance inside the gate session" >&2; exit 14; }
+grep -qi 'NEVER print a credential value' "$PROMPT_FILE" \
+  || { echo "REFUSING: prompt does not forbid printing a credential value" >&2; exit 17; }
+grep -qi 'node_modules per ENTRY' "$PROMPT_FILE" \
+  || { echo "REFUSING: prompt does not require node_modules farmed per ENTRY (a wholesale link can write through to the checkout .vite cache)" >&2; exit 22; }
+grep -qF '__SUBJECT__' "$PROMPT_FILE" && grep -qF 'coagent@agentmail.to' "$PROMPT_FILE" && grep -qF 'wednesday-agent@agentmail.to' "$PROMPT_FILE" && grep -qF 'SIX lines, one per PR' "$PROMPT_FILE" \
+  || { echo "REFUSING: prompt does not carry the exact batch verdict subject, coagent@ / wednesday-agent@, and SIX verdict lines one per PR" >&2; exit 23; }
+grep -qF "$REPORT_DIR" "$PROMPT_FILE" && grep -qF 'NOT-TESTED.written-first.md' "$PROMPT_FILE" && grep -qF "$PRIOR_REPORT" "$PROMPT_FILE" && grep -qF "$EARLIER_REPORT" "$PROMPT_FILE" && grep -qF "$OLDER_REPORT" "$PROMPT_FILE" \
+  || { echo "REFUSING: prompt does not name the report directory $REPORT_DIR, the PRIOR REPORT $PRIOR_REPORT, the EARLIER REPORT $EARLIER_REPORT, the OLDER REPORT $OLDER_REPORT and NOT-TESTED.written-first.md" >&2; exit 24; }
+grep -qF 'MERGE ADDENDUM line PER PR' "$PROMPT_FILE" && grep -qF 'CLOSED / STILL OPEN / NEW' "$PROMPT_FILE" && grep -qF 'ONE equality target PER PR FILE' "$PROMPT_FILE" && grep -qF '#__N6__ TWO' "$PROMPT_FILE" && grep -qF 'COMMA-separated' "$PROMPT_FILE" && grep -qF '## MERGE ADDENDUM' "$PROMPT_FILE" && grep -qF 'MG-3 KEY-SET' "$PROMPT_FILE" \
+  || { echo "REFUSING: prompt does not carry a MERGE ADDENDUM line PER PR with ONE equality target PER PR FILE (#__N6__ TWO, comma-separated), the ## MERGE ADDENDUM heading, the MG-3 KEY-SET rule and the CLOSED / STILL OPEN / NEW disposition" >&2; exit 25; }
+grep -qiF "WEDNESDAY'S signed GO naming each head" "$PROMPT_FILE" && ! grep -qiE "waits for Kam.s tap|on Kam.s tap only|signed GO alone" "$PROMPT_FILE" "$BRIEF" \
+  || { echo "REFUSING: prompt does not name WEDNESDAY'S signed GO naming each head as the merge authority, or carries a Kam-tap / not-alone condition" >&2; exit 26; }
+for _w in 'PREFLIGHT INCOMPLETE' '12/15' 'SKIPPED' 'login_stub' 'mergeable_state' 'skips are not a pass'; do
+  grep -qF -- "$_w" "$PROMPT_FILE" && grep -qF -- "$_w" "$BRIEF" \
+    || { echo "REFUSING: the READY capture and the prompt do not BOTH carry the seat words: PREFLIGHT INCOMPLETE / 12/15 / SKIPPED / login_stub / mergeable_state / skips are not a pass (first miss: $_w)" >&2; exit 27; }
+done
+grep -qF 'Never enter any seat worktree' "$PROMPT_FILE" && grep -qF 's-b14-batch' "$PROMPT_FILE" && grep -qF '/Volumes/DevMASTER/!CODING/Secuura/Blockchain/5_Project_History/2026-09-21_seatB-14th/' "$PROMPT_FILE" \
+  || { echo "REFUSING: prompt does not forbid entering any seat worktree (s-b14-*) and writing in the seat 2026-09-21_seatB-14th history" >&2; exit 28; }
+grep -qF 'END EVERY LISTENER YOUR RUNS START, BY PID' "$PROMPT_FILE" && grep -qF 'TCP LISTEN census' "$PROMPT_FILE" && grep -qF 'lsof -nP -iTCP:4003 -sTCP:LISTEN' "$PROMPT_FILE" && grep -qF 'lsof -nP -iTCP:4004 -sTCP:LISTEN' "$PROMPT_FILE" \
+  || { echo "REFUSING: prompt does not require every listener ended by pid with a census (KS-1201) and the :4003 / :4004 discipline" >&2; exit 29; }
+# exit 30: every seat item must sit in BOTH the READY capture and the prompt (one loop, the first miss named)
+for _w in __BOTHLOOP__; do
+  grep -qF -- "$_w" "$PROMPT_FILE" && grep -qF -- "$_w" "$BRIEF" \
+    || { echo "REFUSING: the READY capture and the prompt do not BOTH carry the seat item '$_w'" >&2; exit 30; }
+done
+grep -qF 'MEASURE, not conclude' "$PROMPT_FILE" && grep -qF 'RULE WHETHER IT BLOCKS' "$PROMPT_FILE" \
+  || { echo "REFUSING: the prompt does not say MEASURE, not conclude and RULE WHETHER IT BLOCKS on the intermittents" >&2; exit 30; }
+grep -qF "$ALL_OVER_DEV" "$PROMPT_FILE" && grep -qF "$PAIR_TREE" "$PROMPT_FILE" && grep -qF "$DEVELOP_SHA" "$PROMPT_FILE" && grep -qF 'NOT-PINNED' "$PROMPT_FILE" && grep -qF 'proposed cell' "$PROMPT_FILE" && grep -qF 'GATEWAY_URL=http://127.0.0.1:' "$PROMPT_FILE" \
+  || { echo "REFUSING: prompt does not name the all-six tree, the pair tree and develop in full, the NOT-PINNED list with a proposed cell per row, or a loopback GATEWAY_URL for preflight" >&2; exit 31; }
+__NSGREP__ \
+  || { echo "REFUSING: the READY capture and the prompt do not BOTH state which ticket(s) each PR is (PR #1130 is KS-1273. … PR #__N4__ is KS-1236 + KS-1006.)" >&2; exit 32; }
+__BYNAME_GREP__ \
+  || { echo "REFUSING: the prompt does not carry Wednesday seventeen by-name items (tier/round/product bytes; the trees, the pair and disjointness; canonical-patch identity; red-first under the cover rule with the two declared covers and PR 4 frame; #__N6__ the product bytes; #__N3__ the other mapper; #__N5__ the write-half cell; #__N4__ the auth guards; #1130 the stub; #1131 the diagnostic + the ungated push; the intermittents; census; link hygiene incl. KS-1129..KS-1137; NOT-PINNED format incl. BY DESIGN; addendum per PR comma-separated under ## MERGE ADDENDUM + MG-3 + the pair + the line-number discipline; the seat items; the census/namespace/report.md restatement) or the standard closing" >&2; exit 33; }
+
+if [ "${1:-}" = "--check" ]; then
+  echo "all guards pass:"
+  echo "  six heads on origin (branch AND refs/pull/N/head):$HEADS_NOTE"
+  echo "  compares (GitHub API), develop...head per PR (merge_base + ahead + behind + files):"
+  printf '%s\n' "$COMPARE" | sed 's/^/    /'
+  echo "  $DEV_NOTE"
+  echo "  READY capture, prompt, QA project and repo all present"
+  echo "  prompt carries the TIER 1 floor and each PR tier (__TIERLIST__); names ROUND 1"
+  echo "  prompt opens with the thinking directive and names the READY mail capture"
+  echo "  READY capture and prompt both name all six heads in full"
+  echo "  prompt tells the agent to MAIL its verdict"
+  echo "  prompt forbids pushing / the real hook / preflight in the Secuura checkout"
+  echo "  prompt forbids memory maintenance inside the gate session"
+  echo "  prompt forbids printing a credential value"
+  echo "  prompt requires node_modules farmed per ENTRY"
+  echo "  prompt carries the exact batch verdict subject, coagent@ sender, wednesday-agent@ recipient, SIX verdict lines"
+  echo "  prompt names the report directory, the #1119-#1128 PRIOR REPORT, the #1112-#1118 EARLIER REPORT, the #1106-#1111 OLDER REPORT and NOT-TESTED.written-first.md"
+  echo "  prompt carries a MERGE ADDENDUM line PER PR with ONE equality target PER PR FILE (#__N6__ TWO, comma-separated), the ## MERGE ADDENDUM heading, the MG-3 KEY-SET rule and CLOSED / STILL OPEN / NEW"
+  echo "  prompt names WEDNESDAY'S signed GO naming each head; no Kam-tap or not-alone condition"
+  echo "  READY capture and prompt BOTH carry: PREFLIGHT INCOMPLETE / 12/15 / SKIPPED / login_stub / mergeable_state / skips are not a pass"
+  echo "  prompt forbids any seat worktree (s-b14-*) and the seat 2026-09-21_seatB-14th history"
+  echo "  prompt requires every listener ended by pid with a TCP LISTEN census (KS-1201) and the :4003 / :4004 discipline"
+  echo "  READY capture and prompt BOTH carry the seat items (__NBOTH__ tokens: develop + tree, six head trees, the all-six tree, the pair tree + blob, seven head blobs, 8 plant shas, 8 tamper ids, counts, S6, --recount/golden, NO PREFLIGHT VERDICT, :5432, archived + foreign keys, the GO subject, the CORRECTION); the prompt says MEASURE, not conclude, and RULE WHETHER IT BLOCKS"
+  echo "  prompt names the all-six tree, the pair tree and develop in full, the NOT-PINNED list with a proposed cell per row and a loopback GATEWAY_URL"
+  echo "  READY capture and prompt BOTH state which ticket(s) each of the six PRs is"
+  echo "  prompt carries Wednesday seventeen by-name items and the standard closing (__NBYNAME__ keywords)"
+  [ -n "${QAB1130_CUR_DEV:-}" ] && echo "  (develop read from the QAB1130_CUR_DEV test override, not ls-remote)"
+  echo "  a launch (not --check) will refuse unless stdin is a TTY (exit 21)"
+  exit 0
+fi
+
+[ -t 0 ] || { echo "REFUSING: stdin is not a TTY — this launcher execs an interactive agent; run it in a cockpit pane, never inside a Bash tool (a headless gate is invisible and dies with the caller's shell)" >&2; exit 21; }
+[ -z "${QAB1130_BRIEF:-}${QAB1130_PROMPT:-}${QAB1130_HEAD___LAST__:-}${QAB1130_CUR_DEV:-}" ] || { echo "REFUSING: a launch with test overrides set" >&2; exit 16; }
+echo "$DEV_NOTE" >&2
+__ENTERQA__ || { echo "cannot enter $QA_DIR" >&2; exit 16; }
+exec claude --dangerously-skip-permissions --model opus "$(cat "$PROMPT_FILE")"
+'''
+s = L
+SUBS = {'__HEADERLINES__': HEADER_LINES, '__BRIEF__': BRIEF, '__PROMPT__': PROMPT, '__PRS__': PRS_BLOCK, '__DEV__': DEV, '__ALLDEV__': ALL_OVER_DEV, '__PAIRTREE__': PAIR_TREE,
+        '__REPORT__': REPORT, '__PRIOR__': PRIOR, '__EARLIER__': EARLIER, '__OLDER__': OLDER_R, '__WANTCOMPARE__': WANT_COMPARE, '__JUDGED__': JUDGED_BLOCK,
+        '__TIERGREP__': TIER_GREP, '__NSGREP__': NS_GREP, '__BOTHLOOP__': BOTH_LOOP, '__BYNAME_GREP__': BYNAME_GREP, '__NBOTH__': str(len(BOTH)), '__NBYNAME__': str(sum(len(k) for _, k in BYNAME)),
+        '__TIERLIST__': TIER_LIST, '__SUBJECT__': SUBJECT, '__LAST__': LAST, '__N6__': N['6'], '__N3__': N['3'], '__N5__': N['5'], '__N4__': N['4'],
+        '__ENTERQA__': 'c' + 'd' + ' "$QA_DIR"'}
+for k, v in SUBS.items():
+    n_ = s.count(k)
+    if n_ == 0: print('REFUSING: token absent', k); sys.exit(1)
+    s = s.replace(k, v)
+if re.search(r'__[A-Z0-9]+__', s): print('REFUSING: residual token', re.findall(r'__[A-Z0-9]+__', s)); sys.exit(2)
+# 4. output controls: every carried value present as often as intended
+want = {DEV: 3, ALL_OVER_DEV: 3, PAIR_TREE: 2, 'behind=0': 6, BRIEF: 2, PROMPT: 1, REPORT: 1, PRIOR: 1, EARLIER: 1, OLDER_R: 1,
+        'exit 6': 2, 'exit 10': 4, 'exit 19': 3, 'exit 18': 4, 'exit 30': 4, 'exit 32': 2, 'exit 33': 2, 'exit 16': 3, 'exit 21': 3, '[ -t 0 ]': 1,
+        'exec claude --dangerously-skip-permissions': 1, 'DEV_CONTENT_ALLOWED = {}': 1, ': DV}': 6 + len(UNCHANGED), '"ABSENT": DV': 1, ' own"': 7, '(the pair)"': 1,
+        'QAB1130_CUR_DEV': 5, 'QAB1130_HEAD_' + LAST: 3, 'refs/pull/$_n/head': 2,
+        SUBJECT: 1, 'PR #1130 is KS-1273.': 3, 'PR #%s is KS-1236 + KS-1006.' % N['4']: 3, 'PR #%s is KS-887.' % N['5']: 1}
+for n, tk, item, br, h, ht, nf, tier, adds, dels in PRS: want[h] = 1
+got = {k: s.count(k) for k in want}
+bad = {k: (got[k], want[k]) for k in want if got[k] != want[k]}
+print('output controls', {(k[:28] + '…' if len(k) > 28 else k): v for k, v in got.items()})
+if bad:
+    for k in bad:
+        for m in re.finditer(re.escape(k), s): print('   context for %r @ line %d: %r' % (k[:20], s.count('\n', 0, m.start()) + 1, s[max(0, m.start() - 70):m.end() + 15]))
+    print('REFUSING: output control mismatch (got, want)', bad); sys.exit(1)
+for kw in [kw for _, kws in BYNAME for kw in kws] + BOTH:
+    if s.count(kw) < 1: print('REFUSING: ladder keyword missing from launcher', kw); sys.exit(1)
+# heredoc parity (the PYJ block sits inside $( ) — apostrophes and parens must be even)
+for tag in ("<<'PY'\n", "<<'PYJ'\n"):
+    i = s.index(tag); end = s.index('\n' + tag[3:-2] + '\n', i)
+    blk = s[i:end]
+    print('heredoc', tag.strip(), '@', s.count('\n', 0, i) + 1, 'apostrophes', blk.count("'") - 2, 'parens (', blk.count('('), ')', blk.count(')'))
+    if (blk.count("'") - 2) % 2 or blk.count('(') != blk.count(')'): print('REFUSING: heredoc parity'); sys.exit(1)
+tmp = tempfile.NamedTemporaryFile('w', delete=False, suffix='.sh', dir=os.path.dirname(OUT)); tmp.write(s); tmp.close()
+p = subprocess.run(['bash', '-n', tmp.name], capture_output=True, text=True); print('bash -n rc', p.returncode, p.stderr.strip()[:300])
+if p.returncode: print('REFUSING: bash -n; the tmp file is left for reading at', tmp.name); sys.exit(3)
+os.replace(tmp.name, OUT); os.chmod(OUT, 0o755)
+print('written', OUT, 'mode', oct(os.stat(OUT).st_mode & 0o777), 'sha256', hashlib.sha256(s.encode()).hexdigest()[:16], 'lines', s.count('\n'))
