@@ -2582,3 +2582,8 @@ INCLUDED until he says otherwise.
 > Rather than loading the certificate, can it check for it in a specific local C or Mac drive? Allow the user to define where it is stored.
 
 *Note:* Receipted 11:4x with the reading: a page cannot read a path silently; the File System Access API (Chrome/Edge) lets the user pick a folder once, remembered per browser, re-read on each visit with one click; Safari/iOS fall back to import-once; a local helper is the only fully automatic route (offered). Folded into the Phase 2 builder brief.
+
+## 2026-09-21 12:52 — Kam (panel (view=wednesday) 12:50:55, verbatim)
+> Great, the live version looks perfect. I posted a couple of comments on that. Did you get these? And when you're ready, switch to using the live version only. Awesome, please generate a new key for my laptop and one for my iPad.
+
+*Note:* Receipted 12:5x with a measurement: 4 live rows from Kam (12:07 x2, 12:48 x2), all ciphertext — unreadable by any seat by design. Phase 3 commissioned: per-seat wrapped keys (D-2(b)), device keys for laptop + iPad with a re-wrap migration, and the cut-over to the live board only.
