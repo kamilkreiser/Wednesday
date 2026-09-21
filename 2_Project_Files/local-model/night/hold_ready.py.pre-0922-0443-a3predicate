@@ -137,19 +137,8 @@ def hold_code_patch():
     numstat = _read(os.path.join(chk, 'numstat.out'), 'numstat.out').strip()
     ns_rows = [l.split('\t') for l in numstat.splitlines() if l.strip()]
     touched = sorted({r[2] for r in ns_rows if len(r) == 3})
-    # The checker's A3 predicate (tasks/code_patch/checker.sh A3): touched == { product_file , exactly ONE test under
-    # test_dir that is not the reference test }, nothing else. `suggested_test_file` is the builder's SUGGESTION (one slug
-    # per ticket) — a split ticket's second part names its own test, and the checker accepts it; so must this tool.
-    # (2026-09-22 04:4x: KS-1231 PART B refused on suggested_test_file while its checker said PASS A3.)
-    test_dir = inp.get('test_dir') or ''; ref_test = inp.get('reference_test_file') or ''
-    tests_touched = [f for f in touched if f != product_file and test_dir and f.startswith(test_dir + '/')]
-    others = [f for f in touched if f != product_file and f not in tests_touched]
-    if product_file not in touched or len(tests_touched) != 1 or others or tests_touched[0] == ref_test:
-        die(f"touched {touched} is not {{ product_file , ONE test under {test_dir} }} (product present={product_file in touched}, tests={tests_touched}, other={others}, ref={ref_test})")
-    if tests_touched[0] != test_file:
-        print(f"NOTE: the touched test {tests_touched[0]} differs from the builder's suggested_test_file {test_file} — the checker's A3 accepts it; the READY names the TOUCHED file", file=sys.stderr)
-        test_file = tests_touched[0]
     declared = sorted({product_file, test_file})
+    if touched != declared: die(f"touched {touched} != declared {declared} (input.json product_file + suggested_test_file)")
     adds = {r[2]: r[0] for r in ns_rows if len(r) == 3}; dels = {r[2]: r[1] for r in ns_rows if len(r) == 3}
 
     # 4. product hunk '+' lines vs the brief's expected_plus (whitespace-stripped ordered equality; A3i covers bytes)
