@@ -63,14 +63,6 @@ if not minus_ok: die(f"'-' lines {minus} != must_remove {must_remove}")
 # 4. strict apply at the tip (T3) from its own artefact
 t3 = open(os.path.join(chk, 'apply_strict.out')).read() if os.path.exists(os.path.join(chk, 'apply_strict.out')) else ''
 strict_ok = ('PASS T3' in co)
-# 2026-09-21 16:5x (ledger 16:14 row): the T3 sentence is COPIED from checker.out, never templated. A non-empty
-# apply_strict.out is the strict apply's ERROR (e.g. 'corrupt patch at line 7'); then the checker passed T3 only
-# with an accommodation (--recount) and the word 'strict' may not be emitted as a claim.
-t3_line = next((l.strip() for l in co.splitlines() if l.strip().startswith(('PASS T3', 'FAIL T3'))), '')
-if not t3_line: die("checker.out has no 'PASS T3'/'FAIL T3' line — T3 cannot be asserted")
-strict_failed = (t3.strip() != '')
-if strict_failed and 'accommodation' not in t3_line: die(f"apply_strict.out is non-empty ({t3.strip()[:80]}) but the T3 line names no accommodation: {t3_line}")
-if strict_failed: strict_ok = False
 
 # 5. tampers: red set == declared, controls green — from each verdict file
 tampers = []
@@ -106,24 +98,24 @@ stamp = now.strftime('%H:%M %Y-%m-%d'); day = now.strftime('%Y-%m-%d')
 num = ticket.split('-')[1]
 fname = f"READY_{ticket}-{rowid}_ornith35b-q4_BRIEFED-TESTONLY-{title}-PASS-{passed}of{total}_{day}.diff.md"
 out = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'night', fname) if False else os.path.join('/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night', fname)
-if os.path.exists(out) and not dry: die(f"READY already exists: {out}")
+if os.path.exists(out): die(f"READY already exists: {out}")
 
 tamper_lines = '\n'.join(f"- `{tid}` → red exactly {decl}" for tid, decl in tampers)
 body = f"""# READY — {ticket}-{rowid} (Ornith, briefed, test_only, {mode} · {runner}) — PASS {passed}/{total} — HELD for QA
 
-> ⚠ **CANONICAL PATCH = `{patch_path}`** (from `ls` at {stamp}). Checker T3 (verbatim from checker.out): `{t3_line}`{' — STRICT APPLY REFUSED: `' + t3.strip() + '` (apply with --recount or rewrite the header; the raise seat states which)' if strict_failed else ''}; {golden_clause}.
+> ⚠ **CANONICAL PATCH = `{patch_path}`** (from `ls` at {stamp}). Checker T3: strict `git apply --check` at the tip {'PASS' if strict_ok else 'NOT ASSERTED'}; {golden_clause}.
 
 **Held {stamp} by {seat} after a source read (hold_ready.py — every clause below is built from the checker's own artefacts in `{chk}`, not typed).** Tip `{tip}`. Touches ONE file: `{test_file}` ({mode}). `+` lines {len(plus)} ordered-equal to the brief's `expected_plus` ({'ASCII' if nonascii == 0 else str(nonascii) + ' NON-ASCII chars'}); `-` lines {len(minus)} == `must_remove`. Green at the tip: {cells_total}/{cells_total} cells. Tampers ({len(tampers)}), each red exactly its declared set with controls green and the product file restored by bytes (T6/T7/T8):
 {tamper_lines}
 
-**PR NOTES for the raise seat:** TEST-ONLY — zero product bytes; one file, apply `patch.diff` {'WITH --recount (strict apply refuses: miscounted hunk header — every line byte-exact per the T3 line) — or rewrite the header and assert the blob equals the --recount result' if strict_failed else 'strictly'} at the tip (re-check `git ls-remote origin develop` first; if develop moved, re-run `git apply --check` and state it). Input: `{os.path.join(run, 'input.json')}`. Brief: `night/briefs/{ticket}-{rowid}.md`. Verdict source: `{os.path.join(run, 'checker.out')}`.
+**PR NOTES for the raise seat:** TEST-ONLY — zero product bytes; one file, apply `patch.diff` strictly at the tip (re-check `git ls-remote origin develop` first; if develop moved, re-run `git apply --check` and state it). Input: `{os.path.join(run, 'input.json')}`. Brief: `night/briefs/{ticket}-{rowid}.md`. Verdict source: `{os.path.join(run, 'checker.out')}`.
 
 ```diff
 {open(patch_path).read().rstrip()}
 ```
 """
 if dry:
-    print(f"DRY-RUN OK → {fname}\n  golden: {golden_clause}\n  plus={len(plus)} minus={len(minus)} cells={cells_total} tampers={len(tampers)} nonascii={nonascii}\n  header: {body.splitlines()[2]}\n  prnote: {[l for l in body.splitlines() if l.startswith('**PR NOTES')][0][:220]}")
+    print(f"DRY-RUN OK → {fname}\n  golden: {golden_clause}\n  plus={len(plus)} minus={len(minus)} cells={cells_total} tampers={len(tampers)} nonascii={nonascii}")
     sys.exit(0)
 open(out, 'w').write(body)
 print(f"HELD → {out}\n  golden: {'BYTE-IDENTICAL' if same else ('DIFFERS' if same is False else 'not compared')}; plus={len(plus)} minus={len(minus)} cells={cells_total} tampers={len(tampers)}")
