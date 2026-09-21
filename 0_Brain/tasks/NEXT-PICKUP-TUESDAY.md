@@ -36,7 +36,12 @@ Kam asked 15:24 (both tabs): "How's the sync going with the portable drive?" Mea
   - The engine gained `DEVNAS_PATHS` (backup `.pre-0921-1615-devnaspaths`; `!SYNC FILES` is NOT a git repo).
   - `nas_sync.sh` has a tuesday branch (aa98b478e).
   - The plist has `WED_AGENT=tuesday`.
-  - **STILL UNLOADED:** arming waits on the read-only rsync preview in `.claude/jobs/4c844a00/tmp/nas_preview/summary.txt`. If NAS-only or NAS-newer files are non-trivial, tell Kam BEFORE arming; otherwise `launchctl bootstrap gui/$(id -u) ~/Library/LaunchAgents/com.tuesday.nassync.plist` for 23:00.
+  - **PREVIEW DONE (16:4x) — DO NOT ARM.**
+    - Datasec: T9→NAS 23,331; **NAS-only (would copy INTO T9) 137,309**; NAS-newer 3. TUESDAY is not on the NAS at all.
+    - The 137k: 51,021 are one abandoned `.unison.qa-worktrees.*.tmp`; ~65k are old myPKI/CypherKey copies; HPSM and Security Review make up the rest.
+    - **The T9→NAS direction would have pushed SECRETS** (msal token caches, service_principal_entries.json, gh hosts.yml, a private .pem, a private deploy key). **Excluded 4_Credentials / 3_Access_Keys / .unison*** (39124c601).
+  - **BLOCKED ON KAM: card `t9-nas-leg-direction`**, recommending (a) one-way drive→NAS additive (a `-force <T9> -nodeletion <NAS>`-style opt-in in the engine).
+  - **Re-arm ONLY after he rules.** `launchctl bootstrap gui/$(id -u) ~/Library/LaunchAgents/com.tuesday.nassync.plist` for 23:00. The plist already has WED_AGENT=tuesday.
 
 ### 🟢 CHECKPOINT 65% (15:5x) — STATE NOW, newest first
 - **RD-518 round 3 READY @ `4230d23`** (NexusAI-C, 05:53Z): G-01 fixed (`role==='admin'`), G-02 covered behaviourally (new `rd518-r3-health-detail-decision.test.js`), BOTH red-proofs fire, 3796/3796. **Its GATE is RUNNING in pane %29** (launcher `launch_qa_nexusai_rd518_round3_4230d23.sh`: guard 22 = exactly 3 files, **guard 25 = authEnforcement.js byte-unchanged, enforcing RD-594's exclusion**). Round 3 is the LAST round Kam authorised: a Major → ticket, and a 4th round is his.
