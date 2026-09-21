@@ -8,10 +8,10 @@ TARGET A — RD-495 (+RD-498 folded). Branch rd-495-csp-violations-hard-gate-s71
   - GET /api/admin/csp-violations moved below the requireAuth gate (C-129): anonymous 401, viewer 403, admin 200.
   - POST /api/csp-report stays pre-auth with a 16 KB cap, a lazily built per-address limiter (60/min), query and fragment stripped in the buffer AND the log (RD-498), and a warning instead of an empty catch.
 
-TARGET B — RD-525. Branch rd-525-export-erasure-coverage-s76e at @RD525_SHA@: E's last push 91f5b73 plus ONE lane-A commit by NexusAI-D in the server entry point only, the onPurge('audit-buffer') registration. Ten more stores exported and erased (11 -> 21); onPurge hooks run before the first unlink; the export redacts session ids always and password hashes and mail secrets unless includeSecrets.
+TARGET B — RD-525. Branch rd-525-export-erasure-coverage-s76e at 792fda0b3dc1884b32f3e04877f18959fbaaae77: E's last push 91f5b73 plus ONE lane-A commit by NexusAI-D in the server entry point only, the onPurge('audit-buffer') registration. Ten more stores exported and erased (11 -> 21); onPurge hooks run before the first unlink; the export redacts session ids always and password hashes and mail secrets unless includeSecrets.
 
 TARGET C — RD-575. Branch rd-575-purge-reaches-attachments-s76e at @RD575_SHA@, off main aae041a. The purge removes the attachment directory as a tree and removes symlinks without following them; the export streams the tree file by file without .incoming.
-RD-575 STATUS: IN THIS GATE
+RD-575 STATUS: NOT IN THIS GATE
 
 THE QUESTIONS, each by measurement (the brief's sections 3 to 6 carry the full list):
   - A: is every other pre-gate admin route byte-unchanged (the move decides ONE route)? Is the lazy limiter applied from the first request, one instance under concurrency, and keyed per address behind the proxy (READ ONLY acceptable, labelled)? Does stripping cover both report formats (report-uri and the Reporting API) and every URI field? Does anything still log the raw body? Readout exposure beyond query strings is reported, not a blocker.

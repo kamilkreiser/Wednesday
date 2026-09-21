@@ -43,13 +43,14 @@ done
 case "$INCLUDE_RD575" in 0|1) ;; *) echo "REFUSING: INCLUDE_RD575 must be 0 or 1 (got '$INCLUDE_RD575')" >&2; exit 21 ;; esac
 
 # ─── THE VALUES STILL TO PIN (one variable each; the brief and prompt carry the same placeholders) ─────────────────
-RD525_SHA="${QA_RD525_SHA_OVERRIDE:-@RD525_SHA@}"
+RD525_SHA="${QA_RD525_SHA_OVERRIDE:-792fda0b3dc1884b32f3e04877f18959fbaaae77}"
 RD575_SHA="${QA_RD575_SHA_OVERRIDE:-@RD575_SHA@}"
 # Pin-time shape of B's lane-A tail after 91f5b73 (check with `git log --format='%H %P' 91f5b73..<RD525_SHA>` and
 # `git diff --name-only 91f5b73 <RD525_SHA>`): default = D's one commit, the server entry point only. If D also commits
 # the regenerated counts (separately or in the same commit), set the count and add scripts/verify-expected-counts.json.
-B_LANEA_EXPECTED_COMMITS=1
-B_LANEA_EXPECTED_FILES='backend/server.js'
+B_LANEA_EXPECTED_COMMITS=2
+B_LANEA_EXPECTED_FILES='backend/server.js
+scripts/verify-expected-counts.json'   # NEWLINE-separated: guard 29 compares line lists
 # Pin-time shape of C (WIP at drafting: 1 commit, 6 files). Re-count at pin; if E adds commits or files, set them here.
 C_EXPECTED_COMMITS=1
 C_EXPECTED_FILES='__tests__/erasure-partial-purge-leaves-a-record.test.js
