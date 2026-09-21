@@ -1,11 +1,10 @@
-# Ornith candidates — derived 2026-09-21 22:37 from 340 KS Backlog/Todo tickets (read-only, unpaginated)
+# Ornith candidates — derived 2026-09-22 04:57 from 314 KS Backlog/Todo tickets (read-only, unpaginated)
 
 A CENSUS for the coordinator to brief from, easy → hard (Kam 2026-09-15 16:40 / 18:19). A ticket here is a candidate, not a task: read it, read the file at the tip, write `night/briefs/<id>.md`, then queue it. Auth-shaped titles are excluded (LAST); Peter/Stuart tickets and PR-attached tickets are excluded outright.
 
-## T1 services (vitest, one file) — 26
+## T1 services (vitest, one file) — 25
 - KS-678 (P2) [resolved:basename, a HINT — read the file] #568 publishes 17 URLs on secuura.io — `scripts/openapi-examples/synthesize.ts`
 - KS-683 (P2) Anchor-status standoff: a consumer repolls anchors K reports as terminally faile — `services/anchoring/src/index.ts`
-- KS-947 (P2) [resolved:basename, a HINT — read the file] KS-733 gate blindness (F3+F4): the p — `services/api-gateway/src/routes/proxy.ts`
 - KS-953 (P2) CLASS: editing api-gateway/src/index.ts silently reddens packages/shared, and no — `services/api-gateway/src/index.ts`
 - KS-955 (P2) [resolved:basename, a HINT — read the file] A fresh clone cannot run the four pl — `services/auth/src/services/accountLockout.ts`
 - KS-987 (P2) [resolved:route, a HINT — read the file] A deploy that rsyncs the OpenAPI spec a — `services/api-gateway/src/index.ts`
@@ -39,21 +38,19 @@ A CENSUS for the coordinator to brief from, easy → hard (Kam 2026-09-15 16:40 
 - KS-630 (P3) Wire the status-page XSS probe into preflight (or decide not to) — it runs today — `scripts/preflight/preflight.sh`
 - KS-789 (P3) CONTRIBUTING.md justifies the hook's degradation and its --no-verify bypass with — `.githooks/pre-push`
 
-## T3 jest services (originate, governance) — 5
+## T3 jest services (originate, governance) — 4
 - KS-1019 (P3) [Question] The document's whole `blockchain` block is published as z.unknown() — — `services/originate/src/originate.openapi.ts`
 - KS-1263 (P3) A partly-completed /share or /transfer-custody is now unattributed: the multi-wr — `services/originate/src/routes/documents.ts`
-- KS-1265 (P3) POST /api/documents saves the document and its provenance row, then answers 400  — `services/originate/src/routes/documents.ts`
 - KS-759 (P3) tenantId is read through two `as unknown as` casts because it is not on JwtPaylo — `services/originate/src/middleware/auth.ts`
 - KS-1084 (P0) READ ONLY / unverified: the gateway's own Authorization-only calls to originate  — `services/originate/src/index.ts`
 
 ## T4 docs (doc_patch) — 1
 - KS-965 (P4) [resolved:docs, a HINT — the ticket MENTIONS the file] 87 documentary sites still publish the retired admin credential — wrong rather t — `docs/BROWSER-TESTING-GUIDE.md`
 
-## T5 multi-file / later — 30
+## T5 multi-file / later — 29
 - KS-1051 (P2) develop is RED on the services/originate jest suite and NOTHING catches it — the — `scripts/preflight/preflight.sh`, `.githooks/pre-push`
 - KS-1055 (P2) Per-tenant databases never receive the file migrations — CORE_MIGRATIONS FORCEs  — `services/api-gateway/src/startup-migrations.ts`, `services/tenant-provisioning/src/index.ts`
 - KS-1100 (P2) [resolved:basename, a HINT — read the file] Kintsugi deploy 4554b25e2: four live — `services/auth/src/routes/mfa.ts`, `services/auth/src/repositories/userRepo.ts`, `services/anchoring/src/chainHealthStatus.ts`
-- KS-1231 (P2) A connector allow-list fails open when platform-settings integrations is not a c — `services/api-gateway/src/routes/verification.ts`, `services/api-gateway/src/services/health.ts`
 - KS-1241 (P2) [resolved:route, a HINT — read the file] T-4: POST /api/v1/documents never answe — `services/api-gateway/src/index.ts`, `services/api-gateway/src/middleware/scopes.ts`, `services/api-gateway/src/routes/proxy.ts`
 - KS-1262 (P2) Security: PUT /api/settings/notifications writes the same key namespace as platf — `services/api-gateway/src/services/redis.ts`, `services/api-gateway/src/routes/admin.ts`
 - KS-485 (P2) Security review — plan, methodology & handover (Platform K) — `services/api-gateway/src/routes/notifications.ts`, `services/originate/src/repositories/documentRepo.ts`, `services/originate/src/index.ts`
@@ -106,50 +103,33 @@ A CENSUS for the coordinator to brief from, easy → hard (Kam 2026-09-15 16:40 
 - KS-966 — named in READY_KS-972_ornith35b-q4_BASHPATCH-REANCHORED-PASS-7of7_2026-09-16.diff.md
 - KS-999 — named in READY_KS-1186_ornith35b-q4_AUTH-5SITE-LINEKEYED-PASS-7of7_2026-09-17.diff.md
 
-## HELD (READY_* or done.md PASS) — 79
+## HELD (READY_* or done.md PASS) — 56
 - KS-1009 Security: GET /api/auth/wallet/status returns userId + role to ANY anonymous cal
 - KS-1011 KS-666 stack marker reads "unknown" for owner/branch/commit/started_at whenever 
 - KS-1028 KS-754 gate F-1 (MAJOR): a step-12 throw skips the USER_ERASED fan-out AFTER the
 - KS-1031 KS-754 gate F-4: DEPLOY CONDITION — apply 048 BEFORE rolling the originate image
 - KS-1033 KS-926 residue: the three guards that could NOT be wired, and what each needs fi
 - KS-1034 check-stack-safety.sh resolves the WRONG repo root inside a git hook and calls p
-- KS-1037 The NO-FORCE-PUSH rule exists only in .githooks/pre-push and in no .md — documen
 - KS-1040 Push preflight leg 4 reports 'a published path is unroutable' when the real caus
-- KS-1045 KINTSUGI-DEV-SERVER-PLAN.md still says the VM "has NOT been created" — Stage B r
 - KS-1047 pre-push:230 names the stack-dependent legs as (3, 4, 7); measured they are 3, 4
-- KS-1049 A PR's Test Evidence must state whether the preflight RAN — the hook skips syste
 - KS-1074 The poller/reconcile blob writers also erase threadToken — on the CONFIRM/heal p
 - KS-1081 CONFIG DRIFT: two tracked env templates disagree by ~39 vars — bootstrap-env.sh 
 - KS-1089 run-shell-suites.sh polish from #953's tier-2 gate: make `--list` survive a tree
 - KS-1090 api-gateway + originate: tsc never type-checks #951's three wiring tests, and th
 - KS-1093 check-stack-safety.sh 6f reports a FALSE red once a real Playwright run exists —
-- KS-1097 Merge-rule docs after #957: the v4 footer and two gate statements gloss TESTED w
 - KS-1108 Akto harness: loadSecretsYml() parses config/secrets.yml with no catch — the KS-
 - KS-1117 k6 YAML loader: a BOM immediately followed by a comment is a marked syntax error
-- KS-1118 POST /api/verification/verify: the `documentHash`-over-`hash` precedence is unpi
-- KS-1120 GET /api/presentations/:id exact-or-404: the memory-path PREFIX class and the DB
 - KS-1121 Security: credentialRepo.getById resolves a credential by SUBSTRING (LIKE '%id%'
 - KS-1123 api-gateway verify: an empty-string / 0 / false anchor status is one edit (`??`→
 - KS-1127 run-shell-suites.sh counts an exit-0 SKIP as `passed` — a suite that ran 0 of it
-- KS-1133 verify-hash precedence: v1 hash-LAST, v2 hash-FIRST — document the split on both
 - KS-1139 Bare arithmetic-command `((X++))` under `set -e` — exits 1 at 0 and bash ≥ 4.1 e
-- KS-1140 ks879 guard: the 🔴 cell walks the tree on its own (`offendersUnder(DEV_ROOT)` :1
-- KS-1152 L5 gate records (#799/#880/#985): jwt.ts citation ×5, security log title, dist t
-- KS-1156 AUTH4 gate records (#983 r2 / #984 r2 / #986 / #987): H-limiter MACHINE_AUTH_MET
-- KS-1158 L3a gate records (#912 r2 / #937): the placeholder-hash anchoredAt carry keys on
 - KS-1160 originate POST /api/webhooks persists the RAW url where PATCH persists the norma
 - KS-1164 gate/report.ts writeGateReport overwrites the input summary when --summary does 
 - KS-1171 Guard 3's re-poll reads a MIXED window as ABSENT — one early "not found" then an
-- KS-1179 safeOutboundRequest tests: no cell pins DNS-layer classification, ks932 cells de
-- KS-1181 KS-727 error-handler guard: corpus-1 canary cells cannot witness a hit, and the 
 - KS-1182 demo-service errorHandler: unchecked err.status (NaN crashes the process, 200/30
-- KS-1185 KS-1183 gate follow-ups: validate the approve forward timeout override, and pin 
 - KS-1186 userRepo.ts: five sibling reads still return fromRow unawaited inside try, so a 
-- KS-1188 #1013 gate findings (KS-999): the getUserById route-level 503 and its log line a
 - KS-1192 ks871-real-app-canonical-audit-rows production cell does not pin production mode
-- KS-1193 #1015 gate findings (KS-1018): the message-form pool timeout, the review route's
 - KS-1196 admin POST /api/admin/document-types ids are dt-${Date.now()}: two creates in on
-- KS-1199 ks1072 verify cells pin no verdict on a tie whose rows differ in status: a compa
 - KS-1201 bootstrap_login_diagnosis.test.sh leaks its 4 login stubs on every run: start_st
 - KS-1205 api-gateway per-key limiter follow-up (KS-1195 gates): a JWT claim can name a ke
 - KS-1212 ks1187 tests: no cell pins that the erasure door reads its own router's caseSens
@@ -158,9 +138,9 @@ A CENSUS for the coordinator to brief from, easy → hard (Kam 2026-09-15 16:40 
 - KS-1220 ks839 cells pin padded wildcards with ASCII separators only - a second tokenizer
 - KS-1221 ks744 cells never test a falsy claim - a verificationLevel of '' or null must fo
 - KS-1227 ks1072 postTier2's anchor-store witness counts every stub request, leaks its lis
-- KS-1229 ks1213 cells: ten tampers stay green - a refused issue can mint a holder stub or
-- KS-1237 ks1204 cells: three tampers stay green - the array-like allow-list, the refusal 
+- KS-1231 A connector allow-list fails open when platform-settings integrations is not a c
 - KS-1250 O-2: RUNBOOK §2.2 documents SMOKE_BASE_URL, but scripts/smoke-test.sh ignores it
+- KS-1265 POST /api/documents saves the document and its provenance row, then answers 400 
 - KS-1277 documents.ts: two stale comments about on-behalf-of recording (:2327-2334 inside
 - KS-623 Test-token env guard is asymmetric: the gateway fails closed on an unset NODE_EN
 - KS-629 kyc `livenessVideo` is accepted by spec and runtime, then silently discarded — n
@@ -168,24 +148,18 @@ A CENSUS for the coordinator to brief from, easy → hard (Kam 2026-09-15 16:40 
 - KS-730 Security: 71 inline handlers still return err.message verbatim off-production — 
 - KS-747 Spec drift: GET /api/security/keys declares no parameters while the handler requ
 - KS-794 verify-file returns `fileSize` on every 200 and neither response schema declares
-- KS-855 The OAuth `AVAILABLE_SCOPES` list is a second, divergent scope vocabulary — deri
-- KS-864 Dead-estate pointers in RUNTIME SOURCE outside deployment/azure — system-status.
 - KS-865 check-no-latest-tags.sh silently skips a missing input — it scans 5 of the 6 fil
 - KS-866 Merge protocol: the server-side `sha=` pin protects the PR head, not the base — 
 - KS-884 pre-push resolves the bare name `develop`, so a TAG named develop beats the bran
 - KS-888 dbSaveApiKey SWALLOWS a failed INSERT — POST /api/keys answers 201 for a key tha
-- KS-890 Runbook: a code-first deploy leg must use `docker compose up -d --no-deps <svc>`
 - KS-908 connectorId persists but is invisible through the API — POST and GET both return
 - KS-910 Preflight leg 12 executes ZERO suite cells — it is a reachability check, so with
-- KS-928 The demo-seed gate's predicate is tested but its CALL SITE is not — delete admin
 - KS-938 Security: "MFA disabled" leaves the TOTP seed and hashed backup codes in the row
-- KS-944 The gateway's auth gate reads the spec's security: [] — nothing pins the four pu
+- KS-947 KS-733 gate blindness (F3+F4): the parity cell misses skip:() and mount ORDER, a
 - KS-960 Two schema sources disagree on whether users.email is unique — a statement valid
 - KS-972 start-secuura.sh banner prints admin@secuura.com / admin123, which has returned 
 - KS-974 Published bound vs runtime bound on rate-limit scope: /check enforces code UNITS
-- KS-975 rateLimitScope tri-state: a MALFORMED `sub` silently became a 403 on the ungated
 - KS-976 Rate-limit refusals name the wrong field: 400 says "Key required" when the key w
-- KS-979 KS-597's own bind test file repeats two claims that were corrected in the produc
 
 ## SET ASIDE with a recorded reason — 30 (re-read only if the ticket's updatedAt moved)
 - KS-1063 — decision-class: its own words say the design question comes first (updated 2026-09-09)
