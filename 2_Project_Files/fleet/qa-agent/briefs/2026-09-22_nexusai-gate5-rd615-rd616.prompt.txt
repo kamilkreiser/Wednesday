@@ -1,0 +1,48 @@
+ultrathink
+
+You are the fleet QA/testing agent running ONE BATCHED gate (gate 5) on Datasec/NexusAI: two targets in one session, BOTH TIER 1. Give the verdict SEPARATELY PER TARGET.
+
+READ YOUR COMMISSION FIRST: /Volumes/KK_T9_External_HDD/TUESDAY/2_Project_Files/fleet/qa-agent/briefs/2026-09-22_nexusai-gate5-rd615-rd616.md
+
+TARGET A — RD-615 (TIER 1). Branch rd-615-audit-flush-epoch-s77f at b7fc78f2cb4e3650f4e045596688beed924aeaaa, off main 982a84f2d0c72596a2d389897439e1d8d3425068: four commits, 5f99fcb1c1c8178105b0dd3c56715ef44a0bcc04 (the fix in the server entry point: a purge epoch checked after writeFile and after rename, plus cells W1/W2 and a slow-flush preload), 71f2949 (dataErasure.js comment only; its message cites C-131 in error, C-132 is meant), c60a00d (cells wait for a clean exit), b7fc78f (counts 3864/220). Gate 2's F-B1: an erasure landing mid audit-flush must not resurrect the pre-erasure entries.
+  - Re-derive the red-proof yourself: M (the server entry point from 982a84f, tests kept) must redden W1 and W2 with both CONTROLs green; FIX 4/4. Read why each red is red. Add your own mutants.
+  - The preload delays BEFORE the real writeFile/rename. Say which interleavings W1/W2 really prove, and drive the ones they do not (purge after the write resolves; purge after the rename resolves), plus gate 2's own timer-flush repro, on a running server.
+  - RD-627: MEASURE whether an erasure removes a stray audit-buffer.json.tmp (planted before the erasure, with a findable pre-erasure needle), whether the erasure record names it, and what a second SIGTERM mid-flush leaves behind. The builder's answer is READ, NOT MEASURED. Class-hunt other .tmp siblings of customer files.
+  - Two overlapping flushes (builder NOT TESTED). C-68 re-runs; full verify (predicted 3864/220).
+
+TARGET B — RD-616 + RD-617 (TIER 1). Branch rd-616-617-s79h at f0519fd2390c7d5f2103e72dddac3adc276df639, off main 982a84f: cd6cd55735ceac4e931e0f3dea049279ed18bf63 (the change) and f0519fd (counts 3871/220). machine-id mode now stores both mail secrets ENC: and decrypts them; an unknown shape in the export is withheld and named instead of passed through as redacted; RD-413 option B (Kam: with NO key source the password is still saved, never refused) kept and guarded by M-413; the rd412 RD-413 cell's fixture moved (C-97); the placeholder now says "stored form".
+  - Re-derive all five arms yourself: R0 27/27, M-616 red M1-M3, M-616d red M2-M3, M-617 red the six W rows, M-413 red the rd412 option-B cell.
+  - Drive POST /api/setup/mail-config through the REAL HTTP route on a RUNNING server in machine-id mode and read the stored file BYTES: no plaintext anywhere under the data directory or the logs; a restart reads it back; the export over HTTP, default and includeSecrets, two parsers, raw and decompressed: no plaintext in either.
+  - Option B on a real server: establish whether a no-key-source state is reachable without the test seam; if so it saves and nothing claims "encrypted"; if not, say so. Does the fixture move weaken the RD-413 guard (M-413 must redden a cell in the moved/new set; add mutants)?
+  - The health field side effect: is 'machine-id' true, and is 'not-resolved' the misleading reading? Which machine-id source is in force and how guessable is it (READ, evidence class stated).
+  - The plaintext-already-on-disk upgrade path: build a data directory at 982a84f, upgrade to f0519fd, measure after boot and after one save (both halves? the recovery copies?), and whether any path ever re-encrypts a read-only deployment. Report it as a finding with its evidence class.
+  - The LEGITIMATE SHAPES table (brief section 2a): RD-617's refusal is a checker; a legitimate shape withheld is a Major.
+  - C-68 re-runs; full verify (predicted 3871/220). Key Vault is NOT COMMISSIONED: NOT TESTED.
+
+ACROSS TARGETS: quote git merge-tree --write-tree for every pair in brief section 6, using your OWN object directory: GIT_OBJECT_DIRECTORY=<your own mktemp -d> GIT_ALTERNATE_OBJECT_DIRECTORIES=<repo>/.git/objects. RD-575 (6a32426) and RD-524 (dc8635c) are in gate 4 and merge FIRST. The single most important cross-target question: on the B x RD-575 merge result, does RD-617's unknown shape refusal catch feedback-attachments, a directory store? Tuesday READ that it cannot (the directory branch runs first); MEASURE it (PROBED), including feedback-attachments itself as a symlink. Name the C-68 re-run cells for the real forward-merged trees.
+
+Build your own trees INSIDE YOUR OWN PROJECT from the object store (git archive <sha> into a fresh mktemp dir). Never worktree, checkout, fetch, pull, stash, clean, gc or commit in the NexusAI repo, and never work in its 2_Project_Files checkout. You are findings-only: no commits, no branch moves, no tickets, no writes inside NexusAI. Never rm: quarantine.
+
+FLOOR DISCIPLINE — follow section 7 of the brief exactly. QUEUE, NEVER TAKE OVER: the jest lock is shared (FIFO); never kill, signal or move another seat's process, lock or ticket.
+  - Every jest run goes through session-tools/nexusai-lock.sh, the lock held once per multi-run measurement, as a tracked child of your seat.
+  - Count foreign servers the RD-606 way, anchored on YOUR OWN claude pid: basename(argv[0]) == node AND the server entry point anywhere in argv, read from the kernel; ours means the ancestor chain CONTAINS your claude pid. Negative controls: the three live seats named in the brief (NexusAI-G pane %36, NexusAI-H pane %38, gate 4 pane %37) must classify foreign in the same run. Never by EADDRINUSE, a whole-command-line grep, or raw comm.
+  - A zero is reportable only beside a control that fired in the same window.
+  - DEADLINE AND HEARTBEAT (gate 4 stalled about 70 minutes at 0% CPU holding the lock with 10 seats queued): every real-server probe has a per-step DEADLINE and a client timeout on every request, kills its server in a finally, and logs a HEARTBEAT line at least every 2 minutes. A step with no heartbeat for 5 minutes is aborted and reported, never waited on.
+  - Reap every server you start.
+
+DRIVABLE SURFACE IS A LOCAL RUN, NOT THE DEMO (RD-76).
+
+QUESTIONS: your sender QA/Datasec-NexusAI has no inbox routing line, so you cannot count on an answer. If you must ask, mail tuesday-agent@agentmail.to with subject "[QA/Datasec-NexusAI -> Tuesday] QUESTION: <topic>", then PROCEED ON THE SAFEST READING without waiting, and record both in the report.
+
+Write your report to: /Volumes/KK_T9_External_HDD/!CODING/Testing Agent MAIN/projects/nexusai/reports/2026-09-22-gate5-rd615-rd616/report.md
+
+GIVE THE VERDICT SEPARATELY PER TARGET: A GO/NO-GO, B GO/NO-GO. Then say what the verdicts mean for the merge queue (RD-575 -> RD-524 -> A/B), each forward-merged and verified green (C-68, C-89), each Tuesday's GO under C-127. A GO is a statement about the gated SHA only.
+
+MAIL YOUR VERDICT to tuesday-agent@agentmail.to with the subject exactly:
+[QA/Datasec-NexusAI -> Tuesday] GATE VERDICT — gate 5: RD-615 @ b7fc78f (tier 1) + RD-616/617 @ f0519fd (tier 1)
+
+The AgentMail key is AGENTMAIL_API_KEY in /Volumes/KK_T9_External_HDD/TUESDAY/4_Credentials/.env. It is an absolute path because the QA project has no 4_Credentials directory of its own. Never put the key or any secret in a mail or the report.
+
+Report each target's head, and main's, as three timestamped readings (start / mid / end) with the branch name beside each.
+
+Rule 2 stands: what you did NOT test is first-class output — a NOT TESTED section, and every action recommendation labelled MEASURED AT RUNTIME, PROBED or READ ONLY.
