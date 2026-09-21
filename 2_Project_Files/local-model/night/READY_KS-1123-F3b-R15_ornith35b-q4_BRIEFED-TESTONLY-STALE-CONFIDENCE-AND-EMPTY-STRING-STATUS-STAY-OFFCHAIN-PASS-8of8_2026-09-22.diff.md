@@ -1,0 +1,230 @@
+# READY — KS-1123-F3b-R15 (Ornith, briefed, test_only, new · vitest) — PASS 8/8 — HELD for QA
+
+> ⚠ **CANONICAL PATCH = `/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/runs/2026-09-21_ks1123-ornith35b-night3/out.md.checker/patch.diff`** (from `ls` at 00:14 2026-09-22). Checker T3 (verbatim from checker.out): `PASS T3 diff applies at the tip (strict git apply --check)`; the run's patch is BYTE-IDENTICAL to the drafter's golden (`cmp -s /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/runs/2026-09-21_ks1123-ornith35b-night3/out.md.checker/patch.diff /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/runs/2026-09-21_r15feed2-drafter-precheck/1123F3b-R15/out.md.checker/patch.diff` rc 0, Wednesday 00:05 seat (post-rotation), source-read: expected_plus 215/215 in the diff, titles = the F2/F3 reds + 3 controls; golden cmp IDENTICAL; a PASS that SUPERSEDES READY_KS-1123-F2-R15 (21:10 09-21)).
+
+**Held 00:14 2026-09-22 by Wednesday 00:05 seat (post-rotation), source-read: expected_plus 215/215 in the diff, titles = the F2/F3 reds + 3 controls; golden cmp IDENTICAL; a PASS that SUPERSEDES READY_KS-1123-F2-R15 (21:10 09-21) after a source read (hold_ready.py — every clause below is built from the checker's own artefacts in `/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/runs/2026-09-21_ks1123-ornith35b-night3/out.md.checker`, not typed).** Tip `581ed7fa124b85c7c2da89ac05d52f99c2502911`. Touches ONE file: `Blockchain/Dev/services/api-gateway/src/__tests__/ks1123-api-gateway-verify-an-empty-string.test.ts` (new). `+` lines 215 ordered-equal to the brief's `expected_plus` (ASCII); `-` lines 0 == `must_remove`. Green at the tip: 6/6 cells. Tampers (2), each red exactly its declared set with controls green and the product file restored by bytes (T6/T7/T8):
+- `F2` → red exactly ['RED KS-1123 F2 - a confirmed-status blob with no hash and a ', 'RED KS-1123 F2 - a failed anchor with a stale confidence fie']
+- `F3` → red exactly ['RED KS-1123 F3 - tier 1: an EMPTY-STRING status with a real ']
+
+**PR NOTES for the raise seat:** TEST-ONLY — zero product bytes; one file, apply `patch.diff` strictly at the tip (re-check `git ls-remote origin develop` first; if develop moved, re-run `git apply --check` and state it). Input: `/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/runs/2026-09-21_ks1123-ornith35b-night3/input.json`. Brief: `night/briefs/KS-1123-F3b-R15.md`. Verdict source: `/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/runs/2026-09-21_ks1123-ornith35b-night3/checker.out`.
+
+```diff
+--- /dev/null
++++ b/Blockchain/Dev/services/api-gateway/src/__tests__/ks1123-api-gateway-verify-an-empty-string.test.ts
+@@ -0,0 +1,215 @@
++// =============================================================================
++// KS-1123 F2 - TEST ONLY MODE (no product hunk)
++//
++// The guard at verification.ts:709 (`persistedStatus == null &&`) stops a
++// stale confidence field from upgrading any non-statusless blob to pending-onchain.
++// This file pins that behaviour with two tier-1 cells that only the guard keeps honest.
++//
++// The checker reddens these RED cells by replacing line 709 with:
++//   : persistedConfidence === 'pending-onchain' // TAMPER: ...
++// and expects them GREEN at the untouched tip.
++// =============================================================================
++
++import { describe, it, expect, beforeAll, afterAll, vi } from 'vitest';
++import express from 'express';
++import http from 'node:http';
++import type { Server } from 'node:http';
++import type { AddressInfo } from 'node:net';
++import type { RequestHandler } from 'express';
++
++const REAL_TX = 'a'.repeat(64);
++const DOC_ID = 'doc-ks1123-f2';
++const CONTENT_HASH = 'b'.repeat(64);
++
++let gateway: Server;
++let originate: Server;
++let gatewayPort: number;
++const realFetch = globalThis.fetch;
++
++/** The blockchain blob the stub originate serves for the current cell. */
++let currentBlob: Record<string, unknown> | undefined;
++/** The anchoring chain-scan reply for the current cell. `null` = no live hit. */
++let liveAnchorReply: Record<string, unknown> | null = null;
++/** Tier-2 rows served by the stub anchor store. `null` = tier 2 has nothing. */
++let anchorStoreRows: Array<Record<string, unknown>> | null = null;
++/** When true the stub originate 404s, so the lookup falls through to tier 2. */
++let tier1Absent = false;
++const jsonHead = { 'Content-Type': 'application/json' };
++
++beforeAll(async () => {
++  // Stub originate: the first lookup tier. Serves the document whose blockchain
++  // blob each cell sets.
++  originate = http.createServer((req, res) => {
++    if (req.url === `/api/anchors/document/${DOC_ID}`) {
++      if (!anchorStoreRows) { res.writeHead(404, jsonHead); res.end('{}'); return; }
++      res.writeHead(200, jsonHead);
++      res.end(JSON.stringify({ data: { anchors: anchorStoreRows } }));
++      return;
++    }
++    if (req.url === `/api/documents/${DOC_ID}`) {
++      if (tier1Absent) { res.writeHead(404, jsonHead); res.end('{}'); return; }
++      res.writeHead(200, { 'Content-Type': 'application/json' });
++      res.end(JSON.stringify({
++        id: DOC_ID,
++        status: 'anchored',
++        contentHash: CONTENT_HASH,
++        owner: { id: 'org-1' },
++        ...(currentBlob ? { blockchain: currentBlob } : {}),
++      }));
++      return;
++    }
++    res.writeHead(404, { 'Content-Type': 'application/json' });
++    res.end('{}');
++  });
++  originate.listen(0, '127.0.0.1');
++  await new Promise<void>((r) => originate.once('listening', () => r()));
++  const originatePort = (originate.address() as AddressInfo).port;
++
++  globalThis.fetch = (async () => (
++    liveAnchorReply
++      ? { ok: true, status: 200, json: async () => liveAnchorReply, text: async () => '' }
++      : { ok: false, status: 404, json: async () => ({}), text: async () => '' }
++  )) as never;
++
++  const { createVerificationRoutes } = await import('../routes/verification');
++  const mockBodyParser: RequestHandler = express.json({ limit: '1mb' });
++
++  const app = express();
++  app.use(
++    createVerificationRoutes({
++      authenticateToken: () => (req, _res, next) => {
++        (req as { user?: unknown }).user = {
++          userId: 'u1', email: 'u@secuura.local', role: 'ADMIN',
++          organizationId: 'org-1', tenantId: 't1', verificationLevel: 'FULL',
++        };
++        next();
++      },
++      mockBodyParser,
++      query: vi.fn(async () => ({ rows: [] })) as never,
++      isDbAvailable: () => false,
++      redisService: {
++        getPendingDocument: vi.fn(async () => null),
++        deletePendingDocument: vi.fn(async () => undefined),
++        getAllDocumentTypes: vi.fn(async () => []),
++        getAllWorkflowInstances: vi.fn(async () => []),
++        getNotificationSettings: vi.fn(async () => ({})),
++        getRejectedDocument: vi.fn(async () => null),
++        setRejectedDocument: vi.fn(async () => undefined),
++        getWorkflowDocumentMapping: vi.fn(async () => null),
++        getWorkflowInstance: vi.fn(async () => null),
++        setWorkflowInstance: vi.fn(async () => undefined),
++      } as never,
++      services: { originate: { url: `http://127.0.0.1:${originatePort}` }, anchoring: { url: `http://127.0.0.1:${originatePort}` } } as never,
++      log: () => undefined,
++      memWorkflowToDocumentMap: new Map(),
++      memRejectedDocuments: new Map(),
++      dbSaveRejection: vi.fn(async () => undefined),
++      ADMIN_ROLES: ['ADMIN', 'admin'],
++      enforceDocumentTypeRules: vi.fn(async () => ({ ok: true, docType: {} })) as never,
++      createWorkflowInstanceIfRequired: vi.fn(async () => ({ gated: false })) as never,
++      meetsVerificationLevel: () => true,
++    }),
++  );
++
++  gateway = app.listen(0, '127.0.0.1');
++  await new Promise<void>((r) => gateway.once('listening', () => r()));
++  gatewayPort = (gateway.address() as AddressInfo).port;
++});
++
++afterAll(async () => {
++  globalThis.fetch = realFetch;
++  await new Promise<void>((r) => gateway.close(() => r()));
++  await new Promise<void>((r) => originate.close(() => r()));
++});
++
++/** Drive the real route and return the parsed body. */
++async function verify(
++  blob: Record<string, unknown> | undefined,
++  live: Record<string, unknown> | null = null,
++): Promise<any> {
++  currentBlob = blob;
++  liveAnchorReply = live;
++  anchorStoreRows = null;
++  tier1Absent = false;
++  const r = await realFetch(`http://127.0.0.1:${gatewayPort}/api/documents/${DOC_ID}/verify`, {
++    method: 'POST',
++    headers: { 'Content-Type': 'application/json', Authorization: 'Bearer t' },
++    body: JSON.stringify({ purpose: 'test' }),
++  });
++  expect(r.status).toBe(200);
++  return r.json();
++}
++
++/** Drive the tier-2 verify path via the stub anchor store and return the parsed body. */
++async function verifyViaAnchorStore(row: Record<string, unknown>): Promise<any> {
++  currentBlob = undefined;
++  liveAnchorReply = null;
++  tier1Absent = true;                       // tier 1 misses -> fall through to tier 2
++  anchorStoreRows = [{ contentHash: CONTENT_HASH, ...row }];
++  const r = await realFetch(`http://127.0.0.1:${gatewayPort}/api/documents/${DOC_ID}/verify`, {
++    method: 'POST',
++    headers: { 'Content-Type': 'application/json', Authorization: 'Bearer t' },
++    body: JSON.stringify({ purpose: 'test' }),
++  });
++  expect(r.status).toBe(200);
++  const body = await r.json();
++  // Guard the whole family: if tier 2 were not the tier that answered, every
++  // assertion below would be about the wrong code path.
++  expect(body.blockchain.source).toBe('persisted');
++  return body;
++}
++
++describe('KS-1123 F2 - stale confidence cannot upgrade a status', () => {
++  it('RED KS-1123 F2 - a failed anchor with a stale confidence field stays off-chain-only', async () => {
++    // Under the tamper :709 becomes `persistedConfidence === 'pending-onchain'`
++    // which is TRUE here -> `'pending-onchain'`. At the tip line 709 requires
++    // `persistedStatus == null &&` so this cell measures OFF-CHAIN-ONLY.
++    const body = await verify({ txHash: null, blockHeight: 0, status: 'anchor_failed', confidence: 'pending-onchain' });
++    expect(body.verificationConfidence).toBe('off-chain-only');
++    expect(body.blockchain.confidence).toBe('off-chain-only');
++    expect(body.verified).toBe(false);
++  });
++
++  it('RED KS-1123 F2 - a confirmed-status blob with no hash and a stale confidence field stays off-chain-only', async () => {
++    // No hash -> not anchored (line 705 false). `'confirmed'` maps to on-chain via
++    // confidenceForAnchorStatus (line 707 checks for pending-onchain only), so
++    // line 707 is false. Line 709 at the tip refuses because persistedStatus !== null.
++    // Under the tamper -> `'pending-onchain'` - the red.
++    const body = await verify({ txHash: null, blockHeight: null, status: 'confirmed', confidence: 'pending-onchain' });
++    expect(body.verificationConfidence).toBe('off-chain-only');
++    expect(body.verified).toBe(false);
++  });
++
++  it('KS-1123 control - a pending-status blob is pending-onchain, before and after', async () => {
++    // Decided by line 707 (`confidenceForAnchorStatus('pending') === 'pending-onchain'`)
++    // and never reaches line 709. Green both sides of the change.
++    const body = await verify({ txHash: null, blockHeight: null, status: 'pending', confidence: 'pending-onchain' });
++    expect(body.verificationConfidence).toBe('pending-onchain');
++    expect(body.verified).toBe(false);
++  });
++});
++
++describe('KS-1123 F3 - an empty-string status must stay off-chain-only (not collapse to null)', () => {
++  it('RED KS-1123 F3 - tier 1: an EMPTY-STRING status with a real hash and height is off-chain-only', async () => {
++    // Under the tamper `??` -> `||` at verification.ts:624 the '' collapses to null, the tier-1
++    // statusless carve-out at :722 fires, and a real hash + height report on-chain / verified: true.
++    const body = await verify({ txHash: REAL_TX, blockHeight: 4242, status: '' });
++    expect(body.verified).toBe(false);
++    expect(body.verificationConfidence).toBe('off-chain-only');
++  });
++
++  it('KS-1123 F3 control - tier 2: the empty-string twin stays off-chain-only even when tier 1 collapses', async () => {
++    // Green on both trees since KS-1073 (#1005): the carve-out at :722 excludes `_source: 'anchor_store'`,
++    // so a null status on this tier never earns the claim - the F3 tamper cannot reach it.
++    const body = await verifyViaAnchorStore({ transactionHash: REAL_TX, blockNumber: 4242, status: '' });
++    expect(body.verified).toBe(false);
++    expect(body.verificationConfidence).toBe('off-chain-only');
++  });
++
++  it('KS-1123 F3 control - a confirmed tier-1 blob still reports on-chain', async () => {
++    // Green at the tip AND under both tampers (a 'confirmed' status is neither falsy nor stale).
++    const body = await verify({ txHash: REAL_TX, blockHeight: 4242, status: 'confirmed' });
++    expect(body.verified).toBe(true);
++    expect(body.verificationConfidence).toBe('on-chain');
++  });
++});
+```
