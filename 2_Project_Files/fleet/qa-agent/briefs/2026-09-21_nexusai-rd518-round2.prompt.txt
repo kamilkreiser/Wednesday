@@ -1,0 +1,29 @@
+ultrathink
+
+You are the fleet QA/testing agent running a THROUGH-CODE gate on Datasec/NexusAI.
+
+READ YOUR COMMISSION FIRST: /Volumes/KK_T9_External_HDD/TUESDAY/2_Project_Files/fleet/qa-agent/briefs/2026-09-21_nexusai-rd518-round2.md
+
+Target: branch rd-518-kv-identity-r2-s75c at 9a7bc0c36d59c264040c9c6dce982c7576591ec1 (short 9a7bc0c). Base 1c4fcb0 (the merge commit), exactly one commit in range.
+This is ROUND 2 of 2. The TIER 1 gate ran at 6ea15a0 and returned NO GO with five findings — F-01 BLOCKER, F-02 MAJOR, F-03 MAJOR (test design), F-04 MINOR, F-05 MINOR. Those findings are what this round claims to have fixed. Round 1's report is at /Volumes/KK_T9_External_HDD/!CODING/Testing Agent MAIN/projects/nexusai/reports/2026-09-20-rd518-6ea15a0-tier1/report.md — READ IT BEFORE YOU READ THE FIX.
+
+NO WORKTREE IS PINNED FOR YOU. Build your own scratch worktree from the object store at that sha. The repo's working checkout is NOT at this sha and carries uncommitted modifications — pin everything to the sha, never to HEAD, and never clean or stash that checkout. You are findings-only: do not commit, do not move any branch.
+
+THE BUILDER DECLARED TWO LIMITS AND THEY ARE YOUR FIRST WORK, NOT YOUR LAST. A declared limit is where the evidence stops; declaring it does not clear it.
+  L-1: STATE 2 of the four-state matrix (403 non-admin) was NOT driven this round — it needs an injected session, so what is reported is three states plus a scanner control, not four. Decide explicitly whether F-02's fix rests on a state nobody has driven since the fix landed.
+  L-2: the C-57 id-superset shortcut is CONDITIONAL on nothing having been content-merged. Check the check — it is falsifiable in minutes and it is the whole basis for "missing 0".
+
+You need the companion branch rd-518-r2-runbook-fix-s75c at c54d44cea9f2aea6090015118606cdc48ec6a71b (c54d44c) to run — it is F-05's fix and is deliberately NOT in the head under test. Judge it separately. You are the natural test of it: report whether the runbook works as written and whether you were ever served by the misconfiguration listener rather than the app.
+
+DRIVABLE SURFACE IS A LOCAL RUN IN OPEN MODE, NOT THE DEMO (RD-76, C-02).
+
+THREE SEATS ARE LIVE ON THIS PROJECT. Every jest invocation goes through session-tools/nexusai-lock.sh, hold the lock once across a multi-run measurement, record the foreign backend/server.js count beside every result by ps and never by EADDRINUSE, and treat a zero as reportable only if a control fired in the same window. Queueing behind another seat is the mechanism working, not a stall. Run bash -n on any script you write before you run it.
+
+Write your report to: /Volumes/KK_T9_External_HDD/!CODING/Testing Agent MAIN/projects/nexusai/reports/2026-09-21-rd518-9a7bc0c-round2/report.md
+
+MAIL YOUR VERDICT to tuesday-agent@agentmail.to with the subject exactly:
+[QA/Datasec-NexusAI -> Tuesday] GATE VERDICT — RD-518 round 2 @ 9a7bc0c (through-code)
+
+The AgentMail key is AGENTMAIL_API_KEY in /Volumes/KK_T9_External_HDD/TUESDAY/4_Credentials/.env — an absolute path; the QA project has no 4_Credentials directory of its own.
+
+This is round 2 of 2. If you find a Major, C-62 says it is ticketed, not escalated to Kam — a third round on this class is Kam's own call, so say so and stop rather than assuming one. If you believe the delta justifies full tier-1 weight after all, STOP and mail Tuesday with the reason rather than silently widening the scope. Rule 2 stands: what you did NOT test is first-class output.

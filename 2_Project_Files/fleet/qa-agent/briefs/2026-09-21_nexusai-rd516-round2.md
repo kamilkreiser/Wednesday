@@ -31,8 +31,14 @@ silently widen.**
 1. **F-1's false header is gone.** The module previously claimed ai-config's Azure branch calls it
    *"so (C-54) holds BY CONSTRUCTION"*. Verify the header now states: single definition **for
    ai-test**; `checkEndpointName` exported for ai-config **to adopt and not yet adopted**; C-41's ONE
-   PLACE **not** achieved; the mirror clause false in both directions and untested. **Line 177 must
-   say `can`, not `does`.** ⚠️ **And verify the claim it replaced is actually false**: `checkEndpointName`
+   PLACE **not** achieved; the mirror clause false in both directions and untested. **`checkEndpointName`'s
+   own docstring must state the export is UNADOPTED — that ai-config *could* apply the same name rule,
+   not that it *does*.** (Cited by content, per C-107; it is at `:208-210` @ `aaffbb9` in
+   `backend/services/aiEndpointPolicy.js`, opened and verified 2026-09-21. **Corrected: this brief
+   originally said "Line 177 must say `can`, not `does`" — line 177 is an unrelated `net.isIPv4`
+   branch inside `addressClass`. The wrong number propagated from the claim mail into this commission;
+   the gate caught it as F-1 Minor. HISTORY.md and CLARIFICATIONS.md never repeated it.**)
+   ⚠️ **And verify the claim it replaced is actually false**: `checkEndpointName`
    should have **zero external callers** and ai-config should still run its own inline regex.
 2. **RD-588 exists** and covers ai-config wiring + the Gov `cognitiveservices.azure.us` save defect
    (TEST succeeds, SAVE never can) + ONE PLACE unachieved. **It must NOT be written as a security
