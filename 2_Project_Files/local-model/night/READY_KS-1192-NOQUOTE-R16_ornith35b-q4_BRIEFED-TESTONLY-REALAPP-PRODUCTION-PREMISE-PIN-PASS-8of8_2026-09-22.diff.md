@@ -1,17 +1,21 @@
-# READY — KS-1192 (F-1011-6: NEW api-gateway test boots the REAL index.ts under NODE_ENV=production — pins the module-load witness (X-CSRF-Token + Secure cookie on the 307) and that a connector WITHOUT subjects:erase is refused by the erasure DOOR, 403 INSUFFICIENT_SCOPE, 0 upstream hits) — Ornith ornith:35b (Q4_K_M) PASS 7/7 FIRST SAMPLE. Held by Wednesday at 07:17 AEST. Run /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/runs/2026-09-17_ks1192-ornith35b-night
-# Source read by me (Wednesday): 143 of the model's 144 lines IDENTICAL to the brief's test block (python compare; a mutated copy unequal). ONE line differs — test line 84: the brief's `res.end('{"recorder":true}')`, the model's `res.end('{\"recorder\":true}')` — a useless escape inside a single-quoted JS string: the runtime string is identical, eslint no-useless-escape would flag it. RAISING SEAT: write line 84 as the brief has it (no backslashes). One new file, no product change; apply STRICT; A4 under the brief's tamper at index.ts:387 (production loses the CSRF witness): 2 red / 4 run by assertion, controls green; A6 api-gateway 419 → 423, NEW reds []; A7 tsc rc 0.
-# FINDING carried from the brief-writer: under that tamper the WHOLE existing api-gateway suite stays 419/419 green — nothing but this file catches CSRF silently missing from production.
-# PR NOTES: "Refs KS-1192". Test-only → tier 2. Pinned at develop 523f283c6 (develop is now eb1051fd3 = #1015, services/auth only — file-disjoint by path).
+# READY — KS-1192-NOQUOTE-R16 (Ornith, briefed, test_only, new · vitest) — PASS 8/8 — HELD for QA
+
+> ⚠ **CANONICAL PATCH = `/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/runs/2026-09-22_ks1192-ornith35b-night/out.md.checker/patch.diff`** (from `ls` at 04:37 2026-09-22). Checker T3 (verbatim from checker.out): `PASS T3 diff applies at the tip (strict git apply --check)`; the run's patch is BYTE-IDENTICAL to the drafter's golden (`cmp -s /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/runs/2026-09-22_ks1192-ornith35b-night/out.md.checker/patch.diff /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/runs/2026-09-22_feed4-drafter-precheck/1192NOQUOTE-R16/out.md.checker/patch.diff` rc 0, Wednesday).
+
+**Held 04:37 2026-09-22 by Wednesday after a source read (hold_ready.py — every clause below is built from the checker's own artefacts in `/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/runs/2026-09-22_ks1192-ornith35b-night/out.md.checker`, not typed).** Tip `64ab105132eada0621622acf4d6053bc59926780`. Touches ONE file: `Blockchain/Dev/services/api-gateway/src/__tests__/ks1192-real-app-production-erasure-door.test.ts` (new). `+` lines 144 ordered-equal to the brief's `expected_plus` (ASCII); `-` lines 0 == `must_remove`. Green at the tip: 4/4 cells. Tampers (1), each red exactly its declared set with controls green and the product file restored by bytes (T6/T7/T8):
+- `R16` → red exactly ['RED KS-1192 - a connector WITHOUT subjects:erase is refused ', 'RED KS-1192 - the 307 for POST /api/gdpr/erasures carries th']
+
+**PR NOTES for the raise seat:** TEST-ONLY — zero product bytes; one file, apply `patch.diff` strictly at the tip (re-check `git ls-remote origin develop` first; if develop moved, re-run `git apply --check` and state it). Input: `/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/runs/2026-09-22_ks1192-ornith35b-night/input.json`. Brief: `night/briefs/KS-1192-NOQUOTE-R16.md`. Verdict source: `/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/runs/2026-09-22_ks1192-ornith35b-night/checker.out`.
 
 ```diff
 --- /dev/null
 +++ b/Blockchain/Dev/services/api-gateway/src/__tests__/ks1192-real-app-production-erasure-door.test.ts
 @@ -0,0 +1,144 @@
 +// KS-1192 (F-1011-6, the #1011 round-2 gate on KS-871): the ks871 real-app production cell stays green with its
-+// vi.resetModules() removed (index.ts stays the test-mode module), and "0 upstream hits" cannot tell the erasure door
++// vi.resetModules() removed (index.ts stays the test-mode module), and 0-upstream-hits cannot tell the erasure door
 +// from CSRF. These cells import the REAL index.ts app under NODE_ENV=test, re-import it under NODE_ENV=production, and pin
-+// the module-load witness (X-CSRF-Token from index.ts's CSRF mount, the Secure XSRF-TOKEN cookie from csrf.ts) and the
-+// door's own refusal code.
++// the module-load witness (X-CSRF-Token from the index.ts CSRF mount, the Secure XSRF-TOKEN cookie from csrf.ts) and the
++// refusal code the door itself emits.
 +import { describe, it, expect, beforeAll, afterAll, vi } from 'vitest';
 +import http from 'http';
 +import jwt from 'jsonwebtoken';
@@ -42,7 +46,7 @@
 +  await new Promise<void>((r) => server.close(() => r()));
 +}
 +
-+/** POST an empty JSON body; read the two module-load witnesses and the refusal body's error code. */
++/** POST an empty JSON body; read the two module-load witnesses and the error code of the refusal body. */
 +function post(gateway: Gateway | undefined, path: string, ua: string, scopes: string[]): Promise<Reply> {
 +  const token = jwt.sign(
 +    { userId: 'c0000000-0000-4000-8000-00000000000c', role: 'connector', authMethod: 'api_key', email: 'connector@ks1192.test', scopes,
@@ -90,7 +94,7 @@
 +beforeAll(async () => {
 +  recorder = http.createServer((req, res) => {
 +    req.resume();
-+    req.on('end', () => { seen.push(`${req.method} ${req.url}`); res.writeHead(200, { 'content-type': 'application/json' }); res.end('{\"recorder\":true}'); });
++    req.on('end', () => { seen.push(`${req.method} ${req.url}`); res.writeHead(200, { 'content-type': 'application/json' }); res.end('{}'); });
 +  });
 +  recorderUrl = await listen(recorder);
 +});
@@ -100,14 +104,14 @@
 +  vi.unstubAllEnvs();
 +});
 +
-+describe('KS-1192 control — the real app imported under NODE_ENV=test carries no production witness', () => {
++describe('KS-1192 control - the real app imported under NODE_ENV=test carries no production witness', () => {
 +  let gateway: Gateway | undefined;
 +  beforeAll(async () => {
 +    gateway = await bootApp({ NODE_ENV: 'test', ORIGINATE_SERVICE_URL: recorderUrl, GATEWAY_VOUCH_SECRET: '', SUBJECTS_ERASE_SCOPE_ENFORCED: 'true' });
 +  }, 60000);
 +  afterAll(async () => { await closeServer(gateway?.server); });
 +
-+  it('🟢 KS-1192 control — NODE_ENV=test: no X-CSRF-Token, no Secure cookie, and the connector without subjects:erase is refused 403', async () => {
++  it('GREEN KS-1192 control - NODE_ENV=test: no X-CSRF-Token, no Secure cookie, and the connector without subjects:erase is refused 403', async () => {
 +    const hitsBefore = seen.length;
 +    const res = await post(gateway, '/api/gdpr/erasures', 'ks1192-test-refused', ['documents:read']);
 +    expect([res.csrfHeader, res.secureCookie], 'the module-load witness under NODE_ENV=test').toEqual([false, false]);
@@ -116,7 +120,7 @@
 +  });
 +});
 +
-+describe('KS-1192 real app re-imported under NODE_ENV=production — the mode is pinned and the 403 is the erasure door', () => {
++describe('KS-1192 real app re-imported under NODE_ENV=production - the mode is pinned and the 403 is the erasure door', () => {
 +  let gateway: Gateway | undefined;
 +  beforeAll(async () => {
 +    gateway = await bootApp({
@@ -127,14 +131,14 @@
 +  }, 60000);
 +  afterAll(async () => { await closeServer(gateway?.server); });
 +
-+  it('🔴 KS-1192 — the 307 for POST /api/gdpr/erasures carries the production module-load witness: X-CSRF-Token and a Secure cookie', async () => {
++  it('RED KS-1192 - the 307 for POST /api/gdpr/erasures carries the production module-load witness: X-CSRF-Token and a Secure cookie', async () => {
 +    const res = await post(gateway, '/api/gdpr/erasures', 'ks1192-prod-307', ['documents:read']);
 +    expect([res.csrfHeader, res.secureCookie], 'the module-load witness: index.ts CSRF mount, csrf.ts Secure cookie').toEqual([true, true]);
 +    expect(res.status, 'production redirects the unversioned path').toBe(307);
 +    expect(res.location).toBe('/api/v1/gdpr/erasures');
 +  });
 +
-+  it('🔴 KS-1192 — a connector WITHOUT subjects:erase is refused by the door (403 INSUFFICIENT_SCOPE) under the witness, audited gdpr.create', async () => {
++  it('RED KS-1192 - a connector WITHOUT subjects:erase is refused by the door (403 INSUFFICIENT_SCOPE) under the witness, audited gdpr.create', async () => {
 +    const hitsBefore = seen.length;
 +    const res = await post(gateway, '/api/v1/gdpr/erasures', 'ks1192-prod-refused', ['documents:read']);
 +    expect([res.csrfHeader, res.secureCookie], 'the module-load witness on the refusal').toEqual([true, true]);
@@ -143,7 +147,7 @@
 +    expect(await waitForRow('ks1192-prod-refused')).toEqual({ action: 'gdpr.create', resourceType: 'gdpr', path: '/api/gdpr/erasures' });
 +  });
 +
-+  it('🟢 KS-1192 control — a connector WITH subjects:erase passes the door: 200 from originate, one upstream hit, audited gdpr.create', async () => {
++  it('GREEN KS-1192 control - a connector WITH subjects:erase passes the door: 200 from originate, one upstream hit, audited gdpr.create', async () => {
 +    const hitsBefore = seen.length;
 +    const res = await post(gateway, '/api/v1/gdpr/erasures', 'ks1192-prod-admitted', ['documents:read', 'subjects:erase']);
 +    expect(res.status, 'originate answered').toBe(200);
@@ -152,5 +156,3 @@
 +  });
 +});
 ```
-
-> 🔁 **SUPERSEDED 2026-09-22 04:37 by Wednesday — do NOT raise this READY.** Its one differing line (the quote-carrying `res.end`) is the round-1 miss; the round-2 (no-quote, golden byte-identical, 8/8) READY is `READY_KS-1192-NOQUOTE-R16_ornith35b-q4_BRIEFED-TESTONLY-REALAPP-PRODUCTION-PREMISE-PIN-PASS-8of8_2026-09-22.diff.md`. Raise that one.
