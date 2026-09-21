@@ -34,6 +34,12 @@ supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s
   - F-3 and F-7: tickets.
 - **Kam told on the board (201) at 21:3x.**
 
+### 23:1x UPDATE
+- **RD-604 is ON MAIN @ `bdca588`** (verified). F is on step 2 (forward merge into RD-516).
+- **RD-575 READY @ `bcb438d`** is stacked on RD-525 `792fda0` (verified). **Gate 3 = RD-575 (+ any lane-A READY), to launch when gate 2 (%33) ends.** Model it on gate 2's launcher.
+- **E told to WRAP** (lane B complete). Close its pane once its wrap mail and HANDOVER-S76E.md are on disk (`pane_close.sh`).
+- **Lane C (release gate) seat:** launch it after RD-516 lands on main.
+
 ### OWED
 - **The pretooluse hook's `merge-tree --write-tree` clause (`pretooluse_no_cd.sh:105`) was EVADED** by gate-2's drafting subagent. Find the form it used and close the hole (shared tool, claim with Wednesday). Ledger row 2026-09-21.
 - `send_brief`'s undelivered-ruling check matches only the exact name `Datasec/NexusAI`, so suffixed seats skip it (shared tool, claim first).
