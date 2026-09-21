@@ -2567,3 +2567,18 @@ INCLUDED until he says otherwise.
 > I understand that Secure at Work would land on the shared tenant, and as this would be encrypted, there is no risk for anyone else to see it. This is acceptable. Also have access to the Kaiser.org tenant. Please go ahead and start building it, and use your CLI access to deploy it to that tenant.
 
 *Note:* Receipted 10:1x with the reading (Secuura rows on the shared kreiser.org tenant, encrypted end to end; Option A + envelope; new RG; pilot on synthetic rows first). 'Secure at Work' = Secuura, 'Kaiser.org' = kreiser.org (dictation). Build delegated.
+
+## 2026-09-21 11:44 — Kam (panel (view=wednesday) 11:43:15, verbatim)
+> I accessed the site above. A couple of things. Can you save the certificate into this machine? Two, can you please mirror the layout of this dashboard and chat view on the live site so that it's identical?
+
+*Note:* Receipted 11:4x: (1) the pilot private key is already on the Studio at 4_Credentials/dashboard-cloud/kam-pilot-private.pem — pick it in the site's Load private key; asked if he meant a sign-in cert instead. (2) Phase 2 builder commissioned: mirror cockpit.html + chat.html layout on the live site and sync the real chat streams encrypted.
+
+## 2026-09-21 11:44 — Kam (panel (view=wednesday) 11:43:53, verbatim)
+> Place the certificate for Tuesday on the NAS and email Tuesday with instructions to get the certificate as well as what to do to post to this board. The local board should work the same way, so that we no longer use this local version and we're only managing and operating with one version.
+
+*Note:* Receipted 11:4x. Lifts the 09-14 07:22 Wednesday→Tuesday messaging suspension for this purpose (his word). Cert → NAS handover folder; instruction mail to tuesday-agent@; Phase 2 = one board (the live site), local retired after cutover.
+
+## 2026-09-21 11:46 — Kam (panel (view=wednesday) 11:45:52, verbatim)
+> Rather than loading the certificate, can it check for it in a specific local C or Mac drive? Allow the user to define where it is stored.
+
+*Note:* Receipted 11:4x with the reading: a page cannot read a path silently; the File System Access API (Chrome/Edge) lets the user pick a folder once, remembered per browser, re-read on each visit with one click; Safari/iOS fall back to import-once; a local helper is the only fully automatic route (offered). Folded into the Phase 2 builder brief.

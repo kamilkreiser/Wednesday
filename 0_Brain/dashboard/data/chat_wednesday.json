@@ -5655,5 +5655,26 @@
   "project": "WED",
   "ts": "2026-09-21T11:11:40.670216+10:00",
   "text": "The external dashboard pilot is LIVE, verified by my own hand, synthetic rows only:\n\nhttps://wednesday-dashboard-e42e.azurewebsites.net\n\nThree things for your hands, when you can:\n\n1. Sign in there on your phone and your laptop with kreiser.org at me dot com — you are the only account assigned, so anyone else is refused. MFA is whatever your tenant enforces: Entra P1 and P2 show as suspended since the 9th and the Security Defaults setting would not let me read it, so please check Security Defaults is Enabled in the Entra admin centre.\n\n2. To read the rows you need the pilot private key on the device: the file is 4_Credentials/dashboard-cloud/kam-pilot-private.pem on the Studio drive — move it to your device by a channel you trust, then use the page's Load private key button once; it stays in the browser, non-extractable. The server never has it.\n\n3. Tuesday's seat certificate is parked in the same folder for you to move to the mini. Nothing else needs you.\n\nWhat is running: one new resource group, wednesday-dashboard-rg, with exactly three resources — a B1 Linux App Service, its plan, and a storage account with shared-key access disabled; nothing else in the subscription was touched. Only you can sign in; Tuesday and I each have our own certificate identity and the server takes the client partition from the token, so a seat that names another client gets a 403. Every record's text is encrypted at write with a per-record key wrapped to your public key, bound to its routing fields; the raw row shows ciphertext and the wrong key fails. I re-ran the twenty-seven live probes myself: all pass. Cost is about fourteen US dollars a month from the Retail Prices API. The sign-in secret expires on the twenty-first of March next year. Real rows start only when I wire my own tools to it — that is phase two, with your word."
+ },
+ {
+  "role": "wednesday",
+  "seat": "Kamils-Mac-Studio.local",
+  "project": "WED",
+  "ts": "2026-09-21T11:44:02.255031+10:00",
+  "text": "Received both. Good that the sign-in worked.\n\n1. The key is already on this machine — no copy needed. In the site, click Load private key and pick this file:\n\n/Volumes/DevMASTER/WEDNESDAY/4_Credentials/dashboard-cloud/kam-pilot-private.pem\n\nOnce per browser; it stays in that browser, non-extractable. If by certificate you meant something else — a sign-in certificate rather than the decryption key — tell me and I'll do that instead.\n\n2. Mirroring the layout: on it now. My reading — the live site gets the same cockpit layout and the same chat view as this dashboard, pixel for pixel where the data exists, and to make the chat view identical I start syncing the real chat streams into it, encrypted at write as designed. Tiles whose data lives only on this machine will say so rather than pretend. I'll tell you when it is deployed."
+ },
+ {
+  "role": "wednesday",
+  "seat": "Kamils-Mac-Studio.local",
+  "project": "WED",
+  "ts": "2026-09-21T11:44:49.800741+10:00",
+  "text": "Received: Tuesday's certificate goes on the NAS, I email her the instructions to fetch it and to post to the live board, and the goal is one board — the live site replaces this local one for both of us. Doing the NAS copy and her email now; the builder for the mirrored layout and the seat wiring starts right after."
+ },
+ {
+  "role": "wednesday",
+  "seat": "Kamils-Mac-Studio.local",
+  "project": "WED",
+  "ts": "2026-09-21T11:46:51.720860+10:00",
+  "text": "Received. A web page cannot read a local path on its own — the browser forbids it by design — but there is a close equivalent, and I'll build it into the layout work: you pick the folder once (a Mac path or a C: drive folder), the page remembers that location in that browser and reads the key from it on each visit with a one-click permission, no re-import. That works in Chrome and Edge; Safari and iPhone do not allow it, so there the once-per-browser import stays as the fallback. If you want it fully automatic with no click at all, the only way is a small helper program installed on each machine that hands the key to the page locally — say so and I'll add that as a second step."
  }
 ]
