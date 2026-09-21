@@ -1,0 +1,236 @@
+ultrathink
+
+You are the fleet QA agent running ONE TIER 1 ROUND 1 gate (round 1 of 2 under the cap, FULL WEIGHT) over Secuura/Blockchain PR #1036 (KS-763, Seat B
+1st successor, PR-4: qs in range on express 4) at head @@HEAD@@ (branch feature/ks-763-qs-in-range = refs/pull/1036/head).
+PR #1036 is KS-763 (it also attaches to KS-775 `contributes`; nothing closes on merge). It is a DEPENDENCY / LOCK REGENERATION PR: 50 files vs develop at
+its own base — 20 manifests (`overrides.body-parser` "1.20.6" -> "1.20.8"), 29 regenerated locks (express 4.22.1/4.22.2 -> 4.22.3, body-parser 1.20.6 ->
+1.20.8, every qs -> 6.16.0, side-channel 1.1.0 -> 1.1.1 in 23 locks), and Blockchain/Dev/scripts/audit/audit-baseline.json 29 -> 26 rows (GHSA-4mjr-xmp4-gh2g,
+GHSA-x5fp-wj9c-mxmx = KS-763; GHSA-q8mj-m7cp-5q26 = KS-531 / KS-775 on Wednesday's 2026-09-17 13:50:18Z ruling). Wednesday ruled TIER 1 (receipt_1036.md,
+2026-09-18): express, body-parser and qs are PROD RUNTIME dependencies in every express service image. No rendered surface changes: say in one line that
+the real-browser half of tier 1 does not apply.
+WHY NOW: the two KS-763 rows EXPIRE 2026-09-24 (the ticket says Thu 24 Sep 10:00 AEST); when the fuse lapses the audit gate blocks every push (the #738 /
+#780 precedent). Kam's rulings on record: the exception-expiry PATTERN is "extend" (2026-08-26); KS-775 (express 4 -> 5) is "migrate" (2026-09-03) and is
+NOT this PR. Grade the PR against those rulings; recommend nothing beyond them.
+
+Read FIRST and in full, then plan:
+- the seat's READY, whole (its own claims list, incl. NOT COVERED): /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/gatesets/2026-09-18_gate1036/mail_1036_ready.md
+- Wednesday's receipt: /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/gatesets/2026-09-18_gate1036/receipt_1036.md
+- the drafter's measurements (every value with its command; the drafter's own slips FIRST): /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/gatesets/2026-09-22_gate1036_ks763/DRAFTER_REPORT.md
+  and its raw outputs beside it (read_shape_2.out, predict_merge_1.out, predict_merge_3_ghmergeref.out, predict_merge_4_ghcontrol.out, api_read_1.out, dockerfile_anchors_1.out, host_probe_1.out);
+- the template whose method is the bar (the #1033 gate, the same lock class, verdicted GO WITH FINDINGS on 2026-09-17):
+  /Volumes/DevMASTER/!CODING/Testing Agent MAIN/projects/secuura/reports/2026-09-17-ks763-1033-2cab54988-tier1-r1/report.md — copy its pipeline (runtime reach
+  first, load trace, shipped gates with a negative control, scope by parse, merge-in, linking, dependabot record), change the claims to THIS PR's.
+- the drafter's scratch clone (read it, never write in it; make your own): its path is in predict_merge_1.out.
+
+THE SHAPE (drafter, 07:42-07:49 AEST 2026-09-22; RE-READ every value at origin before you use it):
+  head   @@HEAD@@ = refs/pull/1036/head = refs/heads/feature/ks-763-qs-in-range (git ls-remote 07:42:24; PR API 07:47:43 agrees).
+         THREE commits: c9e034744 (20 manifests + 29 locks + the two KS-763 rows, parent bb848b828), c93d84c9b (a MERGE of develop 3961c2add = #1029 + #1031 +
+         #1033 — the baseline CONFLICTED there and was resolved as develop's minus this PR's rows; the root and originate locks auto-merged and were rebuilt
+         from develop's blob), 4b251997a (GHSA-q8mj removed; baseline only).
+  develop @@DEV@@ at draft (ls-remote 07:42:24 = the branches API 07:48). It has taken 142 commits (6 merges) since the merge-base and will move
+         again: judge it by CONTENT and NAME the SHA you measured against (that SHA is BASE_GO in the addendum).
+  merge-base = 3961c2add8e1637b32e638f8f0952c328c00833e (the develop the seat merged in). compare develop...head = merge_base 3961c2add, status diverged,
+         ahead 3, behind 142, files 50 (the launcher asserts merge_base + ahead + files; `behind` is NOT asserted).
+  trees: head tree d7b86b0b052d9363e18106d069f14be9a8d9719c; develop tree 4b573853be61832f3adc14656de742b6051d5622;
+         MERGED TREE (head onto develop @@DEV_SHORT@@, git merge-tree --write-tree in the drafter's scratch clone, BOTH orders, rc 0, 0 conflicts) =
+         @@MERGED@@. Its audit-baseline.json blob == the head's (648e8ee7b, 26 rows); develop's is 91d8b71c9 (29 rows) = the
+         merge-base's (develop has NOT touched the baseline since #1033 landed). develop's 164-path delta since the merge-base INTERSECTS the 50 PR paths in
+         ZERO paths (95 .ts, 34 .py, 18 .sh, 8 .md, 3 .html, 2 .yaml, …: test files, scripts, docs — no lock, no manifest, no baseline).
+  GitHub's own refs/pull/1036/merge (5c5d4ff0f, ls-remote 07:42) is STALE: computed 2026-09-21 15:01 AEST over develop e2d0672af (47 commits behind
+         @@DEV_SHORT@@); its tree 7981ab41f is reproduced exactly by merge-tree(e2d0672af, head) in the scratch clone (the instrument control). The PR API's
+         mergeable_state read "unknown" at 07:47. Neither is a verdict input: YOU re-predict over the CURRENT develop.
+  the 50 paths (git diff --name-only -z, NUL-safe; the seat's whitespace-split instrument read 251, re-measured 50): 29 package-lock.json + 20 package.json +
+         the baseline; all status M, 0 mode changes, +552/-951 (files API agrees: 50 modified, +552 -951).
+Repo:    /Volumes/DevMASTER/!CODING/Secuura/Blockchain/2_Project_Files  (READ-ONLY)
+  - Read verbs only there: ls-remote, rev-parse, log, show, diff, diff-tree, grep, cat-file, ls-tree, merge-base, rev-list, for-each-ref, status,
+    count-objects. NEVER fetch, pull, checkout, worktree, apply, merge, merge-tree, reset or push in that checkout (a hook refuses the write verbs).
+  - git clone --shared --no-checkout by SHA into your own fresh mktemp -d OUTSIDE the Secuura checkout (your report dir or /private/tmp/claude-501/…);
+    worktree add, merge-tree --write-tree, every install, build, tamper, trace and container run happen there only, from a script file. The scratch
+    clone's `origin` is the LOCAL checkout (it carries no refs/pull/*): to read refs/pull/1036/* fetch from the GitHub URL
+    (git config --get remote.origin.url) with the checkout's core.sshCommand, INTO YOUR SCRATCH CLONE only (the drafter's predict_merge_3 shows the shape).
+  - Never enter any seat's worktree (Blockchain/worktrees/*, s-b*/s-c*) or another gate's clone (other gates may be live); pin by SHA, never origin/*.
+  - Record the checkout's porcelain count, .git/worktrees entry count, for-each-ref count and count-objects -v before and after: they must be equal
+    for YOUR run (drafter at 07:42: porcelain 17, worktrees 257, refs 1197, count 9190 / in-pack 101422 — a live seat may move porcelain/refs; name the delta
+    and prove it is not yours by ref name / path).
+  - NEVER touch the push-window lock directory (Blockchain/worktrees/.push-lock-*): record only.
+
+A PR is gated at a SHA, not a name. FIRST verify the head at origin (git ls-remote refs/pull/1036/head AND refs/heads/feature/ks-763-qs-in-range, plus the
+PR API). If the head moved, STOP and say so in the mail. develop moving is EXPECTED: judge it by content, re-predict the merged tree over the tip you
+read, and name that tip as BASE_GO.
+
+You are FINDINGS-ONLY. You never fix, merge, push, deploy, comment, file, tick an ack box, `@` anyone, or unarchive a ticket. Linear and GitHub are
+READ-ONLY to you. Nothing to Peter or Stuart. MEASURE, not conclude: every claim in the READY is re-derived, never adopted; where you cannot measure,
+write NOT TESTED and why, at the same prominence as a finding.
+
+NEVER run a push, the real pre-push hook, or preflight.sh inside the Secuura checkout or any of its worktrees.
+
+NEVER print a credential value. GH_TOKEN and LINEAR_API_KEY are read by NAME inside a script from the Secuura 4_Credentials/.env, AGENTMAIL_API_KEY by
+NAME from /Volumes/DevMASTER/WEDNESDAY/4_Credentials/.env, never echoed or written anywhere (gatesets/2026-09-22_gate1036_ks763/api_read_gate1036.py is a
+working read script to copy). Count, never echo. NEVER the wallet mnemonic. No Datasec files or mail (subject-only if seen).
+
+CONTAINERS: at the drafter's 07:48 probe the Docker daemon was DOWN (unix:///Users/kam_code/.docker/run/docker.sock absent; `docker ps` 0). Probe it
+yourself FIRST (`docker version`, rc on its own line). If it is up: the image build in item 6(a) is IN SCOPE (node:24-alpine, linux/arm64 — the deployed
+amd64/musl npm is not measured by an arm64 container: say so); name every container uniquely (qa1036-<tree>-<epoch>), run suites --runInBand inside it
+(the Docker VM is 8 GB, shared), remove only your own container by that exact name, never touch any other. If it is DOWN: write "IMAGE BUILD NOT TESTED —
+Docker daemon down at <time>" FIRST in NOT-TESTED, and run the runtime load trace on the HOST in the Dockerfile-shaped runner tree instead (item 6(b));
+never fake a build.
+No stack, no kintsugi, no demo, no az. Outbound network: npm installs (registry reads) for the scratch trees and scripts/audit, what the audit scripts do
+themselves, `git ls-remote` / the scratch-clone fetch from GitHub, GitHub and Linear GETs, the AgentMail send. Bounded runs only; end a hung process by
+its verified pid (argv + cwd), never a pattern kill, never pid 1; `timeout` is NOT installed on the host. ANY LISTENER YOU START binds 127.0.0.1 and you
+end it by verified pid, then recount.
+THE CENSUS RULE v2: quote `lsof -nP -iTCP -sTCP:LISTEN` (node rows) AND `lsof -nP -iTCP -sTCP:ESTABLISHED` before your first run, mid, and at close.
+Loopback only: ZERO connections to :5432 (at 07:48 the host had 3 LISTEN rows on :5432 — someone's Postgres, NOT yours: never connect, never touch, record
+only) and ZERO non-loopback ESTABLISHED rows opened by your processes = STOP if either appears from YOUR pids. Quote `lsof -nP -iTCP:5432 -sTCP:LISTEN`,
+`lsof -nP -iTCP:4000 -sTCP:LISTEN`, `lsof -nP -iTCP:4003 -sTCP:LISTEN`, `lsof -nP -iTCP:8080 -sTCP:LISTEN` before/after every traced start. Any login_stub /
+foreign node listener (KS-1201 class): NOT yours, never touch, record by pid + cwd.
+node_modules farmed per ENTRY whenever you reuse an install -- never a wholesale symlink of a node_modules directory.
+Record the host load average (uptime; /proc/loadavg inside a container) beside EVERY timed run: installs, suites, traced starts (drafter 07:48: load1 8.69).
+Host toolchain: node v24.7.0, npm 11.5.1. The seat regenerated every lock on npm 11.19.0 in node:24-alpine and #1033's gate MEASURED that the root-lock
+recipe is npm-version dependent (host 11.5.1 inert on `npm update`; only 11.19.0 reproduces the blob byte-identically): a host-npm "does not reproduce" is an
+INSTRUMENT ARTEFACT, not a seat defect — name the npm version beside every regeneration you attempt; `npm ci` from the shipped locks is version-neutral.
+Time-box 75 minutes, in this priority order: 2, 3, 4, 5, 6(b), 6(a), 8, 7, 9, 1, 10, 11 (write NOT-TESTED first; the CONTEXT RULE below overrides the box).
+
+ELEVEN things you must not miss (numbered as Wednesday commissioned them; each with its instrument and the drafter's measured prediction):
+
+1. TIER AND ROUND: TIER 1, round 1 of 2, FULL WEIGHT — a dependency change to runtime bytes in every express image. Say why in one line (which
+   runtime trees move: every service whose Dockerfile runs `npm ci --omit=dev` on its own lock — 24 services/* + connectors/whatsapp-bot; the root lock is
+   installed by NO Dockerfile; frontend/issuer's qs is a dev-only path (vitest via `url`)). The real-browser half does not apply. Any product byte outside
+   the 50 paths = NO GO.
+
+2. MERGEABILITY at the CURRENT develop (@@DEV_SHORT@@ or later — re-read at origin in the same action you use it): the three-way merge in YOUR scratch
+   clone (`git merge-tree --write-tree`, BOTH orders, rc on its own line); conflicts BY PATH; the merged tree OID in FULL; its delta to the head tree (=
+   develop's delta since the merge-base, as a set) and to develop (= exactly the 50 PR paths, every one at its HEAD blob). If audit-baseline.json (or any
+   lock) conflicts because develop moved it, that is a FINDING for the seat (a re-merge under the push-window lock), NOT a reason to stop the gate: report
+   the conflict by path and grade the head anyway. CONSERVATION: the merged tree's baseline = develop's minus EXACTLY the three rows — MEASURE develop's
+   row count NOW (it may not be 29 any more; state both counts and the removed set by GHSA id, key order kept, `$comment` equal, 0 added, 0 altered).
+   Drafter (measured 07:45): over @@DEV_SHORT@@ merged tree @@MERGED@@, 0 conflicts both orders; develop 29 -> merged 26, removed exactly
+   {GHSA-4mjr-xmp4-gh2g, GHSA-x5fp-wj9c-mxmx, GHSA-q8mj-m7cp-5q26}; the baseline re-derives from develop's BYTE-EQUAL by
+   `json.dumps({"$comment", "accepted" minus the 3}, indent=2, ensure_ascii=False) + "\n"` (the ensure_ascii=True variant does NOT match — the `$comment`
+   carries an em dash); develop-delta ∩ PR paths = ∅. Planted control: a merge-tree over a develop that DID move the baseline must conflict there.
+
+3. THE LOCKS: parse EVERY tracked package-lock.json (45 at head = 45 at develop, same set; node_modules/ excluded) at the head vs develop — a TABLE per lock
+   of express / body-parser / qs / side-channel / mysql2 / vitest versions (every distinct version per name, incl. nested), before -> after; then assert:
+   (a) 29 locks moved = exactly the 29 qs carriers at develop (the 16 non-carriers UNMOVED by blob); (b) 0 qs < 6.16.0 anywhere at head (compare with
+   semver, never as strings); (c) express 4.22.1/4.22.2 -> 4.22.3 and body-parser 1.20.6 -> 1.20.8 in every carrier; express 5.2.1 and body-parser 2.3.0
+   (root, mcp-server) UNTOUCHED; (d) the ONLY non-family move is side-channel 1.1.0 -> 1.1.1 in 23 locks (necessity: qs 6.16.0 declares `^1.1.1` — read
+   it from the lock's own entry; the 6 carriers already at 1.1.1 — whatsapp-bot, issuer, root, packages/shared, mcp-server, vc-issuer — do not move it);
+   (e) NO major jumps and NO other package moves (diff every `packages[*]` entry, not just the family — name any entry that moved outside {express,
+   body-parser, qs, side-channel} and rule it); (f) mysql2 3.23.1 (root, originate) and vitest 4.1.11 (every lock that carries it) PRESERVED; (g) the 20
+   manifests move ONLY `overrides.body-parser` 1.20.6 -> 1.20.8 (JSON parse: no other top-level key, no other override — drafter 20/20); the 9 carriers WITHOUT
+   that override (whatsapp-bot, anchoring, kyc, mcp-server, nft-certificate, originate, vc-issuer, root, frontend/issuer) moved by `npm update` only — say
+   which manifests are unchanged by blob. PLANTED-VIOLATION CONTROL: plant qs 6.14.2 into a scratch copy of one lock -> your checker MUST red (and a
+   planted side-channel 1.2.0 -> your "only non-family move" rule MUST red).
+   Drafter (measured, read_shape_2.out): 29 moved / 29 carriers / 0 qs < 6.16.0 / side-channel moves 23 / manifests 20 of 20 exact; whole-entry diff NOT
+   done by the drafter (item (e) is yours).
+
+4. THE SHIPPED AUDIT SCRIPTS at the head (Blockchain/Dev/scripts/audit: 13 files, only audit-baseline.json moved; audit-gate.mjs 8e236ee70 and
+   audit-locks.mjs aff23b042 UNCHANGED since the #1033 gate; `npm ci --ignore-scripts` in scripts/audit, semver ^7.8.0, lock ffb2b110a unchanged, NO root
+   node_modules): (a) FIX: head + head's baseline (26) — audit-gate rc 0 AND audit-locks rc 0, 0 CLEANUP (the READY: "26 reported / 26 baselined";
+   "43 lockfiles, 24/24"); (b) CONTROL: head + develop's baseline (29 — copy develop's blob in) — audit-gate rc 0 with CLEANUP naming exactly GHSA-4mjr +
+   GHSA-x5fp (say which script prints it, by line), audit-locks CLEANUP GHSA-q8mj; (c) NEGATIVE CONTROL: develop's tree (@@DEV_SHORT@@) + develop's
+   baseline MINUS the three rows (bytes == head's baseline: assert) — audit-gate rc 1 naming exactly GHSA-4mjr + GHSA-x5fp, audit-locks rc 1 naming
+   GHSA-4mjr + GHSA-x5fp ("in 28 lock(s)") AND GHSA-q8mj ("in 26 lock(s)") — the READY says the root was never in q8mj's range: confirm from the script's
+   own output. Tee vulnerable_versions from the bulk response audit-locks.mjs receives (no extra URL) for qs; test 6.14.2 / 6.15.3 / 6.16.0 with the
+   shipped semver with controls on both sides of each boundary; quote the advisory ranges you receive.
+   Drafter: NOT RUN (the audit scripts talk to the registry; yours to run). The expiries in develop's 29 rows: GHSA-4mjr + GHSA-x5fp 2026-09-24 (KS-763);
+   GHSA-q8mj 2026-11-11 (KS-531); GHSA-frvp / GHSA-jjmj / GHSA-mwp4 2026-09-30; GHSA-wrjc / GHSA-337j 2026-10-02 — record which rows lapse NEXT after this PR.
+
+5. INSTALL + SUITES from the head's locks, in a worktree of your scratch clone at the head: root `npm ci` (Blockchain/Dev, workspaces packages/* services/*
+   frontend/*), then `npm ls express body-parser qs side-channel` at the root (hoisted express 4.22.3 / body-parser 1.20.8 / qs 6.16.0 / side-channel
+   1.1.1; 0 invalid; name every nested copy). THE WORKSPACE MATRIX the READY lists — RE-RUN, do not copy (read jest/vitest "Tests:" lines, never a TAP parse;
+   load average beside each): packages/shared 851/851; analytics 28/28; anchoring 237/238 (threadTokenMint = KS-562, the KNOWN pre-existing red — admit it by
+   NAME; a second red is a finding); api-gateway 556/556; auth 762/762; billing 93/93; demo-service 72/72; governance 115/115; guardian 1/1; kyc 26/26;
+   m365 38/38; mcp-server 1/1; nft-certificate 38/38; originate 741/741; prism 29/29; queue 1/1; referral 26/26; security 213/213; services/shared 11/11;
+   staking 61/61; tenant-provisioning 13/13; timestamping 42/42; tokenisation 8/8; transfer 70/70; vc-issuer 108/108; wallet-connector 45/45. develop has
+   taken ~40 test-only merges since the seat's run: counts MAY be higher at the MERGED tree — run the matrix at the HEAD (the seat's numbers) and, for the
+   express-serving lanes (api-gateway, auth, originate), ALSO at the merged tree; name the delta as develop's new tests, never as a PR effect.
+   frontend/issuer vitest (12/12). connectors/whatsapp-bot own-lock `npm ci` -> express 4.22.3 / qs 6.16.0 (no test script: say so).
+   scripts/preflight/lockfile-cleanroom.sh 35/35 (read its header for how it is invoked; run it in YOUR worktree only). Census v2 around every lane.
+   Run suites serially (the host load1 was 8.69 at draft; other seats are live).
+
+6. THE TWO THINGS THE READY SAYS ARE NOT COVERED, which tier 1 owes (RUNTIME REACH FIRST — the FIRST line of your verdict):
+   (a) IMAGE BUILD of at least the express services whose runtime deps move — api-gateway, auth, originate at minimum: `docker build` of the service's
+       Dockerfile from a copied source tree in your scratch clone (never the checkout), if the daemon is up (see CONTAINERS). Anchor-assert the runtime
+       install lines at the head (the Dockerfiles are UNCHANGED head == develop: api-gateway 6faa70472 — :22 COPY services/api-gateway/package*.json, :25
+       `npm ci --ignore-scripts`, :47 `npm ci --omit=dev --ignore-scripts`, :97 CMD node dist/index.js, EXPOSE 8080; auth 9402b0de3 — :28, :29, :54 `npm ci
+       --ignore-scripts --omit=dev`, :82 CMD, EXPOSE 4003; originate ac2fb91bf — :28, :30, :79 `npm ci --ignore-scripts --omit=dev`, :108 CMD, EXPOSE 4000).
+       If Docker is DOWN: NOT TESTED, say why and when you probed, never fake it.
+   (b) RUNTIME LOAD TRACE: for each of the three, reproduce the Dockerfile's RUNTIME step OUTSIDE Blockchain/Dev (copy the service's package.json +
+       package-lock.json at the head into a fresh dir; `npm ci --omit=dev --ignore-scripts`; `npm ls express body-parser qs side-channel` inside that tree
+       must read 4.22.3 / 1.20.8 / 6.16.0 / 1.1.1, 0 invalid, 0 extraneous); build dist from the builder step (`npm ci --ignore-scripts` + `npm run build`,
+       @secuura/shared linked to a built packages/shared as the Dockerfile's /shared); start `node dist/index.js` IN-PROCESS with a preload require/resolve
+       hook (module.registerHooks + Module._load), every listener forced to 127.0.0.1:0, DATABASE_URL / REDIS_URL / upstream URLs at a closed loopback
+       port; prove it SERVES ONE REQUEST on express 4.22.3 / body-parser 1.20.8 / qs 6.16.0: GET /health (or the service's first route), THEN a request whose
+       query string is parsed by qs with the advisory's own shapes — `?a[b]=1&a[c]=2` (nested) and the array-limit bypass `?a[0]=x,y` plus a
+       `?a[1000]=x` sparse index — and show from the hook which qs FILE (node_modules/qs/lib/parse.js at 6.16.0) resolved it; record what the route
+       answered (status only; no PII). FAIL: any qs < 6.16.0 or body-parser < 1.20.8 file resolved; any listener not on 127.0.0.1. Controls: the same hook
+       sees `require('qs')` (positive), and at DEVELOP's lock the same trace resolves qs 6.14.2/6.15.x (the A/B). End every child by verified pid, recount.
+       Say plainly what is NOT traced (post-connection paths, requests beyond the ones above, NODE_ENV=production if it needs secrets — a throwaway key
+       generated in-process is allowed, never printed).
+   Drafter: NOT RUN (Docker down at 07:48; the host route is yours). Prediction: every start serves /health (503 without a DB is fine, as #1033), qs
+   6.16.0 resolves the nested query; 0 files < 6.16.0.
+
+7. DEPENDABOT OVERLAP (RECORD ONLY; the gate closes nothing): the open Dependabot PRs touching the same locks/manifests — drafter (07:48, 19 open PRs):
+   EXACTLY #949 #948 #947 #946 #945 #649 #639 #635 #575 #572 (the READY's ten) share paths with #1036 (#649 pg: 18 shared; #575 dotenv: 17; #948 vite: 4;
+   #635 cbor: 2; the other six: the root lock only); 0 other open PRs touch audit-baseline.json; #1036 is the seat's only open PR. List them by number and
+   say which #1036 SUPERSEDES (none by content — they bump OTHER packages; every one of them will need a re-generation on npm >= 11.19.0 after #1036 lands,
+   the #1033 F1 class) — facts for the seat.
+
+8. LINEAR LINK HYGIENE, at run time and immediately before the mail: attachmentsForURL(pull/1036) = EXACTLY KS-763 `contributes` + KS-775 `contributes`
+   (both In Progress, status open; controls pull/1033 -> KS-763 merged, pull/99999 -> 0); 0 closing phrases in the title, the body, the THREE commit
+   messages and every comment (planted regex controls both ways); `Refs KS-763` in the body (drafter: ×1; `Refs KS-775` ×0 — the KS-775 link is by
+   ATTACHMENT, not a body magic word: grade that as the seat states it); the two comment ids the READY names READ BACK: KS-775 09d6f7c6-eb10-4e1f-8f98-16bf8254b689
+   body EXACTLY "qs rows fixed in range on express 4; the express 5 migration ruled 2026-09-03 is unchanged" (drafter: byte-equal), KS-763
+   1b1eb4d3-aa0f-4e38-8e70-9fbcb407a787 (names #1036, no `@`); KS-531 is ARCHIVED (Done, archivedAt 2026-08-16) — no attachment or comment expected there,
+   not a defect; commit SUBJECTS <= 92 chars ASCII — drafter: c9e034744's subject is 112 chars (OVER the 92 rule; c93d84c9b 77, 4b251997a 84; all ASCII):
+   grade it (the squash subject Wednesday's merging seat writes is what lands on develop; the PR title is 138 chars and is not a commit subject).
+   Both tickets stay In Progress; nothing closes on merge.
+
+9. THE SEAT'S OWN SLIPS from the READY — CONFIRMED / REFUTED against their predictor: (i) the whitespace-split path count 251 -> 50: the drafter could NOT
+   reproduce 251 (`git diff --name-only mb...head | wc -w` = 50 — no PR path carries whitespace), so the seat's 251 came from an instrument the READY does
+   not name: grade the CLAIM (50, NUL-safe) as confirmed and the 251 as unreproduced RECORD; (ii) the root loop re-picking express 4.x (express 5.2.1's
+   `^6.14.0` already admits 6.16.0): confirm express 5.2.1 / body-parser 2.3.0 are unmoved in the root and mcp-server locks (item 3(c)); (iii) the PR body
+   patched once (doubled comma; "all 3 rows removed" for both scripts): drafter 07:47 — body 8376 chars, ",," ×0, "all 3 rows" ×1, "express 5" ×5, PR
+   updated_at 2026-09-17T14:52:26Z; read it back yourself. Name every prediction slip against its predictor (the READY, the seat, the drafter, Wednesday).
+
+10. MERGE ADDENDUM — ONE line VERBATIM in report.md, under a `## MERGE ADDENDUM` heading, filled in (report.md ON DISK first, NOT-TESTED first):
+    - #1036 KS-763 on WEDNESDAY'S signed GO naming @@HEAD@@: squash onto develop <BASE_GO> (merged tree <sha>); attaches to KS-763 + KS-775 `contributes`, no closes; both stay In Progress; equality targets: <every changed path> <blob> — the 50 paths as `path blob (mode)`, comma-separated; SHIPS-WITH <= 3 sentences
+    where BASE_GO = the develop SHA you measured against (the merging seat re-predicts over a moved develop under the push-window lock) and <sha> = your
+    merged tree OID in full. The GO string the merging seat expects, in your mail: `GO: merge #1036` naming the head @@HEAD@@ and BASE_GO.
+    The 50 equality targets at the head (drafter, `git diff --raw -z --abbrev=40 mb HEAD`; re-derive, do not copy):
+    @@TARGETS@@
+    A NOT-PINNED section is not needed (no test cells); say "NOT-PINNED: none (lock gate)".
+
+11. INTERMITTENTS do not block: a suite timeout under host load is re-run standalone 3x serial and RULED (WHETHER IT BLOCKS) by name.
+    THE CONTEXT RULE: at ctx 80% write report.md NOW with NOT TESTED for everything not yet run, then mail; a report that stays in your pane is lost.
+
+Your tool shell's grep may be a function: use /usr/bin/grep -i with a same-file positive control.
+Read jest "Tests:" / vitest "Tests" lines, never a TAP parse. Compare versions with semver, never as strings.
+zsh: no PIPESTATUS (write rc=$? on its own line); quote "${SHA}:path" (zsh reads $SHA:s as a modifier); never begin a line with `====`. `timeout` is not
+installed on the host: end a hung process by verified pid. `git grep -c` prints nothing for a zero (silence is unread, not 0).
+Never `cd` in your own tool calls. stderr is never discarded. Every scripted edit asserts its anchor count = 1. Every count carries the command that
+produced it. Quoted heredocs. Absolute paths.
+Quote the Secuura checkout's porcelain count, .git/config sha256, for-each-ref count, .git/worktrees entry count, branch, origin develop and
+refs/pull/1036/head at start, mid and close, as THREE timestamped readings. If refs/pull/1036/head moves, STOP. develop moving is expected: judge it by
+content and name it.
+Never rm (never delete: move to a quarantine dir by rename). Use a fresh mktemp -d per attempt.
+Do no memory maintenance of your own project's memory store inside this session.
+
+Report FOUND / TESTED / HOW, with controls, and state what you did NOT test at the same prominence. Write NOT-TESTED.written-first.md BEFORE any run,
+then report.md and evidence/ (scripts/ and out/), to:
+/Volumes/DevMASTER/!CODING/Testing Agent MAIN/projects/secuura/reports/2026-09-22-ks763-1036-4b251997a-tier1-r1/
+Every finding carries its evidence class (MEASURED AT RUNTIME / PROBED / READ ONLY / RELAYED), severity, target (PR, seat evidence, or TICKET) and
+oracle. Name every prediction slip against its predictor (the READY, the seat, the drafter, Wednesday).
+Verdict: GO, GO WITH FINDINGS, or NO GO, on @@HEAD@@ and on the merged tree (name the develop SHA = BASE_GO and the merged-tree OID in full).
+Round 1 of 2: a NO GO goes back to the seat for one fix round.
+
+MAIL YOUR VERDICT to wednesday-agent@agentmail.to when the pass is complete — WRITE report.md BEFORE THE MAIL. Your pane holds ~19 lines of alternate screen
+with no scrollback, so a verdict that stays in the pane is one pane-close from being lost. The verdict MAIL is the END STATE and the wait signal. Send it
+FROM coagent@agentmail.to. Subject, EXACTLY:
+[QA -> Wednesday] TIER 1 GATE #1036 (KS-763) 4b251997a — <GO | GO WITH FINDINGS | NO GO>
+
+Sending: the QA project has no send_brief.sh of its own. POST https://api.agentmail.to/v0/inboxes/coagent@agentmail.to/messages/send with JSON
+{"to": ["wednesday-agent@agentmail.to"], "subject": "...", "text": "..."} and Authorization: Bearer $AGENTMAIL_API_KEY, the key read by NAME from
+/Volumes/DevMASTER/WEDNESDAY/4_Credentials/.env and never echoed. Build the body from a template file with no shell interpolation and assert the backtick
+spans survived; put report.md's sha256 + byte count IN the mail, the verdict's first line = RUNTIME REACH, then the MERGE ADDENDUM line verbatim.
+Confirm the API answered 2xx and quote the message id in your final pane line. Timestamps in the mail come from `date`, never estimated.

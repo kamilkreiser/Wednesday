@@ -1,0 +1,92 @@
+at 2026-09-21T21:49:18Z — Dockerfile anchors at HEAD (git show HEAD:path | grep -n), blob at HEAD == develop 3916eacd1?
+== Blockchain/Dev/services/api-gateway/Dockerfile  blob head 6faa70472 dev 6faa70472  lines 97
+7:FROM ${REGISTRY_PREFIX}node:24-alpine AS shared-builder
+8:WORKDIR /shared
+9:COPY packages/shared/package*.json ./
+10:RUN npm ci --ignore-scripts
+11:COPY packages/shared/ ./
+12:RUN npm run build
+14:FROM ${REGISTRY_PREFIX}node:24-alpine AS builder
+16:WORKDIR /app
+19:COPY --from=shared-builder /shared /shared
+22:COPY services/api-gateway/package*.json ./
+25:RUN npm ci --ignore-scripts
+36:RUN npm run build
+41:FROM ${REGISTRY_PREFIX}node:24-alpine
+43:WORKDIR /app
+46:COPY --from=builder /app/package*.json ./
+47:RUN npm ci --omit=dev --ignore-scripts
+55:COPY --from=shared-builder /shared /shared
+59:COPY --from=builder /app/dist ./dist
+62:COPY --from=builder /app/src/docs/developer-portal.html ./dist/docs/developer-portal.html
+63:COPY --from=builder /app/src/docs/extension-login.html ./dist/docs/extension-login.html
+66:COPY --from=builder /app/downloads ./downloads
+69:COPY --from=builder /app/docs/openapi ./docs/openapi
+87:USER nodejs
+90:EXPOSE 8080
+97:CMD ["node", "dist/index.js"]
+== Blockchain/Dev/services/auth/Dockerfile  blob head 9402b0de3 dev 9402b0de3  lines 82
+8:FROM ${REGISTRY_PREFIX}node:24-alpine AS shared-builder
+9:WORKDIR /shared
+10:COPY packages/shared/package*.json ./
+11:RUN npm ci --ignore-scripts
+12:COPY packages/shared/ ./
+13:RUN npm run build
+15:FROM ${REGISTRY_PREFIX}node:24-alpine AS builder
+16:WORKDIR /app
+25:COPY --from=shared-builder /shared /shared
+28:COPY services/auth/package*.json ./
+29:RUN npm ci --ignore-scripts
+36:RUN npm run build
+41:FROM ${REGISTRY_PREFIX}node:24-alpine
+42:WORKDIR /app
+53:COPY services/auth/package*.json ./
+54:RUN npm ci --ignore-scripts --omit=dev
+56:COPY --from=shared-builder /shared /shared
+59:COPY --from=builder /app/dist ./dist
+75:USER nodejs
+77:EXPOSE 4003
+82:CMD ["node", "dist/index.js"]
+== Blockchain/Dev/services/originate/Dockerfile  blob head ac2fb91bf dev ac2fb91bf  lines 108
+11:FROM ${REGISTRY_PREFIX}node:24-alpine AS shared-builder
+12:WORKDIR /shared
+13:COPY packages/shared/package*.json ./
+14:RUN npm ci --ignore-scripts
+15:COPY packages/shared/ ./
+16:RUN npm run build
+19:FROM ${REGISTRY_PREFIX}node:24-alpine AS builder
+20:WORKDIR /app
+25:COPY --from=shared-builder /shared /shared
+28:COPY services/originate/package*.json ./
+30:RUN npm ci --ignore-scripts
+44:RUN npm run build
+51:FROM ${REGISTRY_PREFIX}node:24-alpine AS runner
+52:WORKDIR /app
+62:COPY --from=builder /app/dist ./dist
+63:COPY --from=builder /app/node_modules ./node_modules
+64:COPY --from=builder /app/package.json /app/package-lock.json ./
+67:COPY --from=builder /app/scripts ./scripts
+68:COPY --from=builder /app/migrations ./migrations
+79:RUN npm ci --ignore-scripts --omit=dev
+86:COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
+88:COPY --from=shared-builder /shared /shared
+96:USER secuura
+102:EXPOSE 4000
+108:CMD ["node", "dist/index.js"]
+== package.json main/scripts.start at HEAD
+api-gateway main dist/index.js start node dist/index.js test vitest express ^4.18.2 body-parser dep None overrides {'path-to-regexp': '0.1.13', 'express': {'path-to-regexp': '0.1.13'}, 'body-parser': '1.20.8', 'postcss': '8.5.23'}
+auth main dist/index.js start node dist/index.js test vitest express ^4.18.2 body-parser dep None overrides {'path-to-regexp': '0.1.13', 'express': {'path-to-regexp': '0.1.13'}, 'body-parser': '1.20.8', 'postcss': '8.5.23'}
+originate main dist/index.js start node dist/index.js test jest express ^4.18.2 body-parser dep None overrides {'fast-uri': '^3.1.7', 'path-to-regexp': '0.1.13', 'express': {'path-to-regexp': '0.1.13'}, '@babel/core': '7.29.6', 'deepmerge-ts': '^8.0.1', 'mysql2': '3.23.1'}
+== root package.json workspaces + overrides at HEAD
+workspaces 3 ['packages/*', 'services/*', 'frontend/*']
+overrides {'fast-uri': '^3.1.7', 'node-forge': '^1.4.0', 'path-to-regexp': '0.1.13', 'express': {'path-to-regexp': '0.1.13'}, '@cardano-sdk/crypto': '^0.4.5', 'postcss': '^8.5.24', 'mysql2': '3.23.1'}
+engines {'node': '>=18.0.0', 'npm': '>=9.0.0'}
+== whatsapp-bot package.json
+express ^4.18.2 scripts {'build': 'tsc', 'start': 'node dist/index.js', 'dev': 'ts-node src/index.ts'} overrides None
+== frontend/issuer package.json (qs via url, dev)
+test None vitest ^4.1.9 overrides None
+== lockfile-cleanroom script?
+Blockchain/Dev/scripts/preflight/lockfile-cleanroom.sh
+== scripts/audit package.json scripts
+None
+deps {'semver': '^7.8.0'} None

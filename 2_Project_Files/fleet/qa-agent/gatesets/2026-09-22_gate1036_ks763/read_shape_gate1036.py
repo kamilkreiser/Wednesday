@@ -1,0 +1,146 @@
+#!/usr/bin/env python3
+"""read_shape_gate1036.py — READ-ONLY local object reads in the Secuura checkout for the #1036 tier-1 gate draft (KS-763 PR-4, qs in range).
+Read verbs only: rev-parse, log, merge-base, diff-tree, diff, ls-tree, show, cat-file, rev-list. Never fetch/checkout/worktree/apply/merge here.
+Prints every measurement with the command that produced it. Usage: read_shape_gate1036.py <head> <develop> > read_shape_1.out"""
+import datetime, json, re, subprocess, sys
+REPO = '/Volumes/DevMASTER/!CODING/Secuura/Blockchain/2_Project_Files'
+HEAD, DEV = sys.argv[1], sys.argv[2]
+D = 'Blockchain/Dev/'
+BASELINE = D + 'scripts/audit/audit-baseline.json'
+def git(*a, check=True):
+    p = subprocess.run(['git', '-C', REPO] + list(a), capture_output=True, text=True)
+    if check and p.returncode != 0: raise SystemExit('git %r rc %d %s' % (a[:3], p.returncode, p.stderr[-300:]))
+    return p.stdout
+def say(cmd, val=''): print('$ ' + cmd + ('\n' + val.rstrip() if val else ''))
+print('read_shape_gate1036.py at', datetime.datetime.now().astimezone().strftime('%Y-%m-%d %H:%M:%S %Z'), '/', datetime.datetime.now(datetime.timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ'))
+print('HEAD', HEAD, 'DEVELOP', DEV)
+
+# A. the head's commits and the merge-base
+say('git log --format="%H %P %ci %s" -3 ' + HEAD, git('log', '--format=%H %P %ci %s', '-3', HEAD))
+mb = git('merge-base', HEAD, DEV).strip()
+say('git merge-base HEAD DEV', mb)
+say('git rev-list --left-right --count DEV...HEAD (behind<TAB>ahead from develop\'s view: left=develop-only, right=head-only)', git('rev-list', '--left-right', '--count', DEV + '...' + HEAD))
+say('git rev-parse HEAD^{tree} DEV^{tree} mb^{tree}', git('rev-parse', HEAD + '^{tree}', DEV + '^{tree}', mb + '^{tree}'))
+
+# B. the PR's files vs develop (three-dot = vs merge-base) and vs the CURRENT develop tip (two-dot), NUL-safe
+def names(rng, z=True):
+    out = git('diff', '--name-only', '-z', rng) if z else git('diff', '--name-only', rng)
+    return [x for x in out.split('\0') if x] if z else out.splitlines()
+p3 = names(mb + '...' + HEAD); p2 = names(DEV + '..' + HEAD)
+say('git diff --name-only -z mb...HEAD | count (NUL-safe)', str(len(p3)))
+say('git diff --name-only -z DEV..HEAD | count (NUL-safe)', str(len(p2)))
+say('same set (three-dot vs two-dot)?', str(sorted(p3) == sorted(p2)))
+say('whitespace-split control: git diff --name-only mb...HEAD | wc -w (the READY\'s slip instrument: 251 = paths split on spaces)', str(len(git('diff', '--name-only', mb + '...' + HEAD).split())))
+raw = git('diff', '--raw', '-z', '--abbrev=40', mb, HEAD)   # the PR's OWN 50 paths = mb..HEAD (a DEV..HEAD two-dot read gives 214: develop's 142 commits since mb seen as deletions — drafter S1, read_shape_1.out)
+# parse -z raw: ":srcmode dstmode srcsha dstsha status\0path\0"
+recs = []; parts = raw.split('\0'); i = 0
+while i < len(parts) - 1:
+    meta = parts[i]; path = parts[i + 1]; i += 2
+    m = re.match(r':(\d{6}) (\d{6}) ([0-9a-f]{40}) ([0-9a-f]{40}) (\w)', meta)
+    if not m: continue
+    recs.append((path, m.group(1), m.group(2), m.group(3), m.group(4), m.group(5)))
+say('git diff --raw -z --abbrev=40 mb HEAD | records (the PR paths)', str(len(recs)))
+say('control: git diff --raw -z DEV HEAD | records (two-dot, includes develop-side changes as D/M)', str(len([x for x in git('diff', '--raw', '-z', DEV, HEAD).split('\0') if x.startswith(':')])))
+devdelta = names(mb + '..' + DEV)
+say('git diff --name-only -z mb..DEV | count (develop\'s delta since the merge-base)', str(len(devdelta)))
+print('  develop-delta paths INTERSECT the PR paths (predicted merge conflicts by path):', sorted(set(devdelta) & set(p3)))
+print('  develop-delta basenames:', {b: n for b, n in sorted(__import__('collections').Counter(x.rsplit('/', 1)[-1].split('.')[-1] for x in devdelta).items())})
+print('  develop commits since mb: git rev-list --count mb..DEV =', git('rev-list', '--count', mb + '..' + DEV).strip(), '| merges among them:', git('rev-list', '--count', '--merges', mb + '..' + DEV).strip())
+print('  status counts:', {s: sum(1 for r in recs if r[5] == s) for s in sorted({r[5] for r in recs})})
+print('  mode changes:', sum(1 for r in recs if r[1] != r[2]))
+kinds = {}
+for r in recs:
+    b = r[0].rsplit('/', 1)[-1]
+    kinds[b] = kinds.get(b, 0) + 1
+print('  basenames:', kinds)
+print('  MERGE-ADDENDUM equality targets (path blob (mode)) at HEAD, comma-separated:')
+print('  ' + ', '.join('%s %s (%s)' % (r[0], r[4], r[2]) for r in recs))
+nums = [l.split('\t') for l in git('diff', '--numstat', mb, HEAD).splitlines()]
+add = sum(int(a) for a, d_, p in nums if a != '-'); dele = sum(int(d_) for a, d_, p in nums if d_ != '-')
+print('  numstat +%d/-%d over %d files (binary rows %d)' % (add, dele, len(nums), sum(1 for a, d_, p in nums if a == '-')))
+
+# C. the baseline: rows at DEV, mb, HEAD; the removed set; expiries
+def baseline(sha):
+    return json.loads(git('show', sha + ':' + BASELINE))
+bd, bm, bh = baseline(DEV), baseline(mb), baseline(HEAD)
+say('git show DEV:audit-baseline.json | rows (len(accepted))', str(len(bd['accepted'])))
+say('git show mb:audit-baseline.json | rows', str(len(bm['accepted'])))
+say('git show HEAD:audit-baseline.json | rows', str(len(bh['accepted'])))
+say('git rev-parse DEV:baseline mb:baseline HEAD:baseline', git('rev-parse', DEV + ':' + BASELINE, mb + ':' + BASELINE, HEAD + ':' + BASELINE))
+removed = [k for k in bd['accepted'] if k not in bh['accepted']]; added = [k for k in bh['accepted'] if k not in bd['accepted']]
+altered = [k for k in bd['accepted'] if k in bh['accepted'] and bd['accepted'][k] != bh['accepted'][k]]
+print('  removed DEV->HEAD:', removed); print('  added:', added); print('  altered:', altered)
+print('  key order kept (DEV minus removed == HEAD order)?', [k for k in bd['accepted'] if k not in removed] == list(bh['accepted']))
+print('  $comment equal?', bd.get('$comment') == bh.get('$comment'))
+for k in removed:
+    r = bd['accepted'][k]; print('  %s: package=%s ticket=%s expires=%s severity=%s' % (k, r.get('package'), r.get('ticket'), r.get('expires') or r.get('expiry') or r.get('review_by'), r.get('severity')))
+print('  every DEV row (key, package, ticket, expires):')
+for k, r in bd['accepted'].items():
+    print('    %s %s %s %s' % (k, r.get('package'), r.get('ticket'), r.get('expires') or r.get('expiry') or r.get('review_by')))
+re_bytes = json.dumps({'$comment': bd['$comment'], 'accepted': {k: v for k, v in bd['accepted'].items() if k not in removed}}, indent=2, ensure_ascii=False) + '\n'
+head_bytes = git('show', HEAD + ':' + BASELINE)
+print('  re-derived (DEV minus removed, json.dumps indent=2 ensure_ascii=False + newline) == HEAD bytes?', re_bytes == head_bytes,
+      '| ensure_ascii=True variant ==?', json.dumps({'$comment': bd['$comment'], 'accepted': {k: v for k, v in bd['accepted'].items() if k not in removed}}, indent=2) + '\n' == head_bytes)
+
+# D. scripts/audit listing at DEV and HEAD (blob per file)
+def lst(sha, path):
+    return [(l.split('\t')[1].rsplit('/', 1)[-1], l.split()[2]) for l in git('ls-tree', sha, path + '/').splitlines() if l.split()[1] == 'blob']
+ad, ah = lst(DEV, D + 'scripts/audit'), lst(HEAD, D + 'scripts/audit')
+say('git ls-tree DEV scripts/audit/ | files', str(len(ad)))
+for (n, b), (n2, b2) in zip(ad, ah):
+    print('  %-28s dev %s head %s %s' % (n, b[:9], b2[:9], '' if b == b2 else 'MOVED'))
+say('scripts/audit tree oid DEV / HEAD / mb', git('rev-parse', DEV + ':' + D + 'scripts/audit', HEAD + ':' + D + 'scripts/audit', mb + ':' + D + 'scripts/audit'))
+
+# E. every tracked package-lock.json at HEAD vs DEV: express / body-parser / qs / side-channel / mysql2 / vitest
+def locks(sha):
+    return [l for l in git('ls-tree', '-r', '--name-only', sha).splitlines() if l.endswith('package-lock.json') and 'node_modules/' not in l]
+lh, ld = locks(HEAD), locks(DEV)
+say('git ls-tree -r --name-only HEAD | grep package-lock.json (tracked locks)', str(len(lh)) + ' at HEAD, ' + str(len(ld)) + ' at DEV, same set ' + str(sorted(lh) == sorted(ld)))
+FAM = ['express', 'body-parser', 'qs', 'side-channel', 'mysql2', 'vitest']
+def vers(sha, path):
+    try: pk = json.loads(git('show', sha + ':' + path)).get('packages', {})
+    except SystemExit: return None
+    out = {}
+    for k, v in pk.items():
+        n = k.rsplit('node_modules/', 1)[-1] if 'node_modules/' in k else None
+        if n in FAM: out.setdefault(n, set()).add(v.get('version'))
+    return out
+moved = 0; qs_lt = []; sc_moves = 0; qs_carriers_dev = 0; table = []
+def vkey(v): return tuple(int(x) if x.isdigit() else 0 for x in re.split(r'[.\-+]', v)[:3])
+for p in sorted(lh):
+    vd, vh = vers(DEV, p), vers(HEAD, p)
+    bd_, bh_ = git('rev-parse', DEV + ':' + p).strip(), git('rev-parse', HEAD + ':' + p).strip()
+    mv = bd_ != bh_
+    moved += mv
+    if vd and 'qs' in vd: qs_carriers_dev += 1
+    for v in (vh or {}).get('qs', set()):
+        if vkey(v) < (6, 16, 0): qs_lt.append((p, v))
+    if (vd or {}).get('side-channel') != (vh or {}).get('side-channel'): sc_moves += 1
+    fmt = lambda d: ' '.join('%s=%s' % (n, ','.join(sorted(x for x in d.get(n, set()) if x))) for n in FAM if n in d)
+    table.append('  %-70s %s | dev: %s | head: %s' % (p.replace(D, ''), 'MOVED' if mv else 'same ', fmt(vd or {}), fmt(vh or {})))
+print('\n'.join(table))
+print('  locks moved DEV->HEAD (blob differs):', moved, '| qs carriers at DEV:', qs_carriers_dev, '| qs < 6.16.0 at HEAD:', qs_lt, '| side-channel moves:', sc_moves)
+whole_moved = [r[0] for r in recs]
+print('  moved lock paths per diff --raw:', sum(1 for x in whole_moved if x.endswith('package-lock.json')), '| manifests per diff --raw:', sum(1 for x in whole_moved if x.endswith('package.json')), '| other:', [x for x in whole_moved if not x.endswith('package-lock.json') and not x.endswith('package.json')])
+
+# F. manifests: overrides.body-parser at DEV vs HEAD on the moved package.json paths
+mans = [r[0] for r in recs if r[0].endswith('package.json')]
+ok = 0
+for p in mans:
+    jd, jh = json.loads(git('show', DEV + ':' + p)), json.loads(git('show', HEAD + ':' + p))
+    od, oh = (jd.get('overrides') or {}).get('body-parser'), (jh.get('overrides') or {}).get('body-parser')
+    other = {k for k in set(jd) | set(jh) if jd.get(k) != jh.get(k)} - {'overrides'}
+    ov_other = {k for k in set(jd.get('overrides') or {}) | set(jh.get('overrides') or {}) if (jd.get('overrides') or {}).get(k) != (jh.get('overrides') or {}).get(k)} - {'body-parser'}
+    ok += (od == '1.20.6' and oh == '1.20.8' and not other and not ov_other)
+    print('  %-60s overrides.body-parser %s -> %s | other top-level keys differing: %s | other overrides differing: %s' % (p.replace(D, ''), od, oh, sorted(other), sorted(ov_other)))
+print('  manifests with EXACTLY overrides.body-parser 1.20.6 -> 1.20.8 and nothing else:', ok, 'of', len(mans))
+
+# G. Dockerfiles: which install a lock (express services)
+dfs = [l for l in git('ls-tree', '-r', '--name-only', HEAD).splitlines() if l.rsplit('/', 1)[-1] == 'Dockerfile' or l.rsplit('/', 1)[-1].startswith('Dockerfile.')]
+say('tracked Dockerfiles at HEAD', str(len(dfs)))
+for df in dfs:
+    txt = git('show', HEAD + ':' + df)
+    npm_lines = [l.strip() for l in txt.splitlines() if re.search(r'\bnpm (ci|install)\b', l)]
+    copies = [l.strip() for l in txt.splitlines() if re.search(r'^\s*COPY .*package', l)]
+    print('  %-60s npm lines %d: %s | package COPYs: %s' % (df.replace(D, ''), len(npm_lines), ' || '.join(npm_lines)[:200], ' || '.join(copies)[:160]))
+print('done', datetime.datetime.now(datetime.timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ'))

@@ -1,0 +1,49 @@
+predict_merge_gate1036.py at 2026-09-22 07:45:37 AEST / 2026-09-21T21:45:37Z
+$ git -C REPO count-objects -v (BEFORE)
+count: 9190
+size: 60548
+in-pack: 101422
+packs: 47
+size-pack: 297855
+prune-packable: 435
+garbage: 0
+size-garbage: 0
+$ git clone --shared --no-checkout REPO /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/37c28f31-b065-4f99-b37a-8976d071f996/scratchpad/predict1036.4e710_tb_c
+  clone objects (count-objects -v in the clone; --shared = alternates, expect count 0):
+    count: 0
+    size: 0
+    in-pack: 0
+    packs: 0
+    size-pack: 0
+    prune-packable: 0
+    garbage: 0
+    size-garbage: 0
+    alternate: /Volumes/DevMASTER/!CODING/Secuura/Blockchain/2_Project_Files/.git/objects
+  alternates: /Volumes/DevMASTER/!CODING/Secuura/Blockchain/2_Project_Files/.git/objects
+  cat-file -e 4b251997a^{commit} rc 0
+  cat-file -e 3916eacd1^{commit} rc 0
+$ git merge-base HEAD DEV = 3961c2add8e1637b32e638f8f0952c328c00833e
+$ git merge-tree --write-tree --name-only 3916eacd1 4b251997a -> rc 0 tree 04b05e093ad8b3d6e55b0fe553d7deb96b247050 conflicts 0 []
+$ git merge-tree --write-tree --name-only 4b251997a 3916eacd1 -> rc 0 tree 04b05e093ad8b3d6e55b0fe553d7deb96b247050 conflicts 0 []
+  both orders give the same tree? True | rc both 0 (clean)? True
+  head tree d7b86b0b052d9363e18106d069f14be9a8d9719c | develop tree 4b573853be61832f3adc14656de742b6051d5622 | merged tree 04b05e093ad8b3d6e55b0fe553d7deb96b247050
+$ audit-baseline.json rows: develop 29 (blob 91d8b71c9) | head 26 (blob 648e8ee7b) | merged 26 (blob 648e8ee7b)
+  merged == head blob? True | develop minus merged = ['GHSA-4mjr-xmp4-gh2g', 'GHSA-q8mj-m7cp-5q26', 'GHSA-x5fp-wj9c-mxmx'] | merged minus develop = [] | CONSERVATION develop 29 -> merged 26 = exactly 3 removed, 0 added
+$ diff-tree head..merged | count 164 | == develop delta mb..DEV (164) as a set? True
+$ diff-tree develop..merged | count 50 | == the PR paths mb..HEAD (50) as a set? True
+  every PR path at its HEAD blob in the merged tree? True | mismatches: []
+  develop-delta INTERSECT PR paths: []
+$ (scratch clone) git fetch origin refs/pull/1036/merge refs/pull/1036/head -> rc 128 fatal: couldn't find remote ref refs/pull/1036/merge
+$ git -C REPO count-objects -v (AFTER)
+count: 9190
+size: 60548
+in-pack: 101422
+packs: 47
+size-pack: 297855
+prune-packable: 435
+garbage: 0
+size-garbage: 0
+  checkout count-objects identical before/after? True
+  scratch clone kept at /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/37c28f31-b065-4f99-b37a-8976d071f996/scratchpad/predict1036.4e710_tb_c (never deleted by the drafter)
+done 2026-09-21T21:45:37Z
+rc=0

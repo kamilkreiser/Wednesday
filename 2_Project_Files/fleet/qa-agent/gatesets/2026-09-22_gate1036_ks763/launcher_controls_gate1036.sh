@@ -1,0 +1,49 @@
+#!/bin/bash
+# launcher_controls_gate1036.sh — exercise the launcher's refusals on COPIES of the prompt (never the real one) and with --check-only overrides.
+# LADDER ORDER (drafter S3, first run): the by-name ladder (exit 30) runs BEFORE the CONTEXT RULE (31), CENSUS (32) and BOTH (36) greps and every
+# token of 31/32 is also a by-name keyword, so a prompt copy missing one of them refuses at 30 (J, M want 30 — 31/32 are belt-and-braces guards
+# shadowed by 30); the BOTH control (O) removes a token that is NOT a by-name keyword (the KS-775 comment id) so 36 fires. SEL=<names> runs a subset.
+# Each control prints "<name> rc=<n> want=<m> <PASS|MISMATCH>". Usage: launcher_controls_gate1036.sh <launcher> <prompt> [<controls dir>]
+set -u
+L="$1"; P="$2"; CD="${3:-$(mktemp -d "/private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/37c28f31-b065-4f99-b37a-8976d071f996/scratchpad/controls_gate1036.XXXXXX")}"
+mkdir -p "$CD"; echo "controls dir $CD"; echo "controls start $(date -u '+%Y-%m-%dT%H:%M:%SZ')"
+mm=0
+run() { # name want env... -- args
+  local name="$1" want="$2"; shift 2
+  if [ -n "${SEL:-}" ] && ! printf "%s" "$SEL" | /usr/bin/grep -qF -- "$name"; then return 0; fi
+  local envs=(); while [ "$1" != "--" ]; do envs+=("$1"); shift; done; shift
+  env "${envs[@]}" "$L" "$@" > "$CD/$name.out" 2>&1 < /dev/null
+  local rc=$?
+  local v=PASS; [ "$rc" -eq "$want" ] || { v=MISMATCH; mm=$((mm+1)); }
+  echo "$name rc=$rc want=$want $v :: $(tail -1 "$CD/$name.out" | cut -c1-160)"
+}
+HEAD=4b251997a96034ee8a3359aac357ee17d222c3ef
+run A_positive_check 0 X=1 -- --check
+run B_wrong_head 6 QA1036_HEAD=c9e034744b22db79cffe75938dd4c3d1a718f03e -- --check
+run C_curdev_is_head_LANDED 19 QA1036_CUR_DEV=$HEAD -- --check
+run D_curdev_premerge_GUARDED 18 QA1036_CUR_DEV=c9e034744b22db79cffe75938dd4c3d1a718f03e -- --check
+run E_curdev_mergebase_OK 0 QA1036_CUR_DEV=3961c2add8e1637b32e638f8f0952c328c00833e -- --check
+run F_curdev_dependabot949_GUARDED 18 QA1036_CUR_DEV=7ee1a26e6 -- --check
+sed 's/04b05e093ad8b3d6e55b0fe553d7deb96b247050/deadbeefdeadbeefdeadbeefdeadbeefdeadbeef/' "$P" > "$CD/prompt_deadbeef.txt"
+run G_prompt_deadbeef 34 QA1036_PROMPT=$CD/prompt_deadbeef.txt -- --check
+{ cat "$P"; echo "PENDING-PR-1036"; } > "$CD/prompt_pending.txt"
+run H_prompt_pending 33 QA1036_PROMPT=$CD/prompt_pending.txt -- --check
+sed 's/MERGE ADDENDUM/MERGE APPENDIX/g' "$P" > "$CD/prompt_noaddendum.txt"
+run I_prompt_no_addendum 25 QA1036_PROMPT=$CD/prompt_noaddendum.txt -- --check
+sed 's/THE CONTEXT RULE/THE CONTEXT NOTE/g' "$P" > "$CD/prompt_nocontext.txt"
+run J_prompt_no_context_rule 30 QA1036_PROMPT=$CD/prompt_nocontext.txt -- --check
+sed 's/648e8ee7bbf22b5737597e3dd61ee92922628e58/648e8ee7bbf22b5737597e3dd61ee92922628e59/' "$P" > "$CD/prompt_blob.txt"
+run K_prompt_wrong_target_blob 35 QA1036_PROMPT=$CD/prompt_blob.txt -- --check
+sed 's/RUNTIME REACH FIRST/RUNTIME REACH LAST/g' "$P" > "$CD/prompt_noreach.txt"
+run L_prompt_no_reach_first 27 QA1036_PROMPT=$CD/prompt_noreach.txt -- --check
+sed 's/lsof -nP -iTCP:5432 -sTCP:LISTEN/lsof -nP -iTCP:5433 -sTCP:LISTEN/g' "$P" > "$CD/prompt_nocensus.txt"
+run M_prompt_no_5432_census 30 QA1036_PROMPT=$CD/prompt_nocensus.txt -- --check
+sed 's/TIER AND ROUND/TIER + ROUND/g' "$P" > "$CD/prompt_byname.txt"
+run N_prompt_byname_miss 30 QA1036_PROMPT=$CD/prompt_byname.txt -- --check
+sed 's/09d6f7c6-eb10-4e1f-8f98-16bf8254b689/09d6f7c6-eb10-4e1f-8f98-16bf8254b680/g' "$P" > "$CD/prompt_both.txt"
+run O_prompt_both_miss 36 QA1036_PROMPT=$CD/prompt_both.txt -- --check
+sed '1s/ultrathink/think/' "$P" > "$CD/prompt_nothink.txt"
+run P_prompt_no_ultrathink 8 QA1036_PROMPT=$CD/prompt_nothink.txt -- --check
+run Q_launch_no_tty 21 X=1 --
+echo "controls end $(date -u '+%Y-%m-%dT%H:%M:%SZ') MISMATCH=$mm"
+exit $mm
