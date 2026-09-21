@@ -9,7 +9,8 @@ supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s
 ## 🔴 DELTA 55 — 2026-09-22 03:0x ROTATION HANDOVER (Tuesday ctx ~78-80%, safe boundary). **READ THIS FIRST. DELTA 51's OWED ZIP STANDS.**
 
 ### MAIN NOW
-- **main = `47be2b0`** (RD-516 merged; verified: tree == `3d9eb97`, 3828/3828). Earlier: RD-604 @ `bdca588`. **Kam's 18:02 card (a) is fulfilled. Kam was told on the board at 02:57 (201).** Demo is still on `aae041a`: CI deploy is off, and a demo redeploy needs a Tuesday GO under C-127 (the manual path, with the rollback rule as on 09-21).
+- **UPDATE 03:3x: main = `f1319ac` (RD-495 + RD-498 merged, verified tree == `b2358cb`, 3840/3840). F is on the RD-525 forward merge next.** Before that:
+- **main was `47be2b0`** (RD-516 merged; verified: tree == `3d9eb97`, 3828/3828). Earlier: RD-604 @ `bdca588`. **Kam's 18:02 card (a) is fulfilled. Kam was told on the board at 02:57 (201).** Demo is still on `aae041a`: CI deploy is off, and a demo redeploy needs a Tuesday GO under C-127 (the manual path, with the rollback rule as on 09-21).
 
 ### FLOOR
 - `%34` **NexusAI-F** (S77F, launcher 94091 / claude 94093), lane A. It is executing Tuesday's gate-2 GO (mail 14:08Z):
