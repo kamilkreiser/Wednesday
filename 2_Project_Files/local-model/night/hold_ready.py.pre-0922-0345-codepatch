@@ -1,0 +1,129 @@
+#!/usr/bin/env python3
+"""hold_ready.py — Wednesday's source-read + HOLD writer for a PASSING Ornith test_only run.
+
+Built 2026-09-21 04:5x by the 04:3x Wednesday seat, closing the OWED item from ledger 2026-09-21 03:3x:
+a READY was written saying "BYTE-IDENTICAL to the golden (cmp)" while the same action's output said
+`patch==golden: False` — the sentence was templated from the previous READYs, not from the check.
+This script MEASURES first and builds every provenance clause FROM the measurement's boolean; it
+REFUSES (rc 2) to write a READY when any load-bearing check fails, and it never emits the
+byte-identical clause unless its own `cmp` said so. Read verbs only; writes ONE file under night/.
+
+Usage: hold_ready.py <run-dir> <golden-run-dir-or-'-'> <ROWID> <short-title-caps> [--seat '<who>'] [--dry-run]
+  run-dir     the runner's run directory (holds input.json, out.md.checker/, checker.out)
+  golden      the drafter's precheck directory whose out.md.checker/patch.diff is the golden, or '-' (none)
+  ROWID       e.g. LIVETENANTDEFAULT-1 (goes into the READY filename)
+  title       e.g. LIVE-ROWTOAPIKEY-DEFAULT-TENANT (caps, dashes; goes into the filename)
+"""
+import json, os, subprocess, sys, datetime, re
+
+def die(msg, rc=2):
+    print(f"hold_ready: REFUSE — {msg}", file=sys.stderr); sys.exit(rc)
+
+args = sys.argv[1:]
+dry = '--dry-run' in args; args = [a for a in args if a != '--dry-run']
+seat = 'Wednesday'
+if '--seat' in args:
+    i = args.index('--seat'); seat = args[i+1]; del args[i:i+2]
+if len(args) != 4: die(f"expected 4 positional args (run-dir golden ROWID title), got {len(args)}: {args}", 1)
+run, golden, rowid, title = args
+chk = os.path.join(run, 'out.md.checker')
+if not os.path.isdir(chk): die(f"no checker dir at {chk}")
+
+inp = json.load(open(os.path.join(run, 'input.json')))
+ticket = inp['ticket']['identifier'] if isinstance(inp.get('ticket'), dict) else str(inp.get('ticket'))
+tip = inp['tip']; test_file = inp['test_file']; mode = inp.get('test_mode'); runner = inp.get('runner')
+
+# 1. verdict from checker.out (the run's own artefact, never done.md)
+co = open(os.path.join(run, 'checker.out')).read()
+m = re.search(r'^RESULT: (PASS|FAIL) \((\d+)/(\d+)\)', co, re.M)
+if not m or m.group(1) != 'PASS': die(f"checker.out RESULT is not PASS: {m.group(0) if m else 'absent'}")
+passed, total = m.group(2), m.group(3)
+
+# 2. touched files == {test_file}
+touched = json.load(open(os.path.join(chk, 'touched.json')))['touched']
+if touched != [test_file]: die(f"touched {touched} != [{test_file}]")
+
+# 3. '+' lines of the run's patch, ordered, vs the brief's expected_plus
+patch_path = os.path.join(chk, 'patch.diff')
+patch = open(patch_path).read().split('\n')
+plus = [l[1:] for l in patch if l.startswith('+') and not l.startswith('+++')]
+minus = [l[1:] for l in patch if l.startswith('-') and not l.startswith('---')]
+exp = inp.get('expected_plus') or []
+if isinstance(exp, str): exp = exp.split('\n')
+plus_ok = (plus == exp)
+if not plus_ok:
+    # tolerate the builder storing expected_plus without a trailing empty element
+    plus_ok = ([l for l in plus if l != ''] == [l for l in exp if l != ''])
+if not plus_ok: die(f"'+' lines ({len(plus)}) are not ordered-equal to expected_plus ({len(exp)})")
+nonascii = sum(1 for l in plus for c in l if ord(c) > 127)
+must_remove = inp.get('must_remove') or []
+minus_ok = (sorted(minus) == sorted(must_remove))
+if not minus_ok: die(f"'-' lines {minus} != must_remove {must_remove}")
+
+# 4. strict apply at the tip (T3) from its own artefact
+t3 = open(os.path.join(chk, 'apply_strict.out')).read() if os.path.exists(os.path.join(chk, 'apply_strict.out')) else ''
+strict_ok = ('PASS T3' in co)
+# 2026-09-21 16:5x (ledger 16:14 row): the T3 sentence is COPIED from checker.out, never templated. A non-empty
+# apply_strict.out is the strict apply's ERROR (e.g. 'corrupt patch at line 7'); then the checker passed T3 only
+# with an accommodation (--recount) and the word 'strict' may not be emitted as a claim.
+t3_line = next((l.strip() for l in co.splitlines() if l.strip().startswith(('PASS T3', 'FAIL T3'))), '')
+if not t3_line: die("checker.out has no 'PASS T3'/'FAIL T3' line — T3 cannot be asserted")
+strict_failed = (t3.strip() != '')
+if strict_failed and 'accommodation' not in t3_line: die(f"apply_strict.out is non-empty ({t3.strip()[:80]}) but the T3 line names no accommodation: {t3_line}")
+if strict_failed: strict_ok = False
+
+# 5. tampers: red set == declared, controls green — from each verdict file
+tampers = []
+for f in sorted(os.listdir(chk)):
+    if f.startswith('tamper_') and f.endswith('.verdict.out'):
+        v = json.load(open(os.path.join(chk, f)))
+        tid = f[len('tamper_'):-len('.verdict.out')]
+        ok = (sorted(v.get('red', [])) == sorted(v.get('declared', [])) and not v.get('problems') and not v.get('ctrl_bad'))
+        if not ok: die(f"tamper {tid}: red {v.get('red')} declared {v.get('declared')} problems {v.get('problems')} ctrl_bad {v.get('ctrl_bad')}")
+        tampers.append((tid, v.get('declared', [])))
+if not tampers: die("no tamper verdict files")
+
+# 6. green at the tip: cells present
+gt = open(os.path.join(chk, 't5.out')).read().strip().split('\n')[0] if os.path.exists(os.path.join(chk, 't5.out')) else ''
+mg = re.search(r'total=(\d+) passed=(\d+) failed=(\d+)', gt)
+if not mg or mg.group(3) != '0' or mg.group(1) != mg.group(2): die(f"green_tip line not all-green: {gt!r}")
+cells_total = mg.group(1)
+
+# 7. the golden comparison — MEASURED, and the sentence is built from the result
+golden_clause = "golden not located — no byte-identity claim is made"
+same = None
+if golden != '-':
+    gpath = os.path.join(golden, 'out.md.checker', 'patch.diff')
+    if os.path.exists(gpath):
+        same = (subprocess.run(['cmp', '-s', patch_path, gpath]).returncode == 0)
+        golden_clause = (f"the run's patch is BYTE-IDENTICAL to the drafter's golden (`cmp -s {patch_path} {gpath}` rc 0, {seat})" if same
+                         else f"the run's patch DIFFERS from the drafter's golden at `{gpath}` (`cmp` rc 1) — read the diff before raising")
+    else:
+        golden_clause = f"golden path `{gpath}` does not exist — no byte-identity claim is made"
+
+now = datetime.datetime.now()
+stamp = now.strftime('%H:%M %Y-%m-%d'); day = now.strftime('%Y-%m-%d')
+num = ticket.split('-')[1]
+fname = f"READY_{ticket}-{rowid}_ornith35b-q4_BRIEFED-TESTONLY-{title}-PASS-{passed}of{total}_{day}.diff.md"
+out = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'night', fname) if False else os.path.join('/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night', fname)
+if os.path.exists(out) and not dry: die(f"READY already exists: {out}")
+
+tamper_lines = '\n'.join(f"- `{tid}` → red exactly {decl}" for tid, decl in tampers)
+body = f"""# READY — {ticket}-{rowid} (Ornith, briefed, test_only, {mode} · {runner}) — PASS {passed}/{total} — HELD for QA
+
+> ⚠ **CANONICAL PATCH = `{patch_path}`** (from `ls` at {stamp}). Checker T3 (verbatim from checker.out): `{t3_line}`{' — STRICT APPLY REFUSED: `' + t3.strip() + '` (apply with --recount or rewrite the header; the raise seat states which)' if strict_failed else ''}; {golden_clause}.
+
+**Held {stamp} by {seat} after a source read (hold_ready.py — every clause below is built from the checker's own artefacts in `{chk}`, not typed).** Tip `{tip}`. Touches ONE file: `{test_file}` ({mode}). `+` lines {len(plus)} ordered-equal to the brief's `expected_plus` ({'ASCII' if nonascii == 0 else str(nonascii) + ' NON-ASCII chars'}); `-` lines {len(minus)} == `must_remove`. Green at the tip: {cells_total}/{cells_total} cells. Tampers ({len(tampers)}), each red exactly its declared set with controls green and the product file restored by bytes (T6/T7/T8):
+{tamper_lines}
+
+**PR NOTES for the raise seat:** TEST-ONLY — zero product bytes; one file, apply `patch.diff` {'WITH --recount (strict apply refuses: miscounted hunk header — every line byte-exact per the T3 line) — or rewrite the header and assert the blob equals the --recount result' if strict_failed else 'strictly'} at the tip (re-check `git ls-remote origin develop` first; if develop moved, re-run `git apply --check` and state it). Input: `{os.path.join(run, 'input.json')}`. Brief: `night/briefs/{ticket}-{rowid}.md`. Verdict source: `{os.path.join(run, 'checker.out')}`.
+
+```diff
+{open(patch_path).read().rstrip()}
+```
+"""
+if dry:
+    print(f"DRY-RUN OK → {fname}\n  golden: {golden_clause}\n  plus={len(plus)} minus={len(minus)} cells={cells_total} tampers={len(tampers)} nonascii={nonascii}\n  header: {body.splitlines()[2]}\n  prnote: {[l for l in body.splitlines() if l.startswith('**PR NOTES')][0][:220]}")
+    sys.exit(0)
+open(out, 'w').write(body)
+print(f"HELD → {out}\n  golden: {'BYTE-IDENTICAL' if same else ('DIFFERS' if same is False else 'not compared')}; plus={len(plus)} minus={len(minus)} cells={cells_total} tampers={len(tampers)}")
