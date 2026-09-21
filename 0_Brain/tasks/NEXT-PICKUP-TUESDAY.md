@@ -26,6 +26,18 @@ Kam asked 15:24 (both tabs): "How's the sync going with the portable drive?" Mea
 - **WHEN HE RULES:** add `WED_AGENT=tuesday` (plus the paths) to the plist, preview, then `launchctl bootstrap gui/$(id -u) ~/Library/LaunchAgents/com.tuesday.nassync.plist`. **Never re-load the plist as it stands.**
 - The case-fold hazard is cleared: the NAS shows `!CODING/Datasec` in the correct case.
 
+### 🟢 16:3x — NEWEST STATE (supersedes the 65% block where they differ)
+- **RD-518 round 3 = 🟢 GO** (06:28Z, report `…/reports/2026-09-21-rd518-4230d23-round3/report.md`). No Blocker, no Major, no 4th round. NexusAI-C told: ticket H-01..H-05, widen RD-596, carry the success-path residual, **DO NOT MERGE**, wrap.
+- **RD-518's MERGE WAITS ON KAM'S TERMINAL WORD** ("merge RD-518"): same classifier class as RD-574/516. Asked on the board 16:3x. It goes AFTER RD-574/516 and needs a forward merge (C-68). Send a `RELEASE`-prefixed mail only after he says it.
+- 🔴 **RD-518's LARGEST RESIDUAL, per the gate: the Key Vault SUCCESS path has never been executed by anyone.** Only the failure and exposure side is proven. It needs real Azure. Raised to Kam, with an offer to scope where and how. **Do not let the resubmission zip go out without saying so.**
+- **RD-574/516 merges RUNNING** (S74; the lock label s74-merge1-verify was seen at 16:1x). Expect two reports.
+- **The floor counter is corrected a THIRD time** (9b901d55e): basename(argv[0]) + the entry point ANYWHERE in argv. Q-01 found first-arg matching blind to `node -r <preload> server.js`.
+- **T9 NAS leg (card t9-nas-leg-scope-mechanism = a, Kam 16:10):**
+  - The engine gained `DEVNAS_PATHS` (backup `.pre-0921-1615-devnaspaths`; `!SYNC FILES` is NOT a git repo).
+  - `nas_sync.sh` has a tuesday branch (aa98b478e).
+  - The plist has `WED_AGENT=tuesday`.
+  - **STILL UNLOADED:** arming waits on the read-only rsync preview in `.claude/jobs/4c844a00/tmp/nas_preview/summary.txt`. If NAS-only or NAS-newer files are non-trivial, tell Kam BEFORE arming; otherwise `launchctl bootstrap gui/$(id -u) ~/Library/LaunchAgents/com.tuesday.nassync.plist` for 23:00.
+
 ### 🟢 CHECKPOINT 65% (15:5x) — STATE NOW, newest first
 - **RD-518 round 3 READY @ `4230d23`** (NexusAI-C, 05:53Z): G-01 fixed (`role==='admin'`), G-02 covered behaviourally (new `rd518-r3-health-detail-decision.test.js`), BOTH red-proofs fire, 3796/3796. **Its GATE is RUNNING in pane %29** (launcher `launch_qa_nexusai_rd518_round3_4230d23.sh`: guard 22 = exactly 3 files, **guard 25 = authEnforcement.js byte-unchanged, enforcing RD-594's exclusion**). Round 3 is the LAST round Kam authorised: a Major → ticket, and a 4th round is his.
 - Checked at commission: the 6 changed lines naming `adminGateRefuses` are ALL COMMENTS (5 in the test header, 1 in server.js). No call site changed.
