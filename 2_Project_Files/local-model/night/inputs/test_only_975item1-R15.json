@@ -1,0 +1,92 @@
+{
+ "ticket": {
+  "identifier": "KS-975",
+  "title": "KS-975 R15-item1 - re-brief of the held READY at develop 9f0265eb0 (written 20:35 on 2026-09-21 by Wednesday's census15 drafter from the file at the tip - 0 lines read whole)",
+  "description": "# KS-975 R15-item1 - re-brief of the held READY at develop 9f0265eb0 (written 20:35 on 2026-09-21 by Wednesday's census15 drafter from the file at the tip - 0 lines read whole)\nFile: `Blockchain/Dev/services/security/src/__tests__/ks975-malformed-sub-is-refused.test.ts`\nTip: `9f0265eb06ecf24d4de18149ce862ad2330a61ee`\nRunner: `vitest`\n\n## Premises (measured by the census15 drafter at 20:35:38 AEST, in a `--shared` scratchpad clone detached at the tip; Wednesday re-derives before queueing)\n- Source READY: `night/READY_KS-975-item1_ornith35b-q4_TESTONLY-TAMPER-PASS-7of7_2026-09-16.diff.md` (its checker PASS was at an OLDER tip; run dir exists: `runs/2026-09-16_ks975-ornith35b-night`); canonical patch 2034 B sha256[:16] `6bde9ee9a974fb74`, +36/-0.\n- The old patch at the tip: strict rc 128 / --recount rc 0 / --directory=Blockchain/Dev rc 128 / -R rc 128 -> effective mode **--directory+--recount**; the old READY's + lines PRESENT at the tip: NO (content absent - un-merged).\n- The test file `Blockchain/Dev/services/security/src/__tests__/ks975-malformed-sub-is-refused.test.ts` at the tip: ABSENT - ONE NEW FILE. Mode: **NEW**.\n- Tamper source: the old brief `night/briefs/KS-975.md` (its `## Tamper` line/from/to, converted to the current `### ID` shape). Each From located at the tip by exact whole-line match (count in the Tampers section).\n- Ticket KS-975: Backlog, assignee UNASSIGNED, PR attachments none (all merged); briefs already on disk: KS-975.md.\n- Generator notes: the run input.json is the older code_patch shape (no tampers key) - tampers taken from the old brief instead; Runner: vitest from the old brief header.\n\n## What is wrong (one paragraph)\nThe held READY's own summary, verbatim from its header (the model wrote these cells once and the checker passed them at tip 2026-09-16; the run is re-done at the CURRENT tip so the checker verdicts it fresh):\n> # READY — KS-975 ITEM 1 (rateLimitScope tri-state: a MALFORMED `sub` — numeric or blank, with no `userId` — is a REFUSAL on the ungated `/api/rate-limit/check`; the behaviour #894 shipped, now PINNED so it cannot silently revert to #893's tenant-bucket mapping) — **KAM RULED 2026-09-16 07:01 (card `secuura-ornith-decision-class-tickets-1121-629-975`, option a: \"keep the 403 and pin it\")** — Ornith ornith:35b (Q4_K_M) PASS 7/7 FIRST SAMPLE, TEST-ONLY MODE with a tamper on `rateLimitScope.ts:118`, tip develop M55 48e65c435, run /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/runs/2026-09-16_ks975-ornith35b-night\n> # Source read by me (Wednesday): the new test file's imports, consts and four `it` cells are IDENTICAL to the brief's block (diff on non-comment lines: empty); under the tamper (a MALFORMED `sub` mapped back to ABSENT — #893's behaviour) the two 🔴 cells fail BY ASSERTION (2 failed / 4 run, controls green); at the untouched tip 4/4; A6 the whole security suite shows no new red. The product file is UNTOUCHED (test-only; A3 asserts it).\n> # PR NOTES for the Sunday raising seat: (1) ONE file: `Blockchain/Dev/services/security/src/__tests__/ks975-malformed-sub-is-refused.test.ts`; KS-975 stays OPEN for item 2 (below) — close item 1 with a comment citing Kam's 07:01 ruling. (2) The ticket's fix-shape also asked for the DECISION to be stated in the product comment at `rateLimitScope.ts:114-116` (\"`sub` substitutes for an ABSENT `userId` only…\") — add one sentence there in the PR: \"A MALFORMED `sub` is itself a refusal (KS-975 item 1, ruled 2026-09-16) — pinned by ks975-malformed-sub-is-refused.test.ts.\" (a comment-only edit; no model round needed). (3) ITEM 2 (explicitScope treats JSON `null` as ABSENT and falls through to `principalScope(caller)` — :86 `claim()` / :232 the second line) is a SEPARATE product change, briefed next as its own pin.\nThis task asks for the SAME cells, re-derived at develop `9f0265eb0`. Nothing in the product changes. The old diff still applies at the tip in mode --directory+--recount - emit the same cells, anchored on the lines quoted below.\n\n## THE MODE - read this twice\nTEST-ONLY, ONE NEW FILE: your diff contains EXACTLY ONE file, the NEW test file above: `--- /dev/null` then `+++ b/Blockchain/Dev/services/security/src/__tests__/ks975-malformed-sub-is-refused.test.ts` then ONE `@@ -0,0 +1,N @@` hunk, every line `+`, no context, no `-`. No product hunk. \n\n## The exact change\n```\n+/**\n+ * KS-975 item 1 - a MALFORMED `sub` (numeric, blank) with no `userId` is a REFUSAL.\n+ *\n+ * `principalScope` substitutes `sub` for an ABSENT `userId` (rateLimitScope.ts:118) and\n+ * refuses on MALFORMED (:121). `claim(user?.sub)` can itself be MALFORMED, so a numeric or\n+ * blank `sub` refuses - #894 shipped that; #893 had mapped it to the tenant-only bucket\n+ * (200 on the ungated /check). Ruled deliberate (Kam, 2026-09-16); these cells pin it so\n+ * a future change cannot silently map a MALFORMED `sub` back to ABSENT (the KS-949 gate\n+ * measured that restoring #893's behaviour left all 179 cells green).\n+ */\n+\n+import { describe, it, expect } from 'vitest';\n+import { principalScope } from '../rateLimitScope';\n+\n+const TENANT_A = 'a0000000-0000-4000-8000-00000000000a';\n+const USER_1 = 'user-1';\n+\n+describe('KS-975 item 1 - a MALFORMED `sub` is a refusal, not a silent downgrade to the tenant bucket', () => {\n+  it('RED KS-975 - a NUMERIC sub with no userId is refused (null), not scoped to the tenant bucket', () => {\n+    expect(principalScope({ tenantId: TENANT_A, sub: 123 })).toBeNull();\n+  });\n+\n+  it('RED KS-975 - a BLANK sub with no userId is refused (null), not scoped to the tenant bucket', () => {\n+    expect(principalScope({ tenantId: TENANT_A, sub: '   ' })).toBeNull();\n+  });\n+\n+  it('KS-975 control - a good sub scopes exactly as the same userId would', () => {\n+    expect(principalScope({ tenantId: TENANT_A, sub: USER_1 })).not.toBeNull();\n+    expect(principalScope({ tenantId: TENANT_A, sub: USER_1 })).toBe(principalScope({ tenantId: TENANT_A, userId: USER_1 }));\n+  });\n+\n+  it('KS-975 control - an ABSENT sub with a tenant is NOT a refusal: tenant-only scope', () => {\n+    expect(principalScope({ tenantId: TENANT_A })).not.toBeNull();\n+    expect(principalScope({ tenantId: TENANT_A, sub: undefined })).toBe(principalScope({ tenantId: TENANT_A }));\n+  });\n+});\n```\n\n## Cells (every cell RED or CONTROL; the names below are the EXACT it() titles)\n- `RED KS-975 - a NUMERIC sub with no userId is refused (null), not scoped to the tenant bucket`\n- `RED KS-975 - a BLANK sub with no userId is refused (null), not scoped to the tenant bucket`\n- `KS-975 control - a good sub scopes exactly as the same userId would`  (CONTROL - green on both trees)\n- `KS-975 control - an ABSENT sub with a tenant is NOT a refusal: tenant-only scope`  (CONTROL - green on both trees)\n\n## Tampers\n### ITEM1\nFile: `Blockchain/Dev/services/security/src/rateLimitScope.ts`\nLine: 118\nFrom:\n```\n  const user_ = rawUser === ABSENT ? claim(user?.sub) : rawUser;\n```\nTo:\n```\n  const user_ = rawUser === ABSENT ? (claim(user?.sub) === MALFORMED ? ABSENT : claim(user?.sub)) : rawUser; // TAMPER: #893's behaviour — a MALFORMED sub is treated as ABSENT (KS-975 item 1 restores the refusal)\n```\nReds: `RED KS-975 - a NUMERIC sub with no userId is refused (null), not scoped to the tenant bucket`, `RED KS-975 - a BLANK sub with no userId is refused (null), not scoped to the tenant bucket`\n(From located at the tip: 1 match(es); the old brief/input said line 118)\n\n## Controls\n- `KS-975 control - a good sub scopes exactly as the same userId would`\n- `KS-975 control - an ABSENT sub with a tenant is NOT a refusal: tenant-only scope`\n\n## Output\nExactly ONE ```diff block; paths repo-relative (`Blockchain/Dev/services/security/src/__tests__/ks975-malformed-sub-is-refused.test.ts`); correct hunk counts; no `\\$` / `\\u` / backslash escapes in a `+` line; the cell titles EXACTLY as listed (the checker matches the full title).\n"
+ },
+ "repo": {
+  "source_checkout": "/Volumes/DevMASTER/!CODING/Secuura/Blockchain/2_Project_Files",
+  "tip": "9f0265eb06ecf24d4de18149ce862ad2330a61ee",
+  "branch": "develop",
+  "test_runner": "vitest (run one file with `npx vitest run <file>` from Blockchain/Dev/services/security)"
+ },
+ "task_type": "test_only",
+ "tip": "9f0265eb06ecf24d4de18149ce862ad2330a61ee",
+ "source_checkout": "/Volumes/DevMASTER/!CODING/Secuura/Blockchain/2_Project_Files",
+ "repo_subdir": "Blockchain/Dev",
+ "service_dir": "services/security",
+ "shared_pkg_dir": "packages/shared",
+ "shared_pkg_name": "@secuura/shared",
+ "test_file": "Blockchain/Dev/services/security/src/__tests__/ks975-malformed-sub-is-refused.test.ts",
+ "test_file_rel_to_service": "src/__tests__/ks975-malformed-sub-is-refused.test.ts",
+ "test_mode": "new",
+ "diff_file_headers": [
+  "--- /dev/null",
+  "+++ b/Blockchain/Dev/services/security/src/__tests__/ks975-malformed-sub-is-refused.test.ts"
+ ],
+ "runner": "vitest",
+ "expected_plus": [
+  "/**",
+  " * KS-975 item 1 - a MALFORMED `sub` (numeric, blank) with no `userId` is a REFUSAL.",
+  " *",
+  " * `principalScope` substitutes `sub` for an ABSENT `userId` (rateLimitScope.ts:118) and",
+  " * refuses on MALFORMED (:121). `claim(user?.sub)` can itself be MALFORMED, so a numeric or",
+  " * blank `sub` refuses - #894 shipped that; #893 had mapped it to the tenant-only bucket",
+  " * (200 on the ungated /check). Ruled deliberate (Kam, 2026-09-16); these cells pin it so",
+  " * a future change cannot silently map a MALFORMED `sub` back to ABSENT (the KS-949 gate",
+  " * measured that restoring #893's behaviour left all 179 cells green).",
+  " */",
+  "",
+  "import { describe, it, expect } from 'vitest';",
+  "import { principalScope } from '../rateLimitScope';",
+  "",
+  "const TENANT_A = 'a0000000-0000-4000-8000-00000000000a';",
+  "const USER_1 = 'user-1';",
+  "",
+  "describe('KS-975 item 1 - a MALFORMED `sub` is a refusal, not a silent downgrade to the tenant bucket', () => {",
+  "  it('RED KS-975 - a NUMERIC sub with no userId is refused (null), not scoped to the tenant bucket', () => {",
+  "    expect(principalScope({ tenantId: TENANT_A, sub: 123 })).toBeNull();",
+  "  });",
+  "",
+  "  it('RED KS-975 - a BLANK sub with no userId is refused (null), not scoped to the tenant bucket', () => {",
+  "    expect(principalScope({ tenantId: TENANT_A, sub: '   ' })).toBeNull();",
+  "  });",
+  "",
+  "  it('KS-975 control - a good sub scopes exactly as the same userId would', () => {",
+  "    expect(principalScope({ tenantId: TENANT_A, sub: USER_1 })).not.toBeNull();",
+  "    expect(principalScope({ tenantId: TENANT_A, sub: USER_1 })).toBe(principalScope({ tenantId: TENANT_A, userId: USER_1 }));",
+  "  });",
+  "",
+  "  it('KS-975 control - an ABSENT sub with a tenant is NOT a refusal: tenant-only scope', () => {",
+  "    expect(principalScope({ tenantId: TENANT_A })).not.toBeNull();",
+  "    expect(principalScope({ tenantId: TENANT_A, sub: undefined })).toBe(principalScope({ tenantId: TENANT_A }));",
+  "  });",
+  "});"
+ ],
+ "must_remove": [],
+ "cells": {},
+ "tampers": [
+  {
+   "id": "ITEM1",
+   "file": "Blockchain/Dev/services/security/src/rateLimitScope.ts",
+   "line": 118,
+   "from": "  const user_ = rawUser === ABSENT ? claim(user?.sub) : rawUser;",
+   "to": "  const user_ = rawUser === ABSENT ? (claim(user?.sub) === MALFORMED ? ABSENT : claim(user?.sub)) : rawUser; // TAMPER: #893's behaviour — a MALFORMED sub is treated as ABSENT (KS-975 item 1 restores the refusal)",
+   "reds": [
+    "RED KS-975 - a NUMERIC sub with no userId is refused (null), not scoped to the tenant bucket",
+    "RED KS-975 - a BLANK sub with no userId is refused (null), not scoped to the tenant bucket"
+   ],
+   "reds_as_written": [
+    "RED KS-975 - a NUMERIC sub with no userId is refused (null), not scoped to the tenant bucket",
+    "RED KS-975 - a BLANK sub with no userId is refused (null), not scoped to the tenant bucket"
+   ]
+  }
+ ],
+ "controls": [
+  "KS-975 control - a good sub scopes exactly as the same userId would",
+  "KS-975 control - an ABSENT sub with a tenant is NOT a refusal: tenant-only scope"
+ ],
+ "files": {},
+ "runner_pin": "vitest by the brief's Runner: line; detected jest:- vitest:['vitest.config.ts', 'package.json']",
+ "_night_num_ctx": 65536
+}

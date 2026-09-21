@@ -1,0 +1,68 @@
+{
+ "ticket": {
+  "identifier": "KS-864",
+  "title": "KS-864 R15-F1009 - re-brief of the held READY at develop 9f0265eb0 (written 20:35 on 2026-09-21 by Wednesday's census15 drafter from the file at the tip - 80 lines read whole)",
+  "description": "# KS-864 R15-F1009 - re-brief of the held READY at develop 9f0265eb0 (written 20:35 on 2026-09-21 by Wednesday's census15 drafter from the file at the tip - 80 lines read whole)\nFile: `Blockchain/Dev/services/api-gateway/src/__tests__/ks864c-portal-env-vars.test.ts`\nTip: `9f0265eb06ecf24d4de18149ce862ad2330a61ee`\n\n## Premises (measured by the census15 drafter at 20:35:38 AEST, in a `--shared` scratchpad clone detached at the tip; Wednesday re-derives before queueing)\n- Source READY: `night/READY_KS-864-F1009_ornith35b-q4_TESTONLY-TAMPER-PASS-7of7_2026-09-17.diff.md` (its checker PASS was at an OLDER tip; run dir exists: `runs/2026-09-17_ks864f1009-ornith35b-night`); canonical patch 1790 B sha256[:16] `da1d3bfd656680e2`, +13/-2.\n- The old patch at the tip: strict rc 0 / --recount rc 0 / --directory=Blockchain/Dev rc 1 / -R rc 1 -> effective mode **strict**; the old READY's + lines PRESENT at the tip: NO (content absent - un-merged).\n- The test file `Blockchain/Dev/services/api-gateway/src/__tests__/ks864c-portal-env-vars.test.ts` at the tip: EXISTS (80 lines) - MODIFY IN PLACE. Mode: **MODIFY**.\n- Tamper source: the old brief `night/briefs/KS-864-F1009.md` (its `## Tamper` line/from/to, converted to the current `### ID` shape). Each From located at the tip by exact whole-line match (count in the Tampers section).\n- Ticket KS-864: Backlog, assignee kamil.kreiser@secuura.ai, PR attachments #1007, #1009, #1064, #1073 (all merged); briefs already on disk: KS-864-F1009.md, KS-864-N64-1.md, KS-864-R1.md, KS-864.md, KS-864.md.five-edit-2026-09-15.\n- Generator notes: dropped 2 blank + line(s) (a blank + is refused in a modify fence); the run input.json is the older code_patch shape (no tampers key) - tampers taken from the old brief instead.\n\n## What is wrong (one paragraph)\nThe held READY's own summary, verbatim from its header (the model wrote these cells once and the checker passed them at tip 2026-09-17; the run is re-done at the CURRENT tip so the checker verdicts it fresh):\n> # READY — KS-864 F-1009-1 + F-1009-2 (TEST-ONLY, MODIFY-IN-PLACE ks864c-portal-env-vars.test.ts: per-block env values so vi.resetModules is pinned; a served environment.env == NODE_ENV cell + a control per block) — Ornith ornith:35b (Q4_K_M) PASS 7/7 FIRST SAMPLE (03:59:39). Held by Wednesday at 04:14 AEST. Run /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/runs/2026-09-17_ks864f1009-ornith35b-night\n> # Source read by me (Wednesday): the model's 13 `+` / 2 `-` lines IDENTICAL in sequence to the brief's two hunks (a mutated-copy control unequal); apply STRICT; A4 under the system-status.ts:437 tamper 1 red by assertion / 10 run, controls green; A6 api-gateway no new red; A7 tsc rc 0.\n> # NOT GRADED BY THE CHECKER: F-1009-1 (a test-side vi.resetModules property) — graded in the brief's premises (Q-reset: OLD 6/6 green → golden 3 red). The input was built with the builder's PR-attachment refusal bypassed (both KS-864 PRs merged; IMPROVEMENTS 03:52).\n> # PR NOTES: \"Part of KS-864 (F-1009-1, F-1009-2)\" — never Closes; test-only → tier 2; KS-864 stays open (Backlog).\nThis task asks for the SAME cells, re-derived at develop `9f0265eb0`. Nothing in the product changes. The old diff still applies at the tip in mode strict - emit the same cells, anchored on the lines quoted below.\n\n## THE MODE - read this twice\nTEST-ONLY, MODIFY IN PLACE: your diff contains EXACTLY ONE file, the EXISTING test file above, as the hunk(s) below (context lines byte-for-byte from the tip; no blank context line; no blank + line; a pure insertion ends with a context line). No product hunk. \n\n## The exact change\n```\n@@ -54,7 +54,8 @@\n       vi.resetModules();\n       vi.stubGlobal('fetch', vi.fn(async () => { throw new Error('offline in test'); }));\n       process.env.NODE_ENV = nodeEnv;\n-      for (const p of PORTALS) process.env[p.envVar] = p.value;\n+      // F-1009-1: each block sets its OWN values, so a development block that reads a staging-loaded module reds.\n+      for (const p of PORTALS) process.env[p.envVar] = p.value + '/' + nodeEnv;\n       const router = (await import('../routes/system-status')).default;\n       const app = express();\n       app.use('/api/system', router);\n@@ -71,7 +71,15 @@\n     for (const p of PORTALS) {\n       it(`🔴 KS-864 — ${p.name} reports ${p.envVar} under NODE_ENV=${nodeEnv}`, async () => {\n-        expect((await portalUrls(port))[p.name]).toBe(p.value);\n+        expect((await portalUrls(port))[p.name]).toBe(p.value + '/' + nodeEnv);\n       });\n     }\n+    it(`RED KS-864 F-1009-2 - the served environment.env equals NODE_ENV=${nodeEnv}`, async () => {\n+      const envBody = await getJson(port, '/api/system/status');\n+      expect(envBody.environment.env, 'F-1009-2: the block NODE_ENV reached the route').toBe(nodeEnv);\n+    });\n+    it(`GREEN KS-864 control - the status body under NODE_ENV=${nodeEnv} carries an environment block`, async () => {\n+      const controlBody = await getJson(port, '/api/system/status');\n+      expect(typeof controlBody.environment.env, 'control: environment.env is served').toBe('string');\n+    });\n   });\n }\n```\n\n## Cells (every cell RED or CONTROL; the names below are the EXACT it() titles)\n- `RED KS-864 F-1009-2 - the served environment.env equals NODE_ENV=${nodeEnv}`\n- `GREEN KS-864 control - the status body under NODE_ENV=${nodeEnv} carries an environment block`  (CONTROL - green on both trees)\n\n## Tampers\n### F1009\nFile: `Blockchain/Dev/services/api-gateway/src/routes/system-status.ts`\nLine: 446\nFrom:\n```\n    env: process.env.NODE_ENV || 'development',\n```\nTo:\n```\n    env: 'development',\n```\nReds: `RED KS-864 F-1009-2 - the served environment.env equals NODE_ENV=${nodeEnv}`\n(From located at the tip: 1 match(es); the old brief/input said line 437)\n\n## Controls\n- `GREEN KS-864 control - the status body under NODE_ENV=${nodeEnv} carries an environment block`\n\n## Output\nExactly ONE ```diff block; paths repo-relative (`Blockchain/Dev/services/api-gateway/src/__tests__/ks864c-portal-env-vars.test.ts`); correct hunk counts; no `\\$` / `\\u` / backslash escapes in a `+` line; the cell titles EXACTLY as listed (the checker matches the full title).\n"
+ },
+ "repo": {
+  "source_checkout": "/Volumes/DevMASTER/!CODING/Secuura/Blockchain/2_Project_Files",
+  "tip": "9f0265eb06ecf24d4de18149ce862ad2330a61ee",
+  "branch": "develop",
+  "test_runner": "vitest (run one file with `npx vitest run <file>` from Blockchain/Dev/services/api-gateway)"
+ },
+ "task_type": "test_only",
+ "tip": "9f0265eb06ecf24d4de18149ce862ad2330a61ee",
+ "source_checkout": "/Volumes/DevMASTER/!CODING/Secuura/Blockchain/2_Project_Files",
+ "repo_subdir": "Blockchain/Dev",
+ "service_dir": "services/api-gateway",
+ "shared_pkg_dir": "packages/shared",
+ "shared_pkg_name": "@secuura/shared",
+ "test_file": "Blockchain/Dev/services/api-gateway/src/__tests__/ks864c-portal-env-vars.test.ts",
+ "test_file_rel_to_service": "src/__tests__/ks864c-portal-env-vars.test.ts",
+ "test_mode": "modify",
+ "diff_file_headers": [
+  "--- a/Blockchain/Dev/services/api-gateway/src/__tests__/ks864c-portal-env-vars.test.ts",
+  "+++ b/Blockchain/Dev/services/api-gateway/src/__tests__/ks864c-portal-env-vars.test.ts"
+ ],
+ "runner": "vitest",
+ "expected_plus": [
+  "      // F-1009-1: each block sets its OWN values, so a development block that reads a staging-loaded module reds.",
+  "      for (const p of PORTALS) process.env[p.envVar] = p.value + '/' + nodeEnv;",
+  "        expect((await portalUrls(port))[p.name]).toBe(p.value + '/' + nodeEnv);",
+  "    it(`RED KS-864 F-1009-2 - the served environment.env equals NODE_ENV=${nodeEnv}`, async () => {",
+  "      const envBody = await getJson(port, '/api/system/status');",
+  "      expect(envBody.environment.env, 'F-1009-2: the block NODE_ENV reached the route').toBe(nodeEnv);",
+  "    });",
+  "    it(`GREEN KS-864 control - the status body under NODE_ENV=${nodeEnv} carries an environment block`, async () => {",
+  "      const controlBody = await getJson(port, '/api/system/status');",
+  "      expect(typeof controlBody.environment.env, 'control: environment.env is served').toBe('string');",
+  "    });"
+ ],
+ "must_remove": [
+  "      for (const p of PORTALS) process.env[p.envVar] = p.value;",
+  "        expect((await portalUrls(port))[p.name]).toBe(p.value);"
+ ],
+ "cells": {},
+ "tampers": [
+  {
+   "id": "F1009",
+   "file": "Blockchain/Dev/services/api-gateway/src/routes/system-status.ts",
+   "line": 446,
+   "from": "    env: process.env.NODE_ENV || 'development',",
+   "to": "    env: 'development',",
+   "reds": [
+    "RED KS-864 F-1009-2 - the served environment.env equals NODE_ENV=${nodeEnv}"
+   ],
+   "reds_as_written": [
+    "RED KS-864 F-1009-2 - the served environment.env equals NODE_ENV=${nodeEnv}"
+   ]
+  }
+ ],
+ "controls": [
+  "GREEN KS-864 control - the status body under NODE_ENV=${nodeEnv} carries an environment block"
+ ],
+ "files": {
+  "Blockchain/Dev/services/api-gateway/src/__tests__/ks864c-portal-env-vars.test.ts": "/**\n * =============================================================================\n * KS-864 (QA gate F-1007-1 on PR #1007) — each portal's env var wins, in and\n * out of NODE_ENV=staging\n * =============================================================================\n * #1007 rewrote the issuer, verifier and admin portal URLs in\n * routes/system-status.ts to `process.env.<X>_PORTAL_URL || '<compose default>'`.\n * ks864b pins the DEFAULT arm (it deletes all three vars). Nothing pinned the\n * ENV-VAR arm: the gate's tamper G-2 (issuer url hard-coded to its default)\n * compiled and reddened 0 of 388 cells.\n *\n * The URLs are computed when the module loads, so each block sets the env and\n * imports a FRESH module (vi.resetModules) inside its beforeAll: once under\n * NODE_ENV=staging (the arm #1007 added) and once under NODE_ENV=development\n * (the arm that existed before).\n * =============================================================================\n */\nimport { describe, it, expect, vi, beforeAll, afterAll } from 'vitest';\nimport http from 'node:http';\nimport express from 'express';\n\nvi.mock('../services/redis', () => ({ getRedisHealth: vi.fn(async () => ({ status: 'healthy' })) }));\n\nconst PORTALS = [\n  { name: 'issuer-portal', envVar: 'ISSUER_PORTAL_URL', value: 'http://issuer.ks864c.example:7001' },\n  { name: 'verifier-portal', envVar: 'VERIFIER_PORTAL_URL', value: 'http://verifier.ks864c.example:7002' },\n  { name: 'admin-portal', envVar: 'ADMIN_PORTAL_URL', value: 'http://admin.ks864c.example:7003' },\n] as const;\n\nconst savedEnv = { ...process.env };\n\nfunction getJson(port: number, path: string): Promise<any> {\n  return new Promise((resolve, reject) => {\n    http.get({ hostname: '127.0.0.1', port, path }, (res) => {\n      let data = '';\n      res.on('data', (c) => (data += c));\n      res.on('end', () => { try { resolve(JSON.parse(data)); } catch (e) { reject(e); } });\n    }).on('error', reject);\n  });\n}\n\nasync function portalUrls(port: number): Promise<Record<string, string | undefined>> {\n  const body = await getJson(port, '/api/system/status');\n  const services = Object.values(body.services).flat() as Array<{ name?: string; url?: string }>;\n  return Object.fromEntries(PORTALS.map((p) => [p.name, services.find((s) => s.name === p.name)?.url]));\n}\n\nfunction describeUnder(nodeEnv: 'staging' | 'development') {\n  describe(`KS-864 — portal env vars win under NODE_ENV=${nodeEnv}`, () => {\n    let server: ReturnType<ReturnType<typeof express>['listen']>;\n    let port = 0;\n\n    beforeAll(async () => {\n      vi.resetModules();\n      vi.stubGlobal('fetch', vi.fn(async () => { throw new Error('offline in test'); }));\n      process.env.NODE_ENV = nodeEnv;\n      for (const p of PORTALS) process.env[p.envVar] = p.value;\n      const router = (await import('../routes/system-status')).default;\n      const app = express();\n      app.use('/api/system', router);\n      await new Promise<void>((r) => { server = app.listen(0, '127.0.0.1', () => { port = (server.address() as any).port; r(); }); });\n    }, 10_000);\n\n    afterAll(async () => {\n      await new Promise<void>((r) => server.close(() => r()));\n      for (const k of Object.keys(process.env)) if (!(k in savedEnv)) delete process.env[k];\n      Object.assign(process.env, savedEnv);\n      vi.unstubAllGlobals();\n    });\n\n    for (const p of PORTALS) {\n      it(`🔴 KS-864 — ${p.name} reports ${p.envVar} under NODE_ENV=${nodeEnv}`, async () => {\n        expect((await portalUrls(port))[p.name]).toBe(p.value);\n      });\n    }\n  });\n}\n\ndescribeUnder('staging');\ndescribeUnder('development');\n"
+ },
+ "_night_num_ctx": 65536
+}
