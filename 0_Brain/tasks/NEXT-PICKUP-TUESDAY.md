@@ -14,6 +14,18 @@ Kam, typed to this seat 2026-09-21 ~15:2x, verbatim: **"It's okay, let's keep wo
 - **"keep working through it"** = drive the blockers below, do not wait on them.
 - "It's okay" ruled card `nexusai-rd535-premise-no-resubmission-today` = **(a)** at 15:24:01: nothing on the live listing; the fix ships with the resubmission. He declined the warning (b). **Do not re-raise it.**
 
+### 🔴 THE PORTABLE DRIVE'S NAS SYNC — PAUSED BY ME 15:3x; DELTA 49 IS WRONG ABOUT IT, DO NOT RE-ARM FROM IT
+Kam asked 15:24 (both tabs): "How's the sync going with the portable drive?" Measured answer:
+- **`com.tuesday.nassync` HAS RUN**, on 09-17, 09-18 and 09-19 at 03:30, from THIS mini. DELTA 49 said "never loaded, zero nas_sync_tuesday_* logs", and that was wrong.
+- **Why it looked like Wednesday's:** its plist has NO EnvironmentVariables, so `nas_sync.sh:42` `AGENT="${WED_AGENT:-wednesday}"` ran it AS WEDNESDAY. The logs `scheduler/logs/nas_sync_wednesday_2026-09-1{7,8,9}_*` all have headers reading `agent=wednesday workspace=/Volumes/KK_T9_External_HDD`.
+- **So it applied Wednesday's ruled ignore set** (`Datasec TUESDAY …`), the REVERSE of Kam's `nas-shared-folders-owner` ruling ("Tuesday's leg syncs only Datasec and its own tree"). It SKIPPED Datasec and TUESDAY, and walked the shared folders from the T9, which is the copy. **This drive's Datasec work has never been backed up to the NAS.**
+- **The 26 deletions of 09-19 are BENIGN:** 23 are `WEDNESDAY/…/fleet/cockpit/state/` flags; the others are a `.night_run.lock`, a `(conflict_on_2026-09-17)` duplicate and a `.pre-0908` backup. All are in `~/.unison/backup` on THE MINI (`backup = Name *`), not on the Studio.
+- **"The Studio's leg last completed on the 19th" was wrong** (I told Kam so, then corrected it). Its real status is Wednesday's to measure on the Studio; she was mailed before answering him.
+- **ACTION TAKEN:** `launchctl bootout gui/$(id -u)/com.tuesday.nassync` at 15:3x, so tonight's 23:00 run cannot fire. The plist is kept on disk, with a backup in the job tmp.
+- **BLOCKED ON KAM:** card `t9-nas-leg-scope-mechanism`. The engine (`!SYNC FILES/devnas-sync.sh`, Kam's file) only EXCLUDES by name, so "only Datasec + own tree" as exclusions fails OPEN. Recommended (a): a 3-line `DEVNAS_PATHS` passthrough (fails CLOSED). Measured scope with narrow-hard applied: Datasec 108,137 files / 25.35 GiB; TUESDAY 12,397 / 1.13 GiB; vault Datasec 43 files.
+- **WHEN HE RULES:** add `WED_AGENT=tuesday` (plus the paths) to the plist, preview, then `launchctl bootstrap gui/$(id -u) ~/Library/LaunchAgents/com.tuesday.nassync.plist`. **Never re-load the plist as it stands.**
+- The case-fold hazard is cleared: the NAS shows `!CODING/Datasec` in the correct case.
+
 ### THE CRITICAL PATH TO THAT ZIP (C-105: RD-518's fix lands BEFORE the package ships)
 1. **RD-518 round 3**: Kam authorised it at 15:16 (card `rd518-round3` = **a**, scoped to G-01/RD-592 + G-02/RD-593). Commissioned to `Datasec/NexusAI-C` (%24) at 15:17; delivered, prompt clear. Then its gate. **RD-594 (adminGateRefuses) is EXCLUDED**: it is C-01's deliberate open window and needs Kam's scope ruling.
 2. **RD-574 round 2** @ `7728d69`: gate RUNNING (%28, launcher `launch_qa_nexusai_rd574_round2_7728d69.sh`). RD-516 is blocked on RD-574; RD-574 merges BEFORE RD-516.
