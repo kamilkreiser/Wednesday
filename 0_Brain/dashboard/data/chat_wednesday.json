@@ -5634,5 +5634,12 @@
   "project": "WED",
   "ts": "2026-09-21T10:16:46.410981+10:00",
   "text": "Received — build authorised. My reading, say if any part is wrong: Secuura rows may live on the shared kreiser.org tenant because they are encrypted end to end, so encryption is in from the first real record, not a later switch; I build Option A with that envelope and deploy it to the kreiser.org tenant with my own CLI access, into a NEW resource group of its own, touching nothing that already runs there. First act: verify which identity and tenant my az is actually on before any command, then a pilot on synthetic rows behind Entra MFA, then real rows. Running cost lands in the fifteen-to-twenty US dollars a month band unless I tell you otherwise. I'll report the pilot URL when it is live."
+ },
+ {
+  "role": "wednesday",
+  "seat": "Kamils-Mac-Studio.local",
+  "project": "WED",
+  "ts": "2026-09-21T10:22:49.460901+10:00",
+  "text": "NAS sync fix is built and verified; its first real run is tonight's 03:30 leg.\n\nOne action for you, when convenient — it is your file, so I have not touched it: open /Volumes/DevMASTER/!SYNC FILES/devnas.prf and paste the ignore lines from section 6 of /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/scheduler/logs/nas_fix_2026-09-21_REPORT.md. They stop 46 of last night's 67 aborts by not mirroring pure state and logs at all. Two of those lines are flagged as your call in the report (a Graph token file under 4_Credentials, and regenerated dashboard HTML). Without them the retry still carries all the real content; the run just keeps reporting exit 2 on churn.\n\nWhat I built: a retry pass that re-syncs exactly the files that aborted, scoped by path, up to twice, with the deletion alarm still watching; a staleness report at the end of every run and a doctor warning when a key file's NAS copy is more than 36 hours old — it fires today: history.md is 138 hours stale, the ledger 111, today's note missing. Proof before arming: 43 test arms pass, and one bounded real run scoped to a single identical file returned nothing to do in 5 seconds. One thing to know: the builder's probe of the archive listing unexpectedly started a normal run for two minutes before it was stopped — nothing propagated, no deletions; it is written up in the report."
  }
 ]
