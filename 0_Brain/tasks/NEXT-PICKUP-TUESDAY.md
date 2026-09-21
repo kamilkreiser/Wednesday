@@ -26,6 +26,15 @@ Kam asked 15:24 (both tabs): "How's the sync going with the portable drive?" Mea
 - **WHEN HE RULES:** add `WED_AGENT=tuesday` (plus the paths) to the plist, preview, then `launchctl bootstrap gui/$(id -u) ~/Library/LaunchAgents/com.tuesday.nassync.plist`. **Never re-load the plist as it stands.**
 - The case-fold hazard is cleared: the NAS shows `!CODING/Datasec` in the correct case.
 
+### 🟢 18:0x — RD-518 IS ON MAIN @ `aae041a` (verified by Tuesday)
+- main `aae041a` = parents `16f05ea` + `4230d23` (the gated head). PASS 3797/3797, 216 suites. C-57 applied (the counts file was the ONLY conflict), id superset missing 0. `authEnforcement.js` has 0 diff (RD-594 untouched).
+- **C-105's precondition is MET: RD-518's fix is on main.** What remains between main and the resubmission zip:
+  - **RD-516** (held; D is fixing RD-585 + RD-541)
+  - **RD-463** and **RD-505** (D, after those)
+  - **RD-460** (the ACR, Kam's)
+  - **the Key Vault success-path real-Azure proof** (C-124, Kam's)
+- D (pane %30) is now on RD-585. Main is GREEN: RD-574 + RD-518.
+
 ### 🟢 17:4x — RD-518 MERGE RELEASED on Kam's terminal word ("merge RD-518"); a FRESH SEAT is running
 - **Kam 17:3x: "It looks like all the agents have stopped. What's the progress like?"** They had: I had left commissionable work waiting on cards. **Restarted:** fresh seat **`Datasec/NexusAI-D` (pane %30, transcript 2aef58e8)**, launched via `cockpit.sh add` with the T9 launcher. **`rotate Datasec/NexusAI` REFUSES on the mini: the launchers.conf entry points at unmounted DevMASTER.** Do not "fix" the registry to a T9 path; it would break the Studio. A routing line was added for -D (7a937e4b1).
 - **D's order:** (1) **RD-518 merge FIRST** (RELEASE mail 07:41Z): 4230d23 onto 16f05ea. The ONLY overlap is `scripts/verify-expected-counts.json`, so C-57 applies. It must be fully GREEN, since RD-518 carries no known reds. (2) the batch: **RD-585 + RD-541** (on RD-516's branch, to make it green), then **RD-463**, then **RD-505**. Each gets a READY FOR QA to Tuesday. **Tuesday commissions each gate.**
