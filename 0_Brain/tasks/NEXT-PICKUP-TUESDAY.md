@@ -26,6 +26,22 @@ Kam asked 15:24 (both tabs): "How's the sync going with the portable drive?" Mea
 - **WHEN HE RULES:** add `WED_AGENT=tuesday` (plus the paths) to the plist, preview, then `launchctl bootstrap gui/$(id -u) ~/Library/LaunchAgents/com.tuesday.nassync.plist`. **Never re-load the plist as it stands.**
 - The case-fold hazard is cleared: the NAS shows `!CODING/Datasec` in the correct case.
 
+### 🟢 18:1x — T9 NAS LEG ARMED FOR 23:00 (Kam: `t9-nas-leg-direction` = a, 18:01) + LIVE BOARD PROVEN END-TO-END
+- **Armed:** `com.tuesday.nassync` is loaded, with `WED_AGENT=tuesday` and 23:00 confirmed via `launchctl print`.
+  - Scope BY PATH: !CODING/Datasec, TUESDAY, Notes (MASTER)/Datasec.
+  - **ONE-WAY additive:** `-force <T9> -nodeletion <NAS>`.
+  - Credentials, access keys and unison temp folders are excluded.
+  - Engine backups: `.pre-0921-1615-devnaspaths` and `.pre-0921-1805-oneway`.
+- **OWED — CHECK THE FIRST RUN tomorrow morning:** `2_Project_Files/scheduler/logs/nas_sync_tuesday_*.log` and `state/nas_sync_last_tuesday.txt`. What it should show:
+  - **agent=tuesday**
+  - **rc=1 is EXPECTED** (~137k NAS-only files skipped, "[CONFLICT] Skipping … nodeletion")
+  - **deletions=0**
+  - **NOTHING written into the T9** (`git status` in the NexusAI repos unchanged by the sync)
+  - The first run pushes ~26 GiB and can run for hours. If it is still running when seats are active, expect some "failed:" paths, which the wrapper's retry handles.
+  - Tell Kam on the LIVE board.
+- **The live board is proven end-to-end:** Kam's 18:02:06 view=tuesday row decrypted here, and the poller tapped the pane in 24s. **Kam now reads and types on the LIVE dashboard while travelling** ("post it to the live dashboard"). Memory updated.
+- Kam ruled `nexusai-rd516-merge-two-known-reds` = **a** (keep holding, fix RD-585/541 first) ON THE LIVE BOARD at 18:02. Recorded locally; **it still has to be landed in NexusAI artefacts, so carry it in the next mail to NexusAI-D** (the RULED BY KAM section).
+
 ### 🟢 18:0x — RD-518 IS ON MAIN @ `aae041a` (verified by Tuesday)
 - main `aae041a` = parents `16f05ea` + `4230d23` (the gated head). PASS 3797/3797, 216 suites. C-57 applied (the counts file was the ONLY conflict), id superset missing 0. `authEnforcement.js` has 0 diff (RD-594 untouched).
 - **C-105's precondition is MET: RD-518's fix is on main.** What remains between main and the resubmission zip:
