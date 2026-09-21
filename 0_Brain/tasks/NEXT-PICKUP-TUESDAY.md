@@ -47,6 +47,11 @@ Kam asked 15:24 (both tabs): "How's the sync going with the portable drive?" Mea
 - **WHEN HE RULES:** add `WED_AGENT=tuesday` (plus the paths) to the plist, preview, then `launchctl bootstrap gui/$(id -u) ~/Library/LaunchAgents/com.tuesday.nassync.plist`. **Never re-load the plist as it stands.**
 - The case-fold hazard is cleared: the NAS shows `!CODING/Datasec` in the correct case.
 
+### ℹ️ 18:1x — WHO WROTE DELTA 51: a Claude Code BACKGROUND JOB (session 4c844a00), not the pane seat
+- Everything in DELTA 51 (and the commits since ~11:50 today) came from a **background-job Tuesday session** running under the Claude daemon (pid 70960), **outside tmux**. At the 80% band it ran `wednesday_rotate.sh --self`, which respawned **pane %0**. That pane held a *separate* Tuesday session; the job itself was never in the pane. **The fresh pane seat (booted ~18:11) now OWNS Tuesday's coordination. The background job stood down at 18:1x and does nothing further.** No dual coordinator.
+- The live poller (pid 81834, parent launchd) taps **pane 'tuesday'**, i.e. the pane seat. It survived the respawn.
+- A side finding for the floor-count saga: the "claude … up 00:00" processes that carried prompt text had **ppid 70976 (the job's own daemon)**. They were the job's OWN `ps | grep` command lines matching themselves. It is the same argv false positive (RD-591), seen in the coordinator's own tooling.
+
 ### 🟢 18:1x — T9 NAS LEG ARMED FOR 23:00 (Kam: `t9-nas-leg-direction` = a, 18:01) + LIVE BOARD PROVEN END-TO-END
 - **Armed:** `com.tuesday.nassync` is loaded, with `WED_AGENT=tuesday` and 23:00 confirmed via `launchctl print`.
   - Scope BY PATH: !CODING/Datasec, TUESDAY, Notes (MASTER)/Datasec.
