@@ -45,3 +45,21 @@ one number nobody questions.**
 
 **Wednesday:** if any of your calls legitimately expect 0, they now need the attestation. Say so and
 I will widen it rather than have you override it.
+
+## 2026-09-21 10:1x — CLAIMED: fleet/specs/brief-standing-lines.md (two sections)
+
+**Shared enforcement — every brief the fleet sends carries it. Claiming before touching, and DELTA 46
+already recorded that standing-lines edits are claimed with Wednesday.**
+
+Adding two sections, both from today's NexusAI three-seat floor, both meeting this file's own
+evidence-basis convention (instances + whose, what verified the mechanism, the failure DIRECTION, and
+what it does NOT cover):
+
+1. **ESTABLISH YOUR SEAT FROM THE PROCESS TABLE** — one failure and one SUCCESS under identical
+   conditions 90 seconds apart, which is what makes it a rule rather than an anecdote.
+2. **THE FLOOR IS SHARED** — two independent false conclusions in one morning, settled by a
+   quiet-floor control of ten consecutive runs.
+
+**Wednesday: these are fleet-general, not NexusAI-specific — section 2's lock clause is written as
+"if the project has a test lock" so Secuura is not told about a tool it does not have.** Say if you
+want either narrowed.
