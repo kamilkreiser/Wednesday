@@ -26,6 +26,14 @@ Kam asked 15:24 (both tabs): "How's the sync going with the portable drive?" Mea
 - **WHEN HE RULES:** add `WED_AGENT=tuesday` (plus the paths) to the plist, preview, then `launchctl bootstrap gui/$(id -u) ~/Library/LaunchAgents/com.tuesday.nassync.plist`. **Never re-load the plist as it stands.**
 - The case-fold hazard is cleared: the NAS shows `!CODING/Datasec` in the correct case.
 
+### 🔴 MERGE OF RD-574 + RD-516 IS ON HOLD — waiting on KAM's word in the terminal (15:4x)
+- **RD-574 round 2 = 🟢 GO** (05:33Z; report `…/reports/2026-09-21-rd574-7728d69-round2/report.md`). RD-516 is unblocked: aaffbb9 + 7728d69 merge clean, 31 cells pass.
+- **C-32 gives Tuesday merge + demo-deploy authority, BUT this seat's harness permission classifier REFUSED the tap that delivers the merge-go as a "Production Deploy"**: a merge to main triggers `deploy-demo.yml`. **Do not route around it.**
+- Sent: `MERGE GO` (05:4xZ), then **`HOLD — do NOT execute the MERGE GO`** straight after, to datasec-nexusai@. **The HOLD stands until a Tuesday mail with RELEASE in its subject.** A RELEASE needs Kam's explicit word **in the terminal**: a card ruling on the board is not visible to the classifier as his consent.
+- Asked Kam on the board: "say 'merge RD-574 and RD-516' in the Tuesday terminal".
+- **R2-1 (MAJOR, the fleet's instrument):** the `comm == node` foreign-server counter is BLIND on macOS (comm = the full execPath). BRIEF_TEMPLATE was corrected a second time (c3f5820ae); NexusAI-C (RD-518 r3) got the correction at 15:36 and was told to re-take any readings. The RULE now is: basename(argv[0]) + the script argument + ancestry + a live control before trusting any zero.
+- **Kam's "portable drive" (15:24) meant KK_DEV_Local, not the T9.** Wednesday is syncing it and answering him; Kam has been told. The T9 NAS-leg findings stand separately (card `t9-nas-leg-scope-mechanism`).
+
 ### THE CRITICAL PATH TO THAT ZIP (C-105: RD-518's fix lands BEFORE the package ships)
 1. **RD-518 round 3**: Kam authorised it at 15:16 (card `rd518-round3` = **a**, scoped to G-01/RD-592 + G-02/RD-593). Commissioned to `Datasec/NexusAI-C` (%24) at 15:17; delivered, prompt clear. Then its gate. **RD-594 (adminGateRefuses) is EXCLUDED**: it is C-01's deliberate open window and needs Kam's scope ruling.
 2. **RD-574 round 2** @ `7728d69`: gate RUNNING (%28, launcher `launch_qa_nexusai_rd574_round2_7728d69.sh`). RD-516 is blocked on RD-574; RD-574 merges BEFORE RD-516.
