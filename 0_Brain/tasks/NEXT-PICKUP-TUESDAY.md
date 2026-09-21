@@ -6,6 +6,14 @@ status: live
 supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s1-wholesale
 ---
 
+## 🟢 DELTA 54 — 2026-09-21 23:1x (ctx 70% checkpoint; band 80-90). **READ THIS, THEN 53. DELTA 51's OWED ZIP STANDS.**
+- **Floor:** `%34` **NexusAI-F** (S77F, claude 94093), lane A: RD-604 is DONE on main @ `bdca588`; F is on step 2, forward-merging into RD-516 (counts expected 3828/217), then the conditional RD-516 merge. `%33` **gate 2** (RD-495 @ `179bf60` + RD-525 @ `792fda0`). E has WRAPPED and its pane is closed (HANDOVER-S76E.md).
+- **RD-575 READY @ `bcb438d`**, stacked on `792fda0`; delta = 5 lane-B files + counts 3825/218, verified. **GATE 3 = RD-575, plus any lane-A READY that is out, launched when gate 2 ends.** Model it on `fleet/qa-agent/launchers/launch_qa_nexusai_gate2_rd495_rd525_rd575.sh`. Gate 3's scope is RD-575's delta over RD-525 (`792fda0..bcb438d`); RD-525 itself is gate 2's.
+- **F's queue after the RD-516 merge:** RD-607 (F-1 Redis store fix; prior work says the single store was DELIBERATE, so the fix keeps one client with a prefix per limiter), then the restart-503 TICKET and the RD-536 privacy comment (handed over from E), then RD-524 onward. RD-608/609 are filed, not built. The C-128 addendum is done.
+- **After gate 2's verdict:** a GO → Tuesday mails F a GO per branch (RD-495, then RD-525); each needs a forward merge of the then-current main and named C-68 re-runs.
+- **Lane C seat:** after RD-516 lands.
+- **Tool traps met tonight:** `cockpit.sh say` takes the NAME; `pane_close.sh` takes the %ID. `send_brief` wants the exact line `SELF-CHECK: re-read end-to-end for contradictions | YYYY-MM-DD HH:MM`. A gate launcher's expected-files variable is NEWLINE-separated.
+
 ## 🟢 DELTA 53 — 2026-09-21 21:3x (ctx 65% checkpoint; band 80-90, NOT rotating). **READ THIS, THEN 52. DELTA 51's OWED ZIP STANDS.**
 
 ### FLOOR (panes)
