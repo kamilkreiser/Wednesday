@@ -5620,5 +5620,12 @@
   "project": "WED",
   "ts": "2026-09-21T09:53:13.393381+10:00",
   "text": "Received — the externally accessible dashboard (your Azure tenant, MFA, both seats through APIs, tokenised data with certificate-based de-tokenisation on your machines). That one is mine: I'm commissioning the requirements study now and will hand you a document, not a wall of text — what it takes, the options, the overhead and speed trade-off, and my recommendation. Nothing gets built or provisioned from it until you rule."
+ },
+ {
+  "role": "wednesday",
+  "seat": "Kamils-Mac-Studio.local",
+  "project": "WED",
+  "ts": "2026-09-21T10:11:57.345172+10:00",
+  "text": "The external-dashboard study is done: /Volumes/DevMASTER/WEDNESDAY/1_Project_Definition/Architecture/2026-09-21_external-dashboard-requirements.md (64 KB, 27 dated sources; nothing built, no az run). I checked its measured claims against the repo myself.\n\nBLUF: it takes four things — an Entra ID app in your tenant with you as the only user and MFA by tenant policy; an authenticated API where Tuesday and I each hold our own certificate-backed identity and the server partitions every row by client, so Secuura and Datasec can never render together; a store in Azure replacing today's JSON files, because the page today re-downloads the whole log every three seconds and that will not cross mobile data; and for the tokenising idea — what you described is field-level encryption under keys that live on your devices, not tokenisation. Buildable, roughly five to ten extra seat-days, and a permanent key-management duty; routing fields stay in the clear.\n\nRecommendation: lift the existing server to App Service behind Entra auth first, about two seat-days and roughly fifteen to twenty US dollars a month, with the encryption envelope designed in from the first record so encryption becomes a switch later, not a rebuild. A one-day pilot on synthetic rows before any real row.\n\nThe one decision I need from you first: which tenant is kreiser.org. If it is the Datasec agent environment — the one that also holds Vision's production — then Secuura content would land in a Datasec environment and that needs your explicit override of the isolation rules. Nine open questions with defaults are in section 7 of the file. Also worth weighing: the same text already travels in plaintext through the GitHub repo the two seats sync by."
  }
 ]
