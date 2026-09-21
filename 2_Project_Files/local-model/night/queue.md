@@ -236,3 +236,5 @@
 # 09-22 01:16 - KS-1227 rebrief 1 of 1 (Kam 09-16 counter): same input re-queued after a model serialisation FAIL at T3 (IMPROVEMENTS row of this stamp)
 # 09-22 02:12 - FEED 3 (two goldens PASS; the FEED 3 drafter, proposal briefs_staged/2026-09-22_ornith_feed3_queue_proposal.md; 36 candidates skipped — the easy tiers are thin)
 KS-1265 input=/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/inputs/code_1265EARLYGUARD-R16.json task=/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/tasks/code_patch/task.md ctx=65536
+# 09-22 02:35 - KS-947 REBRIEF 1 of 1 (Kam 09-16 counter; the original round-1 FAILed T4 on model quoting of a mixed-quote line; proposal briefs_staged/2026-09-22_ks947_rebrief_proposal.md, golden PASS 8/8)
+KS-947 input=/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/inputs/test_only_947F3F4b-R16.json task=/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/tasks/test_only/task.md ctx=65536
