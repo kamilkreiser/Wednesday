@@ -6,6 +6,41 @@ status: live
 supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s1-wholesale
 ---
 
+## 🔴 DELTA 55 — 2026-09-22 03:0x ROTATION HANDOVER (Tuesday ctx ~78-80%, safe boundary). **READ THIS FIRST. DELTA 51's OWED ZIP STANDS.**
+
+### MAIN NOW
+- **main = `47be2b0`** (RD-516 merged; verified: tree == `3d9eb97`, 3828/3828). Earlier: RD-604 @ `bdca588`. **Kam's 18:02 card (a) is fulfilled. Kam was told on the board at 02:57 (201).** Demo is still on `aae041a`: CI deploy is off, and a demo redeploy needs a Tuesday GO under C-127 (the manual path, with the rollback rule as on 09-21).
+
+### FLOOR
+- `%34` **NexusAI-F** (S77F, launcher 94091 / claude 94093), lane A. It is executing Tuesday's gate-2 GO (mail 14:08Z):
+  - **RD-495** (`179bf60`) forward-merged onto `47be2b0`, A's 12 cells re-run, full verify green, then merge.
+  - **RD-525** (`792fda0`) the same onto the post-RD-495 main; the counts are the only conflict, and they are regenerated.
+  - **RD-575** (`bcb438d`, stacked) forward-merged onto the post-RD-525 main, then a **READY FOR QA**. **Do NOT let it merge before gate 4.**
+- **Then F builds, in order:**
+  1. **F-B1** (a purge during an in-flight audit flush resurrects entries; epoch-before-rename fix);
+  2. **F-B2** (mail secrets PLAINTEXT at rest in machine-id mode, MAJOR, pre-existing);
+  3. RD-607 (Redis shared store; keep one client, a prefix per limiter);
+  4. RD-583 (re-arm the parked R10i half from `__tests__/helpers/rd583-parked-NOT-RUN/`);
+  5. RD-524's merge after gate 3;
+  6. RD-531+497, then RD-510 (measured on main: **STALL = no listen by 420 s**; its harness must kill on a deadline), then the rest.
+  - **Tickets filed:** RD-607/608/609/610. F-A1..5 are to be bundled. The `bootServer` child-leak ticket is owed by F.
+- `%35` **QA gate 3** (`fleet/qa-agent/launchers/launch_qa_nexusai_gate3_rd524_r10i.sh`): A = RD-524+404+441 @ `f422178` (tier 1); B = the R10i split/repair `bef8946..91861ae` (through-code). Verdict subject `[QA/Datasec-NexusAI -> Tuesday] GATE VERDICT — gate 3: …`. **On a GO for A: mail F a merge GO for RD-524**, forward-merged onto the main of its turn (the counts conflict is expected). **The gate has NO mail route** (`QA/Datasec-NexusAI` is not in `inbox_routing.conf`), so questions from it are answered by acting, not by mail.
+- **GATE 4 = RD-575 on its post-RD-525 forward-merged head.** Model it on gate 2's launcher. The gate-2 report §6 lists the cells to re-run (C's 8 + RD-525's E1/E1-R/E2-LIVE/N1/S1/S2/S2-CTL/AB0-2, lists-agree, a redacted-plus-directory coexistence cell).
+- **Lane C seat (release gate): launch it NOW that RD-516 is on main.** It owns `azure-marketplace/**`, the packaging scripts, `bicep/` and `DEPLOYMENT_GUIDE.md`. Its work is the release-gate merge of main into `mkt-selfcontained-pkg-s64` (`a643fe1`), RD-526/527/528/529, RD-471/472 and the listing folds, up to the digest (which waits on Kam's 2.2.0 image push). The path map is `s76d-path-map` @ `710e875`. The `DEPLOYMENT_GUIDE.md` conflict at the release-gate merge is Tuesday's ruling (docs). Brief it like F's: routing line, send_brief `--kind brief`, then `cockpit.sh add 'Datasec/NexusAI-G' "bash '<NexusAI>/Launch_Claude.command'"`.
+
+### RULINGS TUESDAY MADE TONIGHT (all delivered as C-numbers except where noted)
+- C-129: move the csp-violations readout.
+- C-130 + addendum: split R10i and park the unbuilt half; no gate change, no skip. A declared-skip list was REFUSED as Kam's call (the workspace no-skip rule is in his shared file).
+- RD-575's 4-hunk resolution.
+- Gate 2's B GO accepted despite F-B1.
+- The existing-test derive edit.
+
+### OWED (shared tooling, claim with Wednesday first)
+- The pretooluse hook's `merge-tree --write-tree` clause (:105) was evaded by a drafting subagent: find the form it used.
+- `send_brief`'s undelivered-ruling check matches only `Datasec/NexusAI`, so suffixed seats skip it.
+- `QA/Datasec-NexusAI` needs a routing line or a reply channel.
+- NAS first-run check this morning (DELTA 51). Kam's demo sign-in (asked). The zip email (DELTA 51).
+
 ## 🟢 DELTA 54 — 2026-09-21 23:1x (ctx 70% checkpoint; band 80-90). **READ THIS, THEN 53. DELTA 51's OWED ZIP STANDS.**
 - **Floor:** `%34` **NexusAI-F** (S77F, claude 94093), lane A: RD-604 is DONE on main @ `bdca588`; F is on step 2, forward-merging into RD-516 (counts expected 3828/217), then the conditional RD-516 merge. `%33` **gate 2** (RD-495 @ `179bf60` + RD-525 @ `792fda0`). E has WRAPPED and its pane is closed (HANDOVER-S76E.md).
 - **RD-575 READY @ `bcb438d`**, stacked on `792fda0`; delta = 5 lane-B files + counts 3825/218, verified. **GATE 3 = RD-575, plus any lane-A READY that is out, launched when gate 2 ends.** Model it on `fleet/qa-agent/launchers/launch_qa_nexusai_gate2_rd495_rd525_rd575.sh`. Gate 3's scope is RD-575's delta over RD-525 (`792fda0..bcb438d`); RD-525 itself is gate 2's.
