@@ -30,7 +30,10 @@ def common_args(p: argparse.ArgumentParser):
     p.add_argument("--base", default=f"https://{ids.get('WEBAPP','')}.azurewebsites.net")
     p.add_argument("--tenant", default=ids.get("TENANT_ID", DEFAULT_TENANT))
     p.add_argument("--api-appid", default=ids.get("API_APPID", ""))
-    p.add_argument("--ts", default=None); p.add_argument("--id", default=None)
+    p.add_argument("--ts", default=None, help="UTC ISO with Z (default now). Use --src-ts to keep a local timestamp beside it")
+    p.add_argument("--id", default=None)
+    p.add_argument("--backfill", action="store_true", help="Phase 2: mark the row as copied from the local store (clear flag)")
+    p.add_argument("--src-ts", default=None, help="Phase 2: the ORIGINAL local timestamp string (clear); --ts is derived from it if --ts is absent")
     p.add_argument("--dry-run", action="store_true", help="encrypt + print the request body; no token, no HTTP")
     p.add_argument("--token-only", action="store_true", help="get a token and print its claims (no secrets); no HTTP to the app")
     return p
@@ -53,11 +56,26 @@ def claims_of(token: str) -> dict:
     part = token.split(".")[1]; part += "=" * (-len(part) % 4)
     return json.loads(base64.urlsafe_b64decode(part))
 
+def to_utc_z(local_iso: str) -> str:
+    """Local ISO (e.g. 2026-09-21T11:46:51.720860+10:00, what the local tools write) -> the API's UTC form with ms + Z.
+    A naive timestamp is taken as the machine's local zone (the local tools always write an offset, so this is a fallback)."""
+    import datetime
+    t = datetime.datetime.fromisoformat(local_iso.replace("Z", "+00:00"))
+    if t.tzinfo is None: t = t.astimezone()
+    return t.astimezone(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%f")[:-3] + "Z"
+
+def row_id(stream: str, ts: str, text: str) -> str:
+    """Deterministic id for a local chat entry: the SAME entry always maps to the same id, so the live-board dual-write
+    and a later backfill dedupe against each other (the API refuses a duplicate (client, ts, id) with 200, writes nothing)."""
+    return "bf-" + hashlib.sha256(f"{stream}|{ts}|{text}".encode("utf-8")).hexdigest()[:20]
+
 def build(args, kind: str, plaintext: str, clear_extra: dict) -> dict:
     import datetime, uuid
-    ts = args.ts or datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%f")[:-3] + "Z"
+    ts = args.ts or (to_utc_z(args.src_ts) if args.src_ts else None) or datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%f")[:-3] + "Z"
     rid = args.id or uuid.uuid4().hex[:10]
     clear = {"client": args.client, "kind": kind, "id": rid, "ts": ts, **clear_extra}
+    if args.backfill: clear["backfill"] = True
+    if args.src_ts and str(args.src_ts).strip(): clear["src_ts"] = str(args.src_ts)[:40]   # empty -> omitted (the API refuses an empty src_ts)
     pub = envelope.load_public(args.pubkey)
     env = envelope.encrypt_text(pub, plaintext, clear)
     # always-verify per record: the envelope must NOT contain the plaintext (the writer cannot decrypt — Kam's key is not here)
@@ -75,4 +93,5 @@ def send(args, path: str, body: dict):
         c = claims_of(tok); print(json.dumps({k: c.get(k) for k in ("aud", "iss", "azp", "roles", "tid", "exp")}, indent=1)); return 0
     r = requests.post(args.base + path, json=body, headers={"Authorization": f"Bearer {tok}"}, timeout=30)
     print(json.dumps({"status": r.status_code, "body": r.text[:600]}, indent=1))
-    return 0 if r.status_code == 201 else 1
+    # 201 = stored; 200 = the API already held this row (duplicate message / updated card) — both are success for the caller
+    return 0 if r.status_code in (200, 201) else 1

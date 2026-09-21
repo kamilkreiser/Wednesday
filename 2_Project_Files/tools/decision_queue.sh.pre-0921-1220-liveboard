@@ -49,16 +49,6 @@
 # Guarantees: the file stays valid JSON (atomic tmp+rename write); malformed
 # input or an unreadable existing file FAILS LOUDLY (exit 2) and never
 # clobbers what is on disk.
-#
-# ── DUAL-WRITE TO THE LIVE BOARD (Phase 2, Kam 2026-09-21 11:43) ─────────────
-# After a WRITE command (add / rule / withdraw / amend / --delivered) succeeds
-# locally, the card's CURRENT state is posted to the external dashboard as one
-# encrypted card row (tools/_live_board.sh -> dashboard-cloud/seat/post_card.py
-# --from-store): the first post creates it, every later one updates it in place,
-# so a ruling made here shows as ruled there. Local first, always; a failed post
-# is LOUD (stderr + fleet/state/live_board_post_failures.log) and never changes
-# this script's exit code. Datasec cards are refused locally for the Wednesday
-# seat (the API would 403 anyway). LIVE_BOARD=0 disables the post.
 set -u
 DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 export DQ_FILE="${DQ_FILE:-$DIR/../../0_Brain/dashboard/data/decisions.json}"
@@ -78,8 +68,7 @@ for a in "$@"; do
   if [ "$a" = "--json" ]; then DQ_JSON="$(cat)"; break; fi
 done
 export DQ_JSON
-# Phase 2: no longer `exec` — the live-board post runs after the python returns. Its exit code is preserved verbatim.
-python3 - "$@" <<'PYEOF'
+exec python3 - "$@" <<'PYEOF'
 import datetime, json, os, sys, tempfile
 
 FILE = os.environ["DQ_FILE"]
@@ -513,30 +502,3 @@ elif cmd == "amend": cmd_amend(rest)
 elif cmd == "list": cmd_list(rest)
 else: die(f"unknown command: {cmd}", 1)
 PYEOF
-_rc=$?
-# ── Phase 2: mirror the card's current state to the live board (local write already done; rc untouched) ──
-if [ "$_rc" -eq 0 ] && [ -f "$DIR/_live_board.sh" ]; then
-  case "${1:-}" in
-    add|rule|--delivered|delivered|amend|withdraw)
-      _cid=""
-      if [ "${1:-}" = "add" ]; then
-        # the id is a flag on the CLI path, or the "id" key of the stdin JSON
-        _prev=""; for _a in "$@"; do [ "$_prev" = "--id" ] && _cid="$_a"; _prev="$_a"; done
-        [ -n "$_cid" ] || _cid="$(printf '%s' "$DQ_JSON" | python3 -c 'import json,sys
-try: print(json.load(sys.stdin).get("id",""))
-except Exception: print("")' 2>/dev/null)"
-      else
-        _cid="${2:-}"
-      fi
-      # seat: the launcher's WED_AGENT, else the tree (same resolver as chat_reply.sh); no hostname guess
-      _seat="${WED_AGENT:-}"
-      if [ -z "$_seat" ]; then case "$(basename "$(cd -P "$DIR/../.." && pwd)")" in TUESDAY|Tuesday|tuesday) _seat=tuesday ;; WEDNESDAY|Wednesday|wednesday) _seat=wednesday ;; esac; fi
-      if [ -n "$_cid" ]; then
-        . "$DIR/_live_board.sh"
-        live_board_post_card "$_seat" "$DQ_FILE" "$_cid"
-      else
-        echo "decision_queue: live-board post skipped — could not determine the card id from the arguments (local write is intact)" >&2
-      fi ;;
-  esac
-fi
-exit "$_rc"

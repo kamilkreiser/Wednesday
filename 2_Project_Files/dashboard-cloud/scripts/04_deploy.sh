@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 # Step 4 — App Service plan (Linux B1) + web app (Python 3.12) + identity + RBAC + settings + zip deploy + Easy Auth v2.
+# Phase 2 (2026-09-21): adds the KAM_OBJECT_ID app setting (the one principal allowed on POST /api/kam/messages). Otherwise unchanged.
 # Idempotent. Every az call names -g $RG --subscription $SUB_ID. The Easy Auth client secret is read from 4_Credentials and
 # written ONLY into the app setting MICROSOFT_PROVIDER_AUTHENTICATION_SECRET (never echoed).
 set -eu
@@ -51,7 +52,8 @@ $AZ webapp config appsettings set -n "$WEBAPP" -g "$RG" -o none --settings \
   TENANT_ID="$TENANT_ID" SEAT_API_APPID="$API_APPID" STORAGE_ACCOUNT="$STORAGE" \
   SEAT_APP_MAP="$wednesday_seat_APPID:wednesday,$tuesday_seat_APPID:tuesday" \
   MICROSOFT_PROVIDER_AUTHENTICATION_SECRET="$SECRET" \
-  WEBSITE_AUTH_AAD_ALLOWED_TENANTS="$TENANT_ID"
+  WEBSITE_AUTH_AAD_ALLOWED_TENANTS="$TENANT_ID" \
+  KAM_OBJECT_ID="$KAM_USER_OBJ"
 unset SECRET
 echo "app settings (names only): $($AZ webapp config appsettings list -n "$WEBAPP" -g "$RG" --query '[].name' -o tsv | tr '\n' ' ')"
 

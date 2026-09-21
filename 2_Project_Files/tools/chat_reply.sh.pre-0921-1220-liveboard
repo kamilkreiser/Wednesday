@@ -15,15 +15,6 @@
 # --project (Kam, 2026-09-07 11:12): tags the entry so each dashboard can choose
 # which project's replies it displays / auto-speaks (per-browser filter, WED on
 # by default). Omitted → "WED"; entries with no field at all read as "WED".
-#
-# ── DUAL-WRITE TO THE LIVE BOARD (Phase 2, Kam 2026-09-21 11:43) ─────────────
-# After the local append + derived rebuild succeed, the SAME entry is posted to
-# the external dashboard, encrypted to Kam's public key on this machine
-# (tools/_live_board.sh -> dashboard-cloud/seat), with view=<this seat>. Local
-# first, always; a failed post is LOUD on stderr + fleet/state/
-# live_board_post_failures.log and never changes this script's exit code. The
-# seat is $AGENT (below); Datasec is refused locally for the Wednesday seat.
-# LIVE_BOARD=0 disables the post.
 set -u
 SELF_DIR="$(cd -P "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_DIR="$(cd -P "$SELF_DIR/../.." && pwd)"
@@ -225,8 +216,7 @@ if [ "${CHAT_DRY:-0}" = "1" ]; then
   echo "chat_reply: DRY — all checks passed, nothing written (${#MSG} chars)"
   exit 0
 fi
-_TS_STATE="$PROJECT_DIR/2_Project_Files/fleet/state/live_board_last_local_ts"; mkdir -p "$(dirname "$_TS_STATE")" 2>/dev/null; : > "$_TS_STATE"
-CHAT_FILE="$CHAT" CHAT_PROJECT="$PROJECT" CHAT_TS_OUT="$_TS_STATE" python3 - "$MSG" <<'PYEOF'
+CHAT_FILE="$CHAT" CHAT_PROJECT="$PROJECT" python3 - "$MSG" <<'PYEOF'
 import json, os, sys, datetime, tempfile
 path = os.environ["CHAT_FILE"]
 msg = sys.argv[1]
@@ -283,12 +273,11 @@ except json.JSONDecodeError:
     log.sort(key=lambda e: str(e.get('ts', '')))
     sys.stderr.write('chat_reply: REPAIRED a conflict-marked log via %s -> %d entries\n'
                      % (_how, len(log)))
-_ts = datetime.datetime.now(datetime.timezone.utc).astimezone().isoformat()
 log.append({
     "role": "wednesday",
     "seat": __import__("socket").gethostname(),  # 2026-09-07: which machine wrote this (autoplay scope)
     "project": os.environ.get("CHAT_PROJECT") or "WED",  # 2026-09-07: per-dashboard display filter
-    "ts": _ts,
+    "ts": datetime.datetime.now(datetime.timezone.utc).astimezone().isoformat(),
     "text": msg,
 })
 d = os.path.dirname(path)
@@ -297,13 +286,8 @@ with os.fdopen(fd, "w") as f:
     json.dump(log, f, ensure_ascii=False, indent=1)
 os.replace(tmp, path)
 print(f"appended to {os.path.basename(path)} ({len(log)} in this stream)")
-# Phase 2: hand the generated ts back to the shell (state file named in CHAT_TS_OUT) so the live-board post carries the
-# SAME timestamp — and therefore the same deterministic id the backfill computes — never a second clock reading.
-if os.environ.get("CHAT_TS_OUT"):
-    open(os.environ["CHAT_TS_OUT"], "w").write(_ts)
 PYEOF
 _rc=$?
-_live_ts="$(cat "$_TS_STATE" 2>/dev/null)"
 [ "$_rc" -eq 0 ] || exit "$_rc"
 # Regenerate Kam's reading surface from every stream. Never discard stderr: a
 # merge that refuses (a stream that will not parse) must be visible, because the
@@ -314,11 +298,3 @@ python3 "$STREAMS" || {
   echo "  python3 $STREAMS" >&2
   exit 4
 }
-# ── Phase 2: the same entry to the live board (encrypted here; the local write already happened above) ──
-if [ -n "$_live_ts" ] && [ -f "$SELF_DIR/_live_board.sh" ]; then
-  . "$SELF_DIR/_live_board.sh"
-  live_board_post_message "$AGENT" "$PROJECT" "$_live_ts" "$(basename "$CHAT")" "$MSG"
-else
-  echo "chat_reply: live-board post skipped (no ts captured or _live_board.sh missing) — local write is intact" >&2
-fi
-exit 0

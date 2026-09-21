@@ -87,8 +87,41 @@ try:
     envelope.decrypt_text(envelope.load_private(sys.argv[2]),r,dict(clear,client="Datasec")); print("FAIL  RELABELLED ROW DECRYPTED")
 except Exception as e: print("PASS  row relabelled to another client refused (AAD):", type(e).__name__)
 PY
+echo "### G. Phase 2 (2026-09-21) — pages, Kam's write path, seat author=kam partitions, idempotency"
+ea_refused  "GET /chat plain client" "$BASE/chat";                       ea_redirect "GET /chat" "$BASE/chat"
+ea_refused  "GET /static/common.js plain client" "$BASE/static/common.js"
+KB='{"client":"WED","view":"wednesday","id":"probe-kam-'$TS'","ts":"2026-09-21T00:00:00.000Z","envelope":{"scheme":"x","kid":"x","iv":"x","wrapped_key":"x","ciphertext":"x"}}'
+ea_refused  "POST /api/kam/messages NO principal (Easy Auth refuses before the app)" -X POST -H 'Content-Type: application/json' -d "$KB" "$BASE/api/kam/messages"
+ea_refused  "POST /api/kam/messages with FORGED x-ms-client-principal-id = Kam's real object id, from outside" -X POST -H "x-ms-client-principal-id: $KAM_USER_OBJ" -H 'x-ms-client-principal-name: kreiser.org@me.com' -H 'Content-Type: application/json' -d "$KB" "$BASE/api/kam/messages"
+ea_redirect "POST /api/kam/messages (browser Accept, no session)" -X POST -H 'Content-Type: application/json' -d "$KB" "$BASE/api/kam/messages"
+TOK=$("$V" - <<PY
+import sys; sys.path.insert(0,"$HERE/seat"); import seat_common as sc, argparse
+a=sc.common_args(argparse.ArgumentParser()).parse_args(["--seat","wednesday","--client","WED"]); print(sc.get_token(a, sc.load_ids()))
+PY
+)
+TOKT=$("$V" - <<PY
+import sys; sys.path.insert(0,"$HERE/seat"); import seat_common as sc, argparse
+a=sc.common_args(argparse.ArgumentParser()).parse_args(["--seat","tuesday","--client","Datasec"]); print(sc.get_token(a, sc.load_ids()))
+PY
+)
+ea_refused  "POST /api/kam/messages with a SEAT bearer token (a seat is not Kam)" -X POST -H "Authorization: Bearer $TOK" -H 'Content-Type: application/json' -d "$KB" "$BASE/api/kam/messages"
+c=$(hdr -H "Authorization: Bearer $TOK" "$BASE/api/seat/messages?author=kam&limit=200"); expect "wednesday seat GET author=kam" 200 "$c"
+python3 -c 'import json,sys;d=json.load(open(sys.argv[1]));m=d["messages"];bad=[r for r in m if r.get("role")!="kam" or r["client"] not in ("ALL","Secuura","WED")];print("      partitions:",d["clients"],"rows:",len(m),"clients seen:",sorted({r["client"] for r in m}),"non-kam or foreign rows:",len(bad)); assert set(d["clients"])=={"ALL","Secuura","WED"} and not bad; print("PASS  wednesday author=kam: only ALL+Secuura+WED, only role=kam")' "$SCRATCH/p_body.txt" || FAIL=1
+c=$(hdr -H "Authorization: Bearer $TOKT" "$BASE/api/seat/messages?author=kam&limit=200"); expect "tuesday seat GET author=kam" 200 "$c"
+python3 -c 'import json,sys;d=json.load(open(sys.argv[1]));m=d["messages"];bad=[r for r in m if r.get("role")!="kam" or r["client"] not in ("ALL","Datasec")];print("      partitions:",d["clients"],"rows:",len(m),"clients seen:",sorted({r["client"] for r in m}),"non-kam or foreign rows:",len(bad)); assert set(d["clients"])=={"ALL","Datasec"} and not bad; print("PASS  tuesday author=kam: only ALL+Datasec, only role=kam")' "$SCRATCH/p_body.txt" || FAIL=1
+expect "tuesday seat GET client=WED (MUST refuse)" 403 "$(hdr -H "Authorization: Bearer $TOKT" "$BASE/api/seat/messages?client=WED")"
+expect "tuesday seat GET client=ALL (broadcast, every seat)" 200 "$(hdr -H "Authorization: Bearer $TOKT" "$BASE/api/seat/messages?client=ALL&limit=1")"
+expect "wednesday seat GET client=ALL" 200 "$(hdr -H "Authorization: Bearer $TOK" "$BASE/api/seat/messages?client=ALL&limit=1")"
+unset TOK TOKT
+# The message dedupe key is (client, ts, id) — the tools and the backfill always pass a FIXED ts (the local entry's), so a
+# repeat is byte-identical in the key. The probe therefore fixes --ts too (first run of this probe omitted it and correctly got 201).
+postts() { "$V" "$HERE/seat/post_message.py" --seat "$1" --client "$2" --base "$BASE" --text "$3" --id "$4" --ts "$5" --backfill --src-ts "$6" 2>"$SCRATCH/p_err.txt" | python3 -c 'import json,sys;d=json.load(sys.stdin);print(d["status"]); sys.stderr.write("      body: "+d["body"][:200]+"\n")'; }
+expect "seat message probe-dup-$TS first post (fixed ts, backfill flags)" 201 "$(postts wednesday WED "SYNTHETIC dup probe $TS" probe-dup-$TS 2026-09-21T00:00:01.000Z 2026-09-21T10:00:01.000000+10:00)"
+expect "seat message probe-dup-$TS SAME (client,ts,id) again -> 200 duplicate, nothing written" 200 "$(postts wednesday WED "SYNTHETIC dup probe $TS" probe-dup-$TS 2026-09-21T00:00:01.000Z 2026-09-21T10:00:01.000000+10:00)"
+CARDU=$("$V" "$HERE/seat/post_card.py" --seat wednesday --client Secuura --base "$BASE" --title "SYNTHETIC card $TS: choose a synthetic option" --bluf "SYNTHETIC bluf — nothing real here" --option A "Option alpha (synthetic)" --option B "Option beta (synthetic)" --recommended A --status ruled --ruled-choice A --id live-card-$TS | python3 -c 'import json,sys;print(json.load(sys.stdin)["status"])')
+expect "card live-card-$TS re-posted as ruled -> 200 updated in place" 200 "$CARDU"
 echo "### F. Rows per partition (counts only)"
-for c in Secuura Datasec WED; do n=$(az storage entity query --account-name "$STORAGE" --table-name messages --auth-mode login --filter "PartitionKey eq '$c'" --select id -o json 2>/dev/null | python3 -c 'import json,sys;print(len(json.load(sys.stdin)["items"]))'); echo "      messages/$c: $n"; done
+for c in Secuura Datasec WED ALL; do n=$(az storage entity query --account-name "$STORAGE" --table-name messages --auth-mode login --filter "PartitionKey eq '$c'" --select id -o json 2>/dev/null | python3 -c 'import json,sys;print(len(json.load(sys.stdin)["items"]))'); echo "      messages/$c: $n"; done
 echo "      cards total: $(az storage entity query --account-name "$STORAGE" --table-name cards --auth-mode login --select id -o json 2>/dev/null | python3 -c 'import json,sys;print(len(json.load(sys.stdin)["items"]))')"
 echo "### RESULT: $([ $FAIL = 0 ] && echo ALL PROBES PASS || echo SOME PROBES FAILED)"
 exit $FAIL

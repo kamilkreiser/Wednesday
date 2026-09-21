@@ -1,27 +1,35 @@
-"""main.py — Wednesday external dashboard, Phase 1 pilot (FastAPI on App Service Linux).
+"""main.py — Wednesday external dashboard (FastAPI on App Service Linux). Phase 1 pilot + Phase 2 (2026-09-21).
 
 Two surfaces, two gates:
-  VIEWER (Kam)  GET /            panel page (static/index.html; decrypts client-side)
+  VIEWER (Kam)  GET /            cockpit page (static/index.html — the local cockpit.html layout; decrypts client-side)
+                GET /chat        chat page   (static/chat.html  — the local chat.html layout)
+                GET /static/common.js        shared key/crypto/API module for both pages
                 GET /api/messages?client=&since=   delta read (never the whole store)
-                GET /api/cards?client=&since=
-                GET /api/me                        who Easy Auth says I am
-     gate: App Service Easy Auth (Microsoft provider, requireAuthentication). The
-     app ADDITIONALLY refuses any viewer route without the X-MS-CLIENT-PRINCIPAL-ID
-     header (defence in depth: if Easy Auth were ever switched off, these return 401,
-     not data). Kam is the only assigned user, so the viewer sees all partitions.
+                GET /api/cards?client=             cards are STATE (ruled/withdrawn change in place) -> read whole, no since
+                GET /api/me                        who Easy Auth says I am (+ is_kam)
+                GET /api/pubkey                    Kam's envelope PUBLIC key (the browser encrypts his replies with it)
+                POST /api/kam/messages             Phase 2: Kam's reply path. Envelope only (the browser encrypts to his own
+                                                   public key); `view` (the tab he typed in) decides the partition:
+                                                   wednesday -> WED, tuesday -> Datasec, both -> ALL (broadcast).
+     gate: App Service Easy Auth (Microsoft provider, requireAuthentication). The app ADDITIONALLY refuses any viewer
+     route without the X-MS-CLIENT-PRINCIPAL-ID header (defence in depth), and the WRITE route additionally requires that
+     principal id to equal KAM_OBJECT_ID (app setting) — Easy Auth strips/overwrites x-ms-client-principal-* on the way
+     in and never forwards an anonymous request, so a forged header from outside never reaches this code (probe A8).
 
-  SEAT API      POST /api/seat/messages   POST /api/seat/cards   GET /api/seat/messages?since=
+  SEAT API      POST /api/seat/messages   POST /api/seat/cards   GET /api/seat/messages?since=&author=&client=
                 GET  /api/seat/health (anonymous liveness for probes)
-     gate: Bearer JWT from the seat's client-credentials flow against wednesday-seat-api,
-     validated HERE (issuer, audience, signature via the tenant JWKS, expiry). The
-     token's `roles` decide the partitions: Client.<X> roles -> allowed clients;
-     Seat.Write / Seat.Read -> verb. A body naming a client outside the token's roles
-     is REFUSED 403 — the partition comes from the token, never from the body.
-     Easy Auth excludes /api/seat/* so this validation is the only gate there.
+     gate: Bearer JWT from the seat's client-credentials flow against wednesday-seat-api, validated HERE (issuer,
+     audience, signature via the tenant JWKS, expiry). The token's `roles` decide the partitions: Client.<X> roles ->
+     allowed clients; Seat.Write / Seat.Read -> verb. A body naming a client outside the token's roles is REFUSED 403 —
+     the partition comes from the token, never from the body. Easy Auth excludes /api/seat/* so this validation is the
+     only gate there. Seats READ their own partitions plus ALL (Kam's broadcast rows); no seat can WRITE ALL (no role).
 
-The server holds NO decryption key. `text` arrives as an envelope (seat/envelope.py)
-and is stored as ciphertext; the server never sees prose. Clear routing fields are
-validated and stored as columns.
+Phase 2 idempotency: a message row is INSERTED, never replaced — a second POST with the same (client, ts, id) returns
+200 {"duplicate": true} and writes nothing, so a re-run of the backfill posts nothing new. A card row is keyed by its id
+alone (RowKey card_<id>) and is state: the first POST is 201, a later POST with the same id updates it (200 {"updated"}).
+
+The server holds NO decryption key. `text` arrives as an envelope (seat/envelope.py or the browser's WebCrypto twin)
+and is stored as ciphertext; the server never sees prose. Clear routing fields are validated and stored as columns.
 """
 import json, logging, os, re, time, datetime, uuid
 from typing import Optional
@@ -30,6 +38,7 @@ from fastapi import FastAPI, Request, HTTPException, Query
 from fastapi.responses import JSONResponse, FileResponse, PlainTextResponse
 from azure.identity import DefaultAzureCredential
 from azure.data.tables import TableServiceClient, UpdateMode
+from azure.core.exceptions import ResourceExistsError
 
 log = logging.getLogger("wedcloud")
 logging.basicConfig(level=logging.INFO)
@@ -38,7 +47,11 @@ logging.getLogger("azure").setLevel(logging.WARNING)  # SDK request/response dum
 TENANT_ID = os.environ.get("TENANT_ID", "")
 API_APPID = os.environ.get("SEAT_API_APPID", "")          # audience of seat tokens
 STORAGE = os.environ.get("STORAGE_ACCOUNT", "")
-CLIENTS = ("Secuura", "Datasec", "WED")
+KAM_OBJECT_ID = os.environ.get("KAM_OBJECT_ID", "")       # the ONLY principal allowed to write via /api/kam/*
+CLIENTS = ("Secuura", "Datasec", "WED")                   # seat-writable partitions (token roles)
+BROADCAST = "ALL"                                          # Kam's "both" rows; readable by every seat, written only by Kam
+READ_PARTITIONS = CLIENTS + (BROADCAST,)
+VIEW_TO_CLIENT = {"wednesday": "WED", "tuesday": "Datasec", "both": BROADCAST}
 SEAT_APPS = {}  # client app id -> seat name, from env SEAT_APP_MAP="appid:wednesday,appid:tuesday"
 for pair in os.environ.get("SEAT_APP_MAP", "").split(","):
     if ":" in pair:
@@ -49,9 +62,10 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 PUBKEY_PATH = os.path.join(HERE, "keys", "kam-pilot-public.pub")
 TS_RE = re.compile(r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?Z$")
 ID_RE = re.compile(r"^[A-Za-z0-9._-]{1,64}$")
+KEY_RE = re.compile(r"^[A-Za-z0-9._-]{0,32}$")             # option keys are slugs (measured up to 26 chars locally)
 ENVELOPE_FIELDS = ("scheme", "kid", "iv", "wrapped_key", "ciphertext")
 
-app = FastAPI(title="wednesday-dashboard pilot", docs_url=None, redoc_url=None, openapi_url=None)
+app = FastAPI(title="wednesday-dashboard", docs_url=None, redoc_url=None, openapi_url=None)
 
 # ---------------- storage (managed identity; no account key anywhere) ----------------
 _tables = {}
@@ -90,9 +104,12 @@ def seat_from_token(request: Request) -> dict:
     return {"appid": appid, "seat": SEAT_APPS.get(appid, "unknown"), "oid": claims.get("oid"),
             "clients": clients, "write": "Seat.Write" in roles, "read": "Seat.Read" in roles}
 
-def require_partition(seat: dict, client: Optional[str]) -> str:
-    if client not in CLIENTS:
-        raise HTTPException(400, f"client must be one of {CLIENTS}")
+def require_partition(seat: dict, client: Optional[str], for_read: bool = False) -> str:
+    allowed = tuple(READ_PARTITIONS) if for_read else CLIENTS
+    if client not in allowed:
+        raise HTTPException(400, f"client must be one of {allowed}")
+    if client == BROADCAST and for_read:
+        return client                       # every seat reads Kam's broadcast rows; nobody but Kam writes them
     if client not in seat["clients"]:
         # The check that must be able to fail: token says X, body says Y -> refused, empty.
         log.warning("R0 refusal: seat=%s roles=%s asked=%s", seat["seat"], sorted(seat["clients"]), client)
@@ -114,12 +131,56 @@ def validate_clear(body: dict, kind: str):
     if not ID_RE.match(rid): raise HTTPException(400, "id must be [A-Za-z0-9._-]{1,64}")
     return ts, rid
 
+def clear_extras(body: dict) -> dict:
+    """Phase 2 clear routing extras (study §4.4 — timestamps and flags, never prose)."""
+    out = {}
+    if body.get("backfill") is True: out["backfill"] = True
+    src = body.get("src_ts")
+    if src is not None:
+        src = str(src)[:40]
+        if not re.match(r"^[0-9T:.+\-Z]{1,40}$", src): raise HTTPException(400, "src_ts must be a timestamp")
+        out["src_ts"] = src
+    return out
+
 def now_iso(): return datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+
+def insert_message(row: dict) -> bool:
+    """INSERT semantics: returns True if written, False if the (PartitionKey, RowKey) already existed (nothing written)."""
+    try:
+        table("messages").create_entity(row)
+        return True
+    except ResourceExistsError:
+        return False
+
+def store_card(row: dict) -> bool:
+    """Cards are state: returns True if created, False if an existing card was updated in place."""
+    try:
+        table("cards").create_entity(row)
+        return True
+    except ResourceExistsError:
+        table("cards").update_entity(row, mode=UpdateMode.REPLACE)
+        return False
+
+def card_row(client: str, body: dict, env: dict, ts: str, rid: str, seat_name: str, written_by: str) -> dict:
+    option_keys = body.get("option_keys") or []
+    if not isinstance(option_keys, list) or not all(isinstance(k, str) and KEY_RE.match(k) for k in option_keys):
+        raise HTTPException(400, "option_keys must be a list of slugs [A-Za-z0-9._-]{0,32} (the keys stay clear)")
+    status = str(body.get("status") or "open")
+    if status not in ("open", "ruled", "withdrawn"): raise HTTPException(400, "status")
+    rec = str(body.get("recommended") or ""); rc = str(body.get("ruled_choice") or "")
+    if not KEY_RE.match(rec) or not KEY_RE.match(rc): raise HTTPException(400, "recommended/ruled_choice must be slugs")
+    ruled_ts = str(body.get("ruled_ts") or "")[:40]
+    if ruled_ts and not re.match(r"^[0-9T:.+\-Z]{1,40}$", ruled_ts): raise HTTPException(400, "ruled_ts must be a timestamp")
+    return {"PartitionKey": client, "RowKey": f"card_{rid}", "kind": "card", "id": rid, "ts": ts,
+            "client_project": str(body.get("client_project") or client)[:64], "status": status,
+            "option_keys": json.dumps(option_keys), "recommended": rec,
+            "ruled": bool(body.get("ruled", False)), "ruled_choice": rc, "ruled_ts": ruled_ts,
+            "seat": seat_name, "written_by": written_by, "written_at": now_iso(), **clear_extras(body), **env}
 
 # ---------------- seat routes (Easy Auth excluded; own JWT gate) ----------------
 @app.get("/api/seat/health")
 def seat_health():
-    return {"app": "wednesday-dashboard-cloud", "ok": True, "phase": "pilot", "ts": now_iso()}
+    return {"app": "wednesday-dashboard-cloud", "ok": True, "phase": "2", "ts": now_iso()}
 
 @app.post("/api/seat/messages", status_code=201)
 async def seat_post_message(request: Request):
@@ -132,9 +193,11 @@ async def seat_post_message(request: Request):
     view = str(body.get("view") or client)[:64]
     role = str(body.get("role") or seat["seat"])[:32]
     row = {"PartitionKey": client, "RowKey": f"{ts}_{rid}", "kind": "message", "id": rid, "ts": ts, "view": view,
-           "role": role, "seat": seat["seat"], "written_by": seat["appid"], "written_at": now_iso(), **env}
-    table("messages").upsert_entity(row, mode=UpdateMode.REPLACE)
-    return {"stored": {"client": client, "id": rid, "ts": ts, "row_key": row["RowKey"], "written_by": seat["seat"]}}
+           "role": role, "seat": seat["seat"], "written_by": seat["appid"], "written_at": now_iso(), **clear_extras(body), **env}
+    stored = {"client": client, "id": rid, "ts": ts, "row_key": row["RowKey"], "written_by": seat["seat"]}
+    if insert_message(row):
+        return {"stored": stored}
+    return JSONResponse(status_code=200, content={"stored": stored, "duplicate": True})
 
 @app.post("/api/seat/cards", status_code=201)
 async def seat_post_card(request: Request):
@@ -144,48 +207,57 @@ async def seat_post_card(request: Request):
     client = require_partition(seat, body.get("client"))
     env = validate_envelope(body)
     ts, rid = validate_clear(body, "card")
-    option_keys = body.get("option_keys") or []
-    if not isinstance(option_keys, list) or not all(isinstance(k, str) and len(k) <= 4 for k in option_keys):
-        raise HTTPException(400, "option_keys must be a list of short strings (the letters stay clear)")
-    status = str(body.get("status") or "open")
-    if status not in ("open", "ruled", "withdrawn"): raise HTTPException(400, "status")
-    row = {"PartitionKey": client, "RowKey": f"{ts}_{rid}", "kind": "card", "id": rid, "ts": ts,
-           "client_project": str(body.get("client_project") or client)[:64], "status": status,
-           "option_keys": json.dumps(option_keys), "recommended": str(body.get("recommended") or "")[:4],
-           "ruled": bool(body.get("ruled", False)), "ruled_choice": str(body.get("ruled_choice") or "")[:4],
-           "seat": seat["seat"], "written_by": seat["appid"], "written_at": now_iso(), **env}
-    table("cards").upsert_entity(row, mode=UpdateMode.REPLACE)
-    return {"stored": {"client": client, "id": rid, "ts": ts, "row_key": row["RowKey"], "written_by": seat["seat"]}}
+    row = card_row(client, body, env, ts, rid, seat["seat"], seat["appid"])
+    stored = {"client": client, "id": rid, "ts": ts, "row_key": row["RowKey"], "written_by": seat["seat"]}
+    if store_card(row):
+        return {"stored": stored}
+    return JSONResponse(status_code=200, content={"stored": stored, "updated": True})
 
-def _query(tname: str, clients, since: Optional[str], limit: int):
+def _query(tname: str, clients, since: Optional[str], limit: int, author: Optional[str] = None):
+    """Rows after `since` (RowKey order = ts order for messages), up to `limit` PER PARTITION, merged and sorted.
+    Phase 2: the cap is per partition on purpose — a shared cap filled by the first partition starved the others."""
     out = []
     for c in sorted(clients):
-        flt = f"PartitionKey eq @c" + (" and RowKey gt @s" if since else "")
-        params = {"c": c, "s": since or ""}
+        flt = "PartitionKey eq @c" + (" and RowKey gt @s" if since else "") + (" and role eq @a" if author else "")
+        params = {"c": c, "s": since or "", "a": author or ""}
+        n = 0
         for e in table(tname).query_entities(flt, parameters=params, results_per_page=min(limit, 1000)):
             d = {k: v for k, v in e.items() if k not in ("PartitionKey", "RowKey")}
             d["client"] = c; d["row_key"] = e["RowKey"]
             if "option_keys" in d:
                 try: d["option_keys"] = json.loads(d["option_keys"])
                 except Exception: pass
-            out.append(d)
-            if len(out) >= limit: break
+            out.append(d); n += 1
+            if n >= limit: break
     out.sort(key=lambda r: r["row_key"])
-    return out[-limit:]
+    return out
 
 @app.get("/api/seat/messages")
-def seat_get_messages(request: Request, client: Optional[str] = None, since: Optional[str] = None, limit: int = Query(200, le=1000)):
+def seat_get_messages(request: Request, client: Optional[str] = None, since: Optional[str] = None,
+                      author: Optional[str] = None, limit: int = Query(200, le=1000)):
+    """A seat reads its own partitions + ALL (Kam's broadcast). `author=kam` narrows to Kam's rows (role=kam) —
+    this is how a seat picks up what Kam typed on the live site. The partition set is the token's, never the query's."""
     seat = seat_from_token(request)
     if not seat["read"]: raise HTTPException(403, "Seat.Read role required")
-    clients = {require_partition(seat, client)} if client else seat["clients"]
-    return {"messages": _query("messages", clients, since, limit), "clients": sorted(clients)}
+    clients = {require_partition(seat, client, for_read=True)} if client else (set(seat["clients"]) | {BROADCAST})
+    if author is not None and not re.match(r"^[a-z]{1,32}$", author): raise HTTPException(400, "author")
+    return {"messages": _query("messages", clients, since, limit, author), "clients": sorted(clients)}
 
 # ---------------- viewer routes (Easy Auth gate + header check) ----------------
 def viewer(request: Request) -> dict:
     pid = request.headers.get("x-ms-client-principal-id")
     if not pid:
         raise HTTPException(401, "no authenticated principal (Easy Auth header missing)")
-    return {"id": pid, "name": request.headers.get("x-ms-client-principal-name", "")}
+    return {"id": pid, "name": request.headers.get("x-ms-client-principal-name", ""),
+            "is_kam": bool(KAM_OBJECT_ID) and pid == KAM_OBJECT_ID}
+
+def kam_only(request: Request) -> dict:
+    """The write path: the Easy Auth principal must BE Kam (object id pinned by app setting). Anyone else -> 403, empty."""
+    who = viewer(request)
+    if not who["is_kam"]:
+        log.warning("kam route refused: principal %s is not KAM_OBJECT_ID", who["id"][:8])
+        raise HTTPException(403, "only Kam's principal may write here")
+    return who
 
 @app.get("/api/me")
 def me(request: Request):
@@ -194,24 +266,55 @@ def me(request: Request):
 @app.get("/api/messages")
 def get_messages(request: Request, client: Optional[str] = None, since: Optional[str] = None, limit: int = Query(200, le=1000)):
     viewer(request)
-    clients = {client} if client in CLIENTS else set(CLIENTS)
+    clients = {client} if client in READ_PARTITIONS else set(READ_PARTITIONS)
     return {"messages": _query("messages", clients, since, limit)}
 
 @app.get("/api/cards")
-def get_cards(request: Request, client: Optional[str] = None, since: Optional[str] = None, limit: int = Query(200, le=1000)):
+def get_cards(request: Request, client: Optional[str] = None, since: Optional[str] = None, limit: int = Query(1000, le=1000)):
     viewer(request)
-    clients = {client} if client in CLIENTS else set(CLIENTS)
+    clients = {client} if client in READ_PARTITIONS else set(READ_PARTITIONS)
     return {"cards": _query("cards", clients, since, limit)}
+
+@app.post("/api/kam/messages", status_code=201)
+async def kam_post_message(request: Request):
+    """Kam's reply from the live site. The BROWSER encrypts to his public key (this server never sees the prose);
+    `view` is the tab he typed in and fixes the partition. The body's `client` must agree (the AAD binds it)."""
+    who = kam_only(request)
+    body = await request.json()
+    view = str(body.get("view") or "")
+    if view not in VIEW_TO_CLIENT: raise HTTPException(400, f"view must be one of {sorted(VIEW_TO_CLIENT)}")
+    client = VIEW_TO_CLIENT[view]
+    if body.get("client") not in (None, client): raise HTTPException(400, f"client for view={view} is {client}")
+    env = validate_envelope(body)
+    ts, rid = validate_clear(body, "message")
+    row = {"PartitionKey": client, "RowKey": f"{ts}_{rid}", "kind": "message", "id": rid, "ts": ts, "view": view,
+           "role": "kam", "seat": "kam", "written_by": f"easyauth:{who['id']}", "written_at": now_iso(), **env}
+    stored = {"client": client, "id": rid, "ts": ts, "row_key": row["RowKey"], "written_by": "kam"}
+    if insert_message(row):
+        return {"stored": stored}
+    return JSONResponse(status_code=200, content={"stored": stored, "duplicate": True})
 
 @app.get("/api/pubkey")
 def pubkey(request: Request):
     viewer(request)
     return PlainTextResponse(open(PUBKEY_PATH).read())
 
+NO_STORE = {"Cache-Control": "no-store"}
+
 @app.get("/")
 def index(request: Request):
     viewer(request)
-    return FileResponse(os.path.join(HERE, "static", "index.html"), headers={"Cache-Control": "no-store"})
+    return FileResponse(os.path.join(HERE, "static", "index.html"), headers=NO_STORE)
+
+@app.get("/chat")
+def chat(request: Request):
+    viewer(request)
+    return FileResponse(os.path.join(HERE, "static", "chat.html"), headers=NO_STORE)
+
+@app.get("/static/common.js")
+def common_js(request: Request):
+    viewer(request)
+    return FileResponse(os.path.join(HERE, "static", "common.js"), media_type="application/javascript", headers=NO_STORE)
 
 @app.get("/{path:path}")
 def catch_all(path: str, request: Request):
