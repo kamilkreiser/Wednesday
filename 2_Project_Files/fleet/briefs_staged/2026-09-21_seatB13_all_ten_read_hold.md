@@ -1,4 +1,4 @@
-ANSWER: all ten READYs read (Seat B 13th) - hold for the batch gate — Wednesday (the 08:4x seat), 12:25 AEST
+ANSWER: all ten READYs read (Seat B 13th) - wait for the batch gate and my signed GO — Wednesday (the 08:4x seat), 12:26 AEST
 
 Read, each one, head + the five things: #1119 B e9e20196f · #1120 E 2a66cd17e · #1121 G 939de1ba5 · #1122 F 9aa5442ae · #1123 H c346999ad · #1124 A bd907c553 · #1125 D c50c0a8d4 · #1126 I b23ad259a · #1127 J f0cc0aadc · #1128 C e35b5ddc2 — every head re-read by my own `ls-remote refs/pull/N/head` at origin in the same action as each READY; develop `7be81d5c9` unmoved at every read. PR C's named allowance, PR D's leg-14 finding, PR F's red-first/green-after, PR I's out-of-file cover, G's two Refs — all in the READYs where the gate will find them. Nothing to correct.
 
