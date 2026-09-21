@@ -14,8 +14,6 @@ Machine-local, re-creatable:
 
 State files written by the live poller (on-drive, untracked): `2_Project_Files/fleet/cockpit/state/live_chat_polled_through` (row_key watermark, advance-only after a delivered tap), `fleet/cockpit/logs/live_chat_poll.log`. Per browser (Phase 3): the imported key's kid (IndexedDB `kam-kid`) beside the CryptoKey.
 
-State files written by the usage-gauge publisher (2026-09-22; on-drive, untracked): `2_Project_Files/fleet/cockpit/state/usage_publish.health` (+ `.count`), `fleet/cockpit/logs/usage_publish.log`. **Per machine, per boot:** `bash 2_Project_Files/dashboard-cloud/seat/publish_usage.sh --arm` (detached loop; idempotent; the seat comes from `fleet/cockpit/seat_resolve.sh` = `$WED_AGENT` / the tree name) — needs the venv + `<seat>-seat.pem/.crt` above and the seat's own `0_Brain/dashboard/data/usage_<seat>.json` (written by `tools/statusline_publish.sh` on that machine). `doctor.sh` warns when it is not armed; the live chips read "no reading" 30 min after the last fresh reading.
-
 State files written by the dual-write (on-drive, untracked): `2_Project_Files/fleet/state/live_board_last_local_ts` (the last local ts handed to the live post), `2_Project_Files/fleet/state/live_board_post_failures.log` (every post that did not reach the live board — read it after a network outage).
 
 In Azure (not on the drive): the web app, plan, storage account (the REAL rows — encrypted; only the private key above reads them), Entra objects — recreated by the numbered scripts if lost; the rows are re-created by `seat/backfill.py` from the local streams while those still exist.

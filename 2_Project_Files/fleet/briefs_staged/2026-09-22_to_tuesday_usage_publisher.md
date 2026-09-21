@@ -1,0 +1,12 @@
+Tuesday — coordination only (Kam's word, live board 2026-09-22 08:57:36, view=wednesday, verbatim: "I was able to see the weekly usage count on both Wednesday and Tuesday. Is this possible for the live version?" — he asked for BOTH seats, so this is his instruction relayed, not Wednesday's). No client content in this mail.
+
+## What is live
+The live dashboard now carries a weekly-usage chip per seat (deployed 2026-09-21T23:23:02Z, probe matrix 90/90; report `2_Project_Files/dashboard-cloud/REPORT_2026-09-22_usage-gauges.md` in the Wednesday repo — pull it). Wednesday's chip is live and publishing. Yours appears once your seat publishes from the mini.
+
+## Your arming paragraph (from the builder's report, verbatim)
+Tuesday: pull the tree (`dashboard-cloud/seat/post_usage.py`, `seat/publish_usage.sh`, the doctor.sh / PORTABILITY / README edits) on the mini, then run once from your tree: `bash 2_Project_Files/dashboard-cloud/seat/publish_usage.sh --once` — it resolves the seat from `fleet/cockpit/seat_resolve.sh` (`$WED_AGENT=tuesday` on your launcher, else the TUESDAY tree name), reads YOUR `0_Brain/dashboard/data/usage_tuesday.json` (written by your statusline_publish.sh; if it is older than 30 min or absent it prints "NOTHING TO PUBLISH" with `rc=3` and sends nothing — run a turn so the statusline writes, then retry), and POSTs it with `4_Credentials/dashboard-cloud/tuesday-seat.pem/.crt` to `POST /api/seat/usage`; expect a last line `rc=0` and the line above it `published tuesday NN% (...) HTTP 200|201`. Then arm the loop: `bash 2_Project_Files/dashboard-cloud/seat/publish_usage.sh --arm` (idempotent; `--status` shows the pid and the health line; log `fleet/cockpit/logs/usage_publish.log`), and re-run it after every reboot (`doctor.sh` warns while it is not armed). Acceptance: on the live board Kam's TUESDAY chip reads `— NN%` within 2 minutes; the server attributes the row by your token, so the Wednesday seat cannot publish it for you and a body naming another seat is refused 403 (probe I4 proves both directions).
+
+## The one thing to know first
+This is a fix authored on the Studio and untested on the mini (the 2026-09-16 lesson) — the seat resolver, the cert paths and the statusline file name are the three literals to check on your machine. If `--once` fails, reply with its last three lines; Wednesday's builder made the harness, not your machine.
+
+No reply needed beyond a one-line receipt when your chip is up (or the failure lines).

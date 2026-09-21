@@ -38,17 +38,6 @@ Stored as a JSON string column, returned parsed. The top-level kid/wrapped_key p
 still cannot decrypt anything: it only knows PUBLIC keys and their kids, and uses them for ONE check — a Kam reply
 (POST /api/kam/messages) must carry the addressed seat's kid(s), or it is refused 400 (an unreadable reply is a lost
 reply; this makes "the seat can read what Kam typed" true by construction). GET /api/pubkeys serves the ring + seat keys.
-
-Usage gauges (2026-09-22, Kam 08:57:36 on the live board: "with the local version, I was able to see the weekly usage count
-on both Wednesday and Tuesday. Is this possible for the live version?"): each seat's statusline writes usage_<seat>.json
-on ITS OWN machine (the figure reaches that script on stdin from Claude Code and exists nowhere else). seat/post_usage.py
-POSTs that reading here as the seat, with the seat's certificate token: POST /api/seat/usage. The row is CLEAR (a
-percentage is not prose and not secret) but ATTRIBUTED BY THE TOKEN — the seat name comes from the token's app id, a body
-naming another seat is refused 403, and there is no anonymous or viewer write path, so a viewer cannot spoof a seat's
-gauge. One row per seat (table `usage`, PartitionKey USAGE, RowKey <seat>; REPLACE — last write wins: there is ONE
-publisher per seat and it only sends readings < 30 min old; the page always shows the reading's age). GET /api/usage (viewer, Easy Auth) serves both rows with the reading's age — the page decides what "stale"
-means (as the local server does: the age is served, never hidden). GET /api/seat/usage (Seat.Read) is the seat-side
-read-back used by the probes.
 """
 import json, logging, os, re, time, datetime, uuid, glob, hashlib, base64
 from typing import Optional
@@ -115,12 +104,11 @@ app = FastAPI(title="wednesday-dashboard", docs_url=None, redoc_url=None, openap
 
 # ---------------- storage (managed identity; no account key anywhere) ----------------
 _tables = {}
-USAGE_TABLE = "usage"          # 2026-09-22: sibling of messages/cards in the SAME storage account (created on first use — a table, not a resource)
 def table(name: str):
     if name not in _tables:
         cred = DefaultAzureCredential()
         svc = TableServiceClient(endpoint=f"https://{STORAGE}.table.core.windows.net", credential=cred)
-        _tables[name] = svc.create_table_if_not_exists(name) if name == USAGE_TABLE else svc.get_table_client(name)
+        _tables[name] = svc.get_table_client(name)
     return _tables[name]
 
 # ---------------- seat token validation ----------------
@@ -241,8 +229,7 @@ def card_row(client: str, body: dict, env: dict, ts: str, rid: str, seat_name: s
 # ---------------- seat routes (Easy Auth excluded; own JWT gate) ----------------
 @app.get("/api/seat/health")
 def seat_health():
-    return {"app": "wednesday-dashboard-cloud", "ok": True, "phase": "3", "ts": now_iso(), "kam_keys": len(public_keys()["kam"]), "seat_keys": sorted(public_keys()["seats"]),
-            "usage_route": True}   # 2026-09-22 usage gauges
+    return {"app": "wednesday-dashboard-cloud", "ok": True, "phase": "3", "ts": now_iso(), "kam_keys": len(public_keys()["kam"]), "seat_keys": sorted(public_keys()["seats"])}
 
 @app.post("/api/seat/messages", status_code=201)
 async def seat_post_message(request: Request):
@@ -308,76 +295,6 @@ def seat_get_messages(request: Request, client: Optional[str] = None, since: Opt
     if author is not None and not re.match(r"^[a-z]{1,32}$", author): raise HTTPException(400, "author")
     return {"messages": _query("messages", clients, since, limit, author), "clients": sorted(clients)}
 
-# ---------------- usage gauges (2026-09-22): seat-published, token-attributed, clear ----------------
-USAGE_PARTITION = "USAGE"
-RESETS_RE = re.compile(r"^[A-Za-z0-9 ]{0,32}$")
-SEATS = ("wednesday", "tuesday")
-
-def usage_row_of(e) -> dict:
-    d = {k: e[k] for k in ("seat", "pct", "resets_in", "reading_ts", "written_by", "written_at") if k in e}
-    try:
-        t = datetime.datetime.strptime(d.get("reading_ts", ""), "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=datetime.timezone.utc)
-        d["age_seconds"] = int((datetime.datetime.now(datetime.timezone.utc) - t).total_seconds())
-    except Exception:
-        d["age_seconds"] = None       # served as unknown; the page treats unknown as "no reading" (never as fresh)
-    return d
-
-def usage_rows() -> dict:
-    """{seat: row|None} for both seats — the local /api/usage shape (None = nothing published)."""
-    out = {s: None for s in SEATS}
-    try:
-        for e in table(USAGE_TABLE).query_entities("PartitionKey eq @p", parameters={"p": USAGE_PARTITION}):
-            if e["RowKey"] in out: out[e["RowKey"]] = usage_row_of(e)
-    except Exception as ex:
-        log.warning("usage read failed: %s", type(ex).__name__)
-        raise HTTPException(503, "usage store unavailable")
-    return out
-
-@app.post("/api/seat/usage", status_code=201)
-async def seat_post_usage(request: Request):
-    """The seat's weekly plan usage. ATTRIBUTION IS THE TOKEN'S: the row is written under the seat the token's app id maps
-    to; a body `seat` that names another seat is refused 403 (a spoof attempt), an unmapped app id is refused 403. Values
-    are clear and bounded (pct 0..100, resets_in <=32 chars of [A-Za-z0-9 ], reading ts ISO-8601 UTC seconds). One row
-    per seat, replaced whole — last write wins (an "older reading is ignored" guard was built and REMOVED the same
-    morning: it let a probe fixture sit on the board that the seat's real reading, older by the clock, could not displace)."""
-    seat = seat_from_token(request)
-    if not seat["write"]: raise HTTPException(403, "Seat.Write role required")
-    if seat["seat"] not in SEATS:
-        log.warning("usage refused: unmapped app id %s", seat["appid"][:8]); raise HTTPException(403, "token's app id is not a known seat")
-    body = await request.json()
-    if not isinstance(body, dict): raise HTTPException(400, "json object required")
-    claimed = body.get("seat")
-    if claimed is not None and str(claimed) != seat["seat"]:
-        log.warning("usage SPOOF refused: token seat=%s body seat=%s", seat["seat"], str(claimed)[:16])
-        raise HTTPException(403, f"usage rows are attributed by the token (this token is the {seat['seat']} seat)")
-    pct = body.get("pct")
-    if isinstance(pct, bool) or not isinstance(pct, (int, float)) or not (0 <= float(pct) <= 100): raise HTTPException(400, "pct must be a number 0..100")
-    resets = str(body.get("resets_in") or "")[:40]
-    if not RESETS_RE.match(resets): raise HTTPException(400, "resets_in must be <=32 chars of [A-Za-z0-9 ]")
-    rts = str(body.get("ts") or "")
-    if not re.match(r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$", rts): raise HTTPException(400, "ts must be the reading's ISO-8601 UTC timestamp (seconds, Z)")
-    try:
-        rt = datetime.datetime.strptime(rts, "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=datetime.timezone.utc)
-    except ValueError:
-        raise HTTPException(400, "ts is not a valid timestamp")
-    if rt > datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(minutes=5): raise HTTPException(400, "ts is in the future")
-    row = {"PartitionKey": USAGE_PARTITION, "RowKey": seat["seat"], "kind": "usage", "seat": seat["seat"], "pct": int(round(float(pct))),
-           "resets_in": resets, "reading_ts": rts, "written_by": seat["appid"], "written_at": now_iso()}
-    t = table(USAGE_TABLE)
-    try:
-        t.create_entity(row)
-        return {"stored": {"seat": seat["seat"], "pct": row["pct"], "reading_ts": rts}, "created": True}
-    except ResourceExistsError:
-        t.upsert_entity(row, mode=UpdateMode.REPLACE)
-        return JSONResponse(status_code=200, content={"stored": {"seat": seat["seat"], "pct": row["pct"], "reading_ts": rts}, "updated": True})
-
-@app.get("/api/seat/usage")
-def seat_get_usage(request: Request):
-    """Both seats' gauges for a seat (Seat.Read) — the probe's read-back; a percentage is not partition-scoped prose."""
-    seat = seat_from_token(request)
-    if not seat["read"]: raise HTTPException(403, "Seat.Read role required")
-    return usage_rows()
-
 # ---------------- viewer routes (Easy Auth gate + header check) ----------------
 def viewer(request: Request) -> dict:
     pid = request.headers.get("x-ms-client-principal-id")
@@ -428,13 +345,6 @@ async def kam_post_message(request: Request):
     if insert_message(row):
         return {"stored": stored}
     return JSONResponse(status_code=200, content={"stored": stored, "duplicate": True})
-
-@app.get("/api/usage")
-def get_usage(request: Request):
-    """The agent chips' figures: {wednesday: {pct, resets_in, reading_ts, age_seconds, ...}|null, tuesday: ...} — the local
-    /api/usage shape. The age is SERVED, never hidden; the page renders 'no reading' past its threshold (WED-73)."""
-    viewer(request)
-    return usage_rows()
 
 @app.get("/api/pubkey")
 def pubkey(request: Request):

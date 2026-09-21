@@ -237,6 +237,26 @@ else
   fi
 fi
 
+# --- Live-board usage gauge publisher (Kam, live board 2026-09-22 08:57:36: "I was able to see the weekly
+# usage count on both Wednesday and Tuesday. Is this possible for the live version?"). Mechanism:
+# dashboard-cloud/seat/publish_usage.sh (a detached loop, --arm) hands this seat's usage_<seat>.json to
+# seat/post_usage.py every 2 min -> POST /api/seat/usage (token-attributed). Not armed = the live chips
+# read "no reading" within 30 min. WARN, never FAIL: a gauge is a degraded feature, not a broken seat.
+UPUB="$PROJECT_DIR/2_Project_Files/dashboard-cloud/seat/publish_usage.sh"
+UHEALTH="$PROJECT_DIR/2_Project_Files/fleet/cockpit/state/usage_publish.health"
+if [ ! -x "$UPUB" ]; then
+  warn "live usage publisher missing/not executable" "2_Project_Files/dashboard-cloud/seat/publish_usage.sh — the live chips will show 'no reading'"
+elif bash "$UPUB" --status >/dev/null 2>&1; then
+  UH="$(head -1 "$UHEALTH" 2>/dev/null)"
+  case "$UH" in
+    OK*)      ok "live usage publisher running; $(printf '%s' "$UH" | cut -c1-100)" ;;
+    FAILING*) warn "live usage publisher FAILING" "$(printf '%s' "$UH" | cut -c1-110) — read fleet/cockpit/logs/usage_publish.log" ;;
+    *)        warn "live usage publisher running, no health line yet" "first tick pending — fleet/cockpit/logs/usage_publish.log" ;;
+  esac
+else
+  warn "live usage publisher NOT armed on this seat" "bash 2_Project_Files/dashboard-cloud/seat/publish_usage.sh --arm  (live chips show 'no reading' otherwise)"
+fi
+
 # --- Repo hooks (ledger w=3 enforcement travels per-clone) ---
 # A TRACKED master copy now lives beside the other hooks, so a stranded seat installs it
 # with one command instead of reconstructing it from a 2026-08-04 commit message. The

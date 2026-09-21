@@ -186,57 +186,6 @@ assert len(mine)==3, "the rows this run posted with --synthetic are not all mark
 unset TOK
 node "$HERE/scripts/09b_page_checks_phase3.mjs" > "$SCRATCH/p_09b.txt" 2>&1; expect "H7 page checks (DOM order Updates-below-Needs-you; synthetic filter in the pages' own ingestion code)" 0 "$?"
 /usr/bin/grep -i -c '^pass' "$SCRATCH/p_09b.txt" | sed 's/^/      09b PASS lines: /'
-echo "### I. Usage gauges (2026-09-22) — seat-published, token-attributed, spoof refused, stale renders 'no reading'"
-c=$(hdr "$BASE/api/seat/health"); expect "I1 health" 200 "$c"
-python3 -c 'import json,sys;d=json.load(open(sys.argv[1]));assert d.get("usage_route") is True and d["phase"]=="3",d;print("PASS  I1 health: phase 3 + usage_route true")' "$SCRATCH/p_body.txt" || { echo "FAIL  (section I python arm, see traceback above)"; FAIL=1; }
-ea_refused "I2 GET /api/usage plain client (viewer route, Easy Auth gated)" "$BASE/api/usage"
-NOWU=$(date -u +%Y-%m-%dT%H:%M:%SZ)
-expect "I3 POST /api/seat/usage NO token" 401 "$(hdr -X POST -H 'Content-Type: application/json' -d '{"pct":1,"ts":"'$NOWU'"}' "$BASE/api/seat/usage")"
-expect "I3 POST /api/seat/usage forged token" 401 "$(hdr -X POST -H 'Authorization: Bearer eyJhbGciOiJSUzI1NiIsImtpZCI6Im5vcGUifQ.eyJhdWQiOiJ4In0.c2ln' -H 'Content-Type: application/json' -d '{"pct":1,"ts":"'$NOWU'"}' "$BASE/api/seat/usage")"
-TOK=$("$V" - <<PY
-import sys; sys.path.insert(0,"$HERE/seat"); import seat_common as sc, argparse
-a=sc.common_args(argparse.ArgumentParser()).parse_args(["--seat","wednesday","--client","WED"]); print(sc.get_token(a, sc.load_ids()))
-PY
-)
-TOKT=$("$V" - <<PY
-import sys; sys.path.insert(0,"$HERE/seat"); import seat_common as sc, argparse
-a=sc.common_args(argparse.ArgumentParser()).parse_args(["--seat","tuesday","--client","Datasec"]); print(sc.get_token(a, sc.load_ids()))
-PY
-)
-expect "I4 SPOOF: body seat=tuesday with the WEDNESDAY token (MUST refuse)" 403 "$(hdr -X POST -H "Authorization: Bearer $TOK" -H 'Content-Type: application/json' -d '{"seat":"tuesday","pct":7,"resets_in":"1d 1h","ts":"'$NOWU'"}' "$BASE/api/seat/usage")"; echo "      body: $(head -c 120 "$SCRATCH/p_body.txt")"
-expect "I4 SPOOF: body seat=wednesday with the TUESDAY token (MUST refuse)" 403 "$(hdr -X POST -H "Authorization: Bearer $TOKT" -H 'Content-Type: application/json' -d '{"seat":"wednesday","pct":7,"resets_in":"1d 1h","ts":"'$NOWU'"}' "$BASE/api/seat/usage")"
-expect "I4 pct=101 -> 400" 400 "$(hdr -X POST -H "Authorization: Bearer $TOK" -H 'Content-Type: application/json' -d '{"pct":101,"ts":"'$NOWU'"}' "$BASE/api/seat/usage")"
-expect "I4 ts not ISO -> 400" 400 "$(hdr -X POST -H "Authorization: Bearer $TOK" -H 'Content-Type: application/json' -d '{"pct":10,"ts":"yesterday"}' "$BASE/api/seat/usage")"
-# I5: the publisher itself, on a fresh fixture, as THIS seat -> read back through the seat API AND the raw table row, attributed to the wednesday app id
-printf '{"agent":"wednesday","pct":42,"resets_in":"3d 4h","ts":"%s"}\n' "$NOWU" > "$SCRATCH/usage_fixture_fresh.json"
-"$V" "$HERE/seat/post_usage.py" --seat wednesday --base "$BASE" --file "$SCRATCH/usage_fixture_fresh.json" > "$SCRATCH/p_usage_pub.txt" 2>&1; echo "      $(tail -2 "$SCRATCH/p_usage_pub.txt" | head -1 | cut -c1-160)"
-expect "I5 seat/post_usage.py --seat wednesday (fresh fixture 42%) rc" "rc=0" "$(tail -1 "$SCRATCH/p_usage_pub.txt")"
-c=$(hdr -H "Authorization: Bearer $TOK" "$BASE/api/seat/usage"); expect "I5 GET /api/seat/usage (seat read-back)" 200 "$c"
-python3 -c 'import json,sys;d=json.load(open(sys.argv[1]));w=d["wednesday"];print("      wednesday row:",{k:w.get(k) for k in ("seat","pct","resets_in","reading_ts","age_seconds")},"written_by:",w.get("written_by","")[:8]+"…","tuesday:",None if d["tuesday"] is None else {k:d["tuesday"].get(k) for k in ("pct","age_seconds")})
-assert w["pct"]==42 and w["seat"]=="wednesday" and w["written_by"]==sys.argv[2] and w["reading_ts"]==sys.argv[3] and 0<=w["age_seconds"]<300,w;print("PASS  I5 read-back: wednesday 42%, attributed to the WEDNESDAY app id by the token, reading_ts == fixture, age fresh")' "$SCRATCH/p_body.txt" "$wednesday_seat_APPID" "$NOWU" || { echo "FAIL  (section I python arm, see traceback above)"; FAIL=1; }
-ROWU=$(az storage entity query --account-name "$STORAGE" --table-name usage --auth-mode login --filter "PartitionKey eq 'USAGE' and RowKey eq 'wednesday'" -o json 2>"$SCRATCH/q_err.txt"); [ -s "$SCRATCH/q_err.txt" ] && sed 's/^/      az stderr: /' "$SCRATCH/q_err.txt"
-echo "$ROWU" | python3 -c 'import json,sys;it=json.load(sys.stdin)["items"];assert len(it)==1,it;r=it[0];assert r["pct"]==42 and r["written_by"]==sys.argv[1] and r["seat"]=="wednesday" and r["kind"]=="usage",r;print("      raw row fields:",sorted(k for k in r if not k.startswith("odata") and not k.endswith("@odata.type")));print("PASS  I5 raw table row USAGE/wednesday: pct 42, written_by = wednesday app id (clear row, no envelope — a percentage is not prose)")' "$wednesday_seat_APPID" || { echo "FAIL  (section I python arm, see traceback above)"; FAIL=1; }
-# I6: an OLDER reading is ignored; a stale file publishes nothing; the stored row is untouched by both
-OLDU=$(date -u -v-2H +%Y-%m-%dT%H:%M:%SZ)
-c=$(hdr -X POST -H "Authorization: Bearer $TOK" -H 'Content-Type: application/json' -d '{"pct":99,"resets_in":"1d","ts":"'$OLDU'"}' "$BASE/api/seat/usage"); expect "I6 POST a 2h-old reading (99%) -> 200 replaced (last write wins; the page will show its age)" 200 "$c"
-python3 -c 'import json,sys;d=json.load(open(sys.argv[1]));assert d.get("updated") is True and d["stored"]["pct"]==99,d;print("PASS  I6 stored echo: 99%, updated (no older-reading guard: a fixture must never be able to block the real reading)")' "$SCRATCH/p_body.txt" || { echo "FAIL  (section I python arm, see traceback above)"; FAIL=1; }
-printf '{"agent":"wednesday","pct":99,"resets_in":"1d","ts":"%s"}\n' "$OLDU" > "$SCRATCH/usage_fixture_stale.json"
-"$V" "$HERE/seat/post_usage.py" --seat wednesday --base "$BASE" --file "$SCRATCH/usage_fixture_stale.json" > "$SCRATCH/p_usage_pub2.txt" 2>&1; echo "      $(tail -2 "$SCRATCH/p_usage_pub2.txt" | head -1 | cut -c1-160)"
-expect "I6 post_usage.py on a STALE reading (2h) publishes nothing" "rc=3" "$(tail -1 "$SCRATCH/p_usage_pub2.txt")"
-"$V" "$HERE/seat/post_usage.py" --seat wednesday --base "$BASE" --file "$SCRATCH/usage_none_$$_$TS.json" > "$SCRATCH/p_usage_pub3.txt" 2>&1; expect "I6 post_usage.py on a MISSING file publishes nothing" "rc=3" "$(tail -1 "$SCRATCH/p_usage_pub3.txt")"
-c=$(hdr -H "Authorization: Bearer $TOK" "$BASE/api/seat/usage"); python3 -c 'import json,sys;d=json.load(open(sys.argv[1]));w=d["wednesday"];assert w["pct"]==99 and w["age_seconds"]>=7100,w;print("PASS  I6 after the stale/missing attempts (nothing published) the row is the 2h-old 99%% with age_seconds=%d -> the page renders it as no reading" % w["age_seconds"])' "$SCRATCH/p_body.txt" || { echo "FAIL  (section I python arm, see traceback above)"; FAIL=1; }
-# I7: how the page renders it — the pages' OWN usageState in Node (fresh / ageing / >=30 min or absent -> "no reading")
-node "$HERE/scripts/09d_usage_page_checks.mjs" > "$SCRATCH/p_09d.txt" 2>&1; expect "I7 page checks (usageState: fresh figure, ageing dimmed, stale >=30 min or absent -> 'no reading'; both pages identical)" 0 "$?"
-/usr/bin/grep -i -c '^pass' "$SCRATCH/p_09d.txt" | sed 's/^/      09d PASS lines: /'
-# I8: leave the board TRUE — republish this seat's REAL reading (rc 0 if fresh; rc 3 = this seat idle, the fixture row then ages into "no reading" within 30 min)
-"$V" "$HERE/seat/post_usage.py" --seat wednesday --base "$BASE" > "$SCRATCH/p_usage_pub5.txt" 2>&1; RC8=$(tail -1 "$SCRATCH/p_usage_pub5.txt"); echo "      I8 real reading republished: $(tail -2 "$SCRATCH/p_usage_pub5.txt" | head -1 | cut -c1-140) $RC8"
-c=$(hdr -H "Authorization: Bearer $TOK" "$BASE/api/seat/usage")
-if [ "$RC8" = "rc=0" ]; then
-  python3 -c 'import json,sys;d=json.load(open(sys.argv[1]));w=d["wednesday"];f=json.load(open(sys.argv[2]));assert w["pct"]==f["pct"] and w["reading_ts"]==f["ts"],(w,f);print("PASS  I8 the board is left at THIS seat'"'"'s REAL reading: %d%% @ %s (== usage_wednesday.json)" % (w["pct"], w["reading_ts"]))' "$SCRATCH/p_body.txt" "/Volumes/DevMASTER/WEDNESDAY/0_Brain/dashboard/data/usage_wednesday.json" || { echo "FAIL  (section I python arm, see traceback above)"; FAIL=1; }
-else
-  python3 -c 'import json,sys;d=json.load(open(sys.argv[1]));w=d["wednesday"];assert w["age_seconds"]>=1800,w;print("PASS  I8 this seat has no fresh reading (rc %s); the board holds a row %ds old -> the page renders no reading (nothing faked)" % (sys.argv[2], w["age_seconds"]))' "$SCRATCH/p_body.txt" "$RC8" || { echo "FAIL  (section I python arm, see traceback above)"; FAIL=1; }
-fi
-unset TOK TOKT
 echo "### F. Rows per partition (counts only)"
 for c in Secuura Datasec WED ALL; do n=$(az storage entity query --account-name "$STORAGE" --table-name messages --auth-mode login --filter "PartitionKey eq '$c'" --select id -o json 2>/dev/null | python3 -c 'import json,sys;print(len(json.load(sys.stdin)["items"]))'); s=$(az storage entity query --account-name "$STORAGE" --table-name messages --auth-mode login --filter "PartitionKey eq '$c' and synthetic eq true" --select id -o json 2>/dev/null | python3 -c 'import json,sys;print(len(json.load(sys.stdin)["items"]))'); echo "      messages/$c: $n (synthetic, hidden by the pages: $s)"; done
 echo "      cards total: $(az storage entity query --account-name "$STORAGE" --table-name cards --auth-mode login --select id -o json 2>/dev/null | python3 -c 'import json,sys;print(len(json.load(sys.stdin)["items"]))') (synthetic, hidden: $(az storage entity query --account-name "$STORAGE" --table-name cards --auth-mode login --filter "synthetic eq true" --select id -o json 2>/dev/null | python3 -c 'import json,sys;print(len(json.load(sys.stdin)["items"]))'))"
