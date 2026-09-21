@@ -78,6 +78,14 @@ if [ "$AGENT" = "tuesday" ]; then
   # .unison*: unison's own temp dirs — 51,021 of the NAS's stale Datasec files were one abandoned .unison.*.tmp.
   [ -n "${DEVNAS_IGNORE_NAMES:-}" ] || DEVNAS_IGNORE_NAMES="4_Credentials 3_Access_Keys .unison* node_modules worktrees qa-worktrees* deploy-worktrees wt-* .venv __pycache__ .next .turbo .pytest_cache"
 fi
+# ONE-WAY, ADDITIVE (Kam 2026-09-21 18:01, card t9-nas-leg-direction = a): the T9 is the source and is NEVER written;
+# nothing is deleted on the NAS. The preview showed a two-way first run would copy 137,309 NAS-only files INTO the
+# live Datasec working trees. EXPECT rc=1 nightly while NAS-only files exist ("[CONFLICT] Skipping … nodeletion"):
+# that is the rule working, not a failure. Proven on scratch dirs before arming (see the engine's comment).
+if [ "$AGENT" = "tuesday" ]; then
+  [ -n "${DEVNAS_ONEWAY:-}" ] || DEVNAS_ONEWAY=1
+fi
+export DEVNAS_ONEWAY="${DEVNAS_ONEWAY:-}"
 export DEVNAS_PATHS="${DEVNAS_PATHS:-}"
 # <<< ruled-ignores
 
