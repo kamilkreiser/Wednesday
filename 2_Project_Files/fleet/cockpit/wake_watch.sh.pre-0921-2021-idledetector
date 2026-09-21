@@ -339,20 +339,10 @@ except Exception: print('')" 2>/dev/null)
     # separate legs and are untouched.
     # (ackf/ack are read above the branches since 2026-09-16)
     if [ "$cnt" -ge "$STABLE_N" ] && [ "$ack" != "$h" ]; then
-      # DETECTOR VERDICT IN THE WAKE (2026-09-21, ledger w=3 -> enforcement): four
-      # times today a Claude ghost suggestion wearing the fleet's own tap prefix sat
-      # at a HOLDING seat's prompt and the idle wake carried no verdict, so the
-      # coordinator read the pane before the detector had. The idle leg now runs
-      # pane_prompt_check.sh on the pane itself and appends its one-line verdict
-      # (SUGGESTION / TYPED, UNSENT / prompt empty / MODAL) to BOTH idle wordings.
-      # Newlines are folded; a silent or failing detector reports NO VERDICT (rc N).
-      det=$(bash "$(cd -P "$(dirname "${BASH_SOURCE[0]}")" && pwd)/pane_prompt_check.sh" "$pid" 2>/dev/null); drc=$?
-      det=$(printf '%s' "$det" | tr '\n\r' '  ' | sed 's/^[[:space:]]*//; s/[[:space:]]*$//')
-      [ -n "$det" ] || det="NO VERDICT (rc $drc)"
       if [ "$holding" = 1 ]; then
-        echo "WAKE: pane '$name' ($pid) idle at prompt ~$((STABLE_N * INTERVAL / 60)) min — likely waiting on Wednesday (HOLDING: turn ended, only a background monitor/shell is live — check its inbox first; if it is holding by design, wake_ack.sh $pid silences this exact state) — detector: $det" > "$STATE_DIR/fired"
+        echo "WAKE: pane '$name' ($pid) idle at prompt ~$((STABLE_N * INTERVAL / 60)) min — likely waiting on Wednesday (HOLDING: turn ended, only a background monitor/shell is live — check its inbox first; if it is holding by design, wake_ack.sh $pid silences this exact state)" > "$STATE_DIR/fired"
       else
-        echo "WAKE: pane '$name' ($pid) idle at prompt ~$((STABLE_N * INTERVAL / 60)) min — likely waiting on Wednesday — detector: $det" > "$STATE_DIR/fired"
+        echo "WAKE: pane '$name' ($pid) idle at prompt ~$((STABLE_N * INTERVAL / 60)) min — likely waiting on Wednesday" > "$STATE_DIR/fired"
       fi
     fi
   done
