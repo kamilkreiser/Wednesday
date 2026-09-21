@@ -38,8 +38,11 @@ before `fill_prompt_gate15.py`.
 
 ## 2. The exact `--check` command (headless; run it yourself before the launch action)
     /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/launchers/launch_qa_secuura_batch1136-<last>.sh --check
-  Drafter's runs: see DRAFTER_REPORT.md section 1 (the partial launcher's `--check` rc 34 by design at 13:08:34Z; the complete launcher's, if
-  written before the bound, `launcher_check_1.out`).
+  Drafter's runs: the COMPLETE launcher `launch_qa_secuura_batch1136-1146.sh` (485 lines, sha256 3e473afea18d129d…) — `launcher_check_1.out`
+  rc 0 at 13:39:32Z-13:40:28Z and `launcher_check_2.out` rc 0 at 13:42:18Z; the prompt `2026-09-21_secuura-batch1136-1146.prompt.txt` (852
+  lines, 115117 B, sha256 273a5437435390b9…). READYs 10 of 10 captured (the tenth at 13:38:35Z, three minutes past the bound — DRAFTER_REPORT
+  section 8). The seat's GO string (READY 10): `GO: merge #1136, #1137, #1139, #1140, #1141, #1142, #1143, #1144, #1145, #1146 batch`. The
+  PARTIAL pair beside them is the bound-time record (`--check` rc 34 by design).
 
 ## 3. The routing line — NOT WRITTEN BY THE DRAFTER (this commission confined writes to the gateset + briefs + launchers): add it FIRST
   Append to `/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/inbox_routing.conf` (backup beside, `$(date +%H%M)` stamp):
@@ -95,7 +98,7 @@ before `fill_prompt_gate15.py`.
   `git fetch` BY SHA into the scratch clone over the checkout's own ssh road (b192ffd4a — the moved develop; the https road with the token was
   refused "Repository not found" — S1), and the GitHub / AgentMail / Linear READ APIs; no Datasec mail opened (subject lines in listings only).
 
-## 8. If the drafter's bound hit first — how Wednesday (or a cold successor) finishes from disk
+## 8. If a READY had been missing (it was not — all ten captured) — how Wednesday (or a cold successor) re-finishes from disk after any change
   In order: (a) `python3 /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/gatesets/2026-09-21_gate15_docs_comments/capture_ready_mail_gate15.py` until every
   `mail_seatB15_ready<k>_pr<n>_*.md` (01..10) exists (idempotent; never overwrites; it also picks up any later STATUS / CORRECTION); (b)
   `python3 …/shape_gate15.py <scratchpad dir>` and `python3 …/predict_batch_scratch_gate15.py <scratchpad dir>` (re-derives every landed head, the
