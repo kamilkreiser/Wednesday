@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 # Step 4 — App Service plan (Linux B1) + web app (Python 3.12) + identity + RBAC + settings + zip deploy + Easy Auth v2.
 # Phase 2 (2026-09-21): adds the KAM_OBJECT_ID app setting (the one principal allowed on POST /api/kam/messages). Otherwise unchanged.
-# Phase 3 (2026-09-21): unchanged except the zip excludes '*.pre-*' backup files; app/keys now ships kam-laptop/ipad-public.pub + the seat public keys (all PUBLIC).
 # Idempotent. Every az call names -g $RG --subscription $SUB_ID. The Easy Auth client secret is read from 4_Credentials and
 # written ONLY into the app setting MICROSOFT_PROVIDER_AUTHENTICATION_SECRET (never echoed).
 set -eu
@@ -60,7 +59,7 @@ echo "app settings (names only): $($AZ webapp config appsettings list -n "$WEBAP
 
 # 5. zip deploy (app/ + seat/ + requirements.txt; no .venv, no keys except the PUBLIC one). Fresh zip name each run — nothing deleted.
 ZIP="$SCRATCH/wedcloud_deploy_$(date +%H%M%S).zip"
-( builtin cd "$HERE" && zip -q -r "$ZIP" requirements.txt app seat -x 'app/__pycache__/*' 'seat/__pycache__/*' '*.pyc' '*.pre-*' )   # Phase 3: .pre-* backups stay out of the zip
+( builtin cd "$HERE" && zip -q -r "$ZIP" requirements.txt app seat -x 'app/__pycache__/*' 'seat/__pycache__/*' '*.pyc' )
 echo "zip contents:"; unzip -Z1 "$ZIP"
 # PEM armour line (with dashes), case-insensitive: the viewer JS legitimately contains the words "BEGIN PRIVATE KEY" in a regex.
 PRIV_MARKERS=$(unzip -p "$ZIP" | /usr/bin/grep -i -c -- '-----BEGIN [A-Z ]*PRIVATE' || true)

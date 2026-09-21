@@ -1,6 +1,8 @@
-# dashboard-cloud — Wednesday's external dashboard (Phase 1 pilot 2026-09-21 → Phase 2 same day)
+# dashboard-cloud — Wednesday's external dashboard (Phase 1 pilot 2026-09-21 → Phase 2 → Phase 3, all the same day)
 
 **Live:** `https://wednesday-dashboard-e42e.azurewebsites.net/` (cockpit) and `/chat` — sign-in restricted to `kreiser.org@me.com`. **Phase 2: REAL rows** (the local chat streams + decision cards, encrypted at write; Wednesday's tools dual-write). The local board remains the record until Kam rules the cut-over.
+**Phase 3 (Kam 12:50 "switch to using the live version only" + laptop/iPad keys; report `REPORT_2026-09-21_phase3.md`):** every record's data key is wrapped to Kam's whole KEY RING (`app/keys/kam-*-public.pub`: pilot, laptop, ipad) AND to the ADDRESSED SEAT's certificate public key (`app/keys/<seat>-seat-public.pub`; WED/Secuura → wednesday, Datasec → tuesday, ALL → both) — `wrapped_keys: [{kid, wrapped_key}…]`, top-level pair kept (= pilot). So any of Kam's devices reads any row, and a seat reads what Kam typed to its tab (`seat/get_kam_messages.py --decrypt`). Kam's reply route REFUSES (400) a reply not wrapped to the addressed seat. Probe/test rows carry `synthetic=true` and are hidden by the pages (never deleted). The seat-side readers (`tools/kam_msgs.sh`, `kam_rulings_today.sh`, `reconcile_rulings.py`) default to the LIVE board (`--source local|both` remain); `fleet/cockpit/live_chat_poll.sh` is the live twin of the chat wake (not yet armed). Migration `seat/migrate_rewrap.py` (idempotent) re-wrapped every existing row; re-run it after any Phase-2-era writer posts (Tuesday's seat until she pulls Phase 3).
+
 **Study it implements:** `1_Project_Definition/Architecture/2026-09-21_external-dashboard-requirements.md` (Option A + the §4 envelope from the first record). **Build reports:** `REPORT_2026-09-21_pilot.md` (Phase 1), `REPORT_2026-09-21_phase2.md` (Phase 2: mirror layout, key folder, dual-write + backfill, cut-over notes).
 
 ## Architecture as built (Phase 2)
@@ -35,7 +37,7 @@ Tenant `d500ebad-cf53-4f2a-a501-f831289e67fc`, subscription `0c57ab37-349c-47ae-
 | App Service plan / web app | `wednesday-dashboard-plan` (B1) / `wednesday-dashboard-e42e` (MI `305da448-befb-4445-b827-6ff5bd49fa82`) |
 | Storage account | `wedndashtkhrqh` |
 
-## Envelope (scheme `rsa-oaep-sha256+aes-256-gcm/v1`, `seat/envelope.py` ⇄ `app/static/common.js`)
+## Envelope (scheme `rsa-oaep-sha256+aes-256-gcm/v1` + Phase 3 `wrapped_keys`, `seat/envelope.py` ⇄ `app/static/common.js`)
 Per record: 32-byte data key → AES-256-GCM (12-byte IV) over UTF-8 text, **AAD = `client|kind|id|ts`**; data key wrapped RSA-OAEP(SHA-256) to Kam's public key (`app/keys/kam-pilot-public.pub`, kid = sha256(SPKI)[:16]). Both the seats (Python) and Kam's browser (WebCrypto, for his own replies) encrypt; only Kam's private key decrypts. Clear on purpose (study §4.4): `client, view, ts, kind, id, role, seat, backfill, src_ts`; cards also `status, option_keys (slugs ≤32), recommended, ruled, ruled_choice, ruled_ts, client_project`. Cards encrypt a JSON of `{title, bluf, default_action, options[{key,label,detail}], ruling_note, withdrawn_reason, delivered_artefact, local_id}`.
 
 ## The key-folder flow (Kam, 2026-09-21 11:45 — "check for it in a specific local drive; let the user define where")
@@ -48,8 +50,8 @@ Per record: 32-byte data key → AES-256-GCM (12-byte IV) over UTF-8 text, **AAD
 
 ## Layout
 - `app/main.py` — the service. `app/static/index.html` (cockpit mirror), `app/static/chat.html` (chat mirror), `app/static/common.js` (key access + envelope + row mapping). `app/keys/kam-pilot-public.pub` — PUBLIC envelope key (tracked).
-- `seat/envelope.py`, `seat/seat_common.py`, `seat/post_message.py`, `seat/post_card.py` (`--from-store`), `seat/backfill.py`, `seat/get_kam_messages.py` — the seat CLI (`--dry-run`, `--token-only`).
-- `scripts/00`–`07` as in Phase 1 (`04_deploy.sh` now also sets `KAM_OBJECT_ID`; `05_probe_live.sh` gained section G); `08_local_matrix_phase2.sh` (new routes on loopback), `08b_webcrypto_roundtrip.mjs` (the page's own module in Node WebCrypto, both directions), `price_check.py`.
+- `seat/envelope.py` (Phase 3: `recipients_for`, `encrypt_record`, kid-selected `decrypt_text`, `rewrap`), `seat/seat_common.py`, `seat/post_message.py` / `post_card.py` (`--from-store`, `--synthetic`), `seat/backfill.py`, `seat/get_kam_messages.py` (`--decrypt`, `--json`), `seat/migrate_rewrap.py` (Phase 3 re-wrap, idempotent, `--dry-run`, `--sample`), `seat/mark_synthetic.py` — the seat CLI (`--dry-run`, `--token-only`).
+- `scripts/00`–`07` as in Phase 1 (`04_deploy.sh` now also sets `KAM_OBJECT_ID`; `05_probe_live.sh` gained sections G and H); `01c_device_keys.sh` (laptop/iPad keys + seat public keys), `08_local_matrix_phase2.sh`, `08b_webcrypto_roundtrip.mjs`, `08c_local_matrix_phase3.sh` (Kam's reply route with the seat-kid guard, loopback), `09_webcrypto_phase3.mjs` (kid selection / device keys / reply wrapping in the page's own module), `09b_page_checks_phase3.mjs` (Updates-below-Needs-you DOM order + synthetic filter), `price_check.py`.
 - `requirements.txt` — pinned. `.venv/` is local and gitignored.
 
 ## Run the seat CLI (Wednesday's machine)
@@ -62,7 +64,7 @@ Per record: 32-byte data key → AES-256-GCM (12-byte IV) over UTF-8 text, **AAD
 Needs `4_Credentials/dashboard-cloud/wednesday-seat.pem` + `.crt`. Tuesday's pair (`tuesday-seat.*`) is parked in the same folder for Kam to move to the mini — it is not distributed by this repo, and while it sits here this machine CAN act as Tuesday (Phase 2 report, piece C).
 
 ## Re-verify after any change
-`bash scripts/05_probe_live.sh` — exit 0 only if every probe passes (Phase 2 final run: 44 PASS / 0 FAIL). `bash scripts/08_local_matrix_phase2.sh` for the Kam write path (needs no MFA: loopback with a simulated principal header). Redeploy: `bash scripts/04_deploy.sh` (idempotent; zip guard refuses a private key in the zip).
+`bash scripts/05_probe_live.sh` — exit 0 only if every probe passes (Phase 3 final run: 70 PASS / 0 FAIL). `bash scripts/08c_local_matrix_phase3.sh` for Kam's reply route; `node scripts/09_webcrypto_phase3.mjs <raw row json> <pubkeys json> <expected text>` and `node scripts/09b_page_checks_phase3.mjs` for the page code. `bash scripts/08_local_matrix_phase2.sh` for the Kam write path (needs no MFA: loopback with a simulated principal header). Redeploy: `bash scripts/04_deploy.sh` (idempotent; zip guard refuses a private key in the zip).
 
 ## Not done (Kam's call / Phase 3)
 Cut-over of the local board (the Phase 2 report, piece D, lists what remains); Tuesday's wiring on the mini; in-browser test of the folder picker; fleet-mail events / usage gauges / attachments / ack lines on the live site; custom domain `dash.kreiser.org`; sign-in/API logging + alerts; export/delete path; Conditional Access (Entra Premium suspended → Security Defaults only).

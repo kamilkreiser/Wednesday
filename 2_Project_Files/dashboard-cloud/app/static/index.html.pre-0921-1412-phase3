@@ -57,10 +57,12 @@ main { flex:1; display:flex; min-height:0; width:100%; }
   text-transform:uppercase; color:var(--text-muted);
   padding:10px 18px 8px; border-bottom:1px solid var(--line); }
 .scroll { flex:1; overflow-y:auto; scrollbar-width:thin; padding:14px 18px; }
-/* The attention region (2026-09-16) was PINNED on the local page (#needscroll, flex:none, max-height 46%). On the LIVE
-   page it is NOT (Kam 12:48 2026-09-21: "remove the updates stickingness so that it just goes at the bottom of the fleet
-   activity that needs me"): Needs-you and Updates share one scroller, Updates below. The local cockpit.html is untouched. */
-#feed .sechead:first-child { margin-top:14px; padding-top:12px; border-top:1px solid var(--line); }
+/* The attention region (2026-09-16). flex:none so Updates can never push it off the panel, and a
+   max-height so a long run of open cards still leaves the feed visible — it scrolls within itself
+   rather than growing without bound. It is PINNED, not merely first. */
+#needscroll { flex:none; max-height:46%; overflow-y:auto; padding-bottom:8px;
+  border-bottom:1px solid var(--line); background:var(--bg); }
+#needscroll:has(.sechead.needs.quiet) { max-height:none; }
 .empty { color:var(--text-muted); font-size:13px; padding:10px 0; }
 
 /* ── LEFT: conversation (same bubble grammar as /chat) ── */
@@ -307,10 +309,8 @@ body.view-tuesday header h1::after { content:" · TUESDAY (Datasec)"; color:#e08
   <h2>Fleet activity</h2>
   <div id="tally"></div>
   <div id="filters"></div>
-  <!-- Phase 3 (Kam 12:48 on the live site: "remove the updates stickingness so that it just goes at the bottom of the fleet
-       activity that needs me"): ONE flowing scroller — Needs-you first, Updates BELOW it. The local cockpit keeps its pinned
-       #needscroll region; this page no longer has one (DOM order: #needs then #feed inside #feedscroll). -->
-  <div class="scroll" id="feedscroll"><div id="needs"></div><div id="feed"><p class="empty" id="feed-empty">no fleet events yet</p></div></div>
+  <div class="scroll" id="needscroll"><div id="needs"></div></div>
+  <div class="scroll" id="feedscroll"><div id="feed"><p class="empty" id="feed-empty">no fleet events yet</p></div></div>
   <div id="feed-note"></div>
  </section>
 </main>
@@ -508,7 +508,7 @@ async function loadOlder() {
   const newFloor = new Date(Date.parse(floorM) - 7 * DAY).toISOString();
   try {
     const d = await WED.getJSON("/api/messages?limit=1000&since=" + encodeURIComponent(newFloor));
-    for (const r of d.messages || []) { if (WED.isSynthetic(r)) { WED.hidden.messages++; continue; } if (r.row_key < floorM) rows.set(r.row_key, r); }
+    for (const r of d.messages || []) if (r.row_key < floorM) rows.set(r.row_key, r);
     floorM = newFloor; if (knownKeys) for (const k of rows.keys()) knownKeys.add(k);   // history is never auto-spoken
     await decryptAll(); lastSig = null; forceRender(msgsFromRows());
   } catch (e) { live.textContent = "○ " + (e.message || e); }
@@ -518,8 +518,7 @@ async function poll(force) {
     const q = sinceM ? "&since=" + encodeURIComponent(sinceM) : "";
     const d = await WED.getJSON("/api/messages?limit=1000" + q);
     let fresh = [];
-    for (const r of d.messages || []) { if (r.row_key > sinceM) sinceM = r.row_key; if (WED.isSynthetic(r)) { WED.hidden.messages++; continue; }   // synthetic: skipped, never rendered (Phase 3)
-      if (!rows.has(r.row_key)) fresh.push(r); rows.set(r.row_key, r); }
+    for (const r of d.messages || []) { if (!rows.has(r.row_key)) fresh.push(r); rows.set(r.row_key, r); if (r.row_key > sinceM) sinceM = r.row_key; }
     live.textContent = "● live"; live.classList.add("on");
     await decryptAll();
     const msgs = msgsFromRows();
@@ -550,7 +549,7 @@ textEl.addEventListener("keydown", e => { if (e.key === "Enter") doSend(); });
 
 /* ══ RIGHT: fleet activity — decision cards from the API; agentmail events NOT SYNCED (Studio-local) ══ */
 const feedEl = document.getElementById("feed"), feedScroll = document.getElementById("feedscroll");
-const needsEl = document.getElementById("needs");   // Phase 3: no separate pinned scroller — #needs sits above #feed inside #feedscroll
+const needsEl = document.getElementById("needs"), needsScroll = document.getElementById("needscroll");
 const feedNote = document.getElementById("feed-note"), tallyEl = document.getElementById("tally"), filtersEl = document.getElementById("filters");
 let pendingRender = false, decisionsErr = null;
 const expandedKeys = new Set(), sentDecisions = new Set(), sentNotes = new Set(), decDrafts = new Map();
@@ -730,14 +729,13 @@ function renderFeed(opts) {
   else if (prevTop > 4) feedScroll.scrollTop = prevTop + (feedScroll.scrollHeight - prevH);
   else feedScroll.scrollTop = 0;
   feedNote.textContent = needDecs.length + " need you · " + updates.length + " ruled today · " + cardRows.size + " cards synced" +
-    (dp.skipped ? " · " + dp.skipped + " unparsed (skipped)" : "") + (WED.hidden.cards ? " · " + WED.hidden.cards + " synthetic hidden" : "") + " · fleet mail not synced";
+    (dp.skipped ? " · " + dp.skipped + " unparsed (skipped)" : "") + " · fleet mail not synced";
 }
 async function pollDecisions() {
   try {
     const d = await WED.getJSON("/api/cards?limit=1000");
     cardRows.clear();
-    WED.hidden.cards = 0;
-    for (const r of d.cards || []) { if (WED.isSynthetic(r)) { WED.hidden.cards++; continue; } cardRows.set(r.id, r); }   // synthetic cards hidden (Phase 3)
+    for (const r of d.cards || []) cardRows.set(r.id, r);
     decisionsErr = null;
     await decryptAll();
     renderFeed();
@@ -753,8 +751,7 @@ kfilename.value = WED.filename();
 kfilename.addEventListener("change", () => { WED.setFilename(kfilename.value); kfilename.value = WED.filename(); });
 async function paintKey(msg, cls) {
   const k = WED.key;
-  const kname = WED.keyNameOfKid(k.kid); const klabel = kname ? " — " + kname + " key" : (k.kid ? " — kid " + k.kid : "");   // Phase 3: which device key
-  if (k.priv) { kstate.textContent = "key: unlocked" + klabel + (k.source === "folder" ? " from folder “" + k.dirName + "”" + (k.fileName ? " (" + k.fileName + ")" : "") : " (imported copy in this browser)"); kstate.className = "kstate ok"; }
+  if (k.priv) { kstate.textContent = "key: unlocked" + (k.source === "folder" ? " from folder “" + k.dirName + "”" : " (imported copy in this browser)"); kstate.className = "kstate ok"; }
   else if (k.needsClick) { kstate.textContent = "key: folder “" + k.dirName + "” remembered — click Unlock"; kstate.className = "kstate warn"; }
   else { kstate.textContent = "key: not loaded — rows stay encrypted"; kstate.className = "kstate warn"; }
   if (msg) { kstate.textContent = msg; kstate.className = "kstate " + (cls || "warn"); }
@@ -764,7 +761,7 @@ async function paintKey(msg, cls) {
   kforget.hidden = !(k.priv || k.needsClick || await WED.rememberedFolderName());
   knote.textContent = k.fsAvailable
     ? (k.priv ? "read from disk on each visit; never stored by the page, never sent anywhere" : "Chrome/Edge: choose the folder once; the key is read from it on every visit and never leaves this machine")
-    : "this browser has no folder access (Safari/iOS/Firefox): Import key… once (kam-ipad-private.pem on the iPad); it stays in this browser only";
+    : "this browser has no folder access (Safari/iOS/Firefox): import the key file once; it stays in this browser only";
 }
 async function afterKeyChange() { ptCache.clear(); await decryptAll(); lastSig = null; render(msgsFromRows()); renderFeed(); await paintKey(); }
 kunlock.addEventListener("click", async () => { try { await WED.unlock(true); await afterKeyChange(); } catch (e) { await paintKey("unlock failed: " + (e.message || e), "bad"); } });
@@ -775,7 +772,6 @@ kforget.addEventListener("click", async () => { await WED.forget(); await afterK
 
 (async () => {
   try { const me = await WED.getJSON("/api/me"); document.getElementById("who").textContent = "signed in as " + (me.name || me.id) + (me.is_kam ? "" : " (read-only: not Kam's principal)"); } catch (e) {}
-  try { await WED.publicKeys(); } catch (e) {}      // Phase 3: the ring (names the device key; the reply path wraps to it + the seat)
   try { await WED.unlock(false); } catch (e) {}
   await paintKey();
   await poll(true); await pollDecisions();

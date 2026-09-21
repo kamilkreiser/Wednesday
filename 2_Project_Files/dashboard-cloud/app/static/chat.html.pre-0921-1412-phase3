@@ -302,7 +302,7 @@ async function loadOlder() {
   const newFloor = new Date(Date.parse(floorM) - 7 * DAY).toISOString();
   try {
     const d = await WED.getJSON("/api/messages?limit=1000&since=" + encodeURIComponent(newFloor));
-    for (const r of d.messages || []) { if (WED.isSynthetic(r)) { WED.hidden.messages++; continue; } if (r.row_key < floorM) rows.set(r.row_key, r); }
+    for (const r of d.messages || []) if (r.row_key < floorM) rows.set(r.row_key, r);
     floorM = newFloor; if (knownKeys) for (const k of rows.keys()) knownKeys.add(k);
     await decryptAll(); lastSig = null; render(msgsFromRows());
   } catch (e) { live.textContent = "○ " + (e.message || e); }
@@ -311,7 +311,7 @@ async function poll(force) {
   try {
     const q = sinceM ? "&since=" + encodeURIComponent(sinceM) : "";
     const d = await WED.getJSON("/api/messages?limit=1000" + q);
-    for (const r of d.messages || []) { if (r.row_key > sinceM) sinceM = r.row_key; if (WED.isSynthetic(r)) { WED.hidden.messages++; continue; } rows.set(r.row_key, r); }   // synthetic hidden (Phase 3)
+    for (const r of d.messages || []) { rows.set(r.row_key, r); if (r.row_key > sinceM) sinceM = r.row_key; }
     live.textContent = "● live"; live.classList.add("on");
     await decryptAll();
     const msgs = msgsFromRows();
@@ -349,8 +349,7 @@ kfilename.value = WED.filename();
 kfilename.addEventListener("change", () => { WED.setFilename(kfilename.value); kfilename.value = WED.filename(); });
 async function paintKey(msg, cls) {
   const k = WED.key;
-  const kname = WED.keyNameOfKid(k.kid); const klabel = kname ? " — " + kname + " key" : (k.kid ? " — kid " + k.kid : "");   // Phase 3: which device key
-  if (k.priv) { kstate.textContent = "key: unlocked" + klabel + (k.source === "folder" ? " from folder “" + k.dirName + "”" + (k.fileName ? " (" + k.fileName + ")" : "") : " (imported copy in this browser)"); kstate.className = "kstate ok"; }
+  if (k.priv) { kstate.textContent = "key: unlocked" + (k.source === "folder" ? " from folder “" + k.dirName + "”" : " (imported copy in this browser)"); kstate.className = "kstate ok"; }
   else if (k.needsClick) { kstate.textContent = "key: folder “" + k.dirName + "” remembered — click Unlock"; kstate.className = "kstate warn"; }
   else { kstate.textContent = "key: not loaded — rows stay encrypted"; kstate.className = "kstate warn"; }
   if (msg) { kstate.textContent = msg; kstate.className = "kstate " + (cls || "warn"); }
@@ -359,7 +358,7 @@ async function paintKey(msg, cls) {
   kforget.hidden = !(k.priv || k.needsClick || await WED.rememberedFolderName());
   knote.textContent = k.fsAvailable
     ? (k.priv ? "read from disk on each visit; never stored by the page, never sent anywhere" : "Chrome/Edge: choose the folder once; the key is read from it on every visit and never leaves this machine")
-    : "this browser has no folder access (Safari/iOS/Firefox): Import key… once (kam-ipad-private.pem on the iPad); it stays in this browser only";
+    : "this browser has no folder access (Safari/iOS/Firefox): import the key file once; it stays in this browser only";
 }
 async function afterKeyChange() { ptCache.clear(); await decryptAll(); lastSig = null; render(msgsFromRows()); await paintKey(); }
 kunlock.addEventListener("click", async () => { try { await WED.unlock(true); await afterKeyChange(); } catch (e) { await paintKey("unlock failed: " + (e.message || e), "bad"); } });
@@ -370,7 +369,6 @@ kforget.addEventListener("click", async () => { await WED.forget(); await afterK
 
 (async () => {
   try { const me = await WED.getJSON("/api/me"); document.getElementById("who").textContent = "signed in as " + (me.name || me.id) + (me.is_kam ? "" : " (read-only: not Kam's principal)"); } catch (e) {}
-  try { await WED.publicKeys(); } catch (e) {}      // Phase 3: the ring (names the device key; the reply path wraps to it + the seat)
   try { await WED.unlock(false); } catch (e) {}
   await paintKey();
   await poll(true);

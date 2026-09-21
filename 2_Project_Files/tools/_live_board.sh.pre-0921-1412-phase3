@@ -68,8 +68,9 @@ import seat_common as sc, envelope, requests
 ids = sc.load_ids()
 class A: pass
 a = A(); a.seat = seat; a.cert_dir = os.path.join(root, "4_Credentials", "dashboard-cloud"); a.tenant = ids["TENANT_ID"]; a.api_appid = ids["API_APPID"]
+pub = envelope.load_public(os.path.join(root, "2_Project_Files", "dashboard-cloud", "app", "keys", "kam-pilot-public.pub"))
 clear = {"client": client, "kind": "message", "id": sc.row_id(stream, ts, text), "ts": sc.to_utc_z(ts), "view": "wednesday" if seat == "wednesday" else "tuesday", "role": seat, "src_ts": ts[:40]}
-env = envelope.encrypt_record(text, clear)   # Phase 3 (2026-09-21): wrapped to Kam's whole key ring (pilot+laptop+ipad) + this partition's seat key
+env = envelope.encrypt_text(pub, text, clear)
 if len(text) >= 8: assert text not in json.dumps(env), "plaintext leaked into envelope"
 tok = sc.get_token(a, ids)
 r = requests.post(f"https://{ids['WEBAPP']}.azurewebsites.net/api/seat/messages", json={**clear, "envelope": env}, headers={"Authorization": f"Bearer {tok}"}, timeout=25)

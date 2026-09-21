@@ -6,7 +6,7 @@ set -u
 export AZURE_CONFIG_DIR=/Volumes/DevMASTER/WEDNESDAY/4_Credentials/.azure
 HERE=/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/dashboard-cloud
 CRED=/Volumes/DevMASTER/WEDNESDAY/4_Credentials/dashboard-cloud
-SCRATCH=${SCRATCH:-/private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/6a45299b-5e60-46f6-b7e7-e32507803323/scratchpad}
+SCRATCH=${SCRATCH:-/private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/bbb4a64c-5352-455e-b4e6-9f36320976aa/scratchpad}
 . "$HERE/scripts/ids.conf"
 V=$HERE/.venv/bin/python
 BASE="https://$WEBAPP.azurewebsites.net"
@@ -39,7 +39,7 @@ c=$(hdr -X POST -H 'Content-Type: application/json' -d '{"client":"Secuura"}' "$
 c=$(hdr -X POST -H 'Authorization: Bearer eyJhbGciOiJSUzI1NiIsImtpZCI6Im5vcGUifQ.eyJhdWQiOiJ4In0.c2ln' -H 'Content-Type: application/json' -d '{"client":"Secuura"}' "$BASE/api/seat/messages"); expect "POST forged token" 401 "$c"; echo "      body: $(head -c 120 "$SCRATCH/p_body.txt")"
 c=$(hdr "$BASE/api/seat/messages"); expect "GET /api/seat/messages NO token" 401 "$c"
 post() { # seat client text id -> prints status
-  "$V" "$HERE/seat/post_message.py" --seat "$1" --client "$2" --base "$BASE" --text "$3" --id "$4" --synthetic 2>"$SCRATCH/p_err.txt" | python3 -c 'import json,sys;d=json.load(sys.stdin);print(d["status"]); sys.stderr.write("      body: "+d["body"][:160]+"\n")'; [ -s "$SCRATCH/p_err.txt" ] && sed 's/^/      stderr: /' "$SCRATCH/p_err.txt" >&2; }
+  "$V" "$HERE/seat/post_message.py" --seat "$1" --client "$2" --base "$BASE" --text "$3" --id "$4" 2>"$SCRATCH/p_err.txt" | python3 -c 'import json,sys;d=json.load(sys.stdin);print(d["status"]); sys.stderr.write("      body: "+d["body"][:160]+"\n")'; [ -s "$SCRATCH/p_err.txt" ] && sed 's/^/      stderr: /' "$SCRATCH/p_err.txt" >&2; }
 TS=$(date -u +%H%M%S)
 echo "### C. The partition (R0) — token roles decide, body is refused"
 expect "wednesday-seat -> client=Secuura" 201 "$(post wednesday Secuura "SYNTHETIC live alpha $TS — wednesday writes Secuura" live-alpha-$TS)"
@@ -49,7 +49,7 @@ expect "tuesday-seat -> client=Secuura (MUST refuse)" 403 "$(post tuesday Secuur
 expect "tuesday-seat -> client=WED (not granted to tuesday; MUST refuse)" 403 "$(post tuesday WED "SYNTHETIC live wed2 $TS — must be refused" live-wed2-$TS)"
 expect "tuesday-seat -> client=Datasec" 201 "$(post tuesday Datasec "SYNTHETIC live delta $TS — tuesday writes Datasec" live-delta-$TS)"
 echo "### D. Card + plaintext refusal"
-CARD=$("$V" "$HERE/seat/post_card.py" --seat wednesday --client Secuura --base "$BASE" --title "SYNTHETIC card $TS: choose a synthetic option" --bluf "SYNTHETIC bluf — nothing real here" --option A "Option alpha (synthetic)" --option B "Option beta (synthetic)" --recommended A --id live-card-$TS --synthetic | python3 -c 'import json,sys;print(json.load(sys.stdin)["status"])')
+CARD=$("$V" "$HERE/seat/post_card.py" --seat wednesday --client Secuura --base "$BASE" --title "SYNTHETIC card $TS: choose a synthetic option" --bluf "SYNTHETIC bluf — nothing real here" --option A "Option alpha (synthetic)" --option B "Option beta (synthetic)" --recommended A --id live-card-$TS | python3 -c 'import json,sys;print(json.load(sys.stdin)["status"])')
 expect "wednesday-seat card -> Secuura" 201 "$CARD"
 TOK=$("$V" - <<PY
 import sys; sys.path.insert(0,"$HERE/seat"); import seat_common as sc, argparse
@@ -115,79 +115,13 @@ expect "wednesday seat GET client=ALL" 200 "$(hdr -H "Authorization: Bearer $TOK
 unset TOK TOKT
 # The message dedupe key is (client, ts, id) — the tools and the backfill always pass a FIXED ts (the local entry's), so a
 # repeat is byte-identical in the key. The probe therefore fixes --ts too (first run of this probe omitted it and correctly got 201).
-postts() { "$V" "$HERE/seat/post_message.py" --seat "$1" --client "$2" --base "$BASE" --text "$3" --id "$4" --ts "$5" --backfill --src-ts "$6" --synthetic 2>"$SCRATCH/p_err.txt" | python3 -c 'import json,sys;d=json.load(sys.stdin);print(d["status"]); sys.stderr.write("      body: "+d["body"][:200]+"\n")'; }
+postts() { "$V" "$HERE/seat/post_message.py" --seat "$1" --client "$2" --base "$BASE" --text "$3" --id "$4" --ts "$5" --backfill --src-ts "$6" 2>"$SCRATCH/p_err.txt" | python3 -c 'import json,sys;d=json.load(sys.stdin);print(d["status"]); sys.stderr.write("      body: "+d["body"][:200]+"\n")'; }
 expect "seat message probe-dup-$TS first post (fixed ts, backfill flags)" 201 "$(postts wednesday WED "SYNTHETIC dup probe $TS" probe-dup-$TS 2026-09-21T00:00:01.000Z 2026-09-21T10:00:01.000000+10:00)"
 expect "seat message probe-dup-$TS SAME (client,ts,id) again -> 200 duplicate, nothing written" 200 "$(postts wednesday WED "SYNTHETIC dup probe $TS" probe-dup-$TS 2026-09-21T00:00:01.000Z 2026-09-21T10:00:01.000000+10:00)"
-CARDU=$("$V" "$HERE/seat/post_card.py" --seat wednesday --client Secuura --base "$BASE" --title "SYNTHETIC card $TS: choose a synthetic option" --bluf "SYNTHETIC bluf — nothing real here" --option A "Option alpha (synthetic)" --option B "Option beta (synthetic)" --recommended A --status ruled --ruled-choice A --id live-card-$TS --synthetic | python3 -c 'import json,sys;print(json.load(sys.stdin)["status"])')
+CARDU=$("$V" "$HERE/seat/post_card.py" --seat wednesday --client Secuura --base "$BASE" --title "SYNTHETIC card $TS: choose a synthetic option" --bluf "SYNTHETIC bluf — nothing real here" --option A "Option alpha (synthetic)" --option B "Option beta (synthetic)" --recommended A --status ruled --ruled-choice A --id live-card-$TS | python3 -c 'import json,sys;print(json.load(sys.stdin)["status"])')
 expect "card live-card-$TS re-posted as ruled -> 200 updated in place" 200 "$CARDU"
-echo "### H. Phase 3 (2026-09-21) — per-seat wrapped keys, device keys, migrated rows, live readers"
-c=$(hdr "$BASE/api/seat/health"); expect "H1 health phase 3" 200 "$c"
-python3 -c 'import json,sys;d=json.load(open(sys.argv[1]));assert d["phase"]=="3" and d["kam_keys"]==3 and d["seat_keys"]==["tuesday","wednesday"],d;print("PASS  H1 health: phase 3, kam_keys 3, seat_keys [tuesday, wednesday]")' "$SCRATCH/p_body.txt" || FAIL=1
-ea_refused "H2 GET /api/pubkeys plain client (viewer route, Easy Auth gated)" "$BASE/api/pubkeys"
-# H3: a NEW seat row carries the full recipient set; each Kam key + the addressed seat opens it; the other seat cannot
-expect "H3 wednesday-seat -> WED (Phase 3 writer)" 201 "$(post wednesday WED "SYNTHETIC phase3 wed $TS — ring + wednesday seat" p3-wed-$TS)"
-ROW=$(az storage entity query --account-name "$STORAGE" --table-name messages --auth-mode login --filter "PartitionKey eq 'WED' and id eq 'p3-wed-$TS'" -o json 2>"$SCRATCH/q_err.txt"); echo "$ROW" > "$SCRATCH/raw_p3_wed.json"
-"$V" - "$SCRATCH/raw_p3_wed.json" "SYNTHETIC phase3 wed $TS — ring + wednesday seat" WED <<'PY' || FAIL=1
-import json,sys; sys.path.insert(0,"/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/dashboard-cloud/seat"); import envelope
-CRED="/Volumes/DevMASTER/WEDNESDAY/4_Credentials/dashboard-cloud"; items=json.load(open(sys.argv[1]))["items"]; assert len(items)==1, len(items)
-r=items[0]; expected=sys.argv[2]; part=sys.argv[3]; clear={"client":r["PartitionKey"],"kind":r["kind"],"id":r["id"],"ts":r["ts"]}
-kids=envelope.kids_of(r); exp=[envelope.kid_of(k) for _,k in envelope.recipients_for(part)]
-print("      raw row kids:", kids); assert expected not in json.dumps(r), "PLAINTEXT IN RAW ROW"
-print("PASS  H3 raw row wrapped_keys kids == recipients_for(%s) (pilot, ipad, laptop, wednesday-seat)" % part if kids==exp else "FAIL  H3 kids %s != %s" % (kids, exp)); assert kids==exp
-for k in ("kam-pilot-private.pem","kam-laptop-private.pem","kam-ipad-private.pem","wednesday-seat.pem"):
-    pt=envelope.decrypt_text(envelope.load_private(f"{CRED}/{k}"), r, clear); print(("PASS  H3 %s decrypts the new WED row == expected" % k) if pt==expected else ("FAIL  H3 %s mismatch" % k)); assert pt==expected
-try: envelope.decrypt_text(envelope.load_private(f"{CRED}/tuesday-seat.pem"), r, clear); print("FAIL  H3 TUESDAY SEAT KEY DECRYPTED A WED ROW"); sys.exit(1)
-except KeyError as e: print("PASS  H3 tuesday-seat.pem REFUSED on the WED row (KeyError: not a recipient)")
-PY
-# H4: a tuesday row (Datasec, synthetic) is wrapped to the tuesday seat and NOT to wednesday — verified on the DATA KEY only (no text decrypt of a Datasec row)
-expect "H4 tuesday-seat -> Datasec (Phase 3 writer)" 201 "$(post tuesday Datasec "SYNTHETIC phase3 delta $TS — ring + tuesday seat" p3-delta-$TS)"
-ROW=$(az storage entity query --account-name "$STORAGE" --table-name messages --auth-mode login --filter "PartitionKey eq 'Datasec' and id eq 'p3-delta-$TS'" -o json 2>"$SCRATCH/q_err.txt"); echo "$ROW" > "$SCRATCH/raw_p3_delta.json"
-"$V" - "$SCRATCH/raw_p3_delta.json" <<'PY' || FAIL=1
-import json,sys; sys.path.insert(0,"/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/dashboard-cloud/seat"); import envelope
-CRED="/Volumes/DevMASTER/WEDNESDAY/4_Credentials/dashboard-cloud"; items=json.load(open(sys.argv[1]))["items"]; assert len(items)==1, len(items); r=items[0]
-kids=envelope.kids_of(r); exp=[envelope.kid_of(k) for _,k in envelope.recipients_for("Datasec")]
-print("PASS  H4 Datasec row kids == recipients_for(Datasec) (pilot, ipad, laptop, tuesday-seat)" if kids==exp else "FAIL  H4 kids %s" % kids); assert kids==exp
-ref=envelope.unwrap_data_key(envelope.load_private(f"{CRED}/kam-pilot-private.pem"), r)
-for k in ("kam-laptop-private.pem","kam-ipad-private.pem","tuesday-seat.pem"):
-    ok=envelope.unwrap_data_key(envelope.load_private(f"{CRED}/{k}"), r)==ref; print(("PASS  H4 %s unwraps the Datasec row's DATA KEY (bytes only, text untouched)" % k) if ok else "FAIL  H4 %s" % k); assert ok
-try: envelope.unwrap_data_key(envelope.load_private(f"{CRED}/wednesday-seat.pem"), r); print("FAIL  H4 WEDNESDAY SEAT UNWRAPPED A DATASEC ROW"); sys.exit(1)
-except KeyError: print("PASS  H4 wednesday-seat.pem REFUSED on the Datasec row (KeyError: not a recipient)")
-PY
-# H5: a MIGRATED (backfill) WED row opens with every device key and the pilot (texts compared, never printed)
-ROW=$(az storage entity query --account-name "$STORAGE" --table-name messages --auth-mode login --filter "PartitionKey eq 'WED' and backfill eq true and role eq 'wednesday'" --num-results 1 -o json 2>"$SCRATCH/q_err.txt"); echo "$ROW" > "$SCRATCH/raw_p3_migrated.json"
-"$V" - "$SCRATCH/raw_p3_migrated.json" <<'PY' || FAIL=1
-import json,sys; sys.path.insert(0,"/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/dashboard-cloud/seat"); import envelope
-CRED="/Volumes/DevMASTER/WEDNESDAY/4_Credentials/dashboard-cloud"; items=json.load(open(sys.argv[1]))["items"]; assert items, "no migrated row"; r=items[0]
-clear={"client":r["PartitionKey"],"kind":r["kind"],"id":r["id"],"ts":r["ts"]}; print("      migrated row:", r["RowKey"], "kids:", envelope.kids_of(r))
-ref=envelope.decrypt_text(envelope.load_private(f"{CRED}/kam-pilot-private.pem"), r, clear)
-for k in ("kam-laptop-private.pem","kam-ipad-private.pem","wednesday-seat.pem"):
-    ok=envelope.decrypt_text(envelope.load_private(f"{CRED}/{k}"), r, clear)==ref; print(("PASS  H5 %s decrypts the MIGRATED row == the pilot's decrypt (%d chars, not printed)" % (k, len(ref))) if ok else "FAIL  H5 %s" % k); assert ok
-print("PASS  H5 pilot key still decrypts the migrated row")
-PY
-# H6: the LIVE READERS — each seat, through the API with its own token and --decrypt (tuesday's rows are piped, never written to disk)
-"$V" "$HERE/seat/get_kam_messages.py" --seat wednesday --decrypt --json --since 2026-09-21T02:00 --limit 400 > "$SCRATCH/kam_wed.json" 2>"$SCRATCH/p_err.txt"; expect "H6 wednesday seat get_kam_messages --decrypt --json rc" 0 "$?"
-python3 -c 'import json,sys;d=json.load(open(sys.argv[1]));m=d["messages"];live=[r for r in m if str(r.get("written_by","")).startswith("easyauth:")];dec=[r for r in live if "text" in r];err=[r for r in live if "decrypt_error" in r];bad=[r for r in m if r["client"] not in ("ALL","Secuura","WED")]
-print("      partitions:",d["clients"],"kam rows:",len(m),"live (easyauth) rows:",len(live),"decrypted:",len(dec),"errors:",len(err),"foreign:",len(bad))
-assert not bad and len(live)>=4 and len(dec)==len(live), "wednesday seat could not decrypt every live Kam row it may read (or fewer than the 4 known)"; print("PASS  H6 wednesday seat decrypts EVERY live Kam row in its partitions (WED+ALL, %d rows since 02:00Z, >=4 known); 0 foreign rows" % len(live))' "$SCRATCH/kam_wed.json" || FAIL=1
-"$V" "$HERE/seat/get_kam_messages.py" --seat tuesday --decrypt --json --since 2026-09-21T02:00 --limit 400 2>"$SCRATCH/p_err.txt" | python3 -c 'import json,sys;d=json.load(sys.stdin);m=d["messages"];live=[r for r in m if str(r.get("written_by","")).startswith("easyauth:")];dec=[r for r in live if "text" in r];bad=[r for r in m if r["client"] not in ("ALL","Datasec")]
-print("      partitions:",d["clients"],"kam rows:",len(m),"live rows:",len(live),"decrypted:",len(dec),"foreign:",len(bad),"(Datasec text NOT printed, NOT written to disk)")
-assert set(d["clients"])=={"ALL","Datasec"} and not bad and len(dec)==len(live); print("PASS  H6 tuesday seat sees only ALL+Datasec and decrypts its live Kam rows; no WED row reaches it (R0)")' || FAIL=1
-# H7: synthetic rows — born marked by this run's own posts (clear flag synthetic=true), PRESENT in the seat API, counted per partition;
-#     the pages hide them (proven by scripts/09b_page_checks_phase3.mjs on the pages' own ingestion code — run here too)
-TOK=$("$V" - <<PY
-import sys; sys.path.insert(0,"$HERE/seat"); import seat_common as sc, argparse
-a=sc.common_args(argparse.ArgumentParser()).parse_args(["--seat","wednesday","--client","WED"]); print(sc.get_token(a, sc.load_ids()))
-PY
-)
-c=$(hdr -H "Authorization: Bearer $TOK" "$BASE/api/seat/messages?client=WED&since=$(date -u +%Y-%m-%dT00:00)&limit=1000"); expect "H7 wednesday seat GET WED rows today" 200 "$c"
-python3 -c 'import json,sys;d=json.load(open(sys.argv[1]));m=d["messages"];ts=sys.argv[2];syn=[r for r in m if r.get("synthetic") is True];mine=[r for r in syn if r["id"] in ("live-wed-"+ts,"p3-wed-"+ts,"probe-dup-"+ts)]
-print("      WED rows today:",len(m),"synthetic=true among them:",len(syn),"this run'"'"'s own probe rows found marked:",[r["id"] for r in mine])
-assert len(mine)==3, "the rows this run posted with --synthetic are not all marked"; print("PASS  H7 this run'"'"'s 3 synthetic WED rows are PRESENT in the seat API and carry synthetic=true (the pages hide them; nothing deleted)")' "$SCRATCH/p_body.txt" "$TS" || FAIL=1
-unset TOK
-node "$HERE/scripts/09b_page_checks_phase3.mjs" > "$SCRATCH/p_09b.txt" 2>&1; expect "H7 page checks (DOM order Updates-below-Needs-you; synthetic filter in the pages' own ingestion code)" 0 "$?"
-/usr/bin/grep -i -c '^pass' "$SCRATCH/p_09b.txt" | sed 's/^/      09b PASS lines: /'
 echo "### F. Rows per partition (counts only)"
-for c in Secuura Datasec WED ALL; do n=$(az storage entity query --account-name "$STORAGE" --table-name messages --auth-mode login --filter "PartitionKey eq '$c'" --select id -o json 2>/dev/null | python3 -c 'import json,sys;print(len(json.load(sys.stdin)["items"]))'); s=$(az storage entity query --account-name "$STORAGE" --table-name messages --auth-mode login --filter "PartitionKey eq '$c' and synthetic eq true" --select id -o json 2>/dev/null | python3 -c 'import json,sys;print(len(json.load(sys.stdin)["items"]))'); echo "      messages/$c: $n (synthetic, hidden by the pages: $s)"; done
-echo "      cards total: $(az storage entity query --account-name "$STORAGE" --table-name cards --auth-mode login --select id -o json 2>/dev/null | python3 -c 'import json,sys;print(len(json.load(sys.stdin)["items"]))') (synthetic, hidden: $(az storage entity query --account-name "$STORAGE" --table-name cards --auth-mode login --filter "synthetic eq true" --select id -o json 2>/dev/null | python3 -c 'import json,sys;print(len(json.load(sys.stdin)["items"]))'))"
+for c in Secuura Datasec WED ALL; do n=$(az storage entity query --account-name "$STORAGE" --table-name messages --auth-mode login --filter "PartitionKey eq '$c'" --select id -o json 2>/dev/null | python3 -c 'import json,sys;print(len(json.load(sys.stdin)["items"]))'); echo "      messages/$c: $n"; done
+echo "      cards total: $(az storage entity query --account-name "$STORAGE" --table-name cards --auth-mode login --select id -o json 2>/dev/null | python3 -c 'import json,sys;print(len(json.load(sys.stdin)["items"]))')"
 echo "### RESULT: $([ $FAIL = 0 ] && echo ALL PROBES PASS || echo SOME PROBES FAILED)"
 exit $FAIL

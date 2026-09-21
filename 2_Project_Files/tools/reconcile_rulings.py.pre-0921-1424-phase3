@@ -23,20 +23,6 @@ WHAT IT DOES NOT DO, ON PURPOSE:
     bookkeeping too. Out-of-scope taps are REPORTED so the other seat can act,
     and are only applied under an explicit --all.
 
-WHERE THE TAPS COME FROM (Phase 3, 2026-09-21 — Kam 12:50 "switch to using the
-live version only"): his taps on the LIVE board's cards arrive as rows on the
-live store, encrypted to his keys AND to this seat's certificate key. They are
-read through dashboard-cloud/seat/get_kam_messages.py --decrypt as $WED_AGENT
-(the API returns only this seat's partitions + his broadcasts — R0 holds by
-construction). RECONCILE_SOURCE=live|local|both:
-  both  (DEFAULT) the local chat_kam.json AND the live board, one tap per card
-        (newest wins across both) — his taps land on whichever board he used.
-  live  the live board only.   local  chat_kam.json only (and ALWAYS when
-        RECONCILE_CHAT points at a fixture: the arms never touch the API).
-A live fetch failure is LOUD and exits 2: a reconciler that quietly falls back
-to the local file would drop every live tap while looking healthy — the exact
-failure this tool was written to end.
-
 Usage:
   reconcile_rulings.py            # report only, changes nothing (default)
   reconcile_rulings.py --apply    # rule the cards in THIS seat's scope
@@ -53,11 +39,6 @@ ROOT = Path(__file__).resolve().parents[2]
 KAM_STREAM = Path(os.environ.get("RECONCILE_CHAT") or ROOT / "0_Brain" / "dashboard" / "data" / "chat_kam.json")
 DECISIONS  = Path(os.environ.get("RECONCILE_DECISIONS") or ROOT / "0_Brain" / "dashboard" / "data" / "decisions.json")
 DQ_TOOL    = ROOT / "2_Project_Files" / "tools" / "decision_queue.sh"
-GET_LIVE   = ROOT / "2_Project_Files" / "dashboard-cloud" / "seat" / "get_kam_messages.py"
-VENV_PY    = ROOT / "2_Project_Files" / "dashboard-cloud" / ".venv" / "bin" / "python"
-SOURCE     = (os.environ.get("RECONCILE_SOURCE") or ("local" if os.environ.get("RECONCILE_CHAT") else "both")).strip().lower()
-if SOURCE not in ("live", "local", "both"):
-    sys.exit(f"REFUSED — RECONCILE_SOURCE must be live|local|both (got {SOURCE!r})")
 
 # "Decision <id>: <key> — <label>[ | note: ...]".  The id and key are taken from
 # the text; the label is deliberately IGNORED (the key is what rules the card —
@@ -122,35 +103,6 @@ def load(p, what):
     except Exception as e:
         sys.exit(f"REFUSED — {what} unreadable ({p}): {e}")
 
-def load_live():
-    """Kam's rows from the LIVE board as this seat, decrypted with the seat's certificate key (Phase 3). 7-day window,
-    max cap (the API caps PER PARTITION oldest-first; get_kam_messages warns on stderr if a partition hits the cap).
-    Any failure is fatal and loud — never an empty list that reads as 'no taps'."""
-    import datetime, subprocess
-    if not VENV_PY.exists():
-        sys.exit(f"REFUSED — live source needs {VENV_PY} (PORTABILITY.md); set RECONCILE_SOURCE=local to read the local file only")
-    if not (ROOT / "4_Credentials" / "dashboard-cloud" / f"{SEAT}-seat.pem").exists():
-        sys.exit(f"REFUSED — live source needs 4_Credentials/dashboard-cloud/{SEAT}-seat.pem on this machine; set RECONCILE_SOURCE=local")
-    since = (datetime.datetime.now(datetime.timezone.utc) - datetime.timedelta(days=7)).strftime("%Y-%m-%dT%H:%M")
-    r = subprocess.run([str(VENV_PY), str(GET_LIVE), "--seat", SEAT, "--cert-dir", str(ROOT / "4_Credentials" / "dashboard-cloud"), "--decrypt", "--json", "--limit", "1000", "--since", since],
-                       capture_output=True, text=True)
-    if r.returncode != 0 or not r.stdout.strip():
-        sys.exit(f"REFUSED — live board read failed (rc={r.returncode}): {' '.join(r.stderr.split())[:300]}")
-    if r.stderr.strip():
-        sys.stderr.write(r.stderr)
-    out = []
-    synthetic = 0
-    for m in json.loads(r.stdout).get("messages", []):
-        if m.get("synthetic") in (True, "true", "True"):
-            synthetic += 1; continue   # a probe row wearing role=kam is NOT Kam's word — never a tap (Wednesday, 2026-09-21 15:0x)
-        if m.get("decrypt_error"):
-            sys.stderr.write(f"  live row {m.get('row_key')} not readable by this seat ({m['decrypt_error']}) — read it on the live board\n")
-            continue
-        out.append({"role": "kam", "ts": m.get("ts_local") or m.get("ts"), "view": m.get("view"), "text": m.get("text", ""), "source": "live"})
-    if synthetic:
-        sys.stderr.write(f"  live: {synthetic} synthetic (probe) row(s) skipped — not Kam's word\n")
-    return out
-
 def main():
     apply_ = "--apply" in sys.argv[1:]
     widen  = "--all" in sys.argv[1:]
@@ -158,14 +110,9 @@ def main():
         if a not in ("--apply", "--all"):
             sys.exit(f"REFUSED — unknown argument {a!r}. Usage: reconcile_rulings.py [--apply] [--all]")
 
-    msgs = []
-    if SOURCE in ("local", "both"):
-        msgs = load(KAM_STREAM, "Kam's chat stream")
-        if isinstance(msgs, dict):
-            msgs = msgs.get("messages", [])
-    live = load_live() if SOURCE in ("live", "both") else []
-    n_local = sum(1 for m in msgs if isinstance(m, dict) and m.get("role") == "kam")
-    msgs = list(msgs) + live
+    msgs = load(KAM_STREAM, "Kam's chat stream")
+    if isinstance(msgs, dict):
+        msgs = msgs.get("messages", [])
     cards = load(DECISIONS, "decisions.json")
     if not isinstance(cards, list):
         sys.exit("REFUSED — decisions.json is not a list")
@@ -231,8 +178,7 @@ def main():
             continue
         todo.append((cid, key, ts))
 
-    print(f"source={SOURCE} (local kam rows: {n_local}, live rows: {len(live)}, seat={SEAT}) · "
-          f"taps found: {len(taps)} · to rule: {len(todo)} · notes: {len(notes)} "
+    print(f"taps found: {len(taps)} · to rule: {len(todo)} · notes: {len(notes)} "
           f"(flagged, NOT applied) · skipped: {len(skipped)}")
     for cid, key, ts, why in skipped:
         print(f"  SKIP  {cid} -> {key or 'note'}  ({ts[:16]})  {why}")

@@ -26,14 +26,13 @@ def common_args(p: argparse.ArgumentParser):
     p.add_argument("--seat", choices=["wednesday", "tuesday"], required=True, help="which seat identity")
     p.add_argument("--cert-dir", default="/Volumes/DevMASTER/WEDNESDAY/4_Credentials/dashboard-cloud", help="dir holding <seat>-seat.pem (private) + <seat>-seat.crt (public)")
     p.add_argument("--client", required=True, choices=["Secuura", "Datasec", "WED"], help="partition; must be within the seat's roles or the API refuses 403")
-    p.add_argument("--pubkey", default=None, help="(Phase 2 compat) ONE public key to wrap to instead of the Phase 3 recipient set (Kam's whole ring + the partition's seat)")
+    p.add_argument("--pubkey", default=os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "app", "keys", "kam-pilot-public.pub"), help="Kam's envelope public key (PEM SPKI)")
     p.add_argument("--base", default=f"https://{ids.get('WEBAPP','')}.azurewebsites.net")
     p.add_argument("--tenant", default=ids.get("TENANT_ID", DEFAULT_TENANT))
     p.add_argument("--api-appid", default=ids.get("API_APPID", ""))
     p.add_argument("--ts", default=None, help="UTC ISO with Z (default now). Use --src-ts to keep a local timestamp beside it")
     p.add_argument("--id", default=None)
     p.add_argument("--backfill", action="store_true", help="Phase 2: mark the row as copied from the local store (clear flag)")
-    p.add_argument("--synthetic", action="store_true", help="Phase 3: mark a probe/test row (clear flag `synthetic=true`); the live pages hide such rows, seats still read them")
     p.add_argument("--src-ts", default=None, help="Phase 2: the ORIGINAL local timestamp string (clear); --ts is derived from it if --ts is absent")
     p.add_argument("--dry-run", action="store_true", help="encrypt + print the request body; no token, no HTTP")
     p.add_argument("--token-only", action="store_true", help="get a token and print its claims (no secrets); no HTTP to the app")
@@ -76,10 +75,9 @@ def build(args, kind: str, plaintext: str, clear_extra: dict) -> dict:
     rid = args.id or uuid.uuid4().hex[:10]
     clear = {"client": args.client, "kind": kind, "id": rid, "ts": ts, **clear_extra}
     if args.backfill: clear["backfill"] = True
-    if getattr(args, "synthetic", False): clear["synthetic"] = True
     if args.src_ts and str(args.src_ts).strip(): clear["src_ts"] = str(args.src_ts)[:40]   # empty -> omitted (the API refuses an empty src_ts)
-    # Phase 3: wrap to Kam's whole key ring + the seat(s) the partition addresses (envelope.recipients_for); --pubkey = one key only
-    env = envelope.encrypt_text(envelope.load_public(args.pubkey), plaintext, clear) if args.pubkey else envelope.encrypt_record(plaintext, clear)
+    pub = envelope.load_public(args.pubkey)
+    env = envelope.encrypt_text(pub, plaintext, clear)
     # always-verify per record: the envelope must NOT contain the plaintext (the writer cannot decrypt — Kam's key is not here)
     # (a substring check is only meaningful for plaintexts long enough not to occur in base64 by chance)
     if len(plaintext) >= 8:

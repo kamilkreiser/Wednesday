@@ -1,19 +1,45 @@
 #!/usr/bin/env python3
-"""get_kam_messages.py — a SEAT reads what Kam typed on the live site (Phase 2; the cut-over successor of kam_msgs.sh).
+"""get_kam_messages.py — a SEAT reads what Kam typed on the live site (Phase 2 read; Phase 3 adds --decrypt).
 
 GET /api/seat/messages?author=kam&since=<row_key>  with the seat's certificate token. The API returns Kam's rows from
 THIS seat's partitions plus ALL (his broadcast/"both" rows) — Wednesday sees WED + Secuura + ALL, Tuesday sees Datasec +
-ALL; the partition set comes from the token's roles, never from this script. Rows are CIPHERTEXT: a seat cannot read
-Kam's prose (only Kam's private key can). What a seat gets is the clear routing: ts, view, id, client — enough to know
-THAT he wrote, WHERE (which tab) and WHEN; the text itself reaches the seat by the local panel today (see the report,
-piece D — cut-over is Kam's call).
+ALL; the partition set comes from the token's roles, never from this script (R0: a view=tuesday row lives in Datasec and
+never reaches the Wednesday seat's token).
 
-Usage: get_kam_messages.py --seat wednesday [--since ROWKEY] [--limit 200] [--json]
+Phase 3 (D-2(b)): every row's data key is also wrapped to the ADDRESSED seat's certificate public key, so `--decrypt` opens
+the text with `<seat>-seat.pem` (kid-selected; `envelope.decrypt_text`). A row not wrapped to this seat (pre-migration,
+or another seat's) is reported as `[not wrapped to this seat]`, never guessed. Output shapes:
+  default   one line per row (ts | client | view | id | live/backfill | text or lock state)
+  --json    the API's rows, each gaining `text` (when --decrypt) / `decrypt_error`, plus `ts_local` (the local ISO form the
+            local tools use) — this is what tools/kam_msgs.sh --source live, kam_rulings_today.sh and reconcile_rulings.py consume.
+Usage: get_kam_messages.py --seat wednesday [--decrypt] [--since ROWKEY] [--limit 200] [--json] [--client X]
 """
-import argparse, sys, os, json
+import argparse, sys, os, json, datetime
 import requests
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-import seat_common as sc
+import seat_common as sc, envelope
+
+def ts_local(utc: str) -> str:
+    try: return datetime.datetime.fromisoformat(utc.replace("Z", "+00:00")).astimezone().isoformat()
+    except Exception: return utc
+
+def fetch(a, ids) -> dict:
+    tok = sc.get_token(a, ids)
+    params = {"author": "kam", "limit": a.limit}
+    if a.since: params["since"] = a.since
+    if a.client: params["client"] = a.client
+    r = requests.get(a.base + "/api/seat/messages", params=params, headers={"Authorization": f"Bearer {tok}"}, timeout=30)
+    if r.status_code != 200:
+        sys.stderr.write(f"get_kam_messages: HTTP {r.status_code}: {r.text[:200]}\n"); sys.exit(1)
+    return r.json()
+
+def decrypt_rows(rows, priv):
+    for m in rows:
+        clear = {"client": m.get("client"), "kind": m.get("kind"), "id": m.get("id"), "ts": m.get("ts")}
+        try: m["text"] = envelope.decrypt_text(priv, m, clear)
+        except KeyError: m["decrypt_error"] = "not wrapped to this seat"
+        except Exception as e: m["decrypt_error"] = f"decrypt failed: {type(e).__name__}"
+    return rows
 
 if __name__ == "__main__":
     ids = sc.load_ids()
@@ -24,17 +50,26 @@ if __name__ == "__main__":
     ap.add_argument("--tenant", default=ids.get("TENANT_ID")); ap.add_argument("--api-appid", default=ids.get("API_APPID", ""))
     ap.add_argument("--since", default=None); ap.add_argument("--limit", type=int, default=200); ap.add_argument("--json", action="store_true")
     ap.add_argument("--client", default=None, help="one partition (must be in the seat's roles or ALL)")
+    ap.add_argument("--decrypt", action="store_true", help="Phase 3: open the text with this seat's private key (<seat>-seat.pem)")
     a = ap.parse_args()
-    tok = sc.get_token(a, ids)
-    params = {"author": "kam", "limit": a.limit}
-    if a.since: params["since"] = a.since
-    if a.client: params["client"] = a.client
-    r = requests.get(a.base + "/api/seat/messages", params=params, headers={"Authorization": f"Bearer {tok}"}, timeout=30)
-    if r.status_code != 200:
-        sys.stderr.write(f"get_kam_messages: HTTP {r.status_code}: {r.text[:200]}\n"); sys.exit(1)
-    d = r.json()
-    if a.json: print(json.dumps(d, indent=1)); sys.exit(0)
-    print(f"partitions readable by this seat: {d.get('clients')}  rows: {len(d.get('messages', []))}")
-    for m in d.get("messages", []):
-        print(f"{m.get('ts')} | client={m.get('client'):8} view={str(m.get('view')):10} id={m.get('id')} "
-              f"{'backfill' if m.get('backfill') else 'live'} written_by={str(m.get('written_by'))[:20]}  [ciphertext {len(m.get('ciphertext',''))} b64 chars]")
+    d = fetch(a, ids)
+    rows = d.get("messages", [])
+    # The API caps `limit` PER PARTITION and Table storage returns rows OLDEST-FIRST after `since`: a partition that hits
+    # the cap has had its NEWEST rows cut off. Say so loudly (this is how the 02:48Z rows vanished from a 14-day read).
+    import collections
+    per = collections.Counter(m.get("client") for m in rows)
+    for c, n in per.items():
+        if n >= a.limit:
+            sys.stderr.write(f"get_kam_messages: ⚠️  partition {c} returned {n} rows = the cap (--limit {a.limit}); the NEWEST rows may be cut — narrow --since or raise --limit (max 1000)\n")
+            d["truncated"] = sorted(set(d.get("truncated", [])) | {c})
+    for m in rows: m["ts_local"] = ts_local(str(m.get("ts", "")))
+    if a.decrypt:
+        priv = envelope.load_private(os.path.join(a.cert_dir, f"{a.seat}-seat.pem"))
+        decrypt_rows(rows, priv)
+    if a.json: print(json.dumps(d, indent=1, ensure_ascii=False)); sys.exit(0)
+    print(f"partitions readable by this seat: {d.get('clients')}  rows: {len(rows)}" + ("  (decrypted with %s-seat.pem)" % a.seat if a.decrypt else "  (ciphertext — add --decrypt)"))
+    for m in rows:
+        head = f"{m.get('ts')} | client={m.get('client'):8} view={str(m.get('view')):10} id={m.get('id')} {'backfill' if m.get('backfill') else 'live'}"
+        if "text" in m: print(f"{head}\n    {m['text'] if len(m['text']) < 4000 else m['text'][:4000] + ' …[TRUNCATED IN DISPLAY]'}")
+        elif "decrypt_error" in m: print(f"{head}  [{m['decrypt_error']}]")
+        else: print(f"{head}  [ciphertext {len(m.get('ciphertext',''))} b64 chars]")

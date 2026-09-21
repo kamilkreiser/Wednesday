@@ -83,6 +83,7 @@ def main():
     a = ap.parse_args()
     ids = sc.load_ids(); only = set(a.only.split(","))
     base = a.base or f"https://{ids['WEBAPP']}.azurewebsites.net"
+    pub = envelope.load_public(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "app", "keys", "kam-pilot-public.pub"))
     msgs, sk1 = plan_messages(only); cards, sk2 = plan_cards(only)
     if a.limit: msgs, cards = msgs[:a.limit], cards[:a.limit]
     plan = collections.Counter((s, c) for s, c, *_ in msgs)
@@ -113,7 +114,7 @@ def main():
             return
         rid = sc.row_id(stream, ts_local, text)
         clear = {"client": client, "kind": "message", "id": rid, "ts": ts, "view": view, "role": role, "backfill": True, "src_ts": ts_local[:40]}
-        env = envelope.encrypt_record(text, clear)                      # Phase 3: Kam's ring + the partition's seat
+        env = envelope.encrypt_text(pub, text, clear)
         if len(text) >= 8: assert text not in json.dumps(env), "plaintext leaked into envelope"
         post("/api/seat/messages", {**clear, "envelope": env}, f"{stream} -> {client}")
     def do_card(item):
@@ -124,7 +125,7 @@ def main():
         except Exception: ts = "2026-08-21T00:00:00.000Z"
         clear = {"client": client, "kind": "card", "id": rid, "ts": ts, **clear_x, "backfill": True}
         if card.get("ts"): clear["src_ts"] = str(card["ts"])[:40]     # one local card has no ts: an empty src_ts is refused (400), so omit it
-        env = envelope.encrypt_record(json.dumps(prose_d, ensure_ascii=False), clear)
+        env = envelope.encrypt_text(pub, json.dumps(prose_d, ensure_ascii=False), clear)
         post("/api/seat/cards", {**clear, "envelope": env}, f"decisions.json -> {client}")
     t0 = time.time()
     with ThreadPoolExecutor(max_workers=a.workers) as ex:

@@ -30,16 +30,8 @@ alone (RowKey card_<id>) and is state: the first POST is 201, a later POST with 
 
 The server holds NO decryption key. `text` arrives as an envelope (seat/envelope.py or the browser's WebCrypto twin)
 and is stored as ciphertext; the server never sees prose. Clear routing fields are validated and stored as columns.
-
-Phase 3 (2026-09-21, D-2(b)): the envelope may carry `wrapped_keys: [{kid, wrapped_key}, ...]` — the same data key wrapped
-to EVERY recipient: Kam's key ring (every app/keys/kam-*-public.pub: pilot, laptop, ipad) AND the addressed seat's
-certificate public key (app/keys/<seat>-seat-public.pub; WED/Secuura -> wednesday, Datasec -> tuesday, ALL -> both).
-Stored as a JSON string column, returned parsed. The top-level kid/wrapped_key pair stays for one release. The server
-still cannot decrypt anything: it only knows PUBLIC keys and their kids, and uses them for ONE check — a Kam reply
-(POST /api/kam/messages) must carry the addressed seat's kid(s), or it is refused 400 (an unreadable reply is a lost
-reply; this makes "the seat can read what Kam typed" true by construction). GET /api/pubkeys serves the ring + seat keys.
 """
-import json, logging, os, re, time, datetime, uuid, glob, hashlib, base64
+import json, logging, os, re, time, datetime, uuid
 from typing import Optional
 import jwt, requests
 from fastapi import FastAPI, Request, HTTPException, Query
@@ -68,33 +60,6 @@ ISSUERS = (f"https://login.microsoftonline.com/{TENANT_ID}/v2.0", f"https://sts.
 JWKS_URL = f"https://login.microsoftonline.com/{TENANT_ID}/discovery/v2.0/keys"
 HERE = os.path.dirname(os.path.abspath(__file__))
 PUBKEY_PATH = os.path.join(HERE, "keys", "kam-pilot-public.pub")
-KEYS_DIR = os.path.join(HERE, "keys")
-SEAT_OF_CLIENT = {"WED": ("wednesday",), "Secuura": ("wednesday",), "Datasec": ("tuesday",), BROADCAST: ("wednesday", "tuesday")}
-KID_RE = re.compile(r"^[0-9a-f]{16}$")
-B64_RE = re.compile(r"^[A-Za-z0-9+/]+={0,2}$")
-
-def _kid_of_pem(pem: str) -> str:
-    """sha256(SPKI DER)[:16] — the same kid seat/envelope.py and common.js compute. PUBLIC keys only live here."""
-    body = "".join(l for l in pem.splitlines() if l and not l.startswith("-----"))
-    return hashlib.sha256(base64.b64decode(body)).hexdigest()[:16]
-
-_ring_cache = {"t": 0, "v": None}
-def public_keys() -> dict:
-    """Kam's ring (pilot first) + the seat public keys, with kids. Read from disk, cached 60 s."""
-    if _ring_cache["v"] is None or time.time() - _ring_cache["t"] > 60:
-        kam = []
-        files = sorted(glob.glob(os.path.join(KEYS_DIR, "kam-*-public.pub")))
-        files.sort(key=lambda q: (0 if os.path.basename(q) == "kam-pilot-public.pub" else 1, q))
-        for q in files:
-            pem = open(q).read(); kam.append({"name": os.path.basename(q)[4:-11], "kid": _kid_of_pem(pem), "pem": pem})
-        seats = {}
-        for s in ("wednesday", "tuesday"):
-            q = os.path.join(KEYS_DIR, f"{s}-seat-public.pub")
-            if os.path.exists(q):
-                pem = open(q).read(); seats[s] = {"kid": _kid_of_pem(pem), "pem": pem}
-        _ring_cache["v"] = {"kam": kam, "seats": seats, "seat_of_client": {c: list(v) for c, v in SEAT_OF_CLIENT.items()}}
-        _ring_cache["t"] = time.time()
-    return _ring_cache["v"]
 TS_RE = re.compile(r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?Z$")
 ID_RE = re.compile(r"^[A-Za-z0-9._-]{1,64}$")
 KEY_RE = re.compile(r"^[A-Za-z0-9._-]{0,32}$")             # option keys are slugs (measured up to 26 chars locally)
@@ -151,26 +116,13 @@ def require_partition(seat: dict, client: Optional[str], for_read: bool = False)
         raise HTTPException(403, "partition not granted to this seat")
     return client
 
-def validate_envelope(body: dict, require_seat_kids_for: Optional[str] = None):
+def validate_envelope(body: dict):
     env = body.get("envelope")
     if not isinstance(env, dict) or any(k not in env for k in ENVELOPE_FIELDS):
         raise HTTPException(400, f"envelope must carry {ENVELOPE_FIELDS}")
     if "text" in body or "plaintext" in body:
         raise HTTPException(400, "plaintext fields are refused; encrypt into the envelope")
-    out = {k: str(env[k]) for k in ENVELOPE_FIELDS}
-    wk = env.get("wrapped_keys")
-    if wk is not None:
-        if not isinstance(wk, list) or len(wk) > 8 or not all(isinstance(e, dict) and KID_RE.match(str(e.get("kid", ""))) and
-               isinstance(e.get("wrapped_key"), str) and 0 < len(e["wrapped_key"]) <= 1024 and B64_RE.match(e["wrapped_key"]) for e in wk):
-            raise HTTPException(400, "wrapped_keys must be a list (<=8) of {kid: 16 hex, wrapped_key: base64}")
-        out["wrapped_keys"] = json.dumps([{"kid": e["kid"], "wrapped_key": e["wrapped_key"]} for e in wk])
-    if require_seat_kids_for:
-        # Phase 3: a Kam reply must be wrapped to the seat(s) that partition addresses, or nobody but Kam can ever read it.
-        kids = {e["kid"] for e in (wk or [])} | {out["kid"]}
-        need = {public_keys()["seats"][s]["kid"] for s in SEAT_OF_CLIENT[require_seat_kids_for] if s in public_keys()["seats"]}
-        if not need <= kids:
-            raise HTTPException(400, f"reply must be wrapped to the addressed seat key(s) {sorted(need)} (page out of date? reload)")
-    return out
+    return {k: str(env[k]) for k in ENVELOPE_FIELDS}
 
 def validate_clear(body: dict, kind: str):
     ts = body.get("ts") or datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%f")[:-3] + "Z"
@@ -183,7 +135,6 @@ def clear_extras(body: dict) -> dict:
     """Phase 2 clear routing extras (study §4.4 — timestamps and flags, never prose)."""
     out = {}
     if body.get("backfill") is True: out["backfill"] = True
-    if body.get("synthetic") is True: out["synthetic"] = True    # Phase 3: probe/test rows are BORN marked; the pages hide them (never deleted)
     src = body.get("src_ts")
     if src is not None:
         src = str(src)[:40]
@@ -229,7 +180,7 @@ def card_row(client: str, body: dict, env: dict, ts: str, rid: str, seat_name: s
 # ---------------- seat routes (Easy Auth excluded; own JWT gate) ----------------
 @app.get("/api/seat/health")
 def seat_health():
-    return {"app": "wednesday-dashboard-cloud", "ok": True, "phase": "3", "ts": now_iso(), "kam_keys": len(public_keys()["kam"]), "seat_keys": sorted(public_keys()["seats"])}
+    return {"app": "wednesday-dashboard-cloud", "ok": True, "phase": "2", "ts": now_iso()}
 
 @app.post("/api/seat/messages", status_code=201)
 async def seat_post_message(request: Request):
@@ -275,9 +226,6 @@ def _query(tname: str, clients, since: Optional[str], limit: int, author: Option
             d["client"] = c; d["row_key"] = e["RowKey"]
             if "option_keys" in d:
                 try: d["option_keys"] = json.loads(d["option_keys"])
-                except Exception: pass
-            if isinstance(d.get("wrapped_keys"), str):
-                try: d["wrapped_keys"] = json.loads(d["wrapped_keys"])
                 except Exception: pass
             out.append(d); n += 1
             if n >= limit: break
@@ -337,7 +285,7 @@ async def kam_post_message(request: Request):
     if view not in VIEW_TO_CLIENT: raise HTTPException(400, f"view must be one of {sorted(VIEW_TO_CLIENT)}")
     client = VIEW_TO_CLIENT[view]
     if body.get("client") not in (None, client): raise HTTPException(400, f"client for view={view} is {client}")
-    env = validate_envelope(body, require_seat_kids_for=client)
+    env = validate_envelope(body)
     ts, rid = validate_clear(body, "message")
     row = {"PartitionKey": client, "RowKey": f"{ts}_{rid}", "kind": "message", "id": rid, "ts": ts, "view": view,
            "role": "kam", "seat": "kam", "written_by": f"easyauth:{who['id']}", "written_at": now_iso(), **env}
@@ -350,13 +298,6 @@ async def kam_post_message(request: Request):
 def pubkey(request: Request):
     viewer(request)
     return PlainTextResponse(open(PUBKEY_PATH).read())
-
-@app.get("/api/pubkeys")
-def pubkeys(request: Request):
-    """Phase 3: Kam's key ring + the seat PUBLIC keys (with kids) — what the page wraps his replies to, and how it names the
-    device key it holds. Public material only; there is still no route that accepts or returns a private key."""
-    viewer(request)
-    return public_keys()
 
 NO_STORE = {"Cache-Control": "no-store"}
 
