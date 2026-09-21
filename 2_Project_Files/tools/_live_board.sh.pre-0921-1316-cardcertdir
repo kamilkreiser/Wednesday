@@ -92,7 +92,7 @@ for c in json.load(open(sys.argv[1])):
     if isinstance(c, dict) and c.get("id") == sys.argv[2]: print(c.get("client_project", "")); break' "$store" "$cid" 2>/dev/null)")"
   _lb_preflight "$seat" "$client" || return 0
   py="$(_lb_python)"
-  out="$("$py" "$root/2_Project_Files/dashboard-cloud/seat/post_card.py" --seat "$seat" --cert-dir "$root/4_Credentials/dashboard-cloud" --from-store "$store" --card-id "$cid" 2>&1)"; rc=$?
+  out="$("$py" "$root/2_Project_Files/dashboard-cloud/seat/post_card.py" --seat "$seat" --from-store "$store" --card-id "$cid" 2>&1)"; rc=$?
   if [ $rc -eq 0 ]; then echo "live-board: card $cid posted to $client ($(printf '%s' "$out" | python3 -c 'import json,sys
 try: d=json.load(sys.stdin); print("HTTP", d["status"])
 except Exception: print("ok")' 2>/dev/null))"
