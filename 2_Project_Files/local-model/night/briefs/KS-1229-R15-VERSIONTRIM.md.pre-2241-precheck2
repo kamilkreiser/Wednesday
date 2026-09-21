@@ -11,8 +11,7 @@ Runner: `jest`
 - Ticket KS-1229: Backlog, assignee kamil.kreiser@secuura.ai, PR attachments none (all merged); briefs already on disk: KS-1229.md.
 - Generator notes: dropped 1 blank + line(s) (a blank + is refused in a modify fence); RE-ANCHORED: the old hunk appended at EOF / before a blank line; the last leading context line '];' is now the TRAILING context, so the new block lands one line UP (inside the enclosing block) - a placement change from the old READY, said here; tamper VERSIONTRIM: the one-line From occurs 3x at the tip; WIDENED to a 5-line block starting at :1993 (the occurrence nearest the old line 1980) - an INFERENCE by line proximity; Wednesday confirms the site.
 
-
-- Precheck fix (feed2 drafter, 22:41): RE-ANCHORED at a TOP-LEVEL SEAM (the 22:22 brief rule: a new describe's anchor is at describe level, verified by indentation - both context lines here are column-0 statements). The census15 fence (@@ -145,3 +145,15 @@) landed the block INSIDE the WRITERS array literal (the `];` at :147 became trailing context) - a TS2322 load error at the tip (golden T5 FAIL, feed2 precheck). The hunk now has LEADING and TRAILING non-blank context (the shape the model reproduces natively; a hunk with no trailing context is pinned to EOF by git apply, and this file separates every top-level block with a blank line, which a modify fence may not carry - so the seam is the one place a describe can be inserted with context on both sides). The describe's '+' lines are byte-identical to the census15 fence. New header @@ -123,3 +123,15 @@. Siblings on this file take DISTINCT seams (SIGNCERT :116/117, AFTERVERIFY :119/120 unchanged, VERSIONTRIM :123/124, SIGNWALLET :141/142, UNTYPEDSRCb EOF :226) so the raise seat can apply all five.
+- Precheck fix (feed2 drafter, 22:38): RE-ANCHORED AGAIN at DESCRIBE level (the 22:22 brief rule: a new describe's anchor is a column-0 sibling closer, verified by indentation). The census15 fence (@@ -145,3 +145,15 @@) landed the block INSIDE the WRITERS array literal (the `];` at :147 became trailing context) - a TS2322 load error at the tip (golden T5 FAIL, feed2 precheck). The anchor is now the column-0 closer at :176, written as a '-' line and re-emitted with a trailing comment (the file's own `}); // ...` style) so the model cannot slide the insertion; the describe's '+' lines are byte-identical to the census15 fence. New header @@ -174,3 +174,15 @@.
 
 ## What is wrong (one paragraph)
 The held READY's own summary, verbatim from its header (the model wrote these cells once and the checker passed them on the date in the file name; the run is re-done at the CURRENT tip so the checker verdicts it fresh):
@@ -30,8 +29,11 @@ TEST-ONLY, MODIFY IN PLACE: your diff contains EXACTLY ONE file, the EXISTING te
 
 ## The exact change
 ```
-@@ -123,3 +123,15 @@
- const SOURCE_ID = 'doc-src-1213';
+@@ -174,3 +174,15 @@
+     });
+   });
+-});
++}); // KS-1213 writers x principals
 +describe('KS-1229 X-VERSION-TRIM - the /version guard compares EXACTLY, so a padded carrier is refused', () => {
 +  const version = (documentType: string) => write(ISSUER, '/api/documents/' + SOURCE_ID + '/version', { action: 'watermark', newContentHash: HASH, metadata: { documentType } });
 +  it('RED KS-1229 VT1 - a trailing-space carrier is refused, never trimmed into a match', async () => {
@@ -44,8 +46,6 @@ TEST-ONLY, MODIFY IN PLACE: your diff contains EXACTLY ONE file, the EXISTING te
 +    expect(await version('DOCUMENT')).toEqual({ status: 201, code: null, saved: 1, stored: 'DOCUMENT', served: 'DOCUMENT' });
 +  }); // KS-1229 VT control
 +});
- function seed(type: string, data: Record<string, unknown> = {}) {
-   store.set(SOURCE_ID, { id: SOURCE_ID, type, status: 'draft', owner: { id: ISSUER.userId }, data: { title: 'src', ...data }, contentHash: 'sha256:' + 'a'.repeat(64), signatures: [], createdAt: '2026-09-17T00:00:00Z', updatedAt: '2026-09-17T00:00:00Z' });
 ```
 
 ## Cells (every cell RED or CONTROL; the names below are the EXACT it() titles)

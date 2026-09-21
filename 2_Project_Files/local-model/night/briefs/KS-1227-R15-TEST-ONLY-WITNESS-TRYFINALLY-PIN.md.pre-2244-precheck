@@ -11,8 +11,6 @@ Runner: `vitest`
 - Ticket KS-1227: Backlog, assignee kamil.kreiser@secuura.ai, PR attachments none (all merged); briefs already on disk: KS-1227.md.
 - Generator notes: reds INFERRED as every non-CONTROL/COMPLETENESS cell (2) - no RED-prefixed title in the old patch; Wednesday confirms the set against the old READY header; the run input.json is the older code_patch shape (no tampers key) - tampers taken from the old brief instead; CONTROL INFERRED: the file's first existing cell 'KS-1180 control - a document the anchor store does not have:' (green on both trees by construction; the old READY declared no control); Runner: vitest from the old brief header.
 
-- Precheck fix (feed2 drafter, 22:44): the census15 inference 'reds = every non-CONTROL cell (2)' was WRONG for R2. The golden run under the :585 tamper reds exactly R1 (T6: 'declared but GREEN [KS-1227 R2 ...]'), as the 09-17 READY header says ('A4 red-first by assertion' - one red). R2 pins the try/finally detach (R-1029-3), a TEST-SIDE property no product tamper reaches; it is re-declared as a CONTROL. Fence unchanged.
-
 ## What is wrong (one paragraph)
 The held READY's own summary, verbatim from its header (the model wrote these cells once and the checker passed them at tip 2026-09-17; the run is re-done at the CURRENT tip so the checker verdicts it fresh):
 > # READY — KS-1227 (test-only, api-gateway ks1072 test: try/finally around postTier2's witness listener + R1 env-pointed witness pin + R2 listener-leak cell)
@@ -73,7 +71,7 @@ TEST-ONLY, MODIFY IN PLACE: your diff contains EXACTLY ONE file, the EXISTING te
 
 ## Cells (every cell RED or CONTROL; the names below are the EXACT it() titles)
 - `KS-1227 R1 - a second request reaching the stub anchor store reds the postTier2 witness even though tier 2 answered`
-- `KS-1227 R2 - a status red inside postTier2 still detaches its anchor-store listener`  (CONTROL - green on both trees: a TEST-SIDE property of the try/finally, not reachable by the product tamper)
+- `KS-1227 R2 - a status red inside postTier2 still detaches its anchor-store listener`
 - `KS-1180 control - a document the anchor store does not have: 404, and the stub anchor store was asked once`  (CONTROL - green on both trees)
 
 ## Tampers
@@ -88,12 +86,11 @@ To:
 ```
     const anchoringBase = 'http://anchoring:4005'; // TAMPER: KS-1227 red-proof, the live chain scan ignores ANCHORING_SERVICE_URL, so no second request reaches the stub
 ```
-Reds: `KS-1227 R1 - a second request reaching the stub anchor store reds the postTier2 witness even though tier 2 answered`
-(From located at 581ed7fa1 by exact whole-line match: 1 match. Reachability: R1 stubs ANCHORING_SERVICE_URL to the stub anchor store so the live chain scan at :585 sends a SECOND request there and the postTier2 witness reds inside the helper (the cell asserts that red). Under the tamper :585 ignores the env, the second request never arrives, the witness stays green and the cell's `toContain` fails -> R1 red by assertion. R2 never reads :585: it posts an EMPTY store (404 at the status read) and asserts the listener count after the finally - a test-side property, green on both trees -> a CONTROL, not a red.)
+Reds: `KS-1227 R1 - a second request reaching the stub anchor store reds the postTier2 witness even though tier 2 answered`, `KS-1227 R2 - a status red inside postTier2 still detaches its anchor-store listener`
+(From located at the tip: 1 match(es); the old brief/input said line 585)
 
 ## Controls
 - `KS-1180 control - a document the anchor store does not have: 404, and the stub anchor store was asked once`
-- `KS-1227 R2 - a status red inside postTier2 still detaches its anchor-store listener`
 
 ## Output
 Exactly ONE ```diff block; paths repo-relative (`Blockchain/Dev/services/api-gateway/src/__tests__/ks1072-the-latest-anchor-selector-documents-a.test.ts`); correct hunk counts; no `\$` / `\u` / backslash escapes in a `+` line; the cell titles EXACTLY as listed (the checker matches the full title).

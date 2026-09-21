@@ -1,0 +1,86 @@
+# KS-864 R15-F1009b - REBRIEF (round 1 re-run on a corrected brief; the 21:5x FAIL of KS-864-R15-F1009 was a BRIEF defect - template cell titles - so the rebrief counter is NOT consumed) at develop 581ed7fa1 (written 22:35 on 2026-09-21 by Wednesday's feed2 drafter from ks864c-portal-env-vars.test.ts, 80 lines read whole, and system-status.ts:440-450)
+File: `Blockchain/Dev/services/api-gateway/src/__tests__/ks864c-portal-env-vars.test.ts`
+Tip: `581ed7fa124b85c7c2da89ac05d52f99c2502911`
+Runner: `vitest`
+
+## Premises (measured by the feed2 drafter at 22:35:29 AEST, in a `--shared` scratchpad clone detached at 581ed7fa1; Wednesday re-derives before queueing)
+- THE DEFECT of `KS-864-R15-F1009.md` (run `runs/2026-09-21_ks864-ornith35b-night`, FAIL T5 "DECLARED CELL NOT IN THE RUN"): both declared titles carried the loop template `${nodeEnv}`; the checker matches the FULL RENDERED title (IMPROVEMENTS 2026-09-21 22:22 rule: declared cell titles are LITERAL rendered strings; a looped cell declares each rendered title or is written as N literal cells). The run itself was green 10/10.
+- THE SECOND THING THE TEMPLATE HID: `describeUnder` runs the block TWICE (`'staging'`, `'development'`). Under the tamper `env: 'development'` only the STAGING block's F-1009-2 cell can red (`'development' !== 'staging'`); the DEVELOPMENT block's reads `'development' === 'development'` and stays green. A RED-titled cell that is green under the tamper would fail T6 ("declared but GREEN"), so the development-block cell is written as a CONTROL, by a literal per-block title chosen with a ternary (no template in any declared title).
+- Reachability at 581ed7fa1: each block imports a FRESH `routes/system-status` (`vi.resetModules` :54) under its own `NODE_ENV` (:56) and reads GET /api/system/status; the handler builds `environment.env` at system-status.ts:446 `env: process.env.NODE_ENV || 'development'` (exact whole-line match count 1 at the tip). The tamper hard-codes `'development'`; the staging block then serves `env: 'development'` -> its F-1009-2 cell reds by assertion.
+- The F-1009-1 edit of the held READY (per-block env VALUES `p.value + '/' + nodeEnv`, so a development block that reads a staging-loaded module reds) is kept byte-for-byte - it is a test-side property, not graded by a tamper, as the 09-17 READY said.
+- Ticket KS-864: Backlog; PR attachments #1007, #1009, #1064, #1073 (all merged). Nothing in the product changes.
+
+## What is wrong (one paragraph)
+`ks864c-portal-env-vars.test.ts` pins that each portal's env var wins under NODE_ENV=staging and =development, but nothing pins that the served `environment.env` is the block's NODE_ENV (system-status.ts:446), and the two blocks set IDENTICAL portal values so a block that read the OTHER block's module would still be green (F-1009-1). This task is the PIN, test-only: per-block values, plus one F-1009-2 cell per block with a LITERAL title (the staging one reds under the tamper; the development one is a control), plus one control per block that the status body carries an environment block at all.
+
+## THE MODE - read this twice
+TEST-ONLY, MODIFY IN PLACE: your diff contains EXACTLY ONE file, the EXISTING test file above, as the THREE hunks below (context lines byte-for-byte from the tip; no blank context line; no blank + line). No product hunk. The hunk headers are `@@ -48,2 +48,7 @@`, `@@ -54,7 +59,8 @@` and `@@ -71,7 +77,16 @@` - copy them.
+
+## The exact change
+```
+@@ -48,2 +48,7 @@
+ function describeUnder(nodeEnv: 'staging' | 'development') {
++  // F-1009-2 titles are LITERAL per block (the checker matches the full rendered title). Under the tamper
++  // env: 'development' only the staging block can tell, so the development block's cell is a CONTROL.
++  const f1009Title = nodeEnv === 'staging'
++    ? 'RED KS-864 F-1009-2 - the served environment.env equals NODE_ENV=staging'
++    : 'KS-864 F-1009-2 control - the served environment.env equals NODE_ENV=development';
+   describe(`KS-864 — portal env vars win under NODE_ENV=${nodeEnv}`, () => {
+@@ -54,7 +59,8 @@
+       vi.resetModules();
+       vi.stubGlobal('fetch', vi.fn(async () => { throw new Error('offline in test'); }));
+       process.env.NODE_ENV = nodeEnv;
+-      for (const p of PORTALS) process.env[p.envVar] = p.value;
++      // F-1009-1: each block sets its OWN values, so a development block that reads a staging-loaded module reds.
++      for (const p of PORTALS) process.env[p.envVar] = p.value + '/' + nodeEnv;
+       const router = (await import('../routes/system-status')).default;
+       const app = express();
+       app.use('/api/system', router);
+@@ -71,7 +77,16 @@
+     for (const p of PORTALS) {
+       it(`🔴 KS-864 — ${p.name} reports ${p.envVar} under NODE_ENV=${nodeEnv}`, async () => {
+-        expect((await portalUrls(port))[p.name]).toBe(p.value);
++        expect((await portalUrls(port))[p.name]).toBe(p.value + '/' + nodeEnv);
+       });
+     }
++    it(f1009Title, async () => {
++      const envBody = await getJson(port, '/api/system/status');
++      expect(envBody.environment.env, 'F-1009-2: the block NODE_ENV reached the route').toBe(nodeEnv);
++    });
++    it(`GREEN KS-864 control - the status body under NODE_ENV=${nodeEnv} carries an environment block`, async () => {
++      const controlBody = await getJson(port, '/api/system/status');
++      expect(typeof controlBody.environment.env, 'control: environment.env is served').toBe('string');
++    });
+   });
+ }
+```
+
+## Cells (every cell RED or CONTROL; the names below are the EXACT RENDERED it() titles - literal strings, one per block)
+- `RED KS-864 F-1009-2 - the served environment.env equals NODE_ENV=staging`
+- `KS-864 F-1009-2 control - the served environment.env equals NODE_ENV=development`  (CONTROL - green on both trees: the tamper's hard-coded value IS this block's NODE_ENV)
+- `GREEN KS-864 control - the status body under NODE_ENV=staging carries an environment block`  (CONTROL - green on both trees)
+- `GREEN KS-864 control - the status body under NODE_ENV=development carries an environment block`  (CONTROL - green on both trees)
+(The six existing looped cells `🔴 KS-864 — <portal> reports <VAR> under NODE_ENV=<env>` are neither declared red nor control: the tamper does not touch the portal URLs, so they stay green on both trees.)
+
+## Tampers
+### F1009
+File: `Blockchain/Dev/services/api-gateway/src/routes/system-status.ts`
+Line: 446
+From:
+```
+    env: process.env.NODE_ENV || 'development',
+```
+To:
+```
+    env: 'development',
+```
+Reds: `RED KS-864 F-1009-2 - the served environment.env equals NODE_ENV=staging`
+(From located at 581ed7fa1 by exact whole-line match: 1 match (the old brief said :437; the R15-F1009 brief already had :446). Reachability: the staging block's cell reads `environment.env` from the route the block imported fresh under NODE_ENV=staging; the tampered :446 serves 'development' -> `toBe('staging')` fails by assertion. The development block's cell reads 'development' on both trees - the control.)
+
+## Controls
+- `KS-864 F-1009-2 control - the served environment.env equals NODE_ENV=development`
+- `GREEN KS-864 control - the status body under NODE_ENV=staging carries an environment block`
+- `GREEN KS-864 control - the status body under NODE_ENV=development carries an environment block`
+
+## Output
+Exactly ONE ```diff block; paths repo-relative (`Blockchain/Dev/services/api-gateway/src/__tests__/ks864c-portal-env-vars.test.ts`); the three hunk headers as written above; no `\$` / `\u` / backslash escapes in a `+` line; the `+` lines byte for byte (the two template literals in `+` lines keep their backticks and `${nodeEnv}`).

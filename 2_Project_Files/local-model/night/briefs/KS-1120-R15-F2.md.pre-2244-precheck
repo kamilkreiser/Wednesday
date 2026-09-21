@@ -11,8 +11,6 @@ Runner: `vitest`
 - Ticket KS-1120: Backlog, assignee kamil.kreiser@secuura.ai, PR attachments none (all merged); briefs already on disk: KS-1120-F3.md, KS-1120.md, KS-1120.md.f2-held-2026-09-15.
 - Generator notes: Runner: vitest INFERRED for vc-issuer (vitest.config.ts present; package.json lists both) - Wednesday confirms.
 
-- Precheck fix (feed2 drafter, 22:44): the census15 tamper was the F1 line (`:128 memPresentationStore.get(id)` -> a prefix scan, copied from `night/briefs/KS-1120.md`, the F1 brief). A prefix scan still finds an EXACT id, so the F2 cells stayed green under it (golden T6 'reds NOTHING'). Replaced with the F2 tamper the held READY was graded by: `:127 // Memory fallback` -> `return undefined`. Also: the sibling row KS-1120-R15-F2-F2DBMISSFAL creates the SAME new file with the SAME three cell titles (it came from the q8 sample of the same 09-15 brief) - one brief per new file, so that row is HELD as a duplicate and this one carries F2.
-
 ## What is wrong (one paragraph)
 The held READY's own summary, verbatim from its header (the model wrote these cells once and the checker passed them at tip 2026-09-15; the run is re-done at the CURRENT tip so the checker verdicts it fresh):
 > # READY — KS-1120 (F-2 pin only) — Ornith ornith:35b (Q4_K_M) PASS 7/7 on round 2, TEST-ONLY mode, 2026-09-15 12:22 — tip develop M55 48e65c435. NO product change; cells red under the tamper (:127 → return undefined) and green at the tip.
@@ -154,17 +152,17 @@ TEST-ONLY, ONE NEW FILE: your diff contains EXACTLY ONE file, the NEW test file 
 ## Tampers
 ### F2
 File: `Blockchain/Dev/services/vc-issuer/src/routes/presentations.ts`
-Line: 127
+Line: 128
 From:
 ```
-  // Memory fallback
+  const exact = memPresentationStore.get(id);
 ```
 To:
 ```
-  return undefined; // TAMPER: the DB miss no longer falls through to memory
+  const exact = Array.from(memPresentationStore.entries()).find(([k]) => k.startsWith(id))?.[1]; // TAMPER: a prefix scan
 ```
 Reds: `RED KS-1120 F-2 - a row present in memory and absent from the DB answers 200`, `RED KS-1120 F-2 - exactly one exact-id SELECT ran, then memory answered`
-(From located at 581ed7fa1 by exact whole-line match: 1 match at :127 - the tamper of `night/briefs/KS-1120.md.f2-held-2026-09-15` and of the 09-15 F2 READY header (`:127 -> return undefined`). Reachability: both RED cells create a row whose seed INSERT is refused (memory-only), then GET /:id with the DB available and returning 0 rows; at the tip `getPresentation` falls through to `memPresentationStore.get(id)` :128 and answers 200; under the tamper the function returns undefined before the memory read -> 404 -> both cells red by assertion. The control asks an unknown id -> 404 on both trees.)
+(From located at the tip: 1 match(es); the old brief/input said line 128)
 
 ## Controls
 - `KS-1120 control - an unknown id is 404 on the DB-miss path`

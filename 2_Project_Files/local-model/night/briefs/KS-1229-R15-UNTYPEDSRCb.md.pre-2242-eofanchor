@@ -1,0 +1,71 @@
+# KS-1229 R15-UNTYPEDSRCb - REBRIEF (round 1 re-run on a corrected brief; the 22:00 FAIL of KS-1229-R15-UNTYPEDSRC was a BRIEF defect - anchor placement - so the rebrief counter is NOT consumed) at develop 581ed7fa1 (written 22:39 on 2026-09-21 by Wednesday's feed2 drafter from ks1213-a-derived-writer-relabel-is-refused.test.ts, 226 lines read whole, and documents.ts:2596-2615)
+File: `Blockchain/Dev/services/originate/src/__tests__/ks1213-a-derived-writer-relabel-is-refused.test.ts`
+Tip: `581ed7fa124b85c7c2da89ac05d52f99c2502911`
+Runner: `jest`
+
+## Premises (measured by the feed2 drafter at 22:39:02 AEST, in a `--shared` scratchpad clone detached at 581ed7fa1; Wednesday re-derives before queueing)
+- THE CLASSIFIED DEFECT of `KS-1229-R15-UNTYPEDSRC.md` (run `runs/2026-09-21_ks1229-ornith35b-night`, FAIL T5 "Cannot nest a describe inside a test"): the fence was a pure insertion with TRAILING context only (:209-211, the KS-1202 describe's first three lines). The model normalised it into "2 leading + 2 trailing" context and the block landed INSIDE the KS-1202 describe's `create` helper. Rule earned (IMPROVEMENTS 22:22): a new describe's anchor is a line at DESCRIBE level, verified by indentation. This file separates every top-level block with a BLANK line, which a modify fence may not carry, so the anchor is written as a '-'/'+' pair on a column-0 closer: the `];` that ends the `WRITERS` array at :147 is removed and re-emitted with a trailing comment, and the describe follows it at top level (the model cannot slide a hunk that carries a '-' line). :147 is the last column-0 closer before the first `describe.each` (:149); every name the cells use (`write` :128, `ISSUER` :93, `SOURCE_ID` :123, `seed` :124, `REFUSED` :122) is declared ABOVE it.
+- A SECOND DEFECT the classification did not name: the R15 brief's tamper was `certifications.ts:201` (the /api/certifications/issue guard, copied from `night/briefs/KS-1229.md` - the SIDE-EFFECTS row), which the sign-cert cells never reach; it would have failed T6 "reds NOTHING" after the anchor fix. The UNTYPEDSRC tamper is the one in `night/briefs/split_1229untyped/KS-1229.md` and the 09-18 READY: the /sign-cert relabel guard `if (metadata.documentType !== undefined && metadata.documentType !== source.type) {` at documents.ts (old :2590, at the tip :2609; the one-line text occurs 3x - :1993 /version, :2609 /sign-cert, :2878 /sign-wallet - so it is a BLOCK tamper, the same unique 5-line block the held SIGNCERT-R15 sibling uses, with only its first line changed).
+- Reachability at 581ed7fa1: U1 seeds an in-memory source with `type: undefined` and POSTs /api/documents/:id/sign-cert with `metadata.documentType: 'DEGREE'`. The handler resolves the source (:2604) and reaches the guard at :2609: at the tip `'DEGREE' !== undefined` is true -> 400 BAD_REQUEST before any upstream call (GREEN, `REFUSED`). Under the tamper the prepended `typeof source.type === 'string' &&` is false for an untyped source -> the guard is skipped, the handler signs and saves -> U1 reads status 201 (RED by assertion at `.toEqual`). The control seeds `'DOCUMENT'` (a string) so the tampered conjunct is true and the guard evaluates exactly as at the tip -> 400 on both trees. Every existing sign-cert cell seeds a string-typed source, so nothing else reds.
+- SIBLINGS on this file (feed2 precheck, same clone): AFTERVERIFY anchors at :118-120 (top level, unchanged), VERSIONTRIM re-anchored at :176, SIGNWALLET at :207, SIGNCERT at :226 - four DISTINCT column-0 closers plus this one at :147; the five hunks are disjoint, so the raise seat can apply all five patches in file order at the tip.
+- Ticket KS-1229: Backlog; nothing in the product changes; in-memory only (`fromDbRow` gives `type = document_type || 'document'`, so an untyped source is unreachable through Postgres - this pins the handler's own guard).
+
+## What is wrong (one paragraph)
+`services/originate/src/routes/documents.ts` refuses a /sign-cert whose `metadata.documentType` differs from the source's stored type (:2609) - KS-1213 closed the relabel. Nothing pins that the refusal ALSO holds when the source row has NO type (`source.type` undefined): a guard that first checked `typeof source.type === 'string'` would skip the refusal, sign and save a relabelled version. The code is RIGHT at the tip. This task is the PIN, test-only: one new top-level describe in the existing ks1213 file whose RED cell reds under that tamper and whose control (a typed source, differing label) is refused on both trees.
+
+## THE MODE - read this twice
+TEST-ONLY, MODIFY IN PLACE: your diff contains EXACTLY ONE file, the EXISTING test file above, as the ONE hunk below (context lines byte-for-byte from the tip; no blank context line; no blank + line). No product hunk. The hunk header is `@@ -145,3 +145,15 @@`: two context lines (:145, :146 - the last two WRITERS rows, long lines, copy them whole), one '-' line (`];` at :147), then 13 '+' lines. Your '+' lines come AFTER the '-' line and there is NO context after them.
+
+## The exact change
+```
+@@ -145,3 +145,15 @@
+   ['/sign-cert', `/api/documents/${SOURCE_ID}/sign-cert`, (metadata) => ({ ...(metadata ? { metadata } : {}) })],
+   ['/sign-wallet', `/api/documents/${SOURCE_ID}/sign-wallet`, (metadata) => ({ walletAddress: 'addr_test1ks1213', signature: 'a1', key: 'a2', ...(metadata ? { metadata } : {}) })],
+-];
++]; // the three KS-1213 writers
++describe('KS-1229 Q-SIGNCERT-UNTYPED-SOURCE-SKIP - the sign-cert guard still refuses when the source has no type', () => {
++  const signCert = (metadata: Record<string, unknown>) => write(ISSUER, '/api/documents/' + SOURCE_ID + '/sign-cert', { metadata });
++  it('RED KS-1229 U1 - an untyped source is refused a relabel, nothing saved', async () => {
++    // KS-1229 (Q-SIGNCERT-UNTYPED-SOURCE-SKIP): an untyped in-memory source must not skip the guard.
++    seed(undefined as unknown as string);
++    expect(await signCert({ documentType: 'DEGREE' })).toEqual(REFUSED);
++  }); // KS-1229 U1
++  it('control - KS-1229 a typed source is still refused a differing relabel', async () => {
++    seed('DOCUMENT');
++    expect(await signCert({ documentType: 'PROPERTY_DEED' })).toEqual(REFUSED);
++  }); // KS-1229 U control
++});
+```
+
+## Cells (every cell RED or CONTROL; the names below are the EXACT it() titles - literal strings)
+- `RED KS-1229 U1 - an untyped source is refused a relabel, nothing saved`
+- `control - KS-1229 a typed source is still refused a differing relabel`  (CONTROL - green on both trees)
+
+## Tampers
+### UNTYPEDSRC
+File: `Blockchain/Dev/services/originate/src/routes/documents.ts`
+Line: 2609
+From:
+```
+      if (metadata.documentType !== undefined && metadata.documentType !== source.type) {
+        return res.status(400).json({ success: false, error: { code: 'BAD_REQUEST', message: 'metadata.documentType must equal the source document type' } });
+      }
+
+      // 2. Call auth-service DIRECTLY (AUTH_SERVICE_URL) to sign
+```
+To:
+```
+      if (typeof source.type === 'string' && metadata.documentType !== undefined && metadata.documentType !== source.type) { // TAMPER: KS-1229 red-proof, an untyped source skips the relabel guard entirely (the gate row Q-SIGNCERT-UNTYPED-SOURCE-SKIP)
+        return res.status(400).json({ success: false, error: { code: 'BAD_REQUEST', message: 'metadata.documentType must equal the source document type' } });
+      }
+
+      // 2. Call auth-service DIRECTLY (AUTH_SERVICE_URL) to sign
+```
+Reds: `RED KS-1229 U1 - an untyped source is refused a relabel, nothing saved`
+(Block tamper, 5 lines, located at 581ed7fa1 by exact whole-block match: 1 match starting at :2609 (the /sign-cert handler; the same guard text at :1993 /version and :2878 /sign-wallet is NOT touched). Only the first line changes: the conjunct is PREPENDED, the block, its body and its close are untouched.)
+
+## Controls
+- `control - KS-1229 a typed source is still refused a differing relabel`
+
+## Output
+Exactly ONE ```diff block; paths repo-relative (`Blockchain/Dev/services/originate/src/__tests__/ks1213-a-derived-writer-relabel-is-refused.test.ts`); the header `@@ -145,3 +145,15 @@`; no `\$` / `\u` / backslash escapes in a `+` line; the '+' lines byte for byte (0 spaces for `describe(` and its `});`, 2 for `const signCert` and the `it(` lines and their closers, 4 inside each `it(`; the trailing `// KS-1229 U1` / `// KS-1229 U control` comments are part of the line); the two context lines and the `-];` line exactly as the tip has them (the two template literals in CONTEXT lines keep their backticks and `${SOURCE_ID}`).

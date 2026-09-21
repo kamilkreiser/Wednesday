@@ -11,9 +11,6 @@ Runner: `jest`
 - Ticket KS-1229: Backlog, assignee kamil.kreiser@secuura.ai, PR attachments none (all merged); briefs already on disk: KS-1229.md.
 - Generator notes: dropped 1 blank + line(s) (a blank + is refused in a modify fence); RE-ANCHORED: the old hunk appended at EOF / before a blank line; the last leading context line '});' is now the TRAILING context, so the new block lands one line UP (inside the enclosing block) - a placement change from the old READY, said here; tamper SIGNCERT: the one-line From occurs 3x at the tip; WIDENED to a 5-line block starting at :2609 (the occurrence nearest the old line 2590) - an INFERENCE by line proximity; Wednesday confirms the site.
 
-
-- Precheck fix (feed2 drafter, 22:41): RE-ANCHORED at a TOP-LEVEL SEAM (the 22:22 brief rule: a new describe's anchor is at describe level, verified by indentation - both context lines here are column-0 statements). The census15 fence (@@ -224,3 +224,31 @@) landed the block INSIDE the KS-1202 create-guard describe (anchor `  });` at 2-space indent) - a nested describe under a foreign title (golden PASS 8/8, placement wrong for a PR). The hunk now has LEADING and TRAILING non-blank context (the shape the model reproduces natively; a hunk with no trailing context is pinned to EOF by git apply, and this file separates every top-level block with a blank line, which a modify fence may not carry - so the seam is the one place a describe can be inserted with context on both sides). The describe's '+' lines are byte-identical to the census15 fence. New header @@ -115,3 +115,31 @@. Siblings on this file take DISTINCT seams (SIGNCERT :116/117, AFTERVERIFY :119/120 unchanged, VERSIONTRIM :123/124, SIGNWALLET :141/142, UNTYPEDSRCb EOF :226) so the raise seat can apply all five.
-
 ## What is wrong (one paragraph)
 The held READY's own summary, verbatim from its header (the model wrote these cells once and the checker passed them on the date in the file name; the run is re-done at the CURRENT tip so the checker verdicts it fresh):
 > # READY — KS-1229 X-SIGNCERT-AFTER-UPSTREAM (TEST-ONLY, jest, originate: a refused /sign-cert must reach no upstream)
@@ -30,9 +27,9 @@ TEST-ONLY, MODIFY IN PLACE: your diff contains EXACTLY ONE file, the EXISTING te
 
 ## The exact change
 ```
-@@ -115,3 +115,31 @@
-   const s = stub.address(); process.env.AUTH_SERVICE_URL = 'http://127.0.0.1:' + String(typeof s === 'object' && s ? s.port : 0);
- });
+@@ -224,3 +224,31 @@
+     expect(await create({ data: { title: 'nb', documentType: 'DOCUMENT' } })).toEqual({ status: 201, code: null, saved: 1, stored: 'DOCUMENT', served: 'DOCUMENT' });
+   });
 +describe('KS-1229 X-SIGNCERT-AFTER-UPSTREAM - a refused sign-cert reaches no upstream', () => {
 +  const signCert = (metadata: Record<string, unknown>) => write(ISSUER, '/api/documents/' + SOURCE_ID + '/sign-cert', { metadata });
 +  it('RED KS-1229 SC1 - a refused sign-cert sends nothing to the issuer-certs upstream', async () => {
@@ -61,7 +58,7 @@ TEST-ONLY, MODIFY IN PLACE: your diff contains EXACTLY ONE file, the EXISTING te
 +    }
 +  }); // KS-1229 SC control
 +});
- afterAll(() => {
+ });
 ```
 
 ## Cells (every cell RED or CONTROL; the names below are the EXACT it() titles)

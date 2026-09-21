@@ -1,8 +1,8 @@
-# Ornith candidates — derived 2026-09-21 14:57 from 344 KS Backlog/Todo tickets (read-only, unpaginated)
+# Ornith candidates — derived 2026-09-21 22:37 from 340 KS Backlog/Todo tickets (read-only, unpaginated)
 
 A CENSUS for the coordinator to brief from, easy → hard (Kam 2026-09-15 16:40 / 18:19). A ticket here is a candidate, not a task: read it, read the file at the tip, write `night/briefs/<id>.md`, then queue it. Auth-shaped titles are excluded (LAST); Peter/Stuart tickets and PR-attached tickets are excluded outright.
 
-## T1 services (vitest, one file) — 25
+## T1 services (vitest, one file) — 26
 - KS-678 (P2) [resolved:basename, a HINT — read the file] #568 publishes 17 URLs on secuura.io — `scripts/openapi-examples/synthesize.ts`
 - KS-683 (P2) Anchor-status standoff: a consumer repolls anchors K reports as terminally faile — `services/anchoring/src/index.ts`
 - KS-947 (P2) [resolved:basename, a HINT — read the file] KS-733 gate blindness (F3+F4): the p — `services/api-gateway/src/routes/proxy.ts`
@@ -13,6 +13,7 @@ A CENSUS for the coordinator to brief from, easy → hard (Kam 2026-09-15 16:40 
 - KS-1168 (P3) userRepo.ts: ILIKE search on encrypted PII columns can never match — :1017 and : — `services/auth/src/repositories/userRepo.ts`
 - KS-1190 (P3) api-gateway meetsVerificationLevel fails open on an unknown REQUIRED level: an o — `services/api-gateway/src/services/enforcement.ts`
 - KS-1222 (P3) POST /api/documents/upload never reaches the gateway's blocked-extension / MIME  — `services/api-gateway/src/routes/proxy.ts`
+- KS-1287 (P3) OpenAPI: path parameter `index` on GET /api/status/{id}/check/{index} is publish — `services/vc-issuer/src/vc-issuer.openapi.ts`
 - KS-579 (P3) Per-person platform-admin identities — the shared seeded admin cannot carry attr — `services/api-gateway/src/routes/platform.ts`
 - KS-581 (P3) register-connector: volume alerting, rate limit, and correlation of refused re-k — `services/api-gateway/src/routes/platform.ts`
 - KS-627 (P3) Implement real wallet signature verification (CIP-8/COSE + address binding) — ne — `services/wallet-connector/src/types/index.ts`
@@ -105,15 +106,13 @@ A CENSUS for the coordinator to brief from, easy → hard (Kam 2026-09-15 16:40 
 - KS-966 — named in READY_KS-972_ornith35b-q4_BASHPATCH-REANCHORED-PASS-7of7_2026-09-16.diff.md
 - KS-999 — named in READY_KS-1186_ornith35b-q4_AUTH-5SITE-LINEKEYED-PASS-7of7_2026-09-17.diff.md
 
-## HELD (READY_* or done.md PASS) — 83
+## HELD (READY_* or done.md PASS) — 79
 - KS-1009 Security: GET /api/auth/wallet/status returns userId + role to ANY anonymous cal
 - KS-1011 KS-666 stack marker reads "unknown" for owner/branch/commit/started_at whenever 
 - KS-1028 KS-754 gate F-1 (MAJOR): a step-12 throw skips the USER_ERASED fan-out AFTER the
 - KS-1031 KS-754 gate F-4: DEPLOY CONDITION — apply 048 BEFORE rolling the originate image
 - KS-1033 KS-926 residue: the three guards that could NOT be wired, and what each needs fi
 - KS-1034 check-stack-safety.sh resolves the WRONG repo root inside a git hook and calls p
-- KS-1035 The merge gate cannot see a WITHDRAWN approval — #813 reads approved+clean again
-- KS-1036 The review-stream overlay covers 57 of 114 active tickets, and DEV-PROCESS still
 - KS-1037 The NO-FORCE-PUSH rule exists only in .githooks/pre-push and in no .md — documen
 - KS-1040 Push preflight leg 4 reports 'a published path is unroutable' when the real caus
 - KS-1045 KINTSUGI-DEV-SERVER-PLAN.md still says the VM "has NOT been created" — Stage B r
@@ -174,7 +173,6 @@ A CENSUS for the coordinator to brief from, easy → hard (Kam 2026-09-15 16:40 
 - KS-865 check-no-latest-tags.sh silently skips a missing input — it scans 5 of the 6 fil
 - KS-866 Merge protocol: the server-side `sha=` pin protects the PR head, not the base — 
 - KS-884 pre-push resolves the bare name `develop`, so a TAG named develop beats the bran
-- KS-887 KS-869 test defect (mine): the WRITE-half column-list pin can be satisfied by th
 - KS-888 dbSaveApiKey SWALLOWS a failed INSERT — POST /api/keys answers 201 for a key tha
 - KS-890 Runbook: a code-first deploy leg must use `docker compose up -d --no-deps <svc>`
 - KS-908 connectorId persists but is invisible through the API — POST and GET both return
@@ -182,7 +180,6 @@ A CENSUS for the coordinator to brief from, easy → hard (Kam 2026-09-15 16:40 
 - KS-928 The demo-seed gate's predicate is tested but its CALL SITE is not — delete admin
 - KS-938 Security: "MFA disabled" leaves the TOTP seed and hashed backup codes in the row
 - KS-944 The gateway's auth gate reads the spec's security: [] — nothing pins the four pu
-- KS-958 The re-link guard matches the JS runtime name case-sensitively — every UPPERCASE
 - KS-960 Two schema sources disagree on whether users.email is unique — a statement valid
 - KS-972 start-secuura.sh banner prints admin@secuura.com / admin123, which has returned 
 - KS-974 Published bound vs runtime bound on rate-limit scope: /check enforces code UNITS
@@ -190,7 +187,7 @@ A CENSUS for the coordinator to brief from, easy → hard (Kam 2026-09-15 16:40 
 - KS-976 Rate-limit refusals name the wrong field: 400 says "Key required" when the key w
 - KS-979 KS-597's own bind test file repeats two claims that were corrected in the produc
 
-## SET ASIDE with a recorded reason — 31 (re-read only if the ticket's updatedAt moved)
+## SET ASIDE with a recorded reason — 30 (re-read only if the ticket's updatedAt moved)
 - KS-1063 — decision-class: its own words say the design question comes first (updated 2026-09-09)
 - KS-1076 — likely already fixed at M55 (docblock present since ec61abf8e/0882f7661) — measure with eslint in a tool-mode clone; item 2 is a Claude seat's (updated 2026-09-13)
 - KS-1088 — decision-class: 'filing only; decide whether the runner should enforce isolation' — a ruling, not a patch (updated 2026-09-11)
@@ -202,7 +199,6 @@ A CENSUS for the coordinator to brief from, easy → hard (Kam 2026-09-15 16:40 
 - KS-1128 — the seed's pg is a require inside the function (updated 2026-09-13)
 - KS-1129 — three services, anchoring index.ts listens on import (updated 2026-09-16)
 - KS-1132 — services/auth — security surface (Kam 16:40: auth LAST) (updated 2026-09-13)
-- KS-1135 — diagnosis-first: which of the six suites spawns tsx (direct vs shared preamble) is UNMEASURED; the fix shape is prose (updated 2026-09-13)
 - KS-1142 — a test refactor with no product tamper (updated 2026-09-13)
 - KS-1148 — its own words: 'Fixing either is a .github/workflows/ edit — Kam-class; nothing here is changed by the seat that filed this' (updated 2026-09-14)
 - KS-1159 — a guard widening with three fixture files — later tier (updated 2026-09-14)
@@ -210,8 +206,8 @@ A CENSUS for the coordinator to brief from, easy → hard (Kam 2026-09-15 16:40 
 - KS-1184 — decision-class: the ticket's own words are 'A design call beside KS-1087 item 2, not a fix round on #1008' with two shapes offered (updated 2026-09-16)
 - KS-1191 — decision-class: 'Not built; Backlog. This is a design decision for the audit trail's owner, not a one-line fix' — two choices, and the edge behaviour is NOT TESTED (updated 2026-09-16)
 - KS-590 — verification.ts, security-adjacent (updated 2026-09-13)
-- KS-709 — its own 'Done means' requires reproduction from a real run, not a unit test — beyond the local model (updated 2026-09-10)
-- KS-755 — diagnosis-first (which side is wrong is unmeasured) (updated 2026-09-10)
+- KS-709 — its own 'Done means' requires reproduction from a real run, not a unit test — beyond the local model (updated 2026-09-21)
+- KS-755 — diagnosis-first (which side is wrong is unmeasured) (updated 2026-09-21)
 - KS-757 — blocked by the ticket's own measurement (updated 2026-09-08)
 - KS-770 — not a doc edit — the body is a review-stream test pass for Peter; the docs/ path came from a MENTION, not an edit target (updated 2026-09-14)
 - KS-777 — tracker ticket — all four findings FIXED on #795; a board close (updated 2026-09-05)
