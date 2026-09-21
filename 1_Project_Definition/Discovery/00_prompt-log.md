@@ -2562,3 +2562,8 @@ INCLUDED until he says otherwise.
 > Been thinking, and I would like to build this dashboard in a way that is externally accessible to me, and both you and Tuesday interact with it through APIs. This will be hosted in the Chrysler.org Azure tenant and secured by MFA, so it's an external website. Depending on the overhead and speed, one approach will be to tokenize all data and to have de-tokenization based on certificates that live on my machine or multiple machines. Please look what would be required to do this.
 
 *Note:* Receipted 09:5x; 'Chrysler.org' read as kreiser.org (dictation). Requirements study commissioned to a research subagent → 1_Project_Definition/Architecture/2026-09-21_external-dashboard-requirements.md; nothing provisioned.
+
+## 2026-09-21 10:16 — Kam (panel (view=wednesday) 10:15:44, verbatim)
+> I understand that Secure at Work would land on the shared tenant, and as this would be encrypted, there is no risk for anyone else to see it. This is acceptable. Also have access to the Kaiser.org tenant. Please go ahead and start building it, and use your CLI access to deploy it to that tenant.
+
+*Note:* Receipted 10:1x with the reading (Secuura rows on the shared kreiser.org tenant, encrypted end to end; Option A + envelope; new RG; pilot on synthetic rows first). 'Secure at Work' = Secuura, 'Kaiser.org' = kreiser.org (dictation). Build delegated.
