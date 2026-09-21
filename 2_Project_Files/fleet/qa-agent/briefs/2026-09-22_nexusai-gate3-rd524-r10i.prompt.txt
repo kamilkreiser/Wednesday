@@ -1,0 +1,50 @@
+ultrathink
+
+You are the fleet QA/testing agent running ONE BATCHED gate (gate 3) on Datasec/NexusAI: two targets in one session. TARGET A is TIER 1. TARGET B is THROUGH-CODE (test-only). They share no file, but both meet the server entry point through the merge queue.
+
+READ YOUR COMMISSION FIRST: /Volumes/KK_T9_External_HDD/TUESDAY/2_Project_Files/fleet/qa-agent/briefs/2026-09-22_nexusai-gate3-rd524-r10i.md
+
+TARGET A — RD-524 + RD-404 + RD-441 (TIER 1). Branch rd-524-404-441-s77f at f42217844bde4fd07952a3d1ec7f165d0957790d (short f422178), base main bdca588eced9c6a7ee6085b19e48765be3c8c07b. Three commits: faa9cbe (re-implementation of S59's unmerged rd-404-441-sentinel-banner-s59 on main), 07b9ce6 (fixture W + BACKLOG), f422178 (counts 3838/218).
+  - The store module's positive-evidence first-boot rule (collectPriorStateEvidence, taken on the constructor's first line), seven sentinel states, a latched wipe alarm, a read-back-verified sentinel write, recheckPersistenceSentinel, persistenceStatus/persistenceHealth.
+  - A NEW route GET /api/status/persistence below the requireAuth gate, returning {volumeWiped, isPersistent} only.
+  - The dashboard banner (SERVICE_BANNER_SOURCES, fetchPersistenceStatus, showPersistenceAlarm).
+  - IMPROVED: two use markers (the RD-554 enforcement stamp and the RD-452/RD-535 restored-without-group marker) are prior-state evidence, cells B7 and F4.
+
+TARGET B — RD-516's R10i split + repair (THROUGH-CODE). Branch rd-516-ai-test-ssrf-s73, range b9666342f50646fbe44aefcdeeaa732dea10dccb..91861aef2302ef8c8800a28a8977e490c021679a: bef8946 (split: built half stays in the suite as a normal cell, scheme/port half parked verbatim under the helpers directory as NOT-RUN, plus the F-5 comment fix on R7) and 91861ae (repair: R10i reads checkEndpointName, the network-free name layer, instead of the async, DNS-resolving assertAllowedAiEndpoint). THE RANGE END IS PINNED AT 91861ae: if the branch head has moved above it, or RD-516 is already merged to main, you still read those two commits only, and say which you found.
+
+THE QUESTIONS, each by measurement (the brief's sections 3, 4 and 6 carry the full list):
+  - A: a genuine fresh volume raises NO alarm; a volume wiped of everything except ANY SINGLE piece of prior evidence DOES — enumerate every evidence source from the code and plant each ALONE, with a not-on-any-list control. A legitimate customer erasure followed by a restart must not raise a false wipe alarm.
+  - A: the new route leaks nothing beyond the two booleans (bodies, headers, the 503/500 bodies), is unreachable anonymously in the enforced state (probe path variants: case, trailing slash, double slash, encoding), and SAY WHAT IT ANSWERS in the setup-open states (first-run; enforced but sign-in unconfigured).
+  - A: the banner renders for a signed-in user on a wiped volume — drive a REAL browser on a local run if you can; otherwise PROBE the served script and the API and label it PROBED.
+  - A: the latch — nothing inside a running process clears the alarm. Then restart: the brief explains why Tuesday's first wording ("cannot be cleared by a restart alone") is contradicted by the tracked RD-612. Measure boot 3 and report.
+  - A: will the evidence rule see RD-525's and RD-575's new stores after their merge (READ ONLY acceptable, labelled; better, run the rd404 cells on a merge-tree result).
+  - B: the parked file is inert (jest --listTests with the control listed); no skip remains in the collected suite (control: one at b966634); R10i is red at bef8946 CLEAN and green at 91861ae CLEAN; M-a (add openai.azure.us to SOURCED_SUFFIXES) reddens 'openai.azure.us NOT sourced' only, M-b (remove the one-label rule in hostIsSourced) reddens 'two-label host' only; add your own mutants; the built half asserts nothing the product does not do; C-130 and its addendum match the commits; the F-5 comment edit changed no assertion (prove it mechanically).
+
+Re-run the builder's red-proofs yourself — a kill you did not reproduce is the builder's:
+  - A: R0 clean (41/41), M1 product reverted (24 red, 17 green, every red behavioural), M2 only the use-marker loop removed (exactly B7 red, F4 green). Add your own mutants per the brief.
+  - B: CLEAN, M-a, M-b as above, plus your own.
+
+Quote git merge-tree --write-tree for A f422178 against RD-516 91861aef2302ef8c8800a28a8977e490c021679a, RD-495 179bf603cf563013ac9f89dbc7b1e216e8a9d385, RD-525 792fda0b3dc1884b32f3e04877f18959fbaaae77 and RD-575 bcb438d1cabb9ef855a024ff93c59048034e6ce8 (and the new main if it has moved), using your OWN object directory: GIT_OBJECT_DIRECTORY=<your own mktemp -d> GIT_ALTERNATE_OBJECT_DIRECTORIES=<repo>/.git/objects. At commission the first was clean and the other three conflicted in the counts file only. Run a full verify of A (predicted 3838/218) and account for every failure and every counts mismatch.
+
+Build your own trees INSIDE YOUR OWN PROJECT from the object store: git archive <sha> into a fresh mktemp dir. Never worktree, checkout, fetch, stash, clean or commit in the NexusAI repo; its working checkout is dirty. You are findings-only: no commits, no branch moves, no tickets, no writes inside NexusAI.
+
+FLOOR DISCIPLINE — follow section 7 of the brief exactly. NexusAI-F is live on the floor, merging the queue, and shares the jest lock.
+  - Every jest run goes through session-tools/nexusai-lock.sh, with the lock held once per multi-run measurement.
+  - Count foreign servers by basename(argv[0]) == node AND the server entry point anywhere in argv. Tell yours from foreign by ancestry: ours means the chain CONTAINS YOUR OWN seat pid; a shared ancestor (tmux, launchd, a login shell) proves nothing. Carry a negative control: NexusAI-F's claude (re-read its pid) must classify foreign in the same run. Never by EADDRINUSE, a whole-command-line grep, or raw comm.
+  - A zero is reportable only beside a control that fired in the same window.
+  - Reap every server you start, the browser-drive server included.
+
+DRIVABLE SURFACE IS A LOCAL RUN, NOT THE DEMO (RD-76).
+
+Write your report to: /Volumes/KK_T9_External_HDD/!CODING/Testing Agent MAIN/projects/nexusai/reports/2026-09-22-gate3-rd524-r10i/report.md
+
+GIVE THE VERDICT SEPARATELY PER TARGET: A GO/NO-GO, B GO/NO-GO. Then say what the verdicts mean for the merge queue RD-516 -> RD-495 -> RD-525 -> RD-575 -> RD-524, each forward-merged and verified green (C-68, C-89), each Tuesday's GO under C-127. A GO is a statement about the gated SHA only: name the cells that must be re-run on RD-524's forward-merged tree.
+
+MAIL YOUR VERDICT to tuesday-agent@agentmail.to with the subject exactly:
+[QA/Datasec-NexusAI -> Tuesday] GATE VERDICT — gate 3: RD-524 @ f422178 + RD-516 R10i split/repair (tier 1 / through-code)
+
+The AgentMail key is AGENTMAIL_API_KEY in /Volumes/KK_T9_External_HDD/TUESDAY/4_Credentials/.env. It is an absolute path because the QA project has no 4_Credentials directory of its own.
+
+Report each target's head, and main's, as three timestamped readings (start / mid / end) with the branch name beside each.
+
+Rule 2 stands: what you did NOT test is first-class output — a NOT TESTED section, and every action recommendation labelled MEASURED AT RUNTIME, PROBED or READ ONLY.
