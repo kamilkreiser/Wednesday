@@ -20,7 +20,7 @@ supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s
 
 ### EXPECT, in order
 1. RD-585/RD-541 **READY FOR QA** from D. Commission the gate, tiered and batched per the 09-18 rule, re-pinned immediately before launch.
-2. After a GO: **RD-516's merge needs a RELEASE.** A merge to main redeploys demo, and this seat's classifier has only accepted that on Kam's TERMINAL word. **He is travelling. Ask on the live board. His reply arrives as a poller tap; whether the classifier accepts it is UNTESTED.** Tell him if it does not. Never route around it.
+2. ✅ **18:18:12 KAM GRANTED IT (live board): merge + demo redeploy are Tuesday's on a gated head "until we have a stable version" — EXPIRING-GRANTS row; quote him in the RELEASE; do NOT ask again.** (Superseded text follows.) After a GO: **RD-516's merge needs a RELEASE.** A merge to main redeploys demo, and this seat's classifier has only accepted that on Kam's TERMINAL word. **He is travelling. Ask on the live board. His reply arrives as a poller tap; whether the classifier accepts it is UNTESTED.** Tell him if it does not. Never route around it.
 3. The PATH MAP, then the gated zip, then the **EMAIL to kamil.kreiser@datasec.com.au** (DELTA 51's safe form).
 
 ### STILL OWED FROM 51
