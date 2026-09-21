@@ -1,18 +1,16 @@
-# READY — KS-1171-8J-GUARD3S-R15 (Ornith, briefed, test_only, new · vitest) — PASS 8/8 — HELD for QA
-> ⚠ **HELD by Wednesday 2026-09-22 (the 00:05 seat), not raised in the 16th round:** Seat B 16th's targeted type-check (a temp tsconfig extending anchoring's with `exclude []` + `files=[the test]`; planted TS2322 control CAUGHT) found the two KS-1171 files carry SEVEN TypeScript errors under anchoring's tsconfig (TS6133 unused `beforeEach`/`waitForConfirmation`/`confirmResult`/`SEED_USER_ID`; THREE TS2353 at :84/:93/:101 — `makeHarness`'s parameter typed `Awaited<ReturnType<AnchorSubmissionDeps['confirm']>>` resolves to a Promise, so `{ confirmed: true, … }` does not type) while vitest is green (esbuild strips types) and the checker graded PASS (it does not type-check). Disposition: REBRIEF 1 of 1 under Kam's 2026-09-16 counter with the seven lines as the defect list (the seat's STATUS/handover quotes them verbatim); the seat's worktree `s-b16-ks1171` + commit stay on disk un-pushed. This READY is NOT in any raise pool until the rebrief PASSes and supersedes it.
+# READY — KS-1171-GUARD3S-TSFIX-R16 (Ornith, briefed, test_only, new · vitest) — PASS 8/8 — HELD for QA
 
+> ⚠ **CANONICAL PATCH = `/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/runs/2026-09-22_ks1171-ornith35b-night2/out.md.checker/patch.diff`** (from `ls` at 04:04 2026-09-22). Checker T3 (verbatim from checker.out): `PASS T3 diff applies at the tip (strict git apply --check)`; the run's patch is BYTE-IDENTICAL to the drafter's golden (`cmp -s /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/runs/2026-09-22_ks1171-ornith35b-night2/out.md.checker/patch.diff /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/runs/2026-09-22_rebrief3-drafter-precheck/1171TSFIXGUARD3S-R16/out.md.checker/patch.diff` rc 0, Wednesday).
 
-> ⚠ **CANONICAL PATCH = `/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/runs/2026-09-21_ks1171-ornith35b-night2/out.md.checker/patch.diff`** (from `ls` at 21:35 2026-09-21). Checker T3 (verbatim from checker.out): `PASS T3 diff applies at the tip (strict git apply --check)`; golden not located — no byte-identity claim is made.
+**Held 04:04 2026-09-22 by Wednesday after a source read (hold_ready.py — every clause below is built from the checker's own artefacts in `/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/runs/2026-09-22_ks1171-ornith35b-night2/out.md.checker`, not typed).** Tip `64ab105132eada0621622acf4d6053bc59926780`. Touches ONE file: `Blockchain/Dev/services/anchoring/src/__tests__/ks1171-guard-3-s-re-poll-reads.test.ts` (new). `+` lines 107 ordered-equal to the brief's `expected_plus` (ASCII); `-` lines 0 == `must_remove`. Green at the tip: 3/3 cells. Tampers (1), each red exactly its declared set with controls green and the product file restored by bytes (T6/T7/T8):
+- `8J` → red exactly ['RED KS-1171 8j - an injected confirmed:true with polled 0 CO', 'RED KS-1171 8j - no never-reached-the-chain log when the tra']
 
-**Held 21:35 2026-09-21 by Wednesday (the 20:1x seat) after a source read (hold_ready.py — every clause below is built from the checker's own artefacts in `/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/runs/2026-09-21_ks1171-ornith35b-night2/out.md.checker`, not typed).** Tip `9f0265eb06ecf24d4de18149ce862ad2330a61ee`. Touches ONE file: `Blockchain/Dev/services/anchoring/src/__tests__/ks1171-guard-3-s-re-poll-reads.test.ts` (new). `+` lines 108 ordered-equal to the brief's `expected_plus` (ASCII); `-` lines 0 == `must_remove`. Green at the tip: 3/3 cells. Tampers (1), each red exactly its declared set with controls green and the product file restored by bytes (T6/T7/T8):
-- `8J` → red exactly ['RED KS-1171 8j - an injected confirmed:true with polled 0 CO', 'RED KS-1171 8j - no "never reached the chain" log when the t']
-
-**PR NOTES for the raise seat:** TEST-ONLY — zero product bytes; one file, apply `patch.diff` strictly at the tip (re-check `git ls-remote origin develop` first; if develop moved, re-run `git apply --check` and state it). Input: `/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/runs/2026-09-21_ks1171-ornith35b-night2/input.json`. Brief: `night/briefs/KS-1171-8J-GUARD3S-R15.md`. Verdict source: `/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/runs/2026-09-21_ks1171-ornith35b-night2/checker.out`.
+**PR NOTES for the raise seat:** TEST-ONLY — zero product bytes; one file, apply `patch.diff` strictly at the tip (re-check `git ls-remote origin develop` first; if develop moved, re-run `git apply --check` and state it). Input: `/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/runs/2026-09-22_ks1171-ornith35b-night2/input.json`. Brief: `night/briefs/KS-1171-GUARD3S-TSFIX-R16.md`. Verdict source: `/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/runs/2026-09-22_ks1171-ornith35b-night2/checker.out`.
 
 ```diff
 --- /dev/null
 +++ b/Blockchain/Dev/services/anchoring/src/__tests__/ks1171-guard-3-s-re-poll-reads.test.ts
-@@ -0,0 +1,108 @@
+@@ -0,0 +1,107 @@
 +/**
 + * KS-1171 - Guard 3's re-poll reads a MIXED window as ABSENT (#805 tier-1 r3 residue).
 + *
@@ -30,7 +28,7 @@
 +  const orig = await importOriginal<typeof import('../cardano/provider')>();
 +  return { ...orig, getTransaction: vi.fn() };
 +});
-+import { waitForConfirmation } from '../cardano/confirmation';
++import type { ConfirmationResult } from '../cardano/confirmation';
 +
 +const TX_A = '408e72087942198b69d686401829b5b9419d018dc4cc64917283aa3cdb084994';
 +const ANCHOR_ID = 'anchor_a93bd8dd-10c8-4d52-b12e-c0bff6f5c790';
@@ -40,7 +38,7 @@
 +  new BlockfrostServerError({
 +    status_code: 400,
 +    error: 'Bad Request',
-+    message: 'Transaction submission failed: ConwayMempoolFailure "All inputs are spent"',
++    message: 'Transaction submission failed: ConwayMempoolFailure All inputs are spent',
 +    url: 'x',
 +  });
 +
@@ -60,8 +58,7 @@
 + * NOT confirmed -> unknown -> retry scheduled; at the untouched tip it confirms
 + * the row because `confirmed` is checked first regardless of counters.
 + */
-+function makeHarness(confirmResult: ReturnType<typeof waitForConfirmation>) {
-+  const SEED_USER_ID = 'seed-user-for-harness';
++function makeHarness(confirmResult: ConfirmationResult) {
 +  const row: AnchorSnapshot = {
 +    id: ANCHOR_ID, status: 'pending', transactionHash: undefined, retryCount: 0,
 +    metadataLabel: 674, metadataPayload: { documentId: 'doc-1787874883988-04d3ee24' },
@@ -104,7 +101,7 @@
 +    expect(h.calls(h.deps.scheduleRetry)).toBe(0);
 +  }, 60_000);
 +
-+  it('RED KS-1171 8j - no "never reached the chain" log when the transaction was found', async () => {
++  it('RED KS-1171 8j - no never-reached-the-chain log when the transaction was found', async () => {
 +    const h = makeHarness({ confirmed: true, confirmations: 1, blockNumber: 4242, slot: 99, blockHash: 'b'.repeat(64), polled: 0, errored: 3 });
 +    await createAnchorSubmitter(h.deps)(ANCHOR_ID);
 +
@@ -122,5 +119,3 @@
 +  }, 60_000);
 +});
 ```
-
-> 🔁 **SUPERSEDED 2026-09-22 04:04 by Wednesday — do NOT raise this READY.** Its round-1 fence failed the raise seat's per-file typecheck (the HELD note above); the round-2 (TS-clean, typecheck 0 in-file, golden byte-identical) READY is `READY_KS-1171-GUARD3S-TSFIX-R16_ornith35b-q4_BRIEFED-TESTONLY-GUARD-3S-REPOLL-READS-TSCLEAN-PASS-8of8_2026-09-22.diff.md`. Raise that one.

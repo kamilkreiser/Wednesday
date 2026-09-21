@@ -1,14 +1,12 @@
-# READY — KS-1123-F3b-R15 (Ornith, briefed, test_only, new · vitest) — PASS 8/8 — HELD for QA
-> ⚠ **HELD by Wednesday 2026-09-22 (the 00:05 seat), not raised in the 16th round:** Seat C 16th's targeted type-check (temp tsconfig, `exclude []`, planted TS2322 control CAUGHT) found this NEW file BRINGS one TypeScript error under api-gateway's tsconfig — TS18046 `'body' is of type 'unknown'` at `ks1123-api-gateway-verify-an-empty-string.test.ts:158`, `expect(body.blockchain.source)` (a `res.json()` result asserted without a cast) — while vitest is green (esbuild strips types) and the checker graded PASS (it does not type-check). Rule applied to both 16th seats: a NEW test file with a non-zero targeted-typecheck delta is not raised. Disposition: REBRIEF 1 of 1 under Kam's 2026-09-16 counter (the R15 run was round 1) — the brief's defect line = the seat's TS18046 verbatim (cast the parsed body); the seat's worktree `s-c16-ks1123` + commit stay on disk un-pushed. This READY is NOT in any raise pool until the rebrief PASSes and supersedes it. (It SUPERSEDED F2-R15 on 09-22 — that supersession stands; F2 is not revived.)
+# READY — KS-1123-F3b-CAST-R16 (Ornith, briefed, test_only, new · vitest) — PASS 8/8 — HELD for QA
 
+> ⚠ **CANONICAL PATCH = `/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/runs/2026-09-22_ks1123-ornith35b-night/out.md.checker/patch.diff`** (from `ls` at 04:04 2026-09-22). Checker T3 (verbatim from checker.out): `PASS T3 diff applies at the tip (strict git apply --check)`; the run's patch is BYTE-IDENTICAL to the drafter's golden (`cmp -s /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/runs/2026-09-22_ks1123-ornith35b-night/out.md.checker/patch.diff /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/runs/2026-09-22_rebrief3-drafter-precheck/1123F3bCAST-R16/out.md.checker/patch.diff` rc 0, Wednesday).
 
-> ⚠ **CANONICAL PATCH = `/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/runs/2026-09-21_ks1123-ornith35b-night3/out.md.checker/patch.diff`** (from `ls` at 00:14 2026-09-22). Checker T3 (verbatim from checker.out): `PASS T3 diff applies at the tip (strict git apply --check)`; the run's patch is BYTE-IDENTICAL to the drafter's golden (`cmp -s /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/runs/2026-09-21_ks1123-ornith35b-night3/out.md.checker/patch.diff /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/runs/2026-09-21_r15feed2-drafter-precheck/1123F3b-R15/out.md.checker/patch.diff` rc 0, Wednesday 00:05 seat (post-rotation), source-read: expected_plus 215/215 in the diff, titles = the F2/F3 reds + 3 controls; golden cmp IDENTICAL; a PASS that SUPERSEDES READY_KS-1123-F2-R15 (21:10 09-21)).
-
-**Held 00:14 2026-09-22 by Wednesday 00:05 seat (post-rotation), source-read: expected_plus 215/215 in the diff, titles = the F2/F3 reds + 3 controls; golden cmp IDENTICAL; a PASS that SUPERSEDES READY_KS-1123-F2-R15 (21:10 09-21) after a source read (hold_ready.py — every clause below is built from the checker's own artefacts in `/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/runs/2026-09-21_ks1123-ornith35b-night3/out.md.checker`, not typed).** Tip `581ed7fa124b85c7c2da89ac05d52f99c2502911`. Touches ONE file: `Blockchain/Dev/services/api-gateway/src/__tests__/ks1123-api-gateway-verify-an-empty-string.test.ts` (new). `+` lines 215 ordered-equal to the brief's `expected_plus` (ASCII); `-` lines 0 == `must_remove`. Green at the tip: 6/6 cells. Tampers (2), each red exactly its declared set with controls green and the product file restored by bytes (T6/T7/T8):
+**Held 04:04 2026-09-22 by Wednesday after a source read (hold_ready.py — every clause below is built from the checker's own artefacts in `/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/runs/2026-09-22_ks1123-ornith35b-night/out.md.checker`, not typed).** Tip `64ab105132eada0621622acf4d6053bc59926780`. Touches ONE file: `Blockchain/Dev/services/api-gateway/src/__tests__/ks1123-api-gateway-verify-an-empty-string.test.ts` (new). `+` lines 215 ordered-equal to the brief's `expected_plus` (ASCII); `-` lines 0 == `must_remove`. Green at the tip: 6/6 cells. Tampers (2), each red exactly its declared set with controls green and the product file restored by bytes (T6/T7/T8):
 - `F2` → red exactly ['RED KS-1123 F2 - a confirmed-status blob with no hash and a ', 'RED KS-1123 F2 - a failed anchor with a stale confidence fie']
 - `F3` → red exactly ['RED KS-1123 F3 - tier 1: an EMPTY-STRING status with a real ']
 
-**PR NOTES for the raise seat:** TEST-ONLY — zero product bytes; one file, apply `patch.diff` strictly at the tip (re-check `git ls-remote origin develop` first; if develop moved, re-run `git apply --check` and state it). Input: `/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/runs/2026-09-21_ks1123-ornith35b-night3/input.json`. Brief: `night/briefs/KS-1123-F3b-R15.md`. Verdict source: `/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/runs/2026-09-21_ks1123-ornith35b-night3/checker.out`.
+**PR NOTES for the raise seat:** TEST-ONLY — zero product bytes; one file, apply `patch.diff` strictly at the tip (re-check `git ls-remote origin develop` first; if develop moved, re-run `git apply --check` and state it). Input: `/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/runs/2026-09-22_ks1123-ornith35b-night/input.json`. Brief: `night/briefs/KS-1123-F3b-CAST-R16.md`. Verdict source: `/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/runs/2026-09-22_ks1123-ornith35b-night/checker.out`.
 
 ```diff
 --- /dev/null
@@ -168,7 +166,7 @@
 +    body: JSON.stringify({ purpose: 'test' }),
 +  });
 +  expect(r.status).toBe(200);
-+  const body = await r.json();
++  const body: any = await r.json();
 +  // Guard the whole family: if tier 2 were not the tier that answered, every
 +  // assertion below would be about the wrong code path.
 +  expect(body.blockchain.source).toBe('persisted');
@@ -230,5 +228,3 @@
 +  });
 +});
 ```
-
-> 🔁 **SUPERSEDED 2026-09-22 04:04 by Wednesday — do NOT raise this READY.** Its round-1 fence failed the raise seat's per-file typecheck (the HELD note above); the round-2 (TS-clean, typecheck 0 in-file, golden byte-identical) READY is `READY_KS-1123-F3b-CAST-R16_ornith35b-q4_BRIEFED-TESTONLY-STALE-CONFIDENCE-EMPTY-STATUS-OFFCHAIN-TSCLEAN-PASS-8of8_2026-09-22.diff.md`. Raise that one.
