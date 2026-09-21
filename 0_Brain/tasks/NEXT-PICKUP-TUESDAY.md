@@ -35,7 +35,12 @@ Kam asked 15:24 (both tabs): "How's the sync going with the portable drive?" Mea
 - **Live-board poller:** Kam (15:43, via Wednesday) said "Please let Tuesday know to do the same", i.e. keep it armed. **Verified armed at 15:45** (pid 81834, health OK). Wednesday's seat got Kam's first real tap at 15:43. **OWED: confirm when his first real live message to view=tuesday taps this pane.**
 - **NEXT when the RD-518 r3 verdict lands:** GO → it joins the merge queue behind RD-574/RD-516 (all still HELD for Kam's terminal word); NO GO with a Major → ticket it, tell Kam a 4th round is his.
 
-### 🔴 MERGE OF RD-574 + RD-516 IS ON HOLD — waiting on KAM's word in the terminal (15:4x)
+### 🟢 MERGE OF RD-574 + RD-516 RELEASED (16:05) — Kam, typed in the Tuesday terminal, verbatim: "merge RD-574 and RD-516"
+- `RELEASE` mail sent 06:05Z to datasec-nexusai@ and S74 (%22) tapped, delivery verified. Heads verified unmoved at release: rd-574 `7728d692f156`, rd-516 `aaffbb91a993`, main `60c76d763503`.
+- **EXPECT two reports from S74:** RD-574 merged (sha + verdict), THEN RD-516 merged (§5 on the merged tree + the duplicate-const check). Each is a DEMO deploy. **Any STOP from S74 → read it; never re-release blind.**
+- The HOLD history below is kept as a record of why it waited. **Do not re-hold.**
+
+#### (history) MERGE OF RD-574 + RD-516 WAS ON HOLD — waiting on KAM's word in the terminal (15:4x)
 - **RD-574 round 2 = 🟢 GO** (05:33Z; report `…/reports/2026-09-21-rd574-7728d69-round2/report.md`). RD-516 is unblocked: aaffbb9 + 7728d69 merge clean, 31 cells pass.
 - **C-32 gives Tuesday merge + demo-deploy authority, BUT this seat's harness permission classifier REFUSED the tap that delivers the merge-go as a "Production Deploy"**: a merge to main triggers `deploy-demo.yml`. **Do not route around it.**
 - Sent: `MERGE GO` (05:4xZ), then **`HOLD — do NOT execute the MERGE GO`** straight after, to datasec-nexusai@. **The HOLD stands until a Tuesday mail with RELEASE in its subject.** A RELEASE needs Kam's explicit word **in the terminal**: a card ruling on the board is not visible to the classifier as his consent.
