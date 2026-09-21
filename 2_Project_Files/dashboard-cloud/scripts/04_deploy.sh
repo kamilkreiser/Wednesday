@@ -1,0 +1,95 @@
+#!/usr/bin/env bash
+# Step 4 — App Service plan (Linux B1) + web app (Python 3.12) + identity + RBAC + settings + zip deploy + Easy Auth v2.
+# Idempotent. Every az call names -g $RG --subscription $SUB_ID. The Easy Auth client secret is read from 4_Credentials and
+# written ONLY into the app setting MICROSOFT_PROVIDER_AUTHENTICATION_SECRET (never echoed).
+set -eu
+export AZURE_CONFIG_DIR=/Volumes/DevMASTER/WEDNESDAY/4_Credentials/.azure
+HERE=/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/dashboard-cloud
+CRED=/Volumes/DevMASTER/WEDNESDAY/4_Credentials/dashboard-cloud
+SCRATCH=${SCRATCH:-/private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/bbb4a64c-5352-455e-b4e6-9f36320976aa/scratchpad}
+mkdir -p "$SCRATCH"
+. "$HERE/scripts/ids.conf"
+T=$(az account show --query tenantId -o tsv); U=$(az account show --query user.name -o tsv); S=$(az account show --query id -o tsv)
+[ "$T" = "$TENANT_ID" ] && [ "$U" = "kreiser.org@me.com" ] && [ "$S" = "$SUB_ID" ] || { echo "TENANT ASSERTION FAILED: $T $U $S"; exit 3; }
+echo "tenant assertion PASS"
+azs() { az "$@" --subscription "$SUB_ID"; }   # global arg must follow the subcommand
+AZ=azs
+
+# 1. plan
+if ! $AZ appservice plan show -n "$PLAN" -g "$RG" -o none 2>"$SCRATCH/plan_err.txt"; then
+  echo "creating plan $PLAN (B1 Linux): $(head -c 120 "$SCRATCH/plan_err.txt")"
+  $AZ appservice plan create -n "$PLAN" -g "$RG" -l "$LOCATION" --is-linux --sku B1 --tags project=wednesday-dashboard phase=pilot -o none
+fi
+$AZ appservice plan show -n "$PLAN" -g "$RG" --query '{name:name,sku:sku.name,tier:sku.tier,linux:reserved,workers:sku.capacity}' -o json
+
+# 2. web app  (startup uses a RELATIVE --chdir app: Oryx extracts output.tar.zst to /tmp/<hash> and runs the command from there —
+#              an absolute /home/site/wwwroot/app failed with "can't chdir", seen in the container log 00:50 on the first deploy)
+if ! $AZ webapp show -n "$WEBAPP" -g "$RG" -o none 2>"$SCRATCH/app_err.txt"; then
+  echo "creating webapp $WEBAPP: $(head -c 120 "$SCRATCH/app_err.txt")"
+  $AZ webapp create -n "$WEBAPP" -g "$RG" -p "$PLAN" --runtime "PYTHON:3.12" --https-only true --tags project=wednesday-dashboard phase=pilot -o none
+fi
+$AZ webapp update -n "$WEBAPP" -g "$RG" --https-only true --client-affinity-enabled false -o none
+$AZ webapp config set -n "$WEBAPP" -g "$RG" --ftps-state Disabled --min-tls-version 1.2 --http20-enabled true --always-on true \
+   --startup-file "gunicorn -k uvicorn.workers.UvicornWorker -w 2 --bind 0.0.0.0:8000 --timeout 120 --chdir app main:app" -o none
+# basic-auth publishing creds off (zip deploy uses the AAD token; FTP is disabled anyway)
+APP_RES=$($AZ webapp show -n "$WEBAPP" -g "$RG" --query id -o tsv)
+$AZ resource update --ids "$APP_RES/basicPublishingCredentialsPolicies/ftp" --set properties.allow=false -o none
+$AZ resource update --ids "$APP_RES/basicPublishingCredentialsPolicies/scm" --set properties.allow=false -o none
+
+# 3. system-assigned identity + RBAC on the storage account (scope = the account)
+MI=$($AZ webapp identity assign -n "$WEBAPP" -g "$RG" --query principalId -o tsv)
+echo "managed identity principalId=$MI"
+if [ -z "$($AZ role assignment list --assignee "$MI" --scope "$SA_ID" --role 'Storage Table Data Contributor' --query '[0].id' -o tsv)" ]; then
+  $AZ role assignment create --assignee-object-id "$MI" --assignee-principal-type ServicePrincipal --role 'Storage Table Data Contributor' --scope "$SA_ID" -o none
+  echo "granted Storage Table Data Contributor to the app identity on $STORAGE"
+else echo "app identity already has the role"; fi
+
+# 4. app settings (the ONE secret read from the credentials file, never printed)
+SECRET=$(python3 -c "import json;print(json.load(open('$CRED/easyauth-client-secret.json'))['password'])")
+$AZ webapp config appsettings set -n "$WEBAPP" -g "$RG" -o none --settings \
+  SCM_DO_BUILD_DURING_DEPLOYMENT=true \
+  TENANT_ID="$TENANT_ID" SEAT_API_APPID="$API_APPID" STORAGE_ACCOUNT="$STORAGE" \
+  SEAT_APP_MAP="$wednesday_seat_APPID:wednesday,$tuesday_seat_APPID:tuesday" \
+  MICROSOFT_PROVIDER_AUTHENTICATION_SECRET="$SECRET" \
+  WEBSITE_AUTH_AAD_ALLOWED_TENANTS="$TENANT_ID"
+unset SECRET
+echo "app settings (names only): $($AZ webapp config appsettings list -n "$WEBAPP" -g "$RG" --query '[].name' -o tsv | tr '\n' ' ')"
+
+# 5. zip deploy (app/ + seat/ + requirements.txt; no .venv, no keys except the PUBLIC one). Fresh zip name each run — nothing deleted.
+ZIP="$SCRATCH/wedcloud_deploy_$(date +%H%M%S).zip"
+( builtin cd "$HERE" && zip -q -r "$ZIP" requirements.txt app seat -x 'app/__pycache__/*' 'seat/__pycache__/*' '*.pyc' )
+echo "zip contents:"; unzip -Z1 "$ZIP"
+# PEM armour line (with dashes), case-insensitive: the viewer JS legitimately contains the words "BEGIN PRIVATE KEY" in a regex.
+PRIV_MARKERS=$(unzip -p "$ZIP" | /usr/bin/grep -i -c -- '-----BEGIN [A-Z ]*PRIVATE' || true)
+PUB_MARKERS=$(unzip -p "$ZIP" app/keys/kam-pilot-public.pub | /usr/bin/grep -i -c -- '-----BEGIN PUBLIC' || true)
+CTRL=$(/usr/bin/grep -i -c -- '-----BEGIN [A-Z ]*PRIVATE' "$CRED/kam-pilot-private.pem" || true)
+echo "guard positive control on a real private key file: $CTRL (must be 1)"; [ "$CTRL" = "1" ] || { echo "GUARD CANNOT FAIL — ABORT"; exit 9; }
+echo "zip private-key markers: $PRIV_MARKERS (must be 0); positive control: public-key markers in the public file: $PUB_MARKERS (must be 1)"
+[ "$PRIV_MARKERS" = "0" ] && [ "$PUB_MARKERS" = "1" ] || { echo "ZIP CHECK FAILED — ABORT"; exit 9; }
+$AZ webapp deploy -n "$WEBAPP" -g "$RG" --src-path "$ZIP" --type zip --async false --timeout 900 -o json > "$SCRATCH/deploy_out.json" 2>"$SCRATCH/deploy_err.txt" || true
+echo "deploy stderr: $(head -c 600 "$SCRATCH/deploy_err.txt")"
+python3 -c 'import json,sys
+try:
+    d=json.load(open(sys.argv[1])); print("deploy:",{k:d.get(k) for k in ("status","status_text","complete","active","provisioningState","message","log_url") if k in d})
+except Exception as e: print("deploy output not json:",open(sys.argv[1]).read()[-800:])' "$SCRATCH/deploy_out.json"
+
+# 6. Easy Auth v2 (Microsoft provider, require auth, redirect unauthenticated, exclude the seat API)
+cat > "$SCRATCH/authv2.json" <<JSON
+{"properties":{
+ "platform":{"enabled":true,"runtimeVersion":"~1"},
+ "globalValidation":{"requireAuthentication":true,"unauthenticatedClientAction":"RedirectToLoginPage","redirectToProvider":"azureactivedirectory",
+                     "excludedPaths":["/api/seat/*"]},
+ "identityProviders":{"azureActiveDirectory":{"enabled":true,
+   "registration":{"openIdIssuer":"https://login.microsoftonline.com/$TENANT_ID/v2.0","clientId":"$WEB_APPID","clientSecretSettingName":"MICROSOFT_PROVIDER_AUTHENTICATION_SECRET"},
+   "validation":{"allowedAudiences":["api://$WEB_APPID","$WEB_APPID"],"defaultAuthorizationPolicy":{"allowedApplications":["$WEB_APPID"]}},
+   "login":{"disableWWWAuthenticate":false}}},
+ "login":{"tokenStore":{"enabled":true},"preserveUrlFragmentsForLogins":false,"cookieExpiration":{"convention":"FixedTime","timeToExpiration":"08:00:00"}},
+ "httpSettings":{"requireHttps":true,"routes":{"apiPrefix":"/.auth"},"forwardProxy":{"convention":"NoProxy"}}
+}}
+JSON
+az rest --method PUT --url "https://management.azure.com${APP_RES}/config/authsettingsV2?api-version=2022-03-01" --body @"$SCRATCH/authv2.json" \
+  --query '{enabled:properties.platform.enabled,require:properties.globalValidation.requireAuthentication,action:properties.globalValidation.unauthenticatedClientAction,excluded:properties.globalValidation.excludedPaths,aad:properties.identityProviders.azureActiveDirectory.registration.clientId,issuer:properties.identityProviders.azureActiveDirectory.registration.openIdIssuer}' -o json
+
+echo "== config as set:"
+$AZ webapp config show -n "$WEBAPP" -g "$RG" --query '{ftps:ftpsState,minTls:minTlsVersion,http20:http20Enabled,alwaysOn:alwaysOn,linuxFx:linuxFxVersion,startup:appCommandLine}' -o json
+$AZ webapp show -n "$WEBAPP" -g "$RG" --query '{httpsOnly:httpsOnly,host:defaultHostName,state:state,identity:identity.type}' -o json

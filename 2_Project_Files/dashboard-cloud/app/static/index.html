@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Wednesday — panel (pilot)</title>
+<style>
+:root{--bg:#0f1115;--fg:#e6e6e6;--mut:#8a8f98;--card:#171a21;--acc:#7aa2f7;--ok:#9ece6a;--warn:#e0af68;--bad:#f7768e;--sec:#bb9af7;--dat:#7dcfff;--wed:#9ece6a}
+@media (prefers-color-scheme: light){:root{--bg:#f6f7f9;--fg:#1a1d24;--mut:#5f6673;--card:#fff}}
+body{margin:0;background:var(--bg);color:var(--fg);font:15px/1.45 -apple-system,system-ui,sans-serif}
+header{position:sticky;top:0;background:var(--bg);padding:10px 16px;border-bottom:1px solid #2a2e37;display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+h1{font-size:16px;margin:0 8px 0 0}
+.chip{border:1px solid #2a2e37;border-radius:14px;padding:3px 10px;cursor:pointer;font-size:13px;color:var(--mut)}
+.chip.on{color:var(--fg);border-color:var(--acc)}
+main{padding:12px 16px;max-width:900px;margin:0 auto}
+.msg{background:var(--card);border-radius:10px;padding:10px 12px;margin:8px 0;border-left:3px solid var(--mut)}
+.msg.Secuura{border-left-color:var(--sec)}.msg.Datasec{border-left-color:var(--dat)}.msg.WED{border-left-color:var(--wed)}
+.meta{font-size:12px;color:var(--mut);display:flex;gap:8px;flex-wrap:wrap}
+.text{white-space:pre-wrap;margin-top:4px}
+.locked{color:var(--warn);font-style:italic}
+.card{border:1px dashed var(--acc)}
+.opts span{display:inline-block;border:1px solid #2a2e37;border-radius:6px;padding:1px 7px;margin:2px 4px 0 0;font-size:13px}
+#status{font-size:12px;color:var(--mut);margin-left:auto}
+button{background:var(--card);color:var(--fg);border:1px solid #2a2e37;border-radius:8px;padding:5px 10px;cursor:pointer}
+input[type=file]{display:none}
+.bad{color:var(--bad)}.ok{color:var(--ok)}
+</style></head><body>
+<header>
+ <h1>Wednesday panel <small style="color:var(--mut)">pilot · synthetic rows</small></h1>
+ <span class="chip on" data-c="Secuura">Secuura</span><span class="chip on" data-c="Datasec">Datasec</span><span class="chip on" data-c="WED">WED</span>
+ <label><button id="keybtn" type="button">Load private key…</button><input id="keyfile" type="file" accept=".pem,.key,.p8"></label>
+ <button id="forget" type="button" title="Remove the key from this browser">Forget key</button>
+ <button id="speak" type="button" aria-pressed="false">🔇 Autoplay off</button>
+ <span id="status">…</span>
+</header>
+<main><div id="who" class="meta"></div><div id="list"></div></main>
+<script>
+// ---- key store: PKCS8 PEM -> WebCrypto non-extractable CryptoKey -> IndexedDB. The key never leaves this browser. ----
+const DB='wedpanel', STORE='keys';
+function idb(){return new Promise((res,rej)=>{const r=indexedDB.open(DB,1);r.onupgradeneeded=()=>r.result.createObjectStore(STORE);r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error);});}
+async function putKey(k){const d=await idb();return new Promise((res,rej)=>{const t=d.transaction(STORE,'readwrite');t.objectStore(STORE).put(k,'kam-pilot');t.oncomplete=res;t.onerror=()=>rej(t.error);});}
+async function getKey(){const d=await idb();return new Promise((res,rej)=>{const t=d.transaction(STORE,'readonly');const g=t.objectStore(STORE).get('kam-pilot');g.onsuccess=()=>res(g.result||null);g.onerror=()=>rej(g.error);});}
+async function delKey(){const d=await idb();return new Promise((res,rej)=>{const t=d.transaction(STORE,'readwrite');t.objectStore(STORE).delete('kam-pilot');t.oncomplete=res;t.onerror=()=>rej(t.error);});}
+function pemToDer(pem){const b=pem.replace(/-----[^-]+-----/g,'').replace(/\s+/g,'');const s=atob(b);const u=new Uint8Array(s.length);for(let i=0;i<s.length;i++)u[i]=s.charCodeAt(i);return u.buffer;}
+const unb64=s=>{const b=atob(s);const u=new Uint8Array(b.length);for(let i=0;i<b.length;i++)u[i]=b.charCodeAt(i);return u;};
+let PRIV=null;
+async function importPem(text){
+  if(!/BEGIN PRIVATE KEY/.test(text)) throw new Error('need a PKCS8 "BEGIN PRIVATE KEY" PEM');
+  PRIV=await crypto.subtle.importKey('pkcs8',pemToDer(text),{name:'RSA-OAEP',hash:'SHA-256'},false,['decrypt']);
+  await putKey(PRIV);
+}
+// ---- envelope decrypt (mirror of seat/envelope.py) ----
+const AAD=r=>new TextEncoder().encode([r.client,r.kind,r.id,r.ts].map(x=>x==null?'':String(x)).join('|'));
+async function decryptRow(r){
+  if(!PRIV) return null;
+  if(r.scheme!=='rsa-oaep-sha256+aes-256-gcm/v1') throw new Error('scheme '+r.scheme);
+  const dk=await crypto.subtle.decrypt({name:'RSA-OAEP'},PRIV,unb64(r.wrapped_key));
+  const k=await crypto.subtle.importKey('raw',dk,{name:'AES-GCM'},false,['decrypt']);
+  const pt=await crypto.subtle.decrypt({name:'AES-GCM',iv:unb64(r.iv),additionalData:AAD(r)},k,unb64(r.ciphertext));
+  return new TextDecoder().decode(pt);
+}
+// ---- state + delta polling (since=) ----
+const on={Secuura:true,Datasec:true,WED:true}; let sinceM='',sinceC=''; const rows=new Map(); let autoplay=false; const spoken=new Set();
+const $=s=>document.querySelector(s); const status=(t,c='')=>{$('#status').textContent=t;$('#status').className=c;};
+function esc(s){return s.replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
+async function render(){
+  const list=[...rows.values()].filter(r=>on[r.client]).sort((a,b)=>a.row_key<b.row_key?1:-1);
+  const out=[];
+  for(const r of list){
+    let body;
+    try{ const pt=await decryptRow(r); r._pt=pt;
+      if(pt==null) body='<div class="text locked">🔒 encrypted — load the private key to read</div>';
+      else if(r.kind==='card'){ const c=JSON.parse(pt); body=`<div class="text"><b>${esc(c.title||'')}</b><br>${esc(c.bluf||'')}</div><div class="opts">${(c.options||[]).map(o=>`<span><b>${esc(o.key)}</b> ${esc(o.label||'')}</span>`).join('')}</div>`; }
+      else body=`<div class="text">${esc(pt)}</div>`;
+    }catch(e){ body=`<div class="text bad">decrypt failed: ${esc(String(e.message||e))}</div>`; }
+    const clear=r.kind==='card'?`status=${esc(r.status||'')} keys=${esc((r.option_keys||[]).join(','))} ruled=${r.ruled?'yes':'no'}${r.ruled_choice?' → '+esc(r.ruled_choice):''}`:`view=${esc(r.view||'')}`;
+    out.push(`<div class="msg ${r.client} ${r.kind==='card'?'card':''}"><div class="meta"><span>${esc(r.client)}</span><span>${esc(r.kind)}</span><span>${esc(r.role||r.seat||'')}</span><span>${esc(r.ts||'')}</span><span>${clear}</span></div>${body}</div>`);
+  }
+  $('#list').innerHTML=out.join('')||'<p class="meta">no rows yet</p>';
+  if(autoplay&&PRIV){ for(const r of list.slice(0,3).reverse()){ if(r.kind==='message'&&r._pt&&!spoken.has(r.row_key)){spoken.add(r.row_key); speechSynthesis.speak(new SpeechSynthesisUtterance(r._pt));} } }
+}
+async function poll(){
+  try{
+    const q=s=>s?`&since=${encodeURIComponent(s)}`:'';
+    const [m,c]=await Promise.all([fetch(`/api/messages?limit=200${q(sinceM)}`,{cache:'no-store'}),fetch(`/api/cards?limit=200${q(sinceC)}`,{cache:'no-store'})]);
+    if(m.status===401||m.status===302||m.redirected){status('session expired — reload to sign in','bad');return;}
+    const mj=await m.json(), cj=await c.json();
+    for(const r of mj.messages||[]){rows.set(r.row_key,r); if(r.row_key>sinceM) sinceM=r.row_key;}
+    for(const r of cj.cards||[]){rows.set(r.row_key,r); if(r.row_key>sinceC) sinceC=r.row_key;}
+    status(`${rows.size} rows · delta ok · ${new Date().toLocaleTimeString()} · key ${PRIV?'loaded':'not loaded'}`,PRIV?'ok':'');
+    await render();
+  }catch(e){status('poll failed: '+(e.message||e),'bad');}
+}
+document.querySelectorAll('.chip').forEach(ch=>ch.onclick=()=>{on[ch.dataset.c]=!on[ch.dataset.c];ch.classList.toggle('on');render();});
+$('#keybtn').onclick=()=>$('#keyfile').click();
+$('#keyfile').onchange=async e=>{const f=e.target.files[0]; if(!f)return; try{await importPem(await f.text()); status('key imported (non-extractable, this browser only)','ok'); spoken.clear(); await render();}catch(err){status('key import failed: '+err.message,'bad');}};
+$('#forget').onclick=async()=>{await delKey();PRIV=null;await render();status('key forgotten');};
+$('#speak').onclick=()=>{autoplay=!autoplay;$('#speak').textContent=autoplay?'🔊 Autoplay on':'🔇 Autoplay off';$('#speak').setAttribute('aria-pressed',String(autoplay)); if(autoplay){speechSynthesis.speak(new SpeechSynthesisUtterance('Autoplay on'));} else speechSynthesis.cancel();};
+(async()=>{ try{PRIV=await getKey();}catch(e){} try{const me=await (await fetch('/api/me')).json(); $('#who').textContent=`signed in as ${me.name||me.id}`;}catch(e){} await poll(); setInterval(poll,5000); })();
+</script></body></html>

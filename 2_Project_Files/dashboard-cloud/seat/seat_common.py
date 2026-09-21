@@ -1,0 +1,78 @@
+"""seat_common.py — token (MSAL client-credentials with a certificate) + encrypt + post.
+Wednesday's tools call post_message.py / post_card.py; this holds the shared parts.
+Never prints a token or key. SYNTHETIC text only in the pilot."""
+import argparse, json, os, sys, hashlib
+import requests
+from cryptography import x509
+from cryptography.hazmat.primitives import serialization
+from cryptography.hazmat.primitives.serialization import pkcs12
+import msal
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import envelope
+
+DEFAULT_TENANT = "d500ebad-cf53-4f2a-a501-f831289e67fc"
+
+def load_ids():
+    p = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "scripts", "ids.conf")
+    ids = {}
+    for line in open(p):
+        line = line.strip()
+        if line and not line.startswith("#") and "=" in line:
+            k, v = line.split("=", 1); ids[k] = v
+    return ids
+
+def common_args(p: argparse.ArgumentParser):
+    ids = load_ids()
+    p.add_argument("--seat", choices=["wednesday", "tuesday"], required=True, help="which seat identity")
+    p.add_argument("--cert-dir", default="/Volumes/DevMASTER/WEDNESDAY/4_Credentials/dashboard-cloud", help="dir holding <seat>-seat.pem (private) + <seat>-seat.crt (public)")
+    p.add_argument("--client", required=True, choices=["Secuura", "Datasec", "WED"], help="partition; must be within the seat's roles or the API refuses 403")
+    p.add_argument("--pubkey", default=os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "app", "keys", "kam-pilot-public.pub"), help="Kam's envelope public key (PEM SPKI)")
+    p.add_argument("--base", default=f"https://{ids.get('WEBAPP','')}.azurewebsites.net")
+    p.add_argument("--tenant", default=ids.get("TENANT_ID", DEFAULT_TENANT))
+    p.add_argument("--api-appid", default=ids.get("API_APPID", ""))
+    p.add_argument("--ts", default=None); p.add_argument("--id", default=None)
+    p.add_argument("--dry-run", action="store_true", help="encrypt + print the request body; no token, no HTTP")
+    p.add_argument("--token-only", action="store_true", help="get a token and print its claims (no secrets); no HTTP to the app")
+    return p
+
+def seat_appid(seat, ids): return ids[f"{seat}_seat_APPID"]
+
+def get_token(args, ids) -> str:
+    key_pem = open(os.path.join(args.cert_dir, f"{args.seat}-seat.pem"), "rb").read()
+    crt = x509.load_pem_x509_certificate(open(os.path.join(args.cert_dir, f"{args.seat}-seat.crt"), "rb").read())
+    thumb = crt.fingerprint(__import__("cryptography.hazmat.primitives.hashes", fromlist=["SHA1"]).SHA1()).hex()
+    app = msal.ConfidentialClientApplication(seat_appid(args.seat, ids), authority=f"https://login.microsoftonline.com/{args.tenant}",
+                                             client_credential={"private_key": key_pem.decode(), "thumbprint": thumb})
+    r = app.acquire_token_for_client(scopes=[f"api://{args.api_appid}/.default"])
+    if "access_token" not in r:
+        sys.stderr.write(f"TOKEN FAILED: {r.get('error')}: {r.get('error_description','')[:400]}\n"); sys.exit(2)
+    return r["access_token"]
+
+def claims_of(token: str) -> dict:
+    import base64
+    part = token.split(".")[1]; part += "=" * (-len(part) % 4)
+    return json.loads(base64.urlsafe_b64decode(part))
+
+def build(args, kind: str, plaintext: str, clear_extra: dict) -> dict:
+    import datetime, uuid
+    ts = args.ts or datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%f")[:-3] + "Z"
+    rid = args.id or uuid.uuid4().hex[:10]
+    clear = {"client": args.client, "kind": kind, "id": rid, "ts": ts, **clear_extra}
+    pub = envelope.load_public(args.pubkey)
+    env = envelope.encrypt_text(pub, plaintext, clear)
+    # always-verify per record: the envelope must NOT contain the plaintext (the writer cannot decrypt — Kam's key is not here)
+    # (a substring check is only meaningful for plaintexts long enough not to occur in base64 by chance)
+    if len(plaintext) >= 8:
+        assert plaintext not in json.dumps(env), "plaintext leaked into envelope"
+    return {**clear, "envelope": env}
+
+def send(args, path: str, body: dict):
+    ids = load_ids()
+    if args.dry_run:
+        print(json.dumps({"DRY_RUN": True, "url": args.base + path, "body": body}, indent=1)); return 0
+    tok = get_token(args, ids)
+    if args.token_only:
+        c = claims_of(tok); print(json.dumps({k: c.get(k) for k in ("aud", "iss", "azp", "roles", "tid", "exp")}, indent=1)); return 0
+    r = requests.post(args.base + path, json=body, headers={"Authorization": f"Bearer {tok}"}, timeout=30)
+    print(json.dumps({"status": r.status_code, "body": r.text[:600]}, indent=1))
+    return 0 if r.status_code == 201 else 1

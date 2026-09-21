@@ -1,0 +1,28 @@
+#!/usr/bin/env bash
+# Step 7 — secret VALUE scan of the pilot dir (what would be committed). Each check has a positive control that must hit
+# in 4_Credentials (or a scratch fixture), so a zero here is a real zero. Needles are assembled at runtime so this file
+# never contains them literally (it self-matched on the first run). .venv and __pycache__ are gitignored and excluded.
+set -u
+D=/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/dashboard-cloud
+CRED=/Volumes/DevMASTER/WEDNESDAY/4_Credentials/dashboard-cloud
+SCRATCH=/private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/bbb4a64c-5352-455e-b4e6-9f36320976aa/scratchpad
+FAIL=0
+scan() { /usr/bin/grep -r -i -l -F --exclude-dir=.venv --exclude-dir=__pycache__ -e "$1" "$D" 2>/dev/null | wc -l | tr -d ' '; }
+ctrl() { /usr/bin/grep -i -c -F -e "$1" "$2" 2>/dev/null | tr -d ' '; }
+check() { local n c; n=$(scan "$2"); c=$(ctrl "$2" "$3")
+  if [ "$n" = "0" ] && [ "$c" -ge 1 ]; then echo "PASS  $1: 0 files in dashboard-cloud; positive control hits=$c in $(basename "$3")"
+  else echo "FAIL  $1: files=$n control=$c"; /usr/bin/grep -r -i -l -F --exclude-dir=.venv --exclude-dir=__pycache__ -e "$2" "$D" | sed 's/^/        hit: /'; FAIL=1; fi; }
+ARM="-----BEGIN "; ARM="${ARM}PRIVATE KEY-----"
+check "PEM private-key armour line" "$ARM" "$CRED/kam-pilot-private.pem"
+SECRET=$(python3 -c "import json;print(json.load(open('$CRED/easyauth-client-secret.json'))['password'])")
+check "Easy Auth client secret value" "$SECRET" "$CRED/easyauth-client-secret.json"; unset SECRET
+for k in kam-pilot-private wednesday-seat tuesday-seat; do
+  SLICE=$(sed -n 2p "$CRED/$k.pem" | cut -c1-48); check "$k.pem body slice (48 chars)" "$SLICE" "$CRED/$k.pem"; done
+AK="Account"; AK="${AK}Key="; FIX="$SCRATCH/fixture_accountkey.txt"; echo "DefaultEndpointsProtocol=https;${AK}FIXTURE_NOT_REAL" > "$FIX"
+check "storage connection-string marker" "$AK" "$FIX"
+PW='"pass'; PW="${PW}word\": \""; check "az credential-reset JSON password key" "$PW" "$CRED/easyauth-client-secret.json"
+echo "== gitignore coverage:"
+for p in 4_Credentials/dashboard-cloud/kam-pilot-private.pem 2_Project_Files/dashboard-cloud/.venv/x 2_Project_Files/dashboard-cloud/app/keys/x.pem 2_Project_Files/dashboard-cloud/.env 2_Project_Files/dashboard-cloud/scripts/x.out 2_Project_Files/dashboard-cloud/app/keys/kam-pilot-public.pub; do
+  if git -C /Volumes/DevMASTER/WEDNESDAY check-ignore -q "$p"; then r=IGNORED; else r="tracked-if-added"; fi; printf '  %-62s -> %s\n' "$p" "$r"; done
+echo "  (kam-pilot-public.pub is the PUBLIC key and is meant to be tracked)"
+echo "== RESULT: $([ $FAIL = 0 ] && echo CLEAN || echo SECRET FOUND)"; exit $FAIL
