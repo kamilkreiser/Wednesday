@@ -26,6 +26,15 @@ Kam asked 15:24 (both tabs): "How's the sync going with the portable drive?" Mea
 - **WHEN HE RULES:** add `WED_AGENT=tuesday` (plus the paths) to the plist, preview, then `launchctl bootstrap gui/$(id -u) ~/Library/LaunchAgents/com.tuesday.nassync.plist`. **Never re-load the plist as it stands.**
 - The case-fold hazard is cleared: the NAS shows `!CODING/Datasec` in the correct case.
 
+### 🟢 CHECKPOINT 65% (15:5x) — STATE NOW, newest first
+- **RD-518 round 3 READY @ `4230d23`** (NexusAI-C, 05:53Z): G-01 fixed (`role==='admin'`), G-02 covered behaviourally (new `rd518-r3-health-detail-decision.test.js`), BOTH red-proofs fire, 3796/3796. **Its GATE is RUNNING in pane %29** (launcher `launch_qa_nexusai_rd518_round3_4230d23.sh`: guard 22 = exactly 3 files, **guard 25 = authEnforcement.js byte-unchanged, enforcing RD-594's exclusion**). Round 3 is the LAST round Kam authorised: a Major → ticket, and a 4th round is his.
+- Checked at commission: the 6 changed lines naming `adminGateRefuses` are ALL COMMENTS (5 in the test header, 1 in server.js). No call site changed.
+- **C's C-01 finding, measured:** no consumer of `keyVaultEncryption` / `.detail` in `static/`, so the admin-only fix does not gate setup. **NEW, pre-existing: RD-596** — `/api/health` never serves `keyVaultStatus`, so the first-run KV tile can never read "Connected". It fails safe; out of scope.
+- **Kam's two rulings are DELIVERED:** rd518-round3 → **C-121**; nexusai-rd535-premise → **C-120 addendum** (he DECLINED the warning, recorded as a decision). `list ruled --undelivered nexusai-` = 0.
+- **The floor counter is now right on C's side:** basename(argv[0]) + a live control that must RISE, built in; a blind counter ABORTS the window. The control reads 2 (an over-count, which is safe). C's first r3 readings were voided and re-run.
+- **Live-board poller:** Kam (15:43, via Wednesday) said "Please let Tuesday know to do the same", i.e. keep it armed. **Verified armed at 15:45** (pid 81834, health OK). Wednesday's seat got Kam's first real tap at 15:43. **OWED: confirm when his first real live message to view=tuesday taps this pane.**
+- **NEXT when the RD-518 r3 verdict lands:** GO → it joins the merge queue behind RD-574/RD-516 (all still HELD for Kam's terminal word); NO GO with a Major → ticket it, tell Kam a 4th round is his.
+
 ### 🔴 MERGE OF RD-574 + RD-516 IS ON HOLD — waiting on KAM's word in the terminal (15:4x)
 - **RD-574 round 2 = 🟢 GO** (05:33Z; report `…/reports/2026-09-21-rd574-7728d69-round2/report.md`). RD-516 is unblocked: aaffbb9 + 7728d69 merge clean, 31 cells pass.
 - **C-32 gives Tuesday merge + demo-deploy authority, BUT this seat's harness permission classifier REFUSED the tap that delivers the merge-go as a "Production Deploy"**: a merge to main triggers `deploy-demo.yml`. **Do not route around it.**
