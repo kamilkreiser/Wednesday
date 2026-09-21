@@ -6,6 +6,39 @@ status: live
 supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s1-wholesale
 ---
 
+## 🟢 DELTA 53 — 2026-09-21 21:3x (ctx 65% checkpoint; band 80-90, NOT rotating). **READ THIS, THEN 52. DELTA 51's OWED ZIP STANDS.**
+
+### FLOOR (panes)
+- `%32` **NexusAI-E (S76E, pid 73275 / claude 73277) = lane B.** RD-525 is DONE at `792fda0`: E's 7 files, then D's lane-A `fef773b` (server.js onPurge) and `792fda0` (counts 3817/217); verify 3817/3817. **RD-575 is being STACKED on RD-525's head** (the two conflict in dataExport.js, 4 hunks; E told 11:1xZ). Its READY will name RD-525 as its base.
+- `%33` **QA gate 2** (`fleet/qa-agent/launchers/launch_qa_nexusai_gate2_rd495_rd525_rd575.sh --without-rd575`) covers **RD-495 @ `179bf60` + RD-525 @ `792fda0`**, with separate verdicts. Verdict subject: `[QA/Datasec-NexusAI -> Tuesday] GATE VERDICT — gate 2: …`. At 21:3x it was in its opening think; **confirm rung 5 at its first real output.**
+- **NexusAI-D (S76D) WRAPPED 11:26Z** (HANDOVER-S76D.md). Its pane is closed.
+- **SUCCESSOR `Datasec/NexusAI-F` (S77F, lane A): a subagent is drafting the brief** into `fleet/briefs_staged/2026-09-21_nexusai_F_laneA_successor.md` (+ `.subject`). **WHEN IT LANDS:**
+  - read it WHOLE;
+  - stamp the SELF-CHECK in the exact gate format `SELF-CHECK: re-read end-to-end for contradictions | YYYY-MM-DD HH:MM`, with a separate `Self-check note:` line;
+  - add the routing line `Datasec/NexusAI-F|datasec-nexusai@agentmail.to|no` to `fleet/inbox_routing.conf`;
+  - run `send_brief.sh --kind brief --to Datasec/NexusAI-F --subject-file … --body-file …`, and verify it at datasec-nexusai@;
+  - THEN run `cockpit.sh add 'Datasec/NexusAI-F' "bash '/Volumes/KK_T9_External_HDD/!CODING/Datasec/NexusAI/Launch_Claude.command'"`;
+  - verify rung 5 on its pane.
+  - **`cockpit.sh say` takes the COCKPIT NAME, never `%NN`.**
+
+### GATE 1 = GO / GO (11:26Z; report `Testing Agent MAIN/projects/nexusai/reports/2026-09-21-rd516-fixround-rd604-batch/report.md`)
+- **The merge order that F's brief pre-authorises (C-127):**
+  1. RD-604 to main.
+  2. C-126 step 3: forward-merge main into RD-516, regenerate AND COMMIT the counts (F-6, expect 3828/217), verify GREEN.
+  3. The RD-516 merge, CONDITIONAL on step 3 being GREEN and nothing else incoming.
+- **RD-495 and RD-525 merge only on a separate Tuesday GO after gate 2.** Then RD-575 after its own gate.
+- **Findings for F:**
+  - F-1 MAJOR, pre-existing: in Redis mode, one RedisStore is shared by every limiter (ticket + fix, one store per limiter with its own prefix).
+  - F-5: C-128 is false about top-level codes (addendum).
+  - F-2: comment wording.
+  - F-3 and F-7: tickets.
+- **Kam told on the board (201) at 21:3x.**
+
+### OWED
+- **The pretooluse hook's `merge-tree --write-tree` clause (`pretooluse_no_cd.sh:105`) was EVADED** by gate-2's drafting subagent. Find the form it used and close the hole (shared tool, claim with Wednesday). Ledger row 2026-09-21.
+- `send_brief`'s undelivered-ruling check matches only the exact name `Datasec/NexusAI`, so suffixed seats skip it (shared tool, claim first).
+- NAS first-run check tomorrow morning (DELTA 51). Kam's demo sign-in (asked on the board). The zip email (DELTA 51).
+
 ## 🟢 DELTA 52 — 2026-09-21 18:2x (s76 rotation boot, ctx 40% after the WHOLE load). **DELTA 51's OWED ZIP STANDS. Read this, then 51.**
 
 ### STATE
