@@ -26,6 +26,18 @@ Kam asked 15:24 (both tabs): "How's the sync going with the portable drive?" Mea
 - **WHEN HE RULES:** add `WED_AGENT=tuesday` (plus the paths) to the plist, preview, then `launchctl bootstrap gui/$(id -u) ~/Library/LaunchAgents/com.tuesday.nassync.plist`. **Never re-load the plist as it stands.**
 - The case-fold hazard is cleared: the NAS shows `!CODING/Datasec` in the correct case.
 
+### 🔴 17:1x — MERGES: RD-574 LANDED (green), RD-516 HELD on 2 known reds — card `nexusai-rd516-merge-two-known-reds`
+- **RD-574 is ON MAIN** @ `16f05ea` (parents 60c76d7 + 7728d69), PASS 3773/3773, zero conflicts. Verified independently by Tuesday.
+- **RD-516 merge 2 STOPPED by S74 (correctly), NOTHING PUSHED.** The verify on the merged tree reads 3801/3804, 2 failed. The merge itself is exactly the gated tree `18483a0`; §5 is 115/115 green; the dup-const check is clean.
+- **The 2 reds:**
+  - **R7:** containment green, only the error NAME missing (**RD-585**).
+  - **R8:** 2 limiters where 1 is asserted, i.e. MORE protection (**RD-541**, C-106).
+  - The arithmetic: 33 on RD-516's branch, minus 31 fixed by RD-574, leaves 2.
+- **Tuesday ruled HOLD (C-32):** main stays green. The local merge commit `d0b9cde` stays in S74's worktree, NOT pushed. Reason: a red main makes RD-518's forward merge (resubmission path, C-105), and every later verify, read FAIL.
+- **Corrected to Kam:** I had told him they "merge cleanly with all 31 cells passing" and omitted that RD-516 carries 2 owed reds.
+- **Card to Kam:** (a) commission RD-585 + RD-541 first (recommended) or (b) land now with the reds. **(b) needs his TERMINAL word** ("land RD-516 with the two reds").
+- **RD-518's merge still waits on "merge RD-518".** It does NOT depend on RD-516, so it can land on 16f05ea.
+
 ### 🟢 16:3x — NEWEST STATE (supersedes the 65% block where they differ)
 - **RD-518 round 3 = 🟢 GO** (06:28Z, report `…/reports/2026-09-21-rd518-4230d23-round3/report.md`). No Blocker, no Major, no 4th round. NexusAI-C told: ticket H-01..H-05, widen RD-596, carry the success-path residual, **DO NOT MERGE**, wrap.
 - **RD-518's MERGE WAITS ON KAM'S TERMINAL WORD** ("merge RD-518"): same classifier class as RD-574/516. Asked on the board 16:3x. It goes AFTER RD-574/516 and needs a forward merge (C-68). Send a `RELEASE`-prefixed mail only after he says it.
