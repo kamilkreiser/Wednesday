@@ -1,0 +1,47 @@
+ultrathink
+
+You are the fleet QA/testing agent running ONE BATCHED gate on Datasec/NexusAI: two disjoint targets in one session. RD-541 is TIER 1. RD-585 and RD-604 are THROUGH-CODE.
+
+READ YOUR COMMISSION FIRST: /Volumes/KK_T9_External_HDD/TUESDAY/2_Project_Files/fleet/qa-agent/briefs/2026-09-21_nexusai-rd516-fixround-rd604-batch.md
+
+TARGET A — RD-516 fix round. Branch rd-516-ai-test-ssrf-s73 at b9666342f50646fbe44aefcdeeaa732dea10dccb (short b966634). The range under test is 059f0a8..b966634: two commits, two files.
+  - ae98c74 is RD-585, test-only. R7 now reads the refusal from details.code and details.error.
+  - b966634 is RD-541, in the server entry point. POST /api/setup/ai-test is collapsed to ONE limiter: the no-skip aiTestLimiter, now at AI_DEPLOYMENT_TEST_LIMIT (5 per 10 min). The AI-off-skipping aiDeploymentTestLimiter is removed.
+  - 059f0a8 is a forward merge of main aae041a. Confirm its one true content merge carried both sides and nothing else.
+
+TARGET B — RD-604. Branch rd-604-rd423-timer-s76d at 172abc8308eeb71d3ffa1a1626ef069559876b98, one commit off main aae041a, test-only, one file (the rd423 test). It loops until elapsed >= WAIT_PAST_MS before asserting. Confirm the real property (process alive, /api/health 200 after the window) is still asserted and not weakened, and that the loop is bounded.
+
+THE QUESTIONS A MUST ANSWER, each by measurement:
+  - Does anonymous traffic with AI OFF now count against the limit? It must.
+  - Is there exactly one limiter on the route? Measure it by source, by runtime stack and by behaviour, not only through R8, which is a source regex.
+  - Does any existing cell (rd464*, rd545*, rd395*, rd486 (e)) now pass for a WEAKER reason? Removing a middleware changes every caller's path, so check negative-asserting cells outside the diff.
+  - Does the RD-585 cell check MORE than before, not less?
+
+Re-run the builder's red-proofs yourself:
+  - M1: a second limiter mounted, so R8 goes red.
+  - M2: the only limiter removed, so R8 goes red and rd545 A1-A4 go red.
+  - M3: fetchOptions removed from the adapter, so R7 and R7b go red.
+  - Add your own mutant: put the AI-off skip back on the survivor.
+
+Reproduce the full verify. The builder reports 3826/1/1 of 3828 across 217 suites; the one fail is rd423 R1 (RD-604) and the skip is R10i (RD-583). Report the committed counts file mismatch the brief names in section 5.
+
+Build your own trees INSIDE YOUR OWN PROJECT from the object store: git archive <sha> into a fresh mktemp dir. Never worktree, checkout, fetch, stash, clean or commit in the NexusAI repo; its working checkout is dirty. You are findings-only: no commits, no branch moves, no writes inside NexusAI.
+
+FLOOR DISCIPLINE — follow section 7 of the brief exactly:
+  - Every jest run goes through session-tools/nexusai-lock.sh, with the lock held once per multi-run measurement.
+  - Count foreign servers by basename(argv[0]) == node AND the server entry point anywhere in argv, told apart by ancestry. Never by EADDRINUSE, a whole-command-line grep, or raw comm.
+  - A zero is reportable only beside a control that fired in the same window.
+  - Reap every server you start.
+
+DRIVABLE SURFACE IS A LOCAL RUN, NOT THE DEMO (RD-76).
+
+Write your report to: /Volumes/KK_T9_External_HDD/!CODING/Testing Agent MAIN/projects/nexusai/reports/2026-09-21-rd516-fixround-rd604-batch/report.md
+
+GIVE THE VERDICT SEPARATELY PER TARGET: A GO/NO-GO and B GO/NO-GO. Then say what the pair means for RD-516's merge against C-126's sequence: gate, then RD-604 merges first, then forward-merge main into RD-516 and verify GREEN, then Tuesday's GO under C-127. A GO on A alone does not clear the merge.
+
+MAIL YOUR VERDICT to tuesday-agent@agentmail.to with the subject exactly:
+[QA/Datasec-NexusAI -> Tuesday] GATE VERDICT — RD-516 fix round @ b966634 + RD-604 (batched, tier 1/2)
+
+The AgentMail key is AGENTMAIL_API_KEY in /Volumes/KK_T9_External_HDD/TUESDAY/4_Credentials/.env. It is an absolute path because the QA project has no 4_Credentials directory of its own.
+
+Rule 2 stands: what you did NOT test is first-class output.
