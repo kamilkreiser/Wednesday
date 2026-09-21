@@ -2587,3 +2587,8 @@ INCLUDED until he says otherwise.
 > Great, the live version looks perfect. I posted a couple of comments on that. Did you get these? And when you're ready, switch to using the live version only. Awesome, please generate a new key for my laptop and one for my iPad.
 
 *Note:* Receipted 12:5x with a measurement: 4 live rows from Kam (12:07 x2, 12:48 x2), all ciphertext — unreadable by any seat by design. Phase 3 commissioned: per-seat wrapped keys (D-2(b)), device keys for laptop + iPad with a re-wrap migration, and the cut-over to the live board only.
+
+## 2026-09-21 14:07 — Kam (panel (view=wednesday) 2026-09-21 14:05:04 AEST, verbatim)
+> With the page available from anywhere, I can interact with you on that. So, two things. First of all, the work for the week will be to continue with the tickets, both local LLM and through the Claude agents. But, let's get the live site fully functioning and tested today so that we can interact normally while I'm traveling.
+
+*Note:* THE WEEK INSTRUCTION - receipted 14:0x; written verbatim into tasks/WEEK-INSTRUCTION.md (status live, valid_until 2026-09-27 = Wednesday reading; he was asked for his return day)
