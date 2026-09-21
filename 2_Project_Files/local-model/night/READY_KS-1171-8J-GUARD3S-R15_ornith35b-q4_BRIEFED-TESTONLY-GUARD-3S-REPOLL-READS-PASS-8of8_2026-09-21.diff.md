@@ -1,0 +1,122 @@
+# READY — KS-1171-8J-GUARD3S-R15 (Ornith, briefed, test_only, new · vitest) — PASS 8/8 — HELD for QA
+
+> ⚠ **CANONICAL PATCH = `/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/runs/2026-09-21_ks1171-ornith35b-night2/out.md.checker/patch.diff`** (from `ls` at 21:35 2026-09-21). Checker T3 (verbatim from checker.out): `PASS T3 diff applies at the tip (strict git apply --check)`; golden not located — no byte-identity claim is made.
+
+**Held 21:35 2026-09-21 by Wednesday (the 20:1x seat) after a source read (hold_ready.py — every clause below is built from the checker's own artefacts in `/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/runs/2026-09-21_ks1171-ornith35b-night2/out.md.checker`, not typed).** Tip `9f0265eb06ecf24d4de18149ce862ad2330a61ee`. Touches ONE file: `Blockchain/Dev/services/anchoring/src/__tests__/ks1171-guard-3-s-re-poll-reads.test.ts` (new). `+` lines 108 ordered-equal to the brief's `expected_plus` (ASCII); `-` lines 0 == `must_remove`. Green at the tip: 3/3 cells. Tampers (1), each red exactly its declared set with controls green and the product file restored by bytes (T6/T7/T8):
+- `8J` → red exactly ['RED KS-1171 8j - an injected confirmed:true with polled 0 CO', 'RED KS-1171 8j - no "never reached the chain" log when the t']
+
+**PR NOTES for the raise seat:** TEST-ONLY — zero product bytes; one file, apply `patch.diff` strictly at the tip (re-check `git ls-remote origin develop` first; if develop moved, re-run `git apply --check` and state it). Input: `/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/runs/2026-09-21_ks1171-ornith35b-night2/input.json`. Brief: `night/briefs/KS-1171-8J-GUARD3S-R15.md`. Verdict source: `/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/runs/2026-09-21_ks1171-ornith35b-night2/checker.out`.
+
+```diff
+--- /dev/null
++++ b/Blockchain/Dev/services/anchoring/src/__tests__/ks1171-guard-3-s-re-poll-reads.test.ts
+@@ -0,0 +1,108 @@
++/**
++ * KS-1171 - Guard 3's re-poll reads a MIXED window as ABSENT (#805 tier-1 r3 residue).
++ *
++ * TEST-ONLY MODE. The product at the tip is CORRECT: `reconfirmKnownSubmission`
++ * checks `confirmation.confirmed` FIRST and only THEN maps `polled === 0` to
++ * `'unknown'`. This task pins that behaviour with one new test file whose cells
++ * RED when line 260 is tampered to gate the confirmed check on `polled !== 0`,
++ * then go GREEN again once the tamper is removed (the untouched tip).
++ */
++import { describe, it, expect, vi, beforeEach } from 'vitest';
++import { BlockfrostServerError } from '@blockfrost/blockfrost-js';
++import { createAnchorSubmitter, type AnchorSubmissionDeps, type AnchorSnapshot } from '../anchorSubmission';
++
++vi.mock('../cardano/provider', async (importOriginal) => {
++  const orig = await importOriginal<typeof import('../cardano/provider')>();
++  return { ...orig, getTransaction: vi.fn() };
++});
++import { waitForConfirmation } from '../cardano/confirmation';
++
++const TX_A = '408e72087942198b69d686401829b5b9419d018dc4cc64917283aa3cdb084994';
++const ANCHOR_ID = 'anchor_a93bd8dd-10c8-4d52-b12e-c0bff6f5c790';
++
++/** The node reply guard 3 matches so it enters the re-poll path instead of retrying. */
++const INPUTS_SPENT_SHORT = () =>
++  new BlockfrostServerError({
++    status_code: 400,
++    error: 'Bad Request',
++    message: 'Transaction submission failed: ConwayMempoolFailure "All inputs are spent"',
++    url: 'x',
++  });
++
++function makeLock() {
++  let chain: Promise<unknown> = Promise.resolve();
++  return function lock<T>(fn: () => Promise<T>): Promise<T> {
++    const next = chain.catch(() => undefined).then(() => fn());
++    chain = next.catch(() => undefined);
++    return next;
++  };
++}
++
++/**
++ * Harness for KS-1171 - same shape as ks726's but the confirm dep ignores the
++ * chain and always returns FOUND with polled: 0 / errored: 3. Under the tamper
++ * at line 260 (`confirmed && polled !== 0`) this injected double would read as
++ * NOT confirmed -> unknown -> retry scheduled; at the untouched tip it confirms
++ * the row because `confirmed` is checked first regardless of counters.
++ */
++function makeHarness(confirmResult: ReturnType<typeof waitForConfirmation>) {
++  const SEED_USER_ID = 'seed-user-for-harness';
++  const row: AnchorSnapshot = {
++    id: ANCHOR_ID, status: 'pending', transactionHash: undefined, retryCount: 0,
++    metadataLabel: 674, metadataPayload: { documentId: 'doc-1787874883988-04d3ee24' },
++  };
++  const statusWrites: Array<Record<string, unknown>> = [];
++  const signedHashes: string[] = [];
++  const logs: Array<{ level: string; message: string; meta?: Record<string, unknown> }> = [];
++  const submit = vi.fn(async (_label: number, _payload: object, options?: { onSigned?: (txHash: string) => Promise<void> }) => {
++    if (options?.onSigned) { signedHashes.push(TX_A); await options.onSigned(TX_A); }
++    throw INPUTS_SPENT_SHORT();
++  });
++  const deps: AnchorSubmissionDeps = {
++    getAnchor: vi.fn(async () => ({ ...row })),
++    submit,
++    // Stub that ignores the chain entirely - always reports found with the given counters.
++    confirm: vi.fn(async () => confirmResult),
++    updateStatus: vi.fn(async (_id: string, updates: Record<string, unknown>) => {
++      statusWrites.push(updates);
++      if (typeof updates.status === 'string') row.status = updates.status as AnchorSnapshot['status'];
++      if (typeof updates.transactionHash === 'string') row.transactionHash = updates.transactionHash;
++    }),
++    bumpRetryCount: vi.fn(async () => { row.retryCount += 1; }),
++    scheduleRetry: vi.fn(),
++    log: vi.fn((level, message, meta) => { logs.push({ level, message, meta }); }),
++    withWalletLock: makeLock(),
++  };
++  const calls = (fn: unknown) => (fn as ReturnType<typeof vi.fn>).mock.calls.length;
++  return { deps, row, signedHashes, logs, calls };
++}
++
++beforeEach(() => { vi.clearAllMocks(); });
++
++describe('KS-1171 - confirmed:true with polled:0 confirms the row at the tip (test-only mode)', () => {
++  it('RED KS-1171 8j - an injected confirmed:true with polled 0 CONFIRMS the row', async () => {
++    const h = makeHarness({ confirmed: true, confirmations: 1, blockNumber: 4242, slot: 99, blockHash: 'b'.repeat(64), polled: 0, errored: 3 });
++    await createAnchorSubmitter(h.deps)(ANCHOR_ID);
++
++    expect(h.row.status).toBe('confirmed');
++    expect(h.row.transactionHash).toBe(TX_A);
++    expect(h.calls(h.deps.scheduleRetry)).toBe(0);
++  }, 60_000);
++
++  it('RED KS-1171 8j - no "never reached the chain" log when the transaction was found', async () => {
++    const h = makeHarness({ confirmed: true, confirmations: 1, blockNumber: 4242, slot: 99, blockHash: 'b'.repeat(64), polled: 0, errored: 3 });
++    await createAnchorSubmitter(h.deps)(ANCHOR_ID);
++
++    expect(h.logs.some(l => l.message.startsWith('Anchor confirmation poll never reached the chain'))).toBe(false);
++    expect(h.logs.some(l => l.message === 'Anchor confirmed on Cardano')).toBe(true);
++  }, 60_000);
++
++  it('KS-1171 control - confirmed:true with polled 2 confirms the row too', async () => {
++    const h = makeHarness({ confirmed: true, confirmations: 1, blockNumber: 4242, slot: 99, blockHash: 'b'.repeat(64), polled: 2, errored: 0 });
++    await createAnchorSubmitter(h.deps)(ANCHOR_ID);
++
++    expect(h.row.status).toBe('confirmed');
++    expect(h.row.transactionHash).toBe(TX_A);
++    expect(h.logs.some(l => l.message === 'Anchor confirmed on Cardano')).toBe(true);
++  }, 60_000);
++});
+```
