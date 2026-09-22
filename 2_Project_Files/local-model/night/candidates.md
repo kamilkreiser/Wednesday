@@ -1,8 +1,8 @@
-# Ornith candidates — derived 2026-09-22 14:51 from 303 KS Backlog/Todo tickets (read-only, unpaginated)
+# Ornith candidates — derived 2026-09-22 15:44 from 299 KS Backlog/Todo tickets (read-only, unpaginated)
 
 A CENSUS for the coordinator to brief from, easy → hard (Kam 2026-09-15 16:40 / 18:19). A ticket here is a candidate, not a task: read it, read the file at the tip, write `night/briefs/<id>.md`, then queue it. Auth-shaped titles are excluded (LAST); Peter/Stuart tickets and PR-attached tickets are excluded outright.
 
-## T1 services (vitest, one file) — 25
+## T1 services (vitest, one file) — 24
 - KS-678 (P2) [resolved:basename, a HINT — read the file] #568 publishes 17 URLs on secuura.io — `scripts/openapi-examples/synthesize.ts`
 - KS-683 (P2) Anchor-status standoff: a consumer repolls anchors K reports as terminally faile — `services/anchoring/src/index.ts`
 - KS-953 (P2) CLASS: editing api-gateway/src/index.ts silently reddens packages/shared, and no — `services/api-gateway/src/index.ts`
@@ -26,7 +26,6 @@ A CENSUS for the coordinator to brief from, easy → hard (Kam 2026-09-15 16:40 
 - KS-986 (P3) [resolved:basename, a HINT — read the file] The published admin credential survi — `services/auth/src/repositories/userRepo.ts`
 - KS-1145 (P4) ks949 suite coverage (KS-950 / KS-962, #973): ID3's capture half has no size ass — `services/api-gateway/src/startup-migrations.ts`
 - KS-1197 (P4) [resolved:basename, a HINT — read the file] A non-string verificationLevel claim — `services/auth/src/repositories/userRepo.ts`
-- KS-1239 (P4) R-1: the index.ts:347 rawAuthorization capture is dead code — 0 readers — `services/api-gateway/src/index.ts`
 - KS-748 (P4) [resolved:route, a HINT — read the file] svc_api_keys.organization_id is not a t — `services/security/src/index.ts`
 
 ## T2 tooling (systemTest/*, one file) — 0
@@ -80,7 +79,7 @@ A CENSUS for the coordinator to brief from, easy → hard (Kam 2026-09-15 16:40 
 
 ## ⚠ ALSO NAMED IN A HELD READY's HEADLINE — 23 (verify before briefing; surfaced, NOT suppressed)
 - KS-1004 — named in READY_KS-1158-R1_ornith35b-q4_JEST-PASS-7of7_2026-09-15.diff.md
-- KS-1020 — named in READY_KS-1121_ornith35b-q4_VITEST-MODIFYINPLACE-REANCHORED-PASS-7of7_2026-09-16.diff.md, READY_KS-1121_ornith35b-q4_VITEST-MODIFYINPLACE-REANCHORED-PASS-7of7_2026-09-16.diff.md.pre-1350-superseded
+- KS-1020 — named in READY_KS-1121_ornith35b-q4_VITEST-MODIFYINPLACE-REANCHORED-PASS-7of7_2026-09-16.diff.md, READY_KS-1121_ornith35b-q4_VITEST-MODIFYINPLACE-REANCHORED-PASS-7of7_2026-09-16.diff.md.pre-0922-1509-stashrestore, READY_KS-1121_ornith35b-q4_VITEST-MODIFYINPLACE-REANCHORED-PASS-7of7_2026-09-16.diff.md.pre-1350-superseded
 - KS-1046 — named in READY_KS-1047_ornith35b-q4_BASHPATCH-RECOUNTED-PASS-7of7_2026-09-16.diff.md, READY_KS-1047_ornith35b-q4_BASHPATCH-RECOUNTED-PASS-7of7_2026-09-16.diff.md.pre-0951-superseded
 - KS-1069 — named in READY_KS-1130-E3twin_ornith35b-q4_TESTONLY-PASS-7of7_2026-09-15.diff.md
 - KS-1072 — named in READY_KS-1199_ornith35b-q4_TESTONLY-TAMPER-PASS-7of7_2026-09-17.diff.md
@@ -88,14 +87,14 @@ A CENSUS for the coordinator to brief from, easy → hard (Kam 2026-09-15 16:40 
 - KS-1092 — named in READY_KS-1097-B_ornith35b-q4_DOCPATCH-REFLOW-INFERRED-PASS-7of7_2026-09-15.diff.md, READY_KS-1097-B_ornith35b-q4_DOCPATCH-REFLOW-INFERRED-PASS-7of7_2026-09-15.diff.md.pre-1034-superseded
 - KS-1099 — named in READY_KS-1108_ornith35b-q4_TOOLING-AKTO-PASS-7of7_2026-09-15.diff.md
 - KS-1173 — named in READY_KS-1172-A3_ornith35b-q4_JEST-MODIFYINPLACE-THREE-VERBS-PASS-7of7_2026-09-15.diff.md, READY_KS-1172-B3_ornith35b-q4_MODIFYINPLACE-THREE-VERBS-PASS-7of7_2026-09-15.diff.md, READY_KS-1172-D3_ornith35b-q4_DOCPATCH-THREE-VERBS-PASS-6of6_2026-09-15.diff.md
-- KS-202 — named in READY_KS-974-B_ornith35b-q4_PASS-7of7_2026-09-15.diff.md, READY_KS-974-B_ornith35b-q4_PASS-7of7_2026-09-15.diff.md.pre-1137-superseded
+- KS-202 — named in READY_KS-974-B_ornith35b-q4_PASS-7of7_2026-09-15.diff.md, READY_KS-974-B_ornith35b-q4_PASS-7of7_2026-09-15.diff.md.pre-0922-1509-stashrestore, READY_KS-974-B_ornith35b-q4_PASS-7of7_2026-09-15.diff.md.pre-1137-superseded
 - KS-217 — named in READY_KS-1193-F1_ornith35b-q4_TESTONLY-TAMPER-PASS-7of7_2026-09-17.diff.md
 - KS-253 — named in READY_KS-999_ornith35b-q4_RECHECK-PASS-7of7_2026-09-15.diff.md
-- KS-430 — named in READY_KS-629-B_ornith35b-q4_VITEST-PASS-7of7_2026-09-16.diff.md, READY_KS-629-B_ornith35b-q4_VITEST-PASS-7of7_2026-09-16.diff.md.pre-1132-superseded
+- KS-430 — named in READY_KS-629-B_ornith35b-q4_VITEST-PASS-7of7_2026-09-16.diff.md, READY_KS-629-B_ornith35b-q4_VITEST-PASS-7of7_2026-09-16.diff.md.pre-0922-1509-stashrestore, READY_KS-629-B_ornith35b-q4_VITEST-PASS-7of7_2026-09-16.diff.md.pre-1132-superseded
 - KS-666 — named in READY_KS-1011_ornith35b-q4_BASHPATCH-NEWTEST-PASS-7of7_2026-09-16.diff.md, READY_KS-1011_ornith35b-q4_BASHPATCH-NEWTEST-PASS-7of7_2026-09-16.diff.md.pre-1034-superseded
 - KS-691 — named in READY_KS-1047_ornith35b-q4_BASHPATCH-RECOUNTED-PASS-7of7_2026-09-16.diff.md, READY_KS-1047_ornith35b-q4_BASHPATCH-RECOUNTED-PASS-7of7_2026-09-16.diff.md.pre-0951-superseded
 - KS-727 — named in READY_KS-1181-F3_ornith35b-q4_TESTONLY-TAMPER-PASS-7of7_2026-09-17.diff.md, READY_KS-1181-F3w_ornith35b-q4_comment-PASS-9of9_2026-09-17.diff.md
-- KS-754 — named in READY_KS-1028_ornith35b-q4_JEST-PASS-7of7_2026-09-15.diff.md, READY_KS-1028_ornith35b-q4_JEST-PASS-7of7_2026-09-15.diff.md.pre-1257-superseded, READY_KS-1031_ornith35b-q4_BASHPATCH-NEWTEST-PASS-7of7_2026-09-16.diff.md, READY_KS-1031_ornith35b-q4_BASHPATCH-NEWTEST-PASS-7of7_2026-09-16.diff.md.pre-1034-superseded
+- KS-754 — named in READY_KS-1028_ornith35b-q4_JEST-PASS-7of7_2026-09-15.diff.md, READY_KS-1028_ornith35b-q4_JEST-PASS-7of7_2026-09-15.diff.md.pre-0922-1509-stashrestore, READY_KS-1028_ornith35b-q4_JEST-PASS-7of7_2026-09-15.diff.md.pre-1257-superseded, READY_KS-1031_ornith35b-q4_BASHPATCH-NEWTEST-PASS-7of7_2026-09-16.diff.md, READY_KS-1031_ornith35b-q4_BASHPATCH-NEWTEST-PASS-7of7_2026-09-16.diff.md.pre-1034-superseded
 - KS-835 — named in READY_KS-1156-A2_ornith35b-q4_comment-PASS-9of9_2026-09-17.diff.md
 - KS-869 — named in READY_KS-887_ornith35b-q4_TESTONLY-MODIFYINPLACE-PASS-7of7_2026-09-16.diff.md
 - KS-930 — named in READY_KS-958_ornith35b-q4_BASHPATCH-REANCHORED-RECOUNTED-PASS-7of7_2026-09-16.diff.md
@@ -103,11 +102,9 @@ A CENSUS for the coordinator to brief from, easy → hard (Kam 2026-09-15 16:40 
 - KS-966 — named in READY_KS-972_ornith35b-q4_BASHPATCH-REANCHORED-PASS-7of7_2026-09-16.diff.md, READY_KS-972_ornith35b-q4_BASHPATCH-REANCHORED-PASS-7of7_2026-09-16.diff.md.pre-0951-superseded
 - KS-999 — named in READY_KS-1186_ornith35b-q4_AUTH-5SITE-LINEKEYED-PASS-7of7_2026-09-17.diff.md
 
-## HELD (READY_* or done.md PASS) — 48
+## HELD (READY_* or done.md PASS) — 45
 - KS-1009 Security: GET /api/auth/wallet/status returns userId + role to ANY anonymous cal
-- KS-1011 KS-666 stack marker reads "unknown" for owner/branch/commit/started_at whenever 
 - KS-1028 KS-754 gate F-1 (MAJOR): a step-12 throw skips the USER_ERASED fan-out AFTER the
-- KS-1031 KS-754 gate F-4: DEPLOY CONDITION — apply 048 BEFORE rolling the originate image
 - KS-1033 KS-926 residue: the three guards that could NOT be wired, and what each needs fi
 - KS-1034 check-stack-safety.sh resolves the WRONG repo root inside a git hook and calls p
 - KS-1040 Push preflight leg 4 reports 'a published path is unroutable' when the real caus
@@ -134,12 +131,12 @@ A CENSUS for the coordinator to brief from, easy → hard (Kam 2026-09-15 16:40 
 - KS-1220 ks839 cells pin padded wildcards with ASCII separators only - a second tokenizer
 - KS-1221 ks744 cells never test a falsy claim - a verificationLevel of '' or null must fo
 - KS-1227 ks1072 postTier2's anchor-store witness counts every stub request, leaks its lis
+- KS-1239 R-1: the index.ts:347 rawAuthorization capture is dead code — 0 readers
 - KS-1250 O-2: RUNBOOK §2.2 documents SMOKE_BASE_URL, but scripts/smoke-test.sh ignores it
 - KS-1277 documents.ts: two stale comments about on-behalf-of recording (:2327-2334 inside
 - KS-623 Test-token env guard is asymmetric: the gateway fails closed on an unset NODE_EN
 - KS-629 kyc `livenessVideo` is accepted by spec and runtime, then silently discarded — n
 - KS-692 Security: /api/status revoke/unrevoke has no tenant ownership check — an ISSUER_
-- KS-730 Security: 71 inline handlers still return err.message verbatim off-production — 
 - KS-747 Spec drift: GET /api/security/keys declares no parameters while the handler requ
 - KS-794 verify-file returns `fileSize` on every 200 and neither response schema declares
 - KS-865 check-no-latest-tags.sh silently skips a missing input — it scans 5 of the 6 fil
@@ -149,7 +146,6 @@ A CENSUS for the coordinator to brief from, easy → hard (Kam 2026-09-15 16:40 
 - KS-908 connectorId persists but is invisible through the API — POST and GET both return
 - KS-938 Security: "MFA disabled" leaves the TOTP seed and hashed backup codes in the row
 - KS-960 Two schema sources disagree on whether users.email is unique — a statement valid
-- KS-972 start-secuura.sh banner prints admin@secuura.com / admin123, which has returned 
 - KS-974 Published bound vs runtime bound on rate-limit scope: /check enforces code UNITS
 - KS-976 Rate-limit refusals name the wrong field: 400 says "Key required" when the key w
 

@@ -38,5 +38,14 @@ h = runH(pick(chat, "if (WED.isSynthetic(r) || WED.isHidden(r)) { WED.hidden.mes
 P(h.rows.size === 1 && !h.rows.has("2026-09-22T04:00:01.000Z_hid"), `chat.html poll(): hidden=true row absent (${h.rows.size} of 2 kept)`);
 P(WED.hiddenQ === "" && WED.revealHidden === false && typeof WED.isHidden === "function", "common.js: no ?hidden=1 -> hiddenQ empty, revealHidden false (the API is not asked for hidden rows)");
 P(/WED\.hiddenQ/.test(idx.split("async function poll(")[1].split("\n")[3]) && /WED\.hiddenQ/.test(chat.split("async function poll(")[1].split("\n")[3]), "both pages pass WED.hiddenQ on the poll() API call (the ?hidden=1 reveal reaches the API)");
+// (4) file drawer (2026-09-22): both pages carry the files button right after stop (the same header row), load drawer.js after common.js,
+//     have the attach control beside send, hand attachment chips to WEDFILES in render(), and upload queued files before the reply is posted.
+for (const [name, html] of [["index.html", idx], ["chat.html", chat]]) {
+  const stop_i = html.indexOf('id="stopvoice"'), files_i = html.indexOf('id="filesbtn"'), live_i = html.indexOf('id="live"');
+  P(stop_i > 0 && files_i > stop_i && files_i < live_i, `${name}: #filesbtn sits right after #stopvoice (before #live) in the header`);
+  P(html.indexOf('src="/static/common.js"') < html.indexOf('src="/static/drawer.js"') && html.indexOf('src="/static/drawer.js"') > 0, `${name}: drawer.js loads after common.js`);
+  P(/id="attachfile" type="file" multiple/.test(html) && /id="attach"/.test(html) && /WEDFILES\.attachmentsEl\(m\)/.test(html) && /WEDFILES\.uploadPending\(activeAgent, id\)/.test(html) && /WEDFILES\.init\(\{ zone:/.test(html), `${name}: attach input + button, attachment chips in render(), uploadPending before postKamMessage, WEDFILES.init with a drop zone`);
+}
+P(fs.existsSync(`${HERE}/app/static/drawer.js`) && /window\.WEDFILES = /.test(fs.readFileSync(`${HERE}/app/static/drawer.js`, "utf8")), "drawer.js exists and defines window.WEDFILES");
 console.log(fails ? `### RESULT: ${fails} FAILED` : "### RESULT: ALL PAGE CHECKS PASS (static DOM order + the pages' own ingestion statements in Node; not a browser)");
 process.exit(fails ? 1 : 0);

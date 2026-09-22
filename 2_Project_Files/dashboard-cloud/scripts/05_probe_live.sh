@@ -275,9 +275,105 @@ c=$(hdr -X POST -H "Authorization: Bearer $TOK" -H 'Content-Type: application/js
 python3 -c 'import json,sys;d=json.load(open(sys.argv[1]));assert d["changed"] is True and d["row"]["hidden"] is False,d;print("PASS  J3 unhide echo: changed=true hidden=false")' "$SCRATCH/p_body.txt" || { echo "FAIL  (section J python arm, see traceback above)"; FAIL=1; }
 c=$(hdr -H "Authorization: Bearer $TOK" "$BASE/api/seat/messages?client=WED&since=$(date -u +%Y-%m-%dT00:00)&limit=1000"); python3 -c 'import json,sys;d=json.load(open(sys.argv[1]));ids=[m["id"] for m in d["messages"]];assert sys.argv[2] in ids;print("PASS  J3 row BACK in the default seat list after the unhide (reversible)")' "$SCRATCH/p_body.txt" "live-wed-$TS" || { echo "FAIL  (section J python arm, see traceback above)"; FAIL=1; }
 unset TOK TOKT
+echo "### K. File drawer (2026-09-22, Kam 15:26 download / 15:31 upload) — encrypted both ways, seat-scoped, bounded, audited, never deletes"
+c=$(hdr "$BASE/api/seat/health"); expect "K1 health" 200 "$c"
+python3 -c 'import json,sys;d=json.load(open(sys.argv[1]));assert d.get("file_route") is True and d.get("file_max_bytes")==33554432 and d["phase"]=="3",d;print("PASS  K1 health: phase 3 + file_route true + file_max_bytes 33554432 (32 MiB)")' "$SCRATCH/p_body.txt" || { echo "FAIL  (section K python arm, see traceback above)"; FAIL=1; }
+expect "K2 GET /api/seat/files NO token" 401 "$(hdr "$BASE/api/seat/files")"
+expect "K2 POST /api/seat/files NO token" 401 "$(hdr -X POST -H 'Content-Type: application/json' -d '{"client":"WED"}' "$BASE/api/seat/files")"
+expect "K2 GET /api/seat/files/WED/<rk>/blob NO token" 401 "$(hdr "$BASE/api/seat/files/WED/2026-09-22T00:00:00.000Z_x/blob")"
+expect "K2 GET /api/seat/files FORGED token" 401 "$(hdr -H 'Authorization: Bearer eyJhbGciOiJSUzI1NiIsImtpZCI6Im5vcGUifQ.eyJhdWQiOiJ4In0.c2ln' "$BASE/api/seat/files")"
+ea_refused "K2 GET /api/files plain client (viewer list, Easy Auth gated)" "$BASE/api/files"
+ea_refused "K2 GET /api/files/WED/<rk>/blob plain client (viewer download, Easy Auth gated)" "$BASE/api/files/WED/2026-09-22T00:00:00.000Z_x/blob"
+ea_refused "K2 PUT /api/files/WED/<rk>/blob plain client (Kam's upload bytes, Easy Auth gated)" -X PUT -H 'Content-Type: application/octet-stream' -d 'x' "$BASE/api/files/WED/2026-09-22T00:00:00.000Z_x/blob"
+ea_refused "K2 POST /api/files with FORGED x-ms-client-principal-id = Kam's object id, from outside" -X POST -H "x-ms-client-principal-id: $KAM_USER_OBJ" -H 'Content-Type: application/json' -d '{"view":"wednesday"}' "$BASE/api/files"
+ea_refused "K2 GET /api/static drawer.js plain client" "$BASE/static/drawer.js"
+# K3: share -> list -> download round-trip as the WEDNESDAY seat with a REAL random file; sha256 equal after decrypt with the seat key and Kam's keys
+head -c 3000 /dev/urandom > "$SCRATCH/k3_$TS.bin"; K3SHA=$(shasum -a 256 "$SCRATCH/k3_$TS.bin" | cut -c1-64)
+"$V" "$HERE/seat/share_file.py" "$SCRATCH/k3_$TS.bin" --seat wednesday --client WED --base "$BASE" --note "live probe K3 $TS" --synthetic > "$SCRATCH/k3_share.txt" 2>&1
+expect "K3 share_file.py --seat wednesday --client WED (3000 random bytes) rc" "rc=0" "$(tail -1 "$SCRATCH/k3_share.txt")"
+K3ID=$(/usr/bin/grep -o 'file_id=[A-Za-z0-9._-]*' "$SCRATCH/k3_share.txt" | cut -d= -f2); K3RK=$(/usr/bin/grep -o 'row_key=[A-Za-z0-9._:-]*' "$SCRATCH/k3_share.txt" | cut -d= -f2); echo "      file_id=$K3ID row_key=$K3RK"
+TOK=$("$V" - <<PY
+import sys; sys.path.insert(0,"$HERE/seat"); import seat_common as sc, argparse
+a=sc.common_args(argparse.ArgumentParser()).parse_args(["--seat","wednesday","--client","WED"]); print(sc.get_token(a, sc.load_ids()))
+PY
+)
+TOKT=$("$V" - <<PY
+import sys; sys.path.insert(0,"$HERE/seat"); import seat_common as sc, argparse
+a=sc.common_args(argparse.ArgumentParser()).parse_args(["--seat","tuesday","--client","Datasec"]); print(sc.get_token(a, sc.load_ids()))
+PY
+)
+c=$(hdr -H "Authorization: Bearer $TOK" "$BASE/api/seat/files?client=WED&since=$(date -u +%Y-%m-%dT00:00)&limit=1000"); expect "K3 wednesday GET /api/seat/files?client=WED" 200 "$c"
+python3 -c 'import json,sys;d=json.load(open(sys.argv[1]));m=[x for x in d["files"] if x["id"]==sys.argv[2]];assert len(m)==1,m;r=m[0];assert r["status"]=="ready" and r["direction"]=="shared" and r["size"]==3016 and r["seat"]=="wednesday" and r["synthetic"] is True and len(r["wrapped_keys"])==4,r
+raw=open(sys.argv[1]).read();assert "k3_" not in raw and "live probe K3" not in raw, "NAME/NOTE IN CLEAR";print("PASS  K3 listed: ready, direction=shared, size 3016 (=3000+16 tag), 4 wrapped keys; the name and note are NOT in the response (encrypted meta)")' "$SCRATCH/p_body.txt" "$K3ID" || { echo "FAIL  (section K python arm, see traceback above)"; FAIL=1; }
+cp "$SCRATCH/p_body.txt" "$SCRATCH/k3_list.json"
+c=$(curl -s -o "$SCRATCH/k3_ct.bin" -D "$SCRATCH/p_hdr.txt" -w '%{http_code}' --max-time 60 -H "Authorization: Bearer $TOK" "$BASE/api/seat/files/WED/$K3RK/blob"); expect "K3 wednesday GET .../blob (download)" 200 "$c"
+"$V" - "$SCRATCH/k3_list.json" "$K3ID" "$SCRATCH/k3_ct.bin" "$K3SHA" <<'PY' || { echo "FAIL  (section K python arm, see traceback above)"; FAIL=1; }
+import json,sys,hashlib; sys.path.insert(0,"/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/dashboard-cloud/seat"); import envelope
+CRED="/Volumes/DevMASTER/WEDNESDAY/4_Credentials/dashboard-cloud"; r=[x for x in json.load(open(sys.argv[1]))["files"] if x["id"]==sys.argv[2]][0]; ct=open(sys.argv[3],"rb").read(); want=sys.argv[4]
+assert len(ct)==r["size"] and hashlib.sha256(ct).hexdigest()==r["sha256"], "stored bytes != row size/sha256"; print("PASS  K3 downloaded bytes: len == row size, sha256 == row sha256 (the API serves the stored ciphertext verbatim)")
+assert hashlib.sha256(ct).hexdigest()!=want and ct[:3000]!=open("/dev/null","rb").read(), "ciphertext equals plaintext?!"; print("PASS  K3 the stored bytes are NOT the file (ciphertext sha256 != plaintext sha256)")
+clear={"client":r["client"],"kind":"file","id":r["id"],"ts":r["ts"]}
+for k in ("wednesday-seat.pem","kam-pilot-private.pem","kam-laptop-private.pem","kam-ipad-private.pem"):
+    pt=envelope.decrypt_file(envelope.load_private(f"{CRED}/{k}"), r, clear, ct); m=json.loads(envelope.decrypt_text(envelope.load_private(f"{CRED}/{k}"), r, clear))
+    ok=hashlib.sha256(pt).hexdigest()==want==m["sha256"] and m["name"].startswith("k3_"); print(("PASS  K3 %s decrypts meta (name %s) + bytes: sha256 == the file's %s…" % (k, m["name"], want[:12])) if ok else "FAIL  K3 %s" % k); assert ok
+try: envelope.decrypt_file(envelope.load_private(f"{CRED}/tuesday-seat.pem"), r, clear, ct); print("FAIL  K3 TUESDAY KEY OPENED A WED FILE"); sys.exit(1)
+except KeyError: print("PASS  K3 tuesday-seat.pem REFUSED on the WED file (KeyError: not a recipient)")
+PY
+mkdir -p "$SCRATCH/k3_fetch_$TS"; "$V" "$HERE/seat/get_files.py" --seat wednesday --base "$BASE" --ids "$K3ID" --include-synthetic --fetch "$SCRATCH/k3_fetch_$TS" > "$SCRATCH/k3_fetch.txt" 2>&1; expect "K3 get_files.py --fetch (seat-side download + decrypt) rc" "rc=0" "$(tail -1 "$SCRATCH/k3_fetch.txt")"
+expect "K3 fetched file sha256 == original" "$K3SHA" "$(shasum -a 256 "$SCRATCH/k3_fetch_$TS/${K3ID}_k3_$TS.bin" 2>/dev/null | cut -c1-64)"
+c=$(hdr -H "Authorization: Bearer $TOK" "$BASE/api/seat/files/audit?limit=1000"); expect "K3 GET /api/seat/files/audit" 200 "$c"
+python3 -c 'import json,sys;d=json.load(open(sys.argv[1]));a=[x for x in d["audit"] if x["target_id"]==sys.argv[2]];acts=[x["action"] for x in a];assert acts.count("share")==1 and acts.count("download")>=2,acts;assert all(x["target_client"] in ("WED","Secuura","ALL") and x["kind"]=="file_audit" for x in d["audit"]);print("PASS  K3 audit lines for this file: %s (who=%s, at=%s); no foreign-partition line" % (acts, a[0]["seat"], a[0]["at"]))' "$SCRATCH/p_body.txt" "$K3ID" || { echo "FAIL  (section K python arm, see traceback above)"; FAIL=1; }
+c=$(hdr -H "Authorization: Bearer $TOK" "$BASE/api/seat/hide/audit?limit=1000"); python3 -c 'import json,sys;d=json.load(open(sys.argv[1]));assert all(x.get("kind","hide_audit")=="hide_audit" for x in d["audit"]);print("PASS  K3 the hide audit route still lists hide/unhide lines only (%d rows, no file_audit among them)" % len(d["audit"]))' "$SCRATCH/p_body.txt" || { echo "FAIL  (section K python arm, see traceback above)"; FAIL=1; }
+# K4: refusals — the Datasec client from the wednesday seat (403, exactly as post_message.py), R0 on reads/writes, unknown row, re-PUT of a ready row
+"$V" "$HERE/seat/share_file.py" "$SCRATCH/k3_$TS.bin" --seat wednesday --client Datasec --base "$BASE" --note "must be refused" --synthetic > "$SCRATCH/k4_share.txt" 2>&1; expect "K4 share_file.py --seat wednesday --client Datasec (MUST refuse) rc" "rc=1" "$(tail -1 "$SCRATCH/k4_share.txt")"
+expect "K4 ... the refusal is the API's 403" '"status": 403' "$(/usr/bin/grep -o '"status": [0-9]*' "$SCRATCH/k4_share.txt" | head -1)"
+expect "K4 tuesday token GET the WED file's bytes (MUST refuse)" 403 "$(hdr -H "Authorization: Bearer $TOKT" "$BASE/api/seat/files/WED/$K3RK/blob")"
+expect "K4 tuesday token PUT bytes onto the WED row (MUST refuse)" 403 "$(hdr -X PUT -H "Authorization: Bearer $TOKT" -H 'Content-Type: application/octet-stream' -d 'xxxxxxxxxxxxxxxxxxxxx' "$BASE/api/seat/files/WED/$K3RK/blob")"
+expect "K4 tuesday GET /api/seat/files?client=WED (MUST refuse)" 403 "$(hdr -H "Authorization: Bearer $TOKT" "$BASE/api/seat/files?client=WED")"
+expect "K4 unknown row_key blob -> 404" 404 "$(hdr -H "Authorization: Bearer $TOK" "$BASE/api/seat/files/WED/2026-09-22T00:00:00.000Z_no-such-$TS/blob")"
+c=$(hdr -X PUT -H "Authorization: Bearer $TOK" -H 'Content-Type: application/octet-stream' -d 'xxxxxxxxxxxxxxxxxxxxx' "$BASE/api/seat/files/WED/$K3RK/blob"); expect "K4 wednesday re-PUT bytes onto its READY row -> 200 duplicate (nothing overwritten)" 200 "$c"
+python3 -c 'import json,sys;d=json.load(open(sys.argv[1]));assert d.get("duplicate") is True,d;print("PASS  K4 duplicate echo: the ready row keeps its bytes")' "$SCRATCH/p_body.txt" || { echo "FAIL  (section K python arm, see traceback above)"; FAIL=1; }
+c=$(curl -s -o "$SCRATCH/k4_ct.bin" -w '%{http_code}' --max-time 60 -H "Authorization: Bearer $TOK" "$BASE/api/seat/files/WED/$K3RK/blob"); expect "K4 bytes after the re-PUT are byte-identical to the first download" "$(shasum -a 256 "$SCRATCH/k3_ct.bin" | cut -c1-64)" "$(shasum -a 256 "$SCRATCH/k4_ct.bin" | cut -c1-64)"
+# K5: the size bound — a row declaring more than FILE_MAX is refused 413 at the row; a PUT whose Content-Length exceeds the bound is refused 413 before the bytes are read
+"$V" "$HERE/seat/share_file.py" "$SCRATCH/k3_$TS.bin" --seat wednesday --client WED --note "bound" --synthetic --dry-run > "$SCRATCH/k5_dry.txt" 2>&1
+python3 -c 'import json,sys;t=open(sys.argv[1]).read();d=json.loads(t[:t.rindex("}")+1])["body"];d["size"]=33554433;d["id"]="k5big-"+sys.argv[2];json.dump(d,open(sys.argv[3],"w"));d2=dict(d);d2["size"]=33554432;d2["id"]="k5max-"+sys.argv[2];json.dump(d2,open(sys.argv[4],"w"));d3=dict(d);d3["size"]=16;d3["id"]="k5tiny-"+sys.argv[2];json.dump(d3,open(sys.argv[5],"w"))' "$SCRATCH/k5_dry.txt" "$TS" "$SCRATCH/k5_big.json" "$SCRATCH/k5_max.json" "$SCRATCH/k5_tiny.json"
+expect "K5 POST /api/seat/files declaring size 33554433 (= bound + 1) -> 413" 413 "$(hdr -X POST -H "Authorization: Bearer $TOK" -H 'Content-Type: application/json' --data-binary "@$SCRATCH/k5_big.json" "$BASE/api/seat/files")"; echo "      body: $(head -c 120 "$SCRATCH/p_body.txt")"
+expect "K5 POST /api/seat/files declaring size 16 (< tag + 1 byte) -> 400" 400 "$(hdr -X POST -H "Authorization: Bearer $TOK" -H 'Content-Type: application/json' --data-binary "@$SCRATCH/k5_tiny.json" "$BASE/api/seat/files")"
+c=$(hdr -X POST -H "Authorization: Bearer $TOK" -H 'Content-Type: application/json' --data-binary "@$SCRATCH/k5_max.json" "$BASE/api/seat/files"); expect "K5 POST a row declaring exactly the bound (33554432) -> 201 pending" 201 "$c"
+K5RK=$(python3 -c 'import json,sys;print(json.load(open(sys.argv[1]))["stored"]["row_key"])' "$SCRATCH/p_body.txt")
+# a REAL 32 MiB + 1 body (a forged Content-Length with a short body never yields a status to curl — first run got 000, an instrument fault)
+head -c 33554433 /dev/zero > "$SCRATCH/k5_big.bin"
+expect "K5 PUT a real 33554433-byte body (bound + 1) onto it -> 413" 413 "$(curl -s -o "$SCRATCH/p_body.txt" -w '%{http_code}' --max-time 180 -X PUT -H "Authorization: Bearer $TOK" -H 'Content-Type: application/octet-stream' -H 'Expect:' --data-binary "@$SCRATCH/k5_big.bin" "$BASE/api/seat/files/WED/$K5RK/blob")"; echo "      body: $(head -c 120 "$SCRATCH/p_body.txt")"
+# K3b: a file ABOVE Kam's 25 MB ask (30 MB of random bytes) makes the whole round trip — share, seat download, decrypt, sha256 equal
+head -c 31457280 /dev/urandom > "$SCRATCH/k3b_$TS.bin"; K3BSHA=$(shasum -a 256 "$SCRATCH/k3b_$TS.bin" | cut -c1-64)
+"$V" "$HERE/seat/share_file.py" "$SCRATCH/k3b_$TS.bin" --seat wednesday --client WED --base "$BASE" --note "live probe K3b 30 MB $TS" --synthetic > "$SCRATCH/k3b_share.txt" 2>&1
+expect "K3b share_file.py 30 MB (31457280 random bytes) rc" "rc=0" "$(tail -1 "$SCRATCH/k3b_share.txt")"
+K3BID=$(/usr/bin/grep -o 'file_id=[A-Za-z0-9._-]*' "$SCRATCH/k3b_share.txt" | cut -d= -f2); mkdir -p "$SCRATCH/k3b_fetch_$TS"
+"$V" "$HERE/seat/get_files.py" --seat wednesday --base "$BASE" --ids "$K3BID" --include-synthetic --fetch "$SCRATCH/k3b_fetch_$TS" > "$SCRATCH/k3b_fetch.txt" 2>&1; expect "K3b get_files.py --fetch 30 MB rc" "rc=0" "$(tail -1 "$SCRATCH/k3b_fetch.txt")"
+expect "K3b fetched 30 MB file sha256 == original" "$K3BSHA" "$(shasum -a 256 "$SCRATCH/k3b_fetch_$TS/${K3BID}_k3b_$TS.bin" 2>/dev/null | cut -c1-64)"
+expect "K5 PUT bytes whose length != the declared size -> 400" 400 "$(hdr -X PUT -H "Authorization: Bearer $TOK" -H 'Content-Type: application/octet-stream' -d 'twenty-one bytes here' "$BASE/api/seat/files/WED/$K5RK/blob")"
+c=$(hdr -H "Authorization: Bearer $TOK" "$BASE/api/seat/files?client=WED&since=$(date -u +%Y-%m-%dT00:00)&limit=1000"); python3 -c 'import json,sys;d=json.load(open(sys.argv[1]));ids=[x["id"] for x in d["files"]];assert "k5max-"+sys.argv[2] not in ids and "k5big-"+sys.argv[2] not in ids;print("PASS  K5 the pending (never completed) row is NOT listed (%d ready WED files today)" % len(ids))' "$SCRATCH/p_body.txt" "$TS" || { echo "FAIL  (section K python arm, see traceback above)"; FAIL=1; }
+# K6: a message row carries attachments (clear file ids) — seat writer; 9 ids refused
+"$V" "$HERE/seat/post_message.py" --seat wednesday --client WED --base "$BASE" --text "SYNTHETIC K6 $TS message with an attachment" --id k6-msg-$TS --synthetic --dry-run > "$SCRATCH/k6_dry.txt" 2>&1
+python3 -c 'import json,sys;d=json.load(open(sys.argv[1]))["body"];d["attachments"]=[sys.argv[2]];json.dump(d,open(sys.argv[3],"w"));d2=dict(d);d2["id"]="k6-nine-"+sys.argv[4];d2["attachments"]=["f-%d"%i for i in range(9)];json.dump(d2,open(sys.argv[5],"w"))' "$SCRATCH/k6_dry.txt" "$K3ID" "$SCRATCH/k6_msg.json" "$TS" "$SCRATCH/k6_nine.json"
+expect "K6 POST /api/seat/messages with attachments=[file id] -> 201" 201 "$(hdr -X POST -H "Authorization: Bearer $TOK" -H 'Content-Type: application/json' --data-binary "@$SCRATCH/k6_msg.json" "$BASE/api/seat/messages")"
+expect "K6 POST with 9 attachment ids -> 400" 400 "$(hdr -X POST -H "Authorization: Bearer $TOK" -H 'Content-Type: application/json' --data-binary "@$SCRATCH/k6_nine.json" "$BASE/api/seat/messages")"
+c=$(hdr -H "Authorization: Bearer $TOK" "$BASE/api/seat/messages?client=WED&since=$(date -u +%Y-%m-%dT00:00)&limit=1000"); python3 -c 'import json,sys;d=json.load(open(sys.argv[1]));m=[x for x in d["messages"] if x["id"]=="k6-msg-"+sys.argv[2]];assert len(m)==1 and m[0].get("attachments")==[sys.argv[3]],m;print("PASS  K6 the message row lists attachments == [%s] (parsed list, clear ids only)" % sys.argv[3])' "$SCRATCH/p_body.txt" "$TS" "$K3ID" || { echo "FAIL  (section K python arm, see traceback above)"; FAIL=1; }
+unset TOK TOKT
+# K7: the page module — file envelope both directions between common.js (Node WebCrypto) and envelope.py
+"$V" - > "$SCRATCH/pubkeys_k7.json" <<'PY'
+import sys, os, glob, hashlib, base64, json
+K="/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/dashboard-cloud/app/keys"
+def kid(pem): return hashlib.sha256(base64.b64decode("".join(l for l in pem.splitlines() if l and not l.startswith("-----")))).hexdigest()[:16]
+files=sorted(glob.glob(K+"/kam-*-public.pub")); files.sort(key=lambda q:(0 if os.path.basename(q)=="kam-pilot-public.pub" else 1,q))
+print(json.dumps({"kam":[{"name":os.path.basename(q)[4:-11],"kid":kid(open(q).read()),"pem":open(q).read()} for q in files],"seats":{s:{"kid":kid(open(f"{K}/{s}-seat-public.pub").read()),"pem":open(f"{K}/{s}-seat-public.pub").read()} for s in ("wednesday","tuesday")},"seat_of_client":{"WED":["wednesday"],"Secuura":["wednesday"],"Datasec":["tuesday"],"ALL":["wednesday","tuesday"]}}))
+PY
+node "$HERE/scripts/09e_file_webcrypto.mjs" "$SCRATCH/pubkeys_k7.json" "$SCRATCH" > "$SCRATCH/p_09e.txt" 2>&1; expect "K7 page file checks (encryptFile -> seat decrypts; seat encrypt_file -> page decrypts; tuesday refused; relabel refused)" 0 "$?"
+/usr/bin/grep -i -c '^pass' "$SCRATCH/p_09e.txt" | sed 's/^/      09e PASS lines: /'
 echo "### F. Rows per partition (counts only)"
 for c in Secuura Datasec WED ALL; do n=$(az storage entity query --account-name "$STORAGE" --table-name messages --auth-mode login --filter "PartitionKey eq '$c'" --select id -o json 2>/dev/null | python3 -c 'import json,sys;print(len(json.load(sys.stdin)["items"]))'); s=$(az storage entity query --account-name "$STORAGE" --table-name messages --auth-mode login --filter "PartitionKey eq '$c' and synthetic eq true" --select id -o json 2>/dev/null | python3 -c 'import json,sys;print(len(json.load(sys.stdin)["items"]))'); h=$(az storage entity query --account-name "$STORAGE" --table-name messages --auth-mode login --filter "PartitionKey eq '$c' and hidden eq true" --select id -o json 2>/dev/null | python3 -c 'import json,sys;print(len(json.load(sys.stdin)["items"]))'); echo "      messages/$c: $n (synthetic, hidden by the pages: $s; hidden by a seat, reversible: $h)"; done
 echo "      messages/AUDIT (hide/unhide audit lines): $(az storage entity query --account-name "$STORAGE" --table-name messages --auth-mode login --filter "PartitionKey eq 'AUDIT'" --select action -o json 2>/dev/null | python3 -c 'import json,sys;print(len(json.load(sys.stdin)["items"]))')"
+echo "      files table (ready/pending, counts only): $(az storage entity query --account-name "$STORAGE" --table-name files --auth-mode login --select status -o json 2>/dev/null | python3 -c 'import json,sys,collections;c=collections.Counter(i.get("status") for i in json.load(sys.stdin)["items"]);print(dict(c))')  file AUDIT lines: $(az storage entity query --account-name "$STORAGE" --table-name messages --auth-mode login --filter "PartitionKey eq 'AUDIT' and kind eq 'file_audit'" --select action -o json 2>/dev/null | python3 -c 'import json,sys,collections;c=collections.Counter(i.get("action") for i in json.load(sys.stdin)["items"]);print(dict(c))')"
 echo "      cards total: $(az storage entity query --account-name "$STORAGE" --table-name cards --auth-mode login --select id -o json 2>/dev/null | python3 -c 'import json,sys;print(len(json.load(sys.stdin)["items"]))') (synthetic, hidden: $(az storage entity query --account-name "$STORAGE" --table-name cards --auth-mode login --filter "synthetic eq true" --select id -o json 2>/dev/null | python3 -c 'import json,sys;print(len(json.load(sys.stdin)["items"]))'))"
 echo "### RESULT: $([ $FAIL = 0 ] && echo ALL PROBES PASS || echo SOME PROBES FAILED)"
 exit $FAIL

@@ -22,7 +22,13 @@
    key it holds at import (sha256(SPKI)[:16], the same function the seats use) and SELECTS its wrapped entry by kid — with a
    trial-decrypt fallback for a key imported before Phase 3 whose kid was not recorded (the matching kid is then remembered);
    (b) wraps Kam's replies to the whole ring + the addressed seat(s) from GET /api/pubkeys; (c) when reading the key from
-   the chosen folder, tries the configured filename first and then every known device filename. */
+   the chosen folder, tries the configured filename first and then every known device filename.
+
+   FILE DRAWER (2026-09-22, Kam 15:26 / 15:31): files are records too — item 2 covers them. ONE data key per file, used twice:
+   over the meta JSON {name, note, size, sha256, mime} as the row's ciphertext (AAD client|file|id|ts — decryptRow opens it)
+   and over the bytes as the blob (AAD client|fileblob|id|ts, its own iv_blob). Wrapped to the ring + the addressed seat(s)
+   exactly like a reply, so the seat can read what Kam attached. encryptFile / decryptFileMeta / decryptFileBytes here;
+   the drawer's DOM lives in drawer.js. The server stores bytes it cannot read; downloads are decrypted here before saving. */
 "use strict";
 window.WED = (function () {
   const SCHEME = "rsa-oaep-sha256+aes-256-gcm/v1";
@@ -167,27 +173,80 @@ window.WED = (function () {
     return pubCache;
   }
   function keyNameOfKid(kid) { if (!pubCache || !kid) return null; const k = pubCache.kam.find(x => x.kid === kid); return k ? k.name : null; }
-  async function encryptText(text, clear) {
+  /* the data key wrapped to the ring + the addressed seat(s) of `client` — shared by replies and files */
+  async function wrapTo(client, dk) {
     const pk = await publicKeys();
-    const recipients = [...pk.kam, ...(pk.seatOfClient[clear.client] || []).map(s => pk.seats[s]).filter(Boolean)];
-    const dk = crypto.getRandomValues(new Uint8Array(32)), iv = crypto.getRandomValues(new Uint8Array(12));
-    const ak = await crypto.subtle.importKey("raw", dk, { name: "AES-GCM" }, false, ["encrypt"]);
-    const ct = await crypto.subtle.encrypt({ name: "AES-GCM", iv, additionalData: AAD(clear) }, ak, new TextEncoder().encode(text));
+    const recipients = [...pk.kam, ...(pk.seatOfClient[client] || []).map(s => pk.seats[s]).filter(Boolean)];
     const wrapped_keys = [];
     for (const rk of recipients) { if (wrapped_keys.some(e => e.kid === rk.kid)) continue;
       wrapped_keys.push({ kid: rk.kid, wrapped_key: b64(await crypto.subtle.encrypt({ name: "RSA-OAEP" }, rk.key, dk)) }); }
+    return wrapped_keys;
+  }
+  async function encryptText(text, clear) {
+    const dk = crypto.getRandomValues(new Uint8Array(32)), iv = crypto.getRandomValues(new Uint8Array(12));
+    const ak = await crypto.subtle.importKey("raw", dk, { name: "AES-GCM" }, false, ["encrypt"]);
+    const ct = await crypto.subtle.encrypt({ name: "AES-GCM", iv, additionalData: AAD(clear) }, ak, new TextEncoder().encode(text));
+    const wrapped_keys = await wrapTo(clear.client, dk);
     // top-level pair = the first ring entry (pilot), kept for one release
     return { scheme: SCHEME, kid: wrapped_keys[0].kid, iv: b64(iv), wrapped_key: wrapped_keys[0].wrapped_key, ciphertext: b64(ct), wrapped_keys };
+  }
+  // ---- files (2026-09-22): one data key -> meta row + blob; both directions ----
+  const FILE_MAX = 32 * 1024 * 1024;            // ciphertext bound (mirrors app/main.py FILE_MAX); plaintext up to FILE_MAX - 16
+  const BLOB_AAD = r => new TextEncoder().encode([r.client, "fileblob", r.id, r.ts].map(x => x == null ? "" : String(x)).join("|"));
+  async function encryptFile(bytes, meta, clear) {
+    const dk = crypto.getRandomValues(new Uint8Array(32)), ivM = crypto.getRandomValues(new Uint8Array(12)), ivB = crypto.getRandomValues(new Uint8Array(12));
+    const ak = await crypto.subtle.importKey("raw", dk, { name: "AES-GCM" }, false, ["encrypt"]);
+    const ctM = await crypto.subtle.encrypt({ name: "AES-GCM", iv: ivM, additionalData: AAD(clear) }, ak, new TextEncoder().encode(JSON.stringify(meta)));
+    const ctB = new Uint8Array(await crypto.subtle.encrypt({ name: "AES-GCM", iv: ivB, additionalData: BLOB_AAD(clear) }, ak, bytes));
+    const wrapped_keys = await wrapTo(clear.client, dk);
+    return { envelope: { scheme: SCHEME, kid: wrapped_keys[0].kid, iv: b64(ivM), wrapped_key: wrapped_keys[0].wrapped_key, ciphertext: b64(ctM), wrapped_keys }, iv_blob: b64(ivB), ct: ctB };
+  }
+  async function decryptFileMeta(r) { const pt = await decryptRow(r); if (pt === null) return null; try { return JSON.parse(pt); } catch (e) { return { name: "(meta is not JSON)" }; } }
+  async function decryptFileBytes(r, ct) {
+    if (!key.priv) throw new Error("no key");
+    const dk = await unwrapDataKey(r);
+    const k = await crypto.subtle.importKey("raw", dk, { name: "AES-GCM" }, false, ["decrypt"]);
+    return crypto.subtle.decrypt({ name: "AES-GCM", iv: unb64(r.iv_blob), additionalData: BLOB_AAD(r) }, k, ct);
+  }
+  async function listFiles(since) { const d = await getJSON("/api/files?limit=1000" + (since ? "&since=" + encodeURIComponent(since) : "")); return d.files || []; }
+  async function fetchFileBytes(r) {
+    const resp = await fetch("/api/files/" + encodeURIComponent(r.client) + "/" + encodeURIComponent(r.row_key) + "/blob", { cache: "no-store" });
+    if (resp.status === 401 || resp.redirected) throw new Error("session expired — reload to sign in");
+    if (!resp.ok) throw new Error("download failed (HTTP " + resp.status + ")");
+    return resp.arrayBuffer();
+  }
+  /* Kam attaches a file on a tab: encrypted HERE (meta + bytes, one data key wrapped to ring + seat), POST the row, PUT the bytes. */
+  async function uploadKamFile(file, view, msgId, note) {
+    const client = VIEW_TO_CLIENT[view]; if (!client) throw new Error("view " + view);
+    if (file.size + 16 > FILE_MAX) throw new Error(file.name + " is larger than the " + Math.floor(FILE_MAX / 1048576) + " MiB bound");
+    if (file.size === 0) throw new Error(file.name + " is empty");
+    const bytes = await file.arrayBuffer();
+    const clear = { client, kind: "file", id: "f-" + newId().slice(4), ts: utcNow() };
+    const meta = { name: file.name, note: note || "", size: file.size, sha256: await sha256hex(bytes), mime: file.type || "application/octet-stream" };
+    const enc = await encryptFile(bytes, meta, clear);
+    const body = { ...clear, view, size: enc.ct.length, sha256: await sha256hex(enc.ct), iv_blob: enc.iv_blob, envelope: enc.envelope, ...(msgId ? { msg_id: msgId } : {}) };
+    let r = await fetch("/api/files", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
+    if (r.status === 401 || r.redirected) throw new Error("session expired — reload to sign in");
+    let j = await r.json().catch(() => ({}));
+    if (r.status === 400 && /wrapped to the addressed seat/i.test(String(j && j.detail))) { pubCache = null; return uploadKamFile(file, view, msgId, note); }
+    if (!r.ok) throw new Error((j && j.detail) || ("HTTP " + r.status));
+    const rk = j.stored.row_key;
+    r = await fetch("/api/files/" + encodeURIComponent(client) + "/" + encodeURIComponent(rk) + "/blob", { method: "PUT", headers: { "Content-Type": "application/octet-stream" }, body: enc.ct });
+    j = await r.json().catch(() => ({}));
+    if (!r.ok) throw new Error("bytes refused: " + ((j && j.detail) || ("HTTP " + r.status)));
+    return { id: clear.id, row_key: rk, client, name: file.name, size: file.size };
   }
   function utcNow() { return new Date().toISOString(); }               // 2026-09-21T01:23:45.678Z — the API's ts format
   function newId() { const u = crypto.getRandomValues(new Uint8Array(6)); return "kam-" + [...u].map(x => x.toString(16).padStart(2, "0")).join(""); }
   /* Kam types on a tab -> view -> partition. Encrypted here; POSTed as an envelope; refused by the server if it carries text. */
-  async function postKamMessage(text, view, _retried) {
+  async function postKamMessage(text, view, _retried, opts) {
     const client = VIEW_TO_CLIENT[view]; if (!client) throw new Error("view " + view);
-    const clear = { client, kind: "message", id: newId(), ts: utcNow(), view };
+    opts = opts || {};
+    const clear = { client, kind: "message", id: opts.id || newId(), ts: utcNow(), view };
     const envelope = await encryptText(text, clear);
+    const att = Array.isArray(opts.attachments) && opts.attachments.length ? { attachments: opts.attachments } : {};   // 2026-09-22: file ids (clear)
     const r = await fetch("/api/kam/messages", { method: "POST", headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ client, view, id: clear.id, ts: clear.ts, envelope }) });
+      body: JSON.stringify({ client, view, id: clear.id, ts: clear.ts, envelope, ...att }) });
     if (r.status === 401 || r.redirected) throw new Error("session expired — reload to sign in");
     const j = await r.json().catch(() => ({}));
     if (!r.ok) {
@@ -197,7 +256,7 @@ window.WED = (function () {
       // page loaded). The ring is a cache; on THIS refusal drop it, refetch /api/pubkeys, re-encrypt and retry ONCE.
       if (r.status === 400 && /wrapped to the addressed seat/i.test(String(detail)) && !_retried) {
         pubCache = null;
-        return postKamMessage(text, view, true);
+        return postKamMessage(text, view, true, opts);
       }
       throw new Error(detail);
     }
@@ -225,7 +284,8 @@ window.WED = (function () {
   function toMsg(r, pt, err) {
     return { role: r.role === "kam" ? "kam" : "wednesday", agent: agentOfRow(r), project: r.client === "ALL" ? "WED" : r.client,
       seat: r.seat, view: r.view, ts: localTs(r.ts), utc: r.ts, row_key: r.row_key, id: r.id,
-      text: pt == null ? "" : pt, locked: pt === null, error: err || null, backfill: !!r.backfill, kind: r.kind };
+      text: pt == null ? "" : pt, locked: pt === null, error: err || null, backfill: !!r.backfill, kind: r.kind,
+      attachments: Array.isArray(r.attachments) ? r.attachments : [] };   // 2026-09-22: file ids on the row (the drawer names them)
   }
   function toCard(r, pt) {
     let prose = {}; try { prose = pt ? JSON.parse(pt) : {}; } catch (e) { prose = { title: "(card prose is not JSON)", bluf: "" }; }
@@ -254,5 +314,6 @@ window.WED = (function () {
 
   return { key, filename, setFilename, chooseFolder, unlock, importFile, forget, rememberedFolderName, DEFAULT_FILENAME, KNOWN_FILENAMES, isSynthetic, hidden, isHidden, hiddenQ, revealHidden,
            decryptRow, encryptText, publicKeys, keyNameOfKid, postKamMessage, getJSON, toMsg, toCard, agentOfRow, localTs, speak, stopSpeech, VIEW_TO_CLIENT,
-           _internals: { pemToDer, unb64, b64, AAD, SCHEME, wrappedEntries, spkiFromJwk, kidOfPkcs8 } };
+           FILE_MAX, encryptFile, decryptFileMeta, decryptFileBytes, listFiles, fetchFileBytes, uploadKamFile, newId, sha256hex,
+           _internals: { pemToDer, unb64, b64, AAD, BLOB_AAD, SCHEME, wrappedEntries, spkiFromJwk, kidOfPkcs8 } };
 })();

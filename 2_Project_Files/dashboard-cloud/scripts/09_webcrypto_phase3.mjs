@@ -13,7 +13,11 @@ let fails = 0; const P = (ok, msg) => { console.log((ok ? "PASS  " : "FAIL  ") +
 // (4) static
 function fetchCalls(code) { const out = []; let i = 0; while ((i = code.indexOf("fetch(", i)) !== -1) { let d = 0, j = i + 5; for (; j < code.length; j++) { if (code[j] === "(") d++; else if (code[j] === ")") { d--; if (d === 0) break; } } out.push(code.slice(i, j + 1)); i = j; } return out; }
 const bodies = fetchCalls(src).filter(c => /\bbody\s*:/.test(c));
-P(bodies.length === 1 && bodies[0].includes('"/api/kam/messages"') && /JSON\.stringify\(\{ client, view, id: clear\.id, ts: clear\.ts, envelope \}\)/.test(bodies[0]), "static: exactly one fetch() sends a body — POST /api/kam/messages {client, view, id, ts, envelope}; no key material in any request");
+// 2026-09-22 file drawer: THREE body-sending fetches — the reply (now + attachments ids), POST /api/files (row: envelope + clear), PUT .../blob (ciphertext bytes)
+const bReply = bodies.find(b => b.includes('"/api/kam/messages"')), bRow = bodies.find(b => b.includes('"/api/files"')), bBlob = bodies.find(b => /\/blob"/.test(b));
+P(bodies.length === 3 && !!bReply && /JSON\.stringify\(\{ client, view, id: clear\.id, ts: clear\.ts, envelope, \.\.\.att \}\)/.test(bReply)
+  && !!bRow && /JSON\.stringify\(body\)/.test(bRow) && !!bBlob && /body: enc\.ct/.test(bBlob)
+  && !bodies.some(b => /priv|pkcs8|key\.priv/.test(b)), "static: exactly three fetch() calls send a body — POST /api/kam/messages {client, view, id, ts, envelope, ...att}, POST /api/files (row), PUT /api/files/../blob (ciphertext bytes); no key material in any request");
 P(/importKey\("pkcs8", der, \{ name: "RSA-OAEP", hash: "SHA-256" \}, false, \["decrypt"\]\)/.test(src), "static: the kept private CryptoKey is imported extractable=false (the extractable copy exists only inside kidOfPkcs8 for n/e)");
 // sandbox
 const store = new Map();

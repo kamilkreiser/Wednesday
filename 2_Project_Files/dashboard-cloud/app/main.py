@@ -60,8 +60,24 @@ table under PartitionKey AUDIT (action, target, who, when, reason) — a partiti
 (READ_PARTITIONS excludes it; migrate_rewrap leaves unknown partitions alone). Reads (viewer /api/messages, seat
 /api/seat/messages) SKIP hidden rows unless ?hidden=1 (the reveal, for audit); GET /api/seat/hide/audit lists the audit rows
 for the seat's partitions. Health reports hide_route: true.
+
+File drawer (2026-09-22, Kam 15:26:48 "create a download button next to autoplay replies and stop so that if I ask for a
+file to be shared, you can share it with me and place it there and I can download it at a later stage from the live site"
++ 15:31:07 "Does the dashboard that's live still provide the file upload feature? If not, can you please add this?"):
+files travel BOTH ways with the same posture as messages — encrypted before they reach this server, which stores bytes it
+cannot read. A file is ONE data key (AES-256-GCM) used twice: over a small JSON of {name, note, size, sha256, mime} as the
+row's `ciphertext` (AAD client|file|id|ts — the ordinary envelope row, so the page's decryptRow opens it), and over the file
+bytes as a BLOB (AAD client|fileblob|id|ts, its own `iv_blob`). The data key is wrapped to Kam's whole ring AND the addressed
+seat(s) (`wrapped_keys`, exactly as Phase 3 messages; a Kam upload is REFUSED 400 unless wrapped to the seat, so the seat can
+always read what he attached). Rows: table `files` (PartitionKey client, RowKey <ts>_<id>, clear routing + envelope + size +
+sha256 of the CIPHERTEXT + status pending|ready + direction shared|upload + msg_id). Bytes: blob container `files` in the SAME
+storage account (data plane; managed identity, Storage Blob Data Contributor — the one RBAC grant this build added), blob
+name <client>/<row_key>.bin, PUT with If-None-Match:* (insert, never overwrite). Two calls per file: POST the row (pending) ->
+PUT the bytes (size + sha256 must match the row -> ready). Bound: FILE_MAX bytes of ciphertext per file. Every share / upload /
+download appends an AUDIT row (kind file_audit, same AUDIT partition of `messages`). No delete route exists. Message rows may
+carry `attachments: [file ids]` (clear, <=8). Health reports file_route: true.
 """
-import json, logging, os, re, time, datetime, uuid, glob, hashlib, base64
+import json, logging, os, re, time, datetime, uuid, glob, hashlib, base64, email.utils
 from typing import Optional
 import jwt, requests
 from fastapi import FastAPI, Request, HTTPException, Query
@@ -127,11 +143,15 @@ app = FastAPI(title="wednesday-dashboard", docs_url=None, redoc_url=None, openap
 # ---------------- storage (managed identity; no account key anywhere) ----------------
 _tables = {}
 USAGE_TABLE = "usage"          # 2026-09-22: sibling of messages/cards in the SAME storage account (created on first use — a table, not a resource)
+FILE_TABLE = "files"           # 2026-09-22 file drawer: the file rows (envelope + clear routing); created on first use
+_cred = {"v": None}
+def credential():
+    if _cred["v"] is None: _cred["v"] = DefaultAzureCredential()
+    return _cred["v"]
 def table(name: str):
     if name not in _tables:
-        cred = DefaultAzureCredential()
-        svc = TableServiceClient(endpoint=f"https://{STORAGE}.table.core.windows.net", credential=cred)
-        _tables[name] = svc.create_table_if_not_exists(name) if name == USAGE_TABLE else svc.get_table_client(name)
+        svc = TableServiceClient(endpoint=f"https://{STORAGE}.table.core.windows.net", credential=credential())
+        _tables[name] = svc.create_table_if_not_exists(name) if name in (USAGE_TABLE, FILE_TABLE) else svc.get_table_client(name)
     return _tables[name]
 
 # ---------------- seat token validation ----------------
@@ -254,7 +274,8 @@ def card_row(client: str, body: dict, env: dict, ts: str, rid: str, seat_name: s
 def seat_health():
     return {"app": "wednesday-dashboard-cloud", "ok": True, "phase": "3", "ts": now_iso(), "kam_keys": len(public_keys()["kam"]), "seat_keys": sorted(public_keys()["seats"]),
             "usage_route": True,   # 2026-09-22 usage gauges
-            "hide_route": True}    # 2026-09-22 hide/unhide (reversible, audited)
+            "hide_route": True,    # 2026-09-22 hide/unhide (reversible, audited)
+            "file_route": True, "file_max_bytes": FILE_MAX}    # 2026-09-22 file drawer (both directions, encrypted, audited)
 
 @app.post("/api/seat/messages", status_code=201)
 async def seat_post_message(request: Request):
@@ -267,7 +288,7 @@ async def seat_post_message(request: Request):
     view = str(body.get("view") or client)[:64]
     role = str(body.get("role") or seat["seat"])[:32]
     row = {"PartitionKey": client, "RowKey": f"{ts}_{rid}", "kind": "message", "id": rid, "ts": ts, "view": view,
-           "role": role, "seat": seat["seat"], "written_by": seat["appid"], "written_at": now_iso(), **clear_extras(body), **env}
+           "role": role, "seat": seat["seat"], "written_by": seat["appid"], "written_at": now_iso(), **clear_extras(body), **attachments_of(body), **env}
     stored = {"client": client, "id": rid, "ts": ts, "row_key": row["RowKey"], "written_by": seat["seat"]}
     if insert_message(row):
         return {"stored": stored}
@@ -306,6 +327,9 @@ def _query(tname: str, clients, since: Optional[str], limit: int, author: Option
                 except Exception: pass
             if isinstance(d.get("wrapped_keys"), str):
                 try: d["wrapped_keys"] = json.loads(d["wrapped_keys"])
+                except Exception: pass
+            if isinstance(d.get("attachments"), str):      # 2026-09-22 file drawer: clear list of file ids on a message row
+                try: d["attachments"] = json.loads(d["attachments"])
                 except Exception: pass
             out.append(d); n += 1
             if n >= limit: break
@@ -388,6 +412,7 @@ def seat_hide_audit(request: Request, limit: int = Query(200, le=1000)):
     out = []
     for e in table("messages").query_entities("PartitionKey eq @p", parameters={"p": AUDIT_PARTITION}, results_per_page=min(limit, 1000)):
         if e.get("target_client") not in mine: continue
+        if e.get("kind", "hide_audit") != "hide_audit": continue     # 2026-09-22: file_audit rows share the partition; /api/seat/files/audit lists those
         out.append({k: v for k, v in e.items() if k not in ("PartitionKey",)})
         if len(out) >= limit: break
     out.sort(key=lambda r: r["RowKey"])
@@ -463,6 +488,198 @@ def seat_get_usage(request: Request):
     if not seat["read"]: raise HTTPException(403, "Seat.Read role required")
     return usage_rows()
 
+
+# ---------------- file drawer (2026-09-22): encrypted files both ways, blob bytes + table row, audited, never deleted ----------------
+BLOB_CONTAINER = "files"
+FILE_MAX = 32 * 1024 * 1024          # 32 MiB of CIPHERTEXT per file (Kam's brief: >= 25 MB); the plaintext is 16 bytes smaller
+SHA_RE = re.compile(r"^[0-9a-f]{64}$")
+IVB_RE = re.compile(r"^[A-Za-z0-9+/]{16}$")     # 12-byte IV, base64 without padding = 16 chars
+BLOB_NAME_RE = re.compile(r"^[A-Za-z]+/[0-9TZ:.\-_A-Za-z]+\.bin$")
+_blob_tok = {"t": 0, "v": None}
+def blob_token() -> str:
+    if _blob_tok["v"] is None or time.time() > _blob_tok["t"] - 300:
+        tk = credential().get_token("https://storage.azure.com/.default")
+        _blob_tok["v"], _blob_tok["t"] = tk.token, tk.expires_on
+    return _blob_tok["v"]
+def blob_headers(**extra) -> dict:
+    h = {"Authorization": f"Bearer {blob_token()}", "x-ms-version": "2021-12-02", "x-ms-date": email.utils.formatdate(usegmt=True)}
+    h.update({k.replace("_", "-"): v for k, v in extra.items()}); return h
+def blob_url(name: str) -> str: return f"https://{STORAGE}.blob.core.windows.net/{BLOB_CONTAINER}/{name}"
+_container = {"ready": False}
+def ensure_container():
+    """The container is created on first use by the app's managed identity (data plane, like the `usage` table) — never by a script."""
+    if _container["ready"]: return
+    r = requests.put(f"https://{STORAGE}.blob.core.windows.net/{BLOB_CONTAINER}?restype=container", headers=blob_headers(), timeout=30)
+    if r.status_code in (201, 409): _container["ready"] = True; return
+    log.warning("blob container create failed: %s %s", r.status_code, r.text[:200]); raise HTTPException(503, f"file store unavailable ({r.status_code})")
+def blob_put(name: str, data: bytes) -> bool:
+    """INSERT semantics (If-None-Match: *): True if written, False if a blob of that name already existed (nothing overwritten)."""
+    ensure_container()
+    r = requests.put(blob_url(name), data=data, headers=blob_headers(x_ms_blob_type="BlockBlob", Content_Type="application/octet-stream", If_None_Match="*"), timeout=120)
+    if r.status_code == 201: return True
+    if r.status_code == 409: return False
+    log.warning("blob put failed: %s %s", r.status_code, r.text[:200]); raise HTTPException(503, f"file store write failed ({r.status_code})")
+def blob_get(name: str) -> bytes:
+    r = requests.get(blob_url(name), headers=blob_headers(), timeout=120)
+    if r.status_code == 200: return r.content
+    if r.status_code == 404: raise HTTPException(404, "file bytes not found")
+    log.warning("blob get failed: %s %s", r.status_code, r.text[:200]); raise HTTPException(503, f"file store read failed ({r.status_code})")
+
+def attachments_of(body: dict) -> dict:
+    """`attachments: [file ids]` on a message row — clear, <=8 ids, stored as a JSON string column (parsed on read)."""
+    att = body.get("attachments")
+    if att is None: return {}
+    if not isinstance(att, list) or len(att) > 8 or not all(isinstance(x, str) and ID_RE.match(x) for x in att):
+        raise HTTPException(400, "attachments must be a list (<=8) of file ids")
+    return {"attachments": json.dumps(att)} if att else {}
+
+def file_audit(action: str, client: str, e: dict, by: str, seat_name: str, extra: Optional[dict] = None):
+    now = datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%f")[:-3] + "Z"
+    row = {"PartitionKey": AUDIT_PARTITION, "RowKey": f"{now}_{uuid.uuid4().hex[:8]}", "kind": "file_audit", "action": action,
+           "target_client": client, "target_row_key": e["RowKey"], "target_id": str(e.get("id") or ""), "target_view": str(e.get("view") or "")[:64],
+           "seat": seat_name, "by": by, "at": now, "reason": "", "changed": True, "size": int(e.get("size") or 0), "direction": str(e.get("direction") or "")}
+    if extra: row.update(extra)
+    table("messages").create_entity(row)
+    log.info("file %s %s/%s by %s size=%s", action, client, e["RowKey"], seat_name, row["size"])
+    return row["RowKey"]
+
+def file_row_new(client: str, body: dict, env: dict, ts: str, rid: str, view: str, role: str, seat_name: str, written_by: str, direction: str) -> dict:
+    size = body.get("size")
+    if isinstance(size, bool) or not isinstance(size, int) or not (17 <= size <= FILE_MAX):
+        raise HTTPException(413 if isinstance(size, int) and size > FILE_MAX else 400, f"size must be the CIPHERTEXT length in bytes, 17..{FILE_MAX}")
+    sha = str(body.get("sha256") or "")
+    if not SHA_RE.match(sha): raise HTTPException(400, "sha256 must be the hex sha256 of the ciphertext bytes")
+    ivb = str(body.get("iv_blob") or "")
+    if not IVB_RE.match(ivb): raise HTTPException(400, "iv_blob must be a 12-byte IV, base64 (16 chars)")
+    msg_id = str(body.get("msg_id") or "")
+    if msg_id and not ID_RE.match(msg_id): raise HTTPException(400, "msg_id")
+    row = {"PartitionKey": client, "RowKey": f"{ts}_{rid}", "kind": "file", "id": rid, "ts": ts, "view": view, "role": role, "seat": seat_name,
+           "written_by": written_by, "written_at": now_iso(), "direction": direction, "size": size, "sha256": sha, "iv_blob": ivb,
+           "status": "pending", "blob": f"{client}/{ts}_{rid}.bin", **({"msg_id": msg_id} if msg_id else {}), **clear_extras(body), **env}
+    return row
+
+def file_create(row: dict) -> dict:
+    try:
+        table(FILE_TABLE).create_entity(row)
+    except ResourceExistsError:
+        raise HTTPException(409, "a file row with this (client, ts, id) exists")
+    return {"stored": {"client": row["PartitionKey"], "id": row["id"], "ts": row["ts"], "row_key": row["RowKey"], "status": "pending",
+                       "put_bytes_to": f"/{row['PartitionKey']}/{row['RowKey']}/blob", "size": row["size"]}}
+
+FILE_SELECT = ["PartitionKey", "RowKey", "id", "ts", "view", "role", "seat", "written_by", "size", "sha256", "status", "blob", "direction", "synthetic", "msg_id"]
+def file_find(client: str, row_key: str) -> dict:
+    if not ROWKEY_RE.match(row_key): raise HTTPException(400, "row_key must be <ISO UTC ts>_<id>")
+    try: return table(FILE_TABLE).get_entity(client, row_key, select=FILE_SELECT)
+    except ResourceNotFoundError: raise HTTPException(404, "no such file")
+
+async def read_bounded(request: Request, declared: int) -> bytes:
+    """The bytes, bounded BEFORE they are held: Content-Length over the bound is refused 413 without reading; a body that
+    grows past the bound while streaming is refused 413 at that point; the total must equal the row's declared size."""
+    cl = request.headers.get("content-length")
+    if cl is not None:
+        try: cl = int(cl)
+        except ValueError: raise HTTPException(400, "content-length")
+        if cl > FILE_MAX: raise HTTPException(413, f"file exceeds the bound of {FILE_MAX} bytes")
+        if cl != declared: raise HTTPException(400, f"content-length {cl} != the row's declared size {declared}")
+    parts, n = [], 0
+    async for chunk in request.stream():
+        n += len(chunk)
+        if n > FILE_MAX: raise HTTPException(413, f"file exceeds the bound of {FILE_MAX} bytes")
+        parts.append(chunk)
+    data = b"".join(parts)
+    if len(data) != declared: raise HTTPException(400, f"received {len(data)} bytes != the row's declared size {declared}")
+    return data
+
+async def file_put_bytes(request: Request, client: str, row_key: str, by: str, seat_name: str, must_seat: Optional[str]) -> dict:
+    e = file_find(client, row_key)
+    if must_seat is not None and e.get("seat") != must_seat: raise HTTPException(403, "this file row belongs to another writer")
+    if e.get("status") == "ready": return {"stored": {"client": client, "row_key": row_key, "id": e.get("id"), "status": "ready"}, "duplicate": True}
+    data = await read_bounded(request, int(e["size"]))
+    sha = hashlib.sha256(data).hexdigest()
+    if sha != e.get("sha256"): raise HTTPException(400, "sha256 of the received bytes != the row's declared sha256")
+    written = blob_put(e["blob"], data)
+    now = now_iso()
+    table(FILE_TABLE).update_entity({"PartitionKey": client, "RowKey": row_key, "status": "ready", "ready_at": now}, mode=UpdateMode.MERGE)
+    e["status"] = "ready"
+    aud = file_audit("share" if e.get("direction") == "shared" else "upload", client, e, by, seat_name, {"blob_written": written})
+    return {"stored": {"client": client, "row_key": row_key, "id": e.get("id"), "status": "ready", "size": int(e["size"]), "blob_written": written, "audit_row_key": aud}}
+
+def file_query(clients, since: Optional[str], limit: int) -> list:
+    """Ready file rows after `since`, per partition, merged (the envelope columns included — the page decrypts the meta)."""
+    out = []
+    for c in sorted(clients):
+        flt = "PartitionKey eq @c" + (" and RowKey gt @s" if since else "")
+        n = 0
+        for e in table(FILE_TABLE).query_entities(flt, parameters={"c": c, "s": since or ""}, results_per_page=min(limit, 1000)):
+            if e.get("status") != "ready": continue
+            if e.get("hidden") is True: continue
+            d = {k: v for k, v in e.items() if k not in ("PartitionKey", "RowKey")}
+            d["client"] = c; d["row_key"] = e["RowKey"]
+            if isinstance(d.get("wrapped_keys"), str):
+                try: d["wrapped_keys"] = json.loads(d["wrapped_keys"])
+                except Exception: pass
+            out.append(d); n += 1
+            if n >= limit: break
+    out.sort(key=lambda r: r["row_key"])
+    return out
+
+def file_download(client: str, row_key: str, by: str, seat_name: str):
+    e = file_find(client, row_key)
+    if e.get("status") != "ready": raise HTTPException(404, "file not ready")
+    data = blob_get(e["blob"])
+    if hashlib.sha256(data).hexdigest() != e.get("sha256"): raise HTTPException(503, "stored bytes do not match the row's sha256")
+    file_audit("download", client, e, by, seat_name)
+    from fastapi.responses import Response
+    return Response(content=data, media_type="application/octet-stream",
+                    headers={"Cache-Control": "no-store", "X-Wed-File-Id": str(e.get("id")), "X-Wed-File-Sha256": str(e.get("sha256")), "Content-Length": str(len(data))})
+
+# --- seat side ---
+@app.get("/api/seat/files/audit")
+def seat_file_audit(request: Request, limit: int = Query(200, le=1000)):
+    seat = seat_from_token(request)
+    if not seat["read"]: raise HTTPException(403, "Seat.Read role required")
+    mine = set(seat["clients"]) | {BROADCAST}
+    out = []
+    for e in table("messages").query_entities("PartitionKey eq @p and kind eq @k", parameters={"p": AUDIT_PARTITION, "k": "file_audit"}, results_per_page=min(limit, 1000)):
+        if e.get("target_client") not in mine: continue
+        out.append({k: v for k, v in e.items() if k not in ("PartitionKey",)})
+        if len(out) >= limit: break
+    out.sort(key=lambda r: r["RowKey"])
+    return {"audit": out, "clients": sorted(mine)}
+
+@app.get("/api/seat/files")
+def seat_get_files(request: Request, client: Optional[str] = None, since: Optional[str] = None, limit: int = Query(200, le=1000)):
+    seat = seat_from_token(request)
+    if not seat["read"]: raise HTTPException(403, "Seat.Read role required")
+    clients = {require_partition(seat, client, for_read=True)} if client else (set(seat["clients"]) | {BROADCAST})
+    return {"files": file_query(clients, since, limit), "clients": sorted(clients)}
+
+@app.post("/api/seat/files", status_code=201)
+async def seat_post_file(request: Request):
+    seat = seat_from_token(request)
+    if not seat["write"]: raise HTTPException(403, "Seat.Write role required")
+    body = await request.json()
+    if not isinstance(body, dict): raise HTTPException(400, "json object required")
+    client = require_partition(seat, body.get("client"))
+    env = validate_envelope(body)
+    ts, rid = validate_clear(body, "file")
+    row = file_row_new(client, body, env, ts, rid, str(body.get("view") or client)[:64], str(body.get("role") or seat["seat"])[:32], seat["seat"], seat["appid"], "shared")
+    return file_create(row)
+
+@app.put("/api/seat/files/{client}/{row_key}/blob")
+async def seat_put_file_bytes(client: str, row_key: str, request: Request):
+    seat = seat_from_token(request)
+    if not seat["write"]: raise HTTPException(403, "Seat.Write role required")
+    client = require_partition(seat, client)
+    return await file_put_bytes(request, client, row_key, seat["appid"], seat["seat"], must_seat=seat["seat"])
+
+@app.get("/api/seat/files/{client}/{row_key}/blob")
+def seat_get_file_bytes(client: str, row_key: str, request: Request):
+    seat = seat_from_token(request)
+    if not seat["read"]: raise HTTPException(403, "Seat.Read role required")
+    client = require_partition(seat, client, for_read=True)
+    return file_download(client, row_key, seat["appid"], seat["seat"])
+
 # ---------------- viewer routes (Easy Auth gate + header check) ----------------
 def viewer(request: Request) -> dict:
     pid = request.headers.get("x-ms-client-principal-id")
@@ -508,7 +725,7 @@ async def kam_post_message(request: Request):
     env = validate_envelope(body, require_seat_kids_for=client)
     ts, rid = validate_clear(body, "message")
     row = {"PartitionKey": client, "RowKey": f"{ts}_{rid}", "kind": "message", "id": rid, "ts": ts, "view": view,
-           "role": "kam", "seat": "kam", "written_by": f"easyauth:{who['id']}", "written_at": now_iso(), **env}
+           "role": "kam", "seat": "kam", "written_by": f"easyauth:{who['id']}", "written_at": now_iso(), **attachments_of(body), **env}
     stored = {"client": client, "id": rid, "ts": ts, "row_key": row["RowKey"], "written_by": "kam"}
     if insert_message(row):
         return {"stored": stored}
@@ -533,6 +750,42 @@ def pubkeys(request: Request):
     viewer(request)
     return public_keys()
 
+
+# --- file drawer, viewer side (Easy Auth; the write half is Kam-only) ---
+@app.get("/api/files")
+def get_files(request: Request, client: Optional[str] = None, since: Optional[str] = None, limit: int = Query(200, le=1000)):
+    viewer(request)
+    clients = {client} if client in READ_PARTITIONS else set(READ_PARTITIONS)
+    return {"files": file_query(clients, since, limit)}
+
+@app.get("/api/files/{client}/{row_key}/blob")
+def get_file_bytes(client: str, row_key: str, request: Request):
+    who = viewer(request)
+    if client not in READ_PARTITIONS: raise HTTPException(400, "client")
+    return file_download(client, row_key, f"easyauth:{who['id']}", "kam" if who["is_kam"] else "viewer")
+
+@app.post("/api/files", status_code=201)
+async def kam_post_file(request: Request):
+    """Kam attaches a file on the live site: the BROWSER encrypts it (one data key: meta JSON in the row, bytes to the blob),
+    wrapped to his ring AND the addressed seat (refused 400 otherwise, as his replies are). `view` fixes the partition."""
+    who = kam_only(request)
+    body = await request.json()
+    if not isinstance(body, dict): raise HTTPException(400, "json object required")
+    view = str(body.get("view") or "")
+    if view not in VIEW_TO_CLIENT: raise HTTPException(400, f"view must be one of {sorted(VIEW_TO_CLIENT)}")
+    client = VIEW_TO_CLIENT[view]
+    if body.get("client") not in (None, client): raise HTTPException(400, f"client for view={view} is {client}")
+    env = validate_envelope(body, require_seat_kids_for=client)
+    ts, rid = validate_clear(body, "file")
+    row = file_row_new(client, body, env, ts, rid, view, "kam", "kam", f"easyauth:{who['id']}", "upload")
+    return file_create(row)
+
+@app.put("/api/files/{client}/{row_key}/blob")
+async def kam_put_file_bytes(client: str, row_key: str, request: Request):
+    who = kam_only(request)
+    if client not in READ_PARTITIONS: raise HTTPException(400, "client")
+    return await file_put_bytes(request, client, row_key, f"easyauth:{who['id']}", "kam", must_seat="kam")
+
 NO_STORE = {"Cache-Control": "no-store"}
 
 @app.get("/")
@@ -549,6 +802,11 @@ def chat(request: Request):
 def common_js(request: Request):
     viewer(request)
     return FileResponse(os.path.join(HERE, "static", "common.js"), media_type="application/javascript", headers=NO_STORE)
+
+@app.get("/static/drawer.js")
+def drawer_js(request: Request):
+    viewer(request)
+    return FileResponse(os.path.join(HERE, "static", "drawer.js"), media_type="application/javascript", headers=NO_STORE)
 
 @app.get("/{path:path}")
 def catch_all(path: str, request: Request):

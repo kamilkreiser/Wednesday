@@ -69,6 +69,8 @@ ids = sc.load_ids()
 class A: pass
 a = A(); a.seat = seat; a.cert_dir = os.path.join(root, "4_Credentials", "dashboard-cloud"); a.tenant = ids["TENANT_ID"]; a.api_appid = ids["API_APPID"]
 clear = {"client": client, "kind": "message", "id": sc.row_id(stream, ts, text), "ts": sc.to_utc_z(ts), "view": "wednesday" if seat == "wednesday" else "tuesday", "role": seat, "src_ts": ts[:40]}
+att = [x for x in os.environ.get("LIVE_BOARD_ATTACHMENTS", "").split(",") if x]   # 2026-09-22: file ids shared into the drawer by chat_reply.sh --file
+if att: clear["attachments"] = att[:8]
 env = envelope.encrypt_record(text, clear)   # Phase 3 (2026-09-21): wrapped to Kam's whole key ring (pilot+laptop+ipad) + this partition's seat key
 if len(text) >= 8: assert text not in json.dumps(env), "plaintext leaked into envelope"
 tok = sc.get_token(a, ids)

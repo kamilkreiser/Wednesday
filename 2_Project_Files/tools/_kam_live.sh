@@ -28,17 +28,20 @@ kam_live_json() {
   python3 - "$py" "$root/2_Project_Files/dashboard-cloud/seat/get_kam_messages.py" "$seat" "$root/4_Credentials/dashboard-cloud" "$@" <<'PYEOF'
 import json, sys, subprocess
 py, tool, seat, cert_dir, *rest = sys.argv[1:]
-r = subprocess.run([py, tool, "--seat", seat, "--cert-dir", cert_dir, "--decrypt", "--json", *rest], capture_output=True, text=True)
+import os
+extra = (["--base", os.environ["KAM_LIVE_BASE"]] if os.environ.get("KAM_LIVE_BASE") else []) + (["--include-synthetic"] if os.environ.get("KAM_LIVE_INCLUDE_SYNTHETIC") == "1" else [])   # 2026-09-22: loopback matrix affordances (08f); unset in normal use
+r = subprocess.run([py, tool, "--seat", seat, "--cert-dir", cert_dir, "--decrypt", "--json", *extra, *rest], capture_output=True, text=True)
 if r.returncode != 0 or not r.stdout.strip():
     sys.stderr.write("kam-live: 🔴 FAILED — get_kam_messages.py rc=%d: %s\n" % (r.returncode, " ".join(r.stderr.split())[:300]))
     sys.exit(2)
 d = json.loads(r.stdout); out = []
 skipped = 0
 for m in d.get("messages", []):
-    if m.get("synthetic") in (True, "true", "True"):
+    if m.get("synthetic") in (True, "true", "True") and os.environ.get("KAM_LIVE_INCLUDE_SYNTHETIC") != "1":
         skipped += 1; continue   # a probe row wearing role=kam is NOT Kam's word (Wednesday, 2026-09-21 15:0x)
     out.append({"role": "kam", "ts": m.get("ts_local") or m.get("ts"), "utc": m.get("ts"), "view": m.get("view"), "text": m.get("text", ""),
-                "attachments": [], "client": m.get("client"), "id": m.get("id"), "row_key": m.get("row_key"), "source": "live",
+                "attachments": [{"id": a, "name": "(live file %s — encrypted; kam_msgs.sh --fetch-attachments <dir>)" % a, "path": "live:%s/%s" % (m.get("client"), a)} for a in (m.get("attachments") or []) if isinstance(a, str)],   # 2026-09-22 file drawer
+                "client": m.get("client"), "id": m.get("id"), "row_key": m.get("row_key"), "source": "live",
                 **({"decrypt_error": m["decrypt_error"]} if m.get("decrypt_error") else {})})
 if skipped: sys.stderr.write("kam-live: %d synthetic (probe) row(s) skipped — not Kam's word\n" % skipped)
 print(json.dumps(out, ensure_ascii=False))

@@ -7,7 +7,15 @@
 # to Kam are mirrored here (short form, pointers to documents for anything
 # long). Fleet mechanics NEVER go through this script.
 #
-# Usage: chat_reply.sh [--project <Datasec|Secuura|WED>] "message text"
+# Usage: chat_reply.sh [--project <Datasec|Secuura|WED>] [--file <path> [--file <path>…]] "message text"
+#
+# --file <path> (2026-09-22, Kam 15:26:48 "if I ask for a file to be shared, you can share it with me and place it there
+# and I can download it at a later stage from the live site"): the file is encrypted on this machine and placed in the
+# live board's FILE DRAWER as this seat (dashboard-cloud/seat/share_file.py — Kam's ring + this seat's key, the server
+# stores bytes it cannot read), BEFORE the message is written; its file id is appended to the mirrored message so the
+# live row carries `attachments: [id]` and Kam's page shows a chip. A share that fails is LOUD and REFUSES the whole
+# reply (rc 5) — a message that says "here is the file" with no file is the 2026-09-09 `--file` incident again. The local
+# stream entry carries the same note. (Until today `--file` was the one flag Wednesday kept typing that did not exist.)
 # Appends {role: "wednesday", seat, project, ts, text} to
 # 0_Brain/dashboard/data/chat_log.json atomically (write temp + mv). Never
 # discards stderr. Refuses empty input.
@@ -117,10 +125,16 @@ seat_project_default() {
 PROJECT="${CHAT_PROJECT:-}"
 [ -n "$PROJECT" ] || PROJECT="$(seat_project_default)"
 [ -n "$PROJECT" ] || PROJECT="WED"
-if [ "${1:-}" = "--project" ]; then
-  [ -n "${2:-}" ] || { echo "chat_reply: --project needs a value (Datasec|Secuura|WED)" >&2; exit 2; }
-  PROJECT="$2"; shift 2
-fi
+FILES=()
+while [ $# -gt 1 ]; do
+  case "$1" in
+    --project) [ -n "${2:-}" ] || { echo "chat_reply: --project needs a value (Datasec|Secuura|WED)" >&2; exit 2; }; PROJECT="$2"; shift 2 ;;
+    --file)    [ -n "${2:-}" ] || { echo "chat_reply: --file needs a path" >&2; exit 2; }
+               [ -f "$2" ] || { echo "chat_reply: --file $2: no such file — REFUSED (nothing written)" >&2; exit 2; }
+               FILES+=("$2"); shift 2 ;;
+    *) break ;;
+  esac
+done
 MSG="${1:-}"
 [ -n "$MSG" ] || { echo "chat_reply: empty message refused" >&2; exit 2; }
 # ADVISORY (ledger w=4, 2026-09-18): flag unmeasured ABSENCE claims before they reach Kam. Never blocks,
@@ -196,9 +210,9 @@ fi
 # silently mirroring a flag name to the principal.
 case "$MSG" in
   --*) echo "chat_reply: REFUSED — the message begins with '--', which is almost certainly" >&2
-       echo "  a flag this script does not have. The ONLY flag is --project <Datasec|Secuura|WED>;" >&2
-       echo "  the message itself is POSITIONAL. There is no --file: pass the body as" >&2
-       echo "  \"\$(cat <path>)\" instead, which also survives punctuation in the prose." >&2
+       echo "  a flag this script does not have. The flags are --project <Datasec|Secuura|WED> and" >&2
+       echo "  --file <path> (share a file into the live drawer); both go BEFORE the positional message." >&2
+       echo "  To send the CONTENT of a file as text pass \"\$(cat <path>)\"; to SHARE the file use --file." >&2
        echo "  (2026-09-09: three messages to Kam were lost exactly this way.)" >&2
        echo "  If you genuinely meant to send text starting with '--', prefix it with a space." >&2
        exit 2 ;;
@@ -222,8 +236,26 @@ if [ -f "$GATE" ]; then
   rm -f "$_cg_tmp"
 fi
 if [ "${CHAT_DRY:-0}" = "1" ]; then
-  echo "chat_reply: DRY — all checks passed, nothing written (${#MSG} chars)"
+  echo "chat_reply: DRY — all checks passed, nothing written (${#MSG} chars, ${#FILES[@]} file(s) would be shared)"
   exit 0
+fi
+# ── --file: share into the live drawer FIRST (encrypted here, as this seat); refuse the reply if any share fails ──
+FILE_IDS=""
+if [ "${#FILES[@]}" -gt 0 ]; then
+  _sf_py="$PROJECT_DIR/2_Project_Files/dashboard-cloud/.venv/bin/python"; [ -x "$_sf_py" ] || _sf_py=python3
+  _sf="$PROJECT_DIR/2_Project_Files/dashboard-cloud/seat/share_file.py"
+  _sf_client="$(printf '%s' "$PROJECT" | cut -d/ -f1)"; case "$(printf '%s' "$_sf_client" | tr '[:upper:]' '[:lower:]')" in secuura*) _sf_client=Secuura ;; datasec*) _sf_client=Datasec ;; *) _sf_client=WED ;; esac
+  for _f in "${FILES[@]}"; do
+    _sf_out="$("$_sf_py" "$_sf" "$_f" --seat "$AGENT" --client "$_sf_client" --cert-dir "$PROJECT_DIR/4_Credentials/dashboard-cloud" --note "$(printf '%s' "$MSG" | head -c 200)" 2>&1)"; _sf_rc=$?
+    _sf_id="$(printf '%s\n' "$_sf_out" | /usr/bin/grep -o 'file_id=[A-Za-z0-9._-]*' | head -1 | cut -d= -f2)"
+    if [ "$_sf_rc" -ne 0 ] || [ -z "$_sf_id" ]; then
+      echo "chat_reply: 🔴 REFUSED — the file share of $_f FAILED (rc=$_sf_rc); nothing was written, Kam was not told a file exists:" >&2
+      printf '%s\n' "$_sf_out" | tail -4 | sed 's/^/  /' >&2; exit 5
+    fi
+    echo "live-board: file $_f shared into the drawer as $AGENT/$_sf_client (file_id=$_sf_id)"
+    FILE_IDS="${FILE_IDS:+$FILE_IDS,}$_sf_id"
+  done
+  MSG="$MSG"$'\n'"📎 file$( [ "${#FILES[@]}" -gt 1 ] && echo s ) in the live drawer: $(for _f in "${FILES[@]}"; do printf '%s ' "$(basename "$_f")"; done)(id $FILE_IDS)"
 fi
 _TS_STATE="$PROJECT_DIR/2_Project_Files/fleet/state/live_board_last_local_ts"; mkdir -p "$(dirname "$_TS_STATE")" 2>/dev/null; : > "$_TS_STATE"
 CHAT_FILE="$CHAT" CHAT_PROJECT="$PROJECT" CHAT_TS_OUT="$_TS_STATE" python3 - "$MSG" <<'PYEOF'
@@ -317,7 +349,7 @@ python3 "$STREAMS" || {
 # ── Phase 2: the same entry to the live board (encrypted here; the local write already happened above) ──
 if [ -n "$_live_ts" ] && [ -f "$SELF_DIR/_live_board.sh" ]; then
   . "$SELF_DIR/_live_board.sh"
-  live_board_post_message "$AGENT" "$PROJECT" "$_live_ts" "$(basename "$CHAT")" "$MSG"
+  LIVE_BOARD_ATTACHMENTS="$FILE_IDS" live_board_post_message "$AGENT" "$PROJECT" "$_live_ts" "$(basename "$CHAT")" "$MSG"
 else
   echo "chat_reply: live-board post skipped (no ts captured or _live_board.sh missing) — local write is intact" >&2
 fi

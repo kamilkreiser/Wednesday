@@ -32,17 +32,19 @@
 #   --source both   union of the two, de-duplicated on (UTC minute, text), each
 #                   line tagged [live]/[local]. A live fetch failure is LOUD and
 #                   exits 2 — never a quiet empty list that reads as "he said nothing".
-# Live rows carry no attachments (the live site has no upload path — Phase 2 report);
-# the attachment flag is therefore only meaningful on [local] rows.
+# Live rows CARRY attachments since 2026-09-22 (the file drawer: Kam attaches on the live page; the bytes are encrypted to
+# his ring + this seat's key). The att=N flag is real for [live] rows; --fetch-attachments <dir> downloads + decrypts them
+# with this seat's key (dashboard-cloud/seat/get_files.py --fetch) and prints the local paths under each message.
 #
-# Usage: kam_msgs.sh [n] [--brief] [--source live|local|both]   last n Kam messages (default 6)
+# Usage: kam_msgs.sh [n] [--brief] [--source live|local|both] [--fetch-attachments <dir>]   last n Kam messages (default 6)
 set -u
-N=6; MODE=""; SOURCE="${KAM_MSGS_SOURCE:-live}"
+N=6; MODE=""; SOURCE="${KAM_MSGS_SOURCE:-live}"; FETCH_DIR=""
 while [ $# -gt 0 ]; do
   case "$1" in
     --brief) MODE="--brief" ;;
     --source) SOURCE="${2:-}"; shift ;;
     --source=*) SOURCE="${1#--source=}" ;;
+    --fetch-attachments) FETCH_DIR="${2:-}"; [ -n "$FETCH_DIR" ] || { echo "kam_msgs: --fetch-attachments needs a directory" >&2; exit 2; }; shift ;;
     --*) echo "kam_msgs: unknown flag $1" >&2; exit 2 ;;
     *) N="$1" ;;
   esac; shift
@@ -56,9 +58,19 @@ if [ "$SOURCE" != "local" ]; then
   # (measured 14:25 today: a 14-day/400 read lost the 02:48Z rows). get_kam_messages warns on stderr if a partition hits the cap.
   LIVE_JSON="$(kam_live_json --limit 1000 --since "$(date -u -v-3d +%Y-%m-%dT%H:%M 2>/dev/null || date -u +%Y-%m-%dT00:00)")" || exit 2
 fi
-python3 - "$ROOT" "$N" "$MODE" "$SOURCE" "$LIVE_JSON" <<'PY'
+FETCHED_JSON="{}"
+if [ -n "$FETCH_DIR" ] && [ "$SOURCE" != "local" ]; then
+  # the ids of the live rows shown are fetched with this seat's key; get_files.py prints one JSON, its rc is the fetch verdict
+  _ids="$(printf '%s' "$LIVE_JSON" | python3 -c 'import json,sys;print(",".join(a["id"] for m in json.load(sys.stdin) for a in m.get("attachments",[])))')"
+  if [ -n "$_ids" ]; then
+    FETCHED_JSON="$("$ROOT/2_Project_Files/dashboard-cloud/.venv/bin/python" "$ROOT/2_Project_Files/dashboard-cloud/seat/get_files.py" --seat "${WED_AGENT:-}" --cert-dir "$ROOT/4_Credentials/dashboard-cloud" --ids "$_ids" --fetch "$FETCH_DIR" --json ${KAM_LIVE_BASE:+--base "$KAM_LIVE_BASE"} ${KAM_LIVE_INCLUDE_SYNTHETIC:+--include-synthetic} 2>"$FETCH_DIR.kam_msgs_fetch.err")" || echo "kam_msgs: ⚠️  attachment fetch reported failures (see $FETCH_DIR.kam_msgs_fetch.err)" >&2
+  fi
+fi
+python3 - "$ROOT" "$N" "$MODE" "$SOURCE" "$LIVE_JSON" "$FETCHED_JSON" <<'PY'
 import json,sys,os,datetime
 root,n,mode,source,live_json=sys.argv[1],int(sys.argv[2]),sys.argv[3],sys.argv[4],sys.argv[5]
+try: fetched={f["id"]:f for f in json.loads(sys.argv[6]).get("files",[])}
+except Exception: fetched={}
 def utc_minute(ts):
     try: return datetime.datetime.fromisoformat(str(ts).replace("Z","+00:00")).astimezone(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M")
     except Exception: return str(ts)[:16]
@@ -96,7 +108,10 @@ for m in ks:
     if m.get('decrypt_error'): warn += '  *** LIVE ROW NOT READABLE BY THIS SEAT (%s) — he wrote; read it on the live board ***' % m['decrypt_error']
     print('%s | [%s] view=%-10s | chars=%-5d | att=%d%s' % (ts, src, view, len(text), len(atts), warn))
     for a in atts:
-        print('      -> %s   %s' % (a.get('name','?'), a.get('path','?')))
+        f=fetched.get(a.get('id'))
+        if f and f.get('fetched'): print('      -> %s   FETCHED: %s' % ((f.get('meta') or {}).get('name','?'), f['fetched']))
+        elif f and f.get('fetch_error'): print('      -> %s   FETCH FAILED: %s' % (a.get('id'), f['fetch_error']))
+        else: print('      -> %s   %s' % (a.get('name','?'), a.get('path','?')))
     if mode != '--brief':
         print('  ' + (text if len(text) < 4000 else text[:4000] + ' …[TRUNCATED IN DISPLAY]'))
     print()
