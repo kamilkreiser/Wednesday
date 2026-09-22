@@ -106,9 +106,9 @@ PY
 )
 ea_refused  "POST /api/kam/messages with a SEAT bearer token (a seat is not Kam)" -X POST -H "Authorization: Bearer $TOK" -H 'Content-Type: application/json' -d "$KB" "$BASE/api/kam/messages"
 c=$(hdr -H "Authorization: Bearer $TOK" "$BASE/api/seat/messages?author=kam&limit=200"); expect "wednesday seat GET author=kam" 200 "$c"
-python3 -c 'import json,sys;d=json.load(open(sys.argv[1]));m=d["messages"];bad=[r for r in m if r.get("role")!="kam" or r["client"] not in ("ALL","Secuura","WED")];print("      partitions:",d["clients"],"rows:",len(m),"clients seen:",sorted({r["client"] for r in m}),"non-kam or foreign rows:",len(bad)); assert set(d["clients"])=={"ALL","Secuura","WED"} and not bad; print("PASS  wednesday author=kam: only ALL+Secuura+WED, only role=kam")' "$SCRATCH/p_body.txt" || FAIL=1
+python3 -c 'import json,sys;d=json.load(open(sys.argv[1]));m=d["messages"];bad=[r for r in m if r.get("role")!="kam" or r["client"] not in ("ALL","Secuura","WED")];print("      partitions:",d["clients"],"rows:",len(m),"clients seen:",sorted({r["client"] for r in m}),"non-kam or foreign rows:",len(bad)); assert set(d["clients"])=={"ALL","Secuura","WED"} and not bad; print("PASS  wednesday author=kam: only ALL+Secuura+WED, only role=kam")' "$SCRATCH/p_body.txt" || { echo "FAIL  (python arm, see traceback above)"; FAIL=1; }
 c=$(hdr -H "Authorization: Bearer $TOKT" "$BASE/api/seat/messages?author=kam&limit=200"); expect "tuesday seat GET author=kam" 200 "$c"
-python3 -c 'import json,sys;d=json.load(open(sys.argv[1]));m=d["messages"];bad=[r for r in m if r.get("role")!="kam" or r["client"] not in ("ALL","Datasec")];print("      partitions:",d["clients"],"rows:",len(m),"clients seen:",sorted({r["client"] for r in m}),"non-kam or foreign rows:",len(bad)); assert set(d["clients"])=={"ALL","Datasec"} and not bad; print("PASS  tuesday author=kam: only ALL+Datasec, only role=kam")' "$SCRATCH/p_body.txt" || FAIL=1
+python3 -c 'import json,sys;d=json.load(open(sys.argv[1]));m=d["messages"];bad=[r for r in m if r.get("role")!="kam" or r["client"] not in ("ALL","Datasec")];print("      partitions:",d["clients"],"rows:",len(m),"clients seen:",sorted({r["client"] for r in m}),"non-kam or foreign rows:",len(bad)); assert set(d["clients"])=={"ALL","Datasec"} and not bad; print("PASS  tuesday author=kam: only ALL+Datasec, only role=kam")' "$SCRATCH/p_body.txt" || { echo "FAIL  (python arm, see traceback above)"; FAIL=1; }
 expect "tuesday seat GET client=WED (MUST refuse)" 403 "$(hdr -H "Authorization: Bearer $TOKT" "$BASE/api/seat/messages?client=WED")"
 expect "tuesday seat GET client=ALL (broadcast, every seat)" 200 "$(hdr -H "Authorization: Bearer $TOKT" "$BASE/api/seat/messages?client=ALL&limit=1")"
 expect "wednesday seat GET client=ALL" 200 "$(hdr -H "Authorization: Bearer $TOK" "$BASE/api/seat/messages?client=ALL&limit=1")"
@@ -122,12 +122,12 @@ CARDU=$("$V" "$HERE/seat/post_card.py" --seat wednesday --client Secuura --base 
 expect "card live-card-$TS re-posted as ruled -> 200 updated in place" 200 "$CARDU"
 echo "### H. Phase 3 (2026-09-21) — per-seat wrapped keys, device keys, migrated rows, live readers"
 c=$(hdr "$BASE/api/seat/health"); expect "H1 health phase 3" 200 "$c"
-python3 -c 'import json,sys;d=json.load(open(sys.argv[1]));assert d["phase"]=="3" and d["kam_keys"]==3 and d["seat_keys"]==["tuesday","wednesday"],d;print("PASS  H1 health: phase 3, kam_keys 3, seat_keys [tuesday, wednesday]")' "$SCRATCH/p_body.txt" || FAIL=1
+python3 -c 'import json,sys;d=json.load(open(sys.argv[1]));assert d["phase"]=="3" and d["kam_keys"]==3 and d["seat_keys"]==["tuesday","wednesday"],d;print("PASS  H1 health: phase 3, kam_keys 3, seat_keys [tuesday, wednesday]")' "$SCRATCH/p_body.txt" || { echo "FAIL  (python arm, see traceback above)"; FAIL=1; }
 ea_refused "H2 GET /api/pubkeys plain client (viewer route, Easy Auth gated)" "$BASE/api/pubkeys"
 # H3: a NEW seat row carries the full recipient set; each Kam key + the addressed seat opens it; the other seat cannot
 expect "H3 wednesday-seat -> WED (Phase 3 writer)" 201 "$(post wednesday WED "SYNTHETIC phase3 wed $TS — ring + wednesday seat" p3-wed-$TS)"
 ROW=$(az storage entity query --account-name "$STORAGE" --table-name messages --auth-mode login --filter "PartitionKey eq 'WED' and id eq 'p3-wed-$TS'" -o json 2>"$SCRATCH/q_err.txt"); echo "$ROW" > "$SCRATCH/raw_p3_wed.json"
-"$V" - "$SCRATCH/raw_p3_wed.json" "SYNTHETIC phase3 wed $TS — ring + wednesday seat" WED <<'PY' || FAIL=1
+"$V" - "$SCRATCH/raw_p3_wed.json" "SYNTHETIC phase3 wed $TS — ring + wednesday seat" WED <<'PY' || { echo "FAIL  (python arm, see traceback above)"; FAIL=1; }
 import json,sys; sys.path.insert(0,"/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/dashboard-cloud/seat"); import envelope
 CRED="/Volumes/DevMASTER/WEDNESDAY/4_Credentials/dashboard-cloud"; items=json.load(open(sys.argv[1]))["items"]; assert len(items)==1, len(items)
 r=items[0]; expected=sys.argv[2]; part=sys.argv[3]; clear={"client":r["PartitionKey"],"kind":r["kind"],"id":r["id"],"ts":r["ts"]}
@@ -142,7 +142,7 @@ PY
 # H4: a tuesday row (Datasec, synthetic) is wrapped to the tuesday seat and NOT to wednesday — verified on the DATA KEY only (no text decrypt of a Datasec row)
 expect "H4 tuesday-seat -> Datasec (Phase 3 writer)" 201 "$(post tuesday Datasec "SYNTHETIC phase3 delta $TS — ring + tuesday seat" p3-delta-$TS)"
 ROW=$(az storage entity query --account-name "$STORAGE" --table-name messages --auth-mode login --filter "PartitionKey eq 'Datasec' and id eq 'p3-delta-$TS'" -o json 2>"$SCRATCH/q_err.txt"); echo "$ROW" > "$SCRATCH/raw_p3_delta.json"
-"$V" - "$SCRATCH/raw_p3_delta.json" <<'PY' || FAIL=1
+"$V" - "$SCRATCH/raw_p3_delta.json" <<'PY' || { echo "FAIL  (python arm, see traceback above)"; FAIL=1; }
 import json,sys; sys.path.insert(0,"/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/dashboard-cloud/seat"); import envelope
 CRED="/Volumes/DevMASTER/WEDNESDAY/4_Credentials/dashboard-cloud"; items=json.load(open(sys.argv[1]))["items"]; assert len(items)==1, len(items); r=items[0]
 kids=envelope.kids_of(r); exp=[envelope.kid_of(k) for _,k in envelope.recipients_for("Datasec")]
@@ -155,7 +155,7 @@ except KeyError: print("PASS  H4 wednesday-seat.pem REFUSED on the Datasec row (
 PY
 # H5: a MIGRATED (backfill) WED row opens with every device key and the pilot (texts compared, never printed)
 ROW=$(az storage entity query --account-name "$STORAGE" --table-name messages --auth-mode login --filter "PartitionKey eq 'WED' and backfill eq true and role eq 'wednesday'" --num-results 1 -o json 2>"$SCRATCH/q_err.txt"); echo "$ROW" > "$SCRATCH/raw_p3_migrated.json"
-"$V" - "$SCRATCH/raw_p3_migrated.json" <<'PY' || FAIL=1
+"$V" - "$SCRATCH/raw_p3_migrated.json" <<'PY' || { echo "FAIL  (python arm, see traceback above)"; FAIL=1; }
 import json,sys; sys.path.insert(0,"/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/dashboard-cloud/seat"); import envelope
 CRED="/Volumes/DevMASTER/WEDNESDAY/4_Credentials/dashboard-cloud"; items=json.load(open(sys.argv[1]))["items"]; assert items, "no migrated row"; r=items[0]
 clear={"client":r["PartitionKey"],"kind":r["kind"],"id":r["id"],"ts":r["ts"]}; print("      migrated row:", r["RowKey"], "kids:", envelope.kids_of(r))
@@ -168,10 +168,10 @@ PY
 "$V" "$HERE/seat/get_kam_messages.py" --seat wednesday --decrypt --json --since 2026-09-21T02:00 --limit 400 > "$SCRATCH/kam_wed.json" 2>"$SCRATCH/p_err.txt"; expect "H6 wednesday seat get_kam_messages --decrypt --json rc" 0 "$?"
 python3 -c 'import json,sys;d=json.load(open(sys.argv[1]));m=d["messages"];live=[r for r in m if str(r.get("written_by","")).startswith("easyauth:") and not r.get("synthetic")];dec=[r for r in live if "text" in r];err=[r for r in live if "decrypt_error" in r];bad=[r for r in m if r["client"] not in ("ALL","Secuura","WED")]
 print("      partitions:",d["clients"],"kam rows:",len(m),"live (easyauth) rows:",len(live),"decrypted:",len(dec),"errors:",len(err),"foreign:",len(bad))
-assert not bad and len(live)>=4 and len(dec)==len(live), "wednesday seat could not decrypt every live Kam row it may read (or fewer than the 4 known)"; print("PASS  H6 wednesday seat decrypts EVERY live Kam row in its partitions (WED+ALL, %d rows since 02:00Z, >=4 known); 0 foreign rows" % len(live))' "$SCRATCH/kam_wed.json" || FAIL=1
+assert not bad and len(live)>=4 and len(dec)==len(live), "wednesday seat could not decrypt every live Kam row it may read (or fewer than the 4 known)"; print("PASS  H6 wednesday seat decrypts EVERY live Kam row in its partitions (WED+ALL, %d rows since 02:00Z, >=4 known); 0 foreign rows" % len(live))' "$SCRATCH/kam_wed.json" || { echo "FAIL  (python arm, see traceback above)"; FAIL=1; }
 "$V" "$HERE/seat/get_kam_messages.py" --seat tuesday --decrypt --json --since 2026-09-21T02:00 --limit 400 2>"$SCRATCH/p_err.txt" | python3 -c 'import json,sys;d=json.load(sys.stdin);m=d["messages"];live=[r for r in m if str(r.get("written_by","")).startswith("easyauth:") and not r.get("synthetic")];dec=[r for r in live if "text" in r];bad=[r for r in m if r["client"] not in ("ALL","Datasec")]
 print("      partitions:",d["clients"],"kam rows:",len(m),"live rows:",len(live),"decrypted:",len(dec),"foreign:",len(bad),"(Datasec text NOT printed, NOT written to disk)")
-assert set(d["clients"])=={"ALL","Datasec"} and not bad and len(dec)==len(live); print("PASS  H6 tuesday seat sees only ALL+Datasec and decrypts its live Kam rows; no WED row reaches it (R0)")' || FAIL=1
+assert set(d["clients"])=={"ALL","Datasec"} and not bad and len(dec)==len(live); print("PASS  H6 tuesday seat sees only ALL+Datasec and decrypts its live Kam rows; no WED row reaches it (R0)")' || { echo "FAIL  (python arm, see traceback above)"; FAIL=1; }
 # H7: synthetic rows — born marked by this run's own posts (clear flag synthetic=true), PRESENT in the seat API, counted per partition;
 #     the pages hide them (proven by scripts/09b_page_checks_phase3.mjs on the pages' own ingestion code — run here too)
 TOK=$("$V" - <<PY
@@ -179,10 +179,11 @@ import sys; sys.path.insert(0,"$HERE/seat"); import seat_common as sc, argparse
 a=sc.common_args(argparse.ArgumentParser()).parse_args(["--seat","wednesday","--client","WED"]); print(sc.get_token(a, sc.load_ids()))
 PY
 )
-c=$(hdr -H "Authorization: Bearer $TOK" "$BASE/api/seat/messages?client=WED&since=$(date -u +%Y-%m-%dT00:00)&limit=1000"); expect "H7 wednesday seat GET WED rows today" 200 "$c"
+# H7 floor is FIXED at the probe-dup row's fixed ts day (2026-09-21T00:00:01Z): a `today` floor lost that row once the UTC date rolled past 2026-09-21 (found 2026-09-22 15:0x, first run after 10:00 AEST)
+c=$(hdr -H "Authorization: Bearer $TOK" "$BASE/api/seat/messages?client=WED&since=2026-09-21T00:00&limit=1000"); expect "H7 wednesday seat GET WED rows since 2026-09-21T00:00Z" 200 "$c"
 python3 -c 'import json,sys;d=json.load(open(sys.argv[1]));m=d["messages"];ts=sys.argv[2];syn=[r for r in m if r.get("synthetic") is True];mine=[r for r in syn if r["id"] in ("live-wed-"+ts,"p3-wed-"+ts,"probe-dup-"+ts)]
 print("      WED rows today:",len(m),"synthetic=true among them:",len(syn),"this run'"'"'s own probe rows found marked:",[r["id"] for r in mine])
-assert len(mine)==3, "the rows this run posted with --synthetic are not all marked"; print("PASS  H7 this run'"'"'s 3 synthetic WED rows are PRESENT in the seat API and carry synthetic=true (the pages hide them; nothing deleted)")' "$SCRATCH/p_body.txt" "$TS" || FAIL=1
+assert len(mine)==3, "the rows this run posted with --synthetic are not all marked"; print("PASS  H7 this run'"'"'s 3 synthetic WED rows are PRESENT in the seat API and carry synthetic=true (the pages hide them; nothing deleted)")' "$SCRATCH/p_body.txt" "$TS" || { echo "FAIL  H7 (python arm, see traceback above)"; FAIL=1; }
 unset TOK
 node "$HERE/scripts/09b_page_checks_phase3.mjs" > "$SCRATCH/p_09b.txt" 2>&1; expect "H7 page checks (DOM order Updates-below-Needs-you; synthetic filter in the pages' own ingestion code)" 0 "$?"
 /usr/bin/grep -i -c '^pass' "$SCRATCH/p_09b.txt" | sed 's/^/      09b PASS lines: /'
@@ -237,8 +238,46 @@ else
   python3 -c 'import json,sys;d=json.load(open(sys.argv[1]));w=d["wednesday"];assert w["age_seconds"]>=1800,w;print("PASS  I8 this seat has no fresh reading (rc %s); the board holds a row %ds old -> the page renders no reading (nothing faked)" % (sys.argv[2], w["age_seconds"]))' "$SCRATCH/p_body.txt" "$RC8" || { echo "FAIL  (section I python arm, see traceback above)"; FAIL=1; }
 fi
 unset TOK TOKT
+echo "### J. Hide / unhide (2026-09-22, Kam 14:27 'clean up your boards') — reversible, seat-scoped, audited, never deletes"
+c=$(hdr "$BASE/api/seat/health"); expect "J1 health" 200 "$c"
+python3 -c 'import json,sys;d=json.load(open(sys.argv[1]));assert d.get("hide_route") is True and d["phase"]=="3",d;print("PASS  J1 health: phase 3 + hide_route true")' "$SCRATCH/p_body.txt" || { echo "FAIL  (section J python arm, see traceback above)"; FAIL=1; }
+expect "J2 POST /api/seat/hide NO token" 401 "$(hdr -X POST -H 'Content-Type: application/json' -d '{"client":"WED","id":"x"}' "$BASE/api/seat/hide")"
+expect "J2 POST /api/seat/hide FORGED token" 401 "$(hdr -X POST -H 'Authorization: Bearer eyJhbGciOiJSUzI1NiIsImtpZCI6Im5vcGUifQ.eyJhdWQiOiJ4In0.c2ln' -H 'Content-Type: application/json' -d '{"client":"WED","id":"x"}' "$BASE/api/seat/hide")"
+ea_refused "J2 GET /api/messages?hidden=1 plain client (the viewer reveal is Easy Auth gated like every viewer route)" "$BASE/api/messages?hidden=1"
+TOK=$("$V" - <<PY
+import sys; sys.path.insert(0,"$HERE/seat"); import seat_common as sc, argparse
+a=sc.common_args(argparse.ArgumentParser()).parse_args(["--seat","wednesday","--client","WED"]); print(sc.get_token(a, sc.load_ids()))
+PY
+)
+TOKT=$("$V" - <<PY
+import sys; sys.path.insert(0,"$HERE/seat"); import seat_common as sc, argparse
+a=sc.common_args(argparse.ArgumentParser()).parse_args(["--seat","tuesday","--client","Datasec"]); print(sc.get_token(a, sc.load_ids()))
+PY
+)
+# J3: this run's own synthetic WED row (live-wed-$TS, posted in section C) is the target — hidden, revealed, audited, unhidden
+RKJ=$(az storage entity query --account-name "$STORAGE" --table-name messages --auth-mode login --filter "PartitionKey eq 'WED' and id eq 'live-wed-$TS'" --select RowKey,ciphertext,wrapped_keys,iv -o json 2>/dev/null | python3 -c 'import json,sys;it=json.load(sys.stdin)["items"];json.dump(it,open(sys.argv[1],"w"));print(it[0]["RowKey"] if len(it)==1 else "")' "$SCRATCH/j_raw_before.json")
+[ -n "$RKJ" ] && echo "PASS  J3 target row found: WED/$RKJ (this run's synthetic row)" || { echo "FAIL  J3 target row live-wed-$TS not found"; FAIL=1; }
+expect "J3 TUESDAY token hides a WED row (another seat's tab; MUST refuse)" 403 "$(hdr -X POST -H "Authorization: Bearer $TOKT" -H 'Content-Type: application/json' -d '{"client":"WED","row_key":"'$RKJ'"}' "$BASE/api/seat/hide")"; echo "      body: $(head -c 120 "$SCRATCH/p_body.txt")"
+expect "J3 WEDNESDAY token hides a Datasec row (MUST refuse)" 403 "$(hdr -X POST -H "Authorization: Bearer $TOK" -H 'Content-Type: application/json' -d '{"client":"Datasec","id":"p3-delta-'$TS'"}' "$BASE/api/seat/hide")"
+expect "J3 unknown row_key -> 404" 404 "$(hdr -X POST -H "Authorization: Bearer $TOK" -H 'Content-Type: application/json' -d '{"client":"WED","row_key":"2026-09-22T00:00:00.000Z_no-such-'$TS'"}' "$BASE/api/seat/hide")"
+expect "J3 client=ALL -> 400" 400 "$(hdr -X POST -H "Authorization: Bearer $TOK" -H 'Content-Type: application/json' -d '{"client":"ALL","row_key":"'$RKJ'"}' "$BASE/api/seat/hide")"
+c=$(hdr -X POST -H "Authorization: Bearer $TOK" -H 'Content-Type: application/json' -d '{"client":"WED","row_key":"'$RKJ'","reason":"live probe J3"}' "$BASE/api/seat/hide"); expect "J3 wednesday HIDES its own row" 200 "$c"
+AUDJ=$(python3 -c 'import json,sys;d=json.load(open(sys.argv[1]));assert d["changed"] is True and d["row"]["hidden"] is True and d["by"]=="wednesday",d;print(d["audit_row_key"])' "$SCRATCH/p_body.txt") && echo "PASS  J3 hide echo: changed=true hidden=true by=wednesday (audit $AUDJ)" || { echo "FAIL  J3 hide echo"; FAIL=1; }
+c=$(hdr -H "Authorization: Bearer $TOK" "$BASE/api/seat/messages?client=WED&since=$(date -u +%Y-%m-%dT00:00)&limit=1000"); expect "J3 seat list after the hide" 200 "$c"
+python3 -c 'import json,sys;d=json.load(open(sys.argv[1]));ids=[m["id"] for m in d["messages"]];assert sys.argv[2] not in ids and d["hidden_included"] is False;print("PASS  J3 hidden row ABSENT from the default seat list (%d WED rows today listed)" % len(ids))' "$SCRATCH/p_body.txt" "live-wed-$TS" || { echo "FAIL  (section J python arm, see traceback above)"; FAIL=1; }
+c=$(hdr -H "Authorization: Bearer $TOK" "$BASE/api/seat/messages?client=WED&since=$(date -u +%Y-%m-%dT00:00)&limit=1000&hidden=1"); expect "J3 seat list ?hidden=1" 200 "$c"
+python3 -c 'import json,sys;d=json.load(open(sys.argv[1]));m=[x for x in d["messages"] if x["id"]==sys.argv[2]];assert len(m)==1 and m[0]["hidden"] is True and m[0]["hidden_seat"]=="wednesday" and m[0]["hidden_by"]==sys.argv[3],m;print("PASS  J3 ?hidden=1 REVEALS it: hidden=true hidden_seat=wednesday hidden_by=wednesday app id hidden_at=%s" % m[0]["hidden_at"])' "$SCRATCH/p_body.txt" "live-wed-$TS" "$wednesday_seat_APPID" || { echo "FAIL  (section J python arm, see traceback above)"; FAIL=1; }
+c=$(hdr -H "Authorization: Bearer $TOK" "$BASE/api/seat/hide/audit?limit=1000"); expect "J3 GET /api/seat/hide/audit" 200 "$c"
+python3 -c 'import json,sys;d=json.load(open(sys.argv[1]));a=[x for x in d["audit"] if x["RowKey"]==sys.argv[2]];assert len(a)==1 and a[0]["action"]=="hide" and a[0]["target_row_key"]==sys.argv[3] and a[0]["seat"]=="wednesday" and a[0]["reason"]=="live probe J3",a;assert all(x["target_client"] in ("WED","Secuura","ALL") for x in d["audit"]);print("PASS  J3 audit line via the API (who=wednesday, when=%s, row=%s); no foreign-partition audit line" % (a[0]["at"], a[0]["target_id"]))' "$SCRATCH/p_body.txt" "$AUDJ" "$RKJ" || { echo "FAIL  (section J python arm, see traceback above)"; FAIL=1; }
+az storage entity query --account-name "$STORAGE" --table-name messages --auth-mode login --filter "PartitionKey eq 'WED' and RowKey eq '$RKJ'" --select RowKey,ciphertext,wrapped_keys,iv,hidden,hidden_seat -o json 2>/dev/null > "$SCRATCH/j_raw_after.json"
+python3 -c 'import json,sys;b=json.load(open(sys.argv[1]))[0];a=json.load(open(sys.argv[2]))["items"][0];assert a["ciphertext"]==b["ciphertext"] and a["iv"]==b["iv"] and a["wrapped_keys"]==b["wrapped_keys"] and a["hidden"] is True and a["hidden_seat"]=="wednesday";print("PASS  J3 raw row: ciphertext/iv/wrapped_keys byte-identical after the hide; hidden=true merged (nothing deleted, nothing rewritten)")' "$SCRATCH/j_raw_before.json" "$SCRATCH/j_raw_after.json" || { echo "FAIL  (section J python arm, see traceback above)"; FAIL=1; }
+c=$(hdr -X POST -H "Authorization: Bearer $TOK" -H 'Content-Type: application/json' -d '{"client":"WED","row_key":"'$RKJ'","reason":"live probe J3 undo"}' "$BASE/api/seat/unhide"); expect "J3 wednesday UNHIDES it" 200 "$c"
+python3 -c 'import json,sys;d=json.load(open(sys.argv[1]));assert d["changed"] is True and d["row"]["hidden"] is False,d;print("PASS  J3 unhide echo: changed=true hidden=false")' "$SCRATCH/p_body.txt" || { echo "FAIL  (section J python arm, see traceback above)"; FAIL=1; }
+c=$(hdr -H "Authorization: Bearer $TOK" "$BASE/api/seat/messages?client=WED&since=$(date -u +%Y-%m-%dT00:00)&limit=1000"); python3 -c 'import json,sys;d=json.load(open(sys.argv[1]));ids=[m["id"] for m in d["messages"]];assert sys.argv[2] in ids;print("PASS  J3 row BACK in the default seat list after the unhide (reversible)")' "$SCRATCH/p_body.txt" "live-wed-$TS" || { echo "FAIL  (section J python arm, see traceback above)"; FAIL=1; }
+unset TOK TOKT
 echo "### F. Rows per partition (counts only)"
-for c in Secuura Datasec WED ALL; do n=$(az storage entity query --account-name "$STORAGE" --table-name messages --auth-mode login --filter "PartitionKey eq '$c'" --select id -o json 2>/dev/null | python3 -c 'import json,sys;print(len(json.load(sys.stdin)["items"]))'); s=$(az storage entity query --account-name "$STORAGE" --table-name messages --auth-mode login --filter "PartitionKey eq '$c' and synthetic eq true" --select id -o json 2>/dev/null | python3 -c 'import json,sys;print(len(json.load(sys.stdin)["items"]))'); echo "      messages/$c: $n (synthetic, hidden by the pages: $s)"; done
+for c in Secuura Datasec WED ALL; do n=$(az storage entity query --account-name "$STORAGE" --table-name messages --auth-mode login --filter "PartitionKey eq '$c'" --select id -o json 2>/dev/null | python3 -c 'import json,sys;print(len(json.load(sys.stdin)["items"]))'); s=$(az storage entity query --account-name "$STORAGE" --table-name messages --auth-mode login --filter "PartitionKey eq '$c' and synthetic eq true" --select id -o json 2>/dev/null | python3 -c 'import json,sys;print(len(json.load(sys.stdin)["items"]))'); h=$(az storage entity query --account-name "$STORAGE" --table-name messages --auth-mode login --filter "PartitionKey eq '$c' and hidden eq true" --select id -o json 2>/dev/null | python3 -c 'import json,sys;print(len(json.load(sys.stdin)["items"]))'); echo "      messages/$c: $n (synthetic, hidden by the pages: $s; hidden by a seat, reversible: $h)"; done
+echo "      messages/AUDIT (hide/unhide audit lines): $(az storage entity query --account-name "$STORAGE" --table-name messages --auth-mode login --filter "PartitionKey eq 'AUDIT'" --select action -o json 2>/dev/null | python3 -c 'import json,sys;print(len(json.load(sys.stdin)["items"]))')"
 echo "      cards total: $(az storage entity query --account-name "$STORAGE" --table-name cards --auth-mode login --select id -o json 2>/dev/null | python3 -c 'import json,sys;print(len(json.load(sys.stdin)["items"]))') (synthetic, hidden: $(az storage entity query --account-name "$STORAGE" --table-name cards --auth-mode login --filter "synthetic eq true" --select id -o json 2>/dev/null | python3 -c 'import json,sys;print(len(json.load(sys.stdin)["items"]))'))"
 echo "### RESULT: $([ $FAIL = 0 ] && echo ALL PROBES PASS || echo SOME PROBES FAILED)"
 exit $FAIL

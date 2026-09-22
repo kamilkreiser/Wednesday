@@ -59,3 +59,6 @@ Re-derived properly, which is what should have happened first:
 
 ## 2026-09-22 13:35 — the 11:0x seat: FEED 11 drained (5 PASS all HELD — 23 R16B READYs today; KS-976-B FAIL ×2 on the same two bytes → Claude), queue EMPTY — reason
 - The FEED 12 brief-writer drafter is being commissioned now (`fleet/briefs_staged/2026-09-22_ornith_feed12.COMMISSION.md`: KS-1121's modify-in-place shape + the FEED 10 §3 rows, at the NEW tip 3bad652d1 — round 18's 13 merges moved product files, so nothing briefed at 8c2f7b3fd is queued unread). Wake for the refill: the drafter's report → Wednesday's checks → queue + kick.
+
+## 2026-09-22 14:44 — the 11:0x seat: FEED 12's one row (KS-1121) FAILED A2b twice ("placeholder test file"); queue EMPTY since 14:12 — reason
+- The FEED 12 drafter measured 0 briefable rows left at tip 3bad652d1 from the old censuses; the round-19 raise (both seats live, 21 PRs) consumes the held pool. The next widening is a FRESH `derive_candidates.py` over the board at the new tip, minus the round-19 lanes' files — the FEED 13 drafter is being commissioned now (`fleet/briefs_staged/2026-09-22_ornith_feed13.COMMISSION.md`), with the KS-1121 A2b classification as its item 0. Wake for the refill: its report → Wednesday's checks → queue + kick.

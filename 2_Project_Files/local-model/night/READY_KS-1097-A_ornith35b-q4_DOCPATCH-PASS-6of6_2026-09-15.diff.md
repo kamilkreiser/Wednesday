@@ -21,3 +21,5 @@
  
  *v2 · 26 August 2026 — updated from v1 after the first day under the flow (zero approvals on 16 PRs; the branch-naming trap; `clean` ≠ tested; CI-outage gate). Repo copy: [`CONTRIBUTING.md`](../CONTRIBUTING.md), merged as PR #733; process ticket KS-685.*
 ```
+
+# SUPERSEDED-BY (feed11 drafter, 2026-09-22 12:57:28 AEST): re-briefed at develop 8c2f7b3fd as night/briefs/KS-1097-R16B-DEVPROCESS.md (golden PASS through the real checker in the feed11 precheck clone; Wednesday queues). This READY is STALE - do not raise it.

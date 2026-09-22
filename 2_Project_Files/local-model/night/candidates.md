@@ -1,4 +1,4 @@
-# Ornith candidates — derived 2026-09-22 07:55 from 312 KS Backlog/Todo tickets (read-only, unpaginated)
+# Ornith candidates — derived 2026-09-22 14:51 from 303 KS Backlog/Todo tickets (read-only, unpaginated)
 
 A CENSUS for the coordinator to brief from, easy → hard (Kam 2026-09-15 16:40 / 18:19). A ticket here is a candidate, not a task: read it, read the file at the tip, write `night/briefs/<id>.md`, then queue it. Auth-shaped titles are excluded (LAST); Peter/Stuart tickets and PR-attached tickets are excluded outright.
 
@@ -80,30 +80,30 @@ A CENSUS for the coordinator to brief from, easy → hard (Kam 2026-09-15 16:40 
 
 ## ⚠ ALSO NAMED IN A HELD READY's HEADLINE — 23 (verify before briefing; surfaced, NOT suppressed)
 - KS-1004 — named in READY_KS-1158-R1_ornith35b-q4_JEST-PASS-7of7_2026-09-15.diff.md
-- KS-1020 — named in READY_KS-1121_ornith35b-q4_VITEST-MODIFYINPLACE-REANCHORED-PASS-7of7_2026-09-16.diff.md
-- KS-1046 — named in READY_KS-1047_ornith35b-q4_BASHPATCH-RECOUNTED-PASS-7of7_2026-09-16.diff.md
+- KS-1020 — named in READY_KS-1121_ornith35b-q4_VITEST-MODIFYINPLACE-REANCHORED-PASS-7of7_2026-09-16.diff.md, READY_KS-1121_ornith35b-q4_VITEST-MODIFYINPLACE-REANCHORED-PASS-7of7_2026-09-16.diff.md.pre-1350-superseded
+- KS-1046 — named in READY_KS-1047_ornith35b-q4_BASHPATCH-RECOUNTED-PASS-7of7_2026-09-16.diff.md, READY_KS-1047_ornith35b-q4_BASHPATCH-RECOUNTED-PASS-7of7_2026-09-16.diff.md.pre-0951-superseded
 - KS-1069 — named in READY_KS-1130-E3twin_ornith35b-q4_TESTONLY-PASS-7of7_2026-09-15.diff.md
 - KS-1072 — named in READY_KS-1199_ornith35b-q4_TESTONLY-TAMPER-PASS-7of7_2026-09-17.diff.md
 - KS-1073 — named in READY_KS-1123-F2_ornith35b-q8_TESTONLY-PASS-7of7_2026-09-15.diff.md, READY_KS-1130-E1twin_ornith35b-q4_TESTONLY-PASS-7of7_2026-09-15.diff.md, READY_KS-1158-R1_ornith35b-q4_JEST-PASS-7of7_2026-09-15.diff.md
-- KS-1092 — named in READY_KS-1097-B_ornith35b-q4_DOCPATCH-REFLOW-INFERRED-PASS-7of7_2026-09-15.diff.md
+- KS-1092 — named in READY_KS-1097-B_ornith35b-q4_DOCPATCH-REFLOW-INFERRED-PASS-7of7_2026-09-15.diff.md, READY_KS-1097-B_ornith35b-q4_DOCPATCH-REFLOW-INFERRED-PASS-7of7_2026-09-15.diff.md.pre-1034-superseded
 - KS-1099 — named in READY_KS-1108_ornith35b-q4_TOOLING-AKTO-PASS-7of7_2026-09-15.diff.md
 - KS-1173 — named in READY_KS-1172-A3_ornith35b-q4_JEST-MODIFYINPLACE-THREE-VERBS-PASS-7of7_2026-09-15.diff.md, READY_KS-1172-B3_ornith35b-q4_MODIFYINPLACE-THREE-VERBS-PASS-7of7_2026-09-15.diff.md, READY_KS-1172-D3_ornith35b-q4_DOCPATCH-THREE-VERBS-PASS-6of6_2026-09-15.diff.md
-- KS-202 — named in READY_KS-974-B_ornith35b-q4_PASS-7of7_2026-09-15.diff.md
+- KS-202 — named in READY_KS-974-B_ornith35b-q4_PASS-7of7_2026-09-15.diff.md, READY_KS-974-B_ornith35b-q4_PASS-7of7_2026-09-15.diff.md.pre-1137-superseded
 - KS-217 — named in READY_KS-1193-F1_ornith35b-q4_TESTONLY-TAMPER-PASS-7of7_2026-09-17.diff.md
 - KS-253 — named in READY_KS-999_ornith35b-q4_RECHECK-PASS-7of7_2026-09-15.diff.md
-- KS-430 — named in READY_KS-629-B_ornith35b-q4_VITEST-PASS-7of7_2026-09-16.diff.md
-- KS-666 — named in READY_KS-1011_ornith35b-q4_BASHPATCH-NEWTEST-PASS-7of7_2026-09-16.diff.md
-- KS-691 — named in READY_KS-1047_ornith35b-q4_BASHPATCH-RECOUNTED-PASS-7of7_2026-09-16.diff.md
+- KS-430 — named in READY_KS-629-B_ornith35b-q4_VITEST-PASS-7of7_2026-09-16.diff.md, READY_KS-629-B_ornith35b-q4_VITEST-PASS-7of7_2026-09-16.diff.md.pre-1132-superseded
+- KS-666 — named in READY_KS-1011_ornith35b-q4_BASHPATCH-NEWTEST-PASS-7of7_2026-09-16.diff.md, READY_KS-1011_ornith35b-q4_BASHPATCH-NEWTEST-PASS-7of7_2026-09-16.diff.md.pre-1034-superseded
+- KS-691 — named in READY_KS-1047_ornith35b-q4_BASHPATCH-RECOUNTED-PASS-7of7_2026-09-16.diff.md, READY_KS-1047_ornith35b-q4_BASHPATCH-RECOUNTED-PASS-7of7_2026-09-16.diff.md.pre-0951-superseded
 - KS-727 — named in READY_KS-1181-F3_ornith35b-q4_TESTONLY-TAMPER-PASS-7of7_2026-09-17.diff.md, READY_KS-1181-F3w_ornith35b-q4_comment-PASS-9of9_2026-09-17.diff.md
-- KS-754 — named in READY_KS-1028_ornith35b-q4_JEST-PASS-7of7_2026-09-15.diff.md, READY_KS-1031_ornith35b-q4_BASHPATCH-NEWTEST-PASS-7of7_2026-09-16.diff.md
+- KS-754 — named in READY_KS-1028_ornith35b-q4_JEST-PASS-7of7_2026-09-15.diff.md, READY_KS-1028_ornith35b-q4_JEST-PASS-7of7_2026-09-15.diff.md.pre-1257-superseded, READY_KS-1031_ornith35b-q4_BASHPATCH-NEWTEST-PASS-7of7_2026-09-16.diff.md, READY_KS-1031_ornith35b-q4_BASHPATCH-NEWTEST-PASS-7of7_2026-09-16.diff.md.pre-1034-superseded
 - KS-835 — named in READY_KS-1156-A2_ornith35b-q4_comment-PASS-9of9_2026-09-17.diff.md
 - KS-869 — named in READY_KS-887_ornith35b-q4_TESTONLY-MODIFYINPLACE-PASS-7of7_2026-09-16.diff.md
 - KS-930 — named in READY_KS-958_ornith35b-q4_BASHPATCH-REANCHORED-RECOUNTED-PASS-7of7_2026-09-16.diff.md
 - KS-932 — named in READY_KS-1179-F1_ornith35b-q4_TESTONLY-TAMPER-PASS-7of7_2026-09-17.diff.md
-- KS-966 — named in READY_KS-972_ornith35b-q4_BASHPATCH-REANCHORED-PASS-7of7_2026-09-16.diff.md
+- KS-966 — named in READY_KS-972_ornith35b-q4_BASHPATCH-REANCHORED-PASS-7of7_2026-09-16.diff.md, READY_KS-972_ornith35b-q4_BASHPATCH-REANCHORED-PASS-7of7_2026-09-16.diff.md.pre-0951-superseded
 - KS-999 — named in READY_KS-1186_ornith35b-q4_AUTH-5SITE-LINEKEYED-PASS-7of7_2026-09-17.diff.md
 
-## HELD (READY_* or done.md PASS) — 57
+## HELD (READY_* or done.md PASS) — 48
 - KS-1009 Security: GET /api/auth/wallet/status returns userId + role to ANY anonymous cal
 - KS-1011 KS-666 stack marker reads "unknown" for owner/branch/commit/started_at whenever 
 - KS-1028 KS-754 gate F-1 (MAJOR): a step-12 throw skips the USER_ERASED fan-out AFTER the
@@ -120,15 +120,12 @@ A CENSUS for the coordinator to brief from, easy → hard (Kam 2026-09-15 16:40 
 - KS-1108 Akto harness: loadSecretsYml() parses config/secrets.yml with no catch — the KS-
 - KS-1117 k6 YAML loader: a BOM immediately followed by a comment is a marked syntax error
 - KS-1121 Security: credentialRepo.getById resolves a credential by SUBSTRING (LIKE '%id%'
-- KS-1123 api-gateway verify: an empty-string / 0 / false anchor status is one edit (`??`→
 - KS-1127 run-shell-suites.sh counts an exit-0 SKIP as `passed` — a suite that ran 0 of it
 - KS-1139 Bare arithmetic-command `((X++))` under `set -e` — exits 1 at 0 and bash ≥ 4.1 e
 - KS-1160 originate POST /api/webhooks persists the RAW url where PATCH persists the norma
 - KS-1164 gate/report.ts writeGateReport overwrites the input summary when --summary does 
-- KS-1171 Guard 3's re-poll reads a MIXED window as ABSENT — one early "not found" then an
 - KS-1182 demo-service errorHandler: unchecked err.status (NaN crashes the process, 200/30
 - KS-1186 userRepo.ts: five sibling reads still return fromRow unawaited inside try, so a 
-- KS-1192 ks871-real-app-canonical-audit-rows production cell does not pin production mode
 - KS-1196 admin POST /api/admin/document-types ids are dt-${Date.now()}: two creates in on
 - KS-1201 bootstrap_login_diagnosis.test.sh leaks its 4 login stubs on every run: start_st
 - KS-1205 api-gateway per-key limiter follow-up (KS-1195 gates): a JWT claim can name a ke
@@ -137,11 +134,7 @@ A CENSUS for the coordinator to brief from, easy → hard (Kam 2026-09-15 16:40 
 - KS-1220 ks839 cells pin padded wildcards with ASCII separators only - a second tokenizer
 - KS-1221 ks744 cells never test a falsy claim - a verificationLevel of '' or null must fo
 - KS-1227 ks1072 postTier2's anchor-store witness counts every stub request, leaks its lis
-- KS-1231 A connector allow-list fails open when platform-settings integrations is not a c
-- KS-1246 F-2: /health/services still reads response.ok only — a degraded service reads he
 - KS-1250 O-2: RUNBOOK §2.2 documents SMOKE_BASE_URL, but scripts/smoke-test.sh ignores it
-- KS-1257 After platform-settings has expired, a partial admin write now persists forever 
-- KS-1265 POST /api/documents saves the document and its provenance row, then answers 400 
 - KS-1277 documents.ts: two stale comments about on-behalf-of recording (:2327-2334 inside
 - KS-623 Test-token env guard is asymmetric: the gateway fails closed on an unset NODE_EN
 - KS-629 kyc `livenessVideo` is accepted by spec and runtime, then silently discarded — n
@@ -149,14 +142,12 @@ A CENSUS for the coordinator to brief from, easy → hard (Kam 2026-09-15 16:40 
 - KS-730 Security: 71 inline handlers still return err.message verbatim off-production — 
 - KS-747 Spec drift: GET /api/security/keys declares no parameters while the handler requ
 - KS-794 verify-file returns `fileSize` on every 200 and neither response schema declares
-- KS-811 Nothing asserts #815's 403 code SET against what the route actually throws
 - KS-865 check-no-latest-tags.sh silently skips a missing input — it scans 5 of the 6 fil
 - KS-866 Merge protocol: the server-side `sha=` pin protects the PR head, not the base — 
 - KS-884 pre-push resolves the bare name `develop`, so a TAG named develop beats the bran
 - KS-888 dbSaveApiKey SWALLOWS a failed INSERT — POST /api/keys answers 201 for a key tha
 - KS-908 connectorId persists but is invisible through the API — POST and GET both return
 - KS-938 Security: "MFA disabled" leaves the TOTP seed and hashed backup codes in the row
-- KS-947 KS-733 gate blindness (F3+F4): the parity cell misses skip:() and mount ORDER, a
 - KS-960 Two schema sources disagree on whether users.email is unique — a statement valid
 - KS-972 start-secuura.sh banner prints admin@secuura.com / admin123, which has returned 
 - KS-974 Published bound vs runtime bound on rate-limit scope: /check enforces code UNITS

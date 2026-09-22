@@ -102,3 +102,5 @@
 +  });
 +});
 ```
+
+# SUPERSEDED-BY (feed11 drafter, 2026-09-22 12:57:28 AEST): re-briefed at develop 8c2f7b3fd as night/briefs/KS-976-R16B-SCOPE403.md (golden PASS through the real checker in the feed11 precheck clone; Wednesday queues). This READY is STALE - do not raise it.

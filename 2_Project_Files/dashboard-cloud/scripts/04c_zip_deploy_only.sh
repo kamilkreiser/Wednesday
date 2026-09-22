@@ -22,6 +22,14 @@ CTRL=$(/usr/bin/grep -i -c -- '-----BEGIN [A-Z ]*PRIVATE' "$CRED/kam-pilot-priva
 echo "guard positive control on a real private key file: $CTRL (must be 1)"; [ "$CTRL" = "1" ] || { echo "GUARD CANNOT FAIL — ABORT"; exit 9; }
 echo "zip private-key markers: $PRIV_MARKERS (must be 0); positive control: public-key markers in the public file: $PUB_MARKERS (must be 1)"
 [ "$PRIV_MARKERS" = "0" ] && [ "$PUB_MARKERS" = "1" ] || { echo "ZIP CHECK FAILED — ABORT"; exit 9; }
+# 2026-09-22 14:5x: EXPECT_MARKER=<string> asserts the zipped app/main.py carries the change being shipped. Added after a deploy
+# shipped the PREVIOUS main.py: a `git pull --rebase --autostash` from another session had reverted the working tree 2 min
+# before the zip was built (the edits sat in stash@{0}); the health check caught it, this guard catches it before the upload.
+if [ -n "${EXPECT_MARKER:-}" ]; then
+  MK=$(unzip -p "$ZIP" app/main.py | /usr/bin/grep -c -- "$EXPECT_MARKER" || true)
+  echo "zipped app/main.py carries EXPECT_MARKER '$EXPECT_MARKER': $MK line(s) (must be >= 1)"
+  [ "$MK" -ge 1 ] || { echo "ZIP DOES NOT CARRY THE CHANGE (working tree reverted?) — ABORT"; exit 9; }
+fi
 $AZ webapp deploy -n "$WEBAPP" -g "$RG" --src-path "$ZIP" --type zip --async false --timeout 900 -o json > "$SCRATCH/deploy_out.json" 2>"$SCRATCH/deploy_err.txt" || true
 echo "deploy stderr: $(head -c 600 "$SCRATCH/deploy_err.txt")"
 python3 -c 'import json,sys

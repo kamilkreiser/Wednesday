@@ -242,11 +242,17 @@ window.WED = (function () {
   //      HIDDEN by both pages (never deleted; the seats still read them). hidden{} counts what each page skipped, for its footer.
   const hidden = { messages: 0, cards: 0 };
   function isSynthetic(r) { return !!(r && r.synthetic === true); }
+  // ---- hidden rows (2026-09-22, Kam 14:27 "clean up your boards"): a seat may HIDE a row of its own tab (POST /api/seat/hide,
+  //      reversible, audited, never deleted). The API already omits them; the pages skip them too (defence in depth) UNLESS the
+  //      page URL carries ?hidden=1 — the reveal for audit, passed through to the API as hiddenQ.
+  let revealHidden = false; try { revealHidden = new URLSearchParams(window.location ? window.location.search : "").get("hidden") === "1"; } catch (e) {}
+  const hiddenQ = revealHidden ? "&hidden=1" : "";
+  function isHidden(r) { return !revealHidden && !!(r && r.hidden === true); }
   // ---- speech (client-side speechSynthesis; the local page used the Studio's Moira voice server-side) ----
   function speak(text) { try { speechSynthesis.cancel(); const u = new SpeechSynthesisUtterance(String(text || "").slice(0, 4000)); u.lang = "en-IE"; speechSynthesis.speak(u); } catch (e) {} }
   function stopSpeech() { try { speechSynthesis.cancel(); } catch (e) {} }
 
-  return { key, filename, setFilename, chooseFolder, unlock, importFile, forget, rememberedFolderName, DEFAULT_FILENAME, KNOWN_FILENAMES, isSynthetic, hidden,
+  return { key, filename, setFilename, chooseFolder, unlock, importFile, forget, rememberedFolderName, DEFAULT_FILENAME, KNOWN_FILENAMES, isSynthetic, hidden, isHidden, hiddenQ, revealHidden,
            decryptRow, encryptText, publicKeys, keyNameOfKid, postKamMessage, getJSON, toMsg, toCard, agentOfRow, localTs, speak, stopSpeech, VIEW_TO_CLIENT,
            _internals: { pemToDer, unb64, b64, AAD, SCHEME, wrappedEntries, spkiFromJwk, kidOfPkcs8 } };
 })();

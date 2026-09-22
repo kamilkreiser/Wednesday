@@ -74,3 +74,5 @@
 +  });
 +});
 ```
+
+# SUPERSEDED-BY (feed10 drafter, 2026-09-22 11:32:21 AEST): re-briefed at develop 8c2f7b3fd as `night/briefs/KS-629-R16B-LIVENESSSPEC.md` (golden RESULT: PASS (7/7) through tasks/code_patch/checker.sh; the one 18-line hunk re-cut as TWO minimal hunks with ascii_proxy on the two em-dash lines :186 / :198; the test rewritten ASCII). This READY is the 2026-09-1x pin; do not raise it.

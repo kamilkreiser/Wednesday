@@ -13,3 +13,5 @@
 +  main `require-pr-gates` rulesets and turn on required reviews = 1 (any writer). *[NOT APPLIED (2026-09-11, KS-1095): the pending ruling is raise-to-1 (Kam's card `secuura-required-approvals-zero-after-the-untick`; Kam applies it himself; not yet applied) — do not turn it on while fleet PRs carry 0 GitHub reviews: it would block every fleet merge.]* The former
     Environment-based sign-off jobs were removed in favour of this checkbox approach.
 ```
+
+# SUPERSEDED-BY (feed11 drafter, 2026-09-22 12:57:28 AEST): re-briefed at develop 8c2f7b3fd as night/briefs/KS-1097-R16B-CLAUDEMD.md (golden PASS through the real checker in the feed11 precheck clone; Wednesday queues). This READY is STALE - do not raise it.

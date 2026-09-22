@@ -64,3 +64,5 @@
 +    });
 +});
 ```
+
+# SUPERSEDED-BY (feed10 drafter, 2026-09-22 11:35:05 AEST): re-briefed at develop 8c2f7b3fd as `night/briefs/KS-1164-R16B-REPORTPATH.md` (golden RESULT: PASS (7/7) through tasks/code_patch/checker.sh in tool mode; the template literal written as concatenation, the test rewritten ASCII with JSON.stringify for the raw summary). This READY is the 2026-09-15 pin; do not raise it.

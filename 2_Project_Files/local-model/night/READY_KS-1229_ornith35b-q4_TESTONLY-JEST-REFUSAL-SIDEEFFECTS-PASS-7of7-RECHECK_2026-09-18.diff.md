@@ -54,3 +54,5 @@
  
  describe('KS-1202 create guard - the properties its gate left unpinned (#1024 N-B)', () => {
 ```
+
+# SUPERSEDED-BY: night/briefs/KS-1229-R16B-SIDEEFFECTS.md (feed7 drafter, 2026-09-22 08:56:00 AEST) - re-briefed at develop 3916eacd12af23bfd464440b4c770f7da0f2dd96; this READY stays as the record of the original PASS, never raise it as-is.

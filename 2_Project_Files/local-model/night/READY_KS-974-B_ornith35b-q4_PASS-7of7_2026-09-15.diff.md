@@ -49,3 +49,5 @@
 +  });
 +});
 ```
+
+# SUPERSEDED-BY (feed10 drafter, 2026-09-22 11:37:36 AEST): re-briefed at develop 8c2f7b3fd as `night/briefs/KS-974-R16B-SCOPETRIM.md` (golden RESULT: PASS (7/7) through tasks/code_patch/checker.sh; the hunk re-cut as a pure insertion of `.trim()` above `.min(1)` - the READY re-added `.min(1)` as a `+` line, which the builder now refuses; the test rewritten ASCII). This READY is the 2026-09-15 pin; do not raise it.

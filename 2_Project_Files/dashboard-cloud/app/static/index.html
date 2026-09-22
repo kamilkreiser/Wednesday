@@ -542,8 +542,8 @@ function msgsFromRows() {
 async function loadOlder() {
   const newFloor = new Date(Date.parse(floorM) - 7 * DAY).toISOString();
   try {
-    const d = await WED.getJSON("/api/messages?limit=1000&since=" + encodeURIComponent(newFloor));
-    for (const r of d.messages || []) { if (WED.isSynthetic(r)) { WED.hidden.messages++; continue; } if (r.row_key < floorM) rows.set(r.row_key, r); }
+    const d = await WED.getJSON("/api/messages?limit=1000" + WED.hiddenQ + "&since=" + encodeURIComponent(newFloor));
+    for (const r of d.messages || []) { if (WED.isSynthetic(r) || WED.isHidden(r)) { WED.hidden.messages++; continue; } if (r.row_key < floorM) rows.set(r.row_key, r); }
     floorM = newFloor; if (knownKeys) for (const k of rows.keys()) knownKeys.add(k);   // history is never auto-spoken
     await decryptAll(); lastSig = null; forceRender(msgsFromRows());
   } catch (e) { live.textContent = "○ " + (e.message || e); }
@@ -551,9 +551,9 @@ async function loadOlder() {
 async function poll(force) {
   try {
     const q = sinceM ? "&since=" + encodeURIComponent(sinceM) : "";
-    const d = await WED.getJSON("/api/messages?limit=1000" + q);
+    const d = await WED.getJSON("/api/messages?limit=1000" + WED.hiddenQ + q);
     let fresh = [];
-    for (const r of d.messages || []) { if (r.row_key > sinceM) sinceM = r.row_key; if (WED.isSynthetic(r)) { WED.hidden.messages++; continue; }   // synthetic: skipped, never rendered (Phase 3)
+    for (const r of d.messages || []) { if (r.row_key > sinceM) sinceM = r.row_key; if (WED.isSynthetic(r) || WED.isHidden(r)) { WED.hidden.messages++; continue; }   // synthetic: skipped, never rendered (Phase 3); hidden: skipped unless ?hidden=1 (2026-09-22)
       if (!rows.has(r.row_key)) fresh.push(r); rows.set(r.row_key, r); }
     live.textContent = "● live"; live.classList.add("on");
     await decryptAll();

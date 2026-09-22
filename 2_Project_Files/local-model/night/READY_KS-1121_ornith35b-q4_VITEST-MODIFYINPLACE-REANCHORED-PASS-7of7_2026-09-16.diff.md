@@ -105,3 +105,5 @@
  
    it('getById returns undefined for a totally absent id', async () => {
 ```
+
+# SUPERSEDED-BY (feed12 drafter, 2026-09-22 13:50:46 AEST): re-briefed at develop 3bad652d1 as night/briefs/KS-1121-R16B-EXACTID.md (golden PASS 7/7 strict through the real checker in the feed12 precheck clone; Wednesday queues). This READY is STALE - its test hunk is corrupt at the tip; do not raise it.

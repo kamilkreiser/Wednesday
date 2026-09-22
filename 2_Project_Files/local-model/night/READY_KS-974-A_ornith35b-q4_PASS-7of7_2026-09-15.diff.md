@@ -53,3 +53,5 @@
 +  });
 +});
 ```
+
+# SUPERSEDED-BY (feed10 drafter, 2026-09-22 11:32:21 AEST): re-briefed at develop 8c2f7b3fd as `night/briefs/KS-974-R16B-CHECKKEYCP.md` (golden RESULT: PASS (7/7) through tasks/code_patch/checker.sh; paths normalised to Blockchain/Dev/; the template literal written as concatenation; the astral test character as String.fromCodePoint). This READY is the 2026-09-1x pin; do not raise it.

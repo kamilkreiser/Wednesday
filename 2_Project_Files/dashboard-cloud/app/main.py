@@ -49,6 +49,17 @@ gauge. One row per seat (table `usage`, PartitionKey USAGE, RowKey <seat>; REPLA
 publisher per seat and it only sends readings < 30 min old; the page always shows the reading's age). GET /api/usage (viewer, Easy Auth) serves both rows with the reading's age — the page decides what "stale"
 means (as the local server does: the age is served, never hidden). GET /api/seat/usage (Seat.Read) is the seat-side
 read-back used by the probes.
+
+Hide / unhide (2026-09-22, Kam 14:27:09 on the Tuesday tab: "Please clean up your boards so you don't have any local model
+workloads at this stage"): a message row can be HIDDEN — never deleted, never rewritten. POST /api/seat/hide and
+POST /api/seat/unhide take {client, row_key | id} and are allowed ONLY for rows whose partition the calling seat's token
+grants (the same R0 rule as a write: a Datasec/`tuesday`-tab row is the tuesday seat's, a WED/Secuura row the wednesday
+seat's; no seat may hide ALL). The flag is a MERGE of clear columns onto the row (hidden, hidden_by, hidden_at, hidden_seat /
+unhidden_*): the envelope and every other column are untouched. Every call appends an AUDIT row in the same `messages`
+table under PartitionKey AUDIT (action, target, who, when, reason) — a partition no read route or page ever lists
+(READ_PARTITIONS excludes it; migrate_rewrap leaves unknown partitions alone). Reads (viewer /api/messages, seat
+/api/seat/messages) SKIP hidden rows unless ?hidden=1 (the reveal, for audit); GET /api/seat/hide/audit lists the audit rows
+for the seat's partitions. Health reports hide_route: true.
 """
 import json, logging, os, re, time, datetime, uuid, glob, hashlib, base64
 from typing import Optional
@@ -57,7 +68,7 @@ from fastapi import FastAPI, Request, HTTPException, Query
 from fastapi.responses import JSONResponse, FileResponse, PlainTextResponse
 from azure.identity import DefaultAzureCredential
 from azure.data.tables import TableServiceClient, UpdateMode
-from azure.core.exceptions import ResourceExistsError
+from azure.core.exceptions import ResourceExistsError, ResourceNotFoundError
 
 log = logging.getLogger("wedcloud")
 logging.basicConfig(level=logging.INFO)
@@ -242,7 +253,8 @@ def card_row(client: str, body: dict, env: dict, ts: str, rid: str, seat_name: s
 @app.get("/api/seat/health")
 def seat_health():
     return {"app": "wednesday-dashboard-cloud", "ok": True, "phase": "3", "ts": now_iso(), "kam_keys": len(public_keys()["kam"]), "seat_keys": sorted(public_keys()["seats"]),
-            "usage_route": True}   # 2026-09-22 usage gauges
+            "usage_route": True,   # 2026-09-22 usage gauges
+            "hide_route": True}    # 2026-09-22 hide/unhide (reversible, audited)
 
 @app.post("/api/seat/messages", status_code=201)
 async def seat_post_message(request: Request):
@@ -275,15 +287,18 @@ async def seat_post_card(request: Request):
         return {"stored": stored}
     return JSONResponse(status_code=200, content={"stored": stored, "updated": True})
 
-def _query(tname: str, clients, since: Optional[str], limit: int, author: Optional[str] = None):
+def _query(tname: str, clients, since: Optional[str], limit: int, author: Optional[str] = None, include_hidden: bool = False):
     """Rows after `since` (RowKey order = ts order for messages), up to `limit` PER PARTITION, merged and sorted.
-    Phase 2: the cap is per partition on purpose — a shared cap filled by the first partition starved the others."""
+    Phase 2: the cap is per partition on purpose — a shared cap filled by the first partition starved the others.
+    2026-09-22: rows with hidden=true are SKIPPED (not counted against the cap) unless include_hidden — the filter is applied
+    here in code, not in the OData filter, because Table storage drops rows that LACK a property from a `ne` comparison."""
     out = []
     for c in sorted(clients):
         flt = "PartitionKey eq @c" + (" and RowKey gt @s" if since else "") + (" and role eq @a" if author else "")
         params = {"c": c, "s": since or "", "a": author or ""}
         n = 0
         for e in table(tname).query_entities(flt, parameters=params, results_per_page=min(limit, 1000)):
+            if not include_hidden and e.get("hidden") is True: continue     # hidden (reversible): absent from every list unless ?hidden=1
             d = {k: v for k, v in e.items() if k not in ("PartitionKey", "RowKey")}
             d["client"] = c; d["row_key"] = e["RowKey"]
             if "option_keys" in d:
@@ -299,14 +314,84 @@ def _query(tname: str, clients, since: Optional[str], limit: int, author: Option
 
 @app.get("/api/seat/messages")
 def seat_get_messages(request: Request, client: Optional[str] = None, since: Optional[str] = None,
-                      author: Optional[str] = None, limit: int = Query(200, le=1000)):
+                      author: Optional[str] = None, limit: int = Query(200, le=1000), hidden: int = Query(0, ge=0, le=1)):
     """A seat reads its own partitions + ALL (Kam's broadcast). `author=kam` narrows to Kam's rows (role=kam) —
-    this is how a seat picks up what Kam typed on the live site. The partition set is the token's, never the query's."""
+    this is how a seat picks up what Kam typed on the live site. The partition set is the token's, never the query's.
+    `hidden=1` REVEALS hidden rows (they carry hidden/hidden_by/hidden_at); default lists skip them."""
     seat = seat_from_token(request)
     if not seat["read"]: raise HTTPException(403, "Seat.Read role required")
     clients = {require_partition(seat, client, for_read=True)} if client else (set(seat["clients"]) | {BROADCAST})
     if author is not None and not re.match(r"^[a-z]{1,32}$", author): raise HTTPException(400, "author")
-    return {"messages": _query("messages", clients, since, limit, author), "clients": sorted(clients)}
+    return {"messages": _query("messages", clients, since, limit, author, include_hidden=bool(hidden)), "clients": sorted(clients), "hidden_included": bool(hidden)}
+
+# ---------------- hide / unhide (2026-09-22): reversible, audited, never deletes, never rewrites text ----------------
+AUDIT_PARTITION = "AUDIT"       # same `messages` table; not in READ_PARTITIONS -> no read route / page / seat list ever returns it
+ROWKEY_RE = re.compile(r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?Z_[A-Za-z0-9._-]{1,64}$")
+REASON_RE = re.compile(r"^[A-Za-z0-9 ._:/()+'-]{0,160}$")
+HIDE_SELECT = ["PartitionKey", "RowKey", "id", "ts", "view", "role", "seat", "hidden", "hidden_at", "hidden_by", "hidden_seat", "synthetic"]
+
+def find_message(client: str, body: dict) -> dict:
+    """The target row, by row_key (exact) or by id (must match exactly ONE row in the partition). Clear columns only are read."""
+    t = table("messages")
+    rk = body.get("row_key")
+    if rk is not None:
+        rk = str(rk)
+        if not ROWKEY_RE.match(rk): raise HTTPException(400, "row_key must be <ISO UTC ts>_<id>")
+        try: return t.get_entity(client, rk, select=HIDE_SELECT)
+        except ResourceNotFoundError: raise HTTPException(404, "no such row")
+    rid = body.get("id")
+    if rid is None or not ID_RE.match(str(rid)): raise HTTPException(400, "row_key or id required")
+    hits = list(t.query_entities("PartitionKey eq @c and id eq @i", parameters={"c": client, "i": str(rid)}, select=HIDE_SELECT))
+    if not hits: raise HTTPException(404, "no such row")
+    if len(hits) > 1: raise HTTPException(409, "id matches several rows; pass row_key")
+    return hits[0]
+
+async def set_hidden(request: Request, flag: bool):
+    """Shared by /hide and /unhide. Gate = Seat.Write + the row's partition granted to the token (R0, exactly as a write):
+    the tuesday seat may hide tuesday-tab (Datasec) rows, the wednesday seat WED/Secuura rows; ALL is nobody's to hide.
+    Idempotent: hiding a hidden row is 200 changed=false — and still audited (the attempt is a fact)."""
+    seat = seat_from_token(request)
+    if not seat["write"]: raise HTTPException(403, "Seat.Write role required")
+    body = await request.json()
+    if not isinstance(body, dict): raise HTTPException(400, "json object required")
+    client = require_partition(seat, body.get("client"))          # 403 for a partition outside the token's roles; 400 for ALL/unknown
+    e = find_message(client, body)
+    reason = str(body.get("reason") or "")[:200]
+    if not REASON_RE.match(reason): raise HTTPException(400, "reason must be <=160 chars of [A-Za-z0-9 ._:/()+'-]")
+    was = e.get("hidden") is True
+    now = datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%f")[:-3] + "Z"
+    verb = "hidden" if flag else "unhidden"
+    patch = {"PartitionKey": client, "RowKey": e["RowKey"], "hidden": flag, f"{verb}_by": seat["appid"], f"{verb}_at": now, f"{verb}_seat": seat["seat"]}
+    table("messages").update_entity(patch, mode=UpdateMode.MERGE)   # MERGE = only these columns change; envelope/text/routing untouched
+    audit = {"PartitionKey": AUDIT_PARTITION, "RowKey": f"{now}_{uuid.uuid4().hex[:8]}", "kind": "hide_audit", "action": "hide" if flag else "unhide",
+             "target_client": client, "target_row_key": e["RowKey"], "target_id": str(e.get("id") or ""), "target_view": str(e.get("view") or "")[:64],
+             "seat": seat["seat"], "by": seat["appid"], "at": now, "reason": reason, "changed": was != flag}
+    table("messages").create_entity(audit)
+    log.info("%s %s/%s by seat=%s changed=%s", audit["action"], client, e["RowKey"], seat["seat"], was != flag)
+    return {"row": {"client": client, "row_key": e["RowKey"], "id": e.get("id"), "ts": e.get("ts"), "view": e.get("view"), "hidden": flag},
+            "changed": was != flag, "audit_row_key": audit["RowKey"], "by": seat["seat"]}
+
+@app.post("/api/seat/hide")
+async def seat_hide(request: Request):
+    return await set_hidden(request, True)
+
+@app.post("/api/seat/unhide")
+async def seat_unhide(request: Request):
+    return await set_hidden(request, False)
+
+@app.get("/api/seat/hide/audit")
+def seat_hide_audit(request: Request, limit: int = Query(200, le=1000)):
+    """The audit rows (hide/unhide) whose target partition the seat may read; newest last. Seat.Read."""
+    seat = seat_from_token(request)
+    if not seat["read"]: raise HTTPException(403, "Seat.Read role required")
+    mine = set(seat["clients"]) | {BROADCAST}
+    out = []
+    for e in table("messages").query_entities("PartitionKey eq @p", parameters={"p": AUDIT_PARTITION}, results_per_page=min(limit, 1000)):
+        if e.get("target_client") not in mine: continue
+        out.append({k: v for k, v in e.items() if k not in ("PartitionKey",)})
+        if len(out) >= limit: break
+    out.sort(key=lambda r: r["RowKey"])
+    return {"audit": out, "clients": sorted(mine)}
 
 # ---------------- usage gauges (2026-09-22): seat-published, token-attributed, clear ----------------
 USAGE_PARTITION = "USAGE"
@@ -399,10 +484,10 @@ def me(request: Request):
     return viewer(request)
 
 @app.get("/api/messages")
-def get_messages(request: Request, client: Optional[str] = None, since: Optional[str] = None, limit: int = Query(200, le=1000)):
+def get_messages(request: Request, client: Optional[str] = None, since: Optional[str] = None, limit: int = Query(200, le=1000), hidden: int = Query(0, ge=0, le=1)):
     viewer(request)
     clients = {client} if client in READ_PARTITIONS else set(READ_PARTITIONS)
-    return {"messages": _query("messages", clients, since, limit)}
+    return {"messages": _query("messages", clients, since, limit, include_hidden=bool(hidden)), "hidden_included": bool(hidden)}   # 2026-09-22: hidden rows skipped unless ?hidden=1
 
 @app.get("/api/cards")
 def get_cards(request: Request, client: Optional[str] = None, since: Optional[str] = None, limit: int = Query(1000, le=1000)):

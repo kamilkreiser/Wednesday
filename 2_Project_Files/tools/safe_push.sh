@@ -97,6 +97,12 @@ fi
 
 # 4. Pull, resolving each conflict by the file's OWN rule. Never by side,
 #    never by directory.
+# 2026-09-22 15:1x (three stranded autostashes in one day — the hide builder's five edits shipped OLD in a
+# deploy, and fifteen READYs lost their SUPERSEDED-BY appends): `rebase --autostash` prints "autostash could not
+# be applied" and LEAVES the stash when the re-apply conflicts, and this script's rc stayed 0. A refusal nobody
+# reads. The stash COUNT is the instrument: if it grows across the pull, the work is stranded — REFUSE (rc 6),
+# name the stash, and restore by hand (`git show stash@{0}:<path>`; never drop). Read `git stash list` first.
+STASH_BEFORE="$(git -C "$W" stash list | wc -l | tr -d ' ')"
 for round in 1 2 3 4 5 6 7 8; do
   # 2026-09-19 FETCH_HEAD race: fetch without writing FETCH_HEAD, then rebase onto the ref (never `pull`).
   OUT="$( { { git -C "$W" fetch -q --no-write-fetch-head origin main || { sleep 1; git -C "$W" fetch -q --no-write-fetch-head origin main; }; } && git -C "$W" rebase --autostash origin/main; } 2>&1)"
@@ -173,6 +179,14 @@ for round in 1 2 3 4 5 6 7 8; do
   done <<< "$CONF"
   GIT_EDITOR=true git -C "$W" rebase --continue >/dev/null 2>&1
 done
+STASH_AFTER="$(git -C "$W" stash list | wc -l | tr -d ' ')"
+if [ "$STASH_AFTER" -gt "$STASH_BEFORE" ]; then
+  echo "safe_push: REFUSED rc 6 — the pull STRANDED an autostash (stash count $STASH_BEFORE -> $STASH_AFTER). Work that was in the tree is now ONLY in:" >&2
+  git -C "$W" stash list | head -1 >&2
+  git -C "$W" stash show --name-only 'stash@{0}' 2>/dev/null | sed 's/^/    /' >&2
+  echo "  Restore by hand (git show 'stash@{0}:<path>' > <path>, backup beside), then re-run. Never 'stash drop'." >&2
+  exit 6
+fi
 
 # 5. A digest is derived: after any conflict, rebuild it from the lesson files
 #    rather than leaving whichever side happened to win.
