@@ -10,8 +10,8 @@ AEST; each `cat-file -t` = commit); THE LAUNCHER RE-READS THEM ALL.** If any hea
 launcher parses §PIN, refuses any placeholder, and re-reads EVERY head by `git ls-remote` immediately before launch, refusing on any
 mismatch. The verified table is appended to your prompt.
 
-SELF-CHECK: re-read end-to-end for contradictions | @SELFCHECK_TS@
-Self-check note: @SELFCHECK_NOTE@
+SELF-CHECK: re-read end-to-end for contradictions | 2026-09-22 21:36
+Self-check note: Tuesday read the header, the PIN table (C re-pinned to 3739ce8 from the builder READY 11:35Z; every other row matches its READY), and the drafter 11-item wrong-at-source report, all accepted (K and L on 1f3df8d; C forward merge conflicted in server.js too; A-7 wording; the M and N cell gaps; the variable-name precedence stated by the builder as each app own name wins). Target sections were read by headline plus the drafter report; Tuesday wrote the commission.
 
 SLOT-M: IN
 SLOT-N: IN
@@ -94,13 +94,16 @@ needs a forward merge at merge time; the launcher prints a NOTE naming it, and �
 `ls-remote` too. An `OUT` row carries `-` in head/base/commits. **Gated anchors (launcher-checked):** B's head contains the gated
 `fb23f64`; C's head contains the gated `3c8d3a4`, and `4b946d0`'s parents are exactly `3c8d3a4` + `49d7027`.
 
+
+**RE-PINNED BY TUESDAY 21:3x:** C moved bcef8f7 → `3739ce8` (ONE commit: refundHits() refunds this request's per-source + global hits on ANY failure between the budget check and a usable code, incl. a throwing putOtp; cell: 6 putOtp throws, then the budget is intact, then 429). The derived C harness now lives IN the project: `Vision_Sales_Portal/5_Project_History/gate-harnesses-derived/qa-harness-c-budget.C-F2F3-contract.mjs` (+ qa-lib-c-stage3.cjs); the builder reports 45/45 on 3739ce8 and fails=2 with bcef8f7's server.js (the putOtp cases). Verify the refund is EXACT (no over-refund, no double refund across a retry) and that the rethrow still yields 500. NEW, NOT a target: the builder found body-parser SyntaxError bodies logged raw by the generic error handler (main 51e9286); it goes to the next batch.
+
 <!-- PIN-HEADS:BEGIN -->
 | id | repo | branch | head | base | commits | status |
 |---|---|---|---|---|---|---|
 | MAIN-P | portal | main | f065675c3a0d9f601a6e2a3041a2cb59d2e11cca | - | - | IN |
 | MAIN-Q | quickquote | main | 51e92867930efd4c98b28dc5d95baf82219b3edb | - | - | IN |
 | B | portal | fix/reminder-push-redaction-2026-09-22 | 479c3a20291e55c07901c0a506c3e8a54a0f1685 | 289e2d9545ae08fdcb8fdff47ba0115574e90f3e | 2 | IN |
-| C | quickquote | feat/qq-otp-send-budget-2026-09-22 | bcef8f7dbc83da8f04d29600b882ff46d74d7b80 | 49d7027bcb627b001ed3de4c2cb560c234375261 | 6 | IN |
+| C | quickquote | feat/qq-otp-send-budget-2026-09-22 | 3739ce88c0ee0c5a75ac8aaddfc971a271a76eed | 49d7027bcb627b001ed3de4c2cb560c234375261 | 7 | IN |
 | K | quickquote | fix/qq-feedback-followups-2026-09-22 | a33f87ea1e3e4a6e11363b487cc5d68d6a14b52c | 1f3df8ded0a8357cb6966aba4cc0c4efa78fc593 | 1 | IN |
 | L | quickquote | fix/qq-small-sweep-2026-09-22 | 82710998d307234c843ed5f6f74a687a371cfbe4 | 1f3df8ded0a8357cb6966aba4cc0c4efa78fc593 | 3 | IN |
 | M | quickquote | fix/qq-d-f1-header-order-2026-09-22 | 0ab83e1ec52dcaec041c0491e972ce635d9ba987 | 51e92867930efd4c98b28dc5d95baf82219b3edb | 1 | IN |

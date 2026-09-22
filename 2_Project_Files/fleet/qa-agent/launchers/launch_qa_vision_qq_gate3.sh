@@ -261,7 +261,8 @@ for S in 'const now = clock().getTime();' 'if (!rec || clock().getTime() > Numbe
          'return tooSoon(ipWait, "too many sign-in codes requested from your network");' \
          'return tooSoon(globalWait, "sign-in is busy right now");' \
          'function budgetSetting(name, value, fallback) {' 'refund(key, at) {' \
-         'outcome.then(r => { if (r === "failed") { ipBudget.refund(src, now); globalBudget.refund("*", now); } });' \
+         'const refundHits = () => { ipBudget.refund(src, now); globalBudget.refund("*", now); };' \
+         '}); } catch (e) { refundHits(); throw e; }' 'outcome.then(r => { if (r === "failed") refundHits(); });' \
          'const OTP_IP_BUDGET_PER_HOUR = 6;' 'const OTP_GLOBAL_BUDGET_PER_HOUR = 20;' 'trustForwardedFor = !!process.env.WEBSITE_SITE_NAME'; do
   has C stage3/server.js "$S" || { echo "REFUSING: C's server lacks: $S — re-brief" >&2; exit 58; }
 done
