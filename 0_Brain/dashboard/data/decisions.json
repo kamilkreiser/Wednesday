@@ -13214,5 +13214,48 @@
    "CARD tuesday-seat-self-rotate-with-liveness-check",
    "CARD secuura-ks998-format-gate-fails-open-on-missing-deps"
   ]
+ },
+ {
+  "id": "quickquote-publish-51e9286-price-fix",
+  "client_project": "Datasec/Vision_Sales_Portal",
+  "title": "Publish QuickQuote: the fix for emailed quotes printing the wrong service prices, plus 7 tested changes",
+  "bluf": "I need your word to publish QuickQuote. Say 'publish QuickQuote' or pick (a). The main change: emailed quote PDFs and spreadsheets printed list or stored-rate service prices instead of the rep's typed ones. In testing, a quote whose screen said $35,000 was emailed as $34,820. Live quotes very likely have the same fault (it's the same code), but we haven't checked the live tool. The fix passed its test gate: the PDF matches the screen in 19 of 19 cases. The other 7 changes: feedback CC to Tuesday, the devices label, reopen an old quote, security headers, sign-out, a truthful exchange-rate line, and a slimmer image. Every visible text change and the deploy, check and rollback steps are in the attached pack. Rollback is one step, back to today's image.",
+  "default_action": "If you say nothing: nothing is published. The live tool stays on v2.30, and the merged work waits on main.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Publish now",
+    "detail": "The Vision agent builds the image from QuickQuote main 51e9286, switches the live app to it, runs the post-deploy checks in the pack, and reports. Rollback goes to today's v0.4.5-tool2.30-d258651 if any check fails."
+   },
+   {
+    "key": "b",
+    "label": "Wait for the next batch",
+    "detail": "Hold until gate 3's items (the sign-in limits and the phone layout) are merged too, and publish once. Live quotes keep the price fault until then."
+   },
+   {
+    "key": "c",
+    "label": "I'll deploy it myself",
+    "detail": "Use the steps in the pack, Part 2."
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-09-22T21:21:15.439127+10:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "2026-08-27 11:24",
+   "2026-09-08 11:41",
+   "2026-09-09 17:03",
+   "2026-09-10 09:01",
+   "2026-09-10 09:08",
+   "2026-09-10 09:08",
+   "CARD quickquote-otp-mail-spof",
+   "CARD quickquote-item12-layout",
+   "CARD quickquote-publish-v225",
+   "CARD quickquote-height-lever",
+   "CARD quickquote-per-day-precision",
+   "CARD vision-v230-publish"
+  ]
  }
 ]
