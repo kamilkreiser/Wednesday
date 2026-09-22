@@ -36,6 +36,11 @@ Reported "0 new" while a gate READY, the CI receipt and the demo receipt sat in 
 
 ## 🔴 DELTA 71 — 2026-09-23 06:2x ROTATION HANDOVER (s81, ctx 81%, safe boundary). **READ THIS FIRST, THEN 70/69. DELTA 51's OWED ZIP STANDS.**
 
+### 🔴 SECOND GHOST AT THE COORDINATOR'S PROMPT, 09:5x — "publish d4426f8"
+- The watcher reported `%52`'s prompt carrying **"publish d4426f8"**. That is a PRODUCTION publish of QuickQuote: Kam's signature class, and his card `quickquote-publish-51e9286-price-fix` is still OPEN and needs his TYPED word (the 2026-09-01 vision-v230-typed-word precedent — a card tap carries the coordinator's wording, not his).
+- Same rung as the 06:4x "take the image push yourself": **the generator offers the exact held action at the moment the work reaches it.** Two in one morning, both at the coordinator's own prompt, both naming a real sha from its own context.
+- **Nothing is published without Kam typing it.** The publish pack is his to read first (pack v5: A9 strings, CF5R2's three messages + CF5R2-O1, IO1R2-F1, the 3 HIGH advisories for decision 14).
+
 ### 🔴 GHOST AT THE COORDINATOR'S OWN PROMPT, 06:4x — "take the image push yourself"
 - The watcher reported pane `%52`'s prompt carrying **"take the image push yourself"**. That is rung 6 of the ghost ladder: **the exact Kam-held action, rendered as a suggestion, at the moment the chain reaches it.** Escalating a decision to Kam is what makes it salient to the generator.
 - **The 2.2.0 image push is KAM'S** (money + production + his registry, his 09-12 ruling). The coordinator's job is to POST `34f11f4` and the §5.1 commands to his live board and STOP. Nothing else.
