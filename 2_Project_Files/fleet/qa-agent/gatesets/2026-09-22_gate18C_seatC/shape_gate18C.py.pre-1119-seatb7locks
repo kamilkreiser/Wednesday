@@ -136,7 +136,7 @@ print('union paths', len(CHANGED), '(want 10) | paths in two PRs:', {k.split('/'
 hp = R.AG + 'src/services/health.ts'
 if hp in CHANGED and len(CHANGED[hp]) == 2:
     print('the health.ts pair: #%s blob %s / #%s blob %s (both from develop %s); the PAIR blob %s / %d lines is neither (measured in predict)' % (CHANGED[hp][0][4], CHANGED[hp][0][1][:12], CHANGED[hp][1][4], CHANGED[hp][1][1][:12], CHANGED[hp][0][0][:12], R.PAIR_BLOB[:12], R.PAIR_LINES))
-print('∩ Seat B 18th dirs:', [x for x in CHANGED if any(x.startswith(d) for d in R.SEATB_DIRS)] or 'NONE', '| ∩ Seat B READY paths (ALL SEVEN PRs, %d paths):' % len(R.SEATB_BRIEF_PATHS), sorted(set(CHANGED) & {p_ for x in R.SEATB for p_ in x[3]}) or 'NONE', '| ∩ Seat B brief paths (9):', sorted(set(CHANGED) & set(R.SEATB_BRIEF_PATHS)) or 'NONE', '| every path under api-gateway:', all(x.startswith(R.AG) for x in CHANGED))
+print('∩ Seat B 18th dirs:', [x for x in CHANGED if any(x.startswith(d) for d in R.SEATB_DIRS)] or 'NONE', '| ∩ Seat B READY paths (4 PRs so far):', sorted(set(CHANGED) & {p_ for x in R.SEATB for p_ in x[3]}) or 'NONE', '| ∩ Seat B brief paths (9):', sorted(set(CHANGED) & set(R.SEATB_BRIEF_PATHS)) or 'NONE', '| every path under api-gateway:', all(x.startswith(R.AG) for x in CHANGED))
 print('--- static reads at develop for the seat findings')
 for p in R.PUSH:
     br = R.PRS[p]['branch'].replace('refs/heads/', ''); ex = R.PRS[p]['excised']
@@ -153,24 +153,4 @@ print('  lines %d | it(/test( cells at develop: %s' % (len(k733), [(i + 1, l.str
 print('--- the health.ts hunk sites at develop (Part B @@ -45,8 / KS-1246 @@ -212,4): the pair at different hunks')
 h = out('show', R.DEV + ':' + R.AG + 'src/services/health.ts').splitlines()
 print('  health.ts lines %d | :45-:52 %s | :212-:215 %s | :40 %r (the TS2339 site the temp-tsconfig type-check reads at develop AND head)' % (len(h), [x[:50] for x in h[44:52]], [x[:60] for x in h[211:215]], h[39][:80]))
-print('--- THE TWO-SEAT LOCK WINDOWS as a set (this seat six pushes + %d other windows; Seat B seven pushes from its HOLD table): pairwise overlap, monotonic' % len(R.SEATC_OTHER_LOCKS))
-import datetime
-def T(x): return datetime.datetime.strptime(x, '%Y-%m-%dT%H:%M:%SZ')
-W = [('C #%s' % R.PRS[p]['n'], T('2026-09-2%s' % ('1T' if R.PRS[p]['lock'][0] > '12' else '2T') + R.PRS[p]['lock'][0]), T('2026-09-2%s' % ('1T' if R.PRS[p]['lock'][1] > '12' else '2T') + R.PRS[p]['lock'][1])) for p in R.PUSH]
-W += [('C ' + n, T(a), T(b)) for n, a, b in R.SEATC_OTHER_LOCKS] + [('B #' + n, T(a), T(b)) for n, a, b in R.SEATB_LOCKS]
-W.sort(key=lambda w: w[1])
-ov = [(x[0], y[0]) for i, x in enumerate(W) for y in W[i + 1:] if x[1] < y[2] and y[1] < x[2]]
-print('  windows %d | pairwise overlaps: %s | every window start >= the previous release: %s' % (len(W), ov or 'NONE', all(W[i][1] >= W[i - 1][2] for i in range(1, len(W)))))
-for n, a, b in W: print('    %-16s %s -> %s (%3d s)' % (n, a.strftime('%H:%M:%SZ'), b.strftime('%H:%M:%SZ'), int((b - a).total_seconds())))
-print('--- the seat lock polls per push (raise/KS-<key>-lock.out, `lock HELD by other` rows; the HOLDING STATUS says "PR 5 waited one poll and PR 6 five polls")')
-REC = '/Volumes/DevMASTER/!CODING/Secuura/Blockchain/5_Project_History/2026-09-22_seatC-18th/raise/'
-for p in R.PUSH:
-    fp = REC + 'KS-%s-lock.out' % R.PRS[p]['key'].split('-')[1]
-    ls_ = open(fp, encoding='utf-8').read().splitlines() if os.path.exists(fp) else []
-    polls = [l for l in ls_ if 'held by other' in l.lower()]; taken = [l for l in ls_ if 'LOCK TAKEN' in l]; rel = [l for l in ls_ if 'LOCK RELEASED' in l]
-    who = sorted({re.search(r'"branch": "([^"]+)"', l).group(1)[:40] for l in polls if re.search(r'"branch": "([^"]+)"', l)})
-    print('  PR %-2s #%s polls %d (pin %d): %s | waited on %s | TAKEN %s | RELEASED %s' % (p, R.PRS[p]['n'], len(polls), R.LOCK_POLLS[p], len(polls) == R.LOCK_POLLS[p], who or 'nobody', taken[0][:20] if taken else '?', rel[0][:20] if rel else '?'))
-print('--- the push-lock dir and the s-c18-* / s-b18-* worktrees (ls only)')
-WT = '/Volumes/DevMASTER/!CODING/Secuura/Blockchain/worktrees'
-print('  .push-lock-18 present: %s | s-c18-*: %d | s-b18-*: %d | .git/worktrees: %d' % (os.path.isdir(WT + '/.push-lock-18'), len([x for x in os.listdir(WT) if x.startswith('s-c18-')]), len([x for x in os.listdir(WT) if x.startswith('s-b18-')]), len(os.listdir(REPO + '/.git/worktrees'))))
 print('done', now())

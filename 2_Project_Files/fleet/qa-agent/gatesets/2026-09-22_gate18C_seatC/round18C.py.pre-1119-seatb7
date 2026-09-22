@@ -107,40 +107,17 @@ PRS = {
 BATCH_LANE = 742   # api-gateway on the all-6 tree (the seat: 710 + 6 + 6 + 4 + 7 + 4 + 5 = 742)
 # the seat's item-0 tamper-file blobs (2 files; identical at 64ab10513 / 3916eacd1 / 8c2f7b3fd — the drafter's rev-parse 00:4xZ)
 TAMPER_BLOBS = [(AG + 'src/index.ts', '4e7fc1174d5453f9d6f71e3a69f166fc6a08db49'), (AG + 'src/routes/verification.ts', 'f888e8cd0bd10c98a508542d75902ab122595157')]
-# Seat B 18th's SEVEN pushed PRs (ALL its READYs captured beside: #1170 #1172 #1174 #1176 at 00:39Z / 00:42Z by the first drafter, #1177 #1178 #1179 + its
-# 01:08:36Z HOLD at 01:1xZ by this drafter): (n, key, head, [paths]) — every commit's parent 3916eacd1 (BEFORE the #1036 squash); 9 distinct paths under
-# originate ×4 (3 tests + the PRODUCT documents.ts of KS-1265), anchoring ×2, auth ×2, packages/shared ×1; the heads == Wednesday's / this drafter's ls-remote 01:13:31Z
+# Seat B 18th's pushed PRs so far (its READYs captured beside 00:39Z / 00:42Z; four of seven): (n, key, head, [paths]) — its brief names 7 PRs / 9 files under packages/shared, anchoring, auth, originate
 OR = D + 'services/originate/'; SH = D + 'packages/shared/'; SE = D + 'services/security/'; AN = D + 'services/anchoring/'
 SEATB = [('1170', 'KS-1118', '3e9f7d7b707da88e666ff94c769658f2ba3894b8', [OR + 'src/__tests__/ks1103-verify-hash-field.test.ts']),
          ('1172', 'KS-1158', 'd74b04678574f5cb7828a82f84577882a3496a66', [OR + 'src/__tests__/ks1058-anchor-failed-preserves-thread-token.test.ts']),
          ('1174', 'KS-1265', 'e1dea649c7e338ba70a67acd8ce2957edd8058c9', [OR + 'src/__tests__/ks549-documents-create-issuer-name-persist.test.ts', OR + 'src/routes/documents.ts']),
-         ('1176', 'KS-1171', '8ced0d50bb457d04b186b58a504e69b28052afb5', [AN + 'src/__tests__/ks1171-8j-confirmed-wins-over-polled-zero.test.ts', AN + 'src/__tests__/ks1171-guard-3-s-re-poll-reads.test.ts']),
-         ('1177', 'KS-811', '13030ac59743c0df869bcf56ae10311445ae94d7', [AU + 'src/__tests__/ks811-social-callback-403-code-set-agrees.test.ts']),
-         ('1178', 'KS-1188', 'e48b90e747def96b708f02890d2aa66ce10e52c0', [AU + 'src/__tests__/ks1188-mfa-sibling-sites-503.test.ts']),
-         ('1179', 'KS-1181', 'e62555dd00eb2cdfa8d73c0f9329f4ac467ffa0c', [SH + 'src/__tests__/ks727-errorhandler-class-guard.test.ts'])]
-SEATB_KEYS = ['KS-1118', 'KS-1158', 'KS-1265', 'KS-1171', 'KS-811', 'KS-1188', 'KS-1181']   # its seven own keys (push order)
-SEATB_BRIEF_PATHS = [p_ for x in SEATB for p_ in x[3]]   # the 9 files (the brief tabled the same nine; the gate re-reads the files API)
+         ('1176', 'KS-1171', '8ced0d50bb457d04b186b58a504e69b28052afb5', [AN + 'src/__tests__/ks1171-8j-confirmed-wins-over-polled-zero.test.ts', AN + 'src/__tests__/ks1171-guard-3-s-re-poll-reads.test.ts'])]
+SEATB_KEYS = ['KS-1118', 'KS-1158', 'KS-1265', 'KS-1171', 'KS-811', 'KS-1188', 'KS-1181']   # its seven own keys (the brief; push order)
+SEATB_BRIEF_PATHS = [OR + 'src/__tests__/ks1103-verify-hash-field.test.ts', OR + 'src/__tests__/ks1058-anchor-failed-preserves-thread-token.test.ts', OR + 'src/__tests__/ks549-documents-create-issuer-name-persist.test.ts', OR + 'src/routes/documents.ts',
+                     AN + 'src/__tests__/ks1171-8j-confirmed-wins-over-polled-zero.test.ts', AN + 'src/__tests__/ks1171-guard-3-s-re-poll-reads.test.ts', AU + 'src/__tests__/ks811-social-callback-403-code-set-agrees.test.ts',
+                     AU + 'src/__tests__/ks1188-mfa-sibling-sites-503.test.ts', SH + 'src/__tests__/ks727-errorhandler-class-guard.test.ts']   # the 9 files its brief tables (the gate re-reads the files API)
 SEATB_DIRS = [OR, SH, SE, AN, AU]
-SEATB_ALL7 = 'a36532029483c3f8a4ca0cd33ec1219076ef9219'   # Seat B's all-seven octopus tree over 3916eacd1 (its HOLD 01:08:36Z; the gate18B sibling re-predicts it over 8c2f7b3fd)
-SEATB_GO = 'GO: merge #1170, #1172, #1174, #1176, #1177, #1178, #1179 batch'
-# Seat B 18th's seven push-window lock windows (its HOLD table, UTC): (n, taken, released) — interleaved with this seat's six, zero overlap (measured in shape)
-SEATB_LOCKS = [('1170', '2026-09-21T23:52:36Z', '2026-09-21T23:58:52Z'), ('1172', '2026-09-22T00:05:32Z', '2026-09-22T00:11:23Z'), ('1174', '2026-09-22T00:18:09Z', '2026-09-22T00:23:58Z'),
-               ('1176', '2026-09-22T00:30:20Z', '2026-09-22T00:36:26Z'), ('1177', '2026-09-22T00:39:13Z', '2026-09-22T00:45:43Z'), ('1178', '2026-09-22T00:47:57Z', '2026-09-22T00:53:49Z'),
-               ('1179', '2026-09-22T00:55:30Z', '2026-09-22T01:01:22Z')]
-# this seat's OTHER lock windows (its STATUS mails + gate/*.lock.out, READ-ONLY): the #1036 dry / merge / end-state, the worktree adds, the commits, the batch build, the six GO dry runs
-SEATC_OTHER_LOCKS = [('dry-1036', '2026-09-21T22:53:44Z', '2026-09-21T22:53:57Z'), ('merge-1036', '2026-09-21T22:54:14Z', '2026-09-21T22:54:41Z'), ('endstate-1036', '2026-09-21T22:54:48Z', '2026-09-21T22:54:58Z'),
-                     ('wtadd x6', '2026-09-21T22:57:36Z', '2026-09-21T22:58:48Z'), ('commit-batch', '2026-09-21T23:21:26Z', '2026-09-21T23:21:29Z'), ('batch-build', '2026-09-21T23:21:29Z', '2026-09-21T23:22:40Z'),
-                     ('dry-1167', '2026-09-22T00:37:24Z', '2026-09-22T00:37:38Z'), ('dry-1168', '2026-09-22T00:37:38Z', '2026-09-22T00:37:50Z'), ('dry-1169', '2026-09-22T00:37:51Z', '2026-09-22T00:38:03Z'),
-                     ('dry-1171', '2026-09-22T00:38:03Z', '2026-09-22T00:38:16Z'), ('dry-1173', '2026-09-22T00:38:16Z', '2026-09-22T00:38:30Z'), ('dry-1175', '2026-09-22T00:38:30Z', '2026-09-22T00:38:43Z')]
-# the seat's lock polls per push (raise/KS-<key>-lock.out, `lock HELD by other` rows, read 01:1xZ): the HOLDING STATUS says "PR 5 waited one poll and PR 6 five polls" — MEASURED 0/0/0/4/5/5 (a drafter LEAD)
-LOCK_POLLS = {'1': 0, '2': 0, '3': 0, '4': 4, '5': 5, '6': 5}
-SIBLING_GATE_DIR = '/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/gatesets/2026-09-22_gate18B_seatB'
-SIBLING_REPORT = '/Volumes/DevMASTER/!CODING/Testing Agent MAIN/projects/secuura/reports/2026-09-22-batch1170-1179-r1/'
-REPORT_DIR = '/Volumes/DevMASTER/!CODING/Testing Agent MAIN/projects/secuura/reports/2026-09-22-batch1167-1175-r1/'
-PRIOR_REPORT = '/Volumes/DevMASTER/!CODING/Testing Agent MAIN/projects/secuura/reports/2026-09-22-batch1148-1166-r1/'      # the gate16C report (Seat C 16th's twelve; report.md 121097 B at the drafter's ls)
-EARLIER_REPORT = '/Volumes/DevMASTER/!CODING/Testing Agent MAIN/projects/secuura/reports/2026-09-22-batch1147-1161-r1/'    # the gate16B report (Seat B 16th's eight)
-OLDER_REPORT = '/Volumes/DevMASTER/!CODING/Testing Agent MAIN/projects/secuura/reports/2026-09-22-ks763-1036-4b251997a-tier1-r1/'   # the #1036 tier-1 gate (the base move of this round)
-OLDEST_REPORT = '/Volumes/DevMASTER/!CODING/Testing Agent MAIN/projects/secuura/reports/2026-09-21-batch1136-1146-tier2-r1/'
 SEATB_DEV = DEV_PRE1036   # Seat B 18th built on 3916eacd1 (BEFORE the #1036 squash) — its compares read behind=1 against 8c2f7b3fd; not this gate's
 ARCHIVED = ['KS-501', 'KS-480', 'KS-978', 'KS-721', 'KS-522', 'KS-726', 'KS-535', 'KS-867', 'KS-878', 'KS-914', 'KS-1238', 'KS-1282', 'KS-1062', 'KS-971', 'KS-1078', 'KS-921', 'KS-490',
             'KS-597', 'KS-727', 'KS-764', 'KS-879', 'KS-1020', 'KS-835', 'KS-1270', 'KS-549', 'KS-733', 'KS-815', 'KS-1013', 'KS-1058', 'KS-1103']   # 30 (the READYs' ARCHIVED-TICKET READS block: the standing 24 + six)

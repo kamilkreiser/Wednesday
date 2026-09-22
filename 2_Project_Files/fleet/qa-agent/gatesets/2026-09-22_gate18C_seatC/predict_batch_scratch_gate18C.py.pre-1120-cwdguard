@@ -17,22 +17,9 @@ own objects + the shared store reachable as alternates) — the Secuura checkout
 (c) THE DEVELOP MOVE: if origin develop is not 8c2f7b3fd the new tip is fetched BY SHA into THIS clone (never the checkout) over the checkout's own
     ssh road (its remote URL + repo-local core.sshCommand, read not printed — gate15's S1) and every tree is re-predicted over it; newdev_tree.txt is
     written in either case (the generator reads it).
-Usage: predict_batch_scratch_gate18C.py <scratchpad dir> (MUST be this session's scratchpad under /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/ — the guard refuses rc 9 otherwise). Derived from gatesets/2026-09-22_gate16C_seatC/predict_batch_scratch_gate16C.py."""
+Usage: predict_batch_scratch_gate18C.py <scratchpad dir>. Derived from gatesets/2026-09-22_gate16C_seatC/predict_batch_scratch_gate16C.py."""
 import glob, hashlib, os, random, re, subprocess, sys, tempfile
 G = os.path.dirname(os.path.abspath(__file__)); sys.path.insert(0, G); import round18C as R; S = sys.argv[1]
-# THE CWD / TARGET GUARD (the commission; Seat C 18th's own S1 — a merge-tree whose cwd defaulted to the shared checkout wrote 17 loose objects there):
-# the FIRST act of this script is to refuse unless its target scratchpad is THIS session's scratchpad and every git write verb below runs with
-# cwd INSIDE the scratch clone (chdir after the clone; asserted again before every write verb by g()).
-SCRATCH_ROOT = '/private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/'
-S = os.path.realpath(S)
-if not (S.startswith(SCRATCH_ROOT) and '/scratchpad' in S and os.path.isdir(S)):
-    print('REFUSING: argv[1] is not a scratchpad under', SCRATCH_ROOT, '->', S); sys.exit(9)
-if os.path.realpath(R.REPO) in S or S.startswith(os.path.realpath(R.REPO)):
-    print('REFUSING: the scratchpad is inside the Secuura checkout'); sys.exit(9)
-WRITE_VERBS = {'apply', 'read-tree', 'write-tree', 'merge-tree', 'commit-tree', 'fetch', 'update-ref', 'update-index', 'hash-object', 'init', 'clone', 'worktree', 'checkout', 'merge', 'commit'}
-def assert_in_scratch(verb, cwd_target):
-    if verb in WRITE_VERBS and not (os.path.realpath(cwd_target).startswith(S) and os.path.realpath(os.getcwd()).startswith(S)):
-        print('REFUSING write verb', verb, 'outside the scratch clone: target', cwd_target, 'cwd', os.getcwd()); sys.exit(9)
 REPO = R.REPO; DEV = R.DEV; DEV_TREE = R.DEV_TREE; SEAT_ALL = R.SEAT_ALL6
 def now(): return subprocess.run(['date', '-u', '+%Y-%m-%dT%H:%M:%SZ'], capture_output=True, text=True).stdout.strip()
 def sh(args, cwd=None, env=None):
@@ -40,14 +27,10 @@ def sh(args, cwd=None, env=None):
 print('predict_batch_scratch_gate18C', now())
 co_before = sh(['git', '-C', REPO, 'count-objects', '-v'])[1]; print('checkout count-objects before:', co_before.replace('\n', ' '))
 C = tempfile.mkdtemp(prefix='predict18C.', dir=S)
-assert os.path.realpath(C).startswith(S), C
 rc, o, e = sh(['git', 'clone', '--quiet', '--shared', '--no-checkout', REPO, C + '/clone']); print('clone rc=%d %s at %s' % (rc, e[:100], C))
 CL = C + '/clone'; OBJ = C + '/objtmp'; os.makedirs(OBJ, exist_ok=True)
-os.chdir(CL); print('cwd now', os.getcwd(), '| under the scratchpad:', os.path.realpath(os.getcwd()).startswith(S))
-assert os.path.realpath(os.getcwd()).startswith(S)
 BASE_ENV = dict(os.environ, GIT_OBJECT_DIRECTORY=OBJ, GIT_ALTERNATE_OBJECT_DIRECTORIES=CL + '/.git/objects')   # every new object lands in objtmp; reads chain objtmp -> the clone's objects -> (alternates) the shared store
-def g(*a, env=None):
-    assert_in_scratch(a[0], CL); return sh(['git', '-C', CL] + list(a), env=env or BASE_ENV)
+def g(*a, env=None): return sh(['git', '-C', CL] + list(a), env=env or BASE_ENV)
 print('temp object dir', OBJ, '| alternates chain: the clone objects ->', open(CL + '/.git/objects/info/alternates').read().strip()[:80])
 print('develop tree:', g('rev-parse', DEV + '^{tree}')[1], '==', DEV_TREE, g('rev-parse', DEV + '^{tree}')[1] == DEV_TREE)
 def idx(name, base=DEV):
@@ -194,7 +177,7 @@ print('--- (c) origin develop NOW', CUR, '| the heads parent', DEV[:9], '| moved
 NEWT = {p: (PRTREE[p] if p in PRTREE else '?') for p in R.PUSH}; ALL2 = alls[0]; CT = DEV_TREE
 if CUR != DEV:
     url = sh(['git', '-C', REPO, 'config', '--get', 'remote.origin.url'])[1]; sshc = sh(['git', '-C', REPO, 'config', '--get', 'core.sshCommand'])[1]
-    assert_in_scratch('fetch', CL); rc, o, e = sh(['git', '-C', CL, '-c', 'core.sshCommand=' + sshc, 'fetch', '--quiet', url, CUR], env=BASE_ENV)
+    rc, o, e = sh(['git', '-C', CL, '-c', 'core.sshCommand=' + sshc, 'fetch', '--quiet', url, CUR], env=BASE_ENV)
     print('fetch by SHA over ssh (the checkout remote URL + its repo-local core.sshCommand, read not printed) into the scratch clone temp object dir rc=%d %s | object present now: %s' % (rc, e[:120], g('cat-file', '-e', CUR + '^{commit}')[0] == 0))
     if g('cat-file', '-e', CUR + '^{commit}')[0] == 0:
         CT = g('rev-parse', CUR + '^{tree}')[1]; print('new develop tree', CT, '| rev-list --count %s..%s = %s | merge-base with the heads parent = %s' % (DEV[:9], CUR[:9], g('rev-list', '--count', DEV + '..' + CUR)[1], g('merge-base', DEV, CUR)[1][:12]))
@@ -217,7 +200,7 @@ if CUR != DEV:
         print('  compare per PR would read: merge_base %s ahead 1 behind %s' % (DEV[:9], g('rev-list', '--count', DEV + '..' + CUR)[1]))
 open(os.path.join(G, 'newdev_tree.txt'), 'w').write('DEV_NOW %s\nTREE %s\nALL6_OVER_NEW %s\n' % (CUR, CT, ALL2) + '\n'.join('PR%s %s' % (p, NEWT[p]) for p in R.PUSH) + '\n')
 print('newdev_tree.txt written (DEV_NOW %s, ALL6_OVER_NEW %s)' % (CUR[:9], ALL2[:12]))
-E = tempfile.mkdtemp(prefix='empty18C.', dir=S); assert_in_scratch('init', E); subprocess.run(['git', '-C', E, 'init', '--quiet'])
+E = tempfile.mkdtemp(prefix='empty18C.', dir=S); subprocess.run(['git', '-C', E, 'init', '--quiet'])
 print('control: numstat from an empty repo rc=%d (want 128)' % sh(['git', '-C', E, 'diff-tree', '-r', '--numstat', DEV + '^{tree}', SEAT_ALL])[0])
 print('temp object dir objects written:', sum(len(fs) for _, _, fs in os.walk(OBJ)), '| the clone own objects dir (not the shared store):', sum(len(fs) for _, _, fs in os.walk(CL + '/.git/objects')))
 co_after = sh(['git', '-C', REPO, 'count-objects', '-v'])[1]
