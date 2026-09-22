@@ -24,5 +24,6 @@
 - **2026-09-22 QuickQuote: the SECOND change Kam named ("will forward another"), received by email** (Kam → tuesday-agent@, 03:38:14Z, "FYI", a forwarded QuickQuote feedback item): john.spears@datasec.com.au, 2026-09-22T02:07:06Z, v2.30 simple mode, verbatim: *"In the quote details the "Devices (MFPS)" table should have the syntax of "Devices (MFPS/SFPS) to reinforce the HP advantage of strong market share in the single function printer market."* → in the QuickQuote bundle. Receipted on the board.
 
 ## Recorded (relay closed)
+- 2026-09-22 Vision_Sales_Portal: the QuickQuote tester request, feedback-CC ruling (13:38), start-now (18:09) and John Spears MFPS/SFPS → **C-01..C-04** in the project's new CLARIFICATIONS.md (Vision seat, 08:16Z; verified by Tuesday). The two parked rows above are now RECORDED.
 - 2026-09-17 NexusAI: RD-474 ruling C-42, live listing C-43, RD-460 C-44, keep config/checks C-45, see-what-was-built C-46, RD-454 C-47, RD-470 C-48, prior-work check C-49/C-50; containers + GPT only (08:34:33) C-51 (5.3 medium = Phi-3 medium via Ollama, per RELEASE-NOTES-1.7.1.md:149).
 - 2026-09-17 HPSM: re-verify C-62 (+ Tuesday readings C-63/C-64), prior-work check C-65/C-66.
