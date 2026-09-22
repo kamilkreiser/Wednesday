@@ -1,0 +1,55 @@
+ultrathink
+
+You are the fleet QA/testing agent running ONE BATCHED gate (gate 6) on Datasec/NexusAI: three targets in one session, A TIER 2, B TIER 1, C TIER 2. Give the verdict SEPARATELY PER TARGET.
+
+READ YOUR COMMISSION FIRST: /Volumes/KK_T9_External_HDD/TUESDAY/2_Project_Files/fleet/qa-agent/briefs/2026-09-22_nexusai-gate6-rd619-rd607-pr31.md
+
+Main has MOVED: origin main is 58bb38c1f49987865782f7fda91477350a8ff303 (982a84f2d0c72596a2d389897439e1d8d3425068 + RD-575, RD-524 r2 and RD-615, all merged). A and B were cut from 982a84f; C from 58bb38c.
+
+TARGET A — RD-619 (TIER 2, test harness only, no product file). Branch rd-619-harness-boot-leak-s79h at 695ca5ac96994f1d1f16e9ad0a8c2d5f6f9b0538, off 982a84f: f26c740c1a7a8db34c7be18b06e16cf529eac400 (the fix in the rd395 server harness: a failed boot sends SIGTERM, waits, SIGKILLs, waits, then throws with childPid; two preloads; cells CTRL, N1, X1) and 695ca5a (counts 3863/220).
+  - Re-derive the red-proof yourself: R0 3/3; M-619 (kill lines removed) must redden N1 only, with a survivor reaped. Read why each red is red. Add your own mutants (SIGKILL escalation removed only; wait loops removed; the kill on the timeout path only; childPid unset). If a mutant survives, name the unguarded behaviour.
+  - Drive a child that IGNORES SIGTERM so the SIGKILL branch really runs. READ whether the server spawns grandchildren at boot; the harness signals only its direct child.
+  - C-68 re-run of the 14 harness consumers by name plus rd619 (predicted 15 suites / 245 tests); full verify (predicted 3863/220).
+
+TARGET B — RD-607 (TIER 1, a product security control: rate limiting). Branch rd-607-redis-limiter-stores-s79h at 8fa07917092777bc89be0067a67fe01b614532c2, STACKED on A: 80d083b0a75284dbe7cb234e2596f5a14d3574d2 (the change in the server entry point: one RedisStore per limiter under nexusai:rl:<name>:, every limiter named, a reused or non-kebab name refuses the boot, the csp-report limiter built at load), then two merges of RD-619 (9de358e, c7dc9fd), then 8fa0791 (counts 3870/221). Its scope is its delta over 695ca5a. Seven limiters: csp-report, general, auth, setup, ai, data-source-test, ai-test.
+  - Re-derive R0 7/7, M-607 red exactly R1 R1b R2 R3 R4 S1, M-dup red all 7 with the boot refused "already in use". Add your own mutants; name every behaviour guarded only by the source-text cell S1 (C-122).
+  - THE REAL REDIS the builder did not run: a real redis:7.4-alpine from the LOCAL image store, through the docker lock, bound to 127.0.0.1, stopped in a finally. Do not pull or push an image; if it is absent, NOT RUN with the blocker named. Every one of the seven limiters reaches ITS OWN cap with ITS OWN 429; each key's TTL is its own window; the commands the product sends vs the fake's modelled set.
+  - Redis failure modes on both 8fa0791 and 982a84f (down at boot, killed mid-run, restarted): fail open or fail closed, and is the "falls back to in-memory" log line true.
+  - Memory mode unchanged, and the name check refuses a clash there too. The key-prefix change at upgrade (a one-window reset?). Two servers on one Redis. Is "all seven" the whole set: an eighth limiter exists in the SCIM provisioning service, in-memory in every mode, unchanged by B.
+  - The LEGITIMATE SHAPES table (brief section 2a): the name check is a checker whose failure path refuses the whole boot; a legitimate shape refused is a Major.
+  - C-68 re-runs; full verify (predicted 3870/221).
+
+TARGET C — PR #31, RD-641 (ii) (TIER 2, NO JEST NEEDED). Branch ci-node24-rd641-s79h at a11eb5f1544be745cde315f6273e2a2ef979a0c8 (= refs/pull/31/head), one commit off 58bb38c: node-version '20' -> '24' at .github/workflows/build.yml:25, deploy.yml:27, npm-audit.yml:25, and nothing else. Kam approved it (C-143).
+  - Verify the diff is EXACTLY those three lines; deploy.yml deploys nothing (workflow_dispatch packaging only); say what a merge to main triggers (deploy-demo.yml, gated).
+  - Read the PR's own CI run yourself, read-only gh: Build 35685088456. Extract the failing set BY CELL NAME from the log and compare it with session-tools/s79h/rd641-known-failing-set-982a84f.txt and with main 58bb38c's Build 35683749970. NEW must be none. Report LEFT by name.
+  - You must NOT claim that Node 24 fixes HS3: the rate is unmeasured, and HS3 also passed on main's Node 20 runs. This machine runs node v26, so a local run does not measure Node 24.
+
+ACROSS TARGETS: the drafter could not run git merge-tree --write-tree; quote it for every pair in brief section 6, using your OWN object directory: GIT_OBJECT_DIRECTORY=<your own mktemp -d> GIT_ALTERNATE_OBJECT_DIRECTORIES=<repo>/.git/objects. The pair that matters most is B onto 58bb38c (the server entry point auto-merges with RD-575/524/615). Name the C-68 re-run cells for the real forward-merged trees. C-142: green = the local verify through the lock AND the CI failing set equal to the known set by name; A and B have no CI run at their branch heads, so their CI half is measured at merge.
+
+Build your own trees INSIDE YOUR OWN PROJECT from the object store (git archive <sha> into a fresh mktemp dir). Each tree is EXCLUSIVE to this gate and to one purpose: run nothing else in it, and a fresh tree per arm. Never worktree, checkout, fetch, pull, stash, clean, gc or commit in the NexusAI repo, and never work in its 2_Project_Files checkout (C-28). You are findings-only: no commits, no branch moves, no tickets, no writes inside NexusAI; the gate fixes nothing and merges nothing. gh is read-only: never merge, approve, comment on, re-run or edit PR #31. No az. Never rm: quarantine.
+
+A RED ARM COUNTS ONLY IF THE MUTANT STILL PARSES: run node --check on every mutated file before its arm and quote the exit code. A red from a mutant that does not parse or load is a VOID arm.
+
+FLOOR DISCIPLINE — follow section 7 of the brief exactly. QUEUE, NEVER TAKE OVER: the jest lock is shared (FIFO); never kill, signal or move another seat's process, lock or ticket.
+  - Every jest run goes through session-tools/nexusai-lock.sh with a tag starting qa-gate6- (C-141 and its addendum: your tickets are gate-class and builders yield to them; C-110: no other queue jumping), the lock held once per multi-run measurement, as a tracked child of your seat.
+  - Count foreign servers the RD-606 way, anchored on YOUR OWN claude pid: basename(argv[0]) == node AND the server entry point anywhere in argv, read from the kernel; ours means the ancestor chain CONTAINS your claude pid. Negative controls: the three live seats named in the brief (NexusAI-G pane %36, NexusAI-H pane %38, Tuesday pane %0) must classify foreign in the same run. Never by EADDRINUSE, a whole-command-line grep, or raw comm.
+  - A zero is reportable only beside a control that fired in the same window.
+  - DEADLINE AND HEARTBEAT (gate 4 stalled about 70 minutes at 0% CPU holding the lock with 10 seats queued): every real-server and container probe has a per-step DEADLINE and a client timeout on every request, kills its server (and stops its container) in a finally, and logs a HEARTBEAT line at least every 2 minutes. A step with no heartbeat for 5 minutes is aborted and reported, never waited on.
+  - Reap every server you start.
+
+DRIVABLE SURFACE IS A LOCAL RUN, NOT THE DEMO (RD-76).
+
+QUESTIONS: your sender QA/Datasec-NexusAI has no inbox routing line, so you cannot count on an answer. If you must ask, mail tuesday-agent@agentmail.to with subject "[QA/Datasec-NexusAI -> Tuesday] QUESTION: <topic>", then PROCEED ON THE SAFEST READING without waiting, and record both in the report.
+
+Write your report to: /Volumes/KK_T9_External_HDD/!CODING/Testing Agent MAIN/projects/nexusai/reports/2026-09-22-gate6-rd619-rd607-pr31/report.md
+
+GIVE THE VERDICT SEPARATELY PER TARGET: A GO/NO-GO, B GO/NO-GO, C GO/NO-GO. Then say what the verdicts mean for the queue (A then B onto 58bb38c, each forward-merged and verified green under C-68, C-89 and C-142, each Tuesday's GO under C-127; C independent). A GO is a statement about the gated SHA only.
+
+MAIL YOUR VERDICT to tuesday-agent@agentmail.to with the subject exactly:
+[QA/Datasec-NexusAI -> Tuesday] GATE VERDICT — gate 6: RD-619 @ 695ca5a (tier 2) + RD-607 @ 8fa0791 (tier 1) + PR #31 RD-641 (ii) @ a11eb5f (tier 2)
+
+The AgentMail key is AGENTMAIL_API_KEY in /Volumes/KK_T9_External_HDD/TUESDAY/4_Credentials/.env. It is an absolute path because the QA project has no 4_Credentials directory of its own. Never put the key or any secret in a mail or the report.
+
+Report each target's head, and main's, as three timestamped readings (start / mid / end) with the branch name beside each.
+
+Rule 2 stands: what you did NOT test is first-class output — a NOT TESTED section, and every action recommendation labelled MEASURED AT RUNTIME, PROBED or READ ONLY.
