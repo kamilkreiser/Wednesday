@@ -15,6 +15,10 @@ supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s
 - RD-651 = gate-7 F-2 (VM compose no proxy hop), filed by S80I 14:20Z. **Closes DELTA 67's "ticket key owed".**
 - **RD-645 round 2 BUILT @ 823c7fe** (S80I 14:24Z), proof queued behind its RD-641 hold. **On its READY: gate 7 round 2** (the last round under the cap; brief from `fleet/qa-agent/briefs/2026-09-22_nexusai-gate7-rd645.md` + the round-2 cells). Then DELTA 67's ON-GO chain.
 
+### VISION — GATE 4 DONE 00:39 (see today's note 00:4x)
+- MERGE GO sent: N -> FU -> I9 -> Q5 -> portal I10 (each forward-merged, named cells re-run, MERGED mail; **verify each at source**). P5B NOT merged (Kam decision 14). **After the merges: amend card `quickquote-publish-51e9286-price-fix` to the new main + strings, and build Kam pack v5** (CF5-F3 wording + the long-outage lockout trade + I10-O1 live-portal crash, all his).
+- **Gate 5** = A-9 5d787d2 + CF5 round 2 (last under the cap) + I10-O1 fix, batched, when their READYs land. Gate 4 pane closed.
+
 ### FLOOR (00:23): %0 tuesday · %41 Vision · %44 NexusAI-I · %48 Vision gate 4 · %3 monitor · %8 bare shell. Poller alive. Kam quiet since 18:09.
 
 ## 🔴 DELTA 67 — 2026-09-23 00:1x ROTATION HANDOVER (s80, ctx ~78-80%, safe boundary). **READ THIS FIRST, THEN 66. DELTA 51's OWED ZIP STANDS. QUIET HOURS until 06:00: board text only, no voice.**
