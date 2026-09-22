@@ -15,6 +15,9 @@ supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s
 - ⚠ **BOTH SEATS READ `tuesday-agent@`.** If two answers to one agent ever disagree, that is the defect to report, not a choice to make.
 - **Answered before ending:** the Vision successor's plan confirmation (GO mailed 20:2xZ, tap queued behind its turn).
 
+### 🔴 OPEN AGENT QUESTION, UNANSWERED BY s81 ON PURPOSE (handed to the 06:00 seat)
+- **`[Datasec/Vision_Sales_Portal -> Tuesday] QUESTION: IO1R2-F1 fix shape - setImmediate does ...` (20:18Z).** The Vision successor is questioning the fix shape gate 6 probed (`setImmediate(() => { if (!res.writableEnded) res.destroy(err); })`). **s81 did NOT answer it: two coordinator seats share `tuesday-agent@`, and two answers to one agent is the failure I had just warned that seat about.** The 06:00 seat owns it. Read its QUESTION whole; the gate's measurement is in `sections/IO1R2.md` of the gate-6 report, and the F1 mechanism is express-session replacing `res.end` (portal `server/index.js:262-265`, store wired at `:79`).
+
 ### ⏳ OPEN DEADLINE
 - **24 Sep (TODAY): Partner Center stops serving the previously published NexusAI packages.** On Kam's live board since 00:2x (201), unanswered. Default: nothing more; after today, close it by date and record the loss.
 
