@@ -24,6 +24,10 @@ supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s
 - **Gate 5 (Vision) waits on READYs:** A-9 5d787d2 (ready) + CF5 round 2 + I10-O1 fix + the bounded browser.close() harness fix. **Then ONE Kam update:** amend `quickquote-publish-51e9286-price-fix` to the then-main + pack v5 (strings from gate 4's mail; CF5-F3 wording; the long-outage lockout trade; I10-O1 live-portal crash; the 3 HIGHs as decision-14 evidence).
 - **Gate 7 round 2 (NexusAI) = RD-645 r2 (tier 1, G-3 re-aimed per C-147) + RD-641 (i) @ ab54de1 (tier 2)**, launched on RD-645 r2's READY. RD-652 filed (unset NODE_ENV).
 
+### 02:0x UPDATE
+- **GATE 5 RUNNING in %49** ('QA/Vision-gate5'): A9 5d787d2 · CF5R2 309e6c7 (round 2 of 2) · IO1 a83140e (portal, tier 1) · BC aa89010. Brief `fleet/qa-agent/briefs/2026-09-23_vision-qq-gate5.md`, launcher `launchers/launch_qa_vision_qq_gate5.sh` (guard 74 fixed by Tuesday). **On the verdict:** merge GOs (A9 needs a forward merge onto 3bfbfa2: toolVersion + test:print conflicts expected), then ONE Kam update (publish card amend + pack v5).
+- **Gate 7 round 2: drafter #2 finishing** `fleet/qa-agent/briefs/2026-09-23_nexusai-gate7r2-rd645-rd641.md` + launcher `launch_qa_nexusai_gate7r2_rd645_rd641.sh` + routing line. **RULED: no limiter-evasion table** (classifier stopped drafter #1 and round 1's tester); NOT TESTED by scoping, RD-651 covers it. On its report: read the wrong-at-source list, stamp, --check, launch.
+
 ### FLOOR (00:23): %0 tuesday · %41 Vision · %44 NexusAI-I · %48 Vision gate 4 · %3 monitor · %8 bare shell. Poller alive. Kam quiet since 18:09.
 
 ## 🔴 DELTA 67 — 2026-09-23 00:1x ROTATION HANDOVER (s80, ctx ~78-80%, safe boundary). **READ THIS FIRST, THEN 66. DELTA 51's OWED ZIP STANDS. QUIET HOURS until 06:00: board text only, no voice.**

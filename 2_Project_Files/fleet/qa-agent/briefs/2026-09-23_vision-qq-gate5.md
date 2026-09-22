@@ -10,8 +10,8 @@ THE BC ROW IS A PLACEHOLDER — BC's branch was NOT on origin at drafting. THE L
 before launch, Tuesday edits its row; the launcher parses §PIN, refuses any placeholder, and re-reads EVERY head by `git ls-remote`
 immediately before launch, refusing on any mismatch. The verified table is appended to your prompt.
 
-SELF-CHECK: re-read end-to-end for contradictions | @SELFCHECK_TS@
-Self-check note: @SELFCHECK_NOTE@
+SELF-CHECK: re-read end-to-end for contradictions | 2026-09-23 01:50
+Self-check note: Tuesday read the header, PIN table, §BC notes and the self_check_view output (numbers/ids/claims, no contradiction found); pinned BC and added the PINNED note because the drafter's note (d) predates BC's lib/pdf.js commit. Not re-read line by line end to end at 65% context — stated here, not hidden.
 
 SLOT-BC: IN
 *(Filled `IN` by the drafter on Tuesday's ruling that BC joins gate 5. **To launch with BC:** replace the three `@BC_…@`
@@ -126,8 +126,11 @@ I10's `app.use(lastResortHandler);`; BC's base (if IN) calls `closeBrowser` only
 | A9 | quickquote | fix/qq-logo-ink-inset-2026-09-23 | 5d787d24a7b2ed8d33d319bd495b35ee0dbd96be | 763269d8e910e2dae9a418429d408405e37f164f | 1 | IN |
 | CF5R2 | quickquote | fix/qq-otp-refund-provider-only-2026-09-22 | 309e6c7e96e0f7694c597252849c8689f9b58e90 | 3bfbfa25c8dae52c2ac16b96d4ddf65ad075fdb6 | 3 | IN |
 | IO1 | portal | fix/portal-async-route-errors-2026-09-23 | a83140ebcbbd29b50f054e3b088c5cbed43efa09 | 6f197ca8e6090cd6b6a8ac6c5969fa772e3767c4 | 1 | IN |
-| BC | quickquote | fix/qq-bounded-browser-close-2026-09-23 | @BC_HEAD@ | @BC_BASE@ | @BC_COMMITS@ | IN |
+| BC | quickquote | fix/qq-bounded-browser-close-2026-09-23 | aa8901067aec9bb0ff8ec6f296f51e9cd029b572 | 3bfbfa25c8dae52c2ac16b96d4ddf65ad075fdb6 | 2 | IN |
 <!-- PIN-HEADS:END -->
+
+**PINNED BY TUESDAY 2026-09-23 01:50 (supersedes the drafter's note (d) below):** BC = `aa8901067aec9bb0ff8ec6f296f51e9cd029b572` (ls-remote), base `3bfbfa2`, 2 commits (`907f686`, `aa89010`). **The pinned delta DOES change `stage3/lib/pdf.js`** — only inside `closeBrowser(ms = 5000)` and its leading comment (launcher guard 74 corrected by Tuesday to accept a parameterised signature and the function's own comment; red-proofed: a one-line edit inside `renderQuotePdf` is refused). **§BC's production clauses are LIVE.** Builder's claims to verify, not trust: renderer bytes unchanged outside that block; emailed PDF text-identical, 0 differing pixels, bytes identical with dates masked; full `test:print` 115/115 in one run, exiting in ~22 s.
+
 
 Repos: portal = `/Volumes/KK_T9_External_HDD/!CODING/Datasec/Vision_Sales_Portal/2_Project_Files` (remote
 `datasecau/vision_datasec-sales-portal`); QuickQuote = `/Volumes/KK_T9_External_HDD/!CODING/Datasec/Vision_Sales_Portal/Quoting Tool/hpas-quoting-tool`

@@ -317,9 +317,12 @@ if isin BC; then
     python3 - "$(q show "$(fld BC 5):stage3/lib/pdf.js" 2>/dev/null)" "$(q show "$(fld BC 4):stage3/lib/pdf.js" 2>/dev/null)" <<'PY' || { echo "REFUSING: BC changes stage3/lib/pdf.js OUTSIDE closeBrowser() (renderQuotePdf / the launch / exports / a new helper) — the brief gates a closeBrowser-only change; re-brief" >&2; exit 74; }
 import sys
 def strip(s):
-    i = s.find('async function closeBrowser()')
-    if i < 0: sys.exit(1)
-    j = s.find('{', i); d = 0
+    # the function may take parameters (closeBrowser(ms = 5000)) and its leading /* For tests ... */ comment belongs to it
+    f = s.find('async function closeBrowser(')
+    if f < 0: sys.exit(1)
+    c = s.rfind('/* For tests', 0, f)
+    i = c if (c >= 0 and s.find('*/', c) < f) else f
+    j = s.find('{', s.find(')', f)); d = 0
     for k in range(j, len(s)):
         if s[k] == '{': d += 1
         elif s[k] == '}':
