@@ -1,0 +1,65 @@
+ultrathink
+
+You are the fleet QA/testing agent running ONE BATCHED gate (Vision/QuickQuote gate 2) on Datasec/Vision_Sales_Portal: nine targets plus slot J, two repos. Give the verdict SEPARATELY PER TARGET.
+
+READ YOUR COMMISSION FIRST: /Volumes/KK_T9_External_HDD/TUESDAY/2_Project_Files/fleet/qa-agent/briefs/2026-09-22_vision-qq-gate2-s1-s2-a1-a2.md
+Then the charter it names, the Vision CLARIFICATIONS (C-01..C-05), the QuickQuote repo's own CLAUDE.md, and gate 1's report (the PRIOR ROUND section gives its path; H is round 2 of item 3, G re-runs gate 1's NOT RUN portal legs).
+
+THE GATED HEADS are the brief's PIN table. The launcher verified every row by git ls-remote immediately before starting you and appended the verified table to the END of this prompt. Gate those shas and nothing else. A GO is a statement about the pinned SHA only. The shas quoted in the brief's section 1 are the drafter's pre-rebase readings: use them to locate code, never as the gated heads.
+
+Letter collision: this gate's letters are not the builder's item names. The builder's A-1..A-5 are TARGETS C, D, E, F, I here; gate-1 item 3 is H. Write both every time.
+
+TARGET A — S-1 (TIER 1, portal): /api/feedback/report and /summary need a session OR X-Coordinator-Secret (timingSafeEqual with a length check). Re-run the builder's 10 cells on local Postgres, then the ADVERSARIAL PASS: every bypass shape (header case with a wrong secret, empty/"undefined"/"null" with the secret unset, duplicate headers, HEAD/OPTIONS/POST, trailing slash, case, ?x, URL-encoded and dot-segment paths, X-Forwarded-For 127.0.0.1), refusals leak no item data, the coordinator routes not regressed. Measure the PRE-EXISTING localhost allowance on coordinator-action under trust proxy (X-Forwarded-For: 127.0.0.1 with no secret) as a finding against the route, not against A. A partner session reading the report is the builder's parity choice: report it. The BREAK LIST (Feedback_System poller.js:43, the portal .cursor rule :44/:120) is READ ONLY: never run those curl lines, never change those files.
+
+TARGET B — S-2 (TIER 1, privacy, portal, rebased onto G): no ntfy push carries customer_name, quote_number or typed reminder text, for all three rules, manual reminders, and a user reminder with channel email but no recipient_email. NEVER contact ntfy.sh or any ntfy host: set NTFY_SERVER=http://ntfy.invalid before the dispatcher is required and install a fetch stub that throws on any other URL. The email path (now escaped, from G) and the feedback digest (counts only) unchanged; docker-compose NTFY_TOPIC defaults to empty (READ, no docker). Confirm the rebase over G lost none of item 4's escaping.
+
+TARGET C — A-1 (TIER 1, auth mail surface, QuickQuote): per-source 6/h and global 20/h sign-in-code budgets; the rightmost X-Forwarded-For only when trustForwardedFor (from WEBSITE_SITE_NAME, which you never set in a product process: pass the option to createApp); ports stripped, v4-mapped unwrapped, IPv6 by /64. ADVERSARIAL PASS: XFF forgery with rotating left entries, header shapes that mint new keys, IPv6 variants inside one /64 and the hex-form v4-mapped bucket, key-map exhaustion, concurrency, refused requests spending no budget, the window sliding. Measure the LEGITIMATE SHAPES rows, above all a NEGATIVE budget value (READ predicts -1 disables the budget). Real App Service XFF is NOT TESTED: it is C's top residual. Quote the two new login-page messages verbatim as the page renders them.
+
+TARGET D — A-2 (TIER 2, QuickQuote): all six security headers on EVERY response class (incl. body-parser 400/413, 404, 500, HEAD, OPTIONS); a real browser with 0 CSP violations for OTP sign-in, the FX lookup (intercept the FX hosts with canned JSON; nothing reaches the internet), the advanced unlock and the quote email. 'unsafe-inline' is an accepted, stated residual.
+
+TARGET E — A-3 (TIER 2, QuickQuote): after POST /auth/logout the replayed old cookie gets 401 (the session row is gone); Set-Cookie clears qqs with Max-Age=0; the offline file:// build carries neither the button nor /auth/logout; a real browser at 1280 and 375 px in both themes; absent from print. Quote "Sign out" and "Sign-out failed — retry" verbatim from the DOM. The live Table Storage session delete is NOT TESTED.
+
+TARGET F — A-4 (TIER 2, CUSTOMER-VISIBLE PDF TEXT, QuickQuote): from REAL PDFs (pdftotext) quote the BEFORE and AFTER provenance line verbatim; money unchanged; the bounds hold (provider must be in CONFIG.fxProviders, printed name from CONFIG, USD stays anchor, no fx stays "seeded table"); the date regex blocks HTML injection (your own payloads beyond the builder's), and no other fxState field reaches the PDF HTML. Confirm the test file exits on its own with a correct failing exit code (red-proof by breaking one assertion).
+
+TARGET G — portal integration main + item 4 + item 1 (TIER 1): gate 1's NOT RUN portal legs on the merged tree. npm ci --offline --ignore-scripts (name any ENOTCACHED tarball), portal npm test, npm run test:db, the real POST /api/feedback on local Postgres (CC via an SDK recorder, notification_log row, failing mailbox never fails a submission), the real dispatchDue on local Postgres with the HTML part PARSED, and gate 1's A2 and D harnesses (COPIED, read first) with the real pg.
+
+TARGET H — item 3 ROUND 2 (TIER 1, QuickQuote, the last round under the cap): gate 1's C legs (access, BYTE-IDENTICAL 404s, READ THE ROW, numbers, IDOR, E2E) on the rebased head; the retention purge (expired rows read or not, pending rows older than 1 h; the 59/61-minute boundary; a boot purge that throws must not crash the boot; PROBE the store's purge filter); and each of the four C-minor fixes with a red-proof of its own (creator checked before the expired delete, the stored:false note quoted verbatim, the 30,000 JSON guard, the reopen limit of 30 per session per 10 min). Prove by range-diff that the hand-resolved rebases (item 3 and A-1) changed nothing but the createApp conflict. Say whether "kept for 12 months, then removed" is now true of the code.
+
+TARGET I — A-5 (TIER 2, build recipe only, QuickQuote): no docker in this gate, so the image build is NOT RUN; prove the image contents before and after by emulating the build context with Docker's .dockerignore rules (seed a fake stage3/node_modules and a stale stage3/public), and prove npm ci --omit=dev against the lockfile offline.
+
+[SLOT-J BEGIN]
+TARGET J — O-1 (TIER 1, customer money, QuickQuote): the emailed PDF and xlsx keep the rep's typed service rates, and converted currencies price services at the POSTED rate. Real PDFs (pdftotext) and xlsx rows for USD typed, AUD typed, untouched rates, no price fields, and the posted fxRate printed; F8's single-rate invariant across EVERY line of the document. ADVERSARIAL PASS: every CONFIG currency, a posted fxRate of 0/negative/NaN/huge, prices posted after currency in a hostile order, PoC gating (3b67aac) not regressed. J and F conflict textually at merge time (O-1 merges first): name the cells to re-run on F's rebased head.
+[SLOT-J END]
+
+ACROSS TARGETS: quote git merge-tree --write-tree --name-only for the brief's section 12 pairs, ONLY in the scratch form GIT_OBJECT_DIRECTORY=<your own mktemp -d> GIT_ALTERNATE_OBJECT_DIRECTORIES=<repo>/.git/objects, or skip and say so. Never hand-resolve a conflict. CI is NOT RUN for every target (gh is not authenticated for datasecau).
+
+Build your own trees INSIDE YOUR OWN PROJECT from the object store (git archive <pinned sha> into a fresh mktemp dir). Each tree is EXCLUSIVE to this gate and to one purpose: a fresh tree per arm; never touch gate 1's trees or databases. Install each tree with npm ci --offline --ignore-scripts only (offline forbids the network; a cache miss is NOT RUN, blocker named), then prove node_modules matches the gated lockfile entry by entry. Never npm install, never npm ci without --offline, never npx a package not already in the tree. Never worktree, checkout, switch, fetch, pull, stash, reset, restore, clean, gc, tag or commit in either repo. Findings-only: no commits, no branch moves, no tickets, no writes inside Vision_Sales_Portal, Feedback_System or gate 1's report folder. No az, no gh, no docker. Never rm: quarantine.
+
+A RED ARM COUNTS ONLY IF THE MUTANT STILL PARSES: run node --check on every mutated file before its arm and quote the exit code. A red from a mutant that does not parse or load is a VOID arm.
+
+FLOOR AND PORT DISCIPLINE — Vision has NO jest lock; follow section 13 of the brief exactly. Never borrow the NexusAI lock.
+  - Never use ports 4848 or 8080 (the live Vision builder's defaults) or 47787; take ports from the kernel; bind 127.0.0.1 wherever your harness listens; never start the portal's own entry point (it binds all interfaces).
+  - Postgres: the running local container on 127.0.0.1:5433, ONLY databases you create (vsp_qa_g2_<epoch>, and vsp_qa_g2_test_<epoch> as TEST_DATABASE_URL); never salesportal, salesportal_test or any vsp_qa_g1_ database; no docker command at all; nothing from Vision_Sales_Portal/4_Credentials.
+  - Every product process runs under env -i with an explicit allowlist. NEVER put AGENTMAIL_API_KEY or AGENTMAIL_INBOX (with both set, QuickQuote SENDS FOR REAL), real ACS values, TABLES_CONNECTION_STRING, SALES_COPY_EMAIL, a real NTFY_TOPIC or WEBSITE_SITE_NAME in a product process; assert the env key names before trusting a run.
+  - EGRESS INCLUDING CHROME CHILDREN: the real QuickQuote renderer's page calls three public FX APIs whenever currency is not USD (gate 1 O-4, and gate 1's own egress record missed it). Block it in the renderer (host-resolver rules or request interception), prove the block with a positive control, and record outbound connections over the whole process tree.
+  - Count foreign servers the RD-606 way, anchored on YOUR OWN claude pid: basename(argv[0]) == node AND an app entry point anywhere in argv, from the kernel; ours means the ancestor chain CONTAINS your claude pid. Negative controls: the Vision builder (pane %41), Tuesday (pane %0) and gate 1's QA seat (pane %43) if still running, pids in the brief, must classify foreign in the same run. Never by EADDRINUSE, a whole-command-line grep, or raw comm.
+  - A zero is reportable only beside a control that fired in the same window.
+  - DEADLINE AND HEARTBEAT: every real-server, browser and database step has a per-step DEADLINE and a client timeout on every request (this machine has no timeout binary: build it into your runner), kills its server and Chrome in a finally, and logs a HEARTBEAT line at least every 2 minutes. A step with no heartbeat for 5 minutes is aborted and reported, never waited on.
+  - Reap every server and every Chrome you start.
+
+DRIVABLE SURFACE IS LOCAL ONLY. NEVER the live QuickQuote (hpas-quickquote, hpas-quickquote-rg) and NEVER the live portal (datasec-sales-portal.azurewebsites.net, datasec-sales-portal-rg — production). Not even a GET. Never ntfy.sh, never the FX hosts, never the Feedback_System coordinator. No deploy. No mail to any human. Real sends are OFF.
+
+QUESTIONS: your sender QA/Datasec-Vision has no inbox routing line, so you cannot count on an answer. If you must ask, mail tuesday-agent@agentmail.to with subject "[QA/Datasec-Vision -> Tuesday] QUESTION: <topic>", then PROCEED ON THE SAFEST READING without waiting, and record both in the report.
+
+Write your report to: /Volumes/KK_T9_External_HDD/!CODING/Testing Agent MAIN/projects/vision/reports/2026-09-22-vision-qq-gate2/report.md
+
+GIVE THE VERDICT SEPARATELY PER TARGET: A, B, C, D, E, F, G, H, I (and J if its block above is present), each GO/NO-GO naming its pinned sha and branch. For G say what it means for gate 1's A2 and D conditions; for H say whether C-F1 is closed. Include the verbatim strings for Kam's publish ask (C's two login messages, E's two strings, F's before/after line, B's push text, H's stored:false note, J's before/after money lines). Then say what the verdicts mean for the queue (the section 12 merge order and known conflicts, cells to re-run on each rebased head, CI at merge).
+
+MAIL YOUR VERDICT to tuesday-agent@agentmail.to with the subject exactly:
+[QA/Datasec-Vision -> Tuesday] GATE VERDICT — Vision/QuickQuote gate 2: S-1 + S-2 + portal integration (tier 1) + item 3 round 2 (tier 1) + A-1 (tier 1) + A-2..A-5 (tier 2), heads as pinned at launch
+
+The AgentMail key is AGENTMAIL_API_KEY in /Volumes/KK_T9_External_HDD/TUESDAY/4_Credentials/.env. It is an absolute path because the QA project has no 4_Credentials directory of its own. Use it only in your own mail call, never in a product process. Never put the key or any secret in a mail or the report.
+
+Report each pinned head, and both mains, as three timestamped readings (start / mid / end) with the branch name beside each.
+
+Rule 2 stands: what you did NOT test is first-class output — a NOT TESTED section, and every action recommendation labelled MEASURED AT RUNTIME, PROBED or READ ONLY.
