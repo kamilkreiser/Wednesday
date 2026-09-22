@@ -1,0 +1,60 @@
+ultrathink
+
+You are the fleet QA/testing agent running ONE BATCHED gate (Vision/QuickQuote gate 1) on Datasec/Vision_Sales_Portal: four targets in two repos, A TIER 2, B TIER 2, C TIER 1, D TIER 1. Give the verdict SEPARATELY PER TARGET.
+
+READ YOUR COMMISSION FIRST: /Volumes/KK_T9_External_HDD/TUESDAY/2_Project_Files/fleet/qa-agent/briefs/2026-09-22_vision-qq-gate1-feedback-label-reopen.md
+Then read the Vision CLARIFICATIONS (C-01..C-05) and the QuickQuote repo's own CLAUDE.md, both named in the brief.
+
+Repos: QuickQuote at /Volumes/KK_T9_External_HDD/!CODING/Datasec/Vision_Sales_Portal/Quoting Tool/hpas-quoting-tool (main 47eb533034108c5c92d6b36af44554528ffc71ec); the portal at /Volumes/KK_T9_External_HDD/!CODING/Datasec/Vision_Sales_Portal/2_Project_Files (main ef5a9c0b942c71b8c3b08feec22ae23dbe622581). Both are the LIVE builder's working trees: never work in them.
+
+TARGET A — item 1 (TIER 2, feedback CCs Tuesday, two repos). A1 QuickQuote fix/qq-feedback-cc-tuesday-2026-09-22 at bd3e3cf730cfda7d29c74c389e46c8c9d62b2005; A2 portal fix/feedback-mail-cc-tuesday-2026-09-22 at ce01ba95fa9e074f0e5ed8d4e429600cf0eadb24. Verdict A1 and A2 separately.
+  - Prove the CC against a FAKE provider only (an SDK recorder; a fetch recorder that never reaches the network): To kreiser.org@me.com, CC tuesday-agent@agentmail.to, ONE send.
+  - No secret, margin or buy-price reaches a mail: plant probe values under cpDay/cpPct/psvHourly/advWord/margin/buyPrice/session names and grep every captured field.
+  - A failing mailbox never fails a submission: reject, throw, hang, unconfigured; 201 within the deadline, row stored, no crash.
+  - The two apps use DIFFERENT variable names (FEEDBACK_NOTIFY_EMAIL vs FEEDBACK_NOTIFY_EMAILS) and differ on an empty list; measure the LEGITIMATE SHAPES rows.
+
+TARGET B — item 2 (TIER 2, the label). QuickQuote fix/qq-mfp-sfp-label-2026-09-22 at 72f6c0cc93d52da98ca2205496522b9d82875b26: exactly two lines, Devices (MFPs) -> Devices (MFPs/SFPs) and toolVersion 2.30 -> 2.31. A real render (file://, light and dark, 1280 and 375 px), the hosted page after strip, and print as a real PDF (page 1 and page 2 each one A4). Kam's two unbuilt wording proposals are NOT targets.
+
+TARGET C — item 3 (TIER 1, reopen an old quote by number, creator only). QuickQuote feat/qq-open-old-quote-2026-09-22 at 642b06b4857155cdfdadab2228aad751fb45ce44. Drive createApp in YOUR OWN harness (the stage3 entry point cannot boot here: no Table Storage, no Azurite), with sign-in through the real OTP routes.
+  - Prove: creator 200; another signed-in user 404 with a body BYTE-IDENTICAL to not-found (and to malformed, old-scheme, expired, pending); no session 401; no advanced fields for a non-advanced session; margin/buy-price NEVER stored — READ THE ROW, with the forbidden id list derived from the page's ADVANCED regions, not from the builder; unique server-issued numbers under concurrency (3, 50, 120 in one second; 99 then 503); retention config (QUOTE_RETENTION_DAYS, default 365); how old three-digit numbers co-exist with the new H01..H99 numbers (customer-visible).
+  - Establish whether price-basic / price-advanced / price-custom (stored) are sell prices or cost inputs.
+  - Retention honesty: rows are deleted only when READ; Kam was told "kept for 12 months, then removed". Say whether that is true of the code.
+  - ADVERSARIAL PASS: enumeration by number (no rate limit), a timing difference between 404s (the expired path deletes first), session fixation, IDOR via any other parameter. State the FAIL condition before each.
+  - The real Table Storage 409 contract is NOT TESTED here (PROBE the adapter with the SDK's own error shapes).
+
+TARGET D — item 4 (TIER 1, portal mail HTML escaping). Portal fix/mail-html-escape-2026-09-22 at d11eed6af2bbb8b96e1985d26da8eccf5205612b; fix commit a68b53a600c301a045ec83d00a90ca02c70308b8, d11eed6 is BACKLOG-only. On main the reminder dispatcher puts a portal user's text into a CUSTOMER's inbox as live HTML.
+  - No raw markup survives in the HTML part — script, event-handler attributes, javascript: and data: URLs, entity tricks — asserted by PARSING the HTML, not by substring. The plain-text part is unchanged. No double-escaping of a caller's own html.
+  - Enumerate EVERY caller of sendEmail by require, not by call text (the text grep misses A2's alias), with which carry user text; weigh the approvals mail's raw scenario/type/detail.
+  - Red-proof by reverting a68b53a's three non-test files, keeping the test.
+
+ACROSS TARGETS: the drafter could not run git merge-tree --write-tree; quote it for every pair in brief section 7, using your OWN object directory: GIT_OBJECT_DIRECTORY=<your own mktemp -d> GIT_ALTERNATE_OBJECT_DIRECTORIES=<repo>/.git/objects. A1 x C and A2 x D are READ as likely conflicts (the builder says "different regions"; the insertion points are the same). Do not hand-resolve a conflict. CI is NOT RUN for every target (gh is not authenticated for datasecau).
+
+Build your own trees INSIDE YOUR OWN PROJECT from the object store (git archive <sha> into a fresh mktemp dir). Each tree is EXCLUSIVE to this gate and to one purpose: a fresh tree per arm. The builder's installed node_modules MOVED during drafting (both repos now carry newer advisory-fix dependency sets), so it is NOT the gated set: install each tree with npm ci --offline --ignore-scripts (offline forbids the network; a cache miss is NOT RUN, blocker named), then prove node_modules matches the gated lockfile entry by entry. Copy a builder tree only if it matches at copy time; never symlink, never npm install, never npm ci without --offline. Never worktree, checkout, switch, fetch, pull, stash, reset, restore, clean, gc or commit in either repo. You are findings-only: no commits, no branch moves, no tickets, no writes inside Vision_Sales_Portal; the gate fixes nothing and merges nothing. No az, no gh, no docker. Never rm: quarantine.
+
+A RED ARM COUNTS ONLY IF THE MUTANT STILL PARSES: run node --check on every mutated file before its arm and quote the exit code. A red from a mutant that does not parse or load is a VOID arm.
+
+FLOOR AND PORT DISCIPLINE — Vision has NO jest lock; follow section 8 of the brief exactly. Never borrow the NexusAI lock.
+  - Never use ports 4848 or 8080 (the live Vision builder's defaults) or 47787; take ports from the kernel; bind 127.0.0.1 wherever your harness listens.
+  - Postgres: the running local container on 127.0.0.1:5433, ONLY databases you create (vsp_qa_g1_<epoch>, and vsp_qa_g1_test_<epoch> as TEST_DATABASE_URL); never salesportal or salesportal_test; no docker command at all; nothing from Vision_Sales_Portal/4_Credentials.
+  - Every product process runs under env -i with an explicit allowlist. NEVER put AGENTMAIL_API_KEY or AGENTMAIL_INBOX (with both set, QuickQuote SENDS FOR REAL), real ACS values, TABLES_CONNECTION_STRING, SALES_COPY_EMAIL or NTFY_TOPIC in a product process; assert the env key names before trusting a run; record every server's outbound connections.
+  - Count foreign servers the RD-606 way, anchored on YOUR OWN claude pid: basename(argv[0]) == node AND an app entry point anywhere in argv, from the kernel; ours means the ancestor chain CONTAINS your claude pid. Negative controls: the Vision builder (pane %41) and Tuesday (pane %0), pids in the brief, must classify foreign in the same run. Never by EADDRINUSE, a whole-command-line grep, or raw comm.
+  - A zero is reportable only beside a control that fired in the same window.
+  - DEADLINE AND HEARTBEAT: every real-server, browser and database step has a per-step DEADLINE and a client timeout on every request, kills its server and Chrome in a finally, and logs a HEARTBEAT line at least every 2 minutes. A step with no heartbeat for 5 minutes is aborted and reported, never waited on.
+  - Reap every server and every Chrome you start.
+
+DRIVABLE SURFACE IS LOCAL ONLY. NEVER the live QuickQuote (hpas-quickquote, hpas-quickquote-rg) and NEVER the live portal (datasec-sales-portal.azurewebsites.net, datasec-sales-portal-rg — production). Not even a GET. No deploy. No mail to any human. Real sends are OFF.
+
+QUESTIONS: your sender QA/Datasec-Vision has no inbox routing line, so you cannot count on an answer. If you must ask, mail tuesday-agent@agentmail.to with subject "[QA/Datasec-Vision -> Tuesday] QUESTION: <topic>", then PROCEED ON THE SAFEST READING without waiting, and record both in the report.
+
+Write your report to: /Volumes/KK_T9_External_HDD/!CODING/Testing Agent MAIN/projects/vision/reports/2026-09-22-vision-qq-gate1/report.md
+
+GIVE THE VERDICT SEPARATELY PER TARGET: A GO/NO-GO (A1 and A2 each stated), B GO/NO-GO, C GO/NO-GO, D GO/NO-GO. Then say what the verdicts mean for the queue (A1 x C and A2 x D merge order, cells to re-run on each merged tree, CI at merge). A GO is a statement about the gated SHA only.
+
+MAIL YOUR VERDICT to tuesday-agent@agentmail.to with the subject exactly:
+[QA/Datasec-Vision -> Tuesday] GATE VERDICT — Vision/QuickQuote gate 1: item 1 @ bd3e3cf + ce01ba9 (tier 2) + item 2 @ 72f6c0c (tier 2) + item 3 @ 642b06b (tier 1) + item 4 @ d11eed6 (tier 1)
+
+The AgentMail key is AGENTMAIL_API_KEY in /Volumes/KK_T9_External_HDD/TUESDAY/4_Credentials/.env. It is an absolute path because the QA project has no 4_Credentials directory of its own. Use it only in your own mail call, never in a product process. Never put the key or any secret in a mail or the report.
+
+Report each target's head, and both mains, as three timestamped readings (start / mid / end) with the branch name beside each.
+
+Rule 2 stands: what you did NOT test is first-class output — a NOT TESTED section, and every action recommendation labelled MEASURED AT RUNTIME, PROBED or READ ONLY.

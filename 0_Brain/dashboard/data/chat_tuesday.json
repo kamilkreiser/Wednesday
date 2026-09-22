@@ -2973,5 +2973,33 @@
   "project": "Datasec",
   "ts": "2026-09-22T18:11:04.249696+10:00",
   "text": "QuickQuote agent started. It has four items:\n1. Feedback copies me, for both QuickQuote and the portal.\n2. The 'Devices (MFPS/SFPS)' wording.\n3. Pulling up an old quote by its number. It sends me the design before building, because who may open someone else's quote is a security choice.\n4. A rulings file for the project.\nNothing goes live on the real tool without your word.\n\nNexusAI build status:\n- Today's main-branch merges: RD-575, RD-524, RD-615 and now RD-619. I checked each on GitHub.\n- Merging next: the Redis rate-limiter fix and Node 24 in CI. Both have passed their test gate.\n- Building next: the login rate limiter that was never switched on. It gets its own test gate before the zip.\n- The package work (G) is nearly done: 7 of its items are ready, and the rest are in testing.\n- Still to come: one package check, then your 2.2.0 image push, then I email you the zip. The handover document that goes with it is drafted.\n- H, the lead NexusAI agent, is at the end of its session, and a fresh agent picks up from its notes. The pace is set by the shared test queue, not by the agents."
+ },
+ {
+  "role": "wednesday",
+  "seat": "Kamils-Mac-mini.localdomain",
+  "project": "Datasec",
+  "ts": "2026-09-22T18:24:32.136784+10:00",
+  "text": "QuickQuote progress:\n- Done: feedback now copies me, and the label reads 'DEVICES (MFPS/SFPS)' on screen, John's exact wording. Both are tested.\n- Being built: opening an old quote by its number. Only the person who created a quote can open it; anyone else gets 'not found'. That matches what you told the tester. It also fixes a bug where two quotes emailed in the same second could get the same quote number.\n\nTwo choices for you:\n1. Printed quote wording. Today it says '40 HP multifunction devices'. Proposed: '40 HP MFP/SFP devices'. Reply '1 yes' to change it, or leave it.\n2. Spreadsheet 'Devices' row: proposed 'Devices (MFPs/SFPs)', matching the screen. Reply '2 yes', or leave it.\nIf you don't reply, only the on-screen label changes.\n\nOne default for you to know: saved quotes are kept for 12 months, then removed, because they name customers and deal sizes. That's a single setting, so tell me if you want a different period.\n\nNothing goes live without your word."
+ },
+ {
+  "role": "wednesday",
+  "seat": "Kamils-Mac-mini.localdomain",
+  "project": "Datasec",
+  "ts": "2026-09-22T18:34:32.660730+10:00",
+  "text": "QuickQuote 'open an old quote' is built and going to its test gate. Two things you'll notice, both with a default:\n1. Quote numbers from the online tool will end in 'H01' instead of three digits, for example DSQ-20260922-181500-H01. It keeps new numbers from ever clashing with ones customers already hold, and fixes the duplicate-number bug. Default: keep it.\n2. A reopened quote is re-priced at today's exchange rate, the same as a new quote. It is not frozen at the old quote's rate. Default: today's rate. If you'd rather freeze the original rate, reply 'freeze the rate'.\nNothing goes live without your word."
+ },
+ {
+  "role": "wednesday",
+  "seat": "Kamils-Mac-mini.localdomain",
+  "project": "Datasec",
+  "ts": "2026-09-22T18:41:24.089648+10:00",
+  "text": "One portal security issue for you to know about. It's fixed in code, but not yet live.\n\nWhat: the Vision portal's reminder emails put whatever a portal user types into the email's HTML without escaping it. A client reminder goes to the CUSTOMER. So a user could send a customer an email with a working link or script in it. This is live on the portal today, and has been all along (the QuickQuote agent found it; I haven't re-checked it myself).\n\nStatus: the fix is built and tested. Everything is escaped through one shared function, and the tests fail without it. It's going into the same test gate as the QuickQuote items.\n\nWhat I'll need from you: once the gate passes, your go to publish the portal fix to the live site. I'll bring you the exact change and its test result then. Nothing is needed now."
+ },
+ {
+  "role": "wednesday",
+  "seat": "Kamils-Mac-mini.localdomain",
+  "project": "Datasec",
+  "ts": "2026-09-22T18:52:48.101385+10:00",
+  "text": "Correction to what I told you about saved quotes. I said they're kept for 12 months and then removed. That's only half true of the code as built: an expired quote is deleted only when someone tries to open it. A quote nobody reopens would stay stored forever. The drafter for the test gate caught it. I'm having the agent add a proper clean-up so expired quotes are removed on a schedule, before this goes anywhere near live. Nothing is live yet."
  }
 ]
