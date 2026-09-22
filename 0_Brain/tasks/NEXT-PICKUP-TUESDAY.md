@@ -6,6 +6,17 @@ status: live
 supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s1-wholesale
 ---
 
+## 🟢 DELTA 61 — 2026-09-22 15:1x (s79, ctx 65% light checkpoint; band 80-90, NOT rotating). **READ THIS, THEN 60. DELTA 51's OWED ZIP STANDS.**
+
+### STATE
+- **main = 58bb38c** (verified); the RD-575→524→615 chain is closed, and C-142 is green at every step (Build 35683749970: NEW none).
+- **GATE 6 RUNNING** in pane `%40` ('QA/NexusAI-gate6'): A = RD-619 @ 695ca5a (t2), B = RD-607 @ 8fa0791 (t1, real Redis leg), C = PR #31 @ a11eb5f (t2, Node 24 CI, Kam's yes = C-143 + addendum :1500). Launcher `fleet/qa-agent/launchers/launch_qa_nexusai_gate6_rd619_rd607_pr31.sh`, brief `fleet/qa-agent/briefs/2026-09-22_nexusai-gate6-rd619-rd607-pr31.md`. Verdict subject `[QA/Datasec-NexusAI -> Tuesday] GATE VERDICT — gate 6: …`. **The queue was re-ordered at 05:07Z: qa-gate6-hold1/2 run next** (after s78g-rd471).
+- **On gate 6's verdict:** GO A/B → H forward-merges A then B onto main with C-68 re-runs + C-142, then merges on Tuesday's GO (C-127, Kam 18:18:12). GO C → merge PR #31 on Tuesday's GO (a .github change, Kam approved C-143); then **post the merged link to Kam on the board** (promised). NO-GO → a fix round (cap 2).
+- **G:** READY RD-526, 527, 630, 529; RD-528 (Q7b) + 471/472/listing/devscripts + RD-643 proofs queued; **release-gate re-merge of 58bb38c PREPARED, and its push is cleared** (C-142 met) once s78g-regate is green. The resubmission handover doc DRAFT is @ 1d08560 on resubmission-handover-s78g.
+- **H (~72% ctx):** RD-641 (i) the rd516 Linux harness trace is queued; RD-638 (F-A2) and the other lane-A proofs are queued. It will hand over after RD-531's READY. **On its wrap:** score it, close its pane (`pane_close.sh`), and launch the lane-A successor from HANDOVER-S79H (its top items: RD-641 (i), then the queue).
+- **Remaining lane-A READYs not yet gated:** RD-631, RD-510, RD-531/497, RD-438, RD-616 r2 (the NARROW re-gate), RD-638. They go to gate 7 as they land (batched).
+- **OWED mechanism (NexusAI ticket, post-resubmission):** nexusai-lock.sh should put qa-*/merge-* tickets ahead of waiting builder tickets automatically (4 hand-yields today).
+
 ## 🟢 DELTA 60 — 2026-09-22 13:3x (s79, ctx 50% CHECKPOINT; band 80-90, NOT rotating). **READ THIS, THEN 59. DELTA 51's OWED ZIP STANDS.**
 
 ### MAIN NOW
