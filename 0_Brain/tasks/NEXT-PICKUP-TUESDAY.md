@@ -6,6 +6,20 @@ status: live
 supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s1-wholesale
 ---
 
+## 🟢 DELTA 69 — 2026-09-23 03:0x (s81, ctx 70% CHECKPOINT; band 80-90, NOT rotating). **READ THIS, THEN 68/67. DELTA 51's OWED ZIP STANDS.**
+
+### ⏳ OPEN DEADLINES
+- **24 Sep: Partner Center previously-published packages** — on Kam's live board since 00:2x (201), no reply. Default: nothing more; after 24 Sep, close-by-date.
+
+### RUNNING
+- **%49 GATE 5 (Vision)**: A9 5d787d2 · CF5R2 309e6c7 (round 2 of 2) · IO1 a83140e (portal, t1) · BC aa89010. Verdict -> merge GOs (A9 forward merge onto QQ main 3bfbfa2; toolVersion + test:print conflicts expected) -> ONE Kam update: amend card `quickquote-publish-51e9286-price-fix` to the then-main + pack v5 (CF5-F3 wording; the retrying-office lockout trade; I10-O1 live-portal crash; the 3 HIGHs as decision-14 evidence).
+- **%50 GATE 7 ROUND 2 (NexusAI)**: A = RD-645 r2 a1b524a (t1, last round), B = RD-641 (i) ab54de1 (t2). Holds the jest lock (hold1: full verify A at 16:57Z); hold2 next. **No limiter-evasion table by Tuesday's scoping (classifier stops); RD-651.** Ruled: NET_ADMIN dummy interface in --network none OK; rd516/rd645 Linux server legs NOT RUN (no offline sqlite3 binding) -> RD-641's rd516-on-Linux claim is measured by CI on the merged head (C-142). **On GO: S80I merges RD-645 (+ RD-641) with C-68 + C-142 -> post the new main + §5.1 image commands to Kam (card `nexusai-220-image-build-timing`, rec b) -> new lane-C seat from HANDOVER-S78G for digest/build/package gate -> ZIP to kamil.kreiser@datasec.com.au.** On NO-GO (cap reached): ship the closed parts, ticket the rest (C-62).
+- **%44 NexusAI-I (S80I)**: standing C-141 yield to every qa-gate7r2-* ticket until the verdict. Queue: rd616r2, rd638, rd631-reproof, rd510r2, rd438r2 (RD-438's CTRL-RAW fixed @ 1ae1dfd). **RD-531+497 READY @ d7d6e7e -> GATE 8** (batch with the rest as READYs land).
+- **%41 Vision**: idle by design, waiting on gate 5.
+
+### KAM
+- Quiet since 18:09 yesterday (live board 03:04). 4 open Datasec cards, all with defaults. Reconcile: nothing.
+
 ## 🟢 DELTA 68 — 2026-09-23 00:3x (s81 rotation boot, ctx 53% after the whole load). **READ THIS, THEN 67. DELTA 51's OWED ZIP STANDS.**
 
 ### ⏳ OPEN DEADLINES (re-state in every delta until closed)
