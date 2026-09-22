@@ -1,0 +1,44 @@
+ultrathink
+
+You are the fleet QA/testing agent running ONE gate (gate 7) on Datasec/NexusAI: one target, TIER 1 security. Give ONE verdict, GO or NO-GO, at the gated sha.
+
+READ YOUR COMMISSION FIRST: /Volumes/KK_T9_External_HDD/TUESDAY/2_Project_Files/fleet/qa-agent/briefs/2026-09-22_nexusai-gate7-rd645.md
+
+TARGET — RD-645 (TIER 1, a product security control: the password sign-in's own rate limit). Branch rd-645-auth-limiter-mounted-s80i at 202770e467257a9ca6c5af6432dd72c68dc1210e. Its base is aab3bf2dd72659b09713ccb3f0a8e4ad2560d852 (MEASURED: the merge-base; origin main c0788b1017a20ea5d2d0b9c0e5837ee233830696 is NOT an ancestor, it is aab3bf2 plus the PR #31 merge, three workflow lines only). Chain: d05ec2212f8427c17bd9f9a202c46c72d5fee7fe (the mount, the comment, the new cell file), 7759591e77e3497b5edde867502c0f516b607582 (cell file only: A5 widened to 70 attempts), 202770e (counts 3930/226). The READY mail's "202770e472" does not resolve: pin by the full sha. The one code change in the server entry point: the login route POST /api/auth/login gains authLimiter (rateLimit named 'auth', 15-minute window, max 20 unless NODE_ENV is exactly 'development', then 50). Scope is C-146: POST /api/auth/login ONLY; enforce stays unthrottled as a named residual; the Entra callback is not throttled.
+  - POSITIVE CONTROL FIRST: reproduce gate 6's F-1 on the base in production mode, 70 failed logins from one address: 70 x 401, no 429. Then the head: 1-20 answer 401, 21-70 answer 429 with the limiter's message. Same in development mode (base 70 x 401; head 50 then 429). A head result without its base control in the same window is not reportable.
+  - Re-derive the red-proof yourself: R0 6/6 (CTRL, A1, A5, A2, A3, A4); M-645 (mount removed) must redden EXACTLY A1 and A5, CTRL A2 A3 A4 green. Add your own mutants (over-broad mount on /api/auth/, caps swapped, skipSuccessfulRequests, a constant key, auth sharing general's counter, a GET-only mount). Name every behaviour guarded by no cell, and every one guarded only by source text (C-122: source text does not cover behaviour).
+  - BYPASS SHAPES: X-Forwarded-For forgery given trust proxy 1 (a varying left entry with a fixed rightmost must still 429 at the 21st; a single varying entry is the no-proxy exposure, so READ and state the proxy hop count of every shipped topology); IPv6 addresses and the IPv4-mapped form (express-rate-limit 7.5.1 keys the full address); case, trailing slash, query, double slash, encoded, HEAD/GET/PUT/OPTIONS and method-override variants of the route; 100 parallel requests racing the counter (exactly 20 may reach the handler); body shapes. A shape that reaches the password check uncounted is a Major bypass.
+  - C-146's NOT-THROTTLED routes, measured for an address already at 429: status, check, enforce, entra-config, verify-group, microsoft callback, microsoft login, logout. None may answer the auth 429 and none may SPEND the auth budget (19 logins, then those routes, then the 20th login 401 and the 21st 429).
+  - The 'auth' limiter keeps its OWN count and shares no store with any other limiter (RD-607): memory mode by the 19/20/21 drive; Redis mode on a real redis:7.4-alpine from the LOCAL image store, through the docker lock, bound to 127.0.0.1, stopped in a finally, never pulled or pushed (if absent: NOT RUN, blocker named). The auth key counts login requests only, its PTTL is its own 15-minute window, no command outside gate 6's measured set. Two servers on one Redis share one budget. C-145 rules the Redis-down behaviours as known residuals, not RD-645 defects.
+  - THE NAT TRADE-OFF, AS MEASURED: 20 password-login attempts per 15 minutes per client IP address in production (50 in development), successful sign-ins included; the 21st, even with the right password, is refused. State it in the brief's section 3 Q7 words.
+  - C-68 re-run (rd645, the builder's ten related suites by name, every suite that posts to the login route, the limiter suites); full verify, predicted 3930/226.
+
+ACROSS: the drafter could not run git merge-tree --write-tree; quote it for 202770e onto c0788b1 from your OWN object directory (GIT_OBJECT_DIRECTORY=<your own mktemp -d> GIT_ALTERNATE_OBJECT_DIRECTORIES=<repo>/.git/objects) and prove the merge result differs from 202770e only in the three workflow files; re-run rd645, rd607 and the five suites that read .github on the archived merge result. C-142: RD-645 has no CI run at its branch head (no PR; Build runs only on pull_request and push to main), so report CI NOT RUN; the C-142 CI half is measured at merge. gh, if used at all, is read-only.
+
+Build your own trees INSIDE YOUR OWN PROJECT from the object store (git archive <sha> into a fresh mktemp dir under projects/nexusai/qa-trees/gate7.*). Each tree is EXCLUSIVE to this gate and to one purpose: run nothing else in it, and a fresh tree per arm. Another QA seat is live in your project; touch nothing of theirs. Never worktree, checkout, fetch, pull, stash, clean, gc or commit in the NexusAI repo, and never work in its 2_Project_Files checkout (C-28). You are findings-only: no commits, no branch moves, no tickets, no PRs, no writes inside NexusAI; the gate fixes nothing and merges nothing. No az. Never rm: quarantine.
+
+A RED ARM COUNTS ONLY IF THE MUTANT STILL PARSES: run node --check on every mutated file before its arm and quote the exit code. A red from a mutant that does not parse or load is a VOID arm.
+
+FLOOR DISCIPLINE — follow section 5 of the brief exactly. QUEUE, NEVER TAKE OVER: the jest lock is shared (FIFO); never kill, signal or move another seat's process, lock or ticket.
+  - Every jest run goes through session-tools/nexusai-lock.sh with a tag starting qa-gate7- (C-141 and its addendum: your tickets are gate-class and builders yield to them; C-110: no other queue jumping), the lock held once per multi-run measurement, as a tracked child of your seat. Live-server probes run inside your own hold; the Redis container inside the docker lock.
+  - Count foreign servers the RD-606 way, anchored on YOUR OWN claude pid: basename(argv[0]) == node AND the server entry point anywhere in argv, read from the kernel; ours means the ancestor chain CONTAINS your claude pid. Negative controls: the three live seats named in the brief (NexusAI-G pane %36, NexusAI-I pane %44, Tuesday pane %0) must classify foreign in the same run. Never by EADDRINUSE, a whole-command-line grep, or raw comm.
+  - A zero is reportable only beside a control that fired in the same window; "no 429 on route X" only beside the login route's own 429 for that address in the same window.
+  - DEADLINE AND HEARTBEAT (gate 4 stalled about 70 minutes at 0% CPU holding the lock with 10 seats queued): every real-server and container probe has a per-step DEADLINE and a client timeout on every request, kills its server (and stops its container) in a finally, and logs a HEARTBEAT line at least every 2 minutes. A step with no heartbeat for 5 minutes is aborted and reported, never waited on. Never wait out the 15-minute window.
+  - Reap every server you start.
+
+DRIVABLE SURFACE IS A LOCAL RUN, NOT THE DEMO (RD-76). No request of any kind to a live or demo site.
+
+QUESTIONS: your sender QA/Datasec-NexusAI has no inbox routing line, so you cannot count on an answer. If you must ask, mail tuesday-agent@agentmail.to with subject "[QA/Datasec-NexusAI -> Tuesday] QUESTION: <topic>", then PROCEED ON THE SAFEST READING without waiting, and record both in the report.
+
+Write your report to: /Volumes/KK_T9_External_HDD/!CODING/Testing Agent MAIN/projects/nexusai/reports/2026-09-22-gate7-rd645/report.md
+
+GIVE ONE VERDICT: RD-645 GO/NO-GO at 202770e, positive control first. Then what it means for the queue (forward-merged onto c0788b1 and verified green under C-68, C-89 and C-142, Tuesday's GO under C-127). A GO is a statement about the gated SHA only.
+
+MAIL YOUR VERDICT to tuesday-agent@agentmail.to with the subject exactly:
+[QA/Datasec-NexusAI -> Tuesday] GATE VERDICT — gate 7: RD-645 @ 202770e
+
+The AgentMail key is AGENTMAIL_API_KEY in /Volumes/KK_T9_External_HDD/TUESDAY/4_Credentials/.env. It is an absolute path because the QA project has no 4_Credentials directory of its own. Never put the key or any secret in a mail or the report.
+
+Report the head, and main's, as three timestamped readings (start / mid / end) with the branch name beside each.
+
+Rule 2 stands: what you did NOT test is first-class output — a NOT TESTED section, and every action recommendation labelled MEASURED AT RUNTIME, PROBED or READ ONLY.
