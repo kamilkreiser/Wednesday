@@ -7,7 +7,7 @@ status: live
 
 # Boot digest BY TIER — W whole, M rules-only, every project case a handle
 
-Generated 2026-09-22 07:44 from 198 lesson files (924,637 B). M 36 · MIXED 5 · W 157. 5 project CASE sections inside MIXED files are reduced to one line each: the heading and the path to read it at. W blocks are exactly what the default digest carries; M blocks drop the section index and keep the rules; a P file is a single handle. The CASES behind every rule live only in the lesson files — open one the moment its rule fires.
+Generated 2026-09-22 10:34 from 199 lesson files (926,244 B). M 36 · MIXED 5 · W 158. 5 project CASE sections inside MIXED files are reduced to one line each: the heading and the path to read it at. W blocks are exactly what the default digest carries; M blocks drop the section index and keep the rules; a P file is a single handle. The CASES behind every rule live only in the lesson files — open one the moment its rule fires.
 
 ## The T9 SSD is the master — Wednesday must be fully portable
 `2026-07-31_fully-portable-drive.md` · principle · 2026-07-31 · status: superseded — the "T9 is the master" half by [[2026-08-25_one-drive-devmaster-is-master]] (2026-08-25); the portability principle itself still lives · tier: W
@@ -6514,4 +6514,16 @@ sections (open the file for these): The rule · Why it generalises past this flo
    the trap.
 4. **Never write "you (S74)" in a mail that lands in a shared inbox.** A second-person label
    addressed to one seat reads as an invitation to every seat that finds it.
+
+
+## Ornith is the Studio's — Tuesday never uses it; Datasec work runs on Claude agents
+`2026-09-22_ornith-is-studio-only-not-datasec.md` · preference · 2026-09-22 · status: live · tier: W
+
+**His words, verbatim:** *"Ornith is a studio agent.  not a Datasec workflow.  you have access to your agents and everything claude"*
+
+**How to apply:**
+1. Ornith, `night/queue.md`, `local-model/` and the night runner are Wednesday's. Tuesday neither reads nor acts on them for work.
+2. OWED (shared tooling, claim with Wednesday): make the Tuesday launcher's week-instruction line seat-aware, so it stops telling this seat to keep Ornith running.
+
+**Family:** [[2026-09-16_local-model-is-long-term-and-claude-takes-what-it-cannot-do]] (Wednesday's rule, not this seat's) · [[2026-09-14_ornith-runs-at-night-in-the-downtime-a-standing-rule]].
 
