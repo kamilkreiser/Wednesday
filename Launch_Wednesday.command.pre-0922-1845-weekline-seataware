@@ -88,13 +88,9 @@ fi
 if [ "$AGENT" = "tuesday" ]; then
   PICKUP_FILE="$BRAIN_DIR/tasks/NEXT-PICKUP-TUESDAY.md"
   WEEK_INSTRUCTION_FILE="$BRAIN_DIR/tasks/WEEK-INSTRUCTION-TUESDAY.md"
-  # Kam 2026-09-22: Ornith is a Studio agent, not a Datasec workflow — the Tuesday seat
-  # works its week instruction with Claude agents only (no night/candidates.md, no Ornith).
-  WEEK_FIRST_ACT="your first act is to work its scope with the Datasec Claude agents (Ornith and night/candidates.md are the Studio seat's, never yours)"
 else
   PICKUP_FILE="$BRAIN_DIR/tasks/NEXT-PICKUP.md"
   WEEK_INSTRUCTION_FILE="$BRAIN_DIR/tasks/WEEK-INSTRUCTION.md"
-  WEEK_FIRST_ACT="your first act is to brief the next K candidates from night/candidates.md and keep Ornith running"
 fi
 
 # DevMASTER workspace (read-only context) — may or may not be mounted.
@@ -553,7 +549,8 @@ FIRST ACTIONS (token cost is accepted — do the full reads, don't skim):
    ${BRAIN_DIR}/tasks/WEEK-INSTRUCTION.md — **your seat's copy is
    ${WEEK_INSTRUCTION_FILE}**: if its status is live and valid_until is
    today or later, Kam is AWAY and its words are the week's standing instruction —
-   ${WEEK_FIRST_ACT}; if it is lapsed or not live, do not act on it — card Kam
+   your first act is to brief the next K candidates from night/candidates.md and
+   keep Ornith running; if it is lapsed or not live, do not act on it — card Kam
    (2026-09-16 unattended-week design, piece a).
 5. Read yesterday's and today's notes in THIS SEAT'S OWN note directory. Resolve it,
    never hardcode it: `bash 2_Project_Files/tools/note_entry.sh --where` prints today's
