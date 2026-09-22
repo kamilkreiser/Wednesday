@@ -13008,5 +13008,51 @@
    "CARD secuura-originate-unauthenticated-cross-tenant-billing",
    "CARD secuura-ks1084-gateway-originate-no-tenant-header-p0"
   ]
+ },
+ {
+  "id": "vision-portal-reminder-push-public-ntfy-topic",
+  "client_project": "Datasec/Vision_Sales_Portal",
+  "title": "Portal reminder notifications put customer names on a public ntfy topic: change the topic?",
+  "bluf": "I need you to do one thing if you pick (a) or (c): in the portal's live App Service settings, change NTFY_TOPIC from the documented name to a long random one (or an access-protected ntfy server), then re-subscribe your phone to the new name. Why: the portal's reminder notifications (quote expiring, PoC starting, follow-up gone quiet) put the customer's name and the quote number in the push, and they go to the ntfy topic the portal's docs name as datasec-kam-feedback. ntfy.sh topics can be read by anyone who knows the name unless they are reserved with a password. I have not checked whether yours is reserved, or what the live setting holds, because that means reading production. I did check the code that builds the messages. Separately, the Vision agent is building a code fix on a branch: pushes will say 'Reminder due' with no customer detail and point to the portal. That goes through the gate and waits for you to publish. My recommendation is (c), both.",
+  "default_action": "If you say nothing: the redaction fix is built and gated on a branch, and nothing changes on the live portal or its settings until you pick.",
+  "options": [
+   {
+    "key": "c",
+    "label": "Both: new topic now + redacted pushes",
+    "detail": "You change NTFY_TOPIC and re-subscribe your phone. The redaction fix is gated and then published on your word."
+   },
+   {
+    "key": "a",
+    "label": "New topic only",
+    "detail": "You change NTFY_TOPIC. The pushes keep full detail, but on a name nobody knows."
+   },
+   {
+    "key": "b",
+    "label": "Redacted pushes only",
+    "detail": "No setting change. The code fix is gated and then published on your word. Until it is live, the current topic keeps receiving customer names."
+   },
+   {
+    "key": "d",
+    "label": "Leave it",
+    "detail": "Accept it as built. The branch is kept unmerged."
+   }
+  ],
+  "recommended": "c",
+  "ts": "2026-09-22T19:26:15.134133+10:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "2026-09-09 17:03",
+   "2026-09-10 09:47",
+   "2026-09-10 09:47",
+   "2026-09-10 09:47",
+   "CARD vision-v230-publish",
+   "CARD vision-v230-typed-word",
+   "CARD secuura-806-force-push-2026-09-04",
+   "CARD secuura-force-push-own-branch-standing",
+   "CARD secuura-934-blocks-every-push-needs-one-approval",
+   "CARD secuura-ks1102-public-status-what-may-show"
+  ]
  }
 ]
