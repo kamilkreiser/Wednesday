@@ -12910,5 +12910,43 @@
   ],
   "delivered_artefact": "Launch_Claude.command edited by Seat C 20th 18:14 (backup .pre-0922-1814-nofetch beside; both prompt variants asserted); verified by Wednesday's own read; Kam told",
   "delivered_ts": "2026-09-22T18:17:02.255439+10:00"
+ },
+ {
+  "id": "vision-portal-feedback-report-unauthenticated",
+  "client_project": "Datasec/Vision_Sales_Portal",
+  "title": "The portal's feedback report is readable by anyone on the internet: close it on the live site?",
+  "bluf": "I need your word on one thing: closing a live exposure on the Vision portal. Its feedback report pages (/api/feedback/report and /summary) need no sign-in. They return every open feedback item, including admin notes, triage notes and the names and usernames of the people who wrote them. I verified it in the code on main. The Vision agent proved it on a local copy. Nobody touched the live site. It was left open on purpose months ago so an automated poller in the Feedback_System project could read it without logging in. The fix is about 10 lines: require a sign-in OR the secret the portal already uses for its other coordinator routes. The Vision agent is building it now on a branch, and nothing is deployed. The catch: that poller stops working until Feedback_System sends the secret, and that is a second project. Recommendation (a): fix both, gate both, then I ask you to publish the portal fix.",
+  "default_action": "If you say nothing: the Vision agent finishes the portal fix on a branch and it goes through the gate, which is reversible and not deployed. Nothing is published to the live portal, and Feedback_System is not touched, until you pick a or b.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Fix both, then publish",
+    "detail": "The Vision agent builds the portal fix (under way). Tuesday launches a short Feedback_System seat so its poller sends the existing secret. Both go through the QA gate. Then you publish the portal fix to the live site (a production change, yours)."
+   },
+   {
+    "key": "b",
+    "label": "Close it now, accept the poller break",
+    "detail": "Portal fix only, gated, then published. The Feedback_System poller stops reading feedback until someone updates it later."
+   },
+   {
+    "key": "c",
+    "label": "Leave it open",
+    "detail": "Accept the exposure as it has been since it was built. The portal branch is kept unmerged for later."
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-09-22T19:16:41.987755+10:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "2026-08-24 10:11",
+   "2026-08-26 17:11",
+   "CARD attio-companies-report",
+   "CARD nexusai-feedback-loop-mechanism",
+   "CARD vision-v230-publish",
+   "CARD vision-v230-typed-word",
+   "CARD secuura-originate-unauthenticated-cross-tenant-billing"
+  ]
  }
 ]
