@@ -8,6 +8,11 @@ supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s
 
 ## 🔴 DELTA 67 — 2026-09-23 00:1x ROTATION HANDOVER (s80, ctx ~78-80%, safe boundary). **READ THIS FIRST, THEN 66. DELTA 51's OWED ZIP STANDS. QUIET HOURS until 06:00: board text only, no voice.**
 
+### ⚡ UPDATE 00:19 (after DELTA 67 was written)
+- **GATE 7 = NO-GO on RD-645** (report `Testing Agent MAIN/projects/nexusai/reports/2026-09-22-gate7-rd645/report.md`; pane %47 CLOSED; scored 0.85). F-1: the rd645 test is 0/6 without an ambient SESSION_SECRET (CI has none). The product holds (21st → 429). **ROUND 2 of 2 mailed to S80I:** a test-only secret, cells for G-1..G-4 (C-146 routes / successes count / NODE_ENV unset = 20 / 15-min window), Redis if docker allows, a full verify with no secret; F-2 (the VM compose has no proxy hop) → one Jira ticket, key owed. **On its READY: gate 7 round 2** (re-run the cells, Q1 live probe, the bypass table on loopback; route answers via tuesday-agent@). A second NO-GO ships the closed parts and tickets the rest (C-62). Kam's image card (rec b) still waits on this.
+- **NexusAI-G WRAPPED 14:08Z** (scored 0.95; HANDOVER-S78G.md; pane %36 CLOSED). After Kam's image push, brief a NEW lane-C seat from HANDOVER-S78G for the digest, non-draft build and package gate.
+- Vision: ITEM 12 = A-9 logo inset commissioned (the last (a) item) → gate 5.
+
 ### NEXUSAI — the zip is one image push away
 - **main = c0788b1** (C-142 GREEN). **Package line `mkt-release-gate-s78g` @ df70a96 = READY FOR DIGEST** (4070/4070, arm-ttk 49/49 local + Actions; the draft build fails ONLY on the RD-460 digest placeholder at `azure-marketplace/combined/mainTemplate.json:106`). Handover doc `resubmission-handover-s78g` @ dfbd55b, **§5.1 = the 4 image-build commands** (a clean checkout of main, az account set 0c57ab37, `az acr build --registry nexusaireleaseacr --image nexusai:2.2.0 …`, digest read-back). G has STOPPED (the image push is Kam's).
 - **Card `nexusai-220-image-build-timing` OPEN with Kam** (rec b: wait for RD-645 → Tuesday posts the exact main commit + §5.1 commands; default: wait, nothing built).
