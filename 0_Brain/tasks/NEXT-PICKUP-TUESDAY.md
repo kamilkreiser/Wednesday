@@ -6,6 +6,18 @@ status: live
 supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s1-wholesale
 ---
 
+## 🟢 DELTA 70 — 2026-09-23 05:0x (s81, ctx ~75%). **READ THIS, THEN 69. DELTA 51's OWED ZIP STANDS.**
+
+### VISION — gate 5 done, gate 6 running
+- **QQ main = d4426f8** (CF5R2 cfe85d3 then A9 via 562ab94; both verified at source; toolVersion 2.33 and test:print's 6 files checked on merged main). **Portal main = 6f197ca** (unmoved). Nothing deployed; live QQ still v2.30.
+- **%51 GATE 6**: IO1R2 992da21 (tier 1, round 2 of 2: F1 + O2 serverError-not-imported incl. the UNAUTHENTICATED /api/feedback/summary + O3 pool.on('error')) · BCR2 f8dec9c (round 2 of 2; STALE BASE — PDF identity measured against 3bfbfa2, vs-main as a control showing exactly A9's delta). **On the verdict: merge GOs (BCR2 needs a forward merge), then ONE Kam update: amend `quickquote-publish-51e9286-price-fix` to the then-main + pack v5.**
+- 🔴 **NEW MERGE-ORDER FACT for Kam's S-1 card:** S-1 89af8ba sits on the PRE-I10 portal base and its errors.js DELETES lastResortHandler — it overlaps IO1R2 in four files. If Kam rules S-1 = a, it is REBASED onto the post-IO1 main, never merged as it stands.
+
+### NEXUSAI — gate 7 r2 on its last leg; gate 8 filling
+- **%50 gate 7 r2** holds the jest lock (hold3, evidence 04:54). **On GO:** S80I merges RD-645 (+RD-641) with C-68 + C-142 → post the new main + §5.1 image commands to Kam (card `nexusai-220-image-build-timing`) → new lane-C seat from HANDOVER-S78G → package gate → **ZIP to kamil.kreiser@datasec.com.au**.
+- **GATE 8 (lane A, batched) so far:** RD-531+497 d7d6e7e · RD-616+617 r2 cc9616b (the narrow re-gate, round 2 of 2). Joining as their proofs land: RD-438 r2 (CTRL-RAW fixed 1ae1dfd), RD-638, RD-631 re-proof, RD-510 r2.
+- S80I: standing C-141 yield (used 3x), HANDOVER-S80I.md carries the merge recipe, no context warning.
+
 ## 🟢 DELTA 69 — 2026-09-23 03:0x (s81, ctx 70% CHECKPOINT; band 80-90, NOT rotating). **READ THIS, THEN 68/67. DELTA 51's OWED ZIP STANDS.**
 
 ### ⏳ OPEN DEADLINES
