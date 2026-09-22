@@ -7,7 +7,7 @@ status: live
 
 # Boot digest BY TIER — W whole, M rules-only, every project case a handle
 
-Generated 2026-09-23 06:12 from 199 lesson files (926,244 B). M 36 · MIXED 5 · W 158. 5 project CASE sections inside MIXED files are reduced to one line each: the heading and the path to read it at. W blocks are exactly what the default digest carries; M blocks drop the section index and keep the rules; a P file is a single handle. The CASES behind every rule live only in the lesson files — open one the moment its rule fires.
+Generated 2026-09-23 06:12 from 199 lesson files (924,927 B). M 36 · MIXED 5 · W 158. 5 project CASE sections inside MIXED files are reduced to one line each: the heading and the path to read it at. W blocks are exactly what the default digest carries; M blocks drop the section index and keep the rules; a P file is a single handle. The CASES behind every rule live only in the lesson files — open one the moment its rule fires.
 
 ## The T9 SSD is the master — Wednesday must be fully portable
 `2026-07-31_fully-portable-drive.md` · principle · 2026-07-31 · status: superseded — the "T9 is the master" half by [[2026-08-25_one-drive-devmaster-is-master]] (2026-08-25); the portability principle itself still lives · tier: W
@@ -2924,32 +2924,19 @@ The catalogue's OUTPUT has a shape, and the shape is set by the human who review
 **Also ruled in the same message (a grant, go-slow rule 5): a SECOND Blockchain agent may run in parallel this weekend** — "some will create a problem, but others might be suitable" — Wednesday partitions the queue by file family and each seat works in its own git worktree so no two seats share a checkout; conflicts are the partition's failure, reported, not merged through.
 
 
-## Rotate inside the 70–80% band, at a safe boundary — the only unconditional respawn is a seat that is already dead
-`2026-09-02_rotate-in-the-70-80-band-conditionally.md` · correction · 2026-09-02 · status: live · tier: W · supersedes: rule 2 of 2026-09-02_the-statusline-is-the-context-instrument ('70% = rotate now') — amended the same day, by Kam
+## Rotate inside the 80–90% band, at a safe boundary — the only unconditional respawn is a seat that is already dead
+`2026-09-02_rotate-in-the-70-80-band-conditionally.md` · correction · 2026-09-02 · status: live — the band is 80–90 (Kam 2026-09-07 10:49); the superseded 70–80 and 80–85 bands are kept verbatim in [[_cases_2026-09-02_rotation-band-history]] · tier: W · supersedes: rule 2 of 2026-09-02_the-statusline-is-the-context-instrument ('70% = rotate now') — amended the same day, by Kam
 
-**The operative case, so the headline matches it:** a `ctx at NN%` wake lands on my pane.
-- **50% = a CHECKPOINT only** (rhythm §2): declare the default, start nothing heavy, never rotate.
-- **70% = rotate at the NEXT SAFE BOUNDARY** — the 08-21 grant's conditions unchanged: no agent QUESTION unanswered or imminent, no dangling thread with Kam, everything durable and pushed (HEAD == origin), agents untouched.
-- **80% = the ceiling** — the first boundary after it is the rotation; nothing new is started past it.
-- **Unconditional = the DEAD case only** — the literal "Context limit reached" respawned from outside by `wednesday_rotate.sh --dead`. That is "the flaw" Kam named: a seat that could not act. Its fix stays; nothing else is unconditional.
+> **The filename still says `70-80` because 21 files link to it and a broken handle is a destroyed
+> memory** (`weekly-consolidation.md` step 4). **The band in the filename is DEAD. The rule is below.**
 
-sections (open the file for these): SUPERSEDED IN ITS NUMBERS 2026-09-05 20:28 + 20:33 — Kam: "move your restart threshold to 80%" then "should not be a hard number, so still use the band. Just use a band of 80 to 85%" · SUPERSEDED AGAIN 2026-09-07 10:49 — Kam: "the Wednesday window is between 80 and 90% context. Use this as your rotation window."
+sections (open the file for these): The two rules this file earned, which outlive any particular number · Superseded bands — handles kept, text moved
 
-**How to apply (built the same hour):** the watcher's 70% leg says "rotate at the next safe boundary (70–80% band)"; a new 80% leg says "ceiling — rotate at the first boundary"; `wednesday_rotate.sh --self` stays the mechanism (still refuses on a dirty tree or HEAD != origin); the 50% checkpoint ritual stands; the DEAD leg and runner respawn are untouched.
-
-## SUPERSEDED IN ITS NUMBERS 2026-09-05 20:28 + 20:33 — Kam: "move your restart threshold to 80%" then "should not be a hard number, so still use the band. Just use a band of 80 to 85%"
-The rotation BAND is now **80–85%**: rotate at the first SAFE BOUNDARY inside it, **85% the ceiling** (a hard number was refused at 20:33 — "still use the band") (the 08-21 grant's safety conditions unchanged — no open agent QUESTION, no dangling thread with Kam, everything durable and pushed, agents untouched). 70% is a checkpoint (refresh the handover block; start nothing heavy), not a band entry. The only unconditional respawn remains the DEAD case (`wednesday_rotate.sh --dead`). Context for the change: the boot digest (WED-139) and the coming context split (WED-145, Phase 0 running from 2026-09-05 night) make a seat's useful life longer; Kam moved the number to match. The watcher's 70/80 legs re-worded the same night (backup `wake_watch.sh.pre-0905-80` beside it).
-
-## SUPERSEDED AGAIN 2026-09-07 10:49 — Kam: "the Wednesday window is between 80 and 90% context. Use this as your rotation window."
-**The band is now 80–90%**, ceiling 90. It supersedes the 80–85 band of 2026-09-05, which superseded
-the 70–80 band of 2026-09-02. **70% remains a CHECKPOINT ONLY** — refresh the handover block, start
-nothing heavy, do not rotate. The 08-21 safety conditions are untouched: no open agent QUESTION, no
-dangling thread with Kam, everything durable and pushed, agents untouched. The only unconditional
-respawn is still the DEAD case (`wednesday_rotate.sh --dead`).
-
-**The rule this earns, and it generalises past rotation:** when a number Kam rules lives in BOTH a
-lesson and a mechanism, **the mechanism is the copy that must be updated first**, because it is the
-one that will be obeyed. A lesson corrects the next reader; a boot prompt corrects every seat.
+## Superseded bands — handles kept, text moved
+Moved verbatim to [[_cases_2026-09-02_rotation-band-history]] on 2026-09-23 under Kam's ruling (b)
+on card `tuesday-boot-digest-outgrew-the-window`. Nothing was deleted.
+- **70–80% band, 2026-09-02** (this file's original headline and operative case) — superseded 2026-09-05.
+- **80–85% band, 2026-09-05 20:28 + 20:33** — superseded 2026-09-07.
 
 
 ## Project style guides are adhered to and NEVER mixed — a palette is client identity, and contrast is not conformance
