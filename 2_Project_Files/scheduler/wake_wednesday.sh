@@ -38,7 +38,25 @@ fi
 # AGENT-AWARE (2026-09-09, Kam's `parameterise` ruling). The plist installed by
 # install_scheduler.command carries WED_AGENT in EnvironmentVariables, because launchd
 # does NOT inherit it. Default stays `wednesday` so an old plist behaves exactly as before.
-WAKE_AGENT="${WED_AGENT:-wednesday}"
+# THE DEFAULT IS THE TREE, NOT A LITERAL (2026-09-23, Tuesday s82). It read
+# `${WED_AGENT:-wednesday}` until today. The Tuesday plist carries NO WED_AGENT
+# (verified: `plutil -p com.tuesday.wake.plist` has no EnvironmentVariables at
+# all), so this defaulted to "wednesday" ON THE TUESDAY TREE and the 06:00 job
+# ran Launch_Wednesday.command out of /…/TUESDAY. seat_resolve.sh derives the
+# seat from the tree the file lives in, so the STUDIO IS UNCHANGED (a WEDNESDAY
+# tree resolves to wednesday) while the mini stops guessing the wrong seat.
+SEAT_RESOLVE="$PROJECT_DIR/2_Project_Files/fleet/cockpit/seat_resolve.sh"
+# shellcheck disable=SC1090
+. "$SEAT_RESOLVE" 2>/dev/null || true
+if ! type seat_resolve >/dev/null 2>&1; then
+  log "ERROR: seat_resolve.sh not sourceable at $SEAT_RESOLVE — REFUSING rather than guessing a seat (day NOT stamped)"; exit 1
+fi
+seat_resolve "$PROJECT_DIR"
+case "${SEAT:-}" in
+  tuesday|wednesday) : ;;
+  *) log "ERROR: seat_resolve did not return tuesday|wednesday (got '${SEAT:-}') — REFUSING (day NOT stamped)"; exit 1 ;;
+esac
+WAKE_AGENT="$SEAT"
 case "$WAKE_AGENT" in
   wednesday|tuesday) ;;
   *) log "ERROR: WED_AGENT='$WAKE_AGENT' is not a known agent — refusing to guess a launcher"; exit 1 ;;
@@ -141,17 +159,7 @@ fi
 # seat_resolve.sh (2026-09-13) exists precisely for this and its header names its
 # callers: wednesday_rotate.sh, wake_watch.sh, arm_wake_watch.sh. THIS SCRIPT WAS
 # NOT ON THAT LIST — there were four copies of the lookup, not three.
-SEAT_RESOLVE="$PROJECT_DIR/2_Project_Files/fleet/cockpit/seat_resolve.sh"
-# shellcheck disable=SC1090
-. "$SEAT_RESOLVE" 2>/dev/null || true
-if ! type seat_resolve >/dev/null 2>&1; then
-  log "ERROR: seat_resolve.sh not sourceable at $SEAT_RESOLVE — REFUSING rather than guessing a pane name (day NOT stamped)"; exit 1
-fi
-seat_resolve "$PROJECT_DIR"
-case "$SEAT" in
-  tuesday|wednesday) : ;;
-  *) log "ERROR: seat_resolve did not return tuesday|wednesday (got '$SEAT') — REFUSING (day NOT stamped)"; exit 1 ;;
-esac
+# SEAT / TREE_SEAT were resolved once, above, where the launcher is chosen.
 if PANE_ID_R=$(coord_pane_id "=$FLEET" "$SEAT" "$TREE_SEAT" 2>/dev/null); then
   WROW=$("$TMUX_BIN" list-panes -s -t "=$FLEET" -F '#{pane_id}|#{pane_id}|#{pane_dead}|#{pane_tty}' 2>/dev/null | awk -F'|' -v id="$PANE_ID_R" '$1==id' | head -1)
 else

@@ -79,4 +79,30 @@ if tmux has-session -t '=fleet' 2>/dev/null; then
   else fail "A7 live: seat_resolve.sh not sourceable" "$P"; fi
 else echo "SKIP  A7 live integration (no 'fleet' tmux session)"; fi
 
+# ── The SECOND defect of 2026-09-23: the LAUNCHER default was the literal
+#    "wednesday", and the Tuesday plist carries no WED_AGENT, so the 06:00 job
+#    ran Launch_Wednesday.command out of the TUESDAY tree. Now tree-derived.
+NEEDLE2='${WED_AGENT:-wednesday}'
+if /usr/bin/grep -v '^[[:space:]]*#' "$W" | /usr/bin/grep -qF "$NEEDLE2"; then
+  fail "A8 hardcoded launcher default is back" "matched $NEEDLE2"
+else pass "A8 launcher default is not the literal 'wednesday'"; fi
+if [ -f "$BK" ] && /usr/bin/grep -v '^[[:space:]]*#' "$BK" | /usr/bin/grep -qF "$NEEDLE2"; then
+  pass "A8b positive control: the identical grep DOES match the pre-fix backup"
+else fail "A8b positive control" "grep found nothing in the backup — A8's zero is not trustworthy"; fi
+
+# A9 — with WED_AGENT UNSET (which is how launchd actually runs it: the plist has
+#      no EnvironmentVariables at all) the Tuesday tree must resolve to tuesday.
+R=$(env -u WED_AGENT bash -c '. "'"$P"'/2_Project_Files/fleet/cockpit/seat_resolve.sh"; seat_resolve "'"$P"'"; echo "$SEAT"' 2>/dev/null)
+if [ "$R" = "tuesday" ] && [ -f "$P/Launch_Tuesday.command" ]; then
+  pass "A9 WED_AGENT unset on the TUESDAY tree -> seat 'tuesday', Launch_Tuesday.command exists"
+else fail "A9 unset-WED_AGENT resolution" "got '$R'"; fi
+
+# A10 — CONTROL: a non-TUESDAY tree must still resolve to wednesday, so BOTH fixes
+#       leave the Studio byte-identical. Uses a scratch dir; nothing is deleted.
+WTREE=/private/tmp/wed_arms_tree/WEDNESDAY
+mkdir -p "$WTREE"
+R=$(env -u WED_AGENT bash -c '. "'"$P"'/2_Project_Files/fleet/cockpit/seat_resolve.sh"; seat_resolve "'"$WTREE"'"; echo "$SEAT"' 2>/dev/null)
+[ "$R" = "wednesday" ] && pass "A10 control: a non-TUESDAY tree still resolves to 'wednesday' (Studio unchanged)" \
+                       || fail "A10 wednesday tree control" "got '$R'"
+
 exit $F
