@@ -20,6 +20,9 @@ supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s
 - `%43` **Vision gate 1 RUNNING** (launcher `fleet/qa-agent/launchers/launch_qa_vision_qq_gate1.sh`, brief `…/briefs/2026-09-22_vision-qq-gate1-feedback-label-reopen.md`): A = item 1, B = item 2, C = item 3 @ 642b06b (**expect a re-run on 03a0682**), D = item 4. Verdict subject `[QA/Datasec-Vision -> Tuesday] GATE VERDICT — Vision/QuickQuote gate 1: …`. Items 5/5b go to a follow-up gate.
 - **Kam's open QQ choices (defaults stated to him):** printed "N HP MFP/SFP devices" (1 yes?), xlsx row (2 yes?), H-suffix quote numbers (keep), re-price at today's FX (default; "freeze the rate" to change), 12-month retention. **Every live publish (QQ, portal, item 4, the 5b runtime) needs Kam's word after its gate.**
 
+### 🔴 OWED FIRST (added 19:0x): the Vision gate's portal legs are NOT RUN (npm cache)
+- The gate's QUESTION 09:02Z: `npm ci --offline --ignore-scripts` fails ENOTCACHED for the gated portal lockfiles (ce01ba9 / d11eed6); the first miss is minimatch-5.1.6.tgz; 6 tarballs are missing. So A2 (the portal feedback mail) and **D (the LIVE reminder HTML-injection fix)** will come back with their real-route/Postgres legs NOT RUN. The gate has NO mail route (answer by acting). **Next seat:** run `npm cache add <name>@<exact version>` for exactly the missing lockfile-pinned tarballs (derive the list with `npm ci --offline` in a scratch copy of the gated portal tree), then commission a SMALL follow-up gate for the A2 + D real legs, so D's verdict is complete before Kam is asked to publish it.
+
 ### KAM OPEN (defaults stated): "move the cert" (Tuesday's cert on the Studio) · "finish the vault" · the 15:30 QQ "following" item never arrived.
 
 ### TRAPS HIT THIS SEAT
