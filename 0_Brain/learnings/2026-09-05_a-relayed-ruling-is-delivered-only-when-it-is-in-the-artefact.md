@@ -120,3 +120,30 @@ heading as UNKNOWN rather than asserted as binding.
 3. **This is the 2026-09-08 both-directions asymmetry pointed at a BRIEF rather than a card**, and it landed on the loud side: an item read as UNDONE gets corrected by the next reader at the cost of a turn. The quiet side — an unknown read as STILL BINDING — is the one that becomes a hold nobody tests.
 
 **Family:** [[2026-08-14_i-read-representations-they-read-sources]] (rule 3: never state a mechanism I have not read — here, a state I have not read) · [[2026-09-07_git-topology-is-a-measurement-not-a-model]] (Wednesday holds no client identity, so every such claim is relayed and says so INLINE) · [[2026-08-16_classification-is-the-field-that-grants-authority]] ("not done" is a disposition needing provenance).
+
+## EXTENSION 2026-09-23 06:0x — A **RELEASE** MAILED TO A NAMED SEAT DIES AT THAT SEAT'S ROTATION. Caught at source, 0 harm, but only because main was measured.
+
+**What happened.** Gate 7 round 2 returned **GO/GO** at 05:55. The seat mailed the RELEASE —
+forward-merge RD-645 then RD-641, regenerate the counts once, verify at source — to
+`[Wednesday -> Datasec/NexusAI-I]`, verified at `datasec-nexusai@`, tapped. Correct in every
+respect. Then **S80I wrapped at the 05:30 shift change and a successor booted in the same pane**,
+whose boot turn ended *"Nothing needs your decision."* at 05:57. The next seat measured NexusAI main
+at origin: still **c0788b1**. The merge had not happened and nobody was going to do it.
+
+**The mail was not lost — it was sitting unread in the inbox the successor had already listed.**
+What failed is that **an old mail carries no claim on a new reader.** A successor reads its inbox
+for *new* traffic; a RELEASE sent 3 minutes before it booted looks like history. The pointer died
+with the seat that was pointed at, and the pointer is the part that makes a mail actionable.
+
+**The rule, which is this file's rule aimed one step further out:**
+1. **A GO/RELEASE/merge instruction is OWED WORK, so it belongs in the artefact a successor is
+   guaranteed to read — the project's HANDOVER doc and this seat's pickup — in the same action as
+   the mail, never in the mail alone.** The mail is the content; the handover is the claim.
+2. **Addressing a seat by its session letter (`NexusAI-I`) addresses something that expires.** The
+   routing name survives rotation; the seat behind it does not.
+3. **After sending a RELEASE, the sender's next checkpoint measures the THING, not the mail** —
+   `ls-remote` the branch it was supposed to move. "Mail verified at destination" was true here and
+   proved nothing. **Delivery is not execution** ([[2026-08-06_artifact-presence-is-not-execution]]).
+4. **A wrap at a shift change is exactly when this fires**, because the shift change is timed to
+   catch seats mid-queue. Any seat wrapping with an unexecuted GO in its inbox must name it in its
+   handover, and the coordinator that sent the GO owns re-arming it.
