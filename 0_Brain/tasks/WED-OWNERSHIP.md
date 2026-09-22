@@ -87,3 +87,4 @@ sees the claim rather than discovering it in a conflict.
 | 2026-09-21 19:45 | Kamils-Mac-mini | BRIEF_TEMPLATE.md foreign-count rule: define 'ours' as chain CONTAINS this seat's own pid; shared ancestors (tmux server, launchd) prove nothing; add negative control (RD-606, NexusAI-E finding) | OPEN | |
 | 2026-09-21 20:17 | Kamils-Mac-Studio | wake_watch.sh idle leg runs pane_prompt_check.sh and puts SUGGESTION/TYPED in the wake text (rung 10 x4 on 09-21; enforcement promoted at w=3) — Wednesday 20:1x seat, via a tooling subagent; .new + mv, never in-place | CLOSED |  2026-09-21 20:23 done |
 | 2026-09-22 08:58 | Kamils-Mac-Studio | live dashboard weekly usage (both seats) — Kam 2026-09-22 08:57 | CLOSED |  2026-09-22 09:28 --note |
+| 2026-09-22 15:27 | Kamils-Mac-Studio | live-site Download button + file drawer (Kam 2026-09-22 15:26) | OPEN | |
