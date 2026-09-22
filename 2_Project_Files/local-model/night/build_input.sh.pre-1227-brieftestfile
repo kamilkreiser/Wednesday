@@ -670,40 +670,6 @@ if brief_path and os.path.isfile(brief_path):
     print(f"  prompt source: WEDNESDAY BRIEF {brief_path} ({len(prompt_desc)} chars) — the ticket description is NOT the prompt")
 else:
     print("  prompt source: the ticket description (no night/briefs/<ticket>.md)")
-# ---------------------------------------------------------------- 7c. BRIEF-FILE-PIN: the brief's `## The test` `File:` line IS suggested_test_file (2026-09-22 12:28, feed11 drafter; the FEED 10 build defect)
-# FEED 10 (Wednesday measured it at 12:2x on the five FEED 10 inputs, 5/5 by the drafter's own re-read): `suggested` above is the
-# TICKET-TITLE slug (`ks<n>-<title words>.test.ts`), which is also how the OLD READYs' tests were named, while every FEED 10
-# brief's `## The test` section named a NEW path on its `File:` line. The model follows the FIELD, so every test landed at the
-# OLD name (bodies identical to the goldens); the key-set check (both deltas empty) cannot see a stale VALUE. Rule: when the
-# brief is the prompt and its `## The test` section carries a `File:` line, THAT path (normalised to the repo subdir) is the
-# suggested_test_file, printed beside the slug it replaces. REFUSED: a File: outside test_dir; one equal to the reference test
-# (A3 refuses the pair); one that disagrees with a test_file= pin (two names for one file); a NEW-file File: (no test_file=)
-# that already EXISTS at the tip (a `--- /dev/null` section on an existing path fails A2, and a modify without its content in
-# files[...] is invented context - KS-1172). A brief with no File: line keeps the slug and SAYS so.
-_brief_file = None
-if _brief_for_sites:
-    _mt = re.search(r"^##+\s*The test\b.*?$(.*?)(?=^##+\s|\Z)", _brief_for_sites, re.M | re.S)
-    _mf = re.search(r"^File:\s*`([^`\n]+)`", _mt.group(1), re.M) if _mt else None
-    if _mf:
-        _brief_file = _mf.group(1).strip()
-        if not _brief_file.startswith(subdir + "/"):
-            _brief_file = f"{subdir}/{_brief_file}"
-        if not _brief_file.startswith(f"{subdir}/{test_dir_rel}/"):
-            refuse(f"the brief's `## The test` File: {_brief_file} is not under test_dir {subdir}/{test_dir_rel}/ - the checker's A3 refuses a test outside it")
-        if _brief_file == ref_path:
-            refuse(f"the brief's `## The test` File: names the reference test {ref_path} - A3 refuses that pair; pin a different ref=")
-        if edit_test_path and _brief_file != edit_test_path:
-            refuse(f"the brief's `## The test` File: {_brief_file} disagrees with the test_file= pin {edit_test_path} - two names for one file; make them equal")
-        if not edit_test_path and show(_brief_file[len(subdir) + 1:]) is not None:
-            refuse(f"the brief's `## The test` File: {_brief_file} already EXISTS at the tip but no test_file= pin carries its content - a NEW-file section on it fails A2 and a modify would be invented context; pin test_file= or name a new path")
-        if _brief_file != suggested:
-            print(f"  suggested_test_file = the brief's `## The test` File: line {_brief_file} (REPLACES the title slug {suggested})")
-        else:
-            print(f"  suggested_test_file = the brief's `## The test` File: line {_brief_file} (== the title slug)")
-        suggested = _brief_file
-    else:
-        print(f"  suggested_test_file: the brief has no `File:` line under `## The test` - the title slug stands: {suggested}")
-
 inp = {
     "ticket": {"identifier": n["identifier"], "title": n["title"], "state": state,
                "priority": n["priorityLabel"], "description": prompt_desc},
