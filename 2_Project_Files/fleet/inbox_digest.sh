@@ -112,6 +112,24 @@ if mode == '--inbound':
     print(f'===== {inbox} — {len(new)} new ({n_in} inbound shown; own outbound copies absorbed) =====')
 else:
     print(f'===== {inbox} — {len(new)} new =====')
+
+# FRESHNESS LINE (2026-09-23) — '0 new' IS NOT EVIDENCE THAT NO MAIL ARRIVED.
+# Measured this morning: this digest reported '0 new' on tuesday-agent@ while a gate
+# READY, a CI receipt and a demo receipt sat in the box, ALREADY MARKED SEEN. The
+# seen-marker had advanced over mail that never reached a reader — the
+# 2026-08-04_never-blanket-markseen-mid-monitoring failure (a handled-marker may only
+# advance over what actually reached the processor). The root cause is NOT yet named,
+# so this does not pretend to fix it; it makes the failure impossible to MISS by
+# printing what is genuinely newest regardless of seen-state. A seat that reads '0 new'
+# beside a three-minute-old READY will go and look.
+if not new and msgs:
+    print(f'        WARNING 0 new, but the box is NOT empty - newest {min(3,len(msgs))} regardless of seen-state:')
+    for m in msgs[:3]:
+        subj_f = (m.get('subject') or '(no subject)')
+        if seat == 'tuesday' and inbox == 'coagent@agentmail.to' and not re.search(r'datasec', subj_f, re.I):
+            subj_f = '(other-client, withheld)'
+        ts_f = (m.get('timestamp') or '?')[:16]
+        print('        . ' + ts_f + ' | ' + subj_f[:78])
 if withheld:
     print(f'        ({withheld} other-client message(s) withheld on the shared bus: tag filter for the Tuesday seat; subject and preview not shown)')
 for m in show:
