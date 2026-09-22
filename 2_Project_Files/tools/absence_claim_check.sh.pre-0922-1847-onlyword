@@ -14,7 +14,7 @@
 # Usage: printf '%s' "$MSG" | absence_claim_check.sh      Arms: tests/absence_claim_check_arms.sh
 set -u
 TEXT="$(cat)"
-PAT='\b(nothing|never|no one|nobody|none of|not on|not waiting|isn'"'"'t waiting|wasn'"'"'t waiting|no reviews?|no record|does not exist|doesn'"'"'t exist|there (is|are|was|were) no|there'"'"'s no|only|nothing else|no other|the only)\b'
+PAT='\b(nothing|never|no one|nobody|none of|not on|not waiting|isn'"'"'t waiting|wasn'"'"'t waiting|no reviews?|no record|does not exist|doesn'"'"'t exist|there (is|are|was|were) no|there'"'"'s no)\b'
 HITS="$(printf '%s' "$TEXT" | /usr/bin/grep -oiE "$PAT" | tr 'A-Z' 'a-z' | sort -u | paste -sd, - 2>/dev/null)"
 if [ -n "$HITS" ]; then
   echo "ADVISORY absence-claim(s): [$HITS] — for each, NAME the measurement that covers the WHOLE space it asserts about, or restate it as what you actually measured (ledger w=4, 2026-09-18). Not blocking." >&2
