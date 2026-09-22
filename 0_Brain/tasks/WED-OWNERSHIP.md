@@ -91,3 +91,4 @@ sees the claim rather than discovering it in a conflict.
 | 2026-09-22 20:42 | Kamils-Mac-mini | inbox_digest.sh: add curl -m 30 (no-timeout hang swallowed a verdict behind a piped tail, Tuesday 2026-09-22 20:3x) | CLOSED |  2026-09-22 20:43 done: -m 30 on both fetches, backup .pre-0922-2038-curltimeout, syntax + live run OK |
 | 2026-09-23 05:34 | Kamils-Mac-mini | shift_change.sh wrap-mail address must be seat-aware (Datasec wraps were told to mail wednesday-agent@) | OPEN | |
 | 2026-09-23 06:20 | Kamils-Mac-mini | wake_wednesday.sh coordinator-pane lookup must be seat-aware (hardcoded 'wednesday' spawned a 2nd Tuesday seat at 06:00 while s81 was live) | OPEN | |
+| 2026-09-23 06:30 | Kamils-Mac-mini | cockpit.sh say: refuse a BARE tap that asserts the agent's own state (a false claim tap was nearly logged as a C-148 ghost instance) | OPEN | |
