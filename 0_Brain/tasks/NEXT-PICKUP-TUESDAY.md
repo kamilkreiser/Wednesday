@@ -6,6 +6,22 @@ status: live
 supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s1-wholesale
 ---
 
+## 🔴 DELTA 71 — 2026-09-23 06:2x ROTATION HANDOVER (s81, ctx 81%, safe boundary). **READ THIS FIRST, THEN 70/69. DELTA 51's OWED ZIP STANDS.**
+
+### ⏳ OPEN DEADLINE
+- **24 Sep (TODAY): Partner Center stops serving the previously published NexusAI packages.** On Kam's live board since 00:2x (201), unanswered. Default: nothing more; after today, close it by date and record the loss.
+
+### 🔴 FIRST WORK OF THE NEXT SEAT
+1. **Vision successor (%53) was launched 06:2x with its brief** (`send_brief` verified; subject "BRIEF: successor Vision seat — merge IO1R2 + BCR2, then fix IO1R2-F1"). **ANSWER ITS PLAN CONFIRMATION with a GO mail + pointer tap** — a new seat always waits for it (ledger 2026-09-20). Its order: merge IO1R2 992da21 → portal main 6f197ca; merge BCR2 f8dec9c → QQ main d4426f8 (FORWARD MERGE, base 3bfbfa2; the merged head must carry all SEVEN print-test files); then build IO1R2-F1 (setImmediate defer + 3 cells) → gate 7 (Vision's next).
+2. **NexusAI-I (%44) is MID-MERGE of RD-645 + RD-641 as ONE batch** (gate 7 r2 GO/GO; RELEASE sent 19:54Z quoting Kam's 09-21 18:18:12 grant). Built in `worktrees/merge-r2-s80i`, **deliberately unpushed** until its lock hold regenerates the counts; the verify must read **3937/227** (the gate's combined number) or it STOPS and mails. **ON ITS MERGED MAIL: verify at source, then POST TO KAM on the live board the new main commit + the §5.1 image-build commands** (card `nexusai-220-image-build-timing`, rec b — the 2.2.0 push is his). Then a NEW lane-C seat from HANDOVER-S78G for the digest, non-draft build and PACKAGE GATE → **the ZIP to kamil.kreiser@datasec.com.au**.
+3. **Kam pack v5 + amend `quickquote-publish-51e9286-price-fix`** to QQ main (now d4426f8, and it moves again when BCR2 merges). Carry: A9's before/after strings and the 2.33 footer; CF5R2's three messages; **CF5R2-O1** (the 20/h site-wide budget no longer bounds provider-shaped failures: 12/48/192 provider calls per hour at 1/4/16 sources vs main's 120/480/1,920; whether a caller can manufacture one on real ACS is NOT TESTED); **IO1R2-F1** (a signed-in rep can be shown a network error on a quote that WAS generated — one line, being fixed now); the 3 remaining HIGH advisories as evidence for decision 14 (P5B).
+
+### GATE 8 (NexusAI, lane A, batched) — launch when the batch settles after the merge
+RD-531+497 d7d6e7e · RD-616+617 r2 cc9616b (narrow re-gate, round 2 of 2) · RD-638 ad81ef7. Still to come: RD-631 re-proof, RD-510 r2, RD-438 r2 (CTRL-RAW fixed @ 1ae1dfd). S80I holds a standing C-141 yield to qa-* tickets; its HANDOVER-S80I.md carries the merge recipe; ctx 65% at 05:5x (the WATCHER reads it — my capture-pane does not).
+
+### DONE THIS SEAT (s81)
+Gate 5 + gate 6 (Vision) and gate 7 r2 (NexusAI) commissioned, stamped, launched, scored (1.00 / 0.97 / 0.97 — gate 5 0.95) and their panes closed. **7 merges verified at source**: QQ N, FU, I9, Q5 → 3bfbfa2; CF5R2 → cfe85d3; A9 → d4426f8; portal I10 → 6f197ca. Vision seat wrapped, scored 0.96, successor launched. **Fixed: `shift_change.sh` told every agent to mail its wrap to wednesday-agent@** (a Datasec wrap reached the other seat) — now seat-aware, refuses an unknown seat, 3 arms proven, claimed with Wednesday. **Guard 74 in the gate-5 launcher** corrected (it missed a parameterised `closeBrowser`), red-proofed. **Rung-10 ghost tap** at NexusAI-I caught by the seat; ledgered.
+
 ## 🟢 DELTA 70 — 2026-09-23 05:0x (s81, ctx ~75%). **READ THIS, THEN 69. DELTA 51's OWED ZIP STANDS.**
 
 ### VISION — gate 5 done, gate 6 running
