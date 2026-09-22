@@ -47,7 +47,7 @@ INBOXES=("$SELF_INBOX" "coagent@agentmail.to")
 if [ "${1:-}" = "full" ]; then
   [ $# -eq 3 ] || { echo "usage: $0 full <inbox> <message_id>" >&2; exit 1; }
   MSG_ID_ENC=$(python3 -c "import urllib.parse,sys; print(urllib.parse.quote(sys.argv[1], safe=''))" "$3")
-  curl -s -m 30 "https://api.agentmail.to/v0/inboxes/$2/messages/$MSG_ID_ENC" \
+  curl -s "https://api.agentmail.to/v0/inboxes/$2/messages/$MSG_ID_ENC" \
     -H "Authorization: Bearer $AGENTMAIL_API_KEY" | python3 -c "
 import json,sys
 m=json.load(sys.stdin)
@@ -59,7 +59,7 @@ fi
 MODE="${1:-digest}"
 
 for inbox in "${INBOXES[@]}"; do
-  curl -s -m 30 "https://api.agentmail.to/v0/inboxes/$inbox/messages?limit=50" \
+  curl -s "https://api.agentmail.to/v0/inboxes/$inbox/messages?limit=50" \
     -H "Authorization: Bearer $AGENTMAIL_API_KEY" | \
   INBOX="$inbox" SEEN_FILE="$SEEN_FILE" MODE="$MODE" SEAT="${WED_AGENT:-wednesday}" python3 -c "
 import json, sys, os, re
