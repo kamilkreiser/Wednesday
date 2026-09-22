@@ -270,3 +270,24 @@
 #     *.OVERSIZE-REFUSED-2026-09-23. Viable only if a run is ever given ctx >= 98304.
 #   KS-630 — the only unrun T2b ticket; its fix shape ("add a 7th step to preflight.sh") is STALE at the
 #     tip: preflight.sh is 784 lines and already carries at least 12 legs. The ticket says to re-price.
+#
+# 2026-09-23 07:1x - KS-965 (doc_patch tier) briefed + queued by Wednesday's KS-965 drafter seat at develop
+# 2bc5ccf63. NARROWING, stated so nobody mistakes the round for the ticket: KS-965 is 87 documentary
+# occurrences of the retired admin credential across 55 files (measured 2026-09-07; re-measured at this tip
+# as 86 across 54). This row changes ONE file - USER_TESTING/CREDENTIALS-AND-PORTALS.md - and closes 2 of
+# those 86 (its :68 table row and :177 smoke-loop entry), leaving 84 across 53 files. RAISE AS "Refs KS-965",
+# NEVER a closing word. The file is the cut because it is the canonical credential table and already carries
+# the replacement wording for the sibling platform-admin row at :81 and :181, so both edits copy an in-file
+# pattern. Precondition met: KS-966 items 1+2 are DONE at this tip (requiredSeedPw with no fallback,
+# userRepo.ts:1269/:1305/:1407, PR #888), so the value no longer authenticates - wrong, not dangerous.
+# Verified by the drafter before queueing: identifier BARE (KS-965, not a slug); top-level key set identical
+# to the passing doc_1097REVIEWREQ-R16B input; both must_remove lines byte-match the tip at :68 and :177,
+# count 1 each; every context line byte-matches the tip and both @@ headers count correctly (old 7/7, 6/6);
+# ADMIN_USER_PASSWORD absent from the whole file at the tip, so D4 has something to prove; no insert_after,
+# so D9 is INFO; both + lines ASCII, 0 double-quotes (the one backslash on the second is the shell
+# line-continuation the loop already uses at :181, not a literal \n). Input 25,437 B on disk, ~6.3-7.0K
+# prompt tokens against ctx 65536 - no oversize risk. done.md carries 0 rows for KS-965 (re-derived).
+# NOT PRE-MEASURED: no golden checker run and no git-apply-check in a clone (the drafter was scoped to
+# brief-writing only) - expect a first-round verdict, not a confirmed one. Line :202's "16 x 200 by default"
+# is left alone deliberately: it is now probably 15, but that is inference from userRepo.ts, not a login run.
+KS-965 input=/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/inputs/doc_965.json task=/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/tasks/doc_patch/task.md ctx=65536
