@@ -46,7 +46,7 @@ after.md against the patch RE-APPLIED to before.md in a scratch tempdir, D4/D5 t
 before.md/after.md with the checker's own section rule, D7/D8/D9 re-measured on the same files. The golden verdict is
 `cmp` on FILES only (patch.diff, then the two checkers' after.md): BYTE-IDENTICAL (`cmp` rc 0), CONTEXT-ONLY (change
 lines ordered-identical; context/empty/hunk-header lines counted) or DIFFERS (ndiff count) — never templated.
-`--title-from-brief <brief.md>` derives the title from the brief's `File:` line (basename, `.test.sh`/`.md` stripped,
+`--title-from-brief <brief.md>` derives the title from the brief's `File:` line (basename, `.test.sh`/`.test.ts`/`.test.js`/`.ts`/`.js`/`.sh`/`.md` stripped,
 upper-cased, `_`→`-`), prints the line it came from, requires the `# ` heading to name the ticket, and refuses a
 positional title that disagrees. Arms: tests/hold_ready_docpatch_arms_2026-09-22.md.
 
@@ -84,7 +84,7 @@ ticket = inp['ticket']['identifier'] if isinstance(inp.get('ticket'), dict) else
 NIGHT_DIR = '/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night'
 
 # ------------------------------------------------------------------ --title-from-brief (2026-09-22 11:2x)
-# The title is DERIVED from the brief's own `File:` line, never typed: basename, `.test.sh`/`.md` stripped, upper-cased,
+# The title is DERIVED from the brief's own `File:` line, never typed: basename, `.test.sh`/`.test.ts`/`.test.js`/`.ts`/`.js`/`.sh`/`.md` stripped, upper-cased,
 # `_`→`-`. The brief's `# ` heading must name the run's ticket (a wrong brief is refused, not silently titled from). A
 # positional title given alongside must equal the derived one. The line each came from is printed.
 def _title_from_brief(path):
@@ -98,7 +98,7 @@ def _title_from_brief(path):
     m = re.search(r'`([^`]+)`', fl[1]) or re.match(r'^File:\s*(\S+)', fl[1])
     fpath = m.group(1).strip()
     base = os.path.basename(fpath)
-    for suf in ('.test.sh', '.md'):
+    for suf in ('.test.sh', '.test.ts', '.test.js', '.ts', '.js', '.sh', '.md'):  # longest first; 2026-09-22 12:2x: TS/JS suites too (the FEED 10 code_patch briefs)
         if base.endswith(suf): base = base[:-len(suf)]; break
     t = base.upper().replace('_', '-')
     if not re.match(r'^[A-Z0-9][A-Z0-9.-]*$', t): die(f"--title-from-brief: derived title {t!r} is not caps/digits/dashes (from `File:` basename {base!r})")
@@ -215,7 +215,12 @@ def hold_code_patch():
         fails = [l.strip() for l in co.splitlines() if l.startswith('FAIL ')]
         die(f"checker.out RESULT is not PASS: {m.group(0) if m else next((l for l in co.splitlines() if l.startswith('RESULT:')), 'absent')}; FAIL lines: {fails[:3]}")
     passed, total = m.group(2), m.group(3)
-    a_lines = {k: _line(co, f'PASS {k} ', k) for k in ('A1', 'A2', 'A3', 'A3c', 'A4', 'A5', 'A6', 'A7')}
+    a_lines = {k: _line(co, f'PASS {k} ', k) for k in ('A1', 'A2', 'A3', 'A4', 'A5', 'A6', 'A7')}
+    # A3c is absent from checker.out for a DELETION-ONLY product hunk (the checker prints an INFO A3i 'skipped — no expected + lines'
+    # line and no A3c line at all — 2026-09-22 KS-629 LIVENESSRT). It is accepted ONLY under that exact shape, asserted below at step 3
+    # against numstat (+0 on the product file); any other absence still refuses.
+    a_lines['A3c'] = next((l.rstrip() for l in co.splitlines() if l.startswith('PASS A3c ')), '')
+    a3i_skipped = next((l.rstrip() for l in co.splitlines() if l.startswith('INFO A3i skipped')), '')
     summary_line = _line(co, 'SUMMARY ', 'SUMMARY')
     a3i_line = next((l.rstrip() for l in co.splitlines() if l.startswith('A3i:')), '')
 
@@ -261,6 +266,11 @@ def hold_code_patch():
         test_file = tests_touched[0]
     declared = sorted({product_file, test_file})
     adds = {r[2]: r[0] for r in ns_rows if len(r) == 3}; dels = {r[2]: r[1] for r in ns_rows if len(r) == 3}
+    if not a_lines['A3c']:
+        if a3i_skipped and str(adds.get(product_file)) == '0':
+            a_lines['A3c'] = f"[no PASS A3c line in checker.out — DELETION-ONLY product hunk: numstat.out +0/-{dels.get(product_file, '?')} on {product_file}; checker.out INFO A3i verbatim: `{a3i_skipped}`]"
+        else:
+            die(f"checker.out has no line starting 'PASS A3c ' — A3c cannot be asserted (accepted only for a deletion-only product hunk: needs INFO A3i skipped + numstat +0 on {product_file}; got a3i_skipped={bool(a3i_skipped)}, adds={adds.get(product_file)!r})")
 
     # 4. product hunk '+' lines vs the brief's expected_plus (whitespace-stripped ordered equality; A3i covers bytes)
     exp = (inp.get('defect_line') or {}).get('expected_plus') or inp.get('expected_plus') or []
