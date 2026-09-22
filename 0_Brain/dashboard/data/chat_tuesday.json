@@ -2861,5 +2861,40 @@
   "project": "Datasec",
   "ts": "2026-09-22T13:40:22.488296+10:00",
   "text": "Your email arrived: John Spears asks for the quote details table to read 'Devices (MFPS/SFPS)' instead of 'Devices (MFPS)'. It's added to the QuickQuote bundle with the old-quote request and the copy-me-in change. It goes after the NexusAI round, as you said.\n\nNexusAI feedback, and a correction: I told you the boot check wasn't reaching me. G's boot mail did carry it; it sat outside the 50 mails I searched. The store holds 6 items, all from testers. The newest is from 4 September, so nothing new has arrived since. Five are already tied to tickets. The sixth, 'Love the new UI', is praise, not a request. From now on G reports that line in every wrap mail, not just at boot."
+ },
+ {
+  "role": "wednesday",
+  "seat": "Kamils-Mac-mini.localdomain",
+  "project": "Datasec",
+  "ts": "2026-09-22T13:56:41.672210+10:00",
+  "text": "NexusAI, good news first: the security guard behind the resubmission works correctly on the exact setup customers get. H tested it inside that container with nothing around it (H's measurement, not re-run by me). It blocks the Azure metadata address, private and local addresses, and unknown hosts, and it allows a real Azure address. The red CI builds are a fault in how two test files run on Linux, not in the product.\n\nOne action for you, if you agree: reply 'yes to Node 24 in CI'. Our CI tests on Node 20, but the product ships on Node 24. One of the two red test files fails only on Node 20. Changing CI to Node 24 means editing the GitHub workflow files, which you own. H prepares the change on a separate branch and I bring you the link before anything merges. My recommendation is yes, because CI should test what we ship. If you'd rather not, we leave CI on Node 20 and list it as a known limitation in the zip email.\n\nThe other red test file is H's to fix: the test setup fails on Linux. Nothing needs you for that one."
+ },
+ {
+  "role": "wednesday",
+  "seat": "Kamils-Mac-mini.localdomain",
+  "project": "Datasec",
+  "ts": "2026-09-22T13:58:11.093397+10:00",
+  "text": "Received: yes to Node 24 in CI. H prepares it on its own branch. The pull request's CI run shows whether it works, then a code check, then it merges on my go. I'll post the link here when it's merged."
+ },
+ {
+  "role": "wednesday",
+  "seat": "Kamils-Mac-mini.localdomain",
+  "project": "Datasec",
+  "ts": "2026-09-22T14:23:37.393492+10:00",
+  "text": "Ornith has been gate-refused for 30 minutes on G5-ollama — nothing has run since it started. Remedy: bash 2_Project_Files/local-model/start_ollama.sh (the self-heal already failed — something else holds port 11434)."
+ },
+ {
+  "role": "wednesday",
+  "seat": "Kamils-Mac-mini.localdomain",
+  "project": "Datasec",
+  "ts": "2026-09-22T14:24:40.757783+10:00",
+  "text": "Received: you want a thorough check of what's running, so you're on top of it. One thing first: this seat (Tuesday) runs on the Mac mini, not the Studio. Wednesday is the one on the Studio. I'm checking everything on the mini now: every Claude session, both NexusAI agents, the background jobs and the scheduled tasks. The report will be here in about 10 minutes. If you meant the Studio itself, say so and I'll ask Wednesday to run the same check there."
+ },
+ {
+  "role": "wednesday",
+  "seat": "Kamils-Mac-mini.localdomain",
+  "project": "Datasec",
+  "ts": "2026-09-22T14:26:05.340196+10:00",
+  "text": "The check of the Mac mini is done, and I found and fixed one thing.\n\nFixed: three Ornith jobs were installed on this machine under Tuesday's name. Every 15 minutes one tried to run Ornith, found no local model on the mini, refused, and posted an alert to your panel. Another posted a duplicate daily Ornith summary. That's Studio work showing up from this seat, against your ruling that Ornith is the Studio's. I've stopped all three on the mini. They'll post nothing more from here. The job files are kept, so it can be undone, and I've asked Wednesday to stop her installer adding them to this seat again.\n\nEverything else is as it should be. Three Claude sessions are running: me and the two NexusAI agents, G and H. No test servers are left running. The scheduled jobs on this machine are the normal ones (chat sync, wake, close, sweep, the NAS backup). The NAS backup's last exit code is the known one from this morning's first-run check, with zero deletions. One leftover: an idle terminal session from a 17 September test is named 'wednesday'. It isn't an agent and does nothing; I've left it for now.\n\nNexusAI is unchanged: all three merges are on main, and CI shows nothing beyond the known test-setup failures."
  }
 ]
