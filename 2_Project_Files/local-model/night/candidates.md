@@ -1,8 +1,8 @@
-# Ornith candidates — derived 2026-09-22 15:44 from 299 KS Backlog/Todo tickets (read-only, unpaginated)
+# Ornith candidates — derived 2026-09-23 00:17 from 286 KS Backlog/Todo tickets (read-only, unpaginated)
 
 A CENSUS for the coordinator to brief from, easy → hard (Kam 2026-09-15 16:40 / 18:19). A ticket here is a candidate, not a task: read it, read the file at the tip, write `night/briefs/<id>.md`, then queue it. Auth-shaped titles are excluded (LAST); Peter/Stuart tickets and PR-attached tickets are excluded outright.
 
-## T1 services (vitest, one file) — 24
+## T1 services (vitest, one file) — 23
 - KS-678 (P2) [resolved:basename, a HINT — read the file] #568 publishes 17 URLs on secuura.io — `scripts/openapi-examples/synthesize.ts`
 - KS-683 (P2) Anchor-status standoff: a consumer repolls anchors K reports as terminally faile — `services/anchoring/src/index.ts`
 - KS-953 (P2) CLASS: editing api-gateway/src/index.ts silently reddens packages/shared, and no — `services/api-gateway/src/index.ts`
@@ -12,7 +12,6 @@ A CENSUS for the coordinator to brief from, easy → hard (Kam 2026-09-15 16:40 
 - KS-1168 (P3) userRepo.ts: ILIKE search on encrypted PII columns can never match — :1017 and : — `services/auth/src/repositories/userRepo.ts`
 - KS-1190 (P3) api-gateway meetsVerificationLevel fails open on an unknown REQUIRED level: an o — `services/api-gateway/src/services/enforcement.ts`
 - KS-1222 (P3) POST /api/documents/upload never reaches the gateway's blocked-extension / MIME  — `services/api-gateway/src/routes/proxy.ts`
-- KS-1287 (P3) OpenAPI: path parameter `index` on GET /api/status/{id}/check/{index} is publish — `services/vc-issuer/src/vc-issuer.openapi.ts`
 - KS-579 (P3) Per-person platform-admin identities — the shared seeded admin cannot carry attr — `services/api-gateway/src/routes/platform.ts`
 - KS-581 (P3) register-connector: volume alerting, rate limit, and correlation of refused re-k — `services/api-gateway/src/routes/platform.ts`
 - KS-627 (P3) Implement real wallet signature verification (CIP-8/COSE + address binding) — ne — `services/wallet-connector/src/types/index.ts`
@@ -30,18 +29,15 @@ A CENSUS for the coordinator to brief from, easy → hard (Kam 2026-09-15 16:40 
 
 ## T2 tooling (systemTest/*, one file) — 0
 
-## T2b bash (bash_patch — one script + a *.test.sh beside the reference) — 5
+## T2b bash (bash_patch — one script + a *.test.sh beside the reference) — 4
 - KS-998 (P2) KS-989 gate residue: the formatting gate fails OPEN on missing deps and reads th — `.githooks/pre-push`
 - KS-1163 (P3) start-secuura.sh never waits for five default-profile, healthchecked services —  — `Start_Up/start-secuura.sh`
-- KS-1245 (P3) F-1: scripts/smoke-test.sh:107 fails any /health/deep check that is not 'up' — a — `scripts/smoke-test.sh`
 - KS-630 (P3) Wire the status-page XSS probe into preflight (or decide not to) — it runs today — `scripts/preflight/preflight.sh`
 - KS-789 (P3) CONTRIBUTING.md justifies the hook's degradation and its --no-verify bypass with — `.githooks/pre-push`
 
-## T3 jest services (originate, governance) — 4
-- KS-1019 (P3) [Question] The document's whole `blockchain` block is published as z.unknown() — — `services/originate/src/originate.openapi.ts`
+## T3 jest services (originate, governance) — 2
 - KS-1263 (P3) A partly-completed /share or /transfer-custody is now unattributed: the multi-wr — `services/originate/src/routes/documents.ts`
 - KS-759 (P3) tenantId is read through two `as unknown as` casts because it is not on JwtPaylo — `services/originate/src/middleware/auth.ts`
-- KS-1084 (P0) READ ONLY / unverified: the gateway's own Authorization-only calls to originate  — `services/originate/src/index.ts`
 
 ## T4 docs (doc_patch) — 1
 - KS-965 (P4) [resolved:docs, a HINT — the ticket MENTIONS the file] 87 documentary sites still publish the retired admin credential — wrong rather t — `docs/BROWSER-TESTING-GUIDE.md`
@@ -102,25 +98,17 @@ A CENSUS for the coordinator to brief from, easy → hard (Kam 2026-09-15 16:40 
 - KS-966 — named in READY_KS-972_ornith35b-q4_BASHPATCH-REANCHORED-PASS-7of7_2026-09-16.diff.md, READY_KS-972_ornith35b-q4_BASHPATCH-REANCHORED-PASS-7of7_2026-09-16.diff.md.pre-0951-superseded
 - KS-999 — named in READY_KS-1186_ornith35b-q4_AUTH-5SITE-LINEKEYED-PASS-7of7_2026-09-17.diff.md
 
-## HELD (READY_* or done.md PASS) — 45
+## HELD (READY_* or done.md PASS) — 36
 - KS-1009 Security: GET /api/auth/wallet/status returns userId + role to ANY anonymous cal
-- KS-1028 KS-754 gate F-1 (MAJOR): a step-12 throw skips the USER_ERASED fan-out AFTER the
-- KS-1033 KS-926 residue: the three guards that could NOT be wired, and what each needs fi
-- KS-1034 check-stack-safety.sh resolves the WRONG repo root inside a git hook and calls p
-- KS-1040 Push preflight leg 4 reports 'a published path is unroutable' when the real caus
-- KS-1047 pre-push:230 names the stack-dependent legs as (3, 4, 7); measured they are 3, 4
+- KS-1019 [Question] The document's whole `blockchain` block is published as z.unknown() —
 - KS-1074 The poller/reconcile blob writers also erase threadToken — on the CONFIRM/heal p
-- KS-1081 CONFIG DRIFT: two tracked env templates disagree by ~39 vars — bootstrap-env.sh 
+- KS-1084 READ ONLY / unverified: the gateway's own Authorization-only calls to originate 
 - KS-1089 run-shell-suites.sh polish from #953's tier-2 gate: make `--list` survive a tree
 - KS-1090 api-gateway + originate: tsc never type-checks #951's three wiring tests, and th
-- KS-1093 check-stack-safety.sh 6f reports a FALSE red once a real Playwright run exists —
 - KS-1108 Akto harness: loadSecretsYml() parses config/secrets.yml with no catch — the KS-
 - KS-1117 k6 YAML loader: a BOM immediately followed by a comment is a marked syntax error
 - KS-1121 Security: credentialRepo.getById resolves a credential by SUBSTRING (LIKE '%id%'
 - KS-1127 run-shell-suites.sh counts an exit-0 SKIP as `passed` — a suite that ran 0 of it
-- KS-1139 Bare arithmetic-command `((X++))` under `set -e` — exits 1 at 0 and bash ≥ 4.1 e
-- KS-1160 originate POST /api/webhooks persists the RAW url where PATCH persists the norma
-- KS-1164 gate/report.ts writeGateReport overwrites the input summary when --summary does 
 - KS-1182 demo-service errorHandler: unchecked err.status (NaN crashes the process, 200/30
 - KS-1186 userRepo.ts: five sibling reads still return fromRow unawaited inside try, so a 
 - KS-1196 admin POST /api/admin/document-types ids are dt-${Date.now()}: two creates in on
@@ -132,10 +120,11 @@ A CENSUS for the coordinator to brief from, easy → hard (Kam 2026-09-15 16:40 
 - KS-1221 ks744 cells never test a falsy claim - a verificationLevel of '' or null must fo
 - KS-1227 ks1072 postTier2's anchor-store witness counts every stub request, leaks its lis
 - KS-1239 R-1: the index.ts:347 rawAuthorization capture is dead code — 0 readers
+- KS-1245 F-1: scripts/smoke-test.sh:107 fails any /health/deep check that is not 'up' — a
 - KS-1250 O-2: RUNBOOK §2.2 documents SMOKE_BASE_URL, but scripts/smoke-test.sh ignores it
 - KS-1277 documents.ts: two stale comments about on-behalf-of recording (:2327-2334 inside
+- KS-1287 OpenAPI: path parameter `index` on GET /api/status/{id}/check/{index} is publish
 - KS-623 Test-token env guard is asymmetric: the gateway fails closed on an unset NODE_EN
-- KS-629 kyc `livenessVideo` is accepted by spec and runtime, then silently discarded — n
 - KS-692 Security: /api/status revoke/unrevoke has no tenant ownership check — an ISSUER_
 - KS-747 Spec drift: GET /api/security/keys declares no parameters while the handler requ
 - KS-794 verify-file returns `fileSize` on every 200 and neither response schema declares
@@ -146,8 +135,6 @@ A CENSUS for the coordinator to brief from, easy → hard (Kam 2026-09-15 16:40 
 - KS-908 connectorId persists but is invisible through the API — POST and GET both return
 - KS-938 Security: "MFA disabled" leaves the TOTP seed and hashed backup codes in the row
 - KS-960 Two schema sources disagree on whether users.email is unique — a statement valid
-- KS-974 Published bound vs runtime bound on rate-limit scope: /check enforces code UNITS
-- KS-976 Rate-limit refusals name the wrong field: 400 says "Key required" when the key w
 
 ## SET ASIDE with a recorded reason — 30 (re-read only if the ticket's updatedAt moved)
 - KS-1063 — decision-class: its own words say the design question comes first (updated 2026-09-09)
