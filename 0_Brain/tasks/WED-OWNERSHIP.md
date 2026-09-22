@@ -89,3 +89,4 @@ sees the claim rather than discovering it in a conflict.
 | 2026-09-22 08:58 | Kamils-Mac-Studio | live dashboard weekly usage (both seats) — Kam 2026-09-22 08:57 | CLOSED |  2026-09-22 09:28 --note |
 | 2026-09-22 15:27 | Kamils-Mac-Studio | live-site Download button + file drawer (Kam 2026-09-22 15:26) | OPEN | |
 | 2026-09-22 20:42 | Kamils-Mac-mini | inbox_digest.sh: add curl -m 30 (no-timeout hang swallowed a verdict behind a piped tail, Tuesday 2026-09-22 20:3x) | CLOSED |  2026-09-22 20:43 done: -m 30 on both fetches, backup .pre-0922-2038-curltimeout, syntax + live run OK |
+| 2026-09-23 05:34 | Kamils-Mac-mini | shift_change.sh wrap-mail address must be seat-aware (Datasec wraps were told to mail wednesday-agent@) | OPEN | |
