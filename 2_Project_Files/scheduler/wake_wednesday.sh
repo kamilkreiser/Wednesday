@@ -126,21 +126,51 @@ fi
 
 # -s = all panes in the session, no window-index assumption: '$FLEET:0' broke
 # under base-index 1 and made 'window missing' look like 'pane missing' (finding 10).
-WROW=$("$TMUX_BIN" list-panes -s -t "=$FLEET" -F '#{@cockpit_name}|#{pane_id}|#{pane_dead}|#{pane_tty}' 2>/dev/null | awk -F'|' '$1=="wednesday"' | head -1)
+# ── THE COORDINATOR PANE IS RESOLVED, NEVER NAMED (2026-09-23, Tuesday s82) ──
+# This line read `awk -F'|' '$1=="wednesday"'` until 06:3x today. On the Tuesday
+# seat the coordinator pane is named "tuesday", so the lookup found NOTHING, the
+# "live claude -> just tap it" verdict below could never fire, and the fallback
+# branch ran `cockpit.sh add wednesday <launcher>` — booting a SECOND coordinator
+# into a new pane it then named "wednesday".
+#
+# MEASURED THIS MORNING: s81 was alive and working at ctx 75-82% when the 06:00
+# job fired; it spawned s82 anyway. Two Tuesday seats ran for ~20 minutes ON ONE
+# WORKING TREE, which is one `git add -A` from the w=4 misattribution problem,
+# and is the duplicate-coordinator shape Kam stopped this seat for in September.
+#
+# seat_resolve.sh (2026-09-13) exists precisely for this and its header names its
+# callers: wednesday_rotate.sh, wake_watch.sh, arm_wake_watch.sh. THIS SCRIPT WAS
+# NOT ON THAT LIST — there were four copies of the lookup, not three.
+SEAT_RESOLVE="$PROJECT_DIR/2_Project_Files/fleet/cockpit/seat_resolve.sh"
+# shellcheck disable=SC1090
+. "$SEAT_RESOLVE" 2>/dev/null || true
+if ! type seat_resolve >/dev/null 2>&1; then
+  log "ERROR: seat_resolve.sh not sourceable at $SEAT_RESOLVE — REFUSING rather than guessing a pane name (day NOT stamped)"; exit 1
+fi
+seat_resolve "$PROJECT_DIR"
+case "$SEAT" in
+  tuesday|wednesday) : ;;
+  *) log "ERROR: seat_resolve did not return tuesday|wednesday (got '$SEAT') — REFUSING (day NOT stamped)"; exit 1 ;;
+esac
+if PANE_ID_R=$(coord_pane_id "=$FLEET" "$SEAT" "$TREE_SEAT" 2>/dev/null); then
+  WROW=$("$TMUX_BIN" list-panes -s -t "=$FLEET" -F '#{pane_id}|#{pane_id}|#{pane_dead}|#{pane_tty}' 2>/dev/null | awk -F'|' -v id="$PANE_ID_R" '$1==id' | head -1)
+else
+  WROW=""
+fi
 if [ -z "$WROW" ]; then
   if [ "$TEST_MODE" = "1" ]; then
-    log "REFUSED (test mode): no wednesday pane in '$FLEET' and cockpit.sh add only knows the real fleet — add the pane yourself"
+    log "REFUSED (test mode): no $SEAT coordinator pane in '$FLEET' and cockpit.sh add only knows the real fleet — add the pane yourself"
     exit 2
   fi
-  log "fleet session up but no wednesday pane — adding it"
+  log "fleet session up but no $SEAT coordinator pane — adding it"
   echo "morning" > "$STATE_DIR/wake_mode"
-  if OUT=$("$COCKPIT" add wednesday "$LAUNCH_CMD" 2>&1); then
+  if OUT=$("$COCKPIT" add "$SEAT" "$LAUNCH_CMD" 2>&1); then
     case "$OUT" in
       *"already present"*)
         # Our pane scan and cockpit's disagree — instruments in conflict is a
         # failure, not a success (the silent-skip half of finding 10).
         rm -f "$STATE_DIR/wake_mode"
-        log "ERROR: my pane scan found no wednesday pane but cockpit.sh says 'already present' — instrument disagreement, NO wake delivered, day not stamped"; exit 1 ;;
+        log "ERROR: my pane scan found no $SEAT coordinator pane but cockpit.sh says 'already present' — instrument disagreement, NO wake delivered, day not stamped"; exit 1 ;;
     esac
     log "added: $OUT"; wake_done; exit 0
   else
