@@ -1,0 +1,10 @@
+# COMMISSION — Ornith FEED 9 brief-writer drafter: the FOUR bash_patch rows FEED 8 did not reach, then the not-reached older rows (Wednesday, the 07:2x seat of 2026-09-22; `date` at the head of your report)
+
+EXACTLY the FEED 8 commission's discipline, scope, rules and deliverable shape (`2026-09-22_ornith_feed8.COMMISSION.md` — read it WHOLE, then the FEED 8 proposal `…feed8_queue_proposal.md` §0–§3 and its precheck dir `runs/2026-09-22_feed8-drafter-precheck/` for exactly how the clone, builder, golden and `bash -n` were run; reuse `do_row.sh` / `rebrief.py` by COPYING them into your own precheck dir `runs/2026-09-22_feed9-drafter-precheck/` — the FEED 8 fixes (one `+` group per hunk; old headers not trusted, hunks located by unique match at the tip; a trailing blank context line kept) are in them). Proposal: `fleet/briefs_staged/2026-09-22_ornith_feed9_queue_proposal.md`.
+
+## Rows, in order
+1. **The four bash rows FEED 8 measured but did not reach** (each re-applies with `--recount` at the tip; the suite ABSENT): **KS-1011, KS-1031, KS-1081, KS-1040-part1** — KS-1040 needs a wording call: one of its `+` lines re-adds a tip echo carrying an em-dash; RULING: keep the tip's echo byte-exact if the hunk must re-add it (a context line, not a `+` line) — if it must be a `+` line, replace the em-dash with `--` in the NEW text and say so in the brief (non-ASCII 0 on `+` lines stands; the tip's own bytes are the tip's).
+2. Then, up to the cap of 6 total: the **not-reached older rows** from the FEED 7 census (`…feed7_queue_proposal.md` §3: unknown 16 / comment 16 / doc 6 / code_patch 4 — take `comment` and `doc` rows with a runnable checker under `tasks/comment_patch` / `tasks/doc_patch` first; a `unknown` row is briefed only once you have read its old READY and named its real task type).
+Excluded as always: KS-1250 by name; Done/Canceled/Archived; auth/MFA/OAuth product edits; files a live 18th/19th seat owns (their briefs' GROUPING tables: B = originate/anchoring/auth/shared, C = api-gateway).
+
+Deliverables and the final message exactly as FEED 8's. Bound ~60 min; `PARTIAL` marker if hit.
