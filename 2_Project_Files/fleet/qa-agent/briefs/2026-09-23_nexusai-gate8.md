@@ -1,0 +1,999 @@
+# QA Agent Invocation Brief — Datasec/NexusAI, GATE 8 (lane A, batched): SIX targets, SIX verdicts
+
+**Drafted for Tuesday 2026-09-23 07:45-08:25 AEST by a read-only drafting agent; Tuesday reviews, stamps and launches.**
+Commissioned on six READY FOR QA mails from NexusAI-I (S80I, live), sent copies in
+`/Volumes/KK_T9_External_HDD/!CODING/Datasec/NexusAI/session-tools/s80i/`:
+- **A — RD-531 + RD-497** @ `d7d6e7e` — `mail-27-ready531.bWCe9P` (02:07 AEST).
+- **B — RD-616 + RD-617 round 2** @ `cc9616b` — `mail-34-ready616.6hrVHD` (04:39 AEST).
+- **C — RD-638** @ `ad81ef7` — `mail-39-ready638.2gEBtM` (06:11 AEST).
+- **D — RD-631** @ `153e472` — `mail-44-ready631.Z8UY2Q` (06:50 AEST).
+- **E — RD-438** @ `63bb818` — `mail-48-ready438.IaxqEL` (07:34 AEST).
+- **F — RD-510** @ `3f96a40` — `mail-51-ready510.DIUy3J` (08:00 AEST). **ADDED BY AMENDMENT** after this brief's first pass:
+  the coordinator's earlier line *"RD-510 is deliberately NOT in this gate"* is **WITHDRAWN** — the READY landed at 08:00
+  while the brief was being written. The builder's own 07:41 mail (`mail-50-rd510r3.d4XdI2`) still says *"Gate 8 going without
+  RD-510 is right"*; **that sentence is 19 minutes older than its own READY and is superseded.**
+**All six heads are pinned here; nothing is pinned at launch.** The launcher re-reads all six plus `main` by
+`git ls-remote` immediately before launch and refuses on any mismatch.
+
+SELF-CHECK: re-read end-to-end for contradictions | @SELFCHECK_TS@
+Self-check note: @SELFCHECK_NOTE@
+
+## Charter
+Read `/Volumes/KK_T9_External_HDD/TUESDAY/2_Project_Files/fleet/qa-agent/QA_AGENT_CHARTER.md` in full first. You are an
+independent tester. You did not build these changes and you owe no builder anything. **Every line below that reports what a
+builder says is a CLAIM, never evidence.**
+
+**ONE gate, SIX targets, ONE session, SIX verdicts, plus the merge-order result (§8).**
+- **RD-531 + RD-497 is TIER 1** (a product SECURITY CONTROL: 13 admin routes and the user-data export move below the auth
+  gate; one route is retired). Verdict: GO / NO-GO at `d7d6e7e`.
+- **RD-616 + RD-617 (round 2) is TIER 1** (mail secrets at rest; an unknown store shape is withheld, never "redacted").
+  **This is ROUND 2 OF 2** (C-62). Verdict: GO / NO-GO at `cc9616b`.
+- **RD-638 is TIER 2** (a data export always ends — gate 4's F-A2, Minor there). Verdict: GO / NO-GO at `ad81ef7`.
+- **RD-631 is TIER 2** (C-139: a directory streams only for a DECLARED directory store). Verdict: GO / NO-GO at `153e472`.
+- **RD-438 is TIER 1** (the auth gate decides on the SERVED path — a traversal/prefix bypass of the gate). Verdict:
+  GO / NO-GO at `63bb818`.
+- **RD-510 is TIER 1 — by the coordinator's ruling, and the ruling is right for a reason worth stating:** its round 3 is
+  test-only, but what it re-anchors is **`rd523 E1`, a ZERO-TRAFFIC SECURITY CELL**. A change to a security control's
+  *instrument* is a change to the security control. **AND the branch as a whole is NOT test-only** — see §7a: its delta over
+  its base carries `backend/server.js` **+106/−60**. Verdict: GO / NO-GO at `3f96a40`.
+- **They are COUPLED THROUGH TWO FILES (§8):** three of the six rewrite `backend/dataExport.js` and **four** rewrite the server
+  entry point. No verdict is complete without §8's merge-order measurement.
+
+## RULED BY KAM, NOT YET IN AN ARTEFACT
+- **None new for these five.** Every ruling that applies is IN `1_Project_Definition/CLARIFICATIONS.md`, cited below with its
+  line number as read at drafting.
+
+**THE COORDINATOR'S RULINGS FOR THIS GATE, VERBATIM** (carried here word for word; where a drafting measurement disagrees with
+one, the measurement is printed immediately beneath it and the disagreement is a finding of this brief, not a silent edit):
+
+> **RD-631's builder proof ran with SESSION_SECRET PRESENT; the GATE runs it UNSET** (that is gate 7 F-1's shape, and CI has
+> no ambient secret).
+
+  — **MEASURED (drafter):** true, and **true of all five, not only RD-631.** Every one of the five READY mails states it in its
+  own LIMITS line: `mail-27-ready531` ("The proof ran with my seat's environment (SESSION_SECRET present) … the gate should run
+  it unset"), `mail-34-ready616` (same words), `mail-39-ready638` (same words), `mail-44-ready631` ("the proof ran with
+  SESSION_SECRET present"), `mail-48-ready438` ("the proof ran with SESSION_SECRET present; the gate runs it unset"). **So the
+  ruling is widened, not narrowed: EVERY jest run of this gate runs with `SESSION_SECRET` UNSET** (`env -u SESSION_SECRET`),
+  for all five targets. See §3 Q0.
+
+> **RD-631 and RD-617 both touch `dataExport.js`**, so if both land in one merge it needs a hand-resolved `dataExport.js`.
+> Carry this as a NAMED MERGE-ORDER FACT in the brief so it is not rediscovered at merge time.
+
+  — **MEASURED (drafter), and the specific pairing is WRONG AT SOURCE.** `backend/dataExport.js` is rewritten by **THREE** of
+  the five, not two: **B (RD-617)**, **C (RD-638)** and **D (RD-631)**. And the pair the ruling names is the one pair that does
+  **not** need a hand resolution: `git merge-tree --write-tree --name-only cc9616b 153e472` **auto-merges `backend/dataExport.js`**
+  and conflicts on `scripts/verify-expected-counts.json` only. The collider is **RD-638**: B×C and C×D each CONFLICT in
+  `backend/dataExport.js`. The ruling's INSTRUCTION stands and is honoured — §8 carries the corrected fact as this brief's
+  NAMED MERGE-ORDER FACT, with the measurement, the reproducible commands and the order that costs exactly one hand resolution.
+
+> ~~**RD-510 is deliberately NOT in this gate** (it is mid round 3).~~ — **WITHDRAWN by the coordinator, 2026-09-23 ~08:15
+> AEST**, verbatim: *"RD-510 is now READY and becomes the SIXTH target. My earlier line 'RD-510 is deliberately NOT in this
+> gate' is WITHDRAWN — it landed while you were drafting."*
+
+  — **MEASURED (drafter), and the withdrawal is correct at source:** at 07:47:5x `rd-510-listen-before-warmup-s80i` was at
+  `7dd2171` (counts 3863/220) with the jest lock held by ticket `s80i-rd510r3-proof` (pid 9929, since 2026-09-22T21:41:07Z).
+  **Re-read at 08:06:38 it is at `3f96a40`** (counts 3867/221) — the only ref in the whole `ls-remote` that moved between the
+  two readings. The proof completed at 07:59 and the READY was sent at 08:00.
+
+> **RD-510 @ `3f96a40`, branch `rd-510-listen-before-warmup-s80i`.** … **TIER 1 in the brief, by my ruling, even though round 3
+> is test-only** — it re-anchors `rd523 E1`, which is a zero-traffic SECURITY cell.
+
+  — **MEASURED:** head confirmed at origin at 08:06:38. **One correction to the premise, and it makes the ruling stronger, not
+  weaker: "round 3 is test-only" is true of the round-3 COMMIT (`7dd2171`, which touches
+  `__tests__/rd523-aoai-redirect-refused.test.js` only), but it is NOT true of the branch.** `695ca5a..3f96a40` carries
+  `backend/server.js` **+106/−60** across rounds 1 and 2. **The gate gates the whole delta at the head, not the last commit.**
+  §7a.
+
+> 1. **E1 must remain a DELTA ACROSS THE CALL with NO PATH FILTER** — any caller-caused request, on any path including a chat
+>    completion, must still redden it. The gate re-establishes that property; it does not take my word or the builder's.
+> 2. **CTRL-WARM must FAIL if the boot warm-up marker never arrives.** A wait that can be silently skipped is how this class of
+>    cell dies.
+> 3. **The mutant arm must be re-derived independently. EXPECT THREE REDS, NOT ONE** — the builder declared this itself: its
+>    M-anon mutant lets the anonymous path through `requireAuth`, and `requireAuth` is where `req.user` is assigned, so E2 and
+>    E2-happy lose admin identity and redden too. The mutant is BROADER THAN SURGICAL. That is a stated deviation from its own
+>    prediction, not a defect the gate should re-discover as a surprise.
+> 4. **Full verify with SESSION_SECRET UNSET** (builder measured 3867/3867 across 221 suites that way).
+> 5. **Residual to carry, already ticketed as RD-654:** after its deadline the warm-up starts no new query, but the orphaned
+>    call keeps its socket and may retry once (+32 KB RSS, 2 sockets held at +60 s, health unaffected; **the retry is
+>    CONSISTENT WITH a client retry but NOT PROVEN — do not let the brief assert the mechanism**). **RD-655** covers boot
+>    warm-up reaching the stored origin with no caller.
+> **"Note the counts differ per target (RD-510's verify is 3867/221); do not assume one number across the batch."**
+
+  — All five clauses are carried into §7a as required measurements. **Clause 1 verified at source by the drafter:** at
+  `3f96a40`, E1 asserts `{ status, stored: r.seen['signed-stored'], sink: r.seen['signed-sink'] }` equals
+  `{ status: 401, stored: NONE, sink: NONE }` where `NONE = { connections: 0, requests: [] }` — **the whole delta object, no
+  `reached(…)` URL filter.** (E2, by contrast, *does* filter: `reached(r.seen, 'signed-stored', /\/openai\/models$/)`. The
+  no-filter property is E1's alone — say so.) **Clause 2 verified at source:** `CTRL-WARM` is
+  `expect(SIGNED.bootWarmupSettled).toBe(true)` and `waitForBootWarmup` returns `false` on timeout, so the cell fails. **But
+  see §7a Q4 — round 3 did NOT discharge the whole of the builder's own diagnosis.** Clause 5's "not proven" wording is
+  carried verbatim; the brief asserts no mechanism.
+
+> **RD-510 is at "round 3".** — **READ THIS BEFORE APPLYING C-62.** RD-510's rounds 1, 2 and 3 are **BUILDER PROOF rounds**,
+  not QA gate rounds: there is **no prior gate report for RD-510** anywhere in
+  `…/Testing Agent MAIN/projects/nexusai/reports/`. **This is RD-510's FIRST gate.** C-62's cap ("a Major at round 2 of 2 is
+  ticketed"; "only a third round on the same class needs his word") therefore **does NOT apply to F — it applies to B alone.**
+  Do not tell Tuesday a Major on RD-510 is capped or needs Kam; a Major on F is an ordinary round-1 Major.
+
+> **The verdict mail goes to `tuesday-agent@agentmail.to` with subject beginning
+> `[QA/Datasec-NexusAI -> Tuesday] GATE VERDICT — gate 8:`**
+
+  — Carried in §13 and in the prompt, exact.
+
+**The clarifications that bind this gate** (line numbers read at drafting from
+`1_Project_Definition/CLARIFICATIONS.md`, 244,745 bytes, mtime 2026-09-23 06:29):
+- **C-57** (:410) — a merge conflict confined to `scripts/verify-expected-counts.json` is resolved by **regeneration** with an
+  **id-superset control** (`merged N ⊇ A M ∪ B K; missing 0`); any other conflicting file still STOPS. Never hand-edit.
+  Its AMENDMENT (:421) adds the digit-normalised pass 2; its WIDENING (:427) covers measured-quantity pins.
+- **C-62** (:573) — **the cap.** A Major at round 2 of 2 is ticketed, not sent to Kam; what round 2 closed stands and the
+  residue is ticketed. **It applies to TARGET B only** — B is the only round-2 GATE target here (F's "round 3" is a BUILDER
+  round; RD-510 has no prior gate report, so F is gate round 1). Its "Not covered" clause
+  reserves a tier-1 security item **where a ruling already names Kam**; no ruling for RD-616/617 names Kam (C-134, C-139, C-140
+  are Tuesday's and Kam's product rule, not a "Major → Kam" instruction), so read the cap as applying to B and say so in the
+  verdict. A NO-GO on B must state exactly **which parts are closed** (and would ship) and **which are ticketed**, each with
+  its evidence class. **A, C, D, E and F are round 1 AT THE GATE: C-62 does NOT apply to them.**
+- **C-68** (:657) — a verdict holds only at the head it ran on; semantic overlap git cannot see is exactly what it exists to
+  catch (**§8 is that case, three times over**). Its **AMENDMENT** (:667) — a merged tree's counts are regenerated ONCE on the
+  tree that exists AFTER the merge, with the id-superset control, **REGARDLESS of whether `merge-tree` reported a conflict on
+  the counts file**: *"No conflict is not evidence the number is right — it only means nobody edited the same line."*
+- **C-133** (:1425) — **C-57 AMENDMENT, base-aware accounting for a LONG-LIVED branch.** *"A missing id is ACCOUNTED, not a
+  STOP, only when BOTH of these hold for its file: (1) the merged blob is byte-identical to one parent's blob; (2) since the
+  merge base, ONLY that parent changed the file, and the other parent's blob equals the base blob."* **This is on point and the
+  commission did not cite it:** all five branches are long-lived — main has moved **42 commits** past the oldest merge base
+  (`982a84f`) and their counts (3865-3872) sit **65-72 tests below main's 3937** — so plain C-57's union rule will report
+  missing ids at every merge in §8. **The C-112 control is REQUIRED beside it.**
+- **C-112** (:1141) — **a declared limit is where the evidence stops, not a place it is cleared.** Its corollary binds §8: the
+  id-superset control may be established **by construction** (comparing every `__tests__` blob against both parents) **only
+  when every merged test file is byte-identical to a parent**. A merge that content-merges a test file gets no shortcut and
+  owes the four locked runs. **State the condition wherever the conclusion is stated.** Each builder's declared LIMITS (quoted
+  per target below) is promoted here as **L-1..L-6** — a finding against one is the mechanism working, not a mark against the
+  round.
+- **C-127** (:1349) — Kam widened merges and demo redeploys until NexusAI has a stable, fully-ready version (2026-09-21
+  18:18:12 AEST). Merges are **Tuesday's GO** under it; this gate merges nothing.
+- **C-141** + ADDENDUM (:1478) — your `qa-*` tickets are **gate-class**: a builder's PROOF ticket yields to a QA GATE ticket.
+- **C-142** (:1488) — what "green" means at a merge: local full verify green **AND** the new head's CI Build failing set equals
+  RD-641's known set by cell NAME. **As of main `34f11f4` that set is EMPTY** (Build 35780902023, §9): the bar for every merge
+  out of this gate is a failing set that is still empty, and **C-143's ADDENDUM** makes rd464 HS3 the known flake if it
+  reappears.
+- Also binding, per target: **C-54** (:337 and its "Not covered" at :346), **C-129** (:1375), **C-136** (:1445) for A;
+  **C-97**, **C-134** (:1435), **C-140** (:1463) for B; **C-139** (:1471) for D; **C-131** (:1406) at merge for A's retirement;
+  **C-28** (:153-area) never write, pull, check out or stash NexusAI's `2_Project_Files`; **C-110** the floor rule; **C-122**
+  source text does not cover behaviour; **C-130** no `test.skip`; **C-49** prior work; **C-98** cells assert the property after
+  the fix; **C-63/C-64** the FIFO lock and the usage rule.
+
+## PRIOR ROUND
+- **TARGET B is the ONLY target with a prior QA round.** **Gate 5 (RD-616 + RD-617 @ `f0519fd`): NO-GO.** Report on disk, read
+  it whole: `/Volumes/KK_T9_External_HDD/!CODING/Testing Agent MAIN/projects/nexusai/reports/2026-09-22-gate5-rd615-rd616/report.md`
+  (its §B). Its evidence directory holds instruments you may REUSE BY COPY.
+  - **Gate 5's blocker:** the full verify was **RED at the gated sha** — 3870/3871, 219/220 suites, jest exit 1 — on B's own
+    new cell **rd616 M3**, failing its PRECONDITION: a `~/.printer-dashboard-machine-id` written into the same jest worker's
+    contained HOME by `auth-gate-fail-closed.test.js` ~15 minutes earlier. **Order-dependent**, therefore green or red by luck.
+    "Re-run until green" is not an acceptance gate (charter §4d).
+  - **Gate 5's re-gate spec, verbatim (:49):** *"A narrow re-gate suffices: that ordered pair, the rd616 file, and a full
+    verify."* — the ordered pair being `auth-gate-fail-closed.test.js` then `rd616-617-…test.js` under `--runInBand`.
+    **THIS GATE'S TARGET B IS THAT NARROW RE-GATE.** Everything gate 5 measured about B's product behaviour held; do not
+    re-litigate it, and do not expand B beyond the narrow scope plus §8 and the C-68 blast radius.
+  - **Gate 5's F-B1 (Major, PRE-EXISTING — gate 2's F-B2 persisting, MEASURED AT RUNTIME):** on a volume configured before this
+    change, the mail secrets **stay plaintext after the upgrade**, and `includeSecrets` hands out the plaintext; only an
+    explicit save of a mail field re-encrypts. Gate 5 said: *"If Tuesday holds RD-616's 'stored ENC:' as a property of every
+    deployment, F-B1 is a second reason for NO-GO."* **That is a priority call and it is Tuesday's — re-state it in your
+    verdict with its evidence class; do not decide it.** Gate 5's F-B2 (Major, READ ONLY, the machine-id key input is guessable
+    in App Service and dev deployments), F-B3 (Minor) and F-B4 (Minor, the UI says "Stored encrypted at rest"
+    unconditionally) are open and are not blockers.
+- **A, C, D, E have NO prior QA gate.** Each has a builder-side round that was VOID or corrected, and each correction is a
+  named thing this gate must re-derive rather than accept:
+  - **A (RD-531+497):** NexusAI-H's run 1 was VOID on a mis-specified B3 (it expected 200 where law-schema answers its own
+    503, past the role check); corrected at `d37d4a4` before the proof that the READY cites.
+  - **D (RD-631):** H's proof was **VOID** — its CLEAN arm reddened RD-575's X1 with
+    `TypeError: Cannot read properties of undefined (reading 'has')` at `dataExport.js:217`, `DIRECTORY_STORES.has(fname)`.
+    Cause (`mail-09-rd631void.4SOehQ`, read at source): RD-575's C2 cell installs a `jest.doMock` stand-in for
+    `customerDataFiles` naming only two exports; `jest.resetModules()` does not clear a `doMock`, so X1 got the stand-in.
+    **That also means X1 has been measuring C2's stand-in rather than the real declaration since RD-575 — on MAIN as well.**
+    The fixture fix is `4ff2d45`, and `M-fixture` exists to prove it.
+  - **E (RD-438):** H's run reddened a CONTROL. `M-guard` reddened **T1 AND CTRL-RAW**, expected T1 only, because CTRL-RAW
+    proved "the raw client sends the dot-segments" by comparing the PRODUCT's own answers — **a control whose result depended
+    on the product under test.** Fixed at `1ae1dfd`: CTRL-RAW now sends every traversal form to an in-test loopback recorder
+    (`listenInBand`, RD-571) and asserts the request lines arrive as written. **The gate's job is to prove the fix: `M-guard`
+    must redden T1 ONLY and CTRL-RAW must stay GREEN.**
+  - **C (RD-638):** H's first cell could not fail on the old code (a throw in a Promise executor already rejects); `a46d336`
+    re-aimed **E2 at the export ROUTE**, where the hang lived. A cell that cannot fail is not a cell (C-98).
+
+## 1. Targets — verified at drafting from the object store (07:45-08:10 AEST)
+**origin, by `git ls-remote origin` at 07:47:5x AEST (260 refs; each branch ref appears once):**
+`main` **`34f11f405fa4ffd301df1c1bf6559ee313c1797c`**;
+`rd-531-497-s80i` **`d7d6e7eec9f62fbc75ad9971c8a14cb6be4826cb`**;
+`rd-616-617-s80i` **`cc9616b2b22aa5c65619f3c47d4742f2bf7664d6`**;
+`rd-638-export-always-ends-s80i` **`ad81ef735b68f6ef9c421759307581dc64a9ea56`**;
+`export-dir-stores-declared-s80i` **`153e4726c4a33801a53c6e0a8bdd0824f714777c`**;
+`rd-438-dot-segment-gate-s80i` **`63bb818f6f341e8e04745dd822d2d8ca9ad05a30`**;
+`rd-510-listen-before-warmup-s80i` **`3f96a40559387c7fb29499f9ce0b322729f3c1bd`** (**re-read at 08:06:38 — this one MOVED**:
+at 07:47:5x it was `7dd21717dbe32d0dc902bbec69636c926836eda4`, and it is the ONLY ref of the 260 that changed between the two
+readings. A `diff` of the two `ls-remote` dumps shows exactly that one line).
+The drafter did not map every `refs/pull/*` sha (READ: no READY names a PR; the two pull refs present are #11 and #20, neither
+a target). **Re-read them all at your start, and `main` again at the end. RD-510's branch moved once already during the
+drafting of this brief — treat a moved head as a finding, re-brief, and do not proceed on a stale pin.**
+
+> 🔴 **THE FACT THAT GOVERNS THIS WHOLE GATE, AND IT IS NOT IN ANY READY: NONE OF THE SIX IS BASED ON `main`.**
+> `main` is `34f11f4` (2026-09-23 06:31:42 +1000, the RD-641 merge). The six merge-bases are `982a84f` (A, B, E),
+> `4bc4868` (C), `6a32426` (D) and `695ca5a` (F) — all ancestors of main; **42 commits** separate `982a84f` from `34f11f4` and
+> **40** separate `695ca5a` from it. Every
+> "Base 982a84f / 4bc4868 / 6a32426" line in the READYs is still true, and every merge-preview claim in them
+> (`mail-27-ready531`, `mail-34-ready616`: *"Against current main **c0788b1** …"*) was measured against a main that **no longer
+> exists as the tip** — `c0788b1` is two merges behind. Re-measure every merge claim yourself at `34f11f4` (§8).
+
+### TARGET A — RD-531 + RD-497 (TIER 1)
+- **Branch `rd-531-497-s80i` @ `d7d6e7eec9f62fbc75ad9971c8a14cb6be4826cb`**, off
+  **`982a84f2d0c72596a2d389897439e1d8d3425068`** (MEASURED: `merge-base(34f11f4, d7d6e7e) = 982a84f`; `34f11f4` is NOT an
+  ancestor).
+- **`982a84f..d7d6e7e` = four single-parent commits:** `536619301bff90f224223c78d7d8e91c2aa782f9` (WIP RD-497: 13 admin routes
+  + `GET /api/user-data/export` below `requireAuth`) → `0081b722732ea785f6ff630c8f2ac72f857379ca` (RD-531: retire
+  `POST /api/user-data/delete-request`, its button and handler) → `d37d4a45e3a0946f39809e90d8676383cd48f191` (B3 re-aimed at
+  law-schema's own 503) → **`d7d6e7e` (counts only)**.
+- **Delta over `982a84f`: six files, +258/−78** — `__tests__/rd495-admin-routes-behind-the-gate.test.js` (+19/−9),
+  `__tests__/rd497-admin-routes-below-the-gate.test.js` (A, 195), `backend/server.js` (+39/−49), `static/admin.html` (−1),
+  `static/js/admin.js` (+2/−16), `scripts/verify-expected-counts.json` (3/3).
+- **Counts: base `982a84f` 3860/219 → head `d7d6e7e` 3870/220** (+10 tests, +1 suite = the new rd497 file's ten cells).
+- **The cells at the head (READ, 10 in one file):** `CTRL-ENF`, **B1** (enforced + anonymous: every moved route answers the
+  gate's 401), **B2** (enforced viewer: every moved admin route 403, the viewer's own export 200), **B3** (enforced admin:
+  every moved admin GET reaches its handler — 200, *or law-schema's own 503* — and every write gets past the role check),
+  **B4** (the export is the caller's own: own account, no password hash, no other user), `CTRL-OPEN`, **B5** (OPEN mode: every
+  moved admin route still refuses, so the move opens nothing in the first-run window), **E1** (RD-531: a signed-in user's
+  `POST /api/user-data/delete-request` answers **404**), **E2** (**SOURCE TEXT** — the Admin page no longer offers "Request
+  erasure"; "Export my data" is still offered), **E3** (CONTROL, last: the documented admin erasure workflow still works).
+  In `rd495-…` the CTRL-1 cell was **re-anchored on a PLANTED route** (it had pinned the defect).
+- **Builder's claims (`mail-27-ready531.bWCe9P`, 02:07 AEST; proof `rd531-hold-s80i-run8.out`; H's expectations
+  `session-tools/s79h/expect-rd531-497.txt`; floor ours 0 throughout, control rose):** R0 clean none (32/32); **M-497**
+  (afterAuthGate mounted ABOVE requireAuth) → B1 B2 B3 B4; **M-531** (`982a84f`'s route + button + handler restored) → E1 E2;
+  **M-open** (open-mode `req.user` = admin) → B5; **M-scan** (rd495 scan blind) → rd495 CTRL-1. Full verify `--update-counts`
+  **PASS 3870/3870 (220)**.
+- **L-1 — the builder's declared limit, verbatim:** *"E2 is SOURCE TEXT (C-122): it reads that the page no longer offers the
+  button, not a rendered page."* **And L-2:** *"The proof ran with my seat's environment (SESSION_SECRET present), the same gap
+  gate 7 F-1 found elsewhere; the gate should run it unset."*
+- **USER-VISIBLE CHANGE the READY flags (C-136):** the per-user "Request erasure" button is **REMOVED** from the Admin page.
+  The READY says *"It never worked; Kam's package notes should carry it."* Carry that forward in your verdict as a
+  documentation item for Tuesday; it is not yours to file.
+
+### TARGET B — RD-616 + RD-617 round 2 (TIER 1) — ROUND 2 OF 2, NARROW
+- **Branch `rd-616-617-s80i` @ `cc9616b2b22aa5c65619f3c47d4742f2bf7664d6`**, off **`982a84f`** (MEASURED).
+- **`982a84f..cc9616b` = four single-parent commits:** `cd6cd55735ceac4e931e0f3dea049279ed18bf63` (WIP: mail secrets encrypted
+  in machine-id mode; redactors refuse unknown shapes) → **`f0519fd2390c7d5f2103e72dddac3adc276df639` (counts — GATE 5'S GATED
+  HEAD, NO-GO)** → `ed6f3fc1394ce29a2da8f26eb6c0724f9cb58163` (**round 2:** M3 owns its HOME; RD-624 class fix — one contained
+  HOME per test file) → **`cc9616b` (counts only)**.
+- **ROUND 2 CHANGES NO PRODUCT FILE.** MEASURED: `f0519fd..cc9616b` touches exactly
+  `__tests__/helpers/home-containment.js`, `__tests__/rd616-617-mail-secrets-at-rest-and-export-shapes.test.js`,
+  `__tests__/rd624-home-per-file.test.js` (the `ed6f3fc` commit) and `scripts/verify-expected-counts.json` (the tip).
+  `backend/dataExport.js` is blob `9dc23e2` and `backend/services/emailService.js` blob `77d59df` at **both** `f0519fd` and
+  `cc9616b`. **Prove that yourself before you spend a minute re-measuring B's product behaviour.**
+- **Delta over `982a84f`: seven files, +332/−19** — `__tests__/helpers/home-containment.js` (+10/−5),
+  `__tests__/rd412-smtp-transport.test.js` (+8/−3), `__tests__/rd616-617-…test.js` (A, 200), `__tests__/rd624-home-per-file.test.js`
+  (A, 43), `backend/dataExport.js` (+48/−11), `backend/services/emailService.js` (+20/−5), counts (3/3).
+- **Counts: `982a84f` 3860/219 → `f0519fd` 3871/220 → `cc9616b` 3872/221** (round 2 adds rd624's suite and its one cell).
+- **The cells (READ):** rd616 **M1** (both secrets stored `ENC:`, no plaintext anywhere under the data directory), **M2** (a
+  fresh process with no cached key reads both back in the clear), **M3** (the key is bound to the data directory — another
+  deployment's directory cannot read the secret; **this is gate 5's blocker cell, now claimed to own its HOME**); rd617
+  **P** (CONTROL: the shapes the product writes are still exported and redacted), **F** (CONTROL: with `includeSecrets` the
+  reader finds a planted secret, so "absent" is a real search), and **six `W` rows** by `test.each(WRONG_SHAPES)`
+  (*"withheld and named, never marked redacted, secret not in the ZIP"*); rd624 **H1** (two runs of the containment setup get
+  two different HOMEs, and the second cannot see the first's legacy id).
+- **Builder's claims (`mail-34-ready616.6hrVHD`, 04:39 AEST; proof `rd616r2-hold-s80i-run10.out`; H's expectations
+  `session-tools/s79h/expect-rd616-r2.txt`; `--runInBand` with the ordered sequencer; floor ours 0, control rose):** in EVERY
+  arm the proof-of-execution line *"[ordered-sequencer] order used: auth-gate-fail-closed.test.js ->
+  rd616-617-mail-secrets-at-rest-and-export-shapes.test.js -> rd624-home-per-file.test.js"* and *"Test Suites: 3 total"*.
+  R0 clean 49/49; **M-both** (`home-containment.js` AND the rd616 test = `f0519fd`'s) → M3 + H1; **M-helper**
+  (`home-containment.js` = `f0519fd`'s only) → H1 only; **M-m3** (the rd616 test = `f0519fd`'s only) → **none (49/49)**.
+  Full verify `--update-counts` **PASS 3872/3872 (221)**.
+  **Read the shape of that claim, because it is the whole round:** M-helper and M-m3 each green on the other's cell is offered
+  as proof that the class fix and M3's own fix each hold ALONE, and M-both as proof that M-m3's zero is not vacuous.
+  **M-m3's "none" is a ZERO — it is reportable only beside a control that fired in the same window (§10 clause 4).** Re-derive
+  it; do not accept the builder's pairing as the control.
+- **L-3 — declared limits, verbatim:** *"the proof ran with my seat's environment (SESSION_SECRET present) — the same gap gate 7
+  F-1 found in my own file; the gate should run it unset. The C-97 fixture move H made (rd412's RD-413 cell) is in his round 1,
+  not re-measured here."*
+
+### TARGET C — RD-638 (TIER 2)
+- **Branch `rd-638-export-always-ends-s80i` @ `ad81ef735b68f6ef9c421759307581dc64a9ea56`**, off
+  **`4bc48686c022933543c85ab6d1e430b7062d6901`** (MEASURED — RD-575's merge into main, 2026-09-22 11:49).
+- **`4bc4868..ad81ef7` = three single-parent commits:** `a46d336edbba1b7a7713471b9eee414c9c8130b0` (the fix + the cell file) →
+  `0ab8a05512771564ede54c7e980e7423779ecae2` (**E2 re-aimed at the export ROUTE**, where the hang lived) → **`ad81ef7`
+  (counts only)**.
+- **Delta over `4bc4868`: four files, +238/−75** — `__tests__/rd638-export-always-ends.test.js` (A, 128),
+  `backend/dataExport.js` (+103/−74), `backend/server.js` (+4/−1), counts (3/3).
+  **Note the shape: RD-638 REWRITES ~103 lines of `streamExport`** (hunks at `:120`, `:193-202` and `:252-285` of the base) —
+  by far the largest of the three `dataExport.js` deltas, and the reason it is §8's collider.
+- **Counts: `4bc4868` 3868/220 → `ad81ef7` 3870/221** (+2 tests, +1 suite: E1 and E2).
+- **The cells (READ, 2):** **E1** — *"an unlistable attachment subdirectory: the export completes and names it; a readable
+  sibling still streams"*; **E2** — *"the export ROUTE ends its response within 15 s when the archive errors after the headers
+  were sent"*.
+- **Builder's claims (`mail-39-ready638.2gEBtM`, 06:11 AEST; proof `rd638-hold-s80i-run11.out`; H's expectations
+  `session-tools/s79h/expect-rd638.txt`):** R0 none (2/2); **M-638** (`dataExport.js` AND `server.js` = `4bc4868`'s) → E1 + E2
+  (*"E2 NOT SETTLED at 5 s, the gate-4 hang"*); **M-route** (`server.js` only) → E2 only; **M-files** (`dataExport.js` only) →
+  E1 only. Full verify `--update-counts` **PASS 3870/3870 (221)**.
+- **L-4 — declared limits, verbatim:** *"the proof ran with my seat's environment (SESSION_SECRET present) — gate 7 F-1's shape;
+  the gate should run it unset. Against current main the forward merge is not yet measured; it is off 4bc4868 and main is now
+  c0788b1 (about to move again with the RD-645 + RD-641 batch), so it forward-merges at merge time as usual."*
+  **That second half is now stale twice over — main is `34f11f4` — and §8 discharges it.**
+- **Where it came from:** gate 4's **F-A2**, classed **Minor** there (`…/2026-09-22-gate4-rd575-rd524r2/report.md:281, :302`):
+  *"`POST /api/admin/export` never ends its response when any attachment subdirectory is unlistable"*, MEASURED AT RUNTIME
+  twice, and the same hang is what held gate 4's own jest lock for ~71 minutes (its O-2). Read both before you drive E2.
+
+### TARGET D — RD-631 (TIER 2)
+- **Branch `export-dir-stores-declared-s80i` @ `153e4726c4a33801a53c6e0a8bdd0824f714777c`** — **note the branch name carries no
+  `rd-631-` prefix**; it is the only one of the five that does not follow the `rd-NNN-…` convention. Off
+  **`6a32426a7aa7b847cd2ec0ab89f0ec3bdc2fe71e`** (MEASURED — RD-575's forward-merge commit, an ancestor of main).
+- **`6a32426..153e472` = three single-parent commits:** `4b685d6ad89d0be1d6a14ac96bd54a1ef6808dff` (H's product change) →
+  `4ff2d45eb8b689995d71221a49ba9f7418158541` (**the fixture fix** — RD-575's `customerDataFiles` stand-in carries every export
+  and stops leaking into later tests, C-97) → **`153e472` (counts only)**.
+- **Delta over `6a32426`: six files, +135/−6** — `__tests__/customer-data-lists-agree.test.js` (+8/−1),
+  `__tests__/erasure-reaches-attachments.test.js` (+10/−1), `__tests__/rd631-export-directory-branch-declared-only.test.js`
+  (A, 92), `backend/customerDataFiles.js` (+12/−1), `backend/dataExport.js` (+13/−2), counts (3/3).
+- **Counts: `6a32426` 3868/220 → `153e472` 3872/221** (+4 tests, +1 suite).
+- **The product change (READ):** `dataExport.js` now imports `DIRECTORY_STORES` alongside `CUSTOMER_DATA_FILES`, and in
+  `streamExport` a directory at a store name **not** in `DIRECTORY_STORES` is withheld with RD-617's exact wording
+  (`unexpected shape (…); withheld because it may hold credentials`) and **never `redacted: true`**. `customerDataFiles.js`
+  gains the `DIRECTORY_STORES` declaration (today: `feedback-attachments`).
+- **The cells (READ, 4):** `test.each(PROBES)` — **D1** (a directory named `email_settings.json` holding `smtp.json` with a
+  password) and **D2** (a directory named `sessions.json` holding a session id), each *"withheld and named, never redacted,
+  not streamed"*; **C1** (CONTROL: `feedback-attachments` still streams byte-identical and the reader finds its content); plus
+  one new cell in `customer-data-lists-agree.test.js` — *"every DIRECTORY_STORES name is in CUSTOMER_DATA_FILES, and the set is
+  not empty"*.
+- **Builder's claims (`mail-44-ready631.Z8UY2Q`, 06:50 AEST; proof `rd631-hold-s80i-run12.out`; expectations first in
+  `expect-rd631-s80i.txt`):** R0 clean 82/82 (*"the VOID run's X1 red is gone"*); **M-631** (`dataExport.js` = `6a32426`'s) →
+  D1 + D2; **M-decl** (`feedback-attachments` out of `DIRECTORY_STORES`) → C1 + X1 + lists-agree; **M-fixture** (RD-575's OLD
+  stand-in restored) → X1 only, with `TypeError: Cannot read properties of undefined (reading 'has')`.
+  Full verify `--update-counts` **PASS 3872/3872 (221)**.
+- **L-5 — declared limits, verbatim:** *"the proof ran with SESSION_SECRET present (gate 7 F-1's shape; the gate should run it
+  unset). The forward merge onto current main (now 34f11f4) is not yet measured — H's note stands that meeting RD-617 needs a
+  hand-resolved dataExport.js if both land in the same merge."*
+  **This is the origin of the coordinator's merge-order ruling, and §8 measures it: at these heads the RD-617 × RD-631 pair
+  auto-merges `dataExport.js`. H's note is WRONG AT SOURCE; the hand resolution RD-638 needs is real.**
+- **The cross-target fact in `mail-09-rd631void` that is NOT in the READY, and is this target's most important line:**
+  *"The X1 leak is on MAIN too (RD-575 merged with the same fixture; it passes there only because main has no DIRECTORY_STORES
+  yet). It's fixed when RD-631 merges."* — i.e. **`erasure-reaches-attachments.test.js`'s X1 has been measuring a `doMock`
+  stand-in instead of the real declaration on main since RD-575.** Measure it at `34f11f4` and report it, with its class.
+
+### TARGET E — RD-438 (TIER 1)
+- **Branch `rd-438-dot-segment-gate-s80i` @ `63bb818f6f341e8e04745dd822d2d8ca9ad05a30`**, off **`982a84f`** (MEASURED).
+- **`982a84f..63bb818` = four single-parent commits:** `662facac076cd5f89bc9b8c8c14af4e351fcbdc5` (the product change + the
+  cell file) → `7a1a9ba53b1b84a1f1d458fe8f19177f209bfb56` (counts 3865/220) → **`1ae1dfd2fa01b09883d40839f7b9a1970fe01320`
+  (the CTRL-RAW fix — test file only)** → **`63bb818` (counts "re-confirmed": the counts commit changes only the file's
+  `_updated` stamp; tests/suites are 3865/220 at both `7a1a9ba` and `63bb818` — prove it by blob and say so)**.
+- **Delta over `982a84f`: three files, +164/−1** — `__tests__/rd438-dot-segment-gate.test.js` (A, 129), `backend/server.js`
+  (+32/−1), counts (3/3).
+- **Counts: `982a84f` 3860/219 → `63bb818` 3865/220** (+5 tests, +1 suite).
+- **The product change (READ, two halves, both in the server entry point):**
+  1. **`rejectDotSegments`** — an `app.use` mounted just below helmet that 400s any request whose path holds a dot-segment
+     (`.` or `..`, raw or percent-encoded) or an encoded slash (`%2f` / `%5c`), decided on `req.originalUrl`'s path.
+     The comment says the gate matched the raw path while `express.static` normalised it, so `/favicon.ico/../settings.html`
+     was judged public and served the gated page.
+  2. **`PUBLIC_SUBTREES`** — `isAlwaysPublicPath` changes from `path === p || path.startsWith(p)` to
+     `path === p || (PUBLIC_SUBTREES.has(p) && path.startsWith(p + '/'))`, with `/scim/v2` the ONLY subtree.
+     So `/api/healthx` no longer passes as a prefix of `/api/health`.
+- **The cells (READ, 5):** `CTRL-GATED`, `CTRL-EXACT`, **`CTRL-RAW`** (*"the raw client sends every traversal form literally,
+  measured at a loopback recorder, not by the product's answer"* — **the fixed control**), **T1** (every traversal form, raw
+  and encoded, is refused and never serves the gated page), **T2** (`/api/healthx` meets the gate, 401).
+- **Builder's claims (`mail-48-ready438.IaxqEL`, 07:34 AEST; proof `rd438r2-hold-run4.out`; expectations first in
+  `expect-rd438-r2.txt`; arm logs `rd438r2-R0.log`, `rd438r2-M-438.log`, `rd438r2-M-guard.log`, `rd438r2-M-exact.log`;
+  verify `rd438r2-verify.log`):** R0 5/5; **M-438** (`server.js` = `982a84f`'s) → T1 + T2; **M-guard** (`rejectDotSegments`
+  removed) → **T1 ONLY, CTRL-RAW green**; **M-exact** (prefix matching restored) → T2 only.
+  Full verify `--update-counts` **PASS 3865/3865 (220)**.
+- **L-6 — declared limit, verbatim:** *"the proof ran with SESSION_SECRET present; the gate runs it unset (gate 7 F-1)."*
+- **⚠️ NOTE ON `expect-rd438-r2.txt`:** it is written against **`1ae1dfd`**, not the gated `63bb818`. `63bb818` adds only the
+  counts commit, so the cell file and `server.js` are byte-identical — **prove both blobs, then run at `63bb818` anyway.**
+- **C-54's "Not covered" clause (:346) binds this target's TIER:** *"RD-438 becomes tier 1 if any API, not only HTML pages, is
+  reachable through the path. Measure first."* **T2 already drives an API path (`/api/healthx`).** This brief sets RD-438
+  TIER 1; **your §7 Q2 measurement settles it on the record** — drive a traversal at an **API** route as well as at an HTML
+  page, on the base and on the head, and state the answer plainly.
+
+### TARGET F — RD-510 (TIER 1, by the coordinator's ruling) — ADDED BY AMENDMENT
+- **Branch `rd-510-listen-before-warmup-s80i` @ `3f96a40559387c7fb29499f9ce0b322729f3c1bd`**, off
+  **`695ca5ac96994f1d1f16e9ad0a8c2d5f6f9b0538`** (MEASURED: `merge-base(34f11f4, 3f96a40) = 695ca5a`, which is
+  *"RD-619: counts regenerated on this tree (3863/220, verify PASS)"*, 2026-09-22 09:07:50, an ancestor of main and a
+  descendant of `982a84f`). **This is the OLDEST base in the gate by commit graph position on the RD-607/RD-619 line — it is
+  not on the same line as A/B/E's `982a84f`.** Say which base you used everywhere you report an F result.
+- **`695ca5a..3f96a40` = four single-parent commits:**
+  `1b9f1754d5abd3f7cc777d678d3582c0df6aaf17` (**round 1**: listen before the boot AI warm-up; the warm-up runs in the
+  background with a deadline — `backend/server.js` **+** the new `__tests__/rd510-listen-before-warmup.test.js`) →
+  `5c1af17551653709e1af1c35681e7cd4f4bcdca7` (**round 2**: the warm-up deadline is a timer every step races; the listen lines
+  come before the warm-up starts — **`backend/server.js` only**) →
+  `7dd21717dbe32d0dc902bbec69636c926836eda4` (**round 3**: rd523's delta window opens on the BOOT warm-up's own marker, and
+  the marker is REQUIRED — **`__tests__/rd523-aoai-redirect-refused.test.js` only**) → **`3f96a40` (counts only)**.
+- **⚠️ "ROUND 3 IS TEST-ONLY" IS TRUE OF THE COMMIT, NOT OF THE BRANCH.** Delta over `695ca5a`: **four files, +232/−63** —
+  `__tests__/rd510-listen-before-warmup.test.js` (A, 97), `__tests__/rd523-aoai-redirect-refused.test.js` (+26/−0),
+  **`backend/server.js` (+106/−60)**, counts (3/3). **Gate the whole delta at `3f96a40`.**
+- **Counts: base `695ca5a` 3863/220 → head `3f96a40` 3867/221** (+4 tests, +1 suite = rd510's three cells plus rd523's new
+  CTRL-WARM). **The coordinator's warning applies: the six predicted verify numbers are all different — A 3870/220 ·
+  B 3872/221 · C 3870/221 · D 3872/221 · E 3865/220 · F 3867/221. Never carry one number across the batch.**
+- **The product change (rounds 1-2, READ):** the server calls `app.listen` **before** the boot AI warm-up; the warm-up runs in
+  the background with a deadline that is **a timer every awaited step races**, so a stalled AI deployment cannot hold the boot.
+- **The cells (READ):** `rd510-listen-before-warmup.test.js` — **L1** (*"STALL: the server answers `/api/health` inside the
+  boot deadline, listening before the warm-up"*), **L2** (*"CONTROL, GOOD: the warm-up still runs after listen and
+  completes"*), **L3** (*"STALL with a 2 s warm-up deadline: the warm-up stops at its deadline and says so; the server
+  answered throughout"*). In `rd523-aoai-redirect-refused.test.js` (31 cells total) round 3 adds **CTRL-WARM** —
+  *"the BOOT warm-up settled before the delta windows opened (RD-510)"*.
+- **What round 3 actually changed (READ at source, `git diff 5c1af17 7dd2171`):** a new
+  `BOOT_WARMUP_SETTLED = /✅ AI pipeline warmed in|⏱️ AI warm-up stopped at its|⏭️ AI warm-up skipped/` and
+  `waitForBootWarmup(h, ms = 180000)` which returns **`false`** on timeout with the comment *"the caller MUST assert this: a
+  wait that can be skipped silently is no wait"*; `SIGNED.bootWarmupSettled = await waitForBootWarmup(SIGNED)` in `beforeAll`
+  **before** the delta windows open; and `CTRL-WARM` = `expect(SIGNED.bootWarmupSettled).toBe(true)`.
+- **The defect it exposes, in the builder's words (`mail-50-rd510r3.d4XdI2`, read in full):** rd523 *"opened its window after
+  `waitForWarmup`, which waits for the ADAPTER's marker (`azureOpenAIAdapter.js:471/473`) … That is NOT the boot loop:
+  `server.js` fires 8 synthetic queries through `analyzeQuery` and only then logs its own line … RD-510 moved the loop after
+  listen and the window started opening mid-loop."* The in-file comment records the measurement: **rd523 E1 saw 17 boot chat
+  completions at the stored origin.**
+- **Builder's claims (`mail-51-ready510.DIUy3J`, 08:00 AEST; proof `rd510r3-hold-run1.out`; expectations first in
+  `expect-rd510-r3.txt`; arm logs `rd510r3-R0.log`, `rd510r3-M-anon.log`, `rd510r3-R1.log`; verify `rd510r3-verify.log`;
+  floor ours 0 throughout, control rose; **the whole hold ran with `SESSION_SECRET` UNSET**):** R0 clean **27/27** incl.
+  CTRL-WARM and E1; **M-anon** (`requireAuth` patched to let `/api/setup/ai-test` through, so the anonymous call really dials)
+  → **E1 red AND ALSO E2 and E2-happy**; R1 clean 27/27; full verify `--update-counts` **PASS 3867/3867 (221)** with round 2's
+  rd523 E1 failure gone.
+- **THE BUILDER'S OWN DECLARED DEVIATION, verbatim, and the coordinator requires it carried:** *"I wrote 'E1 RED … rd510's
+  three cells stay green' and did not predict E2 / E2-happy. They reddened too. The reason, read at source: my mutant skips
+  `requireAuth` for that path, and `requireAuth` is where `req.user` is assigned — so the ADMIN calls in E2 and E2-happy lose
+  their identity as well. The mutant is therefore BROADER than surgical. It still does the job your ruling asked of it (E1
+  reddens when the anonymous path sends, so the re-anchored cell discriminates), but I am not calling it a precise one-cell
+  mutant, and a gate re-deriving it should expect three reds, not one."*
+  **So: THREE REDS IS THE PREDICTION, NOT A SURPRISE.** One red, or four, is the finding.
+- **⚠️ NONE OF F'S EVIDENCE IS AT THE GATED HEAD.** `rd510r3-hold-run1.out` line 2 reads
+  `=== 2026-09-22T21:41:07Z HEAD 7dd21717dbe32d0dc902bbec69636c926836eda4; SESSION_SECRET UNSET`, and
+  `expect-rd510-r3.txt` names base `695ca5a` but no head. `3f96a40` adds only the counts commit, so the two test files and
+  `backend/server.js` are byte-identical at `7dd2171` and `3f96a40` — **prove all three blobs, then run at `3f96a40` anyway.**
+- **L-7 — the residual the coordinator requires carried, in her wording:** *"after its deadline the warm-up starts no new
+  query, but the orphaned call keeps its socket and may retry once (+32 KB RSS, 2 sockets held at +60 s, health unaffected;
+  the retry is **CONSISTENT WITH** a client retry but **NOT PROVEN** — do not let the brief assert the mechanism)."*
+  **Ticketed RD-654.** **RD-655** covers boot warm-up reaching the stored origin with no caller. **Neither is fixed here and
+  neither is an RD-510 finding unless RD-510 changes it.** If you measure the retry, report the measurement and say plainly
+  whether it establishes the mechanism or only remains consistent with it (C-112).
+
+### How to build your trees
+- **No worktree is pinned, and none is created in the NexusAI repo. Build your own trees INSIDE YOUR OWN PROJECT (Testing Agent
+  MAIN), from the object store:** `git -C <repo> archive <sha> | tar -x -C <a fresh mktemp -d under
+  projects/nexusai/qa-trees/gate8.XXXXXX/>`, git-indexed from the object store where a full verify needs a git tree (five
+  suites read `.github` / `node-version`). **Never `git worktree add`, `checkout`, `fetch`, `pull`, `stash`, `clean`, `gc` or
+  commit against the NexusAI repo, and never work in its `2_Project_Files` checkout (C-28, C-67).** Pin by sha, read origin by
+  `ls-remote`. Do not run anything in the builder's `worktrees/`, `qa-worktrees/` or `session-tools/s80i/*-tree.*`.
+- **READ AND DO NOT DISTURB:** at drafting the NexusAI checkout had **33 modified files in its working tree** (`git status`
+  read-only). That is not yours. Every measurement you take is from the OBJECT STORE by sha, never from the checkout.
+- **Each tree you build is EXCLUSIVE to this gate and to ONE purpose.** Run nothing else in it, let no other seat run in it,
+  never reuse a mutant tree for a clean arm: a fresh `mktemp -d` per arm. Use `gate8`-prefixed directories only; gate 7's
+  `gate7.*` / `gate7r2.*` trees are those gates' evidence — read, never run in.
+- `node_modules`: an APFS clone (`cp -c -R`) of gate 7 round 2's. **`package-lock.json` is blob `9064763` at `34f11f4` and at
+  ALL SIX heads and all four bases** (MEASURED) — one `node_modules` serves every tree here. Confirm it yourself.
+- **`git merge-tree --write-tree` writes objects** — always `GIT_OBJECT_DIRECTORY=<your own mktemp -d>
+  GIT_ALTERNATE_OBJECT_DIRECTORIES=<repo>/.git/objects`. The same two variables let you `git archive` a merge RESULT tree, and
+  `git commit-tree` a merge result so you can chain the next merge onto it (§8 needs that). **The drafter did exactly this and
+  the repo's object count was 759 before and 759 after its five-target runs — verify the same for your own runs, count
+  `find <repo>/.git/objects -type f` before and after, and account for any delta by mtime (the live NexusAI-I seat commits
+  into that same repo while you work; see PROVENANCE).**
+- The repo is `/Volumes/KK_T9_External_HDD/!CODING/Datasec/NexusAI/2_Project_Files`.
+- **NOT on main. Nothing merges on your word or a builder's.**
+
+## 2. Why these tiers, and who is waiting
+- **A (RD-531+497) TIER 1:** 13 `/api/admin/*` routes plus `GET /api/user-data/export` were reachable **above**
+  `app.use(requireAuth)`. A move that leaves any of them reachable anonymously, or that opens something in the first-run
+  window, or that lets one user's export return another's data, is a **Major**. RD-531 RETIRES a route: a retirement that
+  leaves the route reachable, or that removes a working channel, is also a **Major**.
+- **B (RD-616+617) TIER 1:** mail secrets at rest. A redactor that hands an unknown shape back unchanged **while the manifest
+  says `redacted: true`** streams a credential and lies about it — that is the defect RD-617 closes. A round-2 fix that makes
+  the verify green by making a cell stop measuring is a **Major**.
+- **C (RD-638) TIER 2:** availability on a privacy path. An export that never ends leaves a customer waiting forever and, as
+  gate 4 measured on itself, can hold a shared resource for over an hour. A "fix" that ends the response by silently dropping
+  data is a **Major**.
+- **D (RD-631) TIER 2:** C-139's latent leak (a tampered or mis-restored volume). A withheld entry that is nonetheless marked
+  `redacted: true`, or a declared store that stops streaming, is a **Major**.
+- **E (RD-438) TIER 1:** an auth-gate bypass. A traversal form the guard misses, or a public entry that still matches by
+  prefix, is a **Major**. So is a `rejectDotSegments` that 400s a path the product's own pages produce.
+- **F (RD-510) TIER 1:** the branch reorders **boot** — the server listens before the AI warm-up — and it re-anchors the
+  instrument of `rd523 E1`, the cell that proves an anonymous caller causes **zero traffic to either origin**. A re-anchor
+  that makes E1 stop discriminating would retire a zero-traffic security guarantee while looking like a test tidy-up: that is
+  a **Major**. So is a boot reorder that serves traffic before something the product must have finished.
+- 🔴 **The queue.** Main `34f11f4`, CI GREEN, failing set EMPTY (§9). All six are Tuesday's GO under C-127 after this gate,
+  each forward-merged onto the main of its turn and verified green there (C-68, C-57, C-133, C-112, C-142). At drafting the
+  jest lock was held by `s80i-rd510r3-proof` (pid 9929, since 2026-09-22T21:41:07Z) with the **jest queue EMPTY** and the
+  **docker queue EMPTY**; that hold is TARGET F's own proof and it finished at 07:59, so expect the lock free or held by
+  something new. C-141 makes any builder proof yield to your `qa-gate8-*` tickets.
+
+## 2a. LEGITIMATE SHAPES — the three checkers in this gate (template §2a)
+*(F/RD-510 is not a checker — it rejects no input. Its equivalent of this table is §7a Q7: what must be finished before the
+first request, now that the first request can arrive earlier.)*
+Each of these rejects input, so each owes a table of ordinary forms that must NOT be rejected. Measure every row.
+
+**E — `rejectDotSegments` + `PUBLIC_SUBTREES` (the auth gate's path decision):**
+
+| shape — its ordinary form, as the product really sees it | expected verdict | the rule clause that yields it | predicted-by |
+|---|---|---|---|
+| `GET /login`, `GET /api/health` (exact public entries) | answered 200 | `path === p` | builder (CTRL-EXACT) |
+| `GET /scim/v2/Users` (the one declared subtree) | reaches the SCIM router, not the gate's 401 | `PUBLIC_SUBTREES.has('/scim/v2')` | drafter |
+| `GET /api/healthx` | **meets the gate (401)** — not public by prefix | exact match only | builder (T2) |
+| `GET /favicon.ico/../settings.html`, and every encoded form | **400**, and never the gated page | `rejectDotSegments` | builder (T1) |
+| a normal static asset path with a dot in the FILENAME (`/js/app.min.js`, `/x.y.z/a`) | answered normally, **never 400** | a segment equal to `.` or `..` only | drafter — **a 400 here is a Major** |
+| a query string containing `..` (`/login?next=../x`) | answered normally | the check reads the path, not the query | drafter |
+| a path with a literal `+` or a percent-encoded space | answered normally | neither is `%2f`/`%5c` nor a dot-segment | drafter |
+
+**B — the RD-617 redactors (`_UnexpectedShape`):**
+
+| shape | expected verdict | clause | predicted-by |
+|---|---|---|---|
+| `authorized_users.json` = `[]` and `sessions.json` = `{}` (what the product writes at FIRST BOOT) | **streamed and redacted, never withheld** | they are the known shapes | gate 5 measured it; **a withhold here is a Major** |
+| `authorized_users.json` an array of user objects with `password_hash` | streamed with the hash replaced | `_REDACTED_HASH` | builder (P) |
+| a user object carrying `passwordHash` (camelCase) or any other `pass…hash` spelling | **withheld and named**, `redacted` NOT true | `_OTHER_HASH_KEY` | builder (W rows) |
+| `email_settings.json` with `smtp` / `agentmail` sections as objects | streamed, secrets replaced with *"…request export with includeSecrets=true for the **stored form**"* | `_isPlainObject` per section | builder |
+| `sessions.json` keyed by session id, values records | streamed, ids replaced | the sessions redactor | builder |
+| any of the above as a plain string, number or wrong container | withheld, named, `bytes: 0`, never `redacted: true` | `_UnexpectedShape` | builder (W rows) |
+
+**D — the RD-631 directory branch:**
+
+| shape | expected verdict | clause | predicted-by |
+|---|---|---|---|
+| `feedback-attachments/` (the declared directory store) | streams byte-identical | `DIRECTORY_STORES.has(fname)` | builder (C1) |
+| a directory named `email_settings.json` or `sessions.json` | **withheld and named, never `redacted: true`, never streamed** | not declared | builder (D1, D2) |
+| an ordinary file at a declared-directory name | the ordinary file path, unchanged | `lstatSync().isDirectory()` is false | drafter |
+| a **symlink** at a store name pointing at a directory | **state what happens** (`lstatSync` does not follow) | READ, then measure | drafter — if it streams past the redactor, that is the same class as C-139 |
+
+**A row whose expected verdict and clause disagree is a finding against this brief — say so.**
+
+## 3. THE FIVE QUESTIONS EVERY TARGET ANSWERS (do these first, once, for all six)
+0. **SESSION_SECRET UNSET, EVERY RUN (the coordinator's ruling, widened — see RULED BY KAM).** Launch every hold under
+   `env -u SESSION_SECRET` and print, as the hold's first line, whether the variable is **SET or UNSET** (name only, never a
+   value). **The positive control:** in the same hold, run one target's own new cell file with a throwaway random 64-hex secret
+   exported (never printed, never written) — if the two arms are identical, say so; if any target's cells need an ambient
+   secret, that is **gate 7 F-1 recurring** and it is a Major against that target. **READ `.github/workflows/build.yml` at
+   `34f11f4`: still no `SESSION_SECRET`** (so CI's shape is your UNSET arm) — quote the lines you read.
+1. **Re-pin everything yourself.** `git ls-remote origin` at start, mid and end; the five heads, their merge-bases, their
+   exact chains (`git log --format='%H %P'`), and each delta (`git diff --name-only <base> <head>`). **Any disagreement with
+   §1 is a finding, not a typo to fix.**
+2. **Re-derive every mutant table INDEPENDENTLY** — your own mutation script, never the builder's `*-proof-hold.sh` /
+   `*-hold.sh`. One lock hold per target's table. Proof of execution (`Tests: … N total`) per arm. **Before each mutant arm,
+   prove the mutant still parses** — `node --check` on every mutated file, exit 0, output quoted. **A red from a mutant that
+   does not parse or load is a VOID arm, never a red.** Read WHY each red is red (quote the failing assertion).
+3. **Name every behaviour guarded by no cell, and every one guarded only by SOURCE TEXT (C-122).** A's E2 is declared source
+   text (L-1); find the others.
+4. **Full verify of each head**, `npm run verify -- --maxWorkers=2` (RD-561: the worker argument is mandatory), through the
+   lock, on a git-indexed tree, SESSION_SECRET UNSET. **Predicted: A 3870/220 · B 3872/221 · C 3870/221 · D 3872/221 ·
+   E 3865/220 · F 3867/221.** **Six targets, six DIFFERENT numbers — the coordinator's words: *"the counts differ per target
+   (RD-510's verify is 3867/221); do not assume one number across the batch."*** Every failure by NAME, with the worker
+   timeline if order-dependent. **"Re-run until green" is not an acceptance gate (charter §4d).** That clause has teeth here:
+   gate 5 failed B on exactly this.
+
+## 4. TARGET A — RD-531 + RD-497 (TIER 1). Answer each with a measurement.
+1. **Scope, mechanically (READ ONLY, quoted):** `git diff --name-status 982a84f d7d6e7e` = the six files; `git diff --name-only
+   d37d4a4 d7d6e7e` = the counts file only; `git rev-parse d37d4a4:backend/server.js d7d6e7e:backend/server.js` identical.
+2. **THE CENSUS, AND THE OPEN DISCREPANCY.** C-129 and RD-497 speak of "16" routes and "the other 15"; the READY's census says
+   **13 admin + 2 user-data**; **gate 2 counted 14** at `aae041a` and left the difference unreconciled (its §3.1 and its open
+   item *"The RD-497 route-count discrepancy (14 vs 16), unreconciled"* —
+   `…/2026-09-21-gate2-rd495-rd525-rd575/report.md:131, :380`). **Settle it here.** Enumerate, from source at `982a84f` and at
+   `d7d6e7e`, every `app.(get|post|put|delete|patch|use)('/api/admin…` and every `/api/user-data/…` registration, with its line,
+   and say for each whether it is above or below `app.use(requireAuth)` at each sha. **A route still above the gate at the head
+   that nobody has ruled on is a Major.**
+3. **Drive it, PRODUCTION-shaped, on your own loopback server** (boot from your own tree, fresh `DATA_DIR`): in the ENFORCED
+   boot — anonymous (predicted the gate's 401 on every moved route), a signed-in **viewer** (predicted 403 on every moved admin
+   route, **200** on the viewer's own export), a signed-in **admin** (predicted the handler, 200 **or law-schema's own 503**);
+   in the OPEN boot — predicted every moved admin route still refuses. **B4 is the one to drive hardest:** prove the export is
+   the CALLER'S OWN — create two local accounts, export as one, and prove the other's records and every password hash are
+   absent, by searching the decompressed bytes **and** by finding a planted token first (a search that finds nothing is only
+   reportable beside a search that finds something).
+4. **RD-531's retirement:** `POST /api/user-data/delete-request` answers **404** signed in (E1) and anonymously (drive both).
+   **C-136 says the documented channel is PRIVACY.md's `privacy@` address plus the admin erasure workflow** — E3 is that
+   control; drive it. **READ `PRIVACY.md` and `TERMS` at the head and confirm neither was edited** (the READY claims they were
+   not) **and that neither still points a customer at the retired button.** A privacy document that promises a removed control
+   is a finding.
+5. **E2 is SOURCE TEXT (L-1, C-122).** Replace it with a measurement: render or serve `static/admin.html` from your own tree
+   and confirm, through the served page, that "Request erasure" is gone and "Export my data" remains. If you cannot render it,
+   say so and leave L-1 standing explicitly (C-112).
+6. **C-68 re-run set for A:** every suite that drives `/api/admin/*`, `requireAuth`, `/api/user-data/*` or the admin page
+   (`git grep -l -E "api/admin|requireAuth|user-data" d7d6e7e -- __tests__`: name them, per-file counts). **rd495's CTRL-1 was
+   re-anchored on a planted route — prove the re-anchored control still fires** (it is the cell M-scan kills).
+
+## 5. TARGET B — RD-616 + RD-617 round 2 (TIER 1, NARROW). Answer each with a measurement.
+1. **Scope first, and let it save you time:** prove `f0519fd..cc9616b` is the three test files + counts, and that
+   `backend/dataExport.js` (`9dc23e2`) and `backend/services/emailService.js` (`77d59df`) are byte-identical at `f0519fd` and
+   `cc9616b`. **With that proved, gate 5's product measurements stand and you do not repeat them** — say so explicitly and cite
+   gate 5's §B.
+2. **THE NARROW RE-GATE, gate 5's words:** the ordered pair `auth-gate-fail-closed.test.js` → `rd616-617-…test.js` under
+   `--runInBand` (gate 5 predicted 11/11 on the fix), the rd616 file, and a full verify. **Run the ordered pair BOTH ways**
+   (leaker first and leaker second) and **in the same worker**, and run it against `f0519fd` as the positive control:
+   **predicted `f0519fd` RED on rd616 M3's precondition, `cc9616b` GREEN.** A green at the head without that red in the same
+   window is not reportable (§10 clause 4).
+3. **Re-derive the round-2 table independently**, `node --check`ed and predicted first: **M-both** (`home-containment.js` AND
+   the rd616 test from `f0519fd`) → predicted M3 + H1; **M-helper** (helper only) → predicted H1 only; **M-m3** (the rd616 test
+   only) → predicted none. **M-m3's zero needs its own control in the same run** — say what fired.
+4. **Does the class fix actually contain HOME per FILE?** Read `__tests__/helpers/home-containment.js` at `cc9616b` and prove
+   it sets **both** `process.env.HOME` **and** `os.homedir` to a fresh per-file directory and restores them. Then measure
+   **blast radius**: every file that requires `home-containment` (`git grep -l home-containment cc9616b -- __tests__`) — name
+   them, and say whether any of them depended on the SHARED HOME the old helper gave (a suite that silently starts seeing an
+   empty HOME is a new failure mode this round introduces).
+5. **F-B1 STANDS AND IS TUESDAY'S CALL.** Re-state gate 5's F-B1 (pre-existing plaintext after upgrade until an explicit save)
+   in your verdict, with its evidence class, and say whether anything in round 2 changes it (predicted: nothing — round 2 is
+   test-only). **Do not decide it; do not grade it as an RD-616 defect this round.** Same for F-B2, F-B3, F-B4.
+6. **C-62, ROUND 2 OF 2.** A Major here is **ticketed, not sent to Kam**. Your verdict must state exactly which parts are
+   CLOSED (and would ship) and which are TICKETED, each with its evidence class.
+7. **L-3's second half is a real hole:** *"The C-97 fixture move H made (rd412's RD-413 cell) is in his round 1, not
+   re-measured here."* `__tests__/rd412-smtp-transport.test.js` is in B's delta (+8/−3). **Re-measure it:** drive the
+   no-key-source case and prove the product still **SAVES as given and tells the truth** (C-140, Kam's RD-413 option B — it
+   never refuses), and that the M-413 mutant (the catch refuses instead of storing) reddens exactly that cell.
+
+## 6. TARGET C — RD-638 (TIER 2). Answer each with a measurement.
+1. **Scope (READ ONLY, quoted):** `git diff --name-status 4bc4868 ad81ef7` = four files; `git diff --name-only 0ab8a05 ad81ef7`
+   = counts only.
+2. **E2 IS A DEADLINE CELL — drive the ROUTE, not the function.** On your own loopback server at `ad81ef7`, with an attachment
+   subdirectory made unlistable (mode 0000 under your own `DATA_DIR`, restored in a `finally`), `POST /api/admin/export` as an
+   admin: **predicted the response ENDS within 15 s**, and you say how (status, headers, whether the ZIP is readable, what the
+   manifest names). Then the same drive at `4bc4868`: **predicted it does NOT end** — gate 4 measured 200 `application/zip`,
+   2900 bytes, then nothing. **Your probe carries its own client timeout and a per-step DEADLINE (§10 clause 5): gate 4's
+   identical probe held the jest lock for ~71 minutes because it did not.** Never wait it out.
+3. **E1: the export completes AND names what it could not read.** Prove the manifest entry for the unreadable subdirectory
+   exists with `bytes: 0`, that it is **never `redacted: true`**, and that a readable sibling still streams byte-identical.
+4. **The fix must not end the response by dropping data.** With NOTHING unlistable, export at `4bc4868` and at `ad81ef7` and
+   **compare the two ZIPs entry by entry** — same names, same bytes, same manifest shape. **A missing entry at the head is a
+   Major.** `RD-638 rewrites ~103 lines of `streamExport`; this is the cell nobody wrote.
+5. **Re-derive the table independently**, parse-checked: **M-638** (both product files from `4bc4868`) → predicted E1 + E2;
+   **M-route** (`server.js` only) → predicted E2 only; **M-files** (`dataExport.js` only) → predicted E1 only.
+6. **C-68 re-run set for C:** every suite that drives the export or `streamExport`
+   (`git grep -l -E "streamExport|api/admin/export|dataExport" ad81ef7 -- __tests__`), named, with per-file counts. RD-575's,
+   RD-525's and RD-617's cells are all in that set.
+
+## 7. TARGET D — RD-631 and TARGET E — RD-438. Answer each with a measurement.
+**D — RD-631:**
+1. **Scope (READ ONLY, quoted):** `git diff --name-status 6a32426 153e472` = six files; `4ff2d45..153e472` = counts only.
+2. **Re-derive the table independently**, parse-checked: **M-631** (`dataExport.js` = `6a32426`'s) → predicted D1 + D2;
+   **M-decl** (`feedback-attachments` removed from `DIRECTORY_STORES`) → predicted C1 + X1 + the lists-agree cell;
+   **M-fixture** (RD-575's OLD stand-in restored) → predicted **X1 only**, with
+   `TypeError: Cannot read properties of undefined (reading 'has')`. **M-fixture is the cell that proves the VOID run was the
+   fixture and not the product — it is the most important arm on this target.**
+3. **Drive it live** on your own loopback server at `153e472`: plant a directory named `email_settings.json` holding
+   `smtp.json` with a token, and one named `sessions.json`; export; prove the token is **absent from the ZIP bytes** (having
+   first proved your search finds a planted token that IS there), the manifest names each with `bytes: 0`, and **neither
+   carries `redacted: true`**. Then `feedback-attachments/` still streams byte-identical (C1).
+4. **THE MAIN-SIDE LEAK (the READY does not carry it; `mail-09-rd631void` does).** At `34f11f4`, prove or refute:
+   `erasure-reaches-attachments.test.js`'s C2 `jest.doMock` stand-in reaches X1, so **X1 has been measuring the stand-in, not
+   the real declaration, since RD-575**. `git grep` every `doMock` of `customerDataFiles` at `34f11f4` and at `153e472`
+   (the builder claims it is the only one). Report it as a cross-target finding with its class; it is fixed when D merges.
+5. **The symlink row of §2a** — `lstatSync` does not follow a symlink, so a symlink at a store name pointing at a directory is
+   not `isDirectory()`. Measure what the export does with it. If it streams past the redactor, it is C-139's class again.
+
+**E — RD-438:**
+1. **Scope (READ ONLY, quoted):** `git diff --name-status 982a84f 63bb818` = three files; `1ae1dfd..63bb818` = counts only, and
+   the counts VALUES are unchanged (3865/220 at both) — quote both blobs.
+2. **THE CONTROL IS THE POINT OF THIS ROUND.** Re-derive, parse-checked and predicted first: **M-438** (`server.js` =
+   `982a84f`'s) → predicted T1 + T2, controls green; **M-guard** (`rejectDotSegments` removed) → predicted **T1 ONLY, and
+   CTRL-RAW GREEN**; **M-exact** (prefix matching restored) → predicted T2 only. **If CTRL-RAW reddens under M-guard, the
+   instrument fix did not work and that is the round's blocking finding.** Read CTRL-RAW's loopback recorder yourself and say
+   whether it can still be made dark by the product.
+3. **Drive the bypass live, base against head, same window** (this is the positive control): on `982a84f`, anonymous
+   `GET /favicon.ico/../settings.html` and every encoded form — predicted the **gated page is served** (the defect);
+   on `63bb818` — predicted **400**. And `GET /api/healthx` anonymous: predicted 200-ish at the base, **401 at the head**.
+   **A head result without its base control in the same window is not reportable.**
+4. **C-54's tier clause (:346), settled on the record:** drive a traversal at an **API** route (not only an HTML page) at the
+   base — e.g. `/api/health/../admin/...`-shaped forms against a gated API — and say whether an API was reachable through the
+   path. Answer in one sentence: *"RD-438 is / is not tier 1 under C-54's clause, because …"*.
+5. **THE FALSE-POSITIVE HALF, which no cell covers:** `rejectDotSegments` 400s on **any** segment that decodes to `.` or `..`,
+   and on `%2f`/`%5c` anywhere in the path, and it also 400s on a segment that fails `decodeURIComponent` (`catch → return
+   true`). Drive §2a's E rows: ordinary static asset paths, a filename with dots, a query string containing `..`, a stray `%`
+   in a path. **Any ordinary path of this product's own pages that now 400s is a Major.** Crawl the served pages for the paths
+   they actually request.
+6. **`PUBLIC_SUBTREES` has exactly one member.** Prove that every other entry on `alwaysPublicPaths` is a single route or file
+   that does not need a subtree (enumerate them from source at the head), and drive `/scim/v2/…` to prove the one subtree still
+   works.
+7. **C-68 re-run set for E:** every suite that drives the auth gate or a public path
+   (`git grep -l -E "isAlwaysPublicPath|alwaysPublicPaths|auth-gate|requireAuth" 63bb818 -- __tests__`), named, per-file counts.
+
+## 7a. TARGET F — RD-510 (TIER 1, ADDED BY AMENDMENT). Answer each with a measurement.
+1. **Scope (READ ONLY, quoted), and DO NOT let "round 3 is test-only" shrink the gate:** `git diff --name-status 695ca5a
+   3f96a40` = the four files including **`backend/server.js` +106/−60**; `git diff --name-only 5c1af17 7dd2171` = the rd523
+   file only; `git diff --name-only 7dd2171 3f96a40` = the counts file only; `git rev-parse 7dd2171:backend/server.js
+   3f96a40:backend/server.js` identical, and the same for both test files. **Then gate the whole `695ca5a..3f96a40` delta.**
+2. **THE COORDINATOR'S CLAUSE 1 — E1 IS A DELTA ACROSS THE CALL WITH NO PATH FILTER. Re-establish it; do not take her word or
+   the builder's.** Read E1's assertion at `3f96a40` and prove it compares the **whole** `seen` object for BOTH origins against
+   `NONE = { connections: 0, requests: [] }`, with **no `reached(…)` URL regex**. Then prove the property **behaviourally**:
+   make the caller cause a request on a path E1 does not name — **including a chat completion** — and show E1 goes red.
+   **If any path escapes E1, that is the defect the re-anchor was supposed to preserve against, and it is a Major.**
+   Contrast it explicitly with **E2**, which *does* filter (`reached(r.seen, 'signed-stored', /\/openai\/models$/)`) — say in
+   the report which cells filter and which do not, so nobody re-derives it.
+3. **THE COORDINATOR'S CLAUSE 2 — CTRL-WARM MUST FAIL IF THE BOOT MARKER NEVER ARRIVES.** Prove it by making it fail: force
+   `waitForBootWarmup` to time out (shorten its 180 000 ms budget in your own tree, or suppress the three markers) and show
+   **CTRL-WARM RED**. A control that cannot be made to fire is not a control (C-40 is in this very file's INST1 comment).
+   Then prove the window really opens after the marker: quote the boot log ordering and, ideally, show the 17-completion
+   race the builder measured on the old anchor.
+4. **THE HALF ROUND 3 DID NOT FIX — measure it and name it.** The builder's own diagnosis (`mail-50-rd510r3`) was TWO
+   findings: the wrong marker, **and** *"SIGNED's `warmupSeen` was stored and never asserted (only REDIR's is, in W1). So even
+   that wait could have silently returned false after 120 s and the suite would not have noticed."* **READ at `3f96a40`:
+   `SIGNED.warmupSeen = await waitForWarmup(SIGNED)` is still assigned and still asserted by nothing.** Round 3 added a
+   *separate* assertion for a *different* marker. **Report whether `SIGNED.warmupSeen` is asserted anywhere; if it is not,
+   that is an unguarded behaviour (C-122's cousin: a value computed and never checked), and it is exactly the class the
+   coordinator's clause 2 exists to close.** Do the same audit for every other stored-and-unasserted wait result in the file.
+5. **THE MUTANT ARM, RE-DERIVED INDEPENDENTLY — EXPECT THREE REDS, NOT ONE.** Your own mutation script, `node --check`ed and
+   predicted before running. **M-anon** (`requireAuth` lets `/api/setup/ai-test` through, so the anonymous call really dials):
+   **predicted E1 + E2 + E2-happy red, CTRL-WARM GREEN, rd510's L1/L2/L3 green.** The reason is stated and is not a defect:
+   `requireAuth` is where `req.user` is assigned, so the mutant also strips the admin identity E2 and E2-happy depend on —
+   **the mutant is broader than surgical.** *(Anchor note, READ: the builder records that the naive one-line anchor matched
+   **two** sites, `requireAuth` at `:2435` and another at `:2676`, and that it used a unique two-line anchor. Check your own
+   anchor's uniqueness before you run, or your arm is void.)*
+   **THEN DO WHAT THE BROAD MUTANT CANNOT:** build a **surgical** mutant that reddens E1 **alone** (e.g. let the anonymous
+   call dial without disturbing `req.user` for the admin cells). If no surgical mutant can redden E1 alone, say so and say
+   what that leaves unproven — that is a C-112 limit, not a pass.
+6. **rd510's own three cells.** **L1** (the server answers `/api/health` inside the boot deadline, listening before the
+   warm-up), **L2** (CONTROL, GOOD: the warm-up still runs after listen and completes), **L3** (with a 2 s warm-up deadline
+   the warm-up stops at its deadline and says so; the server answered throughout). Re-derive round 2's arms **M-510**,
+   **M-race** and **M-order** independently, each parse-checked, each predicted to redden exactly its own cell.
+   **L2 is the anti-vacuity control for L1 and L3: if L2 can pass while the warm-up never runs at all, L1 and L3 mean
+   nothing.** Test that.
+7. **The boot reorder, driven (MEASURED AT RUNTIME, on your own loopback server from your own tree at `3f96a40`):** with the
+   AI endpoint pointed at a sink that never answers, prove `/api/health` answers inside the boot deadline and the warm-up
+   stops at its deadline and says so. **Then the question no cell asks: does anything the product must have finished before
+   serving now happen AFTER `app.listen`?** Enumerate, from source, what the boot did between the old warm-up call site and
+   `app.listen`, and say whether any of it is a precondition for a request that can now arrive first. **Anything security- or
+   data-relevant that now races the first request is a Major.**
+8. **L-7 / RD-654, measured but NOT asserted as a mechanism (the coordinator's wording binds you).** After the deadline, does
+   the orphaned call keep its socket, and is there a second request at the sink? Report RSS, socket count at +60 s, and
+   whether `/api/health` stayed unaffected. **If you see a second request, report it as "consistent with a client retry;
+   mechanism NOT PROVEN" unless you can show the retry path at source.** RD-654 and RD-655 are known residuals, not RD-510
+   findings.
+9. **C-68 re-run set for F:** rd523 whole (31 cells), rd510 (3), and every suite that boots the server through the harness or
+   asserts boot ordering / `/api/health` (`git grep -l -E "bootServer|api/health|warm" 3f96a40 -- __tests__`), named, with
+   per-file counts. **rd523 is 31 cells of zero-traffic security assertions — run the whole file, never a subset.**
+
+## 8. THE MERGE ORDER — the NAMED MERGE-ORDER FACT (C-68, C-57, C-133, C-112). No verdict is complete without it.
+**Why (READ):** these six branches were cut from **four** different ancestors of main and none from `34f11f4`. Three of them
+rewrite `backend/dataExport.js` (**B** RD-617, **C** RD-638, **D** RD-631) and **four** rewrite the server entry point
+(**A** RD-497/531, **C** RD-638, **E** RD-438, **F** RD-510). All six rewrite `scripts/verify-expected-counts.json`.
+
+**THE NAMED MERGE-ORDER FACT, as this brief carries it (the coordinator's ruling, corrected by measurement):**
+
+> **`backend/dataExport.js` is the contended file, and RD-638 is the collider — not the RD-631 × RD-617 pair.**
+> Measured with `git merge-tree --write-tree --name-only` in an isolated object directory at drafting (08:0x AEST):
+> - **B × D (RD-617 × RD-631): `Auto-merging backend/dataExport.js` — NO product conflict.** Only
+>   `scripts/verify-expected-counts.json` conflicts. *(RD-617 edits the redactors at `:79-140` and the redact block at `:232`;
+>   RD-631 edits the require at `:49` and the directory branch at `:210`. They do not touch the same lines.)*
+> - **B × C (RD-617 × RD-638): `CONFLICT (content): Merge conflict in backend/dataExport.js`.**
+> - **C × D (RD-638 × RD-631): `CONFLICT (content): Merge conflict in backend/dataExport.js`.**
+> - *(RD-638 rewrites `streamExport` wholesale — hunks at `:120`, `:193-202`, `:252-285` — which is why it collides with both.)*
+> **CONSEQUENCE, sequenced onto `34f11f4` and verified over fifteen orders (eight at five targets, seven at six):** if
+> **RD-638 is merged AFTER both RD-617 and RD-631**, `backend/dataExport.js` needs **exactly ONE** hand resolution. In every
+> other position it needs **TWO**.
+> Measured five-target sequences: `BDCAE`, `DBCAE`, `BDACE`, `BDCEA` → one; `ABCDE`, `EDCBA`, `ACEBD`, `CBDAE`, `BCDAE`,
+> `DCBAE` → two. Measured six-target sequences: `BDCAEF`, `FBDCAE`, `BDCFAE`, `AEFBDC` → one; `ABCDEF`, `FEDCBA`, `CBDAEF`
+> → two. **Adding RD-510 changes nothing about the rule.**
+> **A (RD-531+497), E (RD-438) and F (RD-510) never conflict in a product file in any order, despite all three rewriting the
+> server entry point — git auto-merges them against `34f11f4` and against each other.** Pairwise at drafting: `M×F`, `F×A`,
+> `F×C`, `F×E` auto-merge `backend/server.js`; `F×B`, `F×D` touch no file in common but the counts. **F's `backend/server.js`
+> delta (+106/−60) is the largest server-entry-point delta in the gate and it still auto-merges — say so, because "it
+> auto-merged" is C-68's whole warning: a clean merge-tree and a changed measured surface are not in tension.**
+
+**What you must do with it:**
+1. **Re-measure all six against `34f11f4` individually.** `git merge-tree --write-tree --name-only 34f11f4 <head>` for each.
+   **Predicted: rc 1 with `scripts/verify-expected-counts.json` the ONLY conflict, for all six**; `backend/server.js`
+   auto-merges for A, C, E and F; `backend/dataExport.js` auto-merges for B, C and D. **Quote the `Auto-merging` lines** — they
+   are the evidence that no product file conflicts on a single merge.
+2. **Re-measure the fifteen pairwise merges** (`merge-tree` head × head) and reproduce the three `dataExport.js` results above,
+   or contradict them.
+3. **Re-measure at least three sequenced orders** onto `34f11f4`, chaining with `git commit-tree` in **your own object
+   directory**: one that puts C last among {B, C, D} and one that does not, and at least one with F in it. State the
+   resolution count for each.
+   **Recommend ONE order to Tuesday, with its cost in hand resolutions, and name the file and the hunks that must be
+   hand-resolved.**
+4. **C-57 / C-68 AMENDMENT / C-133 / C-112, together, because this is exactly the case they were written for:**
+   - The counts file conflicts on **every** merge. Resolve it by **REGENERATION on the merged tree**
+     (`npm run verify -- --maxWorkers=2 --update-counts` in YOUR scratch tree, through the lock). **Never hand-edit. Never
+     pre-compute a number from several bases** — C-68's amendment makes regeneration mandatory *even where merge-tree reports
+     the counts file clean.*
+   - Run the **id-superset control** (`merged N ⊇ A M ∪ B K; missing 0`). **Expect it to MISS**, because these are long-lived
+     branches (main is 42 commits past `982a84f`, 40 past `695ca5a`, and carries 65-77 more tests than any head).
+     **Then apply C-133 verbatim:** an
+     id is ACCOUNTED, not a STOP, only when (1) the merged blob is byte-identical to one parent's AND (2) since the merge base
+     only that parent changed the file and the other parent's blob equals the base blob. **List every accounted id with the
+     side that removed or rewrote it and the removing commit.** Anything that fails both conditions **STOPS**.
+   - **C-112's control is REQUIRED beside it:** every merged `__tests__` file byte-identical to a parent, 0 files absent — and
+     **state the condition wherever you state the conclusion**, so the next reader inherits the condition and not just the
+     `missing 0`. If any test file content-merged, say so and say that the cheap form does not apply there.
+   - The script exists: `session-tools/c57-id-superset.sh` (READ it; run it **from a copy in your own project**, against your
+     own trees — never write in NexusAI).
+5. **Run the cells on the merged tree, not only on the heads (C-68).** On your recommended order's final tree, one hold,
+   SESSION_SECRET UNSET: **rd497, rd495, rd616-617, rd624, rd412, rd638, rd631, customer-data-lists-agree,
+   erasure-reaches-attachments, rd438, rd510, rd523**, plus every suite that drives `streamExport`, the auth gate or boot
+   ordering, plus the five `.github` / `node-version` readers, plus the **full verify**. Then re-run **one mutant per target**
+   on the merged tree (M-497, M-m3, M-route, M-631, M-guard, M-anon) — **the mutant tables must still hold through the other
+   five changes.** **A GO on any target that the merged run contradicts is not a GO.**
+   🔴 **THE MERGED-TREE RUN IS THE POINT OF THE GATE FOR F, AND FOR E.** F reorders boot and E inserts an `app.use` near the
+   top of the middleware stack; A moves 14 routes below `requireAuth`; all four rewrite the same file. **Four independent
+   rewrites of the server entry point that git merges silently is exactly the case C-68 was written for.** On the merged
+   tree, prove the middleware ORDER is still what each target assumed: `rejectDotSegments` below helmet and above the gate
+   (E), `app.use(requireAuth)` above `afterAuthGate` (A), `app.listen` before the warm-up (F). Read the merged
+   `backend/server.js` and say what order it actually has.
+6. **Say what this means for the queue:** the order, the one file that needs hands, the hunks, the counts regenerated once on
+   the tree that exists after each merge, and the cells to re-run on each REAL forward-merged head. Tuesday merges under
+   C-127; this gate merges nothing.
+
+## 9. CI (C-142) — GREEN ON MAIN, NOT RUN AT ANY BRANCH HEAD
+- **MEASURED at drafting:** `main` `34f11f4` — **Build 35780902023 SUCCESS**, *"Tests: 3937 passed, 3937 total"*,
+  *"VERDICT: PASS — 3937/3937 tests passed across 227 suites (jest exit 0)"*, node v24.20.0.
+  `session-tools/s80i/build-35780902023-failed.log` is **0 bytes** and `rd641-failing-set-34f11f4.tests.txt` is **0 bytes** —
+  **the C-142 failing set is EMPTY, by name, for the first time.** Also on `34f11f4`: Gitleaks 35780902118 success, npm-audit
+  35780902110 success, Deploy demo 35780902159 **skipped** (the unset `CI_DEPLOY_ENABLED` master switch).
+- **Confirm all of that yourself** (`gh run list --branch main --workflow build.yml --limit 5`, `gh run view <id>`), READ-ONLY,
+  and label it READ ONLY. **`gh` never merges, approves, comments, reviews, labels, re-runs, dispatches or opens a PR.**
+- **`build.yml` runs on `pull_request` to main and `push` to main ONLY** (READ it at `34f11f4` and quote the trigger block).
+  No READY names a PR and the drafter found no `refs/pull/*` at any of the six heads. **Report CI NOT RUN for all six
+  branch heads.** C-142's CI half is measured at merge — and **the bar is now an EMPTY failing set**, with rd464 HS3 the known
+  flake if it reappears (C-143 ADDENDUM). **A merge out of this gate that reddens CI has broken something that was green.**
+
+## 10. Floor discipline — THE FOUR CLAUSES, plus THE DEADLINE RULE
+1. **Every jest run goes through `session-tools/nexusai-lock.sh`** (FIFO, C-63), **tagged `qa-gate8-…`**, so C-141 makes
+   builders' proof tickets yield to yours (C-141 + ADDENDUM: gate-class; C-110: otherwise no queue jumping). **QUEUE, NEVER
+   TAKE OVER:** never kill, signal, move or edit another seat's process, lock directory, owner file or ticket, even if it looks
+   stuck. The yielding is theirs. If a holder looks stuck, mail a QUESTION (§13) and keep waiting. **Live-server probes are
+   floor load (C-110): run them inside your own hold.**
+2. **Hold the lock ONCE per multi-run measurement.** Every hold is a TRACKED CHILD of your seat, never detached (`nohup … &`
+   reparents to launchd and every server it starts reads FOREIGN).
+3. **Record the foreign server count beside every result — the RD-606 form, anchored on YOUR OWN claude pid:**
+   `basename(argv[0]) == node` AND the server entry point anywhere in the remaining argv, argv from the kernel
+   (`KERN_PROCARGS2`); **"ours" = the ancestor chain CONTAINS YOUR OWN claude pid.** **NEGATIVE controls, all in the same run,
+   all must classify FOREIGN — read at drafting 08:00 AEST from `tmux list-panes -a` + `ps`:** NexusAI-I claude **`8360`**
+   (pane `%44`), Tuesday's claude **`3434`** (pane `%0`), and the two other live seats **`51683`** (pane `%52`) and **`17056`**
+   (pane `%53`). **Gate 7 round 2's Vision seat `1613` has EXITED — do not use it.** Re-read them at start; if one has exited,
+   say so and use the others; **a hold with NO live negative control aborts.** Never by `EADDRINUSE`, a whole-command-line
+   grep (RD-591 c.37901), or raw `comm`. Reuse gate 7 round 1's instrument BY COPY, with YOUR pid as `ROOT` and the seats above
+   as `NEG`:
+   `/Volumes/KK_T9_External_HDD/!CODING/Testing Agent MAIN/projects/nexusai/reports/2026-09-22-gate7-rd645/evidence/qa-floorcount.py`
+   and `…/2026-09-22-gate7-rd645/evidence/qa-floorlib.sh` (its first line names gate 7's pid — correct it to yours before any
+   hold). `qa-mkarm.sh`, `qa-make-mutants.py`, `qa-runlib.sh` and `qa-jsum.js` are in the same directory.
+4. **A zero is reportable only beside a control that fired in the same window.** Spawn one server the way the harness does,
+   require the count to RISE, then reap it. The same clause governs **M-m3's "none" (§5 Q3)**, **B4's "no other user's data"
+   (§4 Q3)**, **D1/D2's "token absent" (§7 D Q3)** and — most of all — **every ZERO in rd523 (§7a)**: that whole file asserts
+   zeros at two origins, and a zero from a sink that never received anything from anyone is not a measurement. rd523's own
+   `W1 CONTROL`, `INST1`, `INST2` and `K` exist for that; name what fired.
+
+**5. THE DEADLINE RULE — every real-server probe has a per-step DEADLINE, a HEARTBEAT, and kills its server in a `finally`.**
+*Why, measured:* gate 4's real-server probe stalled ~70 minutes at 0% CPU while HOLDING the jest lock with 10 seats queued
+(`/Volumes/KK_T9_External_HDD/!CODING/Testing Agent MAIN/projects/nexusai/reports/2026-09-22-gate4-rd575-rd524r2/evidence/a3u-stall-evidence.txt`),
+**and the thing that stalled it is TARGET C's own defect (F-A2).** §6 Q2 drives that defect deliberately.
+- Every HTTP request carries a client timeout; every step (boot 60 s, request 30 s, an export drive 60 s, exit 20 s) has a
+  written DEADLINE. A step past its deadline is ABORTED and reported as a finding with its evidence, never waited on.
+- Every server you start is killed in a `finally` (SIGTERM, then SIGKILL after a grace) — on success, failure, deadline or
+  exception — and the reap is confirmed by your floor counter.
+- **Log a HEARTBEAT line (timestamp, step, pid, elapsed) at least every 2 minutes** during any hold. **A step with no heartbeat
+  for 5 minutes is aborted and reported.** A hold that is not making progress releases the lock.
+- **Never wait out the 15-minute window.**
+
+**Reap every server you start.** An orphan of yours is the next seat's foreign server.
+At drafting (08:00 AEST) the jest lock was held by `s80i-rd510r3-proof` (pid 9929, since 2026-09-22T21:41:07Z), the jest queue
+was EMPTY and the docker queue was EMPTY.
+
+## 11. Drivable surface — LOCAL RUN, **NOT THE DEMO** (RD-76)
+No demo pass happened; none must be recorded. Every request goes to a server YOU booted on **127.0.0.1** from YOUR tree.
+**No request of any kind to any live, demo or public host.** If a response is cut off by a safety check, record it and continue
+with the next item; do not stop the gate on it. **This is authorised defensive QA of Datasec's own product on loopback** —
+§7 E drives path traversal against a server the gate itself booted, and that is the point of the control.
+
+## 12. HELD
+- No merge, no deploy, no registry, no Partner Center, no production, no money, no external comms.
+- No real Azure, credential, vault, tenant or key. **No `az` at all.** Local accounts are ones you create in your own fresh
+  `DATA_DIR`; every `SESSION_SECRET` you set is random per run, never printed, never written.
+- **`gh` is READ-ONLY and optional** (§9 only): never merge, approve, comment, review, label, re-run, dispatch, or open a PR.
+- **No docker is required by this gate.** No target here has a container leg. If you think you need one, say why first — and
+  note `node:24-alpine` was **not** in the local image store at drafting (only `node:24-bookworm-slim`), so a container leg
+  would need a pull, which is HELD.
+- **Findings-only: do not commit, do not move any branch, do not file a ticket, do not write inside the NexusAI project** (its
+  `2_Project_Files` checkout, `session-tools/`, `worktrees/`, `1_Project_Definition/` included). The gate fixes nothing and
+  merges nothing.
+- **NEVER `rm`** — quarantine, per the template §5; every preload, fixture, cache and probe you plant lives under YOUR project.
+
+## 13. Output
+Report: `/Volumes/KK_T9_External_HDD/!CODING/Testing Agent MAIN/projects/nexusai/reports/2026-09-23-gate8/report.md`
+
+**Questions:** your sender `QA/Datasec-NexusAI` has NO inbox routing line in the fleet — you cannot receive an answer reliably.
+If you must ask, mail `tuesday-agent@agentmail.to`, subject `[QA/Datasec-NexusAI -> Tuesday] QUESTION: <topic>`
+(Context / one Question / Meanwhile / Needed-by), **and proceed on the safest reading without waiting**; record the question
+and the reading.
+
+MAIL YOUR VERDICT to `tuesday-agent@agentmail.to`, subject exactly:
+`[QA/Datasec-NexusAI -> Tuesday] GATE VERDICT — gate 8: RD-531+497 d7d6e7e · RD-616+617 cc9616b · RD-638 ad81ef7 · RD-631 153e472 · RD-438 63bb818 · RD-510 3f96a40`
+
+AgentMail key: `AGENTMAIL_API_KEY` in `/Volumes/KK_T9_External_HDD/TUESDAY/4_Credentials/.env` — an absolute path, because the
+QA project has none. Never put the key, or any secret, in a mail or the report.
+
+Verdict format:
+- **RD-531 + RD-497: GO / NO-GO** naming `d7d6e7eec9f62fbc75ad9971c8a14cb6be4826cb`, the route census settled first (§4 Q2),
+  then the enforced/viewer/admin/open drives and the retirement.
+- **RD-616 + RD-617: GO / NO-GO** naming `cc9616b2b22aa5c65619f3c47d4742f2bf7664d6`, the ordered-pair control first (`f0519fd`
+  red, `cc9616b` green, same window). **Round 2 of 2 under C-62:** state exactly which parts are closed and which are ticketed,
+  each with its evidence class. Re-state F-B1 as Tuesday's call.
+- **RD-638: GO / NO-GO** naming `ad81ef735b68f6ef9c421759307581dc64a9ea56`, the E2 route drive first (base does not end, head
+  ends within 15 s, same window), then the no-data-dropped ZIP comparison.
+- **RD-631: GO / NO-GO** naming `153e4726c4a33801a53c6e0a8bdd0824f714777c`, M-fixture first, then the live withhold drive, then
+  the main-side X1 leak as a cross-target finding.
+- **RD-438: GO / NO-GO** naming `63bb818f6f341e8e04745dd822d2d8ca9ad05a30`, the live base-vs-head bypass first, then M-guard
+  reddening **T1 ONLY with CTRL-RAW green**, then the false-positive table, then C-54's tier sentence.
+- **RD-510: GO / NO-GO** naming `3f96a40559387c7fb29499f9ce0b322729f3c1bd`, **E1's no-path-filter delta re-established
+  behaviourally first**, then CTRL-WARM proved able to FAIL, then **M-anon with THREE reds (E1, E2, E2-happy) as the
+  PREDICTION**, then L1/L2/L3 and the boot reorder driven, then the `SIGNED.warmupSeen` stored-and-unasserted audit (§7a Q4).
+  **State plainly that the branch is NOT test-only** (`backend/server.js` +106/−60) and that the gate covered the whole delta.
+  L-7 / RD-654 / RD-655 are carried as residuals with their evidence class, and the retry mechanism is **NOT asserted**.
+- **The merge order (§8):** the named merge-order fact re-measured, the recommended order, the one file and hunks needing
+  hands, the regenerated counts with the C-133 accounting and the C-112 condition stated beside the conclusion.
+- **Rule 2: what you did NOT test is first-class output — a NOT TESTED section.** It MUST carry this line, verbatim:
+
+  Container legs: not run this gate — no target has one, and node:24-alpine is not in the local image store; a pull is HELD.
+
+  Every action recommendation carries its evidence class: **MEASURED AT RUNTIME / PROBED / READ ONLY**. §5 Q5 (F-B1), §7 D Q4
+  (the main-side X1 leak), §7a Q8 (RD-654's retry) and §9 (CI) must each carry one. Each of **L-1 … L-7** is answered:
+  discharged with a measurement, or left standing and named (C-112).
+- Report all six heads, and main's, as **three timestamped readings (start / mid / end)**, each with its branch name.
+  **RD-510's head moved once during drafting — if any head moves under you, stop, say so, and re-brief.**
+- **DEADLINE / HEARTBEAT: 2 minutes between heartbeats, 5 minutes with none aborts the step, every server killed in a
+  `finally`.**
+
+## WRONG AT SOURCE — what this brief found when it checked the commission against the repo
+Carried here so the gate inherits the corrections and not the errors:
+1. **"RD-631 and RD-617 both touch `dataExport.js` … needs a hand-resolved `dataExport.js`"** — the file is right, the pair is
+   wrong. **THREE** targets rewrite it, and the named pair is the one that auto-merges. **RD-638 is the collider.** §8.
+2. **"RD-631's builder proof ran with SESSION_SECRET PRESENT"** — true, and true of **five of the six**. Every READY except
+   RD-510's says it; **RD-510's hold ran UNSET already.** §3 Q0.
+3. **The commission gave `main` as the BASE. It is not any target's base.** All six are off `982a84f` / `4bc4868` /
+   `6a32426` / `695ca5a`, and main is 42 commits past the oldest of them. §1.
+4. **Two READYs state a merge preview "against current main `c0788b1`".** `c0788b1` has not been main since 05:55 AEST. §1.
+5. **`expect-rd438-r2.txt` is written against `1ae1dfd`, not the gated `63bb818`; `rd510r3-hold-run1.out` ran at `7dd2171`,
+   not the gated `3f96a40`.** §7 E Q1, §7a Q1.
+6. **C-133 was not cited in the commission and is the clarification most likely to decide §8.** It is cited now.
+7. **RD-438's tier is conditional under C-54 (:346) and had not been measured.** §7 E Q4 settles it.
+8. **Gate 2 left the RD-497 route census unreconciled (14 vs 16).** §4 Q2 settles it.
+9. **"RD-510 … round 3 is test-only" — true of the COMMIT, not of the BRANCH.** `695ca5a..3f96a40` carries
+   `backend/server.js` **+106/−60**. §7a Q1.
+10. **RD-510's head moved from `7dd2171` to `3f96a40` between two `ls-remote` reads 19 minutes apart** (07:47:5x → 08:06:38).
+    The amendment's `3f96a40` is correct; the earlier pin would have been stale. §1.
+11. **"RD-510 is mid round 3" invites a C-62 misreading.** Those are BUILDER proof rounds — **RD-510 has no prior gate
+    report, so this is its FIRST gate and C-62 does not apply to it.** Only B is at gate round 2 of 2.
+12. **The builder's own 07:41 mail says *"Gate 8 going without RD-510 is right"* — 19 minutes before its own READY.** A gate
+    reading `session-tools/s80i/` chronologically would find a live-looking instruction that its READY supersedes. Header.
+13. **Round 3 discharges only HALF the builder's own two-part diagnosis.** `SIGNED.warmupSeen` is still assigned by
+    `waitForWarmup` and still asserted by nothing at `3f96a40`; the new CTRL-WARM asserts a *different* marker.
+    The coordinator's clause 2 is satisfied for the boot marker and NOT for the adapter marker. §7a Q4.
+14. **The commission's `dataExport.js` pairing was wrong and the corrected fact is in §8** (item 1 above) — **and with
+    RD-510 added it is now FOUR targets rewriting `backend/server.js`, all auto-merging.** That is the C-68 case, not a
+    reassurance. §8 step 5.
+
+## PROVENANCE (drafter, 2026-09-23 07:45-08:25 AEST, read-only)
+- origin heads: main `34f11f405fa4…`, `rd-531-497-s80i` `d7d6e7eec9f6…`, `rd-616-617-s80i` `cc9616b2b22a…`,
+  `rd-638-export-always-ends-s80i` `ad81ef735b68…`, `export-dir-stores-declared-s80i` `153e4726c4a3…`,
+  `rd-438-dot-segment-gate-s80i` `63bb818f6f34…`; 260 refs, each branch once | `git ls-remote origin` | read 07:47
+- **second `ls-remote` after the amendment: `rd-510-listen-before-warmup-s80i` `3f96a40559387c7fb29499f9ce0b322729f3c1bd`;
+  a `diff` of the two dumps shows exactly one changed line (`7dd2171` → `3f96a40`); main and the other five unchanged** |
+  `git ls-remote origin`, `diff` | read 08:06:38
+- merge-bases 982a84f (A, B, E), 4bc4868 (C), 6a32426 (D), 695ca5a (F); all four ancestors of main; `982a84f..34f11f4` = 42
+  commits, `695ca5a..34f11f4` = 40; 982a84f is an ancestor of 695ca5a |
+  `git merge-base`, `git merge-base --is-ancestor`, `git rev-list --count` | read 07:52 and 08:10
+- chains and exact parents for all six; every tip is counts-only; every commit single-parent | `git log --format='%H %P'`,
+  `git diff --name-only <c>^ <c>` | read 07:55 and 08:10
+- counts: 34f11f4 3937/227 · 982a84f 3860/219 · 4bc4868 & 6a32426 3868/220 · d7d6e7e 3870/220 · f0519fd & ed6f3fc 3871/220 ·
+  cc9616b 3872/221 · ad81ef7 3870/221 · 153e472 3872/221 · 7a1a9ba & 63bb818 3865/220 · 695ca5a & 7dd2171 3863/220 ·
+  **3f96a40 3867/221** | `git show <sha>:scripts/verify-expected-counts.json` | read 07:56 and 08:10
+- cross-target file map: `scripts/verify-expected-counts.json` × 6; `backend/server.js` × 4 (A, C, E, F);
+  `backend/dataExport.js` × 3 (B, C, D); everything else single-owner | `git diff --name-only <base> <head>` × 6 | read 07:58
+  and 08:10
+- merge predictions: each head × main = counts conflict only, with `Auto-merging backend/server.js` (A, C, E, F) and
+  `Auto-merging backend/dataExport.js` (B, C, D); pairwise B×D clean in dataExport.js, B×C and C×D conflicting; F conflicts
+  with nothing but counts against main or any head; fifteen sequenced orders onto 34f11f4 (eight five-target, seven
+  six-target) | `git merge-tree --write-tree --name-only` + `git commit-tree` under
+  `GIT_OBJECT_DIRECTORY`/`GIT_ALTERNATE_OBJECT_DIRECTORIES` | read 08:02 and 08:12. **Repo object files 759 before and 759
+  after the five-target runs; 763 later. ACCOUNTED, not a drafter write: `find .git/objects -type f -newermt '2026-09-23
+  07:55'` names seven objects, all with mtimes 08:00 or 08:08, and one of them IS `3f96a40` itself — a commit the live
+  NexusAI-I seat made in its own checkout, which no read-only drafter could have created. Every `merge-tree` /
+  `commit-tree` here ran with `GIT_OBJECT_DIRECTORY` pointed at a scratch directory (29 objects landed there).
+  Re-check the count yourself before and after your own runs, and account for any delta by mtime the same way.**
+- `package-lock.json` blob `9064763` at main, all four bases and all six heads | `git rev-parse <sha>:package-lock.json` |
+  read 07:58 and 08:10
+- builder evidence and the six READY mails, all in `session-tools/s80i/`; RD-510's `mail-50-rd510r3.d4XdI2` (07:41) says
+  *"Gate 8 going without RD-510 is right"* and its own `mail-51-ready510.DIUy3J` (08:00) supersedes it | `cat` | read 08:05
+  and 08:15
+- rd523 E1's assertion compares the whole `seen` object for both origins against `NONE` with no URL filter; E2 uses
+  `reached(…, /\/openai\/models$/)`; `CTRL-WARM` is `expect(SIGNED.bootWarmupSettled).toBe(true)` and `waitForBootWarmup`
+  returns false on timeout; `SIGNED.warmupSeen` is assigned and asserted nowhere |
+  `git show 3f96a40:__tests__/rd523-aoai-redirect-refused.test.js`, `git diff 5c1af17 7dd2171` | read 08:18
+- CI: Build 35780902023 SUCCESS on 34f11f4, 3937/3937 across 227 suites, `build-35780902023-failed.log` 0 bytes,
+  `rd641-failing-set-34f11f4.tests.txt` 0 bytes | `tail`, `wc -c`, `mail-46-ci.l8953g` | read 08:06
+- seats %44 → claude 8360 (NexusAI-I), %0 → claude 3434 (Tuesday), %52 → claude 51683, %53 → claude 17056; 1613 not running;
+  jest lock `s80i-rd510r3-proof` pid 9929 since 2026-09-22T21:41:07Z; jest and docker queues empty |
+  `tmux list-panes -a`, `ps`, `session-tools/locks/` | read 08:00
+- local images: `node:24-bookworm-slim`, `postgres:16-alpine` and the qq/s64 images; **no `node:24-alpine`, no
+  `redis:7.4-alpine`** | `docker image ls` | read 08:08
+- CLARIFICATIONS line numbers C-54 :337/:346, C-57 :410, C-62 :573, C-68 :657, C-112 :1141, C-127 :1349, C-129 :1375,
+  C-131 :1406, C-133 :1425, C-134 :1435, C-136 :1445, C-139 :1471, C-140 :1463, C-141 :1478, C-142 :1488, C-147 :1526,
+  C-148 :1532 (the highest) | `grep -n` | read 07:50
+- NexusAI working tree had 33 modified files at drafting (not touched) | `git status --porcelain` (read-only) | read 07:53

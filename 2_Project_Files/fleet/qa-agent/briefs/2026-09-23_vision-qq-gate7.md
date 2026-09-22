@@ -1,0 +1,592 @@
+# QA Agent Invocation Brief — Datasec/Vision_Sales_Portal, BATCHED GATE 7 (QuickQuote + portal), TWO TARGETS: BCR3 = bounded browser.close() ROUND 3 (TIER 2 through-code with ONE DECLARED TIER-1 TOUCH: `lib/pdf.js` `closeBrowser`, QuickQuote), IO1F1 = the IO1R2-F1 END-MARKER (TIER 1, portal)
+
+**Drafted for Tuesday 2026-09-23 08:0x-08:4x AEST by a read-only drafting agent; Tuesday reviews, stamps and launches.**
+Commissioned on Tuesday's rulings of 2026-09-23 06:28 and 06:34 AEST (20:28Z / 20:34Z, daily note `0_Brain/daily_tuesday/2026-09-23.md`)
+and on gate 6's report. **The drafter did NOT read the builder's mail bodies** (no AgentMail call in a read-only commission): every builder
+claim below comes from commit messages, code, the BACKLOG, Tuesday's daily note or gate 6's report, and is a **CLAIM**.
+**BOTH HEADS AND BOTH MAINS WERE READ BY THE DRAFTER FROM `git ls-remote origin` (both repos 2026-09-23 08:0x AEST; each `cat-file -t`
+= commit). THE LAUNCHER RE-READS EVERY HEAD.** If a head moves before launch, Tuesday edits its row; the launcher parses §PIN, refuses any
+placeholder, and re-reads EVERY head by `git ls-remote` immediately before launch, refusing on any mismatch. The verified table is appended
+to your prompt.
+
+SELF-CHECK: re-read end-to-end for contradictions | 2026-09-23 08:13 AEST
+Self-check note: Tuesday, s82. READ: the header and Charter, the RULED/Tuesday-rulings block and PRIOR ROUND whole (lines 50-130), the heading index end to end, and the drafter's 15-item wrong-at-source report in full; I then wrote the COORDINATOR ADDENDUM (A1-A6) at the end of this brief. STATED LIMIT: I did NOT read all ~1,000 lines line by line. CONTRADICTIONS I RESOLVED RATHER THAN LEFT: the bound's four numbers are asserted by regex over source, which cannot fail on wrong behaviour - A1 makes a behavioural arm the evidence; 'one earlier run hung 400 s' was a claim I relayed with no durable source and is STRUCK by A2; the builder's shipped comment (1.7 s) contradicts its own idle measurement (2,032 ms), A3; condition (e) is already bounded and named, so A5 redirects the round to checking the measurement (its cell sets appEndGraceMs=300, so the shipped 30,000 ms is never exercised); conditions 2 and 3 are met only in the weak form, A6. BCR3 is NOT a stale-base row - merge-base is main - so the gate verifies a RESOLUTION, not a conflict.
+
+## Charter
+Read `/Volumes/KK_T9_External_HDD/TUESDAY/2_Project_Files/fleet/qa-agent/QA_AGENT_CHARTER.md` in full first. You are an independent
+tester. You did not build any of these changes and you owe no builder anything. **Every line below that reports what a builder says is a
+CLAIM, never evidence.**
+
+**ONE batched gate, TWO targets, TWO repos, ONE session** (Kam's standing rule of 2026-09-18: batch gates, never pay for the same setup
+twice). **Give a SEPARATE verdict for each: BCR3 and IO1F1 — each GO / NO-GO, each naming its pinned sha.**
+
+**⚠ Letter collision, write both names every time:** **BCR3 = ROUND 3 of the BC class** (gate 4 N-C1 → gate 5 target BC → gate 6 target
+BCR2), the bounded `browser.close()` change, still on `fix/qq-bounded-browser-close-2026-09-23` and NOT on QuickQuote main.
+**IO1F1 = the fix for IO1R2-F1**, the Major gate 6 found and TICKETED inside its GO for IO1R2 (= gate 5's IO1 = gate 4's finding I10-O1).
+**IO1R2 itself is FINISHED and MERGED**: portal main `f95f625` is the merge of the gated `992da21`. IO1F1 is a NEW branch off that main,
+and it is **ROUND 1 of the IO1R2-F1 class**, not a round of I10-O1.
+
+Tiers:
+- **IO1F1 (IO1R2-F1 end-marker, portal completed-response) is TIER 1**: it mounts a middleware on EVERY request of the live portal, wraps
+  `res.end` for every response, and rewrites `server/errors.js`, the module every route's error path runs through.
+- **BCR3 (bounded browser.close() round 3) is TIER 2, through-code, WITH ONE DECLARED TIER-1 TOUCH** — `stage3/lib/pdf.js`
+  `closeBrowser()`, a shipped module. Everything that proves production is untouched is **TIER 1 in rigour**, at this sha, re-established.
+
+**THE CAP — C-62 AND WHAT TUESDAY ALREADY RULED.** Kam's cap rule, recorded verbatim as **C-62** in the NexusAI clarifications
+(`/Volumes/KK_T9_External_HDD/!CODING/Datasec/NexusAI/1_Project_Definition/CLARIFICATIONS.md:573`), verbatim:
+*"A Major at round 2 of 2 is ticketed, not sent to Kam. Only a third round on the same class needs his word."*
+**Tuesday ruled on 2026-09-23 06:34 AEST that THE CAP IS NOT SPENT by either target here** — BCR2 was **GO at its pinned sha** and its
+round 3 is a pre-merge improvement the builder found in its own runs, not a remediation round forced by a NO-GO; IO1F1 is round 1 of a
+class that was ticketed inside a GO. So **no third round on the same class is being spent, and Kam's word is not required to run this
+gate.** That ruling is Tuesday's, not Kam's — **say so in your report**, and if you grade either target NO-GO, say plainly, part by part,
+what CLOSED and would ship and what is TICKETED, and that **a third round on that class** would then need Kam.
+
+**NOT IN THIS GATE:** portal **S-1** (`fix/feedback-report-auth-2026-09-22` @ `89af8ba`) is GO from gate 2 and waits on Kam's card —
+gate 6 MEASURED that it conflicts with the merged IO1 work in `BACKLOG.md` ONLY and that `lastResortHandler` survives the merge, which
+corrected gate 6's own brief; **§12 re-measures it against the NEW main and against IO1F1**. N (A-6), FU, I9, Q5, **A9** and **CF5R2** are
+GO and on QuickQuote main `d4426f8`; **I10 and IO1R2 are GO and on portal main `f95f625`**. **P5B (puppeteer 25 + node 22) is GO-tested at
+gate 4 and HELD by Kam's decision 14 — NOT on main.** Do not gate any of them; do not re-open them.
+
+## RULED BY KAM, AND SETTLED (Vision `1_Project_Definition/CLARIFICATIONS.md`)
+`/Volumes/KK_T9_External_HDD/!CODING/Datasec/Vision_Sales_Portal/1_Project_Definition/CLARIFICATIONS.md` — read it whole
+(**C-01..C-05 at drafting; still five entries, unchanged since gate 4**).
+- **No Vision C-entry covers either target here.** Their authority is gate 6's findings and **Tuesday's rulings of 2026-09-23 06:28 and
+  06:34 AEST** (a duplicate-coordinator collision that day produced two ANSWER mails 20 s apart; the 06:34 ruling is the one that settled
+  all four disputed points and is the one this brief carries).
+- **TUESDAY'S RULINGS THAT ARE GATE CLAUSES HERE — these are the coordinator's conditions, and the marked text is VERBATIM:**
+  1. **IO1F1 — the `setImmediate` shape gate 6 suggested was MEASURED NOT TO FIX IT and is WITHDRAWN.** express-session holds the last
+     byte of a signed-in response until the store callback returns, so `writableEnded` is false for longer than one `setImmediate` turn;
+     the client got a **truncated 61-of-62-byte body**. **Nobody may re-propose it**, and the refutation is why the withdrawal is a gate
+     clause and not a footnote.
+  2. **The marker middleware is mounted ONCE, immediately after the session middleware so it is the OUTERMOST `res.end` — and that
+     position is asserted in a cell**, not a comment.
+  3. **The flag lives on `res`, never module scope.**
+  4. **Cells must be proven RED on BOTH 992da21 AND on the setImmediate shape** (the second arm records why the gate's own suggestion was
+     rejected).
+  5. **A stream that faults mid-body must STILL break the connection.**
+  6. **Arm (e), the one I most want measured: a store callback that NEVER RETURNS.** The marker makes us trust the session store to
+     finish; if it never does, the response may hang open forever — **worse than the defect being fixed, and invisible in a green suite.**
+     **Measure it; then either bound it or record it as a NAMED residual with the measurement.**
+  7. **BCR3 — the bound is a HANG GUARD, not a latency assertion.** A false kill is worse than a slow test. The builder sized it from
+     measurement. **The gate must RE-ESTABLISH at this sha the claim that production never calls `closeBrowser`** — gate 6's firing-spy
+     result was `{"closeBrowser":0,"cdpClose":0,"disconnect":0,"childKill":0}` while two real PDFs were emailed, the spy proven able to
+     fire. **Re-establish it, do not re-assert it.**
+  8. **BCR3 — `phone-layout.mjs`'s real close: the builder measured it NEVER returns (5 of 5, killed at 60 s), which CONTRADICTS gate 6's
+     measurement that it "returned at 5,018 ms". The gate must settle that.**
+- **No product choice in either target is Kam's ruling.** Report each as the BUILDER's choice (or Tuesday's) and say whether it needs Kam:
+  IO1F1's `Symbol`-keyed flag on `res` and its **30 s grace timer** (an `unref`'d `setTimeout` cleared on `close`); its decision to leave a
+  completed answer alone rather than end it; BCR3's **30,000 ms** default in a **shipped** module and the `Number.isFinite` coercion.
+- **Kam's pending decisions that bound this gate** (`Vision_Sales_Portal/5_Project_History/2026-09-22_kam-decisions-and-publish-pack.md`,
+  READ ONLY): decision 14 (P5B) still holds; decision 18 (QuickQuote's production logs) — **never query any production log**.
+- The QuickQuote repo's own rules: `Quoting Tool/hpas-quoting-tool/CLAUDE.md` (single offline HTML file; **version discipline**; **always
+  verify print as a real PDF**; nothing in the sub-project goes near Azure). Read it. **BCR3 changes no version: `toolVersion` is `2.33` at
+  BOTH main `d4426f8` and BCR3 `58c9094`** (READ-verified by the drafter) — say whether that is within the rule at merge time, given that
+  `lib/pdf.js` (a shipped module) DID change.
+- **Live QuickQuote is v2.30 and waits on Kam's typed word. Neither target goes on main until this gate passes. Deploys are HELD for Kam.
+  Nothing here merges on your word.**
+
+## PRIOR ROUND
+- **Gate 6's report is ON DISK AT:** `/Volumes/KK_T9_External_HDD/!CODING/Testing Agent MAIN/projects/vision/reports/2026-09-23-vision-qq-gate6/`
+  (`report.md` + `sections/BCR2.md` + `sections/IO1R2.md` + `sections/CONVENTIONS.md` + `evidence/`, 214 evidence files). **Read its
+  VERDICTS, FINDINGS INDEX, NOT TESTED, `sections/BCR2.md`, `sections/IO1R2.md` and `sections/CONVENTIONS.md`.** Gate 5's report is one
+  level back (`…/2026-09-23-vision-qq-gate5/`) and remains the source for BC-F1's socket-peer root cause and for the IO1 history.
+- **BCR3 is ROUND 3 of the BC class.** Gate 6 graded **BCR2 GO at `f8dec9c`** with one Minor (BCR2-F1) ticketed. Round 3 is what the
+  builder found afterwards, running the **forward-merged** head `983f916` before merge: (i) A9's `test/logo-inset.mjs`, new to the merged
+  tree and therefore never in BCR2's own tree, still closed its browser **unbounded** — under a forced hang it passed 24/24 and never
+  exited (rc=124 at 150 s); (ii) at 5 s the bound **killed healthy Chromes** — 1 of 3 `test:print` runs went red on BC's own "does not kill
+  a healthy Chrome" cell (5,003 ms at load average 56). Gate 6 had already seen the shape and called it **BCR2-O1**, an observation: a real
+  `phone-layout.mjs` close at **5,018 ms**, killed 18 ms past the bound. **Round 3 turns that observation into the reason the bound moved.**
+- **IO1F1 is ROUND 1 of the IO1R2-F1 class.** Gate 6 graded **IO1R2 GO at `992da21`** and TICKETED **IO1R2-F1 (Major, introduced at round
+  2)**: `express-session` defers the real `res.end` until the session is written to Postgres, so for a **signed-in** request `res.json()`
+  returns with `writableEnded === false`, and round 2's `if (!res.writableEnded) res.destroy(...)` destroyed a response that was already
+  complete. Gate 6 measured it on the shipped route `POST /api/quotes/:id/generate`: the quote **COMMITted and its number burned**, and
+  where round 1 returned the quote (200, 1,544 B) round 2 returned **ECONNRESET, 0 bytes**, 3/3. Gate 6 also left **IO1R2-P1** (the
+  backup-route cell asserted `typeof r.status === 'number'`, which is true for a hang too) and **IO1R2-P2** (the `!res.writableEnded` guard
+  had no reddening cell at all). **IO1F1 claims to fix all three.**
+- **PRIOR WORK — verify every claim above against history and gate 6's evidence, never against this brief:** `git log` / `git show` for
+  `992da21`, `f8dec9c`, `983f916` and `58c9094`; gate 6's `sections/IO1R2.md` (IO1R2-F1's measurement, IO1R2-P1, IO1R2-P2) and
+  `sections/BCR2.md` (the 5,018 ms close, the firing spy, the byte-identity hashes). **If this brief's account of prior work disagrees with
+  the record, the record wins — report it as a brief correction.**
+- **Gate 6's (and gate 5's) harnesses are REUSABLE BY COPY.** From `…/2026-09-23-vision-qq-gate6/evidence/`: `qa-run.py` (the `env -i`
+  runner), `qa-chrome-egressblock.sh`, `qa-chrome-lock.py` (the gate's OWN fcntl Chrome lock — **never NexusAI's**), `qa-egress-monitor.py`,
+  `qa-egress-posctl.mjs`, `qa-netlog-scan.py`, `qa-floorcount.py`, `lockcmp.py`, `lockwalk.py`, `mktree-qq.sh`, `mktree-portal.sh`,
+  `qa-mkdb.cjs`, `qa-dbcheck.cjs`, `qa-harness-floorctl.mjs`; **IO1F1:** `qa-harness-io1-edges.cjs` (the real `createApp()` on real
+  Postgres), `qa-harness-io1-boot.cjs`, `qa-harness-lead-io1-hang.cjs` (the independent post-headers probe), `qa-io1-preload-fetchguard.cjs`,
+  `qa-io1-preload-hidelayer.cjs`, `IO1-count-async.py`; **BCR3:** `qa-bc-preload.mjs` (the close/kill/NaN-delay logger — **it is also the
+  instrument whose numbers now contradict the builder's**), `qa-harness-bc-emailed.cjs` (the server route + spies), `qa-harness-bc-concurrent.mjs`,
+  `qa-lib-bc-stage3.cjs`, `qa-lib-bc-png.cjs`, `BC-pdfcompare.sh`, `BC-diag2.sh` (the socket-peer attribution). Gate 6's
+  `sections/CONVENTIONS.md` is the working method. **COPY what you use into this gate's own evidence folder, read it before trusting it,
+  and never edit gate 1-6's copies.**
+- **Self-findings from gates 2-6 bind you:** (1) quote every path (the project path has a space); (2) **zsh does not word-split
+  `set -- $p`, and zsh reads `$s:stage3/…` as a history modifier** — gates 3, 4, 5 AND their drafters hit it; **run every such loop under
+  `bash`**; (3) never detach a control server; (4) the portal test-DB name MUST end in `_test`; (5) npm's update-notifier egresses unless
+  disabled; (6) isolate a browser context per case; puppeteer's default PDF is Letter — pass `format: "A4"`; (7) the real renderer calls
+  public FX APIs whenever currency ≠ USD — BLOCK and RECORD them (§13.3); (8) a harness leg that asserts the shape it measured is circular
+  for a NO-GO — re-measure any NO-GO with an independent probe; (9) **run each browser gate file ALONE and time it** (N-C1); (10)
+  **serialise or salt DB creation** (gate 5's millisecond-collision void); (11) **a red arm on a file that ALREADY hangs cannot
+  discriminate** — pick a red arm on a file that passes at the pinned head; (12) **gate 6's own self-finding: the floor is SHARED — its
+  1-of-3 red ran at load average 56 on 8 cores with a NexusAI merge verifying concurrently. Record the load average beside every timing
+  number in this gate; a latency result with no load figure is not a measurement.**
+
+## PIN — HEADS (PRE-FILLED BY THE DRAFTER; RE-CHECKED BY TUESDAY AT LAUNCH; parsed and verified by the launcher)
+Rules the launcher enforces: every row has a 40-hex head; every target row has a 40-hex base and a commit count and no `@`; head is a
+commit in its repo; base is an ancestor AND the merge-base; `git rev-list --count base..head` equals `commits`; `git ls-remote origin
+refs/heads/<branch>` equals head NOW; **base is either the same repo's MAIN row head, or — a STALE BASE — an ancestor of the repo's MAIN
+row that equals `merge-base(head, MAIN)`**. MAIN rows are re-read by `ls-remote` too. **No row may be OUT in this gate.**
+**NEITHER TARGET IS ON MAIN, AND — UNLIKE GATE 6 — NEITHER ROW IS STALE.** Both bases ARE their repo's MAIN row: BCR3 carries the forward
+merge `983f916` inside itself, so `merge-base(58c9094, d4426f8) = d4426f8`. The launcher prints a NOTE if either row turns out stale, and
+§12 measures the merge either way. **Gated anchors (launcher-checked):** BCR3 contains gate 6's gated head `f8dec9c` AND the forward merge
+`983f916`, whose two parents are exactly `f8dec9c` and `d4426f8`; portal main contains gate 6's gated head `992da21`; IO1F1's
+`server/asyncErrors.js` blob is IDENTICAL to main's (this branch does not touch the I10-O1 patch); at BCR3's base, `closeBrowser` is
+referenced only by `lib/pdf.js`, `test/typed-rates.mjs` and `test/fx-provenance.mjs`.
+
+<!-- PIN-HEADS:BEGIN -->
+| id | repo | branch | head | base | commits | status |
+|---|---|---|---|---|---|---|
+| MAIN-P | portal | main | f95f6254c1e1b296af9717603df60a9ecf33865f | - | - | IN |
+| MAIN-Q | quickquote | main | d4426f899620419819ae755ff0ddba4f2a9843b7 | - | - | IN |
+| IO1F1 | portal | fix/portal-io1r2-f1-completed-response-2026-09-23 | 15cd73304bf54b8b3a166635f86fa4723bf415f1 | f95f6254c1e1b296af9717603df60a9ecf33865f | 3 | IN |
+| BCR3 | quickquote | fix/qq-bounded-browser-close-2026-09-23 | 58c9094834ec98bb66c2a28a24f482000bb216ba | d4426f899620419819ae755ff0ddba4f2a9843b7 | 5 | IN |
+<!-- PIN-HEADS:END -->
+
+Repos: portal = `/Volumes/KK_T9_External_HDD/!CODING/Datasec/Vision_Sales_Portal/2_Project_Files` (remote
+`datasecau/vision_datasec-sales-portal`); QuickQuote = `/Volumes/KK_T9_External_HDD/!CODING/Datasec/Vision_Sales_Portal/Quoting Tool/hpas-quoting-tool`
+(remote `datasecau/vision_hpas-quickquote`).
+
+**Shape at drafting (READ, 08:0x-08:3x AEST):**
+- **IO1F1 sits on current portal main `f95f625`**, which is the merge of gate 6's gated `992da21`. Three commits:
+  `bac7b65` (BACKLOG only) → `edbe6dc` (cells, claimed red on main) → `15cd733` (the product change). **No forward merge is owed.**
+- **BCR3 sits on current QuickQuote main `d4426f8`** — through the forward merge it carries. Five commits over main: `907f686` →
+  `aa89010` (gate 5's gated round-1 head) → `f8dec9c` (gate 6's gated round-2 head) → `983f916` (the forward merge of main `d4426f8`) →
+  `58c9094` (round 3). **No forward merge is owed. `stage3/package.json`'s `test:print` conflict gate 6 predicted has ALREADY been
+  resolved inside `983f916` — verify the resolution rather than the conflict** (§12).
+- **A GO is a statement about the pinned SHA only.** If a head moves, its verdict expires.
+
+**Commission corrections the drafter made AT SOURCE (verify each — the commission is a claim like any other):**
+- **(a) BCR3 is NOT a stale-base row, and the commission's framing invited that reading.** The commission says BCR3 "sits on 983f916 (the
+  BCR2 forward merge, parents f8dec9c + d4426f8)" and that "QuickQuote main is d4426f8 and BCR2 is NOT on it". Both halves are TRUE
+  (MEASURED: `983f916` has exactly those two parents; `merge-base(58c9094, d4426f8) = d4426f8`; `58c9094` is **not** an ancestor of main).
+  But the consequence matters and the commission does not state it: **`d4426f8` IS the merge-base, so the row's base is MAIN and no forward
+  merge is owed.** Gate 6's `test:print` conflict prediction is therefore spent.
+- **(b) The commission's "TIER 2 with ONE DECLARED TIER-1 TOUCH: `lib/pdf.js` closeBrowser" is true of ROUND 3's own commit and NOT of the
+  branch.** Round 3 alone changes `lib/pdf.js` by **two numbers and a comment** (MEASURED). **Over main the branch changes the whole of
+  `closeBrowser()`** — the bound, the kill, the disconnect and the stdio-destroy loop — which is what gate 6 gated at `f8dec9c`.
+  **You gate the branch against main, not round 3 against `983f916`.** Both extractions are named in §BC.1.
+- **(c) The file set over main is 15 files, not gate 6's 13.** `BACKLOG.md` and `stage3/test/logo-inset.mjs` are new to it —
+  `logo-inset.mjs` is **A9's** gate file, which existed only on main and therefore could never appear in BCR2's own tree. Round 3 brings it
+  onto `closeBounded`. The launcher pins the exact 15.
+- **(d) The bound is FOUR numbers, not two.** The commission says "the bound moved 5,000 -> 30,000 ms in BOTH `test/lib-close.mjs` AND
+  `lib/pdf.js` closeBrowser's default" — MEASURED true, **and each module carries the number TWICE**: the signature default
+  (`ms = 30000`) and the NaN-proof fallback (`… ? Number(ms) : 30000`). The new cell "the default bound is ONE number…" asserts all four by
+  regex over the source text. **A regex over source is not a behavioural cell — say what it would miss** (a caller that passes 5000
+  explicitly; a third module).
+- **(e) THE CONTRADICTION IS REAL, MEASURED ON BOTH SIDES, AND IT IS THIS GATE'S SHARPEST QUESTION.** Gate 6's own evidence
+  (`evidence/BC-observe-BCR2.log:36`) reads verbatim: `phone-layout.mjs] real close() returned after 5018ms browserPid=41760`. The builder's
+  round-3 commit reads: *"`phone-layout.mjs`'s close never returned, 5 of 5."* **Both are on disk; they cannot both describe the same
+  thing.** The commission's extra detail — *"one earlier run hung 400 s"* — is **NOT in the commit message, NOT in the BACKLOG and NOT in
+  gate 6's evidence**; the drafter could not verify it anywhere in either repo. Treat it as an unverified builder claim, and say so.
+- **(f) The builder's own worst-case numbers disagree with the comment it shipped.** The commit says healthy closes were
+  *"<= 1,680 ms with 8 CPU-bound workers on 8 cores (2,032 ms worst idle …)"* — so the **worst measured healthy close is 2,032 ms**, on an
+  IDLE box. The comment shipped in `test/lib-close.mjs` says *"every healthy close returned within 1.7 s, even with 8 CPU-bound workers"*,
+  which the builder's own idle figure refutes. The sizing arithmetic survives (`max(30 s, 10 × 2.032 s)` is still 30,000 ms) but **the
+  shipped comment is wrong at source — report it as a Polish finding if you confirm it.**
+- **(g) Gate 6's own merge instruction said the merged `test:print` line must carry "all seven" files and then listed EIGHT.** The
+  resolution in `983f916`/`58c9094` carries eight: `print-fit`, `typed-rates`, `fx-provenance`, `phone-layout`, `email-collector`,
+  `logo-inset`, `lib-close.test.mjs`, `lib-close-shared.test.mjs`. **Count the cells on every run**; gate 6's own warning applies to itself.
+- **(h) Arm (e) is already BOUNDED, and the residual is already NAMED — so your job is to check the measurement, not to ask for one.**
+  Tuesday's condition allowed either. The builder did both: a **30 s grace** for the FAULTED case, and a BACKLOG entry saying the pool has
+  no query timeout so **a never-answering store hangs EVERY signed-in response, faulted or not**. **The arm-(e) cell shortens the grace to
+  300 ms (`settings.appEndGraceMs = 300`), so the real 30,000 ms default is never exercised** — §5.5 makes you exercise it once.
+
+## 1. Targets — READ from the object store at drafting (08:0x-08:3x AEST)
+Drafting shas = the PIN table. **Neither target changes a lockfile** (portal `package-lock.json` blob `9d426df` at BOTH `f95f625` and
+`15cd733`, **express 4.22.2**, **express-session 1.19.0**; stage3 `package-lock.json` blob `70ebda7` at BOTH `d4426f8` and `58c9094`); the
+launcher re-checks this at the pinned heads. **Every file:line below is at the pinned sha; re-locate by content if anything moved.**
+
+### TARGET IO1F1 — the IO1R2-F1 END-MARKER: a fault AFTER a complete answer no longer resets that answer (TIER 1), portal
+Six files over main `f95f625`, three commits: `BACKLOG.md`, `server/errors.js`, `server/errors.test.js`, `server/index.js`,
+`test/db/async-faults.test.js`, `test/db/completed-response.test.js` (new). **`server/asyncErrors.js` is untouched** — the I10-O1 patch is
+carried verbatim from main.
+- **`server/errors.js`** gains `const APP_ENDED = Symbol('vision.appEnded');`, `const settings = { appEndGraceMs: 30000 };` and
+  `function markAppEnd(req, res, next)`, which wraps `res.end` to set `res[APP_ENDED] = true` before calling through. `serverError` becomes,
+  in order: log → `if (!res.headersSent) return void res.status(500).json(…)` → `if (res.writableEnded) return;` →
+  `if (!res[APP_ENDED]) return void res.destroy(err);` → otherwise arm an **`unref`'d 30 s `setTimeout`** that destroys only if the response
+  still has not finished, cleared on `res.once('close', …)`. The exports become
+  `module.exports = { serverError, lastResortHandler, markAppEnd, APP_ENDED, settings };`.
+- **`server/index.js`** imports `markAppEnd` and mounts it with a single `app.use(markAppEnd);` **immediately after the
+  `session(...)` block and before the CSRF backstop.**
+- **Cells (builder's CLAIM):** `server/errors.test.js` gains a parameterised signed-in/anonymous pair at store delay 0 and 50 ms, the
+  **arm (e)** cell, and four `guard:` cells (mid-stream breaks at once / a finished response is left alone / ended-and-finishes is never
+  broken / ended-and-never-finishes is broken after the grace). `test/db/completed-response.test.js` (new, 123 lines, 3 cells + a control)
+  drives the **real** `POST /api/quotes/:id/generate` with the session store slowed 50 ms and `client.release()` throwing after COMMIT, and
+  asserts the mount position off `app._router.stack`. `test/db/async-faults.test.js`'s backup-route cell is rewritten to fault the
+  **archiver** mid-body (`QA: archive failed mid-stream`) instead of the pool, which is gate 6's IO1R2-P1.
+
+### TARGET BCR3 — bounded browser.close() ROUND 3: the bound becomes a 30 s HANG GUARD and A9's `logo-inset.mjs` is bounded (TIER 2 through-code, the `lib/pdf.js` clauses TIER 1 in rigour), QuickQuote
+Fifteen files over main `d4426f8`, five commits. **Round 3's own commit `58c9094` touches six:** `BACKLOG.md`, `stage3/lib/pdf.js`,
+`stage3/test/fixtures/browser-file.mjs`, `stage3/test/lib-close.mjs`, `stage3/test/lib-close.test.mjs`, `stage3/test/logo-inset.mjs`.
+- **`stage3/lib/pdf.js`** — `closeBrowser(ms = 5000)` → `closeBrowser(ms = 30000)`, the fallback `: 5000` → `: 30000`, and the comment now
+  names all three test callers and says the bound is a hang guard. **Nothing outside `closeBrowser` moves** (the launcher proves it).
+- **`stage3/test/lib-close.mjs`** — `closeBounded(browser, ms = 5000)` → `30000`, same fallback, plus the measurement comment.
+- **`stage3/test/logo-inset.mjs`** — `after(async () => { await browser?.close(); });` → `after(async () => { await closeBounded(browser); });`.
+- **`stage3/test/fixtures/browser-file.mjs`** — `Number(process.env.QA_CLOSE_MS || 5000)` → `Number(process.env.QA_CLOSE_MS) || undefined`,
+  so an unset variable falls back to the module default. **Note the coercion: `QA_CLOSE_MS=0` now also falls back to 30,000** — a harness
+  that relied on 0 meaning "kill immediately" silently gets a 30 s wait. **Check every harness of yours that sets it.**
+- **Two new cells** in `lib-close.test.mjs`: a stubbed **6 s** healthy close is not killed, and the default is one number in both modules.
+  Two pre-existing `closeBounded(b, 5000)` calls in the control cell become `closeBounded(b)`.
+- **`stage3/package.json`**'s `test:print` line (changed by earlier commits on the branch, resolved in `983f916`) now runs **eight** files.
+
+### All targets
+- **No worktree is pinned. Build your own trees INSIDE YOUR OWN PROJECT (Testing Agent MAIN), from the object store:**
+  `git -C <repo> archive <pinned sha> | tar -x -C <a fresh mktemp -d under your project>`. **Never `git worktree add`, `checkout`,
+  `switch`, `fetch`, `pull`, `stash`, `reset`, `restore`, `clean`, `gc`, `tag` or commit against either repo, and never work inside either
+  checkout.** Both checkouts are the LIVE builder's working trees: pin by sha, read origin by `ls-remote`.
+- **Dependencies, without the network:** in YOUR archived tree, **`npm ci --offline --ignore-scripts`** (in `stage3/` for QuickQuote, at
+  the root for the portal). `--offline` forbids the network by construction: a cache miss FAILS rather than fetches — that suite is then
+  **NOT RUN, blocker named** (name the missing tarballs). Never `npm install`, never `npm ci` without `--offline`, never `npx` a package
+  that is not already in the tree, **never `npm audit`** (a registry call). After it, prove `node_modules/.package-lock.json` matches
+  `git show <sha>:<lockfile>` **entry by entry** and quote the count (gate 5: stage3 282/282, portal 247/247), by `lockcmp.py` AND the
+  on-disk `lockwalk.py`. Chrome: `PUPPETEER_EXECUTABLE_PATH` = YOUR copy of the egress-block wrapper (§13.3).
+- **Each tree you build is EXCLUSIVE to this gate and to ONE purpose.** A fresh `mktemp -d` per arm; never reuse a mutant tree for a clean
+  arm; never touch gate 1-6's trees (`work/`, `work-g2/` … `work-g6/`). **Use `work-g7/`.**
+- **`git merge-tree --write-tree` writes objects** — only ever as `GIT_OBJECT_DIRECTORY=<your own mktemp -d>
+  GIT_ALTERNATE_OBJECT_DIRECTORIES=<repo>/.git/objects git -C <repo> merge-tree --write-tree --name-only <a> <b>`, **from the gate's OWN
+  object directories**. If you cannot do it that way, SKIP it and say so.
+- **A RED ARM COUNTS ONLY IF THE MUTANT STILL PARSES:** `node --check` on every mutated `.js`/`.mjs`/`.cjs` before its arm, exit code
+  quoted. A red from a mutant that does not parse or load is a VOID arm, never a red.
+- **CONTROLS MUST BE ABLE TO FAIL INDEPENDENTLY:** every positive or negative control is a separate measurement that could have come out
+  the other way on its own. A control derived from the same run it validates is not a control.
+- **NOT on main. Nothing merges on your word or a builder's.** Merges are Tuesday's GO on a pinned head.
+
+## 2. Why these tiers, and who is waiting
+- **IO1F1** decides whether the portal's merged crash-to-500 work is SAFE for signed-in users. Today main resets a completed answer on any
+  post-answer fault — a generated quote, its number burned, reaching the rep as ECONNRESET. The fix mounts a wrapper on **every** response
+  in production. **A hang introduced here is worse than the defect: it is invisible in a green suite.**
+- **BCR3** de-flakes `test:print` (N-C1) and changes a **shipped** default in `lib/pdf.js` from 5 s to 30 s. If production ever did call
+  `closeBrowser`, a 6× longer bound would be a production latency change — which is exactly why the "production never calls it" claim must
+  be **re-established here by measurement**, not carried over from gate 6.
+- 🔴 **Queue:** **live QuickQuote is v2.30 and waits on Kam's typed word.** Deploys HELD. Portal main carries IO1R2-F1 today; QuickQuote
+  main still hangs `test:print`. **Neither target goes on main until this gate passes.**
+
+## 2a. LEGITIMATE SHAPES — CHECKERS in this gate (template §2a)
+Measure every row. **A row whose expected verdict and clause disagree is a finding against this brief — say so.** A legitimate shape
+refused is a **Major**.
+
+| shape — its ordinary form, as the product really sees it | expected verdict | the rule clause that yields it | predicted-by |
+|---|---|---|---|
+| IO1F1: a signed-in rep generates a quote and the handler faults in a `finally` AFTER the answer | the rep gets **200 and the full body with the quote number**; the fault is still logged under a ref; the portal lives | `markAppEnd` + the `res[APP_ENDED]` branch | builder (cell) — **measure on the REAL route, and measure it red on main `f95f625`** |
+| IO1F1: an admin downloads the backup zip and the **archive** fails mid-body | the download **BREAKS at once** (socket hang up / ECONNRESET / aborted), never a hang, never a "complete" response; the log names the real fault | `if (!res[APP_ENDED]) return void res.destroy(err)` | builder (rewritten cell) — **measure; a completed-looking response OR a hang is a finding** |
+| IO1F1: an anonymous visitor hits a faulting route | unchanged from main: 500 + ref pre-headers, broken connection mid-stream | the same branch, `APP_ENDED` never set in time | gate 6 (GO) — **re-measure; the anonymous path is the control that proves the fix is session-specific** |
+| IO1F1: a Postgres blip during `GET /api/quotes` (signed-in) | 500 `{ error: 'Internal error', ref }`; the portal keeps serving; next request 200 | pre-headers branch unchanged | gate 6 — **re-measure at the new sha** |
+| IO1F1: the session store answers slowly (Azure Postgres, 50-200 ms) but does answer | every response completes; **no grace timer ever fires**; no extra latency on a non-faulted request | the grace only arms inside `serverError` | builder — **measure, and measure the non-faulted path's latency against main** |
+| IO1F1: **the session store never answers at all** | the FAULTED request's connection is broken after the 30 s grace; an UNFAULTED signed-in request **still hangs forever** — the NAMED residual | the grace timer; the pool has no `query_timeout` | builder + BACKLOG — **measure BOTH halves; the second is the residual Kam asked to be named with its measurement** |
+| BCR3: a developer runs `npm run test:print` on a machine with the installed Google Chrome | completes and **exits on its own**, every cell green, **eight files** | the bound + the stdio release + `logo-inset` bounded | builder — **measure N≥3 at BCR3, with main `d4426f8` as the control (it should still hang)** |
+| BCR3: a `test:print` run on a **LOADED** box (the 1-of-3 red that caused round 3) | **0 kills of a healthy Chrome**, green, at load average ≥ 8 on 8 cores | 5,000 → 30,000 ms | builder — **this is the shape round 3 exists for: reproduce the LOAD, not just the pass** |
+| BCR3: a real Chrome whose `close()` genuinely hangs | each test file exits within 30 s + margin, killing only its own browser | the hang guard | gate 6 (8/8 at `f8dec9c`) — **measure all NINE files now (`logo-inset` is new to the set)** |
+| BCR3: production renders and emails a quote PDF | `closeBrowser` is **never called**; the PDF is byte-identical to main's | production imports `renderQuotePdf` only | gate 6 — **RE-ESTABLISH at this sha with a spy proven able to fire; do not re-assert** |
+
+## 5. TARGET IO1F1 — the IO1R2-F1 END-MARKER (TIER 1)
+**The portal's `createApp()` in YOUR harness on LOCAL Postgres (§13.2), `env -i`; never the portal's own entry point (it binds all
+interfaces).** Gate 6's `qa-harness-io1-edges.cjs`, `qa-harness-io1-boot.cjs`, `qa-harness-lead-io1-hang.cjs` and
+`qa-io1-preload-fetchguard.cjs` by COPY, read before trusted.
+**FAIL condition (state it before the runs):** IO1R2-F1 still open (a completed signed-in answer reset by a later fault); **a response that
+HANGS where main broke it** — including any grace path that does not fire; a mid-body stream fault that no longer breaks the connection; a
+NEW way to kill the process; a double response / `ERR_HTTP_HEADERS_SENT` crash; any change to a NON-faulted request's body, status or
+measured latency; the marker mounted more than once or in the wrong place; the flag observable across requests.
+
+1. **IO1R2-F1 CLOSED, on the REAL route, red on main in the same session (MEASURED).** `POST /api/quotes/:id/generate` with the session
+   store slowed and `release()` throwing after COMMIT. On main `f95f625` the rep must get **ECONNRESET / 0 bytes** while the row is
+   `generated` (that is gate 6's measurement, and it is your positive control — **it must reproduce, or your instrument is wrong**); at
+   `15cd733` the rep must get **200 + the full body + the quote number**, the fault still logged, the portal still serving. Quote the byte
+   counts on both sides. **Then the signed-in/anonymous pair at store delay 0 and 50 ms**, both directions.
+2. **THE WITHDRAWN SHAPE IS A RED ARM, NOT A FOOTNOTE (MEASURED).** Tuesday's condition: **cells must be proven RED on BOTH 992da21 AND on
+   the setImmediate shape.** So build TWO mutant trees off `15cd733`: (i) revert `serverError` to `992da21`'s body
+   (`if (!res.writableEnded) res.destroy(…)`, no marker) — the IO1R2-F1 cells must redden; (ii) the **setImmediate shape**: the same
+   `992da21` body with the destroy deferred one `setImmediate` turn — the cells must **STILL redden**, and you must quote **how many bytes
+   the client received** (the builder measured **61 of 62**). `node --check` both. **If arm (ii) does not redden, the withdrawal itself is
+   unproven and that is a finding against this brief and against the ticket.**
+3. **THE MOUNT POSITION — THE CELL, AND WHAT THE CELL DOES NOT COVER (MEASURED + READ).** The cell asserts `names[s + 1] === 'markAppEnd'`
+   off `app._router.stack` and that it appears exactly once. **That is layer ORDER, not `res.end` wrapper order.** Measure the wrapper
+   order directly (instrument `res.end` at request time and record the wrapper chain), and **enumerate every middleware mounted AFTER
+   `markAppEnd` and say whether any of them wraps `res.end`** (helmet, the CSRF backstop, `express.json`, the routers, `compression` if
+   present). A later wrapper becomes the outermost one; say what that would do to the flag. Also: `app._router` is an Express-4 internal —
+   note that the cell would break silently under Express 5, which `server/asyncErrors.js` already refuses to boot on.
+4. **THE FLAG LIVES ON `res` (READ + MEASURED).** `res[APP_ENDED]` is a `Symbol`-keyed own property — prove it does not leak between
+   requests (two concurrent requests, one faulting after its answer, one mid-stream; keep-alive reuse of the same socket). **`settings` IS
+   module scope** — say whether anything but a test mutates it, and whether a shared `appEndGraceMs` is the right shape for a multi-tenant
+   process.
+5. **ARM (e) — THE ONE THE COORDINATOR MOST WANTS MEASURED (MEASURED, BOTH HALVES).** *"The marker makes us trust the session store to
+   finish; if it never does, the response may hang open forever — worse than the defect being fixed, and invisible in a green suite."*
+   (a) **The FAULTED case at the REAL default.** The builder's cell sets `settings.appEndGraceMs = 300`, so **30,000 ms is never
+   exercised** — run it ONCE at the shipped default and quote the elapsed time (budget your deadline above 30 s for this one step only).
+   (b) **The UNFAULTED case, which nothing bounds.** A signed-in request that never faults, with a store that never calls back: measure how
+   long the client waits and say plainly that it is unbounded. (c) **The residual.** Check the BACKLOG entry ("The Postgres pool has no
+   query or connection timeout…") against what you measure, and say whether Kam's condition — *bound it or record it as a NAMED residual
+   with the measurement* — is discharged. (d) **Timer hygiene:** one `unref`'d timer per faulted-after-end request, cleared on `close`;
+   prove no accumulation under load and that the `unref` cannot let the process exit early.
+6. **A STREAM THAT FAULTS MID-BODY MUST STILL BREAK THE CONNECTION (MEASURED).** The rewritten `async-faults` cell faults the **archiver**
+   after real bytes are on the wire. Re-measure it independently (your own probe, not the builder's cell): the client must see a broken
+   connection within your deadline, the partial ZIP must be **recognisably truncated**, and the log must name the real fault. Then the
+   inverse: prove the OLD cell's weakness is gone — a hang must now fail the cell (gate 6's IO1R2-P1).
+7. **RE-ESTABLISH the merged work at the NEW sha — do NOT carry it over.** (a) main's crash probe vs `15cd733`; (b) the **26 listed
+   handlers** under a DB fault: status, body shape, exactly one log line under the ref, no `unhandledRejection`, process alive, health 200;
+   (c) **non-faulted requests unchanged vs main** — body, status AND latency (the marker wraps every `res.end` in production: **measure the
+   overhead**, N large enough to see 1 ms); (d) refuse-to-boot on a non-Express-4 Layer; (e) no login enumeration under a fault.
+8. **Did the marker trade a reset for a crash? (MEASURED.)** `res.destroy(err)` on a socket a stream is still writing into; a response that
+   already ENDED then rejects; keep-alive with a second in-flight request; a double `next(err)`; a rejection after `next()`; an async 4-arg
+   error handler that rejects; a sync throw; a resolving handler; a non-promise thenable; **and `res.end()` called twice by the app.**
+   Record client outcome within 30 s, every log line, `unhandledRejection` / `uncaughtException` counts, process state. **Any new uncaught
+   exception is a Major.**
+9. **Red-proofs (parse-checked, `node --check` rc quoted; fresh tree per arm):** (a) remove `app.use(markAppEnd)` → the position cell AND
+   the F1 cells redden; (b) mount `markAppEnd` BEFORE `session` → the position cell reddens AND the real-route cell reddens; (c) remove the
+   `if (!res[APP_ENDED]) return void res.destroy(err);` line → the mid-body cell reddens; (d) remove the `res.writableEnded` early return →
+   what breaks; (e) remove the grace `setTimeout` → the arm-(e) cell reddens; (f) move the flag from `res` to module scope → does ANY cell
+   redden (if not, say so — condition 3 would then be unguarded). **A fix with no reddening cell is a finding.**
+9a. **TICKETED, NOT IN SCOPE, REPORT — DO NOT FAIL ON (MEASURED where cheap).** **IO1-F2** (a DB fault during sign-in spends the login
+    limiter, so 10 faulted tries lock a rep out for 15 minutes after recovery — gate 6 reproduced the per-account half exactly; say whether
+    IO1F1 changed it at all), **IO1-F3** (the "async handler rejected without a reason" fallback still has no reddening cell) and
+    **IO1-P1** (a bare `MODULE_NOT_FOUND` under Express 5). **Do not fail IO1F1 on any of them**, but check each ticket's BACKLOG entry
+    against what you measure and report any inaccuracy.
+10. **Suites at `15cd733`:** `npm test` (builder claims **95**) and `npm run test:db` on a **FRESHLY CREATED** `vsp_qa_g7_<epoch>_test`
+    database (prove it fresh: zero user tables). `test:db` runs `test/db/*.test.js` one file at a time via `scripts/run-db-tests.js`, so
+    **`completed-response.test.js` is picked up automatically — confirm it actually ran and count its cells.** The builder claims
+    `30/3/5/4/6/18`. **Serialise or salt your database creation.** The builder's own BACKLOG records **one unexplained "fail 1" on
+    `async-faults.test.js`, never reproduced in five runs** — run that file at least 5 times and say whether you saw it.
+
+## BC. TARGET BCR3 — bounded browser.close() ROUND 3 (TIER 2 through-code; the `lib/pdf.js` clauses TIER 1 in rigour)
+**FAIL condition (state it before the runs):** `test:print` still not completing and exiting on its own; **a healthy Chrome killed at any
+load you can produce**; a test file that does not exit on a forced close hang; any byte of `renderQuotePdf` or the browser launch changed;
+any production path reaching `closeBrowser`; the emailed PDF differing from main's in text or by one pixel (timestamp bytes excepted); a
+kill that reaches any process the test did not start.
+
+1. **Scope (READ) — TWO extractions, because correction (b) splits them.** `git diff --stat d4426f8 58c9094` (15 files) **and**
+   `git diff --stat 983f916 58c9094` (6 files). **Extract `renderQuotePdf`, `browser()`, `svcInject()`, the `puppeteer.launch` options and
+   `module.exports` at main `d4426f8` and at `58c9094` and prove them byte-identical (quote the hashes), and hash the WHOLE FILE MINUS the
+   `closeBrowser` comment+function on both sides** — that is the strong row, and gate 6 measured it as **11,258 B / `617a79f87ac5d27c`**
+   against the old base, so your number will differ only if something outside `closeBrowser` moved. Quote the whole `closeBrowser` diff
+   **over main**, not just round 3's two numbers. `stage3/package.json` delta = the `test:print` line only.
+   **Gate 5's self-finding: anchor the extraction on the body brace and sanity-check the size** — its first attempt stopped inside an
+   `opts = {}` default and "proved" a 46-byte block identical.
+2. **PRODUCTION NEVER CALLS `closeBrowser` — RE-ESTABLISH IT, DO NOT RE-ASSERT IT (READ + MEASURED). This is Tuesday's condition and the
+   reason the tier-1 touch is allowed at all.** Gate 6's result was `{"closeBrowser":0,"cdpClose":0,"disconnect":0,"childKill":0}` with the
+   spy proven able to fire in the same run while **two real PDFs were emailed**. Reproduce that **at `58c9094`**: read every
+   `require("./lib/pdf")` / `lib/pdf.js` import in stage3 outside `test/`; then your harness server signs in through the real OTP flow and
+   emails a PDF with spies on the export, on `CdpBrowser.prototype.close`, on `disconnect` and on `ChildProcess.prototype.kill` → **0
+   calls**, repeated; then call the spied export yourself so the spy is proven able to fire **in the same run**. **Say explicitly what a
+   non-zero would have meant: the shipped bound went 5 s → 30 s, so a production caller would wait six times longer before giving up.**
+3. **Emailed PDF identity (MEASURED) — against MAIN `d4426f8` this time.** Gate 6 had to compare against the old base because A9 was on main
+   and not in BCR2's tree; **BCR3 carries A9 through the forward merge, so the comparison is BCR3 vs main directly**: pages equal,
+   `pdftotext` equal, raster **0 differing pixels**, differing bytes only inside `/CreationDate` and `/ModDate`, default USD and heavy AUD,
+   fixed qnum, egress blocked, with the comparator's positive control (a planted difference) firing in the same run. `lib/pdf.js` is the
+   ONLY shipped file BCR3 touches, so a difference here has exactly one possible cause. Quote the footer line and the version from a real
+   PDF at both (**both should read 2.33**).
+4. **THE HEADLINE — `test:print` COMPLETES AND EXITS, AND IS NOT KILLED UNDER LOAD (MEASURED).** Plain `npm run test:print`, no preload,
+   each run ALONE under your own exclusive Chrome lock, timed, with a written deadline: at `58c9094`, **N ≥ 3 back-to-back runs must
+   COMPLETE and EXIT on their own**, every cell green. Quote elapsed time **and the load average** for every run (the builder claims
+   143/143 × 4 at 54/54/55 s, and 30 s under 8 busy workers). Controls that can fail independently, same session: **main `d4426f8`**
+   (expected to hang) and **gate 6's head `f8dec9c`** (expected to complete — it was GO — which makes it the control for the bound, not for
+   the hang). **THEN THE ROUND-3 SHAPE ITSELF:** reproduce the LOAD that reddened the builder — ≥ 8 CPU-bound workers on this 8-core box,
+   load average recorded — and show **0 kills of a healthy Chrome across ≥ 3 loaded runs**, with the **same run at a 5,000 ms bound as the
+   positive control that CAN redden**. A green at idle proves nothing about the defect round 3 exists for. **Count the cells on every run
+   and say how many** — the `test:print` line now carries **eight** files.
+5. **SETTLE THE CONTRADICTION — this is the gate's sharpest question (MEASURED; see correction (e)).** Gate 6's evidence says
+   `phone-layout.mjs] real close() returned after 5018ms`; the builder says it **never returns, 5 of 5, killed at 60 s**. Measure
+   `phone-layout.mjs`'s **real** close yourself, N ≥ 5, at `58c9094` and at main, with the bound lifted high enough not to interfere, under
+   both idle and loaded conditions, logging the actual return. **Then say which is right and WHY the other saw what it saw** — candidates to
+   discriminate between, not to assume: gate 6's own `qa-bc-preload.mjs` instrumentation changing the close path; a different Chrome or
+   profile state; load; the `logo-inset`/A9 files being present in one tree and not the other. **"Both were seen" is not an answer; name the
+   variable.** This decides whether 30,000 ms is a hang guard with a margin or a hang guard over a close that never returns at all.
+6. **THE BOUND AS A HANG GUARD, AND THE FOUR NUMBERS (MEASURED + READ).** *The bound is a HANG GUARD, not a latency assertion.* Check the
+   sizing against the builder's own figures: worst healthy **1,680 ms loaded**, **2,032 ms idle** → `max(30 s, 10 × worst)` = 30,000 ms.
+   **Report correction (f)** — the comment shipped in `test/lib-close.mjs` says "every healthy close returned within 1.7 s", which the
+   builder's own 2,032 ms idle figure refutes. Then the new cells: the **6 s** stubbed close is not killed (prove it RED at a 5,000 ms
+   bound); and the "one number" cell — **it is a regex over source text, so say what it would miss** and whether a behavioural cell exists.
+7. **FORCED HANG — NINE FILES NOW (MEASURED).** (a) a stubbed browser whose `close()` never resolves → **each** patched test file exits
+   within the bound + margin, **including `logo-inset.mjs`, which is new to the set and was UNBOUNDED until round 3** (the builder claims
+   rc=124 at 150 s before, 33 s after — reproduce both sides); (b) a real Chrome with its close stalled (`SIGSTOP` on the browser process
+   you started) → same; (c) the kill targets only that browser's own pid tree — prove by pid ancestry anchored on YOUR claude pid that no
+   updater or foreign Chrome was signalled, and reconcile every kill against the `browserPid` the same process's own `close()` reported;
+   (d) **an ordinary OBSERVE run, no stubbing: 0 kills and 0 `TimeoutNaNWarning` lines** — and note that gate 6's fourth SIGKILL (the
+   5,018 ms one) must now be **absent**, because 5,018 < 30,000. Its absence is a positive result for the bound AND a data point for §5.
+8. **`QA_CLOSE_MS` CHANGED MEANING (READ + MEASURED).** `browser-file.mjs` now reads `Number(process.env.QA_CLOSE_MS) || undefined`. Any
+   harness of yours (or of gate 5/6) that set `QA_CLOSE_MS=0` to force an immediate kill now gets the 30 s default instead. **Audit your own
+   copied harnesses for it before you trust a timing result.**
+9. **Red-proofs (parse-checked, fresh tree per arm; never on a file that already hangs at the pinned head):** (a) revert the bound to 5000
+   in `test/lib-close.mjs` only → the "one number" cell reddens; (b) revert it in `lib/pdf.js` only → the same cell reddens (that is its
+   whole point); (c) revert BOTH to 5000 → the 6 s cell reddens and the loaded run's healthy kill returns; (d) revert `logo-inset.mjs` to
+   `browser?.close()` → under (7a) that file hangs to your deadline; (e) remove the stdio-destroy loop from `lib/pdf.js` `closeBrowser` →
+   gate 6 found **nothing reddens (BCR2-F1, ticketed)** — confirm whether round 3 changed that, and say so either way. **A fix with no
+   reddening cell is a finding.**
+10. **Suites at `58c9094`:** stage3 `npm test` (builder claims 124/124), `test:print` (§4), `test:xlsx` (5/5), root quote-engine (67/67).
+    **Count them; do not read a smaller green as the same green.**
+11. **CI / Linux Chromium is the carried gap, and round 3 WIDENS it.** `gh` is NOT authenticated for `datasecau` and **you must not use
+    `gh`**. State plainly that BC-F1's root cause may be macOS-with-installed-Chrome only; that **a 30 s bound on a CI box means a genuinely
+    hung file now costs 30 s per file instead of 5** (eight files ⇒ up to 4 minutes added to a hanging run); and that CI is the first thing
+    to measure at merge. Say what a Linux run would have to show to make the fix unnecessary — and whether it could HURT there.
+
+## 12. Across targets — merges and the queue
+**The drafter DID read ancestry and file sets but ran NO `merge-tree`. Every row below is a READ expectation. Quote
+`git merge-tree --write-tree --name-only` from YOUR OWN object directory for each pair, or say you skipped it.** Never hand-resolve.
+
+| pair | drafter's READ expectation |
+|---|---|
+| IO1F1 `15cd733` × portal main `f95f625` | **CLEAN — IO1F1 sits on main**; the result tree should equal IO1F1's own tree |
+| BCR3 `58c9094` × QuickQuote main `d4426f8` | **CLEAN — BCR3 carries the forward merge `983f916` inside itself**, so main is its merge-base and the result tree should equal BCR3's own. **Gate 6's predicted `stage3/package.json` conflict is ALREADY RESOLVED in `983f916` — verify the resolved `test:print` line carries all EIGHT files** (`print-fit`, `typed-rates`, `fx-provenance`, `phone-layout`, `email-collector`, `logo-inset`, `lib-close.test.mjs`, `lib-close-shared.test.mjs`) and that the resolution dropped nothing |
+| IO1F1 × S-1 `89af8ba` (context only, NOT gated) | gate 6 MEASURED `IO1R2 × S-1` as **CONFLICT in `BACKLOG.md` ONLY**, with `lastResortHandler` surviving and `feedback.js` auto-merging — **correcting its own brief. Re-measure against the NEW main and IO1F1**: IO1F1 touches `server/errors.js` and `server/index.js`, which S-1 does not, so BACKLOG-only should still hold. **Tell Tuesday plainly either way** |
+| BCR3 × A9 `5d787d2` / CF5R2 `309e6c7` (context) | both are IN main `d4426f8` and IN BCR3 through `983f916`; the row above covers them |
+
+- **A GO is a GO at the pinned sha only.** Name, for each target, the cells to re-run on its merged head — at least: **IO1F1** — `npm test`
+  + `test:db` on a fresh `_test` DB + the real-generate-route leg + the arm-(e) leg at the shipped default + your independent mid-body
+  probe; **BCR3** — `test:print` end to end, timed, N ≥ 3, **asserting the process exits**, **including at least one LOADED run**, plus the
+  forced-hang arms over all nine files, the emailed-PDF compare and the `closeBrowser` spy.
+- **CI:** `gh` is not authenticated for `datasecau`; every target's CI half is **NOT RUN**, measured at merge. For the portal, CI's
+  `test:db` job is what pins the `asyncErrors` wiring — `npm test` alone stays green with the require removed (gate 5 and gate 6).
+
+## 13. FLOOR AND PORT DISCIPLINE — Vision has NO jest lock, plus THE DEADLINE RULE (and HELD)
+**There is no shared lock or queue on this project, and you must NOT borrow NexusAI's** (`session-tools/nexusai-lock.sh`).
+1. **The Vision builder seat is LIVE** (claude `17056`, pane `%53`) and owns portal `:4848` and stage3 `:8080`. **Never use 4848 or 8080**,
+   nor `47787` (Tuesday's dashboard), nor any port another seat holds. Take every port from the kernel and bind `127.0.0.1` wherever YOUR
+   harness listens. Never start the portal's own entry point (it binds `0.0.0.0` in `main()`).
+2. **Postgres = the running local container on `127.0.0.1:5433`, and ONLY databases you create.** **No docker command at all.** Create
+   `vsp_qa_g7_<epoch>` for app runs and `vsp_qa_g7_<epoch>_test` as `TEST_DATABASE_URL` for `test:db` (it TRUNCATEs; the name MUST end in
+   `_test`; never `salesportal`, `salesportal_test`, any `vsp_qa_g1_*`, `vsp_qa_g2_*`, `vsp_qa_g3_*`, `vsp_qa_g4_*`, `vsp_qa_g5_*` or
+   `vsp_qa_g6_*` database, or the builder's `vsp_bf1_*`). Local defaults from `server/db.js` / `scripts/ensure-test-db.js` only; never
+   anything from `Vision_Sales_Portal/4_Credentials/`. If `:5433` does not answer, the portal runtime legs are **NOT RUN, blocker named**.
+   Leave your databases in place and list their names (no DROP). **Serialise or salt creation.**
+3. **Every product process runs under `env -i` with an explicit ALLOWLIST** (PATH, HOME = a fresh mktemp dir, TZ, NODE_ENV = `test` or
+   `development` — never `production` — PORT, a fresh random SESSION_SECRET / unlock word / `COORDINATOR_SECRET` you generate,
+   DATABASE_URL / TEST_DATABASE_URL = yours, PUPPETEER_EXECUTABLE_PATH, `NTFY_SERVER=http://ntfy.invalid`, dummy provider values,
+   `npm_config_update_notifier=false`, `npm_config_offline=true`). **NEVER set in a product process:** `AGENTMAIL_API_KEY`,
+   `AGENTMAIL_INBOX` (with both set, QuickQuote SENDS FOR REAL), any real `ACS_*` / `MAIL_SENDER`, `TABLES_CONNECTION_STRING`,
+   `SALES_COPY_EMAIL`, a real `APPROVALS_INBOX`, a real `NTFY_TOPIC`, `LEAD_BOT_API_KEY`, `WEBSITE_SITE_NAME`. Print each product process's
+   env KEY NAMES (never values) and assert none is forbidden. **Never contact ntfy.sh**: set `NTFY_SERVER=http://ntfy.invalid` before any
+   portal module is required and stub `fetch` to throw on any other URL.
+   **Egress — including Chrome children:** the real QuickQuote renderer's page calls three public **FX** APIs whenever currency ≠ USD.
+   **Block it** with YOUR copy of `qa-chrome-egressblock.sh` as `PUPPETEER_EXECUTABLE_PATH` and **prove the block with a positive control**.
+   Record outbound connections of EVERY process you start, Chrome children included (`lsof` over the whole process tree, plus the net-log
+   scan). **GoogleUpdater reparents out of the descendant monitor — record every `GoogleUpdater` / `chrome_crashpad_handler` process at
+   start and end (pid, ppid, start time) and say which appeared during the gate.** **Gate 5's socket-peer method (`BC-diag2.sh`) is what
+   attributes them — reuse it.**
+4. **Count foreign servers the RD-606 way, anchored on YOUR OWN claude pid** (gate 6's `qa-floorcount.py`, COPIED from
+   `/Volumes/KK_T9_External_HDD/!CODING/Testing Agent MAIN/projects/vision/reports/2026-09-23-vision-qq-gate6/evidence/qa-floorcount.py`):
+   `basename(argv[0]) == node` AND an app entry point ANYWHERE in the remaining argv, from the kernel; **"ours" = the ancestor chain
+   CONTAINS your claude pid**. **Negative controls, same run, must classify FOREIGN:** the Vision builder's claude `17056` (pane `%53`),
+   Tuesday's claude `3434` (pane `%0`) and `51683` (pane `%52`), and the NexusAI seat's claude `8360` (pane `%44`). Re-read them at start;
+   if one has exited, say so and use the others (gate 6's controls `1613` and `40615` have BOTH exited — that is why this list differs).
+   Never by `EADDRINUSE`, a whole-command-line grep, or raw `comm`. **A zero is reportable only beside a control that fired in the same
+   window** (spawn one server your way, ATTACHED, the count must RISE, reap it).
+5. **THE DEADLINE RULE:** every real-server, browser and database step has a written DEADLINE (boot 60 s, request 30 s, render 60 s, DB
+   connect 15 s, exit 20 s) and a client timeout on every request (no `timeout` binary here — build deadlines into your runner); a step past
+   its deadline is ABORTED and reported (a hung product request IS a finding). **Every server, browser and child you start is killed in a
+   `finally`.** **Log a HEARTBEAT line (timestamp, step, pid, elapsed) at least every 2 minutes; a step with no heartbeat for 5 minutes is
+   aborted and reported.** **TWO DELIBERATE EXCEPTIONS, each stated in the report when used:** §5.5(a) runs one arm at the shipped
+   **30,000 ms** grace, and §BC.7 bounds a forced hang at **30,000 ms + margin** per file — budget above them, and never above 150 s.
+   The shapes that hang here: IO1F1's arm (e) and the unfaulted never-answering store, and every BCR3 `test:print` and forced-hang arm.
+
+**Reap every server and every Chrome you start.** An orphan of yours is someone else's foreign process.
+
+### Drivable surface — LOCAL ONLY. **NEVER the live QuickQuote or the live portal.**
+- **NEVER the live** QuickQuote (App Service `hpas-quickquote`, resource group `hpas-quickquote-rg`, its ACR `hpasqqacr`, its Table Storage,
+  its log workspace `hpas-quickquote-logs` — decision 18: never query it; **it is on v2.30 and waits on Kam's typed word**) **or the live
+  portal** (`https://datasec-sales-portal.azurewebsites.net`, resource group `datasec-sales-portal-rg` — PRODUCTION: the live site, its
+  Postgres `datasec-sales-db.postgres.database.azure.com` and key vault). No request, no DB connection, not even a GET or a health probe.
+  **Never ntfy.sh** or any ntfy host. **Never the three FX hosts.** Never the npm registry (`npm audit` included). Never
+  `api.agentmail.to` from a product process. Never the Feedback_System coordinator.
+
+### HELD
+- No merge, no deploy, no registry, no Partner Center, **no production**, no money, **no mail to any human**, no external comms.
+- **No `az`, no `gh`, no `docker`, no `npm install`, no `npm ci` without `--offline --ignore-scripts`, no `npm audit`, no `npx` of anything
+  not already in your tree.** The launcher points `AZURE_CONFIG_DIR` and `GH_CONFIG_DIR` at EMPTY directories.
+- **Real sends are OFF.** Every provider is a recorder you wrote.
+- **Findings-only:** do not commit, do not move any branch, do not file a ticket, **no writes in either repo**, inside
+  `Vision_Sales_Portal/` (including `5_Project_History/`), inside `Feedback_System/`, inside the builder's scratchpad, or inside gate 1-6's
+  report folders. The gate fixes nothing.
+- **NEVER `rm`** — quarantine; every preload, stub, harness and fixture lives under YOUR project.
+
+## 14. Output
+Report: `/Volumes/KK_T9_External_HDD/!CODING/Testing Agent MAIN/projects/vision/reports/2026-09-23-vision-qq-gate7/report.md`
+
+**QUESTIONS:** if you must ask, mail `tuesday-agent@agentmail.to` with subject `[QA/Datasec-Vision -> Tuesday] QUESTION: <topic>`
+(Context / one Question / Meanwhile / Needed-by) and **proceed on the safest reading**; the ANSWER arrives in `tuesday-agent@` with subject
+beginning `[Wednesday -> QA/Vision-gate7] ANSWER` — read it with your verdict key. Record every question, the reading you took and any
+answer in the report. **If two answers arrive and they differ, STOP, enumerate the differences and ask which stands** — that happened on
+2026-09-23 and the agent catching it is what saved the round.
+If a response is cut off by a safety check, record it and continue with the next item; this is
+authorised defensive QA of Datasec's own product on loopback.
+
+MAIL YOUR VERDICT to `tuesday-agent@agentmail.to`, subject exactly:
+`[QA/Datasec-Vision -> Tuesday] GATE VERDICT — gate 7: bounded browser.close round 3 (tier 2 with one declared tier-1 touch, QuickQuote) + IO1R2-F1 end-marker (tier 1, portal), heads as pinned at launch`
+
+AgentMail key: `AGENTMAIL_API_KEY` in `/Volumes/KK_T9_External_HDD/TUESDAY/4_Credentials/.env` — an absolute path, because the QA project
+has none. Use it ONLY in your own verdict/question/answer-read `curl` (with a client timeout, e.g. `-m 30`); it must never enter a product
+process's environment (§13.3). Never put the key, or any secret, in a mail or the report.
+
+Verdict format:
+- **BCR3 (bounded close round 3)** and **IO1F1 (IO1R2-F1 end-marker)** — each **GO / NO-GO**, stated SEPARATELY PER TARGET, each naming its
+  pinned sha and branch.
+  **For IO1F1:** IO1R2-F1 closed or not, on the REAL generate route, with main as the red control; the withdrawn `setImmediate` shape
+  proven red; the mount position measured as wrapper order, not just layer order; the flag proven per-`res`; **arm (e) measured at the
+  shipped 30 s default AND the unfaulted never-answering case measured and named**; a mid-body fault still breaking the connection; no new
+  way to kill the process; the merged work re-confirmed at the new sha including non-faulted latency.
+  **For BCR3:** `test:print` completing and exiting, N ≥ 3, timed, **with load averages**, plus ≥ 3 LOADED runs showing 0 healthy kills
+  against a 5,000 ms positive control; all nine forced-hang arms including `logo-inset`; **the `phone-layout` contradiction SETTLED with the
+  discriminating variable named**; `renderQuotePdf` and the launch byte-unchanged; **production 0 calls with a firing spy, re-established at
+  this sha**; the emailed PDF 0 differing pixels vs main.
+- **THE CAP:** state that Tuesday ruled **the cap is NOT spent** by this gate and that the ruling is Tuesday's, not Kam's. If either target
+  is NO-GO, list which parts CLOSED and would ship and which are TICKETED, and say that **a third round on that class** would need Kam (C-62).
+- The verbatim strings an operator or Kam's pack needs: the rep's body and log line for a generate-then-fault; what a client sees when a
+  faulted download is cut; the `[db] idle client error` line; BCR3's bounded-close log line; any remaining `TimeoutNaNWarning`; and the
+  footer line and version from a real PDF at BCR3 and at main.
+- Then one paragraph on the queue quoting §12's merge-tree results (or that you skipped them), **including the S-1 line**.
+- **Rule 2: what you did NOT test is first-class output** (a NOT TESTED section — at least: **CI / Linux Chromium**, still BCR3's biggest
+  gap; Node 20 (production's runtime) and Node 22; **a real stalled Azure Postgres** (arm (e) is measured with an in-process stub only);
+  real App Service idle timeouts and `X-Forwarded-For`; multiple replicas; the container image; **`connect-pg-simple` against a real
+  failover**). Every action recommendation carries its evidence class: **MEASURED AT RUNTIME / PROBED / READ ONLY**. §5 Q1-Q10 and
+  §BC Q1-Q11 must each carry one.
+- Report each pinned head, and both mains, as three timestamped readings (**start / mid / end**), each with its branch name.
+
+PROVENANCE:
+- heads: portal main `f95f6254c1e1…`, `fix/portal-io1r2-f1-completed-response-2026-09-23` `15cd73304bf5…`; QQ main `d4426f899620…`,
+  `fix/qq-bounded-browser-close-2026-09-23` `58c9094834ec…` | `git -C <repo> ls-remote origin` + `cat-file -t` (all = commit) |
+  read 2026-09-23 08:0x AEST
+- chains: `15cd733` → `edbe6dc` → `bac7b65` → portal main `f95f625` (3 commits; merge-base with main = `f95f625`); portal main `f95f625`
+  = merge IO1R2 `992da21` ← `a83140e` ← `6f197ca`; `58c9094` → `983f916` (merge, parents `f8dec9c` + `d4426f8`) → `f8dec9c` → `aa89010` →
+  `907f686` → `3bfbfa2` (5 commits over main; **merge-base with QQ main `d4426f8` = `d4426f8`, NOT stale**) |
+  `git log --format='%h %p %s'`, `merge-base --is-ancestor`, `rev-list --count` | read 08:0x-08:1x
+- file sets (IO1F1 6 files over main; BCR3 15 over main, round 3's own commit 6); lockfile blobs (portal `9d426df` at `f95f625`/`15cd733`,
+  express 4.22.2, express-session 1.19.0; stage3 `70ebda7` at `d4426f8`/`58c9094`); `toolVersion: "2.33"` at BOTH `d4426f8` and `58c9094`;
+  `closeBrowser` callers at BCR3's base = `lib/pdf.js`, `test/typed-rates.mjs`, `test/fx-provenance.mjs` | `git diff --name-only/--stat`,
+  `git rev-parse <sha>:<path>`, `git show`, `git grep`, all under `bash` | read 08:1x-08:2x
+- mechanisms and strings (`errors.js` `markAppEnd` / `APP_ENDED` / `settings.appEndGraceMs` / the grace timer, `index.js`
+  `app.use(markAppEnd);`, the `completed-response` mount-position cell, the arm-(e) cell's `settings.appEndGraceMs = 300`, the archiver
+  mid-body cell; `lib/pdf.js` `ms = 30000` + `: 30000`, `lib-close.mjs` `ms = 30000`, `logo-inset.mjs` `closeBounded(browser)`,
+  `browser-file.mjs` `Number(process.env.QA_CLOSE_MS) || undefined`, the two new cells, the eight-file `test:print`) | `git show`,
+  `git diff` | read 08:1x-08:3x
+- the 5,018 ms contradiction | gate 6 `evidence/BC-observe-BCR2.log:36` and `sections/BCR2.md:63` vs `58c9094`'s commit message | read 08:2x
+- C-62's verbatim text | `/Volumes/KK_T9_External_HDD/!CODING/Datasec/NexusAI/1_Project_Definition/CLARIFICATIONS.md:573` | read 08:2x
+- Tuesday's rulings (setImmediate withdrawn 20:27-20:28Z; the four-point settlement 06:34 AEST: stay on the branch, cap not spent, bound =
+  max(30 s, 10× worst healthy close) as a HANG GUARD, change `lib/pdf.js` too) | `0_Brain/daily_tuesday/2026-09-23.md` lines at 06:28,
+  06:30 and 06:34 | read 08:3x
+- seats: `%53` → claude `17056` (Vision builder, started 06:15), `%0` → claude `3434` (Tuesday), `%52` → claude `51683` (Tuesday, started
+  06:00), `%44` → claude `8360` (NexusAI); gate 6's controls `1613` and `40615` have exited; `:5433` LISTENING | `tmux list-panes -a`,
+  `ps -axo pid,ppid,comm`, `lsof` | read 08:3x
+- builder claims | commit messages `58c9094`, `15cd733`, `edbe6dc`, `bac7b65`; both BACKLOGs; gate 6 `report.md` + `sections/` (mail bodies
+  NOT read)
+
+---
+
+## COORDINATOR ADDENDUM — Tuesday, 2026-09-23 08:1x AEST (added at SELF-CHECK, after reading the drafter's wrong-at-source list)
+
+**A1. THE FOUR-NUMBER BOUND CELL IS A REGEX OVER SOURCE TEXT, AND I WILL NOT ACCEPT IT AS PROOF OF THE BOUND.**
+The drafter measured that the bound is **four** numbers, not two — each module carries the signature default *and* the `Number.isFinite`/NaN fallback — and that the new cell asserts `[30000,30000,30000,30000]` **by matching source text**. A regex proves a literal is present; it cannot fail if the literal is right and the behaviour is wrong, which is this fleet's oldest failure shape (`a-check-that-cannot-fail`). **The gate MUST add a BEHAVIOURAL arm and grade the bound on that, not on the regex:** a close that stalls PAST the old 5,000 ms but UNDER the new bound must **not** be killed, and one that stalls past the new bound **must** be. Record the load average beside both, per self-finding 12. The regex cell may stay as a cheap tripwire; it is not the evidence.
+
+**A2. STRIKE "one earlier run hung 400 s" — I RELAYED IT AND IT HAS NO SOURCE.**
+It came to me in the builder's READY mail and I passed it into the commission without checking it had a durable source. The drafter looked: not in `58c9094`'s commit message, not in either BACKLOG, not in gate 6's `report.md` or `sections/`, not in the coordinator's daily note. **It is struck. Do not carry it, do not cite it, and do not treat its absence as evidence either way.** What IS verified, on both sides, is the contradiction clause 8 already names: gate 6's evidence records a real `phone-layout.mjs` close returning at ~5,018 ms, and the builder's commit says it never returned, 5 of 5. Settle THAT, from the two records.
+
+**A3. THE BUILDER'S SHIPPED COMMENT CONTRADICTS THE BUILDER'S OWN MEASUREMENT.** `test/lib-close.mjs` says *"every healthy close returned within 1.7 s, even with 8 CPU-bound workers"*, while the same commit reports a worst **idle** close of **2,032 ms**. The sizing survives (10 x 2.032 s < 30 s) so this is Polish, not a blocker — but report it, because a comment that misstates the measurement it was derived from is how the next person re-derives the wrong bound.
+
+**A4. `QA_CLOSE_MS` CHANGED MEANING SILENTLY** — `Number(env || 5000)` became `Number(env) || undefined`, so an unset value **and a literal `0`** now fall back to 30,000 ms. Any gate-5/6 harness that set `0` to force an immediate kill will now wait 30 s and look like a hang. The launcher `unset`s it; say in the report whether any harness you copy relies on `0`.
+
+**A5. WHAT IS ALREADY DISCHARGED, so you do not spend a round on it:** my condition (e) is BOUNDED (30 s grace) and NAMED. The remaining job is to check the measurement, not to demand the bound: **the builder's own arm-(e) cell sets `settings.appEndGraceMs = 300`, so the shipped 30,000 ms is never exercised.** Run it once at the real default, and measure the case nothing bounds — an **unfaulted** signed-in response against a never-answering store, where the pool has no query timeout. Report it as a residual with numbers if it is not bounded.
+
+**A6. TWO OF MY CONDITIONS ARE MET ONLY IN THE WEAK FORM — the drafter caught both and they are gate clauses, not footnotes:** (i) condition 3 is satisfied for `res[APP_ENDED]` (a Symbol-keyed own property) but `settings.appEndGraceMs` IS shared module state mutated by tests — say whether that is acceptable; (ii) condition 2's cell proves **layer** order off `app._router.stack`, not **wrapper** order — it does not assert that nothing mounted *after* `markAppEnd` also wraps `res.end`, and a later wrapper becomes the outermost one. `app._router` is an Express-4 internal besides. **Condition 2 is not discharged until wrapper order itself is asserted.**
