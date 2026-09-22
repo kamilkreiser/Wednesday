@@ -13219,13 +13219,13 @@
   "id": "quickquote-publish-51e9286-price-fix",
   "client_project": "Datasec/Vision_Sales_Portal",
   "title": "Publish QuickQuote: the fix for emailed quotes printing the wrong service prices, plus 7 tested changes",
-  "bluf": "I need your word to publish QuickQuote. Say 'publish QuickQuote' or pick (a). The main change: emailed quote PDFs and spreadsheets printed list or stored-rate service prices instead of the rep's typed ones. In testing, a quote whose screen said $35,000 was emailed as $34,820. Live quotes very likely have the same fault (it's the same code), but we haven't checked the live tool. The fix passed its test gate: the PDF matches the screen in 19 of 19 cases. The other 7 changes: feedback CC to Tuesday, the devices label, reopen an old quote, security headers, sign-out, a truthful exchange-rate line, and a slimmer image. Every visible text change and the deploy, check and rollback steps are in the attached pack. Rollback is one step, back to today's image.",
+  "bluf": "I need your word to publish QuickQuote. Say 'publish QuickQuote' or pick (a). The main change: emailed quote PDFs and spreadsheets printed list or stored-rate service prices instead of the rep's typed ones. In testing, a screen quote of $35,000 was emailed as $34,820. Live quotes very likely carry the same fault (it's the same code), but we haven't checked the live tool. The fix passed its gate: PDF matches screen in 19 of 19 cases. Now also in: sign-in rate limits (6 codes per network per hour, 20 site-wide), security headers, sign-out, reopen an old quote, a truthful exchange-rate line, feedback CC to Tuesday, the devices label, and the page no longer sending the access word with every quote email. New sign-in messages: 'too many sign-in codes requested from your network. Try again in 60 minutes.' and 'sign-in is busy right now. Try again in 60 minutes.' Build from main 763269d. Rollback is one step, back to today's v2.30 image. The phone layout (v2.32) is NOT in; it is still being fixed.",
   "default_action": "If you say nothing: nothing is published. The live tool stays on v2.30, and the merged work waits on main.",
   "options": [
    {
     "key": "a",
     "label": "Publish now",
-    "detail": "The Vision agent builds the image from QuickQuote main 51e9286, switches the live app to it, runs the post-deploy checks in the pack, and reports. Rollback goes to today's v0.4.5-tool2.30-d258651 if any check fails."
+    "detail": "The Vision agent builds the image from QuickQuote main 763269d, switches the live app, runs the post-deploy checks in the pack, and rolls back to v0.4.5-tool2.30-d258651 if any check fails."
    },
    {
     "key": "b",
@@ -13256,6 +13256,21 @@
    "CARD quickquote-height-lever",
    "CARD quickquote-per-day-precision",
    "CARD vision-v230-publish"
-  ]
+  ],
+  "amendments": [
+   {
+    "ts": "2026-09-22T22:28:49.991296+10:00",
+    "reason": "QuickQuote main moved 51e9286 -> 763269d at 22:27 AEST: the gate-3 GO items were merged and verified at source by Tuesday (A-1 sign-in limits round 2, the D-F1 header cell, the item-1 follow-ups, A-7/A-8/A-10). The card must name what would actually ship.",
+    "changed": [
+     "bluf",
+     "option:a"
+    ],
+    "before": {
+     "bluf": "I need your word to publish QuickQuote. Say 'publish QuickQuote' or pick (a). The main change: emailed quote PDFs and spreadsheets printed list or stored-rate service prices instead of the rep's typed ones. In testing, a quote whose screen said $35,000 was emailed as $34,820. Live quotes very likely have the same fault (it's the same code), but we haven't checked the live tool. The fix passed its test gate: the PDF matches the screen in 19 of 19 cases. The other 7 changes: feedback CC to Tuesday, the devices label, reopen an old quote, security headers, sign-out, a truthful exchange-rate line, and a slimmer image. Every visible text change and the deploy, check and rollback steps are in the attached pack. Rollback is one step, back to today's image.",
+     "option:a": "The Vision agent builds the image from QuickQuote main 51e9286, switches the live app to it, runs the post-deploy checks in the pack, and reports. Rollback goes to today's v0.4.5-tool2.30-d258651 if any check fails."
+    }
+   }
+  ],
+  "amended_ts": "2026-09-22T22:28:49.991313+10:00"
  }
 ]
