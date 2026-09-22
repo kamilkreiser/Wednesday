@@ -1,0 +1,84 @@
+ultrathink
+
+You are the fleet QA/testing agent running ONE gate (gate 8, lane A, batched) on Datasec/NexusAI: SIX targets, one session. Give SIX verdicts, GO or NO-GO, each at its gated sha, plus the merge-order result.
+
+READ YOUR COMMISSION FIRST, whole: /Volumes/KK_T9_External_HDD/TUESDAY/2_Project_Files/fleet/qa-agent/briefs/2026-09-23_nexusai-gate8.md
+
+THE FACT THAT GOVERNS THE WHOLE GATE: origin main is 34f11f405fa4ffd301df1c1bf6559ee313c1797c (CI Build 35780902023 GREEN, 3937/3937 across 227 suites, C-142 failing set EMPTY) and NONE of the six targets is based on it. Their merge-bases are 982a84f2d0c72596a2d389897439e1d8d3425068 (A, B, E), 4bc48686c022933543c85ab6d1e430b7062d6901 (C), 6a32426a7aa7b847cd2ec0ab89f0ec3bdc2fe71e (D) and 695ca5ac96994f1d1f16e9ad0a8c2d5f6f9b0538 (F) — all ancestors of main, 42 and 40 commits back. Every merge claim in every READY was measured against an older main. Re-measure all of them.
+
+EVERY JEST RUN OF THIS GATE RUNS WITH SESSION_SECRET UNSET (env -u SESSION_SECRET; print SET or UNSET as the hold's first line, the NAME only, never a value). The coordinator ruled this for RD-631; five of the six READYs declare the same gap in their own LIMITS, so it is widened to the whole gate. RD-510's own hold already ran UNSET. CI has no ambient secret: read .github/workflows/build.yml at main and quote it.
+
+TARGET A — RD-531 + RD-497 (TIER 1, a product security control: 13 /api/admin/* routes plus GET /api/user-data/export move below the auth gate; POST /api/user-data/delete-request is retired under C-136). Branch rd-531-497-s80i at d7d6e7eec9f62fbc75ad9971c8a14cb6be4826cb, off 982a84f2d0c72596a2d389897439e1d8d3425068. Chain: 536619301bff90f224223c78d7d8e91c2aa782f9, 0081b722732ea785f6ff630c8f2ac72f857379ca, d37d4a45e3a0946f39809e90d8676383cd48f191, d7d6e7e (counts 3870/220). Cells CTRL-ENF, B1, B2, B3, B4, CTRL-OPEN, B5, E1, E2, E3.
+  - SETTLE THE CENSUS FIRST: C-129 says 16 routes, the READY says 13 admin + 2 user-data, gate 2 counted 14 and left it unreconciled. Enumerate from source at both shas. A route still above the gate that nobody has ruled on is a Major.
+  - B3 expects the handler OR law-schema's own 503 (a mis-specified B3 voided the builder's first run). B4 must prove the export is the CALLER'S OWN: two local accounts, planted token found first, then the other user's records and every password hash absent.
+  - E2 is SOURCE TEXT (C-122). Replace it with a served-page measurement or leave the limit standing by name.
+  - Re-derive M-497, M-531, M-open, M-scan yourself. Verify predicted 3870/220.
+
+TARGET B — RD-616 + RD-617 (TIER 1, mail secrets at rest; an unknown store shape is withheld, never marked redacted), ROUND 2 OF 2, NARROW. C-62 cap applies to this target only: a NO-GO names what is closed and what is ticketed. Branch rd-616-617-s80i at cc9616b2b22aa5c65619f3c47d4742f2bf7664d6, off 982a84f. Chain: cd6cd55735ceac4e931e0f3dea049279ed18bf63, f0519fd2390c7d5f2103e72dddac3adc276df639 (GATE 5's gated head, NO-GO), ed6f3fc1394ce29a2da8f26eb6c0724f9cb58163, cc9616b (counts 3872/221).
+  - Round 2 changes NO product file: prove dataExport.js and the email service blob are identical at f0519fd and cc9616b, then do not repeat gate 5's product work.
+  - GATE 5'S NARROW RE-GATE IS THIS TARGET: the ordered pair auth-gate-fail-closed then the rd616 file under --runInBand, the rd616 file, and a full verify. POSITIVE CONTROL FIRST: run the ordered pair at f0519fd too — predicted RED on rd616 M3's precondition there, GREEN at cc9616b, same window. A green without that red is not reportable.
+  - Re-derive M-both, M-helper, M-m3. M-m3's zero needs a control that fired in the same window.
+  - Gate 5's F-B1 (Major, pre-existing: plaintext survives the upgrade until an explicit save) is TUESDAY'S PRIORITY CALL — re-state it with its evidence class, do not decide it, do not grade it as an RD-616 defect.
+  - L-3's second half: rd412's RD-413 cell was not re-measured. Re-measure it (C-140: with no key source the product still SAVES as given and tells the truth, it never refuses). Verify predicted 3872/221.
+
+TARGET C — RD-638 (TIER 2, a data export always ends — gate 4's F-A2). Branch rd-638-export-always-ends-s80i at ad81ef735b68f6ef9c421759307581dc64a9ea56, off 4bc48686c022933543c85ab6d1e430b7062d6901. Chain: a46d336edbba1b7a7713471b9eee414c9c8130b0, 0ab8a05512771564ede54c7e980e7423779ecae2, ad81ef7 (counts 3870/221). Cells E1 and E2.
+  - DRIVE THE ROUTE, NOT THE FUNCTION: base does NOT end, head ends within 15 s, same window, with a client timeout and a per-step DEADLINE. Gate 4's identical probe held the jest lock about 71 minutes because it had neither.
+  - THE CELL NOBODY WROTE: with nothing unlistable, export at base and at head and compare the two archives entry by entry. RD-638 rewrites about 103 lines of the export; a missing entry at the head is a Major.
+  - Re-derive M-638, M-route, M-files. Verify predicted 3870/221.
+
+TARGET D — RD-631 (TIER 2, C-139: a directory streams only for a DECLARED directory store). Branch export-dir-stores-declared-s80i (note: no rd-631- prefix) at 153e4726c4a33801a53c6e0a8bdd0824f714777c, off 6a32426a7aa7b847cd2ec0ab89f0ec3bdc2fe71e. Chain: 4b685d6ad89d0be1d6a14ac96bd54a1ef6808dff, 4ff2d45eb8b689995d71221a49ba9f7418158541 (the fixture fix), 153e472 (counts 3872/221). Cells D1, D2, C1 and one new lists-agree cell.
+  - M-fixture is the most important arm: it must reproduce the VOID run's TypeError on X1 and nothing else.
+  - THE MAIN-SIDE LEAK, which the READY does not carry: at main, prove or refute that RD-575's jest.doMock stand-in reaches X1, so X1 has been measuring the stand-in and not the real declaration since RD-575. Report it as a cross-target finding with its class.
+  - Drive it live: plant a directory at a non-declared store name, prove the token is absent from the archive bytes (planted-token search first), the manifest names it with bytes 0, and it is never marked redacted. Verify predicted 3872/221.
+
+TARGET E — RD-438 (TIER 1, the auth gate decides on the SERVED path). Branch rd-438-dot-segment-gate-s80i at 63bb818f6f341e8e04745dd822d2d8ca9ad05a30, off 982a84f. Chain: 662facac076cd5f89bc9b8c8c14af4e351fcbdc5, 7a1a9ba53b1b84a1f1d458fe8f19177f209bfb56, 1ae1dfd2fa01b09883d40839f7b9a1970fe01320 (the CTRL-RAW fix), 63bb818 (counts 3865/220). Cells CTRL-GATED, CTRL-EXACT, CTRL-RAW, T1, T2.
+  - THE CONTROL IS THE POINT OF THIS ROUND: M-guard must redden T1 ONLY and CTRL-RAW must stay GREEN. In the builder's first run CTRL-RAW went dark exactly when it was needed, because it inferred the raw request from the product's own answers. If CTRL-RAW reddens under M-guard, the instrument fix did not work and that is the blocking finding.
+  - POSITIVE CONTROL FIRST, live, same window: at the base the traversal serves the gated page; at the head it is 400. Anonymous /api/healthx: base answers, head meets the gate with 401.
+  - THE FALSE-POSITIVE HALF, which no cell covers: the guard 400s any segment decoding to . or .., any encoded slash, and any segment that fails to decode. Drive ordinary paths of this product's own pages — an asset filename with dots, a query string containing .., a stray percent sign. Any ordinary path that now 400s is a Major.
+  - C-54's clause: RD-438 becomes tier 1 if any API, not only HTML pages, is reachable through the path. Measure it and answer in one sentence. Re-derive M-438, M-guard, M-exact. Verify predicted 3865/220.
+
+TARGET F — RD-510 (TIER 1 by the coordinator's ruling, ADDED BY AMENDMENT). Branch rd-510-listen-before-warmup-s80i at 3f96a40559387c7fb29499f9ce0b322729f3c1bd, off 695ca5ac96994f1d1f16e9ad0a8c2d5f6f9b0538. Chain: 1b9f1754d5abd3f7cc777d678d3582c0df6aaf17 (round 1), 5c1af17551653709e1af1c35681e7cd4f4bcdca7 (round 2), 7dd21717dbe32d0dc902bbec69636c926836eda4 (round 3, test-only), 3f96a40 (counts 3867/221). Cells L1, L2, L3, plus rd523's new CTRL-WARM in a 31-cell file.
+  - ROUND 3 IS TEST-ONLY BUT THE BRANCH IS NOT: its delta over the base carries the server entry point at +106/-60. Gate the whole delta at the gated sha.
+  - RD-510's rounds are BUILDER rounds. There is no prior gate report for RD-510, so this is its FIRST gate and the C-62 cap does not apply to it.
+  - E1 must remain a DELTA ACROSS THE CALL WITH NO PATH FILTER: any caller-caused request, on any path including a chat completion, must still redden it. Re-establish that property behaviourally; do not take anyone's word.
+  - CTRL-WARM must FAIL if the boot warm-up marker never arrives. Prove it by making it fail.
+  - EXPECT THREE REDS, NOT ONE, from the M-anon arm: it lets the anonymous path through the auth middleware, and that middleware is where the request's user is assigned, so E2 and E2-happy lose admin identity and redden too. The builder declared this deviation itself. The mutant is BROADER THAN SURGICAL. Then try to build a surgical mutant that reddens E1 alone; if none exists, say what that leaves unproven.
+  - THE HALF ROUND 3 DID NOT FIX: the adapter-marker wait's result is still assigned and asserted by nothing. Audit every stored-and-unasserted wait result in that file and name them.
+  - RD-654 and RD-655 are known residuals: after the deadline the warm-up starts no new query, but the orphaned call keeps its socket and may retry once. The retry is CONSISTENT WITH a client retry but NOT PROVEN — do not assert the mechanism. Verify predicted 3867/221.
+
+THE COUNTS DIFFER PER TARGET: A 3870/220, B 3872/221, C 3870/221, D 3872/221, E 3865/220, F 3867/221. Never assume one number across the batch.
+
+THE MERGE ORDER (C-68, C-57, C-133, C-112) — no verdict is complete without it. Three targets rewrite the data-export module (B, C, D) and four rewrite the server entry point (A, C, E, F). NAMED MERGE-ORDER FACT, measured at drafting and yours to reproduce or contradict: the RD-631 x RD-617 pair AUTO-MERGES the data-export module — RD-638 is the collider, and it conflicts with each of the other two. If RD-638 is merged AFTER both, exactly ONE hand resolution is needed; in any other position, TWO. Measure it with git merge-tree --write-tree --name-only: each head against main, then the fifteen pairwise merges, then at least three sequenced orders. Build every merge only in YOUR OWN object directory (GIT_OBJECT_DIRECTORY=<your own mktemp -d> GIT_ALTERNATE_OBJECT_DIRECTORIES=<repo>/.git/objects), chain with git commit-tree, and count the repo's object files before and after, accounting for any delta by mtime. Every merge CONFLICTS in the counts file: C-57 regenerate ONCE on the merged tree with the id-superset control, never hand-edit, never pre-compute from several bases; expect the union control to MISS because these are long-lived branches, then apply C-133's base-aware accounting verbatim and list every accounted id with the side that removed it; the C-112 control is REQUIRED beside it and its CONDITION is stated wherever the conclusion is stated. Then run the cells on the MERGED tree, re-run one mutant per target there, and read the merged server entry point to prove the middleware ORDER each target assumed still holds.
+
+CI NOT RUN at any of the six branch heads (no PR; Build runs only on pull_request and push to main). CI is GREEN on main with an EMPTY C-142 failing set — that is the bar every merge out of this gate must keep. gh, if used at all, is READ-ONLY.
+
+Build your own trees INSIDE YOUR OWN PROJECT from the object store (git archive <sha> into a fresh mktemp dir under projects/nexusai/qa-trees/gate8.*). Each tree is EXCLUSIVE to this gate and to one purpose: a fresh tree per arm; gate 7's trees are that gate's evidence, never run in. Never worktree, checkout, fetch, pull, stash, clean, gc or commit in the NexusAI repo, and never work in its 2_Project_Files checkout (C-28). At drafting that checkout had 33 modified files in its working tree — not yours, do not touch them, measure only from the object store by sha. Findings-only: no commits, no branch moves, no tickets, no PRs, no writes inside NexusAI. No az. Never rm: quarantine.
+
+A RED ARM COUNTS ONLY IF THE MUTANT STILL PARSES: run node --check on every mutated file before its arm and quote the exit code. A red from a mutant that does not parse or load is a VOID arm.
+
+FLOOR DISCIPLINE — follow section 10 of the brief exactly. QUEUE, NEVER TAKE OVER: the jest lock is shared (FIFO); never kill, signal or move another seat's process, lock or ticket.
+  - Every jest run goes through session-tools/nexusai-lock.sh with a tag starting qa-gate8- (C-141 and its addendum: your tickets are gate-class; C-110: no other queue jumping), the lock held once per multi-run measurement, as a tracked child of your seat. Live-server probes run inside your own hold.
+  - Count foreign servers the RD-606 way, anchored on YOUR OWN claude pid; the negative-control seats named in the brief's section 10 must classify foreign in the same run. Never by EADDRINUSE, a whole-command-line grep, or raw comm.
+  - A zero is reportable only beside a control that fired in the same window.
+  - DEADLINE AND HEARTBEAT (gate 4 stalled about 70 minutes at 0% CPU holding the lock, on the very defect target C closes): every real-server probe has a per-step DEADLINE and a client timeout on every request, kills its server in a finally, and logs a HEARTBEAT line at least every 2 minutes. A step with no heartbeat for 5 minutes is aborted and reported. Never wait out the 15-minute window.
+  - Reap every server you start.
+
+DRIVABLE SURFACE IS A LOCAL RUN on 127.0.0.1, NOT THE DEMO (RD-76). No request of any kind to a live, demo or public host. This is authorised defensive QA of Datasec's own product on loopback. If a response is cut off by a safety check, record it and continue with the next item; do not stop the gate on it.
+
+RE-PIN EVERY HEAD YOURSELF at start, mid and end. RD-510's head already moved once during drafting (from 7dd21717dbe32d0dc902bbec69636c926836eda4 to 3f96a40 in 19 minutes). A head that disagrees with the brief is a FINDING and a reason to re-brief, never a typo to fix.
+
+QUESTIONS: your sender QA/Datasec-NexusAI has no inbox routing line, so you cannot count on an answer. If you must ask, mail tuesday-agent@agentmail.to with subject "[QA/Datasec-NexusAI -> Tuesday] QUESTION: <topic>", then PROCEED ON THE SAFEST READING without waiting, and record both in the report.
+
+Write your report to: /Volumes/KK_T9_External_HDD/!CODING/Testing Agent MAIN/projects/nexusai/reports/2026-09-23-gate8/report.md
+
+GIVE SIX VERDICTS, each a statement about its gated SHA only, then the merge order, then what it all means for the queue (each forward-merged onto the main of its turn and verified green under C-68, C-57, C-133, C-112, C-89 and C-142, Tuesday's GO under C-127).
+
+MAIL YOUR VERDICT to tuesday-agent@agentmail.to with the subject exactly:
+[QA/Datasec-NexusAI -> Tuesday] GATE VERDICT — gate 8: RD-531+497 d7d6e7e · RD-616+617 cc9616b · RD-638 ad81ef7 · RD-631 153e472 · RD-438 63bb818 · RD-510 3f96a40
+
+The AgentMail key is AGENTMAIL_API_KEY in /Volumes/KK_T9_External_HDD/TUESDAY/4_Credentials/.env. It is an absolute path because the QA project has no 4_Credentials directory of its own. Never put the key or any secret in a mail or the report.
+
+Report all six heads, and main's, as three timestamped readings (start / mid / end) with the branch name beside each.
+
+Rule 2 stands: what you did NOT test is first-class output — a NOT TESTED section, and every action recommendation labelled MEASURED AT RUNTIME, PROBED or READ ONLY. That section must carry this line verbatim:
+Container legs: not run this gate — no target has one, and node:24-alpine is not in the local image store; a pull is HELD.

@@ -15,8 +15,8 @@ Commissioned on six READY FOR QA mails from NexusAI-I (S80I, live), sent copies 
 **All six heads are pinned here; nothing is pinned at launch.** The launcher re-reads all six plus `main` by
 `git ls-remote` immediately before launch and refuses on any mismatch.
 
-SELF-CHECK: re-read end-to-end for contradictions | 2026-09-23 08:23 AEST
-Self-check note: Tuesday, s82. READ: the drafter's full 14-item wrong-at-source report, the heading index, and the sections its findings touch; I then wrote the COORDINATOR ADDENDUM (A1-A12) at the end. STATED LIMIT: I did NOT read all ~1,900 lines line by line. I RE-MEASURED two load-bearing claims MYSELF rather than accept them: merge-base for all six heads against main (A/B/E off 982a84f, C off 4bc4868, D off 6a32426, F off 695ca5a; main is 36-42 commits ahead of every base, so MAIN IS NOBODY'S BASE and my commission's 'BASE: main 34f11f4' was wrong - A2), and that drove A3 (C-133 must sit beside C-57 or a correct merge reads as a failure). CORRECTIONS TO MY OWN RULINGS, all carried as addendum clauses: the dataExport.js collider is RD-638, not the RD-631/RD-617 pair, which auto-merges (A1); C-62 does not apply to RD-510 - builder proof rounds are not gate rounds, this is its FIRST gate (A5); RD-510's round 3 discharges only HALF its own diagnosis, since SIGNED.warmupSeen is still asserted nowhere, so my clause 2 is met for the boot marker only (A6); 'test-only' is true of the commit and false of the branch (A7). NOT RESOLVED BY ME, left to the gate with the measurement required: RD-438's tier (C-54 :346 says measure first).
+SELF-CHECK: re-read end-to-end for contradictions | @SELFCHECK_TS@
+Self-check note: @SELFCHECK_NOTE@
 
 ## Charter
 Read `/Volumes/KK_T9_External_HDD/TUESDAY/2_Project_Files/fleet/qa-agent/QA_AGENT_CHARTER.md` in full first. You are an
@@ -998,32 +998,3 @@ Carried here so the gate inherits the corrections and not the errors:
   C-131 :1406, C-133 :1425, C-134 :1435, C-136 :1445, C-139 :1471, C-140 :1463, C-141 :1478, C-142 :1488, C-147 :1526,
   C-148 :1532 (the highest) | `grep -n` | read 07:50
 - NexusAI working tree had 33 modified files at drafting (not touched) | `git status --porcelain` (read-only) | read 07:53
-
----
-
-## COORDINATOR ADDENDUM — Tuesday, 2026-09-23 08:2x AEST (written at SELF-CHECK, after the drafter's wrong-at-source report)
-
-**A1. MY `dataExport.js` MERGE-ORDER RULING WAS WRONG. THE COLLIDER IS RD-638, NOT THE RD-631/RD-617 PAIR.**
-I told the drafter that RD-631 and RD-617 both touch `backend/dataExport.js` and would need a hand-resolved merge. `merge-tree` at these heads says otherwise: **RD-617 × RD-631 AUTO-MERGES** that file (the counts file is their only conflict). The real collider is **RD-638**, which conflicts with BOTH — RD-617 edits `:79-140`/`:232`, RD-631 edits `:49`/`:210`, and RD-638 rewrites `streamExport` at `:120`/`:193-202`/`:252-285`. Measured across 15 sequenced orders: **merging RD-638 AFTER both costs ONE hand resolution; any other position costs TWO.** The corrected fact and its commands are in §8 and they supersede my ruling. I am recording the provenance because it is the lesson: the claim reached me from H's note quoted in `mail-44-ready631`, and I passed it on without re-deriving it.
-
-**A2. "BASE: NexusAI main is 34f11f4" IS WRONG ABOUT THE TARGETS — MAIN IS NOBODY'S BASE.** I re-measured with `merge-base` myself: A/B/E are off `982a84f` (main 42 ahead), C off `4bc4868` (36), D off `6a32426` (37), F off `695ca5a` (40). Main `34f11f4` is the MERGE DESTINATION, not any target's base. Two READYs still preview against **`c0788b1`**, which stopped being the tip at 05:55 — treat those previews as stale and re-derive.
-
-**A3. CITE C-133 BESIDE C-57, AND C-112'S BY-CONSTRUCTION CONDITION WITH IT.** The drafter is right that this is the clarification most likely to decide the gate and I omitted it. C-133 is C-57's **base-aware** amendment for long-lived branches; with main 36–42 commits ahead of every base, **plain C-57's union control WILL report missing ids at every merge** and a gate applying C-57 alone would read a correct merge as a failure.
-
-**A4. THE SESSION_SECRET CONDITION IS GATE-WIDE, NOT RD-631'S.** Five of the six READYs declare it verbatim in their own LIMITS; RD-510's hold is the one that already ran UNSET. **The whole gate runs with SESSION_SECRET UNSET** — that is CI's shape (gate 7 F-1).
-
-**A5. C-62 DOES NOT APPLY TO RD-510, AND I CAUSED THAT CONFUSION.** I described it as "mid round 3". Those are **builder proof rounds**; there is no prior gate report for RD-510, so **this is its FIRST gate and the cap is not spent.** The only target at gate round 2 of 2 is RD-616/617 (gate 5 §B's narrow re-gate).
-
-**A6. RD-510'S ROUND 3 DISCHARGES ONLY HALF OF ITS OWN DIAGNOSIS — I ACCEPTED IT AS WHOLE AND I WAS WRONG.** The builder's diagnosis had two parts: the window opened on the wrong marker, AND a `warmupSeen` result was stored but never asserted. At `3f96a40`, `SIGNED.warmupSeen = await waitForWarmup(...)` **is still assigned and asserted nowhere**; CTRL-WARM asserts the BOOT marker, which is a different thing. **My clause 2 is satisfied for the boot marker ONLY.** The gate must say plainly whether the unasserted SIGNED wait can still time out silently, and grade accordingly. This is not a NO-GO on its own; it is an honesty requirement.
-
-**A7. "ROUND 3 IS TEST-ONLY" IS TRUE OF THE COMMIT AND FALSE OF THE BRANCH.** `695ca5a..3f96a40` carries `backend/server.js` **+106/−60**. The gate covers the WHOLE branch delta, not the last commit.
-
-**A8. `backend/server.js` IS REWRITTEN BY FOUR TARGETS (A, C, E, F) AND ALL FOUR AUTO-MERGE.** This is the sharper C-68 case and my commission never mentioned it. An auto-merge across four independent rewrites of one file is exactly where a clean merge hides a semantic conflict: **re-run each target's named cells on the COMBINED tree, never only pairwise.**
-
-**A9. RD-438'S TIER IS NOT MINE TO ASSERT — MEASURE IT.** C-54 `:346` says RD-438 **becomes TIER 1 if any API, not only HTML pages, is reachable through the path — measure first.** T2 already drives `/api/healthx`. **Treat it as TIER 1 and make the measurement a required deliverable**; if the measurement says otherwise, say so and grade it tier 2 with the evidence.
-
-**A10. IGNORE THE BUILDER'S 07:41 MAIL SAYING "gate 8 going without RD-510 is right".** It predates RD-510's own READY by 19 minutes and its READY supersedes it. A gate reading `session-tools/s80i/` in filename order will meet the stale instruction first — it is superseded, and RD-510 is in this gate.
-
-**A11. EVIDENCE IS NOT AT THE GATED HEAD, TWICE.** `expect-rd438-r2.txt` is written against `1ae1dfd`, and `rd510r3-hold-run1.out` line 2 reads `HEAD 7dd2171…`. Both are counts-only deltas so the blobs should hold — **prove that, do not assume it**, and say so in the report.
-
-**A12. SIX DIFFERENT VERIFY COUNTS, ONE PER TARGET** (3870/220, 3872/221, 3870/221, 3872/221, 3865/220, 3867/221). Do not carry one number across the batch; each is guarded individually. And `node:24-alpine` is **not in the local image store** (only `node:24-bookworm-slim`) — the container leg stays HELD and its NOT TESTED line is carried verbatim, never silently pulled.
