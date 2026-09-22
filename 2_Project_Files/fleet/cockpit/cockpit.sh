@@ -319,6 +319,32 @@ case "${1:-}" in
       echo "  (ledger w=5 — a tap like this cost a seat 20 minutes and 47 held tickets on 2026-09-08.)" >&2
       exit 6
     fi
+    # AGENT-STATE CLAIM CLAUSE (2026-09-23, ledger: the false-absence family).
+    # The verb clause above blocks a tap that AUTHORISES work. It does not block a
+    # tap that ASSERTS something about the agent's own state, and that is how a
+    # coordinator tap nearly got written into a project's CLARIFICATIONS as a
+    # ghost-text instance this morning: "your pane has shown no test process since,
+    # only the MCP at 0% CPU" — sent bare, every falsifiable claim in it FALSE,
+    # because the sender had read one `ps -t <pane tty>` frame and the agent's jest
+    # was running in a detached worktree under the queue lock.
+    #
+    # From the agent's seat, a fleet-prefixed content-bearing tap with NO mail is
+    # indistinguishable from generator text, so the agent is RIGHT to file it as a
+    # ghost — and a real tap filed as a ghost teaches it to ignore the next real one.
+    #
+    # Narrow by construction: it fires only on assertions about the AGENT'S state,
+    # never on pointers (read/check/see/your inbox carry no claim), and it is skipped
+    # entirely whenever --mail is present, which every genuine pointer has.
+    if [ -z "$MAIL_SUBJ" ] && printf '%s' "$3" | grep -qiE '(your (pane|turn|session|process|shell)|no (test|jest|node|agent) process|nothing is running|you (are|appear|look) (idle|stalled|stuck|stopped)|has (not|n.t) moved|0(\.[0-9]+)?% cpu|still running|shows? no )'; then
+      echo "cockpit: REFUSED — this tap ASSERTS something about the agent's own state and has no mail behind it." >&2
+      echo "  The agent can measure its own state better than you can, and a bare claim tap is" >&2
+      echo "  indistinguishable from ghost text — it will (correctly) be filed as one." >&2
+      echo "  Either ask by mail (send_brief.sh, then say … --mail '<subject>'), or read the" >&2
+      echo "  fleet's own instrument first: session-tools/locks/queue-jest names tag, pid and start time." >&2
+      echo "  (2026-09-23: a bare claim tap was nearly recorded as a C-148 ghost instance; every" >&2
+      echo "   falsifiable claim in it was false and came from a single ps frame.)" >&2
+      exit 7
+    fi
     if [ -n "$MAIL_SUBJ" ]; then
       SAY_DIR="$(cd -P "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
       SAY_ROUTING="$SAY_DIR/../inbox_routing.conf"
