@@ -1,0 +1,54 @@
+ultrathink
+
+You are the fleet QA/testing agent running ONE gate (gate 7 round 2) on Datasec/NexusAI: TWO targets, batched, coupled. Give TWO verdicts, GO or NO-GO, each at its gated sha, plus the combined-tree result.
+
+READ YOUR COMMISSION FIRST, whole: /Volumes/KK_T9_External_HDD/TUESDAY/2_Project_Files/fleet/qa-agent/briefs/2026-09-23_nexusai-gate7r2-rd645-rd641.md
+
+TARGET A — RD-645 (TIER 1, a product security control: the password sign-in's own rate limit), ROUND 2 OF 2 (C-62 cap applies: a NO-GO names what is closed and what is ticketed). Branch rd-645-auth-limiter-mounted-s80i at a1b524a9e532f98dd1ffd42f3dd1a3763525f998, off aab3bf2dd72659b09713ccb3f0a8e4ad2560d852 (the merge-base; origin main c0788b1017a20ea5d2d0b9c0e5837ee233830696 is not an ancestor). Chain: d05ec2212f8427c17bd9f9a202c46c72d5fee7fe, 7759591e77e3497b5edde867502c0f516b607582, 202770e467257a9ca6c5af6432dd72c68dc1210e (round 1's gated head, NO-GO), 823c7fe359a9ba0d36ec14b96a991ceeddcdf446 (cells: F-1 + G-1..G-4), 1e92f58937ae14cba97b1c26bddfd31a4b71d9ce (G-3 re-aimed to staging per C-147), a1b524a (counts 3934/226). Round 2 changes no product file. Scope is C-146: authLimiter on POST /api/auth/login ONLY; enforce stays unthrottled as a named residual; the Entra callback is not throttled. C-147: an UNSET NODE_ENV is development by design (RD-652), G-3 is staging.
+  - F-1 REGRESSION FIRST: every jest run with SESSION_SECRET UNSET (env -u; print SET/UNSET, never a value). a1b524a's rd645 file UNSET predicted 10/10; 202770e's UNSET predicted 0/6 in the same hold (the control).
+  - POSITIVE CONTROL FIRST for the live probe: on your own server on 127.0.0.1, production mode, 70 failed logins from one client address: base aab3bf2 70 x 401, no 429; head a1b524a 1-20 answer 401, the 21st onward 429 with the limiter's message and RateLimit headers (limit 20, policy 20;w=900). Also development (50) and staging (20). A head result without its base control in the same window is not reportable.
+  - Re-derive the mutant table yourself: R0 10/10; M-645 reddens exactly A1 A5 G-2 G-3 G-4; M-Gib exactly G-1; M-Giii exactly G-2; M-Gvii exactly G-3; M-Gx exactly G-4. ADD M-Gib+logout (the limiter on logout alone): the builder's M-Gib leaves logout out, so G-1's logout coverage is unproven — G-1 is REQUIRED to redden on it. Also round 1's Mi, Miv, Mvi. Name every behaviour guarded by no cell, and every one guarded only by source text (C-122).
+  - YOUR runs are at a1b524a: the builder's proof hold ran at 1e92f58 (a1b524a adds counts only).
+  - C-146's not-throttled routes in PRODUCTION mode for a capped address: status, check, enforce, entra-config, verify-group, microsoft callback, microsoft login, logout — never the auth 429, never spending the auth budget.
+  - RD-607: auth keeps its own count; memory mode by the 19/20/21 drive; Redis on a real redis:7.4-alpine from the LOCAL image store, through the docker lock, --pull never, 127.0.0.1 only, stopped in a finally (absent: NOT RUN, blocker named). C-145: Redis-down behaviours are known residuals.
+  - THE NAT TRADE-OFF, AS MEASURED: 20 password-login attempts per 15 minutes per client IP address in production (50 in development), successful sign-ins included; the 21st, even with the right password, is refused. Use the brief's §3 Q7 words.
+  - Prior work (C-49), the C-68 re-run set, full verify predicted 3934/226.
+
+TARGET B — RD-641 (i) (TIER 2, test harness only). Branch rd-641-harness-wildcard-bind-s80i at ab54de151e3df23fe903aef374bac5691a165a06, off main c0788b1. Chain: 1bfc265f5d416d773269fb2fbc4faf684b541d22 (helper fix + cell file), d0f04b6a55809fcff000e58d01267406d3b1a561 (W1 gets its own instrument), ab54de1 (counts 3927/226). reservePort() additionally proves the port binds on every address, because Linux refuses the server's wildcard bind while an address-specific socket holds the port. W1 discriminates on LINUX only.
+  - None of the builder's RD-641 evidence is at the gated head: its Mac proof log and its Linux arms are at d0f04b6, and the READY calls rd641-hold-run3.out "run 2". YOUR runs are at ab54de1.
+  - The Linux red proof, re-run your way: node:24-alpine from the LOCAL image store, through the docker lock, docker run --pull never --network none, an OFFLINE install only (never apk add, never a network npm ci, never a macOS node_modules). If an offline install is impossible, the Linux leg is NOT RUN with the reason, and say what that leaves unproven. Predicted: new helper all green; OLD helper = rd516's 31 red by name (C-142's known set minus HS3) + W1 red on the property.
+  - rd516 must still measure (its CTRL cells fire); your own mutant (canBindAllAddresses always true) must redden W1 on Linux. Full verify predicted 3927/226.
+
+THE COUPLING (C-68): rd645's cells boot through the rd395 harness, which takes its port from the helper RD-641 changes. Re-run rd645's cells on the COMBINED A+B tree, built with git merge-tree --write-tree in YOUR OWN object directory (GIT_OBJECT_DIRECTORY=<your own mktemp -d> GIT_ALTERNATE_OBJECT_DIRECTORIES=<repo>/.git/objects) and archived into your own gate7r2 scratch dir. Predicted: A onto c0788b1 clean; the second merge CONFLICTS in the counts file only (both branches rewrite the same lines). C-57: regenerate the counts once on the merged tree with the id-superset control; never hand-edit, never pre-compute from the two branches' figures. On the combined tree: rd645, rd641, rd571, rd516, the five .github readers, R0 and M-645 again, and the full verify.
+
+CI NOT RUN at either branch head (no PR; Build runs only on pull_request and push to main). The C-142 CI half is measured at merge. gh, if used at all, is read-only.
+
+Build your own trees INSIDE YOUR OWN PROJECT from the object store (git archive <sha> into a fresh mktemp dir under projects/nexusai/qa-trees/gate7r2.*). Each tree is EXCLUSIVE to this gate and to one purpose: a fresh tree per arm; round 1's gate7.* trees are evidence, never run in. Never worktree, checkout, fetch, pull, stash, clean, gc or commit in the NexusAI repo, and never work in its 2_Project_Files checkout (C-28). Findings-only: no commits, no branch moves, no tickets, no PRs, no writes inside NexusAI. No az. Never rm: quarantine.
+
+A RED ARM COUNTS ONLY IF THE MUTANT STILL PARSES: run node --check on every mutated file before its arm and quote the exit code. A red from a mutant that does not parse or load is a VOID arm.
+
+FLOOR DISCIPLINE — follow section 7 of the brief exactly. QUEUE, NEVER TAKE OVER: the jest lock is shared (FIFO); never kill, signal or move another seat's process, lock or ticket.
+  - Every jest run goes through session-tools/nexusai-lock.sh with a tag starting qa-gate7r2- (C-141 and its addendum: your tickets are gate-class; C-110: no other queue jumping), the lock held once per multi-run measurement, as a tracked child of your seat. Live-server probes run inside your own hold; every container inside the docker lock.
+  - Count foreign servers the RD-606 way, anchored on YOUR OWN claude pid; the negative-control seats named in the brief's section 7 must classify foreign in the same run. Never by EADDRINUSE, a whole-command-line grep, or raw comm.
+  - A zero is reportable only beside a control that fired in the same window.
+  - DEADLINE AND HEARTBEAT (gate 4 stalled about 70 minutes at 0% CPU holding the lock): every real-server and container probe has a per-step DEADLINE and a client timeout on every request, kills its server (and stops its container) in a finally, and logs a HEARTBEAT line at least every 2 minutes. A step with no heartbeat for 5 minutes is aborted and reported. Never wait out the 15-minute window.
+  - Reap every server you start.
+
+DRIVABLE SURFACE IS A LOCAL RUN on 127.0.0.1, NOT THE DEMO (RD-76). No request of any kind to a live, demo or public host.
+
+SCOPING (Tuesday's ruling): this round runs no limiter-evasion table. Your NOT TESTED section carries exactly this line: Limiter-evasion via request headers: not run this round by the coordinator's scoping; the trust-proxy exposure is ticketed as RD-651.
+
+QUESTIONS: your sender QA/Datasec-NexusAI has no inbox routing line, so you cannot count on an answer. If you must ask, mail tuesday-agent@agentmail.to with subject "[QA/Datasec-NexusAI -> Tuesday] QUESTION: <topic>", then PROCEED ON THE SAFEST READING without waiting, and record both in the report.
+
+Write your report to: /Volumes/KK_T9_External_HDD/!CODING/Testing Agent MAIN/projects/nexusai/reports/2026-09-23-gate7r2-rd645-rd641/report.md
+
+GIVE TWO VERDICTS: RD-645 GO/NO-GO at a1b524a (positive control first), RD-641 (i) GO/NO-GO at ab54de1 (Linux red proof first, or NOT RUN with its reason), then the combined tree, then what it means for the queue (forward-merged onto c0788b1 and verified green under C-68, C-57, C-89 and C-142, Tuesday's GO under C-127). A GO is a statement about the gated SHA only.
+
+MAIL YOUR VERDICT to tuesday-agent@agentmail.to with the subject exactly:
+[QA/Datasec-NexusAI -> Tuesday] GATE VERDICT — gate 7 r2: RD-645 @ a1b524a + RD-641 @ ab54de1
+
+The AgentMail key is AGENTMAIL_API_KEY in /Volumes/KK_T9_External_HDD/TUESDAY/4_Credentials/.env. It is an absolute path because the QA project has no 4_Credentials directory of its own. Never put the key or any secret in a mail or the report.
+
+Report both heads, and main's, as three timestamped readings (start / mid / end) with the branch name beside each.
+
+Rule 2 stands: what you did NOT test is first-class output — a NOT TESTED section, and every action recommendation labelled MEASURED AT RUNTIME, PROBED or READ ONLY.
