@@ -12410,7 +12410,9 @@
    "CARD secuura-ks953-shared-pins-anchor-by-marker",
    "CARD secuura-ks953-anchor-grammar-for-the-non-route-site",
    "CARD nexusai-demo-deploy-finish-scope"
-  ]
+  ],
+  "delivered_artefact": "KS-1175 comment c0f62102-d3c4-4bfd-9d53-289d297f7e2c (09:18:19Z, Seat A 16th, read back byte-equal): kintsugi at 3bad652d1 + first anchor anchor_1526505a tx 0180573229… block 4685580 — https://linear.app/secuura/issue/KS-1175/anchor-originate-lifecycle-event-schemas-accept-and-anchor-platform-ss#comment-c0f62102",
+  "delivered_ts": "2026-09-22T19:20:35.413330+10:00"
  },
  {
   "id": "wed-nas-sync-ignore-lines-for-devnas-profile",
@@ -12947,6 +12949,64 @@
    "CARD vision-v230-publish",
    "CARD vision-v230-typed-word",
    "CARD secuura-originate-unauthenticated-cross-tenant-billing"
+  ]
+ },
+ {
+  "id": "secuura-ks1084-part-b-api-batch-surface-unauthenticated-dead",
+  "client_project": "Secuura/Blockchain",
+  "title": "KS-1084 part B: the api-gateway /api/batch surface answers 401 to EVERY caller at 3bad652d1 — the write site cannot carry x-tenant-id until it can be reached. File a ticket for a Claude seat, or a different disposition of the batch surface?",
+  "bluf": "Measured by the FEED 16 drafter in-process at 19:08 (record: fleet/briefs_staged/2026-09-22_ornith_feed16_queue_proposal.md §0.5, probe_batch_result.txt): index.ts:798 mounts batchRouter with NO authenticateToken; routes/batch.ts:73 getUserId reads req.user, which only middleware/auth.ts writes (0 other writers) — a LIVE user JWT of a non-default tenant posting a valid documents body to POST /api/batch/certifications gets 401 UNAUTHORIZED and originate is never called. So KS-1084's WRITE site (batch.ts:94-120 proxyRequest) is unreachable: forwarding the tenant header there changes nothing observable until the mount is authenticated, and WHICH middleware and WHICH roles is an auth-surface product decision — yours, not an Ornith hunk. Part A (the read site, proxy.ts) IS briefed and running on the local model as a HELD diff under your c. Default (a) fires without you: a Secuura seat files ONE ticket 'api-gateway /api/batch is unauthenticated-and-therefore-dead' (mount authenticateToken(true) + the tenant forward in one PR, Claude seat, tier-1 gate); part B stays TABLED on KS-1084 with this evidence.",
+  "default_action": "a — the next Secuura seat with board authority files the ticket with the measurement quoted; part B stays tabled on KS-1084; your tap redirects",
+  "options": [
+   {
+    "key": "a",
+    "label": "File the ticket for a Claude seat; part B tabled on KS-1084 (Recommended)",
+    "detail": "one ticket, filed by the next Secuura seat under the board login; the fix is a later Claude PR through a tier-1 gate"
+   },
+   {
+    "key": "b",
+    "label": "Hold — leave /api/batch as it is, record the finding on KS-1084 only",
+    "detail": "no ticket; the dead surface stays dead and undocumented on the board"
+   },
+   {
+    "key": "c",
+    "label": "The batch surface is intentionally disabled — record that and close part B",
+    "detail": "needs your word that /api/batch is meant to be unreachable"
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-09-22T19:21:09.653198+10:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "2026-08-17 20:10",
+   "2026-08-17 20:15",
+   "2026-08-21 19:49",
+   "2026-08-21 20:06",
+   "2026-08-27 19:42",
+   "2026-08-28 09:33",
+   "2026-09-04 15:25",
+   "2026-09-07 10:50",
+   "2026-09-07 18:03",
+   "2026-09-07 18:54",
+   "2026-09-08 07:08",
+   "2026-09-08 11:41",
+   "2026-09-10 09:00",
+   "2026-09-10 09:01",
+   "2026-09-10 09:08",
+   "2026-09-10 09:08",
+   "2026-09-10 09:17",
+   "2026-09-10 18:01",
+   "2026-09-15 13:08",
+   "2026-09-18 06:37",
+   "2026-09-18 09:15",
+   "CARD secuura-ks781-consent-page-shipping-surface",
+   "CARD workspace-dead-secuura-tenant-cleanup",
+   "CARD secuura-ci-dead-19-days-blocks-your-own-ruling",
+   "CARD wed-schedulers-dead-since-0907",
+   "CARD secuura-originate-unauthenticated-cross-tenant-billing",
+   "CARD secuura-ks1084-gateway-originate-no-tenant-header-p0"
   ]
  }
 ]
