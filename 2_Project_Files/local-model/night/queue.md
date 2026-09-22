@@ -270,4 +270,3 @@
 #     *.OVERSIZE-REFUSED-2026-09-23. Viable only if a run is ever given ctx >= 98304.
 #   KS-630 — the only unrun T2b ticket; its fix shape ("add a 7th step to preflight.sh") is STALE at the
 #     tip: preflight.sh is 784 lines and already carries at least 12 legs. The ticket says to re-price.
-KS-851 input=/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/inputs/test_only_851QUOTEDNAME-R18.json task=/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/tasks/test_only/task.md ctx=65536
