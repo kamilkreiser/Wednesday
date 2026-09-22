@@ -6,6 +6,17 @@ status: live
 supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s1-wholesale
 ---
 
+## 🟢 DELTA 68 — 2026-09-23 00:3x (s81 rotation boot, ctx 53% after the whole load). **READ THIS, THEN 67. DELTA 51's OWED ZIP STANDS.**
+
+### ⏳ OPEN DEADLINES (re-state in every delta until closed)
+- **24 Sep (TOMORROW): Partner Center stops serving previously published NexusAI packages.** Handed to Kam 09-18 and dropped for 5 days (ledger 2026-09-23). Re-raised on the live board 00:2x (201) with the route. Local copies of our own built 2.1.0/2.1.1 zips + SHA256SUMS exist in NexusAI `evidence-s62-published-packages/`. Chrome on the mini still refuses AppleEvents (never script System Events). **Default if he is silent: nothing more; after 24 Sep, record the loss as closed-by-date.**
+
+### NEXUSAI
+- RD-651 = gate-7 F-2 (VM compose no proxy hop), filed by S80I 14:20Z. **Closes DELTA 67's "ticket key owed".**
+- **RD-645 round 2 BUILT @ 823c7fe** (S80I 14:24Z), proof queued behind its RD-641 hold. **On its READY: gate 7 round 2** (the last round under the cap; brief from `fleet/qa-agent/briefs/2026-09-22_nexusai-gate7-rd645.md` + the round-2 cells). Then DELTA 67's ON-GO chain.
+
+### FLOOR (00:23): %0 tuesday · %41 Vision · %44 NexusAI-I · %48 Vision gate 4 · %3 monitor · %8 bare shell. Poller alive. Kam quiet since 18:09.
+
 ## 🔴 DELTA 67 — 2026-09-23 00:1x ROTATION HANDOVER (s80, ctx ~78-80%, safe boundary). **READ THIS FIRST, THEN 66. DELTA 51's OWED ZIP STANDS. QUIET HOURS until 06:00: board text only, no voice.**
 
 ### ⚡ UPDATE 00:19 (after DELTA 67 was written)
