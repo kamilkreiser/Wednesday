@@ -13054,5 +13054,163 @@
    "CARD secuura-934-blocks-every-push-needs-one-approval",
    "CARD secuura-ks1102-public-status-what-may-show"
   ]
+ },
+ {
+  "id": "secuura-ks974-lone-surrogate-key-check-and-reset",
+  "client_project": "Secuura/Blockchain",
+  "title": "KS-974: neither /check nor /reset refuses an unpaired-surrogate rate-limit key — the gate's Minor read the scope fields, not the key. Leave the recorded design, or add a two-route refine?",
+  "bluf": "gate19B's Minor on #1198 said /check's key lacks the lone-surrogate refine that /reset has. measured by the FEED 17 drafter at develop 2bc5ccf63 on 2026-09-22 19:4x-20:0x (proposal fleet/briefs_staged/2026-09-22_ornith_feed17_queue_proposal.md, the row's cited lines read at that sha): requestSchemas.ts:82 bounds the key by code points ONLY on both routes; the only hasLoneSurrogate refine is inside scopeField() (:65 — tenantId/userId), and :52-:53 records the design in words: the key is appended RAW and last, never encoded, so nothing malformed reaches the encoder through it. So the premise is refuted: both routes behave the same and by design. Default (a) fires without you: LEAVE both; a Secuura seat posts the corrected fact on KS-974 (the gate's Minor row stands corrected) and nothing is briefed.",
+  "default_action": "a — no brief; the correction rides in the next Secuura seat's brief as a KS-974 comment; your tap redirects",
+  "options": [
+   {
+    "key": "a",
+    "label": "Leave both routes as designed; correct the record on KS-974 (Recommended)",
+    "detail": "no code change; one facts comment by the next Secuura seat"
+   },
+   {
+    "key": "b",
+    "label": "Add a lone-surrogate refine to the key on BOTH routes",
+    "detail": "a design change against :52-:53 — two product hunks + two cells, a tier-1 gate"
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-09-22T20:10:20.624805+10:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "2026-08-21 20:06",
+   "2026-09-03 09:55",
+   "2026-09-15 10:51"
+  ]
+ },
+ {
+  "id": "secuura-ks1163-start-script-never-waits-for-five-services",
+  "client_project": "Secuura/Blockchain",
+  "title": "KS-1163 (your own 'Decision needed (Kamil)'): start-secuura.sh never waits for five healthchecked services — wait for all five, or keep them deliberately unwaited?",
+  "bluf": "measured by the FEED 17 drafter at develop 2bc5ccf63 on 2026-09-22 19:4x-20:0x (proposal fleet/briefs_staged/2026-09-22_ornith_feed17_queue_proposal.md, the row's cited lines read at that sha): demo-service, mcp-server, pgbouncer, tenant-provisioning and tokenisation have healthchecks and restart: unless-stopped but are absent from EXPECTED_SUFFIXES (27 of 33 containers), so 'All 27 containers are healthy' prints while they are still booting; the ks1096 suite carries the five as KNOWN_UNWAITED exceptions 'for Kamil'. The ticket's own heading says the decision is yours. Default (a) fires without you: WAIT for all five — a one-hunk bash_patch (add the five suffixes, the count comment 27 -> 32, delete the five KNOWN_UNWAITED lines) briefed to the local model as a held diff; the existing suite goes red-then-green by construction.",
+  "default_action": "a — briefed to the local model as a held diff at the next feed; merges only after its gate; your tap redirects",
+  "options": [
+   {
+    "key": "a",
+    "label": "Wait for all five (Recommended)",
+    "detail": "one bash_patch for the local model; held + gated; the start script reports honestly"
+   },
+   {
+    "key": "b",
+    "label": "Keep the five unwaited on purpose — record why per service",
+    "detail": "a comment on KS-1163 naming the reason for each; no code change"
+   },
+   {
+    "key": "c",
+    "label": "Wait for some — name which",
+    "detail": "you list the services; same brief shape"
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-09-22T20:10:29.137712+10:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "2026-09-02 19:29",
+   "2026-09-03 10:27",
+   "2026-09-10 09:01",
+   "2026-09-10 09:08",
+   "2026-09-10 09:08",
+   "2026-09-12 11:58",
+   "CARD secuura-workspace-suites-never-run-on-a-pr",
+   "CARD wed-nas-nightly-leg-has-never-completed",
+   "CARD secuura-fourteen-merged-own-pr-tickets-never-moved",
+   "CARD secuura-apikey-rate-limiter-never-fires"
+  ]
+ },
+ {
+  "id": "secuura-ks998-formatting-gate-fails-open-on-missing-prettier",
+  "client_project": "Secuura/Blockchain",
+  "title": "KS-998: the formatting gate fails OPEN when prettier is absent (a fresh clone pushes a red silently) — hard-fail when a tracked file of the package is in the push, install-on-first-run, or accept the skip in writing?",
+  "bluf": "measured by the FEED 17 drafter at develop 2bc5ccf63 on 2026-09-22 19:4x-20:0x (proposal fleet/briefs_staged/2026-09-22_ornith_feed17_queue_proposal.md, the row's cited lines read at that sha) + the KS-989 gate's measurement: check-package-format.sh prints SKIP (advisory) and exits 0 when prettier is not installed, so a fresh clone can push formatting reds without a word. Three fixes with different costs: (a) hard-fail ONLY when a TRACKED file of that package is in the push (an env check + one branch; an untouched package still skips), (b) install-on-first-run like preflight.sh (npm on the push path — slower, and a network dependency in a hook), (c) accept the skip in writing (a doc line; the gap stays). Items 3-4 of the ticket (a fail-closed cell; grep -qx -> -qxF) are small and independent. The ticket says the choice should be 'settled deliberately'. Default (a) fires without you.",
+  "default_action": "a — queued for the next Claude seat on the hooks lane with items 3-4; your tap redirects",
+  "options": [
+   {
+    "key": "a",
+    "label": "Hard-fail only when a tracked file of the package is in the push (Recommended)",
+    "detail": "one hook change + a cell; a Claude seat (the hook sits outside Blockchain/Dev)"
+   },
+   {
+    "key": "b",
+    "label": "Install prettier on first run inside the hook",
+    "detail": "network + time on every fresh clone's first push"
+   },
+   {
+    "key": "c",
+    "label": "Accept the advisory skip in writing",
+    "detail": "a doc line; the fresh-clone gap stays"
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-09-22T20:10:36.076670+10:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "2026-08-21 20:06",
+   "2026-09-10 09:01",
+   "2026-09-10 09:08",
+   "2026-09-10 09:08",
+   "2026-09-13 16:55",
+   "2026-09-14 14:53",
+   "2026-09-16 09:53",
+   "CARD secuura-ks566-revoke-gate",
+   "CARD secuura-erasure-scope-gate",
+   "CARD secuura-ks788-gate-fails-open-2026-09-04",
+   "CARD secuura-892-cap-spent-blocker-open",
+   "CARD secuura-892-round3-nogo-blocker-still-open",
+   "CARD secuura-61-archived-while-still-open",
+   "CARD secuura-advisory-gate-moving-set",
+   "CARD hpsm-phase1-missing-source-workbook",
+   "CARD secuura-ks998-format-gate-fails-open-on-missing-deps"
+  ]
+ },
+ {
+  "id": "secuura-ks789-ci-is-the-hard-gate-with-no-ci",
+  "client_project": "Secuura/Blockchain",
+  "title": "KS-789: CONTRIBUTING.md still says 'CI is the hard gate' — CI was retired 2026-08-27. Replace the clause with the reviewer + Test Evidence backstop, and require a --no-verify push to say so on the PR?",
+  "bluf": "measured by the FEED 17 drafter at develop 2bc5ccf63 on 2026-09-22 19:4x-20:0x (proposal fleet/briefs_staged/2026-09-22_ornith_feed17_queue_proposal.md, the row's cited lines read at that sha): CONTRIBUTING.md:383-385 justifies the hook's degradation and --no-verify pushes with a CI backstop that no longer exists (retired 2026-08-27; the hook's own line :12 still points at it). Two parts: (1) strike the clause and name the reviewer + the PR's Test Evidence block as the backstop — a one-paragraph doc_patch; (2) a NEW obligation on authors — a --no-verify push must say so on the PR with which legs did and did not run — a policy statement that is yours to make, not a doc correction. Default (a) fires without you: both — (1) briefed to the local model as a doc_patch, (2) stated in the same paragraph as the rule.",
+  "default_action": "a — a doc_patch at the next feed; merges only after its gate; your tap redirects",
+  "options": [
+   {
+    "key": "a",
+    "label": "Both: strike the CI clause AND require --no-verify pushes to say so on the PR (Recommended)",
+    "detail": "one doc_patch for the local model, held + gated"
+   },
+   {
+    "key": "b",
+    "label": "Part 1 only — strike the clause; no new obligation",
+    "detail": "the doc stops lying; --no-verify stays silent"
+   },
+   {
+    "key": "c",
+    "label": "Leave it — CI may come back",
+    "detail": "the doc keeps naming a gate that is not there"
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-09-22T20:10:44.159349+10:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "2026-09-03 16:21",
+   "2026-09-11 16:55",
+   "CARD secuura-ks566-revoke-gate",
+   "CARD secuura-erasure-scope-gate",
+   "CARD secuura-ks788-gate-fails-open-2026-09-04",
+   "CARD secuura-advisory-gate-moving-set",
+   "CARD wed-nas-narrow-hard-followon",
+   "CARD hpsm-composer-demo-release-with-device-groups",
+   "CARD tuesday-seat-self-rotate-with-liveness-check",
+   "CARD secuura-ks998-format-gate-fails-open-on-missing-deps"
+  ]
  }
 ]
