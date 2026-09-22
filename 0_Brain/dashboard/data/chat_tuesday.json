@@ -2952,5 +2952,26 @@
   "project": "Datasec",
   "ts": "2026-09-22T17:04:45.052026+10:00",
   "text": "NexusAI test gate 6 passed all three: the harness fix, the Redis rate-limiter fix (tested against a real Redis), and Node 24 in CI. H is merging them now, and I'll post the Node 24 link when it's in.\n\nThe gate also found a real gap that has always been there, not caused by these changes: the login rate limiter was built but never switched on. The gate made 70 failed logins and was never locked out. Login is protected only by the general limit of 1000 requests per 15 minutes. That matters for a product going to Marketplace, so H fixes it next and it goes through its own test gate before the zip. No action needed from you.\n\nOne decision card is on your board: what NexusAI should do when its Redis goes down. It only affects the docker-compose setup, not the Marketplace package. My recommendation is (a): keep refusing to run, but fix the misleading log and make it recover by itself. If you don't choose, nothing is built until after the resubmission."
+ },
+ {
+  "role": "wednesday",
+  "seat": "Kamils-Mac-mini.localdomain",
+  "project": "Datasec",
+  "ts": "2026-09-22T17:16:23.176331+10:00",
+  "text": "Received: (c) on Redis. It stays as it is, with tickets only. RD-646 and RD-647 are filed and nothing gets built for them. I'll have your choice recorded on both tickets."
+ },
+ {
+  "role": "wednesday",
+  "seat": "Kamils-Mac-mini.localdomain",
+  "project": "Datasec",
+  "ts": "2026-09-22T18:09:32.886400+10:00",
+  "text": "Received. I'm starting a QuickQuote agent now instead of waiting for the NexusAI round, and a NexusAI status follows in a few minutes."
+ },
+ {
+  "role": "wednesday",
+  "seat": "Kamils-Mac-mini.localdomain",
+  "project": "Datasec",
+  "ts": "2026-09-22T18:11:04.249696+10:00",
+  "text": "QuickQuote agent started. It has four items:\n1. Feedback copies me, for both QuickQuote and the portal.\n2. The 'Devices (MFPS/SFPS)' wording.\n3. Pulling up an old quote by its number. It sends me the design before building, because who may open someone else's quote is a security choice.\n4. A rulings file for the project.\nNothing goes live on the real tool without your word.\n\nNexusAI build status:\n- Today's main-branch merges: RD-575, RD-524, RD-615 and now RD-619. I checked each on GitHub.\n- Merging next: the Redis rate-limiter fix and Node 24 in CI. Both have passed their test gate.\n- Building next: the login rate limiter that was never switched on. It gets its own test gate before the zip.\n- The package work (G) is nearly done: 7 of its items are ready, and the rest are in testing.\n- Still to come: one package check, then your 2.2.0 image push, then I email you the zip. The handover document that goes with it is drafted.\n- H, the lead NexusAI agent, is at the end of its session, and a fresh agent picks up from its notes. The pace is set by the shared test queue, not by the agents."
  }
 ]
