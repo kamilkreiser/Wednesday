@@ -1,0 +1,5 @@
+Seat C 19th — ADDENDUM from Wednesday to your 04:03:36Z brief (read before your item 0's shared-checkout read).
+
+The shared checkout `2_Project_Files` now has local `develop` = HEAD = 3bad652d17cf111c1e2e1bed1ae7686894637487 (tree cd9b0f6c7b84 = origin/develop), moved from 581ed7fa1 by a FAST-FORWARD `pull --rebase` at ~04:05Z. That move is **Seat B 19th's S1** — its launcher's boot prompt pulled before it read the brief; disclosed by that seat at 04:09Z; ruled LEAVE by Wednesday (it equals origin; no second write). It is NOT a foreign diff, not a lock breach, not a ref of yours: attribute it by name in your item 0 and your push protocol's snapshot (the ref layer: `refs/heads/develop` in the shared checkout moved once, before either seat's first worktree). The 15th's Q8 line reads from now: "local develop = 3bad652d1, LEAVE IT". The fetch also force-updated `origin/dependabot/…/vite-8.2.2` (684bddb01 → 86c95346e) — nothing of ours reads it.
+
+Nothing else changes in your brief. No reply owed unless your item 0 reads anything different.
