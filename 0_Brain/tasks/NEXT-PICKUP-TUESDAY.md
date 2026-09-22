@@ -6,6 +6,27 @@ status: live
 supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s1-wholesale
 ---
 
+## 🔴 DELTA 63 — 2026-09-22 19:0x ROTATION HANDOVER (s79, ctx ~80%, safe boundary). **READ THIS FIRST, THEN 62/61/60. DELTA 51's OWED ZIP STANDS.**
+
+### NEXUSAI
+- **main = af90431** (RD-619 merged, verified: parents 58bb38c + d98271e ← 695ca5a; CI Build 35702776293 NEW none).
+- `%44` **NexusAI-I** (successor, lane A, LAUNCHED 18:5x; brief = "BRIEF: SUCCESSOR Datasec/NexusAI-I…"). Its order: RD-607 @ 8fa0791 merge → PR #31 @ a11eb5f merge (**then post the merged PR link to Kam: promised**) → RD-645 (authLimiter NEVER MOUNTED, tier 1) → RD-641 (i) → re-queue H's proofs. **Answer its plan confirmation with a GO + tap** (a new seat always waits for it). Verify each MERGED at source.
+- `%38` **H (S79H) WRAPPED 08:53Z, scored 0.95. Its pane is still open ONLY because its `s79h-rd641-trace` held the jest lock. Close it with `pane_close.sh %38` once that ticket is gone from locks/.**
+- `%36` **G**: 7 lane-C READYs; queued devscripts, rd643, rd528-q7b. **Its regate (the package re-merge) waits for main to be FINAL after PR #31: relay I's PR #31 MERGED mail to G.**
+- **Gate 7 (lane A) is owed** when I's RD-645 READY lands, batched with RD-631/510/531/438/616r2/638 as they come.
+
+### VISION / QUICKQUOTE (Kam 18:09 "start running an agent to fix all the quick quote tools")
+- `%41` **Vision seat**: READY items 1 (feedback CC, QQ bd3e3cf + portal ce01ba9), 2 (label 72f6c0c), 3 (reopen quote 642b06b → **follow-up 03a0682**: retention purge + a real forbidden-field cell), 4 (**LIVE portal HTML-injection in reminder mail to customers**, d11eed6), 5 (portal 8 advisories cleared; QQ qs 320a169), **5b (puppeteer-core 25 + node:22 image: a PRODUCTION RUNTIME CHANGE, Kam's to deploy)**.
+- `%43` **Vision gate 1 RUNNING** (launcher `fleet/qa-agent/launchers/launch_qa_vision_qq_gate1.sh`, brief `…/briefs/2026-09-22_vision-qq-gate1-feedback-label-reopen.md`): A = item 1, B = item 2, C = item 3 @ 642b06b (**expect a re-run on 03a0682**), D = item 4. Verdict subject `[QA/Datasec-Vision -> Tuesday] GATE VERDICT — Vision/QuickQuote gate 1: …`. Items 5/5b go to a follow-up gate.
+- **Kam's open QQ choices (defaults stated to him):** printed "N HP MFP/SFP devices" (1 yes?), xlsx row (2 yes?), H-suffix quote numbers (keep), re-price at today's FX (default; "freeze the rate" to change), 12-month retention. **Every live publish (QQ, portal, item 4, the 5b runtime) needs Kam's word after its gate.**
+
+### KAM OPEN (defaults stated): "move the cert" (Tuesday's cert on the Studio) · "finish the vault" · the 15:30 QQ "following" item never arrived.
+
+### TRAPS HIT THIS SEAT
+- `ls -A dirA dirB` prints headers, so it is never empty (fixed in the Vision launcher; the --check mode exits before that guard).
+- A rebase that git calls "all conflicts fixed" can refuse to continue: commit by hand, `rebase --quit`, `branch -f main HEAD`, push; read the autostash first (it was a usage line).
+- send_brief refuses "hold" in a subject; relative paths in PROVENANCE are refused ("your own …" fixes it).
+
 ## 🟢 DELTA 62 — 2026-09-22 17:1x (s79, ctx 70% CHECKPOINT; band 80-90, NOT rotating). **READ THIS, THEN 61/60. DELTA 51's OWED ZIP STANDS.**
 
 ### GATE 6 = GO/GO/GO (07:02Z; report `Testing Agent MAIN/projects/nexusai/reports/2026-09-22-gate6-rd619-rd607-pr31/report.md`; pane %40 CLOSED, listeners 12 → 12; scored 1.00)
