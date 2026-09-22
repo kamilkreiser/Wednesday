@@ -12824,5 +12824,37 @@
    "CARD secuura-originate-unauthenticated-cross-tenant-billing",
    "CARD secuura-originate-internal-ingress-widened"
   ]
+ },
+ {
+  "id": "nexusai-redis-down-fail-closed-policy",
+  "client_project": "Datasec/NexusAI",
+  "title": "When Redis fails, NexusAI stops serving (fails closed) - keep that, or keep serving without rate limits?",
+  "bluf": "Gate 6 measured two pre-existing behaviours in the Redis (docker-compose) deployment only. The Marketplace template sets no Redis, so customers of the listing are not affected. (1) If Redis is configured but down at startup, the app exits within ~300 ms. It first logs a false line saying it 'falls back to in-memory'. (2) If Redis drops while running, every /api request answers 500 and never recovers, even after Redis returns. Both fail CLOSED: no request gets past the rate limits, but the app stops working. The alternative is fail OPEN: keep serving, with limits temporarily in-memory per server. That keeps the app up, but weakens limits across servers until Redis returns.",
+  "default_action": "Tickets are filed and nothing is built; it waits for your choice, after the resubmission (compose-only, not in the Marketplace package).",
+  "options": [
+   {
+    "key": "a",
+    "label": "Fail closed, and fix the false log line and the never-recovers bug",
+    "detail": "The app still refuses to run without Redis. It logs the truth, and it recovers by itself once Redis is back. The safest security posture, with the least surprise."
+   },
+   {
+    "key": "b",
+    "label": "Fail open to in-memory limits while Redis is down",
+    "detail": "Stays up. Limits count per server until Redis returns. It is what the log line already claims."
+   },
+   {
+    "key": "c",
+    "label": "Leave it as is; tickets only",
+    "detail": "No change now; revisit after the resubmission."
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-09-22T17:04:29.941872+10:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "2026-09-02 16:32"
+  ]
  }
 ]
