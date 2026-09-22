@@ -755,7 +755,21 @@ fi
 # ANTHROPIC_DEFAULT_OPUS_MODEL appears 40x in the claude binary (strings on
 # /Users/.../claude/versions/2.1.227), i.e. the CLI genuinely reads it — the
 # documentation for this is third-party, so the binary is the source of truth.
-export ANTHROPIC_DEFAULT_OPUS_MODEL=claude-opus-5
+# SUPERSEDED 2026-09-23 09:25 by Kam (live board, view=wednesday, verbatim):
+#   "can you please Update to 2.1.280+ to use Opus 5.5 and set it so each agent
+#    launches in opus 5.5 by default"
+# Measured before changing anything (do-not-guess, 2026-09-14): the CLI is ALREADY
+# 2.1.280 (no update needed); `strings` on that binary carries `claude-opus-5-5`
+# (15 hits) beside `claude-opus-5` (24) with `claude-sonnet` (64) as the control, so
+# the id is real; and `--model` documents a full model name as an accepted value.
+# WHY AN EXPLICIT ID AND NOT THE `opus` ALIAS: this seat booted 06:00 on 2.1.280 with
+# `--model opus` and resolved to OPUS 5, not 5.5 — the alias tracks the latest Opus
+# GA, which is not yet 5.5. An alias would silently not do what Kam asked.
+# THE COST, stated: an explicit pin goes stale the day Opus 5.6 ships (exactly the
+# 2026-09-04 hand-pin that kept every later seat on Opus after Fable credits returned,
+# and the 2026-09-02 dated-pin lesson). Revert to `--model opus` when the alias
+# reaches 5.5, or Kam's word moves it. Backup beside this file: .pre-0923-0930-opus55.
+export ANTHROPIC_DEFAULT_OPUS_MODEL=claude-opus-5-5
 
 # WEEK-SCOPED OVERRIDE (Kam, 2026-09-06 20:2x, verbatim into Wednesday's own
 # session: "please change your boot script for the rest of the week to boot in
