@@ -12712,5 +12712,117 @@
   ],
   "delivered_artefact": "NexusAI CLARIFICATIONS C-126 (line 1340) + RD-516 comment 37920 — read by Tuesday 18:3x",
   "delivered_ts": "2026-09-21T18:38:13.022931+10:00"
+ },
+ {
+  "id": "secuura-ks1245-smoke-test-degraded-semantics",
+  "client_project": "Secuura/Blockchain",
+  "title": "KS-1245: smoke-test.sh fails a 'degraded' /health/deep — pass-with-warning, or keep failing?",
+  "bluf": "OVERRIDE of the prior-rulings gate, reason read from the two cards it matched: 'secuura-archive-uat-tickets-vs-peters-test-list' ruled which UAT tickets to archive (a board sweep, nothing about the smoke test), and 'nexusai-degraded-flip-and-live-deployments' is NexusAI's Key Vault defect (another client); neither rules what 'degraded' means to the Secuura dev-box smoke test. Since #1037, /health/deep reports 'degraded' when one dependency is soft-down, and scripts/smoke-test.sh:107 fails anything that is not 'up' (the FEED 15 drafter read it at the tip 3bad652d1: 5 pass / 0 fail became 4 / 1). Wednesday's reading: a semantic choice about what the smoke test guarantees — yours. Default (a) fires without you: the local model briefs 'degraded' = PASS WITH WARNING naming the service; 'down'/'error' stay failures.",
+  "default_action": "a — Wednesday briefs it to the local model as a held diff; it merges only after its gate; your tap redirects",
+  "options": [
+   {
+    "key": "a",
+    "label": "Pass-with-warning for 'degraded', naming the service; down/error still fail (Recommended)",
+    "detail": "a one-file bash change + a cell, briefable to Ornith now"
+   },
+   {
+    "key": "b",
+    "label": "Keep failing on anything not 'up'",
+    "detail": "no change; the smoke test stays red on kintsugi while any dependency is degraded"
+   },
+   {
+    "key": "c",
+    "label": "'degraded' is a hard failure only for named critical services",
+    "detail": "needs your list of which services"
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-09-22T16:15:03.682976+10:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "CARD secuura-archive-uat-tickets-vs-peters-test-list",
+   "CARD nexusai-degraded-flip-and-live-deployments"
+  ]
+ },
+ {
+  "id": "secuura-ks1019-blockchain-block-untyped",
+  "client_project": "Secuura/Blockchain",
+  "title": "KS-1019: the document's blockchain block is published as z.unknown() — leave it (record why) or type it?",
+  "bluf": "OVERRIDE of the prior-rulings gate, reason read from what it matched: your 2026-09-16 'leave it' on secuura-ks683-blockfrost-key-per-environment ruled the Blockfrost KEY per environment, and secuura-audit-baseline-rows-lapse-24sep-block-pushes ruled the advisory re-triage date — the words 'blockchain'/'block' matched, the subjects do not. KS-1019 is a [Question] ticket: the document schema publishes its blockchain block untyped (z.unknown() at originate :601 per the FEED 15 drafter's read at 3bad652d1), so the drift guards are blind to its shape by construction. Two honest answers: leave it and say why in one comment line, or type it as a discriminated union — a product change Peter would review. Wednesday's reading: a design call, not a defect to patch quietly. Default (a) fires without you: LEAVE, the reason recorded at :601 by the local model as a one-line comment patch.",
+  "default_action": "a — the local model writes the one-line comment; nothing else changes; your tap redirects",
+  "options": [
+   {
+    "key": "a",
+    "label": "Leave untyped; record the reason at",
+    "detail": "601 in one comment line (Recommended):a doc_patch for the local model; no behaviour change"
+   },
+   {
+    "key": "b",
+    "label": "Type the block as a discriminated union",
+    "detail": "a Peter-reviewed product PR by a Claude seat; a schema change every consumer sees"
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-09-22T16:15:27.827029+10:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "2026-08-28 10:39",
+   "2026-09-01 17:51",
+   "2026-09-03 09:55",
+   "2026-09-05 09:15",
+   "2026-09-05 16:42",
+   "2026-09-10 09:01",
+   "2026-09-10 09:08",
+   "2026-09-10 09:08",
+   "2026-09-16 15:03",
+   "CARD secuura-audit-baseline-rows-lapse-24sep-block-pushes"
+  ]
+ },
+ {
+  "id": "secuura-ks1084-gateway-originate-no-tenant-header-p0",
+  "client_project": "Secuura/Blockchain",
+  "title": "KS-1084 (P0): gateway→originate calls send no x-tenant-id — spend a Claude measurement seat on it now, or hold?",
+  "bluf": "OVERRIDE of the prior-rulings gate, reason read from the two cards it matched: 'secuura-originate-unauthenticated-cross-tenant-billing' (ruled probe-then-rule) and 'secuura-originate-internal-ingress-widened' (ruled fresh-seat-now) are this defect's FAMILY — originate reached from inside without tenant scoping — and both of your rulings said MEASURE FIRST; that is this card's default, not a new direction. The new question is the spend: KS-1084 is a P0 the ticket says is unverified since 2026-09-11 (the gateway's internal calls to originate carry no x-tenant-id; one read + one write site at 3bad652d1 per the FEED 15 drafter's read). The local model cannot measure it (its harness forbids a live stack); a Claude measurement seat on a two-tenant stack is a launch on the allowance you asked me to stretch at 15:16. Default (a) fires without you: ONE Claude measurement seat, report only, at the next Claude slot after Seat A 16th's deploy confirms.",
+  "default_action": "a — Wednesday briefs the measurement seat after Seat A 16th's plan confirms; report-only; no fix without a second ruling",
+  "options": [
+   {
+    "key": "a",
+    "label": "Commission one Claude measurement seat — two-tenant stack, one read + one write site, report only (Recommended)",
+    "detail": "~one seat-session on the allowance; a fix is a second decision on the report, per your probe-then-rule"
+   },
+   {
+    "key": "b",
+    "label": "Hold KS-1084 until round 19's seats are done and the allowance is re-read",
+    "detail": "nothing runs; the P0 stays unverified"
+   },
+   {
+    "key": "c",
+    "label": "Let the local model attempt a fix unmeasured",
+    "detail": "against the 09-16 rule (mechanism-checked tasks only); Wednesday advises against it"
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-09-22T16:16:07.999531+10:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "2026-08-21 19:49",
+   "2026-08-21 20:06",
+   "2026-09-10 09:00",
+   "2026-09-10 09:17",
+   "2026-09-10 10:32",
+   "2026-09-10 17:11",
+   "CARD nexusai-costs-header-green-gradient",
+   "CARD workspace-dead-secuura-tenant-cleanup",
+   "CARD secuura-org-trust-boundary-within-tenant",
+   "CARD secrev-live-pass-blocked-on-tenant",
+   "CARD secuura-originate-unauthenticated-cross-tenant-billing",
+   "CARD secuura-originate-internal-ingress-widened"
+  ]
  }
 ]

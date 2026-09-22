@@ -49,6 +49,15 @@
 # `block: true`, `line` = the matched start, `from_lines`, `to_lines`; the checker plants it after the same exact-and-
 # unique check and restores by bytes (T8) as for a line. A single-line From is handled EXACTLY as before (Line: required,
 # To one line) — its JSON is byte-for-byte unchanged.
+# FARM (2026-09-22 15:5x, KS-1145 / the ks949 suite; feed15): a BASH suite that shells out to the workspace install (tsx) or
+# needs packages/shared built dies on the bare clone the bash runner prepares (ks949_main_seed_idempotence.test.sh :113-:114
+# `die`, not SKIP). A `Farm: \`<tokens>\`` line in the brief's header (before the first `## `), tokens joined by `+` from the
+# set {shared, tsx}, names what the suite needs: `tsx` = the source checkout's node_modules symlink-farmed into the clone
+# (node_modules/.bin/tsx resolves); `shared` = that farm PLUS packages/shared built in the clone (dist/index.js). The JSON
+# carries `farm` (the tokens, canonical order shared+tsx) and, for `shared`, `shared_pkg_dir` = packages/shared; tasks/
+# test_only/prepare_clone.sh reads `farm` and routes the bash branch through the code_patch farm. REFUSED (rc 2, naming
+# the line): a Farm: line on a vitest/jest brief (those are always farmed), an empty value, a token outside the set, a
+# duplicate token. With no Farm: line the JSON is byte-for-byte what it was (no `farm` key; shared_pkg_dir "" for bash).
 # rc 0 ok · 2 refused · 1 usage/error. bash 3.2. stderr never discarded.
 set -uo pipefail
 ID="${1:-}"; OUT="${2:-}"; BRIEF="${3:-}"; shift 3 2>/dev/null
@@ -137,6 +146,18 @@ if rpin is not None:
         refuse(f"runner pin {rpin} ({rsrc}) is NOT in {svc}/package.json (no {rpin} in dependencies/devDependencies, no scripts command running it) — a pin must name a runner the service actually has (detected {why})")
     runner = rpin; runner_pin = f"{rpin} by {rsrc}; detected {why}"
 if not runner: refuse(f"cannot tell the runner of {svc} ({why}) — exactly one of jest / vitest must be marked")
+# ---- FARM (2026-09-22): the brief header's `Farm:` line — bash suites only; tokens from {shared, tsx}
+farm = ""
+fm = re.search(r"^Farm:[ \t]*(.*?)[ \t]*$", re.split(r"^##\s", text, maxsplit=1, flags=re.M)[0], re.M)
+if fm:
+    raw = fm.group(1).strip().strip("`").strip()
+    if not is_bash: refuse(f"Farm: line {fm.group(0)!r} on a {runner} brief — only a *.test.sh suite runs on a bare clone; vitest/jest briefs are always farmed")
+    toks = [x.strip() for x in raw.split("+")] if raw else []
+    if not toks or any(not x for x in toks): refuse(f"Farm: line {fm.group(0)!r} names no token — write Farm: `shared+tsx` (tokens from shared, tsx)")
+    badt = [x for x in toks if x not in ("shared", "tsx")]
+    if badt: refuse(f"Farm: line {fm.group(0)!r} names {badt[0]!r} — not a farm token (the set is shared, tsx); a suite that needs more is not briefable on this runner")
+    if len(set(toks)) != len(toks): refuse(f"Farm: line {fm.group(0)!r} repeats a token")
+    farm = "+".join(x for x in ("shared", "tsx") if x in toks)
 service_dir = svc[len(subdir) + 1:]
 test_rel = tf[len(svc) + 1:]
 
@@ -288,7 +309,7 @@ inp = {"ticket": {"identifier": ident, "title": text.splitlines()[0].lstrip("# "
                 "test_runner": (f"{runner} (run one file with `{cmd}` from {subdir}/{service_dir})" if runner != "bash" else
                                 f"bash (the suite runs as `{cmd}`; a cell is one `ok <desc>` / `FAIL <desc>` line the suite's own helper prints; bash 3.2: no mapfile, no declare -A, no ${{x,,}}, no timeout)")},
        "task_type": "test_only", "tip": tip, "source_checkout": src_repo, "repo_subdir": subdir,
-       "service_dir": service_dir, "shared_pkg_dir": ("" if runner == "bash" else pins.get("shared_pkg_dir", "packages/shared")),
+       "service_dir": service_dir, "shared_pkg_dir": (("" if "shared" not in farm else pins.get("shared_pkg_dir", "packages/shared")) if runner == "bash" else pins.get("shared_pkg_dir", "packages/shared")),
        "shared_pkg_name": pins.get("shared_pkg_name", "@secuura/shared"),
        "test_file": tf, "test_file_rel_to_service": test_rel, "test_mode": mode,
        # 2026-09-19 (IMPROVEMENTS 08:06, KS-739 F1 r1 FAIL T2): the EXACT two file-header lines the diff must open with,
@@ -300,7 +321,8 @@ inp = {"ticket": {"identifier": ident, "title": text.splitlines()[0].lstrip("# "
        "tampers": tampers, "controls": controls, "files": {}}
 if ttext is not None: inp["files"][tf] = ttext
 if runner_pin: inp["runner_pin"] = runner_pin
+if farm: inp["farm"] = farm
 if "ctx" in pins: inp["_night_num_ctx"] = int(pins["ctx"])
 json.dump(inp, open(out, "w", encoding="utf-8"), indent=1, ensure_ascii=False)
-print(f"wrote {out}: test_only {mode} {tf} ({runner}, service {service_dir}) at {tip[:9]}; '+' {len(expected_plus)} '-' {len(must_remove)} in {hunks} hunk(s); tampers {len(tampers)} ({', '.join(t['id'] + '->' + str(len(t['reds'])) for t in tampers)}); controls {len(controls)}" + (f"; RUNNER PINNED {runner_pin}" if runner_pin else ""))
+print(f"wrote {out}: test_only {mode} {tf} ({runner}, service {service_dir}) at {tip[:9]}; '+' {len(expected_plus)} '-' {len(must_remove)} in {hunks} hunk(s); tampers {len(tampers)} ({', '.join(t['id'] + '->' + str(len(t['reds'])) for t in tampers)}); controls {len(controls)}" + (f"; RUNNER PINNED {runner_pin}" if runner_pin else "") + (f"; FARM {farm} (opt-in, brief Farm: line)" if farm else ""))
 PY
