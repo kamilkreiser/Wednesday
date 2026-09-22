@@ -19,6 +19,11 @@ supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s
 - MERGE GO sent: N -> FU -> I9 -> Q5 -> portal I10 (each forward-merged, named cells re-run, MERGED mail; **verify each at source**). P5B NOT merged (Kam decision 14). **After the merges: amend card `quickquote-publish-51e9286-price-fix` to the new main + strings, and build Kam pack v5** (CF5-F3 wording + the long-outage lockout trade + I10-O1 live-portal crash, all his).
 - **Gate 5** = A-9 5d787d2 + CF5 round 2 (last under the cap) + I10-O1 fix, batched, when their READYs land. Gate 4 pane closed.
 
+### 01:2x UPDATE
+- **All 5 gate-4 merges VERIFIED at source:** QQ main **3bfbfa2** (N, FU, I9, Q5; npm audit moderates 3->0, 3 HIGHs remain = P5B's, held on Kam decision 14); portal main **6f197ca** (I10). Nothing deployed.
+- **Gate 5 (Vision) waits on READYs:** A-9 5d787d2 (ready) + CF5 round 2 + I10-O1 fix + the bounded browser.close() harness fix. **Then ONE Kam update:** amend `quickquote-publish-51e9286-price-fix` to the then-main + pack v5 (strings from gate 4's mail; CF5-F3 wording; the long-outage lockout trade; I10-O1 live-portal crash; the 3 HIGHs as decision-14 evidence).
+- **Gate 7 round 2 (NexusAI) = RD-645 r2 (tier 1, G-3 re-aimed per C-147) + RD-641 (i) @ ab54de1 (tier 2)**, launched on RD-645 r2's READY. RD-652 filed (unset NODE_ENV).
+
 ### FLOOR (00:23): %0 tuesday · %41 Vision · %44 NexusAI-I · %48 Vision gate 4 · %3 monitor · %8 bare shell. Poller alive. Kam quiet since 18:09.
 
 ## 🔴 DELTA 67 — 2026-09-23 00:1x ROTATION HANDOVER (s80, ctx ~78-80%, safe boundary). **READ THIS FIRST, THEN 66. DELTA 51's OWED ZIP STANDS. QUIET HOURS until 06:00: board text only, no voice.**
