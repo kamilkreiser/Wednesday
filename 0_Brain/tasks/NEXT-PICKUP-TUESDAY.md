@@ -6,6 +6,24 @@ status: live
 supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s1-wholesale
 ---
 
+## 🟢 DELTA 62 — 2026-09-22 17:1x (s79, ctx 70% CHECKPOINT; band 80-90, NOT rotating). **READ THIS, THEN 61/60. DELTA 51's OWED ZIP STANDS.**
+
+### GATE 6 = GO/GO/GO (07:02Z; report `Testing Agent MAIN/projects/nexusai/reports/2026-09-22-gate6-rd619-rd607-pr31/report.md`; pane %40 CLOSED, listeners 12 → 12; scored 1.00)
+- **RELEASE mailed to H 07:0xZ** (quotes Kam 18:18:12): merge **RD-619 → RD-607 → PR #31** in order, each under C-142. The heads were re-read unmoved (main 58bb38c). **Verify each MERGED at source** (ls-remote, cat-file parents, tree identity). **After PR #31 merges: post the merged link to Kam on the board (promised).**
+- **Pre-existing MAJOR F-1 = RD-645: authLimiter NEVER MOUNTED** (70 failed logins → 70×401, no 429). **The NEXT BUILD, tier 1, → gate 7 BEFORE the zip.** Kam was told (201).
+- F-2/F-3 = RD-646/647 (Redis-down: the process dies / 500s forever; compose-only, fail closed). **Card `nexusai-redis-down-fail-closed-policy` with Kam** (rec a; default = nothing built until after the resubmission).
+
+### FLOOR
+- `%38` **H at 80%**: told to hand over at the NEXT SAFE BOUNDARY (after RD-619's merge lands). HANDOVER-S79H is written (top: remaining RELEASE, RD-645, RD-641 (i), tickets RD-645..650, every queued ticket). **ON H's WRAP MAIL:** score it, `pane_close.sh %38`, then launch the lane-A successor `Datasec/NexusAI-I` (add a routing line `Datasec/NexusAI-I|datasec-nexusai@agentmail.to|no`; a drafter writes the brief from HANDOVER-S79H; send_brief --kind brief; `cockpit.sh add 'Datasec/NexusAI-I' "bash '/Volumes/KK_T9_External_HDD/!CODING/Datasec/NexusAI/Launch_Claude.command'"`; verify rung 5). **The successor must re-queue H's proof tickets** (they die with H's session).
+- `%36` **G**: READY RD-526/527/630/529/471/472. Queued: devscripts, rd643, rd528-q7b (behind H's merge ticket). **Its regate (the package re-merge) is WITHDRAWN until main is FINAL after PR #31: relay H's PR #31 MERGED mail to G, then G re-prepares once.**
+- Queue order at 17:1x: merge-rd619 → H's 7 → G's 3.
+
+### KAM TODAY (since 60), all receipted
+- 13:57 "yes" = Node 24 in CI (C-143 + addendum :1500). 14:24-14:27 cross-configuration: FIXED (the mini's Ornith jobs booted out; the installer fixed by Wednesday; the Studio clean; the 6 live rows HIDDEN by Wednesday). **Open question to him: "move the cert"** (Tuesday's certificate is parked on the Studio); default = no change. 14:27 praise + HP Spark FYI (not yet).
+- 15:24 `mini-vault-stale-skills` = a → the inventory showed the skills are CURRENT (the card's premise was wrong); the extranet conflict copy was quarantined out of skills/Current. **Offered "finish the vault"**; default = leave it.
+- 15:30 "look at the following regarding the quick quote tool": **the content never arrived** (att=0, no mail). Asked him to paste or forward. **OWED when it lands.**
+- The QuickQuote bundle (after the NexusAI round): feedback CC to Tuesday + the old-quote request + John Spears's "Devices (MFPS/SFPS)" (register `projects_index/clarifications_register.md`).
+
 ## 🟢 DELTA 61 — 2026-09-22 15:1x (s79, ctx 65% light checkpoint; band 80-90, NOT rotating). **READ THIS, THEN 60. DELTA 51's OWED ZIP STANDS.**
 
 ### STATE
