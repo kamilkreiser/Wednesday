@@ -1,0 +1,819 @@
+<!doctype html><html data-theme="dark" lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Wednesday — Cockpit (live)</title>
+<style>
+/* WED-113 two-panel cockpit — round 2 (2026-08-21).
+   Round-2 changes: scramble fix (interaction-aware re-render + scroll
+   preservation in BOTH panels), true full-window layout, voice controls
+   carried over from chat.html, feed row expand + ask-Wednesday + filters +
+   day tally. chat.html remains the styling parent: same palette tokens. */
+:root { color-scheme: dark;
+  --surface-1:#1a1a19; --surface-2:#232322; --line:#33332f;
+  --text-primary:#ffffff; --text-secondary:#c3c2b7; --text-muted:#8a897f;
+  --series-1:#3987e5; --series-2:#d95926; --series-3:#199e70;
+  --amber:#d99a26; --plum:#9a6fd0; --teal:#2a9d9d; }
+:root[data-theme="light"] { color-scheme: light;
+  --surface-1:#f7f7f4; --surface-2:#ffffff; --line:#dcdcd4;
+  --text-primary:#1b1b19; --text-secondary:#4a4a44; --text-muted:#78776e;
+  --series-1:#1f63b8; --series-2:#b8431a; --series-3:#127956;
+  --amber:#9c6d12; --plum:#6f46a8; --teal:#177878; }
+* { box-sizing:border-box; margin:0; }
+html, body { height:100%; }
+body { background:var(--surface-1); color:var(--text-primary);
+  height:100vh; height:100dvh; width:100%; overflow:hidden;   /* full window; panels own all scrolling */
+  font:15px/1.55 -apple-system, "SF Pro Text", Helvetica, Arial, sans-serif;
+  display:flex; flex-direction:column; }
+header { border-bottom:1px solid var(--line); flex:none;
+  display:flex; align-items:baseline; gap:12px; padding:12px 18px 10px; flex-wrap:wrap; }
+header h1 { font-size:17px; font-weight:650; }
+header a { color:var(--text-muted); font-size:12.5px; text-decoration:none; }
+header a:hover { color:var(--text-primary); }
+#live { margin-left:auto; font-size:12px; color:var(--text-muted); }
+#live.on { color:var(--series-3); }
+#feedheld { display:block; width:calc(100% - 28px); margin:6px 14px; padding:6px 10px;
+           background:color-mix(in srgb, var(--series-3) 16%, transparent);
+           border:1px solid var(--series-3); border-radius:7px; color:var(--series-3);
+           font-size:11.5px; text-align:left; cursor:pointer; }
+#feedheld:hover { background:color-mix(in srgb, var(--series-3) 26%, transparent); }
+#heldbar { display:block; width:calc(100% - 28px); margin:6px 14px; padding:6px 10px;
+           background:color-mix(in srgb, var(--series-3) 16%, transparent);
+           border:1px solid var(--series-3); border-radius:7px; color:var(--series-3);
+           font-size:11.5px; text-align:left; cursor:pointer; }
+#heldbar:hover { background:color-mix(in srgb, var(--series-3) 26%, transparent); }
+#projfilter { padding:6px 14px 2px; font-size:11px; color:var(--text-dim); }
+.pftog { background:var(--surface-2); border:1px solid var(--line); border-radius:6px;
+         color:var(--text-dim); font-size:11px; padding:2px 7px; margin:0 4px 4px 0; cursor:pointer; }
+.pftog.on { color:var(--series-3); border-color:var(--series-3); }
+#autoplay, #stopvoice { background:var(--surface-2); border:1px solid var(--line); border-radius:7px;
+  color:var(--text-muted); font:inherit; font-size:12px; padding:3px 10px; cursor:pointer; }
+#autoplay:hover, #stopvoice:hover { color:var(--text-primary); }
+#autoplay.on { color:var(--series-3); border-color:var(--series-3); }
+#stopvoice:disabled { opacity:.5; cursor:default; }
+
+main { flex:1; display:flex; min-height:0; width:100%; }
+.panel { flex:1 1 50%; min-width:0; display:flex; flex-direction:column; min-height:0; }
+#convo-panel { border-right:1px solid var(--line); }
+.panel h2 { flex:none; font-size:12px; font-weight:650; letter-spacing:.06em;
+  text-transform:uppercase; color:var(--text-muted);
+  padding:10px 18px 8px; border-bottom:1px solid var(--line); }
+.scroll { flex:1; overflow-y:auto; scrollbar-width:thin; padding:14px 18px; }
+/* The attention region (2026-09-16) was PINNED on the local page (#needscroll, flex:none, max-height 46%). On the LIVE
+   page it is NOT (Kam 12:48 2026-09-21: "remove the updates stickingness so that it just goes at the bottom of the fleet
+   activity that needs me"): Needs-you and Updates share one scroller, Updates below. The local cockpit.html is untouched. */
+#feed .sechead:first-child { margin-top:14px; padding-top:12px; border-top:1px solid var(--line); }
+.empty { color:var(--text-muted); font-size:13px; padding:10px 0; }
+
+/* ── LEFT: conversation (same bubble grammar as /chat) ── */
+.msg { margin:0 0 14px; max-width:88%; }
+.msg .meta { font-size:11.5px; color:var(--text-muted); margin:0 2px 2px; }
+.msg .who { font-weight:600; }
+.msg.wednesday .who { color:var(--series-3); }
+.msg.kam .who { color:var(--series-1); }
+.playbtn { background:none; border:none; color:var(--text-muted); cursor:pointer;
+  font-size:11px; padding:0 2px; margin-left:4px; line-height:1; vertical-align:baseline; }
+.playbtn:hover { color:var(--text-primary); }
+.playbtn:disabled { opacity:.4; cursor:default; }
+.msg .body { background:var(--surface-2); border:1px solid var(--line);
+  border-radius:10px; padding:8px 12px; white-space:pre-wrap; word-break:break-word;
+  color:var(--text-primary); }
+.msg.kam { margin-left:auto; }
+.msg.kam .meta { text-align:right; }
+.msg.kam .body { border-color:color-mix(in srgb, var(--series-1) 35%, var(--line));
+  border-radius:10px 10px 2px 10px; }
+.msg.wednesday .body { border-radius:10px 10px 10px 2px; }
+.msg .body a { color:var(--series-1); word-break:break-all; }
+.msg .body strong { font-weight:650; }
+.ackline { font-size:11.5px; color:var(--text-muted); margin:3px 2px 0; text-align:right; }
+.ackline.done, .ackline.seen { color:var(--series-3); }
+.ackline.actioning, .ackline.action_requested { color:var(--series-2); }
+#convo-foot { flex:none; border-top:1px solid var(--line);
+  display:flex; gap:8px; padding:10px 18px calc(12px + env(safe-area-inset-bottom, 0px)); }
+#text { flex:1; min-width:0; background:var(--surface-2); border:1px solid var(--line);
+  border-radius:8px; color:var(--text-primary); font:inherit; padding:8px 12px; }
+#text:focus { outline:none; border-color:var(--series-1); }
+#send { background:var(--surface-2); color:var(--text-secondary); border:1px solid var(--line);
+  border-radius:8px; font:inherit; font-size:14px; padding:8px 16px; cursor:pointer; }
+#send:hover { color:var(--text-primary); }
+#send:disabled { opacity:.5; cursor:default; }
+
+/* ── RIGHT: fleet activity feed ── */
+#tally { flex:none; display:flex; gap:6px; flex-wrap:wrap; align-items:baseline;
+  font-size:11.5px; color:var(--text-muted); padding:8px 18px 0; }
+#tally .tchip { background:var(--surface-2); border:1px solid var(--line); border-radius:6px;
+  padding:2px 8px; color:var(--text-secondary); }
+#tally .tchip b { font-weight:650; color:var(--text-primary); }
+#filters { flex:none; display:flex; gap:5px; flex-wrap:wrap; padding:7px 18px 9px;
+  border-bottom:1px solid var(--line); }
+.fchip { background:var(--surface-2); border:1px solid var(--line); border-radius:6px;
+  color:var(--text-muted); font:inherit; font-size:11px; padding:2px 8px; cursor:pointer; }
+.fchip:hover { color:var(--text-primary); }
+.fchip.on { color:var(--text-primary); border-color:var(--series-1);
+  background:color-mix(in srgb, var(--series-1) 12%, var(--surface-2)); }
+.fchip.clear { border-style:dashed; }
+.evt { border:1px solid var(--line); border-radius:9px; background:var(--surface-2);
+  padding:7px 11px 8px; margin:0 0 9px; cursor:pointer; }
+.evt .top { display:flex; align-items:baseline; gap:8px; flex-wrap:wrap; }
+.evt .proj { font-weight:600; font-size:13px; color:var(--text-primary); }
+.evt .when { margin-left:auto; font-size:11.5px; color:var(--text-muted); white-space:nowrap; }
+.askbtn { background:none; border:1px solid var(--line); border-radius:6px;
+  color:var(--text-muted); font:inherit; font-size:10.5px; padding:1px 7px; cursor:pointer; }
+.askbtn:hover { color:var(--text-primary); border-color:var(--series-1); }
+.evt .sum { font-size:13px; color:var(--text-secondary); margin-top:2px;
+  overflow:hidden; text-overflow:ellipsis; display:-webkit-box;
+  -webkit-line-clamp:2; -webkit-box-orient:vertical; }
+.evt.expanded .sum { display:block; -webkit-line-clamp:unset; }
+.evt .detail { display:none; margin-top:7px; border-top:1px solid var(--line);
+  padding-top:7px; font-size:12.5px; color:var(--text-secondary); }
+.evt.expanded .detail { display:block; }
+.evt .detail .row { margin:0 0 3px; }
+.evt .detail .k { color:var(--text-muted); font-size:11px; text-transform:uppercase;
+  letter-spacing:.05em; margin-right:6px; }
+.evt .detail .excerpt { margin-top:5px; padding:6px 9px; border-left:3px solid var(--line);
+  background:color-mix(in srgb, var(--surface-1) 55%, var(--surface-2));
+  border-radius:0 6px 6px 0; white-space:pre-wrap; word-break:break-word; }
+.evt .detail .noexcerpt { color:var(--text-muted); font-style:italic; }
+.chip { flex:none; font-size:10.5px; font-weight:650; letter-spacing:.04em;
+  border-radius:5px; padding:1px 7px; border:1px solid transparent; }
+.t-brief     { color:var(--series-1); background:color-mix(in srgb, var(--series-1) 12%, transparent); }
+.t-confirmed { color:var(--series-3); background:color-mix(in srgb, var(--series-3) 12%, transparent); }
+.t-status    { color:var(--teal);     background:color-mix(in srgb, var(--teal) 12%, transparent); }
+.t-question  { color:var(--amber);    background:color-mix(in srgb, var(--amber) 14%, transparent); }
+.t-answer    { color:var(--series-3); background:color-mix(in srgb, var(--series-3) 12%, transparent);
+               border-color:color-mix(in srgb, var(--series-3) 30%, transparent); }
+.t-wrap      { color:var(--plum);     background:color-mix(in srgb, var(--plum) 12%, transparent); }
+.t-score     { color:var(--series-2); background:color-mix(in srgb, var(--series-2) 12%, transparent); }
+.t-mail      { color:var(--text-muted); background:color-mix(in srgb, var(--text-muted) 12%, transparent); }
+/* unanswered QUESTION = "needs Wednesday" — amber flag on the whole row */
+.evt.open-q { border-color:color-mix(in srgb, var(--amber) 55%, var(--line));
+  box-shadow:inset 3px 0 0 var(--amber); }
+.evt.open-q .needs { font-size:11px; font-weight:600; color:var(--amber); }
+/* ── round 3: NEEDS-YOU / UPDATES split + decision cards ── */
+.sechead { font-size:11px; font-weight:650; letter-spacing:.07em; text-transform:uppercase;
+  color:var(--text-muted); margin:2px 0 8px; }
+.sechead.needs { color:var(--amber); }
+.sechead:not(:first-child) { margin-top:14px; }
+.t-decision { color:var(--amber); background:color-mix(in srgb, var(--amber) 14%, transparent); }
+.t-ruled { color:var(--text-muted); background:color-mix(in srgb, var(--text-muted) 12%, transparent); }
+.evt.ruledrow { opacity:.62; cursor:default; }
+.evt.dec { border-color:color-mix(in srgb, var(--amber) 55%, var(--line));
+  box-shadow:inset 3px 0 0 var(--amber); }
+.dec .title { font-weight:600; font-size:13px; color:var(--text-primary); margin-top:3px; }
+.recbadge { font-size:10.5px; color:var(--series-3); white-space:nowrap;
+  border:1px solid color-mix(in srgb, var(--series-3) 40%, transparent);
+  border-radius:5px; padding:1px 7px; margin-left:8px; vertical-align:1px; }
+.dec .bluf { margin-top:7px; font-size:13px; color:var(--text-primary); }
+.opt { border:1px solid var(--line); border-radius:7px; padding:6px 9px; margin-top:6px;
+  font-size:12.5px; color:var(--text-secondary); }
+.opt b { color:var(--text-primary); font-weight:600; }
+.opt.rec { border-color:color-mix(in srgb, var(--series-3) 45%, var(--line));
+  background:color-mix(in srgb, var(--series-3) 7%, var(--surface-2)); }
+.opt.rec b::after { content:" · recommended"; color:var(--series-3); font-weight:600; font-size:11px; }
+.defline { margin-top:6px; font-size:11.5px; color:var(--text-muted); }
+.decbtns { display:flex; gap:6px; flex-wrap:wrap; margin-top:9px; }
+.decbtn { background:var(--surface-1); border:1px solid var(--line); border-radius:7px;
+  color:var(--text-secondary); font:inherit; font-size:12px; padding:5px 11px; cursor:pointer; }
+.decbtn:hover { color:var(--text-primary); border-color:var(--series-1); }
+.decbtn.rec { border-color:var(--series-3); color:var(--series-3); font-weight:600; }
+.decbtn:disabled { opacity:.5; cursor:default; }
+.decsent { margin-top:7px; font-size:12px; color:var(--series-3); }
+.decnote { display:block; width:100%; box-sizing:border-box; margin-top:9px;
+  background:var(--surface-2); border:1px solid var(--line); border-radius:7px;
+  color:var(--text-primary); font:inherit; font-size:12.5px; padding:6px 10px; }
+.decnote:focus { outline:none; border-color:var(--series-1); }
+.decnote:disabled { opacity:.5; }
+.decbtn.noteonly { color:var(--text-muted); border-style:dashed; }
+.decbtn.noteonly:hover:not(:disabled) { color:var(--text-secondary); border-color:var(--line); }
+.qerr { font-size:12px; color:var(--series-2); margin:0 0 8px; }
+#feed-note { flex:none; font-size:11.5px; color:var(--text-muted);
+  border-top:1px solid var(--line); padding:7px 18px; }
+
+/* ── narrow screens: stack panels vertically, each still owns its scroll ── */
+@media (max-width: 880px) {
+  main { flex-direction:column; }
+  .panel { flex:1 1 50%; min-height:0; }
+  #convo-panel { border-right:none; border-bottom:1px solid var(--line); }
+}
+/* ══ AGENT TOGGLE (Phase 1, Kam's 2026-09-08 11:50 commission) ═══════════════
+   Kam asked for "a toggle in the top right hand side between main agent and
+   datasec agent". It is deliberately LOUD: the cost of him typing a Datasec
+   instruction while looking at the Wednesday view is a cross-client message,
+   which is his own severity-max class. So the live view is stated three ways —
+   the pressed button, a full-width colour band, and the header's own tint —
+   never a subtle chip you can be wrong about at a glance. */
+#agentbar { flex:none; height:4px; background:var(--series-1); }
+body.view-tuesday #agentbar { background:#e08a2b; }
+/* NOT margin-left:auto — #live already carries one, and a second auto margin
+   splits the right-hand group across the free space instead of keeping it
+   together. It rides beside #live, so the pair anchors right at any width.
+   (Measured 2026-09-08 in Chrome: toggle at x 3289-3473 of a 3491px viewport,
+   inside the header, correct both before and after this change. An earlier
+   reading here said it was pushed off-screen — that was a screenshot crop being
+   read as the viewport, not a defect in the page.) */
+#agenttoggle { margin-left:10px; display:flex; gap:0; align-items:center;
+               border:1px solid var(--line); border-radius:7px; overflow:hidden; }
+#agenttoggle button { background:var(--surface-2); color:var(--text-muted);
+               border:none; padding:5px 11px; font-size:11.5px; font-weight:700;
+               letter-spacing:.05em; cursor:pointer; }
+#agenttoggle button + button { border-left:1px solid var(--line); }
+#agenttoggle button:hover { color:var(--text-primary); }
+#agenttoggle button.on { color:#fff; background:var(--series-1); }
+#agenttoggle button#ag-tuesday.on { background:#e08a2b; color:#241300; }
+#agenttoggle .use{font-weight:400;opacity:.75;font-size:.9em;letter-spacing:0}
+#agenttoggle .use.stale{opacity:.45;font-style:italic}
+body.view-tuesday header { background:rgba(224,138,43,.10); }
+body.view-tuesday header h1::after { content:" · TUESDAY (Datasec)"; color:#e08a2b;
+               font-size:12px; font-weight:700; letter-spacing:.04em; }
+
+/* ══ DRAG-AND-DROP ATTACHMENTS (Kam, 2026-09-08 14:10) ═══════════════════════
+   The drop target is the whole conversation column, not a small button: Kam is
+   dragging from Finder or another window and should not have to aim. */
+.dropping { outline:2px dashed var(--series-1); outline-offset:-6px;
+            background:color-mix(in srgb, var(--series-1) 7%, transparent); }
+#pending { display:flex; flex-wrap:wrap; gap:6px; padding:0 18px 6px; }
+#pending:empty { display:none; }
+#pending .pf { display:flex; align-items:center; gap:6px; font-size:11.5px;
+            background:var(--surface-2); border:1px solid var(--line);
+            border-radius:6px; padding:2px 6px 2px 4px; color:var(--text-secondary); }
+#pending .pf img { height:22px; width:22px; object-fit:cover; border-radius:3px; }
+#pending .pf button { background:none; border:none; color:var(--text-muted);
+            cursor:pointer; font-size:13px; line-height:1; padding:0 2px; }
+#pending .pf button:hover { color:var(--series-2); }
+.msg .atts { display:flex; flex-wrap:wrap; gap:8px; margin-top:6px; }
+.msg .atts a { font-size:12px; color:var(--series-1); text-decoration:none;
+            border:1px solid var(--line); border-radius:6px; padding:2px 8px;
+            background:var(--surface-2); }
+.msg .atts img { max-width:min(320px,100%); max-height:260px; border-radius:8px;
+            border:1px solid var(--line); display:block; }
+/* ══ LIVE-SITE ADDITIONS (Phase 2, 2026-09-21) — the only rules not copied from the local page ═══════
+   The palette and every component above are the local cockpit.html / chat.html verbatim (Kam's 2026-09-02 design
+   rule). What follows is the chrome the live site needs and the local one does not: the key bar (the rows are
+   ciphertext until the key is present) and the honest "not synced yet" state for tiles whose data still lives on
+   the Studio. Same tokens, same radii, same type sizes. */
+#keybar { flex:none; display:flex; align-items:center; gap:8px; flex-wrap:wrap; padding:6px 18px;
+  border-bottom:1px solid var(--line); font-size:12px; color:var(--text-muted); background:var(--surface-1); }
+#keybar .kstate { font-weight:600; }
+#keybar .kstate.ok { color:var(--series-3); }
+#keybar .kstate.warn { color:var(--amber, #d99a26); }
+#keybar .kstate.bad { color:var(--series-2); }
+#keybar button { background:var(--surface-2); border:1px solid var(--line); border-radius:7px; color:var(--text-secondary);
+  font:inherit; font-size:12px; padding:3px 10px; cursor:pointer; }
+#keybar button:hover { color:var(--text-primary); }
+#keybar button.primary { border-color:var(--series-1); color:var(--series-1); }
+#keybar button:disabled { opacity:.5; cursor:default; }
+#keybar input { background:var(--surface-2); border:1px solid var(--line); border-radius:7px; color:var(--text-primary);
+  font:inherit; font-size:12px; padding:3px 8px; width:15em; }
+#keybar .note { font-size:11.5px; color:var(--text-muted); }
+#keybar input[type=file] { display:none; }
+.msg .body.locked { color:var(--text-muted); font-style:italic; }
+.msg .body.bad { color:var(--series-2); }
+.msg .bf { font-size:10.5px; color:var(--text-muted); margin-left:6px; border:1px solid var(--line); border-radius:4px; padding:0 4px; }
+.notsynced { border:1px dashed var(--line); border-radius:9px; background:var(--surface-2); padding:7px 11px 8px; margin:0 0 9px;
+  font-size:12.5px; color:var(--text-muted); font-style:italic; }
+.notsynced b { color:var(--text-secondary); font-style:normal; font-weight:600; }
+#tally .tchip.notsynced { font-style:italic; border-style:dashed; color:var(--text-muted); padding:2px 8px; margin:0; }
+</style></head><body>
+<div id="agentbar" aria-hidden="true"></div>
+<header><h1>Cockpit</h1>
+ <a href="/chat">chat view</a>
+ <button id="autoplay" title="speak newly-arriving Wednesday replies aloud (this device's voice)">&#128266; auto-play replies</button>
+ <button id="stopvoice" title="stop the voice that is speaking now (autoplay stays on)">&#9209; stop</button>
+ <span id="live">&#9675; connecting&hellip;</span>
+ <span id="agenttoggle" role="group" aria-label="which agent's view is live">
+  <button id="ag-wednesday" type="button" title="Wednesday — Secuura and all general work">WEDNESDAY<span class="use" id="use-wednesday"></span></button>
+  <button id="ag-tuesday" type="button" title="Tuesday — all Datasec projects">TUESDAY<span class="use" id="use-tuesday"></span></button>
+ </span></header>
+<!-- KEY BAR (live site only): rows are ciphertext until the private key is present in THIS browser. -->
+<div id="keybar">
+ <span class="kstate" id="kstate">key: checking…</span>
+ <button id="kunlock" type="button" class="primary" hidden>Unlock key (1 click)</button>
+ <button id="kchoose" type="button" hidden>Choose the folder that holds the key…</button>
+ <label id="kfilelbl" hidden>file <input id="kfilename" type="text" spellcheck="false" autocomplete="off"></label>
+ <label id="kimportlbl" hidden><button id="kimport" type="button">Import key…</button><input id="kimportfile" type="file" accept=".pem,.key,.p8"></label>
+ <button id="kforget" type="button" title="forget the remembered folder / imported key in this browser" hidden>Forget key</button>
+ <span class="note" id="knote"></span>
+ <span id="who" class="note" style="margin-left:auto"></span>
+</div>
+<main>
+ <section class="panel" id="convo-panel" aria-label="Conversation with Wednesday">
+  <h2 id="convo-h">Conversation — Kam &amp; Wednesday</h2>
+  <div id="projfilter"></div>
+  <div class="scroll" id="log"><div id="msgs"><p class="empty" id="convo-empty">no messages yet</p></div></div>
+  <div id="pending"></div>
+  <div id="convo-foot">
+   <input id="text" type="text" maxlength="100000" placeholder="message Wednesday&hellip;" autocomplete="off">
+   <button id="send">send</button></div>
+ </section>
+ <section class="panel" id="feed-panel" aria-label="Fleet activity feed">
+  <h2>Fleet activity</h2>
+  <div id="tally"></div>
+  <div id="filters"></div>
+  <!-- Phase 3 (Kam 12:48 on the live site: "remove the updates stickingness so that it just goes at the bottom of the fleet
+       activity that needs me"): ONE flowing scroller — Needs-you first, Updates BELOW it. The local cockpit keeps its pinned
+       #needscroll region; this page no longer has one (DOM order: #needs then #feed inside #feedscroll). -->
+  <div class="scroll" id="feedscroll"><div id="needs"></div><div id="feed"><p class="empty" id="feed-empty">no fleet events yet</p></div></div>
+  <div id="feed-note"></div>
+ </section>
+</main>
+<script src="/static/common.js"></script>
+<script>
+"use strict";
+/* ══ DATA SOURCE (the ONE parameter that differs from the local cockpit.html) ═══════════════════════════════
+   local:  GET /api/chatlog (plaintext JSON from chat_log.json), GET /api/decisions, GET /api/agentmail, GET /api/usage,
+           POST /api/chat, POST /api/speak
+   live:   GET /api/messages?since= (ciphertext rows, decrypted here with WED.decryptRow), GET /api/cards (state, whole),
+           POST /api/kam/messages (encrypted HERE to Kam's public key), speechSynthesis on this device.
+           GET /api/usage (seat-published gauges, 2026-09-22). agentmail events + ack lines + attachments still live on the Studio -> rendered as
+           "not synced yet" in the same chrome, never faked. */
+const rows = new Map();          // row_key -> raw row (messages)
+const cardRows = new Map();      // id -> raw row (cards; state, replaced whole on each poll)
+const ptCache = new Map();       // row_key -> decrypted text (or null=locked / undefined=failed)
+// First load = the last 7 days (RowKey = UTC ts, so an ISO lower bound is a valid `since`); "load older" widens it.
+const DAY = 86400000; let windowDays = 7;
+let sinceM = new Date(Date.now() - windowDays * DAY).toISOString();
+let floorM = sinceM;              // the oldest bound loaded so far
+
+/* ══ interaction guard (round-2 scramble fix) — verbatim from the local page ══ */
+const pointerDown = { convo: false, feed: false };
+function armGuards(el, key) { el.addEventListener("pointerdown", () => { pointerDown[key] = true; }); }
+window.addEventListener("pointerup", () => { pointerDown.convo = pointerDown.feed = false; setTimeout(flushPending, 0); });
+window.addEventListener("pointercancel", () => { pointerDown.convo = pointerDown.feed = false; setTimeout(flushPending, 0); });
+function selectionIn(el) { const s = window.getSelection(); if (!s || s.isCollapsed || !s.anchorNode) return false;
+  return el.contains(s.anchorNode) || (s.focusNode && el.contains(s.focusNode)); }
+function flushPending() { if (pendingMsgs && !convoBusy()) { render(pendingMsgs); } if (pendingRender && !feedBusy()) { renderFeed(); } }
+
+/* ══ LEFT: conversation ══ */
+const log = document.getElementById("log");
+const AGENT_KEY = "wed_active_agent";
+let activeAgent = "wednesday";
+try { const a = localStorage.getItem(AGENT_KEY); if (a === "wednesday" || a === "tuesday") activeAgent = a; } catch (e) {}
+function agentOfProject(p) { return /datasec/i.test(String(p || "")) ? "tuesday" : "wednesday"; }
+function agentOfMsg(m) { const a = m && m.agent; if (a === "wednesday" || a === "tuesday" || a === "both") return a; return "both"; }
+const PF_KEY = "wed_cockpit_projfilter";
+let pfSel = {};
+try { pfSel = JSON.parse(localStorage.getItem(PF_KEY) || "{}") || {}; } catch (e) { pfSel = {}; }
+function projOf(m) { return (m && typeof m.project === "string" && m.project.trim()) ? m.project.trim() : "WED"; }
+function projOn(name) { return (name in pfSel) ? !!pfSel[name] : true; }
+function renderProjFilter(msgs) {
+  const el = document.getElementById("projfilter"); if (!el) return;
+  const names = new Set();
+  for (const m of msgs || []) if (m.role !== "kam" && msgInView(m)) names.add(projOf(m));
+  if (names.size <= 1) { el.innerHTML = ""; return; }
+  const sorted = [...names].sort((a, b) => a === "WED" ? -1 : b === "WED" ? 1 : a.localeCompare(b));
+  el.innerHTML = ""; el.append("show replies from: ");
+  for (const n of sorted) {
+    const b = document.createElement("button"); b.type = "button";
+    b.className = "pftog" + (projOn(n) ? " on" : ""); b.textContent = n;
+    b.title = (projOn(n) ? "hide" : "show") + " " + n + " replies on this browser";
+    b.addEventListener("click", () => { pfSel[n] = !projOn(n); try { localStorage.setItem(PF_KEY, JSON.stringify(pfSel)); } catch (e) {}
+      if (lastRenderedMsgs) render(lastRenderedMsgs); });
+    el.appendChild(b);
+  }
+}
+function msgVisible(m) { return msgInView(m) && (m.role === "kam" || projOn(projOf(m))); }
+function msgInView(m) { const a = agentOfMsg(m); return a === "both" || a === activeAgent; }
+function applyAgentView() {
+  document.body.classList.toggle("view-tuesday", activeAgent === "tuesday");
+  const w = document.getElementById("ag-wednesday"), t = document.getElementById("ag-tuesday");
+  if (w) { w.classList.toggle("on", activeAgent === "wednesday"); w.setAttribute("aria-pressed", activeAgent === "wednesday"); }
+  if (t) { t.classList.toggle("on", activeAgent === "tuesday"); t.setAttribute("aria-pressed", activeAgent === "tuesday"); }
+  const box = document.getElementById("text");
+  if (box) box.placeholder = activeAgent === "tuesday" ? "message Tuesday (Datasec)…" : "message Wednesday…";
+  const h = document.getElementById("convo-h");
+  if (h) h.textContent = activeAgent === "tuesday" ? "Conversation — Kam & Tuesday" : "Conversation — Kam & Wednesday";
+}
+function setAgent(a) {
+  if (a !== "wednesday" && a !== "tuesday") return;
+  activeAgent = a; try { localStorage.setItem(AGENT_KEY, a); } catch (e) {}
+  applyAgentView();
+  if (Array.isArray(lastRaw)) render(lastRaw);
+  renderFeed();
+}
+document.getElementById("ag-wednesday").addEventListener("click", () => setAgent("wednesday"));
+document.getElementById("ag-tuesday").addEventListener("click", () => setAgent("tuesday"));
+applyAgentView();
+// ── weekly plan usage on the agent chips (Kam, 2026-09-09 12:32 on the local board; on the LIVE board 2026-09-22 08:57:36:
+// "with the local version, I was able to see the weekly usage count on both Wednesday and Tuesday. Is this possible for
+// the live version?"). Same meaning as the local page, one source difference: the figure is the seat's OWN reading,
+// published by that seat with its certificate (seat/post_usage.py -> POST /api/seat/usage) and read here from
+// GET /api/usage — the server attributes the row by the seat's token, so nothing on this page can be another seat's number.
+// HONESTY (WED-73): three states, visibly different —
+//   live   (reading < 15 min old)      -> "— 60%"           the seat is running and this is now
+//   ageing (15..30 min)                -> "— 60% (22m)"     last known, WITH its age, dimmed
+//   none   (absent, or >= 30 min old)  -> "— no reading"    dimmed; the tooltip says the last figure and how old it is
+const USE_STALE_S = 900, USE_DEAD_S = 1800;
+function ageLabel(sec) {
+  if (sec == null) return "";
+  if (sec < 3600) return Math.max(1, Math.round(sec / 60)) + "m";
+  if (sec < 86400) return Math.round(sec / 3600) + "h";
+  return Math.round(sec / 86400) + "d";
+}
+function usageState(d) {   // -> {text, cls, title}; pure, so scripts/09d_usage_page_checks.mjs can run it in Node
+  if (!d || typeof d.pct !== "number") return { text: " — no reading", cls: "use stale", title: "no reading — this seat has not published its weekly usage to the live board" };
+  const age = d.age_seconds;
+  if (age == null || age >= USE_DEAD_S) return { text: " — no reading", cls: "use stale",
+    title: "no reading — last published " + (ageLabel(age) || "unknown") + " ago (" + d.pct + "%); this seat may not be running" };
+  const stale = age >= USE_STALE_S;
+  return { text: " — " + d.pct + "%" + (stale ? " (" + ageLabel(age) + ")" : ""), cls: stale ? "use stale" : "use",
+    title: "weekly plan usage, published by the " + (d.seat || "?") + " seat" + (d.resets_in ? " · renews in " + d.resets_in : "") + " · reading " + (ageLabel(age) || "0m") + " old" };
+}
+function renderUsage(data) {
+  ["wednesday", "tuesday"].forEach(function (a) {
+    const el = document.getElementById("use-" + a); if (!el) return;
+    const s = usageState(data && data[a]); el.textContent = s.text; el.className = s.cls; el.title = s.title;
+  });
+}
+async function pollUsage() {
+  try { renderUsage(await WED.getJSON("/api/usage")); }
+  catch (e) { /* leave the last render alone rather than blanking on a blip */ }
+}
+pollUsage();
+setInterval(pollUsage, 60000);
+
+const msgsEl = document.getElementById("msgs");
+const live = document.getElementById("live");
+const textEl = document.getElementById("text");
+let lastSig = null, pendingMsgs = null, lastRaw = null;
+armGuards(log, "convo");
+let heldCount = 0;
+function heldEl() {
+  let el = document.getElementById("heldbar");
+  if (!el) {
+    el = document.createElement("button"); el.id = "heldbar"; el.type = "button"; el.hidden = true;
+    el.title = "the conversation is paused while you are typing — click to show what arrived";
+    el.addEventListener("click", () => { if (pendingMsgs) { const m = pendingMsgs; pendingMsgs = null; hideHeld(); forceRender(m); } });
+    const logEl = document.getElementById("log");
+    if (logEl && logEl.parentNode) logEl.parentNode.insertBefore(el, logEl);
+    else { const panel = document.getElementById("convo-panel"); if (panel) panel.appendChild(el); else return null; }
+  }
+  return el;
+}
+function showHeld(msgs) { const el = heldEl(); if (!el) return; if (lastRendered === null) { el.hidden = true; return; }
+  el.hidden = false; el.textContent = "paused while you type — click to show the latest"; }
+function hideHeld() { const el = document.getElementById("heldbar"); if (el) el.hidden = true; }
+function convoBusy() { return pointerDown.convo || selectionIn(log) || (document.activeElement === textEl && textEl.value.trim() !== ""); }
+function esc(s) { return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;"); }
+function mdLite(s) {
+  let h = esc(s);
+  h = h.replace(/https?:\/\/[^\s*]+/g, u => { const m = u.match(/[.,)\]!?;:]+$/); const trail = m ? m[0] : ""; if (trail) u = u.slice(0, -trail.length);
+    return '<a href="' + u + '" target="_blank" rel="noopener noreferrer">' + u + "</a>" + trail; });
+  h = h.replace(/\*\*([^*\n][^*]*?)\*\*/g, "<strong>$1</strong>");
+  return h;
+}
+function nearBottom() { return log.scrollHeight - log.scrollTop - log.clientHeight < 80; }
+let lastRenderedMsgs = null, forcingRender = false;
+function forceRender(msgs) { forcingRender = true; try { render(msgs); } finally { forcingRender = false; } }
+function render(msgs) {
+  if (convoBusy() && !forcingRender) { pendingMsgs = msgs; showHeld(msgs); return; }
+  pendingMsgs = null; hideHeld();
+  lastRenderedMsgs = msgs || [];
+  renderProjFilter(msgs);
+  msgs = (msgs || []).filter(msgVisible);
+  const stick = nearBottom() || lastRendered === null;
+  const keepTop = log.scrollTop;
+  msgsEl.innerHTML = "";
+  const older = document.createElement("p"); older.className = "empty";
+  const ob = document.createElement("button"); ob.type = "button"; ob.className = "pftog"; ob.textContent = "load older (7 more days) — showing since " + floorM.slice(0, 10);
+  ob.addEventListener("click", loadOlder); older.appendChild(ob); msgsEl.appendChild(older);
+  if (!msgs.length) { const p = document.createElement("p"); p.className = "empty"; p.textContent = "no messages in this window"; msgsEl.appendChild(p); }
+  for (const m of msgs) {
+    const role = m.role === "kam" ? "kam" : "wednesday";
+    const div = document.createElement("div"); div.className = "msg " + role;
+    const meta = document.createElement("div"); meta.className = "meta";
+    const who = document.createElement("span"); who.className = "who";
+    // The name comes from the MESSAGE (its seat), never from a constant — the 2026-09-10 lesson, kept.
+    who.textContent = role === "kam" ? "Kam" : (m.seat === "tuesday" || agentOfMsg(m) === "tuesday" ? "Tuesday" : "Wednesday");
+    meta.append(who, "  " + (m.ts || "").slice(11, 16));
+    if (role === "wednesday" && m.text) {
+      const pb = document.createElement("button"); pb.className = "playbtn"; pb.textContent = "▶"; pb.title = "speak this message aloud (this device)";
+      pb.addEventListener("click", e => { e.stopPropagation(); WED.speak(m.text); });
+      meta.appendChild(pb);
+    }
+    if (m.backfill) { const bf = document.createElement("span"); bf.className = "bf"; bf.textContent = "backfill";
+      bf.title = "copied from the Studio's local log by the seat, original timestamp kept"; meta.appendChild(bf); }
+    const body = document.createElement("div"); body.className = "body";
+    if (m.locked) { body.classList.add("locked"); body.textContent = "🔒 encrypted — unlock the key to read"; }
+    else if (m.error) { body.classList.add("bad"); body.textContent = "decrypt failed: " + m.error; }
+    else if (role === "wednesday") body.innerHTML = mdLite(m.text || "");
+    else body.textContent = m.text || "";
+    div.append(meta, body);
+    // ack lines (ack_state.json) are Studio-local: nothing is rendered rather than a guessed state (WED-73).
+    msgsEl.appendChild(div);
+  }
+  log.scrollTop = stick ? log.scrollHeight : keepTop;
+  lastRendered = true;
+}
+let lastRendered = null;
+
+/* ── voice: speechSynthesis on THIS device (the Studio's server-side Moira voice is not reachable from here) ── */
+const svBtn = document.getElementById("stopvoice");
+svBtn.addEventListener("click", () => { svBtn.disabled = true; WED.stopSpeech(); setTimeout(() => { svBtn.disabled = false; }, 400); });
+const AP_KEY = "wed_chat_autoplay";
+const apBtn = document.getElementById("autoplay");
+let autoplayOn = false;
+try { autoplayOn = localStorage.getItem(AP_KEY) === "1"; } catch (e) {}
+apBtn.classList.toggle("on", autoplayOn);
+apBtn.addEventListener("click", () => {
+  autoplayOn = !autoplayOn; try { localStorage.setItem(AP_KEY, autoplayOn ? "1" : "0"); } catch (e) {}
+  apBtn.classList.toggle("on", autoplayOn);
+  if (autoplayOn) WED.speak("Autoplay on");          // the gesture iOS needs before speechSynthesis will speak
+  else WED.stopSpeech();
+});
+let knownKeys = null;   // null until the first successful poll seeds the history (back-history is never auto-spoken)
+
+async function decryptAll() {
+  for (const [k, r] of rows) {
+    if (ptCache.has(k) && ptCache.get(k) !== null) continue;            // decrypted already
+    if (!WED.key.priv) { ptCache.set(k, null); continue; }
+    try { ptCache.set(k, await WED.decryptRow(r)); } catch (e) { ptCache.set(k, undefined); r._err = String(e.message || e); }
+  }
+  for (const [id, r] of cardRows) {
+    const k = "card|" + id + "|" + r.written_at;
+    if (ptCache.has(k) && ptCache.get(k) !== null) continue;
+    if (!WED.key.priv) { ptCache.set(k, null); continue; }
+    try { ptCache.set(k, await WED.decryptRow(r)); } catch (e) { ptCache.set(k, undefined); r._err = String(e.message || e); }
+  }
+}
+function msgsFromRows() {
+  const out = [];
+  for (const [k, r] of rows) { const pt = ptCache.get(k); out.push(WED.toMsg(r, pt === undefined ? undefined : pt, pt === undefined ? r._err : null)); }
+  out.sort((a, b) => a.utc < b.utc ? -1 : a.utc > b.utc ? 1 : 0);
+  return out;
+}
+async function loadOlder() {
+  const newFloor = new Date(Date.parse(floorM) - 7 * DAY).toISOString();
+  try {
+    const d = await WED.getJSON("/api/messages?limit=1000" + WED.hiddenQ + "&since=" + encodeURIComponent(newFloor));
+    for (const r of d.messages || []) { if (WED.isSynthetic(r) || WED.isHidden(r)) { WED.hidden.messages++; continue; } if (r.row_key < floorM) rows.set(r.row_key, r); }
+    floorM = newFloor; if (knownKeys) for (const k of rows.keys()) knownKeys.add(k);   // history is never auto-spoken
+    await decryptAll(); lastSig = null; forceRender(msgsFromRows());
+  } catch (e) { live.textContent = "○ " + (e.message || e); }
+}
+async function poll(force) {
+  try {
+    const q = sinceM ? "&since=" + encodeURIComponent(sinceM) : "";
+    const d = await WED.getJSON("/api/messages?limit=1000" + WED.hiddenQ + q);
+    let fresh = [];
+    for (const r of d.messages || []) { if (r.row_key > sinceM) sinceM = r.row_key; if (WED.isSynthetic(r) || WED.isHidden(r)) { WED.hidden.messages++; continue; }   // synthetic: skipped, never rendered (Phase 3); hidden: skipped unless ?hidden=1 (2026-09-22)
+      if (!rows.has(r.row_key)) fresh.push(r); rows.set(r.row_key, r); }
+    live.textContent = "● live"; live.classList.add("on");
+    await decryptAll();
+    const msgs = msgsFromRows();
+    if (knownKeys === null) knownKeys = new Set(rows.keys());
+    else {
+      let latestNew = null;
+      for (const m of msgs) if (!knownKeys.has(m.row_key)) { knownKeys.add(m.row_key); if (m.role === "wednesday" && m.text && !m.backfill) latestNew = m; }
+      if (autoplayOn && latestNew && msgVisible(latestNew)) WED.speak(latestNew.text);
+    }
+    const sig = msgs.length + "|" + sinceM + "|" + (WED.key.priv ? "k" : "-") + "|" + activeAgent;
+    if (!force && sig === lastSig && !pendingMsgs) return;
+    lastSig = sig; lastRaw = msgs;
+    render(msgs);
+  } catch (e) { live.textContent = "○ " + (String(e.message || e).startsWith("session") ? e.message : "reconnecting…"); live.classList.remove("on"); }
+}
+
+/* ── send: Kam's reply, ENCRYPTED HERE to his public key, view = the tab he is on ── */
+const sendBtn = document.getElementById("send");
+async function doSend() {
+  const t = textEl.value.trim(); if (!t) return;
+  sendBtn.disabled = true;
+  try { await WED.postKamMessage(t, activeAgent); textEl.value = ""; await poll(true); log.scrollTop = log.scrollHeight; }
+  catch (e) { alert("not sent: " + (e.message || e)); }
+  finally { sendBtn.disabled = false; textEl.focus(); }
+}
+sendBtn.addEventListener("click", doSend);
+textEl.addEventListener("keydown", e => { if (e.key === "Enter") doSend(); });
+
+/* ══ RIGHT: fleet activity — decision cards from the API; agentmail events NOT SYNCED (Studio-local) ══ */
+const feedEl = document.getElementById("feed"), feedScroll = document.getElementById("feedscroll");
+const needsEl = document.getElementById("needs");   // Phase 3: no separate pinned scroller — #needs sits above #feed inside #feedscroll
+const feedNote = document.getElementById("feed-note"), tallyEl = document.getElementById("tally"), filtersEl = document.getElementById("filters");
+let pendingRender = false, decisionsErr = null;
+const expandedKeys = new Set(), sentDecisions = new Set(), sentNotes = new Set(), decDrafts = new Map();
+armGuards(feedScroll, "feed");
+let forcingFeed = false;
+function forceRenderFeed() { forcingFeed = true; try { renderFeed(); } finally { forcingFeed = false; } }
+function feedHeldEl() {
+  let el = document.getElementById("feedheld");
+  if (!el) {
+    el = document.createElement("button"); el.id = "feedheld"; el.type = "button"; el.hidden = true;
+    el.title = "this panel is paused while you are typing a note — click to show what arrived";
+    el.textContent = "paused while you type — click to show the latest";
+    el.addEventListener("click", () => { hideFeedHeld(); forceRenderFeed(); });
+    if (feedScroll && feedScroll.parentNode) feedScroll.parentNode.insertBefore(el, feedScroll); else return null;
+  }
+  return el;
+}
+function showFeedHeld() { const el = feedHeldEl(); if (el) el.hidden = false; }
+function hideFeedHeld() { const el = document.getElementById("feedheld"); if (el) el.hidden = true; }
+function feedBusy() { const a = document.activeElement;
+  return pointerDown.feed || selectionIn(feedScroll) || (a && a.classList && a.classList.contains("decnote") && a.value.trim() !== ""); }
+const FILTER_KEY = "wed_cockpit_feed_filters";
+let filters = { types: [], projects: [] };
+try { const raw = JSON.parse(localStorage.getItem(FILTER_KEY) || "{}");
+  if (raw && Array.isArray(raw.types)) filters.types = raw.types.filter(x => typeof x === "string");
+  if (raw && Array.isArray(raw.projects)) filters.projects = raw.projects.filter(x => typeof x === "string"); } catch (e) {}
+function saveFilters() { try { localStorage.setItem(FILTER_KEY, JSON.stringify(filters)); } catch (e) {} }
+const AEST = "Australia/Brisbane";
+function aest(t) { try { return new Intl.DateTimeFormat("en-AU", { timeZone: AEST, weekday: "short", hour: "2-digit", minute: "2-digit", hour12: false }).format(new Date(t)); }
+  catch (e) { return new Date(t).toISOString().slice(11, 16) + "Z"; } }
+function aestDay(t) { try { return new Intl.DateTimeFormat("en-CA", { timeZone: AEST, year: "numeric", month: "2-digit", day: "2-digit" }).format(new Date(t)); }
+  catch (e) { return new Date(t).toISOString().slice(0, 10); } }
+function renderTally() {
+  tallyEl.innerHTML = "";
+  const head = document.createElement("span"); head.textContent = "today:"; tallyEl.appendChild(head);
+  const s = document.createElement("span"); s.className = "tchip notsynced"; s.textContent = "wraps/scores not synced yet — data lives on the Studio";
+  tallyEl.appendChild(s);
+}
+const TYPE_ORDER = ["decision"], TYPE_LABEL = { decision: "DECISION" };
+function renderFilters(decisions) {
+  filtersEl.innerHTML = "";
+  if (decisions.length || filters.types.includes("decision")) {
+    const b = document.createElement("button"); b.className = "fchip" + (filters.types.includes("decision") ? " on" : ""); b.textContent = "DECISION";
+    b.addEventListener("click", () => { filters.types = filters.types.includes("decision") ? filters.types.filter(x => x !== "decision") : filters.types.concat("decision"); saveFilters(); renderFeed({ resetScroll: true }); });
+    filtersEl.appendChild(b);
+  }
+  const projects = [...new Set(decisions.map(d => d.project))].filter(p => agentOfProject(p) === activeAgent).sort();
+  for (const p of projects.concat(filters.projects.filter(x => !projects.includes(x) && agentOfProject(x) === activeAgent))) {
+    const b = document.createElement("button"); b.className = "fchip" + (filters.projects.includes(p) ? " on" : ""); b.textContent = p;
+    b.addEventListener("click", () => { filters.projects = filters.projects.includes(p) ? filters.projects.filter(x => x !== p) : filters.projects.concat(p); saveFilters(); renderFeed({ resetScroll: true }); });
+    filtersEl.appendChild(b);
+  }
+  if (filters.types.length || filters.projects.length) {
+    const b = document.createElement("button"); b.className = "fchip clear"; b.textContent = "✕ clear";
+    b.addEventListener("click", () => { filters = { types: [], projects: [] }; saveFilters(); renderFeed({ resetScroll: true }); });
+    filtersEl.appendChild(b);
+  }
+}
+function parseDecisions() {
+  const open = [], ruledToday = []; let skipped = 0; const today = aestDay(Date.now());
+  for (const [id, r] of cardRows) {
+    try {
+      const pt = ptCache.get("card|" + id + "|" + r.written_at);
+      const c = WED.toCard(r, pt === undefined ? null : pt);
+      const dec = { id: c.id, title: c.title, project: c.client_project, bluf: c.bluf, options: c.options, recommended: c.recommended,
+        default_action: c.default_action, t: Date.parse(c.ts || "") || 0, status: c.status, ruled_choice: c.ruled_choice,
+        ruledT: Date.parse(c.ruled_ts || "") || 0, locked: c.locked };
+      if (dec.status === "open") open.push(dec);
+      else if (dec.status === "ruled" && dec.ruledT && aestDay(dec.ruledT) === today) ruledToday.push(dec);
+    } catch (e) { skipped++; }
+  }
+  open.sort((a, b) => b.t - a.t);
+  return { open, ruledToday, skipped };
+}
+function decisionCard(dec) {
+  const row = document.createElement("div"); const key = "dec|" + dec.id;
+  row.className = "evt dec" + (expandedKeys.has(key) ? " expanded" : "");
+  const top = document.createElement("div"); top.className = "top";
+  const chip = document.createElement("span"); chip.className = "chip t-decision"; chip.textContent = "DECISION";
+  const proj = document.createElement("span"); proj.className = "proj"; proj.textContent = dec.project;
+  top.append(chip, proj);
+  const when = document.createElement("span"); when.className = "when"; when.textContent = dec.t ? aest(dec.t) + " AEST" : ""; top.appendChild(when);
+  const title = document.createElement("div"); title.className = "title"; title.textContent = dec.title;
+  const rec = dec.options.find(o => o.key === dec.recommended);
+  if (rec && !dec.locked) { const rb = document.createElement("span"); rb.className = "recbadge"; rb.textContent = "rec: " + rec.label; title.appendChild(rb); }
+  row.append(top, title);
+  const det = document.createElement("div"); det.className = "detail";
+  if (dec.bluf) { const b = document.createElement("div"); b.className = "bluf"; b.textContent = dec.bluf; det.appendChild(b); }
+  for (const o of dec.options) {
+    const od = document.createElement("div"); od.className = "opt" + (o.key === dec.recommended ? " rec" : "");
+    const ob = document.createElement("b"); ob.textContent = o.label; od.appendChild(ob);
+    if (o.detail) od.append(" — " + o.detail);
+    det.appendChild(od);
+  }
+  if (dec.default_action) { const dl = document.createElement("div"); dl.className = "defline"; dl.textContent = "if you say nothing: " + dec.default_action; det.appendChild(dl); }
+  const noteEl = document.createElement("input"); noteEl.type = "text"; noteEl.className = "decnote"; noteEl.maxLength = 2000; noteEl.autocomplete = "off";
+  noteEl.placeholder = "add context or a note — Enter sends"; noteEl.value = decDrafts.get(dec.id) || "";
+  noteEl.addEventListener("click", e => e.stopPropagation());
+  noteEl.addEventListener("input", () => { if (noteEl.value) decDrafts.set(dec.id, noteEl.value); else decDrafts.delete(dec.id); syncNote(); });
+  noteEl.addEventListener("keydown", e => { e.stopPropagation(); if (e.key === "Enter") { e.preventDefault(); if (!noteBtn.disabled) noteBtn.click(); } });
+  const btns = document.createElement("div"); btns.className = "decbtns";
+  const lockBtns = v => { [...btns.querySelectorAll("button[data-ruling]")].forEach(x => { x.disabled = v; }); };
+  const noteBtn = document.createElement("button"); noteBtn.type = "button"; noteBtn.className = "decbtn noteonly"; noteBtn.textContent = "send note only";
+  function syncNote() { noteBtn.disabled = noteEl.disabled || noteEl.value.trim() === ""; }
+  noteBtn.addEventListener("click", async e => {
+    e.stopPropagation(); const t = noteEl.value.trim(); if (!t) return; noteBtn.disabled = true;
+    try { await WED.postKamMessage(`Decision ${dec.id} note: ${t}`, activeAgent);
+      noteEl.value = ""; decDrafts.delete(dec.id);
+      if (!sentNotes.has(dec.id)) { sentNotes.add(dec.id); const n = document.createElement("div"); n.className = "decsent"; n.textContent = "✓ note sent"; det.appendChild(n); }
+      await poll(true);
+    } catch (err) { alert("not sent: " + (err.message || err)); } finally { syncNote(); }
+  });
+  const mkBtn = (label, opt, isRec) => {
+    const b = document.createElement("button"); b.className = "decbtn" + (isRec ? " rec" : ""); b.dataset.ruling = "1"; b.dataset.key = opt.key;
+    b.textContent = isRec ? label : `[${opt.key.toUpperCase()}] ${label}`;
+    b.addEventListener("click", async e => {
+      e.stopPropagation(); lockBtns(true);
+      const noteTxt = noteEl.value.trim(); const key = b.dataset.key || opt.key;
+      // the click is a MESSAGE to the seat (same text shape as the local page); it never mutates the card — the seat rules the queue
+      const text = noteTxt ? `Decision ${dec.id}: ${key} — ${opt.label} | note: ${noteTxt}` : `Decision ${dec.id}: ${key} — ${opt.label}`;
+      try { await WED.postKamMessage(text, activeAgent); sentDecisions.add(dec.id); decDrafts.delete(dec.id);
+        const note = document.createElement("div"); note.className = "decsent"; note.textContent = "✓ sent to " + (activeAgent === "tuesday" ? "Tuesday" : "Wednesday") + ": " + opt.key + " — she rules the queue from here"; det.appendChild(note);
+        await poll(true);
+      } catch (err) { lockBtns(false); alert("not sent: " + (err.message || err)); }
+    });
+    return b;
+  };
+  if (!dec.locked) { if (rec) btns.appendChild(mkBtn("✓ go with recommendation", rec, true)); for (const o of dec.options) btns.appendChild(mkBtn(o.label, o, false)); }
+  btns.appendChild(noteBtn);
+  det.append(noteEl, btns);
+  if (sentNotes.has(dec.id)) { const n = document.createElement("div"); n.className = "decsent"; n.textContent = "✓ note sent"; det.appendChild(n); }
+  syncNote();
+  if (sentDecisions.has(dec.id)) { const note = document.createElement("div"); note.className = "decsent"; note.textContent = "✓ answer sent — awaiting the ruling"; det.appendChild(note); lockBtns(true); }
+  row.appendChild(det);
+  row.addEventListener("click", () => { if (selectionIn(row)) return; if (expandedKeys.has(key)) expandedKeys.delete(key); else expandedKeys.add(key); row.classList.toggle("expanded"); });
+  return row;
+}
+function ruledRow(dec) {
+  const row = document.createElement("div"); row.className = "evt ruledrow";
+  const top = document.createElement("div"); top.className = "top";
+  const chip = document.createElement("span"); chip.className = "chip t-ruled"; chip.textContent = "RULED";
+  const proj = document.createElement("span"); proj.className = "proj"; proj.textContent = dec.project;
+  const when = document.createElement("span"); when.className = "when"; when.textContent = aest(dec.ruledT) + " AEST";
+  top.append(chip, proj, when);
+  const sum = document.createElement("div"); sum.className = "sum";
+  const chosen = dec.options.find(o => o.key === dec.ruled_choice);
+  sum.textContent = dec.title + " → " + (chosen ? chosen.label : String(dec.ruled_choice));
+  row.append(top, sum); return row;
+}
+function notSyncedRow(what) {
+  const p = document.createElement("div"); p.className = "notsynced";
+  p.innerHTML = "<b>" + esc(what) + "</b> — not synced yet; this data lives on the Studio (Phase 2 syncs chat + decision cards only)";
+  return p;
+}
+function renderFeed(opts) {
+  if (feedBusy() && !forcingFeed) { pendingRender = true; showFeedHeld(); return; }
+  pendingRender = false; hideFeedHeld();
+  const dp = parseDecisions();
+  renderTally();
+  renderFilters(dp.open.concat(dp.ruledToday));
+  const typeOk = t => !filters.types.length || filters.types.includes(t);
+  const projOk = p => agentOfProject(p) === activeAgent && (!filters.projects.length || filters.projects.includes(p));
+  const needDecs = dp.open.filter(d => typeOk("decision") && projOk(d.project));
+  const updates = dp.ruledToday.filter(d => typeOk("decision") && projOk(d.project)).map(d => ({ ruled: d, t: d.ruledT })).sort((a, b) => b.t - a.t);
+  const prevTop = feedScroll.scrollTop, prevH = feedScroll.scrollHeight;
+  feedEl.innerHTML = ""; needsEl.innerHTML = "";
+  const nh = document.createElement("div"); nh.className = "sechead needs";
+  if (!needDecs.length && !decisionsErr) nh.classList.add("quiet");
+  nh.textContent = "Needs you (" + needDecs.length + ")"; needsEl.appendChild(nh);
+  if (decisionsErr) { const p = document.createElement("p"); p.className = "qerr"; p.textContent = "⚠ decision cards unreadable — showing the rest without them (" + decisionsErr + ")"; needsEl.appendChild(p); }
+  if (!needDecs.length && !decisionsErr) { const p = document.createElement("p"); p.className = "empty"; p.textContent = "nothing needs you right now (open decision cards; unanswered fleet QUESTIONs are not synced yet)"; needsEl.appendChild(p); }
+  for (const d of needDecs) needsEl.appendChild(decisionCard(d));
+  const uh = document.createElement("div"); uh.className = "sechead"; uh.textContent = "Updates"; feedEl.appendChild(uh);
+  for (const u of updates) feedEl.appendChild(ruledRow(u.ruled));
+  feedEl.appendChild(notSyncedRow("Fleet mail events (BRIEF / STATUS / QUESTION / ANSWER / WRAP / SCORE)"));
+  if (opts && opts.resetScroll) feedScroll.scrollTop = 0;
+  else if (prevTop > 4) feedScroll.scrollTop = prevTop + (feedScroll.scrollHeight - prevH);
+  else feedScroll.scrollTop = 0;
+  feedNote.textContent = needDecs.length + " need you · " + updates.length + " ruled today · " + cardRows.size + " cards synced" +
+    (dp.skipped ? " · " + dp.skipped + " unparsed (skipped)" : "") + (WED.hidden.cards ? " · " + WED.hidden.cards + " synthetic hidden" : "") + " · fleet mail not synced";
+}
+async function pollDecisions() {
+  try {
+    const d = await WED.getJSON("/api/cards?limit=1000");
+    cardRows.clear();
+    WED.hidden.cards = 0;
+    for (const r of d.cards || []) { if (WED.isSynthetic(r)) { WED.hidden.cards++; continue; } cardRows.set(r.id, r); }   // synthetic cards hidden (Phase 3)
+    decisionsErr = null;
+    await decryptAll();
+    renderFeed();
+  } catch (e) { decisionsErr = String(e.message || e); renderFeed(); }
+}
+
+/* ══ KEY BAR ══ */
+const kstate = document.getElementById("kstate"), knote = document.getElementById("knote");
+const kunlock = document.getElementById("kunlock"), kchoose = document.getElementById("kchoose"), kforget = document.getElementById("kforget");
+const kfilelbl = document.getElementById("kfilelbl"), kfilename = document.getElementById("kfilename");
+const kimportlbl = document.getElementById("kimportlbl"), kimport = document.getElementById("kimport"), kimportfile = document.getElementById("kimportfile");
+kfilename.value = WED.filename();
+kfilename.addEventListener("change", () => { WED.setFilename(kfilename.value); kfilename.value = WED.filename(); });
+async function paintKey(msg, cls) {
+  const k = WED.key;
+  const kname = WED.keyNameOfKid(k.kid); const klabel = kname ? " — " + kname + " key" : (k.kid ? " — kid " + k.kid : "");   // Phase 3: which device key
+  if (k.priv) { kstate.textContent = "key: unlocked" + klabel + (k.source === "folder" ? " from folder “" + k.dirName + "”" + (k.fileName ? " (" + k.fileName + ")" : "") : " (imported copy in this browser)"); kstate.className = "kstate ok"; }
+  else if (k.needsClick) { kstate.textContent = "key: folder “" + k.dirName + "” remembered — click Unlock"; kstate.className = "kstate warn"; }
+  else { kstate.textContent = "key: not loaded — rows stay encrypted"; kstate.className = "kstate warn"; }
+  if (msg) { kstate.textContent = msg; kstate.className = "kstate " + (cls || "warn"); }
+  kunlock.hidden = !(k.needsClick && !k.priv);
+  kchoose.hidden = !k.fsAvailable; kfilelbl.hidden = !k.fsAvailable;
+  kimportlbl.hidden = false;
+  kforget.hidden = !(k.priv || k.needsClick || await WED.rememberedFolderName());
+  knote.textContent = k.fsAvailable
+    ? (k.priv ? "read from disk on each visit; never stored by the page, never sent anywhere" : "Chrome/Edge: choose the folder once; the key is read from it on every visit and never leaves this machine")
+    : "this browser has no folder access (Safari/iOS/Firefox): Import key… once (kam-ipad-private.pem on the iPad); it stays in this browser only";
+}
+async function afterKeyChange() { ptCache.clear(); await decryptAll(); lastSig = null; render(msgsFromRows()); renderFeed(); await paintKey(); }
+kunlock.addEventListener("click", async () => { try { await WED.unlock(true); await afterKeyChange(); } catch (e) { await paintKey("unlock failed: " + (e.message || e), "bad"); } });
+kchoose.addEventListener("click", async () => { try { await WED.chooseFolder(); await afterKeyChange(); } catch (e) { await paintKey("folder: " + (e.message || e), "bad"); } });
+kimport.addEventListener("click", () => kimportfile.click());
+kimportfile.addEventListener("change", async e => { const f = e.target.files[0]; if (!f) return; try { await WED.importFile(f); await afterKeyChange(); } catch (err) { await paintKey("import failed: " + (err.message || err), "bad"); } });
+kforget.addEventListener("click", async () => { await WED.forget(); await afterKeyChange(); });
+
+(async () => {
+  try { const me = await WED.getJSON("/api/me"); document.getElementById("who").textContent = "signed in as " + (me.name || me.id) + (me.is_kam ? "" : " (read-only: not Kam's principal)"); } catch (e) {}
+  try { await WED.publicKeys(); } catch (e) {}      // Phase 3: the ring (names the device key; the reply path wraps to it + the seat)
+  try { await WED.unlock(false); } catch (e) {}
+  await paintKey();
+  await poll(true); await pollDecisions();
+  setInterval(poll, 3000); setInterval(pollDecisions, 20000);
+})();
+</script></body></html>

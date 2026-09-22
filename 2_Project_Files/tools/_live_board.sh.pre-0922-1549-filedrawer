@@ -1,0 +1,100 @@
+#!/bin/bash
+# _live_board.sh — sourced by chat_reply.sh and decision_queue.sh (Phase 2 of the external dashboard, Kam 2026-09-21 11:43:
+# "mirror the layout of this dashboard and chat view on the live site … so that we no longer use this local version").
+#
+# DUAL-WRITE, LOCAL FIRST. Each tool completes its LOCAL write exactly as before, then calls one of the two functions
+# below to post the SAME record to the live board (https://wednesday-dashboard-e42e.azurewebsites.net), encrypted to
+# Kam's public key by dashboard-cloud/seat/post_message.py / post_card.py before it leaves this machine. The local board
+# stays the record until Kam rules the cut-over; nothing here removes or changes the local write.
+#
+# FAILURES ARE LOUD AND NEVER BLOCK. A post that fails (no venv, no certificate, 403, network) prints to stderr AND
+# appends a line to fleet/state/live_board_post_failures.log — and returns 0 so the caller's exit code is unchanged.
+# A silent success-looking failure is exactly what the 2026-09-09 `--file` incident was; a blocking failure would make
+# a cloud outage cost Kam his local reading surface. Both are ruled out here.
+#
+# THE SEAT NEVER POSTS ANOTHER CLIENT'S ROWS. Wednesday's certificate carries Client.Secuura + Client.WED only; Tuesday's
+# carries Client.Datasec. The API refuses a mismatch with 403 (proven, probe C); this file refuses it FIRST, locally,
+# so a Datasec reply from the Wednesday seat never even becomes a request. The seat is `$WED_AGENT` (the launcher
+# exports it; chat_reply.sh resolves it from the tree) — never a hostname guess.
+#
+# Environment: LIVE_BOARD=0 disables the post entirely (stated on stderr). LIVE_BOARD_PYTHON overrides the interpreter.
+
+_lb_root() { cd -P "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd; }
+_lb_log() {
+  local root; root="$(_lb_root)"
+  local f="$root/2_Project_Files/fleet/state/live_board_post_failures.log"
+  mkdir -p "$(dirname "$f")" 2>/dev/null
+  printf '%s %s\n' "$(date -u +%Y-%m-%dT%H:%M:%SZ)" "$*" >> "$f" 2>/dev/null
+  echo "live-board: 🔴 NOT POSTED — $*" >&2
+  echo "  (local write is intact; logged to fleet/state/live_board_post_failures.log; the live board is one row stale)" >&2
+}
+_lb_python() {
+  local root; root="$(_lb_root)"
+  if [ -n "${LIVE_BOARD_PYTHON:-}" ]; then echo "$LIVE_BOARD_PYTHON"; return; fi
+  if [ -x "$root/2_Project_Files/dashboard-cloud/.venv/bin/python" ]; then echo "$root/2_Project_Files/dashboard-cloud/.venv/bin/python"; return; fi
+  echo python3
+}
+# client_of_project <Secuura|Datasec|WED|Client/Project> -> Secuura|Datasec|WED
+_lb_client() {
+  case "$(printf '%s' "${1:-}" | cut -d/ -f1 | tr '[:upper:]' '[:lower:]' | tr -d ' ')" in
+    secuura*) echo Secuura ;; datasec*) echo Datasec ;; *) echo WED ;;
+  esac
+}
+# does this seat hold the partition? (mirrors the Entra app-role grants; the API is the real gate)
+_lb_seat_holds() { # seat client
+  case "$1:$2" in wednesday:Secuura|wednesday:WED|tuesday:Datasec) return 0 ;; *) return 1 ;; esac
+}
+_lb_preflight() { # seat client -> 0 if a post may be attempted
+  local seat="$1" client="$2" root; root="$(_lb_root)"
+  [ "${LIVE_BOARD:-1}" = "0" ] && { echo "live-board: disabled by LIVE_BOARD=0 (local write only)" >&2; return 1; }
+  case "$seat" in wednesday|tuesday) ;; *) _lb_log "seat unknown ('$seat') — cannot pick a certificate; export WED_AGENT"; return 1 ;; esac
+  _lb_seat_holds "$seat" "$client" || { _lb_log "REFUSED locally: seat '$seat' does not hold partition '$client' (Kam's 2026-09-08 split; the API would 403)"; return 1; }
+  [ -f "$root/4_Credentials/dashboard-cloud/$seat-seat.pem" ] || { _lb_log "no certificate at 4_Credentials/dashboard-cloud/$seat-seat.pem on this machine (seat $seat)"; return 1; }
+  return 0
+}
+
+# live_board_post_message <seat> <project> <local_ts> <stream-file-basename> <text>
+#   id is deterministic from (stream, ts, text) — the same id the backfill computes, so the two never double-post.
+live_board_post_message() {
+  local seat="$1" project="$2" ts="$3" stream="$4" text="$5" root client py out rc
+  root="$(_lb_root)"; client="$(_lb_client "$project")"
+  _lb_preflight "$seat" "$client" || return 0
+  py="$(_lb_python)"
+  out="$("$py" - "$root" "$seat" "$client" "$ts" "$stream" "$text" <<'PYEOF' 2>&1
+import sys, os, json
+root, seat, client, ts, stream, text = sys.argv[1:7]
+sys.path.insert(0, os.path.join(root, "2_Project_Files", "dashboard-cloud", "seat"))
+import seat_common as sc, envelope, requests
+ids = sc.load_ids()
+class A: pass
+a = A(); a.seat = seat; a.cert_dir = os.path.join(root, "4_Credentials", "dashboard-cloud"); a.tenant = ids["TENANT_ID"]; a.api_appid = ids["API_APPID"]
+clear = {"client": client, "kind": "message", "id": sc.row_id(stream, ts, text), "ts": sc.to_utc_z(ts), "view": "wednesday" if seat == "wednesday" else "tuesday", "role": seat, "src_ts": ts[:40]}
+env = envelope.encrypt_record(text, clear)   # Phase 3 (2026-09-21): wrapped to Kam's whole key ring (pilot+laptop+ipad) + this partition's seat key
+if len(text) >= 8: assert text not in json.dumps(env), "plaintext leaked into envelope"
+tok = sc.get_token(a, ids)
+r = requests.post(f"https://{ids['WEBAPP']}.azurewebsites.net/api/seat/messages", json={**clear, "envelope": env}, headers={"Authorization": f"Bearer {tok}"}, timeout=25)
+print(f"HTTP {r.status_code} {r.text[:160]}")
+sys.exit(0 if r.status_code in (200, 201) else 1)
+PYEOF
+)"; rc=$?
+  if [ $rc -eq 0 ]; then echo "live-board: posted to $client ($(printf '%s' "$out" | head -1 | cut -c1-60))"
+  else _lb_log "message -> $client failed: $(printf '%s' "$out" | tail -3 | tr '\n' ' ' | cut -c1-300)"; fi
+  return 0
+}
+
+# live_board_post_card <seat> <decisions.json path> <card id>
+live_board_post_card() {
+  local seat="$1" store="$2" cid="$3" root client py out rc
+  root="$(_lb_root)"
+  client="$(_lb_client "$(python3 -c 'import json,sys
+for c in json.load(open(sys.argv[1])):
+    if isinstance(c, dict) and c.get("id") == sys.argv[2]: print(c.get("client_project", "")); break' "$store" "$cid" 2>/dev/null)")"
+  _lb_preflight "$seat" "$client" || return 0
+  py="$(_lb_python)"
+  out="$("$py" "$root/2_Project_Files/dashboard-cloud/seat/post_card.py" --seat "$seat" --cert-dir "$root/4_Credentials/dashboard-cloud" --from-store "$store" --card-id "$cid" 2>&1)"; rc=$?
+  if [ $rc -eq 0 ]; then echo "live-board: card $cid posted to $client ($(printf '%s' "$out" | python3 -c 'import json,sys
+try: d=json.load(sys.stdin); print("HTTP", d["status"])
+except Exception: print("ok")' 2>/dev/null))"
+  else _lb_log "card $cid -> $client failed: $(printf '%s' "$out" | tail -3 | tr '\n' ' ' | cut -c1-300)"; fi
+  return 0
+}
