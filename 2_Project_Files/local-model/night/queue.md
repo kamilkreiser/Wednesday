@@ -290,4 +290,3 @@
 # NOT PRE-MEASURED: no golden checker run and no git-apply-check in a clone (the drafter was scoped to
 # brief-writing only) - expect a first-round verdict, not a confirmed one. Line :202's "16 x 200 by default"
 # is left alone deliberately: it is now probably 15, but that is inference from userRepo.ts, not a login run.
-KS-965 input=/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/inputs/doc_965.json task=/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/tasks/doc_patch/task.md ctx=65536
