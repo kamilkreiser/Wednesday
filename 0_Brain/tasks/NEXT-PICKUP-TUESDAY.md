@@ -6,7 +6,7 @@ status: live
 supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s1-wholesale
 ---
 
-## 🟢 DELTA 60 — 2026-09-22 13:4x (s79, ctx 50% CHECKPOINT; band 80-90, NOT rotating). **READ THIS, THEN 59. DELTA 51's OWED ZIP STANDS.**
+## 🟢 DELTA 60 — 2026-09-22 13:3x (s79, ctx 50% CHECKPOINT; band 80-90, NOT rotating). **READ THIS, THEN 59. DELTA 51's OWED ZIP STANDS.**
 
 ### MAIN NOW
 - **main = `f95917f`** (RD-524 r2 merged by H 02:41Z; VERIFIED by Tuesday: parents 4bc4868 + 402a97e, tree 8ab01a0 == 402a97e^{tree}). CI on f95917f (Build 35680313757): 31 failed / 3910, NEW = none vs the known set, HS3 LEFT (2nd pass, flake reading).
@@ -19,11 +19,11 @@ supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s
 
 ### FLOOR
 - `%38` **H** (ctx ~71%): merge chain, then RD-641 (next build item), then its queued proofs (rd607, rd631, rd510, rd531, rd438, rd616r2, **RD-638 = F-A2 built @ 0ab8a05**). RD-583 ruled **DEFER with RD-584** (comment 38019). H plans to hand over after RD-531's READY; at its wrap: score, pane_close, launch the lane-A successor from HANDOVER-S79H.
-- `%36` **G**: READY: RD-526, RD-527, RD-630 (@ d4c623b, arm-ttk CI workflow). RD-528 green but its READY is HELD on an invalid Q7 arm (Q7b queued). Built + queued: rd529, rd471, rd472, listing, devscripts, **RD-643 lane-C @ 3128227** (setup-check refuses a bad AOAI endpoint, mirrors the app's SOURCED_SUFFIXES). **Resubmission handover doc DRAFT** = `docs/resubmission/2026-09-22_resubmission-handover-for-kam.md` on `resubmission-handover-s78g` @ 1d08560 (this is the body of the zip email). RD-642 (README:382) is parked until after the resubmission. **Commissioned 13:4x: run feedback-sweep.sh now and mail the line** (Kam asked; answer owed to him when it lands).
+- `%36` **G**: READY: RD-526, RD-527, RD-630 (@ d4c623b, arm-ttk CI workflow). RD-528 green but its READY is HELD on an invalid Q7 arm (Q7b queued). Built + queued: rd529, rd471, rd472, listing, devscripts, **RD-643 lane-C @ 3128227** (setup-check refuses a bad AOAI endpoint, mirrors the app's SOURCED_SUFFIXES). **Resubmission handover doc DRAFT** = `docs/resubmission/2026-09-22_resubmission-handover-for-kam.md` on `resubmission-handover-s78g` @ 1d08560 (this is the body of the zip email). RD-642 (README:382) is parked until after the resubmission. **Commissioned 13:3x: run feedback-sweep.sh now and mail the line** (Kam asked; answer owed to him when it lands).
 - **Package-gate flags to carry** (in addition to 57/59's): every scriptContent mutant proven to PARSE before its red counts (G's Q7 lesson); RD-630's trigger list carries the dead `rd-*-s78g` pattern; no red run in Actions; lane-C branches never run CI Build (every lane-C PASS is local); RD-643 three-rule note (wizard = save < setup-check < test policy), residuals 12/13.
 
 ### KAM (live board)
-- 13:33 "Do you get feedback from the Nexus AI and Quick Quoting tool as submitted by testers?" + 13:34 a pasted tester conversation (QQ: pull up old quotes by quote number). **Answered 13:4x (201):** no to both. QQ mails each item to FEEDBACK_NOTIFY (him). NexusAI's boot sweep is not reaching Tuesday; G is running it now. Offered: forward QQ mails to tuesday-agent@, and add Tuesday as a notify recipient in the next QQ release (his go, live tool). **OWED: relay G's sweep result to him.** The QQ request is parked in `projects_index/clarifications_register.md` for the next Vision brief.
+- 13:33 "Do you get feedback from the Nexus AI and Quick Quoting tool as submitted by testers?" + 13:34 a pasted tester conversation (QQ: pull up old quotes by quote number). **Answered 13:3x (201):** no to both. QQ mails each item to FEEDBACK_NOTIFY (him). NexusAI's boot sweep is not reaching Tuesday; G is running it now. Offered: forward QQ mails to tuesday-agent@, and add Tuesday as a notify recipient in the next QQ release (his go, live tool). **OWED: relay G's sweep result to him.** The QQ request is parked in `projects_index/clarifications_register.md` for the next Vision brief.
 
 ## 🔴 DELTA 59 — 2026-09-22 11:5x ROTATION HANDOVER (s78, ctx 80%, safe boundary). **READ THIS FIRST, THEN 58/57. DELTA 51's OWED ZIP STANDS.**
 
