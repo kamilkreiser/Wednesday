@@ -1,0 +1,133 @@
+"""round18C.py — the ONE source of this round's pins for every gate18C drafter script (a wrong pin in the prompt is the most expensive slip; every
+script imports this module and asserts against origin / local objects / the READYs — the gate16C drafter's round16C.py shape).
+Values: the seat's SIX READY mails (mail_seatC18_ready*.md, captured 00:39Z / 00:42Z; seven READY rows — PR 4 carries KS-1231 Part A + Part B),
+its 22:55Z (#1036 MERGED) / 23:26Z (six RAISED) / 00:42Z (HOLDING) STATUS mails, its 22:43Z plan confirmation + 22:46Z KS-1257 tail QUESTION,
+Wednesday's brief (briefs_staged/2026-09-22_raise_seatC_18.md GROUPING + QUEUE), her plan ANSWER 22:46:19Z, her `GO: merge #1036` 22:46:56Z and her
+KS-1257 tail ANSWER 22:47:26Z, the drafter's ls-remote 00:40:42Z (lsremote_1.out) and its `git diff --raw --abbrev=40 8c2f7b3fd <head>` ×6 (the
+40-hex blobs). Every value is a CLAIM until a script re-derives it; the scripts print the disagreement, never adopt."""
+DEV = '8c2f7b3fd4fde915b2a24542bc32259b24e092a0'; DEV_TREE = '04b05e093ad8b3d6e55b0fe553d7deb96b247050'   # the base AFTER #1036 (KS-763) squashed on Wednesday's GO 22:46:56Z
+DEV_PRE1036 = '3916eacd12af23bfd464440b4c770f7da0f2dd96'; DEV_PRE1036_TREE = '4b573853be61832f3adc14656de742b6051d5622'   # the brief's tip; rev-list --count --first-parent 3916eacd1..8c2f7b3fd = 1 (the #1036 squash)
+PR1036_HEAD = '4b251997a96034ee8a3359aac357ee17d222c3ef'   # #1036's head; its merged tree over 3916eacd1 = 04b05e093ad8 = DEV_TREE
+TIP64 = '64ab105132eada0621622acf4d6053bc59926780'          # the R16 checker tip for six of the seven rows
+TIPA19 = 'a1931d2f3f99b88748d9db49b9eb36e0572b5e5d'         # the KS-1257 checker tip (Seat B 17th's eight squashes landed)
+SEAT_ALL6 = '52853c8bf6c4ff43585cdade61c637ff8cbaa5d0'     # the all-6 (seven READY rows) tree over DEV (the seat's boot/measure18b.out; fwd/rev/seed-18 shuffle ONE sha; = the s-c18-batch worktree tree)
+SEAT_ALL6_SHORTSTAT = '10 files changed, 1008 insertions(+), 15 deletions(-)'
+SEAT_PAIR_TREE = 'a3becc4c37a9'     # the health.ts PAIR (KS-1231 Part B + KS-1246) over DEV both orders (the seat's 23:26Z STATUS; 12-hex only)
+SEAT_TRIO_TREE = '1b956c660f7c'     # KS-1231 A + B + KS-1246 in three orders over DEV (the seat's 23:26Z STATUS; 12-hex)
+PAIR_BLOB = 'ae6017a84cf7aff42e17e1fe06ed66032e513d8c'; PAIR_LINES = 255   # health.ts with BOTH hunks — the --pair-blob target for #1173 after #1171
+BRIEF_ALL7_OVER_3916 = '1d570b9b23e5cb44a8ba54930dd758fd55b7029a'; BRIEF_PAIR_OVER_3916 = '94d7deceff82cf7496ff2180756fbbe5380919e0'; BRIEF_TRIO_OVER_3916 = '22ca63bb8a09da2c7ef6e040e351a6295da1deb1'
+D = 'Blockchain/Dev/'; AG = D + 'services/api-gateway/'; AU = D + 'services/auth/'; SC = D + 'scripts/'
+LM = '/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model'
+REPO = '/Volumes/DevMASTER/!CODING/Secuura/Blockchain/2_Project_Files'
+PUSH = ['1', '2', '3', '4', '5', '6']
+# a canonical row: (label, run dir, file name under out.md.checker/, sha256[:16], apply options ('' = strict; the ONE accommodation ' --recount --ignore-whitespace' on KS-1231 Part B section 1 — strict rc 0 too, same tree), adds, dels, first hunk header)
+# a file row: dict(path, kind test|product, mode new|modify, dev_blob (40) or None, dev_lines, blob (40 = the head blob), lines, adds, dels, canon=[...], tampers=[(label, path, line, from_count, reds_declared, cover_cells_at_develop)])
+PRS = {
+ '1': dict(n='1167', key='KS-947', tags='F3F4b', kind='test_only', head='4f2b87547d8060646763a5f15ef4a165a1e436bd', tree='fe51775add7817862ba8739d277717e2c417ebc8',
+           branch='refs/heads/feature/ks-947-gate-blindness-f3f4-the-parity-cell-misses-skip-and-r16-f3f4b-1', lane='api-gateway', runner='vitest', tier=1,
+           files=[dict(path=AG + 'src/__tests__/ks733-users-mfa-rate-limit-mount.test.ts', kind='test', mode='modify', dev_blob='f98e22a735613d46e5e006dc7862dcdb5e6b1328', dev_lines=99,
+                       blob='9f50c828743a09459596c1e7aadd2ef0a191e5e4', lines=165, adds=66, dels=0, cells_dev=4, cells=10, controls=4,
+                       canon=[('F3F4b', '2026-09-22_ks947-ornith35b-night2', 'patch.diff', '2539ed9b890df8a0', '', 66, 0, '@@ -96,4 +96,70 @@')],
+                       tampers=[('F3SKIP', AG + 'src/index.ts', 1020, 8, ['RED KS-947 F3 - the users MFA mount declares no limiter option the auth MFA mount does not'], []),
+                                ('F4AUTH', AG + 'src/index.ts', 993, 3, ['RED KS-947 F4 - every mfa-policy operation publishes x-ratelimit-max equal to the auth MFA production max', 'PARITY — the users MFA limiter has the SAME window and max as the auth one'], ['PARITY — the users MFA limiter has the SAME window and max as the auth one']),
+                                ('F4USERS', AG + 'src/index.ts', 1018, 3, ['RED KS-947 F4 - every mfa-policy operation publishes x-ratelimit-max equal to the users MFA production max', 'PARITY — the users MFA limiter has the SAME window and max as the auth one'], ['PARITY — the users MFA limiter has the SAME window and max as the auth one'])])],
+           adds=66, dels=0, lane_dev=710, lane_head=716, files_dev=73, files_head=73, typecheck=[(0, 0)], eslint=[(0, 0)],
+           lock=('23:27:04Z', '23:33:19Z'), push=('23:27:08Z', '23:33:16Z'), ready='23:37:46Z', shell='45 passed, 0 failed (of 45)', a4=None,
+           census=(15, 3346, 3269, {'anchoring:4005 (ks1072-the-latest-anchor-selector-docume)': 35, 'anchoring:4005 (ks815-verification-router-guards-its-own)': 7, 'localhost:6000 (ks815-verification-router-guards-its-own)': 28}),
+           title='KS-947: pin the users MFA limiter option parity and the published max (test-only)', comments=0, prior_prs=[], excised='ks-733', tip='64ab10513'),
+ '2': dict(n='1168', key='KS-1123', tags='F3b-CAST', kind='test_only', head='e17efafa7eac15108cd51bf27eca04902c149603', tree='13f5b691b1eb79b5d19cbf292a1e2d5d3288747d',
+           branch='refs/heads/feature/ks-1123-api-gateway-verify-an-empty-string-0-false-anchor-status-is-r16-f3b-cast-1', lane='api-gateway', runner='vitest', tier=2,
+           files=[dict(path=AG + 'src/__tests__/ks1123-api-gateway-verify-an-empty-string.test.ts', kind='test', mode='new', dev_blob=None, dev_lines=0,
+                       blob='94f08cee8859b4e726b6f2c9f07c5f9405f05582', lines=215, adds=215, dels=0, cells_dev=0, cells=6, controls=3,
+                       canon=[('F3b-CAST', '2026-09-22_ks1123-ornith35b-night', 'patch.diff', '6c3c562aca1c382d', '', 215, 0, '@@ -0,0 +1,215 @@')],
+                       tampers=[('F2', AG + 'src/routes/verification.ts', 746, 1, ['RED KS-1123 F2 - a failed anchor with a stale confidence field stays off-chain-only', 'RED KS-1123 F2 - a confirmed-status blob with no hash and a stale confidence field stays off-chain-only'], ['ks1123-f2-anchor-failed-stale-confidence.test.ts :: 🔴 KS-1123 F2 — a failed anchor with a stale confidence field stays off-chain-only', 'ks1123-f2-anchor-failed-stale-confidence.test.ts :: 🔴 KS-1123 F2 — a confirmed-status blob with no hash and a stale confidence field stays off-chain-only']),
+                                ('F3', AG + 'src/routes/verification.ts', 624, 1, ['RED KS-1123 F3 - tier 1: an EMPTY-STRING status with a real hash and height is off-chain-only'], ['ks1123-f3-empty-status-is-off-chain.test.ts :: 🔴 KS-1123 F3 — tier 1: an EMPTY-STRING status with a real hash and height is off-chain-only'])])],
+           adds=215, dels=0, lane_dev=710, lane_head=716, files_dev=73, files_head=74, typecheck=[(0, 0)], eslint=[(0, 0)],
+           lock=('23:37:07Z', '23:43:31Z'), push=('23:37:08Z', '23:43:25Z'), ready='23:47:33Z', shell='45 passed, 0 failed (of 45)', a4=None,
+           census=(8, 2408, 2353, {'anchoring:4005 (ks1072-the-latest-anchor-selector-docume)': 25, 'anchoring:4005 (ks815-verification-router-guards-its-own)': 5, 'localhost:6000 (ks815-verification-router-guards-its-own)': 20}),
+           title='KS-1123: pin an empty-string, 0 or false anchor status as off-chain-only (test-only, cast)', comments=3, prior_prs=['1002'], excised=None, tip='64ab10513'),
+ '3': dict(n='1169', key='KS-1192', tags='NOQUOTE', kind='test_only', head='9088a3509730c1663ecae3b380e18d17561f9f77', tree='b95f18d1247db353a344878fe1a37655635b8fec',
+           branch='refs/heads/feature/ks-1192-ks871-real-app-canonical-audit-rows-production-cell-does-not-r16-noquote-1', lane='api-gateway', runner='vitest', tier=2,
+           files=[dict(path=AG + 'src/__tests__/ks1192-real-app-production-erasure-door.test.ts', kind='test', mode='new', dev_blob=None, dev_lines=0,
+                       blob='c0fea7ac4cd94e10e66bce1200946c44d030742f', lines=144, adds=144, dels=0, cells_dev=0, cells=4, controls=2,
+                       canon=[('NOQUOTE', '2026-09-22_ks1192-ornith35b-night', 'patch.diff', '8209b9bad1b67b4e', '', 144, 0, '@@ -0,0 +1,144 @@')],
+                       tampers=[('R16', AG + 'src/index.ts', 387, 1, ['RED KS-1192 - the 307 for POST /api/gdpr/erasures carries the production module-load witness: X-CSRF-Token and a Secure cookie', 'RED KS-1192 - a connector WITHOUT subjects:erase is refused by the door under the production premise'], [])])],
+           adds=144, dels=0, lane_dev=710, lane_head=714, files_dev=73, files_head=74, typecheck=[(0, 0)], eslint=[(0, 1)],   # eslint 0 errors / 1 WARNING on the new file (the seat's READY row)
+           lock=('23:46:05Z', '23:52:26Z'), push=('23:46:12Z', '23:52:20Z'), ready='23:56:19Z', shell='45 passed, 0 failed (of 45)', a4=None,
+           census=(5, 1454, 1421, {'anchoring:4005 (ks1072-the-latest-anchor-selector-docume)': 15, 'anchoring:4005 (ks815-verification-router-guards-its-own)': 3, 'localhost:6000 (ks815-verification-router-guards-its-own)': 12}),
+           title='KS-1192: pin the real-app production erasure door under the production premise (test-only)', comments=0, prior_prs=[], excised=None, tip='64ab10513'),
+ '4': dict(n='1171', key='KS-1231', tags='PARTA PARTB', kind='code_patch', head='f17ec0af49d9b3d97e5671176adc70dc3212b7f4', tree='b60cb5694d733b437075b90a9258a7676330a218',
+           branch='refs/heads/feature/ks-1231-a-connector-allow-list-fails-open-when-platform-settings-r16-parta-partb-1', lane='api-gateway', runner='vitest', tier=1,
+           files=[dict(path=AG + 'src/__tests__/ks1231-a-connector-allow-list-fails-open.test.ts', kind='test', mode='new', dev_blob=None, dev_lines=0,
+                       blob='ff079c3c257bde0161ebc43f610abdea92f70170', lines=196, adds=196, dels=0, cells_dev=0, cells=4, controls=2,
+                       canon=[('PARTA-s2', '2026-09-22_ks1231-ornith35b-night', 'section_2.diff', '0033bb21c8c7a633', '', 196, 0, '@@ -0,0 +1,196 @@')], tampers=[]),
+                  dict(path=AG + 'src/routes/verification.ts', kind='product', mode='modify', dev_blob='f888e8cd0bd10c98a508542d75902ab122595157', dev_lines=1489,
+                       blob='bd8165896d173a133859b7a6aa86b94a615d2dbc', lines=1510, adds=24, dels=3, cells_dev=None, cells=None, controls=None,
+                       canon=[('PARTA-s1', '2026-09-22_ks1231-ornith35b-night', 'section_1.diff', '0a768897c42fe375', '', 24, 3, '@@ -1210,13 +1210,34 @@')], tampers=[]),
+                  dict(path=AG + 'src/__tests__/ks1231-info-reader-malformed-container-refused.test.ts', kind='test', mode='new', dev_blob=None, dev_lines=0,
+                       blob='f6592e6d753eb516c4e7917469169dab9936eecb', lines=108, adds=108, dels=0, cells_dev=0, cells=3, controls=2,
+                       canon=[('PARTB-s2', '2026-09-22_ks1231-ornith35b-night2', 'section_2.diff', 'a51a7077f24bc4ad', '', 108, 0, '@@ -0,0 +1,108 @@')], tampers=[]),
+                  dict(path=AG + 'src/services/health.ts', kind='product', mode='modify', dev_blob='7bedc074583d816d997bd6d679043db010804aed', dev_lines=237,
+                       blob='772a70e4c19350ea9e67176696b747194f579e19', lines=254, adds=20, dels=3, cells_dev=None, cells=None, controls=None,
+                       canon=[('PARTB-s1', '2026-09-22_ks1231-ornith35b-night2', 'section_1.diff', 'd037aa38240fe479', ' --recount --ignore-whitespace', 20, 3, '@@ -45,8 +45,25 @@')], tampers=[])],
+           adds=348, dels=6, lane_dev=710, lane_head=717, files_dev=73, files_head=75, typecheck=[(0, 0), (0, 0), (0, 0), (1, 1)],   # health.ts: 1 in-file at head / 1 at develop (delta 0) under the temp tsconfig
+           eslint=[(0, 0), (0, 5), (0, 0), (0, 0)],   # verification.ts 0 errors / 5 warnings, ALL pre-existing at develop (the seat's control)
+           lock=('23:58:54Z', '00:04:53Z'), push=('23:58:54Z', '00:04:48Z'), ready='00:07:59Z', shell='45 passed, 0 failed (of 45)',
+           a4={'PARTA': (2, 4, ['RED KS-1231 - a non-array container (object, string, null) refuses the typed and the untyped create: 403 FORBIDDEN, enforcement never runs', 'RED KS-1231 - a non-object entry, a duplicate caller id or a non-object config refuses the typed and the untyped create: 403 FORBIDDEN, enforcement never runs']),
+               'PARTB': (1, 3, ['RED KS-1231 - a non-array container, a non-object entry, a duplicate caller id or a non-object config answers 403 FORBIDDEN, not allowedDocumentTypes'])},
+           census=(5, 484, 473, {'anchoring:4005 (ks1072-the-latest-anchor-selector-docume)': 5, 'anchoring:4005 (ks815-verification-router-guards-its-own)': 1, 'localhost:6000 (ks815-verification-router-guards-its-own)': 4}),
+           title='KS-1231: refuse a malformed integrations container on create and on connector info (403)', comments=1, prior_prs=[], excised=None, tip='64ab10513'),
+ '5': dict(n='1173', key='KS-1246', tags='SERVICESBODY', kind='code_patch', head='611c9d504463eacd12c37e0be8af11ba67e65c82', tree='454c69ef63d9e2a457a59d20d4653ea0ae6fe8f4',
+           branch='refs/heads/feature/ks-1246-f-2-healthservices-still-reads-responseok-only-a-degraded-r16-servicesbody-1', lane='api-gateway', runner='vitest', tier=1,
+           files=[dict(path=AG + 'src/__tests__/ks1246-f-2-health-services-still-reads.test.ts', kind='test', mode='new', dev_blob=None, dev_lines=0,
+                       blob='84de41765db423554696f1a12c801ef6103c2c22', lines=136, adds=136, dels=0, cells_dev=0, cells=4, controls=3,
+                       canon=[('SERVICESBODY-s2', '2026-09-22_ks1246-ornith35b-night', 'section_2.diff', '2daa85b8c046e74b', '', 136, 0, '@@ -0,0 +1,136 @@')], tampers=[]),
+                  dict(path=AG + 'src/services/health.ts', kind='product', mode='modify', dev_blob='7bedc074583d816d997bd6d679043db010804aed', dev_lines=237,
+                       blob='bca1d9500aa35af6755fba9ae95b6fe7d2aa5f86', lines=238, adds=2, dels=1, cells_dev=None, cells=None, controls=None,
+                       canon=[('SERVICESBODY-s1', '2026-09-22_ks1246-ornith35b-night', 'section_1.diff', '819988738b3714e0', '', 2, 1, '@@ -212,4 +212,5 @@')], tampers=[])],
+           adds=138, dels=1, lane_dev=710, lane_head=714, files_dev=73, files_head=74, typecheck=[(0, 0), (1, 1)], eslint=[(0, 1), (0, 0)],   # ONE NEW eslint warning in the NEW test file (`no-useless-assignment` :77) — the seat's finding (3)
+           lock=('00:11:36Z', '00:17:16Z'), push=('00:11:36Z', '00:17:10Z'), ready='00:20:08Z', shell='45 passed, 0 failed (of 45)',
+           a4={'SERVICESBODY': (1, 4, ['RED KS-1246 - a service answering 200 with status degraded reads degraded in /health/services, and the aggregate says degraded'])},
+           census=(3, 505, 491, {'anchoring:4005 (ks1072-the-latest-anchor-selector-docume)': 5, 'anchoring:4005 (ks815-verification-router-guards-its-own)': 1, 'localhost:6000 (ks815-verification-router-guards-its-own)': 4}),
+           title='KS-1246: /health/services reads a 2xx body status the way the deep check does', comments=0, prior_prs=[], excised=None, tip='64ab10513'),
+ '6': dict(n='1175', key='KS-1257', tags='SETTINGSDEFAULTS (THREEHUNKS)', kind='code_patch', head='be3fb14b6eef1b32cf510a3603287a1ce0e925f7', tree='9cd0a3201aef6c91735e3690955263bb928f09d6',
+           branch='refs/heads/feature/ks-1257-after-platform-settings-has-expired-a-partial-admin-write-r16-settingsdefaults-1', lane='api-gateway', runner='vitest', tier=1,
+           files=[dict(path=AG + 'src/__tests__/ks1230-settings-write-validates-allowed-document-types.test.ts', kind='test', mode='modify', dev_blob='893879a1995031a13d4a1969d24f3aa0c60e5d21', dev_lines=183,
+                       blob='966e055f901cbe9932656dde526843ef5115f058', lines=267, adds=85, dels=1, cells_dev=17, cells=22, controls=19,
+                       canon=[('THREEHUNKS-s2', '2026-09-22_ks1257-ornith35b-night2', 'section_2.diff', '8ab9c06cd8e179d5', '', 85, 1, '@@ -119,4 +119,5 @@')], tampers=[]),
+                  dict(path=AG + 'src/routes/admin.ts', kind='product', mode='modify', dev_blob='20c8a088f5dc34fc1563b3907e7c816e1b9fa3d3', dev_lines=1555,
+                       blob='2e558148f061660ff90744164eaa6e7c2dea9506', lines=1560, adds=12, dels=7, cells_dev=None, cells=None, controls=None,
+                       canon=[('THREEHUNKS-s1', '2026-09-22_ks1257-ornith35b-night2', 'section_1.diff', 'ab13126212432b83', '', 12, 7, '@@ -1104,3 +1104,12 @@')], tampers=[])],
+           adds=97, dels=8, lane_dev=710, lane_head=715, files_dev=73, files_head=73, typecheck=[(0, 0), (0, 0)], eslint=[(0, 0), (0, 16)],   # admin.ts 0 errors / 16 warnings ALL pre-existing at develop (control read)
+           lock=('00:24:06Z', '00:29:49Z'), push=('00:24:06Z', '00:29:46Z'), ready='00:32:55Z', shell='45 passed, 0 failed (of 45)',
+           a4={'THREEHUNKS': (3, 22, ['RED KS-1257 R4b: a partial write after the key expired persists the four default categories beside what it wrote', 'RED KS-1257 R5: a re-save with an EMPTY body after the key expired persists the defaults, not an empty document', 'RED KS-1257 R5: after a partial write past the expiry, GET settings answers every default category and the written one'])},
+           census=(4, 478, 467, {'anchoring:4005 (ks1072-the-latest-anchor-selector-docume)': 5, 'anchoring:4005 (ks815-verification-router-guards-its-own)': 1, 'localhost:6000 (ks815-verification-router-guards-its-own)': 4}),
+           title='KS-1257: lay a post-expiry settings write over the defaults so GET reads them back', comments=0, prior_prs=[], excised=None, tip='a1931d2f3'),
+}
+BATCH_LANE = 742   # api-gateway on the all-6 tree (the seat: 710 + 6 + 6 + 4 + 7 + 4 + 5 = 742)
+# the seat's item-0 tamper-file blobs (2 files; identical at 64ab10513 / 3916eacd1 / 8c2f7b3fd — the drafter's rev-parse 00:4xZ)
+TAMPER_BLOBS = [(AG + 'src/index.ts', '4e7fc1174d5453f9d6f71e3a69f166fc6a08db49'), (AG + 'src/routes/verification.ts', 'f888e8cd0bd10c98a508542d75902ab122595157')]
+# Seat B 18th's pushed PRs so far (its READYs captured beside 00:39Z / 00:42Z; four of seven): (n, key, head, [paths]) — its brief names 7 PRs / 9 files under packages/shared, anchoring, auth, originate
+OR = D + 'services/originate/'; SH = D + 'packages/shared/'; SE = D + 'services/security/'; AN = D + 'services/anchoring/'
+SEATB = [('1170', 'KS-1118', '3e9f7d7b707da88e666ff94c769658f2ba3894b8', [OR + 'src/__tests__/ks1103-verify-hash-field.test.ts']),
+         ('1172', 'KS-1158', 'd74b04678574f5cb7828a82f84577882a3496a66', [OR + 'src/__tests__/ks1058-anchor-failed-preserves-thread-token.test.ts']),
+         ('1174', 'KS-1265', 'e1dea649c7e338ba70a67acd8ce2957edd8058c9', [OR + 'src/__tests__/ks549-documents-create-issuer-name-persist.test.ts', OR + 'src/routes/documents.ts']),
+         ('1176', 'KS-1171', '8ced0d50bb457d04b186b58a504e69b28052afb5', [AN + 'src/__tests__/ks1171-8j-confirmed-wins-over-polled-zero.test.ts', AN + 'src/__tests__/ks1171-guard-3-s-re-poll-reads.test.ts'])]
+SEATB_KEYS = ['KS-1118', 'KS-1158', 'KS-1265', 'KS-1171', 'KS-811', 'KS-1188', 'KS-1181']   # its seven own keys (the brief; push order)
+SEATB_BRIEF_PATHS = [OR + 'src/__tests__/ks1103-verify-hash-field.test.ts', OR + 'src/__tests__/ks1058-anchor-failed-preserves-thread-token.test.ts', OR + 'src/__tests__/ks549-documents-create-issuer-name-persist.test.ts', OR + 'src/routes/documents.ts',
+                     AN + 'src/__tests__/ks1171-8j-confirmed-wins-over-polled-zero.test.ts', AN + 'src/__tests__/ks1171-guard-3-s-re-poll-reads.test.ts', AU + 'src/__tests__/ks811-social-callback-403-code-set-agrees.test.ts',
+                     AU + 'src/__tests__/ks1188-mfa-sibling-sites-503.test.ts', SH + 'src/__tests__/ks727-errorhandler-class-guard.test.ts']   # the 9 files its brief tables (the gate re-reads the files API)
+SEATB_DIRS = [OR, SH, SE, AN, AU]
+SEATB_DEV = DEV_PRE1036   # Seat B 18th built on 3916eacd1 (BEFORE the #1036 squash) — its compares read behind=1 against 8c2f7b3fd; not this gate's
+ARCHIVED = ['KS-501', 'KS-480', 'KS-978', 'KS-721', 'KS-522', 'KS-726', 'KS-535', 'KS-867', 'KS-878', 'KS-914', 'KS-1238', 'KS-1282', 'KS-1062', 'KS-971', 'KS-1078', 'KS-921', 'KS-490',
+            'KS-597', 'KS-727', 'KS-764', 'KS-879', 'KS-1020', 'KS-835', 'KS-1270', 'KS-549', 'KS-733', 'KS-815', 'KS-1013', 'KS-1058', 'KS-1103']   # 30 (the READYs' ARCHIVED-TICKET READS block: the standing 24 + six)
+CONTENT_LIVE = ['KS-1230', 'KS-1072', 'KS-999', 'KS-871', 'KS-763', 'KS-1227', 'KS-1213', 'KS-1073', 'KS-1050', 'KS-1204', 'KS-1183', 'KS-1018', 'KS-1285', 'KS-1031', 'KS-1175', 'KS-1250', 'KS-1273', 'KS-958', 'KS-1185', 'KS-1280', 'KS-730', 'KS-692']   # 22 (the READYs' Live-but-foreign / content / HOLDS block)
+OWN = [PRS[p]['key'] for p in PUSH]
+TIER1 = ['1', '4', '5', '6']   # KS-947 (auth-surface pin) + the three code_patch PRs (product bytes on api-gateway) — the commission item 1
+CODE_PATCH = ['4', '5', '6']
+def run_dir(rd): return LM + '/runs/' + rd
+def canon_path(row): return LM + '/runs/' + row[1] + '/out.md.checker/' + row[2]
+def ready_regex(): return r'READY FOR QA \(Seat C 18th\): PR (\d+) (KS-\d+)[^\n]*? — #(\d+) at head ([0-9a-f]{40})'
+def all_paths(): return [f['path'] for p in PUSH for f in PRS[p]['files']]
+def distinct_paths(): return sorted(set(all_paths()))
+GO_STRING = 'GO: merge #1167, #1168, #1169, #1171, #1173, #1175 batch'
