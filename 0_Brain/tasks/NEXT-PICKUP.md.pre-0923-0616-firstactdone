@@ -12,24 +12,13 @@ supersede: replace wholesale at the next pickup; do not append
 
 **Kam:** on the LIVE board; last rows 2026-09-22 20:53:05–20:53:49 (four cards ruled in 44 s, all on the defaults — receipted within the minute). Nothing since; nothing owed to him at this boot. **His 15:16 reading is still in force: at ~75%+ weekly usage MORE work to Ornith and NO new Claude build/raise lane** — usage read 85% at the wrap (gauge fresh), so **do not launch a raise seat on this file's authority**: re-read the gauge, and if it has renewed or he says so, the raise lane is the first Claude launch. The file drawer still awaits his first click. Floor at the wrap: `%0` + `%9` monitor only — **no Claude seat live**; Ornith idle with an empty queue; stash list 24 (never drop).
 
-### ✅ THE 09-22 FIRST ACT IS DONE — all four FEED-17 passes are HELD (06:06 on 2026-09-23, the 06:0x seat). DO NOT RE-RUN IT.
-Each was source-read against its brief and each is BYTE-IDENTICAL to the FEED-17 drafter's golden (`cmp` rc 0), held via `hold_ready.py --title-from-brief` after a clean `--dry-run`:
-- `READY_KS-1139-ERREXITBEHAVIOUR-1_...PASS-8of8_2026-09-23.diff.md` (test_only) — the diff bumps runtime `TOTAL_CELLS` itself, so the pickup's "the raiser bumps it" note is DISCHARGED.
-- `READY_KS-1081-NEITHERTEMPLATE-1_...PASS-8of8_2026-09-23.diff.md` (test_only)
-- `READY_KS-1033-MISSINGBASE-1_...PASS-7of7_2026-09-23.diff.md` (bash_patch; applied product identical by the two checkers' own `after.sh`) — HELD/GATED, a gate-named design change.
-- `READY_KS-1084-TPVTENANT-1_...PASS-7of7_2026-09-23.diff.md` (code_patch) — **Kam's `c` ruling (card `secuura-ks1084-...-p0`, 2026-09-22 18:11) was MISSING from the artefact and has been appended verbatim** under its own heading; backup `.pre-0923-0609-rulingclause` beside it. **OWED: `hold_ready.py` has no way to carry a card ruling — it templates from the run's artefacts only.**
-
-### 🔴 FIRST ACT FOR THE NEXT SEAT — READ BACK THE FEED-18 DRAFTER, THEN START THE MODEL
-A brief-writing drafter was commissioned at ~06:1x to write THREE new FEED-18 briefs and queue them. **It produces no wake of its own once this seat is gone.** Do this, in order:
-1. `/usr/bin/grep -vc '^#' 2_Project_Files/local-model/night/queue.md` — if it is still only blank lines, the drafter did not land; re-commission it.
-2. Read each new `night/briefs/<KS>.md` against the file it names at the tip before trusting the queue line.
-3. Confirm the floor: `curl -s http://127.0.0.1:11434/api/tags` must list `ornith:35b` (started 06:1x this morning — doctor had it NOT serving), and `launchctl list | grep ornith` — both legs last-exited 4, the empty-queue refusal.
-4. Then let `com.wednesday.ornith-loop` pick it up, or run `night/night_run.sh` by hand, and WATCH THE FIRST VERDICT.
-
-**⚠ KS-1163 IS NOT ORNITH'S.** The 09-22 pickup routed it to Ornith at FEED 18; `done.md` carries FOUR rows ending *"REALLOCATED TO A CLAUDE AGENT 2026-09-16 18:0x by Wednesday under Kam's 07:57Z counter"*. It stays batched for a Claude seat. Every other briefed T1/T2b candidate is ALSO at the counter (2 rows each) — which is why FEED 18 needed NEW briefs rather than a requeue.
-
-### OWED 0 (dated today) — STILL BLOCKED, CORRECTLY
-The 03:30 NAS leg of 09-23 is STILL RUNNING (`com.wednesday.nassync` pid 6207 in `launchctl list`; its log exists; `scheduler/state/nas_sync_last_wednesday.txt` still reads 09-22 because that file is written at the END). `/Volumes/KK_DEV_Local` IS mounted. **Re-read the state file — do NOT read the unison log with `tail`: it is progress output with `\r` separators, 3.5 MB in "4 lines".** When the state file shows a 09-23 run, run `5_Project_History/2026-09-21_portable_blind_copy_KK_DEV_Local.sh` and tell Kam the total + rc.
+### 🔴 FIRST ACT — HOLD THE FOUR FEED-17 PASSES (deferred here deliberately: the shift change said start nothing new; a hold needs a source read per diff)
+All four PASSed round 1 on 2026-09-22 and are UNHELD. For each: read the run's `out.md.checker/patch.diff` against its brief (the product hunk IS the ruling — quote it), then hold:
+- **KS-1084 part C** `PASS 7/7` 20:10 — run `2_Project_Files/local-model/runs/2026-09-22_ks1084-ornith35b-night3`, brief `night/briefs/KS-1084-R17-TPVTENANT.md`, golden `runs/2026-09-22_feed17-drafter-precheck/TPVTENANT` (third-party-verifiers `proxy.ts` `@@ -697,7` — region-disjoint from part A's `:674-:680`; **the HELD/GATED clause is Kam's `c` and must stay verbatim in the READY**).
+- **KS-1033** `PASS 7/7` 20:12 — run `…_ks1033-ornith35b-night2`, brief `KS-1033-R17-MISSINGBASE.md`, golden `…feed17-drafter-precheck/MISSINGBASE` (the fail-open base; a gate-named design change → HELD/GATED).
+- **KS-1139** `PASS 8/8` 20:13 — run `…_ks1139-ornith35b-night2`, brief `KS-1139-R17-ERREXITBEHAVIOUR.md` (test_only; the raiser bumps runtime `TOTAL_CELLS`).
+- **KS-1081** `PASS 8/8` 20:15 — run `…_ks1081-ornith35b-night2`, brief `KS-1081-R17-NEITHERTEMPLATE.md` (test_only).
+Command shape: `python3 2_Project_Files/local-model/night/hold_ready.py <run-dir> <golden-dir> <ROWID> --title-from-brief <brief.md>` (read its usage first). **Known tool gaps:** it has NO `comment_patch` branch (assemble by hand from the run's artefacts in the 2026-09-20 `READY_KS-1277-N60-1` shape — that is how KS-1019 was held), and its golden compare trips on the `@@` function-context suffix (diff the `+`/`-` lines yourself; KS-1084 part A was byte-identical by that test). Then the queue is empty → FEED 18.
 
 ### THE STATE, MEASURED AT THE WRAP
 1. **Round 19 is CLOSED OUT.** develop `2bc5ccf63b8c40911afb568b03cace066238ffcf`, tree `b4f2a8beaecdf758d46c719a0f3becc677e421cf` (21 PRs: #1182–#1201 then #1180–#1197; verified from the commit objects). Seats scored + closed: A 16th 0.97 · B 20th 0.98 · C 20th 1.00; gates 19B/19C closed. Kintsugi runs `3bad652d1` with the first KS-1175 anchor confirmed (`anchor_1526505a-…`, tx `0180573229…76fb`, block 4685580). The Secuura checkout's local develop is `3bad652d1` (21 behind origin) — LEAVE IT; its launcher now runs `ls-remote` only (Kam's `c`).
