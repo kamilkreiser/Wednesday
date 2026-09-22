@@ -1,0 +1,127 @@
+# READY — KS-1084-1084SIGTENANT-R16B (Ornith, briefed, code_patch, vitest) — PASS 7/7 — HELD for QA
+
+> ⚠ **CANONICAL PATCH = `2_Project_Files/local-model/runs/2026-09-22_ks1084-ornith35b-night/out.md.checker/patch.diff`** (from `ls` at 19:35 2026-09-22; it is `cat` of the section files in order: `cmp` rc 0: `/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/runs/2026-09-22_ks1084-ornith35b-night/out.md.checker/section_1.diff`, `/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/runs/2026-09-22_ks1084-ornith35b-night/out.md.checker/section_2.diff`). Checker A2 (verbatim from checker.out): `PASS A2 diff applies at the tip (strict git apply --check, every section, hunk headers consistent)`; CONTENT-compared against the drafter's golden `2_Project_Files/local-model/runs/2026-09-22_feed16-drafter-precheck/SIGTENANT/out.md.checker/patch.diff` (bytes DIFFER: `cmp` rc 1); change lines (`+`/`-`, ordered) IDENTICAL in every file; body lines (context included) identical in every file; hunk headers differ (proxy.ts: golden `@@ -674,7 +674,10 @@` vs run `@@ -674,7 +674,10 @@ export function createProxyRoutes(deps: ProxyRouteDeps): Router {`); APPLIED RESULT not compared (input.json['files'] lacks a touched file's tip content).
+
+**Held 19:35 2026-09-22 by Wednesday after a source read (hold_ready.py, code_patch path — every clause below is COPIED from the checker's own artefacts in `2_Project_Files/local-model/runs/2026-09-22_ks1084-ornith35b-night/out.md.checker`, not typed; the artefact each came from is named in brackets).** Tip `3bad652d17cf111c1e2e1bed1ae7686894637487`.
+- Touched-file set [checker.out A3, verbatim]: `PASS A3 touched-file set == { Blockchain/Dev/services/api-gateway/src/routes/proxy.ts , Blockchain/Dev/services/api-gateway/src/__tests__/ks1084-signatories-forwards-x-tenant-id.test.ts }`
+- Declared set [input.json product_file + suggested_test_file]: `Blockchain/Dev/services/api-gateway/src/routes/proxy.ts` (product) and `Blockchain/Dev/services/api-gateway/src/__tests__/ks1084-signatories-forwards-x-tenant-id.test.ts` (test) — equal to numstat.out's set (2 files).
+- numstat [out.md.checker/numstat.out, verbatim]:
+```
+4	1	Blockchain/Dev/services/api-gateway/src/routes/proxy.ts
+82	0	Blockchain/Dev/services/api-gateway/src/__tests__/ks1084-signatories-forwards-x-tenant-id.test.ts
+```
+- Product hunk `+` count [checker.out A3c, verbatim]: `PASS A3c every '+' line the brief adds is in the product hunk (4 line(s)), and no tip line is re-added as a '+' (A3d)` — product section `+` lines 4 ordered-equal (whitespace-stripped) to the brief's `expected_plus` (ASCII); `-` lines 1.
+- Byte-exactness [checker.out A3i, verbatim]: `A3i: every '+' line the brief adds is in the applied Blockchain/Dev/services/api-gateway/src/routes/proxy.ts byte-exact incl. leading whitespace (apply mode strict): OK 4 line(s) byte-exact incl. leading whitespace (of 4; 4 line(s) added by the apply)` [a3i_indent.out: `OK 4 line(s) byte-exact incl. leading whitespace (of 4; 4 line(s) added by the apply)`]
+- Hunk audit [out.md.checker/hunk_audit.out, first line verbatim]: `sections=2 miscounted_sections=0`
+- Sections [out.md.checker/sections.json + section_<k>.opts + apply_check_strict_<k>.out]:
+- section 1 `section_1.diff` → `Blockchain/Dev/services/api-gateway/src/routes/proxy.ts` (hunks=1, miscount=0; applied file per `section_1.opts`: `section_1.diff`, git-apply options: `(none — strict)`; `apply_check_strict_1.out`: EMPTY (strict apply --check clean))
+- section 2 `section_2.diff` → `Blockchain/Dev/services/api-gateway/src/__tests__/ks1084-signatories-forwards-x-tenant-id.test.ts` (hunks=1, miscount=0; applied file per `section_2.opts`: `section_2.diff`, git-apply options: `(none — strict)`; `apply_check_strict_2.out`: EMPTY (strict apply --check clean))
+- RED-FIRST [checker.out A4, verbatim]: `PASS A4 RED-FIRST: src/__tests__/ks1084-signatories-forwards-x-tenant-id.test.ts fails at the untouched tip (1 failed / 2 run; controls green; assertion reds)` [red_first.json: failed=1 of total=2; red cell(s): ['KS-1084 part A: GET /api/signatories forwards the caller verified tenant to originate RED KS-1084 - originate receives x-tenant-id equal to the caller JWT tenant, not none']]
+- GREEN-AFTER [checker.out A5, verbatim]: `PASS A5 GREEN-AFTER: src/__tests__/ks1084-signatories-forwards-x-tenant-id.test.ts passes with the product hunk (2 passed / 2 run)` [green_after.json: failed=0 of total=2, success=True]
+- Whole suite [out.md.checker/suite_delta.out, verbatim]: `baseline: total=742 failed=0 | after: total=744 failed=0` · `NEW reds: []` [baseline_suite.json total=742 failed=0; after_suite.json total=744 failed=0]
+- A6 [verbatim]: `PASS A6 whole services/api-gateway suite: no NEW red vs the untouched tip` · A7 [verbatim]: `PASS A7 tsc --noEmit for services/api-gateway: rc 0 after the patch (baseline rc=0)`
+- SUMMARY [checker.out, verbatim]: `SUMMARY files=2 +86/-1 test=src/__tests__/ks1084-signatories-forwards-x-tenant-id.test.ts red_first=yes apply_mode=strict`
+
+**PR NOTES for the raise seat:** CODE_PATCH — PRODUCT BYTES CHANGE: `Blockchain/Dev/services/api-gateway/src/routes/proxy.ts` (+4/-1 per numstat.out) and the test file `Blockchain/Dev/services/api-gateway/src/__tests__/ks1084-signatories-forwards-x-tenant-id.test.ts` (+82/-0); two files. Apply PER SECTION with the checker's apply mode — section 1 `section_1.diff`: `git apply -p1` (strict); section 2 `section_2.diff`: `git apply -p1` (strict) — at the tip `3bad652d17cf111c1e2e1bed1ae7686894637487` (re-check `git ls-remote origin develop` first; if develop moved, re-run `git apply --check` per section and state it). Tier: AT LEAST tier 2 (product code changes) — the gate decides. Input: `2_Project_Files/local-model/runs/2026-09-22_ks1084-ornith35b-night/input.json`. brief NOT LOCATED under night/briefs/ (no claim made). Verdict source: `2_Project_Files/local-model/runs/2026-09-22_ks1084-ornith35b-night/checker.out`.
+
+```diff
+--- a/Blockchain/Dev/services/api-gateway/src/routes/proxy.ts
++++ b/Blockchain/Dev/services/api-gateway/src/routes/proxy.ts
+@@ -674,7 +674,10 @@ export function createProxyRoutes(deps: ProxyRouteDeps): Router {
+         const originateUrl = services.originate?.url || 'http://originate:4000';
+         const qs = req.url.includes('?') ? req.url.slice(req.url.indexOf('?')) : '';
+         const upstream = await fetch(`${originateUrl}/api/signatories${qs}`, {
+-          headers: { 'Authorization': req.headers.authorization || '' },
++          // KS-1084: forward the tenant authenticateToken verified (it writes x-tenant-id onto req.headers,
++          // middleware/auth.ts) so single-tenant originate does not scope this read to DEFAULT_TENANT_ID.
++          headers: { 'Authorization': req.headers.authorization || '',
++            ...(req.headers['x-tenant-id'] ? { 'x-tenant-id': String(req.headers['x-tenant-id']) } : {}) },
+         });
+         const body = await upstream.json().catch(() => ({}));
+         return res.status(upstream.status).json(body);
+--- /dev/null
++++ b/Blockchain/Dev/services/api-gateway/src/__tests__/ks1084-signatories-forwards-x-tenant-id.test.ts
+@@ -0,0 +1,82 @@
++/**
++ * KS-1084 (part A, the READ site): GET /api/signatories (routes/proxy.ts) hand-builds its fetch to originate with
++ * Authorization only. authenticateToken has already written the caller verified tenant onto req.headers x-tenant-id
++ * (middleware/auth.ts), but the fetch never forwards it, so single-tenant originate scopes the read to
++ * DEFAULT_TENANT_ID. The stub originate below records what it received; the RED cell asserts x-tenant-id.
++ * Shape: ks1238-hand-forwarded-routes-send-no-caller-bearer.test.ts (real gateway app, stub upstream on port 0).
++ */
++import { describe, it, expect, beforeAll, afterAll, vi } from 'vitest';
++import http from 'http';
++import jwt from 'jsonwebtoken';
++import type { AddressInfo } from 'net';
++
++vi.mock('../db', async (orig) => {
++  const real = (await orig()) as Record<string, unknown>;
++  return { ...real, isDbAvailable: () => true, query: async () => ({ rows: [], rowCount: 0 }) };
++});
++vi.mock('@secuura/shared', async (orig) => {
++  const real = (await orig()) as Record<string, unknown>;
++  return { ...real, isSessionActive: async (id: string) => (id === 'ks1084-live' ? true : null) };
++});
++
++const PRIV = process.env.__TEST_JWT_PRIVATE_PEM as string;
++const CALLER_TENANT = 'b1084000-0000-4000-8000-000000001084';
++const SIG = '/api/signatories';
++type Seen = { url: string; tenant: string; bearer: string };
++const seen: Seen[] = [];
++
++async function listen(server: http.Server): Promise<string> {
++  await new Promise<void>((resolve) => server.listen(0, '127.0.0.1', () => resolve()));
++  return 'http://127.0.0.1:' + String((server.address() as AddressInfo).port);
++}
++function userJwt(sessionId: string): string {
++  return 'Bearer ' + jwt.sign({ userId: 'u-ks1084', email: 'ks1084-user@secuura.io', role: 'user', verificationLevel: 'email', authMethod: 'email', tenantId: CALLER_TENANT, sessionId },
++    PRIV, { algorithm: 'RS256', expiresIn: '10m' });
++}
++
++let upstream: http.Server | undefined;
++let gateway: http.Server | undefined;
++let gatewayUrl = '';
++beforeAll(async () => {
++  upstream = http.createServer((req, res) => {
++    const url = req.url || '';
++    if (url.startsWith(SIG)) seen.push({ url, tenant: String(req.headers['x-tenant-id'] ?? 'none'), bearer: String(req.headers.authorization ?? 'none') });
++    res.writeHead(200, { 'content-type': 'application/json' });
++    res.end(JSON.stringify({ success: true, data: [] }));
++  });
++  const upstreamUrl = await listen(upstream);
++  for (const name of ['ANALYTICS', 'ANCHORING', 'AUTH', 'BILLING', 'GOVERNANCE', 'KYC', 'NFT', 'NOTIFICATION', 'ORIGINATE', 'PRISM',
++    'REFERRAL', 'SECURITY', 'STAKING', 'TIMESTAMPING', 'TRANSFER', 'VC_ISSUER', 'WALLET']) vi.stubEnv(name + '_SERVICE_URL', upstreamUrl);
++  vi.stubEnv('NODE_ENV', 'test');
++  vi.stubEnv('GATEWAY_VOUCH_SECRET', '');
++  delete process.env.JWT_JWKS_URL;
++  vi.resetModules();
++  const app = (await import('../index')).default;
++  gateway = http.createServer(app as http.RequestListener);
++  gatewayUrl = await listen(gateway);
++}, 60000);
++afterAll(async () => {
++  for (const s of [gateway, upstream]) if (s) { s.closeAllConnections(); await new Promise<void>((r) => s.close(() => r())); }
++  vi.unstubAllEnvs();
++});
++
++/** GET a path through the real gateway as a live user of CALLER_TENANT; returns the status and what originate recorded. */
++async function get(path: string): Promise<[number, Seen[]]> {
++  const before = seen.length;
++  const res = await fetch(gatewayUrl + path, { headers: { authorization: userJwt('ks1084-live') } });
++  await res.text();
++  return [res.status, seen.slice(before)];
++}
++describe('KS-1084 part A: GET /api/signatories forwards the caller verified tenant to originate', () => {
++  it('RED KS-1084 - originate receives x-tenant-id equal to the caller JWT tenant, not none', async () => {
++    const [status, recorded] = await get(SIG);
++    expect(status).toBe(200);
++    expect(recorded.map((h) => h.tenant)).toEqual([CALLER_TENANT]);
++  });
++  it('CONTROL - the caller Bearer still reaches originate and the query string is relayed', async () => {
++    const [status, recorded] = await get(SIG + '?limit=5');
++    expect(status).toBe(200);
++    expect(recorded.map((h) => h.url)).toEqual([SIG + '?limit=5']);
++    expect(recorded.map((h) => h.bearer.startsWith('Bearer '))).toEqual([true]);
++  });
++});
+```
