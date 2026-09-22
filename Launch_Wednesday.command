@@ -790,7 +790,7 @@ export ANTHROPIC_DEFAULT_OPUS_MODEL=claude-opus-5-5
 # it. rc > 128 names the signal (129 SIGHUP · 130 SIGINT · 143 SIGTERM); 0 = a normal quit. The log is
 # machine-local (cockpit/logs/ is gitignored) — each machine records its own seats. exited_seat_check.sh
 # still finds claude under the pane (it is now a child of this bash, not its replacement).
-claude --dangerously-skip-permissions --model claude-opus-5-5 --fallback-model opus "$INITIAL_PROMPT"
+claude --dangerously-skip-permissions --model "claude-opus-5-5[1m]" --fallback-model opus "$INITIAL_PROMPT"
 SEAT_RC=$?
 mkdir -p "$PROJECT_DIR/2_Project_Files/fleet/cockpit/logs"
 printf '%s seat=%s host=%s rc=%s\n' "$(date '+%F %T')" "${WED_AGENT:-wednesday}" "$(hostname -s)" "$SEAT_RC" >> "$PROJECT_DIR/2_Project_Files/fleet/cockpit/logs/seat_exit.log"

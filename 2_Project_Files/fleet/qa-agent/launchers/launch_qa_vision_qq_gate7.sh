@@ -557,4 +557,4 @@ PROMPT="$(cat "$PROMPT_FILE")
 
 $PIN_BLOCK"
 cd "$QA_DIR" || { echo "cannot enter $QA_DIR" >&2; exit 16; }
-exec claude --dangerously-skip-permissions --model claude-opus-5-5 --fallback-model claude-opus-5 "$PROMPT"
+exec claude --dangerously-skip-permissions --model "claude-opus-5-5[1m]" --fallback-model claude-opus-5 "$PROMPT"
