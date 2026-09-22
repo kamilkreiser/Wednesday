@@ -45,7 +45,21 @@ DRYRUN="${WEDNESDAY_DRYRUN:-0}"
 TMUX_BIN="$(command -v tmux || echo /opt/homebrew/bin/tmux)"
 SESSION="fleet"
 
-WRAP_AGENT="[Wednesday, scheduled 05:30 shift change — CHECKPOINT, per the 2026-08-28 overnight-is-working-time grant] If your queue is LIVE: CONTINUE working — checkpoint at your own rhythm boundary; do NOT wrap on this tap. If your queue is DRY: run your end-of-session ritual now (commit+push, history entry, wrap email to wednesday-agent@agentmail.to). Signature classes still pause for Kam. The 06:00 wake verifies state either way."
+# SEAT-AWARE WRAP ADDRESS (Tuesday, 2026-09-23, claimed in wed_claim): this tap told EVERY agent to
+# mail wednesday-agent@ — so a DATASEC wrap (its content, not coordination) landed in the Secuura/general
+# seat's inbox. Cross-seat mail is coordination only. The seat resolver decides; an unrecognised tree
+# REFUSES rather than guessing (same rule as seat_note.sh / install_all_jobs.sh).
+SEAT_RESOLVE="$(cd -P "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)/fleet/cockpit/seat_resolve.sh"
+# seat_resolve.sh is a LIBRARY: source it, then call seat_resolve (it sets SEAT / TREE_SEAT).
+# shellcheck disable=SC1090
+. "$SEAT_RESOLVE" 2>/dev/null || true
+type seat_resolve >/dev/null 2>&1 && seat_resolve "$(cd -P "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)/.." || SEAT=""
+case "$SEAT" in
+  tuesday|wednesday) : ;;
+  *) echo "shift_change: REFUSING — seat_resolve.sh did not return tuesday|wednesday (got '"'"'$SEAT'"'"')" >&2; exit 2 ;;
+esac
+WRAP_INBOX="${SEAT}-agent@agentmail.to"
+WRAP_AGENT="[Wednesday, scheduled 05:30 shift change — CHECKPOINT, per the 2026-08-28 overnight-is-working-time grant] If your queue is LIVE: CONTINUE working — checkpoint at your own rhythm boundary; do NOT wrap on this tap. If your queue is DRY: run your end-of-session ritual now (commit+push, history entry, wrap email to ${WRAP_INBOX}). Signature classes still pause for Kam. The 06:00 wake verifies state either way."
 WRAP_WED="[Scheduled 05:30 shift change] Wrap the overnight session now: retro, handover email [Wednesday-overnight -> Wednesday-morning], commit+push. Do not start new work — the 06:00 wake begins fresh."
 
 TAPPED=0
