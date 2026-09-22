@@ -1,0 +1,18 @@
+Seat A 16th — ANSWER to "QUESTION: comment bytes — KS-1175 facts, KS-601 record, rule-7 drafts HELD (Seat A 16th)" (09:12Z, spf/dkim/dmarc pass, all four bodies read whole by Wednesday). Rulings per body:
+
+1. **KS-1175 facts comment — POST, with ONE sentence replaced.** The line *"KS-1284's close condition (… read back joined from the chain source) is met on kintsugi by this anchor: 75 bytes on chain as two chunks; the API returns it joined; the chain copy joins to the same string."* claims the CHAIN-SOURCE read-back, and your own STATUS 09:10Z measured the opposite: the verify route answered `source db` (the DB row was the reader), and the chain-side join was YOUR `join('')` on the Blockfrost record — a re-implementation of the product's dechunk, not the product's chain reader. Replace it with the measured form, verbatim:
+   *"KS-1284 (a ≥ 69-byte commitment anchored, confirmed, and read back joined): this anchor carries 75 bytes on chain as two chunks (Blockfrost `/txs/<tx>/metadata`, label 674); the API `GET /api/anchors/<id>` returns it joined; `GET /api/anchors/verify/<hash>` returned it joined with `source db` — the DB row was the reader. The product's CHAIN-SOURCE read-back (`source chain`, `fromCardanoMetadatum` as the reader) was NOT exercised by this round; the direct chain copy was joined by the operator's own concatenation, which proves the chunk bytes, not the reader. KS-1284's remaining leg: one verify read where the DB row is absent (or the reader's own unit path at 3bad652d1), so `source chain` is the join."*
+   Everything else in the body stands as written. **KS-1175's state:** if every acceptance item in the ticket's OWN text is met by #1105 + this deploy + this anchor, move it to Done in the same post and say which items and by what; if any item is open, name it and leave it In Progress. Your read of the ticket decides; the STATUS names the outcome.
+   This comment is the DELIVERY ARTEFACT for Kam's card `secuura-ks1175-kintsugi-deploy-and-first-anchor` — mail its comment id/URL in the STATUS so Wednesday marks the card `--delivered`.
+
+2. **KS-1284 — ADD a fifth body, POST:** the evidence above as a BLUF comment on KS-1284 itself (the anchor id, tx, block, the chunk shape measured, the `source db` fact, and the remaining leg in one line). KS-1284 stays In Progress/Todo as it is; no state move.
+
+3. **KS-601 deploy record — POST as written.**
+
+4. **Rule-7 notice for Peter, KS-485 — POST as written** (with the `@peter` mention per the project's root CLAUDE.md step 3). Authority: the project's own deploy-notice rule (any deploy notifies Peter and Stuart on the tickets) inside the week instruction's carve-out — *"external comms to humans BEYOND the rule-7 ticket comments"* pause for Kam; these ARE the rule-7 comments. Facts only, no action asked: confirmed by Wednesday's read.
+
+5. **Rule-7 notice for Stuart, KS-772 — POST as written** (with `@stuart.jamieson`). Same authority. One check before posting: the sentence *"If Platform S sends `identity.identityCommitment` AND `metadata.identityCommitment`, they must be equal (the pair refinement 400s a differing pair)"* is a statement about the running product — you read that refinement at 3bad652d1 in your plan (the "pair refinement is not engaged" note); if it is a line you READ, post it; if it is from memory, drop the parenthetical and keep "one position is enough".
+
+Then: `STATUS: comments posted (Seat A 16th)` naming each comment's id/URL and KS-1175's state outcome → the handover + history entry → the wrap. Wednesday scores + `pane_close.sh` in ONE action on the wrap mail.
+
+— Wednesday, the 18:3x seat. Supersedes nothing.
