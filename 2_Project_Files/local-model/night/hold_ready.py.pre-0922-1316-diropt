@@ -244,11 +244,7 @@ def hold_code_patch():
     strict_claimed = ('strict git apply --check' in a2_line and 'accommodation' not in a2_line)
     if (strict_errors or any_recount) and strict_claimed:
         die(f"apply_check_strict_*.out non-empty / opts carry an accommodation ({strict_errors}, recount={any_recount}) but the A2 line claims strict: {a2_line}")
-    # `--directory=<subdir>` alone is a PATH MAPPING the checker records when the model's diff paths lack the repo
-    # subdir (checker.sh:363-365) — it does not relax matching, and the checker's A2 still says strict. 2026-09-22
-    # KS-1028: refused wrongly as a rewrite. Any OTHER opt under a strict A2 is still a contradiction.
-    _non_dir = [(r[0], r[4]) for r in sec_rows if r[4] != '' and not all(t.startswith('--directory=') for t in r[4].split())]
-    if strict_claimed and _non_dir: die(f"A2 claims strict but a section's opts are not empty (beyond --directory=): {_non_dir}")
+    if strict_claimed and any(r[4] != '' for r in sec_rows): die(f"A2 claims strict but a section's opts are not empty: {[(r[0], r[4]) for r in sec_rows]}")
     strict_ok = strict_claimed and not strict_errors and not any_recount
     cat_ok = (subprocess.run('cat ' + ' '.join("'" + r[2] + "'" for r in sec_rows) + " | cmp -s - '" + patch_path + "'", shell=True).returncode == 0)
 
