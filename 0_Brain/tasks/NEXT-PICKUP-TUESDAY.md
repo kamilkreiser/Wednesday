@@ -8,6 +8,13 @@ supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s
 
 ## 🔴 DELTA 71 — 2026-09-23 06:2x ROTATION HANDOVER (s81, ctx 81%, safe boundary). **READ THIS FIRST, THEN 70/69. DELTA 51's OWED ZIP STANDS.**
 
+### 🔴 TWO COORDINATOR SEATS IN THIS TREE — s81 ENDED WITHOUT ROTATING (06:2x)
+- **A second seat booted at 06:00:03 in pane `%52`**, started by `Launch_Wednesday.command` IN THE TUESDAY TREE (pane named `wednesday`, statusline `[Tuesday] ctx:24%`). Measured by s81 from the process table, not from the tap that announced it: pid 50966, lstart Wed 23 Sep 06:00:03.
+- **Root cause is the KNOWN one:** the scheduler's 06:00 wake job is hardcoded to `Launch_Wednesday.command`, so on this machine it boots a coordinator out of Tuesday's tree — the same family as the `com.wednesday.*` installer card Kam ruled `parameterise` on 2026-09-09 and the Ornith jobs found on the mini 2026-09-22. **OWED (shared tooling, claim with Wednesday): make the 06:00 wake job seat-aware, the way `shift_change.sh` was made seat-aware tonight.**
+- **s81 (this seat, ctx 81%) therefore ENDED rather than rotating** — a rotation would have made a THIRD seat. The 06:00 seat holds the floor. Its arrival was announced by a pane tap; s81 acted on its OWN measurement of the process table, which agreed.
+- ⚠ **BOTH SEATS READ `tuesday-agent@`.** If two answers to one agent ever disagree, that is the defect to report, not a choice to make.
+- **Answered before ending:** the Vision successor's plan confirmation (GO mailed 20:2xZ, tap queued behind its turn).
+
 ### ⏳ OPEN DEADLINE
 - **24 Sep (TODAY): Partner Center stops serving the previously published NexusAI packages.** On Kam's live board since 00:2x (201), unanswered. Default: nothing more; after today, close it by date and record the loss.
 
