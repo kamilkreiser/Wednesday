@@ -25,8 +25,13 @@ queue of bad ones, and the bad ones return FAILs that look like model weakness a
 | `02_FOR_THE_COORDINATOR.md` | **Tuesday** (or whoever manages it) | The manual: how to advise, prompt and check a local model, and when to stop. |
 | `03_BRIEF_TEMPLATE.md` | **Tuesday**, every time she queues work | The brief shape that passes. Fill it in; do not improvise it. |
 | `04_KNOWN_FAILURE_MODES.md` | **Tuesday** | What this class of model gets wrong, each with the evidence and the catch. |
+| `05_SETUP_PROMPT_FOR_TUESDAY.md` | **Kam → pastes into Tuesday** | **START HERE.** The block Kam pastes so she stands the loop up and PROVES it works, plus the runbook: what a checker must assert, and the smoke test. |
 
 ## Where to slot it
+
+**Start with `05_SETUP_PROMPT_FOR_TUESDAY.md`** — paste its block into the agent that will manage
+the box. It drives everything below and ends with a smoke test that must catch two deliberate
+breaks before the loop is trusted.
 
 1. **On the Spark box:** put `01_FOR_THE_LOCAL_MODEL.md` where the runner injects a system prompt.
    It is written to be pasted whole. It assumes nothing about the harness.
