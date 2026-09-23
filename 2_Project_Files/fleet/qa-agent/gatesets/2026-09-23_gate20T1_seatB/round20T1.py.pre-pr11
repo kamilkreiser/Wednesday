@@ -1,0 +1,123 @@
+"""round20T1.py — the ONE source of the round-20 TIER-1 batch's pins for every gate20T1 drafter script (the round20T2.py shape, re-keyed).
+Seat B 21st raised seat PRs 3, 6, 7 (#1204 KS-851, #1208 KS-1287, #1207 KS-1245); Seat B 22nd (its successor, same pane Secuura/Blockchain-B) raised
+seat PRs 8, 9, 10 (#1209 KS-1033, #1210 KS-1239, #1211 KS-1084) — every head ONE commit whose parent is develop 2bc5ccf63 (BASE). Wednesday's 05:12:13Z
+plan ANSWER: tier 1 x6 = PRs 3, 6, 7, 8, 9, 10; ONE batch gate per tier. Tier 2 (#1202/#1203/#1205/#1206) was gated 07:35:15Z and GO'd 07:36:38Z — its
+merges MOVE develop off BASE, so the tier-1 gate grades every merged tree and the chained END_TREE over the develop READ AT LAUNCH (DEV_LAUNCH, written by
+predict_batch_scratch_gate20T1.py into newdev_tree.txt — never typed here, never taken from a mail).
+Values: the round-20 brief GROUPING (fleet/briefs_staged/2026-09-23_raise_seatB_21.md; repeated verbatim in _22.md), the six READY mails
+(mail_seatB21_ready03/06/07_*.md, mail_seatB22_ready08/09/10_*.md), Wednesday's rulings 06:52:56Z (PR 6: THIRD file = the regenerated
+docs/openapi/secuura-api.yaml) and 07:52:38Z (PR 10: the raise engine's per-file cumulative count). Every value is a CLAIM until a script re-derives it;
+the scripts print the disagreement, never adopt."""
+import os, re
+G = os.path.dirname(os.path.abspath(__file__))
+BASE = '2bc5ccf63b8c40911afb568b03cace066238ffcf'; BASE_TREE = 'b4f2a8beaecdf758d46c719a0f3becc677e421cf'   # every head's parent (round 19's END tree)
+DEV_PRE = '3bad652d17cf111c1e2e1bed1ae7686894637487'   # the shared checkout's local HEAD (LEAVE — the round-19 S1 ruling; READY 10: "still 3bad652d1, untouched")
+D = 'Blockchain/Dev/'; SC = D + 'scripts/'; GW = D + 'services/api-gateway/src/'; VC = D + 'services/vc-issuer/src/'; KY = D + 'services/kyc/src/'
+LM = '/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model'
+REPO = '/Volumes/DevMASTER/!CODING/Secuura/Blockchain/2_Project_Files'
+ORIGIN_URL = 'git@github.com:Secuura/Distributed_Secuura.git'
+PUSH = ['3', '6', '7', '8', '9', '10']   # seat order (the GO string orders by PR number: #1204, #1207, #1208, #1209, #1210, #1211)
+# canonical row: (label, run dir under LM/runs, file under out.md.checker/, sha256[:16], apply opts ('' = strict), [target paths it writes])
+# file row: dict(path, kind, mode new|modify, blob12 AT THE HEAD, lines, dev_blob12 (None = new), dev_lines)
+PRS = {
+ '3': dict(n='1204', key='KS-851', keys=['KS-851'], tags='QUOTEDNAME', kind='test_only', seat='B21', head='6edffa3a96d08a96b4fd016b65bf12c10cd67869', tree12='4c3beea0b1e7',
+           branch='refs/heads/feature/ks-851-residues-from-the-round-2-gate-g-1-column-ordinal-r18-quotedname-1', adds=6, dels=0, lane='kyc',
+           files=[dict(path=KY + '__tests__/ks386-no-image-payload-written.test.ts', kind='test', mode='modify', blob12='1515cd415d6a', lines=227, dev_blob12='8a4cb4eed74a', dev_lines=221)],
+           canon=[('851-QUOTEDNAME', '2026-09-23_ks851-ornith35b-night', 'patch.diff', '59a7915067703dc6', '--recount', [KY + '__tests__/ks386-no-image-payload-written.test.ts'])],
+           tampers={'QUOTEDWRITE': (KY + 'index.ts', 303)}, suite='kyc 29/29 bare at develop -> 30/30 bare at head (+1)', subject_len=84,
+           lock=('06:14:43Z', '06:20:15Z'), ready='06:21:52Z', rc_tuple='(128, 0, 0, 128, 1)'),
+ '6': dict(n='1208', key='KS-1287', keys=['KS-1287'], tags='PATHREQUIRED', kind='code_patch', seat='B21', head='c5e517eb3a80ca48df10b045b004c4daa8ccf5e2', tree12='1c36a7542970dc7ed2ae19abe66f2c1a9c9e55a3',
+           branch=None, adds=58, dels=2, lane='vc-issuer', amended_from='864c199baf389172cfa948685c72f9cc597268ac',
+           files=[dict(path=VC + '__tests__/ks1287-status-check-index-path-param-is-required.test.ts', kind='test', mode='new', blob12='c71651e8c480', lines=55, dev_blob12=None, dev_lines=0),
+                  dict(path=VC + 'vc-issuer.openapi.ts', kind='product', mode='modify', blob12='a451d545b514', lines=1629, dev_blob12='6ab97ceb863a', dev_lines=1628),
+                  dict(path=D + 'docs/openapi/secuura-api.yaml', kind='generated-spec', mode='modify', blob12='834b0c3d2d2c', lines=None, dev_blob12=None, dev_lines=None)],
+           canon=[('1287-PATHREQUIRED-s1', '2026-09-22_ks1287-ornith35b-night', 'section_1.diff', '9b3d4466466dc529', '', None),
+                  ('1287-PATHREQUIRED-s2', '2026-09-22_ks1287-ornith35b-night', 'section_2.diff', 'e95c668efc684e57', '', None)],
+           canon_patch=('2026-09-22_ks1287-ornith35b-night', 'cd2560d1835add46'), spec_blob40='834b0c3d2d2c3b8b1d5af504338c804cfbb473b6',
+           suite='vc-issuer 123/123 bare -> 127/127 bare (+4)', subject_len=None, lock=('07:03:27Z', '07:09:21Z'), ready='07:11:22Z'),
+ '7': dict(n='1207', key='KS-1245', keys=['KS-1245'], tags='DEGRADEDWARN', kind='bash_patch', seat='B21', head='aa4c486bedb4f647ec192cb4ebbe20e49a50d4ed', tree12='29e249e84057',
+           branch='refs/heads/feature/ks-1245-f-1-scriptssmoke-testsh107-fails-any-healthdeep-check-that-r16b-degradedwarn-1', adds=87, dels=0, lane='shell',
+           files=[dict(path=SC + '__tests__/smoke_test_degraded_warns.test.sh', kind='test', mode='new', blob12='3a1b00d6f19e', lines=81, dev_blob12=None, dev_lines=0),
+                  dict(path=SC + 'smoke-test.sh', kind='script', mode='modify', blob12='fb270385f40b', lines=401, dev_blob12='d5d34357a0e4', dev_lines=395)],
+           canon=[('1245-DEGRADEDWARN-s1', '2026-09-22_ks1245-ornith35b-night', 'section_1.diff', 'f2c04647a13bdb5e', '', None),
+                  ('1245-DEGRADEDWARN-s2', '2026-09-22_ks1245-ornith35b-night', 'section_2.diff', 'b4e527b46eca3e3e', '', None)],
+           canon_patch=('2026-09-22_ks1245-ornith35b-night', '591d38f2f3983c7b'), suite='B4 rc 1 / 2 FAIL at the tip; B5 rc 0 / 0 FAIL / 5 pass', subject_len=82,
+           lock=('06:52:43Z', '06:59:35Z'), ready='07:11:24Z'),
+ '8': dict(n='1209', key='KS-1033', keys=['KS-1033'], tags='MISSINGBASE', kind='bash_patch', seat='B22', head='34f264cfbd8656860e4714f1a584fee1469f5a37', tree12='ee5c6b40654e9626d97f278c61dcf0f738f47496',
+           branch='refs/heads/feature/ks-1033-residue-the-three-guards-that-could-not-be-wired-and-r17-missingbase-1', adds=136, dels=3, lane='shell', prior_pr='1185',
+           files=[dict(path=SC + '__tests__/check_no_demo_mutation_missing_base.test.sh', kind='test', mode='new', blob12='5c7fb19da54a', lines=133, dev_blob12=None, dev_lines=0),
+                  dict(path=SC + 'check-no-demo-mutation.sh', kind='script', mode='modify', blob12='4cc7c080b8a9', lines=144, dev_blob12='3b4af5b463b1', dev_lines=144)],
+           canon=[('1033-MISSINGBASE-s1', '2026-09-22_ks1033-ornith35b-night2', 'section_1.diff', 'e68c0ee6c9f91944', '', None),
+                  ('1033-MISSINGBASE-s2', '2026-09-22_ks1033-ornith35b-night2', 'section_2.diff', '2f9d19072278fbda', '', None)],
+           canon_patch=('2026-09-22_ks1033-ornith35b-night2', 'd1c7d5bc267b2b98'), suite='B4 rc 1 / 2 FAIL / 3 pass; B5 rc 0 / 0 FAIL / 5 pass; B6 sibling 5/5 before and after', subject_len=82,
+           lock=('07:31:01Z', '07:37:04Z'), ready='07:39:01Z'),
+ '9': dict(n='1210', key='KS-1239', keys=['KS-1239'], tags='RAWAUTHDEAD', kind='code_patch', seat='B22', head='231ab8b5c898488b40ffe0c3672116b4bf5c80f7', tree12='08f413f2b6d99a5c8b58ae2e903bc9e8b60523f8',
+           branch='refs/heads/feature/ks-1239-r-1-the-indexts347-rawauthorization-capture-is-dead-code-0-r16b-rawauthdead-1', adds=39, dels=18, lane='api-gateway',
+           files=[dict(path=GW + '__tests__/ks1239-index-takes-no-pre-auth-rawauthorization-copy.test.ts', kind='test', mode='new', blob12='77fad3920727', lines=39, dev_blob12=None, dev_lines=0),
+                  dict(path=GW + 'index.ts', kind='product', mode='modify', blob12='3bccc6696567', lines=1261, dev_blob12='4e7fc1174d54', dev_lines=1279)],
+           canon=[('1239-RAWAUTHDEAD-s1', '2026-09-22_ks1239-ornith35b-night', 'section_1.diff', 'a93c4081f095435c', '', None),
+                  ('1239-RAWAUTHDEAD-s2', '2026-09-22_ks1239-ornith35b-night', 'section_2.diff', '9f16d7e56cb5aff5', '', None)],
+           canon_patch=('2026-09-22_ks1239-ornith35b-night', '921cee38fcb88e5a'), suite='api-gateway 742 -> 746 over 79 files (+4)', subject_len=84,
+           lock=('07:40:30Z', '07:46:18Z'), ready='07:47:55Z'),
+ '10': dict(n='1211', key='KS-1084', keys=['KS-1084'], tags='SIGTENANT+TPVTENANT', kind='code_patch', seat='B22', head='5c8e185513935dc6909710057ce1513962cca88c', tree12='735c31b2c56615634c43cb444c60db7189e747da',
+           branch='refs/heads/feature/ks-1084-read-only-unverified-the-gateways-own-authorization-only-r16b-r17-sigtenant-tpvtenant-1', adds=172, dels=2, lane='api-gateway',
+           files=[dict(path=GW + '__tests__/ks1084-signatories-forwards-x-tenant-id.test.ts', kind='test', mode='new', blob12='48340bf9a196', lines=82, dev_blob12=None, dev_lines=0),
+                  dict(path=GW + '__tests__/ks1084-third-party-verifiers-forwards-x-tenant-id.test.ts', kind='test', mode='new', blob12='4f9f400122a7', lines=82, dev_blob12=None, dev_lines=0),
+                  dict(path=GW + 'routes/proxy.ts', kind='product', mode='modify', blob12='5168d809a51b', lines=1269, dev_blob12='795ae7ca3bdc', dev_lines=1263)],
+           canon=[('1084-SIGTENANT-s1', '2026-09-22_ks1084-ornith35b-night', 'section_1.diff', '623f87421635ba5a', '', None),
+                  ('1084-SIGTENANT-s2', '2026-09-22_ks1084-ornith35b-night', 'section_2.diff', '12cfc2292cb758c8', '', None),
+                  ('1084-TPVTENANT-s1', '2026-09-22_ks1084-ornith35b-night3', 'section_1.diff', '1a2d1a9efb75e78c', '', None),
+                  ('1084-TPVTENANT-s2', '2026-09-22_ks1084-ornith35b-night3', 'section_2.diff', 'd0f7e5567733eb3e', '', None)],
+           canon_patch=('2026-09-22_ks1084-ornith35b-night', '24205a7360a9499c'), canon_patch2=('2026-09-22_ks1084-ornith35b-night3', 'b22aa52ad039413d'),
+           mid=('8a67471cef2c', 1266), suite='api-gateway 742 -> 746 over 80 files (+4); A4 1/2 red, A5 2/2 per part', subject_len=79,
+           lock=('07:57:21Z', '08:03:26Z'), ready='08:07:07Z'),
+}
+SEAT_T1SUB = '655c450d8f3eee7a45db23ad8c9ebd317314e4b4'   # READY 10 (08:07:07Z): the TIER-1 SUB-TREE over BASE, six real heads, three orders one sha
+SEAT_T1SUB_SHORTSTAT = '13 files changed, 498 insertions(+), 25 deletions(-)'
+SEAT_ALL10 = '513390fde5d2e1626af60243ea72f458301d6844'; SEAT_ALL10_SHORTSTAT = '17 files changed, 528 insertions(+), 27 deletions(-)'   # READY 6 / READY 10
+SEAT_GO_STRING = 'GO: merge #1204, #1207, #1208, #1209, #1210, #1211 batch'   # READY 10 verbatim == the commission
+# the tier-2 batch (gated + GO'd; its merges are the expected develop move)
+T2_SUB = 'd13a26e19c8d1b2faf25f9e41cc087fbcd51ec47'   # the tier-2 gate's END_TREE over BASE (report sha256 9cf0159da613…; GO 07:36:38Z)
+T2_PRS = {'1202': ('KS-965', '49f419e625d7304f724b4a604f542827b7772458'), '1203': ('KS-1019', '81accbcfeae3628f00d8698ef1743c53b946bfce'),
+          '1205': ('KS-1081', 'd29a9b21dd70f8e1fb79c56e595e312499edee43'), '1206': ('KS-1139', 'bfbaf4366897a97ec20c2f88e67448597739ce46')}
+T2_PATHS = ['USER_TESTING/CREDENTIALS-AND-PORTALS.md', D + 'services/originate/src/originate.openapi.ts',
+            SC + '__tests__/bootstrap_env_canonical_template.test.sh', SC + '__tests__/validate_lint_errexit.test.sh']
+T2_BLOBS12 = {'USER_TESTING/CREDENTIALS-AND-PORTALS.md': 'f2487018dea3', D + 'services/originate/src/originate.openapi.ts': 'f9675bf96077',
+              SC + '__tests__/bootstrap_env_canonical_template.test.sh': 'bbe4907847fa', SC + '__tests__/validate_lint_errexit.test.sh': '4d11b28d28f6'}
+TAMPER_FILES = [KY + 'index.ts']   # PR 3's QUOTEDWRITE; the other five rows' red-proof is A4/B4 (the test WITHOUT the product/script section)
+AUTH_DIR = D + 'services/auth/'
+REPORT_DIR = '/Volumes/DevMASTER/!CODING/Testing Agent MAIN/projects/secuura/reports/2026-09-23-batch1204-t1-r1/'
+PRIOR_REPORT_T2 = '/Volumes/DevMASTER/!CODING/Testing Agent MAIN/projects/secuura/reports/2026-09-23-batch1202-t2-r1/'   # round 20 tier 2 (same seats, same base)
+PRIOR_REPORT_B = '/Volumes/DevMASTER/!CODING/Testing Agent MAIN/projects/secuura/reports/2026-09-22-batch1182-1201-r1/'   # gate19B (KS-1033's round-19 row #1185 lives here or in 19C)
+PRIOR_REPORT_C = '/Volumes/DevMASTER/!CODING/Testing Agent MAIN/projects/secuura/reports/2026-09-22-batch1180-1197-r1/'
+SEAT_RECORD_21 = '/Volumes/DevMASTER/!CODING/Secuura/Blockchain/5_Project_History/2026-09-23_seatB-21st/'
+SEAT_RECORD_22 = '/Volumes/DevMASTER/!CODING/Secuura/Blockchain/5_Project_History/2026-09-23_seatB-22nd/'
+HANDOVER_21 = '/Volumes/DevMASTER/!CODING/Secuura/Blockchain/5_Project_History/HANDOVER-seatB-21st-successor-2026-09-23.md'
+BRIEF = '/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/briefs_staged/2026-09-23_raise_seatB_21.md'
+BRIEF_22 = '/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/briefs_staged/2026-09-23_raise_seatB_22.md'
+READY_FILES = {'3': 'mail_seatB21_ready03_pr3_ks851.md', '6': 'mail_seatB21_ready06_pr6_ks1287.md', '7': 'mail_seatB21_ready07_pr7_ks1245.md',
+               '8': 'mail_seatB22_ready08_pr8_ks1033.md', '9': 'mail_seatB22_ready09_pr9_ks1239.md', '10': 'mail_seatB22_ready10_pr10_ks1084.md'}
+OWN = sorted(set(k for p in PUSH for k in PRS[p]['keys']))   # 6 keys
+def go_string():
+    return 'GO: merge ' + ', '.join('#' + n for n in sorted(PRS[p]['n'] for p in PUSH)) + ' batch'
+def canon_path(row): return LM + '/runs/' + row[1] + '/out.md.checker/' + row[2]
+def all_paths(): return [f['path'] for p in PUSH for f in PRS[p]['files']]
+def distinct_paths(): return sorted(set(all_paths()))
+def parse_ready(path):
+    """(PR number, head 40-hex) from a captured READY: the number from `PR #N` in THE FIVE THINGS, the head = the first 40-hex after `Head at ORIGIN`."""
+    t = open(path, encoding='utf-8').read(); body = t.split('## THE FIVE THINGS', 1)[-1]
+    mn = re.search(r'PR[: *]*#(\d{4})\b', body); mh = re.search(r'Head at ORIGIN.*?\b([0-9a-f]{40})\b', body, re.S)
+    return (mn.group(1) if mn else None, mh.group(1) if mh else None)
+def read_newdev():
+    """the predict run's launch-develop reading (newdev_tree.txt) as a dict, or {} if absent."""
+    f = os.path.join(G, 'newdev_tree.txt')
+    return dict(l.split(' ', 1) for l in open(f).read().strip().splitlines()) if os.path.exists(f) else {}
+if __name__ == '__main__':
+    print('PRs', len(PRS), 'file rows', len(all_paths()), 'distinct', len(distinct_paths()), 'canon rows', sum(len(PRS[p]['canon']) for p in PUSH),
+          'adds', sum(PRS[p]['adds'] for p in PUSH), 'dels', sum(PRS[p]['dels'] for p in PUSH), '(READY 10: 13 files +498/-25)')
+    print('OWN keys', OWN, '| T1 ∩ T2 paths:', sorted(set(all_paths()) & set(T2_PATHS)) or 'NONE (EMPTY)', '| under services/auth/:', [x for x in all_paths() if x.startswith(AUTH_DIR)] or 'NONE (0)')
+    print('tamper files', TAMPER_FILES, '| ∩ PR paths:', sorted(set(TAMPER_FILES) & set(all_paths())) or 'NONE')
+    for p in PUSH:
+        n, h = parse_ready(os.path.join(G, READY_FILES[p]))
+        print('  parse_ready on READY %s: #%s == %s %s | head %s == %s' % (p, n, PRS[p]['n'], n == PRS[p]['n'], (h or '?')[:12], h == PRS[p]['head']))
+    print('canonical files exist:', all(os.path.exists(canon_path(r)) for p in PUSH for r in PRS[p]['canon']), '| GO string:', go_string(), '== READY 10', go_string() == SEAT_GO_STRING)
