@@ -75,18 +75,6 @@ someone previously looked; it is silent about everything that changed since.
 
 ---
 
-## MEASURED ON THE SPARK ITSELF (Friday, 2026-09-23 — this section outranks anything above that it contradicts)
-The modes above were learned on a 35B model with a 65,536-token window. Friday measured the actual box:
-- **Mode 5 is a COST here, not a wall.** The Spark serves `max_model_len` 384,000 (KV pool 449,519). A ~74K-token
-  whole-file input fits; prefill runs ~1,032 tok/s, so it costs ~70 s. Excerpting is still cheaper, no longer required.
-- **NEW — thinking eats the completion budget.** Thinking is ON by default at `effort=max`. A 1,000-token budget was
-  consumed entirely by reasoning (94 tokens with it off). An empty or truncated answer is a thinking block, not a model
-  failure: run coding tasks with thinking OFF.
-- **ONE request at a time** (`MAX_NUM_SEQS=1`): concurrent requests queue. Keep one task in flight.
-- The container is often stopped (down 18 h one morning): restart it from its own reload notes before calling the
-  endpoint broken.
-Not yet measured on the Spark: the checker contract and the two-break smoke test in 05 — the loop, not just the endpoint.
-
 ## The meta-rule
 
 **Every one of these is cheaper to catch in the brief than in the output.** When you find a new
