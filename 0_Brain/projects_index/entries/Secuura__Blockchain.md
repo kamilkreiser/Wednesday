@@ -3,7 +3,7 @@ client: Secuura
 project: Blockchain
 path: /Volumes/DevMASTER/!CODING/Secuura/Blockchain
 status: active
-updated: 2026-09-09
+updated: 2026-09-23
 ---
 
 # Secuura / Blockchain (Platform K)
@@ -20,6 +20,41 @@ updated: 2026-09-09
 > divergence. **The skill is Kam's file and cannot be edited from a project session — it is on
 > his queue to reconcile.** Until it is, this warning is the only thing standing between the
 > list and the next agent that follows the skill literally.
+
+## Last session — 2026-09-23 (Seat B 22nd, pane `Secuura/Blockchain-B`)
+
+**ROUND 20 CLOSED: 11 PRs raised, 11 MERGED**, on three signed GOs — tier 2 (four), tier 1 (six),
+then #1210 after a round-2 fix. develop `2bc5ccf63` → `72f480ca3584` → `dd8f99cc75b9` →
+**`6ab9d5021e96ea1481cb6c6ff2d6d33b414aecb7`**; every merged tree equalled the GO's END_TREE, each
+predicted locally before the merge was called. **Nothing deployed.** All eleven tickets stay
+**In Progress** — the closing pass is Wednesday's.
+
+**Stopped twice rather than guess.** (1) A gate assertion compared a *cumulative* `git diff` reading
+to a *per-stage* declared number and STOPped on correct data — latent since round 19, firing on the
+first PR whose two stages share one product file. I did not loosen it; diagnosed, proposed a fix with
+controls, and asked. Ruled (a), applied, proved it can still fail. (2) An addendum named a base I
+could not obtain without a forbidden fetch; I asked instead of fetching, and the line was withdrawn.
+
+**Two mistakes, both caught by the QA gate, both disclosed.** "205 files" for `packages/shared` was
+the *suite* count — the file count is 46; it reached an earlier merged commit and cannot be amended,
+so #1210's squash body carries the correction. And a PR body repeated a stale repo comment
+(`origin/main`) instead of reading the script (`origin/develop`, line 62).
+
+**Open / next:**
+- [ ] Nothing of round 20 remains. Next is Wednesday's to commission: **kintsugi**; **demo only on Peter's nod**.
+- [ ] **LEGD-BYTEXT** — `packages/shared`'s LEG D pins api-gateway `index.ts` sites BY LINE NUMBER
+      (now 827/840/873). Any edit above those routes reds a package your lane run never touches; this
+      was the sixth such move. Ticket candidate, carried to the next brief.
+- [ ] Carried, reported, not fixed: `run-code-guards.sh:116`'s stale `origin/main` reason string; the
+      three dangling `rawAuthorization` comments; the cumulative-vs-per-stage defect still in
+      `raise19.py:694-698` and the `raiseC20.py` lineage.
+
+**Blockers:** none.
+
+**Notes for Wednesday:** **Current develop cannot be checked out in this repo** — the eleven squashes
+went through the GitHub API and were never fetched; its *tree* is local, so applicability is checkable
+with a temp index and no fetch. The audit-baseline fuse expires **2026-09-24**. Handover:
+`5_Project_History/HANDOVER-seatB-22nd-successor-2026-09-23.md`.
 
 ## Last session — 2026-09-09 (s159, review-readiness seat)
 
