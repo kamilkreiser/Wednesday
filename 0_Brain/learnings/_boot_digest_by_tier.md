@@ -7,7 +7,7 @@ status: live
 
 # Boot digest BY TIER — W whole, M rules-only, every project case a handle
 
-Generated 2026-09-23 14:13 from 201 lesson files (936,787 B). M 36 · MIXED 5 · W 160. 5 project CASE sections inside MIXED files are reduced to one line each: the heading and the path to read it at. W blocks are exactly what the default digest carries; M blocks drop the section index and keep the rules; a P file is a single handle. The CASES behind every rule live only in the lesson files — open one the moment its rule fires.
+Generated 2026-09-23 14:41 from 202 lesson files (938,801 B). M 36 · MIXED 5 · W 161. 5 project CASE sections inside MIXED files are reduced to one line each: the heading and the path to read it at. W blocks are exactly what the default digest carries; M blocks drop the section index and keep the rules; a P file is a single handle. The CASES behind every rule live only in the lesson files — open one the moment its rule fires.
 
 ## The T9 SSD is the master — Wednesday must be fully portable
 `2026-07-31_fully-portable-drive.md` · principle · 2026-07-31 · status: superseded — the "T9 is the master" half by [[2026-08-25_one-drive-devmaster-is-master]] (2026-08-25); the portability principle itself still lives · tier: W
@@ -6534,6 +6534,20 @@ sections (open the file for these): The rule · Why it generalises past this flo
 2. OWED (shared tooling, claim with Wednesday): make the Tuesday launcher's week-instruction line seat-aware, so it stops telling this seat to keep Ornith running.
 
 **Family:** [[2026-09-16_local-model-is-long-term-and-claude-takes-what-it-cannot-do]] (Wednesday's rule, not this seat's) · [[2026-09-14_ornith-runs-at-night-in-the-downtime-a-standing-rule]].
+
+
+## Build seats run in VISIBLE cockpit panes; in-session subagents are for short reading and drafting only
+`2026-09-23_build-seats-run-in-cockpit-panes.md` · preference · 2026-09-23 · status: live · tier: W
+
+**The operative case, so the headline matches it:** Friday is about to start BUILD work for a project — anything that writes code, runs a stack, or takes more than a short reading/drafting pass. **Launch it as a real Claude seat in a cockpit pane (the right-hand side of the `fleet` tmux window), briefed by mail, so Kam can watch it and type into it.** Do not run a build as an in-process Agent-tool subagent.
+
+**How to apply:**
+1. **Build seat → cockpit pane.** Claim the project first (`wed_claim.sh`), brief through `send_brief.sh`, launch through the cockpit tooling (never raw `send-keys`), verify the launch at rung 5+ (the pane shows the commission received).
+2. **Short reading, extraction, drafting (minutes, file in → file out) → in-session subagent** is still fine; say so when doing it, and tell Kam about the "←" agent view if he wants to watch.
+3. **Usage gate still applies** to every pane launch (`usage_gate.sh`), and the build seat still ends at READY FOR QA → gate → Friday's completion check.
+4. Nothing here changes client isolation: one project per seat, that project's own launcher and identities.
+
+**Family:** [[2026-08-04_delegation-v2-observability]] (Kam wants to SEE the work — the pane layout was his design pointer) · [[2026-08-11_coordinator-not-carrier]] · [[2026-08-05_wed-work-threshold-delegation]].
 
 
 ## When Kam hands me a defect, I fix it — and anything I need from a sister seat I ask HER for, by mail, directly; never route it back through Kam
