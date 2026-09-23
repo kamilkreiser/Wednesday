@@ -96,4 +96,4 @@ sees the claim rather than discovering it in a conflict.
 | 2026-09-23 09:30 | Kamils-Mac-Studio | Kam 09:25 — pin every seat in MY tree to claude-opus-5-5 (Launch_Wednesday + Launch_Tuesday) | OPEN | |
 | 2026-09-23 11:04 | Kamils-Mac-Studio | Friday seat (Kam 10:49+10:57): Launch_Friday + first-run installer, friday seat in shared launcher/resolver, Friday tab + keys on live board, drawer X fix + file-hide deploy, two downloads | CLOSED |  2026-09-23 12:03 done |
 | 2026-09-23 12:54 | Kamils-MacBook-Pro | Friday usage gauge on the live board: publish_usage.sh / post_usage.py / server accept seat 'friday' — Friday (laptop), Kam 2026-09-23 | CLOSED |  2026-09-23 12:56 done |
-| 2026-09-23 13:17 | Kamils-MacBook-Pro | cockpit usage gate reads Wednesday's gauge on the Friday tree (Launch_Cockpit/cockpit.sh/usage_gate seat) — Friday (laptop) | OPEN | |
+| 2026-09-23 13:17 | Kamils-MacBook-Pro | cockpit usage gate reads Wednesday's gauge on the Friday tree (Launch_Cockpit/cockpit.sh/usage_gate seat) — Friday (laptop) | CLOSED |  2026-09-23 13:19 done |
