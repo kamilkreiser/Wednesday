@@ -20,7 +20,7 @@ will break the same way — if something fails with `/Users/kamilkreiser/1FILES:
 - **Spark loop PROVEN** (smoke 6/6, both deliberate breaks caught after the C1 anchor fix; runner accepts only whole-answer unfenced diffs; clones live in the system temp dir; self-tests in `2_Project_Files/friday/spark/tests/`). **Kam's standing rule: local model FIRST for tasks and tickets** (Datasec work only on the Spark until he rules on Secuura).
 - **Word question sets** (HP project owner / HP champion / Datasec experts) are in `HPSM-POC/1_Project_Definition/Questions_and_Answers/` — Kam's to send; nothing sent.
 - **BLOCKED:** `datasec-hpsm-poc@agentmail.to` (created 200, invisible to Friday's key → no scoped key). Briefs are FILES for now.
-- **Queued with Kam:** the 30-min "what does a great 7 minutes on 1 Dec look like" walkthrough — not yet scheduled.
+- **Kam, 2026-09-23 ~15:5x, verbatim:** *"I have a meeting tomorrow to start going through the walkthrough and will respond to you once that's done."* → HPSM-POC HOLDS until he responds (no B02, no seat launch). The walkthrough agenda is §1 of `HPSM-POC/1_Project_Definition/Questions_and_Answers/2026-09-23_stakeholder-questions-to-ask_POC.md`. When he responds: log his answers verbatim (Q&A answers log + CLARIFICATIONS), then brief B02. The seat pane %2 was CLOSED (idle, state on disk); B02 relaunches via `cockpit.sh launch Datasec/HPSM-POC`.
 - No mail pending (no reply from Tuesday on the Spark or HPSM); no Kam panel rulings today (kam_rulings_today 0).
 
 ## OWED — first work of the next session
