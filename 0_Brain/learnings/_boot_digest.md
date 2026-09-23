@@ -7,7 +7,7 @@ status: live
 
 # Boot digest — headline + rules of every lesson (open the file when it fires)
 
-Generated 2026-09-23 14:41 from 202 lesson files (938,591 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 10 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
+Generated 2026-09-23 15:34 from 203 lesson files (940,762 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 10 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
 
 ## The T9 SSD is the master — Wednesday must be fully portable
 `2026-07-31_fully-portable-drive.md` · principle · 2026-07-31 · status: superseded — the "T9 is the master" half by [[2026-08-25_one-drive-devmaster-is-master]] (2026-08-25); the portability principle itself still lives
@@ -6657,4 +6657,27 @@ sections (open the file for these): The rule · Why it generalises past this flo
 - The reference harness (input builders, checkers, queue runner) lives in the Studio's tree and is not shipped. Porting it crosses project trees and is Kam's call.
 
 **Family:** [[2026-09-18_ornith-is-cheap-the-brief-is-the-cost]] · [[2026-09-15_ornith-every-issue-gets-a-tooling-or-instruction-fix]] · [[2026-09-15_never-idle-the-gatekeeper-widens-the-harness-when-the-pool-runs-dry]] · [[2026-08-07_a-check-that-cannot-fail]] · [[2026-09-11_red-proof-arms-cover-every-legitimate-shape-of-the-real-event]] · [[2026-09-22_ornith-is-studio-only-not-datasec]] (Ornith is the Studio's; the Spark is a different box and a different model) · [[2026-08-03_role-beyond-code-three-priorities]] (no cross-client leak).
+
+
+## Route tasks and tickets to the LOCAL model (the Spark) first — as much as possible; Claude seats take what it cannot do
+`2026-09-23_use-the-local-model-as-much-as-possible.md` · preference · 2026-09-23 · status: live
+
+**The operative case, so the headline matches it:** Friday is about to hand a task or a ticket to a worker (a Claude build seat, a
+subagent, or herself). **Ask first: can the local model do this, under the kit's rules?** If yes, it goes to the Spark
+(DeepSeek V4 Flash, `learnings/2026-09-23_spark-kit-running-a-local-coding-model.md`). Claude seats take what it cannot do.
+
+**How to apply:**
+1. **The Spark loop must be PROVEN before real tickets go near it:** the owed smoke test (a trivial known change plus the two
+   deliberate breaks) comes first. "As much as possible" makes that the next piece of work; it does not waive it.
+2. **Route per ticket, by the kit's predicate** (one product file · the fix shape spelled out · a runnable test nearby · not an
+   auth/credential/security surface · a runner the checker can run). Greenfield multi-file scaffolding usually fails it: a Claude
+   seat builds the skeleton, then per-file tasks go to the Spark. **Carve tickets so more of them fit**: that is how "as much as
+   possible" is achieved, not by forcing unfit tickets through.
+3. **The counter still binds:** original brief + ONE rebrief, then the ticket goes to Opus 5.5 in the cloud.
+4. **Client scope of the box:** the Spark is `datasec-rd` hardware. Datasec work (HPSM-POC, HPSM, …) is in scope; Secuura code
+   stays off it until Kam rules (open question on the Spark lesson).
+5. **Record the routing** in every brief or receipt: "local — <why it fits>" or "Claude — <which clause fails>". The routing
+   predicate is measured at the weekly consolidation (how many local, how many reallocated, and why).
+
+**Family:** [[2026-09-23_spark-kit-running-a-local-coding-model]] · [[2026-09-16_local-model-is-long-term-and-claude-takes-what-it-cannot-do]] (Wednesday's same rule for Ornith) · [[2026-09-23_build-seats-run-in-cockpit-panes]].
 
