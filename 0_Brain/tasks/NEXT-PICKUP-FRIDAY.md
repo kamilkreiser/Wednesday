@@ -4,7 +4,7 @@ type: pickup
 seat: friday
 scope: BOTH Secuura and Datasec, from Kam's laptop. Claim each project before driving it (wed_claim.sh)
 status: live
-written_by: Friday, 70% checkpoint 2026-09-23 ~15:4x (not a wrap — the seat is still running)
+written_by: Friday, 75% handover 2026-09-23 ~16:2x (rotation band next)
 supersede: replace wholesale at every wrap; do not append
 ---
 
@@ -15,13 +15,19 @@ git credential helper (repointed); two scripts fixed for the space in the path (
 will break the same way — if something fails with `/Users/kamilkreiser/1FILES: No such file`, that is the class.
 
 
-## CHECKPOINT 70% (~15:4x) — current state, read this first
-- **HPSM-POC (Datasec, claimed):** rulings C-01…C-08 in its CLARIFICATIONS. Build seat in cockpit pane `%2` finished **B01 → READY FOR REVIEW**; Friday REVIEWED + ACCEPTED it (`HPSM-POC/1_Project_Definition/Briefs/2026-09-23_B01_setup-and-M2-drafts.REVIEW.md`; independently checked: GitHub main `8869b1a`, CI + CodeQL SUCCESS, analysis repo 0 forbidden files). The seat is IDLE by design. **Waiting on Kam** to review 4 drafts for M2 (Fri 9 Oct): rules schema RS-01…10, SME template, demo script v0, AD-01…09. Then brief **B02** (carry-overs listed in the REVIEW file: commit Friday's Q&A files, launcher sources `.tools/env.sh`, carve WS4 engine work into Spark-sized tasks).
-- **Spark loop PROVEN** (smoke 6/6, both deliberate breaks caught after the C1 anchor fix; runner accepts only whole-answer unfenced diffs; clones live in the system temp dir; self-tests in `2_Project_Files/friday/spark/tests/`). **Kam's standing rule: local model FIRST for tasks and tickets** (Datasec work only on the Spark until he rules on Secuura).
-- **Word question sets** (HP project owner / HP champion / Datasec experts) are in `HPSM-POC/1_Project_Definition/Questions_and_Answers/` — Kam's to send; nothing sent.
-- **BLOCKED:** `datasec-hpsm-poc@agentmail.to` (created 200, invisible to Friday's key → no scoped key). Briefs are FILES for now.
-- **Kam, 2026-09-23 ~15:5x, verbatim:** *"I have a meeting tomorrow to start going through the walkthrough and will respond to you once that's done."* → HPSM-POC HOLDS until he responds (no B02, no seat launch). The walkthrough agenda is §1 of `HPSM-POC/1_Project_Definition/Questions_and_Answers/2026-09-23_stakeholder-questions-to-ask_POC.md`. When he responds: log his answers verbatim (Q&A answers log + CLARIFICATIONS), then brief B02. The seat pane %2 was CLOSED (idle, state on disk); B02 relaunches via `cockpit.sh launch Datasec/HPSM-POC`.
-- No mail pending (no reply from Tuesday on the Spark or HPSM); no Kam panel rulings today (kam_rulings_today 0).
+## HANDOVER 75% (~16:2x) — current state, read this first
+- **HPSM-POC B02 is RUNNING as THREE concurrent seats** (Kam C-11, verbatim in `HPSM-POC/1_Project_Definition/CLARIFICATIONS.md`: start the build agent, local LLM as much as possible, concurrent agents OK; quality bar = thorough testing · security · GDPR · software-design best practice · graphic/UX UI):
+  - pane `%3` **Datasec/HPSM-POC-A** — design pack + security/GDPR pack + read-only Azure OpenAI availability + Bicep draft (no deploy) + test strategy. Brief `…/Briefs/2026-09-23_B02_SEAT-A_design-pack-and-infra.md`.
+  - pane `%4` **Datasec/HPSM-POC-B** — design system + clickable prototype of the 7-min journey + Playwright/axe tests + screenshots. Brief `…_B02_SEAT-B_clickable-prototype-and-design-system.md`.
+  - pane `%5` **Datasec/HPSM-POC-C** — C# rules engine through the LOCAL MODEL (the seat runs `HPSM-POC/tools/spark/` itself; Friday copied the proven harness in, self-contained) + golden tests vs `reference_scorer.py`. Brief `…_B02_SEAT-C_rules-engine-via-local-model.md`.
+  - Each seat: own worktree `.tools/wt-<A|B|C>` + own branch (`b02/infra`, `b02/web-prototype`, `b02/engine`); `.tools/.git-lock` around ref writes; **nothing merges to main without Friday's review + GO**; only seat A commits the analysis repo. Reports: `…_B02_SEAT-X_….STATUS.md` → READY FOR REVIEW.
+  - **Verified at launch:** each claude process carries `YOUR SEAT: A|B|C` (ps argv) and each created its worktree (wt-A/B/C) with CPU in use. ⚠ **The panes are only 12–14 rows tall, so pane TEXT shows nothing** — judge seats by their STATUS files, worktrees and branch pushes, NOT by capture-pane. (Kam can zoom a pane: tmux prefix + z.)
+  - A background watcher in THIS session (dies with it) wakes on any STATUS READY/BLOCKED. **Successor: re-arm one, or poll the three STATUS files.**
+- **Review duty when a seat reports READY:** delivered-vs-commissioned against its brief + the C-11 quality bar; check claims AT SOURCE (branch SHA on GitHub, CI run, test counts re-run where cheap, Spark ledger for seat C); then GO a merge to main, one branch at a time.
+- **Launcher is seat-aware** (`HPSM-POC/Launch_Claude.command`: waits for `@cockpit_name`, appends the seat line); launchers.conf has `Datasec/HPSM-POC` + `-A/-B/-C` (backups `.pre-0923-1525-hpsmpoc`, `.pre-0923-1610-seats`).
+- **Also today:** Kam ruled C-09 (HP-Project-Owner questions answerable by Datasec, not a priority unless blocking) and edited the HP-champion Word doc himself (C-10; now 19 questions incl. a flow/process/outputs section). He has a **walkthrough meeting tomorrow** and will send answers after — log them verbatim.
+- Spark loop PROVEN; local-model-first is a standing rule. Datasec only on the Spark.
+- BLOCKED as before: `datasec-hpsm-poc@agentmail.to` (no scoped key).
 
 ## OWED — first work of the next session
 1. **Datasec/HPSM-POC (claimed by Friday).** Scaffold, plan, Q&A and Jira are DONE (see the project's `CLAUDE.md` + `BACKLOG.md`).
@@ -45,4 +51,4 @@ will break the same way — if something fails with `/Users/kamilkreiser/1FILES:
 - Lesson: build seats in cockpit panes (ledger row, digests regenerated, pushed).
 
 ## Open claims by Friday
-Spark loop (OPEN) · Datasec/HPSM (OPEN) · Datasec/HPSM-POC (OPEN) · space-in-path fixes (release after this checkpoint's commit).
+Spark loop (OPEN) · Datasec/HPSM (OPEN) · Datasec/HPSM-POC (OPEN — three B02 seats running).
