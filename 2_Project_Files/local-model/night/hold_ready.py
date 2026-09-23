@@ -411,7 +411,7 @@ def hold_code_patch():
 - A6 [verbatim]: `{a_lines['A6']}` · A7 [verbatim]: `{a_lines['A7']}`
 - SUMMARY [checker.out, verbatim]: `{summary_line}`
 
-**PR NOTES for the raise seat:** CODE_PATCH — PRODUCT BYTES CHANGE: `{product_file}` (+{adds.get(product_file, '?')}/-{dels.get(product_file, '?')} per numstat.out) and the test file `{test_file}` (+{adds.get(test_file, '?')}/-{dels.get(test_file, '?')}); two files. Apply PER SECTION with the checker's apply mode — {apply_steps} — at the tip `{tip}` (re-check `git ls-remote origin develop` first; if develop moved, re-run `git apply --check` per section and state it). Tier: AT LEAST tier 2 (product code changes) — the gate decides. Input: `{os.path.join(run, 'input.json')}`. {brief_clause}. Verdict source: `{os.path.join(run, 'checker.out')}`.
+**PR NOTES for the raise seat:** CODE_PATCH — PRODUCT BYTES CHANGE: `{product_file}` (+{adds.get(product_file, '?')}/-{dels.get(product_file, '?')} per numstat.out){(' — ONE file: it is both the product and its test (self-testing mode; red-first is by HUNK, not by file)' if self_testing else f' and the test file `{test_file}` (+{adds.get(test_file, chr(63))}/-{dels.get(test_file, chr(63))}); two files')}. Apply PER SECTION with the checker's apply mode — {apply_steps} — at the tip `{tip}` (re-check `git ls-remote origin develop` first; if develop moved, re-run `git apply --check` per section and state it). Tier: AT LEAST tier 2 (product code changes) — the gate decides. Input: `{os.path.join(run, 'input.json')}`. {brief_clause}. Verdict source: `{os.path.join(run, 'checker.out')}`.
 
 ```diff
 {patch_text.rstrip()}
