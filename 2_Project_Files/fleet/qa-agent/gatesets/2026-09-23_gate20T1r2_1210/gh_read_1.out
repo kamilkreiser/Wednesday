@@ -1,0 +1,66 @@
+head 6b572240fc31e564a6d0c516fdff66814bb856c6 state open merged False base develop 2bc5ccf63b8c40911afb568b03cace066238ffcf draft False
+title (84 chars, ascii True): KS-1239 RAWAUTHDEAD: api-gateway index.ts drops the dead pre-auth Authorization copy
+body 4552 chars; KS keys ['KS-1239']; closing-word+key 0
+  body marker 'FINDING'        True
+  body marker 'platform.ts:204' True
+  body marker 'ks1215'         True
+  body marker 'ks1238'         True
+  body marker 'dangl'          True
+  body marker 'not fixed'      True
+  body marker 'LEG D'          False
+  body marker '827'            False
+  body marker 'round 2'        False
+  body marker 'Refs KS-1239'   True
+files 3
+  modified +17 -8 Blockchain/Dev/packages/shared/src/__tests__/ks781-p3-3-body-parser-order.test.ts
+  added +39 -0 Blockchain/Dev/services/api-gateway/src/__tests__/ks1239-index-takes-no-pre-auth-rawauthorization-copy.test.ts
+  modified +0 -18 Blockchain/Dev/services/api-gateway/src/index.ts
+compare develop...head: merge_base 2bc5ccf63b8c40911afb568b03cace066238ffcf ahead 2 behind 10 files 3
+r2 commit message (2433 chars):
+KS-1239 LEGDPINS: move LEG D's three index.ts line pins by the -18 this PR causes
+
+Round 2 of 2. The tier-1 gate's one blocker, and nothing else.
+
+packages/shared's LEG D leg - in ks781-p3-3-body-parser-order.test.ts - pins
+three api-gateway src/index.ts sites BY
+LINE NUMBER. This PR removes 18 lines above all three, so they move and the
+shared suite reds 915/917 at this head and merged - deterministically, not
+flakily. LEG D is the only place that list lives, and it lives in a DIFFERENT
+package from the one this PR touches, which is why my own lane run could not
+see it: api-gateway went 742 -> 746 green while packages/shared went red.
+
+Measured here, each new line read back out of the file rather than taken from
+the gate's mail or re-baselined from a run - the discipline this file's own
+comments require:
+
+  845 -> 827  app.post('/api/auth/wallet/challenge', mockBodyParser, ...
+  858 -> 840  app.post('/api/auth/wallet/authenticate', mockBodyParser, ...
+  873         the createVerificationRoutes factory argument (was 891)
+
+A uniform -18 on all three, with the same `via`, matching this PR's +0/-18.
+index.ts 1279 -> 1261.
+
+Four edits carry that: the three strings in LEG D's toEqual list, and the
+CONTROL cell's toContain, which pins the factory-argument site by number too.
+Two adjacent comments named the old numbers as the live ones and would have
+been stale the moment the pins moved, so they are brought in line in the same
+commit - that kind of stale comment is exactly what bit this round already.
+A read-back note is added in the shape the five previous instances of this
+move use; the file asks for it in as many words.
+
+The pins are still NUMBERS. Pinning by text instead is a design change to
+another ticket's guard and is NOT done here; it is raised as a proposal in the
+READY instead.
+
+Proven at this head, serially: packages/shared 917/917 green, 0 red, over 205
+files; api-gateway 746/746; tsc --noEmit rc 0 with 0 errors in both packages.
+Note for whoever reads a failing run of this suite: a parallel run of
+packages/shared on a loaded machine reds four whole-repo WALKING guards
+(crypto-agility, entrypoint-corpus, ks764 revoke call sites, ks860 listeners)
+with STACK_TRACE_ERROR and no assertion text. That is contention, not the
+tree - each of the four is green run alone, and the whole suite is green with
+--no-file-parallelism.
+
+Refs KS-1239
+
+Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>
