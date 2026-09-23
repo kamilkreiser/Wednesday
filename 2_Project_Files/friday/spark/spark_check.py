@@ -15,7 +15,7 @@ expect.json:
 Output: one line per clause `Cn: PASS|FAIL|NOT-RUN — detail`, then `VERDICT: PASS|FAIL|INCOMPLETE`.
 Exit: 0 PASS, 1 FAIL, 2 INCOMPLETE (a NOT-RUN clause, none failed), 3 setup error.
 
-The source working copy is never modified: work happens in a fresh clone at <evidence dir>/wc.
+The source working copy is never modified: work happens in a fresh clone in the system temp dir (path in 00_clone_location.txt).
 Nothing is deleted. Python 3 stdlib only.
 """
 import argparse
@@ -198,10 +198,14 @@ def main():
             return die("suite_count_regex must have a named group `passed`")
 
     out_dir = os.path.abspath(a.out)
-    wc = os.path.join(out_dir, "wc")
+    # The throwaway clone lives in the SYSTEM TEMP dir, never in the evidence dir: the evidence dir sits in a synced
+    # tree, and one full clone per check reached 2.3 GB in six checks (Friday, 2026-09-23). Its path is recorded.
+    import tempfile
+    wc = os.path.join(tempfile.mkdtemp(prefix="spark_wc_"), "wc")
     if os.path.exists(wc):
         return die("%r already exists - use a fresh evidence dir (nothing is ever deleted)" % wc)
     os.makedirs(out_dir, exist_ok=True)
+    with open(os.path.join(out_dir, "00_clone_location.txt"), "w") as _f: _f.write(wc + "\n")
     ev = Evidence(out_dir)
 
     # keep the exact inputs next to the evidence
@@ -234,6 +238,47 @@ def main():
     if rc_s == 0:
         mode = "strict"
         res["C1"] = ("PASS", "applies STRICT at %s (evidence %s)" % (head[:12], f_s))
+        # ANCHOR CHECK (Friday, 2026-09-23 smoke break 2): git apply relocates a hunk by searching for its context,
+        # so a header naming a line that does not exist ('@@ -902,3' on a 17-line file) still applied 'strict'.
+        # Clause 1 means the diff applies AT THE STATED LINES: every hunk's old side (context + '-') must sit at
+        # exactly the header's start line in the file at the pinned commit.
+        anchor_lines, anchor_bad = [], []
+        cur_path = None
+        dl = diff_text.split("\n")
+        i = 0
+        while i < len(dl):
+            l = dl[i]
+            if l.startswith("--- "):
+                src = l[4:].split("\t")[0].strip()
+                cur_path = None if src == "/dev/null" else _strip_path(src)
+            m = re.match(r"^@@ -(\d+)(?:,(\d+))? \+\d+(?:,\d+)? @@", l)
+            if m and cur_path:
+                start = int(m.group(1)); old_side = []
+                j = i + 1
+                while j < len(dl) and not dl[j].startswith("@@") and not dl[j].startswith("--- "):
+                    if dl[j].startswith(" ") or dl[j].startswith("-"): old_side.append(dl[j][1:])
+                    elif dl[j] == "": pass
+                    j += 1
+                rc_f, so_f, _, _ = ev.run("C1_anchor_show_%d" % start, ["git", "show", "%s:%s" % (head, cur_path)], cwd=wc)
+                flines = so_f.split("\n")
+                at = flines[start - 1:start - 1 + len(old_side)] if start >= 1 else []
+                if at == old_side:
+                    anchor_lines.append("OK   %s hunk @-%d: old side (%d lines) is at line %d" % (cur_path, start, len(old_side), start))
+                else:
+                    found = next((k + 1 for k in range(len(flines)) if flines[k:k + len(old_side)] == old_side), None)
+                    anchor_bad.append("%s hunk @-%d: old side NOT at line %d (file has %d lines); %s"
+                                      % (cur_path, start, start, len(flines) - (1 if flines and flines[-1] == "" else 0),
+                                         ("content actually at line %d - git applied it by context search" % found) if found else "content not found anywhere"))
+                    anchor_lines.append("BAD  " + anchor_bad[-1])
+                i = j; continue
+            i += 1
+        anchor_file = os.path.join(out_dir, "C1_anchor_check.txt")
+        with open(anchor_file, "w") as f: f.write("\n".join(anchor_lines) + "\n")
+        ev.expected.append(anchor_file)
+        if anchor_bad:
+            res["C1"] = ("FAIL", "applies only by git's context search, NOT at the stated lines: %s (evidence %s)"
+                         % (anchor_bad[0], anchor_file))
+            mode = "strict-offset"
     else:
         with open(recount_copy, "w", encoding="utf-8", errors="surrogateescape") as f:
             f.write(with_git_headers(diff_text))

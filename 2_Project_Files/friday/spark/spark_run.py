@@ -275,6 +275,18 @@ def run(a, out_dir, log):
         return 3
     blocks = extract_fenced_blocks(content)
     diffs = [b for b in blocks if looks_like_diff(b[0], b[1])]
+    # UNFENCED WHOLE-ANSWER DIFF (measured 2026-09-23 smoke run 1: DeepSeek V4 Flash returned a correct unified
+    # diff with NO fences). Accepted ONLY when there are zero fences, the answer starts with '--- ', and EVERY
+    # non-empty line is unified-diff grammar. Any prose anywhere keeps the refusal below. Logged as a breach.
+    if not blocks and stripped.startswith("--- "):
+        grammar = re.compile(r"^(--- |\+\+\+ |@@ -\d+(,\d+)? \+\d+(,\d+)? @@| |\+|-|\\ No newline)")
+        bad = [l for l in stripped.split("\n") if l.strip() and not grammar.match(l)]
+        if not bad:
+            log("CONTRACT BREACH (format): the answer is an UNFENCED diff. Accepted because the WHOLE answer is "
+                "unified-diff grammar (%d lines, 0 non-diff lines). See kit 04, failure mode 8." % stripped.count("\n"))
+            blocks = [("diff", stripped, True)]; diffs = list(blocks)
+        else:
+            log("UNFENCED answer rejected: %d non-diff line(s), first: %r" % (len(bad), bad[0][:120]))
     if len(blocks) != 1 or len(diffs) != 1:
         desc = ", ".join("%s(%s,%d lines%s)" % ("diff" if looks_like_diff(l, bd) else "non-diff",
                                                   l or "no-lang", bd.count("\n") + 1,

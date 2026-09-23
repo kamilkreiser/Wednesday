@@ -80,3 +80,20 @@ someone previously looked; it is silent about everything that changed since.
 **Every one of these is cheaper to catch in the brief than in the output.** When you find a new
 one, do not just fix the instance — decide whether it is a model limit, a harness gap or a brief
 defect, and put the fix where that answer points. Then write it down here, with the evidence.
+
+---
+
+## Measured on the Spark (DeepSeek V4 Flash) by Friday, 2026-09-23 — smoke test
+
+**8. Fences omitted, content correct (MODEL, format).** Smoke run 1 returned a perfect unified diff with **no code fences**;
+run 2 (same brief, temperature 0) fenced it. So the format rule is obeyed inconsistently. **Fix (harness):** `spark_run.py`
+accepts an unfenced answer ONLY when there are zero fences, it starts with `--- `, and EVERY non-empty line is unified-diff
+grammar; it logs `CONTRACT BREACH (format)`. Any prose keeps the refusal. Arms: `2_Project_Files/friday/spark/tests/unfenced_arms.py`
+(pure diff → accepted; diff + one prose line → refused; prose only → refused), 3/3.
+
+**9. A wrong line number still "applies strict" (HARNESS — the checker could not fail).** `git apply` relocates a hunk by
+searching for its context, so a header pointing at line 902 of a 17-line file applied cleanly and C1 PASSED. This is
+the kit's own deliberate break 2, and it exposed the hole. **Fix (checker):** C1 now includes an ANCHOR CHECK: every hunk's
+old side (context + `-`) must sit at exactly the header's start line in the file at the pinned commit, otherwise C1 FAILS
+(`applies only by git's context search`) and names where the content actually is. Evidence: `C1_anchor_check.txt`.
+Re-proved: smoke PASS (anchor OK at line 2) · break 1 C2 FAIL · break 2 C1 FAIL · the original 22-case self-test ALL OK.
