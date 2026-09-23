@@ -196,12 +196,6 @@ def _apply_to_tip(patch_file, files_at_tip, scratch_parent, opts=()):
     try:
         for path, content in files_at_tip.items():
             fp = os.path.join(td, path); os.makedirs(os.path.dirname(fp), exist_ok=True)
-            if isinstance(content, dict):
-                # 2026-09-23: an EXCERPTED input (build_input.sh 7d) carries regions, not the file — read the WHOLE file
-                # at the pinned tip by a git READ verb (the a3c_plus.py pattern). Found on the first excerpted hold (KS-1143).
-                r = subprocess.run(['git', '-C', inp['source_checkout'], 'show', f"{inp['tip']}:{path}"], capture_output=True, text=True)
-                if r.returncode != 0: die(f"excerpted file {path}: git show at the tip failed: {r.stderr.strip()[:200]}")
-                content = r.stdout
             open(fp, 'w').write(content)
         r = subprocess.run(['git', 'apply', '-p1', *opts, patch_file], cwd=td, capture_output=True, text=True)
         digests = {p: hashlib.sha256(open(os.path.join(td, p), 'rb').read()).hexdigest() for p in files_at_tip}
@@ -213,11 +207,7 @@ def hold_code_patch():
     tip = inp['tip']; product_file = inp['product_file']; test_file = inp['suggested_test_file']
     runner = (inp.get('repo') or {}).get('test_runner', '').split(' ')[0] or inp.get('runner') or '?'
     co = _read(os.path.join(run, 'checker.out'), 'checker.out')
-    # 2026-09-23 SELF-TESTING (checker.sh MODE=self_testing, KS-1143): accepted ONLY when the input declares it — the one
-    # product file IS the test; the touched set below is then exactly { product_file }.
-    self_testing = bool((inp.get('self_testing') or {}).get('test_hunks'))
-    want_mode = 'self_testing' if self_testing else 'code_patch'
-    if not re.search(rf'^mode: {want_mode}', co, re.M): die(f"checker.out has no 'mode: {want_mode}' line — the input says {want_mode} but the checker did not run it as one")
+    if not re.search(r'^mode: code_patch', co, re.M): die("checker.out has no 'mode: code_patch' line — the input says code_patch but the checker did not run it as one")
 
     # 1. verdict — from checker.out
     m = re.search(r'^RESULT: (PASS|FAIL) \((\d+)/(\d+)\)', co, re.M)
@@ -271,13 +261,9 @@ def hold_code_patch():
     # per ticket) — a split ticket's second part names its own test, and the checker accepts it; so must this tool.
     # (2026-09-22 04:4x: KS-1231 PART B refused on suggested_test_file while its checker said PASS A3.)
     test_dir = inp.get('test_dir') or ''; ref_test = inp.get('reference_test_file') or ''
-    if self_testing:
-        if touched != [product_file] or not (test_dir and product_file.startswith(test_dir + '/')) or product_file == ref_test:
-            die(f"self-testing: touched {touched} is not exactly [{product_file}] under {test_dir}")
-        test_file = product_file
-    tests_touched = [f for f in touched if f != product_file and test_dir and f.startswith(test_dir + '/')] if not self_testing else [product_file]
+    tests_touched = [f for f in touched if f != product_file and test_dir and f.startswith(test_dir + '/')]
     others = [f for f in touched if f != product_file and f not in tests_touched]
-    if not self_testing and (product_file not in touched or len(tests_touched) != 1 or others or tests_touched[0] == ref_test):
+    if product_file not in touched or len(tests_touched) != 1 or others or tests_touched[0] == ref_test:
         die(f"touched {touched} is not {{ product_file , ONE test under {test_dir} }} (product present={product_file in touched}, tests={tests_touched}, other={others}, ref={ref_test})")
     if tests_touched[0] != test_file:
         print(f"NOTE: the touched test {tests_touched[0]} differs from the builder's suggested_test_file {test_file} — the checker's A3 accepts it; the READY names the TOUCHED file", file=sys.stderr)
