@@ -8,6 +8,11 @@ supersede: replace wholesale at the next pickup; do not append
 
 # NEXT PICKUP
 
+## ⏩ 2026-09-24 05:3x — the 00:00 overnight seat WRAPPED at the shift change (ctx ~46%, 7d:98%). Its deltas to the block below:
+- **OWED 0 DONE** (portable re-copy rc 0, Kam told). **Ornith BLOCKED by G6** (origin develop not local) — see the Ornith update below; KS-1131 F-A brief staged.
+- **Morning receipt to Kam leads with:** nothing merged overnight (no launch possible at 98%); the drive copy done; Ornith blocked on a Secuura fetch, which needs either a new account (Kam signs in) or the allowance renewal (~Sat); what the first Secuura seat would do (fetch → queue KS-1131 → the closing pass on round 20's 11 In-Progress tickets).
+- **Tuesday:** still no reply of hers seen, but Datasec seats are WRAPPING TO HER (19:31Z Vision "queue dry; v2.33 live", 19:32Z NexusAI-I S80I "three RELEASEs merged") — subject-only, not Wednesday's to answer; tell Kam in one line that her projects' wraps are piling up unread if she is still down.
+
 ## ONE block — written by the 17:0x seat of 2026-09-23 at its ROTATION (~23:5x, ctx ~79%); previous copy: the newest `.pre-0923-*-rotate` beside this file
 
 **FLOOR CLEAR:** `%0 wednesday` + `%9 fleet-monitor` only. No Claude seat or gate live. **Usage 7d:97%** — the round-20 lane grant is EXPIRED (moved in EXPIRING-GRANTS), so the 90% cut governs every launch: **nothing new launches** until the allowance renews (~3 d 14 h) or Kam signs into a new account.

@@ -1,3 +1,9 @@
+## 2026-09-24 00:00–05:3x — Wednesday overnight seat (successor of the 17:0x seat)
+- Boot: digest 530 KB + ledger 104 KB read whole, ctx 33%; allowance 7d:98% → no Claude launches (90% cut).
+- OWED 0 closed: portable-drive (KK_DEV_Local) additive re-copy rc 0, 534,663 files / 44 GB; Kam told on the panel.
+- Ornith blocked by G6 (origin develop 6ab9d50 not in the Secuura object store); first act of the next Secuura seat = fetch. KS-1131 F-A self-testing brief staged (simulated + dry-run applied).
+- Ledger: 1 row; rule 3c archived 22 rows (09-21). Commits pushed; handover mail [Wednesday-overnight -> Wednesday-morning].
+
 ## 2026-09-23 13:12 → 14:1x AEST — FRIDAY seat (laptop, terminal copy outside tmux) — cockpit gate fixed; spark-kit adopted; the Spark ruled Friday's
 
 **Kam's cockpit launch refused on the laptop, and that is how two Fridays came to run at once. Friday fixed the cause, adopted Wednesday's spark-kit, and Kam ruled the Spark is Friday's.**
