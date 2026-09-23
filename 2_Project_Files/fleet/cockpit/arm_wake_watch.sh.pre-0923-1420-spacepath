@@ -119,7 +119,7 @@ RUNNER='
     AGENTS=$('"$TMUX_BIN"' list-panes -t fleet:0 -F "#{@cockpit_name}" 2>/dev/null | grep -vE "^($SEAT|wednesday|fleet-monitor)$" | grep -c . || true)
     if [ "${AGENTS:-0}" -gt 0 ] 2>/dev/null; then N=3; else N=9999; fi
     echo "$(date "+%Y-%m-%d %H:%M:%S") armed: baseline=$BASELINE stable_n=$N agents=$AGENTS"
-    OUT=$("'"$HERE"'"/wake_watch.sh "$BASELINE" "$N" 60 2>&1)   # quoted 2026-09-23: the laptop tree lives under a path with spaces
+    OUT=$('"$HERE"'/wake_watch.sh "$BASELINE" "$N" 60 2>&1)
     echo "$(date "+%Y-%m-%d %H:%M:%S") $OUT"
     NEWTS=$(printf "%s" "$OUT" | sed -nE "s/.*(new mail at|message from Kam at) ([0-9T:-]+).*/\2/p" | tail -1)
     [ -n "$NEWTS" ] && BASELINE="$NEWTS"

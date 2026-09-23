@@ -36,10 +36,7 @@ HEALTH="${USAGE_PUB_HEALTH:-$STATE_DIR/usage_publish.health}"; LOG="${USAGE_PUB_
 mkdir -p "$(dirname "$HEALTH")" "$(dirname "$LOG")"
 log() { echo "$(date '+%F %T') $*" >> "$LOG"; [ "$DRY" = 1 ] && echo "$*"; }
 PATTERN="seat/publish_usage.sh"
-# A LOOP is invoked with --seat and --interval only. Any command line carrying --arm/--status/--once/--dry-run is a
-# caller (the launcher, a shell running --arm), not a loop — counting it reported a dead shell pid as "already armed"
-# and spawned nothing (Friday, 2026-09-23 14:18).
-running_pids() { pgrep -f "$PATTERN" 2>/dev/null | while read -r p; do [ "$p" = "$$" ] && continue; [ "$p" = "$PPID" ] && continue; c="$(ps -o command= -p "$p" 2>/dev/null)"; printf '%s' "$c" | /usr/bin/grep -q -- "--seat $SEAT" || continue; printf '%s' "$c" | /usr/bin/grep -qE -- '--(arm|status|once|dry-run)' && continue; echo "$p"; done; }
+running_pids() { pgrep -f "$PATTERN" 2>/dev/null | while read -r p; do [ "$p" = "$$" ] && continue; ps -o command= -p "$p" 2>/dev/null | /usr/bin/grep -q -- "--seat $SEAT" && echo "$p"; done; }
 
 if [ "$STATUS" = 1 ]; then
   pids="$(running_pids | tr '\n' ' ')"
