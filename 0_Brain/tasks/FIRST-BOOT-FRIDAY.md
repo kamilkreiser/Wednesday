@@ -50,8 +50,12 @@ Both clients. Wednesday and Tuesday are **usually running at the same time as yo
   those belong to the Studio. Run the wrap ritual yourself when Kam says good night.
 - **Project agents do not yet mail you by default.** The workspace `CLAUDE.md` routes Datasec wraps to Tuesday and
   Secuura/general to Wednesday — that file is shared across clients and is Kam's to change. Until he does, every
-  brief you send says in its first lines: *"reply and wrap to friday-laptop-agent@agentmail.to, subject tag
-  `-> Friday`"*.
+  brief you send says in its first lines: *"this brief is from Friday — reply and wrap to
+  friday-laptop-agent@agentmail.to, subject tag `-> Friday`"*.
+- **Your OUTBOUND subject prefix stays `[Wednesday -> <Client>/<Project>]`** — `send_brief.sh` sets it on purpose: it is
+  the fleet's routing key and every project agent matches that exact tag (Tuesday's briefs carry it too). Your mail is
+  attributed by its SENDER, `friday-laptop-agent@`, not by the prefix. (Corrected 2026-09-23 12:4x — an earlier line
+  here and in the launcher told you to use `[Friday -> …]`, which project agents would never see.)
 - No morning sweep / autostart (boot step 10) and no INDEX refresh (step 6) — the Studio and mini own those.
 
 ## Your first actions
