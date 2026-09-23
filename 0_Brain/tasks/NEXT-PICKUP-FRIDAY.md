@@ -22,8 +22,7 @@ will break the same way — if something fails with `/Users/kamilkreiser/1FILES:
    inbox; GitHub repo; Azure. **Build seats run in visible cockpit panes** (Kam's ruling today).
 2. **Spark smoke test (owed item from the previous pickup, still OPEN).** Harness BUILT and self-tested:
    `2_Project_Files/friday/spark/{spark_run.py, spark_check.py}` (NOT yet committed — commit with this checkpoint). Smoke brief +
-   expect.json are in the SESSION SCRATCHPAD (`…/scratchpad/smoke/SMOKE-arms-path.{md,expect.json}`) and will NOT survive — move them
-   to `2_Project_Files/friday/spark/briefs/` first. Target: our own `tests/absence_claim_check_arms.sh` line 3 (hardcoded DevMASTER
+   expect.json are committed at `2_Project_Files/friday/spark/briefs/SMOKE-arms-path.{md,expect.json}`. Target: our own `tests/absence_claim_check_arms.sh` line 3 (hardcoded DevMASTER
    path; fix proven green 9/0 on a copy; tip 15189f1f3 — re-derive the tip before running, it will have moved). Then the two deliberate
    breaks (wrong expected line → C2 must fail; non-existent line → C1 must fail), then report to Kam. Datasec-only default for the box stands.
 3. **Datasec/HPSM (claimed):** filed and read. N-1 (round 3) is Kam's; default hold. Nothing else owed.
