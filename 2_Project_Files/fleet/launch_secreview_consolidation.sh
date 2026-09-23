@@ -77,4 +77,4 @@ fi
 
 cd "$SR_DIR" || { echo "cannot enter $SR_DIR" >&2; exit 8; }
 
-exec claude --dangerously-skip-permissions --model claude-opus-5 "$PROMPT"
+exec claude --dangerously-skip-permissions --model claude-opus-5-5 "$PROMPT"

@@ -61,4 +61,4 @@ if [ "${1:-}" = "--check" ]; then
 fi
 
 cd "$NX_DIR" || { echo "cannot enter $NX_DIR" >&2; exit 15; }
-exec claude --dangerously-skip-permissions --model claude-opus-5 "$PROMPT"
+exec claude --dangerously-skip-permissions --model claude-opus-5-5 "$PROMPT"

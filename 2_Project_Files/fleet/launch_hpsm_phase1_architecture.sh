@@ -30,4 +30,4 @@ if [ "${1:-}" = "--check" ]; then
   exit 0
 fi
 cd "$HP_DIR" || { echo "cannot enter $HP_DIR" >&2; exit 13; }
-exec claude --dangerously-skip-permissions --model claude-opus-5 "$PROMPT"
+exec claude --dangerously-skip-permissions --model claude-opus-5-5 "$PROMPT"

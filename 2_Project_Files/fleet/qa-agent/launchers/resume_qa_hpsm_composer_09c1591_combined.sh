@@ -63,4 +63,4 @@ if [ "${2:-}" = "--check" ]; then
   echo "guards passed for gate $GATE (session $SESSION); not launching (--check)"; exit 0
 fi
 cd "$QA_DIR" || { echo "cannot enter $QA_DIR" >&2; exit 9; }
-exec claude --resume "$SESSION" --dangerously-skip-permissions --model claude-opus-5 "$PROMPT"
+exec claude --resume "$SESSION" --dangerously-skip-permissions --model claude-opus-5-5 "$PROMPT"

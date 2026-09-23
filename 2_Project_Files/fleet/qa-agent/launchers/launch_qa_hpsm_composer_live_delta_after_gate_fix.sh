@@ -155,4 +155,4 @@ fi
   echo "REFUSING: QA_BRIEF_OVERRIDE/QA_PROMPT_OVERRIDE are for --check on drafts only; install the files and unset them" >&2; exit 22; }
 [ "$RULING" = 'recorded' ] || { echo "REFUSING: Kam's live-demo ruling $RULING" >&2; exit 19; }
 cd "$QA_DIR" || { echo "cannot enter $QA_DIR" >&2; exit 17; }
-exec claude --dangerously-skip-permissions --model claude-opus-5 "$PROMPT_TEXT"
+exec claude --dangerously-skip-permissions --model claude-opus-5-5 "$PROMPT_TEXT"

@@ -53,4 +53,4 @@ if [ "${1:-}" = "--check" ]; then
   exit 0
 fi
 cd "$WT" || exit 8
-exec claude --dangerously-skip-permissions --model claude-opus-5 "$PROMPT"
+exec claude --dangerously-skip-permissions --model claude-opus-5-5 "$PROMPT"

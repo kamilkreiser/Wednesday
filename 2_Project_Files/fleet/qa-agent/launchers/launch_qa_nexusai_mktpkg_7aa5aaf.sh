@@ -75,4 +75,4 @@ if [ "${1:-}" = "--check" ]; then
 fi
 
 cd "$QA_DIR" || { echo "cannot enter $QA_DIR" >&2; exit 19; }
-exec claude --dangerously-skip-permissions --model claude-opus-5 "$(cat "$PROMPT_FILE")"
+exec claude --dangerously-skip-permissions --model claude-opus-5-5 "$(cat "$PROMPT_FILE")"

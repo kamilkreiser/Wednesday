@@ -1,0 +1,239 @@
+#!/bin/bash
+# arm_wake_watch.sh — the ARMING half of wake_watch (built 2026-08-10).
+#
+# Why this exists (ledger w=5, learnings/2026-08-10_a-ritual-nothing-triggers-
+# is-not-a-ritual + 2026-08-09_an-enforcement-you-must-arm-is-not-one):
+# wake_watch.sh was hand-armed three times and dead within a day each time.
+# A safeguard that runs beside the work needs something that arms it (this
+# script, called by Launch_Wednesday.command on every boot) and something
+# that checks it is armed (doctor.sh's existing hard-fail). Hand-arming is
+# now only for recovery, never the plan.
+#
+# What it does:
+#   - Idempotent: if a runner is already alive, exits 0 saying so. Safe to
+#     call on every launch.
+#   - Starts a detached runner loop that re-arms wake_watch.sh forever:
+#       baseline = now (UTC, minute precision — matches wake_watch's compare)
+#       stable_n = 3 when agent panes are live, 9999 (mail-only) when not —
+#                  recomputed at every re-arm, so a wrapped-idle pane never
+#                  false-fires all morning (2026-08-09 false positive).
+#   - On a WAKE (mail or pane): delivers it through the PROVEN mechanism —
+#     tmux send-keys into the wednesday pane, exactly like shift_change.sh.
+#     No wednesday pane (launcher-only session, cockpit down): the WAKE line
+#     is in the log and the runner re-arms; doctor/next boot reads the log.
+#   - On the 4h no-fire timeout: re-arms silently with a fresh baseline.
+#
+# Usage: arm_wake_watch.sh            (arm if not armed)
+#        arm_wake_watch.sh status     (report, exit 0 armed / 1 not)
+#        arm_wake_watch.sh cycle      (re-arm NOW: kill the CHILD only, never the runner)
+#        arm_wake_watch.sh disarm     (stop runner + watcher)
+
+set -u
+HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_DIR="$(cd -P "$HERE/../../.." && pwd)"
+[ -f "$HERE/seat_resolve.sh" ] || { echo "arm_wake_watch: $HERE/seat_resolve.sh missing — the runner cannot resolve the coordinator seat/pane" >&2; exit 2; }
+STATE_DIR="$HERE/state"
+LOG_DIR="$HERE/logs"
+PIDFILE="$STATE_DIR/wake_watch_runner.pid"
+LOG="$LOG_DIR/wake_watch_runner.log"
+TMUX_BIN="$(command -v tmux || echo /opt/homebrew/bin/tmux)"
+mkdir -p "$STATE_DIR" "$LOG_DIR"
+
+runner_alive() {
+  [ -f "$PIDFILE" ] && kill -0 "$(cat "$PIDFILE" 2>/dev/null)" 2>/dev/null
+}
+
+case "${1:-arm}" in
+  status)
+    if runner_alive; then echo "armed (runner pid $(cat "$PIDFILE"))"; exit 0
+    else echo "NOT armed"; exit 1; fi
+    ;;
+  disarm)
+    if runner_alive; then kill "$(cat "$PIDFILE")" 2>/dev/null; fi
+    pkill -f 'wake_watch\.sh' 2>/dev/null
+    rm -f "$PIDFILE"
+    echo "disarmed"
+    exit 0
+    ;;
+  cycle)
+    # Force the runner to re-arm NOW, so stable_n/agents are recomputed after a
+    # pane is added or closed — WITHOUT touching the runner itself.
+    #
+    # Why this is a subcommand and not a command I type (ledger w=3, 2026-08-13):
+    # three times in one day I cycled by hand with a grep on 'wake_watch.sh' and
+    # a positional head -1, and the RUNNER matched too — its bash -c body quotes
+    # the child's path. Twice that killed the watcher I was trying to refresh.
+    # The discriminator is not greppable by eye but it is exact: the runner's pid
+    # is in PIDFILE; every other match is a child. Encoding it is the fix,
+    # because the selector lesson had already been written and still did not
+    # prevent the third occurrence.
+    runner_alive || { echo "NOT armed — nothing to cycle (run 'arm' first)" >&2; exit 1; }
+    RPID="$(cat "$PIDFILE")"
+    [ -x "$HERE/wake_watch.sh" ] || { echo "cycle ABORTED — $HERE/wake_watch.sh not found or not executable" >&2; exit 2; }
+    KILLED=0
+    while IFS= read -r line; do
+      cpid="${line%% *}"
+      [ "$cpid" = "$RPID" ] && continue          # never the runner
+      kill "$cpid" 2>/dev/null && KILLED=$((KILLED + 1))
+    done <<EOF
+$(ps -eo pid=,command= | awk -v s="$HERE/wake_watch.sh" '$2 == s || $3 == s {print $1" "$0}')
+EOF
+    if [ "$KILLED" -eq 0 ]; then
+      echo "runner $RPID alive; no child to cycle (it will re-arm on its own timer)"
+    else
+      echo "cycled: killed $KILLED child process(es); runner $RPID untouched, re-arms within ~60s"
+    fi
+    exit 0
+    ;;
+  arm) ;;
+  *) echo "usage: arm_wake_watch.sh [arm|status|cycle|disarm]"; exit 2 ;;
+esac
+
+if runner_alive; then
+  echo "already armed (runner pid $(cat "$PIDFILE"))"
+  exit 0
+fi
+# A stray watcher without a runner (old hand-armed instance) would double-fire
+# once a runner starts — fold it in rather than run two.
+pkill -f 'wake_watch\.sh' 2>/dev/null && sleep 1
+
+RUNNER='
+  # Baseline discipline (fixed 2026-08-10 after a QUESTION mail fell into the
+  # fire->re-arm gap, ledger w=2 on the 08-04 blanket-markseen root cause):
+  # the baseline NEVER advances to "now" — it advances ONLY to the timestamp
+  # of a mail/chat event that actually fired a wake (so I was provably tapped
+  # about everything up to it). A refire on an already-read mail costs one
+  # tap; a swallowed mail costs a 15-minute fallback. Always err toward refire.
+  BASELINE=$(date -u +%Y-%m-%dT%H:%M)   # first arm only: session boot has read everything
+  # SEAT + coordinator pane (2026-09-13, Tuesday 19:1x finding): this runner used
+  # to HARDCODE the literal wednesday for the DEAD case and the tap target and
+  # handed --dead no WED_AGENT, so a dead Tuesday seat could never be respawned.
+  # The ONE resolver (seat_resolve.sh) now decides: WED_AGENT, else the tree name;
+  # coord_pane_id accepts the seat name OR the legacy wednesday pane on this seat
+  # own tree. On the Studio SEAT resolves to wednesday - byte-identical in effect.
+  . "'"$HERE"'"/seat_resolve.sh || { echo "$(date "+%Y-%m-%d %H:%M:%S") FATAL: seat_resolve.sh missing - runner exiting"; exit 2; }
+  seat_resolve "'"$PROJECT_DIR"'"
+  echo "$(date "+%Y-%m-%d %H:%M:%S") runner seat=$SEAT (tree seat $TREE_SEAT)"
+  while true; do
+    # agent panes = everything except the coordinator (by seat name AND the legacy name) and the monitor
+    AGENTS=$('"$TMUX_BIN"' list-panes -t fleet:0 -F "#{@cockpit_name}" 2>/dev/null | grep -vE "^($SEAT|wednesday|fleet-monitor)$" | grep -c . || true)
+    if [ "${AGENTS:-0}" -gt 0 ] 2>/dev/null; then N=3; else N=9999; fi
+    echo "$(date "+%Y-%m-%d %H:%M:%S") armed: baseline=$BASELINE stable_n=$N agents=$AGENTS"
+    OUT=$('"$HERE"'/wake_watch.sh "$BASELINE" "$N" 60 2>&1)
+    echo "$(date "+%Y-%m-%d %H:%M:%S") $OUT"
+    NEWTS=$(printf "%s" "$OUT" | sed -nE "s/.*(new mail at|message from Kam at) ([0-9T:-]+).*/\2/p" | tail -1)
+    [ -n "$NEWTS" ] && BASELINE="$NEWTS"
+    # ctx wakes (working-rhythm §2, 2026-08-10) pass through EXACTLY like pane
+    # fires: tap, no baseline movement (the sed above only matches mail/chat).
+    case "$OUT" in
+      # message-from-Kam added 2026-08-17: the chat leg wake wording never
+      # matched this case, so chat wakes advanced the baseline and SILENTLY
+      # skipped the tap (the 12:08 chat message sat unseen ~10 min). Family:
+      # enforcement-scoped-narrower, ledger 2026-08-12 w=3 -> now w=4. NOTE:
+      # this whole runner body is a single-quoted string - no apostrophes in
+      # comments here, ever; one broke the arm path on the first fix attempt.
+      *"new mail"*|*"idle at prompt"*|*"message from Kam"*) MSG="[wake_watch] $OUT — check the fleet inbox / pane now." ;;
+      *"ctx at"*) MSG="[wake_watch] $OUT — apply rhythm §2 now; rotate at the task boundary via cockpit.sh rotate <Client/Project> (wednesday pane: own checkpoint ritual)." ;;
+      # content-FROZEN added 2026-09-01 (WED-136, ledger w=5 enforcement-scoped-narrower):
+      # the FROZEN-BUSY leg (wake_watch.sh, 2026-08-23) fired 14 times on an idle
+      # Secuura pane with a permanent sentinel shell and every fire fell through
+      # this case un-tapped. Same defect as the 08-17 chat-leg row: leg widened,
+      # consumer not. Any new wake shape gets a line HERE the day it is added.
+      *"content FROZEN"*) MSG="[wake_watch] $OUT — turn likely ended with work or mail pending: check the inbox FIRST, then the transcript mtime, then the detector at the pane; tap or score as the state requires." ;;
+      # DEAD coordinator (2026-09-02): do NOT tap a pane that cannot read a tap.
+      # Respawn it through wednesday_rotate.sh --dead (which re-checks the
+      # literal before killing anything) and give the boot ten minutes.
+      # 2026-09-13: matched on the wake shape, not the literal wednesday (the
+      # message names $SEAT), and WED_AGENT=$SEAT is passed EXPLICITLY so the
+      # rotate script respawns THIS seat with THIS seat launcher.
+      *"DEAD"*"respawn required"*)
+        echo "$(date "+%Y-%m-%d %H:%M:%S") DEAD coordinator ($SEAT) detected — respawning via WED_AGENT=$SEAT wednesday_rotate.sh --dead"
+        if WED_AGENT="$SEAT" "'"$HERE"'"/wednesday_rotate.sh --dead >> "'"$LOG"'" 2>&1; then
+          echo "$(date "+%Y-%m-%d %H:%M:%S") respawn issued; waiting 600s for the boot before re-arming"; sleep 600
+        else
+          echo "$(date "+%Y-%m-%d %H:%M:%S") respawn REFUSED or FAILED (rc=$?) — see rotate_wednesday.log; will re-check next cycle"; sleep 120
+        fi
+        MSG="" ;;
+      *) echo "$(date "+%Y-%m-%d %H:%M:%S") WAKE UNMATCHED by tap case (add a pattern): $OUT"; MSG="" ;;
+    esac
+    if [ -n "$MSG" ]; then
+        # Tap target = the resolved coordinator pane id (seat name, else the guarded legacy name) - 2026-09-13
+        WPANE=$(coord_pane_id fleet:0 2>/dev/null || true)
+        if [ -n "$WPANE" ]; then
+          # KAM-TYPING GUARD (2026-08-12): the tap presses Enter in the
+          # wednesday pane — if Kam is mid-typing there, it SUBMITS his
+          # half-written message (happened twice today, both truncated at the
+          # wake text). Before tapping: read the prompt line, strip SGR-2
+          # ghost spans + colour codes + NBSP; if any real text sits after
+          # the prompt char, wait 30s and re-check, up to 20 tries (10 min).
+          # Still occupied -> log-only wake; losing immediacy beats
+          # destroying his input. (Ghost text does NOT block the tap - it is
+          # not his.)
+          # OWN-STUCK-TAP DISCRIMINATOR (2026-09-15, ledger w=2 - the night Ornith lost):
+          # the 22:14 band tap went into a BUSY pane and its Enter never submitted;
+          # the guard below then read the runner OWN unsent tap as Kam typing and
+          # held every wake for seven hours (LOG-ONLY x17). Text at the prompt that
+          # is a substring of the LAST TAP THIS RUNNER SENT is not Kam typing: submit
+          # it with Enter (a late wake beats a lost one) and re-check. And every tap
+          # is READ BACK: prompt clear = delivered; text still there = Enter again,
+          # up to 3 times, then logged STUCK so the next cycle can see and submit it.
+          LASTTAP=""; [ -f "'"$STATE_DIR"'/last_tap_$SEAT.txt" ] && LASTTAP=$(tr -d "[:space:]" < "'"$STATE_DIR"'/last_tap_$SEAT.txt")
+          TRIES=0
+          while [ "$TRIES" -lt 20 ]; do
+            PTXT=$('"$TMUX_BIN"' capture-pane -t "$WPANE" -p -e 2>/dev/null | grep -a "$(printf "\342\235\257")" | tail -1 | \
+              LC_ALL=C perl -pe "s/\x1b\[2m.*?(?=\x1b|\$)//g; s/\x1b\[[0-9;]*m//g; s/\xc2\xa0/ /g; s/^.*\xe2\x9d\xaf//" 2>/dev/null | tr -d "[:space:]")
+            [ -z "$PTXT" ] && break
+            if [ -n "$LASTTAP" ] && [ "${#PTXT}" -ge 12 ] && case "$LASTTAP" in *"$PTXT"*) true ;; *) false ;; esac; then
+              '"$TMUX_BIN"' send-keys -t "$WPANE" Enter
+              echo "$(date "+%Y-%m-%d %H:%M:%S") own stuck tap found at $SEAT prompt (${#PTXT} chars match the last tap) - Enter sent to submit it"
+              sleep 3; TRIES=$((TRIES + 1)); continue
+            fi
+            TRIES=$((TRIES + 1))
+            echo "$(date "+%Y-%m-%d %H:%M:%S") tap held - text at $SEAT prompt (try $TRIES/20)"
+            sleep 30
+          done
+          if [ -n "$PTXT" ]; then
+            echo "$(date "+%Y-%m-%d %H:%M:%S") WAKE LOG-ONLY (prompt still occupied after 10 min): $MSG"
+          else
+            printf "%s" "$MSG" > "'"$STATE_DIR"'/last_tap_$SEAT.txt"
+            if '"$TMUX_BIN"' send-keys -t "$WPANE" -l "$MSG" && '"$TMUX_BIN"' send-keys -t "$WPANE" Enter; then
+              MSGN=$(printf "%s" "$MSG" | tr -d "[:space:]"); RB=0
+              while [ "$RB" -lt 3 ]; do
+                sleep 2
+                PTXT=$('"$TMUX_BIN"' capture-pane -t "$WPANE" -p -e 2>/dev/null | grep -a "$(printf "\342\235\257")" | tail -1 | \
+              LC_ALL=C perl -pe "s/\x1b\[2m.*?(?=\x1b|\$)//g; s/\x1b\[[0-9;]*m//g; s/\xc2\xa0/ /g; s/^.*\xe2\x9d\xaf//" 2>/dev/null | tr -d "[:space:]")
+                [ -z "$PTXT" ] && break
+                if [ "${#PTXT}" -ge 12 ] && case "$MSGN" in *"$PTXT"*) true ;; *) false ;; esac; then
+                  RB=$((RB + 1)); '"$TMUX_BIN"' send-keys -t "$WPANE" Enter
+                  echo "$(date "+%Y-%m-%d %H:%M:%S") tap text still at $SEAT prompt - Enter re-sent ($RB/3)"
+                else
+                  break
+                fi
+              done
+              if [ -z "$PTXT" ]; then
+                echo "$(date "+%Y-%m-%d %H:%M:%S") tapped $SEAT pane $WPANE (read back: prompt clear)"
+              else
+                echo "$(date "+%Y-%m-%d %H:%M:%S") tapped $SEAT pane $WPANE but text remains at the prompt after read-back - STUCK; the next cycle submits it"
+              fi
+            else
+              echo "$(date "+%Y-%m-%d %H:%M:%S") FAILED to tap $SEAT pane $WPANE"
+            fi
+          fi
+        else
+          echo "$(date "+%Y-%m-%d %H:%M:%S") no $SEAT coordinator pane (nor an adoptable legacy wednesday pane) — WAKE logged only"
+        fi
+        sleep 120   # give the session time to read before re-arming
+    fi
+  done
+'
+nohup bash -c "$RUNNER" >> "$LOG" 2>&1 &
+echo "$!" > "$PIDFILE"
+sleep 1
+if runner_alive; then
+  echo "armed (runner pid $(cat "$PIDFILE"), log $LOG)"
+  exit 0
+else
+  echo "ARM FAILED — see $LOG"
+  tail -5 "$LOG" 2>/dev/null
+  exit 1
+fi

@@ -64,4 +64,4 @@ fi
 
 cd "$QA_DIR" || { echo "cannot enter $QA_DIR" >&2; exit 4; }
 
-exec claude --dangerously-skip-permissions --model claude-opus-5 "$PROMPT"
+exec claude --dangerously-skip-permissions --model claude-opus-5-5 "$PROMPT"
