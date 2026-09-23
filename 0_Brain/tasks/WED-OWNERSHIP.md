@@ -94,3 +94,4 @@ sees the claim rather than discovering it in a conflict.
 | 2026-09-23 06:30 | Kamils-Mac-mini | cockpit.sh say: refuse a BARE tap that asserts the agent's own state (a false claim tap was nearly logged as a C-148 ghost instance) | OPEN | |
 | 2026-09-23 09:29 | Kamils-Mac-mini | pin --model claude-opus-5-5 in the shared launcher + fleet launchers (Kam 09:25 live board: Opus 5.5 by default for every agent, including the seats) | OPEN | |
 | 2026-09-23 09:30 | Kamils-Mac-Studio | Kam 09:25 — pin every seat in MY tree to claude-opus-5-5 (Launch_Wednesday + Launch_Tuesday) | OPEN | |
+| 2026-09-23 11:04 | Kamils-Mac-Studio | Friday seat (Kam 10:49+10:57): Launch_Friday + first-run installer, friday seat in shared launcher/resolver, Friday tab + keys on live board, drawer X fix + file-hide deploy, two downloads | OPEN | |
