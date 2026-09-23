@@ -134,12 +134,7 @@ add_pane() { # name, cmd
   # 2026-09-14 19:2x — USAGE GATE (Kam 19:14: no new agents at 90% weekly usage). The
   # gate reads the seat's statusline-published 7d figure; rc 3 at/over the cut, rc 4 stale.
   # COCKPIT_SESSION (the test hook) bypasses it so the rebase-gate arms still run.
-  # 2026-09-23 (Friday seat): panes built by `up` from cockpit.conf are the fleet's STANDING
-  # infrastructure (the coordinator + fleet-monitor, a bash watchdog), not NEW AGENTS — the
-  # 90% cut does not apply to them, exactly as pane 0 is not gated (see `up`). Gating the
-  # monitor made a real 90% gauge die() mid-`up` AFTER pane 0 was running, so the launcher
-  # never attached and the seat ran headless. COCKPIT_UP_BUILD is set only inside `up`.
-  if [ "$SESSION" = fleet ] && [ "${COCKPIT_UP_BUILD:-0}" != 1 ]; then
+  if [ "$SESSION" = fleet ]; then
     # 2026-09-17: `up` builds a fleet whose seat is not yet running, so that seat's statusline gauge is
     # stale BY CONSTRUCTION (Tuesday 10:53: 206 min stale because her seat was the thing that died) —
     # the stale refusal deadlocked the relaunch it follows. During `up` ONLY, stale is tolerated
@@ -207,7 +202,7 @@ case "${1:-}" in
           "$TMUX_BIN" set-option -p -t "$pid" @cockpit_name "$name"
           first=0
         else
-          COCKPIT_UP_BUILD=1 add_pane "$name" "$cmd"
+          add_pane "$name" "$cmd"
         fi
       done < "$CONF"
       apply_layout

@@ -28,16 +28,7 @@
 set -u
 SELF_DIR=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd -P)
 PROJECT_DIR=$(CDPATH= cd -- "$SELF_DIR/../.." && pwd -P)
-# SEAT (2026-09-23, Friday seat): WED_AGENT, else the TREE this script lives in — via the ONE
-# resolver (cockpit/seat_resolve.sh). It used to fall back to the literal "wednesday", so
-# Launch_Cockpit.command (which exports no WED_AGENT) on the FRIDAY tree read the Studio's
-# usage_wednesday.json (90%, synced) instead of usage_friday.json (60%) and refused the
-# laptop's cockpit. On the WEDNESDAY tree the tree resolves to wednesday: unchanged there.
-if [ -r "$SELF_DIR/cockpit/seat_resolve.sh" ] && . "$SELF_DIR/cockpit/seat_resolve.sh" && seat_resolve "$PROJECT_DIR"; then
-  :
-else
-  echo "usage_gate: REFUSED (rc 4) — cannot resolve the seat (cockpit/seat_resolve.sh missing or failed)" >&2; exit 4
-fi
+SEAT="${WED_AGENT:-wednesday}"
 FILE="${USAGE_GATE_FILE:-$PROJECT_DIR/0_Brain/dashboard/data/usage_${SEAT}.json}"
 # USAGE_STOP FILE (2026-09-16 21:1x, Kam panel: "try not to go beyond 40% token allocation"): a tracked
 # fleet/USAGE_STOP whose first line is the cut (digits) sets the default for every launcher, which carry no
