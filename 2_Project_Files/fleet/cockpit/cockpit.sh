@@ -46,6 +46,10 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # 2026-08-05).
 PROJECT_DIR="$(cd "$SCRIPT_DIR/../../.." && pwd)"
 CONF="$SCRIPT_DIR/cockpit.conf"
+# COCKPIT_UP_BUILD is INTERNAL: only the in-script `up` loop sets it (as a prefix on add_pane).
+# Cleared here so an exported value from any caller can never carry `add` past the usage gate
+# (Wednesday's hardening, mail 2026-09-23 03:21Z, on 4413174ca).
+unset COCKPIT_UP_BUILD
 # COCKPIT_SESSION: test hook ONLY — points every subcommand at another tmux
 # session (a scratch one) so `say` can be exercised without touching a live
 # agent. One variable, applied to everything; default is the real fleet.

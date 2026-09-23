@@ -7,7 +7,7 @@ status: live
 
 # Boot digest BY TIER — W whole, M rules-only, every project case a handle
 
-Generated 2026-09-23 14:05 from 201 lesson files (936,527 B). M 36 · MIXED 5 · W 160. 5 project CASE sections inside MIXED files are reduced to one line each: the heading and the path to read it at. W blocks are exactly what the default digest carries; M blocks drop the section index and keep the rules; a P file is a single handle. The CASES behind every rule live only in the lesson files — open one the moment its rule fires.
+Generated 2026-09-23 14:08 from 201 lesson files (936,787 B). M 36 · MIXED 5 · W 160. 5 project CASE sections inside MIXED files are reduced to one line each: the heading and the path to read it at. W blocks are exactly what the default digest carries; M blocks drop the section index and keep the rules; a P file is a single handle. The CASES behind every rule live only in the lesson files — open one the moment its rule fires.
 
 ## The T9 SSD is the master — Wednesday must be fully portable
 `2026-07-31_fully-portable-drive.md` · principle · 2026-07-31 · status: superseded — the "T9 is the master" half by [[2026-08-25_one-drive-devmaster-is-master]] (2026-08-25); the portability principle itself still lives · tier: W
@@ -6550,12 +6550,12 @@ sections (open the file for these): The rule · Why it generalises past this flo
 **Family:** [[2026-08-11_coordinator-not-carrier]] · [[2026-09-14_the-coordinator-adds-value-or-it-is-waste-three-duties-not-watching]] · [[2026-09-10_claim-a-task-with-tuesday-before-starting-it]] · [[2026-08-16_an-ask-without-a-default-is-an-indefinite-hold]].
 
 
-## Running the Spark (local DeepSeek model): the BRIEF is the whole cost, the checker must be able to fail, and the counter is original + ONE rebrief then Opus 5.5
+## The Spark is FRIDAY'S to run (Kam 2026-09-23) — the BRIEF is the whole cost, the checker must be able to fail, and the counter is original + ONE rebrief then Opus 5.5
 `2026-09-23_spark-kit-running-a-local-coding-model.md` · principle · 2026-09-23 · status: live · tier: W
 
 (no rules-shaped section — file included WHOLE)
 
-# Running the Spark (local DeepSeek model): the BRIEF is the whole cost, the checker must be able to fail, and the counter is original + ONE rebrief then Opus 5.5
+# The Spark is FRIDAY'S to run (Kam 2026-09-23) — the BRIEF is the whole cost, the checker must be able to fail, and the counter is original + ONE rebrief then Opus 5.5
 
 **The operative case, so the headline matches it:** Friday is about to send work to the local coding model on the Spark box (HP ZGX Nano, DeepSeek V4 Flash, reached through the 8888 tunnel), or to judge something it returned. **The method is Wednesday's spark-kit, filed whole at `0_Brain/reference/2026-09-22_spark-deepseek-v4-flash/spark-kit_2026-09-23/`.** Read `02_FOR_THE_COORDINATOR.md` before the first task of a session. The rules below are the ones that decide outcomes. Where this box differs from the kit, the box wins, and the differences are listed further down.
 
@@ -6579,7 +6579,7 @@ sections (open the file for these): The rule · Why it generalises past this flo
 
 ## Open, and whose it is
 - **CLIENT OWNERSHIP OF THE BOX — ask before any Secuura code goes near it.** The Spark's login is `datasec-rd`, and the kit says it was commissioned "so that Datasec work can continue". Friday serves both clients, and sending one client's code to hardware provisioned for the other is the cross-client leak hard rule 2 exists to prevent. **Default until Kam rules: the Spark takes Datasec work only.**
-- The kit's setup prompt is addressed to Tuesday (the Datasec seat). Which seat runs the Spark loop is Kam's call. Friday proved the endpoint; nothing here claims the loop. Before driving it, claim it (`wed_claim.sh`) and check with Tuesday by mail ([[2026-09-23_fix-it-yourself-talk-to-sister-seats-directly]]).
+- ~~Which seat runs the loop~~ **RULED — the Spark and the kit are FRIDAY'S.** Kam, terminal 2026-09-23 ~14:1x, verbatim: *"the kit is addressed to tuesday but it should be addressed to you. its yours as you will be using the spark"*. Wherever the kit says "Tuesday" (README, 02, 05), read **Friday**. Claimed in `wed_claim.sh` the same minute, and Tuesday was told directly by mail, so there is no second loop. Kit file 05's setup (place files → inventory the box → checker → smoke test with two deliberate breaks → report to Kam) is Friday's owed work.
 - The reference harness (input builders, checkers, queue runner) lives in the Studio's tree and is not shipped. Porting it crosses project trees and is Kam's call.
 
 **Family:** [[2026-09-18_ornith-is-cheap-the-brief-is-the-cost]] · [[2026-09-15_ornith-every-issue-gets-a-tooling-or-instruction-fix]] · [[2026-09-15_never-idle-the-gatekeeper-widens-the-harness-when-the-pool-runs-dry]] · [[2026-08-07_a-check-that-cannot-fail]] · [[2026-09-11_red-proof-arms-cover-every-legitimate-shape-of-the-real-event]] · [[2026-09-22_ornith-is-studio-only-not-datasec]] (Ornith is the Studio's; the Spark is a different box and a different model) · [[2026-08-03_role-beyond-code-three-priorities]] (no cross-client leak).

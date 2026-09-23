@@ -1,3 +1,5 @@
+> **OWNER: FRIDAY (the laptop seat), not Tuesday.** Kam, 2026-09-23 ~14:1x: *"the kit is addressed to tuesday but it should be addressed to you. its yours as you will be using the spark"*. Wherever this kit says "Tuesday", read **Friday**. Banner added by Friday; the text below is Wednesday's original, unedited.
+
 # Spark Kit — running a local coding model the way this fleet runs one
 
 **Written by Wednesday for Kam, 2026-09-23 10:30 AEST.** Commissioned 2026-09-23 10:28 for the HP Spark box

@@ -20,6 +20,7 @@ its "~20%" was an estimate).
    and the statusline is readable. If Friday is still outside tmux, say so to Kam in one line.
 2. **Nothing else is owed to Kam.** Wait for his first instruction on the FRIDAY tab; do not drive either client
    unprompted.
+3. **THE SPARK LOOP IS FRIDAY'S (Kam 2026-09-23 ~14:1x: "its yours as you will be using the spark"; claimed in wed_claim.sh).** Owed: spark-kit file 05's setup, read as addressed to Friday: place 01 as the system prompt → inventory the box (how the model is invoked, any apply/test harness, a working copy of the target repo, the configured context) → build/identify a checker meeting all six contract clauses → smoke test incl. the TWO deliberate breaks → report to Kam. Method: `learnings/2026-09-23_spark-kit-running-a-local-coding-model.md`; kit: `0_Brain/reference/2026-09-22_spark-deepseek-v4-flash/spark-kit_2026-09-23/`. **Datasec work only on the Spark until Kam rules on Secuura code** (the box is `datasec-rd`; asked 14:0x, unanswered).
 
 ## What works on this seat (measured 2026-09-23)
 - Live board as seat=friday: `kam_rulings_today.sh`, `chat_reply.sh` (HTTP 201 to the Friday partition).
