@@ -296,4 +296,3 @@
 # 2026-09-23 10:4x — FIRST REAL ROUND ON AN EXCERPTED INPUT. The builder proved the regions ANCHOR
 # (Wednesday re-verified: 464 carried lines vs the tip, 0 mismatches) but could NOT prove the MODEL uses
 # the offset. That is what this round settles. Watch the hunk header's START field especially.
-KS-1143 input=/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/inputs/code_1143GUARDMENTION-R18.json task=/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/tasks/code_patch/task.md ctx=65536
