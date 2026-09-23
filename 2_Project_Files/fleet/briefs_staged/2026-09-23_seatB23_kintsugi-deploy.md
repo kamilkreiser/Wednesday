@@ -25,3 +25,16 @@ You are **Seat B 23rd**. Round 20 is **fully MERGED**: eleven PRs (#1202-#1212) 
 - Seat B 22nd's `raise20.py` cumulative-count fix (ruling (a), 07:5xZ) — tooling, not deployed code; the same latent defect in `raise19.py:694-698` / the `raiseC20.py` lineage is a handover item.
 - LEGD-BYTEXT (KS-781 LEG D should pin by text) — a ticket for the next round, not this deploy.
 - KS-1143 / #1212's INDIRECT-INVOCATION false negative stays open on KS-1143.
+
+## VERIFIED BEFORE SENDING (Wednesday, 20:58 local — deploy THIS)
+**develop `6ab9d5021e96ea1481cb6c6ff2d6d33b414aecb7`**, tree `0c834769ecf99f9563105f0b1a48a6c7371955b2` (GitHub commit API) == the #1210 re-gate merged tree; #1210 merged at `6b572240`; the shared `ks781-p3-3-body-parser-order.test.ts` landed as the combined blob `147c9a362d65`. Round 20: all eleven (#1202-#1212) on develop. Re-read develop yourself at ITEM 0; if it has moved, STOP and mail before deploying anything.
+
+PROVENANCE:
+- develop 6ab9d5021e96ea1481cb6c6ff2d6d33b414aecb7, tree 0c834769ecf99f9563105f0b1a48a6c7371955b2; #1210 merged at 6b572240; shared ks781 blob 147c9a362d65 | Wednesday's own ls-remote + the GitHub commit, pulls and contents APIs | read 2026-09-23
+- round 20 = #1202-#1212, eleven merged (tier 2 at 08:09-08:10Z, tier 1 six at ~10:00Z, #1210 at 10:54:40Z) | the seat's MERGED mails, each verified by Wednesday at the GitHub API | read 2026-09-23
+- Kam's authority "…after you do merge, push, and deploy what you can." | live board 2026-09-23 14:24:05, via kam_rulings_today.sh; /Volumes/DevMASTER/WEDNESDAY/0_Brain/tasks/EXPIRING-GRANTS.md round-20 row | read 2026-09-23
+- the proven procedure (items 0-5 + 7; item 6 = the first anchor, NOT this deploy) | /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/briefs_staged/2026-09-22_seatA16_kintsugi-deploy-3bad652d1.md (163 lines, section headings read) | read 2026-09-23
+- the prior deploy's outcome (0.97, handover 11 KB) | /Volumes/DevMASTER/!CODING/Secuura/Blockchain/5_Project_History/HANDOVER-seatA16-kintsugi-deploy.md (ls, 2026-09-22 19:19) + Wednesday's 09-22 note line 279 | read 2026-09-23
+- KS-535 never share demo's PLATFORM_WALLET_MNEMONIC; kintsugi first | /Volumes/DevMASTER/WEDNESDAY/0_Brain/learnings/2026-09-10_kintsugi-first-then-demo-behind-gates.md | read 2026-09-23
+
+SELF-CHECK: re-read end-to-end for contradictions | 2026-09-23 20:59
