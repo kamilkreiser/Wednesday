@@ -19,8 +19,6 @@ Usage:
   hide_message.py --seat tuesday --client Datasec --id bf-af542c5dc54b942b076d --unhide
   hide_message.py --seat tuesday --client Datasec --list-hidden          (the ?hidden=1 reveal, hidden rows only, no text)
   hide_message.py --seat tuesday --audit                                 (audit rows this seat may see)
-  hide_message.py --seat wednesday --client Secuura --file --row-key 2026-09-22T05:58:53.393Z_f-111e68ee05 --reason "…"
-                                                                         (2026-09-23: a FILE-DRAWER row; --list-hidden --file too)
 The last stdout line is always `rc=<n>`: 0 done (200) · 1 the API refused (403/404/409/400 — the body is printed) or unreachable ·
 2 refused locally (token). --dry-run prints the request and sends nothing.
 """
@@ -35,10 +33,9 @@ def finish(rc: int, msg: str) -> int:
 def main() -> int:
     ids = sc.load_ids()
     p = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    p.add_argument("--seat", choices=sc.SEAT_NAMES, required=True, help="which certificate signs the request; the token's roles decide what may be hidden")
+    p.add_argument("--seat", choices=["wednesday", "tuesday"], required=True, help="which certificate signs the request; the token's roles decide what may be hidden")
     p.add_argument("--cert-dir", default=sc.DEFAULT_CERT_DIR)
-    p.add_argument("--client", choices=sc.CLIENT_NAMES, default=None, help="the row's partition (tuesday tab = Datasec, wednesday tab = WED / Secuura, friday tab = Friday)")
-    p.add_argument("--file", action="store_true", help="2026-09-23: the target is a FILE-DRAWER row (table files, row key <ts>_f-…), not a message; same ownership rule, same audit")
+    p.add_argument("--client", choices=["Secuura", "Datasec", "WED"], default=None, help="the row's partition (tuesday tab = Datasec, wednesday tab = WED / Secuura)")
     p.add_argument("--row-key", default=None, help="<ISO UTC ts>_<id> — exact")
     p.add_argument("--id", default=None, help="the row's id (must match exactly one row in the partition)")
     p.add_argument("--reason", default="", help="<=160 chars [A-Za-z0-9 ._:/()+'-]; goes to the audit row, never the message")
@@ -60,15 +57,14 @@ def main() -> int:
             d = r.json(); rows = d.get("audit", [])
             print(f"audit rows visible to the {a.seat} seat (partitions {d.get('clients')}): {len(rows)}")
             for e in rows:
-                print(f"  {e.get('at')} {e.get('action'):6} {e.get('target_kind') or 'message':7} {e.get('target_client')}/{e.get('target_row_key')} by seat={e.get('seat')} changed={e.get('changed')} reason={e.get('reason')!r}")
+                print(f"  {e.get('at')} {e.get('action'):6} {e.get('target_client')}/{e.get('target_row_key')} by seat={e.get('seat')} changed={e.get('changed')} reason={e.get('reason')!r}")
             return finish(0, f"{len(rows)} audit row(s)")
         params = {"limit": 1000, "hidden": 1}
         if a.client: params["client"] = a.client
         if a.since: params["since"] = a.since
-        route, key = ("/api/seat/files", "files") if a.file else ("/api/seat/messages", "messages")   # 2026-09-23: --file = drawer rows
-        r = requests.get(a.base + route, params=params, headers={"Authorization": f"Bearer {tok}"}, timeout=30)
+        r = requests.get(a.base + "/api/seat/messages", params=params, headers={"Authorization": f"Bearer {tok}"}, timeout=30)
         if r.status_code != 200: return finish(1, f"HTTP {r.status_code}: {r.text[:300]}")
-        d = r.json(); rows = d.get(key, []); hid = [m for m in rows if m.get("hidden") is True]
+        d = r.json(); rows = d.get("messages", []); hid = [m for m in rows if m.get("hidden") is True]
         print(f"partitions {d.get('clients')}: {len(rows)} rows listed with hidden=1, of which HIDDEN: {len(hid)}")
         for m in hid:
             print(f"  {m.get('client')}/{m.get('row_key')} view={m.get('view')} hidden_at={m.get('hidden_at')} hidden_seat={m.get('hidden_seat')} src_ts={m.get('src_ts')}")
@@ -77,7 +73,6 @@ def main() -> int:
     if not a.client: return finish(2, "REFUSED locally: --client is required for hide/unhide")
     if not (a.row_key or a.id): return finish(2, "REFUSED locally: --row-key or --id is required")
     body = {"client": a.client, "reason": a.reason}
-    if a.file: body["kind"] = "file"          # 2026-09-23: a drawer row (table files); the API applies the same ownership rule
     if a.row_key: body["row_key"] = a.row_key
     else: body["id"] = a.id
     path = "/api/seat/unhide" if a.unhide else "/api/seat/hide"
@@ -91,7 +86,7 @@ def main() -> int:
     print(json.dumps({"status": r.status_code, "body": r.text[:600]}, indent=1))
     if r.status_code != 200: return finish(1, f"{'unhide' if a.unhide else 'hide'} REFUSED: HTTP {r.status_code}")
     d = r.json()
-    return finish(0, f"{'unhidden' if a.unhide else 'hidden'} {d['row'].get('kind') or 'message'}: {d['row']['client']}/{d['row']['row_key']} changed={d.get('changed')} audit={d.get('audit_row_key')} as seat={d.get('by')}")
+    return finish(0, f"{'unhidden' if a.unhide else 'hidden'}: {d['row']['client']}/{d['row']['row_key']} changed={d.get('changed')} audit={d.get('audit_row_key')} as seat={d.get('by')}")
 
 if __name__ == "__main__":
     sys.exit(main())

@@ -47,19 +47,5 @@ for (const [name, html] of [["index.html", idx], ["chat.html", chat]]) {
   P(/id="attachfile" type="file" multiple/.test(html) && /id="attach"/.test(html) && /WEDFILES\.attachmentsEl\(m\)/.test(html) && /WEDFILES\.uploadPending\(activeAgent, id\)/.test(html) && /WEDFILES\.init\(\{ zone:/.test(html), `${name}: attach input + button, attachment chips in render(), uploadPending before postKamMessage, WEDFILES.init with a drop zone`);
 }
 P(fs.existsSync(`${HERE}/app/static/drawer.js`) && /window\.WEDFILES = /.test(fs.readFileSync(`${HERE}/app/static/drawer.js`, "utf8")), "drawer.js exists and defines window.WEDFILES");
-// (5) FRIDAY tab (2026-09-23): both pages carry #ag-friday right after #ag-tuesday inside #agenttoggle with its usage chip, the
-//     toggle accepts "friday", the usage render covers three seats, the Friday CSS uses ONLY existing tokens (no new colour),
-//     and the drawer-X rule #drawer[hidden]{display:none} is present. PAGES env var = a dir of alternative pages (negative control).
-const PG = process.env.PAGES || `${HERE}/app/static`, SUF = process.env.PAGES_SUFFIX || "";
-for (const name of ["index.html", "chat.html"]) {
-  const html = fs.readFileSync(`${PG}/${name}${SUF}`, "utf8");
-  const tg = html.slice(html.indexOf('id="agenttoggle"'), html.indexOf("</span>", html.indexOf('id="ag-friday"') > 0 ? html.indexOf('id="ag-friday"') + 40 : html.indexOf('id="agenttoggle"')));
-  P(html.indexOf('id="ag-tuesday"') > 0 && html.indexOf('id="ag-friday"') > html.indexOf('id="ag-tuesday"') && /id="ag-friday"[^>]*>FRIDAY<span class="use" id="use-friday">/.test(html) && tg.includes('id="ag-friday"'), `${name}: FRIDAY button (+ use-friday chip) sits right after TUESDAY inside #agenttoggle`);
-  P(/setAgent\("friday"\)/.test(html) && /a !== "wednesday" && a !== "tuesday" && a !== "friday"/.test(html) && /\["wednesday", "tuesday", "friday"\]\.forEach/.test(html) && /view-friday/.test(html), `${name}: click -> setAgent("friday") accepted; body.view-friday toggled; usage render covers wednesday, tuesday, friday`);
-  const fcss = html.split("\n").filter(l => /friday/i.test(l) && /\{[^}]*(background|color)/.test(l));
-  P(fcss.length >= 3 && fcss.every(l => !/#[0-9a-fA-F]{3,6}\b(?![^;]*#fff)/.test(l.replace(/#fff\b/g, "")) && !/rgba?\(/.test(l)), `${name}: FRIDAY CSS uses existing tokens only (${fcss.length} rules; no new hex / rgba colour)`);
-  P(/#drawer\[hidden\]\s*\{\s*display:none;\s*\}/.test(html), `${name}: #drawer[hidden] { display:none; } present (the drawer-X fix rides this deploy)`);
-}
-P(/friday: "Friday"/.test(fs.readFileSync(`${PG}/common.js${SUF}`, "utf8")) && /"Friday" : "Wednesday"|\? "Friday" :/.test(fs.readFileSync(`${PG}/drawer.js${SUF}`, "utf8")), "common.js VIEW_TO_CLIENT.friday = Friday; drawer.js whoOf names Friday");
 console.log(fails ? `### RESULT: ${fails} FAILED` : "### RESULT: ALL PAGE CHECKS PASS (static DOM order + the pages' own ingestion statements in Node; not a browser)");
 process.exit(fails ? 1 : 0);

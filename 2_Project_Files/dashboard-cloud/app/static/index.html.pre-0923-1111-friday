@@ -202,7 +202,6 @@ main { flex:1; display:flex; min-height:0; width:100%; }
    never a subtle chip you can be wrong about at a glance. */
 #agentbar { flex:none; height:4px; background:var(--series-1); }
 body.view-tuesday #agentbar { background:#e08a2b; }
-body.view-friday #agentbar { background:var(--series-3); }   /* FRIDAY (2026-09-23): an existing token, no new colour */
 /* NOT margin-left:auto — #live already carries one, and a second auto margin
    splits the right-hand group across the free space instead of keeping it
    together. It rides beside #live, so the pair anchors right at any width.
@@ -219,14 +218,10 @@ body.view-friday #agentbar { background:var(--series-3); }   /* FRIDAY (2026-09-
 #agenttoggle button:hover { color:var(--text-primary); }
 #agenttoggle button.on { color:#fff; background:var(--series-1); }
 #agenttoggle button#ag-tuesday.on { background:#e08a2b; color:#241300; }
-#agenttoggle button#ag-friday.on { background:var(--series-3); color:#fff; }
 #agenttoggle .use{font-weight:400;opacity:.75;font-size:.9em;letter-spacing:0}
 #agenttoggle .use.stale{opacity:.45;font-style:italic}
 body.view-tuesday header { background:rgba(224,138,43,.10); }
 body.view-tuesday header h1::after { content:" · TUESDAY (Datasec)"; color:#e08a2b;
-               font-size:12px; font-weight:700; letter-spacing:.04em; }
-body.view-friday header { background:color-mix(in srgb, var(--series-3) 10%, transparent); }
-body.view-friday header h1::after { content:" · FRIDAY (laptop)"; color:var(--series-3);
                font-size:12px; font-weight:700; letter-spacing:.04em; }
 
 /* ══ DRAG-AND-DROP ATTACHMENTS (Kam, 2026-09-08 14:10) ═══════════════════════
@@ -321,7 +316,6 @@ body.view-friday header h1::after { content:" · FRIDAY (laptop)"; color:var(--s
  <span id="agenttoggle" role="group" aria-label="which agent's view is live">
   <button id="ag-wednesday" type="button" title="Wednesday — Secuura and all general work">WEDNESDAY<span class="use" id="use-wednesday"></span></button>
   <button id="ag-tuesday" type="button" title="Tuesday — all Datasec projects">TUESDAY<span class="use" id="use-tuesday"></span></button>
-  <button id="ag-friday" type="button" title="Friday — Kam's laptop seat (Secuura and Datasec work, its own conversation)">FRIDAY<span class="use" id="use-friday"></span></button>
  </span></header>
 <!-- KEY BAR (live site only): rows are ciphertext until the private key is present in THIS browser. -->
 <div id="keybar">
@@ -388,10 +382,9 @@ function flushPending() { if (pendingMsgs && !convoBusy()) { render(pendingMsgs)
 const log = document.getElementById("log");
 const AGENT_KEY = "wed_active_agent";
 let activeAgent = "wednesday";
-try { const a = localStorage.getItem(AGENT_KEY); if (a === "wednesday" || a === "tuesday" || a === "friday") activeAgent = a; } catch (e) {}
-function agentOfProject(p) { return /datasec/i.test(String(p || "")) ? "tuesday" : /^friday$/i.test(String(p || "")) ? "friday" : "wednesday"; }
-function agentOfMsg(m) { const a = m && m.agent; if (a === "wednesday" || a === "tuesday" || a === "friday" || a === "both") return a; return "both"; }
-function agentName(a) { return a === "tuesday" ? "Tuesday" : a === "friday" ? "Friday" : "Wednesday"; }
+try { const a = localStorage.getItem(AGENT_KEY); if (a === "wednesday" || a === "tuesday") activeAgent = a; } catch (e) {}
+function agentOfProject(p) { return /datasec/i.test(String(p || "")) ? "tuesday" : "wednesday"; }
+function agentOfMsg(m) { const a = m && m.agent; if (a === "wednesday" || a === "tuesday" || a === "both") return a; return "both"; }
 const PF_KEY = "wed_cockpit_projfilter";
 let pfSel = {};
 try { pfSel = JSON.parse(localStorage.getItem(PF_KEY) || "{}") || {}; } catch (e) { pfSel = {}; }
@@ -417,18 +410,16 @@ function msgVisible(m) { return msgInView(m) && (m.role === "kam" || projOn(proj
 function msgInView(m) { const a = agentOfMsg(m); return a === "both" || a === activeAgent; }
 function applyAgentView() {
   document.body.classList.toggle("view-tuesday", activeAgent === "tuesday");
-  document.body.classList.toggle("view-friday", activeAgent === "friday");
-  const w = document.getElementById("ag-wednesday"), t = document.getElementById("ag-tuesday"), f = document.getElementById("ag-friday");
+  const w = document.getElementById("ag-wednesday"), t = document.getElementById("ag-tuesday");
   if (w) { w.classList.toggle("on", activeAgent === "wednesday"); w.setAttribute("aria-pressed", activeAgent === "wednesday"); }
   if (t) { t.classList.toggle("on", activeAgent === "tuesday"); t.setAttribute("aria-pressed", activeAgent === "tuesday"); }
-  if (f) { f.classList.toggle("on", activeAgent === "friday"); f.setAttribute("aria-pressed", activeAgent === "friday"); }
   const box = document.getElementById("text");
-  if (box) box.placeholder = activeAgent === "tuesday" ? "message Tuesday (Datasec)…" : activeAgent === "friday" ? "message Friday (laptop)…" : "message Wednesday…";
+  if (box) box.placeholder = activeAgent === "tuesday" ? "message Tuesday (Datasec)…" : "message Wednesday…";
   const h = document.getElementById("convo-h");
-  if (h) h.textContent = "Conversation — Kam & " + agentName(activeAgent);
+  if (h) h.textContent = activeAgent === "tuesday" ? "Conversation — Kam & Tuesday" : "Conversation — Kam & Wednesday";
 }
 function setAgent(a) {
-  if (a !== "wednesday" && a !== "tuesday" && a !== "friday") return;
+  if (a !== "wednesday" && a !== "tuesday") return;
   activeAgent = a; try { localStorage.setItem(AGENT_KEY, a); } catch (e) {}
   applyAgentView();
   if (Array.isArray(lastRaw)) render(lastRaw);
@@ -436,7 +427,6 @@ function setAgent(a) {
 }
 document.getElementById("ag-wednesday").addEventListener("click", () => setAgent("wednesday"));
 document.getElementById("ag-tuesday").addEventListener("click", () => setAgent("tuesday"));
-document.getElementById("ag-friday").addEventListener("click", () => setAgent("friday"));
 applyAgentView();
 // ── weekly plan usage on the agent chips (Kam, 2026-09-09 12:32 on the local board; on the LIVE board 2026-09-22 08:57:36:
 // "with the local version, I was able to see the weekly usage count on both Wednesday and Tuesday. Is this possible for
@@ -464,7 +454,7 @@ function usageState(d) {   // -> {text, cls, title}; pure, so scripts/09d_usage_
     title: "weekly plan usage, published by the " + (d.seat || "?") + " seat" + (d.resets_in ? " · renews in " + d.resets_in : "") + " · reading " + (ageLabel(age) || "0m") + " old" };
 }
 function renderUsage(data) {
-  ["wednesday", "tuesday", "friday"].forEach(function (a) {
+  ["wednesday", "tuesday"].forEach(function (a) {
     const el = document.getElementById("use-" + a); if (!el) return;
     const s = usageState(data && data[a]); el.textContent = s.text; el.className = s.cls; el.title = s.title;
   });
@@ -528,7 +518,7 @@ function render(msgs) {
     const meta = document.createElement("div"); meta.className = "meta";
     const who = document.createElement("span"); who.className = "who";
     // The name comes from the MESSAGE (its seat), never from a constant — the 2026-09-10 lesson, kept.
-    who.textContent = role === "kam" ? "Kam" : (m.seat === "tuesday" || agentOfMsg(m) === "tuesday" ? "Tuesday" : m.seat === "friday" || agentOfMsg(m) === "friday" ? "Friday" : "Wednesday");
+    who.textContent = role === "kam" ? "Kam" : (m.seat === "tuesday" || agentOfMsg(m) === "tuesday" ? "Tuesday" : "Wednesday");
     meta.append(who, "  " + (m.ts || "").slice(11, 16));
     if (role === "wednesday" && m.text) {
       const pb = document.createElement("button"); pb.className = "playbtn"; pb.textContent = "▶"; pb.title = "speak this message aloud (this device)";
@@ -759,7 +749,7 @@ function decisionCard(dec) {
       // the click is a MESSAGE to the seat (same text shape as the local page); it never mutates the card — the seat rules the queue
       const text = noteTxt ? `Decision ${dec.id}: ${key} — ${opt.label} | note: ${noteTxt}` : `Decision ${dec.id}: ${key} — ${opt.label}`;
       try { await WED.postKamMessage(text, activeAgent); sentDecisions.add(dec.id); decDrafts.delete(dec.id);
-        const note = document.createElement("div"); note.className = "decsent"; note.textContent = "✓ sent to " + agentName(activeAgent) + ": " + opt.key + " — she rules the queue from here"; det.appendChild(note);
+        const note = document.createElement("div"); note.className = "decsent"; note.textContent = "✓ sent to " + (activeAgent === "tuesday" ? "Tuesday" : "Wednesday") + ": " + opt.key + " — she rules the queue from here"; det.appendChild(note);
         await poll(true);
       } catch (err) { lockBtns(false); alert("not sent: " + (err.message || err)); }
     });

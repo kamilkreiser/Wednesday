@@ -76,20 +76,6 @@ name <client>/<row_key>.bin, PUT with If-None-Match:* (insert, never overwrite).
 PUT the bytes (size + sha256 must match the row -> ready). Bound: FILE_MAX bytes of ciphertext per file. Every share / upload /
 download appends an AUDIT row (kind file_audit, same AUDIT partition of `messages`). No delete route exists. Message rows may
 carry `attachments: [file ids]` (clear, <=8). Health reports file_route: true.
-
-Friday seat (2026-09-23, Kam 10:49:26 on the live board, view=wednesday: "…add a Friday tab to the dashboard and give it the
-necessary keys etc. So create a new agent called Friday… Friday will work on both Secura and Dataset projects from this
-laptop."): a THIRD seat `friday` (Entra app friday-seat, roles Seat.Write + Seat.Read + Client.Friday — and none of the other
-Client.* roles) owning its OWN partition `Friday`. Friday serves Secuura AND Datasec work from Kam's laptop, so it cannot be
-mapped onto either existing partition without breaking R0 (a Friday reply about Datasec must not be readable by the wednesday
-seat, and vice versa); its own partition is its own conversation. view=friday -> Friday; SEAT_OF_CLIENT Friday -> friday;
-ALL (Kam's broadcast) is wrapped to and readable by all THREE seats. A Friday row is the friday seat's to hide, nobody else's.
-Usage gauges: a third row (friday), null until the laptop publishes.
-
-File hide (2026-09-23, Kam 10:49:26 "Please clear all the download files for now."): POST /api/seat/hide|unhide accept
-`kind: "file"` (default "message") — the SAME ownership rule (the row's partition must be granted to the token), the same
-MERGE of clear columns onto the row (now in table `files`), the same audit row shape (kind hide_audit, + target_kind). The
-drawer's reads (file_query) already skip hidden=true; GET /api/seat/files?hidden=1 is the reveal. Health: file_hide_route.
 """
 import json, logging, os, re, time, datetime, uuid, glob, hashlib, base64, email.utils
 from typing import Optional
@@ -108,12 +94,11 @@ TENANT_ID = os.environ.get("TENANT_ID", "")
 API_APPID = os.environ.get("SEAT_API_APPID", "")          # audience of seat tokens
 STORAGE = os.environ.get("STORAGE_ACCOUNT", "")
 KAM_OBJECT_ID = os.environ.get("KAM_OBJECT_ID", "")       # the ONLY principal allowed to write via /api/kam/*
-CLIENTS = ("Secuura", "Datasec", "WED", "Friday")         # seat-writable partitions (token roles); Friday added 2026-09-23
+CLIENTS = ("Secuura", "Datasec", "WED")                   # seat-writable partitions (token roles)
 BROADCAST = "ALL"                                          # Kam's "both" rows; readable by every seat, written only by Kam
 READ_PARTITIONS = CLIENTS + (BROADCAST,)
-VIEW_TO_CLIENT = {"wednesday": "WED", "tuesday": "Datasec", "friday": "Friday", "both": BROADCAST}
-SEATS = ("wednesday", "tuesday", "friday")                 # every seat the board knows (keys, usage gauges); friday 2026-09-23
-SEAT_APPS = {}  # client app id -> seat name, from env SEAT_APP_MAP="appid:wednesday,appid:tuesday,appid:friday"
+VIEW_TO_CLIENT = {"wednesday": "WED", "tuesday": "Datasec", "both": BROADCAST}
+SEAT_APPS = {}  # client app id -> seat name, from env SEAT_APP_MAP="appid:wednesday,appid:tuesday"
 for pair in os.environ.get("SEAT_APP_MAP", "").split(","):
     if ":" in pair:
         a, n = pair.split(":", 1); SEAT_APPS[a.strip()] = n.strip()
@@ -122,7 +107,7 @@ JWKS_URL = f"https://login.microsoftonline.com/{TENANT_ID}/discovery/v2.0/keys"
 HERE = os.path.dirname(os.path.abspath(__file__))
 PUBKEY_PATH = os.path.join(HERE, "keys", "kam-pilot-public.pub")
 KEYS_DIR = os.path.join(HERE, "keys")
-SEAT_OF_CLIENT = {"WED": ("wednesday",), "Secuura": ("wednesday",), "Datasec": ("tuesday",), "Friday": ("friday",), BROADCAST: SEATS}
+SEAT_OF_CLIENT = {"WED": ("wednesday",), "Secuura": ("wednesday",), "Datasec": ("tuesday",), BROADCAST: ("wednesday", "tuesday")}
 KID_RE = re.compile(r"^[0-9a-f]{16}$")
 B64_RE = re.compile(r"^[A-Za-z0-9+/]+={0,2}$")
 
@@ -141,7 +126,7 @@ def public_keys() -> dict:
         for q in files:
             pem = open(q).read(); kam.append({"name": os.path.basename(q)[4:-11], "kid": _kid_of_pem(pem), "pem": pem})
         seats = {}
-        for s in SEATS:
+        for s in ("wednesday", "tuesday"):
             q = os.path.join(KEYS_DIR, f"{s}-seat-public.pub")
             if os.path.exists(q):
                 pem = open(q).read(); seats[s] = {"kid": _kid_of_pem(pem), "pem": pem}
@@ -290,8 +275,7 @@ def seat_health():
     return {"app": "wednesday-dashboard-cloud", "ok": True, "phase": "3", "ts": now_iso(), "kam_keys": len(public_keys()["kam"]), "seat_keys": sorted(public_keys()["seats"]),
             "usage_route": True,   # 2026-09-22 usage gauges
             "hide_route": True,    # 2026-09-22 hide/unhide (reversible, audited)
-            "file_route": True, "file_max_bytes": FILE_MAX,    # 2026-09-22 file drawer (both directions, encrypted, audited)
-            "file_hide_route": True, "seats": list(SEATS), "clients": list(CLIENTS)}   # 2026-09-23 Friday seat + file-row hide
+            "file_route": True, "file_max_bytes": FILE_MAX}    # 2026-09-22 file drawer (both directions, encrypted, audited)
 
 @app.post("/api/seat/messages", status_code=201)
 async def seat_post_message(request: Request):
@@ -370,12 +354,9 @@ ROWKEY_RE = re.compile(r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?Z_[A-Za-z0-
 REASON_RE = re.compile(r"^[A-Za-z0-9 ._:/()+'-]{0,160}$")
 HIDE_SELECT = ["PartitionKey", "RowKey", "id", "ts", "view", "role", "seat", "hidden", "hidden_at", "hidden_by", "hidden_seat", "synthetic"]
 
-HIDE_KINDS = {"message": "messages", "file": FILE_TABLE}    # 2026-09-23: the request's `kind` picks the table; default message
-
-def find_message(client: str, body: dict, tname: str = "messages") -> dict:
-    """The target row, by row_key (exact) or by id (must match exactly ONE row in the partition). Clear columns only are read.
-    2026-09-23: `tname` = messages (default) or files (a drawer row) — the same lookup, the same errors."""
-    t = table(tname)
+def find_message(client: str, body: dict) -> dict:
+    """The target row, by row_key (exact) or by id (must match exactly ONE row in the partition). Clear columns only are read."""
+    t = table("messages")
     rk = body.get("row_key")
     if rk is not None:
         rk = str(rk)
@@ -397,24 +378,21 @@ async def set_hidden(request: Request, flag: bool):
     if not seat["write"]: raise HTTPException(403, "Seat.Write role required")
     body = await request.json()
     if not isinstance(body, dict): raise HTTPException(400, "json object required")
-    kind = str(body.get("kind") or "message")                     # 2026-09-23: "file" = a drawer row (table files); same rules
-    if kind not in HIDE_KINDS: raise HTTPException(400, f"kind must be one of {sorted(HIDE_KINDS)}")
-    tname = HIDE_KINDS[kind]
     client = require_partition(seat, body.get("client"))          # 403 for a partition outside the token's roles; 400 for ALL/unknown
-    e = find_message(client, body, tname)
+    e = find_message(client, body)
     reason = str(body.get("reason") or "")[:200]
     if not REASON_RE.match(reason): raise HTTPException(400, "reason must be <=160 chars of [A-Za-z0-9 ._:/()+'-]")
     was = e.get("hidden") is True
     now = datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%f")[:-3] + "Z"
     verb = "hidden" if flag else "unhidden"
     patch = {"PartitionKey": client, "RowKey": e["RowKey"], "hidden": flag, f"{verb}_by": seat["appid"], f"{verb}_at": now, f"{verb}_seat": seat["seat"]}
-    table(tname).update_entity(patch, mode=UpdateMode.MERGE)       # MERGE = only these columns change; envelope/text/routing/blob untouched
+    table("messages").update_entity(patch, mode=UpdateMode.MERGE)   # MERGE = only these columns change; envelope/text/routing untouched
     audit = {"PartitionKey": AUDIT_PARTITION, "RowKey": f"{now}_{uuid.uuid4().hex[:8]}", "kind": "hide_audit", "action": "hide" if flag else "unhide",
              "target_client": client, "target_row_key": e["RowKey"], "target_id": str(e.get("id") or ""), "target_view": str(e.get("view") or "")[:64],
-             "seat": seat["seat"], "by": seat["appid"], "at": now, "reason": reason, "changed": was != flag, "target_kind": kind}
-    table("messages").create_entity(audit)                         # the audit always lives in messages/AUDIT, whichever table the row is in
-    log.info("%s %s %s/%s by seat=%s changed=%s", audit["action"], kind, client, e["RowKey"], seat["seat"], was != flag)
-    return {"row": {"client": client, "row_key": e["RowKey"], "id": e.get("id"), "ts": e.get("ts"), "view": e.get("view"), "hidden": flag, "kind": kind},
+             "seat": seat["seat"], "by": seat["appid"], "at": now, "reason": reason, "changed": was != flag}
+    table("messages").create_entity(audit)
+    log.info("%s %s/%s by seat=%s changed=%s", audit["action"], client, e["RowKey"], seat["seat"], was != flag)
+    return {"row": {"client": client, "row_key": e["RowKey"], "id": e.get("id"), "ts": e.get("ts"), "view": e.get("view"), "hidden": flag},
             "changed": was != flag, "audit_row_key": audit["RowKey"], "by": seat["seat"]}
 
 @app.post("/api/seat/hide")
@@ -443,7 +421,7 @@ def seat_hide_audit(request: Request, limit: int = Query(200, le=1000)):
 # ---------------- usage gauges (2026-09-22): seat-published, token-attributed, clear ----------------
 USAGE_PARTITION = "USAGE"
 RESETS_RE = re.compile(r"^[A-Za-z0-9 ]{0,32}$")
-# SEATS is defined at the top (2026-09-23: wednesday, tuesday, friday) — the usage rows are one per seat in that tuple.
+SEATS = ("wednesday", "tuesday")
 
 def usage_row_of(e) -> dict:
     d = {k: e[k] for k in ("seat", "pct", "resets_in", "reading_ts", "written_by", "written_at") if k in e}
@@ -626,16 +604,15 @@ async def file_put_bytes(request: Request, client: str, row_key: str, by: str, s
     aud = file_audit("share" if e.get("direction") == "shared" else "upload", client, e, by, seat_name, {"blob_written": written})
     return {"stored": {"client": client, "row_key": row_key, "id": e.get("id"), "status": "ready", "size": int(e["size"]), "blob_written": written, "audit_row_key": aud}}
 
-def file_query(clients, since: Optional[str], limit: int, include_hidden: bool = False) -> list:
-    """Ready file rows after `since`, per partition, merged (the envelope columns included — the page decrypts the meta).
-    Hidden rows (a seat's reversible hide, 2026-09-23) are skipped unless include_hidden (the seat's ?hidden=1 reveal)."""
+def file_query(clients, since: Optional[str], limit: int) -> list:
+    """Ready file rows after `since`, per partition, merged (the envelope columns included — the page decrypts the meta)."""
     out = []
     for c in sorted(clients):
         flt = "PartitionKey eq @c" + (" and RowKey gt @s" if since else "")
         n = 0
         for e in table(FILE_TABLE).query_entities(flt, parameters={"c": c, "s": since or ""}, results_per_page=min(limit, 1000)):
             if e.get("status") != "ready": continue
-            if e.get("hidden") is True and not include_hidden: continue
+            if e.get("hidden") is True: continue
             d = {k: v for k, v in e.items() if k not in ("PartitionKey", "RowKey")}
             d["client"] = c; d["row_key"] = e["RowKey"]
             if isinstance(d.get("wrapped_keys"), str):
@@ -671,12 +648,11 @@ def seat_file_audit(request: Request, limit: int = Query(200, le=1000)):
     return {"audit": out, "clients": sorted(mine)}
 
 @app.get("/api/seat/files")
-def seat_get_files(request: Request, client: Optional[str] = None, since: Optional[str] = None, limit: int = Query(200, le=1000),
-                   hidden: int = Query(0, ge=0, le=1)):
+def seat_get_files(request: Request, client: Optional[str] = None, since: Optional[str] = None, limit: int = Query(200, le=1000)):
     seat = seat_from_token(request)
     if not seat["read"]: raise HTTPException(403, "Seat.Read role required")
     clients = {require_partition(seat, client, for_read=True)} if client else (set(seat["clients"]) | {BROADCAST})
-    return {"files": file_query(clients, since, limit, include_hidden=bool(hidden)), "clients": sorted(clients), "hidden_included": bool(hidden)}
+    return {"files": file_query(clients, since, limit), "clients": sorted(clients)}
 
 @app.post("/api/seat/files", status_code=201)
 async def seat_post_file(request: Request):

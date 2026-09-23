@@ -35,7 +35,7 @@ window.WED = (function () {
   const DB = "wedpanel", STORE = "keys", K_CRYPTOKEY = "kam-pilot", K_DIR = "keydir", K_KID = "kam-kid";
   const LS_FILENAME = "wed_key_filename", DEFAULT_FILENAME = "kam-pilot-private.pem";
   const KNOWN_FILENAMES = ["kam-pilot-private.pem", "kam-laptop-private.pem", "kam-ipad-private.pem"];
-  const VIEW_TO_CLIENT = { wednesday: "WED", tuesday: "Datasec", friday: "Friday", both: "ALL" };   // friday 2026-09-23 (Kam 10:49:26: the laptop seat, its own partition)
+  const VIEW_TO_CLIENT = { wednesday: "WED", tuesday: "Datasec", both: "ALL" };
 
   // ---- IndexedDB (per browser; the ONLY persistence this module has) ----
   function idb() { return new Promise((res, rej) => { const r = indexedDB.open(DB, 1);
@@ -169,7 +169,7 @@ window.WED = (function () {
     const kam = []; for (const k of j.kam || []) { const ik = await importSpki(k.pem); if (ik.kid !== k.kid) throw new Error("kid mismatch for " + k.name); kam.push({ name: k.name, ...ik }); }
     const seats = {}; for (const s of Object.keys(j.seats || {})) { const ik = await importSpki(j.seats[s].pem); if (ik.kid !== j.seats[s].kid) throw new Error("kid mismatch for seat " + s); seats[s] = ik; }
     if (!kam.length) throw new Error("no Kam public key");
-    pubCache = { kam, seats, seatOfClient: j.seat_of_client || { WED: ["wednesday"], Secuura: ["wednesday"], Datasec: ["tuesday"], Friday: ["friday"], ALL: ["wednesday", "tuesday", "friday"] } };
+    pubCache = { kam, seats, seatOfClient: j.seat_of_client || { WED: ["wednesday"], Secuura: ["wednesday"], Datasec: ["tuesday"], ALL: ["wednesday", "tuesday"] } };
     return pubCache;
   }
   function keyNameOfKid(kid) { if (!pubCache || !kid) return null; const k = pubCache.kam.find(x => x.kid === kid); return k ? k.name : null; }
@@ -273,9 +273,8 @@ window.WED = (function () {
 
   // ---- row -> the shape the local pages render ----
   function agentOfRow(r) {
-    if (r.role === "kam") return (r.view === "wednesday" || r.view === "tuesday" || r.view === "friday") ? r.view : "both";
+    if (r.role === "kam") return (r.view === "wednesday" || r.view === "tuesday") ? r.view : "both";
     if (r.seat === "tuesday" || r.client === "Datasec") return "tuesday";
-    if (r.seat === "friday" || r.client === "Friday") return "friday";      // 2026-09-23: the Friday seat's own partition
     return "wednesday";
   }
   function localTs(utc) { const d = new Date(utc); if (isNaN(d)) return String(utc || "");

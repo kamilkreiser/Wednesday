@@ -14,13 +14,6 @@ SCRATCH=${SCRATCH:-/private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/6a45299b
 V=$HERE/.venv/bin/python
 export TENANT_ID SEAT_API_APPID=$API_APPID STORAGE_ACCOUNT=$STORAGE SEAT_APP_MAP="$wednesday_seat_APPID:wednesday,$tuesday_seat_APPID:tuesday" KAM_OBJECT_ID=$KAM_USER_OBJ
 PORT=47791; BASE="http://127.0.0.1:$PORT"; FAIL=0
-# ── LIVE-STORE GUARD (2026-09-23, Wednesday 11:16 + 11:19: "STOP posting to the LIVE board from any local matrix"). This matrix
-# runs the app on loopback BUT against the REAL storage account ($STORAGE) — the same tables the live board reads — so every row it
-# writes is on Kam's screen (08c/08f put three role=kam probe rows there at 01:15:53-58Z on 2026-09-23). It therefore REFUSES unless
-# (a) its base URL is loopback AND (b) LIVE_STORE_MATRIX_OK=1 is set explicitly by whoever accepts that. The store-free equivalent
-# is scripts/08g_double_app.py (in-memory store; scripts/08g_local_matrix_friday.sh). Refusal = rc 2 before anything starts.
-case "${BASE:-http://127.0.0.1:$PORT}" in http://127.0.0.1:*|http://localhost:*) ;; *) echo "REFUSED: base ${BASE:-?} is not loopback — no matrix may target the live host"; exit 2 ;; esac
-[ "${LIVE_STORE_MATRIX_OK:-}" = "1" ] || { echo "REFUSED: $(basename "$0") writes the LIVE storage account $STORAGE through its loopback app (rows appear on the live board). Use scripts/08g_local_matrix_friday.sh (in-memory double) or set LIVE_STORE_MATRIX_OK=1 knowingly."; exit 2; }
 ( "$V" -m uvicorn main:app --app-dir "$HERE/app" --host 127.0.0.1 --port $PORT --log-level warning > "$SCRATCH/wedcloud_local3.log" 2>&1 ) &
 APP_PID=$!
 for i in $(seq 1 40); do curl -s -o /dev/null "$BASE/api/seat/health" && break; sleep 0.5; done
@@ -31,7 +24,7 @@ TS=$(date -u +%H%M%S)
 echo "### P3-L1 /api/pubkeys as Kam"
 expect "GET /api/pubkeys as Kam" 200 "$(hdr "${KAM[@]}" "$BASE/api/pubkeys")"
 cp "$SCRATCH/l_body.txt" "$SCRATCH/pubkeys_local.json"
-python3 -c 'import json,sys;d=json.load(open(sys.argv[1]));print("      kam ring:",[(k["name"],k["kid"]) for k in d["kam"]],"seats:",{s:v["kid"] for s,v in d["seats"].items()});assert len(d["kam"])==3 and set(d["seats"])=={"wednesday","tuesday","friday"} and all("BEGIN PUBLIC KEY" in k["pem"] and "PRIVATE" not in k["pem"] for k in d["kam"]);print("PASS  ring = 3 Kam PUBLIC keys + 3 seat PUBLIC keys (friday since 2026-09-23), no private material")' "$SCRATCH/pubkeys_local.json" || FAIL=1
+python3 -c 'import json,sys;d=json.load(open(sys.argv[1]));print("      kam ring:",[(k["name"],k["kid"]) for k in d["kam"]],"seats:",{s:v["kid"] for s,v in d["seats"].items()});assert len(d["kam"])==3 and set(d["seats"])=={"wednesday","tuesday"} and all("BEGIN PUBLIC KEY" in k["pem"] and "PRIVATE" not in k["pem"] for k in d["kam"]);print("PASS  ring = 3 Kam PUBLIC keys + 2 seat PUBLIC keys, no private material")' "$SCRATCH/pubkeys_local.json" || FAIL=1
 echo "### P3-L2 Kam's reply made by the page's own module (Node WebCrypto), three shapes"
 node - "$HERE" "$SCRATCH/pubkeys_local.json" "$TS" > "$SCRATCH/kam_bodies.json" <<'EOF2'
 import fs from "node:fs"; import vm from "node:vm";
@@ -53,28 +46,13 @@ c=$(hdr "${KAM[@]}" -X POST -H 'Content-Type: application/json' -d "$(body nosea
 c=$(hdr "${KAM[@]}" -X POST -H 'Content-Type: application/json' -d "$(body bad)" "$BASE/api/kam/messages"); expect "POST reply with malformed wrapped_keys" 400 "$c"; echo "      body: $(head -c 120 "$SCRATCH/l_body.txt")"
 c=$(hdr "${KAM[@]}" -X POST -H 'Content-Type: application/json' -d "$(body good)" "$BASE/api/kam/messages"); expect "POST reply wrapped to ring + wednesday seat (view=wednesday -> WED)" 201 "$c"; echo "      body: $(head -c 160 "$SCRATCH/l_body.txt")"
 c=$(hdr "${KAM[@]}" -X POST -H 'Content-Type: application/json' -d "$(body both)" "$BASE/api/kam/messages"); expect "POST reply view=both -> ALL wrapped to both seats" 201 "$c"
-# 2026-09-23 (Wednesday 11:16, after this matrix put two UNMARKED role=kam rows on the live store at 01:15:53Z): the loopback app
-# writes the REAL storage account the live board reads, and Kam's route cannot carry `synthetic` — so the two rows it just stored
-# are MERGED synthetic=true HERE, before anything else runs (the 08f pattern), and the reads below pass --include-synthetic.
-"$V" - "$TS" <<'PYMARK' || { echo "FAIL  could not mark this run's Kam rows synthetic — MARK THEM BY HAND: p3l-good-$TS (WED), p3l-both-$TS (ALL)"; FAIL=1; }
-import sys
-from azure.identity import AzureCliCredential
-from azure.data.tables import TableServiceClient, UpdateMode
-sys.path.insert(0, "/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/dashboard-cloud/seat"); import seat_common as sc
-t = TableServiceClient(endpoint=f"https://{sc.load_ids()['STORAGE']}.table.core.windows.net", credential=AzureCliCredential()).get_table_client("messages")
-n = 0
-for c, rid in (("WED", "p3l-good-" + sys.argv[1]), ("ALL", "p3l-both-" + sys.argv[1])):
-    for e in t.query_entities("PartitionKey eq @c and id eq @i", parameters={"c": c, "i": rid}, select=["PartitionKey", "RowKey", "role"]):
-        assert e["role"] == "kam"; t.update_entity({"PartitionKey": c, "RowKey": e["RowKey"], "synthetic": True}, mode=UpdateMode.MERGE); n += 1
-print("PASS  this run's Kam rows marked synthetic immediately (%d)" % n); assert n == 2
-PYMARK
 echo "### P3-L3 the seats read it back through the API"
-"$V" "$HERE/seat/get_kam_messages.py" --seat wednesday --include-synthetic --decrypt --json --since "$(date -u +%Y-%m-%dT%H:%M -v-2M 2>/dev/null || date -u +%Y-%m-%dT00:00)" > "$SCRATCH/l_wed.json" 2>"$SCRATCH/l_err.txt"; expect "wednesday seat get_kam_messages --decrypt rc" 0 "$?"
+"$V" "$HERE/seat/get_kam_messages.py" --seat wednesday --decrypt --json --since "$(date -u +%Y-%m-%dT%H:%M -v-2M 2>/dev/null || date -u +%Y-%m-%dT00:00)" > "$SCRATCH/l_wed.json" 2>"$SCRATCH/l_err.txt"; expect "wednesday seat get_kam_messages --decrypt rc" 0 "$?"
 python3 -c 'import json,sys;d=json.load(open(sys.argv[1]));m={r["id"]:r for r in d["messages"]};g=m.get("p3l-good-"+sys.argv[3]);b=m.get("p3l-both-"+sys.argv[3]);exp=sys.argv[2]
 assert g and g.get("text")==exp, ("good row missing/undecrypted", g and {k:g.get(k) for k in ("text","decrypt_error")}); print("PASS  wednesday seat decrypts Kam'"'"'s view=wednesday reply == the text the page encrypted")
 assert b and b.get("text")==exp and b["client"]=="ALL"; print("PASS  wednesday seat decrypts Kam'"'"'s view=both (ALL) reply")
 assert "p3l-noseat-"+sys.argv[3] not in m and "p3l-bad-"+sys.argv[3] not in m; print("PASS  the two refused replies were NOT stored")' "$SCRATCH/l_wed.json" "$EXPECTED" "$TS" || FAIL=1
-"$V" "$HERE/seat/get_kam_messages.py" --seat tuesday --include-synthetic --decrypt --json --since "$(date -u +%Y-%m-%dT%H:%M -v-2M 2>/dev/null || date -u +%Y-%m-%dT00:00)" 2>"$SCRATCH/l_err.txt" | python3 -c 'import json,sys;d=json.load(sys.stdin);m={r["id"]:r for r in d["messages"]};exp=sys.argv[1];t=sys.argv[2]
+"$V" "$HERE/seat/get_kam_messages.py" --seat tuesday --decrypt --json --since "$(date -u +%Y-%m-%dT%H:%M -v-2M 2>/dev/null || date -u +%Y-%m-%dT00:00)" 2>"$SCRATCH/l_err.txt" | python3 -c 'import json,sys;d=json.load(sys.stdin);m={r["id"]:r for r in d["messages"]};exp=sys.argv[1];t=sys.argv[2]
 assert "p3l-good-"+t not in m, "R0 BROKEN: WED row reached the tuesday seat"; print("PASS  tuesday seat does NOT receive the WED-partition reply (R0, partition from the token)")
 b=m.get("p3l-both-"+t); assert b and b.get("text")==exp; print("PASS  tuesday seat decrypts the view=both (ALL) reply with her own key")' "$EXPECTED" "$TS" || FAIL=1
 echo "### P3-L4 offline: the raw WED reply row cannot be opened with the tuesday seat key"

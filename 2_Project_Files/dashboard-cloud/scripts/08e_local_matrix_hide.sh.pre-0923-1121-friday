@@ -15,13 +15,6 @@ SCRATCH=${SCRATCH:?set SCRATCH to a scratch dir}
 V=$HERE/.venv/bin/python
 export TENANT_ID SEAT_API_APPID=$API_APPID STORAGE_ACCOUNT=$STORAGE SEAT_APP_MAP="$wednesday_seat_APPID:wednesday,$tuesday_seat_APPID:tuesday" KAM_OBJECT_ID=$KAM_USER_OBJ
 PORT=47793; BASE="http://127.0.0.1:$PORT"; FAIL=0
-# ── LIVE-STORE GUARD (2026-09-23, Wednesday 11:16 + 11:19: "STOP posting to the LIVE board from any local matrix"). This matrix
-# runs the app on loopback BUT against the REAL storage account ($STORAGE) — the same tables the live board reads — so every row it
-# writes is on Kam's screen (08c/08f put three role=kam probe rows there at 01:15:53-58Z on 2026-09-23). It therefore REFUSES unless
-# (a) its base URL is loopback AND (b) LIVE_STORE_MATRIX_OK=1 is set explicitly by whoever accepts that. The store-free equivalent
-# is scripts/08g_double_app.py (in-memory store; scripts/08g_local_matrix_friday.sh). Refusal = rc 2 before anything starts.
-case "${BASE:-http://127.0.0.1:$PORT}" in http://127.0.0.1:*|http://localhost:*) ;; *) echo "REFUSED: base ${BASE:-?} is not loopback — no matrix may target the live host"; exit 2 ;; esac
-[ "${LIVE_STORE_MATRIX_OK:-}" = "1" ] || { echo "REFUSED: $(basename "$0") writes the LIVE storage account $STORAGE through its loopback app (rows appear on the live board). Use scripts/08g_local_matrix_friday.sh (in-memory double) or set LIVE_STORE_MATRIX_OK=1 knowingly."; exit 2; }
 ( "$V" -m uvicorn main:app --app-dir "$HERE/app" --host 127.0.0.1 --port $PORT --log-level warning > "$SCRATCH/wedcloud_local_hide.log" 2>&1 ) &
 APP_PID=$!
 for i in $(seq 1 120); do curl -s -o /dev/null "$BASE/api/seat/health" && break; sleep 1; done   # 120 s: a cold venv import from the external drive took > 60 s once (first run 14:4x)

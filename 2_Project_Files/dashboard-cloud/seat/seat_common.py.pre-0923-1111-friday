@@ -11,11 +11,6 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import envelope
 
 DEFAULT_TENANT = "d500ebad-cf53-4f2a-a501-f831289e67fc"
-# 2026-09-23: the friday seat (Kam's laptop; partition Friday) joins the two existing seats. The API decides what each token
-# may do (roles); these lists only name what a CLI may ASK for. Existing seats' invocations are unchanged.
-SEAT_NAMES = ["wednesday", "tuesday", "friday"]
-CLIENT_NAMES = ["Secuura", "Datasec", "WED", "Friday"]
-HOME_CLIENT = {"wednesday": "WED", "tuesday": "Datasec", "friday": "Friday"}
 
 def load_ids():
     p = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "scripts", "ids.conf")
@@ -34,9 +29,9 @@ DEFAULT_CERT_DIR = os.path.normpath(os.path.join(os.path.dirname(os.path.abspath
 
 def common_args(p: argparse.ArgumentParser):
     ids = load_ids()
-    p.add_argument("--seat", choices=SEAT_NAMES, required=True, help="which seat identity")
+    p.add_argument("--seat", choices=["wednesday", "tuesday"], required=True, help="which seat identity")
     p.add_argument("--cert-dir", default=DEFAULT_CERT_DIR, help="dir holding <seat>-seat.pem (private) + <seat>-seat.crt (public)")
-    p.add_argument("--client", required=True, choices=CLIENT_NAMES, help="partition; must be within the seat's roles or the API refuses 403")
+    p.add_argument("--client", required=True, choices=["Secuura", "Datasec", "WED"], help="partition; must be within the seat's roles or the API refuses 403")
     p.add_argument("--pubkey", default=None, help="(Phase 2 compat) ONE public key to wrap to instead of the Phase 3 recipient set (Kam's whole ring + the partition's seat)")
     p.add_argument("--base", default=f"https://{ids.get('WEBAPP','')}.azurewebsites.net")
     p.add_argument("--tenant", default=ids.get("TENANT_ID", DEFAULT_TENANT))

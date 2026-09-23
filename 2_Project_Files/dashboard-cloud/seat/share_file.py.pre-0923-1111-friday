@@ -30,15 +30,15 @@ def main():
     p = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     p.add_argument("path")
     p.add_argument("--note", default="", help="one line shown in the drawer (encrypted, <=300 chars)")
-    p.add_argument("--seat", choices=sc.SEAT_NAMES, default=os.environ.get("WED_AGENT") or "wednesday")
-    p.add_argument("--client", choices=sc.CLIENT_NAMES, default=None, help="partition (default: the seat's home partition; the API refuses one outside the token)")
+    p.add_argument("--seat", choices=["wednesday", "tuesday"], default=os.environ.get("WED_AGENT") or "wednesday")
+    p.add_argument("--client", choices=["Secuura", "Datasec", "WED"], default=None, help="partition (default: the seat's home partition; the API refuses one outside the token)")
     p.add_argument("--cert-dir", default=sc.DEFAULT_CERT_DIR)
     p.add_argument("--base", default=f"https://{ids.get('WEBAPP','')}.azurewebsites.net")
     p.add_argument("--tenant", default=ids.get("TENANT_ID", sc.DEFAULT_TENANT)); p.add_argument("--api-appid", default=ids.get("API_APPID", ""))
     p.add_argument("--msg-id", default=None, help="the message row this file belongs to (clear linkage)")
     p.add_argument("--id", default=None); p.add_argument("--synthetic", action="store_true"); p.add_argument("--dry-run", action="store_true")
     a = p.parse_args()
-    if not a.client: a.client = sc.HOME_CLIENT[a.seat]
+    if not a.client: a.client = {"wednesday": "WED", "tuesday": "Datasec"}[a.seat]
     if not os.path.isfile(a.path): return finish(2, f"REFUSED locally: no such file {a.path}")
     data = open(a.path, "rb").read()
     if len(data) + 16 > FILE_MAX: return finish(2, f"REFUSED locally: {len(data)} bytes + 16 > the bound {FILE_MAX}")
@@ -51,7 +51,7 @@ def main():
             "mime": mimetypes.guess_type(a.path)[0] or "application/octet-stream"}
     env, ct = envelope.encrypt_file(data, meta, clear)
     assert meta["name"] not in json.dumps(env) or len(meta["name"]) < 8, "name leaked into envelope"
-    body = {**clear, "view": a.seat, "role": a.seat, "size": len(ct), "sha256": hashlib.sha256(ct).hexdigest(),
+    body = {**clear, "view": "wednesday" if a.seat == "wednesday" else "tuesday", "role": a.seat, "size": len(ct), "sha256": hashlib.sha256(ct).hexdigest(),
             "iv_blob": env.pop("iv_blob"), "envelope": env}
     if a.msg_id: body["msg_id"] = a.msg_id
     if a.synthetic: body["synthetic"] = True
