@@ -97,3 +97,4 @@ sees the claim rather than discovering it in a conflict.
 | 2026-09-23 11:04 | Kamils-Mac-Studio | Friday seat (Kam 10:49+10:57): Launch_Friday + first-run installer, friday seat in shared launcher/resolver, Friday tab + keys on live board, drawer X fix + file-hide deploy, two downloads | CLOSED |  2026-09-23 12:03 done |
 | 2026-09-23 12:54 | Kamils-MacBook-Pro | Friday usage gauge on the live board: publish_usage.sh / post_usage.py / server accept seat 'friday' — Friday (laptop), Kam 2026-09-23 | CLOSED |  2026-09-23 12:56 done |
 | 2026-09-23 13:17 | Kamils-MacBook-Pro | cockpit usage gate reads Wednesday's gauge on the Friday tree (Launch_Cockpit/cockpit.sh/usage_gate seat) — Friday (laptop) | CLOSED |  2026-09-23 13:19 done |
+| 2026-09-23 14:06 | Kamils-MacBook-Pro | Spark (ZGX, DeepSeek V4 Flash) local-model loop + spark-kit setup — Friday (laptop), Kam 2026-09-23: 'its yours as you will be using the spark' | OPEN | |
