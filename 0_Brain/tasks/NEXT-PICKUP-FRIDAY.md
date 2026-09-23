@@ -4,7 +4,7 @@ type: pickup
 seat: friday
 scope: BOTH Secuura and Datasec, from Kam's laptop. Claim each project before driving it (wed_claim.sh)
 status: live
-written_by: Friday, 65% checkpoint 2026-09-23 ~15:3x (not a wrap — the seat is still running)
+written_by: Friday, 70% checkpoint 2026-09-23 ~15:4x (not a wrap — the seat is still running)
 supersede: replace wholesale at every wrap; do not append
 ---
 
@@ -15,13 +15,13 @@ git credential helper (repointed); two scripts fixed for the space in the path (
 will break the same way — if something fails with `/Users/kamilkreiser/1FILES: No such file`, that is the class.
 
 
-## CHECKPOINT 65% (~15:3x) — what changed since 50%
-- **Kam's HPSM-POC rulings C-01…C-08** are in `HPSM-POC/1_Project_Definition/CLARIFICATIONS.md` (the POC doesn't replace SOW-01; team = Kam + Friday; event Tue 1 Dec; Datasec owns the IP; Kam is PO; his Azure pays; SOW stack A, borrowing Composer CONTENT not code).
-- **Done:** GitHub `datasecau/HPSM-POC` + rw deploy key; Azure RG `hpsm-poc-rg` + SP `hpsm-poc-deploy` (boundary proven); plan v2 re-based to 1 Dec (reviewed; the 63→64 slip fixed); folder SELF-CONTAINED (Reference_from_HPSM copies + its own launcher; Kam will sync it home); stakeholder question sets (md) + 3 Word docs (HP project owner / HP champion / Datasec experts), rendered via Word and checked.
-- **RUNNING:** HPSM-POC build seat in cockpit pane `%2` on brief `HPSM-POC/1_Project_Definition/Briefs/2026-09-23_B01_setup-and-M2-drafts.md`; it reports to `…B01….STATUS.md` + history.md. A background watcher (this session only — it dies with the session) wakes on READY/BLOCKED or 10 min idle. **A successor must re-arm a watcher or just read the STATUS file.**
-- **BLOCKED:** `datasec-hpsm-poc@agentmail.to` — create returned 200 but Friday's key gets 404 on it; no scoped key minted. The inbox exists (never delete); diagnose the scope before retrying.
-- **NEW STANDING RULE (Kam):** local model first for tasks and tickets (`learnings/2026-09-23_use-the-local-model-as-much-as-possible.md`). → **The Spark smoke test (OWED item 2) is next**, then routing HPSM-POC tickets to the Spark once the skeleton exists.
-- **Queued with Kam:** the 30-minute walkthrough (what a great 7 minutes on 1 Dec looks like), not yet scheduled.
+## CHECKPOINT 70% (~15:4x) — current state, read this first
+- **HPSM-POC (Datasec, claimed):** rulings C-01…C-08 in its CLARIFICATIONS. Build seat in cockpit pane `%2` finished **B01 → READY FOR REVIEW**; Friday REVIEWED + ACCEPTED it (`HPSM-POC/1_Project_Definition/Briefs/2026-09-23_B01_setup-and-M2-drafts.REVIEW.md`; independently checked: GitHub main `8869b1a`, CI + CodeQL SUCCESS, analysis repo 0 forbidden files). The seat is IDLE by design. **Waiting on Kam** to review 4 drafts for M2 (Fri 9 Oct): rules schema RS-01…10, SME template, demo script v0, AD-01…09. Then brief **B02** (carry-overs listed in the REVIEW file: commit Friday's Q&A files, launcher sources `.tools/env.sh`, carve WS4 engine work into Spark-sized tasks).
+- **Spark loop PROVEN** (smoke 6/6, both deliberate breaks caught after the C1 anchor fix; runner accepts only whole-answer unfenced diffs; clones live in the system temp dir; self-tests in `2_Project_Files/friday/spark/tests/`). **Kam's standing rule: local model FIRST for tasks and tickets** (Datasec work only on the Spark until he rules on Secuura).
+- **Word question sets** (HP project owner / HP champion / Datasec experts) are in `HPSM-POC/1_Project_Definition/Questions_and_Answers/` — Kam's to send; nothing sent.
+- **BLOCKED:** `datasec-hpsm-poc@agentmail.to` (created 200, invisible to Friday's key → no scoped key). Briefs are FILES for now.
+- **Queued with Kam:** the 30-min "what does a great 7 minutes on 1 Dec look like" walkthrough — not yet scheduled.
+- No mail pending (no reply from Tuesday on the Spark or HPSM); no Kam panel rulings today (kam_rulings_today 0).
 
 ## OWED — first work of the next session
 1. **Datasec/HPSM-POC (claimed by Friday).** Scaffold, plan, Q&A and Jira are DONE (see the project's `CLAUDE.md` + `BACKLOG.md`).
