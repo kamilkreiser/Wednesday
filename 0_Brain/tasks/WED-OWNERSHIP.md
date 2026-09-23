@@ -101,3 +101,4 @@ sees the claim rather than discovering it in a conflict.
 | 2026-09-23 14:18 | Kamils-MacBook-Pro | space-in-path fixes after Kam moved the laptop tree to '1FILES TO SYNC/FRIDAY': arm_wake_watch.sh runner splices $HERE unquoted (wake_watch never runs); publish_usage.sh --arm reports a dead pid as armed — Friday (laptop) | CLOSED |  2026-09-23 14:51 done |
 | 2026-09-23 14:28 | Kamils-MacBook-Pro | Datasec/HPSM — Friday (laptop): Kam 2026-09-23 asked Friday to unzip+file the 'added' archive in '1FILES TO SYNC/HPSM' and familiarise with the project | OPEN | |
 | 2026-09-23 14:34 | Kamils-MacBook-Pro | Datasec/HPSM-POC — Friday (laptop): Kam 2026-09-23 — scaffold new POC project from the POC SOW, revised plan, Q&A master, new Jira project | OPEN | |
+| 2026-09-23 17:09 | Kamils-Mac-Studio | code_patch self-testing mode (checker.sh + build_input.sh) — local-model/tasks/code_patch | OPEN | |
