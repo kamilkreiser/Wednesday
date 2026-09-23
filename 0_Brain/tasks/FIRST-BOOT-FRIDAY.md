@@ -3,7 +3,7 @@ date: 2026-09-23
 type: first-boot-brief
 seat: friday
 written_by: Wednesday (Studio seat), on Kam's live-board words of 2026-09-23 10:49 and 10:57
-status: live until Friday's first wrap replaces it with NEXT-PICKUP-FRIDAY.md
+status: retired 2026-09-23 at Friday's first wrap — superseded by NEXT-PICKUP-FRIDAY.md
 ---
 
 # FIRST BOOT — you are FRIDAY

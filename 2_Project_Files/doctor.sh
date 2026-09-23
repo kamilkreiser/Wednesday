@@ -302,6 +302,21 @@ else
   warn "live usage publisher NOT armed on this seat" "bash 2_Project_Files/dashboard-cloud/seat/publish_usage.sh --arm  (live chips show 'no reading' otherwise)"
 fi
 
+# --- Spark (ZGX) DeepSeek endpoint — FRIDAY seat only (added 2026-09-23 by Friday, wrap rule 3a; Kam's ask the
+# same day: "check that you can connect, instruct and interact"). Machine-local: the ssh alias ZGX-Nano-G1n comes
+# from NVIDIA Sync's own ssh_config Include, and the model is reached through a loopback tunnel on :8888
+# (0_Brain/reference/2026-09-22_spark-deepseek-v4-flash/HANDOFF.md §1). WARN only, no network probe beyond a
+# 3-second local curl: a missing Spark is a degraded feature, never a broken seat. Other seats skip it entirely.
+if [ "${WED_AGENT:-}" = "friday" ]; then
+  if ! ssh -G ZGX-Nano-G1n 2>/dev/null | /usr/bin/grep -qi '^hostname zgx-15d5'; then
+    warn "Spark ssh alias ZGX-Nano-G1n missing" "install/sign in to NVIDIA Sync (it writes the Include in ~/.ssh/config) — PORTABILITY item 22"
+  elif curl -sf -m 3 http://127.0.0.1:8888/health >/dev/null 2>&1; then
+    ok "Spark DeepSeek endpoint healthy on 127.0.0.1:8888 (tunnel up)"
+  else
+    warn "Spark endpoint not reachable on :8888" "tunnel down or container stopped — HANDOFF.md §1 tunnel line, then ssh ZGX-Nano-G1n '~/DeepSeek-v4-Flash-One-DGX-Spark/run-a2.sh' if /health fails there too"
+  fi
+fi
+
 # --- Repo hooks (ledger w=3 enforcement travels per-clone) ---
 # A TRACKED master copy now lives beside the other hooks, so a stranded seat installs it
 # with one command instead of reconstructing it from a 2026-08-04 commit message. The

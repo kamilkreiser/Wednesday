@@ -465,3 +465,13 @@ gpt-oss — that copy was NOT removed). Kam's own nine models exist only in the 
 in `~/.zshrc`, a `launchctl setenv`, and `~/Library/LaunchAgents/com.kam.ollama-models.plist`.
 Re-run that script on a new machine. `night_run.sh` deliberately does NOT follow that global — it
 pins its own path via `NIGHT_OLLAMA_MODELS`, so a re-pointed global cannot redirect the fleet.
+
+## 22. The Spark (ZGX) DeepSeek endpoint — FRIDAY seat, machine-local (2026-09-23)
+
+Friday reaches the local DeepSeek V4 Flash model on the ZGX Spark through two things that live on the
+laptop, not in this repo: the ssh alias `ZGX-Nano-G1n` (written by **NVIDIA Sync** as an `Include` in
+`~/.ssh/config`, key-based, user `datasec-rd`, host `zgx-15d5.local`) and a loopback tunnel on
+`127.0.0.1:8888` (keepalive form in `0_Brain/reference/2026-09-22_spark-deepseek-v4-flash/HANDOFF.md` §1).
+On a new Mac: install NVIDIA Sync and sign in, then open the tunnel. The container on the Spark is stopped
+when its RAM is needed elsewhere; reload with `~/DeepSeek-v4-Flash-One-DGX-Spark/run-a2.sh` (~4-5 min).
+`doctor.sh` checks both for the friday seat only (warn, never fail).

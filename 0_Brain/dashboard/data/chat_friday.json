@@ -1,0 +1,51 @@
+[
+ {
+  "role": "wednesday",
+  "seat": "Kamils-MacBook-Pro.local",
+  "project": "WED",
+  "ts": "2026-09-23T12:42:09.229961+10:00",
+  "text": "Friday here — I'm up on your laptop. No action needed from you; this is the first-boot test result.\n\nContext: not measurable. I'm not running inside tmux, so there's no statusline pane for me to read. My estimate is about 20% after the full brain load (199 lessons), and that's an estimate, not a reading.\n\nPreflight, 10 warnings, verbatim:\n1. LINEAR_API_KEY unset in .env\n2. Matilda Premium not downloaded\n3. DevMASTER not mounted\n4. live usage publisher NOT armed on this seat\n5. docker CLI present, daemon not responding\n6. scripts have lost their executable bit (drive sync drops modes)\n7. Launch_Wednesday.command has no recognisable --model line\n8. Kam's week-scoped MERGE + DEPLOY + PRODUCTION grants lapsed after 2026-09-13\n9. root folder holds stray file(s): spark-deepseek-v4-flash-HANDOFF.md\n10. ledger rows past rule 3c's cadence: _ledger_laptop_datasec.md\n\nTool tests: reading your rulings from the live board as Friday works (none on my tab today). My inbox works, and my mail to Wednesday went out from my own address. One defect: the mail tool still labels my subjects \"[Wednesday -> …]\" instead of \"[Friday -> …]\". It's a known half-fix in the shared send script, so project agents will read my briefs as Wednesday's. I haven't claimed any project, and the Linear board isn't set up on this seat.\n\nDefault: I'll wait for your first instruction here and won't drive either client until you give one."
+ },
+ {
+  "role": "wednesday",
+  "seat": "Kamils-MacBook-Pro.local",
+  "project": "WED",
+  "ts": "2026-09-23T12:47:21.861352+10:00",
+  "text": "Got it. I'm reading the Spark handoff now and will test the connection, a coding task and a tool call against the DeepSeek model, then Docker, then the list of what else isn't working. Results here when done."
+ },
+ {
+  "role": "wednesday",
+  "seat": "Kamils-MacBook-Pro.local",
+  "project": "WED",
+  "ts": "2026-09-23T12:52:58.836626+10:00",
+  "text": "The Spark works, and I can connect to it, instruct it and hold a conversation with it. Docker works too.\n\nThe model server on the Spark was down when I checked. Its container had stopped cleanly 18 hours ago, when it was shut to free memory for the Ornith comparison. I restarted it with its own reload script, and it was healthy in about four minutes. From the laptop, through a tunnel, three tests passed:\n1. It wrote a duration parser. I ran the code and it passed 5 of 5 cases, in 3 seconds.\n2. A follow-up turn asked it to add error handling. It passed 3 of 3, in 4 seconds.\n3. It made a proper structured tool call, in 2 seconds.\n\nWorth knowing: the Spark is a model endpoint, not an agent. There's no agent software on it, so the loop that runs tools and executes code has to live on our side, the way my test did. It also takes one request at a time.\n\nDocker on the laptop: the hello-world container ran fine.\n\nWhat still isn't working:\n1. Friday's usage gauge on the live board. The publish script only knows Wednesday and Tuesday, so it refuses my name.\n2. No Linear key on this seat.\n3. Secuura has no GitHub or Azure login under my identity wrapper. Datasec has GitHub (kamilDatasec) but no Azure.\n4. I'm not running inside tmux, so I can't read my own context gauge and the automatic rotation can't manage me.\n5. The old Hugging Face write token still exists. The restarted container now uses the read-only one.\n\nIf you want any of these fixed, your hands are needed for three:\n- Revoke the Hugging Face write token at huggingface.co, under Settings, Access Tokens.\n- Log in to Secuura and Azure when you want me driving those clients.\n- Tell me whether this seat gets a Linear key.\n\nI can fix the usage gauge myself. I'll claim it with Wednesday first, since it's shared tooling."
+ },
+ {
+  "role": "wednesday",
+  "seat": "Kamils-MacBook-Pro.local",
+  "project": "WED",
+  "ts": "2026-09-23T12:54:43.952476+10:00",
+  "text": "Received, all three. Thanks for revoking the token. Linear steps are coming next, and I'm taking the gauge fix now."
+ },
+ {
+  "role": "wednesday",
+  "seat": "Kamils-MacBook-Pro.local",
+  "project": "WED",
+  "ts": "2026-09-23T12:57:11.497161+10:00",
+  "text": "The gauge is fixed. Friday now shows 60% on the live board, renewing in 3 days 15 hours, and it re-arms every time I launch. Wednesday's been told about the shared script change.\n\nFor the Linear key, I need you to do this:\n\nStep 1. Open linear.app and sign in as the Wednesday account, kreiser.org+wednesday@me.com. That's the workspace called wednesday-agent.\n\nStep 2. Go to Settings, then Account, then Security and access, then Personal API keys. I believe that's the path, but I haven't seen your screen. Search settings for \"API\" if it's moved.\n\nStep 3. Create a new key named \"Friday laptop\" with full access, and copy it. Don't paste it into this chat.\n\nStep 4. In my terminal on the laptop, type this line exactly. It writes the key straight from your clipboard into my credentials file without showing it:\n! printf 'LINEAR_API_KEY=%s\\n' \"$(pbpaste)\" >> /Users/kamilkreiser/FRIDAY/4_Credentials/.env\n\nStep 5. Tell me \"done\". I'll test the key, look up the team ID myself, and read the board.\n\nThe rationale: a separate key for the laptop means you can revoke it without touching the Studio's."
+ },
+ {
+  "role": "wednesday",
+  "seat": "Kamils-MacBook-Pro.local",
+  "project": "WED",
+  "ts": "2026-09-23T13:01:20.695429+10:00",
+  "text": "Linear works on the laptop now. The key signs in as the Wednesday account on the wednesday-agent workspace. I saved it to my credentials file only, and it's in no commit.\n\nThe board: 5 in progress, 22 to do, 82 in backlog. There are no lesson tickets waiting. Two are overdue: WED-147, the Wednesday and Tuesday coordination surface, due on the 14th, and WED-48, the CypherKey Twilio token rotation reminder, due on the 4th.\n\nOne thing: because you pasted the key in the chat, it now sits in this session's local transcript too. The risk is low, since it's on your laptop only. If you'd rather be tidy, create a new key and run the paste-from-clipboard line from before, and I'll swap it over. Otherwise I'll leave it."
+ },
+ {
+  "role": "wednesday",
+  "seat": "Kamils-MacBook-Pro.local",
+  "project": "WED",
+  "ts": "2026-09-23T13:09:07.550168+10:00",
+  "text": "Received. I'm wrapping now: notes, history and pickup, then I'll push. I'll tell you when it's safe to relaunch me in the cockpit."
+ }
+]
