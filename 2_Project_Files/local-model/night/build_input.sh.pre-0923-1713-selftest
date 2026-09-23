@@ -884,30 +884,6 @@ if _excerpted:
     # a build with no excerpt carries neither key and its key set is unchanged.
     inp["excerpt_rule"] = _EXCERPT_RULE
     inp["excerpted_files"] = _excerpted
-# 2026-09-23 SELF-TESTING (IMPROVEMENTS 14:23/14:24 rows; KS-1143): a brief whose product IS a test file declares
-# `## Self-testing — test hunks: N[,M]` (1-based hunk ordinals of the ONE file's diff). checker.sh then accepts the one
-# file (A3), reds the declared hunk(s) ALONE at the tip (A4) and greens the rest on top (A5). Added AFTER the KS-871
-# contract self-check, like excerpt_rule — a brief without the heading builds exactly as before. REFUSED here, before a
-# model round is spent: the product not under test_dir; no `## Red cells` (the checker's split cross-check needs a named
-# cell to prove the ordinal points at the test hunk); a `## Tamper` beside it (a brief carries one mode).
-if _brief_for_sites:
-    _ms = re.search(r"^##+\s*Self-testing\b[^\n]*?test hunks?\s*:\s*([0-9][0-9,\s]*)$", _brief_for_sites, re.M | re.I)
-    if _ms:
-        _th = sorted({int(x) for x in re.split(r"[,\s]+", _ms.group(1).strip()) if x})
-        if not product.startswith(f"{subdir}/{test_dir_rel}/"):
-            refuse(f"`## Self-testing`: the product {product} is not under test_dir {subdir}/{test_dir_rel}/ — self-testing mode is for a product that IS a test file")
-        if not red_cells:
-            refuse("`## Self-testing` needs a `## Red cells` section: the checker proves the declared test hunk carries the named cell before it splits")
-        if tamper:
-            refuse("`## Self-testing` and `## Tamper` in one brief — a brief carries one mode")
-        if not _th or min(_th) < 1:
-            refuse(f"`## Self-testing` test hunk ordinals must be 1-based integers: {_ms.group(1)!r}")
-        inp["self_testing"] = {"test_hunks": _th,
-                               "rule": "SELF-TESTING: the product file is itself a test file. Emit ONE diff section for it; hunk(s) "
-                                       + ",".join(str(k) for k in _th) + " (counting from the top of the section) add the test and "
-                                       "must go RED alone at the tip; every other hunk is the fix and turns it GREEN. Keep the hunks in "
-                                       "the brief's order."}
-        print(f"  SELF-TESTING from the brief: test hunk(s) {_th} of the one file {product}; red cells {red_cells}")
 if "ctx" in pins:
     inp["_night_num_ctx"] = int(pins["ctx"])
 est = (len(json.dumps(inp)) ) // 4

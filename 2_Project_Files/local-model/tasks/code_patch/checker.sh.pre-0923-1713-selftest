@@ -47,17 +47,7 @@ REF_TEST="$(field reference_test_file)"
 # instead of at the tip; A5 is green at the UNTOUCHED tip. Without a tamper the mode is code_patch, unchanged.
 TAMPER_LINE="$(python3 -c 'import json,sys; d=json.load(open(sys.argv[1])); t=(d.get("defect_line") or {}).get("tamper") or {}; print(t.get("line",""))' "$INPUT")"
 if [ -n "$TAMPER_LINE" ]; then MODE=test_only; else MODE=code_patch; fi
-# 2026-09-23 SELF-TESTING mode (IMPROVEMENTS 14:23/14:24 rows; KS-1143): the product file IS a test file, so the fix and
-# the cell that pins it are hunks of ONE file. The input carries `self_testing: {test_hunks:[k…]}` (build_input.sh parses
-# the brief's `## Self-testing — test hunks: N`). A3 accepts exactly that one file; before A4 the applied section is SPLIT
-# by hunk (tasks/code_patch/selftest_split.py): the TEST hunks alone at the tip must go RED (A4), the rest applied on top
-# must go GREEN (A5). An input without the key is unchanged. Arms: tests/selftest_mode_arms.sh.
-SELFTEST_HUNKS="$(python3 -c 'import json,sys; d=json.load(open(sys.argv[1])); print(",".join(str(k) for k in ((d.get("self_testing") or {}).get("test_hunks") or [])))' "$INPUT")"
-if [ -n "$SELFTEST_HUNKS" ]; then
-  if [ "$MODE" = test_only ]; then echo "checker: input declares BOTH a tamper (test-only) and self_testing — refusing (a brief carries one mode)" >&2; exit 1; fi
-  MODE=self_testing
-fi
-echo "mode: $MODE$( [ "$MODE" = test_only ] && echo " (tamper at $PRODUCT:$TAMPER_LINE)")$( [ "$MODE" = self_testing ] && echo " (one file; test hunk(s) $SELFTEST_HUNKS red alone, the rest green on top)")"
+echo "mode: $MODE$( [ "$MODE" = test_only ] && echo " (tamper at $PRODUCT:$TAMPER_LINE)")"
 SVC="$CLONE/$SUBDIR/$SERVICE"
 REP="$OUT.checker"
 mkdir -p "$REP"
@@ -546,15 +536,6 @@ elif [ "$MODE" = test_only ]; then
   fail "A3 (test-only) touched-file set must be exactly ONE new test under $TEST_DIR and NOTHING else: n=$N_TOUCHED product=$HAS_PRODUCT tests=$N_TESTS other=$N_OTHER"
   echo "RESULT: FAIL ($FAILS failed) — stopped at A3 (test-only mode: the product file must not change)"
   exit 1
-elif [ "$MODE" = self_testing ] && [ "$N_TOUCHED" -eq 1 ] && [ "$HAS_PRODUCT" -eq 1 ] && [ "$N_OTHER" -eq 0 ] && [ "$PRODUCT" != "$REF_TEST" ] && case "$PRODUCT" in "$TEST_DIR"/*) true ;; *) false ;; esac; then
-  TEST_FILE="$PRODUCT"
-  pass "A3 (self-testing) touched-file set == { $PRODUCT } — one file that is both the product and its test (under $TEST_DIR)"
-elif [ "$MODE" = self_testing ]; then
-  # (a `case` inside $( ) in this string closed the substitution at its pattern's `)` — arm C3, 2026-09-23; computed first)
-  PUT=no; case "$PRODUCT" in "$TEST_DIR"/*) PUT=yes ;; esac
-  fail "A3 (self-testing) touched-file set must be exactly the ONE product file, itself under $TEST_DIR: n=$N_TOUCHED product=$HAS_PRODUCT tests=$N_TESTS other=$N_OTHER product_under_test_dir=$PUT"
-  echo "RESULT: FAIL ($FAILS failed) — stopped at A3 (self-testing mode: one file only)"
-  exit 1
 elif [ "$N_TOUCHED" -eq 2 ] && [ "$HAS_PRODUCT" -eq 1 ] && [ "$N_TESTS" -eq 1 ] && [ "$N_OTHER" -eq 0 ] && [ "$TEST_FILE" != "$REF_TEST" ]; then
   pass "A3 touched-file set == { $PRODUCT , $TEST_FILE }"
 else
@@ -763,30 +744,8 @@ while [ "$TK" -le "$N_SEC" ]; do
   fi
   TK=$((TK+1))
 done
-if [ "$MODE" = self_testing ]; then
-  # split the section AS IT WILL BE APPLIED (opts line 1 — reanchored / context-ws / decl / tdz copies included) by hunk,
-  # then apply ONLY the declared test hunk(s) at the tip. selftest_split.py refuses (rc 2) a wrong/out-of-range ordinal.
-  SK=1; ST_F=""; ST_O=""
-  while [ "$SK" -le "$N_SEC" ]; do
-    sp="$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1]))[int(sys.argv[2])-1]["path"])' "$REP/sections.json" "$SK")"
-    if [ "$sp" = "$PRODUCT" ] || [ "$SUBDIR/$sp" = "$PRODUCT" ]; then ST_F="$(sed -n 1p "$REP/section_$SK.opts")"; ST_O="$(sed -n 2p "$REP/section_$SK.opts")"; break; fi
-    SK=$((SK+1))
-  done
-  python3 "$(dirname "$0")/selftest_split.py" "${ST_F:-/dev/null}" "$SELFTEST_HUNKS" "$REP/selftest.test.diff" "$REP/selftest.prod.diff" "$INPUT" > "$REP/selftest_split.out" 2>&1
-  rc_split=$?
-  echo "A4 (self-testing) split: rc=$rc_split $(tr '\n' ' ' < "$REP/selftest_split.out" | cut -c1-400)"
-  if [ "$rc_split" -ne 0 ]; then
-    fail "A4 (self-testing) the section could not be split into its declared test hunk(s) $SELFTEST_HUNKS and the rest: $(tr '\n' ' ' < "$REP/selftest_split.out" | cut -c1-400)"
-    echo "RESULT: FAIL ($FAILS failed) — stopped at A4 (self-testing split)"
-    exit 1
-  fi
-  # shellcheck disable=SC2086 — ST_O is the recorded opts string, word-split on purpose (as apply_section_for does)
-  git -C "$CLONE" apply -p1 $ST_O "$REP/selftest.test.diff" > "$REP/apply_test.out" 2>&1
-  rc=$?
-else
 apply_section_for "$TEST_FILE" > "$REP/apply_test.out" 2>&1
 rc=$?
-fi
 if [ "$rc" -ne 0 ]; then
   fail "A4 the test hunk alone did not apply (rc=$rc): $(head -3 "$REP/apply_test.out" | tr '\n' ' ')"
   echo "RESULT: FAIL ($FAILS failed) — stopped at A4"
@@ -907,10 +866,6 @@ fi
 # ---------------------------------------------------------------- A5 green-after
 if [ "$MODE" = test_only ]; then
   echo "A5 (test-only): no product hunk — the test must be GREEN at the untouched tip" > "$REP/apply_product.out"; rc=0
-elif [ "$MODE" = self_testing ]; then
-  # shellcheck disable=SC2086
-  git -C "$CLONE" apply -p1 $ST_O "$REP/selftest.prod.diff" > "$REP/apply_product.out" 2>&1
-  rc=$?
 else
 apply_section_for "$PRODUCT" > "$REP/apply_product.out" 2>&1
 rc=$?
