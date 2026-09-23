@@ -704,154 +704,6 @@ if _brief_for_sites:
     else:
         print(f"  suggested_test_file: the brief has no `File:` line under `## The test` - the title slug stands: {suggested}")
 
-# ---------------------------------------------------------------- 7d. REGION-CARRYING FILES (2026-09-23 10:3x)
-# Kam RULED this at 09:24 on card `wed-ornith-pool-thin-widen-the-harness`, option (a): "Fix the builder to
-# excerpt, leave num_ctx at 65536." THE DEFECT, measured this morning: `files` carried WHOLE file contents, so
-# KS-1143 — which passes every candidate-selection clause — built to 295,061 B ~= 74,258 prompt tokens against
-# num_ctx 65536 and was UNBUILDABLE (its subject suite is 5,426 lines / 264,474 B). A whole class of large-suite
-# tickets was therefore invisible to the local model. num_ctx STAYS at 65536; the builder carries the REGIONS a
-# brief needs instead of the whole file.
-#
-# THE HARD PART, stated rather than glossed: the model must emit `@@ -219,3 +219,8 @@` headers whose numbers are
-# REAL line numbers in the REAL file. An excerpt breaks that unless it carries its own offset AND the prompt says
-# so. So an excerpted file is NOT a string any more: it is an object whose `regions` each carry `first_line` —
-# the real line number of that region's FIRST line — plus the arithmetic spelled out in `rule` (real number of
-# the Nth line of a region = first_line + N - 1), and the same sentences are pushed to the FRONT of
-# `reference_test_note`, the field tasks/code_patch/task.md tells the model to follow literally.
-# (KS-851 miscounted a hunk header's LENGTH field this morning with the whole file in front of it, so the length
-# arithmetic is a pre-existing weakness this change neither fixes nor worsens; only the START field is at stake
-# here, and the start field is now given explicitly.)
-#
-# NEVER SILENTLY TRUNCATE: when a region cannot be determined (no anchored line in the file, or the anchors do
-# not fit the budget) the build is REFUSED, by name, with the override that would widen it. A partial file that
-# looks whole produces a confident wrong diff.
-#
-# EXCERPT_TRIGGER_BYTES — a file LARGER than this is carried as regions; at or under it, whole and byte-identical.
-#   Measured 2026-09-23 over all 317 inputs in night/inputs: the largest file any input that BUILT carries whole is
-#   services/api-gateway/src/routes/documents.ts at 146,673 B (KS-1228/1229/1264/1265 all built and graded with it).
-#   160,000 B sits just above that measured working maximum, so every build that works today is untouched — the only
-#   file on disk past it is KS-1143's 264,474 B suite. At 4 B/token 160,000 B is ~40K of the 65536 window, which
-#   still leaves the >=12K answer tokens this builder's own headroom warning asks for.
-EXCERPT_TRIGGER_BYTES = int(os.environ.get("NIGHT_EXCERPT_TRIGGER_BYTES", "160000"))
-# EXCERPT_BUDGET_BYTES — the most an excerpt may carry (~12K prompt tokens at 4 B/token). If the lines a brief
-#   anchors cannot be covered inside it, the region has NOT been determined and the build is refused.
-EXCERPT_BUDGET_BYTES = int(os.environ.get("NIGHT_EXCERPT_BUDGET_BYTES", "48000"))
-# EXCERPT_MARGIN_LINES — context carried each side of every anchored line/span. task.md 2b needs 3 for a strict
-#   hunk and the fence-shape gate needs trailing context; 25 carries the enclosing block too, at ~1.5 KB a side.
-EXCERPT_MARGIN_LINES = int(os.environ.get("NIGHT_EXCERPT_MARGIN_LINES", "25"))
-# EXCERPT_HEAD_LINES — the head of the file is ALWAYS carried: the imports task.md rules 5/6 bind the model to
-#   ("using imports the file ALREADY has") live there. It is never a region on its own — see the refusal below.
-EXCERPT_HEAD_LINES = int(os.environ.get("NIGHT_EXCERPT_HEAD_LINES", "60"))
-# EXCERPT_MERGE_GAP — two windows closer than this are merged into one region rather than left with a hole the
-#   model might read as adjacency.
-EXCERPT_MERGE_GAP = int(os.environ.get("NIGHT_EXCERPT_MERGE_GAP", "10"))
-
-_EXCERPT_RULE = (
-    "EXCERPT — the value under this path is NOT the whole file and NOT a string: it is an object whose `regions` "
-    "are separated, verbatim slices of the file at the tip. Each region's `first_line` is the REAL line number, in "
-    "the REAL file, of the FIRST line of that region's `text`; the real number of the Nth line of a region is "
-    "`first_line + N - 1`, and `last_line` is the real number of its last line. EVERY `@@ -a,b +c,d @@` header you "
-    "write MUST use those REAL numbers — never a number counted from the start of an excerpt or of a region. "
-    "Regions are NOT adjacent: never place a context line from one region beside a line from another, and never "
-    "assume the line after a region's last line is the next region's first line. Every line OUTSIDE the regions "
-    "still exists in the file, unchanged: the file is not new (never `--- /dev/null` for it), nothing outside your "
-    "hunks is added or removed, and a line you cannot see is a line you must not touch — if the change you are "
-    "asked for needs a line that is not in any region, write UNKNOWN rather than guess it."
-)
-
-# `:NNN` and `:NNN-:MMM` references in the prompt text. The lookbehind keeps clock times (`06:20`) out: the
-# character before the colon is then a word character. Over-inclusion is SAFE here (a number the brief cites for
-# a DIFFERENT file just carries a few extra lines of this one); under-inclusion is what refuses.
-_LINEREF_RE = re.compile(r"(?<![\w.])`?:(\d{1,5})`?(?:\s*[-–—]\s*`?:(\d{1,5})`?)?")
-
-
-def _prompt_spans(text, n_lines):
-    out = []
-    for m in _LINEREF_RE.finditer(text or ""):
-        a = int(m.group(1))
-        b = int(m.group(2)) if m.group(2) else a
-        if a < 1 or a > n_lines:
-            continue
-        if b < a or b > n_lines:
-            b = a
-        out.append((a, b))
-    return out
-
-
-def _excerpt_file(path_for_msg, text, spans, why):
-    """Return the region-carrying object for `text`, or REFUSE. `spans` are (first,last) real line numbers."""
-    flines = text.split("\n")
-    n = len(flines)
-    real = [(a, b) for (a, b) in spans if 1 <= a <= n]
-    if not real:
-        refuse(f"{path_for_msg} is {len(text)} B / {n} lines — past the {EXCERPT_TRIGGER_BYTES} B ceiling, so it must be "
-               f"carried as REGIONS — but NO line of it is anchored: the input names no defect line, no `## Where` site "
-               f"and no `:NNN` reference in the prompt that falls inside it. The region cannot be determined, and a "
-               f"truncated file that looks whole makes the model write a confident wrong diff. Point the brief at the "
-               f"lines it means (a `## Where` list, or `:NNN` references), or pin a smaller file")
-    wins = []
-    if EXCERPT_HEAD_LINES > 0:
-        wins.append((1, min(EXCERPT_HEAD_LINES, n)))
-    for a, b in real:
-        wins.append((max(1, a - EXCERPT_MARGIN_LINES), min(n, b + EXCERPT_MARGIN_LINES)))
-    wins.sort()
-    merged = []
-    for w in wins:
-        if merged and w[0] <= merged[-1][1] + EXCERPT_MERGE_GAP:
-            merged[-1] = (merged[-1][0], max(merged[-1][1], w[1]))
-        else:
-            merged.append(w)
-    regions = [{"first_line": a, "last_line": b, "line_count": b - a + 1,
-                "text": "\n".join(flines[a - 1:b])} for a, b in merged]
-    carried = sum(len(r["text"]) for r in regions)
-    if carried > EXCERPT_BUDGET_BYTES:
-        refuse(f"{path_for_msg}: the {len(real)} anchored line(s)/span(s) need {carried} B in {len(regions)} region(s), "
-               f"past the {EXCERPT_BUDGET_BYTES} B excerpt budget — the brief points at too much of a {len(text)} B file "
-               f"to carry honestly at num_ctx 65536. Narrow the brief's `## Where`/`:NNN` references, or widen with "
-               f"NIGHT_EXCERPT_BUDGET_BYTES / narrow the window with NIGHT_EXCERPT_MARGIN_LINES (currently "
-               f"{EXCERPT_MARGIN_LINES} lines each side)")
-    anchor_lines = sorted({a for a, _ in real} | {b for _, b in real})
-    return {"excerpt": True, "total_lines": n, "total_bytes": len(text), "carried_bytes": carried,
-            "why": why, "rule": _EXCERPT_RULE,
-            "anchored_lines": anchor_lines[:200], "regions": regions}
-
-
-files_map = {product: content, ref_path: ref_body}
-if edit_test_path:
-    files_map[edit_test_path] = edit_test_body
-_excerpted = []
-for _fp in list(files_map):
-    _ft = files_map[_fp]
-    if not isinstance(_ft, str) or len(_ft) <= EXCERPT_TRIGGER_BYTES:
-        continue
-    if _fp != product:
-        # the brief's `:NNN` numbers are the PRODUCT file's; nothing anchors a line of any other carried file, so
-        # an oversize reference test / pinned test file cannot be excerpted honestly — refuse rather than truncate.
-        refuse(f"{_fp} is {len(_ft)} B, past the {EXCERPT_TRIGGER_BYTES} B ceiling, and it is NOT the product file "
-               f"({product}) — the brief's line numbers name the product file, so no region of this one can be "
-               f"determined. Pin a smaller ref= (or test_file=)")
-    _spans = [(defect_no, defect_no)]
-    for _s in named_sites:
-        if isinstance(_s.get("line"), int):
-            _spans.append((_s["line"], _s["line"]))
-    if tamper:
-        _spans.append((tamper["line"], tamper["line"]))
-    _spans += _prompt_spans(prompt_desc, len(_ft.split("\n")))
-    _why = (f"the file is {len(_ft)} B / {len(_ft.split(chr(10)))} lines; carried whole it would not fit num_ctx 65536 "
-            f"(KS-1143, 2026-09-23: 295,061 B ~= 74,258 prompt tokens). Only the regions this task anchors are carried.")
-    files_map[_fp] = _excerpt_file(_fp, _ft, _spans, _why)
-    _excerpted.append(_fp)
-if _excerpted:
-    _note_head = ("EXCERPTED INPUT — files[" + "], files[".join(_excerpted) + "] is not the whole file. " +
-                  _EXCERPT_RULE + " Read that object's `rule` and every region's `first_line` BEFORE you write a "
-                  "single `@@` header. ")
-    note = _note_head + note
-    for _fp in _excerpted:
-        _o = files_map[_fp]
-        print(f"  EXCERPTED {_fp}: {_o['total_bytes']} B / {_o['total_lines']} lines -> {_o['carried_bytes']} B in "
-              f"{len(_o['regions'])} region(s) {[(r['first_line'], r['last_line']) for r in _o['regions']]} "
-              f"(anchored lines {_o['anchored_lines'][:12]}{'...' if len(_o['anchored_lines']) > 12 else ''})")
-
 inp = {
     "ticket": {"identifier": n["identifier"], "title": n["title"], "state": state,
                "priority": n["priorityLabel"], "description": prompt_desc},
@@ -867,7 +719,7 @@ inp = {
     "suggested_test_file": suggested,
     "reference_test_file": ref_path,
     "reference_test_note": note,
-    "files": files_map,
+    "files": {product: content, ref_path: ref_body, **({edit_test_path: edit_test_body} if edit_test_path else {})},
     "source_checkout": src, "tip": tip, "repo_subdir": subdir, "service_dir": service_dir,
     "shared_pkg_dir": "" if tool_mode else "packages/shared", "shared_pkg_name": "" if tool_mode else "@secuura/shared",
 }
@@ -878,31 +730,14 @@ if os.path.exists(kt):
     if set(k871) != set(inp) or set(k871["ticket"]) != set(inp["ticket"]) or set(k871["repo"]) != set(inp["repo"]):
         sys.stderr.write("build_input: key set differs from the KS-871 input — contract drift\n"); sys.exit(1)
     print("contract: key set == KS-871 input (top-level, ticket, repo)")
-if _excerpted:
-    # top-level too (the last key the model reads, after `files`): the same sentences, so the rule is not something
-    # it has to go looking for. Added AFTER the KS-871 contract self-check above, exactly as `_night_num_ctx` is —
-    # a build with no excerpt carries neither key and its key set is unchanged.
-    inp["excerpt_rule"] = _EXCERPT_RULE
-    inp["excerpted_files"] = _excerpted
 if "ctx" in pins:
     inp["_night_num_ctx"] = int(pins["ctx"])
-est = (len(json.dumps(inp)) ) // 4
-ctx = int(pins.get("ctx", 32768))
-# 2026-09-23: a prompt at or past num_ctx cannot be answered at all — the model would see a truncated prompt and
-# answer confidently from what survived. That is the KS-1143 shape, refused BY HAND this morning; it is mechanical
-# now. It fires only when the build is already unbuildable, so nothing that fits today is affected. The <12K
-# headroom WARNING below is unchanged.
-if est >= ctx:
-    refuse(f"the built input is ~{est} prompt tokens at 4 B/token, at or past num_ctx {ctx} — the model would be "
-           f"handed a TRUNCATED prompt and would answer from whatever survived. Files carried: "
-           + ", ".join(f"{k} {(v['carried_bytes'] if isinstance(v, dict) else len(v or ''))} B"
-                       + (" (excerpt)" if isinstance(v, dict) else "") for k, v in inp["files"].items())
-           + f". Narrow the brief, or lower NIGHT_EXCERPT_TRIGGER_BYTES (currently {EXCERPT_TRIGGER_BYTES}) so a big "
-             f"file is carried as regions")
 os.makedirs(os.path.dirname(os.path.abspath(out)), exist_ok=True)
 with open(out, "w", encoding="utf-8") as f:
     json.dump(inp, f, indent=1, ensure_ascii=False); f.write("\n")
 sz = os.path.getsize(out)
+est = (len(json.dumps(inp)) ) // 4
+ctx = int(pins.get("ctx", 32768))
 print(f"wrote {out} ({sz} B; ~{est} prompt tokens at 4 B/token — num_ctx {ctx} leaves ~{ctx - est} for the answer)")
 if ctx - est < 12000:
     print(f"WARNING: prompt estimate {est} tokens leaves under 12K for the answer at num_ctx {ctx} — pin a larger ctx= on the queue line")

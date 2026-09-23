@@ -62,32 +62,10 @@ if missing:
 # passes ITS path as argv[3] and A3d compares against that file's tip (present in `files` when test_file= is
 # pinned; a NEW test file has no tip lines, so A3d is inert for it — correct). No argv[3] = the product file.
 _pf = sys.argv[3] if len(sys.argv) > 3 and sys.argv[3] else (d.get("product_file") or "")
-def _tip_lines(_d, _path, _val):
-    """2026-09-23 EXCERPT MODE (night/build_input.sh section 7d): a file past NIGHT_EXCERPT_TRIGGER_BYTES is carried
-    as an OBJECT ({"excerpt": true, "regions": [{"first_line": N, "text": "..."}]}), not a string. Without this
-    `_val.split` raised AttributeError, a3c_plus exited 1, and checker.sh reads exit 1 as "A3c INCOMPLETE" — a false
-    FAIL on a correct diff. A3d's subject is the set of lines that EXIST at the tip, so read the whole file from the
-    pinned tip (a git READ verb on the source checkout, the same one build_input.sh uses); fall back to the carried
-    regions if that is not available — a SMALLER set, so A3d can then miss a duplication outside the excerpt, never
-    invent one. A string value takes the old path unchanged."""
-    if isinstance(_val, str):
-        return _val.split("\n")
-    if isinstance(_val, dict):
-        _src = _d.get("source_checkout") or (_d.get("repo") or {}).get("source_checkout") or ""
-        _tp = _d.get("tip") or (_d.get("repo") or {}).get("tip") or ""
-        if _src and _tp:
-            import subprocess
-            _r = subprocess.run(["git", "-C", _src, "show", f"{_tp}:{_path}"], capture_output=True, text=True)
-            if _r.returncode == 0:
-                return _r.stdout.split("\n")
-        return "\n".join(_rg.get("text", "") for _rg in (_val.get("regions") or [])).split("\n")
-    return []
-
-
 _tip = set()
 for _p, _txt in (d.get("files") or {}).items():
     if _p == _pf or _p.endswith(_pf) or _pf.endswith(_p):
-        _tip = {l.strip() for l in _tip_lines(d, _p, _txt) if len(l.strip()) >= 8}
+        _tip = {l.strip() for l in _txt.split("\n") if len(l.strip()) >= 8}
 _expected = {e.strip() for e in exp} | {_without_trailing_comment(e) for e in exp}
 # 2026-09-16 06:5x (KS-1127 r1): a WHOLE-BLOCK REWRITE removes a run of lines and re-adds them with the edits inside —
 # every re-added unchanged line is a tip line marked '+', but it is ALSO a '-' line of the same section, so nothing is
