@@ -1,0 +1,1 @@
+Friday's daily notes live in this directory from her first boot (seat created 2026-09-23 11:13 AEST by the Studio seat, Wednesday, on Kam's 2026-09-23 10:49 word). There is NO cutover: Friday has no notes anywhere else — an empty directory here means she has not booted yet, not that her history is elsewhere.

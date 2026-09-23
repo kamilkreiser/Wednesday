@@ -44,20 +44,16 @@ if [ -z "$AGENT" ]; then
   case "$(basename "$PROJECT_DIR")" in
     TUESDAY|Tuesday|tuesday)       AGENT="tuesday" ;;
     WEDNESDAY|Wednesday|wednesday) AGENT="wednesday" ;;
-    FRIDAY|Friday|friday)          AGENT="friday" ;;   # Kam 2026-09-23 10:49: the laptop seat is FRIDAY
     *)
       case "$(hostname -s 2>/dev/null || hostname 2>/dev/null)" in
-        # 2026-09-23: the laptop's seat is FRIDAY now (Kam 10:49 "changing the name of my laptop agent to
-        # Friday"). This fallback only fires for an UNRECOGNISED tree on the MBP; a TUESDAY tree there still
-        # resolves by its folder name above. Was: Kamils-MBP* -> tuesday.
-        Kamils-MBP*) AGENT="friday" ;;
+        Kamils-MBP*) AGENT="tuesday" ;;
         *)
           echo "Launch: CANNOT DETERMINE WHICH SEAT THIS IS — refusing rather than guessing." >&2
           echo "  tree: $PROJECT_DIR" >&2
           echo "  host: $(hostname -s 2>/dev/null || hostname 2>/dev/null)" >&2
           echo "  Fix, either one:" >&2
-          echo "    - launch the Datasec seat with ./Launch_Tuesday.command (or the laptop seat with ./Launch_Friday.command), or" >&2
-          echo "    - export WED_AGENT=wednesday (or tuesday, or friday) and re-run this script." >&2
+          echo "    - launch the Datasec seat with ./Launch_Tuesday.command, or" >&2
+          echo "    - export WED_AGENT=wednesday (or tuesday) and re-run this script." >&2
           exit 2 ;;
       esac ;;
   esac
@@ -65,8 +61,7 @@ fi
 case "$AGENT" in
   wednesday) AGENT_NAME="Wednesday"; AGENT_UPPER="WEDNESDAY" ;;
   tuesday)   AGENT_NAME="Tuesday";   AGENT_UPPER="TUESDAY"   ;;
-  friday)    AGENT_NAME="Friday";    AGENT_UPPER="FRIDAY"    ;;
-  *) echo "Launch: WED_AGENT must be wednesday, tuesday or friday, got '$AGENT'" >&2; exit 2 ;;
+  *) echo "Launch: WED_AGENT must be wednesday or tuesday, got '$AGENT'" >&2; exit 2 ;;
 esac
 export WED_AGENT="$AGENT"          # chat_reply.sh reads this to pick its stream
 
@@ -75,9 +70,7 @@ export WED_AGENT="$AGENT"          # chat_reply.sh reads this to pick its stream
 # .claude.json/projects/sessions). Wednesday is deliberately left on the global
 # config: pointing her at a fresh one would log Kam's own seat out at its next
 # launch, and that is his move to make, not this script's.
-# Friday (2026-09-23) gets her own the same way: a laptop seat must not share a login space with
-# whatever else Kam runs on the laptop.
-if [ "$AGENT" = "tuesday" ] || [ "$AGENT" = "friday" ]; then
+if [ "$AGENT" = "tuesday" ]; then
   export CLAUDE_CONFIG_DIR="${CLAUDE_CONFIG_DIR:-$PROJECT_DIR/4_Credentials/.claude}"
   mkdir -p "$CLAUDE_CONFIG_DIR"
 fi
@@ -98,10 +91,6 @@ if [ "$AGENT" = "tuesday" ]; then
   # Kam 2026-09-22: Ornith is a Studio agent, not a Datasec workflow — the Tuesday seat
   # works its week instruction with Claude agents only (no night/candidates.md, no Ornith).
   WEEK_FIRST_ACT="your first act is to work its scope with the Datasec Claude agents (Ornith and night/candidates.md are the Studio seat's, never yours)"
-elif [ "$AGENT" = "friday" ]; then
-  PICKUP_FILE="$BRAIN_DIR/tasks/NEXT-PICKUP-FRIDAY.md"
-  WEEK_INSTRUCTION_FILE="$BRAIN_DIR/tasks/WEEK-INSTRUCTION-FRIDAY.md"
-  WEEK_FIRST_ACT="your first act is to work its scope with Claude agents, claiming each project first (Ornith and night/ are the Studio seat's, never yours)"
 else
   PICKUP_FILE="$BRAIN_DIR/tasks/NEXT-PICKUP.md"
   WEEK_INSTRUCTION_FILE="$BRAIN_DIR/tasks/WEEK-INSTRUCTION.md"
@@ -109,9 +98,7 @@ else
 fi
 
 # DevMASTER workspace (read-only context) — may or may not be mounted.
-# WED_WORKSPACE (2026-09-23, Friday): the laptop's workspace is wherever Kam keeps it; Launch_Friday.command
-# exports the path chosen at first-run setup. Unset on the Studio and the mini -> the old literal, unchanged.
-DEVMASTER="${WED_WORKSPACE:-/Volumes/DevMASTER}"
+DEVMASTER="/Volumes/DevMASTER"
 DEVMASTER_VAULT="$DEVMASTER/Notes (MASTER)"
 if [ -d "$DEVMASTER_VAULT" ]; then
   DEVMASTER_STATE="mounted"
@@ -434,8 +421,6 @@ mkdir -p "$DASH_LOG_DIR"
 # Tuesday seat ever genuinely needs its own (a lone laptop with no Studio).
 if [ "$AGENT" = "tuesday" ] && [ "${WED_DASHBOARD:-0}" != "1" ]; then
   DASH_STATE="not started — one panel, served from the Wednesday seat"
-elif [ "$AGENT" = "friday" ] && [ "${WED_DASHBOARD:-0}" != "1" ]; then
-  DASH_STATE="not started — Friday's channel is the FRIDAY tab of the LIVE board, not a local server"
 elif curl -s -m 2 "$DASH_URL/api/health" 2>/dev/null | grep -q wednesday-dashboard; then
   DASH_STATE="already running"
 else
@@ -477,7 +462,6 @@ case "$SEAT_HOST" in
   # that seat's own corrections and every link pointing at it.
   *) case "$AGENT" in
        tuesday) SEAT_LEDGER="_ledger_laptop_datasec.md"; OTHER_LEDGER="_ledger.md" ;;
-       friday)  SEAT_LEDGER="_ledger_friday.md";          OTHER_LEDGER="_ledger.md + _ledger_laptop_datasec.md" ;;
        *)       SEAT_LEDGER="_ledger.md";                OTHER_LEDGER="_ledger_laptop_datasec.md" ;;
      esac ;;
 esac
@@ -501,31 +485,6 @@ ${BRAIN_DIR}/tasks/FIRST-BOOT-TUESDAY.md — it is who you are, what was built f
 ${BRAIN_DIR}/tasks/NEXT-PICKUP-DATASEC-LAPTOP.md for the actual state of your projects.
 Replace the first-boot brief with your own NEXT-PICKUP-TUESDAY.md at your first wrap; a
 first-boot brief still being read on the tenth boot is a stale representation."
-elif [ "$AGENT" = "friday" ]; then
-  AGENT_SCOPE="YOUR CLIENT SCOPE: BOTH Secuura AND Datasec — you are Kam's LAPTOP seat (he named you Friday on
-2026-09-23 at 10:49 so the agents stop confusing the laptop with the Studio and the mini). WEDNESDAY (Studio:
-Secuura + general) and TUESDAY (Mac mini: Datasec) are your sister seats and are usually running AT THE SAME TIME
-as you. Same persona, same voice, same W and M lessons; your own ledger, daily notes, pickup and inbox.
-THREE RULES MAKE SERVING TWO CLIENTS SAFE — they are the reason you exist in this shape:
-1. CLAIM BEFORE YOU DRIVE. Before briefing, launching or answering for ANY project run
-   2_Project_Files/tools/wed_claim.sh claim \"<Client>/<Project> — Friday (laptop)\". If it refuses because
-   Wednesday or Tuesday holds it, do not drive that project: tell Kam on your tab and work something else.
-   Release the claim when you stop. Two coordinators briefing one project is the collision this rule prevents.
-2. CLIENTS NEVER MIX IN ONE ARTEFACT (hard rule 2). Every brief, mail, card, note line and chat message is about
-   ONE client and names it. A Secuura artefact never carries a Datasec name, ticket, path or credential, and
-   vice versa. Each client's identity lives in its own folder (4_Credentials/clients/secuura|datasec/); run any
-   client-scoped gh/az through 2_Project_Files/friday/friday_as.sh <secuura|datasec> <command…>, which loads
-   ONLY that client. Your own shell exports neither client's identity.
-3. PROJECT WORK STAYS IN PROJECTS: everything under the workspace's !CODING/ is read-only to you, exactly as to
-   Wednesday; each project's own launcher carries its own logins.
-Your Kam channel is the FRIDAY tab of the live board. Ornith, night/ and local-model/ are the Studio's, never
-yours. Boot steps 6 (INDEX refresh) and 10 (morning sweep + autostart) belong to the Studio and mini seats —
-skip both unless Kam asks you. Mail: your subjects are [Friday -> <Client>/<Project>]; project agents you brief
-reply to friday-laptop-agent@agentmail.to (say so in every brief).
-
-🔴 ON YOUR VERY FIRST BOOT, before anything else, read ${BRAIN_DIR}/tasks/FIRST-BOOT-FRIDAY.md — who you are,
-what was built for you on 2026-09-23, and what is deliberately NOT done yet. Replace it with your own
-NEXT-PICKUP-FRIDAY.md at your first wrap."
 else
   AGENT_SCOPE="YOUR CLIENT SCOPE: SECUURA and all general/generic work. Every DATASEC
 project belongs to TUESDAY (Kam ruled the name 2026-09-08 11:56); read Datasec mail by
@@ -534,12 +493,7 @@ carries COORDINATION ONLY — never Secuura code, findings, tickets or credentia
 fi
 
 case "$AGENT" in
-  friday) SEAT_DAILY_README="${BRAIN_DIR}/daily_friday/README.md" ;;
-  *)      SEAT_DAILY_README="${BRAIN_DIR}/daily_tuesday/README.md" ;;
-esac
-case "$AGENT" in
   tuesday) SELF_INBOX="tuesday-agent@agentmail.to" ;;
-  friday)  SELF_INBOX="friday-laptop-agent@agentmail.to" ;;   # friday-agent@ was taken outside our org (2026-09-23)
   *)       SELF_INBOX="wednesday-agent@agentmail.to" ;;
 esac
 
@@ -608,7 +562,7 @@ FIRST ACTIONS (token cost is accepted — do the full reads, don't skim):
    rule as install_all_jobs.sh). Create today's from ${BRAIN_DIR}/daily/_template.md if
    missing — the template stays SHARED in daily/ and is not per-seat.
    **Yesterday's note may live in the OTHER directory, and that is expected, not a fault.**
-   ${SEAT_DAILY_README} records the cutover moment: before it, this seat's
+   ${BRAIN_DIR}/daily_tuesday/README.md records the cutover moment: before it, this seat's
    notes are in ${BRAIN_DIR}/daily/<date>.md. So look in the seat's own directory first and
    fall back to ${BRAIN_DIR}/daily/ for any date at or before the cutover. Read the README
    rather than inferring the cutover from which files happen to exist — an empty directory
