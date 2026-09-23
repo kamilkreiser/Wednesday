@@ -40,6 +40,14 @@ HERE="$(cd -P "$(dirname "$SOURCE")" && pwd)"
 PROJECT_DIR="$(cd -P "$HERE/../.." && pwd)"
 WORKSPACE="$(cd -P "$PROJECT_DIR/.." && pwd)"
 AGENT="${WED_AGENT:-wednesday}"
+# FRIDAY (2026-09-23): the laptop seat gets NO scheduled jobs and has NO NAS leg (Kam's NAS rulings name two legs:
+# Wednesday's and Tuesday's). Without this refusal a friday run would fall through to the engine with NEITHER
+# ruled scope (no ignore set, no path restriction) — i.e. walk the whole workspace. Refused BY NAME, before any log,
+# state file or engine call.
+if [ "$AGENT" = "friday" ]; then
+  echo "nas_sync: REFUSED — seat friday: the laptop has no NAS leg (Kam's rulings cover Wednesday's 03:30 and Tuesday's 23:00 legs only); nothing run" >&2
+  exit 2
+fi
 
 # >>> ruled-ignores — KAM'S RULINGS ON WHAT THIS LEG SYNCS
 # 2026-09-10 20:27 `stop-partition-rerun` + 20:28 `nas-shared-folders-owner = wednesday`:

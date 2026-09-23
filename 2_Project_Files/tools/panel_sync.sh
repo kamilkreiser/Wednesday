@@ -48,13 +48,27 @@ DERIVED_RE='^(0_Brain/learnings/_boot_digest(_by_tier)?\.md|0_Brain/dashboard/da
 #   * never touch MY OWN stream (that is the one file this seat writes)
 #   * never move a stream BACKWARDS — take origin's copy only when it is strictly
 #     ahead. A stream that shrank is a symptom, not something to propagate.
+# THREE SEATS (2026-09-23, friday): "the other stream" is now every stream that is not mine. The
+# wednesday/tuesday pair is processed exactly as before (same order, same log lines); a stream
+# that exists NEITHER locally NOR on origin (chat_friday.json until the laptop first speaks) is
+# skipped without a line, so a Studio log is byte-identical until Friday exists.
 advance_other_streams(){
-  local mine other f before after
+  local mine others other
   case "${WED_AGENT:-wednesday}" in
-    tuesday) mine="chat_tuesday.json";   other="chat_wednesday.json" ;;
-    *)       mine="chat_wednesday.json"; other="chat_tuesday.json" ;;
+    tuesday) mine="chat_tuesday.json";   others="chat_wednesday.json chat_friday.json" ;;
+    friday)  mine="chat_friday.json";    others="chat_wednesday.json chat_tuesday.json" ;;
+    *)       mine="chat_wednesday.json"; others="chat_tuesday.json chat_friday.json" ;;
   esac
   git fetch -q --no-write-fetch-head origin 2>/dev/null || { say "  advance: fetch failed, nothing taken"; return 0; }
+  for other in $others; do
+    if [ ! -e "$ROOT/0_Brain/dashboard/data/$other" ] && ! git cat-file -e "origin/main:0_Brain/dashboard/data/$other" 2>/dev/null; then
+      continue
+    fi
+    advance_one_stream "$mine" "$other"
+  done
+}
+advance_one_stream(){
+  local mine="$1" other="$2" f before after
   f="0_Brain/dashboard/data/$other"
   before=$(python3 -c "
 import json,sys

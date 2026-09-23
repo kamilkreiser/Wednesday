@@ -36,6 +36,9 @@ mkdir -p "$AGENTS_DIR"
 AGENT="${WED_AGENT:-wednesday}"
 case "$AGENT" in
   wednesday|tuesday) ;;
+  # FRIDAY (2026-09-23): the laptop seat gets NO scheduled jobs by default — a clear no-op, not a refusal
+  # (same rule and same words as install_all_jobs.sh). Nothing is written or loaded.
+  friday) echo "friday seat: no scheduled jobs are installed on the laptop"; exit 0 ;;
   *) echo "install_scheduler: REFUSING — WED_AGENT='$AGENT' is not a known agent." >&2
      echo "  Set WED_AGENT=wednesday or WED_AGENT=tuesday. Guessing here arms a job that" >&2
      echo "  boots the wrong seat, which is the failure this parameterisation exists to stop." >&2

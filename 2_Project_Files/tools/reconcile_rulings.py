@@ -92,15 +92,15 @@ DATASEC_CLIENTS  = {"datasec"}
 DATASEC_PREFIXES = ("nexusai-", "datasec-", "vision-", "mypki-", "cypherkey-", "leadbot-")
 
 SEAT = os.environ.get("WED_AGENT", "").strip().lower()
-if SEAT not in ("tuesday", "wednesday"):
+if SEAT not in ("tuesday", "wednesday", "friday"):
     # A guess-by-default must become a REFUSAL (2026-09-09, the seat-resolver
     # lesson; Kam's own words in Launch_Tuesday.command: "a seat that guesses its
     # own client is precisely the failure the two-agent split exists to prevent").
     sys.stderr.write(
-        "reconcile_rulings: WED_AGENT is %r, which is neither 'tuesday' nor 'wednesday'.\n"
+        "reconcile_rulings: WED_AGENT is %r, which is not 'tuesday', 'wednesday' or 'friday'.\n"
         "  This tool RULES CARDS, so a guessed seat would rule another client's decisions.\n"
-        "  Fix: launch through Launch_Tuesday.command / Launch_Wednesday.command, or export\n"
-        "  WED_AGENT=tuesday|wednesday in this shell. REFUSING.\n" % (SEAT or None))
+        "  Fix: launch through Launch_Tuesday.command / Launch_Wednesday.command / Launch_Friday.command,\n"
+        "  or export WED_AGENT=tuesday|wednesday|friday in this shell. REFUSING.\n" % (SEAT or None))
     sys.exit(2)
 
 def _is_datasec(card):
@@ -111,9 +111,17 @@ def _is_datasec(card):
     return str(card.get("id", "")).lower().startswith(DATASEC_PREFIXES)
 
 def in_scope(card):
+    # FRIDAY (2026-09-23, Kam 10:49 — the laptop seat, BOTH clients): a card the friday
+    # seat created carries seat="friday" (decision_queue.sh add). The friday seat rules
+    # ONLY those cards, and wednesday/tuesday NEVER rule a seat=friday card. Friday cannot
+    # take a client half of the complement below, because it works both clients.
+    if SEAT == "friday":
+        return card.get("seat") == "friday"
+    if card.get("seat") == "friday":
+        return False
     # Tuesday rules Datasec and nothing else; Wednesday rules everything else.
-    # The two seats are exact complements, so no card is rulable by both and none
-    # is rulable by neither.
+    # The two seats are exact complements over every NON-friday card (unchanged), so no
+    # such card is rulable by both and none is rulable by neither.
     return _is_datasec(card) if SEAT == "tuesday" else not _is_datasec(card)
 
 def load(p, what):

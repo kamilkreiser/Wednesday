@@ -68,6 +68,44 @@ command -v brew >/dev/null && ok "homebrew" || warn "homebrew missing" "needed t
 # com.wednesday.wake, so on Tuesday's machine it reported "not loaded" for a job that
 # SHOULD NOT exist there, and would have reported "loaded" for one that must not.
 _DOC_AGENT="${WED_AGENT:-wednesday}"
+# FRIDAY (2026-09-23, Kam 10:49: the laptop seat, own FRIDAY tree). With WED_AGENT unset, a FRIDAY tree is
+# friday — the tree decides, the same rule as seat_resolve.sh. Every other tree keeps the default above
+# byte-for-byte (a WEDNESDAY tree with WED_AGENT unset is still "wednesday").
+if [ -z "${WED_AGENT:-}" ]; then
+  case "$(basename "$PROJECT_DIR")" in FRIDAY|Friday|friday) _DOC_AGENT=friday ;; esac
+fi
+
+# --- FRIDAY seat (2026-09-23, Kam 10:49: "create a folder for Friday with all the instructions and a launch
+# file"). Four facts only the laptop seat needs; skipped entirely on every other seat. WARN for what first-run
+# setup or a degraded feature explains; FAIL only for a private key readable by others (same rule as the
+# deploy key above) and for a Claude config dir pointed OUTSIDE this tree (the seat would share a login
+# space it must not — Launch_Wednesday.command gives friday its own under 4_Credentials/).
+if [ "$_DOC_AGENT" = "friday" ]; then
+  if [ -f "$PROJECT_DIR/4_Credentials/.env" ] && grep -qE '^AGENTMAIL_API_KEY=.' "$PROJECT_DIR/4_Credentials/.env"; then
+    ok "friday: AGENTMAIL_API_KEY in 4_Credentials/.env (inbox friday-laptop-agent@)"
+  else
+    warn "friday: AGENTMAIL_API_KEY missing from 4_Credentials/.env" "friday-laptop-agent@ cannot be read or sent from — add the key (never commit it)"
+  fi
+  FPEM="$PROJECT_DIR/4_Credentials/dashboard-cloud/friday-seat.pem"
+  if [ -f "$FPEM" ]; then
+    FPM="$(stat -f '%Lp' "$FPEM" 2>/dev/null)"
+    [ "$FPM" = "600" ] && ok "friday: live-board seat key friday-seat.pem present, mode 0600" \
+      || fail "friday: friday-seat.pem mode ${FPM:-?} (must be 0600)" "chmod 600 4_Credentials/dashboard-cloud/friday-seat.pem — a synced copy loses modes"
+  else
+    warn "friday: no live-board seat key at 4_Credentials/dashboard-cloud/friday-seat.pem" "the seat cannot read or post the Friday partition — copy friday-seat.pem (+ .crt) from the Studio's 4_Credentials/dashboard-cloud/ (0600)"
+  fi
+  case "${CLAUDE_CONFIG_DIR:-}" in
+    "")                 warn "friday: CLAUDE_CONFIG_DIR unset in this shell" "launch through Launch_Friday.command (it exports CLAUDE_CONFIG_DIR=<tree>/4_Credentials/.claude)" ;;
+    "$PROJECT_DIR"/*)  ok "friday: CLAUDE_CONFIG_DIR is under this tree ($CLAUDE_CONFIG_DIR)" ;;
+    *)                 fail "friday: CLAUDE_CONFIG_DIR is OUTSIDE this tree ($CLAUDE_CONFIG_DIR)" "the laptop seat must not share another login space — unset it and launch through Launch_Friday.command" ;;
+  esac
+  if [ -f "$PROJECT_DIR/4_Credentials/.friday_configured" ]; then
+    ok "friday: first-run setup done (4_Credentials/.friday_configured)"
+  else
+    warn "friday: first-run marker 4_Credentials/.friday_configured missing" "run Launch_Friday.command — it runs first-time setup"
+  fi
+fi
+
 # INSTRUMENT CHANGED 2026-09-09, and the reason is measured rather than assumed. This check
 # used `launchctl list | grep -q <label>`. On 2026-09-09 that pipeline returned FALSE inside
 # doctor while `launchctl print gui/$(id -u)/<label>` — the call the per-job sweep below uses,
@@ -77,7 +115,12 @@ _DOC_AGENT="${WED_AGENT:-wednesday}"
 # instrument that disagrees with its neighbour and use the one that is already proven here.
 # (Rule: when two instruments disagree, re-measure and keep the one whose answer is checkable —
 # never the one whose answer creates work you were expecting to do.)
-if launchctl print "gui/$(id -u)/com.${_DOC_AGENT}.wake" >/dev/null 2>&1; then ok "scheduler launchd jobs loaded (agent: $_DOC_AGENT)"
+# friday: the laptop gets NO scheduled jobs by design (install_all_jobs.sh is a no-op there), so every
+# launchd / NAS check below is SKIPPED for it with one line each — the same way Ornith is skipped for
+# any seat but wednesday. A "not loaded" warning for a job that must not exist is noise that trains
+# the reader to skip warnings.
+if [ "$_DOC_AGENT" = "friday" ]; then ok "scheduler launchd jobs: friday seat — no scheduled jobs on the laptop (by design), skipped"
+elif launchctl print "gui/$(id -u)/com.${_DOC_AGENT}.wake" >/dev/null 2>&1; then ok "scheduler launchd jobs loaded (agent: $_DOC_AGENT)"
 else warn "scheduler jobs not loaded (agent: $_DOC_AGENT)" "run 2_Project_Files/scheduler/install_scheduler.command on this machine (PORTABILITY 12)"; fi
 
 # --- chat_sync: Kam's ONE page, kept current on BOTH machines (Kam, 2026-09-09 17:53/17:54) ---
@@ -85,7 +128,9 @@ else warn "scheduler jobs not loaded (agent: $_DOC_AGENT)" "run 2_Project_Files/
 # pull — a person standing in for a mechanism. Agent-derived label so a seat can never run the
 # other seat's job from the wrong tree. `launchctl print` deliberately, NOT `list | grep`:
 # the grep form gives a false negative here (2026-09-09, and the comment above says why).
-if launchctl print "gui/$(id -u)/com.${_DOC_AGENT}.chatsync" >/dev/null 2>&1; then
+if [ "$_DOC_AGENT" = "friday" ]; then
+  ok "chat_sync: friday seat — no scheduled jobs on the laptop (by design), skipped"
+elif launchctl print "gui/$(id -u)/com.${_DOC_AGENT}.chatsync" >/dev/null 2>&1; then
   # LOADED IS NOT RUNNING, and a fresh log is NOT proof either: a seat running the script by
   # hand keeps the log fresh while launchd fails every cycle. That exact check passed while the
   # job was dead with EX_CONFIG on 2026-09-09. Key on launchd's OWN exit code, which nothing a
@@ -146,7 +191,7 @@ fi
 NIGHT_DIR="$PROJECT_DIR/2_Project_Files/local-model/night"
 NIGHT_MODEL_TAG="ornith/35b"
 NIGHT_MANIFEST="$PROJECT_DIR/2_Project_Files/local-model/models/manifests/registry.ollama.ai/library/$NIGHT_MODEL_TAG"
-if [ "${WED_AGENT:-wednesday}" != "wednesday" ]; then
+if [ "$_DOC_AGENT" != "wednesday" ]; then
   ok "ornith night job: not this seat's (Wednesday only) — skipped"
 elif [ ! -f "$NIGHT_DIR/night_run.sh" ]; then
   warn "ornith night runner missing" "2_Project_Files/local-model/night/night_run.sh is gone — the 2026-09-14 rule has no mechanism (PORTABILITY 15)"
@@ -334,7 +379,12 @@ done
 # agent — com.wednesday.nassync on this seat, com.tuesday.nassync on hers — so the two
 # machines cannot collide, and so this check follows whichever seat is booting.
 # AGENT-AWARE 2026-09-09: all four labels now follow the booting seat, not just nassync.
-for job in "com.${_DOC_AGENT}.shiftchange" "com.${_DOC_AGENT}.wake" "com.${_DOC_AGENT}.close" "com.${_DOC_AGENT}.nassync"; do
+_DOC_JOBS="com.${_DOC_AGENT}.shiftchange com.${_DOC_AGENT}.wake com.${_DOC_AGENT}.close com.${_DOC_AGENT}.nassync"
+if [ "$_DOC_AGENT" = "friday" ]; then
+  ok "scheduler per-job sweep: friday seat — no scheduled jobs on the laptop (by design), skipped"
+  _DOC_JOBS=""
+fi
+for job in $_DOC_JOBS; do
   if launchctl print "gui/$(id -u)/$job" >/dev/null 2>&1; then
     lec=$(launchctl print "gui/$(id -u)/$job" 2>/dev/null | awk '/last exit code/{print $NF}')
     prog=$(launchctl list "$job" 2>/dev/null | awk -F'"' '/scheduler\/.*\.sh/{print $2; exit}')
@@ -363,7 +413,9 @@ done
 # laptop without the NAS in reach has nothing to measure. The 36 h threshold is one missed
 # night plus a working day — a single bad night self-heals at the next 03:30; two do not.
 NS="$PROJECT_DIR/2_Project_Files/scheduler/nas_staleness.sh"
-if [ -f "$NS" ]; then
+if [ "$_DOC_AGENT" = "friday" ]; then
+  ok "NAS staleness: friday seat — the laptop has no NAS leg (by design), skipped"
+elif [ -f "$NS" ]; then
   NS_OUT="$(bash "$NS" --warn-hours 36 2>&1)"; NS_RC=$?
   NS_SUM="$(printf '%s\n' "$NS_OUT" | /usr/bin/grep -i '^staleness:' | tail -1)"
   if printf '%s\n' "$NS_OUT" | /usr/bin/grep -qi '^SKIP'; then
@@ -421,7 +473,8 @@ fi
 # (learnings/2026-08-09_an-enforcement-you-must-arm-is-not-one). Rule: any
 # live agent pane in the fleet tmux session ⇒ the watcher must be running.
 TMUX_CHK="$(command -v tmux || echo /opt/homebrew/bin/tmux)"
-AGENT_PANES="$("$TMUX_CHK" list-panes -t fleet:0 -F '#{@cockpit_name}' 2>/dev/null | grep -vE '^(wednesday|fleet-monitor)$' | grep -c . || true)"
+# the coordinator is excluded by the legacy name AND this seat's own name (a friday/tuesday pane is not an agent)
+AGENT_PANES="$("$TMUX_CHK" list-panes -t fleet:0 -F '#{@cockpit_name}' 2>/dev/null | grep -vE "^(wednesday|${_DOC_AGENT}|fleet-monitor)\$" | grep -c . || true)"
 if [ "${AGENT_PANES:-0}" -gt 0 ] 2>/dev/null; then
   if pgrep -f 'wake_watch\.sh' >/dev/null 2>&1; then
     ok "wake_watch armed ($AGENT_PANES agent pane(s) live)"
@@ -988,7 +1041,9 @@ fi
 # replies on Kam's page had never run there. The plists are now tracked templates under
 # scheduler/jobs/ and scheduler/install_all_jobs.sh renders them for whichever seat runs it.
 JOBS_INSTALLER="$PROJECT_DIR/2_Project_Files/scheduler/install_all_jobs.sh"
-if [ ! -x "$JOBS_INSTALLER" ]; then
+if [ "$_DOC_AGENT" = "friday" ]; then
+  ok "scheduled jobs: friday seat — no scheduled jobs are installed on the laptop (by design), skipped"
+elif [ ! -x "$JOBS_INSTALLER" ]; then
   warn "scheduler/install_all_jobs.sh missing or not executable" \
        "restore it from git — without it only three of this seat's nine launchd jobs are armed by any installer"
 elif JOBS_OUT="$(env -u WED_AGENT bash "$JOBS_INSTALLER" --check 2>&1)"; then

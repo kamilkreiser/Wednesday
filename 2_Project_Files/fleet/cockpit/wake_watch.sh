@@ -69,6 +69,12 @@ case "$SEAT" in
              KAM_TAG="[Kam -> Tuesday]"   ;;
   wednesday) SEAT_INBOX=$(awk -F'|' '$1=="Wednesday"{print $2}' "$_routing" 2>/dev/null)
              KAM_TAG="[Kam -> Wednesday]" ;;
+  # FRIDAY (2026-09-23): the laptop seat's own inbox (friday-laptop-agent@) from the "Friday" routing row.
+  # NO fallback to Wednesday's inbox for this seat: a friday watcher polling wednesday-agent@ is the
+  # 2026-08-13 cross-seat read — a missing row REFUSES instead.
+  friday)    SEAT_INBOX=$(awk -F'|' '$1=="Friday"{print $2}'    "$_routing" 2>/dev/null)
+             KAM_TAG="[Kam -> Friday]"
+             [ -n "$SEAT_INBOX" ] || { echo "wake_watch: REFUSED — seat friday has no 'Friday' row in $_routing (its inbox is unknown; not falling back to Wednesday's)" >&2; exit 2; } ;;
   *)         SEAT_INBOX=""
              KAM_TAG="[Kam -> Wednesday]" ;;
 esac

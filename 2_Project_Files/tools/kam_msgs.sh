@@ -102,8 +102,12 @@ for m in ks:
     src=m.get('source','local')
     # THE TWO FLAGS THAT WERE MISSED. Loud, because the failure was quiet.
     warn=''
+    # FRIDAY SEAT (2026-09-23): for WED_AGENT=friday "addressed to me" is view=friday. Every other seat keeps the
+    # original wednesday-relative reading byte-for-byte (the tuesday seat's reading is NOT changed here — see
+    # fleet/REPORT_2026-09-23_friday-seat-tools.md: it flags her own view=tuesday rows too, a pre-existing gap).
+    me='friday' if (os.environ.get('WED_AGENT') or '').strip().lower()=='friday' else 'wednesday'
     if view == 'both': warn += '  *** view=both — a BROADCAST: addressed to Wednesday AND Tuesday; she sees it too ***'
-    elif view and view not in ('wednesday','', None): warn += '  *** view=%s — NOT addressed to Wednesday; route it, do not answer it ***' % view
+    elif view and view not in (me,'', None): warn += '  *** view=%s — NOT addressed to %s; route it, do not answer it ***' % (view, me.capitalize())
     if atts: warn += '  *** %d ATTACHMENT(S) — the message is not only its text ***' % len(atts)
     if m.get('decrypt_error'): warn += '  *** LIVE ROW NOT READABLE BY THIS SEAT (%s) — he wrote; read it on the live board ***' % m['decrypt_error']
     print('%s | [%s] view=%-10s | chars=%-5d | att=%d%s' % (ts, src, view, len(text), len(atts), warn))

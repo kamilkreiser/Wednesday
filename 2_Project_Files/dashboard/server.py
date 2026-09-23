@@ -233,7 +233,7 @@ class Handler(SimpleHTTPRequestHandler):
             # as current is exactly the "faked state" WED-73 forbids. The age is
             # served and the page decides; the server asserts nothing.
             out = {}
-            for agent in ("wednesday", "tuesday"):
+            for agent in ("wednesday", "tuesday", "friday"):   # friday: third seat 2026-09-23 (None until its file exists)
                 p = ROOT / "0_Brain" / "dashboard" / "data" / f"usage_{agent}.json"
                 if not p.exists():
                     out[agent] = None
@@ -387,7 +387,7 @@ class Handler(SimpleHTTPRequestHandler):
         if not isinstance(log, list):
             raise ValueError("chat_kam.json is not a list")
         entry = {"role": "kam", "text": text, "ts": ts}
-        if view in ("wednesday", "tuesday", "both"):
+        if view in ("wednesday", "tuesday", "friday", "both"):   # friday: third seat 2026-09-23
             entry["view"] = view
         if attachments:
             # Each carries its ABSOLUTE path, because the reader is an agent with

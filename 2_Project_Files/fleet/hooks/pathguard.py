@@ -17,6 +17,8 @@ FORBIDDEN, for either agent, minus its own root:
                                    coordinator; "manage, don't do"
     /Volumes/*/WEDNESDAY/**        the sister tree, when this seat is Tuesday
     /Volumes/*/TUESDAY/**          the sister tree, when this seat is Wednesday
+    /Volumes/*/FRIDAY/**           the third seat's tree (2026-09-23), for every seat but Friday;
+                                   and Friday's own gate refuses WEDNESDAY/ and TUESDAY/ the same way
     /Volumes/*/Notes (MASTER)/**   the shared vault; write-allowed folders are the named
                                    exception and are handled by asking, not by this gate
 
@@ -50,7 +52,7 @@ WRITE_CMDS = (
 )
 
 FORBIDDEN = re.compile(
-    r"^/Volumes/[^/]+/(?:!CODING|WEDNESDAY|TUESDAY|Notes \(MASTER\))(?:/|$)")
+    r"^/Volumes/[^/]+/(?:!CODING|WEDNESDAY|TUESDAY|FRIDAY|Notes \(MASTER\))(?:/|$)")
 
 
 def strip_heredocs(text):

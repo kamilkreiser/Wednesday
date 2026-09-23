@@ -40,7 +40,7 @@ AGENTS="$HOME/Library/LaunchAgents"
 # DISAGREEMENT, not just on a bad value). A stale-but-valid WED_AGENT is exactly the shape
 # that guard exists for.
 TREE_SEAT="$(basename "$PROJECT_DIR" | tr '[:upper:]' '[:lower:]')"
-case "$TREE_SEAT" in tuesday|wednesday) ;; *) TREE_SEAT="" ;; esac
+case "$TREE_SEAT" in tuesday|wednesday|friday) ;; *) TREE_SEAT="" ;; esac
 ENV_SEAT="${WED_AGENT:-}"
 if [ -n "$TREE_SEAT" ] && [ -n "$ENV_SEAT" ] && [ "$TREE_SEAT" != "$ENV_SEAT" ]; then
   echo "REFUSED — the tree says '$TREE_SEAT' and WED_AGENT says '$ENV_SEAT'." >&2
@@ -52,13 +52,20 @@ fi
 SEAT="${TREE_SEAT:-}"
 if [ -z "$SEAT" ]; then
   echo "REFUSED — cannot tell which seat this tree is: $PROJECT_DIR" >&2
-  echo "  The folder name is the discriminator and it is neither WEDNESDAY nor TUESDAY." >&2
+  echo "  The folder name is the discriminator and it is not WEDNESDAY, TUESDAY or FRIDAY." >&2
   echo "  WED_AGENT alone is NOT accepted here: it is inherited from whatever shell you are in," >&2
   echo "  and a seat that guesses its own identity is the failure the two-agent split prevents." >&2
   echo "  Run this from the seat's own tree." >&2
   exit 2
 fi
 check="${1:-}"
+# FRIDAY (2026-09-23, Kam 10:49): the laptop seat sleeps and travels and runs NO Studio services, so it gets NO
+# scheduled jobs by default. A clear NO-OP, not a refusal: exit 0 for install and --check alike, so doctor and
+# the launcher read "nothing to do" rather than "jobs missing". Nothing is written, loaded or unloaded.
+if [ "$SEAT" = "friday" ]; then
+  echo "friday seat: no scheduled jobs are installed on the laptop"
+  exit 0
+fi
 [ -d "$JOBS" ] || { echo "REFUSED — no templates at $JOBS" >&2; exit 2; }
 
 mkdir -p "$AGENTS"

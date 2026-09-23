@@ -16,8 +16,9 @@
 #
 # Provides (all pure — no env test hooks; tests pass explicit arguments):
 #   seat_resolve [project_dir]
-#       Sets TREE_SEAT (from the tree's folder name: TUESDAY -> tuesday, anything
-#       else -> wednesday — the same rule Launch_Wednesday.command uses) and
+#       Sets TREE_SEAT (from the tree's folder name: TUESDAY -> tuesday, FRIDAY ->
+#       friday, anything else -> wednesday — the same rule Launch_Wednesday.command
+#       uses) and
 #       SEAT (= $WED_AGENT if set, else TREE_SEAT). Default project_dir = the tree
 #       this file lives in (…/2_Project_Files/fleet/cockpit -> three levels up).
 #       Does NOT validate SEAT — callers keep their own "unknown seat" refusals.
@@ -49,8 +50,14 @@
 COORD_LEGACY_NAME="wednesday"
 
 seat_from_tree_name() { # $1 = a directory path -> prints the seat its NAME implies
+  # FRIDAY (2026-09-23, Kam 10:49: the laptop agent becomes Friday, own folder): a THIRD
+  # coordinator seat. The tree decides, exactly as for TUESDAY. "anything else ->
+  # wednesday" is unchanged and is a PANE-LOOKUP default only — every caller that
+  # writes seat-owned state (seat_note.sh, install_all_jobs.sh, chat_reply.sh) keeps
+  # its own "unrecognised tree -> REFUSE" guard, now over wednesday|tuesday|friday.
   case "$(basename "$1")" in
     TUESDAY|Tuesday|tuesday) echo tuesday ;;
+    FRIDAY|Friday|friday)    echo friday ;;
     *)                       echo wednesday ;;
   esac
 }
@@ -85,7 +92,7 @@ coord_pane_id() { # <tmux-target> [seat] [tree_seat] -> prints pane id (rc 0) or
         return 1
       fi
       start="${row#*|}"; start="${start#*|}"
-      start_tree="$(printf '%s' "$start" | sed -nE 's#.*/([^/]+)/Launch_(Wednesday|Tuesday)\.command.*#\1#p' | head -1)"
+      start_tree="$(printf '%s' "$start" | sed -nE 's#.*/([^/]+)/Launch_(Wednesday|Tuesday|Friday)\.command.*#\1#p' | head -1)"
       if [ -n "$start_tree" ] && [ "$(seat_from_tree_name "/$start_tree")" != "$seat" ]; then
         echo "coord_pane_id: REFUSED — pane $legacy_id ('$COORD_LEGACY_NAME') was started from tree '$start_tree', which is not a '$seat' tree; not adopting another seat's coordinator (looked for $looked)" >&2
         return 1

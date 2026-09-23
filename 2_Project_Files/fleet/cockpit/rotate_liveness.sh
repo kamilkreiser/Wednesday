@@ -140,13 +140,13 @@ is_shell_role() {  # $1 = @cockpit_name
 
 # ── seat resolution (once) ─────────────────────────────────────────────────
 _tree_seat=wednesday
-case "$(basename "$PROJECT_DIR")" in TUESDAY|Tuesday|tuesday) _tree_seat=tuesday ;; esac
+case "$(basename "$PROJECT_DIR")" in TUESDAY|Tuesday|tuesday) _tree_seat=tuesday ;; FRIDAY|Friday|friday) _tree_seat=friday ;; esac
 _pane_seat="$(awk -v c="$COORD" '$1==c{gsub(/[\[\]]/,"",$2); print $2; exit}' "$BEFORE" 2>/dev/null)"
 case "${WED_AGENT:-}" in
-  tuesday|wednesday) SEAT="$WED_AGENT" ;;
-  *) case "$_pane_seat" in tuesday|wednesday) SEAT="$_pane_seat" ;; *) SEAT="$_tree_seat" ;; esac ;;
+  tuesday|wednesday|friday) SEAT="$WED_AGENT" ;;
+  *) case "$_pane_seat" in tuesday|wednesday|friday) SEAT="$_pane_seat" ;; *) SEAT="$_tree_seat" ;; esac ;;
 esac
-case "$SEAT" in tuesday) SEAT_NAME="Tuesday" ;; *) SEAT_NAME="Wednesday" ;; esac
+case "$SEAT" in tuesday) SEAT_NAME="Tuesday" ;; friday) SEAT_NAME="Friday" ;; *) SEAT_NAME="Wednesday" ;; esac
 
 TS="$(date '+%Y%m%d_%H%M%S')"
 log "armed for '$SESSION' (seat $SEAT, coordinator $COORD, before-file $(basename "$BEFORE"), delay ${DELAY}s, test=$TEST_MODE)"

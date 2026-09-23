@@ -1,0 +1,542 @@
+#!/bin/bash
+# decision_queue.sh — Wednesday's decision queue CLI (WED-113 round 3).
+# Maintains 0_Brain/dashboard/data/decisions.json — the "requires action from
+# Kam" source the cockpit's NEEDS-YOU section renders. Wednesday writes here;
+# Kam's cockpit buttons only ever send chat messages (his click is a message
+# to Wednesday, never a state write — Wednesday rules the file on processing).
+#
+# Usage:
+#   decision_queue.sh add --id ID --client-project "Client/Project" \
+#       --title "..." --bluf "..." \
+#       --option key:label[:detail]   (repeat, >=2) \
+#       --recommended KEY --default-action "..."
+#   decision_queue.sh add --json      # one JSON object on stdin (same fields:
+#                                     # id, client_project, title, bluf,
+#                                     # options[{key,label,detail?}],
+#                                     # recommended, default_action)
+#                                     # NOTE: the JSON goes on STDIN and NOTHING may
+#                                     # follow --json (`add --json < card.json`).
+#                                     # And --override-prior-rulings DOES NOT WORK on
+#                                     # this path: --json breaks out of the flag loop,
+#                                     # so the JSON-path equivalent is the KEY
+#                                     # "_override_prior": "<the measurement that
+#                                     # justifies it>" INSIDE the object.
+#                                     # (Owed since 2026-09-07, named three times,
+#                                     # written 2026-09-09 at the third instance.)
+#   decision_queue.sh rule ID CHOICE_KEY
+#   decision_queue.sh --delivered ID ARTEFACT   # mark a RULED card delivered: the
+#                                     # ruling now sits in ARTEFACT (ticket comment,
+#                                     # PR, row). Refuses unless the card is ruled.
+#   decision_queue.sh list [open|ruled|all]
+#   decision_queue.sh list ruled --undelivered [ID-PREFIX]
+#                                     # ruled cards with no delivered mark, optionally
+#                                     # only ids starting with e.g. nexusai- / secuura-
+#   decision_queue.sh show ID         # ONE card whole: every option with its KEY,
+#                                     # label and detail, the ruling (choice + note +
+#                                     # ts), delivered_artefact/ts. Copy a letter
+#                                     # FROM HERE, never from the question's wording
+#                                     # (2026-09-06 ledger w=107). Unknown id: exit 2.
+#
+# DELIVERED (2026-09-06, ledger w=3 promotion of learnings/2026-09-05_a-relayed-
+# ruling-is-delivered-only-when-it-is-in-the-artefact.md rule 4): a RULED card is
+# not closed until the ruling sits in the artefact the next reader lands on. The
+# mysql2 EXTEND ruling of 09-04 was relayed, absorbed into a queue, pre-empted,
+# and re-raised as "unanswered" by s133 — nobody owned DELIVERY as a field. Now it
+# is one: `delivered_artefact` + `delivered_ts` on the card, and fleet/send_brief.sh
+# refuses a --kind brief while `list ruled --undelivered <prefix>` is non-empty for
+# that project and the body lacks the RULED BY KAM, NOT YET IN AN ARTEFACT section.
+#
+# Guarantees: the file stays valid JSON (atomic tmp+rename write); malformed
+# input or an unreadable existing file FAILS LOUDLY (exit 2) and never
+# clobbers what is on disk.
+#
+# ── DUAL-WRITE TO THE LIVE BOARD (Phase 2, Kam 2026-09-21 11:43) ─────────────
+# After a WRITE command (add / rule / withdraw / amend / --delivered) succeeds
+# locally, the card's CURRENT state is posted to the external dashboard as one
+# encrypted card row (tools/_live_board.sh -> dashboard-cloud/seat/post_card.py
+# --from-store): the first post creates it, every later one updates it in place,
+# so a ruling made here shows as ruled there. Local first, always; a failed post
+# is LOUD (stderr + fleet/state/live_board_post_failures.log) and never changes
+# this script's exit code. Datasec cards are refused locally for the Wednesday
+# seat (the API would 403 anyway). LIVE_BOARD=0 disables the post.
+set -u
+DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+export DQ_FILE="${DQ_FILE:-$DIR/../../0_Brain/dashboard/data/decisions.json}"
+export DQ_CHAT="${DQ_CHAT:-$DIR/../../0_Brain/dashboard/data/chat_log.json}"
+# STORE GUARD (2026-09-08) — refuse a write when origin is ahead on this file, or
+# when it carries conflict markers. WRITE commands only: `list`/`show` must stay
+# readable on a stale store, because a guard that blocks reading gets routed around.
+. "$DIR/_store_guard.sh"
+case "${1:-}" in
+  add|rule|--delivered|amend|withdraw)
+    store_guard "$DQ_FILE" || exit $? ;;
+esac
+# The python below is delivered on stdin (heredoc), so a `--json` payload
+# cannot also ride stdin — capture it into DQ_JSON first.
+DQ_JSON=""
+for a in "$@"; do
+  if [ "$a" = "--json" ]; then DQ_JSON="$(cat)"; break; fi
+done
+export DQ_JSON
+# Phase 2: no longer `exec` — the live-board post runs after the python returns. Its exit code is preserved verbatim.
+python3 - "$@" <<'PYEOF'
+import datetime, json, os, sys, tempfile
+
+FILE = os.environ["DQ_FILE"]
+
+def die(msg, code=2):
+    print(f"decision_queue: ERROR: {msg}", file=sys.stderr)
+    sys.exit(code)
+
+def now():
+    return datetime.datetime.now().astimezone().isoformat()
+
+def load():
+    if not os.path.exists(FILE):
+        return []
+    try:
+        data = json.loads(open(FILE).read())
+    except Exception as e:
+        die(f"{FILE} is not valid JSON ({e}) — refusing to touch it. Fix it by hand.")
+    if not isinstance(data, list):
+        die(f"{FILE} is not a JSON list — refusing to touch it.")
+    return data
+
+def save(data):
+    # atomic: write a sibling tmp file, validate by re-parsing, then rename
+    d = os.path.dirname(os.path.abspath(FILE))
+    fd, tmp = tempfile.mkstemp(dir=d, prefix=".decisions-", suffix=".json")
+    try:
+        with os.fdopen(fd, "w") as f:
+            json.dump(data, f, indent=1, ensure_ascii=False)
+        json.loads(open(tmp).read())          # paranoia: never install unparseable bytes
+        os.replace(tmp, FILE)
+    except BaseException:
+        try: os.unlink(tmp)
+        except OSError: pass
+        raise
+
+def validate(d, existing_ids):
+    if not isinstance(d, dict):
+        die("decision must be a JSON object")
+    dec = {}
+    for k in ("id", "client_project", "title", "bluf", "default_action"):
+        v = d.get(k)
+        if not isinstance(v, str) or not v.strip():
+            die(f"missing/empty required field: {k}")
+        dec[k] = v.strip()
+    if dec["id"] in existing_ids:
+        die(f"id already exists: {dec['id']}")
+    opts = d.get("options")
+    if not isinstance(opts, list) or len(opts) < 2:
+        die("options must be a list of at least 2 {key,label[,detail]} objects")
+    seen, out = set(), []
+    for o in opts:
+        if not isinstance(o, dict) or not str(o.get("key", "")).strip() \
+           or not str(o.get("label", "")).strip():
+            die("every option needs a non-empty key and label")
+        k = str(o["key"]).strip()
+        if k in seen:
+            die(f"duplicate option key: {k}")
+        seen.add(k)
+        out.append({"key": k, "label": str(o["label"]).strip(),
+                    "detail": str(o.get("detail", "")).strip()})
+    dec["options"] = out
+    rec = str(d.get("recommended", "")).strip()
+    if rec not in seen:
+        die(f"recommended must be one of the option keys ({', '.join(sorted(seen))})")
+    dec["recommended"] = rec
+    dec["ts"] = str(d.get("ts", "")).strip() or now()
+    dec["status"] = "open"
+    dec["ruled_choice"] = None
+    dec["ruled_ts"] = None
+    return dec
+
+STOPWORDS = {"about","after","again","before","between","could","should","would","their","there","these","those","which","while","wednesday","secuura","datasec","nexusai","blockchain","kam","agent","ticket","tickets","decision","recommended","default","nothing","moves","today","tomorrow","reported","expires","money","only","check","again","round","review","update","looked","looking","state","again"}
+
+def prior_rulings(d):
+    """Kam's panel messages whose text shares >=2 subject words with the card's id+title."""
+    import re
+    chat = os.environ.get("DQ_CHAT", "")
+    if not chat or not os.path.exists(chat):
+        return []
+    try:
+        c = json.load(open(chat))
+    except Exception as e:
+        die(f"chat log unreadable ({e}) — refusing to add a card without the prior-ruling check")
+    msgs = c if isinstance(c, list) else c.get("messages", c)
+    subject = f"{d.get('id','')} {d.get('title','')}".lower().replace("-", " ")
+    words = {w for w in re.findall(r"[a-z]{5,}", subject) if w not in STOPWORDS}
+    if not words:
+        return []
+    hits = []
+    for m in msgs:
+        if m.get("role") != "kam":
+            continue
+        text = str(m.get("text", ""))
+        low = text.lower()
+        shared = {w for w in words if w in low}
+        if len(shared) >= 2:
+            hits.append((str(m.get("ts", ""))[:16].replace("T", " "), " ".join(text.split())))
+
+    # ---- LEG 2: CARD-ID LINEAGE (2026-09-07, ledger w=3 — the FIFTH raise of the Azure/Founders
+    # Hub credit subject). Leg 1 above matches Kam's PROSE against the card's words. It is blind
+    # exactly where it matters most: a client name is a STOPWORD (it is in every card), and when
+    # Kam closes a subject he uses PRONOUNS — "no need to raise this again", "the hub is fine" —
+    # not the subject's nouns. His two closing messages on 09-05 shared exactly ONE scoring word
+    # ("credit") with the 09-07 card, and leg 1 needs two, so it could not see either of them.
+    # But his ruling messages carry the CARD ID in a structured form: "Decision <card-id>: ...".
+    # So match the NEW card's id tokens against the ids of cards he has ALREADY ruled, scoring a
+    # token only when it is RARE across the card store (a distinctive subject word, not "secuura").
+    # A rare shared token is one hit. In the path, not in memory.
+    try:
+        new_toks = {t for t in re.split(r"[^a-z0-9]+", str(d.get("id", "")).lower())
+                    if len(t) >= 4 and t not in STOPWORDS}
+        if new_toks:
+            store = load()
+            ruled = [x for x in store if isinstance(x, dict)
+                     and (x.get("status") == "ruled" or x.get("ruled_choice"))
+                     and x.get("id") != d.get("id")]
+            freq = {}
+            for x in store:
+                if not isinstance(x, dict):
+                    continue
+                for t in set(re.split(r"[^a-z0-9]+", str(x.get("id", "")).lower())):
+                    freq[t] = freq.get(t, 0) + 1
+            # RARITY CEILING, corrected 2026-09-07 during its own red-proof: a flat "<=3 cards"
+            # ceiling made a token STOP being a subject word once the subject had been carded a
+            # few times — so the gate went blind exactly on the subjects raised most often, which
+            # is the same flaw it exists to fix. Cell 4 (founders/hub, carded 4x) proved it.
+            # Ceiling is now proportional and generous: exclude only a genuinely ubiquitous token.
+            RARE = max(5, len(store) // 10)
+            for x in ruled:
+                x_toks = {t for t in re.split(r"[^a-z0-9]+", str(x.get("id", "")).lower())
+                          if len(t) >= 4 and t not in STOPWORDS}
+                shared_rare = {t for t in (new_toks & x_toks) if freq.get(t, 99) <= RARE}
+                if shared_rare:
+                    hits.append((f"CARD {x.get('id')}",
+                                 f"ALREADY RULED '{x.get('ruled_choice')}' — {x.get('title','')} "
+                                 f"[shared subject word(s): {', '.join(sorted(shared_rare))}]"))
+    except Exception as e:
+        die(f"card-id lineage check failed ({e}) — refusing to add a card without it")
+    return hits
+
+def cmd_add(args):
+    if args == ["--json"]:
+        try:
+            d = json.loads(os.environ.get("DQ_JSON", ""))
+        except Exception as e:
+            die(f"stdin is not valid JSON ({e})")
+    else:
+        d = {"options": []}
+        flag_map = {"--id": "id", "--client-project": "client_project",
+                    "--title": "title", "--bluf": "bluf",
+                    "--recommended": "recommended", "--default-action": "default_action"}
+        i = 0
+        while i < len(args):
+            a = args[i]
+            if a == "--option":
+                if i + 1 >= len(args): die("--option needs key:label[:detail]")
+                parts = args[i + 1].split(":", 2)
+                if len(parts) < 2: die(f"--option must be key:label[:detail], got {args[i+1]!r}")
+                d["options"].append({"key": parts[0], "label": parts[1],
+                                     "detail": parts[2] if len(parts) > 2 else ""})
+                i += 2
+            elif a == "--override-prior-rulings":
+                d["_override_prior"] = True
+                i += 1
+            elif a in flag_map:
+                if i + 1 >= len(args): die(f"{a} needs a value")
+                d[flag_map[a]] = args[i + 1]
+                i += 2
+            else:
+                die(f"unknown flag: {a}")
+    # PRIOR-RULING GATE (2026-09-05 16:4x, ledger w=2 — the Founders Hub credit was carded a FOURTH
+    # time at 16:32 after Kam's 10:51 panel note "no need to raise this again. this is in hand";
+    # the seat had read the panel only for messages after its predecessor's last action). A card
+    # is Wednesday's artefact; the panel holds Kam's rulings. Before any card is written, every
+    # Kam message on the panel is searched for the card's subject words; a hit REFUSES the add and
+    # prints his words, unless --override-prior-rulings is passed (and then the override is stated
+    # in the receipt). In the path, not in memory.
+    override = bool(d.pop("_override_prior", False))
+    prior = prior_rulings(d)
+    if prior and not override:
+        print("decision_queue: REFUSED — Kam has already written on this subject on the panel "
+              f"({len(prior)} message(s)). Read them; if the card is still warranted, re-run with "
+              "--override-prior-rulings and say why in the BLUF:", file=sys.stderr)
+        for ts, text in prior:
+            print(f"  {ts} | {text[:220]}", file=sys.stderr)
+        sys.exit(3)
+    data = load()
+    dec = validate(d, {x.get("id") for x in data if isinstance(x, dict)})
+    if prior and override:
+        dec["prior_rulings_overridden"] = [ts for ts, _ in prior]
+    data.append(dec)
+    save(data)
+    print(f"added: {dec['id']} ({dec['client_project']}) — {dec['title']} [rec: {dec['recommended']}]")
+
+def cmd_rule(args):
+    if len(args) != 2:
+        die("usage: rule ID CHOICE_KEY")
+    did, choice = args
+    data = load()
+    for dec in data:
+        if isinstance(dec, dict) and dec.get("id") == did:
+            if dec.get("status") == "ruled":
+                die(f"{did} is already ruled ({dec.get('ruled_choice')} @ {dec.get('ruled_ts')})")
+            keys = {o.get("key") for o in dec.get("options", []) if isinstance(o, dict)}
+            if choice not in keys:
+                die(f"choice {choice!r} is not an option of {did} ({', '.join(sorted(k for k in keys if k))})")
+            dec["status"] = "ruled"
+            dec["ruled_choice"] = choice
+            dec["ruled_ts"] = now()
+            save(data)
+            print(f"ruled: {did} -> {choice}")
+            return
+    die(f"no decision with id {did!r}")
+
+def cmd_withdraw(args):
+    # WITHDRAW an OPEN card on Kam's word (built 2026-09-14 13:2x: he annotated the
+    # 16:04 rotation card "legacy" and nothing could close it — its one option was
+    # not what he meant, and --delivered refuses an unruled card). Sets
+    # status=withdrawn + withdrawn_at (generated) + withdrawn_reason (his words,
+    # quoted by the caller). Refuses a ruled or absent card. Nothing deleted.
+    if len(args) < 2:
+        die("usage: withdraw ID \"<reason — Kam's words or the superseding artefact>\"")
+    did, reason = args[0], " ".join(args[1:]).strip()
+    if not reason:
+        die("withdraw: a reason is required")
+    data = load()
+    for dec in data:
+        if isinstance(dec, dict) and dec.get("id") == did:
+            if dec.get("status") == "ruled":
+                die(f"{did} is ruled ({dec.get('ruled_choice')} @ {dec.get('ruled_ts')}) — a ruled card is delivered, not withdrawn")
+            if dec.get("status") == "withdrawn":
+                die(f"{did} is already withdrawn @ {dec.get('withdrawn_at')}")
+            dec["status"] = "withdrawn"
+            dec["withdrawn_at"] = now()
+            dec["withdrawn_reason"] = reason
+            save(data)
+            print(f"withdrawn: {did} — {reason}")
+            return
+    die(f"no decision with id {did!r}")
+
+def cmd_amend(args):
+    # AMEND an OPEN card in place. Built 2026-09-09 after the stale-card family
+    # reached four instances in one day (three cards + one draft), two with a
+    # measured cost: at 09:39 Kam ruled `measure-then-rule` on a card whose
+    # measurement had completed 32 minutes earlier, and at 18:06 a card offered
+    # him a three-option choice that a sweep had superseded two minutes later.
+    #
+    # A filed card is a SNAPSHOT presented as a live question, and the longer it
+    # waits the more certain it is to be wrong -- because waiting is exactly when
+    # the world moves. `supersede` would not have helped either instance: both
+    # cards were LIVE and STALE, not moot.
+    #
+    # DISCIPLINE, and each clause is load-bearing:
+    #   - RULED cards REFUSE. A ruling is a record of what the principal decided
+    #     against what he was shown; editing that retroactively rewrites his
+    #     reasoning. Withdraw and re-file instead.
+    #   - NOTHING IS DESTROYED. Every prior value is kept in `amendments`
+    #     (2026-08-26: cleanup means quarantine, never removal), so the card
+    #     still shows what he would have ruled on before the amendment.
+    #   - THE REASON IS MANDATORY. An amendment with no reason is indis-
+    #     tinguishable from a card that was always worded that way.
+    #   - TIMESTAMPS ARE GENERATED HERE, never typed (ledger w>=3, 2026-08-16).
+    did = args[0].strip() if args else ""
+    if not did or did.startswith("--"):
+        die("usage: amend ID --reason TEXT [--bluf TEXT] [--default-action TEXT] "
+            "[--option-detail KEY TEXT]   (at least one field; --reason always required)")
+    rest, fields, reason = args[1:], {}, None
+    i = 0
+    while i < len(rest):
+        a = rest[i]
+        if a == "--reason":
+            if i+1 >= len(rest): die("--reason needs a value")
+            reason = " ".join(rest[i+1].split()); i += 2
+        elif a in ("--bluf", "--default-action"):
+            if i+1 >= len(rest): die(f"{a} needs a value")
+            fields[a.lstrip("-").replace("-", "_")] = rest[i+1]; i += 2
+        elif a == "--option-detail":
+            if i+2 >= len(rest): die("--option-detail needs KEY and TEXT")
+            fields.setdefault("_options", {})[rest[i+1]] = rest[i+2]; i += 3
+        else:
+            die(f"unknown flag {a!r} for amend")
+    if not reason:
+        die("amend REQUIRES --reason: an amendment with no reason is indistinguishable "
+            "from a card that was always worded that way")
+    if not fields:
+        die("amend changes nothing: give at least one of --bluf, --default-action, --option-detail")
+
+    data = load()
+    for dec in data:
+        if not (isinstance(dec, dict) and dec.get("id") == did):
+            continue
+        st = dec.get("status")
+        if st == "ruled":
+            die(f"{did} is RULED ({dec.get('ruled_choice')} @ {dec.get('ruled_ts')}) -- a ruling records "
+                f"what Kam decided against what he was SHOWN, so amending it rewrites his reasoning. "
+                f"File a new card instead.")
+        if st not in (None, "open"):
+            die(f"{did} has status {st!r}; amend only applies to an OPEN card")
+
+        before, changed = {}, []
+        opts = fields.pop("_options", {})
+        for key, val in fields.items():
+            before[key] = dec.get(key)
+            dec[key] = val
+            changed.append(key)
+        for okey, detail in opts.items():
+            found = False
+            for o in dec.get("options", []):
+                if isinstance(o, dict) and o.get("key") == okey:
+                    before[f"option:{okey}"] = o.get("detail")
+                    o["detail"] = detail
+                    changed.append(f"option:{okey}")
+                    found = True
+                    break
+            if not found:
+                keys = ", ".join(sorted(str(o.get("key")) for o in dec.get("options", []) if isinstance(o, dict)))
+                die(f"{did} has no option {okey!r} (options: {keys}) -- nothing written")
+
+        dec.setdefault("amendments", []).append({
+            "ts": now(), "reason": reason, "changed": changed, "before": before,
+        })
+        dec["amended_ts"] = now()
+        save(data)
+        print(f"amended: {did} -- {', '.join(changed)}")
+        print(f"  reason: {reason}")
+        print(f"  prior values kept in amendments[{len(dec['amendments'])-1}]; nothing destroyed")
+        return
+    die(f"no decision with id {did!r}")
+
+def is_delivered(dec):
+    return bool(str(dec.get("delivered_artefact") or "").strip())
+
+def cmd_delivered(args):
+    # Marks a RULED card as delivered into ARTEFACT. The timestamp is generated
+    # here (now()), never typed. A card that is open/withdrawn/absent REFUSES —
+    # delivery is a property of a ruling, and there is none to deliver.
+    if len(args) != 2 or not args[0].strip() or not args[1].strip():
+        die("usage: --delivered ID ARTEFACT   (ARTEFACT = the ticket comment / PR / row the ruling now sits in)")
+    did, artefact = args[0].strip(), " ".join(args[1].split())
+    data = load()
+    for dec in data:
+        if isinstance(dec, dict) and dec.get("id") == did:
+            st = dec.get("status")
+            if st != "ruled":
+                die(f"{did} is not ruled (status={st!r}) — only a ruled card can be delivered")
+            if is_delivered(dec):
+                die(f"{did} is already delivered: {dec['delivered_artefact']} @ {dec.get('delivered_ts')}")
+            dec["delivered_artefact"] = artefact
+            dec["delivered_ts"] = now()
+            save(data)
+            print(f"delivered: {did} -> {artefact} @ {dec['delivered_ts'][:16]}")
+            return
+    die(f"no decision with id {did!r}")
+
+def cmd_show(args):
+    # SHOW (2026-09-06, ledger w=107): a letter was glossed from the question's word
+    # order instead of the store. Print the card whole, key beside label.
+    if len(args) != 1 or not args[0].strip():
+        die("usage: show ID")
+    did = args[0].strip()
+    dec = next((d for d in load() if isinstance(d, dict) and d.get("id") == did), None)
+    if dec is None:
+        die(f"no decision with id {did!r}")
+    print(f"id:      {dec.get('id')}")
+    print(f"status:  {dec.get('status')}   ({dec.get('client_project', '?')})")
+    print(f"title:   {dec.get('title', '')}")
+    print(f"bluf:    {dec.get('bluf', '')}")
+    print(f"options (recommended: {dec.get('recommended')}):")
+    for o in dec.get("options", []):
+        if isinstance(o, dict):
+            print(f"  [{o.get('key')}] {o.get('label', '')}")
+            if str(o.get("detail") or "").strip():
+                print(f"        detail: {o['detail']}")
+    print(f"default: {dec.get('default_action', '')}")
+    print(f"ruling:  choice={dec.get('ruled_choice')!r}"
+          + (f"  ruling={dec['ruling']!r}" if dec.get("ruling") else "")
+          + f"  ruled_ts={dec.get('ruled_ts')}")
+    for k in ("ruling_note", "withdrawn_at", "withdrawn_reason", "delivered_artefact", "delivered_ts"):
+        if dec.get(k):
+            print(f"{k}: {dec[k]}")
+
+def cmd_list(args):
+    which = args[0] if args else "all"
+    if which not in ("open", "ruled", "all"):
+        die("usage: list [open|ruled|all] | list ruled --undelivered [ID-PREFIX]")
+    undelivered, prefix = False, ""
+    rest = args[1:]
+    if rest:
+        if which != "ruled" or rest[0] != "--undelivered" or len(rest) > 2:
+            die("usage: list [open|ruled|all] | list ruled --undelivered [ID-PREFIX]")
+        undelivered = True
+        prefix = rest[1] if len(rest) == 2 else ""
+    data = load()
+    shown = 0
+    for dec in data:
+        if not isinstance(dec, dict):
+            print("  (skipping one malformed entry)", file=sys.stderr)
+            continue
+        st = dec.get("status", "?")
+        if which != "all" and st != which:
+            continue
+        if undelivered:
+            if is_delivered(dec):
+                continue
+            if prefix and not str(dec.get("id", "")).startswith(prefix):
+                continue
+        shown += 1
+        line = f"[{st:5}] {dec.get('id','?')}  {dec.get('client_project','?')} — {dec.get('title','?')}"
+        if st == "ruled":
+            line += f"  => {dec.get('ruled_choice')} @ {str(dec.get('ruled_ts') or '')[:16]}"
+            if is_delivered(dec):
+                line += f"  delivered: {dec['delivered_artefact']} @ {str(dec.get('delivered_ts') or '')[:16]}"
+        else:
+            line += f"  (rec: {dec.get('recommended','?')}; default: {dec.get('default_action','?')})"
+        print(line)
+    tag = which
+    if undelivered:
+        tag += ", undelivered" + (f", prefix={prefix}" if prefix else "")
+    print(f"{shown} decision(s) [{tag}]")
+
+if len(sys.argv) < 2:
+    die("usage: decision_queue.sh add|rule|amend|--delivered|list|show ...", 1)
+cmd, rest = sys.argv[1], sys.argv[2:]
+if cmd == "add":   cmd_add(rest)
+elif cmd == "rule": cmd_rule(rest)
+elif cmd == "withdraw": cmd_withdraw(rest)
+elif cmd == "show": cmd_show(rest)
+elif cmd in ("--delivered", "delivered"): cmd_delivered(rest)
+elif cmd == "amend": cmd_amend(rest)
+elif cmd == "list": cmd_list(rest)
+else: die(f"unknown command: {cmd}", 1)
+PYEOF
+_rc=$?
+# ── Phase 2: mirror the card's current state to the live board (local write already done; rc untouched) ──
+if [ "$_rc" -eq 0 ] && [ -f "$DIR/_live_board.sh" ]; then
+  case "${1:-}" in
+    add|rule|--delivered|delivered|amend|withdraw)
+      _cid=""
+      if [ "${1:-}" = "add" ]; then
+        # the id is a flag on the CLI path, or the "id" key of the stdin JSON
+        _prev=""; for _a in "$@"; do [ "$_prev" = "--id" ] && _cid="$_a"; _prev="$_a"; done
+        [ -n "$_cid" ] || _cid="$(printf '%s' "$DQ_JSON" | python3 -c 'import json,sys
+try: print(json.load(sys.stdin).get("id",""))
+except Exception: print("")' 2>/dev/null)"
+      else
+        _cid="${2:-}"
+      fi
+      # seat: the launcher's WED_AGENT, else the tree (same resolver as chat_reply.sh); no hostname guess
+      _seat="${WED_AGENT:-}"
+      if [ -z "$_seat" ]; then case "$(basename "$(cd -P "$DIR/../.." && pwd)")" in TUESDAY|Tuesday|tuesday) _seat=tuesday ;; WEDNESDAY|Wednesday|wednesday) _seat=wednesday ;; esac; fi
+      if [ -n "$_cid" ]; then
+        . "$DIR/_live_board.sh"
+        live_board_post_card "$_seat" "$DQ_FILE" "$_cid"
+      else
+        echo "decision_queue: live-board post skipped — could not determine the card id from the arguments (local write is intact)" >&2
+      fi ;;
+  esac
+fi
+exit "$_rc"

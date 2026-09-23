@@ -87,7 +87,8 @@ guard_data_dir() {
   # markers there mean a writer bypassed the streams — but the RECORD lives in
   # the frozen legacy file and the three single-writer streams, and those are
   # what a repair must never lose.
-  for f in chat_log.json chat_legacy.json chat_wednesday.json chat_tuesday.json \
+  # chat_friday.json (2026-09-23): the third seat's stream — irreplaceable the same way; absent = skipped below.
+  for f in chat_log.json chat_legacy.json chat_wednesday.json chat_tuesday.json chat_friday.json \
            chat_kam.json decisions.json; do
     [ -f "$dir/$f" ] || continue
     if grep -qE '^(<<<<<<< |=======$|>>>>>>> )' "$dir/$f" 2>/dev/null; then

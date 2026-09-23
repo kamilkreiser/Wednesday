@@ -123,7 +123,11 @@ BACKOFF = (7, 21, 55)          # seconds, before attempts 2, 3, 4
 # seat is a guess; the tree is the discriminator (learnings/2026-09-09_the-seat-resolver-...).
 # NO apostrophes in new lines here: bash 3.2 miscounts quotes in a heredoc inside a command substitution.
 _agent = os.environ.get("CLOSE_SEAT") or os.environ.get("WED_AGENT", "wednesday")
-if _agent not in ("wednesday", "tuesday"):
+# friday (2026-09-23): its inbox is friday-laptop-agent@ (friday-agent@ was taken outside the org), so it
+# is NOT composable from the seat name; wednesday/tuesday compose exactly as before.
+if _agent == "friday":
+    _inboxes = ("friday-laptop-agent@agentmail.to", "coagent@agentmail.to")
+elif _agent not in ("wednesday", "tuesday"):
     print(f"close: WED_AGENT={_agent!r} is not a known agent — reading only the shared bus", flush=True)
     _inboxes = ("coagent@agentmail.to",)
 else:

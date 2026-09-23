@@ -62,6 +62,17 @@
 set -u
 DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 export DQ_FILE="${DQ_FILE:-$DIR/../../0_Brain/dashboard/data/decisions.json}"
+# THE SEAT, resolved ONCE (2026-09-23, third seat friday): the launcher's WED_AGENT, else the tree (same resolver as
+# chat_reply.sh); no hostname guess. Used by (a) the friday card rule below and (b) the live-board post at the end.
+# CARD OWNERSHIP, friday (Kam 2026-09-23 10:49 — Friday works BOTH clients from the laptop):
+#   * a card ADDED by the friday seat carries "seat": "friday";
+#   * the friday seat RULES only cards whose seat is friday;
+#   * wednesday and tuesday NEVER rule a seat=friday card.
+#   Every other card is exactly as before (no seat field is written by wednesday/tuesday; their
+#   Datasec / non-Datasec complement in reconcile_rulings.py is unchanged for those cards).
+DQ_SEAT="${WED_AGENT:-}"
+if [ -z "$DQ_SEAT" ]; then case "$(basename "$(cd -P "$DIR/../.." && pwd)")" in TUESDAY|Tuesday|tuesday) DQ_SEAT=tuesday ;; WEDNESDAY|Wednesday|wednesday) DQ_SEAT=wednesday ;; FRIDAY|Friday|friday) DQ_SEAT=friday ;; esac; fi
+export DQ_SEAT
 export DQ_CHAT="${DQ_CHAT:-$DIR/../../0_Brain/dashboard/data/chat_log.json}"
 # STORE GUARD (2026-09-08) — refuse a write when origin is ahead on this file, or
 # when it carries conflict markers. WRITE commands only: `list`/`show` must stay
@@ -269,6 +280,8 @@ def cmd_add(args):
         sys.exit(3)
     data = load()
     dec = validate(d, {x.get("id") for x in data if isinstance(x, dict)})
+    if os.environ.get("DQ_SEAT") == "friday":
+        dec["seat"] = "friday"          # 2026-09-23: friday's cards are friday's to rule (see DQ_SEAT above)
     if prior and override:
         dec["prior_rulings_overridden"] = [ts for ts, _ in prior]
     data.append(dec)
@@ -282,6 +295,12 @@ def cmd_rule(args):
     data = load()
     for dec in data:
         if isinstance(dec, dict) and dec.get("id") == did:
+            # 2026-09-23 friday card ownership (see DQ_SEAT in the shell header): refuse BEFORE any state change.
+            _me = os.environ.get("DQ_SEAT", "")
+            if dec.get("seat") == "friday" and _me != "friday":
+                die(f"{did} is a FRIDAY-seat card (seat=friday) — only the friday seat rules it; this seat is {_me or 'unresolved'}")
+            if _me == "friday" and dec.get("seat") != "friday":
+                die(f"{did} is not a friday-seat card — the friday seat rules only cards it created (seat=friday)")
             if dec.get("status") == "ruled":
                 die(f"{did} is already ruled ({dec.get('ruled_choice')} @ {dec.get('ruled_ts')})")
             keys = {o.get("key") for o in dec.get("options", []) if isinstance(o, dict)}
@@ -528,9 +547,8 @@ except Exception: print("")' 2>/dev/null)"
       else
         _cid="${2:-}"
       fi
-      # seat: the launcher's WED_AGENT, else the tree (same resolver as chat_reply.sh); no hostname guess
-      _seat="${WED_AGENT:-}"
-      if [ -z "$_seat" ]; then case "$(basename "$(cd -P "$DIR/../.." && pwd)")" in TUESDAY|Tuesday|tuesday) _seat=tuesday ;; WEDNESDAY|Wednesday|wednesday) _seat=wednesday ;; esac; fi
+      # seat: resolved once at the top (DQ_SEAT — WED_AGENT, else the tree incl. FRIDAY); no hostname guess
+      _seat="$DQ_SEAT"
       if [ -n "$_cid" ]; then
         . "$DIR/_live_board.sh"
         live_board_post_card "$_seat" "$DQ_FILE" "$_cid"

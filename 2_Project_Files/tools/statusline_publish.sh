@@ -72,9 +72,9 @@ _fail() { printf '%s %s\n' "$(date -u +%Y-%m-%dT%H:%M:%SZ)" "$1" >> "$LOG" 2>/de
 # an unknown seat publishes nothing and says so in the log.
 agent="${2:-${WED_AGENT:-}}"
 case "$agent" in
-  wednesday|tuesday) ;;
+  wednesday|tuesday|friday) ;;   # friday: third seat, 2026-09-23 -> usage_friday.json
   "") _fail "no seat name (arg 2 or \$WED_AGENT); published nothing"; exit 0 ;;
-  *)  _fail "seat name '$agent' is neither wednesday nor tuesday; published nothing"; exit 0 ;;
+  *)  _fail "seat name '$agent' is not wednesday, tuesday or friday; published nothing"; exit 0 ;;
 esac
 
 command -v jq >/dev/null 2>&1 || { _fail "jq absent; published nothing"; exit 0; }

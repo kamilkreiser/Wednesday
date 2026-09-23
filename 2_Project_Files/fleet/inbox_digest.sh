@@ -38,8 +38,14 @@ fi
 # the launcher), NOT on the hostname — Tuesday will move machines, and a seat that
 # polls the other agent's inbox is the 2026-08-13 cross-client capture in a new
 # costume. An unknown value falls back to Wednesday's rather than guessing.
+# FRIDAY (2026-09-23): the laptop seat reads ITS inbox, looked up from the "Friday" row of
+# inbox_routing.conf (friday-laptop-agent@ — `friday-agent@` was taken outside our org, so the
+# address is NOT composable from the seat name). A friday seat with no row REFUSES: falling back
+# to Wednesday's inbox would be the cross-seat read this block exists to prevent.
 case "${WED_AGENT:-wednesday}" in
   tuesday) SELF_INBOX="tuesday-agent@agentmail.to" ;;
+  friday)  SELF_INBOX="$(awk -F'|' '$1=="Friday"{print $2; exit}' "$SCRIPT_DIR/inbox_routing.conf")"
+           [ -n "$SELF_INBOX" ] || { echo "ERROR: seat friday has no 'Friday' row in fleet/inbox_routing.conf — REFUSING (not reading another seat's inbox)" >&2; exit 1; } ;;
   *)       SELF_INBOX="wednesday-agent@agentmail.to" ;;
 esac
 INBOXES=("$SELF_INBOX" "coagent@agentmail.to")
@@ -61,7 +67,7 @@ MODE="${1:-digest}"
 for inbox in "${INBOXES[@]}"; do
   curl -s -m 30 "https://api.agentmail.to/v0/inboxes/$inbox/messages?limit=50" \
     -H "Authorization: Bearer $AGENTMAIL_API_KEY" | \
-  INBOX="$inbox" SEEN_FILE="$SEEN_FILE" MODE="$MODE" SEAT="${WED_AGENT:-wednesday}" python3 -c "
+  INBOX="$inbox" SEEN_FILE="$SEEN_FILE" MODE="$MODE" SEAT="${WED_AGENT:-wednesday}" SELF_INBOX="$SELF_INBOX" python3 -c "
 import json, sys, os, re
 
 inbox = os.environ['INBOX']
@@ -98,10 +104,14 @@ if seat == 'tuesday' and inbox == 'coagent@agentmail.to':
 # Tuesday, so on this seat the prefix absorbed her replies as if they were ours and marked them seen, never
 # shown (learnings/2026-08-04_never-blanket-markseen-mid-monitoring: a handled-marker may only advance over
 # what reached the processor). Wednesday's seat keeps the subject rule, byte-identical.
-SEAT_NAME = 'Tuesday' if seat == 'tuesday' else 'Wednesday'
+# FRIDAY (2026-09-23) follows the Tuesday rule: own-outbound = sent FROM its own inbox (SELF_INBOX).
+# Friday works BOTH clients, so no client tag filter applies to it on the shared bus.
+SEAT_NAME = 'Tuesday' if seat == 'tuesday' else ('Friday' if seat == 'friday' else 'Wednesday')
 def is_out(m):
     if seat == 'tuesday':
         return 'tuesday-agent@agentmail.to' in str(m.get('from', ''))
+    if seat == 'friday':
+        return os.environ.get('SELF_INBOX', '\x00') in str(m.get('from', ''))
     return bool(re.match(r'\[Wednesday -> ', m.get('subject', '')))
 LIMIT = 50
 if len(msgs) >= LIMIT and len(new) == len(msgs):

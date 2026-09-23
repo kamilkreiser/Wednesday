@@ -18,7 +18,7 @@ _kl_root() { cd -P "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd; }
 kam_live_json() {
   local root; root="$(_kl_root)"
   local seat="${WED_AGENT:-}"
-  case "$seat" in wednesday|tuesday) ;; *) echo "kam-live: 🔴 REFUSED — WED_AGENT is '${seat:-unset}' (neither wednesday nor tuesday); a guessed seat reads the wrong tab. export WED_AGENT=… or use --source local" >&2; return 2 ;; esac
+  case "$seat" in wednesday|tuesday|friday) ;; *) echo "kam-live: 🔴 REFUSED — WED_AGENT is '${seat:-unset}' (not wednesday, tuesday or friday); a guessed seat reads the wrong tab. export WED_AGENT=… or use --source local" >&2; return 2 ;; esac
   local py="$root/2_Project_Files/dashboard-cloud/.venv/bin/python"
   [ -x "$py" ] || { echo "kam-live: 🔴 FAILED — no venv at 2_Project_Files/dashboard-cloud/.venv (PORTABILITY.md); use --source local" >&2; return 2; }
   [ -f "$root/4_Credentials/dashboard-cloud/$seat-seat.pem" ] || { echo "kam-live: 🔴 FAILED — no certificate 4_Credentials/dashboard-cloud/$seat-seat.pem on this machine; use --source local" >&2; return 2; }

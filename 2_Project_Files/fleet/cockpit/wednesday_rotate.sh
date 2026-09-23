@@ -57,7 +57,8 @@ seat_resolve "$PROJECT_DIR"
 case "$SEAT" in
   tuesday)   SEAT_LAUNCHER="$PROJECT_DIR/Launch_Tuesday.command" ;;
   wednesday) SEAT_LAUNCHER="$PROJECT_DIR/Launch_Wednesday.command" ;;
-  *) log "REFUSED: WED_AGENT='$SEAT' is not a seat this script knows (wednesday|tuesday)"; exit 2 ;;
+  friday)    SEAT_LAUNCHER="$PROJECT_DIR/Launch_Friday.command" ;;   # 2026-09-23: the laptop seat (FRIDAY tree)
+  *) log "REFUSED: WED_AGENT='$SEAT' is not a seat this script knows (wednesday|tuesday|friday)"; exit 2 ;;
 esac
 export WED_AGENT="$SEAT"   # the detached checker resolves the seat from this
 if [ -z "${ROTATE_LAUNCH_CMD:-}" ] && [ ! -f "$SEAT_LAUNCHER" ]; then

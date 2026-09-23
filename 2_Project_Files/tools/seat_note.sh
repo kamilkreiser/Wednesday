@@ -11,10 +11,12 @@
 # Mapping (agreed Wednesday + Tuesday 2026-09-16; amendment 20:35):
 #   tree folder WEDNESDAY -> seat wednesday -> 0_Brain/daily          (UNCHANGED)
 #   tree folder TUESDAY   -> seat tuesday   -> 0_Brain/daily_tuesday
+#   tree folder FRIDAY    -> seat friday    -> 0_Brain/daily_friday   (2026-09-23, Kam 10:49: the laptop
+#     seat, both clients; Wednesday creates the folder + README — this mapping only names it)
 #   ANY OTHER folder name -> REFUSE. seat_resolve.sh maps "anything else" to wednesday by design
 #     (pane lookup); for a NOTE that default would silently write one client's episodic memory
-#     into the other's (R0). Recognition is install_all_jobs.sh:55-61's rule (lower-cased folder
-#     name in {tuesday, wednesday}); WED_AGENT alone never rescues an unrecognised tree.
+#     into the other's (R0). Recognition is install_all_jobs.sh's rule (lower-cased folder
+#     name in {tuesday, wednesday, friday}); WED_AGENT alone never rescues an unrecognised tree.
 #   WED_AGENT set AND different from the tree's seat -> REFUSE (two independent sources disagree).
 # _template.md stays shared at 0_Brain/daily/_template.md.
 #
@@ -47,11 +49,11 @@ seat_note_dir() { # <project_dir> [caller] -> rc 0 (SEAT_NOTE_*) | rc 2 (stderr 
   # installer recognises AND seat_resolve must read it the same way (a "TuEsday" folder would be
   # tuesday to the installer and wednesday to seat_resolve — that disagreement refuses too).
   case "$lower" in
-    tuesday|wednesday) ;;
+    tuesday|wednesday|friday) ;;
     *) lower="" ;;
   esac
   if [ -z "$lower" ] || [ "${TREE_SEAT:-}" != "$lower" ]; then
-    SEAT_NOTE_ERR="$who: REFUSED — cannot tell which seat this tree is — run from a WEDNESDAY or TUESDAY tree (tree: $dir)"
+    SEAT_NOTE_ERR="$who: REFUSED — cannot tell which seat this tree is — run from a WEDNESDAY, TUESDAY or FRIDAY tree (tree: $dir)"
     echo "$SEAT_NOTE_ERR" >&2; return 2
   fi
   if [ -n "${WED_AGENT:-}" ] && [ "$WED_AGENT" != "$TREE_SEAT" ]; then
@@ -62,6 +64,7 @@ seat_note_dir() { # <project_dir> [caller] -> rc 0 (SEAT_NOTE_*) | rc 2 (stderr 
   case "$TREE_SEAT" in
     wednesday) SEAT_NOTE_REL="0_Brain/daily" ;;
     tuesday)   SEAT_NOTE_REL="0_Brain/daily_tuesday" ;;
+    friday)    SEAT_NOTE_REL="0_Brain/daily_friday" ;;
   esac
   SEAT_NOTE_DIR="$dir/$SEAT_NOTE_REL"
   return 0

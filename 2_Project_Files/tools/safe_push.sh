@@ -66,7 +66,7 @@ FEEDS="agentmail brain_state datasec_calendar linear_personal linear_wed news
 # in the frozen legacy file plus one stream per writer. Single-writer files do
 # not conflict — that is the whole point — but they are still irreplaceable, so
 # they are backed up and staged by name exactly as chat_log.json used to be.
-CHATFILES="chat_legacy chat_wednesday chat_tuesday chat_kam"
+CHATFILES="chat_legacy chat_wednesday chat_tuesday chat_friday chat_kam"   # chat_friday: third seat, 2026-09-23 (absent = skipped)
 
 # 1. Back up the irreplaceable files BEFORE any git verb touches the tree.
 for f in $CHATFILES decisions; do
@@ -142,7 +142,7 @@ for round in 1 2 3 4 5 6 7 8; do
         # below. Nothing is decided by picking a side of a generated file.
         git -C "$W" checkout --theirs "$f" 2>/dev/null || git -C "$W" checkout --ours "$f"
         git -C "$W" add "$f" ;;
-      "$D"/chat_legacy.json|"$D"/chat_wednesday.json|"$D"/chat_tuesday.json|"$D"/chat_kam.json)
+      "$D"/chat_legacy.json|"$D"/chat_wednesday.json|"$D"/chat_tuesday.json|"$D"/chat_friday.json|"$D"/chat_kam.json)
         # One writer per stream, so this is not expected — but a stream is
         # irreplaceable and the rule must exist BEFORE it is needed. Union on
         # (ts, text), exactly as the shared log used to be resolved.

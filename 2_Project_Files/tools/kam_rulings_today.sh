@@ -104,7 +104,7 @@ def mine(m):
     v = str(m.get("view") or "").strip().lower()
     if not seat:            return True      # no seat -> no filtering at all
     if v in ("", "both"):   return True      # untagged / broadcast -> fail open
-    if v not in ("wednesday", "tuesday"): return True   # unknown tag -> fail open
+    if v not in ("wednesday", "tuesday", "friday"): return True   # unknown tag -> fail open (friday: third seat, 2026-09-23)
     return v == seat
 
 shown = [m for m in kam if mine(m)]

@@ -45,12 +45,13 @@ ROUTING="$SELF_DIR/inbox_routing.conf"
 case "${WED_AGENT:-}" in
   wednesday) SEAT_KEY="Wednesday" ;;
   tuesday)   SEAT_KEY="Tuesday"   ;;
+  friday)    SEAT_KEY="Friday"    ;;   # 2026-09-23: the laptop seat; inbox = the "Friday" routing row
   "") echo "send_brief: WED_AGENT is not set, so this seat cannot say which coordinator it is." >&2
       echo "  A guess here sends a client's mail out of the other coordinator's inbox." >&2
-      echo "  Fix: launch through Launch_Wednesday.command or Launch_Tuesday.command," >&2
-      echo "  or export WED_AGENT=wednesday|tuesday in this shell. REFUSING." >&2
+      echo "  Fix: launch through Launch_Wednesday.command, Launch_Tuesday.command or Launch_Friday.command," >&2
+      echo "  or export WED_AGENT=wednesday|tuesday|friday in this shell. REFUSING." >&2
       exit 2 ;;
-  *)  echo "send_brief: WED_AGENT='${WED_AGENT}' is neither wednesday nor tuesday. REFUSING." >&2
+  *)  echo "send_brief: WED_AGENT='${WED_AGENT}' is not wednesday, tuesday or friday. REFUSING." >&2
       exit 2 ;;
 esac
 # ── THE TREE MUST AGREE WITH THE ENVIRONMENT (Tuesday's control, 2026-09-09) ──
@@ -73,6 +74,7 @@ esac
 case "$(basename "$PROJECT_DIR")" in
   TUESDAY|Tuesday|tuesday)       TREE_SEAT="tuesday"   ;;
   WEDNESDAY|Wednesday|wednesday) TREE_SEAT="wednesday" ;;
+  FRIDAY|Friday|friday)          TREE_SEAT="friday"    ;;
   *)                             TREE_SEAT=""          ;;
 esac
 if [ -n "$TREE_SEAT" ] && [ "$TREE_SEAT" != "$WED_AGENT" ]; then

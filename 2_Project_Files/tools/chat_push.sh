@@ -65,20 +65,27 @@ fi
 VIEW="$(printf '%s' "${2:-}" | tr '[:upper:]' '[:lower:]')"
 PUSHLOG="$PROJECT_DIR/2_Project_Files/logs/chat_push.log"
 mkdir -p "$(dirname "$PUSHLOG")" 2>/dev/null || PUSHLOG=/dev/null
-case "$VIEW" in
-  tuesday|both)
+# FRIDAY (2026-09-23, Kam 10:49): a third seat on the LAPTOP — another machine, like Tuesday, so
+# a view=friday message is MAILED to Friday's inbox (the "Friday" row of inbox_routing.conf) by
+# the SAME code path. `both` is left exactly as it was (Tuesday only): its name is the two-seat
+# broadcast, and whether a local-board broadcast should also mail the laptop is Kam's call, not
+# a side effect of adding a seat. Friday reads broadcasts on the LIVE board (partition ALL).
+# The Tuesday lines below are byte-identical in the log ("tuesday-push: ...").
+push_to_seat() { # $1 = routing key (Tuesday|Friday)
+  local NAME="$1" TAG ENVF KEY RCPT BODY CODE
+  TAG="$(printf '%s' "$NAME" | tr '[:upper:]' '[:lower:]')-push"
     ENVF="$PROJECT_DIR/4_Credentials/.env"
     KEY="$(sed -n 's/^[[:space:]]*AGENTMAIL_API_KEY[[:space:]]*=[[:space:]]*//p' "$ENVF" 2>/dev/null | tr -d '"'"'"' \r' | head -1)"
     if [ -z "$KEY" ]; then
-      printf '%s tuesday-push: AGENTMAIL_API_KEY not readable at %s — NOT delivered\n' \
-        "$(date -u +%Y-%m-%dT%H:%M:%SZ)" "$ENVF" >> "$PUSHLOG" 2>/dev/null
+      printf '%s %s: AGENTMAIL_API_KEY not readable at %s — NOT delivered\n' \
+        "$(date -u +%Y-%m-%dT%H:%M:%SZ)" "$TAG" "$ENVF" >> "$PUSHLOG" 2>/dev/null
     else
-      RCPT="$(awk -F'|' '$1=="Tuesday"{print $2; exit}' "$PROJECT_DIR/2_Project_Files/fleet/inbox_routing.conf" 2>/dev/null)"
+      RCPT="$(awk -F'|' -v k="$NAME" '$1==k{print $2; exit}' "$PROJECT_DIR/2_Project_Files/fleet/inbox_routing.conf" 2>/dev/null)"
       if [ -z "$RCPT" ]; then
-        printf '%s tuesday-push: no Tuesday row in inbox_routing.conf — NOT delivered\n' \
-          "$(date -u +%Y-%m-%dT%H:%M:%SZ)" >> "$PUSHLOG" 2>/dev/null
+        printf '%s %s: no %s row in inbox_routing.conf — NOT delivered\n' \
+          "$(date -u +%Y-%m-%dT%H:%M:%SZ)" "$TAG" "$NAME" >> "$PUSHLOG" 2>/dev/null
       else
-        BODY="$(TS="$TS" PD="$PROJECT_DIR" python3 - <<'PYEOF' 2>>"$PUSHLOG"
+        BODY="$(TS="$TS" PD="$PROJECT_DIR" SEATNAME="$NAME" python3 - <<'PYEOF' 2>>"$PUSHLOG"
 import json, os
 ts = os.environ["TS"]
 p = os.path.join(os.environ["PD"], "0_Brain/dashboard/data/chat_kam.json")
@@ -89,7 +96,7 @@ except Exception:
 hit = next((e for e in reversed(entries) if e.get("ts") == ts), None)
 text = (hit or {}).get("text", "")
 print(json.dumps(
-    "Kam addressed this to you on the Tuesday tab of the dashboard panel at "
+    "Kam addressed this to you on the " + os.environ.get("SEATNAME", "Tuesday") + " tab of the dashboard panel at "
     + ts + ". Delivered by the panel itself, not relayed by Wednesday.\n\n"
     "HIS WORDS, VERBATIM:\n\n" + text +
     "\n\n(If this is empty, the panel could not read the message back — open "
@@ -100,13 +107,16 @@ PYEOF
         CODE="$(curl -s -o /dev/null -w '%{http_code}' --max-time 20 -X POST \
           "https://api.agentmail.to/v0/inboxes/${RCPT}/messages/send" \
           -H "Authorization: Bearer $KEY" -H "Content-Type: application/json" \
-          -d "{\"to\":[\"${RCPT}\"],\"subject\":\"[Kam -> Tuesday] panel message ${TS}\",\"text\":${BODY}}" \
+          -d "{\"to\":[\"${RCPT}\"],\"subject\":\"[Kam -> ${NAME}] panel message ${TS}\",\"text\":${BODY}}" \
           2>>"$PUSHLOG")"
-        printf '%s tuesday-push: %s -> HTTP %s\n' \
-          "$(date -u +%Y-%m-%dT%H:%M:%SZ)" "$RCPT" "${CODE:-none}" >> "$PUSHLOG" 2>/dev/null
+        printf '%s %s: %s -> HTTP %s\n' \
+          "$(date -u +%Y-%m-%dT%H:%M:%SZ)" "$TAG" "$RCPT" "${CODE:-none}" >> "$PUSHLOG" 2>/dev/null
       fi
     fi
-    ;;
+}
+case "$VIEW" in
+  tuesday|both) push_to_seat Tuesday ;;
+  friday)       push_to_seat Friday ;;
 esac
 
 if "$SELF_DIR/tap_wednesday.sh" "[chat-push] New chat message from Kam at $TS — read the dashboard chat now."; then

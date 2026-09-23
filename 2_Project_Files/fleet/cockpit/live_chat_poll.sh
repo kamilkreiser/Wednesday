@@ -32,9 +32,12 @@ SEAT="${WED_AGENT:-wednesday}"; INTERVAL=30; ONCE=0; DRY=0
 while [ $# -gt 0 ]; do case "$1" in
   --seat) SEAT="${2:-}"; shift ;; --interval) INTERVAL="${2:-30}"; shift ;; --once) ONCE=1 ;; --dry-run) DRY=1 ;;
   *) echo "live_chat_poll: unknown arg $1" >&2; exit 2 ;; esac; shift; done
-case "$SEAT" in wednesday|tuesday) ;; *) echo "live_chat_poll: seat '$SEAT' is neither wednesday nor tuesday — REFUSING (a guessed seat polls the wrong tab)" >&2; exit 2 ;; esac
+case "$SEAT" in wednesday|tuesday|friday) ;; *) echo "live_chat_poll: seat '$SEAT' is not wednesday, tuesday or friday — REFUSING (a guessed seat polls the wrong tab)" >&2; exit 2 ;; esac
 PY="$ROOT/2_Project_Files/dashboard-cloud/.venv/bin/python"; GET="$ROOT/2_Project_Files/dashboard-cloud/seat/get_kam_messages.py"
-STATE="${LIVE_POLL_STATE:-$HERE/state/live_chat_polled_through}"; TAP="${LIVE_POLL_TAP:-$ROOT/2_Project_Files/tools/tap_wednesday.sh}"
+# default tap: friday (2026-09-23) gets the resolver-based tap_friday.sh (its pane may be named `wednesday` or `friday`);
+# wednesday and tuesday keep the old default (tuesday's mini sets LIVE_POLL_TAP=tap_tuesday.sh itself).
+_DEFTAP="$ROOT/2_Project_Files/tools/tap_wednesday.sh"; [ "$SEAT" = "friday" ] && _DEFTAP="$ROOT/2_Project_Files/tools/tap_friday.sh"
+STATE="${LIVE_POLL_STATE:-$HERE/state/live_chat_polled_through}"; TAP="${LIVE_POLL_TAP:-$_DEFTAP}"
 CERT_DIR="${LIVE_POLL_CERT_DIR:-$ROOT/4_Credentials/dashboard-cloud}"   # from THIS tree, never the tool's default (the 13:17 / 14:4x / 14:5x class); the env is a test seam
 FAILMARK="${LIVE_POLL_FAILMARK:-$HERE/state/live_chat_poll.health}"   # content FAILING… on the 3rd consecutive fetch failure, OK… on recovery; read by doctor.sh — a refusal nobody reads is indistinguishable from working
 FAILS="$(cat "$FAILMARK.count" 2>/dev/null || echo 0)"; case "$FAILS" in ''|*[!0-9]*) FAILS=0;; esac   # persists across --once ticks

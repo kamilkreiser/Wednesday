@@ -54,6 +54,9 @@ fi
 seat_resolve "$PROJECT_DIR"
 case "${SEAT:-}" in
   tuesday|wednesday) : ;;
+  # FRIDAY (2026-09-23): the laptop seat gets NO scheduled jobs (install_all_jobs.sh installs none there),
+  # so a morning wake firing for it is a hand-copied plist — refused BY NAME, never guessed into a launcher.
+  friday) log "REFUSED: seat friday — the laptop runs no scheduled jobs; the 06:00 wake is a Studio/mini job only (day NOT stamped)"; exit 1 ;;
   *) log "ERROR: seat_resolve did not return tuesday|wednesday (got '${SEAT:-}') — REFUSING (day NOT stamped)"; exit 1 ;;
 esac
 WAKE_AGENT="$SEAT"

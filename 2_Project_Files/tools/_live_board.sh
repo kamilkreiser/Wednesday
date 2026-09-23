@@ -13,7 +13,9 @@
 # a cloud outage cost Kam his local reading surface. Both are ruled out here.
 #
 # THE SEAT NEVER POSTS ANOTHER CLIENT'S ROWS. Wednesday's certificate carries Client.Secuura + Client.WED only; Tuesday's
-# carries Client.Datasec. The API refuses a mismatch with 403 (proven, probe C); this file refuses it FIRST, locally,
+# carries Client.Datasec; Friday's (2026-09-23) carries Client.Friday ONLY — Friday works both clients from the laptop,
+# so it has its own partition and EVERY row it posts goes there, whatever the project tag (_lb_client_for below).
+# The API refuses a mismatch with 403 (proven, probe C); this file refuses it FIRST, locally,
 # so a Datasec reply from the Wednesday seat never even becomes a request. The seat is `$WED_AGENT` (the launcher
 # exports it; chat_reply.sh resolves it from the tree) — never a hostname guess.
 #
@@ -40,14 +42,19 @@ _lb_client() {
     secuura*) echo Secuura ;; datasec*) echo Datasec ;; *) echo WED ;;
   esac
 }
+# _lb_client_for <seat> <project> -> the partition this seat's row goes to. friday -> Friday always (its only
+# partition); every other seat is unchanged: the project's client (_lb_client).
+_lb_client_for() {
+  if [ "${1:-}" = "friday" ]; then echo Friday; else _lb_client "${2:-}"; fi
+}
 # does this seat hold the partition? (mirrors the Entra app-role grants; the API is the real gate)
 _lb_seat_holds() { # seat client
-  case "$1:$2" in wednesday:Secuura|wednesday:WED|tuesday:Datasec) return 0 ;; *) return 1 ;; esac
+  case "$1:$2" in wednesday:Secuura|wednesday:WED|tuesday:Datasec|friday:Friday) return 0 ;; *) return 1 ;; esac
 }
 _lb_preflight() { # seat client -> 0 if a post may be attempted
   local seat="$1" client="$2" root; root="$(_lb_root)"
   [ "${LIVE_BOARD:-1}" = "0" ] && { echo "live-board: disabled by LIVE_BOARD=0 (local write only)" >&2; return 1; }
-  case "$seat" in wednesday|tuesday) ;; *) _lb_log "seat unknown ('$seat') — cannot pick a certificate; export WED_AGENT"; return 1 ;; esac
+  case "$seat" in wednesday|tuesday|friday) ;; *) _lb_log "seat unknown ('$seat') — cannot pick a certificate; export WED_AGENT"; return 1 ;; esac
   _lb_seat_holds "$seat" "$client" || { _lb_log "REFUSED locally: seat '$seat' does not hold partition '$client' (Kam's 2026-09-08 split; the API would 403)"; return 1; }
   [ -f "$root/4_Credentials/dashboard-cloud/$seat-seat.pem" ] || { _lb_log "no certificate at 4_Credentials/dashboard-cloud/$seat-seat.pem on this machine (seat $seat)"; return 1; }
   return 0
@@ -57,7 +64,7 @@ _lb_preflight() { # seat client -> 0 if a post may be attempted
 #   id is deterministic from (stream, ts, text) — the same id the backfill computes, so the two never double-post.
 live_board_post_message() {
   local seat="$1" project="$2" ts="$3" stream="$4" text="$5" root client py out rc
-  root="$(_lb_root)"; client="$(_lb_client "$project")"
+  root="$(_lb_root)"; client="$(_lb_client_for "$seat" "$project")"
   _lb_preflight "$seat" "$client" || return 0
   py="$(_lb_python)"
   out="$("$py" - "$root" "$seat" "$client" "$ts" "$stream" "$text" <<'PYEOF' 2>&1
@@ -68,7 +75,7 @@ import seat_common as sc, envelope, requests
 ids = sc.load_ids()
 class A: pass
 a = A(); a.seat = seat; a.cert_dir = os.path.join(root, "4_Credentials", "dashboard-cloud"); a.tenant = ids["TENANT_ID"]; a.api_appid = ids["API_APPID"]
-clear = {"client": client, "kind": "message", "id": sc.row_id(stream, ts, text), "ts": sc.to_utc_z(ts), "view": "wednesday" if seat == "wednesday" else "tuesday", "role": seat, "src_ts": ts[:40]}
+clear = {"client": client, "kind": "message", "id": sc.row_id(stream, ts, text), "ts": sc.to_utc_z(ts), "view": seat if seat in ("wednesday", "friday") else "tuesday", "role": seat, "src_ts": ts[:40]}
 att = [x for x in os.environ.get("LIVE_BOARD_ATTACHMENTS", "").split(",") if x]   # 2026-09-22: file ids shared into the drawer by chat_reply.sh --file
 if att: clear["attachments"] = att[:8]
 env = envelope.encrypt_record(text, clear)   # Phase 3 (2026-09-21): wrapped to Kam's whole key ring (pilot+laptop+ipad) + this partition's seat key
@@ -88,12 +95,18 @@ PYEOF
 live_board_post_card() {
   local seat="$1" store="$2" cid="$3" root client py out rc
   root="$(_lb_root)"
-  client="$(_lb_client "$(python3 -c 'import json,sys
+  client="$(_lb_client_for "$seat" "$(python3 -c 'import json,sys
 for c in json.load(open(sys.argv[1])):
     if isinstance(c, dict) and c.get("id") == sys.argv[2]: print(c.get("client_project", "")); break' "$store" "$cid" 2>/dev/null)")"
   _lb_preflight "$seat" "$client" || return 0
   py="$(_lb_python)"
+  # friday: post_card.py derives --client from client_project (Secuura/Datasec/WED), none of which the friday seat holds,
+  # so the partition is passed explicitly. Other seats' command line is unchanged (no --client).
+  if [ "$seat" = "friday" ]; then
+    out="$("$py" "$root/2_Project_Files/dashboard-cloud/seat/post_card.py" --seat "$seat" --cert-dir "$root/4_Credentials/dashboard-cloud" --from-store "$store" --card-id "$cid" --client "$client" 2>&1)"; rc=$?
+  else
   out="$("$py" "$root/2_Project_Files/dashboard-cloud/seat/post_card.py" --seat "$seat" --cert-dir "$root/4_Credentials/dashboard-cloud" --from-store "$store" --card-id "$cid" 2>&1)"; rc=$?
+  fi
   if [ $rc -eq 0 ]; then echo "live-board: card $cid posted to $client ($(printf '%s' "$out" | python3 -c 'import json,sys
 try: d=json.load(sys.stdin); print("HTTP", d["status"])
 except Exception: print("ok")' 2>/dev/null))"

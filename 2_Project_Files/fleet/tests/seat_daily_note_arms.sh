@@ -123,7 +123,7 @@ else bad "5b agreement: rc=$rc :: $(cat "$O/5b.out")"; fi
 from_template "$X" "$X/0_Brain/daily/$TODAY.md"
 printf 'arm5c-marker\n' | note_entry "$X" --stdin > "$O/5c.out" 2>&1; rc=$?
 printf 'arm5d-marker\n' | WED_AGENT=wednesday note_entry "$X" --stdin > "$O/5d.out" 2>&1; rc2=$?
-if [ "$rc" = 2 ] && [ "$rc2" = 2 ] && grep -qF "cannot tell which seat this tree is — run from a WEDNESDAY or TUESDAY tree" "$O/5c.out" \
+if [ "$rc" = 2 ] && [ "$rc2" = 2 ] && grep -qF "cannot tell which seat this tree is — run from a WEDNESDAY, TUESDAY or FRIDAY tree" "$O/5c.out" \
    && grep -qF "cannot tell which seat this tree is" "$O/5d.out" && ! has arm5c-marker "$X/0_Brain/daily/$TODAY.md" \
    && ! has arm5d-marker "$X/0_Brain/daily/$TODAY.md" && [ ! -e "$X/0_Brain/daily_tuesday" ]; then
   ok "5c unrecognised tree (SCRATCHTREE) -> note_entry exit 2 with and without WED_AGENT=wednesday, nothing written"
@@ -204,6 +204,85 @@ for p in $EDITED 2_Project_Files/tools/seat_note.sh 2_Project_Files/fleet/tests/
   bash -n "$f" > "$O/11.out" 2>&1 || SX="$SX $p: $(cat "$O/11.out")"
 done
 if [ -z "$SX" ]; then ok "11 bash -n clean on all edited scripts"; else bad "11 bash -n:$SX"; fi
+
+# ══ FRIDAY (2026-09-23, Kam 10:49 — third coordinator seat, tree folder FRIDAY -> 0_Brain/daily_friday/) ══
+# Same throwaway-tree method as above. FRIDAY and THURSDAY trees are built with the CURRENT scripts; F9 builds a
+# FRIDAY tree whose seat_note.sh is the pre-friday backup, to prove F3's predicate can fail.
+FR="$BASE/new/FRIDAY"; TH="$BASE/new/THURSDAY"
+make_tree "$FR" new; make_tree "$TH" new
+FN="$FR/0_Brain/daily_friday/$TODAY.md"
+fri_pred() { has "$2" "$1/0_Brain/daily_friday/$TODAY.md" && ! has "$2" "$1/0_Brain/daily/$TODAY.md"; }
+FDECOY="$FR/0_Brain/daily/$TODAY.md"; from_template "$FR" "$FDECOY"; cp -p "$FDECOY" "$O/fdecoy.orig"
+
+# F1: FRIDAY tree, note not yet created -> refuses naming daily_friday, creates the dir, shared daily/ decoy untouched
+printf 'F1-marker\n' | note_entry "$FR" --stdin > "$O/F1.out" 2>&1; rc=$?
+if [ "$rc" = 2 ] && grep -qF "no note at $FN" "$O/F1.out" && [ -d "$FR/0_Brain/daily_friday" ] && cmp -s "$FDECOY" "$O/fdecoy.orig" \
+   && [ "$(note_entry "$FR" --where 2>&1)" = "$FN" ]; then
+  ok "F1 FRIDAY tree resolves 0_Brain/daily_friday/$TODAY.md (--where agrees; note absent -> refused), shared daily/ decoy untouched"
+else bad "F1 FRIDAY pre-note: rc=$rc :: $(cat "$O/F1.out")"; fi
+
+# F2: the close bell on FRIDAY creates the seat note from the shared template (no .env in the scratch tree: no inbox call)
+LF0=$(log_len "$FR")
+WEDNESDAY_TEST_HOUR=23 bash "$FR/2_Project_Files/scheduler/close_wednesday.sh" > "$O/F2.out" 2>&1; rc=$?
+if [ "$rc" = 0 ] && [ -f "$FN" ] && has "## 23:00 close" "$FN" && cmp -s "$FDECOY" "$O/fdecoy.orig" \
+   && log_since "$FR" "$LF0" | grep -q "created from template"; then
+  ok "F2 close bell (FRIDAY) created + stamped 0_Brain/daily_friday/$TODAY.md from daily/_template.md; decoy untouched"
+else bad "F2 bell create: rc=$rc :: $(cat "$O/F2.out") :: $(log_since "$FR" "$LF0" | tr '\n' ' ')"; fi
+
+# F3: FRIDAY tree, no WED_AGENT -> writes daily_friday, NOT daily
+printf 'F3-marker\n' | note_entry "$FR" --stdin > "$O/F3.out" 2>&1; rc=$?
+if [ "$rc" = 0 ] && fri_pred "$FR" F3-marker && grep -qF "→ $FN" "$O/F3.out"; then
+  ok "F3 FRIDAY tree writes 0_Brain/daily_friday/$TODAY.md and NOT 0_Brain/daily/$TODAY.md"
+else bad "F3 FRIDAY write: rc=$rc :: $(cat "$O/F3.out")"; fi
+
+# F4: agreement passes; disagreement refuses in BOTH directions (wednesday on FRIDAY, friday on WEDNESDAY)
+printf 'F4a-marker\n' | WED_AGENT=friday note_entry "$FR" --stdin > "$O/F4a.out" 2>&1; rc=$?
+printf 'F4b-marker\n' | WED_AGENT=wednesday note_entry "$FR" --stdin > "$O/F4b.out" 2>&1; rc2=$?
+printf 'F4c-marker\n' | WED_AGENT=friday note_entry "$W" --stdin > "$O/F4c.out" 2>&1; rc3=$?
+if [ "$rc" = 0 ] && fri_pred "$FR" F4a-marker && [ "$rc2" = 2 ] && grep -qF "unset WED_AGENT, or run from the matching tree" "$O/F4b.out" \
+   && ! has F4b-marker "$FN" && [ "$rc3" = 2 ] && grep -qF "WED_AGENT='friday'" "$O/F4c.out" && ! has F4c-marker "$W/0_Brain/daily/$TODAY.md"; then
+  ok "F4 WED_AGENT=friday on FRIDAY passes; wednesday-on-FRIDAY and friday-on-WEDNESDAY both exit 2, nothing written"
+else bad "F4 agreement/disagreement: rc=$rc/$rc2/$rc3 :: $(cat "$O/F4a.out" "$O/F4b.out" "$O/F4c.out")"; fi
+
+# F5: an unknown tree (THURSDAY) still REFUSES — with and without WED_AGENT=friday — and names all three trees
+from_template "$TH" "$TH/0_Brain/daily/$TODAY.md"
+printf 'F5a-marker\n' | note_entry "$TH" --stdin > "$O/F5a.out" 2>&1; rc=$?
+printf 'F5b-marker\n' | WED_AGENT=friday note_entry "$TH" --stdin > "$O/F5b.out" 2>&1; rc2=$?
+if [ "$rc" = 2 ] && [ "$rc2" = 2 ] && grep -qF "run from a WEDNESDAY, TUESDAY or FRIDAY tree" "$O/F5a.out" && grep -qF "cannot tell which seat this tree is" "$O/F5b.out" \
+   && ! has F5a-marker "$TH/0_Brain/daily/$TODAY.md" && ! has F5b-marker "$TH/0_Brain/daily/$TODAY.md" && [ ! -e "$TH/0_Brain/daily_friday" ]; then
+  ok "F5 THURSDAY tree -> note_entry exit 2 with and without WED_AGENT=friday, nothing written, no daily_friday created"
+else bad "F5 THURSDAY: rc=$rc rc2=$rc2 :: $(cat "$O/F5a.out" "$O/F5b.out")"; fi
+
+# F6: speak.sh (muted) on FRIDAY logs into daily_friday/.spoken.log
+bash "$FR/2_Project_Files/voice/speak.sh" "F6-marker" > "$O/F6.out" 2> "$O/F6.err"; rc=$?
+if [ "$rc" = 0 ] && has F6-marker "$FR/0_Brain/daily_friday/.spoken.log" && ! has F6-marker "$FR/0_Brain/daily/.spoken.log" && [ ! -s "$O/F6.err" ]; then
+  ok "F6 speak.sh (muted) on FRIDAY tree logs into daily_friday/.spoken.log, not daily/"
+else bad "F6 speak: rc=$rc :: $(cat "$O/F6.out" "$O/F6.err")"; fi
+
+# F7: compaction hook names daily_friday on FRIDAY; WEDNESDAY line still byte-identical (re-run of arm 7's control)
+bash "$FR/$HOOK" < /dev/null > "$O/F7f.out" 2>&1; rc=$?
+bash "$W/$HOOK" < /dev/null > "$O/F7w.out" 2>&1; rc2=$?
+if [ "$rc" = 0 ] && grep -qF "today's 0_Brain/daily_friday/ note" "$O/F7f.out" && [ "$rc2" = 0 ] && [ "$(cat "$O/F7w.out")" = "$WANT_W" ]; then
+  ok "F7 hook: FRIDAY -> 0_Brain/daily_friday/; WEDNESDAY -> byte-identical 0_Brain/daily/ line"
+else bad "F7 hook: rc=$rc/$rc2 :: $(cat "$O/F7f.out") :: $(cat "$O/F7w.out")"; fi
+
+# F8: close bell on THURSDAY refuses before the stamp step
+LT=$(log_len "$TH"); WEDNESDAY_TEST_HOUR=23 WEDNESDAY_DRYRUN=1 bash "$TH/2_Project_Files/scheduler/close_wednesday.sh" > "$O/F8.out" 2>&1; rc=$?
+if [ "$rc" = 2 ] && grep -qF "cannot tell which seat this tree is" "$O/F8.out" && log_since "$TH" "$LT" | grep -q "REFUSED" && ! log_since "$TH" "$LT" | grep -q "would stamp"; then
+  ok "F8 close bell refuses (exit 2, stderr + log) on the THURSDAY tree, before the stamp step"
+else bad "F8 THURSDAY bell: rc=$rc :: $(cat "$O/F8.out")"; fi
+
+# F9 (NEGATIVE): the PRE-FRIDAY seat_note.sh on a FRIDAY tree refuses — so F3's predicate is one that can fail
+OLDSN="$(ls "$SRC"/2_Project_Files/tools/seat_note.sh.pre-0923-*-friday 2>/dev/null | head -1)"
+OF="$BASE/oldsn/FRIDAY"; make_tree "$OF" new
+if [ -n "$OLDSN" ]; then
+  cp -p "$OLDSN" "$OF/2_Project_Files/tools/seat_note.sh"
+  from_template "$OF" "$OF/0_Brain/daily/$TODAY.md"; mkdir -p "$OF/0_Brain/daily_friday"; from_template "$OF" "$OF/0_Brain/daily_friday/$TODAY.md"
+  printf 'F9-marker\n' | note_entry "$OF" --stdin > "$O/F9.out" 2>&1; rc=$?
+  if [ "$rc" = 2 ] && ! fri_pred "$OF" F9-marker && grep -qF "cannot tell which seat this tree is" "$O/F9.out"; then
+    ok "F9 NEGATIVE: pre-friday seat_note.sh ($(basename "$OLDSN")) on a FRIDAY tree refuses; F3 predicate FALSE there"
+  else bad "F9 negative did not reproduce: rc=$rc :: $(cat "$O/F9.out")"; fi
+else bad "F9 negative: no seat_note.sh.pre-0923-*-friday backup found"; fi
 
 echo "RESULT: $PASS passed, $FAIL failed (work dir $BASE)"
 [ "$FAIL" = 0 ]

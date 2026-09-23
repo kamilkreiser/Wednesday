@@ -60,19 +60,21 @@ PROJECT_DIR="$(cd -P "$SELF_DIR/../.." && pwd)"
 # The travel case argues the same way rather than against it: if he ever runs the
 # TUESDAY tree on the laptop, the TREE check resolves it correctly and the hostname
 # arm was never needed.
+# FRIDAY (2026-09-23, Kam 10:49): a third seat, tree folder FRIDAY, stream chat_friday.json.
 seat_agent_default() {
   case "$(basename "$PROJECT_DIR")" in
     TUESDAY|Tuesday|tuesday)       echo "tuesday"   ;;
     WEDNESDAY|Wednesday|wednesday) echo "wednesday" ;;
+    FRIDAY|Friday|friday)          echo "friday"    ;;
     *)                             echo ""          ;;  # no evidence: no guess
   esac
 }
 AGENT="${WED_AGENT:-}"
 [ -n "$AGENT" ] || AGENT="$(seat_agent_default)"
 case "$AGENT" in
-  wednesday|tuesday) ;;
+  wednesday|tuesday|friday) ;;
   *) echo "chat_reply: cannot tell which agent this seat is (host '$(hostname -s 2>/dev/null)')." >&2
-     echo "  Export WED_AGENT=wednesday or WED_AGENT=tuesday in the launcher. REFUSING —" >&2
+     echo "  Export WED_AGENT=wednesday, tuesday or friday in the launcher. REFUSING —" >&2
      echo "  a guess here writes into the other agent's stream." >&2
      exit 2 ;;
 esac
@@ -119,6 +121,11 @@ seat_project_default() {
   case "$AGENT" in
     tuesday)   echo "Datasec" ;;   # his 2026-09-08 split: Datasec is Tuesday's
     wednesday) echo "Secuura" ;;   # Secuura + all general work is Wednesday's
+    # Friday serves BOTH clients from the laptop and owns ONE live-board partition, `Friday`
+    # (Kam 2026-09-23 10:49). The project tag defaults to that partition's name; --project
+    # still overrides it for the local display filter, and _live_board.sh posts a friday
+    # seat's row to `Friday` whatever the tag says.
+    friday)    echo "Friday" ;;
     *)         echo "" ;;          # unreachable: the resolver above already refused
   esac
 }
@@ -245,6 +252,7 @@ if [ "${#FILES[@]}" -gt 0 ]; then
   _sf_py="$PROJECT_DIR/2_Project_Files/dashboard-cloud/.venv/bin/python"; [ -x "$_sf_py" ] || _sf_py=python3
   _sf="$PROJECT_DIR/2_Project_Files/dashboard-cloud/seat/share_file.py"
   _sf_client="$(printf '%s' "$PROJECT" | cut -d/ -f1)"; case "$(printf '%s' "$_sf_client" | tr '[:upper:]' '[:lower:]')" in secuura*) _sf_client=Secuura ;; datasec*) _sf_client=Datasec ;; *) _sf_client=WED ;; esac
+  [ "$AGENT" = "friday" ] && _sf_client=Friday   # the friday seat holds only the Friday partition (2026-09-23)
   for _f in "${FILES[@]}"; do
     _sf_out="$("$_sf_py" "$_sf" "$_f" --seat "$AGENT" --client "$_sf_client" --cert-dir "$PROJECT_DIR/4_Credentials/dashboard-cloud" --note "$(printf '%s' "$MSG" | head -c 200)" 2>&1)"; _sf_rc=$?
     _sf_id="$(printf '%s\n' "$_sf_out" | /usr/bin/grep -o 'file_id=[A-Za-z0-9._-]*' | head -1 | cut -d= -f2)"

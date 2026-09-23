@@ -53,9 +53,15 @@ SEAT_RESOLVE="$(cd -P "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)/fleet/cockpit/
 # seat_resolve.sh is a LIBRARY: source it, then call seat_resolve (it sets SEAT / TREE_SEAT).
 # shellcheck disable=SC1090
 . "$SEAT_RESOLVE" 2>/dev/null || true
-type seat_resolve >/dev/null 2>&1 && seat_resolve "$(cd -P "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)/.." || SEAT=""
+# 2026-09-23 (friday sweep): the tree path is resolved FULLY. It was "…/2_Project_Files/.." — seat_resolve reads the
+# path's BASENAME, which for that string is "..", so the TREE never decided: every tree resolved to the "anything else"
+# default (wednesday) unless WED_AGENT was set — the friday refusal below could not fire from a FRIDAY tree, and a
+# TUESDAY tree run by launchd (no WED_AGENT) addressed wraps to wednesday-agent@. Measured in the friday arms (U1).
+type seat_resolve >/dev/null 2>&1 && seat_resolve "$(cd -P "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)" || SEAT=""
 case "$SEAT" in
   tuesday|wednesday) : ;;
+  # FRIDAY (2026-09-23): no scheduled jobs on the laptop — refused BY NAME (a hand-copied plist, not a seat to guess for).
+  friday) echo "shift_change: REFUSING — seat friday: the laptop runs no scheduled jobs; the 05:30 shift change is a Studio/mini job only" >&2; exit 2 ;;
   *) echo "shift_change: REFUSING — seat_resolve.sh did not return tuesday|wednesday (got '"'"'$SEAT'"'"')" >&2; exit 2 ;;
 esac
 WRAP_INBOX="${SEAT}-agent@agentmail.to"

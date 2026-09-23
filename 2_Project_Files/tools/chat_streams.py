@@ -12,6 +12,7 @@ is structure, not discipline, and this makes the chat the same shape.
       chat_legacy.json     FROZEN 2026-09-08
       chat_wednesday.json  Studio seat only  \
       chat_tuesday.json    Datasec seat only  >--> chat_log.json
+      chat_friday.json     laptop seat only  /     (2026-09-23: third seat, BOTH clients)
       chat_kam.json        the panel only    /
 
 Every existing reader (generate.py, wake_watch.sh, kam_rulings_today.sh,
@@ -40,8 +41,12 @@ DATA = os.path.join(ROOT, "0_Brain", "dashboard", "data")
 STREAMS = [
     ("chat_wednesday.json", "wednesday"),
     ("chat_tuesday.json", "tuesday"),
+    ("chat_friday.json", "friday"),  # 2026-09-23: the laptop seat (Kam 10:49)
     ("chat_kam.json", None),        # Kam's own: agent comes from the view he sent it in
 ]
+# Streams added AFTER the first two seats are reported in the conservation line only once they
+# exist, so a tree where that seat has never spoken prints exactly what it printed before.
+LATE_STREAMS = {"chat_friday.json"}
 LEGACY = "chat_legacy.json"
 DERIVED = "chat_log.json"
 
@@ -94,6 +99,8 @@ def build():
     per_source.append((LEGACY, len(legacy)))
 
     for fname, agent in STREAMS:
+        if fname in LATE_STREAMS and not os.path.exists(os.path.join(DATA, fname)):
+            continue
         msgs = load(os.path.join(DATA, fname))
         for e in msgs:
             e = dict(e)
@@ -147,9 +154,13 @@ def harvest(found):
     prevent."""
     routed, refused = {}, []
     for e in found:
+        derived_agent = e.get("agent")
         e = {k: v for k, v in e.items() if k not in ("agent", "agent_source")}
         if e.get("role") == "kam":
             tgt = "chat_kam.json"
+        elif derived_agent == "friday":
+            # 2026-09-23: the derived file named it friday's — it came from chat_friday.json.
+            tgt = "chat_friday.json"
         elif "MBP" in (e.get("seat") or "") or e.get("project") == "Datasec":
             tgt = "chat_tuesday.json"
         elif e.get("seat"):

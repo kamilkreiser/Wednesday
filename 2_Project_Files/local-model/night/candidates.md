@@ -1,8 +1,8 @@
-# Ornith candidates — derived 2026-09-23 00:17 from 286 KS Backlog/Todo tickets (read-only, unpaginated)
+# Ornith candidates — derived 2026-09-23 11:55 from 286 KS Backlog/Todo tickets (read-only, unpaginated)
 
 A CENSUS for the coordinator to brief from, easy → hard (Kam 2026-09-15 16:40 / 18:19). A ticket here is a candidate, not a task: read it, read the file at the tip, write `night/briefs/<id>.md`, then queue it. Auth-shaped titles are excluded (LAST); Peter/Stuart tickets and PR-attached tickets are excluded outright.
 
-## T1 services (vitest, one file) — 23
+## T1 services (vitest, one file) — 22
 - KS-678 (P2) [resolved:basename, a HINT — read the file] #568 publishes 17 URLs on secuura.io — `scripts/openapi-examples/synthesize.ts`
 - KS-683 (P2) Anchor-status standoff: a consumer repolls anchors K reports as terminally faile — `services/anchoring/src/index.ts`
 - KS-953 (P2) CLASS: editing api-gateway/src/index.ts silently reddens packages/shared, and no — `services/api-gateway/src/index.ts`
@@ -19,7 +19,6 @@ A CENSUS for the coordinator to brief from, easy → hard (Kam 2026-09-15 16:40 
 - KS-758 (P3) [resolved:route, a HINT — read the file] Connector erasure: three permanent fail — `services/api-gateway/src/routes/proxy.ts`
 - KS-784 (P3) [resolved:route, a HINT — read the file] POST /api/teams/webhook-config fails th — `services/m365-integration/src/index.ts`
 - KS-837 (P3) [resolved:route, a HINT — read the file] Published prose drifts from the routes  — `services/api-gateway/src/middleware/contentType.ts`
-- KS-851 (P3) [resolved:route, a HINT — read the file] KS-386 residues from the round-2 gate:  — `services/kyc/src/index.ts`
 - KS-915 (P3) A clean stack has no supported way to obtain its first privileged account — `services/auth/src/routes/auth.ts`
 - KS-934 (P3) [resolved:route, a HINT — read the file] m365 /api/teams/notify: a serial per-ro — `services/m365-integration/src/index.ts`
 - KS-986 (P3) [resolved:basename, a HINT — read the file] The published admin credential survi — `services/auth/src/repositories/userRepo.ts`
@@ -39,8 +38,7 @@ A CENSUS for the coordinator to brief from, easy → hard (Kam 2026-09-15 16:40 
 - KS-1263 (P3) A partly-completed /share or /transfer-custody is now unattributed: the multi-wr — `services/originate/src/routes/documents.ts`
 - KS-759 (P3) tenantId is read through two `as unknown as` casts because it is not on JwtPaylo — `services/originate/src/middleware/auth.ts`
 
-## T4 docs (doc_patch) — 1
-- KS-965 (P4) [resolved:docs, a HINT — the ticket MENTIONS the file] 87 documentary sites still publish the retired admin credential — wrong rather t — `docs/BROWSER-TESTING-GUIDE.md`
+## T4 docs (doc_patch) — 0
 
 ## T5 multi-file / later — 29
 - KS-1051 (P2) develop is RED on the services/originate jest suite and NOTHING catches it — the — `scripts/preflight/preflight.sh`, `.githooks/pre-push`
@@ -98,7 +96,7 @@ A CENSUS for the coordinator to brief from, easy → hard (Kam 2026-09-15 16:40 
 - KS-966 — named in READY_KS-972_ornith35b-q4_BASHPATCH-REANCHORED-PASS-7of7_2026-09-16.diff.md, READY_KS-972_ornith35b-q4_BASHPATCH-REANCHORED-PASS-7of7_2026-09-16.diff.md.pre-0951-superseded
 - KS-999 — named in READY_KS-1186_ornith35b-q4_AUTH-5SITE-LINEKEYED-PASS-7of7_2026-09-17.diff.md
 
-## HELD (READY_* or done.md PASS) — 36
+## HELD (READY_* or done.md PASS) — 38
 - KS-1009 Security: GET /api/auth/wallet/status returns userId + role to ANY anonymous cal
 - KS-1019 [Question] The document's whole `blockchain` block is published as z.unknown() —
 - KS-1074 The poller/reconcile blob writers also erase threadToken — on the CONFIRM/heal p
@@ -128,6 +126,7 @@ A CENSUS for the coordinator to brief from, easy → hard (Kam 2026-09-15 16:40 
 - KS-692 Security: /api/status revoke/unrevoke has no tenant ownership check — an ISSUER_
 - KS-747 Spec drift: GET /api/security/keys declares no parameters while the handler requ
 - KS-794 verify-file returns `fileSize` on every 200 and neither response schema declares
+- KS-851 KS-386 residues from the round-2 gate: G-1 column ordinal drift, G-2 the second-
 - KS-865 check-no-latest-tags.sh silently skips a missing input — it scans 5 of the 6 fil
 - KS-866 Merge protocol: the server-side `sha=` pin protects the PR head, not the base — 
 - KS-884 pre-push resolves the bare name `develop`, so a TAG named develop beats the bran
@@ -135,6 +134,7 @@ A CENSUS for the coordinator to brief from, easy → hard (Kam 2026-09-15 16:40 
 - KS-908 connectorId persists but is invisible through the API — POST and GET both return
 - KS-938 Security: "MFA disabled" leaves the TOTP seed and hashed backup codes in the row
 - KS-960 Two schema sources disagree on whether users.email is unique — a statement valid
+- KS-965 87 documentary sites still publish the retired admin credential — wrong rather t
 
 ## SET ASIDE with a recorded reason — 30 (re-read only if the ticket's updatedAt moved)
 - KS-1063 — decision-class: its own words say the design question comes first (updated 2026-09-09)

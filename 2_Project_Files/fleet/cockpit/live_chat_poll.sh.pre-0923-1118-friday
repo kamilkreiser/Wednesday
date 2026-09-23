@@ -1,0 +1,96 @@
+#!/bin/bash
+# live_chat_poll.sh — the LIVE-BOARD twin of the chat wake (Phase 3 of the external dashboard, 2026-09-21).
+#
+# WHY: Kam now types on the live board (https://wednesday-dashboard-e42e.azurewebsites.net — Kam 12:50 "switch to using the
+# live version only"; 14:05 "interact normally while I'm traveling"). The local server's POST /api/chat is what triggered
+# chat_push.sh -> tap_wednesday.sh; a reply typed on the live site triggers NOTHING (Phase 2 report, piece D item 3). This
+# script polls the live store every 30 s as this seat and taps the pane when a new Kam row exists.
+#
+# MECHANISM (the 08-10/08-17 ack rules kept whole):
+#   * every tick: dashboard-cloud/seat/get_kam_messages.py --seat $SEAT --since <watermark> (ciphertext is enough to know
+#     THAT he wrote, WHEN and on WHICH tab; the text is read by tools/kam_msgs.sh — one read, not two).
+#   * only LIVE-typed rows count (written_by easyauth:* = Kam's browser); backfilled/synthetic seat rows are ignored.
+#   * ONE tap per tick summarising the new rows, via tap_wednesday.sh (the shared guard: never types over Kam).
+#   * the watermark (state/live_chat_polled_through, a row_key, advance-only) moves ONLY after a tap that PROVABLY reached
+#     the pane (tap exit 0). Guard-held (3) / error (1) -> watermark untouched -> the same rows fire again next tick.
+#   * first run with NO watermark: initialise to the newest existing row_key and wake for nothing (history is not news).
+#   * a fetch failure is LOGGED and the tick is skipped; the loop never dies on one bad tick.
+#   R0: the API returns only this seat's partitions + ALL (Kam's broadcasts) — a tuesday-tab row never reaches the
+#   Wednesday seat. Tuesday runs her own copy on the mini with her own certificate; nothing is mailed by this script.
+#
+# NOT WIRED into wake_watch.sh / arm_wake_watch.sh (shared with Tuesday — Wednesday claims that change separately).
+# The one-line change for arm_wake_watch.sh's runner (or a launchd item) once claimed:
+#   pgrep -f "cockpit/live_chat_poll.sh" >/dev/null || nohup bash "$HERE/live_chat_poll.sh" >> "$HERE/logs/live_chat_poll.log" 2>&1 &
+#
+# Usage: live_chat_poll.sh [--seat wednesday] [--interval 30] [--once] [--dry-run]
+#   --once     one tick, then exit (rc 0 = tick done)      --dry-run  print what WOULD be tapped; never taps, never moves the watermark
+#   LIVE_POLL_STATE overrides the watermark file (arms use a scratch file); LIVE_POLL_TAP overrides the tap helper.
+set -u
+HERE="$(cd -P "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+ROOT="$(cd -P "$HERE/../../.." && pwd)"
+SEAT="${WED_AGENT:-wednesday}"; INTERVAL=30; ONCE=0; DRY=0
+while [ $# -gt 0 ]; do case "$1" in
+  --seat) SEAT="${2:-}"; shift ;; --interval) INTERVAL="${2:-30}"; shift ;; --once) ONCE=1 ;; --dry-run) DRY=1 ;;
+  *) echo "live_chat_poll: unknown arg $1" >&2; exit 2 ;; esac; shift; done
+case "$SEAT" in wednesday|tuesday) ;; *) echo "live_chat_poll: seat '$SEAT' is neither wednesday nor tuesday — REFUSING (a guessed seat polls the wrong tab)" >&2; exit 2 ;; esac
+PY="$ROOT/2_Project_Files/dashboard-cloud/.venv/bin/python"; GET="$ROOT/2_Project_Files/dashboard-cloud/seat/get_kam_messages.py"
+STATE="${LIVE_POLL_STATE:-$HERE/state/live_chat_polled_through}"; TAP="${LIVE_POLL_TAP:-$ROOT/2_Project_Files/tools/tap_wednesday.sh}"
+CERT_DIR="${LIVE_POLL_CERT_DIR:-$ROOT/4_Credentials/dashboard-cloud}"   # from THIS tree, never the tool's default (the 13:17 / 14:4x / 14:5x class); the env is a test seam
+FAILMARK="${LIVE_POLL_FAILMARK:-$HERE/state/live_chat_poll.health}"   # content FAILING… on the 3rd consecutive fetch failure, OK… on recovery; read by doctor.sh — a refusal nobody reads is indistinguishable from working
+FAILS="$(cat "$FAILMARK.count" 2>/dev/null || echo 0)"; case "$FAILS" in ''|*[!0-9]*) FAILS=0;; esac   # persists across --once ticks
+LOG="$HERE/logs/live_chat_poll.log"; mkdir -p "$(dirname "$STATE")" "$(dirname "$LOG")"
+log() { echo "$(date '+%F %T') $*" >> "$LOG"; [ "$DRY" = 1 ] && echo "$*"; }
+[ -x "$PY" ] || { echo "live_chat_poll: no venv python at $PY (PORTABILITY.md)" >&2; exit 2; }
+[ -f "$ROOT/4_Credentials/dashboard-cloud/$SEAT-seat.pem" ] || { echo "live_chat_poll: no certificate for seat $SEAT on this machine" >&2; exit 2; }
+
+tick() {
+  local wm; wm="$(cat "$STATE" 2>/dev/null || echo "")"
+  local out rc
+  if [ -z "$wm" ]; then out="$("$PY" "$GET" --seat "$SEAT" --cert-dir "$CERT_DIR" --json --limit 1000 --since "$(date -u -v-1d +%Y-%m-%dT%H:%M 2>/dev/null || date -u +%Y-%m-%dT00:00)" 2>>"$LOG")"; rc=$?
+  else out="$("$PY" "$GET" --seat "$SEAT" --cert-dir "$CERT_DIR" --json --limit 1000 --since "$wm" 2>>"$LOG")"; rc=$?; fi
+  if [ $rc -ne 0 ]; then
+    FAILS=$((FAILS+1)); printf '%s\n' "$FAILS" > "$FAILMARK.count"; log "fetch failed rc=$rc (consecutive $FAILS): $(printf '%s' "$out" | tr '\n' ' ' | cut -c1-200) — tick skipped, watermark untouched"
+    if [ "$FAILS" -ge 3 ]; then
+      # the 3rd failure in a row is a DEAD poller, not a bad tick: say so where a reader lands (the pane + a health file doctor reads), then keep trying
+      printf 'FAILING %s seat=%s consecutive_failures=%s rc=%s\n' "$(date '+%F %T')" "$SEAT" "$FAILS" "$rc" > "$FAILMARK"
+      if [ $((FAILS % 10)) -eq 3 ] && [ "$DRY" != 1 ]; then "$TAP" "[live-board] 🔴 POLLER FETCH FAILING x$FAILS (rc=$rc) — Kam's live replies are NOT reaching this seat; read $LOG" || true; fi
+    fi
+    return 1
+  fi
+  if [ "$FAILS" -gt 0 ]; then log "fetch recovered after $FAILS failure(s)"; fi; FAILS=0; printf '0\n' > "$FAILMARK.count"; printf 'OK %s seat=%s\n' "$(date '+%F %T')" "$SEAT" > "$FAILMARK"
+  # new live-typed rows above the watermark: "<count>\t<newest row_key>\t<newest any>\t<summary>" (JSON handed via env, not argv)
+  local parsed; parsed="$(POLL_OUT="$out" POLL_WM="$wm" python3 - <<'PYEOF'
+import json, sys, os, datetime
+wm = os.environ["POLL_WM"]; d = json.loads(os.environ["POLL_OUT"])
+rows = [r for r in d.get("messages", []) if str(r.get("written_by", "")).startswith("easyauth:") and r.get("row_key", "") > wm and r.get("synthetic") not in (True, "true", "True")]
+rows.sort(key=lambda r: r["row_key"])
+def loc(ts):
+    try: return datetime.datetime.fromisoformat(ts.replace("Z", "+00:00")).astimezone().strftime("%H:%M:%S")
+    except Exception: return ts
+newest_any = max((r.get("row_key", "") for r in d.get("messages", [])), default="") or (datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.000Z") + "_init-empty")   # an EMPTY partition initialises to NOW, never to "" (Tuesday 05:05Z: an empty string re-runs first-run forever and swallows the first message)
+summ = "; ".join("%s view=%s" % (loc(r.get("ts", "")), r.get("view")) for r in rows[-5:])
+print("%d\t%s\t%s\t%s" % (len(rows), rows[-1]["row_key"] if rows else "", newest_any, summ))
+PYEOF
+)"
+  # a parse failure must never look like "nothing new" (the first arm run did exactly that: SyntaxError -> rc 0 -> watermark initialised to nothing)
+  if [ -z "$parsed" ]; then log "parse failed — tick skipped, watermark untouched"; return 1; fi
+  local n newest newest_any summ; IFS=$'\t' read -r n newest newest_any summ <<< "$parsed"
+  if [ -z "$wm" ]; then
+    # first run: initialise to the newest existing row and wake for nothing
+    [ "$DRY" = 1 ] || printf '%s\n' "${newest_any:-1970-01-01T00:00:00.000Z_init}" > "$STATE"
+    log "initialised watermark to ${newest_any:-<none>} (no wake for history; $n existing live rows in the last day)"; return 0
+  fi
+  if [ "${n:-0}" = "0" ]; then return 0; fi
+  local msg="[live-board] $n new message(s) from Kam on the LIVE board ($summ) — run 2_Project_Files/tools/kam_msgs.sh $n now (source=live)."
+  if [ "$DRY" = 1 ]; then log "DRY-RUN would tap: $msg"; log "DRY-RUN would advance watermark $wm -> $newest after a delivered tap"; return 0; fi
+  if "$TAP" "$msg"; then
+    if [[ "$newest" > "$wm" ]]; then printf '%s\n' "$newest" > "$STATE"; fi
+    log "tapped ($n rows) — watermark $wm -> $newest"
+  else
+    log "tap not delivered (rc=$?) — watermark stays at $wm; the rows fire again next tick"
+  fi
+  return 0
+}
+if [ "$ONCE" = 1 ]; then tick; exit $?; fi
+log "poller started seat=$SEAT interval=${INTERVAL}s state=$STATE"
+while :; do tick; sleep "$INTERVAL"; done
