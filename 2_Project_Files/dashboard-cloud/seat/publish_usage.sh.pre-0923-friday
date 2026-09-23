@@ -7,9 +7,8 @@
 # board as the seat (certificate token; the server attributes the row by the token, never the body).
 #
 # THE SEAT IS RESOLVED, NEVER GUESSED: fleet/cockpit/seat_resolve.sh (the ONE resolver — $WED_AGENT, else the tree's
-# folder name: TUESDAY -> tuesday, FRIDAY -> friday, else wednesday). --seat overrides for arms. A seat name outside
-# {wednesday,tuesday,friday} refuses (rc 2) — friday added 2026-09-23 by the Friday seat (it refused its own name at
-# first boot; the server and post_usage.py already knew it). Same shape as fleet/cockpit/live_chat_poll.sh: a detached loop from THIS script file, a log, a health
+# folder name: TUESDAY -> tuesday, else wednesday). --seat overrides for arms. A seat name outside {wednesday,tuesday}
+# refuses (rc 2). Same shape as fleet/cockpit/live_chat_poll.sh: a detached loop from THIS script file, a log, a health
 # file doctor.sh reads (OK / FAILING after 3 consecutive failed publishes), --once / --dry-run seams for arms.
 #
 # A stale or missing reading publishes NOTHING (post_usage.py rc 3) and the tick is logged as such — that is the seat
@@ -28,7 +27,7 @@ INTERVAL=120; ONCE=0; DRY=0; ARM=0; STATUS=0
 while [ $# -gt 0 ]; do case "$1" in
   --seat) SEAT="${2:-}"; shift ;; --interval) INTERVAL="${2:-120}"; shift ;; --once) ONCE=1 ;; --dry-run) DRY=1 ;; --arm) ARM=1 ;; --status) STATUS=1 ;;
   *) echo "publish_usage: unknown arg $1" >&2; exit 2 ;; esac; shift; done
-case "${SEAT:-}" in wednesday|tuesday|friday) ;; *) echo "publish_usage: seat '${SEAT:-unset}' is not wednesday, tuesday or friday — REFUSING (a guessed seat would publish under the wrong name; export WED_AGENT or pass --seat)" >&2; exit 2 ;; esac
+case "${SEAT:-}" in wednesday|tuesday) ;; *) echo "publish_usage: seat '${SEAT:-unset}' is neither wednesday nor tuesday — REFUSING (a guessed seat would publish under the wrong name; export WED_AGENT or pass --seat)" >&2; exit 2 ;; esac
 PY="$ROOT/2_Project_Files/dashboard-cloud/.venv/bin/python"; POST="$HERE/post_usage.py"
 CERT_DIR="$ROOT/4_Credentials/dashboard-cloud"
 STATE_DIR="$ROOT/2_Project_Files/fleet/cockpit/state"; LOG_DIR="$ROOT/2_Project_Files/fleet/cockpit/logs"

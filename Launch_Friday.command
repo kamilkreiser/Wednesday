@@ -58,4 +58,11 @@ if [ -f "$HERE/4_Credentials/friday.conf" ]; then
   export WED_WORKSPACE
 fi
 
+# ── Friday's weekly-usage gauge on the live board (Kam 2026-09-23: "take the gauge fix") ──
+# The shared launcher arms this for no seat; the laptop reboots and sleeps, so Friday arms it at every launch.
+# --arm is idempotent (refuses a second loop for this seat). Non-fatal: a failure prints and the boot continues;
+# doctor.sh warns "NOT armed" if it did not take.
+bash "$HERE/2_Project_Files/dashboard-cloud/seat/publish_usage.sh" --seat friday --arm \
+  || echo "Launch_Friday: usage publisher did not arm (see 2_Project_Files/fleet/cockpit/logs/usage_publish.log) — continuing" >&2
+
 exec bash "$SHARED"
