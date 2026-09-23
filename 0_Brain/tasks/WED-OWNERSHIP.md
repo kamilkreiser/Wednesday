@@ -99,3 +99,4 @@ sees the claim rather than discovering it in a conflict.
 | 2026-09-23 13:17 | Kamils-MacBook-Pro | cockpit usage gate reads Wednesday's gauge on the Friday tree (Launch_Cockpit/cockpit.sh/usage_gate seat) — Friday (laptop) | CLOSED |  2026-09-23 13:19 done |
 | 2026-09-23 14:06 | Kamils-MacBook-Pro | Spark (ZGX, DeepSeek V4 Flash) local-model loop + spark-kit setup — Friday (laptop), Kam 2026-09-23: 'its yours as you will be using the spark' | OPEN | |
 | 2026-09-23 14:18 | Kamils-MacBook-Pro | space-in-path fixes after Kam moved the laptop tree to '1FILES TO SYNC/FRIDAY': arm_wake_watch.sh runner splices $HERE unquoted (wake_watch never runs); publish_usage.sh --arm reports a dead pid as armed — Friday (laptop) | OPEN | |
+| 2026-09-23 14:28 | Kamils-MacBook-Pro | Datasec/HPSM — Friday (laptop): Kam 2026-09-23 asked Friday to unzip+file the 'added' archive in '1FILES TO SYNC/HPSM' and familiarise with the project | OPEN | |
