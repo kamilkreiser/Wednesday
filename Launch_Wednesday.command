@@ -523,11 +523,7 @@ yours. Boot steps 6 (INDEX refresh) and 10 (morning sweep + autostart) belong to
 skip both unless Kam asks you. Mail: send through 2_Project_Files/fleet/send_brief.sh — it keeps the fleet's ROUTING
 prefix [Wednesday -> <Client>/<Project>] (every project agent matches that exact tag; see the comment above its
 FULL_SUBJECT line) and sends FROM friday-laptop-agent@agentmail.to, which is what attributes the mail to you. So every
-brief's FIRST line says it is from Friday and that replies and wraps go to friday-laptop-agent@agentmail.to.
-
-🔴 ON YOUR VERY FIRST BOOT, before anything else, read ${BRAIN_DIR}/tasks/FIRST-BOOT-FRIDAY.md — who you are,
-what was built for you on 2026-09-23, and what is deliberately NOT done yet. Replace it with your own
-NEXT-PICKUP-FRIDAY.md at your first wrap."
+brief's FIRST line says it is from Friday and that replies and wraps go to friday-laptop-agent@agentmail.to."
 else
   AGENT_SCOPE="YOUR CLIENT SCOPE: SECUURA and all general/generic work. Every DATASEC
 project belongs to TUESDAY (Kam ruled the name 2026-09-08 11:56); read Datasec mail by
