@@ -8,11 +8,12 @@ import sys
 import time
 
 ST = os.path.dirname(os.path.abspath(__file__))
-SPARK = "/Users/kamilkreiser/1FILES TO SYNC/FRIDAY/2_Project_Files/friday/spark"
+SPARK = os.path.dirname(ST)  # self-locating: tests/ sits inside the spark folder
 RUN = os.path.join(SPARK, "spark_run.py")
 CHECK = os.path.join(SPARK, "spark_check.py")
 STAMP = time.strftime("%Y%m%d-%H%M%S")
-W = os.path.join(ST, "run_" + STAMP)
+import tempfile
+W = os.path.join(tempfile.mkdtemp(prefix="spark_selftest_"), "run_" + STAMP)  # never beside the tracked tests (a fixture repo got committed once)
 REPO = os.path.join(W, "fixture repo")  # space in path on purpose
 os.makedirs(REPO)
 
