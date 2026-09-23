@@ -7,7 +7,7 @@ status: live
 
 # Boot digest BY TIER — W whole, M rules-only, every project case a handle
 
-Generated 2026-09-23 06:15 from 199 lesson files (924,927 B). M 36 · MIXED 5 · W 158. 5 project CASE sections inside MIXED files are reduced to one line each: the heading and the path to read it at. W blocks are exactly what the default digest carries; M blocks drop the section index and keep the rules; a P file is a single handle. The CASES behind every rule live only in the lesson files — open one the moment its rule fires.
+Generated 2026-09-23 11:17 from 199 lesson files (927,128 B). M 36 · MIXED 5 · W 158. 5 project CASE sections inside MIXED files are reduced to one line each: the heading and the path to read it at. W blocks are exactly what the default digest carries; M blocks drop the section index and keep the rules; a P file is a single handle. The CASES behind every rule live only in the lesson files — open one the moment its rule fires.
 
 ## The T9 SSD is the master — Wednesday must be fully portable
 `2026-07-31_fully-portable-drive.md` · principle · 2026-07-31 · status: superseded — the "T9 is the master" half by [[2026-08-25_one-drive-devmaster-is-master]] (2026-08-25); the portability principle itself still lives · tier: W
@@ -3075,7 +3075,7 @@ RULED for that project since the last brief and ask, per card, WHERE the ruling 
 answer is "on Kam's panel and in a mail to a seat that has since wrapped", it lives nowhere a
 reader lands, and the next agent will find the question open and ask it again.
 
-sections (open the file for these): EXTENSION 2026-09-06 02:2x (ledger w=4 of the family): WEDNESDAY'S OWN rulings to a project are rulings too — a scope/holds ruling given in an ANSWER to seat N lives in that mail and in nothing seat N+1 reads · EXTENSION 2026-09-08 18:3x (w=2 THE SAME DAY, opposite direction — and the diagnosis this owes) · EXTENSION 2026-09-09 19:5x — an UNKNOWN in a brief NAMES why it is unknown and the instrument that closes it, or it is an assertion wearing a hedge's clothes
+sections (open the file for these): EXTENSION 2026-09-06 02:2x (ledger w=4 of the family): WEDNESDAY'S OWN rulings to a project are rulings too — a scope/holds ruling given in an ANSWER to seat N lives in that mail and in nothing seat N+1 reads · EXTENSION 2026-09-08 18:3x (w=2 THE SAME DAY, opposite direction — and the diagnosis this owes) · EXTENSION 2026-09-09 19:5x — an UNKNOWN in a brief NAMES why it is unknown and the instrument that closes it, or it is an assertion wearing a hedge's clothes · EXTENSION 2026-09-23 06:0x — A **RELEASE** MAILED TO A NAMED SEAT DIES AT THAT SEAT'S ROTATION. Caught at source, 0 harm, but only because main was measured.
 
 **How to apply:**
 1. **A ruled card is not closed until its RECEIPT names the artefact** the ruling was written into
@@ -3141,6 +3141,27 @@ heading as UNKNOWN rather than asserted as binding.
 3. **This is the 2026-09-08 both-directions asymmetry pointed at a BRIEF rather than a card**, and it landed on the loud side: an item read as UNDONE gets corrected by the next reader at the cost of a turn. The quiet side — an unknown read as STILL BINDING — is the one that becomes a hold nobody tests.
 
 **Family:** [[2026-08-14_i-read-representations-they-read-sources]] (rule 3: never state a mechanism I have not read — here, a state I have not read) · [[2026-09-07_git-topology-is-a-measurement-not-a-model]] (Wednesday holds no client identity, so every such claim is relayed and says so INLINE) · [[2026-08-16_classification-is-the-field-that-grants-authority]] ("not done" is a disposition needing provenance).
+
+## EXTENSION 2026-09-23 06:0x — A **RELEASE** MAILED TO A NAMED SEAT DIES AT THAT SEAT'S ROTATION. Caught at source, 0 harm, but only because main was measured.
+**What happened.** Gate 7 round 2 returned **GO/GO** at 05:55. The seat mailed the RELEASE —
+forward-merge RD-645 then RD-641, regenerate the counts once, verify at source — to
+`[Wednesday -> Datasec/NexusAI-I]`, verified at `datasec-nexusai@`, tapped. Correct in every
+respect. Then **S80I wrapped at the 05:30 shift change and a successor booted in the same pane**,
+whose boot turn ended *"Nothing needs your decision."* at 05:57. The next seat measured NexusAI main
+at origin: still **c0788b1**. The merge had not happened and nobody was going to do it.
+
+**The rule, which is this file's rule aimed one step further out:**
+1. **A GO/RELEASE/merge instruction is OWED WORK, so it belongs in the artefact a successor is
+   guaranteed to read — the project's HANDOVER doc and this seat's pickup — in the same action as
+   the mail, never in the mail alone.** The mail is the content; the handover is the claim.
+2. **Addressing a seat by its session letter (`NexusAI-I`) addresses something that expires.** The
+   routing name survives rotation; the seat behind it does not.
+3. **After sending a RELEASE, the sender's next checkpoint measures the THING, not the mail** —
+   `ls-remote` the branch it was supposed to move. "Mail verified at destination" was true here and
+   proved nothing. **Delivery is not execution** ([[2026-08-06_artifact-presence-is-not-execution]]).
+4. **A wrap at a shift change is exactly when this fires**, because the shift change is timed to
+   catch seats mid-queue. Any seat wrapping with an unexecuted GO in its inbox must name it in its
+   handover, and the coordinator that sent the GO owns re-arming it.
 
 
 ## Every handover to Peter or Stuart is a TEST BLOCK, as large as one pass can prove — never a list of PRs
