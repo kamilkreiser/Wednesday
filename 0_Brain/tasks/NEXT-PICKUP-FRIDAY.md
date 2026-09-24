@@ -14,7 +14,15 @@ supersede: replace wholesale at every wrap; do not append
 two scripts and the git credential helper; all fixed (30f01874c). If a tool fails with `/Users/kamilkreiser/1FILES: No such
 file`, that is the class — quote the path.
 
-## 🔴 CHECKPOINT 2026-09-24 ~16:00 (ctx 50%, 7d 75%) — the live state; the block below is its history
+## 🔴 LIVE AT 2026-09-24 ~16:3x — READ FIRST (supersedes the blocks below)
+- **No build seat open.** HPSM-POC main **420d796** carries B06 (#12), B07-C (#13), B07-B (#14) and the readiness-against-the-real-API follow-on (#15); confirm the last main push CI is green. Composer: mobile pass on branch `design/2026-09-24-mobile` @ 888c59a (NOT merged, NOT deployed).
+- **Cards open (Friday tab), each with a default:** `composer-guide-sme-practice-points` · `hpsmpoc-na-ignore-reading` · `composer-mobile-deploy` (default: nothing moves) · `composer-phone-flows` · `composer-discovery-notices-on-phone` · `hpsmpoc-playbook-module2-readiness`. Run `reconcile_rulings.py` first at boot and at every checkpoint.
+- **On Kam's `composer-mobile-deploy: a`:** merge HPSM-light head-pinned, then redeploy the demo the 14:40 way (a temp NSG rule + temp key via az vm run-command in the Composer project's AZURE_CONFIG_DIR, `/opt/hpsm/remote-update.sh`, then REMOVE both and prove it). Needs Kam's az login to still be valid.
+- **Kam's hands:** 9 Azure providers (HPSM-POC) · the HP E8 SOW file into Composer `1_Project_Definition/Source_Documents/`.
+- **Follow-ups queued:** HPSM-POC BACKLOG "Follow-ups from B06/B07" (API partner-self subject, EF log level, snapshot scoring off); Composer BACKLOG 5/11 (internal text + SOW name on the demo before outsiders see it), 12 (product observations).
+- **Left in place:** stopped container `b07c-mssql`; HPSM-POC worktrees under `.tools/wt-B0*`; Composer compose project `pc-b03` UP on 127.0.0.1:18380.
+
+## (older) CHECKPOINT 2026-09-24 ~16:00 (ctx 50%, 7d 75%) — the live state; the block below is its history
 - **Kam:** no new panel message since 14:28; reconcile = 0 to rule. Open cards (Friday): `composer-guide-sme-practice-points`, `hpsmpoc-na-ignore-reading` (both default: as built).
 - **DONE this seat:** 11 unrecorded taps ruled + delivered (C-15 / C-03) · Composer guide v1.2 EMAILED to Kam (2 mails, verified 05:08Z) · HPSM-POC PR #12 (B06) → main 438d5d7 · PR #13 (B07-C: SQLite points CHECK + sign-in race) → main **441d493** (main push-CI watch was armed; confirm green).
 - **16:1x:** PR #14 (B07-B web) MERGED → main **5e362ea**. Composer B04 mobile ACCEPTED (888c59a on origin, pane closed) → cards composer-mobile-deploy / composer-phone-flows / composer-discovery-notices-on-phone. **Seat B (%20) now on ADDENDUM-1** (`Briefs/2026-09-24_B07_SEAT-B_ADDENDUM-1_GO-readiness-live-api.md`): readiness must START against the real API (content diff vs the deck FIRST, STOP on a wording difference). On READY: verify, open the PR, merge on green.
