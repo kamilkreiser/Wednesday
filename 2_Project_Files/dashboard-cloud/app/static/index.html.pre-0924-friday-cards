@@ -390,9 +390,6 @@ const AGENT_KEY = "wed_active_agent";
 let activeAgent = "wednesday";
 try { const a = localStorage.getItem(AGENT_KEY); if (a === "wednesday" || a === "tuesday" || a === "friday") activeAgent = a; } catch (e) {}
 function agentOfProject(p) { return /datasec/i.test(String(p || "")) ? "tuesday" : /^friday$/i.test(String(p || "")) ? "friday" : "wednesday"; }
-// A decision card belongs to the seat whose PARTITION holds it when that partition is a seat (Friday); otherwise by project name.
-// Kam 2026-09-24: Friday's Datasec cards showed under Tuesday because only the project name was read.
-function agentOfCard(part, p) { return /^friday$/i.test(String(part || "")) ? "friday" : agentOfProject(p); }
 function agentOfMsg(m) { const a = m && m.agent; if (a === "wednesday" || a === "tuesday" || a === "friday" || a === "both") return a; return "both"; }
 function agentName(a) { return a === "tuesday" ? "Tuesday" : a === "friday" ? "Friday" : "Wednesday"; }
 const PF_KEY = "wed_cockpit_projfilter";
@@ -687,7 +684,7 @@ function renderFilters(decisions) {
     b.addEventListener("click", () => { filters.types = filters.types.includes("decision") ? filters.types.filter(x => x !== "decision") : filters.types.concat("decision"); saveFilters(); renderFeed({ resetScroll: true }); });
     filtersEl.appendChild(b);
   }
-  const projects = [...new Set(decisions.filter(d => d.agent === activeAgent).map(d => d.project))].sort();
+  const projects = [...new Set(decisions.map(d => d.project))].filter(p => agentOfProject(p) === activeAgent).sort();
   for (const p of projects.concat(filters.projects.filter(x => !projects.includes(x) && agentOfProject(x) === activeAgent))) {
     const b = document.createElement("button"); b.className = "fchip" + (filters.projects.includes(p) ? " on" : ""); b.textContent = p;
     b.addEventListener("click", () => { filters.projects = filters.projects.includes(p) ? filters.projects.filter(x => x !== p) : filters.projects.concat(p); saveFilters(); renderFeed({ resetScroll: true }); });
@@ -705,7 +702,7 @@ function parseDecisions() {
     try {
       const pt = ptCache.get("card|" + id + "|" + r.written_at);
       const c = WED.toCard(r, pt === undefined ? null : pt);
-      const dec = { id: c.id, title: c.title, project: c.client_project, agent: agentOfCard(r.client, c.client_project), bluf: c.bluf, options: c.options, recommended: c.recommended,
+      const dec = { id: c.id, title: c.title, project: c.client_project, bluf: c.bluf, options: c.options, recommended: c.recommended,
         default_action: c.default_action, t: Date.parse(c.ts || "") || 0, status: c.status, ruled_choice: c.ruled_choice,
         ruledT: Date.parse(c.ruled_ts || "") || 0, locked: c.locked };
       if (dec.status === "open") open.push(dec);
@@ -802,9 +799,9 @@ function renderFeed(opts) {
   renderTally();
   renderFilters(dp.open.concat(dp.ruledToday));
   const typeOk = t => !filters.types.length || filters.types.includes(t);
-  const projOk = d => d.agent === activeAgent && (!filters.projects.length || filters.projects.includes(d.project));
-  const needDecs = dp.open.filter(d => typeOk("decision") && projOk(d));
-  const updates = dp.ruledToday.filter(d => typeOk("decision") && projOk(d)).map(d => ({ ruled: d, t: d.ruledT })).sort((a, b) => b.t - a.t);
+  const projOk = p => agentOfProject(p) === activeAgent && (!filters.projects.length || filters.projects.includes(p));
+  const needDecs = dp.open.filter(d => typeOk("decision") && projOk(d.project));
+  const updates = dp.ruledToday.filter(d => typeOk("decision") && projOk(d.project)).map(d => ({ ruled: d, t: d.ruledT })).sort((a, b) => b.t - a.t);
   const prevTop = feedScroll.scrollTop, prevH = feedScroll.scrollHeight;
   feedEl.innerHTML = ""; needsEl.innerHTML = "";
   const nh = document.createElement("div"); nh.className = "sechead needs";
