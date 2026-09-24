@@ -12,13 +12,13 @@
 # pane was not started from another seat's tree (the guard lives there). Delivery is cockpit.sh `say <that pane's
 # name>`, which carries the guards that matter (refuses an occupied prompt — never types over Kam — and reads the
 # prompt back). Exit codes pass through: 0 delivered · 3 guard-held · anything else not delivered.
-# TRUNCATES to 180 chars (cockpit refuses a tap over 200 without --mail), exactly as tap_tuesday.sh does.
+# TRUNCATES to 190 chars (cockpit refuses a tap over 200 without --mail), exactly as tap_tuesday.sh does.
 #
 # Usage: tap_friday.sh "message text"      (WED_AGENT need not be set: the seat is fixed to friday here)
 set -u
 MSG="${1:-}"
 [ -n "$MSG" ] || { echo "usage: tap_friday.sh \"message text\"" >&2; exit 2; }
-[ "${#MSG}" -le 180 ] || MSG="${MSG:0:177}..."   # 180, not 190: cockpit.sh say prepends the 16-char "[Wednesday tap] " label BEFORE its 200-char check (Tuesday 2026-09-25; 190+16=206 was refused)
+[ "${#MSG}" -le 190 ] || MSG="${MSG:0:187}..."
 HERE="$(cd -P "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ROOT="$(cd -P "$HERE/../.." && pwd)"
 TMUX_BIN="${TMUX_BIN:-$(command -v tmux || echo /opt/homebrew/bin/tmux)}"
