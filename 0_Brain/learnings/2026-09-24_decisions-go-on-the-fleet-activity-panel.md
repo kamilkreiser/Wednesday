@@ -29,6 +29,8 @@ Chat and terminal replies may POINT at the cards; they are not where the decisio
 
 5. **The FRIDAY tab, and check it where Kam looks** (Kam, same day: *"You posted the fleet activity under Tuesday, not Friday… going forward, use the Friday board."*). Friday's cards are stored in the Friday partition. Until live-board commit `a3fe28e5e` is deployed, the page routed them by project name (Datasec → Tuesday). After any change to how cards are posted, confirm on the page which TAB shows them. The post's `HTTP 201` is a receipt for the store, not a view of his screen.
 
+6. **Answered cards come OFF the board** (Kam, same day: *"Once answers are submitted through the fleet activity, please remove the tiles."*). `decision_queue.sh rule` on a friday-seat card now hides it on the live board (reversible and audited: `dashboard-cloud/seat/hide_message.py --card --id <id>`, and `--unhide` to restore). This needs the server's `kind=card` (commit 6741602c0, deployed by Wednesday). If the hide fails, it says so loudly; re-run the hide by hand. The ruling itself lives on the local card + the artefact, not on the tile.
+
 **Family:** [[2026-08-21_decision-queue-and-rotation-rhythm]] (the queue was already his preferred surface; this names WHERE it is read)
 · [[2026-08-16_an-ask-without-a-default-is-an-indefinite-hold]] · [[2026-09-08_ask-format-action-first]] ·
 [[2026-09-11_a-number-left-for-kam-in-a-handover-reaches-no-surface-he-reads]].
