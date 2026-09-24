@@ -294,44 +294,6 @@ arm_panel_sync() {
 }
 arm_panel_sync || echo "WARNING: panel_sync failed to arm — Kam's page will go stale; report this in the session (no-skip)."
 
-# ── Arm the LIVE-BOARD poller (2026-09-25, Kam 09:34:16 on the Friday tab: "Please look into what's
-# missing for you to be woken up … Once you've analyzed it, please message Wednesday to fix it.") ──
-# Kam types on the LIVE board; wake_watch's panel leg reads only the LOCAL store, so his live posts
-# woke no seat unless fleet/cockpit/live_chat_poll.sh was running — and no launcher started it
-# (Friday's analysis, mail 2026-09-24T23:36Z: 0 matches in all three launchers; it had never run on
-# the laptop, and on the Studio it was hand-started and died with the 09-24 wrap). Same class as
-# panel_sync above: the launcher is in the path of every boot, so it arms; doctor.sh FAILS when this
-# seat's poller is not alive. Placed BEFORE the doctor preflight for the same reason as panel_sync.
-# Per seat: the pgrep pattern carries --seat, so a machine running two seats arms each once; tuesday
-# taps through tap_tuesday.sh (the script's header said "the mini sets LIVE_POLL_TAP itself" — nothing
-# did); friday's default inside the script is already tap_friday.sh. A seat whose certificate is not
-# on this machine is skipped with a line, never started to die (the script exits 2 without it).
-arm_live_poll() {
-  local lp_script="$PROJECT_DIR/2_Project_Files/fleet/cockpit/live_chat_poll.sh"
-  local lp_log="$PROJECT_DIR/2_Project_Files/fleet/cockpit/logs/live_chat_poll.log"
-  local pid
-  pid="$(pgrep -f "cockpit/live_chat_poll\.sh --seat $AGENT" 2>/dev/null | head -1)"
-  if [ -n "$pid" ]; then echo "live_chat_poll: already running for $AGENT, pid $pid"; return 0; fi
-  if [ ! -f "$lp_script" ]; then echo "live_chat_poll: NOT armed — $lp_script missing"; return 1; fi
-  if [ ! -f "$PROJECT_DIR/4_Credentials/dashboard-cloud/$AGENT-seat.pem" ]; then
-    echo "live_chat_poll: NOT armed — no $AGENT-seat.pem on this machine (the live board cannot be read as $AGENT)"; return 1
-  fi
-  mkdir -p "$(dirname "$lp_log")"
-  if [ "$AGENT" = "tuesday" ]; then
-    LIVE_POLL_TAP="$PROJECT_DIR/2_Project_Files/tools/tap_tuesday.sh" panel_sync_detach nohup bash "$lp_script" --seat "$AGENT" </dev/null >> "$lp_log" 2>&1 &
-  else
-    panel_sync_detach nohup bash "$lp_script" --seat "$AGENT" </dev/null >> "$lp_log" 2>&1 &
-  fi
-  pid=$!
-  sleep 1
-  if kill -0 "$pid" 2>/dev/null; then
-    echo "live_chat_poll: armed for $AGENT pid $pid (tty $(ps -o tty= -p "$pid" 2>/dev/null | tr -d ' '), log $lp_log)"
-  else
-    echo "live_chat_poll: arm FAILED for $AGENT — pid $pid exited within a second; read $lp_log"; return 1
-  fi
-}
-arm_live_poll || echo "WARNING: live_chat_poll failed to arm — Kam's LIVE-board posts will not wake this seat; report this in the session (no-skip)."
-
 # ── Claude Code hooks + permission guards: RENDER them, never rely on the copy ──
 # .claude/settings.local.json is gitignored, so the hooks and permission rules never
 # travelled between seats. Measured 2026-09-16: Wednesday's was 1775 bytes with six hooks;

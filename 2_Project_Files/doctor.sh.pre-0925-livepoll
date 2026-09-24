@@ -501,26 +501,6 @@ else
   ok "no agent panes live — wake_watch not required"
 fi
 
-# --- LIVE-board poller (2026-09-25, Kam 09:34:16 via Friday: "what's missing for you to be woken up") ---
-# Kam's live-board posts wake a seat ONLY through fleet/cockpit/live_chat_poll.sh; wake_watch reads the
-# local store, which never sees them. The launcher arms it (arm_live_poll, before this preflight); this
-# check FAILS when the seat can read the board (its certificate is here) and no poller runs for it, or
-# when the poller's own health file says FAILING (3+ consecutive fetch failures) — a poller that cannot
-# fetch is as deaf as one that is not running (learnings/2026-09-10_a-refusal-nobody-reads…).
-if [ -f "$PROJECT_DIR/4_Credentials/dashboard-cloud/${_DOC_AGENT}-seat.pem" ]; then
-  _LP_HEALTH="$(cat "$PROJECT_DIR/2_Project_Files/fleet/cockpit/state/live_chat_poll.health" 2>/dev/null || echo '')"
-  if ! pgrep -f "cockpit/live_chat_poll\.sh --seat ${_DOC_AGENT}" >/dev/null 2>&1; then
-    fail "live_chat_poll NOT running for ${_DOC_AGENT}" \
-         "Kam's LIVE-board posts will not wake this seat — re-run the launcher (arm_live_poll), or: nohup bash 2_Project_Files/fleet/cockpit/live_chat_poll.sh --seat ${_DOC_AGENT} &"
-  elif [ "${_LP_HEALTH#FAILING}" != "$_LP_HEALTH" ]; then
-    fail "live_chat_poll FETCH FAILING (${_DOC_AGENT})" "$_LP_HEALTH — read 2_Project_Files/fleet/cockpit/logs/live_chat_poll.log"
-  else
-    ok "live_chat_poll running for ${_DOC_AGENT} (${_LP_HEALTH:-no health line yet})"
-  fi
-else
-  warn "live_chat_poll: no ${_DOC_AGENT}-seat.pem" "this machine cannot read the live board as ${_DOC_AGENT}; Kam's live posts will not wake it"
-fi
-
 # --- Boot digest current (WED-139, 2026-09-02): the seat boots on a digest GENERATED
 # from the lesson files. The launcher regenerates it in-path; this is the backstop —
 # a digest older than any lesson file, or missing a headline/rule line, means a seat
