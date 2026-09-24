@@ -13373,5 +13373,337 @@
    "CARD secuura-ks963-widen-to-preauth",
    "CARD secuura-ornith-decision-class-tickets-1121-629-975"
   ]
+ },
+ {
+  "id": "hpsmpoc-na-multi-question-rules",
+  "client_project": "Datasec/HPSM-POC",
+  "title": "Should multi-question rules also ignore not-applicable answers?",
+  "bluf": "A rule that looks at several questions still fires, and still cites answers from questions marked not applicable. This is the follow-on to RS-11.",
+  "default_action": "Current behaviour stays (the rule may fire on N/A answers) until you rule.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Yes, ignore them",
+    "detail": "Consistent with RS-11."
+   },
+   {
+    "key": "b",
+    "label": "No, keep current behaviour",
+    "detail": "The rule may still fire on N/A answers."
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-09-24T11:28:36.337394+10:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "seat": "friday"
+ },
+ {
+  "id": "hpsmpoc-pdf-library",
+  "client_project": "Datasec/HPSM-POC",
+  "title": "PDF library: stay on PdfPig (free) or buy QuestPDF",
+  "bluf": "QuestPDF's free Community licence excludes publicly traded companies, and the client's circumstances decide the tier, so it may not cover work for HP. Seat C built on PdfPig (Apache-2.0) behind a swappable interface.",
+  "default_action": "PdfPig stays.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Stay on PdfPig",
+    "detail": "No cost; the report works today."
+   },
+   {
+    "key": "b",
+    "label": "Buy QuestPDF",
+    "detail": "About US$1,999 or US$4,999 per the 2026-09-23 read (prices not re-checked); Friday swaps the renderer."
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-09-24T11:28:38.374655+10:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "seat": "friday"
+ },
+ {
+  "id": "hpsmpoc-pdf-accessibility",
+  "client_project": "Datasec/HPSM-POC",
+  "title": "Accept that the executive PDF is not accessibility-tagged (PDF/UA) for the POC",
+  "bluf": "The PDF has readable text, bookmarks and word labels for severity, but it is not tagged for screen readers. That is stated in the report's methodology section.",
+  "default_action": "Accepted as a POC limitation, recorded in the known-limitations list.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Accept for the POC",
+    "detail": "Record it as a known limitation."
+   },
+   {
+    "key": "b",
+    "label": "Fund a tagged renderer now",
+    "detail": "An HTML-to-PDF route; more build time."
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-09-24T11:28:40.514027+10:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "seat": "friday"
+ },
+ {
+  "id": "hpsmpoc-playbook-ppt",
+  "client_project": "Datasec/HPSM-POC",
+  "title": "Send the Playbook PowerPoint (the 16 snapshot questions)",
+  "bluf": "The minimum you set (C-12) is the Playbook deck made digital plus its 16 snapshot questions. The deck is not in the HPSM-POC folder, so the build is using 16 labelled placeholder questions.",
+  "default_action": "Friday keeps building on the placeholders; nothing is blocked, but the snapshot flow can't be finished for real without it.",
+  "options": [
+   {
+    "key": "a",
+    "label": "I'll send it now",
+    "detail": "Drop the .pptx anywhere and tell Friday the path; Friday files it and briefs the seats to load it as content."
+   },
+   {
+    "key": "b",
+    "label": "Keep placeholders until next week",
+    "detail": "The build carries on content-driven; the deck drops in later."
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-09-24T11:29:01.228933+10:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "seat": "friday",
+  "prior_rulings_overridden": [
+   "2026-08-17 19:53"
+  ]
+ },
+ {
+  "id": "hpsmpoc-rs11-not-applicable",
+  "client_project": "Datasec/HPSM-POC",
+  "title": "RS-11: a not-applicable question gives no score and no finding",
+  "bluf": "Today the reference scorer raises a finding on a question marked not applicable, which contradicts it being excluded from scoring. The C# engine already does 'no finding' as a flagged divergence.",
+  "default_action": "Nothing changes: the engine keeps its flagged divergence and phase 3 does not start.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Yes: not applicable = no score, no finding",
+    "detail": "Friday runs phase 3: the scorer fix (local model first) + regenerating the prototype's data."
+   },
+   {
+    "key": "b",
+    "label": "No: keep the scorer's current behaviour",
+    "detail": "The engine reverts its divergence."
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-09-24T11:29:02.935733+10:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "seat": "friday",
+  "prior_rulings_overridden": [
+   "2026-09-07 18:03",
+   "2026-09-07 18:54"
+  ]
+ },
+ {
+  "id": "hpsmpoc-branch-protection",
+  "client_project": "Datasec/HPSM-POC",
+  "title": "Turn on branch protection for HPSM-POC main",
+  "bluf": "main is unprotected. The PM Pack asks for branch protection and review before merge. You and Friday are the whole team, so a required human approval would block every merge.",
+  "default_action": "It stays off; Friday keeps merging one PR at a time on green CI.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Require a PR + green CI, no required approvals",
+    "detail": "Friday applies it through the API (as kamilDatasec) and reads it back."
+   },
+   {
+    "key": "b",
+    "label": "Also require one approval",
+    "detail": "Then every merge needs your click on GitHub."
+   },
+   {
+    "key": "c",
+    "label": "Leave it off",
+    "detail": ""
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-09-24T11:29:04.540899+10:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "seat": "friday",
+  "prior_rulings_overridden": [
+   "2026-09-10 09:00",
+   "2026-09-10 09:17",
+   "CARD secuura-force-push-own-branch-standing",
+   "CARD secuura-develop-merge-frozen-branch-protection"
+  ]
+ },
+ {
+  "id": "hpsmpoc-azure-providers",
+  "client_project": "Datasec/HPSM-POC",
+  "title": "Register the 12 Azure resource providers (needs your Owner login)",
+  "bluf": "Every HPSM-POC deploy is blocked until 12 resource providers are registered in subscription a6b8fe11. Registering is free and one-time, but only the Owner can do it; the project's deploy identity can't.",
+  "default_action": "No deploys; everything stays local and in CI.",
+  "options": [
+   {
+    "key": "a",
+    "label": "I'll do it",
+    "detail": "Friday gives the exact az commands (list in infra/README.md P1), then verifies."
+   },
+   {
+    "key": "b",
+    "label": "Not yet",
+    "detail": "No Dev deploy until then."
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-09-24T11:29:06.141890+10:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "seat": "friday",
+  "prior_rulings_overridden": [
+   "2026-08-17 20:05",
+   "2026-08-21 09:56",
+   "2026-09-09 15:37",
+   "2026-09-10 18:01",
+   "CARD secuura-azure-credit-expired-0906"
+  ]
+ },
+ {
+  "id": "hpsmpoc-entra-app",
+  "client_project": "Datasec/HPSM-POC",
+  "title": "Create the Entra app registration for the HPSM-POC API",
+  "bluf": "The API endpoints fail closed until an Entra app registration exists (audience api://<client-id>; roles Admin, Consultant, Partner, Demo). Nothing has been created in the tenant.",
+  "default_action": "Nothing is created; local development uses the Development-only sign-in.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Friday creates it with your login in the project's az config",
+    "detail": "Friday reads it back and records the ids."
+   },
+   {
+    "key": "b",
+    "label": "I'll create it myself",
+    "detail": ""
+   },
+   {
+    "key": "c",
+    "label": "Not yet",
+    "detail": ""
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-09-24T11:29:07.764552+10:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "seat": "friday",
+  "prior_rulings_overridden": [
+   "CARD attio-entra-consent-m365",
+   "CARD attio-entra-consent-decision"
+  ]
+ },
+ {
+  "id": "hpsmpoc-spark-byte-exact",
+  "client_project": "Datasec/HPSM-POC",
+  "title": "Local model: keep its checker byte-exact, or let it write tests, UI and docs itself",
+  "bluf": "On the rules engine the local model passed 18 of 18 tasks first time, but Claude wrote every line, because the checker demands byte-exact added lines. So it saved little effort.",
+  "default_action": "Byte-exact stays (option a).",
+  "options": [
+   {
+    "key": "a",
+    "label": "Keep byte-exact",
+    "detail": "Safest; the saving stays small."
+   },
+   {
+    "key": "b",
+    "label": "Loosen for tests, UI and docs only",
+    "detail": "The model writes the content and the tests judge it; product logic stays byte-exact."
+   }
+  ],
+  "recommended": "b",
+  "ts": "2026-09-24T11:29:09.355326+10:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "seat": "friday",
+  "prior_rulings_overridden": [
+   "2026-08-17 20:01",
+   "2026-09-11 15:00",
+   "2026-09-14 11:12",
+   "2026-09-14 14:46",
+   "2026-09-14 19:14",
+   "2026-09-15 06:51",
+   "2026-09-15 16:36",
+   "2026-09-15 21:05",
+   "2026-09-16 20:40",
+   "2026-09-17 08:34",
+   "2026-09-18 09:12"
+  ]
+ },
+ {
+  "id": "hpsmpoc-analysis-repo-backup",
+  "client_project": "Datasec/HPSM-POC",
+  "title": "Back up the HPSM-POC analysis documents to a private GitHub repo",
+  "bluf": "The design pack, briefs and records live in a local git repo with no online copy. Your folder sync is the only backup. The content is partly derived from HP NDA material.",
+  "default_action": "Your folder sync stays the only backup.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Yes, a private datasecau repo",
+    "detail": "Friday creates it, adds a deploy key and pushes."
+   },
+   {
+    "key": "b",
+    "label": "No, the sync is enough",
+    "detail": ""
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-09-24T11:29:11.009775+10:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "seat": "friday",
+  "prior_rulings_overridden": [
+   "CARD nexusai-rd303-rd307-key-shaped-files-in-repo",
+   "CARD attio-repo-home",
+   "CARD hpsm-composer-repo-and-jira-home"
+  ]
+ },
+ {
+  "id": "hpsmpoc-report-content",
+  "client_project": "Datasec/HPSM-POC",
+  "title": "Report content decisions (batch, defaults are fine for now)",
+  "bluf": "Seat C left five small report questions: the wording of the three AI templates (proposed), whether a consultant's edited narrative shows in Detailed Findings (today: no), what counts as 'approved demo data' (today: synthetic only), the disclaimer text (placeholder), and A4 or Letter (A4 default).",
+  "default_action": "The defaults stand; all five are listed in the known-limitations list.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Keep the defaults for now",
+    "detail": "Revisit with the Playbook content."
+   },
+   {
+    "key": "b",
+    "label": "I'll give answers",
+    "detail": "Reply on the panel with your choices."
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-09-24T11:29:12.715484+10:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "seat": "friday",
+  "prior_rulings_overridden": [
+   "CARD attio-companies-report",
+   "CARD hpsm-composer-synthetic-demo-content-for-monday",
+   "CARD vision-portal-feedback-report-unauthenticated"
+  ]
  }
 ]
