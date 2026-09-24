@@ -552,16 +552,6 @@ except Exception: print("")' 2>/dev/null)"
       if [ -n "$_cid" ]; then
         . "$DIR/_live_board.sh"
         live_board_post_card "$_seat" "$DQ_FILE" "$_cid"
-        # 2026-09-24 Kam (to Friday): "Once answers are submitted through the fleet activity, please remove the tiles."
-        # Friday's seat only: a RULED card is hidden on the live board (reversible + audited: hide_message.py --card --unhide).
-        # Needs the server's kind=card (main.py 2026-09-24); a refusal is LOUD on stderr and never changes this exit code.
-        if [ "$_seat" = "friday" ] && [ "${1:-}" = "rule" ]; then
-          _hroot="$(cd -P "$DIR/../.." && pwd)"
-          "$(_lb_python)" "$_hroot/2_Project_Files/dashboard-cloud/seat/hide_message.py" --seat friday \
-            --cert-dir "$_hroot/4_Credentials/dashboard-cloud" --client Friday --card --id "$_cid" \
-            --reason "answered by Kam: tile removed per his 2026-09-24 instruction" >&2 \
-            || echo "decision_queue: card $_cid ruled, but hiding its tile FAILED (see above); re-run hide_message.py --card when fixed" >&2
-        fi
       else
         echo "decision_queue: live-board post skipped — could not determine the card id from the arguments (local write is intact)" >&2
       fi ;;

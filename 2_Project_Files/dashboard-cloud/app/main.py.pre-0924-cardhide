@@ -265,14 +265,6 @@ def store_card(row: dict) -> bool:
         table("cards").create_entity(row)
         return True
     except ResourceExistsError:
-        # 2026-09-24 (Kam: "once answers are submitted … remove the tiles"): a HIDDEN card stays hidden across a re-post (ruled,
-        # delivered): REPLACE would drop the hide columns, so carry them over from the stored row. Unhide is explicit only.
-        try:
-            old = table("cards").get_entity(row["PartitionKey"], row["RowKey"])
-            for k in ("hidden", "hidden_by", "hidden_at", "hidden_seat", "unhidden_by", "unhidden_at", "unhidden_seat"):
-                if k in old and k not in row: row[k] = old[k]
-        except ResourceNotFoundError:
-            pass
         table("cards").update_entity(row, mode=UpdateMode.REPLACE)
         return False
 
@@ -378,7 +370,7 @@ ROWKEY_RE = re.compile(r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?Z_[A-Za-z0-
 REASON_RE = re.compile(r"^[A-Za-z0-9 ._:/()+'-]{0,160}$")
 HIDE_SELECT = ["PartitionKey", "RowKey", "id", "ts", "view", "role", "seat", "hidden", "hidden_at", "hidden_by", "hidden_seat", "synthetic"]
 
-HIDE_KINDS = {"message": "messages", "file": FILE_TABLE, "card": "cards"}    # 2026-09-24: + card (an ANSWERED decision tile, Kam)    # 2026-09-23: the request's `kind` picks the table; default message
+HIDE_KINDS = {"message": "messages", "file": FILE_TABLE}    # 2026-09-23: the request's `kind` picks the table; default message
 
 def find_message(client: str, body: dict, tname: str = "messages") -> dict:
     """The target row, by row_key (exact) or by id (must match exactly ONE row in the partition). Clear columns only are read.
