@@ -102,3 +102,4 @@ sees the claim rather than discovering it in a conflict.
 | 2026-09-23 14:28 | Kamils-MacBook-Pro | Datasec/HPSM — Friday (laptop): Kam 2026-09-23 asked Friday to unzip+file the 'added' archive in '1FILES TO SYNC/HPSM' and familiarise with the project | OPEN | |
 | 2026-09-23 14:34 | Kamils-MacBook-Pro | Datasec/HPSM-POC — Friday (laptop): Kam 2026-09-23 — scaffold new POC project from the POC SOW, revised plan, Q&A master, new Jira project | OPEN | |
 | 2026-09-23 17:09 | Kamils-Mac-Studio | code_patch self-testing mode (checker.sh + build_input.sh) — local-model/tasks/code_patch | CLOSED |  2026-09-23 17:21 done |
+| 2026-09-24 10:55 | Kamils-MacBook-Pro | Datasec/Datasec Security Composer — Friday (laptop): Kam 2026-09-24 — standalone project folder + launcher + user guide for Paul | OPEN | |
