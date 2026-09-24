@@ -147,6 +147,21 @@ MSG="${1:-}"
 # ADVISORY (ledger w=4, 2026-09-18): flag unmeasured ABSENCE claims before they reach Kam. Never blocks,
 # never changes the exit code. Arms: 2_Project_Files/tests/absence_claim_check_arms.sh
 printf '%s' "$MSG" | bash "$SELF_DIR/absence_claim_check.sh" || true
+# ADVISORY (Friday ledger w=2, 2026-09-24): Kam's card taps are chat rows until reconcile_rulings.py records them. Twice in one day
+# a seat told him it was "waiting on" cards he had already answered. Every message to him passes here, so say it LOUDLY on stderr
+# when taps are unrecorded. Report mode only (never applies), never blocks, never changes the exit code; skip with
+# CHAT_REPLY_NO_RECONCILE=1. A reconciler failure is printed, not hidden.
+if [ -z "${CHAT_REPLY_NO_RECONCILE:-}" ] && [ -f "$SELF_DIR/reconcile_rulings.py" ]; then
+  _rr_out="$(python3 "$SELF_DIR/reconcile_rulings.py" 2>&1)"; _rr_rc=$?
+  _rr_n="$(printf '%s\n' "$_rr_out" | sed -n 's/.*to rule: \([0-9][0-9]*\).*/\1/p' | head -1)"
+  if [ "$_rr_rc" != 0 ] || [ -z "$_rr_n" ]; then
+    echo "chat_reply: ADVISORY — reconcile_rulings.py could not be read (rc=$_rr_rc); Kam's taps are UNCHECKED:" >&2
+    printf '%s\n' "$_rr_out" | tail -3 >&2
+  elif [ "$_rr_n" -gt 0 ]; then
+    echo "chat_reply: ⚠ RECONCILE FIRST — $_rr_n card ruling(s) by Kam are NOT recorded; this message may be stale. Run reconcile_rulings.py --apply:" >&2
+    printf '%s\n' "$_rr_out" | /usr/bin/grep -i 'WOULD RULE' >&2
+  fi
+fi
 
 # ── A REPEATED SENTENCE IS NOISE ON THE ONE SURFACE HE READS (Kam, 2026-09-16 14:50) ──
 # His words: "you said that twice in 2 minutes.  can this be fixed?" — and it was the same
