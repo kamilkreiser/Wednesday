@@ -21,6 +21,6 @@
 set -u
 MSG="${1:-}"
 [ -n "$MSG" ] || { echo "usage: tap_tuesday.sh \"message text\"" >&2; exit 2; }
-[ "${#MSG}" -le 190 ] || MSG="${MSG:0:187}..."
+[ "${#MSG}" -le 180 ] || MSG="${MSG:0:177}..."   # 180 + the 16-char "[Wednesday tap] " label cockpit adds = 196 <= 200 (was 190 -> 206, refused every tick 09-23..09-25)
 HERE="$(dirname "${BASH_SOURCE[0]}")"
 exec bash "$HERE/../fleet/cockpit/cockpit.sh" say tuesday "$MSG"

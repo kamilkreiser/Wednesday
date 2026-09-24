@@ -19,6 +19,15 @@ STATE_DIR="$SELF_DIR/state"
 mkdir -p "$LOG_DIR" "$STATE_DIR"
 LOG="$LOG_DIR/wake_$(date +%F).log"
 log() { echo "$(date '+%F %T') $*" >> "$LOG"; }
+# wake_alarm (Tuesday 2026-09-25, ledger row 2026-09-25): a LOG-ONLY/ERROR wake used to end in the log alone, and on
+# 2026-09-24 that cost the Tuesday seat a whole day (the wake saw an ENDED pane as live and booted nothing). A refusal
+# nobody reads is indistinguishable from working, so it now ALSO posts one line to the seat's own board via chat_reply.sh.
+# WAKE_ALARM_CMD overrides the poster (arms use `echo`). A failed post is logged, never fatal.
+wake_alarm() {
+  local cmd="${WAKE_ALARM_CMD:-bash $PROJECT_DIR/2_Project_Files/tools/chat_reply.sh}"
+  WED_AGENT="${SEAT:-${WED_AGENT:-}}" $cmd "The 06:00 wake could not reach the coordinator seat ($*). No seat has booted this morning, so anything you post may go unanswered until the seat is relaunched." >> "$LOG" 2>&1 \
+    && log "ALARM posted to the board: $*" || log "ERROR: ALARM post FAILED (rc=$?): $*"
+}
 
 TODAY="$(date +%F)"
 HOUR="$((10#$(date +%H)))"
@@ -247,15 +256,17 @@ if [ -z "$PROMPT_LINE" ]; then
   # in a new costume. Log-only is the safe failure (finding 5, half-fix; the
   # full fix is a single-pane mode on pane_prompt_check.sh — WED ticket).
   log "WAKE LOG-ONLY: coordinator live in $PANE_ID but no prompt line is visible — not typing blind"
+  wake_alarm "pane $PANE_ID shows no prompt"
 else
   PTXT=$(printf '%s\n' "$PROMPT_LINE" | \
     LC_ALL=C perl -pe 's/\x1b\[2m.*?(?=\x1b|$)//g; s/\x1b\[[0-9;]*m//g; s/\xc2\xa0/ /g; s/^.*\xe2\x9d\xaf//' 2>/dev/null | tr -d '[:space:]')
   if [ -n "$PTXT" ]; then
     log "WAKE LOG-ONLY: coordinator live in $PANE_ID but its prompt is occupied (Kam-typing guard) — no tap sent"
+    wake_alarm "pane $PANE_ID prompt occupied"
   else
     "$TMUX_BIN" send-keys -t "$PANE_ID" -l "$MSG" && "$TMUX_BIN" send-keys -t "$PANE_ID" Enter \
       && log "coordinator already live in $PANE_ID — morning wake delivered as a tap, no second session spawned" \
-      || log "ERROR: tap failed — coordinator live in $PANE_ID, wake NOT delivered"
+      || { log "ERROR: tap failed — coordinator live in $PANE_ID, wake NOT delivered"; wake_alarm "tap to pane $PANE_ID failed"; }
   fi
 fi
 wake_done
