@@ -13816,5 +13816,180 @@
    "CARD hpsmpoc-analysis-repo-backup",
    "CARD hpsmpoc-report-content"
   ]
+ },
+ {
+  "id": "hpsmpoc-dev-signin",
+  "client_project": "Datasec/HPSM-POC",
+  "title": "Keep a Development-only sign-in inside the app (four locks)?",
+  "bluf": "So the whole journey can be run and tested locally, the API has a sign-in that works only in Development: environment-gated, refused at startup anywhere else, and covered by a test. The design pack (04 §6) wanted that only in the test project.",
+  "default_action": "It stays, locked to Development.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Keep it (four locks)",
+    "detail": "Local end-to-end testing keeps working."
+   },
+   {
+    "key": "b",
+    "label": "Remove it from the app",
+    "detail": "Local runs then need a real Entra sign-in."
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-09-24T12:07:08.477287+10:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "seat": "friday",
+  "prior_rulings_overridden": [
+   "CARD hpsmpoc-na-multi-question-rules",
+   "CARD hpsmpoc-pdf-library",
+   "CARD hpsmpoc-pdf-accessibility",
+   "CARD hpsmpoc-playbook-ppt",
+   "CARD hpsmpoc-rs11-not-applicable",
+   "CARD hpsmpoc-branch-protection",
+   "CARD hpsmpoc-azure-providers",
+   "CARD hpsmpoc-entra-app",
+   "CARD hpsmpoc-spark-byte-exact",
+   "CARD hpsmpoc-analysis-repo-backup",
+   "CARD hpsmpoc-report-content"
+  ]
+ },
+ {
+  "id": "hpsmpoc-draft-ruleset-scoring",
+  "client_project": "Datasec/HPSM-POC",
+  "title": "Let draft rulesets score synthetic assessments until the content is approved?",
+  "bluf": "The ruleset is still a draft (no approved Playbook rules yet). A switch (Assessment:RequireApprovedRuleset) is OFF, so drafts can score SYNTHETIC assessments. Reports show a draft watermark.",
+  "default_action": "Off (drafts score synthetic assessments, watermarked).",
+  "options": [
+   {
+    "key": "a",
+    "label": "Yes, keep it off for now",
+    "detail": "Turn it on once the content is approved."
+   },
+   {
+    "key": "b",
+    "label": "Turn it on now",
+    "detail": "No scoring until a ruleset is approved."
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-09-24T12:07:11.655687+10:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "seat": "friday",
+  "prior_rulings_overridden": [
+   "2026-08-17 20:10",
+   "2026-08-21 20:14",
+   "2026-09-10 09:01",
+   "2026-09-10 09:08",
+   "2026-09-10 09:08",
+   "2026-09-13 11:19",
+   "CARD secreview-estate-wide-scoring-pass-including-june",
+   "CARD hpsmpoc-na-multi-question-rules",
+   "CARD hpsmpoc-pdf-library",
+   "CARD hpsmpoc-pdf-accessibility",
+   "CARD hpsmpoc-playbook-ppt",
+   "CARD hpsmpoc-rs11-not-applicable",
+   "CARD hpsmpoc-branch-protection",
+   "CARD hpsmpoc-azure-providers",
+   "CARD hpsmpoc-entra-app",
+   "CARD hpsmpoc-spark-byte-exact",
+   "CARD hpsmpoc-analysis-repo-backup",
+   "CARD hpsmpoc-report-content"
+  ]
+ },
+ {
+  "id": "hpsmpoc-403-for-missing-ids",
+  "client_project": "Datasec/HPSM-POC",
+  "title": "Return 403 (not 404) for ids that don't exist, to hide which records exist?",
+  "bluf": "Today a Partner asking for another customer's record gets 403, but a non-existent id gets 404. The difference tells a caller which ids exist (an 'existence oracle').",
+  "default_action": "Current behaviour stays (404 for missing ids).",
+  "options": [
+   {
+    "key": "a",
+    "label": "Yes, 403 for both",
+    "detail": "Closes the oracle."
+   },
+   {
+    "key": "b",
+    "label": "Keep 404 for missing",
+    "detail": "Clearer errors, small leak."
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-09-24T12:07:14.824509+10:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "seat": "friday",
+  "prior_rulings_overridden": [
+   "CARD hpsm-phase1-missing-source-workbook",
+   "CARD secuura-ks998-format-gate-fails-open-on-missing-deps",
+   "CARD secuura-ks998-formatting-gate-fails-open-on-missing-prettier",
+   "CARD hpsmpoc-na-multi-question-rules",
+   "CARD hpsmpoc-pdf-library",
+   "CARD hpsmpoc-pdf-accessibility",
+   "CARD hpsmpoc-playbook-ppt",
+   "CARD hpsmpoc-rs11-not-applicable",
+   "CARD hpsmpoc-branch-protection",
+   "CARD hpsmpoc-azure-providers",
+   "CARD hpsmpoc-entra-app",
+   "CARD hpsmpoc-spark-byte-exact",
+   "CARD hpsmpoc-analysis-repo-backup",
+   "CARD hpsmpoc-report-content"
+  ]
+ },
+ {
+  "id": "hpsmpoc-partner-scope",
+  "client_project": "Datasec/HPSM-POC",
+  "title": "Partner role: sees only their OWN customers?",
+  "bluf": "Proposed rule: a user with the Partner role sees and edits only the customers their organisation owns. Admin and Consultant see all; Demo is read-only.",
+  "default_action": "Own customers only (as built).",
+  "options": [
+   {
+    "key": "a",
+    "label": "Yes, own customers only",
+    "detail": ""
+   },
+   {
+    "key": "b",
+    "label": "Partners see all customers",
+    "detail": ""
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-09-24T12:07:18.430929+10:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "seat": "friday",
+  "prior_rulings_overridden": [
+   "2026-08-17 20:01",
+   "CARD secuura-ks662-scope",
+   "CARD secuura-ks739-lookup-role-scope",
+   "CARD nexusai-rd167-dark-mode-scope",
+   "CARD secuura-erasure-scope-gate",
+   "CARD secuura-ks764-key-revoke-org-scope",
+   "CARD secuura-demo-deploy-scope-2026-09-03",
+   "CARD secuura-891-workflow-scope-merge",
+   "CARD nexusai-three-lineages-in-scope-or-parked",
+   "CARD hpsm-phase1-imagepng-out-of-scope",
+   "CARD nexusai-demo-deploy-finish-scope",
+   "CARD secuura-ks839-oauth-wildcard-scope-grants-everything",
+   "CARD t9-nas-leg-scope-mechanism",
+   "CARD hpsmpoc-na-multi-question-rules",
+   "CARD hpsmpoc-pdf-library",
+   "CARD hpsmpoc-pdf-accessibility",
+   "CARD hpsmpoc-playbook-ppt",
+   "CARD hpsmpoc-rs11-not-applicable",
+   "CARD hpsmpoc-branch-protection",
+   "CARD hpsmpoc-azure-providers",
+   "CARD hpsmpoc-entra-app",
+   "CARD hpsmpoc-spark-byte-exact",
+   "CARD hpsmpoc-analysis-repo-backup",
+   "CARD hpsmpoc-report-content"
+  ]
  }
 ]

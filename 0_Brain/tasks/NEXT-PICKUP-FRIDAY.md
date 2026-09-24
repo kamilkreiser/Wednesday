@@ -14,7 +14,12 @@ supersede: replace wholesale at every wrap; do not append
 two scripts and the git credential helper; all fixed (30f01874c). If a tool fails with `/Users/kamilkreiser/1FILES: No such
 file`, that is the class — quote the path.
 
-## 🔴 LIVE AT THE 2026-09-24 ~11:1x CHECKPOINT (read first)
+## 🔴 LIVE AT 2026-09-24 12:1x (65% checkpoint) — read first
+- **HPSM-POC:** main @ 32b74ba (B02 + B04-C merged). **PR #8 (B04-A, core platform) open, CI running → merge on green** (head cf66ef8, head-pinned squash, then main push CI green). Seat A/C panes CLOSED (A's local API still on :5180). **Seat B RUNNING in %8** (web Playbook + the deck's 16 questions; ADDENDUM-2/3). **Next briefs owed:** C (readiness report variant + A's SchemaRegistry.Global fix) · A-next (fold ADR-A01…A19 + openapi.delta into the design pack; root README run notes) · the Spark checker loosened for tests/UI/docs (Kam, `spark-byte-exact: b`).
+- **Composer guide seat RUNNING in %10** (B01 + ADDENDUM-1). On READY: review, then EMAIL the .docx + .pdf to kamil.kreiser@datasec.com.au (owed, below).
+- **Open Friday-tab cards:** na-rulings-confirm · readiness-answer-type · dev-signin · draft-ruleset-scoring · 403-for-missing-ids · partner-scope. **Kam's hands:** 9 Azure providers (command on the panel).
+
+## (older) LIVE AT THE 2026-09-24 ~11:1x CHECKPOINT
 - **HPSM-POC B04: three seats RUNNING**, panes %7 (A core-platform API), %8 (B web Playbook + 16-q snapshot), %9 (C reporting). Briefs: `HPSM-POC/1_Project_Definition/Briefs/2026-09-24_B04_SEAT-{A,B,C}_*.md`. Seats push branches `b04/*` ONLY; **Friday opens PRs and merges on green** as kamilDatasec (`friday_as.sh datasec gh …`; Kam "keep going and merge when green", "build as much as you can"). Merge pattern: head-pinned squash, one at a time, main push-CI green before the next (the script shape is in the 09-24 note).
 - **Datasec Security Composer (NEW standalone project, claimed):** `/Users/kamilkreiser/1FILES TO SYNC/Datasec Security Composer`, cockpit key `Datasec/Security-Composer`. Seat %10 on B01 (Paul's user guide) + ADDENDUM-1 (Kam's template .docx is the base; the demo wins; cold-reader test). Demo login in its `4_Credentials/.env`. Deploy key absent (no push). HPSM originals untouched.
 - **OWED ACTION (Kam 2026-09-24 ~12:0x, verbatim: "once you finish the help guide, please email this to me at kamil.kreiser@datasec.com.au"):** when Composer B01 is READY + reviewed (cold-reader pass), email the .docx + .pdf from friday-laptop-agent@ (AgentMail API, attachments base64) TO kamil.kreiser@datasec.com.au ONLY. It is his own address, so not an external send; nothing goes to Paul. Verify the sent copy.
