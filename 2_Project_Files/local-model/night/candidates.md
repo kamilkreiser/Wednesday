@@ -1,4 +1,4 @@
-# Ornith candidates — derived 2026-09-24 19:39 from 278 KS Backlog/Todo tickets (read-only, unpaginated)
+# Ornith candidates — derived 2026-09-25 09:28 from 278 KS Backlog/Todo tickets (read-only, unpaginated)
 
 A CENSUS for the coordinator to brief from, easy → hard (Kam 2026-09-15 16:40 / 18:19). A ticket here is a candidate, not a task: read it, read the file at the tip, write `night/briefs/<id>.md`, then queue it. Auth-shaped titles are excluded (LAST); Peter/Stuart tickets and PR-attached tickets are excluded outright.
 
