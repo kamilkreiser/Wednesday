@@ -15,6 +15,7 @@ two scripts and the git credential helper; all fixed (30f01874c). If a tool fail
 file`, that is the class — quote the path.
 
 ## STATE — Datasec/HPSM-POC (claimed by Friday), the main work
+- **🔴 2026-09-24 REFOCUS (C-12):** the MINIMUM = the Playbook PPT made digital + the 16 snapshot questions, working WELL; everything built is KEPT (main @19fba6e, tag `b02-full-build-2026-09-24`). More detail from Kam early next week (after the meeting with Pete). **WAITING: the Playbook PPT** (not in the folder). Analysis repo has NO remote; Kam's sync is the backup until he says otherwise.
 - **Folder:** `/Users/kamilkreiser/1FILES TO SYNC/HPSM-POC` — SELF-CONTAINED by Kam's ruling (he syncs it home). Start at its
   `CLAUDE.md`, `BACKLOG.md`, `1_Project_Definition/CLARIFICATIONS.md` (**C-01…C-11**, Kam's rulings verbatim).
 - **B01 + B02 COMPLETE, all REVIEWED + ACCEPTED, NOTHING MERGED.** Reviews sit beside each brief in
