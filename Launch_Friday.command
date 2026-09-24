@@ -65,14 +65,4 @@ fi
 bash "$HERE/2_Project_Files/dashboard-cloud/seat/publish_usage.sh" --seat friday --arm \
   || echo "Launch_Friday: usage publisher did not arm (see 2_Project_Files/fleet/cockpit/logs/usage_publish.log) — continuing" >&2
 
-# ── Live-board wake (Kam 2026-09-25 09:29: "when I posted to the live board there would be a push event to wake the agent") ──
-# The shared launcher's wake_watch reads only the LOCAL chat store; a post on the LIVE board woke nothing on this laptop,
-# because live_chat_poll.sh (the live twin, 30 s) had never been started here. Friday-only, idempotent (pgrep guard),
-# non-fatal; the first tick sets the watermark to the newest row, so history never wakes.
-if ! pgrep -f "cockpit/live_chat_poll.sh" >/dev/null; then
-  nohup bash "$HERE/2_Project_Files/fleet/cockpit/live_chat_poll.sh" --seat friday \
-    >> "$HERE/2_Project_Files/fleet/cockpit/logs/live_chat_poll.log" 2>&1 &
-  disown 2>/dev/null || true
-fi
-
 exec bash "$SHARED"
