@@ -8,6 +8,12 @@ supersede: replace wholesale at the next pickup; do not append
 
 # NEXT PICKUP
 
+## ⏩ 2026-09-24 21:2x — WRAPPED on Kam's word ("Please wrap up for now, and I'll plug in an external module for you tomorrow.")
+- **Tomorrow:** Kam plugs in an "external module" — unknown what; ask him what it is and where it lands before building anything around it.
+- **Tuesday DOWN since 05:36** (her seat, not the board). Kam is travelling and cannot reach the mini; the recommendation given: Friday covers Datasec. Unanswered by him.
+- **Live board:** Friday's a3fe28e5e + 6741602c0 deployed 11:43 / 13:24 (zip-only; the script is scratchpad-only; a `--zip-only` flag in 04_deploy.sh is OFFERED to Friday, not built). Friday is hiding 11 answered hpsmpoc cards; the probe's 182-vs-186 PASS count is unexplained.
+- **7d:98%** (renews ~Sat). Ornith BLOCKED by G6 (see the Ornith update). KS-1131 F-A brief staged.
+
 ## ⏩ 2026-09-24 05:3x — the 00:00 overnight seat WRAPPED at the shift change (ctx ~46%, 7d:98%). Its deltas to the block below:
 - **OWED 0 DONE** (portable re-copy rc 0, Kam told). **Ornith BLOCKED by G6** (origin develop not local) — see the Ornith update below; KS-1131 F-A brief staged.
 - **Morning receipt to Kam leads with:** nothing merged overnight (no launch possible at 98%); the drive copy done; Ornith blocked on a Secuura fetch, which needs either a new account (Kam signs in) or the allowance renewal (~Sat); what the first Secuura seat would do (fetch → queue KS-1131 → the closing pass on round 20's 11 In-Progress tickets).

@@ -1,3 +1,9 @@
+## 2026-09-24 06:00–21:2x — Wednesday day half (same seat as the overnight; wrapped on Kam's word)
+- Morning ritual run from the wrapped overnight seat (7d:98%, a fresh boot ~1% of the allowance); receipt to Kam action-first: a new account unblocks the Secuura fetch.
+- Kam's questions: Tuesday not replying = her seat down since the 05:36 wrap (board fine; the mini unreachable while he travels); NAS has no Datasec newer than 09-23 13:19; the Studio's Datasec copies are stale by design (Datasec excluded from the Studio's NAS leg).
+- Deployed Friday's live-board fixes a3fe28e5e (cards to the FRIDAY tab) and 6741602c0 (kind=card hide) by a zip-only path (no settings restart); probes all pass.
+- Ledger +1 (two frame slips); digests regenerated. Next: Kam plugs in an "external module" tomorrow.
+
 ## 2026-09-24 14:41–16:5x AEST — Friday (laptop), successor seat after the 80% rotation — Datasec only (HPSM-POC, Security Composer)
 - **Boot:** by-tier digest 535 KB + Friday ledger whole, ctx 32%. Reconcile found **11 of Kam's card taps never recorded** (tapped three times); ruled, tiles hidden, delivered (HPSM-POC C-15, Composer C-03).
 - **HPSM-POC:** B06 (N/A ignored everywhere; `RequireApprovedRuleset` ON, readiness proven unaffected) → PR #12; B07-C (SQLite points CHECK, first-sign-in race) → #13; B07-B (plan shape, plain 422s, mock mirrors the switch, two test races) → #14; the readiness flow against the REAL API (content = the deck word for word) → #15. All merged head-pinned on green; main **420d796**, push CI green. Card rulings C-16.
