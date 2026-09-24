@@ -6,6 +6,29 @@ status: live
 supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s1-wholesale
 ---
 
+## 🔴 DELTA 74 — 2026-09-25 09:38 (s83 boot after a LOST DAY; ctx ~45%). **READ THIS FIRST, THEN 73.**
+
+### ⏳ OPEN DEADLINES
+- **Partner Center previously-published packages: 24 Sep PASSED with no action.** Closed by date; the local copies in NexusAI `evidence-s62-published-packages/` are what remains. Record the loss; do not re-raise.
+- **WEEK-INSTRUCTION valid_until 2026-09-27.** Kam wrote on 09-24 that he was "away for 1 more day", so he may be back now; the file stands until his word.
+
+### WHAT HAPPENED (measured)
+- **09-24 had NO seat.** The 06:00 wake did LOG-ONLY (it saw s81's ended pane %0 as live). The machine shut down 21:26 on 09-24 and rebooted 08:55 on 09-25. **Every pane died; nothing was running at boot.**
+- **The live poller's taps had been REFUSED since 09-23 09:25** (190 + the 16-char label = 206 > 200). FIXED in `tools/tap_tuesday.sh` (180). Poller re-armed (`WED_AGENT=tuesday LIVE_POLL_TAP=…/tools/tap_tuesday.sh nohup bash fleet/cockpit/live_chat_poll.sh --seat tuesday`). **It is NOT armed by any launcher on this machine: re-arm it after every reboot.** Pane %0 renamed `tuesday`.
+- `wake_wednesday.sh` LOG-ONLY and ERROR branches now ALARM on the seat's board (claimed; Wednesday mailed). Ornith plists were QUARANTINED to `~/Library/LaunchAgents/_quarantine_2026-09-25_ornith_not_datasec` (the reboot had re-loaded them).
+- Friday's Composer-demo ask is CLOSED (Friday deployed c018e07 itself on 09-24). **tap_friday.sh has the same 206 bug; Friday has been told** (its file).
+
+### 🔴 THE ZIP — IN FLIGHT (the one thing Kam is waiting on)
+- **AUTHORITY: Kam's DKIM-signed mail 2026-09-24 09:04 AEST** (Message-ID `<33D54FEB-D8F0-4220-866D-7182B4094E92@me.com>`): *"Please build the zip or send me instructions…"*. The seat recorded it as **C-149**.
+- **`Datasec/NexusAI-J` (S81J, pane %2)**, brief `fleet/briefs_staged/2026-09-25_nexusai_J_image_and_zip.md`. **GO sent for step 2** (ANSWER "plan confirmation — GO step 2…", tapped and delivered). It builds `nexusai:2.2.0` from **0677388** into `nexusaireleaseacr` (IMAGE_VERSION=2.2.0; IMAGE_SOURCE deliberately empty) → digest → forward-merge 0677388 into `mkt-release-gate-s78g` (df70a96) → set digest → C-58 item 1 BOTH halves (a local anonymous pull, THEN the demo redeployed to the RELEASE digest with a rollback anchor, under C-127) → non-draft build → **READY FOR PACKAGE GATE**.
+- **ON THE READY: commission the PACKAGE GATE** (tier 1, one gate; carry HANDOVER-S78G's package-gate flags + C-133's 23-id table). **ON GO: EMAIL THE ZIP to BOTH `kamil.kreiser@datasec.com.au` AND `kreiser.org@me.com`**, with the zip sha256, source head, gates passed, every residual, and DELTA 50-era items (the RD-464 r3 hold, RD-549 wording, C-92/C-93, VERSION field 2.2.0 in Partner Center, the RD-536 row 14 asks).
+- On an RBAC refusal of the push: the seat writes Cloud Shell steps to `docs/resubmission/2026-09-25_kam-cloud-shell-image-steps.md`; post them to Kam.
+
+### OTHER
+- **`Datasec/Vision_Sales_Portal` (pane %3)**, a SHORT seat: tell Kam WHERE the QuickQuote advanced-mode password is stored (never the value; his 09-23 09:26 ask) + BCR3 round 4 state. On its ANSWER: post the steps to Kam; let it wrap. **BCR3 round 4 (@703d304) still needs its NARROW gate** (DELTA 73 spec) and the BCR2-O1 retraction.
+- Kam was answered on the board (all 201): the lost-day apology, the build plan, the working copy (= `git clone git@github.com:kamilkreiser/Wednesday.git`, 0 credential files tracked), progress. **Confirm every message and action on the board (his 09-24 09:51 instruction).**
+- Floor at writing: %0 tuesday · %1 fleet-monitor · %2 NexusAI-J · %3 Vision. Usage 7d 76% (stop 95).
+
 ## 🔴 DELTA 73 — 2026-09-24 05:3x SHIFT-CHANGE WRAP (s82 ended here; ctx 58%). **READ THIS FIRST, THEN 72/71.**
 
 ### ⚡ STATE — everything green, and the chain is ONE KAM ACTION from the zip
