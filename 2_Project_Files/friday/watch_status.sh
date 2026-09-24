@@ -1,0 +1,23 @@
+#!/bin/bash
+# Friday's STATUS watcher (moved from a session scratchpad 2026-09-24: it had to be re-created at every rotation).
+# Usage: watch_status.sh <seen-file> <glob> [<glob>…]     e.g.
+#   watch_status.sh ~/.friday_seen "/Users/kamilkreiser/1FILES TO SYNC/HPSM-POC/1_Project_Definition/Briefs/2026-09-24_B0*STATUS*.md"
+# Run it in the background: it EXITS (waking the seat) when a STATUS gains a NEW "READY FOR REVIEW" line or states BLOCKED/STOP,
+# or after ~55 min ("re-arm"). Keyed on the COUNT of READY lines, not the mtime: seats re-save a reviewed STATUS many times,
+# and an mtime key false-fired on every save (2026-09-24). A seat that writes READY before its push/CI lines (B04 did) is caught
+# by reading the file on the wake — the watcher is the wake, not the review.
+shopt -s nullglob
+SEEN="${1:?seen-file}"; shift; [ $# -gt 0 ] || { echo "usage: $0 <seen-file> <glob>…" >&2; exit 2; }
+touch "$SEEN"
+for i in $(seq 1 110); do
+  for g in "$@"; do
+    for f in $g; do
+      if /usr/bin/grep -q -i -E 'READY FOR REVIEW|^\*\*State:\*\* *(BLOCKED|STOP)' "$f"; then
+        key="$f READY#$(/usr/bin/grep -c -i -E 'READY FOR REVIEW' "$f")"
+        if ! /usr/bin/grep -qxF "$key" "$SEEN"; then echo "$key" >> "$SEEN"; echo "WAKE: $f"; exit 0; fi
+      fi
+    done
+  done
+  sleep 30
+done
+echo "WAKE: watcher leg expired (55 min), no new READY — re-arm"
