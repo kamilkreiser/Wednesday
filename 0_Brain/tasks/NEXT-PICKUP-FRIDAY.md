@@ -18,6 +18,7 @@ file`, that is the class — quote the path.
 - **HPSM-POC main @ 8d65fec** (B02 + B04-A/B-web pending + B04-C + B05-C merged; #8, #10 merged). **PR #9 (web) OPEN**: CI red round 1 (Node-24 sessionStorage) fixed; round 2 = mobile overflow 424>412 px on Linux fonts, **Seat B running in %14 (round 2 of 2, THE CAP: if still red, ship the closed parts and ticket the rest)**. **Seat A running in %11** (B05: fold the ADRs into the design pack + the root README + the analysis push). Merge on green, head-pinned.
 - **Composer guide DONE + EMAILED to Kam** (2 mails, verified). Cards: composer-hp-sow-name-on-demo, composer-guide-font, composer-purge-test-engagements. Deploy key for HPSM-light is still absent.
 - **Open cards (Friday tab):** na-rulings-confirm · readiness-answer-type · dev-signin · draft-ruleset-scoring · 403-for-missing-ids · partner-scope · the 3 composer cards. **Kam's hands:** 9 Azure providers.
+- **OWED ACTION (Kam 2026-09-24 ~13:3x, verbatim: "send me the updated guide when it's ready"):** when Composer B02 (guide v1.2) is READY + reviewed (the salesperson cold-reader pass), email the .pdf and .docx to kamil.kreiser@datasec.com.au as TWO mails (one attachment each: the combined send is 413 over ~7 MB), and verify both sent copies.
 - **Owed by Friday:** the Spark checker loosened for tests/UI/docs; verify the providers after Kam; the missing 3 of the '12'.
 
 ## (older) LIVE AT 2026-09-24 12:1x (65% checkpoint)
