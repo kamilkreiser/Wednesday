@@ -26,6 +26,8 @@ The **Spark** is an HP ZGX Nano (NVIDIA GB10, 121 GB unified memory) on the offi
 
 ## §0 Whose box is it: read this first
 
+> **RULED by Kam 2026-09-25 09:49:33 (card `spark-studio-client-scope`, verbatim): "c — Not yet: I'll decide after the Studio can connect."** So: get the Studio connected first (§2), then Kam decides. **Until then, no client-scoped code from the Studio. Client-neutral smoke tests are fine.**
+
 - **The box's login is `datasec-rd`.** Wednesday's kit says it was commissioned "so that Datasec work can continue while travelling".
 - **Kam ruled on 2026-09-23 that the Spark and the kit are Friday's.** Friday serves both clients, so Friday's standing default until Kam rules is: **the Spark takes Datasec work only.**
 - **The Studio's work is Secuura plus general work.** Sending Secuura code to hardware provisioned for Datasec is exactly the cross-client leak hard rule 2 exists to prevent.
