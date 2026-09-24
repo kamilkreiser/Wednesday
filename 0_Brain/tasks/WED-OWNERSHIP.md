@@ -103,4 +103,4 @@ sees the claim rather than discovering it in a conflict.
 | 2026-09-23 14:34 | Kamils-MacBook-Pro | Datasec/HPSM-POC — Friday (laptop): Kam 2026-09-23 — scaffold new POC project from the POC SOW, revised plan, Q&A master, new Jira project | OPEN | |
 | 2026-09-23 17:09 | Kamils-Mac-Studio | code_patch self-testing mode (checker.sh + build_input.sh) — local-model/tasks/code_patch | CLOSED |  2026-09-23 17:21 done |
 | 2026-09-24 10:55 | Kamils-MacBook-Pro | Datasec/Datasec Security Composer — Friday (laptop): Kam 2026-09-24 — standalone project folder + launcher + user guide for Paul | OPEN | |
-| 2026-09-24 11:38 | Kamils-MacBook-Pro | live board index.html: Friday-partition decision cards show on the FRIDAY tab (not by project name) — Friday (laptop), Kam 2026-09-24 | OPEN | |
+| 2026-09-24 11:38 | Kamils-MacBook-Pro | live board index.html: Friday-partition decision cards show on the FRIDAY tab (not by project name) — Friday (laptop), Kam 2026-09-24 | CLOSED |  2026-09-24 11:50 deployed by Wednesday 01:43Z (16fe244c), probe 186/0 |
