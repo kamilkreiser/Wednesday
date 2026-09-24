@@ -264,8 +264,13 @@ def main():
                            capture_output=True, text=True,
                            env={**os.environ, "DQ_FILE": str(DECISIONS)})
         # never discard stderr — a failure you cannot diagnose costs more than it saves
-        out = (r.stdout or "").strip() or (r.stderr or "").strip()
+        # BOTH streams: decision_queue's live-board post and the Friday tile hide report on stderr,
+        # and "stdout or stderr" discarded them whenever stdout was non-empty (2026-09-24).
+        out = (r.stdout or "").strip()
+        err = (r.stderr or "").strip()
         print(f"  {'RULED' if r.returncode == 0 else 'FAILED'}  {cid} -> {key}   {out}")
+        if err:
+            print("\n".join("      " + ln for ln in err.splitlines()))
         if r.returncode != 0:
             return 1
     if not apply_:
