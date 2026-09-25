@@ -11,7 +11,7 @@ supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s
 ### OWED TO KAM — copied forward item by item until each is closed BY NAME (new rule, ledger 2026-09-25)
 1. **PAYG signup relay** — when Kam says "done": relay verbatim to `Datasec/NexusAI-L` (tap by NAME), it runs the device login WITH --tenant, the tenant refuse-check, rename, budget alert, deploy FROM THE STORE, tests, report. OPEN.
 2. **Question B (Global Variables SP secret)** — on his board, rec (a) no copy. New fact posted 15:2x: the demo's SIGN-IN is also in bf504a5d (L measured). Relay his answer to L verbatim. OPEN.
-3. **Card `nexusai-customer-test-cost-bound`** (Q2/Q3: telemetry + always-on, ~A$46/mo) — rec a (full mirror, alert to A$60); DEFAULT b (under A$20, two labelled differences). On his word: relay to L. OPEN.
+3. ~~Card `nexusai-customer-test-cost-bound`~~ **CLOSED 15:29: Kam ruled (a) FULL MIRROR (live 15:28:54); relayed to L (ANSWER 05:29Z, tap delivered), receipted 201. Tenant-choice card withdrawn (his 15:29:10 note "details provided").** Was: (Q2/Q3: telemetry + always-on, ~A$46/mo) — rec a (full mirror, alert to A$60); DEFAULT b (under A$20, two labelled differences). On his word: relay to L. OPEN.
 4. ~~HPSM project to the dashboard without source documents (Kam 09-23 11:12)~~ **CLOSED 15:2x**: 3 zips in the live drawer (f-66a6bef592 · f-6345e06ae4 · f-9833619159), message 201.
 5. ~~Working copy of the Tuesday folder (09-23 11:46)~~ **CLOSED 09-25 09:3x** as the GitHub clone (s83), restated to Kam 15:2x.
 6. **Record the 2.2.0 submission as a C-number** in NexusAI CLARIFICATIONS (DELTA 76) — carry to the next NexusAI seat's brief (L may do it: check its CLARIFICATIONS first). OPEN.
