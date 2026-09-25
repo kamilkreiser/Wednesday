@@ -22,7 +22,12 @@ Batched per tier (the 09-18 batch rule). A row enters on its READY mail and only
 | 1 (NEXT batch) | #1228 | KS-1171 (Kam c) | L2 (wrapped) | 43279280f76e (ls-remote 14:4x) | anchoring; legs 3/4/8 OWED; integration cells | 04:41Z |
 | 2 (NEXT batch) | #1229 | KS-865 + KS-808 (3) | L4 | ed85bd81d0ac (ls-remote 15:0x) | none (scripts) | 05:00Z |
 | 1 (NEXT batch, when READY) | — | KS-1127+1089+1135 | L4 | 6320a61d8 (L4's mail, not re-read) | tier 1 per L4 | pushing |
+| 1 (NEXT batch, 4th → LAUNCH) | #1230 | KS-1131 F-A+F-B | B 25th | 1116dab04664 (ls-remote 15:1x) | none; residual + property-2 relaxation | 05:15Z |
+| 2 (NEXT batch) | #1231 | KS-1281 | B 25th | bd1d2daec2bf (ls-remote 15:1x) | none; least-priv SELECT unmeasured | 05:15Z |
+| 2 (NEXT batch) | #1232 | KS-1128 | B 25th | ec0d7efcf682 (ls-remote 15:1x) | none; fake-pg only | 05:15Z |
 | 3 | #1219 | KS-1277 | L1 | 5d5129a03af0 (ls-remote 13:2x) | none (comment-only) | 03:23Z |
+
+**15:1x: TIER 1 next batch = 4 READY (#1224 #1226 #1228 #1230) → the drafter is widened to four (kit gate21T1b). TIER 2 next batch = 5 READY (#1225 #1227 #1229 #1231 #1232) → second drafter (gate21T2b).**
 
 **TIER 2 = 4 READY at 13:4x (#1215, #1218, #1220, #1221) -> gate commissioned (a second drafter).**
 **TIER-1 batch21T1 MERGED 14:40: #1216 feb5cf0c4, #1217 bc092c667 (L2); #1214 ba4016fb8814, #1213 → develop ecb1aa75aefa (Seat B 25th).**
