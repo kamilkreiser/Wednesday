@@ -6,6 +6,13 @@ status: live
 supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s1-wholesale
 ---
 
+## 🟢 DELTA 81 — 2026-09-25 19:4x (s84, ctx ~70%). **READ THIS FIRST, THEN 80.**
+- **NexusAI 2.2.1 RESUBMISSION ZIP EMAILED TO KAM** (both addresses, msg 010001a0d7f19898…, 4 attachments read back). It fixes RD-665: the live 2.2.0 listing's Telemetry Enabled path failed at deploy (classic URL ping test; Microsoft retires them on 2026-09-30). Package gate GO WITH FINDINGS @ e3d9301 (report Testing Agent MAIN/projects/nexusai/reports/2026-09-25-pkg-gate-221/report.md). **OWED on Kam's confirmation that he resubmitted:** the NexusAI seat records it as a C-number.
+- **Customer test (73e9b141, tenant ec01829b, shared with Friday's HPSM-POC — never touch a6b8fe11):** the environment is UP. C-124 closed at log level; T2, T3, T5, T6, T9 PASS. **OPEN for Kam, whenever he chooses:** Part A = the store wizard click-through (nxcusttest2); Part B = the 10-minute sign-in (T7 member + refusal, T8 AI, the T4 admin-health fields). The field sheet is in the live drawer. Teardown = a separate Kam ask.
+- **HPSM hold (Friday):** do not re-share or re-package HPSM until Friday's B02 seat reports.
+- Kam's open cards: none from this seat. Global Variables question B is still his (it was a chat ask, not a card).
+- Floor: %0 tuesday · %1 monitor · %8 NexusAI-L (ticketing F-1..F-4, then handover).
+
 ## 🟢 DELTA 80 — 2026-09-25 15:28 (s84 boot after s83's rotation; ctx ~42%). **READ THIS FIRST, THEN 79.**
 
 ### OWED TO KAM — copied forward item by item until each is closed BY NAME (new rule, ledger 2026-09-25)
