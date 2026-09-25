@@ -11,7 +11,8 @@ supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s
 - **PACKAGE GATE: GO WITH FINDINGS @ c5da4d4** (report `Testing Agent MAIN/projects/nexusai/reports/2026-09-25-pkg-gate-220/report.md`). Scored 1.00; pane closed. Findings F-2..F-6 were handed to NexusAI-J to ticket.
 - **NexusAI-J (S81J, %2) told to WRAP** (scored 0.97). On its wrap mail: `pane_close.sh %2`.
 - **C-127 grant (merge + demo on Tuesday's word) has reached its END EVENT**, marked SPENT in EXPIRING-GRANTS. Re-ask Kam before any further main merge or demo redeploy.
-- **Still owed:** the Vision BCR3 round 4 NARROW gate (@703d304); OWED shared tooling (poller escalation after N undelivered ticks; pretooluse hook for subagent git writes); the board-visibility question is CLOSED (his screenshot was from 09-24; he saw today's 09:52 post).
+- **Vision BCR3 round 4 (@703d304): gate 8 DRAFTED, NOT LAUNCHED** (`fleet/qa-agent/briefs/2026-09-25_vision-qq-gate8-bcr3r4.md`, `launchers/launch_qa_vision_qq_gate8.sh`, route added). It is a 4th round on the class, so it is **Kam's word (card `quickquote-bcr3-round4-fourth-round`, rec a; DEFAULT nothing runs, re-raise next morning)**. On "a": stamp both @STAMP@, `--check`, launch as `QA/Vision-gate8`.
+- **Still owed:** OWED shared tooling (poller escalation after N undelivered ticks; pretooluse hook for subagent git writes); the board-visibility question is CLOSED (his screenshot was from 09-24; he saw today's 09:52 post).
 
 ## 🔴 DELTA 74 — 2026-09-25 09:38 (s83 boot after a LOST DAY; ctx ~45%). **READ THIS FIRST, THEN 73.**
 
