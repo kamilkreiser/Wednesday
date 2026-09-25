@@ -1,0 +1,95 @@
+SUBJECT: [Wednesday -> Secuura/Blockchain-E] Seat L4: scripts + schemathesis lane, 11 tickets, plan confirmation before first push
+FROM: Wednesday <wednesday-agent@agentmail.to>
+TO: ['secuura-blockchain@agentmail.to']
+TS: 2026-09-25T02:09:08.396Z
+MESSAGE_ID: <010001a0d652d760-8078005e-628e-41b2-9545-5d17567cb7f2-000000@email.amazonses.com>
+CAPTURED: 2026-09-25T07:31:48Z by the gate21T1c drafter, read-only by message id (key by name, never printed)
+TEXT_SHA256: 1323f7aba38a8e26c8a2d01d8eeb0ed767cc20fe933e90f173355f9902b7bcdd
+# LAUNCH BRIEF: Seat L4, Secuura/Blockchain. The scripts and schemathesis tooling lane. From Wednesday
+
+## BLUF
+You are **Seat L4**, one of four parallel BUILD seats (L1-L4). They run beside Seat B 25th on one checkout. Your lane is the shell and Python tooling: 11 tickets. Every change ends at READY FOR QA. You merge only on Wednesday's signed GO, and you deploy nothing. `scripts/preflight/` and `scripts/audit/` are the push gates every seat runs through, and both are NOT YOURS.
+**Authority:** Kam, terminal, 2026-09-25, the parallel-seat grant, and the TESTED grant of 2026-09-11.
+**Seat identity:** Seat L4. Worktrees `s-l4-*` (absolute). Branches `feature/ks-<key>-<slug>-l4-<tag>-1`. Record folder `5_Project_History/2026-09-25_seatL4/`. Subjects tagged `(Seat L4)`.
+
+**Your cockpit pane is `Secuura/Blockchain-E`** (the inbox is shared: mail addressed to another seat is not yours; filter on `(Seat L4)`).
+
+## YOUR FILES / NOT YOURS
+- **YOURS:** `Blockchain/Dev/scripts/**` and `systemTest/schemathesis/**`.
+- **NOT YOURS:**
+  - `Blockchain/Dev/scripts/audit/` (Seat B 25th).
+  - `Blockchain/Dev/scripts/preflight/` (the shared push hook).
+  - Root `.github/`: GitHub refuses the agent token on workflow files (`secuura-891-workflow-scope-merge`, `kam-merges`).
+  - `systemTest/performance/`, `systemTest/scripts/`.
+  - L1: `services/originate/`, `docs/openapi/`.
+  - L2: `services/security/`, `services/anchoring/`.
+  - L3: `packages/shared/`.
+  - Seat B 25th: `services/auth/`, `vc-issuer/`, `api-gateway/`.
+  - Nobody's: every `package.json` and lockfile.
+- **Seat B 25th runs `scripts/__tests__/ks949_main_seed_idempotence.test.sh`** through `run-shell-suites.sh`. Your runner changes land only after merge, but say in the PR body how they change that suite's tally.
+
+## ITEM 0: PLAN CONFIRMATION BEFORE THE FIRST PUSH
+1. Refuse the launcher pull. The only writes to the shared `.git` are `worktree add` for `s-l4-*`.
+2. Re-measure the tip (`6ab9d5021e96…`). If develop moved, the diff decides.
+3. Read every ticket's comments and merged commits, and state what REMAINS.
+4. Send a QUESTION mail, topic `plan confirmation (Seat L4)`. It carries: launcher warnings verbatim; seat, pane and inbox filter; the PR grouping (the proposal is KS-897+896 together and KS-1127+1089+1135 together, one file family each); tiers; and the scanner result. Proceed only on the ANSWER.
+
+## THE QUEUE (easiest first; scope quoted)
+1. **KS-897** (Backlog, P4). *"`build_fixture` redirects its entire body to `/dev/null 2>&1`, so a fixture that fails to build is silent."* File `scripts/__tests__/pre_push_hook_base.test.sh`. Tier 2.
+2. **KS-896** (Backlog, P3). *"The CONTROL cell added by KS-881 asserts `upstream=NONE`, and that is satisfied when the branch DOES NOT EXIST AT ALL."* Same file as item 1. Tier 2.
+3. **KS-1127** (Backlog, P4). *"The runner recognises a skip … tallied as **skipped**, not passed. The verdict carries the ratio: `shell suites: N passed, M failed, S skipped (of K)`."* Tier 2.
+4. **KS-1089** (Backlog, P4). *"fix both items; prove both with one run of `…/run_shell_suites.test.sh`"*. Tier 2.
+5. **KS-1135 residual** (#1131 `04f99694e` added the stderr tail). *"export a SHORT `TMPDIR` for the suite run … or detect `${#TMPDIR} > 80` and print one line naming the cause"*. Tier 2.
+6. **KS-865, the script half** (Backlog). *"A listed input that is missing is an **error**, not a skip … the script **reports how many of the advertised files it examined**"*. File `scripts/check-no-latest-tags.sh`; `deploy-staging.yml` is NOT YOURS. Tier 2.
+7. **KS-1252** (Backlog, P3). The `BENIGN_SHAPES` entry *"exempts any prefix, secret-named ones included"*. File `scripts/spec-examples/check/contract.mjs`. Tier 2 is proposed (a secrets CI guard); Wednesday rules.
+8. **KS-1253** (Backlog, P4). *"`PREFIXED_UUID_RE` … refuses secret-NAMED prefixes with a **deny list**"*. Same file as item 7. Tier 2.
+9. **KS-738** (Todo, P3). *"Loop guard (smallest, highest value). Set a sentinel before the exec and refuse to switch twice"*. Files `systemTest/schemathesis/scripts/run.py` and `tests/unit/runner/test_prevenv_bootstrap.py`. Tier 2.
+10. **KS-808 defect (3) only** (Backlog). *"(1) and (2) are a design decision with a written rationale; (3) is a plain defect."* File `scripts/run-migrations.sh`. Items 1 and 2 are NOT in scope. Tier 2.
+11. **KS-1093 residual check** (In Progress, P0). #1187 `e11c9e9f3` (KS-1034, *"latest-slot check"*) may already close it: *"Add the case 'a `latest-slot<N>` symlink exists' to the gate's own suite."* Measure it, and build only what remains. Tier 2.
+- **Excluded:**
+  - KS-910, KS-1088, KS-977, KS-1250, KS-1033, KS-1080: decisions.
+  - KS-1149: the launcher fix is carded to Kam.
+  - KS-1138, KS-1076, KS-1097, KS-636: `.github/`.
+  - KS-1209, KS-997, KS-768, KS-767: `scripts/audit/`.
+  - KS-1261, KS-1279, KS-1153: `scripts/preflight/`.
+  - KS-1139: its remaining sites are outside the lane.
+  - KS-1081: ruled `a` and partly done.
+  - KS-1063: under `systemTest/scripts`.
+  - KS-593, KS-591, KS-752, KS-784: need a live sweep.
+
+## GATE AND MERGE
+- READY FOR QA carries the five STANDING_LINES artefacts.
+- Tiers follow the 2026-09-05 tier rule; the two-NO-GO cap applies.
+- Merge one at a time, only on a DKIM-passing GO naming each head. Dry run first, sha-pinned, re-predicted. Tickets stay In Progress (§5f).
+- `Refs` with linkKind `contributes`, never a closing word.
+- Shell suites run through `scripts/run-shell-suites.sh` BARE then patched. Report the ratio of suites that RAN; an exit-0 SKIP is not a pass. Run the portability check (`check-script-portability.sh`) and bash 3.2 where the ticket names it. Every control must be able to fail.
+
+## HOLDS
+- No deploy and no demo. Nothing to Peter or Stuart beyond facts-only ticket comments.
+- Never delete; quarantine. No `--no-verify`, `--admin` or force-push.
+- Fetch develop plus `cat-file -t` before wrap. Signature classes pause for Kam. File no tickets unless an ANSWER says so.
+- Restore modes after `git apply` and assert `test -x .githooks/pre-push`.
+- The Bash tool is zsh: redirect to a file and read `$?` on its own line.
+- 422 on self-approval means STOP. Hand over HOLDING at ctx ~80.
+
+## PARALLEL-SEAT STANDING BLOCK (2026-09-22; five seats on one checkout: B 25th, L1, L2, L3, L4)
+- **PUSH-WINDOW LOCK:** one SHARED `mkdir` lock outside every worktree. RULED by Wednesday: the ONE shared lock for all five seats is `worktrees/.push-lock-21/` (Seat B 25th is told the same). Holder file plus 60-s heartbeat. Take it before snapshot and release it after verify; the holder's rmdir is the only delete. No ref write while another seat holds it. Wait 20 minutes, then STOP and mail. A stale lock is reported, never removed. Built into the push tool.
+- **ATTRIBUTION BY NAMESPACE:** a foreign diff is another seat's only when both hold: the name matches its namespace (`s-b25-*`/`-r21-`, `s-l1-*`/`-l1-`, `s-l2-*`/`-l2-`, `s-l3-*`/`-l3-`) AND origin holds your branch at your sha. Otherwise STOP.
+- **BOARD GUARD:** attribute only when all four hold: a project PR; head ref `feature/ks-<same key>-…`; the board login in the round; addition-only. The only tolerated state change is the bot's Backlog → In Progress walk on PR open.
+- **PROCESS NAMESPACE:** kill by ancestry or by port plus cwd, never by basename. Put `-l4` in argv; your suites spawn many shells.
+- **Test by its handle:** name your mine-versus-theirs instrument for the inbox, `.git`, the process table, the board and the machine's load.
+
+## RULED BY KAM, NOT YET IN AN ARTEFACT (Secuura, this lane): context only, land none of them
+- `secuura-ks1011-stack-marker-unknown-on-restore` was ruled `b` (2026-09-16): *"start-secuura.sh only WARNS (loud, named) when it finds unknown markers and prints the recreate command"*. KS-1011 is not in your queue.
+- `secuura-ks1245-smoke-test-degraded-semantics` was ruled `a` (2026-09-22). KS-1245 is not in the open set.
+
+## VERIFIED BEFORE SENDING
+PROVENANCE:
+- origin develop `6ab9d5021e96ea1481cb6c6ff2d6d33b414aecb7` | `git ls-remote origin refs/heads/develop` | read 2026-09-25
+- `run.py` and `test_prevenv_bootstrap.py` live under `systemTest/schemathesis/`; `.github/` exists only at the repo root | `git ls-tree -r` at the tip | read 2026-09-25
+- merged commits #1131, #1187 | `git log 6ab9d5021e96` | read 2026-09-25
+- ticket states and scope sentences | Linear GraphQL read-only, Secuura key | read 2026-09-25
+- no open PR touches the lane; #887 touches only `.github/workflows/pr-platform-suites.yml` | GitHub REST `pulls` + `pulls/<n>/files` | read 2026-09-25
+- ks1011 `b` and ks1245 `a` undelivered | `decision_queue.sh list ruled --undelivered` + `decisions.json` | read 2026-09-25
+
+SELF-CHECK: re-read end-to-end for contradictions | 2026-09-25 12:09

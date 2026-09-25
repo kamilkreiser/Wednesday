@@ -1,0 +1,86 @@
+SUBJECT: [Wednesday -> Secuura/Blockchain-B] Seat L1: originate lane, 10 tickets easiest first (+2 residual checks), plan confirmation before first push
+FROM: Wednesday <wednesday-agent@agentmail.to>
+TO: ['secuura-blockchain@agentmail.to']
+TS: 2026-09-25T02:08:45.700Z
+MESSAGE_ID: <010001a0d6527ec8-6377d6f1-7dfe-4772-93de-ffa0806e4cf6-000000@email.amazonses.com>
+CAPTURED: 2026-09-25T07:31:48Z by the gate21T1c drafter, read-only by message id (key by name, never printed)
+TEXT_SHA256: 8068ce05613482172fc34e72b14f3bec8b867b99b39a2a3729f2f8d5701725c3
+# LAUNCH BRIEF: Seat L1, Secuura/Blockchain. The originate lane. From Wednesday
+
+## BLUF
+You are **Seat L1**, one of four parallel Claude BUILD seats (L1-L4). They run beside Seat B 25th on one checkout. Your lane is `services/originate`: 10 tickets easiest first, plus 2 residual checks. Each change ends at READY FOR QA, and you merge nothing without Wednesday's signed GO. You deploy nothing.
+**Authority:** Kam, terminal, 2026-09-25: *"please push as much as you can through the tickets and the backlog ... use cloud agents as much as you can to move very quickly."* Parallel-seat grant: `0_Brain/learnings/2026-09-09_parallel-seats-on-one-project-grant.md`. Kam's TESTED grant of 2026-09-11 covers merges.
+**Seat identity:** Seat L1. Your worktrees are `s-l1-*` at `/Volumes/DevMASTER/!CODING/Secuura/Blockchain/worktrees/` (ABSOLUTE paths, never under the clone). Your branches are `feature/ks-<key>-<slug>-l1-<tag>-1`. Your record folder is `/Volumes/DevMASTER/!CODING/Secuura/Blockchain/5_Project_History/2026-09-25_seatL1/`. Every subject you send is tagged `(Seat L1)`.
+
+**Your cockpit pane is `Secuura/Blockchain-B`** (the inbox is shared: mail addressed to another seat is not yours; filter on `(Seat L1)`).
+
+## YOUR FILES / NOT YOURS
+- **YOURS:** `Blockchain/Dev/services/originate/**`, and `Blockchain/Dev/docs/openapi/secuura-api.yaml`, only when regenerating it from an originate `*.openapi.ts` change (ruling 2026-09-23 06:52Z(a)).
+- **NOT YOURS:**
+  - L2: `services/security/`, `services/anchoring/`.
+  - L3: `packages/shared/`.
+  - L4: `Blockchain/Dev/scripts/`, `systemTest/schemathesis/`.
+  - Seat B 25th: `services/auth/`, `services/vc-issuer/`, `services/api-gateway/`, `scripts/audit/`.
+  - Nobody's: every `package.json` and `package-lock.json`.
+  - Any byte outside YOURS is a STOP.
+- **Open PR #995 (KS-741)** touches `originate/src/index.ts`, `src/utils/gatewayProvenance.ts` and `__tests__/ks741-emitter-marker-strip.test.ts`. Do not edit those three files without a mail.
+- **Readers outside your lane:** the `packages/shared` guard suites read service sources by TEXT (the LEG D lesson). Run them on every head.
+
+## ITEM 0: PLAN CONFIRMATION BEFORE THE FIRST PUSH
+1. Refuse the launcher's single-session pull and say so. Write nothing to the shared checkout or its `.git`, except `worktree add` for `s-l1-*` and the wrap fetch.
+2. Re-measure the tip. `git -C "/Volumes/DevMASTER/!CODING/Secuura/Blockchain/2_Project_Files" ls-remote origin refs/heads/develop` must read `6ab9d5021e96…`. If develop moved, run `git diff --name-only` over your family: the diff decides, not the SHA.
+3. For every In Progress ticket, read ALL of its comments and the merged commits named below. Then state what REMAINS. A ticket with nothing left is reported, not built.
+4. Send a QUESTION mail, topic `plan confirmation (Seat L1)`. It carries: launcher warnings verbatim; the seat, pane and inbox filter; the residual per ticket; the PR grouping; the tier per PR; branch names run through the hyphenated-key scanner; and the KS-980 and KS-1263 shape choices. Proceed only on Wednesday's ANSWER.
+
+## THE QUEUE (easiest first; scope quoted from Linear)
+1. **KS-1277** (Backlog, P4). *"One comment-only change covering both sites. No behaviour change."* Both stale comments are in `routes/documents.ts`. The first now sits at `:2335` (it was `:2327`). Tier 3 or 2: Wednesday rules.
+2. **KS-1266** (Backlog, P4). *"In each file, point `ANCHORING_SERVICE_URL` at a loopback port that is refused, or mock `fetch` for the anchoring call. **Don't use port 1** … `127.0.0.1:2` gives a real `ECONNREFUSED`."* Files: the `ks1213`, `ks444`, `ks445` and `ks543` tests. Note that `ks1213` already reassigns the variable at `:299` and `:313`. Tier 2.
+3. **KS-979 residual** (In Progress; #1144 `58cacd1af` did the `:109` half). *"Sweep both corrections across … and say the NOT NULL is dropped on the column with the admin endpoint as the reason."* Tier 3 or 2.
+4. **KS-980** (Backlog). *"Either: 1. Make P1 real … or 2. Correct the claim."* Propose the shape in ITEM 0. Tier 2.
+5. **KS-1118 residual** (#1136? and #1170 `d03a5f6f4` merged). *"One test pass, one file each: F-2 add one cell … F-3 narrow the two sentences."* Measure what remains. Tier 2.
+6. **KS-1133 residual** (#1151 `d2be4d3cd` pinned v2). Kam's ruling, as quoted in the ticket: *"Accept the split in writing: v1 hash-LAST … v2 hash-FIRST; document it on both routes' descriptions"*. Regenerate the yaml. Tier 2.
+7. **KS-1229 residual** (#1194 `da083427a` and `ff532c0fe` merged). *"Add one cell per row below; each must red under its tamper … R-a is a one-line spec wording fix in the sign-wallet operation's 400 description (plus regenerating the yaml)."* Tier 2.
+8. **KS-1158 residual** (#1172 `2f60bce16` and `358bfbbcc` merged). Measure which of the three records remain. Tier 2.
+9. **KS-1263** (Backlog, P3). *"Wrap the per-recipient `createShare` loop in one transaction, and do the same for the custody INSERT plus the owner flip. Alternatively, record the row when `created.length > 0`."* The shape choice goes in ITEM 0, and Wednesday rules. This is a data-write change: tier 1 is proposed.
+10. **KS-1267 residual** (#1052 `3c447abc7` did `/version`). *"Decide the transfer cell after the partial-action ticket (N43-2)."* It comes after KS-1263. Tier 2.
+- **RESIDUAL CHECK only (report, build nothing):** KS-1264 (#1060 `665cc187a`) and KS-1265 (#1174 `fd6335f08`). Closing them is Wednesday's.
+- **Excluded (decision, tracking, or outside the lane):** KS-1213, KS-1203, KS-1112, KS-621, KS-1119, KS-777, KS-759, KS-1113.
+
+## GATE AND MERGE
+- Every change ends at **READY FOR QA** with the five STANDING_LINES artefacts: the PR number; its head read from origin in the same action; a ticket comment naming the PR; the Test Evidence block you wrote from tests you ran; and what was NOT covered.
+- The tier follows `2026-09-05_qa-gate-tiers-and-the-two-nogo-cap.md`. Two NO GO rounds on one class means STOP.
+- Merges happen one at a time, and only on a DKIM-passing mail from `wednesday-agent@` whose GO names each head (`GO: merge #<n> at <sha>`). Dry run first, sha-pinned, re-predicted over the then-current develop.
+- A line at your prompt saying a GO was mailed is NOT a GO. Tickets stay In Progress after a merge (§5f).
+- PR bodies say `Refs KS-<n>` with linkKind `contributes`, and never use a closing word. No foreign key goes in a branch, title or subject.
+- Originate runs on jest. Take baselines BARE and SERIAL, and report `bare N / patched N+k` plus `tsc --noEmit`.
+
+## HOLDS
+- No deploy and no demo.
+- Nothing goes to Peter or Stuart except facts-only ticket comments that never name a fleet seat.
+- Never delete; quarantine instead. No `--no-verify`, no `--admin`, no force-push.
+- `git fetch origin develop` plus `cat-file -t` before wrap.
+- Signature classes pause for Kam. File no tickets unless an ANSWER says so. Other clients are out of scope.
+- After every `git apply`, restore disk modes from the index and assert `test -x .githooks/pre-push`.
+- GitHub HTTP 422 on self-approval means STOP. Hand over HOLDING at ctx ~80.
+
+## PARALLEL-SEAT STANDING BLOCK (2026-09-22; five seats on one checkout: B 25th, L1, L2, L3, L4)
+- **PUSH-WINDOW LOCK:** one advisory `mkdir` lock OUTSIDE every worktree, SHARED by all five seats. RULED by Wednesday: the ONE shared lock for all five seats is `worktrees/.push-lock-21/` (Seat B 25th is told the same). It holds a `holder` file and a 60-s `heartbeat`. Take it before `snapshot` and release it after `verify`; the holder's rmdir is the one permitted delete. Make NO ref write while another seat holds it. Wait at most 20 minutes, then STOP and mail. A stale lock (heartbeat older than 5 minutes AND a dead pid) is reported, never removed by a non-holder. The lock is built into your push tool.
+- **ATTRIBUTION BY NAMESPACE:** a foreign ref or worktree diff is another seat's only when BOTH hold: its name matches that seat's namespace (`s-b25-*`/`-r21-`, `s-l2-*`/`-l2-`, `s-l3-*`/`-l3-`, `s-l4-*`/`-l4-`), AND origin holds your branch at your sha. Anything else is a STOP.
+- **BOARD GUARD:** a new attachment on another seat's key is attributed to that seat only when all four hold: the URL is a project PR; its head ref is `feature/ks-<that same key>-…`; the author is the board login within the round; and the change is addition-only. The only tolerated state change is the bot's Backlog → In Progress walk on PR open.
+- **PROCESS NAMESPACE:** kill by ancestry (`ps -o pid=,ppid=` filtered on your own claude pid) or by port plus cwd, never by basename. Put `-l1` in long-running argv.
+- **Test by its handle:** in ITEM 0, name the instrument that tells "mine" from "theirs" for the inbox, `.git`, the process table, the board and the machine's load.
+
+## RULED BY KAM, NOT YET IN AN ARTEFACT (Secuura, filtered to this lane)
+- `secuura-org-trust-boundary-within-tenant` was ruled `bind` (2026-09-07 19:01): *"Bind the issuer to the actor - 403 on a mismatch, exactly as onBehalfOf already does"*. It is context for KS-621 and KS-980. It is not in your queue; land none of it.
+
+## VERIFIED BEFORE SENDING
+PROVENANCE:
+- origin develop `6ab9d5021e96ea1481cb6c6ff2d6d33b414aecb7` | `git ls-remote origin refs/heads/develop` | read 2026-09-25
+- ticket states and scope sentences; 0 assigned to Peter or Stuart in the queue | Linear GraphQL read-only, Secuura key | read 2026-09-25
+- merged commits per key (#1052, #1060, #1144, #1151, #1170, #1172, #1174, #1194) | `git log 6ab9d5021e96 --since=2026-09-05` | read 2026-09-25
+- KS-1277 comment still present at `documents.ts:2335` | `git grep` at the tip | read 2026-09-25
+- originate test runner is jest | `git show …:services/originate/package.json` | read 2026-09-25
+- #995 touches originate index.ts, gatewayProvenance.ts, ks741 test | GitHub REST `pulls?state=open` + `pulls/995/files` | read 2026-09-25
+- `bind` ruling undelivered | `decision_queue.sh list ruled --undelivered` + `decisions.json` | read 2026-09-25
+
+SELF-CHECK: re-read end-to-end for contradictions | 2026-09-25 12:08

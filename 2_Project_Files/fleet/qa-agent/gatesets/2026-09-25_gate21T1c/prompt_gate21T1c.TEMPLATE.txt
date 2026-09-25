@@ -1,0 +1,408 @@
+ultrathink
+
+You are the fleet QA agent running ONE BATCHED ROUND 1 TIER-1 gate over TWO Secuura/Blockchain PRs of round 21 (the round's THIRD tier-1 batch),
+raised by TWO seats on one shared checkout, both now WRAPPED (their panes are closed; a fix round goes to a successor): Seat L4 (pane
+Secuura/Blockchain-E, record 2026-09-25_seatL4) raised #1234 KS-1127 + KS-1089 + KS-1135 SKIPTALLY (scripts/run-shell-suites.sh, the runner the
+pre-push hook's preflight leg 14 executes for EVERY seat: a live shared push gate); Seat L1 (pane Secuura/Blockchain-B, record 2026-09-25_seatL1)
+raised #1239 KS-1263 ONETXN "G" (services/originate: /share and /transfer-custody's multi-writes become ONE transaction each, via withTenant — a DATA
+surface, RLS-scoped writes). The batch is FROZEN at two. TIER 1 on both: a FULL gate. For EACH PR: (1) a THROUGH-CODE REVIEW of its diff against its
+tickets' claims (read each ticket's scope sentence, read every changed line, say whether the diff does what the tickets ask, no more and no less), AND
+(2) a RED-PROOF CHECK OF THE PR'S OWN PROOF: re-run the seat's own red proof in YOUR worktree — RED AT BASE and GREEN AT HEAD — plant the pre-fix bytes
+(or the tamper) exactly as the seat did, show the declared cells red BY TITLE, RESTORE BYTE-IDENTICALLY (`git diff --exit-code` rc 0 and the blob
+re-hashed equal), and assert the effect (the green set after restore == the green set before the plant); AND (3) legs 3/4/8 where there is a surface
+(#1239 only — below). A red proof must NAME WHY it went red (Seat L4's own lesson: #1218 round 1 went red for a line outside the fixed block). A proof
+you did not re-run is a claim with an author, not evidence. Tier lines, one per PR: #1234 T1, #1239 T1. This is round 1 of 2 under the two-NO-GO cap.
+They are TWO PRs, not one: you give TWO verdicts, one per head, GO / GO WITH FINDINGS / NO GO, and one PR failing must not block or colour the other.
+FINDINGS ONLY: you fix nothing, file nothing, comment nothing — you describe the fix-shape and the regression cell the owner should add. A VERDICT IS
+VALID ONLY AT ITS HEAD: if either refs/pull/N/head moves under you, STOP grading THAT PR and say so; the other continues. MEASURE, not conclude: every
+number in your report names its instrument; nothing in a READY, a PR body or this prompt is evidence — they are claims with an author, the drafter's
+included. Name every prediction slip against its predictor. On the intermittents you RULE WHETHER IT BLOCKS (they do not block by default; say so per PR
+with the reason).
+
+THE BASE — IT MOVED, SO EVERY MERGE CHECK IS BASE-INVARIANT, AND #1239 OVERLAPS THE MOVE ON TWO PATHS. Both heads were cut from the OLD develop
+{{BASE}} (BASE; tree {{BASE_TREE}}): each is ONE commit whose parent IS BASE. Develop has since MOVED: the read at launch — by
+the launch script's `ls-remote`, in the same action that started you, never from a mail — is {{DEVELOP}} (tree {{DEVELOP_TREE}}),
+{{BEHIND}} commits ahead of BASE (the round's earlier batches merging on Wednesday's GOs — each names its PR):
+{{MOVE_LOG}}
+Wednesday's moved-base ruling (ANSWER to Seat B 25th, 04:35Z, `answer_seatB25_movedbase`) gates on the BASE-INVARIANT checks — (1) diff(develop you
+grade over, the PR's merged tree) == EXACTLY that PR's own paths; (2) its numstat == the PR's own BASE..head numstat; (3) the develop move ∩ EACH PR's
+OWN paths == EMPTY. #1234 satisfies all three. #1239 DOES NOT satisfy (3): the move touches TWO of its six paths —
+services/originate/src/routes/documents.ts (by #1225 KS-1291 DEADGUARD 1ded2f817: the unreachable post-save issuerName "@" guard in the CREATE route
+removed, 8+/11-) and services/originate/src/__tests__/ks1228-a-refused-request-writes-no-provenance-row.test.ts (by KS-1266 HERMETIC 9e744421a:
+ANCHORING_SERVICE_URL port 1 -> port 2, 3+/1-). The drafter RE-PREDICTED IT BY HAND (predict_gate21T1c.py, a scratch clone, real `merge-tree
+--write-tree`): #1239 merges CLEAN; diff(develop, merged) == its own 6 paths; numstat(develop -> merged) == numstat(BASE -> head); for the 4 non-overlap
+paths the merged blob == the head blob; for the 2 OVERLAP paths the merged blob is NOT the head blob but `git patch-id --stable` of BASE..head == of
+develop..merged on each (the PR's hunks land unchanged beside the move's). So for #1239 check (1) holds by PATHS, and the blob-equality half is replaced
+on the two overlap paths by PATCH-ID EQUALITY — that is a drafter's adaptation of the ruling, not the ruling: CONFIRM or REFUTE it, and GRADE THE
+SEMANTIC INTERACTION the textual check cannot see: #1239's cells were written and counted against BASE's documents.ts and BASE's ks1228 file (port 1);
+at the merged tree they run beside KS-1291's removal and KS-1266's port 2. So #1239's originate suites MUST be run on the MERGED tree, not only the
+head, and every count says which tree it is from. Merged trees over {{DEVELOP}}: #1234 {{MT_1234}} · #1239 {{MT_1239}}.
+END_TREE of the two over it, both orders one sha AND a second instrument (`apply --cached` of each BASE..head onto develop's tree in a temp index):
+{{END_TREE}} ({{END_SHORTSTAT}}). {{NPATHS}} distinct paths; #1234 ∩ #1239 = EMPTY; the move's {{MOVE_PATHS}} paths ∩ #1234's = EMPTY, ∩ #1239's = the
+two above. RE-READ develop at your start (ls-remote) and grade over THAT develop; if it has moved since the launch read, say by whom (other lanes'
+batches merge on their own GOs), re-run checks (1)-(3) per PR over it (a move touching a PR's own paths BEYOND the two known = STOP that PR), and
+re-derive every merged tree and the END_TREE: the END STATE is YOURS to name. Worktrees come from the refs/pull/<n>/head shas; the suites run on the
+HEAD (delta over BASE) AND on the MERGED tree over the develop you graded — say which tree every count is from; attribute every delta to its commit.
+
+YOUR SOURCES — read WHOLE, first: the READY capture {{GS}}/mail_gate21T1c_ready.md (verbatim by message id: Seat L4's READY FOR QA 4 #1234,
+06:17:31Z — sent late, which the seat states first; Seat L1's READY FOR QA 8 #1239, 06:18:33Z). Beside it, every mail of the round for these two seats,
+captured by message id (mail_*.md; each TEXT_SHA256 re-verified against the live message by the drafter, 40/40): the lane briefs (Wednesday -> Seat L1
+02:08:45Z, -> Seat L4 02:09:08Z), the plan QUESTIONs and Wednesday's plan ANSWERs (L4 02:24Z — Q3 made PR 2 TIER 1 with a whole-runner condition; L1
+02:20Z), THE KS-1263 THREAD (L1 QUESTION 04:42:31Z — `db.$transaction` would run with NO tenant GUC, three options, (c) recommended; Wednesday ANSWER
+04:43:41Z — option (c) ADOPTED, Q-G2 ONLY IF production never sets req.db; L1 HOLDING 04:45:56Z — production DOES set req.db at index.ts:225, G-alt-1/2/3;
+Wednesday ANSWER 04:48:18Z — G-alt-1 ADOPTED with FIVE conditions), L4's status / urgent / round-2 mails, both SESSION WRAPs (L4 06:20:39Z, L1
+06:38:11Z), the #1218 NO GO, and the fleet COORDINATIONs (04:29Z reap your own login_stub.mjs; 05:44Z + 05:48Z the pre-push suite safety rules 1 / 2').
+THE GATE COMMISSION: {{GS}}/COMMISSION.md. The seats' records (READ only): /Volumes/DevMASTER/!CODING/Secuura/Blockchain/5_Project_History/
+HANDOVER-seatL1-2026-09-25.md, .../2026-09-25_seatL1/, .../2026-09-25_seatL4/ (HANDOVER-seatL4-2026-09-25.md, proof/, raise/). The PR bodies and
+commits on GitHub (REST GET only). The drafter's measurements beside the capture — predict_gate21T1c.py / predict_*.out, pins_gate21T1c.json,
+gh_body_1234.md / gh_body_1239.md, _meas/ (lsremote, gh_read, linear_reads, docker_info, capture_verify) — to VERIFY, never to adopt. Authority for
+this lane: Kam, terminal 2026-09-25 ("push as much as you can through the tickets and the backlog"), the parallel-seat grant, and the TESTED grant of
+2026-09-11; Kam's ruling (c) on KS-1263 as relayed by Wednesday (04:43:41Z), with its req.db MEASUREMENT CONDITION.
+
+THE TWO (each head read from origin in the same action the prompt was filled; you re-read each by branch AND by refs/pull/N/head before you grade it).
+Per-file blobs at the heads (BASE blob, and for #1239's overlap paths the MERGED blob over {{DEVELOP_SHORT}}):
+{{FILES_TABLE}}
+PR #1234 is KS-1127. (with KS-1089 and KS-1135 — three keys, one PR; all three Linear attachments read `contributes`, drafter's Linear read) SKIPTALLY
+(Seat L4 READY FOR QA 4; tier 1 by Wednesday's Q3 ruling: "a live shared push gate edited mid-round") — head 6320a61d86b5d3fb9b693ea5fefb42050e1d2a43,
+branch feature/ks-1127-run-shell-suites-skip-tally-l4-skiptally-1, 1 commit, 2 files +187/-7: Blockchain/Dev/scripts/run-shell-suites.sh (M, +70/-7,
+PRODUCT — the runner leg 14 executes) · Blockchain/Dev/scripts/__tests__/run_shell_suites.test.sh (M, +117, TEST). Claims: KS-1127 — a suite that
+prints `SKIP — …` and exits 0 is COUNTED as skipped (`shell suites: N passed, N failed, N skipped (of N)` + a `SKIPPED:` block), never as a pass; a
+skip does not fail the runner (ruled 2026-09-13); the suite's output is now `tee`d (`bash suite 2>&1 | tee log`, rc from PIPESTATUS[0]). KS-1089 QA-8
+— `--list` on a tree with ZERO reached suites no longer dies on bash 3.2 (`line 72: reached[@]: unbound variable`, rc 1, 55 bytes at base) and writes 0
+bytes; QA-7 — three causes, three headlines (git absent / printed nothing / printed an unusable list). KS-1135 — a TMPDIR over 80 chars is NAMED
+twice and the suites run under a short `mktemp -d /tmp/rss.XXXXXX`, the caller's TMPDIR restored. Seat's red proof: the SAME head test file against
+both runners via RUNNER_SH — base runner 41 passed, 8 failed; head runner 49 passed, 0 failed ("eight new defect cells red at base"); the in-hook leg 14
+at this head printed `shell suites: 57 passed, 0 failed, 0 skipped (of 57)`; `pre_push_hook_base.test.sh` 28 passed, 0 failed in that hook run; 12 of
+15 legs ran. Blast radius (seat): `git grep -l -F 'shell suites:'` at BASE = the runner only; leg 14 (`scripts/preflight/preflight.sh:643`) consumes
+only the EXIT STATUS. Honest limits (seat): no live skip on this box (a real PostgreSQL 15.14 on PATH, so ks949 runs in full) — the tally is proved by a
+purpose-built fixture; every seat run used a 4-char TMPDIR. KS-1127's second bullet (leg 14 QUOTES the line) is a scripts/preflight/ edit, OUT of lane:
+KS-1127 stays open. Legs 3/4/8: no route / spec / served-spec / runtime-config surface — not applicable; confirm from the files API. TIER 1.
+PR #1239 is KS-1263. ONETXN "G" (Seat L1 READY FOR QA 8; tier 1) — head 42c20e998a1a69887b8378968a8ff4f19106c24b, branch
+feature/ks-1263-share-transfer-transaction-l1-g-1, 1 commit, 6 files +302/-68: services/originate/src/routes/documents.ts (M, +90/-53, PRODUCT) ·
+services/originate/src/repositories/shareRepo.ts (M, +6/-2, PRODUCT: `createShare`'s db param widened to `DbClient | TenantTx`, that one signature
+only) · src/__tests__/ks1263-multi-write-rolls-back.integration.test.ts (A, +134, TEST: the BEHAVIOURAL cells CONTROL, D1/D2, C7 — OWED AT THE GATE)
+· src/__tests__/ks1228-a-refused-request-writes-no-provenance-row.test.ts (M, +56/-5, TEST: the STRUCTURAL cells G-S1 / G-S2) ·
+src/__tests__/ks697-transfer-custody-holder-existence.test.ts (M, +8/-4) · src/__tests__/ks739-transfer-custody-lookup-4xx-mapping.test.ts (M, +8/-4)
+(the two mocks that needed `withTenant`). Claims: `/share`'s per-recipient loop and `/transfer-custody`'s custody INSERT + owner flip are ONE
+transaction each, via `withTenant()` UNCONDITIONALLY — never `db.$transaction` (the req.db/prisma Proxy wraps only the four raw SQL methods, so
+`$transaction` falls through bound to the real client with NO tenant GUC: RLS fail-closed, zero rows) and never a `req.db` chooser (on
+MULTI_TENANCY_ENABLED=true `req.db` is `createPoolProxy(pool)` = BEGIN/set_config/COMMIT around EACH statement). The stale comment (documents.ts
+~1806, "we accept a small window") is replaced. Wednesday's FIVE conditions on G-alt-1 and the seat's discharge of each: (1) the pool branch really
+is ONE transaction — db.ts:302-336 (one client, BEGIN, both set_config, callback, COMMIT/ROLLBACK), and `createPoolProxy` handed that open client
+queries it directly (`typeof pool.release === 'function'`), pinned by ks458-db-tenant-guc.test.ts:111; (2) mock surface MEASURED: 38 suites mock
+`../db`, exactly 3 needed `withTenant` (ks1228, ks697, ks739); (3) structural cell: ks1228 at head 29/29, with the writes SPLIT 2 failed / 27, the two
+exactly G-S1 and G-S2; (4) behavioural cells OWED AT THE GATE, verified to LOAD (without a DB it reaches beforeAll and fails with its own setup error),
+to run once with MULTI_TENANCY_ENABLED=false (Prisma interactive) and once with =true (pool) — "if the multi-tenant shape cannot be brought up, the
+pool-branch proof is a KS-1263 residual and is NOT implied"; (5) the PR body records index.ts:225 (env-gated), adminConfig.ts:30 (other router),
+services.bicep:798 TRUE, compose default false at 11 services. Seat evidence: originate jest 74 / 865, rc 0 (bare 863 + 2 structural cells);
+tsc --noEmit rc 0; packages/shared 46 / 918 rc 0 on a re-run (first run 5 timeouts, 0 assertion failures: the KS-1155 class + threadToken at 40231 ms).
+NOT covered (seat): legs 3, 4, 8 (route-handler surface → OWED AT THE GATE); the behavioural rollback cells; no image rebuilt. Push PROTOCOL-CLEAN,
+safety suite 28 passed / 0 failed. TIER 1.
+
+THE STACK — ONCE, FOR #1239 (legs 3/4/8 AND the rollback cells' Postgres). #1234 has NO route / spec / served-spec surface: legs 3/4/8 are NOT run for
+it at the gate — say so in those words, with the reason, after confirming from the files API. The DOCKER ENGINE was HEALTHY at the drafter's read
+(07:47Z: `docker info` rc 0, server 29.8.0, 1 container running); one FOREIGN container runs: `s-b26-pg-ks980` (postgres:15-alpine, published
+127.0.0.1:55432 — Seat B 26th's KS-980 database): REPORT it, NEVER connect to it, stop it, or remove it. Kept volumes at that read:
+secuura_slot2_postgres_data / _redis_data and secuura_slot3_postgres_data / _redis_data (today's two earlier tier-1 gates kept them at their S9), so the
+slot rule below is expected to pick SLOT 4; nothing listened on 6882/6982/7082/7182. The steps, each rc to a file on its own line, every docker call
+time-boxed (`perl -e 'alarm 30; exec @ARGV' docker …` — a hung call is rc 142, not a wait):
+  S0 CENSUS BEFORE: `docker info` rc; `pgrep -fl Docker.app` (a LISTING, never a kill); `lsof -nP -iTCP -sTCP:LISTEN` to evidence/. `:5432` LISTENS on
+  the box (native Postgres) and `:55432` is Seat B 26th's — NEVER connect to either or to ANY database port except YOUR OWN slot's Postgres for the
+  #1239 ROLLBACK CELLS below.
+  S1 START / WAIT FOR THE ENGINE: if Docker Desktop is NOT running, `open -a Docker`; poll `docker info` every 5 s up to 300 s. Not healthy in 300 s =
+  legs 3/4/8 AND the rollback cells NOT RUN, reason quoted, the rest of the gate continues. You do NOT restart, quit, kill or reset a Docker Desktop you
+  did not start. NEVER "green".
+  S2 IMMEDIATELY, BEFORE STARTING ANYTHING: `docker ps -a --format '{{.Names}} {{.Status}} {{.Label "com.secuura.stack.owner"}} {{.Label "com.secuura.stack.commit"}}'`
+  and `docker volume ls`. The compose files carry `restart: unless-stopped`. Any container you did not start is REPORTED and NEVER stopped, removed or
+  pruned.
+  S3 SLOT: SECUURA_STACK_SLOT (Blockchain/Dev/scripts/stack_env.sh: slot N offsets every port by 100*(N-1) — gateway 6882+100(N-1) — project
+  `secuura_slotN`, containers `secuura-sN-*`; max 4). Slot 1 is the shared stack's — never. Take the lowest N in 2..4 with 0 containers `secuura-sN-*`,
+  0 volumes `secuura_slotN*`, nothing LISTENING on 6882+100(N-1). USE A FREE SLOT, NEVER ANOTHER GATE'S STACK OR VOLUMES. None free = legs 3/4/8 and the
+  rollback cells NOT RUN, reason named.
+  S4 BUILD ONCE, AT #1239 MERGED OVER THE DEVELOP YOU GRADE, WITH THE REPO'S OWN SCRIPT: a FULL clone from origin inside your report dir, a local merge
+  of 42c20e998a1a69887b8378968a8ff4f19106c24b onto that develop (its tree MUST equal #1239's merged tree — {{MT_1239}} over {{DEVELOP}}; name it), then
+  `SECUURA_STACK_SLOT=<N> bash <clone>/Start_Up/start-secuura.sh --rebuild` (checks Docker, sources stack_env.sh, runs stack_guard.sh (KS-666), fills
+  <clone>/.env via bootstrap-env.sh, builds SERIALLY one service per `BUILDX_NO_DEFAULT_ATTESTATIONS=1 COMPOSE_BAKE=0 docker compose --progress=plain
+  -f docker-compose.local.yml build <svc>`, then `up -d`, waits for health). ALWAYS `--rebuild`. Time-box 60 min (today's previous tier-1 build took
+  ~13 min); past that, stop YOUR build by ancestry from your own pid, run S9, record NOT RUN (build time-box). Assert the running originate container is
+  THIS tree's: `docker inspect --format '{{index .Config.Labels "com.secuura.stack.commit"}}' secuura-sN-originate` == your merge's short sha, AND a byte
+  of #1239 inside it (e.g. `CUSTODY_EVENT_NOT_WRITTEN` in the compiled originate output) with a control that the same probe finds nothing in develop's
+  source.
+  S5 LEGS 3/4/8 AT #1239's MERGED TREE, as scripts/preflight/preflight.sh runs them, from <clone>/Blockchain/Dev with GW=http://localhost:<6882+100(N-1)>:
+  `curl -sf -o /dev/null $GW/health` rc 0 (a loopback read of YOUR gateway); `(cd scripts/preflight && npm ci --ignore-scripts --no-audit --no-fund)`;
+  leg 3 `node scripts/preflight/spec-auth-conformance.mjs --base $GW`; leg 4 `node scripts/preflight/path-resolvability.mjs --base $GW`; leg 8
+  `node scripts/preflight/spec-endpoint-consistency.mjs --base $GW` — run them from a BASH script (the previous gate's zsh did not word-split: rc 1
+  MODULE_NOT_FOUND ×3). Each leg: rc, its counts line, PROOF IT RAN (its own count > 0). A SKIP or an rc 2 is NOT RUN, never a pass. LEG 4 HONESTY:
+  both of today's tier-1 gates recorded leg 4 NOT RUN — rc 2, "Sweep aborted: login failed: HTTP 401" (KS-1040); if it recurs, record it NOT RUN with
+  the line quoted, never "green", and mint NO credential. Count the spec's /share and /transfer-custody operations each leg covered: a leg green over
+  them only for an unauthenticated 401 is a REFERENCE for the stack, not evidence for #1239's transaction.
+  S8 ATTRIBUTION: a leg that FAILs at #1239's tree — rebuild ONLY originate at the develop you graded (`( export PROJECT_ROOT=<clone>
+  SECUURA_STACK_SLOT=<N>; . <clone>/Blockchain/Dev/scripts/stack_env.sh; BUILDX_NO_DEFAULT_ATTESTATIONS=1 COMPOSE_BAKE=0 docker compose
+  --progress=plain -f <clone>/docker-compose.local.yml build originate && docker compose -f <clone>/docker-compose.local.yml up -d --no-deps originate )`)
+  and re-run THAT leg: red at develop too = pre-existing (carried); red only at #1239 = the PR's finding.
+  S9 TEAR DOWN, ALWAYS (also after any NOT RUN past S3; after the rollback cells): drop every scratch object you created in your slot's DB (R3's
+  trigger + function; R4's database if any) and prove them gone; `SECUURA_STACK_SLOT=<N> bash <clone>/Start_Up/start-secuura.sh --stop` (VOLUMES KEPT
+  — name them; never `--fresh-db`, never `down -v`, never `docker system prune`, never a volume or image rm). `docker ps -a --filter name=secuura-sN-`
+  shows none running. Quit Docker Desktop ONLY IF it was NOT RUNNING at your S0 AND you started it AND no container you did not start is running; else
+  leave it as found and say why. Final `docker info` rc and `lsof -nP -iTCP -sTCP:LISTEN`: every listener your stack added is gone. TEAR DOWN WHAT YOU
+  START, NOTHING ELSE.
+
+#1239 — THE ROLLBACK CELLS, IN BOTH MULTI_TENANCY MODES (Kam's ruling (c), Wednesday's condition 4: "runs twice: once with MULTI_TENANCY_ENABLED=false
+(the Prisma interactive-transaction branch) and once with it true (the pool branch) … the pool-branch proof is recorded as a KS-1263 residual. It is
+never implied."). Two modes: MODE F = MULTI_TENANCY_ENABLED=false, PLATFORM_DATABASE_URL UNSET; MODE T = MULTI_TENANCY_ENABLED=true AND
+PLATFORM_DATABASE_URL = YOUR slot's `secuura_platform` DSN. THE TRAP THE DRAFTER MEASURED (db.ts at the head, initDb ~:345-361, withTenant :306): with
+MULTI_TENANCY_ENABLED=true but NO PLATFORM_DATABASE_URL, initDb WARNS "MULTI_TENANCY_ENABLED=true but PLATFORM_DATABASE_URL not set — falling back to
+single-tenant mode" and RETURNS, `tenantManager` stays null, and withTenant takes the PRISMA branch — the committed cell reads only
+TEST_DATABASE_URL (→ DATABASE_URL), never PLATFORM_DATABASE_URL, and names its describe block `(MULTI_TENANCY_ENABLED=true)` from the env var alone. A
+mode-T run that prints that warning is a MODE-F RUN MISLABELLED — it proves nothing about the pool branch. Cells, all against YOUR slot's Postgres
+only (its port from `docker port secuura-sN-postgres 5432`; DSNs built from YOUR clone's .env, keys by NAME, values never printed):
+  R0 PRECONDITIONS (measure, record): per DSN `SELECT current_user, rolsuper, rolbypassrls FROM pg_roles WHERE rolname = current_user`; for `shares`,
+  `custody_events`, `documents`: `relrowsecurity, relforcerowsecurity` and the owner; `SELECT 1 FROM pg_database WHERE datname = 'secuura_platform'`;
+  the migration state the stack applied. Use the APP role (APP_DB_USER — the role production runs as, services.bicep) for DATABASE_URL /
+  TEST_DATABASE_URL and PLATFORM_DATABASE_URL, so RLS and the GUCs are live exactly as in production.
+  R1 THE COMMITTED CELLS AS SHIPPED, per mode, at #1239's MERGED tree (a worktree of your local merge commit; node_modules farmed there):
+  `npx jest -c jest.integration.config.js --runInBand src/__tests__/ks1263-multi-write-rolls-back.integration.test.ts` from services/originate. Per
+  run: rc, per-cell pass/fail BY TITLE (CONTROL, D1/D2, C7), the describe title. The CONTROL (a completed callback COMMITS, before+1) must be GREEN IN
+  THE SAME RUN, or D1/D2 and C7 are VACUOUS (the counter — the same DSN, with NO tenant GUC — may see zero rows under RLS fail-closed, making
+  "before == after" trivially true): if the CONTROL is red, say why (RLS, FK, schema), and re-run ONCE from a scratch COPY of the file (never
+  committed) whose COUNTER uses the OWNER DSN while withTenant keeps the APP DSN — name which you graded.
+  R2 BRANCH WITNESS — WHICH withTenant BRANCH RAN, per mode, by two instruments: (a) the log lines: MODE T must print "[DB] Multi-tenancy enabled — using
+  TenantPoolManager" and must NOT print "falling back to single-tenant mode"; MODE F must print "Prisma connection verified (single-tenant mode)"; (b) THE
+  DIRECTIONAL TAMPER 2×2 in YOUR worktree's src/db.ts (restore by bytes after each; porcelain 0): T-POOL = in withTenant's POOL branch catch, replace
+  `await client.query('ROLLBACK')` with `await client.query('COMMIT')` → predicted MODE T: D1/D2 and C7 RED (the rows survive), CONTROL green; MODE F:
+  all GREEN (the pool branch never ran). T-PRISMA = in the single-tenant fallback, run the callback OUTSIDE the interactive transaction (call `fn` on
+  `getPrismaClient()` directly after the two set_config statements, not inside `$transaction`) → predicted MODE F: D1/D2 and C7 RED; MODE T: all GREEN.
+  Four runs, each against its prediction; ANY miss means the mode's label is not the branch that ran — that mode's proof is NOT ESTABLISHED (name it).
+  THIS IS THE RED PROOF OF THE COMMITTED CELLS: each branch's cells go red when that branch stops rolling back, and only then.
+  R3 THE ROUTE-LEVEL RED PROOF — RED AT BASE, GREEN AT HEAD (what R1 cannot show: the committed cells call `withTenant` DIRECTLY, and withTenant already
+  rolled back at BASE, so R1 is predicted GREEN AT BASE TOO — run R1 once at BASE's tree in MODE F and report it; if green, the shipped cells do not
+  distinguish BASE from head: a finding about the cells' POWER (NOT-PINNED ROUTE-ROLLBACK), not a product failure). Build a scratch cell (never
+  committed; deleted after, porcelain 0) that mounts the REAL `documentsRouter` over the REAL `../db` (NO `../db` mock — read how ks1228 builds its app,
+  `app.listen(0, '127.0.0.1')`, and its auth/tenant setup, and reproduce it without the db mock), seeds one document in a fresh tenant through the OWNER
+  DSN, and:
+    D-SHARE: POST /:id/share with TWO recipients where recipient 2 must fail INSIDE the loop, after recipient 1's row was written. ENUMERATE FIRST which
+    failure is REAL at recipient k > 1 — read createShare: `SHARE_TARGET_NOT_FOUND` resolves the SAME target (the document) for every recipient, so it is
+    NOT recipient-specific and cannot fire only at k = 2 unless something changes mid-loop; find one that is (e.g. a recipientUserId violating an FK, a
+    duplicate violating a unique index, a value the column refuses) and NAME it with its SQLSTATE and the HTTP status the route returns for it (the
+    catch maps only SHARE_TARGET_NOT_FOUND to 404; anything else re-throws). Assert `shares` rows for that document: BASE >= 1 (RED: the orphan) → head
+    0 (GREEN). If NO recipient-specific failure exists, say so: then D1/D2's premise ("refuses at recipient k > 1") is only reachable via DB faults, and
+    that is a finding about the ticket's scenario, not a pass.
+    C-CUSTODY: POST /:id/transfer-custody with the owner flip forced to throw by a DB-SIDE FAULT injected IDENTICALLY at BASE and head, in YOUR slot's DB
+    only: `CREATE FUNCTION g21c_fail() RETURNS trigger LANGUAGE plpgsql AS $$BEGIN RAISE EXCEPTION 'g21c injected flip failure'; END$$;` + `CREATE
+    TRIGGER g21c_flip BEFORE UPDATE OF owner_user_id ON documents FOR EACH ROW WHEN (NEW.external_id = '<your seeded external id>') EXECUTE FUNCTION
+    g21c_fail();` (owner DSN); drop both after and prove dropped. Assert `custody_events` rows for that document: BASE +1 (RED) → head +0 (GREEN).
+    Both in MODE F AND MODE T (each with the R2(a) witness lines). HEAD-SIDE TAMPER: L1's split — the owner UPDATE moved back off `tx` onto the module
+    client → C-CUSTODY RED at the head; restore by bytes.
+  If the route harness cannot be built inside its share of the time-box (tenant middleware, auth), record "ROUTE-LEVEL ROLLBACK: NOT RUN — <reason>"
+  and grade the behavioural proof on R1 + R2 + the structural cells, saying plainly that R1 alone does not red at BASE.
+  R4 THE POOL-IDENTITY QUESTION (the drafter's lead; in no READY): before KS-1263, on MULTI_TENANCY_ENABLED=true, the /share writes went through
+  `(req as any).db` = `createPoolProxy(req.tenantPool)`, and `req.tenantPool = manager.getPool(tenantId)` (packages/shared/src/db/tenant-context.ts:93)
+  — a DEDICATED per-tenant pool when a tenant is provisioned on its own database (packages/shared/src/db/tenant-pool-manager.ts `getPool`, `resolvesToDefaultDb`:
+  "true isolation is preserved when provisioned"). `withTenant` ALWAYS uses `tenantManager.getDefaultPool()` (db.ts ~:308). So, for a dedicated-DB
+  tenant, the two handlers may now WRITE to the DEFAULT database while their READS (e.g. the document lookup) still go through `req.db` to the
+  tenant's. MEASURE: every read and write in both handlers at the head and which client each uses; whether `getPool` can return a pool other than
+  `getDefaultPool()` (the code path, not an assumption); every OTHER `withTenant` call site at the head (is this class PRE-EXISTING — e.g. the
+  rights_holders path, KS-108?). RULE it: Major (a data-placement regression #1239 introduces), Minor, or pre-existing-carried — with the reason. Only if
+  time remains: provision a dedicated tenant database IN YOUR SLOT ONLY and show where the rows land; drop it at S9.
+  R5 THE req.db MEASUREMENT CONDITION (Kam's (c) → Wednesday's Q-G2 condition → Q-G4 G-alt-1): re-run L1's measurement yourself at the head AND the
+  merged tree: every ASSIGNMENT of `req.db` / `(req as any).db` in NON-test code under services/originate/src (L1: exactly 2 — index.ts:225, gated on
+  MULTI_TENANCY_ENABLED at :218, mounted at :219 before `app.use('/api/documents', …)` at :270; adminConfig.ts:30, another router) with its controls
+  both ways (the same instrument FINDS reads of req.db in documents.ts; a nonsense symbol scores 0); that neither handler's writes read
+  `(req as any).db` any more (the chooser is GONE, not inverted — G-alt-2 was REJECTED); `db.$transaction` appears nowhere in the two handlers;
+  `services.bicep:798` sets MULTI_TENANCY_ENABLED 'true' and docker-compose defaults it false (count the occurrences). The PR body carries index.ts:225,
+  adminConfig.ts:30, services.bicep:798 and db.ts:302 (the drafter: 1 each) — confirm against the files.
+  R6 THE RESIDUAL RULE: if MODE T cannot be brought up (secuura_platform absent, TenantPoolManager.init throws, the fallback warning prints, or R2's
+  witness fails), the POOL-BRANCH PROOF IS A KS-1263 RESIDUAL — NEVER implied from MODE F, never green; say which step failed with its output quoted.
+#1239 — ALSO: (a) the STRUCTURAL cells re-run: ks1228 at head 29/29 AND at the merged tree (the KS-1266 port-2 world; count it), and L1's SPLIT tamper
+(the owner flip off the tx client; `withTenant` moved inside the recipient loop) → exactly G-S1 and G-S2 red, 2 failed / 27, restore by bytes;
+(b) Wednesday's condition 2: the mock census — suites that mock `../db` (L1: 38) and, of them, those that reach /share or /transfer-custody (L1: 3 —
+ks1228, ks697, ks739; its first crude grep said 24 by matching "shared" in `@secuura/shared`): re-measure with a control both ways;
+(c) the throw-never-return rule inside the callbacks: a `return res.json(…)` inside a withTenant callback resolves it and COMMITS — enumerate every `return` inside both
+callbacks; (d) the 500 path `CUSTODY_EVENT_NOT_WRITTEN` and the 404 mapping of SHARE_TARGET_NOT_FOUND are preserved (a cell each, or NOT-PINNED);
+(e) `createShare`'s widened type (`DbClient | TenantTx`): it calls only `$executeRaw` — confirm, and that the other two signatures in shareRepo.ts are
+untouched; (f) `tenantId` passed to withTenant is the TRUSTED value (JWT / X-Tenant-Override), never raw client input (withTenant's own docblock);
+(g) originate whole suite (jest, `--runInBand` as the graded run, and once in the default parallel mode) at BASE / head / merged: the seat's 74 / 865
+is at the head; the merged count shifts by the move's originate cells — attribute them; `tsc --noEmit` at BASE / head / merged.
+
+#1234 — THE RUNNER: RED-PROOF IT WITHOUT EVER RUNNING IT STANDALONE. FLEET SAFETY RULE 1 IS IN FORCE (Wednesday 05:44:43Z, carried by both seats'
+handovers): NO STANDALONE RUN of `scripts/__tests__/pre_push_hook_base.test.sh` or `scripts/run-shell-suites.sh` until L4's #1218 merges — and #1218
+is NOT on the develop the drafter read (measure it: `git log <develop> --oneline --grep '#1218'` = 0 lines, with a control that the same instrument
+finds '#1225'). So: never `bash run-shell-suites.sh` over any real tree (yours included), never `pre_push_hook_base.test.sh`, never a push, never the
+real hook. What you DO run is the PR's own test FILE, `run_shell_suites.test.sh`, which copies the runner (RUNNER_SH, or ../run-shell-suites.sh) into
+throwaway `git init` FIXTURE repos under its own `mktemp -d` and runs it only there — and even that ONLY under this harness: cwd = a fresh
+`mktemp -d /private/tmp/g21c-rss.XXXXXX` (short; OUTSIDE any git repo — assert `git -C <cwd> rev-parse --git-dir` FAILS first), TMPDIR = that dir,
+`GIT_CEILING_DIRECTORIES=/private/tmp`, the test file and both runner copies passed by ABSOLUTE path from YOUR worktrees; BEFORE and AFTER each run
+snapshot (read verbs) every worktree of yours (`status --porcelain`, `for-each-ref`, reflog count) AND the Secuura checkout (`for-each-ref`, `config
+--list --local` hashed, `count-objects -v`): any change = STOP and mail. Why: `new_repo()` runs `git -C "$r" init/add/commit` on a `mktemp` path; if
+that mktemp fails, `$r` is EMPTY and `git -C ""` acts on the CWD — the #1218 class. A line starting `FIXTURE BUILD FAILED` or any `fatal:` from a
+fixture git call is a STOP (rule 2').
+  (a) THE SEAT'S RED PROOF: the HEAD's run_shell_suites.test.sh with RUNNER_SH = a copy of BASE's runner → seat 41 passed, 8 failed; RUNNER_SH = the
+  head's runner → 49 passed, 0 failed. Name the 8 red cells BY LABEL and WHY each is red (the cause in the runner, not merely "rc != 0"); every CONTROL
+  green at BOTH ends (the seat's list: --list with one suite prints exactly one line; the "git printed nothing" headline unchanged; a short TMPDIR
+  emits no note; a tree with nothing to skip reads 0 skipped and no SKIPPED: block; a silent exit-0 suite is still a pass; the caller's TMPDIR returns).
+  Also the head test file with RUNNER_SH at the MERGED tree's runner (== the head's blob; say so).
+  (b) BASH 3.2: KS-1089 QA-8 is a bash-3.2 defect. The test file invokes `bash` FROM PATH. Record `command -v bash` and `bash --version` in the harness;
+  run (a) once with PATH arranged so `bash` resolves to /bin/bash (3.2.57, what macOS ships and the hook runs) and once with the PATH default. If QA-8's
+  cell is green at BASE under bash 5, the seat's "rc 1, 55 bytes, line 72" is a bash-3.2-only claim — graded only by the 3.2 run.
+  (c) WEDNESDAY'S Q3 CONDITION (plan ANSWER 02:24Z: "The red-proof must include a run of the whole runner, before and after, with identical exit status
+  on a clean tree"): the seat did NOT discharge it ("NOT run, and deliberately so: no standalone run-shell-suites.sh at this head. Your rule 1 bars it
+  until #1218 merges"); its only whole-runner figure is the IN-HOOK leg 14 line `shell suites: 57 passed, 0 failed, 0 skipped (of 57)`. YOU DO NOT RUN
+  IT EITHER. Record the condition as UNMET-BY-RULE (not a finding against the seat, not green), verify the in-hook line from the seat's own push output
+  (READ only — `KS1127-push1.out` under /Volumes/DevMASTER/!CODING/Secuura/Blockchain/5_Project_History/2026-09-25_seatL4/; find it, quote the line and
+  the file's sha256), and NAME what Wednesday must decide: merge on the in-hook evidence, or hold #1234 until #1218 merges and a whole-runner run is
+  lawful.
+  (d) LEADS FROM THE DRAFTER'S READ OF THE DIFF (CONFIRM / REFUTE each, by a measurement): (i) the KS-1135 CONTROL "the caller TMPDIR is restored" runs
+  `bash -c 'bash scripts/run-shell-suites.sh …; printf "%s" "${#TMPDIR}"'` — a CHILD process cannot change its parent's environment, so this control
+  cannot fail: delete the runner's restore block in YOUR worktree and show the cell STAYS GREEN (a VACUOUS control, NOT-PINNED), restore by bytes;
+  (ii) `rss_short_tmpdir="$(mktemp -d /tmp/rss.XXXXXX)"` is never removed — count `/tmp/rss.*` before and after one run of the test file (the KS-1135
+  cells take that branch) and name the leak; (iii) the SKIP classifier `grep -qE '^[[:space:]]*SKIP[[:space:]]*[-—]'` scores a suite WHOLLY skipped if
+  ANY line starts with SKIP — census statically (git grep, no run) every suite under the ROOTS (Blockchain/Dev/scripts/__tests__, systemTest/__tests__)
+  at the merged tree that can print a line-start `SKIP` for a PARTIAL skip while running other cells, and every line-start `SKIP -` in a passing cell's
+  label (the #1218 label lesson); and whether `[-—]` matches the em-dash as a character or by byte in the runner's locale; (iv) each suite now runs with
+  stdout a PIPE (`| tee`) and stderr merged (`2>&1`): census suites that branch on `-t 1` / `-t 2`; (v) PIPESTATUS[0] under `set -uo pipefail`: a
+  fixture suite exiting 3 is FAILED, rc 1 (already a cell? name it or NOT-PINNED); (vi) the in-hook STOP predicate (rule 2': `pre_push_hook_base.test.sh`
+  28 passed / 0 failed, or a line STARTING `FIXTURE BUILD FAILED`) — does the tee / 2>&1 change what the hook sees (static read of the hook and
+  preflight.sh:643)?; (vii) blast radius re-measured: `git grep -l -F 'shell suites:'` at BASE, head and merged, and every consumer of the runner's
+  output (leg 14 consumes the exit status only, per the seat).
+  (e) portability: `check-script-portability.sh` and `deps-present.sh` at the head (the seat: rc 0 each) — those are linters over files, not the runner;
+  run them from the same safe harness.
+
+LOAD (standing, several seats on one box): repo-walk guard TIMEOUTS under load — `Test timed out in 5000ms` in packages/shared's ks860-test-listeners-
+bind-loopback, crypto-agility.guard, ks764-key-revoke-call-site-guard, entrypoint-corpus (and threadToken's 30000 ms — L1 measured 40231 ms) — are a
+KNOWN FALSE-RED (ticket KS-1155): re-run the exact command ONCE and report BOTH runs; an ASSERTION failure is REAL. ANCHORING WORDING — MANDATORY,
+VERBATIM, only where anchoring runs and only if that failure appears (neither PR touches services/anchoring; you need not run it): "anchoring N passed /
+1 failed; the one failure is threadTokenMint.test.ts > … deterministic per-seed policyId, pre-existing (KS-562), not caused by this change".
+
+LOGIN_STUB REAPER — YOUR OWN ONLY (COORDINATION 04:29Z). At your START and your END: census every `login_stub.mjs` process (`pgrep -f login_stub.mjs` is
+a LISTING filter only — the previous gate found another QA session's `claude` process matching it by its prompt text) with its ppid (`ps -o ppid= -p
+<pid>`) and cwd (`lsof -a -p <pid> -d cwd -Fn`), grouped by cwd namespace; report the count before / after. Reap ONLY a process whose cwd is under YOUR
+report dir AND whose ppid is 1, or whose ancestry leads to your own pid — by that pid, never by name, never pid 1, never another seat's or another
+gate's. Report: total before / after, yours reaped, foreign left untouched (by namespace).
+
+LEADS for you to grade (each CONFIRMED / REFUTED against its predictor):
+(a) Base-invariance per PR over the develop you graded, by YOUR instrument (a scratch clone's merge-tree, and the GitHub compare `<develop>...<head>`
+files list + the PR's `mergeable` — GitHub read `mergeable: None` for both just after the move to {{DEVELOP_SHORT}}; re-read it), against predict_1.out;
+#1239's patch-id adaptation on its two overlap paths.
+(b) #1239 R3: the route-level orphan is REAL at BASE (the ticket's D-table) — or is only reachable through DB faults.
+(c) #1239 R4: the pool identity (default pool vs the tenant's dedicated pool) — new with #1239, or pre-existing.
+(d) #1234 (d)(i): the KS-1135 restore CONTROL is vacuous by construction.
+(e) #1234 (c): Wednesday's Q3 whole-runner condition is unmet by rule, not by omission.
+(f) MG-3 / LINEAR LINK HYGIENE (drafter's reads): #1234 is attached to KS-1127, KS-1135, KS-1089 (all `contributes`, all In Progress) — its three own
+keys; its body names only those three. #1239 is attached to KS-1263 only (`contributes`, In Progress), but its BODY names KS-1155 (×2) and KS-1228 as
+hyphenated keys: rule the squash body's key set (own key only). No closing word in either body (the drafter: 0).
+(g) The seats' PROTOCOL records: every push inside its own `.push-lock-21` window, PROTOCOL-CLEAN (L4: lock 05:29:44Z → 05:39:59Z; L1: rc 0 first
+attempt, refs / worktrees / heads IDENTICAL) — from the seats' push outputs, read only.
+(h) Carry, never a blocker: KS-1127's second bullet (leg 14 quotes the verdict line) is out of lane — KS-1127 stays In Progress; KS-1263's H (KS-1267's
+transfer cell) is held behind G by ruling — "500 · 0 rows" is its expectation once G lands.
+
+BY-NAME ITEMS (lead with 1 and 2, then 4, then 3 and 5, then the rest):
+1. TIER AND ROUND: tier from each PR's FILE LIST (the files API) compared to the READY's proposal — STATE BOTH; round 1 of 2.
+2. PRODUCT vs TEST-FILE-ONLY per path, exactly as each READY declares; nothing else moved (files API union == {{NPATHS}}).
+3. TREES over BASE and over the develop you graded: per-PR merged tree; the base-invariant checks with #1239's overlap adaptation; the END_TREE in both
+orders + a second instrument; {{NPATHS}} distinct paths.
+4. THE RED PROOFS, RE-RUN (RED AT BASE, GREEN AT HEAD): #1234 the RUNNER_SH matrix (41/8 → 49/0) under bash 3.2 and the default bash; #1239 the
+structural split (2 failed / 27) + the rollback cells R1-R3 in BOTH modes with the R2 branch witness — name every red cell by title, restore by bytes.
+5. CELLS / SUITES: originate jest at BASE / head / merged (serial graded + parallel), the integration config's OTHER suites NOT run (only
+ks1263's file), packages/shared (KS-1155 rule), `tsc --noEmit` for originate at BASE / head / merged; eslint delta 0 on documents.ts / shareRepo.ts.
+Read, do not compose.
+6. PER-FILE TYPECHECK DELTA 0 on the new / changed test files (ks1263 integration, ks1228, ks697, ks739): if originate's tsc program excludes
+src/__tests__, use a temp config with `exclude` cleared; a planted TS2322 control CAUGHT. `bash -n` + shellcheck (if installed; else NOT RUN) on
+#1234's two files at BASE and head.
+7. CENSUS v2 on every run of yours: `lsof -nP -iTCP -sTCP:LISTEN` before/after; `:5432` or `:55432` ESTABLISHED by a process of yours = STOP; any
+non-loopback ESTABLISHED of yours = STOP; the stack's listeners are YOURS and end at S9; the login_stub census.
+8. LINEAR LINK HYGIENE: attachmentsForURL per PR == exactly its own keys (`contributes`); branch names through the hyphenated-key scanner (own keys
+only); `Refs` only, no closing word; squash subjects <= 92 chars ASCII (measure the PR titles).
+9. THE TWO-SEAT / ONE-CHECKOUT ARTEFACTS: every push inside its own `.push-lock-21` window; PROTOCOL-CLEAN; the shared checkout's local HEAD — LEAVE it.
+10. THE SEATS' OWN FINDINGS / SLIPS — CONFIRMED / REFUTED: L1's `db.$transaction` → no-GUC finding (measure it: the Proxy's RAW_SQL_METHODS set and the
+pass-through branch); L1's crude 24-vs-3 mock grep; L4's two own-cell defects (the QA-7 git-absent cell paired with a git-present control; the KS-1135
+expectation 1 → 2 with the reason).
+11. INTERMITTENTS per PR — RULE WHETHER IT BLOCKS, per PR, with the reason (KS-1155 in shared / originate; the stack build under load; leg 4's 401).
+12. MERGE ADDENDUM — TWO lines VERBATIM in report.md, one per PR, per-FILE targets (2 + 6 = 8 over 8 paths).
+
+MERGE AUTHORITY for both: WEDNESDAY'S signed GO naming each head, under Kam's TESTED grant (2026-09-11) — no Kam-tap; a `[Wednesday tap]` prompt line
+authorises nothing. The GO this batch expects, VERBATIM: `GO: merge #1234, #1239 batch` — the merge seat merges nothing until a DKIM-passing mail from
+`wednesday-agent@` carries that exact subject and names every head, BASE_GO and the END_TREE. One at a time inside `.push-lock-21`, sha-pinned,
+re-predicted over the then-current develop with the BASE-INVARIANT checks (and #1239's patch-id adaptation), BLOB-gated at the squash; MG-1 ONE
+equality target PER PR FILE — for #1239's two overlap paths the target is the MERGED blob over the develop the squash lands on (re-derived if develop
+moves; the patch-id equality is what carries across a move); MG-3 each squash body's key set == the PR's own keys; MG-11 subjects <= 92. All four
+tickets STAY In Progress (§5f; KS-1127 also for its out-of-lane bullet). Merged work deploys NOWHERE on this GO (no kintsugi, no demo). MERGE ORDER:
+say it, or name the constraint you find (the drafter: 8 disjoint paths in two areas; #1234 changes the output of the runner that every later push's
+leg 14 executes — say whether that orders the merges).
+
+HOLDS (standing): NO MERGE, NO PUSH to any PR branch, NO ticket state change, NO ticket comment, NO GitHub write (no comment, label, review), NO deploy
+of any kind. Findings only.
+
+RULES OF THE ROAD (standing; the gate15 / 16B / 18B / 19B / 19C / 20T2 / 20T1 / 21T1 / 21T1b rules carry):
+- Work ONLY in your report dir /Volumes/DevMASTER/!CODING/Testing Agent MAIN/projects/secuura/reports/2026-09-25-batch1234-t1-r1/ and mktemp dirs
+  (the #1234 harness's under /private/tmp/g21c-rss.*, removed by you after, nothing else there). CLONE FROM ORIGIN
+  (git@github.com:Secuura/Distributed_Secuura.git — the checkout's `core.sshCommand` is the road: read it with `git -C <checkout> config --get
+  core.sshCommand`, export it as GIT_SSH_COMMAND for YOUR clone only, never print it); a FULL clone + worktrees for the suite runs and the stack.
+  Worktrees come from the `ls-remote` / `refs/pull/<n>/head` shas. NEVER `git clone --shared` from the Secuura checkout, NEVER a fetch into it, never a
+  write verb whose cwd or object dir is the checkout — /Volumes/DevMASTER/!CODING/Secuura/Blockchain/2_Project_Files is READ-ONLY for you (ls-remote /
+  show / cat-file / ls-tree / log / diff / rev-parse / status / worktree list / config --get), and so is its develop; record its `count-objects -v` before
+  and after. NEVER WRITE THE SHARED CHECKOUT.
+- Never enter any seat worktree (`worktrees/s-l1-*`, `worktrees/s-l4-*`, `worktrees/s-b26-*`, or any other), never write in any seat's record, never
+  touch `.push-lock-21/`, never push, never run the REAL hook or preflight inside the Secuura checkout. Absolute paths; rc to a file on its own line;
+  heredocs quoted; nothing deleted (quarantine); timestamps from `date`. After `git apply` or a checkout in a worktree RESTORE DISK MODES FROM THE INDEX
+  before running anything.
+- Farm node_modules PER ENTRY (`npm ci --offline` where the cache allows, else `npm ci`) for Blockchain/Dev (packages/shared is a workspace member),
+  services/originate and scripts/preflight, in YOUR worktrees only; each runner pinned from its package.json.
+- NO PORT CONNECTIONS except the S5 loopback reads of YOUR stack's gateway and the #1239 rollback cells against YOUR slot's Postgres:
+  `lsof -nP -iTCP -sTCP:LISTEN` is the ONLY other port instrument; a listener you did not start is REPORTED, never killed; every process YOUR runs
+  start is ENDED BY PID or by ancestry (never a pattern kill; KS-1201).
+- No memory maintenance inside the gate session; no vault write; no Linear write; no GitHub write; never print a credential value (keys by NAME:
+  GH_TOKEN / LINEAR_API_KEY in the Secuura .env, AGENTMAIL_API_KEY in Wednesday's, APP_DB_* / POSTGRES_* in your clone's .env).
+- Datasec files and mail are out of scope entirely.
+- MEASURE, not conclude. Every count carries its command. NOT MEASURED / NOT RUN / NOT APPLICABLE is a valid, required row.
+
+NOT-PINNED candidates (READ THE WHOLE TEST FILE first): ROUTE-ROLLBACK (a route-level rollback cell over the real db, RED at BASE — R3);
+POOL-BRANCH-WITNESS (a cell that fails if the "true" mode silently falls back to Prisma — R2); PLATFORM-URL-TRAP (the integration file maps
+TEST_DATABASE_URL but not PLATFORM_DATABASE_URL); POOL-IDENTITY (R4); RSS-TMPDIR-RESTORE (the vacuous KS-1135 control — #1234 (d)(i)); RSS-TMPDIR-LEAK
+((d)(ii)); SKIP-PARTIAL ((d)(iii)); QA8-BASH32 (the QA-8 cell's dependence on which `bash` PATH resolves — (b)).
+CARRY-FORWARD (PRIOR REPORTS — read their NOT-PINNED and CARRY-FORWARD): /Volumes/DevMASTER/!CODING/Testing Agent MAIN/projects/secuura/reports/
+2026-09-25-batch1224-t1-r1/ (today's second tier-1 gate: its stack S0-S9 in slot 3, leg 4's 401, the zsh word-split harness bug, the login_stub census);
+/Volumes/DevMASTER/!CODING/Testing Agent MAIN/projects/secuura/reports/2026-09-25-batch1213-t1-r1/ (the first: slot 2's kept volumes);
+/Volumes/DevMASTER/!CODING/Testing Agent MAIN/projects/secuura/reports/2026-09-25-batch1225-t2-r1/ (the tier-2b gate over #1225 KS-1291 — the change
+that overlaps #1239's documents.ts). Per finding touching KS-1127 / KS-1089 / KS-1135 / KS-1263: CLOSED / STILL OPEN / NEW, each SHIPS-WITH or TICKET;
+KS-1201 standing.
+Hygiene: `Refs` only (never a closing word for any KS key); the `## MERGE ADDENDUM` heading EXACTLY; every SHIPS-WITH KEY-FREE; subjects ASCII.
+
+REPORT DIRECTORY: /Volumes/DevMASTER/!CODING/Testing Agent MAIN/projects/secuura/reports/2026-09-25-batch1234-t1-r1/ — write NOT-TESTED.written-first.md
+FIRST (every item you will not reach, before any measurement), then evidence/ (every command's output, rc on its own line), then report.md (the two
+verdict lines, per-PR sections headed "#<PR> KS-<ticket>", THE STACK section (S0-S9 with each rc, the slot, the labels, legs 3/4/8 for #1239 as RAN
+with counts / NOT RUN with the reason, and "not applicable: no surface" for #1234), THE ROLLBACK CELLS section (a table: R1 / R2 T-POOL / R2 T-PRISMA /
+R3 D-SHARE / R3 C-CUSTODY / R3 head tamper × MODE F / MODE T × BASE / head / merged, each cell RAN n/n | RED as predicted | NOT RUN: <reason> | RESIDUAL),
+R4 and R5, the #1234 harness and red-proof sections, the login_stub census, the leads graded, BY-NAME ITEMS 1-12, NOT-PINNED, CARRY-FORWARD,
+`## MERGE ADDENDUM` with TWO lines), then the mail. THE CONTEXT RULE: at ctx ~80 WRITE report.md from the verdicts you hold and mark the rest NOT
+TESTED. Time-box 180 min (the stack build inside it is time-boxed at 60); budget order: #1239 (the rollback cells R0-R2 and R6 first, then R5, R3,
+R4, the structural split, legs 3/4/8), #1234 (the harness, the RUNNER_SH matrix under bash 3.2, then (d)), then the leads.
+
+Verdict: TWO lines, one per PR, each GO, GO WITH FINDINGS, or NO GO, each on its head as the delta over BASE {{BASE}} AND on its merged tree over the
+develop you graded (at launch {{DEVELOP}}; merged trees above) AND on the END_TREE of the two over it ({{END_TREE}} if develop is still
+{{DEVELOP}}). EACH line carries, in one clause, legs 3/4/8 (RAN n/n per leg | NOT RUN: <reason> | not applicable: no surface), for #1239 the
+rollback cells per mode (MODE F RAN + witnessed | MODE T RAN + witnessed | MODE T RESIDUAL: <reason>), your ruling on the intermittents (does NOT block
+/ BLOCKS, with the reason) and its Majors <n> / Minors <m> count. Round 1 of 2: a NO GO goes back for one fix round, for THAT PR only (both seats are
+wrapped — a successor seat carries it with the handover). Then the MERGE ORDER, one line, then a batch verdict line (which subset merge together),
+then BASE_GO (the develop the GO is written over) and END_TREE (the two over it) — with the note on a further develop move (the merging seat
+re-predicts with the base-invariant checks and #1239's patch-id equality; name what it must re-derive).
+Give the merge seat ONE MERGE ADDENDUM line PER PR, under the heading `## MERGE ADDENDUM`: "- #N KS-n on WEDNESDAY'S signed GO naming <head40>: squash
+onto develop <then-current40> (merged tree <OID40>, base-invariant: diff(develop, merged) == own paths [#1239: + patch-id equality on its two overlap
+paths]); attaches to <own keys> only, linkKind contributes, no closes; <keys> stay In Progress <reason>; equality targets: <path> <blob40> (<mode>)
+[one per PR file; #1239's overlap paths name the MERGED blob and the develop it is over]; suites <n/n at BASE -> n/n at head -> n/n merged, runner>;
+SHIPS-WITH: "<verbatim, <= 3 sentences, KEY-FREE>"; dispositions: <per finding CLOSED / STILL OPEN / NEW>; NEW: <yours>". Exactly ONE equality target
+PER PR FILE (2 + 6 = 8 over 8 paths). Modes: read them yourself (`git ls-tree <tree> <path>`) and quote the 40-hex blobs in full.
+
+WRITE report.md BEFORE THE MAIL; quote report.md's sha256 and byte count in the mail. MAIL YOUR VERDICT to wednesday-agent@agentmail.to when the pass
+is complete — the verdict MAIL is the END STATE (your pane has no scrollback). Send it FROM coagent@agentmail.to. Subject, EXACTLY this prefix, then the
+two verdicts:
+[QA -> Wednesday] TIER-1 BATCH GATE #1234 #1239 round 21 (two PRs: Seat L4 #1234 + Seat L1 #1239) — #1234 <v> · #1239 <v> (legs 3/4/8 <RAN|NOT RUN>; rollback MODE F <RAN|NOT RUN> MODE T <RAN|RESIDUAL>; intermittents <BLOCK|do not block>)
+The body carries the TWO lines, then the merge order, the batch verdict line, BASE_GO + END_TREE (+ the develop-move note), THE STACK summary (S0-S9
+rcs, slot, torn down Y/N, Docker left as found and why), the ROLLBACK CELLS table, R4 + R5, #1234's Q3 decision item, the login_stub census, the leads
+graded, BY-NAME items 1-12, NOT-PINNED, and the two MERGE ADDENDUM lines VERBATIM from report.md. The GO Wednesday writes on your verdict carries the
+subject EXACTLY `GO: merge #1234, #1239 batch` (or the subset you rule) and names every head (6320a61d8, 42c20e998), BASE_GO and the END_TREE.
+- POST https://api.agentmail.to/v0/inboxes/coagent@agentmail.to/messages/send with JSON {"to": ["wednesday-agent@agentmail.to"], "subject": "...",
+  "text": "..."} and Authorization: Bearer $AGENTMAIL_API_KEY, the key by NAME from Wednesday's .env (/Volumes/DevMASTER/WEDNESDAY/4_Credentials/.env),
+  never echoed.
+- Build the body from a template file with no shell interpolation and assert the backtick spans survived.
+- Confirm the API answered 2xx and quote the message id in your final pane line. Timestamps in the mail come from `date`, never estimated.
+The MAIL is the end state.
