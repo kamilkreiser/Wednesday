@@ -1,0 +1,6 @@
+# inbox_routing.conf is APPEND-ONLY (one routing line per gate/seat). Two seats appending at
+# once conflicted three times on 2026-09-25/26, and one rebase staged the live file WITH conflict
+# markers. The union driver keeps both sides' lines. Proven 2026-09-26 in a scratch repo through
+# `git pull --rebase` (safe_push's path): with this line rc 0, 0 markers, both lines kept; the
+# control arm without it rc 1, 3 markers. Never use union for a file whose lines are edited in place.
+inbox_routing.conf merge=union
