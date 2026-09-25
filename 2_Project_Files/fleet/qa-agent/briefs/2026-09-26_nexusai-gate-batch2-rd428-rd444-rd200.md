@@ -1,0 +1,607 @@
+# QA Agent Invocation Brief — Datasec/NexusAI, ONE batched gate "batch #2": RD-428 (TIER 1) + RD-444 (TIER 2) + RD-200 (TIER 2) — three targets, three verdicts, one report
+
+**Drafted for Tuesday 2026-09-26 04:20–04:50 AEST by a read-only drafting agent; Tuesday reviews, stamps and launches.**
+Commissioned on three READY FOR QA mails from NexusAI-P (seat S84P), copies on disk, read whole:
+- **A — RD-428** @ `823ef9e5e117d1c3f7d8c8659fe31e1a4fc61a1e` —
+  `/Volumes/KK_T9_External_HDD/TUESDAY/2_Project_Files/fleet/qa-agent/briefs/2026-09-25_nexusai-rd428-READY-mail.txt`
+- **B — RD-444** @ `2f9da1cda0f2971957434b439b0a32792c54dce3` —
+  `/Volumes/KK_T9_External_HDD/TUESDAY/2_Project_Files/fleet/qa-agent/briefs/2026-09-25_nexusai-rd444-READY-mail.txt`
+- **C — RD-200** @ `12b5edc31ee4ef52415d1cbffbbb0504d7f4715c` —
+  `/Volumes/KK_T9_External_HDD/TUESDAY/2_Project_Files/fleet/qa-agent/briefs/2026-09-26_nexusai-rd200-READY-mail.txt`
+**Batched under the 2026-09-18 batch-gates rule** (as the previous gate, `2026-09-25_nexusai-gate-rd579-rd639.md:9`): the three branches
+and main's own line are pairwise file-disjoint except `scripts/verify-expected-counts.json` (MEASURED, §1). **All heads and main are
+pinned here and re-read by `git ls-remote` in the launcher immediately before launch.**
+
+SELF-CHECK: re-read end-to-end for contradictions | Tuesday 2026-09-26 04:35 AEST
+Self-check note: read whole by Tuesday (2026-09-26 04:35 AEST); drafter WRONG list 1-12 read first and carried; pid 91386 confirmed as this seat's claude; authority = Kam 2026-09-25 ~22:0x 'merge once tested' (merges stay Tuesday's GO); tiers A=1, B=2, C=2.
+
+## Charter
+Read `/Volumes/KK_T9_External_HDD/TUESDAY/2_Project_Files/fleet/qa-agent/QA_AGENT_CHARTER.md` in full first. You are an independent
+tester. You did not build these changes and you owe no builder anything. **Every line below that reports what a builder says is a
+CLAIM, never evidence.** Explore a shown-once credential that now lives longer in page memory (A), an ignore rule that now also
+hides symlinks (B), and a colour gate that now claims to see JavaScript (C), with a real browser, real git and your own trees,
+looking for any state in which **a secret leaves the page, a file the product should track is silently ignored, or a gate goes
+green while not seeing what it claims to see.**
+
+- **RD-428 is TIER 1** (credential handling: F2 keeps a shown-once SCIM bearer token in page memory across a mode change —
+  Tuesday's commission raises it from the READY's lane-plan "tier 2", READY :1-2). Verdict: **GO / GO WITH FINDINGS / NO GO at
+  `823ef9e`**, plus its merged-tree result.
+- **RD-444 is TIER 2** (`.gitignore` + one test). Verdict: **GO / GO WITH FINDINGS / NO GO at `2f9da1c`**, plus merged-tree result.
+- **RD-200 is TIER 2** (a JS colour corpus gate + a closed debt manifest; test-side and docs only). Verdict: **GO / GO WITH
+  FINDINGS / NO GO at `12b5edc`**, plus merged-tree result.
+- **One verdict PER ticket, one report, one mail.** A finding on one ticket never becomes another's verdict.
+
+## RULED BY KAM, NOT YET IN AN ARTEFACT
+- **None of RD-428, RD-444, RD-200, RD-676 appears in `CLARIFICATIONS.md`** (drafter: `grep -n -i -E 'RD-428|RD-444|RD-200|RD-676'`
+  → 0 lines; positive control, the same file and tool: `grep -n 'C-141'` → :1479). The rulings that bind these tickets are
+  **Tuesday's, RELAYED by the builder, not read by the drafter in Tuesday's mail**:
+  - RD-428 F2 design — **KEEP** (not discard-and-announce): READY :32 "the ticket allowed keep OR announce; you ruled keep".
+  - RD-428 — the grant to re-anchor ONE cell of `__tests__/rd409-410-provisioning-panel-keyboard-and-recovery.test.js`
+    (READY :8, "under your grant (12:23:01Z)"; the builder's question is on disk,
+    `/Volumes/KK_T9_External_HDD/!CODING/Datasec/NexusAI/session-tools/s84p/mail-03-rd428grant.o5AEbN`, option (a)).
+  - RD-200 — the grant for the new fixture `__tests__/fixtures/rd200-js-brand-debt.json` (READY :7, "your grant 12:40:12Z") and
+    "RD-182's recorded-debt shape is the model, per your ruling" (READY :27).
+- **Merging is Tuesday's GO (Kam, 2026-09-25 ~22:0x, "work your way through the tickets and merge once tested", as recorded in
+  the previous brief :32); this gate merges nothing into anything the fleet can see.**
+
+**The clarifications that bind this gate** (`/Volumes/KK_T9_External_HDD/!CODING/Datasec/NexusAI/1_Project_Definition/CLARIFICATIONS.md`,
+274,618 bytes, mtime 2026-09-26 03:52; line numbers read by `grep -n` at 04:2x AEST — the file grows during the night, re-read them):
+- **C-02** (:30) a local run serves every page and API with no sign-in (open mode on a fresh DATA_DIR) — the surface you drive.
+- **C-28** (:153) never write, pull, check out or stash NexusAI's `2_Project_Files`.
+- **C-40** (:225) a check must be able to fail on the thing it claims — "It can fail" is not enough; a fixture must contain the real
+  wiring (Rule 2). **Central to RD-200 and RD-444.**
+- **C-49** (:299) the prior-work check.
+- **C-57** (:410) a conflict confined to the counts file is resolved by REGENERATION with the id-superset control ("merged N ⊇ A M ∪
+  B K; missing 0"); any other conflicting file STOPS; suites no fewer than the larger parent's.
+- **C-63/C-64** (:581/:599) the FIFO lock and its usage rule.
+- **C-68** (:657) a verdict holds only at the head it ran on; a semantic overlap git cannot see is re-run by NAME; counts are
+  regenerated ONCE on the tree after the merge — **"No conflict is not evidence the number is right"** (its 2026-09-18 amendment).
+- **C-76** (:729) an explanation is a claim — a red proof or UNVERIFIED.
+- **C-89** (:827) after a merge commit: `git diff --quiet HEAD` and HEAD's counts equal the regenerated numbers.
+- **C-97** (:900) when a fix reddens an older test, the FIXTURE changes, never the policy — **RD-428 re-anchors a gated RD-410 cell's
+  PROPERTY (clears → keeps). That is a policy change in a test, authorised only by the relayed grant above; §4 Q2 checks it is
+  exactly one cell and that the old cell's intent survives.** C-98 (:906 per the previous brief) cells assert the property after the fix.
+- **C-104** (:972) any instrument that enumerates from `git ls-files` TRIPLES its population during an unresolved merge — **never run
+  a census, a suite or the id-superset control in a clone with an unresolved merge; resolve (stage) first, then run.**
+- **C-110** (:1101) the floor rule. **C-112** (:1141) a declared limit is where the evidence stops. **C-122** (:1278) source text does
+  not cover behaviour. **C-125** (:1320) the foreign-server counter. **C-133** (:1426) base-aware id accounting (cite only if the
+  id-superset control misses).
+- **C-141** (:1479) a builder's proof ticket YIELDS to a `qa-*` ticket; **ADDENDUM** (:1487) a merge hold is gate-class; **ADDENDUM 2**
+  (:1489) "yield once" is once PER WAITING GATE TICKET — so every one of your holds is a separate `qa-*` ticket the builders yield to.
+- **C-142** (:1491) what "green" means at a merge (local verify through the lock AND CI's known failing set).
+
+## PRIOR ROUND
+- **RD-428 ← RD-409/410 tier-1 gate @ `5507f2b`, findings 2, 3, 4** (report
+  `/Volumes/KK_T9_External_HDD/!CODING/Datasec/NexusAI/qa-reports/2026-09-14-rd409-410-5507f2b-tier1-report.md`, saved by S59; evidence
+  `/Volumes/KK_T9_External_HDD/!CODING/Testing Agent MAIN/projects/nexusai/reports/2026-09-14-rd409-410-5507f2b-tier1/evidence/`):
+  F2 = its finding 2 (:19-25, "an arrow key on a mode card can silently throw away a new SCIM token"); F3 = finding 3 (:26-28, the nav
+  ring's edge next to the active item, **1.00:1 light, 1.64:1 dark**); F4 = finding 4 (:29-31, the fallback message does not name the
+  directory — **measured by that gate "with a store that has really fallen back"**). That gate masked the token in its screenshots
+  (:9) and its report :63 records a broken keyboard harness that **may have opened a public link** — §8 H-6 forbids that here.
+- **RD-444, RD-200: no prior QA round.** RD-200's origin is BRAND.md rule 3's RD-200 bullet (`docs/BRAND.md` at `823ef9e` :561-570:
+  "colours set from JavaScript — `settings.js` went on painting the retired indigo …").
+- **The previous batched gate — its METHOD and its SELF-CORRECTIONS are your inheritance:**
+  `/Volumes/KK_T9_External_HDD/!CODING/Testing Agent MAIN/projects/nexusai/reports/2026-09-25-gate-rd579-rd639/report.md` (§8 S-1..S-6
+  at :337-343; floor table :345-355; merged-tree method :259-271). **§3a below turns each of S-1..S-6 into a rule.** Its corrected
+  instruments are `…/2026-09-25-gate-rd579-rd639/evidence/qa-floorlib.sh`, `qa-floorcount.py` and `qa-dispatch.sh` — reuse BY COPY.
+
+## 1. Targets — verified at drafting from the object store (04:20–04:35 AEST)
+**origin by `git ls-remote` at 2026-09-26 04:20:21 AEST:**
+`main` **`11666d3c4f615190646914270016419fffa642e2`** · `rd-428-provisioning-residue-s84p` **`823ef9e5e117d1c3f7d8c8659fe31e1a4fc61a1e`** ·
+`rd-444-gitignore-symlink-s84p` **`2f9da1cda0f2971957434b439b0a32792c54dce3`** · `rd-200-js-colour-corpus-s84p`
+**`12b5edc31ee4ef52415d1cbffbbb0504d7f4715c`**.
+**Re-read them at your start, mid and end. A moved head is a finding and a reason to stop, never a typo to fix.** The same seat
+(NexusAI-P) builds all three and is working RD-197/RD-204 now (`session-tools/s84p/` has `commit-rd197b` at 04:20) — if a branch
+moves, the verdict still names the pinned sha and you say so.
+
+**Main's line (MEASURED, `git log --format='%H %P' 7c47ec4..11666d3`):** `cac9cf6` (RD-579, parent `0677388`), `fe53540` (RD-639,
+parent `7c47ec4`), `0863711` (merge 1, parents `cac9cf6` `7c47ec4`), **`11666d3` (merge 2, parents `fe53540` `0863711`)** — the
+previous gate's two tickets, merged. Delta `7c47ec4..11666d3` = 5 files (the rd579 and rd639 cells, `backend/dataErasure.js`, the
+server entry point, the counts file). Counts **4012/237** (`git show 11666d3:scripts/verify-expected-counts.json`) — the previous
+gate's merged prediction and measurement (its report :266).
+
+### TARGET A — RD-428 (TIER 1)
+- **Two commits off `7c47ec467f585e9db5daf3a82cdb96deae0b1e7a`** (MEASURED): `2c6279205e7855840dd24262e5c5e956c099e9e6`
+  (the change, parent `7c47ec4`) → `823ef9e` (**counts only**: `git diff --name-only 2c62792 823ef9e` = the counts file).
+  `merge-base(823ef9e, 11666d3) = 7c47ec4` — **main is NOT its base; main is four commits past it.**
+- **Delta over `7c47ec4`: 9 files, +474/−14** (`git diff --stat`): `static/js/entra-provisioning-ui.js` (F2, +27/−6),
+  `backend/routes/entraProvisioning.js` (F4, +15/−1), `static/css/keyboard-focus.css` (F3, +21), `static/css/dark-mode.css` (F3, +7),
+  `__tests__/rd409-410-provisioning-panel-keyboard-and-recovery.test.js` (the re-anchored cell, +17/−4, hunks at :258-270 only),
+  three new cell files `rd428-fallback-names-data-dir` (node), `rd428-nav-inner-focus-ring` (jsdom), `rd428-scim-token-mode-change`
+  (jsdom), and the counts file.
+- **Counts: `7c47ec4` 3978/235 → `823ef9e` 3990/238** (+12 tests, +3 suites = the three new files; READY :19).
+- **What changed (READ at source, line numbers at `823ef9e`):**
+  1. **F2** `selectProvisioningMode` (`static/js/entra-provisioning-ui.js:1004-1039`): the old `state.generatedToken = null` on a real
+     mode change (at `7c47ec4` :1020) is gone; a real change now `render()`s and, if a token is held, says on the status line
+     *"…is shown again below…"* (mode `scim`) or *"…is kept, but it is not shown and is never saved with this method…"*.
+     `saveProvisioningConfig`'s accepted branch (:1317-1346) computes `droppedTokenNote` when a token is held and
+     `payload.scimBearerToken === undefined` (:1321), then clears the token (:1324).
+  2. **F4** `persistenceLocationAdvice` (`backend/routes/entraProvisioning.js:85-98`): on `dataDirFallbackActive`, names the
+     configured `dataDir()`; when `path.resolve(configured) === path.resolve(where)` says to set DATA_DIR instead.
+  3. **F3** `.settings-nav .nav-link:not(.active):focus-visible { box-shadow: inset 0 0 0 3px #00719f }`
+     (`static/css/keyboard-focus.css:61-63`) and `body.dark-mode …` with `#0096d6` (`static/css/dark-mode.css:1569-1571`).
+- **THE F2 SAFETY FACTS — read at source by the drafter at `823ef9e` (READY :33 cites `7c47ec4` numbers; they moved):**
+  | property | `7c47ec4` (READY) | `823ef9e` (drafter) | what the line does |
+  |---|---|---|---|
+  | drawn only in `scimPanel` | :385 | **:385-390**, and `render()` calls `scimPanel()` only when `state.mode === 'scim'` (**:605-607**) | the `<code>` holding the token |
+  | sent only when `mode === 'scim'` | :1293 | **:1308-1310** | `payload.scimBearerToken` set only there |
+  | cleared on reload | :989 | **:989** | `reloadProvisioningConfig` |
+  | cleared on revoke | :1176 | **:1191** | revoke success |
+  | cleared on accepted save | :1303 | **:1324** | after `droppedTokenNote` |
+  | cleared on conflict (409/428) | :1345 | **:1366** | with the "has NOT been saved" reason |
+  | **NOT cleared** | — | **generic save failure `else` (:1379-…) and a thrown fetch** — the token survives, now also while mode ≠ `scim` | **new exposure window; measure it (§4 Q5)** |
+  | server belt | — | `backend/routes/entraProvisioning.js:483-485` stores the token only when `cfg.mode === 'scim'` | independent of the client |
+  | mint | — | `POST /api/setup/entra-provisioning/scim-token` returns a fresh `crypto.randomBytes(32)` token and stores NOTHING (:285-292) | the token exists only in the response and page memory until a scim save |
+  | audit | — | `audit('entra_provisioning_config', {...auditSafeSummary(cfg) …})` (:520-524); `backend/services/entraProvisioning.js:27` claims *"Secrets never appear in `auditSafeSummary()`"* (:217) | **a CLAIM — measure it** |
+- **The cells (READ, from the READY :11-18):** red at `7c47ec4` product code, 9: F4 NAMES, F4 SAME DIR, F3 INNER RING light, dark, the
+  re-anchored DIFFERENT MODE, F2 ARROW AWAY, ARROW BACK, SAVE ELSEWHERE, **and "the round-trip CONTROL (red at main because main
+  clears the token)"** — a control that is red at base is not a control in the usual sense: read what it asserts. Green there: F4
+  CONTROL, F3 ACTIVE and CONTROL, F2 no-token CONTROL, all 37 other rd409-410 cells. With the fix 50/50. **No mutant table.**
+- **Builder's claims:** full verify at `2c62792` *"PASS — 3990/3990 across 238 suites"*, SESSION_SECRET unset, floor 0
+  (`session-tools/s84p/rd428-verify.log`); red/green `session-tools/s84p/rd428-redgreen.log` and `rd428-red-at-7c47ec4.log`; **the
+  real-browser leg covered F3 ONLY** (Chrome via Playwright, 1366×900, `session-tools/s84p/rd428-f3-browser.js`, 8 PNGs in
+  `rd428-evidence/`): main light 1.00:1 / fix 5.16:1 (#00719f on #f8f9fa); main dark 1.64:1 / fix 5.14:1 (#0096d6 on #1c1c1c).
+  **F2 was driven in jsdom only — no real browser has pressed an arrow key on this head.** Brand check relayed in
+  `session-tools/s84p/mail-13-brand428.3win2p` (both colours resolve; the "a GROUND, never text" nuance, below).
+- **L-A1..L-A5 — the builder's declared limits, verbatim (READY :37):** *"pseudo states other than focus-visible (hover over a focused
+  item is measured only through the #e9ecef/#313131 ground arithmetic, not in the browser)"* · *"viewports other than 1366x900"* ·
+  *"Firefox/Safari"* · *"F4 on a store that REALLY fell back (modelled, as RD-409's own cell does)"* · *"screen-reader announcement of
+  the new status text"*.
+- **VISIBLE SIDE EFFECT the builder declares (READY :7):** on a focused non-active nav item the inset box-shadow **replaces
+  Bootstrap's own focus glow** (`rgba(13,110,253,.25) 0 0 0 4px`, measured on main by the builder). Measure it; say whether anything
+  else relied on that glow.
+
+### TARGET B — RD-444 (TIER 2)
+- **Two commits off `7c47ec4`** (MEASURED): `26a7a230ac0c700e0ebd9dc63ce9a7e8e48aa172` (the change) → `2f9da1c` (counts only).
+  `merge-base(2f9da1c, 11666d3) = 7c47ec4`.
+- **Delta over `7c47ec4`: 3 files, +84/−6** — `.gitignore` (`node_modules/` → `node_modules` under "# Dependencies" with a 4-line
+  reason; the duplicate `node_modules/` under "# Dependency directories" removed), `__tests__/rd444-gitignore-node-modules-symlink.test.js`
+  (A, 75 lines, 4 cells: SYMLINK :38, NESTED :48, CONTROL :59, ONE LINE :70), the counts file.
+- **Counts: `7c47ec4` 3978/235 → `2f9da1c` 3982/236** (+4/+1).
+- **READ facts:** `.gitignore` at `2f9da1c` has exactly two negations, `!ssl/cert.pem.example` (:180) and `!ssl/private.key.example`
+  (:181) — neither touches node_modules. **No tracked path at `2f9da1c` has a `node_modules` component** (`git ls-tree -r --name-only
+  2f9da1c | grep -c -E '(^|/)node_modules(/|$)'` → 0). `.dockerignore` is untouched (not in the delta) and already ignores
+  `node_modules` and `**/node_modules` (`7c47ec4:.dockerignore` :8-9). The cell runs real git in a scratch repo with
+  `core.excludesFile=/dev/null` (:27), `GIT_CONFIG_NOSYSTEM=1`, `GIT_CONFIG_GLOBAL=/dev/null` (READY :12).
+- **Readers of `.gitignore` (drafter, `git grep -l -i gitignore 2f9da1c -- __tests__ scripts`, 7 files):** `__tests__/data-dir-selection-bookkeeping.test.js`,
+  `__tests__/image-content-exposure.test.js`, `__tests__/rd429-nul-byte-does-not-hide-a-file.test.js`, `__tests__/rd444-…`,
+  `scripts/build-commit-sha.sh`, `scripts/git-hooks/pre-commit`, `scripts/gitleaks-canary.sh`. **The READY :18 names the three test
+  readers only; the three scripts are not named.**
+- **Builder's claims:** red at `7c47ec4` 3 of 4 (SYMLINK, NESTED, ONE LINE), CONTROL green; 4/4 with the fix; full verify at `26a7a23`
+  *"PASS — 3982/3982 across 236 suites"* (`session-tools/s84p/rd444-verify.log`); red/green in `rd444-redgreen.log` (the READY :9 says
+  `rd428-redgreen.log`, "RD-444 section" — both files exist, read both).
+- **L-B1..L-B3 — declared limits, verbatim (READY :20):** *"git versions other than this Mac's"* · *"Windows symlinks/junctions"* ·
+  *"a node_modules FILE (not dir or symlink), which the new pattern also ignores and no cell pins"*.
+
+### TARGET C — RD-200 (TIER 2)
+- **Chain (MEASURED):** `4f97260c5c4682913cd785ff8569ce1bc490fe70` (the change, parent `7c47ec4`) → **`c01190d0dcc416554074e751a86eca45398cede3`
+  (forward merge of main: parents `4f97260` `11666d3`)** → `12b5edc` (counts only: `git diff --name-only c01190d 12b5edc` = the counts
+  file). **`merge-base(12b5edc, 11666d3) = 11666d3` — RD-200 already CONTAINS main.** `git diff --name-only 11666d3 c01190d` = the four
+  RD-200 files only (the forward merge added nothing else).
+- **Delta over `11666d3`: 5 files, +781/−8** — `__tests__/fixtures/rd200-js-brand-debt.json` (A, 541), `__tests__/helpers/css-colors.js`
+  (+68/−2: new exports `extractJs` / `jsFiles` / `jsCorpus`), `__tests__/rd200-js-colour-corpus.test.js` (A, 156, **9 cells**:
+  POPULATION :56, RESOLVES :66, NO ROT :86, OWNED :96, REPORTS :105, CANARY :127, CANARY-absence :133, NOT READ :138, REAL FILE :150),
+  `docs/BRAND.md` (§8.3, +13/−3), the counts file. **No product file changes** — `static/js/` is byte-identical between `11666d3` and `12b5edc`.
+- **Counts: `11666d3` 4012/237 → `12b5edc` 4021/238** (+9/+1).
+- **The manifest (drafter, `python3` over `git show 12b5edc:__tests__/fixtures/rd200-js-brand-debt.json`):** **66 entries, 147
+  occurrences** (= READY :10), by file: `index.js` 111, `first-run-setup.js` 33, `chart-details.js` 2, `entra-provisioning-ui.js` 1.
+  Tickets named: exactly RD-676..RD-680. **7 entries (26 occurrences) are owned JOINTLY by RD-676 and RD-677**, so the READY's
+  per-ticket split "RD-676 … 95, RD-677 … 16" (READY :9) is not derivable from the manifest (manifest sums: RD-676 102, RD-677 35,
+  RD-678 33, RD-679 2, RD-680 1). Keyed by file + normalised value, no line numbers (its `_about`).
+- **Builder's claims (READY :12-19, `session-tools/s84p/rd200-proof.log`, `rd200-verify.log`, census `rd200-census-7c47ec4.txt`):**
+  A (manifest emptied) RED, RESOLVES naming all 66, OWNED and REPORTS also red; B 9/9; T1 a new `#ba5eba` in settings.js → RESOLVES
+  names `settings.js:3704` (CANARY-absence and REAL FILE also red — the tamper used the canary value itself); T2 entra :222 `#f0f8ff`
+  moved to a token → NO ROT fails; T3 one extra `#f0f8ff` → RESOLVES fails (closed); full verify on `c01190d` *"PASS — 4021/4021 across
+  238 suites"*. Census *"223 literals, 147 off-token"* (READY :28).
+- **Semantic overlap with RD-428 (C-68), READY :24:** RD-428 edits `static/js/entra-provisioning-ui.js`, inside RD-200's corpus. The
+  builder measured 1 off-token literal (`#f0f8ff` :222) at both main and `823ef9e`. **Drafter's raw grep** (`grep -o -i -E
+  '#[0-9a-f]{3,8}\b|rgba?\([^)]*\)'`) of that file finds **5 occurrences of 3 distinct values** at `7c47ec4`, `823ef9e` and `12b5edc`
+  alike (:192 `#dee2e6`, :193 `#0096D6`, :221 `#0096D6`, :221 `#dee2e6`, :222 `#f0f8ff`) — the READY's "3 literals" is 3 distinct
+  values; re-measure with `extractJs` AND your own extractor.
+- **Also touched: `__tests__/helpers/css-colors.js` is a SHARED helper** — consumers at `12b5edc` (`git grep -l helpers/css-colors`):
+  `brand-chrome-gradient-stops`, `brand-token-conformance`, `css-colors-stripper`, `rd200-js-colour-corpus`. The READY :27 says
+  `brand-token-conformance`'s `RGB_TRIPLE`/`toHex` are untouched and `extractJs` carries "an equivalent copy" — **a duplicate is a
+  drift risk; prove equivalence by behaviour (§6 Q4), not by reading.**
+- **L-C1..L-C4 — declared limits, verbatim (READY :31, and css-colors.js header per READY :5):** *"named colours ('white') and colours
+  built at runtime (declared limits)"* · *"vendor or CDN scripts (none are in static/js)"* · *"whether each of the 147 is VISIBLE on a
+  rendered page"* · header: *"hex-only ID selectors"*. **FLAGGED by the builder, not changed:** BRAND.md rule 3's RD-199 bullet reads
+  stale (READY :32) — record, do not grade.
+
+### File-disjointness (MEASURED, READ ONLY)
+Name sets A = `7c47ec4..823ef9e` (9), B = `7c47ec4..2f9da1c` (3), C = `11666d3..12b5edc` (5), M = `7c47ec4..11666d3` (5). **Every pairwise
+`comm -12` (A∩B, A∩C, A∩M, B∩C, B∩M, C∩M) = `scripts/verify-expected-counts.json` only.** `package-lock.json` is blob `9064763…`,
+`package.json` `cdb1168…`, `scripts/verify-suite.sh` `eb9731f…` at `7c47ec4`, `11666d3`, `823ef9e`, `2f9da1c`, `12b5edc` alike
+(`git rev-parse <sha>:<path>`). **Re-prove it yourself, and prove more than names on the merged tree (§7 Q4).**
+
+### How to build your trees
+- **No worktree is created in the NexusAI repo, and you never work in its `2_Project_Files` checkout (C-28).** In that repo use ONLY
+  read verbs: `show`, `log`, `diff`, `ls-tree`, `cat-file`, `rev-parse`, `merge-base`, `grep`, `ls-remote`, `archive`. Never `fetch`,
+  `pull`, `push`, `checkout`, `worktree`, `commit`, `stash`, `gc`, `clean` or `merge-tree --write-tree` against it.
+- **Head trees:** `git -C <repo> archive <sha> | tar -x -C <fresh mktemp -d under
+  /Volumes/KK_T9_External_HDD/!CODING/Testing Agent MAIN/projects/nexusai/qa-trees/batch2.XXXXXX/>`, git-indexed from the object store
+  where a full verify needs a git tree (suites read `.github` / `node-version`; RD-444's cell and rd429 run real git).
+- **The merged tree:** §7, in **your OWN scratch clone** (`git clone --shared --no-checkout <repo> <your own dir>`).
+- **Each tree is EXCLUSIVE to this gate and to ONE purpose.** A fresh `mktemp -d` per arm; never reuse a mutant tree for a clean arm;
+  `batch2`-prefixed directories only. Nothing in another gate's `qa-trees/*`, the builders' `worktrees/` or `session-tools/` is run in —
+  read only.
+- `node_modules`: an APFS clone (`cp -c -R`) of the newest gate tree you trust, **after proving** `package-lock.json` is blob `9064763`
+  there too. **A tree whose `node_modules` is a SYMLINK is exactly RD-444's subject — for RD-444's own arms use a real directory
+  clone, never a symlink, so your instrument is not the thing under test.**
+
+## 2. Why these tiers, and who is waiting
+- **RD-428 TIER 1:** a SCIM bearer token is the whole perimeter of `/scim/v2` (`backend/routes/entraProvisioning.js:283-284`: "a token
+  they made up is the whole perimeter of the SCIM endpoint"). RD-428 lengthens the time it lives in page memory and adds states (mode ≠
+  `scim`) in which it is held but not shown. **Any path on which the token reaches a non-scim request, a URL, a header other than the
+  scim save's body, browser storage of any kind, a log, an audit row, the DOM while mode ≠ `scim`, or survives a Reload/Revoke/accepted
+  save/conflict, is a Major; stored in `settings.json` under a non-scim mode is a Blocker.** A focus ring below 3:1 against its
+  adjacent ground (WCAG 1.4.11) is a Minor; a colour with no token is a Minor under BRAND.md §8 rule 1 (:555-560).
+- **RD-444 TIER 2:** a wrong ignore rule either commits a symlinked `node_modules` (the defect) or silently hides a file the product
+  must track. **Any tracked-or-should-be-tracked path newly ignored is a Major.**
+- **RD-200 TIER 2:** a gate that reports green while not reading the corpus is C-40's first failure mode. **A literal the gate should
+  see and does not, or a manifest that is not closed, is a Major for the gate's claim.**
+- **The queue.** Four NexusAI seats (M, N, O, P) share the jest lock; NexusAI-P is building RD-197/RD-204 now. Expect a live queue;
+  the builders yield to each of your `qa-*` tickets (C-141 + ADDENDUM 2).
+
+## 2a. LEGITIMATE SHAPES — required measurements, row by row, base and head in the same window
+**A — the SCIM token's lifecycle (RD-428 F2). Real browser (§4 Q4); every row records: the status-line text, whether the token string
+is in `document.documentElement.outerHTML`, every request body/URL/header sent, and `settings.json` RAW before and after.**
+
+| shape — ordinary form | expected at `823ef9e` | at `7c47ec4` | clause | predicted-by |
+|---|---|---|---|---|
+| SCIM chosen → Generate → Save (SCIM) | token sent in the one scim POST body; stored; cleared; "Saved." | same | :1308, :1324 | builder |
+| SCIM → Generate → ArrowLeft/ArrowRight to Graph | token NOT in DOM; status "is kept, but it is not shown…" | token discarded silently | :1030-1037 | builder (F2 ARROW AWAY) |
+| … → arrow back to SCIM | the SAME token shown again (compare by hash); status "shown again below" | gone | :385, :1034 | builder (ARROW BACK) |
+| … on Graph → Save (Graph) | 200; body has NO `scimBearerToken`; status ends "…was not stored…"; token cleared; `settings.json` gains no token | no token to drop | :1308, :1321-1324, server :483 | builder (SAVE ELSEWHERE) |
+| … on Off → Save (Off) | same as Graph | — | same | drafter |
+| … on Graph → Reload | cleared; not shown when SCIM is chosen again | — | :989 | drafter |
+| … on Graph → Revoke (a token was configured) | cleared | — | :1191 | drafter |
+| … on Graph → Save refused 409 (another tab saved first) | cleared; conflict reason says "has NOT been saved"; the "unsaved edits" list shows a `token` kind (`editsSinceLoad`, :798) — **say whether that list is TRUE for a token that would never have been sent under Graph** | — | :1356-1367 | drafter |
+| … on Graph → Save refused 400/500 (not version) or fetch throws (server killed) | **token KEPT** (no clear in the `else`, :1379-) — then arrow to SCIM: shown again? | — | none | drafter — **the new exposure window; measure** |
+| Space/Enter on the already-checked card | unchanged: kept, no status change | kept (RD-410) | `changed` false | builder (RD-410 O2) |
+| SCIM → Generate → navigate to another page → **Back** | **bfcache**: does the page restore with the token in memory/DOM (`pageshow.persisted`)? Record both shas | — | none | drafter — **not a Reload; measure** |
+| two tabs: generate in tab 1, arrow away, save SCIM in tab 2 | tab 1's later Save → 409; token cleared | same | :1366 | drafter |
+| HTTP-level: POST the save with `mode:'graph'` AND a `scimBearerToken` (a hand-built body, no page) | server stores NO token (:483); **say whether the token appears in the audit row or log** | same | server belt | drafter |
+
+**B — the ignore rule (RD-444).** Real git (`git status --porcelain --untracked-files=all` and `git check-ignore -v`) in a scratch repo
+whose `.gitignore` is the branch's blob, `GIT_CONFIG_NOSYSTEM=1`, `GIT_CONFIG_GLOBAL=/dev/null`, `core.excludesFile=/dev/null`, at both shas.
+
+| shape | expected at `2f9da1c` | at `7c47ec4` | predicted-by |
+|---|---|---|---|
+| `node_modules/` real directory, top level | ignored | ignored | builder (CONTROL) |
+| `node_modules` symlink → directory, top level | ignored | **listed** | builder (SYMLINK) |
+| nested symlink `a/b/node_modules` → dir (depth ≥2) | ignored | listed | builder (NESTED, depth 1) — **go deeper** |
+| `node_modules` DANGLING symlink | ignored | listed | drafter |
+| `node_modules` symlink → a FILE | ignored | listed | drafter |
+| a regular FILE named `node_modules` | ignored (L-B3: no cell pins it) | listed | builder (declared) |
+| `node_modules.bak/`, `my_node_modules/`, `node_modules_x` | **NOT ignored** (the pattern is exact-name) | not ignored | drafter — **a hit here is a Major** |
+| a file INSIDE a real `node_modules/` re-included by a later `!` rule | none exists (`.gitignore` :180-181 are ssl only) — state it | — | drafter |
+| `git add -A` with a symlinked `node_modules` | stages nothing under it | stages the link | builder ("would commit it") |
+
+**C — the colour gate (RD-200).** Plant each row in a COPY of `static/js/settings.js` (a file with no debt) in your own tree; run the rd200 file.
+
+| planted literal | expected | clause | predicted-by |
+|---|---|---|---|
+| `'#ba5eba'` in a string | RESOLVES red, names file:line | hex rule | builder (T1) |
+| `'#BA5EBA'`, `'#ba5ebaff'` (8-digit), `'#b5b'` (3-digit), `'#b5bf'` (4-digit) | each red (normalised, alpha ignored) | hex 3/4/6/8 | drafter |
+| `'rgb(186, 94, 186)'`, `'rgba(186,94,186,.5)'` | red (alpha ignored) | RGB_TRIPLE | builder (CANARY) |
+| `'hsl(300, 42%, 55%)'` | **recorded "unresolved"** — say whether the gate goes RED on it or passes it | "counts as unresolved" (READY :5) | drafter — **a green on an unresolved value is the RD-199 blind spot again** |
+| the literal in a `//` and a `/* */` comment | NOT read | strip-comments.js | builder (NOT READ) |
+| `'&#039;'` HTML entity | NOT a colour | "not after & or a word character" | builder (NOT READ) |
+| `'#0096d6'` (on-token) | resolves, green | tokens.css | builder (NOT READ) |
+| a template literal `` `#${'ba5eba'}` `` or `'#' + 'ba5eba'` | not seen (declared L-C1) — confirm it is the declared limit and not a crash | runtime-built | builder (declared) |
+| `querySelector('#add')` / `'#fed'` / `'#bad'` (a hex-valid ID selector) | **seen as a colour?** Say whether any shipped file has one; census it | "hex-only ID selectors" (header) | builder (declared) |
+| a colour in a regex literal `/#ba5eba/` and in a string containing `//` (`'http://x #ba5eba'`) | parser-based stripper: read, not stripped | strip-comments.js | drafter |
+| `'white'`, `'rebeccapurple'` | not seen (declared L-C1) | named colours | builder (declared) |
+
+**A row whose expected verdict and clause disagree is a finding against this brief — say so.**
+
+## 3. THE QUESTIONS ALL THREE TARGETS ANSWER FIRST
+0. **SESSION_SECRET UNSET, EVERY RUN** — see §3a H-1 for the ONE permitted printer. Positive control once per target: that target's own
+   cell file(s) with a throwaway random 64-hex secret exported (never printed, never written) — identical results, or say what differed.
+1. **Re-pin everything yourself:** `git ls-remote` at start, mid and end (three timestamped readings, branch name beside each sha, all
+   four refs); chains and exact parents (`git log --format='%H %P'`); deltas (`git diff --name-status`); counts at `7c47ec4`, `11666d3`,
+   `2c62792`, `823ef9e`, `26a7a23`, `2f9da1c`, `4f97260`, `c01190d`, `12b5edc`; the counts-only tips.
+2. **Re-derive every red and every mutant INDEPENDENTLY** — your own script, never the builder's `rd428-redgreen.sh`, `rd444-redgreen.sh`,
+   `rd200-proof.sh` or `rd428-f3-browser.js` (read them for method; run your own). **Before each mutant arm, prove the mutant still parses —
+   `node --check` on every mutated JS file (for CSS, a parse by the same parser the cells use), exit 0, quoted — and assert its anchor
+   matched exactly once and the mutation LANDED (grep the marker). A red from a mutant that does not parse, or a green from a mutation that
+   never landed, is a VOID arm.** Read WHY each red is red: quote the failing assertion.
+3. **Name every behaviour guarded by no cell, and every one guarded only by source text (C-122).**
+4. **Full verify of each head AND of the merged tree**, `npm run verify -- --maxWorkers=2` (RD-561), through the lock, on a git-indexed
+   tree, SESSION_SECRET UNSET. **Predicted: `823ef9e` 3990/238 · `2f9da1c` 3982/236 · `12b5edc` 4021/238 · merged (`11666d3` + all three)
+   4037/242** (arithmetic 4012 + 12 + 4 + 9 and 237 + 3 + 1 + 1 — a PREDICTION; C-68 says the measurement decides). Every failure by
+   NAME. **"Re-run until green" is not an acceptance gate (charter §4d).**
+
+## 3a. INSTRUMENT RULES — the previous gate's S-1..S-6, each turned into a rule (its report :337-343)
+- **H-1 (from S-1: a SET/UNSET idiom printed the secret's VALUE).** The ONLY permitted printer, verbatim:
+  `if [ -n "${SESSION_SECRET+x}" ]; then echo "SESSION_SECRET SET (length ${#SESSION_SECRET})"; else echo "SESSION_SECRET UNSET"; fi`.
+  **FORBIDDEN anywhere in your scripts:** `${SESSION_SECRET-…}`, `${SESSION_SECRET:-…}`, `${SESSION_SECRET+$SESSION_SECRET}`, `echo
+  $SESSION_SECRET`, `printenv`, `env | grep`, `set | grep`. **Self-test it BEFORE the first hold (a control that can fail):** run the
+  printer once with a throwaway exported and once unset, capture both outputs, and assert the throwaway's value is ABSENT from both
+  (compare in-process; never print it). **After every hold, scan that hold's logs for the throwaway value** (in-process comparison) and
+  report the count (0). The same discipline covers the **SCIM token** and the RD-579-era fake keys: print a token only as
+  `<first4>…<last4> (len N)`; compare by equality/hash in-process; **mask it in every screenshot** (the RD-409/410 gate did, its report :9).
+- **H-2 (from S-2: an instrument perturbed the measured volume).** Never construct a product storage object (`JsonStorage` or any
+  module whose constructor writes) on a DATA_DIR you are measuring. Read `settings.json`, backups and logs RAW; do decryption checks
+  through a scratch dir holding a COPY.
+- **H-3 (from S-3: a live-server hook never installed and the arm silently died).** Every hook you rely on (a preload, a signal handler,
+  a Playwright route interceptor, a mutated rule) gets a **LANDING CONTROL** before the measured run: prove it fired once on a known
+  input. An arm whose instrument failed is VOID, is re-run, and is reported as a self-correction — never reported as a result.
+- **H-4 (from S-4: an edit silently disabled the heartbeat for three holds).** The heartbeat is a SEPARATE child process started by the
+  hold wrapper (`while sleep 60; do echo "HB $(date -u +%FT%TZ) <step> <pid> <elapsed>"; done`), killed in the wrapper's `trap … EXIT`;
+  **the wrapper ABORTS the hold if no HB line appears within 90 s of the grant**, and after every hold you compute and REPORT the max gap
+  between HB lines (must be ≤ 120 s; a larger gap is an instrument defect in the report, not a footnote).
+- **H-5 (from S-5: the instrument recorded its own chmod as an "outside change").** Restore your own perturbations (mode bits, links,
+  planted files) before any before/after hash, and hash the restore.
+- **H-6 (from S-6: an extractor matched the wrong anchor; and the report's quoting bug on a path with spaces).** Every extractor
+  (function, CSS rule, hunk, literal census) gets a POSITIVE CONTROL: extract a known unit and compare with an independently counted
+  expectation. **Every path is quoted** — `!CODING` and `Testing Agent MAIN` contain `!` and spaces. **The browser harness ABORTS every
+  request to a non-127.0.0.1 host** (Playwright `route('**/*')`, logged) — the RD-409/410 gate's broken harness may have opened a public
+  link (its report :63).
+
+## 4. TARGET A — RD-428 (TIER 1). Answer each with a measurement.
+1. **Scope (READ ONLY, quoted):** `git diff --name-status 7c47ec4 823ef9e` = the nine files; `2c62792..823ef9e` = the counts file only.
+2. **RED-PROOF, POSITIVE CONTROL FIRST.** In ONE hold: the head's four cell files (three rd428 + the re-anchored rd409-410) against the
+   product code of **`7c47ec4`** — predicted the 9 reds of §1 and the listed greens — then at **`823ef9e`**, predicted **50/50**. **Read
+   why the "round-trip CONTROL" is red at base** and say whether it is a control (C-40). **The re-anchored cell (C-97):** prove from
+   `git diff 7c47ec4 823ef9e -- <that file>` that the ONLY change is the one cell at :258-270, quote the old and new assertion, and say
+   whether the old cell's intent ("a real switch is still distinguished from a same-mode press", READY :35) is still asserted somewhere.
+3. **The mutant table (the builder ran none — every arm is new; predictions are the drafter's, READ ONLY):**
+   **M-A1** restore `state.generatedToken = null` on a real mode change → predicted ARROW AWAY/BACK/SAVE ELSEWHERE red;
+   **M-A2** drop `state.mode === 'scim' &&` from :1308 (the token is sent with any mode) → predicted SAVE ELSEWHERE red on "never sends" —
+   **if nothing reddens, no cell guards the send rule**;
+   **M-A3** delete :1324 (token not cleared after an accepted save) → predicted ?; **M-A4** `droppedTokenNote = ''` → SAVE ELSEWHERE red;
+   **M-A5** draw the token block in `graphPanel` too → ARROW AWAY red (asserts not shown);
+   **M-A6** delete the conflict clear :1366 → the rd388/rd409-410 conflict cells (name which);
+   **M-A7** drop `:not(.active)` from the light rule → F3 ACTIVE red; **M-A8** change `#0096d6` → `#00719f` in the dark rule → F3 dark red;
+   **M-A9** remove F4's same-dir branch → F4 SAME DIR red.
+   Any arm predicted red that stays green is a **gap in the cells** — name the behaviour it leaves unguarded.
+4. **REAL-BROWSER LEG (the builder drove F3 only; F2 has never seen a real browser).** Chrome via Playwright from your tree's
+   `node_modules/@playwright/test` (the builder's route, `rd428-f3-browser.js:25,51`: `channel:'chrome'`, falling back to bundled
+   chromium) on YOUR loopback server from YOUR tree, fresh DATA_DIR, open mode (C-02), inside a hold, both shas, same window.
+   **If no browser launches, the leg is NOT RUN, RD-428 cannot be GO, and you mail a QUESTION (§11) and proceed with the rest.**
+   a. **Settings > nav, keyboard Tab (never a synthetic `.focus()`), light AND dark:** on the item BELOW the active one, and on a
+      non-adjacent item: computed `box-shadow` and `outline`; pixel contrast of the inner ring against the item's own ground and against
+      the hover ground (predicted 5.16:1 on `#f8f9fa`, 4.59:1 on `#e9ecef` light; 5.14:1 on `#1c1c1c`, 3.92:1 on `#313131` dark — the
+      comments at `keyboard-focus.css:53-54` and `dark-mode.css:1566-1567`, CLAIMS); the base's 1.00/1.64 reproduced; the ACTIVE item has
+      no inner ring; **hover over a focused item measured in the browser** (discharges L-A1); a second viewport (e.g. 1024×768 and 400 wide)
+      (L-A2). Record Bootstrap's replaced focus glow (READY :7) before/after.
+   b. **Settings > Provisioning: SCIM > Generate > ArrowLeft / ArrowRight on the focused card > Save under Graph, and separately under
+      SCIM** — every row of §2a-A you can drive in the page. Capture **every request** (URL, method, headers, body) with the interceptor,
+      every console message, `localStorage`/`sessionStorage`/IndexedDB/Cache Storage/cookies after each step, the status line's text, the
+      focus target after each step, and the token's presence in `outerHTML`. **Positive control first:** the instrument FINDS the token in
+      the `/scim-token` response and in the scim save's request body.
+5. **THE F2 SAFETY LEG — at source AND on the wire.** (a) Re-read at `823ef9e` every row of §1's F2 table and quote each line. (b) Prove,
+   with the positive control of Q4b beside it, that the token **never** reaches: a request other than the scim save (URL, query, header,
+   body), browser storage of any kind, the console, the server's stdout/stderr, `LogFiles/*`, the audit buffer / audit file, or
+   `settings.json` under a non-scim save. (c) **The two paths the READY does not list:** a save refused with a non-version error and a
+   thrown fetch — the token survives in memory (READ, :1379-); drive both, then arrow to SCIM, and say what the admin sees. (d) **bfcache:**
+   navigate away and Back; state `pageshow.persisted` and whether the token (and "shown once" text) returns — at both shas; label a
+   pre-existing result as such. (e) **HTTP level:** a hand-built `{mode:'graph', scimBearerToken:<planted>}` save → nothing stored
+   (server :483), and search the audit row and logs for the planted value (tests `backend/services/entraProvisioning.js:27`'s claim).
+6. **BRAND LEG.** (a) READ: `#00719f` = `--nx-brand-chrome` (`static/css/tokens.css:23` light, `:77` dark); `#0096d6` = `--nx-brand-blue`
+   (`:21` light, `:75` dark) — quote them. (b) **Every colour the change introduces:** extract every colour literal from the ADDED lines of
+   the two CSS files **after comment stripping** (the comments also mention `#f8f9fa`, `#e9ecef`, `#1c1c1c`, `#313131` — say whether any is
+   in a rule), and resolve each against `tokens.css` **in the theme block its rule applies to** (light rule → `:root` light; `body.dark-mode`
+   rule → the dark block). Positive control: the same resolver FAILS a planted `#123456`. (c) **What "resolves to a token" means here:**
+   `tokens.css` is linked by NO page and the sheets copy literal hex out of it (`docs/BRAND.md` at `823ef9e` :255-261) — so resolution is
+   value-equality, not `var()`; say so. (d) **Why is `brand-token-conformance` green?** It asserts every light value's OCCURRENCE COUNT still
+   matches the stylesheets (BRAND.md :414-415) and every `dark-mode.css` hex resolves (:416-418). RD-428 adds one `#00719f` to
+   `keyboard-focus.css` and one `#0096d6` to `dark-mode.css` and changes neither BRAND.md nor `tokens.css` (not in the delta): read which
+   counts that test pins and **say why a +1 occurrence did not redden it** (C-40: a green you cannot explain is not evidence). (e) The
+   builder's nuance (`mail-13-brand428.3win2p`): `--nx-brand-chrome` is documented *"a GROUND, never text"* (`tokens.css:23`); the ring is
+   a non-text indicator using the same token the existing outer ring uses (`keyboard-focus.css:40`). **Record it; the ruling is Kam's, not
+   the gate's.**
+7. **F4 on a store that REALLY fell back (L-A4 — the RD-409/410 gate drove one, its report :29-31):** boot your server with a DATA_DIR it
+   cannot use (on your own temp dir) so the store falls back; read the provisioning status message through the route; then DATA_DIR = the
+   fallback directory itself. Both messages quoted, both shas. Say who can read that message (the route is admin-gated when auth is
+   enforced — a pre-existing census, labelled so).
+8. **AUTHORIZATION (pre-existing census, RD-428 changed no route guard):** `/api/setup/entra-provisioning` `GET`, `POST /`, `POST
+   /scim-token`, `POST /scim-token/revoke` — anonymous / viewer / admin in the enforced state, and the open window. **A caller who can MINT
+   a token they may not save** is worth a sentence.
+9. **C-68 re-run set for A (named, per-file counts, one hold):** every file naming `keyboard-focus`, `dark-mode.css`,
+   `entra-provisioning-ui` or `entraProvisioning` at `823ef9e` — **44 files by the drafter's scoped `git grep -l` over `__tests__`, of which
+   5 are helpers/fixtures (`helpers/css-colors.js`, `helpers/dark-corpus.js`, `helpers/dom.js`, `helpers/test-server.js`,
+   `helpers/vendor-surface.css`) → 39 suites** (re-run the grep; the READY's list :29 is a subset).
+10. **PRIOR WORK (C-49):** S59's WIP `fbf4861` on `rd-427-428-444-448-ui-residue-s59` (READY :32) — confirm the three files it says are
+    byte-identical between `6c866ef` and `7c47ec4` are; confirm nothing of RD-427/448 was ported (READY :34).
+
+## 5. TARGET B — RD-444 (TIER 2). Answer each with a measurement.
+1. **Scope:** `git diff --name-status 7c47ec4 2f9da1c` = the three files; the two `.gitignore` hunks quoted; `26a7a23..2f9da1c` = counts only.
+2. **RED-PROOF, POSITIVE CONTROL FIRST:** the head's cell against `7c47ec4`'s `.gitignore` — predicted SYMLINK, NESTED, ONE LINE red,
+   CONTROL green — then 4/4 at `2f9da1c`. **Read the findability line** (READY :12: "probe.txt IS listed") and prove it bites: a mutant in
+   which `git status` lists nothing must turn SYMLINK and NESTED red.
+3. **Mutants:** **M-B1** restore `node_modules/` (trailing slash) → SYMLINK, NESTED red; **M-B2** keep both lines → ONE LINE red; **M-B3**
+   `/node_modules` (anchored) → NESTED red; **M-B4** delete the line → CONTROL red.
+4. **Every row of §2a-B**, at both shas, real git, `git --version` recorded (L-B1). A newly ignored path that is not a `node_modules` is
+   a Major.
+5. **Readers of `.gitignore` (the 7 files of §1):** run the 4 test suites at the head in one hold, named; READ the 3 scripts and say
+   whether any of them enumerates untracked files in a way the new pattern changes (e.g. a hook that would now skip a symlinked tree).
+6. **Live effect:** in a scratch clone of your own with a symlinked `node_modules`, `git status` at both shas (READY :14's claim).
+
+## 6. TARGET C — RD-200 (TIER 2). Answer each with a measurement.
+1. **Scope:** `git diff --name-status 11666d3 12b5edc` = the five files; `c01190d`'s parents; `static/js/` byte-identical 11666d3 ↔ 12b5edc.
+2. **RED-PROOF, POSITIVE CONTROL FIRST:** A (manifest emptied → RESOLVES names all 66, OWNED, REPORTS red), B 9/9, then T1, T2, T3
+   re-derived in your own trees with your own script. **T1 with a value OTHER than the canary** (the builder's T1 used the canary value
+   itself, READY :15, so it also fired CANARY-absence) — the RESOLVES cell alone must name the site.
+3. **INDEPENDENT CENSUS (C-40 — the gate's claim is "every colour literal in static/js"):** your own extractor (not `extractJs`) over
+   every first-party file in `static/js` at `12b5edc` (27 files by `git ls-tree -r`), with H-6's positive control. Compare: files read
+   (POPULATION), literals found (the READY says 223), off-token (147 in 66 file+value entries). **Every difference, by file:line.**
+4. **The duplicated resolver:** `extractJs` "carries an equivalent copy" of `brand-token-conformance`'s `RGB_TRIPLE`/`toHex` (READY :27).
+   Feed both the same 20+ inputs (hex 3/4/6/8, upper case, rgb/rgba with spaces and percentages, out-of-range values) and diff their
+   outputs. A divergence is a finding.
+5. **Every row of §2a-C.** Especially `hsl()` (recorded unresolved — does the gate go red?) and hex-valid ID selectors (census them in the
+   shipped files; a false debt entry or a false green both count).
+6. **Mutants on the gate itself:** **M-C1** make RESOLVES tolerate a count ABOVE the manifest (manifest not closed) → T3 must go red with
+   the unmutated cell and green with the mutant; **M-C2** `jsFiles` returns `[]` → POPULATION red (a gate that reads nothing); **M-C3**
+   comment stripper disabled → NOT READ red; **M-C4** NO ROT disabled → T2 undetected.
+7. **Shared helper regression:** run `brand-chrome-gradient-stops`, `brand-token-conformance`, `css-colors-stripper`, `rd200-js-colour-corpus`
+   at the head in one hold, named, with per-file counts; `git diff 11666d3 12b5edc -- __tests__/helpers/css-colors.js` — prove every
+   pre-existing export is unchanged in behaviour.
+8. **The manifest's honesty:** every entry's count equals your census; every ticket named is RD-676..RD-680; the joint RD-676/RD-677
+   ownership (7 entries, 26 occurrences) stated. Jira is not read by this gate — "filed" (READY :9) is RELAYED.
+9. **Docs:** `docs/BRAND.md` §8.3 diff quoted; say whether it now says anything the gate does not do.
+
+## 7. THE MERGED TREE (C-68, C-57, C-89, C-104, C-112). No verdict is complete without it.
+1. **Build it in YOUR OWN scratch clone** under `projects/nexusai/qa-trees/batch2.*/clone-1`: `git clone --shared --no-checkout <repo>
+   <dir>`; in the clone only: remove `origin`, set a local `user.name`/`user.email` and `gc.auto 0`; `git checkout -b gate 11666d3`;
+   `git merge --no-ff 823ef9e`; `git merge --no-ff 2f9da1c`; `git merge --no-ff 12b5edc`. **Predicted: a conflict, if any, ONLY in
+   `scripts/verify-expected-counts.json`**; whether a later merge is clean depends on which side you took for the counts at the earlier
+   one (the previous gate measured exactly this, its report :263-264) — **predict it before each merge and explain any clean merge with
+   a control.** Anything else conflicting **STOPS** (C-57). **C-104: resolve and stage before any census or run.**
+2. **Resolve the counts file by REGENERATION, never by hand:** take a side to complete each merge commit, then `npm run verify --
+   --maxWorkers=2 --update-counts` ONCE on the tree after ALL THREE merges, through the lock, SESSION_SECRET UNSET, and commit the
+   regenerated file in the clone. **Predicted 4037/242 — a prediction; the measurement decides.**
+3. **Order independence (a control that can fail):** a second clone in a different order (`12b5edc`, then `2f9da1c`, then `823ef9e`);
+   **the two merge results' `HEAD^{tree}` minus the counts file must be identical** — quote both tree ids and the `git diff --name-only`.
+4. **Blob identities on the merged tree:** `static/js/entra-provisioning-ui.js` = `83b9590` (823ef9e's), `backend/routes/entraProvisioning.js`
+   = `ba1dcfe`, `static/css/keyboard-focus.css` = `3d900f8`, `static/css/dark-mode.css` = `49e63a6`, `.gitignore` = `6a9ae50` (2f9da1c's),
+   `__tests__/helpers/css-colors.js` = `78bb004` (12b5edc's), `docs/BRAND.md` = `5fa08fa`, the server entry point = `30aeff7` and
+   `backend/dataErasure.js` = `4835697` (main's); every `__tests__` file byte-identical to one parent (**C-112's condition — state it beside
+   the conclusion**), 0 files absent. (Drafter: `git rev-parse <sha>:<path>`.)
+5. **id-superset control (C-57):** merged test ids ⊇ ids(`11666d3`) ∪ ids(`823ef9e`) ∪ ids(`2f9da1c`) ∪ ids(`12b5edc`); **missing 0
+   predicted**. Use a COPY of `session-tools/c57-id-superset.sh` adapted as the previous gate did (its report :269: reads the jest JSON of
+   YOUR own full verifies, keeps the lock-holder refusal, proven first to STOP on a planted missing id). **Note: `823ef9e` and `2f9da1c` are
+   off `7c47ec4`, not main** — ids of RD-579/RD-639 are absent from those parents by construction, not by loss. If it misses, apply C-133
+   verbatim and list every accounted id.
+6. **The semantic overlaps git cannot see (C-68), on the merged tree, one hold:** the rd200 file **9/9** (RD-428's edit is inside its
+   corpus; re-measure `#f0f8ff` count = 1), the rd428 files + rd409-410, the rd444 file, `brand-token-conformance` (RD-428's CSS vs RD-200's
+   helper), all three C-68 sets (§4 Q9, §5 Q5, §6 Q7), and the full verify. Then ONE mutant per ticket on the merged tree (M-A2, M-B1,
+   M-C2): **the tables must still hold through the other changes.**
+7. **C-89 on your clone:** `git diff --quiet HEAD` holds and `git show HEAD:scripts/verify-expected-counts.json` equals the regenerated counts.
+8. **Nothing leaves your clone.** No push, no remote, no ref written in the NexusAI repo. **Count `<repo>/.git/objects` files before and
+   after your whole session and account for any delta by mtime** (four live seats commit into that repo; the previous gate's accounting
+   method, its report :271, including git freshening the mtime of pre-existing objects).
+
+## 8. CI (C-142) — NOT RUN AT ANY BRANCH HEAD unless a PR exists
+- **Unverified by the drafter:** whether any of the three branches has a PR (no `gh` was run). Check with `gh pr list --head <branch>`
+  (READ ONLY, NexusAI's own `GH_CONFIG_DIR`); main `11666d3`'s CI Build — read it with `gh run list --commit 11666d3` READ ONLY and label
+  it. **`gh` never merges, approves, comments, reviews, labels, re-runs, dispatches or opens a PR.**
+
+## 9. Floor discipline — THE FOUR CLAUSES, plus THE DEADLINE RULE
+1. **Every jest run, every browser run and every server you boot goes through `session-tools/nexusai-lock.sh`, tagged `qa-b2-…`** (e.g.
+   `qa-b2-H1-A-red-arms`, `qa-b2-H2-A-browser`, `qa-b2-H3-BC-arms`, `qa-b2-H4-heads-verify`, `qa-b2-H5-merged`) — C-141: gate-class, and
+   under ADDENDUM 2 every NEW `qa-*` ticket earns a fresh yield. **QUEUE, NEVER TAKE OVER:** never kill, signal, move or edit another
+   seat's process, lock directory, owner file or ticket, even if it looks stuck; if a holder looks stuck, mail a QUESTION (§11) and keep
+   waiting. Pure-git rows (RD-444's §2a-B in a scratch repo, no jest, no server) may run outside the lock — say which did.
+2. **Hold the lock ONCE per multi-run measurement.** Every hold is a TRACKED CHILD of your seat, never detached (`nohup … &`).
+3. **Count foreign servers the RD-606 / C-125 way, anchored on YOUR OWN claude pid:** `basename(argv[0]) == node` AND the server entry point
+   anywhere in the remaining argv; "ours" = the ancestor chain CONTAINS your own claude pid. **NEGATIVE controls, all in the same run, all
+   must classify FOREIGN — read at drafting 2026-09-26 04:23 AEST from `tmux list-panes -a -F '#{pane_id} #{@cockpit_name} #{pane_pid}'`
+   + `ps` ancestry:** NexusAI-M claude **`88756`** (pane `%11`), NexusAI-N claude **`10246`** (pane `%12`), NexusAI-O claude **`10643`**
+   (pane `%13`), NexusAI-P claude **`11987`** (pane `%14`), and Tuesday's claude **`91386`** (pane `%0`). Re-read them at start (Tuesday's
+   seat restarted mid-gate last time: 60235 → 91386, previous report :353); if one has exited, say so and use the others; **a hold with NO
+   live negative control aborts.** Reuse the previous gate's corrected instrument BY COPY with YOUR pid as `ROOT` and these as `NEG`:
+   `/Volumes/KK_T9_External_HDD/!CODING/Testing Agent MAIN/projects/nexusai/reports/2026-09-25-gate-rd579-rd639/evidence/qa-floorlib.sh`
+   (its `ROOT` default names that gate's pid 63876 — **correct it to yours before any hold**), `…/qa-floorcount.py` and `…/qa-dispatch.sh`
+   (the dispatcher's SET/UNSET line already uses H-1's idiom; keep it). The original is gate 7's
+   `/Volumes/KK_T9_External_HDD/!CODING/Testing Agent MAIN/projects/nexusai/reports/2026-09-22-gate7-rd645/evidence/qa-floorcount.py`.
+   **A headless Chrome is a floor process too:** count `Google Chrome for Testing`/`chrome`/`chromium` processes whose ancestry contains your
+   pid, before and after each browser hold; every browser is closed in a `finally`.
+4. **A zero is reportable only beside a control that fired in the same window** — the floor count, "the token reached nothing" (§4 Q5),
+   "no path newly ignored" (§5 Q4), "no literal missed" (§6 Q3), and "no cell reddens" under any mutant.
+
+**5. THE DEADLINE RULE — every real-server or browser probe has a per-step DEADLINE, a HEARTBEAT, and kills its server and browser in a
+`finally`.** Every HTTP request carries a client timeout; each step (boot 60 s, request 30 s, page load 30 s, key press 10 s, browser close
+20 s, exit 20 s) has a written DEADLINE; a step past it is ABORTED and reported, never waited on. **Log a HEARTBEAT line at least every
+2 minutes during any hold (H-4: a separate child, ≤ 120 s max gap, aborted if absent at 90 s); a step with no heartbeat for 5 minutes is
+aborted and reported,** and a hold that is not progressing releases the lock. Every server and browser you start is killed in a `finally`
+(SIGTERM, then SIGKILL after a grace) and the reap is confirmed by your floor counter.
+
+## 10. HELD
+- **LOCAL RUN, NOT THE DEMO:** every request goes to a server YOU booted on 127.0.0.1 from YOUR tree. **The browser aborts every
+  non-loopback request (H-6).** No request to any live, demo or public host; no Entra, no Azure, no real SCIM client — every token is minted
+  by your own local server and is throwaway. This is authorised defensive QA of Datasec's own product on loopback.
+- No merge (outside your own clone), no push, no deploy, no registry, no Partner Center, no production, no money, no external comms, no mail
+  to any human. **No `az` at all.** `gh` READ-ONLY and optional (§8).
+- **Symlinks, chmod and scratch git repos live ONLY under your own mktemp dirs.** Never link to, chmod or plant anything in a real home
+  directory, the NexusAI tree, or any other seat's directory.
+- **Findings-only:** do not commit (outside your clone), move any branch, file a ticket, or write anything inside the NexusAI project
+  (`2_Project_Files`, `session-tools/`, `worktrees/`, `1_Project_Definition/`, `qa-reports/`). **NEVER `rm`** — quarantine, per the
+  template §5. No docker is needed by this gate.
+
+## 11. Output
+Report: `/Volumes/KK_T9_External_HDD/!CODING/Testing Agent MAIN/projects/nexusai/reports/2026-09-26-gate-batch2-rd428-rd444-rd200/report.md` —
+ONE report covering all three tickets; evidence in `./evidence/` beside it.
+
+**Questions:** your routing name is **`QA/NexusAI-batch2`**. If you must ask, mail `tuesday-agent@agentmail.to`, subject
+`[QA/Datasec-NexusAI -> Tuesday] QUESTION: <topic>` (Context / one Question / Meanwhile / Needed-by) and **PROCEED ON THE SAFEST READING
+without waiting**; Tuesday's answer arrives in `tuesday-agent@agentmail.to` with a subject beginning `[Tuesday -> QA/NexusAI-batch2] ANSWER`.
+Approval-class items are NOT RUN and named. Record every question, reading and answer.
+
+MAIL YOUR VERDICT to `tuesday-agent@agentmail.to`, subject exactly:
+`[QA/Datasec-NexusAI -> Tuesday] GATE VERDICT — RD-428: <GO|GO WITH FINDINGS|NO GO> @ 823ef9e · RD-444: <GO|GO WITH FINDINGS|NO GO> @ 2f9da1c · RD-200: <GO|GO WITH FINDINGS|NO GO> @ 12b5edc`
+Lead the body with one sentence per ticket. Never `wednesday-agent@`. AgentMail key: `AGENTMAIL_API_KEY` in
+`/Volumes/KK_T9_External_HDD/TUESDAY/4_Credentials/.env` (absolute: the QA project has none). Never put the key, a SCIM token, or any secret
+in a mail or the report.
+
+Verdict format:
+- **RD-428: GO / GO WITH FINDINGS / NO GO** naming `823ef9e5e117d1c3f7d8c8659fe31e1a4fc61a1e`: the red-proof (base red, head 50/50, same
+  window) first; M-A1..M-A9; the real-browser leg (nav ring light+dark, the SCIM arrow/save flows) with the network capture and its positive
+  control; the F2 safety leg (source table re-read, every sink searched, the two unlisted failure paths, bfcache, the HTTP-level belt); the
+  brand leg (every introduced colour resolved, why the conformance test is green, the "GROUND, never text" nuance recorded); F4 on a real
+  fallback; the C-68 set; prior work.
+- **RD-444: GO / GO WITH FINDINGS / NO GO** naming `2f9da1cda0f2971957434b439b0a32792c54dce3`: the red-proof with the findability control;
+  M-B1..M-B4; every §2a-B row at both shas with `git --version`; the readers.
+- **RD-200: GO / GO WITH FINDINGS / NO GO** naming `12b5edc31ee4ef52415d1cbffbbb0504d7f4715c`: the red-proof and T1-T3 re-derived; the
+  independent census vs the gate; the duplicated resolver diff; every §2a-C row; M-C1..M-C4; the shared-helper regression.
+- **The merged tree (§7):** both orders, conflicts quoted, counts regenerated once (measured vs 4037/242), id-superset with C-112's condition
+  beside it, the semantic-overlap runs and one mutant per ticket, C-89, the object-count accounting.
+- Each of **L-A1..L-A5, L-B1..L-B3 and L-C1..L-C4** answered: discharged with a measurement, or left standing and named (C-112).
+- Report all four refs as **three timestamped readings (start / mid / end)**, each with its branch name.
+- **§3a H-1..H-6:** state for each that it was followed, with the self-test outputs (H-1), landing controls (H-3) and max HB gap per hold (H-4).
+- Every action recommendation carries its evidence class: **MEASURED AT RUNTIME / PROBED / READ ONLY**. Severity is yours; priority is Tuesday's.
+- **Rule 2: a NOT TESTED section.** It MUST carry this line, verbatim:
+
+  Not tested by this gate: Firefox or Safari, a screen reader's announcement of the new status text, Linux or CI at any branch head unless a PR's CI Build exists, git versions other than this Mac's, Windows symlinks or junctions, and whether each of RD-200's 147 recorded literals is visible on a rendered page.
+
+## WRONG OR UNVERIFIED IN THE COMMISSION AND THE READYS — carried so the gate inherits the corrections
+1. **RD-428's tier.** The READY says *"tier 2 (lane plan)"* (READY :1-2); Tuesday's commission makes it TIER 1 (F2 = credential handling).
+   Not an error at source — a raise; this brief follows the commission.
+2. **RD-428 READY :33's F2 line numbers are `7c47ec4`'s.** At the head: sent :1308 (not :1293), revoke clear :1191 (not :1176), accepted-save
+   clear :1324 (not :1303), conflict clear :1366 (not :1345); :385 and :989 unchanged (drafter, `git grep -n generatedToken 823ef9e`).
+3. **"Cleared on reload/revoke/accepted save/conflict" is true and INCOMPLETE:** a non-version save failure (`else`, :1379-) and a thrown fetch
+   do NOT clear it, and bfcache restoration is not addressed — §2a-A, §4 Q5 (c)(d). READ, unmeasured.
+4. **RD-428's builder browser leg covered F3 only; F2 is jsdom-only** (READY :22-25; `rd428-f3-browser.js`). The commission's F2 browser leg
+   is new ground, not a re-run.
+5. **"Resolves to a token" is value-equality:** `tokens.css` is linked by no page and no shipped sheet contains `var(--nx-*)` (BRAND.md :255-261).
+   The change introduces the literals `#00719f`/`#0096d6`, equal to `--nx-brand-chrome`/`--nx-brand-blue` (`tokens.css:21,23,75,77`) — the
+   commission's mapping is CORRECT at source. Why the occurrence-count assertion stayed green after +1 of each is UNEXPLAINED (§4 Q6d).
+6. **RD-444 READY :18 names 3 `.gitignore` readers; a case-insensitive scoped grep finds 3 tests + rd444 + 3 scripts** (`build-commit-sha.sh`,
+   `git-hooks/pre-commit`, `gitleaks-canary.sh`).
+7. **RD-444 READY :9 cites `rd428-redgreen.log` ("RD-444 section");** a separate `rd444-redgreen.log` also exists. Read both.
+8. **RD-200 READY :9's per-ticket counts (RD-676 95, RD-677 16) are not derivable from the manifest:** 7 entries / 26 occurrences are jointly
+   owned by RD-676+RD-677. Totals (66 / 147) and the file split (index.js 111 = 95 + 16) do match.
+9. **RD-200 READY :24's "3 literals" in `entra-provisioning-ui.js`** = 3 distinct values across 5 occurrences (drafter's raw grep). Wording, not
+   necessarily wrong; re-measure.
+10. **"RD-676..680 filed" and every ruling/grant timestamp (12:23:01Z, 12:40:12Z, "you ruled keep") are RELAYED** from the READYs; not read in
+    Jira or in Tuesday's mail by the drafter.
+11. **CI and PR state on all three heads: UNVERIFIED** (no `gh` run at drafting).
+12. **The commission's "the previous gate's routing line has a matching launcher-config line elsewhere in fleet/":** the name appears in exactly
+    one config file, `fleet/inbox_routing.conf` (:106; plus two `.pre-*` backups of it); every other hit is the previous launcher itself or
+    cockpit logs/state. One routing line was added (`QA/NexusAI-batch2`); there is no second config to edit.
+
+## PROVENANCE (drafter, 2026-09-26 04:20–04:50 AEST, read-only)
+- origin heads main `11666d3…`, `rd-428-provisioning-residue-s84p` `823ef9e…`, `rd-444-gitignore-symlink-s84p` `2f9da1c…`,
+  `rd-200-js-colour-corpus-s84p` `12b5edc…` | `git ls-remote origin` | 04:20:21
+- chains and parents: `7c47ec4..11666d3`, `merge-base(<head>,11666d3)..<head>` for each head | `git log --format='%H %P %ad %s'` | 04:20
+- counts at ten shas | `git show <sha>:scripts/verify-expected-counts.json` | 04:21
+- deltas, stats, counts-only tips, pairwise disjointness | `git diff --stat|--name-status|--name-only` + `comm -12` | 04:21–04:25
+- blobs (package-lock 9064763, package.json cdb1168, verify-suite eb9731f; the nine merged-tree identities) | `git rev-parse <sha>:<path>` | 04:25
+- RD-428 product diff, token lifecycle lines, render branch, `editsSinceLoad`, server mint/save/audit lines | `git diff 7c47ec4 823ef9e`,
+  `git show 823ef9e:<file>` + `awk`, `git grep -n` | 04:21–04:30
+- tokens.css :21/:23/:75/:77; BRAND.md :255-261, :414-418, :555-570 | `git show 823ef9e:<file>`, `git grep -n` | 04:24
+- RD-444 diff, cell names, negations, tracked node_modules paths (0), `.dockerignore` :8-9, gitignore readers (7) | `git diff`, `git show`,
+  `git ls-tree -r`, `git grep -l -i` | 04:24
+- RD-200 manifest tallies (66/147, per file, per ticket, 7 joint entries), cell names, css-colors consumers (4), static/js files (27), the
+  entra literal grep | `git show … | python3`, `git grep`, `git ls-tree` | 04:25–04:28
+- C-68 set for A (44 files, 5 helpers) | `git grep -l -e keyboard-focus -e 'dark-mode\.css' -e entra-provisioning-ui -e entraProvisioning 823ef9e -- __tests__` | 04:26
+- CLARIFICATIONS ids (C-02 :30, C-28 :153, C-40 :225, C-49 :299, C-57 :410, C-63 :581, C-64 :599, C-68 :657, C-76 :729, C-89 :827, C-97 :900,
+  C-104 :972, C-110 :1101, C-112 :1141, C-122 :1278, C-125 :1320, C-133 :1426, C-141 :1479 + ADDENDUM :1487 + ADDENDUM 2 :1489, C-142 :1491;
+  highest C-164 :1664; file 274,618 bytes mtime 03:52) | `grep -n` | 04:27
+- RD-409/410 prior report findings 2-4 (:19-31), token masking (:9), harness note (:63) | `sed -n` | 04:29
+- builder evidence present in `session-tools/s84p/` (rd428-{redgreen,red-at-7c47ec4,verify}.log, rd428-f3-browser.js, rd428-evidence/ 8 PNGs,
+  rd444-{redgreen,verify}.log, rd200-{proof,verify}.log, rd200-census-7c47ec4.txt, mail-03, mail-13) | `ls` | 04:28
+- negative-control seats %11 → 88756 (M), %12 → 10246 (N), %13 → 10643 (O), %14 → 11987 (P), %0 → 91386 (Tuesday; ancestry 91386 ← 89558
+  bash ← 89550 pane) | `tmux list-panes -a -F …`, `ps` | 04:23
+- routing: `QA/NexusAI-g579-639` at `fleet/inbox_routing.conf:106`; `QA/NexusAI-batch2` appended by the drafter | `grep -rn -F` over `fleet/` | 04:3x
