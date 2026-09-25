@@ -1,0 +1,33 @@
+LAUNCH ACTION (DRY RUN) 2026-09-26 04:39:17 AEST / 2026-09-25T18:39:17Z | launcher /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/9df682b4-df07-4cdb-b01c-fee44dc335fd/scratchpad/gate24T2d/launch_qa_secuura_batch1250r2-t2.sh | pinned launch develop 4db87c3e4b98b8e366c3dd60d5f399917bad5086 | END_TREE 5cf15de7d0866301ccc636f76fb97e2263692fc5
+  pin #1250 2b8dcb824dd2c5cd4b92757934d7de9d28813a22
+  pin #1253 91e066264004fdb22c67efb0c25fc44375ec6eac
+  pin #1262 3b319485d1e3a58f30e4190a7898d7562cb80c3b
+--- 0. the pane must be routed (inbox_routing.conf) or cockpit.sh say --mail fails silently
+  routing file /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/inbox_routing.conf — line present: 0 (grep rc=1; want 1 / rc 0)
+  (DRY RUN: reported, not refused — the real run refuses rc 1 here)
+--- 0b. the kit's home: launcher filled for /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/9df682b4-df07-4cdb-b01c-fee44dc335fd/scratchpad/gate24T2d | this script lives in /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/9df682b4-df07-4cdb-b01c-fee44dc335fd/scratchpad/gate24T2d
+  AT HOME — no re-fill
+--- 1. instrument: git ls-remote origin (read from the Secuura checkout, READ-ONLY)
+  ls-remote rc=0 at 18:39:22Z
+    4db87c3e4b98b8e366c3dd60d5f399917bad5086	refs/heads/develop
+    91e066264004fdb22c67efb0c25fc44375ec6eac	refs/heads/feature/ks-1297-fixture-guard-anchor-and-two-gaps-l5-1
+    2b8dcb824dd2c5cd4b92757934d7de9d28813a22	refs/heads/feature/ks-1302-runner-tmpdir-residue-and-orphan-pipe-l5-1
+    3b319485d1e3a58f30e4190a7898d7562cb80c3b	refs/heads/feature/ks-1310-transfer-custody-route-level-rollback-cell-r24-f-1
+    2b8dcb824dd2c5cd4b92757934d7de9d28813a22	refs/pull/1250/head
+    91e066264004fdb22c67efb0c25fc44375ec6eac	refs/pull/1253/head
+    3b319485d1e3a58f30e4190a7898d7562cb80c3b	refs/pull/1262/head
+--- 2. instrument: the GitHub PULLS API (an independent read of each head, and mergeable)
+  pulls API rc=0
+    API #1250 head 2b8dcb824dd2c5cd4b92757934d7de9d28813a22 base develop mergeable True reads 1 state open
+    API #1253 head 91e066264004fdb22c67efb0c25fc44375ec6eac base develop mergeable True reads 1 state open
+    API #1262 head 3b319485d1e3a58f30e4190a7898d7562cb80c3b base develop mergeable True reads 1 state open
+--- 3. the heads, judged (both instruments == the pin, open, not mergeable:false)
+  #1250  ls-remote pull/head 2b8dcb824dd2c5cd4b92757934d7de9d28813a22 | branch 2b8dcb824dd2c5cd4b92757934d7de9d28813a22 | API 2b8dcb824dd2c5cd4b92757934d7de9d28813a22 (state open, mergeable True) | pinned 2b8dcb824dd2c5cd4b92757934d7de9d28813a22
+  #1253  ls-remote pull/head 91e066264004fdb22c67efb0c25fc44375ec6eac | branch 91e066264004fdb22c67efb0c25fc44375ec6eac | API 91e066264004fdb22c67efb0c25fc44375ec6eac (state open, mergeable True) | pinned 91e066264004fdb22c67efb0c25fc44375ec6eac
+  #1262  ls-remote pull/head 3b319485d1e3a58f30e4190a7898d7562cb80c3b | branch 3b319485d1e3a58f30e4190a7898d7562cb80c3b | API 3b319485d1e3a58f30e4190a7898d7562cb80c3b (state open, mergeable True) | pinned 3b319485d1e3a58f30e4190a7898d7562cb80c3b
+  BOTH INSTRUMENTS AGREE with every pin.
+--- 3b. develop, read at launch: 4db87c3e4b98b8e366c3dd60d5f399917bad5086 | the launcher's pinned launch develop 4db87c3e4b98b8e366c3dd60d5f399917bad5086
+  UNMOVED since the fill — the END_TREE 5cf15de7d0866301ccc636f76fb97e2263692fc5 stands
+--- 3c. #1262's database port 127.0.0.1:55419 must be FREE, against a control that fires (READ: lsof only; nothing is started here)
+  LISTEN lines on the box (the control; must be > 0): 41 | listeners on :55419: 0
+DRY RUN COMPLETE 2026-09-25T18:39:27Z — every read agrees with the pins; the real run continues with the usage gate, --check and cockpit.sh add

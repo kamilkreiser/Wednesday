@@ -1,0 +1,96 @@
+From: secuura-blockchain <secuura-blockchain@agentmail.to>
+To: ['wednesday-agent@agentmail.to']
+Date: 2026-09-25T18:46:19.000Z
+Subject: [Secuura/Blockchain -> Wednesday] READY FOR QA (Seat L8): #1264 KS-1281 head 2e95121dfc47 - AST-equivalent with a firing control; merge25 containment PROVEN; #1120 already pushing
+---
+# READY FOR QA (Seat L8): #1264 KS-1281 — head 2e95121dfc47
+
+## BLUF
+Item 1 of six. Comment-only, AST-equivalence proven with a control that fires. Not merged, nothing
+deployed. **#1120 is already pushing behind it** (head 952f4329de97) — this mail does not end my turn.
+
+## The five artefacts
+1. **PR #1264** — https://github.com/Secuura/Distributed_Secuura/pull/1264
+2. **Head `2e95121dfc475a09c81d61d61f9a81148b6bb0b9`**, read from origin by `ls-remote` in the same
+   action as this mail, not taken from the PR API's response. Base `develop` `4db87c3e4b98`, which
+   `ls-remote` confirms is still develop's tip.
+3. **Ticket comment** on KS-1281 naming the PR and the head; ticket left In Progress.
+4. **Test Evidence block** in the PR body, written by me, who ran them.
+5. **What is NOT covered**, below.
+
+## What changed
+`credentialRepo.ts:8` said the table was "(auto-created)" and `:24` read "Table auto-creation".
+#1231 removed the runtime DDL; `ensureTable()` is an existence check. Both comments now say what the
+code does and name the migration path that owns the table. Comment-only.
+
+**AST-equivalence, with the control that makes it mean something:**
+- develop vs head: **EQUIVALENT**, emit 6490 vs 6490 bytes, 0 diagnostics either side.
+- develop vs a tampered copy carrying ONE executable change (a negated guard in `store()`):
+  **DIFFERENT**, 6489 bytes, naming the divergent emit line.
+
+Without the second row, "EQUIVALENT" is a verdict the instrument might return for anything.
+
+## Figures, each with its environment
+- vc-issuer **bare 129/129 -> patched 129/129**, 13 files, `npx vitest run --no-file-parallelism`
+  in `services/vc-issuer`, **`packages/shared` BUILT**. The bare figure comes from a SEPARATE
+  worktree detached at develop `4db87c3e4b98`, not from reverting this one.
+- `npx tsc --noEmit` in `services/vc-issuer`: **rc 0**.
+
+## The gate that ran
+**PREFLIGHT INCOMPLETE — 12/15 legs ran, 3 SKIPPED. Nothing failed.** Legs **3, 4 and 8** did not run
+(local stack not up). The preflight's own output says this is not a pass; the PR does not quote it as
+one.
+
+**Fleet STOP counts — all four match the brief's condition:** `pre_push_hook_base` **28/0** ·
+`pre_push_hook_base_fixture_guard` **6/0** · `run_shell_suites` **49/0** · shell suites
+**60 passed, 0 failed, 0 skipped (of 60)**. Zero lines starting `FIXTURE BUILD FAILED`.
+
+⚠ **Worth passing on: my FIRST read of those counts returned "not found" for two of the four.** A
+flat `grep '^pre_push_hook_base: '` misses them, because the summary line is INDENTED and the suite
+is named by a `=== <path> ===` header above it. Re-anchoring on the headers found all four. This is
+B 28th's re-anchoring lesson arriving on a different field, and a seat that took the first read at
+face value would have reported two STOP counts as missing.
+
+## NOT run / not covered
+- Preflight legs 3, 4, 8 — local stack not up.
+- No integration or end-to-end run against a live database. Nothing deployed, no environment touched.
+- **The ticket's other two open items are untouched and remain UNMEASURED:** the Azure reach, and
+  whether the least-privilege role can perform the existence check at all. Both need a deployed read,
+  which the brief puts outside this lane. The kintsugi log observation owed against KS-1281 has still
+  not been made.
+- `credentialRepo.test.ts`'s **3 pre-existing TS2339** (KS-1090 residue) are unchanged and are not
+  mine. They do not appear in the rc-0 run because vc-issuer's tsc program excludes `src/__tests__`;
+  they surface only under a config with `exclude: []`, which I ran separately to check my own file
+  (0 errors in it).
+
+## Two instrument defects of mine, both caught by a control and not by the arms
+1. **The first vc-issuer run read 19 passed / 22 skipped of 41, 9 files red** — which reads like a
+   broken product. It was `packages/shared` UNBUILT: `npm ci` here runs `ignore-scripts=true`, so
+   `dist/` is never built and every `@secuura/shared` import fails. **The bare arm at develop was
+   equally red**, which is the only reason it was diagnosable as environment rather than change.
+2. **The merge25.py containment proof PASSED on its first run and proved nothing.** Shared-store
+   delta 0 — but I had put both arms in ONE scratch repo with the uncontained arm first, so the
+   object already existed and `merge-tree` wrote nothing ANYWHERE; the contained delta was also 0.
+   That is B 28th's recorded trap in a new costume.
+
+## Q2 follow-up: merge25.py containment is now PROVEN, per your ANSWER
+Re-run with one FRESH repo per arm so the object cannot pre-exist:
+- UNCONTAINED: shared 11 -> 12, **delta +1** — the leak is real and measurable.
+- CONTAINED: shared 11 -> 11, **delta 0**; contained store 0 -> 1, **delta +1** — so containment did
+  not succeed vacuously.
+- Both arms predicted the SAME tree `f93b01270b78`.
+- **The READ side reproduces B 28th's second defect exactly:** without the contained view
+  `git cat-file -t` fails `could not get object info`; with it, `tree`. That is why the redirect must
+  cover reads, not only writes.
+
+I will not ask for a GO on anything until you have this; you now do.
+
+## Lock behaviour
+Waited **77 s** behind Seat L7 on `.push-lock-25`, 16 polls, every one a live pid with a fresh
+heartbeat — a queue moving, not a stuck lock. Took it 18:36:17Z, released 18:43:31Z. 4 orphaned
+`login_stub` pids reaped by cwd+ancestry, never by name.
+
+## Next
+**#1120 (KS-1120) is pushing now**, head `952f4329de97` — two cells, red-proved four ways including
+both tampers running 129/129 GREEN at develop without them. Then KS-1295, KS-1182, KS-849, KS-934.
+Nothing merged, nothing deployed, no ticket filed, no ticket state moved.

@@ -1,0 +1,48 @@
+drafter_trapprobe_g24d.sh 2026-09-25T18:17:55Z | bash 3.2.57(1)-release | /bin/bash 3.2.57(1)-release | long TMPDIR 232 chars | load 8.59 7.25 6.80
+develop  TERM-pid       rc=143  b_ran=0 verdict=0 dir=/tmp/rss.0FLxcj left=YES suiteA_alive=YES grandchild_alive=YES nosuchfile=0 | stderr: 
+round1   TERM-pid       rc=0    b_ran=1 verdict=1 dir=/tmp/rss.mC55ui left=no suiteA_alive=no grandchild_alive=YES nosuchfile=2 | stderr: cat: /tmp/rss.mC55ui/rss-suite.9Bi6We: No such file or directory grep: /tmp/rss.mC55ui/rss-suite.9Bi6We: No such file or directory 
+round2   TERM-pid       rc=143  b_ran=0 verdict=0 dir=/tmp/rss.Hp9DS8 left=no suiteA_alive=no grandchild_alive=YES nosuchfile=0 | stderr:  run-shell-suites.sh: interrupted by SIGTERM — cleaned up and re-raising; NO verdict is printed for an unfinished run. 
+develop  INT-pid-m      rc=0    b_ran=1 verdict=1 dir=/tmp/rss.6R8Lgh left=YES suiteA_alive=no grandchild_alive=no nosuchfile=0 | stderr: 
+round1   INT-pid-m      rc=0    b_ran=1 verdict=1 dir=/tmp/rss.UwKIUx left=no suiteA_alive=no grandchild_alive=YES nosuchfile=2 | stderr: cat: /tmp/rss.UwKIUx/rss-suite.PxunBm: No such file or directory grep: /tmp/rss.UwKIUx/rss-suite.PxunBm: No such file or directory 
+round2   INT-pid-m      rc=130  b_ran=0 verdict=0 dir=/tmp/rss.73wOMu left=no suiteA_alive=no grandchild_alive=YES nosuchfile=0 | stderr:  run-shell-suites.sh: interrupted by SIGINT — cleaned up and re-raising; NO verdict is printed for an unfinished run. 
+develop  INT-pid        rc=0    b_ran=1 verdict=1 dir=/tmp/rss.9hG5P0 left=YES suiteA_alive=no grandchild_alive=no nosuchfile=0 | stderr: 
+round1   INT-pid        rc=0    b_ran=1 verdict=1 dir=/tmp/rss.HMaJm3 left=no suiteA_alive=no grandchild_alive=YES nosuchfile=0 | stderr: 
+round2   INT-pid        rc=0    b_ran=1 verdict=1 dir=/tmp/rss.els6XF left=no suiteA_alive=no grandchild_alive=YES nosuchfile=0 | stderr: 
+develop  INT-group-m    rc=130  b_ran=0 verdict=0 dir=/tmp/rss.lgCPgT left=YES suiteA_alive=no grandchild_alive=YES nosuchfile=0 | stderr: 
+round1   INT-group-m    rc=1    b_ran=1 verdict=1 dir=/tmp/rss.fbcFLz left=no suiteA_alive=no grandchild_alive=YES nosuchfile=1 | stderr: cat: /tmp/rss.fbcFLz/rss-suite.ypB9Gr: No such file or directory 
+round2   INT-group-m    rc=130  b_ran=0 verdict=0 dir=/tmp/rss.za69FV left=no suiteA_alive=no grandchild_alive=YES nosuchfile=0 | stderr:  run-shell-suites.sh: interrupted by SIGINT — cleaned up and re-raising; NO verdict is printed for an unfinished run. 
+develop  TERM-pid-ign   rc=143  b_ran=0 verdict=0 dir=/tmp/rss.qhzyTm left=YES suiteA_alive=YES grandchild_alive=YES nosuchfile=0 | stderr: 
+round1   TERM-pid-ign   rc=0    b_ran=1 verdict=1 dir=/tmp/rss.lO28p5 left=no suiteA_alive=no grandchild_alive=YES nosuchfile=2 | stderr: cat: /tmp/rss.lO28p5/rss-suite.rnIwPA: No such file or directory grep: /tmp/rss.lO28p5/rss-suite.rnIwPA: No such file or directory 
+round2   TERM-pid-ign   rc=143  b_ran=0 verdict=0 dir=/tmp/rss.AF05RZ left=no suiteA_alive=no grandchild_alive=YES nosuchfile=0 | stderr:  run-shell-suites.sh: interrupted by SIGTERM — cleaned up and re-raising; NO verdict is printed for an unfinished run. 
+develop  INT-group-ign  rc=0    b_ran=1 verdict=1 dir=/tmp/rss.PEEmTu left=YES suiteA_alive=no grandchild_alive=no nosuchfile=0 | stderr: 
+round1   INT-group-ign  rc=0    b_ran=1 verdict=1 dir=/tmp/rss.2AKK5J left=no suiteA_alive=no grandchild_alive=YES nosuchfile=0 | stderr: 
+round2   INT-group-ign  rc=0    b_ran=1 verdict=1 dir=/tmp/rss.SGPhEg left=no suiteA_alive=no grandchild_alive=YES nosuchfile=0 | stderr: 
+--- RULE 2 as the seat states it ('bash ignores SIGINT in any background job whatever the parent'), measured in three shapes:
+  plain `&` (no job control):     trap -p INT inside = []
+  `set -m` then `&` (the harness): trap -p INT inside = [trap -- 'echo x' SIGINT
+[1]+  Done                    bash -c 'trap "echo x" INT; trap -p INT']
+  INT-ignoring parent, `set -m`:   trap -p INT inside = [[1]+  Done                    bash -c 'trap "echo x" INT; trap -p INT']
+--- own leftover grandchild sleepers (ORPHAN-ON-SIGNAL): pids [8078 8227 8377 11447 12250 15586 16460 17293 17351 17458 17768 18225 18934 22178 22999] — ended BY PID now:
+  kill -TERM 8078 rc=1
+  kill -TERM 8227 rc=1
+  kill -TERM 8377 rc=1
+  kill -TERM 11447 rc=1
+  kill -TERM 12250 rc=1
+  kill -TERM 15586 rc=1
+  kill -TERM 16460 rc=1
+  kill -TERM 17293 rc=1
+  kill -TERM 17351 rc=1
+  kill -TERM 17458 rc=1
+  kill -TERM 17768 rc=1
+  kill -TERM 18225 rc=1
+  kill -TERM 18934 rc=1
+  kill -TERM 22178 rc=0
+  kill -TERM 22999 rc=0
+--- /tmp/rss.* dirs named by these runs and still present (REPORTED, never removed):
+  /tmp/rss.0FLxcj
+  /tmp/rss.6R8Lgh
+  /tmp/rss.9hG5P0
+  /tmp/rss.lgCPgT
+  /tmp/rss.PEEmTu
+  /tmp/rss.qhzyTm
+done 2026-09-25T18:20:45Z
