@@ -23,7 +23,7 @@ supersede: replace wholesale; previous = NEXT-PICKUP-FRIDAY.md.pre-0925-rotate-s
 
 ## 🔴 LIVE (refreshed 21:3x by the 19:37 successor seat, ctx 59%)
 1. **PR #23 (B18 Azure OpenAI + Kam's template approval, head e943e0b)** and **PR #24 (B17 fixes + C-21 features, head 6d27983)**: both reviewed + ACCEPTED; CI polls were running at 21:35. **0 shared files** (compare API), so order is free. Merge each head-pinned (`gh pr merge N --squash --match-head-commit <full sha>`), read main back, then the main push-CI. After BOTH: `pdftotext` a fresh executive PDF shows no "AI-assisted" (B17's provenance label must win on the combined main).
-2. **Seat C (%23) is on B18 ADDENDUM-3** (commit + push its records in the analysis repo, then stop). Close its pane when it reports the remote tip.
+2. B18 records pushed (analysis repo tip 1c8b6f4); seat C closed. **B17's records are still UNCOMMITTED in the analysis repo** (its STATUS, B17-B_evidence, history entry): item 0 of the next HPSM-POC seat, by explicit path.
 3. **NEXT seat after both merges (Friday's decision, v1.3):** one automatic retry on a narrative validator refusal (severity-mismatch), a UI "Try again" that states the reason, and a stricter check that catches "critical" for a non-critical finding and any "compliance" claim. No template text change (that is card `hpsmpoc-templates-v101`). Then a fresh cold-user re-run in AI mode (`scripts/showcase-ai.sh`).
 4. **Open Friday cards:** `hpsmpoc-pdf-approver-name` (default: date only), `hpsmpoc-templates-v101` (default: 1.0.0 stays).
 5. caffeinate `-dims -t 21600` DETACHED 19:37 (pid 22618) until ~01:3x. Seats run on the default ~/.claude = the new account since Kam's 20:12 login (seat C statusline 7d:30%).
