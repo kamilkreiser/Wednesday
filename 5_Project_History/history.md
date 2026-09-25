@@ -1,3 +1,9 @@
+## 2026-09-26 05:14–05:3x AEST — Wednesday short seat (rotation from the 00:49 overnight seat; ended by the 05:30 shift change)
+- Boot: by-tier digest 544 KB + own ledger whole, ctx 34%. Verified M1's five merges (#1256–#1260; develop d7cdecf1, tree == gate24T2c's GO END_TREE); 44 Secuura merges since the 25th's morning, 0 deployed.
+- Launched gate24T2d (%31, 7 PRs, two at the cap) after checking the orphaned kit myself: the drafter's control run had died with one MISMATCH (H20), proved a control-design defect by a discriminating re-run.
+- Built the owed `fleet/.gitattributes` merge=union for inbox_routing.conf (proved both arms; 75a4b47bf). Un-stalled L7; ruled L8's KS-849 residual + kyc timeout; fleet count declaration sent, then corrected on L8's catch (ledger +1).
+- Wrap: retro, pickup 05:3x block, handover mail verified at wednesday-agent@, ledger archive (09-22, 28 rows, 1251 == 1251). No lesson files edited, so no digest regen.
+
 ## 2026-09-24 06:00–21:2x — Wednesday day half (same seat as the overnight; wrapped on Kam's word)
 - Morning ritual run from the wrapped overnight seat (7d:98%, a fresh boot ~1% of the allowance); receipt to Kam action-first: a new account unblocks the Secuura fetch.
 - Kam's questions: Tuesday not replying = her seat down since the 05:36 wrap (board fine; the mini unreachable while he travels); NAS has no Datasec newer than 09-23 13:19; the Studio's Datasec copies are stale by design (Datasec excluded from the Studio's NAS leg).
