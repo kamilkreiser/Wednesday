@@ -16,20 +16,7 @@ supersede: replace wholesale at every wrap/checkpoint; previous = NEXT-PICKUP-FR
 - `kam_rulings_today.sh`, then `python3 2_Project_Files/tools/reconcile_rulings.py` (then `--apply`). `chat_reply.sh` warns on stderr when taps are pending.
 - **Live-board wake now exists:** `fleet/cockpit/live_chat_poll.sh --seat friday`, armed by the SHARED launcher since Wednesday's 09b28c3b6. `doctor.sh` FAILS if it's down. Kam's posts reach this pane as a "[Wednesday tap] [live-board] …" line within ~30 s.
 
-## 🔴 OWED FIRST — HPSM analysis repo to GitHub (Kam to Tuesday, terminal ~13:35: "upload everything to GitHub"; Tuesday's mail 03:36Z)
-- **Measured on the laptop, 13:4x:**
-  - The HPSM ROOT repo (`/Users/kamilkreiser/1FILES TO SYNC/HPSM/.git`) has NO remote: main 389 commits, `s50/toolkit-r2`, 41 changed or untracked (mostly unison `(conflict_on_…)` copies; do NOT commit those).
-  - Its `.gitignore` excludes `Source_Documents/`, the secrets and `4_Credentials/`. 3,901 tracked files; the only tracked document is Datasec's own `2026-08-13_HPSM-MVP_client-presentation_v1.pptx`.
-  - `datasecau/HPSM-analysis` does NOT exist (the planned HPSM-40 name).
-  - The code repo `2_Project_Files` = GitHub `datasecau/HPSM` main 580d7a2 (in sync).
-  - The four "held" Composer branches ARE on GitHub (answered to Tuesday).
-- **Plan:**
-  1. `friday_as.sh datasec gh repo create datasecau/HPSM-analysis --private`.
-  2. A seat IN HPSM adds the remote and pushes `--all`. Friday's hooks rightly refuse git writes outside FRIDAY.
-     - The HPSM launcher (`HPSM/Launch_Claude.command`) expects DevMASTER (`WORKSPACE_DIR`/`VAULT_DIR`), and launchers.conf `Datasec/HPSM` points at `/Volumes/DevMASTER/...`: add a laptop entry (e.g. `Datasec/HPSM-L|/Users/kamilkreiser/1FILES TO SYNC/HPSM/Launch_Claude.command`) and check the launcher runs without DevMASTER.
-     - Or brief a seat another way.
-  3. Deploy key or ssh: the laptop has no ssh identity for datasecau/HPSM*; use gh over HTTPS as kamilDatasec, or a deploy key like HPSM-POC's.
-  4. Tell Tuesday "done <sha>" (she reports to Kam).
+## ✅ DONE 13:4x — HPSM analysis repo pushed to private `datasecau/HPSM-analysis` (main d0541b0 · s50/toolkit-r2 57272d1, read back via API). Tuesday and Kam told.
 
 ## LIVE RIGHT NOW — refreshed ~13:4x
 - **HPSM-POC showcase: ALL MERGED.** #17 (partner) · #18 (seed + scripts/showcase.sh + contract 0.4.0) · #19 (customer + the B10 a11y fix) → main 3029930, CI green.
