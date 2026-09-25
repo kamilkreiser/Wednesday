@@ -1,0 +1,238 @@
+#!/usr/bin/env python3
+"""predict_gate21T2d.py — MEASURE the round-21 FOURTH tier-2 batch (#1241 KS-1226 item 2, #1242 KS-980; one seat, Seat B 26th) over origin develop
+AS READ NOW, and write pins_gate21T2d.json beside this script. Never adopts a value from a mail.
+
+Instruments: `git ls-remote` READ from the Secuura checkout (read verb only); every write verb (clone, fetch, merge-tree --write-tree, commit-tree,
+read-tree / apply --cached / write-tree in a TEMP index, hash-object for a simulation) runs in a scratch BARE clone under <scratchpad>/g21d_sp/clone.git
+— `git clone --shared` FROM the checkout (objects borrowed read-only), then a fetch FROM ORIGIN into THAT clone (the checkout's core.sshCommand
+exported as GIT_SSH_COMMAND for the clone only, never printed). Nothing is written into the checkout.
+
+BASE-INVARIANT (Wednesday's 04:35Z ANSWER `answer_seatB25_movedbase`): both heads were cut from the OLD develop aa600af94 (BASE). Per PR:
+(1) diff(develop, merged) == EXACTLY the PR's own paths, each blob byte-equal to the head's blob; (2) numstat(develop -> merged) == numstat(BASE ->
+head); (3) the develop move ∩ the PR's OWN paths == EMPTY. NO declared overlap in this batch (measured at drafting: the move's 12 paths ∩ each PR's one
+path = EMPTY) — ANY own-path overlap refuses, re-predict BY HAND.
+REFUSES (rc 1) unless every HARD assertion holds. --simulate foreign1241|foreign1242 builds develop + a FOREIGN edit of that PR's own file in the
+scratch clone and measures over it (a NEGATIVE CONTROL: must REFUSE); a simulation writes pins_gate21T2d.SIM-<mode>.json, never the real pins.
+Usage: predict_gate21T2d.py <scratchpad dir under /private/tmp/claude-501/> [--simulate foreign1241|foreign1242]
+"""
+import json, os, re, subprocess, sys, datetime, tempfile
+
+GS = os.path.dirname(os.path.abspath(__file__))
+CHECKOUT = '/Volumes/DevMASTER/!CODING/Secuura/Blockchain/2_Project_Files'
+ORIGIN = 'git@github.com:Secuura/Distributed_Secuura.git'
+BASE = 'aa600af94d69ad59db279d32cbbd7596931a739b'
+D = 'Blockchain/Dev/'
+F1241 = 'systemTest/performance/tests/unit/utils/unitSuiteSlotIndependence.test.ts'
+F1242 = D + 'services/originate/src/__tests__/ks597-issuer-organization-id.integration.test.ts'
+PRS = {
+    '1241': {'key': 'KS-1226', 'head': 'e2d0518df40228f0a183bc4223c7a6840821253e', 'files': {F1241: (47, 1)},
+             'branch': 'refs/heads/feature/ks-1226-unitsuiteslotindependence-summary-regex-returns-null-on-skipped-r22-skippedsummary-1'},
+    '1242': {'key': 'KS-980', 'head': 'a35569aa020e63b2660b60e48b4f0286c46b27fc', 'files': {F1242: (93, 2)},
+             'branch': 'refs/heads/feature/ks-980-the-ks597-integration-suite-exercises-one-of-two-rls-paths-r22-realp1-1'},
+}
+FAIL = []
+def hard(ok, msg):
+    print(('  OK   ' if ok else '  FAIL ') + msg)
+    if not ok: FAIL.append(msg)
+def die(msg):
+    print('REFUSING: ' + msg); sys.exit(1)
+def run(args, cwd=None, env=None, inp=None, ok=(0,)):
+    p = subprocess.run(args, cwd=cwd, env=env, input=inp, capture_output=True, text=True)
+    if p.returncode not in ok:
+        die('%s -> rc %d: %s' % (' '.join(args[:6]), p.returncode, (p.stderr or p.stdout).strip()[:400]))
+    return p.stdout
+if len(sys.argv) < 2 or not re.match(r'^/private/tmp/claude-501/.*/scratchpad', os.path.realpath(sys.argv[1])) or not os.path.isdir(sys.argv[1]):
+    die('argv[1] must be an existing scratchpad dir under /private/tmp/claude-501/')
+SP = sys.argv[1]
+SIM = sys.argv[sys.argv.index('--simulate') + 1] if '--simulate' in sys.argv else ''
+if SIM not in ('', 'foreign1241', 'foreign1242'): die('unknown simulation ' + SIM)
+now = lambda: datetime.datetime.now(datetime.timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ')
+print('predict_gate21T2d.py at', now(), '| scratchpad', SP, '| SIMULATION:', SIM or 'none (the real read)')
+
+print('--- (a) heads and develop: ls-remote (the checkout, READ) then a fetch FROM ORIGIN into the scratch clone')
+refs = ['refs/heads/develop'] + ['refs/pull/%s/head' % n for n in PRS] + [PRS[n]['branch'] for n in PRS]
+ls = run(['git', '-C', CHECKOUT, 'ls-remote', 'origin'] + refs)
+lsd = {l.split('\t')[1]: l.split('\t')[0] for l in ls.strip().splitlines()}
+print('  ls-remote at %s:' % now()); [print('    %s %s' % (v, k)) for k, v in lsd.items()]
+CL = os.path.join(SP, 'g21d_sp', 'clone.git')
+env = dict(os.environ)
+ssh = subprocess.run(['git', '-C', CHECKOUT, 'config', '--get', 'core.sshCommand'], capture_output=True, text=True).stdout.strip()
+if ssh: env['GIT_SSH_COMMAND'] = ssh
+print('  core.sshCommand present: %s (value not printed)' % bool(ssh))
+if not os.path.isdir(CL):
+    os.makedirs(os.path.dirname(CL), exist_ok=True)
+    run(['git', 'clone', '-q', '--bare', '--shared', CHECKOUT, CL])
+    run(['git', '--git-dir', CL, 'remote', 'set-url', 'origin', ORIGIN])
+run(['perl', '-e', 'alarm 300; exec @ARGV', 'git', '--git-dir', CL, 'fetch', '-q', 'origin', '+refs/heads/develop:refs/g21d/develop']
+    + ['+refs/pull/%s/head:refs/g21d/pr%s' % (n, n) for n in PRS] + ['+%s:refs/g21d/br%s' % (PRS[n]['branch'], n) for n in PRS], env=env)
+g = lambda *a, **k: run(['git', '--git-dir', CL] + list(a), **k)
+DEV = g('rev-parse', 'refs/g21d/develop').strip()
+hard(DEV == lsd.get('refs/heads/develop'), 'develop %s: fetch == ls-remote' % DEV)
+for n, p in PRS.items():
+    h = g('rev-parse', 'refs/g21d/pr' + n).strip(); b = g('rev-parse', 'refs/g21d/br' + n).strip()
+    hard(h == b == lsd.get('refs/pull/%s/head' % n) == lsd.get(p['branch']) == p['head'],
+         '#%s head %s == pull head == branch (ls-remote AND fetch) == the pin' % (n, h))
+REAL_DEV = DEV
+CE = dict(env, GIT_AUTHOR_NAME='x', GIT_COMMITTER_NAME='x', GIT_AUTHOR_EMAIL='x@x', GIT_COMMITTER_EMAIL='x@x')
+if SIM:
+    FP = F1241 if SIM == 'foreign1241' else F1242
+    idx = tempfile.mktemp(prefix='g21d_sim_', dir=os.path.dirname(CL)); ienv = dict(CE, GIT_INDEX_FILE=idx)
+    run(['git', '--git-dir', CL, 'read-tree', DEV], env=ienv)
+    blob = g('cat-file', 'blob', DEV + ':' + FP) + '\n// a FOREIGN edit of this PR\'s own file (scratch only, never pushed)\n'
+    bo = run(['git', '--git-dir', CL, 'hash-object', '-w', '--stdin'], env=ienv, inp=blob).strip()
+    run(['git', '--git-dir', CL, 'update-index', '--cacheinfo', '100644,%s,%s' % (bo, FP)], env=ienv)
+    t = run(['git', '--git-dir', CL, 'write-tree'], env=ienv).strip(); os.remove(idx)
+    DEV = g('commit-tree', t, '-p', DEV, '-m', 'SIMULATED foreign edit of ' + FP.rsplit('/', 1)[1], env=CE).strip()
+    print('  SIMULATED develop (%s): %s over the real develop %s — every check below is over the SIMULATION' % (SIM, DEV, REAL_DEV))
+
+print('--- (b) ancestry and the develop move')
+for n, p in PRS.items():
+    par = g('rev-list', '--parents', '-n1', p['head']).split()
+    hard(par[1:] == [BASE] and g('rev-list', '--count', BASE + '..' + p['head']).strip() == '1',
+         '#%s: ONE commit, its parent == BASE %s' % (n, BASE[:12]))
+    hard(g('merge-base', DEV, p['head']).strip() == BASE, '#%s: merge-base(develop, head) == BASE' % n)
+hard(subprocess.run(['git', '--git-dir', CL, 'merge-base', '--is-ancestor', BASE, DEV]).returncode == 0, 'develop %s descends from BASE' % DEV[:12])
+move_log = [l for l in g('log', '--format=%H %s', BASE + '..' + DEV).splitlines() if l]
+move = sorted(x for x in g('diff', '--name-only', BASE, DEV).splitlines() if x)
+print('  develop is %d commits ahead of BASE; the move touches %d paths:' % (len(move_log), len(move)))
+for l in move_log: print('    ' + l)
+for f in move: print('      moved path ' + f)
+for n, p in PRS.items():
+    x = sorted(set(p['files']) & set(move))
+    hard(not x, '(3) BASE-INVARIANT: the develop move ∩ #%s\'s OWN paths == EMPTY (%s) — no declared overlap in this batch' % (n, x))
+hard(not (set(PRS['1241']['files']) & set(PRS['1242']['files'])), '#1241 ∩ #1242 == EMPTY')
+
+print('--- (c) per PR: numstat, blobs, modes; merge-tree over the develop just read (checks (1) and (2))')
+out = {'measured_at': now(), 'simulation': SIM or 'none', 'base': BASE, 'base_tree': g('rev-parse', BASE + '^{tree}').strip(), 'develop': DEV,
+       'develop_tree': g('rev-parse', DEV + '^{tree}').strip(), 'behind': len(move_log), 'move_log': move_log, 'move_paths': len(move), 'prs': {}}
+for n, p in PRS.items():
+    h = p['head']
+    ns = {r.split('\t')[2]: (int(r.split('\t')[0]), int(r.split('\t')[1])) for r in g('diff', '--numstat', BASE, h).strip().splitlines()}
+    hard(ns == p['files'], '#%s numstat BASE..head == the pinned file set and counts %s' % (n, p['files']))
+    mt_p = subprocess.run(['git', '--git-dir', CL, 'merge-tree', '--write-tree', DEV, h], capture_output=True, text=True, env=env)
+    mt = mt_p.stdout.split('\n')[0].strip()
+    hard(mt_p.returncode == 0, '#%s merges clean over develop (merge-tree rc %d) -> %s' % (n, mt_p.returncode, mt))
+    changed = sorted(x for x in g('diff', '--name-only', DEV, mt).splitlines() if x) if mt_p.returncode == 0 else ['CONFLICT']
+    hard(changed == sorted(p['files']), '(1) BASE-INVARIANT: diff(develop, #%s merged) == EXACTLY its own path(s) (got %s)' % (n, changed))
+    nsm = {r.split('\t')[2]: (int(r.split('\t')[0]), int(r.split('\t')[1])) for r in g('diff', '--numstat', DEV, mt).strip().splitlines()} if mt_p.returncode == 0 else {}
+    hard(nsm == ns, '(2) BASE-INVARIANT: numstat(develop -> merged) == numstat(BASE -> head) for #%s' % n)
+    files = []
+    for f in sorted(p['files']):
+        lt = g('ls-tree', h, '--', f).split(); lb = g('ls-tree', BASE, '--', f).split()
+        mb = subprocess.run(['git', '--git-dir', CL, 'rev-parse', '%s:%s' % (mt, f)], capture_output=True, text=True).stdout.strip()
+        hard(mb == lt[2], '(1) #%s merged blob == head blob %s: %s' % (n, lt[2], f))
+        hard(lt[0] == '100644' and lb and lb[0] == '100644', '#%s %s mode 100644 at head, unchanged from BASE' % (n, f))
+        files.append({'path': f, 'mode': lt[0], 'head_blob': lt[2], 'base_blob': lb[2] if lb else 'ABSENT', 'merged_blob': mb})
+        print('    #%s %s %s (BASE %s) %s' % (n, lt[0], lt[2], lb[2][:12] if lb else 'ABSENT', f))
+    dep = [f for f in p['files'] if re.search(r'(^|/)(package(-lock)?\.json|tsconfig[^/]*\.json|npm-shrinkwrap\.json)$', f)]
+    hard(not dep, '#%s: NO package.json / lockfile / tsconfig in the PR' % n)
+    out['prs'][n] = {'head': h, 'branch': p['branch'], 'key': p['key'], 'subject': g('log', '-1', '--format=%s', h).strip(), 'merged_tree': mt,
+                     'files': files, 'numstat': '%d/%d' % list(p['files'].values())[0]}
+
+print('--- (d) END_TREE in both orders + a second instrument (apply --cached of each BASE..head onto develop\'s tree in a TEMP index)')
+def chain(order):
+    cur = DEV
+    for n in order:
+        r = subprocess.run(['git', '--git-dir', CL, 'merge-tree', '--write-tree', cur, PRS[n]['head']], capture_output=True, text=True, env=env)
+        if r.returncode != 0: return 'CONFLICT@' + n
+        cur = g('commit-tree', r.stdout.split('\n')[0].strip(), '-p', cur, '-p', PRS[n]['head'], '-m', 'g21d chain (scratch only)', env=CE).strip()
+    return g('rev-parse', cur + '^{tree}').strip()
+e1, e2 = chain(['1241', '1242']), chain(['1242', '1241'])
+print('  order 1241,1242 -> %s | order 1242,1241 -> %s' % (e1, e2))
+hard(e1 == e2 and not e1.startswith('CONFLICT'), 'END_TREE identical in both orders')
+idx = tempfile.mktemp(prefix='g21d_idx_', dir=os.path.dirname(CL)); ienv = dict(env, GIT_INDEX_FILE=idx)
+run(['git', '--git-dir', CL, 'read-tree', DEV], env=ienv)
+for n in PRS:
+    ap = subprocess.run(['git', '--git-dir', CL, 'apply', '--cached'], env=ienv, input=g('diff', '--binary', '--full-index', BASE, PRS[n]['head']), capture_output=True, text=True)
+    hard(ap.returncode == 0, 'second instrument: apply --cached #%s rc %d %s' % (n, ap.returncode, ap.stderr.strip()[:120]))
+e3 = run(['git', '--git-dir', CL, 'write-tree'], env=ienv).strip(); os.remove(idx)
+hard(e3 == e1, 'second instrument (apply --cached) %s == END_TREE' % e3)
+st = g('diff', '--shortstat', DEV, e1).strip(); print('  develop -> END_TREE:', st)
+hard(sorted(g('diff', '--name-only', DEV, e1).split()) == sorted([F1241, F1242]), 'END_TREE diff vs develop == the union of the 2 batch paths')
+out['end_tree'] = e1; out['end_shortstat'] = st
+
+print('--- (e) the fleet STOP count in force after #1218 (static reads only — NO suite is run)')
+roots = ['Blockchain/Dev/scripts/__tests__', 'systemTest/__tests__']
+def nsuites(rev): return sum(1 for f in g('ls-tree', '-r', '--name-only', rev, '--', *roots).splitlines() if re.fullmatch(r'[^/]+\.test\.sh', f.rsplit('/', 1)[1]) and f.rsplit('/', 1)[0] in roots)
+SD, SE, SB = nsuites(REAL_DEV), nsuites(e1), nsuites(BASE)
+print('  run-shell-suites.sh ROOTS glob `*.test.sh`, read statically: BASE %d | develop %d | END_TREE %d' % (SB, SD, SE))
+hard(SD == SE == 60, 'the fleet STOP count "shell suites 60 of 60" matches the develop tree (60) and the END_TREE (60) — neither PR adds a shell suite')
+hard(any('(#1218)' in l for l in move_log) and bool(g('ls-tree', REAL_DEV, '--', D + 'scripts/__tests__/pre_push_hook_base_fixture_guard.test.sh').strip()),
+     '#1218 is ON develop (1609ecbf6) and its guard suite exists there — so the post-#1218 STOP count (28/0, 6/0, 60 of 60) is the one in force')
+out['suites_dev'] = SD; out['suites_end'] = SE
+
+print('--- (f) #1241 KS-1226 item 2: the regex, its groups, and the summary shapes (a LINE + JS-compatible-regex instrument; the gate MEASURES)')
+def lit(rev):
+    L = [l for l in g('cat-file', 'blob', '%s:%s' % (rev, F1241)).splitlines() if l.strip().startswith('const summary = /')]
+    return L
+lh, lb_ = lit(PRS['1241']['head']), lit(BASE)
+hard(len(lh) == 1 and len(lb_) == 1, '#1241: exactly ONE `const summary = /` line at the head and at BASE (the cells\' self-read finds the first)')
+def body(line): return line[line.index('/') + 1: line.rindex('/.exec(output);')]
+RH, RB = body(lh[0]), body(lb_[0])
+print('  BASE regex body: ' + RB); print('  HEAD regex body: ' + RH)
+hard(re.compile(RH).groups == 3 and re.compile(RB).groups == 3, '#1241: the head regex has exactly 3 capturing groups (BASE 3) — the seat\'s build-time assertion, re-measured')
+hb = g('cat-file', 'blob', '%s:%s' % (PRS['1241']['head'], F1241))
+hard('return { passed: Number(summary[2]), failed: Number(summary[1] ?? \'0\') };' in hb, '#1241: :103 reads summary[2] as passed and summary[1] as failed (unchanged)')
+SHAPES = [('the ticket/PR shape (skipped BEFORE passed)', 'Tests  1 failed | 1 skipped | 243 passed (245)'),
+          ('the ticket/PR shape, no failure', 'Tests  2 skipped | 243 passed (245)'),
+          ('plain failing', 'Tests  2 failed | 243 passed (245)'),
+          ('plain passing', 'Tests  245 passed (245)'),
+          ('VITEST-4 ORDER as READ from its dist: skipped AFTER passed', 'Tests  1 failed | 243 passed | 1 skipped (245)'),
+          ('VITEST-4 ORDER, no failure', 'Tests  243 passed | 2 skipped (245)'),
+          ('VITEST-4 ORDER, todo', 'Tests  243 passed | 1 todo (244)'),
+          ('VITEST-4 ORDER, expected fail', 'Tests  243 passed | 1 expected fail (244)')]
+def rd(rx, s):
+    m = re.search(rx, s); return None if m is None else {'passed': int(m.group(2)), 'failed': int(m.group(1) or 0)}
+TABLE = []
+for lab, s in SHAPES:
+    r = (lab, s, rd(RB, s), rd(RH, s)); TABLE.append(r); print('    %-58s %-50r BASE %-30s HEAD %s' % (lab, s, r[2], r[3]))
+hard(rd(RH, SHAPES[0][1]) == {'passed': 243, 'failed': 1} and rd(RB, SHAPES[0][1]) is None, '#1241: on the PR\'s own shape BASE -> NULL, HEAD -> {243, 1} (the seat\'s R1, reproduced by this instrument)')
+hard(rd(RH, SHAPES[4][1]) is None, 'PREDICTION (READ ONLY, the gate MEASURES): on vitest 4\'s own order (skipped AFTER passed) the HEAD regex still returns NULL')
+VD = '/Volumes/DevMASTER/!CODING/Secuura/Blockchain/2_Project_Files/systemTest/performance/node_modules/vitest'
+try:
+    vv = json.load(open(VD + '/package.json'))['version']
+    src = open([os.path.join(VD, 'dist/chunks', f) for f in os.listdir(VD + '/dist/chunks') if 'getStateString' in open(os.path.join(VD, 'dist/chunks', f), encoding='utf-8', errors='replace').read() and f.startswith('utils.')][0], encoding='utf-8').read()
+    seg = src[src.index('function getStateString'):][:1200]
+    order = [w for w in ('failed`', 'passed`', 'expected fail`', 'skipped`', 'todo`') if w in seg]
+    order.sort(key=seg.index)
+    print('  READ ONLY: the checkout\'s INSTALLED vitest %s (a stale install; the lockfile pins 4.1.11) — getStateString segment order: %s' % (vv, order))
+except Exception as e:
+    vv, order = 'UNREAD', []; print('  READ ONLY: the checkout\'s installed vitest dist could not be read: %s' % e)
+lock = g('cat-file', 'blob', '%s:systemTest/performance/package-lock.json' % PRS['1241']['head'])
+m = re.search(r'"node_modules/vitest": \{\s*"version": "([^"]+)"', lock); LV = m.group(1) if m else 'UNREAD'
+print('  the lockfile at the head pins vitest %s' % LV)
+hard(LV == '4.1.11', '#1241: the package lockfile pins vitest 4.1.11 (the version the gate must install and MEASURE the live summary shape with)')
+out['k1226'] = {'regex_base': RB, 'regex_head': RH, 'shapes': [{'label': a, 'line': b, 'base': c, 'head': d} for a, b, c, d in TABLE],
+                'vitest_installed_read': vv, 'vitest_order_read': order, 'vitest_lock': LV}
+UT = 'systemTest/performance/tests/unit'
+cnt = lambda rev: sum(1 for f in g('ls-tree', '-r', '--name-only', rev, '--', UT).splitlines() if f.endswith('.test.ts'))
+print('  systemTest/performance unit *.test.ts files: BASE %d | develop %d | END_TREE %d (the seat: 63 files; vitest counts, not these, are the gate\'s)' % (cnt(BASE), cnt(REAL_DEV), cnt(e1)))
+hard(any('(#1236)' in l for l in move_log), 'develop carries #1236 KS-1110 (+4 cells in systemTest/performance per its gate) — the merged package count is NOT the seat\'s 1090 (predict 1094; the gate measures)')
+
+print('--- (g) #1242 KS-980: the test-only claim, the DSN door, no credential, the integration corpus')
+h42 = g('cat-file', 'blob', '%s:%s' % (PRS['1242']['head'], F1242))
+hard('TEST_APP_DATABASE_URL' in h42 and 'APP_DB_USER' in h42 and 'APP_DB_PASSWORD' in h42, '#1242: P1\'s DSN comes from TEST_APP_DATABASE_URL or APP_DB_USER/APP_DB_PASSWORD')
+comp = g('cat-file', 'blob', '%s:%sdocker-compose.yml' % (REAL_DEV, D))
+dm = re.search(r'APP_DB_PASSWORD:\s*\$\{APP_DB_PASSWORD:-([^}]+)\}', comp)
+hard(bool(dm) and dm.group(1) not in h42 and dm.group(1) not in g('diff', BASE, PRS['1242']['head']),
+     '#1242: the compose default APP_DB_PASSWORD (read from docker-compose.yml, NOT printed) occurs 0 times in the head file and 0 times in the diff')
+for t in ('KS-980 D1 - platform_bypass connects as a role RLS constrains', 'KS-980 D2 - the admin GUC is load-bearing'):
+    hard(t in h42, '#1242: cell present: ' + t)
+hard("connectionString: path === 'platform_bypass' ? (TEST_APP_DB as string) : TEST_DB" in h42, '#1242: writerOn() routes platform_bypass to the APP DSN, bypassrls to TEST_DB')
+hard('rolsuper' not in h42, 'LEAD (READ ONLY): D1 reads rolbypassrls ONLY — rolsuper is never read (a SUPERUSER bypasses RLS whatever rolbypassrls says); D2 is the behavioural cover')
+ints = [f for f in g('ls-tree', '-r', '--name-only', e1, '--', D + 'services/originate/src').splitlines() if f.endswith('.integration.test.ts')]
+print('  originate *.integration.test.ts on the END_TREE: %d %s — jest.integration.config.js testMatch `**/__tests__/**/*.integration.test.ts` takes all of them; the seat\'s "FULL originate integration 14/14 (2 suites)" names 2' % (len(ints), [x.rsplit('/', 1)[1] for x in ints]))
+hard(len(ints) == 3, 'LEAD: THREE integration suites exist (ks597 x2 + rightsHolders.tenant-scope) — the seat\'s "full" run names two; the gate runs the config unfiltered and says why the third was absent')
+hard(D + 'services/originate/jest.integration.config.js' not in move and not [f for f in move if 'docker/init' in f or 'run-migrations' in f or '/migrations/' in f],
+     'the develop move touches no integration config, docker/init, migration or run-migrations.sh (the DB the gate builds is the same at BASE, head and merged)')
+mig = [f for f in g('ls-tree', '-r', '--name-only', REAL_DEV, '--', D + 'migrations').splitlines() if f.endswith('.sql')]
+print('  Blockchain/Dev/migrations/*.sql at develop: %d (the seat: applied=49 on its instance; the gate MEASURES the tracker count)' % len(mig))
+
+print('--- (h) branch names through the hyphenated-key scanner (own key only)')
+for n, p in PRS.items():
+    ks = sorted(set(re.findall(r'(?i)\bks-(\d+)\b', p['branch']))); hard(ks == [p['key'].split('-')[1]], '#%s branch keys %s == own %s' % (n, ks, p['key']))
+out['fail'] = len(FAIL)
+name = 'pins_gate21T2d.json' if not SIM else 'pins_gate21T2d.SIM-%s.json' % SIM
+with open(os.path.join(GS, name), 'w', encoding='utf-8') as f: json.dump(out, f, indent=1, sort_keys=True)
+print('WROTE', os.path.join(GS, name), 'at', now()); print('HARD FAILS:', len(FAIL), FAIL)
+sys.exit(1 if FAIL else 0)

@@ -1,0 +1,112 @@
+predict_gate21T2d.py at 2026-09-25T10:25:50Z | scratchpad /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/d384786a-4d7e-451d-a78b-40a06ef20e21/scratchpad/gate21T2d/_sp | SIMULATION: none (the real read)
+--- (a) heads and develop: ls-remote (the checkout, READ) then a fetch FROM ORIGIN into the scratch clone
+  ls-remote at 2026-09-25T10:25:53Z:
+    e68e2f0e837df86da527d775a3a49c631b0f5b17 refs/heads/develop
+    e2d0518df40228f0a183bc4223c7a6840821253e refs/heads/feature/ks-1226-unitsuiteslotindependence-summary-regex-returns-null-on-skipped-r22-skippedsummary-1
+    a35569aa020e63b2660b60e48b4f0286c46b27fc refs/heads/feature/ks-980-the-ks597-integration-suite-exercises-one-of-two-rls-paths-r22-realp1-1
+    e2d0518df40228f0a183bc4223c7a6840821253e refs/pull/1241/head
+    a35569aa020e63b2660b60e48b4f0286c46b27fc refs/pull/1242/head
+  core.sshCommand present: True (value not printed)
+  OK   develop e68e2f0e837df86da527d775a3a49c631b0f5b17: fetch == ls-remote
+  OK   #1241 head e2d0518df40228f0a183bc4223c7a6840821253e == pull head == branch (ls-remote AND fetch) == the pin
+  OK   #1242 head a35569aa020e63b2660b60e48b4f0286c46b27fc == pull head == branch (ls-remote AND fetch) == the pin
+--- (b) ancestry and the develop move
+  OK   #1241: ONE commit, its parent == BASE aa600af94d69
+  OK   #1241: merge-base(develop, head) == BASE
+  OK   #1242: ONE commit, its parent == BASE aa600af94d69
+  OK   #1242: merge-base(develop, head) == BASE
+  OK   develop e68e2f0e837d descends from BASE
+  develop is 10 commits ahead of BASE; the move touches 14 paths:
+    e68e2f0e837df86da527d775a3a49c631b0f5b17 KS-1127 + KS-1089 + KS-1135 RSSCOUNT: an exit-0 SKIP is no longer counted as passed (#1234)
+    c41e268eb9355fe06eed7590455aa2fbbd90c59b KS-1158 R5a: re-point the ks1059 header citations and fix the two code quotes that drifted (#1238)
+    e119781ac993ee1c2a5f48ea93d888df4bb135cb KS-1229: pin that the /version relabel guard keys on presence, not truthiness (#1237)
+    2208acc0638abb78aa35d386cf778ec4d8746e91 KS-1110 READYAML: both k6 unit tests parse scenarios.yml through readYaml() (#1236)
+    565e7afb4ebba70919430762d3dd0819325a94a2 KS-1140 HANDEDLIST: the ks879 red cell is handed the list the control walks (#1235)
+    1f1da7f35040a45877833e263cac754bb1744d2b KS-1133 ALIASORDER: document the v1/v2 hash-alias split, and name BAD_REQUEST on sign-wallet (#1233)
+    61e2bd81e8aa9c24d8c590ac37bef65da290219b KS-1118 F-3a: narrow the v1 verify comment that overclaimed (F-2 is already pinned by #1149) (#1223)
+    c0863525a1429c485c87da320cebfb8461da59c9 KS-1277: correct two stale on-behalf-of comments in the originate documents route (#1219)
+    1609ecbf61e1035a50f4cb51d0fbae360bfb73c3 KS-897 FIXTUREABORT + KS-896 CONTROLEXISTS: pre-push base suite aborts on an unbuilt fixture (#1218)
+    d9515f4a06e0db0396a059ccd8c76b610f22a22b KS-789 NOCIBACKSTOP: CONTRIBUTING states what actually catches a degraded or bypassed push (#1240)
+      moved path Blockchain/Dev/CONTRIBUTING.md
+      moved path Blockchain/Dev/docs/openapi/secuura-api.yaml
+      moved path Blockchain/Dev/packages/shared/src/__tests__/ks879-no-raw-control-bytes-repo-wide.test.ts
+      moved path Blockchain/Dev/scripts/__tests__/pre_push_hook_base.test.sh
+      moved path Blockchain/Dev/scripts/__tests__/pre_push_hook_base_fixture_guard.test.sh
+      moved path Blockchain/Dev/scripts/__tests__/run_shell_suites.test.sh
+      moved path Blockchain/Dev/scripts/run-shell-suites.sh
+      moved path Blockchain/Dev/services/originate/src/__tests__/ks1059-sim-leg-must-not-resurrect-a-terminal-document.test.ts
+      moved path Blockchain/Dev/services/originate/src/__tests__/ks1213-a-derived-writer-relabel-is-refused.test.ts
+      moved path Blockchain/Dev/services/originate/src/originate.openapi.ts
+      moved path Blockchain/Dev/services/originate/src/routes/documents.ts
+      moved path Blockchain/Dev/services/originate/src/routes/verification.ts
+      moved path systemTest/performance/tests/unit/config/sheddingCeiling.test.ts
+      moved path systemTest/performance/tests/unit/package_scripts.test.ts
+  OK   (3) BASE-INVARIANT: the develop move ∩ #1241's OWN paths == EMPTY ([]) — no declared overlap in this batch
+  OK   (3) BASE-INVARIANT: the develop move ∩ #1242's OWN paths == EMPTY ([]) — no declared overlap in this batch
+  OK   #1241 ∩ #1242 == EMPTY
+--- (c) per PR: numstat, blobs, modes; merge-tree over the develop just read (checks (1) and (2))
+  OK   #1241 numstat BASE..head == the pinned file set and counts {'systemTest/performance/tests/unit/utils/unitSuiteSlotIndependence.test.ts': (47, 1)}
+  OK   #1241 merges clean over develop (merge-tree rc 0) -> 7d425e5ac19d021b8e47fd3958ac595e0fad5b3a
+  OK   (1) BASE-INVARIANT: diff(develop, #1241 merged) == EXACTLY its own path(s) (got ['systemTest/performance/tests/unit/utils/unitSuiteSlotIndependence.test.ts'])
+  OK   (2) BASE-INVARIANT: numstat(develop -> merged) == numstat(BASE -> head) for #1241
+  OK   (1) #1241 merged blob == head blob d9f45be175d2e2de4aa1fcb68f8835006071e602: systemTest/performance/tests/unit/utils/unitSuiteSlotIndependence.test.ts
+  OK   #1241 systemTest/performance/tests/unit/utils/unitSuiteSlotIndependence.test.ts mode 100644 at head, unchanged from BASE
+    #1241 100644 d9f45be175d2e2de4aa1fcb68f8835006071e602 (BASE e4225f1ed4ac) systemTest/performance/tests/unit/utils/unitSuiteSlotIndependence.test.ts
+  OK   #1241: NO package.json / lockfile / tsconfig in the PR
+  OK   #1242 numstat BASE..head == the pinned file set and counts {'Blockchain/Dev/services/originate/src/__tests__/ks597-issuer-organization-id.integration.test.ts': (93, 2)}
+  OK   #1242 merges clean over develop (merge-tree rc 0) -> 3d71522b696407628949ebec76d731a04ece9241
+  OK   (1) BASE-INVARIANT: diff(develop, #1242 merged) == EXACTLY its own path(s) (got ['Blockchain/Dev/services/originate/src/__tests__/ks597-issuer-organization-id.integration.test.ts'])
+  OK   (2) BASE-INVARIANT: numstat(develop -> merged) == numstat(BASE -> head) for #1242
+  OK   (1) #1242 merged blob == head blob 46337bcfc45a2a6510f43f49689d837662c5e206: Blockchain/Dev/services/originate/src/__tests__/ks597-issuer-organization-id.integration.test.ts
+  OK   #1242 Blockchain/Dev/services/originate/src/__tests__/ks597-issuer-organization-id.integration.test.ts mode 100644 at head, unchanged from BASE
+    #1242 100644 46337bcfc45a2a6510f43f49689d837662c5e206 (BASE 18cd223e482a) Blockchain/Dev/services/originate/src/__tests__/ks597-issuer-organization-id.integration.test.ts
+  OK   #1242: NO package.json / lockfile / tsconfig in the PR
+--- (d) END_TREE in both orders + a second instrument (apply --cached of each BASE..head onto develop's tree in a TEMP index)
+  order 1241,1242 -> 4ee2ff4a5f43e86eea1a018ff57eba71666c410f | order 1242,1241 -> 4ee2ff4a5f43e86eea1a018ff57eba71666c410f
+  OK   END_TREE identical in both orders
+  OK   second instrument: apply --cached #1241 rc 0 
+  OK   second instrument: apply --cached #1242 rc 0 
+  OK   second instrument (apply --cached) 4ee2ff4a5f43e86eea1a018ff57eba71666c410f == END_TREE
+  develop -> END_TREE: 2 files changed, 140 insertions(+), 3 deletions(-)
+  OK   END_TREE diff vs develop == the union of the 2 batch paths
+--- (e) the fleet STOP count in force after #1218 (static reads only — NO suite is run)
+  run-shell-suites.sh ROOTS glob `*.test.sh`, read statically: BASE 59 | develop 60 | END_TREE 60
+  OK   the fleet STOP count "shell suites 60 of 60" matches the develop tree (60) and the END_TREE (60) — neither PR adds a shell suite
+  OK   #1218 is ON develop (1609ecbf6) and its guard suite exists there — so the post-#1218 STOP count (28/0, 6/0, 60 of 60) is the one in force
+--- (f) #1241 KS-1226 item 2: the regex, its groups, and the summary shapes (a LINE + JS-compatible-regex instrument; the gate MEASURES)
+  OK   #1241: exactly ONE `const summary = /` line at the head and at BASE (the cells' self-read finds the first)
+  BASE regex body: Tests\s+(?:(\d+) failed \| )?(\d+) passed \((\d+)\)
+  HEAD regex body: Tests\s+(?:(\d+) failed \| )?(?:\d+ skipped \| )?(\d+) passed \((\d+)\)
+  OK   #1241: the head regex has exactly 3 capturing groups (BASE 3) — the seat's build-time assertion, re-measured
+  OK   #1241: :103 reads summary[2] as passed and summary[1] as failed (unchanged)
+    the ticket/PR shape (skipped BEFORE passed)                'Tests  1 failed | 1 skipped | 243 passed (245)'   BASE None                           HEAD {'passed': 243, 'failed': 1}
+    the ticket/PR shape, no failure                            'Tests  2 skipped | 243 passed (245)'              BASE None                           HEAD {'passed': 243, 'failed': 0}
+    plain failing                                              'Tests  2 failed | 243 passed (245)'               BASE {'passed': 243, 'failed': 2}   HEAD {'passed': 243, 'failed': 2}
+    plain passing                                              'Tests  245 passed (245)'                          BASE {'passed': 245, 'failed': 0}   HEAD {'passed': 245, 'failed': 0}
+    VITEST-4 ORDER as READ from its dist: skipped AFTER passed 'Tests  1 failed | 243 passed | 1 skipped (245)'   BASE None                           HEAD None
+    VITEST-4 ORDER, no failure                                 'Tests  243 passed | 2 skipped (245)'              BASE None                           HEAD None
+    VITEST-4 ORDER, todo                                       'Tests  243 passed | 1 todo (244)'                 BASE None                           HEAD None
+    VITEST-4 ORDER, expected fail                              'Tests  243 passed | 1 expected fail (244)'        BASE None                           HEAD None
+  OK   #1241: on the PR's own shape BASE -> NULL, HEAD -> {243, 1} (the seat's R1, reproduced by this instrument)
+  OK   PREDICTION (READ ONLY, the gate MEASURES): on vitest 4's own order (skipped AFTER passed) the HEAD regex still returns NULL
+  READ ONLY: the checkout's INSTALLED vitest 4.1.9 (a stale install; the lockfile pins 4.1.11) — getStateString segment order: ['failed`', 'passed`', 'expected fail`', 'skipped`', 'todo`']
+  the lockfile at the head pins vitest 4.1.11
+  OK   #1241: the package lockfile pins vitest 4.1.11 (the version the gate must install and MEASURE the live summary shape with)
+  systemTest/performance unit *.test.ts files: BASE 63 | develop 63 | END_TREE 63 (the seat: 63 files; vitest counts, not these, are the gate's)
+  OK   develop carries #1236 KS-1110 (+4 cells in systemTest/performance per its gate) — the merged package count is NOT the seat's 1090 (predict 1094; the gate measures)
+--- (g) #1242 KS-980: the test-only claim, the DSN door, no credential, the integration corpus
+  OK   #1242: P1's DSN comes from TEST_APP_DATABASE_URL or APP_DB_USER/APP_DB_PASSWORD
+  OK   #1242: the compose default APP_DB_PASSWORD (read from docker-compose.yml, NOT printed) occurs 0 times in the head file and 0 times in the diff
+  OK   #1242: cell present: KS-980 D1 - platform_bypass connects as a role RLS constrains
+  OK   #1242: cell present: KS-980 D2 - the admin GUC is load-bearing
+  OK   #1242: writerOn() routes platform_bypass to the APP DSN, bypassrls to TEST_DB
+  OK   LEAD (READ ONLY): D1 reads rolbypassrls ONLY — rolsuper is never read (a SUPERUSER bypasses RLS whatever rolbypassrls says); D2 is the behavioural cover
+  originate *.integration.test.ts on the END_TREE: 3 ['ks597-b-caller-org-externalref.integration.test.ts', 'ks597-issuer-organization-id.integration.test.ts', 'rightsHolders.tenant-scope.integration.test.ts'] — jest.integration.config.js testMatch `**/__tests__/**/*.integration.test.ts` takes all of them; the seat's "FULL originate integration 14/14 (2 suites)" names 2
+  OK   LEAD: THREE integration suites exist (ks597 x2 + rightsHolders.tenant-scope) — the seat's "full" run names two; the gate runs the config unfiltered and says why the third was absent
+  OK   the develop move touches no integration config, docker/init, migration or run-migrations.sh (the DB the gate builds is the same at BASE, head and merged)
+  Blockchain/Dev/migrations/*.sql at develop: 49 (the seat: applied=49 on its instance; the gate MEASURES the tracker count)
+--- (h) branch names through the hyphenated-key scanner (own key only)
+  OK   #1241 branch keys ['1226'] == own KS-1226
+  OK   #1242 branch keys ['980'] == own KS-980
+WROTE /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/d384786a-4d7e-451d-a78b-40a06ef20e21/scratchpad/gate21T2d/pins_gate21T2d.json at 2026-09-25T10:25:58Z
+HARD FAILS: 0 []

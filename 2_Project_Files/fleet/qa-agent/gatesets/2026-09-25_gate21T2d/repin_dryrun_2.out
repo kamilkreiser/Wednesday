@@ -1,0 +1,26 @@
+LAUNCH ACTION (DRY RUN) 2026-09-25 20:26:48 AEST / 2026-09-25T10:26:48Z | launcher /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/d384786a-4d7e-451d-a78b-40a06ef20e21/scratchpad/gate21T2d/launch_qa_secuura_batch1241-t2.sh | pinned launch develop e68e2f0e837df86da527d775a3a49c631b0f5b17 | END_TREE 4ee2ff4a5f43e86eea1a018ff57eba71666c410f
+  pin #1241 e2d0518df40228f0a183bc4223c7a6840821253e
+  pin #1242 a35569aa020e63b2660b60e48b4f0286c46b27fc
+--- 0. the pane must be routed (inbox_routing.conf) or cockpit.sh say --mail fails silently
+  routing file /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/inbox_routing.conf — line present: 0 (grep rc=1; want 1 / rc 0; control: QA/Secuura-batch1234 = 1)
+  (DRY RUN: reported, not refused — the real run refuses rc 1 here)
+--- 0b. the kit's home: launcher filled for /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/d384786a-4d7e-451d-a78b-40a06ef20e21/scratchpad/gate21T2d | this script lives in /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/d384786a-4d7e-451d-a78b-40a06ef20e21/scratchpad/gate21T2d
+  AT HOME — no re-fill
+--- 1. instrument: git ls-remote origin (read from the Secuura checkout, READ-ONLY)
+  ls-remote rc=0 at 10:26:52Z
+    e68e2f0e837df86da527d775a3a49c631b0f5b17	refs/heads/develop
+    e2d0518df40228f0a183bc4223c7a6840821253e	refs/heads/feature/ks-1226-unitsuiteslotindependence-summary-regex-returns-null-on-skipped-r22-skippedsummary-1
+    a35569aa020e63b2660b60e48b4f0286c46b27fc	refs/heads/feature/ks-980-the-ks597-integration-suite-exercises-one-of-two-rls-paths-r22-realp1-1
+    e2d0518df40228f0a183bc4223c7a6840821253e	refs/pull/1241/head
+    a35569aa020e63b2660b60e48b4f0286c46b27fc	refs/pull/1242/head
+--- 2. instrument: the GitHub PULLS API (an independent read of each head, and mergeable)
+  pulls API rc=0
+    API #1241 head e2d0518df40228f0a183bc4223c7a6840821253e base develop mergeable True reads 1 state open
+    API #1242 head a35569aa020e63b2660b60e48b4f0286c46b27fc base develop mergeable True reads 1 state open
+--- 3. the heads, judged (both instruments == the pin, open, not mergeable:false)
+  #1241  ls-remote pull/head e2d0518df40228f0a183bc4223c7a6840821253e | branch e2d0518df40228f0a183bc4223c7a6840821253e | API e2d0518df40228f0a183bc4223c7a6840821253e (state open, mergeable True) | pinned e2d0518df40228f0a183bc4223c7a6840821253e
+  #1242  ls-remote pull/head a35569aa020e63b2660b60e48b4f0286c46b27fc | branch a35569aa020e63b2660b60e48b4f0286c46b27fc | API a35569aa020e63b2660b60e48b4f0286c46b27fc (state open, mergeable True) | pinned a35569aa020e63b2660b60e48b4f0286c46b27fc
+  BOTH INSTRUMENTS AGREE with both pins.
+--- 3b. develop, read at launch: e68e2f0e837df86da527d775a3a49c631b0f5b17 | the launcher's pinned launch develop e68e2f0e837df86da527d775a3a49c631b0f5b17
+  UNMOVED since the fill — the END_TREE 4ee2ff4a5f43e86eea1a018ff57eba71666c410f stands
+DRY RUN COMPLETE 2026-09-25T10:26:53Z — every read agrees with the pins; the real run continues with the usage gate, --check and cockpit.sh add

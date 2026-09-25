@@ -1,0 +1,137 @@
+#!/bin/bash
+# controls_gate21T2d.sh — every guard of the gate21T2d kit, run BOTH WAYS. Each control has a DOCTORED arm (one planted defect; the guard must refuse
+# with its own exit code) and, where the mechanism is an override or a copied file, a PRISTINE twin through the SAME mechanism (defect not planted;
+# must pass) — so a refusal is attributable to the defect, not to the harness. `--invert` flips every expectation: every control must then report
+# MISMATCH (proves each control can fail and the harness can report it). Launches nothing: launcher controls use `--check` (headless) or stop at the
+# non-TTY guard; repin controls use `--dry-run`, a bad argv, or a routing-file override that stops at step 0; predict / fill controls run in a MOVED
+# COPY of the kit, never the home. Each doctored prompt phrase is chosen OUTSIDE the by-name ladder, so the control reaches the rule it names (the
+# ladder, exit 33, runs first). Writes only under <scratchpad>/g21d_controls_*. Derived from gate21T1c's controls_gate21T1c.sh, re-keyed.
+# Usage: controls_gate21T2d.sh <scratchpad dir> [--invert]
+set -u
+GS="$(dirname "$(/bin/realpath "$0")")"
+SP="${1:-}"; INV=0; [ "${2:-}" = "--invert" ] && INV=1
+case "$SP" in /private/tmp/claude-501/*/scratchpad*) [ -d "$SP" ] || { echo "no scratchpad $SP"; exit 9; } ;; *) echo "usage: controls_gate21T2d.sh <scratchpad> [--invert]"; exit 9;; esac
+L="$GS/launch_qa_secuura_batch1241-t2.sh"; PR="$GS/2026-09-25_secuura-batch1241-t2.prompt.txt"; CAP="$GS/mail_gate21T2d_ready.md"
+REPIN="$GS/repin_and_launch_gate21T2d.sh"
+CW="$SP/g21d_controls_$(date -u +%H%M%S)$([ "$INV" = 1 ] && echo _inv)"; mkdir -p "$CW"
+OK=0; BAD=0; N=0
+say() { printf '%s\n' "$*"; }
+judge() { # $1 id, $2 want rc, $3 got rc, $4 label
+  local want="$2"; N=$((N+1))
+  if [ "$INV" = 1 ]; then
+    if [ "$3" != "$want" ]; then OK=$((OK+1)); say "  OK       $1 (inverted: want != $want, got $3) — $4"; else BAD=$((BAD+1)); say "  MISMATCH $1 (inverted: want != $want, got $3) — $4"; fi
+  else
+    if [ "$3" = "$want" ]; then OK=$((OK+1)); say "  OK       $1 want $want got $3 — $4"; else BAD=$((BAD+1)); say "  MISMATCH $1 want $want got $3 — $4"; fi
+  fi
+}
+# doctor <src> <dst> <old> <new>: a copy with ONE planted defect; refuses (rc 99) if <old> is absent, so a control can never pass vacuously
+doctor() { python3 - "$1" "$2" "$3" "$4" <<'PY'
+import re, sys
+s, d, o, n = sys.argv[1:5]
+t = open(s, encoding='utf-8').read()
+# whitespace-tolerant: the prompt is hard-wrapped, and the launcher's `has` checks read it whitespace-joined
+rx = re.compile(r'\s+'.join(re.escape(w) for w in o.split(' ')))
+t2, k = rx.subn(lambda m: n, t)
+if k == 0: print('DOCTOR: anchor absent: %r' % o[:80]); sys.exit(99)
+open(d, 'w', encoding='utf-8').write(t2)
+PY
+}
+chk() { "$L" --check > "$CW/$1.out" 2>&1; echo $?; }
+# pchk: the same --check with develop PINNED to the launcher's own pin (QAB1241_CUR_DEV), so a develop move DURING a controls run cannot mask a doctored
+# arm as exit 17 (controls_2.out: #1234 landed mid-run and 73 arms read 17). P, D, M/twin, N2 and the repin arms still read the LIVE develop.
+pchk() { QAB1241_CUR_DEV="${QAB1241_CUR_DEV:-$PDEV}" "$L" --check > "$CW/$1.out" 2>&1; echo $?; }
+# a prompt control: doctored arm + pristine twin through QAB1241_PROMPT
+pctl() { # id want old new label
+  local id="$1" want="$2"; doctor "$PR" "$CW/$id.prompt" "$3" "$4" || { judge "$id" "$want" 99 "DOCTOR FAILED: $5"; return; }
+  cp "$PR" "$CW/$id.pristine.prompt"
+  judge "$id" "$want" "$(QAB1241_PROMPT="$CW/$id.prompt" pchk "$id")" "$5"
+  judge "$id/twin" 0 "$(QAB1241_PROMPT="$CW/$id.pristine.prompt" pchk "$id.twin")" "$5 — pristine copy through the same override"
+}
+H42="$(sed -n 's/^  "1242|[^|]*|[^|]*|\([0-9a-f]\{40\}\)|.*$/\1/p' "$L")"; PDEV="$(sed -n "s/^DEVELOP_SHA='\(.*\)'$/\1/p" "$L")"
+[ -n "$H42" ] && [ -n "$PDEV" ] || { echo "REFUSING: could not read the #1242 row / DEVELOP_SHA from $L"; exit 9; }
+say "controls_gate21T2d.sh $(date -u +%FT%TZ)$([ "$INV" = 1 ] && echo ' --invert') | kit $GS | work $CW"
+say "--- launcher (--check unless stated)"
+judge P 0 "$(chk P)" "positive: the kit as filled"
+judge C 6 "$(QAB1241_HEAD_1242=0000000000000000000000000000000000000000 pchk C)" "stale #1242 head"
+judge C/twin 0 "$(QAB1241_HEAD_1242="$H42" pchk C.twin)" "the real #1242 head through the same override"
+judge D 17 "$(QAB1241_CUR_DEV=d9515f4a06e0db0396a059ccd8c76b610f22a22b chk D)" "develop moved (an earlier develop d9515f4a0)"
+judge D/twin 0 "$(QAB1241_CUR_DEV="$PDEV" chk D.twin)" "the pinned develop through the same override"
+judge V 10 "$(QAB1241_PATHS_1241='systemTest/performance/tests/unit/utils/unitSuiteSlotIndependence.test.TS' pchk V)" "base-invariant compare: a same-count WRONG path name for #1241"
+judge V/twin 0 "$(QAB1241_PATHS_1241='systemTest/performance/tests/unit/utils/unitSuiteSlotIndependence.test.ts' pchk V.twin)" "the right path through the same override"
+doctor "$CAP" "$CW/O.cap" 'rolbypassrls false vs TRUE' 'rolbypassrls false vs true' && cp "$CAP" "$CW/O.pristine.cap"
+judge O 30 "$(QAB1241_BRIEF="$CW/O.cap" pchk O)" "capture missing a seat item ('rolbypassrls false vs TRUE')"
+judge O/twin 0 "$(QAB1241_BRIEF="$CW/O.pristine.cap" pchk O.twin)" "pristine capture through the same override"
+pctl G 8 $'ultrathink\n' $'think\n' "no thinking directive"
+pctl U 8 'PR #1242 is KS-980.' 'PR #1242 is {{KS_980}}.' "an unfilled fill token"
+pctl H20 20 'a35569aa020e63b2660b60e48b4f0286c46b27fc' 'a35569aa020e63b2660b60e48b4f0286c46b27fX' "the prompt names a wrong #1242 head"
+pctl T 32 'PR #1242 is KS-980.' 'PR #1242 is KS-981.' "ticket statement for #1242"
+pctl I 7 '#1242 T2' '#1242 T3' "tier line for #1242"
+pctl I2 7 'Both PRs are round 1 of 2 under the two-NO-GO cap' 'Both PRs are round 2 of 2' "round 1 of 2"
+pctl K 33 'SELFREAD-SHAPE' 'SELFREAD-FORM' "a by-name keyword (SELFREAD-SHAPE)"
+pctl B 34 'a sibling batch merging is not a difference' 'a sibling batch merging is a difference' "base-invariant rule"
+pctl B2 34 'there is no declared exception here' 'an overlap is fine here' "no declared overlap: a move on an own path STOPS that PR"
+pctl S 35 'the ONE volume you may remove, because you created it' 'a volume you may remove' "Postgres rule: only your own volume"
+pctl S2 35 'never printed, never in evidence/' 'printed if useful' "Postgres rule: credentials never printed"
+pctl S3 35 'you do NOT start, restart, quit, kill or reset Docker Desktop' 'you may restart Docker Desktop' "Postgres rule: the engine is not yours"
+pctl S4 35 'NEVER connect to it' 'connect as needed' "Postgres rule: never the native :5432"
+pctl S5 35 'never `docker system prune` / `volume prune`' 'prune if needed' "Postgres rule: never prune"
+pctl X 36 'restore by bytes' 'restore somehow' "red-proof rule: restore by bytes"
+pctl F 37 'NO 28/0 to claim for #1241' 'a 28/0 to claim for #1241' "fleet STOP: #1241's push ran no Blockchain/Dev leg"
+pctl F2 37 '`pre_push_hook_base_fixture_guard.test.sh` 6 passed / 0 failed, shell suites 60 of 60' '`pre_push_hook_base_fixture_guard.test.sh` 6 passed / 0 failed, shell suites 59 of 59' "fleet STOP: the post-#1218 count 60 of 60"
+pctl F3 37 'NO STANDALONE RUN of' 'A STANDALONE RUN of' "fleet STOP: no standalone run"
+pctl Y 38 'pre-existing (KS-562), not caused by this change"' 'pre-existing, not caused by this change"' "the anchoring wording"
+pctl Y2 38 'an ASSERTION failure is REAL' 'an ASSERTION failure is noise' "the load rule"
+pctl Y3 38 'KNOWN FALSE-RED class (ticket KS-1155; F4 for :127)' 'KNOWN FLAKE class (ticket KS-1155; F4 for :127)' "the load rule names F4 at :127"
+pctl Hh 39 'NEVER WRITE THE SHARED CHECKOUT' 'WRITE THE SHARED CHECKOUT IF NEEDED' "holds: the shared checkout"
+pctl Q 40 'that is NO GO for #1241 (blocking)' 'that is a note for #1241' "LIVE-SHAPE: a NULL on the live line is NO GO"
+pctl Q2 40 'stdout AND stderr PIPED' 'stdout on a TTY' "LIVE-SHAPE: piped, not a TTY (as spawnSync)"
+pctl Q3 40 'EXACTLY as the cells extract it' 'however is easiest' "LIVE-SHAPE: the literal extracted as the cells do"
+pctl R 41 "KS-980's claim is NOT established" "KS-980's claim stands anyway" "T-GUC: no separation = claim not established"
+pctl R2 41 'assert the captured policy rows are byte-equal to before' 'assume the policy is restored' "T-GUC: the policy restore is asserted"
+pctl Z 43 'never by name, never pid 1' 'by name if needed' "login_stub reaper rule"
+pctl A 26 '`GO: merge #1241, #1242 batch`' '`GO: merge #1241 batch`' "the GO string"
+pctl E 25 'PER PR FILE (1 + 1 = 2 over 2 paths)' 'PER PR FILE' "addendum counts"
+pctl J 23 '[QA -> Wednesday] TIER-2 BATCH GATE #1241 #1242 round 21' '[QA -> Wednesday] TIER-2 GATE #1241 #1242 round 21' "the verdict subject"
+ET="$(sed -n "s/^END_TREE='\(.*\)'$/\1/p" "$L")"
+python3 - "$PR" "$CW/W.prompt" "$ET" <<'PY'
+import sys
+s, d, et = sys.argv[1:4]; t = open(s, encoding='utf-8').read(); assert et in t
+open(d, 'w', encoding='utf-8').write(t.replace(et, et[:-1] + ('0' if et[-1] != '0' else '1')))
+PY
+cp "$PR" "$CW/W.pristine.prompt"
+judge W 31 "$(QAB1241_PROMPT="$CW/W.prompt" pchk W)" "the END_TREE not in full in the prompt"
+judge W/twin 0 "$(QAB1241_PROMPT="$CW/W.pristine.prompt" pchk W.twin)" "pristine prompt through the same override"
+"$L" < /dev/null > "$CW/N.out" 2>&1; judge N 21 "$?" "LAUNCH path (no --check) with stdin not a TTY — refuses before exec"
+QAB1241_PROMPT="$PR" "$L" --check > "$CW/N2.out" 2>&1; judge N2 0 "$?" "an override set is allowed under --check (the launch path refuses it, exit 16, after the TTY guard)"
+mkdir -p "$CW/moved"; cp -p "$L" "$CW/moved/"; "$CW/moved/$(basename "$L")" --check > "$CW/M.out" 2>&1; judge M 2 "$?" "the launcher copied out of its filled home (a MOVED KIT)"
+"$L" --check > "$CW/M.twin.out" 2>&1; judge M/twin 0 "$?" "the same launcher at home"
+say "--- repin_and_launch (dry runs / refusals only)"
+bash "$REPIN" "$L" "$SP" --dry-run > "$CW/R1.out" 2>&1; judge R1 0 "$?" "dry run, the kit as filled"
+doctor "$L" "$CW/R2.launch.sh" "$H42|1|1|" "${H42%?}$([ "${H42: -1}" = 0 ] && echo 1 || echo 0)|1|1|" && chmod 755 "$CW/R2.launch.sh"
+bash "$REPIN" "$CW/R2.launch.sh" "$SP" --dry-run > "$CW/R2.out" 2>&1; judge R2 11 "$?" "a stale #1242 head pin"
+cp -p "$L" "$CW/R2.twin.launch.sh"; bash "$REPIN" "$CW/R2.twin.launch.sh" "$SP" --dry-run > "$CW/R2.twin.out" 2>&1; judge R2/twin 0 "$?" "the same copied-launcher mechanism, pins intact"
+doctor "$L" "$CW/R3.launch.sh" "DEVELOP_SHA='$PDEV'" "DEVELOP_SHA='d9515f4a06e0db0396a059ccd8c76b610f22a22b'" && chmod 755 "$CW/R3.launch.sh"
+bash "$REPIN" "$CW/R3.launch.sh" "$SP" --dry-run > "$CW/R3.out" 2>&1; judge R3 10 "$?" "the pinned develop is stale (the dry run reports the re-pin and stops)"
+: > "$CW/empty_routing.conf"
+G21D_ROUTING="$CW/empty_routing.conf" bash "$REPIN" "$L" "$SP" > "$CW/R4.out" 2>&1; judge R4 1 "$?" "a REAL run with the routing line absent stops at step 0 (routing-file override: deterministic)"
+printf 'QA/Secuura-batch1241|coagent@agentmail.to|yes\n' > "$CW/good_routing.conf"
+G21D_ROUTING="$CW/good_routing.conf" bash "$REPIN" "$L" "$SP" --dry-run > "$CW/R4.twin.out" 2>&1; judge R4/twin 0 "$?" "the routing line present (override file), dry run"
+bash "$REPIN" "$L" /tmp > "$CW/R5.out" 2>&1; judge R5 9 "$?" "a scratchpad outside /private/tmp/claude-501/"
+say "--- the moved kit, predict and fill (in a COPY of the kit, never the home)"
+MK="$CW/movedkit"; mkdir -p "$MK"; /usr/bin/rsync -a --exclude '_sp' --exclude 'launch_*.out' "$GS/" "$MK/"
+bash "$MK/repin_and_launch_gate21T2d.sh" "$MK/launch_qa_secuura_batch1241-t2.sh" "$SP" --dry-run > "$CW/R6.out" 2>&1; rc=$?
+[ "$rc" = 0 ] && ! /usr/bin/grep -q -F 'MOVED KIT' "$CW/R6.out" && rc=98
+judge R6 0 "$rc" "moved-kit dry run: rc 0 AND reports MOVED KIT"
+python3 "$MK/predict_gate21T2d.py" "$SP" --simulate foreign1241 > "$CW/P1.out" 2>&1; judge P1 1 "$?" "predict over develop + a FOREIGN edit of #1241's own file — the base-invariant check (3) refuses"
+python3 "$MK/predict_gate21T2d.py" "$SP" --simulate foreign1242 > "$CW/P2.out" 2>&1; judge P2 1 "$?" "predict over develop + a FOREIGN edit of #1242's own file — refuses"
+python3 "$MK/predict_gate21T2d.py" "$SP" > "$CW/P1.twin.out" 2>&1; judge P1/twin 0 "$?" "predict over origin develop in the same copy (no simulation)"
+cp "$MK/pins_gate21T2d.json" "$CW/pins.real.json"; cp "$MK/pins_gate21T2d.SIM-foreign1241.json" "$MK/pins_gate21T2d.json"
+if [ -s "$MK/pins_gate21T2d.SIM-foreign1241.json" ] && ! cmp -s "$CW/pins.real.json" "$MK/pins_gate21T2d.json"; then python3 "$MK/fill_gate21T2d.py" > "$CW/F2.out" 2>&1; rc=$?; else echo "the SIM pins file was not written — the control cannot run" > "$CW/F2.out"; rc=96; fi
+judge F2 1 "$rc" "fill refuses a SIMULATED pins file (the SIM pins asserted present and swapped in first)"
+cp "$CW/pins.real.json" "$MK/pins_gate21T2d.json"
+python3 "$MK/fill_gate21T2d.py" > "$CW/F1.out" 2>&1; rc=$?
+"$MK/launch_qa_secuura_batch1241-t2.sh" --check > "$CW/F1.check.out" 2>&1; rc2=$?
+[ "$rc" = 0 ] && [ "$rc2" = 0 ] && /usr/bin/grep -q -F "GS='$MK'" "$MK/launch_qa_secuura_batch1241-t2.sh" && rc=0 || rc=97
+judge F1 0 "$rc" "the moved copy re-filled at its new home: fill rc 0, --check rc 0, its launcher names the new home"
+say "RESULT $([ "$INV" = 1 ] && echo '(inverted) ')$OK OK / $BAD MISMATCH of $N  $(date -u +%FT%TZ)"
+[ "$BAD" = 0 ]
