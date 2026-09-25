@@ -4,8 +4,8 @@ type: pickup
 seat: friday
 scope: BOTH Secuura and Datasec, from Kam's laptop. Claim each project before driving it (wed_claim.sh)
 status: live
-written_by: Friday, successor seat, 50% checkpoint 2026-09-25 15:09 (ctx 50%, 7d 84%); predecessor rotation 14:3x
-supersede: replace wholesale; previous = NEXT-PICKUP-FRIDAY.md.pre-0925-1509-ckpt50
+written_by: Friday, successor seat, 65% checkpoint 2026-09-25 16:1x (ctx 65%, 7d ~86%)
+supersede: replace wholesale; previous = NEXT-PICKUP-FRIDAY.md.pre-0925-1611-ckpt65
 ---
 
 # NEXT PICKUP — FRIDAY
@@ -14,44 +14,44 @@ supersede: replace wholesale; previous = NEXT-PICKUP-FRIDAY.md.pre-0925-1509-ckp
 
 ## 🔴 FIRST, EVERY BOOT AND EVERY CHECKPOINT
 - `kam_rulings_today.sh`, then `python3 2_Project_Files/tools/reconcile_rulings.py` (then `--apply`).
-- The live-board wake is `fleet/cockpit/live_chat_poll.sh --seat friday`; the SHARED launcher arms it (09b28c3b6). Kam's posts arrive as "[Wednesday tap] [live-board] …" within ~30 s.
-- **Before ANY `git pull` of this tree: commit Friday's own data files first** (`0_Brain/dashboard/data/decisions.json`, `chat_friday.json`, `0_Brain/daily_friday/.spoken.log`, the note). Today an autostash stranded a card + 15 messages (ledger w=1).
-- STATUS wake: `2_Project_Files/friday/watch_status.sh <seen-file> "<glob>"` (fixed today: paths with spaces; `<…>` and ALL_CAPS placeholder READY lines ignored). Re-arm it for anything live.
+- The live-board wake is `fleet/cockpit/live_chat_poll.sh --seat friday` (armed by the shared launcher). Kam's posts arrive as "[Wednesday tap] [live-board] …".
+- **Before ANY `git pull` of this tree: commit Friday's own data files first** (decisions.json, chat_friday.json, usage_friday.json, .spoken.log, the note). When committing, use `git commit -- <paths>`: other tools stage chat_tuesday/chat_wednesday.json, and those are not Friday's.
+- STATUS wake: `2_Project_Files/friday/watch_status.sh <seen-file> "<glob>"`. It keys on the COUNT of READY lines, so a seat that re-saves a finished STATUS will NOT re-fire it; check idle panes.
+- Unregistered project folder (HPSM: its launcher needs DevMASTER) → `cockpit.sh add <Name> "bash '…/2_Project_Files/friday/brief_seat.sh' <client> '<dir>' '<brief>'"`. Register the pane name in `fleet/inbox_routing.conf` BEFORE a `say --mail` tap: without a line, say --mail exits 1 SILENTLY (the fix is owed).
 
-## 🔴 LIVE AT THE ROTATION
-1. **Composer B08: DONE 14:58.** EXAMPLE — Quollbrook Freight Co (fictional), engagement `60503ab0-1cb9-49c3-8ca6-69ba2b5c40fa`, Released 1.0.0 on `bfecdc77`; 8/8 exports; the link was given to Kam on the panel. **Card `composer-outputs-carry-no-answers` open** (F1: the outputs carry no answers; rec b = type the answers → a new release + deploy on his word + a fresh example; default nothing).
-2. **Composer B07 (history rewrite): DONE and verified 14:4x.** main `7855f10` (tree `bc91671…` unchanged), 77 branches; map `…/_quarantine_2026-09-25_HPSM-light-mirror-before-rewrite/commit-map_old-to-new.txt`. Tuesday mailed (a clone on the mini is stale). **Two cards open, both Kam's:**
-   - `hpsm-analysis-sow-sentences` (rec a): the same sentences are in datasecau/HPSM-analysis (Friday's 13:44 push, 5 files, 3 commits each) + the Composer folder's local analysis repo + the old clone HPSM/6_Policy_Composer. On a: a seat in the HPSM folder does the same backup → replace → rewrite → force-push, and quarantines + re-clones 6_Policy_Composer.
-   - `composer-github-support-purge` (rec a): Friday drafts the Support request (4 PR refs + GC); Kam sends it at https://support.github.com/contact.
-   - Also a residual (Tuesday 04:42Z): the mini's T9 clone `/Volumes/KK_T9_External_HDD/!CODING/Datasec/HPSM/6_Policy_Composer` (old history, marked STALE by her), copied by her one-way NAS sync, so the old text also sits on the T9 + the NAS. Removing it is Kam's (delete class). Not yet told to him: put it in the next panel update.
-   - Also a residual (Tuesday 05:36Z): her 3 HPSM zips in Kam's encrypted drawer (Tuesday/Datasec) include Architecture/…/2026-09-10_policy-composer with the sentences. Tell Kam with the others when B02 reports; she will not re-share.
-   - Residuals kept by design: the Composer 2_Project_Files reflogs (R3), the VM's old archives + composer.prev (R6), and the backup mirror + bundle (R8).
-3. **HPSM-POC B11 SEAT-B** (pane `Datasec/HPSM-POC-B`, launched 14:36 by the successor seat, base main 3029930):
-   - Brief: `HPSM-POC/1_Project_Definition/Briefs/2026-09-25_B11_SEAT-B_action-plan-and-dashboard-on-the-real-api.md`.
-   - Scope: the action plan and the dashboard move to the real API (the B09 seats' own follow-ups), with mock mode kept; plus the Showcase records commit (build script + INDEX only; the PDF stays out by the root `.gitignore`'s `*.pdf`).
-   - STATUS watcher glob: `…/HPSM-POC/1_Project_Definition/Briefs/2026-09-25_B11*STATUS*.md`.
-   - **DONE: PR #20 merged 15:1x → main 149d15f (tree = the reviewed head's), pane closed.** Next: confirm main push CI green (a poll was running at the handover; re-read `gh run list --commit 149d15f`).
-4. HPSM-POC showcase B09: all merged (main 3029930, CI green); the showcase pack is in Kam's file drawer. HPSM analysis repo: pushed (private `datasecau/HPSM-analysis`).
+## 🔴 LIVE AT THE HANDOVER
+1. **HPSM-POC B13 → PR https://github.com/datasecau/HPSM-POC/pull/21** (head `121897a`, reviewed + accepted 16:10: delete for added actions + discard plan, C-18; 4 follow-ups). CI poll running. **Next:** merge head-pinned on green (`--match-head-commit 121897a12345ae9f4cc76df0983b9968a30505df`); check tree = head tree; close pane `Datasec/HPSM-POC-A` with pane_close.sh; check main push CI.
+2. **Composer B09 SEAT-B** (pane `Datasec/Security-Composer-B`):
+   - Scope: item 0 = the local analysis repo rewrite; then the answers flow through (typed answers → settings + documents), as a NEW content release, NOT deployed (C-07).
+   - ADDENDUM-1: the E8 SOW extract is now on the laptop, so run the full ci.sh.
+   - Watcher glob: `…/Datasec Security Composer/1_Project_Definition/Briefs/2026-09-25_B09*STATUS*.md`.
+   - On READY: review, then CARD the deploy for Kam. After a deploy on his word, a fresh example engagement (a later brief).
 
-## NEXT after B13 merges (owed, Kam's "test it end to end" 15:1x)
-- **HPSM-POC B14 fix round** from the B12 user test (`HPSM-POC/1_Project_Definition/Briefs/2026-09-25_B12_SEAT-C_end-to-end-user-test-as-a-salesperson.STATUS.md`, 46 findings): fix every finding that is not Kam's (card `hpsmpoc-showcase-score-new-customer`) or the SME's (placeholder content). Internal notes and the named person FIRST. Then RE-RUN the same cold-user test (the driver is at `B12-C_evidence/seat-notes/userdriver.js`). Wait for B13 because B13 owns api/ + web/.
-
-## Small, queued (not started)
-- HPSM-POC, the next API+web round (Friday's decisions, v1.3; no card): one owner-role list = the union of the seed's names (Pre-sales lead, Service delivery lead) and the web's (Sales lead, Technical lead, Services delivery lead); getShowcaseSummary.actions counts the NEWEST plan only; clean the unused readiness-source.ts + content keys by quarantine/move (never delete); the contract declares 415. Waits on card hpsmpoc-plan-no-delete (option b/c adds an API delete in the same round).
+## NEXT (owed, in order)
+1. **HPSM-POC B14 fix round, AFTER #21 merges** (B13 owns api/ + web/ until then). Source: the B12 user test STATUS `HPSM-POC/1_Project_Definition/Briefs/2026-09-25_B12_SEAT-C_end-to-end-user-test-as-a-salesperson.STATUS.md` (46 findings).
+   - Fix every finding that is not Kam's or the SME's. FIRST: internal notes on screen, incl. the named person ("Kam/Paul Waite meeting" footer).
+   - Then: the contradictions (sample customers' narrative/report pages say "No assessment yet"; question totals 16/15/14; identical 54.2); Reset demo not resetting live data; the calculator overwriting the dashboard ARR; the "Demo Consultant" header; readiness Download greyed out.
+   - **Plus C-19:** showcase mode scores NEW customers with the draft rules, labelled DRAFT (outside showcase mode C-15 still refuses).
+   - Then RE-RUN the cold-user test (driver `B12-C_evidence/seat-notes/userdriver.js`).
+2. **Customer maturity-assessment questions:** Kam requested them from HP (16:03). They are in NO file we hold (measured across HPSM-POC Source_Documents + the whole "HP Playbook Project" folder; Tuesday measured the T9). When they arrive → load as content; the ruleset stays DRAFT (C-15/C-19). Optional frame offered to Kam: the PRD's TRUST/KNOW/PROTECT/MANAGE/GOVERN model (no change unless he says).
 
 ## Kam's hands (asked; defaults stated)
+- **GitHub Support request** (in his drawer, `0_Brain/reference/2026-09-25_sow-sentence-rewrite/github-support-request.md`): purge HPSM-light's 4 PR refs + cached objects in both repos. Kam sends.
 - 9 Azure providers (a hosted HPSM-POC link; default: the laptop showcase via `scripts/showcase.sh`).
-- The HP E8 SOW extract file into Composer `1_Project_Definition/Source_Documents/` (CI's one red step).
+- Residuals of the SOW rewrite, his to decide: the T9 + NAS copies of the old clone; Tuesday's HPSM zips in his drawer. Reflogs + bundles + mirrors are kept on purpose (the undo).
 
-## Today's decisions (all recorded + delivered)
-- HPSM-POC C-17 (keep the draft findings).
-- Composer C-05 (fold deploy; content fix; clause ids; 360 accept) and C-06 (keep phrases; rewrite history now; deploy + badge + a new example).
-- The Spark is Wednesday's: Kam ruled Secuura may use it, and the container was recreated. It still fails on tilelang; Wednesday is on it.
+## Today (all recorded + delivered)
+- Composer: B07 history rewrite (HPSM-light main `7855f10`); B08 example engagement released (EXAMPLE — Quollbrook Freight Co, `60503ab0-…`); C-07 (answers flow, Support request, copies).
+- HPSM: B02 rewrite of datasecau/HPSM-analysis (main now `03afbf8`); `6_Policy_Composer` re-cloned; old clone + `added/` copies quarantined with push URLs DISABLED; C-75, C-76.
+- HPSM-POC: B11 merged (#20, main `149d15f`); B12 user test; C-18, C-19.
+- Files Kam shared today, filed (git-ignored, hash-verified): `HPSM/1_Project_Definition/Source_Documents/HP Playbook Project/` + 5 loose items + `HPSM_Policy_Composer_2026-09-10/` (also copied to Composer's Source_Documents for ci.sh).
+- The Spark: UP (Wednesday fixed the tilelang boot-hook pin, 05:05Z). It is Wednesday's box today; claim it before any long run.
 
 ## Left in place (never delete)
 - `git stash list` autostash entries in this tree.
-- HPSM-POC worktrees `.tools/wt-B0*`, `wt-B10-C`; container `b07c-mssql` (stopped).
-- Composer compose project `pc-b03` (up); the demo VM's `.pre-friday-*` backups and `composer.prev`; `/opt/hpsm/composer-*.tar.gz` archives (old content, a residual for the rewrite report).
+- HPSM-POC worktrees `.tools/wt-B0*`, `wt-B1*`; container `b07c-mssql` (stopped).
+- Composer compose `pc-b03`; the demo VM's `.pre-friday-*` backups, `composer.prev`, `/opt/hpsm/composer-*.tar.gz`.
+- All `_quarantine_2026-09-25_*` folders in Composer and HPSM (the undo for both rewrites).
 
 ## Open claims by Friday
 Spark loop · Datasec/HPSM · Datasec/HPSM-POC · Datasec/Datasec Security Composer.
