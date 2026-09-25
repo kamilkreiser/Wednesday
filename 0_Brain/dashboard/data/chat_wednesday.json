@@ -6747,5 +6747,26 @@
   "project": "WED",
   "ts": "2026-09-25T09:47:50.615531+10:00",
   "text": "No action needed. Two things are done.\n\nFirst, the live-board wake is fixed. Every seat's launcher now starts the poller that turns your live-board posts into a wake, and the health check fails if it isn't running. It's tested on the Studio, and Friday re-tested it on the laptop: pass. Tuesday has the note to pull before her next launch.\n\nSecond, one Secuura agent is running. It will fetch the latest code, which unblocks Ornith, then close out round 20's tickets, write your five outstanding rulings onto their tickets, and file three carry-over tickets. It shows me the closing table before it changes any ticket's state.\n\nOn the Spark: I've read Friday's handout. The Studio has no route to it yet, and it stays Datasec-only until you rule Friday's scope card. So nothing from me touches it for now."
+ },
+ {
+  "role": "wednesday",
+  "seat": "Kamils-Mac-Studio.local",
+  "project": "WED",
+  "ts": "2026-09-25T09:50:21.371755+10:00",
+  "text": "Kam, I can't see the Spark yet. I need you to check the cable end to end.\n\n1. Make sure the Spark is powered on.\n\n2. Plug the cable into the Spark's Ethernet port (RJ45), not one of its USB-C ports.\n\n3. Plug the other end into the Mac Studio's Ethernet port on the back.\n\nThen tell me \"done\" and I'll look again straight away.\n\nWhat I measured just now: every wired port on the Studio reads \"no link\". That covers the Ethernet port, all six Thunderbolt ports and the six USB-Ethernet adapters. The only devices on Thunderbolt/USB are your two storage drives. The Spark's name (zgx-15d5.local) doesn't resolve, its last known address doesn't answer, and it doesn't advertise itself on the network. So from here it looks unplugged, switched off, or on a USB-C port that isn't networking.\n\nOnce it shows up, there's a second step only you can do, as Friday's handout explains: give the Studio a login on the box. The easiest way is to install NVIDIA Sync on the Studio and sign in, which is how the laptop got its access. I'll ask for that when we get there. Until you rule Friday's scope card, I'll only run client-neutral checks on it."
+ },
+ {
+  "role": "wednesday",
+  "seat": "Kamils-Mac-Studio.local",
+  "project": "WED",
+  "ts": "2026-09-25T09:53:50.351304+10:00",
+  "text": "One addition on the Spark, from Friday. Check its power first. Yesterday at 13:58 you were given the shutdown command to run yourself. If you ran it, the box is off, and that would explain exactly what I see: no link on any cable and no answer on the network.\n\nFriday also confirms there's no known direct-cable setup. The Spark's wired port has never had an address, so even a good cable gives the Studio no route until its network settings are changed on the box, and that needs your password there. The quickest proven path is the office Wi-Fi it used before: power it on, and I'll look for it by name. Then the Studio needs its own login on it (NVIDIA Sync), which you're the one to set up."
+ },
+ {
+  "role": "wednesday",
+  "seat": "Kamils-Mac-Studio.local",
+  "project": "WED",
+  "ts": "2026-09-25T09:59:56.521038+10:00",
+  "text": "I can see it now, but I can't log in yet. That last step needs your hands.\n\nWhat I need you to do: give the Studio a login on the Spark. Either install NVIDIA Sync on the Studio and sign in (Friday's recommendation, since it's how the laptop was set up), or add this line to /home/datasec-rd/.ssh/authorized_keys on the Spark:\n\ncat ~/.ssh/id_ed25519.pub\n\n(run that on the Studio to print the key, then paste its output into that file on the Spark). Tell me \"done\" and I'll connect and run a client-neutral check only.\n\nWhat I measured: the Spark answers by name on the office network (zgx-15d5.local is now 192.168.7.113, the same network as the Studio's Wi-Fi) and its login port is open. When I tried to log in with the Studio's existing keys, the Spark refused them, so none of them is authorised there yet. The cable is also live now: the Studio's Ethernet port shows a 10-gigabit link. But the Spark's side of the cable has no network address, so for now everything goes over the office network, not the cable. Nothing has been sent to the box."
  }
 ]

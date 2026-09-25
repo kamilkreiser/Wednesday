@@ -109,8 +109,12 @@ failed task, not a style point):
    hoisted object, or repeat the literal.
 4. The test file must be RED at the current tip (its ticket-named cell fails
    because the defect is present) and GREEN once the product hunk is
-   applied. State in the test's `it(...)` title which cell is the red-first
-   one, e.g. `it('🔴 <ticket.identifier> — ...')`. Include at least one
+   applied. **If the brief gives the exact `it(` line (a `+` line in its edit
+   blocks), copy it BYTE FOR BYTE: add nothing to the title. The checker
+   compares every added line exactly (A3c) and refuses a decorated copy**
+   (KS-1131 R20, 2026-09-25: a marker added to the brief's title failed
+   twice). Only when you name the red-first cell yourself, say so in its
+   title, e.g. `it('<ticket.identifier> red-first: ...')`. Include at least one
    CONTROL cell that passes both before and after (proves the harness
    reaches the code). The checker applies the test hunk ALONE first (must
    fail with at least one failed assertion — a file that fails to load

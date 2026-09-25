@@ -1,5 +1,5 @@
 ---
-date: 2026-09-23
+date: 2026-09-25
 type: pickup
 scope: SECUURA + all general/generic work. Datasec is TUESDAY's; FRIDAY (laptop) works both and claims before driving.
 status: live
@@ -8,42 +8,26 @@ supersede: replace wholesale at the next pickup; do not append
 
 # NEXT PICKUP
 
-## ⏩ 2026-09-24 21:2x — WRAPPED on Kam's word ("Please wrap up for now, and I'll plug in an external module for you tomorrow.")
-- **Tomorrow:** Kam plugs in an "external module" — unknown what; ask him what it is and where it lands before building anything around it.
-- **Tuesday DOWN since 05:36** (her seat, not the board). Kam is travelling and cannot reach the mini; the recommendation given: Friday covers Datasec. Unanswered by him.
-- **Live board:** Friday's a3fe28e5e + 6741602c0 deployed 11:43 / 13:24 (zip-only; the script is scratchpad-only; a `--zip-only` flag in 04_deploy.sh is OFFERED to Friday, not built). Friday is hiding 11 answered hpsmpoc cards; the probe's 182-vs-186 PASS count is unexplained.
-- **7d:98%** (renews ~Sat). Ornith BLOCKED by G6 (see the Ornith update). KS-1131 F-A brief staged.
+## ⏩ 2026-09-25 ~10:00 — the morning seat at its 50% checkpoint (previous copy: the newest `.pre-0925-*-checkpoint` beside this file)
 
-## ⏩ 2026-09-24 05:3x — the 00:00 overnight seat WRAPPED at the shift change (ctx ~46%, 7d:98%). Its deltas to the block below:
-- **OWED 0 DONE** (portable re-copy rc 0, Kam told). **Ornith BLOCKED by G6** (origin develop not local) — see the Ornith update below; KS-1131 F-A brief staged.
-- **Morning receipt to Kam leads with:** nothing merged overnight (no launch possible at 98%); the drive copy done; Ornith blocked on a Secuura fetch, which needs either a new account (Kam signs in) or the allowance renewal (~Sat); what the first Secuura seat would do (fetch → queue KS-1131 → the closing pass on round 20's 11 In-Progress tickets).
-- **Tuesday:** still no reply of hers seen, but Datasec seats are WRAPPING TO HER (19:31Z Vision "queue dry; v2.33 live", 19:32Z NexusAI-I S80I "three RELEASEs merged") — subject-only, not Wednesday's to answer; tell Kam in one line that her projects' wraps are piling up unread if she is still down.
+**ACCOUNT:** Kam signed into a NEW account at ~09:39 (user email now the hpauthsuite one). Statusline 7d:0%, and `usage_gate.sh` OK. Launches are open again under the 90% rule.
+**Kam today:** terminal only. 0 rows on the Wednesday tab. Every message is receipted on the panel. He is travelling? UNKNOWN today. He is at the Studio and plugged a Spark in "using a cable".
+**Tuesday:** BACK (her mail 23:35Z; wake_wednesday.sh alarm change f4ed4d47d pulled). **Friday:** live on the laptop and driving Datasec seats.
 
-- **10:2x OPEN THREAD — Tuesday not answering Kam since her 05:36 wrap.** RESOLVED as a SEAT problem, not a board problem (Kam saw her 05:31 row; his screenshot shows the tab rendering, key unlocked). Kam asked 10:2x to check the mini's Tuesday terminal and relaunch with Launch_Tuesday.command. When she is back: confirm on the board that she answers him; her unanswered items are his 12:55 NexusAI question (answered at 05:31) and his email.
+### LIVE RIGHT NOW
+1. **Seat B 24th — Secuura/Blockchain, pane `Secuura/Blockchain` (%2).** Brief `fleet/briefs_staged/2026-09-25_seatB24_fetch-close-rulings.md`. ITEM 0 DONE (develop 6ab9d5021 fetched; Wednesday verified `cat-file` = commit). Plan CONFIRMED by ANSWER 23:57Z with rulings. DONE: KS-1019, KS-1245, KS-1287, KS-1239 (+ residue comment). STAYS: KS-965, KS-851, KS-1081, KS-1139, KS-1033, KS-1084, KS-1143. No duplicate for 2.1 (KS-1243 exists): comments on KS-1084 and KS-1243. File 3a LEGD-BYTEXT and 3b `.dockerignore` (path `Blockchain/Dev/.dockerignore:13`). 3c stops (tooling outside the repo). **NEXT for the successor: read its WRAP mail; `decision_queue.sh rule/--delivered` the five cards (ks1084-part-b, ks974, ks1163, ks998, ks789) FROM its comment ids; score; `pane_close.sh` in the same action.**
+2. **Ornith: KS-1131 F-A.** Round 1 (R20) FAILED A3c. The cause was a HARNESS fault, not the model: `tasks/code_patch/task.md:113` told the model to prefix red cells with 🔴, which contradicts the brief's exact `it(` line. Fixed (backup `task.md.pre-0925-redprefix`; IMPROVEMENTS row 09:5x). Re-queued the SAME input as a harness-fault resume, so **the one rebrief is still unspent.** Read-back: `night/done.md` second KS-1131 row → `runs/2026-09-25_ks1131-ornith35b-night*` → on PASS, `hold_ready.py`. KS-1131 items 2-4 (F-B :206, F-C :256, P2 wallet slice) are the next briefs. They need a `test_file=<product>` pin: a self-testing brief whose `## The test` names an EXISTING file is refused without it.
 
-## ONE block — written by the 17:0x seat of 2026-09-23 at its ROTATION (~23:5x, ctx ~79%); previous copy: the newest `.pre-0923-*-rotate` beside this file
+### DONE THIS SEAT
+- **Live-board wake (Kam 09:34 via Friday):** `Launch_Wednesday.command` arms `live_chat_poll.sh --seat $AGENT` before the doctor preflight (tuesday with `tap_tuesday.sh`), and `doctor.sh` FAILS on a down or FAILING poller. Commit 09b28c3b6. Studio poller running (started 09:42 by the arm test). Friday re-tested on the laptop: PASS. Tuesday told. **OWED (c):** a per-seat tap label (cockpit's `[Wednesday tap]` prefix is what agents and the rung-10 detector recognise, so change it with care).
+- Morning receipt + corrections on the panel. Ledger +1 (weekday/seat-name slip; an inference sat under a "measured" heading).
 
-**FLOOR CLEAR:** `%0 wednesday` + `%9 fleet-monitor` only. No Claude seat or gate live. **Usage 7d:97%** — the round-20 lane grant is EXPIRED (moved in EXPIRING-GRANTS), so the 90% cut governs every launch: **nothing new launches** until the allowance renews (~3 d 14 h) or Kam signs into a new account.
-**Kam:** last real row 14:25:35; told on the panel at every milestone (last 23:4x: kintsugi deployed + verified). Nothing owed to him. It is past 23:00 — **no voice until 06:00.**
-**Tuesday:** still silent since ~12:19 (no reply to the 14:20 check-in). Relaunch on the mini is Kam's hands; tell him in one line when she replies.
+### SPARK (Friday owns the box and the kit)
+Kam: "I have added a spark to this machine connected using a cable." **The Studio sees NO link** on any wired interface (en0, en2-7, en8-13, bridge0). `zgx-15d5.local` does not resolve, `.33` gets no answer, and there is no mDNS entry. Kam has been asked to check power and plug the Spark's RJ45 into the Studio's Ethernet port. Friday: there is no known direct-cable setup, the wired NIC has no IP (a sudo change, Kam's hands), and the proven path is the office Wi-Fi. The box was likely shut down 09-24. **Kam ruled Friday's scope card `c` 09:49: "Not yet: I'll decide after the Studio can connect."** So nothing client-scoped goes to it. Next once it is visible: the Studio needs its own login on the box (NVIDIA Sync, Kam's hands). Handout: `0_Brain/reference/2026-09-22_spark-deepseek-v4-flash/STUDIO_HANDOUT_2026-09-25.md`.
 
-### ✅ ROUND 20 — DONE END TO END (do not re-derive)
-11 PRs merged (#1202-#1212, incl. the local model's #1212 KS-1143), all verified at source; kintsugi runs develop `6ab9d5021e96` (rounds 19+20) verified V1-V13 with controls, KS-535 held, demo untouched; rule-7 comments posted 13:53Z and verified ON LINEAR (KS-601 / KS-485 Peter / KS-772 Stuart) after Wednesday corrected two overclaims. Seat B 21st/22nd/23rd scored 0.95/0.97/0.93. **All eleven tickets stay In Progress — the CLOSING PASS is Wednesday's** (a morning item: which of them can close now that they are deployed and verified).
-
-### CARRY TO THE NEXT SECUURA BRIEF (when a launch is possible again)
-1. LEGD-BYTEXT — KS-781 LEG D should pin by TEXT not NUMBER (six moves so far) → a ticket.
-2. `.dockerignore` `tests` does not match `__tests__` → test sources ship into runtime images; ~23 needless rebuilds per shared change → a ticket (Seat B 23rd's measurement is in its handover).
-3. The latent cumulative-count defect in `raise19.py:694-698` / the `raiseC20.py` lineage (fixed in `raise20.py` only).
-4. KS-1143 / #1212's INDIRECT-INVOCATION false negative stays open on KS-1143; KS-1084 (P0) stays open: cross-tenant effect NOT measured + Part B out.
-5. The four RULED-BY-KAM undelivered cards (below) still ride.
-
-### 🟢 Ornith — KS-1143 HELD (the self-testing harness is BUILT)
-- `night/READY_KS-1143-GUARDMENTION-SELFTEST-1_…PASS-7of7_2026-09-23.diff.md` — its ONE rebrief (R19) passed 7/7: strict apply, red 1/232 alone, green 232/232, `+`/`-` identical to the brief's golden.
-- **code_patch SELF-TESTING mode** (brief line `## Self-testing — test hunks: N` + `## Red cells`): `tasks/code_patch/selftest_split.py`, `checker.sh`, `night/build_input.sh`, `night/hold_ready.py` (also fixed: excerpted inputs). Arms `local-model/tests/selftest_mode_arms.sh [CLONE]`; IMPROVEMENTS row 17:2x. **This widens the pool: any ticket whose "product" is a self-testing suite file is now briefable** — the next brief-writing pass should look for them.
-- Queue empty again after KS-1143. Standing rule: Ornith constantly working — next act is a brief, by hand (no drafters at 93%).
-- **UPDATE 2026-09-24 00:1x (the 00:00 seat): Ornith is BLOCKED ON AN INPUT, not on an empty pool.** `build_input.sh` REFUSES every ticket (G6, rc 2, measured): origin develop `6ab9d5021e96` is not in the Secuura checkout's object store (local develop `2bc5ccf63`; rounds 19+20 were merged via the GitHub API; 32 commits under Blockchain/Dev, so no `tip_override` is possible). **FIRST ACT of the next Secuura seat (whenever a launch is allowed): `git fetch origin develop` in its checkout** — and every future Secuura brief carries "fetch develop before you wrap" as a standing line. **STAGED, READY TO QUEUE the moment the tip is local:** `local-model/night/briefs/KS-1131.md` (item 1 F-A only, SELF-TESTING, 2 hunks; golden applies at fuzz 0 at `2bc5ccf63`; red/green SIMULATED in node with the file's own helper lines; the exact build command is the 09-24 00:09 line at the foot of `night/queue.md`). KS-1131 items 2-4 (F-B `:206`, F-C `:256`, P2 wallet slice) are the next three briefs — region-disjoint, same file.
-
-### 🔴 OPEN — TUESDAY SILENT since ~12:19 (last commit `030b28c28` 12:19; no reply to the 14:20 check-in as of 17:2x). Kam knows (14:18) and a relaunch on the mini is HIS hands. When her reply lands, tell Kam in one line.
+### CARRY (unchanged)
+- KS-1143 indirect-invocation FN and KS-1084 P0 stay open. `decision_queue.sh list ruled --undelivered` = 75, read as a LIST. Also ruled and undelivered: `secuura-ks789` (in this round) and `wed-ornith-pool-thin-widen-the-harness` (a, 09-23).
+- The pickup's former OWED list is below (items 1-7 still owed).
 
 ### What FRIDAY is (do not re-derive)
 Third coordinator seat, Kam's laptop, BOTH clients. Launcher `Launch_Friday.command` (refuses outside a FRIDAY tree) → `2_Project_Files/friday/first_run.sh` once → shared `Launch_Wednesday.command` with `WED_AGENT=friday`. Inbox `friday-laptop-agent@agentmail.to`. Live-board partition `Friday` (Entra `friday-seat` be8404ab-…). Per-client identity via `friday/friday_as.sh`. Claims every project with `wed_claim.sh` before driving it. Reports: `fleet/REPORT_2026-09-23_friday-seat-tools.md`, `dashboard-cloud/REPORT_2026-09-23_friday-seat.md`. Brain: `tasks/FIRST-BOOT-FRIDAY.md`.
