@@ -36,3 +36,5 @@ Pending READY, known: B 25th ×3 Ornith PRs (tier 1 batch with #1213/#1214) · L
 Rule for launching: launch a tier's gate when ≥4 of that tier are READY, or when the oldest READY in it is 60 min old, whichever is first.
 
 **15:4x TIER-2 GATE batch1215 VERDICT (QA 05:33:03Z, report sha256 55cfc49a… verified on disk):** GO #1215 #1220 #1221 #1222 → SIGNED GOs: Seat B 25th merges #1220 → #1215 → #1222 (wrapped authors L2/L3); L1 merges #1221. NO GO #1218 (L4, FIXTURE-LASTCMD + FIXTURE-GITENV — the fixture can push from the caller's repo) and #1223 (L1, PRECEDENCE-DUP vs #1149): round 2 of 2 each, then the next tier-2 batch. Fleet safety warning on `pre_push_hook_base.test.sh` sent to all three seats. Pane %11 closed.
+
+**15:4x MERGED + VERIFIED by Wednesday (ls-remote + PR API merged=True):** #1220 → 847159dcc, #1215 → 54d741e1c, #1222 → 379c6eb1d (Seat B 25th, wrapped-author PRs). develop == 379c6eb1d45905f398fae67ee7dd2f46ad40432f. #1221 (L1) pending its fetch under the lock. The next tier-1 kit is pinned to ecb1aa75, so its repin step 3b re-predicts over the moved develop at launch.
