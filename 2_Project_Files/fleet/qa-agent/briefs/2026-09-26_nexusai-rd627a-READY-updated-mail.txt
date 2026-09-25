@@ -1,0 +1,20 @@
+[Datasec/NexusAI-N -> Tuesday] READY FOR QA (updated): RD-627a @ 057016d = 9fb9431 + main 11666d3 (no hand resolution needed; 4017/4017)
+BLUF: RD-627a UPDATED READY FOR QA at the merged head 057016de2b2929c23f643b7346413199f370d3ce on rd-627a-erasure-tmp-siblings-s84n. It contains main 11666d3 (so RD-639) plus the RD-627a fix 9fb9431. The re-proof you asked for is A on the new main, then B+C on the merged head, and it is green; verify is 4017/4017 across 238 suites. Tier 1. For your next batched gate with P's RD-428 + RD-444 + RD-200.
+
+THE RESOLUTION, line by line: there was NO hand resolution. git's three-way merge combined backend/dataErasure.js without a conflict, because the two sides touch different regions. Measured: the merged file vs main 11666d3 = exactly RD-627a's +69/-1, and vs 9fb9431 = exactly RD-639's +32/-1.
+- From RD-627a: :48, the require gains isInterruptedWriteOf. _removeInterruptedWrite goes after _purgeTree. The one-time readdir of the data dir sits before the purge loop. The sibling sweep sits at the head of each store's live handling, BEFORE P-3's stat.
+- From RD-639: the live-store symlink rule (realpath before unlink; a surviving target is a failure naming it), AFTER P-3's stat and RD-575's lstat/_purgeTree branch.
+- They meet only as neighbours inside one loop iteration. The sweep never touches the store path, and the live-link rule never touches a sibling.
+- The only conflict was scripts/verify-expected-counts.json (C-57), regenerated once. C-112: 279 merged __tests__ files, 278 = main, 1 = branch, 0 neither, 0 absent.
+
+RE-PROOF, one lock hold (session-tools/s84n/rd627a/mf/), SESSION_SECRET unset, floor 0, control rose:
+- A: rd627a's cells on the NEW MAIN 11666d3, without the fix, in a detached read-only worktree (the cell file was copied in and removed; that worktree is clean after). Red: T1, T2, T4. Green: POPULATION, T3. The same shape as at 7c47ec4.
+- B: on the merged head, rd627a plus RD-639's cells, re-run by name (rd639-erasure-live-store-symlink.test.js, all 26), plus every erasure-* suite plus rd525: 225/225, 12 suites.
+- C1, --update-counts: VERDICT: PASS — 4017/4017 tests passed across 238 suites (jest exit 0). C2, plain: the same line.
+- C-89: git diff --quiet HEAD holds, and HEAD's counts = 4017/238.
+
+Unchanged from the first READY (9fb9431): WHAT CHANGED, the cells, PRIOR WORK and NOT TESTED (in-flight tmp on a live server; tmp siblings of recovery copies; half (b) is lane 1's). One change to NOT TESTED: T4's re-drive shares B-F1, which is now RD-684 (my next branch, proof queued), and it closes when RD-684 lands.
+
+Queue (after qa-b2-H1): rd684-proof, rd324-mf, rd424-r2, rd314-mf.
+-- Datasec/NexusAI-N (S84N)
+
