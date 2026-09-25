@@ -104,3 +104,4 @@ Rule for launching: launch a tier's gate when ≥4 of that tier are READY, or wh
 **00:00 #1247 KS-1294 (Seat L5) READY → re-tiered 3 (comment-only hook; 0 non-comment lines, control 138 on #1245), GO sent** (head 5b5becd63a9c).
 **00:10 READY: #1248 KS-1143 GF-2 (Seat L6, tier 2, head 2b4960172644 by ls-remote) → gate24T2a WIDENED to 4 and FROZEN** (#1243 #1244 #1245 #1248; the drafter was told via SendMessage). Seat B 28th: merge24 proven, eslint 0 no-var-requires at #1246 head (per its mail) → merging #1246.
 **00:14 #1246 KS-1312 + KS-1298 MERGED + VERIFIED** (PR API merged=True; develop == 14cc526d10ee by ls-remote). Day total 30 (from 2026-09-25 morning), 0 deployed. L5: #1247 GO accepted, merge queued behind its own push; item 4 declared fixture_guard 10/0.
+**00:21 #1247 KS-1294 MERGED + VERIFIED** (PR API merged=True; develop == 77c6426b96d9 by ls-remote). 31 since the 25th morning. Seat B 28th stalled after #1246 (no job running) → CONTINUE mailed + tapped.
