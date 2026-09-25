@@ -24,6 +24,7 @@ supersede: replace wholesale; previous = NEXT-PICKUP-FRIDAY.md.pre-0925-1509-ckp
    - `hpsm-analysis-sow-sentences` (rec a): the same sentences are in datasecau/HPSM-analysis (Friday's 13:44 push, 5 files, 3 commits each) + the Composer folder's local analysis repo + the old clone HPSM/6_Policy_Composer. On a: a seat in the HPSM folder does the same backup → replace → rewrite → force-push, and quarantines + re-clones 6_Policy_Composer.
    - `composer-github-support-purge` (rec a): Friday drafts the Support request (4 PR refs + GC); Kam sends it at https://support.github.com/contact.
    - Also a residual (Tuesday 04:42Z): the mini's T9 clone `/Volumes/KK_T9_External_HDD/!CODING/Datasec/HPSM/6_Policy_Composer` (old history, marked STALE by her), copied by her one-way NAS sync, so the old text also sits on the T9 + the NAS. Removing it is Kam's (delete class). Not yet told to him: put it in the next panel update.
+   - Also a residual (Tuesday 05:36Z): her 3 HPSM zips in Kam's encrypted drawer (Tuesday/Datasec) include Architecture/…/2026-09-10_policy-composer with the sentences. Tell Kam with the others when B02 reports; she will not re-share.
    - Residuals kept by design: the Composer 2_Project_Files reflogs (R3), the VM's old archives + composer.prev (R6), and the backup mirror + bundle (R8).
 3. **HPSM-POC B11 SEAT-B** (pane `Datasec/HPSM-POC-B`, launched 14:36 by the successor seat, base main 3029930):
    - Brief: `HPSM-POC/1_Project_Definition/Briefs/2026-09-25_B11_SEAT-B_action-plan-and-dashboard-on-the-real-api.md`.
@@ -31,6 +32,9 @@ supersede: replace wholesale; previous = NEXT-PICKUP-FRIDAY.md.pre-0925-1509-ckp
    - STATUS watcher glob: `…/HPSM-POC/1_Project_Definition/Briefs/2026-09-25_B11*STATUS*.md`.
    - **DONE: PR #20 merged 15:1x → main 149d15f (tree = the reviewed head's), pane closed.** Next: confirm main push CI green (a poll was running at the handover; re-read `gh run list --commit 149d15f`).
 4. HPSM-POC showcase B09: all merged (main 3029930, CI green); the showcase pack is in Kam's file drawer. HPSM analysis repo: pushed (private `datasecau/HPSM-analysis`).
+
+## NEXT after B13 merges (owed, Kam's "test it end to end" 15:1x)
+- **HPSM-POC B14 fix round** from the B12 user test (`HPSM-POC/1_Project_Definition/Briefs/2026-09-25_B12_SEAT-C_end-to-end-user-test-as-a-salesperson.STATUS.md`, 46 findings): fix every finding that is not Kam's (card `hpsmpoc-showcase-score-new-customer`) or the SME's (placeholder content). Internal notes and the named person FIRST. Then RE-RUN the same cold-user test (the driver is at `B12-C_evidence/seat-notes/userdriver.js`). Wait for B13 because B13 owns api/ + web/.
 
 ## Small, queued (not started)
 - HPSM-POC, the next API+web round (Friday's decisions, v1.3; no card): one owner-role list = the union of the seed's names (Pre-sales lead, Service delivery lead) and the web's (Sales lead, Technical lead, Services delivery lead); getShowcaseSummary.actions counts the NEWEST plan only; clean the unused readiness-source.ts + content keys by quarantine/move (never delete); the contract declares 415. Waits on card hpsmpoc-plan-no-delete (option b/c adds an API delete in the same round).
