@@ -118,3 +118,4 @@ sees the claim rather than discovering it in a conflict.
 | 2026-09-25 15:29 | Kamils-Mac-Studio | Spark runner on the Studio: point the Ornith brief+checker loop at the Spark (DeepSeek V4 Flash) for real Secuura work, measured (Kam 15:28) | OPEN | |
 | 2026-09-25 15:33 | Kamils-Mac-Studio | live-board usage reading for Wednesday + Tuesday tabs (Kam 15:32) | OPEN | |
 | 2026-09-26 05:18 | Kamils-Mac-Studio | fleet/.gitattributes: inbox_routing.conf merge=union (owed w=3, 3 concurrent-append conflicts 09-25/26) | CLOSED |  2026-09-26 05:19 done |
+| 2026-09-26 06:16 | Kamils-Mac-Studio | local-model bash_patch: self-testing mode for a one-file bash --self-test runner (KS-766 first) | OPEN | |
