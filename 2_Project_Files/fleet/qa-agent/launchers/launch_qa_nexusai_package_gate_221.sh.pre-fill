@@ -12,9 +12,9 @@
 #   - exit 18: RE-PIN by ls-remote: rd-665-standard-webtest-s83l must be EXACTLY the pinned head; mkt-release-2.2.0-s81j must
 #              still be c5da4d4 (the submitted 2.2.0 source). main moving past 0677388 is a NOTE.
 #   - exit 8:  the chain — d14a975's ONLY parent is c5da4d4; the PACKAGE COMMIT (read from the manifest's first line) descends
-#              from d14a975 and is the head or an ancestor of it; package..head touches docs/resubmission/, the c2b test file and the counts file only (azure-marketplace/ unchanged).
+#              from d14a975 and is the head or an ancestor of it; package..head touches docs/resubmission/ only.
 #   - exit 22: c5da4d4..d14a975 = EXACTLY the 3 fix files; d14a975..package = EXACTLY release-policy.json.
-#   - exit 35: counts c5da4d4 4121/241, head 4127/242.
+#   - exit 35: counts c5da4d4 4121/241, head 4125/242.
 #   - exit 41: the template changed ONLY in the webtest resource (comments, Kind ping->standard, Configuration removed,
 #              Request + ValidationRules added), containerImage still the release reference, the alert still points at it.
 #   - exit 42: the policy changed ONLY by imageTagExceptions gaining exactly "2.2.1" = the same image; "2.2.0" and
@@ -72,10 +72,10 @@ ROUTE_NAME='QA/NexusAI-pkg221'
 
 BRANCH='rd-665-standard-webtest-s83l'
 BRANCH_220='mkt-release-2.2.0-s81j'
-HEAD_SHA="${QA_HEAD_SHA_OVERRIDE:-e3d9301b5101d8310c19f9e100c5001e1122fa22}"
-ZIPDIR='/Volumes/KK_T9_External_HDD/!CODING/Datasec/NexusAI/marketplace-submission-2026-09-25-2.2.1'
-READY_MAIL='/Volumes/KK_T9_External_HDD/TUESDAY/2_Project_Files/fleet/qa-agent/briefs/2026-09-25_nexusai-pkg221-READY-mail.txt'
-KAM_DOC='/Volumes/KK_T9_External_HDD/TUESDAY/2_Project_Files/fleet/qa-agent/briefs/2026-09-25_nexusai-pkg221-kam-doc_e3d9301.md'
+HEAD_SHA="${QA_HEAD_SHA_OVERRIDE:-@HEAD@}"
+ZIPDIR='@ZIPDIR@'
+READY_MAIL='@READY_MAIL@'
+KAM_DOC='@KAM_DOC@'
 VERSION='2.2.1'
 FIX_SHA='d14a975e6a325b0b246fbb85287b7831f22e5f33'       # RD-665 fix, ONLY parent = BASE_220
 BASE_220='c5da4d4d77b76a474b1842cfed9e6fe82fe1cd47'      # the submitted 2.2.0 source (the 2.2.0 gate's head)
@@ -99,7 +99,7 @@ FIX_FILES="$RD665_TEST
 $TEMPLATE
 $COUNTS_FILE"
 BASE_COUNTS='4121 241'
-EXP_COUNTS="${QA_EXP_COUNTS_OVERRIDE:-4127 242}"
+EXP_COUNTS="${QA_EXP_COUNTS_OVERRIDE:-4125 242}"
 
 NEG_SEATS='29171 60235'   # NexusAI seat claude (%8), Tuesday claude (%0), read 2026-09-25 ~18:30 AEST
 
@@ -122,7 +122,7 @@ You are the fleet QA/testing agent running ONE gate, TIER 1: THE PACKAGE GATE fo
 READ YOUR COMMISSION FIRST, whole: /Volumes/KK_T9_External_HDD/TUESDAY/2_Project_Files/fleet/qa-agent/briefs/2026-09-25_nexusai-package-gate-221.md
 Then the charter it names, then the 2.2.0 package gate's report it names as PRIOR ROUND (your baseline). Every builder statement is a CLAIM, never evidence.
 
-THE TARGET. Branch rd-665-standard-webtest-s83l at e3d9301b5101d8310c19f9e100c5001e1122fa22. The RD-665 fix is d14a975e6a325b0b246fbb85287b7831f22e5f33, whose ONLY parent is c5da4d4d77b76a474b1842cfed9e6fe82fe1cd47 (the submitted 2.2.0 source, gated GO WITH FINDINGS); the 2.2.1 package commit follows it and only adds imageTagExceptions["2.2.1"]. The builder's non-draft zips and manifest are in /Volumes/KK_T9_External_HDD/!CODING/Datasec/NexusAI/marketplace-submission-2026-09-25-2.2.1 (copy before unzipping; never write there); the 2.2.0 zips are in /Volumes/KK_T9_External_HDD/!CODING/Datasec/NexusAI/marketplace-submission-2026-09-25-2.2.0 (same rule). The release image is UNCHANGED: nexusaireleaseacr.azurecr.io/nexusai@sha256:fdda33098c36a484b50a9a761660bb69bc53f5ed238ffceeb1bd038c8eb77f66 (tag 2.2.0, from 0677388ab031ffaf569a52f6c0301af48f44aece; health build b6f4bfddadcd4055). The builder's READY is /Volumes/KK_T9_External_HDD/TUESDAY/2_Project_Files/fleet/qa-agent/briefs/2026-09-25_nexusai-pkg221-READY-mail.txt. The handover doc that goes to Kam with the zip is /Volumes/KK_T9_External_HDD/TUESDAY/2_Project_Files/fleet/qa-agent/briefs/2026-09-25_nexusai-pkg221-kam-doc_e3d9301.md.
+THE TARGET. Branch rd-665-standard-webtest-s83l at @HEAD@. The RD-665 fix is d14a975e6a325b0b246fbb85287b7831f22e5f33, whose ONLY parent is c5da4d4d77b76a474b1842cfed9e6fe82fe1cd47 (the submitted 2.2.0 source, gated GO WITH FINDINGS); the 2.2.1 package commit follows it and only adds imageTagExceptions["2.2.1"]. The builder's non-draft zips and manifest are in @ZIPDIR@ (copy before unzipping; never write there); the 2.2.0 zips are in /Volumes/KK_T9_External_HDD/!CODING/Datasec/NexusAI/marketplace-submission-2026-09-25-2.2.0 (same rule). The release image is UNCHANGED: nexusaireleaseacr.azurecr.io/nexusai@sha256:fdda33098c36a484b50a9a761660bb69bc53f5ed238ffceeb1bd038c8eb77f66 (tag 2.2.0, from 0677388ab031ffaf569a52f6c0301af48f44aece; health build b6f4bfddadcd4055). The builder's READY is @READY_MAIL@. The handover doc that goes to Kam with the zip is @KAM_DOC@.
 
 THE DELTA FROM c5da4d4 IS EXACTLY FOUR FILES: the template's ONE Microsoft.Insights/webtests resource (Kind ping -> standard, the classic WebTest XML Configuration removed, Request + ValidationRules added, same resource name so the availability metric alert is unchanged), the new RD-665 test file, the counts file (4121/241 -> 4125/242), and release-policy.json (imageTagExceptions gains exactly "2.2.1" with the SAME image). Prove it by parsing, and prove everything else is byte-identical, so the 2.2.0 gate's proofs still cover it.
 
@@ -142,7 +142,7 @@ ARM-TTK: S78G's runner (session-tools/s78g/armttk.sh) on the package commit with
 
 GITLEAKS: run gitleaks over the unpacked 2.2.1 zips, the manifest and the handover doc (copies in your own dir), with the repo's config at the head AND the default rules. POSITIVE CONTROL FIRST: a planted canary the ruleset TARGETS must fire in the same run. THE HANDOVER DOC: check every value against your measurements (version 2.2.1, the package commit, zip names and sha256s, counts 4125/242, arm-ttk, the unchanged digest, why 2.2.1 replaces 2.2.0); a 2.2.0 value presented as 2.2.1's, an unfilled value, or a disagreement is a finding, because it goes to Kam in the same email.
 
-FULL VERIFY at the head under the jest lock, SESSION_SECRET UNSET (env -u SESSION_SECRET; print SET or UNSET as the hold's first line, the NAME only), npm run verify -- --maxWorkers=2 on a tree you built. Predicted 4127/242 (was 4125/242 before the c2b cells; see the brief's ADDENDUM AT READY) — confirm or contradict. Account for every test id at c5da4d4 and at the head: the only change allowed is the four new RD-665 ids plus the two new c2b ids (ADDENDUM AT READY); a missing id is a Major. C-89 on your own copy.
+FULL VERIFY at the head under the jest lock, SESSION_SECRET UNSET (env -u SESSION_SECRET; print SET or UNSET as the hold's first line, the NAME only), npm run verify -- --maxWorkers=2 on a tree you built. Predicted 4125/242 — confirm or contradict. Account for every test id at c5da4d4 and at the head: the only change allowed is the four new RD-665 ids; a missing id is a Major. C-89 on your own copy.
 
 KNOWN RESIDUALS — LIST, DO NOT FAIL: RD-657 (health says 2.0.1); the stale comment at the build script's lines 37-38; C-124 as UPDATED (Key Vault success observed at log level only on the 2.2.0 customer test; admin-health fields never measured); C-20 (this gate does not deploy or validate against real Azure); the 2.2.0 gate's F-3 (no cell catches a consistent wrong digest).
 
@@ -206,10 +206,8 @@ done
 g merge-base --is-ancestor "$FIX_SHA" "$PKGC_SHA" 2>/dev/null && [ "$PKGC_SHA" != "$FIX_SHA" ] || {
   echo "REFUSING: the package commit $PKGC7 does not strictly descend from d14a975" >&2; exit 8; }
 g merge-base --is-ancestor "$PKGC_SHA" "$HEAD_SHA" 2>/dev/null || { echo "REFUSING: $HEAD7 does not descend from the package commit $PKGC7" >&2; exit 8; }
-_DOCD="$(g diff --name-only "$PKGC_SHA" "$HEAD_SHA" 2>/dev/null | grep -v -E '^(docs/resubmission/|__tests__/marketplace-package-build\.test\.js$|scripts/verify-expected-counts\.json$)')"
-# Added at READY by Tuesday 2026-09-25: bd42973 (the c2b cells) and 9408aa8 (counts) sit between the package commit and the head; the SHIPPED dir must not move:
-[ -z "$(g diff --name-only "$PKGC_SHA" "$HEAD_SHA" -- azure-marketplace/ 2>/dev/null)" ] || { echo "REFUSING: $PKGC7..$HEAD7 changes azure-marketplace/ (the shipped files)" >&2; exit 8; }
-[ -z "$_DOCD" ] || { echo "REFUSING: $PKGC7..$HEAD7 touches more than docs/resubmission/, the c2b test file and the counts file: $_DOCD" >&2; exit 8; }
+_DOCD="$(g diff --name-only "$PKGC_SHA" "$HEAD_SHA" 2>/dev/null | grep -v '^docs/resubmission/')"
+[ -z "$_DOCD" ] || { echo "REFUSING: $PKGC7..$HEAD7 touches more than docs/resubmission/: $_DOCD" >&2; exit 8; }
 [ "$(g diff --name-only "$PKG_220" "$BASE_220" 2>/dev/null)" = "docs/resubmission/2026-09-22_resubmission-handover-for-kam.md" ] || {
   echo "REFUSING: 3464dd8..c5da4d4 is no longer only the 2.2.0 handover doc — the 2.2.0 baseline moved" >&2; exit 8; }
 
@@ -330,7 +328,7 @@ RC=$?; [ "$RC" = 0 ] || exit "$RC"
 
 # 31 — builder evidence, standing references and tools on disk.
 for f in "$READY_MAIL" "$KAM_DOC" "$HANDOVER_L" "$CLAR" "$PRIOR_REPORT" \
-         "$EVID_CT/RD665-webtest-readback.json" "$EVID_CT/RD665-alert-readback.json" "$EVID_CT/RD665-availability-results.json" "$EVID_CT/RD665-webtest-after-disable.json" "$EVID_CT/RD665-proof-deployment-operations.json" \
+         "$EVID_CT/RD665-webtest-readback.json" "$EVID_CT/RD665-alert-readback.json" "$EVID_CT/RD665-availability-results.json" \
          "$EVID_CT/T4-restart-log.json" "$EVID_L/ct-az.sh" \
          "$EVID_G/armttk.sh" "$NX/session-tools/nexusai-lock.sh" \
          "$NX/session-tools/pwsh-v7.6.6.bYFB/pwsh" "$NX/session-tools/arm-ttk-20260213.TjXW/arm-ttk/arm-ttk/arm-ttk.psd1" \
@@ -383,7 +381,7 @@ if printf '%s\n' "$PROMPT" | grep -qi 'wednesday-agent@' && ! printf '%s\n' "$PR
 WORDS="C-158 C-58 C-124 C-20 C-23 C-28 C-89 C-141 RD-665 RD-657 37-38 F-3 F-6 V1 V2 V3 standard ValidationRules
 SCOPED <WebTest RELAYED ct-az.sh customer-test PER%ENTRY POSITIVE%CONTROL%FIRST node%--check VOID SESSION_SECRET%UNSET
 arm-ttk hideconf hardloc gitleaks canary DOCKER_CONFIG cp%without%-p MANIFEST%COMPLETE EXCLUSIVE qa-pkg221- QUEUE,%NEVER%TAKE%OVER
-DEADLINE HEARTBEAT 2%minutes 5%minutes finally NOT%TESTED MEASURED%AT%RUNTIME READ%ONLY PROBED 4127/242 docker%rmi FOREGROUND
+DEADLINE HEARTBEAT 2%minutes 5%minutes finally NOT%TESTED MEASURED%AT%RUNTIME READ%ONLY PROBED 4125/242 docker%rmi FOREGROUND
 never%merge Prior-work%check"
 for w in $WORDS; do
   w="${w//%/ }"
