@@ -1,0 +1,36 @@
+[Datasec/NexusAI-O -> Tuesday] READY FOR QA: RD-411 rd-411-machine-labels-s84o @ ed01f7e (tier 1; batch with RD-447 @ 911e706; verify 4040/4040)
+BLUF: RD-411 is READY FOR QA, and it completes the RD-447 + RD-411 batch you set up for ONE gate (your 13:15Z ANSWER). Branch rd-411-machine-labels-s84o @ ed01f7eb02430de74ccaaa6d6f265c7638e5aab4 (pushed, read back). Tier 1. Test-helper change only: no product code or page, so the surface is the jest suite at that head. RD-447's head is unchanged: rd-447-utf16-scan-s84o @ 911e706.
+
+TICKET: RD-411 (Med). identifierSignals()' LABEL regex was prose-shaped, so tenantId / AZURE_TENANT_ID / tenant_id / TenantID beside a GUID was not a labelled identifier, and adding such a line to a REVIEWED file did not reopen its review.
+
+COMMITS: 7be79f0 (the fix + cells, cut from main 7c47ec4) -> d81cd97 (main 11666d3 merged FORWARD, clean, no rebase) -> ed01f7e (counts regenerated once on the merged tree). Main has since moved to 12b5edc (P's merge 1); the branch is NOT re-merged onto it, and the merge step regenerates counts on the final tree (C-68).
+
+WHAT CHANGED (__tests__/helpers/image-manifest.js + new __tests__/rd411-machine-shaped-labels.test.js + counts):
+- labelForm(line): camelCase humps split, _ and - read as spaces. hasLabel(line) = LABEL tested on that form. The GUID is still read from the ORIGINAL line.
+- LABEL also accepts the joined form (tenantid).
+- hasLabel() is used by BOTH identifierSignals() and signalLines(), so the carrier test and the review fingerprint agree.
+- The 24-char window between noun and "id" is UNCHANGED (RD-386's question, Kam's).
+
+MEASURED FIRST (plain node, read-only, 7c47ec4): the wider label newly flags NO shipped file, so __tests__/fixtures/image-carrier-review.json does NOT move. Positive control: 6 planted machine-shaped lines went 0 -> 1 under the same probe.
+
+CELLS, as sets (28): 19 machine shapes (AZURE_TENANT_ID=, "tenantId":, tenant_id:, TenantID, AADTenantId, azureSubscriptionId, SUBSCRIPTION_ID, clientId, AZURE_CLIENT_ID, workspaceId, LOG_ANALYTICS_WORKSPACE_ID, objectId, principal_id, directoryId, applicationId, resourceGroupId, resource-group-id, tenantIds, tenantid), each checked for labelled-identifier 1 AND the signal line; reviewed-file reopen x3 (env, JSON, snake) on TERMS_OF_SERVICE.md + PRECONDITION; a new env-var file flagged "not reviewed". CONTROLS (green at base): prose labels still count; no-label CSV row, tenantName, clientIdentity, identity, requestId -> 0; GUID read from the original line; the shipped tree has no unreviewed carrier and the detector is live.
+
+RED PROOF, one lock hold (session-tools/s84o/rd411-hold.log; foreign server.js 0 each run):
+- base 7c47ec4: 24 failed / 4 passed, controls green.
+- fix: 28/28.
+- M1 (labelForm = identity): 13 red. M2 (joined alternative removed): 1 red (tenantid=). M3 (signalLines keeps the prose-only label): 11 red. Restored (sha checked): 28/28.
+FULL VERIFY on d81cd97's tree, through the lock, SESSION_SECRET unset: VERDICT: PASS — 4040/4040 tests passed across 238 suites (jest exit 0). Log: session-tools/s84o/rd411-verify.log. C-89 on ed01f7e: git diff --quiet HEAD holds; HEAD's counts file = 4040/238.
+
+MERGE-TREE vs RD-447 (your condition): instrument git merge-tree --write-tree --name-only (git 2.54.0), d81cd97 vs 911e706, objects written to a SCRATCH dir (session-tools/s84o/mt-objects, 40K) with the repo's objects as alternate, so the shared .git got no writes. Result rc 1: __tests__/helpers/image-manifest.js AUTO-MERGES; the ONLY conflict is scripts/verify-expected-counts.json (the C-57 case: regenerate once on the merged tree). Order after a GO, per your mail: RD-447 first, then RD-411 merged forward.
+
+PRIOR WORK: S59's WIP c026e94 (saved by S60 "as found: not re-verified, not gated", 255 behind). Its INTENT is kept (labelForm, hasLabel, the joined form) and the code re-applied on current main, not rebased (C-68). Its bracket-rule half is RD-418's and is not carried. Nothing removed.
+
+NOT TESTED / limits:
+- The 24-char window (RD-386) is untouched, so a label and a GUID more than 24 chars apart on one line, or on adjacent lines, are still not linked.
+- labelForm splits camelCase and snake only. A label glued to other words with no separator (for example "mytenantid") matches via the joined alternative only when "tenant" starts a word.
+- No re-review of carriers was needed (none newly flagged); if a later shipped file trips the wider label, its review fingerprint changes.
+- The merge-tree is a textual check; the combined suite at the merged head is the gate's to run.
+
+QUEUE: 12 self-applied C-141 yields this session so far, logged at session-tools/s84o/yield-log.txt.
+-- NexusAI-O
+
