@@ -1,0 +1,86 @@
+[Datasec/NexusAI-J -> Tuesday] READY FOR PACKAGE GATE: 2.2.0 plan zip 3464dd8 (sha256 18155587…ef21c), image sha256:fdda3309…7f66 from 0677388; MANIFEST 32/0; verify 4121/4121; branch local, push GO?
+
+BLUF: READY FOR PACKAGE GATE. The NexusAI 2.2.0 plan zip is built (non-draft, MANIFEST COMPLETE: 32 checks, 0 failed) from package commit 3464dd8. It carries the release image nexusaireleaseacr.azurecr.io/nexusai@sha256:fdda33098c36a484b50a9a761660bb69bc53f5ed238ffceeb1bd038c8eb77f66, built from main 0677388. The branch is LOCAL, per your ruling. One ask: GO to push mkt-release-2.2.0-s81j to origin so the gate can read it (a new branch; nothing on main).
+
+== WHAT TO GATE ==
+- Branch: mkt-release-2.2.0-s81j (local, NOT pushed), head c5da4d4. Worktree: worktrees/s81j-pkg. Commits on top of df70a96:
+    6f4945b  merge of main 0677388 into the package line (step 3)
+    3464dd8  the digest set, and five placeholder pins re-anchored (step 4)   <- THE PACKAGE COMMIT (the zips are built from it)
+    28e1949  fold of the handover doc dfbd55b (doc only)
+    482bdf7  handover doc filled from the build (doc only)
+    c5da4d4  handover doc: the arm-ttk value my fill script missed (doc only)
+  Since 3464dd8 only docs/resubmission/2026-09-22_resubmission-handover-for-kam.md changed (git diff --quiet 3464dd8 HEAD -- azure-marketplace scripts __tests__ backend static: clean).
+- The zips (inside the project tree): /Volumes/KK_T9_External_HDD/!CODING/Datasec/NexusAI/marketplace-submission-2026-09-25-2.2.0/
+    NexusAI_plan-managed-ai_2.2.0_3464dd8.zip     sha256 18155587c6cb0141b35d082b25fcccae9f3b8683189208dac3cf701790eef21c  (18091 bytes: mainTemplate.json, createUiDefinition.json, viewDefinition.json)
+    NexusAI_listing-assets_2.2.0_3464dd8.zip      sha256 c333f95c328c1a0dceb19b9a47ec16721d05742b597d6659446c25159da7ecbe  (7 listed files)
+    MANIFEST-2.2.0_3464dd8.txt                    last line "MANIFEST COMPLETE: 32 checks, 0 failed"
+  The manifest's image section: containerImage resolves to the digest; nexusai-api runs [variables('containerImage')]; no configuration.registries; the release registry; a committed exception for the digest reference; the anonymous-pull probe HTTP 200 (a REAL probe this time, not a stub). The zip's own mainTemplate.json reads containerImage = the digest (read with unzip).
+  Build log: session-tools/s81j/pkgbuild-3464dd8.log.
+
+== THE IMAGE ==
+- nexusai:2.2.0 = sha256:fdda33098c36a484b50a9a761660bb69bc53f5ed238ffceeb1bd038c8eb77f66, ACR run cr1 ("successful after 2m8s", 2026-09-24T23:40:37Z), from a clean worktree at main 0677388ab031ffaf569a52f6c0301af48f44aece. Build args BUILD_COMMIT_SHA=0677388…, IMAGE_VERSION=2.2.0; IMAGE_SOURCE deliberately NOT passed, so the source label is empty (your ruling). Log: session-tools/s81j/acr-build-2.2.0.log.
+- Authority: Kam's signed mail <33D54FEB-D8F0-4220-866D-7182B4094E92@me.com> (C-149) plus your GO 23:37:38Z. The tag did not exist before; the registry holds 1 repository, 1 tag and 1 manifest.
+- C-58 item 1, both halves: (a) an anonymous pull with an empty docker config (rc 0; negative controls 401), and a local smoke boot giving build b6f4bfddadcd4055 = sha256(0677388)[:16] (run 1's PASS was void and is kept as evidence); (b) the demo on the release digest with no registry credential: nexusaidev-app--s81j-220-fdda330, "Successfully pulled image", the SOLE active revision. Re-read at 02:07Z: still sole active, 100%, Healthy; /api/health build b6f4bfddadcd4055. So the demo matches the resubmission image byte for byte; no further demo redeploy is needed.
+
+== VERIFY NUMBERS (all local, through the jest lock, SESSION_SECRET unset) ==
+- 6f4945b (merge): --update-counts 4120/4120 (241 suites) PASS; plain 4120/4120 PASS; named 341/341 over 26 files; C-89 clean. C-57: A 3974 / B 4070 / merged 4120, 0 failed; 21 missing, 20 accounted by the script, 1 (RD-495 CTRL-1) by your ANSWER 00:51:41Z; C-112 283 files, 270 = A, 13 = B, neither 0, absent 0.
+- 3464dd8 (digest): --update-counts 4121/4121 (241) PASS; plain 4121/4121 PASS; named 227/227 over 12 package files; C-89 clean (4121/241). The first attempt STOPPED on the 5th pin (mail-11); nothing was committed then.
+- c5da4d4 (final head): full verify 4121/4121 (241 suites) VERDICT PASS, SESSION_SECRET unset, finished 02:23Z (session-tools/s81j/final-verify-c5da4d4.log).
+- arm-ttk on 3464dd8: TOTAL 49/49 PASS, 0 FAIL (createUiDefinition 18/18, mainTemplate 31/31). session-tools/s81j/armttk-3464dd8.txt.
+- CI: main 0677388 Build 35811343989 green (3974/3974, 234, Node 24). The package-line branch has NEVER run Build (it triggers only on main and on PRs into it).
+
+== THE RE-ANCHOR, for the gate to check (the C-131 shape; you accepted the SHAPE, not the cells) ==
+Before -> after, all in 3464dd8:
+  a. marketplace-package-build.test.js realFixture: expect(containerImage).toBe(PLACEHOLDER) -> expectShippedIsRelease(...): not the placeholder; ^nexusaireleaseacr.azurecr.io/nexusai@sha256:[0-9a-f]{64}$; equals release-policy imageTagExceptions["2.2.0"].image
+  b. REAL POLICY: template toBe(PLACEHOLDER) -> expectShippedIsRelease(shipped); pol.imagePlaceholder still toBe(PLACEHOLDER); the exception has a reason
+  c. "REAL TEMPLATE, as shipped: exit 1 on the placeholder" -> c1 (PLACEHOLDER put back into the REAL files: exit 1, the registry never contacted; expectations unchanged) + c2 NEW (as shipped, version 2.2.0: exit 0, no FAIL, the probe called exactly once with the shipped reference). build() gained an explicit version option (default unchanged).
+  d. :272 toBe(PLACEHOLDER) -> expectShippedIsRelease(shipped) (no write-through)
+  e. marketplace-single-build-path.test.js RD-506: shippedRepo({placeholderBack}) asserts the shipped image IS the committed reference and not the placeholder, then writes imagePlaceholder into the COPY; the two cells run with placeholderBack: true; their assertions are byte-unchanged; the describe was renamed.
+Red-proofs (predictions written first: expect-step4.txt, expect-step4b.txt):
+  R1 template back to the placeholder: 48/55, the 7 predicted red (REAL POLICY, c1, c2, digest-substituted, 3x RED REAL POLICY)
+  R2 exception image one hex char off: 48/55, the same 7
+  Q1 RD-506 back to the as-shipped form: 15/17, the 2 predicted red
+  Q2 exception image one hex char off: 15/17, the same 2
+  restores verified by diff hash; clean runs 55/55 and 17/17.
+  Correction recorded: my mail-06 said c1 stays green under R1; it cannot (it goes through realFixture); corrected in the expect file before any arm ran.
+Product edits in 3464dd8: mainTemplate.json:106 (the digest); plans/README.md:40-42 (the same sentence names the digest and still says the placeholder fails); release-policy.json imageTagExceptions["2.2.0"] only (imagePlaceholder kept as the refusal rule).
+
+== CENSUS (your command + one widening to test helpers): session-tools/s81j/census-table.md ==
+Only A1 and A2 pin the old state, and both are fixed. shipped-plan-build.js (rd471/rd472) got STRONGER, not weaker. The full verify on the digest-set tree reddened exactly the A2 cells and nothing else. Stale text flagged, not edited: scripts/marketplace-package-build.sh:37-38.
+
+== THE HANDOVER DOC FOR KAM ==
+docs/resubmission/2026-09-22_resubmission-handover-for-kam.md @ c5da4d4 (dfbd55b folded, not rewritten). Every <filled at build> value is filled from a measurement. Superseded lines are STRUCK and marked "UPDATED 2026-09-25", never deleted: §0 main 0677388 + the two merge rounds + CI green; BLUF and §5 intro (the push is done by the agents, C-149); §2 values and zip hashes; §3 four new rows; residuals 4 (anonymous pull) CLOSED, 8/19 (CI red) SUPERSEDED, 9 (main moved) CLOSED, 15 (RD-645) CLOSED; §4a two lines closed; §5.1 what was actually run. New residuals 20-24 (below). The doc is not in either zip.
+
+== RESIDUAL LIST FOR KAM (full; carried from HANDOVER-S78G, CLARIFICATIONS and the doc, plus this build) ==
+1. C-124: the Key Vault SUCCESS path has never been executed by anyone. A GO here means "the failure path behaves", never "the Key Vault feature works".
+2. C-20: the template has never been validated against real Azure (az deployment group validate is blocked for the agent identity; validate-marketplace-template.sh NOT RUN). arm-ttk 49/49 is static only.
+3. C-69 row 4: no customer deployment through Partner Center before submission (the $0 preview-audience deploy comes after approval).
+4. C-58: the package-gate jest suites are not network-sandboxed (the manifest's anonymous-pull probe really went out and returned 200).
+5. Accepted holes, open by ruling: C-42 setup-mode takeover in the open first-run window; RD-564 / C-86 the ~60 s window; RD-594's two permissive admin-gate branches (scope with Kam).
+6. C-65 / C-105: legal text as already on the Marketplace; contradictions on RD-536 for Kam.
+7. C-145: Redis outages left as they are: RD-646 (dies at boot after claiming a fallback), RD-647 (500s until restart after a mid-run drop).
+8. C-146: /api/auth/enforce stays unthrottled; login throttling is 20 per 15 min per client address in production (an office behind one NAT gets a 429 at the 21st attempt).
+9. C-136: the per-user "Request erasure" button and route are retired (user-visible, although they never worked).
+10. RD-643 lane-A half: an operator can still edit the running app's AOAI endpoint by hand; ships after the resubmission with RD-583/584. The three endpoint rules differ (the wizard and the app's save rule allow *.openai.azure.com only; the setup check also sources cognitiveservices hosts).
+11. Dev-script residuals: deploy-dev.sh unexecuted after its change; --password visible to ps; its Key Vault flip uses identityref:system while the app identity is user-assigned; .gitleaks.toml:171-173 comment stale.
+12. RD-642: README.md:382 still frames the Key Vault as a choice (README is not in the plan zip).
+13. RD-652: an unset NODE_ENV means development (cap 50, not 20) by design (C-147).
+14. RD-651, RD-653, RD-654, RD-655 (filed by S80I, open by design this round).
+15. C-144 / RD-644: feedback CC to Tuesday is scheduled for the round AFTER the resubmission; not in 2.2.0.
+16. NEW (S81J) RD-657: /api/health says "version":"2.0.1" (hard-coded, server.js:18199; package.json 1.3.0) on the 2.2.0 image. The build digest proves the image; the version string does not. The demo shows 2.0.1 too, and that is NOT a wrong image.
+17. NEW: the image's OCI source label is empty by ruling; the version and revision labels are set.
+18. NEW: the demo now runs the release image; rollback anchor nexusaidev-app--s80i-34f11f4-b2 @ nexusaidevacrfa39…@sha256:b555172b…514b. Authenticated pages are not driven (RD-76).
+19. NEW: scripts/marketplace-package-build.sh:37-38 comment stale ("every build fails today").
+20. NEW RD-658: the C-133 accounting script decides on commit history, not blobs; one id in 6f4945b was accounted by your ruling.
+21. NEW RD-656: the launcher's boot step 1 fetches in the stale clone, against C-28.
+22. The package-line branch has not run the CI Build workflow; every "verify PASS" above is a local lock run.
+
+== PRIOR WORK (C-49) ==
+- Kept and built on: §5.1's commands (dfbd55b:163-179), run as written plus IMAGE_VERSION (the Dockerfile's own ARG, which no build had ever set; your ruling); S80I's image-only demo roll (mail-45 recipe) and its RD-302 discipline; S78G's regate-hold shape (C-57 + C-133 + C-112 in one lock hold); S78G's c133-accounting.py and armttk.sh, unmodified; release-image-2.1.0.sh's smoke-boot step, redone as the post-pull smoke; the handover doc dfbd55b, folded and filled rather than rewritten.
+- Replaced: the four placeholder pins in marketplace-package-build.test.js and the RD-506 pin, which asserted a pre-digest state that is now false by design (the C-131 shape, your ANSWERs 23:47:02Z and 01:30:21Z). Nothing they proved was dropped: the refusal on the placeholder is proven on the real files by c1 and RD-506.
+- Not carried over: S78G's floorcheck.py control (it is anchored on S78G's own claude pid); stated here rather than hidden.
+
+== ASKS ==
+1. GO to push mkt-release-2.2.0-s81j (head c5da4d4) to origin so the gate reads it from GitHub? Recommendation: yes. It is a new branch, touches nothing on main or the S78G branches, and is reversible.
+2. Board hygiene, per your 23:37:38Z ANSWER (item 5: "move them to Release Ready AFTER your READY FOR PACKAGE GATE"): I move gate 8's six (RD-531, RD-497, RD-510, RD-638, RD-631, RD-438) to Release Ready right after this mail and report it in the next STATUS.
+Nothing touches Partner Center. The zip goes to Kam only through you.
