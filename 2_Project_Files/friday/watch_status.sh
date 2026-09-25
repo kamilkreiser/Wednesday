@@ -16,7 +16,7 @@ for i in $(seq 1 110); do
     IFS= ; for f in $g; do unset IFS
       # A seat's DRAFT carries a placeholder line ("READY FOR REVIEW `<when-filled>`", B05 2026-09-25): lines holding a
       # `<…>` placeholder are not a READY, or the watcher fires early and then misses the real one (same count).
-      n=$(/usr/bin/grep -i -E 'READY FOR REVIEW' "$f" | /usr/bin/grep -v -c -E '<[a-z_-]+>|\b[A-Z]{3,}_[A-Z_]{3,}\b')   # also READY_TIME-style tokens (Composer B06, 2026-09-25)
+      n=$(/usr/bin/grep -i -E 'READY FOR REVIEW' "$f" | /usr/bin/grep -v -E '<[a-z_-]+>|\b[A-Z]{3,}_[A-Z_]{3,}\b' | /usr/bin/grep -v -c -i -E '(\bat|until|end at|ends at|to|before)[ *`]+READY FOR REVIEW')   # a line that PROMISES a future READY ("full table at READY FOR REVIEW", Composer B09 2026-09-25) is not one   # also READY_TIME-style tokens (Composer B06, 2026-09-25)
       if [ "$n" -gt 0 ] || /usr/bin/grep -q -i -E '^\*\*State:\*\* *(BLOCKED|STOP)' "$f"; then
         key="$f READY#$n"
         if ! /usr/bin/grep -qxF "$key" "$SEEN"; then echo "$key" >> "$SEEN"; echo "WAKE: $f"; exit 0; fi

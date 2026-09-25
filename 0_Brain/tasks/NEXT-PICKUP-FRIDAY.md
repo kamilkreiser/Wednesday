@@ -4,8 +4,8 @@ type: pickup
 seat: friday
 scope: BOTH Secuura and Datasec, from Kam's laptop. Claim each project before driving it (wed_claim.sh)
 status: live
-written_by: Friday, successor seat, 65% checkpoint 2026-09-25 16:1x (ctx 65%, 7d ~86%)
-supersede: replace wholesale; previous = NEXT-PICKUP-FRIDAY.md.pre-0925-1611-ckpt65
+written_by: Friday, successor seat, 70% checkpoint 2026-09-25 16:3x (ctx 70%, 7d 88%)
+supersede: replace wholesale; previous = NEXT-PICKUP-FRIDAY.md.pre-0925-1632-ckpt70
 ---
 
 # NEXT PICKUP — FRIDAY
@@ -20,15 +20,13 @@ supersede: replace wholesale; previous = NEXT-PICKUP-FRIDAY.md.pre-0925-1611-ckp
 - Unregistered project folder (HPSM: its launcher needs DevMASTER) → `cockpit.sh add <Name> "bash '…/2_Project_Files/friday/brief_seat.sh' <client> '<dir>' '<brief>'"`. Register the pane name in `fleet/inbox_routing.conf` BEFORE a `say --mail` tap: without a line, say --mail exits 1 SILENTLY (the fix is owed).
 
 ## 🔴 LIVE AT THE HANDOVER
-1. **HPSM-POC B13 → PR https://github.com/datasecau/HPSM-POC/pull/21** (head `121897a`, reviewed + accepted 16:10: delete for added actions + discard plan, C-18; 4 follow-ups). CI poll running. **Next:** merge head-pinned on green (`--match-head-commit 121897a12345ae9f4cc76df0983b9968a30505df`); check tree = head tree; close pane `Datasec/HPSM-POC-A` with pane_close.sh; check main push CI.
-2. **Composer B09 SEAT-B** (pane `Datasec/Security-Composer-B`):
-   - Scope: item 0 = the local analysis repo rewrite; then the answers flow through (typed answers → settings + documents), as a NEW content release, NOT deployed (C-07).
-   - ADDENDUM-1: the E8 SOW extract is now on the laptop, so run the full ci.sh.
-   - Watcher glob: `…/Datasec Security Composer/1_Project_Definition/Briefs/2026-09-25_B09*STATUS*.md`.
-   - On READY: review, then CARD the deploy for Kam. After a deploy on his word, a fresh example engagement (a later brief).
+1. **HPSM-POC B14 SEAT-B** (pane `Datasec/HPSM-POC-B`, base main `61f6f06`): the fix round for the B12 user test's 46 findings + C-19. Brief `HPSM-POC/1_Project_Definition/Briefs/2026-09-25_B14_SEAT-B_user-test-fix-round.md`. Watcher glob `…/HPSM-POC/1_Project_Definition/Briefs/2026-09-25_B14*STATUS*.md`. On READY: review (a screenshot per F-number); open the PR as kamilDatasec; merge head-pinned on green; then commission a FRESH cold-user re-run of the B12 test (same driver: `B12-C_evidence/seat-notes/userdriver.js`). Card F-13/F-27 (product/content) from its candidates.
+2. **HPSM-POC B15 SEAT-C, ANALYSIS** (pane `Datasec/HPSM-POC-C`): Kam 16:29 "map what we need for the SOW and for the full deployment". Brief `…/Briefs/2026-09-25_B15_SEAT-C_sow-and-full-deployment-requirements-map.md`; output `HPSM-POC/1_Project_Definition/Analysis/2026-09-25_requirements-map/` (map, full-deployment, open-questions, README, PDF). On READY: spot-check rows at source (3+ against the code at 61f6f06), grep the PDF for HP Restricted text, then send the PDF to Kam's drawer with a short panel BLUF. Card his top decisions.
+3. **Composer B09 SEAT-B** (pane `Datasec/Security-Composer-B`): item 0 DONE (the local analysis repo is clean); items 1–5 (answers flow through → a new content release, NOT deployed) at its full e2e (holding; wake_acked). A decision is coming: D-023's remediation-policy behaviour → card. Watcher (fixed: ignores "at READY" promise lines) glob `…/Datasec Security Composer/1_Project_Definition/Briefs/2026-09-25_B09*STATUS*.md`. On READY: review; CARD the deploy; after a deploy on his word, a fresh example.
+- B13 (delete) MERGED: PR #21 → main `61f6f06`, CI green (16:28).
 
 ## NEXT (owed, in order)
-1. **HPSM-POC B14 fix round, AFTER #21 merges** (B13 owns api/ + web/ until then). Source: the B12 user test STATUS `HPSM-POC/1_Project_Definition/Briefs/2026-09-25_B12_SEAT-C_end-to-end-user-test-as-a-salesperson.STATUS.md` (46 findings).
+1. ~~HPSM-POC B14 fix round~~ LAUNCHED 16:18 (see LIVE 1). Source: the B12 user test STATUS `HPSM-POC/1_Project_Definition/Briefs/2026-09-25_B12_SEAT-C_end-to-end-user-test-as-a-salesperson.STATUS.md` (46 findings).
    - Fix every finding that is not Kam's or the SME's. FIRST: internal notes on screen, incl. the named person ("Kam/Paul Waite meeting" footer).
    - Then: the contradictions (sample customers' narrative/report pages say "No assessment yet"; question totals 16/15/14; identical 54.2); Reset demo not resetting live data; the calculator overwriting the dashboard ARR; the "Demo Consultant" header; readiness Download greyed out.
    - **Plus C-19:** showcase mode scores NEW customers with the draft rules, labelled DRAFT (outside showcase mode C-15 still refuses).
