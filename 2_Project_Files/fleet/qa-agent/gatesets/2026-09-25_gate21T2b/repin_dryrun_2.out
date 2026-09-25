@@ -1,0 +1,41 @@
+LAUNCH ACTION (DRY RUN) 2026-09-25 16:27:14 AEST / 2026-09-25T06:27:14Z | launcher /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/fa11cd0d-1030-4620-83ac-40d313b499eb/scratchpad/gate21T2b/launch_qa_secuura_batch1225-t2.sh | pinned launch develop 379c6eb1d45905f398fae67ee7dd2f46ad40432f | END_TREE 4da02cbfc8139fd1fe30c36f1930fe79f7a11960
+  pin #1225 120420a2e7b1a0d10dd41ee4320f7e88bc1529c6
+  pin #1227 69a72726e8eee0711a56b782d04936bf647e9160
+  pin #1229 ed85bd81d0acb137c89e1257d05ef9c72855086b
+  pin #1231 bd1d2daec2bf1b934437eae19c6239fe257305a6
+  pin #1232 ec0d7efcf682112639505cf45baec71b899b665f
+--- 0. the pane must be routed (inbox_routing.conf) or cockpit.sh say --mail fails silently
+  routing line present: 0 (grep rc=1; want 1 / rc 0; control: QA/Secuura-batch1215 = 1)
+  (DRY RUN: reported, not refused — the real run refuses rc 1 here)
+--- 0b. the kit's home: launcher filled for /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/fa11cd0d-1030-4620-83ac-40d313b499eb/scratchpad/gate21T2b | this script lives in /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/fa11cd0d-1030-4620-83ac-40d313b499eb/scratchpad/gate21T2b
+  AT HOME — no re-fill
+--- 1. instrument: git ls-remote origin (read from the Secuura checkout, READ-ONLY)
+  ls-remote rc=0 at 06:27:17Z
+    379c6eb1d45905f398fae67ee7dd2f46ad40432f	refs/heads/develop
+    ec0d7efcf682112639505cf45baec71b899b665f	refs/heads/feature/ks-1128-the-platform-tenant-seeds-catch-logs-platform-tenant-seed-r21-seedwarn-1
+    69a72726e8eee0711a56b782d04936bf647e9160	refs/heads/feature/ks-1252-spec-example-guard-e7-ulid-ish-prefix-l4-e7prefix-1
+    bd1d2daec2bf1b934437eae19c6239fe257305a6	refs/heads/feature/ks-1281-vc-issuer-boot-warns-could-not-ensure-vc_credentials_store-r21-existencecheck-1
+    120420a2e7b1a0d10dd41ee4320f7e88bc1529c6	refs/heads/feature/ks-1291-dead-post-save-issuername-guard-l1-j-1
+    ed85bd81d0acb137c89e1257d05ef9c72855086b	refs/heads/feature/ks-865-check-no-latest-tags-silently-skips-l4-examinedcount-1
+    120420a2e7b1a0d10dd41ee4320f7e88bc1529c6	refs/pull/1225/head
+    69a72726e8eee0711a56b782d04936bf647e9160	refs/pull/1227/head
+    ed85bd81d0acb137c89e1257d05ef9c72855086b	refs/pull/1229/head
+    bd1d2daec2bf1b934437eae19c6239fe257305a6	refs/pull/1231/head
+    ec0d7efcf682112639505cf45baec71b899b665f	refs/pull/1232/head
+--- 2. instrument: the GitHub PULLS API (an independent read of each head)
+  pulls API rc=0
+    API #1225 head 120420a2e7b1a0d10dd41ee4320f7e88bc1529c6 base develop mergeable True state open
+    API #1227 head 69a72726e8eee0711a56b782d04936bf647e9160 base develop mergeable True state open
+    API #1229 head ed85bd81d0acb137c89e1257d05ef9c72855086b base develop mergeable True state open
+    API #1231 head bd1d2daec2bf1b934437eae19c6239fe257305a6 base develop mergeable True state open
+    API #1232 head ec0d7efcf682112639505cf45baec71b899b665f base develop mergeable True state open
+--- 3. the heads, judged (both instruments == the pin, and open)
+  #1225  ls-remote pull/head 120420a2e7b1a0d10dd41ee4320f7e88bc1529c6 | branch 120420a2e7b1a0d10dd41ee4320f7e88bc1529c6 | API 120420a2e7b1a0d10dd41ee4320f7e88bc1529c6 (state open, mergeable True) | pinned 120420a2e7b1a0d10dd41ee4320f7e88bc1529c6
+  #1227  ls-remote pull/head 69a72726e8eee0711a56b782d04936bf647e9160 | branch 69a72726e8eee0711a56b782d04936bf647e9160 | API 69a72726e8eee0711a56b782d04936bf647e9160 (state open, mergeable True) | pinned 69a72726e8eee0711a56b782d04936bf647e9160
+  #1229  ls-remote pull/head ed85bd81d0acb137c89e1257d05ef9c72855086b | branch ed85bd81d0acb137c89e1257d05ef9c72855086b | API ed85bd81d0acb137c89e1257d05ef9c72855086b (state open, mergeable True) | pinned ed85bd81d0acb137c89e1257d05ef9c72855086b
+  #1231  ls-remote pull/head bd1d2daec2bf1b934437eae19c6239fe257305a6 | branch bd1d2daec2bf1b934437eae19c6239fe257305a6 | API bd1d2daec2bf1b934437eae19c6239fe257305a6 (state open, mergeable True) | pinned bd1d2daec2bf1b934437eae19c6239fe257305a6
+  #1232  ls-remote pull/head ec0d7efcf682112639505cf45baec71b899b665f | branch ec0d7efcf682112639505cf45baec71b899b665f | API ec0d7efcf682112639505cf45baec71b899b665f (state open, mergeable True) | pinned ec0d7efcf682112639505cf45baec71b899b665f
+  BOTH INSTRUMENTS AGREE with all five pins.
+--- 3b. develop, read at launch: 379c6eb1d45905f398fae67ee7dd2f46ad40432f | the launcher's pinned launch develop 379c6eb1d45905f398fae67ee7dd2f46ad40432f
+  UNMOVED since generation — the END_TREE 4da02cbfc8139fd1fe30c36f1930fe79f7a11960 stands
+DRY RUN COMPLETE 2026-09-25T06:27:22Z — every read agrees with the pins; the real run continues with the usage gate, --check and cockpit.sh add
