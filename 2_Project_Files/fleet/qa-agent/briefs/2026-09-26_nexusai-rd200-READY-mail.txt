@@ -1,0 +1,37 @@
+[Datasec/NexusAI-P -> Tuesday] READY FOR QA: RD-200 rd-200-js-colour-corpus-s84p @ 12b5edc (on main 11666d3; verify 4021/4021; debt 147 in 66 entries, RD-676..680)
+READY FOR QA: RD-200. Branch rd-200-js-colour-corpus-s84p, head 12b5edc (pushed, read back). Forward-merged onto main 11666d3 at c01190d (clean, no lane-4 file overlap), and main is unchanged at push. Third branch of the batched gate with RD-428 (823ef9e) and RD-444 (2f9da1c). Lane-plan tier 2.
+
+WHAT CHANGED (5 files; build commit 4f97260):
+- __tests__/helpers/css-colors.js: new exports extractJs / jsFiles / jsCorpus. Comments are removed by the shared parser-based stripper (strip-comments.js, RD-376; no new stripper). It reads hex (3/4/6/8 digits, not after & or a word character, so &#039; is not a colour) and rgb()/rgba() with ALPHA IGNORED, the conformance test's own RGB_TRIPLE rule (RD-199). hsl() is recorded unconverted and counts as unresolved. The header's old "scan static/js separately and say so" now points at the gate, and states the limits (named colours, runtime-built colours, hex-only ID selectors).
+- __tests__/rd200-js-colour-corpus.test.js (new, 9 cells): POPULATION, RESOLVES (closed), NO ROT, OWNED, REPORTS, two CANARY cells, NOT READ, REAL FILE.
+- __tests__/fixtures/rd200-js-brand-debt.json (new; your grant 12:40:12Z): 66 file+value entries, 147 occurrences, pinned counts, each naming its ticket.
+- docs/BRAND.md 8.3: the JS bullet now says what is gated, the debt and its owners, and the narrower meaning of a green brand gate.
+- Tickets filed BEFORE the manifest referenced them: RD-676 (index.js charts, 95), RD-677 (index.js UI, 16), RD-678 (first-run-setup.js, 33), RD-679 (chart-details.js print, 2), RD-680 (entra-provisioning-ui.js, 1). Each is Medium, linked to RD-200 and RD-197, and says palette choice is Kam's.
+- DEBT COUNT: 147 occurrences in 66 entries in 4 files. settings.js (RD-200's origin) has 0.
+
+SETS (one lock hold, floor 0; session-tools/s84p/rd200-proof.log):
+- A, manifest emptied (main's state): RED. RESOLVES names all 66 entries by site; OWNED and REPORTS are also red.
+- B, the real manifest: 9/9.
+- T1, a new #ba5eba in settings.js: RESOLVES names settings.js:3704. CANARY-absence and REAL FILE also went red, because the tamper used the canary value itself, so the canary-absence cell was watched firing too.
+- T2, entra :222 #f0f8ff moved to a token: NO ROT fails ("manifest 1, found 0 — lower or remove the entry (RD-680)").
+- T3, one extra #f0f8ff: RESOLVES fails ("manifest records 1, found 2"), which proves the manifest is closed.
+- Restored with hashes equal; B2 9/9.
+- Full verify on the forward-merged tree c01190d: "VERDICT: PASS — 4021/4021 tests passed across 238 suites (jest exit 0)", SESSION_SECRET unset, floor 0 before and after (session-tools/s84p/rd200-verify.log). Counts committed at 12b5edc; main 11666d3 is 4012/237, and +1 suite +9 tests is the new file. C-89: diff --quiet HEAD clean; HEAD's counts file equals the regenerated one.
+
+MERGE-TREE (your item 2; named object dirs, shared store 1103 files before and after; session-tools/s84p/mergetree.sh):
+- vs rd-428 823ef9e: rc=1, ONLY scripts/verify-expected-counts.json (C-57).
+- vs rd-444 2f9da1c: rc=1, ONLY scripts/verify-expected-counts.json (C-57).
+- SEMANTIC OVERLAP git cannot see (C-68): RD-428 edits static/js/entra-provisioning-ui.js, which is inside RD-200's corpus. Measured with RD-200's own extractJs: main has 3 literals, 1 off-token (#f0f8ff at :222); RD-428's 823ef9e version has 3 literals, 1 off-token (#f0f8ff at :222). The manifest's entry is count 1, so RD-428 adds no colour and the merged tree does not trip the closed manifest. The whole rd200 file is still on the post-merge re-run list.
+
+PRIOR WORK:
+- RD-182's recorded-debt shape (docs/brand-debt.json, and the closed / anti-rot / report-on-pass cells in brand-token-conformance.test.js) is the model, per your ruling. That file, its RGB_TRIPLE and toHex are UNTOUCHED; extractJs carries an equivalent copy for the JS corpus (duplicate recorded on RD-200 comment 38214).
+- theme-preview-palette.test.js (the narrow RD-182/RD-200 swatch guard) is kept unchanged. The Explore census and my own census agree (223 literals, 147 off-token), and every site was read by eye; none is a selector.
+- Nothing replaced or removed.
+
+NOT TESTED: named colours ('white') and colours built at runtime (declared limits); vendor or CDN scripts (none are in static/js); whether each of the 147 is VISIBLE on a rendered page. The gate is about the palette, not contrast.
+FLAGGED, not changed: BRAND.md rule 3's RD-199 bullet ("rgba()/hsl() values ... outside it") reads stale, since the conformance test now reads rgba() in dark-mode.css. It's not my measurement today; it's a candidate one-line doc fix if you want it on this branch.
+
+Moving RD-200 to Testing.
+
+-- NexusAI-P
+
