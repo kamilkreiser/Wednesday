@@ -15,6 +15,9 @@ Batched per tier (the 09-18 batch rule). A row enters on its READY mail and only
 | 2 | #1221 | KS-1266 | L1 | 0a561a5db393 (ls-remote 13:4x) | none (originate tests; port-1 fix) | 03:41Z |
 | 2 | #1222 | KS-1181 F2 | L3 | 9bce90229ad6 (ls-remote 13:4x) | none (packages/shared test) | 03:48Z |
 | 2 | #1223 | KS-1118 | L1 | 759726d8d (ls-remote 13:5x) | none (originate test + comment) | 03:49Z |
+| 2 (NEXT batch) | #1225 | KS-1291 | L1 | 120420a2e (ls-remote 14:1x) | originate route guard removed; legs 3/4/8 OWED | 04:14Z |
+| 1 (NEXT batch) | #1224 | KS-1179 | L3 | d4862b3eee35 (ls-remote 14:2x) | security ssrf-guard | 04:20Z wrap |
+| 1 (NEXT batch) | #1226 | KS-872 | L3 | fcda1a6ef7e4 (ls-remote 14:2x) | none (type-only) | 04:20Z wrap |
 | 3 | #1219 | KS-1277 | L1 | 5d5129a03af0 (ls-remote 13:2x) | none (comment-only) | 03:23Z |
 
 **TIER 2 = 4 READY at 13:4x (#1215, #1218, #1220, #1221) -> gate commissioned (a second drafter).**
