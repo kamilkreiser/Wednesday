@@ -14654,7 +14654,7 @@
   ],
   "recommended": "c",
   "ts": "2026-09-25T11:18:16.689760+10:00",
-  "status": "open",
+  "status": "withdrawn",
   "ruled_choice": null,
   "ruled_ts": null,
   "prior_rulings_overridden": [
@@ -14682,6 +14682,47 @@
    "2026-09-11 16:55",
    "2026-09-14 21:52",
    "2026-09-16 14:00",
+   "2026-09-17 16:37",
+   "2026-09-17 16:37",
+   "CARD nexusai-rd245-audit-log-leaves-settings",
+   "CARD secuura-audit-baseline-rows-lapse-24sep-block-pushes",
+   "CARD secuura-audit-row-mysql2-override-vs-prisma-pin",
+   "CARD secuura-audit-rows-react-router-v7-migration",
+   "CARD secuura-audit-row-ip-address-high-override"
+  ],
+  "withdrawn_at": "2026-09-25T11:33:18.511062+10:00",
+  "withdrawn_reason": "Superseded by secuura-audit-root-lock-0930-remeasured: Seat B 25th measured option (a) at 01:28Z (report mail) and it does not work. A full re-resolution leaves ip-address 9.0.5 and the nested hono 1.19.11 in place, and on this host drops 103 non-darwin platform binaries."
+ },
+ {
+  "id": "secuura-audit-root-lock-0930-remeasured",
+  "client_project": "Secuura/Blockchain",
+  "title": "The shared-lockfile part of two security exceptions cannot be fixed before Wed 30 Sep 10:00: renew that part to 2 Oct, or let Secuura pushes freeze",
+  "bluf": "Replaces my earlier card, whose recommendation turned out not to work. On Wednesday 30 Sep at 10:00, three security exceptions expire and every push to the Secuura repo is refused. The Secuura agent is fixing almost all of it: react-router fully, hono and ip-address in every service and app lockfile. What cannot be fixed in time is the SHARED workspace lockfile, where an old ip-address 9.0.5 (a HIGH advisory) and a nested hono 1.19.11 are held in place by the Cardano SDK (@cardano-sdk/core, via three @meshsdk packages). The agent measured a full rebuild of that lockfile. It clears neither, and on this Mac it silently drops 103 packages the Linux builds need. Renewing a HIGH exception is your signature alone.",
+  "default_action": "If you don't answer: nothing is renewed (it is your signature), so from Wednesday 30 Sep 10:00 every push to the Secuura repo is refused until you rule. I will remind you on Monday 28 Sep with the fixes' status.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Renew the root-lockfile part only, to 2 Oct, and ticket the real fix (Recommended)",
+    "detail": "The two root-lock exceptions move to 2026-10-02, the date the other react-router exceptions already share, so the week's review happens once. A new ticket asks the Secuura agent to measure upgrading @meshsdk/@cardano-sdk to versions that drop ip-address 9.x. Every other part of all three exceptions is fixed through the normal gate."
+   },
+   {
+    "key": "b",
+    "label": "Do not renew: let pushes freeze from Wed 30 Sep 10:00 until the Cardano SDK upgrade lands",
+    "detail": "No exception is extended. Every push to the Secuura repo, Peter's and Stuart's included, is refused from Wednesday 10:00 until a dependency upgrade merges. That upgrade is unmeasured and could take days."
+   },
+   {
+    "key": "c",
+    "label": "Renew to a shorter date (Mon 28 Sep) and decide again then",
+    "detail": "Buys three days instead of seven. It comes back to you on Monday with the Cardano SDK measurement in hand."
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-09-25T11:33:25.293359+10:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "2026-09-04 15:25",
    "2026-09-17 16:37",
    "2026-09-17 16:37",
    "CARD nexusai-rd245-audit-log-leaves-settings",
