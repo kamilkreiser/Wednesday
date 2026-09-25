@@ -6,6 +6,14 @@ status: live
 supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s1-wholesale
 ---
 
+## 🔴 DELTA 84 — 2026-09-25 22:2x (s84, ctx ~76%; band 80-90 close). **READ THIS FIRST, THEN 83/82.**
+### STANDING: Kam ~22:0x (new Claude account): "Please work your way through the tickets and merge once tested." (EXPIRING-GRANTS)
+- **FLOOR: %0 tuesday · %1 monitor · %11 NexusAI-M (lane 1: backend/server.js core, RD-579 first) · NexusAI-N (lane 2: storage/erasure/LAW; item 0 close-outs DONE, RD-674 new) · NexusAI-O (lane 3: image gate, RD-447 on rd-447-utf16-scan-s84o) · NexusAI-P (lane 4: settings UI + brand, RD-428 on rd-428-provisioning-residue-s84p).** Lane plan: `/Volumes/KK_T9_External_HDD/!CODING/Datasec/NexusAI/5_Project_History/2026-09-25_S84M_lane-plan.md`; briefs `fleet/briefs_staged/2026-09-25_nexusai_{M_ticket_lanes,N_lane,O_lane,P_lane}.md`. **NexusAI-L WRAPPED and its pane closed** (its handover carries the 73e9b141 env inventory + Kam's Part B, wizard, question B and teardown).
+- **Main = 7c47ec4** (RD-665 port, verified by Tuesday at source). **CI Build on 7c47ec4 was IN PROGRESS at L's wrap: M was asked to report it; a RED main blocks every merge.**
+- **Rulings given to seats:** P: a one-cell re-anchor of rd409-410:258 GRANTED for RD-428 F2. O: rd429 TEXT_EXTENSIONS left out of RD-447 (residue ticket).
+- **MERGE PROCESS (per READY):** stamp a gate from the QA template (tier per the lane plan; batch file-disjoint READYs into one gate where tiers match, the 09-18 rule) -> on a GO: merge-forward main into the branch if main moved, counts regenerated ONCE on the merged tree, full verify -> Tuesday's GO to the AUTHOR seat to merge (ff or merge commit, no rebase) -> ls-remote main + deploy-demo SKIPPED check -> tell Kam. **One merge at a time.**
+- **Kam cards OPEN:** nexusai-release-package-files-into-main (rec a) · nexusai-rd430-settings-response-form (rec a; P holds RD-430). The other 17 Kam items are on RD-536 (N posted them).
+
 ## 🔴 DELTA 83 — 2026-09-25 22:0x (s84, ctx ~72%, 70% CHECKPOINT; band 80-90). **READ THIS FIRST, THEN 82/81.**
 ### STANDING KAM INSTRUCTION (terminal, after /login to a NEW Claude account, ~22:0x, verbatim): "New account logged in, so you should have plenty of Azure credits. Please work your way through the tickets and merge once tested."
 - Recorded in EXPIRING-GRANTS (merge on Tuesday's GO after a QA gate at the head + full verify, one at a time; no deploy, no prod, no Partner Center). Usage on the new account: 32% at 22:03.
