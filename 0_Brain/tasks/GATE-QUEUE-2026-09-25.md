@@ -42,3 +42,5 @@ Rule for launching: launch a tier's gate when ≥4 of that tier are READY, or wh
 **15:5x THIRD tier-2 batch (after 21T2b):** #1235 KS-1140 GF-1 1c899947ea31 · #1236 KS-1110 A+B 4296ba6d090c (Seat B 25th, ls-remote 15:5x) + #1218 r2 (L4, d971aa4f2 per mail) + #1223 r2 (L1, 2892e5286 per mail) when READY → 4 = launch. Seat B 25th HOLDS by design for the re-dates (Kam's word).
 
 **16:1x THIRD tier-2 batch COMMISSIONED (drafter → scratchpad gate21T2c, frozen at 7):** tier 2: #1218 r2 d971aa4f2 (L4) · #1233 KS-1133 6892124d9 (L1) · #1235 1c899947e · #1236 4296ba6d0 (B 25th) · #1237 KS-1229 cfa16eb70 (L1); tier 3: #1219 KS-1277 · #1238 KS-1158 0f3ffbb09 (L1). All heads read by `ls-remote` 16:0x. #1223 r2 joins only if its READY exists at capture. Tier-1 gate batch1224 running (%12). Tier-2b drafter (5 PRs) still building.
+
+**16:2x NEXT tier-1 batch (after batch1224):** #1234 KS-1127+1089+1135 6320a61d86b5 (L4) · #1239 KS-1263 G 42c20e998a1a (L1; behavioural rollback cells OWED at the gate, both MULTI_TENANCY modes) — both by `ls-remote` 16:2x. 2 READY; launch at 4 or when the oldest is 60 min (#1234 READY 06:17Z → 07:17Z).
