@@ -90,3 +90,7 @@ Rule for launching: launch a tier's gate when ≥4 of that tier are READY, or wh
 **22:17 TIER-1d #1239 r2 VERDICT (QA 12:16:06Z; report sha256 86dbbcab… 39,941 B verified on disk): GO WITH FINDINGS** — MODE T 5/5 witnessed; BASE red reproduced on rows; MODE F loud; 0 Major; Minors C-CUSTODY-ROUTE (ticket) + POOL-IDENTITY (KS-1304). SIGNED GO -> Seat B 27th (+ residue tickets, container teardown incl. anon volume). %19 closed.
 
 **22:18 TIER-2e GATE `QA/Secuura-batch1241r2` (#1241 round 2 of 2) LAUNCHED 12:18:43Z (%20)** over develop 33ccff807eb2 (END_TREE c0f0e7c91b2e). Kit 91/91; drafter READ-predicts NO GO (fail-only/skip-only/todo-only lines -> NULL via the second renderer); THE RULE unchanged.
+
+**22:25 #1239 KS-1263 MERGED + VERIFIED** (PR API merged=True; develop == 6e2a00bfed57 by ls-remote). Day total 29 merged, 0 deployed. Tier-2e #1241 r2 gate still running (%20).
+
+**22:39 TIER-2e #1241 r2 VERDICT (QA 12:38:05Z; report sha256 b6b2c0f1… 32,179 B verified on disk): NO GO AT THE CAP** — LIVE-SHAPE NULL on 3 real vitest shapes (the second renderer omits passed when 0: fail-only / skip-only / todo-only), CALLSITE NOT PINNED. Nothing ships. Seat B 27th: file the residue ticket (verbatim from the report), comment PR #1241 + KS-1226, leave the PR OPEN, then wrap. %20 closed. Round-21 queue EMPTY.
