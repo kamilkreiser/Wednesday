@@ -6,6 +6,11 @@ status: live
 supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s1-wholesale
 ---
 
+## 🟢 DELTA 89 — 2026-09-26 03:4x (s85). **READ THIS, THEN 88/87.**
+- ✅ **BOTH MERGES DONE: NexusAI main = 11666d3** (RD-579 -> 0863711, then RD-639 -> 11666d3; each verified by Tuesday at origin: ls-remote + cat-file parents + counts 3986/236 then 4012/237 = gate predictions). CI green on both (Builds 36159256470, 36164903279 — relayed by M/N; Tuesday holds no GitHub identity). Deploy demo SKIPPED both. **Kam told on the live board 03:4x (201).** Tickets: RD-681/682/683 (M), RD-684 High (B-F1, N's NEXT) + RD-685 (N).
+- **NEXT GATES:** batch #1 = RD-447 (O) + RD-411 (O, not READY yet) + RD-533 (M, tier 2). Batch #2 = RD-428 + RD-444 + RD-200 (P; RD-200 not READY yet) + RD-627a (N: merged forward onto 11666d3, auto-merge, no hand resolution; re-proof queued, predicted 4017/238, then UPDATED READY). Commission each batch's gate DRAFTER when its last READY lands (pattern `fleet/qa-agent/briefs/2026-09-25_nexusai-gate-rd579-rd639.md`; READYs saved in `fleet/qa-agent/briefs/*READY-mail.txt`).
+- Merge ticket rule used tonight (C-141 addendum + addendum 2): when a merge verify ticket queues, tell the other seats to yield their unstarted tickets behind it.
+
 ## 🟢 DELTA 88 — 2026-09-26 01:4x (s85). **READ THIS, THEN 87.**
 - **GATE g579-639 DONE: both GO WITH FINDINGS** (report `Testing Agent MAIN/projects/nexusai/reports/2026-09-25-gate-rd579-rd639/report.md`); scored 0.97; %15 closed.
 - **OWED MERGES, ONE AT A TIME:** (1) M merges RD-579 cac9cf6 (merge main 7c47ec4 forward, counts once, predict 3986/236, verify, ff) — GO mailed 01:4x. (2) N merges RD-639 fe53540 ONLY after M's MERGED (merge new main forward, predict 4012/237) — GO mailed. **On EACH MERGED mail: ls-remote main (it must equal the sha claimed), deploy-demo SKIPPED, CI run id + result relayed, then tell Kam on the board (201).**
