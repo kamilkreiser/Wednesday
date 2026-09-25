@@ -15893,5 +15893,37 @@
    "CARD hpsmpoc-showcase-score-new-customer",
    "CARD nexusai-customer-test-which-subscription"
   ]
+ },
+ {
+  "id": "nexusai-listing-telemetry-pingtest-fix",
+  "client_project": "Datasec/NexusAI",
+  "title": "Live listing: a customer who turns telemetry on gets Deployment failed. Fix and resubmit before Microsoft retires the old test type on 30 Sep?",
+  "bluf": "I need your word on a fix and a resubmission. The customer test deployed the exact store package and it FAILED on one piece: the telemetry availability test, which uses Microsoft's old URL ping type. Microsoft retires ping tests on 30 September 2026 and already refuses new ones. So today any customer who picks Telemetry Enabled sees Deployment failed. The app itself deployed and is healthy (checks T2 and T3 passed). Ticket RD-665 (Highest). Measured by the NexusAI agent 07:09-07:27Z; retirement date read on Microsoft Learn by me. Override reason: the gate matched generic words; no prior card covers this defect.",
+  "default_action": "If you don't answer, the NexusAI agent prepares the fix on a branch only (reversible: no merge, no package, no submission) and I re-raise this tomorrow morning. Nothing is submitted without your word.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Fix it now and resubmit",
+    "detail": "The NexusAI agent converts it to a Standard test on a branch (no merge to main), a QA gate checks it, and I email you a new zip to resubmit before 30 September. Standard tests carry a small monthly charge for the customer when telemetry is on."
+   },
+   {
+    "key": "b",
+    "label": "Don't fix now",
+    "detail": "The listing stays as is; customers must pick telemetry Disabled to deploy. Fixed in the next planned release."
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-09-25T17:30:50.274328+10:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "2026-08-17 20:01",
+   "2026-08-21 19:49",
+   "2026-09-17 08:34",
+   "CARD hpsm-41-telemetry-cr",
+   "CARD nexusai-live-listing-lockout-warn-now",
+   "CARD nexusai-rd535-live-listing-restore-reopen"
+  ]
  }
 ]
