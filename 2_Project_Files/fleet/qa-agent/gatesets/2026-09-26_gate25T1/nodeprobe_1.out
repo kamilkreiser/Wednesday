@@ -1,0 +1,16 @@
+v24.7.0
+setHeader "Allow" -> no throw (CONTROL valid pair), stored "GET"
+setHeader "Bad Name" -> THROWS ERR_INVALID_HTTP_TOKEN (name with a space)
+setHeader "X-Ok" -> THROWS ERR_INVALID_CHAR (value with CR-LF)
+setHeader "X-Num" -> no throw (value NaN (number)), stored null
+MAX_ROWS env="abc" -> NaN | NaN<=0: false | Math.min(2000,v): NaN
+MAX_ROWS env="" -> 50 | NaN<=0: false | Math.min(2000,v): 50
+MAX_ROWS env="0" -> 0 | NaN<=0: true | Math.min(2000,v): 0
+MAX_ROWS env="-5" -> -5 | NaN<=0: true | Math.min(2000,v): -5
+MAX_ROWS env="25" -> 25 | NaN<=0: false | Math.min(2000,v): 25
+(node:86310) TimeoutNaNWarning: NaN is not a number.
+Timeout duration was set to 1.
+(Use `node --trace-warnings ...` to show where the warning was created)
+setTimeout(fn, NaN) fired after 1 ms
+CONTROL setTimeout(fn, 50) fired after 51 ms
+rc=0

@@ -1,0 +1,36 @@
+LAUNCH ACTION gate25T2 (DRY RUN) 2026-09-26 06:53:43 AEST / 2026-09-25T20:53:43Z | launcher /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/4f2cdc54-acc3-4f26-989e-2c407e677824/scratchpad/gate25/gate25T2/launch_qa_secuura_batch1268-t2.sh | pinned launch develop df5e9f5da6d23411e7b38a79a58aa20c04b6afe2 | END_TREE 8624ef60b994062290ff3772f568dddc63889b19
+  pin #1268 a8e0fca70ed41ef061cc99a325b610d27f08c7fb
+  pin #1270 448b8b7fdd87a145acc895c4138811f34aa53c59
+  pin #1271 c9ea1dc1705f10f4b40ccc786604da6768a2c2fb
+  pin #1273 b800791a3295f048b40f920435b080a270c65106
+--- 0. the pane must be routed (inbox_routing.conf) or cockpit.sh say --mail fails silently
+  routing file /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/inbox_routing.conf — line present: 0 (grep rc=1; want 1 / rc 0)
+  (DRY RUN: reported, not refused — the real run refuses rc 1 here)
+--- 0b. the kit's home: launcher filled for /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/4f2cdc54-acc3-4f26-989e-2c407e677824/scratchpad/gate25/gate25T2 | this script lives in /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/4f2cdc54-acc3-4f26-989e-2c407e677824/scratchpad/gate25/gate25T2
+  AT HOME — no re-fill
+--- 1. instrument: git ls-remote origin (read from the Secuura checkout, READ-ONLY)
+  ls-remote rc=0 at 20:53:48Z
+    df5e9f5da6d23411e7b38a79a58aa20c04b6afe2	refs/heads/develop
+    c9ea1dc1705f10f4b40ccc786604da6768a2c2fb	refs/heads/feature/ks-1164-gate-report-samepath-refusal-l7r25-1
+    448b8b7fdd87a145acc895c4138811f34aa53c59	refs/heads/feature/ks-1275-lifecycle-verb-prose-b29-1
+    a8e0fca70ed41ef061cc99a325b610d27f08c7fb	refs/heads/feature/ks-1318-ks781-default-shapes-tag-set-l7r25-1
+    b800791a3295f048b40f920435b080a270c65106	refs/heads/feature/ks-1321-description-word-boundary-b29-2
+    a8e0fca70ed41ef061cc99a325b610d27f08c7fb	refs/pull/1268/head
+    448b8b7fdd87a145acc895c4138811f34aa53c59	refs/pull/1270/head
+    c9ea1dc1705f10f4b40ccc786604da6768a2c2fb	refs/pull/1271/head
+    b800791a3295f048b40f920435b080a270c65106	refs/pull/1273/head
+--- 2. instrument: the GitHub PULLS API (an independent read of each head, and mergeable)
+  pulls API rc=0
+    API #1268 head a8e0fca70ed41ef061cc99a325b610d27f08c7fb base develop mergeable True reads 1 state open
+    API #1270 head 448b8b7fdd87a145acc895c4138811f34aa53c59 base develop mergeable True reads 1 state open
+    API #1271 head c9ea1dc1705f10f4b40ccc786604da6768a2c2fb base develop mergeable True reads 1 state open
+    API #1273 head b800791a3295f048b40f920435b080a270c65106 base develop mergeable True reads 1 state open
+--- 3. the heads, judged (both instruments == the pin, open, not mergeable:false)
+  #1268  ls-remote pull/head a8e0fca70ed41ef061cc99a325b610d27f08c7fb | branch a8e0fca70ed41ef061cc99a325b610d27f08c7fb | API a8e0fca70ed41ef061cc99a325b610d27f08c7fb (state open, mergeable True) | pinned a8e0fca70ed41ef061cc99a325b610d27f08c7fb
+  #1270  ls-remote pull/head 448b8b7fdd87a145acc895c4138811f34aa53c59 | branch 448b8b7fdd87a145acc895c4138811f34aa53c59 | API 448b8b7fdd87a145acc895c4138811f34aa53c59 (state open, mergeable True) | pinned 448b8b7fdd87a145acc895c4138811f34aa53c59
+  #1271  ls-remote pull/head c9ea1dc1705f10f4b40ccc786604da6768a2c2fb | branch c9ea1dc1705f10f4b40ccc786604da6768a2c2fb | API c9ea1dc1705f10f4b40ccc786604da6768a2c2fb (state open, mergeable True) | pinned c9ea1dc1705f10f4b40ccc786604da6768a2c2fb
+  #1273  ls-remote pull/head b800791a3295f048b40f920435b080a270c65106 | branch b800791a3295f048b40f920435b080a270c65106 | API b800791a3295f048b40f920435b080a270c65106 (state open, mergeable True) | pinned b800791a3295f048b40f920435b080a270c65106
+  BOTH INSTRUMENTS AGREE with every pin.
+--- 3b. develop, read at launch: df5e9f5da6d23411e7b38a79a58aa20c04b6afe2 | the launcher's pinned launch develop df5e9f5da6d23411e7b38a79a58aa20c04b6afe2
+  UNMOVED since the fill — the END_TREE 8624ef60b994062290ff3772f568dddc63889b19 stands
+DRY RUN COMPLETE 2026-09-25T20:53:54Z — every read agrees with the pins; the real run continues with the usage gate, --check and cockpit.sh add

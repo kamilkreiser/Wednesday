@@ -1,0 +1,36 @@
+LAUNCH ACTION gate25T1 (DRY RUN) 2026-09-26 06:53:31 AEST / 2026-09-25T20:53:31Z | launcher /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/4f2cdc54-acc3-4f26-989e-2c407e677824/scratchpad/gate25/gate25T1/launch_qa_secuura_batch1267-t1.sh | pinned launch develop df5e9f5da6d23411e7b38a79a58aa20c04b6afe2 | END_TREE 4f420717d0668537f4e37e4819b6e6d0eea717de
+  pin #1267 71f6f4d73cbde5b32f1564c9171eb1b705f77880
+  pin #1269 df21c6fd159f2a707d698e418946911f019ca9a0
+  pin #1272 34980b8e9ee22a36c658a03d9d763c48caeb9064
+  pin #1274 1a37bde12d55563f77e192519ca7db62461dbf6f
+--- 0. the pane must be routed (inbox_routing.conf) or cockpit.sh say --mail fails silently
+  routing file /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/inbox_routing.conf — line present: 0 (grep rc=1; want 1 / rc 0)
+  (DRY RUN: reported, not refused — the real run refuses rc 1 here)
+--- 0b. the kit's home: launcher filled for /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/4f2cdc54-acc3-4f26-989e-2c407e677824/scratchpad/gate25/gate25T1 | this script lives in /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/4f2cdc54-acc3-4f26-989e-2c407e677824/scratchpad/gate25/gate25T1
+  AT HOME — no re-fill
+--- 1. instrument: git ls-remote origin (read from the Secuura checkout, READ-ONLY)
+  ls-remote rc=0 at 20:53:37Z
+    df5e9f5da6d23411e7b38a79a58aa20c04b6afe2	refs/heads/develop
+    df21c6fd159f2a707d698e418946911f019ca9a0	refs/heads/feature/ks-1182-demo-error-handler-status-bounds-l8r25-4
+    71f6f4d73cbde5b32f1564c9171eb1b705f77880	refs/heads/feature/ks-1295-credential-store-db-unavailable-warn-l8r25-3
+    34980b8e9ee22a36c658a03d9d763c48caeb9064	refs/heads/feature/ks-849-kyc-mock-timer-stale-write-l8r25-5
+    1a37bde12d55563f77e192519ca7db62461dbf6f	refs/heads/feature/ks-934-teams-notify-request-path-bound-l8r25-6
+    71f6f4d73cbde5b32f1564c9171eb1b705f77880	refs/pull/1267/head
+    df21c6fd159f2a707d698e418946911f019ca9a0	refs/pull/1269/head
+    34980b8e9ee22a36c658a03d9d763c48caeb9064	refs/pull/1272/head
+    1a37bde12d55563f77e192519ca7db62461dbf6f	refs/pull/1274/head
+--- 2. instrument: the GitHub PULLS API (an independent read of each head, and mergeable)
+  pulls API rc=0
+    API #1267 head 71f6f4d73cbde5b32f1564c9171eb1b705f77880 base develop mergeable True reads 1 state open
+    API #1269 head df21c6fd159f2a707d698e418946911f019ca9a0 base develop mergeable True reads 1 state open
+    API #1272 head 34980b8e9ee22a36c658a03d9d763c48caeb9064 base develop mergeable True reads 1 state open
+    API #1274 head 1a37bde12d55563f77e192519ca7db62461dbf6f base develop mergeable True reads 1 state open
+--- 3. the heads, judged (both instruments == the pin, open, not mergeable:false)
+  #1267  ls-remote pull/head 71f6f4d73cbde5b32f1564c9171eb1b705f77880 | branch 71f6f4d73cbde5b32f1564c9171eb1b705f77880 | API 71f6f4d73cbde5b32f1564c9171eb1b705f77880 (state open, mergeable True) | pinned 71f6f4d73cbde5b32f1564c9171eb1b705f77880
+  #1269  ls-remote pull/head df21c6fd159f2a707d698e418946911f019ca9a0 | branch df21c6fd159f2a707d698e418946911f019ca9a0 | API df21c6fd159f2a707d698e418946911f019ca9a0 (state open, mergeable True) | pinned df21c6fd159f2a707d698e418946911f019ca9a0
+  #1272  ls-remote pull/head 34980b8e9ee22a36c658a03d9d763c48caeb9064 | branch 34980b8e9ee22a36c658a03d9d763c48caeb9064 | API 34980b8e9ee22a36c658a03d9d763c48caeb9064 (state open, mergeable True) | pinned 34980b8e9ee22a36c658a03d9d763c48caeb9064
+  #1274  ls-remote pull/head 1a37bde12d55563f77e192519ca7db62461dbf6f | branch 1a37bde12d55563f77e192519ca7db62461dbf6f | API 1a37bde12d55563f77e192519ca7db62461dbf6f (state open, mergeable True) | pinned 1a37bde12d55563f77e192519ca7db62461dbf6f
+  BOTH INSTRUMENTS AGREE with every pin.
+--- 3b. develop, read at launch: df5e9f5da6d23411e7b38a79a58aa20c04b6afe2 | the launcher's pinned launch develop df5e9f5da6d23411e7b38a79a58aa20c04b6afe2
+  UNMOVED since the fill — the END_TREE 4f420717d0668537f4e37e4819b6e6d0eea717de stands
+DRY RUN COMPLETE 2026-09-25T20:53:43Z — every read agrees with the pins; the real run continues with the usage gate, --check and cockpit.sh add
