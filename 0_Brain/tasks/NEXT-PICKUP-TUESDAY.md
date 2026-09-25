@@ -6,6 +6,16 @@ status: live
 supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s1-wholesale
 ---
 
+## 🔴 DELTA 77 — 2026-09-25 14:55 (s83, ctx ~75%; rotation band 80-90 is close). **READ THIS FIRST, THEN 76/75.**
+### 🔴 NEW KAM INSTRUCTION — AN OWED ACTION (terminal ~14:5x, verbatim)
+> "The Nexus AI offer is live on the marketplace. Can you please set up a full customer test environment in Azure and then deploy the app from the store for testing purposes? I'd like to use a different tenant for this, so get me to log in to that tenant when you're ready."
+- **Card `nexusai-customer-test-tenant-choice`** on his board: (a) a brand-new tenant plus a PAYG subscription (rec), (b) an existing spare tenant. Default: plan only, nothing spent. **Read his ruling first (kam_rulings_today / reconcile).**
+- **`Datasec/NexusAI-L` (%8)**, brief `fleet/briefs_staged/2026-09-25_nexusai_L_customer_test.md`: PREP ONLY. Deliverable = `docs/resubmission/2026-09-25_customer-test-plan.md` on a pushed branch (prerequisites, the exact store path, the test list incl. C-124/C-20, a COST ESTIMATE, teardown) + a device-code login procedure in `4_Credentials/.azure-customer-test`. **It also records "offer LIVE" as a C-number.**
+- **THE SEQUENCE AFTER ITS READY:** (1) Kam's tenant choice arrives → ANSWER L with the tenant id; (2) L runs `az login --use-device-code --tenant <id>` → **post the code + URL to Kam's board** (he enters it from his phone); (3) **the COST goes to Kam for his word before any purchase** (the plan price + resources = money, his signature class); (4) L deploys FROM THE STORE, tests, reports; (5) teardown is a separate Kam ask. **Never any Datasec tenant (ae7a1e46 / d500ebad / dev / sales demo).**
+### ALSO LIVE
+- **Vision gate 8** (%7) running on Kam's "Test it"; on GO: merge GO, then ONE publish ask (typed word).
+- **Floor:** %0 tuesday · %1 monitor · %7 gate 8 · %8 NexusAI-L.
+
 ## 🟢 DELTA 76 — 2026-09-25 13:47 (s83, ctx 72% CHECKPOINT; band 80-90, NOT rotating). **READ THIS, THEN 75.**
 - **Kam is SUBMITTING the 2.2.0 package himself** (terminal ~13:3x). **OWED on his confirmation:** the next NexusAI seat records the submission (date, 2.2.0, package commit 3464dd8, image fdda3309…) as a C-number in CLARIFICATIONS.
 - **GITHUB — DONE** (Kam: "upload everything to GitHub"). NexusAI rd-463-rework-s62 63190c9 + s74-merge-main d0b9cde pushed as branches (verified by ls-remote; main 0677388 unchanged; the 34 dirty files were all already-committed blobs; the stale PEN-TEST copy carries redacted secrets, so NEVER commit it). myPKI working tree == origin/main tree (local main 19 behind; no reset). HPSM analysis repo -> datasecau/HPSM-analysis (Friday). Kam told (201).
