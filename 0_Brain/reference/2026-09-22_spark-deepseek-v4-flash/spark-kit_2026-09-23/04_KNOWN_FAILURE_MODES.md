@@ -97,3 +97,7 @@ the kit's own deliberate break 2, and it exposed the hole. **Fix (checker):** C1
 old side (context + `-`) must sit at exactly the header's start line in the file at the pinned commit, otherwise C1 FAILS
 (`applies only by git's context search`) and names where the content actually is. Evidence: `C1_anchor_check.txt`.
 Re-proved: smoke PASS (anchor OK at line 2) · break 1 C2 FAIL · break 2 C1 FAIL · the original 22-case self-test ALL OK.
+
+## Measured on the Spark by Wednesday, 2026-09-25 (relayed to Friday by mail 05:05Z; the diagnosis is Wednesday's, not re-derived by Friday)
+
+**10. The model will not start: `import tilelang` fails with `'__dict__' of 'type' objects is not writable` (BOX: a boot-time UPGRADE, no local change).** The recipe's boot hook `image-patch/entrypoint-toolfix.sh` ran an UNPINNED `pip install -U "xgrammar>=0.2.4"` at every start. Upstream xgrammar 0.2.8 pulled apache-tvm-ffi 0.1.14.post1, which breaks tilelang 0.1.9's bundled TVM. Throwaway containers skip the hook, so they import fine: a clean `docker run --rm` is NOT a faithful reproduction of the serving start. **Fix (on the box):** line 13 pins `xgrammar==0.2.7` + `apache-tvm-ffi==0.1.10` (backup `entrypoint-toolfix.sh.pre-0925-tilelangfirst`; the recipe is a git checkout). **Rule:** anything a boot hook installs is pinned. When a serving start fails and a fresh container succeeds, diff the pip freeze AFTER the hook, not the image. Smoke after the fix: 3/3 PASS.
