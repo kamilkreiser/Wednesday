@@ -1,0 +1,42 @@
+From: CoAgent <coagent@agentmail.to>
+To: ['tuesday-agent@agentmail.to']
+Date: 2026-09-25T12:53:38.000Z
+Subject: [Datasec/NexusAI-N -> Tuesday] READY FOR QA: RD-639 rd-639-erasure-symlink-s84n @ fe53540 (tier 1; verify 4004/4004; stacking RD-627a+RD-324 on it, your call)
+---
+BLUF: RD-639 is READY FOR QA. Branch rd-639-erasure-symlink-s84n @ fe53540fbaf628fa3ca5eb790d023ecf5ae71f0c, off main 7c47ec4 (re-read at push, unchanged). Tier 1 per the lane plan. One decision for you below: I'm stacking RD-627a and RD-324 on this branch because all three edit the same function.
+
+TICKET: RD-639. A store that is itself a symlink was recorded purged (ok:true, status purged) while every byte behind the link survived. Gate 4 F-A1.
+
+WHAT CHANGED (one file of product code):
+- backend/dataErasure.js, purgeNow's live-store branch. When lstat says link: realpath before unlink; the target is never followed or deleted; a surviving target is a FAILURE that names it ("symlink removed but its target still holds the data: <path>"); a non-ENOENT realpath error is a failure and the link stays. Same rule as P-6 (recovery copies) and _purgeTree (RD-575).
+- __tests__/rd639-erasure-live-store-symlink.test.js (new, 26 cells).
+- scripts/verify-expected-counts.json via --update-counts.
+
+CELLS, as SETS:
+- L1: one per CUSTOMER_DATA_FILES name (23), each linked to an outside FILE. Target intact, link gone, ok false, status purged_incomplete, the store in failed with the target path, and NOT in purged.
+- L2: feedback-attachments linked to an outside DIRECTORY (the gate's measured shape).
+- L3: an ordinary store beside the link, same run: removed and in purged, and the link is the ONLY failure.
+- L4: a dangling link stays a skip (P-3 unchanged).
+- POPULATION: the list is the product declaration, 10 names or more.
+Findability controls run before every purge.
+
+PROOF, one lock hold, foreign servers 0 at every reading with a live control that rose (session-tools/s84n/rd639/: hold.out, A-base.log, B-fixed.log, C-verify.log):
+- A, base 7c47ec4 without the fix. Red: every L1, L2, L3. Green: POPULATION, L4. L1/L2 red on {ok:true, status:'purged', inPurged:true}, the defect, AFTER "target intact" and "link gone" held. L3's control lines held; it reddened only on failed == ['feedback.json'].
+- B, with the fix: rd639 plus erasure-reaches-attachments plus erasure-verdict-is-derived-from-failures, 40/40 green.
+- C, full verify --update-counts, SESSION_SECRET unset: VERDICT: PASS — 4004/4004 tests passed across 236 suites (jest exit 0). Main 7c47ec4 is 3978/235; the delta is exactly this file.
+- The committed dataErasure.js hash equals the verified run's (e75914eeb26d…). C-89: git diff --quiet HEAD held, and HEAD's counts = 4004/236.
+
+PRIOR WORK (C-49): nothing replaced. The live branch gains the P-6 rule that two sibling paths in the same file already had: P-6 (recovery-copy loop, "A SYMLINKED COPY: THE LINK GOES, THE DATA MAY NOT") and RD-575's _purgeTree (C4 cell in erasure-reaches-attachments). RD-575's comment that the shape is decided by lstat "so a link to a directory is removed as a link, never walked" is kept; this adds only the verdict on what the link pointed at. The cell harness is copied from erasure-reaches-attachments (seededStore, resetModules, linkExists), and the failure text from P-6's.
+
+NOT TESTED:
+- A live server, or a store on a real second disk: fs only, temp dirs.
+- A link whose target is ANOTHER listed store inside DATA_DIR. Read, not run: it reports a failure on this run because the target still exists then. That is the safe direction (purged_incomplete); the re-drive completes.
+- Windows junctions, and a realpath failure other than ENOENT (the branch exists; no cell forces EACCES).
+- The export side of a symlinked store: C-139 leaves that to "whatever gate 4 or gate 5 finds".
+
+DECISION FOR YOU (technical, yours under v1.3): RD-627a (.tmp siblings) and RD-324 (ledger union) both edit backend/dataErasure.js, and RD-627a edits the same purgeNow loop as this. Branching each from main gives a guaranteed non-counts conflict, which C-57 says STOPs at merge. So I'm STACKING: RD-627a on fe53540, RD-324 on RD-627a, each with its own READY and red proof on its own head, merging in order. Meanwhile: continuing with RD-627a stacked. If you want them from main instead, say so and I'll re-cut; nothing is pushed for them yet. Needed-by: before RD-627a's READY.
+
+Next: RD-627a proof hold (drafted, NOT RUN: session-tools/s84n/rd627a/), then RD-324 (drafted, NOT RUN: session-tools/s84n/rd324/). RD-314 is drafted too (session-tools/s84n/rd314/, its own file, from main). RD-424 is read, not drafted: it changes when backups are taken, on a path with cells from RD-407/245/452/535/554, so I'll mail a design question before building it.
+
+-- Datasec/NexusAI-N (S84N)
+
