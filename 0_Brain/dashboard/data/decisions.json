@@ -14628,5 +14628,67 @@
    "CARD hpsmpoc-403-for-missing-ids",
    "CARD hpsmpoc-partner-scope"
   ]
+ },
+ {
+  "id": "secuura-audit-root-lock-residue-0930",
+  "client_project": "Secuura/Blockchain",
+  "title": "Two security exceptions expire Wed 30 Sep 10:00 and block every Secuura push. Most is being fixed; one piece of the shared lockfile needs your call.",
+  "bluf": "Three audit-baseline exceptions expire on 30 September. From then, every push to the Secuura repo is refused, for everyone. The Secuura agent (Seat B 25th) measured all three, and I have authorised the fixes you already ruled for: the react-router one is fully fixed and removed; the hono and ip-address ones are fixed in the frontend and service lockfiles. What remains is the shared workspace lockfile (Blockchain/Dev/package-lock.json). There, an old ip-address 9.0.5 (a HIGH advisory) and a nested hono 1.19.11 cannot be cleared by a small change: your 17 Sep override works on the issuer but not on the root as written. Clearing the root needs a full re-resolution of a 1,936-package lockfile, which the agent is measuring now (it pushes nothing). Renewing the HIGH row is outside the authority you gave me, so the fallback is yours.",
+  "default_action": "If you don't answer: the agent attempts (a) and I merge it on GO if it passes. No renewal happens without your word. If (a) is not merged by Wednesday 30 Sep 10:00, pushes to the Secuura repo are refused until it is.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Full re-resolution PR (Recommended)",
+    "detail": "If the agent's measurement shows the re-resolution clears both and moves nothing alarming, it raises it as a separate PR through a tier-1 gate, and I merge it on GO before Tuesday 29 Sep. If it cannot be ready by Tuesday evening, I come back to you for (b)."
+   },
+   {
+    "key": "b",
+    "label": "Renew the ROOT leg only, to 2 Oct",
+    "detail": "Move the two root-lock exceptions to 2026-10-02 (the date the other react-router rows already share) while the re-resolution is done properly. This is a renewal of a HIGH advisory, which is your signature only."
+   },
+   {
+    "key": "c",
+    "label": "Both: attempt (a), with (b) pre-approved as the fallback",
+    "detail": "The agent attempts (a). If it is not merged by Tuesday 29 Sep 18:00, the root-leg renewal to 2 Oct is applied on your word given now, so pushes never freeze."
+   }
+  ],
+  "recommended": "c",
+  "ts": "2026-09-25T11:18:16.689760+10:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "2026-08-17 20:10",
+   "2026-08-17 20:15",
+   "2026-08-21 19:49",
+   "2026-08-21 20:06",
+   "2026-08-22 19:55",
+   "2026-09-04 15:25",
+   "2026-09-05 13:55",
+   "2026-09-05 15:04",
+   "2026-09-06 09:42",
+   "2026-09-08 07:07",
+   "2026-09-08 08:08",
+   "2026-09-09 08:29",
+   "2026-09-09 19:47",
+   "2026-09-10 08:59",
+   "2026-09-10 09:01",
+   "2026-09-10 09:08",
+   "2026-09-10 09:08",
+   "2026-09-10 09:17",
+   "2026-09-10 10:29",
+   "2026-09-10 17:10",
+   "2026-09-10 18:01",
+   "2026-09-11 16:55",
+   "2026-09-14 21:52",
+   "2026-09-16 14:00",
+   "2026-09-17 16:37",
+   "2026-09-17 16:37",
+   "CARD nexusai-rd245-audit-log-leaves-settings",
+   "CARD secuura-audit-baseline-rows-lapse-24sep-block-pushes",
+   "CARD secuura-audit-row-mysql2-override-vs-prisma-pin",
+   "CARD secuura-audit-rows-react-router-v7-migration",
+   "CARD secuura-audit-row-ip-address-high-override"
+  ]
  }
 ]
