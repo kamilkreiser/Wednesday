@@ -54,3 +54,5 @@ Rule for launching: launch a tier's gate when ≥4 of that tier are READY, or wh
 **17:1x TIER-1 batch1224 ALL FOUR MERGED + VERIFIED** (PR API merged=True; `ls-remote`): #1224 → 4ade45465, #1226 → c20e32bad, #1228 → 89a616165, #1230 → cf3de2c4c. develop == cf3de2c4cef5c636446d87fd68fed1073fc964ad. Merged by Seat B 26th on the 07:03Z GO (DKIM pass).
 
 **17:3x TIER-2b batch1225 VERDICT (QA 07:27:37Z; report sha256 d7aa2dfd… verified on disk): ALL FIVE GO WITH FINDINGS.** Heads unmoved; develop cf3de2c4c == BASE_GO. #1231: the new fallback is LOUD (non-blocking); the pre-existing silent P-1 → a ticket (ruled). **SIGNED GO → Seat B 26th** with addendum lines 300-304 verbatim + foreign-key and subject rulings. %13 closed. Remaining gate: tier-2c (drafter; 8 PRs). Next tier-1: #1234 + #1239 (launch at 4 or 07:17Z → overdue: bring in with tier-2c or a small tier-1 kit).
+
+**17:3x TIER-2b batch1225 ALL FIVE MERGED + VERIFIED** (PR API merged=True; `ls-remote`): #1225 → 1ded2f817, #1227 → 7f06f3d40, #1229 → ab7826afb, #1231 → b83f986fd, #1232 → aa600af94. develop == aa600af94d69ad59db279d32cbbd7596931a739b. Seat B 26th, merge22, dry-first each. Day total: 17 merged.
