@@ -6,6 +6,18 @@ status: live
 supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s1-wholesale
 ---
 
+## 🔴 DELTA 91 — 2026-09-26 09:2x ROTATION HANDOVER (s85, ctx 81%, safe boundary). **READ THIS FIRST, THEN 90.**
+### FLOOR
+%0 tuesday · %17 QA/NexusAI-batch1 (launched 09:25, report dir created = rung 6) · %11 M · %12 N · %13 O · %14 P · %1 monitor (2 rows). **Keep agent panes >= 6 rows; re-size after every `cockpit.sh add`.** Usage 69%.
+### IN FLIGHT, in order
+1. **P is merging batch 2 one at a time.** Merge 1 DONE: main = **12b5edc** (RD-200 ff; verified by Tuesday: ancestry + counts 4021/238). Merge 2 (RD-444, ticket s84p-merge-rd444) was verifying; P pushes it only after CI Build 36198298341 on 12b5edc is green; then RD-428 (predicted 4025/239 -> 4037/242). **On each MERGED: ls-remote main + cat-file parents + counts, deploy-demo skipped, CI.** After all three: ONE board line to Kam; P files A-F1, A-N5 (bfcache shows the SCIM token after Back, Medium), A-N3, C-F1; P records the C-133 rename ADDENDUM (done at :1434).
+2. **Batch-1 gate %17** (RD-447 911e706 t1 · RD-411 ed01f7e t1 · RD-533 95c3c9a t2 · RD-627a 057016d t1 · RD-315 1524fca t1). Brief `fleet/qa-agent/briefs/2026-09-26_nexusai-gate-batch1-rd447-rd411-rd533-rd627a-rd315.md` (stamped 09:24), launcher `launchers/launch_qa_nexusai_gate_batch1.sh`. Main is allowed to move under it (M0 rule). Verdict subject "[QA/Datasec-NexusAI -> Tuesday] GATE VERDICT — RD-447 … RD-315 …". On the verdict: read whole, completion check, GOs one at a time (order: RD-447, then RD-411 merged forward, then the rest), score, `pane_close.sh %17`.
+3. **M is fixing the lock tool** (C-141 yields went to the queue TAIL, starving M's RD-413): `nexusai-lock.sh --after <ticket-tag>`, never edited in place (new file + atomic mv), 4 arms on a scratch lock dir, then one mail to all seats. Check its report.
+4. **Card on Kam's board: `nexusai-package-files-scope`** (rec b; default nothing moves). Relay his answer to M verbatim (M holds the package item until then; C-165 recorded).
+5. Queues: N on RD-684 (High, B-F1 fix) then RD-324/424/314; O on RD-418/443/425 (RD-425 ruled (A) + 6 conditions); P after merges: RD-204, RD-197, RD-430 (Kam ruled remove the form; C-166).
+### OWED SMALL
+nexusai-lock.sh:209 race ticket (P reported) · "[Wednesday ->" prefix sequencing (send_brief.sh:610) · Vision morning sweep not done · M's census ticket for the 23 date sites · the 36 autostash entries in `git stash list` are KEPT (never drop).
+
 ## 🔴 DELTA 90 — 2026-09-26 07:3x (s85, ctx 71% CHECKPOINT; band 80-90). **READ THIS FIRST; 89/88/87 are its detail.**
 ### STATE (measured 07:2x)
 - **NexusAI main = 11666d3** (RD-579 + RD-639 merged overnight, CI green both, demo untouched, Kam told + morning brief posted).
