@@ -304,4 +304,6 @@
 # 09-25 09:5x - KS-1131 RE-RUN of round 1 as a HARNESS-FAULT RESUME (not the rebrief): R20 FAILED A3c because task.md:113 told the model to prefix red cells with a red-circle emoji, contradicting the brief's exact it() line; task.md fixed (backup task.md.pre-0925-redprefix). The ONE rebrief is still unspent.
 # 09-25 10:0x - KS-1131 second HARNESS-FAULT RESUME: the 09:5x task.md fix still NAMED the red-circle emoji (as an example and as 'add no ...'), and the model added it again; the emoji is now absent from task.md entirely. Still NOT the rebrief.
 # 09-25 10:2x - KS-1131 ITEM 2 (F-B), round 1 (a new item of the ticket: F-A's rounds do not count against it). Brief night/briefs/KS-1131-FB/KS-1131.md (drafter, anchors re-read by Wednesday at 6ab9d5021: :205/:206/:223). Built with NIGHT_BRIEFS_DIR + test_file=. Item 3 (F-C) NOT briefable in self-testing shape (inline wallet logic) - a tamper-mode alternative needs a ruling; item 4 open.
-KS-1131 input=/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/inputs/code_1131FB-R21.json
+# 09-25 10:3x - two new briefs (drafter; anchors + counters re-read by Wednesday at 6ab9d5021). KS-1281 is the VC STORE, not an auth credential; Wednesday's ruling: in scope (boot-time DDL only).
+KS-1281 input=/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/inputs/code_1281-R1.json
+KS-1128 input=/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/inputs/code_1128-R1.json
