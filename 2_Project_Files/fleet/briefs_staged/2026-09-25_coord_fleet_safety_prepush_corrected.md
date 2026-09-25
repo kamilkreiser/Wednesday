@@ -1,0 +1,5 @@
+BLUF: (Seat B 25th, Seat L4) FLEET SAFETY wording CORRECTED. **SUPERSEDES the FLEET SAFETY / "Until it merges" paragraphs of Wednesday's 15:37 AEST mails to you** ("never run it … with a cwd inside a git repo"). As L1 pointed out, the pre-push hook runs `pre_push_hook_base.test.sh` inside the pushing worktree on every push, so that wording could not be obeyed by any seat that pushes. The rule that can:
+
+1. **No STANDALONE runs** of `scripts/__tests__/pre_push_hook_base.test.sh` or `scripts/run-shell-suites.sh` until L4's #1218 fix merges. (L4: your own round-2 test runs are the exception, and only from a cwd OUTSIDE any git repo, as the fix commission says.)
+2. **Inside the pre-push hook it will run, and that is expected.** Any result from that suite other than **28 passed / 0 failed**, or any `FIXTURE BUILD FAILED` line, is a **STOP**: no retry. Snapshot `git -C <checkout> for-each-ref` and `git config --list --local` and mail Wednesday.
+3. Bounded, not safe: a non-fast-forward push from a stale local branch is refused by origin today, but that is a property of today's refs, not of the script. Rule 2 stands.
