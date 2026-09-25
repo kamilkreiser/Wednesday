@@ -21,6 +21,9 @@ supersede: replace wholesale; previous = NEXT-PICKUP-FRIDAY.md.pre-0925-rotate-s
 
 - **The LAPTOP SLEEPS.** Arm `caffeinate -dims -t 21600` (background) in the same action as launching any seat, and check `pgrep -fl caffeinate` at boot. On 09-25 it slept at ~17:0x and cut two seats' turns. One was armed at 17:4x until ~23:4x.
 
+## 🔴🔴 KAM'S INSTRUCTION FOR THIS BOOT (terminal, 2026-09-26 ~07:2x, verbatim): "Please rotate and then once you're up, pick up the new card with 1.1."
+Read as: the templates **1.0.1** approval (card `hpsmpoc-approve-templates-101`, ruled a, C-26). **This is authorised work, start it at boot, do not re-ask:** item 2 below (brief + launch the small HPSM-POC seat: registry commit → PR → merge on green → live AI-mode re-test ≤12 calls → the real pass rate to Kam). Receipt it on the panel first.
+
 ## 🔴 STATE AT THE WRAP (2026-09-26 07:1x, on Kam's "please wrap up for the day")
 1. **No seat open.** HPSM-POC main = **1360aad** (B17 + B18 + B19 merged, CI green). Composer demo = main b0b512c, content efad540b, with two example engagements (C-08).
 2. 🔴 **FIRST WORK: Kam APPROVED templates 1.0.1 at 07:19:00 on 09-26 (C-26), during the wrap.** Brief a small HPSM-POC seat (from main 1360aad): ONE commit moving the three 1.0.1 rows to approved (approvedBy "Kam Kreiser (Product Owner)", approvedAt 2026-09-26T07:19:00+10:00, ref C-26), hashes …6d138904 / …76ed42f9 / …7e1409c7 asserted unchanged; PR; merge on green; then a live AI-mode re-test by clicks (≤12 calls: 3 customers × 2 drafts + the other two templates once) and the REAL pass rate to Kam, honestly (the remediation "compliance" refusal may persist; keep the check strict).
