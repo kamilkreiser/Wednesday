@@ -19,10 +19,7 @@ supersede: replace wholesale; previous = NEXT-PICKUP-FRIDAY.md.pre-0925-rotate80
 - STATUS wake: `2_Project_Files/friday/watch_status.sh <seen-file> "<glob>"` (fixed today: paths with spaces; `<…>` and ALL_CAPS placeholder READY lines ignored). Re-arm it for anything live.
 
 ## 🔴 LIVE AT THE ROTATION
-1. **Composer B08 SEAT-B: ONE new finished EXAMPLE engagement on the live demo** (pane `Datasec/Security-Composer-B`, launched 14:42; Kam 14:26:21 card `composer-content-release-deploy` a, the 3rd clause, C-06).
-   - Brief: `Datasec Security Composer/1_Project_Definition/Briefs/2026-09-25_B08_SEAT-B_new-finished-example-engagement-on-the-demo.md`. It walks one fictional, labelled engagement to RELEASED through the UI, with every export opened; it STOPS on any refusal (K1's 409).
-   - STATUS watcher glob: `…/Datasec Security Composer/1_Project_Definition/Briefs/2026-09-25_B08*STATUS*.md`.
-   - On READY: view the screenshots, and check the exports for the demo password (0 hits, with a control). Then tell Kam the engagement's name and URL.
+1. **Composer B08: DONE 14:58.** EXAMPLE — Quollbrook Freight Co (fictional), engagement `60503ab0-1cb9-49c3-8ca6-69ba2b5c40fa`, Released 1.0.0 on `bfecdc77`; 8/8 exports; the link was given to Kam on the panel. **Card `composer-outputs-carry-no-answers` open** (F1: the outputs carry no answers; rec b = type the answers → a new release + deploy on his word + a fresh example; default nothing).
 2. **Composer B07 (history rewrite): DONE and verified 14:4x.** main `7855f10` (tree `bc91671…` unchanged), 77 branches; map `…/_quarantine_2026-09-25_HPSM-light-mirror-before-rewrite/commit-map_old-to-new.txt`. Tuesday mailed (a clone on the mini is stale). **Two cards open, both Kam's:**
    - `hpsm-analysis-sow-sentences` (rec a): the same sentences are in datasecau/HPSM-analysis (Friday's 13:44 push, 5 files, 3 commits each) + the Composer folder's local analysis repo + the old clone HPSM/6_Policy_Composer. On a: a seat in the HPSM folder does the same backup → replace → rewrite → force-push, and quarantines + re-clones 6_Policy_Composer.
    - `composer-github-support-purge` (rec a): Friday drafts the Support request (4 PR refs + GC); Kam sends it at https://support.github.com/contact.
