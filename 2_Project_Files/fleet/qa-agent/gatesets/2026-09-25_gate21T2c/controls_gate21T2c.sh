@@ -1,0 +1,87 @@
+#!/bin/bash
+# controls_gate21T2c.sh <launcher> <scratchpad> — controls for launch_qa_secuura_batch1218-t2.sh (--check with test overrides / a doctored prompt or
+# capture copy, one non-TTY launch, one moved copy) and for repin_and_launch_gate21T2c.sh (all --dry-run, except R4 which is a REAL run that must stop
+# at step 0 because the routing line is absent — SKIPPED if the line is present, so this script can never launch). Every doctored copy lives under the
+# scratchpad only. Nothing is launched, sent or written outside it. Derived from gate21T1b's controls_gate21T1b.sh, re-keyed to eight rows and this
+# gate's rules. Each doctored phrase is chosen OUTSIDE the by-name ladder, so the control reaches the rule it names (the ladder, exit 33, runs first).
+set -u
+L="$1"; SP="$2"
+case "$SP" in /private/tmp/claude-501/*/scratchpad*) ;; *) echo "REFUSING: not a scratchpad"; exit 9;; esac
+GS="$(dirname "$(/bin/realpath "$L")")"
+R="$GS/repin_and_launch_gate21T2c.sh"; PF="$GS/2026-09-25_secuura-batch1218-t2.prompt.txt"; BF="$GS/mail_gate21T2c_ready.md"
+D="$(mktemp -d "$SP/g21c_ctrl.XXXXXX")"; ok=0; bad=0
+run() { name="$1"; want="$2"; shift 2; "$@" > "$D/$name.out" 2>&1 < /dev/null; rc=$?; [ "$rc" = "$want" ] && { echo "OK   $name rc $rc (want $want)"; ok=$((ok+1)); } || { echo "MISMATCH $name rc $rc (want $want) — $D/$name.out"; bad=$((bad+1)); }; tail -2 "$D/$name.out" | cut -c1-260 | sed 's/^/     /'; }
+doctor() { # doctor <name> <old> <new> : a prompt copy with <old> replaced by <new>, asserting the replacement happened
+  python3 - "$PF" "$D/p_$1.txt" "$2" "$3" <<'PY'
+import re, sys; s = open(sys.argv[1], encoding='utf-8').read(); n = s.count(sys.argv[3])
+# an anchor that WRAPS across prompt lines (the launcher reads the prompt whitespace-joined) is matched with \s+ at each space, so the copy keeps its
+# line structure. controls_1's first fallback joined the WHOLE copy onto one line, which dropped the `ultrathink` first line: control B then read exit 8,
+# the control's own fault, not the launcher's.
+pat = re.compile(r'\s+'.join(re.escape(w) for w in sys.argv[3].split(' ')))
+out, n = pat.subn(lambda m: sys.argv[4], s)
+assert n >= 1, ('anchor absent', sys.argv[3])
+open(sys.argv[2], 'w', encoding='utf-8').write(out); print('  (copy %s: %d occurrence(s) of %r replaced)' % (sys.argv[2].split('/')[-1], n, sys.argv[3]))
+PY
+}
+echo "controls start $(date -u +%Y-%m-%dT%H:%M:%SZ) dir $D"
+H38="$(sed -n 's/^  "1238|[^|]*|[^|]*|\([0-9a-f]\{40\}\)|[0-9]*|[0-9]*|[^|"]*|T[0-9]"$/\1/p' "$L")"; STALE="${H38%?}$( [ "${H38: -1}" = 0 ] && echo 1 || echo 0 )"
+H18="$(sed -n 's/^  "1218|[^|]*|[^|]*|\([0-9a-f]\{40\}\)|[0-9]*|[0-9]*|[^|"]*|T[0-9]"$/\1/p' "$L")"
+[ -n "$H38" ] && [ -n "$H18" ] || { echo "REFUSING: could not read the #1238 / #1218 rows"; exit 9; }
+echo "== launcher (--check)"
+run P_positive_check 0 "$L" --check
+run C_stale_head_1238 6 env QAB1218_HEAD_1238="$STALE" "$L" --check
+run D_develop_moved 17 env QAB1218_CUR_DEV="$H18" "$L" --check
+run V_compare_paths_by_name 10 env QAB1218_PATHS_1236="systemTest/performance/tests/unit/config/sheddingCeiling.test.ts,systemTest/performance/tests/unit/utils/yamlRedaction.test.ts" "$L" --check
+tail -n +2 "$PF" > "$D/p_noultra.txt"; run G_no_thinking_directive 8 env QAB1218_PROMPT="$D/p_noultra.txt" "$L" --check
+{ cat "$PF"; echo '{{UNFILLED}}'; } > "$D/p_unfilled.txt"; run U_unfilled_token 8 env QAB1218_PROMPT="$D/p_unfilled.txt" "$L" --check
+/usr/bin/grep -v -F '52cb0fc5b18d' "$BF" > "$D/b_no52cb.md"; echo "  (O copy: capture lines naming 52cb0fc5b18d removed: $(/usr/bin/grep -c -F '52cb0fc5b18d' "$BF") -> $(/usr/bin/grep -c -F '52cb0fc5b18d' "$D/b_no52cb.md"))"
+run O_capture_missing_seat_item 30 env QAB1218_BRIEF="$D/b_no52cb.md" "$L" --check
+doctor ticket 'PR #1223 is KS-1118.' 'PR #1223 is KS-11180.'; run T_ticket_statement 32 env QAB1218_PROMPT="$D/p_ticket.txt" "$L" --check
+doctor tier '#1238 T3' '#1238 T2'; run I_tier_line_T3 7 env QAB1218_PROMPT="$D/p_tier.txt" "$L" --check
+doctor kw 'S1 THE ENGINE IS NOT YOURS' 'S1 THE ENGINE'; run L_prompt_missing_keyword 33 env QAB1218_PROMPT="$D/p_kw.txt" "$L" --check
+doctor binv 'a sibling batch merging is not a difference' 'a sibling batch merging is a difference'; run B_base_invariant_rule 34 env QAB1218_PROMPT="$D/p_binv.txt" "$L" --check
+doctor ovl 'Anything else on an own path refuses' 'Anything else on an own path is fine'; run B2_overlap_exact_shape 34 env QAB1218_PROMPT="$D/p_ovl.txt" "$L" --check
+doctor ovl2 "develop's blob at that path == #1225's squash blob 8331f626cd82b977204da3c5193c64df91908ce7" "develop's blob at that path == #1225's squash blob (any)"; run B3_overlap_1225_blob 34 env QAB1218_PROMPT="$D/p_ovl2.txt" "$L" --check
+doctor slot 'take the HIGHEST free N in 4, 3, 2' 'take the lowest free N in 2, 3, 4'; run K_slot_rule 35 env QAB1218_PROMPT="$D/p_slot.txt" "$L" --check
+doctor legs 'A SKIP or an rc 2 is NOT RUN, never a pass' 'A SKIP is fine'; run K2_skip_is_not_a_pass 35 env QAB1218_PROMPT="$D/p_legs.txt" "$L" --check
+doctor leg4 'mint NO credential' 'mint a credential if needed'; run K3_leg4_honesty 35 env QAB1218_PROMPT="$D/p_leg4.txt" "$L" --check
+doctor reach 'NO leg can witness #1233' 'every leg witnesses #1233'; run K4_reach 35 env QAB1218_PROMPT="$D/p_reach.txt" "$L" --check
+doctor engine 'you do NOT start, restart, quit, kill or reset Docker Desktop' 'you may restart Docker Desktop'; run K5_engine_not_yours 35 env QAB1218_PROMPT="$D/p_engine.txt" "$L" --check
+doctor red 'restore by bytes' 'restore somehow'; run X_redproof_rule 36 env QAB1218_PROMPT="$D/p_red.txt" "$L" --check
+doctor sa '`scripts/run-shell-suites.sh` NOT AT ALL' '`scripts/run-shell-suites.sh` once'; run F_no_runner_run_1218 37 env QAB1218_PROMPT="$D/p_sa.txt" "$L" --check
+doctor anc 'a line STARTING `FIXTURE BUILD FAILED`' 'a line containing `FIXTURE BUILD FAILED`'; run F2_anchored_abort_line_1218 37 env QAB1218_PROMPT="$D/p_anc.txt" "$L" --check
+doctor remote 'a LOCAL bare repo you created under your report dir, or `no-push://…` — never a real remote' 'any remote'; run F3_never_a_real_remote_1218 37 env QAB1218_PROMPT="$D/p_remote.txt" "$L" --check
+doctor cwd 'every run from a cwd OUTSIDE any git repo' 'every run from any cwd'; run F4_cwd_outside_1218 37 env QAB1218_PROMPT="$D/p_cwd.txt" "$L" --check
+doctor anch 'pre-existing (KS-562), not caused by this change' 'known flaky'; run Y_anchoring_wording 38 env QAB1218_PROMPT="$D/p_anch.txt" "$L" --check
+doctor load 'KNOWN FALSE-RED (ticket KS-1155)' 'KNOWN FLAKE (ticket KS-1155)'; run Y2_load_rule 38 env QAB1218_PROMPT="$D/p_load.txt" "$L" --check
+doctor holds 'NO Docker Desktop start / restart / quit. Findings only.' 'Docker as needed.'; run H_holds 39 env QAB1218_PROMPT="$D/p_holds.txt" "$L" --check
+doctor t3 'TIER 3 — HYGIENE (#1219 and #1238): no red proof is owed' 'TIER 3 — HYGIENE (#1219 and #1238): skim it'; run W_tier3_rule 40 env QAB1218_PROMPT="$D/p_t3.txt" "$L" --check
+doctor t5 'the HEAD under T5 → 2 failed / 861 with THE SAME two cells and NOTHING ELSE' 'the HEAD under T5 → some reds'; run Q_t5_whole_suite_1223 41 env QAB1218_PROMPT="$D/p_t5.txt" "$L" --check
+doctor legsline 'the squash body carries the legs line' 'the squash body is fine as it is'; run Q2_legs_line_1223 41 env QAB1218_PROMPT="$D/p_legsline.txt" "$L" --check
+doctor canary 'THE PRE-PUSH HOOK RAN NO Blockchain/Dev LEG' 'THE PRE-PUSH HOOK RAN'; run J_routing_1236 42 env QAB1218_PROMPT="$D/p_canary.txt" "$L" --check
+doctor reap 'never by name, never pid 1' 'by name is fine'; run Z_login_stub_reaper 43 env QAB1218_PROMPT="$D/p_reap.txt" "$L" --check
+doctor stop "(the squash body must state it, rule 2" '(optional'; run S2_stop_count 44 env QAB1218_PROMPT="$D/p_stop.txt" "$L" --check
+doctor go '`GO: merge #1218, #1219, #1223, #1233, #1235, #1236, #1237, #1238 batch`' '`GO: merge batch`'; run A_GO_string 26 env QAB1218_PROMPT="$D/p_go.txt" "$L" --check
+doctor add 'ONE equality target PER PR FILE (2/1/1/2/1/2/1/1 = 11 over 11 paths)' 'targets as you like'; run E_addendum 25 env QAB1218_PROMPT="$D/p_add.txt" "$L" --check
+doctor subj '[QA -> Wednesday] TIER-2 BATCH GATE #1218-#1238 round 21' '[QA] gate'; run S_subject 23 env QAB1218_PROMPT="$D/p_subj.txt" "$L" --check
+run N_launch_non_tty 21 "$L"
+mkdir -p "$D/moved"; cp -p "$L" "$D/moved/"; run M_moved_launcher 2 "$D/moved/$(basename "$L")" --check
+echo "== repin (--dry-run unless stated)"
+run R1_positive_dry_run 0 bash "$R" "$L" "$SP" --dry-run
+sed "s/|$H38|1|1|/|$STALE|1|1|/" "$L" > "$D/L_stale.sh"; chmod 755 "$D/L_stale.sh"; echo "  (R2 copy: rows carrying the stale #1238 head: $(/usr/bin/grep -c -F "|$STALE|" "$D/L_stale.sh") — must be 1)"
+run R2_stale_head 11 bash "$R" "$D/L_stale.sh" "$SP" --dry-run
+sed "s/^DEVELOP_SHA='[0-9a-f]*'$/DEVELOP_SHA='$H18'/" "$L" > "$D/L_devstale.sh"; chmod 755 "$D/L_devstale.sh"
+run R3_pinned_develop_stale 10 bash "$R" "$D/L_devstale.sh" "$SP" --dry-run
+# R4 (changed 2026-09-25 by the finishing drafter): the REAL run is made on a COPY of the repin script whose ROUTING names a scratch file that
+# cannot carry the line, so step 0 refuses by construction — the original raced the real inbox_routing.conf (a line added mid-run would have let a
+# "control" proceed to cockpit.sh add). The copy lives under $D; nothing past step 0 can run.
+: > "$D/routing_empty.conf"; sed "s#^ROUTING='.*'\$#ROUTING='$D/routing_empty.conf'#" "$R" > "$D/repin_noroute.sh"
+echo "  (R4 copy: ROUTING lines naming the scratch file: $(/usr/bin/grep -c -F "ROUTING='$D/routing_empty.conf'" "$D/repin_noroute.sh") — must be 1; real routing file named: $(/usr/bin/grep -c -F 'fleet/inbox_routing.conf' "$D/repin_noroute.sh") — must be 0)"
+if [ "$(/usr/bin/grep -c -F "ROUTING='$D/routing_empty.conf'" "$D/repin_noroute.sh")" = 1 ] && [ "$(/usr/bin/grep -c -F 'fleet/inbox_routing.conf' "$D/repin_noroute.sh")" = 0 ]; then
+  run R4_real_run_unrouted 1 bash "$D/repin_noroute.sh" "$L" "$SP"
+else echo "MISMATCH R4 — the no-route copy was not made; NOT running a real repin"; bad=$((bad+1)); fi
+run R5_bad_scratchpad 9 bash "$R" "$L" /tmp --dry-run
+mkdir -p "$D/kitcopy"; cp -p "$GS"/*.py "$GS"/*.sh "$GS"/*.txt "$GS"/*.md "$D/kitcopy/"; run R6_moved_kit_dry_run 0 bash "$D/kitcopy/repin_and_launch_gate21T2c.sh" "$D/kitcopy/$(basename "$L")" "$SP" --dry-run
+/usr/bin/grep -c -F 'MOVED KIT' "$D/R6_moved_kit_dry_run.out" | sed 's/^/  (R6: MOVED KIT lines reported: /; s/$/ — must be 1)/'
+echo "controls end $(date -u +%Y-%m-%dT%H:%M:%SZ): $ok OK / $bad MISMATCH"
+[ "$bad" -eq 0 ]

@@ -15,7 +15,7 @@ for pair in "!CODING/Datasec|CODING_Datasec.files" "TUESDAY|TUESDAY.files" "Note
   root="${pair%%|*}"; list="$H/${pair##*|}"
   [ -s "$list" ] || { echo "skip $root: empty list" | tee -a "$LOG"; continue; }
   echo "=== $root ($(wc -l < "$list") files) $(date '+%F %T')" | tee -a "$LOG"
-  "$RS" -a --update --itemize-changes "${DRY[@]}" --files-from="$list" "/Volumes/Development/$root/" "/Volumes/DevMASTER/$root/" >> "$LOG" 2>&1
+  "$RS" -a --update --itemize-changes ${DRY[@]+"${DRY[@]}"} --files-from="$list" "/Volumes/Development/$root/" "/Volumes/DevMASTER/$root/" >> "$LOG" 2>&1
   rc=$?; echo "rc=$rc $root" | tee -a "$LOG"; [ $rc -ne 0 ] && rc_all=$rc
 done
 echo "=== done rc_all=$rc_all $(date '+%F %T')" | tee -a "$LOG"; exit $rc_all
