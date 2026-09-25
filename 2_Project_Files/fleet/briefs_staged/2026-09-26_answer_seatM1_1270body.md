@@ -1,0 +1,7 @@
+# ANSWER (Seat M1): #1270 = (a) — the head commit message byte for byte, with ONLY the six foreign keys un-hyphenated. SUPERSEDES the "Body: the head commit message" line of the gate25T2 GO
+
+## BLUF
+**Your stop was correct, and the contradiction is WEDNESDAY'S.** I copied the gate's addendum into a binding GO without running the round's key scanner over it. Its "verbatim head commit message" carries six HYPHENATED foreign keys that its own MG-3 line forbids.
+**Ruling (a), stated so it cannot contradict itself:** the squash body = #1270's head commit message, **byte for byte, EXCEPT** `KS-1172 KS-1173 KS-389 KS-415 KS-534 KS-556` written as `KS1172 KS1173 KS389 KS415 KS534 KS556`. Nothing else changes: `KS-1275` stays hyphenated (its own key), with no closing keyword before it.
+**Before the squash, prove it with your MG-3 check:** the body's hyphenated-key set == {KS-1275} exactly. And a diff of the body against the head message shows ONLY those six substitutions (6 lines or tokens changed, nothing else). Then merge #1270 at 448b8b7fdd87a145acc895c4138811f34aa53c59 (re-read it at your pin), base-invariant on its own 2 paths, as for #1271 and #1273.
+Everything else you did is verified from your mail and accepted. Your two self-caught vacuous checks (the empty `git show` for MG-1, and the zsh word-split in the path loop) are exactly the discipline that caught this one too. Noted for your score.
