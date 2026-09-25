@@ -1,0 +1,28 @@
+[Datasec/NexusAI-M -> Tuesday] READY FOR QA: RD-315 @ 1524fca (undated /api/database rows no longer stamped 'now'; server.js :14242/:14294 only)
+BLUF: RD-315 READY FOR QA on rd-315-no-fabricated-completion-s84m @ 1524fca7ec72b23a4f000b77872a4158f8e14f86. I'd call it tier 1 (data correctness, per the lane plan), your call. It does NOT touch the listen-callback region (~22564): the only edits are backend/server.js lines 14242 and 14294 (at 0863711). RD-533's diff is the listen callback only, so the two branches are file-shared but region-disjoint. Next in lane 1: RD-413.
+
+Branch base: main 0863711. Main is now 11666d3 (N's merge 2, RD-639). `git diff 0863711 11666d3 -- backend/server.js` has 0 hunks: merge 2 didn't touch server.js. At merge: forward-merge main, regenerate counts once, C-112/C-57, C-89.
+Counts prediction (not a measurement): 3990/237 at 1524fca = 0863711's 3986/236 + 4 cells + 1 suite. On 11666d3 add N's delta.
+
+WHAT CHANGED (backend/server.js only, 2 lines): both /api/database transforms, print :14242 and scan :14294, used `jobCompletedTime: log.Job_Completed_Time_UTC || log.created_at || new Date().toISOString()`. They now fall back to `null`, as jobStartTime already did.
+
+SETS, not counts: __tests__/rd315-api-database-no-fabricated-completion.test.js
+- Seeding: three rows go through the product's own SimpleDatabase into the server's DB_PATH before boot: one dated control, one undated print, one undated scan (DigitalSend). insertPrinterLog passes created_at explicitly, so it is stored NULL.
+- RED at 0863711 (unmodified): "print: an undated row gets jobCompletedTime null" and "scan: …". Both came back with the REQUEST TIME (2026-09-25T18:22:33.777Z / .778Z), which is the defect itself. GREEN there: "control: the route answers 200 and returns the dated row with its real completion time" and "findability: the undated print row and the undated scan row are both in the response" (C-98: null can't mean "the row didn't come back"). Log: session-tools/s84m/rd315-red-at-0863711.log
+- GREEN at 1524fca: all 4.
+- One lock hold (session-tools/s84m/rd315-hold.sh / .log), CLEAN first, anchor at each line count=1: M1 puts the old fallback back at :14242 -> ONLY print red. M2 at :14294 -> ONLY scan red. server.js restored, sha 320cba60e61b0d7e unchanged.
+- Full verify, same hold, SESSION_SECRET unset, --update-counts: "VERDICT: PASS — 3990/3990 tests passed across 237 suites (jest exit 0)". Floor 0/0.
+- C-89 at 1524fca: tree clean; HEAD counts 3990/237. Pre-commit gitleaks ~5.01 KB, no leaks.
+
+PRIOR WORK: the fallback came in with the root commit 8eb94ce (git log -S), with no reason recorded. RD-306 half 2 removed the same fabrication in the parser; this is its sibling one file down, as the ticket says. Frontend readers all handle null, re-read at 0863711: static/js/index.js 4903, 6290, 6317, 6376, 6424, 6434, 6584, 6794 and chart-details.js 595, 939 (`|| 0`, `t ? … : '—'`, `if (timestampToUse)`). So an undated row renders as undated ("—"/"Unknown"). Nothing replaced.
+
+NOT TESTED:
+- The Log Analytics path: only the SQLite path is seeded. The LAW parser already yields null for missing times since RD-306, but that isn't driven here.
+- No real browser render of an undated row. The null handling was read, not driven.
+- The other 23 `new Date().toISOString(),` sites in server.js are outside this ticket and were not surveyed for the same class. If you want that census it's a separate item.
+
+Yields: 0 self-applied since your 19:19:22Z ruling. 4 earlier, all logged in session-tools/s84m/yield-log.txt.
+Jira: RD-315 -> Testing, evidence comment posted.
+Meanwhile: continuing with RD-413 (branch off 11666d3). Needed-by: none.
+-- NexusAI-M
+
