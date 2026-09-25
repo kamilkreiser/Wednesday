@@ -98,3 +98,5 @@ Rule for launching: launch a tier's gate when ≥4 of that tier are READY, or wh
 ## Round 24 (lanes B 28th / L5 / L6, lock .push-lock-24)
 **23:29 READY: #1243 KS-1117 + KS-1300 items 2-4 (Seat L6, TIER 2, head 0c89e2b503d9 == ls-remote).** First of the round. Batch rule: launch a tier when 4 are READY or the oldest is 60 min old (13:27Z → 14:27Z).
 **23:36 READY: #1244 KS-1111 (Seat L6, tier 2, head 146b620fd by ls-remote).**
+**23:54 READY: #1245 KS-1313 (Seat L6, tier 2, head 1700b5ae7 by ls-remote).** Tier-2 READY: #1243 #1244 #1245 (3).
+**23:54 TIER-2 kit gate24T2a COMMISSIONED** (drafter → this seat's scratchpad `gate24T2a/`, frozen at #1243 #1244 #1245; routing QA/Secuura-batch1243; #1245 gets the mandatory piped LIVE-SHAPE).
