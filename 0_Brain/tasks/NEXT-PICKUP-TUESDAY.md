@@ -6,6 +6,20 @@ status: live
 supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s1-wholesale
 ---
 
+## 🔴 DELTA 90 — 2026-09-26 07:3x (s85, ctx 71% CHECKPOINT; band 80-90). **READ THIS FIRST; 89/88/87 are its detail.**
+### STATE (measured 07:2x)
+- **NexusAI main = 11666d3** (RD-579 + RD-639 merged overnight, CI green both, demo untouched, Kam told + morning brief posted).
+- **Floor:** %0 tuesday · %16 QA/NexusAI-batch2 · %11 M · %12 N · %13 O · %14 P · %1 monitor (2 rows). **Every agent pane MUST be >= 6 rows** (the watcher cannot see HOLDING below that); `cockpit.sh add` re-balances the layout, so re-size after every add (monitor -> 2, agents -> 6).
+- **Usage 63%** (stop 95). Kam's last panel words: 07:18 (two rulings, both relayed and DELIVERED: C-165, C-166).
+### IN FLIGHT / NEXT, in order
+1. **Batch #2 gate %16 (RD-428 823ef9e t1 · RD-444 2f9da1c t2 · RD-200 12b5edc t2):** H4 (heads + merged verify) held the lock since 20:09Z; H5 (RD-428 bfcache) queued. The CDN allow-list for the browser leg was granted with conditions (its 19:05Z QUESTION). **On the verdict:** read it whole, completion-check (ls-remote heads + main), GOs to P ONE AT A TIME (merge forward onto the then-main, counts once, verify, ff), score, `pane_close.sh %16`, then post Kam one board line.
+2. **Then launch BATCH #1** with a drafter on the batch-2 pattern: RD-447 911e706 (O t1) · RD-533 95c3c9a (M t2) · RD-627a 057016d (N t1, already on 11666d3) · RD-315 1524fca (M t1) · RD-411 (O) if READY. READYs saved in `fleet/qa-agent/briefs/*READY*`.
+3. **Card open on Kam's board: `nexusai-package-files-scope`** (rec b; default nothing moves). On his answer relay to M verbatim; M then does the package-files item after RD-413.
+4. **Rulings given tonight (carry):** RD-418 (a2)+(b1)+N3 by ordering, C-163 · RD-424 (a): five fixture files granted to N · RD-425 (A) + 6 conditions (O) · RD-197 accept + success-state browser action · RD-627a merge-forward before gate · C-141 addenda 2 + 3 (seats self-yield, no STATUS mail for routine yields).
+5. **Owed small:** nexusai-lock.sh:209 race -> a NexusAI ticket · the "[Wednesday ->" prefix sequencing (send_brief.sh:610) · Vision morning sweep not done (bounded) · M's census ticket for the 23 `new Date()` sites.
+### LESSON FROM THIS SEAT (ledger 2026-09-26)
+After any interrupted `pull --rebase --autostash`: `git stash list` before/after, re-apply the autostash BEFORE anything else, never `rebase --quit` without it; commit decisions.json in the same action as `reconcile --apply`.
+
 ## 🟢 DELTA 89 — 2026-09-26 03:4x (s85). **READ THIS, THEN 88/87.**
 - ✅ **BOTH MERGES DONE: NexusAI main = 11666d3** (RD-579 -> 0863711, then RD-639 -> 11666d3; each verified by Tuesday at origin: ls-remote + cat-file parents + counts 3986/236 then 4012/237 = gate predictions). CI green on both (Builds 36159256470, 36164903279 — relayed by M/N; Tuesday holds no GitHub identity). Deploy demo SKIPPED both. **Kam told on the live board 03:4x (201).** Tickets: RD-681/682/683 (M), RD-684 High (B-F1, N's NEXT) + RD-685 (N).
 - **NEXT GATES:** batch #1 = RD-447 (O) + RD-411 (O, not READY yet) + RD-533 (M, tier 2). Batch #2 = RD-428 + RD-444 + RD-200 (P; RD-200 not READY yet) + RD-627a (N: merged forward onto 11666d3, auto-merge, no hand resolution; re-proof queued, predicted 4017/238, then UPDATED READY). Commission each batch's gate DRAFTER when its last READY lands (pattern `fleet/qa-agent/briefs/2026-09-25_nexusai-gate-rd579-rd639.md`; READYs saved in `fleet/qa-agent/briefs/*READY-mail.txt`).
