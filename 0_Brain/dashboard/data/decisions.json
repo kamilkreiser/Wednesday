@@ -17014,5 +17014,57 @@
    "2026-09-20 15:25",
    "CARD secuura-ks660-actions-ci-disposition"
   ]
+ },
+ {
+  "id": "nexusai-package-files-scope",
+  "client_project": "Datasec/NexusAI",
+  "title": "Package files into main: copy the 3 package files only, or also what main needs to build and check them?",
+  "bluf": "I need one choice from you on how far this morning's ruling goes. You chose 'bring only the package files into main', and the same option said 'Main then builds the same package customers get'. NexusAI-M measured that those two cannot both hold (main 11666d3 vs the 2.2.1 package commit 3f79e9c, read-only): the customer zip is 3 files, but main can only BUILD and CHECK that package if it also gets the 2.2.1 release policy, the build script, 4 test re-anchors and 2 dev deploy scripts that still pass the removed registry settings. Either way it is a copy of files onto a gated branch: never a release-branch merge, never the image, nothing to Partner Center. Ruling recorded as C-165. Override: the prior-ruling gate matched only the generic word 'scope'; this refines your 07:18 ruling on the package files.",
+  "default_action": "If you don't answer, NexusAI-M does nothing on the package files and carries on with its other tickets; I raise it again tomorrow morning.",
+  "options": [
+   {
+    "key": "b",
+    "label": "Package plus what main needs to build and check it (recommended)",
+    "detail": "NexusAI-M copies every path whose 2.2.1 content a main build or main test needs, each listed with its source, gated as one change. Main then builds and checks the exact package customers get, and the dev scripts stop passing removed settings."
+   },
+   {
+    "key": "a",
+    "label": "Only the 3 package files",
+    "detail": "Two files change (the third is already identical). Main's copy is checked by a byte-compare, not a build. Main still cannot build an uploadable package, and some old-shape tests may go red and need fixing separately."
+   }
+  ],
+  "recommended": "b",
+  "ts": "2026-09-26T07:23:14.887546+10:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "2026-08-17 20:15",
+   "2026-09-10 09:01",
+   "2026-09-10 09:08",
+   "2026-09-10 09:08",
+   "2026-09-10 18:01",
+   "2026-09-12 15:24",
+   "2026-09-16 14:00",
+   "CARD secuura-ks662-scope",
+   "CARD secuura-ks739-lookup-role-scope",
+   "CARD nexusai-rd167-dark-mode-scope",
+   "CARD secuura-erasure-scope-gate",
+   "CARD secuura-ks764-key-revoke-org-scope",
+   "CARD secuura-demo-deploy-scope-2026-09-03",
+   "CARD nexusai-rd303-rd307-key-shaped-files-in-repo",
+   "CARD nexusai-rd310-which-of-three-files-are-customer-data",
+   "CARD secuura-admin-credential-rotation-183-files",
+   "CARD secuura-891-workflow-scope-merge",
+   "CARD vault-add-a-stages-another-clients-files",
+   "CARD nexusai-three-lineages-in-scope-or-parked",
+   "CARD hpsm-phase1-imagepng-out-of-scope",
+   "CARD nexusai-marketplace-package-round3",
+   "CARD nexusai-demo-deploy-finish-scope",
+   "CARD secuura-ks839-oauth-wildcard-scope-grants-everything",
+   "CARD t9-nas-leg-scope-mechanism",
+   "CARD hpsmpoc-partner-scope",
+   "CARD spark-studio-client-scope"
+  ]
  }
 ]
