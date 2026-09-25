@@ -1,0 +1,26 @@
+[Datasec/NexusAI-N -> Tuesday] READY FOR QA: RD-627a rd-627a-erasure-tmp-siblings-s84n @ 9fb9431 (off main; verify 3983/3983)
+BLUF: RD-627 half (a) is READY FOR QA on rd-627a-erasure-tmp-siblings-s84n @ 9fb94311b010c3d4355418eface0e1dc3ecd3795, off main 7c47ec4 (re-read at push, unchanged). It is NOT stacked, as you ruled. It meets RD-639 inside purgeNow's loop when both merge, so whichever lands second takes a real content merge in dataErasure.js; I'll name that in its MERGED. Tier per the lane plan: 1.
+
+WHAT CHANGED:
+- backend/customerDataFiles.js: new isInterruptedWriteOf(name, store) matches both name forms. Census at 7c47ec4: server.js:376 writes the bare .tmp (the audit-buffer form gate 5 measured); five writers write .tmp.<pid>[.<suffix>]. jsonStorage's own boot scans match only the second form.
+- backend/dataErasure.js: the data dir is listed once before the loop; an existing, unlistable dir is a failure (P-3). Each store's siblings go BEFORE the live-store checks, because those `continue` when the store itself is absent (the crash case). _removeInterruptedWrite decides shape by lstat: dir means tree, symlink means P-6, else unlink. Each sibling is named in the ledger.
+- __tests__/rd627a-erasure-tmp-siblings.test.js, new, 5 cells. Counts via --update-counts.
+
+CELLS (sets): POPULATION; T1 both forms beside all 22 stores; T2 audit-buffer.json.tmp with an IP needle, gone and named in the persisted record (_readRawState; getStatus carries counts only, R-3), and no file under DATA_DIR still holds the needle; T3 CONTROL: .machine-id.tmp.*, .persistence-sentinel.json.tmp.*, settings.jsonX.tmp, settings.json-old.tmp.1 and not-a-store.json.tmp all SURVIVE; T4 a symlinked sibling: target intact, link gone, run fails naming it.
+
+PROOF, one lock hold (session-tools/s84n/rd627a/), floor 0 at every reading, control rose:
+- A, base 7c47ec4: T1, T2 and T4 red on the defect (T1 lists all 44 planted names surviving; T2 finds the tmp still there; T4 finds the link untouched). POPULATION and T3 green.
+- B, fixed: rd627a plus every erasure-* suite plus rd525, 199/199.
+- C: VERDICT: PASS — 3983/3983 tests passed across 236 suites (jest exit 0); main is 3978/235. The committed file hashes equal run B's. C-89 holds; HEAD counts = 3983/236.
+
+PRIOR WORK (C-49): nothing replaced. jsonStorage's collectPriorStateEvidence and _existenceEvidence scan the `.tmp.` prefix for boot evidence; they are unchanged and not reused, because they miss the bare `.tmp` form. The removal helper applies P-6 and RD-575's rules. The harness is erasure-reaches-attachments'.
+
+NOT TESTED:
+- A writer's tmp that is IN FLIGHT during a purge on a live server. Read, not run: the sweep deletes it, and the writer's rename then fails ENOENT, so that write is lost while erasure proceeds, which is the intended outcome.
+- Tmp siblings of RECOVERY copies under backups/.
+- The re-drive of T4's failure: it shares RD-639's B-F1 hole, and B-F1's fix covers it.
+- Half (b) of RD-627 (SIGTERM, lane 1).
+
+Queue: RD-324, RD-424 and RD-314 holds wait behind s84m-merge-rd579. RD-639 merge 2 waits for M's MERGED.
+-- Datasec/NexusAI-N (S84N)
+

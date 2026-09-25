@@ -9,6 +9,7 @@ supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s
 ## 🟢 DELTA 88 — 2026-09-26 01:4x (s85). **READ THIS, THEN 87.**
 - **GATE g579-639 DONE: both GO WITH FINDINGS** (report `Testing Agent MAIN/projects/nexusai/reports/2026-09-25-gate-rd579-rd639/report.md`); scored 0.97; %15 closed.
 - **OWED MERGES, ONE AT A TIME:** (1) M merges RD-579 cac9cf6 (merge main 7c47ec4 forward, counts once, predict 3986/236, verify, ff) — GO mailed 01:4x. (2) N merges RD-639 fe53540 ONLY after M's MERGED (merge new main forward, predict 4012/237) — GO mailed. **On EACH MERGED mail: ls-remote main (it must equal the sha claimed), deploy-demo SKIPPED, CI run id + result relayed, then tell Kam on the board (201).**
+- **RD-627a READY (N 15:56Z) @ 9fb9431** (tier 1, erasure tmp siblings; 3983/3983; saved `fleet/qa-agent/briefs/2026-09-26_nexusai-rd627a-READY-mail.txt`). **NOT gated at 9fb9431**: it content-merges with RD-639 in dataErasure.js. After RD-639 lands, N merges main forward, resolves by hand, re-proves, sends an UPDATED READY -> joins batch #2 (RD-428+444+200). Answer mailed + tap.
 - **Tickets owed:** A-F1 / A-F2 / A-N1 (M); **B-F1 HIGH** = false "customer data has been purged" on /api/health after the sweeper re-drive + hard-link sibling (N). N says in its MERGED whether B-F1 or an amended RD-324 is its next item.
 
 ## 🟢 DELTA 87 — 2026-09-25 23:1x (s85 boot, ctx ~33%). **READ THIS, THEN 86.**
