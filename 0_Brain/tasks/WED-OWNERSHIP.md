@@ -114,4 +114,4 @@ sees the claim rather than discovering it in a conflict.
 | 2026-09-25 09:41 | Kamils-Mac-Studio | live_chat_poll.sh armed per seat in Launch_Wednesday.command + doctor liveness check + per-seat tap prefix (Kam 09:34 via Friday) | OPEN | |
 | 2026-09-25 12:26 | Kamils-Mac-Studio | local-model build_input.sh: started_ok=<reason> pin for In Progress tickets with only merged PRs (KS-1140 GF-1) | CLOSED |  2026-09-25 12:29 done |
 | 2026-09-25 13:24 | Kamils-Mac-Studio | dashboard-cloud: Import key accept attr (iPad cannot select .p8) + live deploy | CLOSED |  2026-09-25 13:31 done |
-| 2026-09-25 14:02 | Kamils-Mac-Studio | dashboard-cloud chat.html heading -> Cockpit, no agent name (Kam 14:01) | OPEN | |
+| 2026-09-25 14:02 | Kamils-Mac-Studio | dashboard-cloud chat.html heading -> Cockpit, no agent name (Kam 14:01) | CLOSED |  2026-09-25 14:07 done |
