@@ -11,14 +11,9 @@ SEEN="${1:?seen-file}"; shift; [ $# -gt 0 ] || { echo "usage: $0 <seen-file> <gl
 touch "$SEEN"
 for i in $(seq 1 110); do
   for g in "$@"; do
-    # IFS= : glob-expand WITHOUT word-splitting — every path here contains spaces ("1FILES TO SYNC"); an unset IFS
-    # split them and the watcher grepped the pieces and never fired (Friday 2026-09-25).
-    IFS= ; for f in $g; do unset IFS
-      # A seat's DRAFT carries a placeholder line ("READY FOR REVIEW `<when-filled>`", B05 2026-09-25): lines holding a
-      # `<…>` placeholder are not a READY, or the watcher fires early and then misses the real one (same count).
-      n=$(/usr/bin/grep -i -E 'READY FOR REVIEW' "$f" | /usr/bin/grep -v -c -E '<[a-z_-]+>')
-      if [ "$n" -gt 0 ] || /usr/bin/grep -q -i -E '^\*\*State:\*\* *(BLOCKED|STOP)' "$f"; then
-        key="$f READY#$n"
+    for f in $g; do
+      if /usr/bin/grep -q -i -E 'READY FOR REVIEW|^\*\*State:\*\* *(BLOCKED|STOP)' "$f"; then
+        key="$f READY#$(/usr/bin/grep -c -i -E 'READY FOR REVIEW' "$f")"
         if ! /usr/bin/grep -qxF "$key" "$SEEN"; then echo "$key" >> "$SEEN"; echo "WAKE: $f"; exit 0; fi
       fi
     done
