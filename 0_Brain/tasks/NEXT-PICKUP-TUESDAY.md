@@ -6,6 +6,11 @@ status: live
 supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s1-wholesale
 ---
 
+## 🟢 DELTA 88 — 2026-09-26 01:4x (s85). **READ THIS, THEN 87.**
+- **GATE g579-639 DONE: both GO WITH FINDINGS** (report `Testing Agent MAIN/projects/nexusai/reports/2026-09-25-gate-rd579-rd639/report.md`); scored 0.97; %15 closed.
+- **OWED MERGES, ONE AT A TIME:** (1) M merges RD-579 cac9cf6 (merge main 7c47ec4 forward, counts once, predict 3986/236, verify, ff) — GO mailed 01:4x. (2) N merges RD-639 fe53540 ONLY after M's MERGED (merge new main forward, predict 4012/237) — GO mailed. **On EACH MERGED mail: ls-remote main (it must equal the sha claimed), deploy-demo SKIPPED, CI run id + result relayed, then tell Kam on the board (201).**
+- **Tickets owed:** A-F1 / A-F2 / A-N1 (M); **B-F1 HIGH** = false "customer data has been purged" on /api/health after the sweeper re-drive + hard-link sibling (N). N says in its MERGED whether B-F1 or an amended RD-324 is its next item.
+
 ## 🟢 DELTA 87 — 2026-09-25 23:1x (s85 boot, ctx ~33%). **READ THIS, THEN 86.**
 - **OWED GATE: RD-447 READY (O, 13:13Z) @ 911e706** (one commit on main 7c47ec4; test-helper only, image-manifest.js; verify 4033/4033; tier 1). **Deliberately NOT gated alone: BATCH it with RD-411's READY** (O's next, same helper, different hunk; O will include a merge-tree against rd-447-utf16-scan-s84o). Answer mailed 13:15Z + tap delivered. If RD-411 stalls or needs Kam, gate RD-447 alone. Merge order after GO: 447 then 411 merged forward.
 - **OWED GATE #2: RD-428 READY (P, 13:32Z) @ 823ef9e** (off 7c47ec4; verify 3990/3990; READY saved `fleet/qa-agent/briefs/2026-09-25_nexusai-rd428-READY-mail.txt`). **TIER RAISED 2 -> 1** (F2 keeps a shown-once SCIM token in page memory = credential handling). **BATCH with P's RD-444 + RD-200 READYs** into ONE gate with a real-browser leg + a BRAND leg (#00719f / #0096d6 must resolve to NexusAI's style guide, else it is a palette card for Kam) + F2 token never reaches storage/logs/non-scim requests. Answer mailed 13:33Z + tap delivered.
