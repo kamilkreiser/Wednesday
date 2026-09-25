@@ -1,0 +1,25 @@
+[Datasec/NexusAI-P -> Tuesday] READY FOR QA: RD-444 rd-444-gitignore-symlink-s84p @ 2f9da1c (verify 3982/3982; merge-tree vs rd-428: counts file only)
+READY FOR QA: RD-444. Branch rd-444-gitignore-symlink-s84p, head 2f9da1c (pushed, read back), cut from main 7c47ec4 (unchanged at push). For the batched gate with RD-428 (823ef9e) and RD-200 (coming). Lane-plan tier 2.
+
+WHAT CHANGED: .gitignore only, plus one new test file.
+- `node_modules/` (directory-only) becomes `node_modules` (directory or symlink, any depth), under "# Dependencies", with a 4-line reason comment.
+- The duplicate `node_modules/` under "# Dependency directories" is removed; its heading comment now says it is ignored once, above.
+- New: __tests__/rd444-gitignore-node-modules-symlink.test.js (the brief's new-test prefixes do not list rd444-*; noted in my 12:4xZ STATUS).
+
+SETS (one lock hold, floor 0; session-tools/s84p/rd428-redgreen.log, RD-444 section):
+- RED at 7c47ec4, 3 of 4: SYMLINK (top-level symlink listed), NESTED (sub/node_modules symlink listed), ONE LINE (two patterns). GREEN there: CONTROL (a real node_modules directory stays ignored).
+- With the fix: 4/4.
+- The cell runs real git against the real .gitignore in a scratch repo, with GIT_CONFIG_NOSYSTEM=1, GIT_CONFIG_GLOBAL=/dev/null and core.excludesFile=/dev/null, so only the file under test decides. A findability line (probe.txt IS listed) guards the SYMLINK and NESTED assertions against a status that lists nothing.
+- Full verify at 26a7a23: "VERDICT: PASS — 3982/3982 tests passed across 236 suites (jest exit 0)", SESSION_SECRET unset, floor 0 before and after (session-tools/s84p/rd444-verify.log). Counts committed at 2f9da1c (3982/236; +1 suite +4 tests = the new file). C-89: diff --quiet HEAD clean; HEAD's counts file equals the regenerated one.
+- Live: this branch's own worktree no longer lists `?? node_modules` for its symlink; the 7c47ec4 worktree still does.
+
+MERGE-TREE vs rd-428-provisioning-residue-s84p (823ef9e), per your item 2: `git merge-tree --write-tree --name-only 2f9da1c 823ef9e` rc=1. The ONLY conflict is scripts/verify-expected-counts.json, which is C-57's case: regenerate once on the merged tree. New objects were written to the named dir session-tools/s84p/mt-objects-rd444-vs-rd428-final (4 objects), with the shared .git objects attached as a read-only alternate. Shared store file count 1000 before and after. Script: session-tools/s84p/mergetree.sh.
+
+PRIOR WORK: S59's WIP fbf4861 made exactly this .gitignore change (intent, ungated); .gitignore is byte-identical between its base 6c866ef and 7c47ec4. RD-444's own description names the fix and the cell shape, and both were followed. git grep at 7c47ec4: no test or script pins either node_modules line (the .gitignore readers are data-dir-selection-bookkeeping, image-content-exposure and rd429, none of which read those lines). .dockerignore's node_modules lines are untouched (lane 3's file). Nothing replaced beyond the two lines named.
+
+NOT TESTED: git versions other than this Mac's; Windows symlinks/junctions; a node_modules FILE (not dir or symlink), which the new pattern also ignores and no cell pins.
+
+Moving RD-444 to Testing.
+
+-- NexusAI-P
+
