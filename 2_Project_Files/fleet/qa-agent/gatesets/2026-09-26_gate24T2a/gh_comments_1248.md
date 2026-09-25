@@ -1,0 +1,26 @@
+--- comment 5833751693 by linear[bot] at 2026-09-25T14:06:19Z
+<!-- linear-linkback -->
+<details>
+<summary><a href="https://linear.app/secuura/issue/KS-1143/ks781-leg-f-guard-walk-a-mention-of-a-guard-bound-local-reads-as-a">KS-1143 ks781 LEG F guard walk: a MENTION of a guard-bound local reads as a mount (`:2318`) — `void controlByteGuard; next();` leaves 19 admin routes `{ 19, true }`; and guard-BEFORE-parser reads `guarded: true` (no order predicate)</a></summary>
+<p>
+
+## BLUF
+
+PR #981 (KS-828 + KS-900, merged 2026-09-13) gave LEG F sight of the control-byte guard LEAVING a wrapped router (`{ routes, guarded }` per router module) and closed KS-828's T3 (`admin.ts:560` `controlByteGuard(req, res, next);` → `next();` now reds LEG F). The tier-2 gate measured two ways the new predicate still blesses an unguarded parser — both MEASURED AT RUNTIME, both the ticket's own class (KS-828's T3 is one token away from GF-1). GF-1 was DISCLOSED by the builder (PR body: "the same looseness the parser reach already has … stated rather than widened here") — a disclosed limit is still the limit, and this one errs in the UNSAFE direction (the parser-side mention at `:2293` over-reports, R-1). Fix shapes are the GATE'S PROPOSALS, not ratified. One file, one test pass.
+
+Report: `/Volumes/DevMASTER/!CODING/Testing Agent MAIN/projects/secuura/reports/2026-09-13-ks828-900-981-04807ea0e-tier2-r1/report.md` — §6 GF-1, GF-2, Records R-1; §4 Tg1, Tg-ORDER. Line numbers at `04807ea0e` = develop after the squash.
+
+## Items (one test pass)
+
+1. **GF-1 (Minor) — a guard MENTION counts as a guard mount.** `routerParserAnalysis` `:2318` `if (ts.isIdentifier(m) && (guardSyms.has(m.text) || guardedWrappers.has(m.text))) { hit = true; return; }`. Repro at `04807ea0e`: `admin.ts:560` `controlByteGuard(req, res, next);` → `void controlByteGuard; next();` (anchor count 1) → `npx vitest run src/__tests__/ks781-p3-3-body-parser-order.test.ts` in `packages/shared` → `Tests 231 passed (231)`; LEG F reads admin.ts `{ 19, true }` with the guard never invoked on 19 parsing routes. Fixture forms: W2's `g(req, res, next)` → `void g; next()` stays GREEN; a scratch cell with `const _ = g; next();` → `{ 2, true }`. Oracle: the file's own docblocks `:2307-2308` / `:2485-2488` ("a guard MENTIONED is not a guard MOUNTED") and the LEG F message `:2463-2464` ("`false` means the parser runs and nothing after it inspects the body"). **Proposal:** hit only on a CALL node — `ts.isCallExpression(m) && ts.isIdentifier(m.expression) && (guardSyms.has(m.expression.text) || guardedWrappers.has(m.expression.text))` (or a `guardCallName(m, b)` helper). Regression cells: the `void g; next();` fixture must read `{ 2, false }`; the admin.ts `void controlByteGuard; next();` form must red LEG F.
+2. **GF-2 (Minor, borderline Record — Wednesday rates) — guard BEFORE parser reads** `guarded: true`**.** Fixture P7 (exactly `wrapperModule`'s shape with the body `g(req, res, () => raw(req, res, next));`) → `{"routes":2,"guarded":true}` — the guard inspects an unparsed `req.body`, the KS-800 class in the file's own name ("body-parser ORDER"). Not a regression against the parent (which saw no guard at all), but the LEG F message defines `true` as "something after the parser inspects the body", and this shape is `true` with nothing after the parser. **Proposal:** start the guard walk from the parser call's callback argument (`raw(req, res, cb)` → walk `cb`), not from the whole wrapper body. Regression: P7's fixture reads `false`; W2/W3 still `true`.
+3. **R-1, for context (no change asked):** `:2293` `ts.isIdentifier(m) && syms.has(m.text)` — a MENTION of a parser-bound local admits a wrapper (P8 `void raw; next()` → `{ 2, false }`): pre-existing (KS-816), over-reports, SAFE direction. Whether item 1's fix should also tighten `:2293` is the builder's call; the asymmetry (safe on the parser side, unsafe on the guard side) is why the guard side is the item.
+
+## Dedupe (searched before filing)
+
+By symbol over 1,131 KS issues + 908 comments (includeArchived): `controlByteGuard` → KS-828 only (its own disclosure); `guardSyms` 0; `guardedWrappers` 0; `routerParserAnalysis` 0; `ks781-p3-3` → 12 hits, none on the guard-walk predicate (KS-802 the parser regex; KS-905 the IIFE clause; KS-953 line pins; KS-831 archived, the KS-800 guard-side ticket where LEG F was born — named, not related). No home; filed new.
+</p>
+</details>
+<!-- linear-review-link -->
+<p><a href="https://linear.app/secuura/review/ks-1143-gf2callback-leg-f-reads-the-guard-from-the-parsers-c2ff9ccf2f8a">Review in Linear</a></p>
+

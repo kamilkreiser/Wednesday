@@ -1,0 +1,238 @@
+predict_gate24T2a.py at 2026-09-25T14:51:23Z | scratchpad /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/9df682b4-df07-4cdb-b01c-fee44dc335fd/scratchpad | SIMULATION: none (the real read)
+--- (a) heads and develop: ls-remote (the checkout, READ) then a fetch FROM ORIGIN into the scratch clone
+  ls-remote at 2026-09-25T14:51:28Z:
+    77c6426b96d9e48a758e68fa56e9138dc8509aa8 refs/heads/develop
+    146b620fda53f008b3384334a474b06a16235af3 refs/heads/feature/ks-1111-k6-echo-mask-lookbehind-l6-r24-1
+    0c89e2b503d9333829c277c50ad3b1a33f03cb96 refs/heads/feature/ks-1117-readyaml-bom-strip-l6-r24-1
+    2b4960172644b5ef0414b94d46d11974012c2007 refs/heads/feature/ks-1143-legf-gf2-callback-walk-l6-r24-1
+    1700b5ae7dd56ad3e30602a40b20ae6469c35350 refs/heads/feature/ks-1313-readsuitecounts-label-set-l6-r24-1
+    b4427d416592b40eb5ddb8727b2d6c31f3c7d067 refs/pull/1241/head
+    0c89e2b503d9333829c277c50ad3b1a33f03cb96 refs/pull/1243/head
+    146b620fda53f008b3384334a474b06a16235af3 refs/pull/1244/head
+    1700b5ae7dd56ad3e30602a40b20ae6469c35350 refs/pull/1245/head
+    2b4960172644b5ef0414b94d46d11974012c2007 refs/pull/1248/head
+  core.sshCommand present: True (value not printed)
+  OK   the scratch clone has NO alternates file (no borrowing from the shared object store)
+  OK   develop 77c6426b96d9e48a758e68fa56e9138dc8509aa8: fetch == ls-remote
+  OK   #1243 head 0c89e2b503d9333829c277c50ad3b1a33f03cb96 == pull head == branch (ls-remote AND fetch) == the pin
+  OK   #1244 head 146b620fda53f008b3384334a474b06a16235af3 == pull head == branch (ls-remote AND fetch) == the pin
+  OK   #1245 head 1700b5ae7dd56ad3e30602a40b20ae6469c35350 == pull head == branch (ls-remote AND fetch) == the pin
+  OK   #1248 head 2b4960172644b5ef0414b94d46d11974012c2007 == pull head == branch (ls-remote AND fetch) == the pin
+  #1241 (NOT in the batch, NOT graded) refs/pull/1241/head = b4427d416592b40eb5ddb8727b2d6c31f3c7d067 (== the head its gate graded)
+--- (b) ancestry and the develop move
+  OK   #1243: ONE commit, its parent == BASE 6e2a00bfed57
+  OK   #1243: merge-base(develop, head) == BASE
+  OK   #1244: ONE commit, its parent == BASE 6e2a00bfed57
+  OK   #1244: merge-base(develop, head) == BASE
+  OK   #1245: ONE commit, its parent == BASE 6e2a00bfed57
+  OK   #1245: merge-base(develop, head) == BASE
+  OK   #1248: ONE commit, its parent == BASE 6e2a00bfed57
+  OK   #1248: merge-base(develop, head) == BASE
+  OK   develop 77c6426b96d9 descends from BASE
+  develop is 2 commits ahead of BASE; the move touches 4 paths:
+    77c6426b96d9e48a758e68fa56e9138dc8509aa8 KS-1294 HOOKPROSE: the hook no longer names CI as the backstop for a bypassed push (#1247)
+    14cc526d10ee6dcf1a0cb8e1fdee5473e51511ed KS-1312: drop six unused eslint directives, correct two stale comments (KS-1298) (#1246)
+      moved path .githooks/pre-push
+      moved path Blockchain/Dev/services/originate/src/__tests__/ks1228-a-refused-request-writes-no-provenance-row.test.ts
+      moved path Blockchain/Dev/services/originate/src/__tests__/ks1263-multi-write-rolls-back.integration.test.ts
+      moved path Blockchain/Dev/services/originate/src/routes/documents.ts
+  OK   (3) BASE-INVARIANT: the develop move ∩ #1243's OWN paths == EMPTY ([]) — no declared overlap
+  OK   (3) BASE-INVARIANT: the develop move ∩ #1244's OWN paths == EMPTY ([]) — no declared overlap
+  OK   (3) BASE-INVARIANT: the develop move ∩ #1245's OWN paths == EMPTY ([]) — no declared overlap
+  OK   (3) BASE-INVARIANT: the develop move ∩ #1248's OWN paths == EMPTY ([]) — no declared overlap
+  systemTest/performance paths in the move: NONE
+  OK   PAIRWISE path-disjoint: #1243 ∩ #1244 == EMPTY ([])
+  OK   PAIRWISE path-disjoint: #1243 ∩ #1245 == EMPTY ([])
+  OK   PAIRWISE path-disjoint: #1243 ∩ #1248 == EMPTY ([])
+  OK   PAIRWISE path-disjoint: #1244 ∩ #1245 == EMPTY ([])
+  OK   PAIRWISE path-disjoint: #1244 ∩ #1248 == EMPTY ([])
+  OK   PAIRWISE path-disjoint: #1245 ∩ #1248 == EMPTY ([])
+  OK   #1243: every path under systemTest/performance/, 0 under Blockchain/Dev/ (the pre-push preflight early return applies: NO 28/0 to claim)
+  OK   #1244: every path under systemTest/performance/, 0 under Blockchain/Dev/ (the pre-push preflight early return applies: NO 28/0 to claim)
+  OK   #1245: every path under systemTest/performance/, 0 under Blockchain/Dev/ (the pre-push preflight early return applies: NO 28/0 to claim)
+  OK   #1248: every path under Blockchain/Dev/packages/shared/ (the pre-push hook RAN the preflight: the 28/0 claim is READ from the push log)
+  directories the batch touches: ['Blockchain/Dev/packages/shared/src/__tests__', 'systemTest/performance/runner', 'systemTest/performance/tests/unit', 'systemTest/performance/tests/unit/config', 'systemTest/performance/tests/unit/runner', 'systemTest/performance/tests/unit/support', 'systemTest/performance/tests/unit/utils', 'systemTest/performance/utils']
+  directory-level co-residence (not an overlap): ['systemTest/performance/tests/unit/utils']
+--- (c) per PR: numstat, blobs, modes; merge-tree over the develop just read (checks (1) and (2))
+  OK   #1243 numstat BASE..head == the pinned file set and counts (5 files)
+  OK   #1243 merges clean over develop (merge-tree rc 0) -> f290aa54427ba991ef91779409da761a0e176ba6
+  OK   (1) BASE-INVARIANT: diff(develop, #1243 merged) == EXACTLY its own paths (got 5)
+  OK   (2) BASE-INVARIANT: numstat(develop -> merged) == numstat(BASE -> head) for #1243
+  OK   (1) #1243 merged blob == head blob 8108c65132e3471167640f4d89003f2e4d52f6a7: systemTest/performance/tests/unit/config/sheddingCeiling.test.ts
+  OK   #1243 systemTest/performance/tests/unit/config/sheddingCeiling.test.ts mode 100644 at head (100644 at BASE)
+  OK   #1243 develop's blob of sheddingCeiling.test.ts == BASE's (61c8bdbca0eb)
+    #1243 100644 8108c65132e3471167640f4d89003f2e4d52f6a7 (BASE 61c8bdbca0eb) +88/-6 systemTest/performance/tests/unit/config/sheddingCeiling.test.ts
+  OK   (1) #1243 merged blob == head blob 5870ad378569cbfaff23efb94c750abca5aaa09d: systemTest/performance/tests/unit/package_scripts.test.ts
+  OK   #1243 systemTest/performance/tests/unit/package_scripts.test.ts mode 100644 at head (100644 at BASE)
+  OK   #1243 develop's blob of package_scripts.test.ts == BASE's (3658654c47f8)
+    #1243 100644 5870ad378569cbfaff23efb94c750abca5aaa09d (BASE 3658654c47f8) +19/-4 systemTest/performance/tests/unit/package_scripts.test.ts
+  OK   (1) #1243 merged blob == head blob 62c9ecccb17b598ec8425f1f2d950783b2988766: systemTest/performance/tests/unit/support/readYamlRouting.ts
+  OK   #1243 systemTest/performance/tests/unit/support/readYamlRouting.ts mode 100644 at head (ABSENT at BASE)
+  OK   #1243 develop's blob of readYamlRouting.ts == BASE's (ABSENT)
+    #1243 100644 62c9ecccb17b598ec8425f1f2d950783b2988766 (BASE ABSENT) +67/-0 systemTest/performance/tests/unit/support/readYamlRouting.ts
+  OK   (1) #1243 merged blob == head blob 9cf304daafa2fb0a98a173aaf42f984948f23916: systemTest/performance/tests/unit/utils/yamlRedaction.test.ts
+  OK   #1243 systemTest/performance/tests/unit/utils/yamlRedaction.test.ts mode 100644 at head (100644 at BASE)
+  OK   #1243 develop's blob of yamlRedaction.test.ts == BASE's (5c137e834c77)
+    #1243 100644 9cf304daafa2fb0a98a173aaf42f984948f23916 (BASE 5c137e834c77) +71/-0 systemTest/performance/tests/unit/utils/yamlRedaction.test.ts
+  OK   (1) #1243 merged blob == head blob 53ad5ebd6894eb62a3da142418cd18f1f72d1321: systemTest/performance/utils/yaml.ts
+  OK   #1243 systemTest/performance/utils/yaml.ts mode 100644 at head (100644 at BASE)
+  OK   #1243 develop's blob of yaml.ts == BASE's (ca11b6438eec)
+    #1243 100644 53ad5ebd6894eb62a3da142418cd18f1f72d1321 (BASE ca11b6438eec) +10/-1 systemTest/performance/utils/yaml.ts
+  OK   #1243: NO package.json / lockfile / tsconfig / vitest / eslint / prettier / knip config in the PR
+  OK   #1244 numstat BASE..head == the pinned file set and counts (2 files)
+  OK   #1244 merges clean over develop (merge-tree rc 0) -> c2bddcf8c382c4b3dd0dc8e20b9a74977f29c202
+  OK   (1) BASE-INVARIANT: diff(develop, #1244 merged) == EXACTLY its own paths (got 2)
+  OK   (2) BASE-INVARIANT: numstat(develop -> merged) == numstat(BASE -> head) for #1244
+  OK   (1) #1244 merged blob == head blob 10bcfe3d9e4eac6af5d2d454c061f891076f08d6: systemTest/performance/runner/k6_docker.ts
+  OK   #1244 systemTest/performance/runner/k6_docker.ts mode 100644 at head (100644 at BASE)
+  OK   #1244 develop's blob of k6_docker.ts == BASE's (c776083ff527)
+    #1244 100644 10bcfe3d9e4eac6af5d2d454c061f891076f08d6 (BASE c776083ff527) +40/-8 systemTest/performance/runner/k6_docker.ts
+  OK   (1) #1244 merged blob == head blob a7511e11fc89ba7e83dffb6df5ebb54b5190a450: systemTest/performance/tests/unit/runner/k6DockerRedaction.test.ts
+  OK   #1244 systemTest/performance/tests/unit/runner/k6DockerRedaction.test.ts mode 100644 at head (100644 at BASE)
+  OK   #1244 develop's blob of k6DockerRedaction.test.ts == BASE's (869c94b0aa48)
+    #1244 100644 a7511e11fc89ba7e83dffb6df5ebb54b5190a450 (BASE 869c94b0aa48) +64/-0 systemTest/performance/tests/unit/runner/k6DockerRedaction.test.ts
+  OK   #1244: NO package.json / lockfile / tsconfig / vitest / eslint / prettier / knip config in the PR
+  OK   #1245 numstat BASE..head == the pinned file set and counts (1 files)
+  OK   #1245 merges clean over develop (merge-tree rc 0) -> dd06809bcc09accbeeffa0e6cf908d9e48d954a9
+  OK   (1) BASE-INVARIANT: diff(develop, #1245 merged) == EXACTLY its own paths (got 1)
+  OK   (2) BASE-INVARIANT: numstat(develop -> merged) == numstat(BASE -> head) for #1245
+  OK   (1) #1245 merged blob == head blob a932f56ff21d82a553718caece15238cfb28a0c9: systemTest/performance/tests/unit/utils/unitSuiteSlotIndependence.test.ts
+  OK   #1245 systemTest/performance/tests/unit/utils/unitSuiteSlotIndependence.test.ts mode 100644 at head (100644 at BASE)
+  OK   #1245 develop's blob of unitSuiteSlotIndependence.test.ts == BASE's (e4225f1ed4ac)
+    #1245 100644 a932f56ff21d82a553718caece15238cfb28a0c9 (BASE e4225f1ed4ac) +234/-4 systemTest/performance/tests/unit/utils/unitSuiteSlotIndependence.test.ts
+  OK   #1245: NO package.json / lockfile / tsconfig / vitest / eslint / prettier / knip config in the PR
+  OK   #1248 numstat BASE..head == the pinned file set and counts (1 files)
+  OK   #1248 merges clean over develop (merge-tree rc 0) -> cb4fb4770341371e2cdfb4fa420af1860997ac89
+  OK   (1) BASE-INVARIANT: diff(develop, #1248 merged) == EXACTLY its own paths (got 1)
+  OK   (2) BASE-INVARIANT: numstat(develop -> merged) == numstat(BASE -> head) for #1248
+  OK   (1) #1248 merged blob == head blob f79132ccaccfe7f9cf44440f12c8e0c8e9abe0a0: Blockchain/Dev/packages/shared/src/__tests__/ks781-p3-3-body-parser-order.test.ts
+  OK   #1248 Blockchain/Dev/packages/shared/src/__tests__/ks781-p3-3-body-parser-order.test.ts mode 100644 at head (100644 at BASE)
+  OK   #1248 develop's blob of ks781-p3-3-body-parser-order.test.ts == BASE's (f3b9df7c726a)
+    #1248 100644 f79132ccaccfe7f9cf44440f12c8e0c8e9abe0a0 (BASE f3b9df7c726a) +97/-1 Blockchain/Dev/packages/shared/src/__tests__/ks781-p3-3-body-parser-order.test.ts
+  OK   #1248: NO package.json / lockfile / tsconfig / vitest / eslint / prettier / knip config in the PR
+--- (d) END_TREE in all 24 orders + a second instrument (apply --cached of each BASE..head onto develop's tree in a TEMP index)
+  24 orders -> ['c647fd4349b89094fcf337c348730fcbfe261069']
+  OK   END_TREE identical in all 24 orders
+  OK   second instrument: apply --cached #1243 rc 0 
+  OK   second instrument: apply --cached #1244 rc 0 
+  OK   second instrument: apply --cached #1245 rc 0 
+  OK   second instrument: apply --cached #1248 rc 0 
+  OK   second instrument (apply --cached) c647fd4349b89094fcf337c348730fcbfe261069 == END_TREE
+  develop -> END_TREE: 9 files changed, 690 insertions(+), 24 deletions(-)
+  OK   END_TREE diff vs develop == the union of the 9 batch paths
+  OK   END_TREE blob of sheddingCeiling.test.ts == #1243 head blob (the merged-blob target)
+  OK   END_TREE blob of package_scripts.test.ts == #1243 head blob (the merged-blob target)
+  OK   END_TREE blob of readYamlRouting.ts == #1243 head blob (the merged-blob target)
+  OK   END_TREE blob of yamlRedaction.test.ts == #1243 head blob (the merged-blob target)
+  OK   END_TREE blob of yaml.ts == #1243 head blob (the merged-blob target)
+  OK   END_TREE blob of k6_docker.ts == #1244 head blob (the merged-blob target)
+  OK   END_TREE blob of k6DockerRedaction.test.ts == #1244 head blob (the merged-blob target)
+  OK   END_TREE blob of unitSuiteSlotIndependence.test.ts == #1245 head blob (the merged-blob target)
+  OK   END_TREE blob of ks781-p3-3-body-parser-order.test.ts == #1248 head blob (the merged-blob target)
+  CONTEXT ONLY (#1241 is NOT graded): merge-tree(a commit whose tree is the END_TREE, #1241 head) rc 1 — CONFLICTS (as expected: both rewrite the reader)
+--- (e) #1243 KS-1117 + KS-1300 items 2-4 (READ + a Python port of parserImportSites: PREDICTION only)
+  OK   #1243 yaml.ts: ONE leading U+FEFF stripped (startsWith + slice(1)), loadYaml(text) at head; loadYaml(source) at BASE
+  yaml.ts line map at head: strip [115] | loadYaml(text) [117]
+  OK   #1243 readYamlRouting.ts assembles the specifier; the literal `js-yaml` occurs 0 times in it
+    EVASIVE top-level static                                   want 1 | head port 1 | KS-1110 check 1
+    EVASIVE indented                                           want 1 | head port 1 | KS-1110 check 0
+    EVASIVE re-export                                          want 1 | head port 1 | KS-1110 check 0
+    EVASIVE require                                            want 1 | head port 1 | KS-1110 check 0
+    EVASIVE dynamic                                            want 1 | head port 1 | KS-1110 check 0
+    EVASIVE dynamic indented                                   want 1 | head port 1 | KS-1110 check 0
+    NON-HIT comment                                            want 0 | head port 0 | KS-1110 check 0
+    NON-HIT string                                             want 0 | head port 0 | KS-1110 check 0
+    NON-HIT readYaml import                                    want 0 | head port 0 | KS-1110 check 0
+    LEAD multi-line static import (prettier wraps long lists)  want 1 | head port 0 | KS-1110 check 0   <-- DIFFERS
+    LEAD multi-line re-export                                  want 1 | head port 0 | KS-1110 check 0   <-- DIFFERS
+    LEAD `import * as yaml from` split over two lines          want 1 | head port 0 | KS-1110 check 0   <-- DIFFERS
+    LEAD createRequire                                         want 1 | head port 0 | KS-1110 check 0   <-- DIFFERS
+    LEAD `import type` (no runtime load)                       want 0 | head port 1 | KS-1110 check 1   <-- DIFFERS
+    LEAD subpath                                               want 1 | head port 1 | KS-1110 check 1
+  OK   LEAD (READ): the CANARY writes a scratch dir INSIDE the package root (perfRoot/.ks1300-canary-*) and removes it in finally
+  .ks1300-canary- named in the package .gitignore: False | .prettierignore: False (a killed run leaves the dir for format:check / eslint / git status to see)
+  OK   #1243 the canary spawns node_modules/.bin/tsx — tsx is a devDependency (^4.23.1)
+  OK   #1243 touches no hook / preflight / workflow — KS-1300 item 1 (READYAML-UNGATED) NOT built, as disclosed
+--- (f) #1244 KS-1111 (READ + a Python port of formatDockerArgsForLog at BASE and head: PREDICTION only)
+  OK   #1244: SECRET_ENV_NAME byte-identical BASE -> head (NO widening of the masked name set): ['const SECRET_ENV_NAME = /PASSWORD|PASSWD|SECRET|TOKEN|MNEMONIC|(?:^|_)KEY$/i;']
+  OK   #1244: const ENV_SHORT_FLAG_TWO_ARG byte-identical BASE -> head
+  OK   #1244: const ENV_SHORT_FLAG_ATTACHED byte-identical BASE -> head
+  OK   #1244: const REDACTED byte-identical BASE -> head
+    seat L02                           --label -one --env=ADMIN_PASSWORD=ks1111-l02-9b3e          BASE clear   HEAD masked  want masked
+    seat L03                           --label -qe -eKEY=ks1111-l03-4d71                          BASE clear   HEAD masked  want masked
+    seat L08                           -u -qe -e=DB_PASSWORD=ks1111-l08-c052                      BASE clear   HEAD masked  want masked
+    seat Q1                            -Pe API_KEY=ks1111-q1-77ac                                 BASE masked  HEAD masked  want masked
+    seat Q2                            -diteADMIN_TOKEN=ks1111-q2-1fe8                            BASE masked  HEAD masked  want masked
+    seat accident cell                 --label -qe -eADMIN_PASSWORD=ks1111-acc-3f08               BASE masked  HEAD masked  want masked
+    seat -l boundary cell              -l ADMIN_PASSWORD=ks1111-q3-62ba                           BASE clear   HEAD clear   want clear
+    LEAD unrowed L01 (secret name)     --label -e --env=ADMIN_PASSWORD=g-l01                      BASE clear   HEAD masked  want masked
+    LEAD unrowed L04 (KEY)             -e -e -eKEY=g-l04                                          BASE clear   HEAD masked  want masked
+    LEAD unrowed L05 (KEY)             --label -one -qe=KEY=g-l05                                 BASE clear   HEAD masked  want masked
+    LEAD unrowed L07 (secret name)     -a -e --env=ADMIN_PASSWORD=g-l07                           BASE clear   HEAD masked  want masked
+    control L06                        --label -one -e ADMIN_PASSWORD=g-l06                       BASE masked  HEAD masked  want masked
+    control bare -e NAME               -e ADMIN_PASSWORD                                          BASE n/a     HEAD n/a     want nothing to mask
+  OK   #1244 port: every row reads as wanted AT HEAD (PREDICTION)
+  OK   #1244 port: at BASE exactly L02, L03, L08 print clear among the seat's rows (the seat's "L02, L03, L08 red") — PREDICTION
+  LEAD (port, PREDICTION): the unrowed siblings L01/L04/L05/L07, with a secret name, print CLEAR at BASE and are MASKED at head: [('LEAD unrowed L01 (secret name)', 'clear', 'masked'), ('LEAD unrowed L04 (KEY)', 'clear', 'masked'), ('LEAD unrowed L05 (KEY)', 'clear', 'masked'), ('LEAD unrowed L07 (secret name)', 'clear', 'masked')]
+--- (g) #1245 KS-1313 (READ + a Python port of readSuiteCounts: PREDICTION only; the gate MEASURES through the real code)
+  line map at head: {'def': [194], 'ret103': [210], 'call': [234], 'callret': [238], 'lastLine': [115], 'labels': [92], 'describe': [310], 'pin': [360]}
+  OK   readSuiteCounts is EXPORTED, defined once; ONE return (the :103-equivalent) and ONE call in childSuiteCounts
+  OK   develop's :99 inline regex + :103 reading exist at BASE and are GONE at head
+  OK   develop's file carries 3 cells (the slot-independence describe)
+  develop :99/:103 at [99] / [103]
+  OK   the slot-independence describe (the :127/:262 matrix, item 1 / F4) is byte-identical develop -> head: the budget is untouched
+  OK   vitest.unit.config.ts blob identical at BASE and head (b41c9ac0f93d)
+    S01 fail-only                                                            want {'passed': 0, 'failed': 1} HEAD-port {'passed': 0, 'failed': 1} DEVELOP-port None
+    S02 skip-only                                                            want {'passed': 0, 'failed': 0} HEAD-port {'passed': 0, 'failed': 0} DEVELOP-port None
+    S03 todo-only                                                            want {'passed': 0, 'failed': 0} HEAD-port {'passed': 0, 'failed': 0} DEVELOP-port None
+    S04 expected-fail-only                                                   want {'passed': 0, 'failed': 0} HEAD-port {'passed': 0, 'failed': 0} DEVELOP-port None
+    S05 expected-fail+pass                                                   want {'passed': 1, 'failed': 0} HEAD-port {'passed': 1, 'failed': 0} DEVELOP-port None
+    S06 fail+pass+skip                                                       want {'passed': 1, 'failed': 1} HEAD-port {'passed': 1, 'failed': 1} DEVELOP-port None
+    S07 pass-only                                                            want {'passed': 1, 'failed': 0} HEAD-port {'passed': 1, 'failed': 0} DEVELOP-port {'passed': 1, 'failed': 0}
+    S08 multi-file                                                           want {'passed': 1, 'failed': 1} HEAD-port {'passed': 1, 'failed': 1} DEVELOP-port None
+    S09 all-failed                                                           want {'passed': 0, 'failed': 3} HEAD-port {'passed': 0, 'failed': 3} DEVELOP-port None
+    S10 every label                                                          want {'passed': 2, 'failed': 2} HEAD-port {'passed': 2, 'failed': 2} DEVELOP-port None
+    S11 orientation                                                          want {'passed': 3, 'failed': 2} HEAD-port {'passed': 3, 'failed': 2} DEVELOP-port {'passed': 3, 'failed': 2}
+    S12 beforeAll throws (Test Files 1 failed, rc 1)                         want {'passed': 0, 'failed': 0} HEAD-port {'passed': 0, 'failed': 0} DEVELOP-port None
+    S13 lookalike console.log (stdout, BEFORE the summary)                   want {'passed': 1, 'failed': 1} HEAD-port {'passed': 1, 'failed': 1} DEVELOP-port {'passed': 5, 'failed': 0}
+    S14 lookalike console.error (stderr, AFTER the summary in stdout+stderr) want {'passed': 1, 'failed': 1} HEAD-port {'passed': 5, 'failed': 0} DEVELOP-port {'passed': 1, 'failed': 1}   <-- HEAD WRONG
+    S15 no tests                                                             want None                       HEAD-port None                       DEVELOP-port None
+    S16 ctx.skip() at runtime                                                want {'passed': 1, 'failed': 0} HEAD-port {'passed': 1, 'failed': 0} DEVELOP-port None
+    S17 it.fails that passes (unexpected pass)                               want {'passed': 1, 'failed': 1} HEAD-port {'passed': 1, 'failed': 1} DEVELOP-port {'passed': 1, 'failed': 1}
+    S19 a failing string diff whose context line is Tests-shaped (stderr)    want {'passed': 1, 'failed': 1} HEAD-port {'passed': 9, 'failed': 0} DEVELOP-port {'passed': 1, 'failed': 1}   <-- HEAD WRONG
+  OK   PREDICTION (port): the head reads every MANDATED shape (fail-only, skip-only, todo-only, expected-fail+pass, fail+pass+skip, pass-only, multi-file) correctly
+  PREDICTION (port + the drafter's live captures, liveshape_lift_2.out): the head is WRONG on ['S14 lookalike console.error (stderr, AFTER the summary in stdout+stderr)', 'S19 a failing string diff whose context line is Tests-shaped (stderr)'] — the LAST-MATCH exposure: stderr follows stdout in `${stdout}\n${stderr}`, so any Tests-shaped stderr line (console.error, a failing string diff) becomes the verdict
+  PREDICTED (port) HEAD                                                 -> RED NONE
+  PREDICTED (port) R-D develop's :99/:103 reading in readSuiteCounts    -> RED ['fail-only', 'skip-only', 'todo-only', 'expected-fail', 'all-failed', 'mixed', 'every label', 'LAST line', 'null: sum != total', 'the sum check is a real check']
+  PREDICTED (port) T-103 swap at :[210]                                 -> RED ['fail-only', 'pass-only', 'all-failed', 'mixed']
+  PREDICTED (port) T-FIRST (seat T-2)                                   -> RED ['LAST line']
+  PREDICTED (port) T-NOSUM (seat T-3)                                   -> RED ['null: sum != total', 'the sum check is a real check']
+  PREDICTED (port) T-DUPOK (seat T-5)                                   -> RED ['null: repeat surviving sum']
+  OK   the head reading satisfies every value cell under the port (the seat's green, reproduced statically)
+  OK   develop's reading reds at least five KS-1313 cells (RED at base is predictable)
+  T-CALL predictions (READ): (i) :[234] back to develop's inline regex -> the call-site pin RED (its `toContain('readSuiteCounts(output)')`), the reader cells GREEN; (ii) :[238] `return counts;` -> swapped -> the pin GREEN (the text is still there), the KS-1313 cells GREEN, ONLY the :262 matrix RED; (iii) a comment carrying `readSuiteCounts(output)` beside an inline regex -> the pin GREEN (a SOURCE-TEXT pin, CALLSITE-SCRAPE)
+--- (h) vitest 4.1.11 as pinned: the renderer of a PIPED run's final `Tests` line (READ from the npm tarball)
+  OK   the package lockfile at the #1245 head pins vitest 4.1.11
+  READ vitest: every_segment_conditional = True
+  READ vitest: expected_fail_excluded_from_passed = True
+  READ vitest: label_order = ['failed`', 'passed`', 'expected fail`', 'skipped`', 'todo`']
+  READ vitest: total_is_tasks_length = True
+  READ vitest: utils_chunk = utils.BS4fH3nR.js
+  READ vitest: version = 4.1.11
+--- (k) #1248 KS-1143 GF-2 (READ; the gate re-runs L3's tamper matrix, T-2 FIRST)
+  line map at head: {'continuations': [2447], 'filter_T2': [2456], 'walk': [2475], 'W7': [2722], 'W8': [2748], 'W2': [2669], 'W3': [2674], 'census': [2600], 'limit': [2442]}
+  OK   #1248: the continuation walk, the T-2 filter line, the walk call, W2, W3, W7, W8, the LEG F census cell and the disclosed-limit comment each occur ONCE at head
+  OK   #1248: develop walked the WHOLE wrapper body (`walk(body);`); the head walks only the parser continuations
+  OK   #1248 is a FAITHFUL cherry-pick of L3's a40cb9eea049 (a40cb9eea049f57348ef0a2c68326b56a577f7db): patch-id equal True, file blob equal True; L3's parent blob == develop's True
+  READ ONLY — #1248's push log (the seat record, anchored to each suite's `=== …test.sh ===` header): {'pre_push_hook_base': '28/0', 'fixture_guard': '6/0', 'shell_suites': '60 passed, 0 failed, 0 skipped (of 60)', 'preflight': 'PREFLIGHT INCOMPLETE — 12/15 legs ran, 3 SKIPPED. Nothing failed.', 'legs': '  legs 3 4 8 — local stack not up; you can clear this by starting it.', 'fixture_build_failed': 0, 'control_absent_header': 'NOT FOUND'}
+  OK   #1248 push log: the fleet STOP count 28/0, 6/0, 60 of 60, 0 FIXTURE BUILD FAILED (anchored read; control header NOT FOUND)
+--- (i) branch names through the hyphenated-key scanner (own keys only)
+  OK   #1243 branch keys ['KS-1117'] ⊆ own ['KS-1117', 'KS-1300']
+  OK   #1244 branch keys ['KS-1111'] ⊆ own ['KS-1111']
+  OK   #1245 branch keys ['KS-1313'] ⊆ own ['KS-1313']
+  OK   #1248 branch keys ['KS-1143'] ⊆ own ['KS-1143']
+--- (j) the fleet STOP count (static reference; #1248 is the only PR whose push ran the Blockchain/Dev preflight)
+  run-shell-suites.sh ROOTS `*.test.sh`: develop 60 | END_TREE 60
+  systemTest/performance unit *.test.ts files: develop 63 | END_TREE 63 (the seats: 63 files; package counts predicted 1089 develop, +8 #1243, +7 #1244, +18 #1245 -> 1122 END; packages/shared 928 -> 930 with #1248; the gate MEASURES)
+WROTE /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/gatesets/2026-09-26_gate24T2a/pins_gate24T2a.json at 2026-09-25T14:51:47Z
+HARD FAILS: 0 []
