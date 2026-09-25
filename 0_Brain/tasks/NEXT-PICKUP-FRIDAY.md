@@ -21,22 +21,18 @@ supersede: replace wholesale; previous = NEXT-PICKUP-FRIDAY.md.pre-0925-rotate-s
 
 - **The LAPTOP SLEEPS.** Arm `caffeinate -dims -t 21600` (background) in the same action as launching any seat, and check `pgrep -fl caffeinate` at boot. On 09-25 it slept at ~17:0x and cut two seats' turns. One was armed at 17:4x until ~23:4x.
 
-## 🔴 LIVE AT THE HANDOVER
-1. **HPSM-POC B14: MERGED** (PR #22 → main `ca554a6`, tree = the head's tree, 8/8 checks). Pane closed. Main push CI NOT yet read → `gh run list --commit ca554a6…` first thing.
-2. **HPSM-POC B16 cold-user RE-RUN: LIVE** (pane `Datasec/HPSM-POC-C`, launched on the NEW account, usage 25%; card `hpsmpoc-cold-user-rerun-at-93pct` ruled a on Kam's account switch). Brief `HPSM-POC/1_Project_Definition/Briefs/2026-09-25_B16_SEAT-C_cold-user-rerun-after-fixes.md`. **Arm the watcher:** glob `…/HPSM-POC/1_Project_Definition/Briefs/2026-09-25_B16*STATUS*.md`. On READY:
+## 🔴 LIVE (refreshed 19:48 by the 19:37 successor seat)
+1. **HPSM-POC B16 cold-user RE-RUN: LIVE** (pane `Datasec/HPSM-POC-C` %19). Brief `HPSM-POC/1_Project_Definition/Briefs/2026-09-25_B16_SEAT-C_cold-user-rerun-after-fixes.md`. Watcher glob `…/HPSM-POC/1_Project_Definition/Briefs/2026-09-25_B16*STATUS*.md`. On READY:
    - verify one GONE claim at source (a screenshot);
    - send Kam the top 5 + the file;
    - then brief a fix round for anything STILL THERE / NEW (not Kam's or the SME's).
-3. **Open cards for Kam (Friday tab):**
-   - `composer-typed-answers-deploy` (rec a: deploy the release pair `8fab2ed5…`/`efad540b…` + migration 0018, runbook `2_Project_Files/friday/composer_demo_deploy.md`, then a fresh example that SELECTS FRAMEWORKS E8 2023 ML2);
-   - `composer-example-d023-choice` (default "On");
-   - `hpsmpoc-sow-ai-tools-clause` (Q-K01; rec b);
-   - the re-run card above.
-   Kam signed into a NEW account at 19:28 (usage 25%), so the 90% gate is open again.
-4. Done today and closed (details in the note): Composer B07/B08/B09 (main `b0b512c`); HPSM B02; HPSM-POC B11/B12/B13 (main `61f6f06`)/B15 (the map in Kam's drawer).
+2. **Composer B10 two examples: LIVE** (pane `Datasec/Security-Composer-B` %20). Brief `Datasec Security Composer/1_Project_Definition/Briefs/2026-09-25_B10_SEAT-B_two-example-engagements-d023-on-and-manual.md` (Kam C-08: A = D-023 On, B = Manual approval). Watcher glob `…/Datasec Security Composer/1_Project_Definition/Briefs/2026-09-25_B10*STATUS*.md`. On READY: view one released screenshot per example, grep exports for the password (control), tell Kam with both names.
+3. DONE this seat: B14 merged + main CI green (ca554a6); Composer typed-answers release DEPLOYED to the demo (b0b512c, content efad540b, 0018 applied; temp key removed and proven; C-08); SOW AI-clause wording delivered (HPSM-POC C-20, drawer f-4ca8dff847).
+4. **Open Friday cards: 0.** New account: usage 26% at 19:4x.
+5. caffeinate `-dims -t 21600` armed DETACHED at 19:37 (pid 22618, sess 0 / tty ??), until ~01:3x. It survives a rotation; check `pgrep -fl "caffeinate -dims"` anyway.
 
 ## NEXT (owed, in order)
-1. ~~HPSM-POC B14 fix round~~ DONE (LIVE 1); the re-run is LIVE 2. Source: the B12 user test STATUS `HPSM-POC/1_Project_Definition/Briefs/2026-09-25_B12_SEAT-C_end-to-end-user-test-as-a-salesperson.STATUS.md` (46 findings).
+1. ~~HPSM-POC B14 fix round~~ DONE and merged; the re-run is LIVE 1. Source: the B12 user test STATUS `HPSM-POC/1_Project_Definition/Briefs/2026-09-25_B12_SEAT-C_end-to-end-user-test-as-a-salesperson.STATUS.md` (46 findings).
    - Fix every finding that is not Kam's or the SME's. FIRST: internal notes on screen, incl. the named person ("Kam/Paul Waite meeting" footer).
    - Then: the contradictions (sample customers' narrative/report pages say "No assessment yet"; question totals 16/15/14; identical 54.2); Reset demo not resetting live data; the calculator overwriting the dashboard ARR; the "Demo Consultant" header; readiness Download greyed out.
    - **Plus C-19:** showcase mode scores NEW customers with the draft rules, labelled DRAFT (outside showcase mode C-15 still refuses).
