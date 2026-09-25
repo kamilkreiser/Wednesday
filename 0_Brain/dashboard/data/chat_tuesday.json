@@ -3617,5 +3617,12 @@
   "project": "Datasec",
   "ts": "2026-09-25T22:18:45.585103+10:00",
   "text": "Datasec / NexusAI — the telemetry fix is now in main. I checked main on GitHub myself: exactly three files changed, the test type is now standard, and the image setting is unchanged. No demo deployment happened. All 3,978 tests pass. The GitHub build is still running; I'll flag it if it fails."
+ },
+ {
+  "role": "wednesday",
+  "seat": "Kamils-Mac-mini.localdomain",
+  "project": "Datasec",
+  "ts": "2026-09-26T03:36:31.896156+10:00",
+  "text": "NexusAI overnight: no action needed. Two tested fixes are merged to main, one at a time, and CI is green on each.\n\n1. RD-579: clearing the AI settings now really removes the leftover stored values, and saving with no endpoint stores nothing. Main 0863711, CI Build 36159256470 passed 3986/3986.\n2. RD-639: erasure no longer follows a symlink out of the data folder and reports honestly when it cannot finish. Main 11666d3, CI Build 36164903279 passed 4012/4012.\n\nI checked each merge on GitHub myself (commit, parents, test counts). The demo did not redeploy. The QA gate found two older problems, now ticketed: RD-684 (High), where the erasure clean-up re-run can record 'purged' while files behind a link survive, which N is fixing next; and RD-681 (High), where Clear says 'cleared' over a stored key it cannot decrypt. Four lanes are still working through tickets; the next gate batches are lined up."
  }
 ]
