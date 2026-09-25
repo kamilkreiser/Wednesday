@@ -94,3 +94,7 @@ Rule for launching: launch a tier's gate when ≥4 of that tier are READY, or wh
 **22:25 #1239 KS-1263 MERGED + VERIFIED** (PR API merged=True; develop == 6e2a00bfed57 by ls-remote). Day total 29 merged, 0 deployed. Tier-2e #1241 r2 gate still running (%20).
 
 **22:39 TIER-2e #1241 r2 VERDICT (QA 12:38:05Z; report sha256 b6b2c0f1… 32,179 B verified on disk): NO GO AT THE CAP** — LIVE-SHAPE NULL on 3 real vitest shapes (the second renderer omits passed when 0: fail-only / skip-only / todo-only), CALLSITE NOT PINNED. Nothing ships. Seat B 27th: file the residue ticket (verbatim from the report), comment PR #1241 + KS-1226, leave the PR OPEN, then wrap. %20 closed. Round-21 queue EMPTY.
+
+## Round 24 (lanes B 28th / L5 / L6, lock .push-lock-24)
+**23:29 READY: #1243 KS-1117 + KS-1300 items 2-4 (Seat L6, TIER 2, head 0c89e2b503d9 == ls-remote).** First of the round. Batch rule: launch a tier when 4 are READY or the oldest is 60 min old (13:27Z → 14:27Z).
+**23:36 READY: #1244 KS-1111 (Seat L6, tier 2, head 146b620fd by ls-remote).**

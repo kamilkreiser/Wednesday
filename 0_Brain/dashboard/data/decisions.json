@@ -16923,5 +16923,52 @@
    "CARD hpsmpoc-pdf-approver-name",
    "CARD hpsmpoc-templates-v101"
   ]
+ },
+ {
+  "id": "secuura-ks1304-withtenant-tenant-pool-and-admin-writes",
+  "client_project": "Secuura/Blockchain",
+  "title": "KS-1304: should admin config writes follow a tenant onto its own database?",
+  "bluf": "A question about product behaviour, not urgent. Today every tenant shares one database, so nothing is affected yet. If a tenant is ever given its own database (a setting that exists but is switched on nowhere), there are two cases. The document share/transfer writes would still go to the SHARED database. Fixing that one helper (withTenant) also changes 9 admin-config writes, which today deliberately use the shared database. Seat B 28th measured all 11 call sites tonight. Default if you don't answer: nothing is built; KS-1304 stays open with the measurement on the ticket.",
+  "default_action": "c — nothing is built; Seat B 28th posts the 11-site measurement on KS-1304 and the ticket stays open.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Admin writes follow the tenant too (seat's recommendation)",
+    "detail": "One-line change in withTenant; the 9 admin config writes for a named tenant would land in that tenant's own database. Stated in the PR body; a tier-1 gate tests it."
+   },
+   {
+    "key": "b",
+    "label": "Admin stays on the shared database; only documents move",
+    "detail": "Needs an explicit opt-out flag for admin routes — a second parameter, close to the per-request database chooser you ruled out earlier (Q-G4)."
+   },
+   {
+    "key": "c",
+    "label": "Leave it until per-tenant databases are actually planned",
+    "detail": "Nothing changes. The ticket keeps the measurement for whoever builds per-tenant databases."
+   }
+  ],
+  "recommended": "c",
+  "ts": "2026-09-25T23:18:23.989755+10:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "2026-08-17 20:23",
+   "2026-08-21 19:49",
+   "2026-09-01 13:45",
+   "2026-09-16 07:01",
+   "CARD secuura-demo-admin-image-rebuild-2026-09-05",
+   "CARD secuura-demo-kam-admin-default-password",
+   "CARD secuura-demo-admin-transcripts",
+   "CARD secuura-demo-admin-mfa",
+   "CARD workspace-dead-secuura-tenant-cleanup",
+   "CARD secuura-ks949-round2-and-the-second-admin",
+   "CARD secuura-admin-credential-rotation-183-files",
+   "CARD secuura-org-trust-boundary-within-tenant",
+   "CARD secrev-live-pass-blocked-on-tenant",
+   "CARD secuura-originate-unauthenticated-cross-tenant-billing",
+   "CARD secuura-ks1084-gateway-originate-no-tenant-header-p0",
+   "CARD wed-ornith-pool-thin-widen-the-harness"
+  ]
  }
 ]
