@@ -21,3 +21,9 @@ tier: W
 5. **Blocked today:** the model does not start (the tilelang import failure, 2026-09-25; Friday is diagnosing). The calibration starts on the first healthy boot, with Friday's smoke tests first.
 
 **Family:** [[2026-09-25_three-tier-routing-ornith-spark-cloud-always-on]] · [[2026-09-23_spark-kit-running-a-local-coding-model]] · [[2026-09-15_ornith-every-issue-gets-a-tooling-or-instruction-fix]] · [[2026-09-18_ornith-is-cheap-the-brief-is-the-cost]] · [[2026-08-03_go-slow-earn-autonomy]] (rule 4: pilot, measure, review; autonomy is earned).
+
+## EXTENSION 2026-09-25 15:28 — Kam, live board (view=wednesday), verbatim: *"great.  Use the spark as much as possible and push it to its limits as part of the test.  from my laptop tests, it usually corrects things on the second pass with some assistance but after the second time, its a diminishing return game so switch to Opus5.5 after the second attempt"* · 15:28:32 *"and by test I mean give it real work but measure progress"*
+- **The test IS real work.** No synthetic benchmark rounds: Secuura tickets from the real backlog, each one measured (rung · pass/fail · the cause of any fail (model / harness / brief) · rounds · wall-clock · tokens).
+- **Push it to its limits:** climb the ladder as fast as the evidence allows, and keep going past the first failure to find where it actually breaks. A rung that fails twice is where its limit is, and that is recorded, not avoided.
+- **The counter, confirmed by his own laptop tests:** original + ONE assisted second pass ("with some assistance" = a rebrief naming the specific miss); after that, Opus 5.5. Same as the 2026-09-23 kit counter.
+- **As much as possible:** the Spark is the default for medium work while it is healthy; Ornith keeps the simplest; cloud only on the counter or on a clause the Spark cannot meet.

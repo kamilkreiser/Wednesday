@@ -7,7 +7,7 @@ status: live
 
 # Boot digest — headline + rules of every lesson (open the file when it fires)
 
-Generated 2026-09-25 15:28 from 206 lesson files (953,980 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 10 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
+Generated 2026-09-25 15:30 from 206 lesson files (955,265 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 10 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
 
 ## The T9 SSD is the master — Wednesday must be fully portable
 `2026-07-31_fully-portable-drive.md` · principle · 2026-07-31 · status: superseded — the "T9 is the master" half by [[2026-08-25_one-drive-devmaster-is-master]] (2026-08-25); the portability principle itself still lives
@@ -6736,6 +6736,8 @@ subagent, or herself). **Ask first: can the local model do this, under the kit's
 **His words, verbatim:** *"Working with the spark, keep a similar approach to what we did with a smaller LLM in testing its capability and adjusting the complexity, or how much you need to guide it. Once you have a good idea of what the metal can and cannot do, we can reduce the level of oversight. So, let's start with height."*
 ("the metal" = the model; "start with height" read as **start with HIGH oversight**. That reading was said back to him on the panel; his word corrects it.)
 
+sections (open the file for these): EXTENSION 2026-09-25 15:28 — Kam, live board (view=wednesday), verbatim: *"great.  Use the spark as much as possible and push it to its limits as part of the test.  from my laptop tests, it usually corrects things on the second pass with some assistance but after the second time, its a diminishing return game so switch to Opus5.5 after the second attempt"* · 15:28:32 *"and by test I mean give it real work but measure progress"*
+
 **How to apply:**
 1. **Start high.** Every Spark task gets a full brief (the kit's `03_BRIEF_TEMPLATE.md` / the Ornith brief shape), a checker that can fail (smoke-test the harness first: a trivial change + two deliberate breaks), and Wednesday's line-by-line read of every PASS. A PASS is a candidate, never a merge.
 2. **Measure capability as a ladder**, the way the Ornith week did: one-file + spelled-out fix → multi-hunk → multi-file → looser briefs (fix shape only, no exact lines) → a ticket described in prose. Record each rung's result (pass, fail and why: model / harness / brief) in an IMPROVEMENTS-style file for the Spark, scored at the weekly consolidation.
@@ -6744,6 +6746,12 @@ subagent, or herself). **Ask first: can the local model do this, under the kit's
 5. **Blocked today:** the model does not start (the tilelang import failure, 2026-09-25; Friday is diagnosing). The calibration starts on the first healthy boot, with Friday's smoke tests first.
 
 **Family:** [[2026-09-25_three-tier-routing-ornith-spark-cloud-always-on]] · [[2026-09-23_spark-kit-running-a-local-coding-model]] · [[2026-09-15_ornith-every-issue-gets-a-tooling-or-instruction-fix]] · [[2026-09-18_ornith-is-cheap-the-brief-is-the-cost]] · [[2026-08-03_go-slow-earn-autonomy]] (rule 4: pilot, measure, review; autonomy is earned).
+
+## EXTENSION 2026-09-25 15:28 — Kam, live board (view=wednesday), verbatim: *"great.  Use the spark as much as possible and push it to its limits as part of the test.  from my laptop tests, it usually corrects things on the second pass with some assistance but after the second time, its a diminishing return game so switch to Opus5.5 after the second attempt"* · 15:28:32 *"and by test I mean give it real work but measure progress"*
+- **The test IS real work.** No synthetic benchmark rounds: Secuura tickets from the real backlog, each one measured (rung · pass/fail · the cause of any fail (model / harness / brief) · rounds · wall-clock · tokens).
+- **Push it to its limits:** climb the ladder as fast as the evidence allows, and keep going past the first failure to find where it actually breaks. A rung that fails twice is where its limit is, and that is recorded, not avoided.
+- **The counter, confirmed by his own laptop tests:** original + ONE assisted second pass ("with some assistance" = a rebrief naming the specific miss); after that, Opus 5.5. Same as the 2026-09-23 kit counter.
+- **As much as possible:** the Spark is the default for medium work while it is healthy; Ornith keeps the simplest; cloud only on the counter or on a clause the Spark cannot meet.
 
 
 ## Standing routine: Ornith for the simplest tasks, the Spark for medium and normal ones, cloud agents only when necessary. Wednesday orchestrates and tests everything, the routine always runs, and from 70% of the weekly allowance cloud agents are minimised
