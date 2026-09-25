@@ -4,7 +4,7 @@ type: pickup
 seat: friday
 scope: BOTH Secuura and Datasec, from Kam's laptop. Claim each project before driving it (wed_claim.sh)
 status: live
-written_by: Friday, day WRAP 2026-09-26 07:1x on Kam's word (successor seat of 19:37; no seat open)
+written_by: Friday, 50% checkpoint 2026-09-26 09:50 (day seat)
 supersede: replace wholesale; previous = NEXT-PICKUP-FRIDAY.md.pre-0925-rotate-successor2
 ---
 
@@ -21,16 +21,16 @@ supersede: replace wholesale; previous = NEXT-PICKUP-FRIDAY.md.pre-0925-rotate-s
 
 - **The LAPTOP SLEEPS.** Arm `caffeinate -dims -t 21600` (background) in the same action as launching any seat, and check `pgrep -fl caffeinate` at boot. On 09-25 it slept at ~17:0x and cut two seats' turns. One was armed at 17:4x until ~23:4x.
 
-## 🔴🔴 KAM'S INSTRUCTION FOR THIS BOOT (terminal, 2026-09-26 ~07:2x, verbatim): "Please rotate and then once you're up, pick up the new card with 1.1."
-Read as: the templates **1.0.1** approval (card `hpsmpoc-approve-templates-101`, ruled a, C-26). **This is authorised work, start it at boot, do not re-ask:** item 2 below (brief + launch the small HPSM-POC seat: registry commit → PR → merge on green → live AI-mode re-test ≤12 calls → the real pass rate to Kam). Receipt it on the panel first.
+## 🔴🔴 DAY INSTRUCTION, live until end of SATURDAY 2026-09-26 — `tasks/WEEK-INSTRUCTION-FRIDAY.md`
+Kam (terminal ~08:0x, verbatim): "Yes, please keep going for the day. I'll be out all day, so just keep working on getting the product ready and refined." = Datasec/HPSM-POC. Still his: deploys, anything to HP/humans, money, template text + validator/rule changes, irreversible. Usage 71% at 09:50: cloud seats only when nothing local can do it AND it matters now; Spark first.
 
-## 🔴 STATE AT THE WRAP (2026-09-26 07:1x, on Kam's "please wrap up for the day")
-1. **No seat open.** HPSM-POC main = **1360aad** (B17 + B18 + B19 merged, CI green). Composer demo = main b0b512c, content efad540b, with two example engagements (C-08).
-2. 🔴 **FIRST WORK: Kam APPROVED templates 1.0.1 at 07:19:00 on 09-26 (C-26), during the wrap.** Brief a small HPSM-POC seat (from main 1360aad): ONE commit moving the three 1.0.1 rows to approved (approvedBy "Kam Kreiser (Product Owner)", approvedAt 2026-09-26T07:19:00+10:00, ref C-26), hashes …6d138904 / …76ed42f9 / …7e1409c7 asserted unchanged; PR; merge on green; then a live AI-mode re-test by clicks (≤12 calls: 3 customers × 2 drafts + the other two templates once) and the REAL pass rate to Kam, honestly (the remediation "compliance" refusal may persist; keep the check strict).
-3. Friday KEEPS the "compliance" check strict. If 1.0.1 live still refuses on remediation, report that honestly; do not loosen to make a demo pass.
-4. Owed to Kam when relevant: the Azure budget's currency (UNMEASURED); the erasure endpoint is designed, not built (C-25 runbook only).
-5. **Mechanisms owed (w=2 rows, shared tooling: claim first):** caffeinate armed DETACHED by the laptop launcher / `cockpit.sh add`, + a doctor warning; a `friday_pull.sh` that never silences a pull and refuses on UU.
-6. caffeinate from 19:37 expires ~01:37: gone by the next boot. Re-arm DETACHED (`nohup caffeinate -dims -t 21600 &`) with the first seat launch.
+## 🔴 STATE AT THE 09:50 CHECKPOINT (2026-09-26)
+1. **HPSM-POC main = 99483e4** (B20 #26 templates 1.0.1 approved, C-26 delivered; B24 #28 cold-user fix round). Main push CI for 99483e4: poll was running.
+2. **HELD, do NOT merge without Kam's tap:** PR #27 (B23 validator false-refusals, head 88e3ab2, CI 8/8 at 88e3ab2) ← card `hpsmpoc-validator-false-refusals` (default: stays unmerged). Re-check mergeability after #28 before any merge.
+3. **Open Friday cards (5):** validator-false-refusals (rec a merge #27) · summary-citation-gaps (rec a auto-cite; default c nothing) · showcase-approver-line (default b ALREADY BUILT in #28; another ruling replaces that part) · findings-order (default nothing) · showcase-labelling (default keep). On a tap: reconcile --apply, act, --delivered.
+4. **Spark loop (Friday's):** laptop tunnel open (keepalive, HANDOFF §1); Wednesday says the box is free (mail 23:39Z). A drafting subagent was writing the census + briefs in `2_Project_Files/friday/spark/briefs/2026-09-26_hpsmpoc-sample-tag/` (CENSUS.md, <Component>.brief.md + .expect.json) for the B22-08 residue ("Sample data" tag on user-added customers; SyntheticTag used in 10 files). NEXT: run each brief with spark_run.py (repo = a clone of HPSM-POC at main in Friday's own dir, never the project checkout), check with spark_check.py, READ every diff, then a Claude seat raises the PASSes as ONE PR (counter: original + ONE rebrief, then Opus 5.5).
+5. **Evidence of today:** B20–B24 briefs + STATUS in HPSM-POC/1_Project_Definition/Briefs/. No seat open at 09:50. caffeinate pid 49522 (until ~13:2x).
+6. End of day: a summary to Kam's panel (what merged, what is held, the 5 cards, the pass rate), then the wrap.
 
 ## NEXT (owed, in order)
 1. ~~HPSM-POC B14 fix round~~ DONE and merged; the re-run is LIVE 1. Source: the B12 user test STATUS `HPSM-POC/1_Project_Definition/Briefs/2026-09-25_B12_SEAT-C_end-to-end-user-test-as-a-salesperson.STATUS.md` (46 findings).
