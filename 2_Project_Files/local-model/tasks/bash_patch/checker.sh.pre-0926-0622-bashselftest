@@ -10,49 +10,17 @@
 #   B5 GREEN-AFTER: the script hunk applied, `bash -n` on the script passes, the same test exits 0 with 0 `FAIL:` and >= 1 pass
 #   B6 sibling suites that drive this script (any *.test.sh in test_dir naming its basename) show no NEW failure after
 #   B7 shellcheck on the script after, when installed — INFORMATIONAL, never gated
-#   SELF-TESTING mode (2026-09-26, KS-766 first; mirrors tasks/code_patch/checker.sh's self_testing mode): when the input
-#   carries `self_testing` (build_bash_input.sh, from a `## Self-testing … test hunks: N` brief) the product script IS its
-#   own suite (`bash <product> --self-test`). B0/B2-B7 are replaced by S0-S5 (after B1, which is shared):
-#     S0 a SCRATCH tree = `git -C <clone-dir> archive <tip> | tar -x` (a read verb; <clone-dir> may be the source checkout
-#        itself — nothing is written in it), and the self-test run there at the untouched tip (the PASS-count baseline)
-#     S2 every section applies in the scratch tree: strict first; --recount only for a MEASURED miscounted header; then
-#        --recount --ignore-whitespace — the mode is recorded and named, "strict" is claimed only when strict applied
-#     S2a every hunk's old side sits at its header's start line (code_patch/a2a_anchor.py — a relocated header FAILS)
-#     S3 touched-file set == { product_file } exactly
-#     S3b must_change sites are '-' lines; no stays-site removed; A3c/A3d (code_patch/a3c_plus.py)
-#     S3g '+' lines BYTE-IDENTICAL, in order, to the golden's when the input names one (sha256 re-checked)
-#     S4 RED: the declared TEST hunk(s) ALONE (code_patch/selftest_split.py, red cells cross-checked) -> the self-test
-#        exits red_rc with >= 1 FAIL line. `command not found` for a function the FIX defines is a LEGITIMATE red here.
-#     S5 GREEN: the remaining hunks on top -> `bash -n` clean, exit green_rc, 0 FAIL lines, PASS count >= the tip's
-#   Arms: tests/bash_selftest_arms.sh.
 # Every write verb runs inside <clone-dir>; the source checkout is never touched. Untracked files a previous run left in the
 # clone are QUARANTINED, never deleted. bash 3.2. Tests run with a 120 s budget through python (macOS has no `timeout`).
 set -uo pipefail
 INPUT="${1:-}"; OUT="${2:-}"; CLONE="${3:-}"
 [ -f "$INPUT" ] && [ -f "$OUT" ] && [ -d "$CLONE/.git" ] || { echo "usage: checker.sh <input.json> <out.md> <clone-dir>" >&2; exit 1; }
 REP="$OUT.checker"; mkdir -p "$REP"
-field() { python3 -c 'import json,sys; print(json.load(open(sys.argv[1])).get(sys.argv[2],""))' "$INPUT" "$1"; }
+field() { python3 -c 'import json,sys; print(json.load(open(sys.argv[1]))[sys.argv[2]])' "$INPUT" "$1"; }
 PRODUCT="$(field product_file)"; REF_TEST="$(field reference_test_file)"; TEST_FILE="$(field suggested_test_file)"; TEST_DIR="$(field test_dir)"
 TIP="$(python3 -c 'import json,sys; d=json.load(open(sys.argv[1])); print(d.get("tip") or d.get("repo",{}).get("tip",""))' "$INPUT")"
 FAILS=0; pass(){ echo "PASS $*"; }; fail(){ echo "FAIL $*"; FAILS=$((FAILS+1)); }
 CODE_DIR="$(cd "$(dirname "$0")/../code_patch" && pwd)"
-SELFTEST_HUNKS="$(python3 -c 'import json,sys; d=json.load(open(sys.argv[1])); print(",".join(str(k) for k in ((d.get("self_testing") or {}).get("test_hunks") or [])))' "$INPUT")"
-if [ -n "$SELFTEST_HUNKS" ]; then
-  MODE=self_testing
-  stf() { python3 -c 'import json,sys; v=(json.load(open(sys.argv[1])).get("self_testing") or {}).get(sys.argv[2]); print("" if v is None else v)' "$INPUT" "$1"; }
-  ST_RUNNER="$(stf runner)"; ST_RED_RC="$(stf red_rc)"; ST_GREEN_RC="$(stf green_rc)"; ST_RE="$(stf line_regex)"; ST_GOLDEN="$(stf golden_diff)"; ST_GOLDEN_SHA="$(stf golden_sha256)"
-  echo "mode: self_testing (one file $PRODUCT; test hunk(s) $SELFTEST_HUNKS alone -> exit $ST_RED_RC, the rest on top -> exit $ST_GREEN_RC; runner \`$ST_RUNNER\`; lines /$ST_RE/)"
-  if [ -z "$ST_RUNNER" ] || [ -z "$ST_RED_RC" ] || [ -z "$ST_GREEN_RC" ] || [ -z "$ST_RE" ] || [ -z "$PRODUCT" ] || [ -z "$TIP" ]; then
-    echo "FAIL S0 input: self_testing needs runner, red_rc, green_rc, line_regex, product_file and tip (runner='$ST_RUNNER' red=$ST_RED_RC green=$ST_GREEN_RC)"; echo "RESULT: FAIL (1 failed) — stopped at S0 (the harness, not the model)"; exit 1
-  fi
-  if [ "$(git -C "$CLONE" cat-file -t "$TIP" 2> "$REP/s0_cat.err")" != "commit" ] || ! git -C "$CLONE" cat-file -e "$TIP:$PRODUCT" 2>> "$REP/s0_cat.err"; then
-    echo "FAIL S0 subject: $TIP or $TIP:$PRODUCT is not readable from $CLONE ($(head -1 "$REP/s0_cat.err"))"; echo "RESULT: FAIL (1 failed) — stopped at S0 (the harness, not the model)"; exit 1
-  fi
-  pass "S0 subject: $TIP:$PRODUCT readable from $CLONE (read verbs only; nothing is written there in this mode)"
-else
-  MODE=bash_patch
-fi
-if [ "$MODE" = bash_patch ]; then
 # B0
 HEADC="$(git -C "$CLONE" rev-parse HEAD 2>/dev/null)"
 if [ -z "$TIP" ] || [ "$HEADC" != "$TIP" ] || [ ! -f "$CLONE/$PRODUCT" ] || [ ! -f "$CLONE/$REF_TEST" ]; then
@@ -66,7 +34,6 @@ while IFS= read -r line; do [ -z "$line" ] && continue; st="${line:0:2}"; p="${l
   case "$st" in "??") mkdir -p "$Q/$(dirname "$p")"; mv "$CLONE/$p" "$Q/$p"; echo "quarantined untracked $p -> $Q" ;; esac
 done < "$REP/pre_status.out"
 git -C "$CLONE" checkout -q -- "$(dirname "$PRODUCT")" "$TEST_DIR" 2>/dev/null
-fi
 # B1
 python3 - "$OUT" "$REP/patch.diff" <<'PY' || { echo "RESULT: FAIL (1 failed) — stopped at B1"; exit 1; }
 import re,sys
@@ -190,138 +157,6 @@ while i < len(L):
     i = j
 PYH
 }
-# ================================================================ SELF-TESTING MODE (S0-S5), 2026-09-26
-if [ "$MODE" = self_testing ]; then
-  ST_TIMEOUT="${BASH_SELFTEST_TIMEOUT:-300}"
-  SCR_ROOT="${BASH_SELFTEST_SCRATCH:-${TMPDIR:-/tmp}}"; mkdir -p "$SCR_ROOT"
-  SCR="$(mktemp -d "${SCR_ROOT%/}/bash_selftest.XXXXXX")"; TREE="$SCR/tree"; mkdir -p "$TREE"
-  # the scratch must NOT sit inside a git work tree: `git apply` there would resolve paths against THAT repo's root
-  if git -C "$TREE" rev-parse --show-toplevel > "$REP/s0_scratch_git.out" 2>&1; then
-    fail "S0 scratch $TREE is inside the git work tree $(head -1 "$REP/s0_scratch_git.out") — set BASH_SELFTEST_SCRATCH outside any repo"; echo "RESULT: FAIL ($FAILS failed) — stopped at S0 (the harness, not the model)"; exit 1
-  fi
-  git -C "$CLONE" archive "$TIP" 2> "$REP/s0_archive.err" | tar -x -C "$TREE" 2>> "$REP/s0_archive.err"
-  if [ $? -ne 0 ] || [ ! -f "$TREE/$PRODUCT" ]; then
-    fail "S0 scratch: \`git archive $TIP | tar -x\` did not produce $PRODUCT: $(head -2 "$REP/s0_archive.err" | tr '\n' ' ')"; echo "RESULT: FAIL ($FAILS failed) — stopped at S0 (the harness, not the model)"; exit 1
-  fi
-  # run helper: the declared runner, cwd = the scratch tree, a budget through python (macOS has no `timeout`); PASS/FAIL
-  # lines are counted with the input's line_regex (group 1). `command not found` is COUNTED, never read as a load error.
-  run_selftest() {  # $1 = report prefix
-    python3 - "$TREE" "$ST_RUNNER" "$ST_RE" "$REP/$1" "$ST_TIMEOUT" <<'PYR'
-import os, re, shlex, signal, subprocess, sys
-tree, runner, rx, prefix, budget = sys.argv[1:6]
-rx = re.compile(rx)
-p = subprocess.Popen(shlex.split(runner), cwd=tree, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, start_new_session=True)
-try:
-    out, _ = p.communicate(timeout=int(budget)); rc = p.returncode; to = 0
-except subprocess.TimeoutExpired:
-    os.killpg(p.pid, signal.SIGKILL); out, _ = p.communicate(); rc = 124; to = 1
-open(prefix + ".out", "w", encoding="utf-8").write(out or "")
-np = nf = 0; fails = []
-for ln in (out or "").split("\n"):
-    m = rx.search(ln)
-    if not m: continue
-    if m.group(1) == "PASS": np += 1
-    elif m.group(1) == "FAIL": nf += 1; fails.append(ln.strip()[:90])
-cnf = len(re.findall(r"command not found", out or ""))
-open(prefix + ".fails", "w", encoding="utf-8").write("\n".join(fails) + ("\n" if fails else ""))
-print(f"rc={rc} pass_lines={np} fail_lines={nf} command_not_found={cnf} timeout={to}")
-PYR
-  }
-  kv() { printf '%s' "$1" | sed -E "s/.*$2=([0-9]+).*/\\1/"; }
-  TIPRUN="$(run_selftest selftest_tip)"; echo "S0 self-test at the untouched tip (scratch $TREE): $TIPRUN"
-  tip_rc="$(kv "$TIPRUN" rc)"; tip_np="$(kv "$TIPRUN" pass_lines)"; tip_nf="$(kv "$TIPRUN" fail_lines)"
-  if [ "$(kv "$TIPRUN" timeout)" = 1 ]; then fail "S0 the self-test did not finish in ${ST_TIMEOUT}s at the untouched tip (the harness, not the model)"; echo "RESULT: FAIL ($FAILS failed) — stopped at S0"; exit 1; fi
-  pass "S0 scratch tree = git archive $TIP (never the checkout); the tip self-test: rc=$tip_rc, $tip_np PASS / $tip_nf FAIL line(s) — the PASS baseline"
-  # S2 apply, per section, strict first
-  ST_MODE=strict; S2_NOTE=""
-  for sf in "$REP"/section_*.diff; do
-    : > "$sf.opts"
-    MIS="$(hdr_mis "$sf")"; printf '%s\n' "$MIS" > "$sf.header_measure.out"
-    git -C "$TREE" apply --check -p1 "$sf" > "$sf.check.out" 2>&1; rc_s=$?
-    if [ "$rc_s" -eq 0 ] && [ -z "$MIS" ]; then :
-    elif [ -n "$MIS" ] && git -C "$TREE" apply --check -p1 --recount "$sf" > "$sf.check_recount.out" 2>&1; then
-      printf '%s' "--recount" > "$sf.opts"; [ "$ST_MODE" = strict ] && ST_MODE=recount
-      S2_NOTE="$S2_NOTE $(basename "$sf"): --recount (MISCOUNTED header, measured first — strict rc=$rc_s not trusted: $(printf '%s' "$MIS" | head -2 | tr '\n' ' '));"
-    elif git -C "$TREE" apply --check -p1 --recount --ignore-whitespace "$sf" > "$sf.check_lenient.out" 2>&1; then
-      printf '%s' "--recount --ignore-whitespace" > "$sf.opts"; ST_MODE=lenient
-      S2_NOTE="$S2_NOTE $(basename "$sf"): --recount --ignore-whitespace needed (strict: $(head -1 "$sf.check.out"));"
-    else
-      fail "S2 $(basename "$sf") does NOT apply at the tip in any mode: strict: $(head -2 "$sf.check.out" | tr '\n' ' ') | lenient: $(head -1 "$sf.check_lenient.out" | tr '\n' ' ')"; echo "RESULT: FAIL ($FAILS failed) — stopped at S2"; exit 1
-    fi
-  done
-  if [ "$ST_MODE" = strict ]; then pass "S2 every section applies at the tip (strict — headers measured consistent)"; else pass "S2 every section applies at the tip — mode $ST_MODE, an accommodation named:$S2_NOTE"; fi
-  # S2a anchor: the header's START line must be where the old side sits (git would otherwise place it by context search)
-  python3 -c 'import json,sys; s=json.load(open(sys.argv[1])); [x.__setitem__("n",i) for i,x in enumerate(s,1)]; json.dump(s,open(sys.argv[2],"w"))' "$REP/sections.json" "$REP/sections_n.json"
-  python3 "$CODE_DIR/a2a_anchor.py" "$INPUT" "$CLONE" "$REP/sections_n.json" > "$REP/a2a_anchor.out" 2>&1; ARC=$?
-  if [ "$ARC" -eq 0 ]; then pass "S2a ANCHOR: every hunk's old side sits at its header's start line at the tip ($(/usr/bin/grep -m1 '^SUMMARY' "$REP/a2a_anchor.out"))"
-  else fail "S2a ANCHOR (rc=$ARC): a hunk's header does not name the line its old side sits at: $(/usr/bin/grep -m2 -E '^(BAD|MEASURE)' "$REP/a2a_anchor.out" | tr '\n' ' ' | cut -c1-400)"; echo "RESULT: FAIL ($FAILS failed) — stopped at S2a"; exit 1; fi
-  # S3 touched set == { product } exactly
-  TOUCHED="$(for sf in "$REP"/section_*.diff; do git -C "$TREE" apply --numstat -p1 $(cat "$sf.opts") "$sf" 2>> "$REP/numstat.err" | awk '{print $3}'; done | sort -u)"
-  N_TOUCHED="$(printf '%s\n' "$TOUCHED" | /usr/bin/grep -c .)"; N_SECS="$(ls "$REP"/section_*.diff | /usr/bin/grep -c -E 'section_[0-9]+\.diff$')"
-  if [ "$N_TOUCHED" -eq 1 ] && [ "$TOUCHED" = "$PRODUCT" ] && [ "$N_SECS" -eq 1 ]; then pass "S3 touched-file set == { $PRODUCT } (one section, one file)"
-  else fail "S3 touched-file set must be exactly { $PRODUCT } in ONE section: n=$N_TOUCHED sections=$N_SECS — touched: $(printf '%s' "$TOUCHED" | tr '\n' ' ')"; echo "RESULT: FAIL ($FAILS failed) — stopped at S3 (self-testing: one file only)"; exit 1; fi
-  PSEC="$REP/section_1.diff"; PSEC_O="$(cat "$PSEC.opts")"
-  # S3b sites (the B3b / B3c predicates, applied to the one section) + A3c/A3d
-  ST_SITES="$(python3 - "$INPUT" "$PSEC" <<'PYS'
-import json,sys
-d=json.load(open(sys.argv[1])); sec=open(sys.argv[2],encoding="utf-8").read().split("\n")
-minus={l[1:].strip() for l in sec if l.startswith("-") and not l.startswith("---")}
-for s in (d.get("defect_line") or {}).get("sites",[]):
-    t=(s.get("text_at_tip") or "").strip()
-    if s.get("must_change") and t not in minus: print(f"MISSED :{s['line']} {t[:80]}")
-    if not s.get("must_change") and t and t in minus: print(f"REMOVED :{s['line']} {t[:80]}")
-PYS
-)"
-  if printf '%s' "$ST_SITES" | /usr/bin/grep -q '^MISSED'; then fail "S3b must_change site(s) NOT changed: $(printf '%s' "$ST_SITES" | /usr/bin/grep '^MISSED' | tr '\n' '·' | cut -c1-300)"; echo "RESULT: FAIL ($FAILS failed) — stopped at S3b"; exit 1; fi
-  if printf '%s' "$ST_SITES" | /usr/bin/grep -q '^REMOVED'; then fail "S3b a line the brief says STAYS was removed (no repair in self-testing mode): $(printf '%s' "$ST_SITES" | /usr/bin/grep '^REMOVED' | tr '\n' '·' | cut -c1-300)"; echo "RESULT: FAIL ($FAILS failed) — stopped at S3b"; exit 1; fi
-  A3C_MISSING="$(python3 "$CODE_DIR/a3c_plus.py" "$INPUT" "$PSEC" "$PRODUCT" 2> "$REP/a3c.err")"; A3C_RC=$?
-  if [ "$A3C_RC" -eq 0 ]; then pass "S3b every must_change site is a '-' line; no stays-site removed; every brief '+' line is added; no tip line re-added as '+'"
-  elif [ "$A3C_RC" -eq 2 ]; then fail "S3b CONTEXT MARKED AS ADDITION (A3d): $(printf '%s' "$A3C_MISSING" | sed 's/^A3D //' | head -3 | cut -c1-90 | tr '\n' '·')"; echo "RESULT: FAIL ($FAILS failed) — stopped at S3b"; exit 1
-  else fail "S3b INCOMPLETE (A3c): brief '+' line(s) ABSENT: $(printf '%s' "$A3C_MISSING" | head -3 | cut -c1-90 | tr '\n' '·') $(head -1 "$REP/a3c.err")"; echo "RESULT: FAIL ($FAILS failed) — stopped at S3b"; exit 1; fi
-  # S3g golden: '+' lines byte-identical and in order (only when the input names a golden)
-  if [ -n "$ST_GOLDEN" ]; then
-    GOUT="$(python3 - "$ST_GOLDEN" "$ST_GOLDEN_SHA" "$PSEC" <<'PYG'
-import hashlib, sys
-g, sha, s = sys.argv[1:4]
-try: gb = open(g, "rb").read()
-except OSError as e: print(f"ERR golden unreadable: {e}"); sys.exit(1)
-if sha and hashlib.sha256(gb).hexdigest() != sha: print(f"ERR golden {g} changed since the input was built (sha256 {hashlib.sha256(gb).hexdigest()[:16]} != {sha[:16]})"); sys.exit(1)
-plus = lambda b: [l[1:] for l in b.split(b"\n") if l.startswith(b"+") and not l.startswith(b"+++")]
-minus = lambda b: [l[1:] for l in b.split(b"\n") if l.startswith(b"-") and not l.startswith(b"---")]
-sb = open(s, "rb").read(); gp, sp = plus(gb), plus(sb)
-if gp == sp:
-    print(f"OK {len(sp)} '+' line(s) byte-identical to the golden, in order; '-' lines {'identical' if minus(gb) == minus(sb) else 'DIFFER (informational)'}"); sys.exit(0)
-i = next((k for k in range(min(len(gp), len(sp))) if gp[k] != sp[k]), min(len(gp), len(sp)))
-print(f"DIFF '+' lines: golden {len(gp)} vs output {len(sp)}; first difference at '+' #{i+1}: golden={gp[i][:70]!r} output={sp[i][:70] if i < len(sp) else '<none>'!r}".replace("b'", "'"))
-sys.exit(1)
-PYG
-)"; GRC=$?
-    if [ "$GRC" -eq 0 ]; then pass "S3g GOLDEN: ${GOUT#OK } ($(basename "$ST_GOLDEN"))"
-    else fail "S3g GOLDEN: $GOUT"; echo "RESULT: FAIL ($FAILS failed) — stopped at S3g"; exit 1; fi
-  else echo "INFO S3g no golden named in the input — no byte-identity claim is made"; fi
-  # S4 RED: the declared test hunk(s) alone at the tip
-  python3 "$CODE_DIR/selftest_split.py" "$PSEC" "$SELFTEST_HUNKS" "$REP/selftest.test.diff" "$REP/selftest.prod.diff" "$INPUT" > "$REP/selftest_split.out" 2>&1; rc_split=$?
-  echo "S4 split: rc=$rc_split $(tr '\n' ' ' < "$REP/selftest_split.out" | cut -c1-300)"
-  if [ "$rc_split" -ne 0 ]; then fail "S4 the section could not be split into its declared test hunk(s) $SELFTEST_HUNKS and the rest: $(tr '\n' ' ' < "$REP/selftest_split.out" | cut -c1-300)"; echo "RESULT: FAIL ($FAILS failed) — stopped at S4 (split)"; exit 1; fi
-  git -C "$TREE" apply -p1 $PSEC_O "$REP/selftest.test.diff" > "$REP/apply_test.out" 2>&1 || { fail "S4 the test hunk(s) alone did not apply: $(head -2 "$REP/apply_test.out" | tr '\n' ' ')"; echo "RESULT: FAIL ($FAILS failed) — stopped at S4"; exit 1; }
-  if ! bash -n "$TREE/$PRODUCT" > "$REP/red_syntax.out" 2>&1; then fail "S4 the script with the test hunk(s) alone does not parse (bash -n) — a defect, not a red: $(head -2 "$REP/red_syntax.out" | tr '\n' ' ')"; echo "RESULT: FAIL ($FAILS failed) — stopped at S4"; exit 1; fi
-  RED="$(run_selftest red_first)"; echo "S4 self-test with the test hunk(s) alone: $RED"
-  red_rc="$(kv "$RED" rc)"; red_np="$(kv "$RED" pass_lines)"; red_nf="$(kv "$RED" fail_lines)"; red_cnf="$(kv "$RED" command_not_found)"
-  if [ "$(kv "$RED" timeout)" = 1 ]; then fail "S4 the self-test did not finish in ${ST_TIMEOUT}s (a hang, not a red)"; echo "RESULT: FAIL ($FAILS failed) — stopped at S4"; exit 1
-  elif [ "$red_rc" -eq "$ST_RED_RC" ] && [ "$red_nf" -ge 1 ]; then pass "S4 RED-FIRST: the test hunk(s) alone exit $red_rc (declared $ST_RED_RC) with $red_nf FAIL line(s), $red_np PASS$( [ "$red_cnf" -gt 0 ] && echo "; $red_cnf \`command not found\` — legitimate here: the fix hunks define it"): $(head -2 "$REP/red_first.fails" | cut -c1-90 | tr '\n' '·')"
-  else fail "S4 RED-FIRST: the test hunk(s) alone are NOT red (rc=$red_rc, declared $ST_RED_RC; $red_nf FAIL line(s)) — they do not prove the defect"; echo "RESULT: FAIL ($FAILS failed) — stopped at S4"; exit 1; fi
-  # S5 GREEN: the remaining hunks on top
-  git -C "$TREE" apply -p1 $PSEC_O "$REP/selftest.prod.diff" > "$REP/apply_product.out" 2>&1 || { fail "S5 the fix hunk(s) did not apply on top: $(head -2 "$REP/apply_product.out" | tr '\n' ' ')"; echo "RESULT: FAIL ($FAILS failed) — stopped at S5"; exit 1; }
-  cp "$TREE/$PRODUCT" "$REP/after.sh"
-  if ! bash -n "$TREE/$PRODUCT" > "$REP/product_syntax.out" 2>&1; then fail "S5a the script does not parse after every hunk (bash -n): $(head -2 "$REP/product_syntax.out" | tr '\n' ' ')"; echo "RESULT: FAIL ($FAILS failed) — stopped at S5a"; exit 1; else pass "S5a the script parses after every hunk (bash -n)"; fi
-  GREEN="$(run_selftest green_after)"; echo "S5 self-test after every hunk: $GREEN"
-  g_rc="$(kv "$GREEN" rc)"; g_np="$(kv "$GREEN" pass_lines)"; g_nf="$(kv "$GREEN" fail_lines)"
-  if [ "$(kv "$GREEN" timeout)" = 0 ] && [ "$g_rc" -eq "$ST_GREEN_RC" ] && [ "$g_nf" -eq 0 ] && [ "$g_np" -ge "$tip_np" ]; then pass "S5 GREEN-AFTER: exit $g_rc (declared $ST_GREEN_RC), 0 FAIL lines, $g_np PASS line(s) >= the tip's $tip_np (no cell dropped)"
-  else fail "S5 GREEN-AFTER: rc=$g_rc (declared $ST_GREEN_RC), $g_nf FAIL line(s), $g_np PASS vs the tip's $tip_np: $(head -2 "$REP/green_after.fails" | cut -c1-90 | tr '\n' '·')"; fi
-  if command -v shellcheck > "$REP/shellcheck_which.out" 2>&1; then shellcheck -S warning "$TREE/$PRODUCT" > "$REP/shellcheck.out" 2>&1; echo "INFO S7 shellcheck rc=$? (informational)"; else echo "INFO S7 shellcheck not installed (informational)"; fi
-  echo "SUMMARY files=1 mode=self_testing apply_mode=$ST_MODE tip=rc$tip_rc/${tip_np}P/${tip_nf}F red=rc$red_rc/${red_np}P/${red_nf}F green=rc$g_rc/${g_np}P/${g_nf}F scratch=$SCR (kept, never deleted)"
-  if [ "$FAILS" -eq 0 ]; then echo "RESULT: PASS (self-testing, all S-assertions)"; exit 0; else echo "RESULT: FAIL ($FAILS failed)"; exit 1; fi
-fi
 for sf in "$REP"/section_*.diff; do
   # 2026-09-16 (KS-1163 r2): apply options are PER SECTION — a lenient need on the test section used to force
   # --recount onto the script section too, and --recount turned a harmless trailing blank context line into a
