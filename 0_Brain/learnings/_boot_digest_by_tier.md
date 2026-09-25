@@ -7,7 +7,7 @@ status: live
 
 # Boot digest BY TIER — W whole, M rules-only, every project case a handle
 
-Generated 2026-09-25 11:47 from 205 lesson files (951,206 B). M 36 · MIXED 5 · W 164. 5 project CASE sections inside MIXED files are reduced to one line each: the heading and the path to read it at. W blocks are exactly what the default digest carries; M blocks drop the section index and keep the rules; a P file is a single handle. The CASES behind every rule live only in the lesson files — open one the moment its rule fires.
+Generated 2026-09-25 12:02 from 206 lesson files (954,190 B). M 36 · MIXED 5 · W 165. 5 project CASE sections inside MIXED files are reduced to one line each: the heading and the path to read it at. W blocks are exactly what the default digest carries; M blocks drop the section index and keep the rules; a P file is a single handle. The CASES behind every rule live only in the lesson files — open one the moment its rule fires.
 
 ## The T9 SSD is the master — Wednesday must be fully portable
 `2026-07-31_fully-portable-drive.md` · principle · 2026-07-31 · status: superseded — the "T9 is the master" half by [[2026-08-25_one-drive-devmaster-is-master]] (2026-08-25); the portability principle itself still lives · tier: W
@@ -6668,6 +6668,22 @@ subagent, or herself). **Ask first: can the local model do this, under the kit's
 **Family:** [[2026-08-21_decision-queue-and-rotation-rhythm]] (the queue was already his preferred surface; this names WHERE it is read)
 · [[2026-08-16_an-ask-without-a-default-is-an-indefinite-hold]] · [[2026-09-08_ask-format-action-first]] ·
 [[2026-09-11_a-number-left-for-kam-in-a-handover-reaches-no-surface-he-reads]].
+
+
+## The Spark is calibrated the way Ornith was: start with HIGH oversight, measure what the model can and cannot do, adjust task complexity and how much the brief guides it, and reduce oversight only once the capability is known
+`2026-09-25_spark-calibrate-like-ornith-start-high-oversight.md` · preference · 2026-09-25 · status: live · tier: W
+
+**His words, verbatim:** *"Working with the spark, keep a similar approach to what we did with a smaller LLM in testing its capability and adjusting the complexity, or how much you need to guide it. Once you have a good idea of what the metal can and cannot do, we can reduce the level of oversight. So, let's start with height."*
+("the metal" = the model; "start with height" read as **start with HIGH oversight**. That reading was said back to him on the panel; his word corrects it.)
+
+**How to apply:**
+1. **Start high.** Every Spark task gets a full brief (the kit's `03_BRIEF_TEMPLATE.md` / the Ornith brief shape), a checker that can fail (smoke-test the harness first: a trivial change + two deliberate breaks), and Wednesday's line-by-line read of every PASS. A PASS is a candidate, never a merge.
+2. **Measure capability as a ladder**, the way the Ornith week did: one-file + spelled-out fix → multi-hunk → multi-file → looser briefs (fix shape only, no exact lines) → a ticket described in prose. Record each rung's result (pass, fail and why: model / harness / brief) in an IMPROVEMENTS-style file for the Spark, scored at the weekly consolidation.
+3. **Reduce oversight only on evidence, and one notch at a time:** a rung with a run of clean PASSes earns the next rung, or a lighter read on that rung. Say which notch was loosened and why in the receipt. Kam decides the big step ("reduce the level of oversight"); Wednesday proposes it with the numbers.
+4. **The counter stands:** original brief + ONE rebrief, then Opus 5.5 in the cloud (the Spark kit, 2026-09-23).
+5. **Blocked today:** the model does not start (the tilelang import failure, 2026-09-25; Friday is diagnosing). The calibration starts on the first healthy boot, with Friday's smoke tests first.
+
+**Family:** [[2026-09-25_three-tier-routing-ornith-spark-cloud-always-on]] · [[2026-09-23_spark-kit-running-a-local-coding-model]] · [[2026-09-15_ornith-every-issue-gets-a-tooling-or-instruction-fix]] · [[2026-09-18_ornith-is-cheap-the-brief-is-the-cost]] · [[2026-08-03_go-slow-earn-autonomy]] (rule 4: pilot, measure, review; autonomy is earned).
 
 
 ## Standing routine: Ornith for the simplest tasks, the Spark for medium and normal ones, cloud agents only when necessary. Wednesday orchestrates and tests everything, the routine always runs, and from 70% of the weekly allowance cloud agents are minimised
