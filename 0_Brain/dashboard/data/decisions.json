@@ -15046,5 +15046,45 @@
    "CARD composer-phone-flows",
    "CARD composer-discovery-notices-on-phone"
   ]
+ },
+ {
+  "id": "spark-recreate-serving-container",
+  "client_project": "WED/Spark",
+  "title": "The Spark model won't start. May Friday remove and recreate its serving container? The weights and caches stay.",
+  "bluf": "The Studio connected, but the model failed to start twice: a Python import error in its speed-up library (tilelang). Friday narrowed it down. The same image imports that library cleanly in a brand-new container, even with the same settings and cache. It fails only inside the old container, created on 09-22, which worked on 09-23. The recipe's own reset (./start.sh down, then start again) removes that container and keeps the weights, caches and settings on disk. The model is back in about 5 minutes. It deletes a runtime container, so it needs your word.",
+  "default_action": "If you don't answer, the box stays as it is (stopped); nothing is removed.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Yes: recreate it, then run the smoke test",
+    "detail": "Friday runs ./start.sh down and then ./run-a2.sh, and waits for /health. Wednesday then runs the client-neutral smoke test from the Studio. If a fresh container still fails, Friday digs further (the recipe's patch files)."
+   },
+   {
+    "key": "b",
+    "label": "No: leave the box as it is",
+    "detail": "The model stays down, and the Studio can't use it."
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-09-25T11:46:58.110809+10:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "seat": "friday",
+  "prior_rulings_overridden": [
+   "2026-08-17 20:10",
+   "2026-08-17 20:15",
+   "2026-09-05 16:42",
+   "2026-09-10 11:38",
+   "2026-09-15 06:51",
+   "2026-09-15 16:40",
+   "2026-09-16 09:53",
+   "2026-09-16 13:43",
+   "2026-09-17 08:34",
+   "CARD secuura-ks1041-demo-container-recreate",
+   "CARD nexusai-client-secret-in-container-log",
+   "CARD hpsmpoc-spark-byte-exact",
+   "CARD spark-studio-client-scope"
+  ]
  }
 ]
