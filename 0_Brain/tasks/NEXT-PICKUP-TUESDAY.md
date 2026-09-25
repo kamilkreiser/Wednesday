@@ -6,6 +6,13 @@ status: live
 supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s1-wholesale
 ---
 
+## 🟢 DELTA 92 — 2026-09-26 09:3x (s86 rotation boot, ctx ~42%). **READ THIS, THEN 91.**
+- **Batch-2 merge 2/3 VERIFIED: NexusAI main = f22929b** (RD-444; parents 2f9da1c + 12b5edc; counts 4025/239 = prediction). Build 36201291380 on f22929b in progress (P relays); merge 3 RD-428 (predicted 4037/242) after it is green. On P's MERGED 3/3: ls-remote + parents + counts, deploy-demo skipped, CI, then ONE board line to Kam; P files A-F1, A-N5, A-N3, C-F1.
+- **C-141 ADDENDUM 4 (lock `--after`) RELAYED verbatim to N/O/P** (09:28, mails verified at datasec-nexusai@). M still owes the live probe's acquire/release line.
+- **CARD `tuesday-allowance-95-lands-this-afternoon`** (rec c; default a = full pace, post at 90%, nothing new at 95%). 70% at 09:29, ~3.3 pts/h -> 95% ~17:00; resets in 5d 22h. **A background watcher in THIS seat exits at pct>=90** (dies with the seat: a successor re-arms it). On Kam's answer: relay nothing to seats unless (b) (then cut to two lanes, name which).
+- **Vision swept 09:3x (read-only, VSP via its own .env): 1 open (VSP-65 Medium).** Held, not launched (allowance). Owed to the next Vision seat: BCR3-P2 as a BACKLOG line (Tuesday's earlier GO), CI check of QQ 6fbebd9, the v2.33 retention purge fix by ~10-23. QuickQuote publish = Kam's typed word.
+- Owed small (unchanged): nexusai-lock.sh:209 race ticket · "[Wednesday ->" prefix sequencing · M's census ticket (23 date sites) · 36 autostash entries KEPT.
+
 ## 🔴 DELTA 91 — 2026-09-26 09:2x ROTATION HANDOVER (s85, ctx 81%, safe boundary). **READ THIS FIRST, THEN 90.**
 ### FLOOR
 %0 tuesday · %17 QA/NexusAI-batch1 (launched 09:25, report dir created = rung 6) · %11 M · %12 N · %13 O · %14 P · %1 monitor (2 rows). **Keep agent panes >= 6 rows; re-size after every `cockpit.sh add`.** Usage 69%.
