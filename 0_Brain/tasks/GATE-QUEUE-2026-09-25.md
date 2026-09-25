@@ -34,3 +34,5 @@ Batched per tier (the 09-18 batch rule). A row enters on its READY mail and only
 **TIER 1 = 4 READY at 13:1x -> gate commissioned (drafter writing the brief).** 
 Pending READY, known: B 25th ×3 Ornith PRs (tier 1 batch with #1213/#1214) · L1 A/B/C/J (tier 3/2/2/2) · L2 KS-975, KS-976 (tier 1), KS-1129 (tier 2) · L3 GF-2 (stacked on #1215) · L4 PR 1 (tier 2).
 Rule for launching: launch a tier's gate when ≥4 of that tier are READY, or when the oldest READY in it is 60 min old, whichever is first.
+
+**15:4x TIER-2 GATE batch1215 VERDICT (QA 05:33:03Z, report sha256 55cfc49a… verified on disk):** GO #1215 #1220 #1221 #1222 → SIGNED GOs: Seat B 25th merges #1220 → #1215 → #1222 (wrapped authors L2/L3); L1 merges #1221. NO GO #1218 (L4, FIXTURE-LASTCMD + FIXTURE-GITENV — the fixture can push from the caller's repo) and #1223 (L1, PRECEDENCE-DUP vs #1149): round 2 of 2 each, then the next tier-2 batch. Fleet safety warning on `pre_push_hook_base.test.sh` sent to all three seats. Pane %11 closed.
