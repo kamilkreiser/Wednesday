@@ -16,18 +16,29 @@ supersede: replace wholesale at every wrap/checkpoint; previous = NEXT-PICKUP-FR
 - `kam_rulings_today.sh`, then `python3 2_Project_Files/tools/reconcile_rulings.py` (then `--apply`). `chat_reply.sh` warns on stderr when taps are pending.
 - **Live-board wake now exists:** `fleet/cockpit/live_chat_poll.sh --seat friday`, armed by the SHARED launcher since Wednesday's 09b28c3b6. `doctor.sh` FAILS if it's down. Kam's posts reach this pane as a "[Wednesday tap] [live-board] …" line within ~30 s.
 
-## LIVE RIGHT NOW (Datasec/HPSM-POC; claim OPEN by Friday) — refreshed at the 70% checkpoint (~13:1x)
-- **Kam ~12:0x: "Build as much as you can … showcase what we have" next week.** B09 progress:
-  - **B (partner screens): MERGED** #17 → main effb3cf (CI green).
-  - **A (showcase seed + `scripts/showcase.sh` + contract 0.4.0): MERGED** #18 → main 98527a2.
-  - **C (customer screens): PR #19** (b09/customer-screens @ 2c5e8a9) CI RED on ONE test: `[tablet] e2e/a11y.spec.ts:69` negative control (desktop passes).
-- **Fix round 1 of 2:** B10 Seat C (pane Datasec/HPSM-POC-C), brief `HPSM-POC/1_Project_Definition/Briefs/2026-09-25_B10_SEAT-C_pr19-ci-a11y-negative-control-tablet.md` (rebase onto main; fix without weakening the control). The STATUS watcher is on the B10 glob.
-- On B10 READY: re-review; wait for PR #19 CI; merge head-pinned; check main CI.
-- **Then send Kam the showcase pack:** screenshots beside his mocks (`Briefs/B09-{A,B,C}_evidence/`) + how to run it (`scripts/showcase.sh live|mock`, README "Showcase").
-- **Card open:** hpsmpoc-showcase-draft-findings (default: keep the labelled draft findings in the demo).
-- **Later (small):** the action-plan screen still uses the browser store; swap it to A's API (0.4.0 is on main now). The dashboard's "Engagements by phase" → getShowcaseSummary. One web seat.
-- **Kam's hands (a hosted link):** the 9 Azure providers. Default: the laptop showcase.
-- **Composer:** PR #3 merged, NOT deployed; 4 cards open. **Spark:** Wednesday's.
+## 🔴 OWED FIRST — HPSM analysis repo to GitHub (Kam to Tuesday, terminal ~13:35: "upload everything to GitHub"; Tuesday's mail 03:36Z)
+- **Measured on the laptop, 13:4x:**
+  - The HPSM ROOT repo (`/Users/kamilkreiser/1FILES TO SYNC/HPSM/.git`) has NO remote: main 389 commits, `s50/toolkit-r2`, 41 changed or untracked (mostly unison `(conflict_on_…)` copies; do NOT commit those).
+  - Its `.gitignore` excludes `Source_Documents/`, the secrets and `4_Credentials/`. 3,901 tracked files; the only tracked document is Datasec's own `2026-08-13_HPSM-MVP_client-presentation_v1.pptx`.
+  - `datasecau/HPSM-analysis` does NOT exist (the planned HPSM-40 name).
+  - The code repo `2_Project_Files` = GitHub `datasecau/HPSM` main 580d7a2 (in sync).
+  - The four "held" Composer branches ARE on GitHub (answered to Tuesday).
+- **Plan:**
+  1. `friday_as.sh datasec gh repo create datasecau/HPSM-analysis --private`.
+  2. A seat IN HPSM adds the remote and pushes `--all`. Friday's hooks rightly refuse git writes outside FRIDAY.
+     - The HPSM launcher (`HPSM/Launch_Claude.command`) expects DevMASTER (`WORKSPACE_DIR`/`VAULT_DIR`), and launchers.conf `Datasec/HPSM` points at `/Volumes/DevMASTER/...`: add a laptop entry (e.g. `Datasec/HPSM-L|/Users/kamilkreiser/1FILES TO SYNC/HPSM/Launch_Claude.command`) and check the launcher runs without DevMASTER.
+     - Or brief a seat another way.
+  3. Deploy key or ssh: the laptop has no ssh identity for datasecau/HPSM*; use gh over HTTPS as kamilDatasec, or a deploy key like HPSM-POC's.
+  4. Tell Tuesday "done <sha>" (she reports to Kam).
+
+## LIVE RIGHT NOW — refreshed ~13:4x
+- **HPSM-POC showcase: ALL MERGED.** #17 (partner) · #18 (seed + scripts/showcase.sh + contract 0.4.0) · #19 (customer + the B10 a11y fix) → main 3029930, CI green.
+  - The showcase pack (18 pages) is DELIVERED to Kam's file drawer: `HPSM-POC/1_Project_Definition/Showcase/2026-09-25_showcase-pack.pdf`. The Showcase folder is untracked in the analysis repo; commit it with the next records pass.
+  - Later (small): swap the action-plan screen to A's API; the dashboard phase chart → getShowcaseSummary.
+- **Composer content fix RUNNING:** B06 SEAT-B (pane Datasec/Security-Composer-B), brief `Datasec Security Composer/1_Project_Definition/Briefs/2026-09-25_B06_SEAT-B_internal-text-and-sow-clause-ids.md` (C-05: rows 1–15 in screens + content = a new content release; SOW sentences → clause ids). The STATUS watcher is on the B06 glob.
+  - On READY: review, open the PR, merge on green (no GitHub CI on HPSM-light; the seat's own runs are the gate), then CARD the demo deploy (it switches the demo to the new release; engagements pinned to the old one go read-only).
+- **Composer fold DEPLOYED** 13:2x (5b9f6db, CSS index-BifC5jzu). The runbook step-2 note: today the laptop IP was the standing ssh rule's source, so no NSG rule was needed.
+- **Kam's hands:** the 9 Azure providers (a hosted HPSM-POC link). **Spark:** Wednesday's.
 
 ## DONE TODAY (receipts in daily_friday/2026-09-25.md)
 - Card hpsmpoc-playbook-module2-readiness → b (kept separate).
