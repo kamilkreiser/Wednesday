@@ -105,3 +105,7 @@ Rule for launching: launch a tier's gate when ≥4 of that tier are READY, or wh
 **00:10 READY: #1248 KS-1143 GF-2 (Seat L6, tier 2, head 2b4960172644 by ls-remote) → gate24T2a WIDENED to 4 and FROZEN** (#1243 #1244 #1245 #1248; the drafter was told via SendMessage). Seat B 28th: merge24 proven, eslint 0 no-var-requires at #1246 head (per its mail) → merging #1246.
 **00:14 #1246 KS-1312 + KS-1298 MERGED + VERIFIED** (PR API merged=True; develop == 14cc526d10ee by ls-remote). Day total 30 (from 2026-09-25 morning), 0 deployed. L5: #1247 GO accepted, merge queued behind its own push; item 4 declared fixture_guard 10/0.
 **00:21 #1247 KS-1294 MERGED + VERIFIED** (PR API merged=True; develop == 77c6426b96d9 by ls-remote). 31 since the 25th morning. Seat B 28th stalled after #1246 (no job running) → CONTINUE mailed + tapped.
+**00:23 READY: #1249 KS-1144 (Seat L6, tier 2, stacked on #1248 as a declared overlap).** NOT in gate24T2a (frozen at 4) — the NEXT tier-2 batch; it must gate/merge AFTER #1248.
+**00:31 READY: #1250 KS-1302 + KS-1303 (Seat L5, tier 2, head c78f4093fb53; run_shell_suites 55/0 declared).** Next tier-2 batch with #1249.
+**00:36 READY: #1251 KS-1147 (Seat L6, tier 2, head 8020adae9).** Next tier-2 batch: #1249 #1250 #1251 (3).
+**00:44 READY: #1252 KS-1275 + KS-1299 (Seat B 28th, head ca7337fa04e0; spec descriptions + regenerated yaml → legs 3/4/8 surface).** Next tier-2 batch: #1249 #1250 #1251 #1252 (4) → commission the kit.
