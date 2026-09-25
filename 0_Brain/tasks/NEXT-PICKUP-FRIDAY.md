@@ -16,18 +16,18 @@ supersede: replace wholesale at every wrap/checkpoint; previous = NEXT-PICKUP-FR
 - `kam_rulings_today.sh`, then `python3 2_Project_Files/tools/reconcile_rulings.py` (then `--apply`). `chat_reply.sh` warns on stderr when taps are pending.
 - **Live-board wake now exists:** `fleet/cockpit/live_chat_poll.sh --seat friday`, armed by the SHARED launcher since Wednesday's 09b28c3b6. `doctor.sh` FAILS if it's down. Kam's posts reach this pane as a "[Wednesday tap] [live-board] …" line within ~30 s.
 
-## LIVE RIGHT NOW (all Datasec; claims OPEN by Friday)
-- **HPSM-POC B08 Seat A (pane Datasec/HPSM-POC-A).**
-  - Brief: `HPSM-POC/1_Project_Definition/Briefs/2026-09-25_B08_SEAT-A_partner-self-subject-and-ef-race-log.md`.
-  - READY; REVIEWED + ACCEPTED 10:0x.
-  - **PR #16** (b08/partner-self-and-race-log @ 9cb834f) is open. CI watch running; **merge head-pinned squash on green**, then watch main's push CI.
-  - The seat is working ADDENDUM-1 (`…_ADDENDUM-1_analysis-repo-records.md`): commit history/BACKLOG/CLARIFICATIONS with explicit paths and push the analysis repo. Check the "ADDENDUM-1 PUSHED" line in its STATUS.
-  - Then close the pane with `pane_close.sh`.
-- **Composer B05 Seat B (pane Datasec/Security-Composer-B).**
-  - Brief: `Datasec Security Composer/1_Project_Definition/Briefs/2026-09-25_B05_SEAT-B_s5-notices-fold-and-internal-text-inventory.md` + ADDENDUM-0.
-  - Running its full e2e (idle-wake acked at the hold).
-  - On READY: review the fold (≤600 px, same wording), open the PR, merge on green, then **card the DEMO DEPLOY with before/after at 390 px (no deploy without Kam's word)** and **card the internal-text inventory** (C-03 #5/#11).
-- STATUS wake: `2_Project_Files/friday/watch_status.sh` (FIXED today: paths with spaces; placeholder READY lines ignored), running in the background over both projects' `2026-09-25_B0*STATUS*.md`.
+## LIVE RIGHT NOW (Datasec/HPSM-POC; claim OPEN by Friday) — refreshed at the 65% checkpoint (~12:1x)
+- **Kam ~12:0x: "Build as much as you can … showcase what we have" next week.** B09, three seats, base main 826933a:
+  - A (pane Datasec/HPSM-POC-A): showcase seed data + a one-command showcase run (real-API and mock-only modes) + action-plan/finding API, contract-first.
+  - B (Datasec/HPSM-POC-B): the partner screens (dashboard, action plan, revenue calculator + results with ILLUSTRATIVE content only, managed service, phase 2). Owns the nav file.
+  - C (Datasec/HPSM-POC-C): the customer screens (customer management, engagement view, finding detail, firmware risk, conversation coach, document generation).
+  - Briefs: `HPSM-POC/1_Project_Definition/Briefs/2026-09-25_B09_SEAT-{A,B,C}_*.md`.
+  - The STATUS watcher is running (`2_Project_Files/friday/watch_status.sh`, B09 glob).
+  - On each READY: review vs the brief + the mocks; open the PR; merge on green one at a time (rebase order A → B → C if they collide); send Kam screenshots beside his mocks.
+- **Kam's hands (a hosted link):** the 9 Azure providers. Default: the showcase runs from a laptop with one command.
+- **Composer:** PR #3 (fold) MERGED 5b9f6db, NOT deployed. Kam's 4 cards open (deploy, SOW text in the repo, internal-text plan, 360 title).
+- **Spark: Wednesday's (Kam 12:0x "don't worry about the spark").** Friday's diagnosis agent was stopped; nothing more is owed by Friday. Kam ruled "yes, Secuura code can go to the Spark" and "recreate … use it going forward" (both on Wednesday's terminal; recorded on the card, in the lesson and in the handout). The recreated container still fails (tilelang); Wednesday is on it.
+- **HPSM-POC PR #16 (B08) MERGED 826933a; main CI green.**
 
 ## DONE TODAY (receipts in daily_friday/2026-09-25.md)
 - Card hpsmpoc-playbook-module2-readiness → b (kept separate).
