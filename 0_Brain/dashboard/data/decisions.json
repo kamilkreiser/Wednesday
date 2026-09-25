@@ -16250,5 +16250,41 @@
   ],
   "delivered_artefact": "Friday daily note 2026-09-25 (Kam terminal ~19:3x: signed into a new Claude account, 'so you have more credit')",
   "delivered_ts": "2026-09-25T19:28:12.548433+10:00"
+ },
+ {
+  "id": "secuura-gate-stack-slots-full-of-kept-volumes",
+  "client_project": "Secuura/Blockchain",
+  "title": "QA gates have no free stack slot: slots 2, 3 and 4 all hold kept test volumes — may I remove them?",
+  "bluf": "I need a yes/no from you: may I delete the six leftover Docker volumes (secuura_slot2/3/4 _postgres_data and _redis_data)? They are throwaway test databases today's QA gates kept on the Studio; no client data, nothing deployed. Why: a gate picks a slot only if it holds no volume, so every slot now reads 'busy'. Tonight two gates raced for slot 4 and one mounted the other's leftover DB; migrations failed and #1239's database tests could not run (NO GO partly for that). Nothing was harmed (read-only SELECTs only). Default if you don't answer: nothing is deleted; gates that need only a database use a throwaway container instead, and gates that need the full stack (legs 3/4/8) wait.",
+  "default_action": "b — nothing deleted; Wednesday routes database-only gates to a throwaway container and holds full-stack legs.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Yes, remove the six gate volumes",
+    "detail": "Wednesday lists them first, removes only secuura_slot2/3/4 volumes with no running container, re-lists to prove they are gone, and reports. Slot 1 (the Studio's own stack) is not touched."
+   },
+   {
+    "key": "b",
+    "label": "No, keep them",
+    "detail": "Gates use a throwaway Postgres container when they only need a database; full-stack legs wait for a slot."
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-09-25T19:33:06.833205+10:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "2026-08-21 09:47",
+   "CARD secuura-ks566-revoke-gate",
+   "CARD secuura-erasure-scope-gate",
+   "CARD secuura-ks788-gate-fails-open-2026-09-04",
+   "CARD secuura-advisory-gate-moving-set",
+   "CARD tuesday-mac-mini-scheduler-full-disk-access",
+   "CARD secuura-ks998-format-gate-fails-open-on-missing-deps",
+   "CARD secuura-ks1011-stack-marker-unknown-on-restore",
+   "CARD secuura-ks998-formatting-gate-fails-open-on-missing-prettier",
+   "CARD secuura-ks789-ci-is-the-hard-gate-with-no-ci"
+  ]
  }
 ]
