@@ -6,6 +6,23 @@ status: live
 supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s1-wholesale
 ---
 
+## 🔴 DELTA 79 — 2026-09-25 15:17 ROTATION HANDOVER (s83, ctx 80%, safe boundary). **READ THIS FIRST, THEN 78/77/76/75/74.**
+
+### THE FIRST WORK OF THE NEXT SEAT
+1. **RE-ARM THE LIVE POLLER IF IT IS NOT RUNNING** (`pgrep -fl live_chat_poll`): `WED_AGENT=tuesday LIVE_POLL_TAP=/Volumes/KK_T9_External_HDD/TUESDAY/2_Project_Files/tools/tap_tuesday.sh nohup bash /Volumes/KK_T9_External_HDD/TUESDAY/2_Project_Files/fleet/cockpit/live_chat_poll.sh --seat tuesday >> …/fleet/cockpit/logs/live_chat_poll.log 2>&1 &`. It survives a pane respawn but not a reboot. Wednesday's shared-launcher change (09b28c3b6) should now arm it at launch; verify.
+2. **Kam has TWO open asks on the board (posted 15:1x):**
+   (a) **create the PAYG subscription** as kamil@datasec-rd.com (signup.azure.com/signup?offer=ms-azr-0003p), then reply "done". On "done": tell `Datasec/NexusAI-L` (%8); it runs the device login WITH --tenant (a new code → post to Kam's board), the tenant check (refuse list), renames the sub to `nexusai-customer-test`, creates an A$20 budget alert, then providers → Entra → **deploy FROM THE STORE** → full client-mirror config → tests → report. Environment left UP; teardown = a separate Kam ask.
+   (b) **the Global Variables SP secret**: YES = copy it into the test tenant (through its own Key Vault only); NO = a separate test workspace. Until he answers, L mirrors every NON-secret demo setting and leaves that data source unconnected. **Relay his answer to L verbatim.**
+3. **`Datasec/Vision_Sales_Portal` (%9)** briefed (`fleet/briefs_staged/2026-09-25_vision_bcr3r4_ship_closed.md`): merge BCR3 r4 703d304 into QQ main under Kam's cap rule (gate 8 NO-GO on the load-~144 residue only) + ONE backlog ticket; NO publish, NO round 5. **Answer its plan confirmation (GO + tap).** On its MERGED mail: verify by ls-remote, score, pane_close, then tell Kam (the publish stays his typed word).
+
+### STATE
+- **NexusAI 2.2.0 is LIVE on the Marketplace** (C-152; SolutionTemplate, no Marketplace charge). Zip emailed; Kam submitted.
+- **Gates today:** package gate GO WITH FINDINGS (1.00); Vision gate 8 NO-GO residue-only (1.00). Seats: NexusAI-J 0.97, NexusAI-K 1.00, myPKI 1.00, Vision short 1.00.
+- **GitHub done; NAS done** (14:50, deletions 0). HPSM-light history was rewritten by Friday at 14:32: the mini's clone `HPSM/6_Policy_Composer` is STALE (never pull or push).
+- **C-127 merge/demo grant is SPENT.** Re-ask before any further NexusAI main merge or demo redeploy.
+- **Floor:** %0 tuesday · %1 monitor · %8 NexusAI-L · %9 Vision. Usage 7d ~84% (stop 95).
+- **Owed shared tooling:** the poller escalation after N undelivered ticks; the pretooluse hook for subagent git writes; card_id_gate matched a subscription name (allow-listed).
+
 ## 🔴 DELTA 78 — 2026-09-25 15:13 (s83). **READ THIS FIRST, THEN 77.**
 - **KAM (terminal 15:1x): "go through the whole process. This is a test Datasec account, so feel free to use it." + "deploy a full environment that mirrors a client environment, and use the global variables details, which will be the same as the demo Nexus AI system, to configure everything. I'd like it fully configured as well."** A GO was mailed to `Datasec/NexusAI-L` (%8), subject "ANSWER: GO for the whole customer test in the test account (Kam 15:1x), fully configured…". It SUPERSEDES the purchase/creation hold FOR ACCOUNT kamil@datasec-rd.com ONLY.
 - **Account state:** kamil@datasec-rd.com is a PERSONAL Microsoft account (home tid 9188040d = the consumer tenant); ZERO subscriptions. L measures the billing scopes; if none, **Kam must add a pay-as-you-go subscription with a card in the portal**, and L writes the exact clicks for Tuesday to post.
