@@ -7,7 +7,7 @@ status: live
 
 # Boot digest BY TIER — W whole, M rules-only, every project case a handle
 
-Generated 2026-09-25 11:46 from 205 lesson files (950,856 B). M 36 · MIXED 5 · W 164. 5 project CASE sections inside MIXED files are reduced to one line each: the heading and the path to read it at. W blocks are exactly what the default digest carries; M blocks drop the section index and keep the rules; a P file is a single handle. The CASES behind every rule live only in the lesson files — open one the moment its rule fires.
+Generated 2026-09-25 11:47 from 205 lesson files (951,206 B). M 36 · MIXED 5 · W 164. 5 project CASE sections inside MIXED files are reduced to one line each: the heading and the path to read it at. W blocks are exactly what the default digest carries; M blocks drop the section index and keep the rules; a P file is a single handle. The CASES behind every rule live only in the lesson files — open one the moment its rule fires.
 
 ## The T9 SSD is the master — Wednesday must be fully portable
 `2026-07-31_fully-portable-drive.md` · principle · 2026-07-31 · status: superseded — the "T9 is the master" half by [[2026-08-25_one-drive-devmaster-is-master]] (2026-08-25); the portability principle itself still lives · tier: W
@@ -6614,7 +6614,8 @@ sections (open the file for these): The rule · Why it generalises past this flo
 - **The kit's rules were learned on a 35B model.** Its failure list is a hypothesis for this one. Re-measure in the first week and amend kit file 04 with evidence, not memory.
 
 ## Open, and whose it is
-- **CLIENT OWNERSHIP OF THE BOX — ask before any Secuura code goes near it.** The Spark's login is `datasec-rd`, and the kit says it was commissioned "so that Datasec work can continue". Friday serves both clients, and sending one client's code to hardware provisioned for the other is the cross-client leak hard rule 2 exists to prevent. **Default until Kam rules: the Spark takes Datasec work only.**
+- **CLIENT OWNERSHIP OF THE BOX — RULED 2026-09-25 11:45 by Kam (Wednesday's terminal, verbatim, relayed by Wednesday's mail 01:46Z): *"yes, Secuura code can go to the Spark"*.** One client per task; per-client run directories; the box queues one request at a time, so seats claim it before long runs. What follows is the pre-ruling history, kept.
+- ~~CLIENT OWNERSHIP OF THE BOX — ask before any Secuura code goes near it.~~ The Spark's login is `datasec-rd`, and the kit says it was commissioned "so that Datasec work can continue". Friday serves both clients, and sending one client's code to hardware provisioned for the other is the cross-client leak hard rule 2 exists to prevent. **Default until Kam rules: the Spark takes Datasec work only.**
 - ~~Which seat runs the loop~~ **RULED — the Spark and the kit are FRIDAY'S.** Kam, terminal 2026-09-23 ~14:1x, verbatim: *"the kit is addressed to tuesday but it should be addressed to you. its yours as you will be using the spark"*. Wherever the kit says "Tuesday" (README, 02, 05), read **Friday**. Claimed in `wed_claim.sh` the same minute, and Tuesday was told directly by mail, so there is no second loop. Kit file 05's setup (place files → inventory the box → checker → smoke test with two deliberate breaks → report to Kam) is Friday's owed work.
 - The reference harness (input builders, checkers, queue runner) lives in the Studio's tree and is not shipped. Porting it crosses project trees and is Kam's call.
 

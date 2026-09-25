@@ -26,7 +26,9 @@ The **Spark** is an HP ZGX Nano (NVIDIA GB10, 121 GB unified memory) on the offi
 
 ## §0 Whose box is it: read this first
 
-> **RULED by Kam 2026-09-25 09:49:33 (card `spark-studio-client-scope`, verbatim): "c — Not yet: I'll decide after the Studio can connect."** So: get the Studio connected first (§2), then Kam decides. **Until then, no client-scoped code from the Studio. Client-neutral smoke tests are fine.**
+> **SUPERSEDED 2026-09-25 11:45: Kam ruled on Wednesday's terminal, verbatim: "yes, Secuura code can go to the Spark".** One client per task and per-client run directories. It still waits on the model starting again (card `spark-recreate-serving-container`).
+>
+> ~~RULED by Kam 2026-09-25 09:49:33 (card `spark-studio-client-scope`, verbatim): "c — Not yet: I'll decide after the Studio can connect."** So: get the Studio connected first (§2), then Kam decides. **Until then, no client-scoped code from the Studio. Client-neutral smoke tests are fine.**
 
 - **The box's login is `datasec-rd`.** Wednesday's kit says it was commissioned "so that Datasec work can continue while travelling".
 - **Kam ruled on 2026-09-23 that the Spark and the kit are Friday's.** Friday serves both clients, so Friday's standing default until Kam rules is: **the Spark takes Datasec work only.**
