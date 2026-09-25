@@ -11,6 +11,7 @@ Batched per tier (the 09-18 batch rule). A row enters on its READY mail and only
 | 1 | #1217 | KS-976 it.1 | L2 | e83f34447402 (ls-remote 13:1x) | /reset 400 message; legs 3/4/8 OWED | 03:14Z |
 | 2 | #1218 | KS-897+896 | L4 | 999623d28f7c (ls-remote 13:1x) | none (scripts test) | 03:17Z |
 
+| 2 | #1220 | KS-1129 | L2 | 9c2021ba3e77 (ls-remote 13:3x) | anchoring response field; legs 3/4/8 OWED; anchoring wording | 03:29Z |
 | 3 | #1219 | KS-1277 | L1 | 5d5129a03af0 (ls-remote 13:2x) | none (comment-only) | 03:23Z |
 
 **TIER 1 = 4 READY at 13:1x -> gate commissioned (drafter writing the brief).** 
