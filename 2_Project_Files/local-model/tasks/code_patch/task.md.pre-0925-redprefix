@@ -1,0 +1,156 @@
+TASK: code_patch
+
+The INPUT is a JSON object describing ONE defect ticket and the repository
+state it must be fixed in:
+
+- `ticket` — identifier, title, description (verbatim; it names the fix shape).
+- `repo` — pinned `tip` SHA, `repo_subdir`, `service_dir`, the test runner and
+  the TypeScript settings that apply.
+- `product_file` — the ONE product source file you may change (path from the
+  repo root). Its FULL current content is in `files[product_file]`.
+- `defect_line` — the line (number + text) the ticket is about.
+- `test_dir` — the ONLY directory in which your test file may live.
+- `suggested_test_file` — the path to use for a NEW test file — UNLESS that path
+  already has its full content in `files[...]` (the `reference_test_note` then
+  opens with MODIFY THE EXISTING TEST FILE): then you MODIFY it in place —
+  `--- a/<path>` / `+++ b/<path>` hunks with context copied byte-for-byte from
+  that content, never `--- /dev/null` (KS-1172, 2026-09-15: a widened pinned
+  list must update the existing exact-set pin, or the whole suite stays red).
+- `reference_test_file` + `reference_test_note` — an EXISTING test file (full
+  content in `files[...]`) that shows how this repo drives the same code
+  in-process with `vi.mock` stubs. It is a template to copy the mock shape
+  from. You must NOT modify it.
+
+Produce a fix for the ticket as ONE unified diff, and nothing else. The fix
+shape comes from the TICKET's own description and from reading the product
+file — the ticket says what is wrong and how it should behave; you decide the
+minimal code change that makes it so. If the ticket names several sites that
+read the same wrong value, fix every named site inside `product_file`, not
+only the first one.
+
+TEST RUNNER (2026-09-15 18:2x): read `repo.test_runner` FIRST. If it begins with `jest`, this service runs
+ts-jest: use `jest.mock('<module>', () => ({ ... }))` (auto-hoisted above the imports — do NOT write
+`vi.mock`, `vi.hoisted`, `vi.fn`, `vi.stubGlobal`; use `jest.fn()`), `describe / it / expect / beforeAll /
+afterAll / beforeEach` as globals (or `import { describe, it, expect, jest } from '@jest/globals'`), and copy
+the reference test's mock shape exactly — it is a jest test. If it begins with `vitest`, everything below
+about `vi.*` applies. A vitest idiom in a jest file (or the reverse) fails to LOAD and the checker reads that
+as a load error, never as a red. ts-jest also TYPE-CHECKS your test file with the service's tsconfig
+(`noUnusedLocals` / `noUnusedParameters` are on): an unused import, constant or parameter is compile
+error TS6133 and the file never runs — declare only what you use (measured 2026-09-15 18:25, KS-1118).
+
+RETRY FEEDBACK (2026-09-15 15:5x — added after the fourth "changed the neighbour" slip on one
+file): if the input carries a `retry_feedback` object, this is your SECOND attempt at this exact
+task and the checker REFUSED your first one. Read `retry_feedback` BEFORE anything else. It names
+the verdict (`verdict`), the site line(s) your first diff left untouched (`missed_sites`, each with
+`line` and `text_at_tip`), and an `instruction`. Emit the COMPLETE diff again (every product hunk
+and the test) — and for every missed site the `-` line of your hunk MUST be `text_at_tip` copied
+character for character, with the line ABOVE and BELOW it as unchanged context. The commonest way
+the first attempt failed is editing the comment or the line NEXT TO the named line; do not touch a
+neighbour.
+
+NAMED-SITE CHECKLIST (2026-09-15 — the rule that turns "fix every site" into
+something checkable): the input carries `defect_line.sites`, one entry per
+site the ticket's `Where` list names, each with `line`, `text_at_tip` and
+`must_change`. BEFORE you write the diff, list every `must_change: true` site
+and decide what its line becomes. Your product hunks MUST change every one of
+them — each `text_at_tip` must appear as a `-` line in your diff, at that site.
+A diff that leaves one `must_change` site untouched is refused by the checker
+(A3b) before any test runs, whatever else it does right. Sites with
+`must_change: false` are context the ticket cites; do not change them unless
+the fix shape requires it.
+
+HARD CONSTRAINTS (a mechanical checker enforces every one; a violation is a
+failed task, not a style point):
+
+1. Output exactly ONE fenced code block, opened with ```diff and closed with
+   ```. No prose before it, no prose after it, no second block.
+2. The diff is `git apply -p1` applicable from the repo root at the pinned
+   tip: `--- a/<path>` / `+++ b/<path>` headers, `@@` hunks, context lines
+   copied EXACTLY (byte for byte, including indentation) from the file
+   content in the input. A new file uses `--- /dev/null` and
+   `+++ b/<path>` with a single `@@ -0,0 +1,N @@` hunk where every line is
+   prefixed `+`.
+   DIFF MECHANICS (the two errors models most often make):
+   2a. A context line is ONE space followed by the source line UNCHANGED.
+       If the source line has a 2-space indent, the context line is ` ` +
+       that line — three leading spaces in total, never more. Do not
+       re-indent context lines. Take the `-` line's text from the file
+       content (and `defect_line.text`) verbatim.
+   2b. In `@@ -a,b +c,d @@`, b MUST equal the number of lines in the hunk
+       that start with ' ' or '-', and d the number that start with ' ' or
+       '+'. Count them. A wrong count makes git read the NEXT file's
+       `--- /dev/null` header as a deletion line and the whole patch is
+       rejected. Prefer a small hunk: 3 context lines above, the changed
+       lines, 3 context lines below → `@@ -N,b +N,d @@` where N is the
+       line number of the first context line in the ORIGINAL file.
+   2c. For the new test file, N in `@@ -0,0 +1,N @@` is the exact number
+       of `+` lines. Count them.
+   2d. Within ONE file section the `--- a/<path>` and `+++ b/<path>` lines
+       name the SAME path (a new file: `--- /dev/null` then `+++ b/<path>`).
+       Never pair the product file's `---` with the test file's `+++` —
+       git reads that as a rename and rejects the section (KS-908, 2026-09-15).
+   2e. Every edit's context lines are the ACTUAL neighbours of the changed
+       line in the file content — copy the line above and the line below
+       from the file, never from memory (KS-844, 2026-09-15: a one-line
+       import edit placed under three imports that sit ten lines lower).
+3. The diff touches EXACTLY two files: `product_file`, and ONE test file
+   under `test_dir` (new at `suggested_test_file`, or an extension of an
+   existing file in `test_dir` other than the reference file). No third
+   file. Never touch package.json, lockfiles, configs, or the reference
+   test file.
+3a. A test title or any single-quoted string NEVER contains an apostrophe (`anchoring's`) —
+    write `anchoring is` or use double quotes; an unescaped `'` is a transform error and the file
+    runs no test (KS-1101 B, 2026-09-15: `Expected ")" but found "s"`).
+3b. Inside `vi.hoisted(() => ({ … }))` use STRING LITERALS only — never a
+   `const` declared elsewhere in the file: vitest lifts the hoisted block
+   above every declaration, so `SEED_USER_ID` read inside it throws
+   `Cannot access 'SEED_USER_ID' before initialization` and the whole file
+   fails to load (KS-1050, 2026-09-15). Declare the constant INSIDE the
+   hoisted object, or repeat the literal.
+4. The test file must be RED at the current tip (its ticket-named cell fails
+   because the defect is present) and GREEN once the product hunk is
+   applied. State in the test's `it(...)` title which cell is the red-first
+   one, e.g. `it('🔴 <ticket.identifier> — ...')`. Include at least one
+   CONTROL cell that passes both before and after (proves the harness
+   reaches the code). The checker applies the test hunk ALONE first (must
+   fail with at least one failed assertion — a file that fails to load
+   counts as a load error, not a red), then the product hunk (must pass).
+   The red cell must assert the BEHAVIOUR the ticket describes, at the
+   site(s) it names — not only the easiest observable side effect.
+5. The product change is MINIMAL and DETERMINISTIC: only the lines the
+   ticket's fix shape requires, using imports the file ALREADY has. No new
+   dependencies, no refactors, no renamed symbols, no changed behaviour
+   outside the defect. Keep existing comments; a short
+   `// <ticket.identifier>:` comment on the changed line is welcome.
+6. TypeScript must compile under the repo's stated settings (strict,
+   noUnusedLocals, noUnusedParameters). Do not leave unused imports,
+   variables or parameters in either file. vitest globals are available but
+   importing `{ describe, it, expect, beforeAll, afterAll, beforeEach, vi }`
+   from 'vitest' is the repo's precedent — follow it.
+   6a. IDENTIFIER SELF-CHECK (2026-09-15): before you write the diff, list
+       every identifier your test file uses (helpers like `deleteFn`, stubs,
+       servers, ports) and the line that declares or imports it; an
+       undeclared one is a `ReferenceError` that fails EVERY cell including
+       the control, and the checker now refuses that as "not a real red".
+       Also: the test file's path is `<test_dir>/<name>.test.ts` EXACTLY as
+       `test_dir` is given in the input (repo-relative) — never `__tests__/`
+       at the repo root.
+   6a-original. Every identifier the test uses must be imported or declared IN the
+       test file. Calling `vi.mocked(someModule.fn)` without importing
+       `someModule` is a ReferenceError at runtime. Simpler and preferred:
+       capture inside the `vi.mock` factory itself — declare a
+       `vi.hoisted(() => ({ ... }))` state object and have the mocked
+       function push into it / read from it.
+   6b. Follow `reference_test_note` literally: it says which mocks must
+       return what for the ticket-named cell to reach the defective code
+       path (an early return, a 400 on a mismatch, or a found-row branch
+       means the code under test is never reached and there is nothing to
+       compare). Keep per-request values in the hoisted state and set them
+       before each request.
+7. Where the input lacks a fact you need, write `UNKNOWN` in a comment
+   rather than inventing an API, a path, or a value.
+8. The whole test suite of the service must stay green: do not change any
+   exported symbol, route, status code, or response shape the existing
+   tests assert.
+
+Output the ```diff block now.
