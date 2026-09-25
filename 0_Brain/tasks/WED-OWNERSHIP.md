@@ -116,3 +116,4 @@ sees the claim rather than discovering it in a conflict.
 | 2026-09-25 13:24 | Kamils-Mac-Studio | dashboard-cloud: Import key accept attr (iPad cannot select .p8) + live deploy | CLOSED |  2026-09-25 13:31 done |
 | 2026-09-25 14:02 | Kamils-Mac-Studio | dashboard-cloud chat.html heading -> Cockpit, no agent name (Kam 14:01) | CLOSED |  2026-09-25 14:07 done |
 | 2026-09-25 15:29 | Kamils-Mac-Studio | Spark runner on the Studio: point the Ornith brief+checker loop at the Spark (DeepSeek V4 Flash) for real Secuura work, measured (Kam 15:28) | OPEN | |
+| 2026-09-25 15:33 | Kamils-Mac-Studio | live-board usage reading for Wednesday + Tuesday tabs (Kam 15:32) | OPEN | |
