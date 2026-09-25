@@ -1,0 +1,32 @@
+[Datasec/NexusAI-M -> Tuesday] READY FOR QA: RD-533 @ 95c3c9a (listen error -> named failure + exit 1; Express 5 callback-as-error-handler)
+BLUF: RD-533 READY FOR QA on rd-533-listen-eaddrinuse-s84m @ 95c3c9a9d39429f9093270e283e531f3cda4e88d. Tier 2 per the lane plan (operations); tier 1 if you'd rather, since it changes boot behaviour. One ticket, backend/server.js only. Next in lane 1: RD-315.
+
+Branch base: main 7c47ec4, current when I branched. Main is now 0863711 (RD-579). The overlap in server.js is disjoint regions: RD-579 touched the ai-config routes (~16379-16640), RD-533 touches the listen callback (~22564). The only expected git conflict is the counts file. At merge: forward-merge main, regenerate counts once, C-57/C-112, C-89. Prediction: 0863711's 3986/236 + 4 cells + 1 suite = 3990/237. That is a prediction, not a measurement. C-68: the gate verdict holds at 95c3c9a.
+
+MECHANISM (measured, not inferred):
+- Two real servers on one PORT at 7c47ec4: both logged "running on port 38995", both stayed alive, and lsof showed one listener (A). session-tools/s84m/rd533-probe-7c47ec4.log
+- Control: a bare http.Server on a held port raises EADDRINUSE (same Node v26.8.1). So it isn't the platform.
+- Cause: Express 5.2.1's app.listen does `server.once('error', done)` with our callback (node_modules/express/lib/application.js:603). On EADDRINUSE our callback ran WITH the error, ignored it, logged "running" and started the warm-up and intervals. The error counted as handled, so nothing crashed.
+
+WHAT CHANGED: the listen callback takes `listenErr`. On any listen error it logs "❌ Could not listen on port N: <code>. <remedy>. Exiting." and exits 1 after 250 ms so the log transports write (C-15). Nothing else in the callback changed.
+
+SETS, not counts: __tests__/rd533-listen-error-fails-loudly.test.js
+- RED at 7c47ec4 (unmodified): "B exits on its own, non-zero", "B names the failure: EADDRINUSE and the port", "B never claims it is running". GREEN there: "control: server A answers ... before and after". session-tools/s84m/rd533-red-at-7c47ec4.log
+- GREEN at 95c3c9a: all 4.
+- One lock hold (session-tools/s84m/rd533-hold.sh / .log), CLEAN first, anchors count=1: M1 `if (listenErr)` -> `if (false)` reddens all three B cells; M2 exit(1) -> exit(0) reddens ONLY the non-zero cell. server.js restored, sha 56da537024d6d9b9 unchanged.
+- Full verify, same hold, SESSION_SECRET unset, --update-counts: "VERDICT: PASS — 3982/3982 tests passed across 236 suites (jest exit 0)". Floor 0/0.
+- C-89 at 95c3c9a: tree clean; HEAD counts 3982/236. Pre-commit gitleaks ~5.60 KB, no leaks.
+
+PRIOR WORK: RD-510 moved the warm-up after listen (kept). F-18's audit flush and SIGTERM handlers and F-16's banner are kept byte-identical. Only the early error branch is added. The ticket's own recommendation (log a named failure, exit non-zero, red-first cell with two servers) is exactly what was built. Nothing replaced.
+
+NOT TESTED:
+- Linux. SO_REUSEPORT semantics differ, and CI hasn't run on the branch (no PR).
+- Container Apps: whether one replica can ever start two processes on one port.
+- EACCES and other listen errors: same branch, but only EADDRINUSE has a cell.
+- The 250 ms delay is a pragmatic choice. The cell proves the message arrives before exit, on this Mac, over a pipe.
+- The harness (bootServer) now gets a failed boot instead of a silent second server. That is RD-490/RD-619's intended shape, but no harness consumer was re-run beyond the full verify.
+
+Jira: RD-533 -> In Progress -> Testing, evidence comment posted.
+Meanwhile: continuing with RD-315 (branch off 0863711). Needed-by: none.
+-- NexusAI-M
+
