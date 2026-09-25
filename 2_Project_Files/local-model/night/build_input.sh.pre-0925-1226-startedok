@@ -153,15 +153,7 @@ if prs:
 if n["archivedAt"]:
     refuse(f"archived at {n['archivedAt']}")
 if stype not in ("backlog", "unstarted"):
-    # 2026-09-25: `started_ok=<reason>` admits ONLY an In Progress (started) ticket whose attached PRs are all
-    # merged/closed (an open PR already refused above). It is an explicit, printed override: an item carved OUT
-    # of every live lane (e.g. KS-1140 GF-1 after #1142 merged). Never automatic: an In Progress ticket with a
-    # merged PR can still have a seat building its next item (KS-975, 2026-09-25), so the coordinator must say why.
-    _sok = pins.get("started_ok", "").strip()
-    if stype == "started" and _sok:
-        print(f"WARN state is {state} (started) — ADMITTED by started_ok: {_sok}")
-    else:
-        refuse(f"state is {state} ({stype}) — not Backlog/Todo; a seat has it" + ("" if stype != "started" else " (pass started_ok=<reason> only if the item is carved out of every live lane)"))
+    refuse(f"state is {state} ({stype}) — not Backlog/Todo; a seat has it")
 if any(x in assignee for x in ("peter", "stuart")):
     refuse(f"assigned to {assignee} (Peter/Stuart tickets are off-limits)")
 
