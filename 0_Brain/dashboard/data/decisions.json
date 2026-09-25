@@ -16970,5 +16970,47 @@
    "CARD secuura-ks1084-gateway-originate-no-tenant-header-p0",
    "CARD wed-ornith-pool-thin-widen-the-harness"
   ]
+ },
+ {
+  "id": "secuura-pr1245-ks1313-at-the-cap-disposition",
+  "client_project": "Secuura/Blockchain",
+  "title": "PR #1245 (KS-1313, the vitest summary reader) failed its second and last allowed gate: authorise a round 3, merge it as is, or close it?",
+  "bluf": "Tap a, b or c. #1245 fixes KS-1313's original defect (a failing test run read as null) and passes 18 real output shapes, but the gate found one more: a child test run killed by its 180 s timeout, after a test printed a fake 'Tests 7 passed' line, reads as 7 passed, 0 failed. Develop reads that same shape the same way today, so #1245 is strictly better than develop, but under our two-round cap a NO GO ships nothing without your word. The fix is small: refuse when the child was killed or errored. Report: Testing Agent MAIN/projects/secuura/reports/2026-09-26-batch1245r2-t2c/report.md. PR: https://github.com/Secuura/Distributed_Secuura/pull/1245",
+  "default_action": "Nothing merges. #1245 stays OPEN at 65eb964271b0, and Seat M1 files the residue ticket (as it is already doing). Nothing else changes until you tap.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Authorise ONE more round (round 3)",
+    "detail": "Seat M1 or a builder adds the killed/errored refusal plus a cell for it; one more tier-2 gate; merge on GO."
+   },
+   {
+    "key": "b",
+    "label": "Merge #1245 as it is",
+    "detail": "Develop gains the fix for the original defect; the killed-child shape stays open (same as develop today) and its residue ticket carries it."
+   },
+   {
+    "key": "c",
+    "label": "Close #1245 unmerged",
+    "detail": "The residue ticket carries the whole of KS-1313 to a fresh PR later."
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-09-26T05:09:25.958381+10:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "2026-08-17 20:23",
+   "2026-09-02 16:32",
+   "2026-09-04 08:33",
+   "2026-09-07 10:34",
+   "2026-09-07 11:01",
+   "2026-09-07 18:58",
+   "2026-09-14 08:11",
+   "2026-09-14 21:56",
+   "2026-09-17 07:50",
+   "2026-09-20 15:25",
+   "CARD secuura-ks660-actions-ci-disposition"
+  ]
  }
 ]
