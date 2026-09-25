@@ -21,13 +21,12 @@ supersede: replace wholesale; previous = NEXT-PICKUP-FRIDAY.md.pre-0925-rotate-s
 
 - **The LAPTOP SLEEPS.** Arm `caffeinate -dims -t 21600` (background) in the same action as launching any seat, and check `pgrep -fl caffeinate` at boot. On 09-25 it slept at ~17:0x and cut two seats' turns. One was armed at 17:4x until ~23:4x.
 
-## 🔴 LIVE (refreshed 20:2x at the 50% checkpoint by the 19:37 successor seat)
-1. **HPSM-POC B17 fix round + ADDENDUM-1 (C-21: profile fields, placeholder offer sheets, single-customer revenue): LIVE** (pane `Datasec/HPSM-POC-B` %21). Brief + addendum in `HPSM-POC/1_Project_Definition/Briefs/2026-09-25_B17_SEAT-B_*`. Watcher glob `…/Briefs/2026-09-25_B17*STATUS*.md`. On READY: check F-22/F-33/F-34 were proved BY CLICKS (view shots); PR; merge on green; then a cold-user re-run (B16 method).
-2. **HPSM-POC B18 Azure OpenAI: DONE, READY, reviewed** (pane closed). PR https://github.com/datasecau/HPSM-POC/pull/23 (head 01996e3); a background CI poll was running at 21:15 → merge on green (head-pinned; B17 may need a rebase after, README overlap). Azure verified at source (oai-hpsmpoc-dev-bdn2se, keyless, gpt-4.1-mini cap 10, budget 50). **Kam's card `hpsmpoc-ai-templates-approval`** decides live AI text: (a) is PREPARED at `517a9b9` on local branch `b18/option-a-showcase-template-switch-LOCAL` in `HPSM-POC/.tools/wt-B18-C-optA` (unpushed) → on (a): a small seat pushes it, PR, merge, then the live proof (the brief's items 4–5, with `--audit`); on (b): Kam's approval commit + the same proof; default (c): nothing.
-3. Accounts: Kam logged the default `~/.claude` into the NEW account at 20:12. Seats launched before that (B17 %21) started on the old one; re-read each seat's statusline `7d:` before claiming which account it spends.
-4. Open Friday cards: 0 (all ruled and delivered by 20:2x).
-5. DONE this seat: see today's note from 19:38.
-6. caffeinate `-dims -t 21600` DETACHED 19:37 (pid 22618) until ~01:3x.
+## 🔴 LIVE (refreshed 21:3x by the 19:37 successor seat, ctx 59%)
+1. **PR #23 (B18 Azure OpenAI + Kam's template approval, head e943e0b)** and **PR #24 (B17 fixes + C-21 features, head 6d27983)**: both reviewed + ACCEPTED; CI polls were running at 21:35. **0 shared files** (compare API), so order is free. Merge each head-pinned (`gh pr merge N --squash --match-head-commit <full sha>`), read main back, then the main push-CI. After BOTH: `pdftotext` a fresh executive PDF shows no "AI-assisted" (B17's provenance label must win on the combined main).
+2. **Seat C (%23) is on B18 ADDENDUM-3** (commit + push its records in the analysis repo, then stop). Close its pane when it reports the remote tip.
+3. **NEXT seat after both merges (Friday's decision, v1.3):** one automatic retry on a narrative validator refusal (severity-mismatch), a UI "Try again" that states the reason, and a stricter check that catches "critical" for a non-critical finding and any "compliance" claim. No template text change (that is card `hpsmpoc-templates-v101`). Then a fresh cold-user re-run in AI mode (`scripts/showcase-ai.sh`).
+4. **Open Friday cards:** `hpsmpoc-pdf-approver-name` (default: date only), `hpsmpoc-templates-v101` (default: 1.0.0 stays).
+5. caffeinate `-dims -t 21600` DETACHED 19:37 (pid 22618) until ~01:3x. Seats run on the default ~/.claude = the new account since Kam's 20:12 login (seat C statusline 7d:30%).
 
 ## NEXT (owed, in order)
 1. ~~HPSM-POC B14 fix round~~ DONE and merged; the re-run is LIVE 1. Source: the B12 user test STATUS `HPSM-POC/1_Project_Definition/Briefs/2026-09-25_B12_SEAT-C_end-to-end-user-test-as-a-salesperson.STATUS.md` (46 findings).
