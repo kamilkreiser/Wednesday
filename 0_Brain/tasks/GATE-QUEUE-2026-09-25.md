@@ -12,8 +12,12 @@ Batched per tier (the 09-18 batch rule). A row enters on its READY mail and only
 | 2 | #1218 | KS-897+896 | L4 | 999623d28f7c (ls-remote 13:1x) | none (scripts test) | 03:17Z |
 
 | 2 | #1220 | KS-1129 | L2 | 9c2021ba3e77 (ls-remote 13:3x) | anchoring response field; legs 3/4/8 OWED; anchoring wording | 03:29Z |
+| 2 | #1221 | KS-1266 | L1 | 0a561a5db393 (ls-remote 13:4x) | none (originate tests; port-1 fix) | 03:41Z |
+| 2 | #1222 | KS-1181 F2 | L3 | 9bce90229ad6 (ls-remote 13:4x) | none (packages/shared test) | 03:48Z |
+| 2 | #1223 | KS-1118 | L1 | 759726d8d (ls-remote 13:5x) | none (originate test + comment) | 03:49Z |
 | 3 | #1219 | KS-1277 | L1 | 5d5129a03af0 (ls-remote 13:2x) | none (comment-only) | 03:23Z |
 
+**TIER 2 = 4 READY at 13:4x (#1215, #1218, #1220, #1221) -> gate commissioned (a second drafter).**
 **TIER 1 = 4 READY at 13:1x -> gate commissioned (drafter writing the brief).** 
 Pending READY, known: B 25th ×3 Ornith PRs (tier 1 batch with #1213/#1214) · L1 A/B/C/J (tier 3/2/2/2) · L2 KS-975, KS-976 (tier 1), KS-1129 (tier 2) · L3 GF-2 (stacked on #1215) · L4 PR 1 (tier 2).
 Rule for launching: launch a tier's gate when ≥4 of that tier are READY, or when the oldest READY in it is 60 min old, whichever is first.
