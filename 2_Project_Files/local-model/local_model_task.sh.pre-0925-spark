@@ -21,14 +21,6 @@
 #                <think>…</think> from the answer — the Ornith runtime-cut
 #                workaround (2026-09-14 head-to-head; night runner default)
 #   OLLAMA_URL   default http://127.0.0.1:11434
-#   LM_BACKEND   (2026-09-25) unset or `ollama` = the path above, UNCHANGED.
-#                `spark` = DeepSeek V4 Flash on the Spark box via lib/spark_call.py
-#                (OpenAI chat API, thinking OFF), same out.md/.meta.json/.raw.json
-#                shape; the Studio load rule is skipped (the model runs on the
-#                box, one request at a time). Spark-only env: SPARK_URL (default
-#                http://127.0.0.1:47788 = the PORTS.md tunnel to the box's :8888),
-#                SPARK_MODEL (deepseek-v4-flash-0731), SPARK_MAX_TOKENS (16384),
-#                SPARK_THINK (0). Any other LM_BACKEND value refuses rc 2.
 #
 # Exit codes: 0 ok, 2 usage/missing-input/ollama-unreachable, 3 load rule
 # refused, 4 HTTP/JSON failure from the model call.
@@ -64,43 +56,6 @@ if [ ! -f "$INPUT_FILE" ]; then
   echo "local_model_task: input file missing: $INPUT_FILE" >&2
   exit 2
 fi
-
-# --- LM_BACKEND=spark (2026-09-25, Kam live board 15:28 "use the spark as much as possible ...
-# give it real work but measure progress"). Self-contained: it exits here, so every line below
-# (ollama reachability, the load rule, lm_call.py) runs exactly as before when LM_BACKEND is unset.
-case "${LM_BACKEND:-ollama}" in
-  ollama) ;;
-  spark)
-    SPARK_URL="${SPARK_URL:-http://127.0.0.1:47788}"
-    SPARK_MODEL="${SPARK_MODEL:-deepseek-v4-flash-0731}"
-    SPARK_MAX_TOKENS="${SPARK_MAX_TOKENS:-16384}"
-    SPARK_THINK="${SPARK_THINK:-0}"
-    HEALTH_OUT="$(curl -sS -m 10 -o /dev/null -w '%{http_code}' "$SPARK_URL/health" 2>&1)"
-    HEALTH_RC=$?
-    if [ "$HEALTH_RC" -ne 0 ] || [ "$HEALTH_OUT" != "200" ]; then
-      echo "local_model_task: spark not answering $SPARK_URL/health (rc=$HEALTH_RC http=$HEALTH_OUT) — check the tunnel first (pgrep -fl 'L 47788:127.0.0.1:8888'; open it with: ssh -f -N -o BatchMode=yes -o ServerAliveInterval=30 -o ServerAliveCountMax=3 -o ExitOnForwardFailure=yes -L 47788:127.0.0.1:8888 Spark), then the box (ssh Spark curl -sf 127.0.0.1:8888/health)" >&2
-      exit 2
-    fi
-    META_FILE="${OUT_FILE}.meta.json"
-    mkdir -p "$SCRIPT_DIR/logs"
-    RUN_LOG="$SCRIPT_DIR/logs/runs.log"
-    START_TS="$(date '+%Y-%m-%d %H:%M:%S')"
-    OUT_TMP=$(python3 "$SCRIPT_DIR/lib/spark_call.py" "$TASK_FILE" "$INPUT_FILE" "$OUT_FILE" "$META_FILE" "$SPARK_MODEL" "$SPARK_MAX_TOKENS" "$SPARK_URL" "$SPARK_THINK" 2>&1 > /dev/null)
-    CALL_RC=$?
-    if [ "$CALL_RC" -ne 0 ]; then
-      echo "local_model_task: spark call failed (rc=$CALL_RC): $OUT_TMP" >&2
-      echo "$START_TS | task=$(basename "$(dirname "$TASK_FILE")") backend=spark model=$SPARK_MODEL rc=$CALL_RC err=$OUT_TMP" >> "$RUN_LOG"
-      exit 4
-    fi
-    echo "$OUT_TMP" >&2
-    echo "$START_TS | task=$(basename "$(dirname "$TASK_FILE")") backend=spark model=$SPARK_MODEL think=$SPARK_THINK rc=0 out=$OUT_FILE $OUT_TMP" >> "$RUN_LOG"
-    exit 0
-    ;;
-  *)
-    echo "local_model_task: unknown LM_BACKEND '${LM_BACKEND}' (ollama | spark)" >&2
-    exit 2
-    ;;
-esac
 
 # --- ollama reachability ---
 TAGS_OUT="$(curl -sS -m 10 "$OLLAMA_URL/api/tags" 2>&1)"

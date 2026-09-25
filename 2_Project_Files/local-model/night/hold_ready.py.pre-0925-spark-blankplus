@@ -314,10 +314,7 @@ def hold_code_patch():
     prod_lines = open(prod_sec['file'], errors='replace').read().split('\n')
     prod_plus = [l[1:] for l in prod_lines if l.startswith('+') and not l.startswith('+++')]
     prod_minus = [l[1:] for l in prod_lines if l.startswith('-') and not l.startswith('---')]
-    # 2026-09-25 (Spark KS-1147, the first SELF-TESTING section with blank added lines): expected_plus never carries a blank
-    # '+' line (build_input.sh keeps only non-empty ones), so blank added lines are dropped from BOTH sides before the compare.
-    # A section with no blank '+' line compares exactly as before.
-    plus_ok = ([l.strip() for l in prod_plus if l.strip()] == [l.strip() for l in exp if l.strip()]) if exp else None
+    plus_ok = ([l.strip() for l in prod_plus] == [l.strip() for l in exp if l != '']) if exp else None
     if plus_ok is False: die(f"product hunk '+' lines ({len(prod_plus)}) are not ordered-equal (stripped) to the brief's expected_plus ({len([l for l in exp if l])})")
     nonascii = sum(1 for l in prod_plus for c in l if ord(c) > 127)
     a3i_out = open(os.path.join(chk, 'a3i_indent.out'), errors='replace').read().strip() if os.path.exists(os.path.join(chk, 'a3i_indent.out')) else ''

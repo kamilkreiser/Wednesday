@@ -68,20 +68,6 @@ dry = '--dry-run' in args; args = [a for a in args if a != '--dry-run']
 seat = 'Wednesday'
 if '--seat' in args:
     i = args.index('--seat'); seat = args[i+1]; del args[i:i+2]
-# 2026-09-25 (the Spark backend, local_model_task.sh LM_BACKEND=spark): the READY's filename token and heading name the
-# model that WROTE the diff. Default = the Ornith values, byte-identical to before. code_patch path only (refused elsewhere).
-model_tag = 'ornith35b-q4'; model_label = 'Ornith'
-if '--model-tag' in args:
-    i = args.index('--model-tag')
-    if i + 1 >= len(args): die("--model-tag needs a value", 1)
-    model_tag = args[i+1]; del args[i:i+2]
-    if not re.match(r'^[a-z0-9][a-z0-9.-]*$', model_tag): die(f"--model-tag {model_tag!r} must be lower-case letters/digits/dots/dashes", 1)
-    model_label = model_tag
-brief_given = None
-if '--brief' in args:
-    i = args.index('--brief')
-    if i + 1 >= len(args): die("--brief needs a path", 1)
-    brief_given = args[i+1]; del args[i:i+2]
 title_brief = None
 if '--title-from-brief' in args:
     i = args.index('--title-from-brief')
@@ -174,8 +160,6 @@ def _detect_doc_patch():
     return is_doc
 IS_DOC_PATCH = (not IS_BASH_PATCH) and _detect_doc_patch()
 IS_CODE_PATCH = (not IS_BASH_PATCH) and (not IS_DOC_PATCH) and ('test_file' not in inp and 'product_file' in inp and 'suggested_test_file' in inp)
-if (model_tag != 'ornith35b-q4' or brief_given is not None) and not IS_CODE_PATCH:
-    die("--model-tag / --brief are supported on the code_patch path only (2026-09-25); this run is not code_patch")
 if not IS_BASH_PATCH and not IS_DOC_PATCH and not IS_CODE_PATCH and 'test_file' not in inp:
     die(f"input.json is neither test_only (test_file) nor code_patch (product_file + suggested_test_file), and the run's artefacts name neither bash_patch nor doc_patch: keys {sorted(inp)}")
 
@@ -314,10 +298,7 @@ def hold_code_patch():
     prod_lines = open(prod_sec['file'], errors='replace').read().split('\n')
     prod_plus = [l[1:] for l in prod_lines if l.startswith('+') and not l.startswith('+++')]
     prod_minus = [l[1:] for l in prod_lines if l.startswith('-') and not l.startswith('---')]
-    # 2026-09-25 (Spark KS-1147, the first SELF-TESTING section with blank added lines): expected_plus never carries a blank
-    # '+' line (build_input.sh keeps only non-empty ones), so blank added lines are dropped from BOTH sides before the compare.
-    # A section with no blank '+' line compares exactly as before.
-    plus_ok = ([l.strip() for l in prod_plus if l.strip()] == [l.strip() for l in exp if l.strip()]) if exp else None
+    plus_ok = ([l.strip() for l in prod_plus] == [l.strip() for l in exp if l != '']) if exp else None
     if plus_ok is False: die(f"product hunk '+' lines ({len(prod_plus)}) are not ordered-equal (stripped) to the brief's expected_plus ({len([l for l in exp if l])})")
     nonascii = sum(1 for l in prod_plus for c in l if ord(c) > 127)
     a3i_out = open(os.path.join(chk, 'a3i_indent.out'), errors='replace').read().strip() if os.path.exists(os.path.join(chk, 'a3i_indent.out')) else ''
@@ -392,15 +373,10 @@ def hold_code_patch():
              if f.startswith(ticket + '-') and f.endswith('.md') and all(tok.lower() in f.lower() for tok in rowid.split('-'))]
     if len(cands) == 1: brief_clause = f"Brief (located by ticket + ROWID tokens under night/briefs/): `{cands[0]}`"
     elif cands: brief_clause = f"brief AMBIGUOUS under night/briefs/ ({len(cands)} match the ticket + ROWID tokens): " + ', '.join('`' + c + '`' for c in cands)
-    if brief_given is not None:
-        if not os.path.isfile(brief_given): die(f"--brief: no such file: {brief_given}")
-        _hl = next((l for l in open(brief_given, errors='replace').read().splitlines() if l.startswith('# ')), '')
-        if ticket not in _hl: die(f"--brief: the brief's `# ` heading does not name the run's ticket {ticket}: {_hl[:120]!r}")
-        brief_clause = f"Brief (given by --brief; its `# ` heading names {ticket}): `{os.path.abspath(brief_given)}`"
 
     now = datetime.datetime.now()
     stamp = now.strftime('%H:%M %Y-%m-%d'); day = now.strftime('%Y-%m-%d')
-    fname = f"READY_{ticket}-{rowid}_{model_tag}_BRIEFED-CODEPATCH-{title}-PASS-{passed}of{total}_{day}.diff.md"
+    fname = f"READY_{ticket}-{rowid}_ornith35b-q4_BRIEFED-CODEPATCH-{title}-PASS-{passed}of{total}_{day}.diff.md"
     out = os.path.join(NIGHT_DIR, fname)
     if os.path.exists(out) and not dry: die(f"READY already exists: {out}")
 
@@ -413,7 +389,7 @@ def hold_code_patch():
     apply_steps = '; '.join((f"section {k} `{os.path.basename(applied)}`: `git apply -p1 {opts}`" if opts else f"section {k} `{os.path.basename(applied)}`: `git apply -p1` (strict)")
                             for k, _, _, applied, opts, _, _, _ in sec_rows)
     strict_note = ('' if strict_ok else ' — STRICT APPLY NOT CLAIMED: ' + ('; '.join(f"section {k} ({p}): `{e}`" for k, p, e in strict_errors) or 'the checker applied a rewritten/accommodated section (see section_<k>.opts)') + ' (apply with the options recorded in section_<k>.opts; the raise seat states which)')
-    body = f"""# READY — {ticket}-{rowid} ({model_label}, briefed, code_patch, {runner}) — PASS {passed}/{total} — HELD for QA
+    body = f"""# READY — {ticket}-{rowid} (Ornith, briefed, code_patch, {runner}) — PASS {passed}/{total} — HELD for QA
 
 > ⚠ **CANONICAL PATCH = `{patch_path}`** (from `ls` at {stamp}; it is `cat` of the section files in order: {'`cmp` rc 0' if cat_ok else 'NOTE — `cat section_*.diff | cmp patch.diff` rc 1, the sections are the applied units'}: {', '.join('`' + r[2] + '`' for r in sec_rows)}). Checker A2 (verbatim from checker.out): `{a2_line}`{strict_note}; {golden_clause}.
 

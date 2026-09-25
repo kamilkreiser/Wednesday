@@ -1,4 +1,4 @@
-# Ornith candidates — derived 2026-09-25 09:28 from 278 KS Backlog/Todo tickets (read-only, unpaginated)
+# Ornith candidates — derived 2026-09-25 15:47 from 263 KS Backlog/Todo tickets (read-only, unpaginated)
 
 A CENSUS for the coordinator to brief from, easy → hard (Kam 2026-09-15 16:40 / 18:19). A ticket here is a candidate, not a task: read it, read the file at the tip, write `night/briefs/<id>.md`, then queue it. Auth-shaped titles are excluded (LAST); Peter/Stuart tickets and PR-attached tickets are excluded outright.
 
@@ -77,15 +77,14 @@ A CENSUS for the coordinator to brief from, easy → hard (Kam 2026-09-15 16:40 
 - KS-966 — named in READY_KS-972_ornith35b-q4_BASHPATCH-REANCHORED-PASS-7of7_2026-09-16.diff.md, READY_KS-972_ornith35b-q4_BASHPATCH-REANCHORED-PASS-7of7_2026-09-16.diff.md.pre-0951-superseded
 - KS-999 — named in READY_KS-1186_ornith35b-q4_AUTH-5SITE-LINEKEYED-PASS-7of7_2026-09-17.diff.md
 
-## HELD (READY_* or done.md PASS) — 31
+## HELD (READY_* or done.md PASS) — 28
 - KS-1009 Security: GET /api/auth/wallet/status returns userId + role to ANY anonymous cal
 - KS-1074 The poller/reconcile blob writers also erase threadToken — on the CONFIRM/heal p
-- KS-1089 run-shell-suites.sh polish from #953's tier-2 gate: make `--list` survive a tree
 - KS-1090 api-gateway + originate: tsc never type-checks #951's three wiring tests, and th
 - KS-1108 Akto harness: loadSecretsYml() parses config/secrets.yml with no catch — the KS-
+- KS-1110 Two k6 unit tests parse config/scenarios.yml with js-yaml directly, bypassing re
 - KS-1117 k6 YAML loader: a BOM immediately followed by a comment is a marked syntax error
 - KS-1121 Security: credentialRepo.getById resolves a credential by SUBSTRING (LIKE '%id%'
-- KS-1127 run-shell-suites.sh counts an exit-0 SKIP as `passed` — a suite that ran 0 of it
 - KS-1182 demo-service errorHandler: unchecked err.status (NaN crashes the process, 200/30
 - KS-1186 userRepo.ts: five sibling reads still return fromRow unawaited inside try, so a 
 - KS-1196 admin POST /api/admin/document-types ids are dt-${Date.now()}: two creates in on
@@ -97,12 +96,10 @@ A CENSUS for the coordinator to brief from, easy → hard (Kam 2026-09-15 16:40 
 - KS-1221 ks744 cells never test a falsy claim - a verificationLevel of '' or null must fo
 - KS-1227 ks1072 postTier2's anchor-store witness counts every stub request, leaks its lis
 - KS-1250 O-2: RUNBOOK §2.2 documents SMOKE_BASE_URL, but scripts/smoke-test.sh ignores it
-- KS-1277 documents.ts: two stale comments about on-behalf-of recording (:2327-2334 inside
 - KS-623 Test-token env guard is asymmetric: the gateway fails closed on an unset NODE_EN
 - KS-692 Security: /api/status revoke/unrevoke has no tenant ownership check — an ISSUER_
 - KS-747 Spec drift: GET /api/security/keys declares no parameters while the handler requ
 - KS-794 verify-file returns `fileSize` on every 200 and neither response schema declares
-- KS-865 check-no-latest-tags.sh silently skips a missing input — it scans 5 of the 6 fil
 - KS-866 Merge protocol: the server-side `sha=` pin protects the PR head, not the base — 
 - KS-884 pre-push resolves the bare name `develop`, so a TAG named develop beats the bran
 - KS-888 dbSaveApiKey SWALLOWS a failed INSERT — POST /api/keys answers 201 for a key tha
@@ -110,7 +107,7 @@ A CENSUS for the coordinator to brief from, easy → hard (Kam 2026-09-15 16:40 
 - KS-938 Security: "MFA disabled" leaves the TOTP seed and hashed backup codes in the row
 - KS-960 Two schema sources disagree on whether users.email is unique — a statement valid
 
-## SET ASIDE with a recorded reason — 30 (re-read only if the ticket's updatedAt moved)
+## SET ASIDE with a recorded reason — 26 (re-read only if the ticket's updatedAt moved)
 - KS-1063 — decision-class: its own words say the design question comes first (updated 2026-09-09)
 - KS-1076 — likely already fixed at M55 (docblock present since ec61abf8e/0882f7661) — measure with eslint in a tool-mode clone; item 2 is a Claude seat's (updated 2026-09-13)
 - KS-1088 — decision-class: 'filing only; decide whether the runner should enforce isolation' — a ruling, not a patch (updated 2026-09-11)
@@ -119,8 +116,6 @@ A CENSUS for the coordinator to brief from, easy → hard (Kam 2026-09-15 16:40 
 - KS-1113 — an e2e spec under tests/e2e — no Playwright checker yet (updated 2026-09-13)
 - KS-1114 — decision-class (spec vs implementation of a title strategy) (updated 2026-09-13)
 - KS-1119 — multi-tenant security surface (updated 2026-09-13)
-- KS-1128 — the seed's pg is a require inside the function (updated 2026-09-13)
-- KS-1129 — three services, anchoring index.ts listens on import (updated 2026-09-16)
 - KS-1132 — services/auth — security surface (Kam 16:40: auth LAST) (updated 2026-09-13)
 - KS-1142 — a test refactor with no product tamper (updated 2026-09-13)
 - KS-1148 — its own words: 'Fixing either is a .github/workflows/ edit — Kam-class; nothing here is changed by the seat that filed this' (updated 2026-09-14)
@@ -134,15 +129,13 @@ A CENSUS for the coordinator to brief from, easy → hard (Kam 2026-09-15 16:40 
 - KS-757 — blocked by the ticket's own measurement (updated 2026-09-08)
 - KS-770 — not a doc edit — the body is a review-stream test pass for Peter; the docs/ path came from a MENTION, not an edit target (updated 2026-09-14)
 - KS-777 — tracker ticket — all four findings FIXED on #795; a board close (updated 2026-09-05)
-- KS-808 — item 1 is a recorded decision; items 2–3 need psql → a Claude seat (updated 2026-09-07)
 - KS-849 — kyc has no in-process driver (app.listen at import) (updated 2026-09-06)
 - KS-889 — a measurement/ruling ticket, not a patch (updated 2026-09-06)
-- KS-897 — the subject IS a test file — the bash tier's B3 wants ONE new test beside a reference (updated 2026-09-06)
 - KS-906 — a test file → a Claude seat (updated 2026-09-06)
 - KS-980 — decision-class (a second DB role or a claim correction) (updated 2026-09-07)
 - KS-981 — lives only on the frozen #892 branch (updated 2026-09-07)
 
-## EXCLUDED by predicate — 179
+## EXCLUDED by predicate — 171
 - KS-1000 — has a PR attached
 - KS-1003 — auth-shaped title (LAST, Kam 16:40)
 - KS-1005 — auth-shaped title (LAST, Kam 16:40)
@@ -174,11 +167,9 @@ A CENSUS for the coordinator to brief from, easy → hard (Kam 2026-09-15 16:40 
 - KS-1105 — auth-shaped title (LAST, Kam 16:40)
 - KS-1106 — names no product file (after basename/docs/route resolution)
 - KS-1107 — auth-shaped title (LAST, Kam 16:40)
-- KS-1110 — names no product file (after basename/docs/route resolution)
 - KS-1115 — names no product file (after basename/docs/route resolution)
 - KS-1116 — names no product file (after basename/docs/route resolution)
 - KS-1124 — auth-shaped title (LAST, Kam 16:40)
-- KS-1131 — names no product file (after basename/docs/route resolution)
 - KS-1138 — names no product file (after basename/docs/route resolution)
 - KS-1141 — names no product file (after basename/docs/route resolution)
 - KS-1144 — names no product file (after basename/docs/route resolution)
@@ -208,16 +199,14 @@ A CENSUS for the coordinator to brief from, easy → hard (Kam 2026-09-15 16:40 
 - KS-1247 — names no product file (after basename/docs/route resolution)
 - KS-1249 — names no product file (after basename/docs/route resolution)
 - KS-1251 — names no product file (after basename/docs/route resolution)
-- KS-1252 — names no product file (after basename/docs/route resolution)
-- KS-1253 — names no product file (after basename/docs/route resolution)
 - KS-1255 — names no product file (after basename/docs/route resolution)
 - KS-1256 — names no product file (after basename/docs/route resolution)
 - KS-1259 — names no product file (after basename/docs/route resolution)
-- KS-1266 — names no product file (after basename/docs/route resolution)
 - KS-1274 — names no product file (after basename/docs/route resolution)
 - KS-1278 — names no product file (after basename/docs/route resolution)
 - KS-1280 — auth-shaped title (LAST, Kam 16:40)
-- KS-1281 — auth-shaped title (LAST, Kam 16:40)
+- KS-1289 — names no product file (after basename/docs/route resolution)
+- KS-1290 — names no product file (after basename/docs/route resolution)
 - KS-135 — on Peter/Stuart
 - KS-139 — on Peter/Stuart
 - KS-188 — on Peter/Stuart
@@ -230,7 +219,6 @@ A CENSUS for the coordinator to brief from, easy → hard (Kam 2026-09-15 16:40 
 - KS-492 — on Peter/Stuart
 - KS-502 — on Peter/Stuart
 - KS-525 — on Peter/Stuart
-- KS-530 — names no product file (after basename/docs/route resolution)
 - KS-562 — names no product file (after basename/docs/route resolution)
 - KS-565 — has a PR attached
 - KS-568 — on Peter/Stuart
@@ -266,7 +254,6 @@ A CENSUS for the coordinator to brief from, easy → hard (Kam 2026-09-15 16:40 
 - KS-724 — auth-shaped title (LAST, Kam 16:40)
 - KS-725 — names no product file (after basename/docs/route resolution)
 - KS-735 — names no product file (after basename/docs/route resolution)
-- KS-738 — names no product file (after basename/docs/route resolution)
 - KS-748 — names no product file (after basename/docs/route resolution)
 - KS-749 — has a PR attached
 - KS-752 — names no product file (after basename/docs/route resolution)
@@ -295,8 +282,6 @@ A CENSUS for the coordinator to brief from, easy → hard (Kam 2026-09-15 16:40 
 - KS-838 — names no product file (after basename/docs/route resolution)
 - KS-840 — auth-shaped title (LAST, Kam 16:40)
 - KS-846 — names no product file (after basename/docs/route resolution)
-- KS-872 — names no product file (after basename/docs/route resolution)
-- KS-896 — names no product file (after basename/docs/route resolution)
 - KS-902 — names no product file (after basename/docs/route resolution)
 - KS-903 — names no product file (after basename/docs/route resolution)
 - KS-918 — auth-shaped title (LAST, Kam 16:40)
