@@ -21,12 +21,12 @@ supersede: replace wholesale; previous = NEXT-PICKUP-FRIDAY.md.pre-0925-rotate-s
 
 - **The LAPTOP SLEEPS.** Arm `caffeinate -dims -t 21600` (background) in the same action as launching any seat, and check `pgrep -fl caffeinate` at boot. On 09-25 it slept at ~17:0x and cut two seats' turns. One was armed at 17:4x until ~23:4x.
 
-## 🔴 LIVE (refreshed 21:5x by the 19:37 successor seat)
-1. **HPSM-POC main = a89359c** (PR #23 B18 Azure OpenAI + Kam's template approval, and PR #24 B17 fixes + C-21 features, both merged head-pinned; combined main CI green 21:5x).
-2. **B19 SEAT-B LIVE on ADDENDUM-3** (pane %24, branch `b19/narrative-reliability`, reviewed head 3520c78): B19 + ADD-1 (1.0.1 drafted, proposed) + ADD-2 (approver name) are DONE and reviewed; ADD-3 fixes FRIDAY's brief error (critical "in any phrasing" → 0/12 live) = critical as a severity only, text-named ids count as cited, 1.0.1 aligned, re-measure ≤20 calls. Watcher on the B19 STATUS. On READY: read its offline-replay + live table; then **send Kam the 1.0.1 sheet (`HPSM-POC/1_Project_Definition/Showcase/2026-09-25_AI-templates-1.0.1-changes.md`) + an APPROVAL card** (held until now: deliver whole); open ONE PR for the branch; merge on green.
-3. **Open Friday cards: 0.** Kam 21:55 ruled templates-v101 a (C-24 → B19 ADDENDUM-1: draft 1.0.1, proposed; send Kam the side-by-side + an APPROVAL CARD when B19 is ready) and pdf-approver-name b (C-25 → B19 ADDENDUM-2).
-4. Azure (HPSM-POC dev sub, hpsm-poc-rg): oai-hpsmpoc-dev-bdn2se, keyless, deployment `narrative` gpt-4.1-mini cap 10, budget 50/month (currency UNMEASURED; Kam told).
-5. caffeinate `-dims -t 21600` DETACHED 19:37 (pid 22618) until ~01:3x. Seats use the default ~/.claude = the new account.
+## 🔴 LIVE (refreshed ~22:5x at the 65% checkpoint by the 19:37 successor seat)
+1. **HPSM-POC main = a89359c** (B17 + B18 merged, green). **PR #25 (B19, head b7dc220)** reviewed + ACCEPTED; a CI poll was running at ~22:55 → merge head-pinned on green, read main back, then the main push-CI. No seat open.
+2. **Kam's card `hpsmpoc-approve-templates-101`** (sheet `HPSM-POC/1_Project_Definition/Showcase/2026-09-25_AI-templates-1.0.1-changes.md`, drawer f-fba9c7ca9e; hashes …6d138904 / …76ed42f9 / …7e1409c7). **On (a):** brief a small seat: ONE commit moving the three 1.0.1 rows to approved (approvedBy Kam Kreiser (Product Owner), approvedAt = his tap time, ref the C-number you record), hashes asserted unchanged; then a live AI-mode re-test by clicks (≤12 calls: 3 customers × 2 drafts + the other two templates once); report the real pass rate to Kam. **Default (b):** nothing; the showcase uses template mode (`scripts/showcase.sh`).
+3. Friday KEEPS the "compliance" check strict (the model's "maintaining compliance with internal security objectives" stays refused). If 1.0.1 live is still mostly refused on remediation, THAT is the next honest finding, not a reason to loosen.
+4. Owed to Kam when relevant: the budget currency (UNMEASURED); the erasure endpoint is designed, not built (C-25 runbook only).
+5. caffeinate `-dims -t 21600` DETACHED 19:37 (pid 22618) until ~01:3x.
 
 ## NEXT (owed, in order)
 1. ~~HPSM-POC B14 fix round~~ DONE and merged; the re-run is LIVE 1. Source: the B12 user test STATUS `HPSM-POC/1_Project_Definition/Briefs/2026-09-25_B12_SEAT-C_end-to-end-user-test-as-a-salesperson.STATUS.md` (46 findings).
