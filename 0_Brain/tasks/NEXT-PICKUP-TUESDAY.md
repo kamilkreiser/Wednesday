@@ -6,6 +6,14 @@ status: live
 supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s1-wholesale
 ---
 
+## 🟢 DELTA 76 — 2026-09-25 13:47 (s83, ctx 72% CHECKPOINT; band 80-90, NOT rotating). **READ THIS, THEN 75.**
+- **Kam is SUBMITTING the 2.2.0 package himself** (terminal ~13:3x). **OWED on his confirmation:** the next NexusAI seat records the submission (date, 2.2.0, package commit 3464dd8, image fdda3309…) as a C-number in CLARIFICATIONS.
+- **GITHUB — DONE** (Kam: "upload everything to GitHub"). NexusAI rd-463-rework-s62 63190c9 + s74-merge-main d0b9cde pushed as branches (verified by ls-remote; main 0677388 unchanged; the 34 dirty files were all already-committed blobs; the stale PEN-TEST copy carries redacted secrets, so NEVER commit it). myPKI working tree == origin/main tree (local main 19 behind; no reset). HPSM analysis repo -> datasecau/HPSM-analysis (Friday). Kam told (201).
+- **NAS SYNC RUNNING since 13:35** (com.tuesday.nassync kickstarted, agent=tuesday, one-way, no deletions; log `scheduler/logs/nas_sync_tuesday_2026-09-25_133544_61324.log`). **On finish: read `scheduler/state/nas_sync_last_tuesday.txt` (expect deletions=0) and tell Kam on the board.**
+- **Vision gate 8 HELD on Kam's card** `quickquote-bcr3-round4-fourth-round` (default: nothing runs; re-raise next morning).
+- **Floor: %0 tuesday + %1 monitor only.** Every pane closed after its wrap.
+- **Traps met this session:** Friday's chat stream keeps arriving staged/conflicted on rebase (take `--ours` = origin for chat_friday/chat_wednesday; never commit other seats' streams); send_brief refuses "stop" in a subject; the myPKI seat hit a first-run trust dialog (answered "Yes" by Tuesday, disclosed).
+
 ## 🟢 DELTA 75 — 2026-09-25 13:06 (s83). **THE ZIP IS DONE. READ THIS FIRST, THEN 74.**
 - **EMAILED to kamil.kreiser@datasec.com.au AND kreiser.org@me.com** (msg `010001a0d6862e9e…`, read back: 4 attachments). Plan zip `NexusAI_plan-managed-ai_2.2.0_3464dd8.zip` sha256 `18155587…ef21c`, listing zip `c333f95c…`, MANIFEST 32/0, and the COMMITTED handover doc (`c5da4d4`, sha256 `6252a60d…`; NOT the unfilled session-tools copy, gate F-1). Kam told on the board (201). **DELTA 51's owed zip and Kam's 09-25 "email me the zip" are CLOSED.** He uploads and submits; we do not touch Partner Center.
 - **PACKAGE GATE: GO WITH FINDINGS @ c5da4d4** (report `Testing Agent MAIN/projects/nexusai/reports/2026-09-25-pkg-gate-220/report.md`). Scored 1.00; pane closed. Findings F-2..F-6 were handed to NexusAI-J to ticket.
