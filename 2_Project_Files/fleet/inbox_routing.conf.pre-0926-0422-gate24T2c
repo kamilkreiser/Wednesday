@@ -1,0 +1,108 @@
+# inbox_routing.conf — where a brief for each project is DELIVERED (WED-104).
+#
+# WHY: 2026-08-13 the fleet moved from one shared bus (coagent@) to per-project
+# inboxes with inbox-scoped API keys (WED-103), because a single-client agent
+# polling the shared bus can read another client's mail — it happened
+# (learnings/2026-08-13_shared-bus-tag-filter-or-leak). send_brief.sh addressed
+# coagent@ unconditionally, so a brief to a MIGRATED project would land on a bus
+# that project no longer reads.
+#
+# Format: <Client>/<Project>|<project inbox>|<migrated: yes|no>
+#
+#   migrated=yes → deliver to the project inbox ONLY. They have stopped polling
+#                  the bus; a bus copy would be an unread copy sitting on a
+#                  shared channel, which is the exposure this migration removed.
+#   migrated=no  → deliver to the project inbox AND the bus. They still read the
+#                  bus today and will read their own inbox after they migrate at
+#                  their next boot; the brief must be findable on whichever
+#                  channel that session actually reads. (Bootstrap pattern proven
+#                  2026-08-13: the migration notice itself was seeded both ways.)
+#
+# Flip a project to yes ONLY after that project's agent has reported its own
+# verification (own inbox 200 · another inbox 404 · enumeration count 1) — the
+# agent's report, not my assumption. A project absent from this file is REFUSED
+# by send_brief.sh rather than defaulted anywhere.
+# Flipped to yes 2026-08-13 22:2x on the agent's OWN verification report (session
+# 28 plan mail): own inbox 200 · coagent@ 404 · all three Datasec inboxes AND
+# wednesday-agent@ 404 · GET /v0/inboxes count 1. Their probe was wider than the
+# one I asked for.
+Secuura/Blockchain|secuura-blockchain@agentmail.to|yes
+Datasec/NexusAI|datasec-nexusai@agentmail.to|no
+Datasec/Vision_Sales_Portal|datasec-vision@agentmail.to|no
+Datasec/HPSM|datasec-hpsm@agentmail.to|yes
+Wednesday|wednesday-agent@agentmail.to|yes
+Tuesday|tuesday-agent@agentmail.to|yes
+Friday|friday-laptop-agent@agentmail.to|yes
+Secuura/Blockchain-B|secuura-blockchain@agentmail.to|yes
+Secuura/Blockchain-C|secuura-blockchain@agentmail.to|yes
+Secuura/Blockchain-D|secuura-blockchain@agentmail.to|yes
+Secuura/Blockchain-E|secuura-blockchain@agentmail.to|yes
+Datasec/NexusAI-B|datasec-nexusai@agentmail.to|no
+Datasec/HPSM-S42|datasec-hpsm@agentmail.to|yes
+Datasec/HPSM-S43|datasec-hpsm@agentmail.to|yes
+Datasec/HPSM-S44|datasec-hpsm@agentmail.to|yes
+Datasec/HPSM-S45|datasec-hpsm@agentmail.to|yes
+Datasec/HPSM-clean|datasec-hpsm@agentmail.to|yes
+Datasec/HPSM-S46|datasec-hpsm@agentmail.to|yes
+Secuura/Blockchain-BOARD|secuura-blockchain@agentmail.to|yes
+# QA gate panes (2026-09-20): a cockpit pane that is not routed cannot be tapped —
+# `cockpit.sh say --mail` fails rc 1 with NO output when the pane has no inbox here.
+# The QA gate agent SENDS from coagent@ and its verdict goes to wednesday-agent@, so
+# coagent@ is the inbox a pointer to it must land in. migrated=yes: coagent@ IS the
+# bus, so a second bus copy would be the same message twice.
+QA/Secuura-1100|coagent@agentmail.to|yes
+QA/Secuura-1102-1104|coagent@agentmail.to|yes
+QA/Secuura-1105|coagent@agentmail.to|yes
+QA/Secuura-batch1106|coagent@agentmail.to|yes
+QA/Secuura-batch1112|coagent@agentmail.to|yes
+Datasec/NexusAI-C|datasec-nexusai@agentmail.to|no
+QA/Secuura-batch1119|coagent@agentmail.to|yes
+Datasec/NexusAI-D|datasec-nexusai@agentmail.to|no
+Datasec/NexusAI-E|datasec-nexusai@agentmail.to|no
+QA/Secuura-batch1130|coagent@agentmail.to|yes
+Datasec/NexusAI-F|datasec-nexusai@agentmail.to|no
+QA/Secuura-batch1136|coagent@agentmail.to|yes
+Datasec/NexusAI-G|datasec-nexusai@agentmail.to|no
+QA/Secuura-batch1147|coagent@agentmail.to|yes
+QA/Secuura-batch1148|coagent@agentmail.to|yes
+Datasec/NexusAI-H|datasec-nexusai@agentmail.to|no
+QA/Secuura-1036|coagent@agentmail.to|yes
+QA/Secuura-batch1167|coagent@agentmail.to|yes
+QA/Secuura-batch1170|coagent@agentmail.to|yes
+QA/Secuura-batch1180|coagent@agentmail.to|yes
+QA/Secuura-batch1182|coagent@agentmail.to|yes
+Datasec/NexusAI-I|datasec-nexusai@agentmail.to|no
+QA/NexusAI-gate7|tuesday-agent@agentmail.to|no
+QA/Vision-gate4|tuesday-agent@agentmail.to|no
+QA/Vision-gate5|tuesday-agent@agentmail.to|no
+QA/NexusAI-gate7r2|tuesday-agent@agentmail.to|no
+QA/Vision-gate6|tuesday-agent@agentmail.to|no
+QA/Vision-gate7|tuesday-agent@agentmail.to|no
+QA/NexusAI-gate8|tuesday-agent@agentmail.to|no
+QA/Secuura-batch1202|coagent@agentmail.to|yes
+QA/Secuura-batch1204|coagent@agentmail.to|yes
+QA/Secuura-1210r2|coagent@agentmail.to|yes
+Datasec/NexusAI-J|datasec-nexusai@agentmail.to|no
+QA/NexusAI-pkg220|tuesday-agent@agentmail.to|no
+QA/Vision-gate8|tuesday-agent@agentmail.to|no
+Datasec/NexusAI-K|datasec-nexusai@agentmail.to|no
+Datasec/myPKI|coagent@agentmail.to|no
+QA/Secuura-batch1213|coagent@agentmail.to|yes
+QA/Secuura-batch1215|coagent@agentmail.to|yes
+Datasec/NexusAI-L|datasec-nexusai@agentmail.to|no
+QA/Secuura-batch1224|coagent@agentmail.to|yes
+QA/Secuura-batch1225|coagent@agentmail.to|yes
+QA/Secuura-batch1218|coagent@agentmail.to|yes
+QA/NexusAI-pkg221|tuesday-agent@agentmail.to|no
+QA/Secuura-batch1234|coagent@agentmail.to|yes
+QA/Secuura-batch1241|coagent@agentmail.to|yes
+QA/Secuura-batch1239|coagent@agentmail.to|yes
+Datasec/NexusAI-M|datasec-nexusai@agentmail.to|no
+Datasec/NexusAI-N|datasec-nexusai@agentmail.to|no
+Datasec/NexusAI-O|datasec-nexusai@agentmail.to|no
+Datasec/NexusAI-P|datasec-nexusai@agentmail.to|no
+QA/Secuura-batch1241r2|coagent@agentmail.to|yes
+QA/NexusAI-rd579|tuesday-agent@agentmail.to|no
+QA/NexusAI-g579-639|tuesday-agent@agentmail.to|no
+QA/Secuura-batch1243|coagent@agentmail.to|yes
+QA/Secuura-batch1249|coagent@agentmail.to|yes
