@@ -7,7 +7,7 @@ status: live
 
 # Boot digest — headline + rules of every lesson (open the file when it fires)
 
-Generated 2026-09-25 15:30 from 206 lesson files (955,265 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 10 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
+Generated 2026-09-25 15:35 from 206 lesson files (956,196 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 10 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
 
 ## The T9 SSD is the master — Wednesday must be fully portable
 `2026-07-31_fully-portable-drive.md` · principle · 2026-07-31 · status: superseded — the "T9 is the master" half by [[2026-08-25_one-drive-devmaster-is-master]] (2026-08-25); the portability principle itself still lives
@@ -6283,7 +6283,7 @@ sections (open the file for these): Refinement 10:4x, same day — a good brief 
 **His words, verbatim (09:16:16):**
 > *"The credits have reset, so please start up all agents and continue the work. Also, as a standing rule, I'd like the local agent to be constantly working on the tickets that it can."*
 
-sections (open the file for these): How to apply
+sections (open the file for these): How to apply · EXTENSION 2026-09-25 15:33 — Kam, live board (view=wednesday), verbatim: *"I understand why Ornith is idle.  I expect it will be until we get some tickets which are suitable for Ornith"*
 
 ## How to apply
 
@@ -6293,6 +6293,11 @@ sections (open the file for these): How to apply
 4. **If the queue must be empty, write WHY where the next reader lands** — the reason is the artefact, and "I didn't find anything" is not one.
 
 **Family:** [[2026-09-15_never-idle-the-gatekeeper-widens-the-harness-when-the-pool-runs-dry]] (the correction this promotes) · [[2026-09-16_local-model-is-long-term-and-claude-takes-what-it-cannot-do]] (the router: Claude takes what Ornith cannot) · [[2026-09-16_if-something-blocks-move-on-to-the-next]] (a blocked item is skipped, never waited on) · [[2026-09-14_ornith-runs-at-night-in-the-downtime-a-standing-rule]] (the night shape this widens to all hours).
+
+## EXTENSION 2026-09-25 15:33 — Kam, live board (view=wednesday), verbatim: *"I understand why Ornith is idle.  I expect it will be until we get some tickets which are suitable for Ornith"*
+- **An idle Ornith whose queue is empty FOR A WRITTEN, MEASURED REASON is accepted by Kam, and is not a rule being broken.** Today's reason: three screens over ~280 KS tickets found no briefable one-file candidate outside the live lanes (the why-line in `night/queue.md`).
+- **What still binds:** rule 4 above (write WHY the queue is empty where the next reader lands), and re-screen whenever the pool changes (a lane wraps and frees files, new tickets are filed, a gate's NOT-PINNED rows arrive). The G7 idle alarm is silenced with `night/PAUSE_QUEUE` plus the reason, never by ignoring it.
+- **The medium work goes to the Spark now** (Kam 2026-09-25 15:28), so a ticket too big for Ornith is not an Ornith gap; it is the Spark's queue.
 
 
 ## `cockpit.sh rotate` is for a seat that has NOT wrapped; retire a wrapped seat by hand

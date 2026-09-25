@@ -332,20 +332,6 @@ arm_live_poll() {
 }
 arm_live_poll || echo "WARNING: live_chat_poll failed to arm — Kam's LIVE-board posts will not wake this seat; report this in the session (no-skip)."
 
-# ── Arm the LIVE-BOARD usage publisher (2026-09-25, Kam 15:32:29 on the Wednesday tab, with a screenshot of the
-# seat buttons: "can you pplease also look into the button for you and tuesday.  at the moment only friday is
-# showing weekly usage") ── dashboard-cloud/seat/publish_usage.sh posts THIS seat's statusline reading to the live
-# board every 120 s. No launcher started it: on the Studio it was hand-started, died with the 09-24 21:3x wrap, and
-# the Wednesday tab read "no reading" from then on. Same class as arm_live_poll above. publish_usage.sh --arm is
-# idempotent (it refuses to spawn a second loop for the seat) and detaches itself; a seat whose certificate is not on
-# this machine is skipped with its own line (the script exits 2 without it).
-if [ -f "$PROJECT_DIR/2_Project_Files/dashboard-cloud/seat/publish_usage.sh" ]; then
-  WED_AGENT="$AGENT" bash "$PROJECT_DIR/2_Project_Files/dashboard-cloud/seat/publish_usage.sh" --seat "$AGENT" --arm || \
-    echo "WARNING: publish_usage failed to arm for $AGENT — this seat's weekly usage will read 'no reading' on the live board; report it in the session (no-skip)."
-else
-  echo "WARNING: publish_usage.sh missing — the live board cannot show this seat's weekly usage."
-fi
-
 # ── Claude Code hooks + permission guards: RENDER them, never rely on the copy ──
 # .claude/settings.local.json is gitignored, so the hooks and permission rules never
 # travelled between seats. Measured 2026-09-16: Wednesday's was 1775 bytes with six hooks;

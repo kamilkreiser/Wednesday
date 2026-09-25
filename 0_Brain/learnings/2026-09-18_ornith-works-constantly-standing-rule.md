@@ -24,3 +24,8 @@ expires: none — Kam called it a STANDING RULE
 4. **If the queue must be empty, write WHY where the next reader lands** — the reason is the artefact, and "I didn't find anything" is not one.
 
 **Family:** [[2026-09-15_never-idle-the-gatekeeper-widens-the-harness-when-the-pool-runs-dry]] (the correction this promotes) · [[2026-09-16_local-model-is-long-term-and-claude-takes-what-it-cannot-do]] (the router: Claude takes what Ornith cannot) · [[2026-09-16_if-something-blocks-move-on-to-the-next]] (a blocked item is skipped, never waited on) · [[2026-09-14_ornith-runs-at-night-in-the-downtime-a-standing-rule]] (the night shape this widens to all hours).
+
+## EXTENSION 2026-09-25 15:33 — Kam, live board (view=wednesday), verbatim: *"I understand why Ornith is idle.  I expect it will be until we get some tickets which are suitable for Ornith"*
+- **An idle Ornith whose queue is empty FOR A WRITTEN, MEASURED REASON is accepted by Kam, and is not a rule being broken.** Today's reason: three screens over ~280 KS tickets found no briefable one-file candidate outside the live lanes (the why-line in `night/queue.md`).
+- **What still binds:** rule 4 above (write WHY the queue is empty where the next reader lands), and re-screen whenever the pool changes (a lane wraps and frees files, new tickets are filed, a gate's NOT-PINNED rows arrive). The G7 idle alarm is silenced with `night/PAUSE_QUEUE` plus the reason, never by ignoring it.
+- **The medium work goes to the Spark now** (Kam 2026-09-25 15:28), so a ticket too big for Ornith is not an Ornith gap; it is the Spark's queue.
