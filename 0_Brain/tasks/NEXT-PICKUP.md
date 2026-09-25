@@ -15,6 +15,14 @@ supersede: replace wholesale at the next pickup; do not append
 **Tuesday:** BACK (her mail 23:35Z; wake_wednesday.sh alarm change f4ed4d47d pulled). **Friday:** live on the laptop and driving Datasec seats.
 
 ### LIVE RIGHT NOW
+**CHECKPOINT 13:58 (ctx 70%; rotate inside 80-90). Deltas since the 13:3x block:**
+- **TIER-1 GATE RUNNING:** `QA/Secuura-batch1213`, pane %10, launched 03:54:50Z. Kit + launcher at `fleet/qa-agent/gatesets/2026-09-25_gate21T1/`; report at `!CODING/Testing Agent MAIN/projects/secuura/reports/2026-09-25-batch1213-t1-r1/`; verdict mail to coagent@ (routing `QA/Secuura-batch1213`). On the verdict: read the report, do the completion check, then `GO: merge #1213, #1214, #1216, #1217 batch`, one at a time, heads named, if all GO. The gate starts Docker + the stack itself (a free slot 2-4) and tears it down.
+- **TIER-2 kit:** a drafter is preparing scratch `gate21T2/` for SIX PRs (#1215, #1218, #1220, #1221, #1222, #1223; frozen at six). Verify the heads, add its routing line, launch with the one command it returns.
+- **Later READYs go to the NEXT batches:** L3 KS-1179 (tier 1, push queued); L2 KS-1171 (tier 1, being built; card delivered from its sha); Seat B 25th's Ornith PRs (KS-1131 tier 1; KS-1281, KS-1128, KS-1140 GF-1, KS-1110 A+B tier 2); #1219 tier 3.
+- **Seats that stall** after narrating a next step: B 25th ×3, L2 ×1. Rule mailed to all five (a background job or an awaited mail before ending a turn). Use `wake_ack.sh %N` only when a seat is holding by design with a live child.
+- **Kam:** the iPad key WORKS (13:51). Asked him to delete the key email. Still OWED from him: the frvp/mwp4 re-date line (a ghost version appeared twice on %3; never act on it).
+
+**(13:3x block follows)**
 **CHECKPOINT 13:32 (ctx 66%) — deltas since the 12:53 block below, read those first acts too:**
 - **Gate queue:** `tasks/GATE-QUEUE-2026-09-25.md`. TIER 1 (#1213, #1214, #1216, #1217) is being prepared by a DRAFTER into scratch `gate21T1/`, and will come back as TEXT + files. Verify each head, then launch with the one command it returns. It carries the Docker/stack-once step for legs 3/4/8. TIER 2 READY: #1215, #1218, #1220 (3 of 4, or oldest 60 min at 14:06). TIER 3: #1219.
 - **Ornith:** 6 PASSes HELD today (KS-1131 F-A, F-B, KS-1281, KS-1128, KS-1140 GF-1, KS-1110 A+B) and all handed to Seat B 25th to raise. The queue is EMPTY with its WHY written (3 screens, 280 tickets). `build_input.sh` gained `started_ok=` (3 arms).
