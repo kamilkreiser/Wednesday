@@ -29,7 +29,7 @@ supersede: replace wholesale; previous = NEXT-PICKUP-FRIDAY.md.pre-0925-1509-ckp
    - Brief: `HPSM-POC/1_Project_Definition/Briefs/2026-09-25_B11_SEAT-B_action-plan-and-dashboard-on-the-real-api.md`.
    - Scope: the action plan and the dashboard move to the real API (the B09 seats' own follow-ups), with mock mode kept; plus the Showcase records commit (build script + INDEX only; the PDF stays out by the root `.gitignore`'s `*.pdf`).
    - STATUS watcher glob: `…/HPSM-POC/1_Project_Definition/Briefs/2026-09-25_B11*STATUS*.md`.
-   - **READY 15:0x → REVIEWED + ACCEPTED; PR https://github.com/datasecau/HPSM-POC/pull/20 open (head e14e0aa), CI running.** Next: merge on green (head-pinned squash), then pane_close the seat (%11) and re-read main CI. Card hpsmpoc-plan-no-delete posted.
+   - **DONE: PR #20 merged 15:1x → main 149d15f (tree = the reviewed head's), pane closed.** Next: confirm main push CI green (a poll was running at the handover; re-read `gh run list --commit 149d15f`).
 4. HPSM-POC showcase B09: all merged (main 3029930, CI green); the showcase pack is in Kam's file drawer. HPSM analysis repo: pushed (private `datasecau/HPSM-analysis`).
 
 ## Small, queued (not started)
