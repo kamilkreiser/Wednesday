@@ -21,12 +21,13 @@ supersede: replace wholesale; previous = NEXT-PICKUP-FRIDAY.md.pre-0925-rotate-s
 
 - **The LAPTOP SLEEPS.** Arm `caffeinate -dims -t 21600` (background) in the same action as launching any seat, and check `pgrep -fl caffeinate` at boot. On 09-25 it slept at ~17:0x and cut two seats' turns. One was armed at 17:4x until ~23:4x.
 
-## 🔴 LIVE (refreshed 20:09 by the 19:37 successor seat)
-1. **HPSM-POC B17 fix round: LIVE** (pane `Datasec/HPSM-POC-B` %21). Brief `HPSM-POC/1_Project_Definition/Briefs/2026-09-25_B17_SEAT-B_rerun-fix-round.md`, base main ca554a6. Watcher glob `…/HPSM-POC/1_Project_Definition/Briefs/2026-09-25_B17*STATUS*.md`. On READY: check at source that each of F-22/F-33/F-34 was proved BY CLICKS (view the shots), open the PR, merge on green, then another cold-user re-run (B16's method and driver).
-2. ⚠ **The seats run on the DEFAULT `~/.claude` login = the OLD account (seat statusline 7d:93%)**; Friday runs on the new one (FRIDAY/4_Credentials/.claude, 26%). `usage_gate.sh` reads Friday's gauge only. Kam was asked (20:0x) to `/login` the default account (steps on the panel). If B17 stops at the limit: relaunch it after he signs in.
-3. Open Friday cards (defaults = nothing changes): `hpsmpoc-real-ai-model-before-meetings` (B17 fixes the false "AI-assisted" PDF line regardless), `hpsmpoc-single-customer-revenue`, `hpsmpoc-service-offer-sheets`, `hpsmpoc-customer-profile-fields`.
-4. DONE this seat: B14 merged + CI green; Composer typed-answers release deployed (C-08); Composer B10 two examples released (A Wombalong On, B Tarnwick Manual approval); SOW AI clause md + PDF delivered (C-20; drawer f-4ca8dff847, f-cb2d903896); B16 reviewed, top 5 sent.
-5. caffeinate `-dims -t 21600` armed DETACHED 19:37 (pid 22618) until ~01:3x.
+## 🔴 LIVE (refreshed 20:2x at the 50% checkpoint by the 19:37 successor seat)
+1. **HPSM-POC B17 fix round + ADDENDUM-1 (C-21: profile fields, placeholder offer sheets, single-customer revenue): LIVE** (pane `Datasec/HPSM-POC-B` %21). Brief + addendum in `HPSM-POC/1_Project_Definition/Briefs/2026-09-25_B17_SEAT-B_*`. Watcher glob `…/Briefs/2026-09-25_B17*STATUS*.md`. On READY: check F-22/F-33/F-34 were proved BY CLICKS (view shots); PR; merge on green; then a cold-user re-run (B16 method).
+2. **HPSM-POC B18 Azure OpenAI for the narrative (C-22): LIVE** (pane `Datasec/HPSM-POC-C` %22). Brief `…/Briefs/2026-09-25_B18_SEAT-C_connect-azure-openai-for-the-narrative.md`. Watcher glob `…/Briefs/2026-09-25_B18*STATUS*.md`. May end BLOCKED (quota/provider) with a literal step for Kam. On READY: read the what-leaves-the-laptop proof + the live narrative shot yourself; merge order vs B17 (disjoint paths; B17 first if both ready).
+3. Accounts: Kam logged the default `~/.claude` into the NEW account at 20:12. Seats launched before that (B17 %21) started on the old one; re-read each seat's statusline `7d:` before claiming which account it spends.
+4. Open Friday cards: 0 (all ruled and delivered by 20:2x).
+5. DONE this seat: see today's note from 19:38.
+6. caffeinate `-dims -t 21600` DETACHED 19:37 (pid 22618) until ~01:3x.
 
 ## NEXT (owed, in order)
 1. ~~HPSM-POC B14 fix round~~ DONE and merged; the re-run is LIVE 1. Source: the B12 user test STATUS `HPSM-POC/1_Project_Definition/Briefs/2026-09-25_B12_SEAT-C_end-to-end-user-test-as-a-salesperson.STATUS.md` (46 findings).
