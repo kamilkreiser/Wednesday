@@ -6,6 +6,13 @@ status: live
 supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s1-wholesale
 ---
 
+## 🔴 DELTA 78 — 2026-09-25 15:13 (s83). **READ THIS FIRST, THEN 77.**
+- **KAM (terminal 15:1x): "go through the whole process. This is a test Datasec account, so feel free to use it." + "deploy a full environment that mirrors a client environment, and use the global variables details, which will be the same as the demo Nexus AI system, to configure everything. I'd like it fully configured as well."** A GO was mailed to `Datasec/NexusAI-L` (%8), subject "ANSWER: GO for the whole customer test in the test account (Kam 15:1x), fully configured…". It SUPERSEDES the purchase/creation hold FOR ACCOUNT kamil@datasec-rd.com ONLY.
+- **Account state:** kamil@datasec-rd.com is a PERSONAL Microsoft account (home tid 9188040d = the consumer tenant); ZERO subscriptions. L measures the billing scopes; if none, **Kam must add a pay-as-you-go subscription with a card in the portal**, and L writes the exact clicks for Tuesday to post.
+- **L's plan** (branch `s83l-customer-test-plan` @ 0e8af8e): live listing = 2.2.0 (C-152); SolutionTemplate = NO Marketplace charge; Azure ~A$2-3/week, ceiling ~A$70/mo. Guard `session-tools/s83l/ct-az.sh` pins the dir and refuses every Datasec/Secuura tenant and sub. RD-662 (this work), RD-663 (stale plan summary, Kam's Partner Center text).
+- **After the subscription:** L re-checks the tenant, then providers → Entra app + group → deploy FROM THE STORE → FULL configuration mirroring the demo's global variables (secrets by reference, a SETTINGS MIRROR TABLE) → tests C-124/C-20/anon pull/first-run lock/customer sign-in → report; environment left UP; teardown a separate Kam ask.
+- **Vision gate 8** (%7) still running. Floor: %0 · %1 · %7 · %8.
+
 ## 🔴 DELTA 77 — 2026-09-25 14:55 (s83, ctx ~75%; rotation band 80-90 is close). **READ THIS FIRST, THEN 76/75.**
 ### 🔴 NEW KAM INSTRUCTION — AN OWED ACTION (terminal ~14:5x, verbatim)
 > "The Nexus AI offer is live on the marketplace. Can you please set up a full customer test environment in Azure and then deploy the app from the store for testing purposes? I'd like to use a different tenant for this, so get me to log in to that tenant when you're ready."
