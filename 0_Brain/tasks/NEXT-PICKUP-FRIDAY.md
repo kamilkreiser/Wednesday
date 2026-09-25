@@ -19,18 +19,15 @@ supersede: replace wholesale; previous = NEXT-PICKUP-FRIDAY.md.pre-0925-rotate80
 - STATUS wake: `2_Project_Files/friday/watch_status.sh <seen-file> "<glob>"` (fixed today: paths with spaces; `<…>` and ALL_CAPS placeholder READY lines ignored). Re-arm it for anything live.
 
 ## 🔴 LIVE AT THE ROTATION
-1. **Composer B07 SEAT-B — the HISTORY REWRITE** (pane `Datasec/Security-Composer-B`).
-   - Kam 14:26:04, card `composer-sow-history-rewrite`: **c — Rewrite history now.** Brief: `Datasec Security Composer/1_Project_Definition/Briefs/2026-09-25_B07_SEAT-B_rewrite-history-remove-sow-sentences.md`.
-   - The seat has made the backup mirror `Datasec Security Composer/_quarantine_2026-09-25_HPSM-light-mirror-before-rewrite/` (rung 6).
-   - **Re-arm the STATUS watcher on `…/Briefs/2026-09-25_B07*STATUS*.md`.**
-   - On READY:
-     - check the new main tree = `ba67540`'s tree (`bc916715…`);
-     - check all branches with `ls-remote`;
-     - read the residuals (GitHub `refs/pull/*`: only GitHub Support can purge; the other clones incl. `HPSM/6_Policy_Composer` and the T9/Studio copies; the VM archives) and tell Kam plainly.
-2. **Composer: OWED — ONE NEW finished example engagement on the new content release** (Kam 14:26:21 card a, the 3rd clause).
-   - The demo now runs release `bfecdc77…` (deployed 14:3x). The 8 kept examples are pinned to `2971ffc4`: read-only, no exports.
-   - Brief a Composer seat to walk one engagement to RELEASED on the LIVE demo through the UI (clearly labelled as an example; creating labelled test data on the demo is allowed per its launcher). Do it AFTER B07 finishes (one seat at a time on that folder).
-   - Tell Kam when it's there.
+1. **Composer B08 SEAT-B: ONE new finished EXAMPLE engagement on the live demo** (pane `Datasec/Security-Composer-B`, launched 14:42; Kam 14:26:21 card `composer-content-release-deploy` a, the 3rd clause, C-06).
+   - Brief: `Datasec Security Composer/1_Project_Definition/Briefs/2026-09-25_B08_SEAT-B_new-finished-example-engagement-on-the-demo.md`. It walks one fictional, labelled engagement to RELEASED through the UI, with every export opened; it STOPS on any refusal (K1's 409).
+   - STATUS watcher glob: `…/Datasec Security Composer/1_Project_Definition/Briefs/2026-09-25_B08*STATUS*.md`.
+   - On READY: view the screenshots, and check the exports for the demo password (0 hits, with a control). Then tell Kam the engagement's name and URL.
+2. **Composer B07 (history rewrite): DONE and verified 14:4x.** main `7855f10` (tree `bc91671…` unchanged), 77 branches; map `…/_quarantine_2026-09-25_HPSM-light-mirror-before-rewrite/commit-map_old-to-new.txt`. Tuesday mailed (a clone on the mini is stale). **Two cards open, both Kam's:**
+   - `hpsm-analysis-sow-sentences` (rec a): the same sentences are in datasecau/HPSM-analysis (Friday's 13:44 push, 5 files, 3 commits each) + the Composer folder's local analysis repo + the old clone HPSM/6_Policy_Composer. On a: a seat in the HPSM folder does the same backup → replace → rewrite → force-push, and quarantines + re-clones 6_Policy_Composer.
+   - `composer-github-support-purge` (rec a): Friday drafts the Support request (4 PR refs + GC); Kam sends it at https://support.github.com/contact.
+   - Also a residual (Tuesday 04:42Z): the mini's T9 clone `/Volumes/KK_T9_External_HDD/!CODING/Datasec/HPSM/6_Policy_Composer` (old history, marked STALE by her), copied by her one-way NAS sync, so the old text also sits on the T9 + the NAS. Removing it is Kam's (delete class). Not yet told to him: put it in the next panel update.
+   - Residuals kept by design: the Composer 2_Project_Files reflogs (R3), the VM's old archives + composer.prev (R6), and the backup mirror + bundle (R8).
 3. **HPSM-POC B11 SEAT-B** (pane `Datasec/HPSM-POC-B`, launched 14:36 by the successor seat, base main 3029930):
    - Brief: `HPSM-POC/1_Project_Definition/Briefs/2026-09-25_B11_SEAT-B_action-plan-and-dashboard-on-the-real-api.md`.
    - Scope: the action plan and the dashboard move to the real API (the B09 seats' own follow-ups), with mock mode kept; plus the Showcase records commit (build script + INDEX only; the PDF stays out by the root `.gitignore`'s `*.pdf`).
