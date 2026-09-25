@@ -15088,5 +15088,49 @@
   ],
   "delivered_artefact": "Executed by Wednesday on Kam's word in her terminal (verbatim: 'go ahead and recreate the Spark container Use it going forward'); ./start.sh down + run-a2.sh, new container 2026-09-25 01:53:55Z (her mail 01:54Z)",
   "delivered_ts": "2026-09-25T11:55:18.206942+10:00"
+ },
+ {
+  "id": "secuura-ks1171-when-is-an-anchor-absent",
+  "client_project": "Secuura/Blockchain",
+  "title": "KS-1171: when may the anchoring service declare a transaction ABSENT and retry it?",
+  "bluf": "Tap one letter. Today one answered poll that finds nothing marks a Cardano anchor ABSENT, and it is retried in about 15 s. KS-1171 asks for a stricter rule so a transaction that is actually still in flight is not submitted twice. The cost of stricter: a truly absent transaction can wait about 24 h for the reconciler instead of 15 s. The ticket itself says this is the owner's design decision, not a bug fix. Context: you ruled 'retry' on the related node-rejection case (KS-726 guard 5, 14 Sep). Seat L2 has measured the code (anchorSubmission.ts:292 is still `polled === 0`) and is building its other three tickets meanwhile. Wednesday has not measured how often either failure happens: unmeasured.",
+  "default_action": "Nothing is built: KS-1171 stays open and Seat L2 skips it. Its other three tickets are unaffected.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Absent only after 2 answered polls",
+    "detail": "Seat L2 builds it, tier 1; the KS-726 unreachable-chain test is rewritten (not deleted) to the new rule."
+   },
+   {
+    "key": "b",
+    "label": "Absent only when an answer arrives at least 60 s after the node's 400",
+    "detail": "Same build and test rewrite, timed rule instead of a count."
+   },
+   {
+    "key": "c",
+    "label": "Both conditions (strictest, fewest double submissions)",
+    "detail": "Same build; slowest to retry a truly absent transaction."
+   },
+   {
+    "key": "d",
+    "label": "Keep today's rule and close the residual as decided",
+    "detail": "Seat L2 records your decision on KS-1171 and builds nothing."
+   }
+  ],
+  "recommended": "c",
+  "ts": "2026-09-25T12:23:30.584522+10:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "2026-08-21 20:06",
+   "2026-09-10 09:01",
+   "2026-09-10 09:08",
+   "2026-09-10 09:08",
+   "CARD secuura-platform-s-count-was-wrong-when-you-ruled",
+   "CARD secuura-ks953-shared-pins-anchor-by-marker",
+   "CARD secuura-ks953-anchor-grammar-for-the-non-route-site",
+   "CARD secuura-ks1175-kintsugi-deploy-and-first-anchor"
+  ]
  }
 ]
