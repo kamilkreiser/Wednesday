@@ -8,6 +8,8 @@ supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s
 
 ## 🟢 DELTA 87 — 2026-09-25 23:1x (s85 boot, ctx ~33%). **READ THIS, THEN 86.**
 - **OWED GATE: RD-447 READY (O, 13:13Z) @ 911e706** (one commit on main 7c47ec4; test-helper only, image-manifest.js; verify 4033/4033; tier 1). **Deliberately NOT gated alone: BATCH it with RD-411's READY** (O's next, same helper, different hunk; O will include a merge-tree against rd-447-utf16-scan-s84o). Answer mailed 13:15Z + tap delivered. If RD-411 stalls or needs Kam, gate RD-447 alone. Merge order after GO: 447 then 411 merged forward.
+- **OWED GATE #2: RD-428 READY (P, 13:32Z) @ 823ef9e** (off 7c47ec4; verify 3990/3990; READY saved `fleet/qa-agent/briefs/2026-09-25_nexusai-rd428-READY-mail.txt`). **TIER RAISED 2 -> 1** (F2 keeps a shown-once SCIM token in page memory = credential handling). **BATCH with P's RD-444 + RD-200 READYs** into ONE gate with a real-browser leg + a BRAND leg (#00719f / #0096d6 must resolve to NexusAI's style guide, else it is a palette card for Kam) + F2 token never reaches storage/logs/non-scim requests. Answer mailed 13:33Z + tap delivered.
+- **RD-418 (O)**: ruled (a2)+(b1) and N3-by-ordering, conditions 1-7; C-163 recorded by O; real-image proven; READY after its jest holds.
 - **JEST LOCK = the floor ceiling** (measured: full verify 15-18 min; 11 queued at 23:11). The %15 gate verdict (RD-579/639) realistically ~01:00-02:30. Do not add lanes. Idle wakes on lane panes = check `session-tools/locks/queue-jest` pids, then wake_ack.
 
 ## 🔴 DELTA 86 — 2026-09-25 23:1x ROTATION HANDOVER (s84, ctx 81%, safe boundary). **READ THIS FIRST, THEN 85/84.** QUIET HOURS: board text only.

@@ -1,0 +1,42 @@
+[Datasec/NexusAI-P -> Tuesday] READY FOR QA: RD-428 rd-428-provisioning-residue-s84p @ 823ef9e (tier 2; verify 3990/3990; browser F3 1.00 -> 5.16 light, 1.64 -> 5.14 dark)
+READY FOR QA: RD-428. Branch rd-428-provisioning-residue-s84p, head 823ef9e (pushed, read back by ls-remote), cut from main 7c47ec4 (main unchanged at push). QA tier: 2 (lane plan).
+
+WHAT CHANGED (4 product files + 1 re-anchored cell + 3 new test files):
+- static/js/entra-provisioning-ui.js (F2): an arrow key or click away from SCIM KEEPS a just-generated, shown-once token in page memory until Save, Revoke or Reload. It is shown only on the SCIM panel, sent only with a 'scim' save (unchanged line), and every change is said on the status line ("…is kept, but it is not shown and is never saved with this method…" / "…is shown again below…"). An accepted save under another method drops it and appends "The SCIM token generated on this page was not stored…".
+- backend/routes/entraProvisioning.js (F4): a store on its temporary fallback names the configured directory (dataDir(): DATA_DIR or the default): "Mount the persistent volume at <configured>, or set DATA_DIR…". When DATA_DIR IS the fallback directory it says to set DATA_DIR instead of "mount at <tmp>". The non-fallback message is unchanged.
+- static/css/keyboard-focus.css + dark-mode.css (F3): `.settings-nav .nav-link:not(.active):focus-visible { box-shadow: inset 0 0 0 3px #00719f }`, #0096d6 in dark. The 3px outline is unchanged; the active item gets no inner ring. VISIBLE SIDE EFFECT: on a focused NON-active nav item, this box-shadow replaces Bootstrap's own faint focus glow (measured on main: `rgba(13,110,253,.25) 0 0 0 4px`). The outline stays, so the item still has its main ring.
+- __tests__/rd409-410-provisioning-panel-keyboard-and-recovery.test.js: ONE cell re-anchored under your grant (12:23:01Z). The old "CONTROL — choosing a DIFFERENT mode still clears a generated token (unchanged)" is now "DIFFERENT MODE — … keeps a generated token, never sends it, and says so (RD-428 F2)". No other line of that file.
+- New: __tests__/rd428-fallback-names-data-dir.test.js (node), rd428-nav-inner-focus-ring.test.js (jsdom), rd428-scim-token-mode-change.test.js (jsdom).
+
+SETS (one lock hold, floor 0; session-tools/s84p/rd428-redgreen.log):
+- RED at 7c47ec4 product code, 9 failed:
+  - F4 NAMES and SAME DIR
+  - F3 INNER RING light and dark
+  - the re-anchored DIFFERENT MODE
+  - F2 ARROW AWAY, ARROW BACK, SAVE ELSEWHERE, and the round-trip CONTROL (red at main because main clears the token)
+- GREEN at 7c47ec4 product code, as intended: F4 CONTROL (non-fallback message), F3 ACTIVE and CONTROL (outer ring pinned), F2 no-token CONTROL, and all 37 other rd409-410 cells.
+- With the fix: 50/50.
+- Full verify at 2c62792: "VERDICT: PASS — 3990/3990 tests passed across 238 suites (jest exit 0)", SESSION_SECRET unset, floor 0 before and after (session-tools/s84p/rd428-verify.log). Counts committed at 823ef9e (3990/238; +3 suites, +12 tests = the three rd428 files). C-89: `git diff --quiet HEAD` clean, and HEAD's counts file equals the regenerated one.
+- The first red run caught a defect in MY OWN F3 control: its lookup compared a grouped selector list as one string. The product was untouched. Fixed before the proof hold.
+
+REAL BROWSER (F3; Chrome via Playwright, local server on a fresh DATA_DIR, keyboard Tab to the item below the active one; session-tools/s84p/rd428-f3-browser.js; evidence session-tools/s84p/rd428-evidence/*.png):
+  main light: outer edge vs active fill 1.00:1, no inner ring  |  fix light: inner ring #00719f on #f8f9fa 5.16:1
+  main dark:  outer edge vs active fill 1.64:1, no inner ring  |  fix dark:  inner ring #0096d6 on #1c1c1c 5.14:1
+The main-branch figures reproduce the gate's 1.00 / 1.64 exactly. The outer edge over the active fill is unchanged by design; the inner ring is the edge no neighbour can cover. Before/after crops: rd428-f3-{main,fix}-{light,dark}-nav.png.
+
+SURFACE FOR THE GATE: a local run of 823ef9e on a fresh data directory (open mode, C-02). Settings > nav (keyboard Tab), and Settings > Provisioning: SCIM > Generate > ArrowLeft/ArrowRight on the focused card > Save under Graph and under SCIM. F4 needs a store on its fallback directory (modelled in the cell exactly as RD-409 O4's own FALLBACK cell does). Same commit, not the demo image.
+
+RE-RUN LIST (C-68): the whole rd409-410-provisioning-panel-keyboard-and-recovery file (other cells share its harness), rd409-persistence-message-names-data-dir, entra-provisioning-ui, entra-provisioning-revoke-ui, rd372/rd388 provisioning UI suites, rd410-settings-nav-keyboard, dark-mode-link-order. All are inside the full verify above.
+
+PRIOR WORK:
+- Design follows S59's WIP fbf4861 on rd-427-428-444-448-ui-residue-s59 (intent, ungated). entraProvisioning.js, entra-provisioning-ui.js and keyboard-focus.css are byte-identical between its base 6c866ef and 7c47ec4; dark-mode.css moved by 18 unrelated lines. What was kept: its F2 keep-and-announce design (the ticket allowed keep OR announce; you ruled keep), its F4 message pair and its F3 inner ring and values.
+- Before building on those, I re-checked every safety claim at source at 7c47ec4: the token is drawn only in scimPanel (:385), sent only when mode === 'scim' (:1293), and cleared on reload (:989), revoke (:1176), accepted save (:1303) and conflict (:1345).
+- Not ported: the WIP's RD-427/448 parts (first-run-setup, entra-provisioning-mount, azureLogAnalytics), which are lane 1/2 files; and its keyboard-focus.css header edit about first-run-setup, which depends on RD-427.
+- Replaced: the rd409-410 CONTROL cell's clearing property (RD-410, gated). Its reason, verbatim: "the same-mode rule leaked into a real mode switch". The re-anchored cell keeps that intent (a real switch is still distinguished from a same-mode press) with the new property.
+
+NOT TESTED: pseudo states other than focus-visible (hover over a focused item is measured only through the #e9ecef/#313131 ground arithmetic, not in the browser); viewports other than 1366x900; Firefox/Safari; F4 on a store that REALLY fell back (modelled, as RD-409's own cell does); screen-reader announcement of the new status text (it goes through the existing status line, whose live-region behaviour is unchanged).
+
+Moving RD-428 to Testing. Next: RD-444's and RD-200's verifies are in the queue.
+
+-- NexusAI-P
+
