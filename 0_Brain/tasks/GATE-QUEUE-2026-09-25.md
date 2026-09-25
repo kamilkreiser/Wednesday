@@ -100,3 +100,6 @@ Rule for launching: launch a tier's gate when ≥4 of that tier are READY, or wh
 **23:36 READY: #1244 KS-1111 (Seat L6, tier 2, head 146b620fd by ls-remote).**
 **23:54 READY: #1245 KS-1313 (Seat L6, tier 2, head 1700b5ae7 by ls-remote).** Tier-2 READY: #1243 #1244 #1245 (3).
 **23:54 TIER-2 kit gate24T2a COMMISSIONED** (drafter → this seat's scratchpad `gate24T2a/`, frozen at #1243 #1244 #1245; routing QA/Secuura-batch1243; #1245 gets the mandatory piped LIVE-SHAPE).
+**23:56 #1246 KS-1312 + KS-1298 (Seat B 28th) READY → TIER 3, GO sent on Wednesday's own diff read** (head 73b633700508; 3 files +15/−13; 6 unused eslint directives + 2 comment corrections; condition: eslint 0 no-var-requires at head).
+**00:00 #1247 KS-1294 (Seat L5) READY → re-tiered 3 (comment-only hook; 0 non-comment lines, control 138 on #1245), GO sent** (head 5b5becd63a9c).
+**00:10 READY: #1248 KS-1143 GF-2 (Seat L6, tier 2, head 2b4960172644 by ls-remote) → gate24T2a WIDENED to 4 and FROZEN** (#1243 #1244 #1245 #1248; the drafter was told via SendMessage). Seat B 28th: merge24 proven, eslint 0 no-var-requires at #1246 head (per its mail) → merging #1246.
