@@ -1,0 +1,378 @@
+ultrathink
+
+You are the fleet QA agent running ONE TIER-1 gate, ROUND 2 of 2, over ONE Secuura/Blockchain PR: #1239 KS-1263 ONETXN (services/originate:
+/share's per-recipient loop and /transfer-custody's custody INSERT + owner flip each become ONE transaction, via withTenant — a DATA surface,
+RLS-scoped writes). Round 1 was raised by Seat L1 (wrapped) and graded NO GO by the tier-1 gate batch1234-t1; round 2 was built and pushed by Seat B
+27th (pane Secuura/Blockchain, record /Volumes/DevMASTER/!CODING/Secuura/Blockchain/5_Project_History/2026-09-25_seatB-27th/). TIER 1: a FULL gate.
+(1) a THROUGH-CODE REVIEW of the round-2 delta and a re-read of the whole PR against the ticket's claim; (2) a RED-PROOF CHECK OF THE PR'S OWN PROOF:
+re-run the seat's red proof in YOUR worktrees against YOUR OWN database — RED AT BASE and GREEN AT HEAD — plant each tamper exactly as named, show the
+declared cells red BY TITLE, RESTORE BYTE-IDENTICALLY (`git diff --exit-code` rc 0 and the blob re-hashed equal), and assert the effect (the green set
+after restore == the green set before the plant). A red proof must NAME WHY it went red (rows, never a connection, auth or module error). A proof you did
+not re-run is a claim with an author, not evidence. Tier line: #1239 T1. This is round 2 of 2 under the two-NO-GO cap — THE CAP: a NO GO now SHIPS
+NOTHING (no round 3), and every residue is TICKETED (you name each ticket's shape; Wednesday files). FINDINGS ONLY: you fix nothing, file nothing,
+comment nothing — you describe the fix-shape and the regression cell the owner should add. A VERDICT IS VALID ONLY AT ITS HEAD: if refs/pull/1239/head
+moves under you, STOP grading and say so. MEASURE, not conclude: every number in your report names its instrument; nothing in a READY, a PR body or this
+prompt is evidence — they are claims with an author, the drafter's included. Name every prediction slip against its predictor. On the intermittents you
+RULE WHETHER IT BLOCKS (they do not block by default; say so with the reason).
+
+PRIOR ROUND: round 1 gated 42c20e998a1a69887b8378968a8ff4f19106c24b, verdict NO GO. ITS REPORT IS ON DISK AT:
+/Volumes/DevMASTER/!CODING/Testing Agent MAIN/projects/secuura/reports/2026-09-25-batch1234-t1-r1/ — read report.md's "#1239 KS-1263" section, "THE
+ROLLBACK CELLS", "R4", "R5", "(b) R3 lead", "NOT-PINNED" and "MERGE ADDENDUM" WHOLE before anything else. Its evidence/ and scripts/ (mock_census.sh,
+tamper_ks1228.sh, split.pl) are READ-ONLY inputs you may copy into your own dir.
+
+THE HEAD, THE BASE AND THE MOVE (measured by the drafter, predict_gate21T1d.py in a scratch clone, at 2026-09-25T11:14:51Z — VERIFY, never adopt).
+PR #1239 is KS-1263. Head c8e1875c21e994a746e36c8b8efec8de1d9dbc98 (branch feature/ks-1263-share-transfer-transaction-l1-g-1), a FAST-FORWARD of round 1: head^ == the
+round-1 head 42c20e998a1a69887b8378968a8ff4f19106c24b and that commit's parent == BASE 6ab9d5021e96ea1481cb6c6ff2d6d33b414aecb7 (tree 0c834769ecf99f9563105f0b1a48a6c7371955b2): 2 commits over BASE. The round-2 commit is TEST-ONLY
+— ks1228-a-refused-request-writes-no-provenance-row.test.ts +12/-0; ks1263-multi-write-rolls-back.integration.test.ts +266/-9 — and the two PRODUCT blobs (routes/documents.ts, repositories/shareRepo.ts) are byte-identical to round 1's. So every round-1 PRODUCT
+reading (the through-code review, R4, R5, (c) throw-never-return, (f) tenantId) carries unless you find otherwise — re-verify by blob, do not re-derive by
+hand. The whole PR over BASE: 6 files changed, 571 insertions(+), 68 deletions(-). Per-file blobs (BASE blob; for the two overlap paths also the MERGED blob over e68e2f0e8):
+  Blockchain/Dev/services/originate/src/__tests__/ks1228-a-refused-request-writes-no-provenance-row.test.ts b67ef80bd053e6289e394794c59cad36efa3471c (100644; BASE ae43c82f8c29) | MERGED a965ecdc5e7286462633d5386a46516f38ad8074 over e68e2f0e8 (OVERLAP: the move touched it; patch-id 59c15da5150f equal)
+  Blockchain/Dev/services/originate/src/__tests__/ks1263-multi-write-rolls-back.integration.test.ts bd699044ea9331c4f9c3f8ce78ad5ddb8808eebe (100644; BASE ABSENT)
+  Blockchain/Dev/services/originate/src/__tests__/ks697-transfer-custody-holder-existence.test.ts 56bbd366536c37e2cafbbd48cf2fffb76fcdaa25 (100644; BASE 30e6a170b499)
+  Blockchain/Dev/services/originate/src/__tests__/ks739-transfer-custody-lookup-4xx-mapping.test.ts 85bf4ff3d9101415cc596715935dd0cfd4dc0920 (100644; BASE abe4453bb76c)
+  Blockchain/Dev/services/originate/src/repositories/shareRepo.ts 1329fceee701c3b34a962acbed44b4cedec1ae9d (100644; BASE 55494e949575)
+  Blockchain/Dev/services/originate/src/routes/documents.ts ca5531ca6687d89e9e89e6381b4a6b8d46f55c72 (100644; BASE 1089377e1146) | MERGED 492b46740c8401664ed3e77272c973ae87a0031c over e68e2f0e8 (OVERLAP: the move touched it; patch-id 64feb6afd066 equal)
+Develop at the fill: e68e2f0e837df86da527d775a3a49c631b0f5b17 (tree 393fa632a9f254b244a7cc99485db4cd2988b162), 27 commits ahead of BASE:
+  e68e2f0e837df86da527d775a3a49c631b0f5b17 KS-1127 + KS-1089 + KS-1135 RSSCOUNT: an exit-0 SKIP is no longer counted as passed (#1234)
+  c41e268eb9355fe06eed7590455aa2fbbd90c59b KS-1158 R5a: re-point the ks1059 header citations and fix the two code quotes that drifted (#1238)
+  e119781ac993ee1c2a5f48ea93d888df4bb135cb KS-1229: pin that the /version relabel guard keys on presence, not truthiness (#1237)
+  2208acc0638abb78aa35d386cf778ec4d8746e91 KS-1110 READYAML: both k6 unit tests parse scenarios.yml through readYaml() (#1236)
+  565e7afb4ebba70919430762d3dd0819325a94a2 KS-1140 HANDEDLIST: the ks879 red cell is handed the list the control walks (#1235)
+  1f1da7f35040a45877833e263cac754bb1744d2b KS-1133 ALIASORDER: document the v1/v2 hash-alias split, and name BAD_REQUEST on sign-wallet (#1233)
+  61e2bd81e8aa9c24d8c590ac37bef65da290219b KS-1118 F-3a: narrow the v1 verify comment that overclaimed (F-2 is already pinned by #1149) (#1223)
+  c0863525a1429c485c87da320cebfb8461da59c9 KS-1277: correct two stale on-behalf-of comments in the originate documents route (#1219)
+  1609ecbf61e1035a50f4cb51d0fbae360bfb73c3 KS-897 FIXTUREABORT + KS-896 CONTROLEXISTS: pre-push base suite aborts on an unbuilt fixture (#1218)
+  d9515f4a06e0db0396a059ccd8c76b610f22a22b KS-789 NOCIBACKSTOP: CONTRIBUTING states what actually catches a degraded or bypassed push (#1240)
+  aa600af94d69ad59db279d32cbbd7596931a739b KS-1128 SEEDWARN: a failed platform tenant seed logs WARN FAILED, 200 chars (#1232)
+  b83f986fd3e47b66054d23a350e5aef6d80d0550 KS-1281 EXISTENCECHECK: vc-issuer credentialRepo sends no runtime DDL (#1231)
+  ab7826afb15aacd999358b52697be63343e6e836 KS-865 + KS-808 (3): missing latest-tag input is an error; runner cites keys (#1229)
+  7f06f3d4044dca4593168be26726c0c71938e427 KS-1252 + KS-1253 E7PREFIX: bound the ULID-ish prefix; refuse 14 credential names (#1227)
+  1ded2f8176fc5f639510ef528179300321f06123 KS-1291 DEADGUARD: remove the post-save issuerName guard that #1174 made unreachable (#1225)
+  cf3de2c4cef5c636446d87fd68fed1073fc964ad KS-1131 CALLSHAPED: ks963 helper counts consume CALLS, not mentions (items 1, 2) (#1230)
+  89a6161652cdfb4a4ce7a690fccc27daeeab5618 KS-1171 LASTANS: a transaction is ABSENT only when BOTH of Kam's conditions hold (#1228)
+  c20e32badec516a42294808e20852c59714081e2 KS-872 JWKLOCAL: declare the JWK shape locally instead of crypto.JsonWebKey (#1226)
+  4ade454655d69bc560182a8ea073cbd68ea60f92 KS-1179 DNSTIMERFIN: clear the DNS timer on the rejecting exit, and correct two docblocks (#1224)
+  9e744421ada2166c8944764017cad76d94737286 KS-1266 HERMETIC: seven originate unit files off the network; port-1 cells moved to port 2
+  379c6eb1d45905f398fae67ee7dd2f46ad40432f KS-1181 CANARYHIT: the ks727 canary cells witness that the handler answered (#1222)
+  54d741e1c997759fe9d7557fe46610b12af172e0 KS-1288 LEGDBYTEXT: LEG D pins its three api-gateway sites by text, not line (#1215)
+  847159dccd1ea73b94376851555554045c158637 KS-1129 BIGNUM: the anchoring verify body reports blockNumber as a number (#1220)
+  ecb1aa75aefae35a8e2d8694f303adac7c17ab55 KS-530 PATCHLINE: mcp-server + originate take @hono/node-server 1.19.17 (#1213)
+  ba4016fb8814eb1d5a9b3e6aa1e90f3370fd1d3f KS-528 DOMPATCH: react-router-dom 6.30.6 in four locks, GHSA-jjmj row removed (#1214)
+  bc092c66725fe24a88f07b93435ca159974ec623 KS-976 MSG400: the /reset 400 names the field that actually failed (#1217)
+  feb5cf0c4b32b21862a7f089373a2e241234a673 KS-975 SCOPENULL: explicitScope treats an explicit null body field as MALFORMED (#1216)
+The move ∩ #1239's own paths == EXACTLY the two known overlaps (documents.ts via #1225 KS-1291 1ded2f817 and #1219 KS-1277 c0863525a; the ks1228 file
+via KS-1266 9e744421a — port 1 -> port 2). #1239 still merges CLEAN: merged tree 72c90a380192877047bf3615b59f9d252122d070 == END_TREE 72c90a380192877047bf3615b59f9d252122d070 (6 files changed, 571 insertions(+), 68 deletions(-)), by
+`merge-tree --write-tree` AND a second instrument (`apply --cached` of BASE..head onto develop's tree in a temp index); diff(develop, merged) == the 6 own
+paths; numstat(develop -> merged) == numstat(BASE -> head); the 4 non-overlap merged blobs == the head blobs; on the 2 overlap paths PATCH-ID EQUALITY
+(`git patch-id --stable` of BASE..head == of develop..merged). THE REGION CHECK (Wednesday's ask — the seat measured it; re-measure): the move's BASE-side
+hunks on documents.ts are 62-62, 64-65, 610-611, 841-849, 2333-2335, 2341-2341 — the file header comment (62-65), the CREATE route (610-611, 841-849: KS-1291's dead-guard removal) and the
+/:id/revoke comment (2333-2341); NONE lies inside the two handlers the cells reach:
+  /:id/share handler: BASE lines 2128-2294 | develop 2128-2294 | head 2148-2331 | merged 2148-2331 | move hunks inside: none
+  /:id/transfer-custody handler: BASE lines 1580-1935 | develop 1580-1935 | head 1580-1955 | merged 1580-1955 | move hunks inside: none
+Each handler's text is byte-equal at BASE and at develop, and each handler's text in the MERGED tree is byte-equal to the head's. The move touches NONE of
+the cells' reach (services/originate/src/db.ts, repositories/shareRepo.ts, packages/shared/src/db/). Substrate paths it DOES touch (reported, graded by
+you): Blockchain/Dev/package-lock.json (by ba4016fb8); Blockchain/Dev/scripts/run-migrations.sh (by ab7826afb); Blockchain/Dev/services/originate/package-lock.json (by ecb1aa75a); Blockchain/Dev/services/originate/package.json (by ecb1aa75a). RE-READ develop at your start (ls-remote) and grade over THAT develop; if it moved, say by whom, re-run the base-invariant checks
+and the region check over it (a move touching the handlers, db.ts, shareRepo.ts or packages/shared/src/db = STOP), and re-derive the merged tree: the
+END STATE is YOURS to name. Worktrees come from the refs/pull/1239/head sha; every count says which tree it is from.
+
+YOUR SOURCES — read WHOLE, first: the READY capture /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/d384786a-4d7e-451d-a78b-40a06ef20e21/scratchpad/gate21T1d/mail_gate21T1d_ready.md (Seat B 27th, READY FOR QA #1239 round 2, 11:05:25Z, verbatim by
+message id with its TEXT_SHA256). THE GATE COMMISSION: /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/d384786a-4d7e-451d-a78b-40a06ef20e21/scratchpad/gate21T1d/COMMISSION.md. Round 1's mails (Seat L1's READY 8, the KS-1263 thread, Wednesday's five
+conditions on G-alt-1): /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/gatesets/2026-09-25_gate21T1c/mail_*.md (read-only). The seat's
+record (READ only, never write, never enter its worktrees): /Volumes/DevMASTER/!CODING/Secuura/Blockchain/5_Project_History/2026-09-25_seatB-27th/
+(READY-1239-round2.md, HANDOVER-NOTES-tools.md, raise/ — env_up_b27.sh and setup_ks1263_b27.sh are how it built its Postgres; b27-route-BASE-final.out,
+b27-route-HEAD-final.out, b27-modeF-after.out, gs2-*.out its runs; inherited/, saved/). The ticket (Linear GET only): KS-1263, and KS-1304 (POOL-IDENTITY)
+and KS-1305 (the MODE F residual) — both Backlog at the drafter's read. The PR body and commits on GitHub (REST GET only). The drafter's measurements
+beside the capture — predict_gate21T1d.py / predict_*.out, pins_gate21T1d.json, gh_body_1239.md, linear_KS-1263.md, _meas/ — to VERIFY, never adopt.
+Authority for this lane: Kam, terminal 2026-09-25 ("push as much as you can through the tickets and the backlog"), the TESTED grant of 2026-09-11;
+Kam's ruling (c) on KS-1263 as relayed by Wednesday (04:43:41Z) with its conditions; and WEDNESDAY'S ROUND-2 RULING (b), below.
+
+WEDNESDAY'S ROUND-2 RULING (b), verbatim in substance: PROVE IT IN MODE T — MULTI_TENANCY_ENABLED=true AND PLATFORM_DATABASE_URL pointing at a REAL
+secuura_platform. MODE F IS A NAMED RESIDUAL: a fresh worktree has no generated Prisma client (`Cannot find module '.prisma/client/default'`), ticket
+KS-1305; it must FAIL LOUD, NEVER PASS MISLABELLED. No package.json edit. So: MODE T is graded RAN + witnessed or NOT ESTABLISHED; MODE F is graded
+FAILS LOUD BY NAME, or VACUOUS (any MODE F cell green without having written a row = a finding), never "green"; "both modes" is never claimed.
+
+ROUND-1 FINDINGS — RE-DERIVE EACH DISPOSITION AT c8e1875c21e994a746e36c8b8efec8de1d9dbc98 (CLOSED / STILL OPEN / RESIDUAL-TICKETED), each by a measurement named below:
+  F1 ROLLBACK-CELLS-SCHEMA (Major): the three shipped behavioural cells violated the migrated schema (shares.target_id uuid NOT NULL,
+     migrations/022_shares_polymorphic.sql:32; custody_events.document_id uuid NOT NULL REFERENCES documents(id), 023_custody_events.sql:21). Round 2
+     seeds a real tenant + document and writes uuid target_id / document_id. CLOSED only if CONTROL, D1/D2 and C7 RUN GREEN against YOUR migrated
+     database in MODE T AND the counter sees real rows (the CONTROL's before+1 in the same run).
+  F2 G-S2-TXCLIENT (Minor): G-S2 stayed 29/29 under round 1's module-client tamper. Round 2 exports the mock's `__txClient` and asserts identity.
+     CLOSED only if the tamper reds G-S2 BY TITLE at the head file and stays green with round 1's ks1228 (the gap reproduced) — G-S2 below.
+  F3 PLATFORM-URL-TRAP (Minor): the file mapped only TEST_DATABASE_URL. Round 2 maps TEST_PLATFORM_DATABASE_URL -> PLATFORM_DATABASE_URL and throws when
+     `getTenantManager()` is null under MT. CLOSED only if T-TRAP reds every cell BY NAME and the witnessed MODE T run is green.
+  F4 NOT-PINNED ROUTE-ROLLBACK (round 1: D-SHARE AND C-CUSTODY, both through the real router over the real db, red at BASE): round 2 adds the /share
+     route cell only. Grade D-SHARE (the committed cell) and C-CUSTODY (NOT committed — your scratch cell, below) separately; RULE whether the
+     missing C-CUSTODY route cell blocks, given G-S1 pins the flip's client IDENTITY structurally (read G-S1: does it record writes ON the tx mock?).
+  F5 POOL-BRANCH-WITNESS (NOT-PINNED): the getTenantManager() guard is the witness — graded with F3, plus lead (c).
+  F6 POOL-IDENTITY (Minor): TICKETED as KS-1304, NOT this round — confirm the product blobs are unchanged (so the finding stands unchanged) and carry it.
+  F7 Polish: the stale read-only `db` comment at documents.ts ~1759-1761; the PR body's "11 services" (round 1 measured 22 services / 24 lines) —
+     product and body re-read: still open or not.
+
+THE DISPOSABLE POSTGRES — YOUR OWN DATABASE (the cells need a Postgres, a real secuura_platform, and nothing else: no gateway, no stack, no legs).
+NO SECUURA STACK SLOT IS USED. At drafting (_meas/docker_census_1.out, 11:09Z) slots 2, 3 and 4 were FREE (0 `secuura-sN-*` containers, 0
+`secuura_slotN*` volumes — Kam had them removed at 20:52 AEST); Wednesday's commission PREFERRED a free slot OR a disposable container; the drafter
+chose the disposable container (README §6.1 gives the reasons; Wednesday may overrule before launch). Foreign at drafting, REPORTED and NEVER touched,
+connected to, stopped or removed: `qa-g21d-pg-ks980` (127.0.0.1:55441, volume `qa_g21d_pg_ks980` — the tier-2 gate batch1241, RUNNING); `s-b27-pg-ks1263`
+(127.0.0.1:55437 — the seat's; its READY says "Destroyed and proved gone before wrap", it was UP at drafting: report its state at your P0 and at your
+P9, as a lead, never act); three ANONYMOUS volumes (0ec12181…, 7b9c2cf8…, 0187e199…); `:5432` LISTENS (the native Postgres) — NEVER connect to it. Every
+docker call time-boxed (`perl -e 'alarm 30; exec @ARGV' docker …`; a hung call is rc 142), each rc to a file on its own line:
+  P0 CENSUS BEFORE: `docker info` rc; `docker ps -a --format '{{.Names}} | {{.Status}} | {{.Ports}} | {{.Label "com.secuura.qa.gate"}}'`; `docker volume ls`;
+  `lsof -nP -iTCP -sTCP:LISTEN` — all to evidence/.
+  P1 THE ENGINE IS NOT YOURS: you do NOT start, restart, quit, kill or reset Docker Desktop (another gate depends on it). If `docker info` is not rc 0
+  within 120 s of polling every 5 s, the DB cells are NOT RUN (reason named, error quoted) — NEVER "green" — and the rest of the gate continues.
+  P2 PORT: the FIRST N in 55450..55459 with 0 lines from `lsof -nP -iTCP:<N> -sTCP:LISTEN` AND absent from every `docker ps -a` Ports column — with the
+  CONTROL `lsof -nP -iTCP:5432 -sTCP:LISTEN` > 0 lines (the instrument discriminates). NEVER 55437, 55441, 5432, 6432+100k or 6882+100k. None free =
+  NOT RUN. Re-check N IMMEDIATELY before P4.
+  P3 CREDENTIALS: two throwaway passwords (`python3 -c 'import secrets; print(secrets.token_urlsafe(24))'`) written as POSTGRES_PASSWORD= / APP_DB_PASSWORD=
+  lines into <report dir>/private/pg.env, mode 0600, OUTSIDE every clone; never printed, never in evidence/ or report.md; assert each != the compose
+  default APP_DB_PASSWORD (read docker-compose.yml in-process; print ONLY the boolean). Every DSN is composed in-process from pg.env, never echoed.
+  P4 CREATE (yours alone, both labelled `com.secuura.qa.gate=gate21T1d`): `docker volume create --label com.secuura.qa.gate=gate21T1d qa_g21T1d_pg_ks1263`;
+  then `docker run -d --name qa-g21T1d-pg-ks1263 --label com.secuura.qa.gate=gate21T1d -p 127.0.0.1:<N>:5432 --env-file <report dir>/private/pg.env -e
+  TZ=UTC -e POSTGRES_USER=secuura -e POSTGRES_DB=secuura -e APP_DB_USER=secuura_app -e 'POSTGRES_INITDB_ARGS=--auth-host=scram-sha-256
+  --auth-local=scram-sha-256' -v qa_g21T1d_pg_ks1263:/var/lib/postgresql/data -v <merged>/Blockchain/Dev/docker/init:/docker-entrypoint-initdb.d:ro -v
+  <merged>/Blockchain/Dev/docker/init-platform:/docker-entrypoint-initdb.d/platform:ro postgres:15-alpine postgres -c max_connections=200 -c
+  log_statement=all -c 'log_line_prefix=%m [%p] %u@%d '` — <merged> is YOUR worktree of YOUR local merge of the head onto the develop you graded (its
+  tree == the merged tree you named). THE SUBSTRATE IS NAMED (BRIEF_TEMPLATE §7, "build the schema the product deploys"): the SAME image, the SAME two
+  init mounts docker-compose.yml's postgres service declares (./docker/init and ./docker/init-platform -> …/platform, docker-compose.yml ~:159-160 —
+  quote the lines) and the SAME scripts/run-migrations.sh its migrations service runs (P5). NOTE the seat's container mounted docker/init ONLY — NOT
+  init-platform (env_up_b27.sh): lead (b). Record the image ID you ran (the drafter saw postgres:15-alpine f7d23353e1b1); `docker port
+  qa-g21T1d-pg-ks1263` == 127.0.0.1:<N> ONLY. Readiness: `docker exec qa-g21T1d-pg-ks1263 pg_isready -U secuura` polled every 2 s, time-boxed 120 s;
+  `docker logs` shows 00-init-platform-db.sh "Platform schema initialized." (NOT "WARNING: Platform schema file not found.") and 01-create-app-role.sh
+  completing.
+  P5 MIGRATIONS, INSIDE YOUR CONTAINER (it has psql; the host has no psql on PATH): `docker cp <merged>/Blockchain/Dev/migrations
+  qa-g21T1d-pg-ks1263:/tmp/migrations` and `docker cp <merged>/Blockchain/Dev/scripts/run-migrations.sh qa-g21T1d-pg-ks1263:/tmp/run-migrations.sh`,
+  then `docker exec -w /tmp -e DATABASE_URL=…/secuura -e PLATFORM_DATABASE_URL=…/secuura_platform qa-g21T1d-pg-ks1263 sh /tmp/run-migrations.sh`
+  (127.0.0.1:5432 inside the container, the `secuura` role; the DSNs composed in-process, passed without echo); rc captured IMMEDIATELY (the seat's own
+  lesson: `$?` read after a `$(…)` is always 0); the `Summary: applied=… failed=…` line; the `_secuura_migrations` count in BOTH databases; every failed
+  migration by name. #1239 adds no migration (its 6 paths) — so the schema is develop's; say so.
+  P6 R0 PRECONDITIONS (to evidence/, before any cell): for `secuura` and `secuura_app` — `rolsuper`, `rolbypassrls`; `relrowsecurity` /
+  `relforcerowsecurity` and the owner of shares, custody_events, documents, tenants (MAIN db); `\dt` count in secuura_platform, and that `tenants` and
+  `tenant_config` exist THERE with the seeded default tenant (init-platform/02-seed-default-tenant.sql) — `SELECT count(*) FROM tenants` in
+  secuura_platform; whether a `tenants` table exists in the MAIN db (the file seeds one there, errors swallowed — lead (e)); the column facts
+  shares.target_id / shares.recipient_email / custody_events.document_id (type, nullability) and that 22021 is what a U+0000 in recipient_email raises
+  (one INSERT inside a BEGIN … ROLLBACK, with a clean-email control that inserts — the seat's own probe, re-run).
+  P7 THE CELLS — THE MATRIX below.
+  P9 TEAR DOWN, ALWAYS (also after any NOT RUN past P4; and FIRST if the context rule fires): drop every scratch object you created (the C-CUSTODY
+  trigger + function, the empty-platform scratch DB of lead (c)) and prove each gone; `docker rm -f qa-g21T1d-pg-ks1263`, then `docker volume rm
+  qa_g21T1d_pg_ks1263` — the ONE volume you may remove, because you created it. PROOF OF GONE, each rc and count to evidence/: `docker ps -a --filter
+  name=qa-g21T1d-pg-ks1263 --format '{{.Names}}'` -> 0 lines; `docker volume inspect qa_g21T1d_pg_ks1263` -> rc != 0; `docker volume ls` == P0's list
+  exactly (no new anonymous volume — a named volume was used precisely so none is left); `lsof -nP -iTCP:<N> -sTCP:LISTEN` -> 0 lines. NEVER `docker
+  compose`, never `start-secuura.sh`, never `down -v`, never `docker system prune` / `volume prune`, never another container, volume, image or network.
+  NEVER quit Docker Desktop. pg.env stays 0600 in private/ and is never printed.
+
+THE MATRIX — #1239's rollback proof (P7). Worktrees (all from YOUR full clone, never the seat's): HEAD = c8e1875c2; DEVT = develop (the seat's
+"BASE") with the HEAD's ks1263 integration file copied in byte-identical (name its blob bd699044ea9331c4f9c3f8ce78ad5ddb8808eebe after the copy — nothing else changed; `git
+status` shows exactly that one untracked file); BASE0 = the true merge-base 6ab9d5021 with the same copy; MERGED = your local merge (its tree ==
+72c90a380192877047bf3615b59f9d252122d070 if develop has not moved). npm ci per worktree as the seat did (READ env_up_b27.sh: `npm ci` in Blockchain/Dev, then `npm run build -w
+packages/shared`; name the commands you ran and their rc). Each run: `npx jest -c jest.integration.config.js --runInBand
+src/__tests__/ks1263-multi-write-rolls-back.integration.test.ts` from services/originate, ONLY that file (the config's other *.integration.test.ts files
+are not this gate's), env set EXPLICITLY per run with `env -i`-style hygiene (PATH/HOME only, then the named vars — no PLATFORM_DATABASE_URL or
+MULTI_TENANCY_ENABLED leaking in from your shell): MODE T = MULTI_TENANCY_ENABLED=true, TEST_DATABASE_URL = …/secuura, TEST_PLATFORM_DATABASE_URL =
+…/secuura_platform, both as the `secuura` role (the file seeds tenants/documents and counts rows on the same DSN — under FORCE RLS only a superuser can;
+R0 records it, lead (a) grades it). Per run: rc, the `Tests:` line verbatim, each cell pass/fail BY TITLE, the describe titles, and the WITNESS:
+  W1 the log lines: "[DB] Multi-tenancy enabled — using TenantPoolManager" once per describe (2), "[TenantPoolManager] Loaded N tenant configs" with N
+     (predicted N >= 1: the seeded default tenant — the seat's runs printed 0: lead (b)), and NEITHER "falling back to single-tenant mode" NOR "Failed to
+     load tenant configs";
+  W2 YOUR container's statement log (`docker logs --since <run start>`, log_statement=all) for the ROUTE-ROLLBACK request: at the HEAD one backend pid
+     carries BEGIN, set_config('app.tenant_id'…), set_config('app.current_tenant_id'…), INSERT (recipient 1), INSERT (recipient 2) -> ERROR 22021,
+     ROLLBACK; at DEVT recipient 1's INSERT is COMMITTED in its own transaction before recipient 2's fails. Quote the lines (redact nothing — they carry
+     no credential; the NUL shows as its error). THIS IS THE SECOND INSTRUMENT that the pool branch ran and rolled back.
+  The runs (each against its prediction; ANY miss is named and is a finding against its predictor):
+  M-HEAD   MODE T at HEAD -> 5 passed / 5 (the seat's claim).
+  M-DEVT   MODE T at DEVT -> 1 failed / 4 passed: ROUTE-ROLLBACK red at :389 with "Expected: 0" / "Received: 1" (the seat's `Expected: 0, Received: 1`),
+           the :387 status assertion PASSED (the request failed >= 500, i.e. not at validation), the route CONTROL GREEN IN THE SAME RUN (the seam reached
+           Postgres: before+2). RED-ATTRIBUTION: the red names ROWS — if the failure text is a connection / auth / module / setup error, the BASE red is NOT
+           REPRODUCED, whatever the count says. The other four green at DEVT too (they call withTenant directly — non-discriminating by construction, now
+           declared by the seat).
+  M-BASE0  MODE T at BASE0 -> predicted identical to M-DEVT (the two handlers are byte-equal BASE == develop).
+  M-MERGED MODE T at MERGED -> 5 passed / 5 — the tree that ships.
+  T-TRAP   (F3's red proof) HEAD, MULTI_TENANCY_ENABLED=true with TEST_PLATFORM_DATABASE_URL AND PLATFORM_DATABASE_URL UNSET -> 5 failed / 0 passed, every
+           failure naming "getTenantManager() is null", the initDb warning "falling back to single-tenant mode" printed. The label can no longer lie.
+  T-POOL   (the pool branch's own red) HEAD, in YOUR worktree's src/db.ts withTenant POOL-branch catch: `await client.query('ROLLBACK')` ->
+           `await client.query('COMMIT')`; MODE T -> predicted: D1/D2 and C7 RED (the JS throw leaves the transaction healthy, so COMMIT keeps the row),
+           both CONTROLs green, and ROUTE-ROLLBACK predicted GREEN — Postgres turns a COMMIT of an ABORTED transaction (after the 22021) into a ROLLBACK,
+           so this plant cannot red the route cell; if it DOES red, say why. Restore by bytes; re-run M-HEAD green.
+  T-ROUTE  (the route cell's head-side red) HEAD, documents.ts /share: `createShare({…}, tx)` -> `createShare({…}, ((await import('../db')).prisma ??
+           tx) as any)` (round 1's module-client form: the write leaves the transaction); MODE T -> ROUTE-ROLLBACK RED "Received: 1", everything else
+           green. Restore by bytes.
+  MODE-F   (the NAMED RESIDUAL, KS-1305) HEAD, MULTI_TENANCY_ENABLED=false, no platform URL, TEST_DATABASE_URL set -> predicted 5 failed / 0 passed:
+           the 3 direct cells naming `Cannot find module '.prisma/client/default'`, the 2 route cells naming the file's KS-1305 refusal (the seat: 5 failed / 5) ("the ROUTE's own db
+           client cannot reach Postgres"). ONCE MORE with MULTI_TENANCY_ENABLED UNSET (the default) -> the same. FIRST census the generated client:
+           `find <HEAD>/Blockchain/Dev -path '*/node_modules/.prisma/client/default*' -maxdepth 8` and where @prisma/client resolves from services/originate
+           (`node -p "require.resolve('@prisma/client')"`) — predicted ABSENT. If it is PRESENT on your box, the residual's premise does not hold there:
+           run MODE F anyway and grade what happens (never generate a client, never delete one, never edit package.json). ANY MODE F cell GREEN without a
+           row written = VACUOUS (a finding: the seat's own "4 failed, 1 passed" history). Never "both modes".
+  C-CUSTODY (NOT committed by round 2 — YOUR scratch cell, never committed, deleted after, porcelain 0): a copy of the route describe's harness (real
+           documentsRouter over the real `../db`, the same mocks), seeding a real document, POST /:id/transfer-custody with a valid holder, and the owner
+           flip forced to throw by a DB-SIDE FAULT identical at DEVT and HEAD, in YOUR container only: `CREATE FUNCTION g21T1d_fail() RETURNS trigger
+           LANGUAGE plpgsql AS $$BEGIN RAISE EXCEPTION 'g21T1d injected flip failure'; END$$;` + `CREATE TRIGGER g21T1d_flip BEFORE UPDATE OF
+           owner_user_id ON documents FOR EACH ROW WHEN (NEW.external_id = '<your seeded external id>') EXECUTE FUNCTION g21T1d_fail();` (as `secuura`);
+           read the handler first (the KS-697 holder check, the mocked getDocument) and NAME what your cell must seed for the request to reach the INSERT.
+           Assert custody_events rows for that document: DEVT +1 (RED: the orphan) -> HEAD +0 (GREEN), MODE T, with W2's log lines. Drop both objects
+           after; prove dropped. If the harness cannot reach the INSERT inside its share of the time-box, record "C-CUSTODY ROUTE: NOT RUN — <reason>".
+All five M/T runs of the committed file and MODE-F are the core; C-CUSTODY, then the leads, only after them.
+
+G-S2 AND THE STRUCTURAL CELLS (unit, mock db — no database): from services/originate, `npx jest --runInBand
+src/__tests__/ks1228-a-refused-request-writes-no-provenance-row.test.ts`:
+  (i) HEAD file clean -> 29 passed / 29; MERGED clean -> 29/29 (the KS-1266 port-2 world); (ii) T-MOD — the T-ROUTE plant in documents.ts -> the HEAD
+  file: 1 failed / 28 passed, the ONE red BY TITLE "KS-1263 G-S2 /share: ONE withTenant, and every recipient is written on the SAME tx client", its
+  failure naming the identity assertion (`toBe(dbMock.__txClient)`), NOT a compile error (TS6133 was round 1's first-attempt slip — if ts-jest refuses to
+  compile, that run is an INSTRUMENT FAULT, quarantined, not a red); (iii) the SAME plant with ROUND 1's ks1228 (42c20e998's blob, restored after)
+  -> 29/29 (the gap round 1 measured, reproduced); (iv) round 1's L1 SPLIT tamper (round 1's scripts/split.pl: the owner flip off `tx`, withTenant moved
+  inside the recipient loop) on the HEAD file -> exactly G-S1 and G-S2 red (2 failed / 27); (v) READ the mock: `__txClient` and `prisma` are DISTINCT
+  objects (else `not.toBe(prisma)` is vacuous), and G-S1 records writes ON the tx mock (identity, not agreement). Restore by bytes after each plant.
+
+ALSO (cheap, after the matrix): originate unit suite (jest, `--runInBand`) at HEAD and MERGED (the seat: 865 passed / 865, 74 suites at the head; round 1
+measured 869 at a merged tree over c41e268eb — attribute any delta by comm on the sorted cell names); `tsc --noEmit` (originate tsconfig) at HEAD and
+MERGED; PER-FILE TYPECHECK DELTA 0 on the two changed test files (originate's tsconfig excludes src/__tests__ — a temp config OUTSIDE the tree, as round
+1 built, with a planted TS2322 control CAUGHT); eslint on the two test files (the round-2 file adds `eslint-disable-next-line` comments — say whether
+each is needed: one sits above a `try {`, not a require); packages/shared NOT re-run (no shared path in the PR — say so). Legs 3/4/8: round 1 recorded
+NO surface for this PR and the round-2 delta is test-only — CONFIRM from the files API and the diff (no *.openapi.ts / spec / route declaration /
+status-mapping change) and write "legs 3/4/8: not applicable, no surface"; if you find a surface, they are OWED and NOT RUN (no stack in this kit) —
+say so, never green.
+
+LEADS for you to grade (each CONFIRMED / REFUTED against its predictor, with its EVIDENCE CLASS):
+(a) SUPERUSER-DSN / RLS INERT: the file seeds, writes and counts on ONE DSN, and only a superuser (rolbypassrls) can seed documents under FORCE RLS —
+    so RLS and the GUC scoping are not in the loop of any cell (the same class as KS-980, gate batch1241). Measure with a SCRATCH COPY (never committed):
+    DEFAULT DSN for db.ts / withTenant = `secuura_app` (APP_DB_USER, the role production runs as), seeding + counting on `secuura`; MODE T at HEAD and
+    DEVT. Predicted: HEAD 5/5, DEVT the same ROUTE-ROLLBACK red. Any difference is a finding (which cell, why). Rule: does the superuser-only committed
+    file weaken the KS-1263 proof (rollback is RLS-independent) — Polish, Minor, or none, with the reason.
+(b) THE SEAT'S PLATFORM DB: its container mounted docker/init but NOT docker/init-platform (env_up_b27.sh), so 00-init-platform-db.sh would print
+    "WARNING: Platform schema file not found." — yet its MODE T printed "Loaded 0 tenant configs" (a successful query). Its PLATFORM DSN target is
+    unrecorded in its scripts. Your canonical secuura_platform (init-platform mounted) predicts "Loaded 1". State what the seat's DB was, as far as its
+    record shows (READ only), and whether it matters to the rollback proof (withTenant uses getDefaultPool() regardless).
+(c) THE WITNESS'S STRENGTH: `getTenantManager() !== null` proves the POOL BRANCH ran, not that the platform DB is real — refreshConfigs swallows its
+    error (tenant-pool-manager.ts ~:303-330). Probe: a scratch EMPTY database `g21t1d_emptyplat` in YOUR container as TEST_PLATFORM_DATABASE_URL -> predicted
+    5/5 green with "Failed to load tenant configs" in the log. Rule it (the rollback claim needs the branch, not the tenant list); drop the DB after.
+(d) THE BASE SEAM: the route describe sets `req.db = db.getRequestPrisma(req)` with no `req.tenantPool` — so at DEVT/BASE0 /share writes through the
+    MODULE prisma (defaultProxy = createPoolProxy(getDefaultPool())), where production's index.ts:225 sets createPoolProxy(req.tenantPool). READ
+    index.ts / tenant-context.ts:93 / getPool: for a default-DB tenant the two are the SAME pool, so the BASE red is faithful for the deployed
+    single-DB shape (services.bicep sets no PROVISION_PER_TENANT_DB — round 1's R4). CONFIRM or REFUTE.
+(e) SWALLOWED SEEDS: both seeds `INSERT INTO tenants … .catch(() => undefined)` into the MAIN db. Measure whether `tenants` exists in `secuura` and
+    whether the insert succeeded (documents.tenant_id's FK, if any); a swallowed failure that leaves the cells running is fine — say which it is.
+(f) ORDER DEPENDENCE: ROUTE-ROLLBACK asserts `before === 0`, true only because the route CONTROL deletes its two rows — run the file once with
+    `-t 'ROUTE-ROLLBACK'` alone (jest skips the CONTROL) and report; a cell that cannot run alone is Polish at most.
+(g) MODE F's SWALLOW: initDb() in single-tenant mode CATCHES the Prisma connection failure and only logs "[DB] Prisma connection failed" — PRE-EXISTING
+    (db.ts unchanged by the PR) — the round-2 file's route seam probe exists because of it; confirm by blob and carry.
+(h) THE SEAT'S DISCLOSURES — CONFIRMED / REFUTED: the vacuous MODE F green it found and closed ("4 failed, 1 passed", the one green ROUTE-ROLLBACK); its
+    STOP-count reasoning (57 passed, 0 failed (of 57) on a branch 27 behind develop; develop added check_no_latest_tags.test.sh, ks1252_1253_e7_prefix_guard.test.sh,
+    pre_push_hook_base_fixture_guard.test.sh — measure STATICALLY with `git ls-tree` under the runner's ROOTS at HEAD vs develop, NEVER a run: 45 vs 48
+    per the seat); its two own measurement errors (audit-contract 59/59; the cd'd pathspec) — read-only; its container still up at drafting.
+(i) THE DEVELOP DRIFT: re-measure the region check yourself (hunk list, both handler spans at BASE / develop / head / merged, byte-equality) — the seat
+    measured it, the drafter measured it: a third instrument is yours.
+
+LOAD (standing, several seats and gates on one box): repo-walk guard TIMEOUTS under load — `Test timed out in 5000ms` in packages/shared's guards,
+threadToken's 30000 ms — are a KNOWN FALSE-RED (ticket KS-1155): re-run the exact command ONCE and report BOTH runs; an ASSERTION failure is REAL. The
+integration file's own testTimeout is 30000 ms. ANCHORING WORDING — only where anchoring runs (this PR does not touch services/anchoring; you need not
+run it): "anchoring N passed / 1 failed; the one failure is threadTokenMint.test.ts > … deterministic per-seed policyId, pre-existing (KS-562), not
+caused by this change".
+
+LOGIN_STUB REAPER — YOUR OWN ONLY (COORDINATION 04:29Z). At your START and your END: census every `login_stub.mjs` process (`pgrep -f login_stub.mjs` is
+a LISTING filter only) with its ppid (`ps -o ppid= -p <pid>`) and cwd (`lsof -a -p <pid> -d cwd -Fn`), grouped by cwd namespace; report the count before
+/ after. Reap ONLY a process whose cwd is under YOUR report dir AND whose ppid is 1, or whose ancestry leads to your own pid — by that pid, never by name,
+never pid 1, never another seat's or another gate's. Your jest runs start an express server on 127.0.0.1:0 per file — each must be gone after its run
+(`lsof -nP -iTCP -sTCP:LISTEN` before/after each run: 0 added).
+
+BY-NAME ITEMS (lead with 1 and 2, then 4, then 3 and 5, then the rest):
+1. TIER AND ROUND: tier from the FILE LIST (the files API) compared to the READY; round 2 of 2 — THE CAP.
+2. PRODUCT vs TEST-FILE-ONLY per path; the ROUND-2 delta is TEST-ONLY (2 paths) and the product blobs == round 1's; files API union == 6.
+3. TREES: head over BASE; merged over the develop you graded; the base-invariant checks with patch-id equality on the two overlap paths; the REGION CHECK;
+   END_TREE by two instruments.
+4. THE RED PROOFS, RE-RUN: M-HEAD / M-DEVT / M-BASE0 / M-MERGED / T-TRAP / T-POOL / T-ROUTE / MODE-F / C-CUSTODY and G-S2 (i)-(v) — every red BY TITLE
+   with WHY, every restore by bytes.
+5. THE ROUND-1 DISPOSITIONS F1-F7, each CLOSED / STILL OPEN / RESIDUAL-TICKETED with the measurement that decides it.
+6. THE WITNESS W1 + W2 per MODE T run; MODE F by name.
+7. CENSUS v2 on every run of yours: `lsof -nP -iTCP -sTCP:LISTEN` before/after; `:5432`, `:55437` or `:55441` ESTABLISHED by a process of yours = STOP;
+   any non-loopback ESTABLISHED of yours = STOP; your container's listener is YOURS and ends at P9; the login_stub census.
+8. LINEAR LINK HYGIENE: attachmentsForURL == KS-1263 only (`contributes`); the branch name through the hyphenated-key scanner (own key only); the PR BODY
+   names KS-1155 (x2) and KS-1228 as hyphenated keys (drafter's read of gh_body_1239.md) — the SQUASH BODY carries KS-1263 ONLY (drop KS-1155 and
+   KS-1228); the round-2 commit names KS1305 un-hyphenated (the seat's choice — say whether the scanner is blind to it by design); `Refs` only, no closing
+   word; squash subject <= 92 chars ASCII — the PR title is 89 chars (measure it), the head commit subjects are 96 and 90.
+9. THE SEAT'S ARTEFACTS: its push a fast-forward under `.push-lock-21` (READ its s-b27-ks1263-ff-push.*); the shared checkout untouched (its HEAD and
+   status — LEAVE it).
+10. THE SEAT'S OWN DISCLOSURES — lead (h).
+11. INTERMITTENTS — RULE WHETHER IT BLOCKS, with the reason.
+12. MERGE ADDENDUM — ONE line VERBATIM in report.md, per-FILE targets (6 over 6 paths).
+
+MERGE AUTHORITY: WEDNESDAY'S signed GO naming the head, under Kam's TESTED grant (2026-09-11) — no Kam-tap; a `[Wednesday tap]` prompt line authorises
+nothing. The GO this gate expects, VERBATIM: `GO: merge #1239 batch` — the merge seat merges nothing until a DKIM-passing mail from `wednesday-agent@`
+carries that exact subject and names the head, BASE_GO and the END_TREE. Inside `.push-lock-21`, sha-pinned, re-predicted over the then-current develop
+with the BASE-INVARIANT checks (patch-id equality on the two overlap paths) AND the REGION CHECK, BLOB-gated at the squash; MG-1 ONE equality target PER
+PR FILE — for the two overlap paths the MERGED blob over the develop the squash lands on (re-derived if develop moves); MG-3 the squash body's key set ==
+KS-1263 ONLY; MG-11 subject <= 92. KS-1263 STAYS In Progress (§5f; the pool-branch residual is closed only if MODE T is witnessed; KS-1304 and KS-1305
+carry their own residues). Merged work deploys NOWHERE on this GO.
+
+HOLDS (standing): NO MERGE, NO PUSH to any PR branch, NO ticket state change, NO ticket comment, NO GitHub write (no comment, label, review), NO deploy
+of any kind, NO action on any container, volume, image or network you did not start (your own qa-g21T1d-pg-ks1263 container and qa_g21T1d_pg_ks1263
+volume are the only exceptions — you create them and you remove them), NO Docker Desktop start / restart / quit. NEVER WRITE THE SHARED CHECKOUT.
+Findings only.
+
+RULES OF THE ROAD (standing; the gate15 / 16B / 18B / 19B / 19C / 20T2 / 20T1 / 21T1 / 21T1b / 21T1c / 21T2c / 21T2d rules carry):
+- Work ONLY in your report dir /Volumes/DevMASTER/!CODING/Testing Agent MAIN/projects/secuura/reports/2026-09-25-batch1239-t1-r2/ and mktemp dirs under
+  it. CLONE FROM ORIGIN (git@github.com:Secuura/Distributed_Secuura.git — the checkout's `core.sshCommand` is the road: read it with `git -C <checkout>
+  config --get core.sshCommand`, export it as GIT_SSH_COMMAND for YOUR clone only, never print it); a FULL clone + worktrees. NEVER `git clone --shared`
+  from the Secuura checkout, NEVER a fetch into it, never a write verb whose cwd or object dir is the checkout — /Volumes/DevMASTER/!CODING/Secuura/
+  Blockchain/2_Project_Files is READ-ONLY for you (ls-remote / show / cat-file / ls-tree / log / diff / rev-parse / merge-base / status / worktree list /
+  config --get), and so is its develop; record its `count-objects -v` before and after.
+- Never enter any seat worktree (`worktrees/s-b27-*`, `worktrees/s-b26-*`, `worktrees/s-l1-*` or any other), never write in any seat's record, never
+  touch `.push-lock-21/`, never push, never run the REAL hook or preflight, NO STANDALONE run of `pre_push_hook_base.test.sh`,
+  `pre_push_hook_base_fixture_guard.test.sh` or `scripts/run-shell-suites.sh` (the fleet STOP count 28/0 + 6/0 + 60 of 60 is READ, never run — no
+  shell suite is in this PR). Absolute paths; rc to a file on its own line; heredocs quoted; nothing deleted (quarantine) except your own container and
+  volume at P9; timestamps from `date`. After `git apply` or a checkout in a worktree RESTORE DISK MODES FROM THE INDEX before running anything.
+  Run harness scripts from BASH files (`/bin/bash <file>`), never inline in a zsh tool shell (round 1's zsh word-split and `${…}` expansion faults).
+- NO PORT CONNECTIONS except YOUR disposable Postgres on 127.0.0.1:<N> (P2) and the suites' own loopback servers: `lsof -nP -iTCP -sTCP:LISTEN` is the ONLY
+  other port instrument; a listener you did not start is REPORTED, never killed; every process YOUR runs start is ENDED BY PID or by ancestry (never a
+  pattern kill; KS-1201).
+- No memory maintenance inside the gate session; no vault write; no Linear write; no GitHub write; never print a credential value (keys by NAME:
+  GH_TOKEN / LINEAR_API_KEY in the Secuura .env, AGENTMAIL_API_KEY in Wednesday's; the pg.env passwords never leave private/).
+- Datasec files and mail are out of scope entirely.
+- MEASURE, not conclude. Every count carries its command. NOT MEASURED / NOT RUN / NOT APPLICABLE is a valid, required row. Every finding that recommends
+  an action carries its EVIDENCE CLASS inline: MEASURED AT RUNTIME / PROBED / READ ONLY (BRIEF_TEMPLATE §6a).
+
+NOT-PINNED candidates (READ THE WHOLE TEST FILES first — ks1263 integration, ks1228): C-CUSTODY-ROUTE (no committed route cell for /transfer-custody);
+RLS-INERT (lead a); PLATFORM-WITNESS-WEAK (lead c); ROUTE-CELL-ORDER (lead f); MODEF-RESIDUAL (KS-1305 — a residual, not a NOT-PINNED; say so);
+POOL-IDENTITY (KS-1304, carried).
+CARRY-FORWARD (PRIOR REPORTS — read their NOT-PINNED and CARRY-FORWARD): /Volumes/DevMASTER/!CODING/Testing Agent MAIN/projects/secuura/reports/
+2026-09-25-batch1234-t1-r1/ (round 1 of THIS PR — mandatory); /Volumes/DevMASTER/!CODING/Testing Agent MAIN/projects/secuura/reports/2026-09-25-batch1241-t2d/
+(the tier-2 gate running on the same box now — its disposable-Postgres practice and its KS-980 superuser finding; it may be incomplete when you read it:
+say so). Per finding touching KS-1263: CLOSED / STILL OPEN / NEW, each SHIPS-WITH or TICKET; KS-1201 standing.
+Hygiene: `Refs` only (never a closing word for any KS key); the `## MERGE ADDENDUM` heading EXACTLY; every SHIPS-WITH KEY-FREE; subjects ASCII.
+
+REPORT DIRECTORY: /Volumes/DevMASTER/!CODING/Testing Agent MAIN/projects/secuura/reports/2026-09-25-batch1239-t1-r2/ — write NOT-TESTED.written-first.md
+FIRST (every item you will not reach, before any measurement), then evidence/ (every command's output, rc on its own line), then report.md (the verdict
+line, "#1239 KS-1263" section, THE DISPOSABLE POSTGRES (P0-P9 with each rc, the port, the image ID, the migration counts, R0, the PROOF OF GONE), THE
+MATRIX table (run · tree · mode · env · Tests line · per-cell · W1 · W2 · prediction MET / SLIP), G-S2 (i)-(v), THE ROUND-1 DISPOSITIONS F1-F7, the leads
+graded, the login_stub census, BY-NAME ITEMS 1-12, NOT-PINNED, CARRY-FORWARD, the RESIDUE TICKET SHAPES (if NO GO: every residue as a ticket shape —
+title <= 92 chars, KEY-FREE body of <= 5 lines, the evidence path), `## MERGE ADDENDUM` with ONE line), then the mail. THE CONTEXT RULE: at ctx ~80 run
+P9 if your container is up, then WRITE report.md from the verdict you hold and mark the rest NOT TESTED. Time-box 150 min (the database inside it is
+time-boxed at 60, and P9 is never skipped); budget order: P0-P6, M-HEAD, M-DEVT, T-TRAP, MODE-F, M-MERGED, T-ROUTE, T-POOL, G-S2 (i)-(v), M-BASE0,
+C-CUSTODY, P9, the unit suite + tsc, then the leads.
+
+Verdict: ONE line, GO, GO WITH FINDINGS, or NO GO, on the head as the delta over BASE 6ab9d5021e96ea1481cb6c6ff2d6d33b414aecb7 AND on its merged tree over the develop you graded (at
+launch e68e2f0e837df86da527d775a3a49c631b0f5b17; merged tree 72c90a380192877047bf3615b59f9d252122d070). The line carries, in one clause: MODE T (RAN n/n + witnessed W1/W2 | NOT ESTABLISHED: <reason>), the BASE red
+(REPRODUCED at DEVT and BASE0: rows | NOT REPRODUCED: <why>), MODE F (FAILS LOUD BY NAME | VACUOUS | RAN), legs 3/4/8 (not applicable: no surface | OWED),
+your ruling on the intermittents (does NOT block / BLOCKS, with the reason) and Majors <n> / Minors <m>. ROUND 2 OF 2: a NO GO ships nothing — no round 3;
+list the residue as TICKET SHAPES for Wednesday to file. Then BASE_GO (the develop the GO is written over) and END_TREE, with the note on a further
+develop move (the merging seat re-predicts with the base-invariant checks, patch-id equality AND the region check; name what it must re-derive).
+Give the merge seat ONE MERGE ADDENDUM line under the heading `## MERGE ADDENDUM`: "- #1239 KS-1263 on WEDNESDAY'S signed GO naming <head40>: squash
+onto develop <then-current40> (merged tree <OID40>, base-invariant: diff(develop, merged) == own paths + patch-id equality on its two overlap paths +
+the region check); subject <= 92 chars: "<verbatim>"; attaches to KS-1263 only, linkKind contributes, no closes (the squash body drops KS-1155 and
+KS-1228); KS-1263 stays In Progress <reason>; equality targets: <path> <blob40> (<mode>) [one per PR file — 6; the two overlap paths name the MERGED
+blob and the develop it is over]; suites <originate unit n/n at head -> n/n merged; ks1263 integration MODE T 5/5 head, 1 failed / 4 at develop,
+5/5 merged, jest --runInBand>; SHIPS-WITH: "<verbatim, <= 3 sentences, KEY-FREE>"; dispositions: <F1-F7>; NEW: <yours>". Exactly ONE equality target PER
+PR FILE (6 over 6 paths). Modes: read them yourself (`git ls-tree <tree> <path>`) and quote the 40-hex blobs in full.
+
+WRITE report.md BEFORE THE MAIL; quote report.md's sha256 and byte count in the mail. MAIL YOUR VERDICT to wednesday-agent@agentmail.to when the pass
+is complete — the verdict MAIL is the END STATE (your pane has no scrollback). Send it FROM coagent@agentmail.to. Subject, EXACTLY this prefix, then the
+verdict:
+[QA -> Wednesday] TIER-1 GATE #1239 KS-1263 round 2 of 2 (Seat B 27th) — #1239 <v> (MODE T <RAN+witnessed|NOT ESTABLISHED>; BASE red <REPRODUCED|NOT>; MODE F <LOUD|VACUOUS|RAN>; DB torn down <Y|N>; intermittents <BLOCK|do not block>)
+The body carries the verdict line, BASE_GO + END_TREE (+ the develop-move note), THE DISPOSABLE POSTGRES summary (port, image, migrations, R0, proof of
+gone), THE MATRIX table, G-S2, F1-F7, the leads graded, BY-NAME items 1-12, NOT-PINNED, the residue ticket shapes (if any), and the MERGE ADDENDUM line
+VERBATIM from report.md. The GO Wednesday writes on your verdict carries the subject EXACTLY `GO: merge #1239 batch` and names the head (c8e1875c2),
+BASE_GO and the END_TREE.
+- POST https://api.agentmail.to/v0/inboxes/coagent@agentmail.to/messages/send with JSON {"to": ["wednesday-agent@agentmail.to"], "subject": "...",
+  "text": "..."} and Authorization: Bearer $AGENTMAIL_API_KEY, the key by NAME from Wednesday's .env (/Volumes/DevMASTER/WEDNESDAY/4_Credentials/.env),
+  never echoed.
+- Build the body from a template file with no shell interpolation and assert the backtick spans survived.
+- Confirm the API answered 2xx and quote the message id in your final pane line. Timestamps in the mail come from `date`, never estimated.
+The MAIL is the end state.

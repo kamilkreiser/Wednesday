@@ -1,0 +1,21 @@
+LAUNCH ACTION (DRY RUN) 2026-09-25 21:22:44 AEST / 2026-09-25T11:22:44Z | launcher /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/d384786a-4d7e-451d-a78b-40a06ef20e21/scratchpad/gate21T1d/launch_qa_secuura_batch1239-t1r2.sh | pinned launch develop e68e2f0e837df86da527d775a3a49c631b0f5b17 | END_TREE 72c90a380192877047bf3615b59f9d252122d070
+  pin #1239 c8e1875c21e994a746e36c8b8efec8de1d9dbc98
+--- 0. the pane must be routed (inbox_routing.conf) or cockpit.sh say --mail fails silently
+  routing line present: 0 (grep rc=1; want 1 / rc 0; control: QA/Secuura-batch1234 = 1)
+  (DRY RUN: reported, not refused — the real run refuses rc 1 here)
+--- 0b. the kit's home: launcher filled for /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/d384786a-4d7e-451d-a78b-40a06ef20e21/scratchpad/gate21T1d | this script lives in /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/d384786a-4d7e-451d-a78b-40a06ef20e21/scratchpad/gate21T1d
+  AT HOME — no re-fill
+--- 1. instrument: git ls-remote origin (read from the Secuura checkout, READ-ONLY)
+  ls-remote rc=0 at 11:22:47Z
+    e68e2f0e837df86da527d775a3a49c631b0f5b17	refs/heads/develop
+    c8e1875c21e994a746e36c8b8efec8de1d9dbc98	refs/heads/feature/ks-1263-share-transfer-transaction-l1-g-1
+    c8e1875c21e994a746e36c8b8efec8de1d9dbc98	refs/pull/1239/head
+--- 2. instrument: the GitHub PULLS API (an independent read of the head, and mergeable)
+  pulls API rc=0
+    API #1239 head c8e1875c21e994a746e36c8b8efec8de1d9dbc98 base develop mergeable True reads 1 state open
+--- 3. the head, judged (both instruments == the pin, open, not mergeable:false)
+  #1239  ls-remote pull/head c8e1875c21e994a746e36c8b8efec8de1d9dbc98 | branch c8e1875c21e994a746e36c8b8efec8de1d9dbc98 | API c8e1875c21e994a746e36c8b8efec8de1d9dbc98 (state open, mergeable True) | pinned c8e1875c21e994a746e36c8b8efec8de1d9dbc98
+  BOTH INSTRUMENTS AGREE with the pin.
+--- 3b. develop, read at launch: e68e2f0e837df86da527d775a3a49c631b0f5b17 | the launcher's pinned launch develop e68e2f0e837df86da527d775a3a49c631b0f5b17
+  UNMOVED since the fill — the END_TREE 72c90a380192877047bf3615b59f9d252122d070 stands
+DRY RUN COMPLETE 2026-09-25T11:22:48Z — every read agrees with the pins; the real run continues with the usage gate, --check and cockpit.sh add
