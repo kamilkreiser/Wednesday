@@ -9,8 +9,8 @@ claim below comes from the commit message of `703d304`, the BACKLOG, Tuesday's n
 again.** It parses §PIN, refuses any placeholder, and re-reads EVERY row by `git ls-remote` immediately before launch, refusing on any
 mismatch. The verified table is appended to your prompt.
 
-SELF-CHECK: re-read end-to-end for contradictions | @STAMP@
-Self-check note: @STAMP@
+SELF-CHECK: re-read end-to-end for contradictions | 2026-09-25 13:52
+Self-check note: stamped by Tuesday after KAM RULED card quickquote-bcr3-round4-fourth-round = a ("Test it", live board 2026-09-25 13:52:08) — that ruling is the authority for this 4th round on the BC class (C-62), resolving the drafter's item 1; the raised deadlines (240/300/180/360/420 s) are confirmed.
 
 ## Charter
 Read `/Volumes/KK_T9_External_HDD/TUESDAY/2_Project_Files/fleet/qa-agent/QA_AGENT_CHARTER.md` in full first. You are an independent
