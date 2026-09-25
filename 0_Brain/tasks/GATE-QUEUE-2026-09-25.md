@@ -19,6 +19,7 @@ Batched per tier (the 09-18 batch rule). A row enters on its READY mail and only
 | 1 (NEXT batch) | #1224 | KS-1179 | L3 | d4862b3eee35 (ls-remote 14:2x) | security ssrf-guard | 04:20Z wrap |
 | 1 (NEXT batch) | #1226 | KS-872 | L3 | fcda1a6ef7e4 (ls-remote 14:2x) | none (type-only) | 04:20Z wrap |
 | 2 (NEXT batch) | #1227 | KS-1252+1253 | L4 | 69a72726e8ee (ls-remote 14:4x) | none (scripts contract.mjs) | 04:40Z |
+| 1 (NEXT batch) | #1228 | KS-1171 (Kam c) | L2 (wrapped) | 43279280f76e (ls-remote 14:4x) | anchoring; legs 3/4/8 OWED; integration cells | 04:41Z |
 | 3 | #1219 | KS-1277 | L1 | 5d5129a03af0 (ls-remote 13:2x) | none (comment-only) | 03:23Z |
 
 **TIER 2 = 4 READY at 13:4x (#1215, #1218, #1220, #1221) -> gate commissioned (a second drafter).**
