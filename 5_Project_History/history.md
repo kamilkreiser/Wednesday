@@ -3,6 +3,12 @@
 - Launched gate24T2d (%31, 7 PRs, two at the cap) after checking the orphaned kit myself: the drafter's control run had died with one MISMATCH (H20), proved a control-design defect by a discriminating re-run.
 - Built the owed `fleet/.gitattributes` merge=union for inbox_routing.conf (proved both arms; 75a4b47bf). Un-stalled L7; ruled L8's KS-849 residual + kyc timeout; fleet count declaration sent, then corrected on L8's catch (ledger +1).
 - Wrap: retro, pickup 05:3x block, handover mail verified at wednesday-agent@, ledger archive (09-22, 28 rows, 1251 == 1251). No lesson files edited, so no digest regen.
+## 2026-09-25 19:37–23:14 AEST (+ wrap 09-26 07:1x) — Friday (laptop), successor seat after the 19:35 rotation — Datasec only (HPSM-POC, Security Composer)
+- **Boot:** by-tier digest 544 KB + Friday ledger whole, ctx 35%, new Claude account (7d 25%). Found: the caffeinate from 17:4x died with the old pane (re-armed detached); no STATUS watcher running (armed).
+- **Composer:** typed-answers release DEPLOYED to the demo on Kam's word (main b0b512c, migration 0018, content efad540b, PREFLIGHT GREEN; temp key removed and proven); two example engagements released (A: D-023 On, 24 exceptions; B: Manual approval); C-08.
+- **HPSM-POC:** B16 cold-user re-run reviewed (25 of 47 gone); B17 fixes proved by clicks + C-21 features (profile fields, placeholder offer sheets, one-customer revenue); B18 keyless Azure OpenAI in hpsm-poc-rg (gpt-4.1-mini, budget alert) + Kam's template approval (C-23); B19 retry-once, "Try again", stricter output checks, approver name on the PDF (C-25), templates 1.0.1 drafted (C-24). PRs #23, #24, #25 merged head-pinned; main 1360aad green. The SOW AI-clause wording + a formatted PDF delivered to Kam (C-20); he sent HP a change request.
+- **Open for Kam:** card `hpsmpoc-approve-templates-101` (default: 1.0.0 stays; the showcase uses template text). With 1.0.0 the live AI over-states on placeholder content and the checks refuse it; 1.0.1 passed 2/3 in a preview.
+- **Ledger:** 4 rows (caffeinate w=2; seat-account claim; autostash w=2, which delayed one panel message; Friday's own brief rule "critical in ANY phrasing"). Digests regenerated.
 
 ## 2026-09-24 06:00–21:2x — Wednesday day half (same seat as the overnight; wrapped on Kam's word)
 - Morning ritual run from the wrapped overnight seat (7d:98%, a fresh boot ~1% of the allowance); receipt to Kam action-first: a new account unblocks the Secuura fetch.

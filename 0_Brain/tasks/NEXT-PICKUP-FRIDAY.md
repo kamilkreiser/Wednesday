@@ -1,10 +1,10 @@
 ---
-date: 2026-09-25
+date: 2026-09-26
 type: pickup
 seat: friday
 scope: BOTH Secuura and Datasec, from Kam's laptop. Claim each project before driving it (wed_claim.sh)
 status: live
-written_by: Friday, rotation handover 2026-09-25 19:3x (ctx ~80%; NEW Claude account, 7d 25%)
+written_by: Friday, day WRAP 2026-09-26 07:1x on Kam's word (successor seat of 19:37; no seat open)
 supersede: replace wholesale; previous = NEXT-PICKUP-FRIDAY.md.pre-0925-rotate-successor2
 ---
 
@@ -21,12 +21,13 @@ supersede: replace wholesale; previous = NEXT-PICKUP-FRIDAY.md.pre-0925-rotate-s
 
 - **The LAPTOP SLEEPS.** Arm `caffeinate -dims -t 21600` (background) in the same action as launching any seat, and check `pgrep -fl caffeinate` at boot. On 09-25 it slept at ~17:0x and cut two seats' turns. One was armed at 17:4x until ~23:4x.
 
-## 🔴 LIVE (refreshed ~22:5x at the 65% checkpoint by the 19:37 successor seat)
-1. **HPSM-POC main = 1360aad** (B17 + B18 + B19 merged; #25 merged ~23:0x head-pinned, tree = head). Main push-CI green (ci + CodeQL). No seat open.
-2. **Kam's card `hpsmpoc-approve-templates-101`** (sheet `HPSM-POC/1_Project_Definition/Showcase/2026-09-25_AI-templates-1.0.1-changes.md`, drawer f-fba9c7ca9e; hashes …6d138904 / …76ed42f9 / …7e1409c7). **On (a):** brief a small seat: ONE commit moving the three 1.0.1 rows to approved (approvedBy Kam Kreiser (Product Owner), approvedAt = his tap time, ref the C-number you record), hashes asserted unchanged; then a live AI-mode re-test by clicks (≤12 calls: 3 customers × 2 drafts + the other two templates once); report the real pass rate to Kam. **Default (b):** nothing; the showcase uses template mode (`scripts/showcase.sh`).
-3. Friday KEEPS the "compliance" check strict (the model's "maintaining compliance with internal security objectives" stays refused). If 1.0.1 live is still mostly refused on remediation, THAT is the next honest finding, not a reason to loosen.
-4. Owed to Kam when relevant: the budget currency (UNMEASURED); the erasure endpoint is designed, not built (C-25 runbook only).
-5. caffeinate `-dims -t 21600` DETACHED 19:37 (pid 22618) until ~01:3x.
+## 🔴 STATE AT THE WRAP (2026-09-26 07:1x, on Kam's "please wrap up for the day")
+1. **No seat open.** HPSM-POC main = **1360aad** (B17 + B18 + B19 merged, CI green). Composer demo = main b0b512c, content efad540b, with two example engagements (C-08).
+2. **Open Kam card: `hpsmpoc-approve-templates-101`** (sheet `HPSM-POC/1_Project_Definition/Showcase/2026-09-25_AI-templates-1.0.1-changes.md`, drawer f-fba9c7ca9e; hashes …6d138904 / …76ed42f9 / …7e1409c7). **On (a):** brief a small seat: ONE commit moving the three 1.0.1 rows to approved (approvedBy Kam Kreiser (Product Owner), approvedAt = his tap, a new C-number), hashes asserted; then a live AI-mode re-test by clicks (≤12 calls) and the real pass rate to Kam. **Default (b):** nothing; the showcase uses `scripts/showcase.sh` (template text).
+3. Friday KEEPS the "compliance" check strict. If 1.0.1 live still refuses on remediation, report that honestly; do not loosen to make a demo pass.
+4. Owed to Kam when relevant: the Azure budget's currency (UNMEASURED); the erasure endpoint is designed, not built (C-25 runbook only).
+5. **Mechanisms owed (w=2 rows, shared tooling: claim first):** caffeinate armed DETACHED by the laptop launcher / `cockpit.sh add`, + a doctor warning; a `friday_pull.sh` that never silences a pull and refuses on UU.
+6. caffeinate from 19:37 expires ~01:37: gone by the next boot. Re-arm DETACHED (`nohup caffeinate -dims -t 21600 &`) with the first seat launch.
 
 ## NEXT (owed, in order)
 1. ~~HPSM-POC B14 fix round~~ DONE and merged; the re-run is LIVE 1. Source: the B12 user test STATUS `HPSM-POC/1_Project_Definition/Briefs/2026-09-25_B12_SEAT-C_end-to-end-user-test-as-a-salesperson.STATUS.md` (46 findings).
