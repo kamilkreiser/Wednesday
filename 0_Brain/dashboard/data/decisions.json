@@ -17070,5 +17070,132 @@
    "CARD hpsmpoc-partner-scope",
    "CARD spark-studio-client-scope"
   ]
+ },
+ {
+  "id": "hpsmpoc-validator-false-refusals",
+  "client_project": "Datasec/HPSM-POC",
+  "title": "Fix the AI check that refuses TRUE sentences (and close two small gaps it misses)?",
+  "bluf": "Most AI summary refusals are the check's mistake, not the model's. Seat B re-sent the product's exact requests 20 times: 13 refused, and 12 of those were TRUE sentences. The clearest: a customer whose findings are all low ('There are no critical or high severity findings') is refused every time, so it can never get an AI summary. The fix recognises a true 'no critical or high' sentence and lets it through only when the data really has none. Measured on the same 20 replies: 7 pass today, 11 with the fix, and every planted over-statement is still refused. In the same change: two over-statements the check currently MISSES get closed (stricter), and refusals caused by a missing citation get their own reason code. Full report: HPSM-POC/1_Project_Definition/Briefs/2026-09-26_B21_SEAT-B_why-executive-summaries-are-refused.STATUS.md (Gate override: the 34 matched messages and ~30 matched cards share only the project prefix 'hpsmpoc' or generic words; none rules on the output validator's false refusals or on citation gaps (read 08:3x). Closest: C-23/C-26 approved template TEXT, unchanged here.)",
+  "default_action": "If you don't answer: Friday has the fix built and reviewed today but does NOT merge it; it waits on a branch for your tap. The meetings use template mode either way.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Yes, merge the fix",
+    "detail": "A seat builds it now with tests and a fresh safety set; Friday reviews it and merges on green. Reversible."
+   },
+   {
+    "key": "b",
+    "label": "No, keep the check as it is",
+    "detail": "The fix stays built on a branch, unmerged. Low-finding customers keep getting 'Try again' in AI mode; template mode is unaffected."
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-09-26T08:26:21.170484+10:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "seat": "friday",
+  "prior_rulings_overridden": [
+   "2026-08-21 20:06",
+   "CARD rd104-gh-identity-acceptance-false-premise",
+   "CARD hpsmpoc-na-multi-question-rules",
+   "CARD hpsmpoc-pdf-library",
+   "CARD hpsmpoc-pdf-accessibility",
+   "CARD hpsmpoc-playbook-ppt",
+   "CARD hpsmpoc-rs11-not-applicable",
+   "CARD hpsmpoc-branch-protection",
+   "CARD hpsmpoc-azure-providers",
+   "CARD hpsmpoc-entra-app",
+   "CARD hpsmpoc-spark-byte-exact",
+   "CARD hpsmpoc-analysis-repo-backup",
+   "CARD hpsmpoc-report-content",
+   "CARD hpsmpoc-na-rulings-confirm",
+   "CARD hpsmpoc-readiness-answer-type",
+   "CARD hpsmpoc-dev-signin",
+   "CARD hpsmpoc-draft-ruleset-scoring",
+   "CARD hpsmpoc-403-for-missing-ids",
+   "CARD hpsmpoc-partner-scope",
+   "CARD hpsmpoc-na-ignore-reading",
+   "CARD hpsmpoc-playbook-module2-readiness",
+   "CARD hpsmpoc-showcase-draft-findings",
+   "CARD hpsmpoc-plan-no-delete",
+   "CARD hpsmpoc-showcase-score-new-customer",
+   "CARD hpsmpoc-sow-ai-tools-clause",
+   "CARD hpsmpoc-cold-user-rerun-at-93pct",
+   "CARD hpsmpoc-real-ai-model-before-meetings",
+   "CARD hpsmpoc-single-customer-revenue",
+   "CARD hpsmpoc-service-offer-sheets",
+   "CARD hpsmpoc-customer-profile-fields",
+   "CARD hpsmpoc-ai-templates-approval",
+   "CARD hpsmpoc-pdf-approver-name",
+   "CARD hpsmpoc-templates-v101",
+   "CARD hpsmpoc-approve-templates-101"
+  ]
+ },
+ {
+  "id": "hpsmpoc-summary-citation-gaps",
+  "client_project": "Datasec/HPSM-POC",
+  "title": "AI summaries mention findings without citing them: how should we close that?",
+  "bluf": "The other big refusal cause (8 of 13): the model writes a true group sentence like 'the medium and low severity findings are also present' without listing which findings it means, and the check refuses it. The model never got a finding's severity wrong (0 of 28 sentences). Two ways to close it. (a) The product adds the missing citations itself before checking, marked on screen as added automatically: measured 19 of 20 passing with the check fix, with no planted over-statement getting through. (b) A new template 1.0.2 telling the model to cite group mentions (draft in the report): needs your approval and a live re-test, and the model already ignores similar rules. Report: HPSM-POC/1_Project_Definition/Briefs/2026-09-26_B21_SEAT-B_why-executive-summaries-are-refused.STATUS.md (Gate override: the 34 matched messages and ~30 matched cards share only the project prefix 'hpsmpoc' or generic words; none rules on the output validator's false refusals or on citation gaps (read 08:3x). Closest: C-23/C-26 approved template TEXT, unchanged here.)",
+  "default_action": "If you don't answer: (c), nothing is built for this; template mode for the meetings.",
+  "options": [
+   {
+    "key": "a",
+    "label": "The product adds the missing citations, marked as added",
+    "detail": "A seat builds it with a fresh, independent safety set before any merge; the reviewer sees which citations were added by code."
+   },
+   {
+    "key": "b",
+    "label": "Template 1.0.2",
+    "detail": "Friday sends you the 1.0.2 text to approve; then a registry PR and a live re-test."
+   },
+   {
+    "key": "c",
+    "label": "Neither for now",
+    "detail": "Template mode for the meetings; AI summaries keep showing 'Try again' about 1 click in 3."
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-09-26T08:26:22.685585+10:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "seat": "friday",
+  "prior_rulings_overridden": [
+   "2026-08-17 20:01",
+   "2026-09-02 16:32",
+   "CARD hpsmpoc-na-multi-question-rules",
+   "CARD hpsmpoc-pdf-library",
+   "CARD hpsmpoc-pdf-accessibility",
+   "CARD hpsmpoc-playbook-ppt",
+   "CARD hpsmpoc-rs11-not-applicable",
+   "CARD hpsmpoc-branch-protection",
+   "CARD hpsmpoc-azure-providers",
+   "CARD hpsmpoc-entra-app",
+   "CARD hpsmpoc-spark-byte-exact",
+   "CARD hpsmpoc-analysis-repo-backup",
+   "CARD hpsmpoc-report-content",
+   "CARD hpsmpoc-na-rulings-confirm",
+   "CARD hpsmpoc-readiness-answer-type",
+   "CARD hpsmpoc-dev-signin",
+   "CARD hpsmpoc-draft-ruleset-scoring",
+   "CARD hpsmpoc-403-for-missing-ids",
+   "CARD hpsmpoc-partner-scope",
+   "CARD hpsmpoc-na-ignore-reading",
+   "CARD hpsmpoc-playbook-module2-readiness",
+   "CARD hpsmpoc-showcase-draft-findings",
+   "CARD hpsmpoc-plan-no-delete",
+   "CARD hpsmpoc-showcase-score-new-customer",
+   "CARD hpsmpoc-sow-ai-tools-clause",
+   "CARD hpsmpoc-cold-user-rerun-at-93pct",
+   "CARD hpsmpoc-real-ai-model-before-meetings",
+   "CARD hpsmpoc-single-customer-revenue",
+   "CARD hpsmpoc-service-offer-sheets",
+   "CARD hpsmpoc-customer-profile-fields",
+   "CARD hpsmpoc-ai-templates-approval",
+   "CARD hpsmpoc-pdf-approver-name",
+   "CARD hpsmpoc-templates-v101",
+   "CARD hpsmpoc-approve-templates-101"
+  ]
  }
 ]
