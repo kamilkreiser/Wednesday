@@ -70,18 +70,3 @@ NIGHT_BRIEFS_DIR=/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/
 (`started_ok` is needed because KS-1341 is In Progress after part A; pass it only if no live lane holds part B.)
 
 UNMEASURED: no jest run (RED at tip / GREEN after / Arm R3 all reasoned); no ts-jest type-check; no lint; the builder was run against a scratch clone, not the real checkout.
-
-## REV C (2026-09-26 20:3x-20:4x) — brief C re-anchored at develop `3f70224a`, C1 fixed for N-1288-2, one Spark round run
-Written by a harness-runner sub-agent for Wednesday. Nothing pushed, no PR, nothing held. The only git write verbs ran in a scratchpad clone. Nothing was written in any Secuura folder.
-
-**`KS-1341.md` IS NOW BRIEF C** (a byte copy of `brief-C.md`). Brief B stays in `brief-B.md`. The brief-B copy that `KS-1341.md` held is backed up as `KS-1341.md.pre-0926-2036-revC` (== `brief-B.md`).
-
-- **Anchors at `3f70224a069b944334480478ad5d16a5ed33eeae`** (develop after #1288 part A and #1290 part B, then #1291 KS-1337). `webhooks.ts` there = golden `webhooks.AB.ts` byte for byte (567 lines, blob `a2ad9e05`). `:391` and `:416` are still the SITE line, with the same 2+2 context lines. `fail500` is at `:562`. The 2 product hunks are unchanged.
-- **C1 fixed for N-1288-2**, the same fix B carried: `mockLoggerError.mockClear()` per NODE_ENV iteration, plus a whole-call-list assertion carrying `nodeEnv`. The test went from 166 to **169** lines. `## Red cells` was added (C1, C2, C3), and so was Arm R3 (`:563` production-only logging).
-- The Tip line, the premises, UNMEASURED and the collision section are updated. N-1288-1 (the docblock's "the only place" claim) becomes true with C, and C3 pins it.
-- **Golden** (`golden/C.golden.diff` and the `ks1341c` test were regenerated; `webhooks.ABC.ts` is unchanged). `patch -p1 -F0` and `git apply --check` on the file at `3f70224a` → rc 0, and the result == `webhooks.ABC.ts`. It has 7 `fail500(res,` calls, 1 declaration, 7 distinct contexts and 0 `message: err.message`. With `:416` tampered, the patch fails (rc 1).
-- **Measured:** the golden passed the checker 7/7 before the model ran. originate's `eslint src` config (v10.7.0) with `--max-warnings 0` → rc 0 (the control has rc 1).
-- **Builder:** `NIGHT_SOURCE_CHECKOUT=<scratchpad clone>` (a `--no-local` clone of the Blockchain checkout, with develop fetched into the clone and the real checkout's node_modules symlinked in), `ref=ks1341b`, `line=391`, `started_ok=parts-A-#1288-and-B-#1290-merged;part-C-is-the-last-split-brief` → rc 0, prompt source WEDNESDAY BRIEF.
-- **Spark round 1: PASS.** Patch byte-identical to the golden. Tamper, R3 and restore all behaved as predicted. See `runs/spark_secuura_2026-09-26_KS-1341-C/`, done.md and SPARK_LADDER row 12. NOT held: Wednesday holds.
-
-UNMEASURED: node_modules were farmed from the real checkout, whose HEAD `3bad652d` has a different `package-lock.json` blob than develop. B ran the same way. The input.json names a scratchpad `source_checkout`, so it must NOT be queued as-is.

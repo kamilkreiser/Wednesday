@@ -16,7 +16,7 @@
  });
 --- /dev/null
 +++ b/Blockchain/Dev/services/originate/src/__tests__/ks1341c-webhooks-500-never-answers-err-message.test.ts
-@@ -0,0 +1,169 @@
+@@ -0,0 +1,166 @@
 +// KS-1341 part C (originate routes/webhooks.ts, POST /:id/test and GET /:id/deliveries): the last two
 +// of the seven catch blocks that answered a 500 whose body carried the thrown error's own text in
 +// every NODE_ENV. Parts A and B added the fail500 helper and converted the other five. This part
@@ -124,14 +124,11 @@
 +describe('KS-1341 part C: test-send and delivery history never answer a 500 with the thrown text', () => {
 +  it.each(ROUTES)('RED KS-1341 C1 $label: the thrown message is not in the 500 body under production, development, test or unset', async (route) => {
 +    for (const nodeEnv of NODE_ENVS) {
-+      // Cleared PER ENVIRONMENT: without it the production call satisfies every later iteration,
-+      // so a helper that logged only under production would stay green (gate 28, N-1288-2).
-+      mockLoggerError.mockClear();
 +      const reply = await call(route, nodeEnv);
 +      expect({ nodeEnv, status: reply.status, leaked: reply.text.includes(LEAK) }).toEqual({ nodeEnv, status: 500, leaked: false });
 +      expect(JSON.parse(reply.text)).toEqual(CONSTANT_BODY);
-+      // REACHED in THIS environment, not merely clean: exactly one call, this route's context, the thrown text.
-+      expect({ nodeEnv, calls: mockLoggerError.mock.calls }).toEqual({ nodeEnv, calls: [[route.context, { error: LEAK }]] });
++      // REACHED, not merely clean: only fail500 logs this route's context with the thrown text.
++      expect(mockLoggerError.mock.calls.at(-1)).toEqual([route.context, { error: LEAK }]);
 +    }
 +  });
 +

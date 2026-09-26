@@ -1,3 +1,30 @@
+# READY — KS-1341-WEBHOOKS500-C (spark-dsv4flash, briefed, code_patch, jest) — PASS 7/7 — HELD for QA
+
+> ⚠ **CANONICAL PATCH = `/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/runs/spark_secuura_2026-09-26_KS-1341-C/out.md.checker/patch.diff`** (from `ls` at 20:46 2026-09-26; it is `cat` of the section files in order: `cmp` rc 0: `/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/runs/spark_secuura_2026-09-26_KS-1341-C/out.md.checker/section_1.diff`, `/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/runs/spark_secuura_2026-09-26_KS-1341-C/out.md.checker/section_2.diff`). Checker A2 (verbatim from checker.out): `PASS A2 diff applies at the tip (strict git apply --check, every section, hunk headers consistent)`; golden not located — no identity claim is made.
+
+**Held 20:46 2026-09-26 by Wednesday evening seat after a source read (hold_ready.py, code_patch path — every clause below is COPIED from the checker's own artefacts in `/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/runs/spark_secuura_2026-09-26_KS-1341-C/out.md.checker`, not typed; the artefact each came from is named in brackets).** Tip `3f70224a069b944334480478ad5d16a5ed33eeae`.
+- Touched-file set [checker.out A3, verbatim]: `PASS A3 touched-file set == { Blockchain/Dev/services/originate/src/routes/webhooks.ts , Blockchain/Dev/services/originate/src/__tests__/ks1341c-webhooks-500-never-answers-err-message.test.ts }`
+- Declared set [input.json product_file + suggested_test_file]: `Blockchain/Dev/services/originate/src/routes/webhooks.ts` (product) and `Blockchain/Dev/services/originate/src/__tests__/ks1341c-webhooks-500-never-answers-err-message.test.ts` (test) — equal to numstat.out's set (2 files).
+- numstat [out.md.checker/numstat.out, verbatim]:
+```
+2	2	Blockchain/Dev/services/originate/src/routes/webhooks.ts
+169	0	Blockchain/Dev/services/originate/src/__tests__/ks1341c-webhooks-500-never-answers-err-message.test.ts
+```
+- Product hunk `+` count [checker.out A3c, verbatim]: `PASS A3c every '+' line the brief adds is in the product hunk (2 line(s)), and no tip line is re-added as a '+' (A3d)` — product section `+` lines 2 ordered-equal (whitespace-stripped) to the brief's `expected_plus` (ASCII); `-` lines 2.
+- Byte-exactness [checker.out A3i, verbatim]: `A3i: every '+' line the brief adds is in the applied Blockchain/Dev/services/originate/src/routes/webhooks.ts byte-exact incl. leading whitespace (apply mode strict): OK 2 line(s) byte-exact incl. leading whitespace (of 2; 2 line(s) added by the apply)` [a3i_indent.out: `OK 2 line(s) byte-exact incl. leading whitespace (of 2; 2 line(s) added by the apply)`]
+- Hunk audit [out.md.checker/hunk_audit.out, first line verbatim]: `sections=2 miscounted_sections=0`
+- Sections [out.md.checker/sections.json + section_<k>.opts + apply_check_strict_<k>.out]:
+- section 1 `section_1.diff` → `Blockchain/Dev/services/originate/src/routes/webhooks.ts` (hunks=2, miscount=0; applied file per `section_1.opts`: `section_1.diff`, git-apply options: `(none — strict)`; `apply_check_strict_1.out`: EMPTY (strict apply --check clean))
+- section 2 `section_2.diff` → `Blockchain/Dev/services/originate/src/__tests__/ks1341c-webhooks-500-never-answers-err-message.test.ts` (hunks=1, miscount=0; applied file per `section_2.opts`: `section_2.diff`, git-apply options: `(none — strict)`; `apply_check_strict_2.out`: EMPTY (strict apply --check clean))
+- RED-FIRST [checker.out A4, verbatim]: `PASS A4 RED-FIRST: src/__tests__/ks1341c-webhooks-500-never-answers-err-message.test.ts fails at the untouched tip (5 failed / 8 run; controls green; assertion reds)` [red_first.json: failed=5 of total=8; red cell(s): ['KS-1341 part C: test-send and delivery history never answer a 500 with the thrown text RED KS-1341 C1 POST /:id/test: the thrown message is not in the 500 body under production, development, test or unset', 'KS-1341 part C: test-send and delivery history never answer a 500 with the thrown text RED KS-1341 C1 GET /:id/deliveries: the thrown message is not in the 500 body under production, development, test or unset', 'KS-1341 part C: test-send and delivery history never answer a 500 with the thrown text RED KS-1341 C2 POST /:id/test: the thrown message is logged once, server-side, with this route named', 'KS-1341 part C: test-send and delivery history never answer a 500 with the thrown text RED KS-1341 C2 GET /:id/deliveries: the thrown message is logged once, server-side, with this route named', 'KS-1341 part C: test-send and delivery history never answer a 500 with the thrown text RED KS-1341 C3 SOURCE: no response in the file carries err.message, and all seven sites use the helper with DISTINCT contexts']]
+- GREEN-AFTER [checker.out A5, verbatim]: `PASS A5 GREEN-AFTER: src/__tests__/ks1341c-webhooks-500-never-answers-err-message.test.ts passes with the product hunk (8 passed / 8 run)` [green_after.json: failed=0 of total=8, success=True]
+- Whole suite [out.md.checker/suite_delta.out, verbatim]: `baseline: total=962 failed=0 | after: total=970 failed=0` · `NEW reds: []` [baseline_suite.json total=962 failed=0; after_suite.json total=970 failed=0]
+- A6 [verbatim]: `PASS A6 whole services/originate suite: no NEW red vs the untouched tip` · A7 [verbatim]: `PASS A7 tsc --noEmit for services/originate: rc 0 after the patch (baseline rc=0)`
+- SUMMARY [checker.out, verbatim]: `SUMMARY files=2 +171/-2 test=src/__tests__/ks1341c-webhooks-500-never-answers-err-message.test.ts red_first=yes apply_mode=strict`
+
+**PR NOTES for the raise seat:** CODE_PATCH — PRODUCT BYTES CHANGE: `Blockchain/Dev/services/originate/src/routes/webhooks.ts` (+2/-2 per numstat.out) and the test file `Blockchain/Dev/services/originate/src/__tests__/ks1341c-webhooks-500-never-answers-err-message.test.ts` (+169/-0); two files. Apply PER SECTION with the checker's apply mode — section 1 `section_1.diff`: `git apply -p1` (strict); section 2 `section_2.diff`: `git apply -p1` (strict) — at the tip `3f70224a069b944334480478ad5d16a5ed33eeae` (re-check `git ls-remote origin develop` first; if develop moved, re-run `git apply --check` per section and state it). Tier: AT LEAST tier 2 (product code changes) — the gate decides. Input: `/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/runs/spark_secuura_2026-09-26_KS-1341-C/input.json`. Brief (given by --brief; its `# ` heading names KS-1341): `/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/briefs/KS-1341/brief-C.md`. Verdict source: `/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/runs/spark_secuura_2026-09-26_KS-1341-C/checker.out`.
+
+```diff
 --- a/Blockchain/Dev/services/originate/src/routes/webhooks.ts
 +++ b/Blockchain/Dev/services/originate/src/routes/webhooks.ts
 @@ -389,5 +389,5 @@
@@ -186,3 +213,4 @@
 +    expect(LEAK).not.toMatch(/\b(22P02|22001|22007|22008|22021|22P05|23502|23503|23505|23514|42804)\b/);
 +  });
 +});
+```
