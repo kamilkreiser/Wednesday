@@ -12,23 +12,8 @@ expect.json:
   suite_cmd         shell cmd for the wider suite, run at base and after; null -> C5 NOT-RUN
   suite_count_regex optional python regex with named groups `passed` (and optionally `failed`)
 
-Output: one line per clause `Cn: PASS|FAIL|NOT-RUN — detail`, then `APPLY-MODE:` and `VERDICT: PASS|FAIL|INCOMPLETE`.
+Output: one line per clause `Cn: PASS|FAIL|NOT-RUN — detail`, then `VERDICT: PASS|FAIL|INCOMPLETE`.
 Exit: 0 PASS, 1 FAIL, 2 INCOMPLETE (a NOT-RUN clause, none failed), 3 setup error.
-
-C1 (kit clause 1: "record WHICH apply mode succeeded; never 'applies cleanly' when only a recount worked")
-has THREE outcomes:
-  PASS          the whole diff applies strict (git apply, no --recount), at the stated lines.
-  PASS-RECOUNT  strict failed; the diff was split PER FILE (split parts concatenated are asserted
-                byte-identical to the input) and every part applies, strict where it can, --recount
-                only for the parts that need it. The line names each file and its mode.
-  FAIL          a part does not apply even alone with --recount, or git applies something different
-                from the diff text, or a hunk sits somewhere other than its header's stated line.
-Why per file: `git apply --recount` on a multi-file diff read as one patch counts the next file's
-`--- a/...` header as a removed line of the previous hunk (measured 2026-09-26), so one miscounted
-file wrongly condemned (or relabelled) its correct neighbours. C2 (byte-exact added lines) is the
-content guard and is unchanged. C4/C5 apply/revert the diff EXACTLY as C1 found it applies (same
-parts, same per-file flags). A recount can never read as clean: the verdict line then reads
-`VERDICT: PASS (recount: <files>)` (or INCOMPLETE/FAIL with the same suffix).
 
 The source working copy is never modified: work happens in a fresh clone in the system temp dir (path in 00_clone_location.txt).
 Nothing is deleted. Python 3 stdlib only.
@@ -151,35 +136,6 @@ def parse_diff(text):
     return touched, added, removed, problems
 
 
-_EXT_HEADER = ("diff --git ", "index ", "new file mode", "deleted file mode", "old mode", "new mode",
-               "similarity index", "dissimilarity index", "rename from ", "rename to ", "copy from ", "copy to ")
-
-
-def split_per_file(text):
-    """Split a diff into per-file parts: [(path, part_text)]. A part starts at a `--- `/`+++ ` header pair
-    (pulled back over any git extended header lines just above it, e.g. `diff --git`, `index`); any preamble
-    rides with the first part. ASSERTS that the parts concatenated are byte-identical to `text`."""
-    lines = re.findall(r"[^\n]*\n|[^\n]+$", text)
-    starts, paths = [], []
-    for i, ln in enumerate(lines):
-        if ln.startswith("--- ") and i + 1 < len(lines) and lines[i + 1].startswith("+++ "):
-            st = i
-            while st > 0 and lines[st - 1].startswith(_EXT_HEADER):
-                st -= 1
-            old = _strip_path(ln[4:].rstrip("\n"))
-            new = _strip_path(lines[i + 1][4:].rstrip("\n"))
-            starts.append(st)
-            paths.append(new if new is not None else old)
-    if not starts:
-        parts = [(None, text)]
-    else:
-        starts[0] = 0
-        parts = [(paths[k], "".join(lines[st:(starts[k + 1] if k + 1 < len(starts) else len(lines))]))
-                 for k, st in enumerate(starts)]
-    assert "".join(t for _, t in parts) == text, "split_per_file: parts do not concatenate to the original diff"
-    return parts
-
-
 def with_git_headers(text):
     """Insert a `diff --git a/P b/P` separator before every `--- `/`+++ ` file-header pair.
 
@@ -277,65 +233,15 @@ def main():
 
     # ---- C1 apply ------------------------------------------------------------
     rc_s, _, se_s, f_s = ev.run("C1_apply_check_strict", ["git", "apply", "--check", "-v", diff_copy], cwd=wc)
-    # plan: the exact way the diff applies, used by C1's real apply AND C4's revert/re-apply: [(path, patch_file, flags)]
-    plan = []
-    per_file = []   # [(path, "strict"|"recount"|"none")] when the diff had to be split
-    recount_files = []
+    mode = None
+    recount_copy = os.path.join(out_dir, "input.recount.diff")  # diff --git separators added, content identical
     if rc_s == 0:
         mode = "strict"
-        plan = [(None, diff_copy, [])]
         res["C1"] = ("PASS", "applies STRICT at %s (evidence %s)" % (head[:12], f_s))
-    else:
-        # Split per file and judge each part alone: strict first, --recount only if strict refuses.
-        parts = split_per_file(diff_text)  # asserts byte-identical concatenation
-        split_log = []
-        split_file = os.path.join(out_dir, "C1_per_file.txt")
-        for k,(path, ptext) in enumerate(parts, 1):
-            pf = os.path.join(out_dir, "input.part%02d.diff" % k)
-            with open(pf, "w", encoding="utf-8", errors="surrogateescape", newline="") as f:
-                f.write(ptext)
-            ev.expected.append(pf)
-            r1, _, e1, g1 = ev.run("C1_part%02d_check_strict" % k, ["git", "apply", "--check", "-v", pf], cwd=wc)
-            if r1 == 0:
-                per_file.append((path, "strict")); plan.append((path, pf, []))
-                split_log.append("part %02d %s: strict (%s)" % (k, path, g1))
-                continue
-            r2, _, e2, g2 = ev.run("C1_part%02d_check_recount" % k, ["git", "apply", "--check", "-v", "--recount", pf], cwd=wc)
-            if r2 == 0:
-                per_file.append((path, "recount")); plan.append((path, pf, ["--recount"]))
-                split_log.append("part %02d %s: RECOUNT only (%s, %s)" % (k, path, g1, g2))
-            else:
-                err = (e2.strip() or e1.strip()).splitlines()
-                per_file.append((path, "none"))
-                split_log.append("part %02d %s: does NOT apply, strict or --recount: %s (%s, %s)"
-                                 % (k, path, err[-1] if err else "?", g1, g2))
-        with open(split_file, "w", encoding="utf-8") as f:
-            f.write("whole diff strict: rc=%d (%s)\nsplit into %d part(s); concatenation byte-identical to input.diff: yes\n%s\n"
-                    % (rc_s, f_s, len(parts), "\n".join(split_log)))
-        ev.expected.append(split_file)
-        recount_files = [p for p, m in per_file if m == "recount"]
-        strict_files = [p for p, m in per_file if m == "strict"]
-        none_files = [p for p, m in per_file if m == "none"]
-        if none_files:
-            mode = "none"
-            plan = []
-            res["C1"] = ("FAIL", "does NOT apply at %s even per file with --recount: %s (%s)"
-                         % (head[:12], "; ".join(l for l in split_log if "does NOT apply" in l), split_file))
-        elif recount_files:
-            mode = "recount"
-            res["C1"] = ("PASS-RECOUNT", "NOT clean - applies only with --recount (hunk header miscounted) for: %s; "
-                         "strict: %s (evidence %s, %s)" % (", ".join(map(str, recount_files)),
-                                                          ", ".join(map(str, strict_files)) or "-", f_s, split_file))
-        else:
-            mode = "strict"
-            res["C1"] = ("PASS", "whole diff refused strict, but every file applies STRICT on its own: %s (%s, %s)"
-                         % (", ".join(map(str, strict_files)), f_s, split_file))
-    if mode != "none":
         # ANCHOR CHECK (Friday, 2026-09-23 smoke break 2): git apply relocates a hunk by searching for its context,
         # so a header naming a line that does not exist ('@@ -902,3' on a 17-line file) still applied 'strict'.
         # Clause 1 means the diff applies AT THE STATED LINES: every hunk's old side (context + '-') must sit at
-        # exactly the header's start line in the file at the pinned commit. Counts are not used, so this holds
-        # for recount parts too.
+        # exactly the header's start line in the file at the pinned commit.
         anchor_lines, anchor_bad = [], []
         cur_path = None
         dl = diff_text.split("\n")
@@ -349,8 +255,7 @@ def main():
             if m and cur_path:
                 start = int(m.group(1)); old_side = []
                 j = i + 1
-                while j < len(dl) and not dl[j].startswith("@@") and not dl[j].startswith("--- ") \
-                        and not dl[j].startswith("diff --git "):
+                while j < len(dl) and not dl[j].startswith("@@") and not dl[j].startswith("--- "):
                     if dl[j].startswith(" ") or dl[j].startswith("-"): old_side.append(dl[j][1:])
                     elif dl[j] == "": pass
                     j += 1
@@ -371,21 +276,26 @@ def main():
         with open(anchor_file, "w") as f: f.write("\n".join(anchor_lines) + "\n")
         ev.expected.append(anchor_file)
         if anchor_bad:
-            res["C1"] = ("FAIL", "applies (%s) only by git's context search, NOT at the stated lines: %s (evidence %s)"
-                         % (mode, anchor_bad[0], anchor_file))
-            mode = mode + "-offset"
-
-    def apply_plan(label, reverse=False):
-        """Apply (or reverse, in reverse order) every part exactly as C1 found it applies. -> (rc, [evidence])."""
-        seq = list(reversed(plan)) if reverse else plan
-        files = []
-        for k, (path, pf, flags) in enumerate(seq, 1):
-            rc_p, _, se_p, f_p = ev.run("%s%s" % (label, "" if len(seq) == 1 else "_part%d" % k),
-                                        ["git", "apply"] + (["-R"] if reverse else []) + flags + [pf], cwd=wc)
-            files.append(f_p)
-            if rc_p != 0:
-                return rc_p, files, se_p
-        return 0, files, ""
+            res["C1"] = ("FAIL", "applies only by git's context search, NOT at the stated lines: %s (evidence %s)"
+                         % (anchor_bad[0], anchor_file))
+            mode = "strict-offset"
+    else:
+        with open(recount_copy, "w", encoding="utf-8", errors="surrogateescape") as f:
+            f.write(with_git_headers(diff_text))
+        ev.expected.append(recount_copy)
+        rc_r, _, se_r, f_r = ev.run("C1_apply_check_recount",
+                                    ["git", "apply", "--check", "-v", "--recount", recount_copy], cwd=wc)
+        if rc_r == 0:
+            mode = "recount-only"
+            res["C1"] = ("FAIL", "applies ONLY with --recount (hunk header miscounted) (evidence %s, %s)"
+                         % (f_s, f_r))
+        else:
+            mode = "none"
+            first_err = (se_r.strip() or se_s.strip()).splitlines()
+            res["C1"] = ("FAIL", "does NOT apply at %s, strict or --recount: %s (evidence %s, %s)"
+                         % (head[:12], first_err[-1] if first_err else "?", f_s, f_r))
+    apply_flags = ["--recount"] if mode == "recount-only" else []
+    patch_file = recount_copy if mode == "recount-only" else diff_copy
 
     # ---- C2 / C3 on the diff text (no apply needed) --------------------------
     touched, added, removed, problems = parse_diff(diff_text)
@@ -427,14 +337,14 @@ def main():
     suite_cmd = exp.get("suite_cmd")
     red_cmd = exp.get("red_test_cmd")
     base = None
-    if suite_cmd and plan:
+    if suite_cmd and mode != "none":
         base = ev.run("C5_suite_before", suite_cmd, cwd=wc, shell=True)
 
     # ---- apply for real ------------------------------------------------------
     applied = False
-    if plan:
-        rc, f_aps, se = apply_plan("apply_%s" % mode.replace("-", "_"))
-        f_ap = ", ".join(f_aps)
+    if mode != "none":
+        rc, _, se, f_ap = ev.run("apply_%s" % mode.replace("-", "_"),
+                                 ["git", "apply"] + apply_flags + [patch_file], cwd=wc)
         applied = rc == 0
         if not applied:
             res["C1"] = ("FAIL", "apply --check passed (%s) but the real apply failed: %s (%s)"
@@ -461,25 +371,23 @@ def main():
                 res["C1"] = ("FAIL", "git applied (%s) something DIFFERENT from the diff text - hunk header "
                                      "count truncates/extends a hunk: applied +/- %s vs text +/- %s (%s)"
                              % (mode, sorted(got_ns.items()), sorted(text_ns.items()), f_n))
-            elif res["C1"][0] in ("PASS", "PASS-RECOUNT"):
-                res["C1"] = (res["C1"][0], res["C1"][1] + "; applied +/- counts match the diff text (%s)" % f_n)
+            elif mode == "strict":
+                res["C1"] = ("PASS", res["C1"][1] + "; applied +/- counts match the diff text (%s)" % f_n)
 
     # ---- C4 red-first ------------------------------------------------------
-    if not plan or not applied:
+    if mode == "none" or not applied:
         res["C4"] = ("NOT-RUN", "diff does not apply")
     elif not red_cmd:
         res["C4"] = ("NOT-RUN", "red_test_cmd is null - red-first NOT proven (a green result without it is worthless)")
     else:
-        how = "applied %s" % (mode if not per_file else "per file (%s)" % ", ".join("%s=%s" % pm for pm in per_file))
+        how = "applied %s" % mode
         r1, _, _, f1 = ev.run("C4_red_with_diff", red_cmd, cwd=wc, shell=True)
-        rr, f_rvs, se_rv = apply_plan("C4_revert", reverse=True)
-        f_rv = ", ".join(f_rvs)
+        rr, _, se_rv, f_rv = ev.run("C4_revert", ["git", "apply", "-R"] + apply_flags + [patch_file], cwd=wc)
         r2, f2 = None, None
         r3, f3 = None, None
         if rr == 0:
             r2, _, _, f2 = ev.run("C4_red_reverted", red_cmd, cwd=wc, shell=True)
-            ra, f_ras, se_ra = apply_plan("C4_reapply")
-            f_ra = ", ".join(f_ras)
+            ra, _, se_ra, f_ra = ev.run("C4_reapply", ["git", "apply"] + apply_flags + [patch_file], cwd=wc)
             if ra == 0:
                 r3, _, _, f3 = ev.run("C4_red_reapplied", red_cmd, cwd=wc, shell=True)
             else:
@@ -505,7 +413,7 @@ def main():
     # ---- C5 part 2: suite after --------------------------------------------
     if not suite_cmd:
         res["C5"] = ("NOT-RUN", "suite_cmd is null")
-    elif not plan or not applied:
+    elif mode == "none" or not applied:
         res["C5"] = ("NOT-RUN", "diff does not apply (or could not be re-applied)")
     else:
         after = ev.run("C5_suite_after", suite_cmd, cwd=wc, shell=True)
@@ -558,25 +466,21 @@ def main():
     statuses = [res["C%d" % i][0] for i in range(1, 7)]
     if "FAIL" in statuses:
         verdict = "FAIL"
-    elif all(s in ("PASS", "PASS-RECOUNT") for s in statuses):
+    elif all(s == "PASS" for s in statuses):
         verdict = "PASS"
     else:
         verdict = "INCOMPLETE"
-    # a recount can never be read as clean: the verdict line itself says so
-    shown_verdict = verdict + (" (recount: %s)" % ", ".join(map(str, recount_files)) if recount_files else "")
 
     lines = ["C%d: %s — %s" % (i, res["C%d" % i][0], res["C%d" % i][1]) for i in range(1, 7)]
-    lines.append("APPLY-MODE: %s%s" % (mode, (" — per file: " + ", ".join("%s=%s" % pm for pm in per_file)) if per_file else ""))
-    lines.append("VERDICT: %s" % shown_verdict)
+    lines.append("APPLY-MODE: %s" % mode)
+    lines.append("VERDICT: %s" % verdict)
     text = "\n".join(lines) + "\n"
     vt = os.path.join(out_dir, "verdict.txt")
     vj = os.path.join(out_dir, "verdict.json")
     with open(vt, "w", encoding="utf-8") as f:
         f.write(text)
     with open(vj, "w", encoding="utf-8") as f:
-        json.dump({"verdict": verdict, "verdict_line": shown_verdict, "apply_mode": mode,
-                   "apply_mode_per_file": [{"path": p, "mode": m} for p, m in per_file],
-                   "recount_files": recount_files, "commit": head,
+        json.dump({"verdict": verdict, "apply_mode": mode, "commit": head,
                    "clauses": {k: {"status": v[0], "detail": v[1]} for k, v in sorted(res.items())},
                    "evidence_files": [os.path.basename(p) for p in ev.expected],
                    "checked_at": time.strftime("%Y-%m-%dT%H:%M:%S%z")}, f, indent=2, ensure_ascii=False)

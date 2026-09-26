@@ -97,8 +97,9 @@ EXP_NULLRED = variant(red_test_cmd=None)
 
 cases = [
     ("a correct diff", GOOD, EXP, {"VERDICT": "PASS", "C1": "PASS", "APPLY-MODE": "strict"}),
-    ("b miscounted hunk header", MISCOUNT, EXP, {"VERDICT": "FAIL", "C1": "FAIL", "APPLY-MODE": "recount-only",
-                                                 "_C1_has": "applies ONLY with --recount"}),
+    # kit clause 1: a recount-only apply is acceptable IF recorded and never called clean (changed 2026-09-26)
+    ("b miscounted hunk header", MISCOUNT, EXP, {"VERDICT": "PASS", "C1": "PASS-RECOUNT", "APPLY-MODE": "recount",
+                                                 "_C1_has": "VERDICT: PASS (recount: calc.py)"}),
     ("b2 under-counted header (extra)", UNDERCOUNT, EXP, {"VERDICT": "FAIL", "C1": "FAIL", "APPLY-MODE": "strict",
                                                          "_C1_has": "something DIFFERENT from the diff text"}),
     ("c expected_added off by 1 char", GOOD, EXP_C2, {"VERDICT": "FAIL", "C2": "FAIL", "C1": "PASS", "C3": "PASS"}),
