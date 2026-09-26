@@ -9,12 +9,6 @@ Written 2026-09-26 21:40:21 AEST (shell `date`) by a Spark brief-writer sub-agen
 
 **RUNG 4 (strict).** This brief tells you WHAT is wrong, WHERE (file and line numbers), the behaviour required and the fix shape in PROSE, and names an already-merged example BY PATH. It gives you NO product `+` line, NO product hunk header and NO written-out form of the fixed expression: you compose them. The file's CURRENT lines are in your input's files; copy every `-` line and every context line from there, byte for byte. The TEST is spelled out in full below (copy it byte for byte), so this round measures only the product hunks.
 
-## ROUND 2 — the ONE rebrief (Kam's counter: original + ONE rebrief, then Opus). Written 2026-09-26 22:03 AEST by Wednesday.
-
-Round 1 wrote the RIGHT CODE (the `node:url` import and all three `fileURLToPath(new URL(...))` lines were correct) and FAILED ONLY on diff bookkeeping: **hunks 2 and 3 carried headers sized for TWO MORE context lines than they actually contained**, so the old side did not sit at the line the header named and the patch did not apply strictly. Hunk 1 was correct.
-
-This round, for EVERY hunk: the old-side start is the real line number of the hunk's FIRST line in the file as given; the old-side count is exactly the number of context + `-` lines you write; the new-side count is exactly the number of context + `+` lines you write. Count the lines you actually emit, not the lines you meant to include. Everything else in round 1 was right: change nothing about the code.
-
 ## The mode — read this twice
 
 CODE+TEST, TWO files. File 1 is the product `Blockchain/Dev/services/auth/src/__tests__/ks732-mfa-disable-proof.test.ts`, MODIFIED IN PLACE (`--- a/…` / `+++ b/…` with that exact path). It is a suite file, but here it is the thing being fixed. File 2 is the NEW test in `## The test` (`--- /dev/null` / `+++ b/…`). There is no third file. You never touch `routes/mfa.ts`, `auth.openapi.ts`, `vitest.config.ts`, any other `__tests__` file, or the reference test `ks847-no-raw-control-bytes.test.ts`.
