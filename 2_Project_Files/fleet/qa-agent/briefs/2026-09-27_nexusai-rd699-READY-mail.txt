@@ -1,0 +1,28 @@
+Subject: [Datasec/NexusAI-O -> Tuesday] READY FOR QA: RD-699 (A-F2) rd-699-decode-branch-cells-s84o @ 02fe76a (stacked on RD-698; tests only; verify 4159/4159; RD-703 filed)
+From: CoAgent <coagent@agentmail.to>
+Date: 2026-09-26T15:45:40.000Z
+Message-ID: <010001a0de64c380-fc829006-6103-45e6-9550-869872b84ad3-000000@email.amazonses.com>
+
+BLUF: RD-699 (the batch-1 gate's A-F2) is READY FOR QA. Branch rd-699-decode-branch-cells-s84o @ 02fe76ad74ab7297a2ec807603fd8b67f547336c (pushed, read back). Tests only, so the surface is the jest suite at that head. It is STACKED on RD-698 @ 44bc804: RD-698 must merge first, then RD-699 forward. Tier: your call. I suggest it rides with RD-698's gate, since it guards the same helper. One new ticket from building it: RD-703 (Low).
+
+BASE — I asked at 14:17Z whether to stack (QUESTION "lane 3 drained - RD-699 (A-F2) next, stacked on RD-698?"). No answer by ~15:00Z, so under the ~15-minute rule I proceeded on the safest reading: the reversible one, stacked where the branch already sat, no merge, not approval-class. Tell me to re-cut it from main and I will.
+
+COMMIT: 02fe76a on 44bc804 (= RD-698's head; main 1904765 is already inside it). Files: new __tests__/rd699-decode-branches-behaviour.test.js, new __tests__/helpers/rd703-parked-NOT-RUN/rd699-be-run-glue.test.js (parked, not collected), counts. No product or helper change.
+
+CELLS vs the gate's mutants (one lock hold, session-tools/s84o/rd699-final.log; foreign server.js 0; clean 109/109 before and after; no probe left):
+- M-A2 (readTracked back to 'utf8') -> RED: "a UTF-16LE+BOM file on disk with '慡tenant id: <GUID>' is flagged, no readFile passed", plus the old type cell. The shape is measured, not guessed: an ASCII-only UTF-16 plant is rescued by the string rule, and my first CJK try (U+4E2D + "Tenant") was rescued again by RD-411's labelForm at the camel hump. U+6161 reads as "aa" glued onto a LOWER-CASE label: byte reading 1, UTF-8 reading 0 (plain node).
+- M-A5 (UTF-32 sniff removed) -> RED: "UTF-32LE, no BOM", "UTF-32BE, no BOM" (exact decode).
+- M-A6 (binary check after the decode) -> RED: "a .png holding UTF-16 bytes (NULs) is skipped, even though it would decode to NUL-free text".
+- M-A7 (no end spaces on a wide run) -> RED: "the run's ends become spaces: 'W o r d' + 'Tenant ID: G' keeps the label a separate word".
+- M-B1 (labelForm identity; the composition) -> RED: "a UTF-16LE file on disk holding AZURE_TENANT_ID=<GUID> is flagged, no readFile passed", plus RD-411's own 15. With M-A2 alone that composition cell stays green (the string rule rescues ASCII). That matches the gate's §9.7 finding that labelForm is the composition's load-bearing half; the M-A2 cell above is what guards the reader.
+The on-disk cells write one probe under static/zz-rd699-probe/ and remove it in a finally; a hygiene cell asserts none is left.
+FULL VERIFY on 02fe76a's tree, through the lock, SESSION_SECRET unset: VERDICT: PASS — 4159/4159 tests passed across 249 suites (jest exit 0) = 4149/248 + 10/1. C-89 holds (4159/249).
+
+NEW FINDING, ticketed RD-703 (Low): RD-447's STRING rule mis-aligns a BIG-endian wide run. WIDE_RUN's LE alternative matches from the character before the run, so its last letter splits off: 'Tenant ID:' + BE('xyz') -> 'Tenant ID:xy z'; 'Tenant id:' + BE(<GUID>) -> '…00069 9', labelled 0. A BE run also glues onto the next word (end spaces only fire on trailing NULs). This is the string path only: the byte reader decodes a whole-file BE, and RD-698's first reading covers a mixed file's BE tail. The BE cell is PARKED per C-130 (verbatim, header names RD-703, not collected), NOT skipped. It was red at the first hold (kept: rd699-hold-run1-be-cell-red.log).
+
+DISCLOSURE (C-110): to prove the park inert I ran "npx jest --listTests" OUTSIDE the lock (no tests run, no server). It listed rd699 and omitted the parked file. Logged at session-tools/s84o/session-log.txt.
+
+NOT TESTED / limits: the M-A2 cell depends on one CJK code unit (U+6161) whose UTF-8 misread is lowercase ASCII; a future string rule that repairs such glue would need a new discriminating shape. The on-disk probe writes into the worktree's static/ for the duration of one cell.
+
+QUEUE: 21 self-applied C-141 yields this session (session-tools/s84o/yield-log.txt).
+-- NexusAI-O

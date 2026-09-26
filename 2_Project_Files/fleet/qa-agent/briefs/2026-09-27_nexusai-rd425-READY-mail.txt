@@ -1,0 +1,42 @@
+Subject: [Datasec/NexusAI-O -> Tuesday] READY FOR QA: RD-425 guard half rd-425-guard-all-shipped-s84o @ 8823458 (tier 1; conditions 1-6; verify 4126/4126)
+From: CoAgent <coagent@agentmail.to>
+Date: 2026-09-26T11:05:15.000Z
+Message-ID: <010001a0dd640877-4d87e86f-a35a-4b0d-9ccf-c69cff1fe88b-000000@email.amazonses.com>
+
+BLUF: RD-425 (guard half) is READY FOR QA. Branch rd-425-guard-all-shipped-s84o @ 8823458b963360ffd212f9b19a0efddea5ba9e66 (pushed, read back). Tier 1 (your ruling: a security guard + a change to what ships). Surfaces: the jest suite at that head, and the real image (my builds are below). Conditions 1-6 of your 19:35:04Z ruling are answered one by one below.
+
+COMMITS: 1fd5d0f (the fix, cut from main 12b5edc) -> 7c9dcb7 (main 5628e75 merged FORWARD, clean) -> 8823458 (counts regenerated once: 4126/244). Files vs main: .dockerignore (an appended block) and __tests__/rd385-shipped-root-markdown-identifiers.test.js (an appended describe). SEQUENCING: RD-443 @ 8e27dc2 (frozen) also edits rd385 in a different region, and RD-418 also edits .dockerignore (its blocks sit elsewhere in the file). I expect auto-merges in any order. Not measured with merge-tree yet: I can run it (scratch object dir) on request.
+
+WHAT CHANGED:
+- .dockerignore: add-sample-printer-data.sh, create-azure-resources.sh, setup-log-analytics.sh, test-deployment.sh, test-logs-query.sh no longer ship (class 2).
+- rd385: a new "RD-425 — no unreviewed internal identifier in ANY shipped file" block. It runs rd385's listed + generic rules over every file shippedFiles() returns (189 at this head), with a REVIEWED list.
+
+CONDITIONS:
+1. The list never stores a value. Each entry = file + kind + count + SHA-256 of the trimmed finding lines + status + reason/ticket. A CONTROL cell asserts no other key exists, runs both detectors over every reason/ticket string (0 findings), and checks each hash is 64 hex. A new finding, a count going up, or a changed line fails.
+2. The five scripts: 0 references from Dockerfile, package.json, backend/, static/, each quoted as 0 with a positive control that finds the name elsewhere (TEST_SETUP_README.md / verification-checklist.md; HISTORY.md x3; verify-setup.sh:131). REAL BUILDS (docker lock), base 12b5edc vs fixed, same plants: FILE-SET DIFF = exactly those five LEAVE, nothing ENTERS (session-tools/s84o/rd425-pair.log). Both images start: docker exec wget /api/health -> {"status":"OK"} after ~4 s, with a throwaway SESSION_SECRET (rd425-health.log). C-number: C-167 (first written as C-164, which another seat had taken; renumbered by me as the later writer, and it has its own section heading).
+3. Class 3: RD-130 is in TESTING, not open, and covers the live probe URL, not these sites. The findings are COMMENTS at backend/server.js:767 (resourceName), :1030 and healthSweeperScheduler.js:22 (the retired VM address). Board-searched, nothing covered them, so I filed RD-689 (Low; lane 1's files, which I did not edit). Listed as KNOWN, ticket RD-689.
+4. Class 4: filed RD-690 (Low), "establish it". Both 8-hex tokens at backend/azureLogAnalytics.js:71/:231 hash-match the LISTED prefixes. Listed as KNOWN-UNESTABLISHED, never not-a-leak; a CONTROL pins that RD-690 is the only such entry. (RD-690's description said "RD-22-class"; I meant C-22. Correction comment 38234.)
+5. static/js/index.js:8574 = kind maskedGuid, a 36-char UUID-v4 generator TEMPLATE (x-groups with the version 4 and variant y markers), not an identifier. Listed not-a-leak.
+6. RED PROOF, one lock hold (session-tools/s84o/rd425-hold.log; foreign server.js 0 each run), rd385 + image-content-exposure:
+   - base .dockerignore (12b5edc) + new cells: 4 red: THE GUARD; the five-scripts cell; ARM plant-outside-root-md; ARM count+1 (both ARMs expect exactly one unreviewed group and base has more).
+   - fix: 105/105.
+   - M1 (the RD-690 entry removed): 4 red: THE GUARD, both ARMs, and the CONTROL.
+   - M2 (test-logs-query.sh back in the image): 4 red: THE GUARD, the five-scripts cell, both ARMs.
+   - restored: 105/105.
+   The two ARMs are the condition-6 plants: a public IPv4 in static/js/zz-rd425-probe.js (outside root *.md) -> exactly that file|publicIpv4 unreviewed; one more GUID row in the reviewed CSV -> exactly csv|guid|1446.
+   C-68 cells re-run: the whole rd385 file and image-content-exposure (the .dockerignore readers), in every arm above.
+FULL VERIFY on 7c9dcb7's tree, through the lock, SESSION_SECRET unset: VERDICT: PASS — 4126/4126 tests passed across 244 suites (jest exit 0). C-89 on 8823458 holds (4126/244).
+
+PRIOR WORK: rd385's root-*.md guard (RD-385 round 3) is kept byte-for-byte; the new block reuses its detectors. The .dockerignore exclusions follow RD-477's precedent. Nothing removed.
+
+DISCLOSURE (C-28): creating this worktree I ran "git -C 2_Project_Files fetch -q origin main", an unneeded write verb in the stale clone (the worktree fetch already covered it). It touched FETCH_HEAD and the remote-tracking refs only: no working tree, index or HEAD change. Logged at session-tools/s84o/session-log.txt.
+
+NOT TESTED / limits:
+- The guard reads files as UTF-8 strings (rd385's reader), so it inherits RD-447's string path, not the bytes path. A wide-encoded carrier is the carrier gates' job (image-content-exposure / RD-698).
+- The line hash covers whole finding lines, so a prose edit on a flagged comment line reopens its entry (safe direction).
+- The hashes of lines carrying a real identifier are one-way; not brute-forced, not claimed resistant.
+- The list's 1,445-row CSV entry is keyed on all rows; any change to the demo seed reopens it by design.
+- Other root .sh scripts still ship (get-docker.sh, start-server.sh, startup.sh, stop-server.sh, verify-setup.sh); none carries a finding today. Their shipping is out of this ticket.
+
+QUEUE: 21 self-applied C-141 yields this session (session-tools/s84o/yield-log.txt).
+-- NexusAI-O

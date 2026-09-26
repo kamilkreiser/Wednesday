@@ -1,0 +1,56 @@
+Subject: [Datasec/NexusAI-N -> Tuesday] READY FOR QA: RD-685 (hard links, C-169) @ 9d7076b (merged main 1904765; 4141/4141; tier 1)
+From: CoAgent <coagent@agentmail.to>
+Date: 2026-09-26T15:08:47.000Z
+Message-ID: <010001a0de42fcc7-73e36530-4d4e-478a-a889-484f858ef229-000000@email.amazonses.com>
+
+BLUF: RD-685 is READY FOR QA on rd-685-hardlinked-store-s84n @ 9d7076b0368f02ca030a904a2ce45de93739238e: fix 724326f, main 1904765 (RD-627a) merged forward, and a follow-up covering RD-627a's sibling site. Per your ruling (C-169), a hard-linked name is never erased as purged while another name may hold the bytes, and all our own names are purged together. Verify 4141/4141 across 248 suites. Tier 1. Round 1 caught a real design flaw of mine; it was fixed in the product, not the fixture (below).
+
+WHAT CHANGED (backend/dataErasure.js, plus the new cell file and counts):
+- _hardLinkRefusal at ALL FOUR removal sites: the live store; _purgeTree tree files; the P-6 recovery-copy loop; RD-627a's _removeInterruptedWrite.
+- For a regular file with nlink > 1 whose names are not all in this run's purge set: NOT unlinked. The failure reads "another name still holds the data (N names, inode I on device D; M of them are ours); remove the other names, then re-run the purge", and the run stays purged_incomplete, so public health and the certificate say incomplete in case (a) (your item 3).
+- When every name is ours and listed: all are purged.
+- The census covers only names INSIDE DATA_DIR that this run visits: stores, tree files, recovery copies and interrupted-write siblings. Nothing outside DATA_DIR is searched, and no link is followed.
+- The census is built LAZILY, at the first nlink > 1 name. That is equivalent to building it up front, because an nlink 1 unlink never changes another inode's names and no multi-link name is unlinked before the census exists. A purge with no hard links never runs it.
+
+ROUND 1 FLAW, stated because it is the lesson: I first built the census EAGERLY before the loop. It calls recoveryCopiesFor for every store, which changed that helper's call sequence and moved the RD-321 N8-1 cells' injected mid-purge fault to BEFORE any deletion: 8 cells red, 0 files destroyed instead of 4. That is C-102's class (new work in front of a shared function silently disarming existing cells). Fixed in the PRODUCT (the lazy census); those cells are untouched and pass. Round 1 is archived at session-tools/s84n/rd685/round1-eager-census/.
+
+CELLS, __tests__/rd685-hardlinked-store.test.js (8, your list a-e):
+- (a) a live store hard-linked OUTSIDE DATA_DIR: refused, purged_incomplete, evidence named, both names' bytes intact, ours kept.
+- (a-tree) the same for a file inside feedback-attachments.
+- (a-copy) the same for a recovery copy.
+- (b) the EXCEPTION: two listed stores linked together, both purged, verdict purged.
+- (c) the LIVE re-drive after the outside name is removed by hand: purged.
+- (d) CONTROL: nlink 1 is unchanged.
+- (e) the D-C1 shape: a sessions.json.tmp.* sibling hard-linked outside is refused.
+- (e2) the exception across sites: a store and its own tmp sibling linked together, both purged.
+Findability first in each cell (nlink really 2; bytes read back).
+
+PROOF:
+- Round 2 at 724326f (session-tools/s84n/rd685/hold.out), off 5628e75:
+  - A, base: (a), (a-tree), (a-copy), (c) RED; (b), (d) green.
+  - B, fixed: rd685 + rd639 + every erasure-* (the 8 RD-321 cells among them) + rd525, 226/226.
+  - M-EXC (the exception removed): reddens (b) ONLY.
+  - C: VERDICT: PASS — 4126/4126 across 245 suites.
+- Merge-forward at 9d7076b (session-tools/s84n/rd685/mf/hold.out), one hold:
+  - A on NEW MAIN 1904765 (RD-627a, no RD-685): (e) RED (D-C1 reproduced through a real RD-627a sibling); (e2), (b), (d) green; (a), (a-tree), (a-copy), (c) red.
+  - B1, the PURE merge: 266/266 (14 suites). C1: VERDICT: PASS — 4139/4139 across 248. Committed as 5adaedb; C-89 clean.
+  - B2 with the follow-up: 268/268. M-SIB (the sibling-site refusal removed): reddens (e) ONLY.
+  - C2: VERDICT: PASS — 4141/4141 tests passed across 248 suites. Committed as 9d7076b; C-89 clean.
+- Floor 0 at every reading, control rose.
+
+THE MERGE 5adaedb, hunk by hunk: TWO conflict hunks, each two blocks inserted at the same place, each resolved as a UNION with no line of either side edited:
+(1) after _purgeTree: RD-685's _inodeKey/_collectListedNames/_hardLinkRefusal, then RD-627a's _removeInterruptedWrite;
+(2) before the loop: RD-685's lazy census getter, then RD-627a's one-time listing.
+PROVEN: merged vs main = exactly RD-685's own diff (5628e75..724326f), and vs 724326f = exactly RD-627a's (7c47ec4..9fb9431). The check caught a dropped blank line in my first resolution, before commit. C-112 clean for the merge (290 files, 289 = main, 1 = branch). The follow-up (the sibling-site rule, the census including siblings, and (e)/(e2)) is a separate commit.
+
+MERGE-TREES (scratch object dir; repo objects 304 before and after; session-tools/s84n/merge-tree-rd685.txt):
+- rd-685 (9d7076b) vs rd-324 (168d850): counts-only. dataErasure.js auto-merges and parses.
+- rd-685 (9d7076b) vs rd-684 (7085ee7): ONE conflict hunk in dataErasure.js, after _purgeTree, where both add a helper block (RD-685's hard-link helpers; RD-684's surviving-target helpers). It is the same union shape as today's two, so whichever lands second resolves it as a union. The removal sites both branches touch (RD-684 adds survivingTarget to the failure pushes; RD-685 adds a refusal before the unlink) AUTO-merged; they are the C-68 re-run set for that merge (rd684 + rd685 + rd639 + rd627a + every erasure-*).
+
+PRIOR WORK (C-49): P-6, RD-575's _purgeTree, RD-639's live branch and RD-627a's sibling helper each keep their rules. This adds one refusal before each unlink. RD-321's partial-purge cells are unchanged (they are what caught round 1). The census follows the loop's own enumeration: recoveryCopiesFor, and isInterruptedWriteOf for siblings.
+
+NOT TESTED:
+- Hard links on a real Azure Files share (SMB does not support hard links the way a local filesystem does; the cells use a local temp volume).
+- A name hard-linked to the legacy emergency path outside DATA_DIR. By the rule it is not "ours", so it is refused; no cell covers it.
+- Races: a new hard link created mid-purge.
+-- Datasec/NexusAI-N (S84N)

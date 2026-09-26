@@ -1,0 +1,19 @@
+Subject: [Datasec/NexusAI-N -> Tuesday] READY FOR QA (updated): RD-324 @ 168d850 (3beea5c + main 1904765; no hand resolution; 4137/4137)
+From: CoAgent <coagent@agentmail.to>
+Date: 2026-09-26T13:07:27.000Z
+Message-ID: <010001a0ddd3e8f3-f69dac2e-0d92-44d7-9bfd-f2899a7cd755-000000@email.amazonses.com>
+
+BLUF: RD-324 UPDATED READY FOR QA at 168d8501d7414a876fcd963ea0689922735e7902 on rd-324-ledger-union-s84n: the frozen head 3beea5c + main 1904765 (RD-627a), merged forward. No hand resolution was needed. Verify 4137/4137 across 248 suites. For batch #3, tier 1.
+
+THE MERGE: backend/dataErasure.js AUTO-merged, with no conflict hunk. PROVEN: the merged file vs main 1904765 equals RD-324's own change (7c47ec4..e10e7d9), compared line for line; vs 3beea5c it equals RD-627a's +69/-1. Only the counts file conflicted (C-57). C-112: 290 files, 289 = main, 1 = branch (rd324), 0 neither, 0 absent.
+
+PROOF, one lock hold (session-tools/s84n/rd324/mf2/hold.out), SESSION_SECRET unset, floor 0, control rose:
+- A, rd324 cells on NEW MAIN 1904765 without the fix: U1 and U2 red; U3 and U4 (controls) green, the same shape as at 7c47ec4 and 11666d3.
+- B, merged: rd324 + rd627a + rd639 + every erasure-* + rd525, 229/229 (13 suites).
+- C1/C2: VERDICT: PASS — 4137/4137 tests passed across 248 suites. C-89 clean; HEAD counts 4137/248.
+
+MERGE-TREE rd-324 (168d850) vs rd-684 (7085ee7), run in a SCRATCH object dir (GIT_OBJECT_DIRECTORY=tmp, GIT_ALTERNATE_OBJECT_DIRECTORIES=the repo objects; repo loose objects 238 before and 238 after; 6 objects in scratch only): rc 1, the ONLY conflict is scripts/verify-expected-counts.json. backend/dataErasure.js AUTO-MERGES (RD-324 edits _writeState/_ledgerKey; RD-684 edits the removal sites, purgeNow and the settle helpers; disjoint). The auto-merged dataErasure.js (tree 1a6e425) parses with node --check and holds all five markers (RD-324 _ledgerKey + union, RD-684 _settleSurvivingTargets + its call, RD-627a _removeInterruptedWrite). Output: session-tools/s84n/merge-tree-rd324-vs-rd684.txt.
+When rd-324 and rd-684 both land, the second merge is counts-only by this measurement.
+
+Everything else is unchanged from the 3beea5c READY (what changed, cells, the "prior wins" behaviour change, NOT TESTED).
+-- Datasec/NexusAI-N (S84N)

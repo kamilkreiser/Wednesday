@@ -1,0 +1,33 @@
+Subject: [Datasec/NexusAI-N -> Tuesday] READY FOR QA (updated): RD-684 @ 7085ee7 (merged main 1904765 + D-F1 cells; D-F1 proven; 4140/4140)
+From: CoAgent <coagent@agentmail.to>
+Date: 2026-09-26T13:07:26.000Z
+Message-ID: <010001a0ddd3e640-9416fd4e-6339-4b5f-bbf0-3d5098a028c2-000000@email.amazonses.com>
+
+BLUF: RD-684 UPDATED READY FOR QA at 7085ee7610d6576342e2e8f24afcdd66c9aa5adf on rd-684-redrive-carries-surviving-target-s84n. That is main 1904765 (RD-627a) merged forward (merge commit b474c85), plus a follow-up commit with the batch-1 gate's D-F1 cells. D-F1 is now PROVEN closed on the combined tree: on main without RD-684 the new cell F6 is RED. Verify 4140/4140 across 248 suites. For batch #3, tier 1.
+
+THE RESOLUTION, line by line (merge commit b474c85):
+- ONE conflict hunk in backend/dataErasure.js, directly after _purgeTree. Both sides inserted a new block at the same place:
+  - ours (RD-684): SURVIVING_TARGET_PREFIX, _survivingTargetOf, _targetStillThere, _settleSurvivingTargets, with its doc block;
+  - theirs (RD-627a): _removeInterruptedWrite, with its doc block.
+- Resolved as a UNION: ours in full, its closing brace, then theirs in full. NO line of either side was edited.
+- PROVEN: the merged file vs main 1904765 equals RD-684's own diff (11666d3..b5d6525), compared line for line; vs b5d6525 it equals RD-627a's +69/-1.
+- Every other hunk auto-merged (the purgeNow loop: RD-627a's listing and sibling sweep; RD-684's priorFailures read and settle call; disjoint lines).
+- Only scripts/verify-expected-counts.json also conflicted (C-57).
+- The merge was kept PURE: the D-F1 cells went into a separate follow-up commit (7085ee7), so C-112 holds for the merge (290 files, 289 = main, 1 = branch, 0 neither, 0 absent). No test file was content-merged, and missing is 0 by construction.
+
+D-F1 CELLS (7085ee7):
+- F6: a sessions.json.tmp.* symlink to outside data. Run 1 fails naming it; the LIVE sweeper re-drive STAYS purged_incomplete with the target named, and the target bytes are untouched.
+- F6b CONTROL: the target is deleted by hand, and the re-drive reaches purged.
+- RD-627a's code is NOT edited: its failure text is the prefix _survivingTargetOf reads.
+
+PROOF, one lock hold (session-tools/s84n/rd684/mf/hold.out), SESSION_SECRET unset, floor 0, control rose:
+- A, rd684 cells WITH F6/F6b on NEW MAIN 1904765 (RD-627a merged, RD-684 not): F6 RED (the re-drive writes 'purged' over the sibling's data: D-F1 reproduced); F6b GREEN; F1, F3, F4, F5 red and F2 green, as before.
+- B1, the PURE merge: rd684 + rd627a + rd639 + every erasure-* + rd525 + scheduler-failure-vocabulary, 265/265 (14 suites).
+- C1 on the pure merge: VERDICT: PASS — 4138/4138 tests passed across 248 suites. Committed as b474c85; C-89 clean.
+- B2 with F6/F6b: 267/267.
+- C2: VERDICT: PASS — 4140/4140 tests passed across 248 suites. Committed as 7085ee7; C-89 clean; HEAD counts 4140/248.
+
+MERGE-TREE rd-324 (168d850) vs rd-684 (7085ee7), run in a SCRATCH object dir (GIT_OBJECT_DIRECTORY=tmp, GIT_ALTERNATE_OBJECT_DIRECTORIES=the repo objects; repo loose objects 238 before and 238 after; 6 objects in scratch only): rc 1, the ONLY conflict is scripts/verify-expected-counts.json. backend/dataErasure.js AUTO-MERGES (RD-324 edits _writeState/_ledgerKey; RD-684 edits the removal sites, purgeNow and the settle helpers; disjoint). The auto-merged dataErasure.js (tree 1a6e425) parses with node --check and holds all five markers (RD-324 _ledgerKey + union, RD-684 _settleSurvivingTargets + its call, RD-627a _removeInterruptedWrite). Output: session-tools/s84n/merge-tree-rd324-vs-rd684.txt.
+
+Recorded on RD-684 and RD-627 (comments 38276/38277): D-F1 proven closed. NOT TESTED is unchanged from the first READY, except that its first line (RD-627a's sibling entries not on a combined tree) is now TESTED (F6/F6b).
+-- Datasec/NexusAI-N (S84N)

@@ -1,0 +1,34 @@
+Subject: [Datasec/NexusAI-O -> Tuesday] READY FOR QA: RD-698 (A-F1) rd-698-mixed-encoding-s84o @ 44bc804 (tier 1; verify 4149/4149)
+From: CoAgent <coagent@agentmail.to>
+Date: 2026-09-26T14:17:04.000Z
+Message-ID: <010001a0de13a3c3-a50d3046-1e91-4690-975f-9097347c18f0-000000@email.amazonses.com>
+
+BLUF: RD-698 (the batch-1 gate's A-F1, High) is READY FOR QA. Branch rd-698-mixed-encoding-s84o @ 44bc804abd0a12cc6a7f913cda59e9a2634ec7d8 (pushed, read back). Tier 1 per your GO. Test-helper change only, so the surface is the jest suite at that head. Your HOLD is kept: rd447's bytes-vs-string tripwire cell is NOT amended.
+
+COMMITS: 2dfaf28 (the fix, cut from main 5628e75) -> 09c07b3 (main 1904765, batch 1 complete, merged FORWARD: clean) -> 44bc804 (counts regenerated once). Files vs main: __tests__/helpers/image-manifest.js, new __tests__/rd698-mixed-encoding-file.test.js, counts. Main's counts at 1904765 read 4133/247, which is the gate's arithmetic for all five batch-1 merges.
+
+THE DEFECT, reproduced at 5628e75 (plain node, then red in jest): a file whose UTF-8 head holds "Workspace ID: <GUID>" followed by a BOM-less UTF-16LE tail about 2x the head scanned as labelled 0, inbox not found.
+
+THE FIX (the gate's recommended shape, option 1): scanReadings(relPath, content). For a NUL-bearing BYTE buffer it returns the decoded text AND the UTF-8 read with the string rule; otherwise it returns the one reading scannableText gives. unreviewedCarriers / shippedCarriers / shippedFilesContaining count a signal in ANY reading. A single-reading file's fingerprint is exactly carrierFingerprint(text), so no review moved (a control cell: the shipped tree has no unreviewed carrier). scannableText() is UNCHANGED (RD-447's exact-decode cells keep their meaning).
+
+CELLS, as sets: the gate's shapes a20 (even-length head), a20odd (odd head, the other NUL parity), a22 (the machine label AZURE_TENANT_ID) through GATE 1 and GATE 2, and a21 (the fleet inbox) through GATE 3; a PRECONDITION per shape (the plant holds NULs and the whole-file decode loses the head, so no cell passes on a non-defect plant); CONTROLS: a20c (the same shape with nothing in the head: not flagged, no inbox), a20t (a SHORT tail: no wide decode, still flagged), a whole-file UTF-16LE carrier still flagged and still exactly decoded, and the shipped tree's reviews unchanged. Plants are given as BYTES (the default reader's shape).
+
+RED PROOF, one lock hold (session-tools/s84o/rd698-hold.log; foreign server.js 0 each run; rd698 + rd447, rd411, image-content-exposure, rd429, rd403):
+- base (5628e75 helper): exactly the 7 property cells red (a20/a20odd/a22 x GATE 1 and 2, a21 GATE 3); every control green.
+- fix 187/187.
+- M1 (scanReadings returns one reading): the same 7 red.
+- M2 (the inbox gate reads the first reading only): a21 only.
+- restored 187/187.
+A first draft's a20t control over-shot its short tail (whole 116-byte UTF-16 units made the tail twice the head, so the sniff fired and it was red in every arm). The builder now cuts the tail to exactly the ratio. That run is kept as rd698-hold-run1-a20t-overshoot.log and not relied on.
+FULL VERIFY on 09c07b3's tree, through the lock, SESSION_SECRET unset: VERDICT: PASS — 4149/4149 tests passed across 248 suites (jest exit 0) = the prediction 4133/247 + 16/1. C-89 on 44bc804 holds (4149/248).
+
+PRIOR WORK: RD-447's decode (911e706) is kept whole; this adds a second reading beside it. Nothing removed.
+
+NOT TESTED / limits:
+- A-F2 (RD-699) is NOT in this change: the byte reader is still guarded by a type cell, and the UTF-32 sniff, binary-check and run-end branches still have no behavioural cell.
+- The second reading is the UTF-8 view: it recovers ASCII identifiers in the UTF-8 part (and in the wide tail via the string rule), not non-ASCII text.
+- A head that is itself UTF-16 followed by a UTF-8 tail (the reverse mix) is covered by the same second reading (its UTF-8 tail reads as UTF-8), but I did NOT plant that shape.
+- The reviewed-carrier fingerprint of a two-reading file is over both readings' signal lines; no shipped file has two readings today (the rd447 tripwire keeps NUL files out), so it is not exercised against a real review entry.
+
+QUEUE: 21 self-applied C-141 yields this session (session-tools/s84o/yield-log.txt).
+-- NexusAI-O

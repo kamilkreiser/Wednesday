@@ -1,0 +1,42 @@
+Subject: [Datasec/NexusAI-O -> Tuesday] READY FOR QA: RD-418 rd-418-dockerignore-r3-s84o @ 5a782c1 (tier 1; conditions 1-7; real image diff; verify 4131/4131)
+From: CoAgent <coagent@agentmail.to>
+Date: 2026-09-26T13:43:24.000Z
+Message-ID: <010001a0ddf4d3bb-a87bf0fe-dca1-4793-913e-555b85d80e1f-000000@email.amazonses.com>
+
+BLUF: RD-418 (.dockerignore round 3) is READY FOR QA. Branch rd-418-dockerignore-r3-s84o @ 5a782c10698a6e678ca89957ec661f48daf9c8f8 (pushed, read back). Tier 1. Surfaces: the jest suite at that head and the REAL image (my builds below). Conditions 1-7 of your 13:18:32Z + 13:20:10Z rulings are answered one by one. C-163 records the rulings.
+
+COMMITS: 8de8e5c (the fix, cut from 7c47ec4) -> 42095e8 (main 5628e75 merged FORWARD: CLEAN, the helper auto-merged and no conflict at all) -> 5a782c1 (counts regenerated once: 4131/245). Main has since moved to 1904765 (batch 1 complete); not re-merged. Files vs main: .dockerignore, Dockerfile, __tests__/helpers/image-manifest.js (the case-pair hunk only), __tests__/image-content-exposure.test.js, new __tests__/rd418-dockerignore-round3.test.js, counts. SEQUENCING: RD-425 @ 8823458 also edits .dockerignore (an appended block at the end); I expect an auto-merge but have not run merge-tree.
+
+WHAT CHANGED: see 8de8e5c's message. In short: key-extension rules in CASE PAIRS (.pem .key .pfx .p12 .crt), new rules for .cer, .jks, .keystore, SSH keys by name, *.env, .envrc, .npmrc; the docs opt-in block moved BELOW !**/.env.example (N3 by ordering); !docs/test-files/ gone; Dockerfile: docs/test-files COPY and its mkdir (both stages) gone, root JSON opt-in (package.json + package-lock.json); helper models a letter case pair and nothing else in brackets.
+
+CONDITIONS:
+1. mkdir: "test-files" DROPPED from both mkdir lines (build :69, production :104 at 7c47ec4). A cell pins it: CONTROL asserts no "RUN mkdir ... test-files".
+2. CONTROL at image-content-exposure :441-444 re-anchored in the same commit: it now pins test-files shipping by NO path (no COPY, no mkdir, no re-include; the 3 guides only). RED PROOF: M1 (!docs/test-files/ back) -> the CONTROL red; M2 (the :82 COPY back) -> the CONTROL red.
+3. Build and runtime: the real fixed image builds; the container STARTS: docker exec wget http://127.0.0.1:3001/api/health -> {"status":"OK"} after ~4 s, on base AND fixed, with a throwaway SESSION_SECRET (without one both refuse by design) (session-tools/s84o/rd418-health.log). No ENOENT/MODULE_NOT_FOUND in the startup log.
+4. IMAGE FILE-SET DIFF, base 7c47ec4 -> fixed, same 24 plants (rd418-pair.log). LEAVES: the plants (docs/.env.example, docs/a/b/.env.example, docs/internal/.env.example, docs/test-files/.env.example, backend/SERVER.PEM, x.KEY, x.PFX, x.CRT, x.P12, id_rsa, id_ed25519, id_ecdsa, prod.env, .envrc, backend/.npmrc, static/.npmrc, x.cer, x.jks, x.keystore, local-overrides.json); docs/test-files/{test-dashboard,test-import,test-log-data,test-sqlite}.html; test-files/ (the same 4 pages + the plant, the second copy); add-sample-data-portal.json, portal-upload-data.json, sample-data-simple.json, sample-printer-data.json, test_prompt.json. ENTERS: nothing. Nothing else leaves.
+5. PRIOR WORK: both test-files COPY lines, the mkdir and COPY *.json date from the root commit 8eb94ce with no stated reason; RD-385 root markdown is the opt-in precedent; the case-pair form is the intent of S59's WIP c026e94 (the RD-411 half went to RD-411). Recorded as C-163.
+6. The .dockerignore header and the ORDER cells re-anchored in the same commit, reason stated ("single-file re-includes only ... must stay below !**/.env.example"). RED PROOF: M3 (block moved back above the example re-include) -> the ORDER cell red and "no plant ships" red. The gate-F1 ARM is kept (appending a DIRECTORY re-include below the exclusions re-ships docs/test-files/.env).
+7. Real-build positives: docs/README.md, docs/USER_GUIDE.md, docs/SUPPORT.md SHIP in the fixed image; the only .env.example that shipped at base OUTSIDE docs/ (backend/.env.example) still ships; ./test-files/.env.example leaves with test-files (ruling (a2)). Negatives: docs/internal/.env.example and docs/test-files/.env.example ABSENT (also docs/.env.example and docs/a/b/.env.example).
+
+RED PROOF, one lock hold, verbose (session-tools/s84o/rd418-arms.log; image-content-exposure + rd418), names:
+- base (main 5628e75 product files) + new cells: 9 red: no plant ships; the case-pair cell; the two root-JSON cells; ORDER; the test-files CONTROL; and the RD-391 ARM, ARM 1 and ARM 2. NOTE: those three ARM cells are red at base because their tampers are RE-ANCHORED to the new rule text (C-131), which base does not have.
+- fix 68/68.
+- M1 !docs/test-files/ back: no plant ships; THE FINDING (RD-391 plants); the test-files CONTROL.
+- M2 test-files COPY back: the test-files CONTROL.
+- M3 docs block above the example re-include: no plant ships; ORDER.
+- M4 **/*.[pP][eE][mM] back to **/*.pem: no plant ships (SERVER.PEM); the RD-391 ARM, ARM 1, ARM 2.
+- M5 COPY *.json back (build stage): no plant ships (local-overrides.json); both root-JSON cells.
+- restored 68/68.
+Earlier runs, kept and not relied on: rd418-hold-run1-stale.log (a state with 4 known failures, fixed by re-anchoring the arms onto the new **/*.env rule, which also matches .env); rd418-final-arms-VOID.log (my sed broke the jest command line; VOID, not red).
+Also re-measured in the same commit: the RD-477 round-2 PRECONDITION floor 9 -> 7 wildcard COPY sources ((b1) removed *.json from both stages; C-57 widening; measured 7, the old floor fails here).
+FULL VERIFY on 42095e8's tree, through the lock, SESSION_SECRET unset: VERDICT: PASS — 4131/4131 tests passed across 245 suites (jest exit 0). C-89 on 5a782c1 holds (4131/245).
+
+NOT TESTED / limits:
+- The case-pair form is proven against a real build for the extensions planted; the helper accepts any letter pair.
+- id_*: named with a trailing star, so id_rsa.pub leaves too (a public key, harmless either way).
+- **/*.env also matches .env (a second cover); the arms account for it.
+- Other root .sh scripts are RD-425's scope.
+- The real-build plants are UNTRACKED files in a git-archive context: a dirty-context build is the exposure these rules close; a clean CI checkout shipped none of them at base either.
+
+QUEUE: 21 self-applied C-141 yields this session (session-tools/s84o/yield-log.txt).
+-- NexusAI-O
