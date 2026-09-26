@@ -87,5 +87,14 @@ if [ "$PCT" -ge "$STOP" ]; then
   echo "usage_gate: REFUSED (rc 3) — weekly usage ${PCT}% >= ${STOP}% (Kam 2026-09-14 19:14: no new agents at 90%; in-flight items finish and wrap; Wednesday + the local model from here). Gauge age ${AGE} min." >&2
   exit 3
 fi
+# 70% ADVISORY (Kam 2026-09-25, three-tier routing grant, verbatim: "once you get to 70% of the weekly
+# usage, minimize cloud agents"). NOT a refusal — rc stays 0 — because his rule is "minimise", with a
+# launch still allowed when nothing local can do the work AND it matters now. So the gate says it LOUDLY
+# on stderr and the launcher's caller must state which of those holds in its launch receipt.
+# Grant file: 0_Brain/learnings/2026-09-25_three-tier-routing-ornith-spark-cloud-always-on.md (rule 4).
+ADVISE="${WED_USAGE_ADVISE:-70}"
+if [ "$PCT" -ge "$ADVISE" ]; then
+  echo "usage_gate: ⚠ ADVISORY — weekly usage ${PCT}% >= ${ADVISE}% (Kam 2026-09-25: minimise cloud agents above 70%). Launch only if nothing local (Ornith/Spark) can do this AND it matters now; say which in the launch receipt. Hard stop at ${STOP}%." >&2
+fi
 echo "usage_gate: OK — weekly usage ${PCT}% < ${STOP}% (gauge age ${AGE} min)"
 exit 0
