@@ -17695,5 +17695,113 @@
    "CARD tuesday-mac-mini-scheduler-full-disk-access",
    "CARD secuura-gate-stack-slots-full-of-kept-volumes"
   ]
+ },
+ {
+  "id": "nexusai-setup-window-admin-gate-scope",
+  "client_project": "Datasec/NexusAI",
+  "title": "Setup window: close ONLY the Key Vault identity setting to strangers, or more, or nothing?",
+  "bluf": "You ruled on 2026-09-17 (C-42, 'accept and warn') that an unconfigured NexusAI stays open to anyone until setup finishes. The NexusAI agent (S86M, lane plan v2, read at main 1904765) then found 8 admin-only settings that are reachable in that window, and one of them is the Key Vault identity that encrypts customer secrets (RD-594). Recommendation (b): close ONLY that one, because it is the one that decides where secrets are encrypted. This keeps your open-window ruling for everything else. (a) goes further: it also refuses viewers' AI-config saves once sign-in exists (RD-683/RD-437), and it stops /api/setup/status returning group, tenant and client IDs (RD-555 O-1). Nothing is built until you answer.",
+  "default_action": "Nothing is built: RD-594, RD-683, RD-437 and the O-1 ticket stay in To Do until you answer. The rest of NexusAI continues.",
+  "options": [
+   {
+    "key": "b",
+    "label": "Close only the Key Vault identity (recommended)",
+    "detail": "RD-594 subset, lane 1, tier 1 gate. Your open window is otherwise unchanged."
+   },
+   {
+    "key": "a",
+    "label": "Close all three",
+    "detail": "Adds RD-683/RD-437 (viewers cannot save AI config once sign-in exists) and hides the IDs from /api/setup/status in the window."
+   },
+   {
+    "key": "c",
+    "label": "Leave the window exactly as ruled",
+    "detail": "The tickets close as intended under C-42."
+   }
+  ],
+  "recommended": "b",
+  "ts": "2026-09-27T08:54:08.639213+10:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "2026-08-17 20:01",
+   "2026-09-01 09:17",
+   "2026-09-01 13:45",
+   "2026-09-04 08:33",
+   "2026-09-05 21:26",
+   "2026-09-07 06:42",
+   "2026-09-07 19:58",
+   "2026-09-08 10:05",
+   "CARD secuura-ks662-scope",
+   "CARD secuura-ks566-revoke-gate",
+   "CARD secuura-ks739-lookup-role-scope",
+   "CARD nexusai-rd167-dark-mode-scope",
+   "CARD nexusai-rd196-dashboard-default-window",
+   "CARD secuura-erasure-scope-gate",
+   "CARD secuura-ks764-key-revoke-org-scope",
+   "CARD secuura-demo-deploy-scope-2026-09-03",
+   "CARD nexusai-rd260-window-persistence-2026-09-03",
+   "CARD secuura-ks788-gate-fails-open-2026-09-04",
+   "CARD secuura-demo-admin-image-rebuild-2026-09-05",
+   "CARD secuura-demo-kam-admin-default-password",
+   "CARD secuura-demo-admin-transcripts",
+   "CARD secuura-demo-admin-mfa",
+   "CARD secuura-ks949-round2-and-the-second-admin",
+   "CARD secuura-admin-credential-rotation-183-files",
+   "CARD secuura-891-workflow-scope-merge",
+   "CARD nexusai-three-lineages-in-scope-or-parked",
+   "CARD secuura-advisory-gate-moving-set",
+   "CARD wed-boot-read-exceeds-the-context-window",
+   "CARD hpsm-phase1-imagepng-out-of-scope",
+   "CARD secuura-oauth-refresh-launder-forward-only-window",
+   "CARD secuura-oauth-refresh-window-iat-cutoff-or-marker",
+   "CARD secuura-ks998-format-gate-fails-open-on-missing-deps",
+   "CARD nexusai-setup-mode-stranger-takeover",
+   "CARD nexusai-demo-deploy-finish-scope",
+   "CARD secuura-ks839-oauth-wildcard-scope-grants-everything",
+   "CARD tuesday-boot-digest-outgrew-the-window",
+   "CARD t9-nas-leg-scope-mechanism",
+   "CARD secuura-ks998-formatting-gate-fails-open-on-missing-prettier",
+   "CARD secuura-ks789-ci-is-the-hard-gate-with-no-ci",
+   "CARD hpsmpoc-partner-scope",
+   "CARD spark-studio-client-scope",
+   "CARD secuura-gate-stack-slots-full-of-kept-volumes",
+   "CARD secuura-ks1304-withtenant-tenant-pool-and-admin-writes",
+   "CARD nexusai-package-files-scope"
+  ]
+ },
+ {
+  "id": "nexusai-redis-down-revisit-after-resubmission",
+  "client_project": "Datasec/NexusAI",
+  "title": "Redis outage behaviour: you said revisit after the resubmission, and 2.2.1 is live. Fix it now?",
+  "bluf": "You ruled (c) on card nexusai-redis-down-fail-closed-policy: leave it, tickets only, revisit after the resubmission (C-145). 2.2.1 is live, so the trigger has fired. Unchanged since gate 6 measured it: this affects the Redis (docker-compose) deployment only, not Marketplace customers. If Redis is down at startup, the app exits within ~300 ms and logs a false 'falls back to in-memory' line. If Redis drops while running, every /api request answers 500 and never recovers. Recommendation (a): keep failing closed, but log the truth and recover by itself when Redis returns.",
+  "default_action": "Nothing is built; RD-646/RD-647 stay in To Do until you answer.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Fail closed, fix the log line and the never-recovers bug (recommended)",
+    "detail": "RD-646/RD-647, lane 1, tier 1 gate. Safest posture, least surprise."
+   },
+   {
+    "key": "b",
+    "label": "Fail open to in-memory limits while Redis is down",
+    "detail": "Stays up; limits count per server until Redis returns."
+   },
+   {
+    "key": "c",
+    "label": "Still later",
+    "detail": "Tickets stay filed; nothing is built."
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-09-27T08:54:11.970790+10:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "CARD nexusai-rd535-premise-no-resubmission-today",
+   "CARD nexusai-redis-down-fail-closed-policy"
+  ]
  }
 ]

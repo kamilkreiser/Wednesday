@@ -9,15 +9,19 @@ supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s
 ## 🟢 DELTA 98 — 2026-09-27 08:4x (s87 boot, ctx ~40%). **READ THIS FIRST, THEN 97.**
 ### OWED TO KAM (copy forward until closed by name)
 - Week instruction (WEEK-INSTRUCTION-TUESDAY) EXPIRES end of TODAY 2026-09-27. Told on the live board 08:3x (201) with default: from Monday work continues under the open-ended new-account grant (EXPIRING-GRANTS row), asks on the live board. On Monday: mark the file lapsed (status) unless he said otherwise.
-### FLOOR
+### FLOOR (updated 08:5x)
+%0 tuesday · %19 NexusAI-M (S86M; lane plan v2 DONE at 5_Project_History/2026-09-27_S86M_lane-plan-v2.md; rulings sent; building lane 1 from RD-705) · %21 NexusAI-N (NEW, lane 2 test harness, RD-591 first; brief 2026-09-27_nexusai_N_lane2_harness.md) · %22 NexusAI-P (NEW successor; RD-430 re-pin grant, RD-694 item 4, then merge author for batch 6; brief 2026-09-27_nexusai_P_successor2.md) · %20 Vision · %1 monitor. S85P RETIRED by hand 08:5x (scored 0.95).
+### CARDS OPEN ON KAM'S BOARD (NexusAI): nexusai-setup-window-admin-gate-scope (rec b) · nexusai-redis-down-revisit-after-resubmission (rec a). Relay each answer to S86M (lane 1) + --delivered.
+### OLD FLOOR LINE (08:4x, superseded above)
 %0 tuesday · %19 NexusAI-M (NEW, lane plan v2 + lane 1 + merge author for S84M's 6 frozen READYs; brief fleet/briefs_staged/2026-09-27_nexusai_M_lane_plan_v2.md) · %18 NexusAI-P (S85P, RD-286 (a) building; ctx 76%) · %20 Vision_Sales_Portal (short seat: VSP-65 READY + BCR3-P2 line + CI 6fbebd9 + retention purge measured; plan CONFIRMED 22:4xZ) · %1 monitor (2 rows). Runner 59390 (pidfile), poller 8500.
 ### IN FLIGHT
 1. **Gate drafters (background Agent subagents of THIS seat — they die with it; re-commission if files absent):** batch 3 -> fleet/qa-agent/briefs/2026-09-27_nexusai-gate-batch3-rd324-rd684-rd685-rd424-rd314.md + launchers/launch_qa_nexusai_gate_batch3.sh; batch 4 -> ...batch4-rd418-rd425-rd698-rd699-rd443.md + launch_qa_nexusai_gate_batch4.sh. On each: read WRONG list, brief whole, stamp @STAMP@, --check, re-pin heads by ls-remote, `cockpit.sh add QA/NexusAI-batchN "bash <launcher>"`, resize, rung 6. Both may run concurrently (file-disjoint; share the jest lock).
 2. **Batch 5 (lane 1, author = new M):** RD-413 f70594a (browser+brand legs) · RD-695 ad97d12 · C-170 be0fe37 · RD-681 4209299 -> RD-682 f15fed6 · RD-627b c82aa92 · RD-696 2c221fa. Draft when a gate slot frees. READY mails in tuesday-agent@ 09-26 (not yet saved to briefs/).
-3. **Batch 6 (lane 4, author P):** RD-693 ddf1b75 (t1 raised, browser R11) · RD-204 fe47bb4 · RD-197 43e729c · RD-686+694 8962a14 · RD-692 4580829 (t2) + RD-286 when READY.
+3. **Batch 6 (lane 4, author = P successor %22):** RD-286 1645c69 (t2 + browser; READY saved briefs/2026-09-27_nexusai-rd286-READY-mail.txt) · RD-430 when re-pinned · RD-693 ddf1b75 (t1 raised, browser R11) · RD-204 fe47bb4 · RD-197 43e729c · RD-686+694 8962a14 · RD-692 4580829 (t2) + RD-286 when READY.
 4. RD-703 (O's Low) goes into M's lane plan v2, not a successor seat. N/O successors: launch only when their batch verdicts need a merge author (or from lane plan v2).
 ### OWED SMALL
-- Runner hardening: arm_wake_watch.sh:232 `nohup bash -c` without setsid -> own session (claim with Wednesday; exercise both arms; re-arm). Cause of 09-26 20:29 death NOT established.
+- **RUNNER DEATH CAUSE ESTABLISHED (08:55): S85P's machine-wide `pkill -f 'sleep 60'` at ~10:28Z matched the runner's own bash -c body (it contains 'sleep 600'); pgrep proves the match today. FIX OWED (claim with Wednesday): run the runner from a script FILE (short argv). 'Never kill by pattern' sent to M/N/P as a standing line.**
+- Runner hardening (second half): arm_wake_watch.sh:232 `nohup bash -c` without setsid -> own session (claim with Wednesday; exercise both arms; re-arm). Cause of 09-26 20:29 death NOT established.
 - History branches to land on main: s84m-history-docs d54a895, s84o-history-docs 9748de0, s84n-history-docs 876ea1d (a seat's RELEASE).
 - T9 vault clone divergence: Kam's 09-20 "leave it" ruling covers it; no action.
 
