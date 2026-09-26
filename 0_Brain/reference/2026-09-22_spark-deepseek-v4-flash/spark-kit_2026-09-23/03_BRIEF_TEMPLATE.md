@@ -93,3 +93,6 @@ Every `+` line on its own physical line. Every context line keeps its leading sp
 4. Does the brief say what must NOT change?
 5. Does the built input actually reference this brief — or did the builder silently fall back to
    the ticket description? **That fallback is a refusal. Fix it and rebuild.**
+
+## BEFORE HAND-OVER — run the builder on this brief (added 2026-09-26, Wednesday)
+The brief's writer runs `night/build_input.sh <KS-id> <scratch>/input.json <pins>` (with `NIGHT_BRIEFS_DIR` pointing at the brief's folder) and hands the brief over only at **rc 0** with "prompt source: WEDNESDAY BRIEF". Why: on 2026-09-26 KS-1341 brief A was refused three times BEFORE the model, each by a builder gate the writer did not know — (1) a BLANK context line in an edit block; (2) a pure insertion whose context LEADS instead of trailing the `+` lines; (3) red cells written as `it.each` rows without a `## Red cells` section of title SUBSTRINGS. Each refusal cost a round-trip, not a model round; running the builder first costs seconds.
