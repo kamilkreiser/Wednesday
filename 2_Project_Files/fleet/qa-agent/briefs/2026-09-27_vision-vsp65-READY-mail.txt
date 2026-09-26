@@ -1,0 +1,57 @@
+Subject: [Datasec/Vision_Sales_Portal -> Tuesday] READY FOR QA: VSP-65 pool query/connect timeout @ 2adfc4a (tier 1; base red 5/6, branch 6/6; unit 95->105, db 66->72 as sets)
+BLUF: VSP-65 is READY FOR QA (tier 1, session/auth path). Branch fix/vsp-65-pool-query-timeout-2026-09-27, head 2adfc4a (ls-remote verified), 3 commits on main eaf024a. Not merged, not deployed.
+
+WHAT CHANGED (server/db.js only, plus tests and one BACKLOG line)
+- The pool now has query_timeout 30000 ms and connectionTimeoutMillis 15000 ms. DB_QUERY_TIMEOUT_MS / DB_CONNECT_TIMEOUT_MS override them; a bad value (0, -1, 1.5, abc, 30s, Infinity) throws at boot instead of running unbounded. Neither setting exists in production, so the defaults apply.
+- LOUD: a hit bound surfaces as DbTimeoutError, code DB_QUERY_TIMEOUT or DB_CONNECT_TIMEOUT, message "DB_QUERY_TIMEOUT: Postgres did not answer a query within 30000 ms (VSP-65)", with pg's original error as cause. The route or lastResortHandler logs it with its ref, as before.
+- A client whose query timed out is DISCARDED on release, even when the caller calls release() with no error. All six pool.connect() callers do that (quotes generate, admin backup, reminders dispatcher, seed, seedCollateral, dbRestore). Without this, the stalled connection goes back into the pool with a query that never finishes.
+- How: BoundedPool extends pg.Pool and overrides connect() only. pg-pool's own query() goes through connect(), so connect-pg-simple's pool.query path is covered too.
+- Why 30 s: the slowest real query is the backup's per-table SELECT *. The last full prod dump on disk (production-full-20260226) is 96,690 bytes, and locally the ten dump queries take 40.5 ms in total (slowest 25.3 ms, 108 rows). So the bound has >1000x headroom.
+
+RED-PROOF: real Postgres 16.15 (local vsp-dev-db) behind a TCP proxy that goes silent on cue, forwarding nothing either way and closing nothing, i.e. a half-open connection. Bounds are shrunk to 1500 ms in the test, with an 8000 ms budget per request. File: test/db/pool-timeout.test.js.
+At BASE (main's db.js swapped in): 1 pass / 5 fail.
+- (ticket) store WRITE (connect-pg-simple touch, "SET expire") never answers on an unfaulted signed-in GET /api/auth/me: TIMED OUT at 8003 ms
+- store READ never answers: TIMED OUT at 8002 ms
+- pool.connect() caller: TIMED OUT at 8018 ms
+- recovery: stalled connections never closed by the app
+- named connect timeout: fails only because BoundedPool doesn't exist at base. That's an import failure, not a behavioural red.
+- control (healthy store): PASS at base
+On the BRANCH: 6/6.
+- ticket cell: 200 with the full body, ended at ~1557 ms (the bound), DbTimeoutError DB_QUERY_TIMEOUT logged
+- read cell: 500 at ~1509 ms
+- recovery: every stalled socket was closed by the app, and the next 3 signed-in requests were 200 in under 1 s
+- pool.connect() caller: named error, and the follow-up query succeeds
+- handshake stall: DB_CONNECT_TIMEOUT at ~1502 ms
+- control: /me 4 ms; a 500 ms pg_sleep completes inside the 1500 ms bound (507 ms)
+MUTATIONS (each run, then db.js restored from the commit):
+- M1, release doesn't pass the stored timeout: exactly 1 red, the pool.connect() cell, at 3004 ms (the poisoned client came back and timed out again)
+- M2, timeouts not renamed: 4 red, the four cells that assert the name. Recovery and control stayed green.
+Repeat: the new file 3/3 more runs, 6/6 each.
+
+FULL SUITES as SETS (test names compared against base eaf024a on the same machine, Node 26.8.1)
+- npm test: base 95 pass → branch 105 pass. Every base name still passes; 10 new names, all "VSP-65: …" in server/db.test.js (shipped defaults 30000/15000/max 10, live pool carries them, per-env override, 6 bad-value cells, DbTimeoutError shape).
+- npm run test:db: base 66 (async-faults 30, completed-response 3, concurrency 5, harness 4, reminder-push 6, routes 18) → branch 72. Every base name still passes; 6 new names in pool-timeout.test.js. 0 failures in either log.
+- Node 20.20.2 (prod's major, node:20 container against the same Postgres): unit 105/105, pool-timeout 6/6, completed-response 3/3, async-faults 30/30, routes 18/18.
+
+PRIOR WORK
+- git log -S query_timeout / statement_timeout / connectionTimeoutMillis on all refs: only the BACKLOG text in 15cd733 (IO1R2-F1, which filed the residual), and scripts/create-azure-user.js (its own Client, not the app pool). No prior fix and no branch.
+- CLARIFICATIONS.md: nothing on VSP-65. history.md: filed 2026-09-23 as gate 7 arm (e)'s unfaulted half. The "add the VSP-65 key to the BACKLOG" to-do is done on this branch.
+- Consistent with IO1R2-F1 (errors.js 30 s appEndGrace): that covers the FAULTED half, and this one the unfaulted half.
+
+BEHAVIOUR CHANGES FOR THE GATE TO WEIGH
+- connectionTimeoutMillis also caps WAITING for a free client when all 10 are busy. Before, a request waited forever; now it gets a DB_CONNECT_TIMEOUT 500 after 15 s.
+- dbBackup.dumpTable() catches per-table errors, so a timed-out table is written into the backup as an error entry, not a failed backup. Pre-existing semantics, now reachable. Not changed.
+- dbRestore (CLI) runs under the same 30 s bound per statement. Its catch does ROLLBACK on the same client, which on a stalled connection times out too and masks the first error. Pre-existing pattern, bounded now. Not changed.
+- statement_timeout (server-side) NOT added. It can't see a half-open connection (the server never gets the query), which is the ticket's case. It would add server-side cancellation to every statement, a separate decision.
+
+NOT TESTED
+- A real stalled Azure Postgres, TLS, or a real failover: production only, so not run. The proxy is plain TCP locally.
+- CI on the pushed branch: this project's gh is not logged in (same gap as item 3). CI (.github/workflows/test.yml) runs npm test and test:db on Postgres 16 at localhost:5433, the same shape as local.
+- Node 22 (the CI matrix's other leg).
+- On Node 20: concurrency, harness and reminder-push weren't run (they passed on Node 26).
+- e2e:api / e2e:feedback / e2e:pro (need a running server).
+- The shipped 30 s / 15 s values in a live stall (the proof ran the shrunk 1.5 s bounds through the same code; the defaults are pinned by unit cells).
+
+HELD: no merge (waits for the gate verdict at 2adfc4a plus your GO), no deploy, no app setting.
+
+-----

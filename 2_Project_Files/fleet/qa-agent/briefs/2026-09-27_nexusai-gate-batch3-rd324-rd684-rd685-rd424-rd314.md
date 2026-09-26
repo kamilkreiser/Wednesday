@@ -1,0 +1,844 @@
+# QA Agent Invocation Brief — Datasec/NexusAI, ONE batched gate "batch #3": RD-324 + RD-684 + RD-685 + RD-424 + RD-314 (all TIER 1) — five targets, five verdicts, one report
+
+**Drafted for Tuesday 2026-09-27 08:30–09:10 AEST by a read-only drafting agent; Tuesday reviews, stamps and launches.**
+Commissioned on Tuesday's batch #3 commission (2026-09-27) and seven READY FOR QA mails on disk, each read WHOLE (all five members are
+NexusAI lane 2, author seat **NexusAI-N (S84N)**):
+- **A — RD-324** @ `168d8501d7414a876fcd963ea0689922735e7902` — the UPDATED READY
+  `/Volumes/KK_T9_External_HDD/TUESDAY/2_Project_Files/fleet/qa-agent/briefs/2026-09-27_nexusai-rd324-READY-updated-mail.txt`, and for WHAT CHANGED /
+  cells / NOT TESTED the first READY `/Volumes/KK_T9_External_HDD/TUESDAY/2_Project_Files/fleet/qa-agent/briefs/2026-09-26_nexusai-rd324-READY-mail.txt`
+  (the updated READY :18: "Everything else is unchanged from the 3beea5c READY").
+- **B — RD-684** @ `7085ee7610d6576342e2e8f24afcdd66c9aa5adf` — the UPDATED READY
+  `/Volumes/KK_T9_External_HDD/TUESDAY/2_Project_Files/fleet/qa-agent/briefs/2026-09-27_nexusai-rd684-READY-updated-mail.txt` (D-F1 cells F6/F6b), and
+  the first READY `/Volumes/KK_T9_External_HDD/TUESDAY/2_Project_Files/fleet/qa-agent/briefs/2026-09-26_nexusai-rd684-READY-mail.txt` (updated READY
+  :32: "NOT TESTED is unchanged from the first READY, except that its first line … is now TESTED").
+- **C — RD-685** @ `9d7076b0368f02ca030a904a2ce45de93739238e` (hard links, C-169) —
+  `/Volumes/KK_T9_External_HDD/TUESDAY/2_Project_Files/fleet/qa-agent/briefs/2026-09-27_nexusai-rd685-READY-mail.txt`
+- **D — RD-424** @ `2ce26eba9752554844bd885903826f409c7d22be` (boot restore; five-file fixture grant C-164; base `5f2683c`, **NOT merged forward onto
+  main `1904765`**) — `/Volumes/KK_T9_External_HDD/TUESDAY/2_Project_Files/fleet/qa-agent/briefs/2026-09-26_nexusai-rd424-READY-mail.txt`
+- **E — RD-314** @ `ce148d5d8332606654c189cd14f3aadee227a407` (LAW window filter; base `11666d3`, **NOT merged forward onto `1904765`**) —
+  `/Volumes/KK_T9_External_HDD/TUESDAY/2_Project_Files/fleet/qa-agent/briefs/2026-09-26_nexusai-rd314-READY-mail.txt`
+
+**Batched under the 2026-09-18 batch-gates rule, as batches #1 and #2.** Three members (A, B, C) edit `backend/dataErasure.js`, the file RD-627a
+(batch #1, already on main) also edited; **B × C conflicts in ONE content hunk** (MEASURED, §1 Merge-trees). D and E are file-disjoint from
+everything but the counts file, and are on OLDER bases. The gate therefore (1) gates each head AS PUSHED, (2) gates D and E on a
+merged-forward tree of its own, and (3) gates the batch on ONE merged tree M0 + all five **in its own scratch clone, with the B × C hunk resolved
+by the gate as a canonical UNION (§9), labelled an EMULATION of the merge the fleet will do.** Every head is re-read by `git ls-remote` in the
+launcher, which refuses on a mismatch.
+
+SELF-CHECK: re-read end-to-end for contradictions | 2026-09-27 08:58
+Self-check note: 2026-09-27 08:58
+
+## TUESDAY'S RULINGS AT STAMP (they answer the drafter's WRONG-list items 3 and 4)
+- **C-57 exception, narrow (Tuesday, 2026-09-27):** the fleet's merge of the SECOND of RD-684 / RD-685 may be hand-resolved in `backend/dataErasure.js` ONLY as the CANONICAL UNION (RD-684's block first, then `}` + blank + `/**`, then RD-685's block), and ONLY if the resolved file's blob EQUALS the blob your merged tree measured (predicted `1f708e2` once RD-324 is in). The merging author repeats your three proofs (`node --check`; each side's diff equals the other ticket's own diff; blob equality) and records the exception as a C-number. **Any other conflicting file, or a blob that differs, STOPS.** So: STATE YOUR MEASURED BLOB in the verdict's first lines, and say whether the order changes it.
+- **`--after` for this gate's own tickets (drafter item 4):** RATIFIED as Tuesday's instruction. When a merge ticket is already queued, file behind it with `--after`; never ahead of it.
+- **Negative-control seats:** re-read them at your start (the set churns). Tuesday's claude pid changes when Tuesday rotates.
+
+## Charter
+Read `/Volumes/KK_T9_External_HDD/TUESDAY/2_Project_Files/fleet/qa-agent/QA_AGENT_CHARTER.md` in full first. You are an independent
+tester. You did not build these changes and you owe no builder anything. **Every line below that reports what a builder says is a
+CLAIM, never evidence.** Explore an erasure ledger's door that now keeps a union (A), an erasure certificate that now carries a surviving
+target across re-drives (B), an erasure that now refuses to unlink a hard-linked name (C), a store writer that now backs up after the write (D),
+and a Log Analytics query rewriter that now puts its window after the source (E), looking for any state in which **a copy of erased data survives
+while the record, the certificate or public health says "purged"; a ledger entry is lost or invented; a torn store restores an older state than
+the last write; an erasure dead-ends on the deployment's own files; or a query samples, filters or errors differently from what its caller meant.**
+
+- **RD-324 is TIER 1** (the erasure ledger's door; lane plan :23 "Tier 1"; first READY :6). Verdict: **GO / GO WITH FINDINGS / NO GO at `168d850`**,
+  plus its merged-tree result.
+- **RD-684 is TIER 1** (erasure certificate; first READY :6 "Tier 1"; High, the RD-639 gate's B-F1). Verdict at **`7085ee7`**, plus merged-tree result.
+- **RD-685 is TIER 1** (erasure of a hard-linked store; READY :6 "Tier 1"; C-169). Verdict at **`9d7076b`**, plus merged-tree result.
+- **RD-424 is TIER 1** (boot restore; lane plan :24; C-164 "tier 1"). Verdict at **`2ce26eb`** AND on your merged-forward tree `1904765` + `2ce26eb`,
+  plus merged-tree result.
+- **RD-314 is TIER 1** (data correctness on the customer's workspace; lane plan :25). Verdict at **`ce148d5`** AND on your merged-forward tree
+  `1904765` + `ce148d5`, plus merged-tree result.
+- **One verdict PER ticket, one report, one mail.** A finding on one ticket never becomes another's verdict. **A finding that exists only in a
+  COMPOSITION (B × C in the purge loop; D × B/C through the erasure freeze; A × B through the ledger) is graded on the merged tree and named
+  against BOTH tickets' merged-tree lines, never silently against one.**
+- **TIER 1 AT FULL WEIGHT, FINDINGS-ONLY:** no fixes, no pushes, no deploys, nothing to Partner Center, the demo or production (§12).
+
+## RULED BY KAM, NOT YET IN AN ARTEFACT
+- **RD-424 appears in `CLARIFICATIONS.md` as C-164; RD-685 as C-169; RD-684 only inside C-169 (:1732, :1737); RD-324 and RD-314 NOT AT ALL** (drafter,
+  `grep -n -i -E 'RD-(324|684|685|424|314)\b'` → :1676, :1680, :1683 (C-164), :1730, :1732, :1735, :1737 (C-169); positive control, same file and tool:
+  `C-141` found 8 times).
+  The rulings that bind these tickets beyond C-164/C-169 are **Tuesday's, RELAYED by the builder, not read by the drafter in Tuesday's mail**:
+  - "Tuesday 05:42:51Z item 2 / item 3" (the batch-3 prep merge-forwards of RD-684 and RD-324, their merge commit messages, MEASURED by `git log`);
+    "Tuesday 07:46:57Z item 3" (RD-685's merge-forward); RD-684's first-READY QUESTION (gate now or after RD-627a lands) was answered (b) — the updated
+    READY exists, so the answer is inferred, not read.
+  - RD-685 READY :10: "(your item 3)" — public health and the certificate say incomplete in case (a).
+  - RD-314 READY :13: "RD-305 comment 37030 says split the two consumers first" (RELAYED; Jira not read).
+- **Merging is Tuesday's GO** (Kam, 2026-09-25 ~22:0x, "work your way through the tickets and merge once tested", as recorded in the batch #1 and #2
+  briefs); **this gate merges nothing into anything the fleet can see.** The B × C union you build is YOUR emulation; the real one is the author's.
+
+**The clarifications that bind this gate** (`/Volumes/KK_T9_External_HDD/!CODING/Datasec/NexusAI/1_Project_Definition/CLARIFICATIONS.md`,
+298,339 bytes, mtime 2026-09-27 08:35 — it was being appended to while the drafter read it; line numbers by `grep -n` at 08:4x AEST, re-read them):
+- **C-02** (:30) open mode on a fresh DATA_DIR. **C-28** (:153) never write, pull, check out or stash NexusAI's `2_Project_Files`. **C-40** (:225) a
+  check must be able to fail on the thing it claims. **C-49** (:299) prior-work check. **C-76** (:729) an explanation is a claim. **C-97** (:900)
+  fixtures change, not policy. **C-98** (:906) cells assert the property after the fix.
+- **C-57** (:410) a conflict confined to the counts file is resolved by REGENERATION with the id-superset control; **"Any other conflicting file still
+  stops."** — this batch HAS another conflicting file (B × C, `dataErasure.js`). **For the fleet's real merge that is a STOP-and-ask for the merging
+  seat; for YOU it is a measured, labelled emulation inside your own clone (§9), never a precedent.** Say so in the report.
+- **C-68** (:657) a verdict holds only at the head it ran on; a semantic overlap git cannot see is re-run by NAME; counts regenerated ONCE after the
+  merge — **"No conflict is not evidence the number is right"**; **"a clean merge-tree and a changed measured surface are not in tension"**.
+- **C-89** (:827) after a merge commit: `git diff --quiet HEAD` and HEAD's counts equal the regenerated numbers.
+- **C-102** (:945) **an EARLY RETURN added to a shared function silently disarms NEGATIVE-asserting cells among its callers; the population is
+  "callers of the mutated function", never "files the commit touched"; the sweep carries a self-test that ABORTS (positive control, negative
+  control, non-empty population).** RD-685's own round 1 was exactly this (READY :15). §3b is this gate's sweep.
+- **C-104** (:972) never run a census, suite or id-superset control in a clone with an unresolved merge — resolve (stage) first.
+- **C-110** (:1101) THE FLOOR RULE: every jest run through `session-tools/nexusai-lock.sh`; a ZERO is reportable only if a control fired in the same
+  window; record the foreign-server count beside every result. **C-112** (:1141) a declared limit is where the evidence stops. **C-122** (:1278)
+  source text does not cover behaviour. **C-125** (:1320) the foreign-server counter.
+- **C-133** (:1426) base-aware id accounting, and its **ADDENDUM** (:1434) the authorised-rename case. **Relevant this time: RD-424 MODIFIES five
+  existing test files** (C-164's grant). Cite C-133 only if the id-superset control misses.
+- **C-141** (:1480) a builder's proof ticket YIELDS to a `qa-*` ticket; **ADDENDUM** (:1488) a MERGE hold is gate-class; **ADDENDUM 2** (:1490) once
+  per waiting gate ticket; **ADDENDUM 3** (:1492) self-applied, logged not mailed; **ADDENDUM 4** (:1494) a yield re-queues DIRECTLY BEHIND the gate
+  or merge ticket with `nexusai-lock.sh <kind> <tag> --after <ticket-tag> <cmd…>`.
+- **C-142** (:1503) what "green" means at a merge. **C-150** (:1569) C-133's conditions are decided on blobs.
+- **C-164** (:1676) RD-424 option (a) and the five-file grant, with its conditions (1)-(4) and the grant's conditions (per-cell byte-identical
+  assertions, per-cell red proof + findability, RD-245's stale-backup red proof, rd452/rd535 "the scenario is real" controls, a NEW upside cell).
+- **C-169** (:1730) RD-685's rule: never unlink a name with nlink > 1 while another name may sit outside this run's purge set; purge all when every
+  name is inside it. **Its "Why not unlink and carry by inode" paragraph (:1732) — "a guessed 'purged' is a false certificate" — is the oracle for
+  row k12 (§2a-C).**
+- **Highest C-number at drafting: C-172** (:1755).
+
+## PRIOR ROUND
+PRIOR ROUND: batch #1 gated RD-627a at `057016d` (GO WITH FINDINGS) with RD-447, RD-411, RD-533, RD-315; all five merged (main `1904765`).
+ITS REPORT IS ON DISK AT: `/Volumes/KK_T9_External_HDD/!CODING/Testing Agent MAIN/projects/nexusai/reports/2026-09-26-gate-batch1/report.md`
+(verdicts :9-22; RD-627a rows d1-d14 §7.4; the live server §7.5; merged tree §9 :391-; findings table §10 :420-; limits §11; self-corrections §13
+S-1..S-11; floor §14). Findings carried forward and their disposition:
+- **D-F1** (Major, known; the RD-639 gate's B-F1) — the LIVE re-drive rewrote `purged_incomplete` (a symlinked tmp sibling) into `purged` with public
+  health "customer data has been purged" → **RD-684 claims it closed, cells F6/F6b** (updated READY :18-21). **Re-measure the batch #1 d4/d5/d8/d9
+  rows AND the §7.5 live-server run on your merged tree; closing D-F1 on a real server is RD-684's first proof.**
+- **D-C1** (Major, class; the RD-639 gate's B-C1) — a HARD-linked tmp sibling was recorded `purged` while the other name kept every byte (row d12) →
+  **RD-685 claims it closed, cell (e)** (READY :24). Re-measure d12 on your merged tree.
+- **D-N1** (note; L-D1/L-D2) — a sibling born after the listing, and a `.tmp` beside a recovery copy under `backups/`, survive under `purged`.
+  **RD-424 doubles the backup writes (§2a-D row r10), so this note's second half gains a producer — measure it.**
+- The batch #1 report also records **how** it measured: reuse its corrected instruments BY COPY (list in §11), and its self-corrections become
+  rules H-13..H-16 below.
+- **Earlier gates behind these tickets (read the named sections, do not re-run them):** the RD-639 gate
+  `/Volumes/KK_T9_External_HDD/!CODING/Testing Agent MAIN/projects/nexusai/reports/2026-09-25-gate-rd579-rd639/report.md` (§3.5 :232-237 B-F1, the
+  re-drive; §3.6 the inside-DATA_DIR links; its "§5 fix shape" that RD-684's first READY :33 quotes); **re-gate 8**
+  (`/Volumes/KK_T9_External_HDD/!CODING/Testing Agent MAIN/projects/nexusai/reports/2026-09-23-gate8/`) whose "fix shape" RD-324's first READY :33 says
+  it builds — find its report by NAME (`ls`), read the N8-6/N7-6 section, and say whether RD-324 is exactly that shape.
+- **Builder's own VOID rounds (read for method; they are lessons, not results):** RD-685 round 1 (eager census disarmed 8 RD-321 N8-1 cells —
+  `session-tools/s84n/rd685/round1-eager-census/`), RD-684 round 1 (a node-cron stub not copied — `session-tools/s84n/rd684/round1-harness-fault/`),
+  RD-424 round 1 (R4's needle encrypted at rest — `session-tools/s84n/rd424/r2/round1-hold.out.txt`).
+
+## 1. Targets — verified at drafting from the object store (08:34–09:05 AEST)
+**origin by `git ls-remote` at 2026-09-27 08:34:56 AEST, and again 08:43:59 AEST (identical):**
+`main` **`1904765007e9447ac6c980f9840c0689a02abe6c`** · `rd-324-ledger-union-s84n` **`168d8501d7414a876fcd963ea0689922735e7902`** ·
+`rd-684-redrive-carries-surviving-target-s84n` **`7085ee7610d6576342e2e8f24afcdd66c9aa5adf`** · `rd-685-hardlinked-store-s84n`
+**`9d7076b0368f02ca030a904a2ce45de93739238e`** · `rd-424-backup-after-write-s84n` **`2ce26eba9752554844bd885903826f409c7d22be`** ·
+`rd-314-law-window-after-source-s84n` **`ce148d5d8332606654c189cd14f3aadee227a407`**. Every sha is a commit in the local object store (`cat-file -t`),
+so nothing on origin is UNMEASURED at drafting.
+**Every other pinned sha, in full (`git rev-parse`, 08:4x AEST):** `7c47ec467f585e9db5daf3a82cdb96deae0b1e7a` (7c47ec4) · `11666d3c4f615190646914270016419fffa642e2`
+(11666d3) · `5f2683cd198067016d56a32ec4e1f46f4e45dcc6` (5f2683c) · `5628e750ebb967b8c6a8e2ca6eb12d9fa5d9b1a4` (5628e75) · `748cecec2a883a117560824ac5615c268dfe0800`
+(748cece) · `057016de2b2929c23f643b7346413199f370d3ce` (057016d) · A: `e10e7d903eff71da65b5b7f52b19a17d30115cef` (e10e7d9), `3beea5c523aeb21ed42fa719bafe0de7136578a5`
+(3beea5c) · B: `b5d65255153c52538ae8910d5f8d6648b691d483` (b5d6525), `b474c85e8150b877e46acd657ad1772117e26420` (b474c85) · C: `724326f1164624e9fa86ce635ef16c68fa4e9062`
+(724326f), `5adaedb5a8e28add95ea28f63121bc78255a6231` (5adaedb) · D: `fa7ffe635c689c3499faae28947b41559be2c7c1` (fa7ffe6) · E: `8dd5de79fd96730b47a273e90a33c48ce8dcfa4d`
+(8dd5de7).
+**Re-read all six at your start, mid and end. A moved TICKET head is a finding and a reason to stop, never a typo to fix.**
+
+**Main at drafting (MEASURED, `git log --format='%H %P' 12b5edc..1904765`):** batch #2 and batch #1 are both on main — `f22929b` (RD-444 merge),
+`5f2683c` (RD-428 merge; 4037/242), `51cab44` + `02b9528` (RD-447 merge + counts; 4092/243), `f20a0ef` + `5628e75` (RD-411 merge + counts; 4120/244),
+`5220335` (RD-315 merge), `748cece` (RD-533 merge), **`1904765`** (RD-627a merge: "Merge main 748cece into rd-627a-erasure-tmp-siblings-s84n", parents
+`057016d` `748cece`; counts **4133/247**). `911e706`, `ed01f7e`, `95c3c9a`, `057016d`, `1524fca`, `823ef9e`, `2f9da1c` are all ancestors of `1904765`
+(`merge-base --is-ancestor`).
+**Main may move during your gate.** Call main at your start **M0**. (1) M0 must be `1904765` or a DESCENDANT of it; (2) `git diff --name-only 1904765 M0`
+must share NO path with any of the five deltas below except `scripts/verify-expected-counts.json` — and must not touch `backend/jsonStorage.js`,
+`backend/azureLogAnalytics.js`, `backend/customerDataFiles.js`, `backend/recoveryLocations.js`, or any file in the §3b populations (the launcher refuses
+on the first list; re-check it yourself); (3) your merged tree is **M0 + all five**, predicted counts **counts(M0) + 36 tests / + 5 suites (4169/252 at
+M0 = `1904765`)**; (4) if main moves AGAIN during your gate, your verdict names M0 and says what moved (C-68). **Never re-base mid-gate.**
+
+### TARGET A — RD-324 (TIER 1)
+- **Chain (MEASURED):** `e10e7d903eff71da65b5b7f52b19a17d30115cef` (the fix, parent `7c47ec4`) → `3beea5c523aeb21ed42fa719bafe0de7136578a5` (merge of main
+  `11666d3`) → **`168d850` (merge of main `1904765`; parents `3beea5c` `1904765`)**. Counts regenerated inside `168d850` (no counts-only tip).
+  `merge-base(168d850, 1904765) = 1904765`.
+- **Delta over `1904765`: 3 files, +152/−8** — `A __tests__/rd324-ledger-guard-union.test.js`, `M backend/dataErasure.js`, counts.
+- **Counts: `e10e7d9` 3982/236 · `3beea5c` 4016/238 · `1904765` 4133/247 → `168d850` 4137/248** (+4/+1; MEASURED).
+- **What changed (READ, `git diff 1904765 168d850 -- backend/dataErasure.js`):** `_ledgerKey(entry)` = `file:<name>` when `entry.file` is a string,
+  else `json:` + `JSON.stringify(entry, Object.keys(entry).sort())` for a plain object, else `json:` + `JSON.stringify(entry)`. In `_writeState`'s
+  N7-6 barrier (non-entitled writes only): `dropped` = prior entries whose key is absent from the passed ledger; warn only if any (with `dropped: N`);
+  **then ALWAYS write `[...priorLedger, ...resulting-not-in-prior]`** — prior order first, prior entry WINS for a shared key (first READY :13,
+  "BEHAVIOUR CHANGE, stated"). The entitled replacer (`replacesLedger`, `purgeNow`'s final write) is untouched.
+- **A drafter's READ you must MEASURE (row g6):** a replacer ARRAY passed to `JSON.stringify` is a property ALLOW-LIST applied at EVERY nesting level,
+  so for a file-less entry a NESTED object keeps only keys that also appear at the top level — `{path:'x', detail:{a:1}}` and `{path:'x', detail:{a:2}}`
+  both serialise to `{"detail":{},"path":"x"}` and would be ONE identity. Reachability: "every entry this module writes carries a string `file`"
+  (the code's own comment) — so only a hand-edited or foreign record. Measure it pure-node; say whether any product path writes a file-less entry.
+- **Cells (first READY :15-19; 4, `git grep` at `168d850` :87/:94/:103/:110):** U1 prior [A,B] + non-entitled [A,X,Y] → A,B,X,Y, no duplicate; U2
+  reordered keys → NO warning; U3 CONTROL real drop warns once, keeps B; U4 CONTROL the entitled replacer replaces.
+- **Builder's claims (RELAYED):** at `7c47ec4` U1, U2 red / U3, U4 green; B 198/198; C 3982/236 (`session-tools/s84n/rd324/hold.out`); on `11666d3` same
+  shape, B 224/224, 4016/238 (`…/rd324/mf/`); on `1904765` same shape, **B 229/229 (13 suites: rd324 + rd627a + rd639 + every erasure-* + rd525)**,
+  **4137/4137 across 248** (`…/rd324/mf2/hold.out`); C-112 290 files, 289 = main, 1 = branch.
+- **NOT TESTED — VERBATIM (first READY :35):** *"NOT TESTED: a product caller that would reach the barrier with new entries. None exists today (the
+  ticket's own census), so the fix is defensive, and the U1/U2 cells drive _writeState directly. It is not RD-684: the re-drive's false certificate is
+  purgeNow's own `failed`, and U4 (the replacer replaces) stays true (RD-639 gate §3.5)."* → **L-A1** (no product caller reaches the barrier with new
+  entries; cells drive `_writeState` directly).
+
+### TARGET B — RD-684 (TIER 1)
+- **Chain (MEASURED):** `b5d65255153c52538ae8910d5f8d6648b691d483` (the fix, parent `11666d3`) → `b474c85e8150b877e46acd657ad1772117e26420` (merge of
+  main `1904765`; parents `b5d6525` `1904765`; **the ONE conflict hunk with RD-627a after `_purgeTree`, resolved as a union — updated READY :8-16**) →
+  **`7085ee7` (parent `b474c85`: `__tests__/rd684-…test.js` + counts only — the D-F1 cells F6/F6b)**. `merge-base(7085ee7, 1904765) = 1904765`.
+- **Delta over `1904765`: 3 files, +328/−5** — `A __tests__/rd684-redrive-keeps-surviving-target.test.js`, `M backend/dataErasure.js`, counts.
+- **Counts: `b5d6525` 4017/238 · `b474c85` 4138/248 → `7085ee7` 4140/248** (+7/+1 over `1904765`).
+- **What changed (READ, `git diff 1904765 7085ee7`):** every "symlink removed but its target still holds the data" failure pushed by `_purgeTree`,
+  the P-6 copy loop and the RD-639 live branch now also carries `survivingTarget`; `SURVIVING_TARGET_PREFIX`; `_survivingTargetOf(entry)` (the field,
+  else the text after the exact prefix — **the upgrade path, AND the only way RD-627a's `_removeInterruptedWrite` failures are recognised: that
+  function is NOT edited (updated READY :21)**); `_targetStillThere(t)` = `lstat` succeeds, **or fails with anything but ENOENT**;
+  `_settleSurvivingTargets(priorFailures, purged, failed)` — (1) a this-run surviving-target failure whose target is gone becomes `purged` (B-F2);
+  (2) an earlier run's surviving-target failure this run said nothing about is re-pushed (text "symlink removed on an earlier run, and its target
+  still holds the data: …", `survivingTarget` set) while its target exists. `purgeNow` reads `priorFailures = getFailureDetail()` BEFORE any write
+  (`7085ee7` :678); settle runs once before the verdict (:1076), before the entitled final write (:1101).
+- **Cells (7; `git grep` at `7085ee7`):** F1 THE GATE'S TEST (live store `feedback.json` → outside; LIVE re-drive stays `purged_incomplete`, target
+  named RAW, bytes intact); F2 CONTROL (target deleted by hand → `purged`); F3 a P-6 recovery copy that is a link; F4 UPGRADE PATH (a `fe53540`-format
+  ledger); F5 B-F2 (a link to a listed store purged later in the same loop → ok, `failed: []`); **F6 D-F1 (a `sessions.json.tmp.*` symlink → outside;
+  the LIVE re-drive stays incomplete)**; **F6b CONTROL** (target deleted → `purged`). All drive `ErasureSweeperScheduler.runOnce()` with
+  `SCHEDULER_LIVE_SEND__ERASURE_SWEEPER=true` and `liveMode` asserted (first READY :19).
+- **Builder's claims (RELAYED):** at `11666d3` F1, F3, F4, F5 red, F2 green (`…/rd684/hold.out`); B 260/260 (13 suites); C 4017/238. On `1904765`
+  WITHOUT RD-684: **F6 RED**, F6b green, F1/F3/F4/F5 red, F2 green (`…/rd684/mf/hold.out`); B1 pure merge 265/265 (14 suites, incl.
+  scheduler-failure-vocabulary); C1 4138/248 (`b474c85`); B2 267/267; **C2 4140/4140 across 248** (`7085ee7`). Round 1 VOID (node-cron stub).
+- **NOT TESTED — VERBATIM (first READY :35-38; updated READY :32 says the first line is now TESTED by F6/F6b):**
+  *"- RD-627a's sibling entries (D-F1). READ ONLY for now: its _removeInterruptedWrite writes the exact prefix _survivingTargetOf parses, so they are
+  carried with no edit to RD-627a. RD-627a is not on main, so this is not yet measured on a combined tree."* **[now TESTED per the updated READY —
+  re-measure]** ·
+  *"- A real server's public /api/health after the re-drive (the gate measured the defect there); here it is filesystem and the sweeper."* ·
+  *"- Hard links (RD-685) are a separate class and not touched."*
+  → **L-B1** (sibling entries — builder says now tested) · **L-B2** (public `/api/health` after the re-drive) · **L-B3** (hard links).
+
+### TARGET C — RD-685 (TIER 1)
+- **Chain (MEASURED):** `724326f1164624e9fa86ce635ef16c68fa4e9062` (the fix, parent **`5628e75`**, main at the time) → `5adaedb5a8e28add95ea28f63121bc78255a6231`
+  (merge of main `1904765`; parents `724326f` `1904765`; **TWO conflict hunks with RD-627a, both resolved as unions — READY :41-44**) → **`9d7076b`
+  (parent `5adaedb`: `M backend/dataErasure.js` + the cell file + counts — "the hard-link rule at RD-627a's sibling site")**. `merge-base(9d7076b,
+  1904765) = 1904765`.
+- **Delta over `1904765`: 3 files, +360/−9** — `A __tests__/rd685-hardlinked-store.test.js`, `M backend/dataErasure.js`, counts.
+- **Counts: `724326f` 4126/245 · `5adaedb` 4139/248 → `9d7076b` 4141/248** (+8/+1 over `1904765`).
+- **What changed (READ, `git diff 1904765 9d7076b`):** `_inodeKey`; `_collectListedNames(dataDir, dirs, purgeFiles)` — every listed store (walking a
+  directory store), every `recoveryCopiesFor` copy, and every `isInterruptedWriteOf` sibling, **counted only when `p.startsWith(dataDir + path.sep)`**
+  and only for `lstat` regular files with nlink > 1; `_hardLinkRefusal(p, census)` — lstat regular file, nlink > 1, `ours = names ? names.size : 1`,
+  `ours >= nlink` → null (the EXCEPTION), else the C-169 text *"another name still holds the data (N names, inode I on device D; M of them are ours);
+  remove the other names, then re-run the purge"*. The refusal is placed BEFORE the unlink at **four sites** — `_purgeTree` (`linkTarget === null &&
+  listed`), `_removeInterruptedWrite` (after the directory branch; `census && st.isFile()`), the P-6 copy loop (`linkTarget === null`), the live store
+  (`liveStat.isFile()`) — each `continue`/`return`s with a failure. **The census is LAZY** (`listedNames()` builds it on first call); READY :13 argues
+  equivalence with an eager build.
+- **A drafter's READ you must MEASURE (row k16):** `dataDir` is `process.env.DATA_DIR || DEFAULT_DATA_DIR` RAW (`backend/dataDir.js:45-46`, READ at
+  `9d7076b`) and the census's `inside()` compares `p.startsWith(dataDir + path.sep)` against paths built by `path.join` (which normalises). **With
+  `DATA_DIR` given WITH a trailing slash, or as a RELATIVE path, no listed name is "inside", the census is empty, `ours` defaults to 1, and the
+  EXCEPTION can never fire** — two of the deployment's own names on one inode would refuse each other on every run, the dead end C-169 :1734 exists to
+  prevent. Predicted, not measured.
+- **Cells (8; `git grep` at `9d7076b`):** (a) live store hard-linked OUTSIDE; (a-tree) a file in `feedback-attachments`; (a-copy) a recovery copy;
+  (b) the EXCEPTION, two listed stores linked; (c) LIVE re-drive after the outside name is removed by hand → purged; (d) CONTROL nlink 1; **(e) the
+  D-C1 shape** (a `sessions.json.tmp.*` sibling hard-linked outside); (e2) the exception across sites (a store and its own tmp sibling).
+- **Builder's claims (RELAYED):** round 2 at `724326f` off `5628e75`: A (a), (a-tree), (a-copy), (c) RED, (b), (d) green; B 226/226; **M-EXC reddens (b)
+  ONLY**; C 4126/245 (`…/rd685/hold.out`). Merge-forward at `9d7076b`: A on `1904765` — (e) RED (D-C1 reproduced), (e2), (b), (d) green, (a), (a-tree),
+  (a-copy), (c) red; B1 pure merge 266/266 (14 suites); C1 4139/248 (`5adaedb`); B2 268/268; **M-SIB reddens (e) ONLY**; **C2 4141/4141 across 248**
+  (`…/rd685/mf/hold.out`). Round 1 VOID and archived (the eager census; C-102).
+- **NOT TESTED — VERBATIM (READY :52-55):** *"- Hard links on a real Azure Files share (SMB does not support hard links the way a local filesystem
+  does; the cells use a local temp volume)."* · *"- A name hard-linked to the legacy emergency path outside DATA_DIR. By the rule it is not "ours",
+  so it is refused; no cell covers it."* · *"- Races: a new hard link created mid-purge."*
+  → **L-C1** (Azure Files / SMB) · **L-C2** (legacy emergency path) · **L-C3** (a hard link created mid-purge).
+
+### TARGET D — RD-424 (TIER 1) — ON AN OLDER BASE
+- **Chain (MEASURED):** `fa7ffe635c689c3499faae28947b41559be2c7c1` (the fix + fixtures, parent `7c47ec4`) → **`2ce26eb` (merge of main `5f2683c`;
+  parents `fa7ffe6` `5f2683c`; counts regenerated inside)**. **`merge-base(2ce26eb, 1904765) = 5f2683c`** — NOT merged forward onto `1904765`.
+- **Delta over `5f2683c`: 8 files, +267/−5** — `M backend/jsonStorage.js`, `A __tests__/rd424-backup-after-write.test.js`, **`M` five granted test
+  files** (`backup-rotation-through-setsetting`, `rd407-concurrent-settings-writers`, `rd407-r2-missing-mid-swap`, `rd452-restore-never-downgrades-group`,
+  `rd535-restore-never-reopens-configured` — exactly C-164 :1680's list), counts.
+- **Counts: `fa7ffe6` 3985/236 · `5f2683c` 4037/242 → `2ce26eb` 4044/243** (+7/+1).
+- **Main since `5f2683c` (`git diff --name-only 5f2683c 1904765`, 10 paths: the image helper, `rd315/411/447/533/627a` cells, `customerDataFiles.js`,
+  `dataErasure.js`, `server.js`, counts) shares ONLY the counts file with RD-424's 8** — so the fleet's merge is predicted counts-only (merge-tree,
+  §1 Merge-trees). **Semantically it is NOT disjoint:** `dataErasure.js` moved under RD-424's erasure freeze (`_erasureIsMidPurge` reads the erasure
+  state file whose lifetime RD-684 and RD-685 extend — row r8), and RD-627a's sweep now reaches the stores RD-424 writes.
+- **What changed (READ, `git diff 5f2683c 2ce26eb -- backend/jsonStorage.js`, `writeFile` :3175-3205):** the PRE-write `backupFile` now also requires
+  `!this._erasureIsMidPurge()` (a stated behaviour change: READY :11 "At base, the pre-write backup did NOT" honour the freeze); **a POST-write
+  `backupFile` after `_replaceFile`, guarded by the freeze only** (not by `hasUserContent`; `backupFile` itself returns early when the live bytes have no
+  user content — `2ce26eb` :1857-1866, READ). Copies are made by `safeCopyFile` → `_replaceFile` (a tmp + rename in `backups/`; never a hard link —
+  READ :1706-1719).
+- **Cells (7 in the new file, `git diff` at `2ce26eb`):** R1 (aiEnabled true then false, torn, boot → last write), R1b (plain key), R2 (condition 3:
+  W1-W3, newest = W3, prev = W2, unchanged rewrite takes no slot), R3 (condition 2: a failed commit backs up nothing), R4 (condition 1: mid-erasure, no
+  copy fanned), **R5 "CONTROL for R4: once the erasure is complete, a write backs up again"**, RD424-UPSIDE (a torn store restores WITH the group).
+  Plus the re-planted cells in the five granted files (READY :15-25).
+- **Builder's claims (RELAYED):** round 2 at `fa7ffe6`: A RED R1, R1b, R2, R4, R5, RD424-UPSIDE; every re-planted cell green on the old code; B 233/233 (19
+  files); mutants M-ROT, M-RETRY, M-GRP, M-POST (READY :17-21); C 3985/236 (`…/rd424/r2/`). Merge-forward at `2ce26eb` on `5f2683c`: "the same red set (R1,
+  R1b, R2, R4, R5; R3 green)" — **RD424-UPSIDE is not named there**; B 233/233; **4044/4044 across 243**; C-112 285 files, 279 = main, 6 = branch.
+- **NOT TESTED — VERBATIM (READY :41-45):** *"- A live server boot after a tear (these are JsonStorage-level cells, as rd452 and rd535 are)."* · *"- A
+  store written outside writeFile (the pre-write call still covers it; no cell)."* · *"- Concurrent writers on the post-write rotation (RD-407's own
+  concurrency cells passed in B, but none targets the new call)."* · *"- The extra small copy per write is not measured for performance."*
+  → **L-D1** (live server boot after a tear) · **L-D2** (a store written outside writeFile) · **L-D3** (concurrent writers on the post-write rotation) ·
+  **L-D4** (performance).
+
+### TARGET E — RD-314 (TIER 1) — ON AN OLDER BASE
+- **Chain (MEASURED):** `8dd5de79fd96730b47a273e90a33c48ce8dcfa4d` (the fix, parent `7c47ec4`) → **`ce148d5` (merge of main `11666d3`; parents `8dd5de7`
+  `11666d3`)**. **`merge-base(ce148d5, 1904765) = 11666d3`** — NOT merged forward onto `1904765`.
+- **Delta over `11666d3`: 3 files, +248/−4** — `A __tests__/rd314-law-window-after-source.test.js`, `M backend/azureLogAnalytics.js`, counts.
+- **Counts: `8dd5de7` 3988/236 · `11666d3` 4012/237 → `ce148d5` 4022/238** (+10/+1).
+- **Main since `11666d3` (24 paths) shares ONLY the counts file with RD-314's 3** (MEASURED). `backend/azureLogAnalytics.js` is blob `036c34f` at
+  `11666d3`, `5f2683c` and `1904765`, `595e71f` at `ce148d5`.
+- **What changed (READ, `git diff 11666d3 ce148d5`):** `insertWindowAfterSource(kql, stage)` — a single left-to-right scan tracking one quote state
+  (`'`, `"`; `@'`/`@"` verbatim with no backslash escape; backslash skips a char in a plain string), one shared bracket depth over `()[]{}`, `//` to
+  end of line; a top-level `;` with non-blank text after it restarts the expression (`let` prelude); inserts `| <stage> ` before the first top-level
+  `|` of the expression, or appends (on a new line when the last line is a `//` comment). `_executeQueryDirect` calls it where it used to append,
+  still gated by `!optimizedQuery.toLowerCase().includes('timegenerated') && !options.skipTimeFilter`. Exported as
+  `module.exports.insertWindowAfterSource`.
+- **Cells (10; `git grep` at `ce148d5` :117-174):** S1 STRUCTURAL GUARD (every public method enumerated and driven; no emitted query filters after it
+  samples; population controls); S2 testConnection; S3 × 6 (`test.each`: the server.js shape, a let prelude, a pipe in a string, a pipe in brackets, a
+  comment on the source line, a bare source); S4 CONTROL (names TimeGenerated / skipTimeFilter → unchanged); S5 CONTROL (RD-305's boundary: `timespan`
+  byte-for-byte). **Every assertion is on the emitted axios POST body, with the cell file's OWN stage splitter** (READY :15).
+- **Builder's claims (RELAYED):** at `7c47ec4` S1, S2 and five S3 shapes red, S1's one offender `null | take 1 | where TimeGenerated > ago(1d)`; S3
+  bare-source, S4, S5 green; B 128/128 (rd314 + 7 LAW suites); C 3988/236 (`…/rd314/hold.out`). On `11666d3` same shape; B 136/136 (+ rd579); **4022/4022
+  across 238** (`…/rd314/mf/hold.out`).
+- **NOT TESTED — VERBATIM (READY :37-39):** *"- A live Log Analytics workspace (no credentials in a session). Azure executes the KQL, and this file asserts
+  only the query the product emits."* · *"- Whether a stored or LLM-generated query that lacks TimeGenerated reaches the server.js shape in practice. The
+  ticket said so, and it is still unmeasured."* · *"- KQL forms beyond the six shapes (for example a union with pipes inside its operand list is covered
+  only by the bracket rule)."*
+  → **L-E1** (a live workspace) · **L-E2** (reachability of a stored/LLM query) · **L-E3** (KQL forms beyond the six shapes).
+
+### File overlap and MERGE-TREES (MEASURED, READ ONLY in NexusAI; objects in the drafter's own scratch)
+Name sets over each head's merge-base with main: A = `1904765..168d850` (3), B = `1904765..7085ee7` (3), C = `1904765..9d7076b` (3), D = `5f2683c..2ce26eb`
+(8), E = `11666d3..ce148d5` (3). Pairwise `comm -12`: **A∩B = A∩C = B∩C = `backend/dataErasure.js` + counts**; every pair with D or E = the counts file
+only.
+**`git merge-tree --write-tree --name-only --messages` (git 2.54.0, Apple Git-157), `GIT_OBJECT_DIRECTORY` = the drafter's own scratch dir,
+`GIT_ALTERNATE_OBJECT_DIRECTORIES` = NexusAI's `.git/objects` (read-only); NexusAI `count-objects` `count: 420` before and after the runs (412 at 08:34,
+so the live seats wrote 8 loose objects between readings — not the drafter's):**
+
+| pair | rc | conflicts | auto-merged | note |
+|---|---|---|---|---|
+| M(`1904765`) vs A / B / C | 0 / 0 / 0 | none | — | fast-forwardable: each head contains M |
+| M vs D (`2ce26eb`) | 1 | counts only | — | the fleet's merge-forward is counts-only |
+| M vs E (`ce148d5`) | 1 | counts only | — | the same |
+| A vs B | 1 | counts only | `dataErasure.js` → blob `4e0a884` (`node --check` rc 0) | **= N's measurement** (updated READYs :15/:30) |
+| A vs C | 1 | counts only | `dataErasure.js` → blob `5d5caea` (`node --check` rc 0) | **= N's measurement** (RD-685 READY :47) |
+| **B vs C** | **1** | **`dataErasure.js` (ONE hunk) + counts** | — | **= N's measurement** (RD-685 READY :48) |
+| every pair with D or E | 1 | counts only | — | disjoint files |
+
+**The B × C hunk, as git writes it (`7085ee7` vs `9d7076b`):** conflict lines 109-254 of the conflicted file; **the hunk STARTS after a SHARED `/**`
+line (:108) and ENDS before a SHARED `}` line (:255)** — ours = RD-684's doc body + `SURVIVING_TARGET_PREFIX` … `_settleSurvivingTargets` without its
+closing brace; theirs = RD-685's doc body + `_inodeKey` … `_hardLinkRefusal` without its closing brace. **So "the union" is NOT `ours` followed by
+`theirs`: the literal concatenation of the two sides fails `node --check` (rc 1, drafter's negative control); the union must re-supply `}` + blank +
+`/**` between them.** The drafter's canonical union (RD-684's block, then RD-685's block, then RD-627a's `_removeInterruptedWrite` as before):
+`node --check` rc 0; **union vs `7085ee7` = exactly RD-685's own diff (`1904765..9d7076b`), and union vs `9d7076b` = exactly RD-684's own diff
+(`1904765..7085ee7`)**, compared as the +/− line lists (130 and 77 lines, `cmp` identical) — the control N used for his own unions.
+**The chain (trees, bases emulated with `--merge-base=1904765`):** M + A → auto; + B → counts only (`dataErasure.js` auto-merges); + C → **the same ONE
+hunk** (conflict lines 109/174/254) + counts. **Reverse (M + C + A + B): the same one hunk, split at DIFFERENT lines (109/189/254) with ours/theirs
+swapped.** With the canonical union (RD-684's block first, whatever side it is on) **both orders give `dataErasure.js` blob `1f708e2`** (`node --check`
+rc 0; `_ledgerKey`, `_settleSurvivingTargets`, `_hardLinkRefusal`, `_collectListedNames`, `_removeInterruptedWrite` all present). Then + D → counts
+only, + E → counts only. Predicted merged blobs: `dataErasure.js` **`1f708e2`** (identical to no parent), `jsonStorage.js` `a63d862` (D's),
+`azureLogAnalytics.js` `595e71f` (E's), `customerDataFiles.js` `708c38b` and `backend/server.js` `bc099b2` (M's), `package-lock.json` `9064763` (every
+head and M). **`__tests__`: 294 files (M 289 + 5 new) — predicted 0 content-merged (the five D-modified files are untouched by main since `5f2683c`).**
+**Re-prove every line of this yourself; the drafter's emulation is a prediction.**
+
+### MERGE ORDER — the drafter's proposal, with its predicted end state and the C-68 re-run set per merge
+**Proposed order (the fleet's): 1. RD-324 → 2. RD-684 → 3. RD-685 → 4. RD-424 → 5. RD-314.**
+Why: A is conflict-free against both B and C, so it goes first on the cheapest merge; B before C so the ONE hand resolution happens once, on the tree
+that already holds everything else of the erasure trio, and in the canonical order (RD-684's block first) that N's two previous unions used ("ours in
+full, then theirs in full"); D after the erasure trio so its C-68 set runs against the erasure code it composes with (the freeze, row r8); E last and
+anywhere — it is disjoint in code and in cells. **Order is the gate's to CHALLENGE, not to accept: if your order-independence control (§9 Q3) or
+any merged-tree row shows the order matters, say so and propose another.**
+
+| step | merge | predicted conflicts | predicted counts after regeneration | C-68 re-run set BY NAME (run on the tree after that step) |
+|---|---|---|---|---|
+| 1 | M + RD-324 | none (A contains M) | 4137/248 | rd324 + rd627a + rd639 + every `erasure-*` (9 at M) + rd525 (= N's B, 13 suites) |
+| 2 | + RD-684 | counts only; `dataErasure.js` auto | 4144/249 | rd684 + rd324 + rd627a + rd639 + every `erasure-*` + rd525 + scheduler-failure-vocabulary |
+| 3 | + RD-685 | **`dataErasure.js` ONE hunk (canonical union) + counts** | 4152/250 | **rd684 + rd685 + rd639 + rd627a + every `erasure-*` (the commission's set)** + rd324 + rd525 + scheduler-failure-vocabulary |
+| 4 | + RD-424 | counts only | 4159/251 | rd424 + the five granted files + backup-rotation-generations, backup-rotation-warning-states, erasure-reaches-backups, rd452-group-config-unit, rd554-restore-r1/r3/r4/r5/r7/r8, rd436-r4-enforce-stamp-and-status, rd436-r3-restore-recovery-page, rd404-sentinel-first-boot-vs-wipe (= N's list, READY :24) **+ rd684 + rd685 + every `erasure-*`** (the freeze × the extended incomplete state) |
+| 5 | + RD-314 | counts only | **4169/252** | rd314 + law-window-truncation, data-freshness, discover-tables-tenant-mask, supply-empty-state, sustainability-log-source-contract, synthetic-feed, table-discovery + rd579 (= N's mf B) |
+**End state predicted: 4169/252 = 4133 + 4 + 7 + 8 + 7 + 10 / 247 + 5 — ARITHMETIC; C-68 says the measurement decides.** The `erasure-*` names at `1904765`
+(`git ls-tree`, READ): erasure-crash-window-and-fallback-paths, erasure-health-branches, erasure-incomplete-is-not-a-dead-end,
+erasure-ledger-survives-every-writer, erasure-partial-purge-leaves-a-record, erasure-reaches-attachments, erasure-reaches-backups,
+erasure-reaches-every-read-location, erasure-verdict-is-derived-from-failures. **Re-derive every set in YOUR clone: `git grep -l -E
+'dataErasure|customerDataFiles|recoveryLocations'`, `'jsonStorage|backupFile|restoreFromBackups'`, `'azureLogAnalytics|AzureLogAnalytics'` over
+`__tests__` at M0, each with a positive control (the ticket's own cell file must be found at its head) — the drafter did NOT run those greps (hard rule:
+no content search over another project's tree); add every file they find that the table misses, and say which.**
+
+### How to build your trees
+- **No worktree is created in the NexusAI repo, and you never work in its `2_Project_Files` checkout (C-28).** In that repo use ONLY read verbs:
+  `show`, `log`, `diff`, `ls-tree`, `cat-file`, `rev-parse`, `merge-base`, `grep`, `ls-remote`, `archive`, `count-objects`. Never `fetch`, `pull`, `push`,
+  `checkout`, `worktree`, `commit`, `stash`, `gc`, `clean`, or `merge-tree --write-tree` without a scratch `GIT_OBJECT_DIRECTORY` of your own.
+- **Head trees:** `git -C <repo> archive <sha> | tar -x -C <fresh mktemp -d under
+  /Volumes/KK_T9_External_HDD/!CODING/Testing Agent MAIN/projects/nexusai/qa-trees/batch3.XXXXXX/>`, git-indexed where a full verify or a cell needs a
+  git tree.
+- **D and E on current main — the MERGED-FORWARD trees (the gate's own, never the author's branch):** in your OWN scratch clone, `git checkout -b fwd-424
+  <M0>` then `git merge --no-ff 2ce26eb`; and `fwd-314` the same with `ce148d5`. Predicted: counts-only conflict each; resolve by REGENERATION (C-57)
+  after C-104's staging; predicted **4140/248** (M0 + RD-424) and **4143/248** (M0 + RD-314) at M0 = `1904765`. **These trees exist only in your clone.
+  You NEVER push, never write a ref in NexusAI, and never merge into the author's branch — the fleet's merge-forward is the author's (N's) job, after
+  your verdict, as RD-424's own condition 6 was.** Verdicts for D and E name BOTH the head and your merged-forward tree.
+- **The merged tree:** §9, in **your OWN scratch clone** (`git clone --shared --no-checkout <repo> <your own dir>`).
+- **Each tree is EXCLUSIVE to this gate and to ONE purpose.** A fresh `mktemp -d` per arm; never reuse a mutant tree for a clean arm; `batch3`-prefixed
+  directories only. Nothing in another gate's `qa-trees/*`, the builders' `worktrees/` or `session-tools/` is run in — read only.
+- `node_modules`: an APFS clone (`cp -c -R`) of the newest gate tree you trust, **after proving** `package-lock.json` is blob `9064763` there too (it is
+  `9064763` at M and all five heads — MEASURED); a real directory, never a symlink.
+
+## 2. Why these tiers, and who is waiting
+- **RD-324 TIER 1:** the ledger is the only durable record of what an erasure could NOT delete. **An entry lost from the persisted ledger while the copy
+  it names still exists is a Blocker; an entry invented (a copy named that never existed or that this run deleted) is a Major; a false or missing warning
+  is a Minor.**
+- **RD-684 TIER 1:** the certificate and public `/api/health` are customer-rights statements. **Any state in which the persisted record or anonymous
+  `/api/health` says `purged` / "customer data has been purged" while bytes behind a link survive is a Blocker; an incomplete that can never resolve
+  after the data is truly gone (a dead end) is a Major.**
+- **RD-685 TIER 1:** **a DATA_DIR name unlinked while another name keeps the bytes and the record says `purged` is a Blocker (D-C1's class); the
+  deployment's OWN names refusing each other on every run (a dead end, C-169 :1734) is a Major; a refusal whose evidence text misleads the operator is a
+  Minor.**
+- **RD-424 TIER 1:** **a torn store that restores a state OLDER than the last successful write is a Major; a copy of a store fanned into `backups/`
+  during an unfinished erasure is a Blocker (R-1); a restore that downgrades the group or reopens a configured deployment (rd452/rd535) is a Blocker.**
+- **RD-314 TIER 1:** **an emitted query that samples (take/top/limit/sample) BEFORE the window, or places the window inside a string, comment or
+  sub-expression, is a Major; a query that was correct at base and is now syntactically broken is a Major.** (No workspace executes KQL here: syntax is
+  judged by the emitted text only — L-E1.)
+- **The queue.** The seats CHURNED during drafting: at 08:40:03 AEST NexusAI-M (`%19`) and NexusAI-P (`%18`) were live and NexusAI-N had no pane; at
+  08:55:47 AEST NexusAI-M (`%19`) and **NexusAI-N, the author of all five (`%21`)** were live and NexusAI-P had exited; at 08:56:40 P was back (`%22`). Expect a live, changing queue; the
+  builders self-yield behind each of your `qa-*` tickets (C-141 ADDENDUM 3/4).
+  Expect a live queue; the builders self-yield behind each of your `qa-*` tickets (C-141 ADDENDUM 3/4).
+
+## 2a. LEGITIMATE SHAPES — required measurements, row by row, base and head(s) in the same window
+**Columns: the head, the base it is measured against (M = `1904765` for A/B/C; `5f2683c` AND `1904765` for D; `11666d3` AND `1904765` for E), and
+the MERGED tree. Every erasure row: a REAL DATA_DIR of your own, planted before the drive, driven through the product path (`requestErasure` →
+`purgeNow`, then the sweeper's `runOnce` in LIVE mode for the re-drive, as batch #1 §7.4 did), the ledger and `erasure-audit.jsonl` read RAW (H-2),
+every byte of the case dir and of an outside sentinel tree hashed before/after by an lstat walk that never follows.**
+
+**A — the ledger door (RD-324). Pure-node on `_writeState` through the module's exports or a preload (H-3 landing control), AND through `purgeNow` where
+the row says so.**
+
+| row | shape | expected at `168d850` | at M | predicted-by |
+|---|---|---|---|---|
+| g1 | prior [A,B] + non-entitled write passing [A,X,Y] | A,B,X,Y; no dup | [A,B] (X,Y lost) | builder (U1) |
+| g2 | the same entries, keys reordered | no warning; unchanged | false "DROPPED" warning | builder (U2) |
+| g3 | a write that really drops B | warns once (`dropped: 1`); B kept | warns; B kept | builder (U3, control) |
+| g4 | the entitled replacer with [X] | [X] | [X] | builder (U4, control) |
+| g5 | a passed entry naming the SAME `file` as a prior one with DIFFERENT text / an added `survivingTarget` | **prior wins** (stated behaviour change) — **and on the merged tree: does any product path (the `purging` marker :829-836, the P-6/R-2 writes :890-899) pass an UPDATED entry through a non-entitled write, so RD-684's richer entry is silently discarded until the final write?** | — | builder (stated) + drafter |
+| g6 | two FILE-LESS entries differing only inside a NESTED object (`{path:'x',detail:{a:1}}` / `{…a:2}`) | **one identity** (the replacer array drops nested keys) — measure; and whether any product writer emits a file-less entry | — | **drafter (READ)** |
+| g7 | an entry whose `file` is a number / null; a `null` entry; a non-array `filesFailed` on disk | no throw; identity sane | — | drafter |
+| g8 | prior ledger with TWO entries for one `file` (a pre-RD-324 record) | both kept, no warning | — | drafter |
+| g9 | `filesFailed` OMITTED by a non-entitled write over a non-empty prior | prior kept; warning? | — | drafter (the `passedFilesFailed: '(omitted)'` branch) |
+| g10 | A × B: run 1 leaves a surviving-target entry; the re-drive's mid-run marker write passes it back; the final write replaces | the persisted record ends with RD-684's carried entry, exactly once | — | drafter — **only the merged tree has both** |
+
+**B — the carried surviving target (RD-684). At `7085ee7` and M (and merged for every row): run 1, then the sweeper's LIVE re-drive (and a 3rd run
+where the row says so). `purgedBy`, `status`, `filesFailed` RAW.**
+
+| row | plant | expected at `7085ee7` | at M | predicted-by |
+|---|---|---|---|---|
+| h1 | live store `feedback.json` → an outside FILE | re-drive stays `purged_incomplete`, target named, bytes intact | re-drive says `purged` (B-F1) | builder (F1) |
+| h2 | h1, then the target deleted by hand | `purged`, entry gone | `purged` | builder (F2, control) |
+| h3 | a P-6 recovery copy that is a link → outside | carried | `purged` | builder (F3) |
+| h4 | a `fe53540`-format ledger (target only in the text) | carried | `purged` | builder (F4) |
+| h5 | `settings.json` → `DATA_DIR/feedback.json`, feedback purged later in the loop | run 1 ok, `failed: []` | stale failure (B-F2) | builder (F5) |
+| h6 | **D-F1: `sessions.json.tmp.4242.ff` → an outside FILE (batch #1 d4)** | carried across the LIVE re-drive | `purged` over surviving bytes | builder (F6) |
+| h7 | a tmp sibling → an outside DIRECTORY (batch #1 d5); d8 (the live store AND its `.tmp.1` → the SAME outside file) | both carried; d8 names BOTH, exactly once each | `purged` | drafter (batch #1 rows) |
+| h8 | the outside target's PARENT made unreadable (`chmod 000` on your own dir, restored after — H-5) → `lstat` EACCES | **kept** (only ENOENT resolves) | — | drafter — **predicted: no cell pins it (M-B4)** |
+| h9 | the target REPLACED by different bytes / by a dangling symlink at the same path | kept (lstat succeeds) | — | drafter |
+| h10 | the app RE-CREATES `feedback.json` as a real file between runs (a product write) | the re-drive purges it AND keeps the carried entry (a different `file`? the same `file`?) — say which, and whether the record is truthful | — | drafter |
+| h11 | **three** re-drives over h1 | exactly ONE entry per file every time; text and `survivingTarget` stable | — | drafter |
+| h12 | **public `/api/health` on a REAL loopback server** after run 1 and after the LIVE re-drive, h1 + h6 planted (batch #1 §7.5's harness: `USE_AZURE_LOG_ANALYTICS=true`, `SCHEDULER_LIVE_SEND__ERASURE_SWEEPER=true`, the sweeper ticked by a preload with its landing control) | **DEGRADED "Data erasure INCOMPLETE" after BOTH ticks** | "customer data has been purged" after tick 2 | drafter — **discharges L-B2** |
+
+**C — the hard-linked name (RD-685). At `9d7076b` and M (and merged). `ln` (never a symlink) under your own mktemp dir; prove `nlink` and the inode
+(`stat -f '%l %i'`) before the drive (H-10).**
+
+| row | plant | expected at `9d7076b` | at M | predicted-by |
+|---|---|---|---|---|
+| k1 | live store hard-linked OUTSIDE | refused; `purged_incomplete`; the C-169 text; both names' bytes intact | unlinked, `purged` | builder (a) |
+| k2 | a file in `feedback-attachments` hard-linked outside | the same | `purged` | builder (a-tree) |
+| k3 | a recovery copy hard-linked outside | the same | `purged` | builder (a-copy) |
+| k4 | two LISTED stores linked to each other | both purged, `purged` | both purged | builder (b) |
+| k5 | k1, then the OUTSIDE name removed by hand, LIVE re-drive | `purged` | — | builder (c) |
+| k6 | nlink 1 | unchanged | unchanged | builder (d, control) |
+| k7 | **D-C1: a `sessions.json.tmp.*` sibling hard-linked outside (batch #1 d12)** | refused, bytes intact | `purged`, bytes survive | builder (e) |
+| k8 | a store and its own tmp sibling linked | both purged | — | builder (e2) |
+| k9 | nlink 3: two OURS + one outside | both ours refused; text "3 names … 2 of them are ours" | — | drafter |
+| k10 | a store hard-linked to a NON-listed file INSIDE DATA_DIR (e.g. `notes.txt`; and `.machine-id`) | refused ("not ours"); `.machine-id` byte-identical | — | drafter |
+| k11 | a store hard-linked to its OWN recovery copy under `backups/` | both purged (both listed) | — | drafter |
+| **k12** | **k1, then the app WRITES that store (`writeFile` → `_replaceFile`: a new inode under the DATA_DIR name, nlink 1; the outside name keeps the pre-erasure bytes), then the LIVE re-drive** | **C-169's oracle: never `purged` while the outside name holds erased data.** Drafter's READ prediction: **`purged`** — a hard-link refusal carries no `survivingTarget`, so RD-684's settle does not carry it, and the new inode is purged normally. **The same after the operator deletes OUR name instead of the other one.** | — | **drafter — the composition B × C on the merged tree; measure at `9d7076b` too** |
+| k13 | the order of first contact: the multi-link name visited FIRST vs LAST in the loop; a directory store with a hard link deep inside | census results equal to an EAGER census (arm M-C1) on every row | — | builder (READY :13, "equivalent") |
+| k14 | a hard link created AFTER the census is built (a preload hook on `_collectListedNames`'s return, H-3) | L-C3, declared — measure if cheap | — | builder (declared) |
+| **k15** | **k4 (the exception) with `DATA_DIR` given WITH A TRAILING SLASH, and as a RELATIVE path** | **both purged** (the exception) | — | **drafter (READ): predicted REFUSED on every run — `inside()` never matches, `ours` = 1 (§1 Target C)** |
+| k16 | a hard link on a DIFFERENT volume is impossible (EXDEV) — prove it once so no row pretends otherwise | `ln` fails EXDEV | — | drafter (a control) |
+
+**D — the newest backup is the newest write (RD-424). JsonStorage-level (as the cells) AND one real-server boot after a tear (L-D1). At `2ce26eb`,
+`5f2683c`, your merged-forward `fwd-424` and the merged tree.**
+
+| row | shape | expected at `2ce26eb` | at `5f2683c` | predicted-by |
+|---|---|---|---|---|
+| r1 | aiEnabled true then false; tear `settings.json`; boot | reads FALSE | TRUE | builder (R1) |
+| r2 | plain key X then Y; tear; boot | Y | X | builder (R1b) |
+| r3 | W1, W2, W3, then an unchanged rewrite | newest W3, prev W2; no slot consumed | — | builder (R2) |
+| r4 | a write whose commit fails (EACCES on the tmp dir, your own) | throws; no backup holds the attempted bytes | — | builder (R3) |
+| r5 | a write during an UNFINISHED erasure (`purging` / `purged_incomplete` on disk) | no copy fanned (pre OR post) | the PRE copy fanned | builder (R4) |
+| r6 | the same after the erasure completes (`purged`) | backs up again | — | builder (R5) — **R5 is red at base; say whether it is a CONTROL in C-40's sense** |
+| r7 | the group upside (rd452/rd535 shape): torn store restores WITH the group; CONFIGURED; no marker | as stated | — | builder (UPSIDE) |
+| **r8** | **THE COMPOSITION D × B/C: an erasure left `purged_incomplete` by an outside SYMLINK target (h1) or an outside HARD LINK (k1), then N settings writes, a tear, a boot** | **merged: `purged_incomplete` persists across re-drives (B/C working as designed), so the R-1 freeze blocks EVERY backup — measure: how many writes, what `backups/` holds, what the boot restores, what `/api/health` says** | at M + RD-424 alone (`fwd-424`), the re-drive flips to `purged` and backups resume | **drafter — only the merged tree has both; grade by the tiers' rubric, never as a regression of either ticket alone without saying so** |
+| r9 | CLEAR a store to `{}` / `[]` (no user content), tear, boot | **what restores?** — `backupFile` returns early on no-user-content live bytes, so the newest backup is the PRE-clear state; predicted: the clear is reverted (the RD-424 class, for a clearing write) | the same | drafter (READ `2ce26eb` :1857-1866) |
+| r10 | kill -9 INSIDE the post-write backup (a preload that exits between the backup's tmp write and its rename; landing control) → boot; then an erasure | a `backups/<store>.backup.json.tmp.*` stranded; does boot restore ignore it; does the purge leave it (batch #1 D-N1 / L-D2 of RD-627a)? | — | drafter |
+| r11 | a store written OUTSIDE writeFile (a direct `fs.writeFileSync`), then a writeFile of another key | the pre-write call backs the outside write up | — | builder (declared L-D2) |
+| r12 | two JsonStorage instances (two processes) writing `settings.json` alternately, 50 rounds | newest backup is ONE of the two last writes, never torn; prev never an unreadable copy | — | builder (declared L-D3) — measure cheaply |
+
+**E — the window after the source (RD-314). Pure-node on the EXPORTED `insertWindowAfterSource` AND through `_executeQueryDirect` with axios
+stubbed at the wire (the cells' method), at `ce148d5`, `11666d3`, `fwd-314` and merged. No network: the belt (H-6) and an axios stub that throws if
+it is ever asked to send.**
+
+| row | query | expected emitted at `ce148d5` | at `11666d3` | predicted-by |
+|---|---|---|---|---|
+| q1 | `null \| take 1` (testConnection) | window BEFORE take | after take | builder (S2) |
+| q2 | `PrinterLogs_CL \| extend u = UserName \| take 50` | window right after the source | after take | builder (S3) |
+| q3 | `let x = 5; T \| take x` | after `T` | after take | builder (S3) |
+| q4 | `T \| where s == "a\|b" \| take 5`; `'a\|b'`; `@"a\|b"`; `@'a\|b'` | after `T`; string untouched | — | builder (S3, one) + drafter (all four) |
+| q5 | `union (T \| take 5), U \| take 10` | after the union; **the inner `take 5` still samples BEFORE the window** — say so | — | drafter — **L-E3's named case; is it a finding?** |
+| q6 | `T // src \| x\n\| take 5` and a query ending in `// comment` with no pipe | the stage never lands in a comment | — | builder (S3) |
+| q7 | bare `T` | `T \| where …` | same | builder (S3) |
+| q8 | a query naming `TimeGenerated`; `skipTimeFilter: true` | unchanged | unchanged | builder (S4) |
+| q9 | a plain string with an escaped quote: `T \| where s == "a\"\|b" \| take 5`, `'it\'s \| x'` | the pipe inside the string ignored | — | drafter (the backslash skip) |
+| q10 | a verbatim string with a DOUBLED quote: `@"a""\|b"` | ignored (the doubled quote toggles twice) — measure | — | drafter |
+| q11 | a KQL multi-line string literal ```` ```a \| b``` ```` | **predicted: the scanner has no triple-backtick rule — the inner pipe is taken as the first stage** | — | drafter (READ) |
+| q12 | `T \| where url == "http://x" \| take 5` (`//` inside a string) | the `//` is NOT a comment | — | drafter |
+| q13 | `print x = 1`, `datatable(a:int)[1] \| take 1`, `search "x" \| take 5`, `T \| summarize count() by P` (no TimeGenerated) | what is emitted; **`summarize` at base appended a window AFTER the summarize (a query that names a dropped column) — say whether base errored and head now returns windowed data (a behaviour change for callers)** | — | drafter |
+| q14 | a `let` whose value holds a `;` inside a string, and a `let` function body with a pipe in `{}` | the expression starts after the LAST top-level `;` | — | drafter |
+| q15 | an UNCLOSED quote / bracket (a malformed caller query) | what is emitted (the window may land inside the string) — pre-existing? | — | drafter |
+| q16 | CRLF line endings with a comment on the source line | the stage after the source, never inside the comment | — | drafter |
+| q17 | the product's OWN emitted queries (every public method, as S1 drives them) — list each emitted KQL with a sub-query (`join (S …)`, `union (…)`) and whether a sampling stage sits INSIDE it before the window | census | census | drafter (the diff context shows `T \| join kind=leftouter (S) on SerialNumber_s`) |
+
+**A row whose expected verdict and clause disagree is a finding against this brief — say so.**
+
+## 3. THE QUESTIONS ALL FIVE TARGETS ANSWER FIRST
+0. **SESSION_SECRET UNSET, EVERY RUN** — §3a H-1's ONE permitted printer. Positive control once per target: its own cell file with a throwaway random
+   64-hex secret exported (never printed, never written) — identical results, or say what differed.
+1. **Re-pin everything yourself:** `git ls-remote` at start, mid and end (three timestamped readings, branch name beside each sha, all six refs); M0 and
+   the "Main may move" rule re-proved on M0; chains and exact parents (`git log --format='%H %P'`); deltas (`git diff --name-status`); counts at
+   `7c47ec4`, `11666d3`, `5f2683c`, `1904765`, M0, `e10e7d9`, `3beea5c`, `168d850`, `b5d6525`, `b474c85`, `7085ee7`, `724326f`, `5adaedb`, `9d7076b`,
+   `fa7ffe6`, `2ce26eb`, `8dd5de7`, `ce148d5`.
+2. **POSITIVE CONTROL FIRST — re-derive every red and every mutant INDEPENDENTLY** — your own scripts, never the builders' `hold.sh` files (read them for
+   method). **Before each mutant arm, prove it still parses — `node --check` on every mutated JS file, exit 0, quoted — and that it LANDED (the exact
+   mutated text present, the original absent once the new text is removed; batch #1's `qa-mutate.py <arm> <mid> --verify` with its negative control).
+   A red from a mutant that does not parse, or a green from one that never landed, is a VOID arm.** Quote the failing assertion of every red.
+3. **Name every behaviour guarded by no cell, and every one guarded only by source text (C-122).**
+4. **Full verify of each head, of `fwd-424`, `fwd-314`, and of the merged tree**, `npm run verify -- --maxWorkers=2` (RD-561), through the lock, on a
+   git-indexed tree, SESSION_SECRET UNSET. **Predicted: `168d850` 4137/248 · `7085ee7` 4140/248 · `9d7076b` 4141/248 · `2ce26eb` 4044/243 · `ce148d5`
+   4022/238 · `fwd-424` 4140/248 · `fwd-314` 4143/248 · merged (M0 + all five) counts(M0) + 36 / + 5 = 4169/252 at M0 = `1904765`** (predictions; C-68 says
+   the measurement decides). Every failure by NAME. **"Re-run until green" is not an acceptance gate (charter §4d).**
+
+## 3a. INSTRUMENT RULES — H-1..H-12 (carried from batch #1's brief, which carried the rd579-rd639 and batch #2 lessons) and H-13..H-16 (batch #1's own S-1..S-11)
+- **H-1 (rd579-rd639 S-1: a SET/UNSET idiom printed the secret's VALUE).** The ONLY permitted printer, verbatim:
+  `if [ -n "${SESSION_SECRET+x}" ]; then echo "SESSION_SECRET SET (length ${#SESSION_SECRET})"; else echo "SESSION_SECRET UNSET"; fi`.
+  **FORBIDDEN anywhere in your scripts:** `${SESSION_SECRET-…}`, `${SESSION_SECRET:-…}`, `${SESSION_SECRET+$SESSION_SECRET}`, `echo
+  $SESSION_SECRET`, `printenv`, `env | grep`, `set | grep`, and **echoing an env array that could hold it (`${envs[*]}`, batch #2 S-5a)**.
+  **Self-test it BEFORE the first hold (a control that can fail):** run the printer once with a throwaway exported and once unset, capture both, assert
+  the throwaway's value is ABSENT from both (compare in-process; never print it). **After every hold, scan that hold's logs for the throwaway value** and
+  report the count (0); **the scan's own positive control plants a DIFFERENT random marker, never the throwaway** (batch #2 S-5b). The same discipline
+  covers every needle: print a needle only as `<first4>…<last4>`, and **mask GUIDs with or without hyphens** (batch #1 S-2).
+- **H-2 (rd579-rd639 S-2).** Never construct a product storage object (`JsonStorage`, `SimpleDatabase`, or any module whose constructor writes) on a
+  DATA_DIR you are measuring AFTER its server booted or its erasure ran. Seed BEFORE; read ledgers, `settings.json`, `erasure-audit.jsonl`, backups and
+  logs RAW. **RD-424's rows are JsonStorage-level by design: each r-row uses a FRESH DATA_DIR, and the "boot" is a NEW process whose construction IS the
+  measured restore — say which object each row constructs and when.**
+- **H-3 (rd579-rd639 S-3: the sweeper never started).** Every hook you rely on (a preload, a signal handler, a mutated rule, a race-writer, the sweeper
+  in LIVE mode, a kill-inside-backup hook) gets a **LANDING CONTROL** before the measured run: prove it fired once on a known input. **The live sweeper
+  needs `USE_AZURE_LOG_ANALYTICS=true` for the schedulers to start and RD-684's cells need node-cron's stub (its round 1 VOID) — prove `liveMode`.** An arm
+  whose instrument failed is VOID, is re-run, and is reported as a self-correction.
+- **H-4 (rd579-rd639 S-4).** The heartbeat is a SEPARATE child process started by the hold wrapper (`while sleep 60; do echo "HB $(date -u +%FT%TZ) <step>
+  <pid> <elapsed>"; done`), killed in the wrapper's `trap … EXIT`; **the wrapper ABORTS the hold if no HB line appears within 90 s of the grant**, and after
+  every hold you compute and REPORT the max gap between HB lines (must be ≤ 120 s).
+- **H-5 (rd579-rd639 S-5).** Restore your own perturbations (mode bits — h8, r4, the unlistable dirs — links, hard links, planted files, held ports)
+  before any before/after hash, and hash the restore.
+- **H-6 (rd579-rd639 S-6).** Every extractor and census gets a POSITIVE CONTROL (a known unit, an independently counted expectation). **Every path is
+  quoted** — `!CODING` and `Testing Agent MAIN` contain `!` and spaces. **Every server you boot runs under the network belt (`qa-netbelt.sb`) with its
+  landing control (EPERM for TEST-NET-1, 200 for loopback).**
+- **H-7 (batch #2 S-1).** Mutants are built and verified ONLY by a quoted tool with a negative control (an unmutated tree → VOID rc ≠ 0). A mutant check
+  that prints an empty count is a VOID arm, never a pass.
+- **H-8 (batch #2 S-2).** The landing rule is "the exact mutated text is present AND the original text is absent once the new text is removed" — never
+  "the anchor is absent".
+- **H-9 (batch #2 S-3).** Byte-level plants (needles, ledgers with exact key order for g2, CRLF queries for q16) are written with `Buffer` and verified by
+  `xxd -l 16` BEFORE use; never with `echo`, `printf`, a heredoc or `JSON.stringify` where the bytes matter.
+- **H-10 (batch #2 S-4).** Prove every phenomenon reachable before measuring its absence: for h1-h12 prove the link is a link and the target holds the
+  needle; for k1-k16 prove `nlink` and the inode; for r1-r12 prove the tear really makes the live store unreadable; for d9-shaped re-drives prove the
+  sweeper really re-drove (`purgedBy`).
+- **H-11 (batch #2 S-6).** Every script runs under `/bin/bash` explicitly, and every `<sha>:<path>` is written `"${sha}:${path}"`. **Never `set -- $x` or
+  `declare -A` in the default shell** (the drafter hit both on this Mac: zsh does not word-split, and `/bin/bash` 3.2 has no associative arrays).
+- **H-12 (batch #2 §6.6).** Before the C-57 control, list every `__tests__` file any head MODIFIES or DELETES (`git diff --name-status <its base>
+  <head> -- __tests__`). **Predicted this time: RD-424's FIVE granted files (M) and nothing else.** C-164 says their assertions are byte-identical and only
+  scenario construction changed — so **missing 0 is predicted; if a test id is missing, apply C-133 and its rename ADDENDUM (:1434) verbatim.**
+- **H-13 (batch #1 S-1: a whitespace split read 73 space-bearing paths as "identical to no parent").** Every tree census is NUL-safe (`ls-tree -z`), with
+  a positive control on a path containing a space.
+- **H-14 (batch #1 S-6: a node driver exited 0 silently when its loop emptied).** Every driver ends with an explicit END record; a run with no END record
+  is VOID, whatever its exit code.
+- **H-15 (batch #1 S-7: `NODE_OPTIONS` split the preload path on its spaces).** Pass preloads as `-r "<path>"` in argv, never through `NODE_OPTIONS`.
+- **H-16 (batch #1 S-5: a "sibling" plant was a sibling of no store).** Before using a plant as a store's sibling, assert
+  `isInterruptedWriteOf(<name>, <store>)` is true for it in the tree under test.
+
+## 3b. THE NEGATIVE-ASSERTION SWEEP (C-102) — REQUIRED, one table per ticket
+**The members add refusals and early paths to SHARED functions. RD-685's round 1 is the proof it bites here: an eager census moved the RD-321 N8-1 cells'
+injected fault to before any deletion — 8 cells red, "0 files destroyed instead of 4" (READY :15). A negative-asserting cell that stays GREEN because it
+now returns early is invisible to every verify.**
+1. **Enumerate the new early paths (READ, quote each):** RD-685 — the `continue`/`return` at `_purgeTree`, `_removeInterruptedWrite`, the P-6 copy loop and
+   the live store, and the LAZY census that calls `recoveryCopiesFor` for every store when first triggered (a changed call sequence); RD-684 — the
+   `getFailureDetail()` read BEFORE the first write, and `_settleSurvivingTargets` moving failures to `purged` and injecting carried failures before the
+   verdict; RD-324 — `_writeState`'s barrier now ALWAYS rewrites `filesFailed` as the union (not only on a drop) and warns only on a real drop; RD-424 — the
+   pre-write backup now SKIPPED while mid-purge, and the new post-write backup; RD-314 — the window placement (the TimeGenerated guard is unchanged).
+2. **Enumerate the callers' EXISTING cells** in your clone at M0 (`git grep` of `purgeNow|requestErasure|runOnce|_writeState|getFailureDetail|
+   recoveryCopiesFor` / `writeFile|setSetting|backupFile|restoreFromBackupsIfNeeded` / `executeQuery|_executeQueryDirect|testConnection` over
+   `__tests__`), and **classify each cell NEGATIVE (asserts something refused, ignored, absent, not warned, not written, not deleted, unchanged) or
+   POSITIVE**. Also census `__tests__` for `linkSync` / `ln ` — **an existing fixture that happens to create a hard link is now REFUSED by RD-685**.
+3. **For each NEGATIVE cell ask the one question: does it still reach the check it is NAMED for?** Measure it, do not read it: run each negative cell
+   under jest's coverage for the product file (`--coverage --collectCoverageFrom=<file> --testNamePattern=<cell>`), through the lock, at M0 and on the
+   merged tree, and compare the hit count of the line its name refers to. **A line hit at M0 and not on the merged tree is a DISARMED cell.** Priority:
+   `erasure-partial-purge-leaves-a-record` (the RD-321 N8-1 fault-injection cells — RD-685's round-1 victims — and RD-684's extra early read),
+   `erasure-ledger-survives-every-writer` (N7-6's A-E door cells — RD-324), `erasure-reaches-backups` and `erasure-crash-window-and-fallback-paths`
+   (RD-424's freeze), `rd639-*` and `rd627a-*` (RD-685's refusals at the same sites), the seven LAW suites' "unchanged" cells (RD-314).
+4. **The sweep's self-test ABORTS rather than emit a list (C-102):** a positive control (a cell you KNOW reaches a changed line — e.g. rd685 (a) hits the
+   live-store refusal), a negative control (a cell you KNOW does not — e.g. a LAW cell on `dataErasure.js`), and a non-empty-population check.
+5. **Report per ticket:** the population size, the negative cells, how many still reach their named check, and each that does not (with the line). A
+   disarmed cell is **Minor** with both halves said together (C-102: "the product is correct" AND "the guard is unexercised") unless the product is also
+   wrong.
+
+## 4. TARGET A — RD-324 (TIER 1). Answer each with a measurement.
+1. **Scope (READ ONLY, quoted):** `git diff --name-status 1904765 168d850` = the three files; the barrier hunk quoted; the updated READY :8's "merged file
+   vs main 1904765 equals RD-324's own change (7c47ec4..e10e7d9) … vs 3beea5c it equals RD-627a's +69/-1" re-measured.
+2. **RED-PROOF, POSITIVE CONTROL FIRST:** the cell file against `1904765`'s product code — U1, U2 red (quote both: X and Y lost; the false "DROPPED"
+   warning), U3, U4 green — then 4/4 at `168d850`.
+3. **Mutants (M-A1 onward are new; the READY lists none):** **M-A1** `_ledgerKey` = `JSON.stringify(entry)` (unsorted) → U2 red only; **M-A2** the union
+   replaced by `resulting` (the passed ledger wins) → U3 red?; **M-A3** the warning on `dropped.length >= 0` → U2 red?; **M-A4** "passed wins" for a shared
+   key → **predicted: no cell pins the stated behaviour change — a gap to name**; **M-A5** the union built as `[...resulting, ...prior-not-in-resulting]`
+   (order flipped) → any red?; **M-A6** the barrier applied to the entitled replacer too → U4 red.
+4. **Every row g1-g10 of §2a** (g6 and g10 first).
+5. **C-68 set for A** (the §1 table, step 1) on `168d850` and the merged tree, per-file counts, one hold.
+6. **PRIOR WORK (C-49):** re-gate 8's N8-6 fix shape (find the report by name) — is RD-324 exactly it; N7-6's A-E door cells unchanged and green (READY :33).
+
+## 5. TARGET B — RD-684 (TIER 1). Answer each with a measurement.
+1. **Scope:** `git diff --name-status 1904765 7085ee7`; `b474c85`'s parents; `b474c85..7085ee7` = the cell file + counts only; the updated READY :13's
+   "merged file vs main = RD-684's own diff (11666d3..b5d6525); vs b5d6525 = RD-627a's +69/-1" re-measured.
+2. **RED-PROOF, POSITIVE CONTROL FIRST:** the cell file against `1904765`'s product code — **F1, F3, F4, F5, F6 red; F2, F6b green** (quote F1's and F6's
+   failing assertions: "Expected purged_incomplete, Received purged") — then 7/7 at `7085ee7`. H-3: `liveMode` asserted, the node-cron stub landed.
+3. **Mutants:** **M-B1** the `_settleSurvivingTargets` call removed → F1, F3, F4, F5, F6 red; **M-B2** the upgrade-path prefix parse removed → **F4 AND F6
+   red** (F6 depends on it: RD-627a's sibling failure carries no `survivingTarget` — say whether that is how the cells find out); **M-B3** the carry loop
+   removed (keep only the this-run settle) → F1, F3, F4, F6 red, F5 green; **M-B4** `_targetStillThere` → false on ANY error → **predicted: no cell pins
+   "only ENOENT resolves" — a gap (row h8)**; **M-B5** the dedupe `failed.some(f.file === prior.file)` removed → duplicate entries; any red?; **M-B6**
+   `priorFailures` read AFTER the purging marker write → any red?; **M-B7** `survivingTarget` dropped from the RD-639 live push only → F1 still green via
+   the prefix? (then the field is guarded by nothing at that site — name it).
+4. **Every row h1-h12 of §2a.** h12 is the live-server proof of D-F1's closure (L-B2).
+5. **C-68 set for B** (the §1 table, step 2) on `7085ee7` and the merged tree.
+6. **PRIOR WORK (C-49):** the RD-639 gate's §5 fix shape (quote it) — one rule covering P-6, `_purgeTree` and the live branch; say whether RD-684 is
+   exactly that shape, and whether RD-627a's sibling site is covered by the RULE or only by the text prefix.
+
+## 6. TARGET C — RD-685 (TIER 1). Answer each with a measurement.
+1. **Scope:** `git diff --name-status 1904765 9d7076b`; `5adaedb`'s parents; `5adaedb..9d7076b` (the sibling-site follow-up: product + cells);
+   READY :44's "merged vs main = exactly RD-685's own diff (5628e75..724326f), and vs 724326f = exactly RD-627a's (7c47ec4..9fb9431)" re-measured
+   against `5adaedb`.
+2. **RED-PROOF, POSITIVE CONTROL FIRST:** the cell file against `1904765`'s product code — **(a), (a-tree), (a-copy), (c), (e) red; (b), (d), (e2) green**
+   — then 8/8 at `9d7076b`. Prove nlink = 2 in every red cell's fixture (findability, READY :26).
+3. **Mutants:** **M-EXC** (the exception removed) → (b) ONLY and **M-SIB** (the sibling-site refusal removed) → (e) ONLY (both RELAYED — re-derive);
+   new: **M-C1** the census built EAGERLY before the loop (round 1's shape) → **the RD-321 N8-1 cells red (the builder's round 1: 8) — this is the sweep's
+   positive control for §3b**; **M-C2** `ours >= nlink` → `ours > nlink` → (b), (e2) red; **M-C3** the live-store refusal removed → (a) only?; **M-C4** the
+   `_purgeTree` refusal removed → (a-tree) only?; **M-C5** the P-6 refusal removed → (a-copy) only?; **M-C6** `inside()` → always true (count names
+   OUTSIDE DATA_DIR as ours) → **(a), (a-tree), (a-copy), (e) green-for-the-wrong-reason? or red?** — the census only enumerates inside, so predicted: no
+   cell reddens — name what `inside()` is then guarding; **M-C7** `lstatSync` → `statSync` in `_hardLinkRefusal` (follow a symlink) → any red?
+4. **Every row k1-k16 of §2a.** **k12 and k15 first** — they are the drafter's two predicted defects; each is a PREDICTION until measured.
+5. **The commission's merge-tree fact (B × C):** re-measure it (§9 Q1) and say whether "one union hunk" holds on YOUR clone at every step.
+6. **C-68 set for C** (the §1 table, step 3 — the commission's set: rd684 + rd685 + rd639 + rd627a + every `erasure-*`) on the merged tree.
+7. **PRIOR WORK (C-49):** P-6, RD-575's `_purgeTree`, RD-639's live branch, RD-627a's sibling helper each keep their rules (READY :50) — show each rule's own
+   cells still green AND still reaching their check (§3b).
+
+## 7. TARGET D — RD-424 (TIER 1). Answer each with a measurement.
+1. **Scope:** `git diff --name-status 5f2683c 2ce26eb` = the eight files; the `writeFile` hunk quoted; **per-cell diff of each of the five granted files
+   proving C-164's grant conditions: every `expect(` line byte-identical, only scenario construction changed (READY :15 says the whole diff removes
+   exactly ONE line)**.
+2. **RED-PROOF, POSITIVE CONTROL FIRST:** the new cell file against `5f2683c`'s product code AND against `1904765`'s — predicted R1, R1b, R2, R4, R5,
+   RD424-UPSIDE red, R3 green (the mf READY :36 omits UPSIDE — resolve it) — then 7/7 at `2ce26eb` and on `fwd-424`. **Every re-planted cell in the five
+   files GREEN on the old code AND on the new** (C-164: the fixtures route to the scenario directly).
+3. **Mutants:** re-derive **M-ROT, M-RETRY, M-GRP, M-POST** (READY :17-21 — each anchor matched once); new: **M-D1** the post-write backup's freeze check
+   removed → R4 red?; **M-D2** the pre-write freeze check removed (the base's pre-write gap) → R4 red? (READY :11 says R4 measured it); **M-D3** the post-write
+   backup moved BEFORE `_replaceFile` → R1 red; **M-D4** the post-write backup in a `finally` (runs after a failed commit) → R3 red; **M-D5** RD-245's
+   unchanged-content guard bypassed on the post-write call only → R2 red?
+4. **Every row r1-r12 of §2a** — **r8 (the composition) and r9 (a clearing write) first.** r8 is measured on the MERGED tree against `fwd-424`.
+5. **L-D1: one REAL server boot after a tear** (a loopback server, open mode, the belt): write via the admin route, tear `settings.json`, restart the
+   server, read the setting back through the API.
+6. **C-68 set for D** (the §1 table, step 4) on `fwd-424` and on the merged tree; C-164 condition (4)'s named re-runs included.
+7. **PRIOR WORK (C-49):** each fixture's origin (READY :25) and the rd452 docstring paragraph KEPT with its dated RD-424 note — quote it.
+
+## 8. TARGET E — RD-314 (TIER 1). Answer each with a measurement.
+1. **Scope:** `git diff --name-status 11666d3 ce148d5`; the function quoted; `_executeQueryDirect`'s one-line change quoted; `options.timespan` unchanged.
+2. **RED-PROOF, POSITIVE CONTROL FIRST:** the cell file against `11666d3`'s AND `1904765`'s `azureLogAnalytics.js` (identical blob `036c34f`) — S1, S2
+   and five S3 red; S3 bare-source, S4, S5 green; quote S1's one offender — then 10/10 at `ce148d5` and on `fwd-314`. **Prove the cell's own splitter is
+   independent of the product's** (a mutant in the product's splitter must redden it; a mutant in the cell's must not change the product).
+3. **Mutants:** **M-E1** revert to append → S1, S2, five S3 red; **M-E2** strings ignored → S3 string only?; **M-E3** brackets ignored → S3 brackets only?;
+   **M-E4** `//` ignored → S3 comment only?; **M-E5** the `;` prelude rule removed → S3 let only?; **M-E6** the backslash skip removed → **predicted: no
+   cell (q9) — a gap**; **M-E7** the `endsInComment` newline removed → which?
+4. **Every row q1-q17 of §2a** — q5, q11 and q13 first.
+5. **C-68 set for E** (the §1 table, step 5) on `fwd-314` and the merged tree.
+6. **PRIOR WORK (C-49):** RD-306's builder fix and `law-window-truncation.test.js` unchanged and green (READY :34).
+
+## 9. THE MERGED TREE (C-68, C-57, C-89, C-104, C-112, C-133). No verdict is complete without it.
+1. **Build it in YOUR OWN scratch clone** under `projects/nexusai/qa-trees/batch3.*/clone-1`: `git clone --shared --no-checkout <repo> <dir>`; in the clone
+   only: remove `origin`, set a local `user.name`/`user.email`, `gc.auto 0`, `core.fsmonitor false`; `git checkout -b gate <M0>`; then `git merge --no-ff`
+   in the PROPOSED ORDER: **`168d850`**, **`7085ee7`**, **`9d7076b`**, **`2ce26eb`**, **`ce148d5`**. **Write your prediction for each merge BEFORE it**
+   (§1 MERGE ORDER table); **anything other than the counts file and, at step 3, `backend/dataErasure.js`'s ONE hunk conflicting STOPS (C-57).**
+   **C-104: resolve and stage before any census or run.**
+2. **Step 3 — THE B × C HUNK, resolved by you as the CANONICAL UNION, an EMULATION:** RD-684's block in full, its closing `}`, a blank line, `/**`, then
+   RD-685's block in full — **never a literal `ours`+`theirs` concatenation (it does not parse)**. Prove it three ways before you commit: (a) `node
+   --check` rc 0; (b) **the resolved file vs the `7085ee7` side = exactly RD-685's own diff (`1904765..9d7076b`), and vs the `9d7076b` side = exactly
+   RD-684's own diff (`1904765..7085ee7`)**, as +/− line lists (N's method); (c) its blob equals the drafter's prediction **`1f708e2`** once A is in (or say
+   why not). Commit it in the clone with the message naming it an EMULATION. **The real merge is the author's; C-68 makes your merged-tree verdict hold
+   only for a real resolution whose `dataErasure.js` blob equals yours — say that in the verdict mail.**
+3. **Resolve the counts file by REGENERATION, never by hand:** take a side (a placeholder) to complete each merge commit, then `npm run verify --
+   --maxWorkers=2 --update-counts` ONCE on the tree after ALL FIVE merges, through the lock, SESSION_SECRET UNSET; commit the regenerated file in the clone.
+   **Predicted 4169/252 at M0 = `1904765`.** Then a plain verify of the committed head; suites ≥ the largest parent's (C-57 step 4).
+4. **Order independence (a control that can fail):** clone-2 in REVERSE (`ce148d5`, `2ce26eb`, `9d7076b`, `7085ee7`, `168d850`) — the B × C hunk now
+   appears at the LAST merge with ours/theirs swapped and different split lines (drafter: 109/189/254 vs 109/174/254); resolve it CANONICALLY (RD-684's
+   block first). **The two `HEAD^{tree}` must be identical apart from the counts file** — quote both tree ids and the `git diff --name-only`. A
+   non-canonical union (theirs-after-ours by side) would differ — that is the side control; build it once and show the difference is exactly the block
+   order.
+5. **Blob identities and C-112's condition, stated beside the conclusion:** `dataErasure.js` = `1f708e2` (identical to NO parent — a hand-resolved
+   content merge), `jsonStorage.js` `a63d862`, `azureLogAnalytics.js` `595e71f`, `customerDataFiles.js` `708c38b`, `server.js` `bc099b2`, `package-lock.json`
+   `9064763`. **`__tests__`: 294 files predicted, every one byte-identical to at least one parent, 0 identical to none, 0 absent (NUL-safe, H-13).** The
+   product file identical to no parent is proven by BEHAVIOUR (the C-68 sets, rows h/k on the merged tree, the §3b sweep), never by the superset.
+6. **id-superset control (C-57):** merged test ids ⊇ ids(M0) ∪ ids(`168d850`) ∪ ids(`7085ee7`) ∪ ids(`9d7076b`) ∪ ids(`2ce26eb`) ∪ ids(`ce148d5`);
+   **missing 0 predicted** (H-12). Use batch #1's adapted COPY `qa-c57-id-superset.sh` (reads the jest JSON of YOUR OWN verifies; keeps the lock-holder
+   refusal; proven first to STOP on a planted missing id), six parents. **Note: `2ce26eb` is off `5f2683c` and `ce148d5` off `11666d3`** — ids of later main
+   commits are absent from those parents by construction, not by loss. If it misses, C-133 and its ADDENDUM verbatim; list every accounted id.
+7. **The semantic overlaps git cannot see (C-68), on the merged tree, one hold:** every C-68 set of the §1 table BY NAME (per-file counts); the merged
+   column of rows g5, g10, h1-h12, k1-k16, r5-r8, q1-q17; the §3b sweep's merged column; then the full verify (Q3). Then ONE mutant per ticket on the
+   merged tree (**M-A1, M-B1, M-EXC, M-POST, M-E1**) — each table must still hold through the other four changes — **plus M-BC: RD-684's settle call AND
+   RD-685's live-store refusal removed together → h1 and k1 both red, and k12 unchanged (it is predicted wrong with or without them).**
+8. **C-89 on your clone:** `git diff --quiet HEAD` holds; `git show HEAD:scripts/verify-expected-counts.json` equals the regenerated counts.
+9. **Nothing leaves your clone.** No push, no remote, no ref written in NexusAI. **Count `<repo>/.git/objects` files before and after your whole session
+   and account for any delta by mtime** (live seats commit there; batch #1 §9.9's method, incl. a repack). Drafter's readings: `count-objects -v`
+   `count: 412` at 08:34 AEST, `420` at 08:36-08:44 AEST (the drafter's merge-tree runs wrote only to its own scratch dir).
+
+## 10. CI (C-142) — NOT RUN AT ANY BRANCH HEAD unless a PR exists
+- **Unverified by the drafter** (no `gh` run). Check with `gh pr list --head <branch> --state all` (READ ONLY, NexusAI's own `GH_CONFIG_DIR`); M0's CI Build
+  with `gh run list --commit <M0>` READ ONLY, labelled. **`gh` never merges, approves, comments, reviews, labels, re-runs, dispatches or opens a PR.**
+
+## 11. Floor discipline — THE FOUR CLAUSES, plus THE DEADLINE RULE
+1. **Every jest run, every server you boot and every erasure drive goes through `session-tools/nexusai-lock.sh`, tagged `qa-b3-…`** (e.g.
+   `qa-b3-H1-arms`, `qa-b3-H2-erasure-servers`, `qa-b3-H3-heads-verify`, `qa-b3-H4-merged`, `qa-b3-H5-sweep`) — C-141: gate-class; under ADDENDUM 2/3 every
+   NEW `qa-*` ticket earns a fresh, self-applied yield from the builders. **When a MERGE ticket (gate-class, C-141 ADDENDUM) is already queued when you
+   file, file yours with `--after <that merge ticket's tag>` (ADDENDUM 4's tool) so you sit directly behind it and ahead of later arrivals; never ahead of
+   it.** **QUEUE, NEVER TAKE OVER:** never kill, signal, move or edit another seat's process, lock directory, owner file or ticket, even if it looks stuck;
+   if a holder looks stuck, mail a QUESTION (§13) and keep waiting. Pure-node rows with no server and no jest (g-rows on `_writeState` directly, q-rows on
+   the exported function, the merges, the censuses) may run outside the lock — say which did.
+2. **Hold the lock ONCE per multi-run measurement.** Every hold is a TRACKED CHILD of your seat, never detached (`nohup … &`).
+3. **Count foreign servers the RD-606 / C-125 way, anchored on YOUR OWN claude pid:** `basename(argv[0]) == node` AND the server entry point anywhere in the
+   remaining argv; "ours" = the ancestor chain CONTAINS your own claude pid. **Record the foreign count BESIDE EVERY RESULT (C-110 clause 3).**
+   **NEGATIVE controls, all in the same run, all must classify FOREIGN — re-read at drafting 2026-09-27 08:55:47 AEST from `tmux list-panes -a -F
+   '#{pane_id} #{@cockpit_name} #{pane_pid}'` + `pgrep -P` + `ps`:** NexusAI-M claude **`62649`** (pane `%19`), NexusAI-N claude **`9959`** (pane `%21`),
+   Tuesday's claude **`47349`** (pane `%0`, parent bash `46703`), Datasec/Vision_Sales_Portal's claude **`67576`** (pane `%20`), and — restarted at
+   08:56:40 — NexusAI-P claude **`20317`** (pane `%22`). (At 08:40:03 the set was M, P `12056` on `%18`, Tuesday, Vision — P restarted and N started in
+   between; the seats churn.) Re-read them at start; if one has exited, say so and use the others; **a hold with NO live negative control aborts.** Reuse batch #1's
+   instrument BY COPY with YOUR pid as `ROOT` and these as `NEG`:
+   `/Volumes/KK_T9_External_HDD/!CODING/Testing Agent MAIN/projects/nexusai/reports/2026-09-26-gate-batch1/evidence/qa-floorlib.sh`
+   (**its defaults are STALE: `ROOT=33673`, `NEG=88756,10246,10643,11987,51143` — correct BOTH before any hold**), `…/qa-floorcount.py`, `…/qa-dispatch.sh`,
+   `…/qa-holdlib.sh`, `…/qa-mutate.py`, `…/qa-merge.sh`, `…/qa-mkarm.sh`, `…/qa-mkarm-clone.sh`, `…/qa-ssprint.sh`, `…/qa-h1-selftest.sh`, `…/qa-h1-scan.py`,
+   `…/qa-c57-id-superset.sh`, `…/qa-netbelt.sb`, `…/qa-netbelt-ctl.js`, `…/qa-to.sh`, `…/qa-srvlib.js`, `…/qa-d-probe-v2.js`, `…/qa-d-server.js`,
+   `…/qa-preload-sweeper-tick.js`, `…/qa-jestwrap.sh`, `…/qa-jsum.js`, `…/qa-lockcheck.js`, `…/q-merged-identity.py` (all present, `ls` at 08:5x AEST). The
+   original counter is gate 7's
+   `/Volumes/KK_T9_External_HDD/!CODING/Testing Agent MAIN/projects/nexusai/reports/2026-09-22-gate7-rd645/evidence/qa-floorcount.py`.
+4. **A zero is reportable only beside a control that fired in the same window** — the floor count, "no byte survives" (h/k rows), "no disarmed cell"
+   (§3b), "missing 0" (§9), "no cell reddens" under any mutant, and "no backup fanned" (r5, r8).
+
+**5. THE DEADLINE RULE — every real-server probe has a per-step DEADLINE, a HEARTBEAT, and kills its server in a `finally`.** Every HTTP request carries a
+client timeout; each step (boot 60 s, request 30 s, erasure drive 120 s, sweeper re-drive 180 s, exit 20 s) has a written DEADLINE; a step past it is
+ABORTED and reported, never waited on. **Log a HEARTBEAT line at least every 2 minutes during any hold (H-4: a separate child, ≤ 120 s max gap, aborted if
+absent at 90 s); a step with no heartbeat for 5 minutes is aborted and reported,** and a hold that is not progressing releases the lock. Every server you
+start is killed in a `finally` (SIGTERM, then SIGKILL after a grace), and the reap is confirmed by your floor counter.
+
+## 12. HELD
+- **LOCAL RUN, NOT THE DEMO:** every request goes to a server YOU booted on 127.0.0.1 from YOUR tree, under the network belt (H-6). No request to any live,
+  demo or public host; no Azure, no Entra, **no Log Analytics workspace (RD-314's L-E1 stays NOT TESTED; its axios is stubbed at the wire)**. This is
+  authorised defensive QA of Datasec's own product on loopback.
+- **TIER 1 AT FULL WEIGHT — FINDINGS-ONLY:** no fix, no merge (outside your own clone), **no push — not to main, not to ANY author's branch (RD-424's and
+  RD-314's merge-forwards are the author's, after your verdict)**, no deploy, no registry, **nothing to Partner Center, the demo or production**, no money, no
+  external comms, no mail to any human. **No `az` at all.** `gh` READ-ONLY and optional (§10). No docker.
+- **Symlinks, hard links, chmod, held ports and scratch git repos live ONLY under your own mktemp dirs.** Never link to, chmod or plant anything in a real
+  home directory, the NexusAI tree, or any other seat's directory. Planted needles are random and throwaway.
+- **Findings-only:** do not commit (outside your clone), move any branch, file a ticket, or write anything inside the NexusAI project (`2_Project_Files`,
+  `session-tools/`, `worktrees/`, `1_Project_Definition/`, `qa-reports/`). **NEVER `rm`** — quarantine, per the template §5.
+
+## 13. Output
+Report: `/Volumes/KK_T9_External_HDD/!CODING/Testing Agent MAIN/projects/nexusai/reports/2026-09-27-gate-batch3/report.md` — ONE report covering all five
+tickets; evidence in `./evidence/` beside it.
+
+**Questions:** your routing name is **`QA/NexusAI-batch3`**. If you must ask, mail `tuesday-agent@agentmail.to`, subject
+`[QA/Datasec-NexusAI -> Tuesday] QUESTION: <topic>` (Context / one Question / Meanwhile / Needed-by) and **PROCEED ON THE SAFEST READING without waiting**;
+Tuesday's answer arrives in `tuesday-agent@agentmail.to` with a subject beginning `[Tuesday -> QA/NexusAI-batch3] ANSWER`. Approval-class items are NOT RUN
+and named. Record every question, reading and answer.
+
+MAIL YOUR VERDICT to `tuesday-agent@agentmail.to`, subject exactly:
+`[QA/Datasec-NexusAI -> Tuesday] GATE VERDICT — RD-324 · RD-684 · RD-685 · RD-424 · RD-314`
+Lead the body with ONE line per ticket in this form — `RD-324: <GO|GO WITH FINDINGS|NO GO> @ 168d850` · `RD-684: … @ 7085ee7` · `RD-685: … @ 9d7076b` ·
+`RD-424: … @ 2ce26eb (and fwd-424)` · `RD-314: … @ ce148d5 (and fwd-314)` — then one line naming M0, the merge order you recommend, and the
+`dataErasure.js` blob your union produced. Never `wednesday-agent@`. AgentMail key: `AGENTMAIL_API_KEY` in `/Volumes/KK_T9_External_HDD/TUESDAY/4_Credentials/.env`
+(absolute: the QA project has none). Never put the key, a planted needle or any secret in a mail or the report.
+
+Verdict format:
+- **RD-324** naming `168d8501d7414a876fcd963ea0689922735e7902`: red-proof; M-A1..M-A6; rows g1-g10; the C-68 set; prior work.
+- **RD-684** naming `7085ee7610d6576342e2e8f24afcdd66c9aa5adf`: red-proof (F6 at `1904765`); M-B1..M-B7; rows h1-h12 (h12 = D-F1 on a real server).
+- **RD-685** naming `9d7076b0368f02ca030a904a2ce45de93739238e`: red-proof; M-EXC, M-SIB, M-C1..M-C7; rows k1-k16 (k12, k15 first).
+- **RD-424** naming `2ce26eba9752554844bd885903826f409c7d22be` AND your `fwd-424` tree: red-proof at `5f2683c` and `1904765`; the grant conditions; M-ROT, M-RETRY,
+  M-GRP, M-POST, M-D1..M-D5; rows r1-r12 (r8, r9 first); the real-server tear.
+- **RD-314** naming `ce148d5d8332606654c189cd14f3aadee227a407` AND your `fwd-314` tree: red-proof; M-E1..M-E7; rows q1-q17.
+- **The merged tree (§9):** M0; both orders; the B × C union and its three proofs; counts regenerated once (measured vs 4169/252); id-superset with C-112's
+  condition; the C-68 sets by name; one mutant per ticket + M-BC; C-89; the object-count accounting; **your recommended merge order.**
+- **The §3b sweep:** per ticket, population / negative cells / still reaching / disarmed.
+- Each of **L-A1, L-B1..L-B3, L-C1..L-C3, L-D1..L-D4 and L-E1..L-E3** answered: discharged with a measurement, or left standing and named (C-112).
+- All six refs as **three timestamped readings (start / mid / end)**, each with its branch name.
+- **§3a H-1..H-16:** for each, that it was followed, with the self-test outputs (H-1), landing controls (H-3, H-10), max HB gap per hold (H-4), byte checks (H-9).
+- Every action recommendation carries its evidence class: **MEASURED AT RUNTIME / PROBED / READ ONLY**. Severity is yours; priority is Tuesday's.
+- **Rule 2: a NOT TESTED section.** It MUST carry this line, verbatim:
+
+  Not tested by this gate: Linux or CI at any branch head unless a PR's CI Build exists, Azure Container Apps, Azure Files (SMB) hard-link semantics, a live Log Analytics workspace or any KQL execution, production mode, and Windows.
+
+## WRONG OR UNVERIFIED IN THE COMMISSION AND THE READYS — carried so the gate inherits the corrections
+1. **The B × C conflict is ONE hunk, as the commission and RD-685's READY :48 say — but "resolved as a UNION" is not a concatenation of the two sides.** The
+   hunk boundaries exclude the shared `/**` opener and the shared closing `}` (MEASURED: conflict lines 109-254, shared :108 and :255); `ours`+`theirs`
+   verbatim fails `node --check` (rc 1). The union must re-supply `}` + blank + `/**`. N did this correctly twice (READY :41-44; RD-684 updated READY :10-12)
+   by his own account — the gate proves it on its own emulation.
+2. **The union's block ORDER is not neutral:** reverse merge order swaps ours/theirs and splits the hunk at different lines (109/189/254 vs 109/174/254). A
+   "ours then theirs" rule gives two different files depending on which branch lands first. Canonical (RD-684 first) gives the same blob `1f708e2` in both
+   orders (MEASURED). **Whoever merges second must be told the canonical order, or the gate's merged-tree verdict does not carry (C-68).**
+3. **C-57 as written STOPS on `dataErasure.js`** ("Any other conflicting file still stops", :410). The READYs' "whichever lands second resolves it as a
+   union" (RD-685 READY :48) is the author's plan, not a C-57 allowance — N's own two previous unions were merge-FORWARDS onto his branch, not merges into
+   main. **Whether the second erasure merge may hand-resolve is Tuesday's ruling.**
+4. **"--after for merge tickets, C-141 addendum 4" (commission)** — ADDENDUM 4 (:1494) as written governs a builder's YIELD re-queueing behind a gate or
+   merge ticket. Applying `--after` to the GATE's own tickets when a merge ticket is already queued is the commission's extension (§11 clause 1 follows
+   it); the clause text does not say it.
+5. **RD-424 READY :8 "MAIN: now 5628e75"; RD-314 READY :8 and RD-684 first READY :8 "origin main is 02b9528"** — all stale; main is `1904765`. Their
+   conclusion ("the merge at gate time is counts-only") still holds at `1904765` (MEASURED by merge-tree and `comm -12`).
+6. **RD-424 READY: R5 is called "CONTROL for R4" but is RED at base (READY :31, :36).** A cell red at base is not a control in C-40's sense (the same shape
+   batch #1 B-F1 found in RD-411's READY). **And the merge-forward A-line (:36) lists "R1, R1b, R2, R4, R5; R3 green" without RD424-UPSIDE**, which
+   the round-2 A-line (:31) lists as red — unresolved.
+7. **RD-685 READY :13 "The census is built LAZILY … equivalent to building it up front"** — a CLAIM (C-76); M-C1 and row k13 measure it. **Its `inside()`
+   test (`p.startsWith(dataDir + path.sep)`) with a raw `DATA_DIR`** makes the exception unreachable for a trailing-slash or relative `DATA_DIR` (READ,
+   row k15, unmeasured).
+8. **RD-685 × RD-684 (drafter's READ, row k12):** RD-684's carry is keyed on `survivingTarget`/the symlink text prefix; RD-685's refusal has neither. **If
+   the DATA_DIR name's inode changes after a refusal (an app write's atomic rename, or an operator deleting OUR name), the next run purges the new file and
+   certifies `purged` while the outside name holds the erased bytes** — the false certificate C-169 :1732 names. Predicted, not measured.
+9. **RD-324 `_ledgerKey`'s sorted replacer drops NESTED keys** (JSON.stringify's array replacer is an allow-list at every depth) — READ, row g6;
+   reachable only by a file-less entry, which the code says this module never writes.
+10. **RD-684 × RD-627a:** F6 passes because `_survivingTargetOf` parses RD-627a's failure TEXT (updated READY :21); `_removeInterruptedWrite` sets no
+    `survivingTarget` field. The sibling site is therefore covered by the upgrade-path parse, not by the rule's field — M-B2 measures the dependency.
+11. **Ruling timestamps (Tuesday 05:42:51Z items 2/3, 07:46:57Z item 3), "comments 38276/38277", "RD-305 comment 37030"** — RELAYED from commit messages and
+    READYs; not read in Tuesday's mail or Jira by the drafter.
+12. **CI and PR state on all five heads: UNVERIFIED** (no `gh` run at drafting).
+13. **The C-68 re-run sets beyond the `erasure-*` name listing were NOT derived by content search** (the drafter's hard rule forbids a content grep over
+    another project's tree); the table carries the READYs' own sets plus `ls-tree` names — **the gate derives them properly in its clone (§1).**
+14. **The seats churned during drafting:** NexusAI-N (the author of all five) had no pane at 08:40 AEST and was live at 08:55 (`%21`, claude
+    `9959`); NexusAI-P was live at 08:40 (`%18`), gone at 08:55, back at 08:56:40 (`%22`, claude `20317`). The brief's negative controls are the 08:55 set; the launcher's guard 38 re-reads them.
+
+## PROVENANCE (drafter, 2026-09-27 08:30–09:10 AEST, read-only)
+- origin heads (five branches + main) | `git ls-remote origin <refs>` | 08:34:56 and 08:43:59 (identical)
+- every sha a commit locally; main's line `12b5edc..1904765` with parents; batch #1/#2 heads ancestors of main | `git cat-file -t`, `git log --format='%H %P'`,
+  `git merge-base --is-ancestor` | 08:35-08:38
+- chains, parents, merge-bases with `1904765`, deltas, shortstats | `git log`, `git diff --name-status|--shortstat`, `git merge-base` | 08:36
+- counts at nineteen shas | `git show "${S}:scripts/verify-expected-counts.json"` (bash; a zsh non-split slip in the first attempt, re-run) | 08:36
+- package-lock / package.json / verify-suite blobs; `dataErasure`/`jsonStorage`/`azureLogAnalytics`/`customerDataFiles` blobs at eleven shas | `git rev-parse`
+  | 08:37
+- moved-paths since `5f2683c` and `11666d3` ∩ the D and E deltas; pairwise overlaps | `git diff --name-only`, `comm -12` | 08:37
+- all ten pairwise merge-trees + M vs each; the conflicted B × C file; chain and reverse chain; the canonical union and its three controls; merged blobs;
+  `__tests__` 294 vs 289 | `git merge-tree --write-tree --name-only --messages [--merge-base=1904765]` with `GIT_OBJECT_DIRECTORY` in the drafter's scratchpad
+  and NexusAI objects as a read-only alternate; `node --check`; `git hash-object --no-filters` (no `-w`); `diff -u | grep '^[-+]'` + `cmp`; `count-objects -v` 420
+  before/after | 08:38-08:52
+- the five product diffs and cell lists | `git diff 1904765 <head> -- backend/dataErasure.js`, `git diff 5f2683c 2ce26eb`, `git diff 11666d3 ce148d5`,
+  `git grep -n` on the named cell files and the named product file at the head | 08:39-08:55
+- `backupFile` / `safeCopyFile` / `_erasureIsMidPurge` at `2ce26eb` :1706-1935, :2019-2035; `dataDir()` at `9d7076b` `backend/dataDir.js:45-46`; `_purgeTree`/
+  `_hardLinkRefusal`/settle call sites at the three A/B/C heads | `git show <sha>:<file> | sed -n` (named files only) | 08:45-08:50
+- `erasure-*` and restore/LAW suite names at `1904765` | `git ls-tree --name-only` (a listing, not a content search) | 08:47
+- CLARIFICATIONS ids and lines (C-02 :30 … C-172 :1755; C-133 ADDENDUM :1434; C-141 ADDENDA :1488/:1490/:1492/:1494; C-164 :1676; C-169 :1730); ticket grep 7
+  lines; 298,339 bytes, mtime 08:35 | `grep -n` on that one file | 08:41-08:44
+- the lane plan (tiers RD-324 :23, RD-424 :24, RD-314 :25; RD-684/RD-685 absent) | `grep -n` on that one file | 08:42
+- the batch #1 report (verdicts, §7.4 rows, §7.5 live server, §9, §10 findings, §11 limits, §13 self-corrections, §14 floor) and its evidence listing (the
+  instruments reused above, all present) | `sed -n`, `ls` | 08:45-08:52
+- builder evidence present: `session-tools/s84n/{rd324,rd324/mf,rd324/mf2,rd684,rd684/mf,rd685,rd685/mf,rd424,rd424/r2,rd424/mf,rd314,rd314/mf}`,
+  `merge-tree-rd324-vs-rd684.txt`, `merge-tree-rd685.txt`, `yield-log.txt`, `nexusai-lock.sh` (mtime 26 Sep 09:26), `c57-id-superset.sh` | `ls` on named dirs | 08:48
+- negative-control seats %19 → 62649 (M), %18 → 12056 (P), %0 → 47349 (Tuesday; parent bash 46703), %20 → 67576 (Vision_Sales_Portal); no NexusAI-N pane |
+  `tmux list-panes -a -F …`, `pgrep -P`, `ps` | 08:40:03; RE-READ: %19 → 62649 (M), **%21 → 9959 (N)**, %0 → 47349, %20 → 67576; **P's pane gone** | 08:55:47; P back on %22 → 20317 | 08:56:40
+- routing: **no `QA/NexusAI-batch3` line in `fleet/inbox_routing.conf` at drafting** (batch1 :114, batch2 :109 exist) — Tuesday adds it; the launcher's guard
+  40 refuses until then | `grep -n -i batch` | 08:5x

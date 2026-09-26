@@ -1,0 +1,842 @@
+# QA Agent Invocation Brief — Datasec/NexusAI, ONE batched gate "batch #4" (lane 3, the image-content gate): RD-418 (TIER 1) + RD-425 (TIER 1) + RD-698 (TIER 1) + RD-699 (TIER 2) + RD-443 (TIER 2) — five targets, five verdicts, one report
+
+**Drafted for Tuesday 2026-09-27 08:35–09:40 AEST by a read-only drafting agent; Tuesday reviews, stamps and launches.**
+Commissioned by Tuesday's batch #4 commission (2026-09-27) on five READY FOR QA mails on disk, each read WHOLE, all from NexusAI-O (lane 3):
+- **A — RD-418** (.dockerignore round 3) @ `5a782c10698a6e678ca89957ec661f48daf9c8f8` —
+  `/Volumes/KK_T9_External_HDD/TUESDAY/2_Project_Files/fleet/qa-agent/briefs/2026-09-27_nexusai-rd418-READY-mail.txt`
+- **B — RD-425** (guard half) @ `8823458b963360ffd212f9b19a0efddea5ba9e66` —
+  `/Volumes/KK_T9_External_HDD/TUESDAY/2_Project_Files/fleet/qa-agent/briefs/2026-09-27_nexusai-rd425-READY-mail.txt`
+- **C — RD-698** (batch-1 gate A-F1, High) @ `44bc804abd0a12cc6a7f913cda59e9a2634ec7d8` —
+  `/Volumes/KK_T9_External_HDD/TUESDAY/2_Project_Files/fleet/qa-agent/briefs/2026-09-27_nexusai-rd698-READY-mail.txt`
+- **D — RD-699** (batch-1 gate A-F2) @ `02fe76ad74ab7297a2ec807603fd8b67f547336c`, **STACKED on RD-698** —
+  `/Volumes/KK_T9_External_HDD/TUESDAY/2_Project_Files/fleet/qa-agent/briefs/2026-09-27_nexusai-rd699-READY-mail.txt`
+- **E — RD-443** (guard residue) @ `8e27dc22c168f87a2a11946f7606ec36a67c6895` —
+  `/Volumes/KK_T9_External_HDD/TUESDAY/2_Project_Files/fleet/qa-agent/briefs/2026-09-26_nexusai-rd443-READY-mail.txt`
+
+**Batched under the 2026-09-18 batch-gates rule** (as batches #1 and #2). **The five deltas are NOT pairwise file-disjoint (MEASURED, §1 File
+overlap):** RD-418 and RD-425 both edit `.dockerignore`; RD-418 and RD-698 both edit `__tests__/helpers/image-manifest.js`; RD-425 and RD-443
+both edit `__tests__/rd385-shipped-root-markdown-identifiers.test.js`. **No builder ran a merge-tree for any of these pairs; the drafter did (scratch
+object dir, §1) — every pair and every chain auto-merges with the counts file as the only conflict, and three files come out identical to
+NEITHER parent.** A clean merge-tree says nothing about the semantic overlaps (C-68); §1 lists them as **UNMEASURED** and §9 measures them.
+**Two changes alter WHAT SHIPS in the customer image (RD-418, RD-425): the gate builds REAL images of each alone AND of the COMBINED
+`.dockerignore`, against a base build of main, through the fleet's docker lock (§9a).**
+
+**A SECOND GATE MAY RUN CONCURRENTLY.** A batch-3 gate (lane 2, the erasure files) may be live at the same time, sharing the NexusAI jest lock.
+It is not yours: **you never touch its worktrees, trees, clones, processes, lock tickets or report**, and you queue behind its tickets exactly as
+behind any other (§11). Its erasure servers will show in your foreign-server counter as FOREIGN — record them, never "fix" them.
+
+SELF-CHECK: re-read end-to-end for contradictions | 2026-09-27 09:00
+Self-check note: 2026-09-27 09:00
+
+## TUESDAY'S RULINGS AT STAMP (answering the drafter's WRONG-list items 10 and 11, and the §9 Q5 rename question)
+- **Item 10, `--after`: CONFIRMED as §11.1 reads it.** Use it to sit directly behind an already-queued MERGE ticket, or behind your own preceding `qa-b4-*` ticket. Never use it to jump anyone.
+- **Item 11, between the two gates: CONFIRMED plain FIFO (§11.6).** No self-re-queue behind batch-3's tickets, and no request that it move.
+- **§9 Q5, RD-418's two retitled image-content-exposure cells: AUTHORISED RENAMES under C-133's ADDENDUM (:1434).** The re-anchors were REQUIRED by Tuesday's RD-418 conditions 2 and 6 (C-163). They are ACCOUNTED, not a C-57 STOP, PROVIDED each old->new pair is named and the new id is present and GREEN in the merged set. A THIRD missing id, or any missing id outside image-content-exposure, is still a STOP to name.
+
+## Charter
+Read `/Volumes/KK_T9_External_HDD/TUESDAY/2_Project_Files/fleet/qa-agent/QA_AGENT_CHARTER.md` in full first. You are an independent tester.
+You did not build these changes and you owe no builder anything. **Every line below that reports what a builder says is a CLAIM, never
+evidence.** Explore an image whose `.dockerignore` and `Dockerfile` now keep secret-shaped files and test pages out (A) and whose root dev
+scripts now leave it (B), an identifier guard that now covers EVERY shipped file through a content-keyed reviewed list (B), carrier gates that
+now check BOTH readings of a NUL-bearing file (C), behavioural cells for the decoder's branches (D), and three widened root-markdown detectors
+(E), looking for **any state in which a secret-shaped or identifier-carrying file ships in the image unseen, a file the product needs is missing
+so the container does not start, a guard reads green over a population it never saw, or a reviewed list hides a new finding.**
+
+- **RD-418 is TIER 1** (a change to what ships, with a REAL IMAGE leg; C-163). Verdict: **GO / GO WITH FINDINGS / NO GO at `5a782c1`**, plus its
+  merged-tree and combined-image result.
+- **RD-425 is TIER 1** (a security guard + a change to what ships; the READY :6 "Tier 1 (your ruling …)"; C-167), with a real image. Verdict at
+  **`8823458`**, plus merged-tree and combined-image result.
+- **RD-698 is TIER 1** (the carrier gates; the READY :6 "Tier 1 per your GO"). Verdict at **`44bc804`**, plus merged-tree result.
+- **RD-699 is TIER 2** (tests only, riding with RD-698 — its READY :6 "Tier: your call. I suggest it rides with RD-698's gate"; the commission sets
+  2). Verdict at **`02fe76a`**, plus merged-tree result. **RD-698 merges first; RD-699 merges forward after it — fixed, not yours to reorder.**
+- **RD-443 is TIER 2** (tests only; lane plan and READY :6). Verdict at **`8e27dc2`**, plus merged-tree result.
+- **One verdict PER ticket, one report, one mail.** A finding on one ticket never becomes another's verdict. **A finding that exists only in a
+  COMPOSITION (418×425 on `.dockerignore` and the image, 418×698 on the helper, 425×443 on rd385, 418/698×425 on `shippedFiles`) is graded on the
+  merged tree or the combined image and named against BOTH tickets' merged-tree lines, never silently against one.**
+
+## RULED BY KAM, NOT YET IN AN ARTEFACT
+- **Tuesday's rulings that ARE in CLARIFICATIONS (read them there, not here):** RD-418's conditions 1-7 (13:18:32Z and 13:20:10Z) → **C-163**; RD-425's
+  ruling (A) 19:35:04Z → **C-167**. Positive control, same file and tool: `grep -n` finds `**C-141.` at :1480.
+- **NOT in any artefact (drafter: `grep -n -i -E 'RD-698|RD-699|RD-703'` over CLARIFICATIONS → 0 lines; the same grep finds `RD-418` at :1672 and `RD-425`
+  at :1714, so the tool sees ticket names):**
+  - **The RD-698 HOLD** — RELAYED by RD-698 READY :6 "Your HOLD is kept: rd447's bytes-vs-string tripwire cell is NOT amended." The drafter did not read
+    Tuesday's mail. The HOLD's measurable form is in §6 Q1.
+  - RD-698 **tier 1** "per your GO" (READY :6); RD-699 **stacked** on RD-698 — the builder asked at 14:17Z, had no answer by ~15:00Z and proceeded "on the
+    safest reading … stacked where the branch already sat" (RD-699 READY :8); the commission now accepts the stack and fixes the order.
+  - **RD-703** (the big-endian string-rule mis-alignment) is filed and **PARKED per C-130** (RD-699 READY :21); **it is NOT in scope** — measure that the
+    park is inert, never grade the defect.
+  - RD-425 **tier 1** (READY :6 "your ruling") — the lane plan still says tier 2 (WRONG list item 6).
+- **Merging is Tuesday's GO (Kam, 2026-09-25 ~22:0x, "work your way through the tickets and merge once tested", as recorded in the batch #2 brief :44);
+  this gate merges nothing into anything the fleet can see.**
+
+**The clarifications that bind this gate** (`/Volumes/KK_T9_External_HDD/!CODING/Datasec/NexusAI/1_Project_Definition/CLARIFICATIONS.md`, 298,339
+bytes, mtime 2026-09-27 08:35:31; line numbers by `grep -n` at 08:4x AEST — the file grows, re-read them):
+- **C-15** (:94) broken configuration fails with an explanation — the image refusing to start WITHOUT a `SESSION_SECRET` is this, by design (the builders'
+  health logs; your no-secret control in §9a).
+- **C-28** (:153) never write, pull, restore, reset, check out or stash NexusAI's `2_Project_Files`. **RD-425's builder breached it once (disclosed,
+  §1 Target B) — re-read the ref it touched; you never touch it.**
+- **C-40** (:225) a check must be able to fail on the thing it claims. **C-49** (:299) the prior-work check. **C-122** (:1278) source text does not cover
+  behaviour.
+- **C-57** (:410) a counts-only conflict is resolved by REGENERATION with the id-superset control; any other conflicting file STOPS; suites no fewer than
+  the larger parent's.
+- **C-68** (:657) a verdict holds only at the head it ran on; a semantic overlap git cannot see is re-run BY NAME; counts regenerated ONCE on the tree
+  after the merge — "No conflict is not evidence the number is right." **Three textual auto-merges in this batch are exactly its case.**
+- **C-89** (:827) after a merge commit: `git diff --quiet HEAD` and HEAD's counts equal the regenerated numbers.
+- **C-104** (:972) `git ls-files` TRIPLES its population during an unresolved merge — **every helper consumer in this batch enumerates by `git ls-files`
+  (MEASURED at `02fe76a`: `image-content-exposure` :125/:202/:296/…, `rd385` :247, `rd429` :42, `rd447` :39, `rd699` :39)**, so C-104 binds THEM:
+  resolve and stage before any run.
+- **C-110** (:1101) THE FLOOR RULE — every jest invocation through the lock (**`jest --listTests` included — clause 1 says "anything"**), the lock held once per
+  multi-run measurement, the foreign-server count beside every result, **a ZERO only beside a control that fired in the same window.**
+- **C-112** (:1141) a declared limit is where the evidence stops; the id-superset shortcut by byte identity holds ONLY when no test file was content-merged.
+- **C-125** (:1320) the foreign-server counter (basename(argv[0]) == node AND the entry point anywhere in argv; "ours" by ancestry through YOUR pid).
+- **C-130** (:1386, addenda :1395, :1401) a cell failing for a known, ticketed reason is PARKED outside the suite, never skipped; **the parked file is proven
+  inert (`jest --listTests` omits it while listing a control)** — RD-699's RD-703 park.
+- **C-131** (:1407) a check pinning a removed feature is RE-ANCHORED in the same commit — RD-418 re-anchors image-content-exposure's CONTROL, ORDER and ARM cells
+  under it (READY conditions 2, 6).
+- **C-133** (:1426) base-aware id accounting **and its ADDENDUM (:1434): "an AUTHORISED RENAME is ACCOUNTED, not a STOP, when the old->new id pair is named
+  and the new id is present and green in the merged set."** **This batch HAS renames (MEASURED, §9 Q5): RD-418 retitles two image-content-exposure cells.**
+- **C-141** (:1480) a builder's proof ticket YIELDS to a `qa-*` ticket; ADDENDUM (:1488) a merge hold is gate-class; ADDENDUM 2 (:1490) once PER waiting gate
+  ticket; ADDENDUM 3 (:1492) self-applied, logged not mailed; **ADDENDUM 4 (:1494) a yield re-queues with `--after <ticket-tag>` directly behind the gate or
+  merge ticket; "Not covered: docker-kind arms (the code path is kind-agnostic, not separately run)"**. **C-141 :1484 "Not covered: … gate tickets among
+  themselves"** — see §11 for how that governs you and the batch-3 gate.
+- **C-142** (:1503) what "green" means at a merge.
+- **C-163** (:1666) the customer image ships NO `docs/test-files/` and only the npm manifest pair of root JSON; the docs block sits BELOW `!**/.env.example`;
+  **"Never add a directory re-include to that block."**
+- **C-167** (:1709) five root dev scripts leave the image; the guard covers EVERY shipped file through a reviewed list that never stores a value.
+- **Read, not binding here:** C-02 (:30) open mode on a fresh DATA_DIR; C-17 (:104) shipped documents carry no internal identifiers; C-169 (:1730,
+  lane 2); **C-172 (:1755) is the highest C-number at drafting.**
+
+## PRIOR ROUND
+PRIOR ROUND: the batch-1 gate (QA/NexusAI-batch1) gated RD-447 @ `911e706` and RD-411 @ `ed01f7e` (this lane's precedent), verdicts GO WITH FINDINGS ×2.
+ITS REPORT IS ON DISK AT: `/Volumes/KK_T9_External_HDD/!CODING/Testing Agent MAIN/projects/nexusai/reports/2026-09-26-gate-batch1/report.md`
+(§3 RD-447, §4 RD-411, §5 the composition and rows a20-a22, §9.8 the composition through the real gates, §10 findings, §13 S-1..S-11, §14 floor table).
+Findings carried forward and their disposition:
+- **A-F1 (Major)** — a mixed-encoding shipped file (UTF-8 part + a BOM-less UTF-16 tail ≳ 40% of it) hides its UTF-8 part from the carrier gates (report
+  :424, :442-451) → **filed as RD-698, fixed at `44bc804` (Target C).** Its regression test was specified by that gate (:451): "the a20 shape (and a20odd,
+  a21, a22) through `unreviewedCarriers` with the DEFAULT reader → flagged; control a20c/a20t". **Say whether RD-698's cells are exactly that, or less.**
+- **A-F2 (Minor)** — the reader guarded only by a TYPE cell (M-A2); M-A5, M-A6, M-A7 turned no cell red; no cell observes the RD-447×RD-411 composition
+  (report :427, recommendation 2 :541) → **filed as RD-699 at `02fe76a` (Target D).** **Re-run the batch-1 gate's own mutant arms M-A2, M-A5, M-A6, M-A7
+  and M-AB (report §3.3 :81-87, §9.7) and say which now redden.**
+- The batch-1 gate's **tripwire** (report :20, :410-414): rd447's "every shipped tracked file scans to the same text from bytes as from a UTF-8 read" reddens
+  the suite for any NUL-bearing shipped file; its recommendation 1 (:540) was **"fix A-F1 … certainly before amending rd447's bytes-vs-string cell"** — the
+  HOLD (§6 Q1).
+- **RD-418** ← the RD-391/385/403 gate's F1 (a directory re-include below the exclusions re-shipped `.env`), kept as an ARM (READY condition 6); S59's WIP
+  `c026e94` (the case-pair intent; READY condition 5 and C-163). **RD-425** ← RD-385 round 3's root-markdown guard (kept byte-for-byte, READY PRIOR WORK).
+  **RD-443** ← the RD-385 docs round-3 gate's Minor 5 (READY :10; its docs half fixed by RD-503).
+- **Instruments — reuse BY COPY, never run in place,** the batch-1 gate's corrected set in
+  `/Volumes/KK_T9_External_HDD/!CODING/Testing Agent MAIN/projects/nexusai/reports/2026-09-26-gate-batch1/evidence/`: `qa-floorlib.sh`, `qa-floorcount.py`,
+  `qa-dispatch.sh`, `qa-holdlib.sh`, `qa-jestwrap.sh`, `qa-mutate.py`, `qa-merge.sh`, `qa-mkarm.sh`, `qa-mkarm-clone.sh`, `qa-ssprint.sh`, `qa-h1-selftest.sh`,
+  `qa-h1-scan.py`, `qa-c57-id-superset.sh`, `qa-netbelt.sb`, `qa-to.sh`, `qa-ab-plant3.js`, `qa-ab-table.py` (all present, `ls` at 08:4x AEST). **`qa-floorlib.sh`
+  :3-4 names that gate's `ROOT=33673` and `NEG=88756,10246,10643,11987,51143` — correct BOTH to this gate's values (§11.3) before any hold.** The original
+  counter is gate 7's `/Volumes/KK_T9_External_HDD/!CODING/Testing Agent MAIN/projects/nexusai/reports/2026-09-22-gate7-rd645/evidence/qa-floorcount.py`.
+
+## 1. Targets — verified at drafting from the object store (08:35–09:20 AEST)
+**origin by `git ls-remote` at 2026-09-27 08:35:35 AEST:** `main` **`1904765007e9447ac6c980f9840c0689a02abe6c`** · `rd-418-dockerignore-r3-s84o`
+**`5a782c10698a6e678ca89957ec661f48daf9c8f8`** · `rd-425-guard-all-shipped-s84o` **`8823458b963360ffd212f9b19a0efddea5ba9e66`** · `rd-698-mixed-encoding-s84o`
+**`44bc804abd0a12cc6a7f913cda59e9a2634ec7d8`** · `rd-699-decode-branch-cells-s84o` **`02fe76ad74ab7297a2ec807603fd8b67f547336c`** · `rd-443-guard-residue-s84o`
+**`8e27dc22c168f87a2a11946f7606ec36a67c6895`**. All six are commits in the local object store (`git cat-file -t`).
+**Re-read all six at your start, mid and end. A moved TICKET head is a finding and a reason to stop, never a typo to fix.**
+
+**Main's line since RD-418/RD-425's base (MEASURED, `git log --format='%H %P' 5628e75..1904765`):** `9fb9431` (RD-627a), `95c3c9a` (RD-533), `1524fca`
+(RD-315), `057016d` (RD-627a forward merge), **`5220335`** (parents `1524fca` `5628e75`), **`748cece`** (parents `95c3c9a` `5220335`), **`1904765`** (parents
+`057016d` `748cece`) — the batch-1 merges 3-5. `git diff --name-only 5628e75 1904765` = **7 paths**: `backend/server.js`, `backend/dataErasure.js`,
+`backend/customerDataFiles.js`, three new cell files, the counts file. **Counts: `5628e75` 4120/244 → `1904765` 4133/247.** `12b5edc..1904765` = 20 paths
+(adds RD-444's `.gitignore`, RD-428's nine, RD-447/411's helper and cells).
+
+**Main is moving — the rule.** Call main at your start **M0**. (1) M0 must be `1904765` or a DESCENDANT (`git merge-base --is-ancestor 1904765 M0`); (2)
+`git diff --name-only 1904765 M0` must share NO path with the five deltas below except the counts file (the launcher refuses otherwise; re-check it
+yourself). **Expected movers: the batch-3 lane-2 merges (`backend/jsonStorage.js`, `dataErasure.js`, `recoveryLocations.js`, `azureLogAnalytics.js`, their
+cells) and lane-1/lane-4 merges — none in this batch's delta set, BUT `backend/` and `static/` files SHIP, so a moved main changes the population RD-425's
+guard and RD-698's carrier gates scan: re-run g1/g6 (§2a-G) on M0, and say what moved.** (3) Your merged tree is **M0 + all five**; predicted counts
+**counts(M0) + 47 / + 3** (4180/250 at M0 = `1904765`, ARITHMETIC; C-68 says the measurement decides). (4) If main moves AGAIN during your gate, your
+verdict names M0 and says what moved. **Never re-base mid-gate.**
+
+### TARGET A — RD-418 (TIER 1) — `.dockerignore` round 3, with a REAL IMAGE
+- **Chain (MEASURED):** `8de8e5c446023847362cd470375db4fb6ceaf645` (the fix, parent `7c47ec467f585e9db5daf3a82cdb96deae0b1e7a`, no counts change) →
+  **`42095e8eb6979b6a85e044a45d658508f77e28a9`** (forward merge, parents `8de8e5c` `5628e750ebb967b8c6a8e2ca6eb12d9fa5d9b1a4`) → `5a782c1` (**counts only**:
+  `git diff --name-only 42095e8 5a782c1` = the counts file). **`merge-base(5a782c1, 1904765) = 5628e75` — NOT merged forward onto `1904765`** (READY :8).
+- **Delta over `5628e75`: 6 files, +252/−64** — `M .dockerignore` (82 lines), `M Dockerfile` (18), `M __tests__/helpers/image-manifest.js` (+12/−1, the
+  case-pair hunk only, :59-80), `M __tests__/image-content-exposure.test.js` (93), `A __tests__/rd418-dockerignore-round3.test.js` (104), counts. **The only
+  batch member that edits a PRODUCT-shipping file (`Dockerfile`) and the only one that MODIFIES an existing cell file's titles (§9 Q5).**
+- **Counts: `8de8e5c` 3978/235 (= `7c47ec4`, unregenerated) · `42095e8` 4120/244 (= `5628e75`) → `5a782c1` 4131/245** (+11/+1 over `5628e75`).
+- **What changed (READ, `git diff 5628e75 5a782c1`):** the docs opt-in block (`docs/*`, `!docs/README.md`, `!docs/USER_GUIDE.md`, `!docs/SUPPORT.md`) moved from
+  the TOP of the file to just BELOW `!**/.env.example`, and `!docs/test-files/` removed; new rules `**/*.env`, `**/.envrc`, `**/.npmrc` (below `!**/.env.example`,
+  ABOVE the docs block); key extensions as CASE PAIRS `**/*.[pP][eE][mM]`, `[kK][eE][yY]`, `[pP][fF][xX]`, `[pP]12`, `[cC][rR][tT]`, new `[cC][eE][rR]`,
+  `[jJ][kK][sS]`, `[kK][eE][yY][sS][tT][oO][rR][eE]`, `**/id_rsa*`, `**/id_dsa*`, `**/id_ecdsa*`, `**/id_ed25519*`. `Dockerfile`: `COPY *.json ./` →
+  `COPY package.json package-lock.json ./` (build stage :70) and `COPY --from=build /app/package.json /app/package-lock.json ./` (production :103);
+  `COPY --from=build /app/docs/test-files/ ./test-files/` removed; `test-files` dropped from both `mkdir` lines (:73, :112). Helper: `CASE_PAIR =
+  /\[([A-Za-z])([A-Za-z])\]/g` + `isCasePair(a,b)` (same letter, two cases); `ruleToRegex` removes case pairs before its unsupported-form throw.
+- **Drafter-READ, not in the READY:** the **base stage's `COPY package*.json ./` (`Dockerfile:19`, `FROM base AS production` at :78 inherits it) is a
+  surviving root-JSON GLOB** — a root file named `package-<anything>.json` would still ship. C-163's headline says "only the npm manifest pair of root JSON".
+  **Plant it (row i14) and grade what you measure.**
+- **Builder's claims (READY :13-32):** conditions 1-7 answered; RED PROOF in one lock hold (`session-tools/s84o/rd418-arms.log`; image-content-exposure +
+  rd418): base (main `5628e75` product files) + new cells → 9 red; fix 68/68; M1 `!docs/test-files/` back → 3 named red; M2 test-files COPY back → the CONTROL;
+  M3 docs block above the example re-include → 2; M4 `**/*.[pP][eE][mM]` → `**/*.pem` → 4; M5 `COPY *.json` back (build stage) → 3; restored 68/68. RD-477's
+  round-2 PRECONDITION floor re-measured 9 → 7 wildcard COPY sources. Full verify on `42095e8`'s tree **"PASS — 4131/4131 … across 245 suites"**
+  (drafter cross-read: `rd418-final.log` carries exactly that line ✔).
+- **The builder's REAL builds (drafter cross-read, `rd418-pair.log`, `rd418-build.sh`, `rd418-health.log`):** base = `git archive 7c47ec4`, fixed = `7c47ec4`'s
+  tree **with `.dockerignore` and `Dockerfile` OVERLAID from a worktree** — the overlay's sha256 prefixes `320d3322ddeb` / `12238a1db86f` **equal the committed
+  blobs at `5a782c1`** (drafter: `git show 5a782c1:.dockerignore | shasum -a 256` ✔, same for Dockerfile). 24 plants (+ `backend/3_Access_Keys/k`,
+  `backend/.env.example`); `/app` 220 files → 186; the FILE-SET DIFF lists exactly the READY's condition-4 LEAVES, nothing ENTERS ✔. The pair log's "health
+  ok=0" is the no-secret refusal; `rd418-health.log` with a throwaway secret: base2 and fix2 `{"status":"OK", … "build":"unknown"}` after ~4 s ✔. **So:
+  NO build of RD-418 on main `1904765`, none COMBINED with RD-425, and the base was `7c47ec4`, four merges behind.**
+- **Earlier runs, kept, not relied on (READY :30):** `rd418-hold-run1-stale.log`; `rd418-final-arms-VOID.log` ("my sed broke the jest command line; VOID, not red").
+- **L-A1..L-A5 — NOT TESTED / limits, VERBATIM (READY :34-39):**
+  - **L-A1** *"The case-pair form is proven against a real build for the extensions planted; the helper accepts any letter pair."*
+  - **L-A2** *"id_*: named with a trailing star, so id_rsa.pub leaves too (a public key, harmless either way)."*
+  - **L-A3** *"**/*.env also matches .env (a second cover); the arms account for it."*
+  - **L-A4** *"Other root .sh scripts are RD-425's scope."*
+  - **L-A5** *"The real-build plants are UNTRACKED files in a git-archive context: a dirty-context build is the exposure these rules close; a clean CI checkout
+    shipped none of them at base either."*
+- **Disclosures:** none of C-28/C-110 class in this READY; QUEUE "21 self-applied C-141 yields this session" (READY :41).
+
+### TARGET B — RD-425 guard half (TIER 1), with a REAL IMAGE
+- **Chain (MEASURED):** `1fd5d0f8407586f71f7ca9c4f6b5566a4093d37b` (the fix, parent **`12b5edc31ee4ef52415d1cbffbbb0504d7f4715c`**) → **`7c9dcb7c9cf2f3396d57b03ea4298269e9736de3`**
+  (forward merge, parents `1fd5d0f` `5628e75`) → `8823458` (**counts only**). **`merge-base(8823458, 1904765) = 5628e75`.**
+- **Delta over `5628e75`: 3 files, +112/−2** — `M .dockerignore` (+12, an appended block at the END: `add-sample-printer-data.sh`, `create-azure-resources.sh`,
+  `setup-log-analytics.sh`, `test-deployment.sh`, `test-logs-query.sh`), `M __tests__/rd385-shipped-root-markdown-identifiers.test.js` (+98, an appended
+  describe "RD-425 — no unreviewed internal identifier in ANY shipped file", :690-800 at `8823458`), counts.
+- **Counts: `1fd5d0f` 4021/238 (= `12b5edc`) · `7c9dcb7` 4120/244 → `8823458` 4126/244** (+6/+0 over `5628e75`).
+- **What the guard is (READ at `8823458` :702-800):** `REVIEWED` = 10 entries (`scripts/seed/demo-printer-logs.csv` guid ×1445; `backend/marketplace-api.js`,
+  `backend/marketplaceJwt.js` Microsoft's public resource id; `static/js/index.js` maskedGuid (a UUID-v4 template); `backend/server.js` resourceName /
+  ipAddress / publicIpv4 → RD-689; `backend/services/schedulers/healthSweeperScheduler.js` ipAddress / publicIpv4 → RD-689; `backend/azureLogAnalytics.js`
+  tenantOrSubscriptionIdPrefix ×2 → RD-690 known-unestablished). `shippedIdentifierGroups` reads each file with **rd385's own `read` = `fs.readFileSync(…,
+  'utf8')` (:249) and `m.scannableText(f, <string>)` — the STRING path, not RD-698's `scanReadings`** — and runs **`listedFindings` + `genericFindings`
+  only (not rd385's `ticketFindings` / TICKET and not RD-443's `versionExemptQuads`)**. Cells: PRECONDITION (population > 150, contains `backend/server.js`,
+  `static/js/index.js`, `README.md`, `package.json`); THE GUARD; five-scripts; ARM plant-outside-root-md (`static/js/zz-rd425-probe.js`, publicIpv4); ARM
+  count+1 (CSV → 1446); CONTROL (no value stored; RD-690 the only known-unestablished).
+- **Builder's claims (READY :15-28):** conditions 1-6; the five scripts: 0 references from Dockerfile, package.json, backend/, static/, with positive
+  controls; REAL BUILDS base **`12b5edc`** vs fixed (drafter cross-read, `rd425-pair.log`: fixed = `12b5edc` + `.dockerignore` overlaid, sha256 prefix
+  `35010f561165` **= the committed blob at `8823458`** ✔; `/app` 220 → 215; exactly the five LEAVE ✔); both start with a throwaway secret
+  (`rd425-health.log` ✔). RED PROOF one lock hold (`rd425-hold.log`; foreign server.js 0 each run): base 4 red; fix 105/105; M1 (RD-690 entry removed) 4
+  red; M2 (test-logs-query.sh back) 4 red; restored 105/105. Full verify on `7c9dcb7`'s tree **"PASS — 4126/4126 … across 244 suites"** (`rd425-verify.log`
+  ✔). **"shippedFiles() returns (189 at this head)"** — UNVERIFIED by the drafter.
+- **The REVIEWED hashes were computed on `5628e75`-era product files. Main has since changed `backend/server.js` (RD-533, RD-315), `backend/dataErasure.js`
+  and `backend/customerDataFiles.js` (RD-627a) — all SHIPPED — and batch-3 may change more. RD-425's guard has never run over them. (UNMEASURED; §2a g6.)**
+- **L-B1..L-B5 — NOT TESTED / limits, VERBATIM (READY :34-39):**
+  - **L-B1** *"The guard reads files as UTF-8 strings (rd385's reader), so it inherits RD-447's string path, not the bytes path. A wide-encoded carrier is the
+    carrier gates' job (image-content-exposure / RD-698)."*
+  - **L-B2** *"The line hash covers whole finding lines, so a prose edit on a flagged comment line reopens its entry (safe direction)."*
+  - **L-B3** *"The hashes of lines carrying a real identifier are one-way; not brute-forced, not claimed resistant."*
+  - **L-B4** *"The list's 1,445-row CSV entry is keyed on all rows; any change to the demo seed reopens it by design."*
+  - **L-B5** *"Other root .sh scripts still ship (get-docker.sh, start-server.sh, startup.sh, stop-server.sh, verify-setup.sh); none carries a finding today.
+    Their shipping is out of this ticket."*
+- **DISCLOSURE (C-28), VERBATIM (READY :32):** *"creating this worktree I ran "git -C 2_Project_Files fetch -q origin main", an unneeded write verb in the stale
+  clone (the worktree fetch already covered it). It touched FETCH_HEAD and the remote-tracking refs only: no working tree, index or HEAD change. Logged at
+  session-tools/s84o/session-log.txt."* (Drafter: `session-log.txt:1` carries it ✔ — **and `:3` records a SECOND, earlier slip NOT in any READY: "2026-09-25T12:1xZ
+  SLIP (boot): ran 'git status' and 'git fetch --all --prune' in 2_Project_Files before reading C-28 … Disclosed in the plan-confirmation mail."** Carry both.)
+- Other READY notes: C-167 "first written as C-164 … renumbered by me as the later writer"; RD-690's description said "RD-22-class", meant C-22 (comment
+  38234); RD-689 filed (Low, lane 1's files).
+
+### TARGET C — RD-698 (TIER 1) — both readings of a NUL-bearing file
+- **Chain (MEASURED):** `2dfaf2823abf07dd89000c1c51a7d73107f91c46` (the fix, parent `5628e75`) → **`09c07b36bda2e6c99b006a1b1f1107d9ae830677`** (forward merge,
+  parents `2dfaf28` **`1904765`**) → `44bc804` (**counts only**). **`merge-base(44bc804, 1904765) = 1904765` — main is INSIDE RD-698.**
+- **Delta over `1904765`: 3 files, +146/−12** — `M __tests__/helpers/image-manifest.js` (+41, hunk at :406-480), `A __tests__/rd698-mixed-encoding-file.test.js`
+  (111), counts.
+- **Counts: `2dfaf28` 4120/244 · `09c07b3` 4133/247 → `44bc804` 4149/248** (+16/+1 over `1904765`; READY "= the prediction 4133/247 + 16/1" ✔).
+- **What changed (READ):** `scanReadings(relPath, content)` — `scannableText` first; a non-Buffer or NUL-free buffer → `[first]`; else also
+  `scannableText(relPath, content.toString('utf8'))` and returns both when they differ; `readingsAreCarrier` = ANY reading's `identifierSignals().isCarrier`;
+  `readingsFingerprint` = `carrierFingerprint(readings.join('\n'))`; `shippedCarriers`, `shippedFilesContaining`, `unreviewedCarriers` switched to it;
+  **`scannableText` and `readTracked` unchanged** (the diff does not touch them ✔); `scanReadings` exported.
+- **THE HOLD, measured at drafting:** `__tests__/rd447-utf16-text-is-decoded.test.js` is blob **`c7e861f` at `1904765`, `44bc804`, `02fe76a`, `5a782c1` and
+  `8823458`** (absent at `8e27dc2`, which predates it) — nobody amended it; the tripwire cell is `rd447…:124` "every shipped tracked file scans to the same
+  text from bytes as from a UTF-8 read". `rd429-nul-byte-does-not-hide-a-file.test.js` `7544939` everywhere; `__tests__/fixtures/image-carrier-review.json`
+  `7ec5910` everywhere.
+- **Builder's claims (READY :12-23):** the defect reproduced at `5628e75` (plain node, then red in jest); cells a20, a20odd, a22 (GATE 1, GATE 2), a21 (GATE 3),
+  a PRECONDITION per shape, CONTROLS a20c, a20t, a whole-file UTF-16LE carrier, the shipped tree's reviews unchanged; plants as BYTES. RED PROOF one lock hold
+  (`rd698-hold.log`; foreign server.js 0 each run; rd698 + rd447, rd411, image-content-exposure, rd429, rd403): base 7 red, every control green; fix 187/187;
+  M1 one reading → the same 7; M2 inbox gate first reading only → a21 only; restored 187/187. A first draft's a20t over-shot (kept,
+  `rd698-hold-run1-a20t-overshoot.log`). Full verify on `09c07b3`'s tree **"PASS — 4149/4149 … across 248 suites"** (`rd698-verify.log` ✔). **Its C-68 run set
+  was 5 consumers of 10 (§1 C-68 sets) — it did not run rd385, rd442, rd503-r2, rd503-c51.**
+- **L-C1..L-C4 — NOT TESTED / limits, VERBATIM (READY :27-31):**
+  - **L-C1** *"A-F2 (RD-699) is NOT in this change: the byte reader is still guarded by a type cell, and the UTF-32 sniff, binary-check and run-end branches
+    still have no behavioural cell."*
+  - **L-C2** *"The second reading is the UTF-8 view: it recovers ASCII identifiers in the UTF-8 part (and in the wide tail via the string rule), not
+    non-ASCII text."*
+  - **L-C3** *"A head that is itself UTF-16 followed by a UTF-8 tail (the reverse mix) is covered by the same second reading (its UTF-8 tail reads as
+    UTF-8), but I did NOT plant that shape."*
+  - **L-C4** *"The reviewed-carrier fingerprint of a two-reading file is over both readings' signal lines; no shipped file has two readings today (the rd447
+    tripwire keeps NUL files out), so it is not exercised against a real review entry."*
+
+### TARGET D — RD-699 (TIER 2) — behavioural cells for the decoder, STACKED on RD-698
+- **Chain (MEASURED):** ONE commit, `02fe76a`, parent **`44bc804`** (RD-698's head). `44bc804..02fe76a` = 3 files: `A __tests__/rd699-decode-branches-behaviour.test.js`
+  (136), `A __tests__/helpers/rd703-parked-NOT-RUN/rd699-be-run-glue.test.js` (28, **not collected**: `package.json` jest `testPathIgnorePatterns` contains
+  `"/__tests__/helpers/"`, READ at `02fe76a` :93-98), counts. **No product or helper change** (the helper blob is `4b9e778` at both `44bc804` and `02fe76a` ✔).
+- **Counts: `44bc804` 4149/248 → `02fe76a` 4159/249** (+10/+1).
+- **The parked file (READ):** header "PARKED — NOT RUN (C-130). Re-armed by RD-703." — asserts that a BIG-endian wide run in a UTF-8 string neither glues onto
+  nor splits its neighbours; red at `44bc804` because `WIDE_RUN` matches the little-endian shape first.
+- **Builder's claims (READY :12-19):** one lock hold (`rd699-final.log`; foreign server.js 0; clean 109/109 before and after): **M-A2** (`readTracked` back to
+  `'utf8'`) → RED "a UTF-16LE+BOM file on disk with '慡tenant id: <GUID>' is flagged, no readFile passed" + the old type cell; **M-A5** (UTF-32 sniff removed)
+  → "UTF-32LE, no BOM", "UTF-32BE, no BOM"; **M-A6** (binary check after the decode) → the `.png` cell; **M-A7** (no end spaces) → the run-ends cell; **M-B1**
+  (`labelForm` identity) → the composition cell + RD-411's own 15. The on-disk cells write ONE probe under `static/zz-rd699-probe/` and remove it in a
+  `finally`; a hygiene cell asserts none is left (READ at `02fe76a` :38, :134). Full verify on `02fe76a`'s tree **"PASS — 4159/4159 … across 249 suites"**
+  (`rd699-final.log` ✔). New ticket RD-703 (Low) — the BE cell parked, red at the first hold (`rd699-hold-run1-be-cell-red.log`).
+- **L-D1..L-D2 — NOT TESTED / limits, VERBATIM (READY :25):**
+  - **L-D1** *"the M-A2 cell depends on one CJK code unit (U+6161) whose UTF-8 misread is lowercase ASCII; a future string rule that repairs such glue would
+    need a new discriminating shape."*
+  - **L-D2** *"The on-disk probe writes into the worktree's static/ for the duration of one cell."*
+- **DISCLOSURE (C-110), VERBATIM (READY :23):** *"to prove the park inert I ran "npx jest --listTests" OUTSIDE the lock (no tests run, no server). It listed
+  rd699 and omitted the parked file. Logged at session-tools/s84o/session-log.txt."* (Drafter: `session-log.txt:2` ✔.) **C-110 clause 1 covers "anything" —
+  so the park's inertness is UNPROVEN under the floor rule until YOU run `--listTests` inside the lock (§7 Q3).**
+
+### TARGET E — RD-443 guard residue (TIER 2)
+- **Chain (MEASURED):** `20bf99c71ad43ea48db8c97c8101a1bc3217087e` (the fix, parent **`11666d3c4f615190646914270016419fffa642e2`**) → **`1eae175e541c9151899951aafee01db31a67e009`**
+  (forward merge, parents `20bf99c` `12b5edc`) → `8e27dc2` (**counts only**). **`merge-base(8e27dc2, 1904765) = 12b5edc` — the branch predates RD-447, RD-411,
+  RD-444, RD-428 and the batch-1 merges on main** (READY :8 "Main has since moved to 5628e75" — now further, WRONG list item 4).
+- **Delta over `12b5edc`: 3 files, +75/−5** — `M __tests__/rd327-build-digest-on-public-health.test.js` (+24/−2), `M __tests__/rd385-shipped-root-markdown-identifiers.test.js`
+  (+49/−1, hunks at :444-451, :516-529, :611-661 at `8e27dc2` — **the RD-385 describe, not RD-425's appended one**), counts.
+- **Counts: `20bf99c` 4012/237 · `1eae175` 4021/238 → `8e27dc2` 4025/238** (+4/+0).
+- **What changed (READ):** rd327 W3/W4 refuse ANY `git … rev-parse` in `DEPLOYMENT_GUIDE.md` and `scripts/deploy-dev.sh` (UNGUARDED_REV_PARSE) + a GAP cell;
+  rd385 `TICKET` `/\bRD-\d+\b/g` → `/\bRD[-‐‑‒–−]\d+\b/gi` + a GAP cell; `REVIEWED_VERSION_QUADS = []` + `versionExemptQuads` + THE GUARD
+  and a GAP cell (VERSION_BEFORE kept). **`TICKET` is local to the RD-385 describe (`ticketFindings`), so RD-425's guard does not run it** (READ at `8823458`
+  :447; RD-425 calls `listedFindings` + `genericFindings` only). `DEPLOYMENT_GUIDE.md` `01c7c46` and `scripts/deploy-dev.sh` `5b0b14e` are unchanged at
+  `12b5edc`, `1904765` and all five heads; `git grep -c rev-parse` → 0 in both at `1904765` (positive control: `scripts/build-commit-sha.sh` → 3).
+- **Builder's claims (READY :15-16):** one lock hold (`rd443-hold.log`; foreign server.js 0 each run): fix 83/83; M1 → the W3/W4 GAP only; M2 → the ticket GAP
+  only; M3 → the version GAP only; restored 83/83. Full verify on `1eae175`'s tree **"PASS — 4025/4025 … across 238 suites"** (`rd443-verify.log` ✔).
+- **L-E1..L-E4 — NOT TESTED / limits, VERBATIM (READY :20-24):**
+  - **L-E1** *"The version review guard covers public addresses only; a private range written after "version" is not a review item (it is not an identifier
+    either)."*
+  - **L-E2** *"The TICKET hyphen class lists the common Unicode hyphens; an exotic dash outside it (for example U+FE63) is not matched."*
+  - **L-E3** *"UNGUARDED_REV_PARSE forbids ALL git rev-parse in the two files. A future legitimate use (for example reading a tag) would need the cell amended
+    with a reason."*
+  - **L-E4** *"The red proof is by mutation of the new detectors; "red at base" is the old detector (M1/M2), not a separate base run."*
+- QUEUE "20 self-applied C-141 yields this session" (READY :26).
+
+### File overlap — NOT disjoint (MEASURED, READ ONLY)
+Name sets over each head's merge-base with main: A = `5628e75..5a782c1` (6), B = `5628e75..8823458` (3), C = `1904765..44bc804` (3), D = `44bc804..02fe76a`
+(3), E = `12b5edc..8e27dc2` (3); main-since-base M = `5628e75..1904765` (7, for A and B) and `12b5edc..1904765` (20, for E). Pairwise `comm -12`:
+- **A∩B = `.dockerignore` + counts. A∩C = `__tests__/helpers/image-manifest.js` + counts. B∩E = `__tests__/rd385-shipped-root-markdown-identifiers.test.js` +
+  counts.** Every other pair, and A∩M, B∩M, E∩M(12b5edc), = the counts file only.
+- **Pairwise `git merge-tree --write-tree --name-only --messages` (git 2.54.0), `GIT_OBJECT_DIRECTORY` = a scratch dir in the drafter's scratchpad,
+  `GIT_ALTERNATE_OBJECT_DIRECTORIES` = NexusAI's store (read-only); `git count-objects -v` in NexusAI `count: 420, in-pack: 8566, packs: 3` before AND after:**
+  | pair (merge-base) | rc | auto-merged | conflict |
+  |---|---|---|---|
+  | main vs 418 (`5628e75`), vs 425 (`5628e75`), vs 443 (`12b5edc`) | 1 each | counts | **counts only** |
+  | main vs 698, vs 699 (`1904765`) | 0 | — | none (both contain main) |
+  | **418 vs 425** (`5628e75`) | 1 | **`.dockerignore`**, counts | counts only |
+  | **418 vs 698** (`5628e75`) / 418 vs 699 | 1 | **`helpers/image-manifest.js`**, counts | counts only |
+  | **425 vs 443** (`12b5edc`) | 1 | **`rd385-…test.js`**, counts | counts only |
+  | 418 vs 443, 425 vs 698, 443 vs 698, 443 vs 699 | 1 | counts | counts only |
+  | 698 vs 699 (`44bc804`) | 0 | — | none |
+- **Chains (trees, each step with `--merge-base` = the true merge base of that head with the tree so far: 698→`1904765`, 699→`44bc804`, 418 and 425→`5628e75`,
+  443→`12b5edc`), FOUR orders — O1 `698 699 418 425 443` · O2 `698 699 425 418 443` · O3 `443 425 418 698 699` · O4 `418 698 699 443 425`: counts the ONLY
+  conflict at every conflicting step; the four final trees (`5b691b4`, `0108e5f`, `9dc9575`, `f70f495`) differ from each other ONLY in the counts file.**
+- **Merged (pre-regeneration) blobs, identical in all four orders:** `.dockerignore` **`2714f73`** (= NEITHER parent: main `881f0f8`, 418 `6ac8c6e`, 425 `5c0815f`);
+  `helpers/image-manifest.js` **`ceacc7f`** (= NEITHER: main `07e8711`, 418 `f4bacb8`, 698/699 `4b9e778`); **`rd385-…test.js` `d1b26f3` (= NEITHER: main `0fc35ff`,
+  425 `01c4bfa`, 443 `de7e479`) — a CONTENT-merged TEST FILE WITH TEST IDS**; `Dockerfile` `00ad9db` (= 418's); `image-content-exposure.test.js` `9ede5fd` (= 418's);
+  `rd327-…test.js` `a4db84d` (= 443's). **`node --check` on the two content-merged JS files as merge-tree wrote them: rc 0, rc 0.** Merged `__tests__`: **293
+  files** (`1904765` has 289: + rd418, rd698, rd699, the parked file).
+- `package-lock.json` is blob `9064763` (full `906476350431e2ecb3c21070a25c64b1702c1aa8`) and `package.json` `cdb1168` at `1904765` and all five heads.
+- **Re-prove every line of this yourself in your OWN clone; the drafter's emulation is a prediction.**
+
+### THE UNMEASURED INTERACTIONS — git sees none of them as a conflict; each is a required measurement (§9 Q6, §9a)
+- **U1 — 418 × 425 on `.dockerignore` (auto-merged, `2714f73`, content NOT measured by anyone):** RD-425's block sits at the file's END, after RD-418's
+  re-ordered docs block and new rules. Does the combined file (a) still parse in the helper (no throw on any line), (b) keep RD-418's ORDER invariant
+  ("single-file re-includes only … below `!**/.env.example`") and the gate-F1 ARM's premise (the ARM appends a DIRECTORY re-include at the END — now after
+  RD-425's block), (c) ship exactly the UNION of the two LEAVE sets and nothing else, in a REAL image? **Neither builder built it.**
+- **U2 — 418 × 425 on `shippedFiles()` (no textual overlap at all):** RD-425's guard enumerates `shippedFiles(tracked())`, which RD-418 changes TWICE (the
+  helper's case-pair modelling AND the `.dockerignore`/`Dockerfile` it models: root JSON opt-in, `docs/test-files/` gone). RD-425's REVIEWED list and its
+  PRECONDITION (`> 150`, `package.json` present) were measured on the pre-418 population ("189 at this head"). Measure the population and THE GUARD on the
+  merged tree.
+- **U3 — 418 × 698 on the helper (auto-merged, `ceacc7f`, = neither parent):** hunks far apart (:59-80 vs :406-480); semantic coupling through every consumer
+  (`shippedFiles` feeds `shippedCarriers`/`unreviewedCarriers`). No builder has run RD-698's cells over a tree with RD-418's rules.
+- **U4 — 425 × 443 on rd385 (auto-merged, `d1b26f3`, = neither parent, CARRIES TEST IDS):** different describes; they share the file's top-level detectors
+  (`genericFindings`, `listedFindings`, `VERSION_BEFORE`, `read`, `tracked`). RD-443 did not change the shared detectors (READ) — prove the merged file runs
+  both blocks green, and that C-112's byte-identity shortcut does NOT apply (§9 Q4).
+- **U5 — 698 × 425 on the READER:** RD-425's guard reads UTF-8 strings (L-B1) while RD-698's gates read bytes and both readings. On the merged tree, a file
+  RD-698 flags and RD-425 does not (or the reverse) is a composition result: rows g3, g4.
+- **U6 — main's post-`5628e75` product changes × RD-425's REVIEWED hashes and RD-418's image-content-exposure review** (`backend/server.js`, `dataErasure.js`,
+  `customerDataFiles.js`, all shipped; batch-3 may move more): row g6.
+- **U7 — RD-699's on-disk probe × everything else in the SAME tree:** the probe (`static/zz-rd699-probe/`) is untracked, so every `git ls-files` consumer skips
+  it — but a Docker build context built from a tree that ran rd699 and leaked it WOULD ship it (`COPY static/`). **Image legs build ONLY from `git archive`
+  of a committed sha (H-16).**
+- **U8 — RD-443 × main since `12b5edc`:** rd327 reads `Dockerfile` (in the `.dockerignore`/`Dockerfile` reader census below), which RD-418 changes; rd385's
+  RD-385 describe runs over shipped root markdown whose `.dockerignore` RD-418 and RD-425 change.
+
+### The proposed MERGE ORDER, the predicted counts, and each merge's C-68 re-run set (READ census at `1904765` / `02fe76a` / `5a782c1`, `git grep -l`)
+The order (a proposal — Tuesday decides; the gate proves order independence in §9 Q3): **(1) RD-698 → (2) RD-699 → (3) RD-418 → (4) RD-425 → (5) RD-443.**
+Why: RD-698 is High, already contains main, and RD-699 is stacked on it (FIXED: 698 then 699). RD-418 next so the helper merge (418×698) is absorbed while
+the helper is fresh, and so RD-425's guard runs over the post-418 shipped set (U2). RD-425 after RD-418 (the `.dockerignore` overlap, U1). RD-443 last:
+tests only, tier 2, and its rd385 overlap (U4) lands on the file RD-425 already extended.
+
+| step | merge | predicted conflict | predicted counts after (arithmetic) | C-68 re-run set — by NAME, per-file counts |
+|---|---|---|---|---|
+| 1 | RD-698 → M0 | none (contains main; tree = `44bc804`'s at M0 = `1904765`) | 4149/248 | **all 10 helper consumers**: `image-content-exposure`, `rd385-shipped-root-markdown-identifiers`, `rd403-first-run-no-publisher-identifiers`, `rd411-machine-shaped-labels`, `rd429-nul-byte-does-not-hide-a-file`, `rd442-licence-terms-of-service`, `rd447-utf16-text-is-decoded`, `rd503-r2-doc-claims-against-product`, `rd503-shipped-docs-c51-leftovers`, `rd698-mixed-encoding-file` (the builder ran 5 of them + rd698) |
+| 2 | RD-699 | none (stacked) | 4159/249 | step 1's set + `rd699-decode-branches-behaviour`; **`jest --listTests` inside the lock: rd699 listed, the parked file absent (C-130)** |
+| 3 | RD-418 | counts only | 4170/250 | step 2's set + `rd418-dockerignore-round3` + the **`.dockerignore`/`Dockerfile` readers**: `auth-gate-fail-closed`, `dockerfile-install-and-labels`, `rd327-build-digest-on-public-health` (census `git grep -l -E 'dockerignore|Dockerfile' 1904765 -- __tests__` = those + 6 already listed + the helper) = **15 suites** |
+| 4 | RD-425 | counts only | 4176/250 | step 3's 15 (the `.dockerignore` moved again; `shippedFiles` changed) — **`rd385` whole, THE GUARD named** |
+| 5 | RD-443 | counts only | **4180/250** | `rd385` (both describes), `rd327`, `image-content-exposure` (it reads rd385's file, `git grep -l rd385-shipped-root-markdown` → 1), + step 4's set |
+Arithmetic: 4133 + 16 + 10 + 11 + 6 + 4 = 4180; 247 + 1 + 1 + 1 + 0 + 0 = 250. **Re-run every census yourself; add any file it finds that the drafter
+missed.** Negative census, with control (drafter): `git grep -l -E 'COPY \*\.json|sample-printer-data\.json|test_prompt\.json|portal-upload-data' 1904765 --
+__tests__` → 0; `test-files` → 1 (`image-content-exposure`).
+
+### How to build your trees
+- **No worktree is created in the NexusAI repo, and you never work in its `2_Project_Files` checkout (C-28).** In that repo use ONLY read verbs: `show`,
+  `log`, `diff`, `ls-tree`, `cat-file`, `rev-parse`, `merge-base`, `grep`, `ls-remote`, `archive`, `count-objects`. Never `fetch`, `pull`, `push`, `checkout`,
+  `worktree`, `commit`, `stash`, `gc`, `clean`, or `merge-tree --write-tree` without a scratch `GIT_OBJECT_DIRECTORY` of your own. **If a sha is missing from the
+  local object store, it is UNMEASURED — never fetch.**
+- **Head trees:** `git -C <repo> archive <sha> | tar -x -C <fresh mktemp -d under
+  /Volumes/KK_T9_External_HDD/!CODING/Testing Agent MAIN/projects/nexusai/qa-trees/batch4.XXXXXX/>`, git-indexed where a suite needs it (every helper
+  consumer enumerates by `git ls-files`: **prove the population equals `git ls-tree -r` at the head**).
+- **The merged tree and the image-leg trees:** in **your OWN scratch clone** (`git clone --shared --no-checkout <repo> <your own dir>`), §9 and §9a.
+- **Each tree is EXCLUSIVE to this gate and to ONE purpose.** A fresh `mktemp -d` per arm; never reuse a mutant tree for a clean arm; `batch4`-prefixed
+  directories only. **Nothing in another gate's `qa-trees/*` (batch-3's included), the builders' `worktrees/` or `session-tools/` is run in — read only.**
+- `node_modules`: an APFS clone (`cp -c -R`) of the newest gate tree you trust, **after proving** `package-lock.json` is blob `9064763` there too; a real
+  directory, never a symlink.
+
+## 2. Why these tiers, and who is waiting
+- **RD-418 TIER 1:** it decides which files enter the Marketplace image. **Any secret-shaped plant (a key, keystore, env file, rc file, SSH key) or a
+  `docs/**/.env.example` that SHIPS in the fixed or combined image is a Blocker; a file the running product needs that no longer ships (the container fails
+  to start, or a route 500s with ENOENT) is a Blocker; a root JSON other than the manifest pair shipping (C-163) is a Major; a cell that pins the wrong
+  thing is a Minor.**
+- **RD-425 TIER 1:** **an unreviewed identifier in ANY shipped file that THE GUARD passes is a Major; a REVIEWED entry that stores a value is a Blocker
+  (condition 1); a guard that goes green because its population silently shrank (C-104's family) is a Major.**
+- **RD-698 TIER 1:** **any shape of rows a20-a22 (§2a-R) the merged helper does not flag is a Major; a whole-file wide carrier that RD-447 found and RD-698
+  loses is a Blocker (a regression of RD-447); a real shipped file newly flagged and unreviewed on the merged tree is a Blocker for the merge; a false
+  positive is a Minor.**
+- **RD-699 / RD-443 TIER 2 (tests only):** a cell that cannot fail on the thing it claims (C-40) is a Major; a parked cell that runs, or a skipped one, is a
+  Major (C-130); a flake is a Minor.
+- **The queue.** NexusAI builder seats live at drafting (re-read 08:57:09): **M** (claude `62649`, pane `%19`), **N** (claude `9959`, pane `%21`) and **P** (claude
+  `20317`, pane `%22` — P restarted between 08:37 and 08:57; its earlier pane `%18`/`12056` is gone); **O has no pane now**. The jest lock was held by `s85p-rd286-verify` (P) at 08:4x. **The batch-3 gate may be queued or holding.**
+
+## 2a. LEGITIMATE SHAPES — required measurements, row by row, base and head(s) in the same window
+Every row is a CHECKER row (the image rules and the gates are checkers). **Expected verdict per the rule clause; a row whose expected verdict and clause
+disagree is a finding against this brief — say so.**
+
+**I — the IMAGE (RD-418, RD-425, and COMBINED). Real builds only (§9a). Base B0 = M0; B418 = M0⊕418; B425 = M0⊕425; BC = M0⊕418⊕425; BF = the full merged
+head (all five). Same plants in every build; plants are UNTRACKED files added to the `git archive` context (L-A5's shape) holding only a canary string.**
+
+| row | plant / tracked file | B0 | B418 | B425 | **BC** | predicted-by |
+|---|---|---|---|---|---|---|
+| i1 | the builder's 24 plants (`rd418-build.sh` `P=` list, incl. `docs/{,a/b/,internal/,test-files/}.env.example`, `backend/SERVER.PEM`, `x.KEY/PFX/CRT/P12/cer/jks/keystore`, `id_rsa`, `id_ed25519`, `id_ecdsa`, `prod.env`, `.envrc`, `backend/.npmrc`, `static/.npmrc`, `local-overrides.json`, `backend/3_Access_Keys/k`) | SHIP (except those an old rule already blocked — name them) | all blocked | as B0 | **all blocked** | builder (READY 4) |
+| i2 | `backend/.env.example` (positive) | ships | ships | ships | **ships** | builder (READY 7) |
+| i3 | `docs/README.md`, `docs/USER_GUIDE.md`, `docs/SUPPORT.md` (tracked, positive) | ship | ship | ship | **ship** | builder (READY 7) |
+| i4 | `docs/test-files/*.html` ×4 and `/app/test-files/*` ×4 (tracked) | ship ×2 | **0** | ship ×2 | **0** | builder (C-163 a2) |
+| i5 | the five tracked sample JSONs at the root | ship | **0** | ship | **0** | builder (C-163 b1) |
+| i6 | the five root dev scripts (tracked) | ship | ship | **0** | **0** | builder (C-167) |
+| i7 | `get-docker.sh`, `start-server.sh`, `startup.sh`, `stop-server.sh`, `verify-setup.sh` | ship | ship | ship | **ship** (L-B5) | builder (declared) |
+| i8 | `/app/test-files` as a DIRECTORY (`find -type d`) | exists | **absent** (mkdir dropped) | exists | **absent** | builder (condition 1) |
+| i9 | mixed-case keys the case pair should catch: `backend/x.Pem`, `backend/x.pEm`, `backend/X.JKS`, `backend/y.KeyStore` | ship | blocked | ship | **blocked** | drafter (L-A1: the READY planted only all-caps) |
+| i10 | upper-case env/rc/key NAMES no case pair covers: `backend/.ENV`, `backend/PROD.ENV`, `backend/.NPMRC`, `backend/.ENVRC`, `backend/ID_RSA` | ship | **measure** (`**/.env`, `**/*.env`, `**/.npmrc`, `**/id_rsa*` are case-sensitive) | ship | **measure** | drafter — a SHIP is a Minor-to-Major finding by reachability (grade it) |
+| i11 | suffixed copies: `backend/x.pem.bak`, `backend/x.key.old`, `backend/.env.bak`, `backend/id_rsa.pub` | ship | measure (`id_rsa.pub` leaves — L-A2; the `.bak`/`.old` forms?) | ship | measure | drafter |
+| i12 | `docs/deep/x/.env` and `docs/deep/.env.local` (the docs block below the exclusions) | blocked? | blocked | blocked? | **blocked** | drafter (C-163: "a directory re-include below `**/.env` re-ships") |
+| i13 | **the gate-F1 shape on the COMBINED file:** append `!docs/test-files/` at the END of BC's `.dockerignore` in a SCRATCH copy (a mutant build, not a product state) | — | re-ships `docs/test-files/.env.example`? | — | **measure: does RD-425's trailing block change what re-ships?** | drafter (U1) |
+| i14 | **root `package-local.json` and `packages.json`** (the base stage's `COPY package*.json ./`, `Dockerfile:19`) | ship | **measure — predicted `package-local.json` SHIPS via the base stage** | ship | **measure** | drafter — **C-163's "only the manifest pair" vs a surviving glob** |
+| i15 | root `x.csv`, `x.sh`, `x.js` untracked plants (the other surviving globs) | ship | ship | ship (`x.sh` too) | **ship** | drafter — out of scope; record as census, not a finding against 418/425 |
+| i16 | **no plants at all** (a clean `git archive`, CI's shape) | — | — | — | **file set = BF's; nothing secret-shaped** | drafter (L-A5) |
+| i17 | the `__tests__/`, `scripts/verify-expected-counts.json` and the parked RD-703 file | absent | absent | absent | **absent** (only `scripts/seed/` ships) | drafter (READ: `Dockerfile:48`, `.dockerignore:191`) |
+| i18 | **the helper's MODEL vs the REAL image:** `shippedFiles(git ls-files)` at each tree vs the tracked subset of `/app` (node_modules and runtime-created dirs excluded) | equal | **equal** | equal | **equal** | drafter — **a mismatch is a modelling finding (the G2 class, C-49)** |
+| i19 | container start WITH a throwaway `SESSION_SECRET` (§9a): `docker exec … wget -qO- http://127.0.0.1:3001/api/health` | OK | OK | OK | **OK** | builder (condition 3) |
+| i20 | container start WITHOUT `SESSION_SECRET` (the control that the health check can fail) | refuses (C-15) | refuses | refuses | **refuses** | builder (health logs) |
+| i21 | startup log for `ENOENT`, `MODULE_NOT_FOUND`, `Cannot find`, `.json` | none | **none** | none | **none** | builder (condition 3) |
+
+**G — RD-425's guard on the merged tree (pure node over YOUR tree; jest for the cells).**
+
+| row | shape | at `8823458` | merged | predicted-by |
+|---|---|---|---|---|
+| g1 | THE GUARD over the REAL merged shipped set, beside its own ARM (the detector-live control) | [] | **[]** | builder at head; drafter at merged (U2, U6) |
+| g2 | the population: `shippedFiles(tracked()).length` and the SET DIFF head → merged (named files) | 189 (RELAYED) | **measure: 189 − (5 JSONs + 4 test-files pages … ) + main's new shipped files** | drafter |
+| g3 | a UTF-16LE+BOM shipped `static/js/zz.js` holding `// see https://20.30.40.50/` | measure (L-B1: string path, exact for ASCII) | measure | builder (declared) |
+| g4 | **the A-F1 shape through RD-425's guard:** UTF-8 `20.30.40.50` line + a BOM-less UTF-16LE tail ≳ 2/3 of it | measure | measure — **and through RD-698's carrier gate in the same window** (U5) | drafter |
+| g5 | a lower-case `rd-123` (and `RD‑125` with U+2011) in a SHIPPED `backend/` file | not flagged (the guard runs no TICKET rule) | **not flagged** | drafter (READ) — name the class; not a finding against 443 or 425 unless a ruling says tickets are identifiers outside root md |
+| g6 | **REVIEWED hashes vs main's newer `backend/server.js` (RD-533, RD-315) and any M0 movement** | green | **measure** | drafter (U6) — a red here is a merge blocker to NAME, not a defect of RD-425 |
+| g7 | the CSV row +1 ARM and a CSV row −1 (a count going DOWN) | +1 red | measure −1 | drafter — does a count going down reopen the entry? |
+| g8 | a REVIEWED file that no longer ships (plant: point one entry at a now-excluded file in a SCRATCH copy) | — | measure: silent or red? | drafter — a stale review entry that nothing flags is a Minor |
+
+**R — RD-698 / RD-699 on the helper (pure node, plants as BYTES — H-9), at `1904765` (base), `44bc804`, `02fe76a` and the MERGED tree, same window.**
+
+| row | plant (shipped `.txt` unless named) | `1904765` | `44bc804` | merged | predicted-by |
+|---|---|---|---|---|---|
+| r1 | a20: UTF-8 `Workspace ID: G\r\n` (even length) + BOM-less UTF-16LE tail ≥ 2/3 | **0 — missed (A-F1)** | L1 C UNREV | **L1 C UNREV** | batch-1 report :212; builder |
+| r2 | a20odd (odd-length UTF-8 part → sniffed UTF-16BE) | 0 | flagged | **flagged** | same |
+| r3 | a21: UTF-8 `sender: <fleet inbox>` + the tail (build the inbox at run time, never write it in clear) | not found | found | **found** | same |
+| r4 | a22: UTF-8 `AZURE_TENANT_ID=G` + the tail | 0 | flagged | **flagged** | same |
+| r5 | a20c (the UTF-8 part alone) and a20t (a SHORT tail) — CONTROLS | flagged | flagged | flagged | builder |
+| r6 | a whole-file UTF-16LE+BOM `AZURE_TENANT_ID=G` (batch-1 a4) | flagged | flagged, exactly decoded | **flagged** | builder |
+| r7 | **the REVERSE mix (L-C3):** UTF-16LE head (with `Workspace ID: G`) + a UTF-8 tail (`tenant id: G2`) | measure | measure — both found? | measure | builder (declared, unplanted) |
+| r8 | the tail BIG-endian (RD-703's shape on the BYTES path) | measure | flagged (first reading) | flagged | builder (READY-699 :21: "RD-698's first reading covers a mixed file's BE tail") — **measure; never grade RD-703** |
+| r9 | a non-ASCII identifier in the UTF-8 part (L-C2): `Tenant ID: G` where the label is written with a fullwidth `Ｔ` | measure | measure | measure | builder (declared) |
+| r10 | **two-reading fingerprint vs a REAL review entry (L-C4):** a COPY of a reviewed carrier (`TERMS_OF_SERVICE.md`) + an appended UTF-16LE tail with NO identifier | reviewed? | **"signal lines changed since review"?** | measure | drafter — say which, and whether that is the intended direction |
+| r11 | a NUL-bearing binary-extension file (`x.png` holding UTF-16 text) | null | null | null | batch-1 L-A3; RD-699 M-A6 |
+| r12 | **the HOLD's premise:** any shipped NUL-bearing file (r1's plant committed to the index in a SCRATCH tree) reddens rd447 :124 | red | **red** | **red** | batch-1 report :410-414 |
+| r13 | the REAL shipped tree: `unreviewedCarriers()` with the default reader, detector-live control beside it | [] | [] | **[]** | builders measured each alone |
+| r14 | performance: a 4 MB NUL-strided buffer through `scanReadings` (two readings now) | — | ≤ 2× batch-1's 171 ms? | measure | drafter (batch-1 `ab-perf.txt`) |
+
+**T — RD-443 on rd385/rd327 (pure node where possible), at `12b5edc` (base) , `8e27dc2` and merged.**
+
+| row | shape | `12b5edc` | `8e27dc2` | merged | predicted-by |
+|---|---|---|---|---|---|
+| t1 | the five rev-parse spellings of the GAP cell in a SCRATCH copy of `DEPLOYMENT_GUIDE.md` | 1 of 5 flagged | 5 of 5 | 5 of 5 | builder |
+| t2 | `scripts/build-commit-sha.sh` (the guarded call) and prose "rev-parse" in the guide | not flagged | not flagged | not flagged | builder (control) |
+| t3 | `rd-123`, `Rd-124`, `RD‑125` (U+2011), `RD﹣126` (U+FE63, L-E2), `RD—127` (em dash), `RD 128` | 0/0/0/0/0/0 | 1/1/1/0/?/0 | same | builder + drafter |
+| t4 | the wider TICKET over the REAL shipped root markdown on the MERGED tree (PRIVACY.md excluded) | baseline | **0 new** | **0 new** | builder (measured at `11666d3` only) |
+| t5 | `version 20.30.40.50`; `version 10.0.19041.1`; `version 192.168.1.4`; `ver. 8.8.8.8` | exempt | review item / not / not / **measure** | same | builder + drafter |
+| t6 | `REVIEWED_VERSION_QUADS` over the merged shipped root markdown (the list is empty) | — | [] | **[]** | builder |
+
+## 3. THE QUESTIONS ALL FIVE TARGETS ANSWER FIRST
+0. **SESSION_SECRET UNSET, EVERY jest RUN** — see §3a H-1 for the ONE permitted printer. The image legs NEED a throwaway secret for i19 only: generated
+   in-process, passed to the container BY NAME (`docker run -e SESSION_SECRET …` with the value only in that one `docker` client's environment — never in
+   argv, never in a file outside a `0600` file in your own mktemp dir, never printed), and scanned for afterwards (H-1).
+1. **Re-pin everything yourself:** `git ls-remote` at start, mid and end (three timestamped readings, branch name beside each sha, all six refs); M0 and the
+   "Main is moving" rule re-proved on M0; chains and exact parents (`git log --format='%H %P'`); deltas (`git diff --name-status`); counts at `7c47ec4`,
+   `11666d3`, `12b5edc`, `5628e75`, `1904765`, M0, `8de8e5c`, `42095e8`, `5a782c1`, `1fd5d0f`, `7c9dcb7`, `8823458`, `2dfaf28`, `09c07b3`, `44bc804`, `02fe76a`,
+   `20bf99c`, `1eae175`, `8e27dc2`.
+2. **Re-derive every red and every mutant INDEPENDENTLY** — your own scripts, never the builders' `rd418-hold.sh`, `rd418-final.sh`, `rd418-build.sh`,
+   `rd418-pair.sh`, `rd418-health.sh`, `rd425-hold.sh`, `rd425-pair.sh`, `rd425-health.sh`, `rd698-hold.sh`, `rd699-hold.sh`, `rd699-final.sh`, `rd443-hold.sh`
+   (read them for method; run your own). **Before each mutant arm, prove the mutant still parses (`node --check` on every mutated JS file, exit 0, quoted;
+   for `.dockerignore`/`Dockerfile` mutants, the helper's `parseDockerignore` / `copySources` read them without a throw) and that it LANDED (H-7/H-8). A red
+   from a mutant that does not parse, or a green from a mutation that never landed, is a VOID arm.** Read WHY each red is red: quote the failing assertion.
+3. **Name every behaviour guarded by no cell, and every one guarded only by source text (C-122).**
+4. **Full verify of each head AND of the merged tree**, `npm run verify -- --maxWorkers=2` (RD-561), through the lock, on a git-indexed tree, SESSION_SECRET
+   UNSET. **Predicted: `5a782c1` 4131/245 · `8823458` 4126/244 · `44bc804` 4149/248 · `02fe76a` 4159/249 · `8e27dc2` 4025/238 · merged (M0 + all five)
+   counts(M0) + 47 / + 3 = 4180/250 at M0 = `1904765`** — ARITHMETIC; C-68 says the measurement decides. Every failure by NAME. **"Re-run until green" is not
+   an acceptance gate (charter §4d).**
+
+## 3a. INSTRUMENT RULES — H-1..H-12 (inherited unchanged from the batch-1 brief §3a) and H-13..H-17 (from the batch-1 report §13 and the READYs)
+- **H-1 (a SET/UNSET idiom once printed the secret's VALUE).** The ONLY permitted printer, verbatim:
+  `if [ -n "${SESSION_SECRET+x}" ]; then echo "SESSION_SECRET SET (length ${#SESSION_SECRET})"; else echo "SESSION_SECRET UNSET"; fi`.
+  **FORBIDDEN anywhere in your scripts:** `${SESSION_SECRET-…}`, `${SESSION_SECRET:-…}`, `${SESSION_SECRET+$SESSION_SECRET}`, `echo $SESSION_SECRET`,
+  `printenv`, `env | grep`, `set | grep`, **echoing an env array that could hold it (`${envs[*]}`)**, and **`docker inspect` output of a container that
+  received it** (redact before saving). **Self-test it BEFORE the first hold (a control that can fail):** run the printer once with a throwaway exported and
+  once unset, capture both outputs, assert the throwaway's value is ABSENT from both (compare in-process; never print it). **After every hold AND every
+  image leg, scan its logs for the throwaway value** (in-process) and report the count (0); **the scan's own positive control plants a DIFFERENT random
+  marker, never the throwaway.** The same discipline covers every planted GUID: print a GUID only as `<first4>…<last4>`.
+- **H-2** Never construct a product storage object on a DATA_DIR you are measuring after its server booted. (This batch boots no server outside jest and
+  the containers; keep it anyway.)
+- **H-3** Every hook you rely on (a mutated rule, a plant, the rd699 probe's cleanup, a container's health loop) gets a **LANDING CONTROL** before the
+  measured run. An arm whose instrument failed is VOID, is re-run, and is reported as a self-correction — never as a result.
+- **H-4** The heartbeat is a SEPARATE child process started by the hold wrapper (`while sleep 60; do echo "HB $(date -u +%FT%TZ) <step> <pid> <elapsed>";
+  done`), killed in the wrapper's `trap … EXIT`; **the wrapper ABORTS the hold if no HB line appears within 90 s of the grant**, and you report the max gap
+  between HB lines per hold (must be ≤ 120 s). **The docker lock holds get the same heartbeat.**
+- **H-5** Restore your own perturbations (planted files, scratch `.dockerignore` edits, containers) before any before/after hash, and hash the restore.
+- **H-6** Every extractor (hunk, census grep, image file-list, model-vs-real comparator) gets a POSITIVE CONTROL. **Every path is quoted** — `!CODING` and
+  `Testing Agent MAIN` contain `!` and spaces.
+- **H-7** Mutants are built and verified ONLY by a quoted tool with a negative control (an unmutated tree → VOID rc ≠ 0).
+- **H-8** The landing rule is "the exact mutated text is present AND the original text is absent once the new text is removed" — never "the anchor is absent".
+- **H-9** **Byte-level plants (every §2a-R row, g3, g4) are written with `Buffer` and verified by `xxd -l 16` BEFORE use; a plant whose first bytes are not the
+  intended BOM / NUL stride is VOID.** Never build a wide plant with `echo`, `printf`, a heredoc or `JSON.stringify`.
+- **H-10** Every instrument default that could suppress the phenomenon gets a landing control of the PHENOMENON itself: for i1 prove each plant is IN the
+  build context (list the context before `docker build`); for i19/i20 prove the container is the image you built (`docker image inspect` id match); for r1-r4
+  prove the plant reaches `scanReadings` as bytes.
+- **H-11** Every script runs under `/bin/bash` explicitly, and every `<sha>:<path>` is written `"${sha}:${path}"` (zsh eats `$s:scripts`; the drafter slipped on
+  exactly this once tonight).
+- **H-12** Before the C-57 control, list every `__tests__` file any head MODIFIES or DELETES (`git diff --name-status <base> <head> -- __tests__`); **MEASURED
+  at drafting: RD-418 `M image-content-exposure.test.js` and `M helpers/image-manifest.js`; RD-425 `M rd385-…`; RD-443 `M rd327-…` and `M rd385-…`; RD-698 `M
+  helpers/image-manifest.js`.** If a test id is missing, apply C-133 and its rename ADDENDUM (:1434) verbatim, and say which clause.
+- **H-13 (batch-1 S-1: 73 paths with spaces split by awk).** Every path census is NUL-safe (`git ls-tree -z`, `ls-files -z`) with a positive control that a
+  space-bearing path is found.
+- **H-14 (batch-1 S-2: a GUID mask that required hyphens let `labelForm`'s space form print).** Your GUID redactor matches hyphen OR space separators; scan
+  every evidence file with it before the report is written.
+- **H-15 (batch-1 S-3/S-8, and the drafter tonight).** No inline loops under zsh; every arm builder is a `#!/bin/bash` file.
+- **H-16 (U7, new).** **Every image leg builds from `git archive <committed sha>` into a FRESH context directory, plus the plant list — never from a tree that
+  has run jest, never from a working tree.** Before `docker build`, list the context and assert that no `zz-rd699-probe`, `zz-rd425-probe`, `zz-qa-*` or
+  `node_modules` entry is in it except your declared plants.
+- **H-17 (RD-698's a20t overshoot, RD-699's first CJK try, batch-1 S-11).** A plant whose shape lands in a different class than intended (the sniff hits when it
+  should miss, or the string rule rescues it) is VOID for its row — re-plant, and if the surprise is itself interesting, give it its own row.
+
+## 4. TARGET A — RD-418 (TIER 1). Answer each with a measurement.
+1. **Scope (READ ONLY, quoted):** `git diff --name-status 5628e75 5a782c1` = the six files; `8de8e5c`'s parent `7c47ec4`; `42095e8`'s parents; `42095e8..5a782c1`
+   counts only. Quote the `.dockerignore` hunks, the four `Dockerfile` hunks and the helper hunk.
+2. **RED-PROOF, POSITIVE CONTROL FIRST, in ONE hold:** `image-content-exposure` + `rd418` against `5628e75`'s `.dockerignore`/`Dockerfile`/helper — predicted **9
+  red** (RELAYED: no plant ships; the case-pair cell; two root-JSON cells; ORDER; the test-files CONTROL; the RD-391 ARM, ARM 1, ARM 2 — the three ARMs red "because
+  their tampers are RE-ANCHORED to the new rule text (C-131)") — then **68/68** at `5a782c1`. **Say whether "red at base" for the three ARMs is a red-proof of
+  anything, or only of the re-anchor (C-40).**
+3. **Mutants (M-A1..M-A5 re-derive the builder's M1..M5; the rest are new; predictions are the drafter's):** **M-A1** `!docs/test-files/` back → 3 named red;
+   **M-A2** the `docs/test-files` COPY back → the CONTROL; **M-A3** the docs block moved above `!**/.env.example` → "no plant ships" + ORDER; **M-A4**
+   `**/*.[pP][eE][mM]` → `**/*.pem` → 4; **M-A5** `COPY *.json` back (build stage) → 3; **M-A6** `isCasePair` returns `true` for ANY two letters (`[ab]`
+   accepted) → which cell reddens? (the G2 "only verified forms" guard — predicted: none, a gap); **M-A7** `**/.npmrc` removed → which?; **M-A8** `test-files`
+   back in the build-stage `mkdir` only → the condition-1 cell?; **M-A9** the PRODUCTION-stage `COPY --from=build /app/*.json ./` back (build stage left fixed) →
+   which? (the build stage copies only the pair, so predicted: none, and the IMAGE unchanged — prove it with i5 in a mutant build or say NOT RUN); **M-A10** the
+   base stage's `COPY package*.json` → `COPY *.json` (the surviving glob, i14) → predicted: **no cell guards it — a gap to name.**
+4. **Every row i1-i21 of §2a for B0 and B418** (the BC and BF columns in §9a).
+5. **Model vs real (i18) for B0 and B418**, and the case-pair helper against real Docker for i9/i10 (L-A1 discharged or left standing).
+6. **The RD-477 PRECONDITION floor "9 → 7 wildcard COPY sources" (READY :31):** re-count at `5628e75` and `5a782c1` with a control, and name the cell.
+7. **C-68 re-run set for A (§1 table step 3, 15 suites) in one hold, per-file counts.**
+8. **PRIOR WORK (C-49):** C-163's claims — the COPY lines and `mkdir` date from root commit `8eb94ce` with no stated reason (`git log -S` / blame, READ); nothing
+   reads the five sample JSONs or `docs/test-files/` at runtime (a scoped `git grep` in YOUR tree over `backend/`, `static/`, `package.json`, `Dockerfile`, with a
+   positive control that finds each name somewhere); the case pair is S59's WIP `c026e94`'s intent — confirm RD-411 carried its OTHER half and nothing was removed.
+
+## 5. TARGET B — RD-425 guard half (TIER 1). Answer each with a measurement.
+1. **Scope:** `git diff --name-status 5628e75 8823458` = the three files; `1fd5d0f`'s parent `12b5edc`; `7c9dcb7`'s parents; the RD-385 round-3 block of rd385
+   byte-for-byte unchanged by RD-425 (diff the file outside the appended describe) — READY PRIOR WORK "kept byte-for-byte".
+2. **RED-PROOF, POSITIVE CONTROL FIRST, in ONE hold:** rd385 + image-content-exposure with `5628e75`'s `.dockerignore` → predicted **4 red** (THE GUARD; the
+   five-scripts cell; ARM plant-outside-root-md; ARM count+1 — "both ARMs expect exactly one unreviewed group and base has more"); **105/105** at `8823458`. **Say
+   whether the two ARMs red at base prove the ARMs or only that base has more findings (C-40).**
+3. **Mutants:** **M-B1** the RD-690 entry removed → 4 red (RELAYED); **M-B2** `test-logs-query.sh` back in the image → 4 red (RELAYED); new: **M-B3** one hex of
+   one REVIEWED hash changed → THE GUARD red? (predicted yes, exactly that file|kind); **M-B4** `unreviewed` matches on file + kind only (count and hash
+   dropped) → ARM count+1 red?; **M-B5** `shippedIdentifierGroups` skips `static/` → PRECONDITION or ARM plant-outside red?; **M-B6** `genericFindings`
+   dropped from the guard → which?; **M-B7** a REVIEWED entry given a `value` key → the CONTROL red? (condition 1's guard); **M-B8** the guard reads BYTES
+   through `m.readTracked` instead of rd385's UTF-8 `read` → does ANY hash move? (if yes, the reader is load-bearing for every hash — name it).
+4. **Every row g1-g8 of §2a, and i6/i7 for B0 and B425.**
+5. **Condition 1 (no value stored):** run BOTH detectors over every string in the REVIEWED list (reason, ticket, file) and every hash — 0 findings — with a
+   positive control that the detectors fire on a planted value in the same run.
+6. **Condition 2 (the five scripts are unreferenced):** re-run the 0-reference census in YOUR tree over `Dockerfile`, `package.json`, `backend/`, `static/`
+   (scoped, named paths) with the READY's positive controls (`TEST_SETUP_README.md` / `verification-checklist.md`; `HISTORY.md` ×3; `verify-setup.sh:131`).
+7. **C-68 re-run set for B (§1 table step 4).**
+8. **PRIOR WORK (C-49):** RD-477's `.dockerignore` precedent; RD-385 round 3 kept; RD-689/RD-690 exist as filed (READ ONLY; `gh`/Jira not required — say NOT READ
+   if you cannot).
+
+## 6. TARGET C — RD-698 (TIER 1). Answer each with a measurement.
+1. **THE HOLD (measured, not taken on trust):** `rd447-utf16-text-is-decoded.test.js` byte-identical (`git rev-parse "${sha}:${path}"`) at `1904765`, `44bc804`,
+   `02fe76a`, the merged tree, and at your END re-pin; the tripwire cell `:124` present verbatim; **and r12: a NUL-bearing shipped plant still reddens it on the
+   merged tree.** A HOLD that holds only in the blob but no longer reddens is a finding.
+2. **Scope:** `git diff --name-status 1904765 44bc804` = the three files; `scannableText`, `readTracked`, `decodeText`, `sniffWide` byte-identical to `1904765`'s
+   (extract each function; H-6 control).
+3. **RED-PROOF, POSITIVE CONTROL FIRST, in ONE hold:** rd698 + rd447, rd411, image-content-exposure, rd429, rd403 against `5628e75`'s helper (the builder's base)
+   AND `1904765`'s (main's; the helper is `07e8711` at both — prove it) → predicted **exactly 7 red** (a20/a20odd/a22 × GATE 1 and 2, a21 GATE 3), every control
+   green; **187/187** at `44bc804`. **Is each PRECONDITION a control that can fail (C-40)?**
+4. **Mutants:** **M-C1** `scanReadings` returns one reading → the same 7 (RELAYED); **M-C2** the inbox gate reads the first reading only → a21 only (RELAYED);
+   new: **M-C3** `readingsFingerprint` over `readings[0]` only → predicted **no cell reddens** (L-C4: no shipped two-reading file) — name the gap; **M-C4**
+   `scanReadings` returns `[asUtf8]` only (the exact decode dropped) → which RD-447 cells redden? (predicted: the exact-decode and non-ASCII ones); **M-C5**
+   `readingsAreCarrier` uses `every` → which?; **M-C6** the second reading built WITHOUT the string rule (`content.toString('utf8')` returned raw, not through
+   `scannableText`) → a21/r3's inbox cell?; **M-C7** `!content.includes(0)` → `true` (never two readings) = M-C1's class — confirm.
+5. **Every row r1-r14 of §2a** at `1904765`, `44bc804`, merged.
+6. **A-F1's specified regression test (batch-1 report :451) vs RD-698's cells:** the a20/a20odd/a21/a22 shapes "through `unreviewedCarriers` with the DEFAULT
+   reader". **RD-698's plants are passed as BYTES to the gates — do any go through the DEFAULT reader (`readTracked`), or is that RD-699's M-A2 cell alone?**
+7. **C-68 re-run set for C (§1 table step 1): all 10 helper consumers** — the builder ran 5; run the 10.
+8. **PRIOR WORK (C-49):** RD-447's decode (`911e706`) kept whole — confirm by diff.
+
+## 7. TARGET D — RD-699 (TIER 2). Answer each with a measurement.
+1. **Scope:** `44bc804..02fe76a` = the three files; the helper unchanged; the parked file under `__tests__/helpers/` and `package.json`'s `testPathIgnorePatterns`
+   quoted.
+2. **Re-derive the builder's five arms (M-A2, M-A5, M-A6, M-A7, M-B1) at `02fe76a`**, each red on the named cell, and the clean 109/109 before and after — AND
+   **re-run the batch-1 gate's own arms (its §3.3: M-A2, M-A5, M-A6, M-A7; its §9.7: M-AB) on `02fe76a` and on the merged tree and say which now redden** (A-F2's
+   disposition). New: **M-D6** the `finally` that removes the rd699 probe removed → the hygiene cell red? (H-3 landing control for the probe's cleanup); **M-D7**
+   RD-698's `scanReadings` reverted under RD-699 (the stack) → does any RD-699 cell see it?
+3. **THE PARK (C-130), inside the lock:** `jest --listTests` in YOUR `02fe76a` tree lists `rd699-decode-branches-behaviour` and OMITS
+   `helpers/rd703-parked-NOT-RUN/rd699-be-run-glue.test.js` — with a POSITIVE control in the same hold: a COPY of the parked file placed under `__tests__/`
+   (scratch tree, one purpose) IS listed, runs, and is RED (RD-703 real). **Do not grade RD-703; do not attempt its fix.**
+4. **L-D1 (the U+6161 dependence):** a second discriminating shape for the M-A2 cell — find one (a different CJK unit whose UTF-8 misread is lower-case ASCII glued
+   onto a label) or say you could not; it is evidence for L-D1, not a finding.
+5. **L-D2 / U7:** after a full verify of `02fe76a` in your tree, `static/zz-rd699-probe/` is ABSENT (list the tree, with a control that `static/` is listed).
+6. **C-68 re-run set for D (§1 table step 2).**
+
+## 8. TARGET E — RD-443 guard residue (TIER 2). Answer each with a measurement.
+1. **Scope:** `git diff --name-status 12b5edc 8e27dc2` = the three files; `20bf99c`'s parent `11666d3`; `1eae175`'s parents; the three rd385 hunks and the rd327 hunk
+   quoted.
+2. **RED-PROOF, POSITIVE CONTROL FIRST, in ONE hold:** fix 83/83; M1 (W regex back to the bare form) → ONLY the W3/W4 GAP; M2 (TICKET back) → ONLY the ticket
+   GAP; M3 (version review disabled) → ONLY the version GAP (all RELAYED); **plus the base run the builder did NOT do (L-E4):** the new GAP cells against
+   `12b5edc`'s detectors, in YOUR tree.
+3. **Mutants (new):** **M-E4** TICKET without the `i` flag → the GAP red (rd-123, Rd-124)?; **M-E5** U+2011 dropped from the hyphen class → the GAP red?;
+   **M-E6** `VERSION_BEFORE` emptied (the exemption removed) → the RD-385 CONTROL red (the exemption is KEPT, READY :13)?; **M-E7** UNGUARDED_REV_PARSE
+   narrowed back to `BUILD_COMMIT_SHA=$(git rev-parse` only → = M1, confirm.
+4. **Every row t1-t6 of §2a.**
+5. **C-68 re-run set for E (§1 table step 5).**
+6. **PRIOR WORK (C-49):** all three rules are RD-385 round 3's (`504e4e5`) — confirm by `git log -S`; nothing removed.
+
+## 9. THE MERGED TREE (C-68, C-57, C-89, C-104, C-112, C-133). No verdict is complete without it.
+1. **Build it in YOUR OWN scratch clone** under `projects/nexusai/qa-trees/batch4.*/clone-1`: `git clone --shared --no-checkout <repo> <dir>`; in the clone only:
+   remove `origin`, set a local `user.name`/`user.email` and `gc.auto 0`; `git checkout -b gate <M0>`; then `git merge --no-ff` in the PROPOSED order:
+   **`44bc804`** (RD-698), **`02fe76a`** (RD-699), **`5a782c1`** (RD-418), **`8823458`** (RD-425), **`8e27dc2`** (RD-443). **Predict before each merge whether the
+   counts file conflicts** (it depends on which side you took at the previous one) **and explain any clean merge with a side control**; **predicted: steps 1-2
+   clean, steps 3-5 conflict in the counts file ONLY; `.dockerignore`, the helper and rd385 AUTO-MERGE.** Anything else conflicting **STOPS** (C-57). **C-104:
+   resolve and stage before any census or run.**
+2. **Resolve the counts file by REGENERATION, never by hand:** take a side to complete each merge commit, then `npm run verify -- --maxWorkers=2 --update-counts`
+   ONCE on the tree after ALL FIVE merges, through the lock, SESSION_SECRET UNSET, and commit the regenerated file in the clone. **Predicted counts(M0) + 47/+3
+   (4180/250 at M0 = `1904765`).** Then a plain verify of the committed head; suites ≥ the largest parent's (C-57 step 4). **Also measure the counts at EACH step's
+   tree (a plain verify is not required per step; `jest --listTests | wc -l` inside the lock is enough) against the §1 table's per-step predictions.**
+3. **Order independence (a control that can fail):** a second clone in a DIFFERENT valid order — **O3 `8e27dc2`, `8823458`, `5a782c1`, `44bc804`, `02fe76a`** (698
+   before 699 always). **The two `HEAD^{tree}` must be identical apart from the counts file** — quote both tree ids and the `git diff --name-only`. **Three files are
+   content-merged; the drafter's four emulated orders agreed — prove it in real merges.**
+4. **Blob identities on the merged tree (drafter's emulation at M0 = `1904765`):** `.dockerignore` = **`2714f73`**, `helpers/image-manifest.js` = **`ceacc7f`**, `rd385-…`
+   = **`d1b26f3`** (each = NEITHER parent), `Dockerfile` = `00ad9db`, `image-content-exposure.test.js` = `9ede5fd`, `rd327-…` = `a4db84d`, `rd447-…` = `c7e861f`,
+   `package-lock.json` = `9064763`. **C-112's condition — state it beside the conclusion: at M0 = `1904765`, 293 `__tests__` files, predicted 291 byte-identical to
+   a parent and TWO to none: the helper (no test ids) and `rd385-…` (TEST IDS).** **So the byte-identity shortcut does NOT apply; the id-superset control owes
+   the full run (C-112 corollary), and the composed helper and the composed rd385 are proven by BEHAVIOUR (Q6), never by the superset alone.**
+5. **id-superset control (C-57):** merged test ids ⊇ ids(M0) ∪ ids(`5a782c1`) ∪ ids(`8823458`) ∪ ids(`44bc804`) ∪ ids(`02fe76a`) ∪ ids(`8e27dc2`), with a COPY of
+   the batch-1 gate's `qa-c57-id-superset.sh` (keeps the lock-holder refusal; prove it first to STOP on a planted missing id). **PREDICTED: exact pass MISSES 2 —
+   the drafter's title diff `5628e75 → 5a782c1` on `image-content-exposure.test.js`:**
+   - old *"ORDER ARM (gate F1) — with the docs opt-in block placed LAST (the 6f1f3c4 order), docs/test-files plants ship"* → new *"ORDER ARM (gate F1, kept) — a
+     DIRECTORY re-include placed below the exclusions re-ships the secrets inside it"* (plus two NEW ids: "ORDER — the docs opt-in block sits below the example
+     re-include, …" and "ORDER ARM (RD-418) — moved back above `!**/.env.example` …");
+   - old *"CONTROL — exactly the three re-included guides ship from docs/, plus docs/test-files the production stage COPYs by name"* → new *"CONTROL — exactly the
+     three re-included guides ship from docs/, and docs/test-files ships by NO path"*.
+   **These are RE-ANCHORS under C-131 and Tuesday's conditions 2 and 6 (C-163). Apply C-133 (:1426) and its ADDENDUM (:1434) verbatim: the mechanical test
+   (merged blob `9ede5fd` = `5a782c1`'s; since base `5628e75` only RD-418 changed the file, main's blob `94e6e4c` = the base's) and whether the conditions are
+   a GRANT for the rename in the ADDENDUM's sense. If you judge they are not, it is a C-57 STOP to NAME, and a QUESTION to Tuesday (§13) — never a silent pass.**
+   Titles built at run time (template strings, loops) are outside the drafter's grep: your id lists come from jest's JSON. Parent ids from `8e27dc2` lack
+   everything main added after `12b5edc`, and from `5a782c1`/`8823458` everything after `5628e75` — absent by construction, not by loss.
+6. **The semantic overlaps git cannot see (C-68), on the merged tree, one hold:** U1-U8 of §1 — the helper consumers (10 + rd418 + rd698 + rd699), the
+   `.dockerignore`/`Dockerfile` readers (`auth-gate-fail-closed`, `dockerfile-install-and-labels`, `rd327`), rd385 (BOTH describes), the merged column of §2a-G,
+   -R and -T; then the full verify (Q2). Then ONE mutant per ticket on the merged tree (**M-A4, M-B3, M-C1, M-D (M-A2 of RD-699), M-E2**): each table must still
+   hold through the other four changes.
+7. **C-89 on your clone:** `git diff --quiet HEAD` holds and `git show HEAD:scripts/verify-expected-counts.json` equals the regenerated counts.
+8. **Nothing leaves your clone.** No push, no remote, no ref written in the NexusAI repo. **Record `git count-objects -v` of the NexusAI repo before and after
+   your whole session and account for any delta by mtime** (live seats commit into that repo; batch-3 may merge). Drafter's reading: `count: 420, in-pack:
+   8566, packs: 3` at 08:35 and again after the drafter's merge-trees (~08:47); `count: 423` at 08:58 after only read verbs by the drafter — the +3 loose
+   objects are other seats' (N and P restarted in that window); the store is live, so account by mtime, never by a bare delta.
+
+## 9a. THE IMAGE LEGS — RD-418 and RD-425 TOGETHER (a change to what ships is a sensitive surface)
+1. **Trees (from your clone, committed shas only, H-16):** B0 = M0; **B418 = M0 ⊕ `5a782c1`**; **B425 = M0 ⊕ `8823458`**; **BC = M0 ⊕ `5a782c1` ⊕ `8823458`** (the
+   COMBINED `.dockerignore`, blob `2714f73` predicted); **BF = the full merged head** (§9). Commit each ⊕ in the clone (a counts side taken; the counts file does
+   not ship — i17). **Also rebuild the builders' own bases** (`7c47ec4` with `5a782c1`'s `.dockerignore`+`Dockerfile` overlaid; `12b5edc` with `8823458`'s
+   `.dockerignore`) ONLY if cheap, to reproduce `rd418-pair.log` / `rd425-pair.log` — optional; label it a reproduction.
+2. **Build:** `docker build --target production` from a FRESH `git archive` context per tree + the i-row plants, **every build and every container run inside
+   `session-tools/nexusai-lock.sh docker qa-b4-D<n>-… <cmd>`** (the fleet's docker lock), tagged `qa-b4-<label>` with `--label qa-gate=batch4`. **Never `docker
+   rmi`, `prune`, `stop` or `rm` anything not created by this gate; never push; never log in to any registry.** If the `node:24-alpine` base must be pulled,
+   that is an anonymous public pull — record it; if it cannot be pulled, the leg is NOT RUN with the blocker named.
+3. **File sets:** `docker run --rm --entrypoint sh <img> -c 'cd /app && find . -path ./node_modules -prune -o -type f -print | sort'` AND the same with `-type d`
+   (i8). **Diff each of B418, B425, BC, BF against B0**, per i-row. **Predicted: BC's LEAVES = B418's LEAVES ∪ B425's LEAVES exactly, nothing ENTERS; BF's
+   file set = BC's and every file byte-identical (tests-only merges do not ship).** Hash every shipped file of BC and BF (`find … -exec sha256sum`) to prove the
+   second half.
+4. **Start (i19-i21):** each image once WITH a throwaway `SESSION_SECRET` (H-1: by name, never argv) and once WITHOUT (the refusal control, C-15): health by
+   `docker exec <cid> wget -qO- http://127.0.0.1:3001/api/health` inside the container (no published port — nothing on the host floor), poll ≤ 120 s, quote
+   `status`; the startup log scanned for `ENOENT`, `MODULE_NOT_FOUND`, `Cannot find`, `.json`. **Every container is removed in a `finally` (`docker rm -f <own
+   cid>`), and `docker ps -a --filter label=qa-gate=batch4` reads empty at the end.** After each leg, scan its logs (and any saved `docker inspect`) for the
+   throwaway (H-1).
+5. **Model vs real (i18) for B0, B418, B425, BC:** the helper's `shippedFiles(git ls-files)` in the SAME tree vs the tracked subset of `/app`. A mismatch in
+   either direction is a finding against the helper (the G2 class), named against the ticket whose rule it mis-models.
+6. **The combined `.dockerignore` read by the helper:** `parseDockerignore` over `2714f73` throws on no line; RD-418's ORDER cell and the gate-F1 ARM green on BC's
+   tree; i13's mutant build (the F1 shape appended after RD-425's block).
+7. **What a change to what ships means for the customer:** list, for BC vs B0, every LEAVE that a running product could plausibly read (JSON, `.sh`, `docs/`),
+   and prove with i19/i21 that the product starts; a route-level read of a removed file is out of scope unless the startup log shows it.
+
+## 10. CI (C-142) — NOT RUN AT ANY BRANCH HEAD unless a PR exists
+- **Unverified by the drafter:** whether any of the five branches has a PR (no `gh` was run). Check with `gh pr list --head <branch> --state all` (READ ONLY,
+  NexusAI's own `GH_CONFIG_DIR`); M0's CI Build — `gh run list --commit <M0>` READ ONLY, labelled. **`gh` never merges, approves, comments, reviews, labels,
+  re-runs, dispatches or opens a PR.** CI NOT RUN at a head with no PR.
+
+## 11. Floor discipline — THE FOUR CLAUSES, plus THE DEADLINE RULE, plus THE SECOND GATE
+1. **Every jest run — full verifies, cell runs, mutants, `jest --listTests` — goes through `session-tools/nexusai-lock.sh jest <tag> …`, tagged `qa-b4-…`** (e.g.
+   `qa-b4-H1-arms`, `qa-b4-H2-heads-verify`, `qa-b4-H3-merged`); **every docker build and container run through `session-tools/nexusai-lock.sh docker qa-b4-D<n>-… …`.**
+   **`--after <ticket-tag>`** files a ticket directly behind a named live ticket (C-141 ADDENDUM 4): use it when a hold of yours must sit right behind a NexusAI
+   MERGE ticket already queued (a merge ticket is gate-class — never jump it) or behind your own preceding `qa-b4-*` ticket; **never use it to jump anyone.**
+   Docker-kind `--after` is "not separately run" (C-141 ADDENDUM 4) — if you use it, prove where the ticket landed (list `queue-docker/`). C-141: every NEW
+   `qa-*` ticket earns the builders' self-applied yield. **QUEUE, NEVER TAKE OVER:** never kill, signal, move or edit another seat's process, lock directory,
+   owner file or ticket, even if it looks stuck; if a holder looks stuck, mail a QUESTION (§13) and keep waiting. Pure-node rows with no server and no jest
+   (the §2a-G/R/T helper calls, censuses, the merges themselves) may run outside the lock — say which did.
+2. **Hold the lock ONCE per multi-run measurement.** Every hold is a TRACKED CHILD of your seat, never detached (`nohup … &`). Never hold the jest lock and
+   the docker lock at the same time.
+3. **Count foreign servers the C-125 way, anchored on YOUR OWN claude pid:** `basename(argv[0]) == node` AND the server entry point anywhere in the remaining
+   argv; "ours" = the ancestor chain CONTAINS your own claude pid. **NEGATIVE controls, all in the same run, all must classify FOREIGN — read at drafting
+   2026-09-27 08:57:09 AEST from `tmux list-panes -a -F '#{pane_id} #{@cockpit_name} #{pane_pid}'` + `ps`:** NexusAI-M claude **`62649`** (pane `%19`), NexusAI-N
+   claude **`9959`** (pane `%21`), NexusAI-P claude **`20317`** (pane `%22`), and Tuesday's claude **`47349`** (pane `%0`, parent bash `46703`). NexusAI-O had NO
+   pane at drafting, and P's pane changed once during drafting (`%18`/`12056` at 08:37 → `%22`/`20317` at 08:57) — seats restart; re-read. Re-read them at
+   start (and the batch-3 gate's claude pid if it is live — add it as a fourth negative control); if one has exited, say so and use the others; **a hold with
+   NO live negative control aborts.** Reuse the batch-1 gate's instrument BY COPY with YOUR pid as `ROOT` and these as `NEG`:
+   `/Volumes/KK_T9_External_HDD/!CODING/Testing Agent MAIN/projects/nexusai/reports/2026-09-26-gate-batch1/evidence/qa-floorlib.sh` (**its `ROOT=33673` and `NEG`
+   default name the batch-1 gate's seats — correct both before any hold**), `…/qa-floorcount.py` and `…/qa-dispatch.sh`. The original is gate 7's
+   `/Volumes/KK_T9_External_HDD/!CODING/Testing Agent MAIN/projects/nexusai/reports/2026-09-22-gate7-rd645/evidence/qa-floorcount.py`. **Containers are not host
+   processes: a server inside Docker is invisible to this counter by construction — say so beside every image-leg result.**
+4. **A zero is reportable only beside a control that fired in the same window** — the floor count, "no plant ships" (i1), "nothing enters" (§9a Q3), "no
+   unreviewed carrier" (r13, g1), "no new ticket finding" (t4), "no cell reddens" under any mutant, and "no throwaway in any log".
+
+**5. THE DEADLINE RULE.** Every probe, build and container step has a written DEADLINE (docker build 900 s, container health 120 s, container stop 20 s, a jest
+cell run 600 s, a full verify 2700 s); a step past it is ABORTED and reported, never waited on. **HEARTBEAT at least every 2 minutes during any hold (H-4: a
+separate child, ≤ 120 s max gap, aborted if absent at 90 s); a step with no heartbeat for 5 minutes is aborted and reported,** and a hold that is not
+progressing releases the lock. Every container you start is removed in a `finally`.
+
+**6. THE SECOND GATE (batch-3, lane 2, the erasure files).** It may be live now, with `qa-*` tickets in the same jest queue. **You treat its tickets exactly as
+a builder treats yours under C-141: never jump them, never interrupt a running one, never move, signal or edit one.** C-141 says "Not covered: … gate tickets
+among themselves" (:1484), so **between the two gates the order is plain FIFO: you do NOT self-re-queue behind its tickets and you do NOT ask it to move; if
+its hold is running, you wait.** Never read its trees as inputs, never run in its clones, never count its servers as ours. **If main moves because batch-3's
+merges land (lane-2 files), apply §1's "Main is moving" rule and re-run g1/g6.** If you and it deadlock or its hold looks stuck past its own heartbeat, mail a
+QUESTION (§13) and keep waiting.
+
+## 12. HELD
+- **LOCAL RUN, NOT THE DEMO:** every image you build stays on this Mac's Docker; every request goes to a container you started, from inside it. No request to
+  any live, demo or public host; no Azure, no Entra, no registry push, no Partner Center. This is authorised defensive QA of Datasec's own product.
+- **Findings only:** no fixes, no pushes, no deploys; no merge outside your own clone; nothing to Partner Center, the demo or production; no money; no external
+  comms; no mail to any human. **No `az` at all.** `gh` READ-ONLY and optional (§10).
+- **Plants, scratch `.dockerignore` edits, symlinks and scratch git repos live ONLY under your own mktemp dirs.** Never plant anything in the NexusAI tree or
+  any other seat's directory. Planted GUIDs and canaries are random and throwaway.
+- **Do not commit (outside your clone), move any branch, file a ticket, or write anything inside the NexusAI project** (`2_Project_Files`, `session-tools/`,
+  `worktrees/`, `1_Project_Definition/`, `qa-reports/`). **NEVER `rm`** — quarantine, per the template §5 (this includes your own docker images: leave them
+  tagged `qa-b4-*` and list them in the report).
+
+## 13. Output
+Report: `/Volumes/KK_T9_External_HDD/!CODING/Testing Agent MAIN/projects/nexusai/reports/2026-09-27-gate-batch4/report.md` — ONE report covering all five
+tickets; evidence in `./evidence/` beside it.
+
+**Questions:** your routing name is **`QA/NexusAI-batch4`**. If you must ask, mail `tuesday-agent@agentmail.to`, subject
+`[QA/Datasec-NexusAI -> Tuesday] QUESTION: <topic>` (Context / one Question / Meanwhile / Needed-by) and **PROCEED ON THE SAFEST READING without waiting**;
+Tuesday's answer arrives in `tuesday-agent@agentmail.to` with a subject beginning `[Tuesday -> QA/NexusAI-batch4] ANSWER`. Approval-class items are NOT RUN
+and named. Record every question, reading and answer.
+
+MAIL YOUR VERDICT to `tuesday-agent@agentmail.to`, subject exactly:
+`[QA/Datasec-NexusAI -> Tuesday] GATE VERDICT — RD-418 · RD-425 · RD-698 · RD-699 · RD-443`
+Lead the body with ONE line per ticket in the form `RD-<n>: <GO|GO WITH FINDINGS|NO GO> @ <short sha> — <one sentence>`, then one line naming M0 and the
+combined-image result. Never `wednesday-agent@`. AgentMail key: `AGENTMAIL_API_KEY` in `/Volumes/KK_T9_External_HDD/TUESDAY/4_Credentials/.env` (absolute:
+the QA project has none). Never put the key, a planted GUID, the throwaway secret, a canary or any secret in a mail or the report.
+
+Verdict format:
+- **RD-418: GO / GO WITH FINDINGS / NO GO** naming `5a782c10698a6e678ca89957ec661f48daf9c8f8`: the red-proof (and what "red at base" proves for the re-anchored
+  ARMs); M-A1..M-A10; rows i1-i21 for B418; model vs real; the i14 glob; the C-68 set.
+- **RD-425: GO / GO WITH FINDINGS / NO GO** naming `8823458b963360ffd212f9b19a0efddea5ba9e66`: the red-proof; M-B1..M-B8; rows g1-g8; conditions 1 and 2
+  re-measured; the C-28 disclosures.
+- **RD-698: GO / GO WITH FINDINGS / NO GO** naming `44bc804abd0a12cc6a7f913cda59e9a2634ec7d8`: THE HOLD measured; the red-proof; M-C1..M-C7; rows r1-r14; A-F1's
+  specified regression test vs the cells; the 10-consumer C-68 set.
+- **RD-699: GO / GO WITH FINDINGS / NO GO** naming `02fe76ad74ab7297a2ec807603fd8b67f547336c`: the five arms and the batch-1 gate's own arms; the park proven
+  inert INSIDE the lock with its positive control; L-D1, L-D2.
+- **RD-443: GO / GO WITH FINDINGS / NO GO** naming `8e27dc22c168f87a2a11946f7606ec36a67c6895`: the red-proof incl. the base run; M-E4..M-E7; rows t1-t6.
+- **The merged tree (§9) and the image legs (§9a):** M0 named; both orders, conflicts quoted, counts regenerated once (measured vs counts(M0) + 47/+3), the
+  per-step counts; the id-superset control with the two predicted renames resolved under C-133 (which clause) and C-112's condition stated (TWO files =
+  neither parent, one with test ids); U1-U8 each answered; one mutant per ticket; C-89; the object-count accounting; **B0/B418/B425/BC/BF file sets, the
+  union rule, health with and without the secret, model vs real.**
+- Each of **L-A1..L-A5, L-B1..L-B5, L-C1..L-C4, L-D1..L-D2 and L-E1..L-E4** answered: discharged with a measurement, or left standing and named (C-112).
+- Report all six refs as **three timestamped readings (start / mid / end)**, each with its branch name.
+- **§3a H-1..H-17:** state for each that it was followed, with the self-test outputs (H-1), landing controls (H-3, H-10), max HB gap per hold (H-4), the byte
+  checks of the plants (H-9) and the context listings (H-16).
+- **The floor (§11):** every hold and docker leg with its tag, queue wait, controls fired, foreign max / ours max, and whether the batch-3 gate was live.
+- Every action recommendation carries its evidence class: **MEASURED AT RUNTIME / PROBED / READ ONLY**. Severity is yours; priority is Tuesday's.
+- **Rule 2: a NOT TESTED section.** It MUST carry this line, verbatim:
+
+  Not tested by this gate: Linux or CI at any branch head unless a PR's CI Build exists, Azure Container Apps, the release pipeline's own image build and any registry, a build context other than a git archive of a committed sha plus the gate's own plants, text encodings other than UTF-8, UTF-16 and UTF-32, and Windows.
+
+## WRONG OR UNVERIFIED IN THE COMMISSION AND THE READYS — carried so the gate inherits the corrections
+1. **"RD-418 and RD-425 both edit .dockerignore, and no merge-tree has been run"** — true of the BUILDERS; the drafter has now run it (scratch objects): it
+   auto-merges to `2714f73`, identical to neither parent. Also three other pairwise overlaps exist (418×698 helper, 425×443 rd385) and every chain order agrees
+   (§1). The semantic overlaps remain UNMEASURED (U1-U8).
+2. **"RD-418 … Its base is 5628e75"** — `merge-base(5a782c1, 1904765) = 5628e75` ✔, but the fix commit `8de8e5c` was cut from **`7c47ec4`**, and **both real-image
+   builds used `7c47ec4` (RD-418) and `12b5edc` (RD-425) as the product tree** — no builder ever built on `5628e75` or `1904765`.
+3. **"RD-425 guard half @ 8823458 … Base 5628e75"** — merge-base ✔; the fix `1fd5d0f` was cut from `12b5edc` (READY :8 says so).
+4. **RD-443 READY :8 "Main has since moved to 5628e75 (my merges 1-2)"** — STALE: main is `1904765` (three further merges). Its merge-base with main is `12b5edc`;
+   the branch predates RD-447/RD-411's helper and cells on main. Not wrong about 443's own files.
+5. **RD-698 READY's C-68 run** (rd698 + rd447, rd411, image-content-exposure, rd429, rd403) covers 5 of the 10 helper consumers at `02fe76a`; rd385, rd442,
+   rd503-r2, rd503-c51 were not run in its red-proof hold (they ran only inside its full verify).
+6. **The lane plan** (`5_Project_History/2026-09-25_S84M_lane-plan.md`, LANE 3 item 5) says **"RD-425 guard half … Tier 2"**; the READY and the commission say
+   **tier 1** (Tuesday's ruling, RELAYED). The lane plan is stale at source.
+7. **RD-425 READY :32 (C-28) discloses ONE fetch; `session-tools/s84o/session-log.txt:3` records a SECOND, earlier one** ("ran 'git status' and 'git fetch --all
+   --prune' in 2_Project_Files before reading C-28 … Disclosed in the plan-confirmation mail") that no READY carries. The drafter did not read that mail.
+8. **RD-699's park proof** ran `jest --listTests` OUTSIDE the lock (disclosed, C-110) — so "proven inert" is not yet floor-valid; §7 Q3 re-runs it inside.
+9. **RD-418 READY condition 7 / C-163 "only the npm manifest pair of root JSON"** — the base stage's `COPY package*.json ./` (`Dockerfile:19`, inherited by
+   `production` at :78) survives; a root `package-<x>.json` is predicted to ship (READ, unmeasured; row i14, mutant M-A10).
+10. **The commission's "every jest run goes through session-tools/nexusai-lock.sh (with --after for merge tickets)"** — C-141 ADDENDUM 4 defines `--after` for a
+    builder's YIELD behind a gate or merge ticket. The drafter reads the commission as "use `--after` to sit behind a queued merge ticket, never to jump one"
+    (§11.1). **Tuesday: confirm or correct before launch.**
+11. **The commission's "the gate yields per C-141"** to the batch-3 gate — C-141 :1484 says "Not covered: … gate tickets among themselves". §11.6 reads it as
+    plain FIFO, no self-re-queue between gates. **Tuesday: confirm or correct before launch.**
+12. **Ruling timestamps (13:18:32Z, 13:20:10Z, 19:35:04Z), "your GO" (RD-698 tier), "Your HOLD is kept", RD-689/RD-690/RD-703 filings** — RELAYED from the READYs;
+    C-163/C-167 carry the first three; the rest were not read in Tuesday's mail or Jira by the drafter.
+13. **CI and PR state on all five heads: UNVERIFIED** (no `gh` run at drafting).
+14. **RD-425 READY :12 "shippedFiles() returns (189 at this head)"** — UNVERIFIED (row g2).
+15. **The routing line `QA/NexusAI-batch4|tuesday-agent@agentmail.to|no` is NOT yet in `fleet/inbox_routing.conf`** (the drafter may write only under
+    `fleet/qa-agent/`); the launcher refuses (exit 40) until Tuesday adds it.
+
+## PROVENANCE (drafter, 2026-09-27 08:35–09:40 AEST, read-only)
+- origin heads (five branches + main) | `git ls-remote origin <refs>` | 08:35:35
+- chains, parents, merge-bases with `1904765`, main's line `5628e75..1904765` and `12b5edc..5628e75` | `git log --format='%H %P %s'`, `git merge-base` | 08:36
+- counts at nineteen shas | `git show "${S}:scripts/verify-expected-counts.json"` | 08:37
+- deltas, name-status, stats, pairwise overlaps, counts-only tips (`42095e8..5a782c1`, `7c9dcb7..8823458`, `09c07b3..44bc804`, `1eae175..8e27dc2`) | `git diff
+  --name-status|--stat|--name-only`, `comm -12` | 08:37–08:39
+- merge prediction (14 pairs, 4 chain orders) and merged blobs | `git merge-tree --write-tree --name-only --messages [--merge-base]` with `GIT_OBJECT_DIRECTORY`
+  in the drafter's scratchpad, NexusAI objects as alternate; `git count-objects -v` 420/8566/3 before and after; `node --check` on the two content-merged JS
+  files | 08:40–08:44
+- `.dockerignore`, `Dockerfile`, helper, rd385 and rd327 diffs; RD-425's guard block; `Dockerfile` COPY census at `5a782c1` | `git diff`, `git show`, `git grep -n` | 08:44–08:55
+- test-title diffs (image-content-exposure, rd385, rd327) | `git show … | grep -n -E '(test|it|describe)('`, `diff` | 08:50
+- blob identities (rd447, rd429, rd411, review fixture, package-lock, package.json, DEPLOYMENT_GUIDE, deploy-dev) at six shas | `git rev-parse "${sha}:${path}"` | 08:52–08:56
+- consumer censuses (helper 11 at `02fe76a`, `.dockerignore`/`Dockerfile` readers 9 at `1904765`, rd385 readers 1, `test-files` 1, sample-JSON 0, `git ls-files`
+  enumerators) | `git grep -l`/`-n`, scoped to `__tests__` or named files | 08:53–08:58
+- jest `testPathIgnorePatterns` | `git show 02fe76a:package.json` :92-98 | 08:55
+- builder evidence (`session-tools/s84o/`: rd418-{build.sh,pair.sh,pair.log,health.sh,health.log,arms.log,final.log}, rd425-{pair.sh,pair.log,health.log,hold.log,
+  verify.log}, rd443-{hold.log,verify.log}, rd698-{hold.log,verify.log}, rd699-final.log, session-log.txt :1-3) — VERDICT lines, build overlay sha256 prefixes
+  vs committed blobs | `grep -a`, `shasum -a 256` over `git show` | 08:58–09:05
+- the batch-1 gate report (A-F1 :424/:442-451, A-F2 :427, tripwire :410-414, recommendations :540-541, §13, §14) and its evidence listing | `sed -n`, `grep -n`, `ls` | 09:05–09:10
+- CLARIFICATIONS ids (C-02 :30, C-15 :94, C-17 :104, C-28 :153, C-40 :225, C-49 :299, C-57 :410, C-68 :657, C-73 :701, C-89 :827, C-104 :972, C-110 :1101, C-112
+  :1141, C-122 :1278, C-125 :1320, C-130 :1386 + :1395 + :1401, C-131 :1407, C-133 :1426 + ADDENDUM :1434, C-141 :1480 + :1488/:1490/:1492/:1494, C-142 :1503, C-163
+  :1666, C-167 :1709, C-169 :1730, C-172 :1755 highest); 298,339 bytes, mtime 08:35:31; ticket grep RD-698/699/703 → 0 (control RD-418 :1672) | `grep -n` | 08:45–08:50
+- lane plan LANE 3 | `cat` | 08:40
+- negative-control seats %19 → 62649 (M), %21 → 9959 (N), %22 → 20317 (P), %0 → 47349 (Tuesday; parent bash 46703); no O pane (at 08:37:13 P was %18 → 12056 and N had no
+  pane) | `tmux list-panes -a -F …`, `pgrep -P`, `ps` | 08:37:13 and 08:57:09
+- jest lock owner at 08:4x `s85p-rd286-verify` (P) | `cat session-tools/locks/nexusai-jest.lock/owner` (read only) | 08:5x
+- routing: NOT written by the drafter (outside `fleet/qa-agent/`); `QA/NexusAI-batch1` :114 and `-batch2` :109 present, `-batch4` absent | `grep -n` | 09:0x

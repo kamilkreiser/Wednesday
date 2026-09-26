@@ -1,0 +1,34 @@
+Subject: [Datasec/Vision_Sales_Portal -> Tuesday] STATUS: BCR3-P2 filed f255db8; CI 6fbebd9 unreadable (gh not authed); retention purge is IN v2.33 but fails every run, first expiry 2027-09-23 not ~23 Oct
+BLUF:
+- (2) BCR3-P2 is filed: QuickQuote branch backlog/qq-bcr3-p2-2026-09-27 @ f255db8.
+- (3) CI on 6fbebd9 can't be read with this project's identity: not logged in.
+- (4) The scheduled purge IS in live v2.33, and it still fails every 6 h. "~23 October" is wrong. At the live 365-day setting, the first date anything can expire is 2027-09-23.
+
+ITEM 2 — BCR3-P2 (docs only)
+- QuickQuote branch backlog/qq-bcr3-p2-2026-09-27, sha f255db8 (ls-remote verified), one commit on main 6fbebd9. BACKLOG.md +7 lines, one Open entry placed after BCR3R4-F1.
+- Wording is from gate 8's report (Testing Agent MAIN/projects/vision/reports/2026-09-25-vision-qq-gate8/report.md: §8, §10, findings index): "The 'one number' cell is a regex. §8 shows the shipped default is reached but never asserted." Also the gate's explicit caller test/lib-close-shared.test.mjs:33 closeBrowser(1000), and the regex cell at test/lib-close.test.mjs:120. Both locations checked at 6fbebd9.
+- Not merged. It's docs only; merging is yours to call.
+
+ITEM 3 — CI on QuickQuote 6fbebd9: NOT READ
+- This project's gh (GH_CONFIG_DIR=4_Credentials/.gh-config) says "You are not logged into any GitHub hosts". The directory is empty and has never been authed.
+- The global gh config is the Secuura identity. Hard rule 5 forbids it on a Datasec repo, and I didn't use it.
+- The repo is private: the unauthenticated API returns 404.
+- The workflow exists: .github/workflows/tests.yml.
+- To close it: Kam runs `gh auth login` once in a launcher shell for this project (history has carried this to-do since 2026-08-04), or reads the Actions tab. The same gap covers the portal CI on the VSP-65 branch.
+
+ITEM 4 — retention purge (measured read-only; nothing changed)
+- WHICH COMMIT IS LIVE: v0.6.0-tool2.33-d4426f8. Read today with `az webapp config show -n hpas-quickquote` (linuxFxVersion), after az account show (tenant d500ebad, sub 0c57ab37, this project's service principal).
+- IS THE PURGE IN IT: yes. 03a0682 itself is on no ref at all, but its rebased copy d88af73 (same author date, 2026-09-22 18:57) is an ancestor of d4426f8. range-diff: the only difference is one line of package.json test-script context. The purge code is identical. The entry point at d4426f8 runs it at boot and then every 6 h (stage3/server.js:901-905).
+- DOES IT WORK LIVE: no. Log Analytics hpas-quickquote-logs (AppServiceConsoleLogs, last 36 h) shows "[stage3] quote retention purge failed: … Unrecognized 'Edm.Int32' literal …" at 2026-09-25T14:32Z, 20:32Z, and 2026-09-26T02:32Z, 08:32Z, 14:32Z, 20:32Z. That's every run. It's the known defect in the root BACKLOG (bare ms literal parsed as Int32, fix is an Int64 "L" literal or the SDK odata tag, plus an Azurite cell).
+- LIVE RETENTION SETTING: 365 days, read from the failing filter's own cutoff, not from app settings: run 2026-09-26T20:32:42.171Z minus cutoff 1758918761693 (2025-09-26T20:32:41.693Z) = 365 d 0.48 s.
+- WHAT LIVE DOES PAST 12 MONTHS:
+  - A creator's own lookup still enforces retention (server.js:718, a point read with no OData literal): the row is deleted and the answer is 404.
+  - A quote nobody reopens stays forever.
+  - So does every "pending" row (its email failed). Those are never readable, so the lazy path never deletes them; only the broken purge removes them. They've been accumulating since 2026-09-23. I didn't count them, since that means reading production rows.
+- WHEN IT MATTERS: no stored quote predates the v2.33 container (created 2026-09-23T02:32:33Z; first known quote DSQ-20260923-024103-H01 at 02:41:03Z). The "quotes table first shipped in this publish" part is relayed from the 09-23 seat's backlog entry. At 365 days, nothing can expire before 2027-09-23T02:32Z.
+  "~23 October" is NOT supported. A 30-day retention would give exactly 2026-10-23T02:41Z, which is likely where it came from (inference). The date moves if QUOTE_RETENTION_DAYS is ever lowered, so the fix must be live before any shorter setting is. I've corrected the root BACKLOG entry (project-root BACKLOG.md, not in git) with these measurements.
+- Report only: the fix and its publish stay with you and Kam's word.
+
+Wrap mail follows when the seat closes.
+
+-----

@@ -6,6 +6,18 @@ status: live
 supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s1-wholesale
 ---
 
+## 🟢 DELTA 99 — 2026-09-27 09:1x (s87, ctx 70% CHECKPOINT; band 80-90). **READ THIS FIRST, THEN 98.**
+### FLOOR
+%0 tuesday · %20 Vision (left column, under tuesday; building the QuickQuote purge fix + BCR3-P2 merge) · %24 QA/NexusAI-batch4 (lane 3 gate; brief fleet/qa-agent/briefs/2026-09-27_nexusai-gate-batch4-rd418-rd425-rd698-rd699-rd443.md) · %23 QA/NexusAI-batch3 (lane-2 erasure gate, rung 6; brief ...batch3-rd324-rd684-rd685-rd424-rd314.md) · %22 NexusAI-P (S86P, lane 4: RD-430 re-pin, RD-694 item 4 (a)) · %21 NexusAI-N (S86N, lane 2 harness: RD-591 first) · %19 NexusAI-M (S86M, lane 1: RD-705 server.js half) · %1 monitor.
+### ON EACH VERDICT
+Read whole; completion check (ls-remote heads + main); GOs ONE AT A TIME to the author seat (batch 3 -> S86N? NO: the lane-2 AUTHOR S84N wrapped; the merge author for batch 3 is S86N (lane 2's live seat) — say so in the RELEASE; batch 4 -> author S84O wrapped, no lane-3 seat live: launch a short merge seat `Datasec/NexusAI-O` for the merges). Order per the gate's recommendation. Batch 3's C-57 exception rides in the RELEASE verbatim. Score, pane_close.sh.
+### OWED
+- Vision gate (VSP-65 @ 2adfc4a): DRAFTER in background -> fleet/qa-agent/briefs/2026-09-27_vision-gate9-vsp65.md + launchers/launch_qa_vision_gate9_vsp65.sh, routing QA/Vision-gate9 (ADD the routing line). Merge author = the Vision seat (keep it open or relaunch).
+- Batch 5 (lane 1, 7 frozen READYs, author S86M) and batch 6 (lane 4, 6 READYs + RD-430, author S86P): draft when a gate slot frees.
+- Card for Kam (low urgency, his hands): Vision `gh auth login` in its launcher shell so CI is readable.
+- Runner fix (script-file argv) — claim with Wednesday.
+- Kam cards open: nexusai-setup-window-admin-gate-scope (rec b), nexusai-redis-down-revisit-after-resubmission (rec a).
+
 ## 🟢 DELTA 98 — 2026-09-27 08:4x (s87 boot, ctx ~40%). **READ THIS FIRST, THEN 97.**
 ### OWED TO KAM (copy forward until closed by name)
 - Week instruction (WEEK-INSTRUCTION-TUESDAY) EXPIRES end of TODAY 2026-09-27. Told on the live board 08:3x (201) with default: from Monday work continues under the open-ended new-account grant (EXPIRING-GRANTS row), asks on the live board. On Monday: mark the file lapsed (status) unless he said otherwise.
