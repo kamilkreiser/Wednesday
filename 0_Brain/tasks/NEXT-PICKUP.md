@@ -21,6 +21,7 @@ supersede: replace wholesale at the next pickup; do not append
 2. **NO Secuura seat live** (M1 0.95, B 30th 0.90, both wrapped + closed). Next Secuura work, small: **#1286 docs r2 (da5f3dd837dd, the CAP, T3) → the next gate batch** · **KS-1318's J2 hunk re-raised alone** (handover `HANDOVER-seatB30-2026-09-26.md:30`) · KS-1333 once #1281 merged (it has: #1281 → fef3443747) · new tickets KS-1334 (5 prod leak sites) + KS-1341 (webhooks.ts 7 leaks, High) are real build candidates. Usage 81% (> 70% minimise-cloud; 90% hard stop): launch only what matters now.
 3. **Ornith PAUSE_QUEUE to 18:00** (measured reason). Spark idle.
 4. **Laptop-DEV rsync 13710** still running (watcher in THIS seat; re-arm on rotation), NAS leg 64108 running.
+   - **15:06 update:** usage_gate.sh 70% advisory BUILT (arms 60/75/92). **KS-1341 → Spark:** briefs A/B/C at `2_Project_Files/local-model/night/briefs/KS-1341/` (A first; B/C only after A merges, re-check anchors per each brief); a harness-runner subagent of THIS seat is running brief A (one round; its notification dies with the seat — check `night/done.md` + `SPARK_LADDER.md` for a KS-1341 row; if none, re-run brief A once). Friday told the Spark is claimed (mail 05:0xZ).
 5. OWED (Wednesday tooling): the 70% advisory in `fleet/usage_gate.sh`; `cockpit.sh say` queued-tap re-send; the report-boundary stall mechanism.
 
 **🔵 50% CHECKPOINT 11:46 (the 09:44 seat, session 6a51240d). READ FIRST — supersedes the 09:4x handover where they differ:**
