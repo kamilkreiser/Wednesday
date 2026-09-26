@@ -1,0 +1,76 @@
+--- a/Blockchain/Dev/services/originate/src/__tests__/ks1293-originate-suite-is-hermetic.test.ts
++++ b/Blockchain/Dev/services/originate/src/__tests__/ks1293-originate-suite-is-hermetic.test.ts
+@@ -161,5 +161,5 @@
+     const { offenders, pinned } = scanHermeticity(TESTS_DIR, SUBJECTS);
++    expect(offenders).toEqual([]);
+     // Non-vacuity: the manifest is 9 files and each must yield at least one base.
+     expect(pinned).toBeGreaterThanOrEqual(SUBJECTS.length);
+-    expect(offenders).toEqual([]);
+   });
+--- /dev/null
++++ b/Blockchain/Dev/services/originate/src/__tests__/ks1339-configpinned-names-the-offender-before-the-count.test.ts
+@@ -0,0 +1,64 @@
++/**
++ * KS-1339: ks1293's CONFIGPINNED cell asserts its count floor BEFORE its offender list. When a
++ * SUBJECT stops pinning the base, the scan both drops the pinned count by one and records an
++ * offender that names the file, but the floor fires first, so the failure prints only a count
++ * comparison and never names the file. The file's own header claims the opposite: an offender is
++ * NAMED BY FILE. ks1293 is itself a suite, so it cannot be imported here. This test reads it as
++ * TEXT, takes the statements of the CONFIGPINNED cell that follow its scan, runs them against a
++ * scan result, and checks which failure comes FIRST.
++ */
++
++import { readFileSync } from 'fs';
++import { join } from 'path';
++
++// A newline and a single quote, so no line below needs a backslash or a double-quoted string.
++const NL = String.fromCharCode(10);
++const SQ = String.fromCharCode(39);
++const LINES = readFileSync(join(__dirname, 'ks1293-originate-suite-is-hermetic.test.ts'), 'utf-8').split(NL);
++const START = LINES.findIndex((line) => line.trim().startsWith('it(' + SQ + 'CONFIGPINNED:'));
++const END = LINES.findIndex((line, i) => i > START && line === '  });');
++const SCAN_AT = LINES.findIndex((line, i) => i > START && i < END && line.includes('scanHermeticity(TESTS_DIR, SUBJECTS)'));
++// The CONFIGPINNED statements after its scan, in the order the file writes them.
++const ASSERTIONS = LINES.slice(SCAN_AT + 1, END).join(NL);
++
++const SUBJECTS = Array.from({ length: 9 }, (_, i) => 'subject-' + String(i) + '.test.ts');
++const OFFENDER = 'ks1228-a-refused-request-writes-no-provenance-row.test.ts sets no IMPORT-SCOPE base';
++
++/**
++ * Run the CONFIGPINNED assertions on one scan result.
++ *
++ * @param {string[]} offenders - The scan's offender list.
++ * @param {number} pinned - The scan's pinned-base count.
++ * @returns {string} The FIRST failure's message, or an empty string when every assertion holds.
++ */
++function firstFailure(offenders: string[], pinned: number): string {
++  const cell = new Function('expect', 'offenders', 'pinned', 'SUBJECTS', ASSERTIONS) as (...args: unknown[]) => void;
++  try {
++    cell(expect, offenders, pinned, SUBJECTS);
++    return '';
++  } catch (err) {
++    return err instanceof Error ? err.message : String(err);
++  }
++}
++
++describe('KS-1339 ks1293 CONFIGPINNED: a failure names the offending file, not only a count', () => {
++  it('control KS-1339 A0: the CONFIGPINNED cell asserts both the offender list and the count floor after its scan', () => {
++    expect(START).toBeGreaterThan(-1);
++    expect(SCAN_AT).toBeGreaterThan(START);
++    expect(END).toBeGreaterThan(SCAN_AT);
++    expect(ASSERTIONS).toContain('expect(offenders).toEqual([]);');
++    expect(ASSERTIONS).toContain('expect(pinned).toBeGreaterThanOrEqual(SUBJECTS.length);');
++  });
++
++  it('control KS-1339 A1: a clean scan with every subject pinned passes', () => {
++    expect(firstFailure([], 9)).toBe('');
++  });
++
++  it('control KS-1339 A2: a scan one base short with no offender still fails, so the floor is kept', () => {
++    expect(firstFailure([], 8)).not.toBe('');
++  });
++
++  it('RED KS-1339 A3: a scan with one offender and one base short fails FIRST on the offender list, naming the file', () => {
++    expect(firstFailure([OFFENDER], 8)).toContain('ks1228-a-refused-request-writes-no-provenance-row.test.ts');
++  });
++});
