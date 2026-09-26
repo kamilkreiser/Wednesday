@@ -267,3 +267,12 @@ KS-1226's example `Tests  1 failed | 1 skipped | 243 passed (245)` had been COMP
 
 ## A close withheld by §5f carries the CANONICAL handle, lowercase, verbatim (2026-09-26, Seat M1)
 When `secuura-test-discipline` §5f withholds Done on a runtime change, the ticket gets ONE comment in exactly this shape (KS-1165 / KS-932 precedent): `Merged <sha> (PR #n, <file>); offline gates green; NOT Done per secuura-test-discipline §5f — live sweep owed (torn-down rebuilt stack, all containers verified up), unverified: <what>`. The search handle is the phrase `live sweep owed`, lowercase. On 2026-09-26 two tickets carried a capitalised `Live sweep owed` and a case-sensitive search for the established form missed exactly those two. `live sweep` alone over-collects (32 vs 14); `§5f` alone returns 99. The sweep list is built from this phrase, so a variant spelling silently drops a ticket from a list that reads complete.
+
+## A missing gate is not a passing gate — quote only the gate lines your push actually printed (2026-09-26, Seat B 31st)
+The pre-push hook filters by PATH: a push touching no `Blockchain/Dev/` path runs only the format-gate, and the platform preflight (the fleet STOP counts) never runs. **A PR body or READY carries only the gate lines that appear in THAT push's log** — never the fleet counts as boilerplate. If the platform preflight did not run, say `fleet STOP: NOT APPLICABLE (format gate only)`. Found by B 31st on #1291 when its own parser returned None for all three figures.
+
+## A search token that contains your own worktree name matches every path you own (2026-09-26, Seat B 31st)
+Worktrees are named after their work (`s-b31-ks1341b`), so `grep -c '<ticket-slug>'` over lint/tsc output counts EVERY absolute path in that worktree, not the file you care about (B 31st: 14/14 lint lines, 622/622 tsc lines). **Search on the real FILENAME, and run the same pattern over a baseline run that predates the file as the control** — the control must read 0 (or the pre-existing count) before the number is believed.
+
+## A hyphenated foreign key ATTACHES in a PR title, body or commit message — in a Linear COMMENT it only cross-references (2026-09-26, Seat B 31st; Wednesday agrees)
+The un-hyphenation rule binds the squash subject, the squash body and commit messages (Linear/GitHub attach tickets from those). A ticket COMMENT that points at a follow-up it just filed may name it hyphenated, because there the cross-reference is the intent. The key scanner flags both; the author reads which surface it is before acting.
