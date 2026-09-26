@@ -15,6 +15,14 @@ supersede: replace wholesale at the next pickup; do not append
 **Tuesday:** BACK (her mail 23:35Z; wake_wednesday.sh alarm change f4ed4d47d pulled). **Friday:** live on the laptop and driving Datasec seats.
 
 ### LIVE RIGHT NOW
+**🟣 70% CHECKPOINT 15:50 (the 09:44 seat, session 6a51240d). READ FIRST — supersedes the FLOOR CLEAR block below where they differ:**
+- **Kam:** no panel rows since 07:34. Cards with him (defaults = nothing changes): `secuura-pr1245-round3-failed-at-cap`, `secuura-pr1268-pr1278-closed-at-cap`; the audit fuse 2026-09-30T00:00Z.
+- **develop e080174c86c6; 68 merges since the 25th's morning, 0 deployed.**
+- **LIVE: Seat B 31st (%38)**, launched 05:31:56Z (brief `fleet/briefs_staged/2026-09-26_seatB31_raise.md`): (1) raise KS-1341 part A from the held Spark READY (`local-model/night/READY_KS-1341-WEBHOOKS500-A_*`), eslint owed, PR body notes the two not-yet-true comment sentences (ruled: raise unchanged); (2) KS-1318's J2 hunk alone (hunk 3 of the ks781 diff at #1268's head, `@@ -4979,7 +4979,16 @@`); (3) wait as author. **Plan confirmation awaited** — answer it against the brief.
+- **NEXT GATE KIT (commission when both B31 READYs land):** #1286 r2 (da5f3dd837dd, CAP, T3) + KS-1341 A PR + KS-1318 J2 PR; shape `fleet/qa-agent/gatesets/2026-09-26_gate27/`; GO → B 31st merges its own (and #1286 only if the GO names it). **Then KS-1341 part B on the Spark** (`night/briefs/KS-1341/brief-B.md`; re-check its anchors vs the new develop; RUN build_input.sh to a scratch path FIRST — three brief-shape refusals today), then C.
+- **Spark:** claimed for Secuura (mail to Friday 05:0xZ). KS-1341 A = PASS (SPARK_LADDER row 10). Ornith PAUSE_QUEUE to 18:00.
+- Laptop-DEV rsync 13710 + NAS 64108 still running; watcher in THIS seat (re-arm on rotation).
+
 **🟢 FLOOR CLEAR 14:50 (the 09:44 seat, session 6a51240d). READ FIRST — supersedes every block below where they differ:**
 0. **Kam:** no panel rows since 07:34. **Three close-cards with him** (defaults: nothing changes): `secuura-pr1245-round3-failed-at-cap` (rec a: close #1245 + #1241) · `secuura-pr1268-pr1278-closed-at-cap` (rec a: close both). Audit fuse 2026-09-30T00:00Z still his (card from earlier days).
 1. **develop e080174c86c6. 68 Secuura merges since the 25th's morning, 0 deployed.** This seat verified at source (PR API merged=True at every pin + END/own-path tree checks): gate26T2 five, gate26T1 six, gate27 two (#1285 = the Spark's KS-766 PASS, #1287 = KS-1142's corpus file).
