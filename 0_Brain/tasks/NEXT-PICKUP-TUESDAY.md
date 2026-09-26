@@ -6,6 +6,15 @@ status: live
 supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s1-wholesale
 ---
 
+## 🟢 DELTA 97 — 2026-09-27 06:1x ROTATION HANDOVER (s86, ctx ~79%). **KAM LOGGED IN ON A NEW ACCOUNT (~06:0x, "New account logged in. Please keep going with the work.") — THE STOP IS LIFTED, gauge 0% (renews 6d 19h). EXPIRING-GRANTS row re-affirmed. READ THIS FIRST, THEN 96.**
+### DO NOW, in order (all launches pass usage_gate; 0%)
+1. **BATCH #3 GATE (tier 1), ready to draft NOW:** RD-324 UPDATED @ 168d850 + RD-684 UPDATED (both sent by N ~13:1xZ on 09-26, in tuesday-agent@; read them whole, heads at origin) + RD-314 ce148d5 + RD-424 2ce26eb + RD-413 f70594a (browser + brand legs; RD-636 closes with it) + RD-693 ddf1b75 (tier 1, browser leg R11) + RD-685 9d7076b (N, hard links, C-169, dataErasure.js). Save each READY to fleet/qa-agent/briefs/ first. Commission ONE background drafter (pattern: `fleet/qa-agent/briefs/2026-09-26_nexusai-gate-batch1-rd447-rd411-rd533-rd627a-rd315.md` + its launcher); read its WRONG list, stamp, --check, `cockpit.sh add QA/NexusAI-batch3 …`, resize panes (monitor 2, agents >= 6), verify at rung 6. If it is too big for one gate (7 tickets), split by file family: erasure (324/684/685/424) vs the rest (314/413/693).
+2. **The other READYs** (DELTA 96 list: O's RD-418/698/699/425, M's C-170 package/RD-681/682/627b/696, P's RD-204/197/686+694/692, plus RD-443 t2): a second tier-1 batch and a tier-2 batch (RD-443, RD-692, RD-686+694). Read each whole first.
+3. **Successors for lanes 1 (M), 2 (N), 3 (O)** — all three wrapped at 05:3x (HANDOVER-S84M.md / S84N.md / S84O.md at the project root; panes closed). Brief each by the P-successor pattern (`fleet/briefs_staged/2026-09-26_nexusai_P_successor.md`), carrying the 05:3x answers (M: RD-651 = (b), done; O: RD-703 next; N: RD-685 is READY, then its queue) and "rotate is Wednesday-wired: Datasec seats are retired BY HAND". Launch with cockpit.sh launch after each verified send.
+4. P (S85P, %18) is live: RD-286 (a) in progress; RD-693 READY; ctx ~71%.
+5. Diagnose the 20:29 runner death (ledger 2026-09-27).
+### Floor at handover: %0 tuesday · %18 P · %1 monitor. Wake runner pid 59390 (re-armed 05:30).
+
 ## 🔴🔴 DELTA 96 — 2026-09-27 05:3x (s86, ctx 74%). **USAGE 99% — THE 95% STOP HAS TRIPPED (Kam ruled a, 21:05: full pace, stop at 95%; he logs in with a NEW ACCOUNT this morning). NO NEW LAUNCHES until he does. READ THIS FIRST.**
 ### WHAT WENT WRONG OVERNIGHT (ledger row owed/written)
 - **The wake runner (pid 2556) DIED at 20:29 AEST** (last log line), together with this seat's 90% watcher (exit 144): the same moment P stopped its hung RD-286 processes. Cause NOT established. **Nothing woke this seat from ~21:15 to 05:30**, so ~20 agent mails (6 QUESTIONs, ~12 READYs) sat unread and the lanes drained and idled. Re-armed 05:30 (`WED_AGENT=tuesday arm_wake_watch.sh`, runner pid 59390, verified in its log).
