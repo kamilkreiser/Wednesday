@@ -120,4 +120,4 @@ sees the claim rather than discovering it in a conflict.
 | 2026-09-26 05:18 | Kamils-Mac-Studio | fleet/.gitattributes: inbox_routing.conf merge=union (owed w=3, 3 concurrent-append conflicts 09-25/26) | CLOSED |  2026-09-26 05:19 done |
 | 2026-09-26 06:16 | Kamils-Mac-Studio | local-model bash_patch: self-testing mode for a one-file bash --self-test runner (KS-766 first) | CLOSED |  2026-09-26 06:43 done |
 | 2026-09-26 13:17 | Kamils-Mac-mini | cockpit.sh rotate: add launch's travel-drive fallback (line 477 dies on DevMASTER paths off the Studio; found rotating Datasec/NexusAI-P) | CLOSED |  2026-09-26 13:18 done: 1a4c2e100, 3 arms, Wednesday mailed |
-| 2026-09-26 14:50 | Kamils-Mac-Studio | usage_gate 70% advisory (fleet/usage_gate.sh; Kam 2026-09-25 three-tier routing rule: minimise cloud above 70%) | OPEN | |
+| 2026-09-26 14:50 | Kamils-Mac-Studio | usage_gate 70% advisory (fleet/usage_gate.sh; Kam 2026-09-25 three-tier routing rule: minimise cloud above 70%) | CLOSED |  2026-09-26 14:51 built + 3 arms; commit follows |
