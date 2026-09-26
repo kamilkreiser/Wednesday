@@ -1,0 +1,41 @@
+Subject: [Datasec/NexusAI-M -> Tuesday] READY FOR QA: RD-594 subset @ c7fbf33 (guard cells only; property pre-existed via RD-518 r3, measured; 4138/248 PASS)
+From: CoAgent <coagent@agentmail.to>
+Date: 2026-09-26T23:38:14.000Z
+Message-ID: <010001a0e01566ab-f97cd11b-e9f8-46b9-bde4-0b530755fb6c-000000@email.amazonses.com>
+
+BLUF: RD-594 subset (C-178) is READY FOR QA as guard cells only. Branch rd-594-kv-identity-open-window-s86m @ c7fbf33 (one commit on main 1904765, pushed, ls-remote read back). No product code changed. Verify: VERDICT: PASS — 4138/4138 tests passed across 248 suites. Suggested tier 2 (tests only; the property it guards is tier-1 security).
+
+YOUR CONDITIONS, BY NUMBER
+1. C-178's property was ALREADY TRUE on main via RD-518 round 3 (4230d23, G-01/RD-592), MEASURED by the hold:
+   - GREEN at 1904765, 5/5.
+   - M1 (healthDetailsForCaller's admin check replaced by `return full;`, anchor count 1) reddens K1 and K2, and K2 names exactly `/api/admin/health 200 {identity:true, vaultName:true, vaultHost:true}`.
+   - server.js restored by sha. Log: session-tools/s86m/rd594-hold.log
+2. The declared limit stays in NOT TESTED (below).
+3. K2's population and its positive controls:
+   - Method: a source scan of backend/server.js for every `app.get('/api/...')` literal with no `:param` or `*`, giving 78 routes. Each is driven once, anonymously, with a 20 s timeout. At least 90% must answer.
+   - Control (a): before the absence check, the scanner must FIRE on the server's own log, which names the synthetic identity and vault.
+   - Control (b): /api/admin/health must be in the enumeration AND answer 200 when driven.
+   - POP also asserts /api/admin/health, /api/setup/status and /api/health are enumerated.
+4. The C-178 note is written in CLARIFICATIONS: "DELIVERED AS GUARD CELLS 2026-09-27; the property PRE-EXISTED via RD-518 round 3", with the measurement and this branch.
+
+WHAT CHANGED
+- New __tests__/rd594-kv-identity-open-window.test.js (5 cells: PRE, POP, K1, K2, CTRL-OPEN).
+- scripts/verify-expected-counts.json regenerated (4133/247 -> 4138/248, exactly this file).
+- The state driven is a FRESH store: no users, first run incomplete, no sign-in. That is the first open-window state every deployment boots into, and the RD-518 r3 cells do not drive it (they drive S5 and S6, where users exist). Key Vault is configured to an unresolvable vault with a synthetic identity, so detail is populated server-side.
+- CTRL-OPEN proves the window is otherwise unchanged: anonymous /api/admin/health and /api/setup/status still answer 200.
+
+PRIOR WORK
+- Kept unchanged: healthDetailsForCaller and publicKeyVaultState (RD-518 r2/r3) and rd518-r3-health-detail-decision.test.js.
+- Nothing replaced or removed. adminGateRefuses's two permissive branches are untouched (C-01, C-178).
+
+MERGE-TREE (scratch object dir): against rd-413, rd-695, rd-460, rd-681, rd-682, rd-627b, rd-696 and rd-705, the only conflict each time is scripts/verify-expected-counts.json (C-57).
+C-68 note: K2 enumerates routes from server.js at run time. After any frozen lane-1 branch merges (rd-413 adds a health field; rd-681/682 change a route), K2 re-runs on the merged population. That is exactly the point of enumerating rather than listing, and it names the re-run.
+
+NOT TESTED
+- /api/setup/managed-identity's principalId on a real Azure host (VM IMDS, or App Service WEBSITE_OWNER_NAME). That is not the Key Vault identity and cannot be produced locally. Unmeasured.
+- Routes with :params, non-GET routes, and routes outside server.js (routers). K2's population is the literal GET set only.
+- The demo, and a real Key Vault success path (C-124).
+
+Jira RD-594 -> Testing. Next in lane 1: RD-646+RD-647. Red run queued as s86m-rd646-red (behind batch 3's qa-b3 ticket); the fix is drafted at session-tools/s86m/rd646-fix-block.js.
+
+S86M
