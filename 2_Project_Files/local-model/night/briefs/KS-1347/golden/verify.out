@@ -1,0 +1,51 @@
+== baseline: ks732 at tip
+ Test Files  1 passed (1)
+      Tests  13 passed (13)
+== RED at tip (new test only)
+     × RED KS-1347 A2: from a checkout path WITH spaces every path is the real planted file, not a percent-encoded one 8ms
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+AssertionError: expected [ …(3) ] to deeply equal [ …(3) ]
+- Expected
++ Received
++   "/private/var/folders/xl/p96z5mmd3lzcn3pt8t6djkl40000gn/T/ks1347-ks732-7JHby3/Testing%20Agent%20MAIN/services/auth/src/auth.openapi.ts",
++   "/private/var/folders/xl/p96z5mmd3lzcn3pt8t6djkl40000gn/T/ks1347-ks732-7JHby3/Testing%20Agent%20MAIN/services/auth/src/routes/mfa.ts",
++   "/private/var/folders/xl/p96z5mmd3lzcn3pt8t6djkl40000gn/T/ks1347-ks732-7JHby3/Testing%20Agent%20MAIN/services/auth/src/auth.openapi.ts",
+ Test Files  1 failed (1)
+      Tests  1 failed | 2 passed (3)
+== GREEN after golden (git apply strict, whole diff)
+git apply rc=0
+applied test == golden test
+ Test Files  2 passed (2)
+      Tests  16 passed (16)
+== whole auth suite on the fixed tree
+ Test Files  77 passed (77)
+      Tests  835 passed (835)
+== lint (package's own: npm run lint = eslint src; eslint --max-warnings 0 on the two files; tsc -p tsconfig.json --noEmit)
+npm run lint rc=0
+  115:1  warning  Unused eslint-disable directive (no problems were reported from '@typescript-eslint/no-var-requires')
+✖ 15 problems (0 errors, 15 warnings)
+  0 errors and 2 warnings potentially fixable with the `--fix` option.
+
+/private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/d0b2ec3e-4b50-4d96-87d2-4a998799b9cd/scratchpad/sparkfeed/Blockchain/Dev/services/auth/src/__tests__/ks732-mfa-disable-proof.test.ts
+  319:11  warning  'disableBlock' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+✖ 1 problem (0 errors, 1 warning)
+
+ESLint found too many warnings (maximum: 0).
+eslint 2 files rc=1
+tsc rc=0
+== TAMPER: :317 back to .pathname (fixed tree)
+line 317 is fixed text: True ; fixed text count 2
+     × RED KS-1347 A2: from a checkout path WITH spaces every path is the real planted file, not a percent-encoded one 8ms
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+AssertionError: expected [ …(3) ] to deeply equal [ …(3) ]
+- Expected
++ Received
++   "/private/var/folders/xl/p96z5mmd3lzcn3pt8t6djkl40000gn/T/ks1347-ks732-PWpDgk/Testing%20Agent%20MAIN/services/auth/src/auth.openapi.ts",
+ Test Files  1 failed (1)
+      Tests  1 failed | 2 passed (3)
+== ARM: decodeURIComponent(pathname) at all three sites (should be GREEN: the cell tests behaviour, not the idiom)
+arm replaced 3
+ Test Files  1 passed (1)
+      Tests  3 passed (3)
+== restore clone

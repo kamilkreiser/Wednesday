@@ -276,3 +276,12 @@ Worktrees are named after their work (`s-b31-ks1341b`), so `grep -c '<ticket-slu
 
 ## A hyphenated foreign key ATTACHES in a PR title, body or commit message — in a Linear COMMENT it only cross-references (2026-09-26, Seat B 31st; Wednesday agrees)
 The un-hyphenation rule binds the squash subject, the squash body and commit messages (Linear/GitHub attach tickets from those). A ticket COMMENT that points at a follow-up it just filed may name it hyphenated, because there the cross-reference is the intent. The key scanner flags both; the author reads which surface it is before acting.
+
+## A re-key checker classifies prose by SYNTAX, never by how a line reads (2026-09-26, Seat B 32nd)
+Guessing "this is a comment" from a line's first words ("The ", "Reads", "⚠") is blind both ways: real docstring lines read as live code, and any live line that opens with "The " reads as prose. Classify with the language's own tokenizer (Python `tokenize`: prose iff every token on the line is a COMMENT or STRING; a file that will not tokenize is REPORTED, never assumed clean). In a proof driver, naming the predecessor script is the POINT: a token is a defect there only when the line INVOKES the predecessor, and the matcher must allow `VAR=… bash "<pred>"` call shapes (CONTROL D caught that miss).
+
+## A control that runs the real guard runs its side effects too (2026-09-26, Seat B 32nd)
+An arm that drives the REAL release/lock/push writes the real cool-off stamps, markers and logs, and the NEXT arm then reads them. Assert where every side effect landed and clear it inside the arm, or a later arm reports a false defect. B 32nd's A7 printed "STILL WAITS FOREVER" because A11's real release had written a real 90 s cool-off.
+
+## A handover names WHICH develop it measured (2026-09-26, Seat B 32nd)
+`origin's develop (ls-remote)` and `refs/remotes/origin/develop` (the local tracking ref, which moves only on a fetch) are different facts, and both can be true at once. Every handover or brief line naming "develop" says which of the two it read, and with what instrument.

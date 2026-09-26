@@ -1,0 +1,77 @@
+== RED at tip (new test only)
+    ✕ RED KS-1346 A1 GET /stats: a thrown plain object is logged with its content, once, under this route (18 ms)
+    ✕ RED KS-1346 A1 GET /: a thrown plain object is logged with its content, once, under this route (2 ms)
+    ✕ RED KS-1346 A1 PATCH /:errorId/resolve: a thrown plain object is logged with its content, once, under this route (17 ms)
+    ✕ RED KS-1346 A1 POST /resolve-by-service: a thrown plain object is logged with its content, once, under this route (2 ms)
+    ✓ control KS-1346 A2 GET /stats: the 500 body stays the constant text for an object throw (5 ms)
+    ✓ control KS-1346 A2 GET /: the 500 body stays the constant text for an object throw (1 ms)
+    ✓ control KS-1346 A2 PATCH /:errorId/resolve: the 500 body stays the constant text for an object throw (1 ms)
+    ✓ control KS-1346 A2 POST /resolve-by-service: the 500 body stays the constant text for an object throw (1 ms)
+    ✓ control KS-1346 A3: an Error throw still logs exactly its message
+    ✓ control KS-1346 A4: a string throw still logs exactly itself, not a quoted rendering (1 ms)
+    ✓ control KS-1346 A5: String() of the thrown object really is the lossy text, so A1 is not vacuous
+    - Expected  - 2
+    + Received  + 2
+    - Expected  - 2
+    + Received  + 2
+    - Expected  - 2
+    + Received  + 2
+    - Expected  - 2
+    + Received  + 2
+Test Suites: 1 failed, 1 total
+Tests:       4 failed, 7 passed, 11 total
+== GREEN after golden (git apply strict)
+git apply rc=0
+applied test == golden test
+Test Suites: 2 passed, 2 total
+Tests:       28 passed, 28 total
+== whole originate suite on the fixed tree
+Test Suites: 83 passed, 83 total
+Tests:       973 passed, 973 total
+== lint (package's own: npm run lint; eslint --max-warnings 0 on the two files; tsc --noEmit)
+npm run lint rc=0
+  128:5  warning  Unused eslint-disable directive (no problems were reported from '@typescript-eslint/no-var-requires')
+✖ 22 problems (0 errors, 22 warnings)
+eslint 2 files rc=0
+tsc rc=0
+== TAMPER: :95 inspect(err) -> inspect(String(err)) (fixed tree; the import stays used, so the suite still compiles)
+tamper target count 1 ; at line 95: True
+    ✕ RED KS-1346 A1 GET /stats: a thrown plain object is logged with its content, once, under this route (40 ms)
+    ✕ RED KS-1346 A1 GET /: a thrown plain object is logged with its content, once, under this route (2 ms)
+    ✕ RED KS-1346 A1 PATCH /:errorId/resolve: a thrown plain object is logged with its content, once, under this route (10 ms)
+    ✕ RED KS-1346 A1 POST /resolve-by-service: a thrown plain object is logged with its content, once, under this route (2 ms)
+    ✓ control KS-1346 A2 GET /stats: the 500 body stays the constant text for an object throw (1 ms)
+    ✓ control KS-1346 A2 GET /: the 500 body stays the constant text for an object throw
+    ✓ control KS-1346 A2 PATCH /:errorId/resolve: the 500 body stays the constant text for an object throw (1 ms)
+    ✓ control KS-1346 A2 POST /resolve-by-service: the 500 body stays the constant text for an object throw (1 ms)
+    ✓ control KS-1346 A3: an Error throw still logs exactly its message (1 ms)
+    ✓ control KS-1346 A4: a string throw still logs exactly itself, not a quoted rendering (1 ms)
+    ✓ control KS-1346 A5: String() of the thrown object really is the lossy text, so A1 is not vacuous
+    - Expected  - 2
+    + Received  + 2
+    - Expected  - 2
+    + Received  + 2
+    - Expected  - 2
+    + Received  + 2
+    - Expected  - 2
+    + Received  + 2
+Test Suites: 1 failed, 1 total
+Tests:       4 failed, 7 passed, 11 total
+== ARM: inspect() for EVERY non-Error (string throws get quoted) -> the string control A4 must go RED
+arm count 1
+    ✓ RED KS-1346 A1 GET /stats: a thrown plain object is logged with its content, once, under this route (16 ms)
+    ✓ RED KS-1346 A1 GET /: a thrown plain object is logged with its content, once, under this route (2 ms)
+    ✓ RED KS-1346 A1 PATCH /:errorId/resolve: a thrown plain object is logged with its content, once, under this route (8 ms)
+    ✓ RED KS-1346 A1 POST /resolve-by-service: a thrown plain object is logged with its content, once, under this route (1 ms)
+    ✓ control KS-1346 A2 GET /stats: the 500 body stays the constant text for an object throw (1 ms)
+    ✓ control KS-1346 A2 GET /: the 500 body stays the constant text for an object throw (1 ms)
+    ✓ control KS-1346 A2 PATCH /:errorId/resolve: the 500 body stays the constant text for an object throw (1 ms)
+    ✓ control KS-1346 A2 POST /resolve-by-service: the 500 body stays the constant text for an object throw
+    ✓ control KS-1346 A3: an Error throw still logs exactly its message (6 ms)
+    ✕ control KS-1346 A4: a string throw still logs exactly itself, not a quoted rendering (2 ms)
+    ✓ control KS-1346 A5: String() of the thrown object really is the lossy text, so A1 is not vacuous
+    - Expected  - 1
+    + Received  + 1
+Test Suites: 1 failed, 1 total
+Tests:       1 failed, 10 passed, 11 total
+== restore clone

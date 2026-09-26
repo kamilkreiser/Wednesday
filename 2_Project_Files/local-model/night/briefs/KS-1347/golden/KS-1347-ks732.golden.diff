@@ -1,0 +1,107 @@
+--- a/Blockchain/Dev/services/auth/src/__tests__/ks732-mfa-disable-proof.test.ts
++++ b/Blockchain/Dev/services/auth/src/__tests__/ks732-mfa-disable-proof.test.ts
+@@ -47,2 +47,3 @@
+ import type { AddressInfo } from 'node:net';
++import { fileURLToPath } from 'node:url';
+ import express from 'express';
+@@ -292,6 +293,6 @@
+     const specSrc = await readFile(
+-      new URL('../auth.openapi.ts', import.meta.url).pathname, 'utf8',
++      fileURLToPath(new URL('../auth.openapi.ts', import.meta.url)), 'utf8',
+     );
+     const handlerSrc = await readFile(
+-      new URL('../routes/mfa.ts', import.meta.url).pathname, 'utf8',
++      fileURLToPath(new URL('../routes/mfa.ts', import.meta.url)), 'utf8',
+     );
+@@ -315,3 +316,3 @@
+     const specSrc = await readFile(
+-      new URL('../auth.openapi.ts', import.meta.url).pathname, 'utf8',
++      fileURLToPath(new URL('../auth.openapi.ts', import.meta.url)), 'utf8',
+     );
+--- /dev/null
++++ b/Blockchain/Dev/services/auth/src/__tests__/ks1347-ks732-spec-paths-survive-a-spaced-checkout.test.ts
+@@ -0,0 +1,84 @@
++/**
++ * KS-1347 (ks732 site): ks732-mfa-disable-proof.test.ts reads auth.openapi.ts and routes/mfa.ts
++ * through a path taken off a file URL. A URL pathname is percent-encoded, so a checkout whose
++ * directory holds a space (the QA gate's own Testing Agent MAIN) hands readFile a path carrying
++ * %20 and CELL 12 and CELL 13 die ENOENT before they assert anything. ks732 is itself a suite, so
++ * this one reads it as TEXT, takes each path expression it hands to readFile, plants it in a probe
++ * module inside a temp checkout, imports the probe for real, and checks the path it yields is the
++ * planted file. Same shape as the merged KS-1337 performance cell (#1291).
++ */
++
++import { existsSync, mkdirSync, mkdtempSync, readFileSync, realpathSync, rmSync, writeFileSync } from 'node:fs';
++import { tmpdir } from 'node:os';
++import { join } from 'node:path';
++import { pathToFileURL } from 'node:url';
++
++import { afterEach, beforeEach, describe, expect, it } from 'vitest';
++
++// A newline and a single quote, so no line below needs a backslash or a double-quoted string.
++const NL = String.fromCharCode(10);
++const SQ = String.fromCharCode(39);
++const UTF8_TAIL = ', ' + SQ + 'utf8' + SQ + ',';
++const KS732_LINES = readFileSync(join(__dirname, 'ks732-mfa-disable-proof.test.ts'), 'utf8').split(NL);
++// Every line of ks732 that follows an await readFile( opener is the path argument, then the utf8 tail.
++const PATH_LINES = KS732_LINES.filter((line, i) => i > 0 && KS732_LINES[i - 1].trim().endsWith('await readFile(')).map((line) => line.trim());
++const EXPRESSIONS = PATH_LINES.map((line) => line.slice(0, line.length - UTF8_TAIL.length));
++const TARGETS = ['auth.openapi.ts', 'routes/mfa.ts', 'auth.openapi.ts'];
++
++let root = '';
++
++beforeEach(() => {
++  root = realpathSync(mkdtempSync(join(tmpdir(), 'ks1347-ks732-')));
++});
++afterEach(() => {
++  rmSync(root, { recursive: true, force: true });
++});
++
++/**
++ * Plant checkoutName/services/auth/src/{auth.openapi.ts, routes/mfa.ts, __tests__/probe.mjs}; import the probe.
++ *
++ * @param {string} checkoutName - The checkout directory's name; may contain spaces.
++ * @returns {Promise<{ resolved: string[]; planted: string[] }>} The paths the expressions yield, and the real files.
++ */
++async function pathsFrom(checkoutName: string): Promise<{ resolved: string[]; planted: string[] }> {
++  const src = join(root, checkoutName, 'services', 'auth', 'src');
++  mkdirSync(join(src, 'routes'), { recursive: true });
++  mkdirSync(join(src, '__tests__'), { recursive: true });
++  writeFileSync(join(src, 'auth.openapi.ts'), 'export {};');
++  writeFileSync(join(src, 'routes', 'mfa.ts'), 'export {};');
++  const probe = join(src, '__tests__', 'probe.mjs');
++  writeFileSync(
++    probe,
++    [
++      'import * as url from ' + SQ + 'node:url' + SQ + ';',
++      'import { fileURLToPath } from ' + SQ + 'node:url' + SQ + ';',
++      'export const paths = [' + EXPRESSIONS.join(', ') + '];',
++      'export { url, fileURLToPath };',
++    ].join(NL),
++  );
++  const mod = (await import(pathToFileURL(probe).href)) as { paths: string[] };
++  return { resolved: mod.paths, planted: TARGETS.map((t) => join(src, ...t.split('/'))) };
++}
++
++describe('KS-1347 ks732: the spec and handler paths survive a checkout directory with spaces', () => {
++  it('control KS-1347 A0: ks732 hands readFile three import.meta.url paths, naming the spec, the handler, the spec', () => {
++    expect(PATH_LINES).toHaveLength(3);
++    for (const [i, line] of PATH_LINES.entries()) {
++      expect(line.endsWith(UTF8_TAIL)).toBe(true);
++      expect(line).toContain('import.meta.url');
++      expect(line).toContain(SQ + '../' + TARGETS[i] + SQ);
++    }
++  });
++
++  it('control KS-1347 A1: from a checkout path WITHOUT spaces every path is the real planted file', async () => {
++    const { resolved, planted } = await pathsFrom('TestingAgentMAIN');
++    expect(resolved).toEqual(planted);
++    expect(resolved.map((p) => existsSync(p))).toEqual([true, true, true]);
++  });
++
++  it('RED KS-1347 A2: from a checkout path WITH spaces every path is the real planted file, not a percent-encoded one', async () => {
++    const { resolved, planted } = await pathsFrom('Testing Agent MAIN');
++    expect(resolved).toEqual(planted);
++    expect(resolved.map((p) => existsSync(p))).toEqual([true, true, true]);
++  });
++});

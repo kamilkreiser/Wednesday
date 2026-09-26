@@ -1,0 +1,109 @@
+--- a/Blockchain/Dev/services/originate/src/routes/gdpr.ts
++++ b/Blockchain/Dev/services/originate/src/routes/gdpr.ts
+@@ -15,2 +15,3 @@
+ import { z } from 'zod';
++import { inspect } from 'util';
+ import * as gdpr from '../services/gdprService';
+@@ -210,3 +211,3 @@
+ function fail500(res: Response, context: string, err: unknown): void {
+-  logger.error(context, { error: err instanceof Error ? err.message : String(err) });
++  logger.error(context, { error: err instanceof Error ? err.message : typeof err === 'string' ? err : inspect(err) });
+   res.status(500).json({ success: false, error: { code: 'INTERNAL_ERROR', message: 'Internal server error' } });
+--- /dev/null
++++ b/Blockchain/Dev/services/originate/src/__tests__/ks1346b-gdpr-fail500-logs-a-non-error-throw.test.ts
+@@ -0,0 +1,95 @@
++// KS-1346 part B (originate routes/gdpr.ts): fail500 logged a NON-Error throw through String(), so a
++// thrown plain object reached the log as [object Object] and its content was lost. The 500 BODY was
++// already constant (KS-730); what this file pins is the LOG. Four GDPR routes that reach their service
++// with nothing to satisfy first are driven by making ITS OWN service call reject, on a real loopback
++// listener, exactly as the KS-730 part B cells do. Error and string throws must log exactly what they
++// logged before.
++const mockGetPendingDSRs = jest.fn();
++const mockGetRetentionPolicies = jest.fn();
++const mockGetDeletionLog = jest.fn();
++const mockHasValidConsent = jest.fn();
++const mockLoggerError = jest.fn();
++
++jest.mock('../services/gdprService', () => ({
++  getPendingDSRs: mockGetPendingDSRs,
++  getRetentionPolicies: mockGetRetentionPolicies,
++  getDeletionLog: mockGetDeletionLog,
++  hasValidConsent: mockHasValidConsent,
++}));
++
++jest.mock('../middleware/auth', () => ({
++  authenticate: () => (_req: unknown, _res: unknown, next: () => void) => next(),
++  requireRole: () => (_req: unknown, _res: unknown, next: () => void) => next(),
++  requireSelfOrRole: () => (_req: unknown, _res: unknown, next: () => void) => next(),
++  hasAnyRole: () => true,
++}));
++
++jest.mock('../utils/logger', () => ({
++  logger: { info: jest.fn(), warn: jest.fn(), error: mockLoggerError, debug: jest.fn() },
++}));
++
++import express from 'express';
++import type { AddressInfo } from 'net';
++import { gdprRouter } from '../routes/gdpr';
++
++const DETAIL = 'ks1346b-private-detail';
++const CONSTANT_BODY = { success: false, error: { code: 'INTERNAL_ERROR', message: 'Internal server error' } };
++const ROUTES = [
++  { label: 'GET /dsr/pending', path: '/dsr/pending', mock: mockGetPendingDSRs, context: 'GDPR pending DSR list failed (GET /api/gdpr/dsr/pending)' },
++  { label: 'GET /retention', path: '/retention', mock: mockGetRetentionPolicies, context: 'GDPR retention policy read failed (GET /api/gdpr/retention)' },
++  { label: 'GET /deletion-log', path: '/deletion-log', mock: mockGetDeletionLog, context: 'GDPR deletion log read failed (GET /api/gdpr/deletion-log)' },
++  { label: 'GET /consent/check', path: '/consent/check?userId=u-ks1346b&purpose=MARKETING', mock: mockHasValidConsent, context: 'GDPR consent check failed (GET /api/gdpr/consent/check)' },
++] as const;
++
++const app = express();
++app.use('/api/gdpr', express.json(), gdprRouter);
++let server: ReturnType<typeof app.listen>;
++let baseUrl = '';
++
++beforeAll(async () => {
++  await new Promise<void>((resolve) => {
++    server = app.listen(0, '127.0.0.1', () => resolve());
++  });
++  baseUrl = 'http://127.0.0.1:' + (server.address() as AddressInfo).port;
++});
++afterAll(() => server?.close());
++beforeEach(() => jest.clearAllMocks());
++
++async function callWithThrow(route: (typeof ROUTES)[number], thrown: unknown): Promise<{ status: number; text: string; calls: unknown[][] }> {
++  mockLoggerError.mockClear();
++  route.mock.mockRejectedValueOnce(thrown);
++  const res = await fetch(baseUrl + '/api/gdpr' + route.path, { method: 'GET' });
++  return { status: res.status, text: await res.text(), calls: mockLoggerError.mock.calls };
++}
++
++describe('KS-1346 part B: gdpr fail500 keeps a non-Error throw readable in the log', () => {
++  it.each(ROUTES)('RED KS-1346 B1 $label: a thrown plain object is logged with its content, once, under this route', async (route) => {
++    const reply = await callWithThrow(route, { code: 'KS1346B_OBJECT', detail: DETAIL });
++    expect(reply.status).toBe(500);
++    expect(reply.calls.length).toBe(1);
++    const [context, meta] = reply.calls[0] as [string, { error: unknown }];
++    expect(context).toBe(route.context);
++    expect(typeof meta.error).toBe('string');
++    expect({ hasDetail: String(meta.error).includes(DETAIL), hasCode: String(meta.error).includes('KS1346B_OBJECT') }).toEqual({ hasDetail: true, hasCode: true });
++  });
++
++  it.each(ROUTES)('control KS-1346 B2 $label: the 500 body stays the constant text for an object throw', async (route) => {
++    const reply = await callWithThrow(route, { code: 'KS1346B_OBJECT', detail: DETAIL });
++    expect({ status: reply.status, leaked: reply.text.includes(DETAIL) }).toEqual({ status: 500, leaked: false });
++    expect(JSON.parse(reply.text)).toEqual(CONSTANT_BODY);
++  });
++
++  it('control KS-1346 B3: an Error throw still logs exactly its message', async () => {
++    const reply = await callWithThrow(ROUTES[0], new Error(DETAIL));
++    expect(reply.calls).toEqual([[ROUTES[0].context, { error: DETAIL }]]);
++  });
++
++  it('control KS-1346 B4: a string throw still logs exactly itself, not a quoted rendering', async () => {
++    const reply = await callWithThrow(ROUTES[1], DETAIL);
++    expect(reply.calls).toEqual([[ROUTES[1].context, { error: DETAIL }]]);
++  });
++
++  it('control KS-1346 B5: String() of the thrown object really is the lossy text, so B1 is not vacuous', () => {
++    expect(String({ code: 'KS1346B_OBJECT', detail: DETAIL })).toBe('[object Object]');
++  });
++});
