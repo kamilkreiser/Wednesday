@@ -1,0 +1,131 @@
+print('--- (e) READ probes (PREDICTIONS for the gate; never evidence)')
+def show(c, p):
+    rc, o, _ = gq('show', '%s:%s' % (c, p)); return o if rc == 0 else ''
+def ho(f):
+    r = subprocess.run(['git', 'hash-object', '--no-filters', f], capture_output=True, text=True); return r.stdout.strip() if r.returncode == 0 else 'ABSENT'
+def minus_plus(a, b, pth):
+    d = g('diff', '-U0', a, b, '--', pth)
+    return [l[1:] for l in d.splitlines() if l.startswith('-') and not l.startswith('---')], [l[1:] for l in d.splitlines() if l.startswith('+') and not l.startswith('+++')]
+def route_of(L, i, rx):
+    for j in range(i, -1, -1):
+        m = re.search(rx, L[j])
+        if m: return '%s %s' % (m.group(1).upper(), m.group(2))
+    return '?'
+def golden_apply(mb, gd, paths):
+    """apply a golden diff with `git apply --cached` (strict) onto the merge-base tree in a scratch index; blob per path, or the refusal"""
+    if not os.path.exists(gd): return None, 'golden diff ABSENT (%s)' % gd
+    idx = tempfile.mktemp(prefix='g30T1gold', dir=os.path.join(SP, 'g30T1_sp')); e3 = dict(os.environ, GIT_INDEX_FILE=idx)
+    run(['git', '--git-dir', CL, 'read-tree', mb], env=e3)
+    ra = subprocess.run(['git', '--git-dir', CL, 'apply', '--cached', gd], capture_output=True, text=True, env=e3)
+    if ra.returncode != 0: return None, 'does NOT apply at the merge-base: %s' % ra.stderr.strip()[:200]
+    t_ = run(['git', '--git-dir', CL, 'write-tree'], env=e3).strip()
+    return {p: blob(t_, p) for p in paths}, 'applies strictly'
+SITE = "res.status(500).json({ success: false, error: { code: 'INTERNAL_ERROR', message: err.message } });"
+R3 = "  logger.error(context, { error: err instanceof Error ? err.message : String(err) });"
+PROBES = {}
+for n in NS:
+    h = H[n]; mb = P[n]['merge_base']; out = []
+    prod = [p for p in P[n]['paths'] if '__tests__' not in p and '/tests/' not in p]
+    d = g('diff', '-U0', mb, h, '--', *prod) if prod else ''
+    ch = [l[1:] for l in d.splitlines() if (l.startswith('+') or l.startswith('-')) and not l.startswith(('+++', '---'))]
+    nc = [l for l in ch if not re.match(r'^\s*(//|\*|/\*)', l) and l.strip()]
+    out.append('product files %s: changed lines %d, NON-comment changed lines %d (a line-prefix READ, NOT an emit)' % ([os.path.basename(p) for p in prod], len(ch), len(nc)))
+    if n == '1292':
+        W = 'Blockchain/Dev/services/originate/src/routes/webhooks.ts'; T = 'Blockchain/Dev/services/originate/src/__tests__/ks1341c-webhooks-500-never-answers-err-message.test.ts'
+        sd, sh = show(mb, W), show(h, W); dl_, hl = sd.splitlines(), sh.splitlines(); RX = r"webhooksRouter\.(get|post|put|patch|delete)\('([^']*)'"
+        out.append('LEAK SITES (READ, fixed-string `message: err.message` in webhooks.ts): merge-base %d -> head %d; `fail500(` merge-base %d -> head %d (1 declaration + %d calls at head)' % (
+            sd.count('message: err.message'), sh.count('message: err.message'), sd.count('fail500('), sh.count('fail500('), sh.count('fail500(res,')))
+        minus, plus = minus_plus(mb, h, W)
+        out.append('CONVERTED-TWO (READ, `git diff -U0` merge-base -> head on webhooks.ts): %d `-` line(s), every one the SITE line: %s; %d `+` line(s), every one a `fail500(res, ...)` call: %s' % (
+            len(minus), all(x.strip() == SITE for x in minus), len(plus), all(x.strip().startswith('fail500(res, ') for x in plus)))
+        conv = [(route_of(hl, i, RX), i + 1, re.search(r"fail500\(res, '([^']*)'", l).group(1)) for i, l in enumerate(hl) if 'fail500(res,' in l]
+        own = [c for c in conv if c[0].split(' ', 1)[1].replace('/', '') and c[0].split(' ', 1)[1].split('/')[-1].lstrip(':') in c[2]]
+        out.append('ALL SEVEN SITES (READ, at head): %d `fail500(res,` calls %s; distinct contexts %d; a context naming its own route\'s method: %s' % (
+            len(conv), conv, len(set(c[2] for c in conv)), all(c[0].split(' ')[0] in c[2] for c in conv)))
+        em = [(i + 1, l.strip()[:90]) for i, l in enumerate(hl) if 'err.message' in l]
+        out.append('ERR.MESSAGE LEFT (READ, fixed-string `err.message` at head, every line): %s — the PR says both are server-side logs (:544 logger.warn, :563 the helper)' % em)
+        def c3(src):   # the ks1341c C3 SOURCE cell's own rule, re-implemented line for line (a READ of the cell, not a run)
+            L = [l for l in src.split('\n') if not l.strip().startswith('*') and not l.strip().startswith('//')]
+            hc = [l for l in L if 'fail500(res,' in l]; cx = [(re.search(r"fail500\(res, '([^']+)'", l) or [None, None])[1] for l in hc]
+            return {'leaks': sum(1 for l in L if re.search(r'message: *err\??\.?message', l)), 'helperCalls': len(hc), 'distinctContexts': len(set(cx)), 'definitions': sum(1 for l in L if l.startswith('function fail500('))}
+        out.append('C3 SOURCE RULE (READ, the cell\'s filter re-implemented): merge-base %s | head %s | the cell expects {leaks: 0, helperCalls: 7, distinctContexts: 7, definitions: 1}. C3 pins a COUNT and DISTINCTNESS — not WHICH seven routes; a site moved or a context mislabelled onto another route keeps it green (the gate grades whether that matters)' % (c3(sd), c3(sh)))
+        R3n = [i + 1 for i, l in enumerate(hl) if l == R3]
+        out.append('ARM-R3 ANCHOR (READ, at head): the brief\'s R3 anchor `logger.error(context, { error: err instanceof Error ? err.message : String(err) });` (2 leading spaces) occurs %d time(s) at %s; brief-C\'s tamper is the un-braced `if (process.env.NODE_ENV === \'production\') logger.error(...)`' % (len(R3n), R3n))
+        stale = ['the only place in this router that turns a caught error into a 500', 'Declared at the END of the file', 'Seven catch blocks above put the thrown error\'s own text']
+        out.append('DOCBLOCK THREE SENTENCES (READ, at head; DECLARED NOT COVERED by the PR, a docs ticket follows): %s' % [(s[:48], [i + 1 for i, l in enumerate(hl) if s in l]) for s in stale])
+        dc = [i + 1 for i, l in enumerate(hl) if '.catch(() => [])' in l]
+        out.append('DELIVERIES TRAP (READ): `.catch(() => [])` at head line(s) %s — a REJECTED deliveries query is swallowed into a 200 before the catch; the cell arms GET /:id/deliveries with a SYNCHRONOUS throw (control C0 pins the swallow)' % dc)
+        fns = {}
+        def fb(L, nm):
+            s = [i for i, l in enumerate(L) if l.startswith(('function ' + nm + '(', 'async function ' + nm + '(', 'export function ' + nm + '(', 'export async function ' + nm + '('))][:1]
+            if not s: return []
+            e = s[0]
+            while e < len(L) and L[e] != '}': e += 1
+            return L[s[0]:e + 1]
+        for nm in ('encryptWebhookSecret', 'decryptWebhookSecret', 'deliverWebhook', 'dispatchEvent', 'fail500'):
+            b0, b1 = fb(dl_, nm), fb(hl, nm)
+            fns[nm] = ('IDENTICAL (%d lines)' % len(b0)) if b0 and b0 == b1 else ('ABSENT' if not b0 else 'DIFFERS')
+        out.append('UNTOUCHED BODIES (READ, merge-base vs head, line-equal): %s' % fns)
+        GB = '/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/briefs/KS-1341/golden/'
+        gw, gt, ga = ho(GB + 'webhooks.ABC.ts'), ho(GB + 'ks1341c-webhooks-500-never-answers-err-message.test.ts'), ho(GB + 'webhooks.AB.ts')
+        gb_, gm = golden_apply(mb, GB + 'C.golden.diff', [W, T])
+        out.append('GOLDEN (READ, `git hash-object` of brief-C rev C\'s golden files vs the head blobs): webhooks.ABC.ts %s vs head %s -> %s; ks1341c test %s vs head %s -> %s; the merge-base webhooks.ts %s vs golden webhooks.AB.ts %s -> %s; C.golden.diff at the merge-base: %s%s' % (
+            gw[:12], (blob(h, W) or '-')[:12], 'EXACT' if gw == blob(h, W) else 'DIFFERENT', gt[:12], (blob(h, T) or '-')[:12], 'EXACT' if gt == blob(h, T) else 'DIFFERENT',
+            (blob(mb, W) or '-')[:12], ga[:12], 'EXACT' if ga == blob(mb, W) else 'DIFFERENT', gm, (' -> both blobs == head: %s' % (gb_[W] == blob(h, W) and gb_[T] == blob(h, T))) if gb_ else ''))
+        ts = show(h, T); TL = ts.splitlines()
+        loop = [i + 1 for i, l in enumerate(TL) if 'for (const nodeEnv of NODE_ENVS)' in l]; clr = [i + 1 for i, l in enumerate(TL) if 'mockLoggerError.mockClear()' in l]
+        out.append('TEST FILE (READ): %d lines; RED titles %s; controls %d; the NODE_ENV loop at %s, `mockLoggerError.mockClear()` at %s (INSIDE the loop: %s); `.at(-1)` occurrences %d; listens on %s; NODE_ENVS %s' % (
+            len(TL), sorted(set(re.findall(r"RED KS-1341 (C\d)", ts))), len(re.findall(r"^  it\('control KS-1341", ts, re.M)), loop, clr, bool(loop and clr and loop[0] < clr[0] < loop[0] + 5), ts.count('.at(-1)'),
+            re.findall(r"app\.listen\(0, '([^']+)'", ts), re.findall(r'const NODE_ENVS = (\[[^\]]*\])', ts)))
+    if n == '1294':
+        A_ = 'Blockchain/Dev/services/originate/src/routes/adminConfig.ts'; T = 'Blockchain/Dev/services/originate/src/__tests__/ks730c-adminconfig-500-never-answers-err-message.test.ts'
+        sd, sh = show(mb, A_), show(h, A_); dl_, hl = sd.splitlines(), sh.splitlines(); RX = r"adminConfigRouter\.(get|post|put|patch|delete)\('([^']+)'"
+        def c4(L): return [(route_of(L, i, RX), i + 1) for i, l in enumerate(L) if re.search(r'message: *err\??\.?message', l)]
+        out.append('UNCONDITIONAL SITES (READ, the ks730c C4 regex `message: *err\\??\\.?message` per enclosing route): merge-base %s -> head %s' % (c4(dl_), c4(hl)))
+        minus, plus = minus_plus(mb, h, A_)
+        out.append('CONVERTED-TWO (READ, `git diff -U0` on adminConfig.ts): `-` %s | `+` %s' % ([x.strip()[:120] for x in minus], [x.strip()[:120] for x in plus]))
+        hc = lambda L: [(re.search(r"fail500\(res, '([^']+)'", l) or [None, None])[1] for l in L if 'fail500(res,' in l]
+        out.append('HELPER CALLS (READ): merge-base %d calls / %d distinct -> head %d / %d; `fail500` declared at head line(s) %s, body logs %s' % (
+            len(hc(dl_)), len(set(hc(dl_))), len(hc(hl)), len(set(hc(hl))), [i + 1 for i, l in enumerate(hl) if l.startswith('function fail500(')], [l.strip()[:100] for l in hl if 'logger.error(context' in l][:1]))
+        def catch_block(L, pat):
+            s = [i for i, l in enumerate(L) if pat in l][:1]
+            if not s: return []
+            e = s[0]
+            while e < len(L) and L[e] != '});': e += 1
+            b = L[s[0]:e + 1]; c = [j for j, l in enumerate(b) if 'catch (' in l]
+            return [x.strip()[:110] for x in b[c[-1]:]] if c else []
+        for pat in ("adminConfigRouter.post('/refresh-tenants'", "adminConfigRouter.post('/backfill-certification-metadata'"):
+            out.append('CATCH BODY at head (READ) for %s: %s — a benign `does not exist` / 42P01 branch in this catch: %s' % (pat.split("'")[1], catch_block(hl, pat), any('does not exist' in x for x in catch_block(hl, pat))))
+        ts0, ts = show(mb, T), show(h, T)
+        LK = re.findall(r"^const LEAK = '([^']*)';", ts, re.M); LK2 = re.findall(r"^const KS1334_LEAK = '([^']*)';", ts, re.M)
+        out.append('LEAKED-CHECK (READ): the shared LEAK %r contains a double quote: %s -> JSON-escaped in the body, so `reply.text.includes(LEAK)` CAN NEVER be true (json.dumps carries it verbatim: %s); KS1334_LEAK %r survives JSON encoding: %s. What still catches a leak in C1: `expect(JSON.parse(reply.text)).toEqual(CONSTANT_BODY)` occurs %d time(s) in the file, at C1 line(s) %s' % (
+            LK[0][:60] if LK else None, bool(LK and '"' in LK[0]), bool(LK and LK[0] in json.dumps({'message': LK[0]})), LK2[0][:60] if LK2 else None, bool(LK2 and LK2[0] in json.dumps({'message': LK2[0]})),
+            ts.count('expect(JSON.parse(reply.text)).toEqual(CONSTANT_BODY)'), [i + 1 for i, l in enumerate(ts.splitlines()) if 'expect(JSON.parse(reply.text)).toEqual(CONSTANT_BODY)' in l]))
+        out.append('IN-PLACE ks730c EDITS (READ, `git diff --numstat`): %s; C3 pin 46/46 -> %s; C4 KNOWN at head %s; the new block drives NODE_ENVs %s with `mockLoggerError.mockClear()` inside its loop: %s' % (
+            g('diff', '--numstat', mb, h, '--', T).split('\t')[:2], re.findall(r'helperCalls: (\d+), distinctContexts: (\d+) \}\);', ts), re.findall(r"const KNOWN = \[\s*([^\]]*)\]", ts), re.findall(r'const KS1334_NODE_ENVS = (\[[^\]]*\])', ts),
+            bool(re.search(r'for \(const nodeEnv of KS1334_NODE_ENVS\) \{\s*mockLoggerError\.mockClear\(\);', ts))))
+        GB = '/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/briefs/KS-1334/golden/'
+        ga, gt = ho(GB + 'adminConfig.A.ts'), ho(GB + 'ks730c.A.ts'); gb_, gm = golden_apply(mb, GB + 'KS-1334-A.golden.diff', [A_, T])
+        out.append('GOLDEN (READ, brief-A\'s golden vs the head blobs): adminConfig.A.ts %s vs head %s -> %s; ks730c.A.ts %s vs head %s -> %s; KS-1334-A.golden.diff at the merge-base: %s%s — the Spark ran on an EXCERPTED input (3 regions of adminConfig.ts, briefs/KS-1334/README.md)' % (
+            ga[:12], (blob(h, A_) or '-')[:12], 'EXACT' if ga == blob(h, A_) else 'DIFFERENT', gt[:12], (blob(h, T) or '-')[:12], 'EXACT' if gt == blob(h, T) else 'DIFFERENT', gm,
+            (' -> both blobs == head: %s' % (gb_[A_] == blob(h, A_) and gb_[T] == blob(h, T))) if gb_ else ''))
+    if n == '1296':
+        S_ = 'Blockchain/Dev/services/originate/src/routes/systemErrors.ts'; T = 'Blockchain/Dev/services/originate/src/__tests__/ks1346a-systemerrors-fail500-logs-a-non-error-throw.test.ts'
+        minus, plus = minus_plus(mb, h, S_)
+        out.append('PRODUCT DIFF (READ, `git diff -U0` on systemErrors.ts): `-` %s | `+` %s' % ([x.strip()[:130] for x in minus], [x.strip()[:130] for x in plus]))
+        sh = show(h, S_)
+        out.append('LOG SINK (READ): systemErrors.ts imports the logger from %s; originate utils/logger.ts carries `redact` %d time(s), `SENSITIVE` %d, `password` %d (a winston logger with NO redaction format); packages/shared/src/logger/index.ts carries `SENSITIVE_KEYS` %d time(s) and is NOT the sink on this path' % (
+            re.findall(r"import \{ logger \} from '([^']+)'", sh), *(show(REAL_DEV, 'Blockchain/Dev/services/originate/src/utils/logger.ts').lower().count(x) for x in ('redact', 'sensitive', 'password')),
+            show(REAL_DEV, 'Blockchain/Dev/packages/shared/src/logger/index.ts').count('SENSITIVE_KEYS')))
+        out.append('INSPECT WIDENING (READ, by construction — the gate MEASURES it): at head a thrown value that is neither an Error nor a string reaches `logger.error(context, { error: inspect(err) })` — util.inspect renders every own enumerable key and value to depth 2, so a thrown `{ password, token, email }` puts all three VALUES into the log line where the tip logged `[object Object]`; the PR body itself declares "It can, and nothing on this path redacts it"; the seat\'s s-inspect-probe.out (a node run of the two expressions, not of the router) is a claim. Wednesday\'s WIDEN rule: the gate proves inspect CANNOT put a secret/PII-looking field in the log line, or grades #1296 NO GO')
+        out.append('FAMILY (READ, `String(err)` fail500 bodies at develop): %s — part B (gdpr.ts, a subject-data surface) is the same change, not in this kit' % [x.split(':', 2)[1] + ':' + x.split(':', 2)[2].split(':')[0] for x in gq('grep', '-n', '-E', r'logger\.error\(context, \{ error: err instanceof Error \? err\.message : String\(err\) \}\);', REAL_DEV, '--', 'Blockchain/Dev/services/originate/src/routes/')[1].strip().splitlines()])
+        ts = show(h, T)
+        out.append('TEST FILE (READ): %d lines; RED rows %s x %d routes; controls %s; the object throw carries keys %s (no secret-looking key: %s); `inspect` imported by the cell %d time(s)' % (
+            len(ts.splitlines()), sorted(set(re.findall(r"RED KS-1346 (A\d)", ts))), len(re.findall(r"^  \{ label: '", ts, re.M)), sorted(set(re.findall(r"control KS-1346 (A\d)", ts))),
+            sorted(set(re.findall(r"\{ code: 'KS1346_OBJECT', (\w+): DETAIL \}", ts))), not re.search(r'(?i)password|token|secret|email|apikey', ts), ts.count("from 'util'")))
+        GB = '/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/briefs/KS-1346-A/golden/'
+        gt = ho(GB + 'ks1346a-systemerrors-fail500-logs-a-non-error-throw.test.ts'); gb_, gm = golden_apply(mb, GB + 'KS-1346-A.golden.diff', [S_, T])
+        out.append('GOLDEN (READ, brief KS-1346-A\'s golden): test %s vs head %s -> %s; KS-1346-A.golden.diff at the merge-base: %s%s' % (
+            gt[:12], (blob(h, T) or '-')[:12], 'EXACT' if gt == blob(h, T) else 'DIFFERENT', gm, (' -> both blobs == head: %s' % (gb_[S_] == blob(h, S_) and gb_[T] == blob(h, T))) if gb_ else ''))
+    PROBES[n] = out
+    for o in out: print('  #%s %s' % (n, o))

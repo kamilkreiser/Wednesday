@@ -1,0 +1,77 @@
+print('--- (e) READ probes (PREDICTIONS for the gate; never evidence)')
+def show(c, p):
+    rc, o, _ = gq('show', '%s:%s' % (c, p)); return o if rc == 0 else ''
+def ho(f):
+    r = subprocess.run(['git', 'hash-object', '--no-filters', f], capture_output=True, text=True); return r.stdout.strip() if r.returncode == 0 else 'ABSENT'
+def minus_plus(a, b, pth):
+    d = g('diff', '-U0', a, b, '--', pth)
+    return [l[1:] for l in d.splitlines() if l.startswith('-') and not l.startswith('---')], [l[1:] for l in d.splitlines() if l.startswith('+') and not l.startswith('+++')]
+def golden_apply(mb, gd, paths):
+    """apply a golden diff with `git apply --cached` (strict) onto the merge-base tree in a scratch index; blob per path, or the refusal"""
+    if not os.path.exists(gd): return None, 'golden diff ABSENT (%s)' % gd
+    idx = tempfile.mktemp(prefix='g30T2gold', dir=os.path.join(SP, 'g30T2_sp')); e3 = dict(os.environ, GIT_INDEX_FILE=idx)
+    run(['git', '--git-dir', CL, 'read-tree', mb], env=e3)
+    ra = subprocess.run(['git', '--git-dir', CL, 'apply', '--cached', gd], capture_output=True, text=True, env=e3)
+    if ra.returncode != 0: return None, 'does NOT apply at the merge-base: %s' % ra.stderr.strip()[:160].replace('\n', ' / ')
+    t_ = run(['git', '--git-dir', CL, 'write-tree'], env=e3).strip()
+    return {p: blob(t_, p) for p in paths}, 'applies strictly'
+R3 = "  logger.error(context, { error: err instanceof Error ? err.message : String(err) });"
+PROBES = {}
+for n in NS:
+    h = H[n]; mb = P[n]['merge_base']; out = []
+    prod = [p for p in P[n]['paths'] if '__tests__' not in p and '/tests/unit/' not in p]
+    if prod:
+        d = g('diff', '-U0', mb, h, '--', *prod)
+        ch = [l[1:] for l in d.splitlines() if (l.startswith('+') or l.startswith('-')) and not l.startswith(('+++', '---'))]
+        nc = [l for l in ch if not re.match(r'^\s*(//|\*|/\*)', l) and l.strip()]
+        out.append('product files %s: changed lines %d, NON-comment changed lines %d (a line-prefix READ, NOT an emit)' % ([os.path.basename(p) for p in prod], len(ch), len(nc)))
+    else:
+        out.append('NO product file: every path is a test path %s — TEST-ONLY (no product byte)' % [os.path.basename(p) for p in P[n]['paths']])
+    if n == '1293':
+        T = 'Blockchain/Dev/services/originate/src/__tests__/ks1341a-webhooks-500-never-answers-err-message.test.ts'; W = 'Blockchain/Dev/services/originate/src/routes/webhooks.ts'
+        minus, plus = minus_plus(mb, h, T)
+        out.append('TEST DIFF (READ, `git diff -U0` on ks1341a): `-` %s | `+` %s' % ([x.strip()[:110] for x in minus], [x.strip()[:110] for x in plus]))
+        ts0, ts = show(mb, T), show(h, T); TL = ts.splitlines()
+        loop = [i + 1 for i, l in enumerate(TL) if 'for (const nodeEnv of NODE_ENVS)' in l]; clr = [i + 1 for i, l in enumerate(TL) if 'mockLoggerError.mockClear()' in l]
+        out.append('A1 SHAPE (READ): `.at(-1)` merge-base %d -> head %d; the NODE_ENV loop at %s, `mockLoggerError.mockClear()` at %s (INSIDE the loop: %s); NODE_ENVS %s; the A1 whole-list assertion carries `nodeEnv` in its expected value: %s (a red names its environment only through the loop order if not); A2 unchanged (production only): %s' % (
+            ts0.count('.at(-1)'), ts.count('.at(-1)'), loop, clr, bool(loop and clr and loop[0] < clr[0] < loop[0] + 5), re.findall(r'const NODE_ENVS = (\[[^\]]*\])', ts),
+            'nodeEnv, calls' in ts, [l for l in ts0.splitlines() if 'RED KS-1341 A2' in l] == [l for l in TL if 'RED KS-1341 A2' in l]))
+        wd = show(REAL_DEV, W).splitlines()
+        out.append('THE PRODUCT TAMPER TARGET (READ): the R3 anchor `%s` occurs %d time(s) in webhooks.ts at the launch develop, at %s — the red for a test-only PR comes from THIS product tamper (production-only logging): A1 rows red at #1293\'s head, GREEN at the tip (develop\'s ks1341a, `.at(-1)`) under the same tamper' % (R3.strip()[:60], sum(1 for l in wd if l == R3), [i + 1 for i, l in enumerate(wd) if l == R3]))
+        out.append('A1 ROUTES (READ): %s — two rows, GET / (synchronous throw; control A0 pins the swallow) and POST / (rejected $executeRaw)' % re.findall(r"label: '([^']+)'", ts))
+        GD = '/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/briefs/KS-1344.golden/KS-1344.golden.diff'
+        gb_, gm = golden_apply(mb, GD, [T])
+        out.append('GOLDEN (READ): KS-1344.golden.diff (%s, %d B) at the merge-base: %s%s; the pre-image blob at the merge-base %s (the PR says 3318cccbca3f at both 179a4f32 and 3f70224a: at gate29\'s develop %s)' % (
+            ho(GD)[:12], os.path.getsize(GD) if os.path.exists(GD) else -1, gm, (' -> blob == head: %s' % (gb_[T] == blob(h, T))) if gb_ else '', (blob(mb, T) or '-')[:12], (blob(K['predev'], T) or '-')[:12]))
+    if n == '1295':
+        C = 'systemTest/akto/tests/preSuiteSetup.ts'; T = 'systemTest/akto/tests/unit/setup/ks1337-preSuiteSetupPathWithASpace.test.ts'
+        minus, plus = minus_plus(mb, h, C)
+        out.append('PRODUCT DIFF (READ, `git diff -U0` on preSuiteSetup.ts): `-` %s | `+` %s' % ([x.strip()[:110] for x in minus], [x.strip()[:110] for x in plus]))
+        cd, ch_ = show(mb, C), show(h, C)
+        sp_ = lambda t: [l.strip() for l in t.splitlines() if "spawnSync('npx', ['tsx', step" in l]
+        out.append('SPAWN UNCHANGED (READ): `spawnSync(\'npx\', [\'tsx\', step, label], ...)` merge-base %s | head %s | byte-identical: %s' % (sp_(cd), sp_(ch_), sp_(cd) == sp_(ch_) and len(sp_(ch_)) == 1))
+        sweep = {}
+        for c_, lab in ((REAL_DEV, 'develop'), (h, 'head')):
+            rc, o, _ = gq('grep', '-n', '-E', r'import\.meta\.url\)\.pathname', c_, '--', 'systemTest/', 'Blockchain/Dev/')
+            sweep[lab] = [':'.join(x.split(':')[1:3]) for x in o.strip().splitlines()] if rc == 0 else []
+        rc2, o2, _ = gq('grep', '-n', '-E', r'new URL\([^)]*\)\.pathname', REAL_DEV, '--', 'systemTest/')
+        out.append('SITE SWEEP (READ, `git grep -nE "import\\.meta\\.url\\)\\.pathname" -- systemTest/ Blockchain/Dev/`): develop %s | head %s; the wider `new URL(...).pathname` form in systemTest/ at develop: %s — KS-1337 site 2 of 3 (playwright global-setup.ts:42 left, KS-1337 stays open); KS1347 owns the Blockchain/Dev occurrences' % (
+            sweep['develop'], sweep['head'], [':'.join(x.split(':')[1:3]) for x in o2.strip().splitlines()] if rc2 == 0 else 'NONE'))
+        ts = show(h, T)
+        out.append('CELL (READ, at head): %d lines; `spawn`/`spawnSync`/`execFile`/`execSync`/`fork` calls %d; reads preSuiteSetup.ts as TEXT (`readFileSync(`) %d; the statement filter `line.trim().startsWith(\'const step = \')` %d; `mkdtempSync` %d; `rmSync` %d (afterEach, inside its own tmpdir); the literal `Testing Agent MAIN` %d; `await import(` %d — the cell never runs the npx/tsx pre-suite step (the same DoD-2 boundary #1291 disclosed)' % (
+            len(ts.splitlines()), len(re.findall(r'\b(spawn|spawnSync|execFile|execFileSync|execSync|fork)\(', ts)), ts.count('readFileSync('), ts.count("startsWith('const step = ')"), ts.count('mkdtempSync('), ts.count('rmSync('), ts.count('Testing Agent MAIN'), ts.count('await import(')))
+        GB = '/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/briefs/'
+        gb_, gm = golden_apply(mb, GB + 'KS-1337/golden/KS-1337-akto.golden.diff', [C, T])
+        gw_, gmw = golden_apply(mb, GB + 'KS-1337.golden/KS-1337.golden.diff', [C, T])
+        out.append('GOLDEN (READ): briefs/KS-1337/golden/KS-1337-akto.golden.diff at the merge-base: %s%s | the OTHER golden briefs/KS-1337.golden/KS-1337.golden.diff (the k6 site, #1291) at the merge-base: %s — the PR says the akto one is the match' % (
+            gm, (' -> both blobs == head: %s' % (gb_[C] == blob(h, C) and gb_[T] == blob(h, T))) if gb_ else '', gmw))
+        pk = show(REAL_DEV, 'systemTest/akto/package.json')
+        try: pj = json.loads(pk); sc = pj.get('scripts', {}); eng = pj.get('engines')
+        except Exception: sc, eng = {}, None
+        out.append('PACKAGE SCRIPTS (READ, systemTest/akto/package.json at develop): lint `%s`; format:check `%s`; test:unit `%s`; engines %s' % (sc.get('lint'), sc.get('format:check'), sc.get('test:unit'), eng))
+        tc = show(REAL_DEV, 'systemTest/akto/tsconfig.json'); vc = show(REAL_DEV, 'systemTest/akto/vitest.unit.config.ts')
+        sq = lambda x: re.sub(r'\s+', ' ', x)
+        out.append('PROGRAMS (READ): tsconfig.json include %s exclude %s (covers tests/**/*.ts: the lint script\'s ONE tsc stage sees both files); vitest.unit.config include %s' % (
+            [sq(x) for x in re.findall(r'"include"\s*:\s*(\[[^\]]*\])', tc)], [sq(x) for x in re.findall(r'"exclude"\s*:\s*(\[[^\]]*\])', tc)], re.findall(r'include\s*:\s*(\[[^\]]*\])', vc)))
+    PROBES[n] = out
+    for o in out: print('  #%s %s' % (n, o))
