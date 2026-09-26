@@ -291,3 +291,6 @@ Inherited tools accrete stale tokens across several hand-offs (`merge28.py:160` 
 
 ## A merge seat MAY refresh the shared checkout's tracking ref when a signed GO cannot be executed without it (2026-09-27, Wednesday ruling)
 One `git fetch origin develop` under the push lock, measured (exactly one ref value moved; HEAD, local develop, untracked set and `.git/config` unchanged) and disclosed in the MERGED mail. Instrumental to a GO already signed, so no ASK is needed. Anything beyond a tracking-ref refresh is still an ASK.
+
+## A red set quoted in a PR body names the row DESCRIPTIVELY when the test title embeds a foreign key (2026-09-27, Wednesday ruling on Seat B 32nd's question)
+Write `A1 GET /` or `C3 SOURCE`, and add "the cells' titles carry the ticket key as file content", instead of pasting `RED KS-1341 A1 …` verbatim into a PR title, body or commit message, where a hyphenated key ATTACHES the ticket. Inside a ticket COMMENT the verbatim title is fine (it only cross-references). This is the form B 32nd already used on #1293, #1294 and #1296.
