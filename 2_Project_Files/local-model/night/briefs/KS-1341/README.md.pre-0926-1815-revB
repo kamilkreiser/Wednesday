@@ -44,29 +44,3 @@ The builder's blank-context rule (IMPROVEMENTS.md, 2026-09-18) refused rev 1: Ed
 
 ## REV 3 (Wednesday, 2026-09-26 15:1x) — Edit 3 = the helper FIRST, then `:549` as the only (trailing, non-blank) context
 Rev 2 was refused by the builder's leading-only-context rule. Rev 3 puts the 18 inserted lines (docblock, helper, one empty `+` line) BEFORE `export default webhooksRouter;`, which is the single trailing context line (`@@ -549,1 +549,19 @@`). Verified: A, then B, then C apply strictly (`patch -p1 -F0`) on develop e080174c's file; final 7 `fail500(` calls + 1 declaration, 0 leaks; goldens regenerated (backups `.pre-*-rev3`); `KS-1341.md` re-copied. `assemble_and_check.sh` stays STALE.
-
-## REV B (2026-09-26) — brief B re-anchored at develop `179a4f32` and its B1 cell fixed for N-1288-2
-Written 2026-09-26 18:1x AEST by a brief-reviser sub-agent for Wednesday. No model run, nothing queued/pushed, nothing written in any Secuura folder.
-
-**`KS-1341.md` IS NOW BRIEF B** (a byte copy of `brief-B.md`; the builder reads `<ticket>.md`). Brief A stays in `brief.md` (untouched); the brief-A copy that `KS-1341.md` held is backed up as `KS-1341.md.pre-0926-1815-revB` (== `brief.md`).
-
-What changed:
-- **Anchors re-derived at `179a4f32ec0643689b55a8d7207e63f6ec3d3831`** (origin develop, parent `a2a2b4c50d64` = #1288 part A). `webhooks.ts` there = golden `webhooks.A.ts` byte for byte (567 lines, blob `275dcec4`); `:325/:337/:352` are still the SITE line, `fail500` is declared at `:562` (docblock `:549-:561`), `export default webhooksRouter;` is `:567`. Nothing moved: the 3 product hunks are unchanged. The merged `ks1341a` test = golden. The harness files (sharedModuleMock, pgErrors, logger, jest.config, package.json, encryptedField, ks1160) have the same blobs as at `e080174c`. That commit is not in the Blockchain checkout's object store, so it was read from a scratch shallow fetch of the same remote (scratchpad `biB/dev.git`).
-- **N-1288-2 fixed in B1** (gate 28, `2026-09-26-batch1286-g28/report.md:284-290`): `mockLoggerError.mockClear()` at the top of each NODE_ENV iteration, and the check is now `expect({ nodeEnv, calls: mockLoggerError.mock.calls }).toEqual({ nodeEnv, calls: [[route.context, { error: LEAK }]] })` in place of `.at(-1)`. The test is 197 → **200** lines (`@@ -0,0 +1,200 @@`). Updated in `brief-B.md`, `golden/ks1341b-…test.ts` and the test hunk of `golden/B.golden.diff` (brief's ts block == golden test, byte for byte).
-- **Arm R3 added** to `## The failing case`: `:563` `logger.error(...)` → `if (process.env.NODE_ENV === 'production') logger.error(...)`. Expected: all three B1 rows RED (at `development`), B2 GREEN, controls GREEN. A green B1 under R3 is a FAIL of the brief.
-- **`## Red cells` added** (`- RED KS-1341 B1`, `- RED KS-1341 B2`).
-- Stale prose fixed (the helper position line in `## Before queueing`), a rev-B premise and a rev-B measured block added, UNMEASURED updated (R3 not executed).
-- **NOT done (out of scope, flag):** N-1288-1 (the helper docblock says "the only place in this router that turns a caught error into a 500", false until C). Fixing it in B would be a 4th edit point; the gate's alternative fix-shape is a part-C cell asserting 0 `message: err.message`. Wednesday's call.
-
-Measured:
-- Builder (scratch, `NIGHT_SOURCE_CHECKOUT` = a scratchpad clone with the Blockchain checkout as object alternate + develop fetched, because `179a4f32` is not in the real checkout's object store): **rc 0**. `WARN state is In Progress (started) — ADMITTED by started_ok: part-A-merged-#1288;part-B-is-the-next-split-brief` · `fix shape: WEDNESDAY BRIEF (KS-1341.md)` · `expected '+' lines from the brief's edit blocks: 3 (A3c)` · `red cells declared by the brief: 2 ['RED KS-1341 B1', 'RED KS-1341 B2']` · `prompt source: WEDNESDAY BRIEF …/KS-1341.md (32467 chars)` · `suggested_test_file = … ks1341b-webhooks-500-never-answers-err-message.test.ts` · `contract: key set == KS-871 input` · input.json 72307 B, ~18172 prompt tokens.
-- `patch -p1 -F0 --dry-run` of B's 3 product hunks on develop `179a4f32`'s `webhooks.ts`: **rc 0**. Control on a copy with `:337` tampered: **rc 1** (1 of 3 hunks failed). Brief's diff fences == golden product hunks (cmp). `git apply` (strict) of the whole `golden/B.golden.diff` on a scratch copy: rc 0, result == `golden/webhooks.AB.ts` and the golden test byte for byte. `typescript@5.9.3 transpileModule`: 0 syntax diagnostics on the new test and on `webhooks.AB.ts`.
-- **After B:** 6 lines contain `fail500(` = 5 `fail500(res,` calls + 1 declaration; **2** `message: err.message` left (`:391` POST /:id/test, `:416` GET /:id/deliveries) for part C.
-
-**Run command for the next seat** (needs `179a4f32` in the real checkout's object store — a Secuura seat fetches first, or the coordinator writes `night/tip_override.txt`; the scratch `input.json` above names a scratchpad `source_checkout` and must NOT be queued):
-```
-NIGHT_BRIEFS_DIR=/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/briefs/KS-1341 bash /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/build_input.sh KS-1341 <out>/input.json product=Blockchain/Dev/services/originate/src/routes/webhooks.ts ref=Blockchain/Dev/services/originate/src/__tests__/ks1341a-webhooks-500-never-answers-err-message.test.ts line=325 "started_ok=part-A-merged-#1288;part-B-is-the-next-split-brief"
-```
-(`started_ok` is needed because KS-1341 is In Progress after part A; pass it only if no live lane holds part B.)
-
-UNMEASURED: no jest run (RED at tip / GREEN after / Arm R3 all reasoned); no ts-jest type-check; no lint; the builder was run against a scratch clone, not the real checkout.

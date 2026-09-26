@@ -1,0 +1,13 @@
+--- a/Blockchain/Dev/services/originate/src/__tests__/ks1341a-webhooks-500-never-answers-err-message.test.ts
++++ b/Blockchain/Dev/services/originate/src/__tests__/ks1341a-webhooks-500-never-answers-err-message.test.ts
+@@ -112,7 +112,9 @@
+     for (const nodeEnv of NODE_ENVS) {
++      // KS-1344: cleared per environment, so each iteration must reach fail500 and log for itself.
++      mockLoggerError.mockClear();
+       const reply = await call(route, nodeEnv);
+       expect({ nodeEnv, status: reply.status, leaked: reply.text.includes(LEAK) }).toEqual({ nodeEnv, status: 500, leaked: false });
+       expect(JSON.parse(reply.text)).toEqual(CONSTANT_BODY);
+       // REACHED, not merely clean: only fail500 logs this route's context with the thrown text.
+-      expect(mockLoggerError.mock.calls.at(-1)).toEqual([route.context, { error: LEAK }]);
++      expect(mockLoggerError.mock.calls).toEqual([[route.context, { error: LEAK }]]);
+     }

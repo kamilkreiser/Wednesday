@@ -2,16 +2,16 @@
 
 File: `Blockchain/Dev/services/originate/src/routes/webhooks.ts`  (product, modified in place)
 Test file: `Blockchain/Dev/services/originate/src/__tests__/ks1341b-webhooks-500-never-answers-err-message.test.ts`  (NEW)
-Tip: `179a4f32ec0643689b55a8d7207e63f6ec3d3831` (origin develop, contains brief A's merge #1288 = squash `a2a2b4c50d64`). **REV B (2026-09-26 18:1x): every line quoted here was RE-READ at that sha** — `webhooks.ts` there is 567 lines, blob `275dcec47b5da263614a54aa1fad9710d169cc4c`, byte-identical to the scratch golden `webhooks.A.ts`; `fail500` is declared at `:562` (docblock `:549-:561`), `export default webhooksRouter;` is `:567`. The three sites did not move.
+Tip: `e080174c86c671349c508560744644fc0ef33388` for every line quoted here, READ at that sha. **Apply at the develop commit that contains brief A's merge** (it does not exist yet); see `## Before queueing`.
 Runner: `jest` (ts-jest 29, `Blockchain/Dev/services/originate/package.json` `"test": "jest"`)
 
-Written 2026-09-26 15:03:36 AEST (shell `date`) from `e080174c86c671349c508560744644fc0ef33388`, `webhooks.ts` read WHOLE (549 lines, ends with one `\n`, blob sha1 of `git show` output `c86b6344664f41bd6b12f4e7dc74aa37c76a52dd`, last changed at `408821134` KS-1160 #1186). **Brief B of 3 — SECOND of three (A → B → C). Needs A merged (it calls `fail500`, which A adds) — A IS merged at `179a4f32` (#1288).** Rev B re-read at `179a4f32` (see Tip); the only change from rev 1 is the B1 cell's per-environment logger clear (gate 28 finding N-1288-2) and the test's line count (197 → 200).
+Written 2026-09-26 15:03:36 AEST (shell `date`) from `e080174c86c671349c508560744644fc0ef33388`, `webhooks.ts` read WHOLE (549 lines, ends with one `\n`, blob sha1 of `git show` output `c86b6344664f41bd6b12f4e7dc74aa37c76a52dd`, last changed at `408821134` KS-1160 #1186). **Brief B of 3 — SECOND of three (A → B → C). Needs A merged (it calls `fail500`, which A adds).**
 
 ## The mode — read this twice
 
 CODE+TEST. Your diff touches EXACTLY 2 files, in this order:
 1. `Blockchain/Dev/services/originate/src/routes/webhooks.ts` — modified in place, `--- a/Blockchain/Dev/services/originate/src/routes/webhooks.ts` / `+++ b/Blockchain/Dev/services/originate/src/routes/webhooks.ts`, EXACTLY the 3 hunk(s) given in `## The exact change`, byte for byte.
-2. `Blockchain/Dev/services/originate/src/__tests__/ks1341b-webhooks-500-never-answers-err-message.test.ts` — a NEW file: `--- /dev/null` then `+++ b/Blockchain/Dev/services/originate/src/__tests__/ks1341b-webhooks-500-never-answers-err-message.test.ts`, ONE hunk `@@ -0,0 +1,200 @@`, every line `+`, the text given in `## The test` byte for byte (200 lines).
+2. `Blockchain/Dev/services/originate/src/__tests__/ks1341b-webhooks-500-never-answers-err-message.test.ts` — a NEW file: `--- /dev/null` then `+++ b/Blockchain/Dev/services/originate/src/__tests__/ks1341b-webhooks-500-never-answers-err-message.test.ts`, ONE hunk `@@ -0,0 +1,197 @@`, every line `+`, the text given in `## The test` byte for byte (197 lines).
 
 You never touch any other file. In particular you do NOT edit any existing test, `routes/gdpr.ts`, `routes/systemErrors.ts`, `routes/adminConfig.ts`, `utils/pgErrors.ts`, `utils/logger.ts` or `__tests__/helpers/sharedModuleMock.ts`. Apply on develop AFTER brief A is merged. The checker applies the TEST FILE ALONE first (every 🔴 cell must FAIL by assertion, every 🟢 control must PASS), then your product hunks on top (every cell must PASS).
 
@@ -35,15 +35,13 @@ The rotate-secret catch (`:352`) is in THIS brief; the 🟢 rotate-secret contro
 
 ## Before queueing (the builder, not the model)
 
-This brief is written against `e080174c86c671349c508560744644fc0ef33388` and applies on the develop commit that contains A. By construction the line numbers do not move: A replaces `:200`/`:267` one line for one line and inserts its helper (docblock `:549-:561`, declaration `:562`) just ABOVE `export default webhooksRouter;` (now `:567`) — README rev 3 — and B replaces `:325/:337/:352` one for one. **Verified in the scratch golden** (`golden/assemble_and_check.sh`): A → B → C apply strict with `git apply` (no `--recount`) and reproduce the golden files byte for byte. Before queueing, re-read at the new tip:
+This brief is written against `e080174c86c671349c508560744644fc0ef33388` and applies on the develop commit that contains A. By construction the line numbers do not move: A replaces `:200`/`:267` one line for one line and inserts its helper AFTER `:548`, and B replaces `:325/:337/:352` one for one. **Verified in the scratch golden** (`golden/assemble_and_check.sh`): A → B → C apply strict with `git apply` (no `--recount`) and reproduce the golden files byte for byte. Before queueing, re-read at the new tip:
 
 ```
 git show <new-develop-sha>:Blockchain/Dev/services/originate/src/routes/webhooks.ts | sed -n '325p;337p;352p'   # each must print the SITE line quoted in ## The exact change
 git show <new-develop-sha>:Blockchain/Dev/services/originate/src/routes/webhooks.ts | grep -c '^function fail500('                 # must print 1
 ```
 If either check fails, the brief is stale: do NOT queue it, rebuild it at the new tip.
-
-**Rev B, measured at `179a4f32ec06` (2026-09-26 18:1x):** `sed -n '325p;337p;352p'` prints the SITE line three times; `grep -c '^function fail500('` → 1 (`:562`); `grep -c -i webhooksrouter` → 10 (positive control). `patch -p1 -F0 --dry-run` of this brief's 3 product hunks on that file → rc 0; on a copy whose `:337` was tampered → rc 1. `ks1341b-…test.ts` does not exist at that sha (`git cat-file` → path does not exist).
 
 ## The exact change
 
@@ -102,7 +100,7 @@ The helper's context string for each site is DISTINCT and names the route; do no
 
 ## The test
 
-File: `Blockchain/Dev/services/originate/src/__tests__/ks1341b-webhooks-500-never-answers-err-message.test.ts` (NEW, 200 lines).
+File: `Blockchain/Dev/services/originate/src/__tests__/ks1341b-webhooks-500-never-answers-err-message.test.ts` (NEW, 197 lines).
 This service runs **jest** (ts-jest preset, `testEnvironment: 'node'`, `testMatch: ['**/__tests__/**/*.test.ts']` — read at
 `Blockchain/Dev/services/originate/jest.config.js`), NOT vitest: `jest.mock`, `jest.fn`, `jest.requireMock`; `expect` takes ONE
 argument. There is no database, no network beyond a loopback listener on 127.0.0.1, and no app boot: `../db`,
@@ -112,11 +110,9 @@ in `ks1160-webhooks-post-persists-normalised-url.test.ts` lines 7-60 (the shape 
 
 The cell shape (LEAK string · four NODE_ENVs · constant body · logger received the route context · REACHED) is copied from `ks730c-adminconfig-500-never-answers-err-message.test.ts` lines 58-127, including its lesson (the KS-730 PR3 trap): a LEAK containing `does not exist` was routed into a benign 200 branch there, so a clean body alone proved nothing. Here the LEAK contains neither `does not exist` nor any SQLSTATE that `utils/pgErrors.ts:36` (`KNOWN_PG_CODES`) would classify, and every red cell asserts the logger received THIS route's context with the thrown text — which only the converted catch does.
 
-**REACHED is pinned PER ENVIRONMENT (gate 28, N-1288-2, MEASURED on part A).** Part A's A1 read `mockLoggerError.mock.calls.at(-1)` with no clear inside its NODE_ENV loop, so the production iteration's log call satisfied the development/test/unset iterations: a helper that logged only under `NODE_ENV==='production'` kept A1 green while a real probe went red 18 times. B1 therefore calls `mockLoggerError.mockClear()` at the TOP of each loop iteration and asserts the WHOLE call list for that environment is exactly `[[route.context, { error: LEAK }]]` (with `nodeEnv` in the compared object, so a failure names the environment). Do not "simplify" it back to `.at(-1)`.
-
 **This file's own trap:** PATCH's catch (`webhooks.ts:318-:324`) sends a classified SQLSTATE to an honest 400 BEFORE the 500 line, so the LEAK carries no SQLSTATE and no `code`; 🟢 `B0` pins that branch. rotate-secret is driven by making `encryptField` throw (the shape the gate measured), so its cell never reaches the database.
 
-Emit this text as the new-file hunk `@@ -0,0 +1,200 @@`, every line prefixed `+`, nothing added or dropped:
+Emit this text as the new-file hunk `@@ -0,0 +1,197 @@`, every line prefixed `+`, nothing added or dropped:
 
 ```ts
 // KS-1341 part B (originate routes/webhooks.ts, PATCH /:id, DELETE /:id, POST /:id/rotate-secret):
@@ -240,14 +236,11 @@ async function call(route: (typeof ROUTES)[number], nodeEnv: string | undefined)
 describe('KS-1341 part B: PATCH, DELETE and rotate-secret never answer a 500 with the thrown text', () => {
   it.each(ROUTES)('RED KS-1341 B1 $label: the thrown message is not in the 500 body under production, development, test or unset', async (route) => {
     for (const nodeEnv of NODE_ENVS) {
-      // Cleared PER ENVIRONMENT: without it the production call satisfies every later iteration,
-      // so a helper that logged only under production would stay green (gate 28, N-1288-2).
-      mockLoggerError.mockClear();
       const reply = await call(route, nodeEnv);
       expect({ nodeEnv, status: reply.status, leaked: reply.text.includes(LEAK) }).toEqual({ nodeEnv, status: 500, leaked: false });
       expect(JSON.parse(reply.text)).toEqual(CONSTANT_BODY);
-      // REACHED in THIS environment, not merely clean: exactly one call, this route's context, the thrown text.
-      expect({ nodeEnv, calls: mockLoggerError.mock.calls }).toEqual({ nodeEnv, calls: [[route.context, { error: LEAK }]] });
+      // REACHED, not merely clean: only fail500 logs this route's context with the thrown text.
+      expect(mockLoggerError.mock.calls.at(-1)).toEqual([route.context, { error: LEAK }]);
     }
   });
 
@@ -321,12 +314,6 @@ describe('KS-1341 part B: PATCH, DELETE and rotate-secret never answer a 500 wit
 });
 ```
 
-## Red cells
-- RED KS-1341 B1
-- RED KS-1341 B2
-
-(Title SUBSTRINGS, one per `it.each` row family: each matches the PATCH /:id, DELETE /:id and POST /:id/rotate-secret rows. These six cells go RED at the tip (`179a4f32`, part A merged) and GREEN with the fix; the five `control KS-1341 B…` cells are green at both. The builder's undeclared-red gate cannot see `it.each` titles, so this section is load-bearing.)
-
 ## Cells and controls
 
 - 🔴 `RED KS-1341 B1 PATCH /:id: the thrown message is not in the 500 body under production, development, test or unset` — RED at the tip (the body carries LEAK)
@@ -347,12 +334,9 @@ describe('KS-1341 part B: PATCH, DELETE and rotate-secret never answer a 500 wit
 
 After your change, in `Blockchain/Dev/services/originate/src/routes/webhooks.ts` line `:337` (DELETE /:id) reads `    fail500(res, 'Webhook delete failed (DELETE /api/webhooks/:id)', err);` — byte-unique in the post-change file (literal line-equality count 1, measured on the golden). Tamper: replace it with the original SITE line `res.status(500).json({ success: false, error: { code: 'INTERNAL_ERROR', message: err.message } });` (4 leading spaces). Expected: `B1 DELETE /:id` and `B2 DELETE /:id` go RED; every 🟢 control stays GREEN. Restore → all GREEN.
 
-**Arm R3 — production-only logging (rev B; the N-1288-2 regression arm, REQUIRED).** In the post-change file, line `:563` (inside `fail500`, unchanged by this brief) reads `  logger.error(context, { error: err instanceof Error ? err.message : String(err) });` — byte-unique (count 1 in the golden `webhooks.AB.ts`). Tamper: replace it with `  if (process.env.NODE_ENV === 'production') logger.error(context, { error: err instanceof Error ? err.message : String(err) });` (2 leading spaces). Expected: all three `B1` rows go RED (each fails at its `development` iteration: `calls: []` where one call is expected, and the failure names `nodeEnv: 'development'`); the three `B2` rows stay GREEN (they drive production only); every 🟢 control stays GREEN. **If any `B1` row stays green under this arm, the per-environment clear has been lost and the cell has regressed to part A's blindness — that is a FAIL of this brief, not a pass.** Restore → all GREEN.
-
 ## Premises (each one measured, with where)
 
-- **Rev B:** origin develop = `179a4f32ec0643689b55a8d7207e63f6ec3d3831` (`git ls-remote`, 2026-09-26 18:1x; parent `a2a2b4c50d64` = #1288, part A). The object is NOT in the Blockchain checkout's store (that checkout's `origin/develop` is still `e080174c`), so it was read from a scratch bare repo shallow-fetched from the same remote (nothing written in the Secuura folder). At that sha `webhooks.ts` = golden `webhooks.A.ts` byte for byte, `ks1341a-…test.ts` = the golden A test byte for byte, and `sharedModuleMock.ts`, `utils/pgErrors.ts`, `utils/logger.ts`, `jest.config.js`, `package.json`, `encryptedField.ts` and `ks1160-…test.ts` have the same blob as at `e080174c` (the harness this test copies is unchanged).
-- origin develop (rev 1) = `e080174c86c671349c508560744644fc0ef33388` — `git ls-remote origin refs/heads/develop` re-read at 2026-09-26 15:03:13 AEST (first read earlier this session, same sha); the object is in the local store (`git cat-file -t` → commit).
+- origin develop = `e080174c86c671349c508560744644fc0ef33388` — `git ls-remote origin refs/heads/develop` re-read at 2026-09-26 15:03:13 AEST (first read earlier this session, same sha); the object is in the local store (`git cat-file -t` → commit).
 - The seven SITE lines, byte-identical, at `:200, :267, :325, :337, :352, :391, :416` — python line-equality count 7 on `git show e080174c86c6:Blockchain/Dev/services/originate/src/routes/webhooks.ts`; the gate lists the same seven (`report.md:372`).
 - No catch in the file logs before answering: `webhooks.ts:199-201, :266-268, :314-326, :336-338, :351-353, :390-392, :415-417` read whole.
 - `fail500` does not exist in the file at the tip — `grep -c -i fail500` → 0 (positive control: `grep -c -i webhooksrouter` → 10). `does not exist` occurs 0 times in the file (same instrument, `-i`).
@@ -368,8 +352,7 @@ After your change, in `Blockchain/Dev/services/originate/src/routes/webhooks.ts`
 ## UNMEASURED — stated rather than glossed
 
 - **The new test file was NOT run**, at the tip or after the fix — no jest, no type-check (`tsc`/ts-jest diagnostics), no lint. RED-at-tip and GREEN-after are REASONED from the source. The first checker run is the first execution.
-- Type-level risks I could not rule out without ts-jest: the `it.each` row type inferred from a non-`as const` array with a union `body` field. (Rev B removed `mock.calls.at(-1)`; B1 now compares `{ nodeEnv, calls: mockLoggerError.mock.calls }`.)
-- **Arm R3 was NOT executed.** That B1 reds and B2 stays green under production-only logging is REASONED from the cell (clear per iteration → an empty call list at `development`); the analogous blindness in part A's A1 was MEASURED by gate 28 (report `2026-09-26-batch1286-g28/report.md:281-290`).
+- Type-level risks I could not rule out without ts-jest: the `it.each` row type inferred from a non-`as const` array with a union `body` field; `mock.calls.at(-1)` needs lib ES2022 (it is used by the merged `ks730c`, so probably fine).
 - Setting `process.env.NODE_ENV = 'production'` inside a running jest worker is assumed to have no side effect on express or the mocks (the ks730 files do the same for development/demo/test; production is new here).
 - The rest of the originate suite was not run, before or after; "no worse" is for the checker to measure.
 - Whether the eslint run passes with the helper declared after its callers (reasoned from the config, not run).
@@ -390,4 +373,4 @@ Closes 3 of 7 sites. **Refs KS-1341, does NOT close it.** The ticket closes with
 
 ## Output
 
-Exactly ONE fenced ```diff block, nothing outside it. First the product file (`--- a/Blockchain/Dev/services/originate/src/routes/webhooks.ts` / `+++ b/Blockchain/Dev/services/originate/src/routes/webhooks.ts`, the 3 hunk(s) exactly as given, in file order), then the new test file (`--- /dev/null` / `+++ b/Blockchain/Dev/services/originate/src/__tests__/ks1341b-webhooks-500-never-answers-err-message.test.ts`, `@@ -0,0 +1,200 @@`). Paths exactly as written here. Every `+` line on its own physical line. Every context line keeps its leading space. Do not add, reorder, reword or reindent anything.
+Exactly ONE fenced ```diff block, nothing outside it. First the product file (`--- a/Blockchain/Dev/services/originate/src/routes/webhooks.ts` / `+++ b/Blockchain/Dev/services/originate/src/routes/webhooks.ts`, the 3 hunk(s) exactly as given, in file order), then the new test file (`--- /dev/null` / `+++ b/Blockchain/Dev/services/originate/src/__tests__/ks1341b-webhooks-500-never-answers-err-message.test.ts`, `@@ -0,0 +1,197 @@`). Paths exactly as written here. Every `+` line on its own physical line. Every context line keeps its leading space. Do not add, reorder, reword or reindent anything.
