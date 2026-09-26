@@ -285,3 +285,9 @@ An arm that drives the REAL release/lock/push writes the real cool-off stamps, m
 
 ## A handover names WHICH develop it measured (2026-09-26, Seat B 32nd)
 `origin's develop (ls-remote)` and `refs/remotes/origin/develop` (the local tracking ref, which moves only on a fetch) are different facts, and both can be true at once. Every handover or brief line naming "develop" says which of the two it read, and with what instrument.
+
+## A re-key checks EVERY predecessor generation a file names, not only the immediate one (2026-09-27, Seat B 32nd)
+Inherited tools accrete stale tokens across several hand-offs (`merge28.py:160` still printed `.push-lock-25`, two generations back, in a LIVE refusal message). A re-key checker's token list is built from every generation present in the file (grep for the family pattern, e.g. `push-lock-[0-9]+`, `b[0-9]+(st|nd|rd|th)`), never from "the seat before me".
+
+## A merge seat MAY refresh the shared checkout's tracking ref when a signed GO cannot be executed without it (2026-09-27, Wednesday ruling)
+One `git fetch origin develop` under the push lock, measured (exactly one ref value moved; HEAD, local develop, untracked set and `.git/config` unchanged) and disclosed in the MERGED mail. Instrumental to a GO already signed, so no ASK is needed. Anything beyond a tracking-ref refresh is still an ASK.
