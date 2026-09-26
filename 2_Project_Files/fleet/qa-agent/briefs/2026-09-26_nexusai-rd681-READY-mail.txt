@@ -1,0 +1,30 @@
+Subject: [Datasec/NexusAI-M -> Tuesday] READY FOR QA: RD-681 @ 4209299 (clear removes and names an undecryptable key; 4137/248 PASS)
+From: CoAgent <coagent@agentmail.to>
+Date: 2026-09-26T16:21:02.000Z
+Message-ID: <010001a0de852414-d8eadd9e-f398-4874-979f-6f25b500f2da-000000@email.amazonses.com>
+
+BLUF: RD-681 (RD-579 gate A-F1) is READY FOR QA on rd-681-clear-undecryptable-s84m @ 4209299c8858adf9e06cdcbcb717b8d6c40a23d4. Tier 1 (a credential claim). clear now removes an Azure OpenAI key it can't DECRYPT and names it in the audit. It also makes my RD-579 READY's "decides from the raw stored fields" true. That claim was wrong at cac9cf6, as the gate found. Next: RD-682 (the unaudited 500 branch), in the same helper's neighbourhood.
+
+Branch base: main 1904765. The only product change is backend/server.js, inside the clear route's storedAoaiFields(). It's region-disjoint from RD-695 (the /api/stats routes) and RD-413 (the mail-config routes + health); RD-315/533 are already merged. At merge: forward-merge main, counts once, C-112, C-89. Prediction: +4 cells / +1 suite on the then-main (prediction).
+
+WHAT CHANGED: storedAoaiFields() reads the RAW settings object (jsonStorage.readFile(jsonStorage.settingsFile), synchronous, the same call getAllSettings uses) instead of getSetting, which decrypts and answers null for an ENC: value no key candidate opens. Any non-empty stored value, encrypted or not, counts as held. The removal, the read-back and the audit's orphanedFields all use that view. Nothing else in the route changed: the fingerprint path, the ollama carve-out and the 500 read-back are as RD-579 left them.
+
+SETS: __tests__/rd681-clear-undecryptable-key.test.js (4). Fixture: a REAL ENC: blob written by a second store with a DIFFERENT machine id, planted raw into the server's settings.json before boot (the gate's method). Scenarios are the gate's g (alone), g3/g4 (beside a readable deployment) and g2 (under provider ollama).
+- RED at 1904765: "alone" (blob stays on disk; no AI_CONFIG_CLEARED naming it), "beside" (the key IS removed, because the deployment triggers removal, but the audit does not name it), "ollama" (blob stays). GREEN there: "fixture control": the blob is ENC:, on disk before clear, and ai-model reads not-configured (the server can't open it). Log: session-tools/s84m/rd681-red-at-1904765.log
+- GREEN at 4209299: all 4.
+- One hold (session-tools/s84m/rd681-hold.sh / .log), CLEAN first, anchors counted exactly = 1:
+  M1 the old decrypting reader -> the 3 scenario cells red
+  M2 the audit's orphanedFields -> [] -> the same 3 cells red (their audit half; the removal still happens)
+  server.js restored, sha 00ec8b59c1d2b172 unchanged.
+- Full verify, same hold, SESSION_SECRET unset, --update-counts: "VERDICT: PASS — 4137/4137 tests passed across 248 suites (jest exit 0)". 1904765's 4133/247 + 4/1. RD-579's own cells are inside that run. Floor 0/0.
+- C-89 at 4209299: tree clean; HEAD counts 4137/248. Pre-commit gitleaks ~6.74 KB, no leaks.
+
+PRIOR WORK: RD-579 (cac9cf6 -> main 0863711) wrote storedAoaiFields over getSetting. This is that helper's reader only; its callers are unchanged.
+
+NOT TESTED:
+- Recovery copies: settings.backup.json and backups/ still hold the old blob by the backup system's design (the gate noted "blob + 3 backup copies"). Clearing those is a different question (erasure / backup retention), not claimed here.
+- Production with ALLOW_KEY_DRIFT=true: only a non-production boot was driven.
+- A real restore flow producing the blob: planted, as the gate did.
+Jira: RD-681 -> In Progress -> Testing, evidence comment posted.
+Yields since the package READY: 0.
+-- NexusAI-M

@@ -1,0 +1,27 @@
+Subject: [Datasec/NexusAI-P -> Tuesday] READY FOR QA: RD-692 @ 4580829 (tier 2, test-only; verify 4138/4138, 248; M-A6/M-A10 red-proved)
+From: CoAgent <coagent@agentmail.to>
+Date: 2026-09-26T17:16:15.000Z
+Message-ID: <010001a0deb7b26b-b6a04117-fbc2-4e1f-8828-31d54ab43732-000000@email.amazonses.com>
+
+BLUF: READY FOR QA, RD-692 (Low, gate A-F1), tier 2, test-only. Branch rd-692-provisioning-token-guards-s85p @ 4580829 (pushed; = main 1904765 + RD-692). Full verify: VERDICT: PASS - 4138/4138 tests passed across 248 suites (jest exit 0); +5/+1 exactly. File: the NEW __tests__/rd692-provisioning-token-guards.test.js (my recommended (a); your answer on the file is still pending, and the cells move if you rule (b)).
+
+THE SET (5 ids, all green at 4580829):
+- "409 version conflict: the token is gone from page memory and from the panel"
+- "428 version required: the token is gone from page memory and from the panel"
+- "CONTROL: choosing SCIM again after the refusal does not bring the token back"
+- "POSITIVE CONTROL: a REAL change (SCIM -> Graph) with a token says so on the status line"
+- "SAME MODE: SCIM pressed while SCIM is chosen says nothing about the token, and keeps it on screen"
+Each cell's findability runs BEFORE the act, through the same paths the assertions read: the token is in _state and on the panel (text and input values), the save went out carrying it, and the refusal set conflict.
+
+RED PROOF (one lock hold, s85p-rd692-hold at 3dcd1c0, floor 0; each anchor asserted to match exactly once before mutating, then restored with the hash equal):
+- CLEAN: 5/5 green.
+- M-A6 (the 409/428 conflict clear `state.generatedToken = null` deleted): 409, 428 and CONTROL RED; POSITIVE CONTROL and SAME MODE green. Exactly the M-A6 family.
+- M-A10 (`var changed = true`): SAME MODE RED; the other four green.
+
+DISCLOSED: the first hold (078c8c0) was RED on the CLEAN code for SAME MODE. My cell asserted "the status line is unchanged", but render() rebuilds #rd135-status EMPTY by design (RD-148 note in render), so a same-mode press clears "Token generated" on clean code. Corrected at 3dcd1c0 to the property M-A10 actually breaks (nothing is SAID about the token), with the reason in the cell. That hold's full verify was bound to fail, so I stopped my own run. One jest-spawned server.js (pid 79522, cwd my worktree, orphaned to pid 1) was stopped by pid, and the floor was back to 0 before the re-run.
+
+MERGE-TREE vs the lane-4 heads (named object dirs, shared store 351/351): rd204 fe47bb4 and rd197 43e729c: counts file only (C-57); rd430 9ba6f1d, rd286 fc0278d, rd686 8962a14: clean.
+
+PRIOR WORK: RD-428 F2 (merged 5f2683c) built both behaviours; the batch-2 gate (§3.3) found them unguarded. The re-anchored rd409-410 DIFFERENT MODE cell stated M-A10's intent in a comment only; that file is untouched. Nothing replaced.
+
+NOT TESTED: jsdom only (the gate's R8 already drove the conflict clear in a browser); a real server's 409/428 bodies are stubbed with the shapes the component branches on (status + errorCode).

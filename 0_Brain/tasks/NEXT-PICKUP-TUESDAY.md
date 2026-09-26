@@ -6,6 +6,18 @@ status: live
 supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s1-wholesale
 ---
 
+## 🟢 DELTA 101 — 2026-09-27 09:28 (s88 boot, ctx ~45%). **READ THIS FIRST, THEN 100.**
+### OWED TO KAM (copy forward until closed by name)
+- Week instruction (WEEK-INSTRUCTION-TUESDAY) EXPIRES end of TODAY 2026-09-27 (told on the board 08:3x with the Monday default). On Monday mark it lapsed unless he said otherwise.
+- CLOSED: the Vision `gh auth login` card -> CARDED `vision-gh-login-for-ci` (live 201; rec a; default = every Vision/QuickQuote GO says CI UNMEASURED). On his answer: relay nothing until he has run it; then the next Vision gate reads CI.
+### FLOOR (unchanged from 100): %0 tuesday · %25 gate 9 · %24 batch 4 · %23 batch 3 · %22 P · %21 N · %19 M (holding on the lock: owner s86m-rd594-hold, s86m-rd646-red queued; acked) · %1 monitor.
+### IN FLIGHT — THREE BACKGROUND DRAFTERS (subagents of THIS seat; they die with it: if the files below are absent after a rotation, re-commission by the same prompt shape — see the 09:27 note line)
+- 5a -> fleet/qa-agent/briefs/2026-09-27_nexusai-gate-batch5a-rd681-rd682-rd627b-rd695-rd705-rd413.md + launchers/launch_qa_nexusai_gate_batch5a.sh (route QA/NexusAI-batch5a: ADD it)
+- 5b -> briefs/2026-09-27_nexusai-gate-batch5b-c170pkg-rd696.md + launch_qa_nexusai_gate_batch5b.sh (route QA/NexusAI-batch5b); RD-594 guard cells join at stamp if READY. C-170's arm-ttk.yml = Tuesday's reading "covered by C-138 + C-170" (drafter verifies both texts).
+- 6 -> briefs/2026-09-27_nexusai-gate-batch6-rd693-rd286-rd204-rd197-rd686-rd692.md + launch_qa_nexusai_gate_batch6.sh (route QA/NexusAI-batch6); RD-430 / RD-694 item 4 join at stamp if READY.
+- On each: read its WRONG list first, the brief WHOLE, stamp @STAMP@, --check (re-pin heads by ls-remote), launch ONLY when a gate slot frees (3 gates already share the jest lock), resize panes (agents >= 6).
+- All READY mails for 5a/5b/6 are SAVED in fleet/qa-agent/briefs (12 new files 09:2x, read whole); heads = READY shas at origin (read this session); main 1904765.
+
 ## 🔴 DELTA 100 — 2026-09-27 09:20 ROTATION HANDOVER (s87, ctx 79%, safe boundary). **READ THIS FIRST, THEN 99/98.**
 ### OWED TO KAM (copy forward until closed by name)
 - Week instruction (WEEK-INSTRUCTION-TUESDAY) EXPIRES end of TODAY 2026-09-27; told on the live board 08:3x with the default (from Monday: work continues under the open-ended new-account grant; asks on the live board). On Monday mark the file lapsed unless he said otherwise.

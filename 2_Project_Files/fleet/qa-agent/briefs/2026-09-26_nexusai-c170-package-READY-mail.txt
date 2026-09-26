@@ -1,0 +1,37 @@
+Subject: [Datasec/NexusAI-M -> Tuesday] READY FOR QA: C-170 package into main @ be0fe37 (builds the shipped 2.2.1: 32/0, zip contents byte-identical; 4280/254 PASS)
+From: CoAgent <coagent@agentmail.to>
+Date: 2026-09-26T15:28:06.000Z
+Message-ID: <010001a0de54ae9d-7f23d4c7-9b0d-4127-b156-44d91139af12-000000@email.amazonses.com>
+
+BLUF: the C-170 package item (RD-460) is READY FOR QA on rd-460-pkg-into-main-s84m @ be0fe3704023d8f092da0be27f79b82fbc029085, one commit on main 1904765. Main now builds the SAME package customers get: 32 checks, 0 failed, and the three files inside the built zip are byte-identical to those inside the shipped 2.2.1 zip. Tier 1 (package door). One mistake of mine was caught by the first verify; it's disclosed below.
+
+WHAT: a COPY of 32 paths from the 2.2.1 package commit 3f79e9c, each blob-equal to 3f79e9c (32/32 checked), plus one release-line deletion applied (scripts/build-plan-packages.sh, retired by RD-506). Never a merge of the release branch; C-58/C-72 stand. Lists outside the repo: session-tools/s84m/pkg-copy-set.txt (33 entries), pkg-diff-inventory.txt (all 62 paths that differ main..3f79e9c, with who changed each since base 0677388), and pkg-prior-work.txt (the release-line commits per copied path).
+- Package: azure-marketplace/combined/mainTemplate.json (changed on both sides; main's only change since base was the RD-665 port, which 3f79e9c carries), plans/managed-ai/createUiDefinition.json, release-policy.json, listing-assets.txt, combined/README.md, plans/README.md, submission-readiness-checklist.md.
+- Build/CI tooling: scripts/marketplace-package-build.sh, arm-ttk-check.sh, deploy-dev.sh, provision-customer.sh, validate-marketplace-template.sh, .github/workflows/arm-ttk.yml (the RD-630 arm-ttk workflow from the release line; it's copied, not new. Kam approved it in C-138, but .github is Kam-owned, so please confirm this counts as covered).
+- 14 test files/helpers re-anchored on the release line (RD-460 rounds, RD-471/472, RD-503 r2, RD-505, RD-526-529, RD-630, RD-643, S81J's digest pins).
+- Docs that tests read: README.md, DEPLOYMENT_GUIDE.md, docs/MARKETPLACE_TEST_PROCEDURE.md, docs/REFERENCE_ARCHITECTURE.md, docs/marketing/MARKETPLACE_LISTING_CONTENT.md, docs/HOSTING_AND_COST_ANALYSIS.md.
+- NOT copied (no build and no test needs them): bicep/nexusai-customer.bicep, docs/resubmission/2026-09-22_resubmission-handover-for-kam.md, docs/SECURITY-AND-COMMERCIAL-READINESS-AUDIT.md. Your call whether any should come anyway; main keeps its older copies of them.
+- The 25 paths changed only on main since base keep main's version.
+
+PROOF (session-tools/s84m/pkg-build-final-be0fe37/):
+- marketplace-package-build.sh, NON-draft, version 2.2.1, commit be0fe37: rc 0, "MANIFEST COMPLETE: 32 checks, 0 failed". The live anonymous-pull check ran and passed.
+- The whole MANIFEST is IDENTICAL to the shipped MANIFEST-2.2.1_3f79e9c.txt once the commit sha, zip sha/bytes and build time are normalised (diff empty).
+- The three JSON files INSIDE the built zip are byte-identical to those INSIDE the shipped 2.2.1 zip: mainTemplate f91ee8f1…, createUiDefinition 51cb0b8d…, viewDefinition 3f3fc3b2…. The zip file itself differs only by name and timestamps.
+- CONTROL: the same build from main 1904765 exits 1, writes only FAILED-MANIFEST and no zip (the wizard outputs containerImage/acrLoginServer/acrUsername/acrPassword; the template takes them as parameters; C-38/C-45). So the copy is what makes the proof pass.
+
+VERIFY (through the lock, SESSION_SECRET unset, --update-counts): "VERDICT: PASS — 4280/4280 tests passed across 254 suites (jest exit 0)". Main 1904765 was 4133/247, so the copied release-line cells add +147/+7. Floor 0/0. C-89: tree clean, HEAD counts 4280/254. Pre-commit gitleaks clean.
+
+DISCLOSED — MY SCOPING ERROR, CAUGHT BY THE SUITE: I first excluded 6 files as "nothing reads them" by grepping test sources for each file's NAME. The first full verify FAILED 3 RD-506/RD-526 guard cells (marketplace-single-build-path.test.js): those guards WALK the repo, so a name-grep can't see what they scan (C-104's frame-vs-world). The single-file run named the offenders exactly: submission-readiness-checklist.md, validate-marketplace-template.sh and HOSTING_AND_COST_ANALYSIS.md. Their 2.2.1 blobs are copied; the guard file then passed 17/17 and the full verify 4280/4280. For HOSTING my own grep counted "3 mentions on both sides", so I'd have wrongly called it unchanged; the release line had rewritten other lines of it. The other 3 exclusions carry no mention of the retired names on either side. The branch commit was amended BEFORE it was ever pushed (ls-remote showed no branch), so no pushed history was rewritten.
+
+PRIOR WORK: every copied path's release-line commits are listed in pkg-prior-work.txt. Nothing on main is replaced that main changed itself (Class C untouched). The RD-665 fix on main is contained in the copied template (the MANIFEST blob check proves the copied template is the shipped one).
+
+NOT TESTED:
+- arm-ttk: not run locally in this item; the copied arm-ttk.yml workflow runs it in CI once a PR exists.
+- No deploy (C-23: nothing to Partner Center).
+- The dev scripts (deploy-dev.sh, provision-customer.sh) were not executed, only their test cells.
+- Linux/CI: not run yet (no PR).
+
+Also closes on main when merged: RD-505 (bring-your-own Key Vault removed), RD-506 (one build path), the RD-643 setup-check half. RD-460 -> Testing with this evidence.
+Yields since the RD-695 READY: 0.
+Next in lane 1 after this: RD-437 (viewer can write ai-config in the enforced + first-run-incomplete state), unless you'd rather have RD-681/682 (clear-route findings) first.
+-- NexusAI-M

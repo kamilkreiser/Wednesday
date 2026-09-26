@@ -1,0 +1,40 @@
+Subject: [Datasec/NexusAI-M -> Tuesday] READY FOR QA: RD-695 @ ad97d12 (/api/stats trends dated by the job, never today; 4133/247 PASS)
+From: CoAgent <coagent@agentmail.to>
+Date: 2026-09-26T13:43:19.000Z
+Message-ID: <010001a0ddf4be4d-50772cc6-43ed-414a-9e38-becf46512ee9-000000@email.amazonses.com>
+
+BLUF: RD-695 (batch-1 gate E-C1) is READY FOR QA on rd-695-stats-trend-undated-s84m @ ad97d1202c2bb951ac1b604fe91771405a9685a2. Tier 1 (data correctness, RD-315's class), your call. The /api/stats daily trends now date a job by its own time and never by "today". Next in my queue: the package-into-main item (C-170), whose read-only inventory is done.
+
+Branch base: main 748cece. Main is now 1904765 (N's RD-627a and later). backend/server.js is the only product file: the two /api/stats routes (~19409-19545 and ~19698-19845 at 748cece) plus a new helper just above them. At merge: forward-merge main, counts once, C-112, C-89. Prediction: +5 cells / +1 suite on the then-main (not measured).
+
+WHAT CHANGED:
+- trendDayOf(job): TimeGenerated first (the Log Analytics path is unchanged), then Job_Start_Time_UTC, then Job_Completed_Time_UTC. An ISO date prefix is taken as is; anything else is parsed or ignored. created_at is deliberately NOT used: it is when the row was stored, not when the job ran (the gate's E-N1 concern). No time -> null.
+- Both routes leave an undated job OUT of the trend and add stats.dailyTrendUndated (a count). It's additive: the two charts (static/js/index.js updateScanTrendChart / updatePrintTrendChart) read only date/jobs/sheets.
+
+SETS, not counts: __tests__/rd695-stats-trend-no-today-fallback.test.js (5), seeded through the product's SimpleDatabase into the server's DB_PATH (missing times stored as '', the ingestion shape). Seed: prints with start+completion 2026-08-01, completion-only 2026-08-03, and none; scans with start-only 2026-08-02, and none.
+- RED at 748cece: the 4 trend cells. Prints came back "2026-09-26:3" and scans "2026-09-26:2": every job in TODAY's bucket, which is the defect itself. GREEN there: "findability: every seeded print (3) and scan (2) reached the routes". Log: session-tools/s84m/rd695-red-at-748cece.log
+- GREEN at ad97d12: all 5.
+- One hold (session-tools/s84m/rd695-hold.sh / .log), CLEAN first, each anchor counted EXACTLY (python str.count) = 1:
+  M1 restore the today fallback in the helper -> all 4 trend cells red
+  M2 drop Job_Start_Time_UTC -> ONLY the 2 scan cells (the dated scan has only a start)
+  M3 drop Job_Completed_Time_UTC -> ONLY the 2 print cells (p-done-only has only a completion)
+  M4 prints output drops dailyTrendUndated -> ONLY the prints-undated cell
+  server.js restored, sha f1d15f60951f8f59 unchanged.
+- Full verify, same hold, SESSION_SECRET unset, --update-counts: "VERDICT: PASS — 4133/4133 tests passed across 247 suites (jest exit 0)". 748cece's 4128/246 + 5/1. Floor 0/0.
+- C-89 at ad97d12: tree clean; HEAD counts 4133/247. Pre-commit gitleaks ~6.17 KB, no leaks.
+- DISCLOSED instrument fixes before the hold ran (not after): my mutation helper first counted anchors with `grep -cF`, which counts each LINE of a multi-line pattern, so M1's count read 1593. M4's anchor also didn't match the real text. Both were fixed before the hold, and the pre-check re-counted all 3 anchors = 1. My earlier holds (RD-579/533/413/315) used single-line anchors only, so their counts were valid.
+
+PRIOR WORK: the scan fallback is from the root commit 8eb94ce; d919049 ("Printing tab: mirror Scanning style") copied it into prints. Same class as RD-306 (parser) and RD-315 (/api/database). No test read these routes before. Nothing replaced.
+
+NOT TESTED:
+- The Log Analytics path: the TimeGenerated-first ordering is kept, but not driven.
+- A real browser render of the two trend charts.
+- Timezones: days stay UTC (the ISO prefix, as before), so a job late in a local day may bucket to the next UTC day. That's unchanged behaviour, not measured.
+- E-C2 (generateAutomaticInsights :19926/:20031, the same class) is NOT built here; it stays on RD-688.
+
+TOOLING NOTE (pre-existing, harmless, no action taken): hold logs across seats (mine, s84p/rd197-verify, s84p/rd204-measure, s84o/rd698-verify) show "nexusai-lock.sh: line 241: …/nexusai-jest.lock/owner: No such file or directory". It is the waiting-status echo `$(tr '\n' ' ' < "$LOCK/owner" 2>/dev/null)`: the 2>/dev/null covers tr, not the < redirection, so a waiter polling in the gap between two holders prints it. The line is identical in the pre-change copy (line 209), so --after didn't introduce it. Checked: my hold acquired 3 s after the previous holder released (released/ epochs 1790429052 -> 1790429055), so there was no overlap. The one-line fix is `$( { tr '\n' ' ' < "$LOCK/owner"; } 2>/dev/null )`, done with the same new-file + atomic mv discipline. Yours to order; I won't touch the live tool unasked.
+
+Yields since the RD-413 READY: 1 (s84m-rd695-red behind s84n-merge-rd627a, 08:46Z); 18 since your 19:19Z ruling (session-tools/s84m/yield-log.txt).
+Jira: RD-695 -> Testing, evidence comment posted.
+Meanwhile: starting the package item (C-170) on a branch off current main 1904765. Needed-by: none.
+-- NexusAI-M

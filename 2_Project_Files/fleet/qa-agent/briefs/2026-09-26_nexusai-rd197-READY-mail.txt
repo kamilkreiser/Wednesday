@@ -1,0 +1,34 @@
+Subject: [Datasec/NexusAI-P -> Tuesday] READY FOR QA: RD-197 (b) rd-197-emphasis-ground-guard-s84p @ 43e729c (tier 2; verify 4142/4142, 248; test-only)
+From: CoAgent <coagent@agentmail.to>
+Date: 2026-09-26T11:44:04.000Z
+Message-ID: <010001a0dd8790d1-2a77b5bc-b44e-4969-aceb-362e6e52418b-000000@email.amazonses.com>
+
+BLUF: READY FOR QA, RD-197 option (b) ONLY (High), tier 2. Branch rd-197-emphasis-ground-guard-s84p @ 43e729c (pushed; = main 1904765 + RD-197). Full verify on that tree: VERDICT: PASS - 4142/4142 tests passed across 248 suites (jest exit 0). Test-only; no palette values (option (a) stays Kam's).
+
+WHAT CHANGED (vs main 1904765: 2 files, +155/-3)
+- __tests__/rd197-emphasis-on-notice-ground.test.js (new, 9 tests): every dark-mode "emphasis" colour E that fails AA on the raised surface #262626 (derived from scripts/derive-brand-tokens.js, not hard-coded: info-emphasis 4.32, success-emphasis 4.46, danger-emphasis 4.17) must appear only on its own notice ground, on every page that links the dark sheet (chart-details, first-run-setup, index, settings).
+- scripts/verify-expected-counts.json: 4133/247 -> 4142/248, regenerated once on the merged tree.
+
+THE SET (9 ids, all green at 43e729c): E is derived, not hard-coded, and is not empty while it fails / PROBE RED - an E colour on the raised surface is named / PROBE GREEN - the same colour on its own notice ground is not named / the corpus is not empty / static/chart-details.html, static/first-run-setup.html, static/index.html, static/settings.html - no E-coloured text off its notice ground / FINDABILITY - the pages actually render E-coloured text, so the sweep checked something.
+
+PROOF (S84P, one hold, floor 0, at 3f91242 = RD-197 + main 11666d3; session-tools/s84p/rd197-proof.log)
+- CLEAN 9/9: 38 E-coloured text nodes across the 4 dark pages, all on their own notice ground; 19 nodes jsdom could not resolve were counted, not scored.
+- M1 (info notice ground .status-message.info / .info-box / .component-icon.info -> #262626): RED on first-run-setup, 30 sites named, e.g. "info-emphasis #668cb6 on #262626 = 4.32:1 (its notice ground is #17222f)".
+- M2 (every danger notice ground #2b1c1d -> #262626): stayed GREEN. ACCEPTED LIMIT (your ruling 2025-09-25T18:21:26Z, option (a)): no danger-emphasis text renders by default, so the pages never reach that family; the probe cells cover the shape. Each run prints per-family reach and "NOT REACHED in the default render state (probe cells only): ..." so the gap is visible in every run.
+- Restored, hash equal.
+- STILL VALID AT THE MERGED HEAD (C-68), measured: between 11666d3 and 1904765, the only change to anything this cell reads (static/css, the four dark pages, their JS, derive-brand-tokens.js, helpers/dom.js) is RD-428's dark-mode.css rule `body.dark-mode .settings-nav .nav-link:not(.active):focus-visible { box-shadow: inset 0 0 0 3px #0096d6 }` (plus the light keyboard-focus.css rule). It sets no text colour and no ground, so M1's red and the clean 9/9 stand. The clean state is re-established at 43e729c by the full verify.
+- Full verifies: 4046/243 at 9c742fa (main 5f2683c), 4142/248 at cd589e0 = 43e729c's tree.
+
+MERGE-TREE vs the other lane-4 heads (named object dirs session-tools/s85p/mt-objects-*, shared store 210/210 before/after):
+- vs RD-204 fe47bb4 (READY): rc 1, ONLY scripts/verify-expected-counts.json (C-57).
+- vs RD-430 9ba6f1d: rc 0 clean.
+- vs RD-286 a09dd83: rc 0 clean.
+FORWARD MERGES (never rebase): cd589e0 (main 1904765); the counts file was the only conflict, and C-112 holds (290/290 test files equal a parent).
+
+PRIOR WORK: RD-197's "7 of 10" figure was already corrected to three accents on the raised ground (HISTORY S29). Option (a), the palette values, is Kam's and untouched. Nothing replaced or removed.
+
+NOT TESTED / LIMITS
+- success and danger emphasis on RENDERED pages: no reachable danger action exists (RD-687, first-run's danger branches have no caller). The success action is loading first-run with a saved data source (loadDataSources, first-run-setup.js:2322 at S84P's read), which this jsdom run does not drive. A browser leg that drives an error and a success state is where those belong.
+- jsdom only; nodes jsdom cannot resolve are counted, not scored.
+
+Tier 2, tests only; no user-visible change.

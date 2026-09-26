@@ -1,0 +1,22 @@
+Subject: [Datasec/NexusAI-M -> Tuesday] READY FOR QA: RD-627b @ c82aa92 (2nd SIGTERM no longer kills the audit flush; 4137/248 PASS; guard property stated UNGUARDED)
+From: CoAgent <coagent@agentmail.to>
+Date: 2026-09-26T17:34:57.000Z
+Message-ID: <010001a0dec8d188-1ad9085c-47a8-4138-b230-f2d4b1fbd33a-000000@email.amazonses.com>
+
+BLUF: RD-627 half (b) is READY FOR QA on rd-627b-sigterm-flush-s84m @ c82aa92bec7688653149e4690efaeb3c137e602f (off main 1904765; half (a) is already on main). A second SIGTERM during the shutdown audit flush no longer kills the flush. Tier 1 (audit durability). One honest limit, stated below: the guard's "no duplicate flush" property has no cell.
+
+Region: backend/server.js, the listen callback's signal handlers only. It's region-disjoint from RD-695 (stats), RD-681/682 (clear route) and RD-413 (mail-config/health). At merge: forward-merge, counts once, C-112, C-89; prediction +4/+1 on the then-main.
+
+WHAT CHANGED: process.once('SIGTERM'/'SIGINT') -> process.on behind a shutting-down guard. A repeat signal during the flush logs "Received SIGTERM again while flushing the audit buffer; finishing the flush first (RD-627)." and returns. The flush then finishes and the process exits 0. The swallowed `catch (_e) {}` around the flush now logs the error.
+
+SETS: __tests__/rd627b-second-sigterm-finishes-flush.test.js (4). It uses RD-615's slow-flush preload (RD615_SLOW=write, 4 s), whose signal file proves the second SIGTERM landed INSIDE the open flush window (C-98).
+- RED at 1904765: "double: the process still exits 0 on its own…" (measured: exit code null, signal SIGTERM, i.e. killed mid-flush) and "double: the repeat signal is logged". GREEN there: "control: one SIGTERM … exits 0 … writes audit-buffer.json" and "findability". Log: session-tools/s84m/rd627b-red-at-1904765.log
+- One hold (rd627b-hold.sh / .log), CLEAN 4/4 first, anchors exact = 1: M1 back to once -> the double + log cells red; M2 guard removed -> ONLY the log cell red. server.js restored (c31e97baeac5004a).
+- HONEST READING OF M2: with process.on and no guard, the second signal starts a SECOND concurrent flush, and the process still exits 0 with the buffer written. So process.on is what saves the flush. The guard adds the log line and prevents that second, concurrent flush, but "no duplicate flush" has NO cell. It is UNGUARDED (C-76), and I say so in the commit rather than letting the log cell read as if it guarded it. Happy to add a cell (for example: count "flushing audit buffer before exit" lines == 1) if you want it guarded.
+- Full verify: "VERDICT: PASS — 4137/4137 tests passed across 248 suites (jest exit 0)" = 1904765's 4133/247 + 4/1. Floor 0/0. C-89 clean at c82aa92; gitleaks ~5.84 KB, no leaks.
+
+PRIOR WORK: F-18's flush-on-signal and the periodic flush are kept; RD-615's epoch checks in flushAuditBufferToDisk are untouched. rd615's own header documented the once() trap ("a second SIGTERM … kills the process outright mid-flush"); that file still passes. It waits for exit anyway.
+NOT TESTED: SIGINT (same path, only SIGTERM driven); a flush that THROWS (the new error log has no cell); a real container runtime stop (TERM, then KILL after the grace).
+Jira: RD-627 -> Testing (both halves now done), evidence comment posted. Yields since the RD-682 READY: 0.
+Still waiting on your RD-651 answer (a/b/c). Lane 1 is otherwise at the end of what needs no ruling: RD-437 hangs on RD-683/RD-594. If you have a next item for me, send it; otherwise I'll take RD-696 (C-F1: cells for RD-533's remedy text, delay and EACCES). It's tests only, in files lane 1 owns.
+-- NexusAI-M

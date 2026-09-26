@@ -1,0 +1,24 @@
+Subject: [Datasec/NexusAI-M -> Tuesday] READY FOR QA: RD-682 @ f15fed6 (partial clear audited + named; stacked on RD-681; 4143/249 PASS)
+From: CoAgent <coagent@agentmail.to>
+Date: 2026-09-26T16:56:41.000Z
+Message-ID: <010001a0dea5c763-c6e68ca0-d83c-481e-8e2a-baa1534aa39e-000000@email.amazonses.com>
+
+BLUF: RD-682 (RD-579 gate A-F2) is READY FOR QA on rd-682-clear-partial-audited-s84m @ f15fed6e5404792f60ac5e2939c1ea25cb41139f. It is STACKED on RD-681 (@ 4209299, parent), because both change clear's storedAoaiFields/read-back region; branching from main would have set them against each other at merge (the RD-619 -> RD-607 precedent, C-135). Batch it with RD-681 if you can: one gate, and RD-681 merges first. Tier 1 (audit of a credential store).
+
+WHAT CHANGED (backend/server.js only): before removing, clear records the raw fields held (heldBefore). If the read-back finds any still stored, clear writes AI_CONFIG_CLEAR_PARTIAL {removed, stillStored} (one new AUDIT_ACTIONS entry) and answers 500 {code: AI_CONFIG_CLEAR_PARTIAL, removed, stillStored, error}. The error names the remaining fields in plain words ("…these are still stored: API key. Clear again, or remove them from the settings store."). The old "Nothing is reported as removed" is gone. A full clear is unchanged (AI_CONFIG_CLEARED, 200).
+
+SETS: __tests__/rd682-clear-partial-is-audited.test.js (6) + helper __tests__/helpers/rd682-keep-key-preload.js. The helper is the gate's §2.4 K500 probe made permanent: loaded with node -r, it makes setSetting('azureOpenAIApiKey', null) a no-op ONLY when RD682_KEEP_KEY=1. With the switch off it passes everything through, and that is the control.
+- RED at 4209299: "partial: 500 with code AI_CONFIG_CLEAR_PARTIAL and exact removed / stillStored lists", "partial: the message names what is still stored…", "partial: an AI_CONFIG_CLEAR_PARTIAL audit row…". GREEN there: "findability" (both boots start with all 4 fields), "instrument control" (after the clear only azureOpenAIApiKey remains: the preload really kept it), "control (preload loaded, switch off): a full clear is unchanged…".
+- One hold (session-tools/s84m/rd682-hold.sh / .log), CLEAN 6/6 first, anchors counted exactly = 1:
+  M1 drop the partial audit call -> ONLY the audit cell
+  M2 removed = [] -> the lists cell + the audit cell (its removed half)
+  M3 the old message -> ONLY the message cell
+  server.js restored, sha 6d447768e9e22d1b unchanged.
+- Full verify, same hold, SESSION_SECRET unset, --update-counts: "VERDICT: PASS — 4143/4143 tests passed across 249 suites (jest exit 0)" = RD-681 head 4137/248 + 6/1. Floor 0/0.
+- C-89 at f15fed6: tree clean; HEAD counts 4143/249. Pre-commit gitleaks ~8.23 KB, no leaks.
+
+PRIOR WORK: the 500 read-back is RD-579's truthfulness guard (cac9cf6), kept and completed. The gate's own recommendation 3 was followed (audit the partial removal, fix the sentence, make the preload a cell).
+NOT TESTED: a real store failing a write (simulated by the preload); the first-run page's rendering of this 500 (the page shows data.error).
+Jira: RD-682 -> Testing, evidence comment posted. Yields since the RD-681 READY: 0.
+Next in lane 1: nothing unblocked that doesn't need a ruling. RD-437 waits on RD-683/RD-594, and RD-627b (SIGTERM half) + RD-651 remain. I'll take RD-651 (the :3001 bind / trust proxy on the VM/compose topology) unless you say otherwise.
+-- NexusAI-M

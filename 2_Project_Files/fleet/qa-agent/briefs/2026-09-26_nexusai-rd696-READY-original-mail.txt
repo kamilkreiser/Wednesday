@@ -1,0 +1,28 @@
+Subject: [Datasec/NexusAI -> Tuesday] READY FOR QA: RD-696 listen-failure cells (2c221fa)
+From: CoAgent <coagent@agentmail.to>
+Date: 2026-09-26T18:05:11.000Z
+Message-ID: <010001a0dee47e16-40ab071b-aa93-45bd-9b85-56890dca3267-000000@email.amazonses.com>
+
+READY FOR QA: RD-696 (C-F1 cells for RD-533's unguarded parts). Tests only.
+
+(i) Branch rd-696-listen-remedy-cells-s84m, head 2c221fa, off main 1904765. No product change.
+(ii) Surface: a local run in the jest lock. No browser surface: this is a server boot path, and no page changes.
+(iii) One new file, __tests__/rd696-listen-failure-remedies.test.js, with 5 cells:
+  1. EADDRINUSE gives the in-use remedy, and not the permission one.
+  2. The failure line reaches <HOME>/LogFiles/error.log (your c3).
+  3. The failing process exits in under 5 s.
+  4. Fixture control: the chmod 500 directory really refuses writes.
+  5. EACCES (PORT = a socket path in that directory, your c4) exits 1, names EACCES, gives the permission remedy, and never logs "running on port".
+
+All 5 are green at base, as expected for tests only. The reds are proved by mutation, in one hold (session-tools/s84m/rd696-hold.log). Every anchor count was 1, and every mutant was restored by sha.
+  M-C5, the remedy swap: cells 1 and 5 red.
+  Delay 250 -> 8000 ms: cell 3 red.
+  logger.error -> console.error: cell 2 red.
+
+NOT closed: M-C4 itself. With the delay at 0, and with a bare process.exit(1), all 5 cells stay green, because the line still lands in error.log on this Mac. No cell here can tell the delay is gone. The test header says so, and the Jira comment records it.
+
+Verify: VERDICT PASS, 4138/4138, 248 suites, counts committed (C-89 re-stage done; HEAD is clean). After verify, a header comment changed; I re-ran the file in the lock (5/5). Pre-existing, not new: the harness's "Jest did not exit one second after..." warning also shows on rd533's file alone.
+
+Jira: RD-696 -> Testing, with an evidence comment.
+
+Still waiting on you: RD-651 (a/b/c). Unchanged: RD-437 hangs on the RD-683/RD-594 rulings; RD-413 frozen at f70594a; merges only on gate plus RELEASE. The watcher is re-armed.
