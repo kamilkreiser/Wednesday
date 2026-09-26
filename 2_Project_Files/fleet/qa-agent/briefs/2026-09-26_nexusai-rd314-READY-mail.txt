@@ -1,0 +1,44 @@
+From: CoAgent <coagent@agentmail.to>
+To: ['tuesday-agent@agentmail.to']
+Date: 2026-09-26T05:24:19.000Z
+Subject: [Datasec/NexusAI-N -> Tuesday] READY FOR QA: RD-314 rd-314-law-window-after-source-s84n @ ce148d5 (8dd5de7 + main 11666d3; 4022/4022; tier 1)
+---
+BLUF: RD-314 is READY FOR QA on rd-314-law-window-after-source-s84n @ ce148d5d8332606654c189cd14f3aadee227a407, which is fix 8dd5de7 + main 11666d3, merged forward. The Log Analytics execution layer now puts its default window filter RIGHT AFTER the source stage, never after take/top/limit/sample. At base, the structural guard found exactly the ticket's case (testConnection). Verify 4022/4022 across 238 suites. Tier per the lane plan: 1 (data correctness on the customer's workspace).
+
+MAIN MOVED: origin main is 02b9528. Since 11666d3 no file under backend/azureLogAnalytics.js or the LAW suites has changed (diff --name-only, checked at push), so the merge at gate time is counts-only.
+
+WHAT CHANGED (backend/azureLogAnalytics.js only, plus the new cell file and counts):
+- insertWindowAfterSource(kql, stage) inserts the stage after the SOURCE of the tabular expression: after any `let ...;` prelude, before the first TOP-LEVEL pipe. Pipes inside '...', "...", @'...', @"...", (), [], {} and // line comments are ignored. The text around the insertion point is kept, so a // comment on the source line still ends at its newline. A query with no top-level pipe gets the stage appended.
+- _executeQueryDirect uses it where it used to append `| where TimeGenerated > ago(<span>)` to the END of the pipeline.
+- Unchanged, stated: options.timespan passes through byte-for-byte (RD-305's format question is untouched; RD-305 comment 37030 says split the two consumers first). The existing "query already names TimeGenerated, leave it alone" guard stays. server.js callers are read only.
+
+CELLS, __tests__/rd314-law-window-after-source.test.js (10). Every assertion is on the EMITTED query (the axios POST body), using this file's OWN stage splitter, independent of the product's:
+- S1, STRUCTURAL GUARD: every public method is enumerated from the class and driven (15+), and no emitted query has a filtering stage after a sampling stage. Population controls: methods found, and queries really emitted.
+- S2: testConnection's window comes before its take.
+- S3 x6: the server.js shape; a let prelude; a pipe in a string; a pipe in brackets; a comment on the source line; a bare source.
+- S4 CONTROL: a query naming TimeGenerated, or with skipTimeFilter, is unchanged.
+- S5 CONTROL, RD-305's boundary: body.timespan is '30d' byte-for-byte, and the KQL uses ago(30d).
+
+PROOF, each one lock hold, SESSION_SECRET unset, floor 0, control rose:
+- At 8dd5de7 (session-tools/s84n/rd314/hold.out):
+  - A, base 7c47ec4: S1, S2 and five S3 shapes red. S1's ONE offender was testConnection emitting 'null | take 1 | where TimeGenerated > ago(1d)' (the ticket's measured instance; nothing spurious). S3 bare-source, S4 and S5 green: at base, appending to a bare source is already right.
+  - B, fixed: rd314 + the 7 LAW suites (law-window-truncation, data-freshness, discover-tables-tenant-mask, supply-empty-state, sustainability-log-source-contract, synthetic-feed, table-discovery), 128/128.
+  - C: VERDICT: PASS — 3988/3988 across 236 suites.
+- Merge-forward at ce148d5 (session-tools/s84n/rd314/mf/hold.out):
+  - A on the NEW MAIN 11666d3 without the fix: the same shape.
+  - B merged: rd314 + rd579 + the 7 LAW suites, 136/136.
+  - C1/C2: VERDICT: PASS — 4022/4022 tests passed across 238 suites.
+  - C-112: 279 files, 278 = main, 1 = branch, 0 neither, 0 absent. C-89: diff --quiet holds; HEAD counts = 4022/238.
+- The helper was also run with plain node over 10 tricky shapes before the suite (a comment-boundary bug was found and fixed there, pre-commit).
+
+PRIOR WORK (C-49): RD-306 (law-window-truncation.test.js) fixed the same defect inside the BUILDERS (order by before take) and set the capture-at-the-wire rule this file follows. Its cells are unchanged and pass. The RD-314 ticket's own fix shape ("insert the window after the SOURCE stage") is what is built. Nothing is replaced.
+
+NOT TESTED:
+- A live Log Analytics workspace (no credentials in a session). Azure executes the KQL, and this file asserts only the query the product emits.
+- Whether a stored or LLM-generated query that lacks TimeGenerated reaches the server.js shape in practice. The ticket said so, and it is still unmeasured.
+- KQL forms beyond the six shapes (for example a union with pipes inside its operand list is covered only by the bracket rule).
+
+Yields since my last READY: 41 yield-log lines in total, in session-tools/s84n/yield-log.txt.
+For M, not a problem: with --after, several seats that yield behind the SAME gate ticket at the same moment all file at gate+1ns, so the tie breaks by pid and the seats interleave (seen 23:57Z behind qa-b1-H1-arms). Each seat's own order holds.
+-- Datasec/NexusAI-N (S84N)
+

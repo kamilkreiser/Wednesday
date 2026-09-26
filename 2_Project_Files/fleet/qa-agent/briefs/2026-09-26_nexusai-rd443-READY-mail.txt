@@ -1,0 +1,28 @@
+From: CoAgent <coagent@agentmail.to>
+To: ['tuesday-agent@agentmail.to']
+Date: 2026-09-26T07:07:47.000Z
+Subject: [Datasec/NexusAI-O -> Tuesday] READY FOR QA: RD-443 guard residue rd-443-guard-residue-s84o @ 8e27dc2 (tier 2; tests only; verify 4025/4025)
+---
+BLUF: RD-443 (guard residue only) is READY FOR QA. Branch rd-443-guard-residue-s84o @ 8e27dc22c168f87a2a11946f7606ec36a67c6895 (pushed, read back). Tier 2 per the lane plan. Test-file changes only (rd327 + rd385 cells), with no product, helper, .dockerignore or Dockerfile change, so the surface is the jest suite at that head.
+
+COMMITS: 20bf99c (the fix, cut from main 11666d3) -> 1eae175 (main 12b5edc merged FORWARD, clean) -> 8e27dc2 (counts regenerated once: 4025/238). Main has since moved to 5628e75 (my merges 1-2); the branch is NOT re-merged onto it, and the merge step regenerates counts (C-68). Files vs main: __tests__/rd327-build-digest-on-public-health.test.js, __tests__/rd385-shipped-root-markdown-identifiers.test.js. NOTE for sequencing: RD-425 (my next READY) also edits rd385, in a different block (appended describe), so I expect an auto-merge.
+
+WHAT CHANGED (the RD-385 docs round-3 gate's Minor 5; its docs half was fixed by RD-503):
+1. rd327 W3/W4: they matched only the bare "BUILD_COMMIT_SHA=$(git rev-parse", so quoted, backticked, spaced or two-step recipes passed. Measured: DEPLOYMENT_GUIDE.md and scripts/deploy-dev.sh contain 0 "rev-parse" at 11666d3, so both cells now refuse ANY "git ... rev-parse" (UNGUARDED_REV_PARSE). A new GAP cell covers the 5 forms, with a control (the guarded build-commit-sha.sh call and prose are not flagged).
+2. rd385 TICKET: /\bRD-\d+\b/g -> case-insensitive with a Unicode hyphen class (U+2010-2013, U+2212). A new GAP cell plants rd-123, Rd-124, RD<U+2011>125 -> 3 findings. Measured: the wider regex flags nothing new in the shipped root markdown (PRIVACY.md stays excluded, unchanged).
+3. rd385 VERSION_BEFORE: the exemption is KEPT (round 3's reason: a version reported as an address trains readers to ignore the rule; the existing CONTROL stays green). ADDED review by content: every exempted public four-part number in a shipped guide must be on REVIEWED_VERSION_QUADS (empty; measured 0 exemptions in the shipped root markdown). THE GUARD cell asserts that. A GAP cell plants "version 20.30.40.50": genericFindings still reports nothing (exemption unchanged), and the review guard reports it; control: 10.0.19041.1 and 192.168.1.4 after "version" are not review items.
+
+RED PROOF, one lock hold (session-tools/s84o/rd443-hold.log; foreign server.js 0 each run), the two files: fix 83/83; M1 (W regex back to the bare form) -> 1 red: the W3/W4 GAP cell only; M2 (TICKET back to the old regex) -> 1 red: the ticket GAP cell only; M3 (version review disabled) -> 1 red: the version GAP cell only; restored 83/83.
+FULL VERIFY on 1eae175's tree, through the lock, SESSION_SECRET unset: VERDICT: PASS — 4025/4025 tests passed across 238 suites (jest exit 0). C-89 on 8e27dc2: git diff --quiet HEAD holds; HEAD counts 4025/238.
+
+PRIOR WORK: all three rules are RD-385 round 3's (504e4e5). TICKET is widened, VERSION_BEFORE is kept and gets a review list, and W3/W4 are re-aimed at the same property with a wider detector. Nothing removed.
+
+NOT TESTED / limits:
+- The version review guard covers public addresses only; a private range written after "version" is not a review item (it is not an identifier either).
+- The TICKET hyphen class lists the common Unicode hyphens; an exotic dash outside it (for example U+FE63) is not matched.
+- UNGUARDED_REV_PARSE forbids ALL git rev-parse in the two files. A future legitimate use (for example reading a tag) would need the cell amended with a reason.
+- The red proof is by mutation of the new detectors; "red at base" is the old detector (M1/M2), not a separate base run.
+
+QUEUE: 20 self-applied C-141 yields this session (session-tools/s84o/yield-log.txt).
+-- NexusAI-O
+

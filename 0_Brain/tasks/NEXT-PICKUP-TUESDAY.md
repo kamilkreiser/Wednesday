@@ -6,19 +6,34 @@ status: live
 supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s1-wholesale
 ---
 
+## 🔴 DELTA 94 — 2026-09-26 17:4x (s86, ctx 65% light checkpoint; band 80-90). **READ THIS FIRST, THEN 93.**
+### BATCH-1 MERGES (sequence in DELTA 93, updated there)
+- ✅ 1 RD-447 -> 02b9528 · ✅ 2 RD-411 -> 5628e75 (both verified at source; Builds green; demo skipped).
+- **3-4: M RELEASED 17:32** (RD-315 then RD-533). The s84m-merge-rd315 ticket holds the lock (17:4x). On each MERGED: ls-remote + parents + counts.
+- **5: N (RD-627a @ 057016d) gets its RELEASE mail AFTER M's second MERGED.** Then ONE board line to Kam for all five (target 4133/247).
+### BATCH #3 (tier 1; drafter NOT commissioned yet)
+RD-324 (3beea5c) + RD-684 (b5d6525) + RD-314 (ce148d5) + RD-424 (2ce26eb); READYs saved in fleet/qa-agent/briefs/2026-09-26_nexusai-rd{324,684,314,424}-READY-mail.txt. **Gate after RD-627a merges AND N's UPDATED READYs for rd-324 + rd-684** (forward-merged, the D-F1 cell, merge-tree between them).
+### TIER-2 BATCH (not yet)
+RD-443 (O, 8e27dc2, tests only; READY saved) + RD-430 (P) when its READY lands.
+### SEATS
+M: merging, then RD-413 (+E-C1, C-F1). N: RD-685 started now (ruled (i) + the exception), RELEASE takes priority. O: RD-698 (A-F1 High), RD-418, RD-425 queued. P (S85P, %18): RD-204/197/430/286 queued; RD-288 = measure first (Q3 superseded).
+### STATE
+Usage 85% at 17:48 (~1.3 pts/h) -> 95% ~01:30; card `tuesday-allowance-95-lands-this-afternoon` unanswered (default a); the 90% watcher runs in this seat. Kam: nothing since 07:18. **OWED shared tooling: `cockpit.sh rotate` is Wednesday-wired (tap text + wrap inbox), so Datasec seats are retired by hand until it is seat-aware (claim with Wednesday).**
+
 ## 🔴 DELTA 93 — 2026-09-26 13:1x (s86, ctx 50% CHECKPOINT; band 80-90). **READ THIS FIRST, THEN 92.**
 ### OWED MERGE SEQUENCE — BATCH 1 (gate verdict 03:12Z, all five ACCEPTED; report `Testing Agent MAIN/projects/nexusai/reports/2026-09-26-gate-batch1/report.md`)
 Main at the verdict = **5f2683c**. ONE merge at a time; each author merges main FORWARD (C-68), re-runs the A x B C-68 set where the gate's MERGE NOTE says, regenerates counts ONCE, id-superset, full verify, predicts counts in MERGED, push, deploy-demo SKIPPED, Build green before the next. **Gate arithmetic after all five: 4133/247.**
 1. **O: RD-447 @ 911e706** -> GO SENT 03:13Z (mail "GO: batch-1 merges RD-447 then RD-411", + a date correction mail; tap delivered).
 2. **O: RD-411 @ ed01f7e** -> same GO, after RD-447's Build is green.
-3. **M: RD-315 @ 1524fca** -> APPROVED, QUEUED: **Tuesday sends a RELEASE mail to M after O's SECOND MERGED.** (Answer "batch-1 verdict - your merges APPROVED, QUEUED" sent 03:1xZ.)
+✅ 1-2 DONE: RD-447 -> 02b9528, RD-411 -> 5628e75 (both verified at source; Builds green 4092 then 4120; demo skipped).
+3. **M: RD-315 @ 1524fca** -> **RELEASED 17:3x** (mail "RELEASE: batch-1 merges RD-315 then RD-533", tap delivered). (Answer "batch-1 verdict - your merges APPROVED, QUEUED" sent 03:1xZ.)
 4. **M: RD-533 @ 95c3c9a** -> after RD-315's Build is green.
 5. **N: RD-627a @ 057016d** -> RELEASE to N after M's second MERGED.
 **On EACH MERGED: ls-remote main + cat-file parents + counts; after all five, ONE board line to Kam.** Gate scored 0.98; pane %17 closed.
 ### ROUTED FROM THE VERDICT
 O next: **A-F1 (High)**, and the HOLD that nobody amends rd447's bytes-vs-string cell before it is fixed; A-F2, B-F1. M: C-F1, **E-C1 (MAJOR, new: /api/stats buckets every SQLite job as today)** after RD-413. N: D-F1 -> evidence on RD-684 (its next item); D-F2; D-C1 -> the RD-685 class.
-### BATCH #3 (not launched)
-RD-324 @ 3beea5c (N, tier 1, READY saved `fleet/qa-agent/briefs/2026-09-26_nexusai-rd324-READY-mail.txt`). Commission its drafter when the next tier-1 READYs land (P: RD-204/197/430; O: RD-418/425/443), and not while batch-1 merges hold the lock.
+### BATCH #3 (not launched) — UPDATED 15:4x
+= RD-324 (N) + RD-684 (N, High) + RD-314 (N, LAW, disjoint); READYs saved in `fleet/qa-agent/briefs/2026-09-26_nexusai-rd{324,684,314}-READY-mail.txt`. **Ruled (b) to N: after RD-627a merges, N merges main forward into rd-324 and rd-684 (all three edit dataErasure.js), adds the batch-1 D-F1 regression cell, and sends UPDATED READYs with a merge-tree between them. THEN commission batch #3's drafter.** Merge 1/5 DONE: RD-447 on main 02b9528, Build green (O relayed). O on merge 2 (RD-411, predicted 4120/244). C-141 addendum 4 CLOSED (M's live probe).
 ### STATE
 Usage 79% at 13:15 (~2.4 pts/h) -> 95% ~20:00; card `tuesday-allowance-95-lands-this-afternoon` UNANSWERED (default a); the 90% watcher runs in this seat (re-arm on rotation). Kam: 0 new today since 07:18. Floor: %0 tuesday · %11 M · %12 N · %13 O · %14 P · %1 monitor.
 
