@@ -1,0 +1,53 @@
+From: CoAgent <coagent@agentmail.to>
+To: ['tuesday-agent@agentmail.to']
+Date: 2026-09-26T23:18:42.000Z
+Subject: [Datasec/NexusAI-M -> Tuesday] READY FOR QA: RD-705 @ e164d1a (every HTML page no-store; 4137/248 PASS; browser leg R11 suggested)
+---
+BLUF: RD-705 is READY FOR QA. Branch rd-705-no-store-authenticated-pages-s86m @ e164d1a (one commit on main 1904765, pushed, ls-remote read back). Every HTML page now goes out with Cache-Control: no-store, so Back no longer restores a page from the back-forward cache. Verify: VERDICT: PASS — 4137/4137 tests passed across 248 suites. Suggested tier 1 with a browser leg (re-run the batch-2 gate's R11).
+
+WHAT CHANGED
+- backend/server.js: one middleware right after helmet (+29 lines, nothing else touched). When a response is written with Content-Type text/html, it sets Cache-Control: no-store. That includes headers passed straight to writeHead; a passed Cache-Control is replaced. Scope: every HTML document (express.static, the six res.sendFile page routes, HTML error pages). JS, CSS and images keep send's default caching.
+- __tests__/rd705-html-no-store.test.js (new, 4 cells). scripts/verify-expected-counts.json regenerated (4133/247 -> 4137/248, exactly this file).
+- No static file is edited.
+
+USER-VISIBLE CHANGE (please carry it): Back and Forward to any NexusAI page now re-fetch the page instead of restoring the old copy instantly. The browser also never serves a stale HTML copy from its HTTP cache. This is the point of the ticket, but it applies to every page, the dashboard included.
+
+MECHANISM (read at source): send 1.2.1 (node_modules/send/index.js:746) sets 'public, max-age=0' only when no Cache-Control is already set. The middleware runs at writeHead, after send, so HTML always ends up no-store.
+
+PRIOR WORK
+- The pages already stated this intent: <meta http-equiv="Cache-Control" content="no-cache, no-store, ..."> on index, settings, chart-details, first-run-setup, testing and login (8eb94ce 2026-04-18, 9b58261 2026-04-25). Browsers ignore cache directives in a meta tag for the back-forward cache, so the claim was never true.
+- The metas are KEPT: the header now makes their claim true, and the HEADER is the load-bearing one. The comment in server.js says so. Removing the metas (C-18 "remove it or make it true") is not needed; I chose "make it true". That also avoids lane 4's settings.html and rd-413's first-run-setup.html.
+- No earlier Cache-Control handling for pages exists on main. git grep finds no-store only on API routes: /api/live (server.js:1310) and two admin routes.
+- Nothing replaced or removed.
+
+CELLS (C-98)
+- POP: 14 static/*.html from disk; 7 sendFile page routes enumerated from server.js source; known members asserted in both.
+- N1: every static/*.html served as HTML carries no-store. Findability first: settings, index and first-run-setup answer 200 text/html.
+- N2: every sendFile page route that serves HTML carries no-store. Findability: /login 200 text/html.
+- CTRL-ASSET: /js/settings.js and /css/dark-mode.css answer 200 WITHOUT no-store (scope proof).
+- Boot: open mode (fresh store, first run complete, no Entra), one boot.
+
+MEASURED (one lock hold each, floor 0 foreign servers before and after; counter selftest PASS; no live control spawned, so a zero would not be reportable, but these results are failures and passes, not zeros)
+- Red at 1904765 + the cell only: N1 FAIL on all 14 pages and N2 FAIL on /, /first-run-setup, /login, /marketplace-landing and /status, each 'public, max-age=0'. POP and CTRL-ASSET pass. Log: session-tools/s86m/rd705-red-at-1904765.log
+- Green on the fix: 4/4.
+- Mutations (anchor count 1 each; server.js restored by sha after each):
+  - M2, the condition never true: N1 and N2 red.
+  - M3, applied to every content type: CTRL-ASSET red.
+  - M4, no-cache instead of no-store: N1 and N2 red.
+  Log: session-tools/s86m/rd705-hold.log
+- Full verify: VERDICT: PASS — 4137/4137 tests passed across 248 suites (jest exit 0).
+
+MERGE-TREE (scratch object dir, shared store untouched: loose objects 436/436)
+- e164d1a against rd-413, rd-695, rd-460, rd-681, rd-682, rd-627b, rd-696: the ONLY conflict each time is scripts/verify-expected-counts.json (C-57), and server.js auto-merges.
+- Against rd-430 (lane 4): clean.
+- C-68 note for the gate: RD-693's pageshow persisted===true branch will rarely fire on Chrome once pages are no-store, because pages are no longer bfcache-restored. Its cells are jsdom and unaffected. Its browser leg (R11) should now see a re-fetch, not a restore.
+
+NOT TESTED
+- No real browser. The back-forward-cache effect itself (R11) is claimed from the header, not observed. The gate's browser leg is where it is measured.
+- The demo. RD-76 stands, and nothing is deployed.
+- An HTML response whose Content-Type is set only after writeHead. Nothing in the codebase does that; read, not tested.
+
+Jira RD-705 -> Testing. Next in lane 1: the RD-594 guard cells (hold queued, s86m-rd594-hold), then RD-646+RD-647.
+
+S86M
+

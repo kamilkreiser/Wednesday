@@ -1,0 +1,645 @@
+# QA Agent Invocation Brief — Datasec/Vision_Sales_Portal, GATE 9, TWO TARGETS IN TWO REPOS: VSP65 = the Postgres pool query/connect timeout (portal `server/db.js`, TIER 1) and QQPURGE = the QuickQuote retention purge with no numeric literal (QuickQuote `stage3/lib/store.js`, TIER 1, it deletes customer data)
+
+**Drafted for Tuesday on 2026-09-27 at 09:0x-09:2x AEST by a read-only drafting agent. Tuesday reviews, decides the NODE20-LEG and
+AZURITE-LEG lines, stamps and launches it.** VSP65 was commissioned first; **QQPURGE was added by Tuesday's scope addition the same morning.**
+The two READY mails (on disk, each read whole by the drafter):
+`/Volumes/KK_T9_External_HDD/TUESDAY/2_Project_Files/fleet/qa-agent/briefs/2026-09-27_vision-vsp65-READY-mail.txt` and
+`/Volumes/KK_T9_External_HDD/TUESDAY/2_Project_Files/fleet/qa-agent/briefs/2026-09-27_vision-qq-purge-READY-mail.txt`.
+**Every builder statement below comes from those mails, the commit messages or the BACKLOGs. Each one is a CLAIM.**
+**The drafter read all four rows from `git ls-remote origin` (portal 08:58:13 AEST, QuickQuote 09:10:19 AEST; `cat-file -t` = commit).**
+The launcher parses §PIN, refuses any placeholder, and re-reads EVERY row by `git ls-remote` immediately before launch, refusing on any
+mismatch. The verified table is appended to your prompt.
+
+SELF-CHECK: re-read end-to-end for contradictions | 2026-09-27 09:18
+Self-check note: 2026-09-27 09:18
+
+NODE20-LEG: DOCKER-PULL-NEVER
+AZURITE-LEG: DOCKER-PULL-NEVER
+<!-- Tuesday replaces each TUESDAY-DECIDES with exactly one of: NOT-RUN | DOCKER-PULL-NEVER. The launcher refuses until both are decided.
+     NODE20-LEG (VSP65 only). NOT-RUN: no Node 20 exists on this box (drafter READ 09:0x: /opt/homebrew/bin/node is v26.8.1 only; no
+     node@20 in Homebrew, nvm, volta or fnm; the Homebrew cache holds node 26.8.1 only). DOCKER-PULL-NEVER: one narrow exception, §N.7.
+     AZURITE-LEG (QQPURGE only). NOT-RUN: no Azurite binary or npm package exists on this box (not in stage3's lockfile; `which azurite`
+     empty) and nothing LISTENs on :10002 (09:1x). The Azurite cells are then NOT RUN, and the gate's QQPURGE verdict rests on the fake
+     and the READ items, which the gate must say. DOCKER-PULL-NEVER: the gate runs its OWN Azurite container, §Q.8. A SHARED Azurite
+     is not an option: store.js uses the fixed table "quotes" and the Azurite cells wipe partition 'q'. -->
+
+## Charter
+Read `/Volumes/KK_T9_External_HDD/TUESDAY/2_Project_Files/fleet/qa-agent/QA_AGENT_CHARTER.md` in full first. You are an independent
+tester. You did not build either change and you owe the builders nothing. **Every line below that reports what a builder says is a
+CLAIM, never evidence.**
+
+**One gate, TWO targets in TWO repos, TWO SEPARATE verdicts: GO / NO-GO for VSP65 at its pinned sha, and GO / NO-GO for QQPURGE at its
+pinned sha.** A finding on one target never grades the other. §N is VSP65 (the SALES PORTAL repo); §Q is QQPURGE (the QUICKQUOTE repo).
+
+**TIER: VSP65 (the pool query/connect timeout) is TIER 1.** It changes `server/db.js`, which every database call in the live portal goes
+through, including the session store on every signed-in request. A bound set too tight turns a slow but healthy database into 500s for
+real users. A bound that does not fire leaves the hang it was meant to fix. **Both failure directions are in scope.**
+
+**⚠ Names, written out every time:** **VSP65 = Jira VSP-65 = gate 7's "arm (e), unfaulted half" = the BACKLOG residual "The Postgres
+pool has no query or connection timeout…"**. All four mean the branch `fix/vsp-65-pool-query-timeout-2026-09-27` at `2adfc4a`,
+three commits (`67365ec` fix, `7195df7` test, `2adfc4a` test + BACKLOG) on portal main `eaf024a`. **It is NOT on main.**
+This is **ROUND 1 of the VSP-65 class.** There is no round cap question here.
+
+**TIER: QQPURGE (the QuickQuote retention purge) is TIER 1: it DELETES customer data** (stored quotes carry the customer name, device
+count and notes). A purge that deletes a row it should keep is irreversible; a purge that silently deletes nothing leaves data past the
+retention Kam's decision 18 set. **Both failure directions are in scope here too.**
+**⚠ Names:** **QQPURGE = "the QuickQuote retention-purge fix" = "retention purge, no numeric literal"**, branch
+`fix/qq-retention-purge-no-literal-2026-09-27` at `ac74111`, ONE commit on QuickQuote main `f255db8`. **It is NOT on main.** It re-opens
+the 2026-09-22 C-05 purge (`03a0682`, rebased as `d88af73`), which shipped in live v2.33 and, per the builder and the project-root BACKLOG,
+has failed on every run since the 2026-09-23 publish. **Round 1 of this class** (the first round since the defect was found on live).
+
+## RULED BY KAM, AND SETTLED
+- **Vision `1_Project_Definition/CLARIFICATIONS.md`** (`/Volumes/KK_T9_External_HDD/!CODING/Datasec/Vision_Sales_Portal/1_Project_Definition/CLARIFICATIONS.md`,
+  dated 2026-09-25 15:19): read it whole. **C-01..C-06. No C-entry covers VSP-65** (C-06 is QuickQuote's BC round 4; it is not this gate's).
+- **Kam's condition from gate 7 (arm (e)): "bound it or record it as a NAMED residual with the measurement."** Gate 7 discharged it
+  by NAMING the residual. **VSP-65 is the attempt to BOUND it.** Say whether it does.
+- **PRODUCTION IS LIVE for this project.** `datasec-sales-portal-rg` holds the live site `https://datasec-sales-portal.azurewebsites.net`,
+  its production Postgres `datasec-sales-db.postgres.database.azure.com` and its key vault `datasec-sales-kv`. Production runs Node 20
+  (`.github/workflows/test.yml` comment: "20 = prod (App Service NODE|20-lts)", READ). **Nothing in this gate touches it** (§13, HELD).
+- **No product choice here is Kam's ruling.** Report each of these as the BUILDER's choice and say whether it needs Kam: the **30,000 ms**
+  query bound; the **15,000 ms** connect bound, which also caps the wait for a free client; **max 10** unchanged; **no `statement_timeout`**;
+  the env overrides `DB_QUERY_TIMEOUT_MS` / `DB_CONNECT_TIMEOUT_MS`; and **a bad override value refusing the boot**.
+- **QuickQuote (QQPURGE):** C-05 (stored-quote retrieval, creator only) is the feature this purge enforces retention for; decision 18
+  (`Vision_Sales_Portal/5_Project_History/2026-09-22_kam-decisions-and-publish-pack.md`, READ ONLY) sets that production logs are NEVER
+  queried by a gate. **The purge design (partition-only filter, cutoffs in JS, per-row deletes) is TUESDAY's ruling of 2026-09-27, not
+  Kam's**, superseding the root BACKLOG's earlier Int64 `L` fix-shape. Report it as such. **Live QuickQuote is v2.33
+  (`v0.6.0-tool2.33-d4426f8`); publishing is Kam's typed word.** `toolVersion` / `stage3/package.json` 0.3.2 unchanged by this branch
+  (the builder says the image tag is picked at publish): say whether that is within the QuickQuote repo's version rule.
+- **Deploys are HELD for Kam. Nothing merges on your word.** Merge is Tuesday's GO on the pinned head; deploy is Kam's word.
+
+## PRIOR ROUND
+PRIOR ROUND: there is no earlier round of VSP-65. The measurement it answers is **gate 7's IO1F1 arm (e)**, which gated `15cd733` (now
+merged: portal main `eaf024a` = merge of `f95f625` + `15cd733`), verdict **GO for IO1F1**, with the unfaulted half recorded as a NAMED
+residual.
+**ITS REPORT IS ON DISK AT:** `/Volumes/KK_T9_External_HDD/!CODING/Testing Agent MAIN/projects/vision/reports/2026-09-23-vision-qq-gate7`
+(`report.md`, `sections/IO1F1.md`, `sections/CONVENTIONS.md`, `evidence/io1/`). **Read its IO1F1 verdict, `sections/IO1F1.md` §5 (arm (e)),
+its NOT TESTED, and `evidence/io1/armE-shipped*.txt` and `armE0-deadread.txt`.**
+Findings carried forward and their disposition:
+- **Arm (e) unfaulted half:** `ARM-E UNFAULTED : 200 219B STILL-OPEN-45000ms after 45001 ms` (report.md), "unbounded". **This is what
+  VSP-65 claims to close.** Gate 7 measured it with an **in-process store stub**, not a real connection.
+- **IO1F1-O2 (observation):** if the session store's **READ** never returns, every cookie-bearing request hangs before it reaches any
+  route (`STILL-OPEN at 45,003 ms`). **VSP-65 claims to bound this too** (the READY's "read cell"). Measure it.
+- **IO1F1's 30 s grace (`server/errors.js` `settings.appEndGraceMs = 30000`):** covers the FAULTED half. It is unchanged by VSP-65.
+  **Its 30,000 ms and VSP-65's 30,000 ms query bound are now EQUAL.** See §N.4(i).
+- **IO1F1-P1 (Polish, `appEndGraceMs` has no finite guard):** not in scope. Do not fail on it.
+- **PRIOR WORK: verify every claim against git history and gate 7's evidence, never against this brief.** The READY's PRIOR WORK paragraph
+  says `git log -S` on `query_timeout` / `statement_timeout` / `connectionTimeoutMillis` over all refs finds only the BACKLOG text in
+  `15cd733` and `scripts/create-azure-user.js`. The drafter re-ran it (READ): `query_timeout` → `2adfc4a`, `67365ec`, `15cd733`;
+  `statement_timeout` → `67365ec`, `15cd733`; `connectionTimeoutMillis` → `2adfc4a`, `67365ec`, `15cd733`, `96a5ff3` (2026-04-18, where
+  `create-azure-user.js` entered). Consistent with the claim. **Re-run it yourself.**
+- **Gate 7's portal harnesses can be REUSED BY COPY** from `…/2026-09-23-vision-qq-gate7/evidence/`: `mktree-portal.sh`, `qa-mkdb.cjs`,
+  `qa-dbcheck.cjs`, `qa-harness-io1-edges.cjs` (the real `createApp()` on real Postgres), `qa-harness-io1-boot.cjs`,
+  `qa-harness-lead-io1-hang.cjs`, `qa-io1-preload-fetchguard.cjs`, `qa-io1-preload-hidelayer.cjs`, `IO1-count-async.py`, `qa-run.py`,
+  `qa-floorcount.py`, `lockcmp.py`, `lockwalk.py`. **COPY what you use into this gate's own evidence folder, read it before you trust it,
+  and never edit gate 1-8's copies.** **The builder's proxy (`test/db/pool-timeout.test.js`) is NOT a harness you may reuse blindly** (§N.3).
+- **Self-findings from gates 2-8 bind you:** quote every path (the project path has a space and a `!`); run every loop and every
+  `git show <sha>:<path>` under `bash`, not zsh; never detach a control server; **the portal test-DB name MUST end in `_test`**; npm's
+  update-notifier egresses unless you disable it; record the load average beside every timing number (**a latency result with no load
+  figure is not a measurement**); the floor is SHARED — other QA gates and NexusAI seats are live on this box (§13.4).
+
+## PIN — HEADS (PRE-FILLED BY THE DRAFTER; RE-CHECKED BY TUESDAY AT LAUNCH; parsed and verified by the launcher)
+**The launcher enforces these rules:** every row has a 40-hex head; the target row has a 40-hex base, a commit count and no `@`; the head is a
+commit in the repo; the base is an ancestor AND the merge-base; `git rev-list --count base..head` equals `commits`; `git ls-remote origin
+refs/heads/<branch>` equals the head NOW. **The target is NOT on main and is NOT stale:** `merge-base(2adfc4a, eaf024a) = eaf024a`,
+`git rev-list --left-right --count eaf024a...2adfc4a` = `0 3` (READ 08:58). **Gated anchors (the launcher checks them):** main `eaf024a`
+has parents exactly `f95f625` + `15cd733` (gate 7's gated IO1F1 head).
+
+<!-- PIN-HEADS:BEGIN -->
+| id | repo | branch | head | base | commits | status |
+|---|---|---|---|---|---|---|
+| MAIN-P | portal | main | eaf024a3edb78cd126f7398997c99172e3e87f2f | - | - | IN |
+| VSP65 | portal | fix/vsp-65-pool-query-timeout-2026-09-27 | 2adfc4aabee231dbd3ce6ac3239de174f4dfccd6 | eaf024a3edb78cd126f7398997c99172e3e87f2f | 3 | IN |
+| MAIN-Q | quickquote | main | f255db86af381082b459c05b3fccb3fe424178f5 | - | - | IN |
+| QQPURGE | quickquote | fix/qq-retention-purge-no-literal-2026-09-27 | ac741110fd089a1318debb3744ad53737f85c7c6 | f255db86af381082b459c05b3fccb3fe424178f5 | 1 | IN |
+<!-- PIN-HEADS:END -->
+
+Repo: QuickQuote = `/Volumes/KK_T9_External_HDD/!CODING/Datasec/Vision_Sales_Portal/Quoting Tool/hpas-quoting-tool` (remote
+`datasecau/vision_hpas-quickquote`; path from `Vision_Sales_Portal/CLAUDE.md`, "Sub-project: HPAS QuickQuote"). Its rules: its own
+`CLAUDE.md` in that repo (read it). **QQPURGE shape at drafting (READ 09:10-09:2x):** `ac74111`'s only parent is `f255db8`; 1 ahead / 0
+behind; 8 files: `.github/workflows/tests.yml` (+18, the `store-azurite` job), `BACKLOG.md`, `CLAUDE.md`, `stage3/lib/store.js`,
+`stage3/package.json` (the `test:azurite` script only), `stage3/test/server.test.mjs` (+1 cell), `stage3/test/store-azurite.test.mjs` (new,
+2 cells), `stage3/test/store.test.mjs` (2 base cells → 4). **`stage3/package-lock.json` (`70ebda7`) is the same blob at main and head**;
+`@azure/data-tables` 13.3.2, `@azure/core-rest-pipeline` 1.25.0.
+
+Repo: portal = `/Volumes/KK_T9_External_HDD/!CODING/Datasec/Vision_Sales_Portal/2_Project_Files` (remote
+`datasecau/vision_datasec-sales-portal`). **The portal has no CLAUDE.md of its own inside the repo;** its rules are
+`/Volumes/KK_T9_External_HDD/!CODING/Datasec/Vision_Sales_Portal/CLAUDE.md` (read it; its deploy commands are NOT for you).
+
+**The shape at drafting (READ 08:58-09:0x):** 4 files over main — `BACKLOG.md`, `server/db.js` (+114/-4), `server/db.test.js` (new, 5
+`test(` calls = 10 cells, one inside a 6-value loop), `test/db/pool-timeout.test.js` (new, 6 `test(` calls). **`package.json`
+(`d3b76fb`), `package-lock.json` (`9d426df`, 248 entries), `.github/workflows/test.yml` (`0cb2d05`), `server/index.js` (`711dce0`)
+and `server/errors.js` (`c0c4b0e`) are the SAME BLOB at main and head.** Lockfile versions: pg 8.18.0, pg-pool 3.11.0, pg-protocol 1.11.0,
+connect-pg-simple 10.0.0, express-session 1.19.0, express 4.22.2. **A GO is a statement about the pinned SHA only.** If the head moves,
+the verdict expires.
+
+## WRONG OR UNVERIFIABLE IN THE COMMISSION AND THE READY (VSP65; QQPURGE's list is §Q.0) — found by the drafter (verify each; both are claims)
+- **(a) The READY's recovery claim may be an artefact of the builder's proxy (READ ONLY, drafter's hypothesis — MEASURE it).** The proxy
+  is `net.createServer(...)` with the default `allowHalfOpen: false`. When the app discards a stalled client, pg sends Terminate and
+  half-closes (FIN). A Node server socket with `allowHalfOpen: false` **answers a FIN with its own FIN automatically**, so the app's
+  socket closes cleanly. A genuinely half-open peer (a dead host, a black-holed failover) sends nothing back. The proxy's own
+  `app.on('close', () => db.destroy())` then **tells Postgres the connection is gone**, which a real half-open link never does. So the
+  READY's "every stalled socket was closed by the app" and the recovery cell's `appClosed` flag (set on `'end'`, i.e. on a FIN, not on the
+  fd being released) may not hold on a real half-open connection. **Your own proxy must be able to hold both sides open with no FIN back
+  (§N.3, S1).**
+- **(b) "Node 20 leg" (commission) has no runnable environment under this gate's floor as drafted.** No Node 20 binary exists on the box
+  (READ above), and the builder's Node 20 leg ran in a `node:20` docker container. **Tuesday decides the NODE20-LEG line before launch.**
+- **(c) Local Postgres was NOT listening at drafting.** `lsof -nP -iTCP:5433` returned nothing at 09:01 AEST, with Docker Desktop running
+  (READ). The launcher refuses unless something LISTENs on `:5433`. **The gate never starts, stops or execs a container**; if Postgres is
+  down, Tuesday asks the Vision seat to start its `vsp-dev-db`.
+- **(d) The READY's CI description is incomplete, not wrong.** `.github/workflows/test.yml` at `2adfc4a` also runs (i) a **coverage gate
+  on Node 22 only**, `node --test --experimental-test-coverage --test-coverage-lines=80 --test-coverage-branches=70 $(find server -name
+  '*.test.js')`, and (ii) **`npm run e2e:pro` against a booted server** on both legs. VSP-65 adds ~110 lines to `server/db.js` whose
+  `guard()` / `BoundedPool` paths only `test/db/` exercises. **Whether the coverage gate still passes is unmeasured by the builder** (§N.6).
+- **(e) "the slowest real query is the backup's per-table SELECT *" covers ONE of the two backup paths.** `server/dbBackup.js` (nightly,
+  `query()`) dumps a fixed list of TEN tables — that is the READY's "ten dump queries". **`GET /api/admin/backup-db`
+  (`server/routes/admin.js:92`) dumps EVERY public table** (schema.sql creates 18) on ONE checked-out client, including `session`,
+  `quotes` and the log tables. The READY does not say it measured that route. **Measure its per-query times too** (§N.4(e)).
+- **(f) UNVERIFIABLE by design, and you must not try:** "Neither setting exists in production" (needs `az`); the production dump size
+  "`production-full-20260226` is 96,690 bytes" (the READY names no path, and the file is production data). **Report both as READ from the
+  builder only.** Do not open any production dump or anything under `Vision_Sales_Portal/4_Credentials/`.
+- **(g) Behaviour changes the READY does NOT list (READ ONLY, drafter — rule on each after measuring, §N.4(f)-(j)):** boot-time DDL
+  (`initDb`) is now bounded at 30 s per statement; a timed-out transaction's `ROLLBACK` runs on the same stalled client and waits a
+  second full bound (generate: ~60 s, not 30 s — the READY names this only for `dbRestore`); the reminders dispatcher sends email/ntfy
+  INSIDE its transaction, so a timeout after a send can roll the row back to `pending` and re-send next tick; the IO1F1 grace and the query
+  bound are both 30,000 ms; a discarded client's socket can die later, after its pool has let it go.
+- **Verified TRUE at source (READ):** the head and main by `ls-remote` (above); 3 commits, 0 behind; the six `pool.connect()` callers are
+  exactly `server/routes/quotes.js:262` (generate), `server/routes/admin.js:93` (backup-db), `server/reminders/dispatcher.js:121`,
+  `server/seed.js:18`, `server/seedCollateral.js:13` and `server/dbRestore.js:149`, and **all six call `client.release()` with no
+  argument** (quotes :332, admin :182, dispatcher :159, seed :46, seedCollateral :27, dbRestore :166); the session store is
+  `new PgSession({ pool, createTableIfMissing: true })` on the shared pool (`server/index.js:79`); the new cells are 10 unit + 6 db, matching
+  the READY's 95→105 and 66→72 arithmetic (30+3+5+4+6+18 = 66); `pg` / `pg-pool` versions match the comment in `db.js`.
+
+## THE READY (VSP65) — its NOT TESTED and BEHAVIOUR CHANGES lists, VERBATIM (the gate rules on every behaviour change; QQPURGE's NOT TESTED is §Q.1)
+BEHAVIOUR CHANGES FOR THE GATE TO WEIGH
+- connectionTimeoutMillis also caps WAITING for a free client when all 10 are busy. Before, a request waited forever; now it gets a DB_CONNECT_TIMEOUT 500 after 15 s.
+- dbBackup.dumpTable() catches per-table errors, so a timed-out table is written into the backup as an error entry, not a failed backup. Pre-existing semantics, now reachable. Not changed.
+- dbRestore (CLI) runs under the same 30 s bound per statement. Its catch does ROLLBACK on the same client, which on a stalled connection times out too and masks the first error. Pre-existing pattern, bounded now. Not changed.
+- statement_timeout (server-side) NOT added. It can't see a half-open connection (the server never gets the query), which is the ticket's case. It would add server-side cancellation to every statement, a separate decision.
+
+NOT TESTED
+- A real stalled Azure Postgres, TLS, or a real failover: production only, so not run. The proxy is plain TCP locally.
+- CI on the pushed branch: this project's gh is not logged in (same gap as item 3). CI (.github/workflows/test.yml) runs npm test and test:db on Postgres 16 at localhost:5433, the same shape as local.
+- Node 22 (the CI matrix's other leg).
+- On Node 20: concurrency, harness and reminder-push weren't run (they passed on Node 26).
+- e2e:api / e2e:feedback / e2e:pro (need a running server).
+- The shipped 30 s / 15 s values in a live stall (the proof ran the shrunk 1.5 s bounds through the same code; the defaults are pinned by unit cells).
+
+**How you treat these:** every NOT TESTED line that you CAN test locally (the shipped 30 s / 15 s values in a live stall; the Node 20
+files the builder skipped, if the NODE20-LEG allows it) you test. The rest you carry into your own NOT TESTED, reworded as your own.
+
+## 2a. LEGITIMATE SHAPES — the bound is a GUARD whose failure path is a 500 to a real user, so a false alarm is damage (template §2a)
+Measure every row. **A row whose expected verdict and clause disagree is a finding against this brief. Say so.**
+
+| shape — its ordinary form, as the portal really produces it | expected verdict | the rule clause that yields it | predicted-by |
+|---|---|---|---|
+| A signed-in rep's ordinary request on a healthy local Postgres | 200, unchanged body, **no added latency vs main** (quote N and p50/p95 vs `eaf024a`) | the guard wraps `client.query` and `release` only | builder (control cell, 4 ms) — **measure against main** |
+| A slow but healthy query below the bound (`pg_sleep`, and the backup-db route on a large synthetic dataset) | completes; never cut | `query_timeout` 30,000 ms | builder (507 ms at a 1,500 ms bound) — **measure at the SHIPPED bound too** |
+| A legitimate burst: all 10 clients busy on healthy work for longer than 15 s, an 11th request arrives | **Before: waited and succeeded. Now: 500 `DB_CONNECT_TIMEOUT` at 15 s.** Whether that is acceptable is the gate's ruling (§N.4(a)) | `connectionTimeoutMillis` 15,000 ms | READY (named) — **measure both sides; say how plausible 10 × >15 s is from the six holders' code** |
+| The session store's write never answers on an unfaulted signed-in request (the ticket) | 200 with the full body, ended at ~the bound, `DbTimeoutError DB_QUERY_TIMEOUT` logged | the bound + express-session ending on a touch error | builder (1,557 ms at 1,500) — **reproduce on YOUR proxy, and once at 30,000 ms** |
+| The session store's read never answers | 500 at ~the bound, named error logged, portal keeps serving | the bound | builder (1,509 ms) — **reproduce** |
+| A `pool.connect()` caller whose query stalls, releasing with no error | the client is DISCARDED, never handed out again | the `release` override | builder (M1 reddened it) — **check all SIX callers by reading, measure at least generate and backup-db** |
+| A discarded client whose far end never answers the FIN | its socket and fd are released within a stated time, and a later socket error does not crash the process | pg-pool `_remove` + `pool.on('error')` | **nobody measured it** — drafter (a) |
+| A bad override (`0`, `abc`, `30s`, …) at boot | the process refuses to start, with the named message | `positiveMs` throws at `require('./db')` | builder (unit cells) — **boot it for real once, `env -i`** |
+
+## N. TARGET VSP65 — the measurements (FAIL conditions stated before the runs, per Rule 1)
+**FAIL condition, stated BEFORE the runs:** any signed-in or anonymous request that still hangs past (bound + margin) on a stalled
+connection; a healthy query or ordinary request cut or slowed measurably vs main; a timed-out client handed out again; a process crash
+(`uncaughtException` / unhandled `'error'`) on any stall shape; a timeout that surfaces un-named where the READY claims it is named; an
+unfaulted non-DB request's body, status or latency changed; `npm test` or `test:db` losing any NAME that passes at `eaf024a`; any
+`server/db.js` change outside what §N.1 lists. **A behaviour change is not by itself a FAIL**: you rule on each one in §N.4, and a Major
+there (a legitimate production shape that now 500s, or a new crash) is a FAIL.
+
+1. **Scope (READ).** `git diff --stat eaf024a 2adfc4a` (4 files). Quote the whole `server/db.js` diff. Prove the files the READY says
+   are untouched are the same blob (`package.json`, lockfile, `test.yml`, `server/index.js`, `server/errors.js`). Read `db.js` at the head
+   end to end and state every path a query or a checkout can take: promise and callback `client.query`, submittables (cursors, streams —
+   "still bounded, not renamed": is ANY submittable used in the product?), promise and callback `pool.connect`, and `pool.query`.
+   **In YOUR OWN archived tree's `node_modules`, read pg-pool 3.11.0's `query()` and prove it calls `this.connect(...)`** (the READY's "pg-pool's
+   own query() goes through connect(), so connect-pg-simple's pool.query path is covered too"), and read connect-pg-simple 10.0.0 to
+   prove its `get` / `set` / `touch` go through `pool.query`. Read pg 8.18.0 and quote the exact strings `Query read timeout`,
+   `timeout exceeded when trying to connect` and `Connection terminated due to connection timeout`, with file and line.
+2. **DISCARD-ON-RELEASE, ALL SIX CALLERS (READ each, MEASURE at least two).** For each of `server/routes/quotes.js:262`,
+   `server/routes/admin.js:93`, `server/reminders/dispatcher.js:121`, `server/seed.js:18`, `server/seedCollateral.js:13`,
+   `server/dbRestore.js:149`, write one row: how it releases (the drafter READ `client.release()` with no argument in all six); what its
+   catch does on the SAME client after a timeout (quotes and dispatcher: `ROLLBACK … .catch(() => {})`; seed and dbRestore: `ROLLBACK`
+   with no catch, which REPLACES the original error; seedCollateral and admin: no ROLLBACK); how long the caller is held in total under a
+   stall at the SHIPPED bounds (a queued `ROLLBACK` on a stalled client carries its own 30 s bound); and whether the discard happens.
+   **Measure at least `POST /api/quotes/:id/generate` and `GET /api/admin/backup-db`** through the real `createApp()`: after a stall, the
+   pool's `totalCount` / `idleCount` / `waitingCount` and the proxy's connection table must show the stalled client never reused. Also
+   read and state whether any caller passes the checked-out client to code that could hold it past `release()`.
+3. **AN INDEPENDENT REPRODUCTION OF THE HALF-OPEN STALL — the headline (MEASURED).** Read the builder's proxy first and write down what it
+   does and does not model (correction (a)). **Then build YOUR OWN stall proxy** (in your project, `127.0.0.1`, kernel port, one per arm) in
+   front of YOUR OWN database, and run the real `createApp()` through it under `env -i`. Required shapes, each at the shrunk bound
+   (1,500 ms, as the builder did) AND the shipped-default rows marked ★ once at 30,000 / 15,000 ms:
+   - **S1 BLACK HOLE (★).** `allowHalfOpen: true` on both sockets, ignore `'end'` and `'close'` from the app, never FIN, never RST, never
+     tell Postgres. Run the ticket cell (touch never answers), the read cell, and generate. Then measure what the builder's cell could
+     not: **after each discard, is the app's socket CLOSED, half-closed or still open, and does the process's fd count return to baseline**
+     (`lsof -p <app pid>` before, during, and 60 s after; name the TCP state). N ≥ 3 stalls in a row; say whether sockets accumulate.
+   - **S2 ONE-WAY (★ on generate).** Forward app→Postgres, drop Postgres→app, from a chosen message on. So the server EXECUTES what the client
+     believes timed out. Stall generate on its `COMMIT` reply: record what the rep is told (status, elapsed) AND the row's final state read
+     over a SEPARATE direct connection (`status`, `quote_number`). Then the retry: what does a second generate return? Also stall it
+     mid-transaction (after `SELECT … FOR UPDATE`) and read `pg_stat_activity` / `pg_locks` over the direct connection: **is a backend left
+     `idle in transaction` holding the quote row and the `quote_sequences` row after the client is discarded, and do later generates
+     block on it until THEIR bound?** State how long the server keeps that backend (it never learns the client left). That is the shape a
+     client-side bound cannot clean up; say whether `idle_in_transaction_session_timeout` (server-side, not added) is the missing half.
+   - **S3 SERVER-SIDE WAIT (no proxy).** Hold `LOCK TABLE session IN ACCESS EXCLUSIVE MODE` in a separate direct session for 2× the bound,
+     then send signed-in requests. The client bound fires; **count the server backends still waiting in `pg_stat_activity` while the lock
+     is held, and say whether each abandoned backend later EXECUTES its write once the lock is released.** This is the shape a
+     `statement_timeout` / `lock_timeout` WOULD bound, so it is the evidence for or against the READY's fourth behaviour change.
+   - **S4 STALL MID-RESPONSE.** Forward part of a multi-row result (cut inside a `DataRow`), then silence. The error must still be the named
+     `DB_QUERY_TIMEOUT`; the client must still be discarded.
+   - **S5 SLOW DRIP.** Forward every byte but at a fixed low rate so a large `SELECT *` takes longer than the bound while never going
+     silent. Record that `query_timeout` is a TOTAL bound, not an idle one: a slow-but-alive transfer is cut. Say what that means for the
+     backup-db route on a large database.
+   - **S6 HANDSHAKE STALL (★ once at 15,000 ms).** Silence from the first byte: `DB_CONNECT_TIMEOUT`.
+   - **S7 LATE DEATH.** After a discard in S1, make the proxy RST the stalled socket (or end it) 5 s later: count `uncaughtException`,
+     unhandled `'error'` events and `[db] idle client error` lines. **A crash here is a Major** (it is gate 5's IO1-O3 class, which
+     `pool.on('error')` was added to stop).
+   - **S8 TRANSIENT STALL.** A stall that LIFTS at bound + 2 s, on a client whose caller then issues `ROLLBACK`. Record what the late bytes
+     do to the queued `ROLLBACK`, and prove no response is ever attributed to the wrong query on a client that is later reused.
+   For every shape quote: request status and body bytes, elapsed ms, the log line verbatim (`DbTimeoutError`, `code`, `ref`), the pool
+   counters after, the load average. **Positive control in the same run: the SAME shape against the `eaf024a` tree must HANG past your
+   request deadline** (that is main's defect; if main does not hang, your proxy is not producing the stall). **Negative control:** the
+   proxy in pass-through mode must add < 5 ms per request.
+4. **THE BEHAVIOUR CHANGES — RULE ON EACH (MEASURED where possible, READ where not; label each).**
+   (a) **The 15 s pool-wait cap — could a legitimate burst now 500 where it used to wait?** Measure: hold all 10 clients on healthy
+   `pg_sleep` work longer than 15 s, send an 11th signed-in request, at `eaf024a` (must wait and succeed) and at `2adfc4a` (500
+   `DB_CONNECT_TIMEOUT` at ~15,000 ms). Then answer from the code, READ ONLY, how many clients the six holders plus the per-request session
+   store can hold at once and for how long in real traffic: backup-db holds one client for the whole dump; the dispatcher holds one while it
+   makes up to 50 external sends inside a transaction; generate holds one across pricing. **Also the realistic slow-database case:** make
+   every query slow (e.g. S5 at a moderate rate, or a server under load) so that 10+ concurrent signed-in requests queue — at what arrival
+   rate does a healthy-but-slow database start returning 500s at 2adfc4a that main would have served? Rule: acceptable, needs a bigger
+   `max` or a longer wait, or needs Kam.
+   (b) **dbBackup per-table catch:** trigger a timeout on one table of `buildBackup()` (upload stubbed, never Azure) and show the backup
+   object's `error` entry. Say whether a backup with an error entry is reported as a SUCCESS to its notifier (`sendNotification`, stubbed —
+   never ntfy.sh).
+   (c) **dbRestore ROLLBACK masking:** READ; if you run it, run it only against your own `_test` database with a stubbed download.
+   (d) **No `statement_timeout`:** rule using S3's evidence, not the READY's reasoning.
+   (e) **The backup-db route's headroom:** build a synthetic dataset in your own DB (state its size; scale it to at least 100× the
+   READY's 96,690-byte figure, which you may NOT verify) and time every `client.query` the route makes, at the shipped bound. State the
+   ratio of 30,000 ms to the slowest.
+   (f) **Boot-time DDL:** `initDb()` runs `schema.sql` and `ALTER TABLE` statements at boot, now each bounded at 30 s. Hold a conflicting
+   lock on one altered table longer than the bound and boot `createApp`'s caller path (`initDb` alone is enough): does the boot now FAIL
+   where it waited before? Say what that means for an App Service restart while another instance holds a long transaction (READ ONLY).
+   (g) **Double bound on ROLLBACK:** measure generate's total elapsed under S1 at the SHIPPED bounds (predicted ~60 s: 30 s query +
+   30 s queued ROLLBACK). Say whether the rep-facing time is acceptable and whether it is below the App Service front end's request limit
+   (READ ONLY; do not look it up live).
+   (h) **Dispatcher re-send:** with recorder providers only (never a real send), stall `dispatchDue()`'s `UPDATE reminders` after the first
+   send, let it time out, run a second tick: **is the same reminder sent twice?** At `eaf024a` the same stall hangs the tick forever (and
+   cron starts a new one every 5 minutes). Say which is worse and whether this is a VSP-65 finding or a pre-existing one newly reachable.
+   (i) **IO1F1 grace vs query bound, both 30,000 ms:** a signed-in request that FAULTS after its answer while the store's write stalls:
+   which timer wins, is the outcome deterministic across N ≥ 5 runs, and does the client ever see a truncated body where it saw a whole
+   one before? Measure at the shipped values.
+   (j) **A bad override refuses the boot:** boot once under `env -i` with `DB_QUERY_TIMEOUT_MS=abc`; quote the message and the exit code.
+   Say whether `server/db.test.js`, which requires `./db` at load, turns a bad value in CI's environment into a whole-suite failure.
+5. **RED-PROOFS (parse-checked, fresh tree per arm, `node --check` rc quoted; a red from a mutant that does not parse is VOID).** Reproduce
+   the builder's two and add your own: M1 `release` does not pass `client[TIMED_OUT]` (READY: exactly 1 red, the pool.connect() cell, at
+   ~3,004 ms); M2 errors not renamed (READY: 4 red); **M3** a plain `pg.Pool` with the same options (no `BoundedPool`) — which cells redden,
+   and does ANY behavioural cell catch the poisoned-client return?; **M4** `query_timeout` removed (connect bound kept) — the ticket cell
+   must redden as TIMED OUT, not as a wrong status; **M5** `GUARDED` check removed so `guard()` wraps `query` on every checkout — does
+   anything notice the double wrap? **Assert every tamper landed** (grep the literal) before reading its result. **A behaviour with no
+   reddening cell is a finding.**
+6. **SUITES AS SETS, NOT COUNTS, against base `eaf024a`, same machine, same session (MEASURED).** In fresh archived trees of BOTH shas:
+   `npm test` and `npm run test:db` (the latter on a FRESHLY CREATED `vsp_qa_g9_<epoch>_test`, proven fresh: zero user tables). Extract
+   every test NAME with its outcome (use a machine-readable reporter, e.g. `--test-reporter=tap` via `node --test`, or parse `spec`), and
+   report: names passing at base that do not pass at head (**must be empty**); names added at head (READY: 10 unit, all `VSP-65: …`, and 6 in
+   `pool-timeout.test.js`); names removed. Quote both totals beside the sets. `test:db` runs `test/db/*.test.js` one file at a time via
+   `scripts/run-db-tests.js`: confirm `pool-timeout.test.js` actually ran and name its six cells. Run `pool-timeout.test.js` **N ≥ 5** at the
+   head (timing cells are load-sensitive: quote the load each time), and ONCE at base with the head's file copied in (the READY's base
+   red: 1 pass / 5 fail — reproduce it; the handshake cell is an import failure, not a behavioural red, say so).
+   **Also CI's coverage step, locally:** run the exact command from `test.yml` (`node --test --experimental-test-coverage
+   --test-coverage-lines=80 --test-coverage-branches=70 $(find server -name '*.test.js')`) at base and head on this box's Node, and quote
+   the totals and `server/db.js`'s own line/branch figures. **Label it: local Node 26.8.1 standing in for CI's Node 22; not CI.**
+7. **NODE 20 LEG (production's major) — per the NODE20-LEG line at the top of this brief.**
+   - **NOT-RUN:** report the leg as NOT RUN, blocker "no Node 20 on this box; docker not sanctioned", and carry the READY's Node 20
+     claims (unit 105/105, pool-timeout 6/6, completed-response 3/3, async-faults 30/30, routes 18/18) as the BUILDER's, unverified.
+   - **DOCKER-PULL-NEVER:** exactly ONE docker verb family is sanctioned, for this leg only: `docker image inspect node:20` (prove the
+     image is ALREADY present; if absent, the leg is NOT RUN — never pull) and `docker run --rm --pull=never` of that image, with YOUR
+     archived tree mounted, an explicit `-e` allowlist (the same allowlist as §13.3; never `--env-file`), `NODE_ENV=test`, and the
+     database URL pointing at YOUR `_test` database via `host.docker.internal:5433`. **Never `docker start/stop/exec/rm/compose` on any
+     container, never `vsp-dev-db`, never `--network host`.** Run in it: `node --version` (quote), `npm test`, and every `test/db/*.test.js`
+     file INCLUDING the three the builder skipped on Node 20 (concurrency, harness, reminder-push), plus your S1 and S6 shapes. Reap the
+     container in a `finally` (it is `--rm`; confirm it is gone).
+8. **CI IS UNMEASURED.** This project's `gh` is not authenticated (the Vision seat's status mail of 2026-09-27, item 3), and **you must not
+   use `gh` at all**. Say plainly: CI on `fix/vsp-65-pool-query-timeout-2026-09-27` is **UNMEASURED**, including its Node 22 coverage gate
+   and its `e2e:pro` step, and name them as the first things to read at merge.
+
+## Q. TARGET QQPURGE — the QuickQuote retention purge, no numeric literal (TIER 1, the QUICKQUOTE repo)
+**Repo:** `/Volumes/KK_T9_External_HDD/!CODING/Datasec/Vision_Sales_Portal/Quoting Tool/hpas-quoting-tool`, working directory `stage3/`.
+**The change (READ at `ac74111`, `stage3/lib/store.js` `purgeQuotes()`):** the filter is exactly `PartitionKey eq 'q'` with `$select`
+`RowKey`, `createdAtMs`, `status`; `at = Number(e.createdAtMs)`; `if (!Number.isFinite(at)) continue;`; a row is doomed when
+`at < exp || (e.status === "pending" && at < pen)`; deletes run one at a time AFTER the full scan; a 404 counts as gone; any other error is
+logged `[stage3] quote retention: delete of <rk> failed (<name> <status>); kept for the next run:` and not counted; the return is the count
+actually gone. `Math.floor` on the cutoffs was removed. **Base `f255db8`** put both cutoffs in the filter as bare numbers
+(`PartitionKey eq 'q' and (createdAtMs lt ${exp} or (status eq 'pending' and createdAtMs lt ${pen}))`), selected `RowKey` only, and
+swallowed every delete error.
+
+### Q.0 WRONG OR UNVERIFIABLE IN THE QQPURGE READY — found by the drafter (READ ONLY; verify each)
+- **(a) The fake is an ALLOWLIST as well as a literal rule, so its base red has two possible causes.** `FakeTableClient.listEntities`
+  runs `checkLiterals(filter)` and then throws `fake SDK: filter not evaluated here` for ANY filter that is not exactly
+  `PartitionKey eq 'q'`. So base reddens with live's message only because the literal check runs first; any other filter, including a
+  type-correct one, would also redden. **The fake cannot tell a wrong fix from a different right one, and the head's green is partly
+  guaranteed by construction** (the head sends the one string the fake accepts). What it models of the service is ONE rule: a bare integer
+  literal outside Int32 range is a 400. What it does NOT model is the documented type-matching rule (a literal whose type differs from the
+  stored property's type): check the docs for whether the service errors or just matches nothing there. **§Q.2 is where you rule on it.**
+- **(b) The pagination page count is measured on a SIBLING query.** The cell counts pages with `byPage()` on
+  `listEntities({ filter: "PartitionKey eq 'q'", select: ["RowKey"] })`, not on the purge's own three-property query, and its 1,005 rows are
+  written with `submitTransaction` directly, not through `reserveQuote` / `updateQuote` (the file header's "written by the production path"
+  holds for the FIRST Azurite cell only). What proves `purgeQuotes` itself walks every page is the deletion count plus the builder's M4.
+- **(c) "A row with no usable createdAtMs is left alone" is true for an ABSENT property or a non-numeric string only.** `Number()` coerces
+  `""`, `" "`, `null`, `false` and `[]` to `0` and `true` to `1`, all finite, so such a row is treated as older than any cutoff and
+  DELETED. A numeric STRING (`"1690000000000"`) is compared as a number. Production writes `createdAtMs: created.getTime()`
+  (`stage3/server.js:607`), so reaching this needs a non-production writer. **Measure what the SDK hands back for each such stored value
+  and rule on the severity**; do not assume it.
+- **(d) The READY's cell accounting double-counts the rename.** "Removed: 2 … Renamed: 1 … Added: 5 (4 store cells + the cutoff cell)"
+  balances as NAME sets (124 − 2 + 5 = 127), but in substance ONE base store cell is deleted
+  (`purgeQuotes sends the retention + stale-pending filter and deletes what comes back`, the one that pinned the broken filter string),
+  ONE is renamed (`purgeQuotes refuses a cutoff that is not a number (nothing else reaches the filter)` → `purgeQuotes refuses a cutoff that
+  is not a number`), and THREE store cells plus one `server.test.mjs` cell are new. **§Q.7 proves it by name.**
+- **(e) The CI job's Azurite is UNPINNED.** `store-azurite` uses `image: mcr.microsoft.com/azure-storage/azurite` (latest) with no
+  health check or readiness wait, while the builder's evidence is Azurite **3.37.0**. READ ONLY; name it.
+- **(f) UNVERIFIABLE by design, and you must not try:** live's error lines, the live row count, the live stored type of `createdAtMs`, and
+  the live retention of 365 days. All come from `hpas-quickquote-logs`, which decision 18 says a gate never queries. Carry them as the
+  builder's claims.
+- **Verified TRUE at source (READ):** head and main by `ls-remote` (09:10:19); lockfile unchanged; data-tables 13.3.2 deserializes
+  `Edm.Int64` as `BigInt(value)` by default (read in the builder's on-disk `stage3/node_modules/@azure/data-tables/dist/commonjs/serialization.js`,
+  version 13.3.2 = the lockfile's; **re-read it in YOUR tree**), so the READY's "Int64 BigInt … compare" holds at source; the purge's strict
+  `at < exp` matches the lazy read's `clock().getTime() - Number(row.createdAtMs) > QUOTE_RETENTION_MS` (`stage3/server.js:718`), both
+  strict; live's logged literal `1758594760644` = 2025-09-23T02:32:40.644Z = a 2026-09-23T02:32:40Z boot minus 365 days; the fake's base
+  literal `1790164800000` = 2026-09-23T12:00:00Z = its `NOW` (2027-09-23T12:00Z) minus 365 days; 2027-09-23T02:41:03Z minus 365 days =
+  2026-09-23T02:41:03Z (no leap day between). `test:print` / `test:xlsx` files do not reference `lib/store` (git grep over the nine named
+  files); only `test/server.test.mjs` does.
+
+### Q.1 THE QQPURGE READY's NOT TESTED list, VERBATIM
+NOT TESTED
+- Live's actual stored type of createdAtMs: UNMEASURED. It's no longer load-bearing for this design, since no literal is compared.
+- A live run: production is Kam's publish. After publish, the proof is the next boot and the 6-hourly log lines in hpas-quickquote-logs ("purged N row(s)", or silence when there's nothing to purge, instead of the Int32 error).
+- Real Azure Table Storage paging or continuation (only Azurite's 1,000-row page).
+- CI on the branch, including the new store-azurite job: this project's gh isn't authed. The Azurite default-command setup the job uses was exercised locally.
+- Node 20 and 22 (the CI legs use 22).
+- Concurrent purges from two instances (the 404 path is covered by the fake cell only).
+
+**How you treat it:** concurrent purges from two instances you CAN measure on your own Azurite (two `purgeQuotes` calls racing over the
+same partition, count deletes and 404s); everything else carries into your NOT TESTED in your own words. **CI is UNMEASURED** (this
+project's `gh` is not authenticated; you must not use `gh`).
+
+### Q.2 THE LIVE-RULE FAKE, CHECKED INDEPENDENTLY — the headline for QQPURGE (READ the docs, then MEASURE)
+Azurite accepts the bare literal that live rejects, so the fake in `test/store.test.mjs` is the ONLY red instrument for the live failure.
+**Is its rule faithful to Azure Table Storage's documented literal typing? Read the documentation yourself; do not re-derive from the
+builder's comments or the BACKLOG.** Read Microsoft Learn: "Querying tables and entities" (Table service REST), "Payload format for Table
+service operations" and "Understanding the Table service data model" (property types, Int32/Int64/Double, the JSON type-annotation rules).
+You MAY fetch `learn.microsoft.com` pages from YOUR OWN tool calls for this; never from a product process, and nothing else external. Quote
+each rule you rely on, with its URL and the date you read it. Answer, each labelled READ ONLY:
+  (i) how the service types an UNSUFFIXED integer literal, how it types `L`-suffixed and decimal literals, and what the docs say happens
+  when a literal's type differs from the property's stored type (an error, or simply no match);
+  (ii) how an untyped JSON number the SDK writes (no `@odata.type`) is stored when it does not fit Int32 — or that the docs do not say;
+  (iii) whether the fake's `checkLiterals` regex (`/(?<![\w'.])-?\d+(?![\w.'])/g`, Int32 range, 400) matches that rule, and what it models
+  that the docs do not say, or misses that they do;
+  (iv) whether the head's design depends on ANY of (i)-(iii) (the builder says it no longer does, because no literal is sent).
+Then MEASURE, in a fresh tree: **build YOUR OWN fake** that EVALUATES a filter under the documented rules (partition equality, `lt`/`eq`,
+`and`/`or`, Int32 / Int64 `L` / Double literal typing, the type-mismatch behaviour the docs give) instead of allow-listing one string.
+Run `purgeQuotes` from BASE `f255db8` and from HEAD `ac74111` through it: base must redden for the Int32 reason (quote the message), head
+must delete exactly the right rows. Then run the two REJECTED repairs through it — the `L` literal and the SDK `odata` tag — and say what
+your fake, following the docs, makes of each against an untyped (Double- or Int32-stored) `createdAtMs`. **A fake that disagrees with the
+builder's is a finding either way; say which one follows the docs.**
+
+### Q.3 PAGINATION — 1,005 rows, measured with `byPage` (MEASURED on YOUR Azurite, per AZURITE-LEG)
+Reproduce the builder's cell AND measure the purge's OWN query: count pages with `byPage()` on exactly the purge's query
+(`filter: "PartitionKey eq 'q'"`, `select: ["RowKey", "createdAtMs", "status"]`), confirm ≥ 2 pages at 1,005 rows, then prove every
+expired row on every page is deleted and every other row survives. **Write the rows through `reserveQuote` + `updateQuote` (the production
+path), not only `submitTransaction`.** Put at least one expired row as the LAST row of page 1 and the FIRST row of page 2. Also check that
+deleting rows only AFTER the scan (the head's order) is what keeps the continuation token valid, and say what the base code's order was.
+
+### Q.4 PER-ROW DELETE-FAILURE SEMANTICS (MEASURED)
+Reproduce the A / B(404) / C(503) / D cell, then vary it: a failure on the FIRST and on the LAST row; every delete failing (return 0,
+N log lines, nothing thrown); a non-RestError throw (a plain `Error` with no `statusCode`); a 412 and a 409. For each: all rows attempted,
+the return value, the exact log lines, nothing thrown out of `purgeQuotes`. **On Azurite:** delete a doomed row between the scan and its
+delete (the "creator's lazy read got there first" case) and show it counts. Then the **boot and interval callers** in `stage3/server.js`
+(`app.purgeQuotes`, the `purge` wrapper at ~:901 and its `setInterval(... ).unref()`): read what they log with the new return value and
+whether any failure path can now throw out of the interval (an unhandled rejection in the live container is a Major).
+
+### Q.5 THE "NO USABLE createdAtMs IS LEFT ALONE" BRANCH (MEASURED)
+Write rows (fake AND Azurite) whose `createdAtMs` is absent, `""`, a non-numeric string, a numeric string, `0`, a negative number, a
+BigInt/Int64, a Double, and (if the SDK lets you store it) a boolean. Record what the SDK hands back (`disableTypeConversion: true` and
+default) and whether the head deletes, keeps or throws for each. **Correction (c) predicts `""` / `0` / `false` are DELETED.** Rule on
+whether that is acceptable given production only writes `getTime()`, and say whether the lazy read (`server.js:718`) treats each the same
+way (it uses `Number()` too).
+
+### Q.6 THE CUTOFF ARITHMETIC AND THE BOUNDARY — strict less-than (MEASURED + READ)
+`exp = now − days × 86,400,000`, `pen = now − 3,600,000`, pinned by the new `server.test.mjs` cell at the default 365 d and at 30 d, and
+at 2027-09-23T02:41:03Z the 365-day cutoff is exactly 2026-09-23T02:41:03Z. Re-derive it yourself and add: a row AT `exp` (kept), at
+`exp − 1` (deleted), at `exp + 1` (kept); the same three at `pen` for a `pending` row and for a `sent` row (a `sent` row at `pen − 1` is
+KEPT); a `QUOTE_RETENTION_DAYS` that is fractional (0.5) and one that is rejected (0, -1, "abc": `server.js:262`); and a DST / leap-year
+sanity line (epoch ms carry no timezone: say so). **Prove the purge and the lazy read agree at the boundary** (both strict) with one row
+exactly at the cutoff read both ways. Red-proof: the builder's M1 (`<=` for `<`) — reproduce it, `node --check` rc quoted.
+
+### Q.7 REMOVED AND RENAMED CELLS, PROVED BY NAME; SUITES AS SETS (MEASURED)
+In fresh archived trees of `f255db8` and `ac74111` (`stage3/`, `npm ci --offline --ignore-scripts`, lockfile proven entry by entry):
+`npm test` at both, test NAMES with outcome. Report: names passing at base and absent at head (expect exactly the two old store names in
+correction (d)); names new at head (expect the four store names and the one `server.test.mjs` cutoff name); every other base name still
+passing. **Read both versions of the renamed cell and show the assertions are a superset (the READY: "same assertions, plus nothing
+deleted").** `npm run test:azurite` per AZURITE-LEG (2/2 claimed). The root pricing pack `node --test quote-engine.test.mjs` (67 claimed,
+unchanged) — one run at head. `test:print` and `test:xlsx`: NOT re-run; the drafter READ that none of their nine files references
+`lib/store`, which you confirm by READ and state. Red-proofs M2 (`status` dropped from `$select`), M3 (the `L` literal) and M4 (first page
+only): reproduce each on the fake and, per AZURITE-LEG, on Azurite; `node --check` rc quoted; assert every tamper landed.
+
+### Q.8 THE NEW CI JOB `store-azurite` (READ ONLY) AND YOUR AZURITE
+READ `.github/workflows/tests.yml` at `ac74111`: the job's image (unpinned, correction (e)), port `10002:10002`, Node 22, `npm ci` then
+`npm run test:azurite`, no health check. Say whether the job can race Azurite's start, whether `UseDevelopmentStorage=true` reaches the
+service container at `127.0.0.1:10002` on a GitHub runner, and whether the other jobs changed. **Its CI result is UNMEASURED.**
+**Your Azurite (only if AZURITE-LEG reads DOCKER-PULL-NEVER):** `docker image inspect mcr.microsoft.com/azure-storage/azurite` (quote the
+version/digest; if absent, the leg is NOT RUN — never pull), then ONE container of YOUR OWN, `docker run --rm --pull=never --name
+qa-g9-azurite-<epoch> -p 127.0.0.1:<kernel port>:10002 mcr.microsoft.com/azure-storage/azurite`, and point every Azurite process at it
+with an explicit `TABLES_CONNECTION_STRING` for that port (`DefaultEndpointsProtocol=http;AccountName=devstoreaccount1;AccountKey=<Azurite's
+published well-known dev key>;TableEndpoint=http://127.0.0.1:<port>/devstoreaccount1;`). Never port 10002 on the host, never any other
+container, never `UseDevelopmentStorage=true` (it would hit a shared emulator). Stop it in a `finally` (it is `--rm`; confirm it is gone).
+Quote which Azurite version you measured against and compare it to the builder's 3.37.0.
+
+### Q.9 THE COST CLAIM (READ ONLY, with arithmetic)
+The READY: every run reads every row in partition `q` (three small properties), one page request per 1,000 rows, every 6 h plus boot;
+bounded because the purge removes every row past 365 days, so the partition holds at most one retention period plus < 1 h of pending rows;
+"at 1,000 quotes a year that's 1 to 2 page reads a run". Check it: (i) the boundedness premise holds only while purges SUCCEED and only for
+rows with a usable timestamp (correction (c) rows never age out); (ii) every App Service instance runs its own purge (boot + interval), so
+reads scale with instance count — READ how many instances the code assumes, never `az`; (iii) `QUOTE_RETENTION_DAYS` scales the window;
+(iv) the live partition today holds every row since the 2026-09-23 publish because the purge has never succeeded (builder's claim);
+(v) Table Storage bills per transaction and per GB: state the order of magnitude from the documented model, no live price lookup needed.
+Say whether the claim is sound, and what volume would make a full-partition scan a problem.
+
+### Q.10 QQPURGE FAIL CONDITIONS (stated BEFORE the runs)
+**FAIL:** any row deleted that is inside its window (the boundary included); any expired row left on any page; a purge that throws, or
+lets a delete failure stop later rows, or overstates its count; any numeric literal in the filter; your docs-following fake showing the
+head would still fail on live's documented typing; a base that does NOT redden under your fake (then neither fake is proven); a boot or
+interval path that can now reject unhandled; a base test name lost other than the two in correction (d). **A behaviour you rule
+acceptable is not a FAIL; say so explicitly.** Deletion of a `""` / `0` / `false` row (correction (c)) is graded by you, with its
+reachability from production stated.
+
+### Q.11 QQPURGE FLOOR (adds to §13)
+Everything in §13 applies, with these for QuickQuote: work in `stage3/` of YOUR archived tree; **never set `AGENTMAIL_API_KEY` and
+`AGENTMAIL_INBOX` together in a product process (with both set, QuickQuote SENDS FOR REAL)**, nor any real `ACS_*`, `MAIL_SENDER`,
+`TABLES_CONNECTION_STRING` other than YOUR fake's dummy or YOUR Azurite's, `SALES_COPY_EMAIL`, `HPAM_WORD`, `ADVANCED_UNLOCK_SECRET` or
+`WEBSITE_SITE_NAME`. **No request of any kind to live QuickQuote** (`hpas-quickquote`, `hpas-quickquote-rg`, `hpasqqacr`, its Table
+Storage account, `hpas-quickquote-logs`): **no az, no Azure Table access, no publish.** Azurite and fakes only. No Chrome is needed for
+this target; start none. **Deadlines (§13.5 rule):** Azurite container start 60 s; one Azurite cell 180 s (the 1,005-row cell
+included); one fake run 60 s; stage3 `npm test` 240 s. Nothing above 420 s. Heartbeat every 2 minutes as in §13.5.
+
+## 12. The merge and the queue
+**The drafter ran NO `merge-tree`.** READ expectation: **`2adfc4a` × main `eaf024a` is CLEAN, and the result tree equals `2adfc4a`'s own
+tree**, because main is its merge-base. Quote `git merge-tree --write-tree --name-only` from YOUR OWN object dir, or say you skipped it.
+**Cells to re-run on the merged head** (name at least these): `npm test` + `test:db` as sets; `pool-timeout.test.js` N ≥ 3; your S1
+black-hole shape at the shipped default; the 15 s pool-wait arm; CI's Node 20 and Node 22 legs including the coverage gate and `e2e:pro`.
+**QQPURGE:** READ expectation: **`ac74111` × QuickQuote main `f255db8` is CLEAN and equals `ac74111`'s own tree** (main is its only parent).
+Same `merge-tree` rule, from your own object dir, or skip it and say so. Cells to re-run on the merged head: stage3 `npm test` as sets,
+`test:azurite` (and CI's `store-azurite` job, UNMEASURED here), your docs-following fake over the head, the pagination cell, and the
+first live boot's purge log line after Kam's publish (not yours to read).
+
+## 13. FLOOR AND PORT DISCIPLINE — Vision has NO jest lock, plus THE DEADLINE RULE (and HELD)
+**There is no shared lock or queue on this project, and you must NOT borrow NexusAI's.**
+1. **Never use `4848` (portal), `8080` (stage3's dev port) or `47787` (Tuesday's dashboard)**, or any port another seat holds. Take every
+   port from the kernel and bind `127.0.0.1` wherever YOUR harness or proxy listens. **Never start the portal's own entry point** (it binds
+   `0.0.0.0` in `main()`); use the real `createApp()` inside your harness only.
+2. **Postgres = the local container on `127.0.0.1:5433`, and ONLY databases you create.** **No docker command at all** (the two
+   exceptions are §N.7 if, and only if, the NODE20-LEG line reads DOCKER-PULL-NEVER, and §Q.8 if, and only if, the AZURITE-LEG line does). Create `vsp_qa_g9_<epoch>` for app runs and
+   `vsp_qa_g9_<epoch>_test` as `TEST_DATABASE_URL` for `test:db` (it TRUNCATEs; the name MUST end in `_test`). **Never** `salesportal`,
+   `salesportal_test` (the builder's), any `vsp_qa_g1_*` … `vsp_qa_g8_*`, or the builder's `vsp_bf1_*`. `server/db.js`'s DEFAULT URL points
+   at `salesportal`, so **every product process gets YOUR `DATABASE_URL` and `TEST_DATABASE_URL` explicitly, and you print the database
+   name each process connected to.** Local defaults from `server/db.js` / `scripts/ensure-test-db.js` for credentials only; never anything
+   from `Vision_Sales_Portal/4_Credentials/`. If `:5433` does not answer, the runtime legs are **NOT RUN, blocker named**. Leave your
+   databases in place and list their names (no DROP). **Serialise or salt creation.** Your S2/S3 direct sessions and locks touch ONLY your
+   own databases; release every lock in a `finally` and prove `pg_locks` is clean for your databases at the end.
+3. **Every product process runs under `env -i` with an explicit ALLOWLIST** (PATH; HOME = a fresh mktemp dir; TZ; NODE_ENV = `test` or
+   `development`, never `production`; PORT; a fresh random SESSION_SECRET / unlock word / `COORDINATOR_SECRET` you generate; DATABASE_URL /
+   TEST_DATABASE_URL = yours; DB_QUERY_TIMEOUT_MS / DB_CONNECT_TIMEOUT_MS only where an arm sets them, and say so; `NTFY_SERVER=http://ntfy.invalid`;
+   dummy provider values; `npm_config_update_notifier=false`; `npm_config_offline=true`). **NEVER set in a product process:**
+   `AGENTMAIL_API_KEY`, `AGENTMAIL_INBOX`, any real `ACS_*` / `MAIL_SENDER`, `AZURE_BACKUP_CONN_STR`, `TABLES_CONNECTION_STRING`,
+   `SALES_COPY_EMAIL`, a real `APPROVALS_INBOX`, a real `NTFY_TOPIC`, `LEAD_BOT_API_KEY`, `WEBSITE_SITE_NAME`. Print each product process's
+   env KEY NAMES (never values) and assert none is forbidden. **Never contact ntfy.sh**: set `NTFY_SERVER` before any portal module is
+   required and stub `fetch` to throw on any other URL (gate 7's `qa-io1-preload-fetchguard.cjs`). The reminder dispatcher and the backup
+   notifier run ONLY against recorders you wrote.
+4. **Count foreign servers the RD-606 way, anchored on YOUR OWN claude pid** (`qa-floorcount.py`, copied from gate 7's evidence):
+   `basename(argv[0]) == node` AND an app entry point ANYWHERE in the remaining argv, from the kernel; **"ours" = the ancestor chain CONTAINS
+   your claude pid.** **Negative controls, same run, must classify FOREIGN:** at drafting (09:01 AEST) the live claudes were Tuesday
+   `47349` (pane `%0`), the Vision builder `67576` (pane `%20`, cwd `Vision_Sales_Portal`), NexusAI `20317` (`%22`), `62649` (`%19`) and
+   `9959` (`%21`), two other QA gates `36118` (`%23`) and `40285` (`%24`), and `84139` (not in tmux, cwd `/Users/kamil`). **Re-read the seat
+   list at start**; say which have exited. Never count by `EADDRINUSE`, a whole-command-line grep, or raw `comm`. **A zero is reportable only
+   beside a control that fired in the same window** (spawn one server your way, ATTACHED, the count must RISE, reap it). **Other gates are
+   live on this box: record the 1-minute load beside every timing number** (it was 9.18 at 09:01 with `hw.ncpu` 8).
+5. **THE DEADLINE RULE:** every step has a written DEADLINE and a client timeout on every request (no `timeout` binary here — build
+   deadlines into your runner); a step past its deadline is ABORTED and reported (a hung product request IS a finding, and at `eaf024a` it
+   is the expected positive control). Deadlines: boot 60 s; DB connect 15 s; any request at the SHRUNK bound 20 s; **any request at the
+   SHIPPED bounds 120 s** (worst predicted path: 15 s wait + 30 s query + 30 s queued ROLLBACK); the pool-wait burst arm 180 s; the S3 lock
+   arm 180 s; one `test:db` file 180 s; a whole `test:db` run 420 s. **Nothing above 420 s.** State each shipped-bound exception in the
+   report wherever you use it. **Every server, proxy, direct session, lock, child and container you start is released in a `finally`.**
+   **Log a HEARTBEAT line (timestamp, step, pid, elapsed) at least every 2 minutes; a step with no heartbeat for 5 minutes is aborted and
+   reported.**
+
+**Reap everything you start.** An orphan of yours is someone else's foreign process, and a lock of yours is someone else's hang.
+
+### Drivable surface — LOCAL ONLY. **NEVER the live portal.**
+- **NEVER the live** portal (`https://datasec-sales-portal.azurewebsites.net`, resource group `datasec-sales-portal-rg` — PRODUCTION: the
+  live site, its Postgres `datasec-sales-db.postgres.database.azure.com` and its key vault). **No request, no DB connection, not even a GET
+  or a health probe. No `az` of any kind — no reads, no writes, no app-setting change, no deploy.** Never QuickQuote's live resources
+  (`hpas-quickquote`, `hpas-quickquote-rg`). **Never ntfy.sh**, never Azure Blob Storage, never `api.agentmail.to` from a product process,
+  never the Feedback_System coordinator, never the npm registry (`npm audit` included). **Never open a production dump or any file under
+  `Vision_Sales_Portal/4_Credentials/`.**
+
+### HELD
+- No merge, no deploy, no registry, **no production**, no money, **no mail to any human**, no external comms.
+- **No `az`, no `gh`, no `docker` (except §N.7 / §Q.8, each only under its own DOCKER-PULL-NEVER line), no `npm install`, no `npm ci` without `--offline --ignore-scripts`,
+  no `npm audit`, and no `npx` of anything not already in your tree.** The launcher points `AZURE_CONFIG_DIR` and `GH_CONFIG_DIR` at EMPTY
+  directories.
+- **Trees:** build every tree INSIDE YOUR OWN PROJECT from the object store (`git -C <repo> archive <sha> | tar -x -C <fresh mktemp -d under
+  projects/vision/work-g9/>`). **Each tree is EXCLUSIVE to this gate and to ONE purpose; never touch `work/` or `work-g2/` … `work-g8/`.**
+  Dependencies: **`npm ci --offline --ignore-scripts`** at the tree root and nothing else; a cache miss FAILS rather than fetches (then NOT
+  RUN, missing tarballs named). Prove `node_modules/.package-lock.json` against `git show <sha>:package-lock.json` **entry by entry**, with
+  `lockcmp.py` AND `lockwalk.py` (gate 7: portal 247/247 at the old lockfile; this lockfile has 248 `packages` entries including the root).
+  **Never npm audit.** For QuickQuote the tree root is `stage3/` (lockfile `stage3/package-lock.json`). In EITHER repo use ONLY read verbs (show, log, diff, ls-remote, rev-parse, ls-tree, cat-file, grep, merge-base,
+  archive); **never fetch, pull, checkout, switch, worktree, commit, stash, reset, clean or gc.** `git merge-tree --write-tree` only as
+  `GIT_OBJECT_DIRECTORY=<your own mktemp -d> GIT_ALTERNATE_OBJECT_DIRECTORIES=<repo>/.git/objects git -C <repo> merge-tree --write-tree
+  --name-only <a> <b>`, from the gate's OWN object dir, or SKIP it and say so.
+- **CONTROLS MUST BE ABLE TO FAIL INDEPENDENTLY:** every control is a separate measurement that could have come out the other way on its
+  own. A control derived from the run it validates is not a control.
+- **Findings only:** do not commit, do not move any branch, do not file a ticket. **Make no writes in the portal repo or the QuickQuote repo**, none inside
+  `Vision_Sales_Portal/` (including `5_Project_History/`), inside the builder's scratchpad, or inside gate 1-8's report folders or trees.
+  The gate fixes nothing; describe fix-shapes in prose.
+- **NEVER `rm`.** Quarantine instead. Every proxy, preload, stub, harness and fixture lives under YOUR project.
+
+## 14. Output
+Report: `/Volumes/KK_T9_External_HDD/!CODING/Testing Agent MAIN/projects/vision/reports/2026-09-27-vision-gate9-vsp65-qqpurge/report.md`
+(sections and `evidence/` beside it).
+
+**QUESTIONS:** your routing name is **`QA/Vision-gate9`**. If you must ask, mail `tuesday-agent@agentmail.to` with the subject
+`[QA/Datasec-Vision -> Tuesday] QUESTION: <topic>` (Context / one Question / Meanwhile / Needed-by), and
+**proceed on the safest reading**. The ANSWER arrives in `tuesday-agent@` with a subject beginning `[Tuesday -> QA/Vision-gate9] ANSWER`.
+Read it with your verdict key. **Never mail wednesday-agent@.** Datasec's coordinator is Tuesday. Record every question, the reading
+you took and any answer in the report. **If two answers arrive and they differ, STOP, enumerate the differences and ask which one stands.**
+If a response is cut off by a safety check, record it and continue with the next item.
+This is authorised defensive QA of Datasec's own product on loopback.
+
+MAIL YOUR VERDICT to `tuesday-agent@agentmail.to`, with the subject beginning exactly:
+`[QA/Datasec-Vision -> Tuesday] GATE VERDICT — VSP-65 · QQ retention purge` and then
+`: VSP65 @ 2adfc4a <GO | NO-GO> · QQPURGE @ ac74111 <GO | NO-GO>` (TWO verdicts, one per target, in that order).
+Lead the body with two sentences, one per target: (VSP65) does a half-open Postgres connection now end every signed-in request within
+the bound, on YOUR proxy as well as the builder's, and does any legitimate shape now 500 where main served it? (QQPURGE) does the head
+delete exactly the rows past each cutoff on every page, with no numeric literal in the filter, and does a docs-following fake agree?
+You have no inbox that wakes you, so a verdict you do not mail is lost.
+
+AgentMail key: `AGENTMAIL_API_KEY` in `/Volumes/KK_T9_External_HDD/TUESDAY/4_Credentials/.env`. The path is absolute because the QA
+project has no credentials directory of its own. Use the key ONLY in your own verdict/question/answer-read `curl`, with a client timeout
+(`-m 30`). It must never enter a product process's environment. **Never put the key, or any secret, in a mail or the report.**
+
+Verdict format:
+- **VSP65 (pool query/connect timeout): GO / NO-GO**, naming the pinned sha `2adfc4a` and the branch
+  `fix/vsp-65-pool-query-timeout-2026-09-27`. Report on each of: the ticket cell and the read cell on YOUR proxy (S1) and at the shipped
+  bound; main hanging in the same shapes (positive control); discard-on-release for all six callers (table); every S-shape; every
+  behaviour change ruled (the READY's four plus §N.4(e)-(j)); the red-proofs; the suites as sets vs `eaf024a`; the coverage step; the
+  Node 20 leg per the NODE20-LEG line.
+- The verbatim strings an operator needs: the `DbTimeoutError` log line for `DB_QUERY_TIMEOUT` and for `DB_CONNECT_TIMEOUT` at the
+  shipped values, the boot refusal message for a bad override, and pg's three source strings with file:line.
+- **QQPURGE (retention purge, no numeric literal): GO / NO-GO**, SEPARATELY, naming the pinned sha `ac74111` and the branch
+  `fix/qq-retention-purge-no-literal-2026-09-27`. Report on each of: the docs reading and your own docs-following fake vs the builder's
+  (§Q.2, with URLs); pagination at 1,005 rows measured with `byPage` on the purge's OWN query (§Q.3); the per-row delete-failure variants
+  and the boot/interval callers (§Q.4); the no-usable-`createdAtMs` branch per value (§Q.5); the cutoff arithmetic and the strict
+  boundary, purge and lazy read agreeing (§Q.6); removed / renamed / added cells BY NAME and the suites as sets vs `f255db8` (§Q.7); the
+  `store-azurite` CI job, READ ONLY (§Q.8); the cost claim (§Q.9); and the Azurite leg per the AZURITE-LEG line, with the Azurite version
+  you measured against.
+- The verbatim strings for QQPURGE: the per-row failure log line from a real run, and the error your docs-following fake gives base.
+- One paragraph on the queue quoting §12's merge-tree results (both repos), or saying you skipped them.
+- **Rule 2: what you did NOT test is first-class output.** Write a NOT TESTED section that covers at least **CI (UNMEASURED: gh not
+  authed)**, **a real stalled Azure Postgres / TLS / a real failover**, **Node 22**, **Node 20** if NOT-RUN, **the container image** the App
+  Service runs, **`e2e:pro` / `e2e:api` / `e2e:feedback`**, and **production-scale data** for the headroom figure; and for QQPURGE **a real Azure Table
+  Storage query and its paging / continuation**, **live's stored type of `createdAtMs`**, **a live run after publish**, **CI's
+  `store-azurite` job (UNMEASURED)**, **Node 20 and Node 22**, and the Azurite leg if NOT-RUN. **Every action recommendation carries its
+  evidence class: MEASURED AT RUNTIME / PROBED / READ ONLY.** Each of §N items 1-8 and §Q.2-§Q.9 carries one.
+- Report the pinned head and main as three timestamped readings (**start / mid / end**), each with its branch name.
+
+PROVENANCE:
+- heads: portal main `eaf024a3edb7…`, `fix/vsp-65-pool-query-timeout-2026-09-27` `2adfc4aabee2…` | `git -C <portal> ls-remote origin` +
+  `cat-file -t` (commit) | read 2026-09-27 08:58:13 AEST
+- chain: `2adfc4a` ← `7195df7` ← `67365ec` ← main `eaf024a` (merge, parents `f95f625` + `15cd733`); 3 ahead, 0 behind; merge-base `eaf024a` |
+  `git log --format='%H %P'`, `rev-list --left-right --count`, `merge-base` | read 08:58
+- file set (4), `db.js` diff, the unchanged blobs (`package.json` d3b76fb, lockfile 9d426df, `test.yml` 0cb2d05, `index.js` 711dce0,
+  `errors.js` c0c4b0e), lockfile versions, cell counts | `git diff`, `git rev-parse`, `git show`, python over `git show` output, under `bash` |
+  read 08:58-09:0x
+- the six `pool.connect()` callers and their release/catch lines; the session store wiring; `initDb` at boot; `dbBackup.js` TABLES_TO_BACKUP
+  (10) vs schema.sql (18 `CREATE TABLE`); the admin backup-db route | `git grep` over the named server/ and scripts/ files at `2adfc4a`,
+  `git show` | read 09:0x
+- the builder's proxy (`net.createServer`, default `allowHalfOpen`, `app.on('close', () => db.destroy())`) | `git show 2adfc4a:test/db/pool-timeout.test.js` | read 09:0x
+- CI shape (Node 20/22 matrix, coverage gate on 22, `e2e:pro`, Postgres 16 on 5433) | `git show 2adfc4a:.github/workflows/test.yml` | read 09:0x
+- `git log --all -S` for the three option names | portal repo | read 09:0x
+- gate 7's arm (e) figures (`STILL-OPEN-45000ms after 45001 ms`; read path 45,003 ms) and its NOT TESTED | `…/gate7/report.md:30-40,168-178,222-230,296-304`, `evidence/io1/armE-*.txt` | read 09:0x
+- C-01..C-06, none on VSP-65 | Vision CLARIFICATIONS.md (2026-09-25 15:19) | read 09:0x
+- VSP-65 history (filed 2026-09-23 as arm (e)'s unfaulted half; READY 2026-09-27) | `Vision_Sales_Portal/5_Project_History/history.md:1722,1832` | read 09:0x
+- CI unreadable (project gh not authed) | `briefs/2026-09-27_vision-status-bcr3p2-ci-purge-mail.txt` item 3 | read 09:0x
+- no Node 20 on the box | `which -a node` (v26.8.1), Homebrew Cellar/cache, nvm/volta/fnm dirs | read 09:0x
+- `:5433` not listening; Docker Desktop running | `lsof -nP -iTCP:5433`, `lsof -iTCP -sTCP:LISTEN`, `pgrep` | read 09:01
+- seats: `tmux list-panes -a`, `ps`, `lsof -d cwd` for each claude; load 9.18; `hw.ncpu` 8 | read 09:01
+- builder claims | the READY mail (whole) and the three commit messages; BACKLOG at `2adfc4a`
+- QQ heads: QuickQuote main `f255db86af38…`, `fix/qq-retention-purge-no-literal-2026-09-27` `ac741110fd08…` | `git -C <quickquote> ls-remote origin` + `cat-file -t` | read 2026-09-27 09:10:19 AEST
+- QQ chain and files: `ac74111` (only parent `f255db8`), 1 ahead / 0 behind, 8 files, lockfile `70ebda7` equal, data-tables 13.3.2 | `git log`, `rev-list`, `diff --stat`, `rev-parse`, python over `git show` | read 09:10-09:1x
+- QQ `purgeQuotes` at base and head, the fake, the Azurite cells, the cutoff cell, `server.js:258-262,607,718,866-905` | `git diff f255db8 ac74111`, `git show`, `git grep` over named files | read 09:1x
+- QQ base / head store cell names (2 → 4) | `git show <sha>:stage3/test/store.test.mjs` grep `^test(` | read 09:1x
+- `lib/store` not referenced by the nine print/xlsx files; referenced by `test/server.test.mjs` and `server.js:888` | `git grep -l` over those named files | read 09:1x
+- SDK `Edm.Int64` → `BigInt(value)` | builder's on-disk `stage3/node_modules/@azure/data-tables/dist/commonjs/serialization.js:113-114`, package.json 13.3.2 | read 09:1x
+- Azurite not on the box (no npm package in the lockfile, `which azurite` empty, nothing LISTENs on :10002) | `git show … package-lock.json`, `which`, `lsof` | read 09:1x
+- cutoff arithmetic (1758594760644, 1790164800000, 2027-09-23T02:41:03Z − 365 d) | python `datetime` | read 09:1x
+- project-root BACKLOG entry for the live purge failure and its superseded `L` fix-shape | `Vision_Sales_Portal/BACKLOG.md:15-22` | read 09:1x
+- QQ builder claims | the QQ READY mail (whole) and `ac74111`'s commit message; BACKLOG / CLAUDE.md at `ac74111`
