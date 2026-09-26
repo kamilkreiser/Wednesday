@@ -474,20 +474,7 @@ PYMAIL
     [ -f "$REG" ] || die "no launchers registry at $REG"
     LPATH=$(awk -F'|' -v n="$NAME" '$1==n{print $2}' "$REG" | head -1)
     [ -n "$LPATH" ] || die "'$NAME' not in $REG — rotate needs a registered relaunch path (no relaunch path = no rotation, use say+manual instead)"
-    if [ ! -f "$LPATH" ]; then
-      # Same travel-drive fallback as launch/resolve (2026-09-26, Tuesday): rotate
-      # checked the raw registry path only, so off the Studio (DevMASTER unmounted)
-      # it refused every registered project seat while launch worked. Found
-      # rotating Datasec/NexusAI-P at ctx 81%. Identical derivation to launch.
-      DRIVE_ROOT="$(printf '%s' "$SCRIPT_DIR" | awk -F/ '{print "/"$2"/"$3}')"
-      ALT="$DRIVE_ROOT${LPATH#/Volumes/DevMASTER}"
-      if [ "$ALT" != "$LPATH" ] && [ -f "$ALT" ]; then
-        echo "launcher volume not mounted — using this drive's copy: $ALT" >&2
-        LPATH="$ALT"
-      else
-        die "registered launcher missing on disk: $LPATH (registry stale — fix it before rotating)"
-      fi
-    fi
+    [ -f "$LPATH" ] || die "registered launcher missing on disk: $LPATH (registry stale — fix it before rotating)"
     PANE=$("$TMUX_BIN" list-panes -t "$SESSION:0" -F '#{@cockpit_name}|#{pane_id}' | awk -F'|' -v n="$NAME" '$1==n{print $2}' | head -1)
     [ -n "$PANE" ] || die "no pane named '$NAME'"
     mkdir -p "$SCRIPT_DIR/logs"
