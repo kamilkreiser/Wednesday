@@ -1,0 +1,79 @@
+/**
+ * KS-1337 (akto site): tests/preSuiteSetup.ts resolved the shared pre-suite step with
+ * new URL(...).pathname. A URL pathname is percent-encoded, so a checkout whose directory holds a
+ * space (the QA gate's own Testing Agent MAIN) handed tsx a path carrying %20 and the step died with
+ * ERR_MODULE_NOT_FOUND. preSuiteSetup.ts spawns npx at setup(), so this suite copies its own
+ * const step statement into a probe module planted at tests/ inside a temp checkout, imports the
+ * probe for real, and checks the path it yields is the file. Same shape as the performance
+ * runner's merged KS-1337 cell (#1291).
+ */
+
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+import { fileURLToPath, pathToFileURL } from 'node:url';
+
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+
+// A newline and a single quote, so no line below needs a backslash or a double-quoted string.
+const NL = String.fromCharCode(10);
+const SQ = String.fromCharCode(39);
+const SETUP_LINES = readFileSync(fileURLToPath(new URL('../../preSuiteSetup.ts', import.meta.url)), 'utf8').split(NL);
+const STEP_LINES = SETUP_LINES.filter((line) => line.trim().startsWith('const step = '));
+const STATEMENT = String(STEP_LINES[0]).trim();
+
+let root = '';
+
+beforeEach(() => {
+    root = mkdtempSync(join(tmpdir(), 'ks1337-akto-'));
+});
+afterEach(() => {
+    rmSync(root, { recursive: true, force: true });
+});
+
+/**
+ * Plant checkoutName/systemTest/{fixtures/pre-suite.ts, akto/tests/probe.mjs}; import the probe.
+ *
+ * @param {string} checkoutName - The checkout directory's name; may contain spaces.
+ * @returns {Promise<{ resolved: string; preSuite: string }>} The path the statement yields, and the real file.
+ */
+async function stepFrom(checkoutName: string): Promise<{ resolved: string; preSuite: string }> {
+    const systemTest = join(root, checkoutName, 'systemTest');
+    mkdirSync(join(systemTest, 'fixtures'), { recursive: true });
+    mkdirSync(join(systemTest, 'akto', 'tests'), { recursive: true });
+    const preSuite = join(systemTest, 'fixtures', 'pre-suite.ts');
+    writeFileSync(preSuite, 'export {};');
+    const probe = join(systemTest, 'akto', 'tests', 'probe.mjs');
+    writeFileSync(
+        probe,
+        [
+            'import * as url from ' + SQ + 'node:url' + SQ + ';',
+            'import { fileURLToPath } from ' + SQ + 'node:url' + SQ + ';',
+            STATEMENT,
+            'export { step, url, fileURLToPath };',
+        ].join(NL),
+    );
+    const mod = (await import(pathToFileURL(probe).href)) as { step: string };
+    return { resolved: mod.step, preSuite };
+}
+
+describe('KS-1337 akto: the pre-suite step path survives a checkout directory with spaces', () => {
+    it('control KS-1337 akto: preSuiteSetup.ts has one step statement and it names fixtures/pre-suite.ts', () => {
+        expect(STEP_LINES).toHaveLength(1);
+        expect(STATEMENT).toContain('../../fixtures/pre-suite.ts');
+        expect(STATEMENT).toContain('import.meta.url');
+        expect(STATEMENT.endsWith(';')).toBe(true);
+    });
+
+    it('control KS-1337 akto: from a checkout path WITHOUT spaces the step is the real pre-suite file', async () => {
+        const { resolved, preSuite } = await stepFrom('TestingAgentMAIN');
+        expect(resolved).toBe(preSuite);
+        expect(existsSync(resolved)).toBe(true);
+    });
+
+    it('RED KS-1337 akto: from a checkout path WITH spaces the step is the real pre-suite file, not a percent-encoded one', async () => {
+        const { resolved, preSuite } = await stepFrom('Testing Agent MAIN');
+        expect(resolved).toBe(preSuite);
+        expect(existsSync(resolved)).toBe(true);
+    });
+});

@@ -1,0 +1,80 @@
+--- a/Blockchain/Dev/services/originate/src/routes/adminConfig.ts
++++ b/Blockchain/Dev/services/originate/src/routes/adminConfig.ts
+@@ -112,3 +112,3 @@
+   } catch (err: any) {
+-    res.status(500).json({ success: false, error: { code: 'INTERNAL_ERROR', message: err?.message || 'Refresh failed' } });
++    fail500(res, 'Admin config request failed (POST /api/admin/refresh-tenants)', err);
+   }
+@@ -1857,4 +1857,4 @@
+     res.json({ success: true, updatedCount: result });
+   } catch (err: any) {
+-    res.status(500).json({ success: false, error: { code: 'INTERNAL_ERROR', message: err.message } });
++    fail500(res, 'Admin config request failed (POST /api/admin/backfill-certification-metadata)', err);
+   }
+--- a/Blockchain/Dev/services/originate/src/__tests__/ks730c-adminconfig-500-never-answers-err-message.test.ts
++++ b/Blockchain/Dev/services/originate/src/__tests__/ks730c-adminconfig-500-never-answers-err-message.test.ts
+@@ -141,3 +141,3 @@
+     expect({ liveTernaries: liveTernaries.length, helperCalls: helperCalls.length, distinctContexts: new Set(contexts).size })
+-      .toEqual({ liveTernaries: 0, helperCalls: 46, distinctContexts: 46 });
++      .toEqual({ liveTernaries: 0, helperCalls: 48, distinctContexts: 48 });
+     expect(contexts.filter((c) => !c)).toEqual([]);
+@@ -171,3 +171,2 @@
+     const KNOWN = [
+-      'POST /refresh-tenants', 'POST /backfill-certification-metadata',
+       'POST /seed-demo-users', 'POST /migrate-tenant-data',
+@@ -203,2 +202,55 @@
+   });
++});
++
++// KS-1334 part A: two of the four UNCONDITIONAL sites named by C4 above now go through fail500. They
++// answered err.message in EVERY environment, production included, so unlike the KS-730 cells the
++// production row is the one that separates this class, and it is driven first. Part B covers the
++// other two (seed-demo-users, migrate-tenant-data). Its own LEAK carries no double quote: the shared
++// LEAK above does, JSON-escapes to a backslash-quote in the body, and so can never be found by includes.
++const KS1334_LEAK = 'could not serialize access due to concurrent update ks1334-private-detail';
++const KS1334_NODE_ENVS = ['production', 'development', 'demo', 'test', undefined];
++const KS1334_ROUTES = [
++  { label: 'POST /refresh-tenants', path: '/refresh-tenants', body: {}, context: 'Admin config request failed (POST /api/admin/refresh-tenants)' },
++  { label: 'POST /backfill-certification-metadata', path: '/backfill-certification-metadata', body: { issuerName: 'ks1334-issuer' }, context: 'Admin config request failed (POST /api/admin/backfill-certification-metadata)' },
++] as const;
++const mockRefreshTenantConfigs = (jest.requireMock('../db') as { refreshTenantConfigs: jest.Mock }).refreshTenantConfigs;
++
++async function post1334(route: (typeof KS1334_ROUTES)[number], nodeEnv: string | undefined, throwIt: boolean): Promise<{ status: number; text: string }> {
++  setNodeEnv(nodeEnv);
++  if (throwIt) {
++    mockRefreshTenantConfigs.mockRejectedValue(new Error(KS1334_LEAK));
++    mockExecuteRaw.mockRejectedValue(new Error(KS1334_LEAK));
++  } else {
++    mockRefreshTenantConfigs.mockResolvedValue(undefined);
++    mockExecuteRaw.mockResolvedValue(3);
++  }
++  const res = await fetch(baseUrl + '/api/admin' + route.path, {
++    method: 'POST',
++    headers: { 'content-type': 'application/json' },
++    body: JSON.stringify(route.body),
++  });
++  return { status: res.status, text: await res.text() };
++}
++
++describe('KS-1334 part A: refresh-tenants and backfill-certification-metadata never answer a 500 with err.message', () => {
++  it.each(KS1334_ROUTES)('RED KS-1334 A1 $label: the thrown message is not in the 500 body under production or any other NODE_ENV, and fail500 logged it', async (route) => {
++    for (const nodeEnv of KS1334_NODE_ENVS) {
++      mockLoggerError.mockClear();
++      const reply = await post1334(route, nodeEnv, true);
++      expect({ nodeEnv, status: reply.status, leaked: reply.text.includes(KS1334_LEAK) }).toEqual({ nodeEnv, status: 500, leaked: false });
++      expect(JSON.parse(reply.text)).toEqual(CONSTANT_BODY);
++      expect({ nodeEnv, calls: mockLoggerError.mock.calls }).toEqual({ nodeEnv, calls: [[route.context, { error: KS1334_LEAK }]] });
++    }
++  });
++
++  it.each(KS1334_ROUTES)('control KS-1334 A0 $label: a call that does not throw answers 200 and logs nothing', async (route) => {
++    const reply = await post1334(route, 'production', false);
++    expect({ status: reply.status, success: JSON.parse(reply.text).success }).toEqual({ status: 200, success: true });
++    expect(mockLoggerError).not.toHaveBeenCalled();
++  });
++
++  it('control KS-1334 A2: KS1334_LEAK survives JSON encoding, so leaked: false above is not vacuous', () => {
++    expect(JSON.stringify({ success: false, error: { message: KS1334_LEAK } }).includes(KS1334_LEAK)).toBe(true);
++    expect(new Error(KS1334_LEAK).message).toBe(KS1334_LEAK);
++  });
+ });
