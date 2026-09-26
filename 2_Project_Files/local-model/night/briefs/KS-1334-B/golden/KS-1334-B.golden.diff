@@ -1,0 +1,80 @@
+--- a/Blockchain/Dev/services/originate/src/routes/adminConfig.ts
++++ b/Blockchain/Dev/services/originate/src/routes/adminConfig.ts
+@@ -2028,5 +2028,5 @@
+       failed,
+     });
+   } catch (err: any) {
+-    res.status(500).json({ success: false, error: { code: 'INTERNAL_ERROR', message: err.message } });
++    fail500(res, 'Admin config request failed (POST /api/admin/seed-demo-users)', err);
+   }
+@@ -2156,4 +2156,4 @@
+     res.json({ success: true, results });
+   } catch (err: any) {
+-    res.status(500).json({ success: false, error: { code: 'INTERNAL_ERROR', message: err.message } });
++    fail500(res, 'Admin config request failed (POST /api/admin/migrate-tenant-data)', err);
+   }
+--- a/Blockchain/Dev/services/originate/src/__tests__/ks730c-adminconfig-500-never-answers-err-message.test.ts
++++ b/Blockchain/Dev/services/originate/src/__tests__/ks730c-adminconfig-500-never-answers-err-message.test.ts
+@@ -141,3 +141,3 @@
+     expect({ liveTernaries: liveTernaries.length, helperCalls: helperCalls.length, distinctContexts: new Set(contexts).size })
+-      .toEqual({ liveTernaries: 0, helperCalls: 48, distinctContexts: 48 });
++      .toEqual({ liveTernaries: 0, helperCalls: 50, distinctContexts: 50 });
+     expect(contexts.filter((c) => !c)).toEqual([]);
+@@ -171,4 +171,2 @@
+-    const KNOWN = [
+-      'POST /seed-demo-users', 'POST /migrate-tenant-data',
+-    ];
++    const KNOWN: string[] = [];
+     let route = '';
+@@ -255,2 +253,51 @@
+   });
++});
++
++// KS-1334 part B: the last two UNCONDITIONAL sites (seed-demo-users, migrate-tenant-data) now go through
++// fail500, so the KNOWN list in C4 is empty and C3 counts 50. Neither handler reaches its outer catch
++// through the prisma mock the cells above use, so each is driven through the first call its try block
++// makes outside any inner catch: seed-demo-users through the refusal warning of its demo-seed gate
++// (the gate is closed here), migrate-tenant-data through the platform pool of its tenant manager.
++const mockLoggerWarn = (jest.requireMock('../utils/logger') as { logger: { warn: jest.Mock } }).logger.warn;
++const mockDb = jest.requireMock('../db') as { getTenantManager: () => unknown };
++const KS1334B_ROUTES = [
++  { label: 'POST /seed-demo-users', path: '/seed-demo-users', calmStatus: 403, context: 'Admin config request failed (POST /api/admin/seed-demo-users)' },
++  { label: 'POST /migrate-tenant-data', path: '/migrate-tenant-data', calmStatus: 400, context: 'Admin config request failed (POST /api/admin/migrate-tenant-data)' },
++] as const;
++
++async function post1334b(route: (typeof KS1334B_ROUTES)[number], nodeEnv: string | undefined, throwIt: boolean): Promise<{ status: number; text: string }> {
++  setNodeEnv(nodeEnv);
++  delete process.env.ENABLE_DEMO_SEED;
++  mockLoggerWarn.mockReset();
++  mockDb.getTenantManager = () => null;
++  if (throwIt && route.path === '/seed-demo-users') {
++    mockLoggerWarn.mockImplementationOnce(() => { throw new Error(KS1334_LEAK); });
++  }
++  if (throwIt && route.path === '/migrate-tenant-data') {
++    mockDb.getTenantManager = () => ({ getPlatformPool: () => { throw new Error(KS1334_LEAK); } });
++  }
++  const res = await fetch(baseUrl + '/api/admin' + route.path, {
++    method: 'POST',
++    headers: { 'content-type': 'application/json' },
++    body: JSON.stringify({}),
++  });
++  return { status: res.status, text: await res.text() };
++}
++
++describe('KS-1334 part B: seed-demo-users and migrate-tenant-data never answer a 500 with err.message', () => {
++  it.each(KS1334B_ROUTES)('RED KS-1334 B1 $label: the thrown message is not in the 500 body under production or any other NODE_ENV, and fail500 logged it', async (route) => {
++    for (const nodeEnv of KS1334_NODE_ENVS) {
++      mockLoggerError.mockClear();
++      const reply = await post1334b(route, nodeEnv, true);
++      expect({ nodeEnv, status: reply.status, leaked: reply.text.includes(KS1334_LEAK) }).toEqual({ nodeEnv, status: 500, leaked: false });
++      expect(JSON.parse(reply.text)).toEqual(CONSTANT_BODY);
++      expect({ nodeEnv, calls: mockLoggerError.mock.calls }).toEqual({ nodeEnv, calls: [[route.context, { error: KS1334_LEAK }]] });
++    }
++  });
++
++  it.each(KS1334B_ROUTES)('control KS-1334 B0 $label: with nothing thrown the route answers its own refusal and logs no error', async (route) => {
++    const reply = await post1334b(route, 'production', false);
++    expect({ status: reply.status, success: JSON.parse(reply.text).success }).toEqual({ status: route.calmStatus, success: false });
++    expect(mockLoggerError).not.toHaveBeenCalled();
++  });
+ });

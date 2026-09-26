@@ -1,0 +1,84 @@
+--- a/Blockchain/Dev/services/originate/src/utils/logger.ts
++++ b/Blockchain/Dev/services/originate/src/utils/logger.ts
+@@ -42,6 +42,8 @@
+ // File transports for production
++// KS-1348: each File transport carries its own json() format, as the Console transport does. The
++// logger-level format renders nothing, so without it every line written was the literal undefined.
+ if (nodeEnv === 'production') {
+   transports.push(
+-    new winston.transports.File({ filename: 'logs/error.log', level: 'error', maxsize: 10_000_000, maxFiles: 5 }),
+-    new winston.transports.File({ filename: 'logs/combined.log', maxsize: 10_000_000, maxFiles: 5 }),
++    new winston.transports.File({ filename: 'logs/error.log', level: 'error', format: combine(json()), maxsize: 10_000_000, maxFiles: 5 }),
++    new winston.transports.File({ filename: 'logs/combined.log', format: combine(json()), maxsize: 10_000_000, maxFiles: 5 }),
+   );
+--- /dev/null
++++ b/Blockchain/Dev/services/originate/src/__tests__/ks1348-production-file-log-lines-are-json.test.ts
+@@ -0,0 +1,92 @@
++// KS-1348: under NODE_ENV=production utils/logger.ts adds two File transports (logs/error.log and
++// logs/combined.log) and gave them no format. The logger-level format carries no json() and no
++// printf(), so nothing rendered the entry and every line written to either file was the literal
++// text undefined. Only production builds these transports, so no other cell can see this.
++//
++// The cell loads the REAL module under production through jest.isolateModules (it reads NODE_ENV
++// once, at import), with the working directory moved to a fresh temp dir so the relative logs/
++// paths land there, logs one error, and reads back what winston wrote.
+108
+== strict apply
+git apply --check rc=0
+git apply rc=0
+product == logger.fixed.ts
+test == golden test
+patching file '/private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/d0b2ec3e-4b50-4d96-87d2-4a998799b9cd/scratchpad/feed/ks1348/p.tip'
+patch -F0 product rc=0
+patching file '/private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/d0b2ec3e-4b50-4d96-87d2-4a998799b9cd/scratchpad/feed/ks1348/p.bad'
+1 out of 1 hunks failed while patching '/private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/d0b2ec3e-4b50-4d96-87d2-4a998799b9cd/scratchpad/feed/ks1348/p.bad'
+control (maxFiles altered) patch -F0 rc=1
+== RED at tip: new test, tip product
+    ✕ RED KS-1348 A1 logs/error.log: the production line parses as JSON and carries the message, the error and the service (3 ms)
+    ✕ RED KS-1348 A1 logs/combined.log: the production line parses as JSON and carries the message, the error and the service
+    ✓ control KS-1348 A0 logs/error.log: exactly one line was written, so A1 reads a real write
+    ✓ control KS-1348 A0 logs/combined.log: exactly one line was written, so A1 reads a real write
+    ✓ control KS-1348 A2: the module loaded its production shape, one Console and the two File transports
+  ● KS-1348: originate production file logs are JSON lines, not the literal undefined › RED KS-1348 A1 logs/error.log: the production line parses as JSON and carries the message, the error and the service
+    - Expected  - 6
+    + Received  + 1
+    +     "undefined",
+  ● KS-1348: originate production file logs are JSON lines, not the literal undefined › RED KS-1348 A1 logs/combined.log: the production line parses as JSON and carries the message, the error and the service
+    - Expected  - 6
+    + Received  + 1
+    +     "undefined",
+Tests:       2 failed, 3 passed, 5 total
+== GREEN after: golden
+    ✓ RED KS-1348 A1 logs/error.log: the production line parses as JSON and carries the message, the error and the service (1 ms)
+    ✓ RED KS-1348 A1 logs/combined.log: the production line parses as JSON and carries the message, the error and the service
+    ✓ control KS-1348 A0 logs/error.log: exactly one line was written, so A1 reads a real write
+    ✓ control KS-1348 A0 logs/combined.log: exactly one line was written, so A1 reads a real write
+    ✓ control KS-1348 A2: the module loaded its production shape, one Console and the two File transports
+Tests:       5 passed, 5 total
+== TAMPER: error.log transport loses its format (fixed tree)
+tamper target count 1
+    ✕ RED KS-1348 A1 logs/error.log: the production line parses as JSON and carries the message, the error and the service (3 ms)
+    ✓ RED KS-1348 A1 logs/combined.log: the production line parses as JSON and carries the message, the error and the service
+    ✓ control KS-1348 A0 logs/error.log: exactly one line was written, so A1 reads a real write
+    ✓ control KS-1348 A0 logs/combined.log: exactly one line was written, so A1 reads a real write
+    ✓ control KS-1348 A2: the module loaded its production shape, one Console and the two File transports
+  ● KS-1348: originate production file logs are JSON lines, not the literal undefined › RED KS-1348 A1 logs/error.log: the production line parses as JSON and carries the message, the error and the service
+    - Expected  - 6
+    + Received  + 1
+    +     "undefined",
+Tests:       1 failed, 4 passed, 5 total
+== test-inclusive tsc: tip vs fixed
+test-inclusive tsc rc=0 errors=0
+test-inclusive tsc rc=0 errors=0
+tsc error SETS identical (tip vs fixed)
+package tsc (as checker A7) rc=0
+== lint
+eslint --max-warnings 0 test+product rc=0
+✖ 22 problems (0 errors, 22 warnings)
+  0 errors and 14 warnings potentially fixable with the `--fix` option.
+
+npm run lint rc=0
+== whole originate suite, fixed
+Test Suites: 85 passed, 85 total
+Tests:       984 passed, 984 total
+ls: /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/d0b2ec3e-4b50-4d96-87d2-4a998799b9cd/scratchpad/sparkfeed/Blockchain/Dev/services/originate/logs: No such file or directory

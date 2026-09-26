@@ -1,0 +1,15 @@
+--- a/Blockchain/Dev/services/originate/src/__tests__/ks730c-adminconfig-500-never-answers-err-message.test.ts
++++ b/Blockchain/Dev/services/originate/src/__tests__/ks730c-adminconfig-500-never-answers-err-message.test.ts
+@@ -112,9 +112,11 @@
+     for (const nodeEnv of NODE_ENVS) {
++      // KS-1349: cleared per environment, so each iteration must reach fail500 and log for itself.
++      mockLoggerError.mockClear();
+       const reply = await call(route, nodeEnv, true);
+       expect({ nodeEnv, status: reply.status, leaked: reply.text.includes(LEAK) }).toEqual({ nodeEnv, status: 500, leaked: false });
+       expect(JSON.parse(reply.text)).toEqual(CONSTANT_BODY);
+       // REACHED, not merely clean: a body without the leak is also what the benign branch and any
+       // mock-shaped crash produce. Only fail500 logs this route's context with the thrown text, so
+       // this is the assertion that says the code under test actually ran for THIS nodeEnv.
+-      expect(mockLoggerError.mock.calls.at(-1)).toEqual([route.context, { error: LEAK }]);
++      expect(mockLoggerError.mock.calls).toEqual([[route.context, { error: LEAK }]]);
+     }

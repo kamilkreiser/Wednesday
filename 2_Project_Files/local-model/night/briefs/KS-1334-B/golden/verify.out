@@ -1,0 +1,129 @@
+== strict apply
+git apply --check rc=0
+git apply rc=0
+product == adminConfig.B.ts
+test == ks730c.B.ts
+patching file '/private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/d0b2ec3e-4b50-4d96-87d2-4a998799b9cd/scratchpad/feed/ks1334b/p.tip'
+patch -F0 product rc=0
+patching file '/private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/d0b2ec3e-4b50-4d96-87d2-4a998799b9cd/scratchpad/feed/ks1334b/t.tip'
+patch -F0 test rc=0
+patching file '/private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/d0b2ec3e-4b50-4d96-87d2-4a998799b9cd/scratchpad/feed/ks1334b/p.bad'
+1 out of 2 hunks failed while patching '/private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/d0b2ec3e-4b50-4d96-87d2-4a998799b9cd/scratchpad/feed/ks1334b/p.bad'
+control (:2028 altered) patch -F0 rc=1
+== RED at tip: FIXED test, tip product
+    ✕ KS-730 C3 SOURCE: all forty-six sites are routed through the helper, each with a DISTINCT context (2 ms)
+    ✕ KS-730 C4 SOURCE: the four UNCONDITIONAL err.message sites are named, not silently left (1 ms)
+    ✕ RED KS-1334 B1 POST /seed-demo-users: the thrown message is not in the 500 body under production or any other NODE_ENV, and fail500 logged it (1 ms)
+    ✕ RED KS-1334 B1 POST /migrate-tenant-data: the thrown message is not in the 500 body under production or any other NODE_ENV, and fail500 logged it (1 ms)
+  ● KS-730 part C: the 46 converted admin-config sites never answer a 500 with err.message › KS-730 C3 SOURCE: all forty-six sites are routed through the helper, each with a DISTINCT context
+    - Expected  - 2
+    + Received  + 2
+  ● KS-730 part C: the 46 converted admin-config sites never answer a 500 with err.message › KS-730 C4 SOURCE: the four UNCONDITIONAL err.message sites are named, not silently left
+    - Expected  - 1
+    + Received  + 4
+  ● KS-1334 part B: seed-demo-users and migrate-tenant-data never answer a 500 with err.message › RED KS-1334 B1 POST /seed-demo-users: the thrown message is not in the 500 body under production or any other NODE_ENV, and fail500 logged it
+    - Expected  - 1
+    + Received  + 1
+  ● KS-1334 part B: seed-demo-users and migrate-tenant-data never answer a 500 with err.message › RED KS-1334 B1 POST /migrate-tenant-data: the thrown message is not in the 500 body under production or any other NODE_ENV, and fail500 logged it
+    - Expected  - 1
+    + Received  + 1
+Tests:       4 failed, 19 passed, 23 total
+== GREEN after: golden
+Tests:       23 passed, 23 total
+== TAMPER: :2031 back to the tip's leak line (fixed tree)
+tamper target count 1
+    ✕ KS-730 C3 SOURCE: all forty-six sites are routed through the helper, each with a DISTINCT context (2 ms)
+    ✕ KS-730 C4 SOURCE: the four UNCONDITIONAL err.message sites are named, not silently left (1 ms)
+    ✕ RED KS-1334 B1 POST /seed-demo-users: the thrown message is not in the 500 body under production or any other NODE_ENV, and fail500 logged it (1 ms)
+  ● KS-730 part C: the 46 converted admin-config sites never answer a 500 with err.message › KS-730 C3 SOURCE: all forty-six sites are routed through the helper, each with a DISTINCT context
+    - Expected  - 2
+    + Received  + 2
+  ● KS-730 part C: the 46 converted admin-config sites never answer a 500 with err.message › KS-730 C4 SOURCE: the four UNCONDITIONAL err.message sites are named, not silently left
+    - Expected  - 1
+    + Received  + 3
+  ● KS-1334 part B: seed-demo-users and migrate-tenant-data never answer a 500 with err.message › RED KS-1334 B1 POST /seed-demo-users: the thrown message is not in the 500 body under production or any other NODE_ENV, and fail500 logged it
+    - Expected  - 1
+    + Received  + 1
+Tests:       3 failed, 20 passed, 23 total
+re-apply product rc=0
+== ARM R3: fail500 logs only under production (fixed tree)
+R3 target count 1
+    ✕ RED KS-730 C1 GET /settings: the thrown message is not in the 500 body under development, demo, test or unset (17 ms)
+    ✕ RED KS-730 C1 GET /document-types: the thrown message is not in the 500 body under development, demo, test or unset (4 ms)
+    ✕ RED KS-730 C1 GET /workflows: the thrown message is not in the 500 body under development, demo, test or unset (1 ms)
+    ✕ RED KS-730 C1 GET /organizations: the thrown message is not in the 500 body under development, demo, test or unset (1 ms)
+    ✕ RED KS-730 C2 GET /settings: the thrown message is logged once, server-side, with this route named (1 ms)
+    ✕ RED KS-730 C2 GET /document-types: the thrown message is logged once, server-side, with this route named (1 ms)
+    ✕ RED KS-730 C2 GET /workflows: the thrown message is logged once, server-side, with this route named (1 ms)
+    ✕ RED KS-730 C2 GET /organizations: the thrown message is logged once, server-side, with this route named (1 ms)
+    ✕ RED KS-1334 A1 POST /refresh-tenants: the thrown message is not in the 500 body under production or any other NODE_ENV, and fail500 logged it (8 ms)
+    ✕ RED KS-1334 A1 POST /backfill-certification-metadata: the thrown message is not in the 500 body under production or any other NODE_ENV, and fail500 logged it (2 ms)
+    ✕ RED KS-1334 B1 POST /seed-demo-users: the thrown message is not in the 500 body under production or any other NODE_ENV, and fail500 logged it (2 ms)
+    ✕ RED KS-1334 B1 POST /migrate-tenant-data: the thrown message is not in the 500 body under production or any other NODE_ENV, and fail500 logged it (1 ms)
+  ● KS-730 part C: the 46 converted admin-config sites never answer a 500 with err.message › RED KS-730 C1 GET /settings: the thrown message is not in the 500 body under development, demo, test or unset
+    Expected: ["Admin config request failed (GET /api/admin/settings)", {"error": "duplicate key value violates unique constraint \"admin_settings_pkey\" ks730c-private-detail"}]
+    Received: undefined
+  ● KS-730 part C: the 46 converted admin-config sites never answer a 500 with err.message › RED KS-730 C1 GET /document-types: the thrown message is not in the 500 body under development, demo, test or unset
+    Expected: ["Admin config request failed (GET /api/admin/document-types)", {"error": "duplicate key value violates unique constraint \"admin_settings_pkey\" ks730c-private-detail"}]
+    Received: undefined
+  ● KS-730 part C: the 46 converted admin-config sites never answer a 500 with err.message › RED KS-730 C1 GET /workflows: the thrown message is not in the 500 body under development, demo, test or unset
+    Expected: ["Admin config request failed (GET /api/admin/workflows)", {"error": "duplicate key value violates unique constraint \"admin_settings_pkey\" ks730c-private-detail"}]
+    Received: undefined
+  ● KS-730 part C: the 46 converted admin-config sites never answer a 500 with err.message › RED KS-730 C1 GET /organizations: the thrown message is not in the 500 body under development, demo, test or unset
+    Expected: ["Admin config request failed (GET /api/admin/organizations)", {"error": "duplicate key value violates unique constraint \"admin_settings_pkey\" ks730c-private-detail"}]
+    Received: undefined
+  ● KS-730 part C: the 46 converted admin-config sites never answer a 500 with err.message › RED KS-730 C2 GET /settings: the thrown message is logged once, server-side, with this route named
+    - Expected  - 8
+    + Received  + 1
+  ● KS-730 part C: the 46 converted admin-config sites never answer a 500 with err.message › RED KS-730 C2 GET /document-types: the thrown message is logged once, server-side, with this route named
+    - Expected  - 8
+    + Received  + 1
+  ● KS-730 part C: the 46 converted admin-config sites never answer a 500 with err.message › RED KS-730 C2 GET /workflows: the thrown message is logged once, server-side, with this route named
+    - Expected  - 8
+    + Received  + 1
+  ● KS-730 part C: the 46 converted admin-config sites never answer a 500 with err.message › RED KS-730 C2 GET /organizations: the thrown message is logged once, server-side, with this route named
+    - Expected  - 8
+    + Received  + 1
+  ● KS-1334 part A: refresh-tenants and backfill-certification-metadata never answer a 500 with err.message › RED KS-1334 A1 POST /refresh-tenants: the thrown message is not in the 500 body under production or any other NODE_ENV, and fail500 logged it
+    - Expected  - 8
+    + Received  + 1
+  ● KS-1334 part A: refresh-tenants and backfill-certification-metadata never answer a 500 with err.message › RED KS-1334 A1 POST /backfill-certification-metadata: the thrown message is not in the 500 body under production or any other NODE_ENV, and fail500 logged it
+    - Expected  - 8
+    + Received  + 1
+  ● KS-1334 part B: seed-demo-users and migrate-tenant-data never answer a 500 with err.message › RED KS-1334 B1 POST /seed-demo-users: the thrown message is not in the 500 body under production or any other NODE_ENV, and fail500 logged it
+    - Expected  - 8
+    + Received  + 1
+  ● KS-1334 part B: seed-demo-users and migrate-tenant-data never answer a 500 with err.message › RED KS-1334 B1 POST /migrate-tenant-data: the thrown message is not in the 500 body under production or any other NODE_ENV, and fail500 logged it
+    - Expected  - 8
+    + Received  + 1
+Tests:       12 failed, 11 passed, 23 total
+== test-inclusive tsc: tip vs fixed
+test-inclusive tsc rc=0 errors=0
+test-inclusive tsc rc=0 errors=0
+tsc error SETS identical (tip vs fixed)
+== lint
+eslint --max-warnings 0 fixed test rc=0
+  2089:13  warning  'copied' is never reassigned. Use 'const' instead  prefer-const
+  2129:20  warning  'e' is defined but never used                      @typescript-eslint/no-unused-vars
+✖ 2 problems (0 errors, 2 warnings)
+  0 errors and 1 warning potentially fixable with the `--fix` option.
+eslint product (warnings listed) rc=0
+✖ 22 problems (0 errors, 22 warnings)
+  0 errors and 14 warnings potentially fixable with the `--fix` option.
+
+npm run lint rc=0
+== whole originate suite, fixed
+Test Suites: 84 passed, 84 total
+Tests:       983 passed, 983 total
+== whole originate suite, tip
+Test Suites: 84 passed, 84 total
+Tests:       979 passed, 979 total
+eslint product tip warnings=4
+== COLLISION with KS-1349: order B then 1349
+B rc=0
+1349 on B rc=0
+Tests:       23 passed, 23 total
+== COLLISION: order 1349 then B
+1349 rc=0
+B on 1349 rc=0
+both orders -> identical test file
