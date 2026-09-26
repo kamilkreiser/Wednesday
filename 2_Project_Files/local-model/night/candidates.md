@@ -1,4 +1,4 @@
-# Ornith candidates — derived 2026-09-26 11:10 from 265 KS Backlog/Todo tickets (read-only, unpaginated)
+# Ornith candidates — derived 2026-09-27 01:10 from 267 KS Backlog/Todo tickets (read-only, unpaginated)
 
 A CENSUS for the coordinator to brief from, easy → hard (Kam 2026-09-15 16:40 / 18:19). A ticket here is a candidate, not a task: read it, read the file at the tip, write `night/briefs/<id>.md`, then queue it. Auth-shaped titles are excluded (LAST); Peter/Stuart tickets and PR-attached tickets are excluded outright.
 
@@ -36,13 +36,13 @@ A CENSUS for the coordinator to brief from, easy → hard (Kam 2026-09-15 16:40 
 - KS-1324 (P3) run_shell_suites.test.sh KS-1303 cell: a `-lt 6` WALL-CLOCK margin against a 15  — `scripts/run-shell-suites.sh`
 - KS-630 (P3) Wire the status-page XSS probe into preflight (or decide not to) — it runs today — `scripts/preflight/preflight.sh`
 
-## T3 jest services (originate, governance) — 2
-- KS-1334 (P2) adminConfig: four admin routes return err.message in a 500 body with no NODE_ENV — `services/originate/src/routes/adminConfig.ts`
+## T3 jest services (originate, governance) — 1
 - KS-759 (P3) tenantId is read through two `as unknown as` casts because it is not on JwtPaylo — `services/originate/src/middleware/auth.ts`
 
-## T4 docs (doc_patch) — 3
+## T4 docs (doc_patch) — 4
 - KS-1290 (P3) [resolved:docs, a HINT — the ticket MENTIONS the file] Lockfile edits move platform discriminators silently: an npm command inside a wo — `docs/DEV-PROCESS.md`
 - KS-1320 (P4) [resolved:docs, a HINT — the ticket MENTIONS the file] Nothing tells a PR author the 92-char squash-subject limit until a gate reads th — `CONTRIBUTING.md`, `docs/DEV-PROCESS.md`
+- KS-1343 (P4) [resolved:docs, a HINT — the ticket MENTIONS the file] Multi-tenancy docs: eight non-blocking overstatements and Polish notes left by # — `docs/MULTI-TENANCY.md`, `docs/RLS-FAIL-CLOSED-PLAN.md`
 - KS-1322 (P0) [resolved:docs, a HINT — the ticket MENTIONS the file] Published spec descriptions carry internal ticket keys ("KS-1275:", "KS-1118 F-3 — `docs/VOCABULARY.md`
 
 ## T5 multi-file / later — 33
@@ -51,7 +51,6 @@ A CENSUS for the coordinator to brief from, easy → hard (Kam 2026-09-15 16:40 
 - KS-1100 (P2) [resolved:basename, a HINT — read the file] Kintsugi deploy 4554b25e2: four live — `services/auth/src/routes/mfa.ts`, `services/auth/src/repositories/userRepo.ts`, `services/anchoring/src/chainHealthStatus.ts`
 - KS-1241 (P2) [resolved:route, a HINT — read the file] T-4: POST /api/v1/documents never answe — `services/api-gateway/src/index.ts`, `services/api-gateway/src/middleware/scopes.ts`, `services/api-gateway/src/routes/proxy.ts`
 - KS-1262 (P2) Security: PUT /api/settings/notifications writes the same key namespace as platf — `services/api-gateway/src/services/redis.ts`, `services/api-gateway/src/routes/admin.ts`
-- KS-1336 (P2) Per-tenant DB readiness: the dormant per-tenant-database path, and the five tick — `packages/shared/src/db/tenant-pool-manager.ts`, `services/tenant-provisioning/src/index.ts`, `services/api-gateway/src/startup-migrations.ts`
 - KS-485 (P2) Security review — plan, methodology & handover (Platform K) — `services/api-gateway/src/routes/notifications.ts`, `services/originate/src/repositories/documentRepo.ts`, `services/originate/src/index.ts`
 - KS-491 (P2) Review F — Edge, WAF, DDoS & anti-automation — `services/api-gateway/src/middleware/rateLimitEnforce.ts`, `services/auth/src/routes/auth.ts`
 - KS-576 (P2) Bulk re-key: one admin-authorised rotate across a named set of externalRefs — `services/api-gateway/src/routes/platform.ts`, `services/security/src/index.ts`, `packages/shared/src/db/tenant-guc.ts`
@@ -68,6 +67,7 @@ A CENSUS for the coordinator to brief from, easy → hard (Kam 2026-09-15 16:40 
 - KS-1304 (P3) [resolved:basename, a HINT — read the file] originate documents.ts is the first  — `services/originate/src/routes/adminConfig.ts`, `packages/shared/src/db/tenant-context.ts`, `packages/shared/src/db/tenant-pool-manager.ts`
 - KS-1333 (P3) [resolved:basename, a HINT — read the file] anchorStateSync's four persisting wr — `services/originate/src/services/anchorStateSync.ts`, `services/originate/src/repositories/documentRepo.ts`, `services/anchoring/src/anchorReadback.ts`
 - KS-1335 (P3) POST /api/teams/notify: a permanently failing webhook is never rotated past, bec — `services/m365-integration/src/index.ts`, `services/api-gateway/src/startup-migrations.ts`
+- KS-1345 (P3) [resolved:route, a HINT — read the file] GET /api/webhooks swallows a FAILED lis — `services/api-gateway/src/index.ts`, `services/api-gateway/src/routes/proxy.ts`, `services/originate/src/index.ts`
 - KS-526 (P3) KMS: move platform wallet mnemonic to Key Vault (KS-326 follow-up) — `services/anchoring/src/index.ts`, `services/anchoring/src/cardano/wallet.ts`, `packages/shared/src/vault/key-vault.ts`
 - KS-580 (P3) Append-only recovery audit held outside the estate being recovered — `services/api-gateway/src/routes/platform.ts`, `services/security/src/index.ts`
 - KS-621 (P3) Document reads are scoped by tenant and owner, never by organization — cross-org — `services/originate/src/repositories/documentRepo.ts`, `services/originate/src/routes/documents.ts`
@@ -151,7 +151,7 @@ A CENSUS for the coordinator to brief from, easy → hard (Kam 2026-09-15 16:40 
 - KS-889 — a measurement/ruling ticket, not a patch (updated 2026-09-06)
 - KS-981 — lives only on the frozen #892 branch (updated 2026-09-07)
 
-## EXCLUDED by predicate — 157
+## EXCLUDED by predicate — 159
 - KS-1000 — has a PR attached
 - KS-1003 — auth-shaped title (LAST, Kam 16:40)
 - KS-1005 — auth-shaped title (LAST, Kam 16:40)
@@ -222,6 +222,8 @@ A CENSUS for the coordinator to brief from, easy → hard (Kam 2026-09-15 16:40 
 - KS-1330 — names no product file (after basename/docs/route resolution)
 - KS-1331 — names no product file (after basename/docs/route resolution)
 - KS-1332 — names no product file (after basename/docs/route resolution)
+- KS-1338 — names no product file (after basename/docs/route resolution)
+- KS-1340 — names no product file (after basename/docs/route resolution)
 - KS-135 — on Peter/Stuart
 - KS-139 — on Peter/Stuart
 - KS-188 — on Peter/Stuart
