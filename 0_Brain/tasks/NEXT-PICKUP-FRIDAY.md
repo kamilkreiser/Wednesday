@@ -24,15 +24,14 @@ supersede: replace wholesale; previous = NEXT-PICKUP-FRIDAY.md.pre-0925-rotate-s
 ## 🔴🔴 DAY INSTRUCTION, live until end of SATURDAY 2026-09-26 — `tasks/WEEK-INSTRUCTION-FRIDAY.md`
 Kam (terminal ~08:0x, verbatim): "Yes, please keep going for the day. I'll be out all day, so just keep working on getting the product ready and refined." = Datasec/HPSM-POC. Still his: deploys, anything to HP/humans, money, template text + validator/rule changes, irreversible. Usage 71% at 09:50: cloud seats only when nothing local can do it AND it matters now; Spark first.
 
-## 🔴 STATE AT 21:1x (2026-09-26) — USAGE STOP REACHED (7d 90%, renews ~5d 10h)
-1. **HPSM-POC main = 37df926** (today: #26 templates 1.0.1 · #28 cold-user fixes · #29 sample tags · #30 firmware page · #27 validator fix, merged on Kam's tap). Main CI for 37df926 was polling at 21:1x — read `gh run list --commit 37df926…` first.
-2. **Kam's 5 taps 21:05:55–21:06:32 are all RULED + receipted** and recorded as HPSM-POC **C-27** (with the implementation note). Delivered: approver-line (built in #28), validator (#27 merged). **OWED, need a Claude seat (blocked by the 90% stop until Kam logs the laptop's DEFAULT Claude account into a fresh account or the allowance renews):**
-   a. `hpsmpoc-findings-order` a → DISPLAY sort (severity, then engine order) in `web/src/components/results/ResultsView.tsx` + the executive PDF's findings list (`ReportModelBuilder.cs`), caption text changed; engine key / F-numbering untouched (C-27 note). Spark-fit for the web half once a seat can raise it.
-   b. `hpsmpoc-showcase-labelling` b → one "prototype with sample content" banner per page; per-card badges only on true placeholders (multi-file web; Claude).
-   c. `hpsmpoc-summary-citation-gaps` a → pipeline adds citations for unattached TRUE group mentions, marked as added on screen; a FRESH independent safety set before merge (B21 option e; builds on #27's validator + `uncited-severity`).
-   Mark each card `--delivered` when merged.
-3. Kam was told on the panel (bf-b46be6012ea10): the stop, what his login unlocks, what waits. **Do not launch seats or subagents while usage_gate refuses.**
-4. Spark: laptop tunnel open; RESULTS in `2_Project_Files/friday/spark/runs/2026-09-26_hpsmpoc-sample-tag/RESULTS.md`; checker fixed (PASS-RECOUNT). Wednesday used the box 15:0x–~17:0x.
+## 🔴 STATE AT 22:4x (2026-09-26) — 65% checkpoint
+1. **HPSM-POC main = 0e6abab** (today: #26 · #28 · #29 · #30 · #27 · #31 merged, all green). **PR #32 (B28 auto-added citations, head 2a88ba0) CI was running** → on green: `gh pr merge 32 --squash --match-head-commit 2a88ba0817ffa7e45e44ffbccffa3feca0f12c16`, compare trees, poll main CI, `decision_queue.sh --delivered hpsmpoc-summary-citation-gaps "PR #32 …"`, tell Kam in one line.
+2. **All five 21:06 rulings (C-27):** approver-line + validator + findings-order + labelling DELIVERED; citation-gaps = PR #32.
+3. **Usage:** Kam 21:17 "Ignore the 90%" until he signs in with Datasec in the morning (EXPIRING-GRANTS row; re-ask at ~99%). Launch with `WED_USAGE_STOP=100`.
+4. **For Kam tomorrow (card it, a rule change is his):** B28 FOUND — the validator never reads the FIRST severity of a list ("Medium and low severity findings are present" passes for a low-only customer). Tightening; option: fix + fresh plants.
+5. **Not proven live:** auto-cite was not triggered in B28's 5 live calls. A later AI-mode run should look for one "Added automatically".
+6. Owed tooling (w=2 rows): caffeinate armed by the launcher; `friday_pull.sh` (commit own files → pull → UU check). Today's autostash conflicts on OTHER tools' files were caught by reading status each time.
+7. Day summary to Kam + the wrap are still owed (he is back tomorrow).
 
 ## NEXT (owed, in order)
 1. ~~HPSM-POC B14 fix round~~ DONE and merged; the re-run is LIVE 1. Source: the B12 user test STATUS `HPSM-POC/1_Project_Definition/Briefs/2026-09-25_B12_SEAT-C_end-to-end-user-test-as-a-salesperson.STATUS.md` (46 findings).
