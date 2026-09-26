@@ -1,0 +1,937 @@
+# QA Agent Invocation Brief — Datasec/NexusAI, ONE batched gate "batch #5a" (lane 1, the server entry point): RD-681 + RD-682 + RD-627b + RD-695 + RD-705 + RD-413 (all TIER 1) — six targets, six verdicts, one report
+
+**Drafted for Tuesday 2026-09-27 09:25–10:05 AEST by a read-only drafting agent; Tuesday reviews, stamps and launches.**
+Commissioned on Tuesday's batch #5a commission (2026-09-27 ~09:2x AEST) and six READY FOR QA mails on disk, each read WHOLE. Five were built by
+**NexusAI-M (S84M)**, one (RD-705) by its successor **S86M**; **the merge author after your verdict is the live lane-1 seat Datasec/NexusAI-M (S86M).**
+- **A — RD-681** @ `4209299c8858adf9e06cdcbcb717b8d6c40a23d4` (`rd-681-clear-undecryptable-s84m`; base `1904765`) —
+  `/Volumes/KK_T9_External_HDD/TUESDAY/2_Project_Files/fleet/qa-agent/briefs/2026-09-26_nexusai-rd681-READY-mail.txt`
+- **B — RD-682** @ `f15fed6e5404792f60ac5e2939c1ea25cb41139f` (`rd-682-clear-partial-audited-s84m`; **STACKED on RD-681: its parent is `4209299`**) —
+  `/Volumes/KK_T9_External_HDD/TUESDAY/2_Project_Files/fleet/qa-agent/briefs/2026-09-26_nexusai-rd682-READY-mail.txt`
+- **C — RD-627b** @ `c82aa92bec7688653149e4690efaeb3c137e602f` (`rd-627b-sigterm-flush-s84m`; base `1904765`) —
+  `/Volumes/KK_T9_External_HDD/TUESDAY/2_Project_Files/fleet/qa-agent/briefs/2026-09-26_nexusai-rd627b-READY-mail.txt`
+- **D — RD-695** @ `ad97d1202c2bb951ac1b604fe91771405a9685a2` (`rd-695-stats-trend-undated-s84m`; base **`748cece`**, **NOT merged forward onto `1904765`**) —
+  `/Volumes/KK_T9_External_HDD/TUESDAY/2_Project_Files/fleet/qa-agent/briefs/2026-09-26_nexusai-rd695-READY-mail.txt`
+- **E — RD-705** @ `e164d1a99cb33166d37c98d6f9069d51a7c18ad7` (`rd-705-no-store-authenticated-pages-s86m`; base `1904765`) —
+  `/Volumes/KK_T9_External_HDD/TUESDAY/2_Project_Files/fleet/qa-agent/briefs/2026-09-27_nexusai-rd705-READY-mail.txt`
+- **F — RD-413** @ `f70594a2418bb26a5ec2d98d68e8e4ed620cd575` (`rd-413-truthful-mail-secret-storage-s84m`; base **`11666d3`**, **NOT merged forward onto
+  `1904765`**; seven files, not only the server entry point) —
+  `/Volumes/KK_T9_External_HDD/TUESDAY/2_Project_Files/fleet/qa-agent/briefs/2026-09-26_nexusai-rd413-READY-mail.txt`
+
+**Batched under the 2026-09-18 batch-gates rule, as batches #1–#4.** **All six edit `backend/server.js`** (the server entry point); the author states the
+six are REGION-disjoint. The drafter READ the hunk headers (§1 "Regions") and they are far apart, **but the drafter ran NO merge-tree** (hard rule for
+this drafting): every pairwise and chained merge result in this brief is **a prediction for the gate to measure**, in its own scratch object dir. Two
+members are on OLDER bases (D on `748cece`, F on `11666d3`) and are gated as pushed AND on a merged-forward tree of the gate's own. **RD-682 is stacked on
+RD-681: merge order 681 then 682 is fixed.** Every head is re-read by `git ls-remote` in the launcher, which refuses on a mismatch.
+
+SELF-CHECK: re-read end-to-end for contradictions | 2026-09-27 09:49
+Self-check note: 2026-09-27 09:49
+
+## TUESDAY'S RULINGS AT STAMP (they answer the drafter's WRONG-list items 5, 6, 7 and 16)
+- **Item 5 (RD-705 vs C-175 on the metas): NOT a contradiction — read at source.** C-175 (:1800) splits RD-705: "S86M builds the server.js half (the header)"; the `settings.html:6` meta removal is lane 4's AFTER rd-430 merges. RD-705 building only the header and keeping the metas is exactly its half. **Tuesday's ruling: once RD-705 merges, the header makes the metas TRUE (C-18 "remove it or make it true" is satisfied), so lane 4's meta removal becomes OPTIONAL, not owed.** Row n12 reports the fact; it is not graded against RD-705.
+- **Item 6 ("every HTML page" vs C-171's "every authenticated page"): ACCEPTED by Tuesday, the author of C-171.** No-store on an unauthenticated HTML page (/login, /marketplace-landing, /status) leaks nothing; its only cost is a re-fetch on Back, which the READY discloses and row w7 measures. Grade it as a stated behaviour change, not a scope breach. A NON-HTML asset newly no-store stays a Minor (§2).
+- **Item 7 (RD-705 tier): TIER 1 ratified** — it is the server half of a credential-exposure class (C-171) and carries the browser leg.
+- **Item 16 (deploy-demo on a push to main): a prior measurement exists, not a fact for this gate to assume.** On the five batch-1 merges of 2026-09-26 (main -> 1904765) Tuesday recorded "demo skipped on each" (Tuesday's pickup DELTAs 93-95, RELAYED from the author seats; the batch-2 merges' demo state is not stated in that record). §11's read stays REQUIRED; put what a push triggers in the verdict's first lines.
+- **Items 1-4 and 8-15: carried as written;** each is a row or a measurement this gate owns. Item 4 (six/seven/five sendFile routes) is row n2.
+- **Launch order:** this gate launches only when a gate slot frees (batches 3 and 4 and Vision gate 9 share the machine and the jest lock). Heads are re-pinned by the launcher at launch.
+
+## Charter
+Read `/Volumes/KK_T9_External_HDD/TUESDAY/2_Project_Files/fleet/qa-agent/QA_AGENT_CHARTER.md` in full first. You are an independent tester. You did not
+build these changes and you owe no builder anything. **Every line below that reports what a builder says is a CLAIM, never evidence.** Explore an AI-config
+clear that now decides from the raw stored fields (A), a partial clear that now says what it removed and audits it (B), a shutdown path that now survives a
+second signal (C), a stats trend that now dates a job by its own time (D), a server that now sends every HTML page `no-store` (E), and a mail-settings
+page and admin health that now say how each mail secret is actually stored (F), looking for any state in which **the product says a credential is
+cleared, encrypted or not held while it is stored in the clear or at all; an audit record is lost, torn, duplicated or wrong; a job lands in a day that is
+not its own; a page that showed a secret is restored from a cache; or a colour, message or control a user sees is off the style guide or untrue.**
+
+- **RD-681 is TIER 1** (a credential claim; READY :6). Verdict: **GO / GO WITH FINDINGS / NO GO at `4209299`**, plus its merged-tree result.
+- **RD-682 is TIER 1** (audit of a credential store; READY :6). Verdict at **`f15fed6`**, plus merged-tree result.
+- **RD-627b is TIER 1** (audit durability; READY :6; lane plan v1 :18 "Tier 1"). Verdict at **`c82aa92`**, plus merged-tree result. **Its author disclosed
+  that the guard's "no duplicate flush" property is UNGUARDED (READY :15): you say whether that matters, and measure it (§2a-C rows s5/s6).**
+- **RD-695 is TIER 1** (data correctness, RD-315's class; READY :6 "your call"; the batch-1 gate graded its source E-C1 Major). Verdict at **`ad97d12`**
+  AND on your merged-forward tree `fwd-695` (M0 + `ad97d12`), plus merged-tree result.
+- **RD-705 is TIER 1** (the lane-1 no-store half of the RD-693 credential-page class, C-171; READY :6 "Suggested tier 1 with a browser leg"; Tuesday
+  raised RD-693's lane-4 half to TIER 1 as a credential for the same reason — RELAYED from Tuesday's daily note 2026-09-27 05:58). Verdict at **`e164d1a`**,
+  plus merged-tree result. **RD-693's lane-4 half is NOT in this gate (batch 6).**
+- **RD-413 is TIER 1** (what the product claims about how a credential is stored; lane plan v1 :13 "Tier 1"; READY :6). Verdict at **`f70594a`** AND on your
+  merged-forward tree `fwd-413` (M0 + `f70594a`), plus merged-tree result. **It needs a REAL-BROWSER leg and a BRAND leg (§2b), and you say whether RD-636
+  closes with it (§9 Q7).**
+- **One verdict PER ticket, one report, one mail.** A finding on one ticket never becomes another's verdict. **A finding that exists only in a
+  COMPOSITION (B × C through the audit buffer; A/B × F through the same settings store; E × F on the first-run page) is graded on the merged tree and named
+  against BOTH tickets' merged-tree lines, never silently against one.**
+- **TIER 1 AT FULL WEIGHT, FINDINGS-ONLY:** no fixes, no pushes, no deploys, nothing to Partner Center, the demo or production (§13).
+
+## RULED BY KAM, NOT YET IN AN ARTEFACT
+- **Merging is Tuesday's GO** under Kam's standing grant, typed in Tuesday's terminal 2026-09-25 ~22:0x and re-affirmed 2026-09-27 ~08:2x: *"Please work your
+  way through the tickets and merge once tested."* (RELAYED by Tuesday's commission; the drafter did not read it at source.) Merges happen on Tuesday's GO
+  after a gate verdict at the head; **the merging seat is S86M; no deploy, no production, no Partner Center.** **This gate merges nothing into anything the
+  fleet can see.**
+- **A merge to main triggers `.github/workflows/deploy-demo.yml`** (`on: push: branches: [main]`, `paths-ignore` md/docs/tests — READ at `1904765`). Its header
+  says a push "builds the image in ACR (harmless, no deploy)", its jobs run only `if: vars.CI_DEPLOY_ENABLED == 'true'`, and the deploy job is bound to the
+  GitHub environment `demo` with a required reviewer. **Whether `CI_DEPLOY_ENABLED` is set, and what the last push to main actually ran, is UNVERIFIED by
+  the drafter** — §11 asks you to read it with `gh` READ-ONLY. Your verdict mail states what a merge push will trigger, with its evidence class.
+- **RD-636:** "RD-636 (gate-5 F-B4) is exactly the claim RD-413 removes" (Tuesday's daily note 2026-09-26 18:19, relaying NexusAI-M; RELAYED) and "When
+  rd-413 merges: RD-636" (lane plan v2 :107, the author's plan). **The RD-636 ticket text was not read by the drafter** (no Jira). The only artefact you can
+  read is the gate-5 report's F-B4 (§PRIOR ROUND).
+
+**The clarifications that bind this gate** (`/Volumes/KK_T9_External_HDD/!CODING/Datasec/NexusAI/1_Project_Definition/CLARIFICATIONS.md`,
+313,569 bytes, mtime 2026-09-27 09:09, 1847 lines; line numbers by `grep -n` at 09:3x AEST — **the file is appended to all day; re-read them**):
+- **C-02** (:30) open mode on a fresh DATA_DIR. **C-18** (:109) dead UI is removed, not hidden (RD-705 READY :19 cites "remove it or make it true").
+  **C-28** (:153) never write, pull, check out or stash NexusAI's `2_Project_Files`. **C-40** (:225) a check must be able to fail on the thing it claims.
+  **C-49** (:299) prior-work check. **C-76** (:729) an explanation is a claim. **C-97** (:900) fixtures change, not policy. **C-98** (:906) cells assert the
+  property after the fix.
+- **C-57** (:410) a conflict confined to the counts file is resolved by REGENERATION with the id-superset control;
+  **"Any other conflicting file still stops."** — **predicted this batch: no other conflicting file** (§1 Regions). **If `backend/server.js` (or any other file) conflicts at ANY step, that
+  is a STOP for the fleet's real merge and a measured, labelled finding against this brief's premise for you; you do NOT hand-resolve it** (unlike batch #3,
+  Tuesday has granted no union exception here).
+- **C-68** (:657) a verdict holds only at the head it ran on; a semantic overlap git cannot see is re-run by NAME; counts regenerated ONCE after the
+  merge — **"No conflict is not evidence the number is right"** (:663); **"a clean merge-tree and a changed measured surface are not in tension"** (:660).
+- **C-89** (:827) after a merge commit: `git diff --quiet HEAD` and HEAD's counts equal the regenerated numbers.
+- **C-102** (:945) **an EARLY RETURN added to a shared function silently disarms NEGATIVE-asserting cells among its callers; the population is "callers
+  of the mutated function", never "files the commit touched"; the sweep carries a self-test that ABORTS (positive control, negative control, non-empty
+  population).** §3b is this gate's sweep. **RD-705 changes `res.writeHead` for EVERY response of the app** — the widest population of any member.
+- **C-104** (:972) never run a census, suite or id-superset control in a clone with an unresolved merge — resolve (stage) first.
+- **C-110** (:1101) THE FLOOR RULE: every jest run through `session-tools/nexusai-lock.sh`; a ZERO is reportable only if a control fired in the same
+  window; record the foreign-server count beside every result. **C-112** (:1141) a declared limit is where the evidence stops. **C-122** (:1278) source text
+  does not cover behaviour. **C-125** (:1320) the foreign-server counter.
+- **C-133** (:1426) base-aware id accounting, and its **ADDENDUM** (:1434) the authorised-rename case. **Predicted irrelevant: no member modifies or
+  deletes an existing test file** (§3a H-12). Cite it only if the id-superset control misses.
+- **C-135** (:1442) RD-619 built before RD-607 — **the stacking precedent RD-682 READY :6 cites** for building on RD-681.
+- **C-140** (:1465) RD-413 option B: with NO key source the product still SAVES the mail secrets and tells the truth; it never refuses (Kam, 2026-09-14,
+  RD-413 comment 37521, quoted there). **It is the oracle for every §2a-F row.**
+- **C-141** (:1480) a builder's proof ticket YIELDS to a `qa-*` ticket; **"Not covered: … gate tickets among themselves"** (:1484); **ADDENDUM** (:1488) a
+  MERGE hold is gate-class; **ADDENDUM 2** (:1490) once per waiting gate ticket; **ADDENDUM 3** (:1492) self-applied, logged not mailed; **ADDENDUM 4**
+  (:1494) a yield re-queues DIRECTLY BEHIND the gate or merge ticket with `nexusai-lock.sh <kind> <tag> --after <ticket-tag> <cmd…>`.
+- **C-142** (:1503) what "green" means at a merge. **C-150** (:1570) C-133's conditions are decided on blobs.
+- **C-171** (:1749) RD-693 ruled (c): lane 4 clears the shown-once SCIM token on leaving the page, **AND lane 1 stops the page being cached — "`Cache-Control:
+  no-store` on settings.html, or on every authenticated page, from backend/server.js"**; the batch-2 gate's R11 is the browser leg. **RD-705 is this
+  lane-1 ticket.**
+- **C-173** (:1765) Tuesday's lane-plan-v2 rulings: **RD-633 (re-encrypt plaintext mail secrets at boot) is lane 1 "after rd-413 merges"**; "The lane-1
+  gate (batch 5) is drafted after batches 3 and 4 launch".
+- **C-174** (:1784) NEVER KILL BY PATTERN — kill by a pid from your own ancestry, or by port plus cwd.
+- **C-175** (:1794) lane-4 rulings: **"RD-705's settings.html half (removing the dead no-store meta at `settings.html:6`, C-171, C-18) is lane 4's AFTER
+  rd-430 merges. S86M builds the server.js half (the header)."** — RD-705's READY :19 says the metas are KEPT and "Removing the metas … is not needed";
+  see WRONG item 5.
+- **C-178** (:1830) and **C-179** (:1839) name "after RD-705" as the build order for two lane-1 tier-1 items — **context only: a GO on RD-705 unblocks them.**
+- **Highest C-number at drafting: C-179** (:1839).
+
+## PRIOR ROUND
+PRIOR ROUND: no earlier gate ran on any of these six heads. The gates whose findings these tickets answer, and where each report is ON DISK:
+- **RD-681 / RD-682 ← the RD-579 gate** (RD-579 @ `cac9cf6`, GO WITH FINDINGS):
+  `/Volumes/KK_T9_External_HDD/!CODING/Testing Agent MAIN/projects/nexusai/reports/2026-09-25-gate-rd579-rd639/report.md` — **A-F1** (Major, :280: clear
+  answers 200 "cleared" while an undecryptable `ENC:` key stays in `settings.json` and its recovery copies, no audit row) → **RD-681 claims it closed**;
+  **A-F2** (Minor, :281: the 500 read-back says "Nothing is reported as removed" after removing six settings, no audit row) → **RD-682 claims it closed**.
+  Read §2.4 (:77-82, the K500 probe RD-682's preload makes permanent), §2.5 (:84-, claim 1 and the g/g2 undecryptable shapes, :102), §2.9 (audit rows) and
+  §2.10 (no secret anywhere). **Re-measure A-F1's and A-F2's own shapes at the heads and on the merged tree, and the recovery-copy half of A-F1 (L-A1).**
+- **RD-695 ← the batch-1 gate** `/Volumes/KK_T9_External_HDD/!CODING/Testing Agent MAIN/projects/nexusai/reports/2026-09-26-gate-batch1/report.md` — **E-C1**
+  (Major, class, :426 and its steps :453: `/api/stats/prints` and `/scans` bucket every SQLite-path job under TODAY); **E-C2** (:432, `generateAutomaticInsights`,
+  NOT built here — RD-688); **E-N1** (:437, `created_at` is the insert time). Also its **RD-533 target (§6, C-F1 :428)**: RD-533 changed the same
+  `startServer` listen callback RD-627b now edits — its cells are in RD-627b's C-68 set. **Re-run E-C1's steps at `ad97d12` and `fwd-695`.**
+- **RD-705 ← the batch-2 gate** `/Volumes/KK_T9_External_HDD/!CODING/Testing Agent MAIN/projects/nexusai/reports/2026-09-26-gate-batch2-rd428-rd444-rd200/report.md`
+  — §3.4 (:74, the REAL-BROWSER method: Chrome 153 via Playwright from its tree, loopback under the belt, open mode, keyboard only), **§3.4b R11 (:110:
+  settings.html "restored from bfcache", the SCIM token back in the DOM; served `Cache-Control: public, max-age=0`)**, §3.6 (:122-129, Tuesday's CDN
+  allow-list, ANSWER 2026-09-25T19:07:27Z, conditions 1-5) and **§3.9 (:144-150, the BRAND LEG method: value-equality against `tokens.css`, a planted
+  control)**. **R11 re-run at `e164d1a` is RD-705's first proof** (L-E1).
+- **RD-413 / RD-636 ← gate 5** `/Volumes/KK_T9_External_HDD/!CODING/Testing Agent MAIN/projects/nexusai/reports/2026-09-22-gate5-rd615-rd616/report.md` —
+  **F-B4** (Minor, :394: `static/first-run-setup.html:1849` "Stored encrypted at rest." is unconditional; false on every upgraded volume until its first
+  save, §4.6, and in option B); :427 "the one UI string (F-B4) was checked by grep" (no browser). **RD-636 is RELAYED as F-B4's ticket.**
+- **Instruments:** reuse the batch-1 and batch-2 gates' corrected instruments BY COPY (list in §12). Their self-corrections are rules H-13..H-16 below.
+- **Concurrent, not prior:** the **batch-3 gate** (`QA/NexusAI-batch3`, lane 2, erasure/jsonStorage/LAW files) and the **batch-4 gate** (`QA/NexusAI-batch4`,
+  lane 3, image files, docker) were LIVE at drafting (panes `%23`/`%24`, 09:30:41 AEST). Their reports do not exist yet. **Never read their trees as inputs,
+  never run in their clones, never count their servers as ours** (§12 clause 6).
+
+## 1. Targets — verified at drafting from the object store (09:27–09:40 AEST)
+**origin by `git ls-remote` at 2026-09-27 09:27:28 AEST:** `main` **`1904765007e9447ac6c980f9840c0689a02abe6c`** · `rd-681-clear-undecryptable-s84m`
+**`4209299c8858adf9e06cdcbcb717b8d6c40a23d4`** · `rd-682-clear-partial-audited-s84m` **`f15fed6e5404792f60ac5e2939c1ea25cb41139f`** ·
+`rd-627b-sigterm-flush-s84m` **`c82aa92bec7688653149e4690efaeb3c137e602f`** · `rd-695-stats-trend-undated-s84m` **`ad97d1202c2bb951ac1b604fe91771405a9685a2`** ·
+`rd-705-no-store-authenticated-pages-s86m` **`e164d1a99cb33166d37c98d6f9069d51a7c18ad7`** · `rd-413-truthful-mail-secret-storage-s84m`
+**`f70594a2418bb26a5ec2d98d68e8e4ed620cd575`**. **All seven equal Tuesday's commission.** Every sha is a commit in the local object store (`cat-file -t`).
+**Every other pinned sha, in full:** `748cecec2a883a117560824ac5615c268dfe0800` (748cece, RD-695's base = the RD-533 merge) · `11666d3c4f615190646914270016419fffa642e2`
+(11666d3, RD-413's base) · `057016de2b2929c23f643b7346413199f370d3ce` (057016d) and `748cece` = `1904765`'s parents.
+**Re-read all seven at your start, mid and end. A moved TICKET head is a finding and a reason to stop, never a typo to fix.**
+
+**Main at drafting:** `1904765` = "Merge main 748cece into rd-627a-erasure-tmp-siblings-s84n" (parents `057016d` `748cece`), counts **4133/247**.
+`git diff --name-only 748cece 1904765` = 4 paths (`rd627a` cell, `customerDataFiles.js`, `dataErasure.js`, counts). `git diff --name-only 11666d3 1904765` =
+24 paths, **including `backend/server.js`** (RD-315 at :14242/:14294 and RD-533 at :22609 in 11666d3's coordinates) **and `static/css/dark-mode.css`,
+`static/css/keyboard-focus.css`, `__tests__/helpers/css-colors.js`, `docs/BRAND.md`** (the brand corpus — relevant to §2b).
+**Main may move during your gate — and it is EXPECTED to: batches #3 and #4 are live and their merges land lane-2 and lane-3 files.** Call main at your
+start **M0**. (1) M0 must be `1904765` or a DESCENDANT of it; (2) `git diff --name-only 1904765 M0` must share NO path with the six deltas below except
+`scripts/verify-expected-counts.json` — **the launcher refuses on that** (`backend/server.js`, `backend/services/emailService.js`, `static/first-run-setup.html`,
+`static/js/first-run-setup.js` and the new test files); (3) **if M0 moved `backend/jsonStorage.js`** (batch #3's RD-424 is a `writeFile` change there),
+`backend/dataErasure.js` or any brand-corpus file, the launcher only NOTES it — **you then name those files, and run rows a5, s5/s6, x1-x3 and the §2b brand
+census at M0, because RD-681/682 read the settings store through `jsonStorage.readFile`, RD-627b's flush runs against RD-615's erasure epoch, and the brand
+leg resolves against the corpus as it stands at M0**; (4) your merged tree is **M0 + all six**, predicted counts **counts(M0) + 37 tests / + 7 suites
+(4170/254 at M0 = `1904765`)**; (5) if main moves AGAIN during your gate, your verdict names M0 and says what moved (C-68). **Never re-base mid-gate.**
+
+### Regions in the server entry point (READ: `git diff -U0 <base> <head> -- backend/server.js`, hunk headers only; old-side line numbers)
+| member | base | hunks (old-side lines) | function |
+|---|---|---|---|
+| A RD-681 | 1904765 | :16389, :16391-16396 | `app.post('/api/setup/ai-config/clear')` — `storedAoaiFields` |
+| B RD-682 (over A) | 4209299 | :421 (`AUDIT_ACTIONS`), :16417, :16423-16424 | the same route's read-back |
+| C RD-627b | 1904765 | :22640-22647 | `startServer` listen callback, the signal handlers |
+| D RD-695 | 748cece (`server.js` blob `bc099b2`, = `1904765`'s) | :19408, :19477-19518, :19786-19816 | `/api/stats/scans`, `/api/stats/prints` + `trendDayOf` |
+| E RD-705 | 1904765 | :971 (+29 after `helmet`) | a global middleware |
+| F RD-413 | 11666d3 (`server.js` blob `30aeff7`) | :18314 (`buildFullHealthDetails`), :21633, :21651 | admin health; `GET`/`POST /api/setup/mail-config` |
+Main's own `server.js` change since `11666d3` is :14242, :14294, :22609 (+15) — none within 3 lines of F's hunks. **These are READS of hunk positions.
+"Region-disjoint" is the author's claim (lane plan v2 :19-25; RD-705 READY :41 claims e164d1a vs each other branch "the ONLY conflict each time is
+scripts/verify-expected-counts.json", measured in `session-tools/s86m/mt-objects-rd705`) — the gate measures it (§1 Merge-trees).**
+**`server.js` blobs:** `1904765`/`748cece` `bc099b2` · `11666d3` `30aeff7` · A `0d7e387` · B `e1c8eb5` · C `ab2f5d7` · D `8621bca` · E `c16ca87` · F `4b00719`.
+**`package-lock.json` is blob `9064763` at `1904765`, `748cece`, `11666d3` and all six heads** (MEASURED) — one `node_modules` serves every tree.
+
+### TARGET A — RD-681 (TIER 1)
+- **Chain (MEASURED):** `4209299` (parent `1904765`), one commit. `merge-base(4209299, 1904765) = 1904765`.
+- **Delta over `1904765`: 3 files, +127/−9** — `A __tests__/rd681-clear-undecryptable-key.test.js`, `M backend/server.js`, counts. **Counts 4137/248** (+4/+1).
+- **What changed (READ, `git diff 1904765 f15fed6 -- backend/server.js`):** `storedAoaiFields()` now reads `jsonStorage.readFile(jsonStorage.settingsFile) ||
+  {}` and returns the `AOAI_FIELDS` (`azureOpenAIEndpoint`, `azureOpenAIApiKey`, `azureOpenAIDeployment`, `azureOpenAIApiVersion`) whose RAW value is not
+  `undefined`/`null`/`''` — instead of `getSetting`, which decrypts and answers null for an `ENC:` value no key opens. The removal decision, the read-back
+  and the audit's `orphanedFields` all use it. `aiProvenance.readStatus` and the `llmProvider` read still go through the decrypting path (unchanged).
+- **A drafter's READ you must MEASURE (row a5):** `readFile` answers **null for absent, unreadable OR unparseable** (`jsonStorage.js:2869-2877` at `1904765`,
+  READ), and the RD-407 docblock at :3055-3062 names `readFile(file) || {}` as the pattern that "was fatal for a WRITER". RD-681 puts that exact pattern in
+  a DECISION and in the READ-BACK: **with `settings.json` torn or unparseable, `storedAoaiFields()` answers `[]`** — so the `'none'` branch can answer
+  `200 {aoaiStatus:'cleared'}` without writing, and a read-back after a removal can answer "cleared" without having read the store. `readStoreStrict`
+  (:2893) exists for decisions that must not guess. **Predicted, not measured; compare with `1904765` (did `getSetting` answer the same on a torn store?) and
+  say whether RD-681 introduced it or kept it.**
+- **Cells (4, READY :12-14):** "alone" (a REAL `ENC:` blob from a store with a DIFFERENT machine id, planted raw before boot), "beside" (with a readable
+  deployment), "ollama" (under provider ollama), "fixture control" (the blob is `ENC:`, on disk, and `ai-model` reads not-configured).
+- **Builder's claims (RELAYED):** RED at `1904765` "alone", "beside" (removed but not named), "ollama"; "fixture control" green (`session-tools/s84m/rd681-red-at-1904765.log`);
+  4/4 at `4209299`; M1 (the old decrypting reader) → the 3 scenario cells red; M2 (`orphanedFields` → `[]`) → the same 3 (their audit half);
+  **4137/4137 across 248**; floor 0/0 (`session-tools/s84m/rd681-hold.log`).
+- **NOT TESTED — VERBATIM (READY :24-27):** *"- Recovery copies: settings.backup.json and backups/ still hold the old blob by the backup system's design (the
+  gate noted "blob + 3 backup copies"). Clearing those is a different question (erasure / backup retention), not claimed here."* · *"- Production with
+  ALLOW_KEY_DRIFT=true: only a non-production boot was driven."* · *"- A real restore flow producing the blob: planted, as the gate did."*
+  → **L-A1** (recovery copies keep the blob) · **L-A2** (production with `ALLOW_KEY_DRIFT=true`) · **L-A3** (a real restore flow producing the blob).
+
+### TARGET B — RD-682 (TIER 1) — STACKED ON RD-681
+- **Chain (MEASURED):** `4209299` (RD-681) → **`f15fed6` (parent `4209299`)**. `merge-base(f15fed6, 1904765) = 1904765`.
+- **Delta over `4209299` (its own change): 4 files, +149/−5** — `A __tests__/helpers/rd682-keep-key-preload.js`, `A __tests__/rd682-clear-partial-is-audited.test.js`,
+  `M backend/server.js`, counts. **Over `1904765`: 5 files, +273/−11** (A's three plus the two new B files). **Counts 4143/249** (+6/+1 over A).
+- **What changed (READ):** `AUDIT_ACTIONS.AI_CONFIG_CLEAR_PARTIAL` (:422); `heldBefore = await storedAoaiFields()` before the removal loop; when the
+  read-back finds fields left: `removed = heldBefore − left`, `logger.error(… {removed, stillStored})`, `auditLog(AI_CONFIG_CLEAR_PARTIAL, {removed,
+  stillStored})`, and `500 {success:false, code:'AI_CONFIG_CLEAR_PARTIAL', removed, stillStored, error:"Some AI settings were removed, but these are still
+  stored: <labels>. Clear again, or remove them from the settings store."}`. The full clear is unchanged (`AI_CONFIG_CLEARED`, 200).
+- **Cells (6 + helper, READY :10-11):** the helper, loaded with `node -r`, makes `setSetting('azureOpenAIApiKey', null)` a no-op ONLY when `RD682_KEEP_KEY=1`.
+  RED at `4209299`: "partial: 500 with code … and exact removed / stillStored lists", "partial: the message names what is still stored…", "partial: an
+  AI_CONFIG_CLEAR_PARTIAL audit row…"; GREEN there: "findability", "instrument control", "control (preload loaded, switch off): a full clear is unchanged…".
+- **Builder's claims (RELAYED):** M1 (drop the audit call) → ONLY the audit cell; M2 (`removed = []`) → the lists cell + the audit cell; M3 (the old
+  message) → ONLY the message cell; **4143/4143 across 249** (`session-tools/s84m/rd682-hold.log`; red log `rd682-red-at-4209299.log` — **the READY does not
+  name that file; it is on disk**).
+- **NOT TESTED — VERBATIM (READY :21):** *"NOT TESTED: a real store failing a write (simulated by the preload); the first-run page's rendering of this 500
+  (the page shows data.error)."*
+  → **L-B1** (a real store failing a write) · **L-B2** (the first-run page's rendering of the 500 — discharged by the browser leg, §2b row w5).
+
+### TARGET C — RD-627b (TIER 1)
+- **Chain (MEASURED):** `c82aa92` (parent `1904765`). **Delta: 3 files, +109/−6** — `A __tests__/rd627b-second-sigterm-finishes-flush.test.js`, `M backend/server.js`,
+  counts. **Counts 4137/248** (+4/+1).
+- **What changed (READ, `git diff 1904765 c82aa92`):** `process.once('SIGTERM'|'SIGINT')` → `process.on`, behind ONE `_shuttingDown` flag shared by both
+  signals; a repeat signal logs *"Received ${signal} again while flushing the audit buffer; finishing the flush first (RD-627)."* and returns; the
+  swallowed `catch (_e) {}` around `await flushAuditBufferToDisk()` now logs `'Audit buffer flush on shutdown failed:'`. `process.exit(0)` after the flush.
+- **Drafter's READs you must MEASURE (rows s5, s6, s8):**
+  1. **Why "no duplicate flush" may matter:** `flushAuditBufferToDisk` (:370-399 at `c82aa92`) writes ONE fixed tmp name, `audit-buffer.json.tmp`, with
+     `fsp.writeFile` (truncating), then `rename`s it over `audit-buffer.json`. **Two flushes in flight share that tmp name:** one can truncate/rewrite the
+     tmp while the other renames it (a torn `audit-buffer.json` that `loadAuditBufferFromDisk` then fails to parse and replaces with an EMPTY buffer —
+     :335-350, "continuing with empty buffer"); one rename can ENOENT; and `process.exit(0)` after the first can strand the second's tmp. **Predicted, not
+     measured.**
+  2. **The same concurrency exists AT THE HEAD without a second signal:** the 60 s `setInterval` flush (:22640) is not behind `_shuttingDown`. An interval
+     flush in flight when the first SIGTERM arrives is two concurrent flushes on the same tmp. **Predicted, not measured; pre-existing if so.**
+  3. **The new `logger.error` is predicted near-unreachable:** `flushAuditBufferToDisk` catches its own errors (`logger.warn('Audit buffer flush to disk
+     failed:'…)`, :396-398) and never rethrows, so "the swallowed catch … now logs the error" (READY :10) describes a catch that almost nothing reaches — a
+     C-122/C-76 question; measure which line a real flush failure prints.
+- **Cells (4, READY :12-13):** uses RD-615's slow-flush preload (`RD615_SLOW=write`, 4 s) whose signal file proves the second SIGTERM landed INSIDE the flush
+  window (C-98). RED at `1904765`: "double: the process still exits 0 on its own…" (exit null, signal SIGTERM) and "double: the repeat signal is logged";
+  GREEN there: "control: one SIGTERM … exits 0 … writes audit-buffer.json" and "findability".
+- **Builder's claims (RELAYED):** M1 (back to `once`) → the double + log cells red; **M2 (guard removed) → ONLY the log cell red — and the HONEST READING
+  (READY :15): "with process.on and no guard, the second signal starts a SECOND concurrent flush, and the process still exits 0 with the buffer written …
+  'no duplicate flush' has NO cell. It is UNGUARDED (C-76)"**; **4137/4137 across 248** (`session-tools/s84m/rd627b-hold.log`, red log `rd627b-red-at-1904765.log`).
+- **NOT TESTED — VERBATIM (READY :19):** *"NOT TESTED: SIGINT (same path, only SIGTERM driven); a flush that THROWS (the new error log has no cell);
+  a real container runtime stop (TERM, then KILL after the grace)."*
+  → **L-C1** (SIGINT) · **L-C2** (a flush that throws) · **L-C3** (a real container runtime stop) · **plus L-C4, the author's disclosed UNGUARDED "no duplicate
+  flush" (READY :15)** — this gate's rows s5/s6 discharge or stand it.
+
+### TARGET D — RD-695 (TIER 1) — ON AN OLDER BASE
+- **Chain (MEASURED):** `ad97d12` (parent **`748cece`**). **`merge-base(ad97d12, 1904765) = 748cece`** — NOT merged forward onto `1904765`.
+- **Delta over `748cece`: 3 files, +123/−9** — `A __tests__/rd695-stats-trend-no-today-fallback.test.js`, `M backend/server.js`, counts. **Counts: `748cece`
+  4128/246 → `ad97d12` 4133/247** (+5/+1; the equality with `1904765`'s 4133/247 is a COINCIDENCE of arithmetic — different ids).
+- **Main since `748cece` (4 paths) shares ONLY the counts file with RD-695's 3** (MEASURED, `comm -12`). `server.js` is blob `bc099b2` at both `748cece` and
+  `1904765`, so D's server.js hunks sit on the same file main has.
+- **What changed (READ):** `trendDayOf(job)`: for `TimeGenerated`, then `Job_Start_Time_UTC`, then `Job_Completed_Time_UTC` — a value matching
+  `/^\d{4}-\d{2}-\d{2}/` is taken AS IS (`slice(0,10)`); anything else is `new Date(String(v))` → `toISOString().slice(0,10)` if valid; else next; else
+  `null`. Both routes skip an undated job (`dailyTrendUndated++`) instead of bucketing it under `new Date()`; `dailyTrend` is still
+  `Object.values(...).sort(date).slice(-30)`; `stats.dailyTrendUndated` is added to both responses.
+- **Drafter's READs you must MEASURE (rows p3-p8):** (1) the ISO-prefix branch accepts a value that is not a date (`"2026-13-45…"`) as a bucket key; (2) it
+  takes an OFFSET timestamp's LOCAL date (`"2026-08-01T23:30:00-05:00"` → `2026-08-01`, UTC is `08-02`) while the parse branch converts to UTC — so READY
+  :32 "days stay UTC" holds only for `Z`/zone-less values; (3) a NUMERIC epoch is stringified before `new Date`, so it parses as Invalid and the job is
+  undated although it has a time; (4) a locale string (`"08/01/2026 23:30"`) parses in the SERVER's timezone; (5) `slice(-30)` keeps the last 30 DISTINCT
+  dated buckets, not the last 30 calendar days — a far-future or year-`9999` value sorts last and evicts a real day, and a sparse history now spans months;
+  (6) `dailyTrendUndated` is read by NO chart (READY :12: `static/js/index.js` reads only date/jobs/sheets) — **a user sees a trend with fewer jobs than the
+  totals and no explanation**. **All predicted, none measured.**
+- **Cells (5, READY :14-16):** seeded through the product's `SimpleDatabase` into the server's `DB_PATH` (missing times stored as `''`): prints start+completion
+  2026-08-01, completion-only 2026-08-03, none; scans start-only 2026-08-02, none. RED at `748cece`: the 4 trend cells (prints `"2026-09-26:3"`, scans
+  `"2026-09-26:2"`); GREEN there: findability.
+- **Builder's claims (RELAYED):** M1 (the today fallback) → all 4 trend cells; M2 (drop start) → ONLY the 2 scan cells; M3 (drop completion) → ONLY the 2 print
+  cells; M4 (prints drop `dailyTrendUndated`) → ONLY the prints-undated cell; **4133/4133 across 247** (`session-tools/s84m/rd695-hold.log`, red log
+  `rd695-red-at-748cece.log`). **DISCLOSED instrument fix (READY :25):** the builder's first anchor counter used `grep -cF` on a multi-line pattern (read 1593),
+  fixed before the hold — **your mutator counts anchors with an exact substring count, never `grep -c`.**
+- **NOT TESTED — VERBATIM (READY :29-33):** *"- The Log Analytics path: the TimeGenerated-first ordering is kept, but not driven."* · *"- A real browser render
+  of the two trend charts."* · *"- Timezones: days stay UTC (the ISO prefix, as before), so a job late in a local day may bucket to the next UTC day. That's
+  unchanged behaviour, not measured."* · *"- E-C2 (generateAutomaticInsights :19926/:20031, the same class) is NOT built here; it stays on RD-688."*
+  → **L-D1** (the Log Analytics path) · **L-D2** (a real browser render of the two charts) · **L-D3** (timezones) · **L-D4** (E-C2 → RD-688, declared out).
+
+### TARGET E — RD-705 (TIER 1)
+- **Chain (MEASURED):** `e164d1a` (parent `1904765`). **Delta: 3 files, +164/−3** — `A __tests__/rd705-html-no-store.test.js`, `M backend/server.js`, counts.
+  **Counts 4137/248** (+4/+1). Commit message cites C-171.
+- **What changed (READ, `git diff 1904765 e164d1a`):** one `app.use` registered right after `helmet(...)` (:972-998) that wraps `res.writeHead`: it takes the
+  Content-Type from a headers OBJECT passed to `writeHead` (the first non-array object argument) or from `res.getHeader('Content-Type')`; if it matches
+  `/^text\/html\b/i`, it deletes any passed `Cache-Control` and sets `Cache-Control: no-store`. No static file edited; the `<meta http-equiv="Cache-Control">`
+  tags are KEPT (READY :19).
+- **Drafter's READs you must MEASURE (rows n5-n10):** (1) any handler or static mount registered BEFORE this middleware (before :972) never passes through
+  it — census them; (2) a `writeHead(status, [k, v, …])` raw-ARRAY headers form is skipped by the `find` (arrays excluded) — census whether any code does it;
+  (3) a `304 Not Modified` to a conditional GET carries no Content-Type (`send` strips content headers), so it gets no `no-store` — what a browser holding a
+  pre-deploy cached copy then does; (4) `HEAD`; (5) HTML error pages (static 404, the default handler, a thrown 500); (6) `application/xhtml+xml` is out of
+  scope by the regex. **Scope note:** the branch is named "authenticated-pages" but the header goes on EVERY HTML document, including `/login`,
+  `/marketplace-landing` and `/status` (READY :31) — C-171 allows "or on every authenticated page"; say whether "every page" is inside that ruling.
+- **Cells (4, READY :23-28):** POP (14 `static/*.html` from disk; "7 sendFile page routes enumerated from server.js source"; known members asserted), N1 (every
+  static page served as HTML carries `no-store`; findability first), N2 (every sendFile page route; findability `/login`), CTRL-ASSET (`/js/settings.js`,
+  `/css/dark-mode.css` 200 WITHOUT `no-store`). One open-mode boot.
+- **Builder's claims (RELAYED):** red at `1904765` + the cell: N1 FAIL on all 14 pages, N2 FAIL on `/`, `/first-run-setup`, `/login`, `/marketplace-landing`,
+  `/status` ("public, max-age=0"); POP and CTRL-ASSET pass (`session-tools/s86m/rd705-red-at-1904765.log`); M2 (condition never true) → N1, N2; M3 (every
+  content type) → CTRL-ASSET; M4 (`no-cache`) → N1, N2 (`session-tools/s86m/rd705-hold.log`); **4137/4137 across 248**. **"No live control spawned, so a zero
+  would not be reportable"** (READY :30) — the builder's own floor caveat.
+- **USER-VISIBLE CHANGE (the READY asks you to carry it, :13):** Back/Forward to ANY NexusAI page now re-fetches instead of restoring; the dashboard included.
+  **Carry it in the verdict as a stated behaviour change, not a defect — and measure its user cost once (row n14).**
+- **NOT TESTED — VERBATIM (READY :45-48):** *"- No real browser. The back-forward-cache effect itself (R11) is claimed from the header, not observed. The
+  gate's browser leg is where it is measured."* · *"- The demo. RD-76 stands, and nothing is deployed."* ·
+  *"- An HTML response whose Content-Type is set only after writeHead. Nothing in the codebase does that; read, not tested."*
+  → **L-E1** (the bfcache effect in a real browser — discharged by §2b row w1) · **L-E2** (the demo; stays standing, §13) · **L-E3** (Content-Type set after
+  `writeHead`).
+- **C-68 note from the author (READY :43, RELAYED):** RD-693's `pageshow persisted===true` branch (lane 4, batch 6) will rarely fire once pages are `no-store`.
+  **Not this gate's to grade; name it in the report so batch 6 inherits it.**
+
+### TARGET F — RD-413 (TIER 1) — ON AN OLDER BASE, SEVEN FILES
+- **Chain (MEASURED):** `f70594a` (parent **`11666d3`**). **`merge-base(f70594a, 1904765) = 11666d3`** — NOT merged forward onto `1904765`.
+- **Delta over `11666d3`: 7 files, +317/−10** — `A __tests__/rd413-mail-secret-storage-truth.test.js`, `A __tests__/rd413-mail-secret-storage-ui.test.js`,
+  `M backend/server.js`, `M backend/services/emailService.js`, counts, `M static/first-run-setup.html`, `M static/js/first-run-setup.js`. **Counts: `11666d3`
+  4012/237 → `f70594a` 4026/239** (+14/+2).
+- **Main since `11666d3` (24 paths) shares `backend/server.js` AND the counts file with RD-413's 7** (MEASURED) — **so the fleet's merge-forward of RD-413
+  CONTENT-merges `server.js`** (main's hunks :14242, :14294, :22609 vs F's :18314, :21633, :21651 — predicted auto-merge, for the gate to measure).
+  `emailService.js` (`77d59df`), `first-run-setup.html` (`50be509`) and `first-run-setup.js` (`bec7ae8`) are UNCHANGED on main since `11666d3`.
+- **What changed (READ, `git diff 11666d3 f70594a`):** `EmailService.secretStorage()` reads `this._readJson(this.settingsFile, {})` and reports each of
+  `agentmail.apiKey` / `smtp.password` as `'none'` (undefined/null/''), `'encrypted'` (a string starting `ENC:`) or `'plaintext'`; `sanitizeForApi(settings,
+  storage = null)` adds `agentmail.apiKeyStorage` / `smtp.passwordStorage` (states only). `GET` and `POST /api/setup/mail-config` pass `secretStorage()`.
+  `buildFullHealthDetails` gains `mailSecretStorage {agentmailApiKey, smtpPassword, warning}` — the warning names `STORAGE_ENCRYPTION_KEY` and Key Vault;
+  reported, NOT a status flip. `first-run-setup.html`: "Stored encrypted at rest." removed from the AgentMail key's help; two `<div … class="form-text"
+  role="status" hidden>` notes added. `first-run-setup.js`: `renderSecretStorage()` fills them by `textContent` only ("⚠ The saved <label> is stored
+  unencrypted. Configure STORAGE_ENCRYPTION_KEY or Key Vault, then save these settings again to encrypt it." / "The saved <label> is stored encrypted." /
+  hidden).
+- **Drafter's READs you must MEASURE (rows m15-m18):** (1) `startsWith('ENC:')` reports **"encrypted" for an `ENC:` blob the current key cannot open** —
+  RD-681's exact fixture class, applied to a mail secret: the note then says "stored encrypted" for a secret the server cannot use (what does
+  `passwordSet`/`apiKeySet` say beside it?); (2) a plaintext value that happens to begin `ENC:` (saved with no key source, C-140) is reported "encrypted" —
+  a false claim; (3) `_readJson(file, {})` on a torn/unreadable settings file → `'none'` → no note and no warning while plaintext may be on disk (the RD-681
+  a5 class); (4) `mailSecretStorage` is in `buildFullHealthDetails` — **prove it is not reachable anonymously** (anonymous `/api/health` vs `/api/admin/health`,
+  RD-518 r3's health-detail decision). **All predicted, none measured.**
+- **Colour (READ, for §2b):** the static/JS diff adds **no colour literal, no `style=`, no new class** — only `class="form-text"` on the two new notes (and the
+  existing help line kept), and a `⚠` in text. Tuesday's daily note 2026-09-26 18:19 relays the author's same reading ("the brand leg is a confirmation only").
+  **A confirmation is still a measurement: §2b.**
+- **Cells (14, READY :16-19):** truth file (8): service no-key-source plaintext (findability first), key-source encrypted, none + no value; real server seeded
+  with a plaintext file: findability, mail-config says plaintext and returns no value, the health warning names both key sources, a save re-encrypts (disk
+  `ENC:`, both routes "encrypted", the warning gone), control: nothing stored = none, no warning. UI file (6, jsdom on the SHIPPED page): no unconditional
+  claim, a note per secret, plaintext warns, encrypted says so, none hidden, mixed follows each.
+- **Builder's claims (RELAYED):** RED at `11666d3` 12 of 14; the page "none" cell is **VACUOUS at base** (the notes did not exist) and guarded by the
+  "a note per secret" cell (READY :19 — a C-40 statement: re-derive it); M1..M4 each reddening exactly its named cells; **4026/4026 across 239**
+  (`session-tools/s84m/rd413-hold.log`, red log `rd413-red-at-11666d3.log`).
+- **NOT TESTED — VERBATIM (READY :31-36):** *"- A real browser render of the notes."* · *"- Key Vault as the key source: only the machine id and no-key-source
+  were driven."* · *"- The upgrade shape is driven by SEEDING a plaintext file, not by a real pre-RD-616 volume."* · *"- No admin UI renders
+  /api/admin/health, so its warning is visible only through the API. That is the "admin health" surface as it exists today."* · *"- The other AOAI
+  "Encrypted at rest" help text (first-run-setup.html:162) is jsonStorage's store, not a mail secret, and is out of scope; not surveyed for truth."*
+  → **L-F1** (a real browser render — discharged by §2b rows w2-w4) · **L-F2** (Key Vault as key source) · **L-F3** (a real pre-RD-616 volume) · **L-F4** (no
+  admin UI renders the health warning) · **L-F5** (the AOAI "Encrypted at rest" text at `first-run-setup.html:162` — RD-702, RELAYED).
+
+### File overlap and MERGE-TREES — NOT MEASURED BY THE DRAFTER (for the gate to measure)
+**Name sets (MEASURED, `git diff --name-only` over each head's merge-base with main, `comm -12`):** A∩B = `{rd681 cell, server.js, counts}` (B contains A);
+**every other pair = `{backend/server.js, counts}`**; main-since-`748cece` ∩ D = counts only; **main-since-`11666d3` ∩ F = `{server.js, counts}`**.
+**Merge-trees:** the drafter's hard rule forbade `merge-tree --write-tree` against the project repo. **Predicted by the hunk READ (§1 Regions):** every pair
+among B, C, D, E, F conflicts in the counts file ONLY, `server.js` auto-merging; M × D and M × F counts only; A/B vs M fast-forwardable. **The launcher
+(guard 80) re-measures this premise in a fresh scratch object dir and refuses on any other result; you measure all 15 pairs AND both chains yourself, in
+YOUR OWN scratch object dir (`GIT_OBJECT_DIRECTORY` = your dir, NexusAI's `.git/objects` as a read-only alternate), and record NexusAI's `count-objects`
+before and after** (the drafter read `count: 436` at 09:3x AEST; the live seats write loose objects there). **If ANY pair conflicts in `server.js`, the
+brief's premise is wrong: say which pair, which lines, and STOP the merged-tree arm (C-57) — the heads' own verdicts still stand.**
+
+### MERGE ORDER — the drafter's proposal, with its predicted end state and the C-68 re-run set per merge
+**Proposed order (the fleet's): 1. RD-681 → 2. RD-682 → 3. RD-627b → 4. RD-705 → 5. RD-695 → 6. RD-413.** **681 before 682 is FIXED** (682 contains 681).
+Why: the four on `1904765` first (cheap, counts-only); RD-705 before RD-413 so the no-store middleware's C-68 set runs against RD-413's changed first-run page
+at step 6; RD-695 (on `748cece`, counts-only) before RD-413 (on `11666d3`, the one CONTENT merge of `server.js` with main's RD-315/RD-533 hunks) so the
+riskiest merge is last and its C-68 set is widest. **Order is the gate's to CHALLENGE, not to accept: if your order-independence control (§10 Q4) or any
+merged-tree row shows the order matters, say so and propose another.**
+
+| step | merge | predicted conflicts | predicted counts after regeneration | C-68 re-run set BY NAME (run on the tree after that step) |
+|---|---|---|---|---|
+| 1 | M + RD-681 | none (A contains M) | 4137/248 | rd681 + rd579-ai-config-clear-truthful + rd549-* (3) + ai-config-aoai-save + rd464-* (3) + rd516-ai-test-ssrf |
+| 2 | + RD-682 | none (B contains A) | 4143/249 | step 1's set + rd682 + every cell that enumerates `AUDIT_ACTIONS` (derive) |
+| 3 | + RD-627b | counts only | 4147/250 | rd627b + rd615-audit-flush-cannot-resurrect-erased-entries + rd533-listen-error-fails-loudly + rd682 (the audit row it flushes) |
+| 4 | + RD-705 | counts only | 4151/251 | rd705 + auth-enforced-cache + every cell asserting `Cache-Control` / a response header on an HTML route (derive) + first-run-* (3) + rd465-first-run-open-window |
+| 5 | + RD-695 | counts only | 4156/252 | rd695 + rd315-api-database-no-fabricated-completion + every cell hitting `/api/stats` (derive) |
+| 6 | + RD-413 | counts only (server.js auto) | **4170/254** | rd413 × 2 + rd412-* (3) + rd419-* (2) + rd616-617-mail-secrets-at-rest-and-export-shapes + rd518-r3-health-detail-decision + rd518-keyvault-identity-and-loud-fallback + rd327-build-digest-on-public-health + health-sweep-* (2) + erasure-health-branches + **rd705** + first-run-* (3) + brand-token-conformance + rd403-first-run-no-publisher-identifiers |
+**End state predicted: 4170/254 = 4133 + 4 + 6 + 4 + 5 + 4 + 14 / 247 + 7 — ARITHMETIC; C-68 says the measurement decides.** Test-file names above are
+from `git ls-tree --name-only 1904765 __tests__/` (a LISTING, not a content search). **Re-derive every set in YOUR clone** — `git grep -l -E` over `__tests__`
+at M0 for `ai-config/clear|storedAoaiFields|AI_CONFIG_CLEAR` / `AUDIT_ACTIONS|audit-buffer|flushAuditBufferToDisk|SIGTERM` / `api/stats` / `Cache-Control|no-store|writeHead`
+/ `mail-config|secretStorage|sanitizeForApi|mailSecretStorage|admin/health` / `first-run-setup` — each with a positive control (the ticket's own cell file
+must be found at its head); add every file the table misses and say which. **Because the merged `server.js` is identical to NO parent and every
+server-booting cell reads it, the full verify of the merged tree is part of every step's C-68 set.**
+
+### How to build your trees
+- **No worktree is created in the NexusAI repo, and you never work in its `2_Project_Files` checkout (C-28).** In that repo use ONLY read verbs:
+  `show`, `log`, `diff`, `ls-tree`, `cat-file`, `rev-parse`, `merge-base`, `grep`, `ls-remote`, `archive`, `count-objects`. Never `fetch`, `pull`, `push`,
+  `checkout`, `worktree`, `commit`, `stash`, `gc`, `clean`, or `merge-tree --write-tree` without a scratch `GIT_OBJECT_DIRECTORY` of your own.
+- **Head trees:** `git -C <repo> archive <sha> | tar -x -C <fresh mktemp -d under
+  /Volumes/KK_T9_External_HDD/!CODING/Testing Agent MAIN/projects/nexusai/qa-trees/batch5a.XXXXXX/>`, git-indexed where a full verify or a cell needs a git tree.
+- **D and F on current main — the MERGED-FORWARD trees (the gate's own, never the author's branch):** in your OWN scratch clone, `git checkout -b fwd-695 <M0>`
+  then `git merge --no-ff ad97d12`; and `fwd-413` the same with `f70594a`. Predicted: counts-only conflict each (F's `server.js` auto-merges); resolve by
+  REGENERATION (C-57) after C-104's staging; predicted **4138/248** (`fwd-695`) and **4147/249** (`fwd-413`) at M0 = `1904765`. **These trees exist only in
+  your clone. You NEVER push, never write a ref in NexusAI, and never merge into the author's branch — the fleet's merge-forward is the author's (S86M's)
+  job, after your verdict.** Verdicts for D and F name BOTH the head and your merged-forward tree.
+- **The merged tree:** §10, in **your OWN scratch clone** (`git clone --shared --no-checkout <repo> <your own dir>`).
+- **Each tree is EXCLUSIVE to this gate and to ONE purpose.** A fresh `mktemp -d` per arm; never reuse a mutant tree for a clean arm; `batch5a`-prefixed
+  directories only. Nothing in another gate's `qa-trees/*` (batch 3 and batch 4 are LIVE), the builders' `worktrees/` or `session-tools/` is run in — read only.
+- `node_modules`: an APFS clone (`cp -c -R`) of the newest gate tree you trust, **after proving** `package-lock.json` is blob `9064763` there too; a real
+  directory, never a symlink. **The browser leg's Playwright + Chrome are the batch-2 gate's (its §3.4: Playwright 1.62.1, `channel: 'chrome'`, Chrome
+  153.0.8010.53) — prove the versions you get before you trust them, and never `npm install` into a NexusAI tree.**
+
+## 2. Why these tiers, and who is waiting
+- **RD-681 TIER 1:** "cleared" is a claim about a credential store. **A `200 cleared` while any Azure OpenAI field (readable or not) remains in
+  `settings.json` is a Major (A-F1's grade); a secret VALUE in any response, log line or audit row is a Blocker; an audit row that names the wrong fields is a
+  Minor.** L-A1's recovery copies are a declared limit, graded only if RD-681's text claims them.
+- **RD-682 TIER 1:** **a partial-clear response or audit row whose `removed` / `stillStored` is untrue is a Major; a partial clear with no audit row is a Minor
+  (A-F2's grade); a secret value anywhere is a Blocker.**
+- **RD-627b TIER 1:** **an audit buffer lost, torn or emptied on disk by a signal sequence a container runtime can produce (TERM, TERM; TERM during an interval
+  flush) is a Major; the process killed mid-flush is a Major; an unguarded-but-correct property is a Minor, said with both halves (C-102: "the product is
+  correct" AND "the guard is unexercised").**
+- **RD-695 TIER 1:** **a job counted in a day that is not its own (today included), or a bucket key that is not a calendar date, is a Major (E-C1's grade); a
+  correctly dated job silently left out, or a `dailyTrendUndated` that disagrees with the jobs left out, is a Minor.**
+- **RD-705 TIER 1:** **a page that showed a secret restored from the back-forward cache or the HTTP cache in a real browser is a Major (C-171's class); an HTML
+  document an authenticated user can load served without `no-store` is a Major; a non-HTML asset newly `no-store` is a Minor (a performance cost).**
+- **RD-413 TIER 1:** **a storage statement that is false — "encrypted" while the bytes on disk are plaintext, "none"/no warning while a secret is stored in
+  the clear — is a Major; a secret VALUE in any API view, health payload, DOM node or log is a Blocker; a colour the change introduces that does not resolve
+  to a NexusAI style-guide token is OFF-GUIDE = Major (Tuesday's commission); a warning that is present but not perceivable (hidden, unannounced, below
+  contrast) is a Minor.**
+- **The queue.** At 09:30:41 AEST the live panes were: `%0` tuesday, `%19` Datasec/NexusAI-M, `%21` Datasec/NexusAI-N, `%22` Datasec/NexusAI-P, `%23`
+  QA/NexusAI-batch3, `%24` QA/NexusAI-batch4, `%25` QA/Vision-gate9, `%1` fleet-monitor. **Two other NexusAI gates share the jest lock with you (§12 clause 6);
+  NexusAI-M's `s86m-rd594-hold` was the lock OWNER at 09:27 with `s86m-rd646-red` queued (Tuesday's daily note 09:27, RELAYED).** Expect a long queue; the
+  builders self-yield behind each of your `qa-*` tickets (C-141 ADDENDUM 3/4).
+
+## 2a. LEGITIMATE SHAPES — required measurements, row by row, base and head(s) in the same window
+**Columns: the head, the base it is measured against (M = `1904765` for A/B/C/E; `748cece` AND `1904765` for D; `11666d3` AND `1904765` for F), and the
+MERGED tree. Every server row: a REAL DATA_DIR of your own, seeded BEFORE boot, a loopback server from YOUR tree under the network belt, open mode (C-02)
+unless the row says otherwise; `settings.json`, the mail settings file, `audit-buffer.json` and the SQLite store read RAW before and after (H-2).**
+
+**A — the clear decides from the raw store (RD-681). Real server; the `ENC:` blob built exactly as the RD-579 gate did (a second store with a DIFFERENT
+machine id — its §2.5 g/g2), planted raw before boot.**
+
+| row | shape | expected at `4209299` | at M | predicted-by |
+|---|---|---|---|---|
+| a1 | undecryptable key ALONE (state `none`) | blob removed; `AI_CONFIG_CLEARED` names `azureOpenAIApiKey` in `orphanedFields` | 200 cleared, blob stays, no audit (A-F1) | builder ("alone") |
+| a2 | the blob BESIDE a readable deployment | both removed; the audit names the key | removed, not named | builder ("beside") |
+| a3 | the blob under `llmProvider: ollama` | blob removed; `llmProvider` stays `ollama` | blob stays | builder ("ollama") |
+| a4 | fixture control | blob is `ENC:`, on disk; `ai-model` not-configured | the same | builder (control) |
+| **a5** | **`settings.json` TORN (a truncated JSON, H-9) and UNPARSEABLE, then clear — once with an orphan key, once with a complete config** | **never `200 cleared` while the file holds any AOAI field** | say | **drafter (READ `readFile || {}`, §1 Target A)** |
+| a6 | a value of whitespace, `0`, `false` in an AOAI field | held (non-empty) → removed; audit names it | — | drafter |
+| a7 | the key in `settings.json` AND its recovery copies (`settings.backup.json`, `backups/`) | after clear: count the copies still holding the blob; say whether any response or audit text claims them | the same | drafter — **L-A1, measure it** |
+| a8 | clear by a signed-in VIEWER and anonymously in enforced mode | refused exactly as at M (`aiConfigActAuthority` unchanged) | — | drafter (authorization spot check) |
+| a9 | the blob's VALUE, and every needle | absent from every response, log line and audit row (H-1 scan with its control) | — | drafter |
+
+**B — the partial clear is audited and named (RD-682). Real server with the builder's preload COPIED into your tree (`-r` in argv, H-15), its landing control
+first (H-3).**
+
+| row | shape | expected at `f15fed6` | at `4209299` | predicted-by |
+|---|---|---|---|---|
+| b1 | complete config; the key's removal a no-op | 500 `AI_CONFIG_CLEAR_PARTIAL`, `removed` = the 3 others, `stillStored` = `[azureOpenAIApiKey]`; one audit row | 500 "Nothing is reported as removed", no audit | builder |
+| b2 | the message | names "API key", says "Clear again, or remove them…" | old text | builder |
+| b3 | switch OFF (preload loaded) | full clear unchanged (200, `AI_CONFIG_CLEARED`) | the same | builder (control) |
+| b4 | TWO fields stuck (key + deployment: extend the preload in YOUR copy, landing-controlled) | `stillStored` exactly both, labels "API key, deployment" | — | drafter |
+| b5 | "Clear again" (the message's own remedy) with the preload still on; then with it off | say what each second clear answers and audits; does the record end truthful | — | drafter |
+| b6 | a partial clear from the `'none'` branch (orphans only) | `removed`/`stillStored` over the orphans; `auditDetail` of the full-clear path never used | — | drafter |
+| b7 | the audit row reaches `audit-buffer.json` (flush) and the admin CSV export | present exactly once, names only | — | drafter — **feeds x2** |
+
+**C — the second signal (RD-627b). Real server; RD-615's slow-flush preload COPIED (`RD615_SLOW=write`) with its signal-file landing control (H-3); every
+server killed in a `finally` (§12 clause 5); a dirty audit buffer seeded by a real audited request before the first signal.**
+
+| row | shape | expected at `c82aa92` | at M | predicted-by |
+|---|---|---|---|---|
+| s1 | ONE SIGTERM | flush, `audit-buffer.json` written, exit 0 | the same | builder (control) |
+| s2 | SIGTERM, then SIGTERM inside the flush window | the repeat logged; flush finishes; exit 0 | killed mid-flush (exit null, SIGTERM) | builder |
+| s3 | SIGINT, SIGINT; SIGTERM then SIGINT (the flag is shared) | as s2 | killed | drafter — **L-C1** |
+| s4 | THREE signals; a signal AFTER the flush completed but before exit | one flush, one exit 0 | — | drafter |
+| **s5** | **THE UNGUARDED PROPERTY: M2 (guard removed, `process.on` kept) + a double SIGTERM inside the slow flush, ≥ 20 runs** | **count flush starts per run; `audit-buffer.json` parses and holds exactly the expected entries; `audit-buffer.json.tmp` stranded or not; then a boot: what `loadAuditBufferFromDisk` loads** | — | **drafter (READ: one fixed tmp name, truncating writes) — answers "does it matter"** |
+| **s6** | **AT THE HEAD: an interval flush in flight when the first SIGTERM arrives** (drive the interval's flush through a preload hook with its landing control; never edit the product) | **the same measurements as s5** — is the concurrent-flush shape reachable WITH the guard? | the same at M | **drafter (READ: the 60 s flush is not behind `_shuttingDown`)** |
+| s7 | a flush that FAILS (DATA_DIR not writable — your own dir, restored after, H-5) | which log line prints (the function's own warn, or RD-627b's new error); exit code; what is lost | — | drafter — **L-C2** |
+| s8 | an erasure (`onPurge('audit-buffer')`) landing during the shutdown flush | RD-615's epoch still discards the stale file; no pre-erasure entry lands | the same | drafter (RD-615 composition) |
+
+**D — the trend dates a job by its own time (RD-695). Real server; rows seeded BEFORE boot through each tree's own `SimpleDatabase` into `DB_PATH` (the
+ingestion shape), plus raw `sqlite3` rows where the row needs a non-string value; `TZ` set explicitly per run and recorded.**
+
+| row | shape | expected at `ad97d12` | at `748cece` | predicted-by |
+|---|---|---|---|---|
+| p1 | the builder's seed (prints 08-01 both / 08-03 completion-only / none; scans 08-02 start-only / none) | prints 08-01:1, 08-03:1, undated 1; scans 08-02:1, undated 1 | all today | builder |
+| p2 | `TimeGenerated` garbage (`"N/A"`) with a good start | the start's day | today | drafter |
+| **p3** | **an ISO-shaped non-date (`"2026-13-45T00:00:00Z"`, `"0000-00-00 00:00:00"`)** | **never a bucket keyed by a non-date** — READ predicts it becomes one | today | **drafter (READ)** |
+| **p4** | **an OFFSET timestamp `"2026-08-01T23:30:00-05:00"` and `"…+10:00"`** | **say which day; READY :32 says days stay UTC** | today | **drafter (READ: the prefix is the LOCAL date)** |
+| p5 | a NUMERIC epoch (ms and s) in a raw row | dated, or counted undated — say which; READ predicts undated | today | drafter |
+| p6 | `"08/01/2026 23:30"` under `TZ=UTC` and `TZ=Australia/Sydney` | the same day both runs, or say it moved | today | drafter — **L-D3** |
+| **p7** | **40 distinct dated days + one `"9999-12-31"` job** | **the trend's 30 buckets; is a real day evicted by the far-future one** | one bucket | **drafter (READ `slice(-30)`)** |
+| p8 | control: sum(trend.jobs) + `dailyTrendUndated` = total jobs, for a ≤ 30-day seed | holds | — | drafter (a control) |
+| p9 | where `dailyTrendUndated` is SHOWN: census `static/js/**` and every page for a reader | READ predicts none → **a user sees fewer jobs in the trend than in the totals, unexplained** | — | drafter (user perspective) |
+| p10 | a row with only `created_at` (E-N1) | undated, never dated by `created_at` | today | builder (stated) |
+
+**E — every HTML page is `no-store` (RD-705). Real server; raw HTTP (`http.request`, client timeout) AND the real browser for n13/n14.**
+
+| row | shape | expected at `e164d1a` | at M | predicted-by |
+|---|---|---|---|---|
+| n1 | every `static/*.html` (14 — re-count) | `Cache-Control: no-store` | `public, max-age=0` | builder (N1) |
+| n2 | every `sendFile` page route — **resolve the READY's "six" (:9) vs the cell's "7 … enumerated" (:24)**, and why only 5 were red (:31) | `no-store` on every one that serves HTML | — | builder (N2) + drafter |
+| n3 | `/js/settings.js`, `/css/dark-mode.css`, an image, a JSON API route | NOT `no-store` (API routes keep whatever they had) | the same | builder (CTRL-ASSET) + drafter |
+| n4 | a passed `Cache-Control` in `writeHead(…, {…})` on HTML (a preload route, landing-controlled) | replaced by `no-store` | — | builder (stated) |
+| **n5** | **every handler/static mount registered BEFORE the middleware (READ the server entry point above :972) that can answer HTML** | census + each one's header | — | **drafter (READ)** |
+| n6 | `writeHead(status, [k, v, …])` raw-array form on HTML (preload route) | say; census whether product code uses it (READ predicts none) | — | drafter |
+| n7 | a conditional GET (`If-None-Match` / `If-Modified-Since`) on an HTML page → 304 | the 304's headers; what a browser holding a PRE-DEPLOY cached copy then shows | — | drafter |
+| n8 | `HEAD` on every HTML page | `no-store` | — | drafter |
+| n9 | HTML error pages: a static 404, the default handler's 404/500 | `no-store` if `text/html` | — | drafter |
+| n10 | `Content-Type` set only after `writeHead` (a preload route) | say | — | builder (L-E3, declared) |
+| n11 | the POP cell's own enumeration vs yours (a real `ls static/*.html` + your route census) | equal | — | drafter (C-40: can POP miss a page?) |
+| n12 | the `<meta http-equiv="Cache-Control">` tags: present on which pages at the head | report (C-175 schedules `settings.html:6`'s removal in lane 4) | — | drafter (fact, not graded) |
+
+**F — the mail-secret storage is told truthfully (RD-413). Service-level AND real server; the settings file seeded BEFORE boot; key sources set per row
+and recorded (none / machine id; Key Vault is L-F2).**
+
+| row | shape | expected at `f70594a` | at `11666d3` | predicted-by |
+|---|---|---|---|---|
+| m1 | no key source; plaintext AgentMail key + SMTP password on disk | both `plaintext`; the page warns for each; health `warning` names both key sources | "Stored encrypted at rest." | builder |
+| m2 | a key source; saved | both `encrypted` (disk `ENC:`); page "stored encrypted"; no health warning | the same claim | builder |
+| m3 | nothing stored | `none`; notes hidden; no warning | — | builder (control) |
+| m4 | mixed (one each) | each note follows its own secret | — | builder |
+| m5 | plaintext on disk, then a save WITH a key source | disk `ENC:`, both routes `encrypted`, the warning gone | — | builder |
+| m6 | the API view | never a secret VALUE (states only), with the H-1 needle scan | — | builder + drafter |
+| **m15** | **an `ENC:` blob from a DIFFERENT machine id (RD-681's fixture) as the SMTP password** | **the note, `passwordSet`, and health say — measure; "stored encrypted" for an unusable secret: is it true, and is it enough?** | — | **drafter (READ `startsWith('ENC:')`)** |
+| m16 | a plaintext secret that literally begins `ENC:` saved with NO key source (C-140) | **must not say "encrypted"** — READ predicts it does | — | drafter |
+| m17 | the mail settings file TORN / unparseable | never "none"/no warning while a plaintext secret is on disk — READ predicts `'none'` | — | drafter |
+| m18 | anonymous `/api/health`, signed-in non-admin, admin `/api/admin/health` (enforced mode) | `mailSecretStorage` only where RD-518 r3 allows full details | — | drafter |
+| m19 | the AOAI "Encrypted at rest" text (`first-run-setup.html:162` at `f70594a`) | still present — confirm it is NOT a mail secret's claim (L-F5 / RD-702), not graded on RD-413 | — | builder (declared) |
+
+**X — the compositions (only the merged tree has all of them; measure each member's column too).**
+
+| row | shape | expected on the merged tree | predicted-by |
+|---|---|---|---|
+| x1 | A × F: one `settings.json` holding an undecryptable AOAI key AND a plaintext mail secret; clear AI config; read mail-config | the AI clear touches no mail field; the mail storage state unchanged; both audit truthfully | drafter |
+| x2 | B × C: a partial clear (its `AI_CONFIG_CLEAR_PARTIAL` row), then TERM, TERM inside the slow flush, then a boot | the row survives exactly once in `audit-buffer.json` and the export | drafter |
+| x3 | E × F: the first-run page (RD-413's page) on the merged tree | `no-store`; the notes render (§2b w2-w4) | drafter |
+| x4 | E × B: the partial-clear 500 rendered on the first-run page (the page shows `data.error`) | the message visible, true, and not cached | drafter — **L-B2** |
+| x5 | D × E: the dashboard (index) with the two trend charts | `no-store`; the charts draw the dated buckets (§2b w6) | drafter — **L-D2** |
+
+**A row whose expected verdict and clause disagree is a finding against this brief — say so.**
+
+## 2b. THE REAL-BROWSER LEG AND THE BRAND LEG (RD-705, RD-413 required; RD-682, RD-695 opportunistic)
+**Method: the batch-2 gate's §3.4 — Chrome via Playwright FROM YOUR OWN tree, `channel: 'chrome'`, a loopback server of yours under the network belt, fresh
+DATA_DIR per flow, open mode, KEYBOARD ONLY for navigation and input (never `.focus()`), both light and dark themes where the page has both. Run every flow
+TWICE: loopback-only, and with Tuesday's CDN allow-list exactly as the batch-2 gate applied it (§3.6 conditions 1-5, ANSWER 2026-09-25T19:07:27Z — exact URLs
+read from the page under test, every allowed request logged, SRI held, every other non-loopback request aborted and logged). Screenshots masked (no
+secret, no needle, no token in any PNG). Count your Chrome processes before/after (0/0).**
+
+| row | flow | at | expected | discharges |
+|---|---|---|---|---|
+| **w1** | **R11: Settings > SCIM > Generate, navigate away, Back** (the batch-2 gate's exact flow) | `1904765` AND `e164d1a` AND merged | M: restored from bfcache, token in DOM (the batch-2 observation, re-measured); head/merged: `pageshow persisted` false, a re-fetch, **the token NOT in the DOM or in memory** | **L-E1** |
+| w2 | the first-run page, mail step, each seeded state (m1 plaintext, m2 encrypted, m3 none, m4 mixed) | `f70594a`, `fwd-413`, merged | each note's text and visibility as §2a-F; the `⚠` renders; no "Stored encrypted at rest." for a mail secret | **L-F1** |
+| w3 | w2's notes: `role=status` — are they ANNOUNCED when they appear (an accessibility-tree read, not a screen reader claim) | the same | say; a note that appears on load may not be announced — a Minor at most | drafter |
+| **w4** | **BRAND: every colour the member diffs introduce** | all six heads | see the brand procedure below | commission |
+| w5 | the partial-clear 500 on the first-run page (x4) | `f15fed6` and merged | the message visible and true | **L-B2** |
+| w6 | the dashboard trend charts with p1 + p3 + p7 seeds | `ad97d12`, `fwd-695`, merged | what the charts draw; an invalid bucket (p3) or evicted day (p7) visible | **L-D2** |
+| w7 | the user cost of RD-705: type into a first-run field, navigate away, Back | `1904765` vs `e164d1a` | say what the user loses (a stated behaviour change, not a defect) | n14 |
+
+**THE BRAND PROCEDURE (the batch-2 gate's §3.9 method, value-equality):** the guide is `docs/BRAND.md` (v1.0; "Machine-readable form: `static/css/tokens.css`";
+"Enforced by: `__tests__/brand-token-conformance.test.js`" — READ at `1904765`). (a) Quote `tokens.css`'s light (`:root`) and dark blocks at M0. (b) For
+EACH of the six heads, list every colour in the ADDED lines of every `static/**` and CSS/JS file after comment stripping — **drafter's READ: 0 for all six
+(only RD-413 touches `static/`, and it adds `class="form-text"` and text only)** — with a POSITIVE CONTROL: a planted `#123456` in a scratch copy is found
+and reads "NO TOKEN". (c) **Because a zero-literal diff can still put a NEW element on the page in an EXISTING colour, measure the COMPUTED `color` and
+`background-color` of RD-413's two notes (and the edited help line) in the real browser, light and dark, and resolve each against `tokens.css` by value;
+state the contrast ratio against the computed ground.** A computed colour that resolves to no token is **OFF-GUIDE = Major** against RD-413 — **and in the
+same sentence say whether that colour is the pre-existing `.form-text` colour already on the page at `11666d3` (so the reader can tell "RD-413 introduced
+an off-guide colour" from "RD-413 placed a warning in an existing off-guide class")**. (d) Run `brand-token-conformance` on the merged tree (it is in step
+6's C-68 set). (e) Main moved the brand corpus since `11666d3` (`dark-mode.css`, `keyboard-focus.css`, `css-colors.js`, `BRAND.md`): resolve RD-413's
+colours on `fwd-413` and the merged tree, not only at its old base.
+
+## 3. THE QUESTIONS ALL SIX TARGETS ANSWER FIRST
+0. **SESSION_SECRET UNSET, EVERY RUN** — §3a H-1's ONE permitted printer. Positive control once per target: its own cell file with a throwaway random
+   64-hex secret exported (never printed, never written) — identical results, or say what differed.
+1. **Re-pin everything yourself:** `git ls-remote` at start, mid and end (three timestamped readings, branch name beside each sha, all seven refs); M0 and
+   the "Main may move" rule re-proved on M0; chains and exact parents (`git log --format='%H %P'`); deltas (`git diff --name-status`); counts at `11666d3`,
+   `748cece`, `1904765`, M0, and all six heads.
+2. **POSITIVE CONTROL FIRST — re-derive every red and every mutant INDEPENDENTLY** — your own scripts, never the builders' `*-hold.sh` files (read them for
+   method). **Before each mutant arm, prove it still parses — `node --check` on every mutated JS file, exit 0, quoted — and that it LANDED (the exact
+   mutated text present, the original absent once the new text is removed; the batch-1 gate's `qa-mutate.py <arm> <mid> --verify` with its negative
+   control). A red from a mutant that does not parse, or a green from one that never landed, is a VOID arm.** Quote the failing assertion of every red.
+3. **Name every behaviour guarded by no cell, and every one guarded only by source text (C-122).**
+4. **Full verify of each head, of `fwd-695`, `fwd-413`, and of the merged tree**, `npm run verify -- --maxWorkers=2` (RD-561), through the lock, on a
+   git-indexed tree, SESSION_SECRET UNSET. **Predicted: `4209299` 4137/248 · `f15fed6` 4143/249 · `c82aa92` 4137/248 · `ad97d12` 4133/247 · `e164d1a`
+   4137/248 · `f70594a` 4026/239 · `fwd-695` 4138/248 · `fwd-413` 4147/249 · merged (M0 + all six) counts(M0) + 37 / + 7 = 4170/254 at M0 = `1904765`**
+   (predictions; C-68 says the measurement decides). Every failure by NAME. **"Re-run until green" is not an acceptance gate (charter §4d).**
+
+## 3a. INSTRUMENT RULES — H-1..H-12 (carried from the batch-1 brief, which carried the rd579-rd639 and batch-2 lessons) and H-13..H-16 (the batch-1 gate's own S-1..S-11)
+- **H-1 (rd579-rd639 S-1: a SET/UNSET idiom printed the secret's VALUE).** The ONLY permitted printer, verbatim:
+  `if [ -n "${SESSION_SECRET+x}" ]; then echo "SESSION_SECRET SET (length ${#SESSION_SECRET})"; else echo "SESSION_SECRET UNSET"; fi`.
+  **FORBIDDEN anywhere in your scripts:** `${SESSION_SECRET-…}`, `${SESSION_SECRET:-…}`, `${SESSION_SECRET+$SESSION_SECRET}`, `echo
+  $SESSION_SECRET`, `printenv`, `env | grep`, `set | grep`, and **echoing an env array that could hold it (`${envs[*]}`, batch #2 S-5a)**.
+  **Self-test it BEFORE the first hold (a control that can fail):** run the printer once with a throwaway exported and once unset, capture both, assert
+  the throwaway's value is ABSENT from both (compare in-process; never print it). **After every hold, scan that hold's logs for the throwaway value** and
+  report the count (0); **the scan's own positive control plants a DIFFERENT random marker, never the throwaway** (batch #2 S-5b). The same discipline
+  covers every needle — the planted AOAI keys, mail secrets and the SCIM token: print a needle only as `<first4>…<last4>`, and **mask GUIDs with or without
+  hyphens** (batch #1 S-2). **This batch's needles are credentials by shape: scan every response body, log, audit row, `audit-buffer.json`, screenshot and
+  DOM dump for each one.**
+- **H-2 (rd579-rd639 S-2).** Never construct a product storage object (`JsonStorage`, `SimpleDatabase`, `EmailService`, or any module whose constructor
+  writes) on a DATA_DIR you are measuring AFTER its server booted. Seed BEFORE; read `settings.json`, the mail settings file, `audit-buffer.json`, backups,
+  the SQLite store and logs RAW. **Say which object each row constructs and when.**
+- **H-3 (rd579-rd639 S-3: the sweeper never started).** Every hook you rely on (a preload, the RD-682 keep-key preload, RD-615's slow-flush preload, a
+  signal-timing file, an interval-flush trigger, a raw-array `writeHead` route, a mutated rule) gets a **LANDING CONTROL** before the measured run: prove it
+  fired once on a known input. An arm whose instrument failed is VOID, is re-run, and is reported as a self-correction.
+- **H-4 (rd579-rd639 S-4).** The heartbeat is a SEPARATE child process started by the hold wrapper (`while sleep 60; do echo "HB $(date -u +%FT%TZ) <step>
+  <pid> <elapsed>"; done`), killed in the wrapper's `trap … EXIT`; **the wrapper ABORTS the hold if no HB line appears within 90 s of the grant**, and after
+  every hold you compute and REPORT the max gap between HB lines (must be ≤ 120 s).
+- **H-5 (rd579-rd639 S-5).** Restore your own perturbations (mode bits — s7 — torn files, planted routes, held ports) before any before/after hash, and hash
+  the restore.
+- **H-6 (rd579-rd639 S-6).** Every extractor and census gets a POSITIVE CONTROL (a known unit, an independently counted expectation). **Every path is
+  quoted** — `!CODING` and `Testing Agent MAIN` contain `!` and spaces. **Every server you boot runs under the network belt (`qa-netbelt.sb`) with its
+  landing control (EPERM for TEST-NET-1, 200 for loopback); the browser leg's CDN runs are the one stated exception (§2b).**
+- **H-7 (batch #2 S-1).** Mutants are built and verified ONLY by a quoted tool with a negative control (an unmutated tree → VOID rc ≠ 0). A mutant check
+  that prints an empty count is a VOID arm, never a pass.
+- **H-8 (batch #2 S-2).** The landing rule is "the exact mutated text is present AND the original text is absent once the new text is removed" — never
+  "the anchor is absent". **Anchors are counted with an exact substring count, never `grep -c` (RD-695 READY :25: `grep -cF` counted a multi-line
+  pattern's LINES and read 1593).**
+- **H-9 (batch #2 S-3).** Byte-level plants (the `ENC:` blobs, torn `settings.json` files, raw SQLite values, offset timestamps) are written with `Buffer`
+  and verified by `xxd -l 16` BEFORE use; never with `echo`, `printf`, a heredoc or `JSON.stringify` where the bytes matter.
+- **H-10 (batch #2 S-4).** Prove every phenomenon reachable before measuring its absence: for a1-a3 prove the blob does NOT decrypt on the server's key
+  (the a4 control); for s2-s6 prove the second signal landed INSIDE the open flush (the signal file); for p-rows prove the seeded row is in the store; for w1
+  prove the M column really restores from bfcache before claiming the head does not.
+- **H-11 (batch #2 S-6).** Every script runs under `/bin/bash` explicitly, and every `<sha>:<path>` is written `"${sha}:${path}"`. **Never `set -- $x` or
+  `declare -A` in the default shell** (zsh does not word-split, and `/bin/bash` 3.2 has no associative arrays).
+- **H-12 (batch #2 §6.6).** Before the C-57 control, list every `__tests__` file any head MODIFIES or DELETES (`git diff --name-status <its base> <head> --
+  __tests__`). **Predicted this time: NONE — every member only ADDS test files** (MEASURED: all `A`); the only non-test additions under `__tests__` are
+  `helpers/rd682-keep-key-preload.js` (a helper, not a suite). **So missing 0 is predicted; if a test id is missing, apply C-133 and its ADDENDUM verbatim.**
+- **H-13 (batch #1 S-1: a whitespace split read 73 space-bearing paths as "identical to no parent").** Every tree census is NUL-safe (`ls-tree -z`), with
+  a positive control on a path containing a space.
+- **H-14 (batch #1 S-6: a node driver exited 0 silently when its loop emptied).** Every driver ends with an explicit END record; a run with no END record
+  is VOID, whatever its exit code.
+- **H-15 (batch #1 S-7: `NODE_OPTIONS` split the preload path on its spaces).** Pass preloads as `-r "<path>"` in argv, never through `NODE_OPTIONS`.
+- **H-16 (batch #1 S-5: a "sibling" plant was a sibling of no store).** **Generalised for this batch:** before using a plant as "the thing the product
+  reads", assert the product's OWN reader sees it in the tree under test (the settings file `jsonStorage.settingsFile` names; the mail settings file
+  `EmailService.settingsFile` names; the SQLite `DB_PATH` the server opens) — never a path you assumed.
+
+## 3b. THE NEGATIVE-ASSERTION SWEEP (C-102) — REQUIRED, one table per ticket
+**The members add early returns and change shared paths. RD-705 is the widest: it wraps `res.writeHead` for EVERY response, so any existing cell that asserts a
+header, a caching behaviour or a response shape on an HTML route is in its population. A negative-asserting cell that stays GREEN because it now returns
+early — or never reaches the header it names — is invisible to every verify.**
+1. **Enumerate the new early paths (READ, quote each):** RD-681 — `storedAoaiFields()` now `readFile || {}` (a torn store reads as "nothing held"); RD-682 —
+   the new 500 return before `AI_CONFIG_CLEARED`; RD-627b — `if (_shuttingDown) { …; return; }`; RD-695 — `if (!date) { dailyTrendUndated++; return; }` in
+   both `forEach` loops; RD-705 — the `writeHead` wrapper (a header REPLACED, never a return); RD-413 — `renderSecretStorage`'s `if (!el) return;` and
+   `mailSecretStorage`'s `if (!emailService) return null;`, and `sanitizeForApi`'s new optional parameter (callers that omit it now get `null` state fields).
+2. **Enumerate the callers' EXISTING cells** in your clone at M0 (`git grep` over `__tests__` of `ai-config/clear|storedAoaiFields` /
+   `AUDIT_ACTIONS|auditLog|audit-buffer|SIGTERM|SIGINT` / `api/stats` / `Cache-Control|no-store|writeHead|max-age` / `sanitizeForApi|mail-config|admin/health|
+   buildFullHealthDetails` / `first-run-setup`), and **classify each cell NEGATIVE (asserts something refused, ignored, absent, not warned, not written, not
+   cached, unchanged) or POSITIVE.** **Also census every cell that asserts an EXACT response shape of `/api/setup/mail-config` or of health** — RD-413's
+   `apiKeyStorage`/`passwordStorage`/`mailSecretStorage` fields change those shapes.
+3. **For each NEGATIVE cell ask the one question: does it still reach the check it is NAMED for?** Measure it, do not read it: run each negative cell under
+   jest's coverage for the product file (`--coverage --collectCoverageFrom=<file> --testNamePattern=<cell>`), through the lock, at M0 and on the merged tree,
+   and compare the hit count of the line its name refers to. **A line hit at M0 and not on the merged tree is a DISARMED cell.** Priority:
+   `rd579-ai-config-clear-truthful` (A/B's own route), `rd615-audit-flush-cannot-resurrect-erased-entries` (C's flush), `rd533-listen-error-fails-loudly`
+   (C's callback), `auth-enforced-cache` and every header-asserting cell (E), `rd315-*` (D's class), `rd412-*`, `rd616-617-*`, `rd518-r3-*` (F).
+4. **The sweep's self-test ABORTS rather than emit a list (C-102):** a positive control (a cell you KNOW reaches a changed line — e.g. rd627b "double" hits
+   the `_shuttingDown` return), a negative control (a cell you KNOW does not — e.g. an image-manifest cell on the server entry point), and a
+   non-empty-population check.
+5. **Report per ticket:** the population size, the negative cells, how many still reach their named check, and each that does not (with the line). A disarmed
+   cell is **Minor** with both halves said together (C-102: "the product is correct" AND "the guard is unexercised") unless the product is also wrong.
+
+## 4. TARGET A — RD-681 (TIER 1). Answer each with a measurement.
+1. **Scope (READ ONLY, quoted):** `git diff --name-status 1904765 4209299` = the three files; the `storedAoaiFields` hunk quoted.
+2. **RED-PROOF, POSITIVE CONTROL FIRST:** the cell file against `1904765`'s product code — "alone", "beside", "ollama" red (quote each), "fixture control"
+   green — then 4/4 at `4209299`. H-10: the blob does not decrypt on the server's key.
+3. **Mutants:** re-derive **M1** (the old decrypting reader) and **M2** (`orphanedFields` → `[]`); new: **M-A1** `readFile` → `readStoreStrict(...).value`
+   (fail closed) → which cells change, and does a5 change; **M-A2** drop the `!== ''` clause → any red?; **M-A3** the read-back (`left`) through the OLD
+   decrypting reader while the removal uses the new → any red? (predicted: none — **name what then guards the read-back**); **M-A4** the audit names
+   `heldBefore` instead of `orphaned` → any red?
+4. **Every row a1-a9 of §2a** (a5 first).
+5. **C-68 set for A** (the §1 table, step 1) on `4209299` and the merged tree, per-file counts, one hold.
+6. **PRIOR WORK (C-49):** RD-579's `cac9cf6` wrote `storedAoaiFields` over `getSetting` (READY :22); the RD-579 gate's A-F1 steps re-run exactly; its §2.8
+   authorization census unchanged on this route.
+
+## 5. TARGET B — RD-682 (TIER 1). Answer each with a measurement.
+1. **Scope:** `git diff --name-status 4209299 f15fed6` (its own change) and `1904765 f15fed6` (the stack); `f15fed6`'s parent `4209299` exactly.
+2. **RED-PROOF, POSITIVE CONTROL FIRST:** the cell file against `4209299`'s product code — the three "partial:" cells red (quote each), the three controls
+   green — then 6/6 at `f15fed6`. H-3: the preload's landing control ("instrument control") re-derived by YOUR run, not read from the builder's.
+3. **Mutants:** re-derive **M1, M2, M3**; new: **M-B1** `removed = heldBefore` (not minus `left`) → the lists cell red?; **M-B2** the audit written AFTER the
+   response → any red? (ordering/durability); **M-B3** `heldBefore` computed AFTER the removal loop → `removed` empty → which cells; **M-B4** the label map
+   dropped (raw field names in the message) → the message cell red?
+4. **Every row b1-b7 of §2a.**
+5. **C-68 set for B** (step 2) on `f15fed6` and the merged tree — **derive which cells enumerate `AUDIT_ACTIONS`; a pinned count of actions would move.**
+6. **PRIOR WORK (C-49):** the RD-579 gate's §2.4 K500 probe vs the new helper — say whether the helper is the same instrument; the gate's recommendation 3
+   (READY :20) followed as stated.
+
+## 6. TARGET C — RD-627b (TIER 1). Answer each with a measurement.
+1. **Scope:** `git diff --name-status 1904765 c82aa92`; the signal-handler hunk quoted; RD-615's `flushAuditBufferToDisk` (:370-399) quoted as UNCHANGED.
+2. **RED-PROOF, POSITIVE CONTROL FIRST:** the cell file against `1904765`'s product code — "double: … exits 0" and "double: … logged" red (quote: exit null,
+   signal SIGTERM), control + findability green — then 4/4 at `c82aa92`. H-10: the second SIGTERM landed inside the flush (the signal file).
+3. **Mutants:** re-derive **M1** (`once`) and **M2** (guard removed) — **M2's "ONLY the log cell red" is the author's own proof that the no-duplicate property
+   is uncelled; confirm it**; new: **M-C1** `_shuttingDown` set AFTER the flush → which cells; **M-C2** separate flags per signal → s3 (TERM then INT)
+   changes?; **M-C3** `process.exit(0)` moved before the `await` → the control cell red?; **M-C4** the new `logger.error` removed → any red? (predicted: none —
+   L-C2 / C-122).
+4. **Every row s1-s8 of §2a — s5 and s6 first.** Then answer, in one paragraph, **"does 'no duplicate flush' matter?"**: MEASURED AT RUNTIME if s5/s6 ran, with
+   the run count and every torn/lost/stranded outcome; if a duplicate flush can tear or empty the buffer, say whether the guard at the head closes every path
+   to it (s6 answers the interval-flush path) and grade the missing cell per §2.
+5. **C-68 set for C** (step 3) on `c82aa92` and the merged tree.
+6. **PRIOR WORK (C-49):** F-18's flush-on-signal and the periodic flush kept; RD-615's epoch checks untouched; `rd615`'s header documenting the `once()` trap
+   (READY :18) — quote it and say it is still accurate or now stale.
+
+## 7. TARGET D — RD-695 (TIER 1). Answer each with a measurement.
+1. **Scope:** `git diff --name-status 748cece ad97d12`; `trendDayOf` and both call sites quoted; the charts' readers in `static/js/index.js` quoted (READ).
+2. **RED-PROOF, POSITIVE CONTROL FIRST:** the cell file against `748cece`'s AND `1904765`'s product code (identical `server.js` blob `bc099b2`) — the 4 trend
+   cells red (quote the "today" buckets), findability green — then 5/5 at `ad97d12` and on `fwd-695`.
+3. **Mutants:** re-derive **M1-M4** (anchors counted exactly — H-8); new: **M-D1** the ISO-prefix branch removed (always parse) → any red? (predicted: none — p4's
+   local/UTC difference is uncelled); **M-D2** `created_at` added as a last fallback → any red? (the builder's stated exclusion — is it celled?); **M-D3**
+   `slice(-30)` → `slice(0, 30)` → any red?; **M-D4** scans' `dailyTrendUndated` dropped → any red? (M4 covered prints only).
+4. **Every row p1-p10 of §2a — p3, p4 and p7 first.**
+5. **C-68 set for D** (step 5) on `fwd-695` and the merged tree.
+6. **PRIOR WORK (C-49):** the root-commit fallback (`8eb94ce`) and `d919049` (READY :27, READ `git log -S`); RD-315's `rd315` cells unchanged and green; the
+   batch-1 gate's E-C1 steps (:453) re-run.
+
+## 8. TARGET E — RD-705 (TIER 1). Answer each with a measurement.
+1. **Scope:** `git diff --name-status 1904765 e164d1a`; the middleware quoted; its position relative to every earlier `app.use`/route (n5).
+2. **RED-PROOF, POSITIVE CONTROL FIRST:** the cell file against `1904765`'s product code — N1 on all 14 pages and N2 on the five named routes red (quote one
+   of each: `public, max-age=0`), POP and CTRL-ASSET green — then 4/4 at `e164d1a`.
+3. **Mutants:** re-derive **M2, M3, M4**; new: **M-E1** the regex anchored to `text/html` exact (no `; charset`) → any red?; **M-E2** the passed-headers
+   branch removed (only `res.getHeader`) → any red? (n4 predicts none — name what guards it); **M-E3** the middleware moved to the END of the chain → which
+   cells red (POP/N1/N2 must catch it, or n5 is uncelled); **M-E4** `no-store` → `no-store, private` → any red? (it should stay green — a control on
+   over-specific assertions).
+4. **Every row n1-n12 of §2a — n5 and n7 first — and the browser rows w1 and w7 of §2b.** w1 is RD-705's first proof on a real browser (L-E1).
+5. **C-68 set for E** (step 4) on `e164d1a` and the merged tree — **the widest population (§3b).**
+6. **PRIOR WORK (C-49):** the `<meta http-equiv>` tags (`8eb94ce`, `9b58261`, READY :18); no earlier page `Cache-Control` on main (READY :20, `git grep
+   no-store` at `1904765` — re-run it); C-171 and C-175's split of the ticket (the header here, the meta removal in lane 4).
+
+## 9. TARGET F — RD-413 (TIER 1). Answer each with a measurement.
+1. **Scope:** `git diff --name-status 11666d3 f70594a` = the seven files; `secretStorage()`, `sanitizeForApi`, the health block, the two HTML notes and
+   `renderSecretStorage` quoted.
+2. **RED-PROOF, POSITIVE CONTROL FIRST:** both cell files against `11666d3`'s AND `1904765`'s product code — 12 of 14 red (quote each), the server findability
+   green, the page "none" cell VACUOUS at base (C-40: prove the "a note per secret" cell is what guards it) — then 14/14 at `f70594a` and on `fwd-413`.
+3. **Mutants:** re-derive **M1-M4**; new: **M-F1** `startsWith('ENC:')` → `includes('ENC:')` → any red?; **M-F2** `renderSecretStorage` sets `innerHTML` →
+   any red? (the "textContent only" claim — is it celled?); **M-F3** health `mailSecretStorage` added to the PUBLIC health payload → any red? (m18);
+   **M-F4** `secretStorage()` PREDICTS from key sources (the rejected design, C-140) → the upgrade-shape cell red?
+4. **Every row m1-m6 and m15-m19 of §2a — m15, m16, m17 first — and the browser rows w2-w4 of §2b (the BRAND leg).**
+5. **C-68 set for F** (step 6) on `fwd-413` and the merged tree.
+6. **PRIOR WORK (C-49):** C-140's rd412 option-B cell still guards "never refuses" (READY :29); RD-616's machine-id key source unchanged; `apiKeySet`/`passwordSet`
+   kept; gate 5's F-B4 (:394) and §4.6 (the upgrade path).
+7. **RD-636:** read gate 5's F-B4 (:394) and §4.6, and state — **MEASURED in the browser (w2) at `f70594a`, `fwd-413` and merged** — whether every shape F-B4
+   names (the upgraded volume before its first save; option B) now shows a TRUE statement for BOTH mail secrets and the unconditional string is gone. Say
+   plainly: **"RD-636 closes with RD-413" / "does not, because …"**, and name what is left (the AOAI line :162 is RD-702's, not F-B4's — confirm by quoting
+   F-B4). The ticket text is not on disk; say so beside the conclusion.
+
+## 10. THE MERGED TREE (C-68, C-57, C-89, C-104, C-112, C-133). No verdict is complete without it.
+1. **Build it in YOUR OWN scratch clone** under `projects/nexusai/qa-trees/batch5a.*/clone-1`: `git clone --shared --no-checkout <repo> <dir>`; in the clone
+   only: remove `origin`, set a local `user.name`/`user.email`, `gc.auto 0`, `core.fsmonitor false`; `git checkout -b gate <M0>`; then `git merge --no-ff` in
+   the PROPOSED ORDER: **`4209299`**, **`f15fed6`**, **`c82aa92`**, **`e164d1a`**, **`ad97d12`**, **`f70594a`**. **Write your prediction for each merge BEFORE
+   it** (§1 MERGE ORDER table); **anything other than the counts file conflicting STOPS (C-57)** — record the conflict and end the merged-tree arm there.
+   **C-104: resolve and stage before any census or run.**
+2. **Resolve the counts file by REGENERATION, never by hand:** take a side (a placeholder) to complete each merge commit, then `npm run verify --
+   --maxWorkers=2 --update-counts` ONCE on the tree after ALL SIX merges, through the lock, SESSION_SECRET UNSET; commit the regenerated file in the clone.
+   **Predicted 4170/254 at M0 = `1904765`.** Then a plain verify of the committed head; suites ≥ the largest parent's (C-57 step 4).
+3. **Blob identities and C-112's condition, stated beside the conclusion:** `backend/server.js` is identical to NO parent (six content-merged edits) —
+   **quote its merged blob id and `node --check` rc**; `emailService.js` = F's `4875331`; `first-run-setup.html` = F's `905ec1f`; `first-run-setup.js` = F's
+   `f1ea00f`; `package-lock.json` `9064763`. **`__tests__`: every file byte-identical to at least one parent, 0 identical to none, 0 absent (NUL-safe, H-13).**
+   The product file identical to no parent is proven by BEHAVIOUR (the C-68 sets, the merged columns of §2a/§2b, the §3b sweep), never by the superset.
+4. **Order independence (a control that can fail):** clone-2 in REVERSE (`f70594a`, `ad97d12`, `e164d1a`, `c82aa92`, `f15fed6` — note `f15fed6` brings
+   `4209299` with it; then `4209299` is already merged — say so). **The two `HEAD^{tree}` must be identical apart from the counts file** — quote both tree ids
+   and the `git diff --name-only`. If they differ in `server.js`, the order matters: say where and why.
+5. **id-superset control (C-57):** merged test ids ⊇ ids(M0) ∪ ids(`4209299`) ∪ ids(`f15fed6`) ∪ ids(`c82aa92`) ∪ ids(`ad97d12`) ∪ ids(`e164d1a`) ∪
+   ids(`f70594a`); **missing 0 predicted** (H-12). Use the batch-1 gate's adapted COPY `qa-c57-id-superset.sh` (reads the jest JSON of YOUR OWN verifies;
+   keeps the lock-holder refusal; proven first to STOP on a planted missing id), seven parents. **Note: `ad97d12` is off `748cece` and `f70594a` off
+   `11666d3`** — ids of later main commits are absent from those parents by construction, not by loss.
+6. **The semantic overlaps git cannot see (C-68), on the merged tree, one hold:** every C-68 set of the §1 table BY NAME (per-file counts); the merged column of
+   rows a5, b1, b7, s2, s5, s6, p3, p7, n1, n2, n5, m1, m15-m18 and x1-x5; the §3b sweep's merged column; then the full verify (§3 Q4). Then ONE mutant per
+   ticket on the merged tree (**M-A1** or RD-681's M1, RD-682's **M1**, RD-627b's **M1**, RD-695's **M1**, RD-705's **M2**, RD-413's **M1**) — each table
+   must still hold through the other five changes.
+7. **C-89 on your clone:** `git diff --quiet HEAD` holds; `git show HEAD:scripts/verify-expected-counts.json` equals the regenerated counts.
+8. **Nothing leaves your clone.** No push, no remote, no ref written in NexusAI. **Count `<repo>/.git/objects` files before and after your whole session
+   and account for any delta by mtime** (live seats commit there; the batch-1 gate's §9.9 method). Drafter's reading: `count-objects -v` `count: 436` at
+   09:3x AEST (the drafter wrote no object anywhere).
+
+## 11. CI (C-142) — NOT RUN AT ANY BRANCH HEAD unless a PR exists
+- **Unverified by the drafter** (no `gh` run). Check with `gh pr list --head <branch> --state all` (READ ONLY, NexusAI's own `GH_CONFIG_DIR`); M0's CI Build
+  with `gh run list --commit <M0>` READ ONLY, labelled. **Also READ ONLY: `gh run list --workflow deploy-demo.yml --branch main --limit 5` and `gh variable
+  list` (names and values of repository VARIABLES only — never secrets, which `gh` cannot print anyway): what the last pushes to main ran in "Deploy demo"
+  (build skipped or ran; deploy waiting on the `demo` reviewer or not), and whether `CI_DEPLOY_ENABLED` is set.** Put the answer in the verdict mail's first
+  lines: *what a merge push of these six will trigger*. **`gh` never merges, approves, comments, reviews, labels, re-runs, dispatches, approves a deployment,
+  or opens a PR.**
+
+## 12. Floor discipline — THE FOUR CLAUSES, plus THE DEADLINE RULE, plus THE OTHER GATES
+1. **Every jest run, every server you boot, every browser flow and every signal drive goes through `session-tools/nexusai-lock.sh`, tagged `qa-b5a-…`** (e.g.
+   `qa-b5a-H1-arms`, `qa-b5a-H2-servers`, `qa-b5a-H3-browser`, `qa-b5a-H4-heads-verify`, `qa-b5a-H5-merged`, `qa-b5a-H6-sweep`) — C-141: gate-class; under
+   ADDENDUM 2/3 every NEW `qa-*` ticket earns a fresh, self-applied yield from the builders. **When a MERGE ticket (gate-class, C-141 ADDENDUM) is already
+   queued when you file, file yours with `--after <that merge ticket's tag>` (ADDENDUM 4's tool) so you sit directly behind it; never ahead of it** (Tuesday
+   ratified this use for gate tickets at the batch-3 stamp). **QUEUE, NEVER TAKE OVER:** never kill, signal, move or edit another seat's process, lock
+   directory, owner file or ticket, even if it looks stuck; if a holder looks stuck, mail a QUESTION (§14) and keep waiting. **C-174: never kill by pattern —
+   kill only a pid from your own ancestry, or by port plus cwd.** Pure-node rows with no server and no jest (`trendDayOf` driven through a preload, the
+   merges, the censuses, the brand literal scan) may run outside the lock — say which did.
+2. **Hold the lock ONCE per multi-run measurement.** Every hold is a TRACKED CHILD of your seat, never detached (`nohup … &`).
+3. **Count foreign servers the RD-606 / C-125 way, anchored on YOUR OWN claude pid:** `basename(argv[0]) == node` AND the server entry point anywhere in the
+   remaining argv; "ours" = the ancestor chain CONTAINS your own claude pid. **Record the foreign count BESIDE EVERY RESULT (C-110 clause 3).**
+   **NEGATIVE controls, all in the same run, all must classify FOREIGN — read at drafting 2026-09-27 09:30:41 AEST from `tmux list-panes -a -F '#{pane_id}
+   #{@cockpit_name} #{pane_pid}'` + `pgrep -P` + `ps`:** NexusAI-M claude **`62649`** (pane `%19`), NexusAI-N claude **`9959`** (pane `%21`), NexusAI-P claude
+   **`20317`** (pane `%22`), Tuesday's claude **`23230`** (pane `%0`, parent bash `22288`), the batch-3 gate's claude **`36118`** (pane `%23`), the batch-4
+   gate's claude **`40285`** (pane `%24`), and the Vision gate 9's claude **`16516`** (pane `%25`). (Tuesday's pid changed since the batch-3 brief's `47349`;
+   the Vision_Sales_Portal seat `67576` was retired at 09:20.) Re-read them at start; if one has exited, say so and use the others; **a hold with NO live
+   negative control aborts.** **Your Chrome processes are counted separately (before/after, 0/0).** Reuse the batch-1 gate's instruments BY COPY with YOUR
+   pid as `ROOT` and these as `NEG`:
+   `/Volumes/KK_T9_External_HDD/!CODING/Testing Agent MAIN/projects/nexusai/reports/2026-09-26-gate-batch1/evidence/qa-floorlib.sh`
+   (**its defaults are STALE: `ROOT=33673` and the batch-1 `NEG` list — correct BOTH before any hold**), `…/qa-floorcount.py`, `…/qa-dispatch.sh`,
+   `…/qa-holdlib.sh`, `…/qa-mutate.py`, `…/qa-merge.sh`, `…/qa-mkarm.sh`, `…/qa-mkarm-clone.sh`, `…/qa-ssprint.sh`, `…/qa-h1-selftest.sh`, `…/qa-h1-scan.py`,
+   `…/qa-c57-id-superset.sh`, `…/qa-netbelt.sb`, `…/qa-netbelt-ctl.js`, `…/qa-to.sh`, `…/qa-srvlib.js`, `…/qa-jestwrap.sh`, `…/qa-jsum.js`, `…/qa-lockcheck.js`,
+   `…/q-merged-identity.py`, `…/qa-e-probe.js` and `…/qa-e6-seed.js` (the E-C1 / RD-315 seeders); and the batch-2 gate's browser instruments
+   `/Volumes/KK_T9_External_HDD/!CODING/Testing Agent MAIN/projects/nexusai/reports/2026-09-26-gate-batch2-rd428-rd444-rd200/evidence/qa-a-browser.js`,
+   `…/qa-a-lib.js`, `…/qa-png.js`; and the RD-579 gate's `…/2026-09-25-gate-rd579-rd639/evidence/qa-servercond-decrypt.js` and `…/qa-a-probe.js` (the
+   undecryptable-blob method). The original counter is gate 7's
+   `/Volumes/KK_T9_External_HDD/!CODING/Testing Agent MAIN/projects/nexusai/reports/2026-09-22-gate7-rd645/evidence/qa-floorcount.py`.
+4. **A zero is reportable only beside a control that fired in the same window** — the floor count, "no secret in any response/log/audit/DOM" (a9, m6, H-1),
+   "no torn buffer" (s5/s6), "no disarmed cell" (§3b), "missing 0" (§10), "no cell reddens" under any mutant, "no colour literal added" (§2b), and "no
+   HTML page without `no-store`" (n1-n9).
+
+**5. THE DEADLINE RULE — every real-server probe has a per-step DEADLINE, a HEARTBEAT, and kills its server in a `finally`.** Every HTTP request carries a
+client timeout; each step (boot 60 s, request 30 s, signal drive 60 s including the slow flush, browser flow 180 s, exit 20 s) has a written DEADLINE; a step
+past it is ABORTED and reported, never waited on. **Log a HEARTBEAT line at least every 2 minutes during any hold (H-4: a separate child, ≤ 120 s max gap,
+aborted if absent at 90 s); a step with no heartbeat for 5 minutes is aborted and reported,** and a hold that is not progressing releases the lock. Every
+server and every browser you start is killed in a `finally` (SIGTERM, then SIGKILL after a grace — **by its own pid, C-174**), and the reap is confirmed by
+your floor counter. **The signal rows (s1-s8) SEND signals only to a server pid you spawned and proved to descend from your own claude pid.**
+
+**6. THE OTHER GATES (batch 3, lane 2; batch 4, lane 3) share this jest queue.** **You treat their tickets exactly as a builder treats yours under C-141:
+never jump them, never interrupt a running one, never move, signal or edit one.** C-141 says "Not covered: … gate tickets among themselves" (:1484), so
+**between gates the order is plain FIFO: you do NOT self-re-queue behind their tickets and you do NOT ask them to move; if their hold is running, you wait.**
+Never read their trees as inputs, never run in their clones, never count their servers as ours. **If main moves because their merges land, apply §1's "Main
+may move" rule.** If you and a gate deadlock or its hold looks stuck past its own heartbeat, mail a QUESTION (§14) and keep waiting.
+
+## 13. HELD
+- **LOCAL RUN, NOT THE DEMO:** every request goes to a server YOU booted on 127.0.0.1 from YOUR tree, under the network belt (H-6) — the browser leg's CDN
+  runs are the one stated exception, by exact URL (§2b). No request to any live, demo or public host; no Azure, no Entra, no Key Vault (L-F2 stays NOT
+  TESTED); no Log Analytics (L-D1). This is authorised defensive QA of Datasec's own product on loopback.
+- **TIER 1 AT FULL WEIGHT — FINDINGS-ONLY:** no fix, no merge (outside your own clone), **no push — not to main, not to ANY author's branch (RD-695's and
+  RD-413's merge-forwards are the author's, after your verdict)**, no deploy, no registry, **nothing to Partner Center, the demo or production**, no money, no
+  external comms, no mail to any human. **No `az` at all.** `gh` READ-ONLY and optional (§11). **No docker** (L-C3 stays NOT TESTED).
+- **Plants, torn files, preloads, held ports, browser profiles and scratch git repos live ONLY under your own mktemp dirs.** Never plant anything in a real
+  home directory, the NexusAI tree, or any other seat's directory. Planted keys, mail secrets and tokens are random and throwaway.
+- **Findings-only:** do not commit (outside your clone), move any branch, file a ticket, or write anything inside the NexusAI project (`2_Project_Files`,
+  `session-tools/`, `worktrees/`, `1_Project_Definition/`, `qa-reports/`). **NEVER `rm`** — quarantine, per the template §5.
+
+## 14. Output
+Report: `/Volumes/KK_T9_External_HDD/!CODING/Testing Agent MAIN/projects/nexusai/reports/2026-09-27-gate-batch5a/report.md` — ONE report covering all six
+tickets; evidence in `./evidence/` beside it.
+
+**Questions:** your routing name is **`QA/NexusAI-batch5a`**. If you must ask, mail `tuesday-agent@agentmail.to`, subject
+`[QA/Datasec-NexusAI -> Tuesday] QUESTION: <topic>` (Context / one Question / Meanwhile / Needed-by) and **PROCEED ON THE SAFEST READING without waiting**;
+Tuesday's answer arrives in `tuesday-agent@agentmail.to` with a subject beginning `[Tuesday -> QA/NexusAI-batch5a] ANSWER`. Approval-class items are NOT RUN
+and named. Record every question, reading and answer.
+
+MAIL YOUR VERDICT to `tuesday-agent@agentmail.to`, subject exactly:
+`[QA/Datasec-NexusAI -> Tuesday] GATE VERDICT — RD-681 · RD-682 · RD-627b · RD-695 · RD-705 · RD-413`
+Lead the body with ONE line per ticket in this form — `RD-681: <GO|GO WITH FINDINGS|NO GO> @ 4209299` · `RD-682: … @ f15fed6` · `RD-627b: … @ c82aa92` ·
+`RD-695: … @ ad97d12 (and fwd-695)` · `RD-705: … @ e164d1a` · `RD-413: … @ f70594a (and fwd-413)` — then one line naming M0, the merge order you recommend,
+the merged `server.js` blob, and whether RD-636 closes with RD-413; then one line on what a merge push to main triggers (§11). Never `wednesday-agent@`.
+AgentMail key: `AGENTMAIL_API_KEY` in `/Volumes/KK_T9_External_HDD/TUESDAY/4_Credentials/.env` (absolute: the QA project has none). Never put the key, a
+planted needle, the throwaway secret or any secret in a mail or the report.
+
+Verdict format:
+- **RD-681** naming `4209299c8858adf9e06cdcbcb717b8d6c40a23d4`: red-proof; M1, M2, M-A1..M-A4; rows a1-a9 (a5 first); A-F1 re-run; the C-68 set; prior work.
+- **RD-682** naming `f15fed6e5404792f60ac5e2939c1ea25cb41139f`: red-proof at `4209299`; M1-M3, M-B1..M-B4; rows b1-b7; A-F2 re-run; w5.
+- **RD-627b** naming `c82aa92bec7688653149e4690efaeb3c137e602f`: red-proof; M1, M2, M-C1..M-C4; rows s1-s8 (s5, s6 first); **the "does no-duplicate-flush
+  matter" paragraph.**
+- **RD-695** naming `ad97d1202c2bb951ac1b604fe91771405a9685a2` AND your `fwd-695` tree: red-proof at `748cece` and `1904765`; M1-M4, M-D1..M-D4; rows p1-p10
+  (p3, p4, p7 first); E-C1 re-run; w6.
+- **RD-705** naming `e164d1a99cb33166d37c98d6f9069d51a7c18ad7`: red-proof; M2-M4, M-E1..M-E4; rows n1-n12 (n5, n7 first); **w1 (R11 on a real browser)**, w7;
+  the user-visible change carried.
+- **RD-413** naming `f70594a2418bb26a5ec2d98d68e8e4ed620cd575` AND your `fwd-413` tree: red-proof at `11666d3` and `1904765`; M1-M4, M-F1..M-F4; rows m1-m6,
+  m15-m19 (m15-m17 first); **w2-w4 (REAL-BROWSER and BRAND legs)**; **RD-636**.
+- **The merged tree (§10):** M0; both orders; counts regenerated once (measured vs 4170/254); the merged `server.js` blob; id-superset with C-112's
+  condition; the C-68 sets by name; the composition rows x1-x5; one mutant per ticket; C-89; the object-count accounting; **your recommended merge order.**
+- **The §3b sweep:** per ticket, population / negative cells / still reaching / disarmed.
+- Each of **L-A1..L-A3, L-B1, L-B2, L-C1..L-C4, L-D1..L-D4, L-E1..L-E3 and L-F1..L-F5** answered: discharged with a measurement, or left standing and named (C-112).
+- All seven refs as **three timestamped readings (start / mid / end)**, each with its branch name.
+- **§3a H-1..H-16:** for each, that it was followed, with the self-test outputs (H-1), landing controls (H-3, H-10), max HB gap per hold (H-4), byte checks (H-9).
+- Every action recommendation carries its evidence class: **MEASURED AT RUNTIME / PROBED / READ ONLY**. Severity is yours; priority is Tuesday's.
+- **Rule 2: a NOT TESTED section.** It MUST carry this line, verbatim:
+
+  Not tested by this gate: Linux or CI at any branch head unless a PR's CI Build exists, Azure Container Apps, a real container runtime stop, Key Vault as a key source, a live Log Analytics workspace, any browser other than the one Chrome build named in the report, production mode, and Windows.
+
+## WRONG OR UNVERIFIED IN THE COMMISSION AND THE READYS — carried so the gate inherits the corrections
+1. **"All six edit backend/server.js" (commission) is TRUE but not the whole story:** RD-413 changes SEVEN files, including `backend/services/emailService.js`,
+   `static/first-run-setup.html` and `static/js/first-run-setup.js`; RD-682 adds a test HELPER (`__tests__/helpers/rd682-keep-key-preload.js`). The
+   launcher's delta guard pins the exact sets.
+2. **Two members are NOT on main `1904765`:** RD-695's base is `748cece` (READY :8 says so; main since then touched only erasure files — counts-only
+   predicted) and **RD-413's base is `11666d3`** (READY :8 says so; **main since then changed `backend/server.js` itself** — RD-315 and RD-533 — so the fleet's
+   merge of RD-413 is a CONTENT merge of the server entry point, not counts-only). Both need merged-forward trees (`fwd-695`, `fwd-413`).
+3. **"REGION-disjoint" is the author's claim, and the drafter did NOT measure a merge-tree** (the drafter's hard rule). The hunk READ supports it (§1 Regions);
+   RD-705's READY :41 claims a scratch-object-dir merge-tree of e164d1a against the other five, counts-only. **The launcher's guard 80 and the gate measure it.**
+4. **RD-705 READY :9 says "the six res.sendFile page routes"; its own POP cell (:24) says "7 sendFile page routes enumerated"; its red list (:31) names 5.**
+   Unresolved — row n2.
+5. **RD-705 vs C-175 on the metas:** RD-705 READY :19 says the metas are KEPT and "Removing the metas (C-18 'remove it or make it true') is not needed; I
+   chose 'make it true'". **C-175 (:1800) and lane plan v2 :99 schedule the `settings.html:6` meta's REMOVAL as lane 4's, after rd-430 merges.** Not a defect
+   in RD-705's code; a planning contradiction for Tuesday (row n12 reports the fact).
+6. **RD-705's branch name says "authenticated-pages"; the change covers EVERY HTML page** (incl. `/login`, `/marketplace-landing`, `/status`). C-171 permits
+   "or on every authenticated page"; whether "every page" is inside that is Tuesday's reading.
+7. **RD-705's tier:** C-171 states no tier; TIER 1 here rests on the READY's suggestion (:6) and on Tuesday raising RD-693 to tier 1 (daily note 05:58,
+   RELAYED). Tuesday's commission said "tier as its READY/ticket justifies" — the drafter chose 1.
+8. **RD-627b READY :10 "The swallowed catch … now logs the error":** `flushAuditBufferToDisk` catches its own errors and never rethrows (READ :396-398), so the
+   new `logger.error` is predicted near-unreachable (row s7, M-C4). A claim about an error path that the function below it already swallows.
+9. **RD-627b's disclosed UNGUARDED "no duplicate flush":** the drafter's READ says it may MATTER (one fixed tmp name, truncating writes, `exit` after the first
+   flush) and that the same concurrency is reachable AT THE HEAD through the 60 s interval flush, which the guard does not cover (rows s5, s6). Predicted.
+10. **RD-681 puts `readFile(...) || {}` — the pattern RD-407's docblock calls fatal for writers — into a clear DECISION and its read-back** (row a5). Predicted.
+11. **RD-413's `startsWith('ENC:')` calls an undecryptable blob "encrypted"** (RD-681's own fixture class, row m15) **and a plaintext secret beginning `ENC:`
+    "encrypted"** (row m16). Predicted.
+12. **RD-695 READY :32 "days stay UTC":** true for `Z`/zone-less values; for an OFFSET timestamp the ISO-prefix branch keeps the LOCAL date (row p4); `slice(-30)`
+    is 30 distinct dated days, not 30 calendar days (row p7). Predicted.
+13. **RD-682's red log** is `session-tools/s84m/rd682-red-at-4209299.log` (on disk); the READY names only the hold log.
+14. **RD-636:** the ticket text is not in any artefact the drafter read. "RD-636 = gate-5 F-B4" is RELAYED (Tuesday's daily note 2026-09-26 18:19, relaying
+    NexusAI-M; lane plan v2 :107). The gate can confirm against F-B4 only.
+15. **The Kam merge grant ("Please work your way through the tickets and merge once tested", 2026-09-25 ~22:0x, re-affirmed 2026-09-27 ~08:2x)** is RELAYED
+    from Tuesday's commission; not read at source by the drafter.
+16. **`deploy-demo.yml` runs on every push to main** (READ): whether it builds or deploys depends on `vars.CI_DEPLOY_ENABLED` and the `demo` environment's
+    reviewer — **UNVERIFIED** (no `gh` run at drafting); §11 asks the gate to read it. "A merge must not deploy demo" is therefore a condition Tuesday checks
+    before GO, not a fact established here.
+17. **CI and PR state on all six heads: UNVERIFIED** (no `gh` run at drafting).
+18. **The C-68 re-run sets were NOT derived by content search** (the drafter's hard rule): the table carries names from a `git ls-tree` LISTING plus the
+    READYs' own sets; **the gate derives them properly in its clone (§1).**
+19. **Main is expected to MOVE during this gate** (batches 3 and 4 merge lane-2/lane-3 files). The launcher refuses only when main's movement touches the six
+    deltas; it NOTES movement of `jsonStorage.js` / `dataErasure.js` / the brand corpus (a deliberate change from the batch-3 launcher, which refused on its
+    semantic files — refusing here would force a re-brief on every batch-3 merge).
+
+## PROVENANCE (drafter, 2026-09-27 09:25–10:05 AEST, read-only)
+- origin heads (six branches + main) | `git ls-remote origin <refs>` | 09:27:28
+- every sha a commit locally; chains and parents; merge-bases with `1904765` (`748cece` for D, `11666d3` for F) | `git cat-file -t`, `git log --format='%H %P'`,
+  `git merge-base` | 09:28
+- deltas and shortstats; counts at the six heads, `748cece`, `11666d3`, `1904765` | `git diff --name-status|--shortstat`, `git show "<sha>:scripts/verify-expected-counts.json"` | 09:28
+- main's movement since `748cece` (4 paths) and `11666d3` (24 paths, incl. `server.js`); first-parent log | `git diff --name-only`, `git log --first-parent` | 09:29
+- `server.js` and `package-lock.json` blobs at nine shas; `emailService.js` / `first-run-setup.*` blobs at `11666d3`, `1904765`, `f70594a` | `git rev-parse` | 09:29
+- `server.js` hunk headers per member and main's since `11666d3` | `git diff -U0 … | grep '^@@'` | 09:29
+- pairwise delta overlaps; main ∩ D and ∩ F | `git diff --name-only`, `comm -12` (lists in the drafter's scratchpad) | 09:36
+- the six READY mails, whole | `cat -n` | 09:24-09:26
+- the product diffs of all six and the functions named (`flushAuditBufferToDisk` :330-399 at `c82aa92`; `readFile` / `readStoreStrict` :2860-2935 and the
+  RD-407 note :3050-3075 at `1904765`; `dailyTrend` construction at `ad97d12`; the clear route :16360-16445 at `f15fed6`; the middleware context :950-998 at
+  `e164d1a`) | `git diff`, `git show <sha>:<file> | sed -n` (named files only) | 09:30-09:36
+- `deploy-demo.yml` / `deploy.yml` / `build.yml` triggers at `1904765` | `git show … | sed -n` | 09:37
+- `docs/BRAND.md` head (v1.0; tokens.css; conformance test) at `1904765` | `git show | head -40` | 09:34
+- test-file NAMES for the C-68 table | `git ls-tree --name-only 1904765 __tests__/ | grep -i -E …` (a listing, not a content search) | 09:37
+- CLARIFICATIONS: 313,569 bytes, mtime 09:09, 1847 lines; C-02 :30, C-18 :109, C-28 :153, C-40 :225, C-49 :299, C-57 :410, C-68 :657 (quotes :660, :663),
+  C-76 :729, C-89 :827, C-97 :900, C-98 :906, C-102 :945, C-104 :972, C-110 :1101, C-112 :1141, C-122 :1278, C-125 :1320, C-133 :1426 (ADDENDUM :1434),
+  C-135 :1442, C-140 :1465, C-141 :1480 (Not covered :1484; ADDENDA :1488/:1490/:1492/:1494), C-142 :1503, C-150 :1570, C-171 :1749, C-173 :1765, C-174 :1784,
+  C-175 :1794 (RD-705 line :1800), C-178 :1830, C-179 :1839; each OPENED (heading line read; C-171..C-179 read whole); ticket grep for
+  `RD-(681|682|627b?|695|705|413|636|693|579|615)` → RD-413 at :1439, :1465-1471, :1766; RD-705 at :1800; RD-693 at :1749-1754; **RD-681, RD-682, RD-627b, RD-695,
+  RD-636: 0 lines** | `grep -n` on that one file | 09:31-09:33
+- lane plans: v1 `2026-09-25_S84M_lane-plan.md` (RD-413 :13 Tier 1; RD-627b :18 Tier 1); v2 `2026-09-27_S86M_lane-plan-v2.md` (frozen branches :18, hunks
+  :19-25, RD-705 :36, lane 4 meta removal :99, RD-636 :107) | `grep -n`, `sed -n` on those files | 09:33
+- prior reports: RD-579 gate (A-F1 :280, A-F2 :281, §2.4 :77, §2.5 :84/:102); batch-1 (E-C1 :426/:453, E-C2 :432, E-N1 :437, RD-533 §6, C-F1 :428); batch-2
+  (§3.4 :74, R11 :110, §3.6 :122-129, §3.9 :144-150); gate 5 (F-B4 :60/:394, :427); evidence listings of batch-1, batch-2 and the RD-579 gate (instruments
+  named in §12 all present) | `grep -n`, `sed -n`, `ls` | 09:37-09:40
+- builder evidence present: `session-tools/s84m/{rd681,rd682,rd627b,rd695,rd413}-hold.{sh,log}`, `rd681-red-at-1904765.log`, `rd682-red-at-4209299.log`,
+  `rd627b-red-at-1904765.log`, `rd695-red-at-748cece.log`, `rd413-red-at-11666d3.log`, `yield-log.txt`; `session-tools/s86m/rd705-{hold.sh,hold.log,
+  red-at-1904765.log}`, `mt-objects-rd705/`, `claimed-files.txt`; `session-tools/nexusai-lock.sh` (mtime 26 Sep 09:26), `c57-id-superset.sh` | `ls` on named
+  dirs | 09:38
+- live panes and claude pids (`%0` 23230 via bash 22288; `%19` 62649; `%21` 9959; `%22` 20317; `%23` 36118; `%24` 40285; `%25` 16516) | `tmux list-panes -a -F …`,
+  `pgrep -P`, `ps`, own ancestry walk | 09:30:41
+- NexusAI `count-objects -v` `count: 436`; git 2.54.0 (Apple Git-157) | 09:36
+- routing: **no `QA/NexusAI-batch5a` line in `fleet/inbox_routing.conf` was added by the drafter** — Tuesday adds it; the launcher's guard 40 refuses until then.
