@@ -18,6 +18,13 @@ supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s
 - On each: read its WRONG list first, the brief WHOLE, stamp @STAMP@, --check (re-pin heads by ls-remote), launch ONLY when a gate slot frees (3 gates already share the jest lock), resize panes (agents >= 6).
 - All READY mails for 5a/5b/6 are SAVED in fleet/qa-agent/briefs (12 new files 09:2x, read whole); heads = READY shas at origin (read this session); main 1904765.
 
+### UPDATE (s88, after the checkpoint)
+- **5a STAMPED + --check rc 0** (guard 80 measured the merge-tree premise: counts-only). Rulings at stamp: RD-705 vs C-175 = no contradiction; "every HTML page" ACCEPTED; RD-705 tier 1. **READY TO LAUNCH when a gate slot frees:** `cockpit.sh add QA/NexusAI-batch5a "bash /Volumes/KK_T9_External_HDD/TUESDAY/2_Project_Files/fleet/qa-agent/launchers/launch_qa_nexusai_gate_batch5a.sh"` (re-run --check first; resize panes; verify rung 6).
+- **6 STAMPED + --check rc 0.** G (RD-430) and H (RD-694 item 4) EXCLUDED. RD-692 file question RULED (a). Same launch pattern with launch_qa_nexusai_gate_batch6.sh.
+- **P told (ANSWER 23:51Z, tap delivered):** RD-692 (a); RD-430 in its own round after RD-204+RD-197 merge; push RD-694 item 4 + READY; C-175's meta-removal line SUPERSEDED (RD-705 makes it true), and P records it as an ADDENDUM.
+- **5b drafter still running** (includes RD-594 now). On return: WRONG list, read whole, stamp, route, --check.
+- Order when slots free: 5a first (tier 1, six members), then 6, then 5b.
+
 ## 🔴 DELTA 100 — 2026-09-27 09:20 ROTATION HANDOVER (s87, ctx 79%, safe boundary). **READ THIS FIRST, THEN 99/98.**
 ### OWED TO KAM (copy forward until closed by name)
 - Week instruction (WEEK-INSTRUCTION-TUESDAY) EXPIRES end of TODAY 2026-09-27; told on the live board 08:3x with the default (from Monday: work continues under the open-ended new-account grant; asks on the live board). On Monday mark the file lapsed unless he said otherwise.

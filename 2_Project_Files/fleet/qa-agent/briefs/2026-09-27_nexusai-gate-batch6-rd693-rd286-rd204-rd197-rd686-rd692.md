@@ -34,8 +34,17 @@ A batch-5a gate may start. **None is yours: you never touch their worktrees, tre
 queue behind their tickets exactly as behind any other (§13). Their servers will show in your foreign-server counter as FOREIGN — record them,
 never "fix" them.
 
-SELF-CHECK: re-read end-to-end for contradictions | @STAMP@
-Self-check note: @STAMP@
+SELF-CHECK: re-read end-to-end for contradictions | 2026-09-27 09:50
+Self-check note: 2026-09-27 09:50
+
+## TUESDAY'S RULINGS AT STAMP (they answer the drafter's WRONG-list items 2, 7, 8, 9, 10 and 11)
+- **Item 7 (RD-692's file question): RULED NOW by Tuesday — (a), the NEW disjoint file, ACCEPTED as built.** No earlier ruling exists in Tuesday's record (searched 09-26/09-27 notes and staged briefs). It touches no existing cell file; the batch-2 gate's A-F1 specification is graded against the new file (row f3), not relocated.
+- **Item 2 (RD-693 tier): TIER 1 stands** (credential handling, as batch 2 raised RD-428).
+- **Items 9 and 10 (the optionals): G (RD-430) and H (RD-694 item 4) stay EXCLUDED.** H is not on origin. G would move RD-204's settings pins, which C-175's re-pin grant does not cover ("Not covered: any other pin"); RD-430 is gated AFTER RD-204 and RD-197 merge, in its own round, with its re-pins measured on that main.
+- **Item 8 (RD-705 in batch 5a): confirmed** — batch 5a is stamped (its launcher's --check passed, rc 0) and launches before or alongside this gate as slots free. Row b9 applies only if M0 carries RD-705.
+- **Item 11 (deploy-demo on a push to main): prior measurements exist.** Batch 1's five merges: "demo skipped on each" (Tuesday's pickup DELTAs 93-95). Batch 2's three: "demo skipped on all three pushes" (Tuesday's daily note 2026-09-26 10:53). Both RELAYED from the author seats. §12's read stays REQUIRED.
+- **Items 1, 3-6, 12-15: carried as written;** each is a row or a measurement this gate owns.
+- **Launch order:** this gate launches only when a gate slot frees; heads re-pinned by the launcher at launch.
 
 ## Charter
 Read `/Volumes/KK_T9_External_HDD/TUESDAY/2_Project_Files/fleet/qa-agent/QA_AGENT_CHARTER.md` in full first. You are an independent tester.
