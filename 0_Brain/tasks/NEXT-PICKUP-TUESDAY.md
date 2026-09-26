@@ -22,7 +22,10 @@ supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s
 - **5a STAMPED + --check rc 0** (guard 80 measured the merge-tree premise: counts-only). Rulings at stamp: RD-705 vs C-175 = no contradiction; "every HTML page" ACCEPTED; RD-705 tier 1. **READY TO LAUNCH when a gate slot frees:** `cockpit.sh add QA/NexusAI-batch5a "bash /Volumes/KK_T9_External_HDD/TUESDAY/2_Project_Files/fleet/qa-agent/launchers/launch_qa_nexusai_gate_batch5a.sh"` (re-run --check first; resize panes; verify rung 6).
 - **6 STAMPED + --check rc 0.** G (RD-430) and H (RD-694 item 4) EXCLUDED. RD-692 file question RULED (a). Same launch pattern with launch_qa_nexusai_gate_batch6.sh.
 - **P told (ANSWER 23:51Z, tap delivered):** RD-692 (a); RD-430 in its own round after RD-204+RD-197 merge; push RD-694 item 4 + READY; C-175's meta-removal line SUPERSEDED (RD-705 makes it true), and P records it as an ADDENDUM.
-- **5b drafter still running** (includes RD-594 now). On return: WRONG list, read whole, stamp, route, --check.
+- **5b STAMPED + --check rc 0** (brief `…batch5b-c170pkg-rd696-rd594.md`, launcher `launch_qa_nexusai_gate_batch5b.sh`; guard 90 copy premise, guard 80 merge-trees, K2=78). Rulings at stamp: arm-ttk.yml COVERED by C-138 + C-170 (my commission had said C-170 = 07:18 (a); that is C-165: ledger row); renamed package test ids = AUTHORISED RENAMES under C-133 ADDENDUM on 3 conditions (carry verbatim into the merge RELEASE); **RD-594 TIER 1** (Kam's card), launcher guards/prompt aligned (backup `.pre-0927-tier1`); K2-re-run-on-merged-population is binding at every lane-1 server-source merge.
+- **OWED at the 5b merge:** flag to Kam on the live board BEFORE the merge push that main gains the arm-ttk.yml workflow he approved in C-138 (C-142: Kam owns .github). A flag, not an ask.
+- P recorded C-180 (RD-692 (a)) + the C-175 addendum and PUSHED rd-694 item 4 (its READY to come -> the RD-430 round).
+- **Wrap/rotation owed:** the ledger was edited this session -> regenerate BOTH boot digests (`--by-tier` and bare).
 - Order when slots free: 5a first (tier 1, six members), then 6, then 5b.
 
 ## 🔴 DELTA 100 — 2026-09-27 09:20 ROTATION HANDOVER (s87, ctx 79%, safe boundary). **READ THIS FIRST, THEN 99/98.**
