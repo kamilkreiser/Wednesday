@@ -6,6 +6,22 @@ status: live
 supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s1-wholesale
 ---
 
+## 🔴 DELTA 93 — 2026-09-26 13:1x (s86, ctx 50% CHECKPOINT; band 80-90). **READ THIS FIRST, THEN 92.**
+### OWED MERGE SEQUENCE — BATCH 1 (gate verdict 03:12Z, all five ACCEPTED; report `Testing Agent MAIN/projects/nexusai/reports/2026-09-26-gate-batch1/report.md`)
+Main at the verdict = **5f2683c**. ONE merge at a time; each author merges main FORWARD (C-68), re-runs the A x B C-68 set where the gate's MERGE NOTE says, regenerates counts ONCE, id-superset, full verify, predicts counts in MERGED, push, deploy-demo SKIPPED, Build green before the next. **Gate arithmetic after all five: 4133/247.**
+1. **O: RD-447 @ 911e706** -> GO SENT 03:13Z (mail "GO: batch-1 merges RD-447 then RD-411", + a date correction mail; tap delivered).
+2. **O: RD-411 @ ed01f7e** -> same GO, after RD-447's Build is green.
+3. **M: RD-315 @ 1524fca** -> APPROVED, QUEUED: **Tuesday sends a RELEASE mail to M after O's SECOND MERGED.** (Answer "batch-1 verdict - your merges APPROVED, QUEUED" sent 03:1xZ.)
+4. **M: RD-533 @ 95c3c9a** -> after RD-315's Build is green.
+5. **N: RD-627a @ 057016d** -> RELEASE to N after M's second MERGED.
+**On EACH MERGED: ls-remote main + cat-file parents + counts; after all five, ONE board line to Kam.** Gate scored 0.98; pane %17 closed.
+### ROUTED FROM THE VERDICT
+O next: **A-F1 (High)**, and the HOLD that nobody amends rd447's bytes-vs-string cell before it is fixed; A-F2, B-F1. M: C-F1, **E-C1 (MAJOR, new: /api/stats buckets every SQLite job as today)** after RD-413. N: D-F1 -> evidence on RD-684 (its next item); D-F2; D-C1 -> the RD-685 class.
+### BATCH #3 (not launched)
+RD-324 @ 3beea5c (N, tier 1, READY saved `fleet/qa-agent/briefs/2026-09-26_nexusai-rd324-READY-mail.txt`). Commission its drafter when the next tier-1 READYs land (P: RD-204/197/430; O: RD-418/425/443), and not while batch-1 merges hold the lock.
+### STATE
+Usage 79% at 13:15 (~2.4 pts/h) -> 95% ~20:00; card `tuesday-allowance-95-lands-this-afternoon` UNANSWERED (default a); the 90% watcher runs in this seat (re-arm on rotation). Kam: 0 new today since 07:18. Floor: %0 tuesday · %11 M · %12 N · %13 O · %14 P · %1 monitor.
+
 ## 🟢 DELTA 92 — 2026-09-26 09:3x (s86 rotation boot, ctx ~42%). **READ THIS, THEN 91.**
 - **Batch-2 merge 2/3 VERIFIED: NexusAI main = f22929b** (RD-444; parents 2f9da1c + 12b5edc; counts 4025/239 = prediction). Build 36201291380 on f22929b in progress (P relays); merge 3 RD-428 (predicted 4037/242) after it is green. On P's MERGED 3/3: ls-remote + parents + counts, deploy-demo skipped, CI, then ONE board line to Kam; P files A-F1, A-N5, A-N3, C-F1.
 - **C-141 ADDENDUM 4 (lock `--after`) RELAYED verbatim to N/O/P** (09:28, mails verified at datasec-nexusai@). M still owes the live probe's acquire/release line.
