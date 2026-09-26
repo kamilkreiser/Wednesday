@@ -1,0 +1,33 @@
+{
+ "commit": "99483e47cf050c1de125c9805df7e46e878b4702",
+ "files": [
+  "web/src/components/customer/DocumentGeneration.tsx",
+  "web/src/components/customer/DocumentGeneration.test.tsx"
+ ],
+ "expected_added": {
+  "web/src/components/customer/DocumentGeneration.tsx": [
+   "import { extrasFor } from \"./content\";",
+   "        <PageHeader title=\"Document generation\" eyebrow={customer.name} tags={<>{extrasFor(customer.apiId, customer.name) && <SyntheticTag />}<Tag kind=\"deterministic\">From the scored result: rules, not AI</Tag></>}"
+  ],
+  "web/src/components/customer/DocumentGeneration.test.tsx": [
+   "",
+   "  it(\"B22-08: the seeded sample keeps its 'Sample data' tag; a customer the user added has none\", async () => {",
+   "    session([]);",
+   "    const seeded = show();",
+   "    const h1 = await screen.findByRole(\"heading\", { level: 1, name: \"Document generation\" });",
+   "    expect(within(h1.parentElement!).getByText(\"Sample data\", { exact: true })).toBeInTheDocument();",
+   "    seeded.unmount();",
+   "    const { mockState } = await import(\"@/server/mock/store\");",
+   "    const id = \"CUST-SYN-ADDED-DOC\";",
+   "    mockState().customers.push({ id, name: \"Harbourside Accounting\", synthetic: true, latestAssessmentStatus: null, createdAt: \"2026-09-25T02:00:00Z\", industry: \"Professional services\" });",
+   "    pathname = `/customers/${id}/documents`;",
+   "    render(<CustomerShell customer={customerForRoute(id)!}><DocumentGeneration /></CustomerShell>);",
+   "    const added = await screen.findByRole(\"heading\", { level: 1, name: \"Document generation\" });",
+   "    expect(within(added.parentElement!).queryByText(\"Sample data\", { exact: true })).toBeNull();",
+   "  });"
+  ]
+ },
+ "red_test_cmd": "cd web && (test -d node_modules || npm ci --no-audit --no-fund) && npx vitest run src/components/customer/DocumentGeneration.test.tsx -t \"B22-08: the seeded sample keeps\" 2>&1 | tee /dev/stderr | grep -E \"Tests +1 passed\"",
+ "suite_cmd": "cd web && (test -d node_modules || npm ci --no-audit --no-fund) && npx vitest run src/components/customer src/components/screens",
+ "suite_count_regex": "Tests\\s+(?:(?P<failed>\\d+) failed \\| )?(?P<passed>\\d+) passed"
+}

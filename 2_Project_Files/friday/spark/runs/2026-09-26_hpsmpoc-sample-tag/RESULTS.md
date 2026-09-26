@@ -1,0 +1,16 @@
+# Spark runs 2026-09-26 — Datasec/HPSM-POC B22-08 residue ("Sample data" on user-added customers)
+Model deepseek-v4-flash-0731 via the laptop tunnel; thinking OFF; tip 99483e4; briefs by an in-session drafting subagent, read by Friday; runner spark_run.py, checker spark_check.py (six clauses). Rung: 1 (exact lines spelled out, ≤3 edits, test given in full).
+
+| Ticket part | Round | Wall | C1 apply | C2 lines | C4 red/green | C5 suite | Verdict | Cause of FAIL (model / harness / brief) |
+|---|---|---|---|---|---|---|---|---|
+| EngagementOverview (1 product line + 1 test) | r1 | 20 s | recount only | FAIL: blank line placed AFTER the test, not before | PASS | 91→92 | FAIL | model FORMAT (blank position) + header miscount |
+| EngagementOverview | r2 (rebrief: exact headers) | ~20 s | does not apply | PASS | not run | not run | FAIL | model FORMAT: dropped the EMPTY trailing context line |
+| DocumentGeneration (import + 1 line + 1 test) | r1 (+format-trap note) | 24 s | recount only | FAIL: same blank position | PASS | 91→92 | FAIL | model FORMAT, same as above |
+| DocumentGeneration | r2 (insertion re-shaped: blank LAST, non-empty trailing context) | 22 s | recount only | PASS 17/17 | PASS | 91→92 | FAIL (C1 only) | model header arithmetic; content fully correct |
+| ProfileScreen (import + 1 line + 1 test) | r1 (+format-trap note; trailing context non-empty `});`) | 18 s | STRICT | PASS 18/18 | PASS | 91→92 | **PASS** | — (Friday read the diff against the brief: matches) |
+
+**Findings (for the kit's 04 file and the weekly consolidation):**
+1. The model's CODE was right in 5 of 5 answers; every FAIL was diff FORMAT. Failure mode (new for this model): an insertion whose context neighbour is an EMPTY line — it moves the blank `+` line to the end and/or drops the empty context line, and miscounts the hunk header.
+2. BRIEF fix that worked: shape insertions so the trailing context line is NON-empty (ProfileScreen r1 strict PASS; DocumentGeneration r2 content-perfect).
+3. HARNESS finding, NOT acted on today: the kit (02/05 clause 1) allows a recount-only apply if the mode is RECORDED ("never 'applies cleanly' when only a recount worked"); spark_check.py FAILs it outright. Proposal: C1 = PASS-RECOUNT (recorded), C2 still byte-exact. Needs arms before changing (a strict diff, a recount diff, a non-applying diff). Owed.
+4. Routing: by the counter (original + ONE rebrief), EngagementOverview and DocumentGeneration go to a Claude seat; their content is fully known (DocumentGeneration-r2/answer.diff is content-verified by C2–C5 under recount).
