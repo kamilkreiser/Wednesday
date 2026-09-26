@@ -1,0 +1,107 @@
+# Gateset 2026-09-26_gate28 — README for Wednesday
+
+The drafter launched nothing, sent no mail, tapped no pane, merged nothing, committed nothing, posted nothing and wrote nothing inside any project folder or /Volumes/DevMASTER/WEDNESDAY.
+It wrote only under `/private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/6a51240d-d642-471f-b7c2-1011f35eb0ce/scratchpad/gate28/` (this kit), the scratch clone `/private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/6a51240d-d642-471f-b7c2-1011f35eb0ce/scratchpad/g28_sp/clone.git` (a `--no-local` bare clone, no alternates; the drafter's own merge-tree / hash-object writes only) and the control workdirs `/private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/6a51240d-d642-471f-b7c2-1011f35eb0ce/scratchpad/g28_controls_*`.
+The Secuura checkout was touched only by read verbs (ls-remote, `config --get`, `clone --no-local` as a source). GitHub: REST GET only (Secuura GH_TOKEN read by name, never printed). Linear: queries only. The routing conf was READ (grep), never written.
+
+**gate28 = THREE PRs, tiers 1, 2 and 3, one kit, no sibling.** Heads Wednesday relayed (ls-remote at 06:4xZ) re-read here by TWO instruments at the pin (ls-remote AND the PULLS API, and fetched): all agree.
+
+| PR | ticket | tier | head (READ: API == ls-remote pull/head == branch == fetched) | commits on merge-base | squash subject chars | why this tier (from the DIFF) |
+|---|---|---|---|---|---|---|
+| #1286 | KS-1336 | T3 | `da5f3dd837dd5b6c706e7816bd4028070029d5e1` | 2 on `00de57baeb40` | 84 | **T3** — two Markdown files, no code. **FIX ROUND — round 2 of 2, AT THE CAP** (gate27 NO GO: N-1286-1 TWO-FLAGS-FALSE). |
+| #1288 | KS-1341 | T1 | `cb58d3a59c8921a3a1caede3c6acfb4b599bf959` | 1 on `e080174c86c6` | 89 | **T1** — originate webhooks.ts: what a 500 carries to a client (information exposure). Part A of 3 (2 of 7 sites). Local-model patch. |
+| #1289 | KS-1318 | T2 | `1e24633b9c196c5d3dd5bb83519bce860ca79758` | 1 on `e080174c86c6` | 90 | one test assertion (J2 count -> tag set); hunk 3 of #1268 alone; declared overlap with dead-open #1268 at a DIFFERENT blob. |
+
+Routing `QA/Secuura-batch1286`. GO string `GO: merge #1286, #1288, #1289 batch` (or the subset). All three go to a MERGE SEAT Wednesday names (never an author).
+
+## 1. BLUF
+- **Kit: READY to launch** once you add the routing line (§4). Launcher `--check` rc 0 (all guards pass:); repin `--dry-run` rc 0.
+  - Controls: **115 controls, OK 115, MISMATCH 0** normally (rc 0); **OK 0, MISMATCH 115** under `--invert` (rc 1 — by design every control must flip).
+- **Pinned over develop `e080174c86c671349c508560744644fc0ef33388`** (tree `b698a77faf48cc257e1f5a1fb20c96d731a5d0da`) — read by ls-remote AND fetched AND the API compare agrees: it is the `e080174c86c6` you named (#1287's squash; gate27's two GOs over e6056de7ed64). Its tree is exactly the GO-subset END tree gate27 predicted (`b698a77faf48`).
+  - END_TREE **`80a3d6968f67c1bdf70af6fc1da6cf2ad3a5ee54`** (5 files changed, 304 insertions(+), 37 deletions(-)), identical in all 6 orders (12 merge-tree calls). No sibling kit, so END_TREE_WITH_SIBLING == END_TREE (measured).
+- **OVERLAPS — pairwise, measured:** the 3 kit pairs disjoint; every kit path disjoint from ALL 23 other open PRs (PULLS API census, incl. dead-open #1278/#1245/#1241, Seat L5's #1250/#1253, #995 on originate, dependabot); NOT STACKED.
+  - **ONE DECLARED overlap:** dead-open **#1268** (NO GO at its cap, still OPEN, head `5ac42fafeee1`) carries #1289's `ks781-p3-3-body-parser-order.test.ts` at a **DIFFERENT blob** (`d95ba8ea4891` vs `3f66d4185236`). Asserted HARD in predict as a **hunk subset**: #1289's 1 hunk body == #1268's hunk [3] of 3, pre-image `e96215365a6d` identical at both merge-bases and develop; `W9` (KS-1316-only) 0 vs 7.
+  - **PROBED (merge-tree):** #1268 merged AFTER this kit is **CLEAN** and lands exactly its other two hunks (KS-1316's failed LEG-F rule): merge-tree rc 0 tree 0b4a78c521735dcc98e69547aaac68d566f9db94; .../__tests__/ks781-p3-3-body-parser-order.test.ts | 190 ++++++++++++++++++++-; 1 file changed, 187 insertions(+), 3 deletions(-); W9 tokens landed by that merge: 7. So **#1268 must close unmerged** (§6.6).
+- **#1286 at the cap (round 2 of 2) — the decisive item (READ PREDICTIONS; the gate measures):**
+  - N-1286-1 looks FIXED in the docs: TWO-FLAGS-FIXED (READ): the round-1 wording "two flags … set in **no**" occurs 0 time(s) in the two head docs (round 1: 1); `ON in dev and demo` occurs 2 time(s); the head docs cite env.dev.json:7 2, env.demo.json:7 2, services.bicep:798 2 time(s)
+  - Cites re-read at develop: FLAG CENSUS at develop e080174c86c6 (READ, `git grep`): PROVISION_PER_TENANT_DB on 5 line(s) in ['Blockchain/Dev/packages/shared/src/db/tenant-pool-manager.ts', 'Blockchain/Dev/services/tenant-provisioning/src/index.ts'] (no config file); MULTI_TENANCY_ENABLED in .json/.bicep at ['deployment/azure/env.demo.json:7', 'deployment/azure/env.dev.json:7', 'deployment/azure/services.bicep:798']
+  - The fix touches only the flag sentences + the onboarding cite: FIX ROUND (READ): round 1 27480bb64947 + fix da5f3dd837dd; the fix touches ['Blockchain/Dev/docs/MULTI-TENANCY.md', 'Blockchain/Dev/docs/RLS-FAIL-CLOSED-PLAN.md']; numstat round1 -> head ['11\t4\tBlockchain/Dev/docs/MULTI-TENANCY.md', '6\t3\tBlockchain/Dev/docs/RLS-FAIL-CLOSED-PLAN.md']
+  - **NEW in round 2 — INSERT-LINE-271:** ONBOARDING-CITE-R2 (READ): the corrected cite is `tenant-provisioning/src/index.ts:245-274, the INSERT at :271`; at develop :245 is `const provisionPerTenantDb = process.env.PROVISION_PER_TENANT_DB === '`; the `platformQuery(` call opens at [271], the `INSERT INTO tenant_config` text is at [272], the statement closes at [275] — so ":271" names the call line, not the INSERT line (off by one), and the range ends one line before the close
+  - **BICEP-SCOPE:** BICEP-SCOPE (READ): the doc says MULTI_TENANCY_ENABLED is "ON in dev and demo" and cites services.bicep:798; services.bicep is a template deploy.sh applies for any `-e <env>` and .github/workflows/deploy-demo.yml applies for demo; env files in deployment/azure: ['env.demo.json', 'env.dev.json', 'env.staging.example'] — the gate rules whether "dev and demo" is the whole set
+  - N-1286-3..6 carried (declared NOT done): ROUND-1 NON-BLOCKING NOTES still present at head (READ, fixed-string counts; the fix round declared them NOT done): {'N-1286-3 "writes every `tenant_config` row"': 2, 'N-1286-4 "the only tenant isolation that exists"': 1, 'N-1286-5 RP "not split per-tenant-DB"': 1, 'N-1286-6 "The deliberate exception"': 2}
+  - **PR-BODY-STALE:** PR-BODY-STALE (READ, gh_body_1286.md): the PR BODY still says "dormant behind two flags set in no config file": True — the round-1 false sentence survives in the body (not in the docs); the squash body is the MANDATED block, never the PR body
+- **#1288 KS-1341 part A, T1 (READ PREDICTIONS):**
+  - LEAK SITES (READ, fixed-string `message: err.message` in webhooks.ts): merge-base 7 -> head 5; `fail500(` at head 3 (1 declaration + 2 calls)
+  - UNCONVERTED-FIVE (READ): at head ['PATCH /:id :325', 'DELETE /:id :337', 'POST /:id/rotate-secret :352', 'POST /:id/test :391', 'GET /:id/deliveries :416']; the five lines are byte-identical to their merge-base lines: True (declared scope — parts B and C)
+  - HELPER-PLACEMENT (READ): `function fail500` declared at line [562] of 567 (a function DECLARATION — hoisted); its calls at [200, 267] (all above it); the last line is `export default webhooksRouter;`; deliverWebhook declared at [427], first called at [378]
+  - DOCBLOCK-FALSE-AT-A (READ): the docblock opens "['* KS-1341: the only place in this router that turns a caught error into a 500.']" — at head 5 `message: err.message` 500 lines remain, so "the only place" is FALSE at part A (declared by the PR body)
+  - GOLDEN (READ, `git hash-object` of the brief's golden files vs the head blobs): webhooks.A.ts 275dcec47b5d vs head 275dcec47b5d -> EXACT; ks1341a test 3318cccbca3f vs head 3318cccbca3f -> EXACT; A.golden.diff is a plain unified diff (no `diff --git`/`index` header), so its sha256 is NOT the sha256 of `git diff` output — the identity is at BLOB level
+  - KS-730 FAMILY (READ, fail500 bodies at develop in originate/src/routes/): {'gdpr.ts': 'logger.error(context, { error: err instanceof Error ? err.message : String(err)', 'systemErrors.ts': 'logger.error(context, { error: err instanceof Error ? err.message : String(err)', 'adminConfig.ts': 'logger.error(context, { error: err instanceof Error ? err.message : String(err)'}; #1288's body: logger.error(context, { error: err instanceof Error ? err.message : String(err)
+  - BENIGN-BRANCH (READ): catch blocks in webhooks.ts that test error TEXT (`.includes(` / `does not exist`) at head: 0 / 0; the POST / and GET / catches call only fail500; utils/pgErrors.ts reads err.message: True (the LEAK fixture carries no SQLSTATE token and no "does not exist")
+  - GET / TRAP (READ): the list query chains `.catch(... return [])` at line(s) [196], so only a SYNCHRONOUS throw reaches the GET / catch — the cell arms mockImplementationOnce(() => { throw }) (control A0 pins the swallow)
+  - **Not in part A:** KS-1341's BLUF names DELETE /:id and rotate-secret as the MEASURED leaks ("internal configuration text") — both are part B (golden B.golden.diff, READ). §6.4.
+- **#1289 KS-1318 (READ PREDICTIONS):**
+  - BLOBS (READ): develop e96215365a6d | #1289 merge-base e96215365a6d | #1289 head d95ba8ea4891 | #1268 head 3f66d4185236 | #1268 merge-base e96215365a6d
+  - KS1316-FREE (READ): hunks #1289 1 vs #1268 3 on this file; KS1316-only token `W9` in #1289's diff 0 vs #1268's 7 (the instrument fires); numstat ['10', '1']
+  - J2 ASSERTION (READ): `expect(defaultShapesOf(src)).toHaveLength(3)` merge-base 1 -> head 0; the head toEqual list ['export default function', 'export default <Identifier>', 'export { x as default }']; the push labels in defaultShapesOf ['export default function', 'export { x as default }', 'export default <Identifier>'] (the template label `export default <${ts.SyntaxKind[...]}>` read as <Identifier> for the `export default f;` fixture line); every asserted tag is a push label: True
+  - RED-ARM ANCHORS (READ, at head): `return shapes;` occurs 1 time(s) at [4927] (arm A: -> `return shapes.reverse();`); `shapes.push('export default function')` 1, `shapes.push('export { x as default }')` 1 (arm B swaps these two labels); the seat's arms1318j2.py predicted A: tip 0 red / head 1; B: tip 2 / head 3
+  - KS-1318 DoD (READ, linear_KS-1318.md): ONE checkbox — "the combined cell asserts the set of tags, not the count — e.g. toEqual([...]) against the three expected strings in source order"; this PR is exactly that; Linear link kind `contributes` (linear_reads_1.out) — merged, the ticket does NOT auto-close
+- **Fleet STOP (READ, bounded region, NOT-FOUND control):** #1286 28/0 · 6/0 · 49/0 · 60 of 60; #1288 28/0 · 6/0 · 49/0 · 60 of 60; #1289 28/0 · 6/0 · 49/0 · 60 of 60. After this merge: 28/0 · 6/0 · 49/0 · 60 of 60 (no PR adds, removes or renames a `*.test.sh`).
+- **Linear: every PR links `contributes`; NONE `closes`; no body has a closing word before a key** (linear_reads_1.out, gh_read_1.out). KS-1336, KS-1341, KS-1318 all In Progress.
+- **MG-3 key scan:** key scan: 3 mandated squash text block(s), each carries only its own key: #1286 ['KS-1336'], #1288 ['KS-1341'], #1289 ['KS-1318']. Foreign key to un-hyphenate if quoted: #1286 KS1055 (PR body). #1286's round-1 commit says `Refs KS1336` (un-hyphenated; the scanner sees 0 there); the fix commit `Refs KS-1336`. **No PR body would CLOSE a ticket it only contributes to** (0 closing-word+key in each body).
+- **MG-11:** every `<title> (#n)` fits (84 / 89 / 90); no SHORT subject needed; the mandated blocks use the PR titles as read from the API.
+
+## 2. Pins — predict_1.out (rc 0)
+- #1286: 2 commit(s) `27480bb64947`, `da5f3dd837dd` over `00de57baeb405d0081fe8b6f192bd40d35acef61`; 13 behind develop; merged tree `4e1808a7f69e81d084f3f83d16c553871345fc05`; every merged blob == its head blob; numstat equal; no mode change; move ∩ own paths EMPTY.
+- #1288: 1 commit(s) `cb58d3a59c89` over `e080174c86c671349c508560744644fc0ef33388`; 0 behind develop; merged tree `900fbea611f17884800be874b915ed755ec9bca8`; every merged blob == its head blob; numstat equal; no mode change; move ∩ own paths EMPTY.
+- #1289: 1 commit(s) `1e24633b9c19` over `e080174c86c671349c508560744644fc0ef33388`; 0 behind develop; merged tree `a759052a5738cac7eb66d6ec9869e74940bb6229`; every merged blob == its head blob; numstat equal; no mode change; move ∩ own paths EMPTY.
+- Simulations: foreign1286 -> REFUSED: FAIL=2; foreign1288 -> REFUSED: FAIL=3; foreign1289 -> REFUSED: FAIL=2; moved -> PASS: FAIL=0. `moved` = develop + one unrelated synthetic commit (must PASS); `foreign<n>` = develop + a foreign edit of that PR's first own file (must REFUSE). No OLDER develop can host #1288/#1289 (they sit on the current develop), so the base-invariance simulation is `--simulate moved`; `predev` (e6056de7ed64, gate27's pin) is the moved-develop pin in controls D / RC / RD.
+- Superseded runs are kept, never deleted: `predict_superseded_pretagfix.out` (the first pinned run, before the #1289 tag-probe fix read template labels; same pins, same FAIL=0).
+
+## 3. What the gate owes
+- Prompt `2026-09-26_secuura-batch1286.prompt.txt` (38442 bytes) — per-PR sections: #1288's T1 RUNTIME PROBE (the gate's own LEAK, four NODE_ENVs incl. UNSET, body/logger/REACHED, a merge-base control that must leak), the declared five, helper placement + hoisting, the docblock ruling; #1289's red design (arms A/B at both trees + a fire-twice arm); #1286's ROUND-2 cap rule graded against gate27's NO GO and the TIER 3 sentence table; the MANDATED SQUASH TEXT blocks and the MG-3 key-set table.
+- Report dir `/Volumes/DevMASTER/!CODING/Testing Agent MAIN/projects/secuura/reports/2026-09-26-batch1286-g28/`; mail subject as in the prompt, FROM coagent@ TO wednesday-agent@.
+
+## 4. Routing line to add (the drafter did NOT write it)
+`QA/Secuura-batch1286|coagent@agentmail.to|yes` → `/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/inbox_routing.conf`. Absent at drafting (routing_check_1.out: absent (prefix grep -F 'QA/Secuura-batch1286|'): 0 · absent (whole line -x): 0 · control (prefix 'QA/Secuura-batch1278|'): 1 · control (whole line batch1278): 1). Also in PROPOSED_inbox_routing_line.txt.
+
+## 5. The ONE launch command
+```
+/private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/6a51240d-d642-471f-b7c2-1011f35eb0ce/scratchpad/gate28/repin_and_launch_gate28.sh /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/6a51240d-d642-471f-b7c2-1011f35eb0ce/scratchpad/gate28/launch_qa_secuura_batch1286.sh /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/6a51240d-d642-471f-b7c2-1011f35eb0ce/scratchpad
+```
+- Dry run (`--dry-run` appended): repin_dryrun_1.out → DRY RUN COMPLETE 2026-09-26T06:56:52Z — every read agrees with the pins; the real run continues with the usage gate, --check and cockpit.sh add
+- If develop moves (a GO lands first), step 3b re-pins in the same action; a move onto an own path, a stack or a pairwise overlap refuses rc 10 (controls RD / RE).
+- If you copy the kit into `gatesets/2026-09-26_gate28/`, pass the copied paths: step 0b re-measures and re-fills there.
+
+## 6. Decisions for Wednesday (each with the drafter's recommendation)
+1. **#1286 at the cap — two NEW round-2 accuracy nits (INSERT-LINE-271, BICEP-SCOPE).** ":271" names the `platformQuery(` call; the INSERT text is :272. "ON in dev and demo" is true of the two env files, while services.bicep:798 sets it for whatever environment the template deploys (only env.staging.example besides). *Recommend:* treat both as non-blocking cite/scope findings unless the gate finds a sentence FALSE — at the cap a NO GO ships nothing and throws away a correction whose blocking defect is fixed. The rule is the gate's; this is the drafter's weight.
+2. **#1286 N-1286-3..6** (declared NOT done; the fix-round GO authorised two items). *Recommend:* whatever the verdict, ONE follow-up docs ticket carrying N-1286-3..6 plus any round-2 nit (a board write — yours to authorise; the gate files nothing).
+3. **#1286 PR-BODY-STALE** — the PR body still carries the round-1 false sentence. *Recommend:* the merge seat composes the squash body from the MANDATED block (already mandated); optionally ask the owner to edit the PR body (a GitHub write, not the gate's).
+4. **#1288 DOCBLOCK-FALSE-AT-A in a T1 PR** ("the only place in this router…" is false until B and C). *Recommend:* non-blocking, carried by name into part B/C's brief (part C makes it true); do NOT break the golden identity for a comment. And **PART-A-SCOPE-ORDER:** the two MEASURED leaks (DELETE /:id, rotate-secret) are part B — *recommend* part B next, ahead of other local-model work.
+5. **#1288 LOCAL-MODEL-PROVENANCE.** Blob-identical to the golden (hash-object, READ). *Recommend:* grade on merits, no special handling (as #1285 at gate27).
+6. **#1268 disposition.** After #1287 (landed) and #1289, everything of #1268 except KS-1316's failed hunks is on develop; the merge-tree probe shows a later merge of #1268 is CLEAN and lands exactly KS-1316's rule. *Recommend:* ask Kam to close #1268 unmerged once #1289 lands (approval-class: it closes a PR; Seat B 30th's handover says Kam's). Until then the merge seat must never merge #1268.
+7. **KS-1318 after #1289 merges.** Its Done-when is ONE checkbox that #1289 delivers exactly, but the link is `contributes`, so the ticket will not move. *Recommend:* if the gate rules the DoD closed, a Done transition by you (a ticket state change — your call, not the gate's or a seat's).
+8. **Mixed tiers in one kit (T1 #1288 + T2 #1289 + T3 #1286).** *Recommend:* accept — three PRs, disjoint, well under the cap; each tier rule is an explicit kit rule (exits 40/42/49 T1, 44 T2, 43 T3).
+9. **Routing name** `QA/Secuura-batch1286` (you specified it). Distinct and absent (measured, with a control). *Recommend:* keep.
+10. **READY mails NOT read** (no message id reached the drafter; a listing marks mail seen). The seat claims come from PR bodies, every commit message, #1286's fix-round PR comment, Seat B 30th's handover and Seat B 31st's ticket comments + red/green outputs (the capture).
+
+## 7. Controls: `controls_gate28.sh <scratchpad> [--invert]`
+- **controls_1.out:** 115 controls, **OK 115, MISMATCH 0** (rc 0).
+- **controls_2.out (`--invert`):** **OK 0, MISMATCH 115** (rc 1 by design). Every control can fail.
+- Every mutation is independent of the original: doctor() refuses a replacement that contains the text it replaces (rc 98) and refuses when the original still occurs after the plant (rc 97); every wrong head is the real head with ONE hex digit changed (same length, never a superset); the launcher's head guard is whole-field.
+- Doctored arms are pinned to the launcher's own develop. RD runs the REAL re-pin (predict → fill) from a launcher pinned at predev `e6056de7ed64` in a MOVED copy; RE lists a kit PR in the (empty) sibling set too — a pairwise overlap — and must refuse rc 10. PS1 is `--simulate foreign1288` (a conflicting merge); PS2 is `--simulate moved`; PF1 fills from its SIM pins and must refuse.
+- Not controlled: exit 16 (needs a TTY), repin steps 4-6 (usage gate, cockpit add), a `mergeable=False` refusal.
+
+## 8. Files
+- Kit: kit.json · COMMISSION.md (the drafter's READ predictions table) · PROPOSED_inbox_routing_line.txt + routing_check_1.out · make_commission_gate28.py / make_readme_gate28.py (generate the two .md files from the kit's own outputs)
+- Pins: predict_gate28.py → predict_1.out, predict_sim_*.out, pins_gate28.json (+ .SIM-*.json); probe1268_after_1.out (the #1268-after-kit merge-tree)
+- Reads: gh_read_gate28.py → gh_read_1.out, gh_body_*.md, gh_comments_*.md · linear_reads_gate28.py → linear_reads_1.out, linear_KS-*.md · capture_mail_gate28.py → capture_1.out, mail_gate28_ready.md, stopcounts_gate28.json
+- Prompt/launcher: prompt_gate28.TEMPLATE.txt, launcher_gate28.TEMPLATE.sh.txt, fill_gate28.py → 2026-09-26_secuura-batch1286.prompt.txt + launch_qa_secuura_batch1286.sh (fill_1.out), launcher_check_1.out
+- Repin/controls: repin_and_launch_gate28.sh (repin_dryrun_1.out), controls_gate28.sh (controls_1/2.out + .rc)
+
+## 9. NOT done / NOT measured by the drafter
+- No launch, mail, tap, merge, commit, push, comment, routing write, container or port bind. No inbox read. No write in any project folder or in /Volumes/DevMASTER/WEDNESDAY.
+- **UNMEASURED (#1288):** every runtime behaviour — the probe under four NODE_ENVs, the merge-base leak control, non-Error throws, the five sites still leaking at runtime, the const-arrow placement arm; the seat's 4/4/8 red and 8/8 green; originate 943 → 951; tsc with `exclude: []`; lint 22 warnings; the ks860 / ks879 guards over the new cell; the OpenAPI 500 schema. The drafter ran NO drafter probe of the router (no jest/express run) — every #1288 line above is READ.
+- **UNMEASURED (#1289):** arms A and B at both trees and the fire-twice arm; 242 cells; packages/shared 945; tsc; lint 36 problems.
+- **UNMEASURED (#1286):** the full round-2 sentence table (only the READ predictions above); whether ":271" / "dev and demo" are ruled wrong; NO-PLAN-ADDED on the fix-round sentences.
+- **UNMEASURED (all):** prettier; every suite on END_TREE; the usage gate and launch steps 4-6.
