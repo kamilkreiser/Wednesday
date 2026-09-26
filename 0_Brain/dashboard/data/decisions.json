@@ -17650,5 +17650,42 @@
   "prior_rulings_overridden": [
    "2026-09-08 15:36"
   ]
+ },
+ {
+  "id": "wed-laptop-dev-copy-disk-full",
+  "client_project": "WED",
+  "title": "The Laptop-DEV copy stopped: the drive is full, and DevMASTER itself is 98% full",
+  "bluf": "No action needed tonight. The DevMASTER-to-Laptop-DEV copy you approved ran 38 hours and stopped with 'No space left on device' after about 1.7 TB (rsync rc 11, 02:24, inside a QA report's scratch git clone). Measured with df at 02:2x: Laptop-DEV is 1.8 TiB with 1.7 GiB free; DevMASTER is 1.8 TiB with only 48 GiB free (98%). So a same-size drive cannot hold a full copy, and DevMASTER itself is close to full, which will start breaking agent clones and gates. The biggest avoidable bulk is scratch: full git clones kept inside QA gate report folders and session scratch copies. Nothing was deleted. Override reason: the gate matched 'full disk access' on Tuesday's Mac mini and 'QA stack slots full of volumes' - different subjects sharing the words full/disk.",
+  "default_action": "nothing more copies; the partial Laptop-DEV copy stays as it is and nothing is deleted anywhere.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Exclude scratch clones, then finish (recommended)",
+    "detail": "Re-run the copy excluding the QA reports' clone folders and other scratch clones (regenerable), then report the totals. Separately I propose a quarantine list of scratch clones on DevMASTER for you to approve, to free space. Nothing is deleted without your word."
+   },
+   {
+    "key": "b",
+    "label": "Use a bigger drive",
+    "detail": "Keep everything; you provide a larger drive for Laptop-DEV."
+   },
+   {
+    "key": "c",
+    "label": "Leave it",
+    "detail": "The partial copy stays as it is."
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-09-27T02:25:52.489823+10:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "2026-09-02 17:42",
+   "2026-09-08 11:59",
+   "2026-09-08 12:53",
+   "2026-09-14 07:20",
+   "CARD tuesday-mac-mini-scheduler-full-disk-access",
+   "CARD secuura-gate-stack-slots-full-of-kept-volumes"
+  ]
  }
 ]
