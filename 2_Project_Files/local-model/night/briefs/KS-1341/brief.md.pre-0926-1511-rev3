@@ -61,10 +61,12 @@ Edit 2 — line `:267` (POST /), replacement of ONE line by ONE line. Context: `
  });
 ```
 
-Edit 3 — PURE INSERTION of 18 lines BEFORE `:549` `export default webhooksRouter;` (the file's LAST line, byte-unique, count 1): the helper's docblock, the helper, and ONE empty line (written as a `+` line), all FIRST; then `:549` as the single NON-BLANK context line AFTER them (rev 3: rev 1 anchored on the blank `:548`, refused by the blank-context rule; rev 2 put the context before the insertion, refused by the leading-only-context rule — both refusals correct). The helper lands directly above the export; the function declaration is hoisted, so the handlers call it at request time exactly as before, and every line above `:549` stays where it was.
+Edit 3 — PURE INSERTION of 18 lines AFTER `:549` `export default webhooksRouter;` (the file's LAST line, byte-unique, count 1; the file ends with a newline): ONE empty line, then the helper's docblock and the helper. Context: `:549` only — a single NON-BLANK context line (rev 2 of this brief: rev 1 anchored on the blank `:548` and the builder's blank-context rule refused it, correctly). The function declaration is hoisted, so the handlers above call it at request time exactly as before, and every line above stays where it was.
 
 ```diff
 @@ -549,1 +549,19 @@
+ export default webhooksRouter;
++
 +/**
 + * KS-1341: the only place in this router that turns a caught error into a 500.
 + *
@@ -82,8 +84,6 @@ Edit 3 — PURE INSERTION of 18 lines BEFORE `:549` `export default webhooksRout
 +  logger.error(context, { error: err instanceof Error ? err.message : String(err) });
 +  res.status(500).json({ success: false, error: { code: 'INTERNAL_ERROR', message: 'Internal server error' } });
 +}
-+
- export default webhooksRouter;
 ```
 
 **Do NOT touch:**
@@ -292,12 +292,6 @@ describe('KS-1341 part A: GET / and POST / never answer a 500 with the thrown te
   });
 });
 ```
-
-## Red cells
-- RED KS-1341 A1
-- RED KS-1341 A2
-
-(Title SUBSTRINGS, one per `it.each` row family: each matches both the GET / and POST / rows. These four cells go RED at the tip and GREEN with the fix; the four `control KS-1341 A…` cells are green at both. Rev 4: rev 3 was refused by the undeclared-red gate because `it.each` titles are not literal `it(` titles.)
 
 ## Cells and controls
 

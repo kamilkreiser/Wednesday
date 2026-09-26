@@ -15,6 +15,8 @@
    }
  });
 @@ -549,1 +549,19 @@
+ export default webhooksRouter;
++
 +/**
 + * KS-1341: the only place in this router that turns a caught error into a 500.
 + *
@@ -32,8 +34,6 @@
 +  logger.error(context, { error: err instanceof Error ? err.message : String(err) });
 +  res.status(500).json({ success: false, error: { code: 'INTERNAL_ERROR', message: 'Internal server error' } });
 +}
-+
- export default webhooksRouter;
 --- /dev/null
 +++ b/Blockchain/Dev/services/originate/src/__tests__/ks1341a-webhooks-500-never-answers-err-message.test.ts
 @@ -0,0 +1,173 @@

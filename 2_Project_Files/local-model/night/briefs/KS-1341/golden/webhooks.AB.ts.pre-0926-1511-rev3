@@ -1,0 +1,567 @@
+/**
+ * =============================================================================
+ * WEBHOOK ROUTES
+ * =============================================================================
+ * CRUD for webhook subscriptions + delivery history.
+ * Partners subscribe to events (certification.issued, document.created, etc.)
+ * and receive HMAC-signed payloads at their URL.
+ * =============================================================================
+ */
+
+import { Router, Request, Response } from 'express';
+import { randomBytes, createHmac } from 'crypto';
+import { v4 as uuidv4 } from 'uuid';
+import { z } from 'zod';
+import { prisma } from '../db';
+import { logger } from '../utils/logger';
+import { authenticate } from '../middleware/auth';
+import { extractPgCode } from '../utils/pgErrors';
+import { encryptField, decryptField, runWithTenantId, assertSafeOutboundUrl, safeOutboundRequest } from '@secuura/shared';
+
+// KS-466: canonical platform default tenant (KS-192). Fail-closed RLS
+// (migration 039) forbids NULL tenant_id rows on svc_webhooks and the INSERT's
+// WITH CHECK requires the row's tenant_id to match the session GUC — so webhook
+// creation must set a real tenant and bundle the matching GUC.
+const DEFAULT_TENANT_ID = 'a0000000-0000-4000-8000-000000000001';
+
+// KS-466: svc_webhooks.tenant_id is a uuid column; the gateway may hand us the
+// tenant slug ("default") for a tenantless admin, so guard the ::uuid cast.
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+// =============================================================================
+// F-18 phase 2: webhook secret encryption at rest
+// =============================================================================
+// svc_webhooks.secret_v2 holds an encrypted blob (`v<digit>:base64(iv|tag|ct)`)
+// rather than the plaintext secret. The legacy `secret` column was dropped
+// in migration 008. The server still needs the plaintext at HMAC time
+// (it's the signing key), so we decrypt-on-read.
+//
+// AAD bound to `svc_webhooks.secret.<webhook-id>` so a ciphertext can't
+// be ported between rows.
+
+function encryptWebhookSecret(plaintext: string, webhookId: string): string {
+  return encryptField(plaintext, `svc_webhooks.secret.${webhookId}`) as string;
+}
+
+function decryptWebhookSecret(stored: string | null | undefined, webhookId: string): string {
+  if (stored == null || stored === '') return '';
+  // Migration tail: a row may legitimately still hold a plaintext secret
+  // (no `v<digit>:` envelope). Treat as plaintext, log a warning so the
+  // operator knows there are still un-rotated rows. The next call to
+  // POST /:id/rotate-secret will re-encrypt.
+  if (!/^v\d+:/.test(stored)) {
+    logger.warn('[F-18] plaintext webhook secret observed (will encrypt on next rotation)', { webhookId });
+    return stored;
+  }
+  try {
+    return decryptField(stored, `svc_webhooks.secret.${webhookId}`) ?? '';
+  } catch (err: any) {
+    logger.error('[F-18] webhook secret decrypt failed', { webhookId, error: err?.message });
+    return '';
+  }
+}
+
+// =============================================================================
+// KS-431: path-param id guard for the :id write routes.
+// These routes cast :id into raw SQL as `${id}::uuid`. An id that is well-formed
+// per the spec's declared id grammar but not a UUID (e.g. "0") made Postgres throw
+// `22P02 invalid input syntax for type uuid`, which fell through to a raw 500 — first
+// reachable once the inverted-CSRF fix (KS-428) let these write paths run. Reject a
+// pattern-malformed id (400) and treat a well-formed-but-non-UUID id as not-found
+// (404 — it cannot reference a real webhook) BEFORE the query. Mirrors the KS-423
+// SAFE_ID_PATTERN guard already on GET /:id/deliveries.
+// =============================================================================
+
+/** Spec-declared id grammar (SAFE_ID_PATTERN in originate.openapi.ts). */
+const WEBHOOK_ID_PATTERN = /^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$/;
+/** Canonical UUID — svc_webhooks.id is a uuid column, so a non-UUID id is unresolvable. */
+const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+/**
+ * Validate a webhook :id path param before it reaches a `${id}::uuid` raw query.
+ * Sends the 400/404 response itself and returns true when the id is unusable, so the
+ * caller writes `if (rejectInvalidWebhookId(req.params.id, res)) return;`.
+ *
+ * @param id - the raw `req.params.id` value from the route.
+ * @param res - Express response used to emit the rejection (400 malformed / 404 non-UUID).
+ * @returns true when a rejection response was sent; false when the id is a usable UUID.
+ * @example
+ * if (rejectInvalidWebhookId(req.params.id, res)) return;
+ */
+export function rejectInvalidWebhookId(id: string, res: Response): boolean {
+  // Pattern-malformed per the published contract → 400 (same as GET /:id/deliveries).
+  if (!WEBHOOK_ID_PATTERN.test(id)) {
+    res.status(400).json({ success: false, error: { code: 'BAD_REQUEST', message: 'Invalid webhook id format' } });
+    return true;
+  }
+  // Well-formed per the spec but not a UUID → cannot reference a real row → 404 (never a 500).
+  if (!UUID_PATTERN.test(id)) {
+    res.status(404).json({ success: false, error: { code: 'NOT_FOUND', message: 'Webhook not found' } });
+    return true;
+  }
+  return false;
+}
+
+// =============================================================================
+// KS-445: PATCH /:id body guard.
+// The update handler bound body fields straight into the UPDATE via
+// $executeRawUnsafe: `events` (svc_webhooks.events is text[]) sent as a string,
+// or `isActive` (boolean column) sent as a string/number, made Postgres throw
+// `42804 datatype mismatch`, which fell through to a raw 500. The published
+// contract (WebhookUpdateRequest in originate.openapi.ts) already declares
+// events: WebhookEvent[], description: string, isActive: boolean — so a
+// type-mismatched body is spec-invalid and must be a 400, never a 500.
+// =============================================================================
+
+/** Event types a webhook may subscribe to — mirrors WebhookEventEnum in originate.openapi.ts. */
+const VALID_WEBHOOK_EVENTS = [
+  'certification.issued', 'certification.revoked', 'certification.verified',
+  'document.created', 'document.anchored', 'document.revoked',
+  'user.registered', 'user.login',
+] as const;
+
+/**
+ * Runtime mirror of the published WebhookUpdateRequest schema. `url` stays a
+ * plain string here — validateWebhookUrl (SSRF guard) owns URL semantics and
+ * already returns its own 400. `.passthrough()` matches the spec: unknown keys
+ * are allowed (and ignored by the handler), never rejected.
+ */
+const webhookUpdateBodySchema = z
+  .object({
+    url: z.string().optional(),
+    events: z.array(z.enum(VALID_WEBHOOK_EVENTS)).optional(),
+    description: z.string().optional(),
+    isActive: z.boolean().optional(),
+  })
+  .passthrough();
+
+export const webhooksRouter = Router();
+// All routes here require an authenticated Bearer JWT. Audit A-09 + A-01:
+// previously trusted client-supplied x-user-* headers via getUserFromRequest;
+// the gateway now strips those (commit c796138f0) and this enforces real
+// authentication as defense in depth.
+webhooksRouter.use(authenticate());
+
+// =============================================================================
+// SSRF-safe webhook URL validation (audit A-07, hardened by KS-487 B-2).
+//
+// The implementation now lives in @secuura/shared so that m365-integration
+// (B-1, which had no guard at all) shares exactly this logic rather than a
+// copy. Three defects in the version that used to live here are fixed there:
+//
+//  1. NO DNS RESOLUTION. The comment above this function used to claim it
+//     refused "any host that resolves to those at request-time". It did not
+//     resolve anything — a public hostname with an internal A record walked
+//     straight through. That is B-2, and it is why reusing this guard for B-1
+//     as-written would have imported a known bypass into a second service.
+//  2. THE ENTIRE IPv6 BRANCH WAS INERT. `URL.hostname` keeps the brackets, so
+//     `host === '::1'` and `host.startsWith('fd')` could never match. Verified
+//     against the running service before the fix: https://[::1]/hook,
+//     https://[fd00::1]/hook and https://[::ffff:169.254.169.254]/hook were all
+//     accepted with 201.
+//  3. REGISTRATION-TIME ONLY. Validating at create/update but never at send
+//     means changing the DNS record after registration is enough. The check now
+//     also runs inside deliverWebhook, which is the single choke point for both
+//     the test-send and the dispatch loop.
+// =============================================================================
+async function validateWebhookUrl(
+  raw: unknown,
+): Promise<{ ok: true; url: string } | { ok: false; error: string }> {
+  return assertSafeOutboundUrl(raw);
+}
+
+
+// =============================================================================
+// CRUD
+// =============================================================================
+
+/** List webhook subscriptions */
+webhooksRouter.get('/', async (req: Request, res: Response) => {
+  try {
+    // Pen-test F-04: read from authenticated req.user (set by authenticate()
+    // middleware), NOT from raw headers. Direct header reads are spoofable
+    // by anyone reaching the service directly.
+    const userId = (req as any).user?.userId;
+    const db = (req as any).db || prisma;
+
+    // KS-466: organization_id is a uuid column, so the bind param needs an
+    // explicit ::uuid cast — without it Postgres raises 42883 (uuid = text has
+    // no operator). The error was silently swallowed by the .catch below, so
+    // this list ALWAYS returned [] (a pre-existing bug, independent of RLS).
+    const rows = await db.$queryRaw`
+      SELECT id, url, events, is_active, description, created_at, updated_at
+      FROM svc_webhooks
+      WHERE organization_id = ${userId}::uuid OR app_id IS NOT NULL
+      ORDER BY created_at DESC
+    `.catch((e: any) => { logger.warn('webhooks list query failed', { error: e?.message }); return []; });
+
+    res.json({ success: true, webhooks: rows });
+  } catch (err: any) {
+    fail500(res, 'Webhook list failed (GET /api/webhooks)', err);
+  }
+});
+
+/** Create webhook subscription */
+webhooksRouter.post('/', async (req: Request, res: Response) => {
+  try {
+    const { url, events, description } = req.body;
+
+    if (!url || !events || !Array.isArray(events) || events.length === 0) {
+      return res.status(400).json({ success: false, error: { code: 'BAD_REQUEST', message: 'url and events (array) are required' } });
+    }
+    // KS-444: enforce the published WebhookCreateRequest type for description
+    // (optional string). The sweep's negative_data_rejection sent `{}` and it
+    // was accepted with a 201 — the object was bound into the text column and
+    // echoed back in the response.
+    if (description !== undefined && typeof description !== 'string') {
+      return res.status(400).json({ success: false, error: { code: 'BAD_REQUEST', message: 'description must be a string' } });
+    }
+    const urlValidation = await validateWebhookUrl(url);
+    if (!urlValidation.ok) {
+      return res.status(400).json({ success: false, error: { code: 'BAD_REQUEST', message: `webhook url rejected: ${urlValidation.error}` } });
+    }
+
+    // KS-445: single source of truth for the event list (shared with the PATCH body guard).
+    const validEvents = VALID_WEBHOOK_EVENTS as readonly string[];
+    const invalidEvents = events.filter((e: string) => !validEvents.includes(e));
+    if (invalidEvents.length > 0) {
+      return res.status(400).json({
+        success: false,
+        error: { code: 'BAD_REQUEST', message: 'Invalid events', invalid: invalidEvents, valid: validEvents },
+      });
+    }
+
+    const id = uuidv4();
+    const secret = `whsec_${randomBytes(24).toString('hex')}`;
+    // Pen-test F-04: read from authenticated req.user (set by authenticate()
+    // middleware), NOT from raw headers.
+    const userId = (req as any).user?.userId;
+    const db = (req as any).db || prisma;
+
+    // F-18 phase 2: persist the encrypted blob in secret_v2; the legacy
+    // `secret` column was dropped in migration 008.
+    const encrypted = encryptWebhookSecret(secret, id);
+    // KS-466: set tenant_id (the INSERT previously omitted it → NULL, which
+    // fail-closed RLS rejects). Resolve the tenant from req.tenantId, but the
+    // gateway can pass the tenant SLUG ("default", for a tenantless admin whose
+    // JWT has no tenantId claim) rather than a UUID — and svc_webhooks.tenant_id
+    // is a uuid column, so a slug fails the ::uuid cast. Coerce to a UUID:
+    // accept req.tenantId only when it already is one, else use the platform
+    // default tenant (the UUID the "default" slug maps to, and the tenant the
+    // migration backfills rows into). Wrap in runWithTenantId so the GUC the
+    // proxy sets equals the inserted UUID.
+    const reqTenant = (req as any).tenantId as string | undefined;
+    const tenantId = reqTenant && UUID_RE.test(reqTenant) ? reqTenant : DEFAULT_TENANT_ID;
+    await runWithTenantId(tenantId, () => db.$executeRaw`
+      INSERT INTO svc_webhooks (id, organization_id, tenant_id, url, secret_v2, events, description, is_active)
+      VALUES (${id}::uuid, ${userId}::uuid, ${tenantId}::uuid, ${urlValidation.url}, ${encrypted}, ${events}, ${description || null}, true)
+    `);
+
+    res.status(201).json({
+      success: true,
+      webhook: { id, url: urlValidation.url, events, description, isActive: true },
+      secret,
+      warning: 'Store the webhook secret securely — it is used to verify payload signatures and cannot be retrieved later.',
+    });
+  } catch (err: any) {
+    fail500(res, 'Webhook create failed (POST /api/webhooks)', err);
+  }
+});
+
+/** Update webhook */
+webhooksRouter.patch('/:id', async (req: Request, res: Response) => {
+  try {
+    if (rejectInvalidWebhookId(req.params.id, res)) return;
+    // KS-445: enforce the published body contract BEFORE any field reaches the
+    // raw UPDATE — a wrong-typed field (events as string, isActive as string)
+    // previously hit Postgres as a 42804 datatype mismatch → raw 500.
+    const bodyCheck = webhookUpdateBodySchema.safeParse(req.body ?? {});
+    if (!bodyCheck.success) {
+      const detail = bodyCheck.error.issues
+        .map((i) => `${i.path.join('.') || 'body'}: ${i.message}`)
+        .join('; ');
+      return res.status(400).json({
+        success: false,
+        error: { code: 'VALIDATION_ERROR', message: `Invalid webhook update body — ${detail}` },
+      });
+    }
+    const { url, events, description, isActive } = req.body ?? {};
+    const db = (req as any).db || prisma;
+
+    const updates: string[] = [];
+    const values: any[] = [];
+    let idx = 1;
+
+    if (url !== undefined) {
+      const urlValidation = await validateWebhookUrl(url);
+      if (!urlValidation.ok) {
+        return res.status(400).json({ success: false, error: { code: 'BAD_REQUEST', message: `webhook url rejected: ${urlValidation.error}` } });
+      }
+      updates.push(`url = $${idx}`); values.push(urlValidation.url); idx++;
+    }
+    if (events !== undefined) { updates.push(`events = $${idx}`); values.push(events); idx++; }
+    if (description !== undefined) { updates.push(`description = $${idx}`); values.push(description); idx++; }
+    if (isActive !== undefined) { updates.push(`is_active = $${idx}`); values.push(isActive); idx++; }
+    updates.push('updated_at = NOW()');
+    values.push(req.params.id);
+
+    await db.$executeRawUnsafe(
+      `UPDATE svc_webhooks SET ${updates.join(', ')} WHERE id = $${idx}::uuid`,
+      ...values,
+    );
+
+    res.json({ success: true });
+  } catch (err: any) {
+    // KS-445 belt: if a value the boundary schema could not anticipate still
+    // fails a cast/constraint in Postgres, answer an honest 400 — never leak
+    // the raw datatype-mismatch as a 500.
+    const pgCode = extractPgCode(err);
+    if (pgCode === '42804' || pgCode === '22P02' || pgCode === '22001' || pgCode === '23514') {
+      return res.status(400).json({
+        success: false,
+        error: { code: 'VALIDATION_ERROR', message: 'One or more update values cannot be stored for this webhook' },
+      });
+    }
+    fail500(res, 'Webhook update failed (PATCH /api/webhooks/:id)', err);
+  }
+});
+
+/** Delete webhook */
+webhooksRouter.delete('/:id', async (req: Request, res: Response) => {
+  try {
+    if (rejectInvalidWebhookId(req.params.id, res)) return;
+    const db = (req as any).db || prisma;
+    await db.$executeRaw`UPDATE svc_webhooks SET is_active = false WHERE id = ${req.params.id}::uuid`;
+    res.json({ success: true });
+  } catch (err: any) {
+    fail500(res, 'Webhook delete failed (DELETE /api/webhooks/:id)', err);
+  }
+});
+
+/** Rotate webhook secret */
+webhooksRouter.post('/:id/rotate-secret', async (req: Request, res: Response) => {
+  try {
+    if (rejectInvalidWebhookId(req.params.id, res)) return;
+    const newSecret = `whsec_${randomBytes(24).toString('hex')}`;
+    const db = (req as any).db || prisma;
+    // F-18 phase 2: persist encrypted; return plaintext to caller (one-time).
+    const encrypted = encryptWebhookSecret(newSecret, req.params.id);
+    await db.$executeRaw`UPDATE svc_webhooks SET secret_v2 = ${encrypted}, updated_at = NOW() WHERE id = ${req.params.id}::uuid`;
+    res.json({ success: true, secret: newSecret });
+  } catch (err: any) {
+    fail500(res, 'Webhook secret rotation failed (POST /api/webhooks/:id/rotate-secret)', err);
+  }
+});
+
+/** Send test event to a webhook */
+webhooksRouter.post('/:id/test', async (req: Request, res: Response) => {
+  try {
+    if (rejectInvalidWebhookId(req.params.id, res)) return;
+    const db = (req as any).db || prisma;
+    const rows = await db.$queryRaw`SELECT id, url, secret_v2, events FROM svc_webhooks WHERE id = ${req.params.id}::uuid AND is_active = true`;
+
+    if (!rows || rows.length === 0) {
+      return res.status(404).json({ success: false, error: { code: 'NOT_FOUND', message: 'Webhook not found' } });
+    }
+
+    const webhook = rows[0];
+    // F-18 phase 2: decrypt secret_v2 at HMAC time. The plaintext lives
+    // in process memory only for the duration of the deliverWebhook call.
+    const plainSecret = decryptWebhookSecret(webhook.secret_v2, webhook.id);
+    const testPayload = {
+      id: `evt_test_${uuidv4()}`,
+      type: 'test.ping',
+      timestamp: new Date().toISOString(),
+      data: { message: 'This is a test event from Secuura Platform K' },
+    };
+
+    const result = await deliverWebhook(webhook.url, plainSecret, testPayload);
+
+    res.json({
+      success: true,
+      delivery: {
+        url: webhook.url,
+        status: result.status,
+        success: result.success,
+        duration_ms: result.duration,
+        error: result.error,
+      },
+    });
+  } catch (err: any) {
+    res.status(500).json({ success: false, error: { code: 'INTERNAL_ERROR', message: err.message } });
+  }
+});
+
+/** List delivery history */
+webhooksRouter.get('/:id/deliveries', async (req: Request, res: Response) => {
+  try {
+    // KS-423: enforce the spec's declared id pattern (SAFE_ID_PATTERN in
+    // originate.openapi.ts). Without this, a malformed id fell through to the
+    // ::uuid cast whose .catch(() => []) masked it as an empty 200 — the
+    // negative_data_rejection finding.
+    if (!/^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$/.test(req.params.id)) {
+      return res.status(400).json({ success: false, error: { code: 'BAD_REQUEST', message: 'Invalid webhook id format' } });
+    }
+    const db = (req as any).db || prisma;
+    const rows = await db.$queryRaw`
+      SELECT id, event_type, response_status, success, attempt, error, duration_ms, delivered_at
+      FROM svc_webhook_deliveries
+      WHERE webhook_id = ${req.params.id}::uuid
+      ORDER BY delivered_at DESC
+      LIMIT 50
+    `.catch(() => []);
+
+    res.json({ success: true, deliveries: rows });
+  } catch (err: any) {
+    res.status(500).json({ success: false, error: { code: 'INTERNAL_ERROR', message: err.message } });
+  }
+});
+
+// =============================================================================
+// DELIVERY ENGINE
+// =============================================================================
+
+/**
+ * Deliver a payload to a webhook URL with HMAC-SHA256 signature.
+ */
+export async function deliverWebhook(
+  url: string,
+  secret: string,
+  payload: Record<string, unknown>,
+): Promise<{ status: number; success: boolean; duration: number; error?: string }> {
+  const body = JSON.stringify(payload);
+  const signature = createHmac('sha256', secret).update(body).digest('hex');
+  const start = Date.now();
+
+  // KS-487 B-2: re-validate at SEND time, not just at registration.
+  // Registration-time-only validation is defeated without any race — the
+  // attacker registers a public host, then repoints the DNS record. This is
+  // deliberately inside deliverWebhook rather than at its two call sites (the
+  // test-send at /test and the dispatch loop) so that neither can forget it,
+  // and so a third caller added later inherits it.
+  // KS-914: one call that validates AND connects to the address it validated.
+  // The previous shape — assertSafeOutboundUrl(url) then fetch(url) — resolved
+  // twice, and the second resolution is the one that decided where the packets
+  // went. It returns the guard's error rather than throwing, TAGGED with
+  // `reason: 'blocked' | 'request_failed'` — the branch below reads that tag,
+  // so the distinction is carried by the type and not by this sentence.
+  // `timeoutMs` is a total deadline on connect, transfer and drain, not a
+  // socket-idle timer.
+  const result = await safeOutboundRequest(
+    url,
+    {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-secuura-signature': `sha256=${signature}`,
+        'x-secuura-event': (payload as any).type || 'unknown',
+        'x-secuura-delivery': (payload as any).id || uuidv4(),
+        'User-Agent': 'Secuura-Webhooks/1.0',
+      },
+      body,
+      timeoutMs: 10000,
+    },
+  );
+
+  if (!result.ok) {
+    // KS-914 A-4/A-5: the distinction is carried by `result.reason`, not by a
+    // comment. It reaches the operator on two surfaces — the persisted
+    // svc_webhook_deliveries.error and the /test response's delivery.error —
+    // so an operator can tell "we refused to send" from "their endpoint was
+    // down". The `blocked by SSRF guard:` prefix is the one this replaced; it
+    // is restored verbatim rather than reworded, because it is what anyone
+    // grepping delivery history is already looking for.
+    if (result.reason === 'blocked') {
+      logger.warn('webhook delivery blocked by SSRF guard', { url, reason: result.error });
+      return {
+        status: 0,
+        success: false,
+        duration: Date.now() - start,
+        error: `blocked by SSRF guard: ${result.error}`,
+      };
+    }
+    logger.warn('webhook delivery failed', { url, reason: result.error });
+    return {
+      status: 0,
+      success: false,
+      duration: Date.now() - start,
+      error: result.error,
+    };
+  }
+
+  return {
+    status: result.response.status,
+    success: result.response.ok,
+    duration: Date.now() - start,
+  };
+}
+
+/**
+ * Dispatch an event to all matching webhook subscriptions.
+ * Called by other services when events occur (cert issued, doc created, etc.)
+ */
+export async function dispatchEvent(
+  eventType: string,
+  payload: Record<string, unknown>,
+  db?: any,
+): Promise<number> {
+  try {
+    const client = db || prisma;
+    const webhooks = await client.$queryRaw`
+      SELECT id, url, secret_v2 FROM svc_webhooks
+      WHERE is_active = true AND ${eventType} = ANY(events)
+    `.catch(() => []);
+
+    if (!webhooks || webhooks.length === 0) return 0;
+
+    let delivered = 0;
+    for (const wh of webhooks as any[]) {
+      const event = {
+        id: `evt_${uuidv4()}`,
+        type: eventType,
+        timestamp: new Date().toISOString(),
+        data: payload,
+      };
+
+      // F-18 phase 2: decrypt secret_v2 at HMAC time.
+      const plainSecret = decryptWebhookSecret(wh.secret_v2, wh.id);
+      const result = await deliverWebhook(wh.url, plainSecret, event);
+
+      // Log delivery
+      try {
+        await client.$executeRaw`
+          INSERT INTO svc_webhook_deliveries (webhook_id, event_type, payload, response_status, success, error, duration_ms)
+          VALUES (${wh.id}::uuid, ${eventType}, ${JSON.stringify(event)}::jsonb, ${result.status}, ${result.success}, ${result.error || null}, ${result.duration})
+        `;
+      } catch { /* logging failure shouldn't break delivery */ }
+
+      if (result.success) delivered++;
+    }
+
+    logger.info('Webhook dispatch', { eventType, total: webhooks.length, delivered });
+    return delivered;
+  } catch (err: any) {
+    logger.warn('Webhook dispatch failed', { eventType, error: err.message });
+    return 0;
+  }
+}
+
+export default webhooksRouter;
+
+/**
+ * KS-1341: the only place in this router that turns a caught error into a 500.
+ *
+ * Seven catch blocks above put the thrown error's own text in the 500 body with NO NODE_ENV
+ * guard, so it reached the client in every environment, production included (measured by the
+ * 2026-09-26 gate: DELETE /:id returned the thrown text, rotate-secret returned internal
+ * encryption-configuration text). Same helper as routes/gdpr.ts and routes/systemErrors.ts
+ * (KS-730): log the thrown text server-side with the route named, answer the constant body.
+ *
+ * Declared at the END of the file on purpose: a function declaration is hoisted, and the
+ * handlers above only call it at request time (deliverWebhook is called above its own
+ * declaration the same way). Placing it here leaves every line above it where it was.
+ */
+function fail500(res: Response, context: string, err: unknown): void {
+  logger.error(context, { error: err instanceof Error ? err.message : String(err) });
+  res.status(500).json({ success: false, error: { code: 'INTERNAL_ERROR', message: 'Internal server error' } });
+}
