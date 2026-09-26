@@ -17618,5 +17618,37 @@
    "CARD hpsmpoc-findings-order",
    "CARD hpsmpoc-showcase-labelling"
   ]
+ },
+ {
+  "id": "secuura-ks1346-logging-thrown-objects-leaks-secrets",
+  "client_project": "Secuura/Blockchain",
+  "title": "KS-1346: logging the full thrown object puts passwords and personal data in the logs; how much should an error log say?",
+  "bluf": "No action needed tonight; this only decides how KS-1346 is re-done. KS-1346 asked that when code throws something that is not a proper error, the log should say more than [object Object]. The Spark's fix logged the whole object, and tonight's QA gate measured it through the real logger: a thrown object's password, token, API key, email and SSN all landed in the log line, in production too (report gate30T1, #1296 and #1297). Both pull requests are held open, unmerged. The logger has no redaction. Override reason: the gate matched a 2026-09-08 15:36 terminal paste about a git stash (shared generic words only), not a ruling on logging.",
+  "default_action": "nothing merges; #1296 and #1297 stay open and KS-1346 waits for your word.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Type and field names only (recommended)",
+    "detail": "Log what kind of thing was thrown and the NAMES of its fields, never their values. Enough to debug, nothing sensitive. Re-brief KS-1346 this way; the Spark does it."
+   },
+   {
+    "key": "b",
+    "label": "Leave it as is",
+    "detail": "Keep [object Object]. Close KS-1346 as by design and close #1296/#1297."
+   },
+   {
+    "key": "c",
+    "label": "Full detail with a redaction list",
+    "detail": "Log the object but blank out fields called password, token, apiKey, email, ssn and similar. More detail, but a list always misses a field name somebody invents later."
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-09-27T01:17:03.870970+10:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "2026-09-08 15:36"
+  ]
  }
 ]
