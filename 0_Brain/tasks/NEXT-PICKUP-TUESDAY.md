@@ -6,11 +6,25 @@ status: live
 supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s1-wholesale
 ---
 
+## 🔴 DELTA 95 — 2026-09-26 20:1x (s86, ctx 70% CHECKPOINT; band 80-90). **READ THIS FIRST, THEN 94.**
+### ✅ BATCH 1 CLOSED — all five on NexusAI main **1904765**, 4133/247 = the gate's arithmetic; every merge verified at source by Tuesday; every Build green; demo skipped on each. Kam told on the live board 20:03 (201). Nothing owed on batch 1.
+### NEXT: BATCH #3 GATE (tier 1) — the first work of the next seat if it is not launched yet
+Members + READYs (all in `fleet/qa-agent/briefs/2026-09-26_nexusai-rd*-READY-mail.txt`):
+- RD-324 (N) + RD-684 (N, High): **UPDATED READYs pending.** N forward-merged both onto 1904765 at 20:02 (rd-684 had one real hunk resolved as a union, proven by diffs both ways); holds queued; each UPDATED READY names a merge-tree rd-324 vs rd-684 + the D-F1 cell.
+- RD-314 (N, LAW, ce148d5) · RD-424 (N, 2ce26eb) · RD-413 (M, f70594a; needs a REAL-BROWSER leg + a BRAND leg (no new colours, measured by M) + confirm RD-636 closes with it).
+**When both UPDATED READYs land:** commission a gate DRAFTER (pattern: `fleet/qa-agent/briefs/2026-09-26_nexusai-gate-batch1-rd447-rd411-rd533-rd627a-rd315.md` + its launcher), read its WRONG list, stamp, `--check`, `cockpit.sh add QA/NexusAI-batch3 …`, resize panes (monitor 2, agents >= 6), verify at rung 6. Every NOT TESTED list from the READYs goes into the brief verbatim.
+### TIER-2 BATCH (later): RD-443 (O, 8e27dc2) + RD-430 (P) when its READY lands.
+### SEATS
+M (ctx 78%, near its band; retire BY HAND when it wraps: mail the wrap, verify on disk, pane_close, cockpit.sh launch + a SUCCESSOR mail): RD-695 (E-C1) red run queued. N: batch-3 prep, then RD-685 (ruled (i) + the exception). O: RD-698 (A-F1 High), RD-418, RD-425 queued. P (S85P): RD-204 (a T2b re-run), RD-197, RD-430, RD-286 (RD-288 measure-first).
+### STATE
+Usage 88% at 20:09 (~1 pt/h) -> 95% ~03:00; card `tuesday-allowance-95-lands-this-afternoon` unanswered (default a: post at 90%, nothing new at 95%). The 90% watcher runs in THIS seat (re-arm after a rotation). The usage_gate's 70% "minimise cloud agents" advisory is Wednesday's Ornith/Spark rule, not Datasec's. Kam: nothing since 07:18.
+
 ## 🔴 DELTA 94 — 2026-09-26 17:4x (s86, ctx 65% light checkpoint; band 80-90). **READ THIS FIRST, THEN 93.**
 ### BATCH-1 MERGES (sequence in DELTA 93, updated there)
 - ✅ 1 RD-447 -> 02b9528 · ✅ 2 RD-411 -> 5628e75 (both verified at source; Builds green; demo skipped).
 - **3-4: M RELEASED 17:32** (RD-315 then RD-533). The s84m-merge-rd315 ticket holds the lock (17:4x). On each MERGED: ls-remote + parents + counts.
-- **5: N (RD-627a @ 057016d) gets its RELEASE mail AFTER M's second MERGED.** Then ONE board line to Kam for all five (target 4133/247).
+- ✅ 3 RD-315 -> 5220335 · ✅ 4 RD-533 -> 748cece (both verified at source; RD-315 Build green 4124; RD-533 Build 36230626347 running, M relays).
+- **5: N RELEASED 18:4x** (mail "RELEASE: batch-1 merge RD-627a"; push only after M's merge-2 Build is green). Then ONE board line to Kam for all five (target 4133/247).
 ### BATCH #3 (tier 1; drafter NOT commissioned yet)
 RD-324 (3beea5c) + RD-684 (b5d6525) + RD-314 (ce148d5) + RD-424 (2ce26eb); READYs saved in fleet/qa-agent/briefs/2026-09-26_nexusai-rd{324,684,314,424}-READY-mail.txt. **Gate after RD-627a merges AND N's UPDATED READYs for rd-324 + rd-684** (forward-merged, the D-F1 cell, merge-tree between them).
 ### TIER-2 BATCH (not yet)

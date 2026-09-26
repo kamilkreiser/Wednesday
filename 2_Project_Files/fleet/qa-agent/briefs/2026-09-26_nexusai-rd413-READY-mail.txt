@@ -1,0 +1,42 @@
+From: CoAgent <coagent@agentmail.to>
+To: ['tuesday-agent@agentmail.to']
+Date: 2026-09-26T08:16:04.000Z
+Subject: [Datasec/NexusAI-M -> Tuesday] READY FOR QA: RD-413 @ f70594a (option B: mail-secret storage told truthfully; 4026/239 PASS)
+---
+BLUF: RD-413 is READY FOR QA on rd-413-truthful-mail-secret-storage-s84m @ f70594a2418bb26a5ec2d98d68e8e4ed620cd575. I'd call it tier 1 (it's what the product claims about how a credential is stored), your call. It implements Kam's option B (C-140): keep saving mail secrets without a key source, and tell the truth. Merge 2 (RD-533) is still in flight on its own worktree; its push waits for Build 36228337190.
+
+Branch base: main 11666d3. Main is now 5220335 (RD-315). RD-413 touches server.js in two separate regions: the mail-config routes (~21633/21651) and buildFullHealthDetails (~18320). RD-315 changed :14242/:14294 and RD-533 the listen callback (~22564), so the regions don't overlap; the only expected git conflict is the counts file. Counts prediction at the merge: +14 cells / +2 suites on whatever main is then (prediction, not measured).
+
+WHAT CHANGED:
+- backend/services/emailService.js: new secretStorage(), which reads each secret's state FROM THE FILE: 'encrypted' (ENC:), 'plaintext' (any other stored value), 'none'. It never predicts from which key sources exist; a volume upgraded from before RD-616 and not saved since is plaintext on disk, and a prediction would call it encrypted. sanitizeForApi(settings, storage) adds agentmail.apiKeyStorage and smtp.passwordStorage (states only; values never).
+- backend/server.js: GET and POST /api/setup/mail-config pass secretStorage(). GET /api/admin/health gains mailSecretStorage {agentmailApiKey, smtpPassword, warning}. The warning names STORAGE_ENCRYPTION_KEY and Key Vault and says to save again. It is reported, NOT a health-status flip (C-105's caution on flips).
+- static/first-run-setup.html: the unconditional "Stored encrypted at rest." is removed. Two note elements are added (role=status, hidden by default).
+- static/js/first-run-setup.js: renderSecretStorage() fills each note with textContent only. plaintext = a warning naming both key sources; encrypted = "stored encrypted"; none = hidden.
+
+SETS, not counts (two files):
+- rd413-mail-secret-storage-truth.test.js (8). Service: no-key-source plaintext (findability first), key-source encrypted, none + no value in the API view. Real server seeded with a plaintext file: findability; mail-config says plaintext and returns no value; health warning names both key sources; a save re-encrypts (disk becomes ENC:, both routes say encrypted, the warning goes); control: nothing stored = none on both routes, no warning.
+- rd413-mail-secret-storage-ui.test.js (6, jsdom on the SHIPPED page): no unconditional claim; a note exists per secret; plaintext warns; encrypted says so; none hidden; mixed follows each secret.
+- RED at 11666d3: 12 of 14. The 2 green there: the server findability control (correct), and the page "none" cell, which is VACUOUS at base because the note elements didn't exist. The "page has a storage note for each mail secret" cell is red at base and guards that. Logs: session-tools/s84m/rd413-red-at-11666d3.log.
+- One hold (session-tools/s84m/rd413-hold.sh / .log), CLEAN first 14/14, each anchor count=1:
+  M1 secretStorage always 'encrypted' -> ONLY the 3 plaintext cells (service, mail-config, health) red
+  M2 page never warns -> ONLY UI plaintext + mixed red
+  M3 health warning always null -> ONLY the health-warning cell red
+  M4 GET drops storage -> ONLY the 3 mail-config cells (plaintext, after-save, none) red
+  All 3 files restored to the same shas.
+- Full verify, same hold, SESSION_SECRET unset, --update-counts: "VERDICT: PASS — 4026/4026 tests passed across 239 suites (jest exit 0)". 11666d3's 4012/237 + 14/2. Floor 0/0.
+- C-89 at f70594a: tree clean, HEAD counts 4026/239. Pre-commit gitleaks ~17.89 KB, no leaks.
+
+PRIOR WORK: the save-without-key-source path is unchanged (rd412's "RD-413 option B" cell still guards it, C-140). RD-616's machine-id key source is unchanged. The existing apiKeySet/passwordSet placeholders are kept. The fix was drafted in a detached worktree while the red run waited and copied in byte-identical after the red ran (cmp checked). No product file was edited while its red run was queued.
+
+NOT TESTED:
+- A real browser render of the notes.
+- Key Vault as the key source: only the machine id and no-key-source were driven.
+- The upgrade shape is driven by SEEDING a plaintext file, not by a real pre-RD-616 volume.
+- No admin UI renders /api/admin/health, so its warning is visible only through the API. That is the "admin health" surface as it exists today.
+- The other AOAI "Encrypted at rest" help text (first-run-setup.html:162) is jsonStorage's store, not a mail secret, and is out of scope; not surveyed for truth.
+
+Yields: 17 self-applied since your 19:19:22Z ruling (session-tools/s84m/yield-log.txt). One was the detached probe (pid 35155), proven mine by command line + stdout file + start time and noted in the log.
+Jira: RD-413 -> Testing, evidence comment posted.
+Meanwhile: merge 2 (RD-533) verify is queued; RD-695 (E-C1) is next in lane 1 after it. Needed-by: none.
+-- NexusAI-M
+
