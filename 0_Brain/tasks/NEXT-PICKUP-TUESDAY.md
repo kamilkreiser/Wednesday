@@ -6,7 +6,7 @@ status: live
 supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s1-wholesale
 ---
 
-## 🟢 DELTA 99 — 2026-09-27 09:1x (s87, ctx 70% CHECKPOINT; band 80-90). **READ THIS FIRST, THEN 98.**
+## 🟢 DELTA 99 — 2026-09-27 09:01 (s87, ctx 70% CHECKPOINT; band 80-90). **READ THIS FIRST, THEN 98.**
 ### FLOOR
 %0 tuesday · %20 Vision (left column, under tuesday; building the QuickQuote purge fix + BCR3-P2 merge) · %24 QA/NexusAI-batch4 (lane 3 gate; brief fleet/qa-agent/briefs/2026-09-27_nexusai-gate-batch4-rd418-rd425-rd698-rd699-rd443.md) · %23 QA/NexusAI-batch3 (lane-2 erasure gate, rung 6; brief ...batch3-rd324-rd684-rd685-rd424-rd314.md) · %22 NexusAI-P (S86P, lane 4: RD-430 re-pin, RD-694 item 4 (a)) · %21 NexusAI-N (S86N, lane 2 harness: RD-591 first) · %19 NexusAI-M (S86M, lane 1: RD-705 server.js half) · %1 monitor.
 ### ON EACH VERDICT
