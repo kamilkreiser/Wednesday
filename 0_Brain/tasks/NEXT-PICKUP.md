@@ -15,6 +15,14 @@ supersede: replace wholesale at the next pickup; do not append
 **Tuesday:** BACK (her mail 23:35Z; wake_wednesday.sh alarm change f4ed4d47d pulled). **Friday:** live on the laptop and driving Datasec seats.
 
 ### LIVE RIGHT NOW
+**🟢 FLOOR CLEAR 14:50 (the 09:44 seat, session 6a51240d). READ FIRST — supersedes every block below where they differ:**
+0. **Kam:** no panel rows since 07:34. **Three close-cards with him** (defaults: nothing changes): `secuura-pr1245-round3-failed-at-cap` (rec a: close #1245 + #1241) · `secuura-pr1268-pr1278-closed-at-cap` (rec a: close both). Audit fuse 2026-09-30T00:00Z still his (card from earlier days).
+1. **develop e080174c86c6. 68 Secuura merges since the 25th's morning, 0 deployed.** This seat verified at source (PR API merged=True at every pin + END/own-path tree checks): gate26T2 five, gate26T1 six, gate27 two (#1285 = the Spark's KS-766 PASS, #1287 = KS-1142's corpus file).
+2. **NO Secuura seat live** (M1 0.95, B 30th 0.90, both wrapped + closed). Next Secuura work, small: **#1286 docs r2 (da5f3dd837dd, the CAP, T3) → the next gate batch** · **KS-1318's J2 hunk re-raised alone** (handover `HANDOVER-seatB30-2026-09-26.md:30`) · KS-1333 once #1281 merged (it has: #1281 → fef3443747) · new tickets KS-1334 (5 prod leak sites) + KS-1341 (webhooks.ts 7 leaks, High) are real build candidates. Usage 81% (> 70% minimise-cloud; 90% hard stop): launch only what matters now.
+3. **Ornith PAUSE_QUEUE to 18:00** (measured reason). Spark idle.
+4. **Laptop-DEV rsync 13710** still running (watcher in THIS seat; re-arm on rotation), NAS leg 64108 running.
+5. OWED (Wednesday tooling): the 70% advisory in `fleet/usage_gate.sh`; `cockpit.sh say` queued-tap re-send; the report-boundary stall mechanism.
+
 **🔵 50% CHECKPOINT 11:46 (the 09:44 seat, session 6a51240d). READ FIRST — supersedes the 09:4x handover where they differ:**
 0. **Kam's rulings:** unchanged since 07:34 (5 rows today, all executed). reconcile to-rule 0.
 1. **TWO GATES RUNNING over develop 00de57baeb40** (kits verified by Wednesday: heads == ls-remote ×14; controls T1 132/0 + inv 0/132, T2 152/0 + inv 0/152; routing lines added, backup `inbox_routing.conf.pre-0926-1145-gate26`; kits at `fleet/qa-agent/gatesets/2026-09-26_gate26T1|T2/`):
