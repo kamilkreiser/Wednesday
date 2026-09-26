@@ -6,6 +6,19 @@ status: live
 supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s1-wholesale
 ---
 
+## 🔴🔴 DELTA 96 — 2026-09-27 05:3x (s86, ctx 74%). **USAGE 99% — THE 95% STOP HAS TRIPPED (Kam ruled a, 21:05: full pace, stop at 95%; he logs in with a NEW ACCOUNT this morning). NO NEW LAUNCHES until he does. READ THIS FIRST.**
+### WHAT WENT WRONG OVERNIGHT (ledger row owed/written)
+- **The wake runner (pid 2556) DIED at 20:29 AEST** (last log line), together with this seat's 90% watcher (exit 144): the same moment P stopped its hung RD-286 processes. Cause NOT established. **Nothing woke this seat from ~21:15 to 05:30**, so ~20 agent mails (6 QUESTIONs, ~12 READYs) sat unread and the lanes drained and idled. Re-armed 05:30 (`WED_AGENT=tuesday arm_wake_watch.sh`, runner pid 59390, verified in its log).
+- **The usage gauge read a FROZEN 90% all night** (the statusline publishes only while this pane is active). Real: 99% at 19:30:28Z.
+### ANSWERED 05:3x (late, each says why): P: RD-286 = (a) load-bearing-override marker + inverse assertion; RD-693 = (c) lane-4 pagehide fix + a lane-1 no-store ticket. M: RD-651 = (b) C-51 candidate list, no change. O: next = RD-703 (a), or wrap if in band. **M and P WRAPPED at 05:31/05:32 (shift change, queues dry) BEFORE reading these, so their SUCCESSORS must carry them** (in HANDOVER-S84M? / HANDOVER-S85P.md they are NOT; the mails are in the NexusAI inbox 19:3xZ).
+### READY BACKLOG awaiting gates (all mails in tuesday-agent@, 13:43Z-18:50Z on 09-26; save each to fleet/qa-agent/briefs/*READY* before drafting)
+O: RD-418 5a782c1 · RD-698 (A-F1 High) 44bc804 · RD-699 02fe76a (stacked) · RD-425 8823458 · RD-443 8e27dc2 (t2). N: RD-685 9d7076b (C-169) · RD-324/RD-684 UPDATED READYs? (check) · RD-314 ce148d5 · RD-424 2ce26eb. M: C-170 package into main be0fe37 · RD-681 4209299 · RD-682 f15fed6 · RD-627b c82aa92 · RD-696 2c221fa · RD-413 f70594a. P: RD-204 fe47bb4 · RD-197 43e729c · RD-686+694 8962a14 · RD-692 4580829 (t2). P found RD-704 (brand gate ignores off-token colours in light CSS: a BRAND call = Kam's card).
+### FIRST WORK FOR THE NEXT SEAT (after Kam's new-account login lifts the stop)
+1. Read every READY above whole (heads at origin), tier them, and cut GATE BATCHES by file-disjointness (batch #3 = the erasure set N + RD-413 was the plan; expand it by tier).
+2. Launch successors for M and P (retire by hand: panes %11/%18 are wrapped, verify HANDOVER on disk, pane_close.sh, cockpit.sh launch + a SUCCESSOR mail carrying the 05:3x answers above).
+3. Card RD-704 (brand gate) for Kam if it needs his word.
+4. Diagnose the runner death at 20:29 (what signalled pid 2556 and the watcher at the same instant?).
+
 ## 🔴 DELTA 95 — 2026-09-26 20:1x (s86, ctx 70% CHECKPOINT; band 80-90). **READ THIS FIRST, THEN 94.**
 ### ✅ BATCH 1 CLOSED — all five on NexusAI main **1904765**, 4133/247 = the gate's arithmetic; every merge verified at source by Tuesday; every Build green; demo skipped on each. Kam told on the live board 20:03 (201). Nothing owed on batch 1.
 ### NEXT: BATCH #3 GATE (tier 1) — the first work of the next seat if it is not launched yet
