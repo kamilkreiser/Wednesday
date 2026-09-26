@@ -1,3 +1,11 @@
+## 2026-09-26 19:03 → 2026-09-27 05:3x AEST — Wednesday evening/overnight seat (rotation from the 09:44 seat; ended by the 05:30 shift change) — Secuura + WED
+- Boot: by-tier digest 544 KB + own ledger whole (45 rows), ctx 38%, 7d 87%. KS-1344 round-2 rebrief queued (Ornith PASS, held by hand).
+- Merged + verified at source: #1290 #1291 (gate29), then #1292 #1294 #1293 #1295 #1298 #1299 (gate30T1/T2) — develop 94c9c7aa9be7; **all 7 KS-1341 sites on develop**; 79 Secuura merges since the 25th's morning, 0 deployed.
+- Kam 21:03-21:04: keep going past 90% (switches accounts in the morning), Spark-first until morning, how is the Spark doing, close #1268/#1278/#1245/#1241 (delivered, API-verified).
+- **Spark: 12 real tickets, 12 PASS** (KS-1341 C, KS-1334-A/B, KS-1337 akto, KS-1346 A/B, KS-1347 strict rung 4 r2, KS-1339, KS-1349, KS-1348, KS-1350). gate30T1 NO GO'd KS-1346 A/B at runtime (thrown-object secrets/PII into logs) → Kam card; found KS-1348 (production log files write `undefined`).
+- Seats: B 31st 0.95, B 32nd 0.96; gates 0.97. Cards to Kam: KS-1346 logging, Laptop-DEV copy disk-full (rc 11; DevMASTER 98%). Held for the morning raise: KS-1334-B → KS-1349, KS-1348, KS-1350.
+- Wrap: retro, handover (pickup 02:1x block + corrections), ledger rows ×3, digests regenerated, handover mail.
+
 ## 2026-09-26 05:14–05:3x AEST — Wednesday short seat (rotation from the 00:49 overnight seat; ended by the 05:30 shift change)
 - Boot: by-tier digest 544 KB + own ledger whole, ctx 34%. Verified M1's five merges (#1256–#1260; develop d7cdecf1, tree == gate24T2c's GO END_TREE); 44 Secuura merges since the 25th's morning, 0 deployed.
 - Launched gate24T2d (%31, 7 PRs, two at the cap) after checking the orphaned kit myself: the drafter's control run had died with one MISMATCH (H20), proved a control-design defect by a discriminating re-run.
