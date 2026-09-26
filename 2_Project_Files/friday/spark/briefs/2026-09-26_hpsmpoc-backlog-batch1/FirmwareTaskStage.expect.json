@@ -1,0 +1,29 @@
+{
+ "commit": "291a4eb29b650afdb60ffa16bcc6ff4bbcc0d1a7",
+ "files": [
+  "web/src/components/customer/FirmwareTask.tsx",
+  "web/src/components/customer/FirmwareTask.test.tsx"
+ ],
+ "expected_added": {
+  "web/src/components/customer/FirmwareTask.tsx": [
+   "  const { rows } = useDirectory(); // the same stage the Customers list shows for this customer",
+   "  const stage = rows.find((r) => r.routeId === customer.id)?.stage ?? (customer.hasAssessment ? stageFromPrototype(state.assessment) : stageFromApi(null));"
+  ],
+  "web/src/components/customer/FirmwareTask.test.tsx": [
+   "",
+   "  it(\"the related engagement shows the customer's own stage, as the Customers list does: a snapshot in progress is not a new lead\", async () => {",
+   "    session([]);",
+   "    const none = show(\"sample-c\");",
+   "    await screen.findByRole(\"heading\", { level: 1, name: \"Firmware risk assessment\" });",
+   "    expect(await within(card(/^Related engagement/)).findByText(\"New lead\")).toBeInTheDocument();",
+   "    none.unmount();",
+   "    show(\"sample-b\");",
+   "    await screen.findByRole(\"heading\", { level: 1, name: \"Firmware risk assessment\" });",
+   "    expect(await within(card(/^Related engagement/)).findByText(\"Assessment in progress\")).toBeInTheDocument();",
+   "  });"
+  ]
+ },
+ "red_test_cmd": "cd web && (test -d node_modules || npm ci --no-audit --no-fund) && npx vitest run src/components/customer/FirmwareTask.test.tsx -t \"the related engagement shows the customer's own stage\" 2>&1 | tee /dev/stderr | grep -E \"Tests +1 passed\"",
+ "suite_cmd": "cd web && (test -d node_modules || npm ci --no-audit --no-fund) && npx vitest run src/components/customer src/components/screens",
+ "suite_count_regex": "Tests\\s+(?:(?P<failed>\\d+) failed \\| )?(?P<passed>\\d+) passed"
+}
