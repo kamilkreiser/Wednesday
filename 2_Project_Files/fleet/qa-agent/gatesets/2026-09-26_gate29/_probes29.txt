@@ -1,0 +1,106 @@
+    if n == '1290':
+        W = 'Blockchain/Dev/services/originate/src/routes/webhooks.ts'; T = 'Blockchain/Dev/services/originate/src/__tests__/ks1341b-webhooks-500-never-answers-err-message.test.ts'
+        SITE = "res.status(500).json({ success: false, error: { code: 'INTERNAL_ERROR', message: err.message } });"
+        sd, sh = show(mb, W), show(h, W); dl_, hl = sd.splitlines(), sh.splitlines()
+        def route_of(L, i):
+            for j in range(i, -1, -1):
+                m = re.search(r"webhooksRouter\.(get|post|put|patch|delete)\('([^']*)'", L[j])
+                if m: return '%s %s' % (m.group(1).upper(), m.group(2))
+            return '?'
+        out.append('LEAK SITES (READ, fixed-string `message: err.message` in webhooks.ts): merge-base %d -> head %d; `fail500(` merge-base %d -> head %d (1 declaration + %d calls at head)' % (
+            sd.count('message: err.message'), sh.count('message: err.message'), sd.count('fail500('), sh.count('fail500('), sh.count('fail500(res,')))
+        d = g('diff', '-U0', mb, h, '--', W)
+        minus = [l[1:] for l in d.splitlines() if l.startswith('-') and not l.startswith('---')]
+        plus = [l[1:] for l in d.splitlines() if l.startswith('+') and not l.startswith('+++')]
+        conv = [(route_of(hl, i), i + 1, re.search(r"fail500\(res, '([^']*)'", l).group(1)) for i, l in enumerate(hl) if 'fail500(res,' in l and i + 1 < len(hl)]
+        out.append('CONVERTED-THREE (READ, `git diff -U0` merge-base -> head on webhooks.ts): %d `-` line(s), every one the SITE line: %s; %d `+` line(s), every one a `fail500(res, ...)` call: %s; the fail500 calls at head (route, line, context): %s' % (
+            len(minus), all(x.strip() == SITE for x in minus), len(plus), all(x.strip().startswith('fail500(res, ') for x in plus), conv))
+        left = [(route_of(hl, i), i + 1) for i, l in enumerate(hl) if 'message: err.message' in l]
+        out.append('UNCONVERTED-TWO (READ): `message: err.message` 500 lines left at head %s; each line byte-identical to its merge-base line: %s (declared scope — part C)' % (
+            left, all(hl[i - 1] == dl_[i - 1] for _, i in left) if len(hl) == len(dl_) else 'LINE COUNT MOVED %d -> %d' % (len(dl_), len(hl))))
+        def block(L, pat):
+            s = [i for i, l in enumerate(L) if pat in l][:1]
+            if not s: return []
+            e = s[0]
+            while e < len(L) and L[e] != '});': e += 1
+            return L[s[0]:e + 1]
+        rb0, rb1 = block(dl_, "webhooksRouter.post('/:id/rotate-secret'"), block(hl, "webhooksRouter.post('/:id/rotate-secret'")
+        diffl = [(a, b) for a, b in zip(rb0, rb1) if a != b]
+        sec = [(i + 1, l.strip()[:90]) for i, l in enumerate(hl) if any(k in l for k in ('newSecret', 'encryptWebhookSecret(', 'secret_v2'))]
+        out.append('SECRET-PATH (READ, the rotate-secret handler block merge-base vs head): %d line(s) -> %d line(s); lines that differ %d: %s; every OTHER line of the block byte-identical: %s; the secret-path lines at head %s' % (
+            len(rb0), len(rb1), len(diffl), [(a.strip()[:60], b.strip()[:90]) for a, b in diffl], len(rb0) == len(rb1) and len(diffl) == 1, sec))
+        fns = {}
+        for nm in ('function encryptWebhookSecret', 'function decryptWebhookSecret', 'function deliverWebhook', 'function dispatchEvent', 'function fail500'):
+            b0, b1 = block(dl_, nm), block(hl, nm)
+            if not b0:   # function bodies end at a lone `}` not `});`
+                s0 = [i for i, l in enumerate(dl_) if nm in l][:1]; s1 = [i for i, l in enumerate(hl) if nm in l][:1]
+                def fb(L, s):
+                    if not s: return []
+                    e = s[0]
+                    while e < len(L) and L[e] != '}': e += 1
+                    return L[s[0]:e + 1]
+                b0, b1 = fb(dl_, s0), fb(hl, s1)
+            fns[nm.split()[1]] = 'IDENTICAL (%d lines)' % len(b0) if b0 and b0 == b1 else ('ABSENT' if not b0 else 'DIFFERS')
+        out.append('UNTOUCHED BODIES (READ, merge-base vs head, line-equal): %s' % fns)
+        R3 = "  logger.error(context, { error: err instanceof Error ? err.message : String(err) });"
+        out.append('ARM-R3 ANCHOR (READ, at head): the brief\'s R3 anchor `logger.error(context, { error: err instanceof Error ? err.message : String(err) });` (2 leading spaces) occurs %d time(s) at %s; the brief\'s tamper is the un-braced `if (process.env.NODE_ENV === \'production\') logger.error(...)`, the seat\'s armR3.py planted a BRACED variant — same behaviour, different bytes' % (
+            sh.count(R3 + '\n'), [i + 1 for i, l in enumerate(hl) if l == R3]))
+        out.append('DOCBLOCK-STILL-FALSE (READ): the docblock opens %s — at head %d `message: err.message` 500 lines remain, so "the only place" is still FALSE at part B (declared by the PR body; true only at part C)' % (
+            [l.strip() for l in hl if 'KS-1341:' in l][:1], sh.count('message: err.message')))
+        pi = [i + 1 for i, l in enumerate(hl) if "webhooksRouter.patch('/:id'" in l]
+        pe = [i + 1 for i, l in enumerate(hl) if 'extractPgCode' in l]
+        out.append('PATCH-400-BRANCH (READ): PATCH /:id opens at %s; `extractPgCode` referenced at %s (import + the catch\'s SQLSTATE->400 branch ABOVE the converted line); utils/pgErrors.ts at develop reads err.message: %s — a LEAK carrying a known SQLSTATE token is answered 400 and never reaches fail500 (control B0)' % (
+            pi, pe, 'message' in show(REAL_DEV, 'Blockchain/Dev/services/originate/src/utils/pgErrors.ts')))
+        GB = '/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/briefs/KS-1341/golden/'
+        def ho(f):
+            r = subprocess.run(['git', 'hash-object', '--no-filters', f], capture_output=True, text=True); return r.stdout.strip() if r.returncode == 0 else 'ABSENT'
+        gw, gt = ho(GB + 'webhooks.AB.ts'), ho(GB + 'ks1341b-webhooks-500-never-answers-err-message.test.ts')
+        out.append('GOLDEN (READ, `git hash-object` of the brief\'s golden files vs the head blobs): webhooks.AB.ts %s vs head %s -> %s; ks1341b test %s vs head %s -> %s; the merge-base webhooks.ts blob %s vs golden webhooks.A.ts %s -> %s' % (
+            gw[:12], (blob(h, W) or '-')[:12], 'EXACT' if gw == blob(h, W) else 'DIFFERENT', gt[:12], (blob(h, T) or '-')[:12], 'EXACT' if gt == blob(h, T) else 'DIFFERENT',
+            (blob(mb, W) or '-')[:12], ho(GB + 'webhooks.A.ts')[:12], 'EXACT' if ho(GB + 'webhooks.A.ts') == blob(mb, W) else 'DIFFERENT'))
+        ts = show(h, T); TL = ts.splitlines()
+        loop = [i + 1 for i, l in enumerate(TL) if 'for (const nodeEnv of NODE_ENVS)' in l]; clr = [i + 1 for i, l in enumerate(TL) if 'mockLoggerError.mockClear()' in l]
+        out.append('TEST FILE (READ): %d lines; it.each RED families %d x %d routes = %d cells + controls %d; the NODE_ENV loop at %s, `mockLoggerError.mockClear()` at %s (INSIDE the loop: %s); `.at(-1)` occurrences %d; listens on %s; NODE_ENVS %s' % (
+            len(TL), len(re.findall(r"it\.each\(ROUTES\)\('RED KS-1341", ts)), len(re.findall(r"^    label: '", ts, re.M)), len(re.findall(r"it\.each\(ROUTES\)\('RED KS-1341", ts)) * len(re.findall(r"^    label: '", ts, re.M)),
+            len(re.findall(r"^  it\('control KS-1341", ts, re.M)), loop, clr, bool(loop and clr and loop[0] < clr[0] < loop[0] + 5), ts.count('.at(-1)'), re.findall(r"app\.listen\(0, '([^']+)'", ts), re.findall(r'const NODE_ENVS = (\[[^\]]*\])', ts)))
+    if n == '1291':
+        C = 'systemTest/performance/runner/cli.ts'; T = 'systemTest/performance/tests/unit/runner/ks1337-preSuitePathWithASpace.test.ts'
+        cd, ch = show(mb, C), show(h, C)
+        d = g('diff', '-U0', mb, h, '--', C)
+        minus = [l[1:] for l in d.splitlines() if l.startswith('-') and not l.startswith('---')]
+        plus = [l[1:] for l in d.splitlines() if l.startswith('+') and not l.startswith('+++')]
+        out.append('PRODUCT DIFF (READ, `git diff -U0` merge-base -> head on cli.ts): `-` %s | `+` %s' % ([x.strip()[:100] for x in minus], [x.strip()[:110] for x in plus]))
+        sp = [l.strip() for l in ch.splitlines() if "spawnSync('npx', ['tsx', preSuiteStep" in l]
+        out.append('SPAWN UNCHANGED (READ): the `spawnSync(\'npx\', [\'tsx\', preSuiteStep` line occurs %d time(s) at merge-base, %d at head, byte-identical: %s' % (
+            sum(1 for l in cd.splitlines() if "spawnSync('npx', ['tsx', preSuiteStep" in l), len(sp), [l.strip() for l in cd.splitlines() if "spawnSync('npx', ['tsx', preSuiteStep" in l] == sp))
+        sweep = {}
+        for c_, lab in ((REAL_DEV, 'develop'), (h, 'head')):
+            rc, o, _ = gq('grep', '-n', '-E', r'import\.meta\.url\)\.pathname', c_, '--', 'systemTest/')
+            sweep[lab] = [':'.join(x.split(':')[1:3]) for x in o.strip().splitlines()] if rc == 0 else []
+        rc2, o2, _ = gq('grep', '-n', '-E', r'\.pathname', REAL_DEV, '--', 'systemTest/akto/tests/preSuiteSetup.ts', 'systemTest/playwright/global-setup.ts')
+        out.append('NOT-COVERED SWEEP (READ, `git grep -nE "import\\.meta\\.url\\)\\.pathname" -- systemTest/`): develop %s | head %s; `.pathname` in the two named files at develop: %s — the gate grades whether the PR\'s "the other two occurrences … preSuiteSetup.ts:36 and global-setup.ts:42" is TRUE (the ticket\'s DoD 3 says "Measured today: **1** occurrence" — a disagreement to rule on)' % (
+            sweep['develop'], sweep['head'], [':'.join(x.split(':')[1:3]) + ' ' + ':'.join(x.split(':')[3:]).strip()[:110] for x in o2.strip().splitlines()] if rc2 == 0 else 'NONE'))
+        ts = show(h, T)
+        out.append('DOD2-BOUNDARY (READ, the new cell at head): %d lines; `spawn`/`spawnSync`/`execFile`/`execSync`/`fork` occurrences %d; reads cli.ts as TEXT (`readFileSync(`) %d; writes a probe module (`writeFileSync(`) %d; `mkdtemp` %d; the literal `Testing Agent MAIN` %d; imports the probe (`await import(`) %d — the cell never starts the CLI process: the PR\'s "approximated, not met" for DoD 2 is consistent with the READ' % (
+            len(ts.splitlines()), len(re.findall(r'\b(spawn|spawnSync|execFile|execFileSync|execSync|exec|fork)\(', ts)), ts.count('readFileSync('), ts.count('writeFileSync('), ts.count('mkdtemp'), ts.count('Testing Agent MAIN'), ts.count('await import(')))
+        GD = '/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/briefs/KS-1337.golden/KS-1337.golden.diff'
+        gres = 'golden diff ABSENT'
+        if os.path.exists(GD):
+            idx = tempfile.mktemp(prefix='g29gold', dir=os.path.join(SP, 'g29_sp')); e3 = dict(os.environ, GIT_INDEX_FILE=idx)
+            run(['git', '--git-dir', CL, 'read-tree', mb], env=e3)
+            ra = subprocess.run(['git', '--git-dir', CL, 'apply', '--cached', GD], capture_output=True, text=True, env=e3)
+            if ra.returncode == 0:
+                gt_ = run(['git', '--git-dir', CL, 'write-tree'], env=e3).strip()
+                gc, gtst = blob(gt_, C), blob(gt_, T)
+                ns = g('diff', '--numstat', gt_, h, '--', T).strip()
+                gres = 'golden applied (`git apply --cached`, strict) at the merge-base: cli.ts golden %s vs head %s -> %s; test golden %s vs head %s -> %s, golden -> head numstat %s' % (
+                    (gc or '-')[:12], (blob(h, C) or '-')[:12], 'EXACT' if gc == blob(h, C) else 'DIFFERENT', (gtst or '-')[:12], (blob(h, T) or '-')[:12], 'EXACT' if gtst == blob(h, T) else 'DIFFERENT', ns.split('\t')[:2] if ns else 'none')
+            else: gres = 'golden diff does NOT apply at the merge-base: %s' % ra.stderr.strip()[:200]
+        out.append('GOLDEN + FORMATTER DELTA (READ): %s — the PR discloses ONE eslint --fix hunk re-wrapping the writeFileSync call (+9/-6 by its fmt.diff)' % gres)
+        pk = show(REAL_DEV, 'systemTest/performance/package.json')
+        try: sc = json.loads(pk).get('scripts', {})
+        except Exception: sc = {}
+        out.append('PACKAGE SCRIPTS (READ, systemTest/performance/package.json at develop): lint `%s`; test:unit `%s`; format:check `%s`' % (sc.get('lint'), sc.get('test:unit'), sc.get('format:check')))
+        tc = show(REAL_DEV, 'systemTest/performance/tsconfig.json'); vc = show(REAL_DEV, 'systemTest/performance/vitest.unit.config.ts')
+        out.append('PROGRAMS (READ): tsconfig.json include/exclude %s / %s; vitest.unit.config include %s — the gate says which program covers the new cell' % (
+            re.findall(r'"include"\s*:\s*(\[[^\]]*\])', tc), re.findall(r'"exclude"\s*:\s*(\[[^\]]*\])', tc), re.findall(r'include\s*:\s*(\[[^\]]*\])', vc)))
