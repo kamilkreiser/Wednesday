@@ -1,0 +1,27 @@
+--- a/Blockchain/Dev/services/originate/src/routes/webhooks.ts
++++ b/Blockchain/Dev/services/originate/src/routes/webhooks.ts
+@@ -549,13 +549,16 @@
+ /**
+  * KS-1341: the only place in this router that turns a caught error into a 500.
++ * All seven route catch blocks above now call it (KS-1341 parts A, B, C: #1288, #1290, #1292).
+  *
+- * Seven catch blocks above put the thrown error's own text in the 500 body with NO NODE_ENV
+- * guard, so it reached the client in every environment, production included (measured by the
+- * 2026-09-26 gate: DELETE /:id returned the thrown text, rotate-secret returned internal
+- * encryption-configuration text). Same helper as routes/gdpr.ts and routes/systemErrors.ts
+- * (KS-730): log the thrown text server-side with the route named, answer the constant body.
++ * Until KS-1341 those catch blocks put the thrown error's own text in the 500 body with NO
++ * NODE_ENV guard, so it reached the client in every environment, production included
++ * (measured by the 2026-09-26 gate: DELETE /:id returned the thrown text, rotate-secret
++ * returned internal encryption-configuration text). Same helper as routes/gdpr.ts and
++ * routes/systemErrors.ts (KS-730): log the thrown text server-side with the route named,
++ * answer the constant body.
+  *
+- * Declared at the END of the file on purpose: a function declaration is hoisted, and the
+- * handlers above only call it at request time (deliverWebhook is called above its own
+- * declaration the same way). Placing it here leaves every line above it where it was.
++ * Declared after every route, immediately above the default export, on purpose: a function
++ * declaration is hoisted, and the handlers above only call it at request time (deliverWebhook
++ * is called above its own declaration the same way). Placing it here left every line above it
++ * where it was.
+  */
