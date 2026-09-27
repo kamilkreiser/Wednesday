@@ -1,0 +1,14 @@
+diff --git a/Blockchain/Dev/services/security/src/index.ts b/Blockchain/Dev/services/security/src/index.ts
+index 84b39f638..2baad4c7f 100644
+--- a/Blockchain/Dev/services/security/src/index.ts
++++ b/Blockchain/Dev/services/security/src/index.ts
+@@ -329,7 +329,8 @@ async function dbSaveApiKey(k: ApiKey): Promise<void> {
+        k.expiresAt || null, k.createdAt, k.connectorId ?? null]
+     ));
+   } catch (err: any) {
+-    logger.error('DB save API key failed', { error: err?.message });
++    logger.error('DB save API key failed', { error: err?.message, code: err?.code });
++    if (typeof err?.code === 'string' && /^(42|23|22)/.test(err.code)) throw err;
+   }
+ }
+ 

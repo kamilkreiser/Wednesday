@@ -19214,5 +19214,54 @@
    "CARD vision-portal-reminder-push-public-ntfy-topic",
    "CARD vision-gh-login-for-ci"
   ]
+ },
+ {
+  "id": "secuura-ks888-failed-key-save-design",
+  "client_project": "Secuura/Blockchain",
+  "title": "KS-888: making a failed API-key save return an error would crash the security service on two other routes. Fix mint only for now?",
+  "bluf": "No action needed unless you disagree with the default. KS-888: when saving an API key to the database fails, POST /api/keys still answers 201 with a key that was never stored. The obvious fix (re-throw inside dbSaveApiKey) also fires in the revoke route and POST /api/keys/validate. Those are async handlers with no error handling, so a brief-writer measured that fix causing unhandled rejections, and a Node process exit on one: a schema drift would crash-loop the service on every sk_* key check, which today answers valid. Wednesday verified the two unprotected call sites at develop 958df246 (index.ts :1267, :1335); the crash is the brief-writer's measurement. The 09-15 patch is fenced DO NOT RAISE. Evidence: night/briefs/KS-888-r2/README.md. Precedent: your 2026-09-17 ruling on KS-1194 (a failed save answers 503, fail-closed) points the same way for mint. It was about a different service's save, so it does not settle what revoke and validate should answer.",
+  "default_action": "If there's no ruling by Tuesday 2026-09-29 09:00 AEST: option a. Wednesday briefs the mint-only fix for the Spark, and it goes through the normal QA gate before any merge. Revoke and validate are unchanged.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Fix mint only, now (recommended)",
+    "detail": "Same contract you ruled for KS-1194: the mint route answers 503 or 500 with no key material when the save fails structurally. The Spark gets that brief; revoke and validate keep today's behaviour and are named as open on the ticket. It refs KS-888 and does not close it."
+   },
+   {
+    "key": "b",
+    "label": "Fix all three routes",
+    "detail": "You decide what a failed revoke answers (500? keep or undo the in-memory revoke?) and whether a failed validate admits or refuses the key. That is a Claude seat's job, not the local model's."
+   },
+   {
+    "key": "c",
+    "label": "Leave it in Backlog",
+    "detail": "Nothing changes; the fenced patch stays unraised."
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-09-27T23:51:02.835199+10:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "2026-08-17 20:15",
+   "2026-08-21 19:49",
+   "2026-08-21 20:06",
+   "2026-08-22 19:55",
+   "2026-09-02 17:34",
+   "2026-09-05 14:53",
+   "2026-09-05 16:42",
+   "2026-09-09 15:40",
+   "2026-09-09 16:14",
+   "2026-09-10 09:01",
+   "2026-09-10 09:08",
+   "2026-09-10 09:08",
+   "2026-09-10 11:25",
+   "2026-09-17 15:09",
+   "CARD secuura-ks764-org-arm-design-2026-09-03",
+   "CARD secuura-ks1194-failed-save-answers-200",
+   "CARD composer-design-deploy",
+   "CARD secuura-pr1245-round3-failed-at-cap"
+  ]
  }
 ]
