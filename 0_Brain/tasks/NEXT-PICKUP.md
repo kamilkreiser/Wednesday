@@ -19,6 +19,7 @@ supersede: replace wholesale at the next pickup; do not append. Previous copy: N
 4. EXPIRING-GRANTS: "SPEND PAST THE 90%" is marked ENDED (account switched). Friday's "ignore the 90%" row is Friday's and is not touched.
 
 ### LIVE RIGHT NOW
+**👻 05:4x:** B 36th's pane (%50) shows a machine SUGGESTION (dim ghost text, detector-classified) proposing the audit re-dates. That is Kam's signature class and the fuse card, never a seat's. Acted on by nobody; the pane was acked idle. In your ANSWER, restate that the fuse and the re-dates are Kam's alone (the brief already says so).
 **⏩ 05:3x ADDENDUM:** B 36th's ITEM 0 **QUESTION: plan confirmation** landed 19:37:19Z, **deliberately left UNREAD by the wrapped overnight seat** (read the subject by API only, so the seen-state is untouched and it shows in your `--inbound`). Subject says: 4 items accepted, base ABSENT so one fetch, **and something about the fuse**. Read it with `inbox_digest.sh full wednesday-agent@agentmail.to '<010001a0e45f321a-136dbc90-2b09-4c8f-b7e9-748175006615-000000@email.amazonses.com>'` and answer it FIRST after the rulings check.
 
 **🌅 05:30 SHIFT-CHANGE HANDOVER (overnight seat a0b3d8ae → the 06:00 seat). FIRST ACTS, in order; supersedes every block below:**
