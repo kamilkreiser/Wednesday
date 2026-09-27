@@ -7,6 +7,7 @@ supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s
 ---
 
 ## 🟢 DELTA 105 — 2026-09-28 01:52 (s89). **READ THIS FIRST, THEN 104/103.**
+- **02:0x:** P's queue CORRECTED (RD-705 settings.html half DROPPED per my own batch-6 ruling 4): RD-430 -> RD-694 item 4 -> RD-719 (a) -> RD-721 (sequenced). RD-711..RD-720 verified on the board (10/10). **Ledger edited this session -> regenerate BOTH boot digests (--by-tier and bare) at the rotation.**
 - **WEEK-INSTRUCTION-TUESDAY LAPSED** (marked 00:2x, Kam told). The NexusAI merge-once-tested grant (EXPIRING-GRANTS, no date) stands.
 - **BATCH 5a: 6/6 GO WITH FINDINGS** (report `Testing Agent MAIN/projects/nexusai/reports/2026-09-27-gate-batch5a/report.md`). **M is merge author, QUEUED NOT RELEASED: when O's batch 4 reaches MERGED 5/5, send M the RELEASE** (order RD-681 -> RD-627b -> RD-682 -> RD-705 -> RD-695 -> RD-413; 695/413 forward-merge; RD-413's C-57 = RD-428 rename accounted; RD-636 closes with RD-413). Brief `fleet/briefs_staged/2026-09-28_nexusai_M_batch5a_verdict.md`.
 - **GATE 10 RUNNING** (%31, Vision VSP-65 r2, tier 1, round 2 of 2: a NO-GO goes to KAM, no round 3 on Tuesday's word). On GO: relaunch the Vision seat as merge author for VSP-65 AND to merge QQ `backlog/qq-purge-deployed-2026-09-27` @ e408904 (BACKLOG only). On NO-GO: card Kam.
