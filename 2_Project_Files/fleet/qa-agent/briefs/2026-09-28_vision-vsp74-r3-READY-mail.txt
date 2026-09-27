@@ -1,0 +1,33 @@
+Subject: [Datasec/Vision_Sales_Portal -> Tuesday] READY FOR QA: VSP-74 @ a1794ad (FIX 1: lacking-empty tables not kept; tier 1)
+Date: 2026-09-27T23:16:48.000Z
+Auth: {'spf': 'pass', 'dkim': 'pass', 'dmarc': 'pass'}
+
+BLUF: VSP-74 READY FOR QA @ a1794ad (tier 1). Pre-gate-12 FIX 1: a lacking table whose live copy is EMPTY (or missing here) is no longer kept. Measured REAL first. Unit 121, db 105, 0 names lost vs main 609e967.
+
+Branch: fix/vsp-74-restore-refuses-incomplete-2026-09-28
+New head (ls-remote): a1794ad5111b640fd3041e4f46154c577f559baf
+Chain: f62917f (previous READY) -> a1794ad (fix + cells + BACKLOG, one commit).
+Files touched vs main 609e967: server/dbRestore.js, server/dbRestore.plan.test.js, test/db/restore-incomplete.test.js, BACKLOG.md.
+
+MEASURED before any change (local PG 16.15, own DB vsp_m_fix1_0915, VSP-75 tree 69157de, where the 20-table list lives): an old 10-table backup into a DB whose 10 new tables were empty. restorePlan: lacking = all 10 new tables, keep = those 10 + leads, users, partner_orgs; restoreData refused, INCOMPLETE. The drafter's report is right.
+
+Fix: restorePlan counts a lacking table only when it exists here AND has rows (same hasRows test the outside group uses). Empty or missing here, a clear cannot take anything from it: neither refused nor kept. With rows: refused by default, and the flag keeps it plus its FK parents (unchanged).
+
+Cells (red on f62917f, green on a1794ad):
+- dbRestore.plan.test.js: lacking email_log WITH rows is incomplete and keeps email_log, leads, email_templates, users, partner_orgs; lacking email_log EMPTY is not incomplete, keep empty; lacking feedback that does not exist here is not incomplete.
+- restore-incomplete.test.js FIX 1: a backup lacking meetings with live meetings EMPTY restores leads and the rest from the backup, no flag; the same with meetings HAVING rows is refused ("not in the backup: meetings"), and the flag keeps meetings and leads exactly (this cell was already green; it pins the half that was right).
+Assertion changed, say so: the existing plan cell "a table of the restore list that the backup lacks is incomplete" used an empty catalog; under the ruling that is now NOT incomplete, so it gives email_log rows (and now also asserts the closure).
+Mutants (2, both red): M1 lacking ignores rows (2 cells red); M2 lacking ignores whether the table exists here (11 red: a query on a missing table throws).
+
+Found and fixed on the way: restore-incomplete.test.js complete() read the lazy feedback table, so the file failed ALONE on a fresh DB (5 of 12 red, "relation feedback does not exist"). It passed in test:db only because an earlier suite creates feedback. complete() now skips a table that does not exist. Every db file now passes run alone on a fresh DB.
+
+On VSP-74 alone the brief's literal cells (i)/(ii) cannot be red (its list is the old 10, so a 10-table backup is complete); they live on VSP-75 (see its READY).
+
+Suites (sets vs main 609e967, each db file run alone on a fresh DB vsp_g12_v74_test): unit 121 (+7), db 105 (+12), 0 lost, 0 failed. test:db as the runner: 105/105 on vsp_fix1_74_test.
+CI coverage command locally (Node 26.8.1): lines 80.40% (f62917f READY said 80.36%). Thin margin, as before.
+
+PRIOR WORK: f62917f's behaviour is kept: failed dumps refused/kept whatever their live rows (the ruling touched only the lacking group); outside group unchanged; closure unchanged; clearTables/VSP-70 untouched. All of f62917f's cells pass.
+
+NOT TESTED: real Azure blob download (restoreData driven directly); the CLI end to end; production's catalog (FK edges read from the initDb test DB); a table gaining rows between restorePlan and clearTables (plan is read outside the clear's transaction, same as the outside group already was); Node 20; e2e:pro; CI UNMEASURED (Kam's gh login).
+Tier: 1.
+Jira: VSP-74 comment 38537.

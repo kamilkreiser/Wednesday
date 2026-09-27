@@ -1,0 +1,37 @@
+Subject: [Datasec/Vision_Sales_Portal -> Tuesday] READY FOR QA: VSP-75 @ 41c4a66 (VSP-74 merged forward, cells i/ii; FIX 2 lazy DB from TEST_DATABASE_URL; tier 1)
+Date: 2026-09-27T23:16:49.000Z
+Auth: {'spf': 'pass', 'dkim': 'pass', 'dmarc': 'pass'}
+
+BLUF: VSP-75 READY FOR QA @ 41c4a66 (tier 1). VSP-74 a1794ad (FIX 1) merged forward; the brief's cells (i)/(ii) red on 69157de, green now. FIX 2: the lazy-absent suite derives its DB from TEST_DATABASE_URL, proven not to touch salesportal_test_lazy. Unit 128, db 116, 0 names lost vs main 609e967.
+
+Branch: fix/vsp-75-backup-all-tables-2026-09-28
+New head (ls-remote): 41c4a664a9d1698150424337ccc9d946d221f12b
+Chain: 69157de (previous READY) -> 2ed83fe merge VSP-74 a1794ad (merge, no rebase) -> 0d1376c FIX 1 cells -> 41c4a66 FIX 2 + BACKLOG.
+Files changed since 69157de: server/dbRestore.js, server/dbRestore.plan.test.js, test/db/restore-incomplete.test.js, test/db/restore-old-backup.test.js (new), test/db/backup-lazy-absent.test.js, BACKLOG.md.
+Merge: only the restorePlan() comment conflicted (lacking rule and VSP-75's absent rule side by side); code auto-merged. The absent loop now uses the shared hasRows(); same query.
+
+FIX 1 cells, test/db/restore-old-backup.test.js (red on 69157de: INCOMPLETE naming all 10 new tables + feedback on a fresh DB):
+(i) an old 10-table backup into a DB whose other 10 tables are empty, then the live DB changed (lead renamed, lead added, partner org renamed, collateral added): restore with no flag, every one of the backup's tables equals the backup's rows exactly.
+(ii) same, then a quote row: refused, message names quotes and does not name the empty lacking tables; with --allow-incomplete it keeps EXACTLY quotes, leads, partner_orgs, users (read from the restore's own warnings), all four byte-equal to before, and the other tables it carries are restored from the backup (meetings, emptied live, comes back).
+
+For Kam at deploy time, which of an OLD backup's 10 tables it cannot restore (kept as they are), from the FK catalog (initDb test DB):
+- once any of quotes, quote_approvals, reminders, tco_scenarios, monday_sync has rows: partner_orgs, users, leads;
+- once only pricing_config, notification_log or integration_settings has rows: partner_orgs, users;
+- quote_sequences alone: none of the 10.
+Every other old table (meetings, collateral_items, lead_collateral_provided, email_templates, email_log, feedback, partner_org_requests) is restored. Inference, not measured: production almost certainly has quote rows, so an old backup restores without users, leads and partner_orgs, and any restored child row pointing at a lead or user that the live DB lacks fails its insert with a warning (restoreTable's existing per-row catch).
+
+FIX 2, test/db/backup-lazy-absent.test.js: DB name = TEST_DATABASE_URL's name + "_lazy" (default salesportal_test_lazy, unchanged), name checked ^[a-z0-9_]+$, created if missing, never dropped.
+Proof on local PG 16.15, pg_stat_database:
+- old file with TEST_DATABASE_URL=.../vsp_fix2_proof_test: salesportal_test_lazy xact_commit 2650 -> 2912. It was written.
+- new file, same env: salesportal_test_lazy unchanged; vsp_fix2_proof_test_lazy created and used.
+- whole test:db with TEST_DATABASE_URL=.../vsp_fix12_75full_test: salesportal_test_lazy sessions 76 -> 76 (0 client connections); xact_commit drifted +2, and so did the idle proof DB nobody connected to, so that is background (autovacuum), not the suite.
+- no env: 76 -> 83 sessions, as intended.
+
+Suites (sets vs main 609e967, each db file run alone on a fresh DB vsp_g12_v75_test): unit 128 (+14), db 116 (+23), 0 lost, 0 failed; 0 lost vs VSP-74 a1794ad too. test:db as the runner: 116/116 (twice, vsp_fix12_75full_test).
+CI coverage command locally (Node 26.8.1): lines 80.72% (69157de READY said 80.68%).
+
+PRIOR WORK: everything in 69157de's READY is kept (injector reaches the dump, F1 empty-message errors, all-failed = FAILED with no upload, lazy tables absent not INCOMPLETE, absent-with-rows refused); all its cells pass. VSP-69 e79682a untouched, no new READY.
+
+NOT TESTED: real Azure blob download/upload; the CLI end to end; production's catalog and row counts (the deploy-time list above is from the test DB's FK edges); a real pre-VSP-75 backup blob (cells build the old format from the live DB); CI's Postgres user needing CREATEDB for <name>_lazy (it needed it for salesportal_test_lazy already); Node 20; e2e:pro; CI UNMEASURED (Kam's gh login).
+Tier: 1.
+Jira: VSP-75 comment 38536 (FIX 1, FIX 2, and item 5's narrowed F1 clause recorded).
