@@ -6,6 +6,13 @@ status: live
 supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s1-wholesale
 ---
 
+## 🟢 DELTA 110 — 2026-09-28 07:51 (s90, ctx 51% CHECKPOINT; band 80-90). **READ THIS FIRST, THEN 109 (OWED TO KAM there is still exact) and 108.**
+- **BATCH 6 VERDICT IN (21:47Z), read whole, scored 0.98, pane %28 CLOSED.** GO/GOWF: RD-286 1645c69, RD-204 fe47bb4, RD-197 43e729c, RD-692 4580829, RD-693 ddf1b75 (t1). **RD-686 NO GO, words only** (F-E1/F-E2 Major overclaims) — round 2 of 2. **RELEASE mailed to P 21:50Z + --mail tap delivered** (brief `fleet/briefs_staged/2026-09-28_nexusai_P_batch6_release.md`): five merges in the gate's order 286→204→197→692→693, one at a time, per-merge batch-4 pattern; O merges batch 4 in parallel (push refused = re-merge forward); then RD-686 words → READY; then the finding tickets; then P's old queue (RD-430 → RD-694 item 4 → RD-719 → RD-721), SUPERSEDING the 02:00 mail's order by name. **On each P MERGED: ls-remote + gh run view (NexusAI GH_CONFIG_DIR, read only) + demo skipped.** Brand note for Kam (morning brief): Settings `.text-danger` renders `#dc3545` in light (no token).
+- **BATCH 5b GATE LAUNCHED %36 at 07:5x** (C-170 package RD-460 be0fe37 · RD-696 2c221fa · RD-594 c7fbf33 t1). --check rc 0 after re-reading the negative-control seats (Tuesday 59108, O 38362 added; backups .pre-0928-seats). Rung 5 NOT yet verified — check the pane shows the brief. **FLAG Kam about arm-ttk.yml BEFORE its merge (C-138/C-142).**
+- **Wake hash fix** cf950d655 (the "/clear" hint excluded); Wednesday told.
+- **Floor:** left %0 tuesday · %34 gate11 · %36 b5b | right %23 b3 · %22 P · %21 N · %19 M · %29 O · %1 monitor. Usage 32%. Kam: nothing new since 06:57 (live read 07:51); reconcile to-rule 0.
+- **Rotation owed:** the ledger was edited this session → regenerate BOTH digests (`--by-tier` and bare) before rotating.
+
 ## 🟢 DELTA 109 — 2026-09-28 07:06 (s90). **READ THIS FIRST, THEN 108.**
 ### OWED TO KAM (copy forward until closed by name) — supersedes 106's list for the two Vision cards
 - **VSP-67: WAITING ON HIS TYPED LINE `set VSP-67 timeout`** (card `vision-vsp67-second-consumer-attio-bridge`, 201). His 06:57 TAP (b) is recorded but is NOT production authority (his own 09-01 ruling on `vision-v230-typed-word`: type-it, not taps-count). The Vision seat STOPPED at blast radius (ATTIO bridge reads the server; prod unchanged 0/0/0; exact command + rollback in its 21:03Z mail). On his typed line: brief Vision with the ONE command from that mail, read-back, /healthz, then check the ATTIO bridge's next sync.

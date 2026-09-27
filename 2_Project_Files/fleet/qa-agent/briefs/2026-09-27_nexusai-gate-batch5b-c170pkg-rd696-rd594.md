@@ -706,7 +706,7 @@ cover the release-line content (cite, do not re-run); C-131's RD-625 case is exa
    remaining argv; "ours" = the ancestor chain CONTAINS your own claude pid. **Record the foreign count BESIDE EVERY RESULT (C-110 clause 3).**
    **NEGATIVE controls, all in the same run, all must classify FOREIGN — read at drafting 2026-09-27 09:29:23 AEST from `tmux list-panes -a -F
    '#{pane_id} #{@cockpit_name} #{pane_pid}'` + `pgrep -P` + `ps`:** NexusAI-M claude **`62649`** (pane `%19`), NexusAI-N claude **`9959`** (pane `%21`),
-   NexusAI-P claude **`20317`** (pane `%22`), and Tuesday's claude **`23230`** (pane `%0`, parent bash `22288`; **Tuesday rotated since batch #3's
+   NexusAI-P claude **`20317`** (pane `%22`), NexusAI-O claude **`38362`** (pane `%29`, re-read 2026-09-28 07:51), and Tuesday's claude **`59108`** (pane `%0`, parent bash `56603`, re-read 2026-09-28 07:51 after the s90 rotation; **Tuesday rotated since batch #3's
    `47349`**). Also live then: QA/NexusAI-batch3 `36118` (`%23`), QA/NexusAI-batch4 `40285` (`%24`), QA/Vision-gate9 `16516` (`%25`) — usable as extra
    negatives while they live. **Datasec/Vision_Sales_Portal (`67576`, `%20`) is GONE (Vision retired).** Re-read them at start; if one has exited, say so
    and use the others; **a hold with NO live negative control aborts.** Reuse batch #1's instrument BY COPY with YOUR pid as `ROOT` and these as `NEG`:
