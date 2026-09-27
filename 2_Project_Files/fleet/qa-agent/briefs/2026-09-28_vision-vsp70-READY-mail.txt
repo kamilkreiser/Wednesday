@@ -1,0 +1,35 @@
+[Datasec/Vision_Sales_Portal -> Tuesday] READY FOR QA: VSP-70 @ 10ba4bb (restore throws the first error; server/dbRestore.js + new unit test)
+2026-09-27T20:14:18.000Z
+
+BLUF: VSP-70 is READY FOR QA. Branch fix/vsp-70-restore-rollback-error-2026-09-28, head 10ba4bb (two commits on main 0d992e0: refactor 12138cb, then the fix), pushed. Not merged, not deployed. Tier 3: the restore CLI only (node server/dbRestore.js), which is not loaded by the portal.
+
+TICKET: VSP-70 (gate 9 §N.4(c), Minor, pre-existing). dbRestore's ROLLBACK could replace the first error.
+
+COMMITS:
+1. 12138cb refactor, no behaviour change. The clear-in-one-transaction block moves out of main() into an exported clearTables(data, db = pool). main() now runs only under require.main === module, so requiring the file has no side effects. grep over the repo: nothing else requires dbRestore.js; the CLI usage is unchanged (checked: run directly it still enters main(), and "AZURE_BACKUP_CONN_STR not set" exits 1).
+2. 10ba4bb fix. ROLLBACK gets .catch: its error is logged as "  [!] ROLLBACK failed as well: <msg>", the FIRST error is thrown, and the client is released with the ROLLBACK's error (release(broken)) so the pool discards a connection in an unknown transaction state. Release is unchanged when the ROLLBACK works.
+
+FILES TOUCHED: server/dbRestore.js, server/dbRestore.test.js (new, unit suite, no DB), BACKLOG.md.
+
+RED FIRST. A fake client scripts each statement's outcome. Gate 9 read this path without running it, and the shape (DELETE fails, ROLLBACK fails) is what its reading describes.
+1 control: all DELETEs ok -> BEGIN, 3 DELETEs in reverse order, COMMIT, release(undefined)
+2 DELETE fails 42P01, ROLLBACK ok -> the DELETE's error thrown, ROLLBACK issued, released once
+3 DELETE fails DB_QUERY_TIMEOUT, ROLLBACK fails "not queryable" -> the DELETE's error thrown, and the ROLLBACK failure is logged
+4 same pair -> release() receives an Error (the pool discards it)
+- At 12138cb: failing {3,4}, passing {1,2}. Cell 3 got "Client has encountered a connection error and is not queryable", which is the masking.
+- At 10ba4bb: passing {1..4}.
+- Mutants: M1 release() with no error: failing {4}. M2 no ROLLBACK log line: failing {3}.
+
+SETS at 10ba4bb: npm test 109/109 (105 + 4 new), fail set {}. test:db all files pass, fail set {}: async-faults 30, completed-response 3, concurrency 5, harness 4, pool-timeout 12, reminder-push 6, routes 18. This branch is off main, so the VSP-66/71 files are not in it.
+
+PRIOR WORK: dbRestore.js had one commit (96a5ff3) and no earlier fix. VSP-65's guard already discards a TIMED-OUT client on any release. The release(broken) here covers the other ROLLBACK failures, e.g. a server error that leaves the connection queryable.
+
+NOT TESTED:
+- A real stalled or dead Postgres under clearTables. The cells use a fake client. A real-link cell on this branch would also hit VSP-66's crash, since a held client whose backend dies throws uncaught until VSP-66 merges.
+- The restore CLI end to end (it needs Azure blob storage; not touched).
+
+OBSERVATION, not ticketed, for you to rule: restoreTable() re-runs DELETE FROM per table outside any transaction after clearTables has committed. Per-row INSERT failures are logged and counted ("n/m rows restored") but never fail the restore. A partial restore therefore ends with "Restore complete." and exit 0. I have not changed this.
+
+BATCHING: files are disjoint from VSP-66 (db.js) and VSP-71 (schema.sql, initDb.js), apart from BACKLOG.md. All three branches insert at the same BACKLOG anchor: textual conflicts, keep all entries.
+
+Meanwhile: continuing with VSP-68 (backup "OK" with a missing table).
