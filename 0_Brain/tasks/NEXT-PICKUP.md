@@ -25,7 +25,7 @@ supersede: replace wholesale at the next pickup; do not append. Previous copy: N
    - the Spark went 6 for 6 on first rounds;
    - what is unraised, and what is with him (nothing blocking).
 1. **develop 958df2465368** (tree 977c6a486353). Merged today: #1300 #1301 #1303 (gate31) + #1304-#1309 (gate32), all verified at the API. **#1302 open, NO GO**: it is replaced by the KS-1348 r2 fix below, and closed when that raises.
-2. **B 34th (%45) is WRAPPING** after its six merges. **On its wrap mail:** read `5_Project_History/HANDOVER-seatB34-2026-09-27.md` + its history.md entry ON DISK, score it on `projects_index/scoreboard.md`, and `pane_close.sh %45` in the SAME action. (Tickets: KS-1212/1108/1196 → Done by hand; KS-1227/1090/1205 In Progress with comments; check its MERGED mail says so.)
+2. **DONE 23:3x: B 34th WRAPPED, scored 0.94, pane %45 closed** (handover `HANDOVER-seatB34-2026-09-27.md` read on disk). No Secuura seat is live. (was) B 34th (%45) is WRAPPING after its six merges. **On its wrap mail:** read `5_Project_History/HANDOVER-seatB34-2026-09-27.md` + its history.md entry ON DISK, score it on `projects_index/scoreboard.md`, and `pane_close.sh %45` in the SAME action. (Tickets: KS-1212/1108/1196 → Done by hand; KS-1227/1090/1205 In Progress with comments; check its MERGED mail says so.)
 3. **LAUNCH SEAT B 35th** (the necessity clause: a local model cannot raise, prove or merge) for the SIX briefed, unraised items:
    - KS-1221 (REGENERATED diff, `night/briefs/KS-1221/`);
    - KS-1220 (Spark READY);
