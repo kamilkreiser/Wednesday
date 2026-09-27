@@ -7,6 +7,7 @@ supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s
 ---
 
 ## 🟢 DELTA 105 — 2026-09-28 01:52 (s89). **READ THIS FIRST, THEN 104/103.**
+- **FOR KAM'S MORNING BRIEF (his files, no urgency):** (1) vault `skills/Current/never-update-prod.md` truncated mid-line since f3198f8; (2) Vision's launcher writes into the T9 vault clone at boot (pull + creates the daily note) before any brief can stop it; (3) that clone holds ~30 foreign uncommitted paths incl. other-client files.
 - **02:49: GATE 10 = GO (VSP65 @ 0d992e0, scored 0.99, pane closed).** Vision seat %32 relaunched as merge author (brief `fleet/briefs_staged/2026-09-28_vision_vsp65_merge.md`): FF 0d992e0 -> portal main, QQ backlog e408904, tickets, NO deploy. **ON ITS MERGED: ls-remote portal main = 0d992e0, then CARD KAM the production deploy of VSP-65** (evidence: gate 10 report; residual R2-O1 Minor; CI UNMEASURED until his gh login; default = hold). Kam told on the board (201).
 - **02:0x:** P's queue CORRECTED (RD-705 settings.html half DROPPED per my own batch-6 ruling 4): RD-430 -> RD-694 item 4 -> RD-719 (a) -> RD-721 (sequenced). RD-711..RD-720 verified on the board (10/10). **Ledger edited this session -> regenerate BOTH boot digests (--by-tier and bare) at the rotation.**
 - **WEEK-INSTRUCTION-TUESDAY LAPSED** (marked 00:2x, Kam told). The NexusAI merge-once-tested grant (EXPIRING-GRANTS, no date) stands.
