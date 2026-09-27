@@ -24,6 +24,11 @@ supersede: replace wholesale; previous = NEXT-PICKUP-FRIDAY.md.pre-0925-rotate-s
 ## 🔴🔴 DAY INSTRUCTION, live until end of SATURDAY 2026-09-26 — `tasks/WEEK-INSTRUCTION-FRIDAY.md`
 Kam (terminal ~08:0x, verbatim): "Yes, please keep going for the day. I'll be out all day, so just keep working on getting the product ready and refined." = Datasec/HPSM-POC. Still his: deploys, anything to HP/humans, money, template text + validator/rule changes, irreversible. Usage 71% at 09:50: cloud seats only when nothing local can do it AND it matters now; Spark first.
 
+## 🔴 STATE 2026-09-27 18:35 (Friday) — supersedes the 17:55 block where they differ
+- **FLOOR EMPTY.** No agent-actionable work without Kam: HPSM-POC pool empty; HPSM readiness-only (clinic pack delivered); Composer's rest is Kam's cards or SME items.
+- **Composer main = e0d8a3f** (PR #6 + #7 merged; B11/B12 closed; guide v1.3 committed 702bbf0, v1.2 8f65570). **Open Kam cards:** `composer-repeated-questions-notice` (default keep) · `composer-guide-v13-to-paul` (default nothing sent) · `composer-release-05070f1d-deploy` (rec a deploy + rebuild the two examples; default hold). **On a tap of a:** deploy the way C-06/C-08 did (VM `remote-update.sh`, a temporary key removed + proven, PREFLIGHT, /site.json, the running release = 05070f1d), then a seat rebuilds EXAMPLE A/B on it (the B10 brief shape).
+- Docker stacks left up on the laptop: pc-b03 (b11 branch), pc-b11e2e (18480).
+
 ## 🔴 STATE 2026-09-27 17:55 (Friday, 50% CHECKPOINT) — supersedes everything below where they differ
 **Kam's live instruction (terminal, after 16:3x): "keep working your way through tickets".** Seats run on the new account (7d 24%). No Kam rows since 17:11; reconcile 0.
 1. **HPSM-POC:** main = **b1d3ec9** (PR #49 merged, HPSMPOC-81 Done). Floor empty; agent-actionable pool EMPTY (Kam cards / HP content / Azure -57).
