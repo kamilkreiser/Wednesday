@@ -24,6 +24,12 @@ supersede: replace wholesale; previous = NEXT-PICKUP-FRIDAY.md.pre-0925-rotate-s
 ## 🔴🔴 DAY INSTRUCTION, live until end of SATURDAY 2026-09-26 — `tasks/WEEK-INSTRUCTION-FRIDAY.md`
 Kam (terminal ~08:0x, verbatim): "Yes, please keep going for the day. I'll be out all day, so just keep working on getting the product ready and refined." = Datasec/HPSM-POC. Still his: deploys, anything to HP/humans, money, template text + validator/rule changes, irreversible. Usage 71% at 09:50: cloud seats only when nothing local can do it AND it matters now; Spark first.
 
+## 🔴 STATE 2026-09-27 19:40 (Friday) — supersedes the 18:35 block
+- **FLOOR EMPTY.** Composer DEPLOYED on Kam's word (19:05): HPSM-light main **0b2fca4**, content release **05070f1d** running (checked live); temporary access removed and proven. Examples rebuilt: Quandarra (8eac291a, On) + Yarrowind (8754dc06, Manual). Guide v1.4 committed 1172547.
+- **Open Kam card:** `composer-guide-v14-to-paul` (rec a; default nothing sent). Old-release engagements: a new export → 409, a stored PDF still downloads (Kam told; the correction is on the panel).
+- **Composer follow-ups (not Kam's, small):** B13 Q1 the feedback prefill still says "include or remove?" (align it to the new notice); the old engagements' export buttons render enabled but 409 (grey them, or say why); tidy the docker stacks pc-b03 / pc-b11e2e (leave them, report). B12 Needs-SME 1–6 wait for an SME.
+- HPSM: readiness-only; clinic pack delivered for Tue 29 Sep 07:05. HPSM-POC: pool empty (Kam / HP / Azure).
+
 ## 🔴 STATE 2026-09-27 18:35 (Friday) — supersedes the 17:55 block where they differ
 - **FLOOR EMPTY.** No agent-actionable work without Kam: HPSM-POC pool empty; HPSM readiness-only (clinic pack delivered); Composer's rest is Kam's cards or SME items.
 - **Composer main = e0d8a3f** (PR #6 + #7 merged; B11/B12 closed; guide v1.3 committed 702bbf0, v1.2 8f65570). **Open Kam cards:** `composer-repeated-questions-notice` (default keep) · `composer-guide-v13-to-paul` (default nothing sent) · `composer-release-05070f1d-deploy` (rec a deploy + rebuild the two examples; default hold). **On a tap of a:** deploy the way C-06/C-08 did (VM `remote-update.sh`, a temporary key removed + proven, PREFLIGHT, /site.json, the running release = 05070f1d), then a seat rebuilds EXAMPLE A/B on it (the B10 brief shape).
