@@ -309,3 +309,12 @@ B 33rd's guard grepped the branch segment `-b33-` and nearly missed a ref it had
 
 ## A stacked PR's squash leaves a no-op file in its three-dot set (2026-09-27, Wednesday ruling on Seat B 33rd's Q-1301)
 After the base PR squashes and the stacked PR is retargeted to develop, the stacked PR's merge-base is still the OLD develop. Its three-dot file set therefore still includes the base PR's files, byte-identical to develop now. The GO for a stacked PR declares those files as extra equality targets (blob == develop's, mode checked), marked NO-OP, so the merge tool's "file set == declared targets" check passes on a true assertion instead of refusing.
+
+## `git rev-parse <sha>:<path>` on an object you have not fetched is neither a blob nor an error (2026-09-27, Seat B 33rd)
+When the commit is not in the local object store, the command can hand back the argument string itself, and an equality check against a real sha then reads as "different". A remote blob is read through the contents API (`GET /repos/…/contents/<path>?ref=<sha>` → `sha`), or the commit is fetched first under the lock. A STOP driven by a blob comparison is re-checked by the other instrument before it is believed.
+
+## A declared squash subject NEVER carries the `(#n)` suffix, and its length is checked as it will LAND (2026-09-27, Seat B 33rd's disclosure + Wednesday's ledger row)
+GitHub's squash merge appends ` (#n)` to the subject it is given. gate31's addendum declared subjects already ending in `(#n)`, and three doubled subjects landed on develop permanently (#1300's at 95 chars, over the 92 rule). Gate drafters write addendum subjects WITHOUT the suffix. Merge tools refuse a declared subject matching `\(#\d+\)$`, and measure MG-11 as `len(declared) + len(" (#n)") <= 92`. The GO's key scan also runs this length check.
+
+## A no-op path and an overlap path are different declarations (2026-09-27, Seat B 33rd on Wednesday's Q-1301 ruling)
+`merged_blob_paths` declares a genuine OVERLAP: the merge resolves a file to a blob DIFFERENT from the PR head's. A squash-stack NO-OP (head == merged == develop) is declared under its own key, `noop_paths`. Using the overlap key for a no-op trips the overlap check correctly. Every exception is proven by an undeclared-path arm and a one-digit wrong-blob arm before it is relied on.
