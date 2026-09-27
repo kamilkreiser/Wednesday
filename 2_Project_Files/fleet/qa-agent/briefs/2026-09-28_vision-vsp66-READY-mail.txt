@@ -1,0 +1,51 @@
+[Datasec/Vision_Sales_Portal -> Tuesday] READY FOR QA: VSP-66 @ 1976275 (held-client link death; server/db.js + new test pair)
+2026-09-27T20:06:33.000Z
+
+BLUF: VSP-66 is READY FOR QA. Branch fix/vsp-66-checkout-link-death-2026-09-28, head 1976275 (one commit on main 0d992e0), pushed. Not merged, not deployed. Tier 1.
+
+TICKET: VSP-66 (gate 9 VSP65-O1, Major, pre-existing). A link death while a pool.connect() caller holds its client raised an uncaughtException and the portal exited.
+
+CAUSE: pg-pool attaches its 'error' listener only while a client is IDLE, and removes it at checkout. IO1-O3's pool.on('error') covers the idle case. For a held client nothing listened.
+
+FIX (gate 9's shape): server/db.js guard(), which every checkout passes through (pool.connect callers and pool.query alike), adds an 'error' listener at checkout and removes it on release.
+- It logs one line per death, "[db] a held client lost its connection (discarded on release): <msg>". pg emits twice for one death (the FATAL, then the unexpected end), so the second emit is not logged.
+- It does not swallow the failure for the holder: pg rejects the running and next queries.
+- The dead client is not reused: pg sets _queryable=false, and pg-pool's _release discards such a client even on a no-error release.
+- None of the six callers changed.
+
+FILES TOUCHED: server/db.js, test/db/checkout-link-death.test.js (new), test/db/checkout-link-death.child.js (new, not a *.test.js file), BACKLOG.md.
+
+RED FIRST. Each fault runs in a child process loading the real server/db.js with no handler of its own, because a listener in the test process would hide the crash.
+Cells:
+1 control (clean hold: reused, same pid, nothing logged)
+2 listener present while held
+3 pg_terminate_backend on a held idle client
+4 the same while the holder waits on pg_sleep(10)
+5 RST (resetAndDestroy) under a held client, through an in-child pass-through proxy
+6 FIN (end) under a held client
+Cells 3-6 each assert: child exit 0, no "Unhandled 'error' event" on stderr, the holder's next query REJECTS (not hung, 5 s cap), after release only the pool's idle listener remains (count 1), the fresh pool query gets a DIFFERENT backend pid, and exactly one [db] held line.
+- At 0d992e0: failing {2,3,4,5,6}, passing {1}. Stderr shows "throw er; // Unhandled 'error' event" with 57P01 (cell 3) and "Connection terminated unexpectedly" (cells 4-6).
+- At 1976275: passing {1..6}, three consecutive runs.
+- Mutants (db.js mutated, then restored from the index):
+  M1, no removeListener on release: failing {1,3,4,5,6}
+  M2, no log-once: failing {3,5}. Only terminate-held and RST emit twice; in-flight hands the first error to the query, and FIN emits once.
+  M3, no listener: failing {2,3,4,5,6}
+
+SETS at 1976275, local Node v26.8.1, Postgres 127.0.0.1:5433 salesportal_test:
+- npm test: 105/105 pass, fail set {}.
+- npm run test:db: every file passes, fail set {}. async-faults 30, checkout-link-death 6, completed-response 3, concurrency 5, harness 4, pool-timeout 12 (including VSP65-P1, 20,000 checkouts, no wrapper stacking), reminder-push 6, routes 18.
+
+PRIOR WORK: checked before building.
+- IO1-O3 (the idle case, pool.on('error'), BACKLOG, fixed 2026-09-23) is kept unchanged.
+- VSP-65's guard()/TIMED_OUT release path is kept. The new listener sits inside the same per-checkout release wrapper, and release still passes client[TIMED_OUT] on.
+- No earlier branch or commit touched the held-client listener (git log --all). Gate 10's S7b harness and stall proxy were read, not copied. My cells use their mechanism (resetAndDestroy on the app-facing socket) in a smaller in-child proxy.
+
+NOT TESTED:
+- An end-to-end route cell with a real caller holding the client (e.g. dispatchDue awaiting sendEmail inside its transaction, or backup-db streaming). The cells drive the checkout that all six callers use, not the callers themselves.
+- A half-open link with no FIN or RST: VSP-65's query bound covers that, and it is not re-measured here.
+- Node 20 (CI's runtime): CI is UNMEASURED per vision-gh-login-for-ci. Local run was Node 26.8.1 only.
+- Production/Azure Postgres: not touched.
+
+BATCHING: files are db.js + a new test pair + BACKLOG.md. VSP-71 (next, server/schema.sql and probably initDb.js) should be file-disjoint from this apart from BACKLOG.md.
+
+Meanwhile: continuing with VSP-71.
