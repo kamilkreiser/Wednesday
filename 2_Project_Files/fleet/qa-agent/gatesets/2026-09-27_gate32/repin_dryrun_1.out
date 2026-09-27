@@ -1,0 +1,73 @@
+LAUNCH ACTION gate32 (DRY RUN) 2026-09-27 21:44:17 AEST / 2026-09-27T11:44:17Z | launcher /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/gatesets/2026-09-27_gate32/launch_qa_secuura_batch1304.sh | pinned launch develop a24db57e65c9d0b96e8560ea7feaa0c764dee564 | END_TREE 977c6a48635341fe9d29f48a0c7e83c843dd9895
+  pin #1304 c8233156f0912ec63773e6261cd6926dbce9de7f
+  pin #1305 7aab743e13f45d10a43650e07f25abffccb6441e
+  pin #1306 00180ad72bffdcf917d618b54557a4df90f510c8
+  pin #1307 64d8e398599687b53520bc3710cae6869bdc6b8f
+  pin #1308 f9348a9d10b7512d22a33a0a471f9042ad622831
+  pin #1309 f615d12d58d95b01b98816644334cfd06832252d
+--- 0. the pane must be routed (inbox_routing.conf) or cockpit.sh say --mail fails silently
+  routing file /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/inbox_routing.conf — line present: 1 (grep rc=0; want 1 / rc 0)
+--- 0b. the kit's home: launcher filled for /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/gatesets/2026-09-27_gate32 | this script lives in /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/gatesets/2026-09-27_gate32
+  AT HOME — no re-fill
+--- 1. instrument: git ls-remote origin (read from the Secuura checkout, READ-ONLY)
+  ls-remote rc=0 at 11:44:22Z
+    a24db57e65c9d0b96e8560ea7feaa0c764dee564	refs/heads/develop
+    7aab743e13f45d10a43650e07f25abffccb6441e	refs/heads/feature/ks-1090-r2-3-tsc-wiring-test-b34-2
+    f9348a9d10b7512d22a33a0a471f9042ad622831	refs/heads/feature/ks-1108-akto-secrets-parse-failure-b34-5
+    f615d12d58d95b01b98816644334cfd06832252d	refs/heads/feature/ks-1196-admin-doctype-random-uuid-b34-6
+    00180ad72bffdcf917d618b54557a4df90f510c8	refs/heads/feature/ks-1205-f3-claim-named-limiter-bucket-b34-3
+    64d8e398599687b53520bc3710cae6869bdc6b8f	refs/heads/feature/ks-1212-erasure-door-casesensitive-cell-b34-4
+    c8233156f0912ec63773e6261cd6926dbce9de7f	refs/heads/feature/ks-1227-ks1072-witness-hit-only-cell-b34-1
+    c8233156f0912ec63773e6261cd6926dbce9de7f	refs/pull/1304/head
+    7aab743e13f45d10a43650e07f25abffccb6441e	refs/pull/1305/head
+    00180ad72bffdcf917d618b54557a4df90f510c8	refs/pull/1306/head
+    64d8e398599687b53520bc3710cae6869bdc6b8f	refs/pull/1307/head
+    f9348a9d10b7512d22a33a0a471f9042ad622831	refs/pull/1308/head
+    f615d12d58d95b01b98816644334cfd06832252d	refs/pull/1309/head
+--- 2. instrument: the GitHub PULLS API (an independent read of each head, and mergeable)
+  pulls API rc=0
+    WIDEN #1309 IN-KIT f615d12d58d95b01b98816644334cfd06832252d | feature/ks-1196-admin-doctype-random-uuid-b34-6 | KS-1196: make admin document-type ids collision-proof with randomUUID
+    WIDEN #1308 IN-KIT f9348a9d10b7512d22a33a0a471f9042ad622831 | feature/ks-1108-akto-secrets-parse-failure-b34-5 | KS-1108: name the file and position when akto's secrets.yml will not parse
+    WIDEN #1307 IN-KIT 64d8e398599687b53520bc3710cae6869bdc6b8f | feature/ks-1212-erasure-door-casesensitive-cell-b34-4 | KS-1212: pin that the erasure door reads its own router's caseSensitive option
+    WIDEN #1306 IN-KIT 00180ad72bffdcf917d618b54557a4df90f510c8 | feature/ks-1205-f3-claim-named-limiter-bucket-b34-3 | KS-1205 F3: pin that a JWT claim cannot name another key's rate-limit bucket
+    WIDEN #1305 IN-KIT 7aab743e13f45d10a43650e07f25abffccb6441e | feature/ks-1090-r2-3-tsc-wiring-test-b34-2 | KS-1090 R2-3: type-check the api-gateway wiring test the tsc program never saw
+    WIDEN #1304 IN-KIT c8233156f0912ec63773e6261cd6926dbce9de7f | feature/ks-1227-ks1072-witness-hit-only-cell-b34-1 | KS-1227: pin a hit-only witness in the ks1072 anchor-store cells and clear its listener
+    WIDEN-RX ^\s*(KS-1227|KS-1090|KS-1205|KS-1212|KS-1108|KS-1196)\b | WIDEN-BRANCH-RX -b34-\d+$
+    API #1304 head c8233156f0912ec63773e6261cd6926dbce9de7f base develop mergeable True reads 1 state open
+    API #1305 head 7aab743e13f45d10a43650e07f25abffccb6441e base develop mergeable True reads 1 state open
+    API #1306 head 00180ad72bffdcf917d618b54557a4df90f510c8 base develop mergeable True reads 1 state open
+    API #1307 head 64d8e398599687b53520bc3710cae6869bdc6b8f base develop mergeable True reads 1 state open
+    API #1308 head f9348a9d10b7512d22a33a0a471f9042ad622831 base develop mergeable True reads 1 state open
+    API #1309 head f615d12d58d95b01b98816644334cfd06832252d base develop mergeable True reads 1 state open
+    DEVBASE #1304 OK base.ref develop
+    DEVBASE #1305 OK base.ref develop
+    DEVBASE #1306 OK base.ref develop
+    DEVBASE #1307 OK base.ref develop
+    DEVBASE #1308 OK base.ref develop
+    DEVBASE #1309 OK base.ref develop
+--- 2b. the WIDEN census (Wednesday's widen rule): an open PR matching kit.json widen_rx must be in this kit
+    WIDEN #1309 IN-KIT f615d12d58d95b01b98816644334cfd06832252d | feature/ks-1196-admin-doctype-random-uuid-b34-6 | KS-1196: make admin document-type ids collision-proof with randomUUID
+    WIDEN #1308 IN-KIT f9348a9d10b7512d22a33a0a471f9042ad622831 | feature/ks-1108-akto-secrets-parse-failure-b34-5 | KS-1108: name the file and position when akto's secrets.yml will not parse
+    WIDEN #1307 IN-KIT 64d8e398599687b53520bc3710cae6869bdc6b8f | feature/ks-1212-erasure-door-casesensitive-cell-b34-4 | KS-1212: pin that the erasure door reads its own router's caseSensitive option
+    WIDEN #1306 IN-KIT 00180ad72bffdcf917d618b54557a4df90f510c8 | feature/ks-1205-f3-claim-named-limiter-bucket-b34-3 | KS-1205 F3: pin that a JWT claim cannot name another key's rate-limit bucket
+    WIDEN #1305 IN-KIT 7aab743e13f45d10a43650e07f25abffccb6441e | feature/ks-1090-r2-3-tsc-wiring-test-b34-2 | KS-1090 R2-3: type-check the api-gateway wiring test the tsc program never saw
+    WIDEN #1304 IN-KIT c8233156f0912ec63773e6261cd6926dbce9de7f | feature/ks-1227-ks1072-witness-hit-only-cell-b34-1 | KS-1227: pin a hit-only witness in the ks1072 anchor-store cells and clear its listener
+    WIDEN-RX ^\s*(KS-1227|KS-1090|KS-1205|KS-1212|KS-1108|KS-1196)\b | WIDEN-BRANCH-RX -b34-\d+$
+  WIDEN census clean: every matching open PR is in this kit
+--- 3. the heads, judged (both instruments == the pin, open, not mergeable:false; every stacked child still based on its parent's branch at the pinned parent head; every other PR based on develop)
+  #1304  ls-remote pull/head c8233156f0912ec63773e6261cd6926dbce9de7f | branch c8233156f0912ec63773e6261cd6926dbce9de7f | API c8233156f0912ec63773e6261cd6926dbce9de7f (state open, mergeable True) | pinned c8233156f0912ec63773e6261cd6926dbce9de7f
+  #1305  ls-remote pull/head 7aab743e13f45d10a43650e07f25abffccb6441e | branch 7aab743e13f45d10a43650e07f25abffccb6441e | API 7aab743e13f45d10a43650e07f25abffccb6441e (state open, mergeable True) | pinned 7aab743e13f45d10a43650e07f25abffccb6441e
+  #1306  ls-remote pull/head 00180ad72bffdcf917d618b54557a4df90f510c8 | branch 00180ad72bffdcf917d618b54557a4df90f510c8 | API 00180ad72bffdcf917d618b54557a4df90f510c8 (state open, mergeable True) | pinned 00180ad72bffdcf917d618b54557a4df90f510c8
+  #1307  ls-remote pull/head 64d8e398599687b53520bc3710cae6869bdc6b8f | branch 64d8e398599687b53520bc3710cae6869bdc6b8f | API 64d8e398599687b53520bc3710cae6869bdc6b8f (state open, mergeable True) | pinned 64d8e398599687b53520bc3710cae6869bdc6b8f
+  #1308  ls-remote pull/head f9348a9d10b7512d22a33a0a471f9042ad622831 | branch f9348a9d10b7512d22a33a0a471f9042ad622831 | API f9348a9d10b7512d22a33a0a471f9042ad622831 (state open, mergeable True) | pinned f9348a9d10b7512d22a33a0a471f9042ad622831
+  #1309  ls-remote pull/head f615d12d58d95b01b98816644334cfd06832252d | branch f615d12d58d95b01b98816644334cfd06832252d | API f615d12d58d95b01b98816644334cfd06832252d (state open, mergeable True) | pinned f615d12d58d95b01b98816644334cfd06832252d
+  DEVBASE #1304 OK base.ref develop
+  DEVBASE #1305 OK base.ref develop
+  DEVBASE #1306 OK base.ref develop
+  DEVBASE #1307 OK base.ref develop
+  DEVBASE #1308 OK base.ref develop
+  DEVBASE #1309 OK base.ref develop
+  BOTH INSTRUMENTS AGREE with every pin.
+--- 3b. develop, read at launch: a24db57e65c9d0b96e8560ea7feaa0c764dee564 | the launcher's pinned launch develop a24db57e65c9d0b96e8560ea7feaa0c764dee564
+  UNMOVED since the fill — the END_TREE 977c6a48635341fe9d29f48a0c7e83c843dd9895 stands
+DRY RUN COMPLETE 2026-09-27T11:44:27Z — every read agrees with the pins; the real run continues with the usage gate, --check and cockpit.sh add
