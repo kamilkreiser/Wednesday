@@ -1,0 +1,58 @@
+Subject: [Datasec/Vision_Sales_Portal -> Tuesday] READY FOR QA: VSP65-F1 round 2 of 2 @ 0d992e0 (tier 1; S8d-shape cell red at 2adfc4a; P1/P2 red under M5/M3; unit 105=105, db 72->78 as sets; Node 20 105/78)
+From: datasec-vision <datasec-vision@agentmail.to>
+Date: 2026-09-27T00:50:54.000Z
+Message-ID: <010001a0e057f0bc-7ac4d431-df17-461b-aa8b-a0daba82d359-000000@email.amazonses.com>
+
+BLUF: VSP65-F1 round 2 of 2 READY FOR QA (tier 1). Branch fix/vsp-65-pool-query-timeout-2026-09-27, head 0d992e09ebe0830dbe414aa73ca9a17a1be6c480 (2adfc4a + b5c3e8d + 0d992e0). Fix: the store no longer creates its table; schema.sql does, at boot. The gate's S8d shape is red at 2adfc4a and green at head, and main's recovery is kept.
+
+THE FIX
+- server/index.js: new PgSession({ pool, createTableIfMissing: false }). With that option, connect-pg-simple 10.0.0's _ensureSessionStoreTable returns before it touches #tableCreationPromise (index.js:198), so nothing is cached. A stalled store query now fails only its own request.
+- server/schema.sql: "session" created at boot in the exact shape of node_modules/connect-pg-simple/table.sql (same columns, collation, session_pkey, IDX_session_expire). CREATE TABLE IF NOT EXISTS, and the index only when to_regclass('"IDX_session_expire"') IS NULL.
+- Why the guard on the index (found this round, MEASURED): on Postgres 16, CREATE INDEX IF NOT EXISTS checks table OWNERSHIP before existence. As a boot role that doesn't own "session" it fails: 42501 "must be owner of table session", which would stop the boot. Production's table was made by the store through the app's own pool, so the owner is very likely the boot role, but I can't read production to confirm, so the code no longer depends on it.
+
+PRIOR WORK CHECK (why this shape and not "retry the ensure")
+- Verified the gate's reading: connect-pg-simple 10.0.0 index.js:198-204 caches #tableCreationPromise and never clears it. It's a private field, so a retry wrapper would have to override the underscore method _ensureSessionStoreTable, which ties us to library internals. createTableIfMissing is a documented option.
+- The session table is not in schema.sql at eaf024a/2adfc4a. It exists only because the store made it (563b338, 2026-07-02, VSP-49).
+- Every path that builds the app against a database runs initDb first: main() (server/index.js:173 before createApp at :177), and every test/db suite via helpers.resetDb(). backup-db lists pg_tables dynamically; dbBackup has a fixed list without session; test/db/helpers truncateAll already skips session. So none of those change.
+- The store's prune runs only on a 15-min timer after first use (index.js:225-236), so a fresh store's first query is the request's own.
+
+CELLS (test/db/pool-timeout.test.js; the proxy gains a one-shot stall that then lifts, and a one-shot delay)
+- "VSP65-F1: a fresh instance whose FIRST session-store query stalls past the bound serves every signed-in request again once the stall lifts": a second createApp() on the same pool = a restarted instance. First /me = 500 at the bound; then 3x /me on the same rep = 200; a fresh login stores a row (count +1) and its cookie gets 200 on that instance; instance A serves throughout. At 2adfc4a: "request 1 after the stall lifted is served, not a replayed failure: {"status":500,...,"ms":1}" (the gate's replay, 1 ms).
+- "VSP65-F1 control (main's behaviour kept): ... SLOW but inside the bound waits and serves 200": first store query delayed 750 ms (bound 1,500), 200 after waiting, and the instance serves on.
+- "VSP65-F1: schema.sql creates the session table the store expects, and is a no-op where the store already made it (production)": in a rolled-back transaction, schema.sql in a fresh schema vs table.sql in another. Columns, types, nullability, collation and index defs are deepEqual, and running schema.sql over the store-made table leaves it identical.
+- "VSP65-F1: schema.sql boots even where the session table belongs to ANOTHER role ...": owner role creates it via table.sql; a different boot role runs schema.sql's session part. Rolled back, 0 test roles left.
+- VSP65-P2 "(behaviour, not names): after a checked-out client times out and is released with no error, the next pool query gets a FRESH connection and answers at once": module pool, different backend pid, under BOUND/2. No name assertion at all.
+- VSP65-P1 "one client checked out and released 20,000 times still answers a query (the wrapper goes on once, never stacks)": BoundedPool max 1, same backend pid throughout.
+
+RED-PROOFS (fresh scratch tree per arm, asserted edits, markers grep-counted, node --check rc 0; final files)
+- 2adfc4a code + new cells: 3 red, exactly the three F1 cells (the stall cell with the 1 ms replayed 500; the shape cell with "three columns: []"; the owner cell with "schema.sql creates the session table"). The control, P1 and P2 pass there.
+- Gate's M3 (plain pg.Pool): P2 red for a BEHAVIOURAL reason: "the next query is answered, not queued behind the stalled one (1502 ms): Error: Query read timeout". Four other cells are red too (the three old name cells and F1).
+- Gate's M5 (GUARDED removed): P1 red: "RangeError: Maximum call stack size exceeded". Nothing else is red.
+- createTableIfMissing back to true: only the F1 stall cell is red (the replayed 500, 1 ms).
+- Index back to plain CREATE INDEX IF NOT EXISTS: only the owner cell is red (42501).
+
+SUITES AS SETS (Node 26.8.1 host, local compose Postgres 16 on 5433, salesportal_test; NOT CI)
+- npm test: 2adfc4a 105/105, head 105/105. 0 lost, 0 added, 0 dups.
+- test:db (all seven files): 2adfc4a 72, head 78. 0 lost; 6 added (the six above); 0 dups; 0 failing.
+- pool-timeout.test.js at head N=3: 12/12 each.
+- CI's coverage command, locally: rc 0, all files 84.94% lines / 73.80% branches. NOT CI, and Node 26 is standing in for Node 22.
+- Node 20 leg: node:20 already present (sha256:8f693eaa7e0a), run --rm --pull=never, v20.20.2. Unit 105/105; test:db 78/78 across all seven files. Containers named vsp-f1r2-*, 0 left.
+- Tested files are byte-identical to 0d992e0 (cmp). merge-tree 0d992e0 x main eaf024a = 30798eef = 0d992e0's own tree.
+
+INSTRUMENT NOTES, IN THE OPEN
+- My first Node 20 run mounted the tree READ-ONLY. reminder-push "S-2 control: the feedback digest push is unchanged" then failed at base and head alike: runDigest's writeDigestFile got "EROFS: read-only file system" and swallowed it. That run is VOID. The writable re-run was 6/6.
+- One host test:db run had async-faults "control: with no fault the same routes answer normally" get 501 from /api/admin/users; the next 6 runs (3 head, 3 base) were 30/30. CAUSE MEASURED, local-machine only: supertest does app.listen(0), which binds [::]:<port>, then requests 127.0.0.1:<port>. On this Mac the Logitech plugin holds 127.0.0.1:49162/49164/49166 and answers 501 to anything. I bound a Node server on [::]:49164 and 127.0.0.1:49164 was answered 501 by the other process. The same entry already in BACKLOG (the 2026-09-23 unexplained async-faults "fail 1") now carries this cause and a fix shape. Not fixed (outside this round's scope). Not a product defect, not in CI.
+
+NOT TESTED
+- CI (gh still not logged in here), including the Node 22 coverage gate and e2e:pro on both legs.
+- e2e:pro / e2e:api / e2e:feedback: they need main() booted with schedulers and outbound notifications; I didn't start one.
+- Production: the owner of prod's "session" table, prod's Postgres version, a real Azure stall/failover/TLS. The index guard is there so the owner question doesn't matter; it is still unread.
+- A real App Service restart; multiple instances; Node 22.
+- The gate's own S1 black-hole proxy and S8d instrument on this head (mine is the builder's-proxy equivalent, with a one-shot stall that drops the connection rather than holding and releasing bytes; the pool discards it either way).
+
+BACKLOG (committed on the branch): the VSP-65 entry carries round 2; the async-faults entry carries the 501 cause.
+This is round 2 of 2: a third NO-GO goes to Kam.
+
+Next: item 3, the two Jira tickets, then one STATUS.
+
+-- datasec-vision (Vision_Sales_Portal cockpit seat)

@@ -28,6 +28,9 @@ supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s
 - **GATE 9 CLOSED (scored 0.97, %25 closed):** VSP-65 NO-GO (F1 Major) · QQ purge GO. **Vision seat RELAUNCHED %27** (brief `fleet/briefs_staged/2026-09-27_vision_gate9_merge_and_f1.md`): merge QQ purge (ac74111 -> QQ main f255db8), no publish; F1 fix = round 2 of 2 (a 3rd NO GO goes to Kam); tickets O1 + O3. **On its MERGED: ls-remote QQ main, then a PUBLISH card for Kam (his typed word; production).** On its F1 READY: re-gate (tier 1, carry the gate's S8d cell).
 - **5a LAUNCHED %26** (rung 6: report dir exists). Still queued to launch as slots free: **6, then 5b**.
 - Floor now: left %0 tuesday · %24 batch4 · %26 batch5a · %27 Vision; right %23 batch3 · %22 P · %21 N · %19 M · %1 monitor.
+- **VISION (after the merge):** VSP65-F1 r2 READY @ 0d992e0 (saved `fleet/qa-agent/briefs/2026-09-27_vision-vsp65-f1-r2-READY-mail.txt`). **GATE 10 DRAFTER running (background; dies with this seat: re-commission if the files are absent):** `briefs/2026-09-27_vision-gate10-vsp65-r2.md` + `launchers/launch_qa_vision_gate10.sh`, route QA/Vision-gate10 (ADD it). Round 2 of 2: a 3rd NO GO goes to Kam. Vision seat told to file 3 Minors then WRAP: retire it by hand on the wrap and relaunch it as merge author after gate 10.
+- **CARD OWED:** VSP-67 (server-side statement/lock/idle-in-transaction timeouts on the production Postgres) is Kam's decision. Card it with the gate-9 evidence (report §N, VSP65-O3); default = no change.
+- Kam cards open (Datasec): vision-gh-login-for-ci · quickquote-publish-retention-purge-986f7b8 (typed word).
 - **Wrap/rotation owed:** the ledger was edited this session -> regenerate BOTH boot digests (`--by-tier` and bare).
 - Order when slots free: 5a first (tier 1, six members), then 6, then 5b.
 
