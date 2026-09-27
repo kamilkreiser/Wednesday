@@ -19263,5 +19263,56 @@
    "CARD composer-design-deploy",
    "CARD secuura-pr1245-round3-failed-at-cap"
   ]
+ },
+ {
+  "id": "vision-vsp65-production-deploy",
+  "client_project": "Datasec/Vision_Sales_Portal",
+  "title": "Deploy the VSP-65 fix to the live sales portal?",
+  "bluf": "The VSP-65 fix (database calls can no longer hang the live portal, and a restarted server now recovers from one stalled call instead of failing every signed-in request) passed its QA gate and is merged on portal main at 0d992e0. It is NOT on the live site. Production is yours. One gap: CI is unmeasured because GitHub is not logged in on the mini, and CI's end-to-end step is the first run of the new startup code on a fresh database. (Prior-ruling gate overridden: its 17 matches share generic words; no ruled card concerns deploying VSP-65. Your 10:58 ruling on the GitHub login (a, when you are next at the mini) is the first step of option a, not a re-ask.)",
+  "default_action": "If you do not answer: nothing is deployed. The fix stays merged on main, and Tuesday raises it again at the morning brief.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Log in to GitHub on the mini, then deploy after CI is read (recommended)",
+    "detail": "Your hands, once: in a Vision launcher shell on the mini run `gh auth login`. Then the Vision agent reads CI on 0d992e0 (the Node 22 coverage gate and e2e:pro) and, if green, deploys by the project's own steps and reads the first production boot log (the new startup step against production's session table). Tuesday reports the live version."
+   },
+   {
+    "key": "b",
+    "label": "Deploy now, without CI",
+    "detail": "The gate measured the unit and database suites locally on this exact tree (0 lost tests) and on Node 20 (production's major). CI's Node 22 and e2e legs stay unmeasured."
+   },
+   {
+    "key": "c",
+    "label": "Hold",
+    "detail": "The live portal keeps the old behaviour: a stalled database call can hang a request with no time limit."
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-09-28T02:54:37.983004+10:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "2026-08-21 09:56",
+   "2026-08-28 10:50",
+   "2026-09-03 13:36",
+   "CARD vision-v230-publish",
+   "CARD vision-v230-typed-word",
+   "CARD nexusai-scim-deploy-live-ab",
+   "CARD secuura-demo-deploy-scope-2026-09-03",
+   "CARD nexusai-rd296-deploy-timing",
+   "CARD nexusai-erasure-deploy-after-regate8-2026-09-05",
+   "CARD nexusai-demo-deploy-finish-scope",
+   "CARD secuura-ks1175-kintsugi-deploy-and-first-anchor",
+   "CARD vision-portal-feedback-report-unauthenticated",
+   "CARD vision-portal-reminder-push-public-ntfy-topic",
+   "CARD composer-design-deploy",
+   "CARD composer-mobile-deploy",
+   "CARD composer-s5-fold-deploy",
+   "CARD composer-content-release-deploy",
+   "CARD composer-typed-answers-deploy",
+   "CARD vision-gh-login-for-ci",
+   "CARD composer-release-05070f1d-deploy"
+  ]
  }
 ]
