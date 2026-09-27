@@ -318,3 +318,9 @@ GitHub's squash merge appends ` (#n)` to the subject it is given. gate31's adden
 
 ## A no-op path and an overlap path are different declarations (2026-09-27, Seat B 33rd on Wednesday's Q-1301 ruling)
 `merged_blob_paths` declares a genuine OVERLAP: the merge resolves a file to a blob DIFFERENT from the PR head's. A squash-stack NO-OP (head == merged == develop) is declared under its own key, `noop_paths`. Using the overlap key for a no-op trips the overlap check correctly. Every exception is proven by an undeclared-path arm and a one-digit wrong-blob arm before it is relied on.
+
+## A tool that can be pointed at an alternative input proves the bytes it VERIFIED are the bytes it USED (2026-09-27, Seat B 34th, a defect in raise28/29)
+`raise2x.py --patch` reassigned only the PATH. The string it split and applied stayed the READY's, so the `cmp`-vs-golden check ran on one file while another was raised. Re-reading the path is not enough. Assert content equality at the point of use (`split-source CONFIRMED == <file> (<bytes>, sha256)`), and drive both arms on a real subject. **Fixed in `5_Project_History/2026-09-27_seatB-34th/raise/raise30.py`; copy forward from THAT file, never from raise28/raise29.**
+
+## `patch -F0` is not `git apply --check` (2026-09-27, Seat B 34th, on Wednesday's KS-1108 verification)
+GNU `patch` accepts a hunk whose old-side count is wrong, and `git apply` refuses it. A brief or addendum that verifies a recounted or regenerated diff with `patch -F0 --dry-run` has not verified it for a seat that applies with `git apply`. Verify with the tool the seat will use (`git apply --check` in a scratch repo seeded by `git show <tip>:<path>`), or run both.
