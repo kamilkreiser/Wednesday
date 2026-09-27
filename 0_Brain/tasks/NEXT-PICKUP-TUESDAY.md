@@ -25,6 +25,9 @@ supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s
 - **5b STAMPED + --check rc 0** (brief `…batch5b-c170pkg-rd696-rd594.md`, launcher `launch_qa_nexusai_gate_batch5b.sh`; guard 90 copy premise, guard 80 merge-trees, K2=78). Rulings at stamp: arm-ttk.yml COVERED by C-138 + C-170 (my commission had said C-170 = 07:18 (a); that is C-165: ledger row); renamed package test ids = AUTHORISED RENAMES under C-133 ADDENDUM on 3 conditions (carry verbatim into the merge RELEASE); **RD-594 TIER 1** (Kam's card), launcher guards/prompt aligned (backup `.pre-0927-tier1`); K2-re-run-on-merged-population is binding at every lane-1 server-source merge.
 - **OWED at the 5b merge:** flag to Kam on the live board BEFORE the merge push that main gains the arm-ttk.yml workflow he approved in C-138 (C-142: Kam owns .github). A flag, not an ask.
 - P recorded C-180 (RD-692 (a)) + the C-175 addendum and PUSHED rd-694 item 4 (its READY to come -> the RD-430 round).
+- **GATE 9 CLOSED (scored 0.97, %25 closed):** VSP-65 NO-GO (F1 Major) · QQ purge GO. **Vision seat RELAUNCHED %27** (brief `fleet/briefs_staged/2026-09-27_vision_gate9_merge_and_f1.md`): merge QQ purge (ac74111 -> QQ main f255db8), no publish; F1 fix = round 2 of 2 (a 3rd NO GO goes to Kam); tickets O1 + O3. **On its MERGED: ls-remote QQ main, then a PUBLISH card for Kam (his typed word; production).** On its F1 READY: re-gate (tier 1, carry the gate's S8d cell).
+- **5a LAUNCHED %26** (rung 6: report dir exists). Still queued to launch as slots free: **6, then 5b**.
+- Floor now: left %0 tuesday · %24 batch4 · %26 batch5a · %27 Vision; right %23 batch3 · %22 P · %21 N · %19 M · %1 monitor.
 - **Wrap/rotation owed:** the ledger was edited this session -> regenerate BOTH boot digests (`--by-tier` and bare).
 - Order when slots free: 5a first (tier 1, six members), then 6, then 5b.
 
