@@ -1,0 +1,942 @@
+#!/bin/bash
+# build_input.sh <KS-id> <out input.json> [product=<repo path>] [ref=<repo path>] [line=<n>] [ctx=<n>]
+#
+# Builds ONE `code_patch` input.json for a Secuura KS ticket, the way the KS-871
+# input was built by hand on 2026-09-14 (runs/2026-09-14_ks871-gptoss120b/BUILD_REPORT.md
+# §HOW step 2), as a script so the night runner can do it unattended:
+#
+#   1. read the ticket from Linear (READ-ONLY GraphQL; the key is sourced from the
+#      Secuura project's 4_Credentials/.env and never printed),
+#   2. pin `tip` = origin/develop from `git ls-remote` (no fetch — a fetch is a write
+#      verb on the source checkout; if the object is not local, refuse),
+#   3. `git show <tip>:<path>` for the ONE product file and ONE reference test,
+#   4. emit the contract-shaped JSON (same key set as the KS-806/KS-871 inputs).
+#
+# REFUSES (rc 2, reason printed) when the ticket does not fit the contract:
+#   - attached to an OPEN GitHub pull request (2026-09-17: each attached PR's state is read from the GitHub REST
+#     API with the Secuura GH_TOKEN and printed; merged/closed PRs no longer refuse; a state that cannot be read
+#     REFUSES — fail closed), archived, not Backlog/Todo (a lane took it), or assigned to Peter/Stuart;
+#   - names MORE than one product file (unless `product=` pins one) or NONE;
+#   - has no fix shape (no "Fix shape" / "Recommendation" / "Fix:" / "Acceptance"
+#     section) — a ticket that asks a question is a ruling, not a task;
+#   - the service is not on vitest (the checker runs `npx vitest run`; originate and
+#     governance are jest) — or is not a services/* | packages/shared path;
+#   - no in-process test under the service's src/__tests__ imports the product
+#     module (nothing to copy the mock shape from) — unless `ref=` pins one;
+#   - no defect line can be found (`<file>:NNN` in the ticket, or `line=`).
+#
+# Never writes anywhere but <out>. Never touches the source checkout (git READ
+# verbs only: ls-remote, cat-file, show, ls-tree). rc 0 ok · 2 refused · 1 error.
+# stderr never discarded. bash 3.2 + python3.
+set -uo pipefail
+
+TICKET="${1:-}"; OUT="${2:-}"; shift 2 2>/dev/null
+if [ -z "$TICKET" ] || [ -z "$OUT" ]; then
+  echo "usage: build_input.sh <KS-id> <out input.json> [product=..] [ref=..] [line=N] [ctx=N]" >&2
+  exit 1
+fi
+case "$TICKET" in KS-[0-9]*) ;; *) echo "build_input: not a KS id: $TICKET" >&2; exit 1 ;; esac
+
+SRC="${NIGHT_SOURCE_CHECKOUT:-/Volumes/DevMASTER/!CODING/Secuura/Blockchain/2_Project_Files}"
+ENV_FILE="${NIGHT_SECUURA_ENV:-/Volumes/DevMASTER/!CODING/Secuura/Blockchain/4_Credentials/.env}"
+REPO_SUBDIR="Blockchain/Dev"
+# 2026-09-15 19:5x (Kam 18:19 "extend the checker" — the TOOLING tier): `tool=systemTest/performance` makes that
+# self-contained package the repo subdir (own package.json, vitest.unit.config.ts, tests/unit/, node_modules on disk);
+# service_dir becomes "." and there is no shared package to build. Everything else (tip, briefs, pins, checker) is unchanged.
+for a in "$@"; do case "$a" in tool=*) REPO_SUBDIR="${a#tool=}";; esac; done
+
+if [ ! -f "$ENV_FILE" ]; then echo "build_input: Secuura .env missing at $ENV_FILE" >&2; exit 1; fi
+set -a; source "$ENV_FILE"; set +a
+if [ -z "${LINEAR_API_KEY:-}" ]; then echo "build_input: LINEAR_API_KEY unset in $ENV_FILE" >&2; exit 1; fi
+if [ ! -d "$SRC/.git" ]; then echo "build_input: source checkout missing at $SRC" >&2; exit 1; fi
+
+# --- tip: origin/develop by ls-remote, object must already be local (no fetch) ---
+TIP="$(git -C "$SRC" ls-remote origin refs/heads/develop 2>/dev/null | awk '{print $1}')"
+if [ -z "$TIP" ]; then echo "build_input: ls-remote origin develop returned nothing (offline?)" >&2; exit 1; fi
+ORIGIN_TIP="$TIP"
+if [ "$(git -C "$SRC" cat-file -t "$TIP" 2>/dev/null)" != "commit" ]; then
+  # --- G6 (2026-09-15, the night the object store was stale): a VERIFIED TIP OVERRIDE ---
+  # night/tip_override.txt holds ONE line: <local sha> <origin tip it was verified against> <instrument> <who/when>
+  # written by the coordinator only after measuring that NO file under $REPO_SUBDIR differs between the
+  # two (the GitHub compare API from the seat that holds the token — read-only). It is honoured ONLY while
+  # origin still sits at the sha it was verified against and the local sha is in the object store; the
+  # moment origin moves again the line is stale and this refuses exactly as before. No fetch, ever.
+  OV="$(dirname "$0")/tip_override.txt"
+  OV_SHA=""; OV_AGAINST=""
+  if [ -f "$OV" ]; then read -r OV_SHA OV_AGAINST OV_REST < "$OV"; fi
+  if [ -n "$OV_SHA" ] && [ "$OV_AGAINST" = "$TIP" ] && [ "$(git -C "$SRC" cat-file -t "$OV_SHA" 2>/dev/null)" = "commit" ]; then
+    echo "build_input: G6 — origin develop $TIP is not local; using VERIFIED OVERRIDE $OV_SHA (verified against this origin tip; $OV_REST)" >&2
+    TIP="$OV_SHA"
+  else
+    echo "build_input: REFUSED — develop tip $TIP is not in the local object store; a fetch is a write verb on the source checkout, so a Secuura seat must fetch first (or the coordinator writes night/tip_override.txt after a measured no-$REPO_SUBDIR-change compare — current override: '${OV_SHA:-none}' against '${OV_AGAINST:-none}')" >&2
+    exit 2
+  fi
+fi
+
+# Everything else is Python: the Linear read, the parse, the JSON emit.
+NIGHT_BRIEFS_DIR="${NIGHT_BRIEFS_DIR:-$(dirname "$0")/briefs}" BUILD_ORIGIN_TIP="$ORIGIN_TIP" python3 - "$TICKET" "$OUT" "$SRC" "$TIP" "$REPO_SUBDIR" "$@" <<'PYEOF'
+import json, os, re, subprocess, sys, urllib.request
+
+ticket, out, src, tip, subdir = sys.argv[1:6]
+pins = {}
+for a in sys.argv[6:]:
+    if "=" in a:
+        k, v = a.split("=", 1); pins[k] = v
+number = int(ticket.split("-")[1])
+key = os.environ["LINEAR_API_KEY"]
+
+def refuse(msg):
+    sys.stderr.write(f"build_input: REFUSED {ticket} — {msg}\n"); sys.exit(2)
+def git(*args):
+    return subprocess.run(["git", "-C", src, *args], capture_output=True, text=True)
+
+# ---------------------------------------------------------------- 1. Linear read
+Q = '''query($n:Float){ issues(first:2, includeArchived:true,
+  filter:{ team:{key:{eq:"KS"}}, number:{eq:$n} }){
+  nodes{ id identifier title description priorityLabel archivedAt updatedAt
+    state{name type} assignee{name email} attachments{nodes{url title}} } } }'''
+req = urllib.request.Request("https://api.linear.app/graphql",
+    data=json.dumps({"query": Q, "variables": {"n": number}}).encode(),
+    headers={"Content-Type": "application/json", "Authorization": key})
+with urllib.request.urlopen(req, timeout=60) as r:
+    j = json.loads(r.read())
+if "errors" in j:
+    sys.stderr.write(f"build_input: Linear error: {j['errors']}\n"); sys.exit(1)
+nodes = j["data"]["issues"]["nodes"]
+if len(nodes) != 1:
+    refuse(f"Linear returned {len(nodes)} issues for number {number}")
+n = nodes[0]
+desc = n["description"] or ""
+state, stype = n["state"]["name"], n["state"]["type"]
+assignee = (n["assignee"] or {}).get("email") or ""
+print(f"ticket {n['identifier']} · {state} ({stype}) · {n['priorityLabel']} · assignee={assignee or '-'} · updated {n['updatedAt']}")
+# 2026-09-17 15:4x (Kam 15:37 "keep the local agent constantly churning through the backlog"): an attached PR refuses
+# ONLY when it is OPEN. Until now ANY attached PR refused, so every follow-up on a ticket whose PR had already MERGED
+# (KS-864-F1009 at 03:52, KS-928 with #874 at 15:04) needed a hand-copied builder. Each attached PR's state is read
+# from the GitHub REST API (GET /repos/<owner>/<repo>/pulls/<n>, the Secuura project's GH_TOKEN sourced above, never
+# printed) and printed; one OPEN PR refuses. FAIL CLOSED: no token, a URL that is not a github.com pull URL, an API
+# error, or a response without a readable state/merged pair all REFUSE, naming why. This gate runs BEFORE the
+# archived/state/assignee gates so its refusal is measurable on a real board ticket (every KS ticket with an open PR
+# on 2026-09-17 was In Progress/In Review, which the state gate would have refused first); a ticket with no attached
+# PR makes no GitHub call and sees exactly the old order. NIGHT_GITHUB_API (http/https only) is the arm's stub seam.
+prs = [a["url"] for a in n["attachments"]["nodes"] if "/pull/" in (a["url"] or "")]
+if prs:
+    _gh_api = os.environ.get("NIGHT_GITHUB_API", "https://api.github.com").rstrip("/")
+    _gh_tok = os.environ.get("GH_TOKEN") or ""
+    if not re.match(r"^https?://", _gh_api):
+        refuse(f"attached to pull request(s) {prs} and NIGHT_GITHUB_API is not an http(s) URL — the PR state cannot be read (fail closed)")
+    if not _gh_tok:
+        refuse(f"attached to pull request(s) {prs} and GH_TOKEN is unset in the Secuura .env — the PR state cannot be read (fail closed)")
+    _open = []
+    for _u in prs:
+        _m = re.match(r"^https?://github\.com/([A-Za-z0-9_.\-]+)/([A-Za-z0-9_.\-]+)/pull/(\d+)(?:[/?#].*)?$", (_u or "").strip())
+        if not _m:
+            refuse(f"attached PR URL {_u!r} is not a github.com pull URL — its state cannot be read (fail closed)")
+        _own, _rep, _num = _m.groups()
+        try:
+            _rq = urllib.request.Request(f"{_gh_api}/repos/{_own}/{_rep}/pulls/{_num}",
+                headers={"Authorization": "Bearer " + _gh_tok, "Accept": "application/vnd.github+json",
+                         "X-GitHub-Api-Version": "2022-11-28", "User-Agent": "wednesday-night-build-input"})
+            with urllib.request.urlopen(_rq, timeout=30) as _r:
+                _pj = json.loads(_r.read())
+            _st, _merged = _pj["state"], _pj["merged"]
+        except Exception as _e:
+            refuse(f"attached PR #{_num} ({_own}/{_rep}): its state could not be read ({type(_e).__name__}: {str(_e)[:160]}) — refused, fail closed")
+        if _st not in ("open", "closed") or not isinstance(_merged, bool):
+            refuse(f"attached PR #{_num} ({_own}/{_rep}): unreadable state (state={_st!r}, merged={_merged!r}) — refused, fail closed")
+        _label = "OPEN" if _st == "open" else ("merged" if _merged else "closed, not merged")
+        print(f"attached PR #{_num} ({_own}/{_rep}): {_label}")
+        if _st == "open":
+            _open.append(f"#{_num}")
+    if _open:
+        refuse(f"attached to OPEN pull request(s) {_open} — a lane has it (merged/closed PRs do not refuse)")
+if n["archivedAt"]:
+    refuse(f"archived at {n['archivedAt']}")
+if stype not in ("backlog", "unstarted"):
+    # 2026-09-25: `started_ok=<reason>` admits ONLY an In Progress (started) ticket whose attached PRs are all
+    # merged/closed (an open PR already refused above). It is an explicit, printed override: an item carved OUT
+    # of every live lane (e.g. KS-1140 GF-1 after #1142 merged). Never automatic: an In Progress ticket with a
+    # merged PR can still have a seat building its next item (KS-975, 2026-09-25), so the coordinator must say why.
+    _sok = pins.get("started_ok", "").strip()
+    if stype == "started" and _sok:
+        print(f"WARN state is {state} (started) — ADMITTED by started_ok: {_sok}")
+    else:
+        refuse(f"state is {state} ({stype}) — not Backlog/Todo; a seat has it" + ("" if stype != "started" else " (pass started_ok=<reason> only if the item is carved out of every live lane)"))
+if any(x in assignee for x in ("peter", "stuart")):
+    refuse(f"assigned to {assignee} (Peter/Stuart tickets are off-limits)")
+
+# ---------------------------------------------------------------- 2. product file
+PATH_RE = re.compile(r"(?:Blockchain/Dev/)?((?:services/[a-z0-9\-]+|packages/shared)/src/[A-Za-z0-9_\-./]+\.ts)(?::(\d+))?")
+cands = []
+for m in PATH_RE.finditer(desc):
+    p = m.group(1)
+    if "__tests__" in p or p.endswith(".test.ts"): continue
+    if p not in cands: cands.append(p)
+if "product" in pins:
+    product_rel = pins["product"].replace(subdir + "/", "", 1)
+    print(f"product file PINNED: {product_rel} (ticket names {len(cands)}: {cands})")
+elif len(cands) == 1:
+    product_rel = cands[0]
+elif len(cands) == 0:
+    refuse("names no product file under services/*/src or packages/shared/src (a bare filename is not a path); pin one with product=")
+else:
+    refuse(f"names {len(cands)} product files — not ONE: {cands}; pin one with product= if the fix site is unambiguous")
+# a second .ts basename cited without a services/ prefix (`src/routes/foo.ts:12`, `bar.ts:9`)
+# is a second site the regex above cannot see — refuse unless the product file is pinned
+bases = set(b for b in re.findall(r"\b([A-Za-z0-9_\-]+\.ts)\b(?!\.)", desc) if not b.endswith(".test.ts"))
+bases.discard(os.path.basename(product_rel))
+if bases and "product" not in pins:
+    refuse(f"besides {os.path.basename(product_rel)} the ticket also cites {sorted(bases)} — more than one site; pin product= if the fix is unambiguous")
+product = f"{subdir}/{product_rel}"
+tool_mode = "tool" in pins
+if tool_mode:
+    if "product" not in pins: refuse("tool= needs product= (the ticket's paths are not parsed in tool mode)")
+    service_dir = "."
+elif product_rel.startswith("services/"):
+    service_dir = "services/" + product_rel.split("/")[1]
+elif product_rel.startswith("packages/shared/"):
+    service_dir = "packages/shared"
+else:
+    refuse(f"product path is neither services/* nor packages/shared: {product_rel}")
+
+# ---------------------------------------------------------------- 3. fix shape
+# 2026-09-15 12:3x (Kam 09:30 — Wednesday writes the model's task from the ticket; the ticket is never the
+# prompt): when night/briefs/<TICKET>.md EXISTS, the brief IS the fix shape and it states any decision the
+# ticket left open, so the ticket-prose gates below (no fix shape / decision needed) do NOT apply — they were
+# refusing KS-1050 ("needs a call") and KS-908 (no Fix-shape heading) on tickets Wednesday had already briefed.
+# The brief's "## The exact change" heading is the fix sentence the input carries. Without a brief the gates
+# stand exactly as before.
+_early_brief = os.path.join(os.environ.get("NIGHT_BRIEFS_DIR", ""), f"{ticket}.md")
+_early_brief_text = open(_early_brief, encoding="utf-8").read() if (_early_brief and os.path.isfile(_early_brief)) else None
+FIX_RE = re.compile(r"(?im)^\s*(?:#+\s*|\*\*)?(fix shape[^\n]*|recommendation[^\n]*|fix:[^\n]*|the fix[^\n]*|acceptance[^\n]*)")
+if _early_brief_text is not None:
+    _bm = re.search(r"(?im)^##+\s*(the exact change[^\n]*)", _early_brief_text)
+    fix_sentence = (_bm.group(1).strip() if _bm else "Wednesday brief: the exact change is stated in the brief")
+    print(f"fix shape: WEDNESDAY BRIEF ({os.path.basename(_early_brief)}) — the ticket's fix-shape/decision gates are bypassed; the brief states the change and any decision → {fix_sentence[:120]!r}")
+    fm = None
+else:
+    fm = FIX_RE.search(desc)
+if fm is None and _early_brief_text is None:
+    refuse("no fix shape in the description (no 'Fix shape' / 'Recommendation' / 'Fix:' / 'Acceptance' section) — a ruling, not a task")
+if fm is not None:
+# the quotable sentence: the inline text after the heading's colon (`**Fix shape:** do X`),
+# else the first non-empty line after the heading
+    head = fm.group(1).strip()
+    inline = ""
+    if re.search(r"^(fix shape|recommendation|fix|the fix|acceptance)[^:\n]{0,80}:\**\s*\S", head, flags=re.I):
+        inline = re.sub(r"^(fix shape|recommendation|fix|the fix|acceptance)[^:\n]{0,80}:\**\s*", "", head, flags=re.I).strip("* ").strip()
+    if len(inline) >= 25:
+        fix_sentence = inline
+    else:
+        after = desc[fm.end():].lstrip("\n")
+        fix_sentence = next((ln.strip() for ln in after.split("\n") if ln.strip()), head)
+    print(f"fix shape: {fm.group(1).strip()[:60]!r} → {fix_sentence[:160]!r}")
+    # a fix shape that is explicitly a question/decision is refused
+    if re.search(r"(?i)\b(decision needed|needs a (call|ruling)|do not reconcile|fix shape deliberately blank|not chosen)\b", desc[fm.start():fm.start()+600]):
+        refuse("the fix-shape section itself says a decision/ruling is needed first")
+
+# ---------------------------------------------------------------- 4. test runner at the tip
+def show(path):
+    r = git("show", f"{tip}:{subdir}/{path}")
+    return r.stdout if r.returncode == 0 else None
+svc_prefix = "" if service_dir == "." else service_dir + "/"
+pkg = show(f"{svc_prefix}package.json")
+if pkg is None:
+    refuse(f"{service_dir}/package.json is not at the tip")
+test_script = json.loads(pkg).get("scripts", {}).get("test", "")
+# 2026-09-15 19:5x tool mode: `"test": "npm run test:unit"` is an indirection — resolve ONE level so the runner kind is read
+# from the script that actually runs (systemTest/performance).
+_m_indir = re.match(r"^npm run (\S+)$", test_script.strip())
+if _m_indir:
+    test_script = json.loads(pkg).get("scripts", {}).get(_m_indir.group(1), test_script)
+# 2026-09-15 18:2x (Kam 18:19 "extend the checker"): jest services (originate, governance — ts-jest) are IN. The runner
+# kind is the first word of repo.test_runner (no new key — the input contract's key set is unchanged); the checker
+# branches on it. Anything that is neither vitest nor jest is still refused by name.
+if "vitest" in test_script:
+    runner_kind = "vitest"
+elif "jest" in test_script:
+    runner_kind = "jest"
+else:
+    refuse(f"{service_dir} test script is {test_script!r} — the checker runs vitest or jest only")
+has_setup = show(f"{svc_prefix}vitest.setup.ts") is not None
+has_cfg = show(f"{svc_prefix}vitest.config.ts") is not None
+has_jest_cfg = show(f"{svc_prefix}jest.config.js") is not None
+tsconfig_txt = show(f"{svc_prefix}tsconfig.json") or "{}"
+# tool packages name their unit config explicitly (performance: vitest.unit.config.ts); the checker reads `--config <x>`
+# out of repo.test_runner (no new key — the contract's key set is unchanged).
+vitest_cfg = pins.get("vitest_config") or ("vitest.unit.config.ts" if (not has_cfg and show(f"{svc_prefix}vitest.unit.config.ts") is not None) else "")
+try:
+    co = json.loads(re.sub(r"//[^\n]*", "", tsconfig_txt)).get("compilerOptions", {})
+except Exception:
+    co = {}
+ts_flags = ", ".join(k for k in ("strict", "noUnusedLocals", "noUnusedParameters", "esModuleInterop") if co.get(k))
+ts_desc = f"{ts_flags}, module {co.get('module','?')}, target {co.get('target','?')}"
+
+# ---------------------------------------------------------------- 5. product file content + defect line
+content = show(product_rel)
+if content is None:
+    refuse(f"product file {product_rel} is not at the tip {tip[:9]} (renamed or deleted since the ticket was filed)")
+lines = content.split("\n")
+# Line numbers in a ticket are pinned to the SHA the ticket was read at and DRIFT by the
+# time the night runs (KS-1072's `:240` was a comment line at the 09-14 tip). So the
+# defect line is anchored on CODE the ticket quotes in backticks whenever possible: a
+# snippet (>= 12 chars, not a path, not a bare `:NNN`) that occurs on exactly ONE line of
+# the file at the tip. A cited `:NNN` is used only when that line contains such a snippet
+# or when the ticket quotes nothing anchorable. `line=` pins override both.
+snippets = [t.strip() for t in re.findall(r"`([^`\n]{12,160})`", desc)]
+snippets = [t for t in snippets if not re.match(r"^[:\d\-, ]+$", t) and "/" not in t and not t.endswith(".ts")]
+def unique_line_for(snippet):
+    hits = [i + 1 for i, ln in enumerate(lines) if snippet in ln]
+    return hits[0] if len(hits) == 1 else None
+anchored = []
+for sn in snippets:
+    ln = unique_line_for(sn)
+    if ln and ln not in [a[0] for a in anchored]:
+        anchored.append((ln, sn))
+cited = None
+base = os.path.basename(product_rel)
+idx = desc.find(base)
+tail = desc[idx:] if idx >= 0 else desc
+lm = re.search(r"(?<![\d.])[:`]\s*:?(\d{1,5})(?![\d])", tail) or re.search(r"`:(\d{1,5})`", desc)
+if lm:
+    cited = int(lm.group(1))
+method = ""
+if "line" in pins:
+    defect_no = int(pins["line"]); method = "pinned (line=)"
+elif cited and 1 <= cited <= len(lines) and any(sn in lines[cited - 1] for _, sn in anchored):
+    defect_no = cited; method = f"cited :{cited}, confirmed by a quoted snippet"
+elif anchored:
+    defect_no, sn = anchored[0]; method = f"anchored on quoted snippet {sn[:50]!r} (cited :{cited} not confirmed — line numbers drift)"
+elif cited:
+    defect_no = cited; method = f"cited :{cited} (UNCONFIRMED — the ticket quotes no code that occurs on one line of the file)"
+else:
+    refuse("no defect line: the ticket cites no `<file>:NNN` line and quotes no code that occurs on one line of the file; pin one with line=")
+if not (1 <= defect_no <= len(lines)):
+    refuse(f"defect line {defect_no} is outside the file ({len(lines)} lines at the tip)")
+defect_text = lines[defect_no - 1]
+print(f"product {product_rel} ({len(content)} B, {len(lines)} lines) defect line {defect_no} [{method}]: {defect_text.strip()[:100]!r}")
+if len(anchored) > 1:
+    print(f"  other quoted-code anchors at the tip: {[a[0] for a in anchored[1:8]]}")
+imports = [ln for ln in lines if ln.startswith("import ")][:12]
+
+# ---------------------------------------------------------------- 6. reference test (imports the product module)
+test_dir_rel = (pins.get("test_dir") or "tests/unit") if tool_mode else f"{service_dir}/src/__tests__"
+r = git("ls-tree", "-r", "--name-only", tip, "--", f"{subdir}/{test_dir_rel}")
+tests = [p for p in r.stdout.split("\n") if p.endswith(".test.ts")]
+if not tests:
+    refuse(f"no test files under {test_dir_rel} at the tip")
+mod_rel = product_rel if tool_mode else product_rel[len(service_dir) + len("/src/"):]   # e.g. middleware/audit.ts (tool mode: gate/report.ts)
+mod_noext = re.sub(r"\.ts$", "", mod_rel)                          # middleware/audit
+mod_base = os.path.basename(mod_noext)                             # audit
+scored = []
+for t in tests:
+    body = git("show", f"{tip}:{t}").stdout
+    imp = re.findall(r"from\s+['\"](\.{1,2}/[^'\"]+)['\"]", body) + re.findall(r"import\(\s*['\"](\.{1,2}/[^'\"]+)['\"]\s*\)", body)
+    hits = [i for i in imp if i.rstrip("/").endswith("/" + mod_noext) or i.rstrip("/").endswith("/" + mod_base) or i.endswith(mod_noext)]
+    if not hits: continue
+    mocks = re.findall(r"vi\.mock\(\s*['\"]([^'\"]+)['\"]", body)
+    ksn = re.search(r"ks(\d+)", os.path.basename(t))
+    scored.append((len(mocks) > 0, int(ksn.group(1)) if ksn else 0, t, body, mocks, hits))
+if "ref" in pins:
+    ref_path = pins["ref"] if pins["ref"].startswith(subdir) else f"{subdir}/{pins['ref']}"
+    ref_body = show(ref_path[len(subdir) + 1:])
+    if ref_body is None: refuse(f"pinned ref test {ref_path} is not at the tip")
+    ref_mocks = re.findall(r"vi\.mock\(\s*['\"]([^'\"]+)['\"]", ref_body)
+    print(f"reference test PINNED: {ref_path}")
+elif scored:
+    scored.sort(key=lambda s: (s[0], s[1]), reverse=True)
+    _, _, ref_path, ref_body, ref_mocks, hits = scored[0]
+    print(f"reference test: {ref_path} (imports {hits[0]!r}; {len(ref_mocks)} vi.mock stubs; {len(scored)} candidate(s))")
+else:
+    refuse(f"no in-process test under {test_dir_rel} imports {mod_noext!r} — nothing to copy the mock shape from; pin one with ref=")
+if ref_path.replace(subdir + "/", "") == product_rel:
+    refuse("reference test equals the product file")
+
+# ---------------------------------------------------------------- 7. emit
+slug = re.sub(r"[^a-z0-9]+", "-", n["title"].lower()).strip("-")
+slug = "-".join(slug.split("-")[:6])[:60].rstrip("-")
+suggested = f"{subdir}/{test_dir_rel}/ks{number}-{slug}.test.ts"
+# 2026-09-15 20:0x (KS-1164, tool mode): the NEW test lives BESIDE the reference test, because the relative
+# imports the model copies from it (`../../../gate/report.ts`) resolve only from that directory. For the
+# services' flat src/__tests__ this is the same path; for a nested tests/unit/<area>/ it is the fix.
+suggested = f"{os.path.dirname(ref_path)}/ks{number}-{slug}.test.ts"
+if runner_kind == "vitest":
+    runner = f"vitest (run one file with `npx vitest run{(' --config ' + vitest_cfg) if vitest_cfg else ''} <file>` from {subdir}/{service_dir}" + \
+             ("; setupFiles ./vitest.setup.ts" if has_setup else "") + (")" if has_cfg else "; no vitest.config.ts at the tip)")
+else:
+    runner = (f"jest (ts-jest; run one file with `npx jest <file>` from {subdir}/{service_dir}"
+              + ("; config jest.config.js" if has_jest_cfg else "; no jest.config.js at the tip")
+              + "; use `jest.mock(...)` (auto-hoisted — there is NO vi.mock / vi.hoisted / vi.fn here; use jest.fn), "
+              + "`describe/it/expect/beforeAll/afterAll` are globals or `import { ... } from '@jest/globals'`)")
+note = (
+    f"READ-ONLY template: `{ref_path}` is an EXISTING test in the same __tests__ directory that imports the "
+    f"product module (`{mod_noext}`) and drives it in-process" +
+    (f" with vi.mock stubs for: {', '.join(ref_mocks[:12])}" if ref_mocks else " (no vi.mock — it calls the module directly)") +
+    ". Copy its app-building / import / mock shape; do NOT modify it. "
+    f"The ticket's fix shape, quoted: \"{fix_sentence[:400]}\". "
+    f"The ticket-named cell must reach the defective code at line {defect_no} of `{product_rel}` "
+    f"({defect_text.strip()[:120]!r}) and assert the BEHAVIOUR the ticket describes — fix every site the ticket names inside the product file, "
+    "not only the first. The CONTROL cell passes before and after the fix and proves the harness reaches the code "
+    "(an early return, a 4xx on a mismatch, or a found-row branch means the code under test was never reached). "
+    "Where the reference test's mocks do not cover a dependency your cell needs, add a vi.mock for it in YOUR test file "
+    "following the same factory shape; write UNKNOWN in a comment rather than inventing an API."
+)
+# ---------------------------------------------------------------- 7b. test_file= pin (2026-09-15 18:5x, KS-1172 Part A)
+# A ticket whose fix widens a PINNED list (an exact-set toEqual in an existing test) cannot ship a NEW test file:
+# the old pin stays red at A6. The only shape that passes is a diff that MODIFIES the existing pin file — which
+# task.md rule 3 already allows ("an extension of an existing file in test_dir other than the reference file")
+# and which the input never supported: the file to modify was not in `files`, so the model invented its
+# context lines (KS-1172 Part A, 18:53: FAIL A2 on a hallucinated test hunk while the product hunk was right).
+# `test_file=<path>` puts that file's FULL content into `files`, makes it the `suggested_test_file`, and tells
+# the model in the note that the test section is a MODIFICATION (`--- a/` header, context copied from it).
+# Refused when it names the reference test (the checker's A3 refuses that pair) or is absent at the tip.
+edit_test_path = None; edit_test_body = None
+if "test_file" in pins:
+    edit_test_path = pins["test_file"] if pins["test_file"].startswith(subdir) else f"{subdir}/{pins['test_file']}"
+    if edit_test_path == ref_path:
+        refuse(f"test_file= names the reference test {ref_path} — pin a different ref= (A3 refuses the pair)")
+    if not edit_test_path.startswith(f"{subdir}/{test_dir_rel}/"):
+        refuse(f"test_file= {edit_test_path} is not under {subdir}/{test_dir_rel}")
+    edit_test_body = show(edit_test_path[len(subdir) + 1:])
+    if edit_test_body is None: refuse(f"pinned test_file {edit_test_path} is not at the tip")
+    suggested = edit_test_path
+    note = (
+        f"MODIFY THE EXISTING TEST FILE `{edit_test_path}` — its FULL content is in files[...]; your test section is "
+        f"`--- a/{edit_test_path}` / `+++ b/{edit_test_path}` with hunks whose context lines are copied byte-for-byte from "
+        "that content. Do NOT create a new test file and do NOT use `--- /dev/null`. " + note
+    )
+    print(f"test_file PINNED (modify in place): {edit_test_path} ({len(edit_test_body)} B) — suggested_test_file = it")
+repo = {
+    "source_checkout": src, "tip": tip, "branch": "develop", "repo_subdir": subdir,
+    "service_dir": service_dir, "shared_pkg_dir": "" if tool_mode else "packages/shared", "shared_pkg_name": "" if tool_mode else "@secuura/shared",
+    "test_runner": runner,
+    "typescript": f"{ts_desc}; the product file's imports at the tip are: " + (" | ".join(i.strip() for i in imports) if imports else "(none)"),
+}
+# ---------------------------------------------------------------- 5b. NAMED SITES (2026-09-15, Kam 09:28)
+# Kam: "Is there a way to fix it going red through either instructions or rules or skills?" The KS-871
+# think=1 run fixed ONE of the two sites the ticket's `## Where` list names (:280, not :108) — a PARTIAL
+# that every model has produced on this ticket. So the sites are PARSED, read at the tip, and handed
+# to the model as a checklist; the checker's A3b refuses a product hunk that leaves a must_change
+# site untouched. Heuristic (stated, not hidden): a `:NNN` bullet under a `Where` heading is a site;
+# it is must_change when its bullet carries emphasis (`**…**`) and is not marked "(correct)".
+named_sites = []
+# 2026-09-15 10:5x: the BRIEF may carry its own `## Where` (it names the exact lines Wednesday wants changed);
+# when present it wins over the ticket's, so A3b checks Wednesday's sites — the brief is read before this point.
+_brief_for_sites = None
+_bp = os.path.join(os.environ.get("NIGHT_BRIEFS_DIR", ""), f"{ticket}.md")
+if _bp and os.path.isfile(_bp): _brief_for_sites = open(_bp, encoding="utf-8").read()
+_src_for_sites = _brief_for_sites if (_brief_for_sites and re.search(r"^##+\s*Where\b", _brief_for_sites, re.M)) else desc
+m_where = re.search(r"^##+\s*Where\b.*?$(.*?)(?=^##+\s|\Z)", _src_for_sites, re.M | re.S)
+if m_where:
+    # 2026-09-17 LINE-KEYED WHERE (KS-1186: four of its five '-' lines are byte-identical at the tip, so the checker's
+    # TEXT match could not tell which duplicate a diff edited). OPT-IN, brief only: a Where heading carrying the word
+    # `line-keyed` (e.g. `## Where (line-keyed — every **must change** line must appear as a '-' line AT ITS NUMBER)`)
+    # makes EVERY bullet a line+text site: its FIRST backtick span after `:NNN` is the exact line, it must equal the tip
+    # line at NNN (stripped) or the build is REFUSED here, and the site gets `key: "line+text"` + `text_in_brief`, which
+    # checker A3b/A3e grade by LINE NUMBER (tasks/code_patch/a3b_line.py). Without the word nothing changes: the sites
+    # carry no `key` and the checker's text match grades them exactly as before (the fallback).
+    _where_head = m_where.group(0).split("\n", 1)[0]
+    _line_keyed = bool(re.search(r"line-keyed", _where_head, re.I)) and (_src_for_sites is _brief_for_sites)
+    for b in re.finditer(r"^\s*[*-]\s*`?:(\d+)`?\s*[—–-]?\s*(.*)$", m_where.group(1), re.M):
+        # 2026-09-15 18:5x: this loop used the name `note` and CLOBBERED the reference_test_note built above
+        # (every briefed run since 10:5x sent the last Where-line's text as the note) — found by the test_file
+        # pin's positive arm reading the note back; renamed site_note.
+        ln = int(b.group(1)); site_note = b.group(2).strip()
+        txt = lines[ln - 1] if 0 < ln <= len(lines) else None
+        _site = {"line": ln, "text_at_tip": txt, "note": site_note,
+                 "must_change": ("**" in site_note) and ("(correct)" not in site_note.lower())}
+        # 2026-09-17 15:5x ASCII_PROXY (KS-839 r1 + retry, KS-1180-P1: the model will not reproduce a non-ASCII '-' line and
+        # deletes an ASCII neighbour instead). A LINE-KEYED must_change bullet may carry `ascii_proxy U+XXXX=<ascii> [...]`
+        # (outside its backticks): its quote is then the tip line with each declared character replaced by the ASCII
+        # stand-in (the line the model writes), stored as `ascii_proxy.text`; checker.sh (tasks/code_patch/a3b_proxy.py)
+        # restores the tip's bytes before A2 only where the model's '-' line equals it AND its hunk places it at the number.
+        # Refused here: ascii_proxy outside a line-keyed Where, on a stays site, a declared character absent from the tip
+        # line, a stand-in that is not ASCII, a proxy line still carrying non-ASCII, or one equal to a real tip line.
+        _px = re.search(r"\bascii_proxy((?:[ \t,]+U\+[0-9A-Fa-f]{4,6}=[!-_a-~]+)+)", site_note)
+        if re.search(r"\bascii_proxy\b", site_note) and not _px:
+            refuse(f"`## Where` :{ln}: `ascii_proxy` must be followed by one or more `U+XXXX=<ascii stand-in>` pairs (no backtick, no space in the stand-in)")
+        if _px and not _line_keyed:
+            refuse(f"`## Where` :{ln} declares ascii_proxy but the Where heading is not line-keyed — a proxy site is restored BY LINE NUMBER, so it needs `## Where (line-keyed ...)`")
+        if _line_keyed:
+            _q = re.search(r"`([^`\n]+)`", site_note)
+            if not _q:
+                refuse(f"line-keyed `## Where`: the bullet for :{ln} quotes no exact line in backticks — every line-keyed site names its text")
+            if txt is None:
+                refuse(f"line-keyed `## Where`: :{ln} is outside {product_rel} ({len(lines)} lines at the tip)")
+            _quote_vs = txt
+            if _px:
+                if not _site["must_change"]:
+                    refuse(f"line-keyed `## Where` :{ln}: ascii_proxy on a site that STAYS — only a must_change '-' line is written in proxy form")
+                _pmap = {}
+                for _cp, _sub in re.findall(r"U\+([0-9A-Fa-f]{4,6})=([!-_a-~]+)", _px.group(1)):
+                    _ch = chr(int(_cp, 16))
+                    if ord(_ch) < 128:
+                        refuse(f"line-keyed `## Where` :{ln}: ascii_proxy U+{_cp} is ASCII — only non-ASCII characters are proxied")
+                    if _ch not in txt:
+                        refuse(f"line-keyed `## Where` :{ln}: ascii_proxy U+{_cp.upper()} does not occur in the tip's line {ln} ({txt.strip()!r})")
+                    _pmap["U+" + _cp.upper()] = _sub
+                _ptext = txt
+                for _k, _v in _pmap.items():
+                    _ptext = _ptext.replace(chr(int(_k[2:], 16)), _v)
+                _left = sorted({f"U+{ord(c):04X}" for c in _ptext if ord(c) > 127})
+                if _left:
+                    refuse(f"line-keyed `## Where` :{ln}: the proxy line still carries non-ASCII {_left} — declare a stand-in for each")
+                if any(_ptext.strip() == _l.strip() for _l in lines):
+                    refuse(f"line-keyed `## Where` :{ln}: the proxy line {_ptext.strip()!r} is ALSO a real line of the tip file — the stand-in is ambiguous; pick another")
+                _quote_vs = _ptext
+                _site["ascii_proxy"] = {"map": _pmap, "text": _ptext}
+            if _q.group(1).strip() != _quote_vs.strip():
+                refuse(f"line-keyed `## Where`: :{ln} — the brief quotes {_q.group(1).strip()!r} but the tip's line {ln}{' after its ascii_proxy substitution' if _px else ''} is {_quote_vs.strip()!r} (stale line numbers or a wrong quote; re-read the tip)")
+            _site["key"] = "line+text"; _site["text_in_brief"] = _q.group(1)
+        named_sites.append(_site)
+    print(f"  named sites from '## Where' ({'BRIEF' if _src_for_sites is _brief_for_sites else 'ticket'}): {len(named_sites)} ({sum(1 for x in named_sites if x['must_change'])} must_change)"
+          + (f" — LINE-KEYED: all {len(named_sites)} quoted texts == the tip at their numbers; A3b/A3e grade them by line number + text" if _line_keyed else ""))
+    # ASCII_PROXY neighbours: the model copies context lines around a proxy site; a non-ASCII one there is the same trap
+    # (and would stop the checker from placing the proxy line), so the three lines each side must be ASCII.
+    _px_lines = {x["line"] for x in named_sites if x.get("ascii_proxy")}
+    for _pl in sorted(_px_lines):
+        _bad_nb = [k for k in range(max(1, _pl - 3), min(len(lines), _pl + 3) + 1)
+                   if k not in _px_lines and any(ord(c) > 127 for c in lines[k - 1])]
+        if _bad_nb:
+            refuse(f"ascii_proxy site :{_pl}: context line(s) {_bad_nb} within 3 lines carry non-ASCII — the model will not reproduce them either; not a proxy-shaped site")
+        print(f"  ascii_proxy site :{_pl}: the model writes {next(x['ascii_proxy']['text'] for x in named_sites if x['line'] == _pl).strip()!r} ({next(x['ascii_proxy']['map'] for x in named_sites if x['line'] == _pl)}); the checker restores the tip's line by number")
+else:
+    print("  named sites: no '## Where' section — checklist empty (A3b passes vacuously)")
+# 2026-09-15 22:0x (KS-976 B r1 dropped its insert-only helper hunk): the '+' lines of the brief's edit blocks
+# ("## The exact change" up to the next '## ') are the additions the product hunk must carry — A3c's checklist.
+expected_plus = []
+if _brief_for_sites:
+    _mx = re.search(r"^##+\s*The exact change\b.*?$(.*?)(?=^##+\s|\Z)", _brief_for_sites, re.M | re.S)
+    if _mx:
+        for blk in re.findall(r"^```[^\n]*\n(.*?)^```", _mx.group(1), re.M | re.S):
+            for ln in blk.split("\n"):
+                if ln.startswith("+") and not ln.startswith("+++") and ln[1:].strip():
+                    expected_plus.append(ln[1:].strip())
+    print(f"  expected '+' lines from the brief's edit blocks: {len(expected_plus)} (A3c)")
+    if any(s.get("ascii_proxy") for s in named_sites):
+        _nonascii_plus = [p for p in expected_plus if any(ord(c) > 127 for c in p)]
+        if _nonascii_plus:
+            refuse(f"an ascii_proxy brief's '+' lines must be ASCII (the model will not reproduce non-ASCII there either; nothing restores a '+' line): {_nonascii_plus[:2]!r}")
+    # ------------------------------------------------ CONTEXT-AS-ADDITION GATE (2026-09-16 17:4x)
+    # The VITEST twin of the gate added to tasks/bash_patch/build_bash_input.sh the same afternoon.
+    # A '+' line is a CLAIM that the line is not in the file. When a brief's '+' set repeats a line it
+    # also removes, that line is CONTEXT: the model emits the honest minimal hunk and A3c then refuses a
+    # CORRECT output as "a dropped addition". Four instances on 2026-09-16 (KS-1089, KS-1168 twice,
+    # KS-998) and the gate existed only on the bash tier, so KS-1168 - a vitest ticket Kam had ruled that
+    # morning - burned two rounds against a defect already gated one tier over.
+    _minus = []
+    for blk in re.findall(r"^```[^\n]*\n(.*?)^```", _mx.group(1), re.M | re.S) if _mx else []:
+        for ln in blk.split("\n"):
+            if ln.startswith("-") and not ln.startswith("---") and ln[1:].strip():
+                _minus.append(ln[1:].strip())
+    _dup = [a for a in expected_plus if a in set(_minus)]
+    if _dup and os.environ.get("ALLOW_CONTEXT_AS_ADDITION") != "1":
+        refuse("%d '+' line(s) in `## The exact change` are byte-identical to a '-' line in the same edit "
+               "block, so they are CONTEXT, not additions. The model will keep them as context and A3c will "
+               "refuse the correct output as a dropped addition. Rewrite the hunk minimally: a line that "
+               "survives the edit gets a single leading SPACE, never a '+'. Offending: %r "
+               "(ALLOW_CONTEXT_AS_ADDITION=1 overrides)" % (len(_dup), _dup[:3]))
+
+    # ------------------------------------------------ FENCE SHAPE GATE (2026-09-18 06:5x)
+    # Built from the KS-1229 Q-SIGNCERT-UNTYPED-SOURCE-SKIP r1 failure, MEASURED not reasoned.
+    # THE MODEL'S '+' LINES HAVE NEVER BEEN THE DEFECT — its CONTEXT lines have, three times
+    # (IMPROVEMENTS 04:13, 04:20, 06:2x). Two shapes cause it, and both are visible in the brief:
+    #   (a) a BLANK context line. The model will not emit one. It silently substitutes the nearest
+    #       non-blank lines and KEEPS the header the brief printed, so header and context disagree
+    #       and the harness reanchors — r1 landed one line early, inside the wrong describe, and
+    #       reddened three existing controls.
+    #   (b) a pure INSERTION whose context is all LEADING. Measured on one task, same '+' lines:
+    #       leading 205-207 -> fuzzy only; leading 203-207 (five lines) -> fuzzy only;
+    #       trailing 209-211 -> STRICT. Widening the leading context does NOT help. A fuzzy-only
+    #       fence is one indentation slip from the 01:26 mis-placement class, so this is a
+    #       correctness gate, not a tidiness one.
+    for _bi, _blk in enumerate(re.findall(r"^```[^\n]*\n(.*?)^```", _mx.group(1), re.M | re.S) if _mx else []):
+        _lines = _blk.split("\n")
+        if _lines and _lines[-1] == "":
+            _lines = _lines[:-1]                      # the fence's own trailing newline
+        _is_diff = [i for i, l in enumerate(_lines)
+                    if (l.startswith("+") and not l.startswith("+++"))
+                    or (l.startswith("-") and not l.startswith("---"))]
+        if not _is_diff:
+            continue                                  # not a diff fence (a plain sample) — not ours to judge
+        _first, _last = min(_is_diff), max(_is_diff)
+        # (a) ANY blank line in a diff fence is a blank CONTEXT line — a real unified diff never
+        # carries a bare empty line otherwise (a blank ADDED line is '+', a blank REMOVED line is '-',
+        # and a blank CONTEXT line is a lone space, which .strip() catches). Scoped to first..last
+        # at first writing, which MISSED r1's own case (its blank sat in the LEADING context, before
+        # the first '+') — caught by ARM 1 on 2026-09-18, which is why the arms exist.
+        _blank = [i + 1 for i, l in enumerate(_lines)
+                  if l.strip() == ""
+                  and not l.startswith("+") and not l.startswith("-")]
+        if _blank and os.environ.get("ALLOW_BLANK_CONTEXT") != "1":
+            refuse("edit block %d in `## The exact change` has a BLANK CONTEXT line (fence line %s). The model "
+                   "will not reproduce it: it substitutes the nearest non-blank lines, keeps the header this brief "
+                   "prints, and the harness then reanchors the hunk to the wrong place (KS-1229 r1, 2026-09-18). "
+                   "Move the anchor to the other side of the blank line so every context line is non-blank. "
+                   "(ALLOW_BLANK_CONTEXT=1 overrides)" % (_bi + 1, _blank[:3]))
+        # (b) a pure insertion with no TRAILING context applies fuzzy-only
+        _minus_here = [i for i in _is_diff if _lines[i].startswith("-")]
+        if not _minus_here:
+            _ctx_after = [i for i in range(_last + 1, len(_lines)) if _lines[i].startswith(" ")]
+            if not _ctx_after and os.environ.get("ALLOW_LEADING_ONLY_CONTEXT") != "1":
+                refuse("edit block %d in `## The exact change` is a pure INSERTION whose context is all LEADING "
+                       "(no context line after the last '+'). Measured 2026-09-18 on one task, same '+' lines: "
+                       "leading context applies FUZZY ONLY (git apply strict rc=1) at three AND at five lines, "
+                       "while TRAILING context applies STRICT. Widening the leading context does not help. Put the "
+                       "'+' lines FIRST and the context AFTER them, and set the header's old-start to the first "
+                       "context line. (ALLOW_LEADING_ONLY_CONTEXT=1 overrides)" % (_bi + 1,))
+
+# ---------------------------------------------------------------- 5b2. TEST-ONLY TAMPER (2026-09-15 12:xx)
+# A coverage-only ticket (the code is right at the tip; a PIN is owed — KS-1073, KS-1123-F3, KS-1130, KS-1120) cannot
+# pass RED-FIRST at the tip. The brief may carry a `## Tamper` block naming the ONE product line whose corruption the
+# new cell must detect:  line: NNN / from: `<exact line at the tip>` / to: `<replacement>`.  The checker then runs in
+# test-only mode (A3: only a test file may change; A4: red under the tamper; A5: green at the tip). `from` is checked
+# against the tip here and refused on a mismatch, so a stale brief cannot plant a tamper on the wrong line.
+tamper = None
+# ---------------------------------------------------------------- 5b3. RED CELLS (2026-09-15 19:0x, KS-1172 — the modify-in-place twin)
+# When the diff MODIFIES an existing test file (test_file=), an EXISTING cell may go red at the tip by design
+# (a widened exact-set pin) without a 🔴 in its title — A4 would read it as a CONTROL red and refuse. The brief
+# declares such cells under `## Red cells` (one title substring per `- ` line); A4 counts a declared cell's
+# ASSERTION red as a red. Undeclared non-🔴 reds stay refusals — the declaration is Wednesday's, verified by the run.
+red_cells = []
+_rc_src = _brief_for_sites if _brief_for_sites else desc
+m_rc = re.search(r"^##+\s*Red cells\b.*?$(.*?)(?=^##+\s|\Z)", _rc_src, re.M | re.S)
+if m_rc:
+    red_cells = [l.strip()[2:].strip().strip('`') for l in m_rc.group(1).splitlines() if l.strip().startswith("- ")]
+    print(f"  red cells declared by the brief: {len(red_cells)} {red_cells}")
+# ---------------------------------------------------------------- 5b3a. UNDECLARED-RED GATE (2026-09-16 15:2x, KS-692)
+# A4 counts a failing cell as a RED only when its title carries 🔴 or when `## Red cells` names it. A brief whose
+# `it(` titles carry NEITHER guarantees that every genuine assertion-red is classified as a CONTROL red — so a
+# CORRECT model output FAILS at A4 and the verdict reads as a model failure. That is exactly what happened to
+# KS-692 at 15:13 today: three assertion-reds, both controls green, and a FAIL. The brief was the defect.
+# The gate fires ONLY on that shape. Measured over all 30 vitest-shaped briefs on disk at 15:2x: 29 put 🔴 in
+# their cell titles and are untouched; KS-692 (pre-fix) was the single hit. A rule the builder cannot refuse on
+# is a hope — this refuses BEFORE a model round is spent, and the remedy is four lines in the brief.
+if _brief_for_sites and not red_cells:
+    _it_titles = [m.group(2) for m in re.finditer(r"""\bit\(\s*(['"])(.*?)\1""", _brief_for_sites, re.S)]
+    if _it_titles and not any("🔴" in t for t in _it_titles):
+        if os.environ.get("ALLOW_UNDECLARED_REDS") == "1":
+            print(f"  ⚠ UNDECLARED-RED GATE overridden (ALLOW_UNDECLARED_REDS=1): {len(_it_titles)} it( titles, none with 🔴, no '## Red cells' section — A4 will treat every red as a CONTROL red")
+        else:
+            refuse(
+                f"the brief declares {len(_it_titles)} `it(` cell(s), NONE of whose titles carries 🔴, and it has no "
+                f"`## Red cells` section — so the checker's A4 gate will classify every genuine assertion-red as a "
+                f"CONTROL red and REFUSE a correct output (KS-692, 2026-09-16 15:13). Fix the brief, not the model: "
+                f"either put 🔴 in each red cell's title, or add a `## Red cells` section with one `- ` line per red "
+                f"cell title. Override with ALLOW_UNDECLARED_REDS=1 only if you have read why A4 will not fire. "
+                f"Titles seen: {[t[:60] for t in _it_titles]}")
+if _brief_for_sites:
+    m_t = re.search(r"^##+\s*Tamper\b.*?$(.*?)(?=^##+\s|\Z)", _brief_for_sites, re.M | re.S)
+    if m_t:
+        blk = m_t.group(1)
+        m_l = re.search(r"^\s*line:\s*(\d+)\s*$", blk, re.M)
+        m_f = re.search(r"^\s*from:\s*`(.*)`\s*$", blk, re.M)
+        m_to = re.search(r"^\s*to:\s*`(.*)`\s*$", blk, re.M)
+        if not (m_l and m_f and m_to):
+            refuse("the brief's `## Tamper` block must carry `line: N`, from: `…` and to: `…` on their own lines")
+        _tl = int(m_l.group(1)); _lines = content.split("\n")
+        if _tl < 1 or _tl > len(_lines):
+            refuse(f"tamper line {_tl} is outside {product_rel} ({len(_lines)} lines at the tip)")
+        if _lines[_tl-1].strip() != m_f.group(1).strip():
+            refuse(f"tamper `from` does not match the tip: line {_tl} is {_lines[_tl-1]!r}, the brief says {m_f.group(1)!r}")
+        if m_f.group(1).strip() == m_to.group(1).strip():
+            refuse("tamper `to` equals `from` — a tamper that changes nothing cannot redden anything")
+        # 2026-09-15 15:3x STATEMENT GATE (ledger w=3, endorse-unread / authored-design: the KS-1130 E7 tamper at :623
+        # replaced `typeof … === 'number' &&` and left :624 `Number.isInteger(persistedBlockHeight) &&` in force, so a
+        # string could NEVER pass and the 🔴 cells could never red — one model round and a Wednesday read to find it,
+        # the third brief line this fortnight written from a grep hit without its enclosing lines). A `from` line that
+        # sits MID-STATEMENT — it ends with a continuation token, or the next non-blank tip line begins with one —
+        # requires a `statement_ok:` clause in the block: the writer names why the REST of the statement cannot veto
+        # the tamper. The gate cannot prove semantics; it forces the read that would have. Single-line statements pass.
+        _cont_end = re.compile(r"(&&|\|\||\?|:|,|\(|\[|\{|=|\+|-|\*|/|\.)\s*(//.*)?$")
+        _cont_start = re.compile(r"^\s*(&&|\|\||\?|:|\.|\)|\]|\})")
+        _from_code = re.sub(r"//.*$", "", m_f.group(1)).rstrip()
+        _next = ""
+        for _k in range(_tl, min(_tl + 3, len(_lines))):
+            if _lines[_k].strip():
+                _next = _lines[_k]; break
+        _mid = bool(_cont_end.search(_from_code)) or bool(_cont_start.match(_next)) or (not _from_code.rstrip().endswith((";", "{", "}", ")")) and _next.startswith(" ") and len(_next) - len(_next.lstrip()) > len(m_f.group(1)) - len(m_f.group(1).lstrip()))
+        m_ok = re.search(r"^\s*statement_ok:\s*(\S.*)$", blk, re.M)
+        if _mid and not m_ok:
+            _rest = "\n".join(_lines[_tl-1:_tl+3])
+            refuse("tamper `from` sits MID-STATEMENT (it continues on the next line) and the block carries no `statement_ok:` clause — read the whole statement at the tip and state why its remaining lines cannot veto the tamper (KS-1130 E7: :624 `Number.isInteger(...)` vetoed a :623 tamper). The statement as the tip has it:\n" + _rest)
+        if m_ok:
+            print(f"  tamper statement_ok: {m_ok.group(1).strip()[:120]}")
+        tamper = {"line": _tl, "from": m_f.group(1), "to": m_to.group(1),
+                  "rule": "TEST-ONLY MODE: emit ONLY the new test file (no product hunk). The checker reddens your cells by replacing this product line with `to` in a clone, then expects them GREEN at the untouched tip."}
+        print(f"  TEST-ONLY tamper from the brief: {product_rel}:{_tl} {m_f.group(1).strip()[:60]!r} -> {m_to.group(1).strip()[:60]!r}")
+
+# ---------------------------------------------------------------- 5c. WEDNESDAY'S BRIEF (2026-09-15, Kam 09:30)
+# Kam: "rather than getting it to pick up tickets directly, you pick up the ticket and create a prompt based
+# on the ticket for the agent addressing some of the issues and rewording it so that it's clearer." When
+# night/briefs/<TICKET>.md exists, ITS text REPLACES the ticket description the model sees — the ticket
+# stops being the prompt; the sites checklist + A3b still bind. The log line says which was used.
+brief_path = os.path.join(os.path.dirname(os.path.abspath(sys.argv[0])) if False else os.environ.get("NIGHT_BRIEFS_DIR", ""), f"{ticket}.md")
+prompt_desc = desc
+if brief_path and os.path.isfile(brief_path):
+    prompt_desc = open(brief_path, encoding="utf-8").read()
+    print(f"  prompt source: WEDNESDAY BRIEF {brief_path} ({len(prompt_desc)} chars) — the ticket description is NOT the prompt")
+else:
+    print("  prompt source: the ticket description (no night/briefs/<ticket>.md)")
+# ---------------------------------------------------------------- 7c. BRIEF-FILE-PIN: the brief's `## The test` `File:` line IS suggested_test_file (2026-09-22 12:28, feed11 drafter; the FEED 10 build defect)
+# FEED 10 (Wednesday measured it at 12:2x on the five FEED 10 inputs, 5/5 by the drafter's own re-read): `suggested` above is the
+# TICKET-TITLE slug (`ks<n>-<title words>.test.ts`), which is also how the OLD READYs' tests were named, while every FEED 10
+# brief's `## The test` section named a NEW path on its `File:` line. The model follows the FIELD, so every test landed at the
+# OLD name (bodies identical to the goldens); the key-set check (both deltas empty) cannot see a stale VALUE. Rule: when the
+# brief is the prompt and its `## The test` section carries a `File:` line, THAT path (normalised to the repo subdir) is the
+# suggested_test_file, printed beside the slug it replaces. REFUSED: a File: outside test_dir; one equal to the reference test
+# (A3 refuses the pair); one that disagrees with a test_file= pin (two names for one file); a NEW-file File: (no test_file=)
+# that already EXISTS at the tip (a `--- /dev/null` section on an existing path fails A2, and a modify without its content in
+# files[...] is invented context - KS-1172). A brief with no File: line keeps the slug and SAYS so.
+_brief_file = None
+if _brief_for_sites:
+    _mt = re.search(r"^##+\s*The test\b.*?$(.*?)(?=^##+\s|\Z)", _brief_for_sites, re.M | re.S)
+    _mf = re.search(r"^File:\s*`([^`\n]+)`", _mt.group(1), re.M) if _mt else None
+    if _mf:
+        _brief_file = _mf.group(1).strip()
+        if not _brief_file.startswith(subdir + "/"):
+            _brief_file = f"{subdir}/{_brief_file}"
+        if not _brief_file.startswith(f"{subdir}/{test_dir_rel}/"):
+            refuse(f"the brief's `## The test` File: {_brief_file} is not under test_dir {subdir}/{test_dir_rel}/ - the checker's A3 refuses a test outside it")
+        if _brief_file == ref_path:
+            refuse(f"the brief's `## The test` File: names the reference test {ref_path} - A3 refuses that pair; pin a different ref=")
+        if edit_test_path and _brief_file != edit_test_path:
+            refuse(f"the brief's `## The test` File: {_brief_file} disagrees with the test_file= pin {edit_test_path} - two names for one file; make them equal")
+        if not edit_test_path and show(_brief_file[len(subdir) + 1:]) is not None:
+            refuse(f"the brief's `## The test` File: {_brief_file} already EXISTS at the tip but no test_file= pin carries its content - a NEW-file section on it fails A2 and a modify would be invented context; pin test_file= or name a new path")
+        if _brief_file != suggested:
+            print(f"  suggested_test_file = the brief's `## The test` File: line {_brief_file} (REPLACES the title slug {suggested})")
+        else:
+            print(f"  suggested_test_file = the brief's `## The test` File: line {_brief_file} (== the title slug)")
+        suggested = _brief_file
+    else:
+        print(f"  suggested_test_file: the brief has no `File:` line under `## The test` - the title slug stands: {suggested}")
+
+# ---------------------------------------------------------------- 7d. REGION-CARRYING FILES (2026-09-23 10:3x)
+# Kam RULED this at 09:24 on card `wed-ornith-pool-thin-widen-the-harness`, option (a): "Fix the builder to
+# excerpt, leave num_ctx at 65536." THE DEFECT, measured this morning: `files` carried WHOLE file contents, so
+# KS-1143 — which passes every candidate-selection clause — built to 295,061 B ~= 74,258 prompt tokens against
+# num_ctx 65536 and was UNBUILDABLE (its subject suite is 5,426 lines / 264,474 B). A whole class of large-suite
+# tickets was therefore invisible to the local model. num_ctx STAYS at 65536; the builder carries the REGIONS a
+# brief needs instead of the whole file.
+#
+# THE HARD PART, stated rather than glossed: the model must emit `@@ -219,3 +219,8 @@` headers whose numbers are
+# REAL line numbers in the REAL file. An excerpt breaks that unless it carries its own offset AND the prompt says
+# so. So an excerpted file is NOT a string any more: it is an object whose `regions` each carry `first_line` —
+# the real line number of that region's FIRST line — plus the arithmetic spelled out in `rule` (real number of
+# the Nth line of a region = first_line + N - 1), and the same sentences are pushed to the FRONT of
+# `reference_test_note`, the field tasks/code_patch/task.md tells the model to follow literally.
+# (KS-851 miscounted a hunk header's LENGTH field this morning with the whole file in front of it, so the length
+# arithmetic is a pre-existing weakness this change neither fixes nor worsens; only the START field is at stake
+# here, and the start field is now given explicitly.)
+#
+# NEVER SILENTLY TRUNCATE: when a region cannot be determined (no anchored line in the file, or the anchors do
+# not fit the budget) the build is REFUSED, by name, with the override that would widen it. A partial file that
+# looks whole produces a confident wrong diff.
+#
+# EXCERPT_TRIGGER_BYTES — a file LARGER than this is carried as regions; at or under it, whole and byte-identical.
+#   Measured 2026-09-23 over all 317 inputs in night/inputs: the largest file any input that BUILT carries whole is
+#   services/api-gateway/src/routes/documents.ts at 146,673 B (KS-1228/1229/1264/1265 all built and graded with it).
+#   160,000 B sits just above that measured working maximum, so every build that works today is untouched — the only
+#   file on disk past it is KS-1143's 264,474 B suite. At 4 B/token 160,000 B is ~40K of the 65536 window, which
+#   still leaves the >=12K answer tokens this builder's own headroom warning asks for.
+EXCERPT_TRIGGER_BYTES = int(os.environ.get("NIGHT_EXCERPT_TRIGGER_BYTES", "160000"))
+# EXCERPT_BUDGET_BYTES — the most an excerpt may carry (~12K prompt tokens at 4 B/token). If the lines a brief
+#   anchors cannot be covered inside it, the region has NOT been determined and the build is refused.
+EXCERPT_BUDGET_BYTES = int(os.environ.get("NIGHT_EXCERPT_BUDGET_BYTES", "48000"))
+# EXCERPT_MARGIN_LINES — context carried each side of every anchored line/span. task.md 2b needs 3 for a strict
+#   hunk and the fence-shape gate needs trailing context; 25 carries the enclosing block too, at ~1.5 KB a side.
+EXCERPT_MARGIN_LINES = int(os.environ.get("NIGHT_EXCERPT_MARGIN_LINES", "25"))
+# EXCERPT_HEAD_LINES — the head of the file is ALWAYS carried: the imports task.md rules 5/6 bind the model to
+#   ("using imports the file ALREADY has") live there. It is never a region on its own — see the refusal below.
+EXCERPT_HEAD_LINES = int(os.environ.get("NIGHT_EXCERPT_HEAD_LINES", "60"))
+# EXCERPT_MERGE_GAP — two windows closer than this are merged into one region rather than left with a hole the
+#   model might read as adjacency.
+EXCERPT_MERGE_GAP = int(os.environ.get("NIGHT_EXCERPT_MERGE_GAP", "10"))
+
+_EXCERPT_RULE = (
+    "EXCERPT — the value under this path is NOT the whole file and NOT a string: it is an object whose `regions` "
+    "are separated, verbatim slices of the file at the tip. Each region's `first_line` is the REAL line number, in "
+    "the REAL file, of the FIRST line of that region's `text`; the real number of the Nth line of a region is "
+    "`first_line + N - 1`, and `last_line` is the real number of its last line. EVERY `@@ -a,b +c,d @@` header you "
+    "write MUST use those REAL numbers — never a number counted from the start of an excerpt or of a region. "
+    "Regions are NOT adjacent: never place a context line from one region beside a line from another, and never "
+    "assume the line after a region's last line is the next region's first line. Every line OUTSIDE the regions "
+    "still exists in the file, unchanged: the file is not new (never `--- /dev/null` for it), nothing outside your "
+    "hunks is added or removed, and a line you cannot see is a line you must not touch — if the change you are "
+    "asked for needs a line that is not in any region, write UNKNOWN rather than guess it."
+)
+
+# `:NNN` and `:NNN-:MMM` references in the prompt text. The lookbehind keeps clock times (`06:20`) out: the
+# character before the colon is then a word character. Over-inclusion is SAFE here (a number the brief cites for
+# a DIFFERENT file just carries a few extra lines of this one); under-inclusion is what refuses.
+_LINEREF_RE = re.compile(r"(?<![\w.])`?:(\d{1,5})`?(?:\s*[-–—]\s*`?:(\d{1,5})`?)?")
+
+
+def _prompt_spans(text, n_lines):
+    out = []
+    for m in _LINEREF_RE.finditer(text or ""):
+        a = int(m.group(1))
+        b = int(m.group(2)) if m.group(2) else a
+        if a < 1 or a > n_lines:
+            continue
+        if b < a or b > n_lines:
+            b = a
+        out.append((a, b))
+    return out
+
+
+def _excerpt_file(path_for_msg, text, spans, why):
+    """Return the region-carrying object for `text`, or REFUSE. `spans` are (first,last) real line numbers."""
+    flines = text.split("\n")
+    n = len(flines)
+    real = [(a, b) for (a, b) in spans if 1 <= a <= n]
+    if not real:
+        refuse(f"{path_for_msg} is {len(text)} B / {n} lines — past the {EXCERPT_TRIGGER_BYTES} B ceiling, so it must be "
+               f"carried as REGIONS — but NO line of it is anchored: the input names no defect line, no `## Where` site "
+               f"and no `:NNN` reference in the prompt that falls inside it. The region cannot be determined, and a "
+               f"truncated file that looks whole makes the model write a confident wrong diff. Point the brief at the "
+               f"lines it means (a `## Where` list, or `:NNN` references), or pin a smaller file")
+    wins = []
+    if EXCERPT_HEAD_LINES > 0:
+        wins.append((1, min(EXCERPT_HEAD_LINES, n)))
+    for a, b in real:
+        wins.append((max(1, a - EXCERPT_MARGIN_LINES), min(n, b + EXCERPT_MARGIN_LINES)))
+    wins.sort()
+    merged = []
+    for w in wins:
+        if merged and w[0] <= merged[-1][1] + EXCERPT_MERGE_GAP:
+            merged[-1] = (merged[-1][0], max(merged[-1][1], w[1]))
+        else:
+            merged.append(w)
+    regions = [{"first_line": a, "last_line": b, "line_count": b - a + 1,
+                "text": "\n".join(flines[a - 1:b])} for a, b in merged]
+    carried = sum(len(r["text"]) for r in regions)
+    if carried > EXCERPT_BUDGET_BYTES:
+        refuse(f"{path_for_msg}: the {len(real)} anchored line(s)/span(s) need {carried} B in {len(regions)} region(s), "
+               f"past the {EXCERPT_BUDGET_BYTES} B excerpt budget — the brief points at too much of a {len(text)} B file "
+               f"to carry honestly at num_ctx 65536. Narrow the brief's `## Where`/`:NNN` references, or widen with "
+               f"NIGHT_EXCERPT_BUDGET_BYTES / narrow the window with NIGHT_EXCERPT_MARGIN_LINES (currently "
+               f"{EXCERPT_MARGIN_LINES} lines each side)")
+    anchor_lines = sorted({a for a, _ in real} | {b for _, b in real})
+    return {"excerpt": True, "total_lines": n, "total_bytes": len(text), "carried_bytes": carried,
+            "why": why, "rule": _EXCERPT_RULE,
+            "anchored_lines": anchor_lines[:200], "regions": regions}
+
+
+files_map = {product: content, ref_path: ref_body}
+if edit_test_path:
+    files_map[edit_test_path] = edit_test_body
+_excerpted = []
+for _fp in list(files_map):
+    _ft = files_map[_fp]
+    if not isinstance(_ft, str) or len(_ft) <= EXCERPT_TRIGGER_BYTES:
+        continue
+    if _fp != product:
+        # the brief's `:NNN` numbers are the PRODUCT file's; nothing anchors a line of any other carried file, so
+        # an oversize reference test / pinned test file cannot be excerpted honestly — refuse rather than truncate.
+        refuse(f"{_fp} is {len(_ft)} B, past the {EXCERPT_TRIGGER_BYTES} B ceiling, and it is NOT the product file "
+               f"({product}) — the brief's line numbers name the product file, so no region of this one can be "
+               f"determined. Pin a smaller ref= (or test_file=)")
+    _spans = [(defect_no, defect_no)]
+    for _s in named_sites:
+        if isinstance(_s.get("line"), int):
+            _spans.append((_s["line"], _s["line"]))
+    if tamper:
+        _spans.append((tamper["line"], tamper["line"]))
+    _spans += _prompt_spans(prompt_desc, len(_ft.split("\n")))
+    _why = (f"the file is {len(_ft)} B / {len(_ft.split(chr(10)))} lines; carried whole it would not fit num_ctx 65536 "
+            f"(KS-1143, 2026-09-23: 295,061 B ~= 74,258 prompt tokens). Only the regions this task anchors are carried.")
+    files_map[_fp] = _excerpt_file(_fp, _ft, _spans, _why)
+    _excerpted.append(_fp)
+if _excerpted:
+    _note_head = ("EXCERPTED INPUT — files[" + "], files[".join(_excerpted) + "] is not the whole file. " +
+                  _EXCERPT_RULE + " Read that object's `rule` and every region's `first_line` BEFORE you write a "
+                  "single `@@` header. ")
+    note = _note_head + note
+    for _fp in _excerpted:
+        _o = files_map[_fp]
+        print(f"  EXCERPTED {_fp}: {_o['total_bytes']} B / {_o['total_lines']} lines -> {_o['carried_bytes']} B in "
+              f"{len(_o['regions'])} region(s) {[(r['first_line'], r['last_line']) for r in _o['regions']]} "
+              f"(anchored lines {_o['anchored_lines'][:12]}{'...' if len(_o['anchored_lines']) > 12 else ''})")
+
+inp = {
+    "ticket": {"identifier": n["identifier"], "title": n["title"], "state": state,
+               "priority": n["priorityLabel"], "description": prompt_desc},
+    "repo": repo,
+    "product_file": product,
+    "defect_line": {"line": defect_no, "text": defect_text, "sites": named_sites, "expected_plus": expected_plus,
+                    "sites_rule": "every site with must_change=true MUST be changed by the product hunk (its text appears as a '-' line); the checker refuses a diff that leaves one untouched (A3b) before any test runs"
+                                  + ("; sites with key=line+text are matched by LINE NUMBER: the '-' line must be the file's line AT that number (several sites share the same text, so editing one copy does not satisfy another)" if any(s.get("key") == "line+text" for s in named_sites) else "")
+                                  + ("; a site with ascii_proxy is written as its ascii_proxy.text EXACTLY - the file's line with each listed non-ASCII character replaced by its ASCII stand-in (for example U+2014 written as --) - as the '-' line at that site's number, inside a hunk whose context lines are the file's own; the checker restores the real line" if any(s.get("ascii_proxy") for s in named_sites) else ""),
+                    **({"tamper": tamper} if tamper else {}),
+                    **({"red_cells": red_cells} if red_cells else {})},
+    "test_dir": f"{subdir}/{test_dir_rel}",
+    "suggested_test_file": suggested,
+    "reference_test_file": ref_path,
+    "reference_test_note": note,
+    "files": files_map,
+    "source_checkout": src, "tip": tip, "repo_subdir": subdir, "service_dir": service_dir,
+    "shared_pkg_dir": "" if tool_mode else "packages/shared", "shared_pkg_name": "" if tool_mode else "@secuura/shared",
+}
+# contract self-check against the KS-871 input's key set, when that evidence is present
+kt = "/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/runs/2026-09-14_ks871-gptoss120b/input.json"
+if os.path.exists(kt):
+    k871 = json.load(open(kt))
+    if set(k871) != set(inp) or set(k871["ticket"]) != set(inp["ticket"]) or set(k871["repo"]) != set(inp["repo"]):
+        sys.stderr.write("build_input: key set differs from the KS-871 input — contract drift\n"); sys.exit(1)
+    print("contract: key set == KS-871 input (top-level, ticket, repo)")
+if _excerpted:
+    # top-level too (the last key the model reads, after `files`): the same sentences, so the rule is not something
+    # it has to go looking for. Added AFTER the KS-871 contract self-check above, exactly as `_night_num_ctx` is —
+    # a build with no excerpt carries neither key and its key set is unchanged.
+    inp["excerpt_rule"] = _EXCERPT_RULE
+    inp["excerpted_files"] = _excerpted
+# 2026-09-23 SELF-TESTING (IMPROVEMENTS 14:23/14:24 rows; KS-1143): a brief whose product IS a test file declares
+# `## Self-testing — test hunks: N[,M]` (1-based hunk ordinals of the ONE file's diff). checker.sh then accepts the one
+# file (A3), reds the declared hunk(s) ALONE at the tip (A4) and greens the rest on top (A5). Added AFTER the KS-871
+# contract self-check, like excerpt_rule — a brief without the heading builds exactly as before. REFUSED here, before a
+# model round is spent: the product not under test_dir; no `## Red cells` (the checker's split cross-check needs a named
+# cell to prove the ordinal points at the test hunk); a `## Tamper` beside it (a brief carries one mode).
+if _brief_for_sites:
+    _ms = re.search(r"^##+\s*Self-testing\b[^\n]*?test hunks?\s*:\s*([0-9][0-9,\s]*)$", _brief_for_sites, re.M | re.I)
+    if _ms:
+        _th = sorted({int(x) for x in re.split(r"[,\s]+", _ms.group(1).strip()) if x})
+        if not product.startswith(f"{subdir}/{test_dir_rel}/"):
+            refuse(f"`## Self-testing`: the product {product} is not under test_dir {subdir}/{test_dir_rel}/ — self-testing mode is for a product that IS a test file")
+        if not red_cells:
+            refuse("`## Self-testing` needs a `## Red cells` section: the checker proves the declared test hunk carries the named cell before it splits")
+        if tamper:
+            refuse("`## Self-testing` and `## Tamper` in one brief — a brief carries one mode")
+        if not _th or min(_th) < 1:
+            refuse(f"`## Self-testing` test hunk ordinals must be 1-based integers: {_ms.group(1)!r}")
+        inp["self_testing"] = {"test_hunks": _th,
+                               "rule": "SELF-TESTING: the product file is itself a test file. Emit ONE diff section for it; hunk(s) "
+                                       + ",".join(str(k) for k in _th) + " (counting from the top of the section) add the test and "
+                                       "must go RED alone at the tip; every other hunk is the fix and turns it GREEN. Keep the hunks in "
+                                       "the brief's order."}
+        print(f"  SELF-TESTING from the brief: test hunk(s) {_th} of the one file {product}; red cells {red_cells}")
+if "ctx" in pins:
+    inp["_night_num_ctx"] = int(pins["ctx"])
+est = (len(json.dumps(inp)) ) // 4
+ctx = int(pins.get("ctx", 32768))
+# 2026-09-23: a prompt at or past num_ctx cannot be answered at all — the model would see a truncated prompt and
+# answer confidently from what survived. That is the KS-1143 shape, refused BY HAND this morning; it is mechanical
+# now. It fires only when the build is already unbuildable, so nothing that fits today is affected. The <12K
+# headroom WARNING below is unchanged.
+if est >= ctx:
+    refuse(f"the built input is ~{est} prompt tokens at 4 B/token, at or past num_ctx {ctx} — the model would be "
+           f"handed a TRUNCATED prompt and would answer from whatever survived. Files carried: "
+           + ", ".join(f"{k} {(v['carried_bytes'] if isinstance(v, dict) else len(v or ''))} B"
+                       + (" (excerpt)" if isinstance(v, dict) else "") for k, v in inp["files"].items())
+           + f". Narrow the brief, or lower NIGHT_EXCERPT_TRIGGER_BYTES (currently {EXCERPT_TRIGGER_BYTES}) so a big "
+             f"file is carried as regions")
+os.makedirs(os.path.dirname(os.path.abspath(out)), exist_ok=True)
+with open(out, "w", encoding="utf-8") as f:
+    json.dump(inp, f, indent=1, ensure_ascii=False); f.write("\n")
+sz = os.path.getsize(out)
+print(f"wrote {out} ({sz} B; ~{est} prompt tokens at 4 B/token — num_ctx {ctx} leaves ~{ctx - est} for the answer)")
+if ctx - est < 12000:
+    print(f"WARNING: prompt estimate {est} tokens leaves under 12K for the answer at num_ctx {ctx} — pin a larger ctx= on the queue line")
+sys.exit(0)
+PYEOF

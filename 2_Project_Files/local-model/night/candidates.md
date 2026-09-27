@@ -1,4 +1,4 @@
-# Ornith candidates — derived 2026-09-27 08:12 from 270 KS Backlog/Todo tickets (read-only, unpaginated)
+# Ornith candidates — derived 2026-09-27 22:14 from 261 KS Backlog/Todo tickets (read-only, unpaginated)
 
 A CENSUS for the coordinator to brief from, easy → hard (Kam 2026-09-15 16:40 / 18:19). A ticket here is a candidate, not a task: read it, read the file at the tip, write `night/briefs/<id>.md`, then queue it. Auth-shaped titles are excluded (LAST); Peter/Stuart tickets and PR-attached tickets are excluded outright.
 
@@ -80,23 +80,14 @@ A CENSUS for the coordinator to brief from, easy → hard (Kam 2026-09-15 16:40 
 - KS-966 — named in READY_KS-972_ornith35b-q4_BASHPATCH-REANCHORED-PASS-7of7_2026-09-16.diff.md, READY_KS-972_ornith35b-q4_BASHPATCH-REANCHORED-PASS-7of7_2026-09-16.diff.md.pre-0951-superseded
 - KS-999 — named in READY_KS-1186_ornith35b-q4_AUTH-5SITE-LINEKEYED-PASS-7of7_2026-09-17.diff.md
 
-## HELD (READY_* or done.md PASS) — 25
+## HELD (READY_* or done.md PASS) — 16
 - KS-1009 Security: GET /api/auth/wallet/status returns userId + role to ANY anonymous cal
-- KS-1090 api-gateway + originate: tsc never type-checks #951's three wiring tests, and th
-- KS-1108 Akto harness: loadSecretsYml() parses config/secrets.yml with no catch — the KS-
 - KS-1121 Security: credentialRepo.getById resolves a credential by SUBSTRING (LIKE '%id%'
 - KS-1186 userRepo.ts: five sibling reads still return fromRow unawaited inside try, so a 
-- KS-1196 admin POST /api/admin/document-types ids are dt-${Date.now()}: two creates in on
-- KS-1205 api-gateway per-key limiter follow-up (KS-1195 gates): a JWT claim can name a ke
-- KS-1212 ks1187 tests: no cell pins that the erasure door reads its own router's caseSens
 - KS-1219 OAuth /authorize answers 500 server_error for an array-valued scope (repeated qu
 - KS-1220 ks839 cells pin padded wildcards with ASCII separators only - a second tokenizer
 - KS-1221 ks744 cells never test a falsy claim - a verificationLevel of '' or null must fo
-- KS-1227 ks1072 postTier2's anchor-store witness counts every stub request, leaks its lis
 - KS-1250 O-2: RUNBOOK §2.2 documents SMOKE_BASE_URL, but scripts/smoke-test.sh ignores it
-- KS-1348 originate production file logs are a column of `undefined` — the File transports
-- KS-1349 ks730c A1 reads calls.at(-1) with no per-iteration clear — the same blindness KS
-- KS-1350 webhooks fail500 docblock: three sentences that are stale or only-now-true after
 - KS-623 Test-token env guard is asymmetric: the gateway fails closed on an unset NODE_EN
 - KS-692 Security: /api/status revoke/unrevoke has no tenant ownership check — an ISSUER_
 - KS-747 Spec drift: GET /api/security/keys declares no parameters while the handler requ
