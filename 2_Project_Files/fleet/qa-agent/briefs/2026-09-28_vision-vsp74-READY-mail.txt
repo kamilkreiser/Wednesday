@@ -1,0 +1,38 @@
+[Datasec/Vision_Sales_Portal -> Tuesday] READY FOR QA: VSP-74 (F-B) @ bf5bdc0, stacked on 10ba4bb (restore refuses an incomplete backup; never empties a failed table)
+2026-09-27T20:23:47.000Z
+
+BLUF: F-B is filed as VSP-74 (Task, High) and is READY FOR QA. Branch fix/vsp-74-restore-refuses-incomplete-2026-09-28, head bf5bdc0, stacked on VSP-70's 10ba4bb as ruled: 10ba4bb -> d2531ea (refactor) -> bf5bdc0 (fix). VSP-70's own branch is untouched (origin still at 10ba4bb). Pushed, not merged, not deployed. For the next Vision gate, not gate 11. Tier 3: the restore CLI, run by an operator.
+
+RULING APPLIED (yours, 06:18, F-B = (3) both):
+- restoreData(data, {allowIncomplete}) computes the failed set as metadata.failed_tables plus any tables[t].error (covers pre-VSP-68 backups).
+- Non-empty and no flag -> it throws before touching anything: "this backup is INCOMPLETE, it does not contain: <tables>. Nothing was changed. To restore the other tables and leave these exactly as they are, re-run with --allow-incomplete". main() reports it as "Restore failed: ..." with exit 1, as today.
+- With the flag -> a warning, the other tables are restored, and failed tables are left alone ("(not in this backup, left as it is)").
+- clearTables() never DELETEs a failed table, whatever the caller passed (the defence in depth you ruled).
+- CLI: parseArgs(argv) takes --allow-incomplete in any position. The usage lines say so.
+
+COMMITS: d2531ea is a behaviour-preserving refactor (the post-download body moved into restoreData(data), which main() calls; VSP-70's 4 unit cells still pass, and the CLI still exits 1 with "AZURE_BACKUP_CONN_STR not set"). bf5bdc0 is the fix.
+
+FILES TOUCHED: server/dbRestore.js, test/db/restore-incomplete.test.js (new), BACKLOG.md.
+
+RED FIRST, on real Postgres (the local throwaway test DB salesportal_test, reset per cell). collateral_items plays the failed table (2 live rows); email_templates dumped fine (1 live row, 1 different row in the backup).
+1 control: complete backup -> both tables replaced by the backup's rows
+2 failed table, new format -> refused, the message names collateral_items and --allow-incomplete, both tables unchanged
+3 failed table, pre-VSP-68 format (no failed_tables, only the entry's error) -> refused the same way
+4 --allow-incomplete -> collateral_items keeps both live rows, and email_templates is restored from the backup
+5 parseArgs: [latest], [latest, --allow-incomplete], [--allow-incomplete, x], []
+- At d2531ea: failing {2,3,4,5}, passing {1}. Cell 4 measured the loss: collateral_items went from ['live one','live two'] to []. That is the finding, confirmed on real Postgres.
+- At bf5bdc0: passing {1..5}, two runs.
+- Mutants: M1 no refusal: failing {2,3}. M2 clearTables empties failed tables: failing {4}. M3 failed set from metadata only: failing {3}.
+
+SETS at bf5bdc0: npm test 109/109 (includes VSP-70's 4), fail set {}. test:db all 8 files pass, fail set {}: async-faults 30, completed-response 3, concurrency 5, harness 4, pool-timeout 12, reminder-push 6, restore-incomplete 5, routes 18.
+
+PRIOR WORK: VSP-70's clearTables and ROLLBACK handling are kept unchanged underneath (its cells pass on this head). No earlier refusal logic existed.
+
+NOT TESTED:
+- The CLI end to end against Azure blob storage (not touched).
+- A backup file actually produced by VSP-68's code. The cells build the JSON in the shape dbBackup writes; the two branches are not merged together.
+- Node 20 / CI: UNMEASURED.
+
+BATCHING: dbRestore.js is shared with VSP-70 by design (stacked). F-A is next, stacked on this head, since it also touches dbRestore.js (RESTORE_ORDER).
+
+Meanwhile: continuing with F-A, measurement first.
