@@ -1,0 +1,49 @@
+[Datasec/Vision_Sales_Portal -> Tuesday] READY FOR QA: VSP-75 (F-A) @ 0d7a2fb, stacked on bf5bdc0 (backup carries all 20 tables; drift + FK-order + round-trip cells) - merge note vs VSP-68
+2026-09-27T20:29:53.000Z
+
+BLUF: VSP-75 (F-A) is READY FOR QA. Branch fix/vsp-75-backup-all-tables-2026-09-28, head 0d7a2fb, stacked on VSP-74: bf5bdc0 -> cad19ab (refactor) -> 0d7a2fb (fix). Pushed, not merged, not deployed. Tier 2: the nightly backup and the restore CLI. The measurement went to you in the STATUS mail and is on the ticket.
+
+WHAT CHANGED:
+1. server/backupTables.js (new) is the ONE list, used by both dbBackup (TABLES_TO_BACKUP) and dbRestore (RESTORE_ORDER): 20 tables in the FK order from the STATUS mail. BACKUP_EXCLUDED = {session: the reason}. Each line carries its FK parents as a comment.
+2. dbBackup dumpTable():
+   - orders by the table's PRIMARY KEY from pg_index. quote_sequences, integration_settings, monday_sync and feedback_coordinator_state have no id, and ORDER BY id failed on all four.
+   - reads rows as row_to_json.
+   Why: the round trip showed the old "SELECT *" loses timestamp precision. A JS Date keeps milliseconds, Postgres keeps microseconds, so every restore shifted every timestamp slightly. This is pre-existing in the live nightly backups. Minor, but it made exact restore impossible.
+3. dbRestore restoreTable() sends json/jsonb columns (from information_schema) as JSON.stringify text. A top-level JSON array otherwise fails with 22P02.
+Backups made before this change still restore: their rows are plain objects either way.
+
+FILES TOUCHED: server/backupTables.js (new), server/dbBackup.js, server/dbRestore.js, test/db/backup-coverage.test.js (new), BACKLOG.md.
+
+RED FIRST (real Postgres, the local test DB). The lazy feedback tables are created the product's way: GET /api/feedback/summary, and GET + PUT /api/feedback/coordinator-state with a test COORDINATOR_SECRET.
+1 drift: every table that CREATE TABLE IF NOT EXISTS makes anywhere in server/ (schema.sql plus the lazy creators) is in the list or excluded by name
+2 the exclusions are exactly {session}, and session is not in the list (so nobody can silence cell 1 by quietly adding exclusions)
+3 control: backup and restore name the same set
+4 control: every FK in pg_constraint (child -> parent, not self) has the parent earlier in RESTORE_ORDER and itself in the list
+5 round trip: one row in EVERY non-excluded table, including a quote revision chain (revised_from_id), JSONB objects, and a top-level JSON array in tco_scenarios.results. Then buildBackup() with no failed tables, TRUNCATE everything, restoreData(), and every table's row_to_json set must be identical. The next quotes id is max + 1.
+- At cad19ab: failing {1,5}, passing {2,3,4}. Cell 1 lists the 10 missing tables. Cell 5: 19 tables did not come back identical: the ten missing ones, plus the listed ones via the timestamp precision.
+- At 0d7a2fb: passing {1..5}, two runs.
+- Mutants:
+  M1 quotes dropped from the list: failing {1,4,5}
+  M2 ORDER BY id: failing {5} ('column "id" does not exist' x4)
+  M3 no JSON serialise: failing {5} (tco_scenarios)
+  M4 leads moved after quotes: failing {4,5}
+  M5 SELECT * with pk order (JS Dates): failing {5}, every timestamped table. This confirms the precision cause.
+
+SETS at 0d7a2fb: npm test 109/109, fail set {}. test:db all 9 files pass, fail set {}: async-faults 30, backup-coverage 5, completed-response 3, concurrency 5, harness 4, pool-timeout 12, reminder-push 6, restore-incomplete 5, routes 18.
+
+MERGE NOTE (important for batching):
+- git merge-tree of this head with VSP-68 (7ef698d): dbBackup.js auto-merges; BACKLOG.md conflicts textually.
+- SEMANTIC conflict: VSP-68's server/dbBackup.test.js stubs query() to return {id} rows for ANY SQL, and asserts total_rows 20 (10 tables x 2). With VSP-75, dumpTable makes two queries per table (pk lookup, then row_to_json) over 20 tables, so on the merged tree that control would fail and the stub needs to answer both queries.
+- I have NOT changed VSP-68's branch (it is in gate 11). Tell me when to fix the stub, and on which branch: VSP-68 after its gate, or a merge commit.
+
+PRIOR WORK: VSP-74's refusal and never-empty guard are underneath and pass (restore-incomplete 5/5). VSP-70's unit cells pass. The table lists had no edits since 96a5ff3.
+
+NOT TESTED:
+- Azure blob upload/download (untouched).
+- Production's catalog: unread. A production table the code does not create would still be missed; cell 1 only guards the code.
+- JSON size of a full production backup with quotes: not measured.
+- Node 20 / CI: UNMEASURED.
+
+CHOICES FOR YOU TO OVERRULE: feedback_coordinator_state and integration_settings are INCLUDED (reasons in the STATUS mail).
+
+Meanwhile: continuing with VSP-69, establishing client impact before any build.
