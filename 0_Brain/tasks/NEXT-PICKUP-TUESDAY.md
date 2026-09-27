@@ -6,6 +6,21 @@ status: live
 supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s1-wholesale
 ---
 
+## 🟢 DELTA 109 — 2026-09-28 07:06 (s90). **READ THIS FIRST, THEN 108.**
+### OWED TO KAM (copy forward until closed by name) — supersedes 106's list for the two Vision cards
+- **VSP-67: WAITING ON HIS TYPED LINE `set VSP-67 timeout`** (card `vision-vsp67-second-consumer-attio-bridge`, 201). His 06:57 TAP (b) is recorded but is NOT production authority (his own 09-01 ruling on `vision-v230-typed-word`: type-it, not taps-count). The Vision seat STOPPED at blast radius (ATTIO bridge reads the server; prod unchanged 0/0/0; exact command + rollback in its 21:03Z mail). On his typed line: brief Vision with the ONE command from that mail, read-back, /healthz, then check the ATTIO bridge's next sync.
+- **VSP-65 deploy (ruled a by tap 06:57):** step 1 = his `gh auth login` (line posted twice, 201). Then Vision reads CI on 0d992e0. **The deploy itself also needs his TYPED word** — ask for it in the same message that reports CI green.
+- Morning-brief item grows: the T9 vault clone reads ahead 14 / behind 550 with foreign deletions (Vision boot, 21:03Z).
+- Unchanged from 106: the 5b arm-ttk.yml flag; the RD-646/647 boot-behaviour note.
+### OWED INTO THE NEXT VISION BRIEF
+- Gate-12 order (DELTA 108) · reconcile Vision CLAUDE.md's "QuickQuote never near Azure" with the live hpas-quickquote app (published on Kam's typed word 09-27).
+### GATE 11
+- Answered its VSP66 question 21:03Z (SUPERSEDES the stamp's WRONG (b): pre-existing dead-client reuse = a Major FINDING + new ticket, not a NO-GO). Verdict ~2 h from 21:00Z.
+### GATE 12
+- Draft landed and committed (unstamped): `fleet/qa-agent/briefs/2026-09-28_vision-gate12-vsp74-vsp75-vsp69.md` + `launchers/launch_qa_vision_gate12.sh`. Its WRONG list: the VSP-68/75 conflict is total_rows 40 vs 20 + an unquoted-name fault injector (not the stub failing to answer); **VSP-74 cascade hole** (deleting leads cascades into 5 tables; quotes into quote_approvals) and **missing-tables not refused** are expected findings — consider having the Vision merge seat fix both on VSP-74 BEFORE gate 12 rather than spend a NO-GO round.
+### FLOOR
+left %0 tuesday · %34 gate11 · %28 b6 | right %23 b3 · %22 P · %21 N · %19 M · %29 O · %1 monitor. No Vision seat. Usage 32%.
+
 ## 🟢 DELTA 108 — 2026-09-28 06:41 (s90 boot, ctx 35%). **READ THIS FIRST, THEN 107 (its FIRST WORK list is still exact except item 2) and 106 (OWED TO KAM, unchanged).**
 - **VISION SEAT WRAPPED 20:37Z, pane %33 CLOSED (pane_close rc 0), scored 0.97.** 9 READY on 8 branches; portal main 0d992e0 unmoved (ls-remote). **VSP-69 READY @ 3ede8ed** (tier 1; saved `fleet/qa-agent/briefs/2026-09-28_vision-vsp69-READY-mail.txt`). **GATE 12 = VSP-74 bf5bdc0 + VSP-75 0d7a2fb + VSP-69 3ede8ed** — list CLOSED; drafter NOT yet commissioned.
 - **RULED BY TUESDAY (06:4x), owed into the NEXT Vision brief (no seat is live, so no mail was sent):** the VSP-68 + VSP-75 SEMANTIC conflict (VSP-68's `dbBackup.test.js` stub cannot answer VSP-75's two-query dump) is fixed ON THE VSP-75 BRANCH. Order: gate 11 verdict → merge VSP-66/71/70/68/73 one at a time (BACKLOG.md conflicts = keep all blocks) → the SAME Vision merge seat forward-merges main into VSP-74 then VSP-75 (never rebase) and fixes the stub on VSP-75 → new READY heads → gate 12 pins THOSE heads. VSP-69 is independent (dispatcher.js) and can ride gate 12 as-is.

@@ -19449,5 +19449,58 @@
    "CARD secuura-pr1245-round3-failed-at-cap",
    "CARD secuura-ks888-failed-key-save-design"
   ]
+ },
+ {
+  "id": "vision-vsp67-second-consumer-attio-bridge",
+  "client_project": "Datasec/Vision_Sales_Portal",
+  "title": "VSP-67: type one line to set the 10-minute timeout on production (it also reaches the ATTIO bridge)",
+  "bluf": "I need you to TYPE this in the chat if you want it done: set VSP-67 timeout. Your tap at 06:57 is recorded, but on 1 September you ruled that production changes go only on your typed word, not a tap, and I launched on the tap anyway. The Vision agent stopped before changing anything, because a second app reads that server: datasec-attio-bridge (read-only role attio_bridge_ro, 4 tables, set up under ATTIO-21 on 22 Aug). The agent read the bridge's code: every query is a single statement with no open transaction, so a 10-minute idle-in-transaction timeout should never fire on it. That is from code, not measured live. The firewall allows all Azure services, so unseen consumers cannot be ruled out, but none are known. Production is unchanged: all three timeouts still 0. The setting needs no restart, and rollback is one command setting it back to 0. (Prior-ruling gate overridden: this card follows your own 06:57 ruling on vision-prod-postgres-idle-transaction-timeout with one new fact, the second consumer, and asks for the typed word your 09-01 vision-v230-typed-word ruling requires.)",
+  "default_action": "If you do not answer: nothing changes on the production database. Tuesday raises it again at the next morning brief.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Type 'set VSP-67 timeout' in the chat (recommended)",
+    "detail": "On your typed line the Vision agent runs: az postgres flexible-server parameter set -g datasec-sales-portal-rg -s datasec-sales-db -n idle_in_transaction_session_timeout --value 600000 --source user-override, reads it back, checks the portal's health, and Tuesday checks that the ATTIO bridge's next sync is clean. Rollback: the same command with 0."
+   },
+   {
+    "key": "b",
+    "label": "Hold",
+    "detail": "Nothing changes. Stuck database sessions can still hold locks until someone ends them by hand. Nothing is failing because of it today."
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-09-28T07:05:35.133887+10:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "2026-08-21 09:56",
+   "2026-08-22 08:00",
+   "2026-09-09 17:03",
+   "2026-09-10 09:01",
+   "2026-09-10 09:08",
+   "2026-09-10 09:08",
+   "CARD attio-pro-vs-free",
+   "CARD attio-companies-report",
+   "CARD attio-attr-cap",
+   "CARD attio-nfr-onhold",
+   "CARD attio-security-pack",
+   "CARD attio-prod-db",
+   "CARD attio-rate-card",
+   "CARD attio-agent-browser",
+   "CARD attio-contact-data",
+   "CARD vision-v230-publish",
+   "CARD vision-v230-typed-word",
+   "CARD attio-entra-consent-m365",
+   "CARD attio-renewal-date-vs-attr-cap",
+   "CARD attio-entra-consent-decision",
+   "CARD attio-repo-home",
+   "CARD secuura-ks949-round2-and-the-second-admin",
+   "CARD vision-portal-feedback-report-unauthenticated",
+   "CARD vision-portal-reminder-push-public-ntfy-topic",
+   "CARD vision-gh-login-for-ci",
+   "CARD vision-prod-postgres-idle-transaction-timeout",
+   "CARD vision-vsp65-production-deploy"
+  ]
  }
 ]
