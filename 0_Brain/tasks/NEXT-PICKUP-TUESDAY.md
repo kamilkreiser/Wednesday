@@ -6,6 +6,13 @@ status: live
 supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s1-wholesale
 ---
 
+## 🟢 DELTA 105 — 2026-09-28 01:52 (s89). **READ THIS FIRST, THEN 104/103.**
+- **WEEK-INSTRUCTION-TUESDAY LAPSED** (marked 00:2x, Kam told). The NexusAI merge-once-tested grant (EXPIRING-GRANTS, no date) stands.
+- **BATCH 5a: 6/6 GO WITH FINDINGS** (report `Testing Agent MAIN/projects/nexusai/reports/2026-09-27-gate-batch5a/report.md`). **M is merge author, QUEUED NOT RELEASED: when O's batch 4 reaches MERGED 5/5, send M the RELEASE** (order RD-681 -> RD-627b -> RD-682 -> RD-705 -> RD-695 -> RD-413; 695/413 forward-merge; RD-413's C-57 = RD-428 rename accounted; RD-636 closes with RD-413). Brief `fleet/briefs_staged/2026-09-28_nexusai_M_batch5a_verdict.md`.
+- **GATE 10 RUNNING** (%31, Vision VSP-65 r2, tier 1, round 2 of 2: a NO-GO goes to KAM, no round 3 on Tuesday's word). On GO: relaunch the Vision seat as merge author for VSP-65 AND to merge QQ `backlog/qq-purge-deployed-2026-09-27` @ e408904 (BACKLOG only). On NO-GO: card Kam.
+- **Queue order on the jest lock** (after 5a closed): b6 H1-H3 · O merge3-rd418 · b3 H5b-sweep · P x2 · M x4 · N x2. M yielded behind b6 on the gate's question (C-141).
+- **Floor:** left %0 tuesday · %28 b6 · %31 gate10 · %29 O; right %23 b3 · %22 P · %21 N · %19 M · %1 monitor.
+
 ## 🟢 DELTA 104 — 2026-09-27 21:12 (s89, ctx 50% CHECKPOINT; band 80-90). **READ THIS FIRST, THEN 103.**
 - ✅ **22:3x: QUICKQUOTE PUBLISHED — CLOSED** (v0.6.1-tool2.33-986f7b8 live; healthz probed by Tuesday; purge success by storage metrics; Kam told 201). OWED: merge QQ backlog/qq-purge-deployed-2026-09-27 @ e408904 (BACKLOG.md only) at the next Vision relaunch. VSP-67 CARDED (vision-prod-postgres-idle-transaction-timeout, rec b, default a). Vision seat wrapped, pane closed. Vault skill never-update-prod.md truncated since f3198f8: raise with Kam at the morning brief (his file). ~~Earlier:~~ Kam TYPED on the live board 22:12:54: "Go ahead and publish the quick quote." (his own words; the typed production word). Vision seat %30 launched with `fleet/briefs_staged/2026-09-27_vision_publish_quickquote_986f7b8.md` (read back 12:14:25Z). ON ITS RECEIPT: verify the new tag is what the webapp runs, /healthz, and the purge line has NO OData error; then tell Kam the live tag + the purge line on the board. ITEM 2 (read-only Azure Postgres timeouts) feeds the VSP-67 card.
 - Kam: 0 new since 10:58 (live board read 21:12); reconcile: nothing; usage 26% < 95%; NexusAI undelivered rulings 0. OWED TO KAM unchanged from DELTA 103 (QuickQuote typed word · Vision gh login · VSP-67 card after the Azure read · 5b arm-ttk flag · RD-646/647 boot-change note · WEEK-INSTRUCTION-TUESDAY: LAPSED, marked 09-28 00:2x, CLOSED).
