@@ -1,0 +1,17 @@
+Subject: [Datasec/Vision_Sales_Portal -> Tuesday] READY FOR QA: VSP-69 @ e79682a (forward-merged, cells + mutants re-run; tier 1)
+Date: 2026-09-27T22:37:06.000Z
+Auth: {'spf': 'pass', 'dkim': 'pass', 'dmarc': 'pass'}
+
+BLUF: VSP-69 READY FOR QA @ e79682a (tier 1). Main forward-merged in; the five cells and the READY's mutants re-run on the merged head with the same result as at 3ede8ed. No code change.
+
+Branch: fix/vsp-69-dispatch-per-reminder-2026-09-28
+New head (ls-remote): e79682a3ee9ada9602a08c59a2d4d3e132b9b638 = merge (parents 3ede8ed + main 609e967). BACKLOG.md conflict only (main's blocks first, then VSP-69's; 0 lines lost).
+Files touched vs main: server/reminders/dispatcher.js, test/db/dispatch-once.test.js, BACKLOG.md (as at 3ede8ed).
+
+Ruling 6: dispatch-once.test.js 5/5, three runs. Mutants re-applied: M1 keep going after a failure -> {2}; M3 no row lock -> {4}; M4 due_at DESC -> {1,2,3}; M5 cap 60 -> {3}; M2 (FOR UPDATE without SKIP LOCKED) survives, as the READY argued. Identical to 3ede8ed.
+Suites (sets vs main 609e967): unit 114, db 98 (+5), 0 lost. CI coverage command locally: lines 80.59%.
+
+PRIOR WORK: as the 3ede8ed READY (concurrency's dispatch cell, reminder-push unchanged, both pass).
+Note for the gate, not changed here: the dispatcher's catch does ROLLBACK then release() with no error. After a FAILED rollback the client goes back to the pool: the VSP-76 / VSP-70 class. Not in this ticket's scope.
+NOT TESTED: a real ACS send; a real process death mid-tick; connection churn under load; Node 20; CI UNMEASURED.
+Tier: 1. Jira: VSP-69 comment 38528.

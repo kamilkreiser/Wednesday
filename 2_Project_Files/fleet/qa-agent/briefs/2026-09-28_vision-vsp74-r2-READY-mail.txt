@@ -1,0 +1,33 @@
+Subject: [Datasec/Vision_Sales_Portal -> Tuesday] READY FOR QA: VSP-74 @ f62917f (holes a+b measured real, closed; tier 1)
+Date: 2026-09-27T22:36:41.000Z
+Auth: {'spf': 'pass', 'dkim': 'pass', 'dmarc': 'pass'}
+
+BLUF: VSP-74 READY FOR QA @ f62917f (tier 1). Main forward-merged in; both of the drafter's holes MEASURED REAL, then closed inside Kam's F-B "(3) both". Unit 119, db 103, 0 names lost vs main 609e967.
+
+Branch: fix/vsp-74-restore-refuses-incomplete-2026-09-28
+New head (ls-remote): f62917f605187146f72d55e7d5d2b777c19cca91
+Chain: bf5bdc0 (gated READY) -> 987178c merge main 609e967 -> b7bc78b fix -> 011becb BACKLOG -> 57ecad6 unit cells -> f62917f cell made branch-independent.
+
+Files touched vs main 609e967: server/dbRestore.js, server/dbRestore.plan.test.js (new), test/db/restore-incomplete.test.js, BACKLOG.md.
+
+Ruling 1 (forward merge): 987178c, BACKLOG.md conflict only (main's blocks first, then VSP-74's; 0 lines lost). Own cells after: 5/5.
+
+Ruling 5, MEASURED on real Postgres at 987178c before any fix:
+(a) REAL. --allow-incomplete with meetings failed: clearing leads emptied meetings through ON DELETE CASCADE, 1 row -> 0. Catalog read: leads CASCADEs into email_log, lead_collateral_provided, meetings, monday_sync, reminders; SET NULL on quotes, tco_scenarios. quotes CASCADEs into quote_approvals, reminders. So the drafter's list was right, plus tco_scenarios (SET NULL) and reminders via quotes.
+(b) REAL. A backup lacking a table the database has was NOT refused. On this branch alone it then failed on an unrelated NO ACTION key (quotes -> users) rather than cascading; on VSP-75's 20-table list it cascades.
+Fix: restorePlan() lists (1) failed dumps, (2) tables of RESTORE_ORDER the backup lacks, (3) live tables WITH ROWS outside RESTORE_ORDER (session never). Any of them: refused by default, the message names each group. With --allow-incomplete they are kept, and so is every table a kept table's foreign key points at, to a fixed point (clearing it would CASCADE into, SET NULL, or NO-ACTION-block the kept table). The insert loop skips kept tables too. failedTables() tests 'error' by presence: an old backup with error: "" is refused (F1's class, restore side).
+Red cells: restore-incomplete.test.js hole (a); hole (b) x3 (lacks reminders: refused; with the flag reminders untouched and still pointing where they did; lacks meetings, which IS in the list: refused); error: "" refused. Unit: dbRestore.plan.test.js 5 cells on a scripted catalog (real edges).
+Mutants (7, all red): no closure; clearTables ignores keep; no lacking; no outside; no refusal; truthiness back; insert loop ignores keep.
+
+Builder's choices (none needs Kam, I think; your call): "outside" counts only tables that HAVE rows (an empty unrestorable table cannot be changed by a cascade); the closure keeps parents on ANY foreign key, including NO ACTION ones (clearing them would fail the whole clear).
+Consequence on this branch ALONE: any database with quote rows makes every restore INCOMPLETE, because the 10-table list cannot bring quotes back. That is true of the old list; VSP-75 closes it. If gate 12 merges 74 without 75, the restore needs --allow-incomplete until 75 lands.
+Fixture change you should know about: VSP-74's four original cells used a 2-table backup, which is now incomplete by definition. They are completed from the live rows of every other listed table (complete()); what each cell asserts is unchanged.
+
+Suites (sets vs main 609e967): unit 119 (+5, the plan cells), db 103 (+10), 0 lost, 0 dupes.
+CI coverage command locally (Node 26): lines 80.36% (79.47% before the unit cells; the gate is 80). Thin margin.
+
+PRIOR WORK: VSP-74's gated behaviour (refuse on failed_tables or entry error; --allow-incomplete keeps the failed table) is kept and its cells pass. VSP-70's clearTables (first error thrown, release(broken)) untouched; its unit file 4/4. clearTables keeps its signature; the keep list is a new optional third argument (default = failedTables, as before).
+
+NOT TESTED: a real Azure blob download (restoreData driven directly); the CLI end to end; production's catalog (FK actions read from the test DB built by initDb); a restore under load or a link death mid-restore beyond VSP-70's cells; Node 20; CI UNMEASURED (Kam's gh login).
+Tier: 1.
+Jira: VSP-74 comment 38526 carries rulings 1 and 5 and these measurements.

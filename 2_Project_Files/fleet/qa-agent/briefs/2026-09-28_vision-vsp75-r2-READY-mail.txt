@@ -1,0 +1,28 @@
+Subject: [Datasec/Vision_Sales_Portal -> Tuesday] READY FOR QA: VSP-75 @ 69157de (injector reaches the dump, F1 closed, lazy tables; tier 1)
+Date: 2026-09-27T22:37:06.000Z
+Auth: {'spf': 'pass', 'dkim': 'pass', 'dmarc': 'pass'}
+
+BLUF: VSP-75 READY FOR QA @ 69157de (tier 1). Rulings 1-4 done: the injector now REALLY reaches the dump (mutant-proven), VSP68-G11-F1 closed, lazy tables absent not INCOMPLETE. VSP-74's round 2 merged in. Unit 126, db 112, 0 names lost vs main 609e967.
+
+Branch: fix/vsp-75-backup-all-tables-2026-09-28 (stacks on VSP-74)
+New head (ls-remote): 69157de61521769ba893270af7773967b011e273
+Chain: 0d7a2fb (gated READY) -> e34add4 merge VSP-74 987178c (main 609e967) -> e64d54e fix -> f392582 BACKLOG -> d7a5e77 merge VSP-74 011becb (dbRestore conflict, resolved) -> 987afab / 949b72e merge VSP-74's unit cells -> 69157de absent plan cells.
+
+Files touched vs main 609e967: server/backupTables.js, server/dbBackup.js, server/dbBackup.test.js, server/dbRestore.js, server/dbRestore.plan.test.js, test/db/backup-coverage.test.js, test/db/backup-lazy-absent.test.js (new), test/db/restore-incomplete.test.js, BACKLOG.md.
+
+Ruling 1: e34add4 auto-merged clean (dbBackup.js too). Own cells then: dbBackup.test.js cells 1, 3, 4 RED (cell 1: 40 !== 20). The drafter's mechanism confirmed.
+Ruling 2: the stub now names the table as dumpTable() does (quoted in the row SELECT; a quoted $1 in the PK lookup), returns realistic rows, and counts every thrown fault. Every fault cell asserts reached(<table>). Cell 1 counts TABLES_TO_BACKUP.length x 2 and asserts no fault fired. PROOF: mutant M1 (the old unquoted matcher) reddens all 7 fault cells; product mutant M2 (the catch drops error) reddens 6.
+Ruling 3 (F1): error = message || code || name || 'unknown error'; tested by presence ('error' in dump). All tables failed = FAILED ("no table could be dumped (N failed): <first error>"), nothing uploaded. Builder's choice within your "INCOMPLETE or FAILED": FAILED + no upload, because a 0-table blob would sit at the top of "restore latest" (VSP-74 would refuse it anyway). Red cells: new Error('') on leads -> INCOMPLETE naming "leads (Error)"; AggregateError('') code ECONNREFUSED on every table -> FAILED, 0 uploads, body carries ECONNREFUSED.
+Ruling 4: lazy tables, from the code: feedback (server/routes/feedback.js:25 ensureTable(); also server/feedbackDigest.js:30) and feedback_coordinator_state (server/routes/feedback.js:331 ensureStateTable()). 42P01 on one of those = absent (metadata.absent_tables, alert OK). Any other missing table -> INCOMPLETE (cell: monday_sync); a lazy table that exists but fails -> INCOMPLETE (cell: feedback timeout). LAZY_TABLES is pinned to the code by a backup-coverage cell. Real Postgres: backup-lazy-absent.test.js in its own database salesportal_test_lazy (created if missing, reused, never given those tables, nothing dropped): the real error IS 42P01 and gives absent; a restore of that backup into a DB without them works and does not create them.
+Restore side of absent (merge with VSP-74's plan): absent + empty or missing in the target = left alone, refuses nothing; absent + HAS rows in the target = incomplete (refused by default; kept with the flag, parents kept by the closure).
+
+Mutants: backup side 9, 8 red; M3b (truthiness back) SURVIVES and is equivalent: the fallback chain can never yield an empty string. Restore side on this branch 4, all red (closure, lacking, absent-not-kept, absent-with-rows).
+
+Suites (sets vs main 609e967): unit 126 (+12), db 112 (+19), 0 lost, 0 dupes. vs VSP-74's head: 0 lost.
+CI coverage command locally (Node 26): lines 80.68% (79.51% before the plan unit cells). Thin margin.
+
+PRIOR WORK: VSP-75's gated list, order, row_to_json and JSON-column restore untouched; backup-coverage's 5 original cells pass. VSP-68's cells: same names; cell 4 ("partial backup still uploaded") now fails quotes with a real 42P01 instead of feedback with a code-less error, because a missing feedback is now absent by your ruling. Its assertions are unchanged.
+
+NOT TESTED: a real Azure upload or ntfy (recorders); a real dual-address refusal (the AggregateError is constructed, shaped as Node's); production's catalog; the nightly cron in a running server; Node 20; CI UNMEASURED.
+Tier: 1.
+Jira: VSP-75 comment 38527 carries rulings 1-4; VSP-68 comment 38524 points here.
