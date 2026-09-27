@@ -1,0 +1,47 @@
+[Datasec/Vision_Sales_Portal -> Tuesday] READY FOR QA: VSP-68 @ 7ef698d (backup INCOMPLETE alert) + 2 new findings: backup omits quotes; restore can empty a table
+2026-09-27T20:17:10.000Z
+
+BLUF: VSP-68 is READY FOR QA. Branch fix/vsp-68-backup-missing-table-2026-09-28, head 7ef698d (one commit on main 0d992e0), pushed. Not merged, not deployed. Tier 2: the nightly backup and its ntfy alert, started by server/index.js.
+Separately, two NEW findings below need your ruling. One can lose production data on a restore.
+
+TICKET: VSP-68 (gate 9 §N.4(b), Minor). A backup missing a whole table was announced "DB Backup OK".
+
+FIX (server/dbBackup.js):
+- buildBackup() adds metadata.failed_tables, the tables whose dump failed. The reason is already on tables[t].error.
+- uploadToBlob() adds blob metadata failedTables="a,b", only when the list is non-empty.
+- There are three alerts instead of two:
+  OK: priority 3, unchanged
+  INCOMPLETE: new, title "DB Backup INCOMPLETE", priority 4, tags warning. The body is the usual rows line plus "NOT backed up: <table> (<error>); ..."
+  FAILED: priority 5, unchanged
+- The log line reads "[db-backup] INCOMPLETE in Xs: not backed up: <tables>" instead of "Complete".
+- The partial backup is still uploaded: the tables that dumped are kept.
+- Who sees the change: only whoever reads the NTFY_TOPIC alert (internal). No client-facing effect.
+
+FILES TOUCHED: server/dbBackup.js, server/dbBackup.test.js (new, unit suite, no DB), BACKLOG.md.
+
+RED FIRST. The db module and @azure/storage-blob are stubbed through require.cache and ntfy through global fetch, with recorders on each. The uploaded gzip is unpacked and read.
+1 control: every table dumps -> 1 upload, alert "DB Backup OK", total_rows 20
+2 control: the upload throws -> alert "DB Backup FAILED", body carries the error
+3 leads fails with DB_QUERY_TIMEOUT -> the alert is not OK: "DB Backup INCOMPLETE", priority >= 4, body names leads and DB_QUERY_TIMEOUT
+4 feedback fails 42P01 -> still uploaded; failed_tables ['feedback'] in the return value, in the uploaded JSON, and failedTables on the blob
+5 complete backup -> failed_tables [], no blob marker
+- At 0d992e0: failing {3,4,5}, passing {1,2}. Cell 3 got 'DB Backup OK', which is the ticket.
+- At 7ef698d: passing {1..5}, two runs.
+- Mutants: M1 alert always 'ok': failing {3}. M2 no blob marker: failing {4}. M3 failed list forced empty: failing {3,4}.
+
+SETS at 7ef698d: npm test 110/110 (105 + 5 new), fail set {}. test:db all 7 files pass, fail set {} (the same seven as VSP-70's READY; this branch is off main).
+
+PRIOR WORK: dbBackup.js has one commit (96a5ff3). dumpTable's per-table catch is kept as it is, because it is what keeps a partial backup. sendNotification is internal: it is not exported, and the only require of dbBackup is server/index.js (startBackupScheduler).
+
+NOT TESTED:
+- Real Azure Blob Storage and a real ntfy server (both recorded). Azure accepts the blob metadata key failedTables in the SDK's shape, but it was not uploaded for real.
+- Real Postgres under the backup (the query is stubbed); gate 9 measured the real black-hole path.
+- Node 20 / CI: UNMEASURED.
+
+NEW FINDINGS (in BACKLOG on this branch, not ticketed, for you to rule):
+F-A (Major if confirmed): the backup omits most PRO tables. TABLES_TO_BACKUP, and RESTORE_ORDER in dbRestore.js, name the same 10 tables. Not in the backup: quotes, quote_approvals, quote_sequences, pricing_config, tco_scenarios, reminders, notification_log, statements, integration_settings, monday_sync, feedback_coordinator_state, session. That list comes from a grep of CREATE TABLE in server/, not the production catalog. A restore would bring back no quote. It needs a ruling on what the backup must contain, and a restore order that respects foreign keys.
+F-B (Major, READ only, not run): restoring a backup in which a table's dump failed EMPTIES that live table and puts nothing back. The failed dump is stored as {rowCount: 0, rows: [], error}. clearTables() deletes every table with an entry in data.tables, and main() then skips any table with rowCount 0 ("(empty, skipped)"). Before VSP-68 such a backup was also labelled OK. Candidate fixes, your pick: (1) clearTables skips any table carrying .error; (2) the restore refuses an INCOMPLETE backup unless a --allow-incomplete flag is given; (3) both. It lives in dbRestore.js, the file VSP-70 changes, so it would stack on VSP-70's branch.
+
+BATCHING: files are disjoint from VSP-66 (db.js), VSP-71 (schema.sql, initDb.js) and VSP-70 (dbRestore.js), apart from BACKLOG.md. Same BACKLOG anchor conflict as the others.
+
+Meanwhile: continuing with VSP-73 (backup-db SQL dump replay), unless you rule F-A or F-B first.
