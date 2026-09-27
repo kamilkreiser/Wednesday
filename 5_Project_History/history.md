@@ -1,3 +1,11 @@
+## 2026-09-27 17:03 → 21:5x AEST — Friday (laptop) successor seat; wrapped on Kam's word, resume Tuesday after his HP meeting — Datasec only
+- Boot: by-tier digest 544 KB + own ledger whole, ctx 35%, 7d 22%. HPSM B03 verified on Jira, pane closed.
+- HPSM-POC: PR #49 merged (main b1d3ec9; 15 merges today; board 81 tickets, 40 Done, 38 of them closed today; 32 open tasks all wait on Kam / HP / Azure).
+- HPSM: B04: a read-only Azure model sweep (HPSM-39, a copy of the config, HPSM-POC's hash unchanged), SOW-01 recorded as a verbal start on 6 tickets (Kam's words, nothing re-dated), and the clinic pack for Tue 29 Sep 07:05 shared to Kam; C-78.
+- Composer: PRs #6/#7/#8 merged (4 defects, the approver note, required Environment, the C-05 content clean with new release 05070f1d, the reworded notice); DEPLOYED on Kam's word and verified live; temp key removed + proven; examples rebuilt (Quandarra, Yarrowind; 16/16 exports); guide v1.3 → v1.4, emailed to Kam; C-09.
+- Kam: 11 taps/notes, each ruled or withdrawn with his words, receipted, delivered. Tooling: count_list_check.sh (ledger w=3 enforcement, 10/10 arms).
+- Ledger: 2 rows (w=1: a ruling on a seat's unmeasured claim; a consequence stated to Kam from the records, corrected on the panel). Retro filled; candidates filed or discarded.
+
 ## 2026-09-26 19:03 → 2026-09-27 05:3x AEST — Wednesday evening/overnight seat (rotation from the 09:44 seat; ended by the 05:30 shift change) — Secuura + WED
 - Boot: by-tier digest 544 KB + own ledger whole (45 rows), ctx 38%, 7d 87%. KS-1344 round-2 rebrief queued (Ornith PASS, held by hand).
 - Merged + verified at source: #1290 #1291 (gate29), then #1292 #1294 #1293 #1295 #1298 #1299 (gate30T1/T2) — develop 94c9c7aa9be7; **all 7 KS-1341 sites on develop**; 79 Secuura merges since the 25th's morning, 0 deployed.
