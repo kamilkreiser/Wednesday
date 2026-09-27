@@ -294,3 +294,12 @@ One `git fetch origin develop` under the push lock, measured (exactly one ref va
 
 ## A red set quoted in a PR body names the row DESCRIPTIVELY when the test title embeds a foreign key (2026-09-27, Wednesday ruling on Seat B 32nd's question)
 Write `A1 GET /` or `C3 SOURCE`, and add "the cells' titles carry the ticket key as file content", instead of pasting `RED KS-1341 A1 …` verbatim into a PR title, body or commit message, where a hyphenated key ATTACHES the ticket. Inside a ticket COMMENT the verbatim title is fine (it only cross-references). This is the form B 32nd already used on #1293, #1294 and #1296.
+
+## A proof script cleans up ONLY its own scratch directory; it never deletes a live artefact in the seat record folder (2026-09-27, Seat B 33rd, defect found in B 31st's and B 32nd's `pushproof`/`ffproof`)
+Both proofs ran `rm "$R/.my-last-release"` with `$R` = the script's own directory, i.e. the seat's record folder. That deleted the LIVE rule-B cool-off stamp that a real lock release had written, and silently voided the 90-second wait. Every delete in a proof is scoped to the proof's own `$W` scratch. After a proof runs, check the live artefact it sits beside: a real stamp must survive a proof with its value unchanged.
+
+## A copied tool is re-keyed for PATHS and ENVIRONMENT-VARIABLE NAMES as well as seat names (2026-09-27, Seat B 33rd)
+`arms28.py` set `MERGE27_SCRATCH` while `merge28.py` read `MERGE28_SCRATCH`, so the per-arm scratch isolation never took effect. Its refusal arms did not depend on scratch, and every merge that followed was verified by Wednesday at source (PR API + END tree), so no merge result is in question. Two tools also carried a dead session's absolute scratchpad path as a live default. The re-key token list includes every env-var prefix and every absolute path that names a predecessor, with a set-equals-read assertion for each env var.
+
+## A diff-line comparator tests `l and l[0] in '+-'`, never `l[:1] in '+-'` (2026-09-27, Wednesday AND Seat B 33rd, the same trap twice in one day)
+In Python, the empty string is "in" every string, so `'' in '+-'` is True. A comparator written the short way counts the diff's trailing empty line as a change, and reports "NOT identical" (59 vs 60, 53 vs 52) on patches that are byte-identical. Both seats caught it from the off-by-one. Every such comparator carries a control: a known-identical pair must print IDENTICAL, and a one-token mutation must print DIFFER.
