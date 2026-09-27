@@ -1,0 +1,41 @@
+[Datasec/Vision_Sales_Portal -> Tuesday] READY FOR QA: VSP-73 @ 6d7ea73 (backup-db dump replays into a fresh DB, indexes included; routes/admin.js + new test)
+2026-09-27T20:20:26.000Z
+
+BLUF: VSP-73 is READY FOR QA. Branch fix/vsp-73-backup-dump-replay-2026-09-28, head 6d7ea73 (one commit on main 0d992e0), pushed. Not merged, not deployed. Tier 2: an admin-only download (GET /api/admin/backup-db, datasec_admin). Your ANSWER on F-A/F-B has been read: F-B is next, stacked on 10ba4bb, then F-A.
+
+TICKET: VSP-73 (gate 10 §N.3(b)). The backup-db SQL dump cannot be replayed into a fresh database (42P01) and carries session without its index.
+
+FIX (server/routes/admin.js, backup-db only):
+1. Before the first table: "CREATE SEQUENCE IF NOT EXISTS <seq> AS <type>;" for every public sequence (pg_sequences). This removes the 42P01.
+2. After each table's INSERTs: every index from pg_indexes, rewritten to CREATE [UNIQUE] INDEX IF NOT EXISTS. That brings back IDX_session_expire, and every UNIQUE as its unique index. The PK index is a no-op, since the table DDL already made it.
+3. In the existing reset-sequences section: "ALTER SEQUENCE <seq> OWNED BY <table>.<col>;" beside the setval, so pg_get_serial_sequence and DROP TABLE behave as with SERIAL.
+
+FILES TOUCHED: server/routes/admin.js, test/db/backup-dump-replay.test.js (new), BACKLOG.md.
+
+RED FIRST: the REAL route end to end. The cell signs in as datasec_admin and GETs /api/admin/backup-db. It unpacks the zip with a small central-directory reader in the test (no new dependency), replays the .sql as ONE query into its own fresh database vsp73_<pid> (dropped in after(); 0 left over), and compares that with the source test DB.
+1 control: the dump carries a CREATE TABLE for every source table, session included
+2 the replay as one query succeeds; the same tables, the same row counts per table, the same index names (IDX_session_expire and every UNIQUE included)
+3 nextval(pg_get_serial_sequence('leads','id')) = max(id) + 1 on the replayed DB
+4 there are replayed leads rows (so this is not a boot on an empty DB), then initDb() in a child process resolves on the replayed DB, and IDX_session_expire is present
+- At 0d992e0: failing {2,3,4}, passing {1}. Cell 2 fails with "42P01 relation "collateral_items_id_seq" does not exist", matching gate 10 (i-A).
+- At 6d7ea73: passing {1..4}.
+- Mutants: M1 no sequences: failing {2,3,4}. M2 no indexes: failing {2}. M3 no OWNED BY: failing {3}.
+
+SETS at 6d7ea73: npm test 105/105, fail set {}. test:db all 8 files pass, fail set {}: async-faults 30 (including the backup-db mid-stream fault cells), backup-dump-replay 4, completed-response 3, concurrency 5, harness 4, pool-timeout 12, reminder-push 6, routes 18.
+
+HOW VSP-73 AND VSP-71 INTERACT: VSP-71 (5bdaeae) stops a session-without-index from failing the boot. VSP-73 stops the dump from producing that shape: a replay now makes the index, owned by whoever replays. Each stands alone. Together, the only remaining route to VSP-71's shape is a manual DROP INDEX, which VSP-71 then survives.
+
+PRIOR WORK: backup-db's last change was 992da21 (IO1 round 2: the serverError import and the mid-stream fault). That is kept, and the async-faults backup-db cells pass. The DDL builder getTableDDL() is unchanged.
+
+NOT FIXED (still not in the dump, not in this ticket, recorded in BACKLOG):
+- FOREIGN KEY and CHECK constraints (e.g. leads_current_stage_check).
+- Column typmods (gate 10's expire -1 vs 6).
+A replayed DB therefore accepts rows the source would refuse. If you want those constraints, it is a new ticket.
+
+NOT TESTED:
+- Replaying over an EXISTING populated database (INSERTs collide with 23505, as before).
+- Production-size dumps, Node 20 / CI (UNMEASURED), production (not touched).
+
+BATCHING: file-disjoint from VSP-66, VSP-71, VSP-70 and VSP-68, apart from BACKLOG.md.
+
+Meanwhile: continuing with F-B (new ticket, branch stacked on 10ba4bb).
