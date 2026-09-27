@@ -6,6 +6,12 @@ status: live
 supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s1-wholesale
 ---
 
+## 🟢 DELTA 108 — 2026-09-28 06:41 (s90 boot, ctx 35%). **READ THIS FIRST, THEN 107 (its FIRST WORK list is still exact except item 2) and 106 (OWED TO KAM, unchanged).**
+- **VISION SEAT WRAPPED 20:37Z, pane %33 CLOSED (pane_close rc 0), scored 0.97.** 9 READY on 8 branches; portal main 0d992e0 unmoved (ls-remote). **VSP-69 READY @ 3ede8ed** (tier 1; saved `fleet/qa-agent/briefs/2026-09-28_vision-vsp69-READY-mail.txt`). **GATE 12 = VSP-74 bf5bdc0 + VSP-75 0d7a2fb + VSP-69 3ede8ed** — list CLOSED; drafter NOT yet commissioned.
+- **RULED BY TUESDAY (06:4x), owed into the NEXT Vision brief (no seat is live, so no mail was sent):** the VSP-68 + VSP-75 SEMANTIC conflict (VSP-68's `dbBackup.test.js` stub cannot answer VSP-75's two-query dump) is fixed ON THE VSP-75 BRANCH. Order: gate 11 verdict → merge VSP-66/71/70/68/73 one at a time (BACKLOG.md conflicts = keep all blocks) → the SAME Vision merge seat forward-merges main into VSP-74 then VSP-75 (never rebase) and fixes the stub on VSP-75 → new READY heads → gate 12 pins THOSE heads. VSP-69 is independent (dispatcher.js) and can ride gate 12 as-is.
+- **Floor:** left %0 tuesday · %34 gate11 · %28 b6 | right %23 b3 · %22 P · %21 N · %19 M · %29 O · %1 monitor. Batch 6 H3 holds the lock since 18:30Z (alive, logs 06:40); 11 queued (O merge3-rd418 next). Poller 8500 + wake runner 59390 alive. Usage 31%.
+- Kam: 0 live messages today (newest 22:12:54). Linear: 0 open `lesson` issues.
+
 ## 🔴 DELTA 107 — 2026-09-28 06:37 ROTATION HANDOVER (s89, ctx 82%, safe boundary). **READ THIS FIRST, THEN 106 (it carries the OWED-TO-KAM block, still exact).**
 ### FIRST WORK FOR THE NEXT SEAT
 1. **GATE 11 RUNNING (%34, QA/Vision-gate11)**: five Vision targets on portal main 0d992e0 — VSP-66 1976275 (t1), VSP-71 5bdaeae (t1), VSP-70 10ba4bb (t2), VSP-68 7ef698d (t2), VSP-73 6d7ea73 (t2). Brief `fleet/qa-agent/briefs/2026-09-28_vision-gate11-vsp66-vsp71.md` (stamped, rulings at stamp incl. the vsp71 LOGIN-role drop rule and "a dead client reused = FAIL of VSP-66"). Report will be `Testing Agent MAIN/projects/vision/reports/2026-09-28-vision-gate11-five-targets/report.md`. On the verdict: read whole, score, pane_close, then RELEASE merges to the Vision seat (one at a time, BACKLOG.md conflict = keep all blocks), and add the merged code to the VSP-65 deploy card's evidence if Kam has not ruled.

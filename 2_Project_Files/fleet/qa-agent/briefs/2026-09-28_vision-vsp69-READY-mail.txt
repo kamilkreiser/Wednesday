@@ -1,0 +1,45 @@
+Subject: [Datasec/Vision_Sales_Portal -> Tuesday] READY FOR QA: VSP-69 @ 3ede8ed (one transaction per reminder; tier 1; dispatcher.js + new test)
+From: datasec-vision <datasec-vision@agentmail.to>
+Date: 2026-09-27T20:37:31.000Z
+Auth: {'spf': 'pass', 'dkim': 'pass', 'dmarc': 'pass'}
+
+BLUF: VSP-69 (option A, your 06:33 ruling) is READY FOR QA. Branch fix/vsp-69-dispatch-per-reminder-2026-09-28, head 3ede8ed (one commit on main 0d992e0), pushed. Not merged, not deployed. TIER 1: the client email path. For gate 12 with VSP-74/75.
+
+FIX (server/reminders/dispatcher.js dispatchDue):
+- Up to 50 iterations. Each one checks out a connection, BEGINs, selects ONE row (status 'pending' AND due_at <= cutoff ORDER BY due_at, id LIMIT 1 FOR UPDATE SKIP LOCKED), sends it, UPDATEs its status, and COMMITs.
+- cutoff = NOW() read once at the start of the tick, so "due" is the tick's view, as the single batch query had.
+- A failure: ROLLBACK, warn, and the tick ends, as before (a failure used to end the batch too). The next tick carries on.
+- The send code moved unchanged into sendReminder(rem), with the same client and user routing and the same ntfy notification_log insert.
+- Order: due_at, as before, with id added as a tiebreak. Before, ties in due_at had no defined order.
+- Considered, not built: option B, claim-first. Recorded on VSP-69 (Jira comment) and in BACKLOG as "Kam's call if ever wanted".
+
+FILES TOUCHED: server/reminders/dispatcher.js, test/db/dispatch-once.test.js (new), BACKLOG.md.
+
+RED FIRST. Everything is real except @azure/communication-email, whose EmailClient.beginSend records the subject: the dispatcher, sendEmail, the ACS provider code, and sendEmail's notification_log rows. The fault is one-shot: the UPDATE marking reminder K rejects on the dispatcher's own connection.
+1 control: 5 due client reminders -> sent [R1..R5] in due order, 5 'sent' log rows, all marked sent
+2 5 due, K=3 fails in tick 1, then a clean tick 2 -> tick 1 sends [R1,R2,R3] and stops; the send tally and the notification_log 'sent' rows are both {R1:1,R2:1,R3:2,R4:1,R5:1}; nothing pending
+3 control: 55 due -> 50 in tick 1 (most overdue first, R51 waits), 55 total after tick 2, each exactly once
+4 control: two dispatchDue() running at once over 10 due (sends slowed 30 ms so they overlap the whole run) -> each sent exactly once, and log rows agree
+5 control: a not-yet-due and a cancelled reminder are untouched
+- At 0d992e0: failing {2}, passing {1,3,4,5}. Cell 2 gave R1:2, R2:2, which is the ticket (the whole batch re-sent).
+- At 3ede8ed: passing {1..5}, two runs.
+- Mutants:
+  M1 keep going after a failure: failing {2}
+  M3 no row lock at all: failing {4}
+  M4 due_at DESC: failing {1,2,3}
+  M5 cap 60: failing {3}
+  M2 (FOR UPDATE without SKIP LOCKED) SURVIVES, and that is correct. The second dispatcher waits on the lock, and Postgres re-checks status = 'pending' after the first commits, so it skips the row. Exactly-once holds either way; SKIP LOCKED is kept for throughput (no waiting), not correctness. No cell measures waiting.
+
+SETS at 3ede8ed: npm test 105/105, fail set {}. test:db all 8 files pass, fail set {}: async-faults 30, completed-response 3, concurrency 5 (including the existing "two concurrent ticks process a reminder once" cell, unchanged), dispatch-once 5, harness 4, pool-timeout 12, reminder-push 6, routes 18.
+- Note: running concurrency + reminder-push in ONE parallel node --test invocation fails 6 cells, identically at main (checked by stashing). That is the known shared-test-DB artefact that scripts/run-db-tests.js serialises against (VSP-54/59). Not this change.
+
+PRIOR WORK: concurrency.test.js's dispatch cell is kept and passes. reminder-push is unchanged and passes. The send routing and the ntfy log are moved, not changed.
+
+NOT TESTED:
+- A real ACS send (SDK recorded) and a real process death mid-tick (the fault is an injected UPDATE rejection; VSP-66's cells cover link death generally).
+- Connection churn: one checkout per reminder, up to 50 per tick. Not measured under load. Each is a single short transaction.
+- Node 20 / CI: UNMEASURED.
+
+JIRA: VSP-69 has a comment with the ruling and B's status. VSP-72 is set to Low, with a comment carrying its reachability and "leave" (your ruling). Nothing built for VSP-72.
+
+Meanwhile: wrapping now, as you asked.
