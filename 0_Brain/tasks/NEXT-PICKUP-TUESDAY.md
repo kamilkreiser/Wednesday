@@ -6,6 +6,25 @@ status: live
 supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s1-wholesale
 ---
 
+## 🟢 DELTA 106 — 2026-09-28 05:37 (s89, ctx 70% CHECKPOINT; band 80-90). **READ THIS FIRST — it supersedes 102-105 on state; their OWED lines are folded in here.**
+### OWED TO KAM (copy forward until closed by name)
+- **CARD vision-vsp65-production-deploy** (rec a: his `gh auth login` in a Vision launcher shell on the mini -> Vision reads CI on portal main 0d992e0 -> deploy per its CLAUDE.md + read the first production boot log; default HOLD). VSP-65 is MERGED (portal main 0d992e0, verified), NOT deployed.
+- **CARD vision-prod-postgres-idle-transaction-timeout (VSP-67)** (rec b: idle_in_transaction 10 min only; default no change). Measured prod values: all three timeouts 0, keepalives 120/30/9.
+- **Vision gh login:** his hands (card ruled a).
+- **Morning brief items (his files, posted 05:30):** vault never-update-prod.md truncated since f3198f8; Vision's launcher writes into the T9 vault clone at boot; ~30 foreign uncommitted paths there.
+- **C-28 reading (told 05:3x, his word corrects):** git-DIR fetch allowed for worktrees; the stale clone's tree untouched (RD-656 launcher fix, N installing).
+- **At the 5b merge:** flag to Kam BEFORE the push that main gains arm-ttk.yml (C-138/C-142). **At the RD-646/647 merge:** tell Kam the boot-behaviour change (Redis-down boot -> 503, not exit; C-179).
+- CLOSED since 102: QuickQuote published (v0.6.1, verified); week instruction lapsed (marked, told).
+### FLOOR (left %0 tuesday · %28 b6 · %29 O; right %23 b3 · %22 P · %21 N · %19 M · %1 monitor)
+- **Jest lock:** qa-b6-H3-verify holds (since 18:30Z); then O merge3-rd418, b3 H5b-sweep, P rd430/rd694, M x4 (-h4), N rd591-green2/rd648-green. **The lock queue is the authority on whether a seat is waiting** (wake_ack after checking it).
+- **Batch 4 (O, merge author):** 2/5 MERGED + verified (RD-698 -> 44bc804, RD-699 -> main 02fe76a; Builds green; demo skipped). Next RD-418, RD-425, RD-443 (forward-merge condition). On each MERGED: ls-remote + `gh run view` with NexusAI's GH_CONFIG_DIR (read only) + demo skipped.
+- **Batch 5a (M, merge author):** 6/6 GO WITH FINDINGS; merges QUEUED NOT RELEASED. **When O posts MERGED 5/5, send M the RELEASE** (brief `fleet/briefs_staged/2026-09-28_nexusai_M_batch5a_verdict.md` has the order and conditions). Findings RD-711..720 verified 10/10.
+- **Batch 3:** verdict owed after its H5b sweep (one complete verdict). Then score, pane_close, route merges to N (lane 2).
+- **Batch 6:** running (H3). Verdict -> P is merge author (lane 4); the 5b gate is next into the freed slot (stamped; FLAG Kam before its merge re arm-ttk.yml).
+- **Rulings given tonight (all mailed, tapped):** RD-719 vendor Chart.js RD-204-way, (a) new record (P, after RD-430/RD-694); RD-721 sequenced after RD-719; RD-705 settings.html half DROPPED (ledger row); RD-609 (c) collection-time naming (N); RD-656 launcher install (N); M yielded behind b6 (C-141).
+- **Tooling fixed:** wake_watch frozen-busy leg honours wake_ack (both arms measured).
+- **Rotation owed:** ledger edited -> regenerate BOTH boot digests (--by-tier and bare) before rotating.
+
 ## 🟢 DELTA 105 — 2026-09-28 01:52 (s89). **READ THIS FIRST, THEN 104/103.**
 - **FOR KAM'S MORNING BRIEF (his files, no urgency):** (1) vault `skills/Current/never-update-prod.md` truncated mid-line since f3198f8; (2) Vision's launcher writes into the T9 vault clone at boot (pull + creates the daily note) before any brief can stop it; (3) that clone holds ~30 foreign uncommitted paths incl. other-client files.
 - **02:49: GATE 10 = GO (VSP65 @ 0d992e0, scored 0.99, pane closed).** Vision seat %32 relaunched as merge author (brief `fleet/briefs_staged/2026-09-28_vision_vsp65_merge.md`): FF 0d992e0 -> portal main, QQ backlog e408904, tickets, NO deploy. **DONE 02:5x: MERGED verified (portal main 0d992e0, QQ main e408904); Vision wrapped, pane closed; CARD vision-vsp65-production-deploy POSTED (rec a, default hold) — on his answer: (a) = after his gh login, relaunch Vision to read CI and deploy per its CLAUDE.md + read the first boot log** (evidence: gate 10 report; residual R2-O1 Minor; CI UNMEASURED until his gh login; default = hold). Kam told on the board (201).
