@@ -1,0 +1,48 @@
+[Datasec/Vision_Sales_Portal -> Tuesday] READY FOR QA: VSP-71 @ 5bdaeae (session index cannot fail a boot; schema.sql + initDb.js + new test pair)
+2026-09-27T20:11:54.000Z
+
+BLUF: VSP-71 is READY FOR QA. Branch fix/vsp-71-session-index-boot-2026-09-28, head 5bdaeae (one commit on main 0d992e0), pushed. Not merged, not deployed. Tier 1: every boot runs schema.sql.
+
+TICKET: VSP-71 (gate 10 VSP65-R2-O1, Minor). With IDX_session_expire missing, the guarded CREATE INDEX could fail a boot.
+
+FIX (the gate's first shape, inside schema.sql):
+- The CREATE INDEX runs in its own plpgsql exception block (WHEN OTHERS -> RAISE WARNING, SQLSTATE + message) under lock_timeout 2s, set local and put back after the block.
+- A non-owner (42501) or a held write (55P03 after 2 s) leaves the index missing and the rest of the file commits.
+- initDb.js, straight after schema.sql, checks to_regclass('"IDX_session_expire"') and logs: "[db] IDX_session_expire is missing (VSP-71): sessions still work, but the store's prune scans the whole table. The owner of "session" can create it: CREATE INDEX ...". Postgres's WARNING never reaches the app log, which is why the check lives here.
+- The repair of a missing index when the boot role owns session (VSP65-F1 round-2 behaviour) is kept. The next clean boot makes it.
+- I kept the index in schema.sql rather than moving it into initDb.js, so the pool-timeout F1 cells that compare schema.sql against connect-pg-simple's table.sql stay unchanged.
+
+FILES TOUCHED: server/schema.sql, server/initDb.js, test/db/session-index-boot.test.js (new), test/db/session-index-boot.child.js (new, not *.test.js), BACKLOG.md.
+
+RED FIRST: the gate's two regression cells plus controls. Each cell runs one REAL initDb() in a child process, connected as a LOGIN boot role, against its own throwaway database (vsp71_<pid>_<cell>, owned by the boot role) whose session was made by connect-pg-simple's table.sql, then had its index dropped. Databases and roles are dropped in after(); I checked 0 left over.
+1 control: index missing, boot owns session -> resolves, index created, no warning
+2 control: index present, session owned by another role -> resolves, no warning
+3 (a) index missing, boot role not the owner -> resolves, index still missing, exactly one VSP-71 warning, app tables exist (the file did not roll back)
+4 (b) index missing, UPDATE on session held in an open transaction for bound + 5 s (child DB_QUERY_TIMEOUT_MS=6000) -> resolves in under 6000 ms, one warning, and 500 ms after the holder commits the index is still missing (nothing was left queued to build it)
+5 (b) follow-up: after the holder commits, the next boot creates the index, no warning
+- At 0d992e0: failing {3,4,5}, passing {1,2}. Cell 3 fails with code 42501 "must be owner of table session" at 96 ms; cells 4 and 5 with DB_QUERY_TIMEOUT at 6,019 ms. These match gate 10's (a) and (b).
+- At 5bdaeae: passing {1..5}, two consecutive runs.
+- Mutants (restored from the index after each):
+  M1, no lock_timeout: failing {4,5}
+  M2, no exception block: failing {3,4,5}
+  M3, no initDb warning: failing {3,4}
+
+SETS at 5bdaeae (Node v26.8.1, local Postgres 16 on 5433):
+- npm test: 105/105, fail set {}.
+- test:db: every file passes, fail set {}. async-faults 30, completed-response 3, concurrency 5, harness 4, pool-timeout 12 (including both VSP65-F1 schema cells), reminder-push 6, routes 18, session-index-boot 5.
+- The missing-index warning does not appear anywhere in the normal test:db run (0 lines).
+
+HOW VSP-73 INTERACTS: VSP-73's dump carries session without its index, and replaying it is the only reachable route into VSP-71's shape (gate 10 §N.3). With VSP-71 in, a restore done as any role can no longer crash-loop the next boot. It boots and warns, and a boot role that owns session repairs the index. VSP-73 itself (the dump cannot replay into a fresh DB: 42P01 on sequences, and no index DDL) is untouched here; it is next-but-two in the queue. If VSP-73 makes the dump carry the index, VSP-71 becomes belt and braces.
+
+PRIOR WORK: VSP65-F1 round 2 (0d992e0) added the to_regclass guard. It is kept as the outer IF; the new block only wraps the CREATE INDEX. No other branch or commit touches this block (git log --all -- server/schema.sql). The pool-timeout F1 schema cells run unchanged and pass.
+
+NOT TESTED:
+- A DB_QUERY_TIMEOUT_MS at or under 2000 ms: the query bound would beat the 2 s lock_timeout and (b) would fail the boot again. The shipped default is 30,000.
+- An index build that itself takes longer than the bound on a very large session table (gate 10 flagged the SHARE lock during the build). Not measured.
+- Restoring the lock_timeout after the block: no cell can see it, because the block is the last statement in the file, so nothing runs after it in that transaction.
+- Node 20 / CI (UNMEASURED), production and Azure (not touched).
+- A real App Service restart.
+
+BATCHING: disjoint from VSP-66 except BACKLOG.md. Both branches insert an entry at the same anchor, so the second merge will conflict there: a textual conflict, keep both entries.
+
+Meanwhile: continuing with VSP-70 (dbRestore ROLLBACK).
