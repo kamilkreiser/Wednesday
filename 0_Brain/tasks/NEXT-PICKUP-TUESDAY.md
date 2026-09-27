@@ -6,6 +6,24 @@ status: live
 supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s1-wholesale
 ---
 
+## 🔴 DELTA 102 — 2026-09-27 13:20 ROTATION HANDOVER (s88, ctx ~79%, safe boundary). **READ THIS FIRST, THEN 101 (its UPDATE blocks are the detail).**
+### OWED TO KAM (copy forward until closed by name)
+- **QuickQuote publish: WAITING ON HIS TYPED LINE `publish QuickQuote 986f7b8`.** He TAPPED (a) at 10:57, which is not enough for production; he was asked to type it (board 201, and in the terminal at ~11:0x when he came to the mini). On his typed line (kam_msgs.sh --source live, or his terminal line; HIS typing, not an echo), relaunch `Datasec/Vision_Sales_Portal` with a publish brief (the CLAUDE.md publish steps; report the live tag + the first purge log line), then tell him.
+- **Vision gh login:** his hands at the mini (card ruled a). NOT done at 13:12 (Vision's store is still empty). No chase.
+- **Card OWED: VSP-67** (server-side statement/lock/idle-in-transaction timeouts on production Postgres = Kam's decision; gate-9 VSP65-O3 evidence; default no change).
+- **At the 5b merge:** flag to Kam BEFORE the push that main gains the arm-ttk.yml he approved in C-138 (C-142).
+- **At the RD-646/647 merge:** tell Kam the boot-behaviour change (a Redis-down boot no longer exits; it refuses with 503), since C-179 is his.
+- Week instruction lapses tonight (end of 2026-09-27): on Monday mark WEEK-INSTRUCTION-TUESDAY lapsed unless he says otherwise.
+### FLOOR (13:20)
+Left: %0 tuesday · %28 QA/NexusAI-batch6 (LAUNCHED 13:20; verify rung 6 = its report dir appears) · %26 QA/NexusAI-batch5a (running since 10:2x). Right: %23 QA/NexusAI-batch3 (running 4h+) · %22 P · %21 N · %19 M · %1 monitor. All builder jobs are queued on the jest lock, holding by design (ack idle wakes after checking queue-jest pids).
+### FIRST WORK FOR THE NEXT SEAT
+1. **BATCH 4 VERDICT IN (03:18Z), scored 0.98, pane closed:** RD-699 GO @ 02fe76a; RD-418 GOWF @ 5a782c1; RD-425 GOWF @ 8823458; RD-698 GOWF @ 44bc804; RD-443 GOWF @ 8e27dc2. Report `Testing Agent MAIN/projects/nexusai/reports/2026-09-27-gate-batch4/report.md`: read its MERGE ORDER + MERGE NOTES before any GO. **No lane-3 seat is live: launch a short merge seat `Datasec/NexusAI-O`** (brief by the P-successor pattern, `fleet/briefs_staged/2026-09-26_nexusai_P_successor.md`) to merge the five ONE AT A TIME on your RELEASE (698 then 699 first, per DELTA 100; then the gate's order). The RELEASE carries VERBATIM: the two RD-418 retitles = authorised renames (C-133 ADDENDUM), and **RD-443 = forward-merge main first, and the id-superset shows the RD-428 stale-parent rename gone (my 03:1xZ ANSWER, `fleet/briefs_staged/2026-09-27_qa_batch4_answer_c57_third_id.md`)**. Each MERGED: ls-remote + parents + counts, deploy-demo SKIPPED, CI. Then ONE board line to Kam.
+2. **Tickets for batch 4's findings** via the O seat: A-F1 + A-F2 (pre-existing Majors: upper-case .ENV/.NPMRC/ID_RSA names and root package-<x>.json ship in the image), B-F1, C-F1 (Minors), Polish.
+3. **Gate 10 (Vision VSP-65 round 2):** DRAFT LANDED, NOT STAMPED (DELTA 101 has its WRONG list; the S8d false-green catch and the CAP CORRECTION). Launch when a slot frees: batch 3 or 5a returning. Order after that: 5b.
+4. Verdicts pending: batch 3 (%23), 5a (%26), 6 (%28).
+### STATE
+Usage ~11% (new account). Kam's last words: taps at 10:57-10:58 and the terminal "I'm at the mini" at ~11:0x. Poller 8500 alive, wake runner 59390 alive. Both boot digests regenerated at this handover (the ledger gained a row today: the C-number slip).
+
 ## 🟢 DELTA 101 — 2026-09-27 09:28 (s88 boot, ctx ~45%). **READ THIS FIRST, THEN 100.**
 ### OWED TO KAM (copy forward until closed by name)
 - Week instruction (WEEK-INSTRUCTION-TUESDAY) EXPIRES end of TODAY 2026-09-27 (told on the board 08:3x with the Monday default). On Monday mark it lapsed unless he said otherwise.
