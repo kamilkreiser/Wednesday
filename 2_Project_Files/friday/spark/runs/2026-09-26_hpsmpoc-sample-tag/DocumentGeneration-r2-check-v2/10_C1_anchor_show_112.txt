@@ -1,0 +1,134 @@
+# label: C1_anchor_show_112
+# cwd: /var/folders/7_/7lzlm3mj7ssgz15hssz0lbjw0000gn/T/spark_wc_ufsx7vct/wc
+# cmd: git show 99483e47cf050c1de125c9805df7e46e878b4702:web/src/components/customer/DocumentGeneration.test.tsx
+# rc: 0
+# seconds: 0.01
+# ---- stdout ----
+// Screen 6, document generation, on the demo customer: choose a type, configure its sections, generate a preview of the
+// existing report restricted to them, and save it as PDF (the browser's print-to-PDF; the PDF service is live-API only).
+import { render, screen, within } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import golden from "@/data/golden/synthetic-structural.assessment-result.json";
+import { createPlaybookApi } from "@/api/client";
+import { customerForRoute } from "@/lib/customers";
+import { initialState, reducer, STORAGE_KEY, type Action } from "@/lib/session";
+import { resetStoreForTests } from "@/lib/store";
+import type { ScoredResult } from "@/lib/types";
+import { handleMock } from "@/server/mock/api";
+import { resetMockState } from "@/server/mock/store";
+
+const mockFetch = (async (input: RequestInfo | URL, init?: RequestInit) => {
+  const res = await handleMock(new Request(input, init));
+  res.headers.set("X-HPSM-API-Mode", "mock");
+  return res;
+}) as typeof fetch;
+let pathname = "/customers/quollridge/documents";
+const push = vi.fn();
+vi.mock("next/navigation", () => ({ useRouter: () => ({ push, replace: vi.fn() }), usePathname: () => pathname }));
+vi.mock("@/api/browser", () => ({ api: createPlaybookApi({ baseUrl: "http://mock.test", fetch: mockFetch }) }));
+vi.mock("./api", async (orig) => {
+  const m = await orig<typeof import("./api")>();
+  return { ...m, customerApi: m.createCustomerApi({ baseUrl: "http://mock.test", fetch: mockFetch }) };
+});
+const { CustomerShell } = await import("@/components/shell/CustomerShell");
+const { DocumentGeneration, DocumentsStandalone } = await import("./DocumentGeneration");
+
+const R = golden as unknown as ScoredResult;
+function session(actions: Action[]) {
+  const s = [{ type: "signIn", role: "consultant", displayName: "Demo Consultant", at: "2026-09-25T00:00:00Z" } as Action, ...actions].reduce(reducer, initialState());
+  window.sessionStorage.setItem(STORAGE_KEY, JSON.stringify(s));
+  resetStoreForTests();
+}
+const scored: Action = { type: "scored", result: R, at: "2026-09-25T01:00:00Z" };
+const approved: Action[] = [
+  { type: "narrativeGenerated", text: "SYNTHETIC approved narrative.", inputFindingIds: [], fromFallback: false, at: "2026-09-25T01:10:00Z" },
+  { type: "narrativeApproved", at: "2026-09-25T01:20:00Z" },
+];
+const show = () => render(<CustomerShell customer={customerForRoute("quollridge")!}><DocumentGeneration /></CustomerShell>);
+const sections = () => screen.getByRole("group", { name: /Include sections/ });
+
+beforeEach(() => { resetMockState(); resetStoreForTests(); push.mockReset(); });
+
+describe("Document generation", () => {
+  it("before scoring, it says what is missing and where to go", async () => {
+    session([]);
+    show();
+    expect(await screen.findByRole("heading", { level: 1, name: "Document generation" })).toBeInTheDocument();
+    expect(screen.getByText(/There is no scored assessment to write from yet/)).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Go to the assessment" })).toHaveAttribute("href", "/customers/quollridge/assessment");
+    expect(screen.getByRole("button", { name: "Generate document" })).toBeDisabled();
+  });
+
+  it("the executive summary waits for the approved narrative; a findings document does not", async () => {
+    const u = userEvent.setup();
+    session([scored]);
+    show();
+    await screen.findByRole("heading", { level: 1, name: "Document generation" });
+    expect(screen.getByRole("radio", { name: /Executive summary/ })).toBeChecked();
+    expect(screen.getByText(/a person reviews and approves it before it goes in any document/)).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Generate document" })).toBeDisabled();
+    await u.click(screen.getByRole("radio", { name: /Findings & risk analysis/ }));
+    expect(within(sections()).getByRole("checkbox", { name: /Findings/ })).toBeChecked();
+    expect(within(sections()).getByRole("checkbox", { name: /Executive summary/ })).not.toBeChecked();
+    await u.click(screen.getByRole("button", { name: "Generate document" }));
+    const doc = await screen.findByRole("article", { name: "Findings & risk analysis preview" });
+    expect(within(doc).getByRole("heading", { name: "2. Priority risks" })).toBeInTheDocument();
+    expect(within(doc).getByRole("heading", { name: "3. Findings" })).toBeInTheDocument();
+    expect(within(doc).queryByRole("heading", { name: /Executive summary/ })).toBeNull();
+    expect(within(doc).getByText(R.findings[0].ruleOutcome.title)).toBeInTheDocument();
+  });
+
+  it("sections can be added or removed; none at all is refused", async () => {
+    const u = userEvent.setup();
+    session([scored]);
+    show();
+    await screen.findByRole("heading", { level: 1, name: "Document generation" });
+    await u.click(screen.getByRole("radio", { name: /Prioritised roadmap/ }));
+    for (const c of within(sections()).getAllByRole("checkbox")) if ((c as HTMLInputElement).checked) await u.click(c);
+    expect(screen.getByText("Choose at least one section.")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Generate document" })).toBeDisabled();
+    await u.click(within(sections()).getByRole("checkbox", { name: /Remediation roadmap/ }));
+    await u.click(screen.getByRole("button", { name: "Generate document" }));
+    const doc = await screen.findByRole("article", { name: "Prioritised roadmap preview" });
+    expect(within(doc).getByRole("heading", { name: "1. Remediation roadmap" })).toBeInTheDocument();
+  });
+
+  it("with the narrative approved, the executive summary generates and saves as PDF through the browser", async () => {
+    const u = userEvent.setup();
+    session([scored, ...approved]);
+    show();
+    await screen.findByRole("heading", { level: 1, name: "Document generation" });
+    await u.click(screen.getByRole("button", { name: "Generate document" }));
+    const doc = await screen.findByRole("article", { name: "Executive summary preview" });
+    expect(within(doc).getByText("SYNTHETIC approved narrative.")).toBeInTheDocument();
+    const print = vi.spyOn(window, "print").mockImplementation(() => {});
+    await u.click(screen.getByRole("button", { name: /Print or save this document/ }));
+    expect(print).toHaveBeenCalledOnce();
+    expect(screen.getAllByRole("status").some((s) => /Executive summary generated/.test(s.textContent ?? ""))).toBe(true);
+  });
+
+  it("the template choice offers the neutral template; branded templates are not built", async () => {
+    session([scored]);
+    show();
+    await screen.findByRole("heading", { level: 1, name: "Document generation" });
+    const t = screen.getByRole("combobox", { name: "Template" });
+    expect(within(t).getAllByRole("option").map((o) => o.textContent)).toEqual(["Standard (neutral branding)"]);
+    expect(screen.getByRole("button", { name: /Branded templates/ })).toHaveAttribute("aria-disabled", "true");
+  });
+
+  it("/documents: pick a customer to open its documents", async () => {
+    const u = userEvent.setup();
+    session([]);
+    pathname = "/documents";
+    render(<DocumentsStandalone />);
+    const pick = await screen.findByRole("combobox", { name: "Customer" });
+    await screen.findByRole("option", { name: "Quollridge Logistics (sample)" });
+    await u.selectOptions(pick, "quollridge");
+    await u.click(screen.getByRole("button", { name: "Open the customer's documents" }));
+    expect(push).toHaveBeenCalledWith("/customers/quollridge/documents");
+  });
+});
+
+# ---- stderr ----
+

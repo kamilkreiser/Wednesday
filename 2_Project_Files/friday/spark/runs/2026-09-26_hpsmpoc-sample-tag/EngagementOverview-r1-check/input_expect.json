@@ -1,0 +1,28 @@
+{
+ "commit": "99483e47cf050c1de125c9805df7e46e878b4702",
+ "files": [
+  "web/src/components/customer/EngagementOverview.tsx",
+  "web/src/components/customer/EngagementOverview.test.tsx"
+ ],
+ "expected_added": {
+  "web/src/components/customer/EngagementOverview.tsx": [
+   "        <Panel title=\"Sites & devices\" id=\"sites-title\" tags={factsRecorded || !x ? undefined : <SampleTag />}>"
+  ],
+  "web/src/components/customer/EngagementOverview.test.tsx": [
+   "",
+   "  it(\"B22-08 follow-up: a customer the user added, with no sites or printers recorded, has no 'Sample data' tag on Sites & devices\", async () => {",
+   "    session([]);",
+   "    const id = \"CUST-SYN-ADDED-4\";",
+   "    mockState().customers.push({ id, name: \"Harbourside Legal\", synthetic: true, latestAssessmentStatus: null, createdAt: \"2026-09-25T02:00:00Z\", industry: \"Professional services\" });",
+   "    show(id);",
+   "    expect(await screen.findByRole(\"heading\", { level: 1, name: \"Harbourside Legal\" })).toBeInTheDocument();",
+   "    const sites = card(\"Sites & devices\");",
+   "    expect(within(sites).getAllByText(\"Not recorded\").length).toBeGreaterThan(0);",
+   "    expect(within(sites).queryByText(\"Sample data\", { exact: true })).toBeNull();",
+   "  });"
+  ]
+ },
+ "red_test_cmd": "cd web && (test -d node_modules || npm ci --no-audit --no-fund) && npx vitest run src/components/customer/EngagementOverview.test.tsx -t \"B22-08 follow-up: a customer the user added\" 2>&1 | tee /dev/stderr | grep -E \"Tests +1 passed\"",
+ "suite_cmd": "cd web && (test -d node_modules || npm ci --no-audit --no-fund) && npx vitest run src/components/customer src/components/screens",
+ "suite_count_regex": "Tests\\s+(?:(?P<failed>\\d+) failed \\| )?(?P<passed>\\d+) passed"
+}

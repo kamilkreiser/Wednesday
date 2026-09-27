@@ -1,0 +1,32 @@
+--- a/web/src/components/screens/ProfileScreen.tsx
++++ b/web/src/components/screens/ProfileScreen.tsx
+@@ -8,2 +8,3 @@
+ import { ApiProfile } from "@/components/customer/ApiSteps";
++import { extrasFor } from "@/components/customer/content";
+ import { PlaceholderTag, SyntheticTag } from "@/components/ui/Tag";
+@@ -18,3 +19,3 @@
+   if (!customer.hasAssessment) {
+-    return (<><PageHeader title="Customer profile" eyebrow={customer.name} tags={<SyntheticTag />} lead="The profile sets the context for the assessment." /><ApiProfile /></>);
++    return (<><PageHeader title="Customer profile" eyebrow={customer.name} tags={extrasFor(customer.apiId, customer.name) && <SyntheticTag />} lead="The profile sets the context for the assessment." /><ApiProfile /></>);
+   }
+--- a/web/src/components/customer/EngagementOverview.test.tsx
++++ b/web/src/components/customer/EngagementOverview.test.tsx
+@@ -153,2 +153,18 @@
+   });
++
++  it("B22-08: the profile of a seeded sample keeps its 'Sample data' tag; a customer the user added has none", async () => {
++    session([]);
++    const { ProfileScreen } = await import("@/components/screens/ProfileScreen");
++    pathname = "/customers/sample-b/profile";
++    const seeded = render(<CustomerShell customer={customerForRoute("sample-b")!}><ProfileScreen /></CustomerShell>);
++    const h1 = await screen.findByRole("heading", { level: 1, name: "Customer profile" });
++    expect(within(h1.parentElement!).getByText("Sample data", { exact: true })).toBeInTheDocument();
++    seeded.unmount();
++    const id = "CUST-SYN-ADDED-5";
++    mockState().customers.push({ id, name: "Harbourside Legal", synthetic: true, latestAssessmentStatus: null, createdAt: "2026-09-25T02:00:00Z", industry: "Professional services" });
++    pathname = `/customers/${id}/profile`;
++    render(<CustomerShell customer={customerForRoute(id)!}><ProfileScreen /></CustomerShell>);
++    const added = await screen.findByRole("heading", { level: 1, name: "Customer profile" });
++    expect(within(added.parentElement!).queryByText("Sample data", { exact: true })).toBeNull();
++  });
+ });

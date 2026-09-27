@@ -1,0 +1,79 @@
+# label: C1_anchor_show_8
+# cwd: /var/folders/7_/7lzlm3mj7ssgz15hssz0lbjw0000gn/T/spark_wc_fodf20fg/wc
+# cmd: git show 99483e47cf050c1de125c9805df7e46e878b4702:web/src/components/screens/ProfileScreen.tsx
+# rc: 0
+# seconds: 0.02
+# ---- stdout ----
+"use client";
+import { NextStep } from "@/components/shell/NextStep";
+import { useCustomer } from "@/components/shell/CustomerContext";
+import { Alert } from "@/components/ui/Alert";
+import { Card } from "@/components/ui/Card";
+import { PageHeader } from "@/components/ui/PageHeader";
+import { RadioGroup } from "@/components/ui/RadioGroup";
+import { ApiProfile } from "@/components/customer/ApiSteps";
+import { PlaceholderTag, SyntheticTag } from "@/components/ui/Tag";
+import { rulesOverriddenByProfileField, ruleset } from "@/lib/ruleset";
+import { useSession } from "@/lib/store";
+
+export function ProfileScreen() {
+  const customer = useCustomer();
+  const { state, dispatch } = useSession();
+  const a = state.assessment;
+  const locked = a.status !== "draft";
+  if (!customer.hasAssessment) {
+    return (<><PageHeader title="Customer profile" eyebrow={customer.name} tags={<SyntheticTag />} lead="The profile sets the context for the assessment." /><ApiProfile /></>);
+  }
+  return (
+    <>
+      <PageHeader title="Customer profile" eyebrow={customer.name} tags={<SyntheticTag />}
+        lead="The profile sets the context for the assessment." />
+      <div className="grid grid-cols-1 gap-6 xl:grid-cols-2">
+        <Card aria-labelledby="ctx-title">
+          <h2 id="ctx-title" className="mb-4 text-xl font-semibold">Customer context</h2>
+          <dl className="divide-y divide-border">
+            {customer.description.map((d) => (
+              <div key={d.label} className="grid grid-cols-1 gap-1 py-3 sm:grid-cols-3">
+                <dt className="font-semibold text-fg-muted">{d.label}</dt>
+                <dd className="sm:col-span-2">
+                  {d.value}
+                  {d.note && <span className="block text-sm text-fg-subtle">{d.note}</span>}
+                </dd>
+              </div>
+            ))}
+          </dl>
+        </Card>
+        <Card aria-labelledby="rs-title">
+          <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
+            <h2 id="rs-title" className="text-xl font-semibold">Assessment context</h2>
+            <PlaceholderTag what="profile field" />
+          </div>
+          <p className="mb-4 text-fg-muted">
+            Fields the ruleset reads. They are context, not scored, but a rule can raise a finding&apos;s severity from them.
+          </p>
+          {ruleset.profileFields.map((f) => {
+            const rules = rulesOverriddenByProfileField(f.id);
+            return (
+              <div key={f.id} className="flex flex-col gap-3">
+                <RadioGroup legend={`${f.label} (${f.id})`} name={f.id} inline disabled={locked}
+                  value={a.profile[f.id]} onChange={(v) => dispatch({ type: "setProfile", fieldId: f.id, optionId: v })}
+                  options={f.options.map((o) => ({ id: o.id, label: o.label }))}
+                  hint="Stands in for a context field such as “Stores customer PII”; the SME authors the real field." />
+                {rules.length > 0 && (
+                  <Alert tone="info" title="Watch this field">
+                    It can change a severity later: rule {rules.join(", ")} carries a severity override on it.
+                  </Alert>
+                )}
+              </div>
+            );
+          })}
+          {locked && <p className="mt-4 text-sm text-fg-muted">Locked: the assessment was submitted against this profile.</p>}
+        </Card>
+      </div>
+      <NextStep from="profile" />
+    </>
+  );
+}
+
+# ---- stderr ----
+

@@ -1,0 +1,21 @@
+--- a/web/src/components/customer/DocumentGeneration.test.tsx
++++ b/web/src/components/customer/DocumentGeneration.test.tsx
+@@ -112,3 +112,18 @@
+   });
+ 
++  it("B22-08: the seeded sample keeps its 'Sample data' tag; a customer the user added has none", async () => {
++    session([]);
++    const seeded = show();
++    const h1 = await screen.findByRole("heading", { level: 1, name: "Document generation" });
++    expect(within(h1.parentElement!).getByText("Sample data", { exact: true })).toBeInTheDocument();
++    seeded.unmount();
++    const { mockState } = await import("@/server/mock/store");
++    const id = "CUST-SYN-ADDED-DOC";
++    mockState().customers.push({ id, name: "Harbourside Accounting", synthetic: true, latestAssessmentStatus: null, createdAt: "2026-09-25T02:00:00Z", industry: "Professional services" });
++    pathname = `/customers/${id}/documents`;
++    render(<CustomerShell customer={customerForRoute(id)!}><DocumentGeneration /></CustomerShell>);
++    const added = await screen.findByRole("heading", { level: 1, name: "Document generation" });
++    expect(within(added.parentElement!).queryByText("Sample data", { exact: true })).toBeNull();
++  });
++
+   it("/documents: pick a customer to open its documents", async () => {

@@ -1,0 +1,163 @@
+# label: C1_anchor_show_153
+# cwd: /var/folders/7_/7lzlm3mj7ssgz15hssz0lbjw0000gn/T/spark_wc_fodf20fg/wc
+# cmd: git show 99483e47cf050c1de125c9805df7e46e878b4702:web/src/components/customer/EngagementOverview.test.tsx
+# rc: 0
+# seconds: 0.01
+# ---- stdout ----
+// Screen 2, the engagement view, rendered inside the real customer shell against the mock API in-process.
+import { render, screen, within } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import golden from "@/data/golden/synthetic-structural.assessment-result.json";
+import { createPlaybookApi } from "@/api/client";
+import { customerForRoute } from "@/lib/customers";
+import { initialState, reducer, STORAGE_KEY, type Action } from "@/lib/session";
+import { resetStoreForTests } from "@/lib/store";
+import type { ScoredResult } from "@/lib/types";
+import { handleMock } from "@/server/mock/api";
+import { mockState, resetMockState } from "@/server/mock/store";
+
+const mockFetch = (async (input: RequestInfo | URL, init?: RequestInit) => {
+  const res = await handleMock(new Request(input, init));
+  res.headers.set("X-HPSM-API-Mode", "mock");
+  return res;
+}) as typeof fetch;
+let pathname = "/customers/quollridge";
+vi.mock("next/navigation", () => ({ useRouter: () => ({ push: vi.fn(), replace: vi.fn() }), usePathname: () => pathname }));
+vi.mock("@/api/browser", () => ({ api: createPlaybookApi({ baseUrl: "http://mock.test", fetch: mockFetch }) }));
+vi.mock("./api", async (orig) => {
+  const m = await orig<typeof import("./api")>();
+  return { ...m, customerApi: m.createCustomerApi({ baseUrl: "http://mock.test", fetch: mockFetch }) };
+});
+const { CustomerShell } = await import("@/components/shell/CustomerShell");
+const { EngagementOverview } = await import("./EngagementOverview");
+
+function session(actions: Action[]) {
+  const s = [{ type: "signIn", role: "consultant", displayName: "Demo Consultant", at: "2026-09-25T00:00:00Z" } as Action, ...actions].reduce(reducer, initialState());
+  window.sessionStorage.setItem(STORAGE_KEY, JSON.stringify(s));
+  resetStoreForTests();
+}
+function show(routeId: string) {
+  pathname = `/customers/${routeId}`;
+  return render(<CustomerShell customer={customerForRoute(routeId)!}><EngagementOverview /></CustomerShell>);
+}
+const card = (name: string) => screen.getByRole("region", { name });
+
+beforeEach(() => { resetMockState(); resetStoreForTests(); });
+
+describe("Engagement overview", () => {
+  it("the demo customer, assessment in progress: details, sample sites, progress, summary and the next step", async () => {
+    session([]);
+    show("quollridge");
+    expect(await screen.findByRole("heading", { level: 1, name: "Quollridge Logistics (sample)" })).toBeInTheDocument();
+    expect(within(card("Customer details")).getByText("Logistics & warehousing")).toBeInTheDocument();
+    expect(within(card("Customer details")).getByText("Brisbane, QLD")).toBeInTheDocument();
+    const sites = card("Sites & devices");
+    expect(within(sites).getByText("Sample data", { exact: true })).toBeInTheDocument();
+    expect(within(sites).getByText("310")).toBeInTheDocument();
+    const progress = card("Engagement progress");
+    expect(within(progress).getByRole("listitem", { name: /Assessment: In progress/ })).toBeInTheDocument();
+    expect(within(progress).getByRole("listitem", { name: /Executive report: Not started/ })).toBeInTheDocument();
+    expect(within(card("Engagement summary")).getByText("2 questions open")).toBeInTheDocument();
+    expect(within(card("Engagement summary")).getByText(/You \(Consultant\)/)).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: /Next: Profile/ })).toHaveAttribute("href", "/customers/quollridge/profile");
+    expect(await within(card("Recent activity")).findByText("Customer record created")).toBeInTheDocument(); // from the API
+    // the tabs: this page is the Overview; Meetings and Notes are not wired and say so
+    const tabs = screen.getByRole("navigation", { name: "Customer sections" });
+    expect(within(tabs).getByRole("link", { name: "Overview" })).toHaveAttribute("aria-current", "page");
+    expect(within(tabs).getByRole("button", { name: "Meetings" })).toHaveAttribute("aria-disabled", "true");
+    expect(screen.queryByRole("navigation", { name: "Assessment journey" })).toBeNull(); // the progress card replaces the rail here
+  });
+
+  it("after scoring and issuing: steps done with their dates, activity from the record, the score", async () => {
+    session([
+      { type: "scored", result: golden as unknown as ScoredResult, at: "2026-09-25T01:00:00Z" },
+      { type: "narrativeGenerated", text: "x", inputFindingIds: [], fromFallback: false, at: "2026-09-25T01:10:00Z" },
+      { type: "narrativeApproved", at: "2026-09-25T01:20:00Z" },
+      { type: "reportGenerated", at: "2026-09-25T01:30:00Z", generationMs: 800 },
+    ]);
+    show("quollridge");
+    const progress = await screen.findByRole("region", { name: "Engagement progress" });
+    expect(within(progress).getByRole("listitem", { name: /Executive report: Completed 25 Sept 2026/ })).toBeInTheDocument();
+    const act = card("Recent activity");
+    expect(within(act).getByText("Executive report issued")).toBeInTheDocument();
+    expect(within(act).getByText("Assessment submitted and scored")).toBeInTheDocument();
+    expect(screen.getAllByText("Report issued").length).toBeGreaterThan(0);
+  });
+
+  it("the actions menu offers the customer's work", async () => {
+    const u = userEvent.setup();
+    session([]);
+    show("quollridge");
+    await u.click(await screen.findByRole("button", { name: "Actions" }));
+    expect(screen.getByRole("link", { name: "Generate a document" })).toHaveAttribute("href", "/customers/quollridge/documents");
+    expect(screen.getByRole("link", { name: "Open the conversation coach" })).toHaveAttribute("href", "/customers/quollridge/coach");
+  });
+
+  it("an API-only customer: its name and industry from the API, its snapshot runs, and no journey claimed", async () => {
+    session([]);
+    const id = "CUST-SYN-ADDED-1";
+    mockState().customers.push({ id, name: "Wattle Freight (sample)", synthetic: true, latestAssessmentStatus: null, createdAt: "2026-09-25T02:00:00Z", industry: "Transport" });
+    show(id);
+    expect(await screen.findByRole("heading", { level: 1, name: "Wattle Freight (sample)" })).toBeInTheDocument();
+    expect(within(card("Customer details")).getByText("Transport")).toBeInTheDocument();
+    expect(within(card("Sites & devices")).getAllByText("Not recorded").length).toBeGreaterThan(0);
+    expect(within(card("Engagement progress")).getByRole("heading", { name: "No assessment yet" })).toBeInTheDocument();
+    expect(within(card("Engagement progress")).getByRole("link", { name: /Start a snapshot/ })).toHaveAttribute("href", expect.stringMatching(/^\/playbook\/snapshot-assessment\?customer=CUST-/)); // B14 F-33: chosen already
+    // B17 F-31 (B16 P2-4): before any assessment the Actions menu starts one; nothing to continue, no findings or firmware task yet.
+    await userEvent.click(screen.getByRole("button", { name: /Actions/ }));
+    expect(await screen.findAllByRole("link", { name: "Start a snapshot" })).toHaveLength(2); // the menu's and the progress card's
+    expect(screen.queryByRole("link", { name: /^Continue:/ })).toBeNull();
+    expect(screen.queryByRole("link", { name: "Open the firmware risk task" })).toBeNull();
+    expect(screen.queryByRole("link", { name: "View findings" })).toBeNull();
+    // B17 N-01: an empty size is "Not recorded", never the industry.
+    expect(within(card("Customer details")).getByText("Company size").nextElementSibling).toHaveTextContent("Not recorded");
+  });
+
+  it("B24 B22-08/B22-22: a customer the user added carries no 'Sample data' label on the figures they typed", async () => {
+    session([]);
+    const id = "CUST-SYN-ADDED-2";
+    mockState().customers.push({ id, name: "Harbourside Accounting", synthetic: true, latestAssessmentStatus: null, createdAt: "2026-09-25T02:00:00Z", industry: "Professional services", siteCount: 3, printerCount: 40 });
+    show(id);
+    expect(await screen.findByRole("heading", { level: 1, name: "Harbourside Accounting" })).toBeInTheDocument();
+    const header = screen.getByRole("heading", { level: 1 }).closest("header") ?? document.body;
+    expect(within(header as HTMLElement).queryByText("Sample data", { exact: true })).toBeNull();
+    const sites = card("Sites & devices");
+    expect(within(sites).getByText("3")).toBeInTheDocument();
+    expect(within(sites).getByText("40")).toBeInTheDocument();
+    expect(sites).not.toHaveTextContent(/sample/i);
+    expect(card("Engagement summary")).not.toHaveTextContent(/sample/i);
+  });
+
+  it("B24 B22-22: a sample customer's made-up engagement dates say they are samples, beside the real record date", async () => {
+    session([]);
+    show("quollridge");
+    const summary = await screen.findByRole("region", { name: "Engagement summary" });
+    expect(within(summary).getByText("Engagement start (sample)")).toBeInTheDocument();
+    expect(within(summary).getByText("Target completion (sample)")).toBeInTheDocument();
+    expect(screen.getAllByText("Sample data", { exact: true }).length).toBeGreaterThan(0); // the seeded sample keeps its label
+  });
+
+  it("B24 N-02: a finished snapshot says it is complete, never 'answers so far'", async () => {
+    session([]);
+    const id = "CUST-SYN-ADDED-3";
+    mockState().customers.push({ id, name: "Gecko Clinics", synthetic: true, latestAssessmentStatus: null, createdAt: "2026-09-25T02:00:00Z", industry: "Health" });
+    const { api } = await import("@/api/browser");
+    const { assessment } = await api.createAssessment(id, { contentPackageId: "playbook-placeholder", contentPackageVersion: "0.1.0", questionSetId: "snapshot" });
+    mockState().assessments.get(assessment.id)!.status = "scored";
+    show(id);
+    const progress = await screen.findByRole("region", { name: "Engagement progress" });
+    await within(progress).findByRole("link", { name: /View result/ });
+    expect(progress).toHaveTextContent(/Started [^·]+· complete/);
+    expect(progress).not.toHaveTextContent(/so far/);
+  });
+
+  it("an API id the API does not know says so", async () => {
+    session([]);
+    show("CUST-NOT-THERE");
+    expect(await screen.findByRole("heading", { name: "Customer not found" })).toBeInTheDocument();
+  });
+});
+
+# ---- stderr ----
+

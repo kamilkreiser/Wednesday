@@ -1,0 +1,114 @@
+# label: C1_anchor_show_104
+# cwd: /var/folders/7_/7lzlm3mj7ssgz15hssz0lbjw0000gn/T/spark_wc_23_ns7fc/wc
+# cmd: git show 291a4eb29b650afdb60ffa16bcc6ff4bbcc0d1a7:web/src/components/customer/FirmwareTask.test.tsx
+# rc: 0
+# seconds: 0.01
+# ---- stdout ----
+// Screen 4, the firmware risk task. The checklist is the Playbook deck's Firmware Protection statements (content package,
+// slide 99), ticked per customer in the session; the findings and evidence are the customer's own; the task wording,
+// effort and resources are PLACEHOLDER (the Datasec SME authors them).
+import { render, screen, within } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import golden from "@/data/golden/synthetic-structural.assessment-result.json";
+import { createPlaybookApi } from "@/api/client";
+import { locateQuestionSet } from "@/content/registry";
+import { customerForRoute } from "@/lib/customers";
+import { initialState, reducer, STORAGE_KEY, taskKey, type Action, type SessionState } from "@/lib/session";
+import { dispatch as storeDispatch, resetStoreForTests } from "@/lib/store";
+import type { ScoredResult } from "@/lib/types";
+import { handleMock } from "@/server/mock/api";
+import { resetMockState } from "@/server/mock/store";
+
+const mockFetch = (async (input: RequestInfo | URL, init?: RequestInit) => handleMock(new Request(input, init))) as typeof fetch;
+let pathname = "/customers/quollridge/tasks/firmware-risk";
+const push = vi.fn();
+vi.mock("next/navigation", () => ({ useRouter: () => ({ push, replace: vi.fn() }), usePathname: () => pathname }));
+vi.mock("@/api/browser", () => ({ api: createPlaybookApi({ baseUrl: "http://mock.test", fetch: mockFetch }) }));
+vi.mock("./api", async (orig) => {
+  const m = await orig<typeof import("./api")>();
+  return { ...m, customerApi: m.createCustomerApi({ baseUrl: "http://mock.test", fetch: mockFetch }) };
+});
+const { CustomerShell } = await import("@/components/shell/CustomerShell");
+const { FirmwareTask, FIRMWARE_ITEMS } = await import("./FirmwareTask");
+
+function session(actions: Action[]) {
+  const s = [{ type: "signIn", role: "consultant", displayName: "Demo Consultant", at: "2026-09-25T00:00:00Z" } as Action, ...actions].reduce(reducer, initialState());
+  window.sessionStorage.setItem(STORAGE_KEY, JSON.stringify(s));
+  resetStoreForTests();
+}
+/** What the session store persisted (it writes sessionStorage on every change while signed in). */
+const stored = () => JSON.parse(window.sessionStorage.getItem(STORAGE_KEY)!) as SessionState;
+function show(routeId = "quollridge") {
+  pathname = `/customers/${routeId}/tasks/firmware-risk`;
+  return render(<CustomerShell customer={customerForRoute(routeId)!}><FirmwareTask /></CustomerShell>);
+}
+const card = (name: string | RegExp) => screen.getByRole("region", { name });
+
+beforeEach(() => { resetMockState(); resetStoreForTests(); push.mockReset(); });
+
+describe("Firmware risk task", () => {
+  it("the checklist is the deck's four Firmware Protection statements, word for word", () => {
+    const set = locateQuestionSet("partner-readiness")!.set;
+    expect(FIRMWARE_ITEMS().map((q) => q.text)).toEqual(set.questions.filter((q) => q.sectionId === "firmware-protection").map((q) => q.text));
+    expect(FIRMWARE_ITEMS()).toHaveLength(4);
+  });
+
+  it("ticks are kept per customer; progress, save draft and mark complete (refused until all are ticked)", async () => {
+    const u = userEvent.setup();
+    session([]);
+    show();
+    expect(await screen.findByRole("heading", { level: 1, name: "Firmware risk assessment" })).toBeInTheDocument();
+    const list = card(/^Task checklist/);
+    expect(within(list).getByText("0 of 4 complete")).toBeInTheDocument();
+    const boxes = within(list).getAllByRole("checkbox");
+    await u.click(boxes[0]);
+    await u.click(boxes[2]);
+    expect(within(list).getByText("2 of 4 complete")).toBeInTheDocument();
+    expect(within(list).getByRole("progressbar")).toHaveAttribute("aria-valuenow", "50");
+    expect(stored().customerTasks![taskKey("quollridge", "firmware-risk")].ticked).toHaveLength(2);
+    await u.click(within(list).getByRole("button", { name: "Save draft" }));
+    expect(within(list).getByRole("status")).toHaveTextContent(/Draft saved/);
+    await u.click(within(list).getByRole("button", { name: "Mark as complete" }));
+    expect(within(list).getByRole("alert")).toHaveTextContent("2 items are still open");
+    await u.click(boxes[1]);
+    await u.click(boxes[3]);
+    await u.click(within(list).getByRole("button", { name: "Mark as complete" }));
+    expect(screen.getAllByText("Complete").length).toBeGreaterThan(0);
+    expect(stored().customerTasks![taskKey("quollridge", "firmware-risk")].complete).toBe(true);
+  });
+
+  it("findings and evidence are the customer's own; task wording and resources are labelled PLACEHOLDER", async () => {
+    session([{ type: "scored", result: golden as unknown as ScoredResult, at: "2026-09-25T01:00:00Z" }]);
+    show();
+    await screen.findByRole("heading", { level: 1, name: "Firmware risk assessment" });
+    const f = card(/^Findings/);
+    const first = (golden as unknown as ScoredResult).findings[0];
+    expect(within(f).getByRole("link", { name: new RegExp(first.ruleOutcome.title) })).toHaveAttribute("href", `/customers/quollridge/findings/${first.id}`);
+    expect(within(card(/^Evidence/)).getByText("EV-001")).toBeInTheDocument();
+    expect(within(card("Task overview")).getByTitle(/^Placeholder task:/)).toBeInTheDocument();
+    expect(within(card("Additional resources")).getAllByRole("button", { name: /Coming soon|PDF|Link|Video/ }).length).toBeGreaterThan(0);
+  });
+
+  it("switching customer goes to that customer's task", async () => {
+    const u = userEvent.setup();
+    session([]);
+    show();
+    const pick = await screen.findByRole("combobox", { name: "Customer" });
+    await screen.findByRole("option", { name: "Sample customer B" });
+    await u.selectOptions(pick, "sample-b");
+    await u.click(screen.getByRole("button", { name: "Switch customer" }));
+    expect(push).toHaveBeenCalledWith("/customers/sample-b/tasks/firmware-risk");
+  });
+
+  it("Reset demo clears the ticks", async () => {
+    session([{ type: "toggleTaskItem", customerId: "quollridge", taskId: "firmware-risk", itemId: "Q-RDY-01" }]);
+    show();
+    await screen.findByText("1 of 4 complete");
+    storeDispatch({ type: "resetDemo" });
+    expect(await screen.findByText("0 of 4 complete")).toBeInTheDocument();
+  });
+});
+
+# ---- stderr ----
+

@@ -1,0 +1,234 @@
+# label: C1_anchor_show_18
+# cwd: /var/folders/7_/7lzlm3mj7ssgz15hssz0lbjw0000gn/T/spark_wc_ufsx7vct/wc
+# cmd: git show 99483e47cf050c1de125c9805df7e46e878b4702:web/src/components/customer/DocumentGeneration.tsx
+# rc: 0
+# seconds: 0.01
+# ---- stdout ----
+"use client";
+// Document generation (brief B09 Seat C, screen 6; mock `datasec_document_generation_dashboard.png`, LAYOUT only): choose
+// a document (the EXISTING executive report, or a variant = a subset of its nine sections), configure its sections,
+// generate the preview and save it as PDF with the browser. On the live API, a customer whose result comes from the
+// service can also have the service render its executive PDF (POST …/reports). Neutral template only (brand not ruled).
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useMemo, useState } from "react";
+import { useCustomer } from "@/components/shell/CustomerContext";
+import { ReportPreview, REPORT_SECTIONS } from "@/components/screens/ReportScreen";
+import { Button } from "@/components/ui/Button";
+import { Select } from "@/components/ui/Field";
+import { IconCheck, IconDoc, IconDownload } from "@/components/ui/icons";
+import { PageHeader } from "@/components/ui/PageHeader";
+import { SyntheticTag, Tag } from "@/components/ui/Tag";
+import { stepHref } from "@/lib/journey";
+import type { AssessmentState } from "@/lib/session";
+import { seedAssessment } from "@/lib/session";
+import { useSession } from "@/lib/store";
+import { customerApi } from "./api";
+import { isApproved, latestExecutiveSummary } from "./ApiNarrative";
+import { ServiceReport } from "./ServiceReport";
+import { useAsync } from "@/lib/use-async";
+import { checkGenerate, DOC_TYPES, docType, type ReportSection } from "./documents";
+import { ComingSoon, formatDate } from "./parts";
+import { useCustomerResult } from "./useCustomerResult";
+import { useDirectory } from "./useDirectory";
+import { formatTime } from "@/lib/dates";
+
+const SECTION_NOTE: Record<ReportSection, string> = {
+  "Executive summary": "The approved narrative",
+  "Customer profile": "Background and environment",
+  "Overall score": "Score, target and band",
+  "Priority risks": "Critical and high findings",
+  Findings: "Every finding and its rule",
+  "HP/HPSM recommendations": "Settings to apply",
+  "Remediation roadmap": "Actions by bucket",
+  "Next engagement": "The recommended follow-on",
+  Methodology: "How the results were made",
+};
+
+function Stepper({ step }: { step: 1 | 2 | 3 }) {
+  const steps = [["Document type", "Choose what to generate"], ["Configure content", "Template and sections"], ["Generate", "Preview and save"]];
+  return (
+    <ol aria-label="Steps" className="mb-6 flex flex-wrap gap-4">
+      {steps.map(([t, sub], i) => {
+        const n = (i + 1) as 1 | 2 | 3;
+        const done = n < step;
+        return (
+          <li key={t} aria-current={n === step ? "step" : undefined} className="flex min-w-40 flex-1 items-center gap-3">
+            <span aria-hidden="true" className={`inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full font-bold ${n === step ? "bg-primary text-on-primary" : done ? "bg-[var(--ds-success-fg)] text-white" : "bg-surface-sunken text-fg-muted"}`}>
+              {done ? <IconCheck size={16} /> : n}
+            </span>
+            <span><span className={`block text-sm font-semibold ${n === step ? "text-primary" : ""}`}>{t}</span><span className="block text-xs text-fg-muted">{sub}</span></span>
+          </li>
+        );
+      })}
+    </ol>
+  );
+}
+
+export function DocumentGeneration() {
+  const customer = useCustomer();
+  const { state } = useSession();
+  const res = useCustomerResult();
+  const [typeId, setTypeId] = useState(DOC_TYPES[0].id);
+  const [sections, setSections] = useState<ReportSection[]>(DOC_TYPES[0].sections);
+  const [generated, setGenerated] = useState<{ typeId: string; sections: ReportSection[]; at: string } | null>(null);
+  const t = docType(typeId);
+  const held = res.status === "ready" && res.source === "prototype";
+  const fromApi = res.status === "ready" && res.source === "api" && res.assessmentId ? res.assessmentId : null;
+  // B14 F-04/F-39: an API customer's approved narrative counts too (the service's review), and goes in the document.
+  const narratives = useAsync(() => (fromApi ? customerApi.listNarratives(fromApi) : Promise.resolve([])), `doc-narratives:${fromApi ?? "-"}`);
+  const apiNarrative = narratives.state.status === "ready" ? latestExecutiveSummary(narratives.state.data) : null;
+  const a: AssessmentState | null = useMemo(() => {
+    if (res.status !== "ready") return null;
+    if (res.source === "prototype") return state.assessment;
+    const base = seedAssessment();
+    const n = isApproved(apiNarrative) ? { ...base.narrative, status: "approved" as const, text: apiNarrative!.text ?? null, review: { by: "a reviewer", at: apiNarrative!.review?.at ?? "" } } : base.narrative;
+    return { ...base, status: "scored", result: res.result, submittedAt: res.scoredAt, evidence: [], narrative: n };
+  }, [res, state.assessment, apiNarrative]);
+  const approved = held ? state.assessment.narrative.status === "approved" : isApproved(apiNarrative);
+  const check = checkGenerate({ hasResult: res.status === "ready", narrativeApproved: approved, sections });
+  const step: 1 | 2 | 3 = generated ? 3 : 2;
+
+  const pick = (id: string) => { setTypeId(id); setSections(docType(id).sections); setGenerated(null); };
+  const toggle = (s: ReportSection) => { setGenerated(null); setSections((xs) => REPORT_SECTIONS.filter((x) => (x === s ? !xs.includes(x) : xs.includes(x)))); };
+
+  return (
+    <>
+      <div className="no-print">
+        <PageHeader title="Document generation" eyebrow={customer.name} tags={<><SyntheticTag /><Tag kind="deterministic">From the scored result: rules, not AI</Tag></>}
+          lead="Create documents from this customer's engagement data: the executive report, or a focused part of it." />
+      </div>
+      <div className="no-print grid grid-cols-1 gap-5 xl:grid-cols-[minmax(0,1fr)_22rem]">
+        <section aria-label="Configure the document" className="rounded-lg border border-border bg-surface p-5 shadow-1">
+          <Stepper step={step} />
+          <fieldset>
+            <legend className="text-lg font-semibold">1. Document type</legend>
+            <p className="mb-3 text-sm text-fg-muted">Select the type of document to generate.</p>
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 2xl:grid-cols-3">
+              {DOC_TYPES.map((d) => (
+                <label key={d.id} className={`flex min-h-11 cursor-pointer items-start gap-3 rounded-lg border-2 p-3 ${d.id === typeId ? "border-primary bg-primary-subtle" : "border-border hover:bg-surface-sunken"}`}>
+                  <input type="radio" name="doc-type" value={d.id} checked={d.id === typeId} onChange={() => pick(d.id)} className="mt-1 h-5 w-5 shrink-0 accent-[var(--ds-primary)]" />
+                  <span><span className="flex items-center gap-2 font-semibold"><IconDoc size={16} className="text-primary" />{d.label}</span><span className="block text-sm text-fg-muted">{d.blurb}</span></span>
+                </label>
+              ))}
+            </div>
+          </fieldset>
+
+          <div className="mt-6">
+            <h2 className="text-lg font-semibold">2. Select template</h2>
+            <div className="mt-2 grid grid-cols-1 items-end gap-3 sm:grid-cols-[1fr_auto]">
+              <Select label="Template" value="standard" onChange={() => {}}>
+                <option value="standard">Standard (neutral branding)</option>
+              </Select>
+              <ComingSoon label="Branded templates" />
+            </div>
+          </div>
+
+          <fieldset className="mt-6">
+            <legend className="text-lg font-semibold">3. Include sections</legend>
+            <p className="mb-3 text-sm text-fg-muted">The sections of the executive report this document carries, in the report&apos;s order.</p>
+            <div className="grid grid-cols-1 gap-x-6 gap-y-1 md:grid-cols-2">
+              {REPORT_SECTIONS.map((s) => (
+                <label key={s} className="flex min-h-11 cursor-pointer items-center gap-3">
+                  <input type="checkbox" checked={sections.includes(s)} onChange={() => toggle(s)} className="h-5 w-5 shrink-0 accent-[var(--ds-primary)]" />
+                  <span><span className="font-medium">{s}</span> <span className="text-xs text-fg-muted">{SECTION_NOTE[s]}</span></span>
+                </label>
+              ))}
+            </div>
+          </fieldset>
+
+          <div className="mt-6 flex flex-wrap items-center justify-between gap-3 border-t border-border pt-4">
+            <div className="min-w-0 flex-1 text-sm">
+              {!check.ok && (
+                <p className="text-warning-fg">
+                  <strong>{check.message}</strong>{" "}
+                  {check.reason === "no-result" && customer.hasAssessment && <Link href={stepHref(customer.id, "assessment")} className="underline">Go to the assessment</Link>}
+                  {check.reason === "no-result" && !customer.hasAssessment && <Link href={`/customers/${encodeURIComponent(customer.id)}`} className="underline">Back to the engagement</Link>}
+                  {check.reason === "narrative" && <Link href={stepHref(customer.id, "narrative")} className="underline">Go to the narrative review</Link>}
+                </p>
+              )}
+              {res.status === "loading" && <p className="text-fg-muted" role="status">Loading the customer&apos;s result…</p>}
+            </div>
+            <Button size="lg" disabled={!check.ok} onClick={() => setGenerated({ typeId, sections, at: new Date().toISOString() })}>
+              <IconDoc /> Generate document
+            </Button>
+          </div>
+        </section>
+
+        <section aria-labelledby="cover-title" className="rounded-lg border border-border bg-surface p-5 shadow-1">
+          <h2 id="cover-title" className="text-lg font-semibold">Document preview</h2>
+          <p className="mb-3 text-sm text-fg-muted">The cover of the document, with the chosen template and sections.</p>
+          <div className="report-paper flex aspect-[1/1.3] flex-col justify-between rounded-md border border-border p-6">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-wide text-fg-subtle">Security Services Playbook</p>
+              <p className="mt-6 text-2xl font-bold leading-tight">Print security assessment</p>
+              <p className="mt-1 text-lg text-fg-muted">{t.label}</p>
+              <div className="my-4 h-1 w-12 bg-[var(--ds-accent)]" />
+              <p className="font-semibold">{customer.name}</p>
+              <p className="text-sm text-fg-muted">{formatDate(new Date().toISOString(), "long")}</p>
+            </div>
+            <div className="text-xs text-fg-muted">
+              <p>{sections.length} section{sections.length === 1 ? "" : "s"}: {sections.join(" · ") || "none"}</p>
+              <p className="mt-2 font-semibold">Sample data · neutral template</p>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      {generated && a?.result && (
+        <section aria-label="Generated document" className="mt-8">
+          <div className="no-print mb-4 flex flex-wrap items-center justify-between gap-3 rounded-lg bg-success-bg p-4 text-success-fg">
+            <p role="status" className="font-semibold">{docType(generated.typeId).label} generated ({generated.sections.length} section{generated.sections.length === 1 ? "" : "s"}), {formatTime(generated.at)}.</p>
+            <div className="flex flex-wrap gap-2">
+              <Button variant={fromApi ? "secondary" : "primary"} onClick={() => window.print()}><IconDownload /> Print or save this document</Button>
+              <Button variant="secondary" onClick={() => setGenerated(null)}>Back to editing</Button>
+            </div>
+          </div>
+          <p className="no-print mb-3 text-sm text-fg-muted">
+            “Print or save this document” opens the browser&apos;s print dialog (choose “Save as PDF”) for exactly the sections above.
+            {fromApi ? " The full executive report, as the customer receives it, is the PDF below." : held ? " The executive report itself is issued on the Executive report step." : ""}
+          </p>
+          {fromApi && <div className="no-print mb-6"><h2 className="mb-2 text-lg font-semibold">The executive report (PDF)</h2><ServiceReport assessmentId={fromApi} /></div>}
+          <ReportPreview customer={customer} a={a} only={generated.sections} title={docType(generated.typeId).label} />
+        </section>
+      )}
+    </>
+  );
+}
+
+/** /documents: which documents exist, and a way into a customer's. */
+export function DocumentsStandalone() {
+  const router = useRouter();
+  const { rows } = useDirectory();
+  const [pick, setPick] = useState("");
+  return (
+    <main id="main" className="mx-auto w-full max-w-7xl flex-1 px-4 py-6 md:px-6">
+      <PageHeader title="Document generation" eyebrow="Resources"
+        lead="Create documents from a customer's engagement data. Choose the customer first: every document is written from its scored assessment."
+        actions={
+          <form className="flex flex-wrap items-end gap-2" onSubmit={(e) => { e.preventDefault(); if (pick) router.push(`/customers/${encodeURIComponent(pick)}/documents`); }}>
+            <Select label="Customer" value={pick} onChange={(e) => setPick(e.target.value)}>
+              <option value="">Choose a customer</option>
+              {rows.map((r) => <option key={r.routeId} value={r.routeId}>{r.name}</option>)}
+            </Select>
+            <Button type="submit" disabled={!pick}>Open the customer&apos;s documents</Button>
+          </form>
+        } />
+      <section aria-labelledby="types-title" className="rounded-lg border border-border bg-surface p-5 shadow-1">
+        <h2 id="types-title" className="mb-3 text-lg font-semibold">The documents</h2>
+        <ul className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3">
+          {DOC_TYPES.map((d) => (
+            <li key={d.id} className="rounded-md border border-border p-4">
+              <p className="flex items-center gap-2 font-semibold"><IconDoc size={16} className="text-primary" />{d.label}</p>
+              <p className="text-sm text-fg-muted">{d.blurb}</p>
+              <p className="mt-2 text-xs text-fg-muted">{d.sections.join(" · ")}</p>
+            </li>
+          ))}
+        </ul>
+      </section>
+    </main>
+  );
+}
+
+# ---- stderr ----
+

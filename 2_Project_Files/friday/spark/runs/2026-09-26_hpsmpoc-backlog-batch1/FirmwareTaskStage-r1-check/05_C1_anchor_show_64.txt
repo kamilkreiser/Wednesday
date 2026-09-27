@@ -1,0 +1,212 @@
+# label: C1_anchor_show_64
+# cwd: /var/folders/7_/7lzlm3mj7ssgz15hssz0lbjw0000gn/T/spark_wc_23_ns7fc/wc
+# cmd: git show 291a4eb29b650afdb60ffa16bcc6ff4bbcc0d1a7:web/src/components/customer/FirmwareTask.tsx
+# rc: 0
+# seconds: 0.02
+# ---- stdout ----
+"use client";
+// Firmware risk task (brief B09 Seat C, screen 4; mock `datasec_firmware_risk_assessment_dashboard.png`, LAYOUT only).
+// DERIVED: the checklist (the Playbook deck's Firmware Protection statements, content package, slide 99), its ticks (this
+// session, per customer), the customer's findings and evidence, the engagement's stage. PLACEHOLDER: the task's wording,
+// effort and resources (content.ts FIRMWARE_TASK). ILLUSTRATIVE: the engagement dates. Nothing figure-like is invented.
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useMemo, useState } from "react";
+import { useCustomer } from "@/components/shell/CustomerContext";
+import { Button } from "@/components/ui/Button";
+import { Select } from "@/components/ui/Field";
+import { IconArrowRight, IconCheck, IconInfo, IconShield } from "@/components/ui/icons";
+import { PageHeader } from "@/components/ui/PageHeader";
+import { PlaceholderTag, SeverityChip, StatusPill, Tag } from "@/components/ui/Tag";
+import { locateQuestionSet, READINESS_SET_ID } from "@/content/registry";
+import { stepHref } from "@/lib/journey";
+import { taskKey } from "@/lib/session";
+import { useSession } from "@/lib/store";
+import { extrasFor, FIRMWARE_TASK } from "./content";
+import { stageFromApi, stageFromPrototype } from "./directory";
+import { findingHref } from "./FindingDetail";
+import { IconArrowLeft } from "./icons";
+import { ComingSoon, formatDate, Panel, SampleNote, StagePill } from "./parts";
+import { useCustomerResult } from "./useCustomerResult";
+import { useDirectory } from "./useDirectory";
+import { formatTime } from "@/lib/dates";
+
+const AREA = "firmware-protection";
+
+/** The deck's Firmware Protection statements (content package, partner-readiness set), in the deck's order. */
+export function FIRMWARE_ITEMS(): { id: string; text: string }[] {
+  const found = locateQuestionSet(READINESS_SET_ID);
+  return (found?.set.questions ?? []).filter((q) => q.sectionId === AREA).sort((a, b) => a.order - b.order).map((q) => ({ id: q.id, text: q.text }));
+}
+
+function CustomerSwitch({ current }: { current: string }) {
+  const router = useRouter();
+  const { rows } = useDirectory();
+  const [pick, setPick] = useState(current);
+  if (rows.length === 0) return null;
+  return (
+    <form className="flex items-end gap-2" onSubmit={(e) => { e.preventDefault(); if (pick !== current) router.push(`/customers/${encodeURIComponent(pick)}/tasks/${FIRMWARE_TASK.id}`); }}>
+      <Select label="Customer" value={pick} onChange={(e) => setPick(e.target.value)}>
+        {rows.some((r) => r.routeId === current) ? null : <option value={current}>This customer</option>}
+        {rows.map((r) => <option key={r.routeId} value={r.routeId}>{r.name}</option>)}
+      </Select>
+      <Button type="submit" variant="secondary">Switch customer</Button>
+    </form>
+  );
+}
+
+export function FirmwareTask() {
+  const customer = useCustomer();
+  const { state, dispatch } = useSession();
+  const res = useCustomerResult();
+  const items = useMemo(() => FIRMWARE_ITEMS(), []);
+  const t = state.customerTasks?.[taskKey(customer.id, FIRMWARE_TASK.id)];
+  const ticked = t?.ticked ?? [];
+  const done = items.filter((i) => ticked.includes(i.id)).length;
+  const pct = items.length ? Math.round((done / items.length) * 100) : 0;
+  const status = t?.complete ? "Complete" : done > 0 ? "In progress" : "Not started";
+  const [note, setNote] = useState<{ kind: "saved" | "open"; text: string } | null>(null);
+  const x = extrasFor(customer.apiId, customer.name);
+  const base = `/customers/${encodeURIComponent(customer.id)}`;
+  const stage = customer.hasAssessment ? stageFromPrototype(state.assessment) : stageFromApi(null);
+  const findings = res.status === "ready" ? res.result.findings : [];
+  const evidence = customer.hasAssessment ? state.assessment.evidence : [];
+  const ids = { customerId: customer.id, taskId: FIRMWARE_TASK.id };
+
+  return (
+    <>
+      <div className="mb-2 flex flex-wrap items-end justify-between gap-3">
+        <Link href={base} className="inline-flex min-h-11 items-center gap-1 text-sm font-semibold"><IconArrowLeft size={16} />Back to the engagement</Link>
+        <CustomerSwitch current={customer.id} />
+      </div>
+      <PageHeader title={FIRMWARE_TASK.title} eyebrow={`${customer.name} · ${FIRMWARE_TASK.phase} · Task detail`}
+        tags={<><StatusPill tone={t?.complete ? "success" : done > 0 ? "info" : "neutral"}>{status}</StatusPill><Tag kind="neutral">{FIRMWARE_TASK.category}</Tag></>}
+        lead="View and complete the task: its checklist, the findings it relates to, and the supporting guidance." />
+
+      <nav aria-label="On this page" className="mb-5 flex flex-wrap gap-2 text-sm">
+        {[["#task-overview", "Overview"], ["#task-checklist", "Checklist"], ["#task-findings", "Findings"], ["#task-evidence", "Evidence"], ["#task-guidance", "Guidance"]].map(([h, l]) => (
+          <a key={h} href={h} className="inline-flex min-h-11 items-center rounded-full border border-border-strong px-4 font-semibold no-underline hover:bg-surface-sunken">{l}</a>
+        ))}
+      </nav>
+
+      <div className="grid grid-cols-1 gap-5 xl:grid-cols-2">
+        <div className="flex flex-col gap-5">
+          <div id="task-overview" className="scroll-mt-4">
+            <Panel title="Task overview" id="fw-overview" tags={<PlaceholderTag what="task" />}>
+              <p className="text-fg-muted">{FIRMWARE_TASK.summary}</p>
+              <dl className="mt-4 grid grid-cols-[max-content_1fr] gap-x-6 gap-y-2 text-sm">
+                <dt className="font-semibold text-fg-muted">Phase</dt><dd>{FIRMWARE_TASK.phase}</dd>
+                <dt className="font-semibold text-fg-muted">Category</dt><dd>{FIRMWARE_TASK.category}</dd>
+                <dt className="font-semibold text-fg-muted">Applies to</dt><dd>{FIRMWARE_TASK.appliesTo}{x?.devices ? ` (${x.devices}, sample figure)` : ""}</dd>
+                <dt className="font-semibold text-fg-muted">Estimated effort</dt><dd>{FIRMWARE_TASK.effort}</dd>
+                <dt className="font-semibold text-fg-muted">Deliverable</dt><dd>{FIRMWARE_TASK.deliverable}</dd>
+              </dl>
+              <div className="mt-4 flex gap-3 rounded-md bg-info-bg p-4 text-info-fg">
+                <IconInfo className="mt-0.5 shrink-0" />
+                <div><p className="font-semibold">Why this matters</p><p className="text-sm">{FIRMWARE_TASK.why}</p></div>
+              </div>
+            </Panel>
+          </div>
+
+          <Panel title="Related engagement" id="fw-engagement"
+            action={<Link href={base} className="inline-flex min-h-11 items-center gap-1 text-sm font-semibold">View engagement <IconArrowRight size={14} /></Link>}>
+            <dl className="grid grid-cols-2 gap-3 text-sm sm:grid-cols-4">
+              <div><dt className="text-fg-muted">Customer</dt><dd className="font-medium">{customer.name}</dd></div>
+              <div><dt className="text-fg-muted">Status</dt><dd><StagePill stage={stage} /></dd></div>
+              <div><dt className="text-fg-muted">Start date</dt><dd className="font-medium">{formatDate(x?.engagementStart ?? null)}</dd></div>
+              <div><dt className="text-fg-muted">Target completion</dt><dd className="font-medium">{formatDate(x?.targetCompletion ?? null)}</dd></div>
+            </dl>
+            {x?.engagementStart && <SampleNote>the engagement dates are sample values.</SampleNote>}
+          </Panel>
+        </div>
+
+        <div className="flex flex-col gap-5">
+          <div id="task-checklist" className="scroll-mt-4">
+            <Panel title="Task checklist" id="fw-checklist" tags={<Tag kind="neutral">From the Playbook deck: Firmware protection</Tag>}>
+              <div className="mb-3 flex flex-wrap items-center gap-3 text-sm">
+                <span className="font-semibold">{done} of {items.length} complete</span>
+                <div role="progressbar" aria-label="Checklist progress" aria-valuemin={0} aria-valuemax={100} aria-valuenow={pct}
+                  className="h-2 min-w-24 flex-1 overflow-hidden rounded-full bg-surface-sunken">
+                  <div className="h-full rounded-full bg-primary" style={{ width: `${pct}%` }} />
+                </div>
+                <span className="font-semibold tabular-nums">{pct}%</span>
+              </div>
+              <fieldset>
+                <legend className="sr-only">Checklist items</legend>
+                <ul className="flex flex-col">
+                  {items.map((i) => {
+                    const on = ticked.includes(i.id);
+                    return (
+                      <li key={i.id} className="border-t border-border first:border-t-0">
+                        <label className="flex min-h-11 cursor-pointer items-start gap-3 py-2">
+                          <input type="checkbox" checked={on} className="mt-1 h-5 w-5 shrink-0 accent-[var(--ds-primary)]"
+                            onChange={() => { setNote(null); dispatch({ type: "toggleTaskItem", ...ids, itemId: i.id }); }} />
+                          <span>{i.text}</span>
+                        </label>
+                      </li>
+                    );
+                  })}
+                </ul>
+              </fieldset>
+              {note?.kind === "open" && <p role="alert" className="mt-3 rounded-md bg-warning-bg p-3 text-sm font-semibold text-warning-fg">{note.text}</p>}
+              <p role="status" className={note?.kind === "saved" ? "mt-3 rounded-md bg-success-bg p-3 text-sm font-semibold text-success-fg" : "sr-only"}>{note?.kind === "saved" ? note.text : ""}</p>
+              <div className="mt-4 flex flex-wrap justify-end gap-2">
+                <Button variant="secondary" onClick={() => { const at = new Date().toISOString(); dispatch({ type: "saveTask", ...ids, at }); setNote({ kind: "saved", text: `Draft saved at ${formatTime(at)} (this session).` }); }}>Save draft</Button>
+                <Button disabled={!!t?.complete} onClick={() => {
+                  const open = items.length - done;
+                  if (open > 0) { setNote({ kind: "open", text: `${open} item${open === 1 ? " is" : "s are"} still open: tick every item before marking the task complete.` }); return; }
+                  dispatch({ type: "completeTask", ...ids, required: items.map((i) => i.id), at: new Date().toISOString() });
+                  setNote({ kind: "saved", text: "Task marked complete." });
+                }}>{t?.complete ? <><IconCheck /> Complete</> : "Mark as complete"}</Button>
+              </div>
+            </Panel>
+          </div>
+
+          <div id="task-findings" className="scroll-mt-4">
+            <Panel title={`Findings (${findings.length})`} id="fw-findings">
+              {findings.length === 0 ? (
+                <p className="text-sm text-fg-muted">No findings yet: they appear once the customer&apos;s assessment is scored. {customer.hasAssessment ? <Link href={stepHref(customer.id, "assessment")} className="underline">Go to the assessment</Link> : <Link href={base} className="underline">Open the engagement</Link>}</p>
+              ) : (
+                <ul className="flex flex-col gap-2">
+                  {findings.map((f) => (
+                    <li key={f.id} className="flex flex-wrap items-center gap-2 text-sm">
+                      <SeverityChip severity={(res.status === "ready" ? res.dispositions[f.id]?.amendedSeverity : null) ?? f.ruleOutcome.severity} />
+                      <Link href={findingHref(customer.id, f.id)}>{f.ruleOutcome.title}</Link>
+                    </li>
+                  ))}
+                </ul>
+              )}
+              <p className="mt-2 text-xs text-fg-muted">All of this customer&apos;s findings are listed: the placeholder ruleset does not tag which are about firmware (the SME&apos;s ruleset will).</p>
+            </Panel>
+          </div>
+
+          <div id="task-evidence" className="scroll-mt-4">
+            <Panel title={`Evidence (${evidence.length})`} id="fw-evidence">
+              {evidence.length === 0 ? <p className="text-sm text-fg-muted">No evidence recorded for this customer yet.</p> : (
+                <ul className="flex flex-col gap-1 text-sm">
+                  {evidence.map((e) => <li key={e.id}><span className="font-mono">{e.id}</span> {e.type}: {e.description} ({e.status === "verified" ? "verified" : "unverified"})</li>)}
+                </ul>
+              )}
+            </Panel>
+          </div>
+
+          <div id="task-guidance" className="scroll-mt-4">
+            <Panel title="Additional resources" id="fw-resources" tags={<PlaceholderTag what="resources" />}>
+              <ul className="flex flex-col gap-3">
+                {FIRMWARE_TASK.resources.map((r) => (
+                  <li key={r.title} className="flex flex-wrap items-center justify-between gap-2">
+                    <span className="flex items-start gap-2"><IconShield size={18} className="mt-0.5 text-primary" /><span><span className="block font-medium">{r.title}</span><span className="text-xs text-fg-muted">{r.note}</span></span></span>
+                    <ComingSoon label={`Open ${r.kind}`} />
+                  </li>
+                ))}
+              </ul>
+            </Panel>
+          </div>
+        </div>
+      </div>
+    </>
+  );
+}
+
+# ---- stderr ----
+

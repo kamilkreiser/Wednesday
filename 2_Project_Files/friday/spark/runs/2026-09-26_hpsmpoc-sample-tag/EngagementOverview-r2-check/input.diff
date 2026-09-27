@@ -1,0 +1,22 @@
+--- a/web/src/components/customer/EngagementOverview.tsx
++++ b/web/src/components/customer/EngagementOverview.tsx
+@@ -143,3 +143,3 @@
+ 
+-        <Panel title="Sites & devices" id="sites-title" tags={factsRecorded ? undefined : <SampleTag />}>
++        <Panel title="Sites & devices" id="sites-title" tags={factsRecorded || !x ? undefined : <SampleTag />}>
+           <ul className="flex flex-col gap-3">
+--- a/web/src/components/customer/EngagementOverview.test.tsx
++++ b/web/src/components/customer/EngagementOverview.test.tsx
+@@ -124,2 +124,13 @@
+   });
++
++  it("B22-08 follow-up: a customer the user added, with no sites or printers recorded, has no 'Sample data' tag on Sites & devices", async () => {
++    session([]);
++    const id = "CUST-SYN-ADDED-4";
++    mockState().customers.push({ id, name: "Harbourside Legal", synthetic: true, latestAssessmentStatus: null, createdAt: "2026-09-25T02:00:00Z", industry: "Professional services" });
++    show(id);
++    expect(await screen.findByRole("heading", { level: 1, name: "Harbourside Legal" })).toBeInTheDocument();
++    const sites = card("Sites & devices");
++    expect(within(sites).getAllByText("Not recorded").length).toBeGreaterThan(0);
++    expect(within(sites).queryByText("Sample data", { exact: true })).toBeNull();
++  });

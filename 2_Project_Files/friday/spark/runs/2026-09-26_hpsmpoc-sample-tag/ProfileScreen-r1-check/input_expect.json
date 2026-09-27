@@ -1,0 +1,34 @@
+{
+ "commit": "99483e47cf050c1de125c9805df7e46e878b4702",
+ "files": [
+  "web/src/components/screens/ProfileScreen.tsx",
+  "web/src/components/customer/EngagementOverview.test.tsx"
+ ],
+ "expected_added": {
+  "web/src/components/screens/ProfileScreen.tsx": [
+   "import { extrasFor } from \"@/components/customer/content\";",
+   "    return (<><PageHeader title=\"Customer profile\" eyebrow={customer.name} tags={extrasFor(customer.apiId, customer.name) && <SyntheticTag />} lead=\"The profile sets the context for the assessment.\" /><ApiProfile /></>);"
+  ],
+  "web/src/components/customer/EngagementOverview.test.tsx": [
+   "",
+   "  it(\"B22-08: the profile of a seeded sample keeps its 'Sample data' tag; a customer the user added has none\", async () => {",
+   "    session([]);",
+   "    const { ProfileScreen } = await import(\"@/components/screens/ProfileScreen\");",
+   "    pathname = \"/customers/sample-b/profile\";",
+   "    const seeded = render(<CustomerShell customer={customerForRoute(\"sample-b\")!}><ProfileScreen /></CustomerShell>);",
+   "    const h1 = await screen.findByRole(\"heading\", { level: 1, name: \"Customer profile\" });",
+   "    expect(within(h1.parentElement!).getByText(\"Sample data\", { exact: true })).toBeInTheDocument();",
+   "    seeded.unmount();",
+   "    const id = \"CUST-SYN-ADDED-5\";",
+   "    mockState().customers.push({ id, name: \"Harbourside Legal\", synthetic: true, latestAssessmentStatus: null, createdAt: \"2026-09-25T02:00:00Z\", industry: \"Professional services\" });",
+   "    pathname = `/customers/${id}/profile`;",
+   "    render(<CustomerShell customer={customerForRoute(id)!}><ProfileScreen /></CustomerShell>);",
+   "    const added = await screen.findByRole(\"heading\", { level: 1, name: \"Customer profile\" });",
+   "    expect(within(added.parentElement!).queryByText(\"Sample data\", { exact: true })).toBeNull();",
+   "  });"
+  ]
+ },
+ "red_test_cmd": "cd web && (test -d node_modules || npm ci --no-audit --no-fund) && npx vitest run src/components/customer/EngagementOverview.test.tsx -t \"B22-08: the profile of a seeded sample\" 2>&1 | tee /dev/stderr | grep -E \"Tests +1 passed\"",
+ "suite_cmd": "cd web && (test -d node_modules || npm ci --no-audit --no-fund) && npx vitest run src/components/customer src/components/screens",
+ "suite_count_regex": "Tests\\s+(?:(?P<failed>\\d+) failed \\| )?(?P<passed>\\d+) passed"
+}
