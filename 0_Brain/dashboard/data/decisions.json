@@ -18906,5 +18906,51 @@
    "CARD composer-typed-answers-deploy",
    "CARD composer-example-d023-choice"
   ]
+ },
+ {
+  "id": "secuura-ks1348-log-files-persist-secrets",
+  "client_project": "Secuura/Blockchain",
+  "title": "KS-1348: making originate's log files JSON also writes passwords, tokens and emails into them — redact first, or keep them out?",
+  "bluf": "The gate held #1302 (KS-1348). Today originate's production log FILES hold the useless literal 'undefined'. With #1302 they would hold JSON lines, but every field on a logged object goes with them: the gate measured a password, token, API key, email, SSN and authorization header landing in both files, plus a real caller's email (adminConfig.ts:1999). Stdout already carries all of that; the files would PERSIST it. I recommend (a): the fix round adds key redaction to the logger first, then the JSON files. Default if you don't answer: #1302 stays open and unmerged, and the files keep writing 'undefined'. Why this is a new card: your KS-1346 ruling this afternoon (type and field names only) covers what a THROWN object logs in fail500. This one is every field on EVERY log call reaching disk, which that ruling does not decide.",
+  "default_action": "#1302 stays open and unmerged; nothing changes in the log files; no fix round starts.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Redact first, then JSON files (recommended)",
+    "detail": "The fix round adds logger-level redaction of secret and PII keys (password, token, apiKey, secret, authorization, email, ssn), as packages/shared's logger already does, then gives the File transports their JSON format. The Spark writes it and the gate re-proves it with the same sentinels. Error message text still reaches the files, because that is what fail500 exists to log."
+   },
+   {
+    "key": "b",
+    "label": "Files get the message only",
+    "detail": "The files get one readable line per event (level, time, message) and no metadata at all; stdout keeps everything as today. Simpler, but the files lose the error context KS-1348 wanted."
+   },
+   {
+    "key": "c",
+    "label": "Drop it",
+    "detail": "Close #1302 and leave the files as they are."
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-09-27T17:18:12.967495+10:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "2026-09-05 16:40",
+   "2026-09-10 09:00",
+   "2026-09-10 09:01",
+   "2026-09-10 09:08",
+   "2026-09-10 09:08",
+   "2026-09-10 09:17",
+   "2026-09-10 10:32",
+   "2026-09-17 08:47",
+   "CARD nexusai-rd303-rd307-key-shaped-files-in-repo",
+   "CARD nexusai-rd310-which-of-three-files-are-customer-data",
+   "CARD secuura-admin-credential-rotation-183-files",
+   "CARD vault-add-a-stages-another-clients-files",
+   "CARD nexusai-release-package-files-into-main",
+   "CARD nexusai-package-files-scope",
+   "CARD secuura-ks1346-logging-thrown-objects-leaks-secrets"
+  ]
  }
 ]

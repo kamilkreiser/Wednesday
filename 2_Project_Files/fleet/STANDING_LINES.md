@@ -303,3 +303,9 @@ Both proofs ran `rm "$R/.my-last-release"` with `$R` = the script's own director
 
 ## A diff-line comparator tests `l and l[0] in '+-'`, never `l[:1] in '+-'` (2026-09-27, Wednesday AND Seat B 33rd, the same trap twice in one day)
 In Python, the empty string is "in" every string, so `'' in '+-'` is True. A comparator written the short way counts the diff's trailing empty line as a change, and reports "NOT identical" (59 vs 60, 53 vs 52) on patches that are byte-identical. Both seats caught it from the off-by-one. Every such comparator carries a control: a known-identical pair must print IDENTICAL, and a one-token mutation must print DIFFER.
+
+## A namespace check greps EVERY spelling of the seat token (2026-09-27, Seat B 33rd)
+B 33rd's guard grepped the branch segment `-b33-` and nearly missed a ref it had created itself, `refs/seatb33/pr1301`, which has no hyphens. A seat's namespace check lists every form its token takes: the branch segment, the worktree prefix, a ref namespace, and argv tags. Each form carries a control that fires on a planted instance of that spelling.
+
+## A stacked PR's squash leaves a no-op file in its three-dot set (2026-09-27, Wednesday ruling on Seat B 33rd's Q-1301)
+After the base PR squashes and the stacked PR is retargeted to develop, the stacked PR's merge-base is still the OLD develop. Its three-dot file set therefore still includes the base PR's files, byte-identical to develop now. The GO for a stacked PR declares those files as extra equality targets (blob == develop's, mode checked), marked NO-OP, so the merge tool's "file set == declared targets" check passes on a true assertion instead of refusing.
