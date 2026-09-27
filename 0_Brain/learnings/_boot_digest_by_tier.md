@@ -7,7 +7,7 @@ status: live
 
 # Boot digest BY TIER — W whole, M rules-only, every project case a handle
 
-Generated 2026-09-27 14:12 from 206 lesson files (956,406 B). M 36 · MIXED 5 · W 165. 5 project CASE sections inside MIXED files are reduced to one line each: the heading and the path to read it at. W blocks are exactly what the default digest carries; M blocks drop the section index and keep the rules; a P file is a single handle. The CASES behind every rule live only in the lesson files — open one the moment its rule fires.
+Generated 2026-09-27 16:38 from 207 lesson files (958,811 B). M 36 · MIXED 5 · P-Datasec/HPSM-POC 1 · W 165. 5 project CASE sections inside MIXED files are reduced to one line each: the heading and the path to read it at. W blocks are exactly what the default digest carries; M blocks drop the section index and keep the rules; a P file is a single handle. The CASES behind every rule live only in the lesson files — open one the moment its rule fires.
 
 ## The T9 SSD is the master — Wednesday must be fully portable
 `2026-07-31_fully-portable-drive.md` · principle · 2026-07-31 · status: superseded — the "T9 is the master" half by [[2026-08-25_one-drive-devmaster-is-master]] (2026-08-25); the portability principle itself still lives · tier: W
@@ -6716,3 +6716,5 @@ sections (open the file for these): EXTENSION 2026-09-25 15:28 — Kam, live boa
 
 **Family:** [[2026-09-16_local-model-is-long-term-and-claude-takes-what-it-cannot-do]] · [[2026-09-23_use-the-local-model-as-much-as-possible]] · [[2026-09-23_spark-kit-running-a-local-coding-model]] · [[2026-09-14_at-90pct-weekly-usage-no-new-agents-wednesday-plus-local-model]] · [[2026-08-03_go-slow-earn-autonomy]] (rule 5: recorded) · [[2026-08-03_role-beyond-code-three-priorities]] (no cross-client leak).
 
+
+- **P-Datasec/HPSM-POC** · HPSM-POC: every thing Kam needs from HP gets its OWN email to Kam, formatted to copy, and one register document lists them all with what each is for — cases in the file: `0_Brain/learnings/2026-09-27_hpsmpoc-every-hp-ask-is-its-own-email-plus-a-register.md`
