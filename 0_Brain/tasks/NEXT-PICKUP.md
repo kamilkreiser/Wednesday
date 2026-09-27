@@ -19,6 +19,14 @@ supersede: replace wholesale at the next pickup; do not append. Previous copy: N
 4. EXPIRING-GRANTS: "SPEND PAST THE 90%" is marked ENDED (account switched). Friday's "ignore the 90%" row is Friday's and is not touched.
 
 ### LIVE RIGHT NOW
+**🔵 50% CHECKPOINT 00:29 09-28 (overnight seat a0b3d8ae). Supersedes the 23:46 block where they differ:**
+- B 35th (%48, ctx 43%): plan CONFIRMED 14:07Z; **#1310 KS-1348 r2 READY at 2cd351fad72d (verified at the PR API); #1302 CLOSED unmerged with the ruling comment.** merge31 proved 20/20. Items 2-6 in flight (KS-1346 A → close #1296, B → close #1297, KS-1121, KS-1221, KS-1220). Gate33 over the round when it holds / ~65%.
+- **Fuse: 57.9 h remained at 14:07Z (2026-09-30T00:00Z).** Recompute with the shell; never carry a figure.
+- KS-888: fenced DO NOT RAISE + card `secuura-ks888-failed-key-save-design` (default a at Tue 09-29 09:00). Spark: nothing briefable tonight.
+- Secuura MEMORY.md 215 lines (limit 200): compaction queued for the NEXT Secuura seat after B 35th (not a card); say so in the 06:00 receipt.
+- reconcile_rulings: 0 to rule; one OLD conflict left for a human (`secuura-launcher-boot-fetch-vs-parallel-seat-top-line`, card c vs a 09-22 tap b), not new.
+- OWED tooling: `cockpit.sh say` refuses a pane id SILENTLY (use the cockpit name).
+
 **🟢 23:46 (overnight seat, session a0b3d8ae, booted 23:35 on the day seat's --self rotation; ctx ~45%). READ FIRST; supersedes items 2-3 of the 23:25 block below:**
 - **Seat B 35th LAUNCHED (%48, row `Secuura/Blockchain`)**, brief `2_Project_Files/fleet/briefs_staged/2026-09-28_seatB35_raise.md` (verified at destination 13:40:21Z). Queue in Wednesday's order: KS-1348 r2 (base a24db57e; close #1302) → KS-1346 A (close #1296) → KS-1346 B (close #1297) → KS-1121 → KS-1221 → KS-1220. Lock `.push-lock-31`, namespace `b35`, tools `*31` copied from B 34th's `*30` (pane constants INVERTED back: B 34th was the -B lane). **NEXT from it: the ITEM 0 plan-confirmation QUESTION → answer against the brief.** Its gate = **gate33** (drafter from the gate32 shape `fleet/qa-agent/gatesets/2026-09-27_gate32/`) when it holds or reaches ~65%.
 - **AUDIT FUSE 2026-09-30T00:00Z** (~48 h): every Blockchain/Dev push and merge refused after it unless Kam re-dates it. B 35th's round must merge before it. If the round will not make it, CARD Kam early with the link, not at the wire.
