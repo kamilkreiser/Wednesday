@@ -1,0 +1,63 @@
+--- a/Blockchain/Dev/services/security/src/security.openapi.ts
++++ b/Blockchain/Dev/services/security/src/security.openapi.ts
+@@ -807,6 +807,7 @@
+     'Lists metadata only (no plaintext, no hash). Use /api/keys/validate ' +
+     'to verify a specific key.',
+   security: [{ bearerAuth: [] }],
++  request: { query: z.object({ organizationId: z.string().uuid() }) },
+   responses: {
+     400: commonErrorResponses[400],
+     200: {
+--- /dev/null
++++ b/Blockchain/Dev/services/security/src/__tests__/ks747-keys-list-spec-declares-organizationid.test.ts
+@@ -0,0 +1,50 @@
++// KS-747: the published contract for GET /api/security/keys declared NO parameters, while the handler
++// (index.ts, the GET /api/keys route) answers 400 organizationId required without the query parameter.
++// Every spec-driven caller, Schemathesis included, was steered into the declared 400 and could never
++// reach the 200 branch. This file renders the document the generator publishes, from the same shared
++// registry the security module populates on import, and pins that the parameter is declared: in the
++// query, required, a uuid-format string. No server, no database, no network.
++import { describe, it, expect } from 'vitest';
++import { generateOpenApiDocument } from '@secuura/shared';
++import '../security.openapi';
++
++type AnyObj = Record<string, any>;
++
++const doc = generateOpenApiDocument({ title: 'security (ks747 pin)', version: '0.0.0' }) as AnyObj;
++
++function operation(path: string, method: string): AnyObj | undefined {
++  return doc.paths?.[path]?.[method];
++}
++
++function param(path: string, method: string, where: string, name: string): AnyObj | undefined {
++  const params: AnyObj[] = operation(path, method)?.parameters ?? [];
++  return params.find((p) => p.in === where && p.name === name);
++}
++
++describe('KS-747: GET /api/security/keys publishes the organizationId its handler requires', () => {
++  it('RED KS-747 A1: organizationId is declared as a REQUIRED query parameter', () => {
++    const p = param('/api/security/keys', 'get', 'query', 'organizationId');
++    expect({ declared: p !== undefined, required: p?.required }).toEqual({ declared: true, required: true });
++  });
++
++  it('RED KS-747 A2: the declared organizationId is a uuid-format string', () => {
++    const p = param('/api/security/keys', 'get', 'query', 'organizationId');
++    expect({ type: p?.schema?.type, format: p?.schema?.format }).toEqual({ type: 'string', format: 'uuid' });
++  });
++
++  it('control KS-747 C1: the GET operation is published, keeps bearerAuth, and still declares its 200 and 400', () => {
++    const op = operation('/api/security/keys', 'get');
++    expect(op).toBeDefined();
++    expect(op?.security).toEqual([{ bearerAuth: [] }]);
++    expect(Object.keys(op?.responses ?? {})).toEqual(expect.arrayContaining(['200', '400']));
++  });
++
++  it('control KS-747 C2: the sibling POST declares no parameters and keeps its request body', () => {
++    const op = operation('/api/security/keys', 'post');
++    expect({ params: (op?.parameters ?? []).length, body: op?.requestBody !== undefined }).toEqual({ params: 0, body: true });
++  });
++
++  it('control KS-747 C3: the sibling DELETE still declares its path parameter id', () => {
++    expect(param('/api/security/keys/{id}', 'delete', 'path', 'id')).toBeDefined();
++  });
++});
