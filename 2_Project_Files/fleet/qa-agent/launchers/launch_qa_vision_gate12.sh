@@ -1,8 +1,8 @@
 #!/bin/bash
-# launch_qa_vision_gate12.sh — cross-project QA agent, ONE gate (Vision gate 12; drafted 2026-09-28 06:4x, REFRESHED 08:4x) on
+# launch_qa_vision_gate12.sh — cross-project QA agent, ONE gate (Vision gate 12; drafted 2026-09-28 06:4x, REFRESHED 08:4x, RE-PINNED 09:2x) on
 # Datasec/Vision_Sales_Portal, THREE targets, THREE verdicts plus one merged-tree line:
-#   VSP74  fix/vsp-74-restore-refuses-incomplete-2026-09-28  restore refuses an incomplete backup; restorePlan (server/dbRestore.js)  TIER 1
-#   VSP75  fix/vsp-75-backup-all-tables-2026-09-28           backup carries all 20 tables; F1; lazy tables (backupTables.js, dbBackup.js) TIER 1
+#   VSP74  fix/vsp-74-restore-refuses-incomplete-2026-09-28  restore refuses an incomplete backup; restorePlan + FIX 1 (dbRestore.js)  TIER 1
+#   VSP75  fix/vsp-75-backup-all-tables-2026-09-28           backup carries all 20 tables; F1; lazy tables; FIX 1 cells; FIX 2          TIER 1
 #   VSP69  fix/vsp-69-dispatch-per-reminder-2026-09-28       one transaction per reminder (reminders/dispatcher.js)                  TIER 1
 #
 # SEQUENCING IS DONE: gate 11 went GO x5; the Vision seat merged them (main 0d992e0 -> 609e967) and forward-merged 609e967 into all three
@@ -18,6 +18,11 @@
 # PRODUCTION IS LIVE for this project (datasec-sales-portal-rg). The gate is local Postgres only: no az, no deploy, no app
 # setting, no connection to the production database. Findings only.
 #
+# CHANGES in the 09:2x re-pin (the 08:4x file is kept beside this one as .pre-0928-r3):
+#   - heads VSP74 a1794ad (FIX 1: a lacking table counts only if it exists here with rows), VSP75 41c4a66 (a1794ad merged forward as
+#     2ed83fe; FIX 1 cells in test/db/restore-old-backup.test.js; FIX 2: backup-lazy-absent.test.js takes its DB from TEST_DATABASE_URL
+#     + "_lazy"); VSP69 unchanged e79682a; main unchanged 609e967. READYs: VSP-74/75 r3, VSP-69 r2. Chains 7 / 14 / 1 non-merge,
+#     counts 8 / 20 / 2; file sets 4 / 10 / 3; test( 12/7 and 12/9/6/3/10/2; FIX 1 lacking line and FIX 2 lazyDb line pinned (exit 74).
 # CHANGES in the 08:4x refresh (the pre-refresh file is kept beside this one as .pre-0928-refresh):
 #   - READYs are the round-2 mails (-r2-READY-mail.txt); their NOT TESTED is ONE line each, carried verbatim (exit 31); each READY's
 #     "New head (ls-remote)" must equal its PIN row (exit 31).
@@ -55,8 +60,8 @@ QA_DIR='/Volumes/KK_T9_External_HDD/!CODING/Testing Agent MAIN'
 TUE='/Volumes/KK_T9_External_HDD/TUESDAY'
 BRIEFS="$TUE/2_Project_Files/fleet/qa-agent/briefs"
 BRIEF="$BRIEFS/2026-09-28_vision-gate12-vsp74-vsp75-vsp69.md"
-READY74="$BRIEFS/2026-09-28_vision-vsp74-r2-READY-mail.txt"
-READY75="$BRIEFS/2026-09-28_vision-vsp75-r2-READY-mail.txt"
+READY74="$BRIEFS/2026-09-28_vision-vsp74-r3-READY-mail.txt"
+READY75="$BRIEFS/2026-09-28_vision-vsp75-r3-READY-mail.txt"
 READY69="$BRIEFS/2026-09-28_vision-vsp69-r2-READY-mail.txt"
 ROUTING="$TUE/2_Project_Files/fleet/inbox_routing.conf"
 VSP='/Volumes/KK_T9_External_HDD/!CODING/Datasec/Vision_Sales_Portal'
@@ -72,7 +77,7 @@ G11_DIR="$REPORTS/2026-09-28-vision-gate11-five-targets"
 G11_REPORT="$G11_DIR/report.md"
 REPORT="$REPORTS/2026-09-28-vision-gate12-three-targets/report.md"
 ROUTE_NAME='QA/Vision-gate12'
-NEG_SEATS='59108 20317 38185'   # Tuesday (%0), NexusAI (%22), the Vision builder (%37) — re-read 2026-09-28 08:40 AEST; Tuesday re-reads at stamp
+NEG_SEATS='59108 20317 91381'   # Tuesday (%0), NexusAI (%22), NexusAI batch-5b QA gate (%36) — re-read 09:2x AEST (Vision seat 38185 had exited); Tuesday re-reads at stamp
 # Gated anchors (not heads).
 ANCHOR_MAIN='609e967d6b03ff77dcbd692ee6e4434a5027e70b'     # main after gate 11's five merges; every target's base
 ANCHOR_OLDMAIN='0d992e09ebe0830dbe414aa73ca9a17a1be6c480'  # gate 10's GO'd head; main before gate 11's merges
@@ -86,14 +91,14 @@ R75_FIX='0d7a2fb4514a682c0cb3a69593faf9ff3238a93b'        # VSP-75 round-1 READY
 R75_PRE2='e34add45d313834be3df961679e4f75757104183'       # VSP-75 merge of 987178c = round-2 pre-fix red anchor
 R69_FIX='3ede8ed7e67e686261a260e914bb84600de84a12'        # VSP-69 round-1 READY head
 # The exact NON-merge commits of each target over 609e967 (rev-list --no-merges, read 08:4x).
-CHAIN74="$R74_REF $R74_FIX b7bc78bc7d23fb7680db3bd13b4414bfa25e0ca6 011becb06ec02f8bdaa0bbff8a9ef811d723ab0c 57ecad64dacef5bce3d8342fb883ce532587eceb f62917f605187146f72d55e7d5d2b777c19cca91"
-CHAIN75="$CHAIN74 $R75_REF $R75_FIX e64d54ed2e748e0acd03db7f88d9ab68de4132c9 f3925826e438de1b69b1fe3d2a9b32ca49614286 69157de61521769ba893270af7773967b011e273"
+CHAIN74="$R74_REF $R74_FIX b7bc78bc7d23fb7680db3bd13b4414bfa25e0ca6 011becb06ec02f8bdaa0bbff8a9ef811d723ab0c 57ecad64dacef5bce3d8342fb883ce532587eceb f62917f605187146f72d55e7d5d2b777c19cca91 a1794ad5111b640fd3041e4f46154c577f559baf"
+CHAIN75="$CHAIN74 $R75_REF $R75_FIX e64d54ed2e748e0acd03db7f88d9ab68de4132c9 f3925826e438de1b69b1fe3d2a9b32ca49614286 69157de61521769ba893270af7773967b011e273 0d1376cdf5e5e918490af22816a24e4f5042d5e0 41c4a664a9d1698150424337ccc9d946d221f12b"
 CHAIN69="$R69_FIX"
 DISPATCH_BLOB_MAIN='283be2702721fb3983225af3d2acfec0b9bb64bc'  # server/reminders/dispatcher.js at 0d992e0 and 609e967
 DISPATCH_BLOB_69='7a67be98580c1bf7f2c6f18f9988e6cd905ca1c8'    # the same file at 3ede8ed and e79682a
 DBBACKUP_TEST_68='4fb902e'                                      # VSP-68's server/dbBackup.test.js blob (prefix), = main's
 # Every file any target changes: main may move only in files outside this set.
-DELTA_FILES='BACKLOG.md server/dbRestore.js server/dbRestore.plan.test.js test/db/restore-incomplete.test.js server/backupTables.js server/dbBackup.js server/dbBackup.test.js test/db/backup-coverage.test.js test/db/backup-lazy-absent.test.js server/reminders/dispatcher.js test/db/dispatch-once.test.js'
+DELTA_FILES='BACKLOG.md server/dbRestore.js server/dbRestore.plan.test.js test/db/restore-incomplete.test.js server/backupTables.js server/dbBackup.js server/dbBackup.test.js test/db/backup-coverage.test.js test/db/backup-lazy-absent.test.js test/db/restore-old-backup.test.js server/reminders/dispatcher.js test/db/dispatch-once.test.js'
 
 SUBJECT_STEM='[QA/Datasec-Vision -> Tuesday] GATE VERDICT — Vision gate 12'
 QUESTION_SUBJ='[QA/Datasec-Vision -> Tuesday] QUESTION: <topic>'
@@ -106,22 +111,22 @@ PROMPT=''
 read -r -d '' PROMPT <<'PROMPT_EOF' || true
 ultrathink
 
-You are the fleet QA/testing agent running ONE gate (Vision gate 12) on Datasec/Vision_Sales_Portal with THREE targets and THREE verdicts, each GO or NO-GO, plus one merged-tree line, in the SALES PORTAL repo. Gate 11's five targets are merged: portal main is 609e967. The Vision seat then forward-merged 609e967 into VSP-74, VSP-75 (stacked on VSP-74) and VSP-69 (merges, never rebase), and built round 2 on VSP-74 and VSP-75. All three are 0 behind 609e967. You gate the round-2 heads.
+You are the fleet QA/testing agent running ONE gate (Vision gate 12) on Datasec/Vision_Sales_Portal with THREE targets and THREE verdicts, each GO or NO-GO, plus one merged-tree line, in the SALES PORTAL repo. Gate 11's five targets are merged: portal main is 609e967. The Vision seat then forward-merged 609e967 into VSP-74, VSP-75 (stacked on VSP-74) and VSP-69 (merges, never rebase), and built round 2 on VSP-74 and VSP-75, then a pre-gate fix pass: FIX 1 (VSP-74 a1794ad, merged forward into VSP-75 41c4a66) and FIX 2 (VSP-75 41c4a66). All three are 0 behind 609e967. You gate VSP-74 a1794ad, VSP-75 41c4a66 and VSP-69 e79682a.
 
 READ YOUR COMMISSION FIRST, whole: /Volumes/KK_T9_External_HDD/TUESDAY/2_Project_Files/fleet/qa-agent/briefs/2026-09-28_vision-gate12-vsp74-vsp75-vsp69.md
-Then read the charter it names, the Vision CLARIFICATIONS (C-01..C-06; none covers these tickets), the project's CLAUDE.md (/Volumes/KK_T9_External_HDD/!CODING/Datasec/Vision_Sales_Portal/CLAUDE.md; its deploy commands are not for you), the builder's three round-2 READY mails (/Volumes/KK_T9_External_HDD/TUESDAY/2_Project_Files/fleet/qa-agent/briefs/2026-09-28_vision-vsp74-r2-READY-mail.txt, -vsp75-r2- and -vsp69-r2-READY-mail.txt beside it; the round-1 READYs beside them are PRIOR WORK), and the prior reports: gate 11 /Volumes/KK_T9_External_HDD/!CODING/Testing Agent MAIN/projects/vision/reports/2026-09-28-vision-gate11-five-targets (report.md: its VSP-70 and VSP-68 sections, VSP68-G11-F1 and its whole-database-unreachable cell, the feedback noise ruling, its coverage table; evidence/tools/), gate 10 /Volumes/KK_T9_External_HDD/!CODING/Testing Agent MAIN/projects/vision/reports/2026-09-27-vision-gate10-vsp65-r2 (evidence/tools/) and gate 9 /Volumes/KK_T9_External_HDD/!CODING/Testing Agent MAIN/projects/vision/reports/2026-09-27-vision-gate9-vsp65-qqpurge (report.md section N.4(h): the dispatcher re-send VSP-69 fixes). Every builder statement is a CLAIM, never evidence. The three round-2 READYs landed within 26 seconds: RE-DERIVE every red, every mutant and every suite set yourself. Verify every PRIOR WORK claim against git history and the prior gates' evidence, never against the brief.
+Then read the charter it names, the Vision CLARIFICATIONS (C-01..C-06; none covers these tickets), the project's CLAUDE.md (/Volumes/KK_T9_External_HDD/!CODING/Datasec/Vision_Sales_Portal/CLAUDE.md; its deploy commands are not for you), the builder's READY mails under test (/Volumes/KK_T9_External_HDD/TUESDAY/2_Project_Files/fleet/qa-agent/briefs/2026-09-28_vision-vsp74-r3-READY-mail.txt, -vsp75-r3-READY-mail.txt and -vsp69-r2-READY-mail.txt beside it; the earlier r2 and round-1 READYs beside them are PRIOR WORK), and the prior reports: gate 11 /Volumes/KK_T9_External_HDD/!CODING/Testing Agent MAIN/projects/vision/reports/2026-09-28-vision-gate11-five-targets (report.md: its VSP-70 and VSP-68 sections, VSP68-G11-F1 and its whole-database-unreachable cell, the feedback noise ruling, its coverage table; evidence/tools/), gate 10 /Volumes/KK_T9_External_HDD/!CODING/Testing Agent MAIN/projects/vision/reports/2026-09-27-vision-gate10-vsp65-r2 (evidence/tools/) and gate 9 /Volumes/KK_T9_External_HDD/!CODING/Testing Agent MAIN/projects/vision/reports/2026-09-27-vision-gate9-vsp65-qqpurge (report.md section N.4(h): the dispatcher re-send VSP-69 fixes). Every builder statement is a CLAIM, never evidence. The r3 READYs landed one second apart: RE-DERIVE every red, every mutant and every suite set yourself. Verify every PRIOR WORK claim against git history and the prior gates' evidence, never against the brief.
 
 THE TARGETS. All three are ROUND 1 of their class (the builder's "r2" is a build round; no gate has graded these); the two-NO-GO cap applies per class (a NO-GO here is the first; a NO-GO in round 2 goes to Kam).
-  VSP74 (TIER 1, Tuesday's ruling) = Jira VSP-74 = F-B: a restore EMPTIED a live table whose dump had failed. Round 2 adds restorePlan: failed dumps, RESTORE_ORDER tables the backup lacks, and live tables WITH ROWS outside RESTORE_ORDER are refused by default; with --allow-incomplete they are kept, and so is every table a kept table's foreign key points at, to a fixed point; the insert loop skips kept tables; an old backup's error "" is refused by presence. Re-derive its reds at 987178c (the forward merge, before the round-2 fix) and at 609e967; the round-1 refactor d2531ea only for round-1 claims. THE HEADLINE RISK: ON DELETE CASCADE and SET NULL from a cleared parent still emptying or changing a kept table; measure the builder's two holes on real Postgres yourself (cascade via leads and quotes, including tco_scenarios SET NULL and reminders via quotes; a backup lacking a table the database has). A lost or changed row in a kept table is a FAIL.
-  VSP75 (TIER 1, Tuesday's ruling) = Jira VSP-75 = F-A: the nightly backup never contained quotes or any other PRO table. One shared 20-table list in foreign-key order (session excluded), row_to_json in primary-key order, JSON columns restored as text. Round 2: the unit-test fault injector must REALLY reach the dump (re-derive the builder's M1 and M2 mutants and log every thrown fault's SQL yourself); VSP68-G11-F1 closed (an empty-message error is INCOMPLETE; every table failed is FAILED with nothing uploaded: the builder's choice, you judge it); the lazy tables feedback and feedback_coordinator_state are absent, not INCOMPLETE, when they do not exist yet (verify the code lines), any other missing table is INCOMPLETE, and the restore side of absent. Re-derive its reds at e34add4 and 609e967; the round-1 refactor cad19ab only for round-1 claims. Take YOUR OWN table census, not the builder's regex; round-trip into a TRUNCATEd AND a populated database; prove no secret is in the backup.
+  VSP74 (TIER 1, Tuesday's ruling) = Jira VSP-74 = F-B: a restore EMPTIED a live table whose dump had failed. Round 2 adds restorePlan: failed dumps, RESTORE_ORDER tables the backup lacks, and live tables WITH ROWS outside RESTORE_ORDER are refused by default; with --allow-incomplete they are kept, and so is every table a kept table's foreign key points at, to a fixed point; the insert loop skips kept tables; an old backup's error "" is refused by presence. FIX 1: a lacking table counts only when it EXISTS here AND HAS ROWS (empty or missing: neither refused nor kept); FIX 1's cells and two mutants are claims you re-derive (red at f62917f). Re-derive its reds at 987178c (the forward merge, before the round-2 fix) and at 609e967; the round-1 refactor d2531ea only for round-1 claims. THE HEADLINE RISK: ON DELETE CASCADE and SET NULL from a cleared parent still emptying or changing a kept table; measure the builder's two holes on real Postgres yourself (cascade via leads and quotes, including tco_scenarios SET NULL and reminders via quotes; a backup lacking a table the database has). A lost or changed row in a kept table is a FAIL.
+  VSP75 (TIER 1, Tuesday's ruling) = Jira VSP-75 = F-A: the nightly backup never contained quotes or any other PRO table. One shared 20-table list in foreign-key order (session excluded), row_to_json in primary-key order, JSON columns restored as text. Round 2: the unit-test fault injector must REALLY reach the dump (re-derive the builder's M1 and M2 mutants and log every thrown fault's SQL yourself); VSP68-G11-F1 closed (an empty-message error is INCOMPLETE; every table failed is FAILED with nothing uploaded: the builder's choice, you judge it); the lazy tables feedback and feedback_coordinator_state are absent, not INCOMPLETE, when they do not exist yet (verify the code lines), any other missing table is INCOMPLETE, and the restore side of absent. FIX 1 on the 20-table list: an old 10-table backup restores with no flag into a database whose new tables are empty, and once quotes-linked tables have rows the READY lists which old tables are kept at deploy time: MEASURE that list one trigger table at a time; a contradicted list is a FAIL. FIX 2: the lazy suite's database is TEST_DATABASE_URL's name plus _lazy; prove with pg_stat_database and pg_stat_activity, beside a control your instrument sees, that your runs never touch salesportal_test_lazy. Re-derive its reds at e34add4, 69157de (FIX 1 cells) and 609e967; the round-1 refactor cad19ab only for round-1 claims. Take YOUR OWN table census, not the builder's regex; round-trip into a TRUNCATEd AND a populated database; prove no secret is in the backup.
   VSP69 (TIER 1) = Jira VSP-69 = gate 9's N.4(h): the reminder dispatcher sent a batch inside one transaction, so a failure re-sent the whole batch to clients. One transaction per reminder, now at the forward-merged head e79682a (3ede8ed + main). Re-derive its red at 609e967 (the old red at 0d992e0 is PRIOR WORK); the five cells and the builder's mutants on the merged head; the black-hole arm, a real process death mid-tick, churn under load and under VSP-66's guard, the poison reminder; and DECIDE the surviving mutant M2 (FOR UPDATE without SKIP LOCKED) under the query bound yourself. The builder's note that the dispatcher's catch releases the client with no error after a failed ROLLBACK is OUT OF SCOPE unless you measure a live consequence.
   THE REQUIRED CELL (Tuesday): on the merged tree, VSP-68's dbBackup INCOMPLETE-alert control passes with its injected failure proven to land on the dump query, AND VSP-75's round-trip and FK-order cells pass: the semantic conflict is closed, not papered over. A weakened assertion in the stub fix is a FAIL of VSP75.
   MERGE COUPLING: VSP-74 alone makes every restore INCOMPLETE on a database with rows in any PRO table (its RESTORE_ORDER is still the old 10), so 74 and 75 merge back to back or not at all. Measure VSP74 alone and say whether that holds.
-  COVERAGE: the builder's local line coverage is 80.36% (74), 80.68% (75), 80.59% (69) against CI's 80% gate. Measure the MERGED three-way tree's coverage locally (lines and branches) and label it not CI.
+  COVERAGE: the builder's local line coverage is 80.40% (74), 80.72% (75), 80.59% (69) against CI's 80% gate. Measure the MERGED three-way tree's coverage locally (lines and branches) and label it not CI.
 
-WHAT THE BRIEF REQUIRES, in short (the brief is the authority): (1) VSP74: its ten db cells, five plan unit cells and seven mutants re-derived, the cascade matrix on a real 20-table backup, lacking and outside tables, a backup produced by the real code, the refusal changing nothing, today's 10-table backup shape on the VSP75 tree. (2) VSP75: its cells and mutants, the injector proof, F1 on real Postgres (empty message; whole database unreachable through a dual-address host), lazy tables both sides, drift mutants the regex misses, your own census and FK check, the two round trips, secrets, size and time. (3) VSP69: its five cells and mutants at 609e967 and e79682a, M2 decided, the black hole, SIGKILL mid-tick, churn, the poison reminder. (4) SUITES AS SETS, NOT COUNTS, at every head, the pre-fix merges and the merged tree vs 609e967, plus CI's coverage command run locally. The Node 20 leg follows the NODE20-LEG line in the brief exactly. (5) CI is UNMEASURED: this project's gh is not authenticated and you must not use gh; never claim CI; name CI's Node 22 coverage gate and its e2e:pro step as the first reads at merge. Every red-proof: fresh tree per arm, asserted edits, node --check rc quoted; a red from a mutant that does not parse is VOID.
+WHAT THE BRIEF REQUIRES, in short (the brief is the authority): (1) VSP74: its twelve db cells, seven plan unit cells, FIX 1's two mutants and the seven r2 mutants re-derived, the cascade matrix on a real 20-table backup, lacking and outside tables, a backup produced by the real code, the refusal changing nothing, today's 10-table backup shape on the VSP75 tree. (2) VSP75: its cells and mutants, the injector proof, F1 on real Postgres (empty message; whole database unreachable through a dual-address host), lazy tables both sides, FIX 1's old-backup cells and deploy-time table, FIX 2's proof, drift mutants the regex misses, your own census and FK check, the two round trips, secrets, size and time. (3) VSP69: its five cells and mutants at 609e967 and e79682a, M2 decided, the black hole, SIGKILL mid-tick, churn, the poison reminder. (4) SUITES AS SETS, NOT COUNTS, at every head, the pre-fix merges and the merged tree vs 609e967, plus CI's coverage command run locally. The Node 20 leg follows the NODE20-LEG line in the brief exactly. (5) CI is UNMEASURED: this project's gh is not authenticated and you must not use gh; never claim CI; name CI's Node 22 coverage gate and its e2e:pro step as the first reads at merge. Every red-proof: fresh tree per arm, asserted edits, node --check rc quoted; a red from a mutant that does not parse is VOID.
 
-VSP-75's test/db/backup-lazy-absent.test.js HARD-CODES the database salesportal_test_lazy (the builder's, shared) whatever TEST_DATABASE_URL says. Never run it unmodified: follow the brief's WRONG (t) and Tuesday's ruling on it.
+VSP-75's test/db/backup-lazy-absent.test.js derives its database from TEST_DATABASE_URL (FIX 2): ALWAYS set TEST_DATABASE_URL to your own _test database, never run it unset (it would fall back to the builder's salesportal_test_lazy), and follow the brief's WRONG (t) and section N2.10.
 
 LOCAL POSTGRES ONLY. PRODUCTION IS LIVE for this project. NEVER the live portal (datasec-sales-portal.azurewebsites.net, datasec-sales-portal-rg, its Postgres datasec-sales-db.postgres.database.azure.com, its key vault): no request, no DB connection, not even a GET. No az of any kind, no deploy, no app-setting change. Never open a real backup, a production dump or anything under the project's 4_Credentials: every backup JSON you use is built by the product's own code from YOUR seeded database. Real sends are OFF: the dispatcher, the email sender and the backup notifier run only against recorders you wrote; Azure Blob Storage and ACS are replaced by YOUR recorders; ntfy goes only to YOUR loopback recorder. restoreData, restorePlan and clearTables read and DELETE: print the connected database name before every call and abort if it is not one you created. Never set AZURE_BACKUP_CONN_STR.
 
@@ -295,7 +300,7 @@ PIN_TS="$(date '+%Y-%m-%d %H:%M:%S %Z')"
 fileset() { case "$1" in
   VSP74) printf '%s\n' BACKLOG.md server/dbRestore.js server/dbRestore.plan.test.js test/db/restore-incomplete.test.js ;;
   VSP75) printf '%s\n' BACKLOG.md server/backupTables.js server/dbBackup.js server/dbBackup.test.js server/dbRestore.js server/dbRestore.plan.test.js \
-                       test/db/backup-coverage.test.js test/db/backup-lazy-absent.test.js test/db/restore-incomplete.test.js ;;
+                       test/db/backup-coverage.test.js test/db/backup-lazy-absent.test.js test/db/restore-incomplete.test.js test/db/restore-old-backup.test.js ;;
   VSP69) printf '%s\n' BACKLOG.md server/reminders/dispatcher.js test/db/dispatch-once.test.js ;;
 esac; }
 for ID in $TARGETS; do
@@ -323,6 +328,8 @@ for H in "$H74" "$H75"; do
   must "$H" server/dbRestore.js 'function failedTables(data) {'
   must "$H" server/dbRestore.js "'error' in data.tables[t]"
   must "$H" server/dbRestore.js 'async function restorePlan(data, db = { query }) {'
+  must "$H" server/dbRestore.js 'for (const t of RESTORE_ORDER.filter(t => !(data.tables || {})[t] && live.includes(t))) {'   # FIX 1
+  must "$H" server/dbRestore.js 'if (await hasRows(t)) lacking.push(t);'                                                      # FIX 1
   must "$H" server/dbRestore.js "WHERE contype = 'f' AND conrelid <> confrelid"
   must "$H" server/dbRestore.js 'if (data.tables[t] && !failed.has(t)) {'
   must "$H" server/dbRestore.js 'if (plan.keep.has(t)) {'
@@ -335,8 +342,8 @@ must "$H74" server/dbRestore.js 'const RESTORE_ORDER = ['          # VSP74 alone
 mustnot "$H74" server/dbRestore.js 'backupTables'
 [ "$(blob "$H74" test/db/restore-incomplete.test.js)" = "$(blob "$H75" test/db/restore-incomplete.test.js)" ] \
   || { echo "REFUSING: restore-incomplete.test.js differs between VSP74 and VSP75 — the stack diverged" >&2; exit 74; }
-wantn "$H74" test/db/restore-incomplete.test.js 10
-wantn "$H74" server/dbRestore.plan.test.js 5
+wantn "$H74" test/db/restore-incomplete.test.js 12
+wantn "$H74" server/dbRestore.plan.test.js 7
 [ "$(blob "$H74" server/dbBackup.test.js)" = "$(blob "$MAINH" server/dbBackup.test.js)" ] || { echo "REFUSING: VSP74 changes server/dbBackup.test.js — only VSP75 should" >&2; exit 74; }
 # VSP75
 must "$H75" server/backupTables.js 'const BACKUP_TABLES = ['
@@ -366,7 +373,8 @@ must "$H75" server/dbRestore.js 'function absentTables(data) {'
 must "$H75" server/dbRestore.js 'absentWithRows'
 must "$MAINH" server/dbBackup.js 'failed_tables: Object.keys(tables).filter(t => tables[t].error),'   # main is the truthiness form F1 closes
 mustnot "$MAINH" server/dbBackup.js 'backupTables'
-wantn "$H75" server/dbRestore.plan.test.js 7
+wantn "$H75" server/dbRestore.plan.test.js 9
+wantn "$H75" test/db/restore-old-backup.test.js 2
 wantn "$H75" test/db/backup-coverage.test.js 6
 wantn "$H75" test/db/backup-lazy-absent.test.js 3
 # the semantic-conflict fix (§N4): dbBackup.test.js changed ON VSP75, VSP-68's five cells kept verbatim, five new ones, the reached() proof.
@@ -382,12 +390,13 @@ done <<< "$(p show "${MAINH}:server/dbBackup.test.js" | grep '^test(')"
 for T in 'const reached = (t) =>' "'DB Backup INCOMPLETE'" "'DB Backup OK'" "'DB Backup FAILED'" 'failed_tables' 'absent_tables'; do
   must "$H75" server/dbBackup.test.js "$T"
 done
-# WRONG (t): the lazy-absent test hard-codes its database. NOTE if that is no longer so (the brief's WRONG (t) would be stale).
-if has "$H75" test/db/backup-lazy-absent.test.js "lazyUrl.pathname = '/salesportal_test_lazy';"; then
-  grep -qF 'WRONG (t)' "$BRIEF" && grep -qF 'salesportal_test_lazy' "$BRIEF" || { echo "REFUSING: backup-lazy-absent.test.js hard-codes salesportal_test_lazy and the brief does not carry WRONG (t)" >&2; exit 74; }
-else
-  echo "NOTE: backup-lazy-absent.test.js no longer hard-codes salesportal_test_lazy — the brief's WRONG (t) is stale" >&2
-fi
+# FIX 2 (WRONG (t) resolved): the lazy suite's database is TEST_DATABASE_URL's name + "_lazy", never the literal builder's DB.
+must "$H75" test/db/backup-lazy-absent.test.js 'const lazyDb = `${base.pathname.slice(1)}_lazy`;'
+must "$H75" test/db/backup-lazy-absent.test.js "if (!/^[a-z0-9_]+\$/.test(lazyDb))"
+mustnot "$H75" test/db/backup-lazy-absent.test.js "lazyUrl.pathname = '/salesportal_test_lazy';"
+must "$H75" test/db/restore-old-backup.test.js "test('FIX 1 (i):"
+must "$H75" test/db/restore-old-backup.test.js "test('FIX 1 (ii):"
+grep -qF 'RESOLVED BY FIX 2' "$BRIEF" && grep -qF 'N2.10' "$BRIEF" || { echo "REFUSING: the brief does not carry FIX 2's resolution of WRONG (t) and its proof step (N2.10)" >&2; exit 74; }
 # VSP69
 for T in 'const DISPATCH_PER_TICK = 50;' 'FOR UPDATE SKIP LOCKED' 'ORDER BY due_at, id LIMIT 1' 'async function sendReminder(rem) {' \
          "const cutoff = (await query('SELECT NOW() AS now')).rows[0].now;" "console.warn('[reminders] dispatch failed:', e.message);"; do
@@ -426,7 +435,7 @@ for PAIR in "$READY74|VSP-74|$H74" "$READY75|VSP-75|$H75" "$READY69|VSP-69|$H69"
   grep -qxF -- "$NT" "$BRIEF" || { echo "REFUSING: the brief does not carry $TK's NOT TESTED line verbatim: $NT" >&2; exit 31; }
 done
 for T in 'VSP-74 NOT TESTED' 'VSP-75 NOT TESTED' 'VSP-69 NOT TESTED' 'F-A' 'F-B' 'SEQUENCING — DONE, NOT OWED' '## MERGE COUPLING' '## COVERAGE RISK' \
-         '80.36%' '80.68%' '80.59%' 'r2-READY-mail.txt'; do
+         '80.40%' '80.72%' '80.59%' 'r3-READY-mail.txt' 'FIX 1' 'FIX 2' 'deploy-time' 'comment 38536'; do
   grep -qF -- "$T" "$BRIEF" || { echo "REFUSING: the brief does not carry '$T'" >&2; exit 31; }
 done
 [ -s "$CLAR" ] || { echo "REFUSING: Vision CLARIFICATIONS.md absent: $CLAR" >&2; exit 31; }
@@ -473,7 +482,8 @@ for T in 'forward-merge' 'never rebase' 'CASCADE' 'SET NULL' 'allow-incomplete' 
          '3ede8ed' '0d992e0' 'tco_scenarios' 'census' 'round trip' 'populated' 'TRUNCATE' 'secret' 'M1' 'M2' 'SKIP LOCKED' 'query bound' 'black hole' \
          'process death' 'churn' 'poison' 'not papered over' 'INCOMPLETE' 'FAILED' 'dump query' 'VSP68-G11-F1' 'feedback_coordinator_state' 'absent' \
          'FK-order' 'recorder' 'ROUND 1' 'two-NO-GO cap' 'merged tree' 'MERGE COUPLING' 'coverage' 'BACKLOG' 'SETS, NOT COUNTS' 'Node 20' 'NODE20-LEG' \
-         'UNMEASURED' 'PRODUCTION IS LIVE' 'datasec-sales-db.postgres.database.azure.com' 'e2e:pro' 'real backup' 'OUT OF SCOPE' 'salesportal_test_lazy'; do
+         'UNMEASURED' 'PRODUCTION IS LIVE' 'datasec-sales-db.postgres.database.azure.com' 'e2e:pro' 'real backup' 'OUT OF SCOPE' 'salesportal_test_lazy' \
+         'FIX 1' 'FIX 2' 'a1794ad' '41c4a66' 'pg_stat_database'; do
   grep -qiF -- "$T" "$BRIEF" || { echo "REFUSING: brief lacks '$T'" >&2; exit 78; }
   printf '%s\n' "$PROMPT" | grep -qiF -- "$T" || { echo "REFUSING: prompt lacks '$T'" >&2; exit 78; }
 done
@@ -572,16 +582,16 @@ PIN_BLOCK="$(printf 'PINNED HEADS — verified by the launcher at %s (cat-file, 
   printf '%s\n' "$PIN" | awk -F'\t' '{ printf "  %-7s %-7s %-50s %s  base %s  commits %s\n", $1, $2, $3, $4, ($5=="-"?"-":substr($5,1,12)), $6 }'
   printf '  Main: pinned %s%s\n' "${MAINH:0:12}" "$STALE"
   [ -z "$ORIGIN_MAIN_NOTE" ] || printf '  %s\n' "$ORIGIN_MAIN_NOTE"
-  printf '  Red anchors: VSP74 987178c + 609e967 (round 1: d2531ea); VSP75 e34add4 + 609e967 (round 1: cad19ab); VSP69 609e967 (round 1: 0d992e0)\n'
+  printf '  Red anchors: VSP74 987178c + 609e967, FIX 1 at f62917f (round 1: d2531ea); VSP75 e34add4 + 609e967, FIX 1 cells at 69157de (round 1: cad19ab); VSP69 609e967 (round 1: 0d992e0)\n'
   printf 'NODE20-LEG, as decided in the brief: %s\n' "$NODE20")"
 
 if [ "$CHECK" = "1" ]; then
   echo "all guards pass:"
   printf '%s\n' "$PIN_BLOCK"
   echo "  PIN parsed, four rows, no placeholder (40); every sha a local commit (6); main = 609e967 or a delta-free descendant, GATE11-MERGED + 12138cb + 0d992e0 on main (9)"
-  echo "  bases 609e967, counts 7/16/2, 0 behind (7 8); exact chains 6/11/1, forward merges only, never rebased, VSP74 in VSP75 (9); origin re-read $PIN_TS (18); file sets 4/9/3 + refactors single-file (22)"
-  echo "  content: restorePlan + closure + presence in VSP74/75, old list on VSP74 alone, 20 tables + {session} + LAZY {feedback, feedback_coordinator_state}, F1 lines, dbBackup.test 10 cells keeping VSP-68's 5, test( 10/5 · 10/7/6/3/10 · 5 (74)"
-  echo "  main dispatcher.js 283be27, VSP69 7a67be9, ownership disjoint (63); r2 READYs name the PIN heads + NOT TESTED verbatim, gate 9 (h), gate 11 source, tools (31); floor (39); route $ROUTE_NAME (41); report absent (17)"
+  echo "  bases 609e967, counts 8/20/2, 0 behind (7 8); exact chains 7/14/1, forward merges only, never rebased, VSP74 in VSP75 (9); origin re-read $PIN_TS (18); file sets 4/10/3 + refactors single-file (22)"
+  echo "  content: restorePlan + closure + presence + FIX 1 lacking in VSP74/75, old list on VSP74 alone, 20 tables + {session} + LAZY {feedback, feedback_coordinator_state}, F1 lines, FIX 2 lazyDb, dbBackup.test 10 cells keeping VSP-68's 5, test( 12/7 · 12/9/6/3/10/2 · 5 (74)"
+  echo "  main dispatcher.js 283be27, VSP69 7a67be9, ownership disjoint (63); READYs (74/75 r3, 69 r2) name the PIN heads + NOT TESTED verbatim, gate 9 (h), gate 11 source, tools (31); floor (39); route $ROUTE_NAME (41); report absent (17)"
   echo "  tiers at the pinned heads (12); commission requirements (78); directive/brief/placeholders/mail/key/questions/safety (13 14 15 20 70); words + sections (19); no server path (24); standing rules (53 60 61 62 64 69 75); seats $NEG_SEATS (38); NODE20 $NODE20 (45); :5433 listening (44); stamped (32)"
   exit 0
 fi
