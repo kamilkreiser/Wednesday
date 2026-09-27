@@ -19,6 +19,13 @@ supersede: replace wholesale at the next pickup; do not append. Previous copy: N
 4. EXPIRING-GRANTS: "SPEND PAST THE 90%" is marked ENDED (account switched). Friday's "ignore the 90%" row is Friday's and is not touched.
 
 ### LIVE RIGHT NOW
+**🟢 04:4x 09-28 (overnight seat a0b3d8ae). READ FIRST; supersedes every block below:**
+- **Round 31 DONE:** B 35th merged #1311 #1312 #1313 #1314 #1315 on gate33 (verified at source: develop `ec32c40e2b1e`, tree `e850f613f362` == END); KS-1121/1221/1220 Done; KS-1346 In Progress (F-3: adminConfig.ts + webhooks.ts fail500 still log String(err)); #1302/#1296/#1297 closed; KS-1351 filed. B 35th scored 0.97, pane closed. **No Secuura seat live.**
+- **#1310 (KS-1348 r2) NO GO, OPEN, UNTOUCHED** → card `secuura-ks1348-r2-files-still-leak-allowlist` (rec a allow-list third round; default = nothing changes). **Card `secuura-ks888-failed-key-save-design`** (rec a mint-only; default a at Tue 09-29 09:00).
+- **06:00 MORNING RECEIPT on the live board** (Kam travelling): value first.
+- **NEXT WORK (overnight grant, as many agents as the code allows):** (1) KS-1346 F-3 residue (adminConfig.ts + webhooks.ts fail500 → type and field names only, the same ruled shape) = a Spark brief, then a raise seat; (2) Secuura MEMORY.md 215 lines → compaction by the next Secuura seat; (3) re-screen for Spark/Ornith candidates at the 06:00 sweep (Ornith PAUSE_QUEUE lapses 06:00).
+- **Fuse 2026-09-30T00:00Z**: recompute with the shell.
+
 **🟠 01:1x 09-28 update:** B 35th has raised #1310 #1311 #1312 #1313 #1314 (all verified at the PR API; #1302/#1296/#1297 closed; KS-1351 filed); item 6 KS-1220 pushing. **gate33 DRAFTER running** (subagent of this seat): kit dir `2_Project_Files/fleet/qa-agent/gatesets/2026-09-28_gate33/`; if this seat rotates first, check README.md, verify controls both ways + heads, launch.
 
 **🔵 50% CHECKPOINT 00:29 09-28 (overnight seat a0b3d8ae). Supersedes the 23:46 block where they differ:**
