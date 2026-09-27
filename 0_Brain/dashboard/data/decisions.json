@@ -19240,9 +19240,9 @@
   ],
   "recommended": "a",
   "ts": "2026-09-27T23:51:02.835199+10:00",
-  "status": "open",
-  "ruled_choice": null,
-  "ruled_ts": null,
+  "status": "ruled",
+  "ruled_choice": "b",
+  "ruled_ts": "2026-09-28T06:58:57.428482+10:00",
   "prior_rulings_overridden": [
    "2026-08-17 20:15",
    "2026-08-21 19:49",
@@ -19340,9 +19340,9 @@
   ],
   "recommended": "a",
   "ts": "2026-09-28T04:12:42.418908+10:00",
-  "status": "open",
-  "ruled_choice": null,
-  "ruled_ts": null,
+  "status": "ruled",
+  "ruled_choice": "a",
+  "ruled_ts": "2026-09-28T06:58:50.964485+10:00",
   "prior_rulings_overridden": [
    "2026-08-17 20:15",
    "2026-09-07 12:07",
@@ -19388,9 +19388,9 @@
   ],
   "recommended": "a",
   "ts": "2026-09-28T06:07:40.627449+10:00",
-  "status": "open",
-  "ruled_choice": null,
-  "ruled_ts": null,
+  "status": "ruled",
+  "ruled_choice": "a",
+  "ruled_ts": "2026-09-28T06:58:44.326243+10:00",
   "prior_rulings_overridden": [
    "2026-09-10 10:29",
    "2026-09-17 16:37",
@@ -19409,6 +19409,45 @@
    "CARD secuura-audit-row-ip-address-high-override",
    "CARD secuura-audit-root-lock-0930-remeasured",
    "CARD secuura-allowance-89-before-the-0930-freeze"
+  ]
+ },
+ {
+  "id": "secuura-ks888-revoke-validate-on-failed-save",
+  "client_project": "Secuura/Blockchain",
+  "title": "KS-888 all three routes: what should a failed revoke and a failed key check answer?",
+  "bluf": "No action needed unless you disagree with the default. You ruled b (fix all three routes) at 06:58, and option b left two behaviours for you to choose. The mint route (POST /api/keys) is already being briefed for the Spark with the contract you ruled for KS-1194: 503/500 and no key material. When the database save fails on the other two routes: (1) REVOKE: I recommend it answers 503 and KEEPS the in-memory revoke, so the key stops working in this process and the caller knows the revoke was not stored. (2) VALIDATE (POST /api/keys/validate): I recommend it REFUSES with 503, failing closed. The brief-writer measured that today's unhandled rejection can crash the service, and a caught 503 cannot. The cost: during a database outage every sk_* key check fails instead of passing. A Claude seat builds both with try/catch around the save, and it goes through the QA gate.",
+  "default_action": "If there's no ruling by today 18:00 AEST: option a. Wednesday briefs a Claude seat for revoke + validate on that contract. It goes through the QA gate, and Wednesday gives the GO under the TESTED grant. Deploy still needs your tap.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Revoke: 503 + keep in-memory revoke; Validate: refuse 503 (fail closed) (Recommended)",
+    "detail": "Safe direction on both: a revoked key stays unusable and an unverifiable key is refused. A database outage becomes a visible key-check outage instead of a silent pass."
+   },
+   {
+    "key": "b",
+    "label": "Revoke as a; Validate: admit the key and log the failure (fail open)",
+    "detail": "Keeps partner integrations working through a database blip, at the cost of accepting a key whose status could not be checked."
+   },
+   {
+    "key": "c",
+    "label": "Revoke: 500 and UNDO the in-memory revoke; Validate refuses 503",
+    "detail": "The process state matches the database exactly, but a revoke the caller asked for is silently reverted in this process until they retry."
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-09-28T06:59:38.608796+10:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "2026-09-10 17:10",
+   "2026-09-17 07:50",
+   "CARD secuura-ks566-revoke-gate",
+   "CARD secuura-ks764-key-revoke-org-scope",
+   "CARD secuura-ks692-status-revoke-interim-posture",
+   "CARD secuura-ks1194-failed-save-answers-200",
+   "CARD secuura-pr1245-round3-failed-at-cap",
+   "CARD secuura-ks888-failed-key-save-design"
   ]
  }
 ]
