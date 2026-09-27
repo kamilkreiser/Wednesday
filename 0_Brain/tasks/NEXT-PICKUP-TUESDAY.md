@@ -6,6 +6,14 @@ status: live
 supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s1-wholesale
 ---
 
+## 🟢 DELTA 104 — 2026-09-27 21:12 (s89, ctx 50% CHECKPOINT; band 80-90). **READ THIS FIRST, THEN 103.**
+- Kam: 0 new since 10:58 (live board read 21:12); reconcile: nothing; usage 26% < 95%; NexusAI undelivered rulings 0. OWED TO KAM unchanged from DELTA 103 (QuickQuote typed word · Vision gh login · VSP-67 card after the Azure read · 5b arm-ttk flag · RD-646/647 boot-change note · Monday: mark WEEK-INSTRUCTION-TUESDAY lapsed).
+- **Batch-4 merges: 2/5 DONE, both verified at source by Tuesday (ls-remote + gh run view, NexusAI's GH_CONFIG_DIR read-only):** RD-698 -> main 44bc804 (Build 36291675135 success, demo skipped); RD-699 -> main 02fe76a (Build 36293451995 success, demo skipped). **Merge 3 (RD-418) queued on the jest lock as s86o-merge3-rd418**, then RD-425, RD-443 (forward-merge condition). On each MERGED: ls-remote + gh run view the Build + demo-skip, before the next.
+- **Batch 3:** H1-H4 done (4169/252 = prediction); only the C-102 sweep left (qa-b3-H5b-sweep, FIFO; the --after placement was refused by the lock script and the gate correctly kept FIFO). ONE complete verdict follows. When it lands: read whole, score, pane_close, then LAUNCH GATE 10 into the slot (DELTA 101's WRONG list + CAP CORRECTION), and route batch 3's merges to N (lane 2).
+- **Batch 5a:** H4 heads-verify holds the lock since 10:12Z (heartbeat live 11:09Z); H5, H6 queued. **Batch 6:** H1-H3 queued.
+- **N:** RD-591 + RD-648 red-proved, fixes in, green holds queued (STATUS 06:47Z, no reply needed). **M, P:** holds queued, holding by design.
+- **FIXED this seat:** fleet/cockpit/wake_watch.sh frozen-busy leg honours wake_ack (both arms measured; backup .pre-0927-frozenack; Wednesday told). A frozen-busy wake on a pane whose holds sit in the lock queue = wake_ack.sh <pane>. **Read the CURRENT lock holder's heartbeat (tag in nexusai-jest.lock), never an older step's log.**
+
 ## 🟢 DELTA 103 — 2026-09-27 13:30 (s89 boot, ctx ~40%). **READ THIS FIRST, THEN 102.**
 ### OWED TO KAM (copy forward until closed by name)
 - **QuickQuote publish: STILL WAITING ON HIS TYPED LINE `publish QuickQuote 986f7b8`** (his 10:57 tap is not enough for production). On his typed line: relaunch `Datasec/Vision_Sales_Portal` with a publish brief, report the live tag + the first purge log line, then tell him.
