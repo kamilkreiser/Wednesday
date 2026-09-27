@@ -77,7 +77,7 @@ G11_DIR="$REPORTS/2026-09-28-vision-gate11-five-targets"
 G11_REPORT="$G11_DIR/report.md"
 REPORT="$REPORTS/2026-09-28-vision-gate12-three-targets/report.md"
 ROUTE_NAME='QA/Vision-gate12'
-NEG_SEATS='59108 20317 91381'   # Tuesday (%0), NexusAI (%22), NexusAI batch-5b QA gate (%36) — re-read 09:2x AEST (Vision seat 38185 had exited); Tuesday re-reads at stamp
+NEG_SEATS='59108 20317 91381'   # Tuesday (%0), NexusAI P (%22), QA/NexusAI-batch5b (%36) — re-read AT STAMP 09:25:31 AEST (no Vision seat live)
 # Gated anchors (not heads).
 ANCHOR_MAIN='609e967d6b03ff77dcbd692ee6e4434a5027e70b'     # main after gate 11's five merges; every target's base
 ANCHOR_OLDMAIN='0d992e09ebe0830dbe414aa73ca9a17a1be6c480'  # gate 10's GO'd head; main before gate 11's merges

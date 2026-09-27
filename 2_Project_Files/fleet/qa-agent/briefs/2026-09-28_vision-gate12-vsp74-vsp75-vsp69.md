@@ -34,12 +34,14 @@ The launcher parses §PIN, refuses any placeholder, and re-reads EVERY row by `g
 mismatch (main may have moved only to a descendant of `609e967` that touches none of the three targets' files: a NOTE, see §PIN). The
 verified table is appended to your prompt.
 
-SELF-CHECK: re-read end-to-end for contradictions | @STAMP@
-Self-check note: @STAMP@
+SELF-CHECK: re-read end-to-end for contradictions | 2026-09-28 09:26
+Re-read by Tuesday's drafting subagent on commission; Tuesday reviews the WRONG list before launch.
+Self-check note: tier 1 x3; round 1 per class; 74+75 merge back to back or not at all (the gate says whether that holds); the deploy-time old-backup list is the builder's inference and the gate MEASURES it; CI UNMEASURED; production untouched.
 
-NODE20-LEG: TUESDAY-DECIDES
-<!-- Tuesday sets NOT-RUN or DOCKER-PULL-NEVER at stamp (gate 11 ran DOCKER-PULL-NEVER and proved node:20 present, sha256:8f693eaa…,
-     linux/arm64, v20.20.2). The launcher refuses anything else (exit 45). The drafter did NOT run docker; re-prove the image (§N5.4). -->
+NODE20-LEG: DOCKER-PULL-NEVER
+<!-- STAMPED by Tuesday's ruling (2026-09-28, stamp): as gate 11 — `docker image inspect node:20` then `docker run --rm --pull=never` of
+     the image ALREADY present; nothing is ever pulled; if the image is absent the leg is NOT RUN and the report says so. (Was: Tuesday sets NOT-RUN or DOCKER-PULL-NEVER at stamp (gate 11 ran DOCKER-PULL-NEVER and proved node:20 present, sha256:8f693eaa…,
+     linux/arm64, v20.20.2). The launcher refuses anything else (exit 45). The drafter did NOT run docker; re-prove the image (§N5.5). -->
 
 GATE11-MERGED: 1976275635185db4551d5e3b015a66971f4563a5 5bdaeae6e28e280be380042a3dc8a56dbada0293 10ba4bbd29e34bf601426b68328f63725e228a86 7ef698d7e8c00c4c8e87060bec9f5284dfe8082a 6d7ea736b4f718cddd2e152f1ee0234d42d97bfe
 <!-- The five gate-11 GO heads (VSP66, VSP71, VSP70, VSP68, VSP73), all ancestors of main 609e967 (READ 08:4x: merge parents of dad64d2,
@@ -216,7 +218,7 @@ Repo: portal = `/Volumes/KK_T9_External_HDD/!CODING/Datasec/Vision_Sales_Portal/
 10-table list cannot bring quotes back … If gate 12 merges 74 without 75, the restore needs --allow-incomplete until 75 lands."
 **The drafter's READ at `f62917f`, re-checked at `a1794ad` (stronger than the READY; FIX 1 does not change it — FIX 1 narrows "lacking", and
 on VSP74 alone the PRO tables are "outside", not "lacking"):** `RESTORE_ORDER` at VSP74 is the old 10 tables, and `restorePlan()` marks
-**"outside" = every live public table except `session` that is not in `RESTORE_ORDER` and HAS ROWS** (`:134-139`). Main's `schema.sql` creates
+**"outside" = every live public table except `session` that is not in `RESTORE_ORDER` and HAS ROWS** (`:142-145` at `a1794ad`). Main's `schema.sql` creates
 all the PRO tables at boot. So on VSP74 alone, a row in ANY of `quotes`, `quote_approvals`, `quote_sequences`, `pricing_config`,
 `tco_scenarios`, `reminders`, `notification_log`, `integration_settings`, `monday_sync` or `feedback_coordinator_state` makes every restore
 INCOMPLETE — not only quote rows. And every backup main's VSP-68 code writes on a database without `feedback` carries a failed `feedback`
@@ -239,7 +241,7 @@ target on its own), stated with the per-file lines that moved.
 
 ## WRONG OR UNVERIFIABLE IN THE COMMISSION AND THE READYs — found by the drafters (verify each; all are claims)
 - **(a) VSP-74's `restorePlan()` reads the plan OUTSIDE the clear transaction (READ; rule it).** `restorePlan()` queries through the pool
-  (`db = { query }`, `:131`), then `clearTables()` opens its own client and `BEGIN` (`:161-164`). A row written between the two (VSP-69's
+  (`db = { query }`, `:133` at `a1794ad`), then `clearTables()` opens its own client and `BEGIN` (`:164` ff.). The r3 VSP-74 READY now lists this window under NOT TESTED. A row written between the two (VSP-69's
   dispatcher inserting `notification_log`, a user creating feedback, a lazy table being created) is not in the plan. On the VSP75 tree every
   such table is in `RESTORE_ORDER`, so the window matters most for "absent + empty" lazy tables and for VSP74 alone. Measure once (a writer
   between plan and clear), or rule it unreachable for an operator-run CLI, and say which.
@@ -264,8 +266,8 @@ target on its own), stated with the per-file lines that moved.
   measures 19 failed + 1 empty (INCOMPLETE upload) and says what it saw, without re-opening the empty-database ruling.
 - **(g) VSP-75's M3b "truthiness back" SURVIVES and is called equivalent (READ: plausibly true; decide it).** With `error = message || code ||
   name || 'unknown error'`, `error` can be empty only if `'unknown error'` were empty, so `if (dump.error)` and `'error' in dump` agree for every
-  error `dumpTable()` produces. **But** the restore side's presence test (`failedTables()`, `:115`) is load-bearing for OLD backups written by
-  main's code with `error: ""` — the VSP-74 cell for that exists (`restore-incomplete.test.js:172`). Confirm M3b is equivalent on the backup side
+  error `dumpTable()` produces. **But** the restore side's presence test (`failedTables()`, `:112` ff. at `a1794ad`) is load-bearing for OLD backups written by
+  main's code with `error: ""` — the VSP-74 cell for that exists (`restore-incomplete.test.js`, the "error: \"\"" cell; line numbers moved at `a1794ad`). Confirm M3b is equivalent on the backup side
   only, and that the restore-side truthiness mutant (VSP-74's "truthiness back") reddens.
 - **(h) VSP-75's lazy rule keys on `err.code === '42P01'` (READ).** The code 42P01 comes from the PK lookup's `$1::regclass`. A lazy table in a
   different schema on `search_path`, or a permission error (42501) on an existing lazy table, is NOT absent (correct: INCOMPLETE). Measure the
@@ -290,8 +292,8 @@ target on its own), stated with the per-file lines that moved.
   `feedback_coordinator_state` ("empty would re-send everything"); `integration_settings` has only the comment above. Treat other reasons as unstated.
 - **(o) The session exclusion and restored user ids (carried; measure once at `609e967` and VSP75):** a stale session of a user created after the
   backup may authenticate as the NEXT user created after a restore resets `users_id_seq`.
-- **(p) The READY red-proofs ran on the builder's `salesportal_test`,** the builder's own database, which **the Vision seat (pid `38185`, pane
-  `%37`) is LIVE on now.** Never use it (§13.2).
+- **(p) The READY red-proofs ran on the builder's `salesportal_test`,** the builder's own database, which the Vision seat (pid `38185`, pane
+  `%37`, EXITED by the stamp at 09:25) used. Never use it (§13.2).
 - **(q) Merge prediction: UNMEASURED by the drafter** (it may not run `merge-tree --write-tree` outside its own objdir, and did not). READ only:
   VSP75 and VSP69 both touch `BACKLOG.md`; no code file is shared. Predicted: VSP75 × main and VSP69 × main fast-forward (0 behind);
   **VSP75 × VSP69 CONFLICT in `BACKLOG.md` only.** The gate derives every merge in its own object dir.
@@ -432,9 +434,10 @@ not a note. The same holds for FIX 1's two mutants (M1 lacking ignores rows; M2 
    {2,3,4,5} red (first draft's prediction at `d2531ea`, re-derived on the new main). **FIX 1's cells red at `f62917f`** (plan: the three lacking cells;
    restore-incomplete: the empty-meetings cell red, the meetings-with-rows cell GREEN there as the READY says — prove both). **The CHANGED
    assertion:** diff the old plan cell "a table of the restore list that the backup lacks is incomplete" (`8a305d8` → `24a4dd3`) and rule it a
-   correct re-statement under FIX 1, not a weakening. **`complete()`'s change:** run `restore-incomplete.test.js` ALONE on a fresh DB at
-   `f62917f` (predicted 5 of 12 red, "relation feedback does not exist") and at `a1794ad` (12/12). At `a1794ad`: 12/12 and 7/7, N ≥ 3.
-2. **The seven mutants, re-derived** (fresh tree per arm, asserted edits, `node --check` rc quoted; **a red from a mutant that does not parse is
+   correct re-statement under FIX 1, not a weakening. **`complete()`'s change:** run `restore-incomplete.test.js` ALONE on a fresh DB with the OLD
+   `complete()` (the READY reports 5 of 12 red, "relation feedback does not exist", for its pre-fix copy; the r2 file `cf2f35f` has 10 cells — say
+   which file you ran and what you saw) and at `a1794ad` (12/12). At `a1794ad`: 12/12 and 7/7, N ≥ 3.
+2. **The nine mutants, re-derived** (fresh tree per arm, asserted edits, `node --check` rc quoted; **a red from a mutant that does not parse is
    VOID**): FIX 1's M1 (lacking ignores rows: predicted 2 red) and M2 (lacking ignores existence: predicted 11 red, "a query on a missing
    table throws" — say whether that red is a product red or a crash-red); then the r2 seven: no closure; `clearTables` ignores keep; no lacking; no outside; no refusal; truthiness back (`failedTables()`); insert loop ignores
    keep. Quote which cell reddens each and why. **Plus M8 (yours):** closure on CASCADE/SET NULL only (NO ACTION parents dropped) — predicted:
@@ -474,7 +477,8 @@ lazy table, or clearing one that HAS rows without the flag; a secret in the back
 cell (i) or (ii) of `test/db/restore-old-backup.test.js` not reproduced on YOUR instrument, or the READY's deploy-time list contradicted by
 YOUR measurement (§N2.9) without the READY's list being corrected in your report (a contradicted list is a FAIL: it is the text Kam will read
 at deploy); FIX 2: ANY connection or transaction by the gate's runs in `salesportal_test_lazy` (by `pg_stat_database` / `pg_stat_activity`,
-§N2.10), or the lazy suite using any database other than `<your TEST_DATABASE_URL name>_lazy`.**
+§N2.10), or ANY write to any builder database, or the lazy suite using any database other than `<your TEST_DATABASE_URL name>_lazy` — per
+Tuesday's stamp ruling a measured write to `salesportal_test_lazy` or a builder database is a FAIL of VSP-75 and the gate STOPS that arm.**
 1. **Red re-derived at `e34add4`** (the merge before the round-2 fix): VSP-68's dbBackup cells {1,3,4} red (the READY's "40 !== 20" and the
    silent injector). Then copy the round-2 `dbBackup.test.js` (`12a6e24`) onto `e34add4`: the five new cells red for the product reasons (F1,
    lazy), not load errors. **FIX 1 cells (i)/(ii) red at `69157de`** (READY: INCOMPLETE naming all 10 new tables + feedback). At `41c4a66`: dbBackup
@@ -631,8 +635,8 @@ count (20); the first reminder tick's `notification_log`; and **that no restore 
    `main()`); use the real `createApp()` and `initDb()` inside your harness only.
 2. **Postgres = the local container on `127.0.0.1:5433`, and ONLY databases you create.** **No docker command at all** (the one exception is
    §N5.5, under its NODE20-LEG line). Create `vsp_qa_g12_<epoch>` for app runs and `vsp_qa_g12_<epoch>_test` as `TEST_DATABASE_URL` for
-   `test:db` (it TRUNCATEs; the name MUST end in `_test`). **Never** `salesportal`, `salesportal_test` (the builder's; **the Vision seat is LIVE,
-   pid `38185`**), `salesportal_test_lazy` (the builder's; at `41c4a66` the lazy suite derives `<your test db>_lazy` from `TEST_DATABASE_URL` —
+   `test:db` (it TRUNCATEs; the name MUST end in `_test`). **Never** `salesportal`, `salesportal_test` (the builder's; the Vision seat `38185` had
+   exited at stamp, but a Vision seat may be relaunched at any time), `salesportal_test_lazy` (the builder's; at `41c4a66` the lazy suite derives `<your test db>_lazy` from `TEST_DATABASE_URL` —
    FIX 2 — so ALWAYS set `TEST_DATABASE_URL` and prove it per §N2.10), any `vsp_qa_g1_*` … `vsp_qa_g11_*` database, the builder's
    `vsp_bf1_*`, or any `vsp71_*` / `vsp73_*` database you did not cause. `server/db.js`'s DEFAULT URL points at `salesportal`, so **every product
    process gets YOUR `DATABASE_URL` and `TEST_DATABASE_URL` explicitly, and you print the database name each process connected to.** Local
@@ -657,7 +661,10 @@ count (20); the first reminder tick's `notification_log`; and **that no restore 
    app entry point ANYWHERE in the remaining argv, from the kernel; **"ours" = the ancestor chain CONTAINS your claude pid.** **Negative
    controls, same run, must classify FOREIGN:** at refresh (08:40 AEST) the live claudes were Tuesday `59108` (pane `%0`), **the Vision builder
    `38185` (pane `%37`, LIVE on the same Postgres)**, NexusAI `20317` (`%22`), `9959` (`%21`), `62649` (`%19`), the NexusAI batch-5b QA gate `91381`
-   (`%36`), QA gates `36118` (`%23`) and `38362` (`%29`), and `84139` (not in tmux). **Gate 11's seat `40404` and `18655` had exited. Re-read at 09:2x (third pass): the Vision builder `38185` (`%37`) had ALSO exited; no Vision seat was live; the launcher's controls are now `59108`, `20317`, `91381`.** **Re-read the
+   (`%36`), QA gates `36118` (`%23`) and `38362` (`%29`), and `84139` (not in tmux). **Gate 11's seat `40404` and `18655` had exited.** **RE-READ AT STAMP (09:25:31 AEST, `ps -axo` + `tmux list-panes -a`; load 19.56 / 17.45 /
+   16.93): live claudes Tuesday `59108` (`%0`), NexusAI P `20317` (`%22`), NexusAI O `38362` (`%29`), NexusAI M `62649` (`%19`), NexusAI N `9959`
+   (`%21`), QA/NexusAI-batch5b `91381` (`%36`), and `84139` (not in tmux). EXITED since the refresh: the Vision builder `38185` (`%37`) and the QA
+   gate `36118` (`%23`). No Vision seat is live.** The launcher's negative controls: `59108`, `20317`, `91381`. **Re-read the
    seat list at start**; say which have exited. Never count by `EADDRINUSE`, a whole-command-line grep, or raw `comm`. **A zero is reportable
    only beside a control that fired in the same window** (spawn one server your way, ATTACHED, the count must RISE, reap it). **Record the
    1-minute load beside every timing number** (it was 18.05 at 08:40 with `hw.ncpu` 8).
@@ -703,13 +710,18 @@ count (20); the first reminder tick's `notification_log`; and **that no restore 
 ## TUESDAY'S RULINGS AT STAMP (2026-09-28)
 - **Sequencing: DONE (recorded by the refresh, READ 08:4x):** gate 11 GO ×5 (07:54); merged to main in order VSP-66 (`1976275`, fast-forward),
   VSP-71 (`dad64d2`), VSP-70 (`8efb159`), VSP-68 (`8720b34`), VSP-73 (`609e967`); forward merges VSP74 `987178c`, VSP75 `e34add4` (+ `d7a5e77`,
-  `987afab`, `949b72e`), VSP69 `e79682a`; the stub fix in `e64d54e` on the VSP-75 branch. **@STAMP@ — Tuesday confirms these against the
-  Vision seat's MERGED mails and records the MERGED mails' suite sets beside gate 11's predicted 114 / 93.**
+  `987afab`, `949b72e`), VSP69 `e79682a`; the stub fix in `e64d54e` on the VSP-75 branch. **STAMPED — Tuesday's merge-record
+  confirmation: gate 11's five GO heads are on portal main `609e967` in the order VSP-66 (fast-forward `1976275`), VSP-71 `dad64d2`, VSP-70
+  `8efb159`, VSP-68 `8720b34`, VSP-73 `609e967`; Tuesday verified main at each step by `ls-remote` (08:02-08:11 AEST).** The drafter's
+  `log --format='%h %p %s' 0d992e0..609e967` (08:4x) agrees on order and parents. The MERGED mails' suite sets were NOT supplied at stamp:
+  the gate measures main `609e967`'s sets itself (§N5.2) and compares with gate 11's merged prediction (unit 114, db 93).
 - **WRONG (h) of gate 11 (product `vsp71_*` roles/databases and `vsp73_*` databases created by `test:db`) — carried over and EXTENDED to
-  `salesportal_test_lazy`: permitted ONLY inside a `test:db` run; list every such name before and after; a leftover LOGIN role of YOURS (its
+  YOUR OWN `vsp_qa_g12_*_test_lazy` (never the builder's `salesportal_test_lazy`): permitted ONLY inside a `test:db` run; list every such name before and after; a leftover LOGIN role of YOURS (its
   `<pid>` one of your own test processes, proved from your run log) is dropped at once with its databases, and each drop named in the report; a
-  leftover whose pid is NOT yours, and `salesportal_test_lazy` (the builder's), is reported, never touched.** @STAMP@ — Tuesday
-  confirms or changes this at stamp. **WRONG (t) is RESOLVED by FIX 2 (`41c4a66`): the gate runs the lazy suite against its own
+  leftover whose pid is NOT yours, and `salesportal_test_lazy` (the builder's), is reported, never touched.** **STAMPED — Tuesday's
+  product-test database ruling:** every `test:db` run uses the gate's OWN databases via `TEST_DATABASE_URL` (`vsp_qa_g12_*_test`), and the
+  lazy suite therefore uses `<that>_lazy`; **never run it with `TEST_DATABASE_URL` unset; if the gate measures ANY write to
+  `salesportal_test_lazy` or to any builder database, that is a FAIL of VSP-75 and the gate STOPS that arm.** **WRONG (t) is RESOLVED by FIX 2 (`41c4a66`): the gate runs the lazy suite against its own
   database via `TEST_DATABASE_URL` (`vsp_qa_g12_<epoch>_test_lazy`, listed, left in place); the checked-edit fallback applies ONLY if §N2.10
   measures the file reaching `salesportal_test_lazy`, and then FIX 2 is a FAIL of VSP75.**
 - **Second pass's item 4 RULED (Tuesday, Jira VSP-75 comment 38536):** an empty database's clean dump says OK — correct; a wrong database —
@@ -793,4 +805,8 @@ PROVENANCE:
 - seats and panes; load 18.05 / 16.67 / 17.43; `:5433` LISTEN (Docker); routing lines up to `QA/Vision-gate11` (no gate 12 yet) |
   `ps -axo`, `tmux list-panes -a`, `uptime`, `lsof`, `grep` of `fleet/inbox_routing.conf` | read 08:40
 - first-draft provenance (round-1 READYs, `0d992e0`-era reads, schema FK lines at `0d7a2fb`) | `…vsp69.md.pre-0928-refresh` | read 06:42-06:5x
+- STAMP (Tuesday's rulings 1-7, relayed to the drafting subagent): NODE20-LEG, the merge-record confirmation, the product-test database
+  ruling, the Self-check note; seats re-read by `ps -axo` + `tmux list-panes -a` at 09:25:31 AEST; routing line `QA/Vision-gate12` added to
+  `fleet/inbox_routing.conf` (backup `.pre-0928-gate12`); whole brief re-read for contradictions, 8 fixed (stale line refs at `f62917f`, §N5.4→§N5.5,
+  the exited Vision seat, the nine-mutant count, the `complete()` file, the lazy-DB extension of gate 11's WRONG (h), the builder-DB write rule) | read 2026-09-28 09:26
 - no docker, no merge-tree, no fetch was run by either drafter
