@@ -17625,7 +17625,9 @@
    "CARD hpsmpoc-showcase-approver-line",
    "CARD hpsmpoc-findings-order",
    "CARD hpsmpoc-showcase-labelling"
-  ]
+  ],
+  "delivered_artefact": "PR #39 merged, HPSM-POC main c24a79e (every listed severity read; 18 plants refused, 0 true replies newly failing)",
+  "delivered_ts": "2026-09-27T11:41:11.620766+10:00"
  },
  {
   "id": "secuura-ks1346-logging-thrown-objects-leaks-secrets",
@@ -17982,7 +17984,9 @@
    "CARD hpsmpoc-showcase-approver-line",
    "CARD hpsmpoc-findings-order",
    "CARD hpsmpoc-showcase-labelling"
-  ]
+  ],
+  "delivered_artefact": "PR #39 merged, HPSM-POC main c24a79e (TimeoutSeconds = total budget, 3 s retry floor)",
+  "delivered_ts": "2026-09-27T11:41:09.957025+10:00"
  },
  {
   "id": "hpsmpoc-approve-ai-criteria",
@@ -18285,7 +18289,9 @@
    "CARD hpsmpoc-showcase-approver-line",
    "CARD hpsmpoc-findings-order",
    "CARD hpsmpoc-showcase-labelling"
-  ]
+  ],
+  "delivered_artefact": "PR #40 merged, HPSM-POC main 2f68796 (403 report.withheld for every caller; nothing deleted)",
+  "delivered_ts": "2026-09-27T11:41:13.113335+10:00"
  },
  {
   "id": "quickquote-publish-retention-purge-986f7b8",
@@ -18394,5 +18400,116 @@
   ],
   "delivered_artefact": "C-28 (fb30e5c) + PR #38 merged 932c64c: gitleaks CI job, now a required check on main; 16:00 reminder owed",
   "delivered_ts": "2026-09-27T11:27:27.059018+10:00"
+ },
+ {
+  "id": "hpsmpoc-override-after-report-issued",
+  "client_project": "Datasec/HPSM-POC",
+  "title": "Can a consultant still override a finding after the customer's report has been issued?",
+  "bluf": "The consultant override (HPSMPOC-36, PR #41) is built. The design allows overrides while an assessment is 'scored' and says nothing about after the report is issued, so seat A built it LOCKED there (the API answers 409). A report can still be generated again in that state, so a mistake spotted after the PDF went out is a dead end: there is no way back to 'scored'. Seat A's STATUS: HPSM-POC/1_Project_Definition/Briefs/2026-09-27_B36_SEAT-A_consultant-override.STATUS.md (Q-B36-1).",
+  "default_action": "If you don't answer: (a), locked as built; nothing changes. Friday acts.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Keep it locked",
+    "detail": "Once issued, the findings are frozen, as built today."
+   },
+   {
+    "key": "b",
+    "label": "Allow it; the next report version carries the change",
+    "detail": "The issued PDF stays exactly as issued; a regenerated report shows the override; every change is audited as now. A one-line change."
+   }
+  ],
+  "recommended": "b",
+  "ts": "2026-09-27T11:31:54.828096+10:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "seat": "friday",
+  "prior_rulings_overridden": [
+   "CARD attio-companies-report",
+   "CARD secuura-audit-row-mysql2-override-vs-prisma-pin",
+   "CARD secuura-audit-row-ip-address-high-override",
+   "CARD vision-portal-feedback-report-unauthenticated",
+   "CARD hpsmpoc-report-content"
+  ]
+ },
+ {
+  "id": "hpsmpoc-workspace-counts-after-override",
+  "client_project": "Datasec/HPSM-POC",
+  "title": "After an override, should the customer list's Critical/High counts show the rule's original severities or the amended ones?",
+  "bluf": "The customer list and the showcase summary count Critical/High from the severities the rules gave at submission. An override that lowers a finding (say Medium to Low) does not change those counts. The score is also pinned at submission, by design. Seat A's recommendation: keep the rule counts and label them 'as scored'. Seat A's STATUS: HPSM-POC/1_Project_Definition/Briefs/2026-09-27_B36_SEAT-A_consultant-override.STATUS.md (Q-B36-3).",
+  "default_action": "If you don't answer: (c), nothing changes. Friday acts.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Rule counts, labelled 'as scored'",
+    "detail": "The numbers stay as submitted, matching the pinned score; a small label change."
+   },
+   {
+    "key": "b",
+    "label": "Show the amended counts",
+    "detail": "The list reflects overrides; the score stays pinned, so the two may then disagree on screen."
+   },
+   {
+    "key": "c",
+    "label": "Leave it as it is",
+    "detail": "Rule counts, no label."
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-09-27T11:31:56.450043+10:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "seat": "friday",
+  "prior_rulings_overridden": [
+   "CARD nexusai-rd75-dkim-recipe-workspace",
+   "CARD workspace-dead-secuura-tenant-cleanup",
+   "CARD secuura-workspace-suites-never-run-on-a-pr",
+   "CARD secuura-audit-row-mysql2-override-vs-prisma-pin",
+   "CARD secuura-audit-row-ip-address-high-override"
+  ]
+ },
+ {
+  "id": "hpsmpoc-showcase-phone-access",
+  "client_project": "Datasec/HPSM-POC",
+  "title": "At the HP event, does anyone need to open the showcase from a phone or a second device?",
+  "bluf": "Until today the showcase web answered anyone on the same Wi-Fi as the laptop, with the showcase Partner's access and no sign-in (measured: a LAN request read the customer list, 200). PR #42 makes it answer only on the laptop itself, with an explicit '--lan' switch that prints a warning. If a phone must reach it at the event, the safe way is a per-event access code on the web (seat A work). Seat B's STATUS: HPSM-POC/1_Project_Definition/Briefs/2026-09-27_B40_SEAT-B_ci-azurite-and-showcase-hardening.STATUS.md (Q1).",
+  "default_action": "If you don't answer: (a), laptop only, as built in PR #42. Friday merges it on green.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Laptop only (as built)",
+    "detail": "'--lan' stays available for rehearsals on a trusted network."
+   },
+   {
+    "key": "b",
+    "label": "Phones too, with an access code",
+    "detail": "A seat adds a per-event code on the web before the event; the laptop-only default stays."
+   },
+   {
+    "key": "c",
+    "label": "Phones too, open on the network",
+    "detail": "Not recommended: anyone on the venue Wi-Fi gets Partner access."
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-09-27T11:46:12.916708+10:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "seat": "friday",
+  "prior_rulings_overridden": [
+   "2026-08-17 20:01",
+   "2026-09-17 08:04",
+   "2026-09-21 10:15",
+   "CARD tuesday-mac-mini-scheduler-full-disk-access",
+   "CARD composer-phone-flows",
+   "CARD composer-discovery-notices-on-phone",
+   "CARD hpsmpoc-showcase-draft-findings",
+   "CARD hpsmpoc-showcase-score-new-customer",
+   "CARD hpsmpoc-showcase-approver-line",
+   "CARD hpsmpoc-showcase-labelling"
+  ]
  }
 ]
