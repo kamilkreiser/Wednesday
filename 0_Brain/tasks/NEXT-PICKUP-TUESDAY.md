@@ -6,6 +6,21 @@ status: live
 supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s1-wholesale
 ---
 
+## 🟢 DELTA 103 — 2026-09-27 13:30 (s89 boot, ctx ~40%). **READ THIS FIRST, THEN 102.**
+### OWED TO KAM (copy forward until closed by name)
+- **QuickQuote publish: STILL WAITING ON HIS TYPED LINE `publish QuickQuote 986f7b8`** (his 10:57 tap is not enough for production). On his typed line: relaunch `Datasec/Vision_Sales_Portal` with a publish brief, report the live tag + the first purge log line, then tell him.
+- **Vision gh login:** his hands at the mini. Not done. No chase.
+- **VSP-67 card: NOT FILED, deliberately.** Its premise (Azure's production Postgres settings for statement_timeout / lock_timeout / idle_in_transaction_session_timeout) is UNMEASURED; gate 9's report says so at line 505. **Put a READ-ONLY measurement (az postgres flexible-server parameter show, those three + tcp_keepalives) into the next Vision brief** (the gate-10 merge-author relaunch). Card Kam only with the measured values; default = no change.
+- **At the 5b merge:** flag to Kam BEFORE the push that main gains the arm-ttk.yml he approved in C-138 (C-142).
+- **At the RD-646/647 merge:** tell Kam the boot-behaviour change (a Redis-down boot no longer exits; it refuses with 503), since C-179 is his.
+- Week instruction lapses tonight: on Monday mark WEEK-INSTRUCTION-TUESDAY lapsed unless he says otherwise.
+### FLOOR (13:30)
+%0 tuesday · **%29 Datasec/NexusAI-O (LAUNCHED 13:27, batch-4 merge author; brief `fleet/briefs_staged/2026-09-27_nexusai_O_batch4_merges.md`, read back 03:24:34Z; --mail tap delivered while it was still booting — verify rung 5 = its plan-confirmation mail)** · %28 QA batch6 · %26 QA batch5a · %23 QA batch3 · %22 P · %21 N · %19 M (4 holds queued on the lock; acked) · %1 monitor.
+### ON O's MAILS (plan CONFIRMED 03:30Z: RD-698/699 push as fast-forwards with no lock hold; 3-5 queued --after qa-b6-H3-verify)
+Plan confirmation: read whole, confirm. Each MERGED: ls-remote main + cat-file parents + counts vs the gate's 4180/250 end state, deploy-demo SKIPPED, CI Build green, before the next. After all five: ONE board line to Kam. Then O files the findings tickets (A-F1+A-F2 Major, A-F3, B-F1, C-F1, C-N1) and builds the A-F1+A-F2 fix (tier 1, real-image red-proof).
+### NEXT
+Gate 10 (Vision VSP-65 r2) launches when a gate slot frees (batch 3 has run 4 h+); stamp per DELTA 101's WRONG list and CAP CORRECTION. Then 5b.
+
 ## 🔴 DELTA 102 — 2026-09-27 13:20 ROTATION HANDOVER (s88, ctx ~79%, safe boundary). **READ THIS FIRST, THEN 101 (its UPDATE blocks are the detail).**
 ### OWED TO KAM (copy forward until closed by name)
 - **QuickQuote publish: WAITING ON HIS TYPED LINE `publish QuickQuote 986f7b8`.** He TAPPED (a) at 10:57, which is not enough for production; he was asked to type it (board 201, and in the terminal at ~11:0x when he came to the mini). On his typed line (kam_msgs.sh --source live, or his terminal line; HIS typing, not an echo), relaunch `Datasec/Vision_Sales_Portal` with a publish brief (the CLAUDE.md publish steps; report the live tag + the first purge log line), then tell him.
