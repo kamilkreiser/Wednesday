@@ -19173,5 +19173,46 @@
   ],
   "withdrawn_at": "2026-09-27T21:45:23.949945+10:00",
   "withdrawn_reason": "Kam answered with a note, live board 2026-09-27 21:43:30 (view=friday), verbatim: 'please email me the PDF'. Done 21:4x: v1.4 PDF emailed from friday-laptop-agent@ to kamil.kreiser@datasec.com.au (sent copy read back, attachment 3,702,582 bytes). Sending to Paul is Kam's own act."
+ },
+ {
+  "id": "vision-prod-postgres-idle-transaction-timeout",
+  "client_project": "Datasec/Vision_Sales_Portal",
+  "title": "Production database: stop stuck sessions holding locks forever (VSP-67)",
+  "bluf": "Measured tonight, read only: on Vision's production database (datasec-sales-db) all three server-side timeouts are OFF (statement_timeout, lock_timeout, idle_in_transaction_session_timeout = 0). Gate 9 showed that when the app gives up on a request, the database keeps the session and its row locks; locally that lasted about 2 h 11 min. Nothing on the server ends such a session on Azure either. This is a production setting, so it is your call. Nothing is broken today; this is a hazard, not an outage. (Override of the prior-ruling gate: its 10 matches share only generic words; 0 ruled cards mention idle_in_transaction, statement_timeout or VSP-67 — searched decisions.json, with 91 Vision mentions as the control.)",
+  "default_action": "If you do not answer: nothing changes on the production database (option a). Tuesday re-raises it only if a gate measures the hazard causing a real failure.",
+  "options": [
+   {
+    "key": "a",
+    "label": "No change for now (default)",
+    "detail": "Leave the settings as they are. The app-side time limits from VSP-65 still stop users waiting forever; only the database-side leftovers remain."
+   },
+   {
+    "key": "b",
+    "label": "Set only idle_in_transaction_session_timeout to 10 minutes (recommended)",
+    "detail": "Ends a session that has sat idle inside a transaction for 10 minutes and releases its locks. It cannot cut off a long-running query, backup or migration, which statement_timeout could. The Vision agent applies it as one parameter change, reversible by setting it back to 0."
+   },
+   {
+    "key": "c",
+    "label": "Set all three timeouts",
+    "detail": "Strongest protection, but statement_timeout and lock_timeout can cut off legitimate long operations (restores, migrations); it needs measuring against those first."
+   }
+  ],
+  "recommended": "b",
+  "ts": "2026-09-27T22:25:51.862922+10:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "CARD attio-prod-db",
+   "CARD secuura-ks713-mcp-prod",
+   "CARD vision-v230-publish",
+   "CARD vision-v230-typed-word",
+   "CARD secuura-ks740-maxitems-timeout",
+   "CARD secuura-studio-slot1-shared-postgres-literal-2026-09-03",
+   "CARD secuura-advisories-high-and-prod-reaching",
+   "CARD vision-portal-feedback-report-unauthenticated",
+   "CARD vision-portal-reminder-push-public-ntfy-topic",
+   "CARD vision-gh-login-for-ci"
+  ]
  }
 ]
