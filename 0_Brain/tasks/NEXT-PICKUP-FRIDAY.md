@@ -24,6 +24,18 @@ supersede: replace wholesale; previous = NEXT-PICKUP-FRIDAY.md.pre-0925-rotate-s
 ## 🔴🔴 DAY INSTRUCTION, live until end of SATURDAY 2026-09-26 — `tasks/WEEK-INSTRUCTION-FRIDAY.md`
 Kam (terminal ~08:0x, verbatim): "Yes, please keep going for the day. I'll be out all day, so just keep working on getting the product ready and refined." = Datasec/HPSM-POC. Still his: deploys, anything to HP/humans, money, template text + validator/rule changes, irreversible. Usage 71% at 09:50: cloud seats only when nothing local can do it AND it matters now; Spark first.
 
+## 🔴 STATE 2026-09-27 17:55 (Friday, 50% CHECKPOINT) — supersedes everything below where they differ
+**Kam's live instruction (terminal, after 16:3x): "keep working your way through tickets".** Seats run on the new account (7d 24%). No Kam rows since 17:11; reconcile 0.
+1. **HPSM-POC:** main = **b1d3ec9** (PR #49 merged, HPSMPOC-81 Done). Floor empty; agent-actionable pool EMPTY (Kam cards / HP content / Azure -57).
+2. **HPSM:** B04 DONE + reviewed (sweep on HPSM-39 38488; clinic pack `HPSM/1_Project_Definition/Architecture/2026-09-29_HP-meeting-clinic-pack_FOR-KAM.{md,pdf}` shared to Kam's drawer f-4a39f170f1; SOW status on 6 tickets; C-78). Kam's Tue 29 Sep 07:05 HP meeting = clinic (Friday's reading, told). HPSM-37 is Kam's after Tuesday. **HPSM stays readiness-only** until Kam says the build starts (told him; his word corrects). Pane closed.
+3. **Composer (Datasec Security Composer; HPSM-light repo, NO GitHub CI — ci.sh is the gate):**
+   - B11 merged as **PR #6 → main 3b9a663** (Friday opened it: the seat has no gh login; the compare URL is in the STATUS).
+   - **Seat A %52 on B11 ADDENDUM-1 round 2** (Q2b approver note, Q4a required Environment, N1 hide the link on non-editable versions, Q5 content clean = new content release per C-05, NOT deployed). On READY: review at source, open the PR with `friday_as.sh datasec gh pr create`, merge head-pinned, then card Kam for the DEPLOY of the new release (say what goes read-only).
+   - **Seat B %53 B12 guide v1.3** READY (61 pp, G1–G16 all_pass, cold-reader 0 guesses) BUT the v1.3 AND v1.2 folders were UNTRACKED at 17:5x while the seat was still mid-turn (secret scan). **When it shows "done", check `git -C <Composer> status -- 1_Project_Definition/User_Guide`**; if still untracked, an addendum: commit v1.3 (walk-raw is gitignored) by explicit path. Its draft "GUIDE v1.3 SHOTS" was RELEASED by the cold-reader (a deviation from "draft only"; B02 precedent; C-03 leave test engagements) → tell Kam in the review message. BACKLOG #17 → ask seat A to mark it READY FOR REVIEW. Then a card for Kam: send v1.3 to Paul? (+ 6 Needs-SME items in the STATUS).
+   - Card open: `composer-repeated-questions-notice` (rec a reword; default c keep).
+4. **Tooling built today:** `tools/count_list_check.sh` (advisory, ledger w=3) wired into chat_reply + decision_queue.
+5. Caffeinate pid 53618 (6 h from 17:07). Watcher: re-arm `friday/watch_status.sh /tmp/claude-501/seen_composer_b11b12 "<Composer>/1_Project_Definition/Briefs/2026-09-27_B1[12]_STATUS.md"` after every wake.
+
 ## 🔴 STATE 2026-09-27 ~17:00 (Friday, ROTATION HANDOVER at 79%) — supersedes everything below where they differ
 **Kam's live instruction (terminal, after 16:3x): "keep working your way through tickets".** Seats run on the new account (7d ~21%).
 1. **HPSM-POC main = 1adaaa2** (15 PRs merged today, #35–#48, each head-pinned + blob-verified; main CI green).
