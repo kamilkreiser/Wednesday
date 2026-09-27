@@ -35,7 +35,7 @@ pane_hash() {
   # match — the first draft of this file did exactly that.
   local t
   # 2026-09-15: statusline excluded (it drifts with 7d/renews); identical filter in wake_watch.sh
-  t="$("$TMUX_BIN" capture-pane -t "$1" -p 2>/dev/null | grep -v '^$' | grep -v 'ctx:[0-9-]*%' | tail -20)"
+  t="$("$TMUX_BIN" capture-pane -t "$1" -p 2>/dev/null | grep -v '^$' | grep -v 'ctx:[0-9-]*%' | grep -v 'new task? /clear to save' | tail -20)"
   printf '%s' "$t" | shasum | cut -c1-12
 }
 pane_key() { printf '%s' "$1" | tr -c 'A-Za-z0-9' '_'; }
