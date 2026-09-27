@@ -89,8 +89,6 @@ for a in "$@"; do
   if [ "$a" = "--json" ]; then DQ_JSON="$(cat)"; break; fi
 done
 export DQ_JSON
-# ADVISORY count-vs-list check (Friday ledger w=3, 2026-09-27) — run by cmd_add / cmd_amend over the card's text.
-export DQ_COUNT_LIST_CHECK="${DQ_COUNT_LIST_CHECK:-$DIR/count_list_check.sh}"
 # Phase 2: no longer `exec` — the live-board post runs after the python returns. Its exit code is preserved verbatim.
 python3 - "$@" <<'PYEOF'
 import datetime, json, os, sys, tempfile
@@ -234,26 +232,6 @@ def prior_rulings(d):
         die(f"card-id lineage check failed ({e}) — refusing to add a card without it")
     return hits
 
-def count_list_advisory(dec):
-    """ADVISORY (Friday ledger w=3, 2026-09-27): a card said "Five tickets depend on this answer" over SIX ids
-    (HPSM-12/19/25/32/35/41), another "Four High findings" over three. Runs tools/count_list_check.sh over the
-    card's title + bluf + option labels/details + default_action, one field per line. Its stderr is written
-    through; it NEVER blocks, never changes the exit code, and a failure to run it is printed, not raised."""
-    import subprocess
-    chk = os.environ.get("DQ_COUNT_LIST_CHECK", "")
-    if not chk or not os.path.exists(chk) or not isinstance(dec, dict):
-        return
-    lines = [str(dec.get("title") or ""), str(dec.get("bluf") or "")]
-    for o in dec.get("options", []) or []:
-        if isinstance(o, dict):
-            lines += [str(o.get("label") or ""), str(o.get("detail") or "")]
-    lines.append(str(dec.get("default_action") or ""))
-    try:
-        subprocess.run(["bash", chk], input="\n".join(l for l in lines if l.strip()), text=True,
-                       stdout=subprocess.DEVNULL, timeout=20)
-    except Exception as e:
-        print(f"decision_queue: ADVISORY — count_list_check.sh could not run ({e}); the card was NOT checked", file=sys.stderr)
-
 def cmd_add(args):
     if args == ["--json"]:
         try:
@@ -284,7 +262,6 @@ def cmd_add(args):
                 i += 2
             else:
                 die(f"unknown flag: {a}")
-    count_list_advisory(d)   # ADVISORY, before any gate, so the writer sees it even on a refusal
     # PRIOR-RULING GATE (2026-09-05 16:4x, ledger w=2 — the Founders Hub credit was carded a FOURTH
     # time at 16:32 after Kam's 10:51 panel note "no need to raise this again. this is in hand";
     # the seat had read the panel only for messages after its predecessor's last action). A card
@@ -441,7 +418,6 @@ def cmd_amend(args):
                 keys = ", ".join(sorted(str(o.get("key")) for o in dec.get("options", []) if isinstance(o, dict)))
                 die(f"{did} has no option {okey!r} (options: {keys}) -- nothing written")
 
-        count_list_advisory(dec)   # ADVISORY: the whole card as it will stand after this amendment
         dec.setdefault("amendments", []).append({
             "ts": now(), "reason": reason, "changed": changed, "before": before,
         })
