@@ -19,6 +19,8 @@ supersede: replace wholesale at the next pickup; do not append. Previous copy: N
 4. EXPIRING-GRANTS: "SPEND PAST THE 90%" is marked ENDED (account switched). Friday's "ignore the 90%" row is Friday's and is not touched.
 
 ### LIVE RIGHT NOW
+**🟠 01:1x 09-28 update:** B 35th has raised #1310 #1311 #1312 #1313 #1314 (all verified at the PR API; #1302/#1296/#1297 closed; KS-1351 filed); item 6 KS-1220 pushing. **gate33 DRAFTER running** (subagent of this seat): kit dir `2_Project_Files/fleet/qa-agent/gatesets/2026-09-28_gate33/`; if this seat rotates first, check README.md, verify controls both ways + heads, launch.
+
 **🔵 50% CHECKPOINT 00:29 09-28 (overnight seat a0b3d8ae). Supersedes the 23:46 block where they differ:**
 - B 35th (%48, ctx 43%): plan CONFIRMED 14:07Z; **#1310 KS-1348 r2 READY at 2cd351fad72d (verified at the PR API); #1302 CLOSED unmerged with the ruling comment.** merge31 proved 20/20. Items 2-6 in flight (KS-1346 A → close #1296, B → close #1297, KS-1121, KS-1221, KS-1220). Gate33 over the round when it holds / ~65%.
 - **Fuse: 57.9 h remained at 14:07Z (2026-09-30T00:00Z).** Recompute with the shell; never carry a figure.
