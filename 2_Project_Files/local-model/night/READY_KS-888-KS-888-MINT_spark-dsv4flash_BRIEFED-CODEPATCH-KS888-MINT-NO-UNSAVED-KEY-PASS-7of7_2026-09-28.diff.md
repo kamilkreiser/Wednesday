@@ -1,0 +1,225 @@
+# READY — KS-888-KS-888-MINT (spark-dsv4flash, briefed, code_patch, vitest) — PASS 7/7 — HELD for QA
+
+> ⚠ **CANONICAL PATCH = `/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/runs/spark_secuura_2026-09-28_KS-888-MINT/out.md.checker/patch.diff`** (from `ls` at 07:24 2026-09-28; it is `cat` of the section files in order: `cmp` rc 0: `/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/runs/spark_secuura_2026-09-28_KS-888-MINT/out.md.checker/section_1.diff`, `/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/runs/spark_secuura_2026-09-28_KS-888-MINT/out.md.checker/section_2.diff`). Checker A2 (verbatim from checker.out): `PASS A2 diff applies at the tip (strict git apply --check, every section, hunk headers consistent)`; the run's patch is BYTE-IDENTICAL to the drafter's golden (`cmp -s /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/runs/spark_secuura_2026-09-28_KS-888-MINT/out.md.checker/patch.diff /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/4901153c-5db0-4cfc-bf83-c25726202b34/scratchpad/golden_KS-888-MINT/out.md.checker/patch.diff` rc 0, Wednesday morning 4901153c).
+
+**Held 07:24 2026-09-28 by Wednesday morning 4901153c after a source read (hold_ready.py, code_patch path — every clause below is COPIED from the checker's own artefacts in `/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/runs/spark_secuura_2026-09-28_KS-888-MINT/out.md.checker`, not typed; the artefact each came from is named in brackets).** Tip `ec32c40e2b1e2698d2e855a916f390d48dad1b45`.
+- Touched-file set [checker.out A3, verbatim]: `PASS A3 touched-file set == { Blockchain/Dev/services/security/src/index.ts , Blockchain/Dev/services/security/src/__tests__/ks888-failed-mint-save-issues-no-key.test.ts }`
+- Declared set [input.json product_file + suggested_test_file]: `Blockchain/Dev/services/security/src/index.ts` (product) and `Blockchain/Dev/services/security/src/__tests__/ks888-failed-mint-save-issues-no-key.test.ts` (test) — equal to numstat.out's set (2 files).
+- numstat [out.md.checker/numstat.out, verbatim]:
+```
+22	5	Blockchain/Dev/services/security/src/index.ts
+145	0	Blockchain/Dev/services/security/src/__tests__/ks888-failed-mint-save-issues-no-key.test.ts
+```
+- Product hunk `+` count [checker.out A3c, verbatim]: `PASS A3c every '+' line the brief adds is in the product hunk (19 line(s)), and no tip line is re-added as a '+' (A3d)` — product section `+` lines 22 ordered-equal (whitespace-stripped) to the brief's `expected_plus` (ASCII); `-` lines 5.
+- Byte-exactness [checker.out A3i, verbatim]: `A3i: every '+' line the brief adds is in the applied Blockchain/Dev/services/security/src/index.ts byte-exact incl. leading whitespace (apply mode strict): OK 19 line(s) byte-exact incl. leading whitespace (of 19; 19 line(s) added by the apply)` [a3i_indent.out: `OK 19 line(s) byte-exact incl. leading whitespace (of 19; 19 line(s) added by the apply)`]
+- Hunk audit [out.md.checker/hunk_audit.out, first line verbatim]: `sections=2 miscounted_sections=0`
+- Sections [out.md.checker/sections.json + section_<k>.opts + apply_check_strict_<k>.out]:
+- section 1 `section_1.diff` → `Blockchain/Dev/services/security/src/index.ts` (hunks=3, miscount=0; applied file per `section_1.opts`: `section_1.diff`, git-apply options: `(none — strict)`; `apply_check_strict_1.out`: EMPTY (strict apply --check clean))
+- section 2 `section_2.diff` → `Blockchain/Dev/services/security/src/__tests__/ks888-failed-mint-save-issues-no-key.test.ts` (hunks=1, miscount=0; applied file per `section_2.opts`: `section_2.diff`, git-apply options: `(none — strict)`; `apply_check_strict_2.out`: EMPTY (strict apply --check clean))
+- RED-FIRST [checker.out A4, verbatim]: `PASS A4 RED-FIRST: src/__tests__/ks888-failed-mint-save-issues-no-key.test.ts fails at the untouched tip (5 failed / 9 run; controls green; assertion reds)` [red_first.json: failed=5 of total=9; red cell(s): ['KS-888: a mint whose save fails issues no key; revoke and validate are unchanged RED KS-888 A1: a structural save failure (42703) answers 500 INTERNAL_ERROR with no key material', 'KS-888: a mint whose save fails issues no key; revoke and validate are unchanged RED KS-888 A2 SQLSTATE 08006: an infrastructure save failure answers a retryable 503 with no key material', 'KS-888: a mint whose save fails issues no key; revoke and validate are unchanged RED KS-888 A2 socket ECONNREFUSED: an infrastructure save failure answers a retryable 503 with no key material', 'KS-888: a mint whose save fails issues no key; revoke and validate are unchanged RED KS-888 A2 pool timeout with no code: an infrastructure save failure answers a retryable 503 with no key material', 'KS-888: a mint whose save fails issues no key; revoke and validate are unchanged RED KS-888 A3: the key whose save failed is not left behind in the key list']]
+- GREEN-AFTER [checker.out A5, verbatim]: `PASS A5 GREEN-AFTER: src/__tests__/ks888-failed-mint-save-issues-no-key.test.ts passes with the product hunk (9 passed / 9 run)` [green_after.json: failed=0 of total=9, success=True]
+- Whole suite [out.md.checker/suite_delta.out, verbatim]: `baseline: total=247 failed=0 | after: total=256 failed=0` · `NEW reds: []` [baseline_suite.json total=247 failed=0; after_suite.json total=256 failed=0]
+- A6 [verbatim]: `PASS A6 whole services/security suite: no NEW red vs the untouched tip` · A7 [verbatim]: `PASS A7 tsc --noEmit for services/security: rc 0 after the patch (baseline rc=0)`
+- SUMMARY [checker.out, verbatim]: `SUMMARY files=2 +167/-5 test=src/__tests__/ks888-failed-mint-save-issues-no-key.test.ts red_first=yes apply_mode=strict`
+
+**PR NOTES for the raise seat:** CODE_PATCH — PRODUCT BYTES CHANGE: `Blockchain/Dev/services/security/src/index.ts` (+22/-5 per numstat.out) and the test file `Blockchain/Dev/services/security/src/__tests__/ks888-failed-mint-save-issues-no-key.test.ts` (+145/-0); two files. Apply PER SECTION with the checker's apply mode — section 1 `section_1.diff`: `git apply -p1` (strict); section 2 `section_2.diff`: `git apply -p1` (strict) — at the tip `ec32c40e2b1e2698d2e855a916f390d48dad1b45` (re-check `git ls-remote origin develop` first; if develop moved, re-run `git apply --check` per section and state it). Tier: AT LEAST tier 2 (product code changes) — the gate decides. Input: `/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/runs/spark_secuura_2026-09-28_KS-888-MINT/input.json`. brief NOT LOCATED under night/briefs/ (no claim made). Verdict source: `/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/runs/spark_secuura_2026-09-28_KS-888-MINT/checker.out`.
+
+```diff
+--- a/Blockchain/Dev/services/security/src/index.ts
++++ b/Blockchain/Dev/services/security/src/index.ts
+@@ -288,8 +288,8 @@
+     return null;
+   }
+ }
+-
+-async function dbSaveApiKey(k: ApiKey): Promise<void> {
++
++async function dbSaveApiKey(k: ApiKey, opts: { rethrow?: boolean } = {}): Promise<void> {
+   memApiKeys.set(k.id, k);
+   if (!isDbAvailable()) return;
+   try {
+@@ -330,5 +330,8 @@
+     ));
+   } catch (err: any) {
+     logger.error('DB save API key failed', { error: err?.message });
++    // KS-888: only the mint opts in. Revoke and validate keep this log-only swallow: their handlers
++    // take no next, so a throw from here would be an unhandled rejection that ends the process.
++    if (opts.rethrow) throw err;
+   }
+ }
+@@ -1128,9 +1131,23 @@
+       createdAt: new Date(),
+       connectorId: data.connectorId,
+     };
+-
+-    await dbSaveApiKey(apiKey);
+-
++
++    // KS-888 (Kam ruled 2026-09-28, the KS-1194 contract): a mint whose save did not persist is never
++    // acknowledged, and no key material leaves the service. The in-memory copy is dropped so the
++    // unsaved key is neither listed nor valid. An infrastructure fault (the auth dbErrors classes:
++    // SQLSTATE 08, 53, 57, a lost socket, a pool timeout) answers a retryable 503; anything else 500.
++    try {
++      await dbSaveApiKey(apiKey, { rethrow: true });
++    } catch (saveErr: any) {
++      memApiKeys.delete(apiKey.id);
++      const infra = /^(08|53|57)|^(ECONNREFUSED|ECONNRESET|ETIMEDOUT|EHOSTUNREACH|ENETUNREACH|EPIPE)$/.test(String(saveErr?.code)) || /connection terminated|timeout exceeded when trying to connect|connection timeout|pool is draining|client has encountered a connection error/i.test(String(saveErr?.message));
++      log('error', 'KS-888: API key mint refused, the key could not be saved', { keyId: apiKey.id, code: saveErr?.code, infra });
++      return res.status(infra ? 503 : 500).json({
++        success: false,
++        error: { code: infra ? 'SERVICE_UNAVAILABLE' : 'INTERNAL_ERROR', message: 'The API key could not be saved, so no key was issued' },
++      });
++    }
++
+     // KS-577. MINT FIRST, THEN REVOKE — deliberately this order. A failed
+     // revoke leaves the old key live, which is the status quo being fixed; a
+     // failed mint AFTER a revoke would leave the connector with NO working
+--- /dev/null
++++ b/Blockchain/Dev/services/security/src/__tests__/ks888-failed-mint-save-issues-no-key.test.ts
+@@ -0,0 +1,145 @@
++// KS-888: dbSaveApiKey catches every error from its INSERT and only logs it, so POST /api/keys answered 201
++// with live key material for a key that was never written: it lived in memApiKeys until the next restart.
++// Kam ruled 2026-09-28 (card secuura-ks888-failed-key-save-design, option b) under the KS-1194 contract: a
++// mint whose save did not persist is never acknowledged; an infrastructure fault answers 503, anything else
++// 500, and neither carries a key. This file covers the MINT route only. Revoke and validate keep the swallow:
++// their handlers take no next, so a throw from dbSaveApiKey there is an unhandled rejection (measured by the
++// KS-888 r2 brief-writer). Controls C2 and C3 pin that they still answer 200 while the same INSERT fails.
++// The REAL app runs on a loopback listener, as in ks742 and ks908: a real RS256 token signed with node crypto,
++// the real router, and ../db mocked as AVAILABLE with an INSERT into svc_api_keys that fails on demand.
++import { describe, it, expect, beforeAll, afterAll, afterEach, vi } from 'vitest';
++import crypto from 'crypto';
++import type { Server } from 'http';
++import type { AddressInfo } from 'net';
++
++// Opt-IN boot guard: keeps the import of ../index from binding its port and dialling postgres.
++process.env.SECURITY_DISABLE_BOOT = '1';
++
++const TENANT = 'c0000000-0000-4000-8000-000000000888';
++const ORG = '88800000-0000-4000-8000-000000000888';
++
++type Fault = { code?: string; message: string };
++
++const state = vi.hoisted(() => ({ dbUp: true, fault: null as { code?: string; message: string } | null, inserts: 0 }));
++
++vi.mock('../db', () => ({
++  isDbAvailable: () => state.dbUp,
++  initDb: async () => true,
++  query: async (sql: string) => {
++    if (sql.includes('INSERT INTO svc_api_keys')) {
++      state.inserts++;
++      if (state.fault) throw Object.assign(new Error(state.fault.message), state.fault.code ? { code: state.fault.code } : {});
++    }
++    return { rows: [], rowCount: 0 };
++  },
++}));
++
++const { privateKey, publicKey } = crypto.generateKeyPairSync('rsa', { modulusLength: 2048 });
++const PRIVATE_PEM = privateKey.export({ type: 'pkcs8', format: 'pem' }).toString();
++const PUBLIC_PEM = publicKey.export({ type: 'spki', format: 'pem' }).toString();
++
++function token(claims: Record<string, unknown>): string {
++  const now = Math.floor(Date.now() / 1000);
++  const header = Buffer.from(JSON.stringify({ alg: 'RS256', typ: 'JWT' })).toString('base64url');
++  const payload = Buffer.from(JSON.stringify({ sub: 'ks888-test', iat: now, exp: now + 300, ...claims })).toString('base64url');
++  const signature = crypto.sign('RSA-SHA256', Buffer.from(header + '.' + payload), PRIVATE_PEM).toString('base64url');
++  return header + '.' + payload + '.' + signature;
++}
++
++const PLATFORM = () => token({ role: 'super_admin' });
++const STRUCTURAL: Fault = { code: '42703', message: 'column connector_id of relation svc_api_keys does not exist' };
++const INFRA: Array<[string, Fault]> = [
++  ['SQLSTATE 08006', { code: '08006', message: 'connection failure' }],
++  ['socket ECONNREFUSED', { code: 'ECONNREFUSED', message: 'connect ECONNREFUSED 127.0.0.1:5432' }],
++  ['pool timeout with no code', { message: 'Connection terminated due to connection timeout' }],
++];
++
++let server: Server;
++let base = '';
++
++async function mint(name: string): Promise<{ status: number; text: string; body: any }> {
++  const res = await fetch(base + '/api/keys', {
++    method: 'POST',
++    headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + PLATFORM() },
++    body: JSON.stringify({ name, organizationId: ORG, tenantId: TENANT, scopes: ['documents:read'] }),
++    signal: AbortSignal.timeout(3000),
++  });
++  const text = await res.text();
++  return { status: res.status, text, body: JSON.parse(text) };
++}
++
++async function listedNames(): Promise<string[]> {
++  const res = await fetch(base + '/api/keys?organizationId=' + ORG, { headers: { Authorization: 'Bearer ' + PLATFORM() }, signal: AbortSignal.timeout(3000) });
++  const json = (await res.json()) as { data: Array<{ name: string }> };
++  return json.data.map((k) => k.name);
++}
++
++beforeAll(async () => {
++  // The static-key path of the shared RS256 verifier: base64-encoded PEM, no JWKS.
++  process.env.JWT_PUBLIC_KEY = Buffer.from(PUBLIC_PEM, 'utf8').toString('base64');
++  delete process.env.JWT_JWKS_URL;
++  delete process.env.AUTH_SERVICE_URL;
++  const app = (await import('../index')).default;
++  await new Promise<void>((resolve) => {
++    server = app.listen(0, '127.0.0.1', resolve);
++  });
++  base = 'http://127.0.0.1:' + (server.address() as AddressInfo).port;
++});
++
++afterEach(() => {
++  state.dbUp = true;
++  state.fault = null;
++});
++
++afterAll(async () => {
++  await new Promise<void>((resolve) => server.close(() => resolve()));
++});
++
++describe('KS-888: a mint whose save fails issues no key; revoke and validate are unchanged', () => {
++  it('RED KS-888 A1: a structural save failure (42703) answers 500 INTERNAL_ERROR with no key material', async () => {
++    state.fault = STRUCTURAL;
++    const r = await mint('ks888 structural');
++    expect({ status: r.status, code: r.body?.error?.code, key: r.body?.data?.key, skInBody: r.text.includes('sk_') }).toEqual({ status: 500, code: 'INTERNAL_ERROR', key: undefined, skInBody: false });
++  });
++
++  it.each(INFRA)('RED KS-888 A2 %s: an infrastructure save failure answers a retryable 503 with no key material', async (_label, fault) => {
++    state.fault = fault;
++    const r = await mint('ks888 infra');
++    expect({ status: r.status, code: r.body?.error?.code, key: r.body?.data?.key, skInBody: r.text.includes('sk_') }).toEqual({ status: 503, code: 'SERVICE_UNAVAILABLE', key: undefined, skInBody: false });
++  });
++
++  it('RED KS-888 A3: the key whose save failed is not left behind in the key list', async () => {
++    state.fault = STRUCTURAL;
++    await mint('ks888 left behind probe');
++    state.fault = null;
++    expect((await listedNames()).includes('ks888 left behind probe')).toBe(false);
++  });
++
++  it('control KS-888 C1: a mint whose save lands answers 201 with the key, and the INSERT was issued', async () => {
++    const before = state.inserts;
++    const r = await mint('ks888 saved');
++    expect({ status: r.status, sk: String(r.body?.data?.key).startsWith('sk_'), inserts: state.inserts - before }).toEqual({ status: 201, sk: true, inserts: 1 });
++  });
++
++  it('control KS-888 C2: revoke still answers 200 while the same INSERT fails (the swallow is unchanged there)', async () => {
++    const minted = await mint('ks888 revoke control');
++    state.fault = STRUCTURAL;
++    const res = await fetch(base + '/api/keys/' + minted.body.data.id, { method: 'DELETE', headers: { Authorization: 'Bearer ' + PLATFORM() }, signal: AbortSignal.timeout(3000) });
++    expect({ minted: minted.status, status: res.status, message: ((await res.json()) as { message?: string }).message }).toEqual({ minted: 201, status: 200, message: 'API key revoked' });
++  });
++
++  it('control KS-888 C3: validate still answers 200 valid for an active key while the same INSERT fails', async () => {
++    const minted = await mint('ks888 validate control');
++    state.fault = STRUCTURAL;
++    const res = await fetch(base + '/api/keys/validate', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ key: minted.body.data.key }), signal: AbortSignal.timeout(3000) });
++    const json = (await res.json()) as { data?: { valid?: boolean } };
++    expect({ minted: minted.status, status: res.status, valid: json.data?.valid }).toEqual({ minted: 201, status: 200, valid: true });
++  });
++
++  it('control KS-888 C4: with no database at all the memory-only mint still answers 201 with the key', async () => {
++    state.dbUp = false;
++    state.fault = STRUCTURAL;
++    const r = await mint('ks888 no database');
++    expect({ status: r.status, sk: String(r.body?.data?.key).startsWith('sk_') }).toEqual({ status: 201, sk: true });
++  });
++});
+```
