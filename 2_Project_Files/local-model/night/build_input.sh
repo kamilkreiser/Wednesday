@@ -120,6 +120,13 @@ print(f"ticket {n['identifier']} · {state} ({stype}) · {n['priorityLabel']} ·
 # on 2026-09-17 was In Progress/In Review, which the state gate would have refused first); a ticket with no attached
 # PR makes no GitHub call and sees exactly the old order. NIGHT_GITHUB_API (http/https only) is the arm's stub seam.
 prs = [a["url"] for a in n["attachments"]["nodes"] if "/pull/" in (a["url"] or "")]
+# 2026-09-27 (Wednesday, day seat; Kam ruled secuura-ks1346-logging-thrown-objects-leaks-secrets => a): `supersedes=<n>[,<n>]`
+# admits an OPEN attached PR ONLY when the brief is that PR's own fix round or its replacement. Printed per PR, never automatic;
+# a number that is NOT an attached PR REFUSES (typo guard), so the pin cannot silently widen to an unrelated lane.
+_sup = {x.strip().lstrip('#') for x in pins.get("supersedes", "").split(",") if x.strip()}
+_att_nums = {re.sub(r"[^0-9].*$", "", u.rsplit("/pull/", 1)[-1]) for u in prs}
+if _sup - _att_nums:
+    refuse(f"supersedes={sorted(_sup)} names PR(s) {sorted(_sup - _att_nums)} that are NOT attached to this ticket (attached: {sorted(_att_nums)})")
 if prs:
     _gh_api = os.environ.get("NIGHT_GITHUB_API", "https://api.github.com").rstrip("/")
     _gh_tok = os.environ.get("GH_TOKEN") or ""
@@ -146,7 +153,9 @@ if prs:
             refuse(f"attached PR #{_num} ({_own}/{_rep}): unreadable state (state={_st!r}, merged={_merged!r}) — refused, fail closed")
         _label = "OPEN" if _st == "open" else ("merged" if _merged else "closed, not merged")
         print(f"attached PR #{_num} ({_own}/{_rep}): {_label}")
-        if _st == "open":
+        if _st == "open" and _num in _sup:
+            print(f"attached PR #{_num}: OPEN — ADMITTED by supersedes= (this brief is its fix round / replacement)")
+        elif _st == "open":
             _open.append(f"#{_num}")
     if _open:
         refuse(f"attached to OPEN pull request(s) {_open} — a lane has it (merged/closed PRs do not refuse)")
