@@ -19314,5 +19314,53 @@
    "CARD vision-gh-login-for-ci",
    "CARD composer-release-05070f1d-deploy"
   ]
+ },
+ {
+  "id": "secuura-ks1348-r2-files-still-leak-allowlist",
+  "client_project": "Secuura/Blockchain",
+  "title": "KS-1348: the redaction fix still lets other secrets into the production log files. Allow a third attempt with an allow-list?",
+  "bluf": "No action needed if the default suits you. KS-1348 #1310 (your 'Redact first, then JSON files' ruling) failed its QA gate: the six keys you named are redacted everywhere, but a nested error's Authorization header and token, and 16 other secret or personal keys (passwordHash, privateKey, secretKey, mnemonic, jwt, phone, email_address and more), would reach the production log files, where today they write only 'undefined'. Measured by the gate through the real logger; report 2026-09-28-batch1310-g33. This was the second attempt, so a third needs your word. The other five PRs in the round passed and are merging now. Your 2026-09-27 19:06 ruling chose redaction over 'files get the message only' so the files keep error context. The allow-list keeps that context (the error text plus the request's method and path) and drops arbitrary metadata. Option c stays closest to your ruling as written.",
+  "default_action": "If there's no ruling by Tuesday 2026-09-29 09:00 AEST: nothing changes. #1310 stays open and unmerged, and the log files keep writing 'undefined'. Wednesday does not start a third attempt without your word.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Third attempt: allow-list the file format (recommended)",
+    "detail": "The log FILES record only named safe fields (message, error text, request method and path); everything else stays out. Redaction stays on the console. The gate proposed this shape. The Spark gets the brief, and it goes through the same gate before merging."
+   },
+   {
+    "key": "b",
+    "label": "Stop here; files stay as they are",
+    "detail": "#1310 is closed unmerged. The production log files keep writing 'undefined', which leaks nothing and records nothing. KS-1348 goes back to Backlog."
+   },
+   {
+    "key": "c",
+    "label": "Extend the redaction list instead",
+    "detail": "Add the 16 keys and handle nested errors. Quicker, but any key nobody thought of still leaks: the reason the gate recommends an allow-list."
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-09-28T04:12:42.418908+10:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "2026-08-17 20:15",
+   "2026-09-07 12:07",
+   "2026-09-08 07:09",
+   "2026-09-08 08:09",
+   "2026-09-08 11:50",
+   "2026-09-08 11:52",
+   "2026-09-10 11:29",
+   "2026-09-11 16:55",
+   "CARD nexusai-rd303-rd307-key-shaped-files-in-repo",
+   "CARD nexusai-rd310-which-of-three-files-are-customer-data",
+   "CARD secuura-admin-credential-rotation-183-files",
+   "CARD secuura-892-round3-nogo-blocker-still-open",
+   "CARD vault-add-a-stages-another-clients-files",
+   "CARD secuura-61-archived-while-still-open",
+   "CARD nexusai-release-package-files-into-main",
+   "CARD nexusai-package-files-scope",
+   "CARD secuura-ks1348-log-files-persist-secrets"
+  ]
  }
 ]
