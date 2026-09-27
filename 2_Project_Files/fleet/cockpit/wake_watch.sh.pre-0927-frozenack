@@ -316,10 +316,7 @@ except Exception: print('')" 2>/dev/null)
       # then the transcript (the 08-21 diagnostic order), never at the pane.
       FROZEN_N="${WAKE_WATCH_FROZEN_N:-6}"
       if [ "$prev" = "$h" ]; then fcnt=$((fcnt + 1)); else fcnt=0; fi
-      # ACK (2026-09-27, Tuesday s89): a ghost suggestion at the prompt keeps empty_prompt=0, so a
-      # pane HOLDING on a shared lock lands here, not in the idle branch, and re-fired every ~2 min
-      # (NexusAI-M %19, 6 repeats). Honour the same content-hash ack; any new output lifts it.
-      if [ "$fcnt" -ge "$FROZEN_N" ] && [ "$ack" != "$h" ]; then
+      if [ "$fcnt" -ge "$FROZEN_N" ]; then
         echo "WAKE: pane '$name' ($pid) shows BUSY indicators but content FROZEN ~$((FROZEN_N * INTERVAL / 60)) min — turn likely ENDED (mailed-report/turn-end stall class); check inbox FIRST, then transcript mtime, then detector at the pane" > "$STATE_DIR/fired"
       fi
     elif [ "$holding" = 1 ] || [ "$empty_prompt" = 1 ] || printf '%s' "$tail" | grep -qE 'Pick or adjust'; then
