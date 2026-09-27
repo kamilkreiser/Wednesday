@@ -6,6 +6,17 @@ status: live
 supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s1-wholesale
 ---
 
+## 🔴 DELTA 107 — 2026-09-28 06:37 ROTATION HANDOVER (s89, ctx 82%, safe boundary). **READ THIS FIRST, THEN 106 (it carries the OWED-TO-KAM block, still exact).**
+### FIRST WORK FOR THE NEXT SEAT
+1. **GATE 11 RUNNING (%34, QA/Vision-gate11)**: five Vision targets on portal main 0d992e0 — VSP-66 1976275 (t1), VSP-71 5bdaeae (t1), VSP-70 10ba4bb (t2), VSP-68 7ef698d (t2), VSP-73 6d7ea73 (t2). Brief `fleet/qa-agent/briefs/2026-09-28_vision-gate11-vsp66-vsp71.md` (stamped, rulings at stamp incl. the vsp71 LOGIN-role drop rule and "a dead client reused = FAIL of VSP-66"). Report will be `Testing Agent MAIN/projects/vision/reports/2026-09-28-vision-gate11-five-targets/report.md`. On the verdict: read whole, score, pane_close, then RELEASE merges to the Vision seat (one at a time, BACKLOG.md conflict = keep all blocks), and add the merged code to the VSP-65 deploy card's evidence if Kam has not ruled.
+2. **Vision seat LIVE (%33)** building VSP-69 option (A) (one transaction per reminder; tier 1). **GATE 12 queue:** VSP-74 (F-B, restore refuses incomplete) bf5bdc0 on 10ba4bb, VSP-75 (F-A, back up every table except session) 0d7a2fb on bf5bdc0, VSP-69 when READY. READYs saved in `fleet/qa-agent/briefs/2026-09-28_vision-vsp{74,75}-READY-mail.txt`. Gate 12 needs gate 11's verdict on 10ba4bb first. VSP-72 left in backlog (ruled).
+3. **NexusAI (unchanged from 106):** jest lock = batch 6 H3 then O merge3-rd418, b3 H5b sweep, P x2, M x4, N x3. **Batch 4: 2/5 merged.** When O posts MERGED 5/5 → send M the batch-5a RELEASE (`fleet/briefs_staged/2026-09-28_nexusai_M_batch5a_verdict.md`). Batch 3 verdict → N merges; batch 6 verdict → P merges, then launch 5b (FLAG Kam about arm-ttk.yml before its merge).
+4. **Kam told this morning (all 201):** morning brief 05:30; VSP-65 deploy card + VSP-67 card open; the live backup lacks quotes (fix in gate 12); C-28 reading (RD-656 launcher installed, verified).
+### FLOOR
+left %0 tuesday · %34 gate11 · %33 Vision · %28 b6 | right %23 b3 · %22 P · %21 N · %19 M · %29 O · %1 monitor. Usage 31%.
+### DONE AT THIS HANDOVER
+Both boot digests regenerated (the ledger gained a row this session).
+
 ## 🟢 DELTA 106 — 2026-09-28 05:37 (s89, ctx 70% CHECKPOINT; band 80-90). **READ THIS FIRST — it supersedes 102-105 on state; their OWED lines are folded in here.**
 - **GATE 12 queue (Vision):** VSP-74 (F-B) @ bf5bdc0 stacked on 10ba4bb (READY saved `fleet/qa-agent/briefs/2026-09-28_vision-vsp74-READY-mail.txt`, tier 1: a destructive restore path); VSP-75 (F-A) @ 0d7a2fb READY (saved fleet/qa-agent/briefs/2026-09-28_vision-vsp75-READY-mail.txt, stacked on VSP-74); VSP-69/72 after. Gate 12 waits for gate 11's verdict on 10ba4bb (VSP-74's base).
 - **06:2x: GATE 11 now FIVE targets (list CLOSED; + VSP-73 @ 6d7ea73, tier 2)** (drafter told by message): VSP-66 1976275, VSP-71 5bdaeae, VSP-70 10ba4bb (tier 2), VSP-68 7ef698d (tier 2); READYs saved in fleet/qa-agent/briefs/2026-09-28_vision-vsp{66,71,70,68}-READY-mail.txt. **Vision F-B (restore empties a table) ruled (3), F-A (backup omits quotes) measure-then-build; Kam told (201) the live backup has no quotes.** Both go to a LATER gate.
