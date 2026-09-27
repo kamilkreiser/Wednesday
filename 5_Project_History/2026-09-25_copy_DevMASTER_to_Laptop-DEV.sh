@@ -11,9 +11,10 @@ DST=/Volumes/Laptop-DEV/
 LOG=/Volumes/DevMASTER/WEDNESDAY/5_Project_History/2026-09-25_copy_DevMASTER_to_Laptop-DEV.log
 [ -d "$DST" ] || { echo "REFUSED: $DST not mounted" | tee -a "$LOG"; exit 2; }
 echo "=== copy start $(date '+%F %T') src=$SRC dst=$DST ===" | tee -a "$LOG"
+# AMENDED 2026-09-27 13:2x, Kam: the Docker.raw on the laptop drive "is not necessary and can be deleted" (Kam deleted it; 926G freed) -> excluded here so a later pass cannot re-copy it (rsync -a without -S writes the sparse 994G file dense).
 /opt/homebrew/bin/rsync -a --info=progress2,stats2 \
   --exclude '/.Spotlight-V100' --exclude '/.fseventsd' --exclude '/.Trashes' --exclude '/.TemporaryItems' --exclude '/.DocumentRevisions-V100' \
-  --exclude '/SYSTEM/ollama' --exclude '/WEDNESDAY/2_Project_Files/local-model/models' --exclude '/TUESDAY/2_Project_Files/local-model/models' --exclude '/WEDNESDAY/2_Project_Files/tools/ollama' \
+  --exclude '/!CODING/Docker - Containers/DockerDesktop/Docker.raw' --exclude '/SYSTEM/ollama' --exclude '/WEDNESDAY/2_Project_Files/local-model/models' --exclude '/TUESDAY/2_Project_Files/local-model/models' --exclude '/WEDNESDAY/2_Project_Files/tools/ollama' \
   "$SRC" "$DST" >> "$LOG" 2>&1
 RC=$?
 echo "=== copy done $(date '+%F %T') rc=$RC ===" | tee -a "$LOG"
