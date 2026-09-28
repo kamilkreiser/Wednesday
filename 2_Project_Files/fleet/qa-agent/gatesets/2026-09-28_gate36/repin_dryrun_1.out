@@ -1,0 +1,56 @@
+LAUNCH ACTION gate36 (DRY RUN) 2026-09-28 18:21:07 AEST / 2026-09-28T08:21:07Z | launcher /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/gatesets/2026-09-28_gate36/launch_qa_secuura_batch1323.sh | pinned launch develop d9ce1403d1581ff1584ab799fbbf7fc6f9f8d817 | END_TREE 36d6a2425ecf27c0e898b61e17e1a6280971387b
+  pin #1323 1a509947caf936bcc9b05f7817af6fcbcc974289
+  pin #1324 47c4579b0199df1168220fa226805718c26fbbb3
+  pin #1325 39f4922d391dabc7f3f99c9c0c8ea2ddde1b596f
+  pin #1326 3f569dfc701c757253aa71ed8b91b81ce9c84c93
+--- 0. the pane must be routed (inbox_routing.conf) or cockpit.sh say --mail fails silently
+  routing file /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/inbox_routing.conf — line present: 0 (grep rc=1; want 1 / rc 0)
+  (DRY RUN: reported, not refused — the real run refuses rc 1 here)
+--- 0b. the kit's home: launcher filled for /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/gatesets/2026-09-28_gate36 | this script lives in /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/gatesets/2026-09-28_gate36
+  AT HOME — no re-fill
+--- 1. instrument: git ls-remote origin (read from the Secuura checkout, READ-ONLY)
+  ls-remote rc=0 at 08:21:10Z
+    d9ce1403d1581ff1584ab799fbbf7fc6f9f8d817	refs/heads/develop
+    47c4579b0199df1168220fa226805718c26fbbb3	refs/heads/feature/ks-1124-mintmerge-persisted-blob-b38-2
+    1a509947caf936bcc9b05f7817af6fcbcc974289	refs/heads/feature/ks-1129-livescan-shape-guards-b38-1
+    39f4922d391dabc7f3f99c9c0c8ea2ddde1b596f	refs/heads/feature/ks-1227-witness-counting-rule-b38-3
+    3f569dfc701c757253aa71ed8b91b81ce9c84c93	refs/heads/feature/ks-1351-secuura-status-revocation-fields-b38-4
+    1a509947caf936bcc9b05f7817af6fcbcc974289	refs/pull/1323/head
+    47c4579b0199df1168220fa226805718c26fbbb3	refs/pull/1324/head
+    39f4922d391dabc7f3f99c9c0c8ea2ddde1b596f	refs/pull/1325/head
+    3f569dfc701c757253aa71ed8b91b81ce9c84c93	refs/pull/1326/head
+--- 2. instrument: the GitHub PULLS API (an independent read of each head, and mergeable)
+  pulls API rc=0
+    WIDEN #1326 IN-KIT 3f569dfc701c757253aa71ed8b91b81ce9c84c93 | feature/ks-1351-secuura-status-revocation-fields-b38-4 | KS-1351 item 1: declare the revocation fields on a Secuura status extension
+    WIDEN #1325 IN-KIT 39f4922d391dabc7f3f99c9c0c8ea2ddde1b596f | feature/ks-1227-witness-counting-rule-b38-3 | KS-1227: keep the count-every-stub-request rule, and say so beside the witness
+    WIDEN #1324 IN-KIT 47c4579b0199df1168220fa226805718c26fbbb3 | feature/ks-1124-mintmerge-persisted-blob-b38-2 | KS-1124: the thread-token cache write merges into the blob as persisted now
+    WIDEN #1323 IN-KIT 1a509947caf936bcc9b05f7817af6fcbcc974289 | feature/ks-1129-livescan-shape-guards-b38-1 | KS-1129: the live chain-scan reply is shape-checked before it can claim on-chain
+    WIDEN-RX ^\s*(KS-1129|KS-1124|KS-1227|KS-1351)\b | WIDEN-BRANCH-RX -b38-\d+$
+    API #1323 head 1a509947caf936bcc9b05f7817af6fcbcc974289 base develop mergeable True reads 1 state open
+    API #1324 head 47c4579b0199df1168220fa226805718c26fbbb3 base develop mergeable True reads 1 state open
+    API #1325 head 39f4922d391dabc7f3f99c9c0c8ea2ddde1b596f base develop mergeable True reads 1 state open
+    API #1326 head 3f569dfc701c757253aa71ed8b91b81ce9c84c93 base develop mergeable True reads 1 state open
+    DEVBASE #1323 OK base.ref develop
+    DEVBASE #1324 OK base.ref develop
+    DEVBASE #1325 OK base.ref develop
+    DEVBASE #1326 OK base.ref develop
+--- 2b. the WIDEN census (Wednesday's widen rule): an open PR matching kit.json widen_rx must be in this kit
+    WIDEN #1326 IN-KIT 3f569dfc701c757253aa71ed8b91b81ce9c84c93 | feature/ks-1351-secuura-status-revocation-fields-b38-4 | KS-1351 item 1: declare the revocation fields on a Secuura status extension
+    WIDEN #1325 IN-KIT 39f4922d391dabc7f3f99c9c0c8ea2ddde1b596f | feature/ks-1227-witness-counting-rule-b38-3 | KS-1227: keep the count-every-stub-request rule, and say so beside the witness
+    WIDEN #1324 IN-KIT 47c4579b0199df1168220fa226805718c26fbbb3 | feature/ks-1124-mintmerge-persisted-blob-b38-2 | KS-1124: the thread-token cache write merges into the blob as persisted now
+    WIDEN #1323 IN-KIT 1a509947caf936bcc9b05f7817af6fcbcc974289 | feature/ks-1129-livescan-shape-guards-b38-1 | KS-1129: the live chain-scan reply is shape-checked before it can claim on-chain
+    WIDEN-RX ^\s*(KS-1129|KS-1124|KS-1227|KS-1351)\b | WIDEN-BRANCH-RX -b38-\d+$
+  WIDEN census clean: every matching open PR is in this kit
+--- 3. the heads, judged (both instruments == the pin, open, not mergeable:false; every stacked child still based on its parent's branch at the pinned parent head; every other PR based on develop)
+  #1323  ls-remote pull/head 1a509947caf936bcc9b05f7817af6fcbcc974289 | branch 1a509947caf936bcc9b05f7817af6fcbcc974289 | API 1a509947caf936bcc9b05f7817af6fcbcc974289 (state open, mergeable True) | pinned 1a509947caf936bcc9b05f7817af6fcbcc974289
+  #1324  ls-remote pull/head 47c4579b0199df1168220fa226805718c26fbbb3 | branch 47c4579b0199df1168220fa226805718c26fbbb3 | API 47c4579b0199df1168220fa226805718c26fbbb3 (state open, mergeable True) | pinned 47c4579b0199df1168220fa226805718c26fbbb3
+  #1325  ls-remote pull/head 39f4922d391dabc7f3f99c9c0c8ea2ddde1b596f | branch 39f4922d391dabc7f3f99c9c0c8ea2ddde1b596f | API 39f4922d391dabc7f3f99c9c0c8ea2ddde1b596f (state open, mergeable True) | pinned 39f4922d391dabc7f3f99c9c0c8ea2ddde1b596f
+  #1326  ls-remote pull/head 3f569dfc701c757253aa71ed8b91b81ce9c84c93 | branch 3f569dfc701c757253aa71ed8b91b81ce9c84c93 | API 3f569dfc701c757253aa71ed8b91b81ce9c84c93 (state open, mergeable True) | pinned 3f569dfc701c757253aa71ed8b91b81ce9c84c93
+  DEVBASE #1323 OK base.ref develop
+  DEVBASE #1324 OK base.ref develop
+  DEVBASE #1325 OK base.ref develop
+  DEVBASE #1326 OK base.ref develop
+  BOTH INSTRUMENTS AGREE with every pin.
+--- 3b. develop, read at launch: d9ce1403d1581ff1584ab799fbbf7fc6f9f8d817 | the launcher's pinned launch develop d9ce1403d1581ff1584ab799fbbf7fc6f9f8d817
+  UNMOVED since the fill — the END_TREE 36d6a2425ecf27c0e898b61e17e1a6280971387b stands
+DRY RUN COMPLETE 2026-09-28T08:21:14Z — every read agrees with the pins; the real run continues with the usage gate, --check and cockpit.sh add
