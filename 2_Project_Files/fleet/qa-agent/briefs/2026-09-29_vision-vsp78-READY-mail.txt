@@ -1,0 +1,57 @@
+BLUF: VSP-78 READY FOR QA. Branch vsp-78-restore-role-boot @ c74d7fdaa196 (off main 6dbffdf, pushed; ls-remote matches). A replay by another role no longer crash-loops the boot when the portal's role can use the tables, and says so in one line when it can't. Not merged, not deployed. CI UNMEASURED. One design choice is open to your veto (below).
+
+TICKET: VSP-78 (Medium), gate 11 G11-M1. Jira READY comment 38582.
+CLASS CHECK: not VSP-74's class. VSP-74/81/87 are the restore plan losing or changing rows. This is boot DDL ownership after a replay, i.e. VSP-71's class. No restore code touched.
+
+FILES TOUCHED (disjoint from VSP-76's server/db.js + checkout-link-death)
+- server/schema.sql (indexes), server/initDb.js (missing-index line + access line), server/routes/admin.js (one dump-header line), test/db/restore-role-boot.test.js (new)
+
+FIX
+- schema.sql: each index is made only when missing (to_regclass first, so a replay's own indexes are never re-checked for ownership), and a failure to make one warns instead of failing the boot. That's VSP-71's pattern (WHEN OTHERS, per gate 11's G11-P2), for 15 of the 16 indexes.
+- The exception is idx_reminders_rule_key (UNIQUE). The dispatcher's ON CONFLICT (rule_key) needs it, so it gets the existence check but no excuse: missing and unmakeable still fails the boot.
+- initDb: one warning naming any guarded index still missing. The names are read from schema.sql's own blocks, so the two can't drift.
+- initDb: one warning naming every public table the portal's role can't SELECT/INSERT/UPDATE/DELETE, and every sequence it can't USAGE, plus the fix (restore as the portal's role, or GRANT). Each privilege is asked separately, because has_table_privilege with a comma list is true if ANY is held. A CASE is used because Postgres doesn't short-circuit WHERE; the first draft raised 42809 on tables.
+- backup-db dump header: "-- Replay as the portal's own database role (DATABASE_URL's user): the role that replays owns every table (VSP-78)."
+
+DESIGN CHOICE, OPEN TO VETO: the access check WARNS, it does not fail the boot.
+- First version (788477f, on the branch history) failed the boot. The full db suite then reddened two VSP-71 cells, whose fixture moves `session` to another role with no grant back.
+- In production a boot refusal over one table would take down paths that still work (lead submission needs no session). It could also crash-loop the next deploy while production's roles are unread.
+- Cost of warning: with NO grants the boot resolves and every data request 500s, with a clear line in the log. That's the pre-existing state on main for any table-level grant loss. If you'd rather the boot fail in the no-grants case, it's a one-line change back plus the two VSP-71 fixtures gaining a GRANT.
+
+PRIOR WORK
+- VSP-71 built the guarded DO block for IDX_session_expire (lock_timeout 2s + WHEN OTHERS) and initDb's missing-index warning. Kept untouched; this extends the same pattern to the other indexes, without lock_timeout: those tables aren't written on every request the way `session` is.
+- VSP-73 made the backup-db dump replay whole (the reason G11-M1 became reachable); its dump shape is untouched apart from one header comment.
+- initDb's owner-only ALTERs (reconcile, VSP-38/39, stage constraint) already failed soft with warnings; unchanged.
+- No earlier VSP-78 branch or commit.
+
+RED FIRST
+- Measured on main 6dbffdf (scratch tool, evidence below): another role replays schema.sql as one query and owns all 19 tables; boot as the portal's role -> REJECTED 42501 "must be owner of table leads", granted ALL afterwards (B) and granted nothing (A). In A the role can't even SELECT; in B it can read and write.
+- A probe (all indexes guarded, no other change) made B boot and serve, and made A boot quietly. That's why the access line exists.
+- New cells red on main 5/5 (3 of them "must be owner of table leads"), green on c74d7fd 5/5, and green again when run with VSP-71's session-index-boot file (5/5).
+- Controls that can fail: the unique-index cell (missing + unmakeable must still reject 42501 on reminders); the partial-grant cell (REVOKE DELETE on meetings only -> exactly "1 object(s): table meetings").
+- Mutants (scratch copies): no access report -> 2 fail; excusing idx_reminders_rule_key -> the unique control fails.
+
+SUITES AS SETS vs main 6dbffdf (clean archive, fresh DB vsp_s0929_v78b_test, env -i)
+- unit: 131 = 131; lost 0, failing 0, dup 0.
+- db: 126 -> 131; lost 0, failing 0, dup 0; new 5 (all VSP-78).
+COVERAGE (CI's command, unit, Node 26.8.1): 80.78 lines, unchanged (unit tests don't load initDb.js or schema.sql). Margin 0.78.
+
+NOT TESTED
+- CI; Node 20/22.
+- Production's roles: whether the app's role owns the tables, and whether a restore would run as it. That decides whether the access line would ever fire there. Reading them is a production read, so it's not mine.
+- The real backup-db dump as the replay source: the cells replay schema.sql by another role (the same ownership effect and the same CREATE INDEX shapes). The gate's own replay of the route's dump was not re-run.
+- Concurrent boots racing a guarded index: WHEN OTHERS absorbs the 23505 as in VSP-71, but I didn't re-run the gate's pairs arm.
+- feedbackDigest.js's own CREATE INDEX IF NOT EXISTS on `feedback` (idx_feedback_status/clarity): not part of the boot path I changed, not guarded. If feedback is replayed by another role, the digest's index statement could fail at its run. Left as is. Tell me if you want it on this branch or ticketed.
+- e2e:pro.
+
+QUESTION (not blocking): test hygiene. The new file makes 5 databases and 2 roles per run, named vsp78_<pid>_*, boot role LOGIN with a random password, and leaves them, per the never-delete rule. Locally that's now 13 runs' worth (65 DBs, 26 roles). VSP-71's file drops its own in after(). Should committed tests keep the fleet's never-delete, or follow VSP-71's precedent? I've left it as never-delete.
+
+EVIDENCE: 5_Project_History/evidence/2026-09-29-vsp78/ (measure.js + bootchild.js, main A/B, probe, red/green/mutation runs, suites, coverage).
+Local DBs/roles created and left in place: vsp_s0929_78_main_a, vsp_s0929_78_main_b, vsp_s0929_78_probe_b, vsp_s0929_v78_test(+_lazy), vsp_s0929_v78b_test(+_lazy); roles vsp_s0929_78_boot, vsp_s0929_78_other; plus the test's vsp78_<pid>_* sets.
+
+Next: VSP-82 (client-behaviour read first, per your rule). 21:05Z bridge read still armed.
+
+=====
+One correction to the VSP-78 READY (c74d7fd), hygiene question only. Counted from pg_database/pg_roles at 20:36Z: 58 vsp78_* test databases from 12 runs (the first 2 runs had 4 cells, the rest 5) and 24 vsp78_* roles, not "13 runs, 65 DBs, 26 roles". The question itself is unchanged.
+
+=====
