@@ -12,6 +12,20 @@ supersede: replace wholesale; previous = NEXT-PICKUP-FRIDAY.md.pre-0925-rotate-s
 
 **The tree is at `/Users/kamilkreiser/1FILES TO SYNC/FRIDAY`.** Quote every path (spaces).
 
+## 🔴 STATE 2026-09-29 09:2x (Friday, drive seat) — supersedes every block below where they differ
+**Kam met HP at 07:05 (the meeting was about HPSM-POC, NOT HPSM; Friday's first brief got that wrong and corrected it). Kam is travelling; his words: "continue with the project".**
+- **Tree:** /Volumes/Laptop-DEV/FRIDAY (the drive). The 09-28 wrap branch has been picked (f7d9561cc). main is level with origin at each commit.
+- **NEW GitHub org ruleset (since ~06:14 today):** main on the datasecau analysis repos requires CodeQL results, so direct pushes are refused (GH013). Records land by PR: the seat pushes a branch; Friday runs `friday_as.sh datasec gh pr create` then `gh pr merge --squash --match-head-commit`, and compares trees. Precedents today: HPSM-analysis #1, HPSM-POC-analysis #1.
+- **HPSM:** B05 done and merged (C-79 pointer; SOW-01 HP items list; OneDrive catalogue). Readiness only. Seat's local main diverges from origin after the squash (the next seat fetches and resets its branch; it must not push local main). Brief files B05 and ADDENDUM-1/2 stay UNTRACKED on purpose (they quote the meeting).
+- **HPSM-POC:** B48 done and merged (C-30; Jira HPSMPOC-82..92; `Architecture/content/2026-09-29_question-set-aligned-to-policy-principles_DRAFT-FOR-KAM.md`; `Architecture/2026-09-29_meeting-features-design_FOR-KAM.md` with K1..K10 and the lane plan).
+  - **WAVE 1 LIVE** (base main b1d3ec9): B49 L1 sections (pane HPSM-POC-A) · B50 L2 feedback, delivery OFF (-B) · B51 L4 collateral packs 1+3 (-C). Contract merge order: B50 then B49. Watcher: `friday/watch_status.sh <seen> ".../Briefs/2026-09-29_B49*STATUS*.md" (B50, B51)`. On READY: review at source, QA gate (B50 is tier 1: new outbound integration), merge head-pinned on green.
+  - **L3 client follow-up (HPSMPOC-89)** starts on the ruling or default of card hpsmpoc-client-followup-model. **L4 pack 2** follows L3.
+  - **Kam cards open (4):** hpsmpoc-c30-policy-principles-and-sections · hpsmpoc-c30-feedback-route · hpsmpoc-hosted-link-for-hp · hpsmpoc-client-followup-model. Reconcile at every checkpoint.
+  - **HP asks HP-4..HP-8** emailed to Kam 08:58 (5 mails; register updated; HP-3 reversed: we propose the questions).
+  - **Open question to Kam:** "Feedback board on chat" = the Friday tab or the Teams chat? Default: the Friday tab.
+  - **OWED from Kam:** the full meeting transcript (download requested). When it arrives, a seat records the rest in HPSM-POC C-30's successor.
+- caffeinate pid 46889 (6 h from 08:44).
+
 ## 🔴 FIRST, EVERY BOOT AND EVERY CHECKPOINT
 - `kam_rulings_today.sh`, then `python3 2_Project_Files/tools/reconcile_rulings.py` (then `--apply`).
 - The live-board wake is `fleet/cockpit/live_chat_poll.sh --seat friday` (armed by the shared launcher). Kam's posts arrive as "[Wednesday tap] [live-board] …".
