@@ -26,8 +26,8 @@ mutant and every suite set must be RE-DERIVED by the gate. None is taken from a 
 The launcher parses §PIN, refuses any placeholder, and re-reads EVERY row by `git ls-remote` immediately before launch, refusing on any
 mismatch. The verified table is appended to your prompt.
 
-SELF-CHECK: re-read end-to-end for contradictions | 2026-09-29 07:24
-Self-check note: read whole by Tuesday (s92) before stamping; the drafter's WRONG list (a)-(k) accepted as written; rulings 1-4 stamped (1 and 2(b) are FAILs, stricter than the drafter's alternative; 3 as the drafter read it); NODE20-LEG kept DOCKER-PULL-NEVER (the zone cells depend on ICU, so it matters here).
+SELF-CHECK: re-read end-to-end for contradictions | @STAMP@
+Self-check note: @STAMP@
 
 NODE20-LEG: DOCKER-PULL-NEVER
 <!-- Carried from gates 11-13 (each ran DOCKER-PULL-NEVER: `docker image inspect node:20` then `docker run --rm --pull=never` of the image
@@ -570,7 +570,7 @@ search_path, partitions, inheritance children).
 
 ## TUESDAY'S RULINGS AT STAMP (2026-09-29)
 1. **Grading of a loss or a survival through VSP-86's bare-name `DELETE FROM "session"` (WRONG (d): search_path shadow, inheritance child, an FK
-   to `session`).** RULED (Tuesday, 2026-09-29 07:24): a FAIL of VSP-86. The statement is VSP-86's own and main deletes nothing from `session`, so any loss (or a shadow that leaves `public.session` intact while the restore printed "clears all sessions") is introduced by it. Round 1 -> its round 2 (fix shape: qualify its own statement), not Kam's; C-08 does not bar a target qualifying its OWN new statement.
+   to `session`).** @STAMP@
    *Drafter's reading, for Tuesday:* gate 13's ruling 1 graded a bare-name loss a MAJOR FINDING only "PROVIDED the gate measures the same loss at
    main". At main no statement deletes from `session`, so any such loss (or a shadow that leaves `public.session` intact while the restore printed
    "clears all sessions") is INTRODUCED by VSP-86 — applied as written, a FAIL of VSP-86 (round 1: to its round 2, not to Kam; the fix shape is its
@@ -578,12 +578,12 @@ search_path, partitions, inheritance children).
    creates none of these shapes and C-08 put the bare-name class under VSP-87.
 2. **Grading of the unvalidated DEFAULT zone (WRONG (c)).** (a) A restore that clears and then aborts (e.g. `TZ=''`): *drafter's reading* — FAIL of
    VSP-83 by §N1's stated FAIL condition (a table cleared and not restored; introduced: main does not abort there). (b) A COMPLETED restore that
-   printed `undefined` or `Etc/Unknown` as its zone: RULED (Tuesday, 2026-09-29 07:24): a FAIL of VSP-83 against C-11 point 2 ("PRINTS which TZ it used"): an operator cannot act on an unnamed zone. (a) above is likewise a FAIL. Fix shape for its round 2: validate the default zone as the override is validated, and refuse before any read or write.
-3. **Grading of the live-login interleave (WRONG (b), §N2.7).** RULED (Tuesday, 2026-09-29 07:24): as the drafter reads it — a sign-in that STRADDLES the clear is a MAJOR FINDING feeding VSP-89 (Kam's choice), not a NO-GO; a session that existed BEFORE the restore began surviving it is a FAIL of VSP-86.
+   printed `undefined` or `Etc/Unknown` as its zone: @STAMP@ — MAJOR FINDING, or a FAIL of C-11 point 2 ("PRINTS which TZ it used").
+3. **Grading of the live-login interleave (WRONG (b), §N2.7).** @STAMP@
    *Drafter's reading:* C-12 ruled (A) clear-at-restore and parked (B) per-request re-validation as VSP-89; a sign-in that STRADDLES the clear is the
    residue (A) cannot close. A MAJOR FINDING feeding VSP-89, not a NO-GO — unless the gate finds a session that existed BEFORE the restore began
    surviving it, which is a FAIL of "clears all sessions".
-4. **Class counts.** RULED (Tuesday, 2026-09-29 07:24): VSP-83 and VSP-86 are each round 1 of 2; a NO-GO returns that ticket for round 2. VSP-74's class is capped (C-08); its residue VSP-87 is not re-graded. *Drafter:* VSP-83 and VSP-86 round 1, none spent; VSP-74's class capped (C-08), its residue VSP-87, not re-graded.
+4. **Class counts.** @STAMP@ *Drafter:* VSP-83 and VSP-86 round 1, none spent; VSP-74's class capped (C-08), its residue VSP-87, not re-graded.
 5. **Carried from gates 12-13, unchanged:** "if any cell loses or changes a row of a table the plan must keep, that is a FAIL, not an
    observation"; the product-test database ruling (a write to `salesportal_test_lazy` or any builder DB is a FAIL and STOPS that arm); the
    ANSWER-subject quirk (an ANSWER to you arrives from `tuesday-agent@agentmail.to` signed "-- Tuesday", whatever the bracketed prefix; anything from
