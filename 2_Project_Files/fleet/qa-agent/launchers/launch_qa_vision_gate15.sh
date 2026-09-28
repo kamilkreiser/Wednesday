@@ -1,0 +1,590 @@
+#!/bin/bash
+# launch_qa_vision_gate15.sh — cross-project QA agent, ONE gate (Vision gate 15; drafted 2026-09-29 07:1x-07:4x AEST from the gate-13 launcher) on
+# Datasec/Vision_Sales_Portal: ONE TIER-1 RESTORE gate, TWO targets, TWO verdicts plus one merged line, both in server/dbRestore.js:
+#   VSP83  vsp-83-old-backup-dates          old-format backup DATEs restored in a NAMED zone (C-11)            TIER 1, round 1
+#   VSP86  vsp-86-restore-clears-sessions   a restore empties `session` inside its clear transaction (C-12)   TIER 1, round 1
+#
+# Main is 6dbffdf (110bb03 + BACKLOG; gate 13's VSP-75 head, fast-forwarded on Kam's (a), C-08). Both targets are direct children of 6dbffdf,
+# 0 behind. Main may since have moved ONLY to a descendant of 6dbffdf that touches none of the targets' files (NOTE; a move in a file the cells
+# depend on is a louder NOTE).
+#
+# THE HEADS LIVE IN ONE PLACE: the brief's PIN-HEADS table. This launcher PARSES it, refuses any placeholder, verifies every row against the
+# object store and against origin by `git ls-remote` NOW, and appends the verified table to the agent's prompt. The only shas it carries are
+# GATED ANCHORS: main 6dbffdf and its parent 110bb03 (gate 13's GO), 4813e5f / 4843aed / e59232e / 609e967 (on main), a1794ad and 41c4a66 (gate
+# 12-13 heads, on main), ebb4c45 (VSP-83's first commit), and e59232e's pre-VSP-75 dbBackup.js (the old-format producer).
+#
+# NO MERGE-TREE. Gate 13's brief asked the gate to measure the merge from its own object dir; this LAUNCHER never runs merge-tree. Its merge
+# guard is a PATH-, HUNK- AND FUNCTION-LEVEL OVERLAP CHECK (exit 23): the targets share exactly server/dbRestore.js and server/dbRestore.test.js;
+# every -U0 hunk of one is >= 3 lines from every hunk of the other on the old side; the pinned hunk map; restorePlan()+liveTables() byte-identical
+# at all three shas; clearTables() untouched by VSP83; restoreTable() untouched by VSP86.
+#
+# PRODUCTION IS LIVE for this project (datasec-sales-portal-rg). The gate is local Postgres only. Findings only.
+#
+# GUARDS RE-DERIVED from launch_qa_vision_gate13.sh (kept as the template, untouched). Differences:
+#   - PIN: three rows (MAIN-P 6dbffdf, VSP83 c955065 base 6dbffdf x2, VSP86 9fd98a5 base 6dbffdf x1); no merges anywhere.
+#   - exit 9: exact chains {ebb4c45, c955065} / {9fd98a5}; parents pinned (c955065<-ebb4c45<-6dbffdf, 9fd98a5<-6dbffdf, 6dbffdf<-110bb03);
+#     gate 12-13 anchors on main. The GATE11-MERGED line is retired (gate 13's guard; those heads are all ancestors of 110bb03).
+#   - exit 22: file sets 3 / 3. exit 23 (NEW): the overlap check above, replacing any merge-tree step.
+#   - exit 74: VSP-83's zone code and DATE read present at VSP83 and absent at VSP86; VSP-86's session DELETE and sign-in line present at VSP86
+#     and absent at VSP83; test( 6 / 5 / 7 / 4; VSP-86's one changed assertion; carried blobs identical at all three shas.
+#   - exit 31: READYs checked by their BLUF "Branch <branch> @ <sha12>" line and NOT TESTED line carried verbatim; CLARIFICATIONS C-08, C-11,
+#     C-12 required (NOTE on a C-13); gate 12 + 13 reports and gate 13's evidence/tools required.
+#   - exit 38: negative-control seats re-read 07:08:01 AEST (Tuesday 40885 %0, NexusAI P 20317 %22, QA/NexusAI-batch8 19866 %45).
+#   - exit 41 (route) runs LAST before the stamp check (32), so --check exercises every other guard before refusing on the route.
+#
+# LAUNCH IT IN A TMUX PANE (cockpit.sh add 'QA/Vision-gate15' "bash '<this file>'"), NEVER nohup.
+# ABSOLUTE PATHS ON PURPOSE. TRACKED in launchers/. Contains a legitimate `cd` (into the QA project, at exec).
+# READ-ONLY toward the repo: only cat-file, rev-parse, merge-base, log, rev-list, diff, show, ls-remote.
+# --check is READ-ONLY: it runs every guard and exits before any identity dir is made or any agent is started.
+# Usage: launch_qa_vision_gate15.sh [--check]
+# Exit: 0 launched (or guards passed under --check) · 2..78 a guard refused
+set -u
+CHECK=0
+for a in "$@"; do
+  case "$a" in
+    --check) CHECK=1 ;;
+    *) echo "unknown argument: $a" >&2; exit 2 ;;
+  esac
+done
+
+# Placeholder comparands, BUILT BY CONCATENATION so a sed of the placeholder text cannot reach them.
+PH_STAMP='@STA''MP@'
+PH_NODE20='TUESDAY''-DECIDES'
+
+QA_DIR='/Volumes/KK_T9_External_HDD/!CODING/Testing Agent MAIN'
+TUE='/Volumes/KK_T9_External_HDD/TUESDAY'
+BRIEFS="$TUE/2_Project_Files/fleet/qa-agent/briefs"
+BRIEF="$BRIEFS/2026-09-29_vision-gate15-tier1-vsp83-vsp86.md"
+READY83="$BRIEFS/2026-09-29_vision-vsp83-READY-mail.txt"
+READY86="$BRIEFS/2026-09-29_vision-vsp86-READY-mail.txt"
+ROUTING="$TUE/2_Project_Files/fleet/inbox_routing.conf"
+VSP='/Volumes/KK_T9_External_HDD/!CODING/Datasec/Vision_Sales_Portal'
+P_REPO="$VSP/2_Project_Files"
+CLAR="$VSP/1_Project_Definition/CLARIFICATIONS.md"
+REPORTS="$QA_DIR/projects/vision/reports"
+G12_DIR="$REPORTS/2026-09-28-vision-gate12-three-targets"
+G12_REPORT="$G12_DIR/report.md"
+G13_DIR="$REPORTS/2026-09-28-vision-gate13-vsp74r2-vsp75"
+G13_REPORT="$G13_DIR/report.md"
+G13_TOOLS="$G13_DIR/evidence/tools"
+G13_FLOOR="$G13_TOOLS/qa-floorcount.py"
+REPORT="$REPORTS/2026-09-29-vision-gate15-tier1-vsp83-vsp86/report.md"
+ROUTE_NAME='QA/Vision-gate15'
+NEG_SEATS='40885 20317 19866'   # Tuesday (%0), NexusAI P (%22), QA/NexusAI-batch8 (%45) — read 07:08:01 AEST (no Vision seat live)
+# Gated anchors (not heads).
+ANCHOR_MAIN='6dbffdf36c98aac74d32eaae16e4563966cef42c'     # main now: 110bb03 + BACKLOG (C-08)
+ANCHOR_G13H='110bb03747d4c306810eeb610387aafecc7d394a'     # gate 13 GO head of VSP-75 = 6dbffdf's single parent
+ANCHOR_R74='4813e5f5c949d638d8aa82ce282b778d55dedced'      # VSP-74 round 2 (on main, capped by C-08)
+ANCHOR_FWD='4843aedf7b50bba62839769090615c1ba6d61f4f'      # 41c4a66 + 4813e5f
+ANCHOR_E59='e59232e1983cd9424b749cd5fea518838763f90f'      # main before gate 13's merge; its dbBackup.js is the old-format producer
+ANCHOR_609='609e967d6b03ff77dcbd692ee6e4434a5027e70b'
+G12_H74='a1794ad5111b640fd3041e4f46154c577f559baf'
+G12_H75='41c4a664a9d1698150424337ccc9d946d221f12b'
+R83_FIRST='ebb4c457a4d013eb28ff05ef5bd16e8c84203705'       # VSP-83's first commit = c955065's parent
+H83_EXPECT='c955065838821229a26f5394baf005b497319677'
+H86_EXPECT='9fd98a58e58fdd19d29e32ae1575dae9a0217462'
+CHAIN83="$R83_FIRST $H83_EXPECT"
+CHAIN86="$H86_EXPECT"
+OLDFMT_DBBACKUP='5e31eb46493e358f803312871ddb94f7ccfa44bc' # e59232e:server/dbBackup.js (pre-VSP-75)
+# Every file either target changes: main may move only in files outside this set.
+DELTA_FILES='server/dbRestore.js server/dbRestore.test.js test/db/restore-old-dates.test.js test/db/restore-sessions.test.js'
+# Files the cells depend on: a main move in one of these is a louder NOTE (the gate re-derives the merged tree on the new main).
+WATCH_FILES='test/db/helpers.js server/schema.sql server/initDb.js server/db.js server/auth.js server/backupTables.js server/dbBackup.js server/dbRestore.plan.test.js test/db/restore-incomplete.test.js package.json package-lock.json'
+
+SUBJECT_STEM='[QA/Datasec-Vision -> Tuesday] GATE VERDICT — Vision gate 15'
+QUESTION_SUBJ='[QA/Datasec-Vision -> Tuesday] QUESTION: <topic>'
+ANSWER_PREFIX='[Tuesday -> QA/Vision-gate15] ANSWER'
+
+p() { git --no-optional-locks -C "$P_REPO" "$@"; }
+
+# ---------------------------------------------------------------- THE PROMPT (embedded; guarded below like a prompt file)
+PROMPT=''
+read -r -d '' PROMPT <<'PROMPT_EOF' || true
+ultrathink
+
+You are the fleet QA/testing agent running ONE gate (Vision gate 15) on Datasec/Vision_Sales_Portal: a TIER-1 RESTORE gate with TWO targets and TWO verdicts, each GO or NO-GO, plus one merged line, in the SALES PORTAL repo. Portal main is 6dbffdf (gate 13's GO head 110bb03 plus a BACKLOG commit; VSP-74's class is capped by Kam's ruling C-08 and its residue is ticketed as VSP-87, NOT re-graded here). Both targets are direct children of 6dbffdf and both change server/dbRestore.js and server/dbRestore.test.js.
+
+READ YOUR COMMISSION FIRST, whole: /Volumes/KK_T9_External_HDD/TUESDAY/2_Project_Files/fleet/qa-agent/briefs/2026-09-29_vision-gate15-tier1-vsp83-vsp86.md
+Then read the charter it names, the Vision CLARIFICATIONS (C-01..C-12; C-11 and C-12 are Tuesday's rulings for these two targets, C-08 is Kam's), the project's CLAUDE.md (/Volumes/KK_T9_External_HDD/!CODING/Datasec/Vision_Sales_Portal/CLAUDE.md; its deploy commands are not for you), the builder's READY mails under test (/Volumes/KK_T9_External_HDD/TUESDAY/2_Project_Files/fleet/qa-agent/briefs/2026-09-29_vision-vsp83-READY-mail.txt and -vsp86-READY-mail.txt beside it), gate 12's report /Volumes/KK_T9_External_HDD/!CODING/Testing Agent MAIN/projects/vision/reports/2026-09-28-vision-gate12-three-targets (N2.9, N2.11, VSP75-G12-O1, G12-O7) and gate 13's report /Volumes/KK_T9_External_HDD/!CODING/Testing Agent MAIN/projects/vision/reports/2026-09-28-vision-gate13-vsp74r2-vsp75 (VERDICTS, VERBATIM OPERATOR STRINGS, N2.3, FINDINGS INDEX, THE QUEUE, NOT TESTED; evidence/tools/ holds the instruments you copy). Every builder statement is a CLAIM, never evidence. RE-DERIVE every red, every mutant and every suite set yourself. Verify every PRIOR WORK claim against git history and gates 12-13's evidence, never against the brief.
+
+THE CLASS COUNTS. VSP-83 and VSP-86 are each ROUND 1: a NO-GO sends that ticket to its round 2, not to Kam. VSP-74's class is capped (C-08): a new instance of it that VSP-83 or VSP-86 introduces is graded against the target that introduced it, as the brief's TUESDAY'S RULINGS say.
+
+THE TARGETS.
+  VSP83 (TIER 1, ROUND 1) = Jira VSP-83 = gate 12 VSP75-G12-O1. An old-format (pre-VSP-75) backup made east of UTC restored every DATE one day early. For DATE columns only, a full ISO instant is now read as its calendar date in a NAMED zone: RESTORE_BACKUP_TZ when set (validated; an unknown one refuses with nothing changed), else this process's zone (NOT validated); the zone and its source are printed first in restoreData.
+  VSP86 (TIER 1, ROUND 1) = Jira VSP-86 = gate 12 G12-O7. A stale session outlived a restore and the next new user took its id. The restore now runs DELETE FROM "session" (bare name, no schema, no ONLY) as the last statement of its clear transaction and prints the sign-in-again line after the plan check, before any write. Shape (B), per-request re-validation, is NOT built (VSP-89).
+
+WHAT THE BRIEF REQUIRES, in short (the brief is the authority):
+(1) VSP-83: the gate-12 date shift on YOUR instrument with old-format backups made by e59232e's REAL runBackup under Australia/Sydney, UTC and America/Los_Angeles, main 6dbffdf as the positive control; DATE columns only and plain dates untouched (every non-DATE value and every new-format date equal to main's restore of the same blob, quotes.valid_until included); the zone matrix (process TZ unset, UTC, Australia/Sydney, :Australia/Sydney, AEST-10, Garbage/Zone and the EMPTY string; override unset, blank, lower-case, Etc/GMT-10, +10:00, unknown) on your local Node AND Node 20 — any cell that changes data and then throws is a FAIL; the unknown override byte-identical with zero SQL (plus a closed-port control); the zone line before the first SQL by ONE ordered event log of console lines and SQL statements; the DST edge; the READY's mutants and yours.
+(2) VSP-86: the ghost and the id reuse (main 200, c955065 200, 9fd98a5 and merged 401); every signed-in user signed out and able to sign in again; SCOPE — a restore changes ONLY the printed Cleared set, the restored tables and public.session, in EVERY schema, every table named with its row count before and after; refusals change nothing, sessions included; the class-hunt of the new statement (a search_path shadow session table, an INHERITS child of session, an FK to session with CASCADE / SET NULL / NO ACTION in public and in another schema, session absent, a role without DELETE on session); rollback atomicity (a trigger failing the session DELETE and the last planned DELETE leaves sessions AND data unchanged; the insert phase measured against main); a live login interleaved across the clear COMMIT (the store's save is an upsert); the READY's mutants and yours.
+(3) THE MERGED TREE: built from YOUR OWN object dir or by git apply onto an archive of 6dbffdf; the combined cell in ONE run (an old-format +10 backup restores the right date AND clears sessions, with the event order zone line < first SQL < sign-in-again line < first DELETE < session DELETE < COMMIT < first INSERT); combined refusals and aborts; SUITES AS SETS, NOT COUNTS vs main 6dbffdf (0 lost); coverage run locally (label it NOT CI).
+(4) NO REGRESSION on the merged tree: gate 13's F1 closure cells, one cascade-matrix row, the refusal groups, and the N2.9 deploy-time table line by line (quote the new version whole); the Node 20 leg exactly as the NODE20-LEG line in the brief says (DOCKER-PULL-NEVER).
+CI is UNMEASURED: this project's gh is not authenticated and you must not use gh; never claim CI; name CI's Node 22 coverage gate and its e2e:pro step as the first reads at merge. Every red-proof: fresh tree per arm, asserted edits, node --check rc quoted; a red from a mutant that does not parse is VOID. A 501 in any cell is VSP-80's decoy class until it reproduces at a head and not at main in the same session.
+
+LOCAL POSTGRES ONLY. PRODUCTION IS LIVE for this project. NEVER the live portal (datasec-sales-portal.azurewebsites.net, datasec-sales-portal-rg, its Postgres datasec-sales-db.postgres.database.azure.com, its key vault): no request, no DB connection, not even a GET. No az of any kind, no deploy, no app-setting change; production's TZ is not yours to read. Never open a real backup, a production dump or anything under the project's 4_Credentials: every backup JSON you use is built by the product's own code from YOUR seeded database. Real sends are OFF: Azure Blob Storage and ACS are replaced by YOUR recorders; ntfy goes only to YOUR loopback recorder. restoreData, restorePlan and clearTables read and DELETE: print the connected database name before every call and abort if it is not one you created. Never set AZURE_BACKUP_CONN_STR. Schemas, search_path settings, inheritance children, triggers, FKs to session and any vsp_qa_g15_* role exist only inside your own databases.
+
+TREES AND WRITES. Build every tree INSIDE YOUR OWN PROJECT from the object store (git archive into a fresh mktemp -d under projects/vision/work-g15/). Each tree is EXCLUSIVE to this gate and to one purpose; never touch work/ or work-g2 .. work-g14. Copy gate 13's tools into YOUR evidence folder and re-point them (they hard-code work-g13 and ENFORCE vsp_qa_g13_); never run from, edit or write into gate 1-14's copies. Dependencies: npm ci --offline --ignore-scripts only, then prove node_modules/.package-lock.json against the lockfile entry by entry (lockcmp.py AND lockwalk.py). Never npm install, never npm audit, never npx anything not already in the tree. In the repo use ONLY read verbs (show, log, diff, ls-remote, rev-parse, ls-tree, cat-file, grep, merge-base, archive); never fetch, pull, checkout, switch, worktree, commit, stash, reset, clean or gc. Run git merge-tree --write-tree only from the gate's OWN object dir (GIT_OBJECT_DIRECTORY = your own mktemp -d, alternates = the repo's objects), or build the merged tree with git apply onto an archive and say so. Findings-only: no writes in the portal repo, none inside Vision_Sales_Portal, none in gate 1-14's report folders or trees. Never rm: quarantine. Run every loop and every git show <sha>:<path> under bash. CONTROLS MUST BE ABLE TO FAIL INDEPENDENTLY: a control derived from the run it validates is not a control.
+
+FLOOR DISCIPLINE. Vision has no jest lock; never borrow NexusAI's. Never use ports 4848, 8080 or 47787, nor 127.0.0.1:49162 / 49164 / 49166; take every port from the kernel and bind 127.0.0.1. Never start the portal's own entry point (it binds all interfaces); use the real createApp() and initDb() in your harness. Postgres is the local container on 127.0.0.1:5433, and ONLY databases you create: vsp_qa_g15_<epoch> and vsp_qa_g15_<epoch>_test (the test name MUST end in _test); never salesportal, salesportal_test or salesportal_test_lazy (a Vision seat may be launched at any time), any vsp_qa_g1..g14 database (gate 14 may be running now on the same Postgres: vsp_qa_g14_* databases, roles and work-g14 are NOT yours), the builder's vsp_bf1_*, vsp_g12r2_*, vsp_fix* or vsp_s0929_* databases, or any vsp71_* / vsp73_* database you did not cause. Roles are cluster-global: create one only inside a transaction you roll back, or name it vsp_qa_g15_* and list it; earlier gates' roles are not yours. Never ALTER SYSTEM, never ALTER DATABASE or ALTER ROLE on anything you did not create. The module's default URL is the builder's dev database, so give every product process YOUR DATABASE_URL and TEST_DATABASE_URL explicitly and print the database each one reached. Release every lock and direct session you open in a finally, including the lock the live-login interleave holds on purpose. No docker command at all, except the Node 20 exception under the NODE20-LEG line. Every product process runs under env -i with an explicit allowlist, NODE_ENV never production. Never set AGENTMAIL_API_KEY or AGENTMAIL_INBOX in a product process, nor any real ACS_* or MAIL_SENDER, AZURE_BACKUP_CONN_STR, TABLES_CONNECTION_STRING, SALES_COPY_EMAIL, a real NTFY_TOPIC, LEAD_BOT_API_KEY or WEBSITE_SITE_NAME; print each product process's env KEY NAMES and assert none is forbidden. NTFY_SERVER=http://ntfy.invalid except your loopback recorder; never contact ntfy.sh; stub fetch to throw on any other URL. Count foreign servers the RD-606 way, anchored on YOUR OWN claude pid, with the brief's negative-control seats classifying FOREIGN in the same run. A zero is reportable only beside an ATTACHED control that fired in the same window. Other gates and seats are live on this box: record the load average beside every timing number; a latency result with no load figure is not a measurement.
+DEADLINE AND HEARTBEAT: every step has a written DEADLINE built into your runner (there is no timeout binary here) and releases its servers, proxies, recorders, sessions, locks, roles and children in a finally. Log a HEARTBEAT line at least every 2 minutes; a step with no heartbeat for 5 minutes is aborted and reported, never waited on. Deadlines: one restore cell 120 s; a child-process cell 30 s; one test:db file 180 s; a whole test:db run 420 s; one Node 20 container 420 s. Nothing above 420 s.
+
+QUESTIONS: your routing name is QA/Vision-gate15. If you must ask, mail tuesday-agent@agentmail.to with the subject "[QA/Datasec-Vision -> Tuesday] QUESTION: <topic>" and proceed on the safest reading without waiting. Tuesday's answer arrives in tuesday-agent@agentmail.to with a subject beginning "[Tuesday -> QA/Vision-gate15] ANSWER"; read it with your verdict key. Never wednesday-agent@. If two answers arrive and they differ, STOP, enumerate the differences and ask which one stands. If a response is cut off by a safety check, record it and continue with the next item; this is authorised defensive QA of Datasec's own product on loopback. Record every question, reading and answer in the report.
+
+Write your report to: /Volumes/KK_T9_External_HDD/!CODING/Testing Agent MAIN/projects/vision/reports/2026-09-29-vision-gate15-tier1-vsp83-vsp86/report.md
+
+MAIL YOUR VERDICT to tuesday-agent@agentmail.to with a subject beginning exactly:
+[QA/Datasec-Vision -> Tuesday] GATE VERDICT — Vision gate 15: VSP83 @ <sha7> <GO | NO-GO> · VSP86 @ <sha7> <GO | NO-GO> · merged <CLEAN | CONFLICT | NOT-RUN>
+(each sha7 is the pinned head from the verified table below). Lead the body with two sentences, one per target, as the brief's section 14 words them, then one line on the merged tree and one line on the class counts (round 1 each: a NO-GO goes to round 2; VSP-74's class is capped by C-08 and not re-graded). You have no inbox that wakes you, so a verdict you do not mail is lost.
+
+The AgentMail key is AGENTMAIL_API_KEY in /Volumes/KK_T9_External_HDD/TUESDAY/4_Credentials/.env. It is an absolute path because the QA project has no credentials directory of its own. Use it only in your own mail calls, with a client timeout. Never put the key or any secret in a mail or the report.
+
+Run long commands in the FOREGROUND. Never end a turn waiting on a background notice.
+
+Report every pinned head and main as three timestamped readings (start / mid / end), with the branch name beside each. Include the verbatim operator strings the brief lists: every form of the zone line you saw, the unknown-override error, the sign-in-again line, the Cleared session line, every new error text from the class-hunt and the atomicity cells, the new deploy-time table whole, SELECT version() and node --version for each leg.
+
+Rule 2 stands: what you did NOT test is first-class output. Write a NOT TESTED section that covers at least CI (UNMEASURED), production's TZ, production's catalog, schemas, search_path and roles, whether production restores with the app live, the restore CLI end to end against Azure Blob Storage, real Azure Blob Storage, ACS and ntfy, Node 22, the container image, e2e:pro, and every zone or class-hunt cell you did not run. Label every action recommendation MEASURED AT RUNTIME, PROBED or READ ONLY.
+PROMPT_EOF
+
+# ---------------------------------------------------------------- GUARDS
+[ -d "$QA_DIR" ]  || { echo "QA project missing: $QA_DIR" >&2; exit 2; }
+[ -s "$BRIEF" ]   || { echo "brief missing or empty: $BRIEF" >&2; exit 3; }
+[ -n "$PROMPT" ]  || { echo "embedded prompt is empty" >&2; exit 4; }
+[ -d "$P_REPO/.git" ] || [ -f "$P_REPO/.git" ] || { echo "repo under test missing: $P_REPO" >&2; exit 5; }
+
+# 40 — parse the PIN table from the brief (the ONLY source of heads). Output: id repo branch head base commits status (TAB).
+PIN="$(python3 - "$BRIEF" <<'PY'
+import sys, re
+s = open(sys.argv[1], encoding='utf-8').read()
+m = re.search(r'<!-- PIN-HEADS:BEGIN -->(.*?)<!-- PIN-HEADS:END -->', s, re.S)
+if not m:
+    print('NO-BLOCK'); sys.exit(0)
+for line in m.group(1).splitlines():
+    line = line.strip()
+    if not line.startswith('|') or line.startswith('| id ') or set(line) <= set('|-: '):
+        continue
+    cells = [c.strip().strip('`') for c in line.strip('|').split('|')]
+    print('\t'.join(cells))
+PY
+)"
+[ "$PIN" != "NO-BLOCK" ] && [ -n "$PIN" ] || { echo "REFUSING: the brief has no PIN-HEADS block — the heads have nowhere to come from" >&2; exit 40; }
+TARGETS='VSP83 VSP86'
+EXPECT_IDS="MAIN-P $TARGETS"
+for ID in $EXPECT_IDS; do
+  N="$(printf '%s\n' "$PIN" | awk -F'\t' -v id="$ID" '$1==id' | wc -l | tr -d ' ')"
+  [ "$N" = "1" ] || { echo "REFUSING: PIN table must carry exactly one row '$ID' (found $N)" >&2; exit 40; }
+done
+[ "$(printf '%s\n' "$PIN" | wc -l | tr -d ' ')" = "3" ] || { echo "REFUSING: PIN table carries rows beyond the three expected ($EXPECT_IDS)" >&2; exit 40; }
+row()   { printf '%s\n' "$PIN" | awk -F'\t' -v id="$1" '$1==id'; }
+fld()   { row "$1" | awk -F'\t' -v n="$2" '{print $n}'; }   # 2 repo 3 branch 4 head 5 base 6 commits 7 status
+is40()  { printf '%s' "$1" | grep -Eq '^[0-9a-f]{40}$'; }
+for ID in $EXPECT_IDS; do
+  R="$(row "$ID")"; ST="$(fld "$ID" 7)"
+  [ "$(printf '%s\n' "$R" | awk -F'\t' '{print NF}')" = "7" ] || { echo "REFUSING: PIN row $ID does not have 7 cells: $R" >&2; exit 40; }
+  [ "$ST" = "IN" ] || { echo "REFUSING: PIN row $ID status is '$ST' — IN only" >&2; exit 40; }
+  printf '%s' "$R" | grep -q '@' && { echo "REFUSING: PIN row $ID still carries a placeholder: $R" >&2; exit 40; }
+  is40 "$(fld "$ID" 4)" || { echo "REFUSING: PIN row $ID head is not a 40-hex sha: '$(fld "$ID" 4)'" >&2; exit 40; }
+  [ "$(fld "$ID" 2)" = "portal" ] || { echo "REFUSING: PIN row $ID repo must be portal" >&2; exit 40; }
+done
+[ "$(fld MAIN-P 3)" = "main" ] || { echo "REFUSING: row MAIN-P branch must be main" >&2; exit 40; }
+branch_of() { case "$1" in
+  VSP83) echo 'vsp-83-old-backup-dates' ;;
+  VSP86) echo 'vsp-86-restore-clears-sessions' ;;
+esac; }
+head_of() { case "$1" in VSP83) echo "$H83_EXPECT" ;; VSP86) echo "$H86_EXPECT" ;; esac; }
+for ID in $TARGETS; do
+  [ "$(fld "$ID" 3)" = "$(branch_of "$ID")" ] || { echo "REFUSING: row $ID branch is '$(fld "$ID" 3)', the brief's target is $(branch_of "$ID") — re-brief" >&2; exit 40; }
+  is40 "$(fld "$ID" 5)" || { echo "REFUSING: PIN row $ID base is not a 40-hex sha" >&2; exit 40; }
+  printf '%s' "$(fld "$ID" 6)" | grep -Eq '^[1-9][0-9]*$' || { echo "REFUSING: PIN row $ID commits '$(fld "$ID" 6)' is not a positive integer" >&2; exit 40; }
+  [ "$(fld "$ID" 4)" = "$(head_of "$ID")" ] || { echo "REFUSING: $ID's PIN head $(fld "$ID" 4 | cut -c1-7) is not $(head_of "$ID" | cut -c1-7) — this launcher's chains and content guards are pinned to it; re-brief" >&2; exit 40; }
+done
+MAINH="$(fld MAIN-P 4)"
+H83="$(fld VSP83 4)"; H86="$(fld VSP86 4)"
+
+# 6 — every sha the guards use is a commit in the local object store (this launcher never fetches).
+for S in "$MAINH" "$H83" "$H86" "$ANCHOR_MAIN" "$ANCHOR_G13H" "$ANCHOR_R74" "$ANCHOR_FWD" "$ANCHOR_E59" "$ANCHOR_609" "$G12_H74" "$G12_H75" "$R83_FIRST"; do
+  T="$(p cat-file -t "$S" 2>&1)"
+  [ "$T" = "commit" ] || { echo "REFUSING: $S is not a commit in the portal repo (got '$T') — this launcher never fetches" >&2; exit 6; }
+done
+
+# 9m — MAIN: 6dbffdf, or a descendant of it whose diff from 6dbffdf touches none of the targets' files.
+main_ok() {   # $1 = sha; prints the offending files and returns 1 if it moved in a delta file
+  p merge-base --is-ancestor "$ANCHOR_MAIN" "$1" 2>/dev/null || { echo "(not a descendant of 6dbffdf)"; return 1; }
+  [ "$1" = "$ANCHOR_MAIN" ] && return 0
+  local HIT; HIT="$(p diff --name-only "$ANCHOR_MAIN" "$1" 2>/dev/null | grep -xF -f <(printf '%s\n' $DELTA_FILES))"
+  [ -z "$HIT" ] || { printf '%s\n' "$HIT"; return 1; }
+  return 0
+}
+main_watch() { [ "$1" = "$ANCHOR_MAIN" ] && return 0; p diff --name-only "$ANCHOR_MAIN" "$1" 2>/dev/null | grep -xF -f <(printf '%s\n' $WATCH_FILES); }
+OUT="$(main_ok "$MAINH")" || { echo "REFUSING: the pinned MAIN ${MAINH:0:7} is not 6dbffdf or a descendant that leaves the targets' files alone: $OUT — re-brief" >&2; exit 9; }
+STALE=''
+[ "$MAINH" = "$ANCHOR_MAIN" ] || { STALE=' (main pinned past 6dbffdf; the gate re-derives the merged tree on it)'; echo "NOTE: pinned MAIN ${MAINH:0:7} is a descendant of 6dbffdf touching none of the delta files" >&2; }
+W="$(main_watch "$MAINH")"; [ -z "$W" ] || echo "NOTE: pinned MAIN moved in files the cells depend on: $(printf '%s ' $W)— the gate re-derives the merged tree and the suites on it" >&2
+
+# 7 / 8 — each target: base as briefed, ancestor AND merge-base with MAIN, not on main, exact count, 0 behind 6dbffdf.
+for ID in $TARGETS; do
+  H="$(fld "$ID" 4)"; BASE="$(fld "$ID" 5)"; N="$(fld "$ID" 6)"; H7="${H:0:7}"
+  [ "$BASE" = "$ANCHOR_MAIN" ] || { echo "REFUSING: row $ID base ${BASE:0:7} is not 6dbffdf — re-brief" >&2; exit 7; }
+  p merge-base --is-ancestor "$BASE" "$H" 2>/dev/null || { echo "REFUSING: $ID base ${BASE:0:7} is not an ancestor of $H7" >&2; exit 7; }
+  [ "$(p merge-base "$H" "$MAINH" 2>/dev/null)" = "$BASE" ] || { echo "REFUSING: $ID merge-base(head, MAIN) is not its base ${BASE:0:7}" >&2; exit 7; }
+  p merge-base --is-ancestor "$H" "$MAINH" 2>/dev/null \
+    && { echo "REFUSING: $ID $H7 is ALREADY ON MAIN ${MAINH:0:7} — the brief says it is not; re-brief" >&2; exit 7; }
+  GOTN="$(p rev-list --count "${BASE}..${H}" 2>/dev/null)"
+  [ "$GOTN" = "$N" ] || { echo "REFUSING: $ID $H7 has $GOTN commits over its base, the table says $N" >&2; p log --format='%h %p %s' "${BASE}..${H}" >&2; exit 8; }
+  [ "$(p rev-list --count "${H}..${ANCHOR_MAIN}" 2>/dev/null)" = "0" ] || { echo "REFUSING: $ID $H7 is behind 6dbffdf" >&2; exit 7; }
+done
+p merge-base --is-ancestor "$H83" "$H86" 2>/dev/null && { echo "REFUSING: VSP86 contains VSP83 — the brief gates them as siblings" >&2; exit 7; }
+p merge-base --is-ancestor "$H86" "$H83" 2>/dev/null && { echo "REFUSING: VSP83 contains VSP86 — the brief gates them as siblings" >&2; exit 7; }
+
+# 9 — gated anchors, never-rebased, exact chains, no merges.
+[ "$(p log -1 --format='%P' "$ANCHOR_MAIN")" = "$ANCHOR_G13H" ] || { echo "REFUSING: 6dbffdf's single parent is not 110bb03 (gate 13's GO head)" >&2; exit 9; }
+[ "$(p log -1 --format='%P' "$ANCHOR_G13H")" = "$ANCHOR_FWD $ANCHOR_E59" ] || { echo "REFUSING: 110bb03 is not the merge 4843aed + e59232e" >&2; exit 9; }
+for S in "$ANCHOR_G13H" "$ANCHOR_R74" "$ANCHOR_FWD" "$ANCHOR_E59" "$ANCHOR_609" "$G12_H74" "$G12_H75"; do
+  p merge-base --is-ancestor "$S" "$MAINH" 2>/dev/null || { echo "REFUSING: anchor ${S:0:7} (gate 12-13 heads, 4813e5f, 4843aed, e59232e, 609e967) is not on main ${MAINH:0:7} — re-brief" >&2; exit 9; }
+done
+[ "$(p log -1 --format='%P' "$H83")" = "$R83_FIRST" ] || { echo "REFUSING: VSP83 ${H83:0:7}'s single parent is not ebb4c45 — rebased or rebuilt" >&2; exit 9; }
+[ "$(p log -1 --format='%P' "$R83_FIRST")" = "$ANCHOR_MAIN" ] || { echo "REFUSING: ebb4c45's single parent is not 6dbffdf" >&2; exit 9; }
+[ "$(p log -1 --format='%P' "$H86")" = "$ANCHOR_MAIN" ] || { echo "REFUSING: VSP86 ${H86:0:7}'s single parent is not 6dbffdf — rebased or rebuilt" >&2; exit 9; }
+nonmerge() { p rev-list --no-merges "${1}..${2}" 2>/dev/null | sort; }
+chain_of() { case "$1" in VSP83) printf '%s\n' $CHAIN83 ;; VSP86) printf '%s\n' $CHAIN86 ;; esac | sort; }
+for ID in $TARGETS; do
+  H="$(fld "$ID" 4)"
+  [ "$(nonmerge "$ANCHOR_MAIN" "$H")" = "$(chain_of "$ID")" ] || { echo "REFUSING: $ID's commits over 6dbffdf are not exactly the pinned chain. Got:" >&2; nonmerge "$ANCHOR_MAIN" "$H" >&2; exit 9; }
+  [ -z "$(p rev-list --merges "${ANCHOR_MAIN}..${H}" 2>/dev/null)" ] || { echo "REFUSING: $ID carries a merge over 6dbffdf — the brief says none" >&2; exit 9; }
+done
+
+# 18 — RE-PIN: every row at origin, by ls-remote, read NOW (immediately before launch). Main may have moved harmlessly (NOTE).
+ORIGIN_MAIN_NOTE=''
+for ID in $EXPECT_IDS; do
+  BR="$(fld "$ID" 3)"; H="$(fld "$ID" 4)"
+  L="$(p ls-remote origin "refs/heads/$BR" 2>&1)"
+  if printf '%s\n' "$L" | grep -q "^${H}[[:space:]]refs/heads/${BR}\$"; then continue; fi
+  if [ "$ID" = "MAIN-P" ]; then
+    NOW="$(printf '%s\n' "$L" | awk -v r="refs/heads/$BR" '$2==r {print $1}')"
+    is40 "$NOW" || { echo "REFUSING: cannot read origin main: ${L:-<nothing>}" >&2; exit 18; }
+    [ "$(p cat-file -t "$NOW" 2>/dev/null)" = "commit" ] || { echo "REFUSING: origin main moved to ${NOW:0:7}, which is not in the local object store — this launcher never fetches; Tuesday re-reads and re-pins" >&2; exit 18; }
+    p merge-base --is-ancestor "$H" "$NOW" 2>/dev/null || { echo "REFUSING: origin main ${NOW:0:7} does not contain the pinned main ${H:0:7} — re-pin" >&2; exit 18; }
+    OUT="$(main_ok "$NOW")" || { echo "REFUSING: origin main moved to ${NOW:0:7}, touching the targets' files: $OUT — re-pin and re-brief" >&2; exit 18; }
+    W="$(main_watch "$NOW")"
+    ORIGIN_MAIN_NOTE="origin main is now ${NOW:0:7}, a descendant of the pinned ${H:0:7} touching none of the delta files (NOTE; the merged tree must be re-derived on it)${W:+; it moved in files the cells depend on: $(printf '%s ' $W)}"
+    echo "NOTE: $ORIGIN_MAIN_NOTE" >&2
+    continue
+  fi
+  echo "REFUSING: row $ID: $H is not at refs/heads/$BR on origin — that head moved or was never pushed; re-pin" >&2; printf '%s\n' "${L:-<nothing>}" >&2; exit 18
+done
+PIN_TS="$(date '+%Y-%m-%d %H:%M:%S %Z')"
+
+# 22 — exact file sets.
+fileset() { case "$1" in
+  VSP83) printf '%s\n' server/dbRestore.js server/dbRestore.test.js test/db/restore-old-dates.test.js ;;
+  VSP86) printf '%s\n' server/dbRestore.js server/dbRestore.test.js test/db/restore-sessions.test.js ;;
+esac; }
+for ID in $TARGETS; do
+  H="$(fld "$ID" 4)"
+  GOT="$(p diff --name-only "$ANCHOR_MAIN" "$H" 2>/dev/null | sort)"
+  [ "$GOT" = "$(fileset "$ID" | sort)" ] || { echo "REFUSING: $ID ${H:0:7}'s delta over 6dbffdf is not exactly the briefed file set. Got:" >&2; printf '%s\n' "$GOT" >&2; exit 22; }
+done
+[ "$(p diff --name-only "$R83_FIRST" "$H83" 2>/dev/null)" = "server/dbRestore.test.js" ] || { echo "REFUSING: c955065 itself touches other than server/dbRestore.test.js (the READY: 'c955065 changed only the unit test file')" >&2; exit 22; }
+
+# 23 — THE OVERLAP CHECK (replaces any merge-tree step; this launcher never runs merge-tree). Path level, hunk level, function level.
+SHARED="$(comm -12 <(fileset VSP83 | sort) <(fileset VSP86 | sort) | tr '\n' ' ')"
+[ "$SHARED" = "server/dbRestore.js server/dbRestore.test.js " ] || { echo "REFUSING: the targets' shared paths are '$SHARED', the brief says exactly server/dbRestore.js and server/dbRestore.test.js" >&2; exit 23; }
+hunks() {   # $1 head, $2 path -> "start end" per hunk on the OLD side (an insertion after line a is [a, a+1])
+  p diff -U0 "$ANCHOR_MAIN" "$1" -- "$2" 2>/dev/null | awk '/^@@ /{
+    split($2, o, ","); s = substr(o[1], 2) + 0; n = (o[2] == "" ? 1 : o[2] + 0)
+    if (n == 0) print s, s + 1; else print s, s + n - 1 }'
+}
+hunkmap() { p diff -U0 "$ANCHOR_MAIN" "$1" -- "$2" 2>/dev/null | awk '/^@@ /{ split($2, o, ","); printf "%s ", substr(o[1], 2) }'; }
+[ "$(hunkmap "$H83" server/dbRestore.js)" = "14 61 70 77 291 320 333 " ] || { echo "REFUSING: VSP83's dbRestore.js hunk map is '$(hunkmap "$H83" server/dbRestore.js)', the brief says 14 61 70 77 291 320 333" >&2; exit 23; }
+[ "$(hunkmap "$H86" server/dbRestore.js)" = "222 305 " ] || { echo "REFUSING: VSP86's dbRestore.js hunk map is '$(hunkmap "$H86" server/dbRestore.js)', the brief says 222 305" >&2; exit 23; }
+[ "$(hunkmap "$H83" server/dbRestore.test.js)" = "11 73 " ] || { echo "REFUSING: VSP83's dbRestore.test.js hunk map differs from the brief's 11 73" >&2; exit 23; }
+[ "$(hunkmap "$H86" server/dbRestore.test.js)" = "42 " ] || { echo "REFUSING: VSP86's dbRestore.test.js hunk map differs from the brief's 42" >&2; exit 23; }
+MINGAP=''
+for F in server/dbRestore.js server/dbRestore.test.js; do
+  G="$(awk 'NR==FNR { a[++n] = $1 " " $2; next }
+            { for (i = 1; i <= n; i++) { split(a[i], x, " ");
+                d = ($1 > x[2]) ? $1 - x[2] : (x[1] > $2 ? x[1] - $2 : 0);
+                if (m == "" || d < m) m = d } }
+            END { print (m == "" ? "none" : m) }' <(hunks "$H83" "$F") <(hunks "$H86" "$F"))"
+  MINGAP="$MINGAP $F:$G"
+  { [ "$G" != "none" ] && [ "$G" -ge 3 ]; } || { echo "REFUSING: in $F a VSP83 hunk and a VSP86 hunk are $G line(s) apart on the old side (< 3) — a textual conflict is possible; the gate must merge it for real before this launcher passes" >&2; exit 23; }
+done
+extent() {  # $1 sha, $2 start regex, $3 stop regex -> hash of that function extent
+  p show "${1}:server/dbRestore.js" 2>/dev/null | awk -v a="$2" -v b="$3" '$0 ~ a {f=1} $0 ~ b {f=0} f' | git hash-object --stdin
+}
+PLAN_M="$(extent "$ANCHOR_MAIN" '^async function restorePlan' '^/\*\* Empty every table')"
+for H in "$H83" "$H86"; do
+  [ "$(extent "$H" '^async function restorePlan' '^/\*\* Empty every table')" = "$PLAN_M" ] || { echo "REFUSING: ${H:0:7} changed restorePlan()/liveTables() — VSP-74's capped class (C-08); the brief says neither target touches the plan" >&2; exit 23; }
+done
+[ "$(extent "$H83" '^async function clearTables' '^function parseArgs')" = "$(extent "$ANCHOR_MAIN" '^async function clearTables' '^function parseArgs')" ] \
+  || { echo "REFUSING: VSP83 changed clearTables() — the brief says only VSP86 does" >&2; exit 23; }
+[ "$(extent "$H86" '^async function restoreTable' '^async function resetSequence')" = "$(extent "$ANCHOR_MAIN" '^async function restoreTable' '^async function resetSequence')" ] \
+  || { echo "REFUSING: VSP86 changed restoreTable() — the brief says only VSP83 does" >&2; exit 23; }
+
+# 74 — per-target content, read from the pinned shas (never a checkout).
+has() { p show "${1}:${2}" 2>/dev/null | grep -qF -- "$3"; }   # sha path fixed-string
+must() { has "$1" "$2" "$3" || { echo "REFUSING: ${1:0:7}:$2 lacks '$3' — the brief gates different code; re-brief" >&2; exit 74; }; }
+mustnot() { has "$1" "$2" "$3" && { echo "REFUSING: ${1:0:7}:$2 carries '$3' — the brief's reading is wrong; re-brief" >&2; exit 74; }; return 0; }
+ntests() { p show "${1}:${2}" 2>/dev/null | grep -c '^test('; }
+wantn() { [ "$(ntests "$1" "$2")" = "$3" ] || { echo "REFUSING: ${1:0:7}:$2 carries $(ntests "$1" "$2") test( cells, the brief says $3" >&2; exit 74; }; }
+blob() { p rev-parse "${1}:${2}" 2>/dev/null; }
+# VSP-83 present at VSP83, absent at VSP86 and main.
+for T in 'function restoreTimeZone(env = process.env) {' \
+         "if (!named) return { tz: Intl.DateTimeFormat().resolvedOptions().timeZone, source: \"this process's time zone (RESTORE_BACKUP_TZ not set)\" };" \
+         "is not a time zone Node knows (e.g. Australia/Sydney, UTC). Nothing was changed." \
+         "WHERE table_schema = 'public' AND table_name = \$1 AND data_type = 'date'" \
+         'const ISO_INSTANT = /^' \
+         'console.log(`Dates in a pre-VSP-75 backup are read in ${tz}, from ${source}.`);' \
+         ': dateCols.has(c) ? oldFormatDate(row[c], tz) : row[c]));' \
+         'const inserted = await restoreTable(t, tableData.rows, tz);'; do
+  must "$H83" server/dbRestore.js "$T"
+done
+mustnot "$H86" server/dbRestore.js 'restoreTimeZone'
+mustnot "$ANCHOR_MAIN" server/dbRestore.js 'restoreTimeZone'
+# VSP-86 present at VSP86, absent at VSP83 and main.
+must "$H86" server/dbRestore.js "await client.query('DELETE FROM \"session\"');"
+must "$H86" server/dbRestore.js "console.log('  Cleared session (every signed-in user signs in again)');"
+must "$H86" server/dbRestore.js "console.log('Every signed-in user will have to sign in again: this restore clears all sessions (VSP-86).');"
+mustnot "$H83" server/dbRestore.js 'DELETE FROM "session"'
+mustnot "$ANCHOR_MAIN" server/dbRestore.js 'DELETE FROM "session"'
+# The plan still excludes session by name and reaches starts from restored tables only (WRONG (d)).
+must "$H86" server/dbRestore.js "for (const t of live.filter(t => !restored(t) && (t.schema === 'public' ? !NOT_RESTORED.includes(t.name) : reaches.has(t.oid)))) {"
+must "$H86" server/dbRestore.js 'const reaches = new Set(live.filter(restored).map(t => t.oid));'
+# The insert-phase shape the brief reads: the conversion sits outside the per-row try (WRONG (c)).
+python3 - "$(p show "${H83}:server/dbRestore.js")" <<'PY' || { echo "REFUSING: at VSP83 the DATE conversion is not where the brief reads it (params built before the per-row try) — re-brief WRONG (c)" >&2; exit 74; }
+import sys
+s = sys.argv[1]
+i = s.find('dateCols.has(c) ? oldFormatDate(row[c], tz)'); j = s.find('    try {\n      await query(`INSERT INTO')
+sys.exit(0 if 0 <= i < j else 1)
+PY
+# Test cells and the one changed assertion.
+wantn "$H83" test/db/restore-old-dates.test.js 6
+wantn "$H86" test/db/restore-sessions.test.js 5
+wantn "$H83" server/dbRestore.test.js 7
+wantn "$H86" server/dbRestore.test.js 4
+wantn "$ANCHOR_MAIN" server/dbRestore.test.js 4
+[ "$(p diff --numstat "$ANCHOR_MAIN" "$H83" -- server/dbRestore.test.js | awk '{print $2}')" = "1" ] || { echo "REFUSING: VSP83 deleted other than one line (the require) in server/dbRestore.test.js" >&2; exit 74; }
+DEL86="$(p diff -U0 "$ANCHOR_MAIN" "$H86" -- server/dbRestore.test.js | grep '^-[^-]')"
+[ "$DEL86" = "-  assert.deepEqual(log.queries, ['BEGIN', 'DELETE FROM \"meetings\"', 'DELETE FROM \"leads\"', 'DELETE FROM \"users\"', 'COMMIT']);" ] \
+  || { echo "REFUSING: VSP86's deleted line in server/dbRestore.test.js is not exactly the old clearTables expected list: $DEL86" >&2; exit 74; }
+must "$H86" server/dbRestore.test.js "assert.deepEqual(log.queries, ['BEGIN', 'DELETE FROM \"meetings\"', 'DELETE FROM \"leads\"', 'DELETE FROM \"users\"', 'DELETE FROM \"session\"', 'COMMIT']);"
+for T in "test('VSP-86: a cookie for a user the backup lacks" "test('VSP-86: the id-reuse shape" "test('VSP-86 control: a refused restore" "test('VSP-86 control: the restore clears its planned tables plus session"; do
+  must "$H86" test/db/restore-sessions.test.js "$T"
+done
+for T in "test('VSP-83: a DATE from an old backup made at +10" "test('VSP-83: an unknown RESTORE_BACKUP_TZ stops the restore" "test('VSP-83 control: a plain date (VSP-75 format)"; do
+  must "$H83" test/db/restore-old-dates.test.js "$T"
+done
+# Carried files identical at all three shas; the old-format producer is where the brief says.
+for F in server/dbRestore.plan.test.js test/db/restore-incomplete.test.js test/db/helpers.js server/schema.sql server/backupTables.js server/dbBackup.js \
+         package.json package-lock.json .github/workflows/test.yml; do
+  B0="$(blob "$ANCHOR_MAIN" "$F")"
+  [ -n "$B0" ] && [ "$(blob "$H83" "$F")" = "$B0" ] && [ "$(blob "$H86" "$F")" = "$B0" ] || { echo "REFUSING: $F differs between main and a target — the brief says it is carried unchanged" >&2; exit 74; }
+done
+[ "$(blob "$ANCHOR_E59" server/dbBackup.js)" = "$OLDFMT_DBBACKUP" ] || { echo "REFUSING: e59232e's dbBackup.js is not 5e31eb4 — the old-format producer the brief names is not there" >&2; exit 74; }
+must "$ANCHOR_MAIN" server/schema.sql 'CREATE TABLE IF NOT EXISTS "session" ('
+must "$ANCHOR_MAIN" server/schema.sql 'provided_at DATE NOT NULL DEFAULT CURRENT_DATE,'
+must "$ANCHOR_MAIN" server/schema.sql 'valid_until DATE,'
+for T in 'npm ci --offline --ignore-scripts' 'entry by entry' 'never npm audit'; do
+  grep -qiF "$T" "$BRIEF" || { echo "REFUSING: brief lacks the dependency rule '$T'" >&2; exit 63; }
+  printf '%s\n' "$PROMPT" | grep -qiF -- "$T" || { echo "REFUSING: prompt lacks the dependency rule '$T'" >&2; exit 63; }
+done
+
+# 31 — the READYs are on disk, name the pinned heads, and their NOT TESTED lines are carried verbatim; sources on disk.
+for PAIR in "$READY83|Branch vsp-83-old-backup-dates @ ${H83:0:13}" "$READY86|Branch vsp-86-restore-clears-sessions @ ${H86:0:12}"; do
+  RF="${PAIR%%|*}"; SUBJ="${PAIR#*|}"
+  [ -s "$RF" ] || { echo "REFUSING: a READY mail is not on disk: $RF" >&2; exit 31; }
+  grep -qF -- "$SUBJ" "$RF" || { echo "REFUSING: $RF does not carry '$SUBJ'" >&2; exit 31; }
+  grep -qF -- 'READY FOR QA, TIER 1' "$RF" || { echo "REFUSING: $RF is not a TIER 1 READY" >&2; exit 31; }
+  NT="$(awk 'f&&!/^- /{exit} f{print;next} /^NOT TESTED/{f=1;print}' "$RF")"
+  [ -n "$NT" ] || { echo "REFUSING: $RF carries no NOT TESTED line" >&2; exit 31; }
+  while IFS= read -r L; do
+    [ -n "$L" ] || continue
+    grep -qxF -- "$L" "$BRIEF" || { echo "REFUSING: the brief does not carry this NOT TESTED line of $RF verbatim: $L" >&2; exit 31; }
+  done <<< "$NT"
+done
+for T in 'VSP-83 NOT TESTED' 'VSP-86 NOT TESTED' 'VSP75-G12-O1' 'G12-O7' 'VSP-87' 'VSP-89' 'C-08' 'C-11' 'C-12' 'ROUND 1' 'capped' \
+         '2026-09-29_vision-vsp83-READY-mail.txt' '2026-09-29_vision-vsp86-READY-mail.txt' 'd8a94070574d45a0bebc5fd1792dc5d0c2037969' 'deploy-time'; do
+  grep -qF -- "$T" "$BRIEF" || { echo "REFUSING: the brief does not carry '$T'" >&2; exit 31; }
+done
+[ -s "$CLAR" ] || { echo "REFUSING: Vision CLARIFICATIONS.md absent: $CLAR" >&2; exit 31; }
+for C in 'C-07.' 'C-08.' 'C-11.' 'C-12.'; do grep -qF "**$C" "$CLAR" || { echo "REFUSING: $CLAR lacks $C" >&2; exit 31; }; done
+grep -qF 'RESTORE_BACKUP_TZ' "$CLAR" || { echo "REFUSING: CLARIFICATIONS C-11 does not name RESTORE_BACKUP_TZ — the ruling the brief quotes is not on disk" >&2; exit 31; }
+grep -qF 'VSP-89' "$CLAR" || { echo "REFUSING: CLARIFICATIONS C-12 does not name VSP-89 — the ruling the brief quotes is not on disk" >&2; exit 31; }
+grep -qF '**C-13.' "$CLAR" && echo "NOTE: Vision CLARIFICATIONS now has a C-13 — the brief says C-01..C-12; read it before launch" >&2
+[ -s "$G12_REPORT" ] || { echo "REFUSING: gate 12's report is absent: $G12_REPORT" >&2; exit 31; }
+for T in 'VSP75-G12-O1' 'G12-O7' 'N2.11'; do grep -qF -- "$T" "$G12_REPORT" || { echo "REFUSING: gate 12's report does not carry '$T'" >&2; exit 31; }; done
+[ -s "$G13_REPORT" ] || { echo "REFUSING: gate 13's report is absent: $G13_REPORT" >&2; exit 31; }
+grep -qF '**NO-GO** at `4813e5f' "$G13_REPORT" || { echo "REFUSING: gate 13's report does not carry VSP74's NO-GO at 4813e5f" >&2; exit 31; }
+grep -qF '**GO** on VSP-75' "$G13_REPORT" || { echo "REFUSING: gate 13's report does not carry VSP75's GO" >&2; exit 31; }
+for T in 'VSP74-G13-F3' 'VSP74-G13-F4' 'VSP74-G13-M1'; do grep -qF -- "$T" "$G13_REPORT" || { echo "REFUSING: gate 13's report does not carry $T" >&2; exit 31; }; done
+for D in "$G12_DIR" "$G13_DIR"; do
+  grep -qF "$D" "$BRIEF" || { echo "REFUSING: the brief does not name $D" >&2; exit 31; }
+  case "$PROMPT" in *"$D"*) ;; *) echo "REFUSING: the prompt does not name $D" >&2; exit 31 ;; esac
+done
+for H in qa-harness-g13.cjs qa-g13-db.cjs qa-g13-one.cjs qa-g13-refusals.cjs qa-g13-matrix.cjs qa-g13-n29.cjs qa-g13-tz.cjs qa-g13-hunt.cjs \
+         qa-g13-hunt-cells.cjs qa-g13-lazywatch.cjs qa-g13-node20.cjs run-node20-g13.sh mutate-g13.py build-trees-g13.sh repoint-g13.py floor-g13.sh \
+         seed-g13.sql qa-run.py qa-floorcount.py qa-io1-preload-fetchguard.cjs mktree-portal.sh lockcmp.py lockwalk.py specsets.py tapsets.py; do
+  [ -s "$G13_TOOLS/$H" ] || { echo "REFUSING: gate 13's tool $H is not on disk — the brief names it" >&2; exit 31; }
+  grep -qF -- "$H" "$BRIEF" || { echo "REFUSING: the brief does not name gate 13's tool $H" >&2; exit 31; }
+done
+
+# 39 — the floor instrument is on disk and named.
+[ -s "$G13_FLOOR" ] || { echo "REFUSING: gate 13's floor instrument missing: $G13_FLOOR" >&2; exit 39; }
+grep -qF 'qa-floorcount.py' "$BRIEF" || { echo "REFUSING: brief does not name the floor instrument qa-floorcount.py" >&2; exit 39; }
+
+# 10 / 17 — report path named in both; no stale report.
+grep -qF "$REPORT" "$BRIEF" || { echo "REFUSING: brief does not name the report path $REPORT" >&2; exit 10; }
+case "$PROMPT" in *"$REPORT"*) ;; *) echo "REFUSING: prompt does not name the report path" >&2; exit 10 ;; esac
+[ ! -e "$REPORT" ] || { echo "REFUSING: $REPORT already exists — a stale report would read as this gate's" >&2; exit 17; }
+
+# 12 — tiers declared in both, at the pinned heads.
+for ID in VSP83 VSP86; do
+  H7="$(fld "$ID" 4 | cut -c1-7)"
+  grep -qE "^- \*\*${ID}\*\* at \`${H7}\` — \*\*TIER 1" "$BRIEF" || { echo "REFUSING: brief does not declare $ID at \`$H7\` TIER 1" >&2; exit 12; }
+  case "$PROMPT" in *"$ID (TIER 1"*) ;; *) echo "REFUSING: prompt does not declare: $ID (TIER 1" >&2; exit 12 ;; esac
+done
+
+# 78 — the commission's requirements, in both.
+for T in 'TIER 1' 'ROUND 1' 'C-08' 'VSP-87' 'VSP-89' 'RESTORE_BACKUP_TZ' 'NAMED' 'DATE columns only' 'plain dates' 'Australia/Sydney' 'America/Los_Angeles' \
+         'e59232e' 'runBackup' 'the EMPTY string' 'Garbage/Zone' 'AEST-10' 'zero SQL' 'closed' 'ordered event log' 'DST' 'quotes.valid_until' \
+         'ghost' 'id reuse' 'every signed-in user' 'SCOPE' 'EVERY schema' 'row count before' 'shadow' 'INHERITS' 'FK to session' 'NO ACTION' \
+         'session absent' 'without DELETE on session' 'atomicity' 'trigger' 'insert phase' 'interleave' 'upsert' 'combined cell' 'ONE run' \
+         'SETS, NOT COUNTS' '6dbffdf' 'c955065' '9fd98a5' 'NOT CI' 'Node 20' 'NODE20-LEG' 'DOCKER-PULL-NEVER' 'UNMEASURED' 'e2e:pro' \
+         'PRODUCTION IS LIVE' 'datasec-sales-db.postgres.database.azure.com' 'salesportal_test_lazy' 'TEST_DATABASE_URL' 'deploy-time table' \
+         'node --check' 'VOID' 'VSP-80' '501' 'vsp_qa_g14_' 'git apply'; do
+  grep -qiF -- "$T" "$BRIEF" || { echo "REFUSING: brief lacks '$T'" >&2; exit 78; }
+  printf '%s\n' "$PROMPT" | grep -qiF -- "$T" || { echo "REFUSING: prompt lacks '$T'" >&2; exit 78; }
+done
+
+# 13 / 14 / 15 / 20 / 70 — directive, brief path, placeholders, verdict route, key path, question route, safety line.
+[ "$(printf '%s\n' "$PROMPT" | head -1)" = "ultrathink" ] || { echo "REFUSING: prompt does not open with the thinking directive" >&2; exit 13; }
+case "$PROMPT" in *"$BRIEF"*) ;; *) echo "REFUSING: prompt must name the brief path" >&2; exit 14 ;; esac
+if printf '%s\n' "$PROMPT" | LC_ALL=C grep -q '@[A-Z_]*@'; then echo "REFUSING: the prompt carries a placeholder" >&2; exit 14; fi
+case "$PROMPT" in *"MAIL YOUR VERDICT"*"tuesday-agent@agentmail.to"*) ;; *) echo "REFUSING: prompt must say MAIL YOUR VERDICT to tuesday-agent@agentmail.to" >&2; exit 15 ;; esac
+case "$PROMPT" in *"$SUBJECT_STEM"*) ;; *) echo "REFUSING: prompt must carry the verdict subject stem" >&2; exit 15 ;; esac
+grep -qF "$SUBJECT_STEM" "$BRIEF" || { echo "REFUSING: brief must carry the verdict subject stem" >&2; exit 15; }
+grep -qF 'MAIL YOUR VERDICT' "$BRIEF" || { echo "REFUSING: brief must say MAIL YOUR VERDICT" >&2; exit 15; }
+if printf '%s\n' "$PROMPT" | grep -qi 'wednesday-agent@' && ! printf '%s\n' "$PROMPT" | grep -q 'Never wednesday-agent@'; then
+  echo "REFUSING: the prompt routes to wednesday-agent@ — Datasec's coordinator is Tuesday" >&2; exit 15; fi
+case "$PROMPT" in *"/Volumes/KK_T9_External_HDD/TUESDAY/4_Credentials/.env"*) ;; *) echo "REFUSING: prompt must name the AgentMail key by ABSOLUTE path" >&2; exit 20 ;; esac
+for T in "$QUESTION_SUBJ" "$ANSWER_PREFIX" "$ROUTE_NAME" 'proceed on the safest reading' 'read it with your verdict key'; do
+  grep -qiF -- "$T" "$BRIEF" || { echo "REFUSING: brief lacks the question route: $T" >&2; exit 20; }
+  case "$PROMPT" in *"$T"*) ;; *) echo "REFUSING: prompt lacks the question route: $T" >&2; exit 20 ;; esac
+done
+for T in 'If a response is cut off by a safety check, record it and continue with the next item' "authorised defensive QA of Datasec's own product on loopback"; do
+  grep -qF -- "$T" "$BRIEF" || { echo "REFUSING: brief lacks the safety-check line: $T" >&2; exit 70; }
+  case "$PROMPT" in *"$T"*) ;; *) echo "REFUSING: prompt lacks the safety-check line: $T" >&2; exit 70 ;; esac
+done
+
+# 19 — words the prompt must carry (% is a space) and the brief's sections.
+WORDS="merge-tree NOT%TESTED env%-i bash createApp() initDb() 6dbffdf c955065 9fd98a5 e59232e work-g15 vsp_qa_g15 _test
+FOREGROUND MEASURED%AT%RUNTIME PROBED READ%ONLY start%/%mid%/%end CI VOID node%--check"
+for w in $WORDS; do
+  w="${w//%/ }"
+  case "$PROMPT" in *"$w"*) ;; *) echo "REFUSING: prompt must carry '$w'" >&2; exit 19 ;; esac
+done
+for H in '^## Charter' '^## RULED BY KAM, AND SETTLED' '^## PRIOR ROUND' '^PRIOR ROUND: ' 'ITS REPORT IS ON DISK AT:' '^## PIN' \
+         '^## WRONG OR UNVERIFIABLE' '^## THE READYs' '^## 2a. LEGITIMATE SHAPES' '^## N1. VSP-83' '^## N2. VSP-86' '^## N3. THE MERGED TREE' \
+         '^## N4. NO REGRESSION' '^## 12. The merge' '^## 13. FLOOR' "^## TUESDAY'S RULINGS AT STAMP" '^## 14. Output' '^PROVENANCE:'; do
+  grep -q "$H" "$BRIEF" || { echo "REFUSING: brief lacks section '$H'" >&2; exit 19; }
+done
+# 24 — the prompt must DESCRIBE the app's entry point, never carry its literal path (RD-591 c.37901).
+if printf '%s\n' "$PROMPT" | grep -qE 'server/index\.js|stage3/server\.js'; then
+  echo "REFUSING: the prompt contains a literal server entry path — this agent would read as a FOREIGN SERVER to an argv-grep floor check. Describe it; do not name it." >&2; exit 24; fi
+
+# 53 / 60 / 61 / 62 / 64 / 69 / 75 — standing rules, in both.
+for T in 'DEADLINE' 'HEARTBEAT' '2 minutes' '5 minutes' 'finally' '420 s' '120 s'; do
+  grep -qF -- "$T" "$BRIEF" || { echo "REFUSING: brief lacks the deadline/heartbeat rule '$T'" >&2; exit 53; }
+  case "$PROMPT" in *"$T"*) ;; *) echo "REFUSING: prompt lacks the deadline/heartbeat rule '$T'" >&2; exit 53 ;; esac
+done
+for T in 'node --check' 'VOID'; do
+  grep -qF -- "$T" "$BRIEF" || { echo "REFUSING: brief lacks the parse-before-red rule '$T'" >&2; exit 60; }
+done
+for T in 'EXCLUSIVE' 'work-g15'; do
+  grep -qF -- "$T" "$BRIEF" || { echo "REFUSING: brief lacks the tree-exclusivity rule '$T'" >&2; exit 61; }
+  case "$PROMPT" in *"$T"*) ;; *) echo "REFUSING: prompt lacks the tree-exclusivity rule '$T'" >&2; exit 61 ;; esac
+done
+for T in '4848' '8080' '47787' 'env -i' 'AGENTMAIL_API_KEY' 'AGENTMAIL_INBOX' 'no jest lock' 'salesportal_test' '5433' 'vsp71_' 'vsp73_' 'vsp_s0929_'; do
+  grep -qiF -- "$T" "$BRIEF" || { echo "REFUSING: brief lacks the Vision floor rule '$T'" >&2; exit 62; }
+  case "$PROMPT" in *"$T"*) ;; *) echo "REFUSING: prompt lacks the Vision floor rule '$T'" >&2; exit 62 ;; esac
+done
+for T in 'NEVER the live' 'datasec-sales-portal.azurewebsites.net' 'datasec-sales-portal-rg' 'no app-setting change' 'AZURE_BACKUP_CONN_STR'; do
+  grep -qiF -- "$T" "$BRIEF" || { echo "REFUSING: brief does not name '$T' as NEVER" >&2; exit 64; }
+  printf '%s\n' "$PROMPT" | grep -qiF -- "$T" || { echo "REFUSING: prompt does not name '$T' as NEVER" >&2; exit 64; }
+done
+for T in 'ntfy.invalid' 'never contact ntfy.sh'; do
+  grep -qiF -- "$T" "$BRIEF" || { echo "REFUSING: brief lacks the ntfy egress rule '$T'" >&2; exit 69; }
+  printf '%s\n' "$PROMPT" | grep -qiF -- "$T" || { echo "REFUSING: prompt lacks the ntfy egress rule '$T'" >&2; exit 69; }
+done
+for T in 'CONTROLS MUST BE ABLE TO FAIL INDEPENDENTLY' 'PRIOR WORK' 'OWN object dir' 'no writes in the portal repo' 'start / mid / end' 'NOT TESTED'; do
+  grep -qiF -- "$T" "$BRIEF" || { echo "REFUSING: brief lacks the standing line '$T'" >&2; exit 75; }
+  printf '%s\n' "$PROMPT" | grep -qiF -- "$T" || { echo "REFUSING: prompt lacks the standing line '$T'" >&2; exit 75; }
+done
+
+# 38 — the brief names every negative-control seat; advisory if one is no longer running.
+for P in $NEG_SEATS; do
+  grep -q "\`$P\`" "$BRIEF" || { echo "REFUSING: brief does not name seat pid $P as a negative control" >&2; exit 38; }
+  [ "$(ps -o comm= -p "$P" 2>/dev/null | sed 's#.*/##')" = "claude" ] || echo "NOTE: negative-control seat $P is not a running claude now — re-read the seats and update the brief's §13.4 before launch" >&2
+done
+
+# 45 — the Node 20 leg as commissioned; the prompt is told which.
+NODE20="$(sed -n 's/^NODE20-LEG: \([A-Z-]*\)[[:space:]]*$/\1/p' "$BRIEF" | head -1)"
+case "$NODE20" in
+  NOT-RUN|DOCKER-PULL-NEVER) ;;
+  "$PH_NODE20") echo "REFUSING: the brief's NODE20-LEG line is still ${PH_NODE20} — Tuesday decides NOT-RUN or DOCKER-PULL-NEVER before launch" >&2; exit 45 ;;
+  *) echo "REFUSING: the brief's NODE20-LEG line reads '${NODE20:-<missing>}' — it must be exactly NOT-RUN or DOCKER-PULL-NEVER" >&2; exit 45 ;;
+esac
+
+# 44 — local Postgres is listening on :5433. The launcher never starts a container; the Vision seat does.
+lsof -nP -iTCP:5433 -sTCP:LISTEN >/dev/null 2>&1 \
+  || { echo "REFUSING: nothing LISTENs on :5433 — the gate's runtime legs would all be NOT RUN. Ask the Vision seat to start its local vsp-dev-db (never from this launcher, never from the gate), then re-run --check." >&2; exit 44; }
+
+# 41 — the answer route exists (Tuesday adds 'QA/Vision-gate15|tuesday-agent@agentmail.to|no' at launch). Run late on purpose: --check
+#      shows every other guard first.
+grep -q "^${ROUTE_NAME}|tuesday-agent@agentmail.to|" "$ROUTING" || {
+  echo "guards pass (40 6 9 7 8 18 22 23 74 63 31 39 10 17 12 78 13 14 15 20 70 19 24 53 60 61 62 64 69 75 38 45 44); overlap:$MINGAP; route NOT added." >&2
+  echo "REFUSING: no '${ROUTE_NAME}|tuesday-agent@agentmail.to|…' line in $ROUTING — answers to the gate would have no route. Add it (pattern: the QA/Vision-gate13 line) before launch." >&2; exit 41; }
+
+# 32 — the coordinator stamps the self-check (line AND note) and every @STAMP@. LAST, so --check shows every other guard first.
+if grep -qF "$PH_STAMP" "$BRIEF" || ! grep -q '^SELF-CHECK: re-read end-to-end for contradictions | ' "$BRIEF" || ! grep -q '^Self-check note: ' "$BRIEF"; then
+  echo "guards pass (40 6 9 7 8 18 22 23 74 63 31 39 10 17 12 78 13 14 15 20 70 19 24 53 60 61 62 64 69 75 38 45 44 41); self-check NOT stamped." >&2
+  echo "REFUSING: the brief still carries ${PH_STAMP} (Self-check line and note, or TUESDAY'S RULINGS items 1-4) — the coordinator re-reads end-to-end and stamps all of them before launch" >&2; exit 32
+fi
+
+PIN_BLOCK="$(printf 'PINNED HEADS — verified by the launcher at %s (cat-file; both bases 6dbffdf, 0 behind; ancestor and merge-base with MAIN; not-already-on-main; siblings; commit counts; exact chains, no merges; c955065<-ebb4c45<-6dbffdf, 9fd98a5<-6dbffdf, 6dbffdf<-110bb03; path/hunk/function overlap check (no merge-tree); git ls-remote origin for every row):\n' "$PIN_TS"
+  printf '%s\n' "$PIN" | awk -F'\t' '{ printf "  %-7s %-7s %-34s %s  base %s  commits %s\n", $1, $2, $3, $4, ($5=="-"?"-":substr($5,1,12)), $6 }'
+  printf '  Main: pinned %s%s\n' "${MAINH:0:12}" "$STALE"
+  [ -z "$ORIGIN_MAIN_NOTE" ] || printf '  %s\n' "$ORIGIN_MAIN_NOTE"
+  printf '  Shared paths: server/dbRestore.js, server/dbRestore.test.js; nearest hunks (old side):%s\n' "$MINGAP"
+  printf '  Positive controls: main 6dbffdf (the date a day early; the ghost at 200); old-format producer e59232e (dbBackup.js 5e31eb4)\n'
+  printf 'NODE20-LEG, as set in the brief: %s\n' "$NODE20")"
+
+if [ "$CHECK" = "1" ]; then
+  echo "all guards pass:"
+  printf '%s\n' "$PIN_BLOCK"
+  echo "  PIN parsed, three rows, no placeholder, heads = c955065 / 9fd98a5 (40); every sha a local commit (6); main = 6dbffdf or a delta-free descendant (9)"
+  echo "  bases 6dbffdf, counts 2 / 1, 0 behind, siblings (7 8); exact chains, no merges, parents pinned, gate 12-13 anchors on main (9); origin re-read $PIN_TS (18)"
+  echo "  file sets 3 / 3, c955065 = unit file only (22); overlap: shared paths, pinned hunk maps, gaps >= 3, plan/liveTables untouched, clearTables only by VSP86, restoreTable only by VSP83 (23)"
+  echo "  VSP-83 / VSP-86 code present and absent where briefed, the conversion outside the per-row try, test( 6/5/7/4, the one changed assertion, carried blobs (74)"
+  echo "  READY branch lines + NOT TESTED verbatim, C-07/C-08/C-11/C-12, gate 12 + 13 reports + tools (31); floor (39); report absent (17); tiers (12); commission (78)"
+  echo "  directive/brief/placeholders/mail/key/questions/safety (13 14 15 20 70); words + sections (19); no server path (24); standing rules (53 60 61 62 64 69 75); seats $NEG_SEATS (38); NODE20 $NODE20 (45); :5433 (44); route $ROUTE_NAME (41); stamped (32)"
+  exit 0
+fi
+
+# 11 — no inherited identity: this gate needs neither az nor gh, so both point at fresh EMPTY directories.
+ID_TMP="$(mktemp -d "${TMPDIR:-/tmp}/qa-vision-gate15-id.XXXXXX")" || { echo "REFUSING: cannot create the empty identity dir" >&2; exit 11; }
+mkdir -p "$ID_TMP/azure-empty" "$ID_TMP/gh-empty" || { echo "REFUSING: cannot create the empty identity dirs under $ID_TMP" >&2; exit 11; }
+{ [ -z "$(ls -A "$ID_TMP/azure-empty")" ] && [ -z "$(ls -A "$ID_TMP/gh-empty")" ]; } || { echo "REFUSING: the identity dirs under $ID_TMP are not empty" >&2; exit 11; }
+export AZURE_CONFIG_DIR="$ID_TMP/azure-empty"
+export GH_CONFIG_DIR="$ID_TMP/gh-empty"
+export CLAUDE_CONFIG_DIR="$TUE/4_Credentials/.claude"
+# 64 (cont.) — nothing a product process could use to reach a real provider or database is inherited from this shell.
+unset DATABASE_URL TEST_DATABASE_URL DB_QUERY_TIMEOUT_MS DB_CONNECT_TIMEOUT_MS AGENTMAIL_API_KEY AGENTMAIL_INBOX ACS_CONNECTION_STRING \
+      ACS_EMAIL_CONNECTION_STRING ACS_EMAIL_SENDER MAIL_SENDER TABLES_CONNECTION_STRING AZURE_BACKUP_CONN_STR AZURE_BACKUP_CONTAINER BACKUP_CRON \
+      REMINDER_CRON SESSION_SECRET HPAM_WORD ADVANCED_UNLOCK_SECRET SALES_COPY_EMAIL FEEDBACK_NOTIFY_EMAIL FEEDBACK_NOTIFY_EMAILS APPROVALS_INBOX \
+      NTFY_TOPIC NTFY_SERVER LEAD_BOT_API_KEY WEBSITE_SITE_NAME COORDINATOR_SECRET PORT NODE_ENV RESTORE_BACKUP_TZ
+echo "identity: AZURE_CONFIG_DIR=$AZURE_CONFIG_DIR GH_CONFIG_DIR=$GH_CONFIG_DIR (empty) CLAUDE_CONFIG_DIR=$CLAUDE_CONFIG_DIR" >&2
+
+PROMPT="$PROMPT
+
+$PIN_BLOCK"
+cd "$QA_DIR" || { echo "cannot enter $QA_DIR" >&2; exit 16; }
+exec claude --dangerously-skip-permissions "$PROMPT"

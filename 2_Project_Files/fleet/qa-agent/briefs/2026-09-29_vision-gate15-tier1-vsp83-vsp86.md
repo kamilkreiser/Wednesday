@@ -1,0 +1,648 @@
+# QA Agent Invocation Brief — Datasec/Vision_Sales_Portal, GATE 15: ONE TIER-1 RESTORE gate on portal main `6dbffdf` — VSP-83 @ `c955065` (old-format backup DATEs restored in a NAMED zone) and VSP-86 @ `9fd98a5` (a restore clears `session`), both in `server/dbRestore.js` — two verdicts, one merged line, one report
+
+**Both are TIER 1 (restore code = data integrity; Tuesday's rulings C-11 point 5 and C-12), FULL WEIGHT, and ROUND 1 of their tickets.** No
+NO-GO has been spent on VSP-83 or VSP-86. A NO-GO here sends that ticket to its round 2; it does not go to Kam. Tuesday confirms the class
+counts at stamp (§TUESDAY'S RULINGS item 4). **VSP-74's class is AT ITS CAP (C-08, Kam's (a)):** its residue (VSP74-G13-F1..F6, G13-M1/M2,
+G13-P1) is ticketed as VSP-87 and is NOT re-graded here. A NEW instance of that class introduced by VSP-83 or VSP-86 is graded against the
+target that introduced it (§TUESDAY'S RULINGS item 1).
+
+**Drafted for Tuesday on 2026-09-29 at 07:0x-07:4x AEST by a read-only drafting agent. Tuesday reviews, stamps and launches it.**
+Template: gate 13's brief `/Volumes/KK_T9_External_HDD/TUESDAY/2_Project_Files/fleet/qa-agent/briefs/2026-09-28_vision-gate13-vsp74r2-vsp75.md`
+(a tier-1 restore gate; read it as PRIOR WORK for method, §13 and instruments; **this brief governs where they differ**).
+
+**WHY ONE GATE, AND WHY FULL WEIGHT (read this before planning).** Both deltas sit directly on main `6dbffdf` and SHARE TWO FILES
+(`server/dbRestore.js` and `server/dbRestore.test.js`; §WRONG (a)). Textually they are hunk-disjoint (the launcher proves it; git is never asked to
+merge in the repo). **Semantically they meet in one function, `restoreData()`:** VSP-83 prints the zone as its FIRST statement and threads `tz` into
+the insert loop; VSP-86 prints the sign-in-again line after the plan's keep warnings and adds `DELETE FROM "session"` as the last statement of
+`clearTables()`'s transaction. The restore is the one path that DELETEs production data. So: **§N1 is VSP-83, §N2 is VSP-86, §N3 is the merged tree
+(both on main: the combined behaviour in ONE run), §N4 is a fixed short regression list from gate 13.** Anything else is out of scope unless a
+measurement in scope points at it.
+
+The builder's READY mails under test (on disk, each read whole by the drafter):
+- VSP-83: `/Volumes/KK_T9_External_HDD/TUESDAY/2_Project_Files/fleet/qa-agent/briefs/2026-09-29_vision-vsp83-READY-mail.txt`
+- VSP-86: `/Volumes/KK_T9_External_HDD/TUESDAY/2_Project_Files/fleet/qa-agent/briefs/2026-09-29_vision-vsp86-READY-mail.txt`
+**Every builder statement below comes from those mails, the commit messages or the code at each head. Each one is a CLAIM. Every red, every
+mutant and every suite set must be RE-DERIVED by the gate. None is taken from a READY.**
+The launcher parses §PIN, refuses any placeholder, and re-reads EVERY row by `git ls-remote` immediately before launch, refusing on any
+mismatch. The verified table is appended to your prompt.
+
+SELF-CHECK: re-read end-to-end for contradictions | @STAMP@
+Self-check note: @STAMP@
+
+NODE20-LEG: DOCKER-PULL-NEVER
+<!-- Carried from gates 11-13 (each ran DOCKER-PULL-NEVER: `docker image inspect node:20` then `docker run --rm --pull=never` of the image
+     ALREADY present; nothing is ever pulled; if the image is absent the leg is NOT RUN and the report says so). Tier 1, and this gate's zone
+     cells depend on the ICU build inside Node, so the Node 20 leg matters MORE than usual here (production runs Node 20). The drafter read
+     `docker image inspect node:20` = sha256:8f693eaa…, arm64 at 07:08 AEST (the same digest as gates 12-14). -->
+
+## Charter
+Read `/Volumes/KK_T9_External_HDD/TUESDAY/2_Project_Files/fleet/qa-agent/QA_AGENT_CHARTER.md` in full first. You are an independent
+tester. You did not build any of these changes and you owe the builder nothing. **Every line below that reports what the builder says
+is a CLAIM, never evidence.**
+
+**One gate, TWO targets, TWO verdicts (GO / NO-GO each, at its pinned sha), plus ONE merged line.**
+- **VSP83** at `c955065` — **TIER 1 (Tuesday's ruling, C-11 point 5: "this is restore code (data integrity), so its gate is TIER 1").** ROUND 1.
+  Fixes gate 12's VSP75-G12-O1: an old-format (pre-VSP-75) backup made in a process east of UTC restores every DATE one day early. For DATE-typed
+  columns only, a full ISO instant is read as its calendar date in a NAMED zone: `RESTORE_BACKUP_TZ` when set (validated; an unknown one refuses
+  with nothing changed), else this process's zone; the zone and its source are printed before anything is written. Plain dates pass through.
+- **VSP86** at `9fd98a5` — **TIER 1 (Tuesday's ruling, C-12: "Build it; tier 1 (restore code), gated with VSP-83 in one tier-1 session").**
+  ROUND 1. Fixes gate 12's G12-O7: a stale session of a user the backup lacks still authenticated after a restore, and the next user created took
+  its id. Ruling (A): the restore empties `session` INSIDE its clear transaction and prints "every signed-in user will have to sign in again"
+  before any write. (B) (re-validating the user on every request) is NOT built: it is the Low proposal VSP-89.
+- **MERGED LINE:** neither head contains the other; both are children of `6dbffdf`. Whichever merges first is a fast-forward; the second is a real
+  merge whose tree must equal the merged tree YOU gate here (§N3). Say so from YOUR OWN object dir.
+
+**⚠ Names, written out every time:**
+- **VSP83 = Jira VSP-83** (Medium) = gate 12 **VSP75-G12-O1** (the DATE shift; reproduced unchanged at gate 13).
+- **VSP86 = Jira VSP-86** (Medium) = gate 12 **G12-O7** (the stale session and the id reuse; gate 12 §N2.11). **VSP-89** = shape (B), a proposal only.
+- **VSP-87** = VSP-74's capped residue (G13-F1..F6, G13-M1/M2, G13-P1). **VSP-81** = VSP-74's G12-F2/F3/P1. **VSP-80** = the supertest "501 decoy"
+  in `test/db/routes.test.js` (its fix is on its own branch, not in this gate; §WRONG (i)).
+
+Branches: `vsp-83-old-backup-dates`, `vsp-86-restore-clears-sessions`. **Neither is on main.**
+
+## RULED BY KAM, AND SETTLED
+- **Vision `1_Project_Definition/CLARIFICATIONS.md`** (`/Volumes/KK_T9_External_HDD/!CODING/Datasec/Vision_Sales_Portal/1_Project_Definition/CLARIFICATIONS.md`):
+  read it whole. It carries C-01..C-12 (read at 07:0x). **Cite only what you open.** The entries this gate turns on:
+  - **C-11 (Tuesday's ruling, 2026-09-28T20:45:35Z; NOT Kam's):** "1. On restore, for DATE-typed columns only (information_schema data_type =
+    'date'), a value that is a full ISO instant is converted to the calendar date of that instant in a NAMED timezone. VSP-75-format plain dates
+    pass through unchanged. 2. The timezone is taken from an explicit setting when present (e.g. RESTORE_BACKUP_TZ, your naming), else the restoring
+    process's TZ. The restore PRINTS which TZ it used and whether it came from the setting or the default, before it writes anything. 3. The runbook
+    line says: set the backup maker's TZ when restoring on a different machine. No production read is needed to build this; production's actual TZ
+    stays UNMEASURED and is named so in the READY. 4. Red first with a planted old-format row at +10 (the gate-12 shape), a UTC control (no-op), and a
+    plain-date control (unchanged). A cell with the override set proves the laptop case. 5. TIER: this is restore code (data integrity), so its gate
+    is TIER 1 … Ms truncation stays a documented limitation." Not covered: production's TZ; microseconds old backups never held.
+  - **C-12 (Tuesday's ruling, 2026-09-28T20:52:38Z; NOT Kam's):** "VSP-86 ruled (A)." "The restore empties `session` inside its clear
+    transaction, and PRINTS before any write: "every signed-in user will have to sign in again"." "(B) is NOT built … File it as a Low proposal
+    ticket" (VSP-89). Not covered: Kam's choice on VSP-89.
+  - **C-08 (Kam's, live board 2026-09-28 20:21:02, card `vision-vsp74-cap-reached-ship-or-round3`):** "a — Merge both now; ticket the six
+    layouts (recommended)". VSP-74 round 2 merged inside VSP-75's head; the six layouts are VSP-87; **"a round 3 on VSP-74's class needs Kam's
+    word, per C-06".** **C-07 (Tuesday's):** the plan matches tables and FKs by OID across every user schema.
+  - **C-10 (Tuesday's, VSP-78):** when the portal's role lacks privileges, the boot warns. Relevant to §N2.5 (vii) only as context: it says
+    nothing about the restore's role.
+  **Whether either target strays into VSP-74's class (C-07/C-08) — the drafter's reading, for you to MEASURE:**
+  - **VSP-83: no, by construction.** It does not touch `restorePlan()`, `liveTables()`, the closure or `clearTables()` (the launcher proves the
+    function extents byte-identical to main's). It adds a DATE-column catalog read qualified `table_schema = 'public'` beside the existing JSON-column
+    read, while the INSERT it feeds stays bare-name (the pre-existing G13-M1/F3 path, VSP-87). It adds no statement target. One shadow cell (§N1.2)
+    shows "unworsened".
+  - **VSP-86: YES, at the edge.** It adds a statement to `clearTables()`, the function gate 13's header counted as VSP-74's class, and that
+    statement is bare-name: `DELETE FROM "session"`, with no schema and no `ONLY` (§WRONG (d)). That is the G13-M1/F3/F4 pattern C-08 ticketed
+    as VSP-87. It does not touch the plan, and the plan does not model `session` as cleared. **C-08 bars a round 3 of VSP-74's class without Kam; it
+    does not bar VSP-86 from qualifying its OWN new statement.** Grading: §TUESDAY'S RULINGS item 1.
+- **Kam's F-B ruling "(3) both"** (carried): the restore refuses an incomplete backup AND never empties a table it cannot restore. **Kam's.**
+  Every restore cell here is graded against it.
+- **PRODUCTION IS LIVE for this project.** `datasec-sales-portal-rg` holds the live site `https://datasec-sales-portal.azurewebsites.net`,
+  its production Postgres `datasec-sales-db.postgres.database.azure.com` and its key vault `datasec-sales-kv`. Production runs Node 20
+  (`.github/workflows/test.yml`, blob `0cb2d05`, unchanged at every head). **The restore CLI is run against production by an operator, with the app
+  live. Nothing in this gate touches production** (§13, HELD).
+- **Tuesday's rulings (not Kam's), carried from gates 12-13:** "if any cell loses or changes a row of a table the plan must keep, that is a
+  FAIL, not an observation"; "a table the restore PRINTED as kept that then changed is a FAIL, full stop"; the product-test database ruling (every
+  `test:db` via YOUR `TEST_DATABASE_URL`; a write to `salesportal_test_lazy` or any builder database is a FAIL and STOPS that arm).
+- **The BUILDER's choices, each judged by the gate (say whether each needs Kam):** (1) the DEFAULT zone is taken from the process and is NOT
+  validated (only the override is; §WRONG (c)); (2) the zone line is printed on EVERY restore, including new-format and refused ones; (3) `session`
+  is cleared on `--allow-incomplete` restores too, even when `users` itself is kept; (4) `DELETE FROM "session"` is unqualified (§WRONG (d)); (5) the
+  sign-in-again line is printed after the plan's reads and keep warnings, before the first write (C-12 says "before any write": READ, consistent);
+  (6) one EXISTING assertion changed on purpose (`server/dbRestore.test.js`, the clearTables control's expected statement list).
+- **Deploys are HELD for Kam. Nothing merges on your word.** A merge is Tuesday's GO on a pinned head. A deploy is Kam's word.
+
+## PRIOR ROUND
+PRIOR ROUND: gate 13 (QA/Vision-gate13, 2026-09-28): **VSP74 NO-GO at `4813e5f` (VSP74-G13-F1..F6; round 2 of 2, to Kam)**, VSP75 **GO** at
+`110bb03`; Kam ruled (a) (C-08); main fast-forwarded `e59232e` → `110bb03`, then `6dbffdf` (BACKLOG only). Gate 12 (QA/Vision-gate12,
+2026-09-28) found both tickets under test: **VSP75-G12-O1** (report `:355`, `:569`) and **G12-O7** (§N2.11, `:587`).
+**Class count: VSP-83 and VSP-86 have none spent; this is round 1 of each. VSP-74's class is capped (C-08).**
+ITS REPORT IS ON DISK AT: gate 13 `/Volumes/KK_T9_External_HDD/!CODING/Testing Agent MAIN/projects/vision/reports/2026-09-28-vision-gate13-vsp74r2-vsp75`
+(`report.md`, 546 lines) and gate 12 `/Volumes/KK_T9_External_HDD/!CODING/Testing Agent MAIN/projects/vision/reports/2026-09-28-vision-gate12-three-targets`
+(`report.md`, 700 lines). **Read at least:** gate 12 §N2.9 (the deploy-time table and the DATE shift), §N2.11 (the session exclusion, WRONG (o)),
+its FINDINGS for VSP75-G12-O1 and G12-O7 (with their fix shapes: "truncate `session` on restore, or have `requireAuth` re-validate the user row");
+gate 13 VERDICTS, VERBATIM OPERATOR STRINGS, §N2.3 (the deploy-time table and its TZ arms), FINDINGS INDEX (G13-F1..F6, G13-M1/M2: the bare-name
+DELETE/INSERT follows the search_path; an inheritance child is emptied by `DELETE FROM "leads"`), THE QUEUE, NOT TESTED and its self-findings.
+- **Instruments are REUSED BY COPY from gate 13's `evidence/tools/`** (`qa-harness-g13.cjs`, `qa-g13-db.cjs`, `qa-g13-one.cjs`,
+  `qa-g13-refusals.cjs`, `qa-g13-matrix.cjs`, `qa-g13-n29.cjs`, `qa-g13-tz.cjs`, `qa-g13-hunt.cjs`, `qa-g13-hunt-cells.cjs`,
+  `qa-g13-lazywatch.cjs`, `qa-g13-node20.cjs`, `run-node20-g13.sh`, `mutate-g13.py`, `build-trees-g13.sh`, `repoint-g13.py`, `floor-g13.sh`,
+  `seed-g13.sql`, `qa-run.py`, `qa-floorcount.py`, `qa-io1-preload-fetchguard.cjs`, `mktree-portal.sh`, `lockcmp.py`, `lockwalk.py`,
+  `specsets.py`, `tapsets.py`). **COPY what you use into THIS gate's own `evidence/tools/`, read it before you trust it, and RE-POINT every
+  hard-coded path and prefix** (gate 13's copies ENFORCE `vsp_qa_g13_` and hard-code `work-g13`). **Never edit, run from, or write into gate
+  1-14's copies, evidence, trees or databases.** Record the sha1 of each copy before and after your edits.
+- **GATE 14 MAY BE RUNNING AT THE SAME TIME** (a tier-2 batch on the same main `6dbffdf`, drafted this morning, on the same Postgres `:5433`):
+  `vsp_qa_g14_*` databases and roles, `work-g14/` and its report folder are NOT yours. Never use, alter, list as yours or drop them.
+  Earlier gates' roles (`vsp_qa_g10_*` … `vsp_qa_g14_*`) are not yours either.
+- **Self-findings from gates 2-13 bind you:** quote every path (the project path has a space and a `!`); run every loop and every
+  `git show <sha>:<path>` under **bash, not zsh**; pass SQL to a wrapper as base64, never through a whitespace-split env var; compare a restored
+  table against the BACKUP's rows, not the source DB (gate 12 self-finding 2: this is how VSP75-G12-O1 was found); never run a `nextval` check in
+  one transaction across tables; absolute recorder paths; a snapshot classifier must handle a table absent before and after; **the portal test-DB
+  name MUST end in `_test`**; npm's update-notifier egresses unless you disable it; record the load average beside every timing number.
+- **PRIOR WORK: verify every claim against git history and gates 12-13's evidence, never against this brief.**
+
+## PIN — HEADS (parsed and verified by the launcher)
+**The launcher enforces these rules:** every row has a 40-hex head, base and commit count, and no `@`; the head is a commit; the base is
+an ancestor AND the merge-base with MAIN; `git rev-list --count base..head` equals `commits`; `git ls-remote origin refs/heads/<branch>`
+equals the head NOW; no target is on main; both are 0 behind `6dbffdf`. Non-merge commits over the base must be exactly the chains below, with NO
+merges. **Never rebased:** `ebb4c45` is `c955065`'s single parent and `6dbffdf` is `ebb4c45`'s; `6dbffdf` is `9fd98a5`'s single parent;
+`110bb03` is `6dbffdf`'s single parent. **Main:** origin main must be `6dbffdf` or a DESCENDANT of it whose diff from `6dbffdf` touches none of
+the targets' files (NOTE); a move in a file the cells depend on (`test/db/helpers.js`, `server/schema.sql`, `server/initDb.js`, `server/db.js`,
+`server/auth.js`, `server/backupTables.js`, `server/dbBackup.js`) is a NOTE that makes you re-derive the merged tree on the new main.
+
+<!-- PIN-HEADS:BEGIN -->
+| id | repo | branch | head | base | commits | status |
+|---|---|---|---|---|---|---|
+| MAIN-P | portal | main | 6dbffdf36c98aac74d32eaae16e4563966cef42c | - | - | IN |
+| VSP83 | portal | vsp-83-old-backup-dates | c955065838821229a26f5394baf005b497319677 | 6dbffdf36c98aac74d32eaae16e4563966cef42c | 2 | IN |
+| VSP86 | portal | vsp-86-restore-clears-sessions | 9fd98a58e58fdd19d29e32ae1575dae9a0217462 | 6dbffdf36c98aac74d32eaae16e4563966cef42c | 1 | IN |
+<!-- PIN-HEADS:END -->
+
+Every row above: `git -C <portal> ls-remote origin` read by the drafter at **2026-09-29 07:03:16 AEST** (re-read 07:06:12, unchanged), equal to
+each READY's head (the READYs give 13 / 12 hex: `c955065838821`, `9fd98a58e58f`) and to the commission's (main `6dbffdf36c98aac74d32eaae16e4563966cef42c`);
+`cat-file -t` = commit for all three. Counts by `rev-list --count` (07:0x).
+
+**The chains (READ 07:0x, `log --format='%h %p %s'`):**
+- **VSP83 over `6dbffdf` (2 commits, no merges):** `ebb4c45` (parent `6dbffdf`; "VSP-83: restore old-format backup DATEs as the day they were";
+  `server/dbRestore.js` +44/−4, `test/db/restore-old-dates.test.js` +111) → `c955065` (parent `ebb4c45`; "VSP-83: unit cells for the old-format date
+  helpers"; `server/dbRestore.test.js` +24/−1, the −1 being the `require` line). File set `6dbffdf..c955065` = 3.
+- **VSP86 over `6dbffdf` (1 commit):** `9fd98a5` (parent `6dbffdf`; "VSP-86: a restore clears all sessions, inside its clear transaction";
+  `server/dbRestore.js` +10/−0, `server/dbRestore.test.js` +2/−1, `test/db/restore-sessions.test.js` +109). File set = 3.
+- **Main `110bb03..6dbffdf`:** `6dbffdf` only ("docs(backlog): record VSP-74 round 2 merge, Kam's cap ruling, VSP-87, VSP-81, VSP-80"; `BACKLOG.md`).
+- **Other open branches off `6dbffdf` (READ 07:06, `ls-remote` + `diff --name-only`): none touches `server/dbRestore.js` or `server/dbRestore.test.js`.**
+  `vsp-80-supertest-loopback` (`28adf36`) changes `test/db/helpers.js` (imported by BOTH new test files) and `test/db/routes.test.js`;
+  `vsp-78-restore-role-boot` (`1de6d92`, gate 14) changes `server/schema.sql` and `server/initDb.js` (where `session` is created). Neither is in this gate.
+
+Repo: portal = `/Volumes/KK_T9_External_HDD/!CODING/Datasec/Vision_Sales_Portal/2_Project_Files` (remote
+`datasecau/vision_datasec-sales-portal`). **The portal has no CLAUDE.md inside the repo;** its rules are
+`/Volumes/KK_T9_External_HDD/!CODING/Datasec/Vision_Sales_Portal/CLAUDE.md` (read it; its deploy commands are NOT for you).
+
+**The shape (READ 07:1x at the pinned heads; re-derive it):**
+| file | main `6dbffdf` | **VSP83 `c955065`** | **VSP86 `9fd98a5`** | merged (drafter's scratch, PROBED) |
+|---|---|---|---|---|
+| `server/dbRestore.js` | `97421ec` 333 l | **`6b18e90`** | **`da8423d`** | `d8a9407` 383 l |
+| `server/dbRestore.test.js` (`test(`) | `8315d41` (4) | **`2bd7543` (7)** | **`c764b9b` (4)** | `ce2594d` (7), 97 l |
+| `test/db/restore-old-dates.test.js` (`test(`) | — | **`e395d80` (6)** | — | `e395d80` (6) |
+| `test/db/restore-sessions.test.js` (`test(`) | — | — | **`e8f6f58` (5)** | `e8f6f58` (5) |
+**Same blob at all three shas:** `server/dbRestore.plan.test.js` `e8cb5ee` (12), `test/db/restore-incomplete.test.js` `b282070` (17),
+`test/db/helpers.js` `1d90638`, `server/schema.sql` `74f6e9c`, `server/backupTables.js` `ad03428`, `server/dbBackup.js` `0b38895`,
+`package.json` `d3b76fb`, `package-lock.json` `9d426df`, `.github/workflows/test.yml` `0cb2d05`. **Old-format producer:** `e59232e`'s
+`server/dbBackup.js` = `5e31eb4` (pre-VSP-75; gates 12-13 made their B10 backups with its REAL `runBackup()`).
+**Function extents (hash of the lines from `async function X` to the next top-level definition, READ):** `restorePlan()`+`liveTables()` are
+byte-identical at all three shas (`7210afd…`); `clearTables()` at `c955065` = main's (`a0e77fa…`); `restoreTable()` at `9fd98a5` = main's
+(`700ed5a…`). The launcher re-proves all three.
+
+**The code (READ; line numbers are the drafter's scratch merge, `d8a9407`; each head's own numbers differ — re-derive):**
+- **VSP-83:** `ISO_INSTANT` `:74` (`^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:Z|[+-]\d{2}:?\d{2})$`); `restoreTimeZone(env)` `:77-86`: blank or
+  unset `RESTORE_BACKUP_TZ` → `{ tz: Intl.DateTimeFormat().resolvedOptions().timeZone, source: "this process's time zone (RESTORE_BACKUP_TZ not set)" }`
+  with NO validation; a set one is validated by `new Intl.DateTimeFormat('en-CA', { timeZone })` and on failure throws `RESTORE_BACKUP_TZ '<v>' is
+  not a time zone Node knows (e.g. Australia/Sydney, UTC). Nothing was changed.`; `oldFormatDate(value, tz)` `:89-92` (non-string or non-instant
+  passes through; else `Intl.DateTimeFormat('en-CA', { timeZone: tz, year, month, day }).format(new Date(value))`); `restoreTable(tableName, rows, tz =
+  restoreTimeZone().tz)` `:94`: a second `information_schema.columns` read `table_schema = 'public' AND table_name = $1 AND data_type = 'date'`
+  `:104-106`; the conversion runs while building `params` `:113-114`, **OUTSIDE the per-row `try` (`:115-120`)**; `restoreData()` `:339-340` prints
+  `Dates in a pre-VSP-75 backup are read in ${tz}, from ${source}.` as its FIRST statement, before `restorePlan()`; `:370` passes `tz`.
+- **VSP-86:** `clearTables()` `:260-268`: after the planned DELETEs and before `COMMIT`, `await client.query('DELETE FROM "session"')` then
+  `  Cleared session (every signed-in user signs in again)`; `restoreData()` `:355`: after the refusal check and the keep warnings, before
+  `clearTables()`: `Every signed-in user will have to sign in again: this restore clears all sessions (VSP-86).`
+- **Unchanged (READ):** the plan (`restorePlan()`, `liveTables()`, the closure), the refusal text, `resetSequence()`, `parseArgs()`, `main()`
+  (which prints `Restore complete.` after `restoreData()` returns and `Restore failed: <message>` with rc 1 on a throw). **The insert phase is NOT
+  transactional** (each INSERT autocommits after `clearTables()` has COMMITTED; a failed row is warned and skipped): pre-existing.
+- **Sessions (READ at `6dbffdf`):** `session` is created by `server/schema.sql` at boot (`:265-279`, `CREATE TABLE IF NOT EXISTS "session"`); the
+  store is `connect-pg-simple` with `createTableIfMissing: false`, express-session `resave: false`, `saveUninitialized: false`, no `rolling`
+  (the app factory, `:77-86`); the only session write in `server/auth.js` is the login's `req.session.user = …` (`:62`). `requireAuth` trusts the
+  session object (gate 12 §N2.11, `auth.js:38`). `schema.sql` declares no foreign key to `session` (READ: 0 hits).
+- **Date columns (READ `schema.sql` at `6dbffdf`):** `lead_collateral_provided.provided_at DATE` (`:94`, one of the old 10 tables) and
+  `quotes.valid_until DATE` (`:163`, not in old backups). Lazy tables' DDL lives in route files: **the catalog of YOUR booted DB is the authority**.
+
+## WRONG OR UNVERIFIABLE IN THE COMMISSION AND THE READYs — found by the drafter (verify each; all are claims)
+- **(a) Both READYs understate the overlap.** VSP-83: "Overlaps VSP-86 (also dbRestore.js)"; VSP-86: "Shares dbRestore.js with VSP-83 …
+  different functions (clearTables/restoreData's refusal tail vs restoreTable/restoreData's head), so the merge should be textual only." READ: the
+  deltas share **TWO** files, `server/dbRestore.js` AND `server/dbRestore.test.js`, and VSP-83 also changes `restoreData()`'s insert loop and
+  `module.exports`, not only its head. **Hunk map** (`git diff -U0 6dbffdf <head>`, old-side lines): VSP-83 `dbRestore.js` @14, @61, @70, @77, @291,
+  @320, @333; VSP-86 `dbRestore.js` @222 (`clearTables`), @305 (`restoreData`); `dbRestore.test.js` VSP-83 @11, @73, VSP-86 @42. The nearest
+  hunks are 14 lines apart (VSP-86 @305 between VSP-83 @291 and @320). **The drafter PROBED the textual merge with `git merge-file` on scratch
+  copies made by `git show` (no repo write, no `merge-tree`):** clean, 0 conflict markers, merged blobs `d8a94070574d45a0bebc5fd1792dc5d0c2037969`
+  (`dbRestore.js`, 383 lines) and `ce2594d0b18638c47019a1e4d300a155c75715cd` (`dbRestore.test.js`, 97 lines), by `git hash-object` without `-w`.
+  That is not evidence: re-derive it (§N3.1). Harmless textually; the SEMANTIC overlap is §N3.
+- **(b) The VSP-86 READY's NOT TESTED line says an in-flight request "gets a store miss on its save". READ says only half of that.**
+  `connect-pg-simple` 10's `touch` is `UPDATE … SET expire … WHERE sid = $2` (a miss after the clear: 0 rows), but its `set` is
+  `INSERT … (sess, expire, sid) … ON CONFLICT (sid) DO UPDATE` — an UPSERT (READ in the builder's installed `node_modules/connect-pg-simple/index.js`
+  `:389` / `:435`; not evidence: re-read it in YOUR `npm ci` tree). A request that MODIFIES the session (the login) and saves after the clear
+  COMMITs therefore RE-CREATES the row. A sign-in whose users lookup ran before the clear committed can outlive the restore, carrying a user id
+  from the replaced database. **MEASURE (§N2.7).**
+- **(c) The DEFAULT zone is not validated, and the conversion can throw AFTER the clear.** PROBED by the drafter with standalone `node -e`
+  on **Node v26.8.1** (NOT the product, NOT Node 20; each under `env -i`): process `TZ=''` → `resolvedOptions().timeZone` = `Etc/Unknown`, and
+  `Intl.DateTimeFormat` with it THROWS `Invalid time zone specified: Etc/Unknown`; `TZ='AEST-10'` and `TZ='Garbage/Zone'` → `timeZone` is
+  `undefined`, and formatting falls back to the process default (`AEST-10` gave 2026-09-27 and `Garbage/Zone` gave **2026-09-26** for
+  `"2026-09-26T14:00:00.000Z"`); `TZ=':Australia/Sydney'` → `Australia/Sydney`; `TZ` unset → the machine's zone. READ: `oldFormatDate()` runs while
+  `params` is built, outside the per-row `try`, and `restoreTable()` runs after `clearTables()` has COMMITTED. **Predicted (READ + PROBED, not
+  measured on the product):** with an old-format backup and `TZ=''`, the restore prints `read in Etc/Unknown`, clears every planned table (and on
+  the merged tree `session`), then THROWS at the first old-format DATE (`lead_collateral_provided`, 6th in RESTORE_ORDER), leaving it and EVERY
+  LATER TABLE EMPTY, rc 1. With `Garbage/Zone` it prints `read in undefined` and restores the day early. **MEASURE on the product, on local Node AND
+  Node 20 (ICU differs; §N1.3).** A new-format backup never reaches the formatter (plain dates return early), so it is safe in every zone: prove it.
+- **(d) VSP-86's new statement is bare-name, and the plan does not know `session` is being cleared.** `DELETE FROM "session"` (scratch merge
+  `:267`) has no schema and no `ONLY`: it resolves through the connection's `search_path` and also empties inheritance children (gate 13 measured
+  exactly this for `DELETE FROM "leads"`: G13-M1/M2, G13-F3/F4). And `restorePlan()` excludes public `session` from `outside` by NAME
+  (`NOT_RESTORED`, `:199`), while `reaches` starts only from restored tables (`:191`). So a table whose FK points at `session` is **not refused**
+  when it lives in another schema, and when it is a public table with rows under `--allow-incomplete` the closure puts `session` into `keep`
+  ("clearing it would change …") while `clearTables()` still deletes it UNCONDITIONALLY. The portal creates none of these shapes (READ). **MEASURE
+  (§N2.5); grading §TUESDAY'S RULINGS item 1.**
+- **(e) A database whose `session` is absent, or a restoring role without DELETE on it:** VSP-86's statement fails (42P01 / 42501), the whole
+  clear ROLLS BACK and the restore throws; main completes. Predicted: refused-by-throw, nothing changed (acceptable if nothing changes). MEASURE
+  once each (§N2.5 (vi)/(vii)); quote the operator's text.
+- **(f) VSP-83 READY: printed "before any read or write".** Stronger than C-11 ("before it writes anything"). READ: true (`restoreData()`'s first
+  statement). The builder's cell checks only that the line precedes the first "rows restored / left as it is / empty, skipped" line. **Measure
+  both orders with ONE ordered event log of console lines AND SQL statements (§N1.5).**
+- **(g) C-11 point 3 "the runbook line":** the only runbook text in the repo is `dbRestore.js`'s usage header (`:15-20`, READ). Say whether it
+  carries C-11 point 3's sentence in substance. Not a code defect either way.
+- **(h) Counts (READ, re-derive):** `test(` per file as the shape table; VSP-83 READY "unit 131 -> 134 … db 126 -> 132 (ebb4c45; c955065 changed
+  only the unit test file)" — **verified at source** (`ebb4c45..c955065` = `server/dbRestore.test.js` only). VSP-86 READY "unit 131 = 131; db 126 ->
+  131". Expected at the merged tree: unit **134**, db **137**, vs main 131 / 126 (the READYs' numbers for main; re-derive). Coverage (local, NOT CI):
+  main 80.78%, VSP-83 80.81%, VSP-86 80.82% lines.
+- **(i) VSP-80's decoy (VSP-86 READY):** "2 failing in routes.test.js ('403: datasec_sales blocked...', '403: sales cannot resolve approvals'),
+  both '-> 501'. That's VSP-80's decoy status, its fifth occurrence." Not this gate's target. A 501 in ANY cell: record it as VSP-80's class (file,
+  run, load, the port), re-run on a FRESH DB, and grade it against VSP-83/86 only if it reproduces at their heads and NOT at main in the same
+  session. The new restore-sessions cells use supertest too.
+- **(j) Year below 1000 (Polish at most):** PROBED (Node 26): `Intl … en-CA` renders year 99 as `99-01-01` and year 999 as `999-07-01`; a
+  two-digit year is read by Postgres as 19xx/20xx. Unrealistic for this portal. Measure once if cheap.
+- **(k) UNVERIFIABLE by design, and you must not try:** production's `TZ` (C-11: UNMEASURED), production's session count, whether an operator
+  restores with the app live (assume yes: §N2.7), production's catalog, schemas, search_path, roles (VSP-87), CI, Node 22, real Azure Blob Storage,
+  the restore CLI end to end. **Carry each as NOT TESTED.**
+- **Verified TRUE at source (READ 07:0x-07:1x):** all three heads by `ls-remote` = the READYs' = the commission's; the parents above; file sets 3 / 3;
+  neither target touches `BACKLOG.md`; the function-extent identities above; the shared-blob list above; `schema.sql` DATE columns and `session`
+  DDL; CLARIFICATIONS C-08, C-11, C-12 present (C-11/C-12 at lines 90-101); `:5433` LISTEN (Docker); `node:20` present locally
+  (`docker image inspect` only, `sha256:8f693eaa…`, arm64). The READYs' evidence folders were NOT opened.
+
+## THE READYs — their claims and NOT TESTED (the gate rules on every claim)
+Read each READY whole. Their NOT TESTED lines are carried VERBATIM here (the launcher checks it):
+
+VSP-83 NOT TESTED
+```
+NOT TESTED: CI; Node 20/22. The restore CLI end to end (it needs AZURE_BACKUP_CONN_STR, forbidden). Cells call restoreData(), the same path main() calls after download. quotes.valid_until (the other DATE column) isn't in old backups, so it isn't in the cells. A DST-edge date in the maker's zone (the conversion uses Intl's zone rules, not a fixed offset).
+```
+
+VSP-86 NOT TESTED
+```
+NOT TESTED: CI; Node 20/22. The restore CLI end to end (Azure blob). A restore while users are mid-request (a request in flight when session is cleared gets a store miss on its save; not measured). Production: nothing.
+```
+
+**The claims, in one line each (each a CLAIM, re-derived in §N):**
+- **VSP-83 @ `c955065`:** DATE columns only; a full ISO instant → its calendar date in the zone; `RESTORE_BACKUP_TZ` (trimmed, validated) else the
+  process zone; the zone line first in `restoreData()`, "before restorePlan and any write"; unknown override throws "… Nothing was changed." before
+  any read or write. **Red first** (`test/db/restore-old-dates.test.js`, process TZ switched by `process.env.TZ`): planted
+  `provided_at = "2026-09-26T14:00:00.000Z"`; main 4 of 6 red (the +10 cell restores 2026-09-26), UTC and plain-date controls green on main;
+  `c955065` 6/6. **Mutants:** conversion removed → 2 fail; override ignored → 3 fail; zone line printed after the writes → 1 fail. Unit cells pin
+  the helpers. Suites vs main: unit 131 → 134, db 126 → 132, 0 lost / failing / dup. Coverage 80.78 → 80.81.
+- **VSP-86 @ `9fd98a5`:** `clearTables()` deletes `session` after the planned DELETEs, before COMMIT, same transaction ("a failed clear rolls it back
+  with everything else"); the sign-in-again line after the plan check (a REFUSED restore prints nothing and clears nothing), before `clearTables()`.
+  **Red first** (`test/db/restore-sessions.test.js`, real app via supertest, real login, real `restoreData`): ghost → main 200, branch 401; id reuse →
+  main 200, branch 401; message before the first `Cleared`; refused-restore control green on both; scope control ("the Cleared set is exactly the
+  planned tables + session, and every other PUBLIC table's row COUNT is unchanged"). main 4 red / 1 green; branch 5/5. **Mutants:** DELETE removed →
+  2 fail; message after the clear → 1 fail. Suites vs main: unit 131 = 131, db 126 → 131 (second run on a fresh DB; the first had VSP-80's two 501s).
+  Coverage 80.78 → 80.82. "CHANGED EXISTING ASSERTION, deliberate … not a weakening."
+
+**How you treat these:** every NOT TESTED line you CAN test locally, you test (Node 20, the DST edge, `quotes.valid_until`, the in-flight
+request). CI, Node 22, Azure and production you carry into your own NOT TESTED.
+
+## 2a. LEGITIMATE SHAPES — what must still work, and the destructive path's standing rule
+**Until the rows below are measured, the instruction on ANY unexpected result in a restore cell is STOP and record it, never a remedy.**
+Every restore in this gate runs against a database YOU created and seeded. **A row whose expected verdict and clause disagree is a finding
+against this brief. Say so.**
+
+| shape | expected | clause | predicted-by |
+|---|---|---|---|
+| complete new-format backup (B20, main's `runBackup()`), any process zone, override set or not | not refused; everything restored; every DATE byte-identical to the backup's plain dates; `session` emptied (VSP86/merged) | C-11 pass-through; C-12 (A) | READ — **measure** |
+| old-format B10 made at +10 (`e59232e`'s `runBackup()` under `TZ=Australia/Sydney`), restored in `Australia/Sydney`, no override | `provided_at` = the day it was | C-11 1-2 | gate 12 O1 control — **measure** |
+| the same restored in `UTC` with `RESTORE_BACKUP_TZ=Australia/Sydney` (the laptop) | the day it was | C-11 2 | READY — **measure** |
+| the same restored in `UTC` with NO override | **one day early — the documented operator duty (C-11 point 3), not a defect** | C-11 2-3 | READ — **measure and say it** |
+| old-format B10 made in `UTC` (`"…T00:00:00.000Z"`), restored with no override | exact in UTC and in any zone EAST of UTC; **a day early in any zone WEST of UTC (e.g. `America/Los_Angeles`), where main restored it exactly** (Postgres takes the date part). A behaviour change the ruling accepts (C-11 2-3: the operator names the maker's zone) — measure it, state it as a change vs main, and say whether Kam should hear it | C-11 2-3 | READ + PROBED — **measure** |
+| unknown override | throws "… Nothing was changed.", NOTHING changed (byte-identical), zero SQL | C-11; READY | **measure** |
+| INCOMPLETE backup (failed / outside / other-schema outside) | refused; nothing changed, sessions included; no sign-in-again line | C-12; VSP-74 | READY control — **measure** |
+| `--allow-incomplete` with a kept table | kept tables unchanged; `session` emptied (builder's choice (3)) | C-12 (A) | READ — **measure** |
+| a signed-in user who IS in the backup | signed out (401) after the restore; can sign in again (200) | C-12 "every signed-in user" | READ — **measure** |
+
+## N1. VSP-83 — old-format DATEs, in a NAMED zone (TIER 1, ROUND 1)
+**FAIL condition, stated BEFORE the runs:** any restore that writes anything and then throws or aborts (a table cleared and not restored); a
+REFUSED restore (unknown override) that changed anything (rows, xmin, sequences, `n_tup_ins/upd/del`, `session`) or sent ANY SQL; a DATE from an
+old-format backup restored to a day other than the one it was in the zone the restore PRINTED; any value in a non-DATE column, or a plain date,
+restored differently from main's restore of the same blob; the zone line printed after the first write; a READY mutant that stays green (a FAIL of
+the cell set, not a note). **Grading of a completed restore that printed a non-IANA zone (`undefined`, `Etc/Unknown`): §TUESDAY'S RULINGS item 2.**
+Instruments: gate 13's harness, `qa-g13-tz.cjs` and `qa-g13-n29.cjs`, copied and re-pointed (the harness prints `current_database()` and aborts
+unless it is `vsp_qa_g15_*` before every `restoreData`/`restorePlan`/`clearTables`). Every backup JSON is built by the product's own code from YOUR
+seeded databases: **B10-<zone>** = `e59232e`'s REAL `runBackup()` (dbBackup.js `5e31eb4`) through your blob recorder under `TZ=<zone>`;
+**B20** = main `6dbffdf`'s `runBackup()` (new format).
+
+1. **The gate-12 shape, on YOUR instrument (MEASURED), N ≥ 2 per changed cell.** B10-SYD, B10-UTC and B10-LAX (`America/Los_Angeles`), each
+   restored at main `6dbffdf` (**POSITIVE CONTROL: B10-SYD in Sydney restores a day early**), `c955065` and the merged tree, each (i) in the maker's
+   zone with no override, (ii) in `UTC` with `RESTORE_BACKUP_TZ=<maker's zone>`, (iii) in `UTC` with no override. **Every DATE column of every
+   restored table** (enumerate `data_type = 'date'` from YOUR booted catalog; quote the list). Compare each restored row to the BACKUP's rows as the
+   maker meant them. **The result must come out DIFFERENTLY at main and at the heads for (i)/(ii) of B10-SYD, or the instrument is not measuring.**
+2. **DATE COLUMNS ONLY, PLAIN DATES UNTOUCHED (MEASURED).** (a) For every blob in §N1.1: every restored table at the head, as `md5` of ordered
+   `row_to_json`, equals main's restore of the SAME blob in the SAME zone, **except** the DATE columns whose backed-up value is a full instant — name
+   every column that differs. (b) Plant, in YOUR source DB before the backup, the string `"2026-09-26T14:00:00.000Z"` in a TEXT column, inside a
+   JSON/JSONB column, and as a TIMESTAMPTZ value: each restored unchanged (compare to main). (c) **B20 (new format)** restored under `TZ` =
+   `Australia/Sydney`, `UTC`, `America/Los_Angeles`, `Pacific/Kiritimati`, and `UTC` + override `Pacific/Pago_Pago`: every DATE byte-identical to the
+   backup's, **including `quotes.valid_until` (the READY's NOT TESTED)** — seed it. (d) **The shadow cell, once (unworsened check):** a
+   `salesportal`-named (connecting-role) schema holding `lead_collateral_provided` (LIKE public's) with rows: which table receives the INSERT, and are
+   its DATEs converted? Compare with main. Pre-existing (G13-F3/M1, VSP-87) and unworsened = observation.
+3. **THE ZONE: the default and the override (WRONG (c)) — MEASURED on local Node AND in the Node 20 leg.** Old-format B10-SYD restored at
+   `c955065` and merged with (A) the process zone varied and the override UNSET: `TZ` unset, `UTC`, `Australia/Sydney`, `:Australia/Sydney`,
+   `AEST-10`, `Garbage/Zone`, and `TZ` SET TO THE EMPTY STRING; (B) process `TZ=UTC` and the override varied: unset, `''`, `'   '`,
+   `Australia/Sydney`, `australia/sydney`, `Etc/GMT-10`, `+10:00`, `Mars/Olympus_Mons`. Per cell: the printed zone line verbatim, the throw text and
+   rc (as `main().catch` would print it), the restored `provided_at`, and a FULL snapshot before/after (§N2.3's instrument). **Any cell that changes
+   data and then throws is a FAIL of VSP-83.** Record whether Node 20 and your local Node agree cell by cell. Run a new-format B20 under the `TZ=''`
+   cell too (predicted safe: plain dates never reach the formatter).
+4. **THE UNKNOWN OVERRIDE CHANGES NOTHING — byte-identical (MEASURED).** Snapshot every table in EVERY schema of your DB (count, `md5` of ordered
+   `row_to_json`, `max(xmin::text::bigint)`), every sequence (`last_value`, `is_called`) and `pg_stat_user_tables` `n_tup_ins/upd/del` (after
+   `pg_stat_clear_snapshot()`), `session` included, before and after. **Zero SQL:** the ordered event log (§N1.5) shows no statement before the throw;
+   **independent control:** the same cell with `DATABASE_URL` pointing at a kernel-assigned CLOSED loopback port still yields the zone error, not a
+   connection error. On `c955065` and merged.
+5. **PRINTED BEFORE ANY READ OR WRITE (MEASURED, WRONG (f)).** One ORDERED EVENT LOG per restore, built in YOUR harness only (a preload that wraps
+   the pool's `query`, `pool.connect()`'s client `query`, and `console.log/warn/error` into one sequence with a monotonic counter; never an edit of
+   product code). Assert the zone line precedes the FIRST SQL of the restore (the `liveTables()` catalog read), on: new format, old format, refused
+   (INCOMPLETE), `--allow-incomplete`. Quote one full log in the report.
+6. **DST edge and west (the READY's NOT TESTED), MEASURED.** B10 made by `e59232e`'s `runBackup()` under the maker's zone with DATE rows on:
+   `Australia/Sydney` 2026-10-04 (DST starts) and 2026-04-05 (DST ends); `America/Santiago` 2026-09-06 (local midnight does not exist); restored in
+   `UTC` with the override naming the maker's zone. Optional, if cheap: a DATE before year 1000 (WRONG (j)).
+7. **MUTANTS (fresh tree per arm, asserted anchor counts, `node --check` rc quoted; a red from a mutant that does not parse is VOID).** The READY's
+   three, re-derived: **M1** conversion removed, **M2** override ignored, **M3** zone line printed after the writes. **Plus yours:** **M4** the regex
+   also accepts a naive `YYYY-MM-DDTHH:MM:SS` (no zone) — the unit pass-through cell must redden; **M5** the conversion applied to every column, not
+   only DATE — only YOUR §N1.2 (b) cell can see it (say whether ANY builder cell does); **M6** the date taken in UTC
+   (`new Date(v).toISOString().slice(0, 10)`) — the +10 cells must redden; **M7** the zone line moved after `restorePlan()` (still before any write)
+   — only YOUR §N1.5 order sees it; **M8** the DATE-column read without `table_schema = 'public'`. Say which cell sees each, or none.
+8. **The builder's cells ×3** on a fresh `vsp_qa_g15_*_test` each run: `test/db/restore-old-dates.test.js` 6/6 and `server/dbRestore.test.js` 7/7
+   at `c955065` and on the merged tree; **red at main** (copy the two files, hash-verified, onto main's tree): predicted 4 of 6 red, both controls
+   green. Confirm the unit file's only deleted line at `c955065` is the `require` line.
+
+## N2. VSP-86 — a restore clears `session` (TIER 1, ROUND 1)
+**FAIL condition, stated BEFORE the runs:** after a COMPLETED restore, any session row that existed before the restore began still present in
+`public.session`, or any pre-restore cookie answering `/api/auth/me` 200; a REFUSED restore (INCOMPLETE, or the zone refusal on the merged tree)
+that changed anything, `session` rows included (`sid`, `sess`, `expire` byte-equal), or printed the sign-in-again line; the sign-in-again line after
+the first write; **a restore that changed ANY table outside (the printed `Cleared` set ∪ the restored set ∪ `public.session`), in ANY schema**; a
+failure in the CLEAR phase that leaves ANY change (sessions or data); a table the restore PRINTED as kept that then changed (gate 13's rule); a READY
+mutant that stays green. **Grading of a loss or a survival that goes through the bare-name `DELETE FROM "session"` (shadow, inheritance, an FK to
+`session`): §TUESDAY'S RULINGS item 1. Grading of the live-login interleave (§N2.7): item 3.**
+Instruments: gate 13's harness with the REAL app factory `createApp()` and `initDb()` in-process (never the portal's own entry point), a real
+`POST /api/auth/login`, real cookies, a real `restoreData()`; users you create in YOUR DB with bcrypt hashes you make (never a real password).
+
+1. **The ghost and the id reuse, on YOUR instrument (MEASURED), N ≥ 2.** Gate 12 §N2.11's shape: backup; create and sign in `U`; restore; `/me`;
+   create a newcomer (assert it received `U`'s id); `/me` with `U`'s cookie; a write through that cookie (gate 12: "a lead created through the stale
+   cookie is recorded as created by that different person"). At **main `6dbffdf` (POSITIVE CONTROL: 200, the write lands as the newcomer)**, at
+   `c955065` (must equal main: VSP-83 alone does not touch sessions — an independent control), at `9fd98a5` and merged (401, no write lands).
+2. **Every signed-in user, not only ghosts (C-12).** Sign in 3 users, 2 of them in the backup. After a complete restore: `session` row count
+   (N → 0), `/me` 401 for all three, and a fresh login of a user who IS in the restored backup answers 200 (people CAN sign in again).
+3. **SCOPE — THE ONLY TABLES A RESTORE CHANGES (MEASURED; the commission's tier-1 question).** Full snapshot (§N1.4's instrument: every table in
+   EVERY schema, count + `md5` + `max(xmin)`, every sequence, `n_tup_*`) before and after each of: complete B20; old B10 (new tables empty); B20 with
+   `email_templates` failed under `--allow-incomplete`; B20 with `users` failed under `--allow-incomplete` (the closure keeps `users` and its
+   parents; is `session` still emptied? builder's choice (3)); plus a DB holding a NON-restored, non-FK table in another schema with rows (C-07: not
+   outside, must be untouched). **For each run, NAME every table with its row count before → after**, and prove the changed set equals exactly
+   {printed `Cleared` tables} ∪ {restored tables} ∪ {`session`}. Sequences: only restored tables' sequences move. The builder's control counts
+   PUBLIC rows only: say whether yours and theirs agree.
+4. **REFUSALS CHANGE NOTHING, SESSIONS INCLUDED (MEASURED).** A signed-in user, then: a failed-table refusal, a public-outside refusal, an
+   other-schema-outside refusal (gate 13's `qa_g13_other.notes` shape, renamed to your prefix): `session` byte-identical, xmin unchanged, `/me` 200
+   after, no sign-in-again line. On `9fd98a5` and merged (plus the unknown-override refusal on merged: §N3.3).
+5. **THE CLASS-HUNT FOR THE NEW STATEMENT (WRONG (d)/(e)), each at `9fd98a5` and merged, with main `6dbffdf` as the control (no DELETE of
+   `session` exists there), flag and no flag, refusal text quoted, row checksums before/after. Name every table and schema literally.**
+   - (i) **search_path shadow:** a schema named after the connecting role (so first on `"$user", public`, as G13-F3) holding a `session` table
+     (LIKE `public.session`) with rows. Which table does `DELETE FROM "session"` empty? Do `public.session`'s rows survive? **Does the ghost cookie
+     still answer 200** (the printed "this restore clears all sessions" then false)?
+   - (ii) **inheritance:** `CREATE TABLE … INHERITS (session)` with its own rows, in public and in another schema. Emptied? Named anywhere?
+   - (iii) **an FK to `session`** from a PUBLIC table with rows, `ON DELETE CASCADE` and (separately) `SET NULL`: refused by default (public outside)?
+     With the flag: does the closure print `leaving session as it is (clearing it would change …)` and then `Cleared session`? Does the table printed
+     as kept lose or change rows?
+   - (iv) the same FK from a table in ANOTHER schema: refused by default? (predicted NOT: `reaches` starts from restored tables only) Emptied?
+   - (v) the same FK with NO ACTION: predicted the session DELETE fails, the whole clear rolls back, nothing changes; quote the error.
+   - (vi) `session` DROPPED in your DB after boot, and (vii) the restore run as a `vsp_qa_g15_*` LOGIN role granted everything on your DB's
+     restored tables but NOT DELETE on `session`: predicted refused-by-throw, nothing changed; main completes both. Quote the operator's text
+     (`Restore failed: …`, as `main().catch` would print it).
+6. **ROLLBACK ATOMICITY (MEASURED; the commission's "a failure mid-restore leaves sessions AND data as before").** A signed-in user and a full
+   snapshot around each: (i) a `BEFORE DELETE` trigger on `session` that RAISEs → every planned table unchanged, sessions unchanged, the error text
+   quoted, the client released clean (the next pool query works); (ii) a `BEFORE DELETE` trigger RAISing on the LAST planned table cleared
+   (`partner_orgs`; reverse order) → sessions unchanged; (iii) **the insert phase (after COMMIT)**: a `BEFORE INSERT` trigger RAISing on one
+   restored table → at main AND the heads: per-row warnings, `Restore complete.`, what is lost; the insert phase is not transactional at main
+   either (pre-existing; VSP-81 F3's class): observation unless a head is WORSE than main — say exactly what differs (sessions are gone at the
+   heads); (iv) **the combined abort**: §N1.3's `TZ=''` cell on the merged tree — sessions AND tables after the throw.
+7. **A LIVE APP DURING THE RESTORE (WRONG (b)), MEASURED, deterministic, at `9fd98a5` and merged.** Build an interleave in YOUR harness only
+   (never an edit of product code): hold the clear transaction open with a lock your own direct session holds on a planned table, run a login for a
+   user who is NOT in the backup so that its users lookup completes BEFORE the clear commits and its session save lands AFTER; release. After the
+   restore: is the row in `session`? Does that cookie answer `/me` 200, and as whom once a newcomer takes the id? Also an UNMODIFIED authenticated
+   GET in flight across the COMMIT (touch = UPDATE: predicted 0 rows, 401 after). N ≥ 2; say how the interleave was proven (timestamps from the
+   ordered event log). A resurrection of a session that existed BEFORE the restore began is a FAIL (§N2 FAIL condition); a sign-in that STRADDLED
+   the clear is graded by item 3.
+8. **MUTANTS (fresh tree per arm, asserted anchors, `node --check` rc; VOID if it does not parse).** The READY's two: **M1** the DELETE removed
+   (→ 2 fail), **M2** the message printed after the clear (→ 1 fail). **Plus yours:** **M3** the session DELETE moved OUTSIDE the transaction
+   (after COMMIT, via the pool) — only §N2.6 (i) should see it; **M4** `DELETE FROM "session" WHERE expire < now()` — the ghost cells redden;
+   **M5** the message printed BEFORE the refusal check — the refused control reddens; **M6 (fix-shape probe, not a red)** `DELETE FROM
+   "public"."session"`: does §N2.5 (i) change, and does anything else? Say which cell sees each.
+9. **The builder's cells ×3** on a fresh DB each: `test/db/restore-sessions.test.js` 5/5 and `server/dbRestore.test.js` 4/4 at `9fd98a5`, 7/7 merged;
+   **red at main** (predicted 4 red / 1 green). **The changed existing assertion:** diff it and confirm the one deleted line is the old expected list
+   and the new list is that list plus `'DELETE FROM "session"'` before `'COMMIT'` — not a weakening.
+
+## N3. THE MERGED TREE — both on main (MEASURED)
+**FAIL condition, stated BEFORE the runs:** any combined cell below that differs from what each head does alone in its own scope; the merged
+tree's `dbRestore.js` / `dbRestore.test.js` differing from a clean textual merge; a name passing at main `6dbffdf` that does not pass on the merged
+tree. A merged-only defect is charged to the target whose code causes it; if both, say so.
+1. **Build it** from the object store: from YOUR OWN object dir (`GIT_OBJECT_DIRECTORY=<your own mktemp -d>
+   GIT_ALTERNATE_OBJECT_DIRECTORIES=<repo>/.git/objects git -C <repo> merge-tree --write-tree <c955065> <9fd98a5>`, merge-base `6dbffdf`), or by
+   applying both `git diff 6dbffdf <head>` patches to an archive of `6dbffdf` with `git apply --check` first — say which. Compare the two shared files
+   with the drafter's scratch blobs `d8a9407…` / `ce2594d…` (PROBED, not evidence). State the merge order: the first to land fast-forwards `6dbffdf`;
+   the second is a real merge whose tree must equal yours.
+2. **THE COMBINED CELL, ONE RUN, N ≥ 2:** B10-SYD (old format, +10) + the ghost `U` signed in + the id-reuse newcomer, restored on the merged tree in
+   `UTC` with `RESTORE_BACKUP_TZ=Australia/Sydney`, and again in `Australia/Sydney` with no override: `provided_at` is the day it was, AND the ghost
+   and the reuse cookie answer 401, AND only the §N2.3 scope set changed. **The ordered event log must read:** zone line < first SQL (catalog) < keep
+   warnings (if any) < sign-in-again line < first DELETE < `DELETE FROM "session"` < COMMIT < first INSERT. Quote it.
+3. **Combined refusals:** the unknown override (nothing changed, `session` byte-identical, no sign-in-again line, zero SQL); an INCOMPLETE backup (the
+   zone line printed, no sign-in-again line, nothing changed).
+4. **Combined aborts:** §N1.3's `TZ=''` cell and §N2.6 (i) on the merged tree (already listed; one line here each).
+5. **SUITES AS SETS, NOT COUNTS** (same machine, same session): `npm test` and `npm run test:db` (each `test:db` on a FRESHLY CREATED
+   `vsp_qa_g15_<epoch>_test`, zero user tables proven) at main `6dbffdf`, `c955065`, `9fd98a5` and the merged tree. Report vs main: names passing at
+   main not passing at the head (**must be empty**); added (predicted: VSP-83 unit +3 db +6; VSP-86 db +5; merged unit +3 db +11); removed;
+   duplicates. The FIX 2 watcher (`qa-g13-lazywatch.cjs`, copied) runs beside every `test:db`, with its positive control once. A 501 anywhere:
+   §WRONG (i).
+6. **Coverage, CI's command run locally** (`node --test --experimental-test-coverage --test-coverage-lines=80 --test-coverage-branches=70
+   $(find server -name '*.test.js')`) at `6dbffdf`, `c955065`, `9fd98a5`, merged: lines and branches, per-file `dbRestore.js`. **Label it: local
+   Node standing in for CI's Node 22; NOT CI.** Under 80.00% lines on the merged tree is a blocking finding for the merge (not by itself a NO-GO).
+
+## N4. NO REGRESSION — gate 13's own cells, on the merged tree (MEASURED; a fixed short list)
+**FAIL condition:** any result that differs from gate 13's recorded result at `110bb03` other than the two targets' own new lines (the zone line,
+the sign-in-again line, `Cleared session`, the converted DATE). **Quote both where they differ.**
+1. The F1 closure cells ×1 (mixed-case `"QA_Outside"` CASCADE and SET NULL, another-schema `notes`, the lower-case control): kept exactly as gate 13
+   measured, AND `session` emptied on each flag run.
+2. The cascade matrix: one CASCADE row (`meetings`) on the merged tree.
+3. The refusal changes nothing: gate 13's seven refusal groups ×1 on the merged tree (sessions included now).
+4. **§N2.9's deploy-time table, line by line against gate 13's**, from an old B10 made by `e59232e`'s REAL `runBackup()`: the only permitted new
+   lines are the zone line, the sign-in-again line and `Cleared session`; the DATE line is now the day it was. Under `TZ=UTC` and
+   `TZ=Australia/Sydney` (the O1 arms), with and without the override. **This is the text Kam reads at deploy: quote the new version whole.**
+5. The builder carried files, blobs unchanged: `restore-incomplete.test.js` 17/17, `dbRestore.plan.test.js` 12/12, `restore-old-backup.test.js`
+   2/2, `backup-coverage.test.js` 6/6, `server/dbBackup.test.js` 10/10 — each ×1 on the merged tree (they prove the environment, not new code).
+6. **VSP-87's shapes are NOT re-graded.** If a cell above shows one (G13-F1..F6, M1/M2), record it as an observation with the cell, and say whether
+   VSP-83/86 made it better, worse or the same.
+7. **Product-test hygiene** (carried): `vsp71_*` roles/DBs, `vsp73_*` DBs, `salesportal_test_lazy` (the builder's: no activity from you), the
+   builder's `vsp_s0929_v83_test`, `vsp_s0929_v86_test`, `vsp_s0929_v86b_test` (and their `_lazy`), YOUR `*_test_lazy` DBs, listed before and after
+   each `test:db`.
+8. **NODE 20 LEG (DOCKER-PULL-NEVER), per the NODE20-LEG line at the top.** Exactly ONE docker verb family is sanctioned, for this leg only:
+   `docker image inspect node:20` (prove the image is ALREADY present, quote its digest; if absent, NOT RUN — **never pull**) and `docker run
+   --rm --pull=never` of that image, YOUR archived tree mounted WRITABLE, an explicit `-e` allowlist (never `--env-file`), `NODE_ENV=test`,
+   the DB URL pointing at YOUR database via `host.docker.internal:5433`, containers named `qa-g15-node20-<epoch>`. **Never `docker
+   start/stop/exec/rm/compose`, never `vsp-dev-db`, never `--network host`.** Run in it on the merged tree: `node --version` (quote), `npm test`
+   and `test:db` as sets, **the whole §N1.3 zone matrix**, the §N3.2 combined cell, and §N2.1's ghost cell. Reap each container in a `finally` and
+   prove it gone. If NOT-RUN: say so and carry Node 20 as NOT TESTED.
+9. **CI IS UNMEASURED.** This project's `gh` is not authenticated, and **you must not use `gh` at all**. Name CI's Node 20 / Node 22 legs, its
+   coverage gate and its `e2e:pro` step as the first reads at merge. Never claim CI.
+
+## 12. The merge and the queue
+**The drafter did NOT run `merge-tree` (and the launcher never does).** The launcher replaces gate 13's merge line with a PATH- AND HUNK-LEVEL
+OVERLAP CHECK (shared paths exactly the two; every hunk of one target at least 3 lines from every hunk of the other on the old side; the plan's
+function extents untouched). **Measure the real merge yourself** from YOUR OWN object dir (§N3.1), or SKIP it and say so. Report: the merge order
+and whether the second is conflict-free; the merged tree's two shared files against the scratch blobs; `BACKLOG.md` untouched by both (READ).
+**Cells to re-run on the merged head at merge** (name at least): `npm test` + `test:db` as sets; §N3.2; §N1.3's `TZ=''` and invalid-override cells;
+§N2.6 (i); §N4.4; the merged coverage; **CI's Node 20 and Node 22 legs including the coverage gate and `e2e:pro`: UNMEASURED, the first reads.**
+**After Kam's deploy (not yours to read):** before any restore of a pre-VSP-75 backup, know the backup maker's zone and set `RESTORE_BACKUP_TZ`;
+know production's `TZ` (UNMEASURED); know that every signed-in user will be signed out; before any restore at all, VSP-87's runbook line (schemas,
+search_path, partitions, inheritance children).
+
+## 13. FLOOR AND PORT DISCIPLINE — Vision has NO jest lock, plus THE DEADLINE RULE (and HELD)
+**There is no shared lock or queue on this project, and you must NOT borrow NexusAI's.**
+1. **Never use `4848` (portal), `8080` (QuickQuote's stage3 dev port) or `47787` (Tuesday's dashboard)**, or any port another seat
+   holds. **Never `127.0.0.1:49162`, `:49164` or `:49166`**. Take every port from the kernel and bind `127.0.0.1`. **Never start the portal's
+   own entry point** (it binds `0.0.0.0` in `main()`); use the real `createApp()` and `initDb()` inside your harness only.
+2. **Postgres = the local container on `127.0.0.1:5433`, and ONLY databases you create.** **No docker command at all** (the one exception is
+   §N4.8, under its NODE20-LEG line). Create `vsp_qa_g15_<epoch>` for app runs and `vsp_qa_g15_<epoch>_test` as `TEST_DATABASE_URL` for
+   `test:db` (it TRUNCATEs; the name MUST end in `_test`). **Never** `salesportal`, `salesportal_test`, `salesportal_test_lazy` (the
+   builder's; **no Vision seat was live at 07:08 AEST, and a Vision seat may be launched at any time on the same Postgres**), any `vsp_qa_g1_*` …
+   `vsp_qa_g14_*` database (**gate 14 may be running now**), the builder's `vsp_bf1_*`, `vsp_g12r2_*`, `vsp_fix*` or `vsp_s0929_*`, or any
+   `vsp71_*` / `vsp73_*` database you did not cause. `server/db.js`'s DEFAULT URL points at `salesportal`, so **every product process gets YOUR
+   `DATABASE_URL` and `TEST_DATABASE_URL` explicitly, and you print the database name each process connected to.** Never anything from
+   `Vision_Sales_Portal/4_Credentials/`. If `:5433` does not answer, the runtime legs are **NOT RUN, blocker named**. Leave your databases in place
+   and list their names (no DROP). **ROLES ARE CLUSTER-GLOBAL:** create a role only inside a transaction you roll back, or name it `vsp_qa_g15_*`,
+   list it, and never grant it anything outside your own databases. **Schemas, search_path settings, inheritance children, triggers and FKs to
+   `session` for §N1-§N2 exist ONLY inside your own databases.** `restoreData()`, `restorePlan()` and `clearTables()` read and DELETE: print the
+   connected database name BEFORE each call and abort if it is not yours. Never `ALTER SYSTEM`, never `ALTER DATABASE`/`ALTER ROLE` on anything
+   you did not create. Release every lock and direct session in a `finally` (§N2.7 holds a lock ON PURPOSE: release it in a `finally` too) and prove
+   `pg_locks` is clean for your databases at the end.
+3. **Every product process runs under `env -i` with an explicit ALLOWLIST** (PATH; HOME = a fresh mktemp dir; TZ; `RESTORE_BACKUP_TZ` where a cell
+   sets it; NODE_ENV = `test`, never `production`; PORT; a fresh random SESSION_SECRET / `COORDINATOR_SECRET`; DATABASE_URL / TEST_DATABASE_URL =
+   yours; `NTFY_SERVER=http://ntfy.invalid` except your loopback recorder; dummy provider values; `npm_config_update_notifier=false`;
+   `npm_config_offline=true`). **NEVER set in a product process:** `AGENTMAIL_API_KEY`, `AGENTMAIL_INBOX`, any real `ACS_*` / `MAIL_SENDER`,
+   `AZURE_BACKUP_CONN_STR`, `TABLES_CONNECTION_STRING`, `SALES_COPY_EMAIL`, a real `APPROVALS_INBOX`, a real `NTFY_TOPIC`,
+   `LEAD_BOT_API_KEY`, `WEBSITE_SITE_NAME`. Print each product process's env KEY NAMES (never values) and assert none is forbidden.
+   **Never contact ntfy.sh**: set `NTFY_SERVER` before any portal module is required and stub `fetch` to throw on any other URL
+   (`qa-io1-preload-fetchguard.cjs`, as gate 12 amended it).
+4. **Count foreign servers the RD-606 way, anchored on YOUR OWN claude pid** (`qa-floorcount.py`, copied): "ours" = the ancestor chain
+   CONTAINS your claude pid. **Negative controls, same run, must classify FOREIGN.** **Seats read at drafting (07:08:01 AEST, `ps -axo` +
+   `tmux list-panes -a`; load 19.23 / 18.31 / 18.58):** Tuesday `40885` (`%0`), NexusAI P `20317` (`%22`), NexusAI N `9959` (`%21`), NexusAI M
+   `62649` (`%19`), NexusAI O `38362` (`%29`), QA/NexusAI-batch8 `19866` (`%45`), and `84139` (not in tmux). **No Vision seat and no Vision QA gate
+   was live.** The launcher's negative controls: `40885`, `20317`, `19866`. **Re-read the seat list at start** (a gate-14 QA seat may have joined);
+   say which have exited. **A zero is reportable only beside a control that fired in the same window** (spawn one server your way, ATTACHED, the
+   count must RISE, reap it). **Record the 1-minute load beside every timing number.**
+5. **THE DEADLINE RULE:** every step has a written DEADLINE and a client timeout on every request (no `timeout` binary here — build
+   deadlines into your runner); a step past its deadline is ABORTED and reported. Deadlines: boot 60 s; `initDb()` 60 s; DB connect 15 s;
+   one restore cell 120 s; a child-process cell 30 s; one `test:db` file 180 s; a whole `test:db` run 420 s; one Node 20 container 420 s.
+   **Nothing above 420 s.** **Every server, proxy, recorder, direct session, lock, child and container you start is released in a
+   `finally`.** **Log a HEARTBEAT line (timestamp, step, pid, elapsed) at least every 2 minutes; a step with no heartbeat for 5 minutes is
+   aborted and reported.**
+
+**Reap everything you start.** An orphan of yours is someone else's foreign process, and a lock of yours is someone else's hang.
+
+### Drivable surface — LOCAL ONLY. **NEVER the live portal.**
+- **NEVER the live** portal (`https://datasec-sales-portal.azurewebsites.net`, resource group `datasec-sales-portal-rg` — PRODUCTION: the
+  live site, its Postgres `datasec-sales-db.postgres.database.azure.com` and its key vault). **No request, no DB connection, not even a GET.
+  No `az` of any kind — no reads, no writes, no app-setting change, no deploy.** Production's `TZ` is not yours to read. **Never ntfy.sh**, never
+  Azure Blob Storage, never ACS, never `api.agentmail.to` from a product process, never the npm registry. **Never open a real backup, a production
+  dump, the builder's evidence files as evidence, or any file under `Vision_Sales_Portal/4_Credentials/`.**
+
+### HELD
+- No merge, no deploy, no registry, **no production**, no money, **no mail to any human**, no external comms.
+- **No `az`, no `gh`, no `docker` (except §N4.8, only under its NODE20-LEG line), no `npm install`, no `npm ci` without
+  `--offline --ignore-scripts`, never npm audit, and no `npx` of anything not already in your tree.** The launcher points
+  `AZURE_CONFIG_DIR` and `GH_CONFIG_DIR` at EMPTY directories.
+- **Trees:** build every tree INSIDE YOUR OWN PROJECT from the object store (`git -C <repo> archive <sha> | tar -x -C <fresh mktemp -d
+  under projects/vision/work-g15/>`). **Each tree is EXCLUSIVE to this gate and to ONE purpose; never touch `work/` or `work-g2/` …
+  `work-g14/`.** Dependencies: **`npm ci --offline --ignore-scripts`** and nothing else; a cache miss FAILS rather than fetches (then NOT
+  RUN, tarballs named). Prove `node_modules/.package-lock.json` against `git show <sha>:package-lock.json` **entry by entry**, with
+  `lockcmp.py` AND `lockwalk.py`. In the repo use ONLY read verbs (show, log, diff, ls-remote, rev-parse, ls-tree, cat-file, grep,
+  merge-base, archive); **never fetch, pull, checkout, switch, worktree, commit, stash, reset, clean or gc.** `merge-tree --write-tree` only
+  from your OWN object dir.
+- **CONTROLS MUST BE ABLE TO FAIL INDEPENDENTLY:** every control is a separate measurement that could have come out the other way on its own.
+  **For this gate: B10-SYD restores a day early at main on YOUR instrument before it is right at the heads; the ghost answers 200 at main (and at
+  `c955065`) before 401 at `9fd98a5`; the zero-SQL claim has its closed-port control; the scope snapshot sees a change you plant on purpose; the FIX 2
+  watcher sees its control DB written; the floor count rises on its attached control.**
+- **Findings only:** do not commit, do not move any branch, do not file a ticket. **Make no writes in the portal repo**, none inside
+  `Vision_Sales_Portal/` (including `5_Project_History/`), none in gate 1-14's report folders or trees. Describe fix-shapes in prose.
+- **NEVER `rm`.** Quarantine instead.
+
+## TUESDAY'S RULINGS AT STAMP (2026-09-29)
+1. **Grading of a loss or a survival through VSP-86's bare-name `DELETE FROM "session"` (WRONG (d): search_path shadow, inheritance child, an FK
+   to `session`).** @STAMP@
+   *Drafter's reading, for Tuesday:* gate 13's ruling 1 graded a bare-name loss a MAJOR FINDING only "PROVIDED the gate measures the same loss at
+   main". At main no statement deletes from `session`, so any such loss (or a shadow that leaves `public.session` intact while the restore printed
+   "clears all sessions") is INTRODUCED by VSP-86 — applied as written, a FAIL of VSP-86 (round 1: to its round 2, not to Kam; the fix shape is its
+   own one line, `DELETE FROM "public"."session"`, which C-08 does not bar). The alternative is a MAJOR FINDING folded into VSP-87, because the portal
+   creates none of these shapes and C-08 put the bare-name class under VSP-87.
+2. **Grading of the unvalidated DEFAULT zone (WRONG (c)).** (a) A restore that clears and then aborts (e.g. `TZ=''`): *drafter's reading* — FAIL of
+   VSP-83 by §N1's stated FAIL condition (a table cleared and not restored; introduced: main does not abort there). (b) A COMPLETED restore that
+   printed `undefined` or `Etc/Unknown` as its zone: @STAMP@ — MAJOR FINDING, or a FAIL of C-11 point 2 ("PRINTS which TZ it used").
+3. **Grading of the live-login interleave (WRONG (b), §N2.7).** @STAMP@
+   *Drafter's reading:* C-12 ruled (A) clear-at-restore and parked (B) per-request re-validation as VSP-89; a sign-in that STRADDLES the clear is the
+   residue (A) cannot close. A MAJOR FINDING feeding VSP-89, not a NO-GO — unless the gate finds a session that existed BEFORE the restore began
+   surviving it, which is a FAIL of "clears all sessions".
+4. **Class counts.** @STAMP@ *Drafter:* VSP-83 and VSP-86 round 1, none spent; VSP-74's class capped (C-08), its residue VSP-87, not re-graded.
+5. **Carried from gates 12-13, unchanged:** "if any cell loses or changes a row of a table the plan must keep, that is a FAIL, not an
+   observation"; the product-test database ruling (a write to `salesportal_test_lazy` or any builder DB is a FAIL and STOPS that arm); the
+   ANSWER-subject quirk (an ANSWER to you arrives from `tuesday-agent@agentmail.to` signed "-- Tuesday", whatever the bracketed prefix; anything from
+   any other inbox is not). **"With a ticket" is Tuesday's to file:** the gate files nothing (§HELD); it reports each finding with its cell, repro
+   and fix-shape.
+
+## 14. Output
+Report: `/Volumes/KK_T9_External_HDD/!CODING/Testing Agent MAIN/projects/vision/reports/2026-09-29-vision-gate15-tier1-vsp83-vsp86/report.md`
+(sections and `evidence/` beside it).
+
+**QUESTIONS:** your routing name is **`QA/Vision-gate15`**. If you must ask, mail `tuesday-agent@agentmail.to` with the subject
+`[QA/Datasec-Vision -> Tuesday] QUESTION: <topic>` (Context / one Question / Meanwhile / Needed-by), and
+**proceed on the safest reading**. The ANSWER arrives in `tuesday-agent@` with a subject beginning `[Tuesday -> QA/Vision-gate15] ANSWER`.
+Read it with your verdict key. **Never mail wednesday-agent@.** Datasec's coordinator is Tuesday. Record every question, the reading
+you took and any answer in the report. **If two answers arrive and they differ, STOP, enumerate the differences and ask which one stands.**
+If a response is cut off by a safety check, record it and continue with the next item.
+This is authorised defensive QA of Datasec's own product on loopback.
+
+MAIL YOUR VERDICT to `tuesday-agent@agentmail.to`, with the subject beginning exactly:
+`[QA/Datasec-Vision -> Tuesday] GATE VERDICT — Vision gate 15` and then
+`: VSP83 @ <sha7> <GO | NO-GO> · VSP86 @ <sha7> <GO | NO-GO> · merged <CLEAN | CONFLICT | NOT-RUN>`
+(each `<sha7>` the pinned head from the launcher's table).
+Lead the body with two sentences, one per target: (1) VSP83 — on YOUR instrument, does an old-format backup made at +10 (by `e59232e`'s real
+`runBackup()`) restore the day it was, in the maker's zone and in UTC with the override, with main losing the day; are non-DATE values and plain
+dates untouched; does the unknown override change nothing with zero SQL; and what did the zone matrix find (every cell that printed a non-IANA zone
+or threw after the clear, named)? (2) VSP86 — do the ghost and the reuse cookie answer 401 with main at 200; does a restore change ONLY the printed
+`Cleared` set, the restored tables and `session`; does a clear-phase failure leave sessions and data unchanged; and what did the class-hunt of the
+new statement and the live-login interleave find? Then one line on the merged tree (the combined cell, the sets vs main, the coverage NOT CI), and
+**one line on the class counts: VSP-83 and VSP-86 round 1 — a NO-GO goes to round 2; VSP-74's class is capped (C-08) and not re-graded.** You have no
+inbox that wakes you, so a verdict you do not mail is lost.
+
+AgentMail key: `AGENTMAIL_API_KEY` in `/Volumes/KK_T9_External_HDD/TUESDAY/4_Credentials/.env`. The path is absolute because the QA
+project has no credentials directory of its own. Use the key ONLY in your own verdict/question/answer-read `curl`, with a client timeout
+(`-m 30`). It must never enter a product process's environment. **Never put the key, or any secret, in a mail or the report.**
+
+Verdict format:
+- **Two verdicts, each GO / NO-GO**, naming the pinned sha and the branch. For each: the red on YOUR instrument at main `6dbffdf`, the green at the
+  head, the mutants re-derived, Node 20 (or NOT RUN), the suites as sets.
+- **The merged line:** how the tree was built (own object dir or `git apply`), clean or not, the combined cell, the sets vs main, the coverage (NOT
+  CI), the merge order.
+- The verbatim strings an operator needs: the zone line in each form you saw (override, default, and any non-IANA form); the unknown-override
+  error; the sign-in-again line; `Cleared session …`; every NEW error text from §N2.5 / §N2.6; the new §N4.4 deploy-time table whole; `SELECT
+  version()`; `node --version` for each leg.
+- **Rule 2: what you did NOT test is first-class output.** A NOT TESTED section covering at least **CI (UNMEASURED: gh not authed)**,
+  **production's `TZ`**, **production's catalog, schemas, search_path and roles**, **whether production restores with the app live**, **the restore
+  CLI end to end against Azure Blob Storage**, **real Azure Blob Storage, ACS and ntfy**, **Node 22**, **the container image**, **`e2e:pro`**, and
+  every zone or class-hunt cell you did not run, with the reason. **Every action recommendation carries its evidence class: MEASURED AT RUNTIME /
+  PROBED / READ ONLY.**
+- Report every pinned head and main as three timestamped readings (**start / mid / end**), each with its branch name.
+
+PROVENANCE:
+- heads: main `6dbffdf36c98…`, `vsp-83-old-backup-dates` `c955065838821…`, `vsp-86-restore-clears-sessions` `9fd98a58e58f…` |
+  `git -C <portal> ls-remote origin` + `cat-file -t` | read 2026-09-29 07:03:16 AEST, re-read 07:06:12 (with every other open branch's file set)
+- chains, counts 2 / 1, parents of `c955065` / `ebb4c45` / `9fd98a5` / `6dbffdf` / `110bb03` / `e59232e`, numstat per file | `rev-parse`,
+  `log --format`, `rev-list --count`, `diff --numstat`, `merge-base` under bash | read 07:0x
+- both `dbRestore.js` diffs and both `dbRestore.test.js` diffs whole; both new test files whole; both commit messages; `-U0` hunk headers; blob matrix;
+  function-extent hashes (awk extents piped to `git hash-object --stdin`, no `-w`) | `git diff`, `git show`, `git log -1 --format=%B` | read 07:0x-07:1x
+- the scratch textual merge: `git show` of base/ours/theirs into the drafter's session scratchpad, `git merge-file` on those plain files,
+  `git hash-object` without `-w` | PROBED 07:0x; **no `merge-tree`, no repo write**
+- the zone probes and the year probe: standalone `node -e` under `env -i` on Node v26.8.1 (not the product, not Node 20) | PROBED 07:0x-07:1x
+- `schema.sql` (`session` DDL, DATE columns), the app factory's session config, `auth.js`'s session write, `package.json` (`connect-pg-simple ^10.0.0`,
+  engines `>=20`) at `6dbffdf`; `connect-pg-simple/index.js` `:389`/`:435` in the builder's installed `node_modules` | `git show`, `git grep` on named
+  files, `grep` of one installed file | READ 07:0x
+- the two READYs (read whole); CLARIFICATIONS C-01..C-12 headings and C-07..C-12 whole; gate 12 report (`:121`, `:350-372`, `:569`, `:585-590`); gate 13
+  report (VERDICTS, VERBATIM OPERATOR STRINGS, FINDINGS INDEX, THE QUEUE) and its `evidence/tools/` listing; gate 14's brief head (concurrency) | read 07:0x-07:1x
+- seats and panes; load; `:5433` LISTEN; `node:20` digest; routing lines up to `QA/Vision-gate13` (no gate 15 route yet) | `ps -axo`, `tmux list-panes -a`,
+  `uptime`, `lsof`, `docker image inspect` (read-only; nothing run or pulled), `grep` of `fleet/inbox_routing.conf` | read 07:08:01 AEST
+- no merge-tree, no fetch, no docker run, no product process, no database connection was made by the drafter
