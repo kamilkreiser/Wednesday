@@ -3911,5 +3911,12 @@
   "project": "Datasec",
   "ts": "2026-09-29T09:05:05.430750+10:00",
   "text": "Vision update. No action needed unless you want to change a default.\n\nThe full-weight restore gate failed both fixes: VSP-83 (the dates in old backups) and VSP-86 (signing everyone out on restore). Both go back for a second round with measured fixes, not to you. The dates now restore correctly, and stale logins are refused, but each has an edge case that could empty tables or leave the wrong sessions.\n\nOne behaviour change to know about. If a backup was made in UTC and later restored on a machine west of UTC, the dates now come back a day early unless whoever runs the restore sets the backup's timezone. Before, they came back exact. We accepted that trade-off when we ruled on the fix. Say if you'd rather the restore refuse unless the timezone is set.\n\nAlso, this morning's local test database crash came from old test databases piling up on the dev Postgres on the mini: about 1,900 from earlier gates, plus about 540 made today. Clearing them is your call, because we never delete. If you say nothing, they stay."
+ },
+ {
+  "role": "wednesday",
+  "seat": "Kamils-Mac-mini.localdomain",
+  "project": "Datasec",
+  "ts": "2026-09-29T09:06:58.832964+10:00",
+  "text": "Received: Vision is paused until you say otherwise. QuickQuote stays live and untouched. I'm bringing the one running Vision test gate to a clean stop now. No Vision agent will start, and nothing will be merged or deployed; the second-round fixes and merges are on hold."
  }
 ]
