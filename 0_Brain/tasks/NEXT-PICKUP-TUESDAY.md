@@ -6,6 +6,17 @@ status: live
 supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s1-wholesale
 ---
 
+## 🔴 DELTA 120 — 2026-09-29 05:49 ROTATION HANDOVER (s91, ctx ~80%, safe boundary). **READ THIS FIRST, THEN 119/118 (OWED TO KAM in 118 is exact, plus the items below).**
+### FIRST WORK FOR THE NEXT SEAT
+1. **07:00-07:10 AEST TODAY: the ATTIO bridge check (s91's timer dies with the seat, so do it BY THE CLOCK).** Brief a Vision seat (or a short read-only brief) to read datasec-attio-bridge /healthz: expect runs 6, failures 0 after the 21:00Z sync. Then tell Kam one line on the board. If failures > 0: card Kam BEFORE any rollback (`... --value 0`).
+2. **BATCH 7 VERDICT DONE (read whole, gate scored 0.98, pane %43 closed).** Routed: M mailed + tapped (`fleet/briefs_staged/2026-09-29_nexusai_M_batch7_verdict.md`): RD-628 → RD-652 → RD-646+647 merge AFTER the 5a/5b sequence; RD-618 fix round 2 of 2 (A-F1 per-request cap MAJOR, A-F2, A-F3); tickets D-F1+D-F2 and B-F1. P mailed + tapped: RD-686 held. **The C-179 note was given to Kam on the board (201), so RD-646+647 may merge in its turn.**
+3. **CARD `nexusai-rd686-round2-cap-ship-words-or-round3` on Kam's board (201): rec (a) merge round 2 + put E-F1/E-F2 on RD-722; default: held.** On his answer, relay to P (and, on (a), P merges in its turn and re-runs the 10 readers + e1/e6 on the forward merge).
+4. **BATCH 8 gate still to commission** (N's RD-648 e1c7b21, RD-609 8f9d921, RD-700 006b056; all t2; READYs in fleet/qa-agent/briefs/2026-09-29_nexusai-rd{648,609,700}-READY-mail.txt). Use the batch-7 brief/launcher as the template; commission a drafter; stamp; launch.
+### FLOOR (2026-09-29 05:49)
+NexusAI main dd15ce1. The lock is free of the gate; next: s86m-merge1-rd681 (5a merge 1), then O's rd466-proof2, N's rd591-green4 and rd723-verify. Batch 6 merge 1 is done (P). M: nine 5a/5b merges, then batch 7's three. N: merge 3 RD-685 in its turn. Usage ~47%.
+### DONE AT THIS HANDOVER
+Scoreboard (gate batch 7 0.98; O batch-4 0.98). Kam told (201): the batch-7 summary + the C-179 note. No ledger edit since the 22:59 digest regeneration, so no digest regeneration is owed.
+
 ## 🟢 DELTA 119 — 2026-09-29 05:30 (s91, 05:30 shift change, ctx 73%; band 80-90). **READ THIS FIRST, THEN 118 (OWED TO KAM exact there).**
 - **Floor 05:30:** NexusAI main **dd15ce1** (P batch-6 merge 1 RD-286 verified green). The jest lock has been held by **qa-b7-H1-hold since 16:39Z (2 h 51 min)**. It is HEALTHY: a heartbeat every 60 s, and it is on the merged-tree C-68 union (step RUNJ-m-c68, deadlines on). Queue behind it: s86m-merge1-rd681 → s86o-rd466-proof2 → s86n-rd591-green4 → s86n-rd723-verify. All four builders are holding by design (acked).
 - **New since 118:** a STANDING C-133 rule for the RD-418 image-content-exposure pair, mailed to O/N/P/M (the agents record it as C-187); O yielded its proof to M's merge (C-141). Wednesday's DevMASTER-full warning: not exposed (DevMASTER is not mounted on the mini; the T9 has 390 GiB free). OWED, shared tooling: send_brief.sh hardcodes the "[Wednesday -> …]" subject label; claim it with Wednesday.
