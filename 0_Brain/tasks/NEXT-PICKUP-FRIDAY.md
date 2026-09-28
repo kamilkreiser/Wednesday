@@ -21,6 +21,13 @@ supersede: replace wholesale; previous = NEXT-PICKUP-FRIDAY.md.pre-0925-rotate-s
 
 - **The LAPTOP SLEEPS.** Arm `caffeinate -dims -t 21600` (background) in the same action as launching any seat, and check `pgrep -fl caffeinate` at boot. On 09-25 it slept at ~17:0x and cut two seats' turns. One was armed at 17:4x until ~23:4x.
 
+## 🔴 DRIVE MOVE 2026-09-28 (Kam, travelling this week) — read before anything else
+- Kam: "move all your files and all project files to this drive". DONE and checksum-verified 20:5x: `/Volumes/Laptop-DEV/FRIDAY` (this tree), `/Volumes/Laptop-DEV/!CODING/Datasec/{HPSM, HPSM-POC, Datasec Security Composer}`. Laptop copies under `~/1FILES TO SYNC/` are UNTOUCHED (never delete; Kam decides).
+- **The drive is the new home**: launch Friday from `/Volumes/Laptop-DEV/FRIDAY/Launch_Friday.command`. The laptop tree is now stale the moment the drive seat writes; do not run both. Friday's cockpit rows for HPSM-POC/Composer already point at the drive (launchers.conf, commit 27a0750f0).
+- NOT copied: `HPSM-POC/.tools/` (68 GB of scratch worktrees, work all merged; a partial 15 GB copy sits on the drive). Their `.git` files point at laptop paths (absolute gitdir); if they matter, a seat runs `git worktree repair` there. Copy the rest on a quiet night if Kam wants.
+- The drive's OLD HPSM (pre-SOW-rewrite repos) is quarantined at `!CODING/Datasec/_quarantine_2026-09-28_HPSM-drive-sync-copy/HPSM` (old HPSM-light push URL disabled). Drive-only files brought INTO the new HPSM: `1_Project_Definition/Source_Documents/OneDrive_1_12-08-2026/` (6,244 HP files + zip, git-ignored), `3_Access_Keys/` (8 keys, 0600), `4_Credentials/` policy-composer-*.env + `.azure`; the one conflicting log kept as a second copy. Categorise/read the OneDrive dump for HPSM use in the next HPSM seat's brief.
+- Local main was 136 behind origin at 20:0x; pull (own files committed first) at the first drive boot.
+
 ## 🔴🔴 DAY INSTRUCTION, live until end of SATURDAY 2026-09-26 — `tasks/WEEK-INSTRUCTION-FRIDAY.md`
 Kam (terminal ~08:0x, verbatim): "Yes, please keep going for the day. I'll be out all day, so just keep working on getting the product ready and refined." = Datasec/HPSM-POC. Still his: deploys, anything to HP/humans, money, template text + validator/rule changes, irreversible. Usage 71% at 09:50: cloud seats only when nothing local can do it AND it matters now; Spark first.
 
