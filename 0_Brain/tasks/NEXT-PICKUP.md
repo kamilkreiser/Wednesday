@@ -19,6 +19,12 @@ supersede: replace wholesale at the next pickup; do not append. Previous copy: N
 4. EXPIRING-GRANTS: "SPEND PAST THE 90%" is marked ENDED (account switched). Friday's "ignore the 90%" row is Friday's and is not touched.
 
 ### LIVE RIGHT NOW
+**🟣 65% CHECKPOINT 17:09 09-28 (morning seat 4901153c). READ FIRST; supersedes every block below:**
+- **Seat B 38th (%54) LIVE**, brief as MAILED (the staged file `2026-09-28_seatB38_raise.md` was edited by its drafter after the send, so the mailed copy is the record). Plan confirmed. ITEM 1 DONE: **KS-1352 filed** (revoked credentials verify valid; card `secuura-ks1352-revoked-credentials-still-verify`, default a Tue 29 09:00 → a Claude seat). Now: ITEM 2 KS-1129 livescan → ITEM 3 KS-1124 mintmerge → ITEM 4 KS-1227 → ITEM 5 KS-1351 item 1 → gate36 (Wednesday drafts it from the gate35 kit shape when READYs land) → signed GO naming Seat B 38th. It also files the 16 orphaned login_stub listeners as ONE board ticket.
+- **18:00 TIMER** (a background sleep in THIS seat; it dies with the seat): the KS-888 revoke/validate card default. If Kam has not ruled (`kam_msgs.sh`): `decision_queue.sh rule secuura-ks888-revoke-validate-on-failed-save a` and send ADDENDUM 1 to B 38th with the contract (revoke → 503 and keep the in-memory revoke; validate → refuse 503; no unhandled rejection; the KS-577 order unchanged; red-first cells on both routes).
+- **Open cards with Kam:** fuse (ruled a, **his EMAIL still owed**, remind him Tue 29 morning) · KS-888 revoke/validate (default 18:00) · KS-1054 (default: stage order only) · KS-1124 F4 (default: nothing) · KS-1352 (default a Tue 09:00).
+- develop **d9ce1403d158**. Today 12 merges, all Spark; the Spark 9/9 first-round (ladder rows 29-37). Ornith PAUSE_QUEUE to 06:00 09-29 (measured). KS-1335 is next round's item.
+
 **🟢 15:50 09-28 (morning seat 4901153c, ctx ~60%). READ FIRST; supersedes every block below:**
 - **Floor clear** (wednesday + fleet-monitor). **Today: 12 Secuura merges, all Spark patches** (gate33 ×5 overnight, gate34 ×5, gate35 ×2); develop **d9ce1403d158**. B 36th and B 37th both scored 0.97 and closed; gates 34/35 scored 0.97. SPARK_LADDER rows 31-35 written.
 - **Two subagents of THIS seat running** (they die with it): CARVE screen → `0_Brain/reference/2026-09-28_ks-screen/CARVE.md` + up to 3 briefs in `local-model/night/briefs/`; card verification → `…/CARDS.md`. If this seat rotates first: read both; run the Spark on the briefs (a round.sh copy pinned to d9ce1403, named in each README); post verified cards only after the prior-ruling check.
