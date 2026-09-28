@@ -19971,5 +19971,47 @@
    "CARD nexusai-merge-2-2-1-fix-into-main",
    "CARD nexusai-release-package-files-into-main"
   ]
+ },
+ {
+  "id": "secuura-ks1370-revoke-undone-by-stale-process",
+  "client_project": "Secuura/Blockchain",
+  "title": "KS-1370 is real: a revoked API key still works, and ordinary traffic turns the revoke back off",
+  "bluf": "No action needed unless you want something other than the default. Seat B 41st reproduced KS-1370 on a real PostgreSQL this morning, with controls both ways. A security-service process that booted before a key was revoked keeps answering valid for that key, and its usage write then sets the key active again in the database, so after one request the key is live for every process, freshly booted ones too. Measured, not inferred: control A (never revoked) valid; revoke persisted; the stale instance says valid AND the row flips back to active; control C (booted after the revoke) refuses it and the row stays revoked. Not measured: how long a real deployment's caches stay warm. Nothing is built yet; the ticket is filed High.",
+  "default_action": "If no ruling by 12:00 AEST today (Tue 29 Sep): Wednesday applies (b), the narrow write-back fix, because it only removes the undo and changes nothing for valid keys. A Secuura seat builds it, gated, no deploy, and (a)'s second half stays a follow-up ticket for your word.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Fix both halves (Recommended)",
+    "detail": "The usage write stops touching is_active (it records usage only), AND validate checks the stored revoke before answering valid, so a stale memory copy can neither honour nor restore a revoked key. A Secuura seat builds it with red-first cells for both halves, through the QA gate, no deploy. It re-pins #1334's validate cells, which bind the current upsert shape. It does not change your 20:22 ruling that a failed usage write is logged, never refused."
+   },
+   {
+    "key": "b",
+    "label": "Fix only the write-back now",
+    "detail": "The usage write stops touching is_active, so a revoke can no longer be undone. A stale process still honours a revoked key until it restarts. Smallest change; the stale-acceptance half becomes a follow-up ticket."
+   },
+   {
+    "key": "c",
+    "label": "Leave it filed for now",
+    "detail": "Nothing is built this week; the ticket stays High in Backlog. Any revoke can be silently undone by traffic against a process that booted before it."
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-09-29T06:17:18.547352+10:00",
+  "status": "ruled",
+  "ruled_choice": "a",
+  "ruled_ts": "2026-09-29T07:11:50.585365+10:00",
+  "prior_rulings_overridden": [
+   "2026-08-21 20:06",
+   "2026-09-05 16:45",
+   "2026-09-09 08:29",
+   "2026-09-09 16:39",
+   "2026-09-17 15:10",
+   "CARD secuura-ks566-revoke-gate",
+   "CARD secuura-ks764-key-revoke-org-scope",
+   "CARD nexusai-main-tree-is-a-stale-snapshot",
+   "CARD secuura-ks692-status-revoke-interim-posture",
+   "CARD mini-vault-stale-skills",
+   "CARD secuura-ks888-revoke-validate-on-failed-save"
+  ]
  }
 ]

@@ -1,0 +1,34 @@
+--- a/Blockchain/Dev/services/vc-issuer/src/routes/status.ts
++++ b/Blockchain/Dev/services/vc-issuer/src/routes/status.ts
+@@ -327,4 +327,5 @@
+     // KS-1269: index is optional and not read here, but a present index must be an integer.
+-    if (req.body.index !== undefined && !Number.isInteger(req.body.index)) {
+-      throw new AppError('index must be an integer', 400);
++    // KS-1371: and not below the declared minimum 0 (KS-662 tolerates index -1 on revoke only).
++    if (req.body.index !== undefined && (!Number.isInteger(req.body.index) || req.body.index < 0)) {
++      throw new AppError('index must be a non-negative integer', 400);
+     }
+--- a/Blockchain/Dev/services/vc-issuer/src/__tests__/ks1269-status-unrevoke-refuses-a-non-integer-index.test.ts
++++ b/Blockchain/Dev/services/vc-issuer/src/__tests__/ks1269-status-unrevoke-refuses-a-non-integer-index.test.ts
+@@ -77,3 +77,21 @@
+     expect(await unrevokeWith('urn:uuid:ks1269u-fraction', { index: 1.5 })).toEqual([400, 'BAD_REQUEST', true]);
+   });
++
++  it('control KS-1371: index 0 still unrevokes, 200', async () => {
++    expect(await unrevokeWith('urn:uuid:ks1371-zero', { index: 0 })).toEqual([200, null, false]);
++  });
++
++  it('control KS-1371: revoke still admits index -1 (the KS-662 ruling), 200', async () => {
++    await dispatch('POST', '/default/allocate', { credentialId: 'urn:uuid:ks1371-revoke' });
++    const r = await dispatch('POST', '/default/revoke', { credentialId: 'urn:uuid:ks1371-revoke', index: -1 });
++    expect([r.status, r.body?.revoked]).toEqual([200, true]);
++  });
++
++  it('RED KS-1371 U1: index -1 is refused 400 and the credential stays revoked', async () => {
++    expect(await unrevokeWith('urn:uuid:ks1371-minus-one', { index: -1 })).toEqual([400, 'BAD_REQUEST', true]);
++  });
++
++  it('RED KS-1371 U2: index -7 is refused 400 and the credential stays revoked', async () => {
++    expect(await unrevokeWith('urn:uuid:ks1371-minus-seven', { index: -7 })).toEqual([400, 'BAD_REQUEST', true]);
++  });
+ });

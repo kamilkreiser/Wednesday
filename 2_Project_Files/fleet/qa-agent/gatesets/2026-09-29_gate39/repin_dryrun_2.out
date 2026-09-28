@@ -1,0 +1,38 @@
+LAUNCH ACTION gate39 (DRY RUN) 2026-09-29 06:07:29 AEST / 2026-09-28T20:07:29Z | launcher /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/gatesets/2026-09-29_gate39/launch_qa_secuura_batch1337.sh | pinned launch develop 215cc6875e2bac0b6d6b38918572384fbfcbdb77 | END_TREE b5362672fb7f4d06aaa15a0c9c1f4d9c658040f8
+  pin #1332 f2423bf7aa6c64952cf425d4160a048a55ffaaee
+  pin #1337 bb0067dde82ecda05d7c8ca465715d5a897a008d
+--- 0. the pane must be routed (inbox_routing.conf) or cockpit.sh say --mail fails silently
+  routing file /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/inbox_routing.conf — line present: 0 (grep rc=1; want 1 / rc 0)
+  (DRY RUN: reported, not refused — the real run refuses rc 1 here)
+--- 0b. the kit's home: launcher filled for /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/gatesets/2026-09-29_gate39 | this script lives in /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/gatesets/2026-09-29_gate39
+  AT HOME — no re-fill
+--- 1. instrument: git ls-remote origin (read from the Secuura checkout, READ-ONLY)
+  ls-remote rc=0 at 20:07:34Z
+    215cc6875e2bac0b6d6b38918572384fbfcbdb77	refs/heads/develop
+    f2423bf7aa6c64952cf425d4160a048a55ffaaee	refs/heads/feature/ks-1054-startup-migration-failure-on-health-b40-2
+    bb0067dde82ecda05d7c8ca465715d5a897a008d	refs/heads/feature/ks-888-ks764-guard-accepts-revoke-shape-b41-1
+    f2423bf7aa6c64952cf425d4160a048a55ffaaee	refs/pull/1332/head
+    bb0067dde82ecda05d7c8ca465715d5a897a008d	refs/pull/1337/head
+--- 2. instrument: the GitHub PULLS API (an independent read of each head, and mergeable)
+  pulls API rc=0
+    WIDEN #1337 IN-KIT bb0067dde82ecda05d7c8ca465715d5a897a008d | feature/ks-888-ks764-guard-accepts-revoke-shape-b41-1 | KS-888: widen the KS 764 call-site guard to the revoke shape 1327 introduced
+    WIDEN #1332 IN-KIT f2423bf7aa6c64952cf425d4160a048a55ffaaee | feature/ks-1054-startup-migration-failure-on-health-b40-2 | KS-1054 round 2: create the CORE tables before 039 so a fresh DB is never fail-open
+    WIDEN-RX ^\s*(KS-888|KS-1054)\b | WIDEN-BRANCH-RX -b41-\d+$
+    API #1332 head f2423bf7aa6c64952cf425d4160a048a55ffaaee base develop mergeable True reads 1 state open
+    API #1337 head bb0067dde82ecda05d7c8ca465715d5a897a008d base develop mergeable True reads 1 state open
+    DEVBASE #1332 OK base.ref develop
+    DEVBASE #1337 OK base.ref develop
+--- 2b. the WIDEN census (Wednesday's widen rule): an open PR matching kit.json widen_rx must be in this kit
+    WIDEN #1337 IN-KIT bb0067dde82ecda05d7c8ca465715d5a897a008d | feature/ks-888-ks764-guard-accepts-revoke-shape-b41-1 | KS-888: widen the KS 764 call-site guard to the revoke shape 1327 introduced
+    WIDEN #1332 IN-KIT f2423bf7aa6c64952cf425d4160a048a55ffaaee | feature/ks-1054-startup-migration-failure-on-health-b40-2 | KS-1054 round 2: create the CORE tables before 039 so a fresh DB is never fail-open
+    WIDEN-RX ^\s*(KS-888|KS-1054)\b | WIDEN-BRANCH-RX -b41-\d+$
+  WIDEN census clean: every matching open PR is in this kit
+--- 3. the heads, judged (both instruments == the pin, open, not mergeable:false; every stacked child still based on its parent's branch at the pinned parent head; every other PR based on develop)
+  #1332  ls-remote pull/head f2423bf7aa6c64952cf425d4160a048a55ffaaee | branch f2423bf7aa6c64952cf425d4160a048a55ffaaee | API f2423bf7aa6c64952cf425d4160a048a55ffaaee (state open, mergeable True) | pinned f2423bf7aa6c64952cf425d4160a048a55ffaaee
+  #1337  ls-remote pull/head bb0067dde82ecda05d7c8ca465715d5a897a008d | branch bb0067dde82ecda05d7c8ca465715d5a897a008d | API bb0067dde82ecda05d7c8ca465715d5a897a008d (state open, mergeable True) | pinned bb0067dde82ecda05d7c8ca465715d5a897a008d
+  DEVBASE #1332 OK base.ref develop
+  DEVBASE #1337 OK base.ref develop
+  BOTH INSTRUMENTS AGREE with every pin.
+--- 3b. develop, read at launch: 215cc6875e2bac0b6d6b38918572384fbfcbdb77 | the launcher's pinned launch develop 215cc6875e2bac0b6d6b38918572384fbfcbdb77
+  UNMOVED since the fill — the END_TREE b5362672fb7f4d06aaa15a0c9c1f4d9c658040f8 stands
+DRY RUN COMPLETE 2026-09-28T20:07:39Z — every read agrees with the pins; the real run continues with the usage gate, --check and cockpit.sh add
