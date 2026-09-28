@@ -1,0 +1,23 @@
+BLUF: VSP-80 READY FOR QA. Branch vsp-80-supertest-loopback @ 28adf36579ed (off main 6dbffdf, pushed; ls-remote matches). TEST HARNESS ONLY. Every supertest app is now served on 127.0.0.1 before supertest sees it, so the Logitech listener can't answer a test's request. Not merged. CI UNMEASURED.
+
+TICKET: VSP-80 (Low). Fifth occurrence today: VSP-86's first full db run, two routes.test.js cells got 501 (VSP-80 comment 38595).
+FILES TOUCHED: test/loopback.js (new), test/db/loopback.test.js (new), test/db/helpers.js, test/db/{async-faults,backup-coverage,backup-dump-replay,completed-response,concurrency,routes}.test.js, server/errors.test.js.
+BATCHING WARNING: test/db/backup-coverage.test.js is also changed by VSP-85 (census lines 20-100; VSP-80 touches lines 20 and 47). server/errors.test.js and the other files are disjoint from every other READY today. The call-site edits are one or two lines each, so either merge order is a small textual merge.
+
+FIX: serve(app) = http.createServer(app).listen(0, '127.0.0.1'), awaited. supertest 7.2.2's serverAddress() calls app.listen(0), which binds [::], ONLY when app.address() is null. A server already listening is used as it is, at its 127.0.0.1 address. helpers.closeDb() closes the servers first (so node --test still exits); errors.test.js closes its own in after(). Every `request(app)` / `request.agent(app)` in test/ and server/ now takes a served server (grep: 0 bare call sites left).
+
+PRIOR WORK: the cause was found 2026-09-27 (BACKLOG "One unexplained async-faults run") and ticketed 2026-09-28. The ticket's fix shape is exactly this. No test logic changed; only what each file hands supertest.
+
+RED FIRST / PROOF
+- test/db/loopback.test.js cell 2 reproduces the hazard on this Mac: a decoy on 127.0.0.1:P answering 501; an app bound to [::]:P (what supertest did) succeeds; a request to 127.0.0.1:P gets the DECOY's 501. The same cell then serves the app with serve() and gets the app's 200. Where an OS refuses the overlapping bind (EADDRINUSE, e.g. a Linux runner), the cell records that and still checks serve().
+- Cell 1: serve() binds 127.0.0.1. Mutant (serve binds the wildcard) fails it.
+- The random failure itself can't be forced (supertest picks the ephemeral port), so evidence of the fix in use is the two clean full runs below plus 0 bare call sites.
+
+SUITES AS SETS vs main 6dbffdf (clean archive, fresh DB vsp_s0929_v80_test, env -i)
+- unit 131 = 131; db 126 -> 128 (+2 loopback cells); lost 0, failing 0, dup 0. Coverage 80.78, unchanged.
+
+NOT TESTED: CI (Linux: the hazard cell's EADDRINUSE branch is expected there, not seen here). Node 20/22. Frequency: before the fix it was about 1 in 6 full runs, so "no occurrence since" needs more runs than one session.
+
+EVIDENCE: 5_Project_History/evidence/2026-09-29-vsp80/.
+Next: VSP-77 and VSP-79 READYs when their suites land. 21:05Z bridge read first.
+

@@ -1,0 +1,31 @@
+BLUF: VSP-86 READY FOR QA, TIER 1 (your ruling, with VSP-83). Branch vsp-86-restore-clears-sessions @ 9fd98a58e58f (off main 6dbffdf, pushed; ls-remote matches). After a restore, a ghost user's cookie and the id-reuse cookie both answer 401 (main: 200). Not merged, not deployed. CI UNMEASURED.
+
+TICKET: VSP-86 (Medium), gate 12 G12-O7. Ruling (A): VSP-86 comment 38590, CLARIFICATIONS C-12. (B) filed as VSP-89 (Low proposal, Relates VSP-86).
+FILES TOUCHED: server/dbRestore.js (clearTables + one line in restoreData), server/dbRestore.test.js (the clearTables unit control's expected statement list), test/db/restore-sessions.test.js (new). Shares dbRestore.js with VSP-83 (tier-1 batch): different functions (clearTables/restoreData's refusal tail vs restoreTable/restoreData's head), so the merge should be textual only.
+
+FIX
+- clearTables(): after the planned DELETEs and before COMMIT, DELETE FROM "session" and log "  Cleared session (every signed-in user signs in again)". Same transaction: a failed clear rolls it back with everything else (VSP-70's first-error rule unchanged).
+- restoreData(): after the plan check passes (so a REFUSED restore prints nothing and clears nothing), before clearTables: "Every signed-in user will have to sign in again: this restore clears all sessions (VSP-86)."
+- CHANGED EXISTING ASSERTION, deliberate: server/dbRestore.test.js control "every DELETE succeeds" now expects [BEGIN, meetings, leads, users, DELETE FROM "session", COMMIT]. That's the ruled new statement, not a weakening; the other three clearTables cells are unchanged.
+
+PRIOR WORK: session was made BACKUP_EXCLUDED on purpose by VSP-75 ("live sign-ins must not come back from a backup"). That stays: sessions are still not backed up or restored. They're now cleared, never restored. VSP-49 created the store table; VSP-71/VSP-65F1 make it at boot. None touched.
+
+RED FIRST (test/db/restore-sessions.test.js; real app via supertest, real login, real restoreData)
+- ghost: backup taken, then vsp86_ghost created and signed in, restore. main: /api/auth/me 200 as vsp86_ghost. Branch: 401.
+- id reuse (the gate-12 shape): as above, then a new user takes the ghost's id (asserted equal). main: the old cookie answers 200. Branch: 401.
+- printed before any write: the message precedes the first "Cleared" line (main: absent).
+- control, refused restore (INCOMPLETE backup): no session message, and the signed-in session still answers 200. Green on main and branch.
+- control, scope: the "Cleared" set is exactly the planned tables + session, and every other public table's row count is unchanged. main fails it only because session isn't cleared there.
+- main 4 red / 1 green; branch 5/5. Mutants: DELETE removed -> 2 fail (the auth cells); message printed after the clear -> 1 fail.
+- Self-correction on the way: my first scope control planted an extra public table with a row. The restore plan (VSP-74's rule) refuses such a table, so the cell exercised the refusal, not the scope. Replaced by the row-count snapshot of every non-planned table. The fixture table was dropped by that version's after(); 0 left (checked).
+
+SUITES AS SETS vs main 6dbffdf (clean archive, env -i)
+- unit 131 = 131; db 126 -> 131; lost 0, dup 0.
+- First full db run (fresh DB vsp_s0929_v86_test): 2 failing in routes.test.js ("403: datasec_sales blocked...", "403: sales cannot resolve approvals"), both "-> 501". That's VSP-80's decoy status, its fifth occurrence. routes.test.js alone 4/4 green; second full db run on a fresh DB (vsp_s0929_v86b_test): 131 names, 0 failing. VSP-80's fix is READY on its own branch.
+COVERAGE: 80.78 -> 80.82.
+
+NOT TESTED: CI; Node 20/22. The restore CLI end to end (Azure blob). A restore while users are mid-request (a request in flight when session is cleared gets a store miss on its save; not measured). Production: nothing.
+
+EVIDENCE: 5_Project_History/evidence/2026-09-29-vsp86/. Local DBs vsp_s0929_v86_test, vsp_s0929_v86b_test (+_lazy).
+Next: VSP-80 READY (next mail), then VSP-77 and VSP-79 once their suites land. 21:05Z bridge read first.
+
