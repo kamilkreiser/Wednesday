@@ -8,6 +8,9 @@
 - **DevMASTER FULL (1.5 GiB):** B 41st builds on the Data volume; `2_Project_Files/tools/disk_watch.sh` built, exercised and armed (posts ONCE below 1024 MiB).
 - Ledger: 5 rows, all zero cost; the 09-25 rows archived; both digests regenerated; STANDING_LINES +1 (the fourth next-up stall).
 
+## 2026-09-28 (Monday evening) — FRIDAY: moved to the Laptop-DEV drive
+- Kam (travelling this week) asked for all of Friday's files and project files to move to his new drive. Copied and checksum-verified: FRIDAY, and HPSM, HPSM-POC and Datasec Security Composer under !CODING/Datasec. The drive's pre-rewrite HPSM was quarantined (not merged); the HP OneDrive dump, keys and credentials the laptop lacked were brought into the new HPSM. HPSM-POC/.tools (68 GB of scratch worktrees) was deferred. Laptop copies untouched; drive ejected. Next launch: from the drive. Script: 2_Project_Files/friday/move_to_laptop_dev.sh.
+
 ## 2026-09-27 23:35 → 2026-09-28 05:30 AEST — Wednesday overnight seat (session a0b3d8ae; rotation from the day seat; ended by the 05:30 shift change) — Secuura + WED
 - Boot: by-tier digest 544 KB WHOLE + own ledger whole, ctx 35%, 7d 8%.
 - **Secuura round 31 (Seat B 35th, 0.97):** 6 PRs raised from Spark READYs; **5 merged on gate33** (#1311 #1312 KS-1346 A/B, #1313 KS-1121, #1314 KS-1221, #1315 KS-1220), develop ec32c40e, tree == END, verified at source; #1302/#1296/#1297 closed with Kam's rulings; KS-1351 filed.
