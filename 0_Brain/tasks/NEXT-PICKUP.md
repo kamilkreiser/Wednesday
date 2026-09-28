@@ -19,6 +19,13 @@ supersede: replace wholesale at the next pickup; do not append. Previous copy: N
 4. EXPIRING-GRANTS: "SPEND PAST THE 90%" is marked ENDED (account switched). Friday's "ignore the 90%" row is Friday's and is not touched.
 
 ### LIVE RIGHT NOW
+**🟢 15:50 09-28 (morning seat 4901153c, ctx ~60%). READ FIRST; supersedes every block below:**
+- **Floor clear** (wednesday + fleet-monitor). **Today: 12 Secuura merges, all Spark patches** (gate33 ×5 overnight, gate34 ×5, gate35 ×2); develop **d9ce1403d158**. B 36th and B 37th both scored 0.97 and closed; gates 34/35 scored 0.97. SPARK_LADDER rows 31-35 written.
+- **Two subagents of THIS seat running** (they die with it): CARVE screen → `0_Brain/reference/2026-09-28_ks-screen/CARVE.md` + up to 3 briefs in `local-model/night/briefs/`; card verification → `…/CARDS.md`. If this seat rotates first: read both; run the Spark on the briefs (a round.sh copy pinned to d9ce1403, named in each README); post verified cards only after the prior-ruling check.
+- **18:00 today:** the default of card `secuura-ks888-revoke-validate-on-failed-save` fires if Kam has not ruled (revoke 503 + keep the in-memory revoke; validate refuses 503) → brief a Claude seat (necessity: judgement design across two routes; the Spark is not the tier for it). Check `kam_msgs.sh` first.
+- **Fuse:** Kam's EMAIL still owed (card ruled a 06:58). Remind him on the board **Tue 29 Sep morning**. The re-date must merge before 2026-09-30T00:00Z (B 36th/B 37th's successor builds it on his DKIM mail).
+- Ornith: PAUSE_QUEUE to 06:00 09-29 (measured: 0 Ornith-tier). OWED to a seat with checkout write scope: the 16 orphaned login_stub listeners → BACKLOG.md.
+
 **🔵 50% CHECKPOINT 10:48 09-28 (morning seat 4901153c). READ FIRST; supersedes the blocks below where they differ:**
 - **GATE34 RUNNING (%51, `QA/Secuura-batch1316`, launched 00:47:58Z, commission seen in its pane)** over #1316 KS-1346 C · #1317 D · #1318 KS-747 · #1319 KS-908 · #1320 KS-692; END_TREE 14b9382edbd7; develop ec32c40e. Kit: `2_Project_Files/fleet/qa-agent/gatesets/2026-09-28_gate34/` (README.md). **On its verdict:** read the report sha on disk against the mail; re-read the heads by ls-remote; key-scan every mandated subject and check its landed length (declared + 8 ≤ 92); signed GO to B 36th (addendum lines selected BY PATTERN, with a count assertion); close %51; after B 36th merges, verify develop's tree == END (or the subset END), then Linear; B 36th wraps → score + pane_close %50 in ONE action.
 - **B 36th (%50) HOLDING** for gate34 (ctx ~57%). **Successor B 37th is OWED** for KS-1348 r3 + KS-888 mint (READYs in night/, ADDENDUM 2 = its brief text; #1310 is closed by the KS-1348 r3 PR).
