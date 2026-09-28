@@ -1,0 +1,38 @@
+LAUNCH ACTION gate35 (DRY RUN) 2026-09-28 14:31:42 AEST / 2026-09-28T04:31:42Z | launcher /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/gatesets/2026-09-28_gate35/launch_qa_secuura_batch1321.sh | pinned launch develop 54f37d6399bd5eeb62a4c75220f42c106fad4b4a | END_TREE a87715ebff3ec63e7513fe9a7d5314150fdd08f1
+  pin #1321 52c96db4cf495c4438ad989473ffb0bfe5ab5be3
+  pin #1322 4e8e11bdefd257e2cf1de48df2b68b8075f84b89
+--- 0. the pane must be routed (inbox_routing.conf) or cockpit.sh say --mail fails silently
+  routing file /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/inbox_routing.conf — line present: 0 (grep rc=1; want 1 / rc 0)
+  (DRY RUN: reported, not refused — the real run refuses rc 1 here)
+--- 0b. the kit's home: launcher filled for /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/gatesets/2026-09-28_gate35 | this script lives in /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/gatesets/2026-09-28_gate35
+  AT HOME — no re-fill
+--- 1. instrument: git ls-remote origin (read from the Secuura checkout, READ-ONLY)
+  ls-remote rc=0 at 04:31:45Z
+    54f37d6399bd5eeb62a4c75220f42c106fad4b4a	refs/heads/develop
+    52c96db4cf495c4438ad989473ffb0bfe5ab5be3	refs/heads/feature/ks-1348-file-log-allow-list-b37-1
+    4e8e11bdefd257e2cf1de48df2b68b8075f84b89	refs/heads/feature/ks-888-mint-no-unsaved-key-b37-2
+    52c96db4cf495c4438ad989473ffb0bfe5ab5be3	refs/pull/1321/head
+    4e8e11bdefd257e2cf1de48df2b68b8075f84b89	refs/pull/1322/head
+--- 2. instrument: the GitHub PULLS API (an independent read of each head, and mergeable)
+  pulls API rc=0
+    WIDEN #1322 IN-KIT 4e8e11bdefd257e2cf1de48df2b68b8075f84b89 | feature/ks-888-mint-no-unsaved-key-b37-2 | KS-888: a mint whose key save fails issues no key and answers 503 or 500
+    WIDEN #1321 IN-KIT 52c96db4cf495c4438ad989473ffb0bfe5ab5be3 | feature/ks-1348-file-log-allow-list-b37-1 | KS-1348: allow-list the originate production file log format to named safe fields
+    WIDEN-RX ^\s*(KS-1348|KS-888)\b | WIDEN-BRANCH-RX -b37-\d+$
+    API #1321 head 52c96db4cf495c4438ad989473ffb0bfe5ab5be3 base develop mergeable True reads 1 state open
+    API #1322 head 4e8e11bdefd257e2cf1de48df2b68b8075f84b89 base develop mergeable True reads 1 state open
+    DEVBASE #1321 OK base.ref develop
+    DEVBASE #1322 OK base.ref develop
+--- 2b. the WIDEN census (Wednesday's widen rule): an open PR matching kit.json widen_rx must be in this kit
+    WIDEN #1322 IN-KIT 4e8e11bdefd257e2cf1de48df2b68b8075f84b89 | feature/ks-888-mint-no-unsaved-key-b37-2 | KS-888: a mint whose key save fails issues no key and answers 503 or 500
+    WIDEN #1321 IN-KIT 52c96db4cf495c4438ad989473ffb0bfe5ab5be3 | feature/ks-1348-file-log-allow-list-b37-1 | KS-1348: allow-list the originate production file log format to named safe fields
+    WIDEN-RX ^\s*(KS-1348|KS-888)\b | WIDEN-BRANCH-RX -b37-\d+$
+  WIDEN census clean: every matching open PR is in this kit
+--- 3. the heads, judged (both instruments == the pin, open, not mergeable:false; every stacked child still based on its parent's branch at the pinned parent head; every other PR based on develop)
+  #1321  ls-remote pull/head 52c96db4cf495c4438ad989473ffb0bfe5ab5be3 | branch 52c96db4cf495c4438ad989473ffb0bfe5ab5be3 | API 52c96db4cf495c4438ad989473ffb0bfe5ab5be3 (state open, mergeable True) | pinned 52c96db4cf495c4438ad989473ffb0bfe5ab5be3
+  #1322  ls-remote pull/head 4e8e11bdefd257e2cf1de48df2b68b8075f84b89 | branch 4e8e11bdefd257e2cf1de48df2b68b8075f84b89 | API 4e8e11bdefd257e2cf1de48df2b68b8075f84b89 (state open, mergeable True) | pinned 4e8e11bdefd257e2cf1de48df2b68b8075f84b89
+  DEVBASE #1321 OK base.ref develop
+  DEVBASE #1322 OK base.ref develop
+  BOTH INSTRUMENTS AGREE with every pin.
+--- 3b. develop, read at launch: 54f37d6399bd5eeb62a4c75220f42c106fad4b4a | the launcher's pinned launch develop 54f37d6399bd5eeb62a4c75220f42c106fad4b4a
+  UNMOVED since the fill — the END_TREE a87715ebff3ec63e7513fe9a7d5314150fdd08f1 stands
+DRY RUN COMPLETE 2026-09-28T04:31:50Z — every read agrees with the pins; the real run continues with the usage gate, --check and cockpit.sh add
