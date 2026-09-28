@@ -6,6 +6,20 @@ status: live
 supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s1-wholesale
 ---
 
+## 🟢 DELTA 123 — 2026-09-29 08:12 (s92, ctx 72% CHECKPOINT; band 80-90). **READ THIS FIRST, THEN 122 (its gate lines are current).**
+### KAM RULED THIS MORNING (all delivered; artefacts read at source)
+- 08:06:30 CodeQL ruleset = org policy, adhere -> NexusAI C-190; all four seats acked 22:08Z. Every merge via PR, no NEW high+ alert in changed code (test code too), never dismiss alerts.
+- 08:06:40 RD-686 (a) -> C-191; E-F1/E-F2 on RD-722 c38600; P merges r2 ab12726 as its 6th, via PR, in its turn.
+- 08:07:22 "Create a jira board for security. Place all datasec security tickets from security review and share with Steve" -> Security Review seat %48 (NEW cockpit entry `Datasec/Security Review`; project not mail-wired here). Brief = fleet/briefs_staged/2026-09-29_security-review_jira-security-board.md (label security-review + saved filter + board; no ticket moved; Steve via Jira user search; no/ambiguous Steve = STOP, licence = Kam's). Its report: `!CODING/Datasec/Security Review/_Working/2026-09-29_SECURITY_BOARD_REPORT.md` (read it; it may not mail). On completion: tell Kam the board URL + count + who it is shared with; score; pane_close.
+### OWED TO KAM
+- The security board result (above). Old QA DBs on local Postgres (1,892 / 16 GB) caused the 07:39 crash: clearing them is his (not yet raised on the board; raise ONCE in a status message).
+- VSP-65 deploy (gh login on the mini + typed word). VSP-89 his choice. VSP-84 prod size read optional.
+### NEXUSAI MERGES
+- M: PR #32 pilot. CodeQL alert #247 (test check-then-read) FIXED as a new commit is owed; M mails the new head -> Tuesday READS THE DIFF AT SOURCE (ls-remote + git show, read verbs only) and replies GO -> CodeQL -> land (FF push of same commit, else merge commit). When it lands: mail the fleet the confirmed landing step, then merges resume in C-186 turn order (O, P, M, N).
+- N: RD-723 READY 19fc17c (saved) -> batch 9 with O's RD-466 when ready. N fixed the check-then-read shape on two branches (22:08Z STATUS).
+### FLOOR (08:12)
+%0 tuesday · %45 QA/NexusAI-batch8 (holds the jest lock since 21:58Z) · %46 QA/Vision-gate14 · %47 QA/Vision-gate15 · %48 Datasec/Security Review | %22 P · %21 N · %19 M · %29 O · %1 monitor. Gates 14/15 serialise heavy Postgres runs via projects/vision/pg-heavy.lock (ruled 07:42).
+
 ## 🟢 DELTA 122 — 2026-09-29 07:26 (s92, ctx 67% light checkpoint; band 80-90). **READ THIS FIRST — it supersedes 121's floor and in-flight lines.**
 ### OWED TO KAM (copy forward until closed by name)
 - CLOSED 07:05: ATTIO bridge read CLEAN (runs 6, failures 0), told Kam in the morning brief (201). VSP-67 Done (c38596).
