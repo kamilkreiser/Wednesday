@@ -1,0 +1,91 @@
+{
+ "predev": "9d6f815be8addbf3bedd05ac5095f7d5dd7e201a",
+ "predev_note": "develop^ (first parent) of the pinned develop 215cc6875e2b (READ, `git log --first-parent` in the scratch clone: the #1333 squash 9d6f815be, BEFORE the #1334 squash 215cc687): the MOVED-develop pin in the controls (D, RC, RD, RE, RN, RO). #1337 branches from 215cc6875e2b (develop itself); #1332 still branches from 0d156d12cc0f (gate37's #1328 squash — round 2 is a fast-forward of round 1), seven first-parent commits behind the pinned develop; base-invariance over that real move is measured by predict (b), and simulated by --simulate moved",
+ "inflight": [
+  "1253",
+  "1250",
+  "1129",
+  "995",
+  "989",
+  "949",
+  "948",
+  "947",
+  "946",
+  "945",
+  "927",
+  "923",
+  "920",
+  "887",
+  "809",
+  "649",
+  "639",
+  "635",
+  "575",
+  "572"
+ ],
+ "inflight_note": "EVERY other open PR at the pin (20, the PULLS API census, _api_peek_1.out) outside this kit: hard path-disjoint. gate38's #1330 / #1333 / #1334 are MERGED (squashes 9caa42ad0 / 9d6f815be / 215cc6875); #1335 (KS-1353) and #1336 (KS-1286) are MERGED as merge commits (the develop move since 0d156d12cc0f, with gate38's three squashes)",
+ "inflight_worktrees": {},
+ "declared_overlap": {},
+ "declared_overlap_note": "merged_blob_paths class: a GENUINE overlap (a merged blob DIFFERENT from the PR head's). gate39 declares NONE (measured by predict (c))",
+ "noop_paths": {},
+ "noop_paths_note": "the squash-stack NO-OP class (head == merged == develop), declared under its OWN key per STANDING_LINES 2026-09-27; gate39 has no stack, so NONE",
+ "dead_open_declared": {},
+ "dead_open_note": "none: gate39 declares no dead-open overlap (measured by the census)",
+ "kit": "gate39",
+ "tag": "g39",
+ "pane": "QA/Secuura-batch1337",
+ "tier": "T2 + T1: #1337 a TEST-ONLY widening of the KS-764 revoke call-site guard to the revoke shape #1327 introduced (T2: tests-only; it turns develop's packages/shared green), #1332 ROUND 2 of 2 schema / start-up (a new pre-039 file migration 038a creates the four CORE tables, CORE-stage throws are counted and the summary's error field is set; round 1's 039 guard and /health field unchanged)",
+ "report": "2026-09-29-batch1337-g39",
+ "launcher": "launch_qa_secuura_batch1337.sh",
+ "prompt": "2026-09-29_secuura-batch1337.prompt.txt",
+ "merge_order": [
+  "1337",
+  "1332"
+ ],
+ "merge_order_note": "#1337 FIRST (Wednesday's commission): #1332's branch still carries the pre-existing KS-764 guard red that #1337 fixes, so #1337 lands first and develop's packages/shared is green before #1332's squash. END_TREE is order-independent (measured, predict (d)); the ORDER is fixed for the red, not for the tree",
+ "this_batch": [
+  "1337",
+  "1332"
+ ],
+ "sibling_batch": [],
+ "sibling_kit": "none",
+ "stacks": {},
+ "stacks_note": "NO stack: #1337 is based on develop 215cc6875e2b and #1332 on develop 0d156d12cc0f, neither on the other — measured by predict (c): no head is another's ancestor",
+ "prs": {
+  "1337": {
+   "keys": [
+    "KS-888"
+   ],
+   "seat": "B 41st (ITEM 1, from a local-model READY: KS-888 / the KS 764 guard — TEST-ONLY, one file: both copies of the security revoke pattern in packages/shared ks764-key-revoke-call-site-guard.test.ts (CALL_SITES :84, REVOKE_WRITES :104) widened from an 80-character window to a pattern that admits ONLY whitespace, whole // comment lines and one try { between the flip and the save; a Spark golden, canonical patch == golden == the held checker patch)",
+   "tier": "T2",
+   "class": "test-only-guard",
+   "service": "packages/shared",
+   "commits": 1
+  },
+  "1332": {
+   "keys": [
+    "KS-1054"
+   ],
+   "seat": "B 41st (ROUND 2 of 2, ITEM 2, seat-written, a fast-forward of Seat B 40th's round 1 f5381338: KS-1054 — a new 038a_ks1054_core_tables_before_039.sql creates oauth_apps, svc_webhooks, certifications and charge_events (DDL derived from CORE) so 039 finds them on its only pass under either runner (shape b); the CORE-stage catches now add to totalFailed (N-1332-2) and the recorded summary carries `error` (N-1332-3); round 1's 039 guard, /health field and four widened annotations unchanged)",
+   "tier": "T1",
+   "class": "schema-startup",
+   "service": "services/api-gateway",
+   "commits": 2
+  }
+ },
+ "extra_keys": [
+  "KS-764",
+  "KS-1055",
+  "KS-1101",
+  "KS-377",
+  "KS-458",
+  "KS-703",
+  "KS-1155",
+  "KS-1370",
+  "KS-1352",
+  "KS-1124"
+ ],
+ "widen_rx": "^\\s*(KS-888|KS-1054)\\b",
+ "widen_branch_rx": "-b41-\\d+$",
+ "widen_note": "Wednesday WIDEN rule, re-keyed for Seat B 41st: an OPEN PR titled with one of this kit's keys, or on a branch carrying Seat B 41st's segment `-b41-<n>`, that is NOT in this kit refuses (predict (a) and the launch action's step 2b, rc 15) — it must JOIN by a re-draft with its own cells. #1332 keeps its round-1 branch (Seat B 40th's `-b<40>-2` segment, READ) and is matched by its TITLE key KS-1054"
+}
