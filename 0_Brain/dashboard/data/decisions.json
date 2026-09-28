@@ -19714,5 +19714,48 @@
    "2026-08-21 20:06",
    "CARD secuura-ks888-failed-key-save-design"
   ]
+ },
+ {
+  "id": "secuura-ks1352-unknown-credential-id-verify-policy",
+  "client_project": "Secuura/Blockchain",
+  "title": "KS-1352 follow-up: what should verify answer for a credential the issuer has no record of?",
+  "bluf": "No action needed unless you want fail-closed. Your KS-1352 ruling (a revoked credential fails verify) is being built now by Seat B 40th. To check the stored record, verify must look it up, which it never did before, so a case you did not rule appears: an id with NO record. Measured at develop 0d156d12 (vc-issuer credentialRepo.ts getById :89-108, loadFromDb :211-212, read by Wednesday): 'no record' happens for a forged id, for a real credential whose database write was lost, and for EVERY id on a process with no database. Wednesday ruled the build as pass-through (today's behaviour for that case) plus one follow-up ticket, because fail-closed changes the public verify route beyond your ruling. (This is not a re-ask of your 20:24 KS-1352 ruling: that covered credentials whose record or status list says revoked, and this case has no record at all.)",
+  "default_action": "Nothing changes: Seat B 40th ships pass-through for unknown ids (gated as usual) and files the follow-up ticket; Wednesday reads your tap if you choose b or c and briefs it as the next round.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Pass-through (being built now)",
+    "detail": "No record: the proof and the status list decide, as today. Cost: a revoked credential whose record was lost still verifies true (a thinner form of KS-1352). Seat B 40th names the gap in the PR and files one follow-up ticket."
+   },
+   {
+    "key": "b",
+    "label": "Fail closed",
+    "detail": "No record: verified false with a distinct reason ('no issuer record', never mislabelled 'revoked'). Correct for a security route. Cost, measured by the seat: any stack without a database refuses every credential, and genuine credentials whose write was lost stop verifying."
+   },
+   {
+    "key": "c",
+    "label": "Fail closed only when the database is up",
+    "detail": "No record in a live database: refuse. No database: pass-through, flagged in the response. Wednesday's design, UNMEASURED; a follow-up round would build and gate it."
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-09-28T23:40:37.966612+10:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "2026-08-21 10:06",
+   "CARD secuura-ks622-mfa-verify-fix",
+   "CARD secuura-admin-credential-rotation-183-files",
+   "CARD hpsm-credential-bearing-prd-outside-every-snapshot",
+   "CARD secrev-verify-23-and-batch1-filing",
+   "CARD secuura-ks1041-step1-demo-verify-now",
+   "CARD secuura-ks1114-verify-title-strategy",
+   "CARD secuura-ks1116-presentation-credential-ownership-model",
+   "CARD secuura-965-f1-verify-hash-precedence-v1-vs-v2",
+   "CARD secuura-ks1011-stack-marker-unknown-on-restore",
+   "CARD nexusai-redis-down-fail-closed-policy",
+   "CARD secuura-ks1352-revoked-credentials-still-verify"
+  ]
  }
 ]
