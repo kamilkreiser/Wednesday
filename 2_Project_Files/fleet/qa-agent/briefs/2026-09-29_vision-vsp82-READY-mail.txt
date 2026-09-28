@@ -1,0 +1,32 @@
+BLUF: VSP-82 READY FOR QA. Branch vsp-82-dispatch-cutoff @ ccfc7ef60c44 (off main 6dbffdf, pushed; ls-remote matches). Internal "due now" reminders go out in their own tick again. CLIENT REACH: NONE; the reasoning is below and there are two controls. Not merged, not deployed. CI UNMEASURED.
+
+TICKET: VSP-82 (Medium), gate 12 VSP69-G12-F1. Jira READY comment follows this mail.
+
+FILES TOUCHED (disjoint from VSP-76 and VSP-78): server/reminders/dispatcher.js (dispatchDue's cutoff only), test/db/dispatch-cutoff.test.js (new).
+
+CLIENT BEHAVIOUR, ESTABLISHED BEFORE BUILDING (your VSP-69 rule)
+- Where client reminders come from: the only client path is POST /api/reminders (server/routes/reminders.js). Its due_at comes from the PRO dashboard as new Date($('remDue').value).toISOString() (public/pro/js/pro-dashboard.js:278). remDue is a datetime-local, so due_at is always on the millisecond grid (in practice the minute).
+- The rules (quote_expiry, poc_commencement) write date + 09:00 and are internal ntfy. stale_follow_up writes NOW() (microseconds) and is internal ntfy.
+- For a due_at on the ms grid, due <= floor_ms(now) exactly when due <= now. So the old truncated cutoff and the exact one decide every client reminder identically. What a client receives, including when, does not change.
+- The one thing that changes: stale_follow_up's internal push is handled in the tick that first finds it (today up to ~45% wait 5 minutes).
+- Not covered by that argument: an API caller sending due_at with sub-ms digits. No such caller exists in the repo; for one, the fix sends at most one tick EARLIER than today, never before due.
+
+FIX: dispatchDue() reads SELECT NOW()::text and compares due_at <= $1::timestamptz (the gate's first shape). The per-reminder transaction, SKIP LOCKED, ordering and the 50 cap are unchanged.
+
+PRIOR WORK: VSP-69 (e59232e) introduced the tick-level cutoff when it split the batch into one transaction per reminder. Its intent ("the tick's view of due, as the one batch query had") is kept; only the value's type changes. 609e967's single batch query compared in SQL, which is why the gate measured 0/300 there.
+
+RED FIRST
+- test/db/dispatch-cutoff.test.js cell 1: insert an internal reminder due NOW(), then dispatchDue() at once, 100 times. Red on main 6dbffdf in 3 of 3 runs (28, 45, 26 of 100 deferred; 38 in the first try). Green on ccfc7ef 3 of 3 (0 of 100).
+- Controls that can fail: 100 client reminders due at date_trunc('milliseconds', NOW()) are all sent in their own tick (green on main and branch: nothing changes for clients). 20 client reminders due 2 s ahead are never sent. A mutant cutoff of NOW()+5 s fails that control.
+- The existing reminder files dispatch-once (5) and reminder-push (6) are green on the branch.
+- One void run, recorded: my first mutant had a JS quoting error and failed at load. Kept as VOID-mutation-early-cutoff-syntax-error.txt; the valid rerun is mutation-early-cutoff-valid.txt.
+
+SUITES AS SETS vs main 6dbffdf (clean archive, fresh DB vsp_s0929_v82_test, env -i)
+- unit 131 = 131; db 126 -> 129; lost 0, failing 0, dup 0; new 3 (all VSP-82).
+COVERAGE (CI's command, unit, Node 26.8.1): 80.78 -> 80.65 lines. The only new lines are the comment inside dispatchDue(), which unit tests don't run. Margin 0.65; if VSP-76 merges too, its +1.3 more than covers it.
+
+NOT TESTED: CI; Node 20/22; e2e:pro. A second portal instance ticking at the same time (SKIP LOCKED unchanged). A session TimeZone other than the local default for the ::text round trip (the text carries its offset, and ::timestamptz reads it back; not varied).
+
+EVIDENCE: 5_Project_History/evidence/2026-09-29-vsp82/. Local DB: vsp_s0929_v82_test (+_lazy if made).
+Next: VSP-83. 21:05Z bridge read armed.
+
