@@ -1,0 +1,108 @@
+{
+ "predev": "db8d85dcd19910b59d2976f86e27afa7ac38fab9",
+ "predev_note": "develop^ (first parent) of the pinned develop 3d706c21f65e (READ, `git log --first-parent` in the scratch clone: the #1329 merge commit (KS-1354, Peter's k6 bump), BEFORE the #1331 merge (KS-1365 docs)): the MOVED-develop pin in the controls (D, RC, RD, RE, RN, RO). Both kit PRs branch from 0d156d12cc0f (gate37's #1328 squash), two first-parent commits behind the pinned develop; base-invariance over that real move is measured by predict (b), and simulated by --simulate moved",
+ "inflight": [
+  "1253",
+  "1250",
+  "1129",
+  "995",
+  "989",
+  "949",
+  "948",
+  "947",
+  "946",
+  "945",
+  "927",
+  "923",
+  "920",
+  "887",
+  "809",
+  "649",
+  "639",
+  "635",
+  "575",
+  "572"
+ ],
+ "inflight_note": "EVERY other open PR at the pin (20, the PULLS API census, _api_peek_1.out) outside this kit: hard path-disjoint. #1329 (KS-1354) and #1331 (KS-1365) are CLOSED as merged (merge commits, not squashes: the develop move below); gate37's #1327 / #1328 are MERGED (squashes ea816de19f86 / 0d156d12cc0f)",
+ "inflight_worktrees": {},
+ "declared_overlap": {},
+ "declared_overlap_note": "merged_blob_paths class: a GENUINE overlap (a merged blob DIFFERENT from the PR head's). gate38 declares NONE (measured by predict (c))",
+ "noop_paths": {},
+ "noop_paths_note": "the squash-stack NO-OP class (head == merged == develop), declared under its OWN key per STANDING_LINES 2026-09-27; gate38 has no stack, so NONE",
+ "dead_open_declared": {},
+ "dead_open_note": "none: gate38 declares no dead-open overlap (measured by the census)",
+ "kit": "gate38",
+ "tag": "g38",
+ "pane": "QA/Secuura-batch1330",
+ "tier": "T1 x3 + T2 x1: #1330 verify-truth (a revoked credential must fail verify, by either revoke route; unknown ids pass through), #1332 schema / start-up (a guarded CREATE in migration 039 and the start-up migration result on /health and /health/ready), #1333 certification status (what a certification whose anchoring failed saves), #1334 a TEST-ONLY pin of validate's log-only usage write (T2: tests-only)",
+ "report": "2026-09-29-batch1330-g38",
+ "launcher": "launch_qa_secuura_batch1330.sh",
+ "prompt": "2026-09-29_secuura-batch1330.prompt.txt",
+ "this_batch": [
+  "1330",
+  "1332",
+  "1333",
+  "1334"
+ ],
+ "sibling_batch": [],
+ "sibling_kit": "none",
+ "stacks": {},
+ "stacks_note": "NO stack: all four kit PRs are based on develop 0d156d12cc0f, none on another — measured by predict (c): no head is another's ancestor",
+ "prs": {
+  "1330": {
+   "keys": [
+    "KS-1352"
+   ],
+   "seat": "B 40th (seat-written ITEM 1: KS-1352 — the shared VC verifier gains two id-keyed resolvers (the stored issuer record, the status list's own bit); verify fails when EITHER marks the credential revoked, and the status check now runs when the submitted document carries no credentialStatus; an id with NO record ABSTAINS (pass-through); wired into POST /api/credentials/verify and POST /api/presentations/verify; a BACKLOG.md entry records the pre-existing packages/shared red)",
+   "tier": "T1",
+   "class": "verify-truth",
+   "service": "services/vc-issuer",
+   "commits": 1
+  },
+  "1332": {
+   "keys": [
+    "KS-1054"
+   ],
+   "seat": "B 40th (seat-written ITEM 2: KS-1054 — 039 guards auth_find_oauth_app_by_client_id on oauth_apps existing, and its owner/grant loop skips an absent function; runStartupMigrations returns and records { ran, applied, failed, lastRunAt, error? }, reported on /health and /health/ready with their status codes unchanged; four test annotations widened Promise<void> -> Promise<unknown>)",
+   "tier": "T1",
+   "class": "schema-startup",
+   "service": "services/api-gateway",
+   "commits": 1
+  },
+  "1333": {
+   "keys": [
+    "KS-1124"
+   ],
+   "seat": "B 40th (ADDENDUM 1 ITEM 3, from a local-model READY: KS-1124 F4 — originate certifications.ts: both certification routes (issue, recertify) save `status: 'failed'` in the blockchain blob when anchoringStatus is 'failed' (Kam ruled card secuura-ks1124-f4-failed-anchor-shows-pending b); the success leg stays statusless pending-onchain; three cells appended to the existing ks543 boundary-strip suite; a Spark golden, canonical patch == golden)",
+   "tier": "T1",
+   "class": "certify-status",
+   "service": "services/originate",
+   "commits": 1
+  },
+  "1334": {
+   "keys": [
+    "KS-888"
+   ],
+   "seat": "B 40th (ADDENDUM 1 ITEM 4, from a local-model READY: KS-888 VALIDATE LOG-ONLY — TEST-ONLY, no product change: three cells in the existing ks888 file pin that POST /api/keys/validate answers 200 valid from the key itself while its usage write fails, logs ONE error line carrying neither the key nor its hash, and issues the write when it lands (Kam ruled card secuura-ks888-validate-usage-write-failure a); a Spark golden, canonical patch == golden)",
+   "tier": "T2",
+   "class": "test-only-pin",
+   "service": "services/security",
+   "commits": 1
+  }
+ },
+ "extra_keys": [
+  "KS-1368",
+  "KS-764",
+  "KS-1055",
+  "KS-1101",
+  "KS-377",
+  "KS-520",
+  "KS-535",
+  "KS-1293",
+  "KS-543",
+  "KS-1370"
+ ],
+ "widen_rx": "^\\s*(KS-1352|KS-1054|KS-1124|KS-888)\\b",
+ "widen_branch_rx": "-b40-\\d+$",
+ "widen_note": "Wednesday WIDEN rule, re-keyed for Seat B 40th: an OPEN PR titled with one of this kit's keys, or on a branch carrying Seat B 40th's segment `-b40-<n>`, that is NOT in this kit refuses (predict (a) and the launch action's step 2b, rc 15) — it must JOIN by a re-draft with its own cells. Both of ADDENDUM 1's raises (#1333 `-b40-3`, #1334 `-b40-4`) are IN this kit"
+}

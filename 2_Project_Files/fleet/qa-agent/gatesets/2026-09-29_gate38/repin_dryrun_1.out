@@ -1,0 +1,56 @@
+LAUNCH ACTION gate38 (DRY RUN) 2026-09-29 02:23:31 AEST / 2026-09-28T16:23:31Z | launcher /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/gatesets/2026-09-29_gate38/launch_qa_secuura_batch1330.sh | pinned launch develop 3d706c21f65e7eb8e136fc8703ce10fd91f62480 | END_TREE ee7836b803f65cc049ef3d78c8f38b9866a578e3
+  pin #1330 699acfb804729f80da8aa4f4034f3cd58d99f40e
+  pin #1332 f5381338359da43784f01f625772abafccdf97b6
+  pin #1333 91ceb5bc0a79fd3dceb044837955c07d553771fb
+  pin #1334 9b41a5fcc8fa20070aeff975a07a6f7aa13f7d99
+--- 0. the pane must be routed (inbox_routing.conf) or cockpit.sh say --mail fails silently
+  routing file /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/inbox_routing.conf — line present: 0 (grep rc=1; want 1 / rc 0)
+  (DRY RUN: reported, not refused — the real run refuses rc 1 here)
+--- 0b. the kit's home: launcher filled for /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/gatesets/2026-09-29_gate38 | this script lives in /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/gatesets/2026-09-29_gate38
+  AT HOME — no re-fill
+--- 1. instrument: git ls-remote origin (read from the Secuura checkout, READ-ONLY)
+  ls-remote rc=0 at 16:23:34Z
+    3d706c21f65e7eb8e136fc8703ce10fd91f62480	refs/heads/develop
+    f5381338359da43784f01f625772abafccdf97b6	refs/heads/feature/ks-1054-startup-migration-failure-on-health-b40-2
+    91ceb5bc0a79fd3dceb044837955c07d553771fb	refs/heads/feature/ks-1124-f4-failed-anchor-saves-failed-status-b40-3
+    699acfb804729f80da8aa4f4034f3cd58d99f40e	refs/heads/feature/ks-1352-revoked-credential-fails-verify-b40-1
+    9b41a5fcc8fa20070aeff975a07a6f7aa13f7d99	refs/heads/feature/ks-888-validate-logonly-pin-b40-4
+    699acfb804729f80da8aa4f4034f3cd58d99f40e	refs/pull/1330/head
+    f5381338359da43784f01f625772abafccdf97b6	refs/pull/1332/head
+    91ceb5bc0a79fd3dceb044837955c07d553771fb	refs/pull/1333/head
+    9b41a5fcc8fa20070aeff975a07a6f7aa13f7d99	refs/pull/1334/head
+--- 2. instrument: the GitHub PULLS API (an independent read of each head, and mergeable)
+  pulls API rc=0
+    WIDEN #1334 IN-KIT 9b41a5fcc8fa20070aeff975a07a6f7aa13f7d99 | feature/ks-888-validate-logonly-pin-b40-4 | KS-888: pin that validate logs a failed usage write and never refuses
+    WIDEN #1333 IN-KIT 91ceb5bc0a79fd3dceb044837955c07d553771fb | feature/ks-1124-f4-failed-anchor-saves-failed-status-b40-3 | KS-1124 F4: a certification whose anchoring failed saves status failed
+    WIDEN #1332 IN-KIT f5381338359da43784f01f625772abafccdf97b6 | feature/ks-1054-startup-migration-failure-on-health-b40-2 | KS-1054: a failed start-up migration shows on /health; 039 guards oauth_apps
+    WIDEN #1330 IN-KIT 699acfb804729f80da8aa4f4034f3cd58d99f40e | feature/ks-1352-revoked-credential-fails-verify-b40-1 | KS-1352: a revoked credential fails verify, by either revoke route
+    WIDEN-RX ^\s*(KS-1352|KS-1054|KS-1124|KS-888)\b | WIDEN-BRANCH-RX -b40-\d+$
+    API #1330 head 699acfb804729f80da8aa4f4034f3cd58d99f40e base develop mergeable True reads 1 state open
+    API #1332 head f5381338359da43784f01f625772abafccdf97b6 base develop mergeable True reads 1 state open
+    API #1333 head 91ceb5bc0a79fd3dceb044837955c07d553771fb base develop mergeable True reads 1 state open
+    API #1334 head 9b41a5fcc8fa20070aeff975a07a6f7aa13f7d99 base develop mergeable True reads 1 state open
+    DEVBASE #1330 OK base.ref develop
+    DEVBASE #1332 OK base.ref develop
+    DEVBASE #1333 OK base.ref develop
+    DEVBASE #1334 OK base.ref develop
+--- 2b. the WIDEN census (Wednesday's widen rule): an open PR matching kit.json widen_rx must be in this kit
+    WIDEN #1334 IN-KIT 9b41a5fcc8fa20070aeff975a07a6f7aa13f7d99 | feature/ks-888-validate-logonly-pin-b40-4 | KS-888: pin that validate logs a failed usage write and never refuses
+    WIDEN #1333 IN-KIT 91ceb5bc0a79fd3dceb044837955c07d553771fb | feature/ks-1124-f4-failed-anchor-saves-failed-status-b40-3 | KS-1124 F4: a certification whose anchoring failed saves status failed
+    WIDEN #1332 IN-KIT f5381338359da43784f01f625772abafccdf97b6 | feature/ks-1054-startup-migration-failure-on-health-b40-2 | KS-1054: a failed start-up migration shows on /health; 039 guards oauth_apps
+    WIDEN #1330 IN-KIT 699acfb804729f80da8aa4f4034f3cd58d99f40e | feature/ks-1352-revoked-credential-fails-verify-b40-1 | KS-1352: a revoked credential fails verify, by either revoke route
+    WIDEN-RX ^\s*(KS-1352|KS-1054|KS-1124|KS-888)\b | WIDEN-BRANCH-RX -b40-\d+$
+  WIDEN census clean: every matching open PR is in this kit
+--- 3. the heads, judged (both instruments == the pin, open, not mergeable:false; every stacked child still based on its parent's branch at the pinned parent head; every other PR based on develop)
+  #1330  ls-remote pull/head 699acfb804729f80da8aa4f4034f3cd58d99f40e | branch 699acfb804729f80da8aa4f4034f3cd58d99f40e | API 699acfb804729f80da8aa4f4034f3cd58d99f40e (state open, mergeable True) | pinned 699acfb804729f80da8aa4f4034f3cd58d99f40e
+  #1332  ls-remote pull/head f5381338359da43784f01f625772abafccdf97b6 | branch f5381338359da43784f01f625772abafccdf97b6 | API f5381338359da43784f01f625772abafccdf97b6 (state open, mergeable True) | pinned f5381338359da43784f01f625772abafccdf97b6
+  #1333  ls-remote pull/head 91ceb5bc0a79fd3dceb044837955c07d553771fb | branch 91ceb5bc0a79fd3dceb044837955c07d553771fb | API 91ceb5bc0a79fd3dceb044837955c07d553771fb (state open, mergeable True) | pinned 91ceb5bc0a79fd3dceb044837955c07d553771fb
+  #1334  ls-remote pull/head 9b41a5fcc8fa20070aeff975a07a6f7aa13f7d99 | branch 9b41a5fcc8fa20070aeff975a07a6f7aa13f7d99 | API 9b41a5fcc8fa20070aeff975a07a6f7aa13f7d99 (state open, mergeable True) | pinned 9b41a5fcc8fa20070aeff975a07a6f7aa13f7d99
+  DEVBASE #1330 OK base.ref develop
+  DEVBASE #1332 OK base.ref develop
+  DEVBASE #1333 OK base.ref develop
+  DEVBASE #1334 OK base.ref develop
+  BOTH INSTRUMENTS AGREE with every pin.
+--- 3b. develop, read at launch: 3d706c21f65e7eb8e136fc8703ce10fd91f62480 | the launcher's pinned launch develop 3d706c21f65e7eb8e136fc8703ce10fd91f62480
+  UNMOVED since the fill — the END_TREE ee7836b803f65cc049ef3d78c8f38b9866a578e3 stands
+DRY RUN COMPLETE 2026-09-28T16:23:38Z — every read agrees with the pins; the real run continues with the usage gate, --check and cockpit.sh add

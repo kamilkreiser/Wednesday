@@ -1,0 +1,26 @@
+pgprobe_gate38 2026-09-28T15:07:58Z | #1332 merge-base 0d156d12cc0f head f5381338359d | work /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/24014037-1954-4f3d-a19e-71dd4e50a1cf/scratchpad/g38/g38_pg
+  base already extracted at /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/24014037-1954-4f3d-a19e-71dd4e50a1cf/scratchpad/g38/g38_pg/base (a re-run reuses it: the rev is pinned)
+  head already extracted at /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/24014037-1954-4f3d-a19e-71dd4e50a1cf/scratchpad/g38/g38_pg/head (a re-run reuses it: the rev is pinned)
+  initdb-18 rc 0 -> /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/24014037-1954-4f3d-a19e-71dd4e50a1cf/scratchpad/g38/g38_pg/data_010758
+  pg_ctl-18 start rc 0 (socket dir /tmp/q38.21lhayzk, 32 bytes incl. the socket file)
+  engine PostgreSQL 18.3 (Homebrew) on aarch64-apple-darwin25.2.0, compiled by Apple clang version 17.0.0 (clang-1700.6.3.2), 64-bit
+  bare_base_boot1  rc 0 | 039 tracked 0 | fn None | policy 0 | oauth_apps oauth_apps | lookup ERROR 42883 function auth_find_oauth_app_by_client_id(unknow | ret null | warn 8 (039: ['[WARN] [startup-migrations] migration 039_rls_fail_closed.sql failed {"db":"main","error":"type \\"oauth_apps\\"'])
+  bare_base_boot2  rc 0 | 039 tracked 1 | fn auth_find_oauth_app_by_client_id(text) | policy 1 | oauth_apps oauth_apps | lookup 0 | ret null | warn 0 (039: [])
+  INIT-base: 12 docker/init files applied; files with ERROR lines: [('00-create-platform-db.sql', 1)]
+  init_base_boot1  rc 0 | 039 tracked 1 | fn auth_find_oauth_app_by_client_id(text) | policy 1 | oauth_apps oauth_apps | lookup 0 | ret null | warn 0 (039: [])
+  bare_head_boot1  rc 0 | 039 tracked 1 | fn None | policy 0 | oauth_apps oauth_apps | lookup ERROR 42883 function auth_find_oauth_app_by_client_id(unknow | ret {"ran": true, "applied": 81, "failed": 6, "lastRunAt": "2026-09-28T15:08:01.370Z"} | warn 7 (039: [])
+  bare_head_boot2  rc 0 | 039 tracked 1 | fn None | policy 0 | oauth_apps oauth_apps | lookup ERROR 42883 function auth_find_oauth_app_by_client_id(unknow | ret {"ran": true, "applied": 45, "failed": 0, "lastRunAt": "2026-09-28T15:08:01.509Z"} | warn 0 (039: [])
+  INIT-head: 12 docker/init files applied; files with ERROR lines: [('00-create-platform-db.sql', 1)]
+  init_head_boot1  rc 0 | 039 tracked 1 | fn auth_find_oauth_app_by_client_id(text) | policy 1 | oauth_apps oauth_apps | lookup 0 | ret {"ran": true, "applied": 87, "failed": 0, "lastRunAt": "2026-09-28T15:08:02.198Z"} | warn 0 (039: [])
+  pg_ctl-18 -m fast stop rc 0 (the data dir is KEPT at /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/24014037-1954-4f3d-a19e-71dd4e50a1cf/scratchpad/g38/g38_pg/data_010758; the socket dir /tmp/q38.21lhayzk is left empty, never deleted)
+  controls: {'CT1 a wrong socket dir does not connect': True, 'CT2 no TCP listener (listen_addresses is empty)': True, 'CT2b lsof: the postmaster holds 0 inet sockets': True, 'CT3 BARE-base boot 1 FAILS 039 (the defect reproduced)': True}
+  SUMMARY base: bare DB boot 1 fails 039 (not tracked), boot 2 applies it (tracked, function present)                    True
+  SUMMARY head: bare DB boot 1 records 039 (tracked) with the function ABSENT                                            True
+  SUMMARY head: bare DB boot 2 STILL has no auth_find_oauth_app_by_client_id (039 never re-runs)                         True
+  SUMMARY head: bare DB boot 2 has no oauth_apps_auth_lookup policy                                                      True
+  SUMMARY base: bare DB boot 2 HAS the oauth_apps_auth_lookup policy                                                     True
+  SUMMARY docker-init DB: 039 tracked and the function present at base AND head after ONE boot (the guard inert)         True
+  SUMMARY head: the recorded summary after bare boot 1 reads ran:true and failed == the run's own count                  True
+  SUMMARY controls all behaved                                                                                           True
+  recorded summaries (head): boot1 {"ran": true, "applied": 81, "failed": 6, "lastRunAt": "2026-09-28T15:08:01.370Z"} | boot2 {"ran": true, "applied": 45, "failed": 0, "lastRunAt": "2026-09-28T15:08:01.509Z"} | init {"ran": true, "applied": 87, "failed": 0, "lastRunAt": "2026-09-28T15:08:02.198Z"}
+  base return values: boot1 null | boot2 null
