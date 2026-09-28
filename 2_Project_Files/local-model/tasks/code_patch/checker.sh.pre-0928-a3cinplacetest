@@ -676,19 +676,6 @@ for o in json.load(open(sys.argv[1])):
     echo "RESULT: FAIL ($FAILS failed) — stopped at A3c (no section for the brief's additions)"
     exit 1
   fi
-  # 2026-09-28 18:3x (KS-888 revoke, Spark output BYTE-IDENTICAL to its golden, FAILed A3c 22/43): a brief that edits an
-  # EXISTING test file in place puts that file's '+' lines in expected_plus too, so measuring them against the PRODUCT
-  # section alone reported them "absent" by construction. In code_patch mode, when the diff carries a section for the test
-  # file, A3c measures the product and test sections TOGETHER; A3d still reads the product tip (argv[3]).
-  if [ "$MODE" != test_only ] && [ -n "${TEST_FILE:-}" ]; then
-    TEST_SEC="$(python3 -c 'import json,sys; sub=sys.argv[3]; want=sys.argv[2]
-for o in json.load(open(sys.argv[1])):
-    if o["path"]==want or sub+"/"+o["path"]==want: print(o["file"]); break' "$REP/sections.json" "$TEST_FILE" "$SUBDIR")"
-    if [ -n "$TEST_SEC" ] && [ -s "$TEST_SEC" ]; then
-      cat "$PROD_SEC" "$TEST_SEC" > "$REP/a3c_union.diff"; PROD_SEC="$REP/a3c_union.diff"
-      echo "A3c: measuring the product + test sections together (the test file is in the diff)"
-    fi
-  fi
   A3C_MISSING="$(python3 "$(dirname "$0")/a3c_plus.py" "$INPUT" "$PROD_SEC" "$A3_TARGET" 2>/dev/null)"; A3C_RC=$?
   if [ "$A3C_RC" -eq 0 ]; then
     pass "A3c every '+' line the brief adds is in the product hunk ($N_PLUS line(s)), and no tip line is re-added as a '+' (A3d)"
