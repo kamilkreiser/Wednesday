@@ -16,6 +16,11 @@ status: live
 | HP-1 | Corrected deck v3 slides (duplicates, wrong labels, wrong cross-references, HP's own open placeholders) | The digital Playbook's partner section (HPSMPOC-65, C-12 minimum), which loads the deck verbatim | Emailed to Kam 2026-09-27 16:37 (AgentMail sent copy); not yet sent to HP |
 | HP-2 | Permission to use IDC's quote and logo (deck slide 91) | Slide 91, the only partner-section slide withheld from the digital Playbook | Emailed to Kam 2026-09-27 16:37 (AgentMail sent copy); not yet sent to HP |
 | HP-3 | The Customer Security Maturity questions | The customer snapshot's real questions (C-19: today the ruleset is DRAFT with placeholder questions; HPSMPOC-31) | **Already asked by Kam** on 2026-09-25 (~16:03, per his instruction that day). No answer recorded. No new email: say if you want a chaser drafted |
+| HP-4 | Security Manager: live access and integration overview | Integrating the Playbook with HP Security Manager (live data, integration path); Kam's 29 Sep meeting notes (C-30) | Emailed to Kam 2026-09-29 08:58 (AgentMail sent copy); not yet sent to HP |
+| HP-5 | Overview of Quick Assess | Understanding how Quick Assess relates to the Playbook's assessment (C-30) | Emailed to Kam 2026-09-29 08:58 (AgentMail sent copy); not yet sent to HP |
+| HP-6 | Control Hub: is it part of Security Hub? | Clarification: where Control Hub sits, and whether the Playbook should reference it (C-30) | Emailed to Kam 2026-09-29 08:58 (AgentMail sent copy); not yet sent to HP |
+| HP-7 | Firmware vulnerability tool: access, and how to integrate or upload results | Bringing firmware-vulnerability results into the Playbook, possibly via Security Manager (C-30) | Emailed to Kam 2026-09-29 08:58 (AgentMail sent copy); not yet sent to HP |
+| HP-8 | Fleet Assessment tool: access and info (paid Security Manager module) | Fleet Assessment tool access; a paid Security Manager module, so any licence is Kam's call (C-30) | Emailed to Kam 2026-09-29 08:58 (AgentMail sent copy); not yet sent to HP |
 
 ## Candidates, not yet asked (each needs your decision first)
 | # | Possible ask | What it is for | Why it is not asked yet |
@@ -67,6 +72,65 @@ Can you confirm whether HP's licence to that quote and logo covers their use in 
 
 Thanks,
 Kam
+
+## Update 2026-09-29 (Kam's HP meeting): HP-3
+Kam's meeting notes, verbatim: *"HP has asked us to suggest what questions to use.  We will use the 16 questions as a base but will align the questions to Policy Principles (Datasec Security Composer)"*. So HP-3 turns around: HP is not supplying the customer questions; Datasec proposes them. The HPSM-POC seat (B48) drafts the aligned set for Kam's approval. HP-3 status: **reversed, awaiting our proposal**.
+
+## HP-4: Security Manager: live access and integration overview (formatted request)
+Subject: HP Security Manager: access to a live system and an integration overview
+
+Hi [name],
+
+Thanks for Tuesday's session. To build the Playbook properly we'd like to work against HP Security Manager itself. Could you help with:
+
+1. Access to a live (or demo / sandbox) Security Manager system we can use during the build.
+2. An overview of how to integrate with it: the APIs or export formats available, how authentication works, and any integration guide.
+3. Any product information or documentation you'd recommend we start with.
+
+Who would be the best person to arrange this?
+
+Thanks,
+Kamil
+
+## HP-5: Overview of Quick Assess (formatted request)
+Subject: Quick Assess: overview
+
+Hi [name],
+
+Could you give us an overview of Quick Assess: what it assesses, who runs it, what it produces, and how its results might feed into or complement the Playbook's assessment? Documentation or a short walkthrough would be ideal.
+
+Thanks,
+Kamil
+
+## HP-6: Control Hub: is it part of Security Hub? (formatted request)
+Subject: Quick question: Control Hub
+
+Hi [name],
+
+A quick clarification: is Control Hub part of Security Hub, or a separate product? What does it cover, and is it relevant to the Playbook's assessment or recommendations? A pointer to documentation would be great.
+
+Thanks,
+Kamil
+
+## HP-7: Firmware vulnerability tool: access, and how to integrate or upload results (formatted request)
+Subject: Firmware vulnerability tool: access and integration
+
+Hi [name],
+
+Could we get access to the firmware vulnerability tool, along with some information on it? In particular we'd like to understand how we would integrate with it or upload its results, and whether that is done through Security Manager.
+
+Thanks,
+Kamil
+
+## HP-8: Fleet Assessment tool: access and info (paid Security Manager module) (formatted request)
+Subject: Fleet Assessment tool: access and information
+
+Hi [name],
+
+Could we get access to, and information on, the Fleet Assessment tool? We understand it is an additional paid module in Security Manager. Could you confirm that, and let us know whether access could be arranged for the POC (for example a trial or demo licence)?
+
+Thanks,
+Kamil
 
 ## Sources
 - The slide register built while loading the deck: `HPSM-POC/1_Project_Definition/Architecture/content/2026-09-27_B41_deck-v3-partner-section/README.md` (lines 18, 84-89 and the per-slide table).
