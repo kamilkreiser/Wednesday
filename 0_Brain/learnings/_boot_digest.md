@@ -7,7 +7,7 @@ status: live
 
 # Boot digest — headline + rules of every lesson (open the file when it fires)
 
-Generated 2026-09-29 07:24 from 207 lesson files (958,601 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 10 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
+Generated 2026-09-29 08:37 from 208 lesson files (961,745 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 10 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
 
 ## The T9 SSD is the master — Wednesday must be fully portable
 `2026-07-31_fully-portable-drive.md` · principle · 2026-07-31 · status: superseded — the "T9 is the master" half by [[2026-08-25_one-drive-devmaster-is-master]] (2026-08-25); the portability principle itself still lives
@@ -6791,4 +6791,17 @@ sections (open the file for these): How to apply
 4. **Scope: HPSM-POC** ("as a rule for the project"). Do not generalise it to other projects without his word.
 
 **Family:** [[2026-09-05_tickets-are-the-channel-whatsapp-via-kam-is-the-escalation]] (only Kam talks to client humans) · [[2026-09-08_ask-format-action-first]] · [[2026-09-24_decisions-go-on-the-fleet-activity-panel]] (decisions go on cards; HP asks go by email + register).
+
+
+## Regenerable build leftovers (stale node_modules, old CI/QA scratch clones) are NOT kept once used — but only Kam's word authorises a deletion, and records are never in scope
+`2026-09-29_regenerable-build-leftovers-are-not-kept.md` · preference · 2026-09-29 · status: live
+
+**The operative case, so the headline matches it:** a drive is filling, or a round has finished, and there are regenerable build artefacts lying around: `node_modules` in worktrees nobody has touched for days, repo clones a QA gate made for one run, install caches. **Kam does not want them kept.** They are removed by the project's own seat once they are no longer in use, and the space is re-measured.
+
+**How to apply:**
+- At the end of a round, a seat's handover names the regenerable leftovers it created and removes them (its own only), stating what was removed and the free space after.
+- When a drive runs low, the first proposal is removing stale regenerable artefacts, not moving them; it still goes to Kam as a card if it touches other seats' trees or more than one project.
+- A deletion brief names the exact class (directory name), the staleness predicate, the exclusions (live seats' worktrees), a count before and after, and `df` before and after.
+
+**Family:** [[2026-08-26_never-delete-cleanup-means-quarantine]] (narrowed, not retired) · [[2026-09-07_a-rule-for-creation-is-not-a-mandate-to-retrofit]] (read the scope of the ruling) · [[2026-08-16_classification-is-the-field-that-grants-authority]] ("regenerable" and "no longer used" are scope words and each needs its measurement).
 
