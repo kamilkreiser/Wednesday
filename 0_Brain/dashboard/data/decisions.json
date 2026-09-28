@@ -19589,5 +19589,47 @@
    "2026-09-03 10:27",
    "CARD secuura-audit-rows-react-router-v7-migration"
   ]
+ },
+ {
+  "id": "secuura-ks1124-f4-failed-anchor-shows-pending",
+  "client_project": "Secuura/Blockchain",
+  "title": "KS-1124 F4: outside production, a certification whose blockchain anchoring failed shows 'pending' forever. How should it say it failed?",
+  "bluf": "No action needed unless you disagree with the default. Outside production, when a certification's anchoring fails, originate still saves it as 'pending-onchain' (certifications.ts:470 and :1205). Nothing ever updates it, so the verify page shows 'pending' for as long as it exists (gateway verification.ts:746). Production is not affected: it refuses with a 503 instead (:438). I recommend (b): save a 'failed' status, because the gateway already turns that into off-chain-only (verification.ts:253) and the record then says what happened.",
+  "default_action": "If you do not answer: nothing changes. F4 stays open on KS-1124, failed certifications outside production keep showing 'pending', and the separate O1 fix on the same ticket goes ahead unaffected.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Save no 'pending' label when anchoring fails",
+    "detail": "Originate only, both routes (certifications.ts:470, :1205). With no label and no status, the gateway's closed default answers off-chain-only. Smallest change, but the record carries no explicit 'failed' for later readers."
+   },
+   {
+    "key": "b",
+    "label": "Save a 'failed' status the gateway already reads as off-chain-only",
+    "detail": "Originate only, both routes. The gateway's existing mapping (verification.ts:253) turns 'failed' into off-chain-only, and the stale 'pending' label is then ignored (:746 applies only when there is no status). A seat proves it with a cell: a failed submission never shows pending through the gateway."
+   },
+   {
+    "key": "c",
+    "label": "Make the gateway read the existing 'failed' marker",
+    "detail": "Gateway only (verification.ts:746): honour anchoringStatus, which originate already saves. Fixes the display for new and existing records, but the misleading 'pending' label stays in the saved data for any other reader, and it edits the file the KS-1129 fix is also changing."
+   }
+  ],
+  "recommended": "b",
+  "ts": "2026-09-28T16:37:32.863940+10:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "2026-08-21 20:06",
+   "2026-09-10 09:01",
+   "2026-09-10 09:08",
+   "2026-09-10 09:08",
+   "CARD secuura-ks953-shared-pins-anchor-by-marker",
+   "CARD secuura-ks953-anchor-grammar-for-the-non-route-site",
+   "CARD secuura-ks1194-failed-save-answers-200",
+   "CARD secuura-ks1175-kintsugi-deploy-and-first-anchor",
+   "CARD secuura-ks1171-when-is-an-anchor-absent",
+   "CARD secuura-pr1245-round3-failed-at-cap",
+   "CARD secuura-ks888-failed-key-save-design"
+  ]
  }
 ]
