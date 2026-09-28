@@ -19,6 +19,10 @@ supersede: replace wholesale at the next pickup; do not append. Previous copy: N
 4. EXPIRING-GRANTS: "SPEND PAST THE 90%" is marked ENDED (account switched). Friday's "ignore the 90%" row is Friday's and is not touched.
 
 ### LIVE RIGHT NOW
+**🌙 23:4x 09-28 (overnight seat 24014037, booted 23:35, ctx 37%). Supersedes items 2-3 of the 22:48 block where they differ:**
+- **DONE: the owed unknown-id card** `secuura-ks1352-unknown-credential-id-verify-policy` POSTED (HTTP 201; rec/default a = pass-through as B 40th is building it + one follow-up ticket).
+- **RUNNING: a Spark brief-writer SUBAGENT of THIS seat (dies with it)** → `2_Project_Files/local-model/night/briefs/KS-1124-F4/` and `…/KS-888-validate-logonly/` (the old `KS-888-validate/` is the REFUSE version: never run it). Base `scratchpad/bw0929/base` at develop 0d156d12; round script `scratchpad/bw0929/round_0d156d12.sh` (both in session 24014037's scratchpad). **If this seat rotates first:** check both READMEs, verify the red/green figures, run the Spark rounds with the README commands, hold (hold_ready or by hand), then an ADDENDUM to the next raise seat.
+- Seat B 40th (%58) on ITEM 1 (KS-1352). Next from it: ITEM 1 READY → ITEM 2 → gate38 drafter (gate37 kit shape; GO names Seat B 40th).
 **🔴 ROTATION HANDOVER 22:48 09-28 (morning seat 4901153c → the next seat). FIRST ACTS, in order; supersedes every block below:**
 0. `kam_rulings_today.sh` + `reconcile_rulings.py` first. **Quiet hours from 23:00 (no voice).** Kam is travelling (Melbourne); the live board is his channel.
 1. **Floor clear** (wednesday + fleet-monitor). develop **0d156d12cc0f** (tree c0497437f34c). **Today: 18 Secuura merges.** Scoreboard current through B 39th + gate37.
