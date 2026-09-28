@@ -20058,5 +20058,134 @@
    "CARD secuura-ks888-validate-usage-write-failure",
    "CARD secuura-ks1370-revoke-undone-by-stale-process"
   ]
+ },
+ {
+  "id": "secuura-ks1369-gateway-proxy-crash-guard-shape",
+  "client_project": "Secuura/Blockchain",
+  "title": "KS-1369: the gateway can crash under load when a proxied request has already been sent. Which fix shape?",
+  "bluf": "No action needed unless you disagree with the default. The api-gateway's proxy hook sets headers on the outgoing request as its first statement (proxy.ts :242-:246 at develop 0de10857, read by Wednesday just now), with no check that the request was already sent, which is the crash the ticket describes. The ticket offers two directions and says the shape is your call. Once you choose, it becomes local-model work (the Spark). One caveat, measured by this morning's screen: no existing test reaches this hook, so the round also writes the test harness.",
+  "default_action": "If no ruling by 18:00 AEST today (Tue 29 Sep): Wednesday applies (a). The Spark builds it as a held diff, a Secuura seat raises it, it goes through the QA gate, and nothing deploys. Your word before the merge changes it.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Return early when the request was already sent (Recommended)",
+    "detail": "One guard at the top of the hook: if the outgoing request's headers are already sent, skip the header writes. Smallest change; the ticket's first direction."
+   },
+   {
+    "key": "b",
+    "label": "Catch the error and answer through the proxy's error path",
+    "detail": "Keeps the hook as is and routes the failure to a clean error response. Wider change; the ticket's second direction."
+   },
+   {
+    "key": "c",
+    "label": "Leave it for now",
+    "detail": "The ticket stays open; the crash remains possible under load."
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-09-29T09:04:36.821886+10:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "2026-08-21 20:06",
+   "2026-09-03 18:01",
+   "2026-09-10 09:01",
+   "2026-09-10 09:08",
+   "2026-09-10 09:08",
+   "2026-09-17 08:22",
+   "CARD secuura-ks695-ask3-shape-stuart",
+   "CARD secuura-ks695-ask3-shape-ab",
+   "CARD secuura-demo-service-crash-loop",
+   "CARD secuura-ks1041-fix-shape-demo-exposed",
+   "CARD hpsm-composer-round3-approver-guard",
+   "CARD hpsm-composer-round4-commit-guard-and-forged-release",
+   "CARD secuura-ks1084-gateway-originate-no-tenant-header-p0"
+  ]
+ },
+ {
+  "id": "secuura-ks1360-wallet-session-delete-reply-shape",
+  "client_project": "Secuura/Blockchain",
+  "title": "KS-1360: disconnecting a wallet session replies without the success flag the published API promises. Fix the reply or the spec?",
+  "bluf": "No action needed unless you disagree with the default. DELETE /api/wallets/session/:id answers 200 with only a message (wallet-connector server.ts :195-:220 at develop 0de10857, read by Wednesday just now), while the published API schema says the reply carries success: true, and the route's own 404 reply already uses the success field. The ticket asks which side to change.",
+  "default_action": "If no ruling by 18:00 AEST today (Tue 29 Sep): Wednesday applies (a). The Spark builds it as a held diff, a Secuura seat raises it, it goes through the QA gate, and nothing deploys. Your word before the merge changes it. Caveat, measured by the screen: this service starts its database and listener when imported, so the round also has to write a small test harness.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Add success: true to the reply (Recommended)",
+    "detail": "The code conforms to the published contract and to its own 404 shape. Additive, so existing callers that read message keep working."
+   },
+   {
+    "key": "b",
+    "label": "Change the published schema to match the code",
+    "detail": "The spec drops the success field for this route; no code change."
+   },
+   {
+    "key": "c",
+    "label": "Leave it for now",
+    "detail": "The spec and the service keep disagreeing."
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-09-29T09:04:40.203171+10:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "2026-08-21 10:36",
+   "2026-08-21 19:49",
+   "2026-08-21 20:06",
+   "2026-09-10 09:01",
+   "2026-09-10 09:08",
+   "2026-09-10 09:08",
+   "CARD secuura-ks695-ask3-shape-stuart",
+   "CARD secuura-ks695-ask3-shape-ab",
+   "CARD secuura-ks1041-fix-shape-demo-exposed",
+   "CARD secuura-ks1207-revoked-session-plus-junk-key-bypass",
+   "CARD hpsmpoc-plan-no-delete"
+  ]
+ },
+ {
+  "id": "secuura-ks1359-platform-audit-log-bounds",
+  "client_project": "Secuura/Blockchain",
+  "title": "KS-1359: the platform audit log accepts a negative or non-numeric limit and offset. Refuse those, and keep the KS-5 cap?",
+  "bluf": "No action needed unless you disagree with the default. GET /api/platform/audit-log (super-admin only) caps limit at 500 and offset at 5000, the deliberate KS-5 clamp, but only clamps UPWARD, so a negative value passes straight into the query window (platform.ts :359-:377 at develop 0de10857, read by Wednesday just now). The ticket asks whether to tighten validation or widen the KS-662 ruling to accept it.",
+  "default_action": "If no ruling by 18:00 AEST today (Tue 29 Sep): Wednesday applies (a). The Spark builds it as a held diff, a Secuura seat raises it, it goes through the QA gate, and nothing deploys. Your word before the merge changes it.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Refuse wrong-type and below-minimum values with 400; keep the KS-5 cap for too-large ones (Recommended)",
+    "detail": "Garbage and negative inputs get a clear 400; very large values still clamp quietly as KS-5 chose. One product file."
+   },
+   {
+    "key": "b",
+    "label": "Refuse everything outside the documented range, too-large included",
+    "detail": "Strict, but it undoes KS-5's deliberate clamp: a client asking for page 10,000 would get 400 instead of the last page."
+   },
+   {
+    "key": "c",
+    "label": "Widen the KS-662 ruling and accept these inputs as they are",
+    "detail": "No code change; negative values keep reaching the query."
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-09-29T09:04:43.404990+10:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "2026-08-21 20:06",
+   "2026-08-26 17:11",
+   "CARD nexusai-rd245-audit-log-leaves-settings",
+   "CARD secuura-archive-fifteen-platform-s-tickets",
+   "CARD secuura-platform-s-count-was-wrong-when-you-ruled",
+   "CARD secuura-880-merge-kam-platform-s-cutover",
+   "CARD secuura-audit-baseline-rows-lapse-24sep-block-pushes",
+   "CARD secuura-audit-row-mysql2-override-vs-prisma-pin",
+   "CARD secuura-audit-rows-react-router-v7-migration",
+   "CARD secuura-audit-row-ip-address-high-override",
+   "CARD secuura-audit-root-lock-0930-remeasured",
+   "CARD secuura-audit-fuse-0930-needs-your-email"
+  ]
  }
 ]
