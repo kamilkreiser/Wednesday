@@ -1,0 +1,66 @@
+LAUNCH ACTION gate34 (DRY RUN) 2026-09-28 08:48:54 AEST / 2026-09-27T22:48:54Z | launcher /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/gatesets/2026-09-28_gate34/launch_qa_secuura_batch1316.sh | pinned launch develop ec32c40e2b1e2698d2e855a916f390d48dad1b45 | END_TREE 14b9382edbd7d605552402aaba7cd614e8bf8f3f
+  pin #1316 14fc80fb144c2b95f016cc325885c2684105c7cc
+  pin #1317 2a688b24054929a66c85f7b9a9852a46f2edb8f6
+  pin #1318 62f9a288cf6032263ff183dfdc00ac1b60811f9d
+  pin #1319 07f42897e2afe381e5f91f54f04225077cf659d9
+  pin #1320 b9111f2bfad28f1bd63e787ae69a2de6b71a2d11
+--- 0. the pane must be routed (inbox_routing.conf) or cockpit.sh say --mail fails silently
+  routing file /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/inbox_routing.conf — line present: 0 (grep rc=1; want 1 / rc 0)
+  (DRY RUN: reported, not refused — the real run refuses rc 1 here)
+--- 0b. the kit's home: launcher filled for /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/gatesets/2026-09-28_gate34 | this script lives in /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/gatesets/2026-09-28_gate34
+  AT HOME — no re-fill
+--- 1. instrument: git ls-remote origin (read from the Secuura checkout, READ-ONLY)
+  ls-remote rc=0 at 22:48:57Z
+    ec32c40e2b1e2698d2e855a916f390d48dad1b45	refs/heads/develop
+    14fc80fb144c2b95f016cc325885c2684105c7cc	refs/heads/feature/ks-1346-adminconfig-fail500-type-and-field-names-b36-1
+    2a688b24054929a66c85f7b9a9852a46f2edb8f6	refs/heads/feature/ks-1346-webhooks-fail500-type-and-field-names-b36-2
+    b9111f2bfad28f1bd63e787ae69a2de6b71a2d11	refs/heads/feature/ks-692-status-write-platform-only-b36-5
+    62f9a288cf6032263ff183dfdc00ac1b60811f9d	refs/heads/feature/ks-747-keys-list-spec-declares-organizationid-b36-3
+    07f42897e2afe381e5f91f54f04225077cf659d9	refs/heads/feature/ks-908-connector-id-read-back-b36-4
+    14fc80fb144c2b95f016cc325885c2684105c7cc	refs/pull/1316/head
+    2a688b24054929a66c85f7b9a9852a46f2edb8f6	refs/pull/1317/head
+    62f9a288cf6032263ff183dfdc00ac1b60811f9d	refs/pull/1318/head
+    07f42897e2afe381e5f91f54f04225077cf659d9	refs/pull/1319/head
+    b9111f2bfad28f1bd63e787ae69a2de6b71a2d11	refs/pull/1320/head
+--- 2. instrument: the GitHub PULLS API (an independent read of each head, and mergeable)
+  pulls API rc=0
+    WIDEN #1320 IN-KIT b9111f2bfad28f1bd63e787ae69a2de6b71a2d11 | feature/ks-692-status-write-platform-only-b36-5 | KS-692: restrict vc-issuer status writes to the platform roles
+    WIDEN #1319 IN-KIT 07f42897e2afe381e5f91f54f04225077cf659d9 | feature/ks-908-connector-id-read-back-b36-4 | KS-908: return connectorId in the key mint 201 body and the keys list row
+    WIDEN #1318 IN-KIT 62f9a288cf6032263ff183dfdc00ac1b60811f9d | feature/ks-747-keys-list-spec-declares-organizationid-b36-3 | KS-747: declare organizationId as a required query parameter on the keys list
+    WIDEN #1317 IN-KIT 2a688b24054929a66c85f7b9a9852a46f2edb8f6 | feature/ks-1346-webhooks-fail500-type-and-field-names-b36-2 | KS-1346 D: log a thrown object's type and field names in the webhooks routes
+    WIDEN #1316 IN-KIT 14fc80fb144c2b95f016cc325885c2684105c7cc | feature/ks-1346-adminconfig-fail500-type-and-field-names-b36-1 | KS-1346 C: log a thrown object's type and field names in the adminConfig routes
+    WIDEN-RX ^\s*(KS-1346|KS-747|KS-908|KS-692)\b | WIDEN-BRANCH-RX -b36-\d+$
+    API #1316 head 14fc80fb144c2b95f016cc325885c2684105c7cc base develop mergeable True reads 1 state open
+    API #1317 head 2a688b24054929a66c85f7b9a9852a46f2edb8f6 base develop mergeable True reads 1 state open
+    API #1318 head 62f9a288cf6032263ff183dfdc00ac1b60811f9d base develop mergeable True reads 1 state open
+    API #1319 head 07f42897e2afe381e5f91f54f04225077cf659d9 base develop mergeable True reads 1 state open
+    API #1320 head b9111f2bfad28f1bd63e787ae69a2de6b71a2d11 base develop mergeable True reads 1 state open
+    DEVBASE #1316 OK base.ref develop
+    DEVBASE #1317 OK base.ref develop
+    DEVBASE #1318 OK base.ref develop
+    DEVBASE #1319 OK base.ref develop
+    DEVBASE #1320 OK base.ref develop
+--- 2b. the WIDEN census (Wednesday's widen rule): an open PR matching kit.json widen_rx must be in this kit
+    WIDEN #1320 IN-KIT b9111f2bfad28f1bd63e787ae69a2de6b71a2d11 | feature/ks-692-status-write-platform-only-b36-5 | KS-692: restrict vc-issuer status writes to the platform roles
+    WIDEN #1319 IN-KIT 07f42897e2afe381e5f91f54f04225077cf659d9 | feature/ks-908-connector-id-read-back-b36-4 | KS-908: return connectorId in the key mint 201 body and the keys list row
+    WIDEN #1318 IN-KIT 62f9a288cf6032263ff183dfdc00ac1b60811f9d | feature/ks-747-keys-list-spec-declares-organizationid-b36-3 | KS-747: declare organizationId as a required query parameter on the keys list
+    WIDEN #1317 IN-KIT 2a688b24054929a66c85f7b9a9852a46f2edb8f6 | feature/ks-1346-webhooks-fail500-type-and-field-names-b36-2 | KS-1346 D: log a thrown object's type and field names in the webhooks routes
+    WIDEN #1316 IN-KIT 14fc80fb144c2b95f016cc325885c2684105c7cc | feature/ks-1346-adminconfig-fail500-type-and-field-names-b36-1 | KS-1346 C: log a thrown object's type and field names in the adminConfig routes
+    WIDEN-RX ^\s*(KS-1346|KS-747|KS-908|KS-692)\b | WIDEN-BRANCH-RX -b36-\d+$
+  WIDEN census clean: every matching open PR is in this kit
+--- 3. the heads, judged (both instruments == the pin, open, not mergeable:false; every stacked child still based on its parent's branch at the pinned parent head; every other PR based on develop)
+  #1316  ls-remote pull/head 14fc80fb144c2b95f016cc325885c2684105c7cc | branch 14fc80fb144c2b95f016cc325885c2684105c7cc | API 14fc80fb144c2b95f016cc325885c2684105c7cc (state open, mergeable True) | pinned 14fc80fb144c2b95f016cc325885c2684105c7cc
+  #1317  ls-remote pull/head 2a688b24054929a66c85f7b9a9852a46f2edb8f6 | branch 2a688b24054929a66c85f7b9a9852a46f2edb8f6 | API 2a688b24054929a66c85f7b9a9852a46f2edb8f6 (state open, mergeable True) | pinned 2a688b24054929a66c85f7b9a9852a46f2edb8f6
+  #1318  ls-remote pull/head 62f9a288cf6032263ff183dfdc00ac1b60811f9d | branch 62f9a288cf6032263ff183dfdc00ac1b60811f9d | API 62f9a288cf6032263ff183dfdc00ac1b60811f9d (state open, mergeable True) | pinned 62f9a288cf6032263ff183dfdc00ac1b60811f9d
+  #1319  ls-remote pull/head 07f42897e2afe381e5f91f54f04225077cf659d9 | branch 07f42897e2afe381e5f91f54f04225077cf659d9 | API 07f42897e2afe381e5f91f54f04225077cf659d9 (state open, mergeable True) | pinned 07f42897e2afe381e5f91f54f04225077cf659d9
+  #1320  ls-remote pull/head b9111f2bfad28f1bd63e787ae69a2de6b71a2d11 | branch b9111f2bfad28f1bd63e787ae69a2de6b71a2d11 | API b9111f2bfad28f1bd63e787ae69a2de6b71a2d11 (state open, mergeable True) | pinned b9111f2bfad28f1bd63e787ae69a2de6b71a2d11
+  DEVBASE #1316 OK base.ref develop
+  DEVBASE #1317 OK base.ref develop
+  DEVBASE #1318 OK base.ref develop
+  DEVBASE #1319 OK base.ref develop
+  DEVBASE #1320 OK base.ref develop
+  BOTH INSTRUMENTS AGREE with every pin.
+--- 3b. develop, read at launch: ec32c40e2b1e2698d2e855a916f390d48dad1b45 | the launcher's pinned launch develop ec32c40e2b1e2698d2e855a916f390d48dad1b45
+  UNMOVED since the fill — the END_TREE 14b9382edbd7d605552402aaba7cd614e8bf8f3f stands
+DRY RUN COMPLETE 2026-09-27T22:49:02Z — every read agrees with the pins; the real run continues with the usage gate, --check and cockpit.sh add
+rc 0
