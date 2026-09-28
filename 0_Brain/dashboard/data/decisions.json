@@ -20013,5 +20013,46 @@
    "CARD mini-vault-stale-skills",
    "CARD secuura-ks888-revoke-validate-on-failed-save"
   ]
+ },
+ {
+  "id": "secuura-ks1370-validate-when-the-revoke-check-cannot-read",
+  "client_project": "Secuura/Blockchain",
+  "title": "KS-1370 fix: when validate cannot read the stored revoke state, refuse the key or answer from memory?",
+  "bluf": "No action needed unless you disagree with the default. Your (a) at 07:10 makes validate check the stored revoke before answering valid. Seat B 42nd asks what it answers when that stored read FAILS. Two of your own rulings point different ways: on a failed key save you chose fail closed (refuse 503); on a failed usage write you chose log-only, because the gateway caches any refusal for about 30 seconds (auth.ts:228-229, measured by a brief-writer on 09-28, not re-read today), so a database blip would lock every key out. The seat recommends splitting by fault: refuse when a configured database cannot be read, answer from memory only when the service runs with no database at all (memory is then the store of record, and a revoke still refuses there). Nothing is pushed until this is settled; the seat raises KS-1371 meanwhile.",
+  "default_action": "If no ruling by 12:00 AEST today (Tue 29 Sep): Wednesday applies (a). Seat B 42nd builds it with cells for both modes, through the QA gate, no deploy. Your word at any point before the merge changes it.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Split: refuse on a failed read, memory-only mode answers from memory (Recommended)",
+    "detail": "A failed stored read with a database configured returns 503 'Unable to verify key'. Cost: during a security-database fault every key is refused for the fault's length plus up to 30 s of gateway cache. A revoked key is never honoured. Memory-only deployments behave as today. The usage write stays log-only, as you ruled."
+   },
+   {
+    "key": "b",
+    "label": "Always answer from memory when the read fails",
+    "detail": "Keys keep working through a database fault. Cost: a revoked key is honoured whenever the read fails, which is KS-1370 again under a fault instead of a stale boot."
+   },
+   {
+    "key": "c",
+    "label": "Always refuse, memory-only mode included",
+    "detail": "Strictest. Breaks every deployment that runs the security service without a database, and a pinned test (#1334's memory-only cell) with it."
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-09-29T07:48:13.105775+10:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "2026-09-03 21:20",
+   "CARD secuura-ks566-revoke-gate",
+   "CARD secuura-ks764-key-revoke-org-scope",
+   "CARD secuura-platform-s-count-was-wrong-when-you-ruled",
+   "CARD wed-boot-read-exceeds-the-context-window",
+   "CARD secuura-ks692-status-revoke-interim-posture",
+   "CARD secuura-ks1171-when-is-an-anchor-absent",
+   "CARD secuura-ks888-revoke-validate-on-failed-save",
+   "CARD secuura-ks888-validate-usage-write-failure",
+   "CARD secuura-ks1370-revoke-undone-by-stale-process"
+  ]
  }
 ]
