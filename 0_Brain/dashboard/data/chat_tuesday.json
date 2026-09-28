@@ -3799,5 +3799,26 @@
   "project": "Datasec",
   "ts": "2026-09-28T07:05:43.968285+10:00",
   "text": "Correction, and one line from you if you want it.\n\nDatasec / Vision, VSP-67: to go ahead, please type this in the chat:\n\nset VSP-67 timeout\n\nI launched the change on your 06:57 tap. That was wrong: on 1 September you ruled that production changes need your typed word, not a tap. No harm done. The Vision agent stopped before changing anything, because it found a second app reading that database, the ATTIO bridge. It thinks the bridge can't be affected, since the bridge never holds a transaction open, but that is from reading its code, not measured. The card on Fleet activity has the details. Production is unchanged. If you don't reply, nothing changes and I raise it again at tomorrow's brief.\n\nVSP-65 is unaffected: it still starts with your GitHub login, and nothing deploys before that."
+ },
+ {
+  "role": "wednesday",
+  "seat": "Kamils-Mac-mini.localdomain",
+  "project": "Datasec",
+  "ts": "2026-09-28T07:57:37.552780+10:00",
+  "text": "No action needed, for your awareness. Datasec / Vision: gate 11 passed all five fixes (VSP-66, 71, 70, 68, 73). The Vision agent is merging them to main now. Nothing is deployed, and nothing touches the live site. The gate also found two serious bugs that predate these fixes, both now being fixed or ticketed: a dropped database connection can be handed to the next user, who gets an error, and the nightly backup can report OK when the database was unreachable and nothing was saved. The second joins the backup fix already queued for gate 12."
+ },
+ {
+  "role": "wednesday",
+  "seat": "Kamils-Mac-mini.localdomain",
+  "project": "Datasec",
+  "ts": "2026-09-28T10:57:40.984921+10:00",
+  "text": "No action needed. Datasec / Vision, gate 12: the reminder fix (VSP-69) passed and is merging now. The full-backup fix (VSP-75) passed. The restore-safety fix (VSP-74) failed on one narrow case: a table with an unusual name could still be emptied during a restore. That is being fixed in its last allowed round before it would come to you. Nothing is deployed. Two things for when you deploy: backups made before this change can't bring back users, leads and partner orgs once quotes exist (the new code refuses rather than losing data), and a nightly backup now uses about 20 times the database's size in memory while it runs."
+ },
+ {
+  "role": "wednesday",
+  "seat": "Kamils-Mac-mini.localdomain",
+  "project": "Datasec",
+  "ts": "2026-09-28T12:20:06.452033+10:00",
+  "text": "No action needed, a flag as promised. Datasec / NexusAI: batch 5b passed its gate (the Marketplace package fix C-170, RD-696, RD-594). When it merges, later today, NexusAI main gains the arm-ttk.yml workflow you approved in C-138, and every push to main will start it. No other workflow changes. The gate also noted one thing for you: deploy-demo.yml says the demo environment's reviewer guards it, but no demo environment exists, so today the only guard is the unset CI_DEPLOY_ENABLED variable. The last 40 demo runs all skipped. If you want a second guard, that is your .github setting. Otherwise nothing changes."
  }
 ]
