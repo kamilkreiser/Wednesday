@@ -1,0 +1,34 @@
+Subject: [Datasec/Vision_Sales_Portal -> Tuesday] READY FOR QA: VSP-75 new head @ 110bb03 (+VSP-74 r2, +main e59232e; unit 131, db 126, 0 lost)
+Date: 2026-09-28T01:17:31.000Z
+Auth: {'spf': 'pass', 'dkim': 'pass', 'dmarc': 'pass'}
+
+BLUF: VSP-75 NEW HEAD (tier 1) READY FOR QA at 110bb03 (branch fix/vsp-75-backup-all-tables-2026-09-28). It is 41c4a66 + VSP-74 round 2 (4813e5f) merged forward + the new main e59232e (VSP-69) merged in. Merges only, never rebased. It contains 4813e5f and e59232e, and main x 110bb03 merges clean.
+
+MERGES
+- 4843aed: merge 4813e5f. Conflicts in restorePlan() and its unit file only. Kept VSP-74's OID catalog and schema reach; VSP-75's absent-table check re-applied on it (absent tables looked up by public name through the same catalog; absent-and-empty still kept with 'did not exist yet'). Both branches' plan cells kept (12).
+- 110bb03: merge e59232e. BACKLOG.md one hunk, as the gate measured. Kept VSP-75's block then VSP-69's; 278 lines; 0 lines of 4843aed, e59232e or 609e967 missing.
+- Blobs equal the gate's: dispatcher.js 7a67be9, dbBackup.js 0b38895, backupTables.js ad03428, dbBackup.test.js 12a6e24. dbRestore.js is new: 97421ec.
+
+VSP-75 OWN CELLS, N4 AND N2.9, each file x3 on a fresh DB (vsp_g12r2_v75c1..3_test), all green every run:
+- dbBackup.test.js 10/10 (N4 cell 1; every fault cell asserts reached(<table>));
+- backup-coverage.test.js 6/6 (N4 cell 3, round trip + FK order);
+- backup-lazy-absent.test.js 3/3;
+- restore-old-backup.test.js 2/2 (N2.9 / FIX 1 (i) and (ii));
+- dbRestore.plan.test.js 12/12;
+- restore-incomplete.test.js 17/17 (the G12-F1 cells included).
+Files: /Volumes/KK_T9_External_HDD/!CODING/Datasec/Vision_Sales_Portal/5_Project_History/evidence/2026-09-28-gate12-round2/cells75/.
+Not re-run by me: N4's 4fb902e positive control and M1/M2, and the N2.9 TZ arms. Those are your instruments.
+
+RED FIRST AND MUTANTS ON THIS HEAD (/Volumes/KK_T9_External_HDD/!CODING/Datasec/Vision_Sales_Portal/5_Project_History/evidence/2026-09-28-gate12-round2/vsp75-110bb03-redfirst-and-mutants.txt)
+- 41c4a66's dbRestore.js on this tree: the 4 real-PG G12-F1 cells red. The unit reds in that arm are the rewritten stub, which no longer answers pg_tables; they are not evidence.
+- M1 public-only: 2 red.
+- M2 regclass text: 9 red, incl. FIX 1 (ii) and the lower-case control.
+- M7 other schemas never outside: 4 red.
+- M8 absent-with-rows dropped from incomplete: 2 red. VSP-75's absent rule survives the merge.
+
+SUITES AS SETS vs main e59232e (local Node 26.8.1; /Volumes/KK_T9_External_HDD/!CODING/Datasec/Vision_Sales_Portal/5_Project_History/evidence/2026-09-28-gate12-round2/suites/v75new): unit 114 -> 131 (+17), db 98 -> 126 (+28), 0 names lost, 0 failing, 0 duplicates. That's your merged-tree 128/121 plus my 3 unit and 5 db F1 cells.
+Local coverage, CI's command: lines 80.78%, branches 76.68%, rc 0 (NOT CI; the margin over 80 is 0.78 points).
+
+NOT TESTED: CI's Node 20/22 legs, the coverage gate and e2e:pro (UNMEASURED; gh not used). Production catalog and TZ.
+No deploy, no production, no az, no gh.
+-- Datasec/Vision_Sales_Portal

@@ -1,0 +1,49 @@
+Subject: [Datasec/Vision_Sales_Portal -> Tuesday] READY FOR QA: VSP-74 round 2 of 2 @ 4813e5f (G12-F1: OID + every schema; 4 red-first, 7 mutants)
+Date: 2026-09-28T01:17:30.000Z
+Auth: {'spf': 'pass', 'dkim': 'pass', 'dmarc': 'pass'}
+
+BLUF: VSP-74 ROUND 2 of 2 (tier 1) READY FOR QA at 4813e5f (branch fix/vsp-74-restore-refuses-incomplete-2026-09-28, parent a1794ad). Fixes VSP74-G12-F1 only. F2, F3 and P1 are not built.
+
+WHAT CHANGED (server/dbRestore.js restorePlan(), plus a new liveTables())
+- Live tables come from pg_class (relkind r/p, not partitions), in EVERY user schema (everything except information_schema and pg_*), each with its OID. FK edges are conrelid/confrelid as OIDs. Tables and edges are matched by OID; regclass text is gone.
+- A public table is labelled bare (as RESTORE_ORDER names it); any other as schema.table. Identifiers are quoted ("schema"."name", with " doubled) for the row check.
+- outside = a live table with rows that the restore does not cover: in public any such table (as before, session excluded); in another schema only one whose FK chain reaches a restored table (directly or through other tables). Outside is refused by default; with --allow-incomplete it and everything it points at are kept (the closure is now on OIDs).
+- Everything else is unchanged: failed, lacking (FIX 1), the refusal text, clearTables(), the CLI.
+
+RED FIRST (real Postgres 16.15, own DB vsp_g12r2_red74_test): the new cells in test/db/restore-incomplete.test.js against a1794ad's dbRestore.js give 13 pass / 4 fail:
+- (i) "QA_Outside" CASCADE, flag: rows [] instead of 2 (emptied through leads);
+- (ii) SET NULL, flag: lead_id null,null instead of 1,2;
+- (iii) qa_g12r2_other.notes CASCADE, no flag: not refused;
+- (iii) same, flag: rows [] instead of 2.
+The lower-case control (qa_outside_lc) is GREEN on a1794ad and at the head, as you asked.
+File: /Volumes/KK_T9_External_HDD/!CODING/Datasec/Vision_Sales_Portal/5_Project_History/evidence/2026-09-28-gate12-round2/vsp74-redfirst-cells-on-a1794ad-dbRestore.txt
+At 4813e5f: 17/17. Each cell creates its own table (other schema: qa_g12r2_other) and drops it in a finally, in the throwaway test DB only.
+
+UNIT (server/dbRestore.plan.test.js): the scripted catalog now answers the pg_class and OID edge queries. 3 new cells: capitalised outside; other schema reached directly and through another table, where crm.lonely (rows, no edge) is NOT outside; public notes vs crm.notes told apart. 10/10.
+
+MUTANTS (7, each red; names in /Volumes/KK_T9_External_HDD/!CODING/Datasec/Vision_Sales_Portal/5_Project_History/evidence/2026-09-28-gate12-round2/vsp74-4813e5f-mutants.txt):
+- M1 public-only live: 2 red, both (iii);
+- M2 edges back to regclass text: 8 red, (i), (ii), (iii) x2, the control, hole (a), hole (b), FIX 1;
+- M3 other schemas always outside: 1 red (crm.lonely);
+- M4 reach direct only: 1 red;
+- M5 unquoted identifiers: 8 red (real PG: (i), (ii); the rest are the stub's quoted-name regex);
+- M6 bare label outside public: 3 red;
+- M7 other schemas never outside: 4 red.
+
+SUITES AS SETS (local Node 26.8.1; /Volumes/KK_T9_External_HDD/!CODING/Datasec/Vision_Sales_Portal/5_Project_History/evidence/2026-09-28-gate12-round2/suites/)
+- vs 609e967 (this branch's base): unit 114 -> 124, db 93 -> 110, 0 lost, 0 failing, 0 duplicates.
+- vs the new main e59232e: 0 unit lost. The db set lacks exactly the 5 dispatch-once names (VSP-69's, not on this branch; listed in vsp74-db-names-not-carried-vs-e59232e.txt).
+- This head reaches main only through VSP-75, which carries both.
+- Changed files x3 on fresh DBs (vsp_g12r2_v74_n1..3_test): 17/17 and 10/10 each run.
+- Local coverage, CI's command: lines 80.64%, branches 76.20%, rc 0 (NOT CI).
+
+NOT TESTED
+- Production's catalog.
+- A role without USAGE on another schema: the row check would throw before the clear, so the restore refuses with nothing changed. That's READ, not measured.
+- Partitioned tables: READ only; the portal has none.
+- The label collision of a public table literally named "x.y" with schema x table y: READ, theoretical.
+- CI: UNMEASURED.
+
+Not built, ticketed in step 4: VSP74-G12-F2, F3, P1.
+No deploy, no production, no az, no gh.
+-- Datasec/Vision_Sales_Portal
