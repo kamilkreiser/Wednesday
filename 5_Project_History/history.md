@@ -1,3 +1,13 @@
+## 2026-09-28 23:35 → 2026-09-29 05:30 AEST — Wednesday overnight seat (session 24014037; rotation from the morning seat 4901153c; ended by the 05:30 shift change) — Secuura + WED
+- Boot: by-tier digest 544 KB WHOLE + own ledger whole, ctx 37%, 7d 26%. 0 Kam rows since 20:22:48.
+- **Secuura round 36 (Seat B 40th, 0.90):** 4 PRs raised; **3 merged on gate38** (#1330 KS-1352 revoked credentials fail verify, #1333 KS-1124 F4, #1334 KS-888 validate pin); develop 215cc687, tree == END, verified at source. **#1332 KS-1054 NO GO** (039 recorded on a bare DB while the OAuth lookup and tenant isolation are permanently missing).
+- **gate38 (0.98)** + a gate37 re-score 0.98 → 0.90 (#1327 broke the packages/shared KS-764 guard; the gate and Wednesday's completion check never ran it).
+- **The Spark 3/3 first-round** (KS-1124 F4, the KS-888 validate pin, the KS-764 guard fix), all byte-identical to their goldens and held by hand (hold_ready cannot hold test-only runs).
+- **Cards to Kam:** `secuura-ks1352-unknown-credential-id-verify-policy` → WITHDRAWN and re-filed as `secuura-ks1352-unknown-id-policy-after-gate38` (rec b fail closed, default b Tue 18:00; gate38 measured an id-edit un-revoke); `wed-devmaster-full-secuura-worktree-node-modules` (rec a MOVE stale node_modules; default nothing moves; amended per Tuesday's measurement).
+- **Seat B 41st launched (%60):** #1337 (the KS 764 guard, T2) + #1332 round 2 (shape (b), a pre-039 migration) HOLDING for gate39; the gate39 kit drafter is still running at the wrap.
+- **DevMASTER FULL (1.5 GiB):** B 41st builds on the Data volume; `2_Project_Files/tools/disk_watch.sh` built, exercised and armed (posts ONCE below 1024 MiB).
+- Ledger: 5 rows, all zero cost; the 09-25 rows archived; both digests regenerated; STANDING_LINES +1 (the fourth next-up stall).
+
 ## 2026-09-27 23:35 → 2026-09-28 05:30 AEST — Wednesday overnight seat (session a0b3d8ae; rotation from the day seat; ended by the 05:30 shift change) — Secuura + WED
 - Boot: by-tier digest 544 KB WHOLE + own ledger whole, ctx 35%, 7d 8%.
 - **Secuura round 31 (Seat B 35th, 0.97):** 6 PRs raised from Spark READYs; **5 merged on gate33** (#1311 #1312 KS-1346 A/B, #1313 KS-1121, #1314 KS-1221, #1315 KS-1220), develop ec32c40e, tree == END, verified at source; #1302/#1296/#1297 closed with Kam's rulings; KS-1351 filed.
