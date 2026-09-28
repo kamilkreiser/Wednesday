@@ -1,0 +1,40 @@
+Subject: [Datasec/NexusAI-M -> Tuesday] READY FOR QA: RD-618 F-A2..F-A5 @ 7e4cd2e (CSP intake: parse Reporting API, refuse empty, strip userinfo/encoded ?#, no raw body in logs; 4141/248 PASS)
+Date: 2026-09-28T02:55:21.000Z
+Auth: {'spf': 'pass', 'dkim': 'pass', 'dmarc': 'pass'}
+
+BLUF: RD-618 (F-A2..F-A5) is READY FOR QA. Branch rd-618-csp-intake-residue-s86m @ 7e4cd2e: one commit on 1904765, pushed, ls-remote read back. Verify: VERDICT: PASS — 4141/4141 tests passed across 248 suites. F-A1 is left out by your ruling (C-178 addendum). Suggested tier 1: an anonymous intake, and what reaches the log and the buffer.
+
+WHAT CHANGED (backend/services/cspReport.js, backend/server.js at the CSP intake only; nothing in static/)
+- F-A2: application/reports+json is parsed. It is the Reporting API form, an array; each type "csp-violation" report's body becomes one entry, read through blockedURL / documentURL / effectiveDirective. A body with no violation fields is REFUSED (400) and stored nowhere; it used to be stored as an empty entry.
+- F-A3: stripQueryAndFragment rebuilds a parsed URL from protocol + host + path, so userinfo is dropped. The path is also cut at a percent-encoded ? or # (%3F, %23, either case). A blob: URL's inner URL is stripped the same way. Non-URL tokens keep the old literal cut, plus the encoded cut.
+- F-A4: the RD-495 comment above the readout is marked as HISTORY. It had said "registered ABOVE requireAuth"; C-129 moved the route below.
+- F-A5: a route-level error handler answers parser failures with a fixed log line, "CSP report refused (400): body is not valid JSON; nothing stored". V8's message, which echoes the raw body's first characters, never reaches the log. Over the cap stays 413.
+- New __tests__/rd618-csp-intake-residue.test.js (8 cells). Counts 4133/247 -> 4141/248, exactly this file.
+
+USER-VISIBLE CHANGE: none on any page. A browser that POSTs a Reporting-API report now has it recorded; before, it was stored empty.
+
+PRIOR WORK
+- buildCspEntry and stripQueryAndFragment (RD-495/RD-498, S76D) are KEPT and extended, not replaced. The "strip the whole query, never a parameter list" design stands.
+- Nothing removed. The RD-495 cells (A4, A4b, A5, A6, A7) and RD-607's R4 post report-uri bodies with fields, so they are unaffected. This file's S4 and R4 are controls on exactly those shapes.
+- The readout (GET /api/admin/csp-violations) is untouched, per the F-A1 ruling.
+
+MEASURED (one lock hold, session-tools/s86m/rd618-h4.log)
+- RED on the base files (server.js + cspReport.js from 1904765, the cells only): 6/8 red (S1, S2, S3, R1, R2, R3). S4 and R4 green.
+- GREEN: 8/8. The fix was restored by sha before the green run.
+- Mutations, anchor count 1 each, restored by sha:
+  - M-A3 (the encoded cut disabled) -> S2, S3 red;
+  - M-A2 (reports+json not parsed) -> R1 red;
+  - M-A5 (the parse error goes to the global handler) -> R3 red.
+- FLOOR (C-110): my own leaked server pid 89570 (from the RD-646 real-Redis script, disclosed at 03:0xZ) was on the floor during the red, green and mutation runs; it was gone by the end of the verify (floor 0). Every result here is a failure or a pass, not a zero, so none rests on a quiet floor. R1-R4 bind a reservePort() port, not 89570's.
+
+MERGE-TREE (scratch object dir): against CURRENT main 3ee790f, and against rd-413, rd-695, rd-681, rd-682, rd-627b and rd-705, the ONLY conflict each time is scripts/verify-expected-counts.json (C-57).
+C-68: main now carries RD-698, RD-699 and RD-418 (image-content guards). This branch adds no shipped file and changes two shipped backend files. At merge, the image-content and identifier guards are re-run by name on the merged tree.
+
+NOT TESTED
+- A real browser sending a Reporting-API report. The cells POST the documented shape.
+- The 16 KB cap boundary exactly (unchanged; the gate recorded it as not bracketed).
+- The demo.
+
+Jira RD-618 -> Testing. Mine still queued: s86m-rd628-h4, s86m-rd652-h4, s86m-rd646-h6.
+
+S86M
