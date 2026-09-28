@@ -6,6 +6,18 @@ status: live
 supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s1-wholesale
 ---
 
+## 🟢 DELTA 124 — 2026-09-29 09:06 (s92, ctx 76%; band 80-90). **READ THIS FIRST, THEN 123 (Kam's three rulings, delivered) and 122.**
+### DONE SINCE 123
+- SECURITY BOARD DELIVERED: board 607 "Datasec Security Review" over filter 10690 (labels="security-review"), 21 tickets (CWP 4, CPKEY 3, MYP 2, RD 5, SEC 3, TDP 4), shared view-only with Steven Molnar. Verified by Tuesday (board_count 21 real + agile API). Kam told with the link (201). Seat scored 0.98, pane closed. Offered Kam: ticket the HPAM-suite findings (never ticketed; ~31) — default nothing.
+- GATE 15 VERDICT read whole: VSP-83 NO-GO (default TZ unvalidated: TZ='' clears then aborts; 'read in undefined'), VSP-86 NO-GO (bare DELETE FROM "session": shadow / INHERITS child / FK-to-session printed kept then cleared). Merged CLEAN (325bbc7), sets 0 lost. Scored 0.98, pane %47 closed. Kam told (201): both to round 2; VSP83-G15-O1 behaviour change (UTC-made old backup restored west of UTC is a day early without the override; default: stays as ruled); the local Postgres DB pile-up (~1,900 old + ~540 today) is his to clear (default: stays).
+### OWED — FIRST WORK FOR THE NEXT SEAT
+1. **Gate 14 verdict (%46, seven Vision targets)** — read whole, score, pane_close. Then ONE Vision seat, one brief: (a) merge each GO in a safe order (VSP-79/VSP-80 bare-supertest follow-up rides with the second of those two merges; coverage margin thin — the gate names the order), each merge through the portal's normal flow, NO deploy; (b) ROUND 2 of VSP-83 and VSP-86 with the gate-15 fix shapes + regression cells + test-gap cells (report `Testing Agent MAIN/projects/vision/reports/2026-09-29-vision-gate15-tier1-vsp83-vsp86/report.md`, FINDINGS INDEX + THE QUEUE); (c) then VSP-88. Hygiene note for the brief: the VSP-76 builder created `vsp_qa_g11_7609291_test` in a QA gate's namespace — never again. Round-2 gate = tier 1, round 2 of 2 (a NO-GO then goes to Kam).
+2. **Batch 8 verdict (%45, NexusAI RD-648/609/700)** — read whole, score, pane_close; merges go to N via PR under C-190.
+3. **M's PR #32** — M mails the alert-#247 fix head: READ THE DIFF AT SOURCE (read verbs only) and GO; after CodeQL + landing, mail ALL seats the confirmed landing step. Then merges resume in C-186 order.
+4. Batch 9 (NexusAI): RD-723 @ 19fc17c (N, READY saved) + O's RD-466 when its READY lands.
+### FLOOR (09:06)
+%0 tuesday · %45 QA/NexusAI-batch8 (holds the jest lock since 21:58Z; hold files fresh at 08:57) · %46 QA/Vision-gate14 | %22 P · %21 N · %19 M · %29 O · %1 monitor. All four NexusAI seats acked (holding by design). Usage ~53%.
+
 ## 🟢 DELTA 123 — 2026-09-29 08:12 (s92, ctx 72% CHECKPOINT; band 80-90). **READ THIS FIRST, THEN 122 (its gate lines are current).**
 ### KAM RULED THIS MORNING (all delivered; artefacts read at source)
 - 08:06:30 CodeQL ruleset = org policy, adhere -> NexusAI C-190; all four seats acked 22:08Z. Every merge via PR, no NEW high+ alert in changed code (test code too), never dismiss alerts.
