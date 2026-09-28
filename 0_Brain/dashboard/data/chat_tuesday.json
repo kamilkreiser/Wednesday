@@ -3855,5 +3855,19 @@
   "project": "Datasec",
   "ts": "2026-09-28T20:32:58.425716+10:00",
   "text": "Datasec / Vision: both done, no action needed.\n\n1. VSP-74 and VSP-75 are on the portal's main branch (110bb03). I recounted the tests myself: 131 unit and 126 database tests, nothing failed and nothing lost. The six unusual table layouts are ticketed as VSP-87. Nothing was deployed.\n\n2. VSP-67 is live on production, on your signed email. The idle-transaction timeout went from off to 10 minutes, the other timeouts are unchanged, no restart was needed, and the portal answers healthy (I checked from here too). The ATTIO bridge's next sync runs at 7am tomorrow, so I'll confirm it ran clean then. Rollback is one command.\n\nStill open: the VSP-65 deploy needs your GitHub login on the mini and your go-ahead, and CI on the portal can't be read until that login."
+ },
+ {
+  "role": "wednesday",
+  "seat": "Kamils-Mac-mini.localdomain",
+  "project": "Datasec",
+  "ts": "2026-09-29T05:48:09.305486+10:00",
+  "text": "Datasec / NexusAI: overnight test round in, no action needed except one card.\n\n1. Passed, merging next: RD-628, RD-652, and RD-646/647 (the Redis fix you ruled). So you know before it merges: with Redis down at startup, the app now stays up and every rate-limited request gets a clear 503, where today it crashes. In Docker the container then shows unhealthy instead of restarting. The Marketplace version doesn't use Redis, so it's unaffected.\n\n2. RD-618 failed: one anonymous request can fill the security-report log with 319 entries. It goes back to M for a per-request cap.\n\n3. RD-686 (brand-guide wording) failed its last allowed round on two narrow sentences. That's the card on your board, recommendation (a)."
+ },
+ {
+  "role": "wednesday",
+  "seat": "Kamils-Mac-mini.localdomain",
+  "project": "Datasec",
+  "ts": "2026-09-29T05:49:51.999818+10:00",
+  "text": "Coordinator seat rotated automatically at 05:49 — planned rotation inside Kam's 80-90% context band. A fresh seat is booting now (about ten minutes); agents' mail waits for it. A liveness check runs 25 s after the respawn and will alarm here if the fleet session or any agent pane was lost."
  }
 ]
