@@ -19555,5 +19555,39 @@
    "CARD vision-prod-postgres-idle-transaction-timeout",
    "CARD vision-vsp65-production-deploy"
   ]
+ },
+ {
+  "id": "secuura-ks1054-f9282-migration-failure-visibility",
+  "client_project": "Secuura/Blockchain",
+  "title": "KS-1054: when a database migration fails at start-up, should the gateway keep serving, flag it on its health check, or refuse to start?",
+  "bluf": "No action needed unless you disagree with the default. Today a failed migration on the gateway is only a log line (startup-migrations.ts:930, index.ts:1188-1194). So a brand-new database can start with tenant isolation open until its second start (KS-1054; QA measured 09-09, not re-run). Local stacks already stop on a failure (run-migrations.sh:190, since KS-1031). I recommend (a): keep serving, but make /health report the failure, because the deploy scripts already check /health. Either way we fix the start-up order now.",
+  "default_action": "If you do not answer: nothing about start-up behaviour changes. Wednesday briefs a Claude seat to fix only the stage order (proved on a fresh database), and failures stay a log line until you rule.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Keep serving, flag it on /health",
+    "detail": "The migration run returns its failed count. /health reports it, so the deploy scripts' existing /health checks (deploy-all.sh:281, deploy.sh:823) see it and the deploy reads as failed. The running service is not stopped."
+   },
+   {
+    "key": "b",
+    "label": "Refuse to start",
+    "detail": "Any failed migration makes the gateway exit non-zero, the same as local stacks since KS-1031. Strictest. Risk: a migration that fails on every start would keep production down until it is fixed."
+   },
+   {
+    "key": "c",
+    "label": "Leave start-up log-only, check new databases instead",
+    "detail": "No change to start-up. A new environment or tenant database is not declared ready until a pg_policy check shows the fail-closed shape (the ticket's fix shape 3). This covers the known cause but nothing new."
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-09-28T15:57:23.365678+10:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "2026-08-21 20:06",
+   "2026-09-03 10:27",
+   "CARD secuura-audit-rows-react-router-v7-migration"
+  ]
  }
 ]
