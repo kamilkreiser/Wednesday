@@ -1,0 +1,29 @@
+BLUF: VSP-83 READY FOR QA, TIER 1 (your ruling). Branch vsp-83-old-backup-dates @ c955065838821 (off main 6dbffdf, pushed; ls-remote matches). An old-format backup made at +10 restores 2026-09-27, not 2026-09-26. Production's TZ is UNMEASURED. Not merged, not deployed. CI UNMEASURED.
+
+TICKET: VSP-83 (Medium), gate 12 VSP75-G12-O1. Ruling: your ANSWER 20:45:35Z, on VSP-83 (comment 38585) and CLARIFICATIONS C-11.
+FILES TOUCHED: server/dbRestore.js, server/dbRestore.test.js (unit), test/db/restore-old-dates.test.js (new). Overlaps VSP-86 (also dbRestore.js), which you've put in the same tier-1 gate.
+
+FIX, to the ruling point by point
+1. DATE columns only (information_schema data_type = 'date', read per table like the existing JSON-column read). A value matching a full ISO instant (date T time, optional fraction, Z or ±hh[:]mm) becomes Intl.DateTimeFormat('en-CA', {timeZone}).format(new Date(v)), i.e. its calendar date in the zone. Anything else (VSP-75 plain dates, null, a naive time) passes through untouched.
+2. Zone: RESTORE_BACKUP_TZ when set (trimmed; validated by Intl; unknown -> throws "RESTORE_BACKUP_TZ '...' is not a time zone Node knows ... Nothing was changed." before any read or write), else this process's zone. First line of restoreData(), before restorePlan and any write: "Dates in a pre-VSP-75 backup are read in <tz>, from <RESTORE_BACKUP_TZ | this process's time zone (RESTORE_BACKUP_TZ not set)>."
+3. Runbook: dbRestore.js's usage header now documents RESTORE_BACKUP_TZ ("Set it when restoring on a machine whose time zone differs from the one that made the backup"). Production's TZ stays UNMEASURED.
+4. Red first: see below. 5. Tier 1. Ms truncation: stated in the code comment as a limitation.
+
+PRIOR WORK: VSP-75 made new backups use row_to_json (plain dates, µs kept) and added the JSON-column conversion in restoreTable. This adds the matching DATE conversion beside it; nothing removed. Pre-gate-12 FIX 1 (restore-old-backup.test.js) made old 10-table backups restorable at all; its cells are unchanged and green.
+
+RED FIRST (test/db/restore-old-dates.test.js; the process TZ is switched via process.env.TZ)
+- planted old-format row: lead_collateral_provided.provided_at = "2026-09-26T14:00:00.000Z", which the old backup wrote for 2026-09-27 at +10.
+- main 6dbffdf: 4 of 6 red. The +10 cell restores '2026-09-26' (the gate's symptom). Laptop, printed-zone and unknown-zone cells fail. The UTC control ("2026-09-27T00:00:00.000Z" -> 2026-09-27) and the plain-date control (Sydney / Los Angeles / UTC+override Kiritimati) are GREEN on main: they can fail, and they say nothing else changes.
+- c955065: 6 of 6, including the laptop case (TZ=UTC, RESTORE_BACKUP_TZ=Australia/Sydney -> 2026-09-27) and "unknown zone changes nothing" (a live edit survives).
+- Mutants: conversion removed -> 2 fail; override ignored -> 3 fail; zone line printed after the writes -> 1 fail.
+- Unit cells pin the helpers: east, west, UTC, explicit offset, pass-through set, override/default/blank/unknown.
+
+SUITES AS SETS vs main 6dbffdf (clean archives, fresh DB vsp_s0929_v83_test, env -i)
+- unit 131 -> 134 (c955065); db 126 -> 132 (ebb4c45; c955065 changed only the unit test file); lost 0, failing 0, dup 0.
+COVERAGE: 80.78 -> 80.81 lines (ebb4c45 alone was 80.34; the unit cells recover it).
+
+NOT TESTED: CI; Node 20/22. The restore CLI end to end (it needs AZURE_BACKUP_CONN_STR, forbidden). Cells call restoreData(), the same path main() calls after download. quotes.valid_until (the other DATE column) isn't in old backups, so it isn't in the cells. A DST-edge date in the maker's zone (the conversion uses Intl's zone rules, not a fixed offset).
+
+EVIDENCE: 5_Project_History/evidence/2026-09-29-vsp83/. Local DB vsp_s0929_v83_test (+_lazy if made).
+Next: VSP-86 (A) per your ruling, then VSP-80, VSP-77 (already built as da62873, READY after 86), VSP-79. VSP-72 parked. 21:05Z bridge read armed.
+
