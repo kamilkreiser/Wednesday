@@ -7531,5 +7531,12 @@
   "project": "Secuura",
   "ts": "2026-09-28T18:01:21.631971+10:00",
   "text": "Update at 6pm: you hadn't ruled on the KS-888 revoke/validate card, so my recommendation now applies. When saving fails, revoke returns an error and keeps the key blocked in memory, and validate refuses the key rather than letting it through. The card stays open, so if you want something different, just say, and your answer overrides this.\n\nI'm briefing it for the Spark first, and a cloud seat only raises the PRs.\n\nSeparately, Seat B 38th's four PRs are ready (KS-1129, KS-1124, KS-1227 and KS-1351), and I'm building their QA gate now."
+ },
+ {
+  "role": "wednesday",
+  "seat": "Kamils-Mac-Studio.local",
+  "project": "Secuura",
+  "ts": "2026-09-28T18:21:51.213886+10:00",
+  "text": "Kam, a correction on KS-888 validate. The 6pm default was based on something I hadn't checked.\n\nWhen I briefed it properly, it turned out the only thing validate saves is the key's usage counter. The gateway treats any refusal as an invalid key and remembers that for 30 seconds. So the default would have let one database fault lock out every API key, valid ones included. My card didn't tell you that.\n\nSo I'm holding validate, and there's a new card asking again. I recommend: validate keeps answering from the key itself, and a failed counter write is logged, never refused. Revoke is unaffected and is on the Spark now."
  }
 ]

@@ -19675,5 +19675,38 @@
    "CARD secuura-ks1207-revoked-session-plus-junk-key-bypass",
    "CARD secuura-ks1348-r2-files-still-leak-allowlist"
   ]
+ },
+ {
+  "id": "secuura-ks888-validate-usage-write-failure",
+  "client_project": "Secuura/Blockchain",
+  "title": "KS-888 validate: should a failed usage-counter write lock out a valid API key? The 18:00 default would, and the card never said so",
+  "bluf": "No action needed unless you disagree with the default. At 18:00 your KS-888 revoke/validate card defaulted to 'validate refuses on a failed save'. Measuring it showed the save on validate is only the USAGE COUNTER (last-used time and count), not the key's state. The gateway treats any refusal as an invalid key and caches that for 30 seconds (api-gateway middleware/auth.ts:228-229). So one database fault like a schema drift would refuse EVERY API key, including valid ones. Today the same fault lets them through. The earlier card did not say this, so I have held validate and am asking again. Revoke is unaffected and is going ahead as ruled by default.",
+  "default_action": "If you don't answer by Tue 29 Sep 12:00 AEST: option a. The Spark gets a revised validate brief, then a gate, then a merge on Wednesday's GO; nothing deploys. Until then validate is held and unchanged.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Validate still answers from the key itself; a failed usage write is logged, never refused (Recommended)",
+    "detail": "A valid key keeps working through a counter-write fault, and a revoked or unknown key is still refused. The fault is logged loudly so it is noticed. Nothing about key state is ever answered from a failed write."
+   },
+   {
+    "key": "b",
+    "label": "Refuse with 503 on any failed save (the 18:00 default as written)",
+    "detail": "Fails closed on the counter too: every sk_ key is refused through the gateway while the fault lasts, plus 30 s of cached lockout per key."
+   },
+   {
+    "key": "c",
+    "label": "Leave validate as it is today",
+    "detail": "A failed usage write stays a log line and validate answers valid; no code change."
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-09-28T18:21:32.911256+10:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "2026-08-21 20:06",
+   "CARD secuura-ks888-failed-key-save-design"
+  ]
  }
 ]

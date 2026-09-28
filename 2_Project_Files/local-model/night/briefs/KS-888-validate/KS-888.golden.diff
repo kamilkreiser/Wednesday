@@ -1,0 +1,67 @@
+--- a/Blockchain/Dev/services/security/src/index.ts
++++ b/Blockchain/Dev/services/security/src/index.ts
+@@ -1353,4 +1353,16 @@
+   apiKey.usageCount++;
+-  await dbSaveApiKey(apiKey);
+-  
++  // KS-888 (card secuura-ks888-revoke-validate-on-failed-save, option a, the default from 2026-09-28 18:00):
++  // fail closed. A usage save that did not persist never answers valid: the caller gets a retryable 503,
++  // whatever the fault class. The try is required: this handler takes no next, so an uncaught throw would
++  // be an unhandled rejection that ends the process (KS-888 r2).
++  try {
++    await dbSaveApiKey(apiKey, { rethrow: true });
++  } catch (saveErr: any) {
++    log('error', 'KS-888: API key validation refused, the key usage could not be saved', { keyId: apiKey.id, code: saveErr?.code });
++    return res.status(503).json({
++      success: false,
++      error: { code: 'SERVICE_UNAVAILABLE', message: 'The API key could not be validated right now, so it was not accepted' },
++    });
++  }
++
+   res.json({
+--- a/Blockchain/Dev/services/security/src/__tests__/ks888-failed-mint-save-issues-no-key.test.ts
++++ b/Blockchain/Dev/services/security/src/__tests__/ks888-failed-mint-save-issues-no-key.test.ts
+@@ -96,4 +96,4 @@
+ });
+-
+-describe('KS-888: a mint whose save fails issues no key; revoke and validate are unchanged', () => {
++
++describe('KS-888: what the key routes answer when the key save fails', () => {
+   it('RED KS-888 A1: a structural save failure (42703) answers 500 INTERNAL_ERROR with no key material', async () => {
+@@ -129,9 +129,31 @@
+   });
+-
++
++  it.each(INFRA)('RED KS-888 V1 %s: validate refuses with 503 when the usage save hits an infrastructure fault, never valid', async (_label, fault) => {
++    const minted = await mint('ks888 validate infra');
++    state.fault = fault;
++    const res = await fetch(base + '/api/keys/validate', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ key: minted.body.data.key }), signal: AbortSignal.timeout(3000) });
++    const json = (await res.json()) as { success?: boolean; data?: { valid?: boolean }; error?: { code?: string } };
++    expect({ minted: minted.status, status: res.status, success: json.success, valid: json.data?.valid, code: json.error?.code }).toEqual({ minted: 201, status: 503, success: false, valid: undefined, code: 'SERVICE_UNAVAILABLE' });
++  });
++
++  it('control KS-888 V2: a validate whose usage save lands answers 200 valid, and the save was issued', async () => {
++    const minted = await mint('ks888 validate saved');
++    const before = state.inserts;
++    const res = await fetch(base + '/api/keys/validate', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ key: minted.body.data.key }), signal: AbortSignal.timeout(3000) });
++    expect({ minted: minted.status, status: res.status, valid: ((await res.json()) as { data?: { valid?: boolean } }).data?.valid, inserts: state.inserts - before }).toEqual({ minted: 201, status: 200, valid: true, inserts: 1 });
++  });
++
++  it('control KS-888 V3: with no database at all a validate still answers 200 valid from memory', async () => {
++    state.dbUp = false;
++    const minted = await mint('ks888 validate no database');
++    const res = await fetch(base + '/api/keys/validate', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ key: minted.body.data.key }), signal: AbortSignal.timeout(3000) });
++    expect({ minted: minted.status, status: res.status, valid: ((await res.json()) as { data?: { valid?: boolean } }).data?.valid }).toEqual({ minted: 201, status: 200, valid: true });
++  });
++
+-  it('control KS-888 C3: validate still answers 200 valid for an active key while the same INSERT fails', async () => {
+-    const minted = await mint('ks888 validate control');
++  it('RED KS-888 V4: validate refuses with 503 when the usage save fails structurally (42703), never valid', async () => {
++    const minted = await mint('ks888 validate structural');
+     state.fault = STRUCTURAL;
+     const res = await fetch(base + '/api/keys/validate', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ key: minted.body.data.key }), signal: AbortSignal.timeout(3000) });
+-    const json = (await res.json()) as { data?: { valid?: boolean } };
+-    expect({ minted: minted.status, status: res.status, valid: json.data?.valid }).toEqual({ minted: 201, status: 200, valid: true });
++    const json = (await res.json()) as { success?: boolean; data?: { valid?: boolean }; error?: { code?: string } };
++    expect({ minted: minted.status, status: res.status, success: json.success, valid: json.data?.valid, code: json.error?.code }).toEqual({ minted: 201, status: 503, success: false, valid: undefined, code: 'SERVICE_UNAVAILABLE' });
+   });
