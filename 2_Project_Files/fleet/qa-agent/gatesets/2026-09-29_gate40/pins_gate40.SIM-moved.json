@@ -1,0 +1,696 @@
+{
+ "kit": "gate40",
+ "measured_at": "2026-09-28T23:45:38Z",
+ "simulation": "moved",
+ "fail": 0,
+ "develop": "fcaa02af468f73fa699aaab0e7869be31104fe4f",
+ "develop_tree": "3c26cc8337a9f8880322267fb9c4a215b952a4e2",
+ "merge_bases": [
+  "0de108577e6199de3c9402c0643a2944d86aee97"
+ ],
+ "end_tree": "f63a4063325ac196c51670225c103cc086a821a4",
+ "end_tree_with_sibling": null,
+ "end_shortstat": "3 files changed, 331 insertions(+), 8 deletions(-)",
+ "orders": 1,
+ "merge_tree_calls": 1,
+ "prs": {
+  "1338": {
+   "head": "42f8a5abc65ef9a6bc20c07797786089f2b9cd93",
+   "branch": "refs/heads/feature/ks-1370-validate-reads-stored-revoke-b42-1",
+   "merge_base": "0de108577e6199de3c9402c0643a2944d86aee97",
+   "develop_merge_base": "0de108577e6199de3c9402c0643a2944d86aee97",
+   "stacked_on": null,
+   "commits": [
+    "42f8a5abc65ef9a6bc20c07797786089f2b9cd93"
+   ],
+   "paths": [
+    "Blockchain/Dev/services/security/src/__tests__/ks1370-validate-reads-stored-revoke.test.ts",
+    "Blockchain/Dev/services/security/src/__tests__/ks888-failed-mint-save-issues-no-key.test.ts",
+    "Blockchain/Dev/services/security/src/index.ts"
+   ],
+   "numstat": [
+    "192\t0\tBlockchain/Dev/services/security/src/__tests__/ks1370-validate-reads-stored-revoke.test.ts",
+    "51\t7\tBlockchain/Dev/services/security/src/__tests__/ks888-failed-mint-save-issues-no-key.test.ts",
+    "88\t1\tBlockchain/Dev/services/security/src/index.ts"
+   ],
+   "ahead": 1,
+   "behind": 1,
+   "move_paths": 1,
+   "move_commits": 1,
+   "overlap_with_move": [],
+   "msg_keys": [
+    "KS-1370"
+   ],
+   "subjects": [
+    "KS-1370: validate answers on the stored revoke, and its usage write cannot revive one"
+   ],
+   "merged_tree": "f63a4063325ac196c51670225c103cc086a821a4",
+   "merged_blobs": {
+    "Blockchain/Dev/services/security/src/__tests__/ks1370-validate-reads-stored-revoke.test.ts": {
+     "merged": "81f5ed5b9d94e7c262aa4780b8f2b7ed223b6d67",
+     "head": "81f5ed5b9d94e7c262aa4780b8f2b7ed223b6d67",
+     "target": "head blob",
+     "develop": null,
+     "merge_base": null
+    },
+    "Blockchain/Dev/services/security/src/__tests__/ks888-failed-mint-save-issues-no-key.test.ts": {
+     "merged": "1e105be2902deb8bf85643ed751e761d596bd94e",
+     "head": "1e105be2902deb8bf85643ed751e761d596bd94e",
+     "target": "head blob",
+     "develop": "94a489dc63b8239d7c0db57c91feab56c97b8852",
+     "merge_base": "94a489dc63b8239d7c0db57c91feab56c97b8852"
+    },
+    "Blockchain/Dev/services/security/src/index.ts": {
+     "merged": "e010767cf57fec28d65969fbe3f27e1792c9cd85",
+     "head": "e010767cf57fec28d65969fbe3f27e1792c9cd85",
+     "target": "head blob",
+     "develop": "ee9e38d18eb6e31f321c05688c41efcbaa957a8e",
+     "merge_base": "ee9e38d18eb6e31f321c05688c41efcbaa957a8e"
+    }
+   }
+  }
+ },
+ "probes": {
+  "1338": [
+   "ANCHOR index.ts :[1410] (base :[]) `if (revokedInMemory) apiKey.isActive = false;` \u2014 design call (a) STICKY REVOKE: delete it -> the cached-revoked / stored-active arm (KS-888 R2) must answer valid (the arm the gate owes)",
+   "ANCHOR index.ts :[1397] (base :[]) `memApiKeys.delete(apiKey.id);` \u2014 design call (b) EVICTION of a vanished row: delete it -> the entry survives the Key not found answer",
+   "ANCHOR index.ts :[1393] (base :[]) `if (apiKey && isDbAvailable()) {` \u2014 half (ii)'s guard: `false &&` neutralises half (ii) (the seat's W arm: half (i) alone must still keep the row revoked)",
+   "ANCHOR index.ts :[1456] (base :[]) `await dbRecordApiKeyUsage(apiKey);` \u2014 half (i)'s call site: put `dbSaveApiKey(apiKey)` back with half (ii) off -> the revoke is REVIVED (the seat's W4)",
+   "ANCHOR index.ts :[1414] (base :[]) `return res.status(503).json({` \u2014 Kam's split, limb 1: the 503 on a failed stored read",
+   "ANCHOR index.ts :[368] (base :[]) ``UPDATE svc_api_keys SET last_used_at = $2, usage_count = $3 WHERE id = $1`,` \u2014 the usage-only statement (names neither is_active nor INSERT)",
+   "ANCHOR index.ts :[318] (base :[318]) `is_active = EXCLUDED.is_active,` \u2014 the SHARED upsert KEEPS is_active (revoke persists through it; the KS 764 guard pins that shape)",
+   "ANCHOR index.ts :[1322] (base :[1286]) `apiKey.isActive = false;` \u2014 the revoke flip (UNCHANGED by this PR \u2014 the KS 764 guard reads it)",
+   "BASE ANCHOR `await dbSaveApiKey(apiKey);` at base :[1369], at head :[] \u2014 validate's usage write at the BASE (the shared upsert: the revive) (the RED arm at base; at head the call site is dbRecordApiKeyUsage)",
+   "index.ts HUNKS (READ, `git diff -U0`): ['@@ -339,0 +340,36 @@ async function dbSaveApiKey(k: ApiKey, opts: { rethrow?: boolean } = {}): Promis', \"@@ -1334,0 +1371,50 @@ app.post('/api/keys/validate', async (req: Request, res: Response) => {\", \"@@ -1369 +1455,2 @@ app.post('/api/keys/validate', async (req: Request, res: Response) => {\"]",
+   "NOTE (READ, for the gate to MEASURE): an UPDATE that the tenant_isolation policy filters to ZERO rows does NOT throw \u2014 a GUC mismatch would lose the usage count SILENTLY (rowCount is never read); the drafter measured the usage count moving 0 -> 1 as secuura_app (pgprobe U2 / R1). The stale-copy LOST UPDATE (usage_count written from a stale value) is the seat's own candidate, not fixed, not filed",
+   "#1334's RE-PIN in ks888 (READ): 7 `-` / 51 `+` lines; hunks by declaration ['+23: TOP-LEVEL (the mock / state)', '+52: TOP-LEVEL (the mock / state)', '+67: TOP-LEVEL (the mock / state)', '+211: control KS-888 V1 %s: validate answers 200 valid from the key itself w', '+214: control KS-888 V1 %s: validate answers 200 valid from the key itself w', '+240: control KS-888 V3: a validate whose usage write lands answers 200 vali', '+242: control KS-888 V3: a validate whose usage write lands answers 200 vali']; declarations at base 13, at head 13 (it.each over INFRA = 3 cases each). The seat: 5 declarations = 7 executed cases went red on the fix \u2014 only the ones listed here had TEXT edits; the rest went green by the MOCK change alone: the gate runs the BASE ks888 file against the HEAD product to name the red set, and reads each changed line: fixture more faithful, or a pin weakened",
+   "ks1370 CELLS (READ, head): ['W1 half (i): validate\\\\', 'W2 half (i): the usage write still RECORDS usage \u2014 it is narrowed, not removed', 'V1 half (ii): a STALE cache saying active cannot honour a key the store has revoked', 'V2 half (ii): the stale cache entry is REFRESHED, so it stops lying for later requests', 'S1 KS-888 is preserved: a cached revoke is NOT undone by a store that still reads active', 'D1 a row that has VANISHED is not honoured from cache, and the entry is evicted', 'F1 a stored read that FAILS answers 503 Unable to verify key, never valid (Kam ruling a, limb 1)', 'M1 memory-only mode answers from memory, NOT 503 (Kam ruling a, limb 2 \u2014 keeps #1334 C4)', 'M2 memory-only mode still refuses a key revoked IN memory']",
+   "CROSS-PACKAGE CENSUS (READ, `git grep -l -F` over Blockchain/Dev at head; fragments = file name and <parent>/<stem>, for index.ts the path spellings; globs *.test.ts *.test.js *.test.sh __tests__/*.sh): {'ks1370-validate-reads-stored-revoke.test.ts': [], 'ks888-failed-mint-save-issues-no-key.test.ts': [], 'index.ts': ['Blockchain/Dev/packages/shared/src/__tests__/ks764-key-revoke-call-site-guard.test.ts', 'Blockchain/Dev/packages/shared/src/__tests__/ks781-p3-3-body-parser-order.test.ts']} \u2014 the suites the gate RUNS: ['packages/shared', 'services/security']",
+   "GATEWAY REFUSAL CACHE (READ, api-gateway middleware/auth.ts at develop): `if (!resp.ok)` :[198, 228] and `!data?.valid` both cache null for 30 s at :[229, 235]; a VALID answer is cached 60 s at :[247]; the connector bearer is cached up to 8 min at :[180]. So END TO END (a PREDICTION): a security-DB fault on a cache-HIT key now answers 503 -> the gateway caches a refusal 30 s -> the caller gets 401 Invalid API key for the fault + up to 30 s; a key whose VALID answer the gateway cached in the last 60 s keeps working until that entry expires (a revoke also takes up to 60 s + 8 min of bearer cache to bite through the gateway, unchanged by this PR); a cache-MISS key answered Key not found (valid:false, also cached 30 s) BEFORE and AFTER this PR; memory-only security never 503s",
+   "THE PREMISE (READ, develop): 039 creates security_find_api_key_by_hash SECURITY DEFINER at :[256], the permissive svc_api_keys_auth_lookup policy FOR SELECT TO secuura_auth_lookup at :[173], owner -> secuura_auth_lookup and GRANT EXECUTE to secuura_app ONLY IF the role exists at :[285]; the gateway provisions secuura_app (NOSUPERUSER NOINHERIT NOBYPASSRLS) AFTER the migrations and grants EXECUTE ON ALL FUNCTIONS at startup-migrations.ts :[941] \u2014 so on a fresh database the function EXECUTE for secuura_app comes from the gateway grant, not from 039 (measured by pgprobe P rows)",
+   "THE POSTGRES (MEASURED by the drafter AS secuura_app, pgprobe_gate40.py -> pgprobe_1.out / pgprobe_gate40.json, PostgreSQL 18.3 (Homebrew) on aarch64-ap): {'base': {'R2 stale instance after the stored revoke: answer / row after': [True, None, {'is_active': True, 'usage': 2}], 'A1 cached-revoked stored-active: answer / store': [False, 'Key revoked', {'is_active': True, 'usage': 0}], 'D1 vanished: answer / evicted / row re-created?': [True, None, False, {'is_active': True, 'usage': 1}], 'F1 stored read fails (EXECUTE revoked): status / message': [200, True], 'U1 usage write fails: status / valid / error lines / key lines / hash lines': [200, True, 1, 0, 0], 'M1 memory-only: avail / active / revoked': [False, [200, True], [200, False, 'Key revoked']]}, 'head': {'R2 stale instance after the stored revoke: answer / row after': [False, 'Key revoked', {'is_active': False, 'usage': 1}], 'A1 cached-revoked stored-active: answer / store': [False, 'Key revoked', {'is_active': True, 'usage': 0}], 'D1 vanished: answer / evicted / row re-created?': [False, 'Key not found', True, None], 'F1 stored read fails (EXECUTE revoked): status / message': [503, 'Unable to verify key'], 'U1 usage write fails: status / valid / error lines / key lines / hash lines': [200, True, 1, 0, 0], 'M1 memory-only: avail / active / revoked': [False, [200, True], [200, False, 'Key revoked']]}, 'armA_nosticky': {'R2 stale instance after the stored revoke: answer / row after': [False, 'Key revoked', {'is_active': False, 'usage': 1}], 'A1 cached-revoked stored-active: answer / store': [True, None, {'is_active': True, 'usage': 1}], 'D1 vanished: answer / evicted / row re-created?': [False, 'Key not found', True, None], 'F1 stored read fails (EXECUTE revoked): status / message': [503, 'Unable to verify key'], 'U1 usage write fails: status / valid / error lines / key lines / hash lines': [200, True, 1, 0, 0], 'M1 memory-only: avail / active / revoked': [False, [200, True], [200, False, 'Key revoked']]}, 'armB_noevict': {'R2 stale instance after the stored revoke: answer / row after': [False, 'Key revoked', {'is_active': False, 'usage': 1}], 'A1 cached-revoked stored-active: answer / store': [False, 'Key revoked', {'is_active': True, 'usage': 0}], 'D1 vanished: answer / evicted / row re-created?': [False, 'Key not found', False, None], 'F1 stored read fails (EXECUTE revoked): status / message': [503, 'Unable to verify key'], 'U1 usage write fails: status / valid / error lines / key lines / hash lines': [200, True, 1, 0, 0], 'M1 memory-only: avail / active / revoked': [False, [200, True], [200, False, 'Key revoked']]}, 'armC_revive': {'R2 stale instance after the stored revoke: answer / row after': [True, None, {'is_active': True, 'usage': 2}], 'A1 cached-revoked stored-active: answer / store': [False, 'Key revoked', {'is_active': True, 'usage': 0}], 'D1 vanished: answer / evicted / row re-created?': [True, None, False, {'is_active': True, 'usage': 1}], 'F1 stored read fails (EXECUTE revoked): status / message': [200, True], 'U1 usage write fails: status / valid / error lines / key lines / hash lines': [200, True, 1, 0, 0], 'M1 memory-only: avail / active / revoked': [False, [200, True], [200, False, 'Key revoked']]}, 'armD_half1only': {'R2 stale instance after the stored revoke: answer / row after': [True, None, {'is_active': False, 'usage': 2}], 'A1 cached-revoked stored-active: answer / store': [False, 'Key revoked', {'is_active': True, 'usage': 0}], 'D1 vanished: answer / evicted / row re-created?': [True, None, False, None], 'F1 stored read fails (EXECUTE revoked): status / message': [200, True], 'U1 usage write fails: status / valid / error lines / key lines / hash lines': [200, True, 1, 0, 0], 'M1 memory-only: avail / active / revoked': [False, [200, True], [200, False, 'Key revoked']]}, 'premise as secuura_app (head)': {'P role attributes': {'rolsuper': False, 'rolbypassrls': False, 'rolinherit': False}, 'P svc_api_keys rls/force/policies': {'rls': True, 'force': True, 'policies': [{'name': 'svc_api_keys_auth_lookup', 'roles': ['secuura_auth_lookup'], 'cmd': 'SELECT'}, {'name': 'tenant_isolation', 'roles': ['public'], 'cmd': 'ALL'}]}, 'P fn owner / EXECUTE for ROLE': {'owner': 'secuura_auth_lookup', 'secdef': True, 'execute': True}, 'P direct SELECT by hash as ROLE, no GUC (premise: 0 under FO': 0, 'P carve-out security_find_api_key_by_hash as ROLE, no GUC (m': 1, 'P CONTROL direct SELECT by hash as the SUPERUSER (1: a super': 1, 'P CONTROL carve-out for an unknown hash as ROLE (0)': 0}, 'premise as postgres (head)': {'P direct SELECT by hash as ROLE, no GUC (premise: 0 under FO': 1, 'P CONTROL direct SELECT by hash as the SUPERUSER (1: a super': 1}, \"R2 as postgres (the builder's drill), base / head\": [{'answer': {'status': 200, 'valid': True}, 'row_before': {'is_active': True, 'usage': 1}, 'row_after': {'is_active': True, 'usage': 2}, 'cache_after': True}, {'answer': {'status': 200, 'valid': False, 'reason': 'Key revoked'}, 'row_before': {'is_active': True, 'usage': 1}, 'row_after': {'is_active': False, 'usage': 1}, 'cache_after': False}]} \u2014 the gate re-measures and RULES"
+  ]
+ },
+ "measured": {
+  "1338": {
+   "pgprobe": {
+    "summary": {
+     "base": {
+      "R2 stale instance after the stored revoke: answer / row after": [
+       true,
+       null,
+       {
+        "is_active": true,
+        "usage": 2
+       }
+      ],
+      "A1 cached-revoked stored-active: answer / store": [
+       false,
+       "Key revoked",
+       {
+        "is_active": true,
+        "usage": 0
+       }
+      ],
+      "D1 vanished: answer / evicted / row re-created?": [
+       true,
+       null,
+       false,
+       {
+        "is_active": true,
+        "usage": 1
+       }
+      ],
+      "F1 stored read fails (EXECUTE revoked): status / message": [
+       200,
+       true
+      ],
+      "U1 usage write fails: status / valid / error lines / key lines / hash lines": [
+       200,
+       true,
+       1,
+       0,
+       0
+      ],
+      "M1 memory-only: avail / active / revoked": [
+       false,
+       [
+        200,
+        true
+       ],
+       [
+        200,
+        false,
+        "Key revoked"
+       ]
+      ]
+     },
+     "head": {
+      "R2 stale instance after the stored revoke: answer / row after": [
+       false,
+       "Key revoked",
+       {
+        "is_active": false,
+        "usage": 1
+       }
+      ],
+      "A1 cached-revoked stored-active: answer / store": [
+       false,
+       "Key revoked",
+       {
+        "is_active": true,
+        "usage": 0
+       }
+      ],
+      "D1 vanished: answer / evicted / row re-created?": [
+       false,
+       "Key not found",
+       true,
+       null
+      ],
+      "F1 stored read fails (EXECUTE revoked): status / message": [
+       503,
+       "Unable to verify key"
+      ],
+      "U1 usage write fails: status / valid / error lines / key lines / hash lines": [
+       200,
+       true,
+       1,
+       0,
+       0
+      ],
+      "M1 memory-only: avail / active / revoked": [
+       false,
+       [
+        200,
+        true
+       ],
+       [
+        200,
+        false,
+        "Key revoked"
+       ]
+      ]
+     },
+     "armA_nosticky": {
+      "R2 stale instance after the stored revoke: answer / row after": [
+       false,
+       "Key revoked",
+       {
+        "is_active": false,
+        "usage": 1
+       }
+      ],
+      "A1 cached-revoked stored-active: answer / store": [
+       true,
+       null,
+       {
+        "is_active": true,
+        "usage": 1
+       }
+      ],
+      "D1 vanished: answer / evicted / row re-created?": [
+       false,
+       "Key not found",
+       true,
+       null
+      ],
+      "F1 stored read fails (EXECUTE revoked): status / message": [
+       503,
+       "Unable to verify key"
+      ],
+      "U1 usage write fails: status / valid / error lines / key lines / hash lines": [
+       200,
+       true,
+       1,
+       0,
+       0
+      ],
+      "M1 memory-only: avail / active / revoked": [
+       false,
+       [
+        200,
+        true
+       ],
+       [
+        200,
+        false,
+        "Key revoked"
+       ]
+      ]
+     },
+     "armB_noevict": {
+      "R2 stale instance after the stored revoke: answer / row after": [
+       false,
+       "Key revoked",
+       {
+        "is_active": false,
+        "usage": 1
+       }
+      ],
+      "A1 cached-revoked stored-active: answer / store": [
+       false,
+       "Key revoked",
+       {
+        "is_active": true,
+        "usage": 0
+       }
+      ],
+      "D1 vanished: answer / evicted / row re-created?": [
+       false,
+       "Key not found",
+       false,
+       null
+      ],
+      "F1 stored read fails (EXECUTE revoked): status / message": [
+       503,
+       "Unable to verify key"
+      ],
+      "U1 usage write fails: status / valid / error lines / key lines / hash lines": [
+       200,
+       true,
+       1,
+       0,
+       0
+      ],
+      "M1 memory-only: avail / active / revoked": [
+       false,
+       [
+        200,
+        true
+       ],
+       [
+        200,
+        false,
+        "Key revoked"
+       ]
+      ]
+     },
+     "armC_revive": {
+      "R2 stale instance after the stored revoke: answer / row after": [
+       true,
+       null,
+       {
+        "is_active": true,
+        "usage": 2
+       }
+      ],
+      "A1 cached-revoked stored-active: answer / store": [
+       false,
+       "Key revoked",
+       {
+        "is_active": true,
+        "usage": 0
+       }
+      ],
+      "D1 vanished: answer / evicted / row re-created?": [
+       true,
+       null,
+       false,
+       {
+        "is_active": true,
+        "usage": 1
+       }
+      ],
+      "F1 stored read fails (EXECUTE revoked): status / message": [
+       200,
+       true
+      ],
+      "U1 usage write fails: status / valid / error lines / key lines / hash lines": [
+       200,
+       true,
+       1,
+       0,
+       0
+      ],
+      "M1 memory-only: avail / active / revoked": [
+       false,
+       [
+        200,
+        true
+       ],
+       [
+        200,
+        false,
+        "Key revoked"
+       ]
+      ]
+     },
+     "armD_half1only": {
+      "R2 stale instance after the stored revoke: answer / row after": [
+       true,
+       null,
+       {
+        "is_active": false,
+        "usage": 2
+       }
+      ],
+      "A1 cached-revoked stored-active: answer / store": [
+       false,
+       "Key revoked",
+       {
+        "is_active": true,
+        "usage": 0
+       }
+      ],
+      "D1 vanished: answer / evicted / row re-created?": [
+       true,
+       null,
+       false,
+       null
+      ],
+      "F1 stored read fails (EXECUTE revoked): status / message": [
+       200,
+       true
+      ],
+      "U1 usage write fails: status / valid / error lines / key lines / hash lines": [
+       200,
+       true,
+       1,
+       0,
+       0
+      ],
+      "M1 memory-only: avail / active / revoked": [
+       false,
+       [
+        200,
+        true
+       ],
+       [
+        200,
+        false,
+        "Key revoked"
+       ]
+      ]
+     },
+     "premise as secuura_app (head)": {
+      "P role attributes": {
+       "rolsuper": false,
+       "rolbypassrls": false,
+       "rolinherit": false
+      },
+      "P svc_api_keys rls/force/policies": {
+       "rls": true,
+       "force": true,
+       "policies": [
+        {
+         "name": "svc_api_keys_auth_lookup",
+         "roles": [
+          "secuura_auth_lookup"
+         ],
+         "cmd": "SELECT"
+        },
+        {
+         "name": "tenant_isolation",
+         "roles": [
+          "public"
+         ],
+         "cmd": "ALL"
+        }
+       ]
+      },
+      "P fn owner / EXECUTE for ROLE": {
+       "owner": "secuura_auth_lookup",
+       "secdef": true,
+       "execute": true
+      },
+      "P direct SELECT by hash as ROLE, no GUC (premise: 0 under FO": 0,
+      "P carve-out security_find_api_key_by_hash as ROLE, no GUC (m": 1,
+      "P CONTROL direct SELECT by hash as the SUPERUSER (1: a super": 1,
+      "P CONTROL carve-out for an unknown hash as ROLE (0)": 0
+     },
+     "premise as postgres (head)": {
+      "P direct SELECT by hash as ROLE, no GUC (premise: 0 under FO": 1,
+      "P CONTROL direct SELECT by hash as the SUPERUSER (1: a super": 1
+     },
+     "R2 as postgres (the builder's drill), base / head": [
+      {
+       "answer": {
+        "status": 200,
+        "valid": true
+       },
+       "row_before": {
+        "is_active": true,
+        "usage": 1
+       },
+       "row_after": {
+        "is_active": true,
+        "usage": 2
+       },
+       "cache_after": true
+      },
+      {
+       "answer": {
+        "status": 200,
+        "valid": false,
+        "reason": "Key revoked"
+       },
+       "row_before": {
+        "is_active": true,
+        "usage": 1
+       },
+       "row_after": {
+        "is_active": false,
+        "usage": 1
+       },
+       "cache_after": false
+      }
+     ]
+    }
+   }
+  }
+ },
+ "stacks": {},
+ "retarget": {},
+ "declared_overlap": {},
+ "noop_paths": {},
+ "sibling_paths": {},
+ "sibling_heads": {},
+ "inflight": {
+  "1253": {
+   "head": "91e066264004fdb22c67efb0c25fc44375ec6eac",
+   "state": "open",
+   "paths": [
+    "Blockchain/Dev/scripts/__tests__/pre_push_hook_base_fixture_guard.test.sh"
+   ]
+  },
+  "1250": {
+   "head": "2b8dcb824dd2c5cd4b92757934d7de9d28813a22",
+   "state": "open",
+   "paths": [
+    "Blockchain/Dev/scripts/__tests__/run_shell_suites.test.sh",
+    "Blockchain/Dev/scripts/run-shell-suites.sh"
+   ]
+  },
+  "1129": {
+   "head": "25c31a0e82990844181a5b9c9a479722dc30baea",
+   "state": "open",
+   "paths": [
+    "5_Project_History/history.md"
+   ]
+  },
+  "995": {
+   "head": "b8155636e8e60ee9646b10217859fcd274ef87f5",
+   "state": "open",
+   "paths": [
+    "Blockchain/Dev/services/anchoring/src/index.ts",
+    "Blockchain/Dev/services/api-gateway/src/utils/trustHeaders.ts",
+    "Blockchain/Dev/services/originate/src/__tests__/ks741-emitter-marker-strip.test.ts",
+    "Blockchain/Dev/services/originate/src/index.ts",
+    "Blockchain/Dev/services/originate/src/utils/gatewayProvenance.ts"
+   ]
+  },
+  "989": {
+   "head": "e62fd23cda1bc120716e5f592efac2b8abea97bf",
+   "state": "open",
+   "paths": [
+    "systemTest/fixtures/pre-suite.ts",
+    "systemTest/fixtures/provision.ts",
+    "systemTest/performance/tests/unit/fixtures/preSuiteStreams.test.ts",
+    "systemTest/performance/tests/unit/fixtures/provisionDriftQuarantine.test.ts",
+    "systemTest/performance/tests/unit/fixtures/provisionRedaction.test.ts"
+   ]
+  },
+  "949": {
+   "head": "7ee1a26e634f33b6a4ae115d559f5440a90f6fff",
+   "state": "open",
+   "paths": [
+    "Blockchain/Dev/package-lock.json",
+    "Blockchain/Dev/services/originate/package.json"
+   ]
+  },
+  "948": {
+   "head": "86c95346e5f2ec4d6b1f66ebcbf0cf55a5b55539",
+   "state": "open",
+   "paths": [
+    "Blockchain/Dev/frontend/admin/package.json",
+    "Blockchain/Dev/frontend/demo-overlay/package.json",
+    "Blockchain/Dev/frontend/issuer/package.json",
+    "Blockchain/Dev/frontend/outlook-addin/package.json",
+    "Blockchain/Dev/frontend/verifier/package.json",
+    "Blockchain/Dev/frontend/website/package.json",
+    "Blockchain/Dev/package-lock.json",
+    "Blockchain/Dev/services/analytics/package.json",
+    "Blockchain/Dev/services/auth/package.json",
+    "Blockchain/Dev/services/shared/package.json"
+   ]
+  },
+  "947": {
+   "head": "d68b9d79e67f336e527cc4eef7eaf07fa78670bb",
+   "state": "open",
+   "paths": [
+    "Blockchain/Dev/frontend/issuer/package.json",
+    "Blockchain/Dev/package-lock.json"
+   ]
+  },
+  "946": {
+   "head": "41cc5209aaf2f8369f4ce8d5735a43fb07340d0b",
+   "state": "open",
+   "paths": [
+    "Blockchain/Dev/frontend/outlook-addin/package.json",
+    "Blockchain/Dev/package-lock.json"
+   ]
+  },
+  "945": {
+   "head": "264098fce62b1e839c506f61fa443830fdba996a",
+   "state": "open",
+   "paths": [
+    "Blockchain/Dev/package-lock.json",
+    "Blockchain/Dev/package.json"
+   ]
+  },
+  "927": {
+   "head": "1041d2d32d389a5f21cf622dfcf4d5be66e0ce2f",
+   "state": "open",
+   "paths": [
+    "systemTest/__tests__/pre_suite.test.sh",
+    "systemTest/__tests__/quarantine_call_sites.test.sh"
+   ]
+  },
+  "923": {
+   "head": "d127dc7d4655a4e227d4f6e511f469c456eaabb7",
+   "state": "open",
+   "paths": [
+    "Blockchain/Dev/services/api-gateway/src/__tests__/ks570-proxy-mount-auth.test.ts"
+   ]
+  },
+  "920": {
+   "head": "2112a99e31aec4b6e132dc6519c75d3afb6b2b02",
+   "state": "open",
+   "paths": [
+    ".gitignore",
+    "Blockchain/Dev/docs/DEV-PROCESS.md",
+    "Blockchain/Dev/package.json",
+    "Blockchain/Dev/tests/e2e/BASELINE.md",
+    "Blockchain/Dev/tests/e2e/check-e2e-ready.mjs",
+    "Blockchain/Dev/tests/e2e/global-setup.ts",
+    "Blockchain/Dev/tests/e2e/package.json"
+   ]
+  },
+  "887": {
+   "head": "3aee3deed2e3ac557f0a52c0797c2a4a8df25f69",
+   "state": "open",
+   "paths": [
+    ".github/workflows/pr-platform-suites.yml",
+    "Blockchain/Dev/docs/DEV-PROCESS.md"
+   ]
+  },
+  "809": {
+   "head": "aa2270fe14cf95dbe349fb8aae14f1473d2db5e7",
+   "state": "open",
+   "paths": [
+    "systemTest/schemathesis/config/check_predicates.py",
+    "systemTest/schemathesis/schemathesis.toml"
+   ]
+  },
+  "649": {
+   "head": "1d9198ac7e2f54e43cd38b66ce40ce1f52d338b8",
+   "state": "open",
+   "paths": [
+    "Blockchain/Dev/package-lock.json",
+    "Blockchain/Dev/packages/shared/package.json",
+    "Blockchain/Dev/services/analytics/package.json",
+    "Blockchain/Dev/services/anchoring/package.json",
+    "Blockchain/Dev/services/api-gateway/package.json",
+    "Blockchain/Dev/services/auth/package.json",
+    "Blockchain/Dev/services/billing/package.json",
+    "Blockchain/Dev/services/demo-service/package.json",
+    "Blockchain/Dev/services/governance/package.json",
+    "Blockchain/Dev/services/kyc/package.json",
+    "Blockchain/Dev/services/m365-integration/package.json",
+    "Blockchain/Dev/services/nft-certificate/package.json",
+    "Blockchain/Dev/services/prism/package.json",
+    "Blockchain/Dev/services/referral/package.json",
+    "Blockchain/Dev/services/security/package.json",
+    "Blockchain/Dev/services/staking/package.json",
+    "Blockchain/Dev/services/tenant-provisioning/package.json",
+    "Blockchain/Dev/services/timestamping/package.json",
+    "Blockchain/Dev/services/tokenisation/package.json",
+    "Blockchain/Dev/services/transfer/package.json",
+    "Blockchain/Dev/services/vc-issuer/package.json",
+    "Blockchain/Dev/services/wallet-connector/package.json"
+   ]
+  },
+  "639": {
+   "head": "2069d852ee1618fac25cd3eeb56f22005422125f",
+   "state": "open",
+   "paths": [
+    "Blockchain/Dev/frontend/admin/package.json",
+    "Blockchain/Dev/frontend/issuer/package.json",
+    "Blockchain/Dev/package-lock.json"
+   ]
+  },
+  "635": {
+   "head": "6cbc298f41a1dd4a0a986084800c6de71aeb08fd",
+   "state": "open",
+   "paths": [
+    "Blockchain/Dev/package-lock.json",
+    "Blockchain/Dev/packages/shared/package.json"
+   ]
+  },
+  "575": {
+   "head": "7d32d8ae4b064592b2d133e17d23c67b8d50dc60",
+   "state": "open",
+   "paths": [
+    "Blockchain/Dev/package-lock.json",
+    "Blockchain/Dev/packages/shared/package.json",
+    "Blockchain/Dev/services/analytics/package.json",
+    "Blockchain/Dev/services/anchoring/package.json",
+    "Blockchain/Dev/services/api-gateway/package.json",
+    "Blockchain/Dev/services/auth/package.json",
+    "Blockchain/Dev/services/billing/package.json",
+    "Blockchain/Dev/services/demo-service/package.json",
+    "Blockchain/Dev/services/governance/package.json",
+    "Blockchain/Dev/services/guardian/package.json",
+    "Blockchain/Dev/services/kyc/package.json",
+    "Blockchain/Dev/services/m365-integration/package.json",
+    "Blockchain/Dev/services/originate/package.json",
+    "Blockchain/Dev/services/prism/package.json",
+    "Blockchain/Dev/services/queue/package.json",
+    "Blockchain/Dev/services/referral/package.json",
+    "Blockchain/Dev/services/security/package.json",
+    "Blockchain/Dev/services/staking/package.json",
+    "Blockchain/Dev/services/timestamping/package.json",
+    "Blockchain/Dev/services/transfer/package.json",
+    "Blockchain/Dev/services/vc-issuer/package.json"
+   ]
+  },
+  "572": {
+   "head": "4ea847b39ec8cb2db1e7bee0eb9355e35a8c4208",
+   "state": "open",
+   "paths": [
+    "Blockchain/Dev/frontend/outlook-addin/package.json",
+    "Blockchain/Dev/package-lock.json"
+   ]
+  }
+ },
+ "inflight_worktrees": {},
+ "dead_open_declared": {},
+ "titles": {
+  "1338": "KS-1370: validate answers on the stored revoke, and its usage write cannot revive one"
+ },
+ "merge_order": [
+  "1338"
+ ],
+ "order_proof": {}
+}

@@ -1,0 +1,388 @@
+pgprobe_gate40 2026-09-28T22:53:17Z | #1338 base 0de108577e61 head 42f8a5abc65e | work /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/407373b1-2c8c-4c6e-b92a-14f32c2c8007/scratchpad/g40/g40_pg
+  base @ 0de108577e61 extracted; index.ts blob ee9e38d18eb6 == the clone's
+  head @ 42f8a5abc65e extracted; index.ts blob e010767cf57f == the clone's
+  base == head for every path but services/security (the schema, shared and the gateway runner are the same bytes): True
+  armA_nosticky: 1 asserted edit(s) on a COPY of head
+  armB_noevict: 1 asserted edit(s) on a COPY of head
+  armC_revive: 2 asserted edit(s) on a COPY of head
+  armD_half1only: 1 asserted edit(s) on a COPY of head
+  engine PostgreSQL 18.3 (Homebrew) on aarch64-apple-darwin25.2.0, co | socket /tmp/q40.o29c1kwx | postmaster pid 52602 | controls {'CT1 wrong socket dir does not connect': True, "CT2 SHOW listen_addresses == ''": True, 'CT2b lsof -a -p <my postmaster> -i: 0 inet lines': True, 'CT2b control: the same lsof on another postgres pid that holds a socket finds > 0 (or no such pid running)': True}
+  base: boot 2 -> {"db": {"tracked_039": 1, "tracked_total": 49, "secuura_app": {"exists": true, "rolsuper": false, "rolbypassrls": false, "rolinherit": false, "rolcanlogin": true}, "svc_api_keys": {"rls": true, "force": true}, "fn": "security_find_api_key_by_hash(text)"}, "failed_files": [], "threw": null}
+  base as secuura_app: 19 scenario rows
+  base as postgres: 19 scenario rows
+  head: boot 2 -> {"db": {"tracked_039": 1, "tracked_total": 49, "secuura_app": {"exists": true, "rolsuper": false, "rolbypassrls": false, "rolinherit": false, "rolcanlogin": true}, "svc_api_keys": {"rls": true, "force": true}, "fn": "security_find_api_key_by_hash(text)"}, "failed_files": [], "threw": null}
+  head as secuura_app: 19 scenario rows
+  head as postgres: 19 scenario rows
+  armA_nosticky: boot 2 -> {"db": {"tracked_039": 1, "tracked_total": 49, "secuura_app": {"exists": true, "rolsuper": false, "rolbypassrls": false, "rolinherit": false, "rolcanlogin": true}, "svc_api_keys": {"rls": true, "force": true}, "fn": "security_find_api_key_by_hash(text)"}, "failed_files": [], "threw": null}
+  armA_nosticky as secuura_app: 19 scenario rows
+  armB_noevict: boot 2 -> {"db": {"tracked_039": 1, "tracked_total": 49, "secuura_app": {"exists": true, "rolsuper": false, "rolbypassrls": false, "rolinherit": false, "rolcanlogin": true}, "svc_api_keys": {"rls": true, "force": true}, "fn": "security_find_api_key_by_hash(text)"}, "failed_files": [], "threw": null}
+  armB_noevict as secuura_app: 19 scenario rows
+  armC_revive: boot 2 -> {"db": {"tracked_039": 1, "tracked_total": 49, "secuura_app": {"exists": true, "rolsuper": false, "rolbypassrls": false, "rolinherit": false, "rolcanlogin": true}, "svc_api_keys": {"rls": true, "force": true}, "fn": "security_find_api_key_by_hash(text)"}, "failed_files": [], "threw": null}
+  armC_revive as secuura_app: 19 scenario rows
+  armD_half1only: boot 2 -> {"db": {"tracked_039": 1, "tracked_total": 49, "secuura_app": {"exists": true, "rolsuper": false, "rolbypassrls": false, "rolinherit": false, "rolcanlogin": true}, "svc_api_keys": {"rls": true, "force": true}, "fn": "security_find_api_key_by_hash(text)"}, "failed_files": [], "threw": null}
+  armD_half1only as secuura_app: 19 scenario rows
+  cluster stopped rc 0 (data dir kept at /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/407373b1-2c8c-4c6e-b92a-14f32c2c8007/scratchpad/g40/g40_pg/data)
+{
+ "base": {
+  "R2 stale instance after the stored revoke: answer / row after": [
+   true,
+   null,
+   {
+    "is_active": true,
+    "usage": 2
+   }
+  ],
+  "A1 cached-revoked stored-active: answer / store": [
+   false,
+   "Key revoked",
+   {
+    "is_active": true,
+    "usage": 0
+   }
+  ],
+  "D1 vanished: answer / evicted / row re-created?": [
+   true,
+   null,
+   false,
+   {
+    "is_active": true,
+    "usage": 1
+   }
+  ],
+  "F1 stored read fails (EXECUTE revoked): status / message": [
+   200,
+   true
+  ],
+  "U1 usage write fails: status / valid / error lines / key lines / hash lines": [
+   200,
+   true,
+   1,
+   0,
+   0
+  ],
+  "M1 memory-only: avail / active / revoked": [
+   false,
+   [
+    200,
+    true
+   ],
+   [
+    200,
+    false,
+    "Key revoked"
+   ]
+  ]
+ },
+ "head": {
+  "R2 stale instance after the stored revoke: answer / row after": [
+   false,
+   "Key revoked",
+   {
+    "is_active": false,
+    "usage": 1
+   }
+  ],
+  "A1 cached-revoked stored-active: answer / store": [
+   false,
+   "Key revoked",
+   {
+    "is_active": true,
+    "usage": 0
+   }
+  ],
+  "D1 vanished: answer / evicted / row re-created?": [
+   false,
+   "Key not found",
+   true,
+   null
+  ],
+  "F1 stored read fails (EXECUTE revoked): status / message": [
+   503,
+   "Unable to verify key"
+  ],
+  "U1 usage write fails: status / valid / error lines / key lines / hash lines": [
+   200,
+   true,
+   1,
+   0,
+   0
+  ],
+  "M1 memory-only: avail / active / revoked": [
+   false,
+   [
+    200,
+    true
+   ],
+   [
+    200,
+    false,
+    "Key revoked"
+   ]
+  ]
+ },
+ "armA_nosticky": {
+  "R2 stale instance after the stored revoke: answer / row after": [
+   false,
+   "Key revoked",
+   {
+    "is_active": false,
+    "usage": 1
+   }
+  ],
+  "A1 cached-revoked stored-active: answer / store": [
+   true,
+   null,
+   {
+    "is_active": true,
+    "usage": 1
+   }
+  ],
+  "D1 vanished: answer / evicted / row re-created?": [
+   false,
+   "Key not found",
+   true,
+   null
+  ],
+  "F1 stored read fails (EXECUTE revoked): status / message": [
+   503,
+   "Unable to verify key"
+  ],
+  "U1 usage write fails: status / valid / error lines / key lines / hash lines": [
+   200,
+   true,
+   1,
+   0,
+   0
+  ],
+  "M1 memory-only: avail / active / revoked": [
+   false,
+   [
+    200,
+    true
+   ],
+   [
+    200,
+    false,
+    "Key revoked"
+   ]
+  ]
+ },
+ "armB_noevict": {
+  "R2 stale instance after the stored revoke: answer / row after": [
+   false,
+   "Key revoked",
+   {
+    "is_active": false,
+    "usage": 1
+   }
+  ],
+  "A1 cached-revoked stored-active: answer / store": [
+   false,
+   "Key revoked",
+   {
+    "is_active": true,
+    "usage": 0
+   }
+  ],
+  "D1 vanished: answer / evicted / row re-created?": [
+   false,
+   "Key not found",
+   false,
+   null
+  ],
+  "F1 stored read fails (EXECUTE revoked): status / message": [
+   503,
+   "Unable to verify key"
+  ],
+  "U1 usage write fails: status / valid / error lines / key lines / hash lines": [
+   200,
+   true,
+   1,
+   0,
+   0
+  ],
+  "M1 memory-only: avail / active / revoked": [
+   false,
+   [
+    200,
+    true
+   ],
+   [
+    200,
+    false,
+    "Key revoked"
+   ]
+  ]
+ },
+ "armC_revive": {
+  "R2 stale instance after the stored revoke: answer / row after": [
+   true,
+   null,
+   {
+    "is_active": true,
+    "usage": 2
+   }
+  ],
+  "A1 cached-revoked stored-active: answer / store": [
+   false,
+   "Key revoked",
+   {
+    "is_active": true,
+    "usage": 0
+   }
+  ],
+  "D1 vanished: answer / evicted / row re-created?": [
+   true,
+   null,
+   false,
+   {
+    "is_active": true,
+    "usage": 1
+   }
+  ],
+  "F1 stored read fails (EXECUTE revoked): status / message": [
+   200,
+   true
+  ],
+  "U1 usage write fails: status / valid / error lines / key lines / hash lines": [
+   200,
+   true,
+   1,
+   0,
+   0
+  ],
+  "M1 memory-only: avail / active / revoked": [
+   false,
+   [
+    200,
+    true
+   ],
+   [
+    200,
+    false,
+    "Key revoked"
+   ]
+  ]
+ },
+ "armD_half1only": {
+  "R2 stale instance after the stored revoke: answer / row after": [
+   true,
+   null,
+   {
+    "is_active": false,
+    "usage": 2
+   }
+  ],
+  "A1 cached-revoked stored-active: answer / store": [
+   false,
+   "Key revoked",
+   {
+    "is_active": true,
+    "usage": 0
+   }
+  ],
+  "D1 vanished: answer / evicted / row re-created?": [
+   true,
+   null,
+   false,
+   null
+  ],
+  "F1 stored read fails (EXECUTE revoked): status / message": [
+   200,
+   true
+  ],
+  "U1 usage write fails: status / valid / error lines / key lines / hash lines": [
+   200,
+   true,
+   1,
+   0,
+   0
+  ],
+  "M1 memory-only: avail / active / revoked": [
+   false,
+   [
+    200,
+    true
+   ],
+   [
+    200,
+    false,
+    "Key revoked"
+   ]
+  ]
+ },
+ "premise as secuura_app (head)": {
+  "P role attributes": {
+   "rolsuper": false,
+   "rolbypassrls": false,
+   "rolinherit": false
+  },
+  "P svc_api_keys rls/force/policies": {
+   "rls": true,
+   "force": true,
+   "policies": [
+    {
+     "name": "svc_api_keys_auth_lookup",
+     "roles": [
+      "secuura_auth_lookup"
+     ],
+     "cmd": "SELECT"
+    },
+    {
+     "name": "tenant_isolation",
+     "roles": [
+      "public"
+     ],
+     "cmd": "ALL"
+    }
+   ]
+  },
+  "P fn owner / EXECUTE for ROLE": {
+   "owner": "secuura_auth_lookup",
+   "secdef": true,
+   "execute": true
+  },
+  "P direct SELECT by hash as ROLE, no GUC (premise: 0 under FO": 0,
+  "P carve-out security_find_api_key_by_hash as ROLE, no GUC (m": 1,
+  "P CONTROL direct SELECT by hash as the SUPERUSER (1: a super": 1,
+  "P CONTROL carve-out for an unknown hash as ROLE (0)": 0
+ },
+ "premise as postgres (head)": {
+  "P direct SELECT by hash as ROLE, no GUC (premise: 0 under FO": 1,
+  "P CONTROL direct SELECT by hash as the SUPERUSER (1: a super": 1
+ },
+ "R2 as postgres (the builder's drill), base / head": [
+  {
+   "answer": {
+    "status": 200,
+    "valid": true
+   },
+   "row_before": {
+    "is_active": true,
+    "usage": 1
+   },
+   "row_after": {
+    "is_active": true,
+    "usage": 2
+   },
+   "cache_after": true
+  },
+  {
+   "answer": {
+    "status": 200,
+    "valid": false,
+    "reason": "Key revoked"
+   },
+   "row_before": {
+    "is_active": true,
+    "usage": 1
+   },
+   "row_after": {
+    "is_active": false,
+    "usage": 1
+   },
+   "cache_after": false
+  }
+ ]
+}
+wrote /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/gatesets/2026-09-29_gate40/pgprobe_gate40.json
