@@ -6,6 +6,13 @@ status: live
 supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s1-wholesale
 ---
 
+## 🔴 DELTA 125 — 2026-09-29 09:10 (s92). **VISION IS PAUSED BY KAM — READ THIS BEFORE ANYTHING IN 124.**
+- Kam, live board 09:06:26 (view=tuesday), verbatim: "Pause the vision project until further notice.  Keep the quick quote tool live but the rest of vision is being reviewed now". Receipt posted (201). Parked verbatim in projects_index/clarifications_register.md.
+- **DELTA 124 item 1 is ON HOLD in full:** no Vision seat, no merges of gate-14 GOs, no round 2 of VSP-83/86, no VSP-88. Nothing Vision-side is launched or briefed until Kam lifts the pause in his own words. QuickQuote: touch nothing, it stays live.
+- Gate 14 (%46) told to END CLEANLY with a PARTIAL report (mail verified at tuesday-agent@, --mail tap queued behind its turn). On its GATE PAUSED mail: read the partial report, score, pane_close. Record the resume point here.
+- Kam's other open Vision items keep their defaults (VSP-65 deploy waits; timezone default stays; DB cleanup stays; VSP-89 his).
+- NexusAI work is UNAFFECTED (items 2-4 of DELTA 124 stand).
+
 ## 🟢 DELTA 124 — 2026-09-29 09:06 (s92, ctx 76%; band 80-90). **READ THIS FIRST, THEN 123 (Kam's three rulings, delivered) and 122.**
 ### DONE SINCE 123
 - SECURITY BOARD DELIVERED: board 607 "Datasec Security Review" over filter 10690 (labels="security-review"), 21 tickets (CWP 4, CPKEY 3, MYP 2, RD 5, SEC 3, TDP 4), shared view-only with Steven Molnar. Verified by Tuesday (board_count 21 real + agile API). Kam told with the link (201). Seat scored 0.98, pane closed. Offered Kam: ticket the HPAM-suite findings (never ticketed; ~31) — default nothing.
