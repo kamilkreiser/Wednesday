@@ -6,6 +6,22 @@ status: live
 supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s1-wholesale
 ---
 
+## 🟢 DELTA 118 — 2026-09-29 01:26 (s91, ctx 70% CHECKPOINT; band 80-90). **READ THIS FIRST, THEN 117 (its batch-7/8 lines are current) and 116.**
+### OWED TO KAM (copy forward until closed by name)
+- **ATTIO bridge first sync under VSP-67** (21:00Z = 07:00 AEST 09-29): have the Vision agent read datasec-attio-bridge /healthz (runs 6, failures 0), then tell Kam one line. A timer (the background task in s91) fires 07:05; a successor must do it by the clock.
+- **At the RD-646/647 MERGE (batch 7, later):** tell Kam the boot-behaviour change (C-179): Redis down at boot → stays up with a named 503 instead of exiting; the compose healthcheck marks it UNHEALTHY instead of restarting it (drafter row r9).
+- **RD-686 is round 2 of 2:** a NO-GO in batch 7 → card Kam (no round 3).
+- VSP-65 deploy: his gh login + typed word (unchanged).
+- CLOSED since 116: VSP-67 done + verified; the vsp74 merge done; all three Vision cards delivered.
+### FLOOR (2026-09-29 01:26)
+- NexusAI main **40b7eae** (batch 4 closed, O 0.98). jest lock: tag=s86p-merge-1-rd286; queue: tag=qa-b7-H1-hold tag=s86o-rd466-proof 
+- **M:** 5a+5b RELEASED (nine merges; its turn comes after P's batch-6 merge 1 push, per C-186 3a O,P,M,N). **P:** batch-6 merge 1 RD-286 queued. **N:** batch-3 merge 3 RD-685 after O and P; RD-723 in progress. **O:** RD-466 proof queued.
+- **Gate %43 QA/NexusAI-batch7** running (5 targets); its lock ticket qa-b7-H1-hold is queued, which is rung-5 evidence. On its verdict: read whole, score, pane_close, route A-D → M (after 5a/5b), E → P.
+- **Batch 8** (N's RD-648/609/700, t2) drafts after batch 7's verdict.
+### RULES LEARNED THIS SESSION (ledger row written): before acking any seat as 'queued by design', read the lock OWNER's since= and the newest mtime of its log; a holder > ~45 min whose log has not moved in 20 min is a suspected hang.
+### ROTATION NOTES
+Both digests were regenerated 22:59 (after the ledger row). stash@{0} "autostash" is kept (digests + usage, superseded). Kam: nothing since his 20:23 "email sent".
+
 ## 🟢 DELTA 117 — 2026-09-29 00:15 (s91). **READ THIS FIRST, THEN 116/115/114.**
 - **BATCH 4 COMPLETE:** O merge 5 RD-443 pushed 3d05567 → **40b7eae** (ls-remote). Demo 36434215535 skipped; Build 36434215522 was RUNNING at 00:1x (O's MERGED 5/5 follows with its failing set; check it fits C-185). O's C-57 (RD-428 pair + the 2 ice retitles) VERIFIED at source by Tuesday.
 - **5a+5b RELEASE SENT to M** (`fleet/briefs_staged/2026-09-29_nexusai_M_release_5a_5b.md`, --mail tap delivered). Nine merges: RD-681 → 627b → 682 → 705 → 695 (fwd) → 413 (fwd; RD-428 id accounted) → C-170 → RD-696 → RD-594. **On each M MERGED:** ls-remote + gh run view (Build failing set ⊆ {rd638 E2}) + demo skipped. At C-170: arm-ttk result. At RD-594: K2 population. Close RD-636 on RD-413.
