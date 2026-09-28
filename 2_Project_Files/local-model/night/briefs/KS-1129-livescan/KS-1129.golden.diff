@@ -1,0 +1,72 @@
+--- a/Blockchain/Dev/services/api-gateway/src/routes/verification.ts
++++ b/Blockchain/Dev/services/api-gateway/src/routes/verification.ts
+@@ -603,10 +603,12 @@
+           // confirmedAt, ... }. Older code expected j.anchor.* (nested) which
+           // never matched, so liveTxHash stayed null and the response always
+           // fell through to the persisted document.blockchain stub.
+-          if (j.verified) {
+-            liveTxHash = j.txHash || j.transactionHash || (j.anchor && j.anchor.txHash) || null;
++          // KS-1129 O1: the live reply gets the three shape guards the persisted read got in KS-1069.
++          if (j.verified === true && !j.simulated) {
++            const liveHash = j.txHash || j.transactionHash || (j.anchor && j.anchor.txHash) || null;
++            liveTxHash = typeof liveHash === 'string' && !/^(tx_sim_|mock_tx_|tx_)/.test(liveHash) ? liveHash : null;
+             const blockNum = j.blockNumber ?? j.blockHeight ?? (j.anchor && j.anchor.blockHeight);
+-            liveBlockHeight = blockNum != null ? Number(blockNum) : null;
++            liveBlockHeight = typeof blockNum === 'number' && Number.isInteger(blockNum) && blockNum > 0 ? blockNum : null;
+             liveConfirmedAt = j.confirmedAt || j.anchoredAt || (j.anchor && j.anchor.confirmedAt) || null;
+           }
+         }
+--- a/Blockchain/Dev/services/api-gateway/src/__tests__/ks1069-persisted-anchored-input-shape.test.ts
++++ b/Blockchain/Dev/services/api-gateway/src/__tests__/ks1069-persisted-anchored-input-shape.test.ts
+@@ -258,2 +258,51 @@
+   });
++});
++
++// KS-1129 O1: the LIVE chain-scan read (anchoring's reply to GET /api/anchors/verify/:hash) had no shape
++// rule. A truthy verified, any truthy hash and a Number()-coerced height reported on-chain. It now applies
++// the three guards the persisted read above got in KS-1069. Every cell below serves NO persisted blob, so
++// the live reply alone decides the claim.
++async function verifyLive(reply: Record<string, unknown>): Promise<any> {
++  currentBlob = undefined;
++  liveAnchorReply = reply;
++  anchorStoreRows = null;
++  tier1Absent = false;
++  return post();
++}
++
++const LIVE_REAL = { verified: true, txHash: REAL_TX, blockNumber: 4242 } as const;
++const OFF_CHAIN = { verified: false, confidence: 'off-chain-only' } as const;
++
++function claim(body: any): { verified: unknown; confidence: unknown } {
++  return { verified: body.verified, confidence: body.verificationConfidence };
++}
++
++describe('KS-1129 O1: the live chain-scan reply is shape-checked before it can claim on-chain', () => {
++  it('RED KS-1129 L1: a STRING verified value is not a verified reply', async () => {
++    expect(claim(await verifyLive({ ...LIVE_REAL, verified: 'false' }))).toEqual(OFF_CHAIN);
++  });
++  it('RED KS-1129 L2: a tx_sim_ placeholder hash from the live reply is not a hash', async () => {
++    expect(claim(await verifyLive({ ...LIVE_REAL, txHash: 'tx_sim_' + 'c'.repeat(32) }))).toEqual(OFF_CHAIN);
++  });
++  it('RED KS-1129 L3: a live height of -1 is not a height', async () => {
++    expect(claim(await verifyLive({ ...LIVE_REAL, blockNumber: -1 }))).toEqual(OFF_CHAIN);
++  });
++  it('RED KS-1129 L4: a live height of 4242.5 is not a height', async () => {
++    expect(claim(await verifyLive({ ...LIVE_REAL, blockNumber: 4242.5 }))).toEqual(OFF_CHAIN);
++  });
++  it('RED KS-1129 L5: a numeric STRING live height is refused, strict as the persisted read (E7)', async () => {
++    expect(claim(await verifyLive({ ...LIVE_REAL, blockNumber: '4242' }))).toEqual(OFF_CHAIN);
++  });
++  it('RED KS-1129 L6: a live reply that declares simulated is not on-chain', async () => {
++    expect(claim(await verifyLive({ ...LIVE_REAL, simulated: true }))).toEqual(OFF_CHAIN);
++  });
++  it('control KS-1129 C1: a real hash, a positive integer height and verified true still report on-chain, from the live read', async () => {
++    const body = await verifyLive({ ...LIVE_REAL });
++    expect(claim(body)).toEqual({ verified: true, confidence: 'on-chain' });
++    expect({ source: body.blockchain.source, txHash: body.blockchain.txHash, blockHeight: body.blockchain.blockHeight })
++      .toEqual({ source: 'cardano-live', txHash: REAL_TX, blockHeight: 4242 });
++  });
++  it('control KS-1129 C2: simulated false on a real live reply still reports on-chain', async () => {
++    expect(claim(await verifyLive({ ...LIVE_REAL, simulated: false }))).toEqual({ verified: true, confidence: 'on-chain' });
++  });
+ });

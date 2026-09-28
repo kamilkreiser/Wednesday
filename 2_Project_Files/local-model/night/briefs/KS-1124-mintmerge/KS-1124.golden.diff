@@ -1,0 +1,93 @@
+--- a/Blockchain/Dev/services/originate/src/routes/documents.ts
++++ b/Blockchain/Dev/services/originate/src/routes/documents.ts
+@@ -785,7 +785,7 @@
+           createdAtMs: Date.now(),
+           bearerToken,
+         })
+-          .then((entry) => {
++          .then(async (entry) => {
+             logger.info('thread-token minted at document create', {
+               documentId: id,
+               policyId: entry.policyId,
+@@ -794,9 +794,12 @@
+             // Surface the thread-token info on the document record so
+             // dashboards can show it without a separate lookup. The
+             // canonical truth is state_thread_registry; this is a cache.
++            // KS-1124 O1: merge into the blob as persisted NOW, not the create-time local, so an anchor
++            // write that landed first (txHash, status, anchorId) is not erased by this cache write.
++            const current = await getDocument(id, tenantId).catch(() => null);
+             updateDocument(id, tenantId, {
+               blockchain: {
+-                ...(document.blockchain || {}),
++                ...(current?.blockchain || document.blockchain || {}),
+                 threadToken: {
+                   policyId: entry.policyId,
+                   scriptAddress: entry.scriptAddress,
+--- a/Blockchain/Dev/services/originate/src/__tests__/ks520-anchor-fail-closed.test.ts
++++ b/Blockchain/Dev/services/originate/src/__tests__/ks520-anchor-fail-closed.test.ts
+@@ -191,2 +191,65 @@
+   });
++});
++
++// KS-1124 O1: the thread-token mint callback at document create wrote the create-time local (which has
++// no blockchain key) plus the token, and updateDocument replaces the blockchain column wholesale. So an
++// anchor accept persisted FIRST lost its txHash, status and anchorId. The callback now merges into the
++// blob as persisted at write time. Same harness as above: documentRepo and the thread-token client are
++// this file's own mocks, reached through jest.requireMock.
++const KS1124_TX = 'a'.repeat(64);
++const KS1124_MINTED = { policyId: 'policy-ks1124', scriptAddress: 'addr_test1ks1124', mintTxHash: 'b'.repeat(64), network: 'preprod' };
++const ks1124GetDocument = (jest.requireMock('../repositories/documentRepo') as { getDocument: jest.Mock }).getDocument;
++const ks1124Mint = (jest.requireMock('../services/threadTokenClient') as { mintAndRegisterThreadToken: jest.Mock }).mintAndRegisterThreadToken;
++
++/** Create a document, then wait (bounded) for the fire-and-forget thread-token write and return its blob. */
++async function ks1124ThreadTokenWrite(): Promise<Record<string, any> | undefined> {
++  const res = await fetch(baseUrl + '/api/documents', {
++    method: 'POST',
++    headers: { 'content-type': 'application/json', authorization: 'Bearer t' },
++    body: JSON.stringify({ title: 'ks1124 thread token', type: 'general', data: { note: 'x' } }),
++  });
++  expect(res.status).toBe(201);
++  const deadline = Date.now() + 3000;
++  while (Date.now() < deadline) {
++    const hit = (mockUpdateDocument.mock.calls as unknown[][]).find(
++      (c) => (c[2] as { blockchain?: { threadToken?: { mintTxHash?: string } } }).blockchain?.threadToken?.mintTxHash === KS1124_MINTED.mintTxHash,
++    );
++    if (hit) return (hit[2] as { blockchain: Record<string, any> }).blockchain;
++    await new Promise((r) => setTimeout(r, 25));
++  }
++  return undefined;
++}
++
++describe('KS-1124 O1: the thread-token cache write merges into the persisted blob', () => {
++  beforeEach(() => {
++    process.env.STATE_THREAD_NFT_ENABLED = 'true';
++    ks1124Mint.mockResolvedValue(KS1124_MINTED);
++  });
++  afterEach(() => {
++    delete process.env.STATE_THREAD_NFT_ENABLED;
++  });
++
++  it('RED KS-1124 M1: an anchor accept already persisted keeps its txHash, status and anchorId', async () => {
++    ks1124GetDocument.mockResolvedValue({
++      id: 'doc-ks1124',
++      blockchain: { txHash: KS1124_TX, status: 'submitted', anchorId: 'anchor-ks1124', network: 'preprod' },
++    });
++    const blob = await ks1124ThreadTokenWrite();
++    expect(blob).toBeDefined();
++    expect({ txHash: blob?.txHash, status: blob?.status, anchorId: blob?.anchorId })
++      .toEqual({ txHash: KS1124_TX, status: 'submitted', anchorId: 'anchor-ks1124' });
++  });
++
++  it('control KS-1124 C1: the write carries the minted thread token, field for field', async () => {
++    ks1124GetDocument.mockResolvedValue({ id: 'doc-ks1124', blockchain: { txHash: KS1124_TX, status: 'submitted' } });
++    const blob = await ks1124ThreadTokenWrite();
++    expect(ks1124Mint).toHaveBeenCalledTimes(1);
++    expect(blob?.threadToken).toEqual(KS1124_MINTED);
++  });
++
++  it('control KS-1124 C2: with no persisted row the write carries the thread token and invents no anchor field', async () => {
++    ks1124GetDocument.mockResolvedValue(null);
++    const blob = await ks1124ThreadTokenWrite();
++    expect(Object.keys(blob ?? {})).toEqual(['threadToken']);
++  });
+ });
