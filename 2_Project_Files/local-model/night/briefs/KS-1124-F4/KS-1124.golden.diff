@@ -1,0 +1,52 @@
+--- a/Blockchain/Dev/services/originate/src/routes/certifications.ts
++++ b/Blockchain/Dev/services/originate/src/routes/certifications.ts
+@@ -470,4 +470,7 @@
+           confidence: 'pending-onchain',
+           anchoringStatus,
++          // KS-1124 F4 (Kam ruled b, 2026-09-28): an issue whose anchoring failed saves status 'failed', which the
++          // gateway maps to off-chain-only; a statusless 'pending-onchain' blob would show as pending forever.
++          ...(anchoringStatus === 'failed' ? { status: 'failed' } : {}),
+         } as any,
+       };
+@@ -1205,4 +1208,7 @@
+           confidence: 'pending-onchain',
+           anchoringStatus,
++          // KS-1124 F4 (Kam ruled b, 2026-09-28): a recertify whose anchoring failed saves status 'failed', the same
++          // rule as the issue route: the gateway maps it to off-chain-only instead of pending forever.
++          ...(anchoringStatus === 'failed' ? { status: 'failed' } : {}),
+         } as any,
+       };
+--- a/Blockchain/Dev/services/originate/src/__tests__/ks543-certify-boundary-strip.test.ts
++++ b/Blockchain/Dev/services/originate/src/__tests__/ks543-certify-boundary-strip.test.ts
+@@ -151,2 +151,31 @@
+   });
++});
++
++describe('KS-1124 F4: a certification whose anchoring failed is saved with status failed', () => {
++  it('RED KS-1124 F4-1: an issue whose anchoring is unreachable saves status failed, not a statusless pending', async () => {
++    const res = await issue({ type: 'certificate', data: { grade: 'F4' } });
++    const bc = mockSaveCertification.mock.calls[0][0].blockchain;
++    expect({ status: res.status, saves: mockSaveCertification.mock.calls.length, saved: bc.status, anchoringStatus: bc.anchoringStatus, anchorId: bc.anchorId }).toEqual({ status: 201, saves: 1, saved: 'failed', anchoringStatus: 'failed', anchorId: null });
++  });
++
++  it('RED KS-1124 F4-2: a recertify whose anchoring is unreachable saves status failed, not a statusless pending', async () => {
++    jest.requireMock('../repositories/certificationRepo').getCertification.mockResolvedValueOnce({ id: 'cert-ks1124-f4', type: 'certificate', status: 'issued', issuer: { id: 'issuer-1' }, holder: { id: 'holder-1' } });
++    const res = await fetch(baseUrl + '/api/certifications/cert-ks1124-f4/recertify', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ note: 'f4' }) });
++    const bc = mockSaveCertification.mock.calls[0][0].blockchain;
++    expect({ status: res.status, saves: mockSaveCertification.mock.calls.length, saved: bc.status, anchoringStatus: bc.anchoringStatus, anchorId: bc.anchorId }).toEqual({ status: 201, saves: 1, saved: 'failed', anchoringStatus: 'failed', anchorId: null });
++  });
++
++  it('control KS-1124 F4-3: an issue whose anchoring is accepted stays statusless pending-onchain with its anchor id', async () => {
++    const stub = express().post('/api/anchors', (_req, r) => { r.status(202).json({ data: { id: 'anchor-ks1124-f4' } }); }).listen(0, '127.0.0.1');
++    await new Promise((resolve) => stub.once('listening', resolve));
++    process.env.ANCHORING_SERVICE_URL = 'http://127.0.0.1:' + (stub.address() as { port: number }).port;
++    try {
++      const res = await issue({ type: 'certificate', data: { grade: 'F4' } });
++      const bc = mockSaveCertification.mock.calls[0][0].blockchain;
++      expect({ status: res.status, hasStatus: 'status' in bc, confidence: bc.confidence, anchoringStatus: bc.anchoringStatus, anchorId: bc.anchorId }).toEqual({ status: 201, hasStatus: false, confidence: 'pending-onchain', anchoringStatus: 'submitted', anchorId: 'anchor-ks1124-f4' });
++    } finally {
++      process.env.ANCHORING_SERVICE_URL = 'http://127.0.0.1:2';
++      stub.close();
++    }
++  });
+ });

@@ -1,0 +1,44 @@
+--- a/Blockchain/Dev/services/security/src/__tests__/ks888-failed-mint-save-issues-no-key.test.ts
++++ b/Blockchain/Dev/services/security/src/__tests__/ks888-failed-mint-save-issues-no-key.test.ts
+@@ -162,3 +162,40 @@
+   });
+-
++
++  it.each(INFRA)('control KS-888 V1 %s: validate answers 200 valid from the key itself while its usage write fails', async (_label, fault) => {
++    const minted = await mint('ks888 validate usage write infra');
++    state.fault = fault;
++    const before = state.inserts;
++    const res = await fetch(base + '/api/keys/validate', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ key: minted.body.data.key }), signal: AbortSignal.timeout(3000) });
++    const json = (await res.json()) as { data?: { valid?: boolean; tenantId?: string; scopes?: string[] } };
++    expect({ minted: minted.status, status: res.status, valid: json.data?.valid, tenantId: json.data?.tenantId, scopes: json.data?.scopes, writes: state.inserts - before }).toEqual({ minted: 201, status: 200, valid: true, tenantId: TENANT, scopes: ['documents:read'], writes: 1 });
++  });
++
++  it('pin KS-888 V2: a failed usage write logs ONE error line, and no log line carries the key or its hash', async () => {
++    const { logger } = await import('../utils/logger');
++    const minted = await mint('ks888 validate usage write log');
++    const key = String(minted.body.data.key);
++    const hash = crypto.createHash('sha256').update(key).digest('hex');
++    const errors = vi.spyOn(logger, 'error');
++    const warns = vi.spyOn(logger, 'warn');
++    const lines = vi.spyOn(console, 'log');
++    try {
++      state.fault = STRUCTURAL;
++      const res = await fetch(base + '/api/keys/validate', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ key }), signal: AbortSignal.timeout(3000) });
++      const valid = ((await res.json()) as { data?: { valid?: boolean } }).data?.valid;
++      const logged = JSON.stringify([errors.mock.calls, warns.mock.calls, lines.mock.calls]);
++      expect({ status: res.status, valid, errorLines: errors.mock.calls.length, first: errors.mock.calls[0]?.[0], key: logged.includes(key), hash: logged.includes(hash) }).toEqual({ status: 200, valid: true, errorLines: 1, first: 'DB save API key failed', key: false, hash: false });
++    } finally {
++      errors.mockRestore();
++      warns.mockRestore();
++      lines.mockRestore();
++    }
++  });
++
++  it('control KS-888 V3: a validate whose usage write lands answers 200 valid, and the write was issued', async () => {
++    const minted = await mint('ks888 validate usage write lands');
++    const before = state.inserts;
++    const res = await fetch(base + '/api/keys/validate', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ key: minted.body.data.key }), signal: AbortSignal.timeout(3000) });
++    expect({ minted: minted.status, status: res.status, valid: ((await res.json()) as { data?: { valid?: boolean } }).data?.valid, writes: state.inserts - before }).toEqual({ minted: 201, status: 200, valid: true, writes: 1 });
++  });
++
+   it('control KS-888 C4: with no database at all the memory-only mint still answers 201 with the key', async () => {
