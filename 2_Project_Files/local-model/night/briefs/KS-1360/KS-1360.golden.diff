@@ -1,0 +1,84 @@
+--- a/Blockchain/Dev/services/wallet-connector/src/server.ts
++++ b/Blockchain/Dev/services/wallet-connector/src/server.ts
+@@ -219,2 +219,2 @@
+-  res.json({ message: 'Session disconnected' });
++  res.json({ success: true, message: 'Session disconnected' });
+ });
+--- /dev/null
++++ b/Blockchain/Dev/services/wallet-connector/src/__tests__/ks1360-session-delete-carries-success.test.ts
+@@ -0,0 +1,75 @@
++/**
++ * KS-1360 - DELETE /api/wallets/session/:sessionId answers the declared 200
++ * body: WalletSuccessSchema requires a boolean success, and the handler sent
++ * only message. Drives the REAL server.ts app on 127.0.0.1. server.ts boots
++ * at import, so the boot is held off: initDb never settles (no listen), the DB
++ * reads as unavailable (the in-memory path), the user.erased subscriber is a
++ * no-op, and the shared JWT check is a pass-through (auth is not under test).
++ */
++import { describe, it, expect, beforeAll, afterAll, vi } from 'vitest';
++import http from 'http';
++import type { AddressInfo } from 'net';
++import type { RequestHandler } from 'express';
++
++vi.mock('../db', () => ({
++  initDb: () => new Promise<boolean>(() => {}),
++  isDbAvailable: () => false,
++  query: async () => ({ rows: [], rowCount: 0 }),
++}));
++vi.mock('../userErasedSubscriber', () => ({
++  startUserErasedSubscriber: async () => {},
++}));
++vi.mock('@secuura/shared', async (importOriginal) => ({
++  ...(await importOriginal<Record<string, unknown>>()),
++  authenticate: () => ((_req, _res, next) => next()) as RequestHandler,
++}));
++
++import app from '../server';
++
++let base = '';
++let server: http.Server;
++
++beforeAll(async () => {
++  server = http.createServer(app);
++  await new Promise<void>((resolve) => server.listen(0, '127.0.0.1', () => resolve()));
++  base = 'http://127.0.0.1:' + (server.address() as AddressInfo).port;
++});
++
++afterAll(async () => {
++  await new Promise<void>((resolve) => server?.close(() => resolve()));
++});
++
++async function call(method: string, path: string, body?: object): Promise<[number, unknown]> {
++  const r = await fetch(base + path, {
++    method,
++    headers: body ? { 'content-type': 'application/json' } : {},
++    body: body ? JSON.stringify(body) : undefined,
++  });
++  return [r.status, await r.json()];
++}
++
++async function newSession(): Promise<string> {
++  const [status, body] = await call('POST', '/api/wallets/session', { walletType: 'nami', address: 'addr_ks1360' });
++  expect(status).toBe(201);
++  return (body as { sessionId: string }).sessionId;
++}
++
++describe('KS-1360 DELETE /api/wallets/session/:sessionId', () => {
++  it('RED KS-1360 D1: a live session disconnects 200 with success true and the message', async () => {
++    const id = await newSession();
++    expect(await call('DELETE', '/api/wallets/session/' + id)).toEqual([200, { success: true, message: 'Session disconnected' }]);
++  });
++
++  it('control KS-1360: an unknown session is still 404 NOT_FOUND', async () => {
++    expect(await call('DELETE', '/api/wallets/session/ks1360-unknown')).toEqual([
++      404,
++      { success: false, error: { code: 'NOT_FOUND', message: 'Session not found' } },
++    ]);
++  });
++
++  it('control KS-1360: the session is gone after the disconnect, a second DELETE is 404', async () => {
++    const id = await newSession();
++    expect((await call('DELETE', '/api/wallets/session/' + id))[0]).toBe(200);
++    expect((await call('DELETE', '/api/wallets/session/' + id))[0]).toBe(404);
++  });
++});

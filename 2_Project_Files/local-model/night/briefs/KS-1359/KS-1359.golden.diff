@@ -1,0 +1,100 @@
+--- a/Blockchain/Dev/services/api-gateway/src/routes/platform.ts
++++ b/Blockchain/Dev/services/api-gateway/src/routes/platform.ts
+@@ -360,5 +360,11 @@
+     '/api/platform/audit-log',
+     authenticateToken(),
+     requireSuperAdmin,
+     async (req: Request, res: Response) => {
++      // KS-1359: a present limit/offset must be a whole number (limit from 1, offset from 0), else 400. The KS-5 clamp below is unchanged.
++      const badInt = (v: unknown, min: number) => v !== undefined && (typeof v !== 'string' || !/^[0-9]+$/.test(v) || parseInt(v, 10) < min);
++      if (badInt(req.query.limit, 1) || badInt(req.query.offset, 0)) {
++        res.status(400).json({ success: false, error: { code: 'VALIDATION_ERROR', message: 'limit must be an integer from 1 and offset an integer from 0' } });
++        return;
++      }
+       // BACKLOG H1: the platform audit page used to read only from
+--- /dev/null
++++ b/Blockchain/Dev/services/api-gateway/src/__tests__/ks1359-platform-audit-log-refuses-a-bad-limit-or-offset.test.ts
+@@ -0,0 +1,83 @@
++/**
++ * KS-1359 - GET /api/platform/audit-log refuses a wrong-type or below-minimum
++ * limit/offset with 400, and keeps the KS-5 upward clamp (limit 500, offset
++ * PLATFORM_AUDIT_MAX_OFFSET) exactly as it was. Drives the REAL
++ * createPlatformRoutes on 127.0.0.1 with a fake query; the tenant-provisioning
++ * URL is a closed port, so that leg fails fast and the route degrades as it
++ * does in production. The overfetch (limit + offset) is read from the fake
++ * query's LIMIT parameter.
++ */
++import { describe, it, expect, beforeAll, afterAll, vi } from 'vitest';
++import express, { type RequestHandler } from 'express';
++import http from 'http';
++import type { AddressInfo } from 'net';
++import { createPlatformRoutes } from '../routes/platform';
++
++const limits: unknown[] = [];
++let base = '';
++let server: http.Server;
++
++beforeAll(async () => {
++  vi.stubEnv('PLATFORM_AUDIT_MAX_OFFSET', '5000');
++  const superAdmin = (() => ((req, _res, next) => {
++    (req as unknown as { user: object }).user = { userId: 'u-ks1359', email: 'a@b.c', role: 'super_admin', verificationLevel: 'none' };
++    next();
++  }) as RequestHandler) as (required?: boolean) => RequestHandler;
++  const app = express();
++  app.use(createPlatformRoutes({
++    authenticateToken: superAdmin,
++    tenantProvisioningUrl: 'http://127.0.0.1:1',
++    setTenantKey: () => {},
++    getTenantKey: () => undefined,
++    removeTenantKey: () => {},
++    query: async (_sql: string, params?: unknown[]) => {
++      if (params && params.length === 1) limits.push(params[0]);
++      return { rows: [] };
++    },
++  }));
++  server = http.createServer(app);
++  await new Promise<void>((resolve) => server.listen(0, '127.0.0.1', () => resolve()));
++  base = 'http://127.0.0.1:' + (server.address() as AddressInfo).port;
++});
++
++afterAll(async () => {
++  await new Promise<void>((resolve) => server?.close(() => resolve()));
++  vi.unstubAllEnvs();
++});
++
++async function auditLog(qs: string): Promise<[number, string | null, unknown]> {
++  limits.length = 0;
++  const r = await fetch(base + '/api/platform/audit-log' + qs);
++  const body = (await r.json()) as { error?: { code?: string } };
++  return [r.status, body.error?.code ?? null, limits[0] ?? null];
++}
++
++describe('KS-1359 audit-log limit/offset', () => {
++  it('RED KS-1359 B1: offset -1 is refused 400', async () => {
++    expect(await auditLog('?offset=-1')).toEqual([400, 'VALIDATION_ERROR', null]);
++  });
++
++  it('RED KS-1359 B2: a non-numeric limit is refused 400', async () => {
++    expect(await auditLog('?limit=abc')).toEqual([400, 'VALIDATION_ERROR', null]);
++  });
++
++  it('RED KS-1359 B3: limit 0 is refused 400', async () => {
++    expect(await auditLog('?limit=0')).toEqual([400, 'VALIDATION_ERROR', null]);
++  });
++
++  it('RED KS-1359 B4: a fractional offset is refused 400', async () => {
++    expect(await auditLog('?offset=1.5')).toEqual([400, 'VALIDATION_ERROR', null]);
++  });
++
++  it('control KS-1359: no query keeps the defaults, 200 and overfetch 50', async () => {
++    expect(await auditLog('')).toEqual([200, null, 50]);
++  });
++
++  it('control KS-1359: limit 10 offset 0 is admitted, 200 and overfetch 10', async () => {
++    expect(await auditLog('?limit=10&offset=0')).toEqual([200, null, 10]);
++  });
++
++  it('control KS-1359: above the maximum still clamps (KS-5), 200 and overfetch 500 + 5000', async () => {
++    expect(await auditLog('?limit=900&offset=999999')).toEqual([200, null, 5500]);
++  });
++});
