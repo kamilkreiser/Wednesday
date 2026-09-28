@@ -19631,5 +19631,49 @@
    "CARD secuura-pr1245-round3-failed-at-cap",
    "CARD secuura-ks888-failed-key-save-design"
   ]
+ },
+ {
+  "id": "secuura-ks1352-revoked-credentials-still-verify",
+  "client_project": "Secuura/Blockchain",
+  "title": "KS-1352: a revoked credential still verifies as valid, and says its status check passed. How should verify decide?",
+  "bluf": "No action needed unless you disagree with the default. Measured today by the Secuura seat on a local stack at develop: a credential revoked by EITHER revoke route still verifies as valid, and the verify reply says checks.status: true, even when the credential's own record says revoked. Cause, read in code: POST /api/credentials/verify never gives the verifier a way to look up revocation, so the status check can only ever pass (credentials.ts:338-342, verifier.ts:435 and :449). Filed as KS-1352. Not yet measured: whether demo or kintsugi behave the same, and the gateway's own verify paths. I recommend (a).\n\nhttps://linear.app/secuura/issue/KS-1352",
+  "default_action": "If you don't answer by Tuesday 29 Sep 09:00 AEST: option a. Wednesday briefs a Claude seat, and it goes through the gate before any merge; nothing deploys. Telling Peter or Stuart stays with you: the ticket carries the facts, and Wednesday sends nothing to them.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Fix verify properly: a revoked credential fails (Recommended)",
+    "detail": "Verify refuses a credential that its stored record or the status list marks revoked, and the status check reports false. A Claude seat builds it with red-first tests on both revoke routes; it goes through the QA gate and merges on Wednesday's GO. Nothing deploys without your tap."
+   },
+   {
+    "key": "b",
+    "label": "Stop the false claim first, design later",
+    "detail": "Verify stops reporting checks.status: true when it cannot actually check (it reports 'not checked'), so nobody is told a revoked credential passed. The full revocation check is decided later."
+   },
+   {
+    "key": "c",
+    "label": "Leave it in the backlog",
+    "detail": "Nothing changes; revoked credentials keep verifying as valid."
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-09-28T17:07:42.800231+10:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "2026-08-21 20:06",
+   "2026-09-04 15:32",
+   "2026-09-09 12:09",
+   "CARD secuura-ks622-mfa-verify-fix",
+   "CARD secuura-892-round3-nogo-blocker-still-open",
+   "CARD secrev-verify-23-and-batch1-filing",
+   "CARD secuura-61-archived-while-still-open",
+   "CARD secreview-june-register-discloses-credentials",
+   "CARD secuura-ks1041-step1-demo-verify-now",
+   "CARD secuura-ks1114-verify-title-strategy",
+   "CARD secuura-965-f1-verify-hash-precedence-v1-vs-v2",
+   "CARD secuura-ks1207-revoked-session-plus-junk-key-bypass",
+   "CARD secuura-ks1348-r2-files-still-leak-allowlist"
+  ]
  }
 ]
