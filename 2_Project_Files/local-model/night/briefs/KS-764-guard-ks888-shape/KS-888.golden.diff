@@ -1,0 +1,19 @@
+--- a/Blockchain/Dev/packages/shared/src/__tests__/ks764-key-revoke-call-site-guard.test.ts
++++ b/Blockchain/Dev/packages/shared/src/__tests__/ks764-key-revoke-call-site-guard.test.ts
+@@ -76,3 +76,10 @@
+     // enough to mean nothing, so each site names its own write.
+-    revokeWrite: /isActive\s*=\s*false;[\s\S]{0,80}dbSaveApiKey\(/,
++    // KS-888 (#1327) put a comment block and a try between the flip and the
++    // save, which an 80-character window could not span. Between the two this
++    // admits ONLY whitespace, whole // comment lines and one try {, so a
++    // statement in between, or a save that is moved, deleted or commented out,
++    // turns the guard red. [^!-~] is any character that is not visible ASCII,
++    // which here means whitespace; [/] [{] [(] are those literal characters;
++    // ^ under the m flag is the start of a line.
++    revokeWrite: /isActive[^!-~]*=[^!-~]*false;(?:[^!-~]*^[ ]*[/][/].*)*[^!-~]*^[ ]*(?:try[^!-~]*[{][^!-~]*^[ ]*)?await[ ]+dbSaveApiKey[(]/m,
+   },
+@@ -96,3 +103,3 @@
+   /UPDATE\s+svc_api_keys\s+SET\s+is_active\s*=\s*false/i,
+-  /isActive\s*=\s*false;[\s\S]{0,80}dbSaveApiKey\(/,
++  /isActive[^!-~]*=[^!-~]*false;(?:[^!-~]*^[ ]*[/][/].*)*[^!-~]*^[ ]*(?:try[^!-~]*[{][^!-~]*^[ ]*)?await[ ]+dbSaveApiKey[(]/m,
+ ];
