@@ -6,6 +6,12 @@ status: live
 supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s1-wholesale
 ---
 
+## 🟢 DELTA 117 — 2026-09-29 00:15 (s91). **READ THIS FIRST, THEN 116/115/114.**
+- **BATCH 4 COMPLETE:** O merge 5 RD-443 pushed 3d05567 → **40b7eae** (ls-remote). Demo 36434215535 skipped; Build 36434215522 was RUNNING at 00:1x (O's MERGED 5/5 follows with its failing set; check it fits C-185). O's C-57 (RD-428 pair + the 2 ice retitles) VERIFIED at source by Tuesday.
+- **5a+5b RELEASE SENT to M** (`fleet/briefs_staged/2026-09-29_nexusai_M_release_5a_5b.md`, --mail tap delivered). Nine merges: RD-681 → 627b → 682 → 705 → 695 (fwd) → 413 (fwd; RD-428 id accounted) → C-170 → RD-696 → RD-594. **On each M MERGED:** ls-remote + gh run view (Build failing set ⊆ {rd638 E2}) + demo skipped. At C-170: arm-ttk result. At RD-594: K2 population. Close RD-636 on RD-413.
+- **P took the turn (C-186 3a):** batch-6 merge 1 RD-286 merged forward onto 40b7eae, hold queued. Then M's turns interleave while P waits on its Build.
+- **Batch 7** still waits on RD-618's new READY (+ M's mx618x646 cross-run). **ATTIO bridge check owed 07:00 AEST today** (DELTA 116).
+
 ## 🟢 DELTA 116 — 2026-09-28 20:33 (s91). **READ THIS FIRST, THEN 115/114.**
 - **VISION DONE (verified by Tuesday):** portal main e59232e → 110bb03 (FF) → 6dbffdf (BACKLOG only, +22/-3). Suites 114/98 → 131/126, 0 lost (recounted from the evidence). VSP-87 = the six layouts + M1/M2/P1. **VSP-67 LIVE on prod**: before 0 → after 600000 user-override, the other timeouts 0, no restart; portal /api/health 200 (Tuesday curl). All three cards ruled + delivered. Kam told (201).
 - **OWED, DATED: the ATTIO bridge's first sync under the new timeout runs 2026-09-28T21:00Z = 07:00 AEST 2026-09-29.** After it, have the Vision seat (or its next boot) read datasec-attio-bridge /healthz: runs 6, failures 0 → tell Kam one line. Failures > 0 → rollback is `... --value 0` (his email names it), card him first.
