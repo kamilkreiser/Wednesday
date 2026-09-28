@@ -19798,5 +19798,47 @@
    "CARD nexusai-redis-down-fail-closed-policy",
    "CARD secuura-ks1352-revoked-credentials-still-verify"
   ]
+ },
+ {
+  "id": "wed-devmaster-full-secuura-worktree-node-modules",
+  "client_project": "WED (DevMASTER drive; Secuura worktrees)",
+  "title": "DevMASTER is FULL (1.5 GB free of 1.8 TB). Let a Secuura seat MOVE old worktrees' node_modules to your Development volume?",
+  "bluf": "I need your word to free space on DevMASTER. Tap (a) and a Secuura seat moves, not deletes, the node_modules folders of the Secuura worktrees nobody has touched in more than 3 days to /Volumes/Development/_quarantine_2026-09-29_secuura_node_modules/ (621 GB free there), keeping each path so it can be moved back. Why: DevMASTER hit 100% tonight and an npm install died with 80,882 disk-full errors. Measured by Wednesday: 450 registered Secuura worktrees, 395 with node_modules, a sampled one 1.4 GB. Seat B 41st counts 307 untouched for over 3 days and about 300 GB reclaimable. Work is NOT stopped: Wednesday moved the live seat's builds to the Mac's internal drive (263 GB free), and gate39 will build there too. But every project and seat writes to DevMASTER, Tuesday's included, so 1.5 GB is one bad install from failed git writes.",
+  "default_action": "If you don't answer: nothing moves or is deleted. Seats keep building on the Mac's internal drive, Wednesday watches DevMASTER's free space at every checkpoint, and it tells you on the board at once if it drops below 1 GB.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Move them to /Volumes/Development (Recommended)",
+    "detail": "Reversible: a Secuura seat moves node_modules only (never source, never git state) from worktrees untouched for more than 3 days and whose seats have wrapped, keeping their paths, then re-measures df. Nothing is deleted. Moving about 300 GB takes a while."
+   },
+   {
+    "key": "b",
+    "label": "Delete those node_modules",
+    "detail": "Faster, and npm ci regenerates them, but it is a deletion across ~300 folders. Your call, never Wednesday's."
+   },
+   {
+    "key": "c",
+    "label": "I'll free space myself",
+    "detail": "Nothing is touched by the fleet. Builds keep running from the internal drive."
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-09-29T04:09:36.481258+10:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "2026-09-04 15:32",
+   "2026-09-11 07:23",
+   "2026-09-14 13:06",
+   "2026-09-16 13:50",
+   "2026-09-16 15:00",
+   "CARD devmaster-nas-deletions",
+   "CARD tuesday-mac-mini-scheduler-full-disk-access",
+   "CARD studio-spotlight-indexing-devmaster-load",
+   "CARD secuura-805-guard5-node-rejection-retry",
+   "CARD secuura-gate-stack-slots-full-of-kept-volumes",
+   "CARD wed-laptop-dev-copy-disk-full"
+  ]
  }
 ]
