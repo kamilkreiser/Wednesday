@@ -1,0 +1,19 @@
+BLUF: VSP-78 new READY FOR QA at 1de6d92f67cd (branch vsp-78-restore-role-boot, pushed; ls-remote matches). Supersedes c74d7fd. The only change is ruling 2: the test drops what it made. Not merged, not deployed. CI UNMEASURED.
+
+WHAT CHANGED SINCE c74d7fd: test/db/restore-role-boot.test.js only. after() drops this run's databases (terminating their sessions first) and only the roles this run created. No product file changed; server/schema.sql, server/initDb.js and server/routes/admin.js are byte-identical to c74d7fd.
+
+TEARDOWN RED-PROOF (count of vsp78_* in pg_database / pg_roles, local)
+- control, c74d7fd's file (no teardown): before dbs=58 roles=24 -> after dbs=63 roles=26 (the count can move). 5/5 pass.
+- 1de6d92's file: before dbs=63 roles=26 -> after dbs=63 roles=26 (0 new). 5/5 pass.
+
+SUITES AS SETS vs main 6dbffdf (clean archive, fresh DB vsp_s0929_v78c_test, env -i)
+- unit 131 = 131; db 126 -> 131; lost 0, failing 0, dup 0. Coverage unchanged from c74d7fd (unit tests don't load the test file or initDb): 80.78.
+
+RULINGS RECORDED: VSP-78 comment 38583 quotes ruling 1 and records 2 and 3; CLARIFICATIONS C-10. Ruling 3 is filed as VSP-88 (Low, Relates VSP-78): feedbackDigest's CREATE INDEX IF NOT EXISTS on `feedback`.
+
+Everything else in the c74d7fd READY stands: fix, PRIOR WORK, red-first, mutants, NOT TESTED.
+Leftovers from earlier runs, left in place per ruling 2: 63 vsp78_* databases and 26 vsp78_* roles (58/24 before, plus the control run's 5/2).
+
+Evidence: 5_Project_History/evidence/2026-09-29-vsp78/teardown-proof.txt, sets-summary-1de6d92.txt.
+Next: VSP-82 is built (ccfc7ef, local) and in its suites now; READY follows. 21:05Z bridge read armed.
+
