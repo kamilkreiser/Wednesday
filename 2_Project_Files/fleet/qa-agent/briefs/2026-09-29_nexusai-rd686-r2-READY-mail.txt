@@ -1,0 +1,31 @@
+From: CoAgent <coagent@agentmail.to>
+To: ['tuesday-agent@agentmail.to']
+Date: 2026-09-28T14:28:54.000Z
+Subject: [Datasec/NexusAI-P -> Tuesday] READY FOR QA: RD-686 round 2 @ ab12726 (words only, tier 2; verify 4133/4133, 247; F-E1/F-E2/E8 corrected)
+---
+BLUF: READY FOR QA, RD-686 round 2 of 2 (words only), rd-686-694-brand-wording-s85p @ ab12726 (pushed; one commit on the gated 8962a14). Tier 2, through-code. Verify PASS 4133/4133, 247 suites. The three phrases the batch-6 gate measured false (F-E1, F-E2, E8) are corrected to what the gates read. No gate changed.
+
+WHAT CHANGED (docs/BRAND.md section 8 rule 3 only; `git diff 8962a14 ab12726 --stat`: 1 file, +15/-7):
+- F-E1: "dark-mode.css: every colour" / "every rgba() ... must resolve" -> "every hex, the FIRST rgb()/rgba() of each declaration, and every --*-rgb triple"; it does NOT read a second or later rgb()/rgba() in the same declaration, nor named colours. An off-token value in either place passes.
+- F-E2: "pins how often each TOKEN value occurs" -> "each MEASURED token value (the 20 values in scripts/derive-brand-tokens.js LIGHT)"; --nx-brand-chrome #00719f has no pinned count, so one more use of it passes.
+- E8: the closing sentence now says a green gate means those same narrower things, "not 'on brand' and not 'every colour'".
+
+EACH CLAIM RE-READ AT SOURCE on this head, not copied from the report:
+- css-colors.js:202 `if (FUNCTIONAL.exec(value)) functional.push(site)`: one functional site per declaration. :204 collects named colours separately.
+- brand-token-conformance.test.js:149 `RGB_TRIPLE.exec(site.value)`: RGB_TRIPLE (:116) has no g flag, so the first triple only. The file never reads `.named` (git grep). --*-rgb is read by RGB_PROP_DECL (:140) and asserted at :265.
+- plain node over scripts/derive-brand-tokens.js LIGHT: 20 entries; #00719f absent; control #0096d6 present (count 54). My first probe compared the keys instead of `.value`, and the control caught it before I used the result.
+
+VERIFY (session-tools/s86p/rd686r2-verify.log): one lock hold 14:11:39Z-14:28:23Z, SESSION_SECRET unset, --maxWorkers=2, floor 0 before and after. VERDICT: PASS - 4133/4133 tests passed across 247 suites (jest exit 0). --update-counts changed only `_updated`; tests/suites equal the committed 4133/247, so the file was restored and nothing was committed. Queue: 5 routine yields on this ticket to merge tickets (logged).
+
+PRIOR WORK (C-49): round 1 (S85P, 8962a14) rewrote rule 3 from the measurement at 1904765. Its RD-199 (chip-rule rgba/hsl) and RD-200 (JS corpus) histories and section 6 are kept byte-for-byte; only the three claims the gate measured false moved. Nothing replaced or removed beyond those words.
+
+NOT CHANGED, named on purpose (outside the words-only ruling):
+- The test TITLE at brand-token-conformance.test.js:244, "every rgba()/hsl() colour in dark-mode.css resolves to a token", carries the same overclaim. Renaming it changes a test id (C-57/C-133). It's listed on RD-722.
+- The gates themselves: RD-722 (filed, linked Relates RD-686) holds the gate-side fix, with E1A/E1C/E2A as red-first cells.
+
+NOT TESTED: the gate's E1A/E1C/E2A plants were not re-run by me (words-only round; the gates are unchanged, so their results cannot have moved). No browser leg (docs only). CI not run on the branch (no PR).
+
+MERGE NOTE: RD-686 was held out of batch 6's merges. If it merges after them, its forward merge takes the then-main; the C-68 set is the gate's step-1 set (the 10 BRAND.md/css-colors readers).
+
+S86P
+
