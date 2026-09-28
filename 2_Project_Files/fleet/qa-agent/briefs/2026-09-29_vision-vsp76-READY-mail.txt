@@ -1,0 +1,54 @@
+BLUF: VSP-76 READY FOR QA. Branch vsp-76-dead-client-handoff @ f593e38198e6 (off main 6dbffdf, pushed; ls-remote matches). Gate 11's own cell goes 20/20 -> 0/20 on both product and max-1 pools. Not merged, not deployed. CI UNMEASURED.
+
+TICKET: VSP-76 (High), gate 11 VSP66-G11-F1, plus comment 38535 (dispatcher failed-ROLLBACK catch). Jira READY comment 38580.
+
+FILES TOUCHED (for batching)
+- server/db.js (guard(): BROKEN mark + release pass-through; exports isConnectionError, guard)
+- server/db.test.js (unit cells)
+- test/db/checkout-link-death.child.js, test/db/checkout-link-death.test.js (builder cells)
+No route, schema or dispatcher file touched.
+
+FIX
+guard()'s query wrapper: when any query through a guarded client rejects with severity FATAL, SQLSTATE class 57P or 08, or !client._queryable, the client is marked BROKEN; release() passes err || TIMED_OUT || BROKEN, so pg-pool discards it whatever the caller passes. The ROLLBACK goes through the same wrapper, so comment 38535's dispatcher catch is covered by construction. Plain errors (22012, 23505) and 57014 cancels do NOT mark it. The gate's alternative (routing backup-db through ROLLBACK-then-release) was not taken: the guard covers every holder at once.
+
+PRIOR WORK
+- VSP-65 built guard() (TIMED_OUT: a timed-out client is released with the timeout so pg-pool drops it). BROKEN is the same mechanism, extended; nothing in it removed or replaced.
+- VSP-66 added the held-client 'error' listener and wrote "the dead client is not reused: pg marks it not queryable". Gate 11 showed that is false for an in-flight terminate with a same-tick release. The comment is corrected in place; the listener is unchanged.
+- VSP-70 made dbRestore release with the ROLLBACK's error; untouched, still correct.
+- No earlier VSP-76 branch or commit existed (git log --all --grep, branch list).
+
+RED FIRST (gate 11 tool qa-g11-n1-child.cjs, read-only, run unmodified from its evidence path, N=20, my own DB vsp_qa_g11_7609291_test)
+- main 6dbffdf: window:terminate:immediate:product reused 20/20, next failed 20/20 ("Connection terminated unexpectedly"); :immediate:max1 reused 20/20, next failed 20/20.
+- control that can fail: :rollback:product 0/20 on main (the gate's 0/20 shape).
+- 79ec3cd and f593e38: immediate:product 0/20 reused, 0/20 failed; immediate:max1 0/20, 0/20; window hit in 20/20 (queryableTrueAtRelease 20); 0 uncaught. rollback:product 0/20 on 79ec3cd.
+- Builder cells (test/db/checkout-link-death): window-promise, window-callback, window-max1 are RED on the unfixed server/db.js (3 fail: next caller "Connection terminated unexpectedly") and green on the fix. Controls: "the window is real" (FATAL 57P at release while _queryable is true) green on both; ROLLBACK-then-release green on both; keep-plain-error (22012) and keep-cancel (57014) keep the client in the pool.
+- Mutants (scratch copies): A, classifier always true -> the two keep controls fail. B, release drops BROKEN -> the three window cells fail, and 2 unit cells fail.
+- The link-death file ran 8x consecutively after the child fix below: 13/13 each time.
+
+SUITES AS SETS vs main 6dbffdf (clean git archives, fresh DBs, env -i)
+- unit: 131 -> 136 names; lost 0, failing 0, dup 0; new 5 (all VSP-76).
+- db: 126 -> 133 names; lost 0, failing 0, dup 0; new 7 (all VSP-76).
+- Two incidents on the way, both resolved. (1) First full db run on 79ec3cd: completed-response.test.js before() login got 501, 3 hookFailed. The file passed alone 2/2 and the full run passed on a fresh DB. LogiPlugi pid 1129 was listening on 127.0.0.1:49162/4/6, and 501 is not a portal status. That's VSP-80's cause; I logged it as its fourth occurrence (VSP-80 comment 38581). (2) Same run: my keep-cancel child attached its rejection handler late, and an early cancel exited it. That was a test-harness race and is fixed in f593e38.
+
+COVERAGE (CI's command, unit, local Node 26.8.1): lines 80.78 -> 82.09, branches 76.31 -> 76.50, functions 77.44 -> 78.36. db.js lines 62.73 -> 86.02.
+
+NOT TESTED
+- CI (gh not logged in). Node 22/20 not run locally; only Node 26.8.1.
+- A ROLLBACK that is itself the FIRST connection-class failure on a link pg still reads as queryable: not reached on a real link. In the real shape the preceding query's FATAL marks the client first. Covered only by the fake-client unit cell, which goes through the same wrapper path.
+- RST/FIN during an in-flight query with a same-tick release (the gate measured those 0/20 before the fix; not re-run).
+- Submittables (cursors/streams) bypass the wrapper as before; the repo has none (grep).
+- No route-level cell for GET /api/admin/backup-db under an in-flight terminate; the guard covers it by construction.
+- e2e:pro not run.
+
+EVIDENCE: 5_Project_History/evidence/2026-09-29-vsp76/ (42 files; the four empty *.txt without ".run2" are the first attempt, which failed rc=127 because macOS has no `timeout`, re-run with a perl alarm).
+Local DBs created (left in place): vsp_qa_g11_7609291_test, vsp_s0929_main_test, vsp_s0929_v76_test, vsp_s0929_v76b_test, vsp_s0929_v76c_test, vsp_s0929_v76d_test.
+
+Board: VSP-69 / VSP-74 / VSP-75 moved to Done at ~20:10Z, comments 38577 / 38578 / 38579, each "merged, not deployed". VSP-67 waits for the 21:05Z read (wake armed). Next: VSP-78.
+
+=====
+One correction to the VSP-76 READY (f593e38), evidence line only:
+- The first-attempt files that failed rc=127 ("env: timeout: No such file or directory") are THREE, not four: main-6dbffdf__window-terminate-{immediate-product,immediate-max1,rollback-product}.txt (empty) with 40-byte .stderr. The *.run2.* files are the real main runs.
+- The four empty .stderr files for 79ec3cd/f593e38 immediate modes are real results: the fixed tree wrote nothing to stderr. On main the same modes wrote 20 "[db] a held client lost its connection (discarded on release): Connection terminated unexpectedly" lines each. That's the dead client being checked out again by the next caller, whose guard listener then hears the death.
+Nothing else in the READY changes.
+
+=====
