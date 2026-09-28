@@ -1,3 +1,6 @@
+## 2026-09-28 (Monday evening) — FRIDAY: moved to the Laptop-DEV drive
+- Kam (travelling this week) asked for all of Friday's files and project files to move to his new drive. Copied and checksum-verified: FRIDAY, and HPSM, HPSM-POC and Datasec Security Composer under !CODING/Datasec. The drive's pre-rewrite HPSM was quarantined (not merged); the HP OneDrive dump, keys and credentials the laptop lacked were brought into the new HPSM. HPSM-POC/.tools (68 GB of scratch worktrees) was deferred. Laptop copies untouched; drive ejected. Next launch: from the drive. Script: 2_Project_Files/friday/move_to_laptop_dev.sh.
+
 ## 2026-09-27 17:03 → 21:5x AEST — Friday (laptop) successor seat; wrapped on Kam's word, resume Tuesday after his HP meeting — Datasec only
 - Boot: by-tier digest 544 KB + own ledger whole, ctx 35%, 7d 22%. HPSM B03 verified on Jira, pane closed.
 - HPSM-POC: PR #49 merged (main b1d3ec9; 15 merges today; board 81 tickets, 40 Done, 38 of them closed today; 32 open tasks all wait on Kam / HP / Azure).
