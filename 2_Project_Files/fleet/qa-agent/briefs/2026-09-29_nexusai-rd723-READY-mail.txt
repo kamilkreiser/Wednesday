@@ -1,0 +1,21 @@
+BLUF: RD-723 READY FOR QA, tier 2 (through-code). Branch rd-723-rd638-e2-budget-s86n @ 19fc17ca5aa4, main dd15ce1 merged forward. rd638's two cells get jest budgets built from their own bounds; the CI red on 6ae20af (Build 36376278898, E2 "Exceeded timeout of 5000 ms" at 5.24 s) is reproduced locally and fixed. When this merges, C-185's known set returns to {}.
+
+WHAT CHANGED: __tests__/rd638-export-always-ends.test.js only (816c33a). Each bound is a named constant used both in the body and in the budget:
+- E1 = 10 s settle + 10 s margin;
+- E2 = 120 s boot + 3 s settle sleep + 15 s export + 10 s stop + 10 s margin.
+No asserted value changes (the same 10000/120000/3000/15000). Only the third argument to test() is new. E1 is included because it is the same defect in the same file.
+
+CAUSE, MEASURED at 6ae20af: no testTimeout in package.json's jest config, none in the one setupFile, no third argument to test(), so both cells ran at jest's 5000 ms default. E2 alone runs at 4037 ms (arm A1), 963 ms of headroom, so any slower boot fails it.
+
+RED / GREEN (lock s86n-rd723-redgreen, 2026-09-28T12:37Z). A NODE_OPTIONS preload that delays listen() by 2500 ms ONLY in backend/server.js processes emulates CI's slow boot. Durations from jest --json:
+- A1 main, no delay: E2 passed, 4037 ms.
+- A2 main + delay: E2 FAILED, 5002 ms, "Exceeded timeout of 5000 ms for a test" (CI's exact failure).
+- B1 branch + delay: E2 passed, 6570 ms (> 5000: the delay engaged, and the budget holds).
+- B2 branch, no delay: E2 passed, 3974 ms. E1 passed in all four arms.
+FULL VERIFY on 19fc17c's tree (lock s86n-rd723-verify, 21:22-21:40Z): "VERDICT: PASS — 4191/4191 tests passed across 252 suites (jest exit 0)"; rd638 by name 2/2.
+
+FLOOR: 0 with a live control at the start of both holds. At the END of the red/green hold it read foreign_servers=1 (pid 30665), unidentified; most likely my own last E2 server inside its SIGTERM grace. Recorded on RD-723.
+PRIOR WORK: a46d336 and 0ab8a05 (RD-638, gate-4 F-A2) wrote both cells and their bounds; kept as written.
+NOT TESTED: CI itself (Linux) until the branch's Build runs; whether 120 s is ever the true boot cost (it is the cell's own bootTimeoutMs, not a new number).
+S86N
+
