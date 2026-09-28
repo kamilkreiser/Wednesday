@@ -1,0 +1,33 @@
+{
+ "predev": "14f35a9ab1c05db336d850dd5730a191db630d7a",
+ "predev_note": "develop^ (first parent) of the pinned develop 63db8a38354c (READ, `git log --first-parent` in the scratch clone: gate36's #1325 squash, BEFORE gate36's #1326 squash): the MOVED-develop pin in the controls (D, RC, RD, RE, RN, RO). Both kit PRs branch from 63db8a38354c itself (MEASURED: each head's one commit has that parent); base-invariance is simulated by --simulate moved",
+ "inflight": ["1253", "1250", "1129", "995", "989", "949", "948", "947", "946", "945", "927", "923", "920", "887", "809", "649", "639", "635", "575", "572"],
+ "inflight_note": "EVERY other open PR at the pin (20, the PULLS API census, _api_peek_1.out) outside this kit: hard path-disjoint. NOTE: open PR #809 (KS-693, the M365 unconfigured-503 interim) is in #1328's SERVICE (m365-integration) — censused like every other open PR for path-disjointness. gate36's #1323-#1326 are MERGED (the develop below)",
+ "inflight_worktrees": {},
+ "declared_overlap": {},
+ "declared_overlap_note": "merged_blob_paths class: a GENUINE overlap (a merged blob DIFFERENT from the PR head's). gate37 declares NONE (measured by predict (c))",
+ "noop_paths": {},
+ "noop_paths_note": "the squash-stack NO-OP class (head == merged == develop), declared under its OWN key per STANDING_LINES 2026-09-27; gate37 has no stack, so NONE",
+ "dead_open_declared": {},
+ "dead_open_note": "none: gate37 declares no dead-open overlap (measured by the census)",
+ "kit": "gate37",
+ "tag": "g37",
+ "pane": "QA/Secuura-batch1327",
+ "tier": "T1 x2: a key-revocation row (what DELETE /api/keys/:id answers, and whether the key still validates, when the revoke's save fails) and a schema-migration row (a new column added by the gateway's startup migrations on every database they reach at the next deploy, and the notify route's rotation key)",
+ "report": "2026-09-28-batch1327-g37",
+ "launcher": "launch_qa_secuura_batch1327.sh",
+ "prompt": "2026-09-28_secuura-batch1327.prompt.txt",
+ "this_batch": ["1327", "1328"],
+ "sibling_batch": [],
+ "sibling_kit": "none",
+ "stacks": {},
+ "stacks_note": "NO stack: both kit PRs are based on develop 63db8a38354c, neither on the other — measured by predict (c): no head is another's ancestor",
+ "prs": {
+  "1327": {"keys": ["KS-888"], "seat": "B 39th (a local-model golden, section-applied by the seat: KS-888 REVOKE — security index.ts: DELETE /api/keys/:id opts into dbSaveApiKey's rethrow inside its own try, answers 503 (infrastructure: SQLSTATE 08/53/57, socket and pool errors, the mint's classifier) or 500 (other) on a failed save, and KEEPS the in-memory revoke; mint and validate unchanged; the existing ks888 cell file edited IN PLACE — header :5-7 and describe :98 reworded, C2 replaced by R1-R4)", "tier": "T1", "class": "key-revocation", "service": "services/security", "commits": 1},
+  "1328": {"keys": ["KS-1335"], "seat": "B 39th (seat-written: KS-1335 — m365-integration POST /api/teams/notify rotates its window on a NEW nullable last_attempted_at, added at all three DDL sites (docker init 06, the CORE_MIGRATIONS CREATE, the guarded information_schema add-column block), stamped ONCE after the deadline guard and before safeOutboundRequest (Wednesday's ruling, placement A); the DEADLINE-SKIPPED row is NOT stamped; ks934 R3 rewritten, R5 added)", "tier": "T1", "class": "schema-migration", "service": "services/m365-integration", "commits": 1}
+ },
+ "extra_keys": ["KS-934", "KS-577", "KS-1194", "KS-742", "KS-643", "KS-764", "KS-487", "KS-914"],
+ "widen_rx": "^\\s*(KS-888|KS-1335)\\b",
+ "widen_branch_rx": "-b39-\\d+$",
+ "widen_note": "Wednesday WIDEN rule, re-keyed for Seat B 39th: an OPEN PR titled with one of this kit's keys, or on a branch carrying Seat B 39th's segment `-b39-<n>`, that is NOT in this kit refuses (predict (a) and the launch action's step 2b, rc 15) — it must JOIN by a re-draft with its own cells"
+}

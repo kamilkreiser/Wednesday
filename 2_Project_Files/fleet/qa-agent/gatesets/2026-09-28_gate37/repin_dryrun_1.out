@@ -1,0 +1,38 @@
+LAUNCH ACTION gate37 (DRY RUN) 2026-09-28 21:52:17 AEST / 2026-09-28T11:52:17Z | launcher /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/gatesets/2026-09-28_gate37/launch_qa_secuura_batch1327.sh | pinned launch develop 63db8a38354c2f153a4d947c6b6203013c293d7e | END_TREE c0497437f34c60b88cdbfe46c4a35d9da1ef38ba
+  pin #1327 e1c94f60a786e2404a77268118e4687137a01d5a
+  pin #1328 dbb70fa418afa13daeee5962f3d3bbdc2125e48f
+--- 0. the pane must be routed (inbox_routing.conf) or cockpit.sh say --mail fails silently
+  routing file /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/inbox_routing.conf — line present: 0 (grep rc=1; want 1 / rc 0)
+  (DRY RUN: reported, not refused — the real run refuses rc 1 here)
+--- 0b. the kit's home: launcher filled for /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/gatesets/2026-09-28_gate37 | this script lives in /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/gatesets/2026-09-28_gate37
+  AT HOME — no re-fill
+--- 1. instrument: git ls-remote origin (read from the Secuura checkout, READ-ONLY)
+  ls-remote rc=0 at 11:52:21Z
+    63db8a38354c2f153a4d947c6b6203013c293d7e	refs/heads/develop
+    dbb70fa418afa13daeee5962f3d3bbdc2125e48f	refs/heads/feature/ks-1335-last-attempted-at-rotation-key-b39-2
+    e1c94f60a786e2404a77268118e4687137a01d5a	refs/heads/feature/ks-888-revoke-not-acknowledged-on-failed-save-b39-1
+    e1c94f60a786e2404a77268118e4687137a01d5a	refs/pull/1327/head
+    dbb70fa418afa13daeee5962f3d3bbdc2125e48f	refs/pull/1328/head
+--- 2. instrument: the GitHub PULLS API (an independent read of each head, and mergeable)
+  pulls API rc=0
+    WIDEN #1328 IN-KIT dbb70fa418afa13daeee5962f3d3bbdc2125e48f | feature/ks-1335-last-attempted-at-rotation-key-b39-2 | KS-1335: rotate the notify window on last_attempted_at, stamped on every attempt
+    WIDEN #1327 IN-KIT e1c94f60a786e2404a77268118e4687137a01d5a | feature/ks-888-revoke-not-acknowledged-on-failed-save-b39-1 | KS-888: a revoke whose save fails answers 503 or 500 and is not acknowledged
+    WIDEN-RX ^\s*(KS-888|KS-1335)\b | WIDEN-BRANCH-RX -b39-\d+$
+    API #1327 head e1c94f60a786e2404a77268118e4687137a01d5a base develop mergeable True reads 1 state open
+    API #1328 head dbb70fa418afa13daeee5962f3d3bbdc2125e48f base develop mergeable True reads 1 state open
+    DEVBASE #1327 OK base.ref develop
+    DEVBASE #1328 OK base.ref develop
+--- 2b. the WIDEN census (Wednesday's widen rule): an open PR matching kit.json widen_rx must be in this kit
+    WIDEN #1328 IN-KIT dbb70fa418afa13daeee5962f3d3bbdc2125e48f | feature/ks-1335-last-attempted-at-rotation-key-b39-2 | KS-1335: rotate the notify window on last_attempted_at, stamped on every attempt
+    WIDEN #1327 IN-KIT e1c94f60a786e2404a77268118e4687137a01d5a | feature/ks-888-revoke-not-acknowledged-on-failed-save-b39-1 | KS-888: a revoke whose save fails answers 503 or 500 and is not acknowledged
+    WIDEN-RX ^\s*(KS-888|KS-1335)\b | WIDEN-BRANCH-RX -b39-\d+$
+  WIDEN census clean: every matching open PR is in this kit
+--- 3. the heads, judged (both instruments == the pin, open, not mergeable:false; every stacked child still based on its parent's branch at the pinned parent head; every other PR based on develop)
+  #1327  ls-remote pull/head e1c94f60a786e2404a77268118e4687137a01d5a | branch e1c94f60a786e2404a77268118e4687137a01d5a | API e1c94f60a786e2404a77268118e4687137a01d5a (state open, mergeable True) | pinned e1c94f60a786e2404a77268118e4687137a01d5a
+  #1328  ls-remote pull/head dbb70fa418afa13daeee5962f3d3bbdc2125e48f | branch dbb70fa418afa13daeee5962f3d3bbdc2125e48f | API dbb70fa418afa13daeee5962f3d3bbdc2125e48f (state open, mergeable True) | pinned dbb70fa418afa13daeee5962f3d3bbdc2125e48f
+  DEVBASE #1327 OK base.ref develop
+  DEVBASE #1328 OK base.ref develop
+  BOTH INSTRUMENTS AGREE with every pin.
+--- 3b. develop, read at launch: 63db8a38354c2f153a4d947c6b6203013c293d7e | the launcher's pinned launch develop 63db8a38354c2f153a4d947c6b6203013c293d7e
+  UNMOVED since the fill — the END_TREE c0497437f34c60b88cdbfe46c4a35d9da1ef38ba stands
+DRY RUN COMPLETE 2026-09-28T11:52:30Z — every read agrees with the pins; the real run continues with the usage gate, --check and cockpit.sh add
