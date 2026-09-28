@@ -1,0 +1,39 @@
+Subject: [Datasec/NexusAI-M -> Tuesday] READY FOR QA: RD-628 @ a5799f3 (two machine-id derivations: comments corrected + golden-blob cells; 4136/248 PASS)
+Date: 2026-09-28T04:23:50.000Z
+Auth: {'spf': 'pass', 'dkim': 'pass', 'dmarc': 'pass'}
+
+BLUF: RD-628 is READY FOR QA. Branch rd-628-two-machine-id-derivations-s86m @ a5799f3: one commit on 1904765, pushed, ls-remote read back. It changes comments only in backend/encryptionService.js, plus new golden-blob cells. Verify: VERDICT: PASS — 4136/4136 tests passed across 248 suites. Suggested tier 2: tests and comments, no behaviour change. The property it pins is security-relevant: existing secrets must keep decrypting.
+
+WHAT CHANGED
+- backend/encryptionService.js, comments only (the header's item 3, the wire-format note, the Path 3 comment, encryptValue's doc). The false "SAME derivation ... interchangeable" is replaced with the truth:
+  - same machine id, iterations and hash, but a different PBKDF2 salt ('nexusai-storage-encryption-salt' here; sha256('printer-dashboard-salt-v1') in jsonStorage.deriveKeyFromMachineId);
+  - deliberately separate: email_settings.json goes through this module only, settings.json through jsonStorage only;
+  - in KV mode jsonStorage takes this module's DEK (getDek); in env-key mode both read STORAGE_ENCRYPTION_KEY.
+- New __tests__/rd628-two-machine-id-derivations.test.js (G1, G2, CTRL). Counts 4133/247 -> 4136/248, exactly this file.
+
+WHY GOLDEN BLOBS (the ticket's own fix shape, sharpened)
+- A cell that encrypts and decrypts fresh values PASSES after a unification, because both sides change together.
+- So each cell holds a blob made ONCE (2026-09-27, at 1904765, from the synthetic machine id 'rd628-synthetic-machine-id-not-real') under today's derivation, and reads it through the real path:
+  - G1: encryptionService.decryptValue;
+  - G2: JsonStorage.getSetting on a real store whose .machine-id holds that id.
+- CTRL: each path refuses the other's blob, so the keys really differ and G1/G2 can fail.
+- Nothing in the file is a real secret.
+
+MEASURED (one lock hold, floor 0 foreign before, between and after; session-tools/s86m/rd628-h4.log)
+- Green 3/3.
+- M1 (encryptionService's PBKDF2 uses jsonStorage's salt: the unification) -> G1 + CTRL red.
+- M2 (jsonStorage's deriveKeyFromMachineId uses encryptionService's salt) -> G2 + CTRL red.
+- Anchor count 1 each; both files restored by sha.
+- M2 edits jsonStorage.js (rd-424's file) ONLY transiently inside the hold. The branch does not touch it.
+- Full verify: VERDICT: PASS — 4136/4136 tests passed across 248 suites (jest exit 0).
+
+PRIOR WORK: the derivations are unchanged; the comment was wrong since the file's introduction (Pattern B, 2026-04-25). RD-616 made emailService derive this module's machine-id key for the first time, which is why the two keys now coexist on disk (the ticket's own finding). Nothing replaced or removed.
+
+MERGE-TREE (scratch object dir): against CURRENT main 6ae20af, rd-413 (the mail path) and rd-424 (jsonStorage.js), the ONLY conflict each time is scripts/verify-expected-counts.json (C-57).
+C-68: G2 reads through JsonStorage.getSetting. When rd-424 (backup after write) merges, G2 is re-run by name on that tree.
+
+NOT TESTED: Key Vault mode (getDek), and a real pre-RD-616 volume. Neither is what these cells pin.
+
+Jira RD-628 -> Testing. Still queued: s86m-rd652-h4, s86m-rd646-h6.
+
+S86M
