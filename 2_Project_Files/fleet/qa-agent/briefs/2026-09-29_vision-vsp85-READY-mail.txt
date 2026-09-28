@@ -1,0 +1,28 @@
+BLUF: VSP-85 READY FOR QA. Branch vsp-85-backup-test-gaps @ b78d2e314b6a (off main 6dbffdf, pushed; ls-remote matches). TEST FILES ONLY, no product change. Four mutants that survive today's tests now fail them. CI UNMEASURED.
+
+TICKET: VSP-85 (Medium), gate 12 VSP75-G12-O3/O4. Jira READY comment follows.
+FILES TOUCHED: test/db/backup-coverage.test.js, server/dbBackup.test.js (unit test file). Disjoint from VSP-76/78/82/83.
+
+WHAT CHANGED
+- O3, census: one regex, /\bCREATE\s+TABLE\s+(?:IF\s+NOT\s+EXISTS\s+)?(?:"?\w+"?\s*\.\s*)?"?(\w+)"?\s*\(/gi, and one walker. The census reads server/ AND scripts/; the lazy-table census stays server/ minus initDb.js, as before. Fixture cells pin the 7 forms (plain, IF NOT EXISTS, lower case, qualified, quoted+qualified, quoted, multi-line) and 3 non-tables (comment prose, doc prose, admin.js's built `${quoteIdent(...)}` statement).
+- O4, stub: failingSelect fires on the ROW SELECT only (FROM "<t>" t). The cell asserts the PK lookup for the same table was answered first, so the fault demonstrably landed on the SELECT; then INCOMPLETE, table and reason named, rowCount 0.
+
+PRIOR WORK: VSP-75 wrote both censuses and the stub. Gate 12's drafter already fixed the stub's quoting (the comment at tableOf); this keeps that and adds the second fault point. No cell removed or weakened; the two old census functions are now one-line calls to the shared walker, with the same scope.
+
+RED PROOF (mutants on 6dbffdf; old test files vs new; evidence mutants.txt)
+- M6 plain `CREATE TABLE vsp85_plain (` in server/: old 6 pass 0 fail -> new 3 fail (census, LAZY_TABLES, round trip)
+- M7 `CREATE TABLE IF NOT EXISTS public.vsp85_qualified (`: old 0 fail -> new 3 fail
+- M8 a table in scripts/: old 0 fail -> new 2 fail (census, round trip)
+- M9 dumpTable swallowing the row-SELECT error: old unit 10 pass 0 fail -> new 1 fail (the O4 cell)
+
+SUITES AS SETS vs main 6dbffdf (clean archive, fresh DB vsp_s0929_v85_test, env -i)
+- unit 131 -> 132; db 126 -> 129; lost 0, failing 0, dup 0; new 1 + 3 (all VSP-85).
+COVERAGE: 80.78, unchanged (test files only).
+
+NOT TESTED: CI; Node 20/22. The census still only reads .sql/.js, so a table made from a .sh or a migration file in another language would not be seen; none exist today.
+
+EVIDENCE: 5_Project_History/evidence/2026-09-29-vsp85/.
+SEPARATE, seen on the push (not VSP-85's): GitHub printed "18 vulnerabilities on datasecau/vision_datasec-sales-portal's default branch (12 high, 6 moderate)" (Dependabot). I haven't read the alerts (gh not logged in). I'll check whether the backlog already tracks them and put it in my wrap.
+
+Status: VSP-83 is built to your ruling and red/green on its cells (+10 restores 2026-09-27; main gives 2026-09-26). Its suites next, then its READY (tier 1). VSP-84 parked (comment 38586). 21:05Z bridge read armed.
+
