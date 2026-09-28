@@ -19740,7 +19740,7 @@
   ],
   "recommended": "a",
   "ts": "2026-09-28T23:40:37.966612+10:00",
-  "status": "open",
+  "status": "withdrawn",
   "ruled_choice": null,
   "ruled_ts": null,
   "prior_rulings_overridden": [
@@ -19753,6 +19753,47 @@
    "CARD secuura-ks1114-verify-title-strategy",
    "CARD secuura-ks1116-presentation-credential-ownership-model",
    "CARD secuura-965-f1-verify-hash-precedence-v1-vs-v2",
+   "CARD secuura-ks1011-stack-marker-unknown-on-restore",
+   "CARD nexusai-redis-down-fail-closed-policy",
+   "CARD secuura-ks1352-revoked-credentials-still-verify"
+  ],
+  "withdrawn_at": "2026-09-29T03:07:59.820868+10:00",
+  "withdrawn_reason": "Superseded by card secuura-ks1352-unknown-id-policy-after-gate38: gate38 (report 2026-09-29-batch1330-g38, N-1330-1) measured that pass-through lets an edited id un-revoke a credential, which changes the recommendation"
+ },
+ {
+  "id": "secuura-ks1352-unknown-id-policy-after-gate38",
+  "client_project": "Secuura/Blockchain",
+  "title": "KS-1352 follow-up (RE-FILED with a measurement): a revoked credential can be un-revoked by editing its id. Keep pass-through or fail closed?",
+  "bluf": "This replaces last night's card on unknown credential ids, because the QA gate measured a cost the first card missed. Your KS-1352 fix (#1330) is merging: a revoked credential now fails verify by either revoke route. But the gate ran it and found that a revoked credential resubmitted with any OTHER id verifies true on a development-mode stack, because verify looks the record up by the caller-supplied id, finds nothing, and passes through (gate38 report, N-1330-1, measured at runtime). This already happens at develop today, so #1330 makes nothing worse. Wednesday now recommends fail-closed. Separately, a ticket is being filed to bind the check to the credential's proof (wire the issuer's DID resolver), which would close the edit trick whatever you choose here.",
+  "default_action": "If you don't answer by Tuesday 29 Sep 18:00 AEST: option b. Wednesday briefs a seat to build fail-closed with the distinct reason, red-first, through the QA gate; nothing deploys. The proof-binding ticket goes ahead either way.",
+  "options": [
+   {
+    "key": "b",
+    "label": "Fail closed on no record (Recommended)",
+    "detail": "No issuer record: verified false with the reason 'no issuer record'. Closes the id-edit trick. Cost, measured by the seat: a stack with no database refuses every credential, and a genuine credential whose database write was lost stops verifying."
+   },
+   {
+    "key": "a",
+    "label": "Keep pass-through",
+    "detail": "What #1330 ships. Cost, measured by the gate: anyone holding a revoked credential can make it verify again on a development-mode stack by editing one field. The proof-binding ticket would be the only fix."
+   },
+   {
+    "key": "c",
+    "label": "Fail closed only when the database is up",
+    "detail": "No record in a live database: refuse. No database: pass through, flagged in the reply. Closes the trick on any real stack. Wednesday's design, unmeasured; a round would build and gate it."
+   }
+  ],
+  "recommended": "b",
+  "ts": "2026-09-29T03:08:11.848872+10:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "2026-08-21 09:56",
+   "2026-08-22 19:51",
+   "2026-09-02 16:32",
+   "2026-09-05 15:01",
+   "2026-09-16 14:00",
    "CARD secuura-ks1011-stack-marker-unknown-on-restore",
    "CARD nexusai-redis-down-fail-closed-policy",
    "CARD secuura-ks1352-revoked-credentials-still-verify"
