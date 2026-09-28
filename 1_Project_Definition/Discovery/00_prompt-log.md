@@ -2592,3 +2592,8 @@ INCLUDED until he says otherwise.
 > With the page available from anywhere, I can interact with you on that. So, two things. First of all, the work for the week will be to continue with the tickets, both local LLM and through the Claude agents. But, let's get the live site fully functioning and tested today so that we can interact normally while I'm traveling.
 
 *Note:* THE WEEK INSTRUCTION - receipted 14:0x; written verbatim into tasks/WEEK-INSTRUCTION.md (status live, valid_until 2026-09-27 = Wednesday reading; he was asked for his return day)
+
+## 2026-09-29 08:36 (Friday, Datasec/HPSM)
+> "here is the transcript from this mornings Meeting with HP" + the Teams transcript paste (kept verbatim at 0_Brain/reference/2026-09-29_hpsm-hp-meeting/transcript_partial_verbatim.txt)
+
+*Note:* the paste covers ~3 of ~56 minutes; filed and summarised; asked Kam for the Teams download before briefing HPSM.
