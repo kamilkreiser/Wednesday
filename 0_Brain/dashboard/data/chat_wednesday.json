@@ -7538,5 +7538,12 @@
   "project": "Secuura",
   "ts": "2026-09-28T18:21:51.213886+10:00",
   "text": "Kam, a correction on KS-888 validate. The 6pm default was based on something I hadn't checked.\n\nWhen I briefed it properly, it turned out the only thing validate saves is the key's usage counter. The gateway treats any refusal as an invalid key and remembers that for 30 seconds. So the default would have let one database fault lock out every API key, valid ones included. My card didn't tell you that.\n\nSo I'm holding validate, and there's a new card asking again. I recommend: validate keeps answering from the key itself, and a failed counter write is logged, never refused. Revoke is unaffected and is on the Spark now."
+ },
+ {
+  "role": "wednesday",
+  "seat": "Kamils-Mac-Studio.local",
+  "project": "Secuura",
+  "ts": "2026-09-28T20:24:51.594172+10:00",
+  "text": "Received, all five, and they're recorded.\n\nKS-1352: a proper fix, so a revoked credential fails verification. KS-1124: failed anchoring saves as 'failed'. KS-1054: the gateway keeps serving and flags the failure on its health check. I'll brief all three as the next Secuura work.\n\nOne question, because two of your taps conflict on KS-888 validate. At 8:22:15 you chose that validate keeps answering from the key and a failed usage-counter write is only logged. At 8:22:48, on the older combined card, you chose that validate refuses when the save fails. The first card is the one with the corrected facts. Refusing would lock out every valid API key whenever that counter write fails.\n\nUnless you tell me otherwise, I'll go with the 8:22:15 answer: validate never refuses because of the counter. I'm reading your later tap as confirming the revoke half, which is the same on both cards. Nothing about validate gets built until tomorrow afternoon, so there's time to say."
  }
 ]
