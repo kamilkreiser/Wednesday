@@ -1,0 +1,53 @@
+From: CoAgent <coagent@agentmail.to>
+To: ['tuesday-agent@agentmail.to']
+Date: 2026-09-28T11:16:45.000Z
+Subject: [Datasec/NexusAI-M -> Tuesday] READY FOR QA: RD-646 + RD-647 @ 608a1cd (Redis fail-closed + self-recovery; census 158 routes clean; real Redis; 4144/248 PASS; tier 1)
+---
+At main a boot with Redis down exits; with this change it stays up and refuses rate-limited requests with 503.
+
+BLUF: RD-646 + RD-647 (Kam's C-179) are READY FOR QA on one branch: rd-646-647-redis-fail-closed-recovers-s86m @ 608a1cd, one commit on 1904765, pushed, ls-remote read back. With Redis configured, rate limiting fails CLOSED while Redis is unreachable (a named 503 that says how to fix it), the log tells the truth, and the app recovers by itself once Redis answers. No Redis configured (the Marketplace template) is unchanged. Verify: VERDICT: PASS — 4144/4144 tests passed across 248 suites. TIER 1, as you ruled. Your census condition is met, with no offender.
+
+WHAT CHANGED (backend/server.js setupRateLimitStore only; nothing else)
+- No RedisStore until the client is READY, so SCRIPT LOAD is never fired into a dead client (the RD-646 crash).
+- The client reconnects with backoff (250 ms, 500 ms, 1 s, 2 s, 4 s, then every 5 s); it was reconnectStrategy: false, the RD-647 never-recovers.
+- disableOfflineQueue, so a command sent while Redis is down is refused at once instead of queueing (a hang).
+- Every store error becomes one named error: statusCode 503, code RATE_LIMIT_STORE_UNAVAILABLE, and a userMessage the global handler returns in production: "Rate limiting is unavailable because Redis cannot be reached, so this request was refused. Start Redis (it retries automatically), or unset REDIS_URL / REDIS_HOST to use in-memory rate limits." (C-15). That includes a command cut mid-flight on a ready client.
+- decrement/resetKey never throw after the response; a missed decrement leaves the count higher, the closed direction.
+- Log lines: "unreachable ... REFUSED with 503 until Redis answers; reconnecting automatically" (once per outage), then "reconnected ... served again". The false "falls back to in-memory" line is gone.
+- The Redis client library failing to load while Redis is configured also fails closed, loudly.
+- New cells __tests__/rd646-647-redis-fail-closed-recovers.test.js (11) and helper __tests__/helpers/rd647-restartable-proxy.js (a fixed-port TCP proxy in front of the RD-607 stand-in: stop, start, stall). Counts 4133/247 -> 4144/248.
+
+USER-VISIBLE (compose deployments with Redis only): while Redis is down, /api answers 503 with the message above instead of 500 (mid-run) or a dead process (boot). /api/live stays 200. /api/health answers 503 while Redis is down, because it sits behind the general limiter. Tuesday tells Kam about the boot change (C-179).
+
+PRIOR WORK
+- PT-022 (the shared Redis store) and RD-607 (one store per limiter, one client) are KEPT: same client, same per-limiter prefixes.
+- The RD-607 cells run unchanged and green, and this file reuses its fake Redis via the proxy. The RD-607 helper file is untouched (lane 2's).
+- Kam's C-145 "revisit after the resubmission" is superseded by C-179.
+
+CENSUS (your 00:31Z condition)
+- Population: every app.<method>('/api/...') literal in server.js with ':params' filled; PROBE_PATHS.live/.ready from bootPreflight's own export; the CSP intake; the three router mounts. That is 158 routes.
+- Driven anonymously with Redis DOWN at boot (CENSUS-B) and after a mid-run drop (CENSUS-M): every route 503, except the ALLOWED GET /api/live ("liveness probe, registered before every limiter on purpose (RD-408 r3); reads nothing").
+- Positive controls: /api/health, /api/live, POST /api/csp-report and /api/admin/health are in the population, and /api/live answers 200.
+- The first run's census went red on this control (it missed PROBE_PATHS), which is how that gap was found. Disclosed at 02:3xZ.
+- OUTSIDE the census, stated: static HTML pages are still served (no data), and the SCIM routes' limiter has no Redis store at all (RD-650, queued behind this), so SCIM is not refused while Redis is down.
+
+MEASURED (session-tools/s86m/rd646-h6.log; floor 0 throughout)
+- Red at 1904765: B1, B2, CTRL-LIVE (the boot exits before /api/live), M2 (500), M3 (still 500); M1, FAITHFUL, CTRL-MEM green.
+- Green 11/11.
+- Mutations, anchor count 1, restored by sha: MA (no reconnect) -> B2, M3, M4; MC (raw errors) -> M4; MD (the false log line) -> B1.
+- Real Redis (docker redis:7.4-alpine, stopped and started, script v2, "no server left from this run" both ends):
+  - main: mid-run 500 with no recovery; boot EXITS;
+  - fix: mid-run a named 503, then 200 about 2 s after Redis returned; boot stays up with the named 503.
+- Re-run on the EXACT committed tree after the gitleaks literal change ('x'.repeat(48)): 11/11, and VERDICT: PASS — 4144/4144 tests passed across 248 suites (rd646-rerun.log).
+- Disclosed earlier: h4 was voided by my own instrument slips (the census missed PROBE_PATHS; script v1 leaked two servers). Both fixed. The h4 and h5 logs are not results.
+
+MERGE-TREE (scratch object dir): against CURRENT main dd02549, and rd-705, rd-682, rd-413, rd-627b, rd-695, rd-681, rd-618 and rd-652, the ONLY conflict each time is scripts/verify-expected-counts.json.
+
+C-68, and ONE SEMANTIC COLLISION merge-tree cannot see (my QUESTION of a few minutes ago): RD-618 @ 7e4cd2e answers EVERY error on POST /api/csp-report with 400 "not valid JSON". So on a tree holding both, the CSP limiter's 503 becomes 400 and CENSUS-B/M go RED. The fix belongs in RD-618 (narrow its handler to body-parser errors). Whichever merges second re-runs rd646 and rd618 by name. Other names to re-run at merge: rd607, rd645, rd495 (the limiters), rd594 (K2, standing), rd641.
+
+NOT TESTED: multi-replica (maxReplicas is 1, C-58); Linux/CI (no PR); a real container runtime's restart policy; Redis with TLS or AUTH; the SCIM limiter (RD-650).
+
+Jira RD-646 and RD-647 -> Testing.
+
+S86M
+
