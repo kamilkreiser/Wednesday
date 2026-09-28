@@ -1,0 +1,24 @@
+BLUF: VSP-77 READY FOR QA. Branch vsp-77-session-index-test-hygiene @ da6287321b3c (off main 6dbffdf, pushed; ls-remote matches). TEST FILE ONLY. The boot-test role's password is random per run, and a concurrent-boot pairs cell now pins WHEN OTHERS: the gate's mutant M5 fails it. CI UNMEASURED.
+
+TICKET: VSP-77 (Low), gate 11 VSP71-G11-P1 + P2.
+FILES TOUCHED: test/db/session-index-boot.test.js only. Disjoint from every other READY today (VSP-78's new test is a separate file).
+
+WHAT CHANGED
+- P1: PASSWORD = crypto.randomBytes(16).toString('hex'), per run (was the fixed 'vsp71', on a Postgres listening on every interface). The file's after() already drops its roles; unchanged.
+- P2: new cell "two boots at once on an existing database, index missing: both resolve, and the index is made (5 pairs)". Each pair runs on a fresh database: one full boot first (so the pair races only on the index), DROP INDEX, then two real initDb() child processes at once. Both must resolve and the index must exist afterwards.
+
+PRIOR WORK: VSP-71 built the guarded block and this file's 5 cells; the gate found M5 survived them. No existing cell changed.
+
+RED PROOF
+- Gate mutant M5 (schema.sql's catch narrowed to insufficient_privilege OR lock_not_available), on a scratch copy of da62873: the new cell FAILS: "pair 1, boot A resolves: {ok:false, code:'23505', message:'duplicate key value violates unique constraint "pg_class_relname_nsp_index"'}". The 5 VSP-71 cells still pass under M5, exactly as the gate found.
+- Control: the new file against main 6dbffdf's product (WHEN OTHERS present): 6/6 green.
+- On da62873: 6/6.
+
+SUITES AS SETS vs main 6dbffdf (clean archive, fresh DB vsp_s0929_v77_test, env -i)
+- unit: 131 -> 131; lost 0, failing 0, dup 0; new 0
+- db: 126 -> 127; lost 0, failing 0, dup 0; new 1
+COVERAGE: 80.78 lines, unchanged (test file only).
+
+NOT TESTED: CI; Node 20/22. More than 5 pairs (the gate's arm was 6/6 red under M5; this cell went red on pair 1).
+EVIDENCE: 5_Project_History/evidence/2026-09-29-vsp77/.
+

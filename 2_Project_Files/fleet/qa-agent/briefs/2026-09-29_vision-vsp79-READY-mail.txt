@@ -1,0 +1,24 @@
+BLUF: VSP-79 READY FOR QA. Branch vsp-79-mixed-case-sequence @ 241b8bb (off main 6dbffdf, pushed; ls-remote matches). backup-db answers 200 with a mixed-case sequence (main: 500), and the dump quotes the name where it uses it. Not merged, not deployed. CI UNMEASURED.
+
+TICKET: VSP-79 (Low), gate 11 G11-O3.
+FILES TOUCHED: server/routes/admin.js (backup-db's sequence loop, 2 lines), test/db/backup-db-sequence-names.test.js (new). admin.js is also touched by VSP-78 (one dump-header line, ~70 lines away), so the merge is textual only.
+
+FIX (the ticket's shape, plus the second site it implies)
+- The catalog lookup's $1::regclass now gets quoteIdent(sequence_name). Unquoted, "Vsp79Seq" was folded to vsp79seq, not found: 42P01, 500.
+- The dump's own `SELECT setval('<name>', ...)` had the same fold, so a replay of the dump would fail on it too. It now writes setval(sqlLiteral(quoteIdent(name)), ...), e.g. setval('"Vsp79Seq"', ...). The ALTER SEQUENCE ... OWNED BY line already quoted it.
+
+PRIOR WORK: VSP-73 wrote this loop (OWNED BY + setval so a replay ties sequences back like SERIAL did). Kept; only the quoting changed. quoteIdent and sqlLiteral are the file's existing helpers.
+
+RED FIRST (test/db/backup-db-sequence-names.test.js)
+- control: only the app's lower-case sequences: 200 on main and branch.
+- a mixed-case sequence owned by a fixture table: main 500 ("the backup route answers (was 500): 500"); branch 200, and the dump contains `ALTER SEQUENCE "Vsp79Seq" OWNED BY` and `SELECT setval('"Vsp79Seq"', `.
+- The file drops its own fixture (table + sequence) in after(), per your ruling on tests' own fixtures.
+
+SUITES AS SETS vs main 6dbffdf (clean archive, fresh DB vsp_s0929_v79_test, env -i)
+- unit: 131 -> 131; lost 0, failing 0, dup 0; new 0
+- db: 126 -> 128; lost 0, failing 0, dup 0; new 2
+COVERAGE: 80.78 lines, unchanged
+
+NOT TESTED: CI; Node 20/22. A replay of a dump carrying a mixed-case sequence (the cell checks the dump text, not a replay). A sequence name containing a single quote (sqlLiteral doubles it; not exercised). No such sequence exists in the app's schema today.
+EVIDENCE: 5_Project_History/evidence/2026-09-29-vsp79/.
+

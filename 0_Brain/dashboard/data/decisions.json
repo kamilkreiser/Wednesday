@@ -19906,5 +19906,70 @@
    "CARD secuura-pr1245-round3-failed-at-cap",
    "CARD vision-vsp74-cap-reached-ship-or-round3"
   ]
+ },
+ {
+  "id": "nexusai-codeql-ruleset-main-pushes",
+  "client_project": "Datasec/NexusAI",
+  "title": "A new GitHub rule blocks every push to NexusAI main until CodeQL has scanned it. Was it you, and is merging through pull requests what you want?",
+  "bluf": "At 06:14 today an organisation ruleset \"Security scan rule\" (datasecau, no bypass) started requiring CodeQL results for anything landing on NexusAI main; CodeQL was switched on at 05:01. Neither Tuesday nor any agent made either change, and I do not know who did (measured by NexusAI-M from GitHub's rules API; relayed, not re-read by me). It refused M's merge of RD-681 at 06:58. Nothing is lost: main is still dd15ce1. I have paused every main push and M is piloting the rule's own route: a pull request (PR #32) so CodeQL scans it, then the same commit lands. https://github.com/datasecau/Reporting_Dashboard_Au/pull/32",
+  "default_action": "If you do not answer: M's PR pilot continues; if CodeQL passes and the commit lands without any change to the rule, the other seats use the same route. If the alert threshold blocks every PR, all merges wait and Tuesday raises it again. Nobody touches the rule.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Yes, that's my rule: merge through pull requests from now on",
+    "detail": "Agents open a PR per merge, wait for CodeQL, land the same commit. No squash, no rebase."
+   },
+   {
+    "key": "b",
+    "label": "Not mine, or not meant for agents: hold all NexusAI merges until I look",
+    "detail": "Every NexusAI merge waits. Work and gates continue."
+   },
+   {
+    "key": "c",
+    "label": "Mine, but I will change the rule myself; hold until I do",
+    "detail": "Merges wait for your change."
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-09-29T07:06:23.180392+10:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "2026-08-21 10:02",
+   "2026-08-21 20:10",
+   "2026-08-27 19:40",
+   "2026-08-27 19:42",
+   "2026-08-27 19:46",
+   "2026-08-28 09:33",
+   "2026-08-31 18:54",
+   "2026-09-05 13:55",
+   "2026-09-05 15:04",
+   "2026-09-05 20:17",
+   "2026-09-06 15:12",
+   "2026-09-08 07:07",
+   "2026-09-08 07:08",
+   "2026-09-08 08:08",
+   "2026-09-09 08:29",
+   "2026-09-09 17:03",
+   "2026-09-10 09:01",
+   "2026-09-10 09:08",
+   "2026-09-10 09:08",
+   "2026-09-10 10:29",
+   "2026-09-10 17:01",
+   "2026-09-10 18:01",
+   "2026-09-11 16:55",
+   "2026-09-15 18:19",
+   "2026-09-17 07:54",
+   "2026-09-17 15:10",
+   "2026-09-18 09:15",
+   "CARD secuura-768-dependabot-routing-to-main",
+   "CARD nexusai-main-tree-is-a-stale-snapshot",
+   "CARD secuura-ks769-mobile-tree-fuse-lapsed-blocks-pushes",
+   "CARD secuura-audit-baseline-rows-lapse-24sep-block-pushes",
+   "CARD hpsmpoc-draft-ruleset-scoring",
+   "CARD nexusai-merge-2-2-1-fix-into-main",
+   "CARD nexusai-release-package-files-into-main"
+  ]
  }
 ]
