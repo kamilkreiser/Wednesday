@@ -19502,5 +19502,58 @@
    "CARD vision-prod-postgres-idle-transaction-timeout",
    "CARD vision-vsp65-production-deploy"
   ]
+ },
+ {
+  "id": "vision-vsp74-cap-reached-ship-or-round3",
+  "client_project": "Datasec/Vision_Sales_Portal",
+  "title": "Restore-safety fix (VSP-74) failed its 2nd and last gate round on unusual table layouts the portal doesn't use. Merge it anyway, or allow a 3rd round?",
+  "bluf": "One tap from you, please. The restore-safety fix VSP-74 has now failed two gate rounds, which is your cap, so the next step is yours. The gate proved it fixes every case found so far, and it is never worse than today's code in any case measured (today's code silently loses rows in all of them). What it still misses are six unusual database layouts: partitioned tables, a table name containing a dot that collides with another, a same-named table in another schema, and inherited tables. The portal creates none of these, but the production database's layout has not been checked. Two of the six are new since the previous round, and only when an operator overrides the refusal. The full-backup fix VSP-75 passed, and it can only merge together with VSP-74. Nothing here deploys: this is about merging to main.",
+  "default_action": "If you do not answer: nothing merges today. Tuesday raises it at tomorrow's morning brief.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Merge both now; ticket the six layouts (recommended)",
+    "detail": "Your standing rule after two failed rounds: what is fixed ships, and the rest becomes a ticket. Tuesday has a Vision seat merge VSP-75's head 110bb03 (which contains VSP-74) as a fast-forward and file one ticket for the six layouts, with the gate's fix ideas and failing tests attached. Deploying stays a separate decision of yours (VSP-65)."
+   },
+   {
+    "key": "b",
+    "label": "Allow a third round on VSP-74 first",
+    "detail": "Tuesday has a Vision seat fix the six layouts, then runs one more gate on them. VSP-75 waits too, since it contains VSP-74. Costs about 2 to 3 hours."
+   },
+   {
+    "key": "c",
+    "label": "Hold both",
+    "detail": "Nothing merges. Main keeps today's restore, which is worse than both fixes in every case measured."
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-09-28T12:31:10.206631+10:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "2026-09-01 17:51",
+   "2026-09-08 07:09",
+   "2026-09-08 08:09",
+   "2026-09-09 17:03",
+   "CARD vision-v230-publish",
+   "CARD vision-v230-typed-word",
+   "CARD secuura-ks843-half2-round3",
+   "CARD secuura-ks949-round3-cap-and-the-cutoff",
+   "CARD secuura-892-round3-nogo-blocker-still-open",
+   "CARD nexusai-rd361-round3-blocker-survives",
+   "CARD nexusai-rd369-round3-or-ship-at-the-cap",
+   "CARD nexusai-marketplace-package-round3",
+   "CARD hpsm-composer-round3-approver-guard",
+   "CARD nexusai-rd436-round3-authorise",
+   "CARD nexusai-round3-nogo-round4-or-merge",
+   "CARD rd518-round3",
+   "CARD vision-portal-feedback-report-unauthenticated",
+   "CARD vision-portal-reminder-push-public-ntfy-topic",
+   "CARD secuura-pr1245-round3-failed-at-cap",
+   "CARD vision-gh-login-for-ci",
+   "CARD vision-prod-postgres-idle-transaction-timeout",
+   "CARD vision-vsp65-production-deploy"
+  ]
  }
 ]
