@@ -1,0 +1,577 @@
+#!/bin/bash
+# launch_qa_nexusai_gate_batch7.sh — cross-project QA agent, ONE batched gate on Datasec/NexusAI ("batch 7"), FIVE members, five verdicts,
+# ONE report (2026-09-29). A-D lane 1 by NexusAI-M (S86M, also their merge author); E lane 4 by NexusAI-P (S86P, its merge author):
+#   A — RD-618 (TIER 1, the anonymous CSP intake): rd-618-csp-intake-residue-s86m @ 4334b96 = 7e4cd2e (parent 1904765) + ONE commit narrowing
+#       the intake's error handler to body-parser entity.* errors. 4142/248.
+#   B — RD-628 (TIER 2, through-code): rd-628-two-machine-id-derivations-s86m @ a5799f3, ONE commit on 1904765; comments-only in
+#       backend/encryptionService.js (guard 93 proves it) + golden-blob cells. 4136/248.
+#   C — RD-652 (TIER 2): rd-652-node-env-unset-warn-s86m @ 09e2e6a, ONE commit on 1904765; a 10-line boot WARN, the NODE_ENV default KEPT (C-173;
+#       guard 94). 4136/248.
+#   D — RD-646+RD-647 (TIER 1, boot behaviour): rd-646-647-redis-fail-closed-recovers-s86m @ 608a1cd, ONE commit on 1904765; Redis down -> named 503
+#       instead of exit/500, self-recovery. 4144/248. Its census (158 routes) enumerates the server source at run time.
+#   E — RD-686 ROUND 2 OF 2 (TIER 2, words; ROUND CAP: a NO GO goes to Kam): rd-686-694-brand-wording-s85p @ ab12726 = 8962a14 (batch-6 NO GO,
+#       parent 1904765) + ONE commit, docs/BRAND.md +15/-7. Over 1904765: BRAND.md + a comment-only css-colors.js helper; no counts change.
+#   THE CROSS-CHANGE CELL (A x D, guard 95): on a tree with 4334b96 AND 608a1cd, D's census must see the named 503 on POST /api/csp-report;
+#   with 7e4cd2e instead it must go RED (the positive control). Merge-tree cannot see it; only a run can.
+#   Predicted merged counts(M0) + 26 / + 4 = 4217/256 at M0 = 40b7eae.
+#
+# AUTHORITY: Tuesday's batch 7 commission (2026-09-29) + her mid-draft message adding E; READY mails copied in briefs/.
+# This gate is FINDINGS-ONLY: it NEVER merges (outside its own scratch clones) and NEVER pushes; no fix, no deploy, nothing to Partner Center/demo/prod,
+# no az, no docker.
+#
+# PATTERN: launch_qa_nexusai_gate_batch5b.sh (guard families 9 6 7 8 18 18b 22 23 35 70 80 31 39 10 17 11 12-15 20 19 24 53 71 76 77 78 79 81 38
+# 32 40), prompt EMBEDDED. CHANGES, each deliberate:
+#   - 7/8: every head's base is 1904765 (NOT main 40b7eae); A and E are TWO-commit chains (7e4cd2e->4334b96, 8962a14->ab12726).
+#   - 18b: main must be 40b7eae or a descendant; a movement touching backend/server.js is EXPECTED (every batch-5a head changes it) and is NOT a
+#     refusal — guard 80b re-measures merge-tree M_ORIGIN x each member instead. Any OTHER member path touched by main's movement refuses.
+#   - 90/91/92 (5b's package/K2 guards): dropped. NEW: 93 (RD-628 and E's helper comments-only), 94 (RD-652 default kept), 95 (the A x D premises),
+#     96 (E's LIGHT premise and unchanged gates), 92 (K2 78 and census 158 at the heads).
+#   - 23: EXPECTED OVERLAPS: A/C/D pairwise = server source + counts; B with anyone = counts; E with anyone = nothing.
+#   - 80: merge-tree every member pair (10) + 7e4cd2e x D, in a FRESH mktemp object dir: A-D pairs counts-only, E pairs conflict-free.
+#   - 38: negative-control seats are @STAMP@ until Tuesday stamps them (a placeholder here refuses, via 32).
+#   - 40: the routing line QA/NexusAI-batch7 must exist (checked AFTER the stamp; Tuesday adds it).
+#   - 32: SELF-CHECK stamp. LAST refusal before --check exits.
+#
+# LAUNCH IT IN A TMUX PANE (cockpit.sh add 'QA/NexusAI-batch7' "bash '<this file>'"), NEVER nohup.
+# Identity: exports NexusAI's OWN az/gh dirs (az unused, gh READ-ONLY for §10); CLAUDE_CONFIG_DIR pinned to Tuesday's store.
+# --check is READ-ONLY in NexusAI: git read verbs (cat-file, log, merge-base, diff, show, rev-parse, ls-remote) plus ONE merge-tree family
+# (guards 80/80b) whose objects go to a fresh mktemp dir, never to NexusAI's store; node/python over `git show` output; grep, ps, tmux.
+# ABSOLUTE PATHS ON PURPOSE. Contains a legitimate `cd` (into the QA project, at exec).
+# Usage: launch_qa_nexusai_gate_batch7.sh [--check]
+# Exit: 0 launched (or guards passed under --check) · 2..96 a guard refused
+set -u
+CHECK=0
+for a in "$@"; do
+  case "$a" in
+    --check) CHECK=1 ;;
+    *) echo "unknown argument: $a" >&2; exit 2 ;;
+  esac
+done
+
+PH_STAMP='@STA''MP@'
+
+QA_DIR='/Volumes/KK_T9_External_HDD/!CODING/Testing Agent MAIN'
+TUE='/Volumes/KK_T9_External_HDD/TUESDAY'
+BRIEFS="$TUE/2_Project_Files/fleet/qa-agent/briefs"
+BRIEF="$BRIEFS/2026-09-29_nexusai-gate-batch7-rd618-rd628-rd652-rd646.md"
+READY_A="$BRIEFS/2026-09-28_nexusai-rd618-r2-READY-mail.txt"
+READY_A1="$BRIEFS/2026-09-28_nexusai-rd618-READY-mail.txt"
+READY_B="$BRIEFS/2026-09-28_nexusai-rd628-READY-mail.txt"
+READY_C="$BRIEFS/2026-09-28_nexusai-rd652-READY-mail.txt"
+READY_D="$BRIEFS/2026-09-28_nexusai-rd646-647-READY-mail.txt"
+READY_E="$BRIEFS/2026-09-29_nexusai-rd686-r2-READY-mail.txt"
+ROUTING="$TUE/2_Project_Files/fleet/inbox_routing.conf"
+NX='/Volumes/KK_T9_External_HDD/!CODING/Datasec/NexusAI'
+REPO="$NX/2_Project_Files"
+EV_M="$NX/session-tools/s86m"
+EV_P="$NX/session-tools/s86p"
+CLAR="$NX/1_Project_Definition/CLARIFICATIONS.md"
+RPTS="$QA_DIR/projects/nexusai/reports"
+PREV_G2="$RPTS/2026-09-21-gate2-rd495-rd525-rd575/report.md"
+PREV_G7R2="$RPTS/2026-09-23-gate7r2-rd645-rd641/report.md"
+PREV_G5="$RPTS/2026-09-22-gate5-rd615-rd616/report.md"
+PREV_B6="$RPTS/2026-09-27-gate-batch6/report.md"
+PREV_B6_BRIEF="$BRIEFS/2026-09-27_nexusai-gate-batch6-rd693-rd286-rd204-rd197-rd686-rd692.md"
+PREV_B5B="$RPTS/2026-09-27-gate-batch5b/report.md"
+B5B_EV="$RPTS/2026-09-27-gate-batch5b/evidence"
+B6_EV="$RPTS/2026-09-27-gate-batch6/evidence"
+PREV_FLOORLIB="$B5B_EV/qa-floorlib.sh"
+G7R1_FLOOR="$RPTS/2026-09-22-gate7-rd645/evidence/qa-floorcount.py"
+REPORT="$RPTS/2026-09-29-gate-batch7/report.md"
+ID_ROOT="${QA_IDENTITY_ROOT_OVERRIDE:-$NX/4_Credentials}"
+ROUTE_NAME='QA/NexusAI-batch7'
+
+MAIN_SHA='40b7eaeac70016f734b54f49c62e3be8398d4245'      # origin main at drafting (00:18:41 and 00:31:38 AEST); a descendant of BASE
+BASE='1904765007e9447ac6c980f9840c0689a02abe6c'          # every member's merge-base with main
+OLD618='7e4cd2efd7f4f2ff28bbf6fb9cd07be02789240d'        # RD-618's OLD head: the cross-change POSITIVE CONTROL only; never merged
+E_R1='8962a149798531b61eddd22361dec1261a372f4e'          # RD-686 round 1 (batch-6 NO GO); E's parent
+A_BRANCH='rd-618-csp-intake-residue-s86m'
+A_HEAD="${QA_A_HEAD_OVERRIDE:-4334b96d91132d933bc30b6b8dbd63e2031552cc}"
+B_BRANCH='rd-628-two-machine-id-derivations-s86m'
+B_HEAD="${QA_B_HEAD_OVERRIDE:-a5799f3ba444fba82b8f8f34529b5493751a9b48}"
+C_BRANCH='rd-652-node-env-unset-warn-s86m'
+C_HEAD="${QA_C_HEAD_OVERRIDE:-09e2e6accf172f574dec22bdaedc47e104076edd}"
+D_BRANCH='rd-646-647-redis-fail-closed-recovers-s86m'
+D_HEAD="${QA_D_HEAD_OVERRIDE:-608a1cd99adcc69f6d2cdc552f170e89710adb02}"
+E_BRANCH='rd-686-694-brand-wording-s85p'
+E_HEAD="${QA_E_HEAD_OVERRIDE:-ab1272678fe40e23cff86ff749601572dc8cb64b}"
+
+COUNTS_FILE='scripts/verify-expected-counts.json'
+SERVER_SRC='backend/server.js'   # used by git only; the PROMPT never names it (guard 24)
+SERVER_BLOB='bc099b245b01e701150cdd3cbbc74068bbcea0c8'   # at BASE and at MAIN_SHA
+ENC_FILE='backend/encryptionService.js'
+CSSC='__tests__/helpers/css-colors.js'
+BTC_BLOB='9cf69939852d22d342816bfdceab73e7da6395d3'      # __tests__/brand-token-conformance.test.js at BASE, MAIN_SHA and E (the gate E describes)
+DERIVE_BLOB='d94423a06beda02ff09074ad3641650439f7bf82'   # scripts/derive-brand-tokens.js at BASE, MAIN_SHA and E
+CSSC_BASE_BLOB='78bb004515ec450e275190cc6c9326860f366ab3'
+CSSC_E_BLOB='bdb5ca38d9e9480a775b1ea921b710d9f8cade72'
+A_EXPECTED_FILES="__tests__/rd618-csp-intake-residue.test.js
+$SERVER_SRC
+backend/services/cspReport.js
+$COUNTS_FILE"
+A_R2_FILES="__tests__/rd618-csp-intake-residue.test.js
+$SERVER_SRC
+$COUNTS_FILE"
+B_EXPECTED_FILES="__tests__/rd628-two-machine-id-derivations.test.js
+$ENC_FILE
+$COUNTS_FILE"
+C_EXPECTED_FILES="__tests__/rd652-node-env-unset-warns.test.js
+$SERVER_SRC
+$COUNTS_FILE"
+D_EXPECTED_FILES="__tests__/helpers/rd647-restartable-proxy.js
+__tests__/rd646-647-redis-fail-closed-recovers.test.js
+$SERVER_SRC
+$COUNTS_FILE"
+E_EXPECTED_FILES="$CSSC
+docs/BRAND.md"
+E_R2_FILES="docs/BRAND.md"
+
+LOCK_BLOB='906476350431e2ecb3c21070a25c64b1702c1aa8'
+K2_POP='78'
+CENSUS_POP='158'
+NEG_SEATS='62649 9959 20317 38362 24942'   # NexusAI-M %19, -N %21, -P %22, -O %29, Tuesday %0 — re-read 2026-09-29 00:46 AEST (s91)
+
+SUBJECT='[QA/Datasec-NexusAI -> Tuesday] GATE VERDICT — batch 7: RD-618 · RD-628 · RD-652 · RD-646+RD-647 · RD-686 r2'
+QUESTION_SUBJ='[QA/Datasec-NexusAI -> Tuesday] QUESTION: <topic>'
+ANSWER_PREFIX='[Tuesday -> QA/NexusAI-batch7] ANSWER'
+NOTTESTED_LINE="Not tested by this gate: Linux or CI at any branch head unless a PR's CI Build exists, a real Redis server (no docker), Redis with TLS or AUTH, multi-replica, a real container runtime's restart or healthcheck, a real browser's Reporting-API report, Key Vault mode and a real Key Vault success path, any deploy, real Azure, Partner Center, the demo, and Windows."
+SAFE_PRINTER='if [ -n "${SESSION_SECRET+x}" ]; then echo "SESSION_SECRET SET (length ${#SESSION_SECRET})"; else echo "SESSION_SECRET UNSET"; fi'
+
+g() { git --no-optional-locks -C "$REPO" "$@"; }
+sorted() { printf '%s\n' "$1" | sed '/^$/d' | sort; }
+counts_at() { g show "${1}:${COUNTS_FILE}" 2>/dev/null | python3 -c 'import json,sys; d=json.load(sys.stdin); print(d["tests"], d["suites"])' 2>/dev/null; }
+blob() { g rev-parse "${1}:${2}" 2>/dev/null; }
+# RD-594's K2 regex and RD-646's census regex (+6 non-literal routes), reproduced over the server source at a sha.
+k2_pop() { g show "${1}:${SERVER_SRC}" 2>/dev/null | python3 -c "import re,sys; print(len(set(re.findall(r\"^app\.get\('(/api/[^':*]+)'\", sys.stdin.read(), re.M))))" 2>/dev/null; }
+census_pop() { g show "${1}:${SERVER_SRC}" 2>/dev/null | python3 -c "
+import re,sys
+s=sys.stdin.read(); out=set()
+for m,p in re.findall(r\"^app\.(get|post|put|delete|patch)\('(/api/[^']*)'\", s, re.M):
+    if '*' in p: continue
+    out.add(m.upper()+' '+re.sub(r':[A-Za-z_]+','rd646x',p))
+for x in ['GET /api/live','GET /api/ready','POST /api/csp-report','GET /api/feedback','GET /api/setup/entra-provisioning','GET /api/sustainability/kpis']: out.add(x)
+print(len(out))" 2>/dev/null; }
+# comments-only: both blobs, block + line comments stripped, whitespace collapsed, compared; prints "equal ctrl" (want "true false").
+code_equal() { node -e '
+const cp=require("child_process");const [R,a,b,p]=process.argv.slice(1);
+const rd=(s)=>cp.execFileSync("git",["-C",R,"show",s+":"+p]).toString();
+const strip=(s)=>s.replace(/\/\*[\s\S]*?\*\//g,"").replace(/^\s*\/\/.*$/gm,"").replace(/\s+/g," ");
+const A=rd(a),B=rd(b);
+const ctl=strip(A)===strip(A.replace(/function\s+(\w+)/,"function $1QAX"));
+console.log(String(strip(A)===strip(B))+" "+String(ctl));' "$REPO" "$1" "$2" "$3" 2>/dev/null; }
+
+# ---------------------------------------------------------------- THE PROMPT (embedded; guarded below like a prompt file)
+PROMPT=''
+read -r -d '' PROMPT <<'PROMPT_EOF' || true
+ultrathink
+
+You are the fleet QA/testing agent running ONE batched gate on Datasec/NexusAI, "batch 7", with FIVE members, one verdict per ticket and ONE report: RD-618 (TIER 1, the anonymous CSP report intake); RD-628 (TIER 2, through-code: comments plus golden-blob cells); RD-652 (TIER 2, a boot WARN with the NODE_ENV default kept); RD-646+RD-647 (TIER 1, a boot-behaviour change: Redis configured and down goes from exit to a named 503, with self-recovery); and RD-686 round 2 of 2 (TIER 2, words only; ROUND CAP: a NO GO on it goes to Kam, not to a round 3). Each ticket gets its own verdict — GO, GO WITH FINDINGS or NO GO — about its branch head AND about the merged tree. A finding on one ticket never becomes another's verdict; a finding that exists only in a COMPOSITION is graded on the merged tree and named against both tickets it joins. TIER 1 AT FULL WEIGHT, FINDINGS-ONLY: you NEVER merge anything the fleet can see and NEVER push; no fixes, no deploys, nothing to Partner Center, the demo or production, no az, no docker.
+
+READ YOUR COMMISSION FIRST, whole: /Volumes/KK_T9_External_HDD/TUESDAY/2_Project_Files/fleet/qa-agent/briefs/2026-09-29_nexusai-gate-batch7-rd618-rd628-rd652-rd646.md
+It opens with TUESDAY'S RULINGS (a) to (g): apply them, do not re-rule them. Then the charter it names, then the six READY mails it names (RD-618 has a first READY for 7e4cd2e and a new-head READY for 4334b96: read both), then the prior reports it names: gate 2 (RD-618's F-A2 to F-A5), gate 7 round 2 (RD-646, RD-647 and RD-652 as ruled residuals), gate 5 (F-B2, RD-628's area), the batch 6 gate (RD-686 round 1's NO GO: F-E1, F-E2, E8) and the batch 5b gate (the instruments, and C-F1: a source-regex route population has blind shapes). Every builder statement is a CLAIM — RELAYED, never evidence. The brief's LEGITIMATE SHAPES tables (section 2a) are required measurements, row by row, base and head in the same window.
+
+THE TARGETS. RD-618: branch rd-618-csp-intake-residue-s86m at 4334b96d91132d933bc30b6b8dbd63e2031552cc, whose only parent is 7e4cd2efd7f4f2ff28bbf6fb9cd07be02789240d (RD-618's old head), whose only parent is 1904765007e9447ac6c980f9840c0689a02abe6c. RD-628: rd-628-two-machine-id-derivations-s86m at a5799f3ba444fba82b8f8f34529b5493751a9b48, ONE commit on 1904765. RD-652: rd-652-node-env-unset-warn-s86m at 09e2e6accf172f574dec22bdaedc47e104076edd, ONE commit on 1904765. RD-646+RD-647: rd-646-647-redis-fail-closed-recovers-s86m at 608a1cd99adcc69f6d2cdc552f170e89710adb02, ONE commit on 1904765. RD-686 round 2 of 2: rd-686-694-brand-wording-s85p at ab1272678fe40e23cff86ff749601572dc8cb64b, whose only parent is 8962a149798531b61eddd22361dec1261a372f4e (round 1, the batch-6 NO GO), whose only parent is 1904765. Main at drafting was 40b7eaeac70016f734b54f49c62e3be8398d4245, a descendant of 1904765 that no member contains. RD-618, RD-652 and RD-646+RD-647 all change the server entry point; RD-628 changes only the storage encryption module's comments and adds cells; RD-686 changes docs/BRAND.md and a comment-only test helper, and shares no path with the others.
+
+THE CROSS-CHANGE CELL (ruling a, brief section 8 — the reason these are gated together). RD-618's narrowed CSP error handler and RD-646's census interact on POST /api/csp-report. POSITIVE CONTROL FIRST: in your own scratch clone build M0 + 7e4cd2e + 608a1cd and run the rd646 file: CENSUS-B and CENSUS-M must go RED, each with exactly one offender, POST /api/csp-report -> 400. If they do not, STOP and report: the interaction is not what everyone read. Then M0 + 4334b96 + 608a1cd (and the full merged tree): CENSUS-B and CENSUS-M green, and YOUR OWN probe shows the 503 on POST /api/csp-report is the NAMED one (the census checks the status only, never the name). Then x4 (the entity guard removed: red again) and x5 (the named error given an entity.* type: red again), x6 and x7 (the intake unchanged by RD-646 when Redis answers and when no Redis is configured). Never run the builder's mx618x646.sh: it merges inside a NexusAI worktree with no forceExit, no deadline and no trap; use its file list and anchors in your own clones. Merge-tree cannot see this cell; only a run can.
+
+RD-618 (TIER 1). POSITIVE CONTROL FIRST: the cell file against 1904765's product and against 7e4cd2e's product (R5 red there), then 9/9 at 4334b96. Re-derive M-A3, M-A2, M-A5 and M-R5. Rows s1 to s9 — s3 (userinfo in an UNPARSEABLE URL: the literal-cut fallback), s4 (a double-encoded query), s6 (ONE Reporting-API array that pushes many entries into the 500-entry ring: the refill rate before and after) and s7 (non-entity body-parser errors reaching the global handler's log) first. Tabulate body-parser's error types and which branch answers each at 4334b96 and at 7e4cd2e. Gate 2's F-A2 to F-A5: closed, partly closed or unchanged, each by measurement; F-A1 stays out (ruled).
+
+RD-628 (TIER 2, through-code). The comments-only claim is Tuesday's condition: prove with TWO independent instruments, each with a control that fires, that no executable line of the storage encryption module changed; if any did, it goes in your WRONG list and is a Major. Then 3/3, M1, M2 and g4 (both derivations unified at once: G1 AND G2 red), g5 (LEGACY_MACHINE_IDS in the runner's env; the cell scrubs four variables but not that one), g6 (the env-key sentence measured, not read), and every added comment sentence checked against the code. Name for the merge author that rd-424 changes the JSON storage module and G2 re-runs by name at its merge.
+
+RD-652 (TIER 2). Ruling (d): the NODE_ENV default is KEPT and only a WARN is added — quote the one 10-line insertion and the default line, byte-identical at both shas. Then 3/3, M1 (warn always: both controls red), M-W2 (the default moved above the WARN: W1 red), w4 (NODE_ENV truly UNSET, not empty), w5 (a .env setting production) if cheap, w6 (the shipped paths, READ ONLY).
+
+RD-646+RD-647 (TIER 1). POSITIVE CONTROL FIRST: at 1904765's product the Redis-down boot EXITS (exit code and last log line); at 608a1cd it stays up, the liveness probe answers 200 and every limited route the named 503; the startup log never says it falls back to in-memory. H-10: prove the proxy's down state refuses and its up state answers before any measurement. Re-derive MA, MC, MD; then rows r1 to r12 — r3 (the not-ready check removed: the original crash back), r5 (the census cannot tell a named 503 from any 503), r6 (every census 503 body read), r7 (the router mounts and afterAuthGate routes the census regex cannot see, driven with Redis down: a 200 that serves data is a Blocker) first. Reproduce the census population (158 predicted: 152 unique literals plus 6) at the head, on M0 and on the merged tree, and name every route M0's movement added. r9 is READ ONLY (the compose healthcheck consequence, for Tuesday's relay to Kam). No docker; a real Redis only if a local redis-server exists without installing anything, else L-D6 stands.
+
+RD-686 ROUND 2 OF 2 (TIER 2, words; ROUND CAP). Are the three rewritten claims (batch 6's F-E1, F-E2, E8) now TRUE of the gate code they describe? Re-read every cited line AT THE HEAD, never from the READY: css-colors.js 202 to 204 and 53; brand-token-conformance.test.js 116, 140, 149, 153 to 154, 265, 70 to 79; scripts/derive-brand-tokens.js LIGHT (20 values; #00719f absent; #0096d6 present). POSITIVE CONTROL FIRST (e6: each shape the words say the gate reads fails when off-token), then e1 to e3 (E1A, E1C, E2A/E2B re-run through the real gate: green or red exactly as the new words say) and e4 and e5, the drafter's READ of two residual overclaims (an off-token hsl() beside an on-token integer rgba(); an off-token first rgb() written with percentages, decimals or var()). One line per rewritten claim: the words, the gate's behaviour, TRUE or NOT TRUE, which direction. e7 to e9, and the 10 BRAND.md/css-colors readers at the head and on the merged tree. The verdict line reads "RD-686 round 2 of 2", and a NO GO names each claim still untrue for Kam.
+
+THE MERGED TREE — part of every verdict (brief section 9). In YOUR OWN scratch clone (git clone --shared --no-checkout into your own project dir; origin removed; local user config; gc.auto 0; merges and commits in the clone ONLY): M0, then merge --no-ff a5799f3, 09e2e6a, 4334b96, 608a1cd, ab12726. Re-measure every member pair by merge-tree in a SCRATCH object dir first (A to D pairs predicted counts-only, RD-686's pairs conflict-free). Predict each merge before it; anything other than the counts file conflicting STOPS (C-57). C-104: resolve and stage before any census or run. Counts by REGENERATION once after all merges: predicted 4217/256 at M0 = 40b7eae, a prediction re-based on YOUR M0; the measurement decides. A second clone in reverse order, root trees identical apart from the counts file, and the auto-merged server entry point the same blob in both. C-112's condition beside the conclusion (300 test files predicted at M0 = 40b7eae, none identical to no parent). Ruling (c), the id-superset control: predicted missing 0 (no member modifies or deletes a cell file; RD-686 joins as docs, no test ids); any missing id is named with its file's blob history and C-133's mechanical test, never assumed, and is still a STOP. On the merged tree, one hold: every C-68 set by name, the cross-change rows, the rows the brief lists, the full verify, then one mutant per ticket. C-89 on your clone. Count the NexusAI object files before and after and account for any delta by mtime. Nothing leaves your clone; never push.
+
+THE NEGATIVE-ASSERTION SWEEP (brief section 3b, C-102). RD-618 adds early returns to the intake and a pass-on to the error handler; RD-646 adds throws before the limiter counts. For every negative-asserting cell among their callers (rd618, rd495, rd607, rd646, the limiter suites), show the refusal it asserts is produced by the check it is NAMED for, with the log line or coverage. Self-test first (a positive control, a negative control, a non-empty population) or ABORT. Report population, negative cells, still reaching, disarmed.
+
+FULL VERIFY of each head and of the merged tree through the lock, SESSION_SECRET UNSET, npm run verify -- --maxWorkers=2 --forceExit (prove the flag reached jest or say it did not). Predicted 4334b96 4142/248, a5799f3 4136/248, 09e2e6a 4136/248, 608a1cd 4144/248, ab12726 4133/247, merged 4217/256 at M0 = 40b7eae. Every failure by NAME; rd638-export-always-ends E2 is C-185's known CI failure, not a local excuse. Re-run-until-green is not an acceptance gate. A RED ARM COUNTS ONLY IF THE MUTANT STILL PARSES AND LANDED: node --check every mutated JS file and quote the exit code, assert each anchor matched once and the exact mutated text is present; a red from a mutant that does not parse, or a green from one that never landed, is a VOID arm.
+
+THE INSTRUMENT RULES H-1 TO H-21 (brief section 3a). H-1: the ONLY SESSION_SECRET printer is the one the brief quotes; self-test it with a throwaway, scan every hold's logs for it, and let the scan's control plant a DIFFERENT marker. H-2: seed before, read raw. H-3: a LANDING CONTROL for every hook, stub, plant or mutant. H-4: the HEARTBEAT is a separate child of the hold wrapper, aborted if absent 90 s after the grant, max gap per hold reported (at most 120 s). H-5: restore your own perturbations before any hash. H-6: every extractor and census gets a positive control; quote every path (the QA path has spaces and a bang); every server under the network belt, and prove the belt lets the loopback fake Redis through. H-7: mutants only through a quoted tool with a negative control. H-8: the exact new text present and the old absent once it is removed. H-9: byte-level plants via Buffer and xxd. H-10: prove the phenomenon reachable before measuring its absence. H-11: /bin/bash explicitly; every sha:path braced; never set -- or declare -A in the default shell. H-12: list every modified or deleted test file before the C-57 control (predicted: one helper, RD-686's comment-only css-colors.js). H-13: NUL-safe tree censuses. H-14: every driver ends with an END record or the run is VOID. H-15: preloads with -r in argv, never NODE_OPTIONS. H-16: a plant is what the product will treat it as. H-17: absolute tool paths, and prove the thing STARTED before reading its rc. H-18: reject the empty-input hash as a VOID read. H-19: gitleaks canaries as real keys. H-20 (ruling f; a hung jest held the NexusAI lock 4.5 h on 2026-09-28): EVERY jest invocation inside a hold carries --forceExit AND runs under a per-step hard deadline (qa-to.sh; targeted 600 s, the C-68 union 2400 s, a full verify 2700 s); a fired deadline aborts that step, is reported by name, and the lock releases through your wrapper's own exit. H-21 (ruling f): every file you mutate is restored in a trap on EXIT (also INT and TERM) installed BEFORE the first mutation, and its hash compared to the pinned blob after every hold; a tree left mutated is quarantined, never reused.
+
+TREES AND WRITES. Build every tree INSIDE YOUR OWN PROJECT (git archive into a fresh mktemp dir under projects/nexusai/qa-trees/batch7.*). Each tree is EXCLUSIVE to this gate and to one purpose. In the NexusAI repo use ONLY read verbs (show, log, diff, ls-tree, cat-file, rev-parse, merge-base, grep, ls-remote, archive, count-objects); never fetch, pull, push, checkout, worktree, commit, stash, gc, clean, or merge-tree --write-tree without your own scratch object directory there, and never work in its 2_Project_Files checkout or any builder worktree. Never write into the builders' session-tools: copy, then hash at start and end. Symlinks, chmod, sockets, held ports, env files and scratch git repos ONLY under your own mktemp dirs. Findings-only: never push, no commits outside your clones, no tickets, no edits in NexusAI, never merge anything anywhere the fleet can see. No Azure (no az at all), no demo, no docker, no Partner Center. No mail to any human. Never rm: quarantine.
+
+FLOOR DISCIPLINE — section 11 of the brief exactly. QUEUE, NEVER TAKE OVER: the NexusAI seats share session-tools/nexusai-lock.sh with you. Every jest run and every server boot goes through it with a tag starting qa-b7- (C-141 gate-class, ADDENDUM 2 and 3: each new qa ticket earns a fresh, self-applied yield). When a merge ticket is already queued, file yours with --after that merge ticket's tag (C-141 ADDENDUM 4's tool), never ahead of it; expect a busy queue while batches 5a, 5b and 6 merge. Hold the lock once per multi-run measurement as a tracked child of your seat. Count foreign servers the C-125 way anchored on YOUR OWN claude pid, with the brief's negative-control seats classifying foreign in the same run (correct the stale ROOT and NEG defaults of the 5b gate's copied instrument first); record the foreign count beside every result; a hold with no live negative control aborts. A zero is reportable only beside a control that fired in the same window. DEADLINE AND HEARTBEAT: every probe, boot, request and run has a per-step DEADLINE and a client timeout, every server, fake Redis and proxy is killed in a finally by pid from your own ancestry (C-174, never by pattern), a HEARTBEAT line at least every 2 minutes during a hold, and a step with no heartbeat for 5 minutes is aborted and reported.
+
+CI: whether any of the five branches has a PR, and M0's CI Build and its failing set against C-185's known set, are UNVERIFIED by the drafter — read them with gh READ ONLY or say you could not. CI NOT RUN at a head with no PR.
+
+RE-PIN at start, mid and end: all five branches and main — three timestamped readings with the branch name beside each sha. A TICKET head that disagrees with the brief is a FINDING and a reason to stop, never a typo to fix. Main WILL move (ruling b: batch 5a, 5b and 6 are merging): call main at your start M0 and say so; it must be 40b7eae or a descendant; a movement that changes the server entry point is expected — re-measure merge-tree M0 against each member, and the census and K2 populations on M0; if main moves again, your verdict names M0 and says what moved (C-68); never re-base mid-gate.
+
+QUESTIONS: your routing name is QA/NexusAI-batch7. If you must ask, mail tuesday-agent@agentmail.to with subject "[QA/Datasec-NexusAI -> Tuesday] QUESTION: <topic>" and PROCEED ON THE SAFEST READING without waiting; Tuesday's answer arrives in tuesday-agent@agentmail.to with a subject beginning "[Tuesday -> QA/NexusAI-batch7] ANSWER". Approval-class items are NOT RUN and named, never done on a safe reading. Record every question, reading and answer in the report.
+
+Write your ONE report to: /Volumes/KK_T9_External_HDD/!CODING/Testing Agent MAIN/projects/nexusai/reports/2026-09-29-gate-batch7/report.md
+
+MAIL YOUR VERDICT to tuesday-agent@agentmail.to with the subject exactly:
+[QA/Datasec-NexusAI -> Tuesday] GATE VERDICT — batch 7: RD-618 · RD-628 · RD-652 · RD-646+RD-647 · RD-686 r2
+Lead the body with one line per ticket (RD-618: <GO|GO WITH FINDINGS|NO GO> @ 4334b96 · RD-628: … @ a5799f3 · RD-652: … @ 09e2e6a · RD-646+RD-647: … @ 608a1cd · RD-686 round 2 of 2: … @ ab12726, a NO GO there saying "-> Kam (round cap)"), then one line naming M0, your recommended merge order, the merged counts you measured, the cross-change cell's result (the merged tree green? the 7e4cd2e control red with exactly POST /api/csp-report -> 400?), and the census population on the merged tree. Never wednesday-agent@. You have no inbox that wakes you, so a verdict you do not mail is lost.
+
+The AgentMail key is AGENTMAIL_API_KEY in /Volumes/KK_T9_External_HDD/TUESDAY/4_Credentials/.env. It is an absolute path because the QA project has no 4_Credentials directory of its own. Never put the key, a token or any secret in a mail or the report.
+
+Run long commands in the FOREGROUND. Never end a turn waiting on a background notice.
+
+Rule 2 stands: what you did NOT test is first-class output — a NOT TESTED section carrying every builder's NOT TESTED list as the brief quotes it, every declared limit L-A1 to L-A3, L-B1 to L-B2, L-C1 to L-C2, L-D1 to L-D6 and L-E1 to L-E3 discharged with a measurement or left standing and named (C-112), Prior work checked for each ticket (C-49), and every action recommendation labelled MEASURED AT RUNTIME, PROBED or READ ONLY. Severity is yours; priority is Tuesday's. That section must carry this line verbatim:
+Not tested by this gate: Linux or CI at any branch head unless a PR's CI Build exists, a real Redis server (no docker), Redis with TLS or AUTH, multi-replica, a real container runtime's restart or healthcheck, a real browser's Reporting-API report, Key Vault mode and a real Key Vault success path, any deploy, real Azure, Partner Center, the demo, and Windows.
+PROMPT_EOF
+
+# ---------------------------------------------------------------- GUARDS
+[ -d "$QA_DIR" ]  || { echo "QA project missing: $QA_DIR" >&2; exit 2; }
+[ -s "$BRIEF" ]   || { echo "brief missing or empty: $BRIEF" >&2; exit 3; }
+[ -n "$PROMPT" ]  || { echo "embedded prompt is empty" >&2; exit 4; }
+[ -d "$REPO/.git" ] || [ -f "$REPO/.git" ] || { echo "repo under test missing: $REPO" >&2; exit 5; }
+for S in "$A_HEAD" "$B_HEAD" "$C_HEAD" "$D_HEAD" "$E_HEAD"; do
+  [[ "$S" =~ ^[0-9a-f]{40}$ ]] || { echo "REFUSING: head '$S' is not a full 40-hex sha" >&2; exit 9; }
+done
+
+# 6 — every pinned sha is a commit in the object store (this launcher never fetches).
+for S in "$MAIN_SHA" "$BASE" "$OLD618" "$E_R1" "$A_HEAD" "$B_HEAD" "$C_HEAD" "$D_HEAD" "$E_HEAD"; do
+  T="$(g cat-file -t "$S" 2>&1)"
+  [ "$T" = "commit" ] || { echo "REFUSING: $S is not a commit in $REPO (got '$T') — this launcher never fetches" >&2; exit 6; }
+done
+
+# 7 — every head's base is 1904765; main-at-drafting descends from it and contains no member.
+g merge-base --is-ancestor "$BASE" "$MAIN_SHA" 2>/dev/null || { echo "REFUSING: 40b7eae does not descend from 1904765 — re-brief" >&2; exit 7; }
+for H in "$A_HEAD" "$B_HEAD" "$C_HEAD" "$D_HEAD" "$E_HEAD" "$OLD618" "$E_R1"; do
+  [ "$(g merge-base "$BASE" "$H" 2>/dev/null)" = "$BASE" ] || { echo "REFUSING: merge-base(1904765, ${H:0:7}) is not 1904765" >&2; exit 7; }
+  [ "$(g merge-base "$MAIN_SHA" "$H" 2>/dev/null)" = "$BASE" ] || { echo "REFUSING: merge-base(40b7eae, ${H:0:7}) is not 1904765 — a member is already (partly) on main; re-brief" >&2; exit 7; }
+done
+
+# 8 — chains exact, parents exact. A and E are two-commit chains; B, C, D one commit each.
+chain() { g log --format='%H %P' "${BASE}..${1}" 2>&1 | tr '\n' '|'; }
+[ "$(chain "$A_HEAD")" = "$A_HEAD $OLD618|$OLD618 $BASE|" ] || { echo "REFUSING: 1904765..RD-618 is not exactly 7e4cd2e (parent 1904765) -> 4334b96 (parent 7e4cd2e)" >&2; exit 8; }
+[ "$(chain "$E_HEAD")" = "$E_HEAD $E_R1|$E_R1 $BASE|" ] || { echo "REFUSING: 1904765..RD-686 is not exactly 8962a14 (parent 1904765) -> ab12726 (parent 8962a14)" >&2; exit 8; }
+for PAIR in "$B_HEAD RD-628" "$C_HEAD RD-652" "$D_HEAD RD-646+647"; do
+  H="${PAIR%% *}"; N="${PAIR#* }"
+  [ "$(chain "$H")" = "$H $BASE|" ] || { echo "REFUSING: 1904765..$N is not exactly ONE commit ${H:0:7} with parent 1904765" >&2; exit 8; }
+done
+
+# 18 — RE-PIN NOW by ls-remote: the five ticket branches exactly the pinned heads (REFUSE on mismatch).
+for PAIR in "$A_BRANCH $A_HEAD" "$B_BRANCH $B_HEAD" "$C_BRANCH $C_HEAD" "$D_BRANCH $D_HEAD" "$E_BRANCH $E_HEAD"; do
+  BR="${PAIR%% *}"; H="${PAIR#* }"
+  L="$(g ls-remote origin "refs/heads/$BR" 2>&1)"
+  printf '%s\n' "$L" | grep -q "^${H}[[:space:]]refs/heads/${BR}\$" || {
+    echo "REFUSING: origin refs/heads/$BR is not $H — moved or never pushed; re-brief. ls-remote said:" >&2; printf '%s\n' "${L:-<nothing>}" >&2; exit 18; }
+done
+# 18b — main WILL move (ruling b). It must be 40b7eae or a descendant IN THE OBJECT STORE. A movement touching the server entry point is EXPECTED
+# (batch 5a) and handled by guard 80b; a movement touching any OTHER member path refuses.
+M_ORIGIN="$(g ls-remote origin refs/heads/main 2>/dev/null | awk '{print $1}')"
+[[ "$M_ORIGIN" =~ ^[0-9a-f]{40}$ ]] || { echo "REFUSING: could not read origin main by ls-remote (got '${M_ORIGIN:-nothing}')" >&2; exit 18; }
+[ "$(g cat-file -t "$M_ORIGIN" 2>&1)" = "commit" ] || { echo "REFUSING: origin main $M_ORIGIN is not in the object store — this launcher never fetches; wait for a seat's fetch or re-brief" >&2; exit 18; }
+g merge-base --is-ancestor "$MAIN_SHA" "$M_ORIGIN" 2>/dev/null || { echo "REFUSING: origin main $M_ORIGIN does not descend from 40b7eae — main was rewritten; re-brief" >&2; exit 18; }
+for H in "$A_HEAD" "$B_HEAD" "$C_HEAD" "$D_HEAD" "$E_HEAD"; do
+  if g merge-base --is-ancestor "$H" "$M_ORIGIN" 2>/dev/null; then echo "REFUSING: ${H:0:7} is already an ancestor of origin main ${M_ORIGIN:0:7} — a member merged before its gate; re-brief" >&2; exit 18; fi
+done
+ALLD="$( { printf '%s\n' "$A_EXPECTED_FILES" "$B_EXPECTED_FILES" "$C_EXPECTED_FILES" "$D_EXPECTED_FILES" "$E_EXPECTED_FILES"; } | sed '/^$/d' | grep -vxF "$COUNTS_FILE" | grep -vxF "$SERVER_SRC" | sort -u)"
+MOVED="$(g diff --name-only "$BASE" "$M_ORIGIN" 2>/dev/null | sort -u)"
+HIT="$(comm -12 <(printf '%s\n' "$ALLD") <(printf '%s\n' "$MOVED" | sed '/^$/d'))"
+[ -z "$HIT" ] || { echo "REFUSING: main moved 1904765..${M_ORIGIN:0:7} and touched a member path other than the server entry point: $HIT — re-brief" >&2; exit 18; }
+[ "$M_ORIGIN" = "$MAIN_SHA" ] || echo "NOTE: origin main is now ${M_ORIGIN:0:7} (moved from 40b7eae) — the gate re-pins M0 itself and re-bases its counts prediction" >&2
+SRV_MOVED=0
+if printf '%s\n' "$MOVED" | grep -qxF "$SERVER_SRC"; then
+  SRV_MOVED=1
+  echo "NOTE: main's movement changes the server entry point (expected: batch 5a) — guard 80b re-measures merge-tree M0 x A, C, D; the census and K2 populations on M0 are the gate's to measure" >&2
+fi
+for P in static/css/dark-mode.css __tests__/brand-token-conformance.test.js scripts/derive-brand-tokens.js; do
+  printf '%s\n' "$MOVED" | grep -qxF "$P" && echo "NOTE: main's movement changes $P — RD-686's words describe/measure a changed surface on M0; the gate re-reads at M0 (TARGET E)" >&2
+done
+PIN_TS="$(date '+%Y-%m-%d %H:%M:%S %Z')"
+
+# 22 — each delta is EXACTLY the commissioned file set; round-2 deltas too.
+chk_delta() { local from="$1" to="$2" want="$3" label="$4" got
+  got="$(g diff --name-only "$from" "$to" 2>/dev/null | sort)"
+  [ "$got" = "$(sorted "$want")" ] || { echo "REFUSING: $label delta is not the commissioned set. Got:" >&2; printf '%s\n' "$got" >&2; exit 22; }; }
+chk_delta "$BASE" "$A_HEAD" "$A_EXPECTED_FILES" "RD-618 (1904765..4334b96)"
+chk_delta "$OLD618" "$A_HEAD" "$A_R2_FILES" "RD-618 new commit (7e4cd2e..4334b96)"
+chk_delta "$BASE" "$B_HEAD" "$B_EXPECTED_FILES" "RD-628 (1904765..a5799f3)"
+chk_delta "$BASE" "$C_HEAD" "$C_EXPECTED_FILES" "RD-652 (1904765..09e2e6a)"
+chk_delta "$BASE" "$D_HEAD" "$D_EXPECTED_FILES" "RD-646+647 (1904765..608a1cd)"
+chk_delta "$BASE" "$E_HEAD" "$E_EXPECTED_FILES" "RD-686 (1904765..ab12726)"
+chk_delta "$E_R1" "$E_HEAD" "$E_R2_FILES" "RD-686 round 2 (8962a14..ab12726)"
+[ "$(g diff --numstat "$E_R1" "$E_HEAD" -- docs/BRAND.md 2>/dev/null | cut -f1,2 | tr '\t' ' ')" = "15 7" ] || { echo "REFUSING: RD-686 round 2 is not docs/BRAND.md +15/-7 (Tuesday's --stat)" >&2; exit 22; }
+[ -z "$(g diff --name-only "$BASE" "$E_HEAD" -- backend static scripts 2>/dev/null)" ] || { echo "REFUSING: RD-686 touches product or scripts — commissioned as words only" >&2; exit 22; }
+
+# 93 — comments-only, measured: RD-628's encryption module and RD-686's css-colors helper (control must fire: "true false").
+[ "$(code_equal "$BASE" "$B_HEAD" "$ENC_FILE")" = "true false" ] || { echo "REFUSING: RD-628's $ENC_FILE is not code-equal to 1904765's after comment strip (or the control did not fire) — Tuesday's comments-only condition" >&2; exit 93; }
+[ "$(code_equal "$BASE" "$E_HEAD" "$CSSC")" = "true false" ] || { echo "REFUSING: RD-686's $CSSC is not code-equal to 1904765's after comment strip (or the control did not fire)" >&2; exit 93; }
+[ "$(g rev-parse "${BASE}:${CSSC}")" = "$CSSC_BASE_BLOB" ] && [ "$(g rev-parse "${E_HEAD}:${CSSC}")" = "$CSSC_E_BLOB" ] || { echo "REFUSING: css-colors.js blobs are not 78bb004 -> bdb5ca3" >&2; exit 93; }
+
+# 94 — ruling (d): RD-652 keeps the NODE_ENV default and adds only a 10-line WARN.
+DEF_LINE="process.env.NODE_ENV = process.env.NODE_ENV || 'development';"
+for S in "$BASE" "$C_HEAD"; do
+  [ "$(g show "${S}:${SERVER_SRC}" 2>/dev/null | grep -cF "$DEF_LINE")" = "1" ] || { echo "REFUSING: the NODE_ENV default line is not present exactly once at ${S:0:7} (C-173)" >&2; exit 94; }
+done
+[ "$(g diff --numstat "$BASE" "$C_HEAD" -- "$SERVER_SRC" 2>/dev/null | cut -f1,2 | tr '\t' ' ')" = "10 0" ] || { echo "REFUSING: RD-652's server change is not a pure 10-line insertion" >&2; exit 94; }
+[ "$(g show "${C_HEAD}:${SERVER_SRC}" 2>/dev/null | grep -cF 'NODE_ENV is not set, so this server runs in DEVELOPMENT mode')" = "1" ] || { echo "REFUSING: RD-652's WARN text is not present once at 09e2e6a" >&2; exit 94; }
+
+# 95 — THE CROSS-CHANGE PREMISES (ruling a): 7e4cd2e answers every intake error as 400/413; 4334b96 passes non-entity errors on; 608a1cd's
+# store error is a 503 with no .type; D's census drives POST /api/csp-report; the builder's script exists (read, never run).
+cnt() { g show "${1}:${2}" 2>/dev/null | grep -cF -- "$3"; }
+[ "$(cnt "$OLD618" "$SERVER_SRC" '(err.status || err.statusCode) === 413')" = "1" ] && [ "$(cnt "$OLD618" "$SERVER_SRC" "startsWith('entity.')")" = "0" ] || { echo "REFUSING: 7e4cd2e's intake error handler is not the catch-all the positive control needs" >&2; exit 95; }
+[ "$(cnt "$A_HEAD" "$SERVER_SRC" "startsWith('entity.')")" = "1" ] && [ "$(cnt "$A_HEAD" "$SERVER_SRC" '(err.status || err.statusCode) === 413')" = "0" ] || { echo "REFUSING: 4334b96's intake error handler is not the narrowed one" >&2; exit 95; }
+[ "$(cnt "$D_HEAD" "$SERVER_SRC" "e.code = 'RATE_LIMIT_STORE_UNAVAILABLE'")" = "1" ] && [ "$(cnt "$D_HEAD" "$SERVER_SRC" 'e.statusCode = 503')" = "1" ] || { echo "REFUSING: 608a1cd's named store error is not as briefed" >&2; exit 95; }
+[ "$(cnt "$D_HEAD" __tests__/rd646-647-redis-fail-closed-recovers.test.js "['POST', '/api/csp-report']")" = "1" ] || { echo "REFUSING: RD-646's census no longer drives POST /api/csp-report" >&2; exit 95; }
+[ -s "$EV_M/mx618x646.sh" ] || { echo "REFUSING: the builder's cross-change script is absent: $EV_M/mx618x646.sh" >&2; exit 95; }
+
+# 96 — RD-686's premise: the gates it describes are unchanged (BASE, main-now, E) and LIGHT is 20 values without #00719f, with #0096d6.
+for S in "$BASE" "$E_HEAD" "$M_ORIGIN"; do
+  [ "$(blob "$S" __tests__/brand-token-conformance.test.js)" = "$BTC_BLOB" ] || echo "NOTE: brand-token-conformance.test.js at ${S:0:7} is not ${BTC_BLOB:0:7} — the gate RD-686 describes changed there; re-read at M0" >&2
+  [ "$(blob "$S" scripts/derive-brand-tokens.js)" = "$DERIVE_BLOB" ] || echo "NOTE: derive-brand-tokens.js at ${S:0:7} is not ${DERIVE_BLOB:0:7} — LIGHT may differ there; re-read at M0" >&2
+done
+[ "$(blob "$E_HEAD" __tests__/brand-token-conformance.test.js)" = "$BTC_BLOB" ] && [ "$(blob "$E_HEAD" scripts/derive-brand-tokens.js)" = "$DERIVE_BLOB" ] || { echo "REFUSING: RD-686 changed a gate file — commissioned as words only" >&2; exit 96; }
+LIGHT_READ="$(node -e '
+const cp=require("child_process");const [R,H]=process.argv.slice(1);
+const src=cp.execFileSync("git",["-C",R,"show",H+":scripts/derive-brand-tokens.js"]).toString();
+const s=src.indexOf("const LIGHT = {");let i=src.indexOf("{",s),d=0,e=-1;
+for(;i<src.length;i++){if(src[i]==="{")d++;else if(src[i]==="}"){d--;if(d===0){e=i;break;}}}
+const L=eval("("+src.slice(src.indexOf("{",s),e+1)+")");const v=Object.values(L).map(t=>String(t.value).toLowerCase());
+console.log(v.length+" "+v.includes("#00719f")+" "+v.includes("#0096d6"));' "$REPO" "$E_HEAD" 2>/dev/null)"
+[ "$LIGHT_READ" = "20 false true" ] || { echo "REFUSING: LIGHT at ab12726 reads '${LIGHT_READ:-unreadable}', not '20 false true' (20 values; #00719f absent; control #0096d6 present)" >&2; exit 96; }
+
+# 92 — route populations at the heads: RD-594's K2 regex (78) and RD-646's census (158); main-now noted.
+for S in "$BASE" "$A_HEAD" "$C_HEAD" "$D_HEAD" "$OLD618"; do
+  [ "$(k2_pop "$S")" = "$K2_POP" ] || { echo "REFUSING: K2's population at ${S:0:7} is '$(k2_pop "$S")', not $K2_POP — re-brief" >&2; exit 92; }
+  [ "$(census_pop "$S")" = "$CENSUS_POP" ] || { echo "REFUSING: RD-646's census population at ${S:0:7} is '$(census_pop "$S")', not $CENSUS_POP — re-brief" >&2; exit 92; }
+done
+KP_NOW="$(k2_pop "$M_ORIGIN")"; CP_NOW="$(census_pop "$M_ORIGIN")"
+[ "$KP_NOW" = "$K2_POP" ] && [ "$CP_NOW" = "$CENSUS_POP" ] || echo "NOTE: at origin main ${M_ORIGIN:0:7} K2's population is ${KP_NOW:-?} and the census's ${CP_NOW:-?} (brief: $K2_POP / $CENSUS_POP) — the gate measures them on M0" >&2
+
+# 23 — EXPECTED OVERLAPS: A/C/D pairwise = server source + counts; B with anyone = counts; E with anyone = nothing.
+dset() { g diff --name-only "$BASE" "$1" 2>/dev/null | sort; }
+DA="$(dset "$A_HEAD")"; DB="$(dset "$B_HEAD")"; DC="$(dset "$C_HEAD")"; DD="$(dset "$D_HEAD")"; DE="$(dset "$E_HEAD")"
+SRV_CNT="$(printf '%s\n%s\n' "$SERVER_SRC" "$COUNTS_FILE" | sort | tr '\n' ' ' | sed 's/ $//')"
+for SPEC in "A C $SRV_CNT" "A D $SRV_CNT" "C D $SRV_CNT" "A B $COUNTS_FILE" "B C $COUNTS_FILE" "B D $COUNTS_FILE" "A E " "B E " "C E " "D E "; do
+  X="${SPEC%% *}"; R1="${SPEC#* }"; Y="${R1%% *}"; WANT="${R1#* }"; [ "$WANT" = "$R1" ] && WANT=""
+  eval "SX=\"\$D$X\""; eval "SY=\"\$D$Y\""
+  COMMON="$(comm -12 <(printf '%s\n' "$SX") <(printf '%s\n' "$SY") | sed '/^$/d' | tr '\n' ' ' | sed 's/ $//')"
+  [ "$COMMON" = "$WANT" ] || { echo "REFUSING: deltas $X and $Y share '${COMMON:-<nothing>}', expected '${WANT:-<nothing>}'" >&2; exit 23; }
+done
+
+# 35 — counts at every pinned sha.
+for PAIR in "$BASE 4133 247" "$MAIN_SHA 4191 252" "$OLD618 4141 248" "$A_HEAD 4142 248" "$B_HEAD 4136 248" "$C_HEAD 4136 248" "$D_HEAD 4144 248" "$E_R1 4133 247" "$E_HEAD 4133 247"; do
+  S="${PAIR%% *}"; WANT="${PAIR#* }"
+  CT="$(counts_at "$S")"
+  [ "$CT" = "$WANT" ] || { echo "REFUSING: $COUNTS_FILE at ${S:0:7} reads '${CT:-unreadable}', not '$WANT'" >&2; exit 35; }
+done
+
+# 70 — package-lock identical everywhere (one node_modules serves every tree), main-now included.
+for S in "$BASE" "$MAIN_SHA" "$M_ORIGIN" "$OLD618" "$A_HEAD" "$B_HEAD" "$C_HEAD" "$D_HEAD" "$E_HEAD"; do
+  [ "$(blob "$S" package-lock.json)" = "$LOCK_BLOB" ] || { echo "REFUSING: package-lock at ${S:0:7} is not ${LOCK_BLOB:0:7}" >&2; exit 70; }
+done
+
+# 80 / 80b — the merge-tree premise, measured in a FRESH scratch object dir (never NexusAI's store). A-D pairs and 7e4cd2e x D: counts-only;
+# every pair with E: no conflict. 80b: origin main x each member the same.
+MT_OBJ="$(mktemp -d "${TMPDIR:-/tmp}/qa-b7-mtobj.XXXXXX")" || { echo "REFUSING: cannot make a scratch object dir" >&2; exit 80; }
+mt_conf() { GIT_OBJECT_DIRECTORY="$MT_OBJ" GIT_ALTERNATE_OBJECT_DIRECTORIES="$REPO/.git/objects" \
+  git --no-optional-locks -C "$REPO" merge-tree --write-tree --name-only "$1" "$2" 2>/dev/null | awk 'NR==1{next} /^$/{exit} {print}' | sort | tr '\n' ' ' | sed 's/ $//'; }
+for PAIR in "$A_HEAD $B_HEAD" "$A_HEAD $C_HEAD" "$A_HEAD $D_HEAD" "$B_HEAD $C_HEAD" "$B_HEAD $D_HEAD" "$C_HEAD $D_HEAD" "$OLD618 $D_HEAD" \
+            "$M_ORIGIN $A_HEAD" "$M_ORIGIN $B_HEAD" "$M_ORIGIN $C_HEAD" "$M_ORIGIN $D_HEAD"; do
+  X="${PAIR%% *}"; Y="${PAIR#* }"
+  [ "$(mt_conf "$X" "$Y")" = "$COUNTS_FILE" ] || { echo "REFUSING: merge-tree ${X:0:7} x ${Y:0:7} is not a counts-only conflict — re-brief (80/80b)" >&2; exit 80; }
+done
+for Y in "$A_HEAD" "$B_HEAD" "$C_HEAD" "$D_HEAD" "$M_ORIGIN"; do
+  [ -z "$(mt_conf "$E_HEAD" "$Y")" ] || { echo "REFUSING: merge-tree ab12726 x ${Y:0:7} conflicts — RD-686 was briefed as disjoint" >&2; exit 80; }
+done
+
+# 31 — builder evidence, prior reports, standing references and tools on disk.
+for f in "$READY_A" "$READY_A1" "$READY_B" "$READY_C" "$READY_D" "$READY_E" "$CLAR" "$PREV_G2" "$PREV_G7R2" "$PREV_G5" "$PREV_B6" "$PREV_B6_BRIEF" "$PREV_B5B" \
+         "$EV_M/rd618-h4.log" "$EV_M/rd618b-hold.log" "$EV_M/rd618b-hold.sh" "$EV_M/rd628-h4.log" "$EV_M/rd652-h4.log" "$EV_M/rd652-rerun.log" \
+         "$EV_M/rd646-h6.log" "$EV_M/rd646-rerun.log" "$EV_M/rd646-real-redis.sh" "$EV_M/mx618x646.sh" "$EV_M/mx618x646.log" "$EV_P/rd686r2-verify.log" \
+         "$NX/session-tools/nexusai-lock.sh" "$NX/session-tools/c57-id-superset.sh" \
+         "$B5B_EV/qa-floorlib.sh" "$B5B_EV/qa-floorcount.py" "$B5B_EV/qa-to.sh" "$B5B_EV/qa-holdlib.sh" "$B5B_EV/qa-jestwrap.sh" "$B5B_EV/qa-runj.sh" \
+         "$B5B_EV/qa-mutate.py" "$B5B_EV/qa-merge.sh" "$B5B_EV/qa-c57-id-superset.sh" "$B5B_EV/q-merged-identity.py" "$B5B_EV/qa-ssprint.sh" \
+         "$B5B_EV/qa-h1-selftest.sh" "$B5B_EV/qa-h1-scan.py" "$B5B_EV/qa-netbelt.sb" "$B5B_EV/qa-netbelt-ctl.js" "$B5B_EV/qa-srvlib.js" \
+         "$B5B_EV/qa-k-population.js" "$B5B_EV/qa-lockcheck.js" "$B6_EV/qa-b6-686-probe.js" "$B6_EV/e-probes.txt" \
+         "$G7R1_FLOOR" "$TUE/2_Project_Files/fleet/qa-agent/QA_AGENT_CHARTER.md"; do
+  [ -s "$f" ] || { echo "REFUSING: evidence or tool absent: $f" >&2; exit 31; }
+done
+grep -qF "${A_HEAD:0:7}" "$READY_A" || { echo "REFUSING: the RD-618 r2 READY does not name ${A_HEAD:0:7}" >&2; exit 31; }
+grep -qF "${OLD618:0:7}" "$READY_A1" || { echo "REFUSING: the RD-618 first READY does not name ${OLD618:0:7}" >&2; exit 31; }
+grep -qF "${B_HEAD:0:7}" "$READY_B" || { echo "REFUSING: the RD-628 READY does not name ${B_HEAD:0:7}" >&2; exit 31; }
+grep -qF "${C_HEAD:0:7}" "$READY_C" || { echo "REFUSING: the RD-652 READY does not name ${C_HEAD:0:7}" >&2; exit 31; }
+grep -qF "${D_HEAD:0:7}" "$READY_D" || { echo "REFUSING: the RD-646+647 READY does not name ${D_HEAD:0:7}" >&2; exit 31; }
+grep -qF "${E_HEAD:0:7}" "$READY_E" || { echo "REFUSING: the RD-686 r2 READY does not name ${E_HEAD:0:7}" >&2; exit 31; }
+[ "$(grep -cF 'csp-report ->' "$EV_M/mx618x646.log")" = "0" ] || echo "NOTE: mx618x646.log now carries result lines — the builder RAN the cross-change script since drafting; read it (still RELAYED) before launch" >&2
+
+# 39 — the floor instruments are named in the brief.
+for f in "$PREV_FLOORLIB" "$G7R1_FLOOR"; do
+  grep -qF "$f" "$BRIEF" || { echo "REFUSING: brief does not name the floor instrument $f" >&2; exit 39; }
+done
+
+# 10 / 17 — report path named in both; no stale report; brief names every source it cites.
+grep -qF "$REPORT" "$BRIEF" || { echo "REFUSING: brief does not name the report path $REPORT" >&2; exit 10; }
+case "$PROMPT" in *"$REPORT"*) ;; *) echo "REFUSING: prompt does not name the report path" >&2; exit 10 ;; esac
+[ ! -e "$REPORT" ] || { echo "REFUSING: $REPORT already exists — a stale report would read as this gate's" >&2; exit 17; }
+for P in "$PREV_G2" "$PREV_G7R2" "$PREV_G5" "$PREV_B6" "$PREV_B6_BRIEF" "$PREV_B5B" "$READY_A" "$READY_A1" "$READY_B" "$READY_C" "$READY_D" "$READY_E"; do
+  grep -qF "$P" "$BRIEF" || grep -qF "${P#$QA_DIR/}" "$BRIEF" || { echo "REFUSING: brief must name $P" >&2; exit 10; }
+done
+
+# 11 — identity: NexusAI's OWN dirs.
+[ -d "$ID_ROOT/.azure" ] && [ -d "$ID_ROOT/.gh-config" ] || {
+  echo "REFUSING: NexusAI identity dirs missing under $ID_ROOT (.azure / .gh-config) — would inherit the caller's" >&2; exit 11; }
+export AZURE_CONFIG_DIR="$ID_ROOT/.azure"
+export GH_CONFIG_DIR="$ID_ROOT/.gh-config"
+export CLAUDE_CONFIG_DIR="$TUE/4_Credentials/.claude"
+
+# 12 / 13 / 14 / 15 / 20 — tiers, directive, brief path, pins, verdict route, key path, question route.
+for T in 'RD-618 is TIER 1' 'RD-628 is TIER 2 (through-code)' 'RD-652 is TIER 2' 'RD-646 + RD-647 is TIER 1' 'RD-686 is TIER 2 (words, round 2 of 2)' \
+         'ROUND CAP' 'One verdict PER ticket' 'TIER 1 AT FULL WEIGHT'; do
+  grep -qF "$T" "$BRIEF" || { echo "REFUSING: brief does not declare '$T'" >&2; exit 12; }
+done
+for T in 'RD-618 (TIER 1' 'RD-628 (TIER 2, through-code' 'RD-652 (TIER 2' 'RD-646+RD-647 (TIER 1' 'RD-686 round 2 of 2 (TIER 2' 'ROUND CAP' \
+         'one verdict per ticket' 'TIER 1 AT FULL WEIGHT'; do
+  case "$PROMPT" in *"$T"*) ;; *) echo "REFUSING: prompt does not declare '$T'" >&2; exit 12 ;; esac
+done
+[ "$(printf '%s\n' "$PROMPT" | head -1)" = "ultrathink" ] || { echo "REFUSING: prompt does not open with the thinking directive" >&2; exit 13; }
+case "$PROMPT" in *"$BRIEF"*) ;; *) echo "REFUSING: prompt must name the brief path" >&2; exit 14 ;; esac
+for S in "$A_HEAD" "$B_HEAD" "$C_HEAD" "$D_HEAD" "$E_HEAD" "$OLD618" "$E_R1" "$BASE" "$MAIN_SHA"; do
+  grep -qF -- "$S" "$BRIEF" || { echo "REFUSING: brief must name $S" >&2; exit 14; }
+  case "$PROMPT" in *"$S"*) ;; *) echo "REFUSING: prompt must name $S" >&2; exit 14 ;; esac
+done
+for S in "$SERVER_BLOB" "$LOCK_BLOB"; do
+  grep -qF -- "${S:0:7}" "$BRIEF" || { echo "REFUSING: brief must name ${S:0:7}" >&2; exit 14; }
+done
+if printf '%s\n' "$PROMPT" | LC_ALL=C grep -q '@[A-Z_0-9]*@'; then echo "REFUSING: the prompt carries a placeholder" >&2; exit 14; fi
+case "$PROMPT" in *"MAIL YOUR VERDICT"*"tuesday-agent@agentmail.to"*) ;; *) echo "REFUSING: prompt must say MAIL YOUR VERDICT to tuesday-agent@agentmail.to" >&2; exit 15 ;; esac
+grep -qF "$SUBJECT" "$BRIEF" || { echo "REFUSING: brief must carry the verdict subject exactly: $SUBJECT" >&2; exit 15; }
+case "$PROMPT" in *"$SUBJECT"*) ;; *) echo "REFUSING: prompt must carry the verdict subject exactly" >&2; exit 15 ;; esac
+case "$PROMPT" in *"/Volumes/KK_T9_External_HDD/TUESDAY/4_Credentials/.env"*) ;; *) echo "REFUSING: prompt must name the AgentMail key by ABSOLUTE path" >&2; exit 20 ;; esac
+for T in "$QUESTION_SUBJ" "$ANSWER_PREFIX" "$ROUTE_NAME"; do
+  grep -qF -- "$T" "$BRIEF" || { echo "REFUSING: brief lacks the question route: $T" >&2; exit 20; }
+  case "$PROMPT" in *"$T"*) ;; *) echo "REFUSING: prompt lacks the question route: $T" >&2; exit 20 ;; esac
+done
+if printf '%s\n' "$PROMPT" | grep -qi 'wednesday-agent@' && ! printf '%s\n' "$PROMPT" | grep -q 'Never wednesday-agent@'; then
+  echo "REFUSING: the prompt routes to wednesday-agent@ — Datasec's coordinator is Tuesday" >&2; exit 15; fi
+
+# 19 — the words the prompt must carry (% is a space); and the brief's sections.
+WORDS="RD-618 RD-628 RD-652 RD-646+RD-647 RD-686 F-A2 F-A5 F-E1 F-E2 E8 C-57 C-68 C-89 C-104 C-112 C-125 C-133 C-141 ADDENDUM C-174 C-185 C-49 C-102
+CROSS-CHANGE%CELL POST%/api/csp-report%->%400 NAMED 7e4cd2e mx618x646.sh M-A3 M-A2 M-A5 M-R5 M1 M2 MA MC MD M-W2 CENSUS-B CENSUS-M 158
+s3 s4 s6 s7 g4 g5 g6 w4 w5 w6 r3 r5 r6 r7 r9 e1 e4 e5 e6 LIGHT #00719f #0096d6 ROUND%CAP round%2%of%2 -> Kam
+L-A1 L-A3 L-B1 L-B2 L-C1 L-C2 L-D1 L-D6 L-E1 L-E3 H-1 H-19 H-20 H-21 --forceExit trap%on%EXIT deadline COMPOSITION
+4217/256 4142/248 4136/248 4144/248 4133/247 300 missing%0 SCRATCH%object%dir reverse%order git%clone%--shared REGENERATION id-superset
+POSITIVE%CONTROL%FIRST NEGATIVE-ASSERTION%SWEEP node%--check VOID EXCLUSIVE qa-b7- QUEUE,%NEVER%TAKE%OVER --after DEADLINE HEARTBEAT
+2%minutes 5%minutes finally LANDING%CONTROL SESSION_SECRET%UNSET NOT%TESTED MEASURED%AT%RUNTIME READ%ONLY PROBED RELAYED CI%NOT%RUN
+Prior%work FOREGROUND never%push NEVER%merge Partner%Center rd-424 afterAuthGate LEGACY_MACHINE_IDS NODE_ENV%truly%UNSET"
+for w in $WORDS; do
+  w="${w//%/ }"
+  case "$PROMPT" in *"$w"*) ;; *) echo "REFUSING: prompt must carry '$w'" >&2; exit 19 ;; esac
+done
+for H in "^## TUESDAY'S RULINGS" '^## THE CLARIFICATIONS THAT BIND THIS GATE' '^## PRIOR ROUND' '^## 2a. LEGITIMATE SHAPES' '^## 3a. INSTRUMENT RULES' \
+         '^## 3b. THE NEGATIVE-ASSERTION SWEEP' '^## 4. TARGET A' '^## 5. TARGET B' '^## 6. TARGET C' '^## 7. TARGET D' '^## 7a. TARGET E' \
+         '^## 8. THE CROSS-CHANGE CELL' '^## 9. THE MERGED TREE' '^## 11. Floor discipline' '^## WRONG OR UNVERIFIED' '^## PROVENANCE' '^### MERGE ORDER' \
+         '^### TARGET E'; do
+  grep -q "$H" "$BRIEF" || { echo "REFUSING: brief lacks section '$H'" >&2; exit 19; }
+done
+for L in L-A1 L-A2 L-A3 L-B1 L-B2 L-C1 L-C2 L-D1 L-D2 L-D3 L-D4 L-D5 L-D6 L-E1 L-E2 L-E3; do
+  grep -qF "$L" "$BRIEF" || { echo "REFUSING: brief lacks declared limit $L (C-112)" >&2; exit 19; }
+done
+# every builder's NOT TESTED list is carried verbatim (distinctive fragments, checked in the READY AND the brief)
+for PAIR in "$READY_A1|A real browser sending a Reporting-API report. The cells POST the documented shape." \
+            "$READY_A1|The 16 KB cap boundary exactly (unchanged; the gate recorded it as not bracketed)." \
+            "$READY_B|NOT TESTED: Key Vault mode (getDek), and a real pre-RD-616 volume. Neither is what these cells pin." \
+            "$READY_C|NOT TESTED: a real .env file setting NODE_ENV (the ordering is read, not driven); Windows." \
+            "$READY_D|NOT TESTED: multi-replica (maxReplicas is 1, C-58); Linux/CI (no PR); a real container runtime's restart policy; Redis with TLS or AUTH; the SCIM limiter (RD-650)." \
+            "$READY_E|NOT TESTED: the gate's E1A/E1C/E2A plants were not re-run by me (words-only round; the gates are unchanged," \
+            "$READY_E|so their results cannot have moved). No browser leg (docs only). CI not run on the branch (no PR)."; do
+  F="${PAIR%%|*}"; T="${PAIR#*|}"
+  grep -qF -- "$T" "$F" || { echo "REFUSING: '$T' is no longer in $F — the READY changed; re-brief" >&2; exit 19; }
+  grep -qF -- "$T" "$BRIEF" || { echo "REFUSING: brief does not carry the NOT TESTED fragment '$T' verbatim" >&2; exit 19; }
+done
+# the rulings the brief rests on are quoted from source and still say so
+for PAIR in "KEEP the default (unset NODE_ENV means development). Add a loud boot WARN only (tier 2). Changing the default is out of scope." \
+            "Decision nexusai-redis-down-revisit-after-resubmission: a — Fail closed, fix the log line and the never-recovers bug (recommended)" \
+            "short-lived branches (plain C-57 applies unchanged)" \
+            "a clean merge-tree and a changed measured surface are not in tension"; do
+  grep -qF -- "$PAIR" "$CLAR" || { echo "REFUSING: CLARIFICATIONS no longer carries '$PAIR' — the brief's quotes are stale; re-brief" >&2; exit 19; }
+  grep -qF -- "$PAIR" "$BRIEF" || { echo "REFUSING: brief does not quote '$PAIR'" >&2; exit 19; }
+done
+
+# 24 — the prompt must DESCRIBE the server entry point, never carry its literal path (RD-591 c.37901).
+if printf '%s\n' "$PROMPT" | grep -qi 'backend/server\.js'; then
+  echo "REFUSING: the prompt contains the server entry point's literal path (RD-591 c.37901). Describe it; do not name it." >&2; exit 24; fi
+
+# 53 / 71 — standing rules in the brief; the NOT TESTED line verbatim in both.
+for w in 'DEADLINE' 'HEARTBEAT' '2 minutes' '5 minutes' 'finally' 'qa-b7-' 'node --check' 'VOID' 'EXCLUSIVE' 'POSITIVE CONTROL FIRST' \
+         'QUEUE, NEVER TAKE OVER' 'LANDING CONTROL' 'C-104' 'Main may move' '--after' 'never push' 'C-174' '--forceExit' 'trap … EXIT'; do
+  grep -qiF -- "$w" "$BRIEF" || { echo "REFUSING: brief lacks the standing rule '$w'" >&2; exit 53; }
+done
+grep -qF "$NOTTESTED_LINE" "$BRIEF" || { echo "REFUSING: brief must carry the NOT TESTED line verbatim" >&2; exit 71; }
+case "$PROMPT" in *"$NOTTESTED_LINE"*) ;; *) echo "REFUSING: prompt must carry the NOT TESTED line verbatim" >&2; exit 71 ;; esac
+
+# 76 — the brief carries the ONE safe SESSION_SECRET printer verbatim and names the forbidden idioms (H-1).
+grep -qF "$SAFE_PRINTER" "$BRIEF" || { echo "REFUSING: brief must carry the safe SESSION_SECRET printer verbatim (H-1)" >&2; exit 76; }
+for w in '${SESSION_SECRET-…}' '${SESSION_SECRET+$SESSION_SECRET}' 'printenv' '${envs[*]}'; do
+  grep -qF "$w" "$BRIEF" || { echo "REFUSING: brief must name the forbidden idiom $w (H-1)" >&2; exit 76; }
+done
+
+# 77 — the heartbeat is a separate child, aborted if absent at 90 s, max gap reported (H-4).
+for w in 'separate child' 'within 90 s' 'max gap'; do
+  grep -qiF "$w" "$BRIEF" || { echo "REFUSING: brief lacks the heartbeat rule fragment '$w' (H-4)" >&2; exit 77; }
+done
+
+# 78 — byte-level plants via Buffer, verified with xxd (H-9).
+for w in 'H-9' 'Buffer' 'xxd -l 16' 'JSON.stringify'; do
+  grep -qF "$w" "$BRIEF" || { echo "REFUSING: brief lacks the byte-plant rule fragment '$w' (H-9)" >&2; exit 78; }
+done
+
+# 79 — quoted mutant tool with a negative control; insertion-aware landing rule (H-7, H-8).
+for w in 'H-7' 'H-8' 'negative control' 'original text is absent once the new text is removed'; do
+  grep -qF "$w" "$BRIEF" || { echo "REFUSING: brief lacks the mutant-landing rule fragment '$w' (H-7/H-8)" >&2; exit 79; }
+done
+
+# 81 — this batch's own premises are in the brief.
+for w in 'THE CROSS-CHANGE CELL' 'EXACTLY ONE offender `POST /api/csp-report -> 400`' 'The census checks the STATUS, not that the 503 is the NAMED one' \
+         'H-20' 'H-21' '4217/256' 'ruling (d)' 'comments-only' 'ROUND CAP' 'round 2 of 2' 'docs, no test ids' '20 entries, 20' \
+         'Re-read every cited line AT THE HEAD' 'the 10 `BRAND.md`/`css-colors.js` readers' 'LEGACY_MACHINE_IDS' 'afterAuthGate' \
+         '158' 'Never merge `7e4cd2e`' 'NEVER merges and never pushes'; do
+  grep -qF -- "$w" "$BRIEF" || { echo "REFUSING: brief lacks this batch's premise '$w'" >&2; exit 81; }
+done
+
+# 38 — negative-control seats: stamped by Tuesday (a placeholder here refuses via 32), named in the brief, live now.
+UNSTAMPED_SEATS=0
+case "$NEG_SEATS" in *"$PH_STAMP"*) UNSTAMPED_SEATS=1; echo "NOTE: NEG_SEATS in this launcher is still a stamp placeholder — Tuesday stamps the live seat pids" >&2 ;; esac
+if [ "$UNSTAMPED_SEATS" = "0" ]; then
+  for P in $NEG_SEATS; do
+    grep -q "\`$P\`" "$BRIEF" || { echo "REFUSING: brief does not name seat pid $P as a negative control" >&2; exit 38; }
+    [ "$(ps -o comm= -p "$P" 2>/dev/null | sed 's#.*/##')" = "claude" ] || echo "NOTE: negative-control seat $P is not a running claude now — re-read the seats and update the brief's section 11 before launch" >&2
+  done
+fi
+if command -v tmux >/dev/null 2>&1; then
+  for N in M N P O; do
+    tmux list-panes -a -F '#{@cockpit_name}' 2>/dev/null | grep -qx "Datasec/NexusAI-$N" || echo "NOTE: no tmux pane named Datasec/NexusAI-$N now — re-read the seats before launch" >&2
+  done
+fi
+
+# 32 — the coordinator stamps the self-check AND the seats. LAST refusal, so --check shows every other guard first.
+if [ "$UNSTAMPED_SEATS" = "1" ] || grep -qF "$PH_STAMP" "$BRIEF" || ! grep -q '^SELF-CHECK: re-read end-to-end for contradictions | ' "$BRIEF" || ! grep -q '^Self-check note: ' "$BRIEF"; then
+  echo "guards pass (9 6 7 8 18 18b 22 93 94 95 96 92 23 35 70 80 80b 31 39 10 17 11 12 13 14 15 20 19 24 53 71 76 77 78 79 81 38); stamp NOT complete." >&2
+  echo "REFUSING: a stamp placeholder remains (the brief's SELF-CHECK line / Self-check note / §11 seats / route-line time, or this launcher's NEG_SEATS) — the coordinator re-reads end-to-end and stamps them before launch" >&2; exit 32
+fi
+
+# 40 — the answer route exists (after the stamp: Tuesday adds it, never this launcher).
+grep -q "^${ROUTE_NAME}|tuesday-agent@agentmail.to|" "$ROUTING" || {
+  echo "REFUSING: no '${ROUTE_NAME}|tuesday-agent@agentmail.to|…' line in $ROUTING — answers to the gate would have no route" >&2; exit 40; }
+
+if [ "$CHECK" = "1" ]; then
+  echo "all guards pass:"
+  echo "  origin $A_BRANCH == ${A_HEAD:0:7}, $B_BRANCH == ${B_HEAD:0:7}, $C_BRANCH == ${C_HEAD:0:7}, $D_BRANCH == ${D_HEAD:0:7}, $E_BRANCH == ${E_HEAD:0:7} at $PIN_TS (18)"
+  echo "  main ${M_ORIGIN:0:7} (40b7eae or a descendant; server source moved: $SRV_MOVED; no other member path) (18b); K2 ${KP_NOW:-?} / census ${CP_NOW:-?} there (92)"
+  echo "  bases (7); chains (8); deltas (22); comments-only B + E helper (93); NODE_ENV default kept (94); cross-change premises (95); LIGHT + gates unchanged (96)"
+  echo "  overlaps (23); counts (35); package-lock ${LOCK_BLOB:0:7} (70); merge-trees in scratch $MT_OBJ (80/80b); evidence (31)"
+  echo "  H-1 (76); H-4 (77); H-9 (78); H-7/H-8 (79); premises (81); route $ROUTE_NAME (40); report absent (17); seats $NEG_SEATS (38)"
+  echo "  SUBJECT: $SUBJECT"
+  echo "  AZURE_CONFIG_DIR=$AZURE_CONFIG_DIR  GH_CONFIG_DIR=$GH_CONFIG_DIR  CLAUDE_CONFIG_DIR=$CLAUDE_CONFIG_DIR"
+  exit 0
+fi
+
+PROMPT="$PROMPT
+
+VERIFIED BY THE LAUNCHER AT $PIN_TS (git ls-remote origin, read-only): refs/heads/$A_BRANCH = $A_HEAD; refs/heads/$B_BRANCH = $B_HEAD; refs/heads/$C_BRANCH = $C_HEAD; refs/heads/$D_BRANCH = $D_HEAD; refs/heads/$E_BRANCH = $E_HEAD; refs/heads/main = $M_ORIGIN (40b7eae or a descendant; server entry point moved since 1904765: $SRV_MOVED; merge-tree against every member re-measured counts-only; K2 population there ${KP_NOW:-unread}, census population ${CP_NOW:-unread}). These are the start-of-gate pins; take your own three readings anyway, and re-pin M0 yourself."
+
+# rd579-rd639 S-1 belt: the gate session inherits NO SESSION_SECRET. The line prints the NAME and a state only, never a value.
+if [ -n "${SESSION_SECRET+x}" ]; then echo "SESSION_SECRET SET in the launcher's environment (length ${#SESSION_SECRET}) — unsetting before exec"; else echo "SESSION_SECRET UNSET"; fi
+unset SESSION_SECRET
+
+cd "$QA_DIR" || { echo "cannot enter $QA_DIR" >&2; exit 16; }
+exec claude --dangerously-skip-permissions "$PROMPT"
