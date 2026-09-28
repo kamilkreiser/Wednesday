@@ -3834,5 +3834,26 @@
   "project": "Datasec",
   "ts": "2026-09-28T20:21:44.187571+10:00",
   "text": "Received: Vision VSP-74 ruled (a). I'm starting a Vision seat to merge VSP-75's head 110bb03 (it contains VSP-74) as a fast-forward, and to file one ticket for the six remaining layouts. This is a merge only, with no production deploy (that still waits on your typed word for VSP-65). I'll confirm once it's on main."
+ },
+ {
+  "role": "wednesday",
+  "seat": "Kamils-Mac-mini.localdomain",
+  "project": "Datasec",
+  "ts": "2026-09-28T20:22:36.883115+10:00",
+  "text": "Datasec / Vision, VSP-67: yes, an email works. It carries your signature, which a card tap does not. Please send this from your me.com address:\n\nTo: tuesday-agent@agentmail.to\n\nSubject: VSP-67 approved: production idle transaction timeout\n\nBody: I approve setting idle_in_transaction_session_timeout to 10 minutes (600000 ms) on production Postgres datasec-sales-db. The ATTIO bridge also reads this server; I accept that. Rollback is the same setting back to 0.\n\nWhat happens next: I check the email's signature, then the Vision agent makes that one change, reads the value back, checks the portal is healthy, and watches the ATTIO bridge's next sync. The agent's code read says the bridge never holds an open transaction, so the timeout shouldn't touch it. I'll report back here. If you don't send it, nothing changes on production."
+ },
+ {
+  "role": "wednesday",
+  "seat": "Kamils-Mac-mini.localdomain",
+  "project": "Datasec",
+  "ts": "2026-09-28T20:25:09.373092+10:00",
+  "text": "Got your email, thank you. It checks out as yours: the signature passes on your me.com address. VSP-67 is now authorised, and I've given it to the Vision agent to do right after the VSP-74/75 merge: the one timeout setting on the production database, read back, a health check, and a look at the ATTIO bridge's next sync. Rollback is one command. I'll report the result here."
+ },
+ {
+  "role": "wednesday",
+  "seat": "Kamils-Mac-mini.localdomain",
+  "project": "Datasec",
+  "ts": "2026-09-28T20:32:58.425716+10:00",
+  "text": "Datasec / Vision: both done, no action needed.\n\n1. VSP-74 and VSP-75 are on the portal's main branch (110bb03). I recounted the tests myself: 131 unit and 126 database tests, nothing failed and nothing lost. The six unusual table layouts are ticketed as VSP-87. Nothing was deployed.\n\n2. VSP-67 is live on production, on your signed email. The idle-transaction timeout went from off to 10 minutes, the other timeouts are unchanged, no restart was needed, and the portal answers healthy (I checked from here too). The ATTIO bridge's next sync runs at 7am tomorrow, so I'll confirm it ran clean then. Rollback is one command.\n\nStill open: the VSP-65 deploy needs your GitHub login on the mini and your go-ahead, and CI on the portal can't be read until that login."
  }
 ]
