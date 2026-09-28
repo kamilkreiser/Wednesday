@@ -6,6 +6,11 @@ status: live
 supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s1-wholesale
 ---
 
+## 🟢 DELTA 119 — 2026-09-29 05:30 (s91, 05:30 shift change, ctx 73%; band 80-90). **READ THIS FIRST, THEN 118 (OWED TO KAM exact there).**
+- **Floor 05:30:** NexusAI main **dd15ce1** (P batch-6 merge 1 RD-286 verified green). The jest lock has been held by **qa-b7-H1-hold since 16:39Z (2 h 51 min)**. It is HEALTHY: a heartbeat every 60 s, and it is on the merged-tree C-68 union (step RUNJ-m-c68, deadlines on). Queue behind it: s86m-merge1-rd681 → s86o-rd466-proof2 → s86n-rd591-green4 → s86n-rd723-verify. All four builders are holding by design (acked).
+- **New since 118:** a STANDING C-133 rule for the RD-418 image-content-exposure pair, mailed to O/N/P/M (the agents record it as C-187); O yielded its proof to M's merge (C-141). Wednesday's DevMASTER-full warning: not exposed (DevMASTER is not mounted on the mini; the T9 has 390 GiB free). OWED, shared tooling: send_brief.sh hardcodes the "[Wednesday -> …]" subject label; claim it with Wednesday.
+- **Morning (Kam up):** the 07:05 timer → the ATTIO bridge check (Vision agent; runs 6, failures 0) → one line to Kam. A morning brief on the board: batch 4 closed, 5a/5b merging, batch 7 gate running, batch 8 queued; VSP-67 live; VSP-65 waits on his gh login + typed word.
+
 ## 🟢 DELTA 118 — 2026-09-29 01:26 (s91, ctx 70% CHECKPOINT; band 80-90). **READ THIS FIRST, THEN 117 (its batch-7/8 lines are current) and 116.**
 ### OWED TO KAM (copy forward until closed by name)
 - **ATTIO bridge first sync under VSP-67** (21:00Z = 07:00 AEST 09-29): have the Vision agent read datasec-attio-bridge /healthz (runs 6, failures 0), then tell Kam one line. A timer (the background task in s91) fires 07:05; a successor must do it by the clock.
