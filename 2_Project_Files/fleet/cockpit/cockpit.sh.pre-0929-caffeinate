@@ -156,10 +156,6 @@ add_pane() { # name, cmd
   "$TMUX_BIN" set-option -p -t "$pane_id" @cockpit_name "$name"
   apply_layout
   echo "pane '$name' added ($pane_id)"
-  # 2026-09-29 (Friday ledger w=2): the laptop SLEPT with seats live three times (09-25 twice, 09-29) because the sleep
-  # guard was a rule a seat had to remember. Every pane added to the real fleet now ensures a DETACHED caffeinate -dims
-  # with >= 3 h left (laptop only; a no-op on the Studio/mini). Never fails the launch. Arms: tests/ensure_caffeinate_arms.sh
-  if [ "$SESSION" = fleet ] && [ -f "$SCRIPT_DIR/ensure_caffeinate.sh" ]; then bash "$SCRIPT_DIR/ensure_caffeinate.sh" || true; fi
 }
 
 rotate_wrap_mail_ts() { # <name> <start-ts-utc-seconds> — print wrap-mail ts + exit 0 when a

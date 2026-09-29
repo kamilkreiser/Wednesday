@@ -12,6 +12,13 @@ supersede: replace wholesale; previous = NEXT-PICKUP-FRIDAY.md.pre-0925-rotate-s
 
 **The tree is at `/Users/kamilkreiser/1FILES TO SYNC/FRIDAY`.** Quote every path (spaces).
 
+## 🔴🔴 STATE 2026-09-29 19:1x (successor seat, ctx 42%) — ADDS to the handover block below
+- **HPSM-POC #53** (B55 round 2, head `e6bc70f`, CI 10/10): **B57 ADDENDUM-1** (round 2 of 2, the cap) written + tapped to `Datasec/HPSM-POC-QA` 19:01 (`Briefs/2026-09-29_B57_ADDENDUM-1_round-2-regate.md`). On GO/GO WITH NOTES: `friday_as.sh datasec gh pr merge 53 -R datasecau/HPSM-POC --squash --match-head-commit e6bc70fcaf223367fea76699d90e643c8a8cfb81`, compare trees; then #54 (B56, pane HPSM-POC-C) rebases; then H1–H7.
+- **HPSM-POC #55** (B58 route A on the laptop, branch `b58/feedback-live` @ `3955c0f`, tier 2) opened by Friday 19:0x. On CI green: merge head-pinned, compare trees, close pane HPSM-POC-A. **Owed from B58:** O-1 (a `sent` row is not proof of delivery on route A; a wrong secret also gets 200) → a Backlog ticket via the next HPSM-POC seat; O-2 (no CI check on `scripts/*.sh`). Kam already confirmed the route A e-mail at 15:43 (for HPSMPOC-102); not re-asked for 103.
+- **Composer:** pane Composer-C is mid-turn on B22 round 2. A ghost line at the Composer-B prompt ("stop pc-b23 and wait for round 2") is NOT acted on.
+- **Watcher:** `friday/watch_status.sh /tmp/claude-501/seen_f1900` on B22/B23 + B55–B58 (seeded at 19:0x).
+- **SHIPPED:** the owed `chat_reply.sh` unread-rows advisory (1ac298ace; ledger row updated; Wednesday + Tuesday mailed 09:07Z; claim released).
+
 ## 🔴🔴 ROTATION HANDOVER 2026-09-29 ~19:0x (Friday, ctx 80%) — READ FIRST; supersedes every block below where they differ
 **KAM'S DEPLOY GO (panel 16:28, verbatim): "Great. These look good. Please publish the changes and make them live".** It answers the 6 Composer screenshots of B22 (PR #12). Friday's reading, told to Kam on the panel at ~19:0x: deploy the FIXED #12 as soon as B23 round 2 passes (the screenshotted build failed B23 round 1 on F1, progress). **So: when B23 round 2 = GO / GO WITH NOTES → merge #12 head-pinned → deploy HPSM-light main to the demo VM per `DEPLOY.md`** (backup before migrate; `remote-update.sh`; temporary access removed and proven; PREFLIGHT; `/site.json`; check the running build live; the C-06/C-08/C-09 pattern). Migrations 0019 + any new ones; the content release is unchanged. Then tell Kam, with the live check, on the panel. If round 2 is NO GO: ship what closed per the cap, ticket the rest, and ask Kam whether to deploy anyway.
 **LIVE SEATS (panes):**

@@ -281,17 +281,6 @@ else
     fail "usage gate wired in $UG_W of 2 launch paths" "brief_and_launch.sh + cockpit.sh add must both call fleet/usage_gate.sh"
   fi
 fi
-# --- Laptop sleep guard (Friday ledger w=2, 2026-09-25 + 09-29): the laptop slept with seats live three times because
-# "arm caffeinate at launch" was a rule a seat had to remember. Mechanism: cockpit.sh add_pane -> fleet/cockpit/ensure_caffeinate.sh.
-# A missing script or wiring is a FAIL; on a laptop, the current state is printed (a no-op elsewhere).
-EC="$PROJECT_DIR/2_Project_Files/fleet/cockpit/ensure_caffeinate.sh"
-if [ ! -f "$EC" ] || ! grep -q 'ensure_caffeinate.sh' "$PROJECT_DIR/2_Project_Files/fleet/cockpit/cockpit.sh" 2>/dev/null; then
-  fail "laptop sleep guard missing or not wired" "fleet/cockpit/ensure_caffeinate.sh must exist and cockpit.sh add_pane must call it"
-else
-  EC_OUT=$(ENSURE_CAFF_DRY=1 bash "$EC" 2>&1 | tail -1)
-  case "$EC_OUT" in *"WOULD ARM"*) warn "laptop sleep guard: no caffeinate with >= 3 h left" "the next cockpit add arms one; seats already live are unprotected until then: $EC_OUT" ;;
-                    *) ok "laptop sleep guard wired; ${EC_OUT#ensure_caffeinate: }" ;; esac
-fi
 
 # --- Live-board usage gauge publisher (Kam, live board 2026-09-22 08:57:36: "I was able to see the weekly
 # usage count on both Wednesday and Tuesday. Is this possible for the live version?"). Mechanism:
