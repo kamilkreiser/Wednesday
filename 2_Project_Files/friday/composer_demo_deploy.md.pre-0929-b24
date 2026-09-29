@@ -16,10 +16,10 @@ prose and the second had to rediscover every name. **A deploy of the demo needs 
 2. **Temp access:** a fresh ed25519 key in the session scratchpad; `az network nsg rule create … -n friday-laptop-ssh-temp-<date> --priority 1001
    --source-address-prefixes <laptop public IP>/32 --destination-port-ranges 22 …`; append the public key with
    `az vm run-command invoke … RunShellScript` after backing up `/home/hpsm/.ssh/authorized_keys` to `.pre-friday-<date>`.
-3. **Archive:** (if `gh` has no login under the project's `.gh-config`, `git archive <sha>` from a fetched clone is the same tree: prove it with `git cat-file -p <sha>` = the tested tree; B24 2026-09-29) `gh api repos/datasecau/HPSM-light/tarball/<sha>`, extract, re-root (drop the top directory), repack with
+3. **Archive:** `gh api repos/datasecau/HPSM-light/tarball/<sha>`, extract, re-root (drop the top directory), repack with
    `COPYFILE_DISABLE=1 tar --no-xattrs --no-mac-metadata -czf composer-<short>.tar.gz -C <top> .`. Entry count ≈ the previous
    archive's real files (5c0490d = 695; its archive on the VM carries AppleDouble twins, 1,390).
-4. **Deploy:** **`remote-update.sh` runs `rm -rf composer.prev`: first rename the existing `composer.prev` to `composer.prev.<its sha>.quarantine-<date>` (never delete; B24 2026-09-29).** Before any build that brings a migration, follow `DEPLOY.md` "Before a deploy that brings a migration" (ledger + `pg_dump` backup into `/opt/hpsm/backups`, mode 700, proven readable). `scp` to `/opt/hpsm/`, then on the VM: `cd /opt/hpsm && ./remote-update.sh /opt/hpsm/composer-<short>.tar.gz secrets/demo-switch.env`.
+4. **Deploy:** `scp` to `/opt/hpsm/`, then on the VM: `cd /opt/hpsm && ./remote-update.sh /opt/hpsm/composer-<short>.tar.gz secrets/demo-switch.env`.
    It keeps `composer.prev` (the rollback), runs migrations, recreates edge. Expect: all services healthy, "migrations applied: …",
    the content release line, **PREFLIGHT: GREEN**, `{"status":"ok"…}`.
 5. **Verify live** behind Basic auth (`COMPOSER_DEMO_URL/USER/PASSWORD` in the project's `4_Credentials/.env`): page 200, and the new
