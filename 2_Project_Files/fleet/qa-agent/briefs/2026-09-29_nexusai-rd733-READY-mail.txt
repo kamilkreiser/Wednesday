@@ -1,0 +1,50 @@
+[Datasec/NexusAI-M -> Tuesday] READY FOR QA: RD-733 @ ed4c1bf (dead User Access auto-check removed, C-18; browser: TypeError before, 0 errors after; 4199/254 PASS)
+{'spf': 'pass', 'dkim': 'pass', 'dmarc': 'pass'}
+READY FOR QA (tier 2 through-code + real-browser check, per your 03:01:39Z ruling): RD-733 @ ed4c1bf on rd-733-user-access-stale-entra-check-s86m (parent faea66b = main).
+
+BLUF: the User Access tab's dead auto-check (checkEntraStatus) is REMOVED under C-18, not guarded. In a real browser: before, one click on User Access logs "TypeError: Cannot set properties of null (setting 'disabled') at checkEntraStatus"; after, 0 console errors and the full tab renders. Once this merges, rd465 O-1 leaves C-185's known set.
+
+(i) Branch / SHA: rd-733-user-access-stale-entra-check-s86m @ ed4c1bfd5a195f163b8f76e84b467157f8b97813 (on origin).
+(ii) Drivable surface: a LOCAL run of this commit, open mode, fresh data dir, http://127.0.0.1:<port>/first-run-setup.html. NOT the demo. No auth is needed on first run.
+(iii) Changed: static/js/first-run-setup.js (-118/+5):
+  - the users branch of switchSection no longer schedules anything;
+  - checkEntraStatus and updateEntraComponent are removed (the only caller of updateEntraComponent was checkEntraStatus).
+  Also changed: __tests__/rd733-user-access-no-stale-check.test.js (new), the rd465 comment (text only), __tests__/fixtures/rd200-js-brand-debt.json (3 counts lowered), and the counts file (4195/253 -> 4199/254).
+
+BROWSER CHECK (Playwright Chromium, evidence at session-tools/s86m/rd733-evidence/: browser-check.txt plus 3 screenshots):
+- BEFORE, main faea66b: open /first-run-setup.html, click #tab-users, wait 1.5 s. Console, 1 error:
+    TypeError: Cannot set properties of null (setting 'disabled') at checkEntraStatus (first-run-setup.js:3706:26) at first-run-setup.js:236:34
+  Screenshot: rd733-before-main-faea66b-user-access.png.
+- AFTER, faea66b + the fixed file (cmp-identical to ed4c1bf's): the same steps give 0 errors and 0 warnings. Screenshots: rd733-after-fix-user-access.png, and rd733-after-fix-user-access-full.png (the full page: the step-1 form, the Redirect URI box, step 2 Pending, step 3, and the Ready checklist all render).
+- The viewport pixels are identical before and after: the dead code never drew anything. What changes is the console error, plus the status check that silently never ran.
+
+EVIDENCE (jest lock; logs session-tools/s86m/rd733-hold.log, rd733-verify.log)
+- RED on faea66b's first-run-setup.js: U1 FAILS with "TypeError: Cannot set properties of null (setting 'disabled')". CTRL-REC, CTRL-TAB and CTRL-VAL pass.
+- GREEN: 4/4.
+- M1 (only the users timer put back, calling the removed function; anchor count 1): U1 fails again, and only U1.
+- rd465 on the fix: 10/10.
+- Full verify on ed4c1bf's tree: VERDICT: PASS — 4199/4199 tests passed across 254 suites. Floor 0 servers before and after.
+- How U1 sees the timer: switchSection runs with window.setTimeout replaced by a recorder, and each scheduled callback is awaited IN the cell. CTRL-REC proves the recorder records: Analytics schedules exactly [300].
+
+Two failed runs before that, disclosed (my instrument, then a real guard doing its job):
+- Hold run 1: CTRL-VAL failed on the fix as well. My test loaded first-run-setup.js without identifier-mask.js, which the page loads first and revalidateEntraConfig needs. The test now loads the page's order. Log rd733-hold.run1.log.
+- Hold run 2: the full verify failed in rd200's NO ROT, because the removed code held recorded off-token colours. The manifest is lowered to the measured counts (first-run-setup.js #28a745 16->15, #dc3545 2->1, #ffc107 5->4; a node census with the test's own logic shows exactly 3 entries differ and nothing unrecorded). Debt total now 144. No palette choice is made; that stays Kam's (RD-676..680).
+
+PRIOR WORK (C-49/C-50)
+- Known before, never fixed:
+  - RD-189 (Low, pass-9 P9-07c, 2026-09-02): "guard the lookup";
+  - RD-469 F-11 (the 1470e18 gate): "C-18 dead UI";
+  - rd465's openFresh note (08c6128, RD-465 re-gate O-5): "pre-existing on main".
+  RD-733 is linked as a Duplicate of RD-189, and Relates to RD-469.
+- What existed and why: the function drives an older layout (a check button, a spinner and an overall card). None of those ids is in any committed static/*.html at any commit (git log --all -S'id="check-entra-btn"' is empty). It arrived with the root import 8eb94ce. 9b58261 only MOVED the inline script to static/js (the CSP refactor); it removed no element. That corrects my own first ticket text, which said "gone since 9b58261".
+- Decision: REMOVE, by C-18 (Kam, 2026-09-14: "Dead UI is removed, not hidden"), rather than RD-189's guard. The function's logic would also mark steps 1-3 complete from azureAdConfigured alone, and assumes a security group ("groups are likely set up"), which contradicts RD-454 / C-47.
+- KEPT: revalidateEntraConfig, the function that drives the tab today (on load with a saved config, after Save, and from Re-validate). CTRL-VAL pins it.
+
+CodeQL (C-190): the changed files hold no fs check-then-use and no new regex. The test only reads files and has no temp dirs. The PR's CodeQL run is the authoritative answer at merge.
+
+NOT TESTED
+- The demo (RD-76).
+- A real Entra round trip on the tab: open mode, no tenant configured. The saved-config path (revalidateEntraConfig on load) is driven only in jsdom, by CTRL-VAL.
+- Browsers other than Chromium.
+- Whether any operator relied on the tab marking steps complete by itself: it never did, because the function threw before reaching that code.
+
