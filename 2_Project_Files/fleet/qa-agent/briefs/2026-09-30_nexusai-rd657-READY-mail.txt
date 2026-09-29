@@ -1,0 +1,40 @@
+{'spf': 'pass', 'dkim': 'pass', 'dmarc': 'pass'}
+READY FOR QA (tier 2 through-code): RD-657 @ 5584ea4 on rd-657-health-version-from-package-s86m (parent 5531d7b = main at build time, by ls-remote). Built exactly to C-181.
+
+(i) Branch / SHA: rd-657-health-version-from-package-s86m @ 5584ea45617477338c2b5a01a0011cc92158a7f0 (on origin).
+(ii) Drivable surface: a local run, GET /api/health (auth-free). Measured on a fresh local boot: 200 {"status":"OK",...,"version":"2.2.1","build":"unknown"}. No page displays health's version (a grep of static/ finds no reader), so nothing visual changes.
+(iii) Changed:
+  - backend/server.js: buildFullHealthDetails reads version: require('../package.json').version. It was the literal '2.0.1'.
+  - package.json: "1.3.0" -> "2.2.1".
+  - package-lock.json: its two ROOT version fields (top level and packages[""]) -> "2.2.1". No dependency line is touched.
+  - __tests__/rd327-build-digest-on-public-health.test.js: R7 is re-anchored in the C-131 shape (health's version equals package.json's, read by a file read, for the four public-body variants V, U, E, M). It pinned '2.0.1'.
+  - New: __tests__/rd657-health-version-one-source.test.js, and __tests__/helpers/rd657-package-version-preload.js.
+  - Counts 4210/254 -> 4213/255.
+
+EVIDENCE (logs session-tools/s86m/rd657-hold.log and rd657-hold2.log; the second re-ran red, M1 and M2 because the first run's output was truncated at 40 lines by my run(), which is disclosed)
+- The new cells:
+    P1: 2.2.1 in package.json and both lock root fields.
+    V1: ONE SOURCE without grep. A server started with `node -r <preload>`, where the preload puts a copy of package.json with version "9.8.7-rd657" into Node's require cache, reports 9.8.7-rd657 on /api/health. No file is edited.
+    CTRL: the same boot without the change reports package.json's real version.
+- RED at 5531d7b's server.js, package.json and package-lock.json (the new cells and the re-anchored R7 in place): exactly P1, V1, CTRL, R7 fail, 4 of 41 (rd657 + rd327).
+- GREEN: 41/41.
+- M1 (server hard-codes '2.2.1', equal to package.json today): ONLY V1 fails, 1 of 41. That is why V1 exists: R7 and CTRL cannot tell a literal that happens to match from a read.
+- M2, R7's red proof (the old '2.0.1' literal back, package.json at 2.2.1): V1, CTRL and R7 fail, 3 of 41.
+- C-68 by name, the package-lock readers (dockerfile-install-and-labels, rd418-dockerignore-round3, rd442-licence-terms-of-service): 24/24.
+- Full verify: VERDICT: PASS — 4213/4213 tests passed across 255 suites. Floor 0 servers throughout.
+- Overlap with RD-732 (daf2210, released): both touch package-lock.json, in different hunks. merge-tree 5584ea4 x daf2210 is clean (rc 0, scratch objects).
+
+PRIOR WORK (C-49/C-50)
+- '2.0.1': the root import 8eb94ce, with no reason recorded.
+- package.json's 1.3.0: 235e474 "Bump to 1.3.0 for two-plan marketplace release" (2026-04-22), which health never read.
+- rd327 R7: a CONTROL that "version keeps its meaning". KEPT as a control, re-anchored (C-131).
+- Nothing removed except the literal.
+- C-181's "not covered" is respected: the image label's IMAGE_VERSION is untouched, a separate item after rd-418.
+
+CodeQL (C-190): the only product change is a require of a JSON file. The preload helper reads package.json once, with no check-then-use.
+
+NOT TESTED
+- A Docker image build: package.json is COPYed by the Dockerfile's deps stage and the app's require is relative, so that should hold, but I did not build an image for this.
+- The demo.
+- The release process's own bump (it is Kam's, per C-181).
+
