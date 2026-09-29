@@ -19,6 +19,16 @@ supersede: replace wholesale at the next pickup; do not append. Previous copy: N
 4. EXPIRING-GRANTS: "SPEND PAST THE 90%" is marked ENDED (account switched). Friday's "ignore the 90%" row is Friday's and is not touched.
 
 ### LIVE RIGHT NOW
+**🟠 70% CHECKPOINT 11:18 09-29 (morning seat 407373b1). READ FIRST; supersedes every block below where they differ:**
+- **Today: 3 Secuura merges** (#1337, #1332, #1338); develop **8af6ab821600**. B 42nd 0.95 / gate40 0.98 / Seat H 0.98 scored; DevMASTER 511 GiB free (Seat H deleted 9,216 stale node_modules on Kam's (b)).
+- **LIVE: Seat B 43rd (%65, `Secuura/Blockchain`)**, brief `fleet/briefs_staged/2026-09-29_seatB43_build.md`, plan confirmed (KS-1369 = T1; KS-1375 Refs KS-1368 too). **ITEM 1 DONE: four Spark patches built + committed, NOT pushed** (KS-1371 4df536b5689b · KS-1359 c084f6cb2e25 · KS-1369 3aeebf2cf09b · KS-1360 b874efb05cae). Building KS-1375 (b) the same way.
+- **🔴 EVERY SECUURA PUSH IS BLOCKED by five NEW advisories** (legs 6-7; ip-address x2, morgan, nodemailer cross-tenant SMTP, undici; all moderate; shipped locks, so outside Wednesday's grant). **Card `secuura-five-new-advisories-block-every-push-0929`** (rec a = BUMP, Kam's 09-09 precedent; AMENDED 11:1x with B 43rd's measurement: morgan + ip-address(shared) are lock refreshes, nodemailer needs a MAJOR 9->10, undici + nested ip-address need overrides). **Default 12:30: nothing accepted, pushes stay blocked**, and remind Kam on the board. **When he rules:** mail B 43rd the ruling (SUPERSEDES the hold); the bump/baseline PR is its NEXT item and goes FIRST through its own gate (gate41 = that PR, or batch it with the four + KS-1375 only if the kit can pin it first; merge order: advisory PR first).
+- **THE FUSE: Kam's re-date EMAIL still owed** (2026-09-30T00:00Z = Wed 10:00 AEST; recompute with the shell). **Remind him on the board ~15:00 if no DKIM mail has reached secuura-blockchain@** (B 43rd scans its inbox for it and STOPs if it lands).
+- **Kam ruled today (all recorded, receipted, delivered where built):** KS-1370 a + split a (#1338 merged); KS-1375 b; DevMASTER b (done); KS-1369/1360/1359 a (the Spark 3/3, raised by B 43rd).
+- **The Spark: 4/4 today, streak 17.** No briefable ticket left from the 09-29 screen; Ornith PAUSE_QUEUE to 06:00 09-30.
+- **OWED:** both digests to regenerate at the wrap (a new lesson + ledger rows today); build_input refuses a local-path origin (IMPROVEMENTS); hold_ready test-only; cockpit.sh say silent on a pane id.
+- **Declared default:** answer B 43rd's mails; act on Kam's advisory ruling; start nothing heavy; rotate inside 80-90 at a safe boundary (B 43rd keeps running; its mails wait for the successor).
+
 **🟣 65% CHECKPOINT 10:21 09-29 (morning seat 407373b1). READ FIRST; supersedes every block below where they differ:**
 - **Live:** Seat B 42nd (%62, `Secuura/Blockchain`) was sent the signed GO `GO (Seat B 42nd): merge 1338 on gate40` (`fleet/briefs_staged/2026-09-29_GO_seatB42_gate40.md`). **NEXT: its MERGED mail → verify develop's tree == END 4d2c269e3381 at source** (a fetch into the scratch clone `screen0929/base`, origin GitHub) **→ score B 42nd + gate40 → pane_close %62 in ONE action.** It files ONE follow-up ticket (N-1338-3/-4/-5) and wraps cold.
 - **Today's Secuura merges: 2** (#1337, #1332; #1338 pending). Develop 0de108577e61 before #1338.
