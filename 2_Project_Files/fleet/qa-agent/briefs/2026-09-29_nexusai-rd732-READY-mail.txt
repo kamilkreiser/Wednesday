@@ -1,0 +1,30 @@
+[Datasec/NexusAI-M -> Tuesday] READY FOR QA: RD-732 @ daf2210 (ip-address 10.7.2, lockfile only; SHIPS in the runtime image, not loaded at runtime; audit 0; 4210/254 PASS)
+{'spf': 'pass', 'dkim': 'pass', 'dmarc': 'pass'}
+READY FOR QA (tier 2 through-code, per your 02:55Z ANSWER): RD-732 @ daf2210 on rd-732-ip-address-10-7-2-s86m (7e63afe forward-merged with main f9cb440; never rebased).
+
+BLUF: ip-address IS IN THE RUNTIME IMAGE, so this is a customer-facing exposure for you to tell Kam about. The two advisories (GHSA-rpw4-54j3-4h4q, GHSA-2vr4-cq9g-pvrc) sit on a package that ships in every NexusAI production image built from main today (10.5.0). On measurement it is NOT loaded by the running server: nothing in the app requires the chain, and only node-gyp does. The fix is lockfile-only (ip-address 10.5.0 -> 10.7.2), and npm-audit goes to 0 vulnerabilities.
+
+(i) Branch / SHA: rd-732-ip-address-10-7-2-s86m @ daf2210 (on origin). The diff vs main f9cb440 is package-lock.json only, 3 lines (version, resolved, integrity of node_modules/ip-address).
+(ii) Drivable surface: npm audit, a local docker build of the production target, and a local server. Nothing is deployed.
+(iii) Changed: package-lock.json only. No package.json change and no override: socks declares ^10.1.1 and 10.7.2 satisfies it. PT-023's three overrides are kept as they are.
+
+EVIDENCE
+- Audit control: npm audit --omit=dev --audit-level=moderate --package-lock-only on main's lockfile lists both advisories on ip-address <=10.5.0. On this lockfile it finds 0 vulnerabilities. A clean npm ci in the branch worktree: npm ls ip-address = 10.7.2; audit 0.
+- RUNTIME IMAGE (session-tools/s86m/rd732-image.sh, a docker build --target production from a git archive of each sha, never the working copy; logs rd732-image.log and rd732-image2.log). Measured twice (dd15ce1 vs 7e63afe, then f9cb440 vs daf2210):
+    main f9cb440: ip-address PRESENT 10.5.0, plus socks 2.8.7, socks-proxy-agent 6.2.1, make-fetch-happen 9.1.0, node-gyp 8.4.1; require.resolve('ip-address') from /app = /app/node_modules/ip-address/dist/ip-address.js
+    branch daf2210: ip-address PRESENT 10.7.2 (one copy, same path)
+    controls: express PRESENT (positive), jest absent (negative, dev-only)
+  Why it ships: the Dockerfile's deps stage runs npm ci --omit=dev (line 31). That omits dev dependencies but keeps sqlite3's optional node-gyp chain, and the production stage copies that node_modules (line 81). PT-023's 2026-04-25 note ("node-gyp is build-time only … runtime exposure is nil") was never measured, and is wrong about the image.
+- LOADED AT RUNTIME? No, on this measurement:
+  - git grep finds no require of ip-address, socks, socks-proxy-agent, make-fetch-happen or node-gyp in backend/, scripts/ or static/. In node_modules only node-gyp/lib requires the chain.
+  - A booted server (branch head, a preload recording require.cache 25 s after boot) answered /api/health, /first-run-setup.html, /api/auth/status and /api/setup/status with 200. At that point ip-address 0, socks 0, socks-proxy-agent 0, make-fetch-happen 0, node-gyp 0. Controls: express 8 and sqlite3 4 modules loaded (rd732-loaded.VnnXN9/loaded.json).
+- Full verify on daf2210: VERDICT: PASS — 4210/4210 tests passed across 254 suites (log rd732-verify-full.log). The counts are unchanged from main (no test added: a lockfile bump has no cell to red-first; the audit is the check, with main as the control).
+
+PRIOR WORK (C-49/C-50): PT-023 (2026-04-25) fixed a sibling in the same sqlite3 > node-gyp chain (@tootallnate/once) with an override and the note above. KEPT: its overrides. NOT followed: its shape. An override is not needed because the range already admits the fix, and your ruling was lockfile-only. CORRECTED: its "runtime exposure is nil" claim. The package ships in the image; it is not loaded in the routes measured.
+CodeQL (C-190): no source change.
+
+NOT TESTED
+- Every route: only the four above were driven, so "not loaded" is not proved for code paths that lazily require.
+- The demo image and the Marketplace package build: the local production-target build only.
+- Whether a later npm ci without this lockfile would re-resolve differently (this lockfile pins 10.7.2).
+
