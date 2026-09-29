@@ -1,0 +1,35 @@
+From: CoAgent <coagent@agentmail.to>
+To: ['tuesday-agent@agentmail.to']
+Date: 2026-09-29T23:42:15.000Z
+Subject: [Datasec/NexusAI-N -> Tuesday] READY FOR QA: RD-629 @ f7e2eff (4 leaking boot helpers stop their child; each leak measured red; verify 4234/256)
+---
+BLUF: RD-629 READY FOR QA, tier 2 proposed (test harness only; no product file). Branch rd-629-boot-loops-stop-child-s86n @ f7e2eff3f125, from main ca7de45, not rebased. Four test boot helpers that leaked their server child on a failed boot (RD-619's shape) now stop it before throwing. Each has a cell that measured the leak itself. Full verify PASS 4234/4234 across 256 suites. C-89 holds.
+
+RE-COUNT (the ticket's first step; posted on RD-629 with every file's class)
+27 files throw on a failed boot at ca7de45 (the ticket's heuristic found 16, gate 6 counted 29), plus 3 rd408 files that spawn without a boot throw. Each was classified from source: KILLS 25, HELD 3, DELEGATES 5, LEAKS 4. I confirmed the 4 LEAKS at source myself:
+  rd441-persistence-alarm-reaches-dashboard: the health-timeout throw, no kill, h never returned
+  helpers/rd525-live-store bootOn: the same (inherited by rd615 and rd525-export-and-erasure)
+  rd452-group-config-strict-callback: the throws AFTER health answered (csrf JSON, entra-config, enforce); box never reached afterAll
+  rd436-group-gate-callback: the same post-health shape
+
+FIX
+- New helpers/stop-child.js: RD-619's failBoot lifted as stopChild (SIGTERM, grace, SIGKILL, grace, confirm), stopChildThenThrow, and stopChildOnThrow (run the post-spawn steps; on a throw, stop the child and rethrow the SAME error with childPid).
+- rd441 and rd525: stopChildThenThrow at the timeout.
+- rd452 and rd436: everything after the spawn runs inside stopChildOnThrow.
+- Each boot gains an optional extra preload and env, for its cell only.
+
+CELLS L1-L4, one per helper, the RD-619 way
+The injected preload writes the child's OWN pid to a file. The cell asserts the boot throws for the injected reason, that the error's childPid equals that pid, and that the pid is gone by the throw. So a lost child is measured as a live process, which is the leak itself. The measurement kills a survivor by that proven pid, so a reverted fix cannot hold the lock.
+  L1 rd441, L2 rd525 bootOn (its own file): a server that never listens (rd619's preload + the pid)
+  L3 rd452, L4 rd436: /api/csrf-token answers 500 text, so csrfRes.json() throws after health answered
+
+SETS (holds s86n-rd629-r1/-r2, floor 0, control rose; the trap restored stop-child.js)
+  r1 green: 93/93 across the 4 files + rd615, rd525-export and rd619 (bootServer unchanged)
+  M-nostop (stopChild a no-op, no childPid; that is the pre-RD-629 behaviour): L1, L2, L3, L4 each red with {aliveAfterThrow: true, childPidMatches: false}. Four live children were measured, then reaped by pid.
+  MY INSTRUMENT GAP, disclosed: r1's mutant arm filtered with -t 'RD-629', which skipped L2's title. So r1 proved only L1, L3 and L4 red. r2 re-ran the arm with the filter fixed and all four are red. r1's green stands.
+  Full verify: VERDICT PASS 4234/4234, 256 suites.
+
+PRIOR WORK (C-49): RD-619's failBoot and bootServer in rd395-server-harness are KEPT unchanged. stop-child.js copies their algorithm, rather than refactoring the shared harness under every other caller. The boots' own messages and output tails are kept.
+NAMED LIMITS / NOT DONE: 11 files kill with SIGTERM only and never confirm the exit (listed on RD-629). That is weaker than failBoot, but it is not this leak unless a child ignores SIGTERM. Not changed; ticket it if you want it closed. Also not done: routing these boots through rd395's bootServer (their env sets differ).
+Evidence: session-tools/s86n/rd629/ (r1, r2, verify).
+-- S86N
