@@ -12,6 +12,17 @@ supersede: replace wholesale; previous = NEXT-PICKUP-FRIDAY.md.pre-0925-rotate-s
 
 **The tree is at `/Users/kamilkreiser/1FILES TO SYNC/FRIDAY`.** Quote every path (spaces).
 
+## 🔴🔴 HANDOVER 2026-09-29 23:3x (ctx ~75%) — FLOOR EMPTY; READ FIRST; supersedes every block below where they differ
+**Floor:** only %0 friday + %1 fleet-monitor. Every other pane closed (work on disk). Nothing runnable without Kam.
+**Waiting on KAM (cards on the Friday tab, all with defaults):**
+1. `hpsmpoc-signin-hardening-third-round` (rec a; default HOLD). **On a:** launch a tier-1 re-gate (a new B63-style QA seat) on HPSM-POC **PR #60** head **`4986e419a317e2359b37cfe79e7a6a7ae65a00e4`** (base main `bfc7b25`; CI 10/10; 0 CodeQL alerts; B59's `READY FOR REVIEW — ROUND 3` section in `HPSM-POC/1_Project_Definition/Briefs/2026-09-29_B59_STATUS.md`; B63's rounds 1–2 in `…_B63_STATUS.md`). On GO: merge head-pinned; then a records seat lands records/b59 + records/b63.
+2. `composer-end-page-fix-deploy` (rec a; default nothing deployed; re-ask before Paul's review Fri 2 Oct). **On a:** a B24-style deploy seat, Composer main **`5b010da`**, runbook `friday/composer_demo_deploy.md` (updated: quarantine composer.prev first) + DEPLOY.md; verify live yourself; tell Kam.
+3. `hpsmpoc-hosted-seed-owner` (default nothing until D-3).
+**MERGED tonight:** HPSM-POC #53 #55 #54 #56 #57 #59 #58 → main **bfc7b25**; records #7–#10 → analysis main 733ffe6. Composer #12 (LIVE, verified) + #13 → main 5b010da (not deployed).
+**Before D-13 (HP reviewers):** #60 merged; HPSMPOC-111, -115, -118 closed; Kam's D-steps + seed-owner card. Other new tickets tonight: HPSMPOC-105..110, 112..117; Composer BACKLOG #39–#48.
+**Owed / noticed:** Composer project-root repo has UNTRACKED older records (09-24 B02, 09-25 ADR-B09): a records tidy for the next Composer seat. B59/B63 records not yet on a branch (land after #60).
+**Lesson for addenda:** ask seats to finish with "READY FOR REVIEW" (the watcher's word); "ADDENDUM-N DONE" was missed twice tonight.
+
 ## 🔴🔴 HANDOVER 2026-09-29 21:3x (ctx 70%) — READ FIRST; supersedes the 20:5x block where they differ
 **MERGED since 20:5x:** HPSM-POC #59 (B59 web) → a706dde · #58 (B60 H4, after round 2) → **bfc7b25**. Composer a60fc22 **DEPLOYED + verified by Friday** (card delivered; Kam told).
 **LIVE SEATS / NEXT:**
