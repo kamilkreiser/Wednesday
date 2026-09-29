@@ -1,0 +1,119 @@
+--- /dev/null
++++ b/Blockchain/Dev/services/api-gateway/src/__tests__/ks1374-global-limiter-at-demo-limit.test.ts
+@@ -0,0 +1,116 @@
++/**
++ * KS-1374 - local stacks may run the global limiter looser than the demo
++ * (RATE_LIMIT_MAX_REQUESTS raised for scanning), so this file pins the limiter
++ * at the DEMO figure: 2000 requests per 60 s window per address.
++ * Wiring cells read index.ts (the KS-733 shape: no gateway test boots it).
++ * Behaviour cells drive express-rate-limit with the same options at the demo
++ * figure and the REAL skip predicate over a local socket: request 2001 is
++ * refused with 429, and the read-only paths still skip.
++ */
++import { describe, it, expect, beforeAll, afterAll } from 'vitest';
++import { readFileSync } from 'node:fs';
++import { join } from 'node:path';
++import type { Server } from 'node:http';
++import type { AddressInfo } from 'node:net';
++import express from 'express';
++import rateLimit from 'express-rate-limit';
++import { shouldSkipGlobalRateLimit } from '../middleware/rateLimitSkip';
++
++const DEMO_MAX = 2000;
++const GATEWAY_SRC = readFileSync(join(__dirname, '..', 'index.ts'), 'utf8');
++const COMPOSE = readFileSync(join(__dirname, '..', '..', '..', '..', 'docker-compose.yml'), 'utf8');
++
++/** The global limiter call in index.ts, from app.use(rateLimit({ to its closing line. */
++function globalLimiterCall(): string {
++  const at = GATEWAY_SRC.indexOf('app.use(rateLimit({');
++  if (at === -1) return '';
++  return GATEWAY_SRC.slice(at, GATEWAY_SRC.indexOf('}));', at) + 4);
++}
++
++let server: Server;
++let base = '';
++
++beforeAll(async () => {
++  const app = express();
++  app.use(rateLimit({
++    windowMs: 60 * 1000,
++    max: DEMO_MAX,
++    message: { success: false, error: { code: 'RATE_LIMIT_EXCEEDED', message: 'Too many requests, please try again later.' } },
++    standardHeaders: true,
++    legacyHeaders: false,
++    skip: (req) => shouldSkipGlobalRateLimit({
++      authHeader: (req.headers.authorization as string) || '',
++      path: req.path,
++      nodeEnv: 'demo',
++      disableEnv: undefined,
++    }),
++  }));
++  app.use((_req, res) => { res.json({ ok: true }); });
++  await new Promise<void>((resolve) => { server = app.listen(0, '127.0.0.1', () => resolve()); });
++  base = 'http://127.0.0.1:' + (server.address() as AddressInfo).port;
++});
++
++afterAll(async () => {
++  server.closeAllConnections();
++  await new Promise<void>((resolve) => { server.close(() => resolve()); });
++});
++
++describe('KS-1374 global limiter wiring in index.ts', () => {
++  it('RED KS-1374 W1: the global limiter max reads RATE_LIMIT_MAX_REQUESTS', () => {
++    expect(globalLimiterCall()).toContain('max: parseInt(process.env.RATE_LIMIT_MAX_REQUESTS ||');
++  });
++
++  it('control KS-1374 W2: the global limiter keeps a 60 s window, standard headers, the shared skip and its 429 code', () => {
++    const call = globalLimiterCall();
++    expect(call).toContain('windowMs: 60 * 1000,');
++    expect(call).toContain('standardHeaders: true,');
++    expect(call).toContain('skip: (req) => shouldSkipGlobalRateLimit({');
++    expect(call).toContain('RATE_LIMIT_EXCEEDED');
++  });
++
++  it('control KS-1374 D1: the compose fallback stays at the demo figure, so a local raise lives in .env only', () => {
++    expect(COMPOSE).toContain('RATE_LIMIT_MAX_REQUESTS=${RATE_LIMIT_MAX_REQUESTS:-' + DEMO_MAX + '}');
++  });
++});
++
++describe('KS-1374 global limiter behaviour at the demo figure', () => {
++  it('control KS-1374 B1: the first 2000 requests in a window pass, under a 2000 per 60 s policy', async () => {
++    const statuses: number[] = [];
++    let policy = '';
++    for (let i = 0; i < DEMO_MAX; i += 100) {
++      const batch = await Promise.all(Array.from({ length: 100 }, () => fetch(base + '/api/v1/documents')));
++      for (const r of batch) { statuses.push(r.status); await r.text(); }
++      policy = batch[0].headers.get('ratelimit-policy') || '';
++    }
++    expect(statuses.filter((s) => s === 200).length).toBe(DEMO_MAX);
++    expect(policy).toBe(DEMO_MAX + ';w=60');
++  }, 60000);
++
++  it('control KS-1374 B2: request 2001 in the same window is refused with 429 RATE_LIMIT_EXCEEDED', async () => {
++    const r = await fetch(base + '/api/v1/documents');
++    const body = await r.json();
++    expect(r.status).toBe(429);
++    expect(body.error.code).toBe('RATE_LIMIT_EXCEEDED');
++  });
++
++  it('control KS-1374 B3: with the budget spent, the read-only paths still skip the limiter', async () => {
++    for (const path of ['/health', '/api/verification/abc']) {
++      const r = await fetch(base + path);
++      await r.text();
++      expect(r.status).toBe(200);
++    }
++  });
++
++  it('control KS-1374 B4: with the budget spent, a test_token bearer is still refused in demo, even with test tokens enabled', async () => {
++    const before = process.env.ENABLE_TEST_TOKENS;
++    process.env.ENABLE_TEST_TOKENS = 'true';
++    try {
++      const r = await fetch(base + '/api/v1/documents', { headers: { authorization: 'Bearer test_token_ks1374' } });
++      await r.text();
++      expect(r.status).toBe(429);
++    } finally {
++      if (before === undefined) delete process.env.ENABLE_TEST_TOKENS;
++      else process.env.ENABLE_TEST_TOKENS = before;
++    }
++  });
++});
