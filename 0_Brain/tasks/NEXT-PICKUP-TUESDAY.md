@@ -6,6 +6,12 @@ status: live
 supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s1-wholesale
 ---
 
+## 🟢 DELTA 129 — 2026-09-29 19:05 (s93, ctx 70% CHECKPOINT; band 80-90). **READ THIS FIRST, THEN 128 (its STATE and OWED lines are current except below).**
+- **NexusAI main = f9cb440** (P, batch-6 merge 2 RD-204 via PR #33; Tuesday ls-remote 19:0x). **OWED: P's MERGED mail** (Build failing set by name inside {rd638 E2, rd465 O-1}, demo SKIPPED) — not yet arrived at 19:03; P's next is merge 3 RD-197 in its turn.
+- Lock at 18:1x: O `rd707-fulldiag` (a diagnostic after proof 2 — expect an O STATUS on RD-707), queue M `rd733-verify`, N `rd591-ready2` (RD-591 round 6: branch-caused failure, fix queued).
+- Kam 16:17:55 + 16:18:57 on KS-1374 (Secuura) ROUTED to Wednesday verbatim (receipts 201; mails 200). Tuesday does nothing on it.
+- Batch 10 still waits for RD-733's READY (then RD-703 saved, RD-707, RD-732 as landed).
+
 ## 🟢 DELTA 128 — 2026-09-29 16:08 (s93, ctx 67% light checkpoint; band 80-90). **READ THIS FIRST — it supersedes 127's in-flight lines.**
 ### STATE
 - NexusAI main = faea66b (RD-681 via PR #32, 13:02; first C-190 landing; push Build inside the known set). **The landing step is mailed to all four seats** (fleet/briefs_staged/2026-09-29_nexusai_all_landing_step.md): PR -> every CodeQL Analyze run -> FF push of the same sha; refused = STOP. Known-failing set = {rd638 E2, rd465 O-1 (that TypeError only)} (C-185 + addendum :1912). npm-audit red on every ref (ip-address) until RD-732.
