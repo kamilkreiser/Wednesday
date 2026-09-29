@@ -20708,5 +20708,60 @@
    "CARD nexusai-package-files-scope",
    "CARD nexusai-setup-window-admin-gate-scope"
   ]
+ },
+ {
+  "id": "secuura-five-new-advisories-block-every-push-0929",
+  "client_project": "Secuura/Blockchain",
+  "title": "Five new advisories (all moderate) block EVERY Secuura push. Bump them, as you chose for the 9 Sep wave, or baseline them to unblock faster?",
+  "bluf": "I need your ruling because these reach shipped services, which is outside the authority you gave me for advisories (moderate AND measured not to reach a runtime image). Five advisories published since yesterday are not in the audit baseline, so the pre-push gate refuses every push on the repo, Seat B 43rd's included (reported 01:02Z; it has four PRs and KS-1375 ready to push). All five are MODERATE, per the gate's own output: ip-address x2 (SSRF classifier gaps; 3 locks incl. packages/shared), morgan (log injection; 10 service locks), nodemailer (a DNS cache that can disclose SMTP credentials ACROSS TENANTS; services/auth + originate), undici (a WebSocket DoS; frontend/issuer). Not measured: whether our code reaches the vulnerable paths. This is separate from the audit fuse email, which is still owed. On 9 Sep you faced this shape for morgan and nodemailer in shipped code, ruled 'measure then rule', and then chose BUMP over baselining (cards secuura-four-advisories-in-shipped-code and secuura-four-advisories-ruled-after-measurement). This card follows that choice.",
+  "default_action": "If no ruling by 12:30 AEST today (Tue 29 Sep): nothing is accepted and no pin changes; pushes stay blocked, Seat B 43rd keeps building its PRs locally and holds them committed, and Wednesday reminds you on the board. Accepting a shipped-tree advisory is your signature, not mine, so silence does not accept it.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Bump all four packages, with a quick reachability check in the same round (Recommended; what you chose on 9 Sep)",
+    "detail": "Seat B 43rd pauses its raises, bumps nodemailer, morgan, ip-address and undici across their lockfiles in ONE PR (a caret bump may need no manifest change where one exists), records the reachability read in the PR, and it goes through the gate first. Every other push waits until it merges, likely a few hours, inside the audit fuse's 23 h."
+   },
+   {
+    "key": "b",
+    "label": "Split: bump nodemailer (the cross-tenant credential one) now, baseline the other three until Fri 9 Oct",
+    "detail": "Pushes reopen sooner; the credential exposure is removed, not accepted. ip-address, morgan and undici are accepted with a reason, a ticket and the same 9 Oct re-triage date as the fuse re-date, then bumped in a later round."
+   },
+   {
+    "key": "c",
+    "label": "Baseline all five until Fri 9 Oct, bump later",
+    "detail": "Fastest unblock. Cost: you accept five advisories in shipped code on severity alone, before any reachability read, including the cross-tenant credential one."
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-09-29T11:05:01.686930+10:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "2026-08-21 20:06",
+   "2026-09-05 15:01",
+   "2026-09-05 15:04",
+   "2026-09-06 09:42",
+   "2026-09-08 07:07",
+   "2026-09-08 08:08",
+   "2026-09-10 09:01",
+   "2026-09-10 09:08",
+   "2026-09-10 09:08",
+   "2026-09-10 10:29",
+   "2026-09-17 16:37",
+   "2026-09-17 16:37",
+   "CARD secuura-806-force-push-2026-09-04",
+   "CARD secuura-force-push-own-branch-standing",
+   "CARD hpsm-credential-bearing-prd-outside-every-snapshot",
+   "CARD secuura-advisories-high-and-prod-reaching",
+   "CARD secuura-four-advisories-in-shipped-code",
+   "CARD secuura-four-advisories-ruled-after-measurement",
+   "CARD secuura-934-blocks-every-push-needs-one-approval",
+   "CARD secuura-two-untriaged-advisories-and-two-allowlists",
+   "CARD secuura-audit-baseline-rows-lapse-24sep-block-pushes",
+   "CARD secuura-ks1019-blockchain-block-untyped",
+   "CARD vision-portal-reminder-push-public-ntfy-topic",
+   "CARD secuura-ks1163-start-script-never-waits-for-five-services"
+  ]
  }
 ]
