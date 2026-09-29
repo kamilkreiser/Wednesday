@@ -1,0 +1,30 @@
+LAUNCH ACTION gate41 (DRY RUN) 2026-09-29 12:37:32 AEST / 2026-09-29T02:37:32Z | launcher /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/gatesets/2026-09-29_gate41/launch_qa_secuura_batch1339.sh | pinned launch develop 8af6ab8216007462e596daed6b0adcd1e87e34ee | END_TREE acb9823fc182adc4031dd420c2e60ddab8aa9142
+  pin #1339 8c1b25b24782d851817f8c7bb1c02d390fe750d7
+--- 0. the pane must be routed (inbox_routing.conf) or cockpit.sh say --mail fails silently
+  routing file /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/inbox_routing.conf — line present: 0 (grep rc=1; want 1 / rc 0)
+  (DRY RUN: reported, not refused — the real run refuses rc 1 here)
+--- 0b. the kit's home: launcher filled for /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/gatesets/2026-09-29_gate41 | this script lives in /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/gatesets/2026-09-29_gate41
+  AT HOME — no re-fill
+--- 1. instrument: git ls-remote origin (read from the Secuura checkout, READ-ONLY)
+  ls-remote rc=0 at 02:37:35Z
+    8af6ab8216007462e596daed6b0adcd1e87e34ee	refs/heads/develop
+    8c1b25b24782d851817f8c7bb1c02d390fe750d7	refs/heads/feature/ks-1378-bump-four-advisory-packages-b43-7
+    8c1b25b24782d851817f8c7bb1c02d390fe750d7	refs/pull/1339/head
+--- 2. instrument: the GitHub PULLS API (an independent read of each head, and mergeable)
+  pulls API rc=0
+    WIDEN #1339 IN-KIT 8c1b25b24782d851817f8c7bb1c02d390fe750d7 | feature/ks-1378-bump-four-advisory-packages-b43-7 | KS-1378: bump morgan, nodemailer, ip-address and undici off five advisories
+    WIDEN-RX ^\s*(KS-1378)\b | WIDEN-BRANCH-RX -b43-\d+$
+    API #1339 head 8c1b25b24782d851817f8c7bb1c02d390fe750d7 base develop mergeable True reads 1 state open
+    DEVBASE #1339 OK base.ref develop
+--- 2b. the WIDEN census (Wednesday's widen rule): an open PR matching kit.json widen_rx must be in this kit
+    WIDEN #1339 IN-KIT 8c1b25b24782d851817f8c7bb1c02d390fe750d7 | feature/ks-1378-bump-four-advisory-packages-b43-7 | KS-1378: bump morgan, nodemailer, ip-address and undici off five advisories
+    WIDEN-RX ^\s*(KS-1378)\b | WIDEN-BRANCH-RX -b43-\d+$
+  WIDEN census clean: every matching open PR is in this kit
+--- 3. the heads, judged (both instruments == the pin, open, not mergeable:false; every stacked child still based on its parent's branch at the pinned parent head; every other PR based on develop)
+  #1339  ls-remote pull/head 8c1b25b24782d851817f8c7bb1c02d390fe750d7 | branch 8c1b25b24782d851817f8c7bb1c02d390fe750d7 | API 8c1b25b24782d851817f8c7bb1c02d390fe750d7 (state open, mergeable True) | pinned 8c1b25b24782d851817f8c7bb1c02d390fe750d7
+  DEVBASE #1339 OK base.ref develop
+  BOTH INSTRUMENTS AGREE with every pin.
+--- 3b. develop, read at launch: 8af6ab8216007462e596daed6b0adcd1e87e34ee | the launcher's pinned launch develop 8af6ab8216007462e596daed6b0adcd1e87e34ee
+  UNMOVED since the fill — the END_TREE acb9823fc182adc4031dd420c2e60ddab8aa9142 stands
+DRY RUN COMPLETE 2026-09-29T02:37:36Z — every read agrees with the pins; the real run continues with the usage gate, --check and cockpit.sh add
+rc 0
