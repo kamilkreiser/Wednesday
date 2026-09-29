@@ -1,0 +1,315 @@
+{
+ "read_at": "2026-09-29T21:59:52Z",
+ "prs": {
+  "1354": {
+   "title": "KS-470: js-yaml 5.4.2 in systemTest/performance, accept GHSA-r53p build-tree only",
+   "state": "open",
+   "user": "kksecura",
+   "head": "4370be410bbf37b839b1030f3e28f95d11c454fe",
+   "branch": "feature/ks-470-jsyaml-542-and-accept-ghsa-r53p-b47-3",
+   "base": "develop",
+   "base_sha": "37205947ddd2775a72a417beb5b7ac8e3240fbf3",
+   "mergeable": true,
+   "mergeable_state": "unstable",
+   "files": [
+    [
+     "Blockchain/Dev/scripts/audit/audit-baseline.json",
+     7,
+     0,
+     "modified"
+    ],
+    [
+     "systemTest/performance/package-lock.json",
+     3,
+     3,
+     "modified"
+    ]
+   ],
+   "commits": [
+    [
+     "4370be410bbf37b839b1030f3e28f95d11c454fe",
+     "KS-470: js-yaml 5.4.2 in systemTest/performance, accept GHSA-r53p build-tree only"
+    ]
+   ],
+   "body": "## BLUF\nTwo advisories published 2026-09-29 refuse **every** push from `develop`. One is **fixed** (js-yaml moves\noff the vulnerable range); one is **accepted as a temporary exception** on the date this baseline already\nshares, with the working measured from the built artefact. Two files.\n\nRefs KS-470\n\n## Why both audit legs were refusing every push\n`GHSA-r3ph-w7gj-g6xm` (js-yaml, moderate) and `GHSA-r53p-7pc4-xj5r` (undici, low) were **published on\n2026-09-29** \u2014 17:57:39Z and 18:22:07Z, from the GitHub advisory API. Neither is caused by any change in\nflight: the commit that first hit the refusal touches two shell files and **zero lockfiles**, and the two\nlockfiles the gate names are byte-identical between the base and that head. A push at 21:07Z failed\n**leg 7** only; the same gate re-run at 21:15Z also failed **leg 6**, which reported 23 advisories at push\ntime and 24 eight minutes later \u2014 npm's quick-audit feed lagged the bulk endpoint leg 7 uses.\n\n## 1. js-yaml \u2014 FIXED, not accepted\n`systemTest/performance/package-lock.json`: `js-yaml` **5.2.3 \u2192 5.4.2**. The advisory's first patched\nversion is 5.4.1 and the manifest already requests `^5.2.1`, so **no manifest change** is needed, and the\npatched line is already in use in this repo (`systemTest/api-explorer` pins 5.4.1, `systemTest/akto` 5.4.2).\n\n**Measured on the real lock, not a scratch copy:** entries **274 \u2192 274**, **MOVED=1, ADDED=0, REMOVED=0**,\nzero non-version field changes, `lockfileVersion` 3 both sides, and the `secuura-observability` link entry\nbyte-identical (`resolved: \"../../observability\"`, `link: true`).\n\n\u26a0 **Two deviations from the documented remediation, both measured and both disclosed:**\n1. **The verb.** `scripts/preflight/lockfile-cleanroom.sh:120` prints\n   `docker run --rm -v \"$PWD/<dir>\":/app -w /app node:24-alpine npm install --package-lock-only\n   --ignore-scripts`. **That command is inert here** \u2014 measured in a scratch copy: MOVED=0, ADDED=0,\n   REMOVED=0, js-yaml still 5.2.3, because `npm install` keeps any pin that still satisfies the range. The\n   container, `--package-lock-only` and `--ignore-scripts` are the script's; only the verb changed, to\n   **`npm update js-yaml`**.\n2. **The mount.** The script's per-directory mount **fails**: `npm error code EMISSINGTARGET \u2014 Missing\n   target in lock file: \"../observability\" is referenced by \"node_modules/secuura-observability\" but does\n   not exist`, rc 1, **lock unchanged**. That manifest carries `\"secuura-observability\":\n   \"file:../../observability\"`, so a per-dir mount cannot see the target; mounting the parent\n   (`-v \"$PWD/systemTest\":/app -w /app/performance`) gives rc 0. **So the script's own remediation command\n   cannot regenerate one of the 43 locks its leg polices** \u2014 ticketed separately, not fixed here.\n   A scratch dry run reported 273 entries because the copy lacked that link target; the real regen reports\n   274, and 274 is the figure quoted above.\n\n## 2. undici \u2014 ACCEPTED, temporary, on the date this file already shares\nOne row for `GHSA-r53p-7pc4-xj5r`: `package: undici`, `ticket: KS-470`, `decidedAt: 2026-09-30`,\n**`expires: 2026-10-09`**. It joins the **single shared re-triage date this baseline already carries** \u2014\nfour rows were on it, now five \u2014 rather than taking a fresh one. It is a **new acceptance on that shared\ndate, not a re-date** of any row dated by a signed instruction; those four are untouched.\n\n**The working, measured FROM THE ARTEFACT rather than the manifest:**\n- The pin is undici 5.29.0, reached only via\n  `frontend/issuer \u2192 @meshsdk/core \u2192 @meshsdk/provider \u2192 @utxorpc/sdk \u2192 @connectrpc/connect-node`\n  (which declares `undici ^5.28.3`).\n- **The built issuer image serves 58 files from nginx with ZERO `node_modules` directories anywhere in the\n  image**, and `undici`, `connectrpc` and `connect-node` each occur **0 times** in the served tree \u2014\n  **positive controls `react`=27 and `secuura`=8 fired in the same grep**, so the search is not blind. The\n  Dockerfile is multi-stage and its final stage copies only `/app/dist/`.\n- **undici is pinned in 0 of the 27 service standalone locks** (all 45 tracked locks parsed, 14,924\n  package entries \u2014 the control that the parser sees anything).\n- **No Dockerfile copies the workspace-root lock**: every image copies a per-directory manifest, so the\n  root lock's own undici entry reaches no image either.\n- **No patched version exists inside `^5.28.3`** \u2014 the newest 5.x on the registry is 5.29.0 itself \u2014 so\n  this cannot be closed by a lock bump.\n\n**Why temporary and not permanent:** the 12 sibling undici rows carry no `expires` **because they are\nlisted in `GRANDFATHERED_NO_EXPIRY`** in `scripts/audit/baseline-contract.mjs`, not because a new row may\nomit it. Measured: that set holds 17 ids, 12 of the 13 undici rows among them; the contract test asserts\nthe no-expiry set equals it **exactly**, and refused a 13th that \"arrived by omission\". A permanent\nacceptance is a gate change and a reviewer decision, so this row is temporary instead. **No gate file is\ntouched by this PR.**\n\n## Test Evidence\nAll rc's read on their own line, never through a pipe.\n\n| check | before this PR | with this PR |\n|---|---|---|\n| `npm run audit:contract` | **rc 1** (with a no-expiry row) | **rc 0** |\n| `npm run audit:gate` (leg 6) | **FAIL**, 24 reported / 25 baselined | **rc 0**, 24 reported / 26 baselined |\n| `npm run audit:locks` (leg 7) | **FAIL**, 20 match / 18 baselined | **rc 0**, 19 match / 19 baselined |\n\n\ud83d\udd34 **The two leg-7 numbers move for different reasons, which is what separates a fix from a suppression:**\n*matches* fall **20 \u2192 19** because the js-yaml pin moved **off** the vulnerable range, and *baselined*\nrises **18 \u2192 19** from the one accepted row. Had both been baselined, matches would have stayed at 20.\nRows with no `expires` stay at **17**, the base's figure, so the grandfather set still matches exactly.\n\n## NOT COVERED \u2014 stated, not hidden\n- **The real undici fix is not in this PR.** An unscoped `overrides` entry (the pattern\n  `frontend/issuer/package.json` already uses for `jsdom`) moves undici 5.29.0 \u2192 7.30.0 and would close\n  this row **and all 12 siblings**; sized 2026-09-30 in a scratch regen at **723 \u2192 721** entries\n  (`@fastify/busboy` removed, the nested jsdom copy deduped). **Its build and suites are UNMEASURED**, and\n  it forces a major version against a declared `^5.28.3`. Ticketed separately.\n- **This PR adds one more entry lapsing at 2026-10-09**, taking that date from four rows to five.\n- The two dead rows leg 6 reports as no longer reported (`GHSA-v2v4-37r5-5v8g`, `GHSA-mwp4-54f8-5fhr`) are\n  **not removed here** \u2014 one of them is on the 2026-10-09 date, so removing it moves that count.\n- `mobile/secuura-app` pins undici 6.28.0, which is also vulnerable to this advisory. That tree is the\n  declared out-of-scope one and leg 7 excludes it by design. Untouched.\n- No service image was built or run; nothing was deployed. The only image built was the issuer, for the\n  artefact measurement above, and nothing was pruned or removed.\n"
+  }
+ },
+ "census": {
+  "1353": {
+   "title": "KS-1063: a format gate that examined nothing refuses instead of passing",
+   "user": "PeterObeden",
+   "created_at": "2026-09-29T14:37:49Z",
+   "head": "2b8414090bb86e8268c342e5fc49e08c650fff2b",
+   "branch": "feature/ks-1063-a-gate-that-examined-nothing-exits-0-check-package-format",
+   "base": "develop",
+   "n_files": 6,
+   "kit_paths_touched": [],
+   "census_keys_in_title": [],
+   "client_human": true
+  },
+  "1352": {
+   "title": "KS-981: the strict pre-suite arm reports what it did to the manifest, and names the real manifest file",
+   "user": "PeterObeden",
+   "created_at": "2026-09-29T14:37:46Z",
+   "head": "6e84a130dae7ecfd946ab5d8f2afad75a668edaa",
+   "branch": "feature/ks-981-the-round-4-quarantine-call-throws-out-of-a-never-throws",
+   "base": "develop",
+   "n_files": 8,
+   "kit_paths_touched": [],
+   "census_keys_in_title": [],
+   "client_human": true
+  },
+  "1351": {
+   "title": "KS-1386: systemTest names no stack slot it was not given, and types no slot value, in any harness",
+   "user": "PeterObeden",
+   "created_at": "2026-09-29T14:37:24Z",
+   "head": "eac2dae2afb7b08d679a37e3bd87290e0791d10f",
+   "branch": "feature/ks-1386-systemtest-api-explorer-hard-codes-slot-1s-gateway-6882-a",
+   "base": "develop",
+   "n_files": 297,
+   "kit_paths_touched": [],
+   "census_keys_in_title": [],
+   "client_human": true
+  },
+  "1253": {
+   "title": "KS-1297 GUARDGAPS: anchor the abort counts, cover the worktree, pin bare call sites",
+   "user": "kksecura",
+   "created_at": "2026-09-25T14:49:46Z",
+   "head": "91e066264004fdb22c67efb0c25fc44375ec6eac",
+   "branch": "feature/ks-1297-fixture-guard-anchor-and-two-gaps-l5-1",
+   "base": "develop",
+   "n_files": 1,
+   "kit_paths_touched": [],
+   "census_keys_in_title": [],
+   "client_human": false
+  },
+  "1250": {
+   "title": "KS-1302 + KS-1303 RSSTRAP: trap the runner's short TMPDIR, and drop the output pipe",
+   "user": "kksecura",
+   "created_at": "2026-09-25T14:28:57Z",
+   "head": "2b8dcb824dd2c5cd4b92757934d7de9d28813a22",
+   "branch": "feature/ks-1302-runner-tmpdir-residue-and-orphan-pipe-l5-1",
+   "base": "develop",
+   "n_files": 2,
+   "kit_paths_touched": [],
+   "census_keys_in_title": [],
+   "client_human": false
+  },
+  "1129": {
+   "title": "docs(history): 2026-09-21 local rebuild on develop 7be81d5c9, OOM diagnosis, preflight 15/15",
+   "user": "StuJam-Secuura",
+   "created_at": "2026-09-21T08:45:36Z",
+   "head": "25c31a0e82990844181a5b9c9a479722dc30baea",
+   "branch": "chore/history-2026-09-21-local-rebuild-preflight",
+   "base": "develop",
+   "n_files": 1,
+   "kit_paths_touched": [],
+   "census_keys_in_title": [],
+   "client_human": false
+  },
+  "995": {
+   "title": "KS-741: strip `x-emitter-internal` at originate's own inbound \u2014 the marker's non-spoofability no longer rests on an unstated convention",
+   "user": "kksecura",
+   "created_at": "2026-09-14T20:37:56Z",
+   "head": "b8155636e8e60ee9646b10217859fcd274ef87f5",
+   "branch": "feature/ks-741-x-emitter-internal-is-unstripped-on-the-originate-route-the",
+   "base": "develop",
+   "n_files": 5,
+   "kit_paths_touched": [],
+   "census_keys_in_title": [],
+   "client_human": false
+  },
+  "989": {
+   "title": "KS-973: the pre-suite step redacts the generated password, pins its DEGRADED stream, drives its second quarantine call \u2014 items 5, 6 + two residues; items 3/4 wait for #927; items 1/2 are L11/L12 files",
+   "user": "kksecura",
+   "created_at": "2026-09-14T07:22:52Z",
+   "head": "e62fd23cda1bc120716e5f592efac2b8abea97bf",
+   "branch": "feature/ks-973-ks-969-round-1-gate-residue-the-pre-suite-step-and-its-own",
+   "base": "develop",
+   "n_files": 5,
+   "kit_paths_touched": [],
+   "census_keys_in_title": [],
+   "client_human": false
+  },
+  "949": {
+   "title": "chore(deps-dev): bump prisma from 7.8.0 to 7.10.0 in /Blockchain/Dev",
+   "user": "dependabot[bot]",
+   "created_at": "2026-09-10T07:59:49Z",
+   "head": "7ee1a26e634f33b6a4ae115d559f5440a90f6fff",
+   "branch": "dependabot/npm_and_yarn/Blockchain/Dev/develop/prisma-7.10.0",
+   "base": "develop",
+   "n_files": 2,
+   "kit_paths_touched": [],
+   "census_keys_in_title": [],
+   "client_human": false
+  },
+  "948": {
+   "title": "chore(deps): bump vite from 6.4.3 to 8.3.1 in /Blockchain/Dev",
+   "user": "dependabot[bot]",
+   "created_at": "2026-09-10T07:58:12Z",
+   "head": "e479578376921edfe99e8befae6acbee2dfb32b3",
+   "branch": "dependabot/npm_and_yarn/Blockchain/Dev/develop/vite-8.2.2",
+   "base": "develop",
+   "n_files": 10,
+   "kit_paths_touched": [],
+   "census_keys_in_title": [],
+   "client_human": false
+  },
+  "947": {
+   "title": "chore(deps-dev): bump @testing-library/jest-dom from 6.9.1 to 7.0.1 in /Blockchain/Dev",
+   "user": "dependabot[bot]",
+   "created_at": "2026-09-10T07:46:52Z",
+   "head": "d68b9d79e67f336e527cc4eef7eaf07fa78670bb",
+   "branch": "dependabot/npm_and_yarn/Blockchain/Dev/develop/testing-library/jest-dom-7.0.1",
+   "base": "develop",
+   "n_files": 2,
+   "kit_paths_touched": [],
+   "census_keys_in_title": [],
+   "client_human": false
+  },
+  "946": {
+   "title": "chore(deps): bump @fluentui/react-icons from 2.0.331 to 2.0.339 in /Blockchain/Dev",
+   "user": "dependabot[bot]",
+   "created_at": "2026-09-10T07:44:37Z",
+   "head": "41cc5209aaf2f8369f4ce8d5735a43fb07340d0b",
+   "branch": "dependabot/npm_and_yarn/Blockchain/Dev/develop/fluentui/react-icons-2.0.339",
+   "base": "develop",
+   "n_files": 2,
+   "kit_paths_touched": [],
+   "census_keys_in_title": [],
+   "client_human": false
+  },
+  "945": {
+   "title": "chore(deps-dev): bump @axe-core/playwright from 4.11.3 to 4.13.0 in /Blockchain/Dev",
+   "user": "dependabot[bot]",
+   "created_at": "2026-09-10T07:43:47Z",
+   "head": "264098fce62b1e839c506f61fa443830fdba996a",
+   "branch": "dependabot/npm_and_yarn/Blockchain/Dev/develop/axe-core/playwright-4.13.0",
+   "base": "develop",
+   "n_files": 2,
+   "kit_paths_touched": [],
+   "census_keys_in_title": [],
+   "client_human": false
+  },
+  "927": {
+   "title": "KS-1027: close Peter's four #904 follow-ups \u2014 the OTHER cp, the stash the refusal deleted, and the duplication nobody had justified",
+   "user": "kksecura",
+   "created_at": "2026-09-09T10:52:11Z",
+   "head": "1041d2d32d389a5f21cf622dfcf4d5be66e0ce2f",
+   "branch": "feature/ks-1027-ks992-followups",
+   "base": "develop",
+   "n_files": 2,
+   "kit_paths_touched": [],
+   "census_keys_in_title": [],
+   "client_human": false
+  },
+  "923": {
+   "title": "KS-736: the mount-auth check scored authenticateToken(false) as green, and could not see half its own surface",
+   "user": "kksecura",
+   "created_at": "2026-09-09T08:53:13Z",
+   "head": "d127dc7d4655a4e227d4f6e511f469c456eaabb7",
+   "branch": "kamilkreiser/ks-736-mount-auth-retag",
+   "base": "develop",
+   "n_files": 1,
+   "kit_paths_touched": [],
+   "census_keys_in_title": [],
+   "client_human": false
+  },
+  "920": {
+   "title": "KS-734: make tests/e2e runnable from a clean checkout, and baseline what it actually reports",
+   "user": "kksecura",
+   "created_at": "2026-09-09T07:38:52Z",
+   "head": "2112a99e31aec4b6e132dc6519c75d3afb6b2b02",
+   "branch": "kamilkreiser/ks-734-e2e-suite-installable",
+   "base": "develop",
+   "n_files": 7,
+   "kit_paths_touched": [],
+   "census_keys_in_title": [],
+   "client_human": false
+  },
+  "887": {
+   "title": "KS-961: run the workspace suites on the PR, advisory and non-blocking \u2014 and they are RED on develop today",
+   "user": "kksecura",
+   "created_at": "2026-09-07T01:41:26Z",
+   "head": "3aee3deed2e3ac557f0a52c0797c2a4a8df25f69",
+   "branch": "feature/ks-961-workspace-suites-advisory-on-pr",
+   "base": "develop",
+   "n_files": 2,
+   "kit_paths_touched": [],
+   "census_keys_in_title": [],
+   "client_human": false
+  },
+  "809": {
+   "title": "KS-693 (interim): guard the 8 M365/OneDrive/Teams unconfigured-503 ops so the merge gate reads a real floor",
+   "user": "kksecura",
+   "created_at": "2026-09-04T22:30:48Z",
+   "head": "aa2270fe14cf95dbe349fb8aae14f1473d2db5e7",
+   "branch": "feature/ks-693-tolerate-m365-unconfigured-503",
+   "base": "develop",
+   "n_files": 2,
+   "kit_paths_touched": [],
+   "census_keys_in_title": [],
+   "client_human": false
+  },
+  "649": {
+   "title": "chore(deps): bump pg and @types/pg in /Blockchain/Dev",
+   "user": "dependabot[bot]",
+   "created_at": "2026-08-05T12:16:10Z",
+   "head": "1d9198ac7e2f54e43cd38b66ce40ce1f52d338b8",
+   "branch": "dependabot/npm_and_yarn/Blockchain/Dev/develop/multi-8cb89e51b7",
+   "base": "develop",
+   "n_files": 22,
+   "kit_paths_touched": [],
+   "census_keys_in_title": [],
+   "client_human": false
+  },
+  "639": {
+   "title": "chore(deps): bump @radix-ui/react-dropdown-menu from 2.1.16 to 2.1.24 in /Blockchain/Dev",
+   "user": "dependabot[bot]",
+   "created_at": "2026-08-03T20:46:50Z",
+   "head": "2069d852ee1618fac25cd3eeb56f22005422125f",
+   "branch": "dependabot/npm_and_yarn/Blockchain/Dev/develop/radix-ui/react-dropdown-menu-2.1.24",
+   "base": "develop",
+   "n_files": 3,
+   "kit_paths_touched": [],
+   "census_keys_in_title": [],
+   "client_human": false
+  },
+  "635": {
+   "title": "chore(deps): bump cbor from 9.0.2 to 10.0.12 in /Blockchain/Dev",
+   "user": "dependabot[bot]",
+   "created_at": "2026-08-03T20:16:58Z",
+   "head": "6cbc298f41a1dd4a0a986084800c6de71aeb08fd",
+   "branch": "dependabot/npm_and_yarn/Blockchain/Dev/develop/cbor-10.0.12",
+   "base": "develop",
+   "n_files": 2,
+   "kit_paths_touched": [],
+   "census_keys_in_title": [],
+   "client_human": false
+  },
+  "575": {
+   "title": "chore(deps): bump dotenv from 16.6.1 to 17.4.2 in /Blockchain/Dev",
+   "user": "dependabot[bot]",
+   "created_at": "2026-07-20T20:21:05Z",
+   "head": "7d32d8ae4b064592b2d133e17d23c67b8d50dc60",
+   "branch": "dependabot/npm_and_yarn/Blockchain/Dev/develop/dotenv-17.4.2",
+   "base": "develop",
+   "n_files": 21,
+   "kit_paths_touched": [],
+   "census_keys_in_title": [],
+   "client_human": false
+  },
+  "572": {
+   "title": "chore(deps-dev): bump @types/office-js from 1.0.599 to 1.0.610 in /Blockchain/Dev in the types group across 1 directory",
+   "user": "dependabot[bot]",
+   "created_at": "2026-07-20T20:19:15Z",
+   "head": "4ea847b39ec8cb2db1e7bee0eb9355e35a8c4208",
+   "branch": "dependabot/npm_and_yarn/Blockchain/Dev/develop/types-1409c3626d",
+   "base": "develop",
+   "n_files": 2,
+   "kit_paths_touched": [],
+   "census_keys_in_title": [],
+   "client_human": false
+  }
+ }
+}
