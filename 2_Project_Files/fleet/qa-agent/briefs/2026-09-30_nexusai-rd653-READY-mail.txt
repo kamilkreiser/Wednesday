@@ -1,0 +1,20 @@
+{'spf': 'pass', 'dkim': 'pass', 'dmarc': 'pass'}
+BLUF: RD-653 READY FOR QA, tier 2 proposed (test-only; no product file). Branch rd-653-rd408-length-scan-s86n @ 8bc88f5c1835, from main 67e8928, not rebased. Full verify PASS 4222/4222 across 254 suites (+1: the CONTROL cell). C-89 holds.
+
+WHAT CHANGED (__tests__/rd408-r2-misconfigured-explains.test.js only)
+- The short-SESSION_SECRET length cell counts a 23 only where it is REPORTED as a length. reportsLength(text, n) matches n beside got/length/len/size or characters/chars/bytes, or on a line naming SESSION_SECRET exactly. It does not use /secret/i, because the short boot's own volume path contains "secret".
+- The short boot's volume is now b-secret-short-23-vol. The server logs "Using DATA_DIR ...: <path>", so every run carries an incidental bare 23, which is gate 7's requested regression made permanent. noiseLive asserts that the 23 is really in the output.
+- A new CONTROL cell checks reportsLength itself:
+  - 5 leak forms must be seen, 5b07f55's "SESSION_SECRET too short (got 23, need 32+ random chars)." verbatim among them.
+  - 4 noise forms must not: the DATA_DIR path, "23 printers in 23 ms", today's FATAL line, and port 3023.
+
+SETS (hold s86n-rd653-r1, floor 0, control rose; the trap restored both files)
+  green  11/11
+  OLD    the pre-RD-653 bare-23 rule, with the -23- volume: the length cell red, {length:true}. O-5 reproduced deterministically.
+  LEAK   preflight's fatal prints "(got N)": the length cell red, {length:true}. The case cell's FATAL-line check is also red, because the text changed (expected).
+  Full verify: VERDICT PASS 4222/4222, 254 suites.
+
+PRIOR WORK (C-49): the cell is RD-408 round 2's (8cca478). The value check, the timestamp stripping and the case cells are KEPT. Only the bare-token scan is replaced.
+NAMED LIMIT: a leak phrased without any of those words, and not on a SESSION_SECRET line (for example a bare "(23)" on some other line), would pass. The old rule caught that, at the cost of O-5. The trade is the ticket's own fix-shape.
+Evidence: session-tools/s86n/rd653/.
+-- S86N

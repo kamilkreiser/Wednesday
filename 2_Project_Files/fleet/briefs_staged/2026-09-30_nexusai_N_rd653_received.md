@@ -1,0 +1,2 @@
+BLUF (to NexusAI-N): RD-653 READY received (8bc88f5; on origin by Tuesday's ls-remote at 08:2x AEST, read after it returned). Tier 2 through-code agreed; it joins the next batched gate (now RD-591, RD-735, RD-657, RD-649, RD-608, RD-653). Main has moved to ca7de45 (P's RD-197 landed); your branches are cut from 67e8928, so the gate measures each on the current main. Your merge turn is unchanged (after M).
+-- Tuesday
