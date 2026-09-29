@@ -6,6 +6,21 @@ status: live
 supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s1-wholesale
 ---
 
+## 🟢 DELTA 128 — 2026-09-29 16:08 (s93, ctx 67% light checkpoint; band 80-90). **READ THIS FIRST — it supersedes 127's in-flight lines.**
+### STATE
+- NexusAI main = faea66b (RD-681 via PR #32, 13:02; first C-190 landing; push Build inside the known set). **The landing step is mailed to all four seats** (fleet/briefs_staged/2026-09-29_nexusai_all_landing_step.md): PR -> every CodeQL Analyze run -> FF push of the same sha; refused = STOP. Known-failing set = {rd638 E2, rd465 O-1 (that TypeError only)} (C-185 + addendum :1912). npm-audit red on every ref (ip-address) until RD-732.
+- **Batch 9 DONE:** read whole, scored 0.98, pane %49 closed, RELEASED (fleet/briefs_staged/2026-09-29_nexusai_batch9_release.md): RD-723 (N) 19fc17c, RD-618 r2 (M) 874c4f5, RD-466 (O) 3f7e263, each in its C-186 turn; tickets owed: M one RD-618 residue ticket (A-F1r/A-F2r/A-F3c/A-N2), N B-F1, O C-N1 into RD-707.
+- **Merges RELEASED and pending (verify each MERGED mail at source: ls-remote main + Build failing set by name + demo skipped):** P batch-6 merge 2 RD-204 (b86799d) onward; N batch 3 (RD-685, RD-314) then batch 8 (RD-700, RD-609, RD-648 b12a475) + RD-723; M RD-618; O RD-466. C-186: one at a time, each after the previous push's Build.
+- **Batch 10 (to commission when RD-733's READY lands):** RD-703 (O, READY saved fleet/qa-agent/briefs/2026-09-29_nexusai-rd703-READY-mail.txt), RD-707 (O, proof 2 queued), RD-733 (M, User Access tab fix, browser-confirmed; t2 + browser leg), RD-732 (M, ip-address lockfile; ip-address SHIPS in the production image, M measured — tell Kam when it lands). Template: the batch 9 brief + launcher; LAUNCH ONLY VIA cockpit.sh add.
+- Rulings today worth carrying: C-187 addendum (RD-466 on main) at CLARIFICATIONS:1933; RD-703 shape (a); PR 32 land with npm-audit red; rd465 O-1 known by name.
+- N's pane showed ~85% context at 14:32: if it wraps, its successor brief carries the batch-3-first order, the batch-8 RELEASE, the b12a475 GO, the batch-9 RELEASE (RD-723) and the C-185/C-187 addenda.
+### OWED TO KAM (copy forward until closed by name)
+- Promised on the board (13:05): RD-733 confirmed in a browser (M, 03:44Z) — mention in the next board update; RD-732's customer-image exposure when it lands.
+- Vision PAUSED (DELTA 125 unchanged). VSP-65 deploy, VSP-89 and the local Postgres DB pile-up remain his.
+### FLOOR
+%0 tuesday | %22 P · %21 N · %19 M · %29 O · %1 monitor. No gate running. Usage 68%.
+### LEDGER this seat today: 3 rows; digests regenerated after the last one (12:4x).
+
 ## 🟢 DELTA 127 — 2026-09-29 12:45 (s93, ctx 54% CHECKPOINT; band 80-90). **READ THIS FIRST, THEN 126 (its item 1 is DONE).**
 ### DONE SINCE 126
 - Batch 8 report read whole; B-O1 RULED ACCOUNTED (C-133 ADDENDUM, this transition merge only; N recorded it as a C-183 addendum); gate scored 0.98; RELEASE to N (fleet/briefs_staged/2026-09-29_nexusai_N_batch8_release.md). N filed RD-729/730/731. Order RULED: batch 3 (RD-685, RD-314) BEFORE batch 8 (RD-700 -> RD-609 -> RD-648). RD-648 head is now b12a475 (CodeQL test fix, read at source, GO).
