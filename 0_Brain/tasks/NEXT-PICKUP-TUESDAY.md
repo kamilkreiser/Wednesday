@@ -6,6 +6,16 @@ status: live
 supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s1-wholesale
 ---
 
+## 🟢 DELTA 133 — 2026-09-30 01:02 (s94, ctx 51% CHECKPOINT; band 80-90). **READ THIS FIRST, THEN 132 (its OWED/NEXT list is current except below).**
+- **RD-466 (O):** hold CLEAN (4210/254, C-57 missing 0); PR #34 for 5531d7b open; CodeQL Analyze x3 + CodeQL PASS, npm-audit red (E-1, not a hold); the CI `build` check was PENDING at 00:3x. O's in-flight land.sh is the OLD script (a failed ls-remote reads 'main moved - STOP'; a denied push is not retried); O finishes by hand under C-192 if either fires. **On O's MERGED: verify at source (retry ls-remote), Build failing set by name within C-185, demo SKIPPED.** Main still f9cb440 at 00:53.
+- **C-192 (Tuesday's ruling, recorded by N):** 'Permission denied (publickey)' = transport, retry up to 5 x ~10 s; C-190 STOP only on ruleset/policy refusals; a failed ls-remote is UNKNOWN; poll main <= 5 min. RD-738 (N) is the ticket. **GitHub auth is intermittent tonight for THIS repo too: every push/ls-remote of mine is retried and read back, never assumed.** Receipts: N, O. P and M not yet.
+- **RD-737 (O):** C-N1 settled on Tuesday's challenge, O measured it: keep broad key rules + a tracked-file guard cell.
+- **RD-735 (M) READY @ 7d853b0** (stacked on RD-618 874c4f5; on origin, confirmed 00:53 3rd try), saved `fleet/qa-agent/briefs/2026-09-30_nexusai-rd735-READY-mail.txt`. **Goes to GATE 11 (batched, tier 2 through-code)** — not launched: a gate holds the lock 2-3 h and the merge queue comes first. Carry into the gate brief: rd646 on RD-735 + 608a1cd by whichever lands second; M's M3 slip (M3b is the isolated form); the per-address budget design is a SHAPE for the gate.
+- **RD-591 (N):** ruled (b) — rd549 stamps arrival at ACCEPT, stays guarded (widens C-177 for rd549 only; N to add the addendum); fallback (a) + ticket. READY verify owed (full + 55-batch). **When RD-591's READY lands, commission gate 11 = RD-735 + RD-591 (+ RD-736/RD-737 if READY by then).**
+- Lock at 00:3x: M s86m-rd735-hold (holder since 14:21Z; log moving), N s86n-rd591-trace queued.
+- LEDGER: 1 row this seat (00:53, a receipt citing an ls-remote that had failed). Digests not regenerated (the ledger is not a lesson file).
+- Kam: nothing since 16:18 on 09-29; reconcile 0 to rule; usage 81% < 95%.
+
 ## 🟢 DELTA 132 — 2026-09-29 23:12 (s94 boot after s93's rotation, ctx ~40%; band 80-90). **READ THIS FIRST, THEN 131 (its item 3 MERGES line is current) and 130 (RULES line).**
 ### DONE SINCE 131
 - **Batch 10 report read WHOLE; gate scored 0.98; pane %50 CLOSED (pane_close, listeners 15 -> 15).** Main f9cb440 + all four heads = gated heads (ls-remote 23:1x).
