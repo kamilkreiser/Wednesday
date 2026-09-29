@@ -12,6 +12,20 @@ supersede: replace wholesale; previous = NEXT-PICKUP-FRIDAY.md.pre-0925-rotate-s
 
 **The tree is at `/Users/kamilkreiser/1FILES TO SYNC/FRIDAY`.** Quote every path (spaces).
 
+## 🔴🔴 ROTATION HANDOVER 2026-09-29 ~19:0x (Friday, ctx 80%) — READ FIRST; supersedes every block below where they differ
+**KAM'S DEPLOY GO (panel 16:28, verbatim): "Great. These look good. Please publish the changes and make them live".** It answers the 6 Composer screenshots of B22 (PR #12). Friday's reading, told to Kam on the panel at ~19:0x: deploy the FIXED #12 as soon as B23 round 2 passes (the screenshotted build failed B23 round 1 on F1, progress). **So: when B23 round 2 = GO / GO WITH NOTES → merge #12 head-pinned → deploy HPSM-light main to the demo VM per `DEPLOY.md`** (backup before migrate; `remote-update.sh`; temporary access removed and proven; PREFLIGHT; `/site.json`; check the running build live; the C-06/C-08/C-09 pattern). Migrations 0019 + any new ones; the content release is unchanged. Then tell Kam, with the live check, on the panel. If round 2 is NO GO: ship what closed per the cap, ticket the rest, and ask Kam whether to deploy anyway.
+**LIVE SEATS (panes):**
+- **Composer-C** (B22 round-2 fix, `Briefs/2026-09-29_B22_ADDENDUM-2_gate-findings-round-2.md`) → then **Composer-B** re-gates it (B23 pane, acked; write a B23 ADDENDUM-1 pinning the new head).
+- **HPSM-POC-B** (B55 round-2 fix for #53) → then **HPSM-POC-QA** re-gates it (B57 pane, acked; a B57 ADDENDUM-1 pinning the new head). This is the last round. After #53 merges: tell B56 (pane HPSM-POC-C) to rebase #54 and regenerate the contract, B57's seat gates #54, merge; then brief the H1–H7 hosted build (Kam approved at 15:07).
+- **HPSM-POC-A** (B58: Route A live on the laptop, R-1/R-3; closes HPSMPOC-102).
+**WATCHERS DIE WITH THIS SEAT. Re-arm at boot:** `friday/watch_status.sh <seen> "<glob>"` on:
+- `!CODING/Datasec/Datasec Security Composer/1_Project_Definition/Briefs/2026-09-29_B2[23]*STATUS*.md`
+- `!CODING/Datasec/HPSM-POC/1_Project_Definition/Briefs/2026-09-29_B5[5678]*STATUS*.md`
+Use fresh seen files: counts start from the current READY lines.
+**caffeinate** re-armed 18:55 for 6 h (pid 7260). It expired at 14:44 earlier and the laptop likely slept.
+**Usage 71%:** cloud seats only when nothing local can do the work and it matters now.
+**OWED MECHANISM (ledger 09-29, w=2):** `chat_reply.sh` must show Kam's live rows newer than the last read, before posting.
+
 ## 🔴 STATE 2026-09-29 16:3x (Friday, ctx ~78%) — Kam: "thats great. thank you! keep going with the work". SUPERSEDES the 15:3x/15:4x blocks where they differ
 - **Usage 71% (> 70%):** cloud seats only when nothing local can do the work AND it matters now (the 09-25 three-tier rule). Queued, low urgency: CodeQL backlog (HPSM-POC #1 `js/bad-tag-filter` in `web/e2e/security.spec.ts:23`; HPSM-POC-analysis #1 in a seat-notes script; HPSM-analysis 115 = 93 http-to-file-access + 22 file-access-to-http in its scripts: a triage report first). These are good Spark tasks when it is up.
 - **Composer:** PR **#12** (B22 wizard→E8, head 5e91f84) is at QA gate **B23** (pane Composer-B, seen `seen_composer_b23`). The screenshots are on Kam's Friday tab (6 desktop). **Deploy only after the gate passes AND Kam says "deploy"** (card ruled a at 10:43: "after gate + seen screenshots"; he was asked to say "deploy"). Follow `DEPLOY.md` (backup first). The B22 pane (Composer-C) is kept for fixes.
