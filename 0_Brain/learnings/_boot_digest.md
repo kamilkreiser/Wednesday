@@ -7,7 +7,7 @@ status: live
 
 # Boot digest — headline + rules of every lesson (open the file when it fires)
 
-Generated 2026-09-29 12:45 from 208 lesson files (961,745 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 10 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
+Generated 2026-09-29 13:21 from 209 lesson files (964,120 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 10 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
 
 ## The T9 SSD is the master — Wednesday must be fully portable
 `2026-07-31_fully-portable-drive.md` · principle · 2026-07-31 · status: superseded — the "T9 is the master" half by [[2026-08-25_one-drive-devmaster-is-master]] (2026-08-25); the portability principle itself still lives
@@ -6791,6 +6791,21 @@ sections (open the file for these): How to apply
 4. **Scope: HPSM-POC** ("as a rule for the project"). Do not generalise it to other projects without his word.
 
 **Family:** [[2026-09-05_tickets-are-the-channel-whatsapp-via-kam-is-the-escalation]] (only Kam talks to client humans) · [[2026-09-08_ask-format-action-first]] · [[2026-09-24_decisions-go-on-the-fleet-activity-panel]] (decisions go on cards; HP asks go by email + register).
+
+
+## Datasec GitHub: every change reaches main through a PR that passes CodeQL. Never a direct push, never a dismissed alert
+`2026-09-29_datasec-github-commits-go-through-codeql.md` · preference · 2026-09-29 · status: live
+
+**His words, verbatim:** *"there has been a change to the datasec github account.  this is an organisational policy recently implemented.   we need to adhere to it so adjust accordingly - commits need to go through codeQL"*
+
+**How to apply:**
+1. **Every Datasec brief carries the standing line:** *"Push your branch only, never main (the org ruleset requires CodeQL results). Friday opens the PR, and merges head-pinned once CodeQL and the checks are green."* Records go on a `records/<round>` branch from the seat's own worktree.
+2. **Friday's merge sequence:** `friday_as.sh datasec gh pr create` → wait for the check-runs (CodeQL + the Analyze jobs + the repo's CI) → `gh pr merge --squash --match-head-commit <sha>` → compare the merge's tree (or its delta blobs) with the head.
+3. **A CodeQL alert is FIXED in the code, never dismissed by a seat or by Friday**, even in a test file where it is harmless in practice. Dismissing an alert is Kam's call. Precedent: 2026-09-29, alert #21 (`js/incomplete-multi-character-sanitization`) in a test helper on HPSM-light #10 was fixed by the builder, not dismissed.
+4. **Never ask for, add or use a ruleset bypass.** Changing the org policy is Kam's (and Datasec IT's).
+5. **Scope:** the Datasec GitHub organisation. Other clients' repos follow their own rules. Do not generalise this to them without Kam's word.
+
+**Family:** [[2026-08-07_protocol-v1.3-signed-delegation]] (merges are Friday's; the policy decides HOW) · [[2026-09-09_my-authority-and-the-targets-rules-are-two-checks]] (my authority AND the target's rules; this is the target's rule) · [[2026-08-09_an-enforcement-you-must-arm-is-not-one]] (the ruleset is in-path enforcement: work with it, never around it).
 
 
 ## Regenerable build leftovers (stale node_modules, old CI/QA scratch clones) are NOT kept once used — but only Kam's word authorises a deletion, and records are never in scope
