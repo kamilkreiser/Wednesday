@@ -12,6 +12,14 @@ supersede: replace wholesale; previous = NEXT-PICKUP-FRIDAY.md.pre-0925-rotate-s
 
 **The tree is at `/Users/kamilkreiser/1FILES TO SYNC/FRIDAY`.** Quote every path (spaces).
 
+## 🔴🔴 ROTATION HANDOVER 2026-09-30 ~10:0x (Friday, ctx ~80%) — READ FIRST; supersedes every block below where they differ
+**Kam ruled all 3 cards at 09:01–09:02 (live board, Friday tab):** composer-end-page-fix-deploy **a** · hpsmpoc-signin-hardening-third-round **a** · hpsmpoc-hosted-seed-owner **a (his own account)**. All receipted, reconciled, hidden. The last two are DELIVERED (C-33).
+**DONE this morning:** HPSM-POC **#60 MERGED** (B64 light round 3 = GO WITH NOTES) → main **645f0a5**. Records **#11** merged → analysis main **544d825** (B59, B61–B65 + C-33). Tickets HPSMPOC-119 (F-B64-1, before-d12: the build traces all of web/ into .next/standalone) + HPSMPOC-120 (F-B64-2).
+**OWED FIRST — the ONE live seat:** **Datasec/Composer-D (%38) = B26, deploying Composer main `5b010da` to the demo VM** (brief `Datasec Security Composer/1_Project_Definition/Briefs/2026-09-30_B26_deploy-5b010da-to-demo-vm.md`; STATUS `…/2026-09-30_B26_STATUS.md`). **Re-arm a wake at boot:** `friday/watch_status.sh <fresh seen> "…/Briefs/2026-09-30_B26*STATUS*.md"`. On READY: **verify live yourself** (Basic auth from the Composer project's `4_Credentials/.env`; page 200; the served `assets/index-*.js` carries the End page's "Still needed:" and the control string; `api/healthz` ok; `az network nsg rule list -g HPSM-DEV-RG --nsg-name hpsm-demo-vmNSG` = only `default-allow-ssh` + `allow-http-https`, with AZURE_CONFIG_DIR = the Composer project's `.azure`), then `decision_queue.sh --delivered composer-end-page-fix-deploy <C-number>` and tell Kam on the panel with the check. Close the pane. Records (records/b26 on the Composer root repo) the seat's.
+**Records rule learned today:** the records repo carries OUTPUTS, not executable test tools (CodeQL scans them; B65 ADDENDUM-1 = HARNESS_MANIFEST.txt pattern). Put it in every records brief.
+**Before D-13 (HP reviewers):** HPSMPOC-111, -115, -118, -119 (before-d12) + Kam's D-steps (seed owner = his own oid at D-3/D-4). No card open.
+**Usage 86%** (hard stop 90). Nothing else to launch without a reason that matters now.
+
 ## 🔴🔴 HANDOVER 2026-09-29 23:3x (ctx ~75%) — FLOOR EMPTY; READ FIRST; supersedes every block below where they differ
 **Floor:** only %0 friday + %1 fleet-monitor. Every other pane closed (work on disk). Nothing runnable without Kam.
 **Waiting on KAM (cards on the Friday tab, all with defaults):**
