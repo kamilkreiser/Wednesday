@@ -1,0 +1,32 @@
+{'spf': 'pass', 'dkim': 'pass', 'dmarc': 'pass'}
+BLUF: RD-591 READY FOR QA, tier 2 by the lane plan (test harness only, no product file). Your call if its scope, the guard wired into 5 C-177 stand-ins, warrants tier 1. Branch rd-591-worktree-band-s86n @ 67b840b89b75 (main faea66b merged forward). Test ports are banded by WORKTREE, and stand-ins REFUSE and NAME traffic from outside the test's process tree (C-173 item 9, C-115). Full verify PASS 4208/4208, 254 suites; the 55 test-server importers by name 972/972 in 3 of 3 runs.
+
+WHAT CHANGED (tests only)
+- __tests__/helpers/test-server.js
+  - workerBand(): 15 worktree SLOTS (sha256 of the root) x 16 workers x 40 ports, from 39000 to below 49152, clear of RD-490's 38900-38939. A worker id above 16 is a named failure.
+  - guardServer() is installed on every listenInBand server and exported. Verdicts: own (fast path = an open/probe/still-connecting socket of this process; or 2+ own fds on the tuple; or the peer's PPID chain reaches this process), foreign (refused, recorded, console.error'd), vanished (HANDED OVER and counted, warned; dropping it would be a false zero), unattributable (refused). close() destroys sockets still waiting and never hands one to a closing server. Test seams: attributionDelayMs, and arrivalTime() (the socket's accept time for its first request). server.rd591Recognised counts fast vs lookup. RD591_TRACE_FILE (off) logs lookups.
+- Wiring (C-177, corrected to 5 files): rd486, rd516, rd523, rd545, rd549, one guardServer line each plus the import. rd549 additionally stamps its env request with arrivalTime(req) (your option (b), the C-177 addendum).
+- __tests__/rd591-cross-seat-isolation.test.js: A0-A3 (bands), B0-B8 (the guard).
+
+SETS: RED -> GREEN -> CONTROLS (every hold under the lock, floor 0, live control; evidence session-tools/s86n/rd591/)
+- RED at main 1904765 (c79926a): A1 ("40 worktrees all got worker 1's band at 39000"), A3, B2, B3, B4 red; A0, A2, B0, B1 green.
+- Mutants, each red on exactly its cell: M-c (vanished dropped) -> B6; M-d (the round-4 helper, no close guard) -> B7; M-e (no still-connecting clause) -> B8. The rd549 red arm (a requester-side 3 s connect delay) -> C2/C10 and O4 red.
+- Main vs branch pass sets BY NAME (rd486, rd516, rd523, rd545, rd549, rd571, test-server-helper, sustainability-dark-mode): LOST 0, 0 cells slower by more than 1 s (round 6).
+- The guard arm on an rd549-shaped stand-in: child accepted and counted, orphan refused, logged and not counted.
+- READY verify at 67b840b's tree: "VERDICT: PASS — 4208/4208 tests passed across 254 suites (jest exit 0)"; the C-68 list = the 55 test files that import helpers/test-server (list: session-tools/s86n/rd591/importers-merged.txt), 972/972 x3.
+
+DEFECTS MY OWN ROUNDS FOUND AND FIXED (each measured, none dismissed as flaky)
+r2: an in-process fetch dropped as vanished (rd571 lost a cell). r3: B6 could not fail. r4: B6's child never vanished (my test). r4b: a socket handed to an http.Server after close() hung close() (1 in 300; 5/5 forced). r5 READY: the fast path missed still-connecting sockets (sustainability-dark-mode P2-05; 3 of 10 GETs at 65 ms). r6/r7 READY: rd549's arrival stamp measured the guard's delay (batch-only; three hypotheses refuted first).
+
+NAMED LIMITS (C-112)
+- The guard delays every OUT-OF-PROCESS connection by its lookup: lsof ~57 ms plus a ps table ~31 ms (lookup-cost.out). The ps table could be cached; lsof cannot be avoided. A cell measuring arrival against a readiness instant must use arrivalTime(). Scanned all 25 guarded test files: only rd549 (handled) and rd591 B7 (the guard's own cell).
+- Only listenInBand/listenOnReservedPort servers and the 5 wired stand-ins are guarded. reservePort() users that bind their own servers are not.
+- A server leaked by an EARLIER file in the SAME jest worker still descends from that worker, so it reads as own: the guard separates seats and orphans, not suites within one worker.
+- CI needs lsof for out-of-process peers (ubuntu-latest ships it): UNVERIFIED until the branch's Build runs.
+- rd554-restore-harness's header ("two concurrent jest runs still share 39000+") becomes false; that is not this file, so it is not edited here.
+
+PRIOR WORK (C-49): RD-203 e952f3b, RD-227 6d95707, RD-571 2a43982, RD-641(i) 1bfc265 all KEPT (refusal proof, bind proof, every-address proof, the host seam). rd554's retirement layer is untouched.
+NOT TESTED: two REAL concurrent seats' full suites against each other (the orphan and foreign cells stand in for it); a macOS/Linux difference in lsof output; Linux CI.
+Jira RD-591 carries every round (comments 38313 ... 38654).
+S86N
+
