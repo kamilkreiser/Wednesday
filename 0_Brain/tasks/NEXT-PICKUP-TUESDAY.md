@@ -6,6 +6,12 @@ status: live
 supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s1-wholesale
 ---
 
+## 🟢 DELTA 135 — 2026-09-30 08:00 (s94, ctx 70% CHECKPOINT; band 80-90). **READ THIS FIRST, THEN 134 (its STATE and OWED lists are current except below).**
+- **P's RD-197 (batch-6 merge 3):** hold done (verify 4230/255, C-68 set 858/858, C-57 missing 2 ACCOUNTED under C-187's RD-466 addendum, stated in PR #36's body); **PR #36 open, CodeQL + Analyze x3 pass, build PENDING at 07:1x**. On P's MERGED: verify main at source, Build failing set, demo SKIPPED.
+- **Morning brief posted (201)**; card `nexusai-gate11-opus55-safeguard-model-switch` unanswered (Kam: nothing since 16:18 on 09-29; reconcile 0).
+- **NEXT GATE BATCH (all READYs saved in fleet/qa-agent/briefs/2026-09-30_nexusai-rd*-READY-mail.txt, heads read by ls-remote):** RD-591 67b840b (t1), RD-735 7d853b0 (t2, on RD-618 874c4f5), RD-657 5584ea4 (t2), RD-649 20fea84 (t2), RD-608 9fd5c9a (t2). Launch on Kam's card ruling or its default, when the merge queue is quiet; brief NARROWED (no attack-framed rows), reuse gate 11's on-disk evidence (and read its P1/P2 verify numbers in HOLD.out first).
+- Lock at 07:4x: N's s86n-rd608-verify (then released; READY 21:57Z). Turn order after P: M (RD-732 first), N (RD-723), O (RD-707).
+
 ## 🟢 DELTA 134 — 2026-09-30 05:22 (s94, ctx 66% light checkpoint; band 80-90). **READ THIS FIRST, THEN 133.**
 ### STATE
 - **NexusAI main = 67e8928** (RD-466 5531d7b then RD-703 67e8928 tonight; both verified at source: ls-remote, Build SUCCESS, demo SKIPPED). **Merge turn now P** (s86p-merge-3-rd197 holds the jest lock since ~05:2x; RD-197 forward-merged c0cff62). Then M (RD-732 → RD-733 → RD-618), N (RD-723 → batch 3/8), O (RD-707), per the **C-186 ADDENDUM at CLARIFICATIONS:1931** (the turn passes; O's copy :1937 marked duplicate).
