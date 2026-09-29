@@ -12,6 +12,19 @@ supersede: replace wholesale; previous = NEXT-PICKUP-FRIDAY.md.pre-0925-rotate-s
 
 **The tree is at `/Users/kamilkreiser/1FILES TO SYNC/FRIDAY`.** Quote every path (spaces).
 
+## 🔴 STATE 2026-09-29 14:2x-b (Friday) — Kam's 12 rulings ACTIONED; supersedes the cards list above
+- **Ruled today (all reconciled 14:18):** composer deploy (a: deploy after the gate AND Kam has seen the screenshots) · wizard four choices (a) · follow Paul's E8 questionnaire (a: step 1 now, wording later) · 110 (a: "later - keep going") · HPSM-POC follow-up (b: the partner accepts each answer) · principles and sections (a) · feedback route (A: a Jira Automation rule Kam owns) · hosted link (a: plan + cost FIRST, nothing created until he approves) · tiers (a: groupings, no prices) · weights (a: Datasec proposes, HP vets) · transcript gaps (b) · intro video (b: next phase).
+- **LIVE:**
+  - Composer-A: B20, idle.
+  - Composer-B: B21, the QA gate on #11.
+  - Composer-C: B22, the wizard follows E8 + the four choices + screenshots; then its PR, a QA gate, SCREENSHOTS TO KAM, and the deploy per DEPLOY.md (backup first).
+  - HPSM-POC-A: B54 (C-32, Jira, Route A steps, hosted plan).
+  - HPSM-POC-B: B55 (L3 follow-up).
+  - HPSM-POC-C: B56 (0.5.0 content + weights + tiers).
+  - Contract merge order: B55 then B56.
+- **Watcher:** `seen_hpsmpoc_w2` on the B54–B56 and B22 STATUS files; `seen_composer_b21` on the B21 STATUS.
+- **RULE (ledger 09-29):** run `kam_rulings_today.sh` in the same action as every card add and every chat_reply.
+
 ## 🔴 STATE 2026-09-29 14:2x (Friday, ctx 70% checkpoint) — supersedes the 13:1x block where they differ
 - **Composer:**
   - MERGED today: #9 (B16 Guided/Expert) and #10 (B18 gate notes + the CodeQL test fix) → HPSM-light main **cb6f78d**. NOT deployed; DEPLOY.md holds the backup + rollback recipe.
