@@ -1,0 +1,50 @@
+{'spf': 'pass', 'dkim': 'pass', 'dmarc': 'pass'}
+READY FOR QA (tier 2 through-code): RD-735 @ 7d853b0 on rd-735-csp-intake-residue-r3-s86m. It is STACKED on RD-618 round 2 (874c4f5, released in batch 9, not yet merged). This is the one follow-up ticket for batch 9's A-F1r, A-F2r, A-F3c and A-N2.
+
+(i) Branch / SHA: rd-735-csp-intake-residue-r3-s86m @ 7d853b0e0b666b37d220dd05ac0727b5160555d2 (parent 874c4f5; on origin). Once RD-618 is on main, this forward-merges like any other branch.
+(ii) Drivable surface: a local run in open mode; POST /api/csp-report is anonymous. Not the demo.
+(iii) Changed (server-side intake only; no page):
+  - A-F1r: createCspEntryBudget in backend/services/cspReport.js, used by the intake in server.js. Each address may store at most 60 entries per 60 s window, the CSP limiter's own numbers. A request granted 0 entries answers 429, with the line "this address's entry budget for the window is spent". The budget is in memory, per process, which is the ring's own scope. Its key map is bounded at 10,000: expired keys go first, then the oldest.
+    Design choice: I took the gate's second fix shape (a per-address entry budget), not "one limiter token per stored entry". The limiter's store (memory or RedisStore per RD-607) is not reachable per entry without reworking _rlOpts, and the ring the budget protects is itself per process.
+  - A-F2r:
+    * Values are trimmed of edge C0/space first, as `new URL` does.
+    * In the fallback, the WHOLE userinfo is dropped: everything up to the LAST @ of an authority that runs to the first / or \ (not to ? or #). This covers scheme://, scheme:\\ (any mix of / and \) and a scheme-relative //.
+    * Known trade-off: an ambiguous forged value such as https://h?x=a@b is logged as https://b. It drops text and never keeps it; only forged reports have these shapes.
+  - A-F3c: rd618's R7 matches its markers case-insensitively (/i). That is a test-only change.
+  - A-N2: the per-request cap line counts entries AFTER the empty filter. buildCspEntries takes the cap as an optional parameter; its default, and S6, are unchanged.
+  Files: backend/server.js (+19/-4), backend/services/cspReport.js (+49/-6), __tests__/rd735-csp-intake-residue-r3.test.js (new), __tests__/rd618-csp-intake-residue.test.js (R7's regex), counts 4146/248 -> 4152/249.
+
+EVIDENCE (logs session-tools/s86m/rd735-hold.log, rd735-m3b.log)
+- New cells:
+    S7: the 7 forged shapes (? and # in the userinfo, leading space, tab, 0x01, an unparseable backslash authority, //);
+    S8: a CONTROL, an @ after the path is not userinfo, and the RD-495/RD-618 shapes are unchanged;
+    B1: grants 10, 45, 5, 0 for key a, 10 for key b, then 10 again after the window;
+    B2: the key map stays at most maxKeys;
+    R8: the gate's regression cell, 61 requests of 12 reports from one address. Expected: 60 stored, 440 or more of 500 ring slots untouched, requests 1-6 answer 204, 7-60 answer 429 (budget), 61 answers 429 (limiter). CONTROL: the first request alone stores 10;
+    R9: 5 reports with 3 empty give no cap line; 12 give "kept 10 of 12".
+  R8 and R9 each boot their own server.
+- RED at 874c4f5's two product files, new cells in place: exactly S7, B1, B2, R8, R9 fail (S8 and all 13 rd618 cells pass).
+- GREEN: 19/19 (rd735 + rd618).
+- Mutations, anchor count 1 each, restored by cmp:
+    M1 (budget grants everything): B1 and R8 red only.
+    M2 (round 2's fallback back): S7 red only.
+    M4 (cap counted before the empty filter): R9 red only.
+    M3b (err.message logged ONLY for charset.unsupported, the gate's MF3c shape): R7 RED with the fix.
+    M3b-control: the same leak with round 2's case-sensitive regex leaves R7 GREEN, which is the defect reproduced.
+  A disclosed instrument slip: my first M3 leaked on BOTH R7 arms. The content-encoding arm's marker is not upper-cased, so R7 reddened under either regex, and that control could not isolate A-F3c. M3b is the isolated form.
+- C-68 by name: rd618, rd735, rd495, rd607: 38/38.
+- Full verify: VERDICT: PASS — 4152/4152 tests passed across 249 suites. Floor 0 servers throughout.
+
+PRIOR WORK (C-49/C-50)
+- The intake, buildCspEntries and stripQueryAndFragment come from RD-495 and RD-618 rounds 1 and 2. All are KEPT. What was added: a budget step after the cap, a parameter for the cap, and a trim plus a wider fallback.
+- R7 comes from RD-618 round 2; its regex is corrected.
+- The limiter (RD-495/RD-498, named by RD-607) is unchanged.
+- Nothing removed.
+
+CodeQL (C-190): the new regexes are anchored and linear (^((?:scheme:)?[\\/]{2})([^/\\]*), and the edge-trim class). There is no file I/O in product code. The test only uses the harness's scratch dirs.
+
+NOT TESTED / NOT RUN
+- The cross cell with RD-646/647 (608a1cd) on this head. The budget runs only AFTER the limiter has passed, so the named 503 comes first in principle, but rd646 was NOT run on 7d853b0 + 608a1cd. It should run on whichever lands second.
+- Multi-replica: the budget is per process, as the ring is.
+- The demo.
+
