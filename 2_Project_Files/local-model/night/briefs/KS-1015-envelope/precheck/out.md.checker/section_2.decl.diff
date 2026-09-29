@@ -1,0 +1,79 @@
+--- /dev/null
++++ b/Blockchain/Dev/services/referral/src/__tests__/ks1015-referral-lookup-spec-declares-envelope.test.ts
+@@ -0,0 +1,76 @@
++// KS-1015 (sweep 2026-09-29): the published contract for GET /api/referrals/{code} declared the flat
++// ReferralCode record (id, code, ownerUserId, uses, ...) as its 200 body, while the handler (routes/referrals.ts,
++// GET /:code) answers { success, data: { code, isActive, isExpired, customLabel, referredReward, referrerReward } }.
++// Schemathesis flagged the 200 as response_schema_conformance. The handler leaves out id and ownerUserId on
++// purpose (a public lookup), so the spec follows the runtime. This file renders the document the generator
++// publishes, from the shared registry the referral module populates on import. No server, no database, no network.
++import { describe, it, expect } from 'vitest';
++import { generateOpenApiDocument } from '@secuura/shared';
++import '../referral.openapi';
++
++type AnyObj = Record<string, any>;
++
++const doc = generateOpenApiDocument({ title: 'referral (ks1015 pin)', version: '0.0.0' }) as AnyObj;
++
++function operation(path: string, method: string): AnyObj | undefined {
++  return doc.paths?.[path]?.[method];
++}
++
++function body(path: string, method: string, status: string): AnyObj | undefined {
++  return operation(path, method)?.responses?.[status]?.content?.['application/json']?.schema;
++}
++
++describe('KS-1015: GET /api/referrals/{code} publishes the envelope its handler returns', () => {
++  it('RED KS-1015 A1: the 200 body is the success/data envelope, not the flat ReferralCode record', () => {
++    const s = body('/api/referrals/{code}', 'get', '200');
++    expect({ ref: s?.$ref, required: s?.required, success: s?.properties?.success }).toEqual({
++      ref: undefined,
++      required: ['success', 'data'],
++      success: { type: 'boolean', enum: [true] },
++    });
++  });
++
++  it('RED KS-1015 A2: data declares the six fields the handler sends, customLabel optional, no id or ownerUserId', () => {
++    const d = body('/api/referrals/{code}', 'get', '200')?.properties?.data;
++    expect({
++      fields: Object.keys(d?.properties ?? {}).sort(),
++      required: [...(d?.required ?? [])].sort(),
++    }).toEqual({
++      fields: ['code', 'customLabel', 'isActive', 'isExpired', 'referredReward', 'referrerReward'],
++      required: ['code', 'isActive', 'isExpired', 'referredReward', 'referrerReward'],
++    });
++  });
++
++  it('RED KS-1015 A3: the data fields carry the runtime types', () => {
++    const p: AnyObj = body('/api/referrals/{code}', 'get', '200')?.properties?.data?.properties ?? {};
++    const types = Object.fromEntries(Object.entries(p).map(([k, v]) => [k, (v as AnyObj).type]));
++    expect(types).toEqual({
++      code: 'string',
++      isActive: 'boolean',
++      isExpired: 'boolean',
++      customLabel: 'string',
++      referredReward: 'string',
++      referrerReward: 'string',
++    });
++  });
++
++  it('control KS-1015 C1: the GET operation keeps bearerAuth, its path parameter code, and its 404', () => {
++    const op = operation('/api/referrals/{code}', 'get');
++    expect(op?.security).toEqual([{ bearerAuth: [] }]);
++    expect((op?.parameters ?? []).map((q: AnyObj) => q.in + ':' + q.name + ':' + q.required)).toEqual(['path:code:true']);
++    expect(Object.keys(op?.responses ?? {})).toEqual(expect.arrayContaining(['200', '404']));
++  });
++
++  it('control KS-1015 C2: the ReferralCode component stays published and the owner list still returns it', () => {
++    expect(doc.components?.schemas?.ReferralCode).toBeDefined();
++    expect(body('/api/referrals/user/{userId}', 'get', '200')?.properties?.codes?.items?.$ref).toBe('#/components/schemas/ReferralCode');
++  });
++
++  it('control KS-1015 C3: the sibling POST /generate keeps its own 201 envelope', () => {
++    const s = body('/api/referrals/generate', 'post', '201');
++    expect({ required: s?.required, shareUrl: s?.properties?.data?.properties?.shareUrl?.type }).toEqual({
++      required: ['success', 'data'],
++      shareUrl: 'string',
++    });
++  });
++});

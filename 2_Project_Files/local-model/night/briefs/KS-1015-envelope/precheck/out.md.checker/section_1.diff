@@ -1,0 +1,31 @@
+--- a/Blockchain/Dev/services/referral/src/referral.openapi.ts
++++ b/Blockchain/Dev/services/referral/src/referral.openapi.ts
+@@ -477,7 +477,27 @@
+     400: commonErrorResponses[400],
+     200: {
+       description: 'Code',
+-      content: { 'application/json': { schema: ReferralCodeSchema } },
++      // KS-1015: the handler (routes/referrals.ts, GET /:code) returns a success/data envelope
++      // with a public projection: code, isActive, isExpired, referredReward and referrerReward
++      // always, customLabel only when set. It leaves out id and ownerUserId on purpose (a public
++      // lookup), so the spec follows the runtime. ReferralCodeSchema stays for the owner list.
++      content: {
++        'application/json': {
++          schema: z.object({
++            success: z.literal(true),
++            data: z
++              .object({
++                code: z.string(),
++                isActive: z.boolean(),
++                isExpired: z.boolean(),
++                customLabel: z.string().optional(),
++                referredReward: z.string(),
++                referrerReward: z.string(),
++              })
++              .passthrough(),
++          }),
++        },
++      },
+     },
+     404: { ...commonErrorResponses[404], description: 'Code not found / inactive' },
+     429: commonErrorResponses[429],

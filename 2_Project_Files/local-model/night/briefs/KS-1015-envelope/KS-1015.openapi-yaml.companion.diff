@@ -1,0 +1,42 @@
+diff --git a/Blockchain/Dev/docs/openapi/secuura-api.yaml b/Blockchain/Dev/docs/openapi/secuura-api.yaml
+index 9c5c51cd4..c6780dcb6 100644
+--- a/Blockchain/Dev/docs/openapi/secuura-api.yaml
++++ b/Blockchain/Dev/docs/openapi/secuura-api.yaml
+@@ -32163,7 +32163,36 @@ paths:
+           content:
+             application/json:
+               schema:
+-                $ref: "#/components/schemas/ReferralCode"
++                type: object
++                properties:
++                  success:
++                    type: boolean
++                    enum:
++                      - true
++                  data:
++                    type: object
++                    properties:
++                      code:
++                        type: string
++                      isActive:
++                        type: boolean
++                      isExpired:
++                        type: boolean
++                      customLabel:
++                        type: string
++                      referredReward:
++                        type: string
++                      referrerReward:
++                        type: string
++                    required:
++                      - code
++                      - isActive
++                      - isExpired
++                      - referredReward
++                      - referrerReward
++                required:
++                  - success
++                  - data
+         "400":
+           description: Bad request — malformed payload, missing required fields, or wrong content-type. See
+             `error.code` for the specific cause.
