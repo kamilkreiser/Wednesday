@@ -19,6 +19,17 @@ supersede: replace wholesale at the next pickup; do not append. Previous copy: N
 4. EXPIRING-GRANTS: "SPEND PAST THE 90%" is marked ENDED (account switched). Friday's "ignore the 90%" row is Friday's and is not touched.
 
 ### LIVE RIGHT NOW
+**⏩ 03:04 2026-09-30 (overnight seat ffc4a192, ctx ~54%). READ FIRST; supersedes every block below:**
+1. **Tonight: #1349 (KS-1374) + #1350 (KS-1054) MERGED on gate47's GO, verified at source** by Wednesday's own scratch-clone fetch: develop **37205947ddd2**, tree == END 6930599560c9, modes right. The ticket texts are the gate's AMENDED wording, read back from Linear. **Today 2 Secuura merges.** gate47 scored 0.98; **Seat B 46th scored 0.95, WRAPPED, pane %74 closed.** Floor: wednesday + fleet-monitor only.
+2. **Peter's PR #1351 (KS-1386)** touches `aktoRateLimit.ts`; it was sequenced out of gate47 at eac2dae2afb7. The gate measured #1349 green over it in either order. It is his; nothing is sent to him. Three #1349 text references go stale if it merges (N-1349-6, info only).
+3. **Held Spark PASSES, both first round, waiting for a RAISE seat** (Wednesday read each diff):
+   - `night/READY_KS-1054-BROKENPY-1_…_2026-09-30.diff.md`: **N-1350-1**, fail closed on a present-but-broken python3; T1 deploy path.
+   - `night/READY_KS-1015-ENVELOPE-1_…_2026-09-30.diff.md`: **KS-1015 carve**, the GET /api/referrals/{code} 200 envelope; T2. The raise seat applies `briefs/KS-1015-envelope/KS-1015.openapi-yaml.companion.diff` and runs `npm run check:openapi`. Refs KS-1015, not a close.
+   **No Claude raise seat was launched overnight** (week instruction: cloud only when necessary, nothing deadline-bound). The morning seat launches ONE raise seat for both, plus any other held READYs, then one gate.
+4. **B 46th's handover carries UNRAISED residue:** the gate47 polish N-1349-4/-5, N-1350-3…-7. Also still owed: the §5f live sweep on KS-1054, and the audit-baseline cleanup of GHSA-v2v4/mwp4 (reported as no longer present).
+5. **Board delta** `0_Brain/reference/2026-09-30_ks-screen-delta/DELTA.md`: 29 moved since 09-29, 26 read, **only KS-1015 was Spark-briefable** (now held). Ornith's PAUSE_QUEUE lapses at 06:00; the delta found 0 Ornith-tier work, so re-pause with that reason or widen per the 09-15 rule.
+6. **Tooling gaps logged in IMPROVEMENTS:** `round.sh` is code_patch-only (bash goes through `build_bash_input.sh` → `local_model_task.sh LM_BACKEND=spark`); `hold_ready.py` refuses `--model-tag` on bash runs. NEXT FUSE 2026-10-09T00:00Z (card Kam by ~Mon 5 Oct if the real fixes are not merged). Ledger archive 3c DONE at 00:05 (09-26 rows).
+
 **⏩ 23:59 09-29 (rotating seat 35f90900): B 46th's ONE READY landed 13:58Z: #1349 (KS-1374, daab8ff3bff5) + #1350 (KS-1054 ITEM 3).** Acknowledged (rc 0, tapped); nothing posted on either ticket. **YOUR FIRST WORK: commission the gate47 kit drafter** (from `fleet/qa-agent/gatesets/2026-09-29_gate46/`; routing `QA/Secuura-batch1349`; GO `GO (Seat B 46th): merge 1349 1350 on gate47`; the gate runs the systemTest checks + audit legs the hook skipped for #1349, and checks every DRAFTED ticket comment in the READY against the head). B 46th holds with its watcher; read its ctx off %74 before the GO.
 
 **🔴 ROTATION HANDOVER 23:3x 09-29 (afternoon seat 35f90900 → the next seat). FIRST ACTS; supersedes every block below:**
