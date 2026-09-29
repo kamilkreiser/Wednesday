@@ -6,6 +6,18 @@ status: live
 supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s1-wholesale
 ---
 
+## 🟢 DELTA 132 — 2026-09-29 23:12 (s94 boot after s93's rotation, ctx ~40%; band 80-90). **READ THIS FIRST, THEN 131 (its item 3 MERGES line is current) and 130 (RULES line).**
+### DONE SINCE 131
+- **Batch 10 report read WHOLE; gate scored 0.98; pane %50 CLOSED (pane_close, listeners 15 -> 15).** Main f9cb440 + all four heads = gated heads (ls-remote 23:1x).
+- **RELEASE sent** (fleet/briefs_staged/2026-09-29_nexusai_batch10_release.md, 13:11Z at datasec-nexusai@) + --mail taps delivered to M and O: M = RD-732 @ daf2210 then RD-733 @ ed4c1bf; O = RD-703 @ bd8e8cd, RD-707 @ e224ab9 AFTER RD-466. Each via C-190 landing step in C-186 turns; named re-runs in the mail. Tickets owed by O: RD-703 follow-up (B-F1 names Tuesday's ruling (a) as the cause + B-F2), RD-707 follow-up (C-F1 plants + C-N1 decision). M: A-P1/A-N1 as ONE comment on RD-733 at merge.
+### OWED / NEXT
+1. **On each MERGED mail: verify at source** (ls-remote main + Build failing set by name within C-185's known set + demo SKIPPED + CodeQL no new high). When RD-733 lands, rd465 O-1 leaves C-185's set; when RD-723 lands, rd638 E2 leaves it; when RD-732 lands, npm-audit should go green.
+2. Merge turns: O's RD-466 (lock holder s86o-merge-rd466 since 13:03Z) -> P RD-197 re-forward -> M (RD-732, RD-733, RD-618) -> N (RD-723 first, then batch 3/8) -> O (RD-703, then RD-707). One merge ticket at a time.
+3. N's RD-591 not ready (s86n-rd591-trace queued); M's RD-735 hold queued (READY not yet read).
+4. OWED TO KAM: nothing open (DELTA 131 closed (a) and (b)). Vision PAUSED (DELTA 125). VSP-65/VSP-89/DB pile-up his.
+### FLOOR
+%0 tuesday | %22 P · %21 N · %19 M · %29 O · %1 monitor. No gate running.
+
 ## 🔴 DELTA 131 — 2026-09-29 23:07 ROTATION HANDOVER (s93, ctx ~79%, safe boundary). **READ THIS FIRST, THEN 130 (its MERGES and RULES lines are current).**
 ### FIRST WORK FOR THE NEXT SEAT
 1. **BATCH 10 VERDICT (13:06Z) — READ THE REPORT WHOLE FIRST** (`Testing Agent MAIN/projects/nexusai/reports/2026-09-29-gate-batch10/report.md`, 68 KB; s93 read only the verdict mail). All four **GO WITH FINDINGS**: RD-733 @ ed4c1bf (Polish; browser main 1 TypeError, head 0) · RD-703 @ bd8e8cd (**B-F1 Minor: ruling (a) trades one misreading for its mirror** — a punctuation-led LE label before a UTF-8 GUID now splits it; fix-shape: gates check BOTH readings of an ambiguous run, the RD-698 pattern; B-F2 Minor C-40: \p{L}\p{N} guarded by no cell) · RD-707 @ e224ab9 (C-F1 Minor C-40: 12 of 27 new rules have no plant; C-N1 Polish) · RD-732 @ daf2210 (Polish). M0 f9cb440 unmoved. MT1 4225/255 PASS; C-57 missing 0; rd465 O-1 k2 red at parent / green at head. **Recommended order RD-732 -> RD-733 -> RD-703 -> (RD-466) -> RD-707.** Then: score the gate, `pane_close.sh %50`, RELEASE to M (RD-732, RD-733) and O (RD-703, RD-707 after RD-466) in C-186 turns, tickets: O one RD-703 follow-up (B-F1 + B-F2) — **B-F1 comes from Tuesday's own ruling (a): say so in the ticket**; O RD-707 C-F1 plants; Polish folded. RD-733 merging drops rd465 O-1 from C-185's set.
