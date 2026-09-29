@@ -5,18 +5,27 @@ kit.json beside it) over origin develop AS READ NOW, and write pins_<kit>.json b
 (kit.json carries NO head): every head is read from origin by TWO instruments — `git ls-remote` (READ, from the Secuura checkout) and the GitHub
 PULLS API — and the fetch into the scratch clone must agree with both.
 
-Shape copied from gate40's predict (gate39 -> gate38 lineage) and re-keyed for gate42: ONE row of Seat B 43rd's queue, T1 — #1339 KS-1378 the
-advisory bump Kam ruled (a) on card secuura-five-new-advisories-block-every-push-0929 (nodemailer 9 -> 10 MAJOR in services/auth, services/originate
-and the root; morgan ^1.12.1 in ten services + a root override; ip-address ^10.5.1 overrides; undici ^7.29.1 SCOPED under jsdom): 14 package.json +
-14 package-lock.json, ZERO source files. Measured over ITS develop merge-base (develop 8af6ab821600 itself at drafting) and merged over the CURRENT
-develop. No sibling kit. The in-flight census is EVERY OTHER OPEN PR at the pin (kit.json `inflight` PLUS any PR opened since, read by the PULLS API
-every run): hard path-disjoint — EXCEPT the open PRs DECLARED under `dead_open_declared`, whose overlap with #1339 must EQUAL the declared path set
+Shape copied from gate41's predict (gate40 -> gate39 -> gate38 lineage) and re-keyed for gate42: #1339 KS-1378 ROUND 2 OF 2 under the Tier-1
+two-NO-GO cap — the advisory bump Kam ruled (a) on card secuura-five-new-advisories-block-every-push-0929 (nodemailer 9 -> 10 MAJOR in services/auth,
+services/originate and the root; morgan ^1.12.1 in ten services + a root override; ip-address ^10.5.1 overrides; undici ^7.29.1 SCOPED under jsdom).
+Round 1 (kit.json round1_head 8c1b25b24782, 14 package.json + 14 package-lock.json) was graded NO GO by gate41 on N-1339-1 (auth + originate `tsc`
+rc 2, TS2503 on nodemailer 10). Round 2 is ONE more commit (fa93ff88f47e at drafting) touching ONLY the two email.ts files (kit.json round2_paths).
+(b) asserts the round-2 SHAPE: the round-1 head is the new head's first parent, diff(round-1 head, head) == EXACTLY round2_paths, diff(merge-base,
+round-1 head) == the 28 manifest / lock paths, and every manifest / lock blob at the head == its blob at the round-1 head (round 2 moved no lock).
+(e) READS the round-2 diff line by line against N-1339-1 (requirement 4): the only non-comment changes are ONE `import type { Transporter }` line and
+the two `nodemailer.Transporter` -> `Transporter` annotations per service; every VALUE use of `nodemailer` is count-identical round 1 -> head; no
+`nodemailer.Transporter` remains. Measured over ITS develop merge-base (develop 8af6ab821600 itself at drafting) and merged over the CURRENT develop.
+No sibling kit. The in-flight census is EVERY OTHER OPEN PR at the pin (kit.json `inflight` PLUS any PR opened since, read by the PULLS API every
+run): hard path-disjoint — EXCEPT the open PRs DECLARED under `dead_open_declared`, whose overlap with #1339 must EQUAL the declared path set
 (measured in (c): an undeclared overlap refuses, and so does a declared path that no longer overlaps). The WIDEN census (kit.json `widen_rx` on
-titles AND `widen_branch_rx` on branches — Seat B 43rd's `-b43-<n>`) is HARD: an open PR matching either outside this kit refuses.
-TIER BY CLASS (kit.json `class`): `dependency-bump` (T1) changes EXACTLY the 28 manifest / lock paths declared below, and no other file.
-STANDING REQUIREMENTS: the CROSS-PACKAGE CENSUS — for every changed path, `git grep -l` of its Blockchain/Dev-relative spelling (and its
-`<dir>/package-lock.json` / `<dir>/package.json` form) over every *.test.ts / *.test.js / *.test.mjs / *.test.sh / __tests__/*.sh at the head —
-the gate runs EVERY suite so named. The LOCK READ: every package-lock.json under Blockchain/Dev at base and head, every copy of nodemailer / morgan /
+titles AND `widen_branch_rx` on branches — Seat B 43rd's `-b43-<n>` and Seat B 44th's `-b44-<n>`) is HARD: an open PR matching either outside this
+kit refuses — with ONE MEASURED class allowed (kit.json `widen_disjoint_rule`, Wednesday's commission requirement 6): an open PR whose ENTIRE file
+list (PULLS API /files) is exactly the audit baseline file is Seat B 44th's separate re-date PR (NOT in this kit; it merges AFTER #1339): it is printed
+as DISJOINT OUT-OF-KIT and does not refuse. Nothing is declared by number; the class is re-measured every run.
+TIER BY CLASS (kit.json `class`): `dependency-bump-r2` (T1) changes EXACTLY the 28 manifest / lock paths plus the two round-2 email.ts, no other file.
+STANDING REQUIREMENTS: the CROSS-PACKAGE CENSUS (requirement 5) — for every changed path, `git grep -l -F` of its FULL repo path, its
+Blockchain/Dev-relative and its workspace-relative spelling over EVERY *.test.ts / *.test.js / *.test.mjs / *.test.sh / __tests__/*.sh in the WHOLE
+monorepo at the head, plus (for the two email.ts) the module spelling `services/email` the importing tests use — the gate runs EVERY suite so named. The LOCK READ: every package-lock.json under Blockchain/Dev at base and head, every copy of nodemailer / morgan /
 ip-address / undici by lock path and version, judged against the first patched versions the seat read from the GitHub advisories API (typed from
 the commit message: a PREDICTION; the gate's instrument is the repo's own audit legs 6 and 7). The drafter's clean standalone installs are
 MEASURED by installprobe_gate42.py (run AFTER this script; its JSON is read here when present).
@@ -90,7 +99,11 @@ if NEWOPEN: print('  NEW open PR(s) since the kit was drafted, censused here for
 INF = INF + NEWOPEN
 WRX = K.get('widen_rx', r'(?!x)x'); WBX = K.get('widen_branch_rx', r'(?!x)x')
 WID = [(str(x['number']), x['head']['sha'], x['head']['ref'], x['title']) for x in OPEN if re.match(WRX, x['title']) or re.search(WBX, x['head']['ref'])]
-hard(all(w[0] in NS + SIB for w in WID), 'WIDEN census (open PRs whose title matches %r or whose branch matches %r): %s — every one is in this kit (a WIDEN PR outside it needs a re-draft that adds its cell)' % (WRX, WBX, [w[:3] for w in WID] or 'NONE'))
+BASELINE_ONLY = os.environ.get('G42_BASELINE_ONLY_PATH') or K.get('widen_disjoint_rule', {}).get('baseline_only_path', '')   # the env var: controls only (a stand-in single path)
+def files_of(num): return sorted(f['filename'] for f in api('pulls/%s/files?per_page=100' % num))
+WDIS = [w for w in WID if w[0] not in NS + SIB and BASELINE_ONLY and files_of(w[0]) == [BASELINE_ONLY]]
+for w in WDIS: print('  WIDEN #%s (branch %s, head %s) is OUTSIDE the kit but touches ONLY %s — DISJOINT OUT-OF-KIT (kit.json widen_disjoint_rule: Seat B 44th\'s separate audit-baseline re-date PR, which merges AFTER #1339); not refused' % (w[0], w[2], w[1][:12], BASELINE_ONLY))
+hard(all(w[0] in NS + SIB or w in WDIS for w in WID), 'WIDEN census (open PRs whose title matches %r or whose branch matches %r): %s — every one is in this kit or measured baseline-only out-of-kit %s (a WIDEN PR outside it needs a re-draft that adds its cell)' % (WRX, WBX, [w[:3] for w in WID] or 'NONE', [w[0] for w in WDIS] or ''))
 AP = {n: api('pulls/' + n) for n in NS + SIB + INF + sorted(DOS)}
 for n in NS:
     if n in ST:
@@ -199,6 +212,18 @@ for n in NS:
     hard('mode change' not in modes, '#%s no mode change (%s)' % (n, modes.replace('\n', ' | ') or 'none'))
     hard(not ov, '#%s (3) develop move since %s ∩ own paths == %s (no declared overlap, no declared no-op path in this kit)' % (n, dmb[:12], ov or 'EMPTY'))
     P[n] = res
+R1 = K['round1_head']; R2P = sorted(K['round2_paths'])
+for n in NS:
+    h = H[n]; ch = P[n]['commits']
+    hard(have_commit(R1) and len(ch) == 2 and ch[0] == R1 and ch[-1] == h and g('rev-parse', h + '^1').strip() == R1,
+         '#%s ROUND 2 SHAPE: the round-1 head %s (gate41 NO GO) is the head\'s first parent and the chain is [round 1, round 2] %s' % (n, R1[:12], [c[:12] for c in ch]))
+    d12 = sorted(g('diff', '--name-only', R1, h).split())
+    hard(d12 == R2P, '#%s ROUND 2 SCOPE (requirement 4, no creep): diff(round-1 head, head) == EXACTLY the two round-2 paths %s (measured %s)' % (n, R2P, d12))
+    d01 = sorted(g('diff', '--name-only', P[n]['merge_base'], R1).split())
+    hard(len(d01) == 28 and all(os.path.basename(x) in ('package.json', 'package-lock.json') for x in d01), '#%s ROUND 1 SCOPE: diff(merge-base, round-1 head) == the 28 manifest / lock paths, no source (measured %d, all manifests/locks %s)' % (n, len(d01), all(os.path.basename(x) in ('package.json', 'package-lock.json') for x in d01)))
+    same = [x for x in d01 if blob(R1, x) == blob(h, x)]
+    hard(same == d01, '#%s ROUND 2 MOVED NO LOCK: every one of the 28 manifest / lock blobs at the head == its blob at the round-1 head (%d of %d equal) — what gate41 measured on them still describes these bytes' % (n, len(same), len(d01)))
+    P[n]['round1_head'] = R1; P[n]['round2_paths'] = d12
 MB = sorted({P[n]['develop_merge_base'] for n in NS})
 print('  MERGE-BASES (measured): %s — %s' % ({m[:12]: ['#' + n for n in NS if P[n]['develop_merge_base'] == m] for m in MB}, 'ONE shared merge-base for all %d PRs' % len(NS) if len(MB) == 1 else '%d distinct merge-bases' % len(MB)))
 print('  THE DEVELOP MOVE since the oldest merge-base (READ, `git log --first-parent`): %s' % [l for l in g('log', '--first-parent', '--format=%h %s', '%s..%s' % (MB[0], REAL_DEV)).splitlines()][:12])
@@ -270,8 +295,9 @@ def wp(w, f): return DR + (w + '/' if w else '') + f
 MORGAN10 = ['services/anchoring', 'services/api-gateway', 'services/auth', 'services/demo-service', 'services/guardian', 'services/m365-integration', 'services/prism',
             'services/queue', 'services/security', 'services/timestamping']
 NODEMAILER = ['', 'services/auth', 'services/originate']
-TIER_OF = {'dependency-bump': 'T1'}
-DECL = {'dependency-bump': {'prod': sorted(wp(w, f) for w in WS for f in ('package.json', 'package-lock.json')), 'doc': [], 'tests': []}}
+TIER_OF = {'dependency-bump-r2': 'T1'}
+EMAILS = [DR + 'services/auth/src/services/email.ts', DR + 'services/originate/src/services/email.ts']
+DECL = {'dependency-bump-r2': {'prod': sorted([wp(w, f) for w in WS for f in ('package.json', 'package-lock.json')] + EMAILS), 'doc': [], 'tests': []}}
 BASELINE = DR + 'scripts/audit/audit-baseline.json'
 CLEANUP = ['GHSA-v2v4-37r5-5v8g', 'GHSA-mwp4-54f8-5fhr']
 FIVE = ['GHSA-rpw4-54j3-4h4q', 'GHSA-2vr4-cq9g-pvrc', 'GHSA-9f6g-j8ch-79g4', 'GHSA-6vj9-mwq6-2f5v', 'GHSA-3wwx-pv8p-q78v']
@@ -310,8 +336,8 @@ for n in NS:
     h = H[n]; cb = P[n]['merge_base']; cls = K['prs'][n]['class']; out = []; MEAS[n] = {}
     d = DECL[cls]
     hard(sorted(P[n]['paths']) == sorted(d['prod'] + d['doc'] + d['tests']) and TIER_OF[cls] == K['prs'][n]['tier'],
-         '#%s TIER BY CLASS %s (%s): changes EXACTLY the %d declared manifest / lock paths (%d workspaces x package.json + package-lock.json)' % (n, cls, TIER_OF[cls], len(d['prod']), len(WS)))
-    hard(all(os.path.basename(p) in ('package.json', 'package-lock.json') for p in P[n]['paths']), '#%s ZERO source files: every own path is a package.json or a package-lock.json' % n)
+         '#%s TIER BY CLASS %s (%s): changes EXACTLY the %d declared paths (%d workspaces x package.json + package-lock.json, plus the two round-2 email.ts)' % (n, cls, TIER_OF[cls], len(d['prod']), len(WS)))
+    hard(all(os.path.basename(p) in ('package.json', 'package-lock.json') or p in EMAILS for p in P[n]['paths']), '#%s ONLY TWO source files: every own path is a package.json, a package-lock.json or one of the two round-2 email.ts' % n)
     # the manifests, verbatim +/- (READ)
     for w in WS:
         out.append('MANIFEST %s: %s' % (w or '(root)', [l.strip() for l in pm_diff(cb, h, wp(w, 'package.json'))]))
@@ -384,25 +410,64 @@ for n in NS:
     out.append('AUDIT LEGS (READ, preflight.sh at head): leg 6 :%s `%s`; leg 7 :%s `%s`; npm scripts audit:gate=`%s` audit:locks=`%s` audit:contract=`%s` — the gate RE-RUNS both legs at the head and at END_TREE (they call the npm advisory API)' % (
         [i + 1 for i, l in enumerate(pf) if re.match(r'^#\s+6\. ', l)], next((l.strip('# ') for l in pf if re.match(r'^#\s+6\. ', l)), '?')[:60], [i + 1 for i, l in enumerate(pf) if re.match(r'^#\s+7\. ', l)],
         next((l.strip('# ') for l in pf if re.match(r'^#\s+7\. ', l)), '?')[:60], pj.get('audit:gate'), pj.get('audit:locks'), pj.get('audit:contract')))
-    # the nodemailer call sites (READ, head): unchanged by the PR; ONE createTransport per service
+    # THE ROUND-2 DIFF, read line by line against N-1339-1 (requirement 4): round-1 head -> head, per email.ts
+    ALLOWED_ADD = {"import type { Transporter } from 'nodemailer';", 'let transporter: Transporter | null = null;', 'function getTransporter(): Transporter | null {'}
+    ALLOWED_DEL = {'let transporter: nodemailer.Transporter | null = null;', 'function getTransporter(): nodemailer.Transporter | null {'}
+    def classify(lines):
+        """split +/- lines into (comment additions, code additions, code deletions)"""
+        ca = [l[1:].strip() for l in lines if l[0] == '+' and l[1:].strip().startswith('//')]
+        co = sorted(l[1:].strip() for l in lines if l[0] == '+' and not l[1:].strip().startswith('//'))
+        de = sorted(l[1:].strip() for l in lines if l[0] == '-')
+        return ca, co, de
+    def judge_r2(lines):
+        ca, co, de = classify(lines); return len(ca) == 4 and co == sorted(ALLOWED_ADD) and de == sorted(ALLOWED_DEL)
+    # CONTROL (the round-2 line judge): the real shape passes; a planted extra VALUE change, and a planted missing annotation, each read NOT the shape
+    _good = ['+// a', '+// b', '+// c', '+// d', "+import type { Transporter } from 'nodemailer';", '-let transporter: nodemailer.Transporter | null = null;', '+let transporter: Transporter | null = null;',
+             '-function getTransporter(): nodemailer.Transporter | null {', '+function getTransporter(): Transporter | null {']
+    hard(judge_r2(_good) and not judge_r2(_good + ['+  return nodemailer.createTransport({});']) and not judge_r2(_good[:-2]), 'CONTROL (the round-2 line judge): the fix shape reads RIGHT; a planted extra value line reads WRONG; a dropped annotation pair reads WRONG')
+    R1 = P[n]['round1_head']
     for s in ('services/auth', 'services/originate'):
-        ep = DR + s + '/src/services/email.ts'; et = show(h, ep)
-        hard(blob(cb, ep) == blob(h, ep) and et.count('nodemailer.createTransport(') == 1 and et.count('.sendMail(') == 1,
-             '#%s %s email.ts BYTE-IDENTICAL base -> head, ONE createTransport at :%s and ONE sendMail at :%s (the two call sites requirement 3 checks against the 9 -> 10 changelog)' % (
-                 n, s, [i + 1 for i, l in enumerate(et.split('\n')) if 'nodemailer.createTransport(' in l], [i + 1 for i, l in enumerate(et.split('\n')) if '.sendMail(' in l]))
+        ep = DR + s + '/src/services/email.ts'; et = show(h, ep); e1 = show(R1, ep); eb = show(cb, ep)
+        lines = pm_diff(R1, h, ep); ca, co, de = classify(lines)
+        code = lambda x: '\n'.join(l for l in x.split('\n') if not l.strip().startswith(('//', '*', '/*')))   # SYNTAX: comment lines out (round 2's own comment NAMES the old form)
+        vuse = lambda x: len(re.findall(r'\bnodemailer\.(?!Transporter\b)\w+', code(x)))
+        hard(judge_r2(lines) and blob(cb, ep) == blob(R1, ep) and 'nodemailer.Transporter' not in code(et) and code(eb).count('nodemailer.Transporter') == 2 and vuse(e1) == vuse(et) and vuse(et) >= 1
+             and et.count('nodemailer.createTransport(') == 1 and et.count('.sendMail(') == 1,
+             '#%s %s email.ts ROUND-2 DIFF (round-1 head -> head, READ line by line): %d comment line(s) added; code added %s; code removed %s — exactly the type-only import + the two annotations; base == round 1 (blob %s); `nodemailer.Transporter` in CODE lines at base %d -> head %d; VALUE uses of `nodemailer.` round 1 %d == head %d; ONE createTransport at :%s and ONE sendMail at :%s (the call sites the gate drives on 10)' % (
+                 n, s, len(ca), co, de, (blob(cb, ep) or '?')[:12], code(eb).count('nodemailer.Transporter'), code(et).count('nodemailer.Transporter'), vuse(e1), vuse(et),
+                 [i + 1 for i, l in enumerate(et.split('\n')) if 'nodemailer.createTransport(' in l], [i + 1 for i, l in enumerate(et.split('\n')) if '.sendMail(' in l]))
+        out.append('ROUND-2 DIFF %s (READ, verbatim +/-): %s' % (s, lines))
+        out.append('N-1339-1 LOCUS %s (READ): the head\'s annotation lines %s; the import lines %s' % (s, [i + 1 for i, l in enumerate(et.split('\n')) if 'Transporter | null' in l], [i + 1 for i, l in enumerate(et.split('\n')) if l.startswith('import') and 'nodemailer' in l]))
     # morgan call sites (READ, head)
     mc = [x for x in gq('grep', '-n', '-F', "morgan('", h, '--', 'Blockchain/Dev/services/*/src/*.ts', 'Blockchain/Dev/services/*/src/**/*.ts')[1].strip().splitlines() if x]
     out.append("MORGAN CALL SITES (READ, head): %s — every one the 'combined' preset (quoted referrer + user-agent: the advisory's quoted fields)" % [x.split(':', 1)[1][:90] for x in mc])
+    # THE RUNTIME-MOVED SERVICES (KS-1379, Wednesday's gate condition — requirement 3): every copy of the moved runtime packages in the three locks, base -> head
+    RTP = ('bullmq', 'msgpackr', '@azure/identity', '@azure/msal-node')
+    def rtrows(c, lp):
+        try: j_ = json.loads(show(c, lp))
+        except Exception: return None
+        return sorted((k, v.get('version'), bool(v.get('dev'))) for k, v in (j_.get('packages') or {}).items() if k.rsplit('node_modules/', 1)[-1] in RTP)
+    rt = {w: (rtrows(cb, wp(w, 'package-lock.json')), rtrows(h, wp(w, 'package-lock.json'))) for w in ('services/queue', 'services/m365-integration', 'packages/shared')}
+    mj = lambda rows, sfx: sorted({vt(v)[0] for k, v, d_ in (rows or []) if k.endswith(sfx)})
+    hard(mj(rt['services/queue'][0], 'msgpackr') == [1] and mj(rt['services/queue'][1], 'msgpackr') == [2]
+         and mj([r for r in rt['services/m365-integration'][0] if '@azure/identity/node_modules' in r[0]], '@azure/msal-node') == [5] and mj([r for r in rt['services/m365-integration'][1] if '@azure/identity/node_modules' in r[0]], '@azure/msal-node') == [6]
+         and mj(rt['packages/shared'][0], '@azure/msal-node') == [5] and mj(rt['packages/shared'][1], '@azure/msal-node') == [6],
+         '#%s THE RUNTIME-MOVED SERVICES (KS-1379; READ from the standalone locks, base -> head): queue msgpackr major 1 -> 2 (via bullmq), m365-integration @azure/identity-nested msal-node 5 -> 6, packages/shared msal-node 5 -> 6 — the two moves Wednesday conditioned on a clean standalone `npm ci` + the service\'s own suite in THIS gate' % n)
+    for w, (b_, h_) in rt.items(): out.append('RUNTIME-MOVED %s (READ, lock rows path/version/dev, base -> head): %s -> %s' % (w, [(k.replace('node_modules/', 'nm/'), v) for k, v, d_ in b_ or []], [(k.replace('node_modules/', 'nm/'), v) for k, v, d_ in h_ or []]))
+    MEAS[n]['runtime_moved'] = {w: {'base': b_, 'head': h_} for w, (b_, h_) in rt.items()}
     # the CROSS-PACKAGE CENSUS: any test naming a changed path by its Blockchain/Dev-relative spelling
     cz = {}
+    AGL = ('*.test.ts', '*.test.js', '*.test.mjs', '*.test.sh', '*/__tests__/*.sh')   # the WHOLE monorepo (requirement 5), not only Blockchain/Dev
     for p in P[n]['paths']:
-        rel = p[len(DR):]; hits = set()
-        for frag in (rel, './' + rel):
-            for f in grep_l(h, frag, *TGLOBS): hits.add(f)
+        rel = p[len(DR):]; wrel = rel.split('/src/', 1)[1] if '/src/' in rel else None; hits = set()
+        for frag in (p, rel, './' + rel) + (('src/' + wrel,) if wrel else ()):
+            for f in grep_l(h, frag, *AGL): hits.add(f)
         if hits: cz[rel] = sorted(hits)
-    broad = grep_l(h, 'package-lock.json', *TGLOBS)
-    out.append('CROSS-PACKAGE CENSUS (READ, `git grep -l -F` of each changed path\'s Blockchain/Dev-relative spelling over *.test.ts|js|mjs|sh and __tests__/*.sh at head): %s | tests naming ANY package-lock.json (lock discovery / audit contract; the gate runs them): %s' % (cz or 'NONE by exact path', broad))
-    MEAS[n]['census'] = {'exact': cz, 'broad': broad}
+    broad = grep_l(h, 'package-lock.json', *AGL)
+    emod = {s: grep_l(h, 'services/email', DR + s + '/*.test.ts', DR + s + '/*.test.js') for s in ('services/auth', 'services/originate')}
+    hard(all(emod.values()), '#%s CENSUS CONTROL: the email.ts module spelling `services/email` finds importing tests in BOTH services (auth %d, originate %d) — the grep instrument can see an importer' % (n, len(emod['services/auth']), len(emod['services/originate'])))
+    out.append('CROSS-PACKAGE CENSUS (READ, `git grep -l -F` of each changed path\'s FULL, Blockchain/Dev-relative and src-relative spellings over *.test.ts|js|mjs|sh and __tests__/*.sh in the WHOLE monorepo at head): %s | tests naming ANY package-lock.json (lock discovery / audit contract; the gate runs them): %s | tests importing email.ts by its module spelling `services/email` (the gate runs every one): %s' % (cz or 'NONE by exact path', broad, emod))
+    MEAS[n]['census'] = {'exact': cz, 'broad': broad, 'email_importers': emod}
     # the suites a changed lock can break: every workspace whose lock changed, with its test script (READ)
     st_ = {}
     for w in WS[1:]:
@@ -416,7 +481,7 @@ for n in NS:
     imp = grep_l(h, "'../routes/anchors'", DR + 'services/originate/src/*.ts', DR + 'services/originate/src/**/*.ts')
     oj = json.loads(show(h, wp('services/originate', 'package.json')) or '{}'); ocfg = [os.path.basename(x) for x in g('ls-tree', '--name-only', h, DR + 'services/originate/').split() if re.search(r'(jest|vitest)[^/]*\.config\.[cm]?[jt]s$', x)]
     njm = len([x for x in grep_l(h, 'jest.mock(', DR + 'services/originate/src/*.test.ts', DR + 'services/originate/src/**/*.test.ts')]); nvi = len(grep_l(h, "from 'vitest'", DR + 'services/originate/src/*.test.ts', DR + 'services/originate/src/**/*.test.ts'))
-    out.append("ORIGINATE '../routes/anchors' (READ): the modules exist at base %s and head %s (no source file changes); %d file(s) import '../routes/anchors' at head (e.g. %s). ORIGINATE'S RUNNER IS JEST, NOT VITEST: `test` = %r, devDependencies %s, config files %s; %d test file(s) call jest.mock( and %d import from 'vitest' — the seat's '93 files, no tests' reads like a VITEST run over a JEST suite (a PREDICTION): the gate runs `npm test` in services/originate (the runner its package.json names) at the BASE and the head" % (
+    out.append("ORIGINATE '../routes/anchors' (READ): the modules exist at base %s and head %s (neither is in the diff; round 2 touches only email.ts); %d file(s) import '../routes/anchors' at head (e.g. %s). ORIGINATE'S RUNNER IS JEST, NOT VITEST: `test` = %r, devDependencies %s, config files %s; %d test file(s) call jest.mock( and %d import from 'vitest' — the seat's '93 files, no tests' reads like a VITEST run over a JEST suite (a PREDICTION): the gate runs `npm test` in services/originate (the runner its package.json names) at the BASE and the head" % (
         [os.path.basename(x) for x in ob], [os.path.basename(x) for x in oh], len(imp), [os.path.basename(x) for x in imp[:3]], oj.get('scripts', {}).get('test'),
         {d_: v_ for d_, v_ in oj.get('devDependencies', {}).items() if 'jest' in d_ or 'vitest' in d_}, ocfg, njm, nvi))
     MEAS[n]['originate_runner'] = oj.get('scripts', {}).get('test')

@@ -10,20 +10,24 @@
 # head, and the control could not fail): doctor() REFUSES (rc 98) a replacement that contains the text it replaces, and every wrong head here is the
 # real head with ONE hex digit CHANGED (same length, never a superset); a removed phrase is SPLIT by ' ~ ' at a space so the original no longer occurs.
 # Writes only under <scratchpad>/g42_controls_<kit>_*. Starts no container and binds no port.
-# gate42 re-key (copied from gate40's controls script, gate39 -> gate38 lineage): ONE row (#1339), so N2 == N1 and every two-row control is re-cut:
-# C2 pins the DEVELOP sha as #1339's head (a real 40-hex sha that is not the head); PS1 is `--simulate foreign1339` (a foreign edit of #1339's first own
-# file on develop — a package-lock.json); PS2 is `--simulate moved`; PF1 fills from its SIM pins. ET plants a wrong END_TREE; RS DECLARES a false
-# (self-)stack in a copy (#1339 on #1339: the launch action's STACKBASE guard must refuse rc 11 — the API base is develop, not the parent's branch).
+# gate42 re-key (copied from gate41's controls script, gate40 -> gate39 -> gate38 lineage): ONE row (#1339 ROUND 2), so N2 == N1 and every two-row control
+# is re-cut: C2 pins the DEVELOP sha as #1339's head (a real 40-hex sha that is not the head); C4 (gate42, NEW) pins the ROUND-1 head 8c1b25b24782 that
+# gate41 graded NO GO as #1339's head (a real, fetched, formerly-valid head: the launcher must refuse rc 6 — a verdict is valid only at ITS head); PS1 is
+# `--simulate foreign1339` (a foreign edit of #1339's first own file on develop — a package-lock.json); PS2 is `--simulate moved`; PF1 fills from its SIM
+# pins. ET plants a wrong END_TREE; RS DECLARES a false (self-)stack in a copy (#1339 on #1339: the launch action's STACKBASE guard must refuse rc 11).
 # RN / RO plant a `noop_paths` / a `declared_overlap` entry in a moved copy (predict must refuse the re-pin rc 10: the two declaration keys are proven
-# separately, STANDING_LINES 2026-09-27); RDO (gate42, NEW) drops ONE declared open-PR overlap (kit.json dead_open_declared #949) in a moved copy — the
-# re-pin must refuse rc 10 (an UNDECLARED overlap with an open PR). RWB/RWB-twin exercise the widen census on BRANCHES (Seat B 43rd's -b43-<n>; the
-# twin matches #1339's own `-b43-7`). gate42 DECLARES its subject explicitly (#1339's title lands at 83, SHORT == the title): SJ1-SJ3 replace it in a
-# fill copy with a declared `(#n)` suffix, a subject that lands over 92 and a FOREIGN hyphenated key (the key scan); SJ4 REMOVES it (SHORT={}) — gate42's
-# fill refuses a row with NO declared subject; each must refuse; the twin is the pristine fill. NS runs the re-key / namespace check clean and then once
-# per spelling of gate40's AND gate39's namespaces (the WIDENED map), each planted in memory and each must be caught — the re-key tool's own predecessor
-# name included. The moved copy carries installprobe_<kit>.json (the drafter's clean-install measurement predict reads).
-# The kit rules 40-44 / 46-49 are the nine requirements of Wednesday's commission (50 the Tier-1 cap) and are exercised by the R<exit> loop like every
-# other kit rule; the moved-develop pin is develop^ (kit.json predev: the MERGED #1332 squash 0de108577, before gate40's #1338 squash).
+# separately, STANDING_LINES 2026-09-27); RDO drops ONE declared open-PR overlap (kit.json dead_open_declared #949) in a moved copy — the re-pin must refuse
+# rc 10. RWB/RWB-twin exercise the widen census on BRANCHES (the twin matches #1339's own `-b43-7`). RWD / RWD-twin (gate42, NEW) exercise kit.json
+# `widen_disjoint_rule` both ways on a REAL open PR: kit.json inflight[0]'s branch is made a WIDEN match; with the baseline-only path stood in by that PR's
+# OWN single file (read from the PULLS API /files) the launch action classes it DISJOINT-OUT-OF-KIT and passes; with the real baseline path it is
+# OUTSIDE and refuses rc 15. gate42 DECLARES its subject explicitly (#1339's title lands at 83, SHORT == the title): SJ1-SJ3 replace it in a fill copy with a
+# declared `(#n)` suffix, a subject that lands over 92 and a FOREIGN hyphenated key (kit.json extra_keys[0], KS-1379 — the ticket this PR does NOT close);
+# SJ4 REMOVES it (SHORT={}) — gate42's fill refuses a row with NO declared subject; each must refuse; the twin is the pristine fill. NS runs the re-key /
+# namespace check clean and then once per spelling of gate41's AND gate40's namespaces (the WIDENED map), each planted in memory and each must be caught
+# — the re-key tool's own predecessor name included. The moved and fill copies carry installprobe_<kit>.json (fill reads its summary: {{IPSUM}}).
+# The kit rules 40-44 / 46-47 are the seven requirements of Wednesday's gate42 commission (48 the prior round's (gate41) findings re-checked, 49 the lock-touched suites, 50
+# the call-site sink) and are exercised by the R<exit> loop like every other kit rule; the moved-develop pin is develop^ (kit.json predev: the MERGED
+# #1332 squash 0de108577, before gate40's #1338 squash).
 # Usage: controls_<kit>.sh <scratchpad dir> [--invert]
 set -u
 GS="$(dirname "$(/bin/realpath "$0")")"
@@ -89,6 +93,8 @@ case "$F1" in *"$H1"*) echo "REFUSING: the flipped head contains the real one"; 
 ovr C 6 "stale #$N1 head (all zeros)" "${OVR}HEAD_$N1=0000000000000000000000000000000000000000"
 ovr C2 6 "the pinned DEVELOP sha given as #$N1's head (a real 40-hex sha that is not the head)" "${OVR}HEAD_$N1=$PDEV"
 ovr C3 6 "#$N1's head with ONE hex digit changed ($F1: same length, never a superset of the real head)" "${OVR}HEAD_$N1=$F1"
+R1H="$(kj 'k["round1_head"]')"; [ "${#R1H}" = 40 ] && [ "$R1H" != "$H1" ] || { echo "REFUSING: kit.json round1_head is not a 40-hex sha distinct from the pinned head"; exit 9; }
+ovr C4 6 "the ROUND-1 head ${R1H:0:12} (gate41 NO GO; real, fetched, formerly valid) given as #$N1's head — a verdict is valid only at ITS head" "${OVR}HEAD_$N1=$R1H"
 TW=(); for n in $NS; do TW+=("${OVR}HEAD_$n=$(hd $n)"); done
 ovr C/twin 0 "every real head through the same overrides" "${TW[@]}"
 judge D 17 "$(env "${OVR}CUR_DEV=$M1BASE" "$L" --check > "$CW/D.out" 2>&1; echo $?)" "develop moved (predev ${M1BASE:0:12} as the current develop)"
@@ -200,6 +206,21 @@ WBX_OUT="$(python3 -c 'import re,sys; print(re.escape(sys.argv[1]) + "$")' "$WBR
 WBX_IN='-b43-7$'   # #1339's own branch segment (feature/ks-1378-…-b43-7)
 judge RWB 15 "$(G42_ROUTING="$CW/routing.present" G42_WIDEN_BRANCH_RX="$WBX_OUT" "$REPIN" "$L" "$SP" --dry-run > "$CW/RWB.out" 2>&1; echo $?)" "WIDEN (branch): an open PR outside the kit whose BRANCH matches ($WBX_OUT) — the launch action refuses rc 15"
 judge RWB/twin 0 "$(G42_ROUTING="$CW/routing.present" G42_WIDEN_BRANCH_RX="$WBX_IN" "$REPIN" "$L" "$SP" --dry-run > "$CW/RWB.twin.out" 2>&1; echo $?)" "WIDEN (branch) twin: the regex matches only an IN-KIT branch ($WBX_IN) — passes"
+# kit.json widen_disjoint_rule, both ways, on the SAME real open PR (inflight[0]): its ENTIRE file list must be one file for the stand-in to mean anything
+WF="$(KJ="$GS/kit.json" python3 - <<'PY'
+import json, os, urllib.request
+tok = ''
+for l in open('/Volumes/DevMASTER/!CODING/Secuura/Blockchain/4_Credentials/.env', encoding='utf-8'):
+    if l.startswith('GH_TOKEN='): tok = l.split('=', 1)[1].strip().strip('"').strip("'")
+k = json.load(open(os.environ['KJ'], encoding='utf-8'))
+fs = json.load(urllib.request.urlopen(urllib.request.Request('https://api.github.com/repos/Secuura/Distributed_Secuura/pulls/%s/files?per_page=100' % k['inflight'][0], headers={'Authorization': 'Bearer ' + tok, 'Accept': 'application/vnd.github+json'}), timeout=60))
+print(fs[0]['filename'] if len(fs) == 1 else '')
+PY
+)"
+[ -n "$WF" ] || { echo "REFUSING: kit.json inflight[0] is not a single-file PR — RWD needs a one-file stand-in (re-cut the control)"; exit 9; }
+BOP="$(kj 'k["widen_disjoint_rule"]["baseline_only_path"]')"; [ "$WF" != "$BOP" ] || { echo "REFUSING: the stand-in file IS the baseline path"; exit 9; }
+judge RWD 0 "$(G42_ROUTING="$CW/routing.present" G42_WIDEN_BRANCH_RX="$WBX_OUT" G42_BASELINE_ONLY_PATH="$WF" "$REPIN" "$L" "$SP" --dry-run > "$CW/RWD.out" 2>&1; echo $?)" "WIDEN disjoint rule: the out-of-kit WIDEN PR's ENTIRE file list == the (stand-in) baseline-only path ($WF) — classed DISJOINT-OUT-OF-KIT, passes"
+judge RWD/twin 15 "$(G42_ROUTING="$CW/routing.present" G42_WIDEN_BRANCH_RX="$WBX_OUT" G42_BASELINE_ONLY_PATH="$BOP" "$REPIN" "$L" "$SP" --dry-run > "$CW/RWD.twin.out" 2>&1; echo $?)" "WIDEN disjoint rule twin: the same PR against the REAL baseline-only path ($BOP) — it touches other files: OUTSIDE, refuses rc 15"
 # a MOVED COPY at its own home: re-fill there (fill only — the pins are current), then plant the PRE-M1 develop as the launcher's pin
 KC="$CW/kitcopy"; mkdir -p "$KC"; for f in kit.json pins_$KIT.json stopcounts_$KIT.json mail_${KIT}_ready.md prompt_$KIT.TEMPLATE.txt launcher_$KIT.TEMPLATE.sh.txt predict_$KIT.py fill_$KIT.py installprobe_$KIT.json repin_and_launch_$KIT.sh $(basename "$(ls "$GS"/predict_[0-9]*.out | tail -1)") $(ls "$GS" | /usr/bin/grep '^gh_body_[0-9]*\.md$'); do cp "$GS/$f" "$KC/"; done
 python3 "$KC/fill_$KIT.py" > "$CW/KC.fill.out" 2>&1; judge KC 0 "$?" "fill in a MOVED copy (the copy becomes its own home)"
@@ -234,7 +255,7 @@ cp "$KC/kit.json.pristine" "$KC/kit.json"
 say "--- predict / fill"
 judge PS1 1 "$(python3 "$GS/predict_$KIT.py" "$SP" --simulate "foreign$N2" > "$CW/PS1.out" 2>&1; echo $?)" "predict over develop + a FOREIGN edit of #$N2's first own file REFUSES"
 judge PS2 0 "$(python3 "$GS/predict_$KIT.py" "$SP" --simulate moved > "$CW/PS2.out" 2>&1; echo $?)" "predict over develop + an UNRELATED synthetic commit (a develop move no PR touches) PASSES"
-KF="$CW/fillcopy"; mkdir -p "$KF"; for f in kit.json stopcounts_$KIT.json mail_${KIT}_ready.md prompt_$KIT.TEMPLATE.txt launcher_$KIT.TEMPLATE.sh.txt fill_$KIT.py $(basename "$(ls "$GS"/predict_[0-9]*.out | tail -1)") $(ls "$GS" | /usr/bin/grep '^gh_body_[0-9]*\.md$'); do cp "$GS/$f" "$KF/"; done
+KF="$CW/fillcopy"; mkdir -p "$KF"; for f in kit.json installprobe_$KIT.json stopcounts_$KIT.json mail_${KIT}_ready.md prompt_$KIT.TEMPLATE.txt launcher_$KIT.TEMPLATE.sh.txt fill_$KIT.py $(basename "$(ls "$GS"/predict_[0-9]*.out | tail -1)") $(ls "$GS" | /usr/bin/grep '^gh_body_[0-9]*\.md$'); do cp "$GS/$f" "$KF/"; done
 cp "$GS/pins_$KIT.SIM-moved.json" "$KF/pins_$KIT.json"
 judge PF1 1 "$(python3 "$KF/fill_$KIT.py" > "$CW/PF1.out" 2>&1; echo $?)" "fill from SIMULATED pins refuses"
 python3 -c 'import json,sys; p=json.load(open(sys.argv[1])); p["fail"]=1; json.dump(p, open(sys.argv[2],"w"))' "$GS/pins_$KIT.json" "$KF/pins_$KIT.json"
@@ -247,25 +268,31 @@ judge PF/twin 0 "$(python3 "$KF/fill_$KIT.py" > "$CW/PF.twin.out" 2>&1; echo $?)
 SHL="$(/usr/bin/grep -x "  SHORT={'$N1': '[^']*'}," "$GS/fill_$KIT.py")"
 [ "$(printf '%s\n' "$SHL" | /usr/bin/grep -c .)" = 1 ] || { echo "REFUSING: fill_$KIT.py does not carry exactly one SHORT={'$N1': '…'}, line"; exit 9; }
 T1T="$(printf '%s' "$SHL" | sed "s/^  SHORT={'$N1': '\(.*\)'},$/\1/")"
+SHA="${SHL#  }"   # the doctor ANCHOR without its indent: doctor() joins words with \s+, so a leading-space anchor also ate the previous line's newline and glued SHORT onto a comment line — every SJ plant then refused for "NO declared subject" whatever it planted (found at drafting by SJ3/why; the same shape was in gate41's controls)
 [ -n "$T1T" ] || { echo "REFUSING: could not read #$N1's declared subject from fill_$KIT.py"; exit 9; }
-FK="$(kj 'k["extra_keys"][0]')"   # one row, one own key: the foreign key is kit.json's first extra key (gate42: KS-888)
+FK="$(kj 'k["extra_keys"][0]')"   # one row, own keys KS-1378 + KS-729: the foreign key is kit.json's first extra key (gate42: KS-1379, the ticket #1339 does NOT close)
 OWN1="$(kj 'k["prs"][sorted(k["prs"])[0]]["keys"][0]')"
 [ "$FK" != "$OWN1" ] || { echo "REFUSING: the foreign key equals #$N1's own key"; exit 9; }
 cp "$KF/fill_$KIT.py" "$KF/fill_$KIT.py.pristine"
-doctor "$KF/fill_$KIT.py.pristine" "$KF/fill_$KIT.py" "$SHL" "  SHORT={'$N1': '$T1T (#$N1)'}," > "$CW/SJ1.doctor" 2>&1
+doctor "$KF/fill_$KIT.py.pristine" "$KF/fill_$KIT.py" "$SHA" "SHORT={'$N1': '$T1T (#$N1)'}," > "$CW/SJ1.doctor" 2>&1
 judge SJ1 1 "$(python3 "$KF/fill_$KIT.py" > "$CW/SJ1.out" 2>&1; echo $?)" "fill with #$N1's subject DECLARED WITH its ' (#$N1)' suffix refuses"
-doctor "$KF/fill_$KIT.py.pristine" "$KF/fill_$KIT.py" "$SHL" "  SHORT={'$N1': '$T1T and also a tail'}," > "$CW/SJ2.doctor" 2>&1
+judge SJ1/why 0 "$(/usr/bin/grep -q 'ENDS IN a (#n) suffix' "$CW/SJ1.out"; echo $?)" "SJ1 refused FOR the (#n) suffix (its REFUSING line names it), not for another defect"
+doctor "$KF/fill_$KIT.py.pristine" "$KF/fill_$KIT.py" "$SHA" "SHORT={'$N1': '$T1T and also a tail'}," > "$CW/SJ2.doctor" 2>&1
 judge SJ2 1 "$(python3 "$KF/fill_$KIT.py" > "$CW/SJ2.out" 2>&1; echo $?)" "fill with #$N1's subject landing OVER 92 (declared + ' (#$N1)') refuses"
-doctor "$KF/fill_$KIT.py.pristine" "$KF/fill_$KIT.py" "$SHL" "  SHORT={'$N1': '$T1T per $FK'}," > "$CW/SJ3.doctor" 2>&1
-judge SJ3 1 "$(python3 "$KF/fill_$KIT.py" > "$CW/SJ3.out" 2>&1; echo $?)" "fill with #$N1's subject carrying a FOREIGN hyphenated key ($FK) refuses at the key scan"
-doctor "$KF/fill_$KIT.py.pristine" "$KF/fill_$KIT.py" "$SHL" "  SHORT={}," > "$CW/SJ4.doctor" 2>&1
-judge SJ4 1 "$(python3 "$KF/fill_$KIT.py" > "$CW/SJ4.out" 2>&1; echo $?)" "fill with NO SHORT (the PR title as read, landing at 93) refuses"
+judge SJ2/why 0 "$(/usr/bin/grep -q 'lands at [0-9]* chars' "$CW/SJ2.out"; echo $?)" "SJ2 refused FOR the landed length (its REFUSING line names it), not for another defect"
+SJ3S="$OWN1: bump four packages per $FK"   # SHORT enough to land <= 92, so the ONLY defect planted is the foreign key (gate41's twin also landed over 92: two defects, one rc)
+doctor "$KF/fill_$KIT.py.pristine" "$KF/fill_$KIT.py" "$SHA" "SHORT={'$N1': '$SJ3S'}," > "$CW/SJ3.doctor" 2>&1
+judge SJ3 1 "$(python3 "$KF/fill_$KIT.py" > "$CW/SJ3.out" 2>&1; echo $?)" "fill with #$N1's subject carrying a FOREIGN hyphenated key ($FK; '$SJ3S', lands $(( ${#SJ3S} + 7 ))) refuses at the key scan"
+judge SJ3/why 0 "$(/usr/bin/grep -q '^REFUSING: KEY SCAN' "$CW/SJ3.out"; echo $?)" "SJ3 refused FOR THE KEY SCAN (its REFUSING line names KEY SCAN), not for another defect"
+doctor "$KF/fill_$KIT.py.pristine" "$KF/fill_$KIT.py" "$SHA" "SHORT={}," > "$CW/SJ4.doctor" 2>&1
+judge SJ4 1 "$(python3 "$KF/fill_$KIT.py" > "$CW/SJ4.out" 2>&1; echo $?)" "fill with NO SHORT (no declared subject — gate42's fill never defaults to the PR title) refuses"
+judge SJ4/why 0 "$(/usr/bin/grep -q 'has NO declared subject' "$CW/SJ4.out"; echo $?)" "SJ4 refused FOR the missing declaration (its REFUSING line names it)"
 cp "$KF/fill_$KIT.py.pristine" "$KF/fill_$KIT.py"
 judge SJ/twin 0 "$(python3 "$KF/fill_$KIT.py" > "$CW/SJ.twin.out" 2>&1; echo $?)" "the pristine fill through the same copy passes"
 
-say "--- the re-key / namespace check (every spelling of every predecessor generation's namespace; STANDING_LINES 2026-09-27/28)"
+say "--- the re-key / namespace check (every spelling of gate41's and gate40's namespaces; STANDING_LINES 2026-09-27/28)"
 judge NS 0 "$(python3 "$GS/rekey_check_$KIT.py" "$GS" > "$CW/NS.out" 2>&1; echo $?)" "the kit as drafted carries no predecessor namespace spelling outside a lineage line"
-for s in g40_sp refs/g40/ g40_controls G40_ROUTING QAB40_HEAD QA/Secuura-batch1338 -b42- s-b42- seatB-42nd b42 B42 /tmp/q40. /tmp/q40g. predict_gate40.py fill_gate40.py capture_mail_gate40.py rekey_check_gate40 pgprobe_gate40 launch_qa_secuura_batch1338 gate40 '#1338' 'B 42nd' g39_sp refs/g39/ g39_controls QAB39_HEAD QA/Secuura-batch1337 -b41- s-b41- seatB-41st b41 /tmp/q39. predict_gate39.py rekey_check_gate39 pgprobe_gate39 gate39; do   # rekey-plant-list (the NS controls' planted spellings; rekey_check exempts ONLY a line carrying this marker)
+for s in g41_sp refs/g41/ g41_controls G41_ROUTING QAB41_HEAD QA/Secuura-batch1339 /tmp/q41. qa41. predict_gate41.py fill_gate41.py capture_mail_gate41.py rekey_check_gate41 installprobe_gate41 launch_qa_secuura_batch1339.sh batch1339-g41/evidence 'REPORT DIRECTORY: x/batch1339-g41/' mail_gate41_ready gate41 g40_sp refs/g40/ g40_controls QAB40_HEAD QA/Secuura-batch1338 -b42- s-b42- seatB-42nd b42 B42 /tmp/q40. predict_gate40.py rekey_check_gate40 pgprobe_gate40 launch_qa_secuura_batch1338 gate40 '#1338' 'B 42nd'; do   # rekey-plant-list (the NS controls' planted spellings; rekey_check exempts ONLY a line carrying this marker)
   judge "NS[$s]" 1 "$(python3 "$GS/rekey_check_$KIT.py" "$GS" --plant "$s" > "$CW/NS.plant.$(echo "$s" | tr -c 'A-Za-z0-9' _).out" 2>&1; echo $?)" "the spelling '$s' planted (in memory) is caught"
 done
 

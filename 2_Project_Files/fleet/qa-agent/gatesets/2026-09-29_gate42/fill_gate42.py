@@ -9,11 +9,14 @@ previous output that differs as <name>.pre-<HHMMSS>. Writes nothing outside its 
 THE SUBJECT RULE (STANDING_LINES 2026-09-27, "a declared squash subject NEVER carries the `(#n)` suffix, and its length is checked as it will LAND"):
 every MANDATED subject is DECLARED EXPLICITLY (gate42: fill REFUSES a row with no SHORT entry — a subject is declared, never defaulted) and WITHOUT
 ` (#n)`; fill REFUSES a declared subject matching `\(#\d+\)$` and one whose len(declared) + len(" (#n)") exceeds 92, and prints each subject's declared
-and landed lengths. gate42: #1339's title as the PULLS API returns it is 75 chars and lands at 83 (gh_read_1.out); SHORT declares it verbatim. The
-mandated body carries ONE `Refs` line per own key (Refs KS-1378, Refs KS-729 — the PR body's two Refs lines; the commit message carries only the first).
-Shape copied from gate40's fill (gate39 -> gate38 lineage); re-keyed to gate42's ONE row (T1), no stack, no sibling kit; the kit rules are the nine
-requirements of Wednesday's commission, each by name (40-44, 46-49), the Tier-1 cap (50), plus the key scan, the addendum shape, the Linear links,
-the declaration keys, the disk rule (51-55) and no-Docker / npm-only egress (35).
+and landed lengths. gate42: #1339's title as the PULLS API returns it is 75 chars and lands at 83 (gh_read_1.out); SHORT declares it verbatim (Wednesday's
+Q5: title and Refs unchanged for round 2). The mandated body carries ONE `Refs` line per own key (Refs KS-1378, Refs KS-729 — the PR body's two Refs lines;
+both commit messages carry only the first).
+Shape copied from gate41's fill (gate40 -> gate39 lineage); re-keyed to gate42's ONE row (T1, ROUND 2 OF 2), no stack, no sibling kit; the kit rules are
+the seven requirements of Wednesday's gate42 commission, each by name (40-44, 46-47), the prior round's findings re-checked (48, gate41 lineage), the lock-touched suites (49), the
+call-site sink at the head (50), plus the key scan, the addendum shape, the Linear links, the declaration keys, the disk rule (51-55) and no-Docker /
+npm-only egress (35). Three fill tokens are MEASURED, never typed: {{CENSUS}} (predict's census from the pins), {{IPSUM}} (installprobe_gate42.json's
+summary) and {{REPORT}} (kit.json `report`).
 Usage: fill_gate42.py [<scratchpad>]   (the argument is accepted for the repin script's calling convention and unused)
 """
 import json, os, re, subprocess, sys, datetime, shutil
@@ -48,47 +51,52 @@ CFG = {
  'gate42': dict(
   TIERWORD='T1', TIER_DEF='T1 ROWS ARE GRADED THROUGH CODE AND AT RUNTIME',
   GO='`GO (Seat B 44th): merge 1339 on gate42`', MERGE_AUTH='it is squashed by the merge seat Wednesday names for this GO',
-  ADDENDUM_COUNT='PER PR FILE (28 over 28 paths) for #1339',
-  SUBJECT='[QA -> Wednesday] GATE41 batch #1339 (Seat B43, round 41; T1: KS-1378 the four-package advisory bump, nodemailer 9 -> 10)',
+  ADDENDUM_COUNT='PER PR FILE (30 over 30 paths) for #1339',
+  SUBJECT='[QA -> Wednesday] GATE42 batch #1339 round 2 (Seat B44, round 42; T1: KS-1378 the four-package advisory bump, round 2 of 2 - the LAST round)',
   # #1339's title lands at 83 (gh_read_1.out): declared EXPLICITLY (gate42's fill refuses a row with no declared subject), WITHOUT the (#n) suffix
   SHORT={'1339': 'KS-1378: bump morgan, nodemailer, ip-address and undici off five advisories'},
   SEAT_ITEMS=['PREFLIGHT INCOMPLETE — 12/15 legs ran, 3 SKIPPED. Nothing failed.',
               'legs 3 4 8 — local stack not up; you can clear this by starting it.',
               'audit-gate: 23 distinct advisories reported, 25 baselined.',
               'OK — no advisories outside the triaged baseline.',
-              '18 advisories match, 18 already baselined.',
-              'CLEANUP (advisory): 2 baseline entries are no longer reported',
-              'Zero vulnerable copies of any of the four remain',
-              '77 files / 836 tests passed against 9.1.1',
-              "Cannot find module '../routes/anchors'",
-              'npm error code EOVERRIDE',
-              'install rc=0',
-              'nodemailer now: 9.1.1',
-              'the ROOT undici 5.29.0 (via @connectrpc/connect-node) is NOT vulnerable',
-              'ip-address: @cardano-sdk/core asks ^9.0.5 and 9.x has NO fix, so only an',
-              "host npm 11.5.1 dies with \"Cannot read properties of null (reading 'edgesOut')\"",
-              'Regenerated in node:24-alpine',
-              'FOUND: **NOT REACHABLE as written.**',
-              'FOUND: **REACHABLE.**',
-              'Both services create exactly **one** transport, memoised:',
-              'The root `morgan` override is redundant now that all ten declarers say ^1.12.1.',
-              'No baseline entry added or removed. No --no-verify. Nothing deployed.',
-              'the audit fuse — 21.9 h, computed 2026-09-29T02:08Z.'],
-  KEYWORDS=['CLEAN-INSTALL', 'NODEMAILER-10-RUNS', 'EOVERRIDE-GOTCHA', 'ROOT-AND-STANDALONE-INSTALL', 'AUTH-SUITE-ON-10', 'ORIGINATE-SUITE-ON-10', 'ORIGINATE-PRE-EXISTING-AT-BASE',
-            'ORIGINATE-RUNNER-IS-JEST', 'NODEMAILER-CHANGELOG-9-TO-10', 'CALL-SITES-PER-SERVICE', 'TYPES-BUNDLED-VS-AT-TYPES', 'ESM-CJS-DUAL-BUILD', 'AUDIT-LEG-6', 'AUDIT-LEG-7',
-            'BASELINE-UNTOUCHED', 'CLEANUP-ROWS-NAMED', 'OUT-OF-SCOPE-LOCKS', 'MORGAN-COMBINED-LOGS', 'MORGAN-QUOTE-ESCAPED', 'UNDICI-SCOPED-TO-JSDOM', 'ROOT-UNDICI-UNTOUCHED',
-            'IP-ADDRESS-NO-9X', 'CARDANO-NESTED-OVERRIDDEN', 'LOCK-SUITES-BEFORE-AFTER', 'CROSS-PACKAGE-GUARDS', 'LOCK-DISCOVERY-CONTRACT', 'DECLARED-OPEN-OVERLAPS', 'SUBJECT-LANDS-AT',
-            'REFS-TWO-KEYS', 'NOOP-VS-OVERLAP', 'NO-FOREIGN-KEY', 'ADDENDUM-ONE-LINE-PER-PR', 'TSC-EXCLUDES-TESTS', 'AUDIT-FUSE', 'DISK-ENOSPC', 'TIER1-CAP-ROUND-1', 'TIERING'],
-  RULES=[(40, ['A CLEAN INSTALL (requirement 1', '`npm ci` per affected lock, never an incremental install', 'print the RESOLVED nodemailer version from node_modules', 'A gate that repeats the EOVERRIDE install has not tested the bump'], 'requirement 1: a CLEAN install, nodemailer 10.0.x proved to be what runs'),
-         (41, ['services/auth AND services/originate SUITES GREEN ON NODEMAILER 10 (requirement 2', "prove the seat's PRE-EXISTING claim at the BASE 8af6ab82", 'or find that it is the bump\'s'], 'requirement 2: auth AND originate suites green on nodemailer 10, originate proved at the base'),
-         (42, ['NODEMAILER 9 -> 10 BREAKING CHANGES (requirement 3', 'read its changelog for 9 -> 10', 'transport creation and the sendMail options, per service'], 'requirement 3: the 9 -> 10 changelog against both call sites per service'),
-         (43, ['AUDIT LEGS 6 AND 7 PASS AT THE HEAD (requirement 4', "re-run the repo's own audit scripts", 'no baseline row was added or edited', 'GHSA-v2v4-37r5-5v8g and GHSA-mwp4-54f8-5fhr', 'without acting on them'], 'requirement 4: audit legs 6 and 7 at the head, baseline untouched, the two CLEANUP rows named'),
-         (44, ['MORGAN 1.12.1 (requirement 5', "the 'combined' format still logs", 'a planted double quote in User-Agent is escaped in the log line'], "requirement 5: morgan 'combined' still logs and escapes a planted quote"),
-         (46, ['THE UNDICI OVERRIDE IS SCOPED TO jsdom (requirement 6', 'the root undici 5.29.0 is untouched', 'no 9.x copy of ip-address remains'], 'requirement 6: undici scoped to jsdom, ip-address nested copies overridden'),
-         (47, ['EVERY SUITE TOUCHED BY A CHANGED LOCKFILE (requirement 7', 'all 10 morgan services, packages/shared, frontend/issuer, anchoring', 'with before/after counts', 'a lock change can break a service without touching its code'], 'requirement 7: every suite a changed lock touches, before/after counts'),
-         (48, ['CROSS-PACKAGE GUARDS (requirement 8', "`git grep -l '<changed path>'`", 'the audit contract suites'], 'requirement 8: the cross-package guards'),
-         (49, ['THE GO STRING AND THE SUBJECT (requirement 9', 'the squash subject is declared WITHOUT `(#n)` and checked as declared + " (#1339)" <= 92 chars', 'Refs KS-1378 and Refs KS-729'], 'requirement 9: the GO string, the subject rule, Refs KS-1378 and KS-729'),
-         (50, ['TIER 1 AND THE TWO-NO-GO CAP (TIER1-CAP-ROUND-1', 'this is ROUND 1 for this class'], 'Tier 1 and the two-NO-GO cap, round 1'),
+              'OK — no standalone-lock advisories outside the triaged baseline.',
+              '2 baseline entries are no longer reported — remove:',
+              '77 files / 836 tests, ALL PASS, rc 0',
+              '89 suites / 1058 tests, ALL PASS, rc 0',
+              '2 suites / 11 tests failed, 87 / 1047 passed, rc 1',
+              'the import removed, annotations kept:',
+              'the annotations reverted, import kept:',
+              'The auth suite is GREEN on the PRE-FIX file (77 / 836).',
+              'host `npm ci` WORKS on this machine.',
+              'is `npm install` (npm 11.5.1, `edgesOut`), not `npm ci`.',
+              'N-1339-2 is TICKETED: KS 1379',
+              'mobile `undici@6.28.0` is inside GHSA-3wwx-pv8p-q78v and is out of scope (mobile tree, KS 769).',
+              'This commit edits no baseline row.',
+              'nodemailer 10.0.12 · morgan 1.12.1 · ip-address 10.7.2 · @types/nodemailer 8.0.1',
+              'Every VALUE use of `nodemailer` is untouched',
+              'I passed `--no-verify` to `git commit`.',
+              '19.8 h, computed 2026-09-29T04:09:23Z',
+              '1937 packages in 29 s',
+              "src/services/email.ts(73,18): error TS2503: Cannot find namespace 'nodemailer'.",
+              "`export type { SendMailOptions, Transporter } from './mailer/index.js';` — a TYPE.",
+              "Kam's four ids cover EVERY row at the fuse"],
+  KEYWORDS=['CLEAN-INSTALL-NODEMAILER-10', 'TSC-AUTH-ON-10', 'TSC-ORIGINATE-ON-10', 'DOCKERFILE-BUILD-PATH', 'AUTH-SUITE-ON-10', 'ORIGINATE-SUITE-IS-JEST', 'N-1339-1-CLOSED',
+            'LEGS-6-7-RED-AT-BASE', 'LEGS-6-7-GREEN-AT-HEAD', 'BASELINE-BYTE-IDENTICAL', 'MORGAN-QUOTE-ESCAPED', 'UNDICI-SCOPED-TO-JSDOM', 'IP-ADDRESS-NO-9X', 'AUDIT-LEG-6', 'AUDIT-LEG-7',
+            'CLEANUP-ROWS-NAMED', 'OUT-OF-SCOPE-LOCKS', 'RUNTIME-MOVED-QUEUE-MSGPACKR-2', 'RUNTIME-MOVED-MSAL-NODE-6', 'STANDALONE-SUITES-RUNTIME-MOVED', 'KS-1379-CONDITION',
+            'ROUND2-DIFF-LINE-BY-LINE', 'ROUND2-NO-SCOPE-CREEP', 'VALUE-USES-UNCHANGED', 'TYPE-ONLY-IMPORT-ELIDED', 'NODEMAILER-CHANGELOG-9-TO-10', 'CALL-SITES-PER-SERVICE', 'ESM-CJS-DUAL-BUILD',
+            'TEST-FILES-BY-PATH', 'EMAIL-IMPORTERS-RUN', 'CROSS-PACKAGE-GUARDS', 'LOCK-DISCOVERY-CONTRACT', 'LOCK-SUITES-BEFORE-AFTER', 'DECLARED-OPEN-OVERLAPS',
+            'GO-STRING-SEAT-B-44TH', 'SUBJECT-LANDS-AT', 'REFS-TWO-KEYS', 'MERGE-ORDER-1339-FIRST', 'REDATE-PR-OUT-OF-KIT', 'NOOP-VS-OVERLAP', 'NO-FOREIGN-KEY', 'ADDENDUM-ONE-LINE-PER-PR',
+            'GATE41-FINDINGS-RECHECKED', 'TSC-EXCLUDES-TESTS', 'AUDIT-FUSE', 'DISK-ENOSPC', 'TIER1-CAP-ROUND-2', 'LAST-ROUND', 'TIERING'],
+  RULES=[(40, ['A CLEAN INSTALL, tsc ON auth AND originate, AND BOTH SUITES ON NODEMAILER 10 (requirement 1', 'a clean `npm ci` per affected lock, never an incremental install', 'ON THE DOCKERFILE BUILD PATH', 'with the runner its package.json names — JEST'], 'requirement 1: a clean install resolving nodemailer 10, tsc rc 0 on auth AND originate on the Dockerfile build path, both suites'),
+         (41, ['EVERYTHING THAT HELD IN gate41 STILL HOLDS (requirement 2', 'at the BASE (RED: the five NEW advisories', "must be BYTE-IDENTICAL to develop's"], 'requirement 2: everything that held in the prior round still holds (legs 6-7 red at base / green at head, baseline byte-identical)'),
+         (42, ['THE RUNTIME-MOVED SERVICES, STANDALONE (requirement 3', "get a clean STANDALONE `npm ci` plus that service's OWN suite in THIS gate", "run each workspace's OWN suite IN that standalone install"], 'requirement 3: clean standalone installs + suites for the runtime-moved services (queue, m365 / shared)'),
+         (43, ['THE ROUND-2 DIFF, LINE BY LINE AGAINST N-1339-1 (requirement 4', "WHOLE, every line, against gate41's N-1339-1"], 'requirement 4: the round-2 diff read line by line against N-1339-1'),
+         (44, ['EVERY TEST FILE THAT REFERENCES A CHANGED PATH (requirement 5', "`git grep -l '<path>' -- '*.test.ts' '*.test.js'` over the WHOLE monorepo", 'Run EVERY one so named'], 'requirement 5: every test file that references a changed path is run'),
+         (46, ['THE GO STRING, THE SUBJECT AND THE MERGE ORDER (requirement 6', 'MERGE ORDER: #1339 ALONE, and it merges FIRST', 'The re-date PR is NOT in this kit'], 'requirement 6: the GO string, the subject rule, the merge order (#1339 first)'),
+         (47, ['TIER 1, ROUND 2 OF 2 — THE LAST ROUND (requirement 7', 'this is ROUND 2 OF 2 for this class', 'A NO GO here is the SECOND'], 'requirement 7: Tier 1, round 2 of 2, the last round'),
+         (48, ['EVERY gate41 FINDING, RE-CHECKED (GATE41-FINDINGS-RECHECKED', 'Each: CLOSED / STILL OPEN / NEW'], 'every finding of the prior round re-checked'),
+         (49, ['EVERY SUITE TOUCHED BY A CHANGED LOCKFILE (LOCK-SUITES-BEFORE-AFTER', 'with before/after counts', 'A lock change can break a service without touching its code'], 'every suite a changed lock touches, before/after counts'),
+         (50, ['NODEMAILER 9 -> 10 AT THE CALL SITES (NODEMAILER-CHANGELOG-9-TO-10', 're-drive the sink ONCE per service at the head through the tsc-EMITTED JS'], 'the call sites driven on nodemailer 10 through the emitted JS'),
          (51, ['MG-3 KEY SCAN (measured by the drafter', 'the key scanner over every mandated body', 'the audit tool prints advisory keys and ticket keys hyphenated'], 'the MG-3 key scan'),
          (52, ['THE ADDENDUM IS ONE LINE PER PR in exactly this shape', '- #NNNN · head <sha12> · subject: `<subject>`', 'NO sub-bullets'], 'the addendum one-line-per-PR shape'),
          (53, ['every PR links its ticket as `contributes`, none as `closes`'], 'the Linear link kinds'),
@@ -137,7 +145,7 @@ for n in ORDER:
         ('STACKED on #%s: its parent head' % stk) if stk else 'merge-base', pr['merge_base'], pr['behind'], ('#%s\'s head' % stk) if stk else 'the launch develop',
         ('over develop + #%s' % stk) if stk else 'over develop', pr['merged_tree'], fl))
     bases.setdefault(pr['merge_base'], []).append('#' + n + (' (STACKED on #%s: its chain base is #%s\'s head)' % (stk, stk) if stk else ''))
-PUSHLOG_NAMES = {'1339': 'push1378.out'}
+PUSHLOG_NAMES = {'1339': 'push.out'}
 def stoprow(n):
     s = SC[n]
     if s.get('log') == 'ABSENT': return '#%s: NO PUSH LOG in the seat record at drafting (%s) — the gate reads it if the seat has written it since, and says so; otherwise UNREAD.' % (n, os.path.basename(PUSHLOG_NAMES.get(n, '?')))
@@ -147,11 +155,28 @@ def stoprow(n):
 inf = '%d open PRs, each path-disjoint: ' % len(P['inflight']) + ', '.join('#%s@%s' % (n, v['head'][:12]) for n, v in sorted(P['inflight'].items(), key=lambda x: -int(x[0])))
 if not inf: inf = 'NONE open at this pin besides the kit; predict_gate42.py re-censuses at every re-pin'
 predict_out = sorted(f for f in os.listdir(GS) if re.match(r'predict_\d+\.out$', f))[-1]
+# MEASURED fill tokens: the census from the pins (predict (e)), the install-probe summary from installprobe_<kit>.json — never typed
+CZ = P['measured'][ORDER[0]]['census']
+rp = lambda x: x[len('Blockchain/Dev/'):] if x.startswith('Blockchain/Dev/') else x   # repo paths, Blockchain/Dev/ elided (systemTest/ etc. stay whole)
+census = '(paths under Blockchain/Dev/ unless they start systemTest/ or another repo root) by exact path %s; naming any package-lock.json %s; importing email.ts by its module spelling `services/email` — auth (%d): %s; originate (%d): %s' % (
+    {k: [rp(x) for x in v] for k, v in CZ['exact'].items()} or 'NONE', [rp(x) for x in CZ['broad']],
+    len(CZ['email_importers']['services/auth']), [rp(x) for x in CZ['email_importers']['services/auth']],
+    len(CZ['email_importers']['services/originate']), [rp(x) for x in CZ['email_importers']['services/originate']])
+IPJ = json.load(open(os.path.join(GS, 'installprobe_%s.json' % KIT), encoding='utf-8'))
+if not all(IPJ.get('controls', {}).values()): die('installprobe_%s.json controls are not ALL PASS — re-run installprobe_%s.py before filling' % (KIT, KIT))
+IS = IPJ['_summary']
+ipsum = 'installprobe_%s.json, npm %s / node %s, controls %d/%d PASS: Dockerfile build path %s; runtime-moved standalone suites %s; moved copies base -> head: queue msgpackr %s -> %s, m365 identity-nested msal-node %s -> %s, shared msal-node %s -> %s' % (
+    KIT, IPJ['npm'], IPJ['node'], sum(IPJ['controls'].values()), len(IPJ['controls']),
+    {k: 'rc %s / %s err' % (v['build_rc'], v['n_errors']) for k, v in IS['tsc'].items()},
+    {k: (v['summary'] or ['rc %s' % v['rc']]) for k, v in IS['standalone_suites'].items()},
+    [v for p_, v in IS['runtime_copies']['base_queue'] if p_.endswith('/msgpackr')], [v for p_, v in IS['runtime_copies']['head_queue'] if p_.endswith('/msgpackr')],
+    [v for p_, v in IS['runtime_copies']['base_m365-integration'] if p_.endswith('identity/node_modules/@azure/msal-node')], [v for p_, v in IS['runtime_copies']['head_m365-integration'] if p_.endswith('identity/node_modules/@azure/msal-node')],
+    [v for p_, v in IS['runtime_copies']['base_shared'] if p_.endswith('/@azure/msal-node')], [v for p_, v in IS['runtime_copies']['head_shared'] if p_.endswith('/@azure/msal-node')])
 V = {'GS': GS, 'KIT': KIT, 'DEVELOP': P['develop'], 'DEVELOP_TREE': P['develop_tree'], 'END_TREE': P['end_tree'], 'END_WITH_SIB': str(P['end_tree_with_sibling']),
      'END_SHORTSTAT': P['end_shortstat'],
      'STACKS': ' '.join('%s:%s' % (c, p) for c, p in sorted(P['stacks'].items())), 'SUBJ_LENS': ', '.join(sublens), 'MEASURED_AT': P['measured_at'], 'FILLED_AT': now(), 'PR_ROWS': '\n'.join(prrows), 'ORDERS': str(P['orders']),
      'BASES': '; '.join('%s for %s' % (b, ', '.join(v)) for b, v in bases.items()), 'INFLIGHT': inf,
-     'PREDICT_OUT': predict_out, 'STOP_ROWS': ' '.join(stoprow(n) for n in ORDER),
+     'PREDICT_OUT': predict_out, 'STOP_ROWS': ' '.join(stoprow(n) for n in ORDER), 'REPORT': K['report'], 'CENSUS': census, 'IPSUM': ipsum,
      'MANDATED': '\n'.join(mand), 'KEYSETS': '\n'.join(keysets),
      'LAUNCHER': K['launcher'], 'PROMPT': K['prompt'], 'OVR': 'QAB42_', 'NROWS': str(len(ORDER)), 'NWORD': WORDS[len(ORDER)],
      'ROWS': '\n'.join(rows), 'ROWS_SUMMARY': ' · '.join('#%s %s (%s, %s)' % (n, ' + '.join(K['prs'][n]['keys']), K['prs'][n]['seat'], K['prs'][n]['tier']) for n in ORDER),

@@ -1,0 +1,49 @@
+LAUNCH ACTION gate42 2026-09-29 15:48:48 AEST / 2026-09-29T05:48:48Z | launcher /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/gatesets/2026-09-29_gate42/launch_qa_secuura_batch1339r2.sh | pinned launch develop 8af6ab8216007462e596daed6b0adcd1e87e34ee | END_TREE 438bc1254bbf7e27637b009e6817bfdb37fb1259
+  pin #1339 fa93ff88f47e993e430889a977a1428c25ca90fe
+--- 0. the pane must be routed (inbox_routing.conf) or cockpit.sh say --mail fails silently
+  routing file /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/inbox_routing.conf — line present: 1 (grep rc=0; want 1 / rc 0)
+--- 0b. the kit's home: launcher filled for /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/gatesets/2026-09-29_gate42 | this script lives in /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/gatesets/2026-09-29_gate42
+  AT HOME — no re-fill
+--- 1. instrument: git ls-remote origin (read from the Secuura checkout, READ-ONLY)
+  ls-remote rc=0 at 05:48:51Z
+    8af6ab8216007462e596daed6b0adcd1e87e34ee	refs/heads/develop
+    fa93ff88f47e993e430889a977a1428c25ca90fe	refs/heads/feature/ks-1378-bump-four-advisory-packages-b43-7
+    fa93ff88f47e993e430889a977a1428c25ca90fe	refs/pull/1339/head
+--- 2. instrument: the GitHub PULLS API (an independent read of each head, and mergeable)
+  pulls API rc=0
+    WIDEN #1339 IN-KIT fa93ff88f47e993e430889a977a1428c25ca90fe | feature/ks-1378-bump-four-advisory-packages-b43-7 | KS-1378: bump morgan, nodemailer, ip-address and undici off five advisories
+    WIDEN-RX ^\s*(KS-1378|KS-1379)\b | WIDEN-BRANCH-RX -b4[34]-\d+$ | BASELINE-ONLY-PATH Blockchain/Dev/scripts/audit/audit-baseline.json
+    API #1339 head fa93ff88f47e993e430889a977a1428c25ca90fe base develop mergeable True reads 1 state open
+    DEVBASE #1339 OK base.ref develop
+--- 2b. the WIDEN census (Wednesday's widen rule): an open PR matching kit.json widen_rx must be in this kit
+    WIDEN #1339 IN-KIT fa93ff88f47e993e430889a977a1428c25ca90fe | feature/ks-1378-bump-four-advisory-packages-b43-7 | KS-1378: bump morgan, nodemailer, ip-address and undici off five advisories
+    WIDEN-RX ^\s*(KS-1378|KS-1379)\b | WIDEN-BRANCH-RX -b4[34]-\d+$ | BASELINE-ONLY-PATH Blockchain/Dev/scripts/audit/audit-baseline.json
+  WIDEN census clean: every matching open PR is in this kit, or MEASURED baseline-only (DISJOINT-OUT-OF-KIT, never refused)
+--- 3. the heads, judged (both instruments == the pin, open, not mergeable:false; every stacked child still based on its parent's branch at the pinned parent head; every other PR based on develop)
+  #1339  ls-remote pull/head fa93ff88f47e993e430889a977a1428c25ca90fe | branch fa93ff88f47e993e430889a977a1428c25ca90fe | API fa93ff88f47e993e430889a977a1428c25ca90fe (state open, mergeable True) | pinned fa93ff88f47e993e430889a977a1428c25ca90fe
+  DEVBASE #1339 OK base.ref develop
+  BOTH INSTRUMENTS AGREE with every pin.
+--- 3b. develop, read at launch: 8af6ab8216007462e596daed6b0adcd1e87e34ee | the launcher's pinned launch develop 8af6ab8216007462e596daed6b0adcd1e87e34ee
+  UNMOVED since the fill — the END_TREE 438bc1254bbf7e27637b009e6817bfdb37fb1259 stands
+--- 4. usage gate
+  usage_gate rc=0
+    usage_gate: OK — weekly usage 43% < 90% (gauge age 0 min)
+--- 5. the launcher's own --check
+  launcher --check rc=0
+    all guards pass:
+      origin develop 8af6ab8216007462e596daed6b0adcd1e87e34ee == the pinned launch develop; heads at branch AND pull/<n>/head: #1339@fa93ff88f; END_TREE 438bc1254bbf7e27637b009e6817bfdb37fb1259; stacks 'none'
+      compare (GitHub API), develop...head per PR, parent...head for a stacked child (merge_base, ahead, behind, the PR's own paths by name):
+        1339 8af6ab8216007462e596daed6b0adcd1e87e34ee ahead=2 behind=0 files=30 paths=Blockchain/Dev/frontend/issuer/package-lock.json,Blockchain/Dev/frontend/issuer/package.json,Blockchain/Dev/package-lock.json,Blockchain/Dev/package.json,Bloc
+      capture, prompt, QA project and repo present; kit at its filled home; 1 rows; thinking directive; capture + commission named; no unfilled token
+      capture and prompt BOTH carry every head in full, every ticket and 25 seat items; the prompt carries 49 by-name keywords and the base-invariant+pairwise / red-proof / fleet-STOP / load+anchoring / holds / legs-3/4/8 / requirement 1: a clean install resolving nodemailer 10, tsc rc 0 on auth AND originate on the Dockerfile build path, both suites / requirement 2: everything that held in the prior round still holds (legs 6-7 red at base / green at head, baseline byte-identical) / requirement 3: clean standalone installs + suites for the runtime-moved services (queue, m365 / shared) / requirement 4: the round-2 diff read line by line against N-1339-1 / requirement 5: every test file that references a changed path is run / requirement 6: the GO string, the subject rule, the merge order (#1339 first) / requirement 7: Tier 1, round 2 of 2, the last round / every finding of the prior round re-checked / every suite a changed lock touches, before/after counts / the call sites driven on nodemailer 10 through the emitted JS / the MG-3 key scan / the addendum one-line-per-PR shape / the Linear link kinds / the no-op vs overlap keys / the disk rule: Data volume, STOP on ENOSPC / no Docker / no stack / npm-only egress rules, the GO string, the addendum rules, the verdict subject, develop / END_TREE in full
+      a launch (not --check) will refuse unless stdin is a TTY (exit 21)
+--- 6. launch through the fleet's own tooling (cockpit.sh add), never raw tmux send-keys
+  cockpit.sh add rc=0
+    usage_gate: OK — weekly usage 43% < 90% (gauge age 0 min)
+    pane 'QA/Secuura-batch1339r2' added (%68)
+--- pane census
+%0 | wednesday | zsh | fleet:0.0
+%68 | QA/Secuura-batch1339r2 | zsh | fleet:0.1
+%67 | Secuura/Blockchain | zsh | fleet:0.2
+%1 | fleet-monitor | zsh | fleet:0.3
+LAUNCHED 2026-09-29T05:48:57Z over develop 8af6ab8216007462e596daed6b0adcd1e87e34ee (END_TREE 438bc1254bbf7e27637b009e6817bfdb37fb1259)

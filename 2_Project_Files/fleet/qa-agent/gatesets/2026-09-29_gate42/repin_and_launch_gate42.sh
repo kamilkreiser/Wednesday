@@ -7,9 +7,11 @@
 #        (predict_gate42.py then fill_gate42.py; both re-read origin and refuse on any disagreement) — rc 8;
 #   (1)  origin develop + refs/pull/<n>/head + each branch, by `git ls-remote` READ from the Secuura checkout — rc 2;
 #   (2)  each head re-read from the GitHub PULLS API (a second, independent instrument; also `mergeable`, re-read up to 3x while GitHub reports null) — rc 3;
-#   (2b) the WIDEN census (kit.json `widen_rx` on TITLES and `widen_branch_rx` on BRANCHES — Seat B 43rd's `-b43-<n>` segment — read by the PULLS API
-#        list of open PRs): rc 15 if an open PR matching either is NOT in this kit (gate42 has no sibling) — Wednesday's widen rule: such a PR must be
-#        added to the kit (with its own cells) by a re-draft, never silently left out;
+#   (2b) the WIDEN census (kit.json `widen_rx` on TITLES and `widen_branch_rx` on BRANCHES — Seat B 43rd's `-b43-<n>` and Seat B 44th's `-b44-<n>` —
+#        read by the PULLS API list of open PRs): rc 15 if an open PR matching either is NOT in this kit (gate42 has no sibling) — Wednesday's widen rule:
+#        such a PR must be added to the kit (with its own cells) by a re-draft, never silently left out — EXCEPT the ONE measured class of kit.json
+#        `widen_disjoint_rule` (Wednesday's gate42 commission, requirement 6): an open WIDEN PR whose ENTIRE file list (PULLS API /files) is exactly
+#        the audit baseline file is Seat B 44th's separate re-date PR (merges AFTER #1339): printed DISJOINT-OUT-OF-KIT and not refused;
 #   (3)  rc 11 unless every head == the launcher's pin on BOTH instruments (WHOLE-FIELD equality) AND each PR is open AND not `mergeable: false` AND
 #        every STACKED child's API base is still its parent's branch at the parent's pinned head (kit.json `stacks`; a retargeted child = a new shape). A
 #        STALE HEAD REFUSES: a new head needs a re-capture and a re-draft; this script never adopts a head it was not given. `mergeable: null` after the
@@ -23,10 +25,12 @@
 # --dry-run: steps 0-3 and a REPORT of 0b/3b (no re-fill, no re-pin, no write outside the scratchpad), then stop before (4); the routing line's
 # absence is reported, not refused; a moved develop is reported and exits 10. READ-ONLY in the Secuura checkout: ls-remote only. Nothing is merged,
 # deployed or commented; no container is started. The pins are READ from the launcher itself. G42_ROUTING: a routing-file override for the controls only.
-# G42_WIDEN_RX: a WIDEN-regex override (titles; G42_WIDEN_BRANCH_RX the same for branches) for the controls only (a real launch refuses when it is set).
+# G42_WIDEN_RX: a WIDEN-regex override (titles; G42_WIDEN_BRANCH_RX the same for branches; G42_BASELINE_ONLY_PATH a stand-in for the widen_disjoint_rule
+# path) for the controls only (a real launch refuses when any is set).
 # G42_STOP_AFTER_3B: controls only — a REAL run (not --dry-run) stops right after step 3b, so a control can exercise the real re-pin and nothing after it.
-# Shape copied from gate40's repin (gate39 -> gate38 -> gate37 lineage), re-keyed to gate42's ONE row (#1339, Seat B 43rd); the STACK check in steps 2/3
-# stays (kit.json `stacks` is EMPTY for gate42, so every PR must read DEVBASE OK); the widen census also reads branches (Seat B 43rd's -b43-<n>: six more are HELD unpushed — any opened before launch refuses rc 15); no port step (no DB).
+# Shape copied from gate41's repin (gate40 -> gate39 -> gate38 lineage), re-keyed to gate42's ONE row (#1339 round 2, Seat B 44th); the STACK check in
+# steps 2/3 stays (kit.json `stacks` is EMPTY for gate42, so every PR must read DEVBASE OK); the widen census also reads branches (-b43-<n> / -b44-<n>: six
+# are HELD unpushed — any opened as a PR before launch refuses rc 15; the baseline-only re-date PR is the one measured exception); no port step (no DB).
 # Usage: repin_and_launch_<kit>.sh <launcher path> <a scratchpad dir under /private/tmp/claude-501/> [--dry-run]
 set -u
 GS="$(dirname "$(/bin/realpath "$0")")"
@@ -79,7 +83,7 @@ echo "  ls-remote rc=$rc at $(date -u +%H:%M:%SZ)"; sed 's/^/    /' "$OUTP.lsrem
 CUR_DEV="$(awk '$2=="refs/heads/develop"{print $1}' "$OUTP.lsremote.out")"
 
 echo "--- 2. instrument: the GitHub PULLS API (an independent read of each head, and mergeable)"
-NS="$NS" KITJSON="$GS/kit.json" WRX_OVR="${G42_WIDEN_RX:-}" WBX_OVR="${G42_WIDEN_BRANCH_RX:-}" python3 - > "$OUTP.api_heads.out" 2>&1 <<'PY'
+NS="$NS" KITJSON="$GS/kit.json" WRX_OVR="${G42_WIDEN_RX:-}" WBX_OVR="${G42_WIDEN_BRANCH_RX:-}" BO_OVR="${G42_BASELINE_ONLY_PATH:-}" python3 - > "$OUTP.api_heads.out" 2>&1 <<'PY'
 import json, os, time, urllib.request, urllib.error
 tok = ''
 for l in open('/Volumes/DevMASTER/!CODING/Secuura/Blockchain/4_Credentials/.env', encoding='utf-8'):
@@ -95,10 +99,15 @@ import re
 k = json.load(open(os.environ['KITJSON'], encoding='utf-8'))
 rx = os.environ.get('WRX_OVR') or k.get('widen_rx', r'(?!x)x'); bx = os.environ.get('WBX_OVR') or k.get('widen_branch_rx', r'(?!x)x'); known = set(k['this_batch']) | set(k['sibling_batch'])
 req = urllib.request.Request('https://api.github.com/repos/Secuura/Distributed_Secuura/pulls?state=open&per_page=100', headers={'Authorization': 'Bearer ' + tok, 'Accept': 'application/vnd.github+json'})
+bo = os.environ.get('BO_OVR') or k.get('widen_disjoint_rule', {}).get('baseline_only_path', '')
+def files(num):
+    r = urllib.request.Request('https://api.github.com/repos/Secuura/Distributed_Secuura/pulls/%s/files?per_page=100' % num, headers={'Authorization': 'Bearer ' + tok, 'Accept': 'application/vnd.github+json'})
+    return sorted(f['filename'] for f in json.load(urllib.request.urlopen(r, timeout=60)))
 for x in json.load(urllib.request.urlopen(req, timeout=60)):
     if re.match(rx, x['title']) or re.search(bx, x['head']['ref']):
-        print('WIDEN #%s %s %s | %s | %s' % (x['number'], 'IN-KIT' if str(x['number']) in known else 'OUTSIDE', x['head']['sha'], x['head']['ref'][:70], x['title'][:100]))
-print('WIDEN-RX %s | WIDEN-BRANCH-RX %s' % (rx, bx))
+        cls = 'IN-KIT' if str(x['number']) in known else ('DISJOINT-OUT-OF-KIT' if bo and files(x['number']) == [bo] else 'OUTSIDE')
+        print('WIDEN #%s %s %s | %s | %s%s' % (x['number'], cls, x['head']['sha'], x['head']['ref'][:70], x['title'][:100], (' | touches ONLY %s (kit.json widen_disjoint_rule: the separate audit-baseline re-date PR, merges AFTER #1339)' % bo) if cls == 'DISJOINT-OUT-OF-KIT' else ''))
+print('WIDEN-RX %s | WIDEN-BRANCH-RX %s | BASELINE-ONLY-PATH %s' % (rx, bx, bo or 'NONE'))
 PP = {}
 for n in os.environ['NS'].split():
     p = get(n); tries = 1
@@ -120,8 +129,8 @@ echo "  pulls API rc=$rc"; sed 's/^/    /' "$OUTP.api_heads.out"
 echo "--- 2b. the WIDEN census (Wednesday's widen rule): an open PR matching kit.json widen_rx must be in this kit"
 awk '$1=="WIDEN" || $1=="WIDEN-RX"' "$OUTP.api_heads.out" | sed 's/^/    /'
 if awk '$1=="WIDEN" && $3=="OUTSIDE"' "$OUTP.api_heads.out" | grep -q .; then echo "REFUSING TO LAUNCH: a WIDEN PR exists outside this kit — re-draft to add it (with its own cells), never launch around it"; exit 15; fi
-[ -z "${G42_WIDEN_RX:-}${G42_WIDEN_BRANCH_RX:-}" ] || [ "$DRY" = 1 ] || [ -n "${G42_STOP_AFTER_3B:-}" ] || { echo "REFUSING: G42_WIDEN_RX / G42_WIDEN_BRANCH_RX are controls-only overrides"; exit 15; }
-echo "  WIDEN census clean: every matching open PR is in this kit"
+[ -z "${G42_WIDEN_RX:-}${G42_WIDEN_BRANCH_RX:-}${G42_BASELINE_ONLY_PATH:-}" ] || [ "$DRY" = 1 ] || [ -n "${G42_STOP_AFTER_3B:-}" ] || { echo "REFUSING: G42_WIDEN_RX / G42_WIDEN_BRANCH_RX / G42_BASELINE_ONLY_PATH are controls-only overrides"; exit 15; }
+echo "  WIDEN census clean: every matching open PR is in this kit, or MEASURED baseline-only (DISJOINT-OUT-OF-KIT, never refused)"
 echo "--- 3. the heads, judged (both instruments == the pin, open, not mergeable:false; every stacked child still based on its parent's branch at the pinned parent head; every other PR based on develop)"
 bad=0
 for n in $NS; do

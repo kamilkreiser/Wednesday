@@ -1,19 +1,22 @@
 #!/usr/bin/env python3
 """capture_mail_gate42.py — build the gate's CAPTURE for the gate42 kit (kit.json beside this script): mail_<kit>_ready.md + stopcounts_<kit>.json.
 
-THIS ROUND ONE READY MESSAGE: Seat B 43rd's READY FOR QA mail for #1339 in wednesday-agent@, subject beginning
-`[Secuura/Blockchain -> Wednesday] READY FOR QA (Seat B 43rd): PR #1339`. Wednesday's commission named the SUBJECT, not the id: the drafter found the
-id by ONE read-only AgentMail API listing of wednesday-agent@ (GET /v0/inboxes/<inbox>/messages?limit=100 — it touches NO seen-state; inbox_digest.sh's
-seen file is written only by its own listing modes, never by this script), filtered by that subject prefix (exactly one match, 2026-09-29T02:08:15Z).
-The mail is then read BY ID (`inbox_digest.sh full <inbox> <message_id>`) and captured VERBATIM with its TEXT_SHA256; the by-id read's own Subject
-line must begin with the prefix (asserted). For the PR the capture also carries (1) the PR BODY (gh_body_<n>.md, as read by gh_read_gate42.py), (2)
-EVERY commit message in the PR's chain over its develop merge-base (read from the scratch clone, `git log --format=%B`), (3) the push log's fleet
-STOP counts, READ by BOUNDED REGION between consecutive `=== <path> ===` headers, with a NOT-FOUND control (a header that does not exist must read
-NOT FOUND). Seat B 43rd's push log is NOT in its record folder this round (2026-09-29_seatB-43rd/ holds only its tools, READ by `find`): it is in the
-seat's SESSION SCRATCHPAD (push1378.out + push1378.end — a /private/tmp path that does not survive a reboot; no .rc file: the log's own last line
-reads `RC=0`). SEAT RECORDS captured whole: Seat B 43rd's handover, and from its session scratchpad its leg 6 / leg 7 outputs, its nodemailer
-install-and-suites transcript (nmtest.out — the EOVERRIDE install the gate must not repeat), its override test, its reachability read and the PR
-body it pushed. Shape copied from gate40's capture (gate39 -> gate38 lineage), re-keyed for Seat B 43rd, one PR, no local-model READY.
+THIS ROUND ONE READY MESSAGE: Seat B 44th's READY FOR QA mail for #1339 ROUND 2 in wednesday-agent@, subject beginning
+`[Secuura/Blockchain -> Wednesday] READY FOR QA (Seat B 44th): PR #1339 round 2`. Wednesday's commission named the round, not the id: the drafter
+found the id by ONE read-only AgentMail API listing of wednesday-agent@ (_mail_list_gate42.py -> _mail_list_1.out: GET /v0/inboxes/<inbox>/messages
+?limit=100 — it touches NO seen-state; inbox_digest.sh's seen file is written only by its own listing modes, never by this script), filtered by
+subjects naming #1339 (exactly one round-2 READY, 2026-09-29T04:09:25Z). The mail is then read BY ID (`inbox_digest.sh full <inbox> <message_id>`)
+and captured VERBATIM with its TEXT_SHA256; the by-id read's own Subject line must begin with the prefix (asserted). THREE MORE MAILS are captured by
+id, verbatim, as context the gate grades (never as evidence): Wednesday's ANSWER to Seat B 44th's plan (03:54:40Z — Q3 (c): N-1339-2 TICKETED as
+KS-1379 with THE GATE CONDITION on the runtime-moved services), Wednesday's ADDENDUM ordering the audit-baseline re-date as its OWN PR (04:16:07Z — not
+in this kit) and Seat B 44th's CORRECTION retracting its fuse finding (04:22:03Z). For the PR the capture also carries (1) the PR BODY
+(gh_body_<n>.md, as read by gh_read_gate42.py), (2) EVERY commit message in the PR's chain over its develop merge-base (read from the scratch clone,
+`git log --format=%B`: round 1 AND round 2), (3) the push log's fleet STOP counts, READ by BOUNDED REGION between consecutive `=== <path> ===`
+headers, with a NOT-FOUND control (a header that does not exist must read NOT FOUND). Seat B 44th's round-2 push log IS in its record folder
+(2026-09-29_seatB-44th/push/push.out + push.rc, READ by `ls`). SEAT RECORDS captured whole: Seat B 44th's round-2 evidence (n1339/: versions,
+npm ci, the shared build, tsc BEFORE / AFTER per service, the suite tails, the four arms), its round-2 commit message draft, and Seat B 43rd's
+handover (round 1's author); the PRIOR ROUND's verdict (gate41's report.md, whole). Shape copied from gate41's capture (gate40 -> gate39 lineage),
+re-keyed for Seat B 44th, one PR, no local-model READY.
 Writes only beside this script. Usage: capture_mail_gate42.py <scratchpad dir>"""
 import hashlib, json, os, re, subprocess, sys, datetime
 G = os.path.dirname(os.path.abspath(__file__))
@@ -21,15 +24,23 @@ K = json.load(open(os.path.join(G, 'kit.json'), encoding='utf-8'))
 P = json.load(open(os.path.join(G, 'pins_%s.json' % K['kit']), encoding='utf-8'))
 SP = sys.argv[1]
 CL = os.path.join(SP, 'g42_sp', 'clone.git')   # the scratch clone predict_gate42.py builds (fetch from origin); capture runs AFTER predict
-B43SP = '/private/tmp/claude-501/-Volumes-DevMASTER--CODING-Secuura-Blockchain/f77d1935-dcce-45e9-85f6-265f00171214/scratchpad'   # Seat B 43rd's session scratchpad (READ: found by `find` for push1378.*, 2026-09-29 12:2x AEST)
+B44SP = '/private/tmp/claude-501/-Volumes-DevMASTER--CODING-Secuura-Blockchain/e903ad14-bad6-4cb0-b9f5-1d31655af0ce/scratchpad'   # Seat B 44th's session scratchpad (READ: `ls -t` — ready_body.txt 14:09 AEST, the round-2 READY's own body)
 REC = '/Volumes/DevMASTER/!CODING/Secuura/Blockchain/5_Project_History/'
-PUSHLOG = {'1339': B43SP + '/push1378.out'}   # READ by `find` at drafting (2026-09-29 12:2x AEST): NOT in the record folder
+B44REC = REC + '2026-09-29_seatB-44th/'
+PUSHLOG = {'1339': B44REC + 'push/push.out'}   # READ by `ls` at drafting: the round-2 push (push.rc beside it reads `rc=0`)
 DIGEST = '/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/inbox_digest.sh'
-READY_SUBJECT = {'1339': '[Secuura/Blockchain -> Wednesday] READY FOR QA (Seat B 43rd): PR #1339'}
-READY_MAIL = {'1339': '<010001a0eaeb7a4a-00bace97-072c-43a5-8a5e-4e46f0503914-000000@email.amazonses.com>'}   # found by the ONE read-only listing described above
+READY_SUBJECT = {'1339': '[Secuura/Blockchain -> Wednesday] READY FOR QA (Seat B 44th): PR #1339 round 2'}
+READY_MAIL = {'1339': '<010001a0eb5a66b0-9168c656-67be-4673-9e7e-9da4a29af76e-000000@email.amazonses.com>'}   # found by the ONE read-only listing described above (_mail_list_1.out)
+EXTRA_MAILS = [('<010001a0eb4ce52c-84b633d1-578d-410d-8f16-faefb99a7fd3-000000@email.amazonses.com>', '[Wednesday -> Secuura/Blockchain] ANSWER: plan confirmation (Seat B 44th)'),
+               ('<010001a0eb6088a1-aa559b30-fd4a-4abc-80e6-b8ccbcb36ffa-000000@email.amazonses.com>', '[Wednesday -> Secuura/Blockchain] ADDENDUM (Seat B 44th): Kam'),
+               ('<010001a0eb65f74c-f7e82ad0-228b-4f5c-91b8-db5f75471756-000000@email.amazonses.com>', '[Secuura/Blockchain -> Wednesday] CORRECTION (Seat B 44th)')]
 READY_FILE = {}
-FILES = [(REC + 'HANDOVER-seatB43-2026-09-29.md', 0), (B43SP + '/leg6.out', 0), (B43SP + '/leg7.out', 0), (B43SP + '/nmtest.out', 0), (B43SP + '/ovtest.out', 0),
-         (B43SP + '/reachability.md', 0), (B43SP + '/pr1378-body.md', 0), (B43SP + '/push1378.out', 40)]
+N1339 = B44REC + 'n1339/'
+FILES = [(N1339 + 'versions.txt', 0), (N1339 + 'npm_ci.out', 0), (N1339 + 'shared_build.out', 0), (N1339 + 'tsc_auth_BEFORE.out', 0), (N1339 + 'tsc_auth_AFTER.out', 0),
+         (N1339 + 'tsc_originate_BEFORE.out', 0), (N1339 + 'tsc_originate_AFTER.out', 0), (N1339 + 'suite_auth.out', 12), (N1339 + 'suite_originate.out', 12)]
+FILES += [(os.path.join(N1339 + 'arms', f), 12) for f in sorted(os.listdir(N1339 + 'arms'))]
+FILES += [(B44SP + '/commitmsg.txt', 0), (B44REC + 'push/push.out', 40), (REC + 'HANDOVER-seatB43-2026-09-29.md', 0),
+          ('/Volumes/DevMASTER/!CODING/Testing Agent MAIN/projects/secuura/reports/2026-09-29-batch1339-g41/report.md', 0)]
 def sha(t): return hashlib.sha256(t.encode('utf-8')).hexdigest()
 def stop(path):
     """bounded-region parse: for each `=== <path> ===` header, the LAST `N passed, M failed` line before the next header"""
@@ -62,8 +73,9 @@ def stop(path):
             'end': open(path.rsplit('.', 1)[0] + '.end').read().strip() if os.path.exists(path.rsplit('.', 1)[0] + '.end') else '?'}
 now = datetime.datetime.now(datetime.timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ')
 out = ['# CAPTURE for %s (%s) — %s' % (K['kit'], K['pane'], now), '',
-       'Seat B 43rd\'s READY FOR QA MAIL for #1339 (its id found by ONE read-only API listing filtered by the commissioned subject prefix, then read BY ID from',
-       'wednesday-agent@) is captured VERBATIM below with its TEXT_SHA256, beside the PR\'s BODY, its COMMIT MESSAGE (over its develop merge-base) and its push log\'s STOP counts.', '']
+       'Seat B 44th\'s ROUND-2 READY FOR QA MAIL for #1339 (its id found by ONE read-only API listing filtered by subjects naming #1339, then read BY ID from',
+       'wednesday-agent@) is captured VERBATIM below with its TEXT_SHA256, beside the PR\'s BODY, its COMMIT MESSAGES (round 1 and round 2, over its develop merge-base), its push log\'s STOP',
+       'counts, three context mails read by id, Seat B 44th\'s round-2 records and the prior round\'s verdict (gate41\'s report, NO GO on N-1339-1).', '']
 print('capture_mail_gate42 (%s) %s clone %s' % (K['kit'], now, CL))
 counts = {}
 for n in sorted(K['prs']):
@@ -93,6 +105,13 @@ for n in sorted(K['prs']):
             '### EVERY COMMIT MESSAGE IN THE CHAIN over %s (oldest first) TEXT_SHA256 %s' % (cb, sha(msg)), '', msg, '',
             '### PUSH LOG STOP COUNTS (READ, bounded region; %s)' % PUSHLOG[n], '', '```', json.dumps(s, indent=1, ensure_ascii=False), '```', '']
     print('#%s head %s ready sha %s (%s) body sha %s msg sha %s | push log: %s' % (n, head, sha(rtxt)[:16], rsrc[:40], sha(body)[:16], sha(msg)[:16], {k: v for k, v in s.items() if k != 'log'}))
+for mid, pfx in EXTRA_MAILS:
+    r = subprocess.run(['bash', DIGEST, 'full', 'wednesday-agent@agentmail.to', mid], capture_output=True, text=True)
+    assert r.returncode == 0 and r.stdout.strip(), 'context mail %s unreadable (rc %d)' % (mid, r.returncode)
+    subj = [l for l in r.stdout.splitlines() if l.startswith('Subject: ')][:1]
+    assert subj and subj[0][len('Subject: '):].startswith(pfx), 'the by-id read of %s is not the expected mail (subject %r)' % (mid, subj)
+    out += ['## CONTEXT MAIL %s (wednesday-agent@, inbox_digest.sh full, by id) TEXT_SHA256 %s' % (mid, sha(r.stdout)), '', r.stdout, '']
+    print('context mail %s sha %s | %s' % (mid[:28], sha(r.stdout)[:16], subj[0][:110]))
 for f, tail in FILES:
     t = open(f, encoding='utf-8', errors='replace').read()
     if tail:
