@@ -6,6 +6,19 @@ status: live
 supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s1-wholesale
 ---
 
+## 🔴 DELTA 130 — 2026-09-29 20:30 ROTATION-READY HANDOVER (s93, ctx 78%; rotating at the first safe boundary in 80-90). **READ THIS FIRST — it supersedes 127-129 on state; their OWED lines are folded in here.**
+### FIRST WORK FOR THE NEXT SEAT
+1. **BATCH 10 GATE RUNNING %50 (QA/NexusAI-batch10)**, hold qa-b10-H1-hold GRANTED ~20:1x AEST (~2 h). Members: RD-733 @ ed4c1bf (M, t2 + browser leg), RD-703 @ bd8e8cd (O, t2), **RD-707 @ e224ab9 (O, t1, ADDENDUM 09:4xZ)**, **RD-732 @ daf2210 (M, t2, ADDENDUM 10:0xZ)**. Brief fleet/qa-agent/briefs/2026-09-29_nexusai-gate-batch10-rd733-rd703.md; report -> Testing Agent MAIN/projects/nexusai/reports/2026-09-29-gate-batch10/report.md. ON THE VERDICT: read whole, score, pane_close.sh %50, RELEASE each to its author in C-186 turns (template: fleet/briefs_staged/2026-09-29_nexusai_batch9_release.md). RD-733 merging removes rd465 O-1 from C-185's known set; RD-723 merging removes rd638 E2.
+2. **OWED TO KAM (live board, chat_reply.sh --project Datasec):** (a) the ip-address exposure, ONCE the gate has measured it (M's READY: in the runtime image but NOT loaded by the server; RD-732 fixes it) — never relayed from the READY alone; (b) that the User Access tab bug was confirmed in a browser (M 03:44Z) and is fixed by RD-733 (after its verdict). Vision stays PAUSED (DELTA 125); VSP-65/VSP-89/DB pile-up his.
+3. **MERGES (verify each MERGED at source: ls-remote main + Build failing set by name + demo SKIPPED):** main = f9cb440 (RD-204, P, Build PASS, failing set {}). NEXT TURN = O's RD-466 (01fb77e, ticket s86o-merge-rd466, queued directly behind the gate). Then P's RD-197 (withdrawn at 09:56Z after a turn collision; re-forward-merges after RD-466's Build is green). Released and waiting their turns: N RD-723 -> RD-685 -> RD-314 -> RD-700 -> RD-609 -> RD-648 (b12a475); M RD-618 (combined server.js re-run, C-68 set named in the batch 9 release).
+4. N's RD-591: not ready (rd549 red only in the 55-file named batch; tracing). M: RD-735 hold queued (not yet read by Tuesday — ask/await its READY).
+### RULES/RULINGS TODAY worth carrying (all delivered into NexusAI CLARIFICATIONS or mails)
+C-190 landing step (PR -> every CodeQL Analyze -> FF push of the same sha; refused = STOP) · C-185 known set {rd638 E2, rd465 O-1 (that TypeError only)} (:1912) · C-187 addendum when RD-466 is on main (:1933) · RD-703 shape (a) · npm-audit red on every ref until RD-732 (not a hold) · merge-turn rule: one merge ticket at a time, order O,P,M,N.
+### FLOOR
+%0 tuesday · %50 QA/NexusAI-batch10 | %22 P · %21 N · %19 M · %29 O · %1 monitor. All four builders holding by design. Usage 76%.
+### LEDGER this seat today: 3 rows. Digests regenerated after the last row (12:4x); no lesson edit since.
+### KAM TODAY: all four morning messages + 16:17/16:18 KS-1374 (Secuura -> routed to Wednesday verbatim, receipts 201). Nothing unanswered.
+
 ## 🟢 DELTA 129 — 2026-09-29 19:05 (s93, ctx 70% CHECKPOINT; band 80-90). **READ THIS FIRST, THEN 128 (its STATE and OWED lines are current except below).**
 - **NexusAI main = f9cb440** (P, batch-6 merge 2 RD-204 via PR #33; Tuesday ls-remote 19:0x). **OWED: P's MERGED mail** (Build failing set by name inside {rd638 E2, rd465 O-1}, demo SKIPPED) — not yet arrived at 19:03; P's next is merge 3 RD-197 in its turn.
 - Lock at 18:1x: O `rd707-fulldiag` (a diagnostic after proof 2 — expect an O STATUS on RD-707), queue M `rd733-verify`, N `rd591-ready2` (RD-591 round 6: branch-caused failure, fix queued).
