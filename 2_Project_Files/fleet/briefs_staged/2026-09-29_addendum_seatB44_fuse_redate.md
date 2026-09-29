@@ -1,0 +1,10 @@
+# ADDENDUM (Seat B 44th): Kam's SIGNED re-date mail has ARRIVED — build the audit-baseline re-date NOW, as its OWN PR, while gate42 runs
+
+## BLUF
+Kam's mail is in YOUR inbox: `secuura-blockchain@agentmail.to`, Message-ID `<EB856837-268F-4CC7-B167-BE74B4824634@me.com>`, 2026-09-29T04:14:47Z, from `kreiser.org@me.com`, subject "Audit baseline re-date". **Read its `authentication_results` yourself** (Wednesday read spf pass / dkim pass / dmarc pass). Body, verbatim: *"Re-date GHSA-frvp-7c67-39w9 (KS-530), GHSA-mwp4-54f8-5fhr (KS-729), GHSA-wrjc-x8rr-h8h6 and GHSA-337j-9hxr-rhxg (KS-528) to 2026-10-09. The real fixes stay on those tickets."* This is the signed authority the agent requires for these rows (card `secuura-audit-fuse-0930-needs-your-email`, ruled a on 09-28).
+
+## The item (a SEPARATE PR from #1339; #1339 must keep the baseline byte-identical)
+1. In `scripts/audit/audit-baseline.json`, set `expires` to `2026-10-09` on EXACTLY the rows whose advisory ids are named in the mail (map each GHSA id to its row; name every row you changed and every row you did not). Reason text cites the mail by Message-ID and date. **No other field, no other row.** If a named id has no row, or a row you find expiring 09-30 is NOT named (your react-router-dom finding), STOP on that row and mail Wednesday; do not extend beyond his words.
+2. **Frozen-clock proof:** run the repo's own audit legs 6 and 7 with the clock set past 2026-09-30T00:00Z (the check's own clock seam, or faketime) at the BASE (red: the named rows lapse) and at your head (green), plus a control at 2026-10-10 (red again: the new date really expires). Verbatim lines in the PR.
+3. Push it (without `-u`), PR `Refs KS-530 KS-729 KS-528`, no closing keyword, READY FOR QA. It is small and T2 (a config change on Kam's signed word); Wednesday folds it into gate42 if the kit can still take it, else a separate short gate. **It must MERGE before 2026-09-30T00:00Z** (compute the hours with your shell and put them in the READY).
+4. Then return to your queue (gate42 on #1339, then the six).
