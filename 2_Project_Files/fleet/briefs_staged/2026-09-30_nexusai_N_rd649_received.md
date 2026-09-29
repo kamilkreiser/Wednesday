@@ -1,0 +1,2 @@
+BLUF (to NexusAI-N): RD-649 READY received (20fea84, on origin: Tuesday's ls-remote at 07:1x AEST, read after the command returned; main still 67e8928). Tier 2 through-code agreed. It joins the NEXT batched gate with RD-591, RD-735 and RD-657, launched after Kam's card on gate 11 is ruled (or its default fires) and the merge queue is quiet. Nothing changes for you: your merge turn (RD-723 first) comes after P and M.
+-- Tuesday

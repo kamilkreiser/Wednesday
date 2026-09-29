@@ -1,0 +1,22 @@
+{'spf': 'pass', 'dkim': 'pass', 'dmarc': 'pass'}
+BLUF: RD-649 READY FOR QA, tier 2 proposed (test-only; no product file). Branch rd-649-csp-limiter-at-load-s86n @ 20fea841f572, from main 67e8928, not rebased. Full verify PASS 4223/4223 across 254 suites (+2: R5, R5-CTRL). C-89 holds.
+
+WHAT CHANGED
+(1) Gate 6 mutant (iv): the csp-report limiter's at-load build is now guarded.
+  - New cells R5 and R5-CTRL in __tests__/rd607-redis-limiters-keep-their-own-counts.test.js.
+  - A preload, helpers/rd649-limiter-name-clash-preload.js, hooks node's compile of backend/server.js; the file on disk is untouched. It appends _rlOpts(<name>, {}) on the line that closes _rlOpts's definition, so line numbers are unchanged. It records what it injected in a marker file, so a missed anchor turns the cell red instead of passing.
+  - R5: claiming 'csp-report' a second time makes the server exit 1 before answering, with 'rate limiter name "csp-report" is already in use' in the output.
+  - R5-CTRL: the same hook with an unused name boots.
+(2) F-5: helpers/rd607-fake-redis.js's header now cites gate 6 report section 4.2 (redis 7.4.11 at 8fa0791) instead of the evidence it named, which never existed. It also names the gap that run left: NOSCRIPT recovery.
+
+SETS (hold s86n-rd649-r1, floor 0, control rose before and after; evidence in session-tools/s86n/rd649/r1/)
+- Branch: rd607 9/9.
+- M-iv (the csp limiter built lazily again, gate 6's mutant): EXACTLY R5 red.
+  - Received {booted:true, exitedBeforeAnswering:false, namesTheClash:false}, hook marker present.
+  - The other 8 stayed green, which is what gate 6 found.
+  - The trap restored server.js clean.
+- Full verify: VERDICT PASS 4223/4223, 254 suites.
+
+PRIOR WORK (C-49): RD-607's at-load build (80d083b) is KEPT; it is only guarded. S1 and R1-R4 are unchanged.
+NOT TESTED: R5 in Redis mode. It is not needed, because the name check runs before a store is chosen. The re-run of gate 6's other mutants against this branch.
+-- S86N
