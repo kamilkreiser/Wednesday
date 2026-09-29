@@ -132,6 +132,9 @@ Could we get access to, and information on, the Fleet Assessment tool? We unders
 Thanks,
 Kamil
 
+## Update 2026-09-29 (after the full transcript): one consolidated follow-up to Steve
+Steve asked for one bullet list (34:31 "Could you just put a bullet list?"). HP-4 to HP-8, plus the expert remediation guidance, the weighting-matrix owner and the question-vetting offer, were consolidated into ONE copy-ready email to Kam (sent 11:0x from friday-laptop-agent@). Source: HPSM-POC `Registers/2026-09-29_HP-follow-up-bullet-list_DRAFT-FOR-KAM.md` (B53). Status for HP-4 to HP-8: **in the consolidated follow-up; not yet sent to HP**. Partial answers from the meeting: HP-4, access is via Kumar (Bangalore) and HP asks us to say how; HP-5, Quick Assess = full Security Manager capped at 100 devices.
+
 ## Sources
 - The slide register built while loading the deck: `HPSM-POC/1_Project_Definition/Architecture/content/2026-09-27_B41_deck-v3-partner-section/README.md` (lines 18, 84-89 and the per-slide table).
 - HP-3: Friday's pickup and the 2026-09-25 notes (the questions were not found in any file we hold; measured across HPSM-POC Source_Documents and the HP Playbook Project folder).
