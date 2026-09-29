@@ -12,6 +12,16 @@ supersede: replace wholesale; previous = NEXT-PICKUP-FRIDAY.md.pre-0925-rotate-s
 
 **The tree is at `/Users/kamilkreiser/1FILES TO SYNC/FRIDAY`.** Quote every path (spaces).
 
+## 🔴 STATE 2026-09-29 15:4x (Friday, ctx ~76%) — ADDS to the 15:3x block
+- **Kam APPROVED the hosted plan** (15:07, hpsmpoc-hosted-plan-approve a, "Approve with the seat's recommendations"): build H1–H7 FIRST (B54 plan §6: `Architecture/2026-09-29_hosted-demo-plan-and-cost_FOR-KAM.md`, merged in analysis 4b86480).
+  - Then a new RG `hpsm-poc-demo-rg` australiaeast, sub `a6b8fe11-…`, tenant `ec01829b-…`, B1, SQL S2 (~A$49/mo), a A$150 budget, B2B guests, DRAFT scoring on hosted.
+  - **Brief H1–H7 right AFTER #53 merges** (H1 Entra sign-in touches `bff.ts` and web auth, which #53 also changes).
+  - Tell Kam before creating ANY Azure resource. The deploy happens only when H1–H7 are merged.
+- **Route A:** the URL + secret are in HPSM-POC `4_Credentials/.env` (FEEDBACK_AUTOMATION_WEBHOOK_URL/_TOKEN, mode 600).
+  - Test: POST 200, but no Jira issue appeared, and a WRONG token also got 200.
+  - Waiting on Kam: the flow's on/off state + audit log (asked 15:40, 3 steps on the tab).
+  - After it works: a seat does R-1..R-3 (B54 doc §6); then advise Kam to Regenerate the secret (it passed through chat/terminal).
+
 ## 🔴 STATE 2026-09-29 15:3x (Friday, ctx 74%) — supersedes the 14:2x blocks where they differ
 - **Composer:** main **5b5252c** (#9, #10, #11 merged; 0 open CodeQL alerts, verified at source). **B22** (pane Composer-C) = the wizard follows E8 + the four choices; it rebases onto 5b5252c (ADDENDUM-1). On READY: open the PR (CodeQL) → QA gate (a new seat) → merge → SCREENSHOTS TO KAM on the Friday tab (`chat_reply --file`) → only after Kam has seen them, deploy per `DEPLOY.md` (backup first; the demo VM `remote-update.sh`, as C-06/C-08/C-09 did). Kam's word = card composer-two-logins-deploy-for-paul-friday (a) at 10:43.
 - **HPSM-POC:** main **1bcbeb1**.
