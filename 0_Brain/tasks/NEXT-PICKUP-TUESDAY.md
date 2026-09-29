@@ -6,6 +6,16 @@ status: live
 supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s1-wholesale
 ---
 
+## 🔴 DELTA 126 — 2026-09-29 10:47 ROTATION HANDOVER (s92, ctx ~79%, safe boundary). **READ THIS FIRST, THEN 125 (VISION PAUSED BY KAM) and 124/123.**
+### FIRST WORK FOR THE NEXT SEAT
+1. **BATCH 8 VERDICT (00:44Z mail) — READ THE REPORT WHOLE FIRST** (`Testing Agent MAIN/projects/nexusai/reports/2026-09-29-gate-batch8/report.md`, 58 KB; s92 read only the verdict mail). Verdicts: RD-648 GO WITH FINDINGS @ e1c7b21 · RD-609 GWF @ 8f9d921 · RD-700 GO @ 006b056; M0 dd15ce1 never moved; order RD-700 -> RD-609 -> RD-648 (order-independent, tree 02f87dd); merged 4194/253 measured; C-68 harness union 574/574 -> 577/577, 0 lost. Findings: A-F1 Minor (deadline half unguarded), A-F2 Minor (a live 6 s /api/health now FAILS boot at the full deadline: the cap governs every attempt, contrary to READY :28), B-F1 Minor (malformed row after a blank line reported by nothing), Polish A-F3/A-F4/B-F2/B-F3/B-N1. **B-O1 is Tuesday's to rule:** on this transition merge a K2/K2 C-57 also misses RD-609's OLD title; C-183 accounts the pair only in a MIXED comparison, so by its letter a K2/K2 run STOPs. Recommend ruling: ACCOUNTED under C-133 ADDENDUM for this transition (blobs hold, NEW id present and green) and write it to N. Then: score the gate, RELEASE to N (lane 2): the three merges IN ORDER, each via PR under C-190 (no new high CodeQL alert), after M's pilot confirms the landing step; ticket A-F1/A-F2/B-F1 (one ticket per logical path) + Polish. **Gate pane %45 is ALREADY CLOSED (s92, 10:47).**
+2. M's PR #32: await M's mail with the alert-#247 fix head -> read the diff at source (read verbs only) -> GO -> CodeQL -> land -> mail ALL seats the confirmed landing step.
+3. Batch 9: RD-723 @ 19fc17c (N, READY saved) + O's RD-466 when ready.
+### FLOOR (10:47)
+%0 tuesday | %22 P · %21 N · %19 M · %29 O · %1 monitor. No gates, no Vision seat (paused). The jest lock is free of the batch 8 gate (queue: O rd466-diag, N rd591-green4b, M merge1b-rd681, M mx618c, N rd648-codeql). Usage ~55%. Kam: everything answered; last message 09:06 (Vision pause), receipted.
+### NOTES
+- This seat's ledger: 1 row (commit swept a live drafter's files). Digests regenerated 07:2x; no lesson edit since, so no digest regeneration owed.
+
 ## 🔴 DELTA 125 — 2026-09-29 09:10 (s92). **VISION IS PAUSED BY KAM — READ THIS BEFORE ANYTHING IN 124.**
 - Kam, live board 09:06:26 (view=tuesday), verbatim: "Pause the vision project until further notice.  Keep the quick quote tool live but the rest of vision is being reviewed now". Receipt posted (201). Parked verbatim in projects_index/clarifications_register.md.
 - **DELTA 124 item 1 is ON HOLD in full:** no Vision seat, no merges of gate-14 GOs, no round 2 of VSP-83/86, no VSP-88. Nothing Vision-side is launched or briefed until Kam lifts the pause in his own words. QuickQuote: touch nothing, it stays live.
