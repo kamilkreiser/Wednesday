@@ -1,0 +1,130 @@
+{
+ "pr": {
+  "number": 1340,
+  "title": "KS-530: re-date the four audit-baseline rows Kam named to 2026-10-09",
+  "state": "open",
+  "body": "**Kam mailed this instruction himself** \u2014 `kreiser.org@me.com` \u2192 `secuura-blockchain@agentmail.to`, 2026-09-29T04:14:47Z, Message-ID `<EB856837-268F-4CC7-B167-BE74B4824634@me.com>`, subject \"Audit baseline re-date\". Body, verbatim:\n\n> \"Re-date GHSA-frvp-7c67-39w9 (KS-530), GHSA-mwp4-54f8-5fhr (KS-729), GHSA-wrjc-x8rr-h8h6 and GHSA-337j-9hxr-rhxg (KS-528) to 2026-10-09. The real fixes stay on those tickets.\"\n\n**Authorship was verified at the raw header level before any edit**, because a relay is not his mail and does not license a baseline change:\n\n```\nAuthentication-Results: amazonses.com; spf=pass (spfCheck: domain of _spf.icloud.com\ndesignates 57.103.78.55 as permitted sender) client-ip=57.103.78.55;\nenvelope-from=kreiser.org@me.com; helo=outbound.st.icloud.com;\ndkim=pass header.i=@me.com; dmarc=pass header.from=me.com;\n```\n\nBoth DKIM and DMARC are **aligned to me.com**, which is the check that matters \u2014 a summary `dmarc: pass` alone could be aligned to another domain.\n\n## The change: four rows, two fields each\n\n| advisory | package | ticket | before | after |\n|---|---|---|---|---|\n| `GHSA-frvp-7c67-39w9` | @hono/node-server | KS-530 | 2026-09-30 | **2026-10-09** |\n| `GHSA-mwp4-54f8-5fhr` | ip-address | KS-729 | 2026-09-30 | **2026-10-09** |\n| `GHSA-wrjc-x8rr-h8h6` | react-router | KS-528 | 2026-10-02 | **2026-10-09** |\n| `GHSA-337j-9hxr-rhxg` | react-router | KS-528 | 2026-10-02 | **2026-10-09** |\n\n`expires` and `reason` only. **Asserted field by field rather than read off the diff:** exactly those four rows differ; on each, exactly those two fields differ; row count 25 before and 25 after; top-level keys unchanged. The file is re-serialised with formatting proved byte-identical on a round trip *before* the edit, which is why the diff is **8 insertions and 8 deletions** and carries nothing incidental.\n\n**This is a date change only.** Every advisory is still live, every exception is still temporary, and the real fix stays on KS-530, KS-729 and KS-528.\n\n`GHSA-jjmj-jmhj-qwj2`: **not re-dated** \u2014 removed from the baseline by #1214 (`ba4016fb8`), absent at develop.\n\n## Test Evidence\n\n**Touched:** `Blockchain/Dev/scripts/audit/audit-baseline.json` (1 file, +8/\u22128). No code, no manifest, no lockfile.\n\n**Frozen-clock proof.** There is no clock seam in the gate \u2014 `utcToday()` is `new Date().toISOString().slice(0,10)` and nothing overrides it, deliberately \u2014 and `faketime` is not installed on this host. So the clock is frozen in a `node --import` preload and the **real** `audit-gate.mjs` and `audit-locks.mjs` run unmodified underneath it. The whole leg runs; it is not a stubbed predicate. The preload announces itself on stderr, **refuses** when the clock is unset and when it is not a date, and a positive arm proves it actually moves `utcToday()`.\n\nMeasured against the post-merge develop `2cb858335472`:\n\n| leg | baseline | clock | rc | lapsed |\n|---|---|---|---|---|\n| 6 | develop's (the committed blob) | 2026-09-30T00:01Z | **1** | 1 \u2014 `GHSA-frvp-7c67-39w9`, KS-530, \"expired 2026-09-30\" |\n| 6 | this PR's | 2026-09-30T00:01Z | **0** | **0** |\n| 6 | this PR's | 2026-10-10T00:01Z (control) | 1 | 3, all \"expired 2026-10-09\" |\n| 7 | develop's / this PR's / 2026-10-10 | | | 0 / 0 / 2 |\n\n**Ran, at the real clock on this head:** `audit-gate.mjs` **rc 0**, `audit-locks.mjs` **rc 0**.\n\n**Push preflight: 12 of 15 legs ran, 3 skipped (legs 3, 4 and 8 \u2014 local stack not up), nothing failed.** 12/15 is not a pass and is not quoted as one. Both audit legs passed inside the hook: leg 6 `audit-gate: 23 distinct advisories reported, 25 baselined. OK \u2014 no advisories outside the triaged baseline.`; leg 7 `1612 distinct packages pinned \u2014 18 advisories match, 18 already baselined. OK`.\n\n**Rebase evidence:** this branch was cut at `8af6ab82` and rebased onto `2cb858335472` after #1339 merged. The diff is **byte-identical before and after** \u2014 same 11,037 bytes, same sha256, `cmp` rc 0 \u2014 with patch-id agreeing as corroboration only. (`patch-id` normalises whitespace and cannot see a whitespace-only change; measured four ways, so `cmp` is the load-bearing half.)\n\n**NOT run:** no built images, no local stack, no live sweep. No service code is touched by this change.\n\n## Not covered\n\n- Leg 6 prints a CLEANUP advising removal of two now-stale rows (`GHSA-v2v4-37r5-5v8g` and `GHSA-mwp4-54f8-5fhr`, both ip-address, the latter cleared by #1339's bump). **This PR edits no row beyond the four Kam named**; that removal is a separate follow-up.\n- After #1339, `GHSA-mwp4-54f8-5fhr` is no longer *reported*, so it cannot lapse regardless of its date. Its re-date is therefore harmless but inert at this head \u2014 included because Kam named it.\n\nRefs KS-530\nRefs KS-729\nRefs KS-528",
+  "mergeable": true,
+  "mergeable_state": "unstable",
+  "draft": false,
+  "head": "9199a2f9f7394cdd2c78b5134e68ff7ba3e91fae",
+  "ref": "feature/ks-530-audit-baseline-redate-b44-1",
+  "base": "develop",
+  "base_sha": "2cb858335472fafcce535ca4ad328c897ed87bfb"
+ },
+ "files": [
+  [
+   "Blockchain/Dev/scripts/audit/audit-baseline.json",
+   8,
+   8,
+   "modified"
+  ]
+ ],
+ "open": [
+  [
+   1340,
+   "feature/ks-530-audit-baseline-redate-b44-1",
+   "KS-530: re-date the four audit-baseline rows Kam named to 2026-10-09"
+  ],
+  [
+   1253,
+   "feature/ks-1297-fixture-guard-anchor-and-two-gaps-l5-1",
+   "KS-1297 GUARDGAPS: anchor the abort counts, cover the worktree, pin bare call sites"
+  ],
+  [
+   1250,
+   "feature/ks-1302-runner-tmpdir-residue-and-orphan-pipe-l5-1",
+   "KS-1302 + KS-1303 RSSTRAP: trap the runner's short TMPDIR, and drop the output pipe"
+  ],
+  [
+   1129,
+   "chore/history-2026-09-21-local-rebuild-preflight",
+   "docs(history): 2026-09-21 local rebuild on develop 7be81d5c9, OOM diagnosis, preflight 15/15"
+  ],
+  [
+   995,
+   "feature/ks-741-x-emitter-internal-is-unstripped-on-the-originate-route-the",
+   "KS-741: strip `x-emitter-internal` at originate's own inbound \u2014 the marker's non-spoofability no longer rests on an unstated convention"
+  ],
+  [
+   989,
+   "feature/ks-973-ks-969-round-1-gate-residue-the-pre-suite-step-and-its-own",
+   "KS-973: the pre-suite step redacts the generated password, pins its DEGRADED stream, drives its second quarantine call \u2014 items 5, 6 + two residues; items 3/4 wait for #927; items 1/2 are L11/L12 files"
+  ],
+  [
+   949,
+   "dependabot/npm_and_yarn/Blockchain/Dev/develop/prisma-7.10.0",
+   "chore(deps-dev): bump prisma from 7.8.0 to 7.10.0 in /Blockchain/Dev"
+  ],
+  [
+   948,
+   "dependabot/npm_and_yarn/Blockchain/Dev/develop/vite-8.2.2",
+   "chore(deps): bump vite from 6.4.3 to 8.3.1 in /Blockchain/Dev"
+  ],
+  [
+   947,
+   "dependabot/npm_and_yarn/Blockchain/Dev/develop/testing-library/jest-dom-7.0.1",
+   "chore(deps-dev): bump @testing-library/jest-dom from 6.9.1 to 7.0.1 in /Blockchain/Dev"
+  ],
+  [
+   946,
+   "dependabot/npm_and_yarn/Blockchain/Dev/develop/fluentui/react-icons-2.0.339",
+   "chore(deps): bump @fluentui/react-icons from 2.0.331 to 2.0.339 in /Blockchain/Dev"
+  ],
+  [
+   945,
+   "dependabot/npm_and_yarn/Blockchain/Dev/develop/axe-core/playwright-4.13.0",
+   "chore(deps-dev): bump @axe-core/playwright from 4.11.3 to 4.13.0 in /Blockchain/Dev"
+  ],
+  [
+   927,
+   "feature/ks-1027-ks992-followups",
+   "KS-1027: close Peter's four #904 follow-ups \u2014 the OTHER cp, the stash the refusal deleted, and the duplication nobody had justified"
+  ],
+  [
+   923,
+   "kamilkreiser/ks-736-mount-auth-retag",
+   "KS-736: the mount-auth check scored authenticateToken(false) as green, and could not see half its own surface"
+  ],
+  [
+   920,
+   "kamilkreiser/ks-734-e2e-suite-installable",
+   "KS-734: make tests/e2e runnable from a clean checkout, and baseline what it actually reports"
+  ],
+  [
+   887,
+   "feature/ks-961-workspace-suites-advisory-on-pr",
+   "KS-961: run the workspace suites on the PR, advisory and non-blocking \u2014 and they are RED on develop today"
+  ],
+  [
+   809,
+   "feature/ks-693-tolerate-m365-unconfigured-503",
+   "KS-693 (interim): guard the 8 M365/OneDrive/Teams unconfigured-503 ops so the merge gate reads a real floor"
+  ],
+  [
+   649,
+   "dependabot/npm_and_yarn/Blockchain/Dev/develop/multi-8cb89e51b7",
+   "chore(deps): bump pg and @types/pg in /Blockchain/Dev"
+  ],
+  [
+   639,
+   "dependabot/npm_and_yarn/Blockchain/Dev/develop/radix-ui/react-dropdown-menu-2.1.24",
+   "chore(deps): bump @radix-ui/react-dropdown-menu from 2.1.16 to 2.1.24 in /Blockchain/Dev"
+  ],
+  [
+   635,
+   "dependabot/npm_and_yarn/Blockchain/Dev/develop/cbor-10.0.12",
+   "chore(deps): bump cbor from 9.0.2 to 10.0.12 in /Blockchain/Dev"
+  ],
+  [
+   575,
+   "dependabot/npm_and_yarn/Blockchain/Dev/develop/dotenv-17.4.2",
+   "chore(deps): bump dotenv from 16.6.1 to 17.4.2 in /Blockchain/Dev"
+  ],
+  [
+   572,
+   "dependabot/npm_and_yarn/Blockchain/Dev/develop/types-1409c3626d",
+   "chore(deps-dev): bump @types/office-js from 1.0.599 to 1.0.610 in /Blockchain/Dev in the types group across 1 directory"
+  ]
+ ]
+}

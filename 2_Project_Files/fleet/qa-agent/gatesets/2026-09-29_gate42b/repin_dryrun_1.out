@@ -1,0 +1,25 @@
+LAUNCH ACTION gate42b (DRY RUN) 2026-09-29 16:42:33 AEST / 2026-09-29T06:42:33Z | launcher /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/gatesets/2026-09-29_gate42b/launch_qa_secuura_batch1340.sh | pinned develop 2cb858335472fafcce535ca4ad328c897ed87bfb | END_TREE 09c593f29fd4ecf1691d99e961bfa060812932c8
+  pin #1340 9199a2f9f7394cdd2c78b5134e68ff7ba3e91fae (refs/heads/feature/ks-530-audit-baseline-redate-b44-1)
+--- 0. the pane must be routed (inbox_routing.conf) or cockpit.sh say --mail fails silently
+  routing file /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/inbox_routing.conf — line present: 0 (grep rc=1; want 1 / rc 0)
+  (DRY RUN: reported, not refused — the real run refuses rc 1 here)
+--- 0b. the kit's home: launcher filled for /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/gatesets/2026-09-29_gate42b | this script lives in /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/gatesets/2026-09-29_gate42b
+  AT HOME — no re-fill
+--- 1. instrument: git ls-remote origin (read from the Secuura checkout, READ-ONLY)
+  ls-remote rc=0 at 06:42:37Z
+    2cb858335472fafcce535ca4ad328c897ed87bfb	refs/heads/develop
+    9199a2f9f7394cdd2c78b5134e68ff7ba3e91fae	refs/heads/feature/ks-530-audit-baseline-redate-b44-1
+    9199a2f9f7394cdd2c78b5134e68ff7ba3e91fae	refs/pull/1340/head
+--- 2. instrument: the GitHub PULLS API (an independent read of the head, and mergeable) + 2b the baseline OVERLAP census
+  pulls API rc=0
+    API #1340 head 9199a2f9f7394cdd2c78b5134e68ff7ba3e91fae base develop mergeable True reads 1 state open
+    CENSUS 20 other open PR(s) read | 0 touch Blockchain/Dev/scripts/audit/audit-baseline.json
+  OVERLAP census clean
+--- 3. the head, judged (both instruments == the pin, open, not mergeable:false, based on develop)
+  #1340  ls-remote pull/head 9199a2f9f7394cdd2c78b5134e68ff7ba3e91fae | branch 9199a2f9f7394cdd2c78b5134e68ff7ba3e91fae | API 9199a2f9f7394cdd2c78b5134e68ff7ba3e91fae (base develop, state open, mergeable True) | pinned 9199a2f9f7394cdd2c78b5134e68ff7ba3e91fae
+  BOTH INSTRUMENTS AGREE with the pin.
+--- 3b. develop, read at launch: 2cb858335472fafcce535ca4ad328c897ed87bfb | the pinned develop 2cb858335472fafcce535ca4ad328c897ed87bfb
+  UNMOVED since the fill — the END_TREE 09c593f29fd4ecf1691d99e961bfa060812932c8 stands
+--- 3c. the fuse: 2026-09-30T00:00:00Z
+  1037 minute(s) to the fuse — #1340 must merge before it
+DRY RUN COMPLETE 2026-09-29T06:42:49Z — every read agrees with the pins; the real run continues with the override check, the usage gate, --check and cockpit.sh add

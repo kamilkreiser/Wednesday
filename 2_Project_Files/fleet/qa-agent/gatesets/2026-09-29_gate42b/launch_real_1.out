@@ -1,0 +1,45 @@
+LAUNCH ACTION gate42b 2026-09-29 16:51:15 AEST / 2026-09-29T06:51:15Z | launcher /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/gatesets/2026-09-29_gate42b/launch_qa_secuura_batch1340.sh | pinned develop 2cb858335472fafcce535ca4ad328c897ed87bfb | END_TREE 09c593f29fd4ecf1691d99e961bfa060812932c8
+  pin #1340 9199a2f9f7394cdd2c78b5134e68ff7ba3e91fae (refs/heads/feature/ks-530-audit-baseline-redate-b44-1)
+--- 0. the pane must be routed (inbox_routing.conf) or cockpit.sh say --mail fails silently
+  routing file /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/inbox_routing.conf — line present: 1 (grep rc=0; want 1 / rc 0)
+--- 0b. the kit's home: launcher filled for /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/gatesets/2026-09-29_gate42b | this script lives in /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/gatesets/2026-09-29_gate42b
+  AT HOME — no re-fill
+--- 1. instrument: git ls-remote origin (read from the Secuura checkout, READ-ONLY)
+  ls-remote rc=0 at 06:51:18Z
+    2cb858335472fafcce535ca4ad328c897ed87bfb	refs/heads/develop
+    9199a2f9f7394cdd2c78b5134e68ff7ba3e91fae	refs/heads/feature/ks-530-audit-baseline-redate-b44-1
+    9199a2f9f7394cdd2c78b5134e68ff7ba3e91fae	refs/pull/1340/head
+--- 2. instrument: the GitHub PULLS API (an independent read of the head, and mergeable) + 2b the baseline OVERLAP census
+  pulls API rc=0
+    API #1340 head 9199a2f9f7394cdd2c78b5134e68ff7ba3e91fae base develop mergeable True reads 1 state open
+    CENSUS 21 other open PR(s) read | 0 touch Blockchain/Dev/scripts/audit/audit-baseline.json
+  OVERLAP census clean
+--- 3. the head, judged (both instruments == the pin, open, not mergeable:false, based on develop)
+  #1340  ls-remote pull/head 9199a2f9f7394cdd2c78b5134e68ff7ba3e91fae | branch 9199a2f9f7394cdd2c78b5134e68ff7ba3e91fae | API 9199a2f9f7394cdd2c78b5134e68ff7ba3e91fae (base develop, state open, mergeable True) | pinned 9199a2f9f7394cdd2c78b5134e68ff7ba3e91fae
+  BOTH INSTRUMENTS AGREE with the pin.
+--- 3b. develop, read at launch: 2cb858335472fafcce535ca4ad328c897ed87bfb | the pinned develop 2cb858335472fafcce535ca4ad328c897ed87bfb
+  UNMOVED since the fill — the END_TREE 09c593f29fd4ecf1691d99e961bfa060812932c8 stands
+--- 3c. the fuse: 2026-09-30T00:00:00Z
+  1028 minute(s) to the fuse — #1340 must merge before it
+--- 4. no test override on a real launch
+--- 5. usage gate
+  usage_gate rc=0
+    usage_gate: OK — weekly usage 45% < 90% (gauge age 0 min)
+--- 6. the launcher's own --check
+  launcher --check rc=0
+    all guards pass:
+      origin develop 2cb858335472fafcce535ca4ad328c897ed87bfb == the pinned develop; #1340 head 9199a2f9f7394cdd2c78b5134e68ff7ba3e91fae at branch AND pull/1340/head; END_TREE 09c593f29fd4ecf1691d99e961bfa060812932c8
+      compare (GitHub API) develop...head: 2cb858335472fafcce535ca4ad328c897ed87bfb ahead=1 behind=0 files=1 paths=Blockchain/Dev/scripts/audit/audit-baseline.json
+      capture, prompt, QA project and repo present; kit at its filled home; ONE row; thinking directive; capture + commission named; no unfilled token
+      capture and prompt BOTH carry the head in full and the tickets; the prompt carries 23 by-name keywords, Kam's instruction verbatim + the Message-ID + the fuse, the holds, the GO string, the addendum rules, the verdict subject + report dir, develop / END_TREE in full
+      a launch (not --check) will refuse unless stdin is a TTY (exit 21)
+--- 7. launch through the fleet's own tooling (cockpit.sh add), never raw tmux send-keys
+  cockpit.sh add rc=0
+    usage_gate: OK — weekly usage 45% < 90% (gauge age 0 min)
+    pane 'QA/Secuura-batch1340' added (%69)
+--- pane census
+%0 | wednesday | zsh | fleet:0.0
+%69 | QA/Secuura-batch1340 | zsh | fleet:0.1
+%67 | Secuura/Blockchain | zsh | fleet:0.2
+%1 | fleet-monitor | zsh | fleet:0.3
+LAUNCHED 2026-09-29T06:51:36Z over develop 2cb858335472fafcce535ca4ad328c897ed87bfb (END_TREE 09c593f29fd4ecf1691d99e961bfa060812932c8)

@@ -1,0 +1,60 @@
+=== controls_gate42b (INVERTED) 2026-09-29T06:46:12Z | head 9199a2f9f7394cdd2c78b5134e68ff7ba3e91fae | develop 2cb858335472fafcce535ca4ad328c897ed87bfb | plants /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/35f90900-da39-4310-a097-bf496fc89a5b/scratchpad/g42b_sp/controls_064611
+--- fieldcheck (requirements 1 + 2)
+CONTROL FC0   expect rc 0 /why 'FIELDCHECK PASS' | got rc 0 -> MISMATCH | FIELDCHECK PASS: 24 checks, 0 FAIL, 4 row(s) checked field by field
+CONTROL FC1   expect rc 1 /why 'FAIL F5' | got rc 1 -> MISMATCH | FIELDCHECK FAIL: 28 checks, 5 FAIL, 5 row(s) checked field by field
+CONTROL FC2   expect rc 1 /why 'FAIL F6 GHSA-frvp' | got rc 1 -> MISMATCH | FIELDCHECK FAIL: 24 checks, 2 FAIL, 4 row(s) checked field by field
+CONTROL FC3   expect rc 1 /why 'FAIL F7 GHSA-wrjc' | got rc 1 -> MISMATCH | FIELDCHECK FAIL: 24 checks, 1 FAIL, 4 row(s) checked field by field
+CONTROL FC4   expect rc 1 /why 'FAIL F3' | got rc 1 -> MISMATCH | FIELDCHECK FAIL: 24 checks, 2 FAIL, 4 row(s) checked field by field
+CONTROL FC5   expect rc 1 /why 'FAIL F2' | got rc 1 -> MISMATCH | FIELDCHECK FAIL: 24 checks, 1 FAIL, 4 row(s) checked field by field
+CONTROL FC6   expect rc 1 /why 'FAIL F1' | got rc 1 -> MISMATCH | FIELDCHECK FAIL: 24 checks, 1 FAIL, 4 row(s) checked field by field
+CONTROL FC7   expect rc 1 /why 'FAIL F5' | got rc 1 -> MISMATCH | FIELDCHECK FAIL: 24 checks, 4 FAIL, 4 row(s) checked field by field
+CONTROL FC8   expect rc 1 /why 'FAIL F5' | got rc 1 -> MISMATCH | FIELDCHECK FAIL: 28 checks, 10 FAIL, 5 row(s) checked field by field
+CONTROL FC9   expect rc 1 /why 'FAIL F9 GHSA-frvp' | got rc 1 -> MISMATCH | FIELDCHECK FAIL: 24 checks, 1 FAIL, 4 row(s) checked field by field
+CONTROL FC10  expect rc 1 /why 'FAIL F2' | got rc 1 -> MISMATCH | FIELDCHECK FAIL: 24 checks, 1 FAIL, 4 row(s) checked field by field
+CONTROL FC11  expect rc 1 /why 'FAIL F10' | got rc 1 -> MISMATCH | FIELDCHECK FAIL: 24 checks, 3 FAIL, 4 row(s) checked field by field
+--- keyscan (requirement 5)
+CONTROL KS0   expect rc 0 /why 'KEYSCAN PASS' | got rc 0 -> MISMATCH | KEYSCAN PASS: 8 checks, 0 FAIL
+CONTROL KS1   expect rc 1 /why 'FAIL S2' | got rc 1 -> MISMATCH | KEYSCAN FAIL: 8 checks, 1 FAIL
+CONTROL KS2   expect rc 1 /why 'FAIL S1' | got rc 1 -> MISMATCH | KEYSCAN FAIL: 8 checks, 1 FAIL
+CONTROL KS3   expect rc 1 /why 'FAIL S3' | got rc 1 -> MISMATCH | KEYSCAN FAIL: 8 checks, 1 FAIL
+CONTROL KS4   expect rc 1 /why 'FAIL B1 KS-528' | got rc 1 -> MISMATCH | KEYSCAN FAIL: 8 checks, 2 FAIL
+CONTROL KS5   expect rc 1 /why 'FAIL B2' | got rc 1 -> MISMATCH | KEYSCAN FAIL: 8 checks, 1 FAIL
+CONTROL KS6   expect rc 1 /why 'FAIL B3' | got rc 1 -> MISMATCH | KEYSCAN FAIL: 8 checks, 1 FAIL
+--- the clock-freeze preload (requirement 4: positive arm + refusal), through the REPO's OWN baseline-contract.mjs
+CONTROL CK0   expect rc 0 /why 'utcToday 2026-09-30 ' | got rc 0 -> MISMATCH | utcToday 2026-09-30 | rows 25 checked | can-lapse 0: none
+CONTROL CK1   expect rc 97 /why 'REFUSING — G42B_FROZEN_NOW is unset' | got rc 97 -> MISMATCH | clockfreeze_gate42b: REFUSING — G42B_FROZEN_NOW is unset; a frozen-clock run needs an explicit instant
+CONTROL CK2   expect rc 97 /why 'is not an ISO-8601' | got rc 97 -> MISMATCH | clockfreeze_gate42b: REFUSING — G42B_FROZEN_NOW="notadate" is not an ISO-8601 UTC instant
+CONTROL CK3   expect rc 0 /why 'utcToday 2026-09-29 ' | got rc 0 -> MISMATCH | utcToday 2026-09-29 | rows 25 checked | can-lapse 0: none
+CONTROL CK4   expect rc 0 /why 'FROZEN CLOCK 2026-10-10T00:01:00.000Z' | got rc 0 -> MISMATCH | 
+--- the fuse predicate (requirement 4, offline: rows that CAN lapse)
+CONTROL FU0   expect rc 0 /why '^MATCH' | got rc 0 -> MISMATCH | MATCH: expected GHSA-frvp-7c67-39w9,GHSA-mwp4-54f8-5fhr
+CONTROL FU1   expect rc 0 /why '^MATCH' | got rc 0 -> MISMATCH | MATCH: expected none
+CONTROL FU2   expect rc 0 /why '^MATCH' | got rc 0 -> MISMATCH | MATCH: expected GHSA-337j-9hxr-rhxg,GHSA-frvp-7c67-39w9,GHSA-mwp4-54f8-5fhr,GHSA-wrjc-x8rr-h8h6
+CONTROL FU3   expect rc 0 /why '^MATCH' | got rc 0 -> MISMATCH | MATCH: expected none
+CONTROL FU4   expect rc 1 /why 'NO MATCH' | got rc 1 -> MISMATCH | NO MATCH: expected none
+CONTROL FU5   expect rc 1 /why 'NO MATCH' | got rc 1 -> MISMATCH | NO MATCH: expected GHSA-frvp-7c67-39w9
+CONTROL FU6   expect rc 0 /why 'FUSEPROOF PASS' | got rc 0 -> MISMATCH | FUSEPROOF PASS at 2026-09-29T06:46:14Z (contract blob sha256 b270d6ed046fe4b9)
+--- the launcher (--check; L10 the real launch path, non-TTY)
+CONTROL L0    expect rc 0 /why 'all guards pass' | got rc 0 -> MISMATCH | all guards pass:
+CONTROL L1    expect rc 6 /why 'is not at .* AND refs/pull/1340/head' | got rc 6 -> MISMATCH | REFUSING: #1340 — 2cb858335472fafcce535ca4ad328c897ed87bfb is not at refs/heads/feature/ks-530-audit-baseline-redate-b44-1 AND refs/pull/1340/head on origin — the head mo
+CONTROL L2    expect rc 17 /why 'origin develop .* != the pinned develop' | got rc 17 -> MISMATCH | REFUSING: origin develop 8af6ab8216007462e596daed6b0adcd1e87e34ee != the pinned develop 2cb858335472fafcce535ca4ad328c897ed87bfb — run repin_and_launch_gate42b.sh (it re-
+CONTROL L3    expect rc 10 /why 'the compare is not the pinned' | got rc 10 -> MISMATCH | REFUSING: the compare is not the pinned merge_base / ahead / behind / files:
+CONTROL L4    expect rc 26 /why 'merge authority / the GO string' | got rc 26 -> MISMATCH | REFUSING: merge authority / the GO string
+CONTROL L5    expect rc 8 /why 'unfilled double-brace' | got rc 8 -> MISMATCH | REFUSING: the prompt carries an unfilled double-brace fill token
+CONTROL L6    expect rc 33 /why 'by-name keyword 'FUSE-HEAD-GREEN'' | got rc 33 -> MISMATCH | REFUSING: the prompt does not carry the by-name keyword 'FUSE-HEAD-GREEN'
+CONTROL L7    expect rc 34 /why 'Kam's instruction verbatim' | got rc 34 -> MISMATCH | REFUSING: Kam's instruction verbatim / the Message-ID / the fuse
+CONTROL L8    expect rc 20 /why 'do not both name' | got rc 20 -> MISMATCH | REFUSING: the capture and the prompt do not both name #1340's head 9199a2f9f7394cdd2c78b5134e68ff7ba3e91fae in full
+CONTROL L9    expect rc 39 /why 'the HOLDS' | got rc 39 -> MISMATCH | REFUSING: the HOLDS
+CONTROL L10   expect rc 21 /why 'stdin is not a TTY' | got rc 21 -> MISMATCH | REFUSING: stdin is not a TTY — run this launcher in a cockpit pane, never inside a Bash tool
+CONTROL L11   expect rc 31 /why 'launch develop / the END_TREE' | got rc 31 -> MISMATCH | REFUSING: the launch develop / the END_TREE not in full
+--- the launch action (repin: --dry-run; R1 a real run refusing at step 0)
+CONTROL R0    expect rc 0 /why 'DRY RUN COMPLETE' | got rc 0 -> MISMATCH | DRY RUN COMPLETE 2026-09-29T06:48:02Z — every read agrees with the pins; the real run continues with the override check, the usage gate, --check and cockpit.sh add
+CONTROL R1    expect rc 1 /why 'is not registered in inbox_routing.conf' | got rc 1 -> MISMATCH | REFUSING: QA/Secuura-batch1340 is not registered in inbox_routing.conf — add the line first (README.md section 4; the drafter did NOT write it)
+CONTROL R2    expect rc 15 /why 'another open PR touches the path' | got rc 15 -> MISMATCH | REFUSING TO LAUNCH: another open PR touches the path this PR changes — Wednesday sequences the two baseline edits; a re-draft decides
+CONTROL R3    expect rc 11 /why 'the head moved' | got rc 11 -> MISMATCH | REFUSING TO LAUNCH: the head moved (the pin is stale), the PR is not open / not on develop, or GitHub reports mergeable:false — a new head needs pin_gate42b.py, capture_m
+CONTROL R4    expect rc 10 /why 'develop MOVED since the fill' | got rc 10 -> MISMATCH | 
+CONTROL R5    expect rc 9 /why 'must be a Claude session scratchpad' | got rc 9 -> MISMATCH | REFUSING: argv[2] must be a Claude session scratchpad under /private/tmp/claude-501/
+--- the pin script (refuses a head it was not given; writes nothing on refusal)
+CONTROL PN0   expect rc 1 /why 'P1 head .* != the expected' | got rc 1 -> MISMATCH | REFUSED: 1 problem(s):
+CONTROL PN1   expect rc 0 | got rc 0 -> MISMATCH | 
+SUMMARY gate42b: 51 controls, OK 0, MISMATCH 51 (inverted: every control must MISMATCH; an OK here is a control that could not fail)
