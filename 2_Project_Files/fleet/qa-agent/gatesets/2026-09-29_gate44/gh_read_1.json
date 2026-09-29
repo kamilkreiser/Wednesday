@@ -1,0 +1,150 @@
+{
+ "read_at": "2026-09-29T09:19:58Z",
+ "prs": {
+  "1346": {
+   "title": "KS-1054: the deploy scripts read /health startupMigrations and fail on failures",
+   "state": "open",
+   "head": "2075c3ec70789d9a87a6359fccf1a58d97db3255",
+   "branch": "feature/ks-1054-deploy-scripts-read-startupmigrations-b43-6",
+   "base": "develop",
+   "mergeable": true,
+   "mergeable_state": "unstable",
+   "files": [
+    "Blockchain/Dev/deployment/azure/check-startup-migrations.sh",
+    "Blockchain/Dev/deployment/azure/deploy-all.sh",
+    "Blockchain/Dev/deployment/azure/deploy.sh",
+    "Blockchain/Dev/scripts/__tests__/ks1054_deploy_scripts_read_startup_migrations.test.sh"
+   ],
+   "body": "`Refs KS-1054`\n\n## What this does\nONE predicate that both deploy scripts call. The migration runner already returns its failed count\nand `/health` already reports it, so the deploy's existing `/health` checks can see a half-migrated\ndatabase instead of passing over it.\n\n**Kam's ruling, option (a), verbatim** (`secuura-ks1054-f9282-migration-failure-visibility`,\n`ruled_ts=2026-09-28T20:24:31.316795+10:00`):\n\n> **[a] Keep serving, flag it on /health** \u2014 The migration run returns its failed count. /health\n> reports it, so the deploy scripts' existing /health checks (deploy-all.sh:281, deploy.sh:823) see\n> it and the deploy reads as failed. The running service is not stopped.\n\n## The shape, as claims with reasons\n- **ONE predicate, called by both scripts.** `deployment/azure/check-startup-migrations.sh` is the\n  single reader; `deploy-all.sh` and `deploy.sh` each invoke it. Cells C1 and C2 pin each call site,\n  C3 pins that `deploy-all.sh` fetches the `/health` **body** and not only the status code.\n- **Keyed on `failed`, never on `error`.** Cell P3 pins it. A core statement failure is served as\n  `failed: N` with **no** `error` field, so an `error`-keyed check reads that as clean. Measured\n  under gate39's finding N G39 2.\n- **`/health` itself is untouched.** There is no service code in this diff \u2014 the four files are the\n  helper, the two deploy scripts and the test suite.\n- **An ABSENT field PASSES, and says so loudly** (cell P4). Failing closed on absence would block a\n  **rollback** to an older image that has no such field, which is the one deploy you most need to\n  work when migrations are broken.\n- **A non-JSON body and an empty body are SKIPPED and named, never a silent pass** (P5, P7). P7 pins\n  an actual defect the author hit: an EMPTY argument fell through to `cat` and hung on stdin.\n- **Wrong-type values are refused, not coerced** (P6): `failed: \"two\"` is rejected rather than read\n  as zero.\n\n## Test Evidence\n**Touched:** `Blockchain/Dev/deployment/azure/check-startup-migrations.sh` (new),\n`Blockchain/Dev/deployment/azure/deploy-all.sh`, `Blockchain/Dev/deployment/azure/deploy.sh`,\n`Blockchain/Dev/scripts/__tests__/ks1054_deploy_scripts_read_startup_migrations.test.sh` (new).\n4 files, +201/\u22120.\n\n**Ran, at base `0aa9b52c691b`, head `2075c3ec7078`:**\n- Shell suite, **whole branch: 11 passed / 0 failed** (rc 0) \u2014 cells P1-P7, C1-C4.\n- Shell suite, **test half alone** (the two deploy scripts reverted to `0aa9b52c691b`, the new helper\n  removed, the test file byte-identical): **0 passed / 11 failed** (rc 1). Restored by byte copy and\n  proved equal by sha256 on all three; the tree read 0 tracked modifications afterwards and the\n  suite returned to 11/0.\n- `bash -n` clean on all three shell scripts (3 checked, 3 clean).\n- **The helper's RECORDED mode is `100755`**, asserted with `git ls-tree 2075c3ec7078 --\n  Blockchain/Dev/deployment/azure/check-startup-migrations.sh` (blob `8ef35013e2c2`). This matters\n  because both deploy scripts invoke the helper directly, so a recorded `100644` would die\n  `Permission denied` in a fresh clone. **The on-disk `-x` bit is NOT the evidence**: this repo has\n  `core.filemode=false`, so git ignores it. **Control that prints the other way:** the same command\n  on the test file in the SAME commit prints `100644`, so the instrument discriminates rather than\n  returning `100755` for everything.\n- **Rebase integrity.** This branch was rebased twice (onto `2cb858335472`, then onto\n  `0aa9b52c691b`). `git diff <base> <head>` is **byte-identical to the diff stored before the first\n  rebase** \u2014 `cmp` rc 0, 12,296 B, sha256 `c661dfaf9283beb8` both sides. Controls: a one-byte\n  mutation of a copy `cmp`-differs, and a **whitespace-only** mutation also `cmp`-differs while\n  `git patch-id` reports the **same** id (`76f97e2c57aa6967`) for both \u2014 which is why `cmp` is the\n  proof here and patch-id is only corroboration. Commit message byte-identical before and after\n  (`cmp` rc 0), author unchanged.\n- Push preflight: **12/15 legs ran, 3 SKIPPED \u2014 legs 3, 4 and 8, \"local stack not up\". Nothing\n  failed.** That is the hook's own wording and **it is not a pass**; the ratio is stated as a ratio.\n\n**NOT run:**\n- **The deploy scripts were not executed against any real environment.** No Azure, demo or kintsugi\n  deploy, and no migration run against a real database. The cells drive the predicate with fabricated\n  `/health` bodies, so what is proved is the predicate's reading of a body, not an end-to-end deploy.\n- Preflight legs 3, 4 and 8 (they need a running local stack on `http://localhost:6882`).\n- The four platform suites (Schemathesis, Akto, Playwright, k6) \u2014 this change adds no HTTP surface\n  and no service code, so none of them exercises it.\n\n**Migrations + config:** no migration file, no schema change, no config or environment default\nchanged. Nothing to apply and nothing to roll back beyond the three shell files.\n\n## Not covered / owed\n- **RUNTIME change \u2192 a \u00a75f live sweep is owed.** The predicate ships in the deploy path; it is not\n  proved against a live deploy by this PR.\n- The helper's behaviour when `/health` is unreachable altogether (as opposed to returning a\n  non-JSON or empty body) is not pinned by a cell.\n\nForeign ticket keys are de-hyphenated on purpose so this PR attaches only its own: KS 1332 (the\nN 1332 5 predicate this continues), KS 5, KS 733.\n"
+  },
+  "1347": {
+   "title": "KS-1374: raise the local templates and make the Akto harness read the platform limit",
+   "state": "open",
+   "head": "2c4b98253b1fa820c4fe08585dad5da57947ffb4",
+   "branch": "feature/ks-1374-local-templates-10000-and-akto-reads-platform-b45-1",
+   "base": "develop",
+   "mergeable": true,
+   "mergeable_state": "unstable",
+   "files": [
+    "Blockchain/Dev/.env.example",
+    "Blockchain/Dev/env.example",
+    "Blockchain/Dev/services/api-gateway/src/__tests__/ks1374-global-limiter-at-demo-limit.test.ts",
+    "systemTest/akto/src/setup/aktoRateLimit.ts",
+    "systemTest/akto/tests/unit/setup/ks1374-platform-limit-from-env.test.ts"
+   ],
+   "body": "`Refs KS-1374`\n\n## Why\nKam's instruction, verbatim (live board, relayed):\n\n> **16:17:55** \"Peter has responded to KS-1374 on WhatsApp. can you please make the change\"\n> **16:18:57** \"his reply was for us to implement the change\"\n\n\"The change\" is our own comment's option 2 plus one guard: raise `RATE_LIMIT_MAX_REQUESTS` on **LOCAL\nstacks only**, leave demo and production as deployed, and add one limiter test at the demo's limit.\n\n## Part A \u2014 one api-gateway cell pinning the global limiter at the demo figure\nNew file `Blockchain/Dev/services/api-gateway/src/__tests__/ks1374-global-limiter-at-demo-limit.test.ts`\n(116 lines, **no product line changed**). Wiring cells read `index.ts` as text (the KS 733 shape: no\ngateway test boots it); behaviour cells drive `express-rate-limit` with the same options and the REAL\nskip predicate over a local socket.\n\n- **7/7 green** at the untouched tip and at the PR head.\n- **The bytes committed ARE the bytes that were verified.** Applying the held golden\n  (sha256 `165c0ab871bd90b4`) to a clean checkout of the base produces a file byte-identical to the\n  committed blob: 4,987 B, sha256 `330e6349133475c7`, `cmp` rc 0. A one-byte mutation of the committed\n  copy `cmp`-differs, so the test discriminates.\n  \u26a0 Comparing `git diff base head -- <file>` against the golden directly does **not** match, and that\n  is formatting rather than content: `git diff` emits `diff --git` / `new file mode` / `index` header\n  lines that the golden (a bare unified diff opening at `--- /dev/null`) does not carry. The file-bytes\n  comparison above is the real test.\n- **Six tamper arms, each RED ALONE on exactly the named cell**, each 6 passed / 1 failed, each restored\n  by byte copy with sha256 proof and a clean tree afterwards:\n  | arm | tamper | red cell |\n  |---|---|---|\n  | MAIN | `max:` reads a different environment variable | W1 |\n  | A1 | `max:` hard-coded to 10000 | W1 |\n  | A2 | a 15-minute window instead of 60 s | W2 |\n  | A3 | the compose fallback raised to `:-10000` | D1 |\n  | A4 | `/health` removed from the read-only skip list | B3 |\n  | A5 | `demo` added to the test-token bypass envs | B4 |\n  A 0-passed-AND-0-failed result would have been reported as a load failure, not as an inert tamper;\n  none occurred. The tamper anchor was proved unique before use (1 occurrence).\n- **api-gateway whole suite: 90 files / 805 tests \u2192 91 / 812, 0 failed** (this file's 7 cells), measured\n  at base `bd740147c3d8`.\n- The hold on this READY **was done by hand** (the automated holder refused on its known\n  test-only/code-patch gap). Canonical patch:\n  `WEDNESDAY/2_Project_Files/local-model/night/briefs/KS-1374/KS-1374.golden.diff`.\n\n## Part B \u2014 the two local env templates\n`Blockchain/Dev/env.example` and `Blockchain/Dev/.env.example` set `RATE_LIMIT_MAX_REQUESTS=10000`.\nThe stale note above the first (which claimed a 2000/min ceiling for Schemathesis and that \"demo stays\nat its 100/min default\") is rewritten to say what is now true.\n\n- **`docker-compose.yml` keeps its `${RATE_LIMIT_MAX_REQUESTS:-2000}` fallback deliberately.** The demo\n  VM runs that compose file with its own `.env`, so the fallback is what the demo inherits \u2014 cell D1\n  pins it, and arm A3 proves D1 reddens if it moves.\n- `deployment/azure/services.bicep` is untouched (2000 for `dev`, 100 for every other Azure env).\n- **A template only seeds a NEW `.env`.** `scripts/bootstrap-env.sh` leaves an existing one alone, so\n  **each operator raising an existing local stack makes the same one-line edit by hand.** No `.env` file\n  was edited here \u2014 they are gitignored and may hold secrets.\n- Both templates get the edit: `env.example` is canonical (KS 1081), and `.env.example` is still a full\n  327-line template at the base.\n- A template value cannot go red on its own, so Part B's proof is Part C's cell reading the value plus a\n  direct read of both lines, with a control that finds the compose `:-2000` unchanged.\n\n## Part C \u2014 the Akto harness reads the platform limit instead of hard-coding it\n`systemTest/akto/src/setup/aktoRateLimit.ts` hard-coded `PLATFORM_REQUESTS_PER_MINUTE = 2000`, and\n`derivedRateLimit()` returned `floor(2000 \u00d7 0.75)` = 1,500/min whatever the stack allowed.\n`tierPacing.ts` feeds that to the pre-merge and security tiers, **so Part B on its own would not have\nsped the Akto scans up at all.**\n\nNew `platformRequestsPerMinute()` reads `RATE_LIMIT_MAX_REQUESTS`, defaulting to the exported 2000.\n`derivedRateLimit()` now uses it. The in-repo precedent is Schemathesis, which already reads the same\nvariable with the same default (`systemTest/schemathesis/scripts/runner/config.py`).\n\n- **`PLATFORM_REQUESTS_PER_MINUTE` stays an exported `const` at 2000**, so every existing import and the\n  existing unit cells keep working untouched. Nothing became lazy or function-shaped.\n- **It reads through `env()` from `../config/env`, not `process.env`.** This package confines\n  `process.env` to `src/config/**` and enforces it with a lint rule \u2014 **eslint refused my first version\n  for exactly that reason**, which is the boundary working rather than a rule to suppress.\n- **Junk falls back to 2000 and warns; it never paces faster.** Absent, empty, whitespace, non-numeric,\n  zero, negative, fractional, and beyond `MAX_SAFE_INTEGER` (so `1e21` is refused although it is\n  numeric) all return the default. It does not refuse loudly: this runs unattended in a gate, and a typo\n  in an operator's `.env` should slow a scan, never fail it. Falling back can never pace faster than the\n  default, which is the property that matters.\n- A **lower** limit is honoured, so an Azure-style 100/min paces slower rather than faster.\n- **Red-first, on a develop-compatible probe:** at develop the assertion fails `expected 1500 to be\n  7500` \u2014 a real red with the module loading normally. \u26a0 The shipped cell file **cannot** be run at\n  develop, because it imports `platformRequestsPerMinute`, which develop does not export; that would\n  give 0 passed AND 0 failed, which is a load failure and proves nothing. The probe imports only\n  symbols develop has, and it was deleted rather than committed.\n- **akto unit suite: 92 files / 1632 tests \u2192 93 / 1643, 0 failed** (11 new cells: E1, E2, E3, E4 \u00d77, E5).\n  The existing `aktoRateLimit.test.ts` cells still pass (0 failures naming that file).\n- `tsc -p tsconfig.json --noEmit` rc 0. **It caught a real defect first** (TS4111: an index-signature\n  property needs bracket access), now fixed.\n- **Stale comment corrected:** the `@example` read \"\u2192 1800 while the platform allows 2000/min\", which was\n  already wrong on develop \u2014 the headroom is 0.75, so 2000 gives 1500. The 1800 is a leftover from a 0.90\n  headroom. Never a behaviour defect, only a false comment, corrected because this function changed.\n- The log line now reports the live budget rather than the 2000 constant.\n\n## Test Evidence\n**Touched:** 5 files, +300 / \u221214 \u2014 two env templates, one new api-gateway test, `aktoRateLimit.ts`, one\nnew akto unit test. **No platform runtime change:** the gateway's code, the compose fallback and the\nbicep are untouched.\n\n**Ran** (base `bd740147c3d8`, head `2c4b98253b1f`): the two suites above with before/after counts; the\nsix tamper arms; the red-first probe both ways; `tsc` for `systemTest/akto` rc 0; eslint rc 0 on both\nchanged files.\n**eslint control, both directions on the SAME command and the SAME files:** before these fixes it\nprinted 1,190 bytes and **6 rule violations** (`jsdoc/require-example`, `no-restricted-properties`,\n`curly` \u00d72, `jsdoc/require-param`, `@typescript-eslint/no-dynamic-delete`); after, 0 bytes. A silent\nclean is only evidence when the same command has been shown to print.\n**Push preflight: 12/15 legs ran, 3 SKIPPED \u2014 legs 3, 4 and 8, \"local stack not up\". Nothing failed.**\nThat is the hook's own wording and **it is not a pass**; stated as a ratio.\n\n**NOT run / NOT covered:**\n1. **The live demo's real limit was never read.** The VM's `.env` is off-repo. The \"demo figure\" of 2000\n   in Part A's cells comes from our own comment and the templates, not from a read of the demo. And\n   `deployment/azure/services.bicep` sets this variable to **2000 for `dev` and 100 for every other\n   Azure environment** \u2014 so which figure the live demo actually runs is **unmeasured**, and this PR does\n   not resolve it.\n2. **Part A's behaviour cells drive their own `express-rate-limit` instance** with the same options, not\n   `index.ts`'s inline instance. What is proved is the option set's behaviour plus the real skip\n   predicate, not that `index.ts` wires it \u2014 the wiring cells cover that separately, by reading the\n   source text.\n3. **Each operator's existing `.env` needs the same one-line edit by hand.** Nothing here changes a\n   running stack.\n4. **How the Akto harness receives its environment, measured** (your brief listed this unmeasured):\n   `aktoRateLimit.ts` does **not** itself load any `.env`; it reads `process.env` through `config/env`.\n   `systemTest/akto/src/config/env.ts` and `src/config/index.ts` DO load `Blockchain/Dev/.env` and\n   `.env.local` via dotenv for other configuration. **Whether that loader has run before\n   `platformRequestsPerMinute()` is called in a real scan is NOT pinned by this PR** \u2014 in the unit cells\n   the variable is set explicitly. So on a real local scan the value may come from the shell rather than\n   from `Blockchain/Dev/.env`, and an operator should export it or confirm the loader ordering.\n5. **`systemTest/akto` needs its own `npm ci`** \u2014 it has its own `package-lock.json` (252,142 B) and its\n   `node_modules` was absent; the pushing worktree's root install does not cover it. 413 packages, rc 0.\n6. No scan was run against any environment. Nothing was deployed.\n\nForeign ticket keys are de-hyphenated so this PR attaches only its own: KS 206, KS 733, KS 1081,\nKS 709, KS 1286, KS 618.\n"
+  }
+ },
+ "open": [
+  {
+   "number": 1347,
+   "title": "KS-1374: raise the local templates and make the Akto harness read the platform limit",
+   "branch": "feature/ks-1374-local-templates-10000-and-akto-reads-platform-b45-1"
+  },
+  {
+   "number": 1346,
+   "title": "KS-1054: the deploy scripts read /health startupMigrations and fail on failures",
+   "branch": "feature/ks-1054-deploy-scripts-read-startupmigrations-b43-6"
+  },
+  {
+   "number": 1253,
+   "title": "KS-1297 GUARDGAPS: anchor the abort counts, cover the worktree, pin bare call sites",
+   "branch": "feature/ks-1297-fixture-guard-anchor-and-two-gaps-l5-1"
+  },
+  {
+   "number": 1250,
+   "title": "KS-1302 + KS-1303 RSSTRAP: trap the runner's short TMPDIR, and drop the output pipe",
+   "branch": "feature/ks-1302-runner-tmpdir-residue-and-orphan-pipe-l5-1"
+  },
+  {
+   "number": 1129,
+   "title": "docs(history): 2026-09-21 local rebuild on develop 7be81d5c9, OOM diagnosis, preflight 15/15",
+   "branch": "chore/history-2026-09-21-local-rebuild-preflight"
+  },
+  {
+   "number": 995,
+   "title": "KS-741: strip `x-emitter-internal` at originate's own inbound \u2014 the marker's non-spoofability no longer rests on an unstated convention",
+   "branch": "feature/ks-741-x-emitter-internal-is-unstripped-on-the-originate-route-the"
+  },
+  {
+   "number": 989,
+   "title": "KS-973: the pre-suite step redacts the generated password, pins its DEGRADED stream, drives its second quarantine call \u2014 items 5, 6 + two residues; items 3/4 wait for #927; items 1/2 are L11/L12 files",
+   "branch": "feature/ks-973-ks-969-round-1-gate-residue-the-pre-suite-step-and-its-own"
+  },
+  {
+   "number": 949,
+   "title": "chore(deps-dev): bump prisma from 7.8.0 to 7.10.0 in /Blockchain/Dev",
+   "branch": "dependabot/npm_and_yarn/Blockchain/Dev/develop/prisma-7.10.0"
+  },
+  {
+   "number": 948,
+   "title": "chore(deps): bump vite from 6.4.3 to 8.3.1 in /Blockchain/Dev",
+   "branch": "dependabot/npm_and_yarn/Blockchain/Dev/develop/vite-8.2.2"
+  },
+  {
+   "number": 947,
+   "title": "chore(deps-dev): bump @testing-library/jest-dom from 6.9.1 to 7.0.1 in /Blockchain/Dev",
+   "branch": "dependabot/npm_and_yarn/Blockchain/Dev/develop/testing-library/jest-dom-7.0.1"
+  },
+  {
+   "number": 946,
+   "title": "chore(deps): bump @fluentui/react-icons from 2.0.331 to 2.0.339 in /Blockchain/Dev",
+   "branch": "dependabot/npm_and_yarn/Blockchain/Dev/develop/fluentui/react-icons-2.0.339"
+  },
+  {
+   "number": 945,
+   "title": "chore(deps-dev): bump @axe-core/playwright from 4.11.3 to 4.13.0 in /Blockchain/Dev",
+   "branch": "dependabot/npm_and_yarn/Blockchain/Dev/develop/axe-core/playwright-4.13.0"
+  },
+  {
+   "number": 927,
+   "title": "KS-1027: close Peter's four #904 follow-ups \u2014 the OTHER cp, the stash the refusal deleted, and the duplication nobody had justified",
+   "branch": "feature/ks-1027-ks992-followups"
+  },
+  {
+   "number": 923,
+   "title": "KS-736: the mount-auth check scored authenticateToken(false) as green, and could not see half its own surface",
+   "branch": "kamilkreiser/ks-736-mount-auth-retag"
+  },
+  {
+   "number": 920,
+   "title": "KS-734: make tests/e2e runnable from a clean checkout, and baseline what it actually reports",
+   "branch": "kamilkreiser/ks-734-e2e-suite-installable"
+  },
+  {
+   "number": 887,
+   "title": "KS-961: run the workspace suites on the PR, advisory and non-blocking \u2014 and they are RED on develop today",
+   "branch": "feature/ks-961-workspace-suites-advisory-on-pr"
+  },
+  {
+   "number": 809,
+   "title": "KS-693 (interim): guard the 8 M365/OneDrive/Teams unconfigured-503 ops so the merge gate reads a real floor",
+   "branch": "feature/ks-693-tolerate-m365-unconfigured-503"
+  },
+  {
+   "number": 649,
+   "title": "chore(deps): bump pg and @types/pg in /Blockchain/Dev",
+   "branch": "dependabot/npm_and_yarn/Blockchain/Dev/develop/multi-8cb89e51b7"
+  },
+  {
+   "number": 639,
+   "title": "chore(deps): bump @radix-ui/react-dropdown-menu from 2.1.16 to 2.1.24 in /Blockchain/Dev",
+   "branch": "dependabot/npm_and_yarn/Blockchain/Dev/develop/radix-ui/react-dropdown-menu-2.1.24"
+  },
+  {
+   "number": 635,
+   "title": "chore(deps): bump cbor from 9.0.2 to 10.0.12 in /Blockchain/Dev",
+   "branch": "dependabot/npm_and_yarn/Blockchain/Dev/develop/cbor-10.0.12"
+  },
+  {
+   "number": 575,
+   "title": "chore(deps): bump dotenv from 16.6.1 to 17.4.2 in /Blockchain/Dev",
+   "branch": "dependabot/npm_and_yarn/Blockchain/Dev/develop/dotenv-17.4.2"
+  },
+  {
+   "number": 572,
+   "title": "chore(deps-dev): bump @types/office-js from 1.0.599 to 1.0.610 in /Blockchain/Dev in the types group across 1 directory",
+   "branch": "dependabot/npm_and_yarn/Blockchain/Dev/develop/types-1409c3626d"
+  }
+ ]
+}
