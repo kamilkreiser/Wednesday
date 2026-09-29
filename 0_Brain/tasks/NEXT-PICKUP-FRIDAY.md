@@ -12,6 +12,17 @@ supersede: replace wholesale; previous = NEXT-PICKUP-FRIDAY.md.pre-0925-rotate-s
 
 **The tree is at `/Users/kamilkreiser/1FILES TO SYNC/FRIDAY`.** Quote every path (spaces).
 
+## 🔴 STATE 2026-09-29 15:3x (Friday, ctx 74%) — supersedes the 14:2x blocks where they differ
+- **Composer:** main **5b5252c** (#9, #10, #11 merged; 0 open CodeQL alerts, verified at source). **B22** (pane Composer-C) = the wizard follows E8 + the four choices; it rebases onto 5b5252c (ADDENDUM-1). On READY: open the PR (CodeQL) → QA gate (a new seat) → merge → SCREENSHOTS TO KAM on the Friday tab (`chat_reply --file`) → only after Kam has seen them, deploy per `DEPLOY.md` (backup first; the demo VM `remote-update.sh`, as C-06/C-08/C-09 did). Kam's word = card composer-two-logins-deploy-for-paul-friday (a) at 10:43.
+- **HPSM-POC:** main **1bcbeb1**.
+  - **#53** (B55 client follow-up, head 179cb37, CI 10/10) is at QA gate **B57** (pane HPSM-POC-QA). On GO: merge.
+  - **#54** (B56 content 0.5.0 + DRAFT weights + tiers, head f400eb4) is a DRAFT PR. After #53 merges: tell B56 (pane HPSM-POC-C) to rebase and regenerate the contract, then have B57's seat gate it as round 1 (a new addendum), then merge.
+  - The records for B55/B56/B57 go by one records branch afterwards.
+  - The weights doc (`Architecture/2026-09-29_proposed-weights_DRAFT-FOR-HP-VETTING.md`) goes to Kam as a copy-ready text **in the CHAT** (his rule: steps and formatted text in chat, not email), minus its internal section.
+- **Kam's hands:** the Route A Jira rule (19 steps on the Friday tab, 15:05). Then he says "done", and a seat runs R-1..R-3 from the B54 doc.
+- **Open cards:** hpsmpoc-hosted-plan-approve (new, 14:3x). Everything else was ruled.
+- **Watchers:** `seen_hpsmpoc_w4` (B57 + B22). Idle wakes of held seats are wake_ack'd.
+
 ## 🔴 STATE 2026-09-29 14:2x-b (Friday) — Kam's 12 rulings ACTIONED; supersedes the cards list above
 - **Ruled today (all reconciled 14:18):** composer deploy (a: deploy after the gate AND Kam has seen the screenshots) · wizard four choices (a) · follow Paul's E8 questionnaire (a: step 1 now, wording later) · 110 (a: "later - keep going") · HPSM-POC follow-up (b: the partner accepts each answer) · principles and sections (a) · feedback route (A: a Jira Automation rule Kam owns) · hosted link (a: plan + cost FIRST, nothing created until he approves) · tiers (a: groupings, no prices) · weights (a: Datasec proposes, HP vets) · transcript gaps (b) · intro video (b: next phase).
 - **LIVE:**
