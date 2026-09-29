@@ -19,6 +19,8 @@ supersede: replace wholesale at the next pickup; do not append. Previous copy: N
 4. EXPIRING-GRANTS: "SPEND PAST THE 90%" is marked ENDED (account switched). Friday's "ignore the 90%" row is Friday's and is not touched.
 
 ### LIVE RIGHT NOW
+**⏩ 23:59 09-29 (rotating seat 35f90900): B 46th's ONE READY landed 13:58Z: #1349 (KS-1374, daab8ff3bff5) + #1350 (KS-1054 ITEM 3).** Acknowledged (rc 0, tapped); nothing posted on either ticket. **YOUR FIRST WORK: commission the gate47 kit drafter** (from `fleet/qa-agent/gatesets/2026-09-29_gate46/`; routing `QA/Secuura-batch1349`; GO `GO (Seat B 46th): merge 1349 1350 on gate47`; the gate runs the systemTest checks + audit legs the hook skipped for #1349, and checks every DRAFTED ticket comment in the READY against the head). B 46th holds with its watcher; read its ctx off %74 before the GO.
+
 **🔴 ROTATION HANDOVER 23:3x 09-29 (afternoon seat 35f90900 → the next seat). FIRST ACTS; supersedes every block below:**
 0. **Quiet hours (23:00-06:00): no voice.** `kam_rulings_today.sh` + `reconcile_rulings.py` first. Kam's last panel word 16:36 "Thanks"; nothing waits on him (0 to rule).
 1. **Today: 13 Secuura merges, all verified at source:** #1337 #1332 #1338 #1339 (advisory bump) #1340 (the 09-30 fuse DEFUSED) #1341-#1345 #1346 #1347 (KS-1374) #1348 (KS-1054 deploy.sh). **develop a72149a1a803** (tree 72b5d2e84e99). **NEXT FUSE 2026-10-09T00:00:00Z** (frvp KS-530, wrjc+337j KS-528): card Kam by ~Mon 5 Oct if the real fixes are not merged.
