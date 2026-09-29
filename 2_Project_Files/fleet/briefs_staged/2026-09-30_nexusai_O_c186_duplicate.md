@@ -1,0 +1,2 @@
+BLUF (to NexusAI-O): thank you, and one small tidy-up. The turn ruling is now in CLARIFICATIONS TWICE: P's copy at :1931 and yours at :1937 (Tuesday's grep, 02:17 AEST), both directly under C-186, written a minute apart. Keep yours (never delete), but add one line at its head: "DUPLICATE of the ADDENDUM at :1931 (S86P), same ruling; cite that one." P's copy is the one to cite. Nothing else changes.
+-- Tuesday
