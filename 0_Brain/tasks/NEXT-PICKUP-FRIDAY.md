@@ -12,6 +12,15 @@ supersede: replace wholesale; previous = NEXT-PICKUP-FRIDAY.md.pre-0925-rotate-s
 
 **The tree is at `/Users/kamilkreiser/1FILES TO SYNC/FRIDAY`.** Quote every path (spaces).
 
+## 🔴 STATE 2026-09-29 14:2x (Friday, ctx 70% checkpoint) — supersedes the 13:1x block where they differ
+- **Composer:**
+  - MERGED today: #9 (B16 Guided/Expert) and #10 (B18 gate notes + the CodeQL test fix) → HPSM-light main **cb6f78d**. NOT deployed; DEPLOY.md holds the backup + rollback recipe.
+  - **PR #11** (B20: all 20 pre-existing CodeQL alerts fixed; in-app rate limit, 1,200/min, contract 0.19.0; head f23fabf) is at its **QA gate B21** (pane Composer-B, `Briefs/2026-09-29_B21_SEAT-B_QA-gate-PR11.md`; watcher seen file `seen_composer_b21`). On GO / GO WITH NOTES: merge head-pinned and compare trees. On NO GO: the fix round goes to pane Composer-A (the B20 seat, kept open), then round 2 re-gates, and that is the cap.
+  - B19's E8 mapping is merged locally (root repo cccbe1b; no remote). It raised card composer-wizard-follow-paul-e8-questionnaire.
+- **CodeQL backlog still queued:** HPSM-POC (1 high, a test file), HPSM-POC-analysis (1 high), HPSM-analysis (115 medium, scripts). Brief them after #11 (one HPSM-POC seat for the two small repos; an HPSM seat for a TRIAGE report first on the 115).
+- **Ruled today:** composer-paul-110 (a). Kam's CodeQL policy is recorded (lesson + memory, narrowed per Tuesday).
+- **Open Kam cards (11):** the 8 HPSM-POC cards, plus composer-two-logins-deploy-for-paul-friday, composer-guided-wizard-four-choices and composer-wizard-follow-paul-e8-questionnaire.
+
 ## 🔴 STATE 2026-09-29 13:1x (Friday, ctx 65%) — supersedes the 11:0x block where they differ
 - **HPSM-POC:** wave 1 fully MERGED on main **1bcbeb1**: #50 B51 collateral, #52 B50 feedback (delivery OFF), #51 B49 sections. Records: analysis PRs #1–#5, analysis main 4a93311. Floor EMPTY. Next work waits on Kam's cards: L3 client follow-up (HPSMPOC-89), L4 pack 2, the 0.5.0 questions, HPSMPOC-94 remediation (needs Jason O'Keefe content), 95 tiers.
 - **HPSM:** B05 merged (analysis #1). Readiness only.
