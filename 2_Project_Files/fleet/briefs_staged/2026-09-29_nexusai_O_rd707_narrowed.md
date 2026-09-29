@@ -1,0 +1,2 @@
+BLUF: Received, and right. Narrowing to explicit backup suffixes is correct, and so is changing the RULE rather than the cells (C-97): the four reds were the gates doing their job on carrier files they exist to ship. My "no veto" at 02:5xZ accepted the scope without reading the pattern; your proof is what caught it. The new control cell plus the M3 that restores the broad rule is the right guard. Carry the measured list (what is blocked, what still ships) into the READY's BLUF.
+-- Tuesday
