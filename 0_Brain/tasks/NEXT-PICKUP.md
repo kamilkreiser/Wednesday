@@ -19,6 +19,20 @@ supersede: replace wholesale at the next pickup; do not append. Previous copy: N
 4. EXPIRING-GRANTS: "SPEND PAST THE 90%" is marked ENDED (account switched). Friday's "ignore the 90%" row is Friday's and is not touched.
 
 ### LIVE RIGHT NOW
+**🟠 65% CHECKPOINT 09:12 2026-09-30 (seat ffc4a192, morning; READ FIRST, supersedes every block below):**
+1. **ALL SECUURA PUSHES ARE BLOCKED** (Peter's included). Legs 6 and 7 refuse two advisories published 2026-09-29. **js-yaml GHSA-r3ph** is fixed in #1354. **undici GHSA-r53p** is LOW and needs an acceptance.
+   - **PR #1354** (KS-470, head `4370be410bbf`: the js-yaml lock line plus the r53p baseline row expiring 2026-10-09) got **gate48a NO GO on AUTHORITY only.** The 09-09 grant's exception fires: undici 5.29.0 is a production entry in the issuer lock, installed in the builder stage. Every technical check passed.
+   - **Kam's card `secuura-undici-ghsa-r53p-exception-1354`** recommends (a): accept to 9 Oct and commission the override. The default is that nothing merges and the undici override MEASUREMENT is commissioned.
+   - **On (a):** a successor seat applies the gate's AMENDED row reason (gate48a report, sha 7710b5e3…), merges on `GO (Seat B 47th|<successor>): merge 1354 on gate48a` (gate48a's GO string names B 47th; a successor needs a SUPERSEDES-named GO), then files the override ticket (the gate's amended text).
+   - **On (b), or no answer:** launch a seat to build and measure the unscoped undici `^7.29.1` override (the issuer + root manifests; build + suites), then gate it.
+2. **Seat B 47th (%77) WRAPPING cold after filing the CLEANROOM ticket** (the gate's amended text). Its handover lists the unfinished work:
+   - ITEM 1a, KS-1054 N-1350-1, committed `0ffb275b2`, unpushed; rebase after #1354;
+   - ITEM 1b, the KS-1015 carve READY, untouched;
+   - ITEM 2, KS-1380/1387 design, with the issuer image build measured.
+   On its WRAP: read the handover and history on disk, score it, and run pane_close.sh in ONE action.
+3. **Tonight's merges still stand:** #1349 + #1350 (develop 37205947ddd2). The fuse on 2026-10-09 becomes **5 rows** if #1354 merges.
+4. Wednesday's own errors today (ledger): the "no expires" ruling (superseded by ROUTE B), and the Kam flag's inaccuracies (corrected in the card). Owed: nothing further to Kam until he rules.
+
 **⏩ 03:04 2026-09-30 (overnight seat ffc4a192, ctx ~54%). READ FIRST; supersedes every block below:**
 1. **Tonight: #1349 (KS-1374) + #1350 (KS-1054) MERGED on gate47's GO, verified at source** by Wednesday's own scratch-clone fetch: develop **37205947ddd2**, tree == END 6930599560c9, modes right. The ticket texts are the gate's AMENDED wording, read back from Linear. **Today 2 Secuura merges.** gate47 scored 0.98; **Seat B 46th scored 0.95, WRAPPED, pane %74 closed.** Floor: wednesday + fleet-monitor only.
 2. **Peter's PR #1351 (KS-1386)** touches `aktoRateLimit.ts`; it was sequenced out of gate47 at eac2dae2afb7. The gate measured #1349 green over it in either order. It is his; nothing is sent to him. Three #1349 text references go stale if it merges (N-1349-6, info only).

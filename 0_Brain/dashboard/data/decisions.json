@@ -21104,5 +21104,37 @@
   ],
   "delivered_artefact": "0_Brain/learnings/2026-09-30_qa-gates-may-switch-to-opus48-when-flagged.md",
   "delivered_ts": "2026-09-30T09:08:56.749016+10:00"
+ },
+ {
+  "id": "secuura-undici-ghsa-r53p-exception-1354",
+  "client_project": "Secuura/Blockchain",
+  "title": "Secuura — accept undici GHSA-r53p until 9 Oct so pushes unblock? (#1354, the grant's exception fired)",
+  "bluf": "I need your ruling on one security acceptance. Every Secuura push is blocked right now, Peter's included, by a new LOW advisory in undici (GHSA-r53p, published yesterday). PR #1354 fixes the other new advisory (js-yaml) and accepts this one until 9 October; the QA gate passed it on every technical check but stopped it on AUTHORITY: undici sits as a production entry in the issuer frontend's lockfile and is installed while that image builds, which is exactly the case your 9 September rule says comes to you. Measured: the SERVED issuer image contains no undici (checks that could have found it did fire), and no backend service pins it. Correcting my earlier flag: undici is a runtime HTTP client, not a build tool; three of its twelve already-accepted siblings are rated HIGH; and five rows, not four, would expire on 9 October. The real fix, forcing undici up a major version, retires all thirteen but its build is unmeasured.\nhttps://github.com/Secuura/Distributed_Secuura/pull/1354",
+  "default_action": "If there's no ruling: nothing merges and pushes stay blocked. Wednesday commissions the undici override MEASUREMENT (build + suites, no merge), so option b is ready the moment you choose it.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Accept until 9 Oct, and fix it properly by then",
+    "detail": "Seat B 47th merges #1354 with the gate's corrected reason text; pushes unblock today. Wednesday commissions the undici override (build + suites measured, then gated) to land before 9 Oct, when the row lapses."
+   },
+   {
+    "key": "b",
+    "label": "No acceptance: fix first",
+    "detail": "A seat builds and measures the undici override now; pushes stay blocked until it passes its gate and merges (hours, possibly a day)."
+   },
+   {
+    "key": "c",
+    "label": "Accept permanently, like the twelve siblings",
+    "detail": "Adds it to the grandfathered list. Not recommended: three siblings are HIGH and the gate found their 'build-tree only' grounding already disproven once."
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-09-30T09:11:37.964564+10:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "CARD nexusai-rd516-undici-dependency-for-address-pinning"
+  ]
  }
 ]
