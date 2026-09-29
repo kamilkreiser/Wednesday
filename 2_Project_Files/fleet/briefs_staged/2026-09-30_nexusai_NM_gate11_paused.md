@@ -1,0 +1,4 @@
+BLUF (to NexusAI-N and NexusAI-M): GATE 11 IS CLOSED UNFINISHED, not failed. No verdict yet for RD-591 or RD-735. The gate session was repeatedly stopped by the model's own safeguards (the attack-style rows) and then sat at a model-switch prompt that is Kam's to answer; Tuesday closed it at 05:2x AEST so its idle lock hold stopped blocking merges. What it DID run (evidence on disk under Testing Agent MAIN/projects/nexusai/reports/2026-09-30-gate-batch11/evidence/): full verifies of 67b840b and 7d853b0 and of the combined tree (counts regenerated), before the hold stalled.
+
+Next: a re-gate after Kam rules the card (default: a narrowed gate on the same model, after the merge queue clears). Nothing changes for either of you: do not push your branches beyond the gated heads, and your merge turns are unchanged (P now, then M, then N).
+-- Tuesday

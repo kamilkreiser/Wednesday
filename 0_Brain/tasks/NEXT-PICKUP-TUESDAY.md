@@ -6,6 +6,19 @@ status: live
 supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s1-wholesale
 ---
 
+## 🟢 DELTA 134 — 2026-09-30 05:22 (s94, ctx 66% light checkpoint; band 80-90). **READ THIS FIRST, THEN 133.**
+### STATE
+- **NexusAI main = 67e8928** (RD-466 5531d7b then RD-703 67e8928 tonight; both verified at source: ls-remote, Build SUCCESS, demo SKIPPED). **Merge turn now P** (s86p-merge-3-rd197 holds the jest lock since ~05:2x; RD-197 forward-merged c0cff62). Then M (RD-732 → RD-733 → RD-618), N (RD-723 → batch 3/8), O (RD-707), per the **C-186 ADDENDUM at CLARIFICATIONS:1931** (the turn passes; O's copy :1937 marked duplicate).
+- **C-192** (publickey denial = transport, retry 5 × ~10 s; failed ls-remote = UNKNOWN): all four seats confirmed.
+- **GATE 11 CLOSED UNFINISHED** (%51, 05:2x): 5 safety-classifier stops, then parked at an 'Opus 5.5 safeguards … switch to Opus 4.8?' dialog. **Tuesday did not answer it** (model/config choice = Kam's; the gate shares this seat's CLAUDE_CONFIG_DIR). Ran: pins, trees, merge-trees, P1 full verifies of 67b840b + 7d853b0, P2 MT1 counts regenerated + plain verify (read HOLD.out lines :68-:182 for the numbers — not yet read by Tuesday). Evidence: Testing Agent MAIN/projects/nexusai/reports/2026-09-30-gate-batch11/evidence/ (classifier-stops.txt). **CARD `nexusai-gate11-opus55-safeguard-model-switch` (201): rec (a) narrowed gate on Opus 5.5; default (a) after the merge queue clears.** N and M told.
+### OWED / NEXT
+1. **On Kam's card ruling (or by default):** re-gate RD-591 (t1) + RD-735 (t2) + RD-657 (t2, READY saved) as ONE batch, brief NARROWED (conventional verification rows; no attack-framed rows; the attack checks (XFF budget, eviction flood, foreign-vanished dial, userinfo shapes) go to the builders as unit cells in RD-736-style follow-up tickets). Reuse gate 11's on-disk evidence. Launch only when the merge queue is quiet (a gate holds the lock 2-3 h).
+2. On each MERGED mail: verify at source (retry ls-remote; Build failing set by name within C-185; demo SKIPPED).
+3. **Morning (Kam up, ~06:xx):** one board message: two merges landed overnight (RD-466, RD-703), batch 10 released, gate 11 closed on the safeguard prompt + the card; nothing else of his.
+4. Tickets filed by O: RD-736 (RD-703 B-F1+B-F2), RD-737 (RD-707 C-F1 + C-N1, broad rules + tracked-file guard). RD-738 (N): GitHub SSH intermittency.
+### FLOOR
+%0 tuesday | %22 P · %21 N · %19 M · %29 O · %1 monitor. No gate pane. Usage 82%.
+
 ## 🟢 DELTA 133 — 2026-09-30 01:02 (s94, ctx 51% CHECKPOINT; band 80-90). **READ THIS FIRST, THEN 132 (its OWED/NEXT list is current except below).**
 - **RD-466 (O):** hold CLEAN (4210/254, C-57 missing 0); PR #34 for 5531d7b open; CodeQL Analyze x3 + CodeQL PASS, npm-audit red (E-1, not a hold); the CI `build` check was PENDING at 00:3x. O's in-flight land.sh is the OLD script (a failed ls-remote reads 'main moved - STOP'; a denied push is not retried); O finishes by hand under C-192 if either fires. **On O's MERGED: verify at source (retry ls-remote), Build failing set by name within C-185, demo SKIPPED.** Main still f9cb440 at 00:53.
 - **C-192 (Tuesday's ruling, recorded by N):** 'Permission denied (publickey)' = transport, retry up to 5 x ~10 s; C-190 STOP only on ruleset/policy refusals; a failed ls-remote is UNKNOWN; poll main <= 5 min. RD-738 (N) is the ticket. **GitHub auth is intermittent tonight for THIS repo too: every push/ls-remote of mine is retried and read back, never assumed.** Receipts: N, O. P and M not yet.
