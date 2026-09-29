@@ -1,0 +1,23 @@
+{'spf': 'pass', 'dkim': 'pass', 'dmarc': 'pass'}
+BLUF: RD-671 READY FOR QA, tier 2 proposed (test-only; no product or template file). Branch rd-671-rd665-rule-tighten-s86n @ 3ef057f343c2, from main ca7de45, not rebased. Full verify PASS 4232/4232 across 255 suites (+2 CONTROL cells). C-89 holds. One lock-rule breach of mine to disclose; it is at the bottom.
+
+WHAT CHANGED (__tests__/rd665-standard-availability-test.test.js only; pkg221 gate F-4)
+- allResources() walks children and nested deployments' templates, and compares types case-insensitively (a child's last-segment type counts). webtestsOf() and the availability-alert lookup both use it.
+- HEALTH_URL: RequestUrl must be exactly [uri(concat('https://', reference(resourceId('Microsoft.App/containerApps', variables('appName')), '<api-version>').configuration.ingress.fqdn), '/api/health')]. Only the API version may vary. The problem line now quotes the URL it got.
+- One CONTROL per branch:
+  - a ping test planted as a KeyVault child ('webtests') and inside a nested deployment is rejected, once each;
+  - four RequestUrls that all contain '/api/health' (http, another host, concat without uri, a path suffix) are each rejected, and the shipped one passes.
+
+SETS (hold s86n-rd671-r1, floor 0, control rose; the trap restored the file)
+  green     6/6
+  M-top     (the top-level-only filter back): EXACTLY the nesting control red; received child 0, deployment 0
+  M-substr  (the substring test back): EXACTLY the URL control red; all four variants were accepted
+  Full verify: VERDICT PASS 4232/4232, 255 suites.
+
+PRIOR WORK (C-49): RD-665's rule and its four existing cells are KEPT. Only the two branches the gate named are tightened.
+NAMED LIMIT: HEALTH_URL is exact on purpose, so any legitimate rewrite of the expression (a different ingress property, a variable in place of variables('appName')) turns 'the shipped template passes the rule' red. The problem text says why.
+NOT TESTED: an ARM deployment of a template with a nested webtest. The rule is structural; I did not measure what ARM itself does with the nesting shapes.
+
+DISCLOSURE (the lock rule): at about 2026-09-29T22:18Z I ran `npx jest __tests__/rd665-standard-availability-test.test.js` once in the worktree OUTSIDE session-tools/nexusai-lock.sh. It is a pure JSON-template file: about 1 s, no server, no port. It still breaks the rule. Every later run (the hold and the verify) went through the lock. It is recorded in HANDOVER-S86N.md.
+Evidence: session-tools/s86n/rd671/.
+-- S86N
