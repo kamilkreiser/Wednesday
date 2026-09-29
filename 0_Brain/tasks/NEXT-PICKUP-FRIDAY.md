@@ -12,6 +12,18 @@ supersede: replace wholesale; previous = NEXT-PICKUP-FRIDAY.md.pre-0925-rotate-s
 
 **The tree is at `/Users/kamilkreiser/1FILES TO SYNC/FRIDAY`.** Quote every path (spaces).
 
+## 🔴 STATE 2026-09-29 13:1x (Friday, ctx 65%) — supersedes the 11:0x block where they differ
+- **HPSM-POC:** wave 1 fully MERGED on main **1bcbeb1**: #50 B51 collateral, #52 B50 feedback (delivery OFF), #51 B49 sections. Records: analysis PRs #1–#5, analysis main 4a93311. Floor EMPTY. Next work waits on Kam's cards: L3 client follow-up (HPSMPOC-89), L4 pack 2, the 0.5.0 questions, HPSMPOC-94 remediation (needs Jason O'Keefe content), 95 tiers.
+- **HPSM:** B05 merged (analysis #1). Readiness only.
+- **Composer:** #9 (B16 Guided/Expert) MERGED → main **6968b7f**, NOT deployed.
+  - #10 (B18 gate notes, head ccb3470) is at the RE-GATE: the B17 seat (pane Composer-B) is running round 2 of 2 per `Briefs/2026-09-29_B17_ADDENDUM-1_round-2-regate.md`. On GO or GO WITH NOTES: merge head-pinned, compare trees, and tell Kam it is deploy-ready for Paul (card composer-two-logins-deploy-for-paul-friday; a deploy follows DEPLOY.md: backup before migrate).
+  - The B18 seat (Composer-A) is idle, kept for a possible fix.
+  - **B19 (Composer-C)** is mapping Kam's E8 questionnaire (HP-branded, git-ignored in Source_Documents) against the 26/123/55. Analysis only; records by branch.
+- **Kam emailed today:** HP-4..8 (08:58); Steve's follow-up bullet list (~10:55).
+- **Open Kam cards (10):** hpsmpoc-c30-policy-principles-and-sections · -c30-feedback-route · -hosted-link-for-hp · -client-followup-model · -section-intro-video-scope · -weighting-matrix-owner · -transcript-gaps · -good-better-best-tiers-scope · composer-two-logins-deploy-for-paul-friday · composer-guided-wizard-four-choices. (composer-paul-110 was ruled 13:1x.)
+- **Watchers:** friday/watch_status.sh on the B17 STATUS (seen file `seen_composer_r2`) and on B19. Re-arm after every wake. The idle wakes of held seats are wake_ack'd.
+- Leftover stacks: pc-b16, pc-b17, pc-b18. Quarantine only, never delete.
+
 ## 🔴 STATE 2026-09-29 11:0x (Friday) — supersedes the 09:2x block where they differ
 - **LIVE SEATS:**
   - HPSM-POC-A (%7): B49 sections, idle by design. Once #52 merges: rebase, add the contract commit, un-draft PR #51, merge.
