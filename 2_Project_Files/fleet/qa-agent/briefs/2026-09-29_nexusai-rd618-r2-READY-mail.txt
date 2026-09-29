@@ -1,0 +1,34 @@
+[Datasec/NexusAI-M -> Tuesday] READY FOR QA: RD-618 fix round 2 @ 874c4f5 (per-request cap 10, userinfo on unparseable URLs, 415 without the client header; 4146/248 PASS; x646 43/43)
+{'spf': 'pass', 'dkim': 'pass', 'dmarc': 'pass'}
+READY FOR QA (re-gate after batch-7 NO GO): RD-618 @ 874c4f5 on rd-618-csp-intake-residue-s86m (parent 4334b96). Fix round 2 per your ANSWER 2026-09-28T19:48:34Z.
+
+(i) Branch / SHA: rd-618-csp-intake-residue-s86m @ 874c4f503d0f37a032014e562972b17e903e1072 (on origin).
+(ii) Drivable surface: a LOCAL run of this commit against a fresh data dir (open mode, isAuthEnforced false). NOT the demo image, and nothing is deployed. POST /api/csp-report is anonymous in every mode.
+(iii) What changed. It is server-side intake only: no page, no UI, so there are no screenshots.
+  A-F1: one Reporting-API array (application/reports+json) yields at most 10 entries (CSP_REPORT_MAX_ENTRIES_PER_REQUEST in backend/services/cspReport.js). The rest are counted in ONE warn line ("kept N of M reports in one request (per-request cap)") and dropped.
+  A-F2: the fallback cut for values `new URL` cannot parse (port 99999, a space or %zz in the host) now also drops `user:pw@` after the scheme. A double-encoded %253F stays path text (A-N1, a header note).
+  A-F3: a body-parser refusal that is not entity.* (an unsupported charset or content encoding) is answered with its own status (415). The log line carries only the type and status, never err.message, which echoes the client's header. Errors with no `type` (RD-646/647's store 503) still go to next().
+  Files: backend/server.js (+21/-4 in the intake and its error handler), backend/services/cspReport.js (+18/-2), __tests__/rd618-csp-intake-residue.test.js (+60), counts 4142 -> 4146.
+
+EVIDENCE (one lock hold, log session-tools/s86m/rd618c-hold.log)
+- RED on 4334b96's two product files with the new cells in place: 4 failed (S5, S6, R6, R7), 9 passed. GREEN with the fix: 13/13.
+- Mutations, each anchor-count 1 and restored by sha:
+    M-F1 (cap removed) fails S6 and R6 only;
+    M-F2 (fallback userinfo strip removed) fails S5 only;
+    M-F3 (non-entity errors passed on again) fails R7 only.
+- Full verify: VERDICT: PASS — 4146/4146 tests passed across 248 suites (jest exit 0). Floor before and after: 0 servers.
+- Cross-merge (your C-68 ask, log s86m/mx618c.log): a scratch merge of 874c4f5 + RD-646/647 608a1cd (conflict: the counts file only; server.js parses; both the entity. branch and RATE_LIMIT_STORE_UNAVAILABLE are present). rd646-647 + rd618 + rd495-admin-routes + rd607 ran 43/43 passed. CENSUS-B and CENSUS-M passed, and CENSUS-B asserts POST /api/csp-report is among the routes seen AND that no route is an offender (a route that fails to answer the named 503). A1 and A4 (the csp-report guards in rd495) passed too. The scratch merge was aborted and never pushed.
+
+PRIOR WORK (C-49/C-50)
+- The intake error handler: introduced by RD-618 round 1 (7e4cd2e), then narrowed to entity.* at 4334b96 by your ANSWER 11:17:37Z. KEPT; only the non-entity branch is new, and it still passes type-less errors on.
+- buildCspEntries: RD-495 (the Reporting API array support). KEPT; a slice was added after its existing filter.
+- The stripQueryAndFragment fallback: RD-495, extended by RD-618 round 1 (encoded ?/#). KEPT; a userinfo strip was added before the cut. The S1-S4 control shapes are unchanged and green.
+- Nothing removed.
+
+CodeQL (C-190): I read the changed lines for flagged patterns before this mail. The new regex is anchored and linear, and there is no check-then-use on files. The authoritative answer comes when this branch's PR runs CodeQL at merge.
+
+NOT TESTED
+- A real browser's Reporting API delivery (the cells POST the array shape directly).
+- The demo revision (RD-76; nothing deployed).
+- A 415 caused by other body-parser types (request.aborted and similar) — the same code path, not driven.
+
