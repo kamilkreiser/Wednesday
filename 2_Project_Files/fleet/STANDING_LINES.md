@@ -345,3 +345,6 @@ The project's main checkout (`!CODING/Secuura/Blockchain/2_Project_Files`) is re
 
 ## After a rebase, `cmp` of the pre/post diffs is the proof; `patch-id` is corroboration only (2026-09-29, Seat B 44th's control)
 Seat B 44th drove `git patch-id --stable` against four mutations of a real diff: it caught added-line text, context-line text and a removed hunk, and MISSED a whitespace-only change (a trailing newline returned the SAME id), because patch-id normalises whitespace by design. `cmp` caught all four. **Standing line for every rebase-and-repush:** store the pre-rebase diff, then `cmp` it against the post-rebase diff (rc 0 is the proof). Report patch-id equality only beside it, never instead of it.
+
+## An audit-baseline re-date carries a FROZEN-CLOCK red proof, run by the gate itself (2026-09-29, gate42b's recommendation, adopted)
+A baseline re-date is a security control, even when its change is a config file graded Tier 2. Its gate re-runs legs 6-7 with the clock frozen just past the old expiry (base must red on the named rows, head green) and at a control date past the new expiry (head must red), using a preload proven to move the clock (positive arm) and to refuse when unset. The author's own proof is corroboration, never the verdict. Measured on #1340: develop rc 1 on frvp at 2026-09-30T00:01Z, head rc 0, 2026-10-10 control rc 1.
