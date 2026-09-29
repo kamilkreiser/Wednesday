@@ -1,0 +1,12 @@
+# KS-1054 N-1350-1 — Spark brief + golden + round 1 (broken python3 fails the migration check closed)
+
+Written 2026-09-30 02:40 AEST by a Spark brief-writer sub-agent for Wednesday. No PR, no merge, no post, no mail, no ticket change; nothing written under `!CODING/` (git write verbs only in this session's scratchpad clones `n1350/{src,gold,ctl_clone,round_clone}`).
+
+- **Finding:** gate47 N-1350-1 (QA report :368, :218, :386). **Ruling:** Wednesday, inside Kam's KS-1054 (a): a python3 that cannot parse fails closed (rc 1) like an absent one; a non-JSON body keeps rc 2.
+- **Base:** develop `37205947ddd2775a72a417beb5b7ac8e3240fbf3` (ls-remote 2026-09-29T16:30Z, unchanged from the base named).
+- **Shape:** ONE product file, ONE hunk (`:77`-`:78` -> 4 lines). deploy.sh (`:848`-`:860`) and deploy-all.sh (`:303`-`:313`) already fail on any rc other than 0/2 — no change there. Test: ks1054 suite modified in place, +27 lines after `:116`.
+- **Files:** `KS-1054.md` (the brief; its fences were filled FROM the golden), `golden.diff` (`git diff`, sha256 feb7a0e49c1d…), `precheck/` (the bash checker run on the brief-fence rebuild: PASS 7/7 strict — the golden dir hold_ready cites).
+- **Measured:** tip 36/0; test hunk alone 38/2 (P10, P10b, by rc 2 vs 1); golden 40/0; checker on the raw `git diff` golden PASS but REANCHORED (its `diff --git`/`index` lines trail into section 1), on the fence rebuild PASS strict; A2a 2/2, mutated header BAD rc 1.
+- **Round 1 (Spark, thinking OFF):** `runs/spark_secuura_2026-09-30_KS-1054-N-1350-1` — PASS 7/7 strict + A2a 2/2; patch.diff byte-identical to the golden (`cmp` rc 0; mutated control rc 1). Held: `night/READY_KS-1054-BROKENPY-1_spark-dsv4flash_BRIEFED-BASHPATCH-CHECK-STARTUP-MIGRATIONS-PASS-7of7_2026-09-30.diff.md`.
+- **How it was run (round.sh is code_patch-only):** `NIGHT_SOURCE_CHECKOUT=<n1350/src> bash tasks/bash_patch/build_bash_input.sh KS-1054 <run>/input.json <brief> product=Blockchain/Dev/deployment/azure/check-startup-migrations.sh ref=Blockchain/Dev/scripts/__tests__/start_secuura_marker_unknown_warning.test.sh test_file=Blockchain/Dev/scripts/__tests__/ks1054_deploy_scripts_read_startup_migrations.test.sh` -> `LM_BACKEND=spark SPARK_THINK=0 bash local_model_task.sh tasks/bash_patch/task.md …` -> `bash tasks/bash_patch/checker.sh <input> <out.md> <fresh clone at tip>` -> `a2a_anchor.py` by hand.
+- **Scope:** closes N-1350-1 only. Refs KS-1054, does NOT close it. UNMEASURED items are in the brief (no end-to-end deploy.sh drive, no macOS shim, no GNU run).

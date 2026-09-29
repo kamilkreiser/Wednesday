@@ -1,0 +1,15 @@
+--- a/Blockchain/Dev/deployment/azure/check-startup-migrations.sh
++++ b/Blockchain/Dev/deployment/azure/check-startup-migrations.sh
+@@ -74,8 +74,10 @@
+ # this makes the two scripts consistent instead of inventing a new failure mode. Kam's option (a) is
+ # explicit that the deploy reads as FAILED.
+ # Checked EXPLICITLY, before the pipeline, so the message can name the real cause.
+-if ! command -v python3 > /dev/null 2>&1; then
+-  echo "  ✗ startupMigrations: python3 is NOT on PATH, so /health's body cannot be parsed."
++# N-1350-1 (gate47): a python3 that is PRESENT but BROKEN (on PATH, exits non-zero) is the same host
++# defect. It is probed here, or the pipeline's `|| echo UNPARSEABLE` reads it as "not JSON" (rc 2).
++if ! command -v python3 > /dev/null 2>&1 || ! python3 -c 'import json' > /dev/null 2>&1 < /dev/null; then
++  echo "  ✗ startupMigrations: python3 is NOT on PATH or does not run, so /health's body cannot be parsed."
+   echo "    A missing parser is not evidence of a clean run; the DEPLOY fails (Kam's option (a))."
+   exit 1
+ fi

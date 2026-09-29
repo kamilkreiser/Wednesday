@@ -1,0 +1,51 @@
+--- a/Blockchain/Dev/deployment/azure/check-startup-migrations.sh
++++ b/Blockchain/Dev/deployment/azure/check-startup-migrations.sh
+@@ -74,8 +74,10 @@
+ # this makes the two scripts consistent instead of inventing a new failure mode. Kam's option (a) is
+ # explicit that the deploy reads as FAILED.
+ # Checked EXPLICITLY, before the pipeline, so the message can name the real cause.
+-if ! command -v python3 > /dev/null 2>&1; then
+-  echo "  ✗ startupMigrations: python3 is NOT on PATH, so /health's body cannot be parsed."
++# N-1350-1 (gate47): a python3 that is PRESENT but BROKEN (on PATH, exits non-zero) is the same host
++# defect. It is probed here, or the pipeline's `|| echo UNPARSEABLE` reads it as "not JSON" (rc 2).
++if ! command -v python3 > /dev/null 2>&1 || ! python3 -c 'import json' > /dev/null 2>&1 < /dev/null; then
++  echo "  ✗ startupMigrations: python3 is NOT on PATH or does not run, so /health's body cannot be parsed."
+   echo "    A missing parser is not evidence of a clean run; the DEPLOY fails (Kam's option (a))."
+   exit 1
+ fi
+--- a/Blockchain/Dev/scripts/__tests__/ks1054_deploy_scripts_read_startup_migrations.test.sh
++++ b/Blockchain/Dev/scripts/__tests__/ks1054_deploy_scripts_read_startup_migrations.test.sh
+@@ -114,6 +114,33 @@
+       '{"status":"healthy","startupMigrations":{"ran":true,"failed":2}}' 1 "2 migration(s) FAILED"
+ probe "P9d CONTROL the clean body with python3 present -> rc 0, so the stub PATH is what moved P9b" \
+       '{"status":"healthy","startupMigrations":{"ran":true,"applied":41,"failed":0}}' 0 "0 failed"
++# ---- N-1350-1 (gate47): python3 PRESENT but BROKEN (on PATH, exits non-zero; a stub exiting 127
++# here, and a macOS /usr/bin/python3 shim with no tools installed is the same shape) must FAIL CLOSED
++# exactly like python3 ABSENT. The base read a failed-2 body as "not JSON" -> rc 2, so deploy.sh
++# passed "with 1 check(s) SKIPPED" over failed migrations. P5 stays the genuinely-non-JSON CONTROL.
++echo "=== P-BADPY: python3 present but broken must FAIL CLOSED, and name the parser ==="
++BADPY_BIN="$NOPY_BIN/badpy"
++mkdir -p "$BADPY_BIN"
++printf '#!/bin/sh\nexit 127\n' > "$BADPY_BIN/python3"
++chmod +x "$BADPY_BIN/python3"
++badpy_probe() { # $1 label  $2 body  $3 want-rc  $4 want-substring
++  local out rc
++  out="$(PATH="$BADPY_BIN" /bin/bash "$SUBJ" "$2" 2>&1 < /dev/null)"; rc=$?
++  if [[ "$rc" != "$3" ]]; then bad "$1" "rc=$rc want $3 :: $out"; return; fi
++  if [[ -n "$4" && "$out" != *"$4"* ]]; then bad "$1" "output did not name '$4' :: $out"; return; fi
++  ok "$1"
++}
++if PATH="$BADPY_BIN" /bin/bash -c 'command -v python3 >/dev/null 2>&1 && ! python3 -c "import json" >/dev/null 2>&1'; then
++  ok "P10-FIXTURE python3 is on the stub PATH and exits non-zero (so the cells below are not vacuous)"
++else
++  bad "P10-FIXTURE python3 is on the stub PATH and exits non-zero" "the stub is absent or it runs - the cells below would prove nothing"
++fi
++badpy_probe "P10 python3 present but BROKEN + a failed-2 body -> FAILS CLOSED (rc 1), not read as 'not JSON'" \
++      '{"status":"healthy","startupMigrations":{"ran":true,"failed":2}}' 1 "python3"
++badpy_probe "P10b python3 present but BROKEN + a CLEAN body ALSO fails closed: a parser that cannot run is not evidence" \
++      '{"status":"healthy","startupMigrations":{"ran":true,"failed":0}}' 1 "python3"
++badpy_probe "P10c CONTROL python3 broken + an EMPTY body -> still rc 2: that branch never needed a parser" \
++      '' 2 "not a pass"
+ # An EMPTY body needs no parser at all, so it must still be PASS-WITH-SKIP even with python3 gone.
+ nopy_probe "P9e python3 absent + an EMPTY body -> still rc 2: that branch never needed a parser" \
+       '' 2 "not a pass"
