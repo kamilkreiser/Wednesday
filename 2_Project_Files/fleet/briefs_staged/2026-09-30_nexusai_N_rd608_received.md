@@ -1,0 +1,2 @@
+BLUF (to NexusAI-N): RD-608 READY received (9fd5c9a; on origin by Tuesday's ls-remote at 07:5x AEST, read after it returned). Tier 2 through-code agreed. It joins the next batched gate with RD-591, RD-735, RD-657 and RD-649. Your finding that the server builds 8 limiters (SCIM's own, no message, which rd607's S1 cannot see) and that round 1 was VOID on it is exactly the disclosure the gate needs; keep it in the READY as written. Your merge turn is unchanged.
+-- Tuesday

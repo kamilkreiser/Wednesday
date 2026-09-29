@@ -1,0 +1,30 @@
+{'spf': 'pass', 'dkim': 'pass', 'dmarc': 'pass'}
+BLUF: RD-608 READY FOR QA, tier 2 proposed (test-only; no product file). Branch rd-608-limiter-census-s86n @ 9fd5c9a34af3, from main 67e8928, not rebased. Full verify PASS 4223/4223 across 255 suites (+1 file, +2 cells). C-89 holds.
+
+WHAT CHANGED
+- New __tests__/rd608-ai-test-limiter-census.test.js and helpers/rd608-limiter-census-preload.js. The preload wraps express-rate-limit's factory in the spawned server and writes a ledger of the limiters that RAN on each POST /api/setup/ai-test.
+- Labels: each limiter is labelled by its own refusal message. A limiter with no message is labelled by the file that built it.
+- CTRL: the census loaded, holds 8 limiters under known labels, and saw 1 request.
+- C1: exactly [general, setup, ai-test] ran, each passed the request on, and ai-test has hasSkip false.
+- RD-516's R8 is unchanged and kept. The census reads no response, so C-106's reason for R8 stands.
+
+A FINDING ABOUT MY OWN ASSUMPTION
+The server builds 8 limiters, not 7. services/scimProvisioning.js builds SCIM's own, which has a handler and no message: gate 6's F-4 limiter. rd607's S1 counts only server.js, so it never sees it. Round 1 was VOID on this: CTRL expected 7 and read unknown:undefined. Fixed by labelling it by its file; nothing in the product changed.
+
+SETS (hold s86n-rd608-r2, floor 0, control rose; every arm runs the census AND R8; trap restored server.js clean)
+  green   census 2/2                    R8 green
+  B1      C1 red (+1 ai-test ran)       R8 GREEN   (a second limiter not named ...limiter)
+  B2      C1 red                        R8 GREEN   (in an array)
+  B3      C1 red                        R8 GREEN   (app.use('/api/setup', x))
+  B4      C1 red                        R8 GREEN   (a global app.use with a path check)
+  B5      census 2/2                    R8 RED     (a non-limiter middleware named ...Limiter...)
+  B6      census 2/2                    R8 RED     (app.use(['/api/setup/ai-test'], aiTestLimiter))
+  M-drop  C1 red (no ai-test)           R8 red
+  M-skip  C1 red (ai-test hasSkip:true) R8 GREEN   (RD-545's shape)
+On B1-B4 CTRL is also red, because the registry holds 9. C1 is the cell that says why.
+
+PRIOR WORK (C-49): QA's qa-limiter-census-preload.js (gate 1 evidence) is the base. Its ledger is kept; its express wrapper and SIGUSR2 stack walk are left out.
+NOT TESTED: the census in Redis mode (labels do not depend on the store); a limiter created through a factory other than express-rate-limit.
+NAMED LIMIT: the labels are the limiters' message texts, so rewording a message turns CTRL red. That is intended, but it is a coupling.
+Evidence: session-tools/s86n/rd608/ (r1 VOID, r2).
+-- S86N
