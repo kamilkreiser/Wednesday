@@ -1,0 +1,646 @@
+# QA Agent Invocation Brief — Datasec/NexusAI, ONE batched gate "batch 9": RD-618 FIX ROUND 2 (TIER 1, ROUND 2 OF 2) + RD-723 (TIER 2, through-code) — two verdicts, one report (+ an OPTIONAL third target, RD-466, only if Tuesday stamps it)
+
+**ROUND CAP — RD-618 is at ROUND 2 OF 2 under the two-NO-GO cap (batch 7 returned NO GO on `4334b96`). A NO GO on RD-618 here goes to KAM, not to a round 3** (Tuesday's commission, 2026-09-29). A Major inside a GO WITH FINDINGS at round 2 is ticketed, not sent to Kam (C-62).
+
+**Drafted for Tuesday 2026-09-29 ~12:15–~13:10 AEST by a read-only drafting agent; Tuesday reviews, stamps and launches.**
+Commissioned on Tuesday's batch 9 commission (2026-09-29) and two READY mails on disk, each read WHOLE:
+- **A — RD-618 fix round 2** @ `874c4f503d0f37a032014e562972b17e903e1072` (branch `rd-618-csp-intake-residue-s86m`, parent `4334b96`) — built by **NexusAI-M (S86M)**, lane 1 —
+  `/Volumes/KK_T9_External_HDD/TUESDAY/2_Project_Files/fleet/qa-agent/briefs/2026-09-29_nexusai-rd618-r2-READY-mail.txt`
+- **B — RD-723** @ `19fc17ca5aa41e3be3a6b9d174a5d627f4a33145` (branch `rd-723-rd638-e2-budget-s86n`) — built by **NexusAI-N (S86N)**, lane 2 —
+  `/Volumes/KK_T9_External_HDD/TUESDAY/2_Project_Files/fleet/qa-agent/briefs/2026-09-29_nexusai-rd723-READY-mail.txt`
+- **OPTIONAL C — RD-466 (NexusAI-O)** — **NOT READY at drafting; no branch on origin names it (MEASURED, ls-remote 12:21 AEST).** Its section (§OPT) is **ADD ONLY IF Tuesday stamps it with a head sha**; the launcher leaves it out unless `O_HEAD`/`O_BRANCH` are stamped.
+
+**Batched under the 2026-09-18 batch-gates rule, as batches #1-#8.** A is a PRODUCT change (the anonymous CSP intake: `backend/server.js` + `backend/services/cspReport.js` + its cell file); B is TEST-ONLY (one test file + counts). **A and B share NO path but the counts file** (MEASURED, §1). What they share is ONE merge window, one lock queue, the harness (both cell files `require` it — C-68 with RD-648) and one merged tree. **A's semantic cross is with RD-646+RD-647 `608a1cd`** (batch 7's cross-change cell, x-rows below — kept by the commission, C-68).
+**Every head is re-read by `git ls-remote` in the launcher, which refuses on a mismatch.**
+
+SELF-CHECK: re-read end-to-end for contradictions | @STAMP@
+Self-check note: @STAMP@
+
+## TUESDAY'S RULINGS (the commission; carried in substance — the gate applies them, it does not re-rule them)
+- **Tiers (Tuesday's commission).** **RD-618 is TIER 1** (the anonymous CSP report intake, reachable before sign-in; round 2 of 2). **RD-723 is TIER 2 (through-code)**
+  (jest budgets on rd638's two cells; no asserted value may change — **verify that AT SOURCE**; if ANY asserted value, bound or cell body changed beyond the
+  third argument to `test()` and the named constants that carry the same numbers, that is a finding and a WRONG item).
+- **(a) ONE gate session for both; no browser leg.** Neither READY names a rendered surface (RD-618 READY (iii): "server-side intake only: no page, no UI").
+- **(b) Main is `dd15ce1` at drafting (Tuesday's ls-remote 10:49 AEST; the drafter's 12:21:29 and 12:26:29 AEST readings agree). MAIN MAY MOVE BEFORE AND
+  DURING THE GATE:** merges are QUEUED AHEAD of this batch — **RD-681 via PR #32 (head `faea66b`), then batch 3 (RD-685 `9d7076b`, RD-314 `ce148d5`), then
+  batch 8 (RD-700 `006b056`, RD-609 `8f9d921`, RD-648 — now `b12a475`, §1)** — and batch 7's GO members may land too. **Take M0 = origin main AT YOUR OWN
+  START by `git ls-remote`, say so, and RE-BASE EVERY PREDICTION in this brief on it** (counts, `__tests__` census, harness population, C-57 id sets,
+  C-187's applicability, which merge partners are already in). Re-read main at start, mid and end. Never re-base mid-gate.
+- **(c) C-190 (NEW since batch 8): every merge to NexusAI main goes through a PULL REQUEST, and a PR must add NO NEW high-or-higher CodeQL alert in the code
+  it changes (test code included). The gate itself NEVER opens, comments on, approves or merges a PR.** You READ (gh, READ ONLY) whether each branch has a
+  PR and its CodeQL result; if none exists, **CodeQL is NOT RUN at that head** — say so, and name any changed line that matches a pattern CodeQL flags
+  (READ ONLY; e.g. check-then-use on files, an unanchored or super-linear regex on client input) as a note for the merge author, never a verdict.
+- **(d) C-57 on the merged tree:** predict the id set; like with like (all history-bearing checkouts). **RD-618 is cut from `1904765`, so C-187 APPLIES to it
+  (MEASURED: `image-content-exposure` blob `94e6e4c` at `1904765` and `874c4f5`, `9ede5fd` at `dd15ce1`) — predicted missing 2 = C-187's pair, ACCOUNTED only
+  when C-187's (a) and (b) are MEASURED; any OTHER missing id is a STOP.** RD-723 is cut after `dd15ce1` (C-187 does not apply to it).
+- **(e) The gate NEVER merges and never pushes. Findings only.** Merges exist ONLY inside your own scratch clones, as the merged-tree measurement (§8).
+- **(f) STANDING (batch 7 ruling f): every jest run inside a hold gets `--forceExit` AND a hard deadline; every mutated file is restored in a `trap … EXIT`.**
+  H-20 and H-21 (§3a).
+- **Launch order:** as gate slots free; the launcher re-pins heads at launch and reads main as it finds it.
+
+## Charter
+Read `/Volumes/KK_T9_External_HDD/TUESDAY/2_Project_Files/fleet/qa-agent/QA_AGENT_CHARTER.md` in full first. You are an independent tester. You did not build
+these changes and you owe no builder anything. **Every line below that reports what a builder says is a CLAIM, never evidence.** Explore two changes — a
+per-request cap, a userinfo strip and a narrowed error handler on an ANONYMOUS intake (A), and jest budgets on two cells that used to run at jest's 5 s
+default (B) — looking for any state in which **an anonymous caller can still flood the ring or put userinfo, a token, the raw body or its own header text
+into the log; a store/limiter error is answered as the intake's own refusal; a cell is green while its named behaviour is broken; a budget change masks a
+hang or changes what a cell asserts; or the id set loses a test silently.**
+
+- **RD-618 is TIER 1 (round 2 of 2).** Verdict: **GO / GO WITH FINDINGS / NO GO at `874c4f5`**, plus its merged-tree result. **A NO GO goes to Kam, no round 3.**
+- **RD-723 is TIER 2 (through-code).** Verdict at **`19fc17c`**, plus its merged-tree result.
+- **One verdict PER ticket, one report, one mail.** A finding on one ticket never becomes another's verdict.
+- **TIER 1 AT FULL WEIGHT (RD-618) and TIER 2 AT THROUGH-CODE WEIGHT (RD-723), FINDINGS-ONLY:** no fixes, no pushes, no PRs, no deploys, nothing to Partner
+  Center, the demo or production (§11).
+
+## THE CLARIFICATIONS THAT BIND THIS GATE (opened by the drafter at source, ~12:30 AEST)
+File: `/Volumes/KK_T9_External_HDD/!CODING/Datasec/NexusAI/1_Project_Definition/CLARIFICATIONS.md` (339,331 bytes, 1970 lines, mtime 2026-09-29 10:51;
+the last numbered entry is C-191 at :1962 — re-read line numbers, the file grows during the day). **The drafter opened ONLY these (line numbers MEASURED):**
+- **C-40** (:231) — a check must be able to fail on the thing it claims to be about.
+- **C-49** (:305) — the PRIOR-WORK check (each READY's PRIOR WORK section is a claim).
+- **C-57** (:416) — *"A merge conflict confined to `scripts/verify-expected-counts.json` is resolved by regeneration, with an id-superset control."*
+- **C-62** (:579) — *"A Major at round 2 of 2 is ticketed, not sent to Kam. Only a third round on the same class needs his word."*
+- **C-68** (:663) — a verdict holds only at its head; when code a cell reads or drives changes before merge, RE-RUN THE AFFECTED CELLS by name;
+  *"a clean merge-tree and a changed measured surface are not in tension, and the clean result is what makes the change invisible."*
+- **C-89** (:833), **C-102** (:951), **C-104** (:978), **C-112** (:1147), **C-125** (:1326), **C-133** (:1432) + ADDENDUM, **C-141** (:1486) + ADDENDA 1-4,
+  **C-174** (:1794) — as carried in the batch 8 brief (not re-quoted here; the batch 8 brief quotes them).
+- **C-184** (:1897) the merge-turn rule; **C-185** (:1906) *"Main's CI known-failing set is {rd638-export-always-ends E2}, BY NAME, until RD-723 merges"* —
+  **RD-723 IS the ticket that empties it**; **C-186** (:1913) the next merge waits for the previous push's CI Build.
+- **C-187** (:1921) — the RD-418 `image-content-exposure` pair, ACCOUNTED under C-133 on blobs for branches cut from `1904765` when *"(a) blobs: base = branch
+  = `94e6e4c`, main = merged = `9ede5fd`, and `git log 1904765..<main> -- <file>` shows only main's commits (`8de8e5c`); (b) the replacement ids are present
+  and green on the merged tree."* *"Any OTHER missing id is still a STOP."* **It APPLIES to RD-618 (and to `608a1cd`) in this batch.**
+- **C-189** (:1936, superseded) and **C-190** (:1947) —
+  *"Every merge to NexusAI main goes through a PULL REQUEST, and a PR must add NO NEW high-or-higher CodeQL alert in the code it changes. Test code is included."*
+- **C-191** (:1962) — RD-686 round 2 merges as written (context: a batch 7 member that may be on your M0).
+- **Not opened by the drafter, so not cited:** every other C-number.
+
+## PRIOR ROUND
+PRIOR ROUND (RD-618): the **batch 7 gate** returned **NO GO at `4334b96`** with **A-F1 (MAJOR)** *"ONE anonymous 16 KB Reporting-API request stores 319
+entries (was 1) — two requests replace the whole 500-entry ring; 19,140 entries/min per address"*, **A-F2 (Minor)** *"userinfo survives in unparseable
+URLs"* (port 99999, a space or `%zz` in the host), **A-F3 (Minor)** *"the narrowing sends attacker charset/encoding header text to the error log"*, and A-N1
+(Polish, `%253F` is path text).
+ITS REPORT IS ON DISK AT: `/Volumes/KK_T9_External_HDD/!CODING/Testing Agent MAIN/projects/nexusai/reports/2026-09-29-gate-batch7/report.md`
+(§0 verdicts :8-31; the cross-change cell §3 :72-90 (x1-x7); RD-618 §4 :92-151 — s-rows §4.2, the body-parser error-type table §4.3, findings §4.6;
+the merged tree §9; the sweep §10; S-1..S-n §15). **Say, by measurement, whether A-F1, A-F2 and A-F3 are each CLOSED, with a RED-AT-PARENT arm for each**
+(`4334b96`'s product files with `874c4f5`'s cells, and batch 7's own s3/s6/s7 probes re-driven at the parent AND the head). Its fix-shapes (§4.6): A-F1
+*"cap entries per request (e.g. the first N `csp-violation` reports, N small), or count each entry against the CSP limiter, or collapse duplicates"*;
+A-F2 *"in the fallback, drop everything between `://` and the last `@` before the first `/`"*; A-F3 *"for body-parser errors (`err.type` set, not
+`entity.*`), log `type`/`status` without `message`"*. The builder took the first shape of each.
+
+PRIOR ROUND (RD-723): **no prior gate.** RD-723 exists because main's CI Build `36376278898` on `6ae20af` failed rd638 E2 ("Exceeded timeout of 5000 ms",
+5.24 s — RELAYED, READY :1/:8; not read by the drafter), which C-185 then named main's known-failing set. RD-638's own cells (`a46d336`, `0ab8a05`, gate 4
+F-A2) are PRIOR WORK the READY says it keeps.
+
+PRIOR ROUND (method, and the lessons this brief carries): the **batch 8 gate** is the most recent NexusAI gate.
+ITS REPORT IS ON DISK AT: `/Volumes/KK_T9_External_HDD/!CODING/Testing Agent MAIN/projects/nexusai/reports/2026-09-29-gate-batch8/report.md`
+(verdicts §0 — RD-648 GWF, RD-609 GWF, RD-700 GO; merged tree §9; WRONG §15; self-corrections §16). **Carried from it, each deliberately:**
+1. **A K2 (`git archive`) FULL verify cannot pass today:** 171 cells in 14 suites need `git ls-files` (identically at M0). **This batch has no tree-kind-sensitive
+   member, so every run here is K1 (a history-bearing checkout of your own clone); no K2 verify is commissioned.** If you run one anyway, compare it BY NAME to
+   M0's K2 run, never to a pass.
+2. **S-1:** a clone of a clone came up with an EMPTY work tree (`checkout -b gate` refused because the branch came along) — **status-check every tree before
+   use** (`git status --porcelain` empty AND a pinned blob present), repair with `checkout -f`.
+3. **S-2:** a side control asked one clone for an object only in another's store — **run every control inside the clone that owns the objects.**
+4. **S-3:** an event file and jest's stdout were the SAME path and jest's `>` erased the events — **every instrument writes its own distinct path.**
+5. **S-4:** an arm that never reached its hang is VOID — **prove the phenomenon reachable (H-10) inside the same arm**: here, that the delay preload engaged
+   in the SERVER child (row t3) and that a probe reached the non-entity branch (its refusal line is in the log).
+6. **S-5:** object-birth classification must use full dates, not time of day.
+7. **H-18 again:** zsh consumed `:s` in `$s:scripts/…` AND `=` in `echo ======` — **`/bin/bash` explicitly, braces always.**
+8. **§15 item 5 (a message prediction was wrong):** predictions about a THROWN or LOGGED message are measured and quoted, never assumed from the code path.
+9. **Batch 8's merge-author note (C-68):** *"RD-681 … changes `backend/server.js` and adds a harness consumer; batch 7's RD-652 and RD-618 each add one. Whichever of
+   RD-648 and each of those merges second re-runs the harness union by name, including rd648 and the added consumer."* **rd618 AND rd638 (RD-723's file) both
+   `require` the harness.** If RD-648 is on your M0, rows a2/t1-t2 run under its bounded health fetch — name that.
+**Reuse instruments BY COPY:** batch 7's `evidence/` (for RD-618: `qa-a-probe.js` (the s-row driver), `qa-d-probe.js` (the Redis-down driver for x2),
+`qa-census-pop.py`, `qa-cov7.js` (coverage view of the cross cell), `qa-mutate.py`, `qa-clone.sh`, `qa-merge.sh`, `qa-c57-id-superset.sh`,
+`q-merged-identity.py`, `qa-codeonly.js`, `qa-to.sh`, `qa-holdlib.sh`, `qa-jestwrap.sh`, `qa-runj.sh`, `qa-h1-selftest.sh`, `qa-h1-scan.py`,
+`qa-netbelt.sb`, `qa-netbelt-ctl.js`, `qa-srvlib.js`, `qa-lockcheck.js`, `qa-ssprint.sh`) at
+`/Volumes/KK_T9_External_HDD/!CODING/Testing Agent MAIN/projects/nexusai/reports/2026-09-29-gate-batch7/evidence/`, and batch 8's (`qa-floorlib.sh` — **its
+`ROOT`/`NEG` defaults are STALE (`19866` / batch 8's seats) — correct BOTH** — `qa-floorcount.py`, `qa-c112-census.py`, `qa-passset.py`, `qa-sweep.py`,
+`qa-sink-ctl.js`, `qa-slow-health-preload.js`) at
+`/Volumes/KK_T9_External_HDD/!CODING/Testing Agent MAIN/projects/nexusai/reports/2026-09-29-gate-batch8/evidence/`. **macOS has no `timeout` binary**
+(`qa-to.sh`: `perl alarm`, rc 142 = fired). The original counter is gate 7's
+`/Volumes/KK_T9_External_HDD/!CODING/Testing Agent MAIN/projects/nexusai/reports/2026-09-22-gate7-rd645/evidence/qa-floorcount.py`.
+
+## 1. Targets — verified at drafting from the object store (12:21–~13:00 AEST)
+**origin by `git ls-remote` at 2026-09-29 12:21:29 AEST (call ended 12:21:34):** `main` **`dd15ce1ae8277cc9450e62b11b584a40d2226bf3`** ·
+`rd-618-csp-intake-residue-s86m` **`874c4f503d0f37a032014e562972b17e903e1072`** · `rd-723-rd638-e2-budget-s86n` **`19fc17ca5aa41e3be3a6b9d174a5d627f4a33145`**
+(= the READY's `19fc17ca5aa4`, resolved as the commission asked) · `rd-646-647-redis-fail-closed-recovers-s86m` **`608a1cd99adcc69f6d2cdc552f170e89710adb02`**
+(the cross partner) · `rd-648-harness-boot-residuals-s86n` **`b12a475fa73b439eea49cc9f692ef915af478253`** (MOVED since batch 8's `e1c7b21`: one commit
+"read the pid/term files once, no existence check first (CodeQL org policy)"; the harness blob is still `c826c1e`) · `rd-681-clear-undecryptable-s84m`
+`faea66b1bce5c17a2fef282c808821b3bf0825c6` (= `refs/pull/32/head`) · `rd-685-hardlinked-store-s84n` `9d7076b0368f02ca030a904a2ce45de93739238e` ·
+`rd-314-law-window-after-source-s84n` `ce148d5d8332606654c189cd14f3aadee227a407`. **Re-read at 12:26:29 AEST:** main still `dd15ce1`; no batch 7 head
+(`608a1cd`, `09e2e6a`, `a5799f3`, `ab12726`) is an ancestor of main. Every sha here is a commit in the local object store (`cat-file -t`).
+**Re-read at your start, mid and end. A moved TICKET head is a finding and a reason to stop, never a typo to fix.**
+
+**Chains (MEASURED, `git log --format='%H %P'`):**
+- **A:** `7e4cd2efd7f4f2ff28bbf6fb9cd07be02789240d` (round 1, parent `1904765007e9447ac6c980f9840c0689a02abe6c`) → `4334b96d91132d933bc30b6b8dbd63e2031552cc`
+  (the narrowing; batch 7's NO GO head) → **`874c4f5`** ("RD-618 fix round 2 (batch-7 A-F1/A-F2/A-F3)"). **NOT forward-merged: merge-base(A, main) =
+  `1904765`.** The merge author forward-merges M0 at merge time (C-68).
+- **B:** `816c33a7b6657d9c2eb857ef21bccaabd17212d8` (parent `6ae20afc4a3b4a0fd78362f7ebb002b55755cfaf`, main's batch-4 merge 4, an ancestor of `dd15ce1`)
+  → `92827633f6ebd46eb5c42f0bdbaa72c11a2cc886` (merge of `dd15ce1`, "forward merge, no rebase") → **`19fc17c`** (counts regenerated, 4191/252).
+  **merge-base(B, main) = `dd15ce1`** (B contains main at drafting). merge-base(A, B) = merge-base(A, `608a1cd`) = `1904765`.
+
+**Deltas (MEASURED, `git diff --numstat`):**
+- **A over its parent `4334b96`:** `backend/server.js` **+17/−4** (`c5bd870` → `e076121`) · `backend/services/cspReport.js` **+15/−3** (`fa868ea` → `4b38e90`) ·
+  `__tests__/rd618-csp-intake-residue.test.js` **+59/−1** (`2b5130b` → `8bbfcc7`) · counts +2/−2. **Over `1904765`:** the same four paths (server +45/−8,
+  cspReport +62/−6, the cell file +192 (added), counts +3/−3). **Counts 4142/248 → 4146/248** (+4 tests: S5, S6, R6, R7).
+- **B over `dd15ce1`:** `__tests__/rd638-export-always-ends.test.js` **+23/−7** (`e7789e5` → `fc121f5`) · counts +1/−1 (**`_updated` only**). **4191/252 → 4191/252.**
+  `816c33a` over `6ae20af` is the same +23/−7 on the same file.
+- **Product blobs elsewhere:** `backend/server.js` is `bc099b2` at `1904765` AND at `dd15ce1` (main has not touched it since A's base) · `4ddf75f` at `608a1cd`
+  · RD-681 (`faea66b`) changes it +7/−6 (the `/api/setup/ai-config/clear` route, ~:16390; A's hunks are ~:867-:920 and ~:2721) · `cspReport.js` is `f102d26`
+  at `1904765`, `dd15ce1`, `608a1cd`. `package-lock.json` `9064763` at every sha named here; `scripts/verify-suite.sh` `eb9731f` everywhere; the harness
+  `__tests__/helpers/rd395-server-harness.js` `2453a3f` at `dd15ce1`, `874c4f5`, `19fc17c`, `608a1cd` (`c826c1e` at RD-648's `e1c7b21`/`b12a475`).
+- **Counts:** `1904765` 4133/247 · `7e4cd2e` 4141/248 · `4334b96` 4142/248 · **`874c4f5` 4146/248** · **`dd15ce1` 4191/252** · `6ae20af` = `816c33a` 4176/250 ·
+  **`19fc17c` 4191/252** · `608a1cd` 4144/248 · `faea66b` 4195/253 · `b12a475` 4189/253 · `9d7076b` 4141/248 (base `1904765`) · `ce148d5` 4022/238 (base `11666d3`, on main).
+- **`__tests__` files (NUL-safe `ls-tree -r -z`):** 289 (`1904765`) · 290 (`874c4f5`) · **295 (`dd15ce1`, `19fc17c`)** · 291 (`608a1cd`).
+
+**Main may move (ruling b).** Call main at your start **M0**. (1) M0 must be `dd15ce1` or a DESCENDANT (the launcher refuses otherwise); (2) main's movement
+since `dd15ce1` must not touch A's cell file, `cspReport.js`, or B's file (the launcher refuses otherwise); **it MAY touch `backend/server.js` (RD-681 does) — a
+NOTE, and then C-68 on A's intake**; (3) your merged trees are **MT1 = M0 + B + A** and **MT2 = MT1 + `608a1cd`** (unless `608a1cd` is already on M0 — then
+MT1 IS the cross tree; say so); predicted at M0 = `dd15ce1`: **MT1 4204/253 (4191 + 0 + 13 / 252 + 0 + 1)**, **MT2 4215/254 (+ 11 / + 1)**; re-base both on
+YOUR M0 (each queued merge adds its own delta: RD-681 +4/+1, RD-685 +8/+1, RD-314 +10/+1, batch 8 +3/+1 — ARITHMETIC ONLY); (4) **if M0 carries RD-648**, the
+harness under rd618 and rd638 is `c826c1e` — re-run both by name on M0 and on the merged trees and say so (C-68); (5) if main moves AGAIN during your gate,
+your verdict names M0 and says what moved (C-68).
+
+### TARGET A — RD-618 FIX ROUND 2 (TIER 1, round 2 of 2) @ `874c4f5`
+- **What changed (READ at `874c4f5`, whole diff over `4334b96`):**
+  (A-F1) `cspReport.js`: `CSP_REPORT_MAX_ENTRIES_PER_REQUEST = 10`; `buildCspEntries` ends `.filter((e) => !isEmptyCspEntry(e)).slice(0,
+  CSP_REPORT_MAX_ENTRIES_PER_REQUEST)`; the intake (server ~:879) computes `offered` = the array's `type === 'csp-violation'` items and, if `offered >
+  entries.length`, writes ONE warn *"kept N of M reports in one request (per-request cap); the rest dropped"*.
+  (A-F2) `stripQueryAndFragment`'s fallback (reached when the value has no scheme or `new URL` throws) now first applies
+  `s.replace(/^([a-z][a-z0-9+.-]*:\/\/)[^/?#]*@/i, '$1')`, then the old cuts.
+  (A-F3) the intake's error handler: `if (!err || typeof err.type !== 'string') return next(err);` (type-less → the global handler, e.g. RD-646/647's store
+  error); `entity.*` → 400/413 with the fixed line (unchanged); **any other typed error → `status = Number.isInteger(err.status) ? err.status : 400`, log
+  `CSP report refused (${status}): ${err.type}; nothing stored` (type and status only), `res.status(status).end()`.** The READ of the added lines: no
+  `err.message` anywhere in them (the launcher asserts it).
+- **Cells (READ):** 13 at the head — S1-S4, R1-R5 (round 1 and the narrowing) + **S5** (the three s3 shapes through `stripQueryAndFragment`, asserting
+  `new URL` throws for each, then no user/pass/`tok=`), **S6** (`buildCspEntries` of a 150-report array: `≤ 10` and `> 0`), **R6** (ONE POST of 150 reports
+  as `application/reports+json`: 204, `CSP violation report` log lines `≤ 10` and `> 0`), **R7** (charset marker and encoding marker: 415 each, marker not
+  in the log, `CSP report refused (415)` in the log). `PER_REQUEST_MAX = 10` is a literal in the cell file (not the exported constant).
+- **Builder's claims (RELAYED, READY :13-20):** red on `4334b96`'s two product files with the new cells: *"4 failed (S5, S6, R6, R7), 9 passed"*; green 13/13;
+  mutants *"M-F1 (cap removed) fails S6 and R6 only; M-F2 (fallback userinfo strip removed) fails S5 only; M-F3 (non-entity errors passed on again) fails R7
+  only"*; full verify **4146/4146 across 248**; cross-merge with `608a1cd`: *"conflict: the counts file only … rd646-647 + rd618 + rd495-admin-routes + rd607
+  ran 43/43 passed. CENSUS-B and CENSUS-M passed"* (`session-tools/s86m/rd618c-hold.log`, `mx618c.log` — **the drafter read the VERDICT line of the first
+  and the `Tests: 43 passed, 43 total` line of the second; `mx618c.log`'s mtime is 12:18 AEST, AFTER the READY's 07:58 — find out what re-wrote it**).
+  CodeQL: *"I read the changed lines for flagged patterns … The authoritative answer comes when this branch's PR runs CodeQL"* — **no PR at drafting (§9).**
+- **The drafter's READ of residual shapes (rows a4, s3b, s6b-s6d, s7b, x3, x4 — MEASURE; this READ is not a verdict):**
+  (i) **the cap is per REQUEST, the limiter is 60 requests/min per address:** 60 × 10 = **600 entries/min ≥ the 500-entry ring — one address still replaces the
+  whole ring in 50 requests (< 1 min)**; before RD-618 (`1904765`, 1 entry per request) it took 500 requests (~8.3 min). A-F1's oracle was *"F-A2's own
+  concern"* and *"the limiter's stated contract (60/min per address)"*: **say whether A-F1 is CLOSED or narrowed to a 10× residue (severity yours).**
+  (ii) the cap line counts `offered` BEFORE `isEmptyCspEntry` and the `r.body` object check, so **an array of report objects with empty bodies (or no
+  `body`) logs "kept 0 of M … (per-request cap)" when no cap applied** — a log line that is not true (predict: logged; the request then 400 per R2's path).
+  (iii) `buildCspEntry` still runs on EVERY array item before `.slice` (work is not capped, only storage; READ; Polish).
+  (iv) **the userinfo regex needs `[^/?#]*@`: userinfo that CONTAINS `?` or `#`** (`https://qab9u:pa?ss@h.test:99999/x`) **fails the regex, and the `[?#]` cut
+  then keeps `https://qab9u:pa`** — the user name and part of the password survive (predict KEPT). **A value with leading whitespace/C0 before the scheme**
+  (` https://qab9u:pw@h.test/x`) fails the scheme pre-test, so neither `new URL` nor the regex runs (predict userinfo KEPT; `new URL` itself would trim it).
+  **A backslash authority** (`https:\\qab9u:pw@h.test:99999\x`) — predict KEPT. **A `blob:` wrapper around an unparseable inner URL** — predict DROPPED
+  (`blob:` parses; the inner value takes the fallback). Browsers strip userinfo, so these are forged reports only (batch 7 rated A-F2 Minor on that basis).
+  (v) **the discriminator is now `typeof err.type === 'string'`, not body-parser's own:** ANY typed error reaching the intake is answered with its
+  `err.status` (or 400) and no body. RD-646/647's named error has NO `type` and sets `statusCode = 503` (READ at `608a1cd` server :1175-1182, no `.status`) — so
+  a future `type` on it would turn the named 503 into a bare 400 from the intake (row x4 measures that the census reddens).
+  (vi) **"type-less errors still go to next()" is guarded by NO cell in rd618 alone** (READ: R5/R7 are typed): only the cross tree's CENSUS can see it (x3).
+- **NOT TESTED — VERBATIM (READY :30-33):**
+  *"- A real browser's Reporting API delivery (the cells POST the array shape directly)."* ·
+  *"- The demo revision (RD-76; nothing deployed)."* ·
+  *"- A 415 caused by other body-parser types (request.aborted and similar) — the same code path, not driven."*
+  → **L-A1** (a real browser's Reporting API delivery) · **L-A2** (the demo) · **L-A3** (other body-parser types — YOU drive `request.aborted`, row s7b) ·
+  **L-A4** (CI/CodeQL at the head — NOT RUN unless a PR exists).
+
+### TARGET B — RD-723 (TIER 2, through-code) @ `19fc17c`
+- **What changed (READ, the whole diff):** named constants `E1_SETTLE_MS = 10000`, `MARGIN_MS = 10000`, `E2_BOOT_MS = 120000`, `E2_SETTLE_SLEEP_MS = 3000`,
+  `E2_EXPORT_WITHIN_MS = 15000`, `E2_STOP_MS = 10000`, `E2_BUDGET_MS = E2_BOOT_MS + E2_SETTLE_SLEEP_MS + E2_EXPORT_WITHIN_MS + E2_STOP_MS + MARGIN_MS`
+  (= 158,000 ms); each literal replaced by its constant at the SAME value (10000 in E1's `settleWithin`; `bootTimeoutMs`, `sleep`, `settleWithin` and
+  `withinMs` in E2); **the only new arguments are `}, E1_SETTLE_MS + MARGIN_MS);` (20,000 ms) and `}, E2_BUDGET_MS);`** (READ). No `jest.setTimeout` in the
+  file; `package.json`'s jest config has no `testTimeout`; the one `setupFiles` entry is `home-containment.js` (READ) — so both cells ran at jest's 5,000 ms default.
+- **The comment says E2's stop phase is *"h.stop() (SIGTERM grace then SIGKILL, 5 s each)"*. At source (`2453a3f` :178-183, READ) `h.stop` sends SIGTERM,
+  waits up to **20,000 ms**, then SIGKILL (not awaited); the "5 s each" is `failBoot`'s grace (RD-619, `BOOT_FAIL_TERM_GRACE_MS = 5000`), a different path.**
+  So `E2_STOP_MS = 10000` understates `h.stop`'s own bound by 10 s, and **the all-bounds path 120 + 3 + 15 + 20 = 158 s = `E2_BUDGET_MS` exactly: the margin is
+  fully consumed** (row t6 measures; the comment is a WRONG item for the gate to confirm or refute).
+- **Builder's claims (RELAYED, READY :10-15):** a NODE_OPTIONS preload delaying `listen()` by 2,500 ms only in the server process: *"A1 main, no delay: E2
+  passed, 4037 ms. A2 main + delay: E2 FAILED, 5002 ms, "Exceeded timeout of 5000 ms for a test" … B1 branch + delay: E2 passed, 6570 ms … B2 branch, no delay:
+  E2 passed, 3974 ms. E1 passed in all four arms."* **Those arms ran at `6ae20af` (main then) and the branch BEFORE its forward merge** (the hold ran
+  2026-09-28 22:37 AEST; the merge of `dd15ce1` is 2026-09-29 02:44) — the drafter READ `session-tools/s86n/rd723/hold.sh` (worktrees `s86n-main-6ae20af`,
+  `s86n-rd723`) and the preload `slow-boot-preload.js` (gated on `argv[1]` matching the server entry point; prints `rd723-slow-boot-preload: listen delayed by
+  N ms in pid P` to stderr). Full verify **4191/4191 across 252** on `19fc17c`'s tree (`verify.log`, 07:40 AEST — the drafter read its VERDICT line).
+  FLOOR: *"foreign_servers=1 (pid 30665), unidentified"* at the end of the red/green hold — RELAYED.
+- **NOT TESTED — VERBATIM (READY :19):**
+  *"NOT TESTED: CI itself (Linux) until the branch's Build runs; whether 120 s is ever the true boot cost (it is the cell's own bootTimeoutMs, not a new number)."*
+  → **L-B1** (CI Linux) · **L-B2** (the true boot cost — row t7 measures what happens when the boot exceeds 120 s).
+
+### File overlap and MERGE-TREES — the drafter RAN merge-tree in a SCRATCH object dir of its own (NexusAI's store as a read-only alternate)
+**MEASURED (`GIT_OBJECT_DIRECTORY` = the drafter's scratchpad, `GIT_ALTERNATE_OBJECT_DIRECTORIES` = NexusAI's `.git/objects`; nothing written in NexusAI):**
+A × M0(`dd15ce1`), A × `608a1cd`, A × B, B × `608a1cd`, A × RD-681 `faea66b`, B × RD-681, A × RD-685, A × RD-314, B × RD-314, A × RD-648 `b12a475`, B × `b12a475`,
+A × `8f9d921`, B × `8f9d921`, A × `006b056`, B × `006b056`, `608a1cd` × M0, RD-681 × `608a1cd` → **each rc 1, conflicted = `scripts/verify-expected-counts.json`
+ONLY**; B × M0 → rc 0 (B contains M0). **`backend/server.js` merges CLEANLY in A × `608a1cd` and in A × RD-681** (clean ≠ unchanged — C-68: the merged
+intake is a file no single head carried; the cross cell runs on it). **Context, not ours:** B × RD-685 also conflicts on `backend/dataErasure.js` —
+RD-685 (cut from `1904765`) conflicts with main's own `dataErasure.js` change; that is RD-685's forward merge, not RD-723's.
+**Re-measure by `git merge-tree --write-tree --name-only` in YOUR OWN scratch object dir (§8.1) on YOUR M0: A × M0, B × M0, A × B, A × `608a1cd`, B × `608a1cd`,
+M0 × `608a1cd` (skip what M0 already contains).**
+
+### MERGE ORDER — the drafter's proposal, with its predicted end state and the C-68 re-run set per merge
+**Proposed order: 1. RD-723 (B) → 2. RD-618 (A).** Why: B is test-only, already carries M0 = `dd15ce1`, and **empties C-185's known-failing set** — every later
+merge's CI Build is then judged against `{}`; A is the product change whose C-68 set includes the cross partner. **The order is file-independent (every pair =
+counts), so order independence is the control (§8.3), not an assumption. Challenge it if any row says otherwise.**
+
+| step | merge | predicted conflicts | predicted counts after (M0 = `dd15ce1`) | C-68 re-run set BY NAME (on the tree after that step) |
+|---|---|---|---|---|
+| 1 | M0 + B | none (B contains `dd15ce1`; if M0 moved: counts only) | **4191/252** | rd638 (2 cells) + every file that `require`s the harness (22 at `dd15ce1`; + rd648 if RD-648 is on M0) — **re-derive** (positive control: rd638, rd619) |
+| 2 | + A | counts only | **4204/253** | rd618 (13) + every file naming the intake (`git grep -l -E "csp-report\|CSP_REPORT\|cspReport\|reports\+json"` over `__tests__`: rd495, rd607 at `dd15ce1`; + rd646 when `608a1cd` is in) + the harness union again (rd618 is a consumer) |
+| x | + `608a1cd` (MT2, the cross tree) | counts only | **4215/254** | **rd646 (11) + rd618 (13) + rd495 (12) + rd607 (7) = 43** (the builder's 43; batch 7's x1 was 39 with rd618's 9) + rows x2-x5 |
+
+**End state predicted: MT1 4204/253 · MT2 4215/254 at M0 = `dd15ce1` — ARITHMETIC; re-base on YOUR M0; C-68 says the measurement decides.** Re-derive every set in
+YOUR clone at M0 with a positive control (the ticket's own cell file must be found) and a negative control (a file that only MENTIONS the harness in a comment,
+e.g. `helpers/rd525-live-store.js`, must NOT be counted as a requirer — batch 8's lesson).
+
+### How to build your trees
+- **No worktree is created in the NexusAI repo, and you never work in its `2_Project_Files` checkout.** In that repo use ONLY read verbs: `show`, `log`,
+  `diff`, `ls-tree`, `cat-file`, `rev-parse`, `merge-base`, `grep`, `ls-remote`, `archive`, `count-objects`. Never `fetch`, `pull`, `push`, `checkout`,
+  `worktree`, `commit`, `stash`, `gc`, `clean`, or `merge-tree --write-tree` without a scratch `GIT_OBJECT_DIRECTORY` of your own.
+- **Every tree is K1** — `git clone --shared --no-checkout <repo> <dir>` then `checkout` in YOUR clone (origin removed; local identity; `gc.auto 0`;
+  `core.fsmonitor false`; hooks off), under a fresh `mktemp -d` in
+  `/Volumes/KK_T9_External_HDD/!CODING/Testing Agent MAIN/projects/nexusai/qa-trees/batch9.XXXXXX/`. Status-check before use (lesson 2).
+- **Each tree is EXCLUSIVE to this gate and to ONE purpose.** A fresh arm per mutant; never reuse a mutant tree for a clean arm; `batch9`-prefixed directories
+  only. Earlier gates' trees are their evidence — copy from, never run in.
+- **The red-at-parent tree for A:** YOUR clone at `874c4f5` with `backend/server.js` and `backend/services/cspReport.js` restored to `4334b96`'s blobs
+  (`c5bd870`, `fa868ea`) — hashed after the restore, committed IN YOUR CLONE ONLY so the tree is a clean K1.
+- `node_modules`: an APFS clone (`cp -c -R`) of the newest gate tree you trust, **after proving** `package-lock.json` is blob `9064763` there too; a real
+  directory, never a symlink.
+
+## OPTIONAL TARGET — RD-466 (NexusAI-O) — ADD ONLY IF Tuesday stamps it with a head sha
+**Status at drafting: NOT READY; no READY mail; no origin branch names RD-466 (MEASURED).** If the launcher's `O_HEAD`/`O_BRANCH` are NOT stamped, **this section
+is not part of your gate — do not measure it, and say "RD-466: not a member" in §0.** If they ARE stamped, RD-466 is **TIER 2 (through-code)**, gets its own
+verdict at the stamped head, and **these checks, which Tuesday already owes the gate, are REQUIRED:**
+- **o1 — the re-pin AT SOURCE.** NexusAI-O lowered the PRECONDITION floor *"the Dockerfile has wildcard COPY sources in both stages to check"* in
+  `__tests__/image-content-exposure.test.js` from **7 to 6**, arguing the removed wildcard is A-F2's own fix (RELAYED by Tuesday; the READY must say which
+  COPY line). At `dd15ce1` the line reads `expect(globs.length).toBeGreaterThanOrEqual(7);` (:735, READ) and the Dockerfile has **7** wildcard COPY sources
+  (`package*.json`, `*.js`, `*.csv`, `*.sh`, `/app/*.js`, `/app/*.csv`, `/app/*.sh` — READ, :19/:50/:64/:65/:96/:101/:102). **Prove at the head: the floor
+  reads 6 on the tree; the Dockerfile's wildcard population is exactly 6; the removed line is the one the READY names; `git log -S` shows the floor change in
+  RD-466's own commit; the PRECONDITION cell's history (added by RD-477 round 2 `19a479f`, re-pinned 9 → 7 by RD-418 `8de8e5c`) is named.**
+- **o2 — a mutant restoring a second wildcard COPY.** Put the removed wildcard COPY back (the exact line, in its stage). **Measure which cell reddens.** The
+  drafter's READ: the floor is `>=`, so ADDING a wildcard cannot redden the PRECONDITION cell; if the restored source matches nothing in the context, *"THE
+  FINDING: no COPY glob matches nothing in the build context"* reddens instead. **Report the cell that reddens, by name, and say whether the commission's
+  "still reddens the cell" holds for the PRECONDITION cell or for a different one.** Add the converse arm: remove ONE MORE wildcard (population 5) → the
+  PRECONDITION cell must redden at the new floor.
+- **o3 — S51 ARM 1's new named-absence checks for the env anchors.** For each env anchor the head names in ARM 1 (describe `S51 — key and env rules match at
+  ANY depth`, `ARM 1 — put the root-anchored forms back …`, :563/:612 at `dd15ce1`), plant a STALE anchor (the `.dockerignore` rule renamed so the named
+  anchor no longer exists) and show the named-absence check FAILS naming it; control: the clean tree green. `onlyThisBlock.length >= 7` (:617 at `dd15ce1`)
+  — say whether RD-466 touches it.
+- **o4** — C-187 on RD-466's base (blob of `image-content-exposure` at base/branch/main/merged), C-57 id set (RD-466 CHANGES this file — its ids may be
+  renamed; name every changed title), and its merge-tree against M0, A and B.
+
+## 2. Why these tiers, and who is waiting
+- **RD-618 TIER 1 (round 2 of 2) — the severity rules carried from batch 7 §2:** *"anonymous, rate-limited at 60/min per address, reachable before sign-in.
+  **Anything an anonymous caller can put into the log or the ring that RD-618 says it strips (userinfo, a query/fragment token, the raw body) is a Blocker on
+  the product; one request that floods the 500-entry ring is a Major (F-A2's own concern); a limiter/store error reported as "not valid JSON" or as 400 is a
+  Major (Tuesday's narrowing); a cell green while its named behaviour is broken is a Major (C-40)**"*; batch 7 rated forged-report-only userinfo (A-F2) Minor —
+  severity is yours; say which rule you applied. **Header text the client chose reaching the log (A-F3's class) is a Minor unless it carries CR/LF or a
+  secret.** **A NO GO → Kam (round cap).**
+- **RD-723 TIER 2:** **any change to an asserted value, a bound or a cell body beyond the budget argument and its same-valued constants is a Major AND a WRONG
+  item; a budget that lets a real hang pass or turns a red into a green is a Major; a comment that states something false about the code is a Minor; a
+  budget whose margin is zero on its own worst case is a Minor/Polish (yours).**
+- **Who is waiting:** RD-618's merge author is **NexusAI-M (S86M)**, lane 1; RD-723's is **NexusAI-N (S86N)**, lane 2 — under C-184/C-186's turn order and
+  C-190's PR route.
+
+## 2a. LEGITIMATE SHAPES — required measurements, row by row
+**Columns: the head, the base it is measured against (P = `4334b96`'s product for A; M0's `e7789e5` rd638 for B), and the MERGED tree. Every server row:
+your own K1 tree, under the network belt, a fresh DATA_DIR, killed in a `finally` by pid.**
+
+**A — RD-618 (every arm names the tree; foreign count beside every result).**
+
+| row | shape | expected at `874c4f5` | at P (`4334b96`'s product) | predicted-by |
+|---|---|---|---|---|
+| a1 | **RED-AT-PARENT (POSITIVE CONTROL FIRST):** `8bbfcc7`'s 13 cells against P's two product files | — | **S5, S6, R6, R7 RED; the other 9 green** — quote each failing assertion | builder |
+| a2 | the 13 cells, clean; + the H-1 SS control | 13/13 | — | builder |
+| a3 | **the builder's three mutants, re-derived INDEPENDENTLY:** M-F1 (the `.slice(0, …)` removed), M-F2 (the userinfo `replace` removed — `noUserinfo = s`), M-F3 (the non-entity branch → `return next(err)`) | M-F1 → **S6 + R6 only**; M-F2 → **S5 only**; M-F3 → **R7 only** | — | builder |
+| a4 | **the gate's own mutants:** M-F3m (the non-entity log line also carries `${err.message}`); M-F1c (cap 11); M-typeless (the type-less `return next(err)` line removed, so type-less errors take the non-entity branch) | M-F3m → **R7 red** (marker in log) — "never echoes err.message" is guarded; M-F1c → S6 + R6 red; **M-typeless → drafter READ: 13/13 GREEN — guarded by no rd618 cell** (x3 measures the cross tree) | — | drafter |
+| s3 | **A-F2 CLOSED?** batch 7's s3 shapes through the REAL server (`https://qab9usr:<pw>@qab9host.test:99999/x?tok=…`, a space in the host, `%zz` in the host), in `document-uri`, `blocked-uri`, `source-file`, report-uri AND Reporting-API forms | userinfo DROPPED from the log in all shapes; query cut; control (parseable) dropped | userinfo KEPT (batch 7) | batch 7 + builder |
+| s3b | **the drafter's residual shapes (READ (iv)):** userinfo containing `?` or `#` in an unparseable URL; a leading space/tab/C0 before a parseable URL; a backslash authority; `blob:` around an unparseable inner URL; an upper-case scheme | **drafter READ: `?`/`#` → `https://qab9u:pa` KEPT; leading whitespace → KEPT; backslash → KEPT; blob → DROPPED; upper-case → DROPPED** — quote each logged value | quote each | drafter |
+| s4 | double-encoded `%253F`/`%2523` (A-N1) | token kept as path text (the header now says so) | kept | batch 7 |
+| s6 | **A-F1 CLOSED?** ONE `application/reports+json` array of 319 csp-violation reports, 16,270 bytes (batch 7's exact shape); also as `application/json` | **204; ≤ 10 violation lines + ONE cap line "kept 10 of 319"**; control 1-report → 1 | 319 entries | batch 7 + builder |
+| s6a | **ring arithmetic:** requests per address to push 500 entries at the head (measure by log lines = entries pushed, READ at the intake as batch 7 did — the readout refuses in open mode, C-129) vs P vs `1904765` | **drafter READ: 50 requests at the head (60/min × 10 = 600 entries/min)**; P: 2; `1904765`: 500 | measure | drafter |
+| s6b | an array of M report objects with EMPTY bodies (or no `body`), M = 5 | **drafter READ: "kept 0 of 5 … (per-request cap)" logged though no cap applied**; status as R2 (400); nothing stored | quote | drafter |
+| s6c | CPU/latency: 319-item array vs 10-item array (READ ONLY acceptable: `buildCspEntry` runs before `.slice`) | say which | — | drafter |
+| s7 | **A-F3 CLOSED?** batch 7's s7 table re-driven: a 4,000-char charset marker; a content-encoding marker; a parse error; a too-large body | charset/encoding → **415**, the log line `CSP report refused (415): charset.unsupported` / `encoding.unsupported`, **marker count 0** in stdout, stderr and every log file; control marker in a VALID report's path → found; parse → 400 fixed; too large → 413 fixed | charset/encoding → 415 via the GLOBAL handler, **marker in the log** (batch 7) | batch 7 + builder |
+| s7b | **L-A3 discharged:** `request.aborted` (raw socket, partial body, then close); `request.size.invalid` if reachable (a `Content-Length` that disagrees) | answered by the intake's non-entity branch with the body-parser status (400) and `type` only; **no crash, no unhandled rejection, no `ERR_HTTP_HEADERS_SENT`** on the aborted socket | global handler (batch 7) | drafter |
+| s8 | 16,383 / 16,384 / 16,385 bytes (H-9) | 204 / 204 / 413 | 204 / 204 / 413 | batch 7 (regression) |
+| s9 | invalid body with a fresh marker in its first 10 chars; control marker in a VALID report's path | marker 0; control found | 0 | batch 7 (regression) |
+
+**X — the cross-change cell with RD-646+647 `608a1cd` (C-68; kept by the commission). On MT2 (or on M0 + A if `608a1cd` is on M0).**
+
+| row | shape | expected | predicted-by |
+|---|---|---|---|
+| x1 | rd646 + rd618 + rd495 + rd607 by name on MT2 | **43/43; CENSUS-B and CENSUS-M 0 offenders** | builder |
+| x2 | your driver on MT2 (production, Redis configured and REFUSING — the proxy port proven refusing, H-10): POST `/api/csp-report` with a VALID report | **503 with D's NAMED body** (the `userMessage`), the global handler's log line, no "CSP report refused", the report's query token absent | batch 7 x2 |
+| x3 | **POSITIVE CONTROL for "type-less errors still go to next()":** MT2 with M-typeless (a4) | **CENSUS-B and CENSUS-M RED, each exactly `POST /api/csp-report -> 400`** (the intake now answers D's type-less error itself, `err.status` absent → 400); rd618 13/13 | drafter |
+| x4 | MT2, D's named error given `type: 'qa.any'` (a string not `entity.*`) | **drafter READ: CENSUS-B/M RED `-> 400`** (the discriminator is "has a string type", and D's error carries `statusCode`, not `status`) | drafter (READ (v)) |
+| x5 | Redis UP and NO Redis configured (the Marketplace configuration), each: report-uri, a 319-array, `{}`, invalid JSON, the charset marker | 204 (stored, token stripped) · 204 (≤ 10 stored + one cap line) · 400 · 400 fixed line · 415 marker 0 — **identical in both**; `/api/health` 200 | batch 7 x6/x7 |
+| x6 | **coverage view (C-102):** on MT2, CENSUS-B's server — how many times the intake's type-less `next(err)`, the entity branch and the NEW non-entity branch executed | type-less `next` ≥ 1, entity 0, non-entity 0 — name the counts (batch 7's `qa-cov7.js` form) | batch 7 §3 |
+
+**B — RD-723's budgets (every arm quotes jest's per-cell `duration` from `--json`).**
+
+| row | shape | expected at `19fc17c` | at M0's file (`e7789e5`) | predicted-by |
+|---|---|---|---|---|
+| t1 | **RED-AT-BASE (POSITIVE CONTROL FIRST):** rd638 at M0 with a listen-delay preload of 2,500 ms in the SERVER child only (the builder's shape, your own copy) | — | **E2 RED, `Exceeded timeout of 5000 ms for a test`**; E1 green; without the delay E2 green — quote its duration (builder: 4037 ms at `6ae20af`) | builder |
+| t2 | the head with and without the same delay | **both green; E2 duration > 5,000 ms with the delay** (the delay engaged and the budget held) | — | builder |
+| t3 | **LANDING CONTROL for the preload (H-3, H-10):** its stderr line appears exactly ONCE per server child, with the SERVER child's pid (from the harness output), and ZERO times for the jest worker's pid; negative control: delay 0 → the line says 0 ms and E2's duration ≈ the no-delay arm | as stated — **an arm whose delay did not land is VOID** | same | drafter |
+| t4 | **no asserted value changed (the commission's condition), TWO independent instruments, each with a control that fires:** (1) substitute every new constant by its value, strip comments, drop the constant declarations and the two budget arguments → equal to `e7789e5` stripped; (2) a token/AST compare of every `expect(...)` / `.toEqual(...)` argument and every literal argument to `settleWithin`, `sleep`, `bootServer` | **only the two `test()` third arguments differ**; each control (one literal changed by 1 in a copy) is CAUGHT | — | commission |
+| t5 | the arithmetic at source: `E2_BUDGET_MS` = 158,000; `E1` budget = 20,000; each constant equals the literal it replaced | READ, quoted | — | drafter |
+| t6 | **the stop term:** a server child that IGNORES SIGTERM after it listens (your own preload, landed by H-3) inside E2 | **drafter READ: `h.stop` waits 20 s (not 5 s + 5 s), then SIGKILL; E2 still green at ≈ normal + 20 s; the comment's "5 s each" is false of `h.stop`** — quote the source lines and the measured duration; state the all-bounds arithmetic (120 + 3 + 15 + 20 = 158 = the budget) | at M0: RED on jest's 5 s | drafter |
+| t7 | **L-B2 — a boot that exceeds `bootTimeoutMs`:** listen delay 125,000 ms (arm deadline 600 s) | **E2 RED with the HARNESS's own message (`never answered /api/health` / `stopped`), NOT jest's "Exceeded timeout"**, at ≈ 120 s + `failBoot`'s ≤ 10 s (+ ≤ 5 s if RD-648 is on M0) < 158 s — the budget exceeds the failure path, so the failure names its cause | RED on jest's 5 s | drafter |
+| t8 | **the budget does not mask the property:** RD-638's own fix removed from the product (READ `a46d336`/`0ab8a05`'s product lines to find the route's end-on-error; one mutant) | **E2 RED with `settled: 'NOT SETTLED'` (or `withinMs: false`) inside the budget** — never green, never "Exceeded timeout" | RED (either message — name it) | drafter |
+| t9 | C-185 — rd638 by name at M0 and at the head, 3 runs each without delay (duration spread) | green; the spread named; **after RD-723 the known set is `{}`** (READ C-185) | name any red | commission |
+| t10 | C-68 with RD-648: if M0 carries RD-648 (harness `c826c1e`), t1/t2 are ON it — say so; else NAME for the merge author that whichever of RD-648 and RD-723 lands second re-runs rd638 by name | as stated | — | batch 8 |
+
+**A row whose expected verdict and clause disagree is a finding against this brief — say so.**
+
+## 3. THE QUESTIONS ALL TARGETS ANSWER FIRST
+0. **SESSION_SECRET UNSET, EVERY RUN** — §3a H-1's ONE permitted printer. Positive control once per target: its own cell file with a throwaway random
+   64-hex secret exported (never printed, never written) — identical results, or say what differed.
+1. **Re-pin everything yourself:** `git ls-remote` at start, mid and end (three timestamped readings, branch name beside each sha): main, both member
+   branches, `608a1cd`'s branch, and the queued merges (RD-681 `faea66b`/PR #32, RD-685, RD-314, RD-700, RD-609, RD-648 `b12a475`) — which tell you what
+   main may become. M0 and the "Main may move" rule re-proved; chains and exact parents; deltas; counts at `1904765`, `4334b96`, `874c4f5`, M0, `6ae20af`,
+   `19fc17c`, `608a1cd`.
+2. **POSITIVE CONTROL FIRST — re-derive every red and every mutant INDEPENDENTLY** — your own scripts, never the builder's `rd618c-hold.sh`, `hold.sh` or
+   `verify-hold.sh` (read them for method). **Before each mutant arm, prove it still parses — `node --check` on every mutated JS file, exit 0, quoted — and
+   that it LANDED (the exact mutated text present, the original absent once the new text is removed; your mutate tool's `--verify` with its negative control).
+   A red from a mutant that does not parse, or a green from one that never landed, is a VOID arm.** Quote the failing assertion of every red.
+3. **Name every behaviour guarded by no cell, and every one guarded only by source text** (a4 M-typeless, s3b, s6b at least).
+4. **Full verify of each head and of MT1**, `npm run verify -- --maxWorkers=2 --forceExit`, through the lock, SESSION_SECRET UNSET, a fresh SHORT TMPDIR each,
+   **K1 only** (lesson 1). Prove `--forceExit` reached jest or say it did not and rely on the deadline. **Predicted: `874c4f5` 4146/248 · `19fc17c` 4191/252 ·
+   M0 = `dd15ce1` 4191/252 · MT1 4204/253 (regenerated once)**; MT2's full verify only if the queue allows (else NOT RUN and named — its C-68 set x1 is required).
+   Every failure by NAME; **`rd638-export-always-ends E2` is C-185's known CI failure — if it fails LOCALLY at M0 it is t1's natural red, name it; at the head it
+   is a finding.** Re-run until green is not an acceptance gate.
+
+## 3a. INSTRUMENT RULES — H-1..H-21 (carried from the batch 8 brief, which carried batches #1-#7)
+- **H-1.** The ONLY permitted SESSION_SECRET printer, verbatim:
+  `if [ -n "${SESSION_SECRET+x}" ]; then echo "SESSION_SECRET SET (length ${#SESSION_SECRET})"; else echo "SESSION_SECRET UNSET"; fi`.
+  **FORBIDDEN anywhere in your scripts:** `${SESSION_SECRET-…}`, `${SESSION_SECRET:-…}`, `${SESSION_SECRET+$SESSION_SECRET}`, `echo
+  $SESSION_SECRET`, `printenv`, `env | grep`, `set | grep`, and **echoing an env array that could hold it (`${envs[*]}`)**.
+  **Self-test it BEFORE the first hold (a control that can fail):** run the printer once with a throwaway exported and once unset, capture both, assert
+  the throwaway's value is ABSENT from both (compare in-process; never print it). **After every hold, scan that hold's logs for the throwaway value** and
+  report the count (0); **the scan's own positive control plants a DIFFERENT random marker, never the throwaway.** Print any needle only as
+  `<first4>…<last4>`, and **mask GUIDs with or without hyphens**. Export the throwaway INSIDE the run's subshell, never in argv.
+- **H-2.** Never construct a product storage object on a DATA_DIR you are measuring AFTER its server booted. Seed BEFORE; read logs RAW.
+- **H-3.** Every hook you rely on (a preload, a planted report, a mutated line) gets a **LANDING CONTROL** before the measured run: prove it fired once on a
+  known input. An arm whose instrument failed is VOID, is re-run, and is reported as a self-correction.
+- **H-4.** The heartbeat is a **separate child** process started by the hold wrapper (`while sleep 60; do echo "HB $(date -u +%FT%TZ) <step> <pid>
+  <elapsed>"; done`), killed in the wrapper's `trap … EXIT`; **the wrapper ABORTS the hold if no HB line appears within 90 s of the grant**, and after
+  every hold you compute and REPORT the **max gap** between HB lines (must be ≤ 120 s). Keep the HB child's output unfiltered.
+- **H-5.** Restore your own perturbations (mutated files, planted rows, held ports, sockets, env files) before any hash, and hash the restore.
+- **H-6.** Every extractor and census gets a POSITIVE CONTROL. **Every path is quoted** — `!CODING` and `Testing Agent MAIN` contain `!` and spaces.
+  **Every server you boot runs under the network belt (`qa-netbelt.sb`) with its landing control (EPERM for TEST-NET-1, 200 for loopback).** The Redis-down
+  arm's refusing port is on loopback — prove the belt lets the REFUSAL through (ECONNREFUSED, not EPERM) before trusting "Redis down".
+- **H-7.** Mutants are built and verified ONLY by a quoted tool with a negative control (an unmutated tree → VOID rc ≠ 0). A mutant check that prints an
+  empty count is a VOID arm, never a pass.
+- **H-8.** The landing rule is "the exact mutated text is present AND the original text is absent once the new text is removed" — never "the anchor is absent".
+- **H-9.** Byte-level plants (the 16,383/16,384/16,385-byte bodies, the 319-report array, a charset marker) are written with `Buffer` and verified by
+  `xxd -l 16` (at the plant's offset) and `wc -c` BEFORE use; never with `echo`, `printf`, a heredoc or `JSON.stringify` where the bytes matter.
+- **H-10.** Prove every phenomenon reachable before measuring its absence: "Redis down" → a raw connect to the configured port is REFUSED; "the non-entity
+  branch" → its refusal line is in the log; "the delay landed" → t3.
+- **H-11.** Every script runs under `/bin/bash` explicitly, and every `<sha>:<path>` is written `"${sha}:${path}"`. **Never `set -- $x` or `declare -A`
+  in the default shell** (macOS bash 3.2 has no associative arrays).
+- **H-12.** Before the C-57 control, list every `__tests__` file any head MODIFIES or DELETES. **Predicted: A MODIFIES `rd618-csp-intake-residue.test.js`
+  relative to its parent and ADDS it relative to M0 (13 ids new to main); B MODIFIES `rd638-export-always-ends.test.js` (titles UNCHANGED — READ); nothing
+  deleted.** Name the stale-parent files: every `__tests__` file main changed since `1904765` that A carries at its OLD blob (C-187's `image-content-exposure`
+  at least).
+- **H-13.** Every tree census is NUL-safe (`ls-tree -z`), with a positive control on a path containing a space.
+- **H-14.** Every driver ends with an explicit END record; a run with no END record is VOID, whatever its exit code.
+- **H-15.** Pass preloads as `-r "<path>"` in argv, never through `NODE_OPTIONS` — **ONE declared exception: rows t1-t3, t6, t7, where the preload must reach
+  a server child the harness spawns from INSIDE rd638's cell with `{ ...process.env }` and no `preload` argument at E2's call site (READ). There, `NODE_OPTIONS=-r
+  <your copy>` is permitted, the preload self-gates on the server entry point in `argv[1]`, and t3's landing control (child pid yes, jest worker pid no) is
+  mandatory in the SAME arm.** Everywhere else H-15 stands.
+- **H-16.** A plant is checked to be what the product will treat it as before it is used (the report is under the field names `buildCspEntry` reads; the
+  array items carry `type: 'csp-violation'` and an object `body`; the delay preload's regex matches the entry point the harness spawns).
+- **H-17.** Absolute tool paths only; every arm asserts the thing actually STARTED (jest's first suite line, the child's pid, the server's listen line) before
+  its rc is read.
+- **H-18.** zsh consumes `:s`/`:a` in `$var:path` AND `=` at word start — `/bin/bash`, braces, and **reject any sha256 equal to `e3b0c442…` as a VOID read**.
+- **H-19.** gitleaks canaries (if you run gitleaks over the deltas) are planted as real keys, not JSON-escaped inside strings.
+- **H-20 (ruling f).** **EVERY jest invocation inside a hold carries `--forceExit` AND runs under a per-step hard DEADLINE** (`qa-to.sh <seconds> …`,
+  rc 142 = fired): targeted cell runs 600 s, the C-68 union 2,400 s, a full verify 2,700 s. A deadline that fires ABORTS that step (reported by name,
+  never retried silently), the wrapper's EXIT trap runs, and the lock releases through the wrapper's own exit. **`--forceExit` hides open handles, so a
+  leak census (children by pid, ports, temp dirs) runs after every jest regardless — above all after t6/t7, whose server children ignore SIGTERM or never listen.**
+- **H-21 (ruling f).** **Every file you mutate is restored in a `trap … EXIT` installed BEFORE the first mutation** (restore by `git show
+  "${sha}:${path}" > file` or from a pre-mutation copy, then hash-compare to the pinned blob); the trap also covers INT and TERM; after every hold, assert
+  every mutated path's hash equals its pinned blob and report it. **A mutant tree left mutated after a deadline is a self-correction to report, and that
+  tree is quarantined, never reused.**
+
+## 3b. THE NEGATIVE-ASSERTION SWEEP (C-102) — REQUIRED, scoped to what these members change
+**A adds EARLY RETURNS to the intake's error handler** (type-less → `next(err)`; entity → 400/413; any other type → its own status) **and a `.slice` that
+drops entries.** B adds no early exit but **lengthens how long a cell may run** — a negative cell that used to time out red might now run to a different red.
+1. **Enumerate the new early exits (READ, quote each):** `git diff 4334b96 874c4f5 -- backend/server.js backend/services/cspReport.js`.
+2. **Enumerate the callers' cells** on MT2: every cell that drives `/api/csp-report` or `buildCspEntries` (positive control: rd618 R2/R3/R5/R7 must be found;
+   rd495's A4/A4b refusals; rd607's intake limiter cells; rd646's CENSUS-B/M and every rd646 cell that POSTs to the intake). Classify each NEGATIVE or POSITIVE.
+3. **For each NEGATIVE cell: does it still reach the check it is NAMED for?** E.g. R3 ("the raw body never reaches the log") must be refused by the ENTITY branch,
+   not by the new non-entity branch; rd495 A4b ("a 20 KB report is refused") by `entity.too.large`, not by the cap; CENSUS's csp-report 503 by D's named error
+   through `next(err)` (x6). **A negative cell whose red (or green) now comes from a different, earlier line is DISARMED** — name it, proven by the log line
+   the handler writes (`body is not valid JSON` / `body over the size cap` / `<type>; nothing stored` / the global handler's) or coverage.
+4. **For B:** E1 and E2 are both negative-shaped ("ends within 15 s", "completes within 10 s"): show t8 — the budget lets the cell reach ITS OWN red
+   (`NOT SETTLED`) instead of jest's timeout.
+5. **Self-test first or ABORT:** a positive control (a cell you know reaches its named check), a negative control (a POSITIVE cell), and a non-empty population.
+6. **Report per ticket:** population, negative cells, still reaching, disarmed.
+
+## 4. TARGET A — RD-618 (TIER 1, round 2 of 2). Answer each with a measurement.
+1. **Scope:** `git diff --name-status 4334b96 874c4f5` = the four files; `1904765..874c4f5` the same four; nothing in `static/`.
+2. **POSITIVE CONTROL FIRST (a1):** red-at-parent — S5, S6, R6, R7 red, the other 9 green. Then a2, a3 (the builder's three mutants, re-derived), a4.
+3. **A-F1, A-F2, A-F3 — each CLOSED, NARROWED or OPEN, by measurement with its red-at-parent arm:** A-F1 → a1(S6/R6) + s6 + s6a; A-F2 → a1(S5) + s3 (+ s3b
+   residuals); A-F3 → a1(R7) + s7 + s7b + a4 M-F3m. **"The log line never echoes err.message" — MEASURED (s7 marker 0) AND GUARDED (a4 M-F3m reddens R7).**
+   **"Type-less errors still go to next()" — MEASURED on the cross tree (x2) AND GUARDED only there (x3).**
+4. **C-68 set A** (MERGE ORDER step 2 and row x) on the head, MT1 and MT2 — re-derived with both controls; batch 7's rows s4, s8, s9 as regressions.
+5. **PRIOR WORK (C-49):** the READY's list (the intake error handler — round 1 `7e4cd2e`, narrowed at `4334b96`; `buildCspEntries` — RD-495; the
+   `stripQueryAndFragment` fallback — RD-495, extended by round 1) — READ each at `874c4f5`, KEPT or not; "Nothing removed" — verify (`git diff` shows only
+   `-` lines replaced by equivalent ones).
+6. **C-190 (READ ONLY):** does `rd-618-csp-intake-residue-s86m` have a PR, and a CodeQL result? The new regex `^([a-z][a-z0-9+.-]*:\/\/)[^/?#]*@` — anchored,
+   one bounded quantifier per class: say whether you see super-linear backtracking on a 16 KB value (a PROBE: time `stripQueryAndFragment` on a
+   16,000-char value with no `@`, READ ONLY acceptable).
+
+## 5. TARGET B — RD-723 (TIER 2, through-code). Answer each with a measurement.
+1. **Scope:** one test file + counts (`_updated` only); nothing under `backend/`, `static/`, `docs/`.
+2. **POSITIVE CONTROL FIRST (t1):** red at M0's file under the landed delay (t3); then t2.
+3. **t4 — the commission's condition (two instruments, controls fire).** Any other change is a Major AND a WRONG item.
+4. **Rows t5-t10** — t6, t7 and t8 first.
+5. **PRIOR WORK (C-49):** `a46d336` and `0ab8a05` (RD-638) "kept as written" — READ: every cell body line of `e7789e5` is present at `fc121f5` modulo the
+   constant substitution (t4 is that measurement).
+6. **C-185 / C-190 (READ ONLY):** the branch's PR (if any), its CI Build and CodeQL; M0's Build failing set against `{rd638 E2}`.
+
+## 8. THE MERGED TREE (C-68, C-57, C-89, C-104, C-133, C-187). No verdict is complete without it.
+1. **Build it in YOUR OWN scratch clone** under `projects/nexusai/qa-trees/batch9.*/clone-1`: `git clone --shared --no-checkout <repo> <dir>`; in the clone
+   only: remove `origin`, set a local `user.name`/`user.email`, `gc.auto 0`, `core.fsmonitor false`, hooks off; `git checkout -b gate <M0>`; then `git merge
+   --no-ff` in the PROPOSED ORDER: **`19fc17c`**, **`874c4f5`** (= MT1); then, in a SEPARATE clone (`clone-x`) built from MT1's commit, `git merge --no-ff
+   608a1cd` (= MT2; skip if M0 already holds it). **Write your prediction for each merge BEFORE it; anything other than the counts file conflicting STOPS
+   (C-57).** Re-measure every pair by `merge-tree` in a SCRATCH object dir first. **C-104: resolve and stage before any census or run.**
+2. **Resolve the counts file by REGENERATION, never by hand:** take a side (a placeholder) to complete each merge commit, then `npm run verify --
+   --maxWorkers=2 --forceExit --update-counts` ONCE on MT1 after both merges, through the lock, SESSION_SECRET UNSET, under its deadline; commit the
+   regenerated file in the clone. **Predicted 4204/253 at M0 = `dd15ce1`.** Then a plain verify of the committed head.
+3. **Order independence (a control that can fail):** clone-2 in REVERSE (`874c4f5`, `19fc17c`). **The two `HEAD^{tree}` must be identical apart from the
+   counts file** — quote both tree ids and the `git diff --name-only`; the side control (MT1's tree before A vs after lists exactly A's non-counts files) run
+   INSIDE the clone that owns both (lesson 3).
+4. **Blob identities (C-133's C-112 control):** member paths at MT1 == their head's blob, EXCEPT where the merge had to combine (predicted: none — `server.js`
+   at MT1 = `e076121` when M0 = `dd15ce1` because M0's `server.js` = A's base blob `bc099b2`; **if M0 carries RD-681, `server.js` is a COMBINED blob no parent
+   holds — name it, parse it (`node --check`), and run the C-68 union on it**); every other `__tests__` file == M0's or a head's; `package-lock.json` `9064763`.
+   **`__tests__`: 296 at MT1 predicted at M0 = `dd15ce1` (295 + rd618), 298 at MT2 (+ rd646 test + rd647 helper)**; 0 identical to no parent (except any
+   combined file you name), 0 absent.
+5. **id-superset control (C-57) — ruling (d): PREDICT, then measure, all K1.** merged ids ⊇ ids(M0) ∪ ids(`874c4f5`) ∪ ids(`19fc17c`)? **Predicted: missing 2
+   = C-187's `image-content-exposure` pair** (A carries `94e6e4c`; M0 = MT1 = `9ede5fd`; `git log 1904765..M0 -- <file>` = `8de8e5c` only) — **ACCOUNTED only if
+   C-187 (a) and (b) are MEASURED** (the replacement ids present and green on MT1). **Predicted new ids: rd618's 13, = the counts delta.** Then the same for
+   MT2 (+ `608a1cd`, also cut from `1904765`: the same pair, no other). Use a COPY of batch 7's `qa-c57-id-superset.sh` (keeps the lock-holder refusal;
+   proven first to STOP on a planted missing id). **Any other missing id: name it, its file, the file's blob at M0, at each head and on the merged tree, and its
+   `git log --format='%h %s' 1904765..<each parent> -- <file>` history — it is a STOP. Never assume an id's absence is benign.**
+6. **The semantic overlaps git cannot see (C-68), one hold:** on MT1 — every C-68 set of the MERGE ORDER table BY NAME (per-file counts), rows a2, s6, s7,
+   t2, t9; the full verify. On MT2 — x1-x6. Then ONE mutant per ticket on MT1: **M-F1** (rd618 S6 + R6 red) and **t4's control on the merged blob** (rd638
+   asserted values unchanged); on MT2 **M-typeless** (x3).
+7. **The harness (C-68 with RD-648):** if M0 carries RD-648, name it and run the harness union by name on MT1 (rd618 and rd638 among it); if not, **name for
+   both merge authors: whichever of RD-648 / RD-618 / RD-723 lands after another re-runs the harness union by name.**
+8. **C-89 on your clone:** `git diff --quiet HEAD` holds; `git show HEAD:scripts/verify-expected-counts.json` equals the regenerated counts.
+9. **Nothing leaves your clone.** No push, no remote, no PR, no ref written in NexusAI. **Count `<repo>/.git/objects` files before and after your whole
+   session and account for any delta by FULL-DATE mtime** (lesson 6; live seats commit there; `--shared` clones and merge-tree freshen mtimes — say so).
+
+## 9. CI (C-185, C-190) — NOT RUN AT ANY BRANCH HEAD unless a PR exists
+- **Unverified by the drafter** (no `gh` run). Check with `gh pr list --head <branch> --state all` (READ ONLY, NexusAI's own `GH_CONFIG_DIR`) for both
+  branches (control: without `--head` it returns PRs, e.g. #32); for any PR, its CodeQL `Analyze (<language>)` runs (C-190: the `CodeQL` summary run can read
+  completed/neutral before the analyses exist) and any NEW high-or-higher alert in changed code; M0's CI Build with `gh run list --commit <M0>` READ ONLY and
+  its failing set against C-185's `{rd638 E2}`. **`gh` never merges, approves, comments, reviews, labels, re-runs, dispatches, sets a variable, dismisses an
+  alert or opens a PR.**
+
+## 10. Floor discipline — THE FOUR CLAUSES, plus THE DEADLINE RULE (carried from the batch 8 brief)
+1. **Every jest run, every server you boot goes through `session-tools/nexusai-lock.sh`, tagged `qa-b9-…`** (e.g. `qa-b9-H1-parent-reds`, `qa-b9-H2-mutants`,
+   `qa-b9-H3-heads-verify`, `qa-b9-H4-merged`, `qa-b9-H5-cross`) — C-141: gate-class; under ADDENDUM 2/3 every NEW `qa-*` ticket earns a fresh, self-applied
+   yield from the builders. **When a MERGE ticket (gate-class, C-141 ADDENDUM) is already queued when you file, file yours with `--after <that merge ticket's
+   tag>` (ADDENDUM 4's tool) so you sit directly behind it; never ahead of it.** **QUEUE, NEVER TAKE OVER:** never kill, signal, move or edit another seat's
+   process, lock directory, owner file or ticket, even if it looks stuck; if a holder looks stuck, mail a QUESTION (§12) and keep waiting. **Expect a busy
+   queue: RD-681's PR merge, batch 3 and batch 8 are merging ahead of you.** Pure reads, the t4 compare and merge-trees may run outside the lock — say which did.
+2. **Hold the lock ONCE per multi-run measurement.** Every hold is a TRACKED CHILD of your seat, never detached (`nohup … &`).
+3. **Count foreign servers the C-125 way, anchored on YOUR OWN claude pid:** `basename(argv[0]) == node` AND the server entry point anywhere in the
+   remaining argv; "ours" = the ancestor chain CONTAINS your own claude pid. **Record the foreign count BESIDE EVERY RESULT.**
+   **NEGATIVE controls, all in the same run, all must classify FOREIGN:** @STAMP@ — claude pids read by Tuesday from each pane's process tree at stamp —
+   Tuesday names the live seat pids (NexusAI-M, -N, -O, -P and her own) at stamp. Re-read them at start; if one has exited, say so and use the others; **a hold
+   with NO live negative control aborts.** Reuse batch 8's instrument BY COPY with YOUR pid as `ROOT` and these as `NEG`:
+   `/Volumes/KK_T9_External_HDD/!CODING/Testing Agent MAIN/projects/nexusai/reports/2026-09-29-gate-batch8/evidence/qa-floorlib.sh`
+   (**its defaults are STALE — correct `ROOT` and `NEG` before any hold**) and `…/qa-floorcount.py`; the original counter is gate 7's
+   `/Volumes/KK_T9_External_HDD/!CODING/Testing Agent MAIN/projects/nexusai/reports/2026-09-22-gate7-rd645/evidence/qa-floorcount.py`.
+   **The harness spawns servers with `spawn(process.execPath, [<the server entry point>])` (and `-r <preload>` before it when given) — and under H-15's
+   exception a `NODE_OPTIONS` preload changes NOTHING in argv; your counter must see them (a control server spawned that way reads 1, then 0 after reap).**
+   RD-723's builder reported one unidentified foreign server at the end of its hold (pid 30665) — **a server inside its SIGTERM grace is still a server: count
+   after `h.stop` returns AND after the 20 s bound.**
+4. **A zero is reportable only beside a control that fired in the same window** — the floor count, "marker 0" (s7/s9's control marker found), "no asserted
+   value changed" (t4's controls caught), "missing 0 beyond C-187" (the planted-missing-id control), "guarded by no cell" (the mutant LANDED and parsed).
+
+**5. THE DEADLINE RULE — every real-server probe and every request has a per-step DEADLINE, a HEARTBEAT, and kills its server in a `finally`.**
+Every HTTP request carries a client timeout; each step (boot 120 s — **t7's boot 200 s**, request 30 s, targeted jest 600 s, C-68 union 2,400 s, full verify
+2,700 s, exit 25 s) has a written DEADLINE (`qa-to.sh`); a step past it is ABORTED and reported, never waited on. **Log a HEARTBEAT line at least every 2 minutes
+during any hold (H-4: a separate child, ≤ 120 s max gap, aborted if absent at 90 s); a step with no heartbeat for 5 minutes is aborted and reported,** and a
+hold that is not progressing releases the lock. Every server, socket, Redis stand-in and preloaded child you start is killed in a `finally` (SIGTERM, then
+SIGKILL after a grace) **by pid from your own ancestry, never by pattern (C-174)**, and the reap is confirmed by your floor counter. **H-20 and H-21 apply to
+every jest.**
+
+## 11. HELD
+- **LOCAL RUN, NOT THE DEMO:** every server request goes to a server YOU (or a cell) booted on 127.0.0.1 from YOUR tree, under the network belt (H-6).
+- **External hosts you MAY contact, and nothing else:** `git ls-remote origin` (pins); `api.github.com` via `gh` READ ONLY (§9); `api.agentmail.to` (your
+  verdict mail and any QUESTION). **No Azure, no registry, no demo, no customer-test tenant, no Partner Center, no docker, no browser.**
+- **FINDINGS-ONLY (ruling e):** no fix, **no merge outside your own clones, no push, never push — not to main, not to ANY author's branch**, **no PR opened,
+  commented, approved or merged (C-190 is the merge authors' route, not yours)**, no deploy, **nothing to Partner Center, the demo or production**, no money,
+  no external comms, no mail to any human. **No `az` at all.**
+- **Never write into** the builders' `session-tools/` (copy, then hash at start and end) or any `worktrees/` directory; **never run the builders' hold scripts.**
+- **Symlinks, chmod, sockets, held ports, env files and scratch git repos live ONLY under your own mktemp dirs.**
+- **Findings-only:** do not commit (outside your clones), move any branch, file a ticket, or write anything inside the NexusAI project (`2_Project_Files`,
+  `session-tools/`, `worktrees/`, `1_Project_Definition/`, `qa-reports/`). **NEVER `rm`** — quarantine, per the template §5.
+
+## 12. Output
+Report: `/Volumes/KK_T9_External_HDD/!CODING/Testing Agent MAIN/projects/nexusai/reports/2026-09-29-gate-batch9/report.md` — ONE report covering every
+member; evidence in `./evidence/` beside it.
+
+**Questions:** your routing name is **`QA/NexusAI-batch9`**. If you must ask, mail `tuesday-agent@agentmail.to`, subject
+`[QA/Datasec-NexusAI -> Tuesday] QUESTION: <topic>` (Context / one Question / Meanwhile / Needed-by) and **PROCEED ON THE SAFEST READING without waiting**;
+Tuesday's answer arrives in `tuesday-agent@agentmail.to` with a subject beginning `[Tuesday -> QA/NexusAI-batch9] ANSWER`. Approval-class items (anything
+touching the demo, Azure, Partner Center, money, or a human) are NOT RUN and named. Record every question, reading and answer.
+
+MAIL YOUR VERDICT to `tuesday-agent@agentmail.to`, subject exactly:
+`[QA/Datasec-NexusAI -> Tuesday] GATE VERDICT — batch 9: RD-618 r2 · RD-723`
+Lead the body with ONE line per ticket in this form — `RD-618 r2: <GO|GO WITH FINDINGS|NO GO> @ 874c4f5 (round 2 of 2 — NO GO goes to Kam)` · `RD-723: … @
+19fc17c` (· `RD-466: … @ <stamped>` or `RD-466: not a member`) — then one line naming M0, the merge order you recommend, the merged counts you measured, A-F1 /
+A-F2 / A-F3 each CLOSED / NARROWED / OPEN, the cross cell's result (x1 count, x3 red?), and the C-57 result (missing ids and their accounting). Never
+`wednesday-agent@`. AgentMail key: `AGENTMAIL_API_KEY` in `/Volumes/KK_T9_External_HDD/TUESDAY/4_Credentials/.env` (absolute: the QA project has none).
+Never put the key, a token or any secret in a mail or the report.
+
+Verdict format:
+- **RD-618 r2** naming `874c4f503d0f37a032014e562972b17e903e1072`: a1 red-at-parent; the builder's three mutants re-derived; a4; A-F1/A-F2/A-F3 dispositions
+  with their arms; s3b/s6b residuals; x1-x6; round-cap consequence stated.
+- **RD-723** naming `19fc17ca5aa41e3be3a6b9d174a5d627f4a33145`: t1-t10; the t4 verdict with both instruments and their controls; the stop-term finding.
+- **The merged tree (§8):** M0; both orders; counts regenerated once (measured vs 4204/253 re-based on M0); the id-superset result with C-187's pair and
+  its (a)/(b) measured; the C-68 sets by name; one mutant per ticket; C-89; the object-count accounting; **your recommended merge order.**
+- **The §3b sweep:** per ticket, population / negative cells / still reaching / disarmed.
+- Each of **L-A1..L-A4 and L-B1..L-B2** answered: discharged with a measurement, or left standing and named (C-112).
+- All refs as **three timestamped readings (start / mid / end)**, each with its branch name.
+- **§3a H-1..H-21:** for each, that it was followed, with the self-test outputs (H-1), landing controls (H-3, H-10), max HB gap per hold (H-4), byte checks
+  (H-9), H-15's exception used where and with which landing control, every deadline that fired (H-20) and every restore hash (H-21).
+- Every action recommendation carries its evidence class: **MEASURED AT RUNTIME / PROBED / READ ONLY**. Severity is yours; priority is Tuesday's.
+- **Rule 2: a NOT TESTED section.** It MUST carry this line, verbatim:
+
+  Not tested by this gate: Linux or CI at any branch head unless a PR's CI Build exists, CodeQL at any head without a PR, a real browser's Reporting API delivery, a real Redis server (only a loopback stand-in and a refusing port), a boot slower than the delays driven here, any browser, any deploy, real Azure, Partner Center, the demo, and Windows.
+
+## WRONG OR UNVERIFIED IN THE COMMISSION AND THE READYS — carried so the gate inherits the corrections
+1. **RD-618 READY :11 "backend/server.js (+21/-4 …), backend/services/cspReport.js (+18/-2), __tests__/rd618-csp-intake-residue.test.js (+60)"** — MEASURED
+   over the parent `4334b96`: **server +17/−4, cspReport +15/−3, the cell file +59/−1.** Cosmetic (the READY may have counted differently); no file missing.
+2. **RD-618 READY :10 "Errors with no `type` … still go to next()"** — TRUE at source (READ), but **guarded by no rd618 cell** (a4 M-typeless predicted 13/13
+   green); only the cross tree's census sees it (x3). Not a false claim — a limit of the cells (C-40).
+3. **RD-618 READY :8 "The rest are counted in ONE warn line (… per-request cap)"** — the count (`offered`) includes reports the empty-entry filter drops, so
+   the line also fires when NO cap applied (READ; row s6b measures).
+4. **RD-618 READY :9 "A-F2: the fallback cut … now also drops `user:pw@` after the scheme"** — true for the three s3 shapes; **not for userinfo containing
+   `?`/`#`, a leading-whitespace value, or a backslash authority** (READ; row s3b measures — the drafter's prediction, not a verdict).
+5. **RD-618 `mx618c.log` mtime 12:18 AEST, after the READY (07:58)** — the file the READY cites was re-written after the READY was sent; its last lines still
+   read `Tests: 43 passed, 43 total` (READ). Unverified what re-ran; the gate re-derives x1 itself.
+6. **RD-723 comment "h.stop() (SIGTERM grace then SIGKILL, 5 s each)" and `E2_STOP_MS = 10000`** — `h.stop` at `2453a3f` :178-183 waits **20,000 ms** after
+   SIGTERM (READ). The "5 s each" is `failBoot`'s grace. **The all-bounds sum equals the budget exactly (158 s): zero margin** (row t6).
+7. **RD-723 READY :10-14 "RED / GREEN … A1 main … B1 branch"** — the arms ran at **`6ae20af` and the pre-forward-merge branch**, not at `dd15ce1`/`19fc17c`
+   (READ: `hold.sh` worktrees `s86n-main-6ae20af`/`s86n-rd723`; hold 2026-09-28 22:37 AEST; forward merge 2026-09-29 02:44). The file is identical in both
+   pairs (`e7789e5` at `6ae20af` and `dd15ce1`; `fc121f5` at `816c33a` and `19fc17c`) — so the claim transfers for the FILE; the tree around it differs. t1/t2
+   re-derive on M0 and the head.
+8. **RD-723 READY :10 "A NODE_OPTIONS preload"** — conflicts with standing H-15; this brief declares a scoped exception with a mandatory landing control
+   (§3a H-15). Not the builder's error — recorded so the gate does not treat the exception as a precedent.
+9. **Commission "RD-723 @ 19fc17ca5aa4 (resolve the full sha by ls-remote)"** — RESOLVED: `19fc17ca5aa41e3be3a6b9d174a5d627f4a33145` (12:21:29 AEST). Verified.
+10. **Commission "main = dd15ce1… (Tuesday's ls-remote at 10:49 AEST)"** — VERIFIED at 12:21:29 and 12:26:29 AEST: still `dd15ce1`. **But RD-648's branch
+    MOVED since batch 8's verdict:** `e1c7b21` → `b12a475` ("RD-648: read the pid/term files once, no existence check first (CodeQL org policy)"; the harness
+    blob unchanged `c826c1e`; counts 4189/253). **Batch 8's RD-648 verdict names `e1c7b21`; whether `b12a475` needs its own re-check (C-68: the cell file
+    changed) is Tuesday's, not this gate's** — this gate only needs the harness blob, which did not change.
+11. **Commission "the RD-477 round-2 PRECONDITION wildcard-COPY population floor 7 -> 6"** — the PRECONDITION cell was ADDED by RD-477 round 2 (`19a479f`),
+    but **the floor 7 was set by RD-418 (`8de8e5c`, re-pinned 9 → 7; the cell's own comment says so at `dd15ce1` :730-734)** (READ, `git log -S`). Cosmetic
+    attribution.
+12. **Commission "a mutant restoring a second wildcard COPY still reddens the cell"** — the floor is `toBeGreaterThanOrEqual(...)`; **adding a wildcard COPY
+    cannot redden a `>=` floor**. If the restored source matches nothing in the context, *"THE FINDING: no COPY glob matches nothing"* reddens — a DIFFERENT
+    cell. §OPT o2 measures which cell reddens and adds the converse arm (remove one more → the floor reddens). UNVERIFIED which reading Tuesday meant.
+13. **Commission "RD-466 (NexusAI-O)"** — no origin branch names RD-466 at 12:21 AEST (the ls-remote filter `rd-?466`); the RD-477 branch
+    `rd-477-c51-customer-leftovers-s63` `19a479f` is ON main (an ancestor). UNVERIFIED which branch RD-466 will use — Tuesday stamps it.
+14. **C-187 APPLIES here** (unlike batch 8, where it did not): RD-618 and `608a1cd` are cut from `1904765` and carry `image-content-exposure` `94e6e4c`;
+    main has `9ede5fd`. Predicted missing 2 on MT1/MT2, ACCOUNTED only under C-187's measured (a)/(b).
+15. **Drafter's own slips, disclosed:** (H-18) one read in zsh used `$B:scripts/…` and zsh answered "bad substitution" — re-run with braces; **one `find
+    …/.git/objects -type f | wc -l` over NexusAI's object store (a recursive listing of a project tree, which the commission forbade) — a read-only count
+    (675 files at ~12:28 AEST), no content read; disclosed.** The drafter's merge-trees wrote objects ONLY into its own scratchpad object dir.
+
+## PROVENANCE (drafter, 2026-09-29 ~12:15–~13:10 AEST, read-only; EXACT times only where a `date` call stamped them, the rest "~")
+- origin main + targets + queued merges | `git ls-remote origin` (named refs + a filtered `refs/heads/*`) | **12:21:29–12:21:34** (date-stamped)
+- re-read: batch 7 heads, PR #32 refs | `git ls-remote origin` | **12:26:29** (date-stamped)
+- every pinned sha a commit; chains, parents, dates, messages; merge-bases; ancestry | `cat-file -t`, `log --format='%H %P %ci | %s'`, `merge-base [--is-ancestor]` | ~12:22
+- deltas and numstats; main's movement `1904765..dd15ce1`; queued merges' file sets | `diff --numstat|--name-only` | ~12:22–~12:25
+- counts at 15 shas | `git show "${s}:scripts/verify-expected-counts.json"` + python | ~12:23
+- RD-618's product diff whole; `stripQueryAndFragment` whole; the cell file's titles and diff; RD-723's diff whole; rd638 :1-48 and requires; the harness
+  :83-112 and :170-192; `package.json` jest config; `608a1cd` server :1175-1182 and rd646's titles; `image-content-exposure` :600-625, :726-745; Dockerfile COPY
+  lines | `git show`, `git diff`, `git grep -n`, `sed -n` | ~12:23–~12:45
+- merge-trees (19 pairs) | `git merge-tree --write-tree --name-only` with `GIT_OBJECT_DIRECTORY` = the drafter's scratchpad `objdir`, NexusAI's objects as
+  alternate | ~12:35
+- blobs (server, cspReport, cell files, rd638, harness, lock, verify-suite, image-content-exposure) | `git rev-parse` | ~12:25–~12:50
+- `__tests__` census 289/290/295/295/291 | `ls-tree -r -z --name-only` | ~12:50
+- harness require-population 22/23/22/22/22/23/23 at `1904765`/`874c4f5`/`dd15ce1`/`19fc17c`/`608a1cd`/`faea66b`/`b12a475`; the intake readers | `git grep -l` over `__tests__` | ~12:40
+- titles removed by main since `1904765` (regex over `git show`) — `image-content-exposure` 1 by the drafter's title regex (C-187 names 2 ids) | ~12:47
+- CLARIFICATIONS: size/mtime/lines; C-numbers' line numbers; C-62, C-187 (:1921-1932), C-189-C-191 (:1936-1970) read | `ls -l`, `wc -l`, `grep -n`, `sed -n` | ~12:30
+- prior reports: batch 8 §0/§1/§1b/§9/§15/§16/§17/§18; batch 7 §0, §1, §3, §4 | `sed -n` | ~12:17–~12:20
+- builder evidence: `s86m/rd618c-hold.log` (VERDICT line), `mx618c.log` (tail, mtime), `s86n/rd723/` listing, `hold.sh`, `slow-boot-preload.js`,
+  `verify.log` VERDICT, `named.log` tail | `ls -l`, `cat`, `grep` | ~12:52–~12:55
+- routing: **no `QA/NexusAI-batch9` line in `fleet/inbox_routing.conf`** (batch8 :141 exists) — Tuesday adds it; the launcher's guard 40 refuses until then | `grep -n` | ~12:55
+- report dir `2026-09-29-gate-batch9` absent | `ls -d` | ~12:55
+- the batch 8 brief (606 lines) and launcher (526 lines) whole; batch 7 brief :1-80 headers, :381-392 severity | `Read`, `grep -n`, `sed -n` | ~12:15–~12:40
+
+## FILL AT STAMP — Tuesday, before launch (the launcher refuses until the starred items are done)
+- ★ both STAMP placeholders at the top (the SELF-CHECK line and the Self-check note) — LAST, by hand, no placeholder token in the note.
+- ★ the routing line `QA/NexusAI-batch9|tuesday-agent@agentmail.to|no` in `fleet/inbox_routing.conf`.
+- ★ the negative-control seats in §10 (replace the stamp placeholder there with the pids, each in backticks) AND the launcher's `NEG_SEATS` — Tuesday's own pid included.
+- OPTIONAL: RD-466 — set the launcher's `O_BRANCH` and `O_HEAD` (full 40-hex, re-read by ls-remote) ONLY when its READY is on disk; copy the READY to
+  `briefs/` and name it in §OPT. Left empty, the launcher tells the gate RD-466 is not a member.
+- If a member head MOVES before launch: the launcher's guard 18 refuses — re-pin that head in the launcher and every occurrence in this brief, re-read its
+  READY, never `sed` a sha blindly.

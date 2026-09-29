@@ -1,0 +1,40 @@
+[Datasec/NexusAI-O -> Tuesday] READY FOR QA: RD-466 @ 3f7e263 (A-F1 + A-F2 + F-12 residue; tier 1; real images 16 leave / 0 enter; verify 4191/4191, 252)
+{'spf': 'pass', 'dkim': 'pass', 'dmarc': 'pass'}
+BLUF: READY FOR QA, tier 1: RD-466 (batch-4 gate A-F1 + A-F2, plus RD-466's own F-12 residue) on rd-466-image-case-names-s86o @ 3f7e263bf69f571d79aeae6ecc7b48ce6730d4c2, off main 40b7eae. Upper-case env / rc / SSH-key names, upper-case database files, .aws/ and stray root package-*.json no longer enter the customer image. Nothing else changes; measured in real images. It asks for a gate. The scope note (F-12 residue folded in) is yours to veto.
+
+WHAT CHANGED (4 files, +60/-23)
+- .dockerignore: **/.env, **/.env.*, **/*.env, **/.envrc, **/.npmrc, the four **/id_* rules and **/*.db / *.sqlite / *.sqlite3 rewritten as CASE PAIRS (RD-418's idiom); NEW **/.[aA][wW][sS]. !**/.env.example stays BELOW every env rule (RD-391).
+- Dockerfile:19 (base stage): COPY package*.json ./ -> COPY package.json package-lock.json ./.
+- __tests__/rd418-dockerignore-round3.test.js: 14 plants in MUST_NOT_SHIP, 3 root-JSON plants, and COPY development/ in the PRECONDITION fixture Dockerfile (the real one copies it). No title changed.
+- __tests__/image-content-exposure.test.js: re-anchored where the rules are now spelled as case pairs (below).
+
+SETS, NOT COUNTS (session-tools/s86o/, floor 0 every hold)
+- RED at base 40b7eae (rd466-hold2.log): {rd418 "no plant ships", rd418 "only package.json and package-lock.json ship from the root ..."}. GREEN: rd418 9/9.
+- Mutations, one per rule, anchor counts asserted before each edit: M1 env lower, M2 rc lower, M3 id_rsa lower, M4 db lower, M5 .aws removed -> {no plant ships}; M6 package*.json restored -> {root-JSON cell}; M7 re-include moved above the env rules -> {".env.example outside docs/ is still re-included"}.
+- C-68 census set (15 suites: helper consumers + .dockerignore/Dockerfile/rd385/rd327 readers): 377/377 (rd466-final.log).
+- Full verify: VERDICT: PASS — 4191/4191 tests passed across 252 suites (rd466-final.log). Counts unchanged; plants add no tests.
+- Stale-anchor mutation (rd466-mut2.log): control S51 6/6; old ANCHORED spelling restored -> {S51 ARM 1 (at the new named check), S51 ARM 2}.
+- REAL IMAGES (rd466-pair.log, docker lock, --network none, fresh mktemp contexts): base 40b7eae ships all 16 new plants; the fix blocks all 16; file-set diff = exactly those 16 LEAVE, 0 ENTER (197 -> 181 files); backend/.env.example still ships. Both images start with a throwaway SESSION_SECRET (health OK ~4 s). Both REFUSE without one: they log "FATAL: SESSION_SECRET is not set ... [SESSION_SECRET_INVALID]" and every request answers 503 with the reason (rd466-nosecret.log). My first no-secret arm read only .State.Running, the wrong instrument; corrected.
+
+PRIOR WORK (C-49; full record session-tools/s86o/rd466-prior-work.md)
+- Base-stage COPY package*.json: root commit 8eb94ce (2026-04-18), "Copy package files for dependency installation"; no reason recorded for the glob. KEPT the purpose (npm ci needs exactly the pair), IMPROVED to the named pair. RD-418 had already named the pair in the build and production stages (:70, :103) and left :19; that gap is A-F2.
+- **/.env, **/.env.*, !**/.env.example: RD-391 (2026-09-14). KEPT, now case pairs; the re-include order is kept and guarded (M7).
+- **/*.env, .envrc, .npmrc, id_* rules, key-extension case pairs: RD-418 round 3 (8de8e5c). KEPT the idiom, extended to names.
+- **/*.db, *.sqlite, *.sqlite3: RD-391. KEPT, now case pairs.
+- CHECKS CHANGED, not the product, each because the rule spelling changed (C-131 shape, RD-418's precedent in the same cells):
+  (a) RD-391 ARM (image-content-exposure ~:349): tamper regexes re-spelled; absence checks now on the current spelling (its old not.toMatch(/^\*\*\/\.env$/m) had gone hollow).
+  (b) S51 ANCHORED + ARM 1 named absence checks: its "tamper landed" check was satisfied by ssl alone while the env anchors were stale; proven by the stale-anchor mutation above.
+  (c) RD-477 round 2 PRECONDITION: wildcard COPY floor 7 -> 6, measured-quantity re-pin in the shape RD-418 used in the same cell (9 -> 7). The removed wildcard is A-F2 itself; the old floor fails on this tree (read 6).
+  Nothing removed; no test title changed, so there is no C-57 id question at merge.
+
+NOT TESTED
+- The helper's model vs Docker for directory case pairs beyond .aws (only .aws and .AWS were planted).
+- A-F3 (suffixed key copies, x.pem.bak) is RD-707, not in this change; still ships.
+- Filesystems where case differs from Docker's matcher (Windows build contexts): only this Mac's Docker was used.
+- CI Build and CodeQL at this head: not run (no PR yet). The diff adds 0 fs calls (0 added existsSync/statSync/openSync/readFileSync/writeFileSync lines), so no js/file-system-race-class pattern.
+
+MERGE NOTE: main is now dd15ce1. git diff --name-only 40b7eae dd15ce1 touches none of RD-466's 4 files. At merge: main forward (C-68), the C-68 census set by name, counts regenerated once, C-57, then a PR under the CodeQL policy in my C-184/C-186 turn.
+
+DISCLOSED (all in the READY's own logs): the first proof hold's full verify was VOID (I edited a test file while it ran); the diag hold's verify was FAIL on the then-known cells; one waiter launched with a plain & was stopped by proven pid and re-queued; the final hold's first mutation report was unreadable (my summary treated -t-skipped cells as failures) and was re-run as rd466-mut2.
+-- NexusAI-O (S86O)
+
