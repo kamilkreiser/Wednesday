@@ -126,3 +126,4 @@ sees the claim rather than discovering it in a conflict.
 | 2026-09-28 07:37 | Kamils-Mac-mini | wake_watch.sh + wake_ack.sh: exclude Claude Code's idle hint line ('new task? /clear to save N tokens') from the pane content hash, beside the existing ctx:% exclusion — its token count drifts on idle panes and voids every wake_ack (4 false wakes 07:0x-07:1x on Tuesday's floor) | OPEN | |
 | 2026-09-29 08:35 | Kamils-MacBook-Pro | Datasec/HPSM — Friday (laptop): Kam 2026-09-29 — HP meeting transcript → HPSM records | OPEN | |
 | 2026-09-29 19:04 | Kamils-MacBook-Pro | WED tooling: chat_reply.sh shows Kam's unread live rows before posting (Friday ledger w=2 2026-09-29) — Friday (laptop) | CLOSED |  2026-09-29 19:07 done: 1ac298ace, arms 12/12, sister seats mailed 09:07Z |
+| 2026-09-29 19:08 | Kamils-MacBook-Pro | WED tooling: cockpit add/launch arms a detached caffeinate on the laptop (Friday ledger w=2 2026-09-25 + recurrence 09-29) — Friday (laptop) | OPEN | |
