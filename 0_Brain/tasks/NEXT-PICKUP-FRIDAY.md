@@ -12,6 +12,16 @@ supersede: replace wholesale; previous = NEXT-PICKUP-FRIDAY.md.pre-0925-rotate-s
 
 **The tree is at `/Users/kamilkreiser/1FILES TO SYNC/FRIDAY`.** Quote every path (spaces).
 
+## 🔴 STATE 2026-09-29 16:3x (Friday, ctx ~78%) — Kam: "thats great. thank you! keep going with the work". SUPERSEDES the 15:3x/15:4x blocks where they differ
+- **Usage 71% (> 70%):** cloud seats only when nothing local can do the work AND it matters now (the 09-25 three-tier rule). Queued, low urgency: CodeQL backlog (HPSM-POC #1 `js/bad-tag-filter` in `web/e2e/security.spec.ts:23`; HPSM-POC-analysis #1 in a seat-notes script; HPSM-analysis 115 = 93 http-to-file-access + 22 file-access-to-http in its scripts: a triage report first). These are good Spark tasks when it is up.
+- **Composer:** PR **#12** (B22 wizard→E8, head 5e91f84) is at QA gate **B23** (pane Composer-B, seen `seen_composer_b23`). The screenshots are on Kam's Friday tab (6 desktop). **Deploy only after the gate passes AND Kam says "deploy"** (card ruled a at 10:43: "after gate + seen screenshots"; he was asked to say "deploy"). Follow `DEPLOY.md` (backup first). The B22 pane (Composer-C) is kept for fixes.
+- **HPSM-POC:**
+  - **#53** (B55 follow-up): B57 = NO GO (F-1 return dead-ends after "I'm done"; F-2 the BFF-IP rate-limit bucket). The ROUND 2 fix runs on pane HPSM-POC-B (`B55_ADDENDUM-1`; seen `seen_b55r2`). Then B57 re-gates (pane HPSM-POC-QA, acked): the last round.
+  - **#54** (B56 content, DRAFT): after #53, rebase and gate.
+  - **B58** (pane HPSM-POC-A): Route A on the laptop (R-1/R-3), closes HPSMPOC-102 (seen `seen_hpsmpoc_w6`).
+  - **H1–H7 hosted build:** brief right after #53 merges (Kam approved the plan 15:07).
+- **Route A: PROVEN** (HPSMPOC-102 created; the wrong secret created nothing; Kam got the email). Later: advise Kam to Regenerate the secret.
+
 ## 🔴 STATE 2026-09-29 15:4x (Friday, ctx ~76%) — ADDS to the 15:3x block
 - **Kam APPROVED the hosted plan** (15:07, hpsmpoc-hosted-plan-approve a, "Approve with the seat's recommendations"): build H1–H7 FIRST (B54 plan §6: `Architecture/2026-09-29_hosted-demo-plan-and-cost_FOR-KAM.md`, merged in analysis 4b86480).
   - Then a new RG `hpsm-poc-demo-rg` australiaeast, sub `a6b8fe11-…`, tenant `ec01829b-…`, B1, SQL S2 (~A$49/mo), a A$150 budget, B2B guests, DRAFT scoring on hosted.
