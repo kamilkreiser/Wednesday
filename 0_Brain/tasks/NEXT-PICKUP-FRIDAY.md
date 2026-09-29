@@ -12,6 +12,17 @@ supersede: replace wholesale; previous = NEXT-PICKUP-FRIDAY.md.pre-0925-rotate-s
 
 **The tree is at `/Users/kamilkreiser/1FILES TO SYNC/FRIDAY`.** Quote every path (spaces).
 
+## 🔴🔴 HANDOVER 2026-09-29 21:3x (ctx 70%) — READ FIRST; supersedes the 20:5x block where they differ
+**MERGED since 20:5x:** HPSM-POC #59 (B59 web) → a706dde · #58 (B60 H4, after round 2) → **bfc7b25**. Composer a60fc22 **DEPLOYED + verified by Friday** (card delivered; Kam told).
+**LIVE SEATS / NEXT:**
+- **HPSM-POC-QA2 (%35) B63 round 2 on PR #60** (hardening, head 8a7dfdb): wait `wait_r2.sh` on B63_STATUS. On GO: merge head-pinned; B59 (%31) then records/b59.
+- **HPSM-POC-E (%32) B60 ADDENDUM-6:** R2 tickets + records/b60 → open + merge the records PR.
+- **HPSM-POC-A (%23) B58:** records/b58 (ADDENDUM-1) still pending.
+- **Composer-B (%37) B25 tier-2 gate on HPSM-light PR #13** (head a476e0d; B22 end-page R2-1): wait `wait_verdict.sh` on B25_STATUS. On GO: merge head-pinned. **Deploy needs Kam's word.**
+- **Composer-C (%18) B22 ADDENDUM-5:** records (own hunks by path, merge records/b24 C-12, prove byte-equal).
+**Before D-13 (HP reviewers):** #60 merged; HPSMPOC-111 (provenance notes) + HPSMPOC-115 (exec summary schema-invalid at worst case) fixed; Kam's D-steps; card hpsmpoc-hosted-seed-owner.
+**Watcher:** `friday/watch_status.sh /tmp/claude-501/seen_f2135` (B2[2-9], B5[89], B6x).
+
 ## 🔴🔴 HANDOVER 2026-09-29 20:5x (successor seat, ctx 65%) — READ FIRST; supersedes the blocks below where they differ
 **MERGED tonight (head-pinned, trees/blobs verified):** HPSM-POC #53 (B55) · #55 (B58) · #54 (B56 content 0.5.0) · #56 (B60 part 1: H2/H5/H7) · #57 (B56 F-1 API) → main **f403251**. Records: analysis #7 (B55), #8 (B56) → analysis main 4495c62. Composer #12 (B22 wizard) → HPSM-light main **a60fc22**.
 **LIVE SEATS:**
