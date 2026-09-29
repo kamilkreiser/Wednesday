@@ -20719,12 +20719,12 @@
    {
     "key": "a",
     "label": "Bump all four packages, with a quick reachability check in the same round (Recommended; what you chose on 9 Sep)",
-    "detail": "Seat B 43rd pauses its raises, bumps nodemailer, morgan, ip-address and undici across their lockfiles in ONE PR (a caret bump may need no manifest change where one exists), records the reachability read in the PR, and it goes through the gate first. Every other push waits until it merges, likely a few hours, inside the audit fuse's 23 h."
+    "detail": "CORRECTED 11:1x, measured by Seat B 43rd: it is not one uniform bump. morgan (10 services) and ip-address in packages/shared are LOCK REFRESHES inside their existing carets (1.12.1 and 10.7.2 published). nodemailer needs a MAJOR bump, 9 -> 10, in services/auth and services/originate (the highest 9.x is 9.1.1, the version we already pin), so it carries API-change risk and needs its own tests. ip-address's nested cardano-sdk copies and undici (only under jsdom, a test dependency of frontend/issuer) need overrides. One PR, its own gate, first; every other push waits, likely several hours."
    },
    {
     "key": "b",
     "label": "Split: bump nodemailer (the cross-tenant credential one) now, baseline the other three until Fri 9 Oct",
-    "detail": "Pushes reopen sooner; the credential exposure is removed, not accepted. ip-address, morgan and undici are accepted with a reason, a ticket and the same 9 Oct re-triage date as the fuse re-date, then bumped in a later round."
+    "detail": "CORRECTED 11:1x: bumping nodemailer is the EXPENSIVE part (a major 9 -> 10), not the cheap one. A cheaper split is the reverse: refresh morgan + ip-address now (lock-only), baseline nodemailer and undici until Fri 9 Oct with a ticket each. That still accepts the cross-tenant credential advisory for up to 10 days."
    },
    {
     "key": "c",
@@ -20762,6 +20762,21 @@
    "CARD secuura-ks1019-blockchain-block-untyped",
    "CARD vision-portal-reminder-push-public-ntfy-topic",
    "CARD secuura-ks1163-start-script-never-waits-for-five-services"
-  ]
+  ],
+  "amendments": [
+   {
+    "ts": "2026-09-29T11:17:02.940008+10:00",
+    "reason": "Seat B 43rd measured the fixed versions (01:15Z CHECKPOINT): option (a)'s 'a caret bump may need no manifest change' was an unmeasured premise and it is FALSE for nodemailer. Corrected before Kam rules.",
+    "changed": [
+     "option:a",
+     "option:b"
+    ],
+    "before": {
+     "option:a": "Seat B 43rd pauses its raises, bumps nodemailer, morgan, ip-address and undici across their lockfiles in ONE PR (a caret bump may need no manifest change where one exists), records the reachability read in the PR, and it goes through the gate first. Every other push waits until it merges, likely a few hours, inside the audit fuse's 23 h.",
+     "option:b": "Pushes reopen sooner; the credential exposure is removed, not accepted. ip-address, morgan and undici are accepted with a reason, a ticket and the same 9 Oct re-triage date as the fuse re-date, then bumped in a later round."
+    }
+   }
+  ],
+  "amended_ts": "2026-09-29T11:17:02.940030+10:00"
  }
 ]
