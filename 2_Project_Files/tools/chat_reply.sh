@@ -166,6 +166,22 @@ if [ -z "${CHAT_REPLY_NO_RECONCILE:-}" ] && [ -f "$SELF_DIR/reconcile_rulings.py
     printf '%s\n' "$_rr_out" | /usr/bin/grep -i 'WOULD RULE' >&2
   fi
 fi
+# ADVISORY (Friday ledger w=2, 2026-09-29): the reconcile above sees card TAPS only. Kam's plain messages ("Please publish the
+# changes and make them live", 16:28) were read only when a seat remembered to run kam_rulings_today.sh, and one sat ~2.5 h.
+# Every message to him passes here, so print LOUDLY on stderr any of his rows newer than this seat's last full read.
+# Never blocks, never changes the exit code, never advances the marker (only a full kam_rulings_today.sh read does).
+# Skip with CHAT_REPLY_NO_UNREAD=1. Arms: 2_Project_Files/tests/kam_unread_arms.sh
+if [ -z "${CHAT_REPLY_NO_UNREAD:-}" ] && [ -f "$SELF_DIR/kam_rulings_today.sh" ]; then
+  _ku_out="$(bash "$SELF_DIR/kam_rulings_today.sh" --unread 2>&1)"; _ku_rc=$?
+  _ku_n="$(printf '%s\n' "$_ku_out" | sed -n 's/^UNREAD \([0-9][0-9]*\) .*/\1/p' | head -1)"
+  if [ "$_ku_rc" != 0 ] || [ -z "$_ku_n" ]; then
+    echo "chat_reply: ADVISORY — Kam's unread rows could not be read (rc=$_ku_rc); this message may answer a stale picture:" >&2
+    printf '%s\n' "$_ku_out" | tail -3 >&2
+  elif [ "$_ku_n" -gt 0 ]; then
+    echo "chat_reply: ⚠ KAM HAS WRITTEN SINCE YOUR LAST READ — read these (then run kam_rulings_today.sh) before relying on this message:" >&2
+    printf '%s\n' "$_ku_out" >&2
+  fi
+fi
 
 # ── A REPEATED SENTENCE IS NOISE ON THE ONE SURFACE HE READS (Kam, 2026-09-16 14:50) ──
 # His words: "you said that twice in 2 minutes.  can this be fixed?" — and it was the same

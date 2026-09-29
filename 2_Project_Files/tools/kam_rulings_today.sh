@@ -29,8 +29,16 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_DIR="$(cd "$SCRIPT_DIR/../.." && pwd)"
 LOG="$PROJECT_DIR/0_Brain/dashboard/data/chat_log.json"
 DAY="$(date +%Y-%m-%d)"; SOURCE="${KAM_RULINGS_SOURCE:-live}"
+# READ MARKER (Friday ledger w=2, 2026-09-29): Kam's 16:28 deploy GO sat unread for ~2.5 h because the rule
+# "re-read his rows before every reply" was one a seat had to remember. A full read of TODAY (this script, no
+# --unread) records the newest row it SHOWED this seat; `--unread` prints only rows newer than that and never
+# advances it — chat_reply.sh calls it before every message to Kam. The marker only moves on a displayed read
+# (2026-08-04: a watermark advances only over what reached the processor). KAM_READ_MARKER overrides the path.
+MODE=read
+MARKER="${KAM_READ_MARKER:-$PROJECT_DIR/2_Project_Files/fleet/state/kam_read_${WED_AGENT:-unset}}"
 while [ $# -gt 0 ]; do
   case "$1" in
+    --unread) MODE=unread ;;
     --source) SOURCE="${2:-}"; shift ;;
     --source=*) SOURCE="${1#--source=}" ;;
     --*) echo "kam_rulings_today: unknown flag $1" >&2; exit 2 ;;
@@ -40,7 +48,10 @@ done
 case "$SOURCE" in live|local|both) ;; *) echo "kam_rulings_today: --source must be live|local|both (got '$SOURCE')" >&2; exit 2 ;; esac
 if [ "$SOURCE" != "live" ]; then [ -r "$LOG" ] || { echo "kam_rulings_today: chat log missing or unreadable: $LOG" >&2; exit 2; }; fi
 LIVE_JSON="[]"
-if [ "$SOURCE" != "local" ]; then
+if [ "$SOURCE" != "local" ] && [ -n "${KAM_RULINGS_LIVE_JSON_FILE:-}" ]; then
+  # TEST HOOK (arms: 2_Project_Files/tests/kam_unread_arms.sh): a canned live-board reply instead of the network.
+  LIVE_JSON="$(cat "$KAM_RULINGS_LIVE_JSON_FILE")" || exit 2
+elif [ "$SOURCE" != "local" ]; then
   . "$PROJECT_DIR/2_Project_Files/tools/_kam_live.sh"
   # window = the day before DAY (UTC) onward, cap 1000 (the API caps per partition, oldest-first: a hit cap cuts the NEWEST rows and get_kam_messages warns)
   SINCE="$(date -j -v-1d -f %Y-%m-%d "$DAY" +%Y-%m-%dT00:00 2>/dev/null || echo "${DAY}T00:00")"
@@ -63,9 +74,10 @@ STALE_MIN="${KAM_RULINGS_STALE_MIN:-25}"
 
 SEAT="${WED_AGENT:-}"
 
-python3 - "$LOG" "$DAY" "$STALE_MIN" "$SEAT" "$SOURCE" "$LIVE_JSON" <<'PY'
+python3 - "$LOG" "$DAY" "$STALE_MIN" "$SEAT" "$SOURCE" "$LIVE_JSON" "$MODE" "$MARKER" <<'PY'
 import json, sys, os, datetime
 log, day, stale_min, seat, source, live_json = sys.argv[1], sys.argv[2], int(sys.argv[3]), sys.argv[4], sys.argv[5], sys.argv[6]
+mode, marker = sys.argv[7], sys.argv[8]
 def utc_minute(ts):
     try: return datetime.datetime.fromisoformat(str(ts).replace("Z", "+00:00")).astimezone(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M")
     except Exception: return str(ts)[:16]
@@ -109,6 +121,38 @@ def mine(m):
 
 shown = [m for m in kam if mine(m)]
 hidden = len(kam) - len(shown)
+
+def as_dt(ts):
+    try: return datetime.datetime.fromisoformat(str(ts).replace("Z", "+00:00")).astimezone(datetime.timezone.utc)
+    except Exception: return None
+today = datetime.datetime.now().astimezone().strftime("%Y-%m-%d")
+if mode == "unread":
+    # Rows newer than the marker (the newest row a FULL read of today showed this seat). Never advances it.
+    mark_raw = ""
+    try: mark_raw = open(marker).read().strip()
+    except OSError: pass
+    mark = as_dt(mark_raw)
+    if mark is None or mark_raw[:10] != day:
+        print(f"UNREAD {len(shown)} — no full read of {day} is recorded for seat={seat or 'unset'}; run kam_rulings_today.sh")
+        newer = shown
+    else:
+        newer = [m for m in shown if (as_dt(m.get("ts", "")) or mark) > mark]
+        print(f"UNREAD {len(newer)} — rows newer than this seat's last full read ({mark_raw[11:19]})")
+    for m in newer:
+        text = " ".join(str(m.get("text", "")).split())
+        if m.get("decrypt_error"): text = "[LIVE ROW NOT READABLE BY THIS SEAT — read it on the live board]"
+        print(f"{str(m.get('ts', ''))[11:16]} [{m.get('source', 'local')}] | {text}")
+    raise SystemExit(0)
+if day == today and shown:
+    # A full read of TODAY: record the newest row it showed (the watermark covers only what was displayed).
+    newest_shown = max(shown, key=lambda m: as_dt(m.get("ts", "")) or datetime.datetime.min.replace(tzinfo=datetime.timezone.utc))
+    try:
+        os.makedirs(os.path.dirname(marker), exist_ok=True)
+        tmp = marker + ".tmp"
+        with open(tmp, "w") as fh: fh.write(str(newest_shown.get("ts", "")) + "\n")
+        os.replace(tmp, marker)
+    except OSError as e:
+        print(f"# ⚠ could not record the read marker {marker}: {e}", file=sys.stderr)
 
 if not seat:
     frame = "ALL views — WED_AGENT is unset, so nothing is filtered"
