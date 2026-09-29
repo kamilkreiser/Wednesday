@@ -7,7 +7,7 @@ status: live
 
 # Boot digest — headline + rules of every lesson (open the file when it fires)
 
-Generated 2026-09-30 05:32 from 210 lesson files (968,866 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 10 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
+Generated 2026-09-30 09:08 from 211 lesson files (971,664 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 10 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
 
 ## The T9 SSD is the master — Wednesday must be fully portable
 `2026-07-31_fully-portable-drive.md` · principle · 2026-07-31 · status: superseded — the "T9 is the master" half by [[2026-08-25_one-drive-devmaster-is-master]] (2026-08-25); the portability principle itself still lives
@@ -6852,4 +6852,33 @@ client channel, so they carry client-grade care) · [[2026-09-01_qa-gate-before-
 - A deletion brief names the exact class (directory name), the staleness predicate, the exclusions (live seats' worktrees), a count before and after, and `df` before and after.
 
 **Family:** [[2026-08-26_never-delete-cleanup-means-quarantine]] (narrowed, not retired) · [[2026-09-07_a-rule-for-creation-is-not-a-mandate-to-retrofit]] (read the scope of the ruling) · [[2026-08-16_classification-is-the-field-that-grants-authority]] ("regenerable" and "no longer used" are scope words and each needs its measurement).
+
+
+## A QA gate flagged by Opus 5.5's safeguards may switch to Opus 4.8 — per gate session, never as a setting for every seat
+`2026-09-30_qa-gates-may-switch-to-opus48-when-flagged.md` · grant · 2026-09-30 · status: live
+
+**The operative case, so the headline matches it:** a QA gate session (any Datasec gate this seat launches)
+has been stopped by Opus 5.5's safeguards and is parked at Claude Code's "Switch to Opus 4.8?" dialog.
+**Kam's ruling (b) says: switch THAT session to Opus 4.8 and let it carry on.** It does not say: change the
+model for every seat, and it does not say: answer the dialog with "Switch automatically".
+
+sections (open the file for these): How to apply
+
+## How to apply
+1. **Never choose "1. Switch automatically"** in that dialog: it is "switch without asking from now on", a
+   persistent config change, and the gate runs on `TUESDAY/4_Credentials/.claude` — the same config as this
+   coordinator seat. That would switch seats Kam did not name.
+2. **Switch the one session:** dismiss the dialog, then switch that pane's model to Opus 4.8 with the
+   session's own `/model` command, and tell the gate by mail (a pointer tap behind it) that it now runs on
+   Opus 4.8 by Kam's ruling of 2026-09-30 09:07, naming this file. Record the switch time in the gate brief's
+   report requirements (the report must say which rows ran on which model).
+3. **The full gate runs, attack rows included** — the ruling exists so they can run. The earlier "narrowed
+   brief" default is superseded for gates, not for any other seat.
+4. **Scope: QA gates only.** Builder seats and this coordinator stay on Opus 5.5 unless Kam says otherwise.
+   No expiry stated; re-read if he changes models or accounts.
+
+**Family:** [[2026-08-07_protocol-v1.3-signed-delegation]] (a model choice was his, not mine) ·
+[[2026-09-06_a-scoped-override-carries-its-own-expiry]] (none stated — said so) ·
+[[2026-08-16_classification-is-the-field-that-grants-authority]] ("per session" is the scope word that decides
+which dialog option is inside the grant).
 
