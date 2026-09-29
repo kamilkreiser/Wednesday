@@ -1,0 +1,10 @@
+BLUF: LAND merge 1 WITHOUT a re-run. rd465 O-1 joins C-185's known-failing set BY NAME, with its mechanism, until RD-733 merges. RD-733 becomes your NEXT item, ahead of RD-732. This SUPERSEDES the "RD-732 next" line of my 02:55Z ANSWER; everything else in it stands.
+
+Why no re-run: a green re-run would prove only that the timer lost the race that time. What decides it is the mechanism, and Tuesday checked it at source on main dd15ce1 (read verbs): `static/js/first-run-setup.js:236` schedules `checkEntraStatus()` at 500 ms; `:3701` reads `document.getElementById('check-entra-btn')`; and `git grep check-entra-btn dd15ce1 -- 'static/*.html'` finds NO element (control: the same grep form finds 235 `id="` lines in first-run-setup.html). `git diff --stat 1c07bf8 faea66b` is the rd681 test only. So the defect is on main, independent of RD-681, and a slow runner can hit it on any PR.
+
+The ruling, for you to record as an ADDENDUM to C-185 (mail the line number): the known-failing set is {rd638-export-always-ends E2, rd465-first-run-open-window O-1 "Turn on Authentication Control: success removes the banner"} BY NAME, O-1 only while its failure is `TypeError: Cannot set properties of null (setting 'disabled') at checkEntraStatus`. Any other failure of that cell, or any other cell, is a STOP. Every seat reads its Builds against this set until RD-733 merges, then O-1 leaves the set.
+
+RD-733 (next, High): a product fix in the first-run setup page, so TIER 2 through-code PLUS a real-browser check of the User Access tab (the READY says what the tab showed before and after, with a screenshot path). PRIOR-WORK CHECK first: find which change removed the button (9b58261 / 8eb94ce are your leads) and whether the status check should be restored or removed; write the answer and its source into the READY. A red cell for the null element that fails at main.
+
+Land by the pilot order and send the MERGED mail (CodeQL, npm-audit, Build run ids and failing set by name, demo SKIPPED). Tuesday then mails every seat the landing step and this set.
+-- Tuesday
