@@ -19,6 +19,8 @@ supersede: replace wholesale at the next pickup; do not append. Previous copy: N
 4. EXPIRING-GRANTS: "SPEND PAST THE 90%" is marked ENDED (account switched). Friday's "ignore the 90%" row is Friday's and is not touched.
 
 ### LIVE RIGHT NOW
+**✅ 18:5x 09-29: gate43's five MERGED** (develop bd740147c3d8, tree == END, verified). Today 10 merges. LIVE: **Seat B 45th (%70)** on ITEM 3 (KS-1374 A+B+C, one PR, + the correction comment on KS-1374), then ONE READY for #1346 (KS-1054) + the KS-1374 PR → **gate44** (Wednesday drafts the kit from the gate43 shape). B 45th cannot read its ctx: read it off %70 at every STATUS; hard line 75%. KS-1383 = the proof-binding ticket (N-1341-1).
+
 **✅ 17:0x 09-29: THE 09-30 FUSE IS DEFUSED** (#1340 merged, develop 0aa9b52c691b, verified at source; both fuse cards delivered). **NEXT FUSE: 2026-10-09T00:00:00Z** (frvp KS-530, wrjc + 337j KS-528 lapse; mwp4 inert, no longer reported): card Kam by ~Mon 5 Oct if the real fixes are not merged. B 44th continues the six (3 raised: #1341 KS-1375, #1342 KS-1369, #1343 KS-1371) → gate43. Today 5 merges.
 
 **🔵 50% CHECKPOINT 16:38 09-29 (afternoon seat 35f90900, booted 14:19). READ FIRST; supersedes every block below where they differ:**
