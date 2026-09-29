@@ -1,0 +1,136 @@
+{
+ "read_at": "2026-09-29T12:32:43Z",
+ "prs": {
+  "1348": {
+   "title": "KS-1054: deploy.sh exits non-zero when post-deploy verification counts issues",
+   "state": "open",
+   "head": "94e31db501cd01aaec7437418d7efbb592b1b59a",
+   "branch": "feature/ks-1054-deploy-sh-exits-non-zero-on-failed-migrations-b45-2",
+   "base": "develop",
+   "mergeable": true,
+   "mergeable_state": "unstable",
+   "files": [
+    "Blockchain/Dev/deployment/azure/deploy.sh",
+    "Blockchain/Dev/scripts/__tests__/ks1054_deploy_scripts_read_startup_migrations.test.sh"
+   ],
+   "commits": [
+    [
+     "1bb58b4ebb97d2fa9f04bddd961ad499b6106e09",
+     "KS-1054: deploy.sh exits non-zero when post-deploy verification counts issues"
+    ],
+    [
+     "94e31db501cd01aaec7437418d7efbb592b1b59a",
+     "KS-1054: the deploy.sh red proof reads the return value, and mktemp is portable"
+    ]
+   ],
+   "body": "`Refs KS-1054`\n\n## Why\ngate44 finding **N-1346-1 (Major)**: `deploy.sh` **exits 0** over failed startup migrations. It prints\n`ERROR \u2026 Post-deploy verification found 1 issue(s)` and then returns success, so the deploy reads as\nhaving worked.\n\nKam's ruling (a), verbatim:\n\n> \"The migration run returns its failed count. /health reports it, so the deploy scripts' existing\n> /health checks (deploy-all.sh:281, deploy.sh:823) see it and **the deploy reads as failed**. The\n> running service is not stopped.\"\n\n`deploy-all.sh` already does that (`exit 1` on a failed smoke test). `deploy.sh` did not. PR #1346\nlanded the shared predicate and both call sites; its squash subject was composed to say \"deploy-all\nfails on them\" precisely because this half was missing. This is that half.\n\n## The change\n`verify_deployment()` counted `ERRORS` and its **last command was `log_error`, an echo**, so the\nfunction returned 0. It now `return 1`s when `ERRORS` is non-zero.\n\n**One `return` is the whole fix, and no call site needed editing.** This file runs under\n`set -euo pipefail` (`deploy.sh:28`) and `verify_deployment` is called **unchecked** at both sites \u2014 as\n`deploy_services`' last command, and directly in the `verify)` branch \u2014 so a non-zero return aborts the\nscript with that status at either. Adding `|| exit 1` at the call sites would be a second, redundant\npath to the same outcome, and a second path is a second thing to keep true.\n\n## Test Evidence\n**Touched:** `Blockchain/Dev/deployment/azure/deploy.sh` (+11, of which 1 is the `return` and 9 are the\ncomment recording why), and the existing shell suite (+53). 2 files, +64/\u22120.\n\n**Ran** (base `8ba2da02d980`, head `1bb58b4ebb97`):\n- **Whole suite 14 passed / 0 failed** (the 11 existing cells plus E0, E1, E2).\n- \ud83d\udd34 **RED-FIRST, with `deploy.sh` reverted to `8ba2da02d980` and the test half byte-unchanged:\n  13 passed / 1 failed, and the one failure is E1 ALONE.** E0 and E2 stay green, so the red is neither\n  a fixture failure nor an unconditional one. Restored by byte copy, sha256-equal, tree clean, suite\n  back to 14/0.\n- `bash -n` clean on both changed files.\n\n**How E1 is driven, and why it is not a grep.** A grep for `return 1` passes on a **commented-out**\nline, and a line-number pin drifts \u2014 this file's line numbers have moved repeatedly. So the cell\n**extracts the real summary block from `deploy.sh` by its own marker** (`# \u2500\u2500 Summary \u2500`, asserted to\noccur exactly once by E0), strips the closing brace, stubs `log_success`/`log_error`, injects `ERRORS`,\nand **executes the product's own bytes**, capturing rc with no pipeline in the measured statement.\n- **E0** asserts the marker is unique, so the extraction is unambiguous.\n- **E1** drives it with `ERRORS=2` and requires a non-zero rc.\n- **E2** drives the same block with `ERRORS=0` and requires rc 0 \u2014 the arm that stops E1 from passing\n  for the wrong reason, because a block that failed unconditionally would fail a **clean** deploy,\n  which is worse than the defect.\nAn empty extraction is reported as a **fixture failure by name**, not as a product result.\n\n**NOT run / NOT covered:**\n1. **`deploy.sh` was not run against any real environment** \u2014 no Azure, demo or kintsugi deploy, and no\n   migration run against a real database. What is proved is that the verification summary's exit status\n   now reflects its own error count.\n2. **The end-to-end propagation is argued from `set -e` and read call sites, not executed.** Driving\n   `deploy.sh verify` whole needs `az` and `curl` stubs and a resolvable API FQDN; gate44 did that and\n   measured the rc-0 defect, and this PR does not repeat it.\n3. **The other gate44 Minors on this path are NOT fixed here** and stay open: N-1346-2 (`ran:false`\n   still prints a pass line, although the gateway's own module says it is not a clean run), N-1346-3\n   (an absent, empty or non-JSON body counts as a passing check in the smoke summary and in deploy.sh's\n   \"all checks OK\"), N-1346-4 (`python3` missing from PATH reads a failed body as \"not JSON \u2014 SKIPPED\",\n   failing open). Each needs a decision about the pass LINE rather than the exit status, and pass-and-warn\n   for an absent field is deliberate \u2014 failing closed there would block a rollback to an older image.\n4. Push preflight: **12/15 legs ran, 3 SKIPPED \u2014 legs 3, 4 and 8, \"local stack not up\". Nothing\n   failed.** That is the hook's wording and it is **not a pass**; stated as a ratio.\n\n**Migrations + config:** none. No schema change, no config default, no compose or bicep line.\n\n**RUNTIME change in the deploy path \u2192 a \u00a75f live sweep is owed**, and KS-1054 stays open.\n\n---\n\n# ROUND 2 (head `94e31db501cd`) \u2014 the test cells, fixed. The product change is unchanged.\n\ngate45 was a **NO GO round 1 of 2**, and it was right: **the `return 1` in `deploy.sh` is correct and is\nuntouched here. Both findings were in my E-cells.** Pushed as a fast-forward, no rebase, no force.\n\n## N-1348-2 (Major, T1) \u2014 the red proof could not fail, which is the whole point of a red proof\nE1 executed the extracted summary block **as a script**, and at top level `return N` is **itself an error\nfor every N** \u2014 rc 1 on bash 3.2, rc 2 on bash 5. **So E1 measured the rc of a malformed `return`, never\nthe return VALUE.** gate45 measured the consequence: with the product changed to `return 0` the suite\nstill read **14/0**, while the real `deploy.sh` exits 0 over failed migrations. The N-1346-1 defect this\nPR exists to close could have been reintroduced and my proof would have stayed green.\n\nThe PR body previously claimed E1 \"executes the product's own bytes\". That was true, and it was not\nenough: **executing real bytes is not the same as observing the property you claim about them.**\n\n**Fix (one line):** the block is wrapped in a function and called \u2014\n`__ks1054_verify() { \u2026extracted\u2026 }; __ks1054_verify` \u2014 so the rc E1 reads **is** the return value.\n\n**The arm that was missing, now present and driven:** tamper the product's `return 1` \u2192 `return 0`:\n- **E1 REDS** (suite 13 passed / 1 failed), **E2 stays green**, so the red is specific and not\n  unconditional. Restored by byte copy, sha256-equal, tree clean, suite back to 14/0.\n- The tamper is located by the summary's own `log_error` line and then the **first** `return` after it.\n  Worth recording: `        return 1` occurs **twice** in `deploy.sh`, and my first attempt asserted\n  uniqueness and **refused** rather than tampering the wrong one. A tamper that hits the wrong line is a\n  false result, so the refusal was the instrument working.\n\n## N-1348-1 (Major) \u2014 it would have put a NEW RED into CI\n`mktemp -t ks1054_summary_drive` carries **no X's**. GNU coreutils refuses that, so `TMPDRV` was empty and\n`bash \"\"` exited 127: **E2 red, E1 green for the wrong reason.** CI's `ubuntu-latest` runs this suite\n(`pr-security-gates.yml` \u2192 `run-shell-suites.sh`), and develop's copy is **11/0** there, so this was a new\nred of my own making. **I had tested on macOS only, never on the runner CI actually uses.**\n\n**Fix (one line):** `mktemp \"${TMPDIR:-/tmp}/ks1054_summary_drive.XXXXXX\"`.\n\n**Measured on BOTH platforms this time:**\n- macOS (bash 3.2, BSD mktemp): **14 passed / 0 failed**.\n- **GNU coreutils 9.7** (`python:3.12-slim`, the gate's own subject): **14 passed / 0 failed**, with\n  `mktemp --version` printed in the same run so the platform is evidenced rather than asserted.\n\n## Round 2 Test Evidence\n**Touched:** the shell suite only, +13/\u22121. **No product file changed** \u2014 `deploy.sh` is byte-identical to\nround 1 (sha256 verified after the tamper was restored).\n**Ran:** macOS 14/0 \u00b7 GNU 14/0 \u00b7 `return 0` tamper \u2192 E1 red alone (13/1), E2 green \u00b7 `bash -n` clean \u00b7\npush preflight **12/15 legs, 3 SKIPPED (legs 3, 4, 8 \u2014 no local stack). Nothing failed** \u2014 not a pass, a\nratio.\n**NOT run / NOT covered, unchanged from round 1:** `deploy.sh` was not executed against any real\nenvironment; the end-to-end propagation is argued from `set -e` and the read call sites, not driven; and\n**N-1346-2 / -3 / -4 are still open** (the pass LINE for `ran:false`, absent, empty and non-JSON bodies,\nand `python3` missing from PATH failing open). Those need a third verdict state and their own cells,\nbecause pass-and-warn for an ABSENT field must survive \u2014 failing closed there blocks a rollback.\n**Also for Kam (gate45 N-1348-3), not a defect:** `return 1` now aborts `deploy.sh` on a portal nginx page,\na failed demo login, and an empty or non-JSON `/health`, not only on failed migrations. That follows from\nthe subject's \"counts issues\" and matches `deploy-all.sh`, but it changes `services`/`full` behaviour, and\nthe scripts still diverge \u2014 an empty body fails `deploy.sh` and passes `deploy-all.sh`.\n**Correcting this PR's own earlier NOT COVERED item 3 (gate45 N-1348-5):** it said an absent, empty or\nnon-JSON body \"counts as a passing check \u2026 in deploy.sh's 'all checks OK'\". That is **false for empty and\nnon-JSON** \u2014 they print ERROR and, at this head, exit 1. It holds for ABSENT, and the KS-1054 comment\nstated it of the smoke summary only, which is true.\n"
+  }
+ },
+ "open": [
+  {
+   "number": 1348,
+   "title": "KS-1054: deploy.sh exits non-zero when post-deploy verification counts issues",
+   "branch": "feature/ks-1054-deploy-sh-exits-non-zero-on-failed-migrations-b45-2"
+  },
+  {
+   "number": 1253,
+   "title": "KS-1297 GUARDGAPS: anchor the abort counts, cover the worktree, pin bare call sites",
+   "branch": "feature/ks-1297-fixture-guard-anchor-and-two-gaps-l5-1"
+  },
+  {
+   "number": 1250,
+   "title": "KS-1302 + KS-1303 RSSTRAP: trap the runner's short TMPDIR, and drop the output pipe",
+   "branch": "feature/ks-1302-runner-tmpdir-residue-and-orphan-pipe-l5-1"
+  },
+  {
+   "number": 1129,
+   "title": "docs(history): 2026-09-21 local rebuild on develop 7be81d5c9, OOM diagnosis, preflight 15/15",
+   "branch": "chore/history-2026-09-21-local-rebuild-preflight"
+  },
+  {
+   "number": 995,
+   "title": "KS-741: strip `x-emitter-internal` at originate's own inbound \u2014 the marker's non-spoofability no longer rests on an unstated convention",
+   "branch": "feature/ks-741-x-emitter-internal-is-unstripped-on-the-originate-route-the"
+  },
+  {
+   "number": 989,
+   "title": "KS-973: the pre-suite step redacts the generated password, pins its DEGRADED stream, drives its second quarantine call \u2014 items 5, 6 + two residues; items 3/4 wait for #927; items 1/2 are L11/L12 files",
+   "branch": "feature/ks-973-ks-969-round-1-gate-residue-the-pre-suite-step-and-its-own"
+  },
+  {
+   "number": 949,
+   "title": "chore(deps-dev): bump prisma from 7.8.0 to 7.10.0 in /Blockchain/Dev",
+   "branch": "dependabot/npm_and_yarn/Blockchain/Dev/develop/prisma-7.10.0"
+  },
+  {
+   "number": 948,
+   "title": "chore(deps): bump vite from 6.4.3 to 8.3.1 in /Blockchain/Dev",
+   "branch": "dependabot/npm_and_yarn/Blockchain/Dev/develop/vite-8.2.2"
+  },
+  {
+   "number": 947,
+   "title": "chore(deps-dev): bump @testing-library/jest-dom from 6.9.1 to 7.0.1 in /Blockchain/Dev",
+   "branch": "dependabot/npm_and_yarn/Blockchain/Dev/develop/testing-library/jest-dom-7.0.1"
+  },
+  {
+   "number": 946,
+   "title": "chore(deps): bump @fluentui/react-icons from 2.0.331 to 2.0.339 in /Blockchain/Dev",
+   "branch": "dependabot/npm_and_yarn/Blockchain/Dev/develop/fluentui/react-icons-2.0.339"
+  },
+  {
+   "number": 945,
+   "title": "chore(deps-dev): bump @axe-core/playwright from 4.11.3 to 4.13.0 in /Blockchain/Dev",
+   "branch": "dependabot/npm_and_yarn/Blockchain/Dev/develop/axe-core/playwright-4.13.0"
+  },
+  {
+   "number": 927,
+   "title": "KS-1027: close Peter's four #904 follow-ups \u2014 the OTHER cp, the stash the refusal deleted, and the duplication nobody had justified",
+   "branch": "feature/ks-1027-ks992-followups"
+  },
+  {
+   "number": 923,
+   "title": "KS-736: the mount-auth check scored authenticateToken(false) as green, and could not see half its own surface",
+   "branch": "kamilkreiser/ks-736-mount-auth-retag"
+  },
+  {
+   "number": 920,
+   "title": "KS-734: make tests/e2e runnable from a clean checkout, and baseline what it actually reports",
+   "branch": "kamilkreiser/ks-734-e2e-suite-installable"
+  },
+  {
+   "number": 887,
+   "title": "KS-961: run the workspace suites on the PR, advisory and non-blocking \u2014 and they are RED on develop today",
+   "branch": "feature/ks-961-workspace-suites-advisory-on-pr"
+  },
+  {
+   "number": 809,
+   "title": "KS-693 (interim): guard the 8 M365/OneDrive/Teams unconfigured-503 ops so the merge gate reads a real floor",
+   "branch": "feature/ks-693-tolerate-m365-unconfigured-503"
+  },
+  {
+   "number": 649,
+   "title": "chore(deps): bump pg and @types/pg in /Blockchain/Dev",
+   "branch": "dependabot/npm_and_yarn/Blockchain/Dev/develop/multi-8cb89e51b7"
+  },
+  {
+   "number": 639,
+   "title": "chore(deps): bump @radix-ui/react-dropdown-menu from 2.1.16 to 2.1.24 in /Blockchain/Dev",
+   "branch": "dependabot/npm_and_yarn/Blockchain/Dev/develop/radix-ui/react-dropdown-menu-2.1.24"
+  },
+  {
+   "number": 635,
+   "title": "chore(deps): bump cbor from 9.0.2 to 10.0.12 in /Blockchain/Dev",
+   "branch": "dependabot/npm_and_yarn/Blockchain/Dev/develop/cbor-10.0.12"
+  },
+  {
+   "number": 575,
+   "title": "chore(deps): bump dotenv from 16.6.1 to 17.4.2 in /Blockchain/Dev",
+   "branch": "dependabot/npm_and_yarn/Blockchain/Dev/develop/dotenv-17.4.2"
+  },
+  {
+   "number": 572,
+   "title": "chore(deps-dev): bump @types/office-js from 1.0.599 to 1.0.610 in /Blockchain/Dev in the types group across 1 directory",
+   "branch": "dependabot/npm_and_yarn/Blockchain/Dev/develop/types-1409c3626d"
+  }
+ ]
+}

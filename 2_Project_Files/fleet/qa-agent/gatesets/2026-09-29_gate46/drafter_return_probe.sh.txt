@@ -1,0 +1,32 @@
+#!/bin/bash
+# drafter_return_probe (gate46): build the driver EXACTLY as the round-2 ks1054 test's drive_summary() does (function wrapper, from 94e31db501cd's
+# test :114-128), over the REAL summary block of 94e31db501cd:deploy.sh extracted with the test's own awk, varying the return argument and ERRORS.
+# Also the round-2 mktemp template, with the round-1 form as the control. Prints bash version and mktemp flavour. Deletes nothing.
+set -u
+D="$1"; OUT="$2"
+M='# ── Summary ─'
+echo "bash: $BASH_VERSION | mktemp: $(mktemp --version 2>/dev/null | head -1 || echo 'BSD (no --version)')"
+TMPDRV="$(mktemp "${TMPDIR:-/tmp}/ks1054_summary_drive.XXXXXX")"; echo "round-2 mktemp template '\${TMPDIR:-/tmp}/ks1054_summary_drive.XXXXXX' -> rc $? path-nonempty: $([ -n "$TMPDRV" ] && echo yes || echo NO)"
+TMPNOX="$(mktemp -t ks1054_summary_drive 2>&1)"; echo "CONTROL round-1 form 'mktemp -t ks1054_summary_drive' -> rc $? '$TMPNOX'"
+hdr() { printf 'log_success() { printf "SUCCESS %%s\\n" "$*"; }\n'; printf 'log_error() { printf "ERROR %%s\\n" "$*"; }\n'; printf 'ERRORS=%s\n' "$1"; }
+for R in 1 0 7; do
+  sed "s/^        return 1\$/        return $R/" "$D" > "$OUT/d_$R.sh"
+  BLOCK=$(awk -v m="$M" 'index($0,m){f=1} f&&/^}/{exit} f{print}' "$OUT/d_$R.sh")
+  n=$(printf '%s\n' "$BLOCK" | grep -c "return $R")
+  for E in 2 0; do
+    { hdr "$E"; printf '__ks1054_verify() {\n'; printf '%s\n' "$BLOCK"; printf '}\n__ks1054_verify\n'; } > "$TMPDRV"
+    bash "$TMPDRV" > "$OUT/o" 2>&1 < /dev/null; rc=$?
+    echo "WRAPPED  return $R (in block: $n) | ERRORS=$E | rc $rc | $(tr '\n' ' ' < "$OUT/o" | cut -c1-100)"
+  done
+  { hdr 2; printf '%s\n' "$BLOCK"; } > "$TMPDRV"
+  bash "$TMPDRV" > "$OUT/o" 2>&1 < /dev/null; rc=$?
+  echo "CONTROL  round-1 driver (block at TOP LEVEL) return $R | ERRORS=2 | rc $rc"
+done
+# unconditional-return tamper: the summary's `return 1` moved after its `fi` (still inside the function)
+awk 'BEGIN{seen=0;done=0} /Post-deploy verification found/ {seen=1} seen && !done && /^        return 1$/ {next} {print} seen && !done && /^    fi$/ {print "    return 1"; done=1}' "$D" > "$OUT/d_unc.sh"
+BLOCK=$(awk -v m="$M" 'index($0,m){f=1} f&&/^}/{exit} f{print}' "$OUT/d_unc.sh")
+echo "unconditional tamper: block tail = $(printf '%s\n' "$BLOCK" | tail -3 | tr '\n' '|')"
+for E in 0 2; do
+  { hdr "$E"; printf '__ks1054_verify() {\n'; printf '%s\n' "$BLOCK"; printf '}\n__ks1054_verify\n'; } > "$TMPDRV"
+  bash "$TMPDRV" > /dev/null 2>&1 < /dev/null; echo "WRAPPED  UNCONDITIONAL return 1 (after fi) | ERRORS=$E | rc $? (E2 wants 0 at ERRORS=0: non-zero = E2 would RED)"
+done

@@ -1,0 +1,36 @@
+drafter_return_probe (gate46) — 2026-09-29T12:36:56Z — subject 94e31db501cd:deploy.sh (blob d7f94298488b, sha256 24a29cb4cecb8e1a), driver shape = round-2 test :114-128
+=== macOS /bin/bash (TMPDIR=<g46_sp>/probe/tmp)
+bash: 3.2.57(1)-release | mktemp: 
+round-2 mktemp template '${TMPDIR:-/tmp}/ks1054_summary_drive.XXXXXX' -> rc 0 path-nonempty: yes
+CONTROL round-1 form 'mktemp -t ks1054_summary_drive' -> rc 0 '/var/folders/xl/p96z5mmd3lzcn3pt8t6djkl40000gn/T/ks1054_summary_drive.48Qjddu0uv'
+WRAPPED  return 1 (in block: 1) | ERRORS=2 | rc 1 |  ERROR Post-deploy verification found 2 issue(s) — see above 
+WRAPPED  return 1 (in block: 1) | ERRORS=0 | rc 0 |  SUCCESS Post-deploy verification passed — all checks OK 
+CONTROL  round-1 driver (block at TOP LEVEL) return 1 | ERRORS=2 | rc 1
+WRAPPED  return 0 (in block: 1) | ERRORS=2 | rc 0 |  ERROR Post-deploy verification found 2 issue(s) — see above 
+WRAPPED  return 0 (in block: 1) | ERRORS=0 | rc 0 |  SUCCESS Post-deploy verification passed — all checks OK 
+CONTROL  round-1 driver (block at TOP LEVEL) return 0 | ERRORS=2 | rc 1
+WRAPPED  return 7 (in block: 1) | ERRORS=2 | rc 7 |  ERROR Post-deploy verification found 2 issue(s) — see above 
+WRAPPED  return 7 (in block: 1) | ERRORS=0 | rc 0 |  SUCCESS Post-deploy verification passed — all checks OK 
+CONTROL  round-1 driver (block at TOP LEVEL) return 7 | ERRORS=2 | rc 1
+unconditional tamper: block tail =         # would be a second, redundant path to the same outcome.|    fi|    return 1|
+WRAPPED  UNCONDITIONAL return 1 (after fi) | ERRORS=0 | rc 1 (E2 wants 0 at ERRORS=0: non-zero = E2 would RED)
+WRAPPED  UNCONDITIONAL return 1 (after fi) | ERRORS=2 | rc 1 (E2 wants 0 at ERRORS=0: non-zero = E2 would RED)
+=== python:3.12-slim (GNU), docker run --rm --network none, probe dir mounted read-only, scratch in the container's /tmp
+bash: 5.2.37(1)-release | mktemp: mktemp (GNU coreutils) 9.7
+round-2 mktemp template '${TMPDIR:-/tmp}/ks1054_summary_drive.XXXXXX' -> rc 0 path-nonempty: yes
+CONTROL round-1 form 'mktemp -t ks1054_summary_drive' -> rc 1 'mktemp: too few X's in template ‘ks1054_summary_drive’'
+WRAPPED  return 1 (in block: 1) | ERRORS=2 | rc 1 |  ERROR Post-deploy verification found 2 issue(s) — see above 
+WRAPPED  return 1 (in block: 1) | ERRORS=0 | rc 0 |  SUCCESS Post-deploy verification passed — all checks OK 
+CONTROL  round-1 driver (block at TOP LEVEL) return 1 | ERRORS=2 | rc 2
+WRAPPED  return 0 (in block: 1) | ERRORS=2 | rc 0 |  ERROR Post-deploy verification found 2 issue(s) — see above 
+WRAPPED  return 0 (in block: 1) | ERRORS=0 | rc 0 |  SUCCESS Post-deploy verification passed — all checks OK 
+CONTROL  round-1 driver (block at TOP LEVEL) return 0 | ERRORS=2 | rc 2
+WRAPPED  return 7 (in block: 1) | ERRORS=2 | rc 7 |  ERROR Post-deploy verification found 2 issue(s) — see above 
+WRAPPED  return 7 (in block: 1) | ERRORS=0 | rc 0 |  SUCCESS Post-deploy verification passed — all checks OK 
+CONTROL  round-1 driver (block at TOP LEVEL) return 7 | ERRORS=2 | rc 2
+unconditional tamper: block tail =         # would be a second, redundant path to the same outcome.|    fi|    return 1|
+WRAPPED  UNCONDITIONAL return 1 (after fi) | ERRORS=0 | rc 1 (E2 wants 0 at ERRORS=0: non-zero = E2 would RED)
+WRAPPED  UNCONDITIONAL return 1 (after fi) | ERRORS=2 | rc 1 (E2 wants 0 at ERRORS=0: non-zero = E2 would RED)
+docker rc=0
+READING: with the round-2 FUNCTION wrapper the driver rc IS the return value on bash 3.2 AND bash 5.2 (return 1 -> 1, 0 -> 0, 7 -> 7 at ERRORS=2), so a `return 0` tamper would make E1 (rc != 0) RED; the round-1 top-level driver (CONTROL) gives 1 (bash 3.2) / 2 (bash 5.2) for every N. The UNCONDITIONAL tamper gives rc 1 at ERRORS=0, so E2 would RED. The round-2 mktemp template succeeds under GNU coreutils 9.7 where the round-1 form is refused (CONTROL). This is the block driven the way the test drives it, NOT the test suite: the gate runs the suite.
+Side effect: the macOS CONTROL `mktemp -t` created one empty file under the user TMPDIR (/var/folders/.../T/ks1054_summary_drive.*); nothing else outside <g46_sp>.

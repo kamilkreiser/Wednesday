@@ -1,0 +1,61 @@
+{
+ "kit": "gate46",
+ "tag": "g46",
+ "pane": "QA/Secuura-batch1348r2",
+ "launcher": "launch_qa_secuura_batch1348r2.sh",
+ "prompt": "2026-09-29_secuura-batch1348r2.prompt.txt",
+ "report": "2026-09-29-batch1348r2-g46",
+ "round": 46,
+ "go": "GO (Seat B 46th): merge 1348 on gate46",
+ "merge_seat": "Seat B 46th",
+ "author_seat": "Seat B 45th",
+ "order": [
+  "1348"
+ ],
+ "order_note": "ONE PR, round 2 of 2 under the Tier-1 cap. Its base 8ba2da02d980 is ONE commit behind develop 8c810023f9c9 (#1347's squash, 6 paths, none of #1348's 2); pin_gate46.py (E) simulates the squash over develop with merge-tree + commit-tree on a scratch clone.",
+ "expected_develop": "8c810023f9c9ac060a7aff24f0933ae3b8734479",
+ "move_since_base": {
+  "from": "8ba2da02d980e7e8065e8ce614b034adc2b7c2eb",
+  "to": "8c810023f9c9ac060a7aff24f0933ae3b8734479",
+  "note": "#1347's squash (gate45 GO) landed on develop after #1348 was raised; #1348 round 2 is a fast-forward on round 1 and still sits on 8ba2da02d980"
+ },
+ "prev_report": "/Volumes/DevMASTER/!CODING/Testing Agent MAIN/projects/secuura/reports/2026-09-29-batch1348-g45/report.md",
+ "prs": {
+  "1348": {
+   "keys": [
+    "KS-1054"
+   ],
+   "tier": "T1",
+   "service": "Blockchain/Dev/deployment/azure/deploy.sh (verify_deployment returns 1 when ERRORS > 0; UNCHANGED since round 1) + the ks1054 shell suite (cells E0-E2; round 2 wraps the driven block in a function and gives mktemp a portable XXXXXX template)",
+   "ruling": "Kam (a) on card secuura-ks1054-f9282-migration-failure-visibility: keep serving, flag it on /health; the deploy scripts' existing /health checks see the failed count and THE DEPLOY READS AS FAILED via BOTH scripts; the running service is not stopped. gate45 measured the deploy.sh fix correct and NO GO'd round 1 on N-1348-1 (mktemp -t with no X's reds on GNU) and N-1348-2 (E1 blind to the return value).",
+   "expected_parent": "1bb58b4ebb97d2fa9f04bddd961ad499b6106e09",
+   "round1_head": "1bb58b4ebb97d2fa9f04bddd961ad499b6106e09",
+   "suites": [
+    "shell (Blockchain/Dev/scripts/run-shell-suites.sh; the ks1054 suite 14 cells) on macOS bash 3.2 / BSD mktemp AND a GNU/Debian image"
+   ],
+   "branch": "refs/heads/feature/ks-1054-deploy-sh-exits-non-zero-on-failed-migrations-b45-2",
+   "title": "KS-1054: deploy.sh exits non-zero when post-deploy verification counts issues",
+   "subject": "KS-1054: deploy.sh exits non-zero when post-deploy verification counts issues",
+   "subject_note": "the PR title verbatim; gate45 ruled it TRUE of the round-1 diff (deploy.sh itself exits 1 on any counted issue, measured on verify / services / full); round 2 changes only the test file, so the gate re-rules it on the round-2 diff",
+   "files": [
+    "Blockchain/Dev/deployment/azure/deploy.sh",
+    "Blockchain/Dev/scripts/__tests__/ks1054_deploy_scripts_read_startup_migrations.test.sh"
+   ],
+   "round2_files": [
+    "Blockchain/Dev/scripts/__tests__/ks1054_deploy_scripts_read_startup_migrations.test.sh"
+   ],
+   "mode_pins": {
+    "Blockchain/Dev/deployment/azure/deploy.sh": "100755",
+    "Blockchain/Dev/scripts/__tests__/ks1054_deploy_scripts_read_startup_migrations.test.sh": "100644"
+   },
+   "mandated_body_refs": [
+    "Refs KS-1054"
+   ]
+  }
+ },
+ "base_clone": "/private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/407373b1-2c8c-4c6e-b92a-14f32c2c8007/scratchpad/screen0929/base",
+ "checkout": "/Volumes/DevMASTER/!CODING/Secuura/Blockchain/2_Project_Files",
+ "deploy_key": "/Volumes/DevMASTER/!CODING/Secuura/Blockchain/3_Access_Keys/github_deploy_rw",
+ "widen_branch_rx": "-b4[567]-\\d+$",
+ "widen_note": "an OPEN PR outside the kit on a `-b45-`/`-b46-`/`-b47-` branch is REPORTED (DISJOINT OUT-OF-KIT); it refuses (rc 15) only when it touches one of the kit's 2 paths or is titled with KS-1054. Any other open PR touching a kit path also refuses rc 15."
+}

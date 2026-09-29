@@ -1,0 +1,23 @@
+LAUNCH ACTION gate46 (DRY RUN) 2026-09-29 22:41:26 AEST / 2026-09-29T12:41:26Z | launcher /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/gatesets/2026-09-29_gate46/launch_qa_secuura_batch1348r2.sh | pinned develop 8c810023f9c9ac060a7aff24f0933ae3b8734479 | END_TREE 72b5d2e84e9972988dfa00cb623a85770b434310
+  pin #1348 94e31db501cd01aaec7437418d7efbb592b1b59a (refs/heads/feature/ks-1054-deploy-sh-exits-non-zero-on-failed-migrations-b45-2)
+--- 0. the pane must be routed (inbox_routing.conf) or cockpit.sh say --mail fails silently
+  routing file /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/inbox_routing.conf — line present: 0 (grep rc=1; want 1 / rc 0)
+  (DRY RUN: reported, not refused — the real run refuses rc 1 here)
+--- 0b. the kit's home: launcher filled for /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/gatesets/2026-09-29_gate46 | this script lives in /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/gatesets/2026-09-29_gate46
+  AT HOME — no re-fill
+--- 1. instrument: git ls-remote origin (ONE read from the Secuura checkout, READ-ONLY)
+  ls-remote rc=0 at 12:41:32Z
+    8c810023f9c9ac060a7aff24f0933ae3b8734479	refs/heads/develop
+    94e31db501cd01aaec7437418d7efbb592b1b59a	refs/heads/feature/ks-1054-deploy-sh-exits-non-zero-on-failed-migrations-b45-2
+    94e31db501cd01aaec7437418d7efbb592b1b59a	refs/pull/1348/head
+--- 2. instrument: the GitHub PULLS API (an independent read of each head, and mergeable) + 2b the OVERLAP / WIDEN census
+  pulls API rc=0
+    API #1348 head 94e31db501cd01aaec7437418d7efbb592b1b59a base develop mergeable True reads 1 state open
+    CENSUS 20 other open PR(s) read | 0 touch a kit path or carry a kit key | 0 seat-branch PR(s) disjoint | 2 kit path(s), 1 kit key(s)
+  OVERLAP census clean
+--- 3. the heads, judged (both instruments == the pin, open, not mergeable:false, based on develop)
+  #1348  ls-remote pull/head 94e31db501cd01aaec7437418d7efbb592b1b59a | branch 94e31db501cd01aaec7437418d7efbb592b1b59a | API 94e31db501cd01aaec7437418d7efbb592b1b59a (base develop, state open, mergeable True) | pinned 94e31db501cd01aaec7437418d7efbb592b1b59a
+  BOTH INSTRUMENTS AGREE with the pin, 1 of 1.
+--- 3b. develop, read at launch: 8c810023f9c9ac060a7aff24f0933ae3b8734479 | the pinned develop 8c810023f9c9ac060a7aff24f0933ae3b8734479
+  UNMOVED since the fill — the END_TREE 72b5d2e84e9972988dfa00cb623a85770b434310 stands
+DRY RUN COMPLETE 2026-09-29T12:41:58Z — every read agrees with the pins; the real run continues with the override check, the usage gate, --check and cockpit.sh add
