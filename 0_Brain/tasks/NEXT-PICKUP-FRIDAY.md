@@ -12,6 +12,18 @@ supersede: replace wholesale; previous = NEXT-PICKUP-FRIDAY.md.pre-0925-rotate-s
 
 **The tree is at `/Users/kamilkreiser/1FILES TO SYNC/FRIDAY`.** Quote every path (spaces).
 
+## 🔴🔴 HANDOVER 2026-09-29 20:5x (successor seat, ctx 65%) — READ FIRST; supersedes the blocks below where they differ
+**MERGED tonight (head-pinned, trees/blobs verified):** HPSM-POC #53 (B55) · #55 (B58) · #54 (B56 content 0.5.0) · #56 (B60 part 1: H2/H5/H7) · #57 (B56 F-1 API) → main **f403251**. Records: analysis #7 (B55), #8 (B56) → analysis main 4495c62. Composer #12 (B22 wizard) → HPSM-light main **a60fc22**.
+**LIVE SEATS:**
+- **Datasec/Composer-D (%36) = B24 DEPLOY of a60fc22 to the demo VM** (Kam 16:28 "publish … make them live"). Brief `Datasec Security Composer/1_Project_Definition/Briefs/2026-09-29_B24_deploy-a60fc22-to-demo-vm.md`. On READY: verify live yourself (Basic auth; a string only this build has), that the temp NSG rule is gone, then tell Kam with the check; `decision_queue.sh --delivered composer-two-logins-deploy-for-paul-friday <C-number>`. Wake: watch_status `seen_b24`.
+- **Composer-C (%18) = B22 ADDENDUM-3:** R2-1 end-page fix on `b22/end-page-r2-1` (tier 2) + BACKLOG R2-2/R2-3. **Its deploy needs Kam's word** (separate).
+- **HPSM-POC-E (%32) = B60 round 2 of 2 on PR #58** (ADDENDUM-5: F-1 reset door scores draft ungated; F-2 partial seed; F-3 gitleaks false positive; N-5 approver name on hosted PDF; N-4 pin RequireApprovedRuleset; N-2). Then **HPSM-POC-QA (%34, B62)** re-gates (write a B62 ADDENDUM-1 pinning the new head; cap: a 2nd NO GO ships nothing without Kam).
+- **HPSM-POC-QA2 (%35) = B63 tier-1 gate on PR #59** (B59 web: Entra sign-in, standalone, notice, DRAFT labels). Verdict wait `wait_verdict.sh` on B63_STATUS. HPSM-POC-D (%31, B59) kept for its fix round.
+- **HPSM-POC-A (%23) = B58 records/b58** (ADDENDUM-1): open + merge its records PR when the branch appears.
+**Open Kam card:** `hpsmpoc-hosted-seed-owner` (rec b presenter account; default nothing until D-3). Tickets filed tonight: HPSMPOC-105..112.
+**Tooling shipped this seat:** chat_reply unread-rows advisory (1ac298ace) · cockpit ensure_caffeinate (a66e49c6d) · watch_status matches READY FOR RE-GATE (e7b026cd5). QA STATUS files carry no READY line: use `/tmp/claude-501/wait_verdict.sh` / `wait_r2.sh` (scratch; re-create from the note if gone).
+**Usage 77%** (cloud only when nothing local fits; the Spark is unreachable off Kam's network).
+
 ## 🔴🔴 STATE 2026-09-29 19:1x (successor seat, ctx 42%) — ADDS to the handover block below
 - **HPSM-POC #53** (B55 round 2, head `e6bc70f`, CI 10/10): **B57 ADDENDUM-1** (round 2 of 2, the cap) written + tapped to `Datasec/HPSM-POC-QA` 19:01 (`Briefs/2026-09-29_B57_ADDENDUM-1_round-2-regate.md`). On GO/GO WITH NOTES: `friday_as.sh datasec gh pr merge 53 -R datasecau/HPSM-POC --squash --match-head-commit e6bc70fcaf223367fea76699d90e643c8a8cfb81`, compare trees; then #54 (B56, pane HPSM-POC-C) rebases; then H1–H7.
 - **HPSM-POC #55** (B58 route A on the laptop, branch `b58/feedback-live` @ `3955c0f`, tier 2) opened by Friday 19:0x. On CI green: merge head-pinned, compare trees, close pane HPSM-POC-A. **Owed from B58:** O-1 (a `sent` row is not proof of delivery on route A; a wrong secret also gets 200) → a Backlog ticket via the next HPSM-POC seat; O-2 (no CI check on `scripts/*.sh`). Kam already confirmed the route A e-mail at 15:43 (for HPSMPOC-102); not re-asked for 103.
