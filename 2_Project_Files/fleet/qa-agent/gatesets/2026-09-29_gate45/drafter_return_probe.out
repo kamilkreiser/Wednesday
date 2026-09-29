@@ -1,0 +1,14 @@
+drafter_return_probe — 2026-09-29T11:09:23Z — GNU bash, version 3.2.57(1)-release (arm64-apple-darwin26)
+The ks1054 cells E1/E2 run deploy.sh's extracted summary block as a SCRIPT (bash "$TMPDRV"), where the block's 'return' is at top level.
+Here: the REAL block from 1bb58b4ebb97:deploy.sh (extracted with the test's own awk), log_* stubbed, ERRORS injected, and the return argument varied.
+block lines:       18 | 'return 1' occurrences in block: 1
+return 1 | ERRORS=2 | rc 1 | ERROR Post-deploy verification found 2 issue(s) — see above <g45_sp>/drv_r1_e2.sh: line 20: return: can only `return' from a function or sourced script 
+return 1 | ERRORS=0 | rc 0 | SUCCESS Post-deploy verification passed — all checks OK 
+return 0 | ERRORS=2 | rc 1 | ERROR Post-deploy verification found 2 issue(s) — see above <g45_sp>/drv_r0_e2.sh: line 20: return: can only `return' from a function or sourced script 
+return 0 | ERRORS=0 | rc 0 | SUCCESS Post-deploy verification passed — all checks OK 
+return 7 | ERRORS=2 | rc 1 | ERROR Post-deploy verification found 2 issue(s) — see above <g45_sp>/drv_r7_e2.sh: line 20: return: can only `return' from a function or sourced script 
+return 7 | ERRORS=0 | rc 0 | SUCCESS Post-deploy verification passed — all checks OK 
+CONTROL (the same block as a FUNCTION body, which is how deploy.sh runs it):
+function body, return 1, ERRORS=2 -> rc 1
+function body, return 0, ERRORS=2 -> rc 0
+READING: as a script, a top-level 'return N' is itself an error with rc 1 for every N, so E1 (rc != 0 with ERRORS=2) is green for 'return 0' too; only the FUNCTION control distinguishes 0 from 1.

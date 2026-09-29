@@ -1,0 +1,88 @@
+{
+ "kit": "gate45",
+ "tag": "g45",
+ "pane": "QA/Secuura-batch1348",
+ "launcher": "launch_qa_secuura_batch1348.sh",
+ "prompt": "2026-09-29_secuura-batch1348.prompt.txt",
+ "report": "2026-09-29-batch1348-g45",
+ "round": 45,
+ "go": "GO (Seat B 45th): merge 1348 1347 on gate45",
+ "merge_seat": "Seat B 45th",
+ "author_seat": "Seat B 45th",
+ "order": [
+  "1348",
+  "1347"
+ ],
+ "order_note": "T1 first (1348, a DEPLOY-PATH change), then T2 (1347, ROUND 2 OF 2 \u2014 the last round under the cap); each merge a squash on the previous tip (pin_gate45.py (F) simulates it with commit-tree on a scratch clone)",
+ "expected_develop": "8ba2da02d980e7e8065e8ce614b034adc2b7c2eb",
+ "move_since_1347_base": {
+  "from": "bd740147c3d88fbf45af109fd68fd35f602c2914",
+  "to": "8ba2da02d980e7e8065e8ce614b034adc2b7c2eb",
+  "note": "#1346's squash (gate44) landed on develop after #1347 round 1 was raised; #1347 round 2 is a fast-forward on round 1 and still sits on bd740147c3d8"
+ },
+ "prs": {
+  "1348": {
+   "keys": [
+    "KS-1054"
+   ],
+   "tier": "T1",
+   "service": "Blockchain/Dev/deployment/azure/deploy.sh (verify_deployment returns 1 when ERRORS > 0) + the ks1054 shell suite (cells E0-E2)",
+   "ruling": "Kam (a) on card secuura-ks1054-f9282-migration-failure-visibility: keep serving, flag it on /health; the deploy scripts' existing /health checks (deploy-all.sh:281, deploy.sh:823) see the failed count and THE DEPLOY READS AS FAILED \u2014 via BOTH scripts; the running service is not stopped. gate44's N-1346-1 (Major) measured deploy.sh exiting 0 over failed migrations; #1348 is that half.",
+   "expected_parent": "8ba2da02d980e7e8065e8ce614b034adc2b7c2eb",
+   "suites": [
+    "shell (Blockchain/Dev/scripts/run-shell-suites.sh; the ks1054 suite 14 cells)"
+   ],
+   "branch": "refs/heads/feature/ks-1054-deploy-sh-exits-non-zero-on-failed-migrations-b45-2",
+   "title": "KS-1054: deploy.sh exits non-zero when post-deploy verification counts issues",
+   "subject": "KS-1054: deploy.sh exits non-zero when post-deploy verification counts issues",
+   "subject_note": "the PR title verbatim; the gate must prove it TRUE by driving deploy.sh (verify branch AND deploy_services' tail) to a non-zero exit with stubs",
+   "files": [
+    "Blockchain/Dev/deployment/azure/deploy.sh",
+    "Blockchain/Dev/scripts/__tests__/ks1054_deploy_scripts_read_startup_migrations.test.sh"
+   ],
+   "mode_pins": {
+    "Blockchain/Dev/deployment/azure/deploy.sh": "100755",
+    "Blockchain/Dev/scripts/__tests__/ks1054_deploy_scripts_read_startup_migrations.test.sh": "100644"
+   },
+   "mandated_body_refs": [
+    "Refs KS-1054"
+   ]
+  },
+  "1347": {
+   "keys": [
+    "KS-1374"
+   ],
+   "tier": "T2",
+   "service": "Blockchain/Dev env templates (env.example 10000; .env.example back to 2000) + docker-compose.yml (one comment) + services/api-gateway (a test only) + systemTest/akto (aktoRateLimit.ts: isLocalScanTarget, the AKTO_PLATFORM_REQUESTS_PER_MINUTE override, derivedRateLimit floored at 1 + its unit test)",
+   "ruling": "Kam 16:17:55 / 16:18:57 (routed by Tuesday): Peter's reply was for us to implement the change = our KS-1374 comment's option 2 plus one guard: raise RATE_LIMIT_MAX_REQUESTS on LOCAL stacks only, demo and production unchanged, one limiter test at the demo's limit. Round 2 answers gate44's Majors N-1347-1 / N-1347-2 and Minor N-1347-3 (Wednesday approved the R2-B shape, 'CI stacks in scope', 10:36Z).",
+   "expected_parent": "2c4b98253b1fa820c4fe08585dad5da57947ffb4",
+   "round1_head": "2c4b98253b1fa820c4fe08585dad5da57947ffb4",
+   "suites": [
+    "services/api-gateway",
+    "systemTest/akto (unit: vitest.unit.config.ts; its OWN npm ci)",
+    "shell (the bootstrap_env_* suites read the templates)"
+   ],
+   "branch": "refs/heads/feature/ks-1374-local-templates-10000-and-akto-reads-platform-b45-1",
+   "title": "KS-1374: raise the local templates and make the Akto harness read the platform limit",
+   "subject": "KS-1374: env.example goes to 10000 and Akto reads the limit only for a local target",
+   "subject_note": "the DRAFTER'S PROPOSAL, NOT the PR title: at round 2 the title is no longer true of the diff (.env.example is back at 2000, so 'the local templates' raised is one template; the harness reads RATE_LIMIT_MAX_REQUESTS only for a local target). The gate rules whether THIS subject is true of the diff and writes a true one if not.",
+   "files": [
+    "Blockchain/Dev/.env.example",
+    "Blockchain/Dev/docker-compose.yml",
+    "Blockchain/Dev/env.example",
+    "Blockchain/Dev/services/api-gateway/src/__tests__/ks1374-global-limiter-at-demo-limit.test.ts",
+    "systemTest/akto/src/setup/aktoRateLimit.ts",
+    "systemTest/akto/tests/unit/setup/ks1374-platform-limit-from-env.test.ts"
+   ],
+   "mode_pins": {},
+   "mandated_body_refs": [
+    "Refs KS-1374"
+   ]
+  }
+ },
+ "base_clone": "/private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/407373b1-2c8c-4c6e-b92a-14f32c2c8007/scratchpad/screen0929/base",
+ "checkout": "/Volumes/DevMASTER/!CODING/Secuura/Blockchain/2_Project_Files",
+ "deploy_key": "/Volumes/DevMASTER/!CODING/Secuura/Blockchain/3_Access_Keys/github_deploy_rw",
+ "widen_branch_rx": "-b4[56]-\\d+$",
+ "widen_note": "an OPEN PR outside the kit on a `-b45-`/`-b46-` branch is REPORTED (DISJOINT OUT-OF-KIT); it refuses (rc 15) only when it touches one of the kit's 8 paths or is titled with a kit key. Any other open PR touching a kit path also refuses rc 15."
+}

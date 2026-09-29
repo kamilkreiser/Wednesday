@@ -1,0 +1,49 @@
+LAUNCH ACTION gate45 2026-09-29 21:28:06 AEST / 2026-09-29T11:28:06Z | launcher /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/gatesets/2026-09-29_gate45/launch_qa_secuura_batch1348.sh | pinned develop 8ba2da02d980e7e8065e8ce614b034adc2b7c2eb | END_TREE 9222b67ef2039327a9debfb25a652c1bbf7e8fc8
+  pin #1348 1bb58b4ebb97d2fa9f04bddd961ad499b6106e09 (refs/heads/feature/ks-1054-deploy-sh-exits-non-zero-on-failed-migrations-b45-2)
+  pin #1347 18bc5123ce90b4c2cf2a9b22f141e1c2b81083c0 (refs/heads/feature/ks-1374-local-templates-10000-and-akto-reads-platform-b45-1)
+--- 0. the pane must be routed (inbox_routing.conf) or cockpit.sh say --mail fails silently
+  routing file /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/inbox_routing.conf — line present: 1 (grep rc=0; want 1 / rc 0)
+--- 0b. the kit's home: launcher filled for /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/gatesets/2026-09-29_gate45 | this script lives in /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/gatesets/2026-09-29_gate45
+  AT HOME — no re-fill
+--- 1. instrument: git ls-remote origin (ONE read from the Secuura checkout, READ-ONLY)
+  ls-remote rc=0 at 11:28:09Z
+    8ba2da02d980e7e8065e8ce614b034adc2b7c2eb	refs/heads/develop
+    1bb58b4ebb97d2fa9f04bddd961ad499b6106e09	refs/heads/feature/ks-1054-deploy-sh-exits-non-zero-on-failed-migrations-b45-2
+    18bc5123ce90b4c2cf2a9b22f141e1c2b81083c0	refs/heads/feature/ks-1374-local-templates-10000-and-akto-reads-platform-b45-1
+    18bc5123ce90b4c2cf2a9b22f141e1c2b81083c0	refs/pull/1347/head
+    1bb58b4ebb97d2fa9f04bddd961ad499b6106e09	refs/pull/1348/head
+--- 2. instrument: the GitHub PULLS API (an independent read of each head, and mergeable) + 2b the OVERLAP / WIDEN census
+  pulls API rc=0
+    API #1348 head 1bb58b4ebb97d2fa9f04bddd961ad499b6106e09 base develop mergeable True reads 1 state open
+    API #1347 head 18bc5123ce90b4c2cf2a9b22f141e1c2b81083c0 base develop mergeable True reads 1 state open
+    CENSUS 20 other open PR(s) read | 0 touch a kit path or carry a kit key | 0 seat-branch PR(s) disjoint | 8 kit path(s), 2 kit key(s)
+  OVERLAP census clean
+--- 3. the heads, judged (both instruments == the pin, open, not mergeable:false, based on develop)
+  #1348  ls-remote pull/head 1bb58b4ebb97d2fa9f04bddd961ad499b6106e09 | branch 1bb58b4ebb97d2fa9f04bddd961ad499b6106e09 | API 1bb58b4ebb97d2fa9f04bddd961ad499b6106e09 (base develop, state open, mergeable True) | pinned 1bb58b4ebb97d2fa9f04bddd961ad499b6106e09
+  #1347  ls-remote pull/head 18bc5123ce90b4c2cf2a9b22f141e1c2b81083c0 | branch 18bc5123ce90b4c2cf2a9b22f141e1c2b81083c0 | API 18bc5123ce90b4c2cf2a9b22f141e1c2b81083c0 (base develop, state open, mergeable True) | pinned 18bc5123ce90b4c2cf2a9b22f141e1c2b81083c0
+  BOTH INSTRUMENTS AGREE with the pin, 2 of 2.
+--- 3b. develop, read at launch: 8ba2da02d980e7e8065e8ce614b034adc2b7c2eb | the pinned develop 8ba2da02d980e7e8065e8ce614b034adc2b7c2eb
+  UNMOVED since the fill — the END_TREE 9222b67ef2039327a9debfb25a652c1bbf7e8fc8 stands
+--- 4. no test override on a real launch
+--- 5. usage gate
+  usage_gate rc=0
+    usage_gate: OK — weekly usage 49% < 90% (gauge age 0 min)
+--- 6. the launcher's own --check
+  launcher --check rc=0
+    all guards pass:
+      origin develop 8ba2da02d980e7e8065e8ce614b034adc2b7c2eb == the pinned develop; END_TREE 9222b67ef2039327a9debfb25a652c1bbf7e8fc8 | #1348 T1 1bb58b4ebb97 compare ok (behind 0) | #1347 T2 18bc5123ce90 compare ok (behind 1)
+      capture, Linear read, prompt, QA project and repo present; kit at its filled home; TWO rows; thinking directive; capture + Linear read (with dc9212b5) + commission + drafter probe + previous round report named; no unfilled token
+      2 of 2 heads at branch AND pull/head (whole-field); 2 of 2 GitHub compares == the pins; capture and prompt BOTH carry every head in full and the tickets
+      the prompt carries 53 by-name keywords, the tier lines, the holds, the GO string, the addendum + REPORT-HASH-LAST rules, the verdict subject + report dir, develop / END_TREE in full
+      a launch (not --check) will refuse unless stdin is a TTY (exit 21)
+--- 7. launch through the fleet's own tooling (cockpit.sh add), never raw tmux send-keys
+  cockpit.sh add rc=0
+    usage_gate: OK — weekly usage 49% < 90% (gauge age 0 min)
+    pane 'QA/Secuura-batch1348' added (%73)
+    ensure_caffeinate: not a laptop (no internal battery): nothing to do
+--- pane census
+%0 | wednesday | zsh | fleet:0.0
+%73 | QA/Secuura-batch1348 | zsh | fleet:0.1
+%70 | Secuura/Blockchain | zsh | fleet:0.2
+%1 | fleet-monitor | zsh | fleet:0.3
+LAUNCHED 2026-09-29T11:28:26Z over develop 8ba2da02d980e7e8065e8ce614b034adc2b7c2eb (END_TREE 9222b67ef2039327a9debfb25a652c1bbf7e8fc8)
