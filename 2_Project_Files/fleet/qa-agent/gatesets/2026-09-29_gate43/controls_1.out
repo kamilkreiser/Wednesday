@@ -1,0 +1,59 @@
+=== controls_gate43  2026-09-29T07:49:25Z | develop 0aa9b52c691bb852e3fd1b796514fe9122ebc054 | old base 2cb858335472fafcce535ca4ad328c897ed87bfb | plants /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/35f90900-da39-4310-a097-bf496fc89a5b/scratchpad/g43_sp/controls_074925
+--- pin_gate43.py (the heads, the move, the OVERLAP matrix, the chain, END) — simulations write pins_gate43.SIM-<name>.json only
+CONTROL PN0   expect rc 0 /why 'PASS: FAIL=0 -> pins_gate43.SIM-real.json .* 0 overlapping pair' | got rc 0 -> OK | PASS: FAIL=0 -> pins_gate43.SIM-real.json | develop 0aa9b52c691b | END_TREE dd70cc631be4f2f9d8ac6c8744acf109931e4ee1 | 5 PRs, 11 distinct paths, 0 overlapping pair(s)
+CONTROL PN0e  expect rc 0 /why 'END_TREE dd70cc631be4f2f9d8ac6c8744acf109931e4ee1' | got rc 0 -> OK | PASS: FAIL=0 -> pins_gate43.SIM-real.json | develop 0aa9b52c691b | END_TREE dd70cc631be4f2f9d8ac6c8744acf109931e4ee1 | 5 PRs, 11 distinct paths, 0 overlapping pair(s)
+CONTROL PN1   expect rc 1 /why '\(A\) #1343 head .* != the expected \(pinned\) head' | got rc 1 -> OK |   - (A) #1343 head 6600514d61efd90387cdeb9316635c3ae83a241b != the expected (pinned) head 0aa9b52c691bb852e3fd1b796514fe9122ebc054
+CONTROL PN2   expect rc 1 /why 'OVERLAP #1342 x #1344: \[.*routes/proxy.ts' | got rc 1 -> OK |     OVERLAP #1342 x #1344: ['Blockchain/Dev/services/api-gateway/src/routes/proxy.ts']
+CONTROL PN2w  expect rc 0 /why 'step #1344 diff / blob mismatch' | got rc 0 -> OK |   - (F) chain: step #1344 diff / blob mismatch
+CONTROL PN3   expect rc 1 /why 'step #1344 NOT clean' | got rc 1 -> OK |   - (F) chain: step #1344 NOT clean (rc 1)
+CONTROL PN4   expect rc 1 /why '\(C\) #1343: the develop move touches its own path' | got rc 1 -> OK |   - (C) #1343: the develop move touches its own path(s) ['Blockchain/Dev/scripts/audit/audit-baseline.json'] — a rebase / re-draft decides
+CONTROL PN5   expect rc 0 /why 'REVERSE-order END dd70cc631be4f2f9d8ac6c8744acf109931e4ee1 \| == END_TREE: True' | got rc 0 -> OK |     REVERSE-order END dd70cc631be4f2f9d8ac6c8744acf109931e4ee1 | == END_TREE: True
+--- testrefs_gate43.py (the census; CT-POS / CT-NEG / CT-TREE inside)
+CONTROL TR0   expect rc 0 /why 'TESTREFS PASS: 0 control problem' | got rc 0 -> OK | TESTREFS PASS: 0 control problem(s)
+CONTROL TR0n  expect rc 0 /why 'CENSUS UNION \(PATH \+ IMPORT, at dd70cc631be4\): 23 test file' | got rc 0 -> OK | CENSUS UNION (PATH + IMPORT, at dd70cc631be4): 23 test file(s):
+CONTROL TR1   expect rc 0 /why 'TESTREFS PASS' | got rc 0 -> OK | TESTREFS PASS: 0 control problem(s)
+CONTROL TR1n  expect rc 1 | got rc 1 -> OK | 
+CONTROL TR2   expect rc 1 /why 'CT-POS .* its own test is not found' | got rc 1 -> OK |   - CT-POS #1341 Blockchain/Dev/packages/shared/src/vc/verifier.ts: its own test is not found — the census is blind
+CONTROL TR3   expect rc 0 /why 'ks781-p3-3-body-parser-order.test.ts' | got rc 0 -> OK |   Blockchain/Dev/packages/shared/src/__tests__/ks781-p3-3-body-parser-order.test.ts
+--- keyscan_gate43.py (subjects, bodies, live-surface FLAGs)
+CONTROL KS0   expect rc 0 /why 'KEYSCAN PASS: 31 checks over 5 PRs, 0 FAIL' | got rc 0 -> OK | KEYSCAN PASS: 31 checks over 5 PRs, 0 FAIL, 0 FLAG line(s) (live surfaces; the gate rules them)
+CONTROL KS1   expect rc 1 /why 'FAIL #1342 S2' | got rc 1 -> OK | FAIL #1342 S2: declared subject carries no (#n) suffix
+CONTROL KS2   expect rc 1 /why 'FAIL #1343 S1' | got rc 1 -> OK | FAIL #1343 S1: subject keys ['KS-1371', 'KS-662'] (primary KS-1371; own ['KS-1371'])
+CONTROL KS3   expect rc 1 /why 'FAIL #1342 S3' | got rc 1 -> OK | FAIL #1342 S3: declared 107, lands at 115 (<= 92): 'KS-1369: the gateway proxy hook returns early once the outgoing headers are sent and a tail past ninety-two'
+CONTROL KS4   expect rc 1 /why 'FAIL #1341 B1 KS-1368' | got rc 1 -> OK | FAIL #1341 B1 KS-1368: `Refs KS-1368` lines: 0
+CONTROL KS5   expect rc 1 /why 'FAIL #1345 B2' | got rc 1 -> OK | FAIL #1345 B2: closing keyword before a key: ['Closes']
+CONTROL KS6   expect rc 1 /why 'FAIL #1344 B3: .*foreign \[.KS-5.\]' | got rc 1 -> OK | FAIL #1344 B3: body key set ['KS-1359', 'KS-5'] | foreign ['KS-5']
+CONTROL KS7   expect rc 0 /why 'FLAG #1343 PR body: .*FOREIGN \[.KS-662.\]' | got rc 0 -> OK | FLAG #1343 PR body: keys ['KS-1371', 'KS-662'] | FOREIGN ['KS-662']
+--- the launcher (--check; L9 the real launch path, non-TTY)
+CONTROL L0    expect rc 0 /why 'all guards pass' | got rc 0 -> OK | all guards pass:
+CONTROL L1    expect rc 6 /why '#1343 — .* is not at .* AND refs/pull/1343/head' | got rc 6 -> OK | REFUSING: #1343 — 0aa9b52c691bb852e3fd1b796514fe9122ebc054 is not at refs/heads/feature/ks-1371-unrevoke-refuses-negative-index-b43-1 AND refs/pull/1343/head on origin — the head moved (or t
+CONTROL L2    expect rc 17 /why 'origin develop .* != the pinned develop' | got rc 17 -> OK | REFUSING: origin develop 2cb858335472fafcce535ca4ad328c897ed87bfb != the pinned develop 0aa9b52c691bb852e3fd1b796514fe9122ebc054 — run repin_and_launch_gate43.sh (it re-pins and re-fills in 
+CONTROL L3    expect rc 10 /why '#1344 — the compare is not the pinned' | got rc 10 -> OK | REFUSING: #1344 — the compare is not the pinned merge_base / ahead / behind / files:
+CONTROL L4    expect rc 26 /why 'merge authority / the GO string' | got rc 26 -> OK | REFUSING: merge authority / the GO string
+CONTROL L5    expect rc 8 /why 'unfilled double-brace' | got rc 8 -> OK | REFUSING: the prompt carries an unfilled double-brace fill token
+CONTROL L6    expect rc 33 /why 'by-name keyword 'UPSTREAM-NOT-HUNG-1342'' | got rc 33 -> OK | REFUSING: the prompt does not carry the by-name keyword 'UPSTREAM-NOT-HUNG-1342'
+CONTROL L7    expect rc 20 /why 'do not both name #1345's head' | got rc 20 -> OK | REFUSING: the capture and the prompt do not both name #1345's head 052f4a3b9c56f78a5fa907a2db8e320105410a54 in full
+CONTROL L8    expect rc 39 /why 'the HOLDS' | got rc 39 -> OK | REFUSING: the HOLDS
+CONTROL L9    expect rc 21 /why 'stdin is not a TTY' | got rc 21 -> OK | REFUSING: stdin is not a TTY — run this launcher in a cockpit pane, never inside a Bash tool
+CONTROL L10   expect rc 31 /why 'launch develop / the END_TREE' | got rc 31 -> OK | REFUSING: the launch develop / the END_TREE not in full
+CONTROL L11   expect rc 7 /why 'the tier lines' | got rc 7 -> OK | REFUSING: the tier lines / FROZEN at FIVE
+CONTROL L12   expect rc 32 /why 'BOTH state 'PR #1344 is KS-1359'' | got rc 32 -> OK | REFUSING: the capture and the prompt do not BOTH state 'PR #1344 is KS-1359'
+CONTROL L13   expect rc 25 /why 'the MERGE ADDENDUM rules' | got rc 25 -> OK | REFUSING: the MERGE ADDENDUM rules
+CONTROL L14   expect rc 23 /why 'the verdict subject' | got rc 23 -> OK | REFUSING: the verdict subject / sender / report dir
+CONTROL L15   expect rc 2 /why 'a MOVED KIT' | got rc 2 -> OK | REFUSING: this launcher lives in /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/35f90900-da39-4310-a097-bf496fc89a5b/scratchpad/g43_sp/controls_074925 but was filled for /Volumes/DevMA
+--- the launch action (repin: --dry-run; R1 and R8 real runs that stop before the usage gate)
+CONTROL R0    expect rc 0 /why 'DRY RUN COMPLETE' | got rc 0 -> OK | DRY RUN COMPLETE 2026-09-29T07:52:00Z — every read agrees with the pins; the real run continues with the override check, the usage gate, --check and cockpit.sh add
+CONTROL R0c   expect rc 0 /why 'CENSUS [0-9]+ other open PR\(s\) read \| 0 touch a kit path' | got rc 0 -> OK |     CENSUS 20 other open PR(s) read | 0 touch a kit path or carry a kit key | 0 seat-branch PR(s) disjoint | 11 kit path(s), 6 kit key(s)
+CONTROL R1    expect rc 1 /why 'is not registered in inbox_routing.conf' | got rc 1 -> OK | REFUSING: QA/Secuura-batch1341 is not registered in inbox_routing.conf — add the line first (README.md section 4; the drafter did NOT write it)
+CONTROL R2    expect rc 15 /why 'OVERLAP #[0-9]+ .*paths \[.Blockchain/Dev/package-lock.json.\]' | got rc 15 -> OK |     OVERLAP #572 dependabot/npm_and_yarn/Blockchain/Dev/develop/types-1409c3626d | chore(deps-dev): bump @types/office-js from 1.0.599 to 1.0.610 in /Blockchain/Dev in the t | paths ['Blockc
+CONTROL R3    expect rc 15 /why 'OVERLAP #1253 .*title keys \[.KS-1297.\]' | got rc 15 -> OK |     OVERLAP #1253 feature/ks-1297-fixture-guard-anchor-and-two-gaps-l5-1 | KS-1297 GUARDGAPS: anchor the abort counts, cover the worktree, pin bare call sites | paths [] | title keys ['KS-12
+CONTROL R4    expect rc 0 /why 'DISJOINT OUT-OF-KIT #9[0-9]+ dependabot' | got rc 0 -> OK |     DISJOINT OUT-OF-KIT #945 dependabot/npm_and_yarn/Blockchain/Dev/develop/axe-core/playwright-4.1 | chore(deps-dev): bump @axe-core/playwright from 4.11.3 to 4.13.0 in /Blockchain/Dev | 2 
+CONTROL R5    expect rc 11 /why 'a head moved' | got rc 11 -> OK | REFUSING TO LAUNCH: a head moved (the pin is stale), a PR is not open / not on develop, or GitHub reports mergeable:false — a new head needs pin_gate43.py, capture_mail_gate43.py, testrefs_g
+CONTROL R6    expect rc 10 /why 'develop MOVED since the fill' | got rc 10 -> OK |   DRY RUN: develop MOVED since the fill — the real run RE-PINS here (pin -> testrefs -> fill) in the same action
+CONTROL R7    expect rc 9 /why 'must be a Claude session scratchpad' | got rc 9 -> OK | REFUSING: argv[2] must be a Claude session scratchpad under /private/tmp/claude-501/
+CONTROL R8    expect rc 0 /why 'STOPPED AFTER 3b' | got rc 0 -> OK | STOPPED AFTER 3b (G43_STOP_AFTER_3B — a controls-only switch) — develop 0aa9b52c691bb852e3fd1b796514fe9122ebc054 | END_TREE dd70cc631be4f2f9d8ac6c8744acf109931e4ee1
+CONTROL R8r   expect rc 0 /why 'line present: 1 \(grep rc=0' | got rc 0 -> OK |   routing file /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/35f90900-da39-4310-a097-bf496fc89a5b/scratchpad/g43_sp/controls_074925/routing_ok.conf — line present: 1 (grep rc=0; want 
+  (R1 / R8 real runs wrote their step-0 outputs as /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/gatesets/2026-09-29_gate43/launch_<HHMMSS>.* — 4 routing file(s) now; kept, never deleted)
+--- the real pins are untouched by every control above
+CONTROL PNZ   expect rc 0 | got rc 0 -> OK | 
+SUMMARY gate43: 50 controls, OK 50, MISMATCH 0

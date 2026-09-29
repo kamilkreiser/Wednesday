@@ -1,0 +1,63 @@
+LAUNCH ACTION gate43 2026-09-29 18:04:48 AEST / 2026-09-29T08:04:48Z | launcher /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/gatesets/2026-09-29_gate43/launch_qa_secuura_batch1341.sh | pinned develop 0aa9b52c691bb852e3fd1b796514fe9122ebc054 | END_TREE dd70cc631be4f2f9d8ac6c8744acf109931e4ee1
+  pin #1341 bf0dfa64a424a3979d8efcb683ce18972a386b1c (refs/heads/feature/ks-1375-verify-fails-closed-on-no-issuer-record-b43-5)
+  pin #1342 add62ea8114627ef386d5399c4011e33e097e784 (refs/heads/feature/ks-1369-onproxyreq-skips-header-writes-once-sent-b43-3)
+  pin #1343 6600514d61efd90387cdeb9316635c3ae83a241b (refs/heads/feature/ks-1371-unrevoke-refuses-negative-index-b43-1)
+  pin #1344 ca4aab7f3b33eaafc7ef9dae8891e11c0e46816b (refs/heads/feature/ks-1359-platform-audit-log-refuses-bad-bounds-b43-2)
+  pin #1345 052f4a3b9c56f78a5fa907a2db8e320105410a54 (refs/heads/feature/ks-1360-session-delete-carries-success-b43-4)
+--- 0. the pane must be routed (inbox_routing.conf) or cockpit.sh say --mail fails silently
+  routing file /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/inbox_routing.conf — line present: 1 (grep rc=0; want 1 / rc 0)
+--- 0b. the kit's home: launcher filled for /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/gatesets/2026-09-29_gate43 | this script lives in /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/gatesets/2026-09-29_gate43
+  AT HOME — no re-fill
+--- 1. instrument: git ls-remote origin (ONE read from the Secuura checkout, READ-ONLY)
+  ls-remote rc=0 at 08:04:52Z
+    0aa9b52c691bb852e3fd1b796514fe9122ebc054	refs/heads/develop
+    ca4aab7f3b33eaafc7ef9dae8891e11c0e46816b	refs/heads/feature/ks-1359-platform-audit-log-refuses-bad-bounds-b43-2
+    052f4a3b9c56f78a5fa907a2db8e320105410a54	refs/heads/feature/ks-1360-session-delete-carries-success-b43-4
+    add62ea8114627ef386d5399c4011e33e097e784	refs/heads/feature/ks-1369-onproxyreq-skips-header-writes-once-sent-b43-3
+    6600514d61efd90387cdeb9316635c3ae83a241b	refs/heads/feature/ks-1371-unrevoke-refuses-negative-index-b43-1
+    bf0dfa64a424a3979d8efcb683ce18972a386b1c	refs/heads/feature/ks-1375-verify-fails-closed-on-no-issuer-record-b43-5
+    bf0dfa64a424a3979d8efcb683ce18972a386b1c	refs/pull/1341/head
+    add62ea8114627ef386d5399c4011e33e097e784	refs/pull/1342/head
+    6600514d61efd90387cdeb9316635c3ae83a241b	refs/pull/1343/head
+    ca4aab7f3b33eaafc7ef9dae8891e11c0e46816b	refs/pull/1344/head
+    052f4a3b9c56f78a5fa907a2db8e320105410a54	refs/pull/1345/head
+--- 2. instrument: the GitHub PULLS API (an independent read of each head, and mergeable) + 2b the OVERLAP / WIDEN census
+  pulls API rc=0
+    API #1341 head bf0dfa64a424a3979d8efcb683ce18972a386b1c base develop mergeable True reads 1 state open
+    API #1342 head add62ea8114627ef386d5399c4011e33e097e784 base develop mergeable True reads 1 state open
+    API #1343 head 6600514d61efd90387cdeb9316635c3ae83a241b base develop mergeable True reads 1 state open
+    API #1344 head ca4aab7f3b33eaafc7ef9dae8891e11c0e46816b base develop mergeable True reads 1 state open
+    API #1345 head 052f4a3b9c56f78a5fa907a2db8e320105410a54 base develop mergeable True reads 1 state open
+    CENSUS 20 other open PR(s) read | 0 touch a kit path or carry a kit key | 0 seat-branch PR(s) disjoint | 11 kit path(s), 6 kit key(s)
+  OVERLAP census clean
+--- 3. the heads, judged (both instruments == the pin, open, not mergeable:false, based on develop)
+  #1341  ls-remote pull/head bf0dfa64a424a3979d8efcb683ce18972a386b1c | branch bf0dfa64a424a3979d8efcb683ce18972a386b1c | API bf0dfa64a424a3979d8efcb683ce18972a386b1c (base develop, state open, mergeable True) | pinned bf0dfa64a424a3979d8efcb683ce18972a386b1c
+  #1342  ls-remote pull/head add62ea8114627ef386d5399c4011e33e097e784 | branch add62ea8114627ef386d5399c4011e33e097e784 | API add62ea8114627ef386d5399c4011e33e097e784 (base develop, state open, mergeable True) | pinned add62ea8114627ef386d5399c4011e33e097e784
+  #1343  ls-remote pull/head 6600514d61efd90387cdeb9316635c3ae83a241b | branch 6600514d61efd90387cdeb9316635c3ae83a241b | API 6600514d61efd90387cdeb9316635c3ae83a241b (base develop, state open, mergeable True) | pinned 6600514d61efd90387cdeb9316635c3ae83a241b
+  #1344  ls-remote pull/head ca4aab7f3b33eaafc7ef9dae8891e11c0e46816b | branch ca4aab7f3b33eaafc7ef9dae8891e11c0e46816b | API ca4aab7f3b33eaafc7ef9dae8891e11c0e46816b (base develop, state open, mergeable True) | pinned ca4aab7f3b33eaafc7ef9dae8891e11c0e46816b
+  #1345  ls-remote pull/head 052f4a3b9c56f78a5fa907a2db8e320105410a54 | branch 052f4a3b9c56f78a5fa907a2db8e320105410a54 | API 052f4a3b9c56f78a5fa907a2db8e320105410a54 (base develop, state open, mergeable True) | pinned 052f4a3b9c56f78a5fa907a2db8e320105410a54
+  BOTH INSTRUMENTS AGREE with the pin, 5 of 5.
+--- 3b. develop, read at launch: 0aa9b52c691bb852e3fd1b796514fe9122ebc054 | the pinned develop 0aa9b52c691bb852e3fd1b796514fe9122ebc054
+  UNMOVED since the fill — the END_TREE dd70cc631be4f2f9d8ac6c8744acf109931e4ee1 stands
+--- 4. no test override on a real launch
+--- 5. usage gate
+  usage_gate rc=0
+    usage_gate: OK — weekly usage 46% < 90% (gauge age 1 min)
+--- 6. the launcher's own --check
+  launcher --check rc=0
+    all guards pass:
+      origin develop 0aa9b52c691bb852e3fd1b796514fe9122ebc054 == the pinned develop; END_TREE dd70cc631be4f2f9d8ac6c8744acf109931e4ee1 | #1341 T1 bf0dfa64a424 compare ok (behind 1) | #1342 T1 add62ea81146 compare ok (behind 1) | #1343 T2 6600514d61ef compare ok (behind 1) | #1344 T2 ca4aab7f3b33 compare ok (behind 0) | #1345 T2 052f4a3b9c56 compare ok (behind 0)
+      capture, prompt, QA project and repo present; kit at its filled home; FIVE rows; thinking directive; capture + commission named; no unfilled token
+      5 of 5 heads at branch AND pull/head (whole-field); 5 of 5 GitHub compares == the pins; capture and prompt BOTH carry every head in full and the tickets
+      the prompt carries 29 by-name keywords, the tier lines, the holds, the GO string, the addendum rules, the verdict subject + report dir, develop / END_TREE in full
+      a launch (not --check) will refuse unless stdin is a TTY (exit 21)
+--- 7. launch through the fleet's own tooling (cockpit.sh add), never raw tmux send-keys
+  cockpit.sh add rc=0
+    usage_gate: OK — weekly usage 46% < 90% (gauge age 1 min)
+    pane 'QA/Secuura-batch1341' added (%71)
+--- pane census
+%0 | wednesday | zsh | fleet:0.0
+%71 | QA/Secuura-batch1341 | zsh | fleet:0.1
+%70 | Secuura/Blockchain | zsh | fleet:0.2
+%1 | fleet-monitor | zsh | fleet:0.3
+LAUNCHED 2026-09-29T08:05:14Z over develop 0aa9b52c691bb852e3fd1b796514fe9122ebc054 (END_TREE dd70cc631be4f2f9d8ac6c8744acf109931e4ee1)

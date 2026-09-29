@@ -1,0 +1,145 @@
+{
+ "kit": "gate43",
+ "tag": "g43",
+ "pane": "QA/Secuura-batch1341",
+ "launcher": "launch_qa_secuura_batch1341.sh",
+ "prompt": "2026-09-29_secuura-batch1341.prompt.txt",
+ "report": "2026-09-29-batch1341-g43",
+ "round": 43,
+ "go": "GO (Seat B 45th): merge 1341 1342 1343 1344 1345 on gate43",
+ "merge_seat": "Seat B 45th",
+ "author_seat": "Seat B 44th",
+ "order": [
+  "1341",
+  "1342",
+  "1343",
+  "1344",
+  "1345"
+ ],
+ "order_note": "T1 first (1341, 1342), then the three T2 (1343, 1344, 1345); each merge a squash on the previous tip (pin_gate43.py (G) simulates it with commit-tree on a scratch clone)",
+ "expected_develop": "0aa9b52c691bb852e3fd1b796514fe9122ebc054",
+ "move_1340": {
+  "from": "2cb858335472fafcce535ca4ad328c897ed87bfb",
+  "to": "0aa9b52c691bb852e3fd1b796514fe9122ebc054",
+  "paths": [
+   "Blockchain/Dev/scripts/audit/audit-baseline.json"
+  ]
+ },
+ "prs": {
+  "1341": {
+   "keys": [
+    "KS-1375",
+    "KS-1368"
+   ],
+   "tier": "T1",
+   "service": "packages/shared (verifier.ts) + services/vc-issuer (tests)",
+   "ruling": "Kam (b): verification FAILS CLOSED when no issuer record exists ('no issuer record'); security surface",
+   "expected_parent": "2cb858335472fafcce535ca4ad328c897ed87bfb",
+   "suites": [
+    "packages/shared",
+    "services/vc-issuer"
+   ],
+   "branch": "refs/heads/feature/ks-1375-verify-fails-closed-on-no-issuer-record-b43-5",
+   "subject": "KS-1375: verify fails closed when no authority holds a record for the id",
+   "files": [
+    "Blockchain/Dev/packages/shared/src/vc/verifier.ts",
+    "Blockchain/Dev/services/vc-issuer/src/__tests__/ks1352-revoked-credential-fails-verify.test.ts",
+    "Blockchain/Dev/services/vc-issuer/src/__tests__/ks1375-verify-fails-closed-on-no-issuer-record.test.ts"
+   ],
+   "mandated_body_refs": [
+    "Refs KS-1375",
+    "Refs KS-1368"
+   ]
+  },
+  "1342": {
+   "keys": [
+    "KS-1369"
+   ],
+   "tier": "T1",
+   "service": "services/api-gateway (routes/proxy.ts)",
+   "ruling": "Kam (a): onProxyReq returns early when the outgoing request's headers are already sent (crash guard)",
+   "expected_parent": "2cb858335472fafcce535ca4ad328c897ed87bfb",
+   "suites": [
+    "services/api-gateway"
+   ],
+   "branch": "refs/heads/feature/ks-1369-onproxyreq-skips-header-writes-once-sent-b43-3",
+   "subject": "KS-1369: the gateway proxy hook returns early once the outgoing headers are sent",
+   "files": [
+    "Blockchain/Dev/services/api-gateway/src/__tests__/ks1369-onproxyreq-skips-header-writes-once-sent.test.ts",
+    "Blockchain/Dev/services/api-gateway/src/routes/proxy.ts"
+   ],
+   "mandated_body_refs": [
+    "Refs KS-1369"
+   ]
+  },
+  "1343": {
+   "keys": [
+    "KS-1371"
+   ],
+   "tier": "T2",
+   "service": "services/vc-issuer (routes/status.ts)",
+   "ruling": "validate against the declared bound: unrevoke refuses index < 0 (a Spark raise; KS 662's revoke -1 tolerance kept)",
+   "expected_parent": "2cb858335472fafcce535ca4ad328c897ed87bfb",
+   "suites": [
+    "services/vc-issuer"
+   ],
+   "branch": "refs/heads/feature/ks-1371-unrevoke-refuses-negative-index-b43-1",
+   "subject": "KS-1371: unrevoke refuses an index below the declared minimum",
+   "files": [
+    "Blockchain/Dev/services/vc-issuer/src/__tests__/ks1269-status-unrevoke-refuses-a-non-integer-index.test.ts",
+    "Blockchain/Dev/services/vc-issuer/src/routes/status.ts"
+   ],
+   "mandated_body_refs": [
+    "Refs KS-1371"
+   ]
+  },
+  "1344": {
+   "keys": [
+    "KS-1359"
+   ],
+   "tier": "T2",
+   "service": "services/api-gateway (routes/platform.ts)",
+   "ruling": "Kam (a): the platform audit log refuses wrong-type and below-minimum limit/offset with 400; the KS 5 clamp kept for too-large",
+   "expected_parent": "0aa9b52c691bb852e3fd1b796514fe9122ebc054",
+   "suites": [
+    "services/api-gateway"
+   ],
+   "branch": "refs/heads/feature/ks-1359-platform-audit-log-refuses-bad-bounds-b43-2",
+   "subject": "KS-1359: the platform audit log refuses a bad limit or offset",
+   "files": [
+    "Blockchain/Dev/services/api-gateway/src/__tests__/ks1359-platform-audit-log-refuses-a-bad-limit-or-offset.test.ts",
+    "Blockchain/Dev/services/api-gateway/src/routes/platform.ts"
+   ],
+   "mandated_body_refs": [
+    "Refs KS-1359"
+   ]
+  },
+  "1345": {
+   "keys": [
+    "KS-1360"
+   ],
+   "tier": "T2",
+   "service": "services/wallet-connector (server.ts)",
+   "ruling": "Kam (a): wallet session DELETE reply adds success: true (additive)",
+   "expected_parent": "0aa9b52c691bb852e3fd1b796514fe9122ebc054",
+   "suites": [
+    "services/wallet-connector"
+   ],
+   "branch": "refs/heads/feature/ks-1360-session-delete-carries-success-b43-4",
+   "subject": "KS-1360: the wallet session DELETE reply carries success: true",
+   "files": [
+    "Blockchain/Dev/services/wallet-connector/src/__tests__/ks1360-session-delete-carries-success.test.ts",
+    "Blockchain/Dev/services/wallet-connector/src/server.ts"
+   ],
+   "mandated_body_refs": [
+    "Refs KS-1360"
+   ]
+  }
+ },
+ "base_clone": "/private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/407373b1-2c8c-4c6e-b92a-14f32c2c8007/scratchpad/screen0929/base",
+ "checkout": "/Volumes/DevMASTER/!CODING/Secuura/Blockchain/2_Project_Files",
+ "deploy_key": "/Volumes/DevMASTER/!CODING/Secuura/Blockchain/3_Access_Keys/github_deploy_rw",
+ "author_claim_paths": 15,
+ "widen_branch_rx": "-b4[345]-\\d+$",
+ "widen_note": "an OPEN PR outside the kit on a `-b43-`/`-b44-`/`-b45-` branch (the sixth held branch KS-1054 goes to Seat B 45th unraised) is REPORTED; it refuses (rc 15) only when it touches one of the kit's paths or is titled with a kit key. Any other open PR touching a kit path also refuses rc 15."
+}
