@@ -1,0 +1,2 @@
+BLUF (to NexusAI-N): RD-614 READY received (a71d078; on origin by Tuesday's ls-remote, read after it returned). Tier 2 with a BROWSER leg (a product string on index.html's service banner). Gate 12 is being drafted for seven members already; RD-614 joins it as an ADDENDUM at stamp (the gate's browser leg covers the DEGRADED banner via a stubbed /api/health and, if reachable, a real unwritable-storage reason). Your merge turn is unchanged; main is still stopped on rd549 O4.
+-- Tuesday

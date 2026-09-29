@@ -1,0 +1,25 @@
+{'spf': 'pass', 'dkim': 'pass', 'dmarc': 'pass'}
+BLUF: RD-614 READY FOR QA, tier 2 (your ruling, C-193), Low. Branch rd-614-degraded-banner-title-s86n @ a71d0786af2c, from main ca7de45, not rebased. It is a PRODUCT change: one string in static/js/index.js. It needs the testing agent's browser render before it ships (the testing-agent review rule). Full verify PASS 4232/4232 across 256 suites. C-89 holds.
+
+(i) BRANCH AND SHA: rd-614-degraded-banner-title-s86n @ a71d078 (f515f6e = the change and cell; a71d078 = the counts).
+(ii) SURFACE AND AUTH: a local run of this commit (npm start with a fresh DATA_DIR serves every page in open mode; no auth shim). This is the same commit, NOT the demo image; the demo sits behind RD-76 SSO. To reach the DEGRADED state without breaking a real store, stub /api/health in the browser to answer {status:'DEGRADED', degradedReason:'<a server reason>'}. Or make it real, for example with an unwritable storage volume (storageStatus 'unwritable' gives the storage reason).
+(iii) FLOW AND SCREEN: the dashboard (index.html) service banner, DEGRADED branch only.
+  BEFORE: "Service degraded — data source unreachable." + the reason
+  AFTER:  "Service degraded — some features may not work." + the reason (unchanged)
+  Measured by me in Chromium (Playwright), serving static/ from main ca7de45 (before) and the branch (after), with /api/health stubbed to the server's own storage reason. Read from the DOM:
+    before: {shown:true, title:"Service degraded — data source unreachable.", message:"Persistent storage volume is not writable — saved settings cannot be updated. Check the Azure Files mount."}
+    after:  {shown:true, title:"Service degraded — some features may not work.", message: same}
+  Screenshots: session-tools/s86n/rd614/rd614-degraded-banner-{before,after}.png. HONEST LIMIT: in both, the banner is under a dimming overlay that the stubbed page never clears (the dashboard's data calls got {} stubs). I did not remove it, because that would change the render. The DOM text above is the measurement; the images only confirm placement. The tester's real render is the gate.
+
+SETS (hold s86n-rd614-r1, floor 0, control rose)
+- New __tests__/rd614-degraded-banner-title.test.js renders the shipped banner through RD-441's jsdom helper, fed the server's own reason strings:
+  - T1: storage reason; the title is exact and names no data source.
+  - T2: storage, Log Analytics fallback, and a combined 'a; b' reason each get the same title and their own message.
+- On the branch: rd614 2/2 and rd441 19/19 (B2's /Service degraded/ still matches).
+- M-old (the old string back): T1 and T2 both red ({title:"...data source unreachable.", namesDataSource:true}). The trap restored index.js.
+- Full verify: VERDICT PASS 4232/4232, 256 suites.
+
+PRIOR WORK (C-49): RD-441's B2 and its render helper are KEPT unchanged. The stale-data (RD-62) and persistence-alarm branches are untouched. Ruling: C-193.
+DISCLOSURE: my two static servers for the screenshots (127.0.0.1:38771 and :38772, my own pids 49769 and 49771) ran for about 2 minutes DURING this verify, after its first floor check. They are outside every test band, and both are stopped (by pid) and confirmed gone. The verify's second floor read 0 foreign servers.
+Evidence: session-tools/s86n/rd614/.
+-- S86N
