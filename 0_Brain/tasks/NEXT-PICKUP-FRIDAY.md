@@ -12,6 +12,32 @@ supersede: replace wholesale; previous = NEXT-PICKUP-FRIDAY.md.pre-0925-rotate-s
 
 **The tree is at `/Users/kamilkreiser/1FILES TO SYNC/FRIDAY`.** Quote every path (spaces).
 
+## 🔴 STATE 2026-09-29 11:0x (Friday) — supersedes the 09:2x block where they differ
+- **LIVE SEATS:**
+  - HPSM-POC-A (%7): B49 sections, idle by design. Once #52 merges: rebase, add the contract commit, un-draft PR #51, merge.
+  - HPSM-POC-B (%8): B50 feedback, FIX ROUND 2 from `Briefs/2026-09-29_B50_ADDENDUM-1_gate-findings-fix-round.md`.
+  - HPSM-POC-QA (%10): re-gates #52 at round 2 (the cap: a second NO GO ships what closed and tickets the rest).
+  - Composer-A (%11): B16 done; PR datasecau/HPSM-light #9 @ 4bffb38.
+  - Composer-B (%13): the B17 QA gate on #9.
+- **MERGED today:** HPSM-analysis #1 · HPSM-POC-analysis #1, #2, #3 (records) · HPSM-POC #50 (B51 collateral; main 70eb4f0). The org CodeQL ruleset → every records change goes by PR (a branch + `friday_as.sh datasec gh pr create/merge --match-head-commit`).
+- **Kam emailed today:**
+  - 5 HP asks (HP-4..8) at 08:58;
+  - the consolidated follow-up for Steve at 11:0x (copy block = B53's `Registers/2026-09-29_HP-follow-up-bullet-list_DRAFT-FOR-KAM.md`).
+- **Kam cards OPEN (10):**
+  - hpsmpoc-c30-policy-principles-and-sections
+  - hpsmpoc-c30-feedback-route
+  - hpsmpoc-hosted-link-for-hp
+  - hpsmpoc-client-followup-model
+  - hpsmpoc-section-intro-video-scope
+  - hpsmpoc-weighting-matrix-owner
+  - hpsmpoc-transcript-gaps
+  - hpsmpoc-good-better-best-tiers-scope
+  - composer-two-logins-deploy-for-paul-friday (Kam told Paul "end of the week" = Fri 2 Oct)
+  - composer-paul-110-questions-source
+  - composer-guided-wizard-four-choices
+- **Next when rulings land:** L3 client follow-up (HPSMPOC-89) · L4 pack 2 · HPSMPOC-94 guided expert remediation (needs HP's Jason O'Keefe content) · a Composer deploy only on Kam's tap.
+- Leftovers: pc-b16 stack (the B16 builder's) · the B52 QA worktrees · `.tools/wt-B53-records`. Quarantine, never delete.
+
 ## 🔴 STATE 2026-09-29 09:2x (Friday, drive seat) — supersedes every block below where they differ
 **Kam met HP at 07:05 (the meeting was about HPSM-POC, NOT HPSM; Friday's first brief got that wrong and corrected it). Kam is travelling; his words: "continue with the project".**
 - **Tree:** /Volumes/Laptop-DEV/FRIDAY (the drive). The 09-28 wrap branch has been picked (f7d9561cc). main is level with origin at each commit.
