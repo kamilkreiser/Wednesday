@@ -1,0 +1,28 @@
+LAUNCH ACTION gate47 (DRY RUN) 2026-09-30 00:20:16 AEST / 2026-09-29T14:20:16Z | launcher /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/gatesets/2026-09-30_gate47/launch_qa_secuura_batch1349.sh | pinned develop a72149a1a803d802430568254e7fa9afa7029321 | END_TREE 6930599560c93f3a6cd929cc634b537a2eeb2eaf
+  pin #1349 daab8ff3bff564ee89d4e03cb36a9af04d9b4c9e (refs/heads/feature/ks-1374-pace-by-scanned-target-b46-1)
+  pin #1350 8f4f0ef1496304cc853532b686e92bb886fa027d (refs/heads/feature/ks-1054-skipped-check-stops-reading-as-a-pass-b46-2)
+--- 0. the pane must be routed (inbox_routing.conf) or cockpit.sh say --mail fails silently
+  routing file /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/inbox_routing.conf — line present: 0 (grep rc=1; want 1 / rc 0)
+  (DRY RUN: reported, not refused — the real run refuses rc 1 here)
+--- 0b. the kit's home: launcher filled for /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/gatesets/2026-09-30_gate47 | this script lives in /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/gatesets/2026-09-30_gate47
+  AT HOME — no re-fill
+--- 1. instrument: git ls-remote origin (ONE read from the Secuura checkout, READ-ONLY)
+  ls-remote rc=0 at 14:20:21Z
+    a72149a1a803d802430568254e7fa9afa7029321	refs/heads/develop
+    8f4f0ef1496304cc853532b686e92bb886fa027d	refs/heads/feature/ks-1054-skipped-check-stops-reading-as-a-pass-b46-2
+    daab8ff3bff564ee89d4e03cb36a9af04d9b4c9e	refs/heads/feature/ks-1374-pace-by-scanned-target-b46-1
+    daab8ff3bff564ee89d4e03cb36a9af04d9b4c9e	refs/pull/1349/head
+    8f4f0ef1496304cc853532b686e92bb886fa027d	refs/pull/1350/head
+--- 2. instrument: the GitHub PULLS API (an independent read of each head, and mergeable) + 2b the OVERLAP / WIDEN census
+  pulls API rc=0
+    API #1349 head daab8ff3bff564ee89d4e03cb36a9af04d9b4c9e base develop mergeable True reads 1 state open
+    API #1350 head 8f4f0ef1496304cc853532b686e92bb886fa027d base develop mergeable True reads 1 state open
+    CENSUS 20 other open PR(s) read | 0 touch a kit path or carry a kit key | 0 seat-branch PR(s) disjoint | 6 kit path(s), 2 kit key(s)
+  OVERLAP census clean
+--- 3. the heads, judged (both instruments == the pin, open, not mergeable:false, based on develop)
+  #1349  ls-remote pull/head daab8ff3bff564ee89d4e03cb36a9af04d9b4c9e | branch daab8ff3bff564ee89d4e03cb36a9af04d9b4c9e | API daab8ff3bff564ee89d4e03cb36a9af04d9b4c9e (base develop, state open, mergeable True) | pinned daab8ff3bff564ee89d4e03cb36a9af04d9b4c9e
+  #1350  ls-remote pull/head 8f4f0ef1496304cc853532b686e92bb886fa027d | branch 8f4f0ef1496304cc853532b686e92bb886fa027d | API 8f4f0ef1496304cc853532b686e92bb886fa027d (base develop, state open, mergeable True) | pinned 8f4f0ef1496304cc853532b686e92bb886fa027d
+  BOTH INSTRUMENTS AGREE with the pins, 2 of 2.
+--- 3b. develop, read at launch: a72149a1a803d802430568254e7fa9afa7029321 | the pinned develop a72149a1a803d802430568254e7fa9afa7029321
+  UNMOVED since the fill — the END_TREE 6930599560c93f3a6cd929cc634b537a2eeb2eaf stands
+DRY RUN COMPLETE 2026-09-29T14:20:34Z — every read agrees with the pins; the real run continues with the override check, the usage gate, --check and cockpit.sh add

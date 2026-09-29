@@ -1,0 +1,159 @@
+{
+ "read_at": "2026-09-29T14:07:49Z",
+ "prs": {
+  "1349": {
+   "title": "KS-1374: pace the Akto scan by the target it attacks, override included",
+   "state": "open",
+   "head": "daab8ff3bff564ee89d4e03cb36a9af04d9b4c9e",
+   "branch": "feature/ks-1374-pace-by-scanned-target-b46-1",
+   "base": "develop",
+   "mergeable": true,
+   "mergeable_state": "unstable",
+   "files": [
+    "systemTest/akto/src/setup/aktoRateLimit.ts",
+    "systemTest/akto/tests/unit/setup/ks1374-n1347-11-scan-target-override.test.ts"
+   ],
+   "commits": [
+    [
+     "daab8ff3bff564ee89d4e03cb36a9af04d9b4c9e",
+     "KS-1374: pace the Akto scan by the target it attacks, override included"
+    ]
+   ],
+   "body": "## Why this change exists\n\nKam's instruction, verbatim (live board, relayed by Tuesday):\n\n> **16:17:55** \"Peter has responded to KS-1374 on WhatsApp. can you please make the change\"\n> **16:18:57** \"his reply was for us to implement the change\"\n\n\"The change\" as shipped in #1347 was: raise the pacing limit on LOCAL stacks only, demo and\nproduction as deployed. **N-1347-11 is where #1347 still fell short of \"local only\".**\n\n## The finding this closes\n\n**N-1347-11** (gate45 report `:329`, evidence `evidence/probeB_loader.*`, `probeC_hostforms.*`,\n`dotenv_order_target.*`, at\n`Testing Agent MAIN/projects/secuura/reports/2026-09-29-batch1348-g45/report.md`).\n\n`isLocalScanTarget()` read `SECUURA_API_URL` alone, but the host akto-testing is actually pointed at\nis `config.overrideAppUrl || config.secuuraUrl` (`systemTest/akto/src/scan/scanOptions.ts:98`). So a\nscan aimed at the demo through `OVERRIDE_APP_URL`, with `SECUURA_API_URL` local or unset, read the\ntarget as LOCAL and paced at **7500/min against a stack that allows 2000** \u2014 gate45's measurement.\ndevelop before #1347 paced the same configuration at 1500.\n\nIt is reachable by editing the one variable the docs invite you to edit\n(`systemTest/akto/.env.example:123`, `configuration.md:424`), and `slot-target.sh:102` keeps a remote\nOVERRIDE while resetting SECUURA to the slot's localhost.\n\n**Why it was Minor and not blocking:** reaching it needs a split configuration in which the harness\nlogs in to the LOCAL stack (`secuuraAuth.ts:70`) and attacks the remote one with local tokens, so\nsuch a scan is already invalid. The documented demo profile sets both variables, and every CI\nworkflow paces correctly.\n\n## The fix\n\nOne product line \u2014 the same precedence `scanOptions.ts:98` already uses for the host it attacks:\n\n```ts\nconst raw = env('OVERRIDE_APP_URL') || env('SECUURA_API_URL');\n```\n\nplus the function's docstring and `@example`, updated only where they became false. This is the trap\nKS 687 fixed in pre-flight, which probed `host.docker.internal` while the scan attacked something\nelse: the question \"what are we scanning?\" now has one answer in this package instead of two.\n\nEvery existing contract is kept: both unset \u2192 local (the slot default); a malformed URL \u2192 NOT local\n(paces at 2000, never faster); `AKTO_PLATFORM_REQUESTS_PER_MINUTE` still overrides for any target;\n`Math.max(1, \u2026)` stays.\n\n**Measured, not reasoned:** `isLocalScanTarget()` takes no arguments, so no caller can hand it a\n`toDockerUrl`-rewritten host, and `toDockerUrl` touches only the `localhost` token\n(`scanOptions.ts:96-97`). An operator-set `OVERRIDE_APP_URL=http://host.docker.internal:6882/api`\ntherefore reads NOT local and paces at 2000 \u2014 slower than intended, the safe direction. Pinned as\nRED-4 rather than left as an argument.\n\n## Test Evidence\n\n**Touched:** `systemTest/akto/src/setup/aktoRateLimit.ts` (+21/\u22126),\n`systemTest/akto/tests/unit/setup/ks1374-n1347-11-scan-target-override.test.ts` (new, +212).\nTwo files. No gateway, compose, bicep or env-template line moves.\n\n**Ran** (every count named with the SHA it was measured on):\n\n- Baseline at develop `8c810023f9c9`, measured here and not quoted from the gate: **93 files / 1654\n  tests, 0 failed.**\n- **Red-first on the final cell text: 4 failed / 5 passed.** The four are RED-1..RED-4 by name; all\n  five controls green. 4-and-5 rather than 0-and-0, which would have been a load failure \u2014 the cell\n  imports only symbols develop exports.\n- **Green with the fix: 9/9.** Whole unit suite at `daab8ff3bff5`: **94 files / 1663 tests, 0\n  failed** \u2014 exactly +1 file and +9 tests over baseline, so nothing else moved.\n- **Tamper arm.** Anchor uniqueness proved first (1 occurrence; control: `const raw = ` occurs twice,\n  so a looser anchor would have been refused). Reverting the product to its passing pre-fix value\n  reddens exactly RED-1..RED-4 and leaves the five controls green. Restored **byte-equal**, sha256\n  `5cd96cbac429cf70e3f8e24c` both sides; green again 9/9.\n- `npm run lint` **rc 0** (tsc + eslint + stylelint), `prettier --check` rc 0 over src and tests.\n  Each rc measured directly, not read off `$?` after a pipe.\n\n**A correction to my own first draft, because the counts moved:** three arms were first labelled\nCONTROL \u2014 the malformed-URL arm, the `host.docker.internal` arm, and an `isLocalScanTarget()`\nassertion inside C5. All three were RED at develop, which makes them red-first arms, not controls; a\ncontrol that fails before the fix proves nothing about the fix. Red went 5 \u2192 4 and green 4 \u2192 5, and\nC5 now asserts only the pace, which is 3000 on both sides because the override variable returns\nfirst. eslint also found three real errors in the first draft of the cell\n(`@typescript-eslint/no-dynamic-delete` on a computed-key `delete`); fixed by matching this package's\nown idiom \u2014 64 literal-key deletes across `tests/unit`, and `Reflect.deleteProperty` appears nowhere\n\u2014 rather than by suppressing the rule.\n\n**NOT run, and why:**\n\n- **The pre-push preflight's 15 legs did not run in-hook.** The hook fast-skips a systemTest-only\n  push by design (`.githooks/pre-push:5`, and `[ -z \"$changed\" ] && exit 0` at `:254`); both changed\n  paths are under `systemTest/`, verified, with #1348's non-systemTest paths as the control. What did\n  run in-hook is the KS 989 systemTest formatting gate: **1 package checked, 0 skipped, 0 failed.**\n- **So the two audit legs were RUN BY HAND against this head instead**, rather than left unclaimed.\n  Both on `daab8ff3bff5`, each rc measured directly:\n  `npm run audit:gate` **rc 0** \u2014 23 distinct advisories reported, 25 baselined, \"no advisories\n  outside the triaged baseline\"; `npm run audit:locks` **rc 0** \u2014 43 standalone lockfiles, 1612\n  packages pinned, 18 advisories matched and all 18 already baselined.\n  The gate also emits an advisory-only CLEANUP note: two baseline entries are no longer reported\n  (`GHSA-v2v4-37r5-5v8g`, KS 470, and `GHSA-mwp4-54f8-5fhr`, KS 729). That cleanup is owed but is\n  **out of scope here** and no baseline row was touched by this PR.\n- **No Akto scan was run against any stack.** The behaviour is unit-proven only.\n- The other three platform suites (Schemathesis, Playwright, Performance) were not run: this change\n  is confined to the Akto harness's own pacing helper and touches no API surface.\n\n**Migrations + config:** none. No migration, no `.env`, no compose, no bicep, no env template.\n\n## NOT COVERED\n\n- A remote stack reached through a localhost port-forward or SSH tunnel still reads as local. Stated,\n  not built for; `AKTO_PLATFORM_REQUESTS_PER_MINUTE` is the operator's answer there and still\n  outranks every target check.\n- **The demo's real `RATE_LIMIT_MAX_REQUESTS` is still unread** \u2014 its environment file is not in this\n  repository. `services.bicep:681` sets 2000 for `dev` and 100 otherwise.\n- `systemTest/akto/.env.example` and `configuration.md` are deliberately unedited. The comment at\n  `.env.example:123` is about URL derivation, which this change does not alter.\n- A CI stack counts as local by Wednesday's reading, because `internal-audit.yml:94` copies\n  `env.example` to `.env`. Kam's word overrides that if he reads it differently.\n\nRefs KS-1374\n"
+  },
+  "1350": {
+   "title": "KS-1054: a skipped startup-migration check stops reading as a clean pass",
+   "state": "open",
+   "head": "8f4f0ef1496304cc853532b686e92bb886fa027d",
+   "branch": "feature/ks-1054-skipped-check-stops-reading-as-a-pass-b46-2",
+   "base": "develop",
+   "mergeable": true,
+   "mergeable_state": "unstable",
+   "files": [
+    "Blockchain/Dev/deployment/azure/check-startup-migrations.sh",
+    "Blockchain/Dev/deployment/azure/deploy-all.sh",
+    "Blockchain/Dev/deployment/azure/deploy.sh",
+    "Blockchain/Dev/scripts/__tests__/ks1054_deploy_scripts_read_startup_migrations.test.sh"
+   ],
+   "commits": [
+    [
+     "8f4f0ef1496304cc853532b686e92bb886fa027d",
+     "KS-1054: a skipped startup-migration check stops reading as a clean pass"
+    ]
+   ],
+   "body": "## The ruling this implements\n\nKam, on `secuura-ks1054-f9282-migration-failure-visibility`, option (a), verbatim:\n\n> **[a] Keep serving, flag it on /health** \u2014 The migration run returns its failed count. /health\n> reports it, so the deploy scripts' existing /health checks (deploy-all.sh:281, deploy.sh:823) see it\n> and the deploy reads as failed. The running service is not stopped.\n\n## The defect, in one sentence\n\n`check-startup-migrations.sh` already distinguished **three** states in its OUTPUT \u2014 a clean tick, a\nnamed skip, a failure \u2014 and then collapsed the first two into **rc 0**. Neither caller could tell\n\"ran clean\" from \"never ran\", so both printed a passing line for a check that did not run. The\ninformation existed and was thrown away at the boundary. That is why gate44's N-1346-2, N-1346-3 and\nN-1346-4 are one item and not three one-liners.\n\n## The change: a third exit code\n\n- **rc 0** \u2014 the check RAN and was clean.\n- **rc 1** \u2014 the deploy step FAILS: migrations failed, `failed` malformed, **or python3 is absent**.\n- **rc 2** \u2014 **PASS-WITH-SKIP**: `ran:false`, field ABSENT, body EMPTY, body non-JSON. The deploy\n  still PASSES \u2014 that is the rollback rule \u2014 but the caller stops reporting a clean run.\n\n`ran:false` is now read **before** `failed`, which is the whole of N-1346-2: a `{ran:false,\nfailed:0}` body used to print a clean \"0 failed\" tick, the most misleading of the four skip shapes\nbecause it names the field and reports a number.\n\n\u26a0 **rc 2 is not backwards-compatible with either call site, deliberately.** Both wrote\n`if predicate` / `if ! predicate`, under which rc 2 is a truthy failure. Shipping the predicate alone\nwould flip ABSENT from pass to FAIL and break the rollback rule. **The predicate and both callers\nchange in one commit**; neither half is separately correct. That is not theoretical \u2014 see the Test\nEvidence note about the moment the suite read 36/0 green while `deploy.sh` would have failed a\nrollback.\n\n## N-1346-4: python3 absent now FAILS CLOSED, and that changed during review\n\nI proposed rc 2 (pass-with-skip, message naming the parser). **Wednesday ruled rc 1, fail closed**,\nand her reasoning is the one that holds: a missing parser is a **host** defect, not an image\nproperty, so the rollback argument that protects the ABSENT case does not reach it. `deploy-all.sh`\n**already** fails a deploy without python3, at its login-token parse (`:299`), so failing closed makes\n`deploy.sh` consistent with the script beside it rather than inventing a new failure mode. And Kam's\nruling is explicit that the deploy reads as FAILED. Recorded as a decision, not presented as obvious.\n\n## Behaviour per script, per body shape (measured on the merged develop, not reasoned)\n\n| body shape | deploy.sh before | deploy.sh after | deploy-all.sh before | deploy-all.sh after |\n|---|---|---|---|---|\n| `{ran:true,failed:0}` | pass, \"all checks OK\" | unchanged | `\u2713`, exit 0 | unchanged |\n| `{ran:false,failed:0}` | **`\u2713 0 failed`, \"all checks OK\"** | `\u26a0 SKIPPED`, **still exit 0**, \"passed with 1 check(s) SKIPPED\" | **`\u2713` PASS** | `\u26a0 SKIPPED`, SKIP++, **still exit 0** |\n| ABSENT | **\"all checks OK\"** | `\u26a0 SKIPPED`, **still exit 0** | **`\u2713` PASS** | `\u26a0 SKIPPED`, SKIP++, **still exit 0** |\n| EMPTY | exit 1 (via the health grep) | **exit 1, unchanged** | **`\u2713` PASS** | `\u26a0 SKIPPED`, SKIP++, exit 0 |\n| non-JSON | exit 1 (same route) | **exit 1, unchanged** | **`\u2713` PASS** | `\u26a0 SKIPPED`, SKIP++, exit 0 |\n| `failed:2` / malformed | exit 1 | unchanged | `\u2717` FAIL | unchanged |\n| **python3 absent** | **exit 0, \"all checks OK\", body misreported as \"not JSON\"** | **exit 1, naming the parser** | exit 1 via the login parse | `\u2717` FAIL, naming the parser |\n\n**Exit statuses are unchanged on all four skip shapes.** Only python3-absent moves, and only because\nthat was ruled. The EMPTY / non-JSON divergence between the two scripts is **kept** and is listed in\nNOT COVERED: closing it either way would change what a real deploy does on a live path.\n\n## Test Evidence\n\n**Touched:** `deployment/azure/check-startup-migrations.sh` (+57/\u2212\u2026),\n`deployment/azure/deploy.sh`, `deployment/azure/deploy-all.sh`, and the ks1054 shell suite. Four\nfiles, +378/\u221230.\n\n**Ran**, each count named with the SHA and the platform it was measured on:\n\n- Baseline at develop `a72149a1a803`: **14 passed / 0 failed**. At head `8f4f0ef14963`: **36 passed /\n  0 failed** on macOS (bash 3.2.57) **and on GNU** (`python:3.12-slim`, bash 5.2.37, coreutils 9.7,\n  Python 3.12.14 \u2014 all three printed in the same run, per N-1348-1).\n- **Red-first, in two stages.** The predicate cells first: 15 passed / **7 failed** against the\n  unchanged product. Then the caller cells: 28 passed / **5 failed**, with R1 red \u2014 which is the one\n  that mattered, because at that moment the predicate returned rc 2 and `deploy.sh` would have FAILED\n  a deploy over an ABSENT field. **No P-cell could see that**: it is a property of the call sites.\n- **Test half alone: 19 passed / 14 failed.** Product files restored to develop, my cells kept \u2014 so\n  14 cells are driven by the product change, and restoring gave 36/0 again.\n- **Eight tamper arms, each setting the product to the PASSING value, each required to red**, each\n  anchor proved unique first and each file restored byte-equal afterwards: ABSENT `exit 2\u21920` reds P4;\n  the `ran:false` branch disabled reds P8; the python3 guard disabled reds P9 and P9b; EMPTY\n  `exit 2\u21920` reds P7; the call site counting rc 2 as an ERROR reds R1; the summary's third arm\n  removed reds R5; deploy-all's SKIP turned back into a PASS reds R8; and the `return` replaced by an\n  unstubbed helper reds E1.\n- **Whole shell suite: 61 passed, 0 failed, 0 skipped (of 61)**, rc 0.\n- **Recorded modes** by `git ls-tree` at the head: `100755` on all three scripts, with the test file\n  at `100644` **in the same commit** as the control. `core.filemode` is false, so the on-disk bit is\n  not evidence. `bash -n` clean on all four files.\n\n**NOT run:** the scripts were run against **no real environment** \u2014 no deploy, no migration, no live\n`/health`. The pre-push preflight ran **12 of 15 legs with 3 SKIPPED** (legs 3, 4 and 8 \u2014 no local\nstack on port 6882) and nothing failed; the hook's own output says that is not a pass, so it is quoted\nas a ratio. A GitHub squash merge runs no local hook.\n\n**Migrations + config:** none. No migration, no `.env`, no compose, no bicep, no env template, no\nbaseline row.\n\n## Two findings from gate46 folded in, as directed\n\n- **N-1348-6** \u2014 E1 accepted **any** non-zero rc, so an edit that dropped the `return` and ended the\n  branch on a helper the driver did not stub kept the suite green while the real script exited 0 over\n  failed migrations. E1 now requires rc **exactly 1**, and every `log_*` helper is stubbed. **Driven\n  both ways:** under the pre-hardening `!= \"0\"` test the same tamper leaves the suite **36/0 green**,\n  and under the hardened test it reds. The hole was real and this closes it.\n- **N-1348-7** \u2014 a comment claimed \"The TAMPER_RETURN_ZERO arm below drives it\"; `git grep` found that\n  line and nothing else, so the file made a false statement about itself. Corrected here rather than\n  in #1348, because a new head would have voided the gate that graded it.\n\n## A correction to one of my own cells, because a tamper caught it\n\nR8 began life as `grep -q smoke_skip`. The tamper that replaces the skip **call** with\n`smoke_test \u2026 \"0 failed\" \"0 failed\"` \u2014 precisely the regression the cell exists to stop \u2014 left the\n`smoke_skip()` **definition** in the file, so the grep still matched and the suite stayed green. A\npresence-grep cannot see whether a path is wired. R8 now extracts and **executes** deploy-all.sh's own\ncall site against a stub predicate and asserts the counters, with rc 0 and rc 1 as controls.\n\n## NOT COVERED\n\n- **The EMPTY / non-JSON divergence between the two scripts is kept, for Kam** (gate45 N-1348-3):\n  `deploy.sh` aborts on those two shapes via its health check, `deploy-all.sh` passes them. Closing\n  it in either direction changes a live deploy outcome.\n- **N-1346-9 is out of scope**: `deploy-all.sh --skip-build` deploys a tag no build produced, so it\n  has no working rollback path. That is on Wednesday's backlog, not this PR.\n- The scripts are not exercised against any real environment, so the rendering is proven by driving\n  their own extracted bytes, not by a deploy.\n- **RUNTIME change on the deploy path: a live sweep is owed** and KS-1054 stays In Progress.\n\nRefs KS-1054\n"
+  }
+ },
+ "open": [
+  {
+   "number": 1350,
+   "title": "KS-1054: a skipped startup-migration check stops reading as a clean pass",
+   "branch": "feature/ks-1054-skipped-check-stops-reading-as-a-pass-b46-2"
+  },
+  {
+   "number": 1349,
+   "title": "KS-1374: pace the Akto scan by the target it attacks, override included",
+   "branch": "feature/ks-1374-pace-by-scanned-target-b46-1"
+  },
+  {
+   "number": 1253,
+   "title": "KS-1297 GUARDGAPS: anchor the abort counts, cover the worktree, pin bare call sites",
+   "branch": "feature/ks-1297-fixture-guard-anchor-and-two-gaps-l5-1"
+  },
+  {
+   "number": 1250,
+   "title": "KS-1302 + KS-1303 RSSTRAP: trap the runner's short TMPDIR, and drop the output pipe",
+   "branch": "feature/ks-1302-runner-tmpdir-residue-and-orphan-pipe-l5-1"
+  },
+  {
+   "number": 1129,
+   "title": "docs(history): 2026-09-21 local rebuild on develop 7be81d5c9, OOM diagnosis, preflight 15/15",
+   "branch": "chore/history-2026-09-21-local-rebuild-preflight"
+  },
+  {
+   "number": 995,
+   "title": "KS-741: strip `x-emitter-internal` at originate's own inbound \u2014 the marker's non-spoofability no longer rests on an unstated convention",
+   "branch": "feature/ks-741-x-emitter-internal-is-unstripped-on-the-originate-route-the"
+  },
+  {
+   "number": 989,
+   "title": "KS-973: the pre-suite step redacts the generated password, pins its DEGRADED stream, drives its second quarantine call \u2014 items 5, 6 + two residues; items 3/4 wait for #927; items 1/2 are L11/L12 files",
+   "branch": "feature/ks-973-ks-969-round-1-gate-residue-the-pre-suite-step-and-its-own"
+  },
+  {
+   "number": 949,
+   "title": "chore(deps-dev): bump prisma from 7.8.0 to 7.10.0 in /Blockchain/Dev",
+   "branch": "dependabot/npm_and_yarn/Blockchain/Dev/develop/prisma-7.10.0"
+  },
+  {
+   "number": 948,
+   "title": "chore(deps): bump vite from 6.4.3 to 8.3.1 in /Blockchain/Dev",
+   "branch": "dependabot/npm_and_yarn/Blockchain/Dev/develop/vite-8.2.2"
+  },
+  {
+   "number": 947,
+   "title": "chore(deps-dev): bump @testing-library/jest-dom from 6.9.1 to 7.0.1 in /Blockchain/Dev",
+   "branch": "dependabot/npm_and_yarn/Blockchain/Dev/develop/testing-library/jest-dom-7.0.1"
+  },
+  {
+   "number": 946,
+   "title": "chore(deps): bump @fluentui/react-icons from 2.0.331 to 2.0.339 in /Blockchain/Dev",
+   "branch": "dependabot/npm_and_yarn/Blockchain/Dev/develop/fluentui/react-icons-2.0.339"
+  },
+  {
+   "number": 945,
+   "title": "chore(deps-dev): bump @axe-core/playwright from 4.11.3 to 4.13.0 in /Blockchain/Dev",
+   "branch": "dependabot/npm_and_yarn/Blockchain/Dev/develop/axe-core/playwright-4.13.0"
+  },
+  {
+   "number": 927,
+   "title": "KS-1027: close Peter's four #904 follow-ups \u2014 the OTHER cp, the stash the refusal deleted, and the duplication nobody had justified",
+   "branch": "feature/ks-1027-ks992-followups"
+  },
+  {
+   "number": 923,
+   "title": "KS-736: the mount-auth check scored authenticateToken(false) as green, and could not see half its own surface",
+   "branch": "kamilkreiser/ks-736-mount-auth-retag"
+  },
+  {
+   "number": 920,
+   "title": "KS-734: make tests/e2e runnable from a clean checkout, and baseline what it actually reports",
+   "branch": "kamilkreiser/ks-734-e2e-suite-installable"
+  },
+  {
+   "number": 887,
+   "title": "KS-961: run the workspace suites on the PR, advisory and non-blocking \u2014 and they are RED on develop today",
+   "branch": "feature/ks-961-workspace-suites-advisory-on-pr"
+  },
+  {
+   "number": 809,
+   "title": "KS-693 (interim): guard the 8 M365/OneDrive/Teams unconfigured-503 ops so the merge gate reads a real floor",
+   "branch": "feature/ks-693-tolerate-m365-unconfigured-503"
+  },
+  {
+   "number": 649,
+   "title": "chore(deps): bump pg and @types/pg in /Blockchain/Dev",
+   "branch": "dependabot/npm_and_yarn/Blockchain/Dev/develop/multi-8cb89e51b7"
+  },
+  {
+   "number": 639,
+   "title": "chore(deps): bump @radix-ui/react-dropdown-menu from 2.1.16 to 2.1.24 in /Blockchain/Dev",
+   "branch": "dependabot/npm_and_yarn/Blockchain/Dev/develop/radix-ui/react-dropdown-menu-2.1.24"
+  },
+  {
+   "number": 635,
+   "title": "chore(deps): bump cbor from 9.0.2 to 10.0.12 in /Blockchain/Dev",
+   "branch": "dependabot/npm_and_yarn/Blockchain/Dev/develop/cbor-10.0.12"
+  },
+  {
+   "number": 575,
+   "title": "chore(deps): bump dotenv from 16.6.1 to 17.4.2 in /Blockchain/Dev",
+   "branch": "dependabot/npm_and_yarn/Blockchain/Dev/develop/dotenv-17.4.2"
+  },
+  {
+   "number": 572,
+   "title": "chore(deps-dev): bump @types/office-js from 1.0.599 to 1.0.610 in /Blockchain/Dev in the types group across 1 directory",
+   "branch": "dependabot/npm_and_yarn/Blockchain/Dev/develop/types-1409c3626d"
+  }
+ ]
+}

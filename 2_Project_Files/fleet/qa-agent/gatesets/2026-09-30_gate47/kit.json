@@ -1,0 +1,105 @@
+{
+ "kit": "gate47",
+ "tag": "g47",
+ "pane": "QA/Secuura-batch1349",
+ "launcher": "launch_qa_secuura_batch1349.sh",
+ "prompt": "2026-09-30_secuura-batch1349.prompt.txt",
+ "report": "2026-09-30-batch1349-g47",
+ "round": 47,
+ "go": "GO (Seat B 46th): merge 1349 1350 on gate47",
+ "merge_seat": "Seat B 46th",
+ "author_seat": "Seat B 46th",
+ "order": [
+  "1349",
+  "1350"
+ ],
+ "order_note": "#1349 first (T2, systemTest-only, ONE commit behind develop: it was raised on 8c810023f9c9 before #1348 landed), then #1350 (T1, a deploy-path RUNTIME change raised on the current develop a72149a1a803). Paths are disjoint; each merge a squash on the previous tip (pin_gate47.py (F) simulates it with commit-tree on a scratch clone, and (G) chains the REVERSE order to show the order does not change END).",
+ "expected_develop": "a72149a1a803d802430568254e7fa9afa7029321",
+ "prev_report": "/Volumes/DevMASTER/!CODING/Testing Agent MAIN/projects/secuura/reports/2026-09-29-batch1348r2-g46/report.md",
+ "prev_report_sha256": "269ac9b34c566ff520da5d8bef10b01c23784bb3c4cbd19b42d08a38dd8e56d4",
+ "g45_report": "/Volumes/DevMASTER/!CODING/Testing Agent MAIN/projects/secuura/reports/2026-09-29-batch1348-g45/report.md",
+ "hook_paths": [
+  ".githooks/pre-push",
+  "Blockchain/Dev/scripts/preflight/preflight.sh",
+  "systemTest/scripts/check-package-format.sh"
+ ],
+ "prs": {
+  "1349": {
+   "keys": [
+    "KS-1374"
+   ],
+   "tier": "T2",
+   "tier_reason": "tier 2 (through-code only): a follow-up PR whose MECHANISM the prior gate already measured (gate45 measured N-1347-11 and wrote the one-line fix it implements); systemTest/akto harness pacing + a unit test; it deploys nothing, touches no security surface of the product, and is not a test block handed to Peter or Stuart. Precedent: #1347 (same KS-1374 class, same file) was T2 in gate44 and gate45.",
+   "round": "ROUND 1 of its own PR (#1349 is new; the KS-1374 class reached round 2 of 2 in gate45, whose GO shipped #1347 and TICKETED the residue N-1347-11 as a KS-1374 checklist item \u2014 #1349 is that ticketed residue re-opened as its own commission per the tiering rule)",
+   "service": "systemTest/akto/src/setup/aktoRateLimit.ts (isLocalScanTarget keyed on OVERRIDE_APP_URL || SECUURA_API_URL) + a new vitest unit file (9 cells: RED-1..RED-4, CONTROL C1..C5)",
+   "ruling": "Kam 16:17:55 / 16:18:57 (routed by Tuesday) on KS-1374: 'Peter has responded to KS-1374 on WhatsApp. can you please make the change' / 'his reply was for us to implement the change' = raise the pacing limit on LOCAL stacks only, demo and production as deployed; gate45's N-1347-11 is where #1347 still fell short of 'local only'.",
+   "expected_parent": "8c810023f9c9ac060a7aff24f0933ae3b8734479",
+   "suites": [
+    "systemTest/akto unit (npm run test:unit, vitest.unit.config.ts; its OWN npm ci)",
+    "systemTest/akto lint (npm run lint = tsc + eslint + stylelint) + prettier --check",
+    "the pre-push hook's KS 989 formatting gate + the preflight's offline legs (the hook fast-skipped them)"
+   ],
+   "branch": "refs/heads/feature/ks-1374-pace-by-scanned-target-b46-1",
+   "title": "KS-1374: pace the Akto scan by the target it attacks, override included",
+   "subject": "KS-1374: pace the Akto scan by the target it attacks, override included",
+   "subject_note": "the PR title verbatim; the drafter reads it as true of the one product line (the scan-target precedence) \u2014 the gate rules it",
+   "files": [
+    "systemTest/akto/src/setup/aktoRateLimit.ts",
+    "systemTest/akto/tests/unit/setup/ks1374-n1347-11-scan-target-override.test.ts"
+   ],
+   "mode_pins": {
+    "systemTest/akto/src/setup/aktoRateLimit.ts": "100644",
+    "systemTest/akto/tests/unit/setup/ks1374-n1347-11-scan-target-override.test.ts": "100644"
+   },
+   "mandated_body_refs": [
+    "Refs KS-1374"
+   ]
+  },
+  "1350": {
+   "keys": [
+    "KS-1054"
+   ],
+   "tier": "T1",
+   "tier_reason": "tier 1 (full gate): 'anything deploying to dev or demo' \u2014 a RUNTIME change to the deploy path (deploy.sh, deploy-all.sh and the shared predicate check-startup-migrations.sh change what a deploy prints and, for python3-absent, whether it FAILS). The KS-1054 deploy-path class was T1 in gates 44, 45 and 46.",
+   "round": "ROUND 1 of its own PR (#1350 is new: N-1346-2/-3/-4, named not fixed in #1346/#1348, plus gate46's N-1348-6/-7 folded in by Wednesday's gate46 GO)",
+   "service": "Blockchain/Dev/deployment/azure: check-startup-migrations.sh (a third exit code, rc 2 = PASS-WITH-SKIP; python3 absent FAILS CLOSED rc 1), deploy.sh verify_deployment (SKIPS counter, a third summary line), deploy-all.sh smoke tests (SKIP counter, smoke_skip, the results line) + the ks1054 shell suite (P8-P9e, R0-R10, E1 hardened to rc == 1)",
+   "ruling": "Kam (a) on card secuura-ks1054-f9282-migration-failure-visibility: 'Keep serving, flag it on /health \u2014 The migration run returns its failed count. /health reports it, so the deploy scripts' existing /health checks (deploy-all.sh:281, deploy.sh:823) see it and the deploy reads as failed. The running service is not stopped.' Wednesday 13:07Z: python3 absent FAILS CLOSED (rc 1); the EMPTY / non-JSON divergence between the two scripts is KEPT, for Kam.",
+   "expected_parent": "a72149a1a803d802430568254e7fa9afa7029321",
+   "suites": [
+    "shell: the ks1054 suite (36 cells claimed) + the whole runner Blockchain/Dev/scripts/run-shell-suites.sh (61 suites claimed) on macOS bash 3.2 AND python:3.12-slim (GNU)",
+    "the preflight at the head / END (it ran 12 of 15 legs at push: 3, 4, 8 skipped)"
+   ],
+   "branch": "refs/heads/feature/ks-1054-skipped-check-stops-reading-as-a-pass-b46-2",
+   "title": "KS-1054: a skipped startup-migration check stops reading as a clean pass",
+   "subject": "KS-1054: a skipped startup-migration check stops reading as a clean pass",
+   "subject_note": "the PR title verbatim; true of the rc-2 half, but it does not name the one EXIT-STATUS change (python3 absent now FAILS a deploy that used to pass) \u2014 the gate rules whether it is TRUE OF THE DIFF as a whole",
+   "files": [
+    "Blockchain/Dev/deployment/azure/check-startup-migrations.sh",
+    "Blockchain/Dev/deployment/azure/deploy-all.sh",
+    "Blockchain/Dev/deployment/azure/deploy.sh",
+    "Blockchain/Dev/scripts/__tests__/ks1054_deploy_scripts_read_startup_migrations.test.sh"
+   ],
+   "mode_pins": {
+    "Blockchain/Dev/deployment/azure/check-startup-migrations.sh": "100755",
+    "Blockchain/Dev/deployment/azure/deploy-all.sh": "100755",
+    "Blockchain/Dev/deployment/azure/deploy.sh": "100755",
+    "Blockchain/Dev/scripts/__tests__/ks1054_deploy_scripts_read_startup_migrations.test.sh": "100644"
+   },
+   "mandated_body_refs": [
+    "Refs KS-1054"
+   ]
+  }
+ },
+ "base_clone": "/private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/407373b1-2c8c-4c6e-b92a-14f32c2c8007/scratchpad/screen0929/base",
+ "checkout": "/Volumes/DevMASTER/!CODING/Secuura/Blockchain/2_Project_Files",
+ "deploy_key": "/Volumes/DevMASTER/!CODING/Secuura/Blockchain/3_Access_Keys/github_deploy_rw",
+ "widen_branch_rx": "-b4[678]-\\d+$",
+ "widen_note": "an OPEN PR outside the kit on a `-b46-`/`-b47-`/`-b48-` branch is REPORTED (DISJOINT OUT-OF-KIT); it refuses (rc 15) only when it touches one of the kit's 6 paths or is titled with KS-1374 / KS-1054. Any other open PR touching a kit path also refuses rc 15.",
+ "sequenced_out_of_kit": {
+  "1351": {
+   "head": "eac2dae2afb7b08d679a37e3bd87290e0791d10f",
+   "ruling": "Wednesday (seat ffc4a192), 2026-09-29T15:25:29Z: #1351 (KS-1386) is PeterObeden's PR, a client human's; Wednesday does not control when it merges and sends him nothing. Sequenced OUT of gate47 at this head. gate47 gates #1349/#1350 only and measures #1349's suites over #1351-over-END too (OUT-OF-KIT-1351), so either merge order is covered by evidence. A moved #1351 head re-refuses rc 15 by design."
+  }
+ },
+ "sequenced_note": "EMPTY BY DRAFTING: the launch action's census refuses rc 15 on any open PR outside the kit that touches a kit path or carries a kit key. #1351 (KS-1386, PeterObeden, opened 2026-09-29T14:37:24Z, head eac2dae2afb7b08d679a37e3bd87290e0791d10f) touches systemTest/akto/src/setup/aktoRateLimit.ts (overlap_probe_1.out). ONLY Wednesday may sequence it: add {\"1351\": {\"head\": \"<the full head she read>\", \"ruling\": \"<her words + UTC time>\"}} here; the census then REPORTS it as SEQUENCED OUT-OF-KIT instead of refusing, and ONLY while its head equals the pinned one (a moved head refuses rc 15 again). The drafter did NOT add it."
+}

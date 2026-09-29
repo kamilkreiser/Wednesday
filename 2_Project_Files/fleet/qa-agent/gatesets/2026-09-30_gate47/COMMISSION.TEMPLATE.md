@@ -1,0 +1,39 @@
+# gate47 COMMISSION — TWO Secuura PRs: #1349 KS-1374 (T2) then #1350 KS-1054 (T1), each ROUND 1 of its own PR; author and merger {{MERGE_SEAT}}, round 47
+
+Filled by fill_gate47.py at {{FILLED_AT}} from pins_gate47.json (measured {{MEASURED_AT}}). Wednesday's commission to the drafter, 2026-09-30, restated requirement by requirement; the gate prompt carries each by name and the launcher refuses a prompt missing any of the {{N_KW}} keywords (each as a token).
+
+## The PRs
+{{PIN_TABLE}}
+
+- develop `{{DEVELOP}}` (tree `{{DEVELOP_TREE}}`) = #1348's squash (gate46's GO). #1349 sits on `{{OLD_BASE}}` (**1 commit behind**; the move touches none of its two paths, pin (C)); #1350 sits on develop itself. The two path sets are disjoint (pin (D)); each merges cleanly alone (pin (E)); the chain 1349 -> 1350 and its reverse both give END_TREE `{{END_TREE}}` (pins (F), (G)).
+- {{MODE_LINE}}
+- {{HOOK_LINE}}
+- Author and merger {{MERGE_SEAT}} (tmux %74). Pane `QA/Secuura-batch1349`. Report dir `{{REPORT}}`.
+
+## The rulings and the rounds
+- #1349 KS-1374 (gate45 N-1347-11, ticketed as a KS-1374 checklist item by gate45's GO) — Kam 16:17:55 / 16:18:57: raise the pacing limit on LOCAL stacks only. One product line: `isLocalScanTarget()` keys on `OVERRIDE_APP_URL || SECUURA_API_URL`, the precedence `scanOptions.ts:98` uses. **TIER 2** (a follow-up whose mechanism gate45 measured; #1347 was T2 in gates 44-45).
+- #1350 KS-1054 (gate44 N-1346-2/-3/-4 + gate46 N-1348-6/-7) — Kam option (a), card `secuura-ks1054-f9282-migration-failure-visibility`. A third predicate exit code (rc 2 = PASS-WITH-SKIP), both callers in the same commit, python3 absent FAILS CLOSED (Wednesday 13:07Z), the EMPTY / non-JSON divergence KEPT for Kam. **TIER 1** (a deploy-path RUNTIME change; KS-1054 was T1 in gates 44-46).
+- **Each is ROUND 1 of its own PR. The tiering rule governs a NO GO: a round-1 NO GO goes back to the author for round 2; a second NO GO ships the closed instances and tickets the residue.** Whether #1349 / #1350 are "the residue re-opened as its own commission" or a third round on their classes (which would need Kam's word) is carried to the gate as CLASS-ROUND-1349.
+
+## What the gate must check (by name)
+1. **#1349's skipped preflight**: the hook read AT THE HEAD, its 15 legs enumerated, every leg runnable offline run at the head and END, each MEASURED / NOT MEASURED with the reason; the formatting gate; `audit:gate` + `audit:locks` re-run. (HOOK-SKIPPED-LEGS-1349, FORMAT-GATE-1349, AUDIT-LEGS-1349, AUDIT-BASELINE-CLEANUP-NOTE)
+2. **#1349's akto suite** at develop / head / END (seat: 93/1654 -> 94/1663), red-first 4 failed / 5 passed, the tamper arm with a unique anchor (`const raw = ` occurs twice), lint + prettier with failing controls; the 7500 / 1500 numbers COMPUTED BY RUNNING THE CODE. (SUITE-1349, RED-FIRST-1349, TAMPER-1349, NUMBERS-FROM-CODE-1349, NOT-COVERED-1349)
+3. **#1350's KS-1054 suite on macOS bash 3.2 AND python:3.12-slim** (`docker run --rm --network none`, source READ-ONLY, versions printed in the same run), develop / head / END; the whole shell runner (seat 61/0/0); NOT MEASURED said plainly. (SUITE-1350-MACOS, SUITE-1350-GNU, RED-FIRST-1350, RED-AT-BASE, GREEN-AT-HEAD, WHOLE-SUITE-BEFORE-AFTER, NO-NEW-RED, SUITES-AT-END)
+4. **The caller cells**: re-create "predicate returns rc 2, callers untouched" and prove R1 red AND the real deploy.sh failing a deploy over ABSENT there; the hardened E1 both ways; R8 EXECUTES deploy-all.sh's call site (the skip-call tamper reds it); python3 absent fails closed rc 1 in both scripts. (CALLER-CELLS-1350, ABSENT-STILL-PASSES-1350, N-1348-6-BOTH-WAYS, R8-EXECUTES, PYTHON3-ABSENT-FAILS-CLOSED, N-1348-7-COMMENT-FIXED, OTHER-CALLERS-1350)
+5. **The eight tamper arms**, each red on its named cell, anchors unique (`return 1` twice in deploy.sh), files restored byte-equal. (TAMPER-ARMS-1350, TAMPER-UNIQUE-ANCHOR, TAMPER-RIGHT-REASON, RESTORE-SHA256)
+6. **The deploy path, stubs only**, per body shape per script per tree, beside the PR body's own table; the kept EMPTY / non-JSON divergence and N-1346-9 carried for ruling, not required. (DEPLOY-PATH-TABLE-1350, EMPTY-NONJSON-DIVERGENCE, N-1346-9-OUT-OF-SCOPE)
+7. **The merge**: #1349 over develop (1 behind), then #1350 over that; END_TREE `{{END_TREE}}`; disjoint paths; recorded modes 100755 x3 / 100644 at head and END; the census of other open PRs. (CLEAN-MERGE, END-TREE, OVERLAP-MEASURED, MODES)
+8. **Both drafted ticket texts** checked claim by claim as ROWS with evidence and returned POST AS-IS / POST AMENDED (with the text) / DO NOT POST; when each may be posted. Nothing is posted by anyone until the gate has read it. (DRAFTED-COMMENTS-CHECKED, DRAFT-POST-TIMING)
+9. **Every test that references a changed file**: the drafter's census {{CENSUS_N}} file(s), re-derived and run. (CENSUS-TESTS-RUN, CENSUS-LISTED)
+10. **Subjects** key-scanned (own key only, no `(#n)`), landed <= 92, **TRUE of the diff**; bodies `Refs KS-xxxx`, no closing keyword; the PR bodies' factual lines. (SUBJECT-KEY-SCAN, SUBJECT-LANDS-AT, SUBJECT-TRUE-OF-DIFF, REFS-OWN-KEY, NO-CLOSING-KEYWORD, PR-BODY-CLAIMS, HOOK-LINE-CITE)
+11. **The tiering and the class round** (TIERING, CLASS-ROUND-1349), DISK-ENOSPC, and **REPORT-HASH-LAST**: the report's `## MERGE ADDENDUM` is the LAST thing written; nothing goes into report.md after the verdict mail, whose body carries the report's sha256.
+
+## GO
+The GO string, as the GO mail's SUBJECT: `{{GO}}` — {{MERGE_SEAT}} merges #1349 then #1350. If only one PR may merge, the gate writes the one-PR form. Verdict mail subject: `{{VERDICT_SUBJECT}}`.
+
+## The drafter's predictions (to be re-derived by the gate, never adopted)
+- pin_gate47.py -> pin_1.out: both PRs clean alone and chained, either order; END_TREE `{{END_TREE}}`.
+- testrefs_gate47.py -> testrefs_1.out: {{CENSUS_N}} test file(s) — {{CENSUS_LIST}}
+- keyscan_gate47.py -> keyscan_1.out: {{KEYSCAN}}
+- linear_read_gate47.py -> linear_read_1.out: {{LINEAR_LINE}}
+- drafts_gate47.py -> drafts_1.out: {{DRAFTS_LINE}}
