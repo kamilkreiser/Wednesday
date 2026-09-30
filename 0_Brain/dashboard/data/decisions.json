@@ -21115,8 +21115,8 @@
   "id": "secuura-undici-ghsa-r53p-exception-1354",
   "client_project": "Secuura/Blockchain",
   "title": "Secuura — accept undici GHSA-r53p until 9 Oct so pushes unblock? (#1354, the grant's exception fired)",
-  "bluf": "I need your ruling on one security acceptance. Every Secuura push is blocked right now, Peter's included, by a new LOW advisory in undici (GHSA-r53p, published yesterday). PR #1354 fixes the other new advisory (js-yaml) and accepts this one until 9 October; the QA gate passed it on every technical check but stopped it on AUTHORITY: undici sits as a production entry in the issuer frontend's lockfile and is installed while that image builds, which is exactly the case your 9 September rule says comes to you. Measured: the SERVED issuer image contains no undici (checks that could have found it did fire), and no backend service pins it. Correcting my earlier flag: undici is a runtime HTTP client, not a build tool; three of its twelve already-accepted siblings are rated HIGH; and five rows, not four, would expire on 9 October. The real fix, forcing undici up a major version, retires all thirteen but its build is unmeasured.\nhttps://github.com/Secuura/Distributed_Secuura/pull/1354",
-  "default_action": "If there's no ruling: nothing merges and pushes stay blocked. Wednesday commissions the undici override MEASUREMENT (build + suites, no merge), so option b is ready the moment you choose it.",
+  "bluf": "UPDATE: you may not need to accept anything. A fix now exists. Seat B 48th measured one PR that upgrades undici from 5 to 7 in the issuer and root lockfiles, plus the js-yaml fix. It passes all three audit checks with no baseline acceptance at all, and it retires the twelve already-accepted undici advisories too, three of them HIGH. It sits inside your KS-1378 ruling (a), which chose to bump undici. Still to measure before its QA gate: the issuer image build and the test suites. My recommendation is now (b): let the fix go through its gate and merge; pushes unblock when it merges, likely today. Choose (a) only if you want pushes unblocked before the fix clears its gate.\nhttps://github.com/Secuura/Distributed_Secuura/pull/1354",
+  "default_action": "If there's no ruling: Wednesday lets the fix PR go through gate48b and merges it on the gate's GO (inside your KS-1378 bump ruling), which unblocks pushes with nothing accepted. #1354's acceptance stays unmerged.",
   "options": [
    {
     "key": "a",
@@ -21126,7 +21126,7 @@
    {
     "key": "b",
     "label": "No acceptance: fix first",
-    "detail": "A seat builds and measures the undici override now; pushes stay blocked until it passes its gate and merges (hours, possibly a day)."
+    "detail": "Merge the no-acceptance fix (the undici 5-to-7 override + js-yaml) after its QA gate; nothing is accepted; #1354 is then unnecessary. Measured green on all three audit checks; the image build and suites are measured before the gate."
    },
    {
     "key": "c",
@@ -21141,7 +21141,24 @@
   "ruled_ts": null,
   "prior_rulings_overridden": [
    "CARD nexusai-rd516-undici-dependency-for-address-pinning"
-  ]
+  ],
+  "amendments": [
+   {
+    "ts": "2026-09-30T10:23:06.306048+10:00",
+    "reason": "New measured fact (Seat B 48th, 2026-09-30 00:21Z): a fix route unblocks every push with NO security acceptance, which makes option b fast and my new recommendation.",
+    "changed": [
+     "bluf",
+     "default_action",
+     "option:b"
+    ],
+    "before": {
+     "bluf": "I need your ruling on one security acceptance. Every Secuura push is blocked right now, Peter's included, by a new LOW advisory in undici (GHSA-r53p, published yesterday). PR #1354 fixes the other new advisory (js-yaml) and accepts this one until 9 October; the QA gate passed it on every technical check but stopped it on AUTHORITY: undici sits as a production entry in the issuer frontend's lockfile and is installed while that image builds, which is exactly the case your 9 September rule says comes to you. Measured: the SERVED issuer image contains no undici (checks that could have found it did fire), and no backend service pins it. Correcting my earlier flag: undici is a runtime HTTP client, not a build tool; three of its twelve already-accepted siblings are rated HIGH; and five rows, not four, would expire on 9 October. The real fix, forcing undici up a major version, retires all thirteen but its build is unmeasured.\nhttps://github.com/Secuura/Distributed_Secuura/pull/1354",
+     "default_action": "If there's no ruling: nothing merges and pushes stay blocked. Wednesday commissions the undici override MEASUREMENT (build + suites, no merge), so option b is ready the moment you choose it.",
+     "option:b": "A seat builds and measures the undici override now; pushes stay blocked until it passes its gate and merges (hours, possibly a day)."
+    }
+   }
+  ],
+  "amended_ts": "2026-09-30T10:23:06.306073+10:00"
  },
  {
   "id": "hpsmpoc-before-hp-invite-fixes-at-88pct",
