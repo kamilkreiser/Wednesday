@@ -12,6 +12,11 @@ supersede: replace wholesale; previous = NEXT-PICKUP-FRIDAY.md.pre-0925-rotate-s
 
 **The tree is at `/Users/kamilkreiser/1FILES TO SYNC/FRIDAY`.** Quote every path (spaces).
 
+## 🔴 STATE 2026-09-30 18:3x — ADDS to the 17:4x block
+- **B86 → #70 + #73 GO WITH NOTES; MERGED** #73 → 25c6942, #70 → **42818ba** (deltas = PR file sets). Panes %61 %57 %60 closed.
+- **B87 (%62) still gating #71 + #72**; builders B83 %58 + B84 %59 held. Verdict wait armed (scratch). On GO: merge #71 → #72 head-pinned onto 42818ba (re-read main between), then main CI, then the board+records seat.
+- Extra tickets for the board seat: B86 #70 notes (address parser strictness vs BFF; create-vs-submit race, also on main; 409 followup.busy under 4 simultaneous creates on SQL Server) + Q-B85-1 (resetShowcase 503 → contract) + Q-B85-3 + Q-B85-4.
+
 ## 🔴🔴 ROTATION HANDOVER 2026-09-30 ~17:4x (Friday, ctx ~79%) — READ FIRST; supersedes the 16:4x block where they differ
 **Main CI on 3ee9107: 8/8 green** (HPSMPOC-110 stays Done). Analysis main 58b6c2e (all records incl. B77's missing entry — read on main, present).
 **WAVE 2 BUILT; PRs OPEN; TWO GATES LIVE:**
