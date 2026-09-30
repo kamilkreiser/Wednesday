@@ -12,6 +12,13 @@ supersede: replace wholesale; previous = NEXT-PICKUP-FRIDAY.md.pre-0925-rotate-s
 
 **The tree is at `/Users/kamilkreiser/1FILES TO SYNC/FRIDAY`.** Quote every path (spaces).
 
+## 🔴🔴🔴 STATE 2026-10-01 08:1x — READ FIRST; supersedes the 07:0x block where they differ
+**FLOOR EMPTY (%0 + %1).** All of Kam's cards ruled and delivered.
+- **Composer:** 0412eb6 DEPLOYED + verified live by Friday (C-14). HPSM-light main is 77609e2 (PR #15 F1 surrogate guard) — NOT deployed; offered to Kam ("say 77609e2"). Root records main a31aa0d; one uncommitted ADDENDUM-1 section in the root B29 STATUS for the next Composer seat to commit.
+- **MPS Commercial Calculator:** main **4008a0e** (PR #1 engine lane 1, .NET 10 C#, AUD, merged unscanned once on Kam's ruling b; PR #2 validity "current until superseded", scanned C# + python SUCCESS). CodeQL now scans csharp+python (org setup auto-detected; 0 alerts). Rulings C-04..C-08. Open Jira questions: MPSCALC-74 (cadence, BID permission, HP factor cells), Q-02/04/06/07/09–19 (see `1_Project_Definition/Questions_and_Answers/00_QUESTIONS_FOR_KAM.md`). Next lanes (spec epics; not started, usage 77%): API/snapshot + price-book importer (MPSCALC-89, allow-list, no PII), then UI. Hosting = kamil@datasec-rd.com tenant; no Azure created. Analysis repo has NO remote (Kam's call). A CI `dotnet test` workflow = Actions minutes (B02 Q3; ask Kam with the next lane).
+- **HPSM-POC:** main 226c2f0 green. Owed: the board+records seat (wave 2 + #74/#75; B88 notes).
+- **HPSM:** readiness B06 done; open for Kam: the 26 still-locked files (K3), D-18 wording.
+
 ## 🔴🔴🔴 STATE 2026-10-01 07:0x — READ FIRST; supersedes the 02:3x block where they differ
 **Kam ruled 07:00 (all reconciled):** composer-0412eb6-deploy-before-paul **a "Deploy 0412eb6 now"** · mpscalc-release1-users **a** (Datasec pricing team first) · mpscalc-hosting-and-signin **b + note "host it on kamil@datasec-rd.com"** (read: that tenant, kamildatasecrd; nothing created yet). Terminal ~06:5x: MPS needs multi-currency "similar to the quick quoting tool", AUD first; two price books copied to `MPS/…/Source_Documents/2026-10-01_pricebooks-from-Kam/` (confidential: no values in any tracked artefact).
 **LIVE:**
