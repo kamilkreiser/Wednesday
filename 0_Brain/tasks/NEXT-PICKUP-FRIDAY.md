@@ -21,7 +21,7 @@ supersede: replace wholesale; previous = NEXT-PICKUP-FRIDAY.md.pre-0925-rotate-s
 3. **B03 Datasec/MPSCalc-A** — importer (tier 1 → needs a QA gate on READY) then API. `MPS/…/Briefs/2026-10-01_B03_*`.
 4. **B30 Datasec/Composer-E** — DONE; PR HPSM-light **#16** @ 60e42bb (tier 1); ADDENDUM-1 answers (Q4 root ff). **B31 Datasec/Composer-QA** gating #16. On GO: merge head-pinned; NOT deployed (demo = 0412eb6; 77609e2 + #16 await Kam's word).
 **Records PR HPSM-POC-analysis #22** (B82–B89, head 4f0990c): merge job in background (waits CodeQL SUCCESS; my first attempt misread pending checks and GitHub refused — never use --admin).
-**Owed to Kam:** Q-B82-2 (invisible chars, HPSMPOC-134) + Q-B84-2 (print heading, HPSMPOC-161) — not yet carded.
+**Carded 08:5x:** `hpsmpoc-refuse-more-invisible-characters` (Q-B82-2, rec a) · `hpsmpoc-client-print-heading` (Q-B84-2, rec a). On a ruling: brief an HPSM-POC seat (web + api), gate, merge.
 
 ## 🔴🔴🔴 STATE 2026-10-01 08:1x — READ FIRST; supersedes the 07:0x block where they differ
 **FLOOR EMPTY (%0 + %1).** All of Kam's cards ruled and delivered.
