@@ -1,0 +1,27 @@
+reach_gate50a 2026-09-30T21:30:53Z | tree 9e84e1fabafe1ecc1963953051759c4038f88db2 (the pinned head) | 37 Dockerfile(s) | 14 compose file(s) | 45 tracked locks
+R1 IMAGE REACH: 35 compose build context(s); every Dockerfile COPY/ADD naming a manifest or lock, the lock it copies, and whether it moved
+    ?     Blockchain/Dev/connectors/whatsapp-bot/Dockerfile          stage shared-builder   ctx (none)           COPY packages/shared/package*.json ./ -> (unresolved: no compose context)
+    ?     Blockchain/Dev/connectors/whatsapp-bot/Dockerfile          stage builder          ctx (none)           COPY connectors/whatsapp-bot/package*.json ./ -> (unresolved: no compose context)
+    ?     Blockchain/Dev/connectors/whatsapp-bot/Dockerfile          stage (final/unnamed # ctx (none)           COPY connectors/whatsapp-bot/package*.json ./ -> (unresolved: no compose context)
+    MOVED Blockchain/Dev/frontend/admin/Dockerfile                   stage builder          ctx Blockchain/Dev   COPY frontend/admin/package*.json ./ -> ['Blockchain/Dev/frontend/admin/package-lock.json']
+          stages ['builder', '(final/unnamed #2)'] | npm lines: builder: RUN npm ci --no-audit
+    ?     Blockchain/Dev/frontend/outlook-addin/Dockerfile           stage builder          ctx (none)           COPY frontend/outlook-addin/package*.json ./ -> (unresolved: no compose context)
+    MOVED Blockchain/Dev/frontend/verifier/Dockerfile                stage builder          ctx Blockchain/Dev   COPY frontend/verifier/package*.json ./ -> ['Blockchain/Dev/frontend/verifier/package-lock.json']
+          stages ['builder', '(final/unnamed #2)'] | npm lines: builder: RUN npm ci --no-audit
+    MOVED Blockchain/Dev/services/kyc/Dockerfile                     stage builder          ctx Blockchain/Dev   COPY services/kyc/package*.json ./ -> ['Blockchain/Dev/services/kyc/package-lock.json']
+          stages ['shared-builder', 'builder', '(final/unnamed #3)'] | npm lines: shared-builder: RUN npm ci --ignore-scripts ; builder: RUN npm ci --ignore-scripts ; (final/unnamed #3): # KS-437: npm ci requires the lockfile — carry it from the builder alongside the ; (final/unnamed #3): # manifest (KS-384's npm install→ci flip missed it here). The builder ; (final/unnamed #3): # node_modules is deliberately NOT copied: npm ci wipes and reinstalls ; (final/unnamed #3): RUN npm ci --ignore-scripts --omit=dev
+R1 3 Dockerfile(s) copy a MOVED lock: ['Blockchain/Dev/frontend/admin/Dockerfile', 'Blockchain/Dev/frontend/verifier/Dockerfile', 'Blockchain/Dev/services/kyc/Dockerfile']
+R1 ROOT-LOCK copies (a bare lock / package*.json from a context that IS Blockchain/Dev): 0  | Dockerfiles with a manifest COPY and NO compose context (the gate resolves): ['Blockchain/Dev/connectors/whatsapp-bot/Dockerfile', 'Blockchain/Dev/frontend/outlook-addin/Dockerfile']
+R1 CONTROL: the matcher finds services/kyc/Dockerfile's own `services/kyc/package-lock.json` COPY: True | 74 manifest/lock COPY line(s) read
+R2 the moves inside each copied lock (PROD may reach the served image; dev only a builder stage)
+    Blockchain/Dev/frontend/admin/Dockerfile                   Blockchain/Dev/frontend/admin/package-lock.json      PROD ['axios 1.18.1->1.20.0'] | dev none
+    Blockchain/Dev/frontend/verifier/Dockerfile                Blockchain/Dev/frontend/verifier/package-lock.json   PROD ['axios 1.18.1->1.20.0'] | dev none
+    Blockchain/Dev/services/kyc/Dockerfile                     Blockchain/Dev/services/kyc/package-lock.json        PROD ['axios 1.18.1->1.20.0'] | dev none
+R3 SHARED-GUARD-TESTS at 9e84e1fabafe: test files naming each changed path (full path, or relative to Blockchain/Dev)
+    Blockchain/Dev/frontend/admin/package-lock.json      0 file(s) name it, 0 test(s): -
+    Blockchain/Dev/frontend/verifier/package-lock.json   0 file(s) name it, 0 test(s): -
+    Blockchain/Dev/package-lock.json                     39 file(s) name it, 7 test(s): ['Blockchain/Dev/scripts/__tests__/check_shared_relink.test.sh', 'Blockchain/Dev/scripts/__tests__/preflight_deps.test.sh', 'Blockchain/Dev/scripts/__tests__/start_secuura_slot_names.test.sh', 'Blockchain/Dev/scripts/audit/lock-discovery.test.mjs', 'Blockchain/Dev/tests/e2e-v2/RUNBOOK.md', 'systemTest/performance/tests/unit/utils/noHardcodedSlotLiterals.test.ts', 'systemTest/playwright/tests-unit/no-hardcoded-slot-literals.test.ts']
+    Blockchain/Dev/services/kyc/package-lock.json        0 file(s) name it, 0 test(s): -
+R3 test files naming the GENERIC `package-lock.json` (guards over every lock): 7: ['Blockchain/Dev/scripts/__tests__/check_shared_relink.test.sh', 'Blockchain/Dev/scripts/__tests__/preflight_deps.test.sh', 'Blockchain/Dev/scripts/__tests__/start_secuura_slot_names.test.sh', 'Blockchain/Dev/scripts/audit/lock-discovery.test.mjs', 'Blockchain/Dev/tests/e2e-v2/RUNBOOK.md', 'systemTest/performance/tests/unit/utils/noHardcodedSlotLiterals.test.ts', 'systemTest/playwright/tests-unit/no-hardcoded-slot-literals.test.ts']
+R3 CONTROLS: `advisory-fetch-stub.mjs` found in gate-exit-codes.test.mjs: True | a nonsense path found in 0 file(s)
+REACH READ: tree 9e84e1fabafe | 3 image Dockerfile(s) copy a moved lock | root-lock copies 0 | 7 test file(s) name a changed path, 7 name the generic lock | controls hold

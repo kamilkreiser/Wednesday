@@ -1,0 +1,35 @@
+LAUNCH ACTION gate50a (DRY RUN) 2026-10-01 07:36:59 AEST / 2026-09-30T21:36:59Z | launcher /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/gatesets/2026-10-01_gate50a/launch_qa_secuura_batch1363.sh | pinned develop 4f18c59a89db16cb8b06b7850aeb64e6f81f95ee | END_TREE 2a874956406ca974f3090b24392f6dbfdc8bc4d6
+  pin #1363 9e84e1fabafe1ecc1963953051759c4038f88db2 (refs/heads/feature/ks-1378-in-range-lock-refresh-axios-1-20-0-dompurify-3-4-16-b51-a)
+--- 0. the pane must be routed (inbox_routing.conf) or cockpit.sh say --mail fails silently
+  routing file /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/inbox_routing.conf — line present: 0 (grep rc=1; want 1 / rc 0)
+  (DRY RUN: reported, not refused — the real run refuses rc 1 here)
+--- 0b. the kit's home: launcher filled for /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/gatesets/2026-10-01_gate50a | this script lives in /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/gatesets/2026-10-01_gate50a
+  AT HOME — no re-fill
+--- 1. instrument: git ls-remote origin (ONE read from the Secuura checkout, READ-ONLY)
+  ls-remote rc=0 at 21:37:04Z
+    4f18c59a89db16cb8b06b7850aeb64e6f81f95ee	refs/heads/develop
+    9e84e1fabafe1ecc1963953051759c4038f88db2	refs/heads/feature/ks-1378-in-range-lock-refresh-axios-1-20-0-dompurify-3-4-16-b51-a
+    9e84e1fabafe1ecc1963953051759c4038f88db2	refs/pull/1363/head
+--- 2. instrument: the GitHub PULLS API (an independent read of each head, and mergeable) + 2b the OVERLAP / WIDEN census
+  pulls API rc=0
+    API #1363 head 9e84e1fabafe1ecc1963953051759c4038f88db2 base develop mergeable True reads 1 state open
+    CLIENT-HUMAN (reported, never sequenced by a gate) #1362 by PeterObeden | head df674d23fdc7 | 1 file(s), none a kit path, no census key
+    EXPECTED OVERLAP (reported_overlaps; reported, never sequenced by a gate) #1360 PeterObeden | head d0e99f181a4e | paths ['Blockchain/Dev/package-lock.json', 'Blockchain/Dev/services/kyc/package-lock.json'] | title keys []
+    EXPECTED OVERLAP (reported_overlaps; reported, never sequenced by a gate) #949 dependabot[bot] | head 7ee1a26e634f | paths ['Blockchain/Dev/package-lock.json'] | title keys []
+    EXPECTED OVERLAP (reported_overlaps; reported, never sequenced by a gate) #948 dependabot[bot] | head b06191741446 | paths ['Blockchain/Dev/package-lock.json'] | title keys []
+    EXPECTED OVERLAP (reported_overlaps; reported, never sequenced by a gate) #947 dependabot[bot] | head d68b9d79e67f | paths ['Blockchain/Dev/package-lock.json'] | title keys []
+    EXPECTED OVERLAP (reported_overlaps; reported, never sequenced by a gate) #946 dependabot[bot] | head 41cc5209aaf2 | paths ['Blockchain/Dev/package-lock.json'] | title keys []
+    EXPECTED OVERLAP (reported_overlaps; reported, never sequenced by a gate) #945 dependabot[bot] | head 264098fce62b | paths ['Blockchain/Dev/package-lock.json'] | title keys []
+    EXPECTED OVERLAP (reported_overlaps; reported, never sequenced by a gate) #649 dependabot[bot] | head 1d9198ac7e2f | paths ['Blockchain/Dev/package-lock.json'] | title keys []
+    EXPECTED OVERLAP (reported_overlaps; reported, never sequenced by a gate) #639 dependabot[bot] | head 2069d852ee16 | paths ['Blockchain/Dev/package-lock.json'] | title keys []
+    EXPECTED OVERLAP (reported_overlaps; reported, never sequenced by a gate) #635 dependabot[bot] | head 6cbc298f41a1 | paths ['Blockchain/Dev/package-lock.json'] | title keys []
+    EXPECTED OVERLAP (reported_overlaps; reported, never sequenced by a gate) #575 dependabot[bot] | head 7d32d8ae4b06 | paths ['Blockchain/Dev/package-lock.json'] | title keys []
+    EXPECTED OVERLAP (reported_overlaps; reported, never sequenced by a gate) #572 dependabot[bot] | head 4ea847b39ec8 | paths ['Blockchain/Dev/package-lock.json'] | title keys []
+    CENSUS 22 other open PR(s) read | 0 touch a kit path or carry a kit key outside reported_overlaps | 11 expected overlap(s) reported | 0 sequenced by Wednesday | 0 seat-branch PR(s) disjoint | 1 client-human PR(s) reported | 4 kit path(s), 1 kit key(s)
+  OVERLAP census clean
+--- 3. the heads, judged (both instruments == the pin, open, not mergeable:false, based on develop)
+  #1363  ls-remote pull/head 9e84e1fabafe1ecc1963953051759c4038f88db2 | branch 9e84e1fabafe1ecc1963953051759c4038f88db2 | API 9e84e1fabafe1ecc1963953051759c4038f88db2 (base develop, state open, mergeable True) | pinned 9e84e1fabafe1ecc1963953051759c4038f88db2
+  BOTH INSTRUMENTS AGREE with the pin, 1 of 1.
+--- 3b. develop, read at launch: 4f18c59a89db16cb8b06b7850aeb64e6f81f95ee | the pinned develop 4f18c59a89db16cb8b06b7850aeb64e6f81f95ee
+  UNMOVED since the fill — the END_TREE 2a874956406ca974f3090b24392f6dbfdc8bc4d6 stands
+DRY RUN COMPLETE 2026-09-30T21:37:33Z — every read agrees with the pins; the real run continues with the override check, the usage gate, --check and cockpit.sh add
