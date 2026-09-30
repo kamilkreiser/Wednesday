@@ -12,7 +12,7 @@ supersede: replace wholesale; previous = NEXT-PICKUP-FRIDAY.md.pre-0925-rotate-s
 
 **The tree is at `/Users/kamilkreiser/1FILES TO SYNC/FRIDAY`.** Quote every path (spaces).
 
-## 🔴🔴🔴 HANDOVER 2026-10-01 ~09:0x (Friday, ctx 70% checkpoint) — READ FIRST; supersedes the 08:1x block where they differ
+## 🔴🔴🔴 HANDOVER 2026-10-01 08:48 (Friday, ctx 70% checkpoint) — READ FIRST; supersedes the 08:1x block where they differ
 **Kam 08:20: "keep going. move the threshold from 70% to 90%"** → grant `learnings/2026-10-01_friday-cloud-threshold-90.md` (launch freely below 90%). Usage 79%.
 **Kam ~08:4x:** today's meeting transcript + 10 screenshots — MEASURED: it is the **Playbook POC = HPSM-POC** (not HPSM); notes say the POC SOW is SIGNED. Filed `HPSM-POC/1_Project_Definition/Source_Documents/2026-10-01_playbook-meeting/` (11 files, SHA256SUMS). **Kam ~08:5x: the FINAL SOW** ("make sure we deliver against the outlined deliverables. More is good but we have to deliver whats there") → `…/Source_Documents/2026-10-01_final-SOW/` (sha edb778c2…).
 **LIVE SEATS (watch their STATUS files; each ends READY FOR REVIEW):**
