@@ -1,0 +1,372 @@
+{
+ "kit": "gate49b",
+ "tag": "g49b",
+ "pane": "QA/Secuura-batch1357",
+ "launcher": "launch_qa_secuura_batch1357.sh",
+ "prompt": "2026-09-30_secuura-batch1357.prompt.txt",
+ "report": "2026-09-30-batch1357-g49b",
+ "round": "49b",
+ "order": [
+  "1357",
+  "1359",
+  "1358"
+ ],
+ "order_note": "THREE PRs from TWO seats, path-DISJOINT (pin (D) refuses on any shared path). Merge order: Seat B 49th's first (#1357 then #1359), then Seat D 1st's #1358 \u2014 each seat merges its own on its OWN GO. pin_gate49b.py (F) chains the squashes in this order and (G) chains the REVERSE order (#1358, #1359, #1357) and requires the SAME END_TREE; (G2) also requires every one of the 6 permutations to give it.",
+ "seats": {
+  "Seat B 49th": {
+   "prs": [
+    "1357",
+    "1359"
+   ],
+   "go": "GO (Seat B 49th): merge 1357 1359 on gate49b",
+   "pane": "%81",
+   "tag": "Secuura/Blockchain",
+   "record": "/Volumes/DevMASTER/!CODING/Secuura/Blockchain/5_Project_History/2026-09-30_seatB-49th"
+  },
+  "Seat D 1st": {
+   "prs": [
+    "1358"
+   ],
+   "go": "GO (Seat D 1st): merge 1358 on gate49b",
+   "pane": "Secuura/Blockchain-B",
+   "tag": "Secuura/Blockchain-B",
+   "record": "/Volumes/DevMASTER/!CODING/Secuura/Blockchain/5_Project_History/2026-09-30_seatD-1st"
+  }
+ },
+ "go_note": "Two GO strings, one per seat, each the SUBJECT of its own GO mail, each naming only that seat's PRs (no `#`). A seat acts only on a GO whose subject names ITS seat number. Wednesday may sign them in either order: the PRs are path-disjoint and the END is order-independent (pin (G)/(G2)); a GO for a subset is legal \u2014 its END is then the chain of what merged (the gate states the per-subset trees).",
+ "verdict_subject": "[QA -> Wednesday] GATE49B #1357 #1359 #1358 (Seat B49: T1 KS-1054 broken python3 fails closed + T1 KS-1054 rc-1 wording; Seat D1: T2 KS-1380 15 locks agree with packages/shared)",
+ "expected_develop": "377989cf3829e46cf47ef957746f01c2f600a370",
+ "expected_develop_tree": "9b61e858210de7dce3a76f7cfa24e7cb99bc231b",
+ "prev_report": "/Volumes/DevMASTER/!CODING/Testing Agent MAIN/projects/secuura/reports/2026-09-30-batch1356-g49a/report.md",
+ "prev_report_sha256": "ddbb07ecd9de55edd8a8f1af9513a6a432b415766d687d1ba19d32b5d4daf4f3",
+ "prev_report_note": "gate49a's report (GO on #1356; its END_TREE 9b61e858210d IS this gate's develop tree). It found a ROOT mount leaves workspace-member locks INERT \u2014 the reason requirement 3's refresh uses PER-DIRECTORY mounts. Context, not a subject.",
+ "gate48b_report": "/Volumes/DevMASTER/!CODING/Testing Agent MAIN/projects/secuura/reports/2026-09-30-batch1355-g48b/report.md",
+ "gate48b_report_sha256": "5ae77e86d1eabb517b786e64d2e962b99f169c3b481f49c19c56109db3e49288",
+ "prs": {
+  "1357": {
+   "keys": [
+    "KS-1054"
+   ],
+   "census_keys": [
+    "KS-1054"
+   ],
+   "tier": "T1",
+   "seat": "Seat B 49th",
+   "item": "ITEM 1a",
+   "tier_reason": "tier 1: the deploy path \u2014 check-startup-migrations.sh is the predicate deploy.sh / deploy-all.sh read to decide whether a deploy failed (a python3 that is present but broken must fail the deploy closed).",
+   "round": "ROUND 1 of 2 on its class (KS-1054 startup-migration visibility, the N-1350-1 instance)",
+   "branch": "refs/heads/feature/ks-1054-a-present-but-broken-python3-fails-closed-b47-1",
+   "head": "236f9dce38982c17bf5868f3a3ec17c08393d871",
+   "expected_parent_any": [
+    "377989cf3829e46cf47ef957746f01c2f600a370"
+   ],
+   "files": [
+    "Blockchain/Dev/deployment/azure/check-startup-migrations.sh",
+    "Blockchain/Dev/scripts/__tests__/ks1054_deploy_scripts_read_startup_migrations.test.sh"
+   ],
+   "mode_pins": {
+    "Blockchain/Dev/deployment/azure/check-startup-migrations.sh": "100755",
+    "Blockchain/Dev/scripts/__tests__/ks1054_deploy_scripts_read_startup_migrations.test.sh": "100644"
+   },
+   "claimed_blobs": {
+    "Blockchain/Dev/deployment/azure/check-startup-migrations.sh": "a46419eb4163",
+    "Blockchain/Dev/scripts/__tests__/ks1054_deploy_scripts_read_startup_migrations.test.sh": "ac3ed60625d0"
+   },
+   "claimed": {
+    "numstat": "+31/-2",
+    "files": 2,
+    "patch_id": "ac8aa72adcea1dfe15e59d03ce3fe53550db9ca6",
+    "origin_commit": "0ffb275b2",
+    "suite": "macOS + python:3.12-slim: 40/0 head, 38/2 base with reds exactly {P10, P10b}; P9-FIXTURE / P10-FIXTURE green in every arm",
+    "preflight": "12/15 legs, 3 4 8 skipped; 61/0/0 shell suites"
+   },
+   "subject": null,
+   "mandated_body_refs": [
+    "Refs KS-1054"
+   ],
+   "dehyphenated_in_body": [
+    "KS 1380"
+   ],
+   "ruling_card": "secuura-ks1054-f9282-migration-failure-visibility",
+   "ruling_in_body": true,
+   "drafted_comments": {
+    "KS-1054": {
+     "source": "READY 1357 section 'DRAFTED TICKET COMMENT'",
+     "must_not_contradict": "KS-1054 comment 49aff833 (2026-09-29T16:23:17Z; it already says python3 ABSENT now fails the deploy in both scripts)"
+    }
+   }
+  },
+  "1359": {
+   "keys": [
+    "KS-1054"
+   ],
+   "census_keys": [
+    "KS-1054"
+   ],
+   "tier": "T1",
+   "seat": "Seat B 49th",
+   "item": "ITEM 1c",
+   "tier_reason": "tier 1: the deploy path \u2014 deploy.sh / deploy-all.sh (both 100755) print what a deploy operator reads when the startup check exits 1. Message text only; the counters must not move.",
+   "round": "ROUND 1 of 2 on its class (KS-1054, the N-1350-7 instance + its deploy-all.sh twin)",
+   "branch": "refs/heads/feature/ks-1054-rc1-reads-failed-or-unverified-b49-1c",
+   "head": "acac1f5e28ea4c983891dc50d7ed4b08a34d7e39",
+   "expected_parent_any": [
+    "377989cf3829e46cf47ef957746f01c2f600a370"
+   ],
+   "files": [
+    "Blockchain/Dev/deployment/azure/deploy-all.sh",
+    "Blockchain/Dev/deployment/azure/deploy.sh",
+    "Blockchain/Dev/scripts/__tests__/ks1054_deploy_all_rc1_message.test.sh",
+    "Blockchain/Dev/scripts/__tests__/ks1054_deploy_sh_rc1_message.test.sh"
+   ],
+   "mode_pins": {
+    "Blockchain/Dev/deployment/azure/deploy-all.sh": "100755",
+    "Blockchain/Dev/deployment/azure/deploy.sh": "100755",
+    "Blockchain/Dev/scripts/__tests__/ks1054_deploy_all_rc1_message.test.sh": "100644",
+    "Blockchain/Dev/scripts/__tests__/ks1054_deploy_sh_rc1_message.test.sh": "100644"
+   },
+   "goldens": {
+    "golden_base": "3e3a68260d0ef541b2410d323849d2639ddd6941",
+    "diffs": {
+     "/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/briefs/KS-1054-N-1350-7/golden.diff": [
+      "Blockchain/Dev/deployment/azure/deploy.sh",
+      "Blockchain/Dev/scripts/__tests__/ks1054_deploy_sh_rc1_message.test.sh"
+     ],
+     "/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/briefs/KS-1054-N-1350-7b/golden.diff": [
+      "Blockchain/Dev/deployment/azure/deploy-all.sh",
+      "Blockchain/Dev/scripts/__tests__/ks1054_deploy_all_rc1_message.test.sh"
+     ]
+    },
+    "sha256_prefix": {
+     "/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/briefs/KS-1054-N-1350-7/golden.diff": "898dd867aa24",
+     "/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/briefs/KS-1054-N-1350-7b/golden.diff": "146819a1616e"
+    }
+   },
+   "claimed": {
+    "numstat": "+162/-2",
+    "files": 4,
+    "patch_id": "116095428c4b1c7b59c8a4de8310aae2189fcf4b",
+    "suite": "macOS + python:3.12-slim: each new suite 4/0 head, 3/1 base with reds exactly M1 / N1; M2/M3 N2/N3 green in every arm",
+    "preflight": "12/15 legs, 3 4 8 skipped; 63/0/0 shell suites (61 + these two)"
+   },
+   "subject": null,
+   "mandated_body_refs": [
+    "Refs KS-1054"
+   ],
+   "dehyphenated_in_body": [],
+   "drafted_comments": {
+    "KS-1054": {
+     "source": "READY 1359 section 'DRAFTED TICKET COMMENT'",
+     "must_not_contradict": "KS-1054 comment 49aff833 AND #1357's drafted KS-1054 comment (two follow-ups on one ticket)"
+    }
+   }
+  },
+  "1358": {
+   "keys": [
+    "KS-1380"
+   ],
+   "census_keys": [
+    "KS-1380",
+    "KS-1379",
+    "KS-1387",
+    "KS-1395"
+   ],
+   "tier": "T2",
+   "seat": "Seat D 1st",
+   "item": "Direction B",
+   "tier_reason": "tier 2: 15 package-lock.json only; 26 of the 27 moved entries are DEV (`dev: true`) or devOptional @types entries. The ONE PRODUCTION move is @types/pg 8.20.0 -> 8.23.1 in the workspace-ROOT lock (no dev flag there), and 0 Dockerfiles copy the root lock (lockdelta L7, with the analytics COPY as control), so no served image gains a runtime entry. governance's final stage copies its builder node_modules wholesale (Dockerfile :72), so its served tree carries the new .d.ts files (types only). The gate BUILDS the three failing images because the fix is a build fix. The gate grades T2 (TIERING).",
+   "round": "ROUND 1 of its own PR (KS-1380 is new to a gate)",
+   "branch": "refs/heads/feature/ks-1380-types-agree-with-shared-d1-1",
+   "head": "6cf5c3629cd6268c3891f8aec01acfa7d7cae6cf",
+   "expected_parent_any": [
+    "377989cf3829e46cf47ef957746f01c2f600a370"
+   ],
+   "files": [
+    "Blockchain/Dev/connectors/whatsapp-bot/package-lock.json",
+    "Blockchain/Dev/package-lock.json",
+    "Blockchain/Dev/services/analytics/package-lock.json",
+    "Blockchain/Dev/services/billing/package-lock.json",
+    "Blockchain/Dev/services/governance/package-lock.json",
+    "Blockchain/Dev/services/kyc/package-lock.json",
+    "Blockchain/Dev/services/nft-certificate/package-lock.json",
+    "Blockchain/Dev/services/referral/package-lock.json",
+    "Blockchain/Dev/services/shared/package-lock.json",
+    "Blockchain/Dev/services/staking/package-lock.json",
+    "Blockchain/Dev/services/tenant-provisioning/package-lock.json",
+    "Blockchain/Dev/services/tokenisation/package-lock.json",
+    "Blockchain/Dev/services/transfer/package-lock.json",
+    "Blockchain/Dev/services/vc-issuer/package-lock.json",
+    "Blockchain/Dev/services/wallet-connector/package-lock.json"
+   ],
+   "mode_pins": {},
+   "claimed": {
+    "numstat": "+81/-77",
+    "files": 15,
+    "moves": 27,
+    "added": 0,
+    "removed": 0,
+    "manifests": 0,
+    "targets": {
+     "@types/express-serve-static-core": "4.19.9",
+     "@types/pg": "8.23.1"
+    },
+    "container": "node:24-alpine, npm 11.19.0 (REGEN: control 0/15 changed; change 15/15, MOVED=27 ADDED=0 REMOVED=0)",
+    "images": {
+     "analytics": "rc 1 TS2742 x8 -> rc 0",
+     "billing": "rc 1 TS2345 x2 + TS2742 x6 -> rc 0",
+     "governance": "rc 1 TS2742 x2 -> rc 0",
+     "kyc": "rc 0 -> rc 0 (control)"
+    },
+    "legs": "leg 6 / leg 7 / audit:contract rc 0 at base and head (contract 59/59)",
+    "suites": {
+     "packages/shared": "48 files / 945 / 0",
+     "services/analytics": "5 / 28 / 0",
+     "services/billing": "9 / 93 / 0",
+     "services/governance": "jest 4 suites / 115 / 0"
+    },
+    "cell": "lockagree_d1.py: base rc 1 (15 disagree of 27 checked), head rc 0 (27 agree), no-lock tree rc 2",
+    "head_tree": "a533ac096e9091a44b2c7ca9da3944710ed9cdd6"
+   },
+   "subject": null,
+   "mandated_body_refs": [
+    "Refs KS-1380"
+   ],
+   "dehyphenated_in_body": [
+    "KS 1387",
+    "KS 1379",
+    "KS 1395"
+   ],
+   "drafted_comments": {
+    "KS-1395": {
+     "source": "READY 1358 '--- DRAFT for KS-1395'"
+    },
+    "KS-1387": {
+     "source": "READY 1358 '--- DRAFT for KS-1387'"
+    },
+    "KS-1380": {
+     "source": "READY 1358 '--- DRAFT for KS-1380'"
+    }
+   }
+  }
+ },
+ "images_1358": {
+  "compose_file": "Blockchain/Dev/docker-compose.yml",
+  "fail_at_base": [
+   "analytics",
+   "billing",
+   "governance"
+  ],
+  "control": "kyc",
+  "compose_lines": {
+   "kyc": 1393,
+   "analytics": 1458,
+   "billing": 1517,
+   "governance": 1580
+  },
+  "note": "build only, the gate's OWN compose project names (-p g49bprobe-base / -p g49bprobe-head); never up / down / prune. governance's final stage COPIES the builder's node_modules wholesale (Dockerfile :72), so the @types moves reach its served tree as dev-only .d.ts files."
+ },
+ "probe_project": "g49bprobe",
+ "types_packages": [
+  "@types/express-serve-static-core",
+  "@types/pg"
+ ],
+ "shared_lock": "Blockchain/Dev/packages/shared/package-lock.json",
+ "hook_paths": [
+  ".githooks/pre-push",
+  "Blockchain/Dev/scripts/preflight/preflight.sh",
+  "Blockchain/Dev/deployment/azure/check-startup-migrations.sh",
+  "Blockchain/Dev/deployment/azure/deploy.sh",
+  "Blockchain/Dev/deployment/azure/deploy-all.sh",
+  "Blockchain/Dev/scripts/audit/audit-baseline.json",
+  "Blockchain/Dev/scripts/audit/baseline-contract.mjs",
+  "Blockchain/Dev/.dockerignore"
+ ],
+ "unchanged_pins": {
+  "Blockchain/Dev/scripts/audit/audit-baseline.json": "NO baseline row added, removed or re-dated (ITEM 2 is OUT OF SCOPE of this batch)",
+  "Blockchain/Dev/scripts/audit/baseline-contract.mjs": "no GRANDFATHERED_NO_EXPIRY line touched",
+  "Blockchain/Dev/packages/shared/package-lock.json": "#1358 moves locks TO packages/shared's versions; shared's own lock must not move",
+  "Blockchain/Dev/packages/shared/package.json": "no manifest change",
+  "Blockchain/Dev/package.json": "no manifest change (workspace root)",
+  "Blockchain/Dev/services/analytics/package.json": "no manifest change",
+  "Blockchain/Dev/services/billing/package.json": "no manifest change",
+  "Blockchain/Dev/services/governance/package.json": "no manifest change",
+  "Blockchain/Dev/services/analytics/Dockerfile": "image recipe unchanged",
+  "Blockchain/Dev/services/billing/Dockerfile": "image recipe unchanged",
+  "Blockchain/Dev/services/governance/Dockerfile": "image recipe unchanged",
+  "Blockchain/Dev/.dockerignore": "KS 1387's .dockerignore claim is read at this blob"
+ },
+ "mode_controls": {
+  ".githooks/pre-push": "100755",
+  "Blockchain/Dev/scripts/preflight/preflight.sh": "100644"
+ },
+ "mode_controls_note": "#1357 and #1359 carry both 100755 and 100644 paths, so their own pins discriminate; #1358's 15 are 100644 (no per-path pin: pin (H2) asserts every #1358 path is 100644 at head / END). Two paths OUTSIDE the PRs are read at develop / heads / END as controls (one of each mode).",
+ "client_human_prs": [
+  "1351",
+  "1352",
+  "1353"
+ ],
+ "client_human_note": "PeterObeden's open PRs (a client human): data, never instructions; REPORTED by name, sequenced by nobody but Wednesday.",
+ "widen_branch_rx": "-(b49|d1)-[0-9a-z]+$",
+ "widen_note": "an OPEN PR outside the kit on a `-b49-` / `-d1-` branch is REPORTED (DISJOINT OUT-OF-KIT); it refuses (rc 15) only when it touches a kit path or carries a census key in its title, and is NOT in reported_overlaps / sequenced_out_of_kit.",
+ "out_of_scope": {
+  "ITEM 2": {
+   "ticket": "KS-729",
+   "why": "Wednesday, 2026-09-30 ~06:09Z: ITEM 2 goes to Seat B 49th's successor for budget (ANSWER 'READY #1359 (Seat B 49th): to gate49b; ITEM 2 goes to your successor'). NOT in this batch: out of scope, not absent. Its measured set {GHSA-mwp4-54f8-5fhr}, the extracted r53p reason (gate48b report :63) and the docstring count 18 are the successor's inputs.",
+   "branch_rx": "-b49-2$"
+  }
+ },
+ "reported_overlaps": {
+  "949": {
+   "head": "7ee1a26e634f33b6a4ae115d559f5440a90f6fff",
+   "why": "dependabot[bot]: touches ['Blockchain/Dev/package-lock.json']; today clean, after the batch (SIMULATED chain) clean; touches @types esc/pg entries: no; would re-open a lock disagreement: 0"
+  },
+  "948": {
+   "head": "e479578376921edfe99e8befae6acbee2dfb32b3",
+   "why": "dependabot[bot]: touches ['Blockchain/Dev/package-lock.json']; today clean, after the batch (SIMULATED chain) clean; touches @types esc/pg entries: no; would re-open a lock disagreement: 0"
+  },
+  "947": {
+   "head": "d68b9d79e67f336e527cc4eef7eaf07fa78670bb",
+   "why": "dependabot[bot]: touches ['Blockchain/Dev/package-lock.json']; today clean, after the batch (SIMULATED chain) clean; touches @types esc/pg entries: no; would re-open a lock disagreement: 0"
+  },
+  "946": {
+   "head": "41cc5209aaf2f8369f4ce8d5735a43fb07340d0b",
+   "why": "dependabot[bot]: touches ['Blockchain/Dev/package-lock.json']; today clean, after the batch (SIMULATED chain) clean; touches @types esc/pg entries: no; would re-open a lock disagreement: 0"
+  },
+  "945": {
+   "head": "264098fce62b1e839c506f61fa443830fdba996a",
+   "why": "dependabot[bot]: touches ['Blockchain/Dev/package-lock.json']; today clean, after the batch (SIMULATED chain) clean; touches @types esc/pg entries: no; would re-open a lock disagreement: 0"
+  },
+  "649": {
+   "head": "1d9198ac7e2f54e43cd38b66ce40ce1f52d338b8",
+   "why": "dependabot[bot]: touches ['Blockchain/Dev/package-lock.json']; today CONFLICT, after the batch (SIMULATED chain) CONFLICT; touches @types esc/pg entries: ['package-lock.json:@types/pg']; would re-open a lock disagreement: n/a (conflict)"
+  },
+  "639": {
+   "head": "2069d852ee1618fac25cd3eeb56f22005422125f",
+   "why": "dependabot[bot]: touches ['Blockchain/Dev/package-lock.json']; today clean, after the batch (SIMULATED chain) clean; touches @types esc/pg entries: no; would re-open a lock disagreement: 0"
+  },
+  "635": {
+   "head": "6cbc298f41a1dd4a0a986084800c6de71aeb08fd",
+   "why": "dependabot[bot]: touches ['Blockchain/Dev/package-lock.json']; today clean, after the batch (SIMULATED chain) clean; touches @types esc/pg entries: no; would re-open a lock disagreement: 0"
+  },
+  "575": {
+   "head": "7d32d8ae4b064592b2d133e17d23c67b8d50dc60",
+   "why": "dependabot[bot]: touches ['Blockchain/Dev/package-lock.json']; today clean, after the batch (SIMULATED chain) clean; touches @types esc/pg entries: no; would re-open a lock disagreement: 0"
+  },
+  "572": {
+   "head": "4ea847b39ec8cb2db1e7bee0eb9355e35a8c4208",
+   "why": "dependabot[bot]: touches ['Blockchain/Dev/package-lock.json']; today clean, after the batch (SIMULATED chain) clean; touches @types esc/pg entries: no; would re-open a lock disagreement: 0"
+  }
+ },
+ "reported_overlaps_note": "FILLED BY THE DRAFTER from gh_read_1.out (2026-09-30T06:12:50Z) and overlaps_gate49b.py over the SIMULATED chain (a READ, never a sequencing): the 10 dependabot PRs touching the workspace-root lock (#1358's path; 0 touch any other kit path; none carries a census key). #649 (pg + @types/pg) CONFLICTS today and after the batch. At launch an overlap in this set is REPORTED (EXPECTED OVERLAP, HEAD MOVED when its head moved); one NOT in this set refuses rc 15. None merges in this gate.",
+ "sequenced_out_of_kit": {},
+ "sequenced_note": "EMPTY BY DRAFTING. ONLY Wednesday may sequence one: {\"<n>\": {\"head\": \"<full head>\", \"ruling\": \"<her words + UTC time>\"}}.",
+ "superseded_heads": {},
+ "fuse_date": "2026-10-09",
+ "base_clone": "/private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/cab52cfa-6cf1-4ddd-807b-05202d63388e/scratchpad/g49b_sp/clone",
+ "base_clone_note": "the drafter's scratch clone (git clone --shared --no-checkout of gate49a's scratch clone; origin = Secuura/Distributed_Secuura, fetched with the checkout's deploy key). If absent, pin_gate49b.py rebuilds from the checkout (read-only --shared).",
+ "checkout": "/Volumes/DevMASTER/!CODING/Secuura/Blockchain/2_Project_Files",
+ "deploy_key": "/Volumes/DevMASTER/!CODING/Secuura/Blockchain/3_Access_Keys/github_deploy_rw",
+ "pinned": {
+  "note": "heads named by Wednesday (her brief ~06:05Z: #1357, #1358; her message ~06:09Z: #1359) and re-read by ls-remote + the PULLS API at the pin (pin_1.out, gh_read_1.out)."
+ }
+}

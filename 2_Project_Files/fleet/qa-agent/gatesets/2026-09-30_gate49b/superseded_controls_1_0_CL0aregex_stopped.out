@@ -1,0 +1,115 @@
+=== controls_gate49b  2026-09-30T06:32:37Z | develop 377989cf3829e46cf47ef957746f01c2f600a370 | develop^ 3e3a68260d0ef541b2410d323849d2639ddd6941 | #1357 236f9dce38982c17bf5868f3a3ec17c08393d871 | #1359 acac1f5e28ea4c983891dc50d7ed4b08a34d7e39 | #1358 6cf5c3629cd6268c3891f8aec01acfa7d7cae6cf | END_TREE 5f6edce1dc63cb0d3e8dadd7b5793a5e11ff1474 | #1351 live head d09b6f4dd630ade01691ecc092ff3300b7f1c8cf | plants /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/cab52cfa-6cf1-4ddd-807b-05202d63388e/scratchpad/g49b_sp/controls_063235
+--- pin_gate49b.py (heads, shape, the move, DISJOINT, alone, the chain, every order, the subsets, RECORDED modes + controls, hooks, unchanged pins, claimed blobs, goldens) — simulations write pins_gate49b.SIM-<name>.json only
+CONTROL PN0    expect rc 0 /why 'PASS: FAIL=0 -> pins_gate49b.SIM-real.json \| develop 377989cf3829 \| END_TREE 5f6edce1dc63cb0d3e8dadd7b5793a5e11ff1474 \| 3 PRs, 21 distinct paths, 0 shared \| 6 permutations agree' | got rc 0 -> OK | PASS: FAIL=0 -> pins_gate49b.SIM-real.json | develop 377989cf3829 | END_TREE 5f6edce1dc63cb0d3e8dadd7b5793a5e11ff1474 | 3 PRs, 21 distinct paths, 0 shared | 6 permutations agree | SUPERSEDED
+CONTROL PN0e   expect rc 0 /why 'END_TREE 5f6edce1dc63cb0d3e8dadd7b5793a5e11ff1474 \| diff\(develop, END\): 21 path\(s\) == the union of the own paths \(21\): True' | got rc 0 -> OK |     END_TREE 5f6edce1dc63cb0d3e8dadd7b5793a5e11ff1474 | diff(develop, END): 21 path(s) == the union of the own paths (21): True | every END blob+mode == its head's: True
+CONTROL PN0d   expect rc 0 /why 'DISJOINT SUMMARY: 3 pair\(s\), 0 shared path\(s\) \| 21 paths in total, 21 distinct' | got rc 0 -> OK |     DISJOINT SUMMARY: 3 pair(s), 0 shared path(s) | 21 paths in total, 21 distinct
+CONTROL PN0r   expect rc 0 /why 'REVERSE-order END 5f6edce1dc63cb0d3e8dadd7b5793a5e11ff1474 \| == END_TREE: True' | got rc 0 -> OK |     REVERSE-order END 5f6edce1dc63cb0d3e8dadd7b5793a5e11ff1474 | == END_TREE: True
+CONTROL PN0s   expect rc 0 /why 'SUBSET Seat D 1st only \(#1358\) -> tree a533ac096e90[0-9a-f]+ \| diff\(develop, tree\) == its own 15 path\(s\): True' | got rc 0 -> OK |     SUBSET Seat D 1st only (#1358) -> tree a533ac096e9091a44b2c7ca9da3944710ed9cdd6 | diff(develop, tree) == its own 15 path(s): True
+CONTROL PN0m   expect rc 0 /why 'MODE SUMMARY: 23 path\(s\) pinned \(21 PR, 2 control\), 23 OK' | got rc 0 -> OK |     MODE SUMMARY: 23 path(s) pinned (21 PR, 2 control), 23 OK | modes pinned: ['100644', '100755']
+CONTROL PN0g   expect rc 0 /why '#1359 golden KS-1054-N-1350-7b on develop 377989cf3829: Blockchain/Dev/scripts/__tests__/ks1054_deploy_all_rc1_message.test.sh .*BYTE-EQUAL' | got rc 0 -> OK |     #1359 golden KS-1054-N-1350-7b on develop 377989cf3829: Blockchain/Dev/scripts/__tests__/ks1054_deploy_all_rc1_message.test.sh golden-applied blob 69c4d72924d5 | head blob 69c4d72924d5 |
+CONTROL PN0l   expect rc 0 /why '#1357 Blockchain/Dev/deployment/azure/check-startup-migrations.sh: head blob a46419eb4163 \| claimed a46419eb4163 \| MATCH' | got rc 0 -> OK |     #1357 Blockchain/Dev/deployment/azure/check-startup-migrations.sh: head blob a46419eb4163 | claimed a46419eb4163 | MATCH
+CONTROL PN1    expect rc 1 /why 'REFUSING: --develop is a controls-only override' | got rc 1 -> OK | REFUSING: --develop is a controls-only override and needs --simulate <name> (it never writes the real pins)
+CONTROL PN2    expect rc 1 /why '\(D\) #1359 and #1358 share \[.Blockchain/Dev/deployment/azure/deploy.sh.\]' | got rc 1 -> OK |   - (D) #1359 and #1358 share ['Blockchain/Dev/deployment/azure/deploy.sh'] — the batch is not disjoint; a re-draft decides the order
+CONTROL PN3    expect rc 1 /why '#1359 Blockchain/Dev/deployment/azure/deploy.sh: want 100755 \(pin\) \| head 100644 .*MODE MISMATCH' | got rc 1 -> OK |     #1359 Blockchain/Dev/deployment/azure/deploy.sh: want 100755 (pin) | head 100644 | alone 100644 | chain 100644 | END 100644 | MODE MISMATCH
+CONTROL PN4    expect rc 1 /why '\(M\) #1359 Blockchain/Dev/deployment/azure/deploy.sh: golden \(golden base\) blob [0-9a-f]{12} != head blob' | got rc 1 -> OK |   - (M) #1359 Blockchain/Dev/deployment/azure/deploy.sh: golden (golden base) blob e345dd91815c != head blob a66784b451b1
+CONTROL PN5    expect rc 1 /why '\(K\) Blockchain/Dev/packages/shared/package-lock.json is not byte-equal in every tree' | got rc 1 -> OK |   - (K) Blockchain/Dev/packages/shared/package-lock.json is not byte-equal in every tree (#1358 moves locks TO packages/shared's versions; shared's own lock must not move)
+CONTROL PN6    expect rc 1 /why '\(L\) #1357 Blockchain/Dev/deployment/azure/check-startup-migrations.sh blob [0-9a-f]{12} != claimed a46419eb4163' | got rc 1 -> OK |   - (L) #1357 Blockchain/Dev/deployment/azure/check-startup-migrations.sh blob 5b1dc363f323 != claimed a46419eb4163
+CONTROL PN7    expect rc 1 /why '\(C\) #1359: the develop move touches its own path\(s\) \[.Blockchain/Dev/deployment/azure/deploy.sh.\]' | got rc 1 -> OK |   - (C) #1359: the develop move touches its own path(s) ['Blockchain/Dev/deployment/azure/deploy.sh'] — a rebase / re-draft decides
+CONTROL PN8    expect rc 0 /why '#1358 move 377989cf3829\.\.[0-9a-f]{12}: 1 path\(s\) \| reaches its own paths: NONE' | got rc 0 -> OK |     #1358 move 377989cf3829..a17e2dc583fe: 1 path(s) | reaches its own paths: NONE
+CONTROL PN8p   expect rc 0 /why 'PASS: FAIL=0 -> pins_gate49b.SIM-devunrel.json' | got rc 0 -> OK | PASS: FAIL=0 -> pins_gate49b.SIM-devunrel.json | develop a17e2dc583fe | END_TREE a5f827dcc68ca649cb5ef6f787d5c2059afc8eee | 3 PRs, 21 distinct paths, 0 shared | 6 permutations agree | SUPERS
+--- lockdelta_gate49b.py (#1358: LOCK-DELTA-15 / DEPENDENT-RANGES / REGISTRY-TRUE / LOCK-AGREEMENT / IMAGE REACH prediction)
+CONTROL LD0    expect rc 0 /why 'LOCKDELTA PASS: 0 FAIL of 27 checks \| 27 moves \(1 PROD\), 15 locks, base 15 / head 0 disagreeing' | got rc 0 -> OK | LOCKDELTA PASS: 0 FAIL of 27 checks | 27 moves (1 PROD), 15 locks, base 15 / head 0 disagreeing, nested base 0 / head 0
+CONTROL LD0p   expect rc 0 /why 'PRODUCTION moves .*: 1 \[.package-lock.json node_modules/@types/pg 8.20.0->8.23.1.\]' | got rc 0 -> OK |     PRODUCTION moves (no dev / devOptional / optional flag): 1 ['package-lock.json node_modules/@types/pg 8.20.0->8.23.1']
+CONTROL LD0a   expect rc 0 /why 'INFO L2 entries whose resolved / integrity were ABSENT at base and PRESENT at head: 2' | got rc 0 -> OK |     INFO L2 entries whose resolved / integrity were ABSENT at base and PRESENT at head: 2 ['package-lock.json node_modules/@types/express-serve-static-core', 'package-lock.json node_modules/
+CONTROL LD0r   expect rc 0 /why 'L7 ROOT-lock copies .*: 0 .*CONTROL analytics Dockerfile COPY found: True' | got rc 0 -> OK |     L7 ROOT-lock copies (a COPY of package*.json / package-lock.json at the context root): 0  | CONTROL analytics Dockerfile COPY found: True
+CONTROL LD1    expect rc 1 /why 'FAIL L2: 28 changed entr.*NO: .*services/kyc/package-lock.json.*node_modules/@types/express' | got rc 1 -> OK | FAIL L2: 28 changed entr(y/ies); every one an @types/express-serve-static-core/@types/pg entry, fields within {version, resolved, integrity}, no flag flipped: NO: [('Blockchain/Dev/services/
+CONTROL LD2    expect rc 1 /why 'FAIL L6: base: 15 of 27 disagree .* \| head: 1 of 27' | got rc 1 -> OK | FAIL L6: base: 15 of 27 disagree (the instrument fires; the seat claims 15 of 27) | head: 1 of 27 | END: 1 of 27 | the seat's cell reads top-level only; nested disagreeing copies base 0 / he
+CONTROL LD2t   expect rc 0 /why 'FAIL L3: 27 moves .*every to-version == packages/shared.s: False' | got rc 0 -> OK | FAIL L3: 27 moves (claimed 27) | every move inside its major: True | every to-version == packages/shared's: False | top-level 27, nested 0
+CONTROL LD3    expect rc 1 /why 'FAIL L2: 27 changed entr.*NO: .*services/analytics/package-lock.json' | got rc 1 -> OK | FAIL L2: 27 changed entr(y/ies); every one an @types/express-serve-static-core/@types/pg entry, fields within {version, resolved, integrity}, no flag flipped: NO: [('Blockchain/Dev/services/
+CONTROL LD4    expect rc 1 /why 'FAIL L5 @types/pg@8.23.1: 13 head entr' | got rc 1 -> OK | FAIL L5 @types/pg@8.23.1: 13 head entr(y/ies) resolved/integrity == registry dist (https://registry.npmjs.org/@types/pg/-/pg-8.23.1.tgz, sha512-fKVHpikPdg4GKks3J…)
+CONTROL LD5    expect rc 1 /why 'FAIL L0: changed paths 0 == the kit.s 15 locks: False' | got rc 1 -> OK | FAIL L0: changed paths 0 == the kit's 15 locks: False | extra none | missing ['Blockchain/Dev/connectors/whatsapp-bot/package-lock.json', 'Blockchain/Dev/package-lock.json', 'Blockchain/Dev/
+--- overlaps_gate49b.py (carries its own three controls: CT-CLEAN / CT-CONFLICT / CT-AGREE)
+CONTROL OV0    expect rc 0 /why 'OVERLAPS READ: 10 PR\(s\) \| conflict today 1 \| conflict after the batch 1' | got rc 0 -> OK | OVERLAPS READ: 10 PR(s) | conflict today 1 | conflict after the batch 1 | empty residue (superseded) 0 | touching @types esc/pg 1 | would re-open a lock disagreement 0
+CONTROL OV0c   expect rc 0 /why 'CT-CLEAN .*: clean \| CT-CONFLICT .*: CONFLICT .*CT-AGREE .*: 1 disagreeing .*-> OK' | got rc 0 -> OK | CT-CLEAN an unrelated plant over the batch: clean | CT-CONFLICT a root-lock @types/pg-line plant: CONFLICT ['Blockchain/Dev/package-lock.json'] | CT-AGREE kyc @types/pg back to 8.20.0 on END
+CONTROL OV0p   expect rc 0 /why '#649 .*today CONFLICT .*touches @types esc/pg: \[.package-lock.json:@types/pg.\]' | got rc 0 -> OK |   #649   dependabot[bot] behind 912  | today CONFLICT ['Blockchain/Dev/package-lock.json', 'Blockchain/Dev/services/analytics/package.json', 'Blockchain/Dev/services/anchoring/package.json',
+--- keyscan_gate49b.py (subject, body, live surfaces, per PR)
+CONTROL KS0    expect rc 0 /why 'KEYSCAN PASS: 18 checks over 3 PR\(s\), 0 FAIL' | got rc 0 -> OK | KEYSCAN PASS: 18 checks over 3 PR(s), 0 FAIL, 0 FLAG line(s) (live surfaces; the gate rules them)
+CONTROL KS1    expect rc 1 /why 'FAIL #1357 S2' | got rc 1 -> OK | FAIL #1357 S2: declared subject carries no (#n) suffix
+CONTROL KS2    expect rc 1 /why 'FAIL #1358 S1: subject keys \[.KS-1379., .KS-1380.\]' | got rc 1 -> OK | FAIL #1358 S1: subject keys ['KS-1379', 'KS-1380'] (own ['KS-1380'])
+CONTROL KS3    expect rc 1 /why 'FAIL #1359 S3: declared 85, lands at 93' | got rc 1 -> OK | FAIL #1359 S3: declared 85, lands at 93 (<= 92): 'KS-1054: rc 1 from the startup check reads as failed or unverified, not as failed, ok'
+CONTROL KS4    expect rc 1 /why 'FAIL #1357 S1: subject keys \[.KS-10540.\]' | got rc 1 -> OK | FAIL #1357 S1: subject keys ['KS-10540'] (own ['KS-1054'])
+CONTROL KS5    expect rc 1 /why 'FAIL #1358 B1 KS-1380: `Refs KS-1380` lines: 0' | got rc 1 -> OK | FAIL #1358 B1 KS-1380: `Refs KS-1380` lines: 0
+CONTROL KS6    expect rc 1 /why 'FAIL #1359 B2: closing keyword' | got rc 1 -> OK | FAIL #1359 B2: closing keyword before a key: ['Closes']
+CONTROL KS7    expect rc 1 /why 'FAIL #1358 B3: body key set \[.KS-1380., .KS-1387.\] \| foreign \[.KS-1387.\]' | got rc 1 -> OK | FAIL #1358 B3: body key set ['KS-1380', 'KS-1387'] | foreign ['KS-1387']
+CONTROL KS8    expect rc 0 /why 'KEYSCAN PASS: 6 checks over 1 PR\(s\)' | got rc 0 -> OK | KEYSCAN PASS: 6 checks over 1 PR(s), 0 FAIL, 0 FLAG line(s) (live surfaces; the gate rules them)
+--- claims_gate49b.py (the ruling verbatim, the drafts, the anchors)
+CONTROL CL0    expect rc 0 /why 'CLAIMS READ: C1 ruling verbatim True \| 56 draft sentence\(s\)' | got rc 0 -> OK | CLAIMS READ: C1 ruling verbatim True | 56 draft sentence(s) (27 NO-INSTRUMENT-WORD) | 6 anchor(s) | 0 problem(s) -> drafts_gate49b.md
+CONTROL CL0a   expect rc 0 /why 'C3 deploy.sh:857 .*develop: log_error .*FAILED — see above .*PR head: # rc 1 is a failed count' | got rc 0 -> MISMATCH | CLAIMS READ: C1 ruling verbatim True | 56 draft sentence(s) (27 NO-INSTRUMENT-WORD) | 6 anchor(s) | 0 problem(s) -> drafts_gate49b.md
+CONTROL CL1    expect rc 1 /why 'PROBLEM: C1: the ruling \(a\) is not verbatim' | got rc 1 -> OK | PROBLEM: C1: the ruling (a) is not verbatim in #1357's body
+--- the launcher (--check; L9 the real launch path, non-TTY)
+CONTROL L0     expect rc 0 /why 'all guards pass' | got rc 0 -> OK | all guards pass:
+CONTROL L0n    expect rc 0 /why '#1357 T1 236f9dce3898 compare ok \(behind 0\) \| #1359 T1 acac1f5e28ea compare ok \(behind 0\) \| #1358 T2 6cf5c3629cd6 compare ok' | got rc 0 -> OK |   origin develop 377989cf3829e46cf47ef957746f01c2f600a370 == the pinned develop; END_TREE 5f6edce1dc63cb0d3e8dadd7b5793a5e11ff1474 | #1357 T1 236f9dce3898 compare ok (behind 0) | #1359 T1 ac
+CONTROL L1     expect rc 6 /why '#1359 — .* is not at .* AND refs/pull/1359/head' | got rc 6 -> OK | REFUSING: #1359 — 377989cf3829e46cf47ef957746f01c2f600a370 is not at refs/heads/feature/ks-1054-rc1-reads-failed-or-unverified-b49-1c AND refs/pull/1359/head on origin — the head moved (or t
+CONTROL L2     expect rc 17 /why 'origin develop .* != the pinned develop' | got rc 17 -> OK | REFUSING: origin develop 3e3a68260d0ef541b2410d323849d2639ddd6941 != the pinned develop 377989cf3829e46cf47ef957746f01c2f600a370 — run repin_and_launch_gate49b.sh (it re-pins and re-fills in
+CONTROL L3     expect rc 10 /why '#1358 — the compare is not the pinned' | got rc 10 -> OK | REFUSING: #1358 — the compare is not the pinned merge_base / ahead / behind / files:
+CONTROL L4     expect rc 26 /why 'merge authority / the GO strings' | got rc 26 -> OK | REFUSING: merge authority / the GO strings / the merge seats
+CONTROL L4b    expect rc 26 /why 'merge authority / the GO strings' | got rc 26 -> OK | REFUSING: merge authority / the GO strings / the merge seats
+CONTROL L4c    expect rc 26 /why 'merge authority / the GO strings / the merge seats' | got rc 26 -> OK | REFUSING: merge authority / the GO strings / the merge seats
+CONTROL L5     expect rc 8 /why 'unfilled double-brace' | got rc 8 -> OK | REFUSING: the prompt carries an unfilled double-brace fill token
+CONTROL L5b    expect rc 8 /why 'unpinned PR placeholder' | got rc 8 -> OK | REFUSING: the prompt carries an unpinned PR placeholder
+CONTROL LK1    expect rc 33 /why 'by-name keyword 'CLEAN-MERGE'' | got rc 33 -> OK | REFUSING: the prompt does not carry the by-name keyword 'CLEAN-MERGE'
+CONTROL LK2    expect rc 33 /why 'by-name keyword 'DISJOINT'' | got rc 33 -> OK | REFUSING: the prompt does not carry the by-name keyword 'DISJOINT'
+CONTROL LK3    expect rc 33 /why 'by-name keyword 'END-TREE'' | got rc 33 -> OK | REFUSING: the prompt does not carry the by-name keyword 'END-TREE'
+CONTROL LK4    expect rc 33 /why 'by-name keyword 'ORDER-INDEPENDENT'' | got rc 33 -> OK | REFUSING: the prompt does not carry the by-name keyword 'ORDER-INDEPENDENT'
+CONTROL LK5    expect rc 33 /why 'by-name keyword 'MODES'' | got rc 33 -> OK | REFUSING: the prompt does not carry the by-name keyword 'MODES'
+CONTROL LK6    expect rc 33 /why 'by-name keyword 'EXEC-BITS'' | got rc 33 -> OK | REFUSING: the prompt does not carry the by-name keyword 'EXEC-BITS'
+CONTROL LK7    expect rc 33 /why 'by-name keyword 'COLLISION-CENSUS'' | got rc 33 -> OK | REFUSING: the prompt does not carry the by-name keyword 'COLLISION-CENSUS'
+CONTROL LK8    expect rc 33 /why 'by-name keyword 'BEHAVIOUR-1357'' | got rc 33 -> OK | REFUSING: the prompt does not carry the by-name keyword 'BEHAVIOUR-1357'
+CONTROL LK9    expect rc 33 /why 'by-name keyword 'RED-FIRST-1357'' | got rc 33 -> OK | REFUSING: the prompt does not carry the by-name keyword 'RED-FIRST-1357'
+CONTROL LK10   expect rc 33 /why 'by-name keyword 'PREDICATE-CONTRACT'' | got rc 33 -> OK | REFUSING: the prompt does not carry the by-name keyword 'PREDICATE-CONTRACT'
+CONTROL LK11   expect rc 33 /why 'by-name keyword 'CALLERS-READ'' | got rc 33 -> OK | REFUSING: the prompt does not carry the by-name keyword 'CALLERS-READ'
+CONTROL LK12   expect rc 33 /why 'by-name keyword 'RULING-VERBATIM'' | got rc 33 -> OK | REFUSING: the prompt does not carry the by-name keyword 'RULING-VERBATIM'
+CONTROL LK13   expect rc 33 /why 'by-name keyword 'BEHAVIOUR-1359'' | got rc 33 -> OK | REFUSING: the prompt does not carry the by-name keyword 'BEHAVIOUR-1359'
+CONTROL LK14   expect rc 33 /why 'by-name keyword 'GOLDENS-BYTE-EQUAL'' | got rc 33 -> OK | REFUSING: the prompt does not carry the by-name keyword 'GOLDENS-BYTE-EQUAL'
+CONTROL LK15   expect rc 33 /why 'by-name keyword 'RED-FIRST-1359'' | got rc 33 -> OK | REFUSING: the prompt does not carry the by-name keyword 'RED-FIRST-1359'
+CONTROL LK16   expect rc 33 /why 'by-name keyword 'NO-COUNTER-CHANGE'' | got rc 33 -> OK | REFUSING: the prompt does not carry the by-name keyword 'NO-COUNTER-CHANGE'
+CONTROL LK17   expect rc 33 /why 'by-name keyword 'MESSAGE-TRUE'' | got rc 33 -> OK | REFUSING: the prompt does not carry the by-name keyword 'MESSAGE-TRUE'
+CONTROL LK18   expect rc 33 /why 'by-name keyword 'IMAGE-BUILDS'' | got rc 33 -> OK | REFUSING: the prompt does not carry the by-name keyword 'IMAGE-BUILDS'
+CONTROL LK19   expect rc 33 /why 'by-name keyword 'LOCK-DELTA-15'' | got rc 33 -> OK | REFUSING: the prompt does not carry the by-name keyword 'LOCK-DELTA-15'
+CONTROL LK20   expect rc 33 /why 'by-name keyword 'DEPENDENT-RANGES'' | got rc 33 -> OK | REFUSING: the prompt does not carry the by-name keyword 'DEPENDENT-RANGES'
+CONTROL LK21   expect rc 33 /why 'by-name keyword 'REGISTRY-TRUE'' | got rc 33 -> OK | REFUSING: the prompt does not carry the by-name keyword 'REGISTRY-TRUE'
+CONTROL LK22   expect rc 33 /why 'by-name keyword 'REPRODUCE-REFRESH'' | got rc 33 -> OK | REFUSING: the prompt does not carry the by-name keyword 'REPRODUCE-REFRESH'
+CONTROL LK23   expect rc 33 /why 'by-name keyword 'PRISTINE-CONTROL'' | got rc 33 -> OK | REFUSING: the prompt does not carry the by-name keyword 'PRISTINE-CONTROL'
+CONTROL LK24   expect rc 33 /why 'by-name keyword 'LOCK-AGREEMENT'' | got rc 33 -> OK | REFUSING: the prompt does not carry the by-name keyword 'LOCK-AGREEMENT'
+CONTROL LK25   expect rc 33 /why 'by-name keyword 'AUDIT-LEGS-BASE-HEAD'' | got rc 33 -> OK | REFUSING: the prompt does not carry the by-name keyword 'AUDIT-LEGS-BASE-HEAD'
+CONTROL LK26   expect rc 33 /why 'by-name keyword 'TSC-NOT-A-RED-PROOF'' | got rc 33 -> OK | REFUSING: the prompt does not carry the by-name keyword 'TSC-NOT-A-RED-PROOF'
+CONTROL LK27   expect rc 33 /why 'by-name keyword 'SUITES'' | got rc 33 -> OK | REFUSING: the prompt does not carry the by-name keyword 'SUITES'
+CONTROL LK28   expect rc 33 /why 'by-name keyword 'SHELL-RUNNER'' | got rc 33 -> OK | REFUSING: the prompt does not carry the by-name keyword 'SHELL-RUNNER'
+CONTROL LK29   expect rc 33 /why 'by-name keyword 'SHARED-BUILT-FIRST'' | got rc 33 -> OK | REFUSING: the prompt does not carry the by-name keyword 'SHARED-BUILT-FIRST'
+CONTROL LK30   expect rc 33 /why 'by-name keyword 'SUBJECT-KEY-SCAN'' | got rc 33 -> OK | REFUSING: the prompt does not carry the by-name keyword 'SUBJECT-KEY-SCAN'
+CONTROL LK31   expect rc 33 /why 'by-name keyword 'SUBJECT-LANDS-AT'' | got rc 33 -> OK | REFUSING: the prompt does not carry the by-name keyword 'SUBJECT-LANDS-AT'
+CONTROL LK32   expect rc 33 /why 'by-name keyword 'SUBJECT-TRUE-OF-DIFF'' | got rc 33 -> OK | REFUSING: the prompt does not carry the by-name keyword 'SUBJECT-TRUE-OF-DIFF'
+CONTROL LK33   expect rc 33 /why 'by-name keyword 'REFS-OWN-KEY'' | got rc 33 -> OK | REFUSING: the prompt does not carry the by-name keyword 'REFS-OWN-KEY'
+CONTROL LK34   expect rc 33 /why 'by-name keyword 'NO-CLOSING-KEYWORD'' | got rc 33 -> OK | REFUSING: the prompt does not carry the by-name keyword 'NO-CLOSING-KEYWORD'
+CONTROL LK35   expect rc 33 /why 'by-name keyword 'PR-BODY-CLAIMS'' | got rc 33 -> OK | REFUSING: the prompt does not carry the by-name keyword 'PR-BODY-CLAIMS'
+CONTROL LK36   expect rc 33 /why 'by-name keyword 'DRAFTED-COMMENTS'' | got rc 33 -> OK | REFUSING: the prompt does not carry the by-name keyword 'DRAFTED-COMMENTS'
+CONTROL LK37   expect rc 33 /why 'by-name keyword 'NO-REPEAT-49AFF833'' | got rc 33 -> OK | REFUSING: the prompt does not carry the by-name keyword 'NO-REPEAT-49AFF833'
+CONTROL LK38   expect rc 33 /why 'by-name keyword 'FOLLOW-ONS'' | got rc 33 -> OK | REFUSING: the prompt does not carry the by-name keyword 'FOLLOW-ONS'
+CONTROL LK39   expect rc 33 /why 'by-name keyword 'FUSE-COUNT'' | got rc 33 -> OK | REFUSING: the prompt does not carry the by-name keyword 'FUSE-COUNT'
+CONTROL LK40   expect rc 33 /why 'by-name keyword 'OUT-OF-SCOPE'' | got rc 33 -> OK | REFUSING: the prompt does not carry the by-name keyword 'OUT-OF-SCOPE'
+CONTROL LK41   expect rc 33 /why 'by-name keyword 'TIERING'' | got rc 33 -> OK | REFUSING: the prompt does not carry the by-name keyword 'TIERING'
+CONTROL LK42   expect rc 33 /why 'by-name keyword 'DISK-ENOSPC'' | got rc 33 -> OK | REFUSING: the prompt does not carry the by-name keyword 'DISK-ENOSPC'
+CONTROL LK43   expect rc 33 /why 'by-name keyword 'REPORT-HASH-LAST'' | got rc 33 -> OK | REFUSING: the prompt does not carry the by-name keyword 'REPORT-HASH-LAST'
+CONTROL L7     expect rc 20 /why 'do not both name #1359's head' | got rc 20 -> OK | REFUSING: the capture and the prompt do not both name #1359's head acac1f5e28ea4c983891dc50d7ed4b08a34d7e39 in full
+CONTROL L8     expect rc 39 /why 'the HOLDS' | got rc 39 -> OK | REFUSING: the HOLDS
+CONTROL L8b    expect rc 39 /why 'the HOLDS' | got rc 39 -> OK | REFUSING: the HOLDS
+CONTROL L8c    expect rc 39 /why 'the HOLDS' | got rc 39 -> OK | REFUSING: the HOLDS
+CONTROL L8d    expect rc 39 /why 'the HOLDS' | got rc 39 -> OK | REFUSING: the HOLDS
+CONTROL L8e    expect rc 39 /why 'the HOLDS' | got rc 39 -> OK | REFUSING: the HOLDS
+CONTROL L8f    expect rc 39 /why 'the HOLDS' | got rc 39 -> OK | REFUSING: the HOLDS
+CONTROL L8g    expect rc 39 /why 'the HOLDS' | got rc 39 -> OK | REFUSING: the HOLDS
+CONTROL L8h    expect rc 39 /why 'the HOLDS' | got rc 39 -> OK | REFUSING: the HOLDS
+CONTROL L8i    expect rc 39 /why 'the HOLDS' | got rc 39 -> OK | REFUSING: the HOLDS
+CONTROL L9     expect rc 21 /why 'stdin is not a TTY' | got rc 21 -> OK | REFUSING: stdin is not a TTY — run this launcher in a cockpit pane, never inside a Bash tool
+CONTROL L10    expect rc 31 /why 'launch develop / the END_TREE' | got rc 31 -> OK | REFUSING: the launch develop / the END_TREE not in full
+CONTROL L11    expect rc 7 /why 'the tier lines' | got rc 7 -> OK | REFUSING: the tier lines / FROZEN at THREE / the rounds / the tiering rule

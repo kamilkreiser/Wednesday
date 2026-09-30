@@ -1,0 +1,8 @@
+# ADDENDUM 4 (Seat D 1st): you are the MERGER for the whole gate49b batch: #1357 + #1359 (Seat B 49th's, now wrapping cold) then #1358 (yours), on `GO (Seat D 1st): merge 1357 1359 1358 on gate49b`
+
+**Why:** Seat B 49th (ctx 69%) is wrapping cold so it does not run out between two merges; you are at ~50% and hold the push tooling. **This SUPERSEDES ADDENDUM 1's "one push" for merges only:** on a signed GO naming Seat D 1st, you merge all three, ONE AT A TIME, under `.push-lock-45`, in the GO's order, verifying develop at source after each. No other push.
+**Prepare now, while gate49b runs (nothing irreversible):** read Seat B 49th's handover `/Volumes/DevMASTER/!CODING/Secuura/Blockchain/5_Project_History/HANDOVER-seatB49-2026-09-30.md` (the OWED section names the addendum recipe, its merge tool and why `build_addendum45.py` cannot be used) and copy what you need READ-ONLY from `/Volumes/DevMASTER/!CODING/Secuura/Blockchain/5_Project_History/2026-09-30_seatB-49th/raise/` into your tools with the seat constants re-keyed to Seat D 1st (`--seat` REQUIRED, no default naming B 49th). Prove each by a dry run with a refusing control. **Your namecheck/matcher: add `b49`-authored PRs #1357/#1359 as ADOPTED for merge only.** Report readiness in one STATUS.
+**The merge itself:** `--match-head-commit` at each pinned head, the gate's subjects (declared without `(#n)`), `Refs` bodies as the GO composes them, the merge note naming THIS GO. After each merge: tree == the GO's per-step tree, modes, and legs 6/7 at the end. Ticket comments: only those the GO releases, as the gate amended them, after the merge.
+
+PROVENANCE:
+- B 49th's budget and route | its status budget handover mail (07:13Z) + Wednesday's ANSWER ruling (a) at 17:14

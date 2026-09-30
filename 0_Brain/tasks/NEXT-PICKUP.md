@@ -19,6 +19,27 @@ supersede: replace wholesale at the next pickup; do not append. Previous copy: N
 4. EXPIRING-GRANTS: "SPEND PAST THE 90%" is marked ENDED (account switched). Friday's "ignore the 90%" row is Friday's and is not touched.
 
 ### LIVE RIGHT NOW
+**🔴 PRE-ROTATION BLOCK 18:35 2026-09-30 (day seat cab52cfa; ctx 76%). READ FIRST; supersedes every block below:**
+0. **KAM 14:18:29:** "Do everything you can to resolve and once tested and deployed let me know" (Stuart's KS-1395 + the build direction). **OWED: tell him when the fixes are merged and on KINTSUGI** (Wednesday's reading, receipted; demo waits for Peter's nod). The KS-1054 fixes (#1357, #1359) are the deployable part; KS-1380's fix (#1358) was merged by Peter and he has opened a REVERT (see 3).
+1. **Today: 6 Secuura merges into develop:**
+   - ours, verified at source: #1349, #1350, #1354, #1355, **#1356** (the lock refresh of six advisories, which lifted the second push freeze);
+   - **#1358** (KS-1380: 15 locks, Direction B) was merged by **PeterObeden** himself at 07:28Z as a MERGE commit, before any gate.
+   Peter also merged his own #1351/#1352/#1353. **develop now `d8b6c2a7a520`** (ls-remote 18:3x).
+2. **LIVE: gate49b (%84, `QA/Secuura-batch1357`, launched 08:34:29Z)** over develop d8b6c2a7a520 (END_TREE d485add27eab) for **#1357** (KS-1054 1a, 236f9dce3898, T1) + **#1359** (KS-1054 1c, acac1f5e28ea, T1), plus a **POST-MERGE AUDIT of #1358** (images, legs, suites, the lock-agreement check, and D 1st's 3 drafted client comments line by line; no GO for it). Kit `fleet/qa-agent/gatesets/2026-09-30_gate49b/` (README opens with a timeline).
+   **On the verdict:**
+   - `pane_close.sh %84` FIRST, then hash the report;
+   - the kit dry run;
+   - signed GO **`GO (Seat D 1st): merge 1357 1359 on gate49b`** to Seat D 1st: **the `-B` tag, naming the seat**; the addendum selected by pattern;
+   - verify at source in Wednesday's scratch clone: **fetch from the GitHub URL, `git@github.com:Secuura/Distributed_Secuura.git`, NOT the clone's local origin**;
+   - post the gated comments;
+   - mark Kam's card `secuura-ks1054-f9282-migration-failure-visibility` `--delivered` (#1357's PR body quotes (a)).
+   **Then a KINTSUGI deploy seat** (Kam's 14:18 word, kintsugi only; KS-535's wallet rule; name the necessity) → tell Kam.
+3. **PeterObeden opened #1360 at 07:38:55Z: "KS-1380: revert #1358 at Peter's request".** The fleet does NOT touch it. **Card `secuura-ks1380-peter-reverting-1358`** (rec b: Kam talks to Peter/Stuart; default a: leave it to Peter). If #1360 merges before gate49b's GO, the audit section becomes moot; #1357/#1359 are unaffected (disjoint files).
+4. **LIVE: Seat D 1st (%82, `Secuura/Blockchain-B`, ctx ~52%)**: MERGE-READY for the GO above (B 49th's tools re-keyed, proved on a synthetic GO); watcher armed at the max (re-arm before 2 h). **Mail to it: always the `-B` tag + name Seat D 1st.** After the merges it wraps; its handover carries the KS-1379 fix shape and the phase2-profile finding (queue/guardian are never built by default).
+5. **Seat B 49th WRAPPED** (0.95, %81 closed). ⚠ Its handover's OWED omits "D 1st merges 1357 1359" and still calls D 1st design-only (superseded by ADD4/ADD5). **The next Secuura build seat takes ITEM 2** (mwp4 only: Refs KS-729, the fuse 4 → 3, r53p's reason extracted at B 49th's record folder), ITEM 3 (KS-1015 carve), ITEM 5 (fuse-row measurement; card Kam by ~Mon 5 Oct if the real fixes are not merged). Its brief template is `fleet/briefs_staged/2026-09-30_seatB49_build.md`.
+6. New STANDING_LINES today: the co-tenant routing rule (both tags); the watcher harness-timeout rule. Ledger: mail-only to a booting seat (w=2); the subject token + a chained send/tap (w=5).
+7. **At the wrap/rotation: regenerate BOTH digests** (ledger rows were added today: `boot_digest.py --by-tier` AND the bare one), and archive ledger rows ≤ 09-27 (3c).
+
 **🟠 70% CHECKPOINT 15:36 2026-09-30 (day seat cab52cfa; ctx 70%). READ FIRST; supersedes every block below:**
 0. **KAM 14:18:29 (live board):** "Do everything you can to resolve and once tested and deployed let me know" (Stuart's KS-1395 + the KS-1379/KS-1380 direction). **OWED: merged + on KINTSUGI, then tell him on the panel.** Direction B chosen and told to him.
 1. **DONE today: 5 Secuura merges**, the last **#1356** (the in-range lock refresh of six advisories; gate49a GO, scored 0.98) → **develop `377989cf3829`, tree `9b61e858`**, verified at source by Wednesday (a fetch from the GitHub URL, NOT the clone's local origin). **Push freeze LIFTED; Kam told.**

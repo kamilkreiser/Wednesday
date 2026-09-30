@@ -1,0 +1,562 @@
+{
+ "read_at": "2026-09-30T07:47:22Z",
+ "prs": {
+  "1357": {
+   "title": "KS-1054: a present but broken python3 fails closed on the startup check",
+   "state": "open",
+   "user": "kksecura",
+   "head": "236f9dce38982c17bf5868f3a3ec17c08393d871",
+   "branch": "feature/ks-1054-a-present-but-broken-python3-fails-closed-b47-1",
+   "base": "develop",
+   "base_sha": "377989cf3829e46cf47ef957746f01c2f600a370",
+   "mergeable": true,
+   "mergeable_state": "unstable",
+   "files": [
+    [
+     "Blockchain/Dev/deployment/azure/check-startup-migrations.sh",
+     4,
+     2,
+     "modified"
+    ],
+    [
+     "Blockchain/Dev/scripts/__tests__/ks1054_deploy_scripts_read_startup_migrations.test.sh",
+     27,
+     0,
+     "modified"
+    ]
+   ],
+   "commits": [
+    [
+     "236f9dce38982c17bf5868f3a3ec17c08393d871",
+     "KS-1054: a present but broken python3 fails closed on the startup check\n\nRefs KS-1054\n\nCo-Authored-By: Claude Opus 5 <noreply@anthropic.com>"
+    ]
+   ],
+   "body": "`check-startup-migrations.sh` treated a python3 that is PRESENT BUT BROKEN as \"the /health body is not\nJSON\", so a deploy whose migration status could not be read exited 2 (PASS-WITH-SKIP) instead of\nfailing closed. python3 being ABSENT already failed closed (rc 1); a python3 that runs and exits\nnon-zero did not.\n\nTwo files: the predicate (+4/\u22122) and a new shell suite (+27).\n\n## Kam's ruling, quoted verbatim\n\nCard `secuura-ks1054-f9282-migration-failure-visibility`, `choice='a'`,\n`ruled_ts=2026-09-28T20:24:31.316795+10:00`:\n\n> [a] Keep serving, flag it on /health \u2014 The migration run returns its failed count. /health reports\n> it, so the deploy scripts' existing /health checks (deploy-all.sh:281, deploy.sh:823) see it and the\n> deploy reads as failed. The running service is not stopped.\n\nWednesday's standing ruling on the exit codes, as a stated decision: python3 ABSENT fails closed\n(rc 1); python3 PRESENT BUT BROKEN fails closed (rc 1); a genuinely non-JSON body keeps rc 2.\n\n## Test Evidence\n\n**Touched:** `Blockchain/Dev/deployment/azure/check-startup-migrations.sh` (100755) and\n`Blockchain/Dev/scripts/__tests__/ks1054_deploy_scripts_read_startup_migrations.test.sh` (100644).\nNo service code, no migration, no config, no lock, no gate file.\n\n**Ran \u2014 red-first on TWO runners, rc captured on its own line:**\n- macOS: with the change **40 passed / 0 failed**; with the predicate reverted to develop and the new\n  suite kept, **38 passed / 2 failed**, and the reds are **exactly P10 and P10b** (set comparison rc 0,\n  zero reds at head). Restored by byte copy (`cmp` rc 0, mode 755) and green again 40/0.\n- `python:3.12-slim` (**bash 5.2.37, coreutils 9.7, Python 3.12.14**, `--network none`, source mounted\n  read-only and copied to a writable layer): **40/0**, base **38/2**, reds **exactly P10 and P10b**,\n  restored **40/0**.\n- **Neither red is vacuous:** `P9-FIXTURE` (\"python3 is absent under the stub PATH\") and\n  `P10-FIXTURE` (\"python3 is on the stub PATH and exits non-zero\") are green in every arm, so the\n  cells below them are driven rather than skipped.\n- The two reverted-product arms ARE the tamper arms: the guard alone reddens exactly those two cells.\n\n**Rebase provenance (this branch carries an earlier seat's commit, rebased twice):**\nthe stored diff at the original base and the diff at this base are **`cmp`-equal, rc 0** (4175 bytes\nboth), with identical patch-ids (`ac8aa72adcea1dfe15e59d03ce3fe53550db9ca6`) across both rebases; both\nproduct files are byte-identical to the original commit (`cmp` rc 0 each). Committed modes read from\nthe tree: **100755** predicate, **100644** suite \u2014 the 100644 file is the control in the same commit.\n\n**Preflight, quoted as the hook prints it, NOT as a pass:**\n`PREFLIGHT INCOMPLETE \u2014 12/15 legs ran, 3 SKIPPED. Nothing failed.` \u00b7\n`legs 3 4 8 \u2014 local stack not up` \u00b7 `This is NOT a pass. Do not quote it as one \u2014 say which legs ran.`\nInside it: **shell suites 61 passed, 0 failed, 0 skipped (of 61)**, **13 code guards passed**.\n\n**NOT run / NOT covered:**\n- **The whole shell runner does not discriminate this change** \u2014 it reads 61/0/0 both with the change\n  and at the base. Stated because a green runner here is not evidence for this diff.\n- The macOS python3 shim: **not reproducible on this Mac; unmeasured on a Mac without developer tools.**\n- `deploy.sh` / `deploy-all.sh` were **not driven end to end** with a broken-python3 stub.\n- The scripts were **not run against any real environment**. No deploy. **Merged is not deployed**, and\n  the \u00a75f live sweep remains owed, blocked on KS 1380.\n- Round 1 of 2 on this class.\n\n**Migrations + config:** none.\n\nRefs KS-1054\n"
+  },
+  "1359": {
+   "title": "KS-1054: rc 1 from the startup check reads as failed or unverified, not as failed",
+   "state": "open",
+   "user": "kksecura",
+   "head": "acac1f5e28ea4c983891dc50d7ed4b08a34d7e39",
+   "branch": "feature/ks-1054-rc1-reads-failed-or-unverified-b49-1c",
+   "base": "develop",
+   "base_sha": "377989cf3829e46cf47ef957746f01c2f600a370",
+   "mergeable": true,
+   "mergeable_state": "unstable",
+   "files": [
+    [
+     "Blockchain/Dev/deployment/azure/deploy-all.sh",
+     3,
+     1,
+     "modified"
+    ],
+    [
+     "Blockchain/Dev/deployment/azure/deploy.sh",
+     3,
+     1,
+     "modified"
+    ],
+    [
+     "Blockchain/Dev/scripts/__tests__/ks1054_deploy_all_rc1_message.test.sh",
+     77,
+     0,
+     "added"
+    ],
+    [
+     "Blockchain/Dev/scripts/__tests__/ks1054_deploy_sh_rc1_message.test.sh",
+     79,
+     0,
+     "added"
+    ]
+   ],
+   "commits": [
+    [
+     "acac1f5e28ea4c983891dc50d7ed4b08a34d7e39",
+     "KS-1054: rc 1 from the startup check reads as failed or unverified, not as failed\n\ngate47 N-1350-7. The startup-migration predicate exits 1 for two different\nreasons: the migrations genuinely failed, or the check could not be verified\n(python3 absent, and after the present-but-broken fix, a python3 that cannot\nrun). Both callers printed a line that claimed the migrations FAILED, which\nis a stronger claim than rc 1 supports.\n\nMessage text only. No exit code, no counter, no branch changes: rc 1 still\ncounts an ERROR and rc 2 still counts a SKIP, and each is pinned by a control\ncell in the new suites.\n\n  deploy.sh:857      \"startup migrations FAILED - see above\"\n                  -> \"... FAILED or could not be verified - see above\"\n  deploy-all.sh:312  smoke value \"one or more failed\"\n                  -> \"failed or could not be verified - see above\"\n\nThe deploy-all.sh twin was not named by the gate; the local-model screen found\nit, and both are fixed here so the two callers cannot drift apart again.\n\nRefs KS-1054"
+    ]
+   ],
+   "body": "gate47 N-1350-7. The startup-migration predicate exits 1 for two different reasons \u2014 the migrations\ngenuinely failed, or the check could not be verified (python3 absent, and after the present-but-broken\nfix, a python3 that cannot run). Both callers printed a line claiming the migrations FAILED, which is a\nstronger claim than rc 1 supports.\n\nMessage text only. No exit code, no counter, no branch change: rc 1 still counts an ERROR and rc 2\nstill counts a SKIP, each pinned by a control cell in the new suites.\n\n    deploy.sh:857      \"startup migrations FAILED - see above\"\n                    -> \"... FAILED or could not be verified - see above\"\n    deploy-all.sh:312  smoke value \"one or more failed\"\n                    -> \"failed or could not be verified - see above\"\n\nThe `deploy-all.sh` twin was not named by the gate; a local-model screen found it. Both are fixed here\nso the two callers cannot drift apart again.\n\n## Test Evidence\n\n**Touched:** `Blockchain/Dev/deployment/azure/deploy.sh` (100755, +2/\u22122),\n`Blockchain/Dev/deployment/azure/deploy-all.sh` (100755, +2/\u22122), and two new shell suites (100644):\n`ks1054_deploy_sh_rc1_message.test.sh`, `ks1054_deploy_all_rc1_message.test.sh`.\nNo service code, no migration, no config, no lock, no gate file.\n\n**Provenance, checked before applying anything:** each patch's diff block was extracted from its held\npass and compared against the golden in its brief directory \u2014 **byte-equal, `cmp` rc 0** (4783 B and\n4617 B). `git apply --check` rc 0 for each at the base.\n\n\ud83d\udd34 **The exec bit, because it actually bit here:** `git apply` dropped the executable bit on **both**\n100755 files. Caught by `[ -x ]` on disk **before the first test run**, restored with `chmod 755`, and\nthe bytes verified unchanged (`cmp` rc 0). Committed modes read from the tree, not from `stat`:\n**100755 \u00d72** for the deploy scripts, **100644 \u00d72** for the new suites \u2014 the 100644 pair is the control\nin the same commit. After the later rebase onto the merged develop the bits were intact (a cherry-pick\npreserves them where `git apply` does not), re-checked the same way.\n\n**Ran \u2014 red-first on TWO runners, rc captured on its own line:**\n- macOS: each new suite **4 passed / 0 failed** with the change. With **both** product files reverted to\n  develop and the new suites kept: **3 passed / 1 failed each**, and the reds are **exactly M1** and\n  **exactly N1**. Restored by byte copy (`cmp` rc 0 \u00d72, both `[ -x ]` YES) and re-green rc 0 \u00d72.\n- `python:3.12-slim` (**bash 5.2.37, coreutils 9.7, Python 3.12.14**, `--network none`, source mounted\n  read-only and copied to a writable layer): **4/0** and **4/0**; base **3/1** and **3/1**, reds\n  **exactly M1** and **exactly N1**; restored and re-green rc 0 \u00d72.\n- **The M2/M3 and N2/N3 control cells stayed green in every arm.** That is what pins the claim that this\n  is message text only: rc 1 still counts an ERROR and rc 2 still counts a SKIP either side of the change.\n- The reverted-product arms ARE the tamper arms \u2014 reverting the wording reddens exactly M1 / N1.\n\n**Rebase:** cherry-picked onto the merged develop; the stored pre-rebase diff and the post-rebase diff\nare **`cmp`-equal, rc 0**, with identical patch-ids (`116095428c4b1c7b59c8a4de8310aae2189fcf4b`). Both\nnew suites re-run green at the rebased head.\n\n**NOT run / NOT covered:**\n- `deploy.sh` and `deploy-all.sh` were **not driven end to end**; the cells exercise the predicate and\n  the callers' message and counting paths, not a full deploy.\n- The scripts were **not run against any real environment**. No deploy. **Merged is not deployed.**\n- At a base without the present-but-broken fix the rc-1 \"could not be verified\" case already exists via\n  python3 being absent, so these cells do not depend on that change landing first.\n- No Schemathesis, Akto, k6 or Playwright run. Round 1 of 2 on this class.\n\n**Migrations + config:** none.\n\nRefs KS-1054\n"
+  }
+ },
+ "census": {
+  "1360": {
+   "title": "KS-1380: revert #1358 (15 lockfiles) at Peter's request",
+   "user": "PeterObeden",
+   "created_at": "2026-09-30T07:38:55Z",
+   "head": "d0e99f181a4e23fcadcb8fdf7c81e4065e6d63f7",
+   "branch": "feature/ks-1380-revert-pr-1358",
+   "base": "develop",
+   "n_files": 15,
+   "kit_paths_touched": [],
+   "kit_prs_touched": [],
+   "census_keys_in_title": [],
+   "client_human": false
+  },
+  "1253": {
+   "title": "KS-1297 GUARDGAPS: anchor the abort counts, cover the worktree, pin bare call sites",
+   "user": "kksecura",
+   "created_at": "2026-09-25T14:49:46Z",
+   "head": "91e066264004fdb22c67efb0c25fc44375ec6eac",
+   "branch": "feature/ks-1297-fixture-guard-anchor-and-two-gaps-l5-1",
+   "base": "develop",
+   "n_files": 1,
+   "kit_paths_touched": [],
+   "kit_prs_touched": [],
+   "census_keys_in_title": [],
+   "client_human": false
+  },
+  "1250": {
+   "title": "KS-1302 + KS-1303 RSSTRAP: trap the runner's short TMPDIR, and drop the output pipe",
+   "user": "kksecura",
+   "created_at": "2026-09-25T14:28:57Z",
+   "head": "2b8dcb824dd2c5cd4b92757934d7de9d28813a22",
+   "branch": "feature/ks-1302-runner-tmpdir-residue-and-orphan-pipe-l5-1",
+   "base": "develop",
+   "n_files": 2,
+   "kit_paths_touched": [],
+   "kit_prs_touched": [],
+   "census_keys_in_title": [],
+   "client_human": false
+  },
+  "1129": {
+   "title": "docs(history): 2026-09-21 local rebuild on develop 7be81d5c9, OOM diagnosis, preflight 15/15",
+   "user": "StuJam-Secuura",
+   "created_at": "2026-09-21T08:45:36Z",
+   "head": "25c31a0e82990844181a5b9c9a479722dc30baea",
+   "branch": "chore/history-2026-09-21-local-rebuild-preflight",
+   "base": "develop",
+   "n_files": 1,
+   "kit_paths_touched": [],
+   "kit_prs_touched": [],
+   "census_keys_in_title": [],
+   "client_human": false
+  },
+  "995": {
+   "title": "KS-741: strip `x-emitter-internal` at originate's own inbound \u2014 the marker's non-spoofability no longer rests on an unstated convention",
+   "user": "kksecura",
+   "created_at": "2026-09-14T20:37:56Z",
+   "head": "b8155636e8e60ee9646b10217859fcd274ef87f5",
+   "branch": "feature/ks-741-x-emitter-internal-is-unstripped-on-the-originate-route-the",
+   "base": "develop",
+   "n_files": 5,
+   "kit_paths_touched": [],
+   "kit_prs_touched": [],
+   "census_keys_in_title": [],
+   "client_human": false
+  },
+  "989": {
+   "title": "KS-973: the pre-suite step redacts the generated password, pins its DEGRADED stream, drives its second quarantine call \u2014 items 5, 6 + two residues; items 3/4 wait for #927; items 1/2 are L11/L12 files",
+   "user": "kksecura",
+   "created_at": "2026-09-14T07:22:52Z",
+   "head": "e62fd23cda1bc120716e5f592efac2b8abea97bf",
+   "branch": "feature/ks-973-ks-969-round-1-gate-residue-the-pre-suite-step-and-its-own",
+   "base": "develop",
+   "n_files": 5,
+   "kit_paths_touched": [],
+   "kit_prs_touched": [],
+   "census_keys_in_title": [],
+   "client_human": false
+  },
+  "949": {
+   "title": "chore(deps-dev): bump prisma from 7.8.0 to 7.10.0 in /Blockchain/Dev",
+   "user": "dependabot[bot]",
+   "created_at": "2026-09-10T07:59:49Z",
+   "head": "7ee1a26e634f33b6a4ae115d559f5440a90f6fff",
+   "branch": "dependabot/npm_and_yarn/Blockchain/Dev/develop/prisma-7.10.0",
+   "base": "develop",
+   "n_files": 2,
+   "kit_paths_touched": [],
+   "kit_prs_touched": [],
+   "census_keys_in_title": [],
+   "client_human": false
+  },
+  "948": {
+   "title": "chore(deps): bump vite from 6.4.3 to 8.3.1 in /Blockchain/Dev",
+   "user": "dependabot[bot]",
+   "created_at": "2026-09-10T07:58:12Z",
+   "head": "b061917414464d30e88dff5d0d6b7b05f9ca5b47",
+   "branch": "dependabot/npm_and_yarn/Blockchain/Dev/develop/vite-8.2.2",
+   "base": "develop",
+   "n_files": 10,
+   "kit_paths_touched": [],
+   "kit_prs_touched": [],
+   "census_keys_in_title": [],
+   "client_human": false
+  },
+  "947": {
+   "title": "chore(deps-dev): bump @testing-library/jest-dom from 6.9.1 to 7.0.1 in /Blockchain/Dev",
+   "user": "dependabot[bot]",
+   "created_at": "2026-09-10T07:46:52Z",
+   "head": "d68b9d79e67f336e527cc4eef7eaf07fa78670bb",
+   "branch": "dependabot/npm_and_yarn/Blockchain/Dev/develop/testing-library/jest-dom-7.0.1",
+   "base": "develop",
+   "n_files": 2,
+   "kit_paths_touched": [],
+   "kit_prs_touched": [],
+   "census_keys_in_title": [],
+   "client_human": false
+  },
+  "946": {
+   "title": "chore(deps): bump @fluentui/react-icons from 2.0.331 to 2.0.339 in /Blockchain/Dev",
+   "user": "dependabot[bot]",
+   "created_at": "2026-09-10T07:44:37Z",
+   "head": "41cc5209aaf2f8369f4ce8d5735a43fb07340d0b",
+   "branch": "dependabot/npm_and_yarn/Blockchain/Dev/develop/fluentui/react-icons-2.0.339",
+   "base": "develop",
+   "n_files": 2,
+   "kit_paths_touched": [],
+   "kit_prs_touched": [],
+   "census_keys_in_title": [],
+   "client_human": false
+  },
+  "945": {
+   "title": "chore(deps-dev): bump @axe-core/playwright from 4.11.3 to 4.13.0 in /Blockchain/Dev",
+   "user": "dependabot[bot]",
+   "created_at": "2026-09-10T07:43:47Z",
+   "head": "264098fce62b1e839c506f61fa443830fdba996a",
+   "branch": "dependabot/npm_and_yarn/Blockchain/Dev/develop/axe-core/playwright-4.13.0",
+   "base": "develop",
+   "n_files": 2,
+   "kit_paths_touched": [],
+   "kit_prs_touched": [],
+   "census_keys_in_title": [],
+   "client_human": false
+  },
+  "927": {
+   "title": "KS-1027: close Peter's four #904 follow-ups \u2014 the OTHER cp, the stash the refusal deleted, and the duplication nobody had justified",
+   "user": "kksecura",
+   "created_at": "2026-09-09T10:52:11Z",
+   "head": "1041d2d32d389a5f21cf622dfcf4d5be66e0ce2f",
+   "branch": "feature/ks-1027-ks992-followups",
+   "base": "develop",
+   "n_files": 2,
+   "kit_paths_touched": [],
+   "kit_prs_touched": [],
+   "census_keys_in_title": [],
+   "client_human": false
+  },
+  "923": {
+   "title": "KS-736: the mount-auth check scored authenticateToken(false) as green, and could not see half its own surface",
+   "user": "kksecura",
+   "created_at": "2026-09-09T08:53:13Z",
+   "head": "d127dc7d4655a4e227d4f6e511f469c456eaabb7",
+   "branch": "kamilkreiser/ks-736-mount-auth-retag",
+   "base": "develop",
+   "n_files": 1,
+   "kit_paths_touched": [],
+   "kit_prs_touched": [],
+   "census_keys_in_title": [],
+   "client_human": false
+  },
+  "920": {
+   "title": "KS-734: make tests/e2e runnable from a clean checkout, and baseline what it actually reports",
+   "user": "kksecura",
+   "created_at": "2026-09-09T07:38:52Z",
+   "head": "2112a99e31aec4b6e132dc6519c75d3afb6b2b02",
+   "branch": "kamilkreiser/ks-734-e2e-suite-installable",
+   "base": "develop",
+   "n_files": 7,
+   "kit_paths_touched": [],
+   "kit_prs_touched": [],
+   "census_keys_in_title": [],
+   "client_human": false
+  },
+  "887": {
+   "title": "KS-961: run the workspace suites on the PR, advisory and non-blocking \u2014 and they are RED on develop today",
+   "user": "kksecura",
+   "created_at": "2026-09-07T01:41:26Z",
+   "head": "3aee3deed2e3ac557f0a52c0797c2a4a8df25f69",
+   "branch": "feature/ks-961-workspace-suites-advisory-on-pr",
+   "base": "develop",
+   "n_files": 2,
+   "kit_paths_touched": [],
+   "kit_prs_touched": [],
+   "census_keys_in_title": [],
+   "client_human": false
+  },
+  "809": {
+   "title": "KS-693 (interim): guard the 8 M365/OneDrive/Teams unconfigured-503 ops so the merge gate reads a real floor",
+   "user": "kksecura",
+   "created_at": "2026-09-04T22:30:48Z",
+   "head": "aa2270fe14cf95dbe349fb8aae14f1473d2db5e7",
+   "branch": "feature/ks-693-tolerate-m365-unconfigured-503",
+   "base": "develop",
+   "n_files": 2,
+   "kit_paths_touched": [],
+   "kit_prs_touched": [],
+   "census_keys_in_title": [],
+   "client_human": false
+  },
+  "649": {
+   "title": "chore(deps): bump pg and @types/pg in /Blockchain/Dev",
+   "user": "dependabot[bot]",
+   "created_at": "2026-08-05T12:16:10Z",
+   "head": "1d9198ac7e2f54e43cd38b66ce40ce1f52d338b8",
+   "branch": "dependabot/npm_and_yarn/Blockchain/Dev/develop/multi-8cb89e51b7",
+   "base": "develop",
+   "n_files": 22,
+   "kit_paths_touched": [],
+   "kit_prs_touched": [],
+   "census_keys_in_title": [],
+   "client_human": false
+  },
+  "639": {
+   "title": "chore(deps): bump @radix-ui/react-dropdown-menu from 2.1.16 to 2.1.24 in /Blockchain/Dev",
+   "user": "dependabot[bot]",
+   "created_at": "2026-08-03T20:46:50Z",
+   "head": "2069d852ee1618fac25cd3eeb56f22005422125f",
+   "branch": "dependabot/npm_and_yarn/Blockchain/Dev/develop/radix-ui/react-dropdown-menu-2.1.24",
+   "base": "develop",
+   "n_files": 3,
+   "kit_paths_touched": [],
+   "kit_prs_touched": [],
+   "census_keys_in_title": [],
+   "client_human": false
+  },
+  "635": {
+   "title": "chore(deps): bump cbor from 9.0.2 to 10.0.12 in /Blockchain/Dev",
+   "user": "dependabot[bot]",
+   "created_at": "2026-08-03T20:16:58Z",
+   "head": "6cbc298f41a1dd4a0a986084800c6de71aeb08fd",
+   "branch": "dependabot/npm_and_yarn/Blockchain/Dev/develop/cbor-10.0.12",
+   "base": "develop",
+   "n_files": 2,
+   "kit_paths_touched": [],
+   "kit_prs_touched": [],
+   "census_keys_in_title": [],
+   "client_human": false
+  },
+  "575": {
+   "title": "chore(deps): bump dotenv from 16.6.1 to 17.4.2 in /Blockchain/Dev",
+   "user": "dependabot[bot]",
+   "created_at": "2026-07-20T20:21:05Z",
+   "head": "7d32d8ae4b064592b2d133e17d23c67b8d50dc60",
+   "branch": "dependabot/npm_and_yarn/Blockchain/Dev/develop/dotenv-17.4.2",
+   "base": "develop",
+   "n_files": 21,
+   "kit_paths_touched": [],
+   "kit_prs_touched": [],
+   "census_keys_in_title": [],
+   "client_human": false
+  },
+  "572": {
+   "title": "chore(deps-dev): bump @types/office-js from 1.0.599 to 1.0.610 in /Blockchain/Dev in the types group across 1 directory",
+   "user": "dependabot[bot]",
+   "created_at": "2026-07-20T20:19:15Z",
+   "head": "4ea847b39ec8cb2db1e7bee0eb9355e35a8c4208",
+   "branch": "dependabot/npm_and_yarn/Blockchain/Dev/develop/types-1409c3626d",
+   "base": "develop",
+   "n_files": 2,
+   "kit_paths_touched": [],
+   "kit_prs_touched": [],
+   "census_keys_in_title": [],
+   "client_human": false
+  }
+ },
+ "out_of_scope": {},
+ "audit_census": {
+  "1360": {
+   "title": "KS-1380: revert #1358 (15 lockfiles) at Peter's request",
+   "user": "PeterObeden",
+   "created_at": "2026-09-30T07:38:55Z",
+   "head": "d0e99f181a4e23fcadcb8fdf7c81e4065e6d63f7",
+   "branch": "feature/ks-1380-revert-pr-1358",
+   "base": "develop",
+   "n_files": 15,
+   "kit_paths_touched": [],
+   "kit_prs_touched": [],
+   "census_keys_in_title": [],
+   "client_human": false,
+   "audit_paths_touched": [
+    "Blockchain/Dev/connectors/whatsapp-bot/package-lock.json",
+    "Blockchain/Dev/package-lock.json",
+    "Blockchain/Dev/services/analytics/package-lock.json",
+    "Blockchain/Dev/services/billing/package-lock.json",
+    "Blockchain/Dev/services/governance/package-lock.json",
+    "Blockchain/Dev/services/kyc/package-lock.json",
+    "Blockchain/Dev/services/nft-certificate/package-lock.json",
+    "Blockchain/Dev/services/referral/package-lock.json",
+    "Blockchain/Dev/services/shared/package-lock.json",
+    "Blockchain/Dev/services/staking/package-lock.json",
+    "Blockchain/Dev/services/tenant-provisioning/package-lock.json",
+    "Blockchain/Dev/services/tokenisation/package-lock.json",
+    "Blockchain/Dev/services/transfer/package-lock.json",
+    "Blockchain/Dev/services/vc-issuer/package-lock.json",
+    "Blockchain/Dev/services/wallet-connector/package-lock.json"
+   ],
+   "audit_keys_in_title": [
+    "KS-1380"
+   ]
+  },
+  "949": {
+   "title": "chore(deps-dev): bump prisma from 7.8.0 to 7.10.0 in /Blockchain/Dev",
+   "user": "dependabot[bot]",
+   "created_at": "2026-09-10T07:59:49Z",
+   "head": "7ee1a26e634f33b6a4ae115d559f5440a90f6fff",
+   "branch": "dependabot/npm_and_yarn/Blockchain/Dev/develop/prisma-7.10.0",
+   "base": "develop",
+   "n_files": 2,
+   "kit_paths_touched": [],
+   "kit_prs_touched": [],
+   "census_keys_in_title": [],
+   "client_human": false,
+   "audit_paths_touched": [
+    "Blockchain/Dev/package-lock.json"
+   ],
+   "audit_keys_in_title": []
+  },
+  "948": {
+   "title": "chore(deps): bump vite from 6.4.3 to 8.3.1 in /Blockchain/Dev",
+   "user": "dependabot[bot]",
+   "created_at": "2026-09-10T07:58:12Z",
+   "head": "b061917414464d30e88dff5d0d6b7b05f9ca5b47",
+   "branch": "dependabot/npm_and_yarn/Blockchain/Dev/develop/vite-8.2.2",
+   "base": "develop",
+   "n_files": 10,
+   "kit_paths_touched": [],
+   "kit_prs_touched": [],
+   "census_keys_in_title": [],
+   "client_human": false,
+   "audit_paths_touched": [
+    "Blockchain/Dev/package-lock.json"
+   ],
+   "audit_keys_in_title": []
+  },
+  "947": {
+   "title": "chore(deps-dev): bump @testing-library/jest-dom from 6.9.1 to 7.0.1 in /Blockchain/Dev",
+   "user": "dependabot[bot]",
+   "created_at": "2026-09-10T07:46:52Z",
+   "head": "d68b9d79e67f336e527cc4eef7eaf07fa78670bb",
+   "branch": "dependabot/npm_and_yarn/Blockchain/Dev/develop/testing-library/jest-dom-7.0.1",
+   "base": "develop",
+   "n_files": 2,
+   "kit_paths_touched": [],
+   "kit_prs_touched": [],
+   "census_keys_in_title": [],
+   "client_human": false,
+   "audit_paths_touched": [
+    "Blockchain/Dev/package-lock.json"
+   ],
+   "audit_keys_in_title": []
+  },
+  "946": {
+   "title": "chore(deps): bump @fluentui/react-icons from 2.0.331 to 2.0.339 in /Blockchain/Dev",
+   "user": "dependabot[bot]",
+   "created_at": "2026-09-10T07:44:37Z",
+   "head": "41cc5209aaf2f8369f4ce8d5735a43fb07340d0b",
+   "branch": "dependabot/npm_and_yarn/Blockchain/Dev/develop/fluentui/react-icons-2.0.339",
+   "base": "develop",
+   "n_files": 2,
+   "kit_paths_touched": [],
+   "kit_prs_touched": [],
+   "census_keys_in_title": [],
+   "client_human": false,
+   "audit_paths_touched": [
+    "Blockchain/Dev/package-lock.json"
+   ],
+   "audit_keys_in_title": []
+  },
+  "945": {
+   "title": "chore(deps-dev): bump @axe-core/playwright from 4.11.3 to 4.13.0 in /Blockchain/Dev",
+   "user": "dependabot[bot]",
+   "created_at": "2026-09-10T07:43:47Z",
+   "head": "264098fce62b1e839c506f61fa443830fdba996a",
+   "branch": "dependabot/npm_and_yarn/Blockchain/Dev/develop/axe-core/playwright-4.13.0",
+   "base": "develop",
+   "n_files": 2,
+   "kit_paths_touched": [],
+   "kit_prs_touched": [],
+   "census_keys_in_title": [],
+   "client_human": false,
+   "audit_paths_touched": [
+    "Blockchain/Dev/package-lock.json"
+   ],
+   "audit_keys_in_title": []
+  },
+  "649": {
+   "title": "chore(deps): bump pg and @types/pg in /Blockchain/Dev",
+   "user": "dependabot[bot]",
+   "created_at": "2026-08-05T12:16:10Z",
+   "head": "1d9198ac7e2f54e43cd38b66ce40ce1f52d338b8",
+   "branch": "dependabot/npm_and_yarn/Blockchain/Dev/develop/multi-8cb89e51b7",
+   "base": "develop",
+   "n_files": 22,
+   "kit_paths_touched": [],
+   "kit_prs_touched": [],
+   "census_keys_in_title": [],
+   "client_human": false,
+   "audit_paths_touched": [
+    "Blockchain/Dev/package-lock.json"
+   ],
+   "audit_keys_in_title": []
+  },
+  "639": {
+   "title": "chore(deps): bump @radix-ui/react-dropdown-menu from 2.1.16 to 2.1.24 in /Blockchain/Dev",
+   "user": "dependabot[bot]",
+   "created_at": "2026-08-03T20:46:50Z",
+   "head": "2069d852ee1618fac25cd3eeb56f22005422125f",
+   "branch": "dependabot/npm_and_yarn/Blockchain/Dev/develop/radix-ui/react-dropdown-menu-2.1.24",
+   "base": "develop",
+   "n_files": 3,
+   "kit_paths_touched": [],
+   "kit_prs_touched": [],
+   "census_keys_in_title": [],
+   "client_human": false,
+   "audit_paths_touched": [
+    "Blockchain/Dev/package-lock.json"
+   ],
+   "audit_keys_in_title": []
+  },
+  "635": {
+   "title": "chore(deps): bump cbor from 9.0.2 to 10.0.12 in /Blockchain/Dev",
+   "user": "dependabot[bot]",
+   "created_at": "2026-08-03T20:16:58Z",
+   "head": "6cbc298f41a1dd4a0a986084800c6de71aeb08fd",
+   "branch": "dependabot/npm_and_yarn/Blockchain/Dev/develop/cbor-10.0.12",
+   "base": "develop",
+   "n_files": 2,
+   "kit_paths_touched": [],
+   "kit_prs_touched": [],
+   "census_keys_in_title": [],
+   "client_human": false,
+   "audit_paths_touched": [
+    "Blockchain/Dev/package-lock.json"
+   ],
+   "audit_keys_in_title": []
+  },
+  "575": {
+   "title": "chore(deps): bump dotenv from 16.6.1 to 17.4.2 in /Blockchain/Dev",
+   "user": "dependabot[bot]",
+   "created_at": "2026-07-20T20:21:05Z",
+   "head": "7d32d8ae4b064592b2d133e17d23c67b8d50dc60",
+   "branch": "dependabot/npm_and_yarn/Blockchain/Dev/develop/dotenv-17.4.2",
+   "base": "develop",
+   "n_files": 21,
+   "kit_paths_touched": [],
+   "kit_prs_touched": [],
+   "census_keys_in_title": [],
+   "client_human": false,
+   "audit_paths_touched": [
+    "Blockchain/Dev/package-lock.json"
+   ],
+   "audit_keys_in_title": []
+  },
+  "572": {
+   "title": "chore(deps-dev): bump @types/office-js from 1.0.599 to 1.0.610 in /Blockchain/Dev in the types group across 1 directory",
+   "user": "dependabot[bot]",
+   "created_at": "2026-07-20T20:19:15Z",
+   "head": "4ea847b39ec8cb2db1e7bee0eb9355e35a8c4208",
+   "branch": "dependabot/npm_and_yarn/Blockchain/Dev/develop/types-1409c3626d",
+   "base": "develop",
+   "n_files": 2,
+   "kit_paths_touched": [],
+   "kit_prs_touched": [],
+   "census_keys_in_title": [],
+   "client_human": false,
+   "audit_paths_touched": [
+    "Blockchain/Dev/package-lock.json"
+   ],
+   "audit_keys_in_title": []
+  }
+ }
+}
