@@ -1,4 +1,4 @@
-# Ornith candidates — derived 2026-09-29 17:34 from 263 KS Backlog/Todo tickets (read-only, unpaginated)
+# Ornith candidates — derived 2026-09-30 06:06 from 273 KS Backlog/Todo tickets (read-only, unpaginated)
 
 A CENSUS for the coordinator to brief from, easy → hard (Kam 2026-09-15 16:40 / 18:19). A ticket here is a candidate, not a task: read it, read the file at the tip, write `night/briefs/<id>.md`, then queue it. Auth-shaped titles are excluded (LAST); Peter/Stuart tickets and PR-attached tickets are excluded outright.
 
@@ -28,15 +28,19 @@ A CENSUS for the coordinator to brief from, easy → hard (Kam 2026-09-15 16:40 
 - KS-1197 (P4) [resolved:basename, a HINT — read the file] A non-string verificationLevel claim — `services/auth/src/repositories/userRepo.ts`
 - KS-748 (P4) [resolved:route, a HINT — read the file] svc_api_keys.organization_id is not a t — `services/security/src/index.ts`
 
-## T2 tooling (systemTest/*, one file) — 0
+## T2 tooling (systemTest/*, one file) — 1
+- KS-1393 (P4) Repo hygiene: 31 spec files under Blockchain/Dev/tests that no Playwright config — `systemTest/playwright/playwright.config.ts`
 
-## T2b bash (bash_patch — one script + a *.test.sh beside the reference) — 7
+## T2b bash (bash_patch — one script + a *.test.sh beside the reference) — 10
 - KS-1355 (P1) Stack tooling is not slot-derived end to end: stack_guard lists a project twice  — `scripts/dev-reload.sh`
 - KS-1305 (P2) No fresh worktree can run a withTenant integration cell in single-tenant mode -  — `scripts/run-migrations.sh`
 - KS-1376 (P2) Security: certifications ends RLS FORCE with no tenant_isolation policy on every — `scripts/run-migrations.sh`
+- KS-1380 (P2) develop does not build since KS-1378 (#1339): analytics, billing and governance  — `Start_Up/start-secuura.sh`
+- KS-1382 (P2) Blockchain/Testing: five audit/DAST/tenant-isolation entry points default TARGET — `scripts/stack_env.sh`
 - KS-998 (P2) KS-989 gate residue: the formatting gate fails OPEN on missing deps and reads th — `.githooks/pre-push`
 - KS-1163 (P3) start-secuura.sh never waits for five default-profile, healthchecked services —  — `Start_Up/start-secuura.sh`
 - KS-1324 (P3) run_shell_suites.test.sh KS-1303 cell: a `-lt 6` WALL-CLOCK margin against a 15  — `scripts/run-shell-suites.sh`
+- KS-1392 (P3) ci.yml's contract job cannot work — all three Aiken steps use `contracts/secuura — `scripts/deploy-contracts.sh`
 - KS-630 (P3) Wire the status-page XSS probe into preflight (or decide not to) — it runs today — `scripts/preflight/preflight.sh`
 
 ## T3 jest services (originate, governance) — 2
@@ -49,12 +53,17 @@ A CENSUS for the coordinator to brief from, easy → hard (Kam 2026-09-15 16:40 
 - KS-1343 (P4) [resolved:docs, a HINT — the ticket MENTIONS the file] Multi-tenancy docs: eight non-blocking overstatements and Polish notes left by # — `docs/MULTI-TENANCY.md`, `docs/RLS-FAIL-CLOSED-PLAN.md`
 - KS-1322 (P0) [resolved:docs, a HINT — the ticket MENTIONS the file] Published spec descriptions carry internal ticket keys ("KS-1275:", "KS-1118 F-3 — `docs/VOCABULARY.md`
 
-## T5 multi-file / later — 33
+## T5 multi-file / later — 40
 - KS-1051 (P2) develop is RED on the services/originate jest suite and NOTHING catches it — the — `scripts/preflight/preflight.sh`, `.githooks/pre-push`
 - KS-1055 (P2) Per-tenant databases never receive the file migrations — CORE_MIGRATIONS FORCEs  — `services/api-gateway/src/startup-migrations.ts`, `services/tenant-provisioning/src/index.ts`
 - KS-1100 (P2) [resolved:basename, a HINT — read the file] Kintsugi deploy 4554b25e2: four live — `services/auth/src/routes/mfa.ts`, `services/auth/src/repositories/userRepo.ts`, `services/anchoring/src/chainHealthStatus.ts`
 - KS-1241 (P2) [resolved:route, a HINT — read the file] T-4: POST /api/v1/documents never answe — `services/api-gateway/src/index.ts`, `services/api-gateway/src/middleware/scopes.ts`, `services/api-gateway/src/routes/proxy.ts`
 - KS-1262 (P2) Security: PUT /api/settings/notifications writes the same key namespace as platf — `services/api-gateway/src/services/redis.ts`, `services/api-gateway/src/routes/admin.ts`
+- KS-1381 (P2) Slot-1 URLs outside KS-1355's four spots: m365's Entra redirect URI defaults to  — `services/m365-integration/src/index.ts`, `scripts/bootstrap-env.sh`, `scripts/auth-matrix-smoke.sh`
+- KS-1384 (P2) One anchor row per (document_id, network): a repeat POST /api/anchors resets the — `services/anchoring/src/index.ts`, `services/originate/src/routes/documents.ts`
+- KS-1385 (P2) KS-1175 follow-on: the anchors K emits for share / transfer-custody / lifecycle- — `services/anchoring/src/anchorSchema.ts`, `services/originate/src/routes/documents.ts`
+- KS-1387 (P2) A clean image build of platform-k develop fails: services/governance does not co — `services/governance/src/routes/governance.ts`, `Start_Up/start-secuura.sh`
+- KS-1390 (P2) The e2e-v2 harness is platform-k's only browser, portal and accessibility covera — `systemTest/playwright/playwright.config.ts`, `.githooks/pre-push`
 - KS-485 (P2) Security review — plan, methodology & handover (Platform K) — `services/api-gateway/src/routes/notifications.ts`, `services/originate/src/repositories/documentRepo.ts`, `services/originate/src/index.ts`
 - KS-491 (P2) Review F — Edge, WAF, DDoS & anti-automation — `services/api-gateway/src/middleware/rateLimitEnforce.ts`, `services/auth/src/routes/auth.ts`
 - KS-576 (P2) Bulk re-key: one admin-authorised rotate across a named set of externalRefs — `services/api-gateway/src/routes/platform.ts`, `services/security/src/index.ts`, `packages/shared/src/db/tenant-guc.ts`
@@ -83,6 +92,8 @@ A CENSUS for the coordinator to brief from, easy → hard (Kam 2026-09-15 16:40 
 - KS-1082 (P4) The Playwright env guard added in #896 reads config/ only — the variable breakin — `systemTest/fixtures/provision-actors.ts`, `systemTest/playwright/global-setup.ts`
 - KS-1106 (P4) [resolved:route, a HINT — read the file] Verifier shows 'Verification Failed' /  — `services/api-gateway/src/middleware/csrf.ts`, `services/mcp-server/src/api-client.ts`, `services/originate/src/middleware/errorHandler.ts`
 - KS-1083 (P0) GATEWAY_VOUCH_SECRET: nothing provisions it and no deploy order or rotation is w — `services/api-gateway/src/routes/verification.ts`, `packages/shared/src/db/tenant-context.ts`, `scripts/bootstrap-env.sh`
+- KS-1388 (P0) observability/ reaches the platform by slot 1's container names (documented), an — `scripts/observability.sh`, `scripts/stack_env.sh`
+- KS-1389 (P0) Sourcing systemTest/slot-target.sh with no slot named silently exports slot 1's  — `systemTest/fixtures/slot-required.ts`, `scripts/stack_env.sh`, `.githooks/pre-push`
 
 ## ⚠ ALSO NAMED IN A HELD READY's HEADLINE — 24 (verify before briefing; surfaced, NOT suppressed)
 - KS-1004 — named in READY_KS-1158-R1_ornith35b-q4_JEST-PASS-7of7_2026-09-15.diff.md
@@ -112,18 +123,17 @@ A CENSUS for the coordinator to brief from, easy → hard (Kam 2026-09-15 16:40 
 
 ## HELD (READY_* or done.md PASS) — 10
 - KS-1009 Security: GET /api/auth/wallet/status returns userId + role to ANY anonymous cal
+- KS-1015 Sweeps 2026-09-08: 28 check/operation pairs have no live owner — 18 untriaged (t
 - KS-1186 userRepo.ts: five sibling reads still return fromRow unawaited inside try, so a 
 - KS-1219 OAuth /authorize answers 500 server_error for an array-valued scope (repeated qu
 - KS-1250 O-2: RUNBOOK §2.2 documents SMOKE_BASE_URL, but scripts/smoke-test.sh ignores it
-- KS-1374 Akto scans are now paced to fit the platform's rate limit — test times went up; 
 - KS-623 Test-token env guard is asymmetric: the gateway fails closed on an unset NODE_EN
 - KS-866 Merge protocol: the server-side `sha=` pin protects the PR head, not the base — 
 - KS-884 pre-push resolves the bare name `develop`, so a TAG named develop beats the bran
 - KS-938 Security: "MFA disabled" leaves the TOTP seed and hashed backup codes in the row
 - KS-960 Two schema sources disagree on whether users.email is unique — a statement valid
 
-## SET ASIDE with a recorded reason — 19 (re-read only if the ticket's updatedAt moved)
-- KS-1063 — decision-class: its own words say the design question comes first (updated 2026-09-09)
+## SET ASIDE with a recorded reason — 17 (re-read only if the ticket's updatedAt moved)
 - KS-1076 — likely already fixed at M55 (docblock present since ec61abf8e/0882f7661) — measure with eslint in a tool-mode clone; item 2 is a Claude seat's (updated 2026-09-13)
 - KS-1088 — decision-class: 'filing only; decide whether the runner should enforce isolation' — a ruling, not a patch (updated 2026-09-11)
 - KS-1112 — two files: option 1 reds ks1029's A1 cell (2026-09-15 18:45) (updated 2026-09-13)
@@ -132,7 +142,7 @@ A CENSUS for the coordinator to brief from, easy → hard (Kam 2026-09-15 16:40 
 - KS-1119 — multi-tenant security surface (updated 2026-09-13)
 - KS-1132 — services/auth — security surface (Kam 16:40: auth LAST) (updated 2026-09-13)
 - KS-1148 — its own words: 'Fixing either is a .github/workflows/ edit — Kam-class; nothing here is changed by the seat that filed this' (updated 2026-09-25)
-- KS-1162 — three .github/workflows/ files (Kam-class) AND decision-class ('Fix direction: Either 1 … or …') (updated 2026-09-14)
+- KS-1162 — three .github/workflows/ files (Kam-class) AND decision-class ('Fix direction: Either 1 … or …') (updated 2026-09-29)
 - KS-1184 — decision-class: the ticket's own words are 'A design call beside KS-1087 item 2, not a fix round on #1008' with two shapes offered (updated 2026-09-16)
 - KS-1191 — decision-class: 'Not built; Backlog. This is a design decision for the audit trail's owner, not a one-line fix' — two choices, and the edge behaviour is NOT TESTED (updated 2026-09-16)
 - KS-590 — verification.ts, security-adjacent (updated 2026-09-13)
@@ -141,9 +151,8 @@ A CENSUS for the coordinator to brief from, easy → hard (Kam 2026-09-15 16:40 
 - KS-770 — not a doc edit — the body is a review-stream test pass for Peter; the docs/ path came from a MENTION, not an edit target (updated 2026-09-28)
 - KS-777 — tracker ticket — all four findings FIXED on #795; a board close (updated 2026-09-05)
 - KS-889 — a measurement/ruling ticket, not a patch (updated 2026-09-06)
-- KS-981 — lives only on the frozen #892 branch (updated 2026-09-07)
 
-## EXCLUDED by predicate — 164
+## EXCLUDED by predicate — 165
 - KS-1000 — has a PR attached
 - KS-1003 — auth-shaped title (LAST, Kam 16:40)
 - KS-1005 — auth-shaped title (LAST, Kam 16:40)
@@ -151,7 +160,6 @@ A CENSUS for the coordinator to brief from, easy → hard (Kam 2026-09-15 16:40 
 - KS-1010 — names no product file (after basename/docs/route resolution)
 - KS-1012 — names no product file (after basename/docs/route resolution)
 - KS-1014 — names no product file (after basename/docs/route resolution)
-- KS-1015 — auth-shaped title (LAST, Kam 16:40)
 - KS-1017 — auth-shaped title (LAST, Kam 16:40)
 - KS-1022 — names no product file (after basename/docs/route resolution)
 - KS-1023 — names no product file (after basename/docs/route resolution)
@@ -224,7 +232,9 @@ A CENSUS for the coordinator to brief from, easy → hard (Kam 2026-09-15 16:40 
 - KS-1367 — on Peter/Stuart
 - KS-1372 — auth-shaped title (LAST, Kam 16:40)
 - KS-1379 — names no product file (after basename/docs/route resolution)
+- KS-1383 — names no product file (after basename/docs/route resolution)
 - KS-139 — on Peter/Stuart
+- KS-1391 — names no product file (after basename/docs/route resolution)
 - KS-188 — on Peter/Stuart
 - KS-239 — on Peter/Stuart
 - KS-263 — names no product file (after basename/docs/route resolution)
@@ -301,7 +311,7 @@ A CENSUS for the coordinator to brief from, easy → hard (Kam 2026-09-15 16:40 
 - KS-959 — names no product file (after basename/docs/route resolution)
 - KS-964 — has a PR attached
 - KS-977 — auth-shaped title (LAST, Kam 16:40)
-- KS-982 — names no product file (after basename/docs/route resolution)
+- KS-982 — on Peter/Stuart
 - KS-983 — on Peter/Stuart
 - KS-984 — on Peter/Stuart
 - KS-985 — on Peter/Stuart
