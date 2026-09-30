@@ -19,6 +19,20 @@ supersede: replace wholesale at the next pickup; do not append. Previous copy: N
 4. EXPIRING-GRANTS: "SPEND PAST THE 90%" is marked ENDED (account switched). Friday's "ignore the 90%" row is Friday's and is not touched.
 
 ### LIVE RIGHT NOW
+**🔴 ROTATION HANDOVER 19:27 2026-09-30 (seat cab52cfa → the next seat). FIRST ACTS; supersedes every block below:**
+0. `kam_rulings_today.sh` + `reconcile_rulings.py` first. Kam today: 11:03 (c), delivered; 14:18 Stuart/KS-1395 ("once tested and deployed let me know"). One open card of his: `secuura-ks1380-peter-reverting-1358` (default a: leave #1360 to Peter).
+1. **Secuura develop `91a8f6b721bc`, tree `d485add27eab`**, verified at source by Wednesday at 19:2x from the GitHub URL. **KS-1054's work is all merged** (#1357, #1359 today, on top of #1332/#1346/#1348/#1350); Kam's KS-1054 card is DELIVERED.
+2. **LIVE: Seat D 1st (%82, `Secuura/Blockchain-B`)**, MERGED mail 09:26Z; now posting the released comments (KS-1054 ×2, KS-1395; KS-1387 HELD; KS-1380 not posted), then WRAP cold. **On its WRAP:** read `HANDOVER-seatD1-2026-09-30.md` + its history entry ON DISK, score it (the design round + merges; KS-1387's `.dockerignore` finding; the tsc-not-a-red-proof finding), and `pane_close.sh %82` in ONE action. Mail to it: the `-B` tag + name the seat.
+3. **YOUR FIRST NEW WORK: the KINTSUGI deploy** of develop `91a8f6b721bc` (Kam's 14:18 word, kintsugi ONLY; demo waits on Peter's nod). A deploy seat, briefed via a drafter:
+   - KS-535's wallet rule: kintsugi never shares demo's mnemonic;
+   - Phase 0 re-tag before building; build all, then swap; migrations in the middle;
+   - re-verify KS-535 after;
+   - the new KS-1054 checks must read clean on the real /health.
+   Necessity clause: a deploy. **Then tell Kam on the panel "tested and deployed"** with what was verified.
+   ⚠ **#1360 (Peter's revert of #1358) may merge any time:** deploy whatever develop is then, and say which.
+4. **The next Secuura build seat** (after the deploy, or in parallel on disjoint files): ITEM 2 (mwp4 dead row only: Refs KS-729, the fuse 4 → 3, r53p's reason in B 49th's record folder), ITEM 3 (KS-1015 carve), ITEM 5 (measure the three fuse rows; **card Kam by ~Mon 5 Oct** if the real fixes are not merged). Template: `fleet/briefs_staged/2026-09-30_seatB49_build.md`. ⚠ B 49th's handover says Seat D 1st is design-only and omits who merged #1357/#1359. It was Seat D 1st, on gate49b's GO; correct that in the brief.
+5. The standing lines added today: co-tenant routing (both tags); the watcher harness-timeout rule. Scored today: gate49a 0.98, gate49b 0.98, B 49th 0.95. Ledger 3c + digests done at 19:1x.
+
 **🔴 PRE-ROTATION BLOCK 18:35 2026-09-30 (day seat cab52cfa; ctx 76%). READ FIRST; supersedes every block below:**
 0. **KAM 14:18:29:** "Do everything you can to resolve and once tested and deployed let me know" (Stuart's KS-1395 + the build direction). **OWED: tell him when the fixes are merged and on KINTSUGI** (Wednesday's reading, receipted; demo waits for Peter's nod). The KS-1054 fixes (#1357, #1359) are the deployable part; KS-1380's fix (#1358) was merged by Peter and he has opened a REVERT (see 3).
 1. **Today: 6 Secuura merges into develop:**
