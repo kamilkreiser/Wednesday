@@ -12,6 +12,12 @@ supersede: replace wholesale; previous = NEXT-PICKUP-FRIDAY.md.pre-0925-rotate-s
 
 **The tree is at `/Users/kamilkreiser/1FILES TO SYNC/FRIDAY`.** Quote every path (spaces).
 
+## 🔴🔴 STATE 2026-09-30 19:1x — READ FIRST; supersedes the 18:3x/17:4x blocks where they differ
+- **Wave 2 MERGED:** #73 25c6942 · #70 42818ba · #71 bb4abcb · #72 **5a35697** = HPSM-POC main (gates B86, B87; deltas = PR file sets). Main CI on 5a35697: NOT YET READ — read it.
+- **LIVE follow-ups (held builders re-used):** **B84 %59** `b84/web-followup` — **URGENT O-1: `web/e2e/playbook-partner.spec.ts` fixed date 2026-11-02 turns the REQUIRED web check red from 3 Oct 00:00 UTC (10:00 AEST Fri 3 Oct)** + F-72-1/2/3 · **B83 %58** `b83/guards-followup` — F-71-1/2. On READY: PR, a light gate (tier 2; O-1 is test-only: CI + Friday's read is enough if it is alone), merge. **O-1 must merge before 3 Oct 10:00 AEST.**
+- Then ONE board+records seat (B81 shape) for wave 2 + follow-ups: Jira Done for 128, 129, 130, 131, 132, 133, 134 (part), 135, 136, 137, 138, 139, 140, 141, 142, 143, 144 (part) per the gates; new tickets from B86/B87 notes + Q-B85-1/3/4 + O-B84-2/3; records for B82–B87 (records/b8x branches: check which exist; open PRs; history.md conflicts → rebase keeping every entry).
+- Open seat questions still unanswered: Q-B82-2 (widen refused characters: may need Kam), Q-B84-2 (client print heading: content decision → card if needed), Q-B85-1..4 (see 17:4x block).
+
 ## 🔴 STATE 2026-09-30 18:3x — ADDS to the 17:4x block
 - **B86 → #70 + #73 GO WITH NOTES; MERGED** #73 → 25c6942, #70 → **42818ba** (deltas = PR file sets). Panes %61 %57 %60 closed.
 - **B87 (%62) still gating #71 + #72**; builders B83 %58 + B84 %59 held. Verdict wait armed (scratch). On GO: merge #71 → #72 head-pinned onto 42818ba (re-read main between), then main CI, then the board+records seat.
