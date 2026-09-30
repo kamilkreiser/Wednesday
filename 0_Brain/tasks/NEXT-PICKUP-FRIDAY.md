@@ -12,7 +12,7 @@ supersede: replace wholesale; previous = NEXT-PICKUP-FRIDAY.md.pre-0925-rotate-s
 
 **The tree is at `/Users/kamilkreiser/1FILES TO SYNC/FRIDAY`.** Quote every path (spaces).
 
-## 🔴🔴🔴 ROTATION HANDOVER 2026-10-01 ~09:1x (Friday, ctx ~78%) — READ FIRST; supersedes every block below where they differ
+## 🔴🔴🔴 HANDOVER 2026-10-01 09:09 (Friday, ctx 72% by statusline; rotation not yet due) — READ FIRST; supersedes every block below where they differ
 **Kam's standing: "keep going", cloud threshold 90% (grant 2026-10-01). Usage ~79%. UNREAD 0 since 08:21:30.**
 **DONE since 08:4x:** B89 records PR #22 merged (analysis 3d28b48). B90 meeting records DONE (C-34; Jira HPSMPOC-162…168 + 12 comments; SOW signed by both, NOT executed until HP's PO; event date clash: C-03 1 Dec vs Amplify 8–10 Dec). **12 HP asks emailed to Kam (kamil.kreiser@datasec.com.au) as HP-9…HP-20, each its own mail, sent copies read back; register updated** (`0_Brain/reference/2026-09-27_hpsmpoc-hp-requests/HP_REQUESTS_REGISTER.md`). B91 SOW traceability DONE (C-35; 10 weeks not 12; **M1 + US$10k due TODAY 1 Oct**; weekly status report with hours now required §4.1.5; AI tools list §4.1.4; matrix 36 rows: 5 done/23 partial/6 missing/2 obligation; 24 tickets labelled sow-deliverable incl. new HPSMPOC-169…176). One-pager sent to Kam's drawer + panel (bf-e45da4285c91d).
 **LIVE:**
