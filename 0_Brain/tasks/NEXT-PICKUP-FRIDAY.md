@@ -12,6 +12,13 @@ supersede: replace wholesale; previous = NEXT-PICKUP-FRIDAY.md.pre-0925-rotate-s
 
 **The tree is at `/Users/kamilkreiser/1FILES TO SYNC/FRIDAY`.** Quote every path (spaces).
 
+## 🔴🔴 STATE 2026-09-30 11:5x — supersedes the 11:3x block where they differ
+- **USAGE AT THE 90% STOP (11:44).** No new seats or gates. Renewal = early **SUNDAY 4 Oct** (~05:00 Melbourne; NOT Saturday).
+- **PR #61** (B66, head 14bb41c) and **PR #62** (B67, head 5214703 → will move with ADDENDUM-2) both OPEN, unmerged. Records: B66's merged (analysis 69be442); B67's records/b67 pending (open its records PR when pushed).
+- **CARD hpsmpoc-qa-gate-at-90pct-stop** (rec a wait; b gate now past 90; c another account). On a/renewal: ONE batched tier-1 QA seat gates #61 + #62 (disjoint: api vs web; #61 also touches 5 web/contract files B67 does not); re-pin heads at launch; merge head-pinned one at a time on GO; then a seat does the Jira transitions/comments for 111/115/119/120 (B67 Q-B67-3).
+- B66 (%41) is idle and held for the gate's fix round, which won't come before the renewal. B67 (%42) is finishing ADDENDUM-2 and then wraps. Close both panes when idle, since their state is on disk (STATUS files).
+- Card hpsmpoc-f006-title-trips-compliance-rule (HPSMPOC-121) still open.
+
 ## 🔴🔴 STATE 2026-09-30 11:3x — supersedes the 11:0x block where they differ
 - **B66 READY → PR #61** (head 14bb41c, 111 + 115). ADDENDUM-1 in flight (F-006 ticket, records/b66 → Friday opens the records PR). Pane kept for a fix round.
 - **B67** working 119 → 120 → ADDENDUM-1 (web bundle provenance, 111's web half).
