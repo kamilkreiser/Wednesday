@@ -12,6 +12,12 @@ supersede: replace wholesale; previous = NEXT-PICKUP-FRIDAY.md.pre-0925-rotate-s
 
 **The tree is at `/Users/kamilkreiser/1FILES TO SYNC/FRIDAY`.** Quote every path (spaces).
 
+## 🔴🔴 STATE 2026-09-30 12:0x — supersedes the 11:5x block where they differ
+- **Kam 12:02: gate b (one gate past 90%, "I will sign into a new account tomorrow") + F-006 a (reword the DRAFT title).** Grant row in EXPIRING-GRANTS (event-scoped).
+- **LIVE: B68** %43 Datasec/HPSM-POC-QA = ONE batched tier-1 gate on #61 @ 14bb41c + #62 @ 7c77dfe (+ their combination). Brief `HPSM-POC/1_Project_Definition/Briefs/2026-09-30_B68_QA-gate-PR61-PR62.md`; verdict lines `PR #61: …` / `PR #62: …` then READY FOR REVIEW in `…_B68_STATUS.md`. Wait: scratchpad `wait_b68.sh` (re-create from this line if gone).
+- **On GO/GO WITH NOTES:** merge #61 then #62, head-pinned, one at a time (re-read main between; #62 needs no rebase: disjoint files), compare trees/blobs. Then, on the NEW account tomorrow: a seat for Jira transitions/comments (111, 115, 119, 120), records PR analysis #13 (records/b67 4d7247f; merge when CodeQL green), F-006 reword (new DRAFT ruleset version, card delivered to HPSMPOC-121), and a ticket for B67's residual (server `.map` files in `.next/standalone` carry code comments: drop them at packaging).
+- **On NO GO:** nothing merges; fix rounds wait for the new account (the grant covers the gate only).
+
 ## 🔴🔴 STATE 2026-09-30 11:5x — supersedes the 11:3x block where they differ
 - **USAGE AT THE 90% STOP (11:44).** No new seats or gates. Renewal = early **SUNDAY 4 Oct** (~05:00 Melbourne; NOT Saturday).
 - **PR #61** (B66, head 14bb41c) and **PR #62** (B67, head 5214703 → will move with ADDENDUM-2) both OPEN, unmerged. Records: B66's merged (analysis 69be442); B67's records/b67 pending (open its records PR when pushed).
