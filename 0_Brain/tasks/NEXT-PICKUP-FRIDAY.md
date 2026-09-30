@@ -12,6 +12,16 @@ supersede: replace wholesale; previous = NEXT-PICKUP-FRIDAY.md.pre-0925-rotate-s
 
 **The tree is at `/Users/kamilkreiser/1FILES TO SYNC/FRIDAY`.** Quote every path (spaces).
 
+## 🔴🔴🔴 ROTATION HANDOVER 2026-10-01 ~09:1x (Friday, ctx ~78%) — READ FIRST; supersedes every block below where they differ
+**Kam's standing: "keep going", cloud threshold 90% (grant 2026-10-01). Usage ~79%. UNREAD 0 since 08:21:30.**
+**DONE since 08:4x:** B89 records PR #22 merged (analysis 3d28b48). B90 meeting records DONE (C-34; Jira HPSMPOC-162…168 + 12 comments; SOW signed by both, NOT executed until HP's PO; event date clash: C-03 1 Dec vs Amplify 8–10 Dec). **12 HP asks emailed to Kam (kamil.kreiser@datasec.com.au) as HP-9…HP-20, each its own mail, sent copies read back; register updated** (`0_Brain/reference/2026-09-27_hpsmpoc-hp-requests/HP_REQUESTS_REGISTER.md`). B91 SOW traceability DONE (C-35; 10 weeks not 12; **M1 + US$10k due TODAY 1 Oct**; weekly status report with hours now required §4.1.5; AI tools list §4.1.4; matrix 36 rows: 5 done/23 partial/6 missing/2 obligation; 24 tickets labelled sow-deliverable incl. new HPSMPOC-169…176). One-pager sent to Kam's drawer + panel (bf-e45da4285c91d).
+**LIVE:**
+1. Records PRs HPSM-POC-analysis **#23 (B90, head 1b3dd5b)** then **#24 (B91, head d53a960)** — background merge job; #24 may CONFLICT on CLARIFICATIONS append order (C-34/C-35): if DIRTY, tap B91 (%74 Datasec/HPSM-POC-B) with a noun-named addendum to rebase records/b91 onto main keeping both entries, then merge. Close %73 (B90) after #23 merges; %74 after #24.
+2. **B03 Datasec/MPSCalc-A** (importer tier 1 → QA gate on READY; then API). Report `MPS/…/Briefs/2026-10-01_B03_STATUS.md` (may sit in a worktree: `find … -name '*B03_STATUS*'`).
+3. **Composer PR HPSM-light #16** (B30 @ 60e42bb) at gate **B31** (Datasec/Composer-QA); B30 (Datasec/Composer-E) held. On GO: merge head-pinned; not deployed (demo 0412eb6; 77609e2 + #16 await Kam).
+**Kam items to card / chase (not yet carded):** event date (1 Dec vs Amplify 8–10 Dec, HPSMPOC-5); the weekly status report's hours source; the PO (HP-9 emailed). Open cards: hpsmpoc-refuse-more-invisible-characters, hpsmpoc-client-print-heading.
+**Watcher lesson (today):** seats now write STATUS into their records WORKTREE (`.tools/wt-*`), so a watcher on the main Briefs folder misses it — glob both.
+
 ## 🔴🔴🔴 HANDOVER 2026-10-01 08:48 (Friday, ctx 70% checkpoint) — READ FIRST; supersedes the 08:1x block where they differ
 **Kam 08:20: "keep going. move the threshold from 70% to 90%"** → grant `learnings/2026-10-01_friday-cloud-threshold-90.md` (launch freely below 90%). Usage 79%.
 **Kam ~08:4x:** today's meeting transcript + 10 screenshots — MEASURED: it is the **Playbook POC = HPSM-POC** (not HPSM); notes say the POC SOW is SIGNED. Filed `HPSM-POC/1_Project_Definition/Source_Documents/2026-10-01_playbook-meeting/` (11 files, SHA256SUMS). **Kam ~08:5x: the FINAL SOW** ("make sure we deliver against the outlined deliverables. More is good but we have to deliver whats there") → `…/Source_Documents/2026-10-01_final-SOW/` (sha edb778c2…).
