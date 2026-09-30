@@ -12,6 +12,11 @@ supersede: replace wholesale; previous = NEXT-PICKUP-FRIDAY.md.pre-0925-rotate-s
 
 **The tree is at `/Users/kamilkreiser/1FILES TO SYNC/FRIDAY`.** Quote every path (spaces).
 
+## 🔴🔴 STATE 2026-09-30 13:3x — supersedes the 12:3x block where they differ (Kam ~12:3x: "go ahead with the items quewed for tomorrow… ignore the limit")
+- **#62 MERGED** (B70 round 2 GO WITH NOTES) → HPSM-POC main **9b655b5**. #61 earlier → 2fa034a. Records: analysis main 52aef7d (B66, B67, B69).
+- **LIVE:** **B71** (Datasec/HPSM-POC-A, F-006 reword from 9b655b5, tier 2 → a light check before merge) · **B72** (Datasec/HPSM-POC-C, Jira + new tickets + records/b68-b70; no code). Watcher: `friday/watch_status.sh <seen> ".../Briefs/2026-09-30_B7[12]*STATUS*.md"`.
+- On B71 READY: open PR, a light tier-2 check (a QA seat, or Friday's completion read if the diff is content-only + tests), merge head-pinned; records PR. On B72 READY: verify each Jira write (read-only), open the records PR, merge on CodeQL green. Then the queued list is DONE → move the EXPIRING-GRANTS row to Expired.
+
 ## 🔴🔴 STATE 2026-09-30 12:3x — supersedes the 12:0x/12:1x blocks where they differ
 - **#61 MERGED** (B68 GO WITH NOTES) → HPSM-POC main **2fa034a**. **#62 NO GO** on F-1 only (test helper `revocations.race-child.mjs` env reads trip the required infra check). B68 STATUS: `HPSM-POC/1_Project_Definition/Briefs/2026-09-30_B68_STATUS.md`.
 - **Floor empty** (%0 + %1). **CARD hpsmpoc-pr62-ci-fix-round-past-90pct** (rec a: tomorrow; default wait).
