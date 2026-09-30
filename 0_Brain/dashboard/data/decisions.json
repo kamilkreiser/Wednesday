@@ -21582,5 +21582,117 @@
    "2026-09-10 09:08",
    "2026-09-10 09:08"
   ]
+ },
+ {
+  "id": "mpscalc-codeql-scan-csharp",
+  "client_project": "Datasec/MPS Commercial Calculator",
+  "title": "Let CodeQL scan the MPS calculator's C# code before it reaches main?",
+  "bluf": "The calculation engine is ready as PR #1 (C#, 151 tests). The org requires CodeQL, but this repo's CodeQL was switched on while the repo was empty, so it scans no language; GitHub would let the PR merge unscanned, which breaks your CodeQL rule. Default setup cannot add C# until C# is on main. Link: https://github.com/datasecau/MPS-Commercial-Calculator/pull/1",
+  "default_action": "PR #1 stays open and unmerged; nothing lands on main unscanned.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Switch this repo to an advanced CodeQL workflow (C#), on the PR",
+    "detail": "Friday has a seat add .github/workflows/codeql.yml (C#, build-mode none, extended queries, like HPSM-POC's coverage) and turns off the empty default setup; the PR merges only after that scan is green. Uses Actions minutes."
+   },
+   {
+    "key": "b",
+    "label": "Merge PR #1 unscanned once, then switch default setup to C#",
+    "detail": "Default setup then scans main and every later PR. The first commit is never scanned on a PR."
+   },
+   {
+    "key": "c",
+    "label": "Hold PR #1 until Datasec IT sets it up",
+    "detail": "Nothing merges meanwhile."
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-10-01T07:36:11.214280+10:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "seat": "friday",
+  "prior_rulings_overridden": [
+   "CARD nexusai-codeql-ruleset-main-pushes",
+   "CARD mpscalc-release1-users",
+   "CARD mpscalc-hosting-and-signin"
+  ]
+ },
+ {
+  "id": "mpscalc-hosting-tenant-confirm",
+  "client_project": "Datasec/MPS Commercial Calculator",
+  "title": "MPS hosting: which tenant exactly, and how do people sign in?",
+  "bluf": "Your 07:00 tap chose option b (the agent-controllable environment #5, which is the kreiser.org@me.com tenant) with the note \"host it on kamil@datasec-rd.com\". Those are two different tenants unless that account is also a user in #5. Nothing is created in Azure until this is settled. Release 1 users are the Datasec pricing team.",
+  "default_action": "Nothing is created; the build continues locally.",
+  "options": [
+   {
+    "key": "a",
+    "label": "The kamil@datasec-rd.com tenant (where HPSM-POC is hosted), sign-in with those Entra accounts",
+    "detail": "New resource group there; spend and creation still reported to Kam before anything is created."
+   },
+   {
+    "key": "b",
+    "label": "Environment #5 (kreiser.org@me.com), a new resource group",
+    "detail": "As the option label said; Entra sign-in in that tenant."
+   },
+   {
+    "key": "c",
+    "label": "Something else (tell me)",
+    "detail": ""
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-10-01T07:36:13.836118+10:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "seat": "friday",
+  "prior_rulings_overridden": [
+   "2026-08-17 20:23",
+   "2026-09-07 19:00",
+   "CARD workspace-dead-secuura-tenant-cleanup",
+   "CARD secuura-org-trust-boundary-within-tenant",
+   "CARD secrev-live-pass-blocked-on-tenant",
+   "CARD secuura-originate-unauthenticated-cross-tenant-billing",
+   "CARD secuura-ks1084-gateway-originate-no-tenant-header-p0",
+   "CARD hpsmpoc-na-rulings-confirm",
+   "CARD secuura-ks1304-withtenant-tenant-pool-and-admin-writes",
+   "CARD mpscalc-release1-users",
+   "CARD mpscalc-hosting-and-signin"
+  ]
+ },
+ {
+  "id": "mpscalc-pricebook-validity",
+  "client_project": "Datasec/MPS Commercial Calculator",
+  "title": "Are the MPS price books you sent current, and until when?",
+  "bluf": "The seat compared them to the workbook: they are the SAME versions it was built from, not newer ones. The HP book (2026H2, dated 1 Aug) states no end date: the \"expired 26 Sep\" we reported was only a rolling 30-day formula (my earlier report was wrong). The Synnex book's BID window reads 1 May to 31 Oct 2026, but its broken date cells will show the A4 supplies BID as Expired from tomorrow, 2 Oct. Details on Jira MPSCALC-74.",
+  "default_action": "Validity stays UNKNOWN in the engine; nothing is quoted to anyone.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Treat both as current until 31 Oct 2026; I'll send refreshed books when I get them",
+    "detail": "The engine records that validity as your ruling, dated."
+   },
+   {
+    "key": "b",
+    "label": "I'll check with HP and Synnex first",
+    "detail": "The engine marks the software prices as validity UNKNOWN until you answer."
+   },
+   {
+    "key": "c",
+    "label": "Other (tell me)",
+    "detail": ""
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-10-01T07:36:16.686865+10:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "seat": "friday",
+  "prior_rulings_overridden": [
+   "CARD mpscalc-release1-users",
+   "CARD mpscalc-hosting-and-signin"
+  ]
  }
 ]
