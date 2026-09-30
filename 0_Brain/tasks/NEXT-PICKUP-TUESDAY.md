@@ -6,6 +6,13 @@ status: live
 supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s1-wholesale
 ---
 
+## ⏸ DELTA 138 — 2026-09-30 12:04 (s95). **KAM PAUSED ALL WORK. READ THIS FIRST; it overrides every OWED/NEXT line below until Kam resumes.**
+- **Kam, live board 2026-09-30 12:03:42 (view=tuesday), verbatim:** "pause work for now as we are past 90%.  I will let you know if anything comes up and if I need anything". Receipt posted (201). Gauge 90% at the ruling.
+- **PAUSE mailed** (fleet/briefs_staged/2026-09-30_nexusai_all_PAUSE.md) to Datasec/NexusAI (M, N, O, P) and QA/NexusAI-batch12; five --mail taps delivered. Rules: start nothing, stop at a safe point, running holds may finish, act on no result, one-line state reply, then wait.
+- **NOTHING is launched, gated, merged or briefed until Kam's word.** Wakes are read and acked only; answer an agent only if a pause-safety question needs it (e.g. a half-landed push).
+- **ON RESUME (Kam's word only):** mail RESUME to the same five with --mail taps; the merge turn is N's (RD-723, hold s86n-merge-rd723 queued 02:02:17Z); then O (RD-707), P (RD-692, RD-693, RD-686), M (RD-733, RD-618). Gate 12 resumes from its report's [pending] sections. Next gate batch: RD-614 (browser leg) + RD-629 (saved READY). P's RD-430 re-pin ruled YES (C-175 ADDENDUM 2026-09-30).
+- **STATE AT PAUSE:** NexusAI main = fae2aa1 (RD-732, verified: ls-remote, Build inside C-185 = rd465 O-1 only, demo SKIPPED, npm-audit green). rd549 O4 in C-185 (P's measurement), RD-740 filed. Gate 12 on Opus 4.8 (session only, switched 09:55:19); lock-free findings incl. RD-735's quadratic trim regex.
+
 ## 🔴 DELTA 137 — 2026-09-30 09:38 ROTATION HANDOVER (s94, ctx 84%, safe boundary). **READ THIS FIRST, THEN 136 (main-red and RD-658 lines current).**
 ### FIRST WORK FOR THE NEXT SEAT
 1. **GATE 12 RUNNING %52 (QA/NexusAI-batch12), launched 09:37 AEST, rung 6 verified (reports/2026-09-30-gate-batch12/evidence/ exists).** Brief `fleet/qa-agent/briefs/2026-09-30_nexusai-gate-batch12.md` (READ WHOLE by s94 and stamped: WRONG 9 ruled — RD-657's R7 retitle AUTHORISED under C-181, accounted on blobs per §8.5; stop count corrected to FOUR), launcher `launchers/launch_qa_nexusai_gate_batch12.sh`. Members: RD-591 67b840b (t1), RD-735 7d853b0 (t2, on RD-618), RD-657 5584ea4, RD-649 20fea84, RD-608 9fd5c9a, RD-653 8bc88f5, RD-671 3ef057f. Full rows incl. attack rows.
