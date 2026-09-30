@@ -1,0 +1,69 @@
+reach_gate49a 2026-09-30T04:29:35Z | tree 52dadb07f70d20da8f201b518eba4ebff05c8455 (the pinned head) | 37 Dockerfile(s) | 14 compose file(s) | 45 tracked locks
+R1 IMAGE REACH: 35 compose build context(s); every Dockerfile COPY/ADD naming a manifest or lock, the lock it copies, and whether it moved
+    ?     Blockchain/Dev/connectors/whatsapp-bot/Dockerfile          stage shared-builder   ctx (none)           COPY packages/shared/package*.json ./ -> (unresolved: no compose context)
+    ?     Blockchain/Dev/connectors/whatsapp-bot/Dockerfile          stage builder          ctx (none)           COPY connectors/whatsapp-bot/package*.json ./ -> (unresolved: no compose context)
+    ?     Blockchain/Dev/connectors/whatsapp-bot/Dockerfile          stage (final/unnamed # ctx (none)           COPY connectors/whatsapp-bot/package*.json ./ -> (unresolved: no compose context)
+    MOVED Blockchain/Dev/frontend/admin/Dockerfile                   stage builder          ctx Blockchain/Dev   COPY frontend/admin/package*.json ./ -> ['Blockchain/Dev/frontend/admin/package-lock.json']
+          stages ['builder', '(final/unnamed #2)'] | npm lines: builder: RUN npm ci --no-audit
+    ?     Blockchain/Dev/frontend/outlook-addin/Dockerfile           stage builder          ctx (none)           COPY frontend/outlook-addin/package*.json ./ -> (unresolved: no compose context)
+    MOVED Blockchain/Dev/frontend/verifier/Dockerfile                stage builder          ctx Blockchain/Dev   COPY frontend/verifier/package*.json ./ -> ['Blockchain/Dev/frontend/verifier/package-lock.json']
+          stages ['builder', '(final/unnamed #2)'] | npm lines: builder: RUN npm ci --no-audit
+    MOVED Blockchain/Dev/frontend/website/Dockerfile                 stage builder          ctx Blockchain/Dev   COPY frontend/website/package*.json ./ -> ['Blockchain/Dev/frontend/website/package-lock.json']
+          stages ['builder', '(final/unnamed #2)'] | npm lines: builder: RUN npm ci
+    MOVED Blockchain/Dev/services/analytics/Dockerfile               stage builder          ctx Blockchain/Dev   COPY services/analytics/package*.json ./ -> ['Blockchain/Dev/services/analytics/package-lock.json']
+    MOVED Blockchain/Dev/services/analytics/Dockerfile               stage (final/unnamed # ctx Blockchain/Dev   COPY services/analytics/package*.json ./ -> ['Blockchain/Dev/services/analytics/package-lock.json']
+          stages ['shared-builder', 'builder', '(final/unnamed #3)'] | npm lines: shared-builder: RUN npm ci --ignore-scripts ; builder: RUN npm ci --ignore-scripts ; (final/unnamed #3): RUN npm ci --ignore-scripts --omit=dev --legacy-peer-deps
+    MOVED Blockchain/Dev/services/billing/Dockerfile                 stage builder          ctx Blockchain/Dev   COPY services/billing/package*.json ./ -> ['Blockchain/Dev/services/billing/package-lock.json']
+    MOVED Blockchain/Dev/services/billing/Dockerfile                 stage (final/unnamed # ctx Blockchain/Dev   COPY services/billing/package*.json ./ -> ['Blockchain/Dev/services/billing/package-lock.json']
+          stages ['shared-builder', 'builder', '(final/unnamed #3)'] | npm lines: shared-builder: RUN npm ci --ignore-scripts ; builder: # Bring shared in BEFORE npm ci so the symlink resolves during install ; builder: RUN npm ci ; (final/unnamed #3): RUN npm ci --omit=dev
+    MOVED Blockchain/Dev/services/governance/Dockerfile              stage builder          ctx Blockchain/Dev   COPY services/governance/package*.json ./ -> ['Blockchain/Dev/services/governance/package-lock.json']
+          stages ['shared-builder', 'builder', '(final/unnamed #3)'] | npm lines: shared-builder: RUN npm ci --ignore-scripts ; builder: RUN npm ci --ignore-scripts ; builder: # `npm ci` above installs devDependencies because the build needs them; the ; builder: RUN npm prune --omit=dev
+    MOVED Blockchain/Dev/services/mcp-server/Dockerfile              stage builder          ctx Blockchain/Dev   COPY services/mcp-server/package.json services/mcp-server/package-lock.json ./ -> ['Blockchain/Dev/services/mcp-server/package-lock.json']
+    MOVED Blockchain/Dev/services/mcp-server/Dockerfile              stage (final/unnamed # ctx Blockchain/Dev   COPY services/mcp-server/package.json services/mcp-server/package-lock.json ./ -> ['Blockchain/Dev/services/mcp-server/package-lock.json']
+          stages ['shared-builder', 'builder', '(final/unnamed #3)'] | npm lines: shared-builder: RUN npm ci --ignore-scripts ; builder: # against the public registry, and the strip is what made `npm ci` impossible. ; builder: RUN npm ci --ignore-scripts ; (final/unnamed #3): RUN npm ci --ignore-scripts --omit=dev
+    MOVED Blockchain/Dev/services/nft-certificate/Dockerfile         stage builder          ctx Blockchain/Dev   COPY services/nft-certificate/package*.json ./ -> ['Blockchain/Dev/services/nft-certificate/package-lock.json']
+          stages ['base', 'shared-builder', 'builder', 'runner'] | npm lines: shared-builder: RUN npm ci --ignore-scripts ; builder: RUN npm ci --ignore-scripts ; builder: # `npm ci` above installs devDependencies because the build needs them; the ; builder: RUN npm prune --omit=dev ; runner: # The builder's `npm prune --omit=dev` above removes it — it is a hand-made,
+    MOVED Blockchain/Dev/services/referral/Dockerfile                stage builder          ctx Blockchain/Dev   COPY services/referral/package*.json ./ -> ['Blockchain/Dev/services/referral/package-lock.json']
+          stages ['base', 'shared-builder', 'builder', 'runner'] | npm lines: shared-builder: RUN npm ci --ignore-scripts ; builder: RUN npm ci --ignore-scripts ; builder: # `npm ci` above installs devDependencies because the build needs them; the ; builder: RUN npm prune --omit=dev ; runner: # The builder's `npm prune --omit=dev` above removes it — it is a hand-made,
+    MOVED Blockchain/Dev/services/staking/Dockerfile                 stage builder          ctx Blockchain/Dev   COPY services/staking/package*.json ./ -> ['Blockchain/Dev/services/staking/package-lock.json']
+          stages ['base', 'shared-builder', 'builder', 'runner'] | npm lines: shared-builder: RUN npm ci --ignore-scripts ; builder: RUN npm ci --ignore-scripts ; builder: # `npm ci` above installs devDependencies because the build needs them; the ; builder: RUN npm prune --omit=dev ; runner: # The builder's `npm prune --omit=dev` above removes it — it is a hand-made,
+    MOVED Blockchain/Dev/services/vc-issuer/Dockerfile               stage builder          ctx Blockchain/Dev   COPY services/vc-issuer/package*.json ./ -> ['Blockchain/Dev/services/vc-issuer/package-lock.json']
+    MOVED Blockchain/Dev/services/vc-issuer/Dockerfile               stage runner           ctx Blockchain/Dev   COPY services/vc-issuer/package*.json ./ -> ['Blockchain/Dev/services/vc-issuer/package-lock.json']
+          stages ['base', 'shared-builder', 'builder', 'runner'] | npm lines: shared-builder: RUN npm ci --ignore-scripts ; builder: # is what made `npm ci` impossible. It no longer declares it, matching the 22 ; builder: RUN npm ci --ignore-scripts ; runner: # builder stage — npm ci + symlink (KS-647). ; runner: RUN npm ci --ignore-scripts --omit=dev
+R1 11 Dockerfile(s) copy a MOVED lock: ['Blockchain/Dev/frontend/admin/Dockerfile', 'Blockchain/Dev/frontend/verifier/Dockerfile', 'Blockchain/Dev/frontend/website/Dockerfile', 'Blockchain/Dev/services/analytics/Dockerfile', 'Blockchain/Dev/services/billing/Dockerfile', 'Blockchain/Dev/services/governance/Dockerfile', 'Blockchain/Dev/services/mcp-server/Dockerfile', 'Blockchain/Dev/services/nft-certificate/Dockerfile', 'Blockchain/Dev/services/referral/Dockerfile', 'Blockchain/Dev/services/staking/Dockerfile', 'Blockchain/Dev/services/vc-issuer/Dockerfile']
+R1 ROOT-LOCK copies (a bare lock / package*.json from a context that IS Blockchain/Dev): 0  | Dockerfiles with a manifest COPY and NO compose context (the gate resolves): ['Blockchain/Dev/connectors/whatsapp-bot/Dockerfile', 'Blockchain/Dev/frontend/outlook-addin/Dockerfile']
+R1 CONTROL: the matcher finds services/mcp-server/Dockerfile's own `services/mcp-server/package-lock.json` COPY: True | 74 manifest/lock COPY line(s) read
+R2 the moves inside each copied lock (PROD may reach the served image; dev only a builder stage)
+    Blockchain/Dev/frontend/admin/Dockerfile                   Blockchain/Dev/frontend/admin/package-lock.json      PROD none | dev ['brace-expansion 5.0.9->5.0.12']
+    Blockchain/Dev/frontend/verifier/Dockerfile                Blockchain/Dev/frontend/verifier/package-lock.json   PROD none | dev ['brace-expansion 5.0.9->5.0.12']
+    Blockchain/Dev/frontend/website/Dockerfile                 Blockchain/Dev/frontend/website/package-lock.json    PROD none | dev ['brace-expansion 5.0.9->5.0.12']
+    Blockchain/Dev/services/analytics/Dockerfile               Blockchain/Dev/services/analytics/package-lock.json  PROD none | dev ['brace-expansion 5.0.9->5.0.12']
+    Blockchain/Dev/services/billing/Dockerfile                 Blockchain/Dev/services/billing/package-lock.json    PROD none | dev ['brace-expansion 5.0.9->5.0.12']
+    Blockchain/Dev/services/governance/Dockerfile              Blockchain/Dev/services/governance/package-lock.json PROD none | dev ['brace-expansion 1.1.18->1.1.21']
+    Blockchain/Dev/services/mcp-server/Dockerfile              Blockchain/Dev/services/mcp-server/package-lock.json PROD ['brace-expansion 5.0.9->5.0.12', 'fast-uri 3.1.7->3.1.8', 'ip-address 10.7.0->10.7.2'] | dev none
+    Blockchain/Dev/services/nft-certificate/Dockerfile         Blockchain/Dev/services/nft-certificate/package-lock.json PROD ['brace-expansion 5.0.9->5.0.12', 'fast-uri 3.1.7->3.1.8'] | dev none
+    Blockchain/Dev/services/referral/Dockerfile                Blockchain/Dev/services/referral/package-lock.json   PROD none | dev ['brace-expansion 5.0.9->5.0.12', 'brace-expansion 1.1.18->1.1.21', 'brace-expansion 1.1.18->1.1.21']
+    Blockchain/Dev/services/staking/Dockerfile                 Blockchain/Dev/services/staking/package-lock.json    PROD none | dev ['brace-expansion 5.0.9->5.0.12']
+    Blockchain/Dev/services/vc-issuer/Dockerfile               Blockchain/Dev/services/vc-issuer/package-lock.json  PROD none | dev ['brace-expansion 5.0.9->5.0.12', 'brace-expansion 1.1.18->1.1.21', 'brace-expansion 1.1.18->1.1.21']
+R3 SHARED-GUARD-TESTS at 52dadb07f70d: test files naming each changed path (full path, or relative to Blockchain/Dev)
+    Blockchain/Dev/frontend/admin/package-lock.json      0 file(s) name it, 0 test(s): -
+    Blockchain/Dev/frontend/verifier/package-lock.json   0 file(s) name it, 0 test(s): -
+    Blockchain/Dev/frontend/website/package-lock.json    0 file(s) name it, 0 test(s): -
+    Blockchain/Dev/package-lock.json                     37 file(s) name it, 5 test(s): ['Blockchain/Dev/scripts/__tests__/check_shared_relink.test.sh', 'Blockchain/Dev/scripts/__tests__/preflight_deps.test.sh', 'Blockchain/Dev/scripts/__tests__/start_secuura_slot_names.test.sh', 'Blockchain/Dev/scripts/audit/lock-discovery.test.mjs', 'Blockchain/Dev/tests/e2e-v2/RUNBOOK.md']
+    Blockchain/Dev/services/analytics/package-lock.json  0 file(s) name it, 0 test(s): -
+    Blockchain/Dev/services/billing/package-lock.json    0 file(s) name it, 0 test(s): -
+    Blockchain/Dev/services/governance/package-lock.json 0 file(s) name it, 0 test(s): -
+    Blockchain/Dev/services/mcp-server/package-lock.json 2 file(s) name it, 0 test(s): -
+    Blockchain/Dev/services/nft-certificate/package-lock.json 1 file(s) name it, 0 test(s): -
+    Blockchain/Dev/services/referral/package-lock.json   1 file(s) name it, 0 test(s): -
+    Blockchain/Dev/services/shared/package-lock.json     0 file(s) name it, 0 test(s): -
+    Blockchain/Dev/services/staking/package-lock.json    0 file(s) name it, 0 test(s): -
+    Blockchain/Dev/services/vc-issuer/package-lock.json  0 file(s) name it, 0 test(s): -
+    observability/package-lock.json                      0 file(s) name it, 0 test(s): -
+    systemTest/akto/package-lock.json                    1 file(s) name it, 0 test(s): -
+    systemTest/api-explorer/package-lock.json            1 file(s) name it, 0 test(s): -
+    systemTest/performance/package-lock.json             0 file(s) name it, 0 test(s): -
+    systemTest/playwright/package-lock.json              0 file(s) name it, 0 test(s): -
+R3 test files naming the GENERIC `package-lock.json` (guards over every lock): 5: ['Blockchain/Dev/scripts/__tests__/check_shared_relink.test.sh', 'Blockchain/Dev/scripts/__tests__/preflight_deps.test.sh', 'Blockchain/Dev/scripts/__tests__/start_secuura_slot_names.test.sh', 'Blockchain/Dev/scripts/audit/lock-discovery.test.mjs', 'Blockchain/Dev/tests/e2e-v2/RUNBOOK.md']
+R3 CONTROLS: `advisory-fetch-stub.mjs` found in gate-exit-codes.test.mjs: True | a nonsense path found in 0 file(s)
+REACH READ: tree 52dadb07f70d | 11 image Dockerfile(s) copy a moved lock | root-lock copies 0 | 5 test file(s) name a changed path, 5 name the generic lock | controls hold

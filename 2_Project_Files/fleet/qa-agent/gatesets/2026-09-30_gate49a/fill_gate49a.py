@@ -1,0 +1,82 @@
+#!/usr/bin/env python3
+"""fill_gate49a.py — fill the gate49a prompt, launcher and COMMISSION.md from their templates, pins_gate49a.json and kit.json. ONE PR.
+Refuses (rc 1) when: kit.json is UNPINNED (a <PR> / <HEAD> / <BRANCH> placeholder remains); the pins are missing, a simulation, or not full shas;
+the pinned head != kit.json's head; the head's parent is not one kit.json allows; the pinned file list != kit.json's 18; the mode pins fail or
+cannot discriminate (need both 100644 and 100755); an UNCHANGED pin is not byte-equal; gate48b's report no longer hashes to kit.json
+prev_report_sha256; a drafter summary file (lockdelta_1.out, reach_1.out, overlaps_1.out, keyscan_1.out, gh_read_1.out, capture_1.out) does not
+end in its PASS / READ / OK line; lockdelta / reach / overlaps were measured at another head / squash than the pins; gh_read_1.json read another
+head; an output keeps an unfilled {{TOKEN}}; or the filled prompt lacks a keyword AS A TOKEN. Writes ONLY: the prompt, the launcher (+x) and
+COMMISSION.md beside this script. Usage: fill_gate49a.py"""
+import json, os, re, datetime, hashlib
+G = os.path.dirname(os.path.abspath(__file__)); K = json.load(open(os.path.join(G, 'kit.json'), encoding='utf-8'))
+raw = open(os.path.join(G, 'kit.json'), encoding='utf-8').read()
+if any(x in raw for x in ('"<PR>"', '<HEAD>', '<BRANCH>')) or K['order'][0] == '<PR>': raise SystemExit('REFUSING: kit.json is UNPINNED — run pinpr_gate49a.py <PR> <HEAD> first')
+P = json.load(open(os.path.join(G, 'pins_gate49a.json'), encoding='utf-8'))
+N = K['order'][0]; k = K['prs'][N]; S = P['pr_pins']
+if P.get('simulate'): raise SystemExit('REFUSING: pins_gate49a.json is a SIMULATION (%s)' % P['simulate'])
+for x in ('develop', 'develop_tree', 'end_tree', 'squash_sim'):
+    if not re.fullmatch(r'[0-9a-f]{40}', P.get(x) or ''): raise SystemExit('REFUSING: pin %s is not a full sha: %r' % (x, P.get(x)))
+for x in ('head', 'merge_base', 'parent'):
+    if not re.fullmatch(r'[0-9a-f]{40}', S.get(x) or ''): raise SystemExit('REFUSING: pin %s is not a full sha' % x)
+if S['head'] != k['head']: raise SystemExit('REFUSING: the pinned head %s != kit.json head %s' % (S['head'], k['head']))
+if S['parent'] not in k['expected_parent_any']: raise SystemExit('REFUSING: head parent %s is not an allowed parent' % S['parent'])
+if sorted(S['files']) != sorted(k['files']): raise SystemExit('REFUSING: pinned files != kit.json files')
+MS = P.get('modes') or []
+if not MS or not all(m['ok'] for m in MS) or sorted(set(m['want'] for m in MS)) != ['100644', '100755']: raise SystemExit('REFUSING: the mode pins are missing, failed, or cannot discriminate')
+UN = P.get('unchanged') or {}
+if not UN or not all(v['same'] for v in UN.values()): raise SystemExit('REFUSING: an UNCHANGED pin is not byte-equal')
+def txt(f): return open(os.path.join(G, f), encoding='utf-8').read()
+def last(f, want):
+    t = [l for l in txt(f).strip().splitlines() if l.startswith(want.split()[0])][-1:] or ['<none>']
+    if not t[0].startswith(want): raise SystemExit('REFUSING: %s does not carry %s: %s' % (f, want, t[0]))
+    return t[0]
+KW = ['LOCK-DELTA-18', 'DEPENDENT-RANGES', 'REGISTRY-TRUE', 'REPRODUCE-REFRESH', 'PRISTINE-CONTROL', 'AUDIT-LEGS-BASE-HEAD', 'SIX-IDS-ABSENT', 'GATE-STILL-REFUSES',
+      'NO-BASELINE-ROW', 'RUNTIME-REACH', 'ROOT-LOCK-CONSUMERS', 'SUITES', 'SHARED-GUARD-TESTS', 'NPM-CI-HEAD', 'CLEAN-MERGE', 'END-TREE', 'MODES', 'COLLISION-CENSUS',
+      'SUBJECT-KEY-SCAN', 'SUBJECT-LANDS-AT', 'SUBJECT-TRUE-OF-DIFF', 'REFS-OWN-KEY', 'NO-CLOSING-KEYWORD', 'PR-BODY-CLAIMS', 'FOLLOW-ONS', 'FUSE-COUNT',
+      'TIERING', 'DISK-ENOSPC', 'REPORT-HASH-LAST']
+GHJ = json.load(open(os.path.join(G, 'gh_read_1.json'), encoding='utf-8'))
+if GHJ['prs'][N]['head'] != S['head']: raise SystemExit('REFUSING: gh_read_1.json read #%s at %s, the pin is %s — re-run gh_read' % (N, GHJ['prs'][N]['head'][:12], S['head'][:12]))
+subj = k.get('subject') or GHJ['prs'][N]['title']; files = sorted(S['files'])
+row = '  "%s|%s|%s|%s|%d|%d|%s|%d|%s|%s"' % (N, ' + '.join(k['keys']), k['branch'], S['head'], len(files), S['ahead'], S['merge_base'], S['behind'], ','.join(files), k['tier'])
+table = '\n'.join(['| PR | ticket | tier | head | parent | merge-base | ahead / behind | files (+/-) | subject declared -> lands |', '|---|---|---|---|---|---|---|---|---|',
+                   '| #%s | %s | %s | `%s` | `%s` | `%s` | %d / %d | %d (+%d/-%d) | %d -> %d |' % (N, ' + '.join(k['keys']), k['tier'], S['head'], S['parent'][:12], S['merge_base'][:12], S['ahead'], S['behind'], len(files), S['adds'], S['dels'], len(subj), len(subj) + len(' (#%s)' % N))])
+srow = '- #%s: `%s` — declared %d, lands %d (%s)' % (N, subj, len(subj), len(subj) + len(' (#%s)' % N), ('kit.json subject' if k.get('subject') else 'the LIVE PR title as read at the pin (gh_read_1.json)') + (', == the commit subject' if S['subject_commit'] == subj else ', != the commit subject %r' % S['subject_commit']))
+ALONE_LINE = 'ALONE over develop: merge-tree clean, tree `%s` == END_TREE (the squash is simulated with commit-tree, parent develop: `%s`).' % (P['alone_tree'], P['squash_sim'][:12])
+MODE_LINE = 'MODES (git ls-tree): all %d PR paths 100644 at head / alone / END; control `.githooks/pre-push` 100755 at develop / head / END.' % sum(1 for m in MS if not m['control'])
+HOOK_LINE = 'IDENTICAL at develop / head / END: ' + ', '.join('`%s` %s' % (p.split('/')[-1], (list(v.values())[0] or ['', ''])[1][:12]) for p, v in P['hooks'].items() if len(set(json.dumps(x) for x in v.values())) == 1) + '.'
+SHORTSTAT = [l for l in txt('pin_1.out').splitlines() if 'git diff --shortstat develop END' in l][-1].split('END: ', 1)[1]
+NUMSTAT = 'The measured numstat is +%d/-%d over %d locks; the seat claimed %s.' % (S['adds'], S['dels'], len(files), K['claimed']['numstat'])
+NUMSTAT_SHORT = ('measured +%d/-%d at the head vs the seat\'s %s' % (S['adds'], S['dels'], K['claimed']['numstat'])) + ('' if '+%d/-%d' % (S['adds'], S['dels']) == K['claimed']['numstat'] else ' — DIFFERS: the head reads %d moves x 3 lines each way; the +102/-102 is the seat\'s status mail (03:56Z) — say where the figure came from and whether the READY or the PR body repeats it' % (S['adds'] // 3))
+prev = K['prev_report']; prev_sha = hashlib.sha256(open(prev, 'rb').read()).hexdigest()
+if prev_sha != K['prev_report_sha256']: raise SystemExit('REFUSING: gate48b report sha256 %s != kit %s' % (prev_sha, K['prev_report_sha256']))
+LD = last('lockdelta_1.out', 'LOCKDELTA PASS'); RC = last('reach_1.out', 'REACH READ'); OV = last('overlaps_1.out', 'OVERLAPS READ'); KS = last('keyscan_1.out', 'KEYSCAN PASS')
+if ('head %s' % S['head'][:12]) not in txt('lockdelta_1.out').splitlines()[0] or ('base %s' % P['develop'][:12]) not in txt('lockdelta_1.out').splitlines()[0]: raise SystemExit('REFUSING: lockdelta_1.out was measured at another develop / head — re-run it')
+if S['head'] not in txt('reach_1.out').splitlines()[0]: raise SystemExit('REFUSING: reach_1.out was measured at another tree — re-run it')
+if ('squash_sim %s' % P['squash_sim'][:12]) not in txt('overlaps_1.out').splitlines()[0]: raise SystemExit('REFUSING: overlaps_1.out was measured over another squash — re-run it')
+GH = txt('gh_read_1.out'); last('gh_read_1.out', 'GH READ OK')
+cl = [l for l in GH.splitlines() if l.startswith('CENSUS ')]
+CENSUS_LINE = (cl[-1] if cl else 'no CENSUS line') + ' (the launch action re-reads it, rc 15 on any hit outside kit.json reported_overlaps)'
+OV_LIST = '; '.join('#%s (%s)' % (n, v['why'].split(':')[0]) for n, v in K['reported_overlaps'].items()) or 'NONE'
+CAP = last('capture_1.out', 'CAPTURE OK')
+CAPTURE_LINE = 'the thread from the plan confirmation to the READY, read by id from one listing, verbatim, with TEXT_SHA256, and Wednesday\'s ANSWER files for Seat B 49th (%s).' % CAP
+now = datetime.datetime.now(datetime.timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ'); H = S['head']
+V = {'GS': G, 'PR': N, 'LAUNCHER': K['launcher'], 'PROMPT': K['prompt'], 'REPORT': K['report'], 'GO': K['go'], 'MERGE_SEAT': K['merge_seat'],
+     'DEVELOP': P['develop'], 'DEVELOP_TREE': P['develop_tree'], 'DEVELOP_SHORT': P['develop'][:12], 'END_TREE': P['end_tree'], 'MEASURED_AT': P['measured_at'],
+     'FILLED_AT': now, 'PIN_TABLE': table, 'ROWS': row, 'SUBJECT_TABLE': srow, 'H': H, 'H_SHORT': H[:12], 'MODE_LINE': MODE_LINE, 'HOOK_LINE': HOOK_LINE,
+     'ALONE_LINE': ALONE_LINE, 'SHORTSTAT': SHORTSTAT, 'NUMSTAT': NUMSTAT, 'NUMSTAT_SHORT': NUMSTAT_SHORT, 'CAPTURE_LINE': CAPTURE_LINE, 'LOCKDELTA': LD, 'REACH': RC,
+     'OVERLAPS': OV, 'OVERLAP_LIST': OV_LIST, 'CENSUS_LINE': CENSUS_LINE, 'KEYSCAN': KS, 'KEYWORDS': ' '.join(KW), 'N_KW': str(len(KW)), 'PREV_REPORT': prev, 'PREV_SHA': prev_sha,
+     'VERDICT_SUBJECT': K['verdict_subject']}
+def fill(src, dst, mode=None):
+    t = open(os.path.join(G, src), encoding='utf-8').read()
+    for a, v in V.items(): t = t.replace('{{%s}}' % a, v)
+    left = sorted(set(re.findall(r'\{\{[A-Z0-9_]+\}\}', t)))
+    if left: raise SystemExit('REFUSING: %s keeps unfilled token(s) %s' % (dst, left))
+    if '<PR>' in t: raise SystemExit('REFUSING: %s keeps the <PR> placeholder' % dst)
+    with open(os.path.join(G, dst), 'w', encoding='utf-8') as f: f.write(t)
+    if mode: os.chmod(os.path.join(G, dst), mode)
+    print('filled %s (%d bytes, sha256 %s)' % (dst, len(t.encode('utf-8')), hashlib.sha256(t.encode('utf-8')).hexdigest()[:12]))
+fill('prompt_gate49a.TEMPLATE.txt', K['prompt']); fill('launcher_gate49a.TEMPLATE.sh.txt', K['launcher'], 0o755); fill('COMMISSION.TEMPLATE.md', 'COMMISSION.md')
+pt = txt(K['prompt'])
+missing = [w for w in KW if not re.search(r'(^|[^A-Za-z0-9-])%s([^A-Za-z0-9-]|$)' % re.escape(w), pt)]
+if missing: raise SystemExit('REFUSING: the prompt lacks keyword(s) as a token %s' % missing)
+print('FILL OK at %s: develop %s | END_TREE %s | 1 row | %d keywords | #%s %s | gate48b report sha256 %s' % (now, P['develop'], P['end_tree'], len(KW), N, H[:12], prev_sha[:12]))
