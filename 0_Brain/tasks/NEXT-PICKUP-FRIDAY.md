@@ -12,6 +12,13 @@ supersede: replace wholesale; previous = NEXT-PICKUP-FRIDAY.md.pre-0925-rotate-s
 
 **The tree is at `/Users/kamilkreiser/1FILES TO SYNC/FRIDAY`.** Quote every path (spaces).
 
+## 🔴🔴 STATE 2026-09-30 14:4x (65% checkpoint) — supersedes the 14:1x block where they differ
+- **Merged today:** #61 (2fa034a) · #62 (9b655b5) · **#63 (a4ff52d, F-006 0.1.1/0.6.0 + pins; gate B76)**. Records analysis main a50adec; **#16 (records/b71) CONFLICTING → B71 ADDENDUM-2 rebases it** + a comments-only branch `b71/comment-followup` (B76 N-2) → Friday opens that PR (CI only).
+- **LIVE:** B71 %46 (ADDENDUM-2) · B73 %48 (api follow-up: 104–107) · B74 %49 (113, 116, 122, then ADDENDUM-1: 114) · B75 %50 (web: 93, 101, 108, 110, CodeQL #1) · B77 %52 (guards: 123, 124, 125 + DraftRuleset cross-check in infra/tests). Standing lines: `HPSM-POC/1_Project_Definition/Briefs/2026-09-30_STANDING_wave-b73.md`.
+- **Watchers:** `friday/watch_status.sh <seen> ".../Briefs/2026-09-30_B7[345]*STATUS*.md"` and `…B7[17]*STATUS*.md` (seed the seen file with current READY counts first: an empty seen file fires on old READY lines).
+- **On READY:** open each PR (friday_as.sh datasec gh pr create), ONE batched gate for B73/B74/B75/B77 when ≥2 are ready (disjoint), merge head-pinned one at a time, re-read main between; then a board seat for Jira (104–107, 113, 114, 116, 122–125, 93, 101, 108, 110) + a ticket for B76 N-3 if B77 did not cover it + records PRs.
+- **Kam's standing words:** "ignore the limit" (12:3x), "keep going and keep fixing" (14:0x). Open Kam items: HPSMPOC-127 (FIPS name, validator exception) · 100 · 98 · 126 (Azure).
+
 ## 🔴🔴 STATE 2026-09-30 14:1x — supersedes the 13:3x block where they differ (Kam ~14:0x: "keep going and keep fixing")
 - **Merged today:** #61 (2fa034a), #62 (9b655b5). Jira: 111/115/119/120 Done; new 122–127. Records analysis main a50adec.
 - **LIVE:** B71 %46 (#63 F-006 0.1.1/0.6.0 + pins ADDENDUM-1; then a light gate + merge) · **wave B73 %48 / B74 %49 / B75 %50** (standing lines `HPSM-POC/1_Project_Definition/Briefs/2026-09-30_STANDING_wave-b73.md`; tickets 104–107 / 113, 116, 122 / 93, 101, 108, 110 + CodeQL #1). Watcher on B7[345] STATUS; B71 watcher separate.
