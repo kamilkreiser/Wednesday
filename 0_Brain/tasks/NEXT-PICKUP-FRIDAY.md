@@ -18,6 +18,11 @@ supersede: replace wholesale; previous = NEXT-PICKUP-FRIDAY.md.pre-0925-rotate-s
 1. **MPS — B03 round 2 of 2** (`MPS/1_Project_Definition/Briefs/2026-10-01_B03_STATUS.md`, ADDENDUM-3): fail-closed allow-list guard (F-3 symlink, F-4 git error) + API F-1/F-2/F-6. Branches b03/importer, b03/api (PR #3 open, importer). Then gate B04 round 2 (the cap: a second NO GO → Kam). Merge with `friday/merge_when_green.sh`. Also B03 ADDENDUM-2 (C-09 rounding a, C-10 margin b) — check it landed.
 2. **HPSM-POC — B92** (`…/Briefs/2026-10-01_B92_*`): print heading (b92/print-heading, tier 2) + invisible characters (b92/invisible-chars, tier 1 → gate). RULED BY KAM in its brief: event date b (1 Dec), print heading a, invisible chars a.
 3. **Composer — B30 ADDENDUM-2** (F1 legacy-row removal must land before ANY deploy; N1/N2; demo-count SQL). HPSM-light main b0aa09b; demo = 0412eb6.
+**REBOOT STATES (read 09:5x; each seat's STATUS has a "REBOOT STATE" section):**
+- **MPS B03:** `b03/importer` = b5d6737 (WIP: F-3/F-4 fixed fail-closed allow-list under `.local/`, a real hard-link bypass also closed; 72 import tests) — PR #3 head moved with it; `b03/api` = d266dd5 NOT yet rebased, F-1/F-2/F-6 not done. Next: finish ADDENDUM-3, then gate round 2.
+- **HPSM-POC B92:** `b92/print-heading` = 93c46af **DONE → open the PR (tier 2)**. `b92/invisible-chars` = dfebb7f is WIP with ONE e2e spec red — **do NOT PR dfebb7f; last good 03aaf5d**; finish, then tier-1 gate.
+- **Composer B30:** `b30/f1-legacy-rows` = 3759481, all items done, **but ci.sh RED: egress (network) and a working-tree SECRET-SCAN finding (1, not located)** → first act: `scripts/secret-scan.sh --tree` in `_wt_b30f1`, locate it; untracked/ignored → quarantine outside the tree; tracked → STOP and report. Then real-browser F1 check, PR, gate. records/b30 local only (root main a90599e).
+
 **Open for Kam (nothing carded now):** 77609e2 + #16 not deployed (his word); the PO (HP-9); weekly-report hours source (SOW §4.1.5); HPSM-POC one-pager already sent.
 
 ## 🔴🔴🔴 HANDOVER 2026-10-01 09:09 (Friday, ctx 72% by statusline; rotation not yet due) — READ FIRST; supersedes every block below where they differ
