@@ -12,6 +12,12 @@ supersede: replace wholesale; previous = NEXT-PICKUP-FRIDAY.md.pre-0925-rotate-s
 
 **The tree is at `/Users/kamilkreiser/1FILES TO SYNC/FRIDAY`.** Quote every path (spaces).
 
+## 🔴🔴 STATE 2026-09-30 11:3x — supersedes the 11:0x block where they differ
+- **B66 READY → PR #61** (head 14bb41c, 111 + 115). ADDENDUM-1 in flight (F-006 ticket, records/b66 → Friday opens the records PR). Pane kept for a fix round.
+- **B67** working 119 → 120 → ADDENDUM-1 (web bundle provenance, 111's web half).
+- **QA gate: ONE batched tier-1 gate for #61 + B67's PR** once B67 is READY (usage 89% at 11:3x; hard stop 90 — if the gauge is at 90, the gate waits for the Sat 3 Oct renewal and Kam is told; no merge without a gate).
+- **Card open:** hpsmpoc-f006-title-trips-compliance-rule (rec a reword DRAFT title; default nothing).
+
 ## 🔴🔴 STATE 2026-09-30 11:0x — supersedes the 10:1x block where they differ
 **Kam ruled b at 10:59:25 ("Run both seats now").** LIVE: **B66** %41 Datasec/HPSM-POC-A (api/: HPSMPOC-111 + -115) and **B67** %42 Datasec/HPSM-POC-B (web/: HPSMPOC-119 + -120), base main 645f0a5, both tier 1. On READY: review at source, open the PR (`friday_as.sh datasec gh pr create`), QA gate per seat (usage permitting; hard stop 90), merge head-pinned on GO, records by PR. Re-arm watcher: `friday/watch_status.sh <fresh seen> ".../HPSM-POC/1_Project_Definition/Briefs/2026-09-30_B6[67]*STATUS*.md"`.
 
