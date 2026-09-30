@@ -12,6 +12,14 @@ supersede: replace wholesale; previous = NEXT-PICKUP-FRIDAY.md.pre-0925-rotate-s
 
 **The tree is at `/Users/kamilkreiser/1FILES TO SYNC/FRIDAY`.** Quote every path (spaces).
 
+## 🔴🔴🔴 STATE 2026-10-01 07:0x — READ FIRST; supersedes the 02:3x block where they differ
+**Kam ruled 07:00 (all reconciled):** composer-0412eb6-deploy-before-paul **a "Deploy 0412eb6 now"** · mpscalc-release1-users **a** (Datasec pricing team first) · mpscalc-hosting-and-signin **b + note "host it on kamil@datasec-rd.com"** (read: that tenant, kamildatasecrd; nothing created yet). Terminal ~06:5x: MPS needs multi-currency "similar to the quick quoting tool", AUD first; two price books copied to `MPS/…/Source_Documents/2026-10-01_pricebooks-from-Kam/` (confidential: no values in any tracked artefact).
+**LIVE:**
+1. **B29 Datasec/Composer-D** — deploy EXACTLY `0412eb6` (tree 144e9533 = gated head) to the demo VM (brief `Composer/1_Project_Definition/Briefs/2026-10-01_B29_deploy-0412eb6-to-demo-vm.md`). On READY: verify live yourself (runbook step 5), temp access removed + proved, then `decision_queue.sh --delivered composer-0412eb6-deploy-before-paul <C-number>` and tell Kam. 77609e2 (PR #15) is offered to Kam, NOT deployed.
+2. **B02 Datasec/MPSCalc-A** — C-04/05/06 + Jira answers, price-book structure register, currency ADR (Vision quote code read-only), engine lane 1 in AUD on a branch → Friday opens the PR. ⚠ Friday marked `mpscalc-release1-users` DELIVERED to "MPS C-05" BEFORE C-05 existed (premature; verify C-05 in CLARIFICATIONS when B02 reports, and deliver `mpscalc-hosting-and-signin` then).
+**Watch:** `watch_status.sh <seen> …B29*STATUS* …B02*STATUS*` (armed 07:04).
+**Still next:** HPSM-POC board+records seat (wave 2 + #74/#75; B88 notes N-74-1/2, N-75-1).
+
 ## 🔴🔴🔴 HANDOVER 2026-10-01 ~02:3x (Friday, ctx 50% checkpoint) — READ FIRST; supersedes every block below where they differ
 **Kam 30 Sep ~19:5x (terminal, NEW ACCOUNT, gauge ~72%):** "keep working on the HPSM project · keep going with the Datasec Security Composer · spin up agents to create a new folder and project for Datasec MPS Commercial Calculator". Reading told to him: HPSM = HPSM-POC continues + an HPSM readiness seat.
 **NETWORK OUTAGE ~20:3x → 01:42** (and flaky after): seats' turns die on API errors; re-point them with a noun-named state note (`<id>_ADDENDUM-N_<noun>-state.md`) + `New file from Friday: <path>` tap.
