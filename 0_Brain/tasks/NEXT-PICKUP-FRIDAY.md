@@ -12,6 +12,10 @@ supersede: replace wholesale; previous = NEXT-PICKUP-FRIDAY.md.pre-0925-rotate-s
 
 **The tree is at `/Users/kamilkreiser/1FILES TO SYNC/FRIDAY`.** Quote every path (spaces).
 
+## 🔴🔴 STATE 2026-09-30 12:1x — ADDS to the 12:0x block
+- Records: analysis #12 (B66) and #13 (B67) MERGED → analysis main c79ac2f.
+- **PR #62's required check `infra (Bicep validate)` FAILS** (rule_web_settings: `web/src/server/auth/revocations.race-child.mjs:10-11` reads `process.env.B67_READY` / `B67_STALE_MS`, test-only). #62 cannot merge until fixed. Fix shape: pass those two values by argv (or move the child where the rule does not scan), no product change; then re-run CI; a light re-check by the gate is enough (test-only). This is a fix round → a build seat → tomorrow's account unless Kam says otherwise. **#61 can merge alone on B68's GO.**
+
 ## 🔴🔴 STATE 2026-09-30 12:0x — supersedes the 11:5x block where they differ
 - **Kam 12:02: gate b (one gate past 90%, "I will sign into a new account tomorrow") + F-006 a (reword the DRAFT title).** Grant row in EXPIRING-GRANTS (event-scoped).
 - **LIVE: B68** %43 Datasec/HPSM-POC-QA = ONE batched tier-1 gate on #61 @ 14bb41c + #62 @ 7c77dfe (+ their combination). Brief `HPSM-POC/1_Project_Definition/Briefs/2026-09-30_B68_QA-gate-PR61-PR62.md`; verdict lines `PR #61: …` / `PR #62: …` then READY FOR REVIEW in `…_B68_STATUS.md`. Wait: scratchpad `wait_b68.sh` (re-create from this line if gone).
