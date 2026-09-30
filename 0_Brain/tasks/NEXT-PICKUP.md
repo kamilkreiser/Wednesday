@@ -19,6 +19,24 @@ supersede: replace wholesale at the next pickup; do not append. Previous copy: N
 4. EXPIRING-GRANTS: "SPEND PAST THE 90%" is marked ENDED (account switched). Friday's "ignore the 90%" row is Friday's and is not touched.
 
 ### LIVE RIGHT NOW
+**⏩ 12:18 2026-09-30 (seat ffc4a192, ctx ~76%; READ FIRST, supersedes every block below):**
+1. **KAM RULED (c) at 11:03:17**, verbatim: "Decision secuura-undici-ghsa-r53p-exception-1354: c — Accept permanently, like the twelve siblings | note: And fix now". The card is ruled. It was told on the panel at 11:1x that the permanent row is dead on arrival once the fix merges; the default was "proceeding", and he had NOT withdrawn as of 11:2x.
+2. **gate48b LIVE (%80, `QA/Secuura-batch1355`, launched 02:17:17Z)** over develop 37205947ddd2, for **#1354** (PERMANENT at `88802586cebe`: the r53p row with no expires + the GRANDFATHERED line; the seat's brief prohibitions were lifted by SUPERSEDES for exactly those two lines) **then #1355** (the undici 5→7 override + js-yaml, `6fab9c0936d4`, Refs KS-1378). END_TREE `0693c2b391b6`. GO string `GO (Seat B 48th): merge 1354 1355 on gate48b`. Kit `fleet/qa-agent/gatesets/2026-09-30_gate48b/` (README §2 lists the items the gate must rule; the top one is connect-node's runtime reach, unmeasured, so no GO on a T1 unless measured).
+3. **On the verdict:**
+   - close %80 with `pane_close.sh` FIRST, then sha256 the report (== the mail);
+   - completion check: re-read the heads with the kit's dry run;
+   - signed GO to **Seat B 48th (%79, holding, ctx ~63%)**, merges one at a time under `.push-lock-44`;
+   - verify at source in a scratch clone (the tree == END);
+   - mark the card `--delivered` naming the merged commits;
+   - tell Kam pushes are unblocked.
+   A NO GO on words (the stale #1354 reason, the subject) → a fix round by B 48th, not a card.
+4. **After the merges (owed):**
+   - the 15-row baseline CLEANUP (13 undici incl. r53p + 2 ip-address; it must edit the GRANDFATHERED list too, and ip-address KS 729 is on the 2026-10-09 fuse);
+   - close #1354? NO: it MERGES under (c);
+   - B 48th rebases ITEM 1a (`-b47-1`, 0ffb275b2) → gate;
+   - ITEM 1b (KS-1015) and ITEM 2 (KS-1380/1387) carried in `HANDOVER-seatB48-2026-09-30.md`.
+5. KS-1394 is filed. The fuse at END is 4 dated rows (r53p is permanent, so it is not among them). 2 Secuura merges today so far (#1349, #1350).
+
 **🟠 70% CHECKPOINT 10:24 2026-09-30 (seat ffc4a192; READ FIRST, supersedes the 65% block below):**
 1. **Pushes are still blocked, and a NO-ACCEPTANCE FIX exists.** Seat B 48th (%79, round 44, brief `fleet/briefs_staged/2026-09-30_seatB48_build.md`) measured ONE PR: `overrides.undici ^7.29.1` in both manifests, both locks regenerated with `npm update undici --package-lock-only` (root 1970 → 1968), plus #1354's js-yaml lock bytes. contract / leg 6 / leg 7 = 0/0/0 with NO baseline row, and it retires 12 undici rows (3 HIGH). **It is being RAISED now** (`Refs KS-1378`; inside Kam's KS-1378 (a) bump ruling). The image build, served tree and suites are measured BEFORE its READY → **gate48b (T1)**; Wednesday drafts that kit on the READY.
 2. **Kam's card `secuura-undici-ghsa-r53p-exception-1354` was AMENDED** (the prior values kept): rec now (b), the fix. Default: the fix merges on gate48b's GO. **#1354 (the acceptance PR) stays OPEN and unmerged**; after the fix merges, #1354 is unnecessary (closing it is reversible and Wednesday's call; its js-yaml half is inside the fix).
