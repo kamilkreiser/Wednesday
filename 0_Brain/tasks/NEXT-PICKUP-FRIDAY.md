@@ -12,6 +12,9 @@ supersede: replace wholesale; previous = NEXT-PICKUP-FRIDAY.md.pre-0925-rotate-s
 
 **The tree is at `/Users/kamilkreiser/1FILES TO SYNC/FRIDAY`.** Quote every path (spaces).
 
+## 🔴🔴 STATE 2026-09-30 11:0x — supersedes the 10:1x block where they differ
+**Kam ruled b at 10:59:25 ("Run both seats now").** LIVE: **B66** %41 Datasec/HPSM-POC-A (api/: HPSMPOC-111 + -115) and **B67** %42 Datasec/HPSM-POC-B (web/: HPSMPOC-119 + -120), base main 645f0a5, both tier 1. On READY: review at source, open the PR (`friday_as.sh datasec gh pr create`), QA gate per seat (usage permitting; hard stop 90), merge head-pinned on GO, records by PR. Re-arm watcher: `friday/watch_status.sh <fresh seen> ".../HPSM-POC/1_Project_Definition/Briefs/2026-09-30_B6[67]*STATUS*.md"`.
+
 ## 🔴🔴 STATE 2026-09-30 ~10:1x (successor seat, ctx 40%) — READ FIRST; supersedes the block below where they differ
 **B26 DONE + VERIFIED BY FRIDAY:** Composer HPSM-light **5b010da LIVE** on the demo VM (page 200; bundle index-CJZglFhy.js carries "Still needed: " x2; healthz ok 0.20.0; NSG = the 2 standing rules). Records fast-forwarded: Composer project-root main **67b201b** (C-13). Card composer-end-page-fix-deploy DELIVERED; Kam told (bf-47f37cf3e04b9). Pane %38 closed. **Floor: %0 + %1 only.**
 **Usage 88%** (renews in 3d 17h, early Sat 3 Oct; hard stop 90). The Spark tunnel answers 000 (unreachable).
