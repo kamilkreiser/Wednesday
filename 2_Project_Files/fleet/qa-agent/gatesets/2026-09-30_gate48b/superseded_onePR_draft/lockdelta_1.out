@@ -1,0 +1,41 @@
+lockdelta_gate48b 2026-09-30T00:59:20Z | 5 files at base 37205947ddd2 and head 6fab9c0936d4
+PASS M1 Dev: top-level keys that differ ['overrides'] | overrides keys that differ ['undici'] | undici None -> '^7.29.1' | jsdom-scoped {'undici': '^7.29.1'} unchanged: True | numstat 1 0
+PASS M1 issuer: top-level keys that differ ['overrides'] | overrides keys that differ ['undici'] | undici None -> '^7.29.1' | jsdom-scoped {'undici': '^7.29.1'} unchanged: True | numstat 1 0
+    D1 Blockchain/Dev/frontend/issuer/package-lock.json: lockfileVersion 3 -> 3 | entries 723 -> 721 | ADDED none | REMOVED ['node_modules/@fastify/busboy 2.1.1', 'node_modules/jsdom/node_modules/undici 7.30.0'] | CHANGED 1: undici ['dependencies', 'engines', 'integrity', 'resolved', 'version'], flag-only 0, other none
+PASS D1: issuer: exactly {undici 5.29.0 -> 7.30.0, -@fastify/busboy 2.1.1, -jsdom nested undici 7.30.0}, 723 -> 721, nothing else (flag-only 0)
+PASS D3 D1: fields changed inside node_modules/undici: ['dependencies', 'engines', 'integrity', 'resolved', 'version'] | dependencies {'@fastify/busboy': '^2.0.0'} -> None | engines {'node': '>=14.0'} -> {'node': '>=20.18.1'}
+    D2 Blockchain/Dev/package-lock.json: lockfileVersion 3 -> 3 | entries 1970 -> 1968 | ADDED none | REMOVED ['node_modules/@fastify/busboy 2.1.1', 'node_modules/jsdom/node_modules/undici 7.30.0'] | CHANGED 13: undici ['dependencies', 'engines', 'integrity', 'resolved', 'version'], flag-only 12, other none
+    D2 drift set (flag-only): lightningcss-android-arm64[dev True->None] lightningcss-darwin-arm64[dev True->None] lightningcss-darwin-x64[dev True->None] lightningcss-freebsd-x64[dev True->None] lightningcss-linux-arm-gnueabihf[dev True->None] lightningcss-linux-arm64-gnu[dev True->None] lightningcss-linux-arm64-musl[dev True->None] lightningcss-linux-x64-gnu[dev True->None] lightningcss-linux-x64-musl[dev True->None] lightningcss-win32-arm64-msvc[dev True->None] lightningcss-win32-x64-msvc[dev True->None] magicast[dev True->None,devOptional None->True]
+PASS D2: root: the same 3 undici entries + exactly 12 flag-only entries (11 lightningcss-* + magicast): 12, names as claimed True — attribution to npm is the GATE's pristine regen
+PASS D3 D2: fields changed inside node_modules/undici: ['dependencies', 'engines', 'integrity', 'resolved', 'version'] | dependencies {'@fastify/busboy': '^2.0.0'} -> None | engines {'node': '>=14.0'} -> {'node': '>=20.18.1'}
+INFO issuer Dockerfile FROM lines at head: ['FROM ${REGISTRY_PREFIX}node:24-alpine AS builder', 'FROM ${REGISTRY_PREFIX}nginx:1.30-alpine'] (undici 7.30.0 engines {'node': '>=20.18.1'})
+PASS D4 issuer: issuer lock undici resolved/integrity == registry undici@7.30.0 dist (https://registry.npmjs.org/undici/-/undici-7.30.0.tgz, sha512-dkrQXeHSaoamnIt…)
+PASS D4c issuer: CONTROL: the same comparison against undici@7.29.1's integrity (sha512-RYONW2MeafgYlkV…) reads False
+PASS D4 root: root lock undici resolved/integrity == registry undici@7.30.0 dist (https://registry.npmjs.org/undici/-/undici-7.30.0.tgz, sha512-dkrQXeHSaoamnIt…)
+PASS D4c root: CONTROL: the same comparison against undici@7.29.1's integrity (sha512-RYONW2MeafgYlkV…) reads False
+    GHSA-r53p-7pc4-xj5r low      NEW (not in the baseline) | row -  expires (none) | undici ranges ['< 6.28.1', '>= 7.0.0, < 7.29.1', '>= 8.0.0, < 8.10.2'] | 7.30.0 outside: True | 5.29.0 inside (control): True
+    GHSA-2mjp-6q6p-2qxm medium   baseline | row KS-470  expires (none) | undici ranges ['< 6.24.0', '>= 7.0.0, < 7.24.0'] | 7.30.0 outside: True | 5.29.0 inside (control): True
+    GHSA-35p6-xmwp-9g52 low      baseline | row KS-470  expires (none) | undici ranges ['< 6.27.0', '>= 7.0.0, < 7.28.0', '>= 8.0.0, < 8.5.0'] | 7.30.0 outside: True | 5.29.0 inside (control): True
+    GHSA-4992-7rv2-5pvq medium   baseline | row KS-470  expires (none) | undici ranges ['< 6.24.0', '>= 7.0.0, < 7.24.0'] | 7.30.0 outside: True | 5.29.0 inside (control): True
+    GHSA-8xcm-r25x-g524 medium   baseline | row KS-559  expires (none) | undici ranges ['< 6.28.0', '>= 7.0.0, < 7.29.0', '>= 8.0.0, < 8.9.0'] | 7.30.0 outside: True | 5.29.0 inside (control): True
+    GHSA-g8m3-5g58-fq7m low      baseline | row KS-470  expires (none) | undici ranges ['< 6.27.0', '>= 7.0.0, < 7.28.0', '>= 8.0.0, < 8.5.0'] | 7.30.0 outside: True | 5.29.0 inside (control): True
+    GHSA-g9mf-h72j-4rw9 medium   baseline | row KS-470  expires (none) | undici ranges ['>= 7.0.0, < 7.18.2', '< 6.23.0'] | 7.30.0 outside: True | 5.29.0 inside (control): True
+    GHSA-m8rv-5g2x-5cg5 medium   baseline | row KS-559  expires (none) | undici ranges ['< 6.28.0', '>= 7.0.0, < 7.29.0', '>= 8.0.0, < 8.9.0'] | 7.30.0 outside: True | 5.29.0 inside (control): True
+    GHSA-p88m-4jfj-68fv medium   baseline | row KS-470  expires (none) | undici ranges ['< 6.27.0', '>= 7.0.0, < 7.28.0', '>= 8.0.0, < 8.5.0'] | 7.30.0 outside: True | 5.29.0 inside (control): True
+    GHSA-v3r7-h72x-cjcm medium   baseline | row KS-559  expires (none) | undici ranges ['< 6.28.0', '>= 7.0.0, < 7.29.0', '>= 8.0.0, < 8.9.0'] | 7.30.0 outside: True | 5.29.0 inside (control): True
+    GHSA-v9p9-hfj2-hcw8 high     baseline | row KS-470  expires (none) | undici ranges ['< 6.24.0', '>= 7.0.0, < 7.24.0'] | 7.30.0 outside: True | 5.29.0 inside (control): True
+    GHSA-vrm6-8vpv-qv8q high     baseline | row KS-470  expires (none) | undici ranges ['< 6.24.0', '>= 7.0.0, < 7.24.0'] | 7.30.0 outside: True | 5.29.0 inside (control): True
+    GHSA-vxpw-j846-p89q high     baseline | row KS-470  expires (none) | undici ranges ['< 6.27.0', '>= 7.0.0, < 7.28.0', '>= 8.0.0, < 8.5.0'] | 7.30.0 outside: True | 5.29.0 inside (control): True
+PASS D5: 7.30.0 OUTSIDE all 13 undici advisory ranges read (r53p + 12 baseline rows); 5.29.0 INSIDE each (control)
+PASS D5j: GHSA-r3ph js-yaml ['>= 5.0.0, <= 5.4.0']: 5.4.2 outside, 5.2.3 inside (control)
+PASS D6: performance lock blob head 80c6752aab86 == #1354 head 80c6752aab86 == kit 80c6752aab86: True | develop 382e74a150d1 differs (control): True | entries changed ['node_modules/js-yaml'] (5.2.3 -> 5.4.2)
+D7 THE RESOLVER — undici as node would resolve it from each dependant (key -> resolved entry version)
+    issuer develop jsdom                      1 entr(y/ies): node_modules/jsdom(declares ^7.25.0) -> node_modules/jsdom/node_modules/undici 7.30.0
+    issuer develop @connectrpc/connect-node   1 entr(y/ies): node_modules/@connectrpc/connect-node(declares ^5.28.3) -> node_modules/undici 5.29.0
+    issuer head    jsdom                      1 entr(y/ies): node_modules/jsdom(declares ^7.25.0) -> node_modules/undici 7.30.0
+    issuer head    @connectrpc/connect-node   1 entr(y/ies): node_modules/@connectrpc/connect-node(declares ^5.28.3) -> node_modules/undici 7.30.0
+    root   develop jsdom                      1 entr(y/ies): node_modules/jsdom(declares ^7.25.0) -> node_modules/jsdom/node_modules/undici 7.30.0
+    root   develop @connectrpc/connect-node   1 entr(y/ies): node_modules/@connectrpc/connect-node(declares ^5.28.3) -> node_modules/undici 5.29.0
+    root   head    jsdom                      1 entr(y/ies): node_modules/jsdom(declares ^7.25.0) -> node_modules/undici 7.30.0
+    root   head    @connectrpc/connect-node   1 entr(y/ies): node_modules/@connectrpc/connect-node(declares ^5.28.3) -> node_modules/undici 7.30.0
+LOCKDELTA PASS: 0 FAIL | base 37205947ddd2 head 6fab9c0936d4 | root 1970 -> 1968 | issuer 723 -> 721

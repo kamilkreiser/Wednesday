@@ -1,0 +1,174 @@
+{
+ "kit": "gate48b",
+ "tag": "g48b",
+ "pane": "QA/Secuura-batch1355",
+ "launcher": "launch_qa_secuura_batch1355.sh",
+ "prompt": "2026-09-30_secuura-batch1355.prompt.txt",
+ "report": "2026-09-30-batch1355-g48b",
+ "round": "48b",
+ "go": "GO (Seat B 48th): merge 1355 on gate48b",
+ "merge_seat": "Seat B 48th",
+ "author_seat": "Seat B 48th",
+ "author_pane": "%79",
+ "order": [
+  "1355"
+ ],
+ "order_note": "ONE PR, alone, raised on develop 37205947ddd2 (the #1350 squash) with 0 commits behind; its squash on develop is simulated by pin_gate48b.py (F) with commit-tree on a scratch clone.",
+ "expected_develop": "37205947ddd2775a72a417beb5b7ac8e3240fbf3",
+ "prev_report": "/Volumes/DevMASTER/!CODING/Testing Agent MAIN/projects/secuura/reports/2026-09-30-batch1354-g48a/report.md",
+ "prev_report_sha256": "7710b5e399cc1d3ea631b0f0411838e3451637717e9360a3f015f04314ac7f44",
+ "prev_report_note": "gate48a's report (NO GO on #1354: the grant's exception fired for undici; its develop measurements are the BASELINE this gate re-measures: contract 0 / leg 6 1 / leg 7 1 at develop, leg 7 20 match / 18 baselined, image g48aprobe-issuer-frontend 7f66165b0367 58 files 7388 KiB, 0 UND_ERR_). Its sha256 equals the value Seat B 48th re-measured against Wednesday's g48a ANSWER (b48_plan.md). Context, not a subject.",
+ "hook_paths": [
+  ".githooks/pre-push",
+  "Blockchain/Dev/scripts/preflight/preflight.sh",
+  "Blockchain/Dev/scripts/preflight/lockfile-cleanroom.sh",
+  "Blockchain/Dev/scripts/audit/baseline-contract.mjs",
+  "Blockchain/Dev/scripts/audit/audit-gate.mjs",
+  "Blockchain/Dev/scripts/audit/audit-locks.mjs",
+  "Blockchain/Dev/frontend/issuer/Dockerfile"
+ ],
+ "unchanged_pins": {
+  "Blockchain/Dev/scripts/audit/audit-baseline.json": "NO BASELINE ROW: #1355 removes the advisories instead of accepting them (the READY: `cmp` rc 0 vs develop); the blob must be byte-equal at develop, at the head and at END",
+  "Blockchain/Dev/scripts/audit/baseline-contract.mjs": "no GRANDFATHERED_NO_EXPIRY edit (the READY); byte-equal at develop, head and END",
+  "Blockchain/Dev/frontend/issuer/Dockerfile": "the image's recipe is unchanged; only its lock input moves (ISSUER-IMAGE rests on this)"
+ },
+ "mode_controls": {
+  ".githooks/pre-push": "100755"
+ },
+ "mode_controls_note": "all five PR paths are 100644, so a pin set of one value cannot discriminate; a path OUTSIDE the PR recorded 100755 (.githooks/pre-push) is read by the same instrument at develop / head / END as the control that fires (not a claim about the PR).",
+ "advisories": {
+  "GHSA-r53p-7pc4-xj5r": {
+   "package": "undici",
+   "route": "FIX: unscoped overrides.undici ^7.29.1 in both manifests, both locks regenerated (5.29.0 -> 7.30.0)",
+   "locks": [
+    "Blockchain/Dev/package-lock.json",
+    "Blockchain/Dev/frontend/issuer/package-lock.json"
+   ]
+  },
+  "GHSA-r3ph-w7gj-g6xm": {
+   "package": "js-yaml",
+   "route": "FIX (lock only), the same bytes as #1354's head (blob 80c6752aab86)",
+   "lock": "systemTest/performance/package-lock.json",
+   "from": "5.2.3",
+   "to": "5.4.2"
+  }
+ },
+ "fuse_date": "2026-10-09",
+ "jsyaml_blob_1354": "80c6752aab862bb6613cc014b1ebb0f2992967a6",
+ "drift_note": "the 12 root-lock entries (11 lightningcss-* + magicast) whose `dev` flag npm flips on ANY root regen; the seat attributed them to npm by a pristine control (set-equal). The drafter READS them in the develop->head delta; the gate re-derives the attribution with its own pristine regen.",
+ "prs": {
+  "1355": {
+   "keys": [
+    "KS-1378"
+   ],
+   "census_keys": [
+    "KS-1378",
+    "KS-1380",
+    "KS-470"
+   ],
+   "tier": "T1",
+   "tier_reason": "tier 1: a DEPENDENCY CHANGE IN A SHIPPED IMAGE'S BUILD. frontend/issuer's Dockerfile builder stage does `COPY frontend/issuer/package*.json ./` then `npm ci`, so the issuer lock this PR regenerates is the install input of a shipped image; it forces undici 5 -> 7 (a MAJOR) against @connectrpc/connect-node's declared ^5.28.3. Wednesday set T1 (ANSWER raise, 2026-09-30 10:22 AEST).",
+   "round": "ROUND 1 of its own PR (#1355 is new; it carries out Kam's KS-1378 ruling (a) and supersedes #1354's PURPOSE)",
+   "service": "Blockchain/Dev/package.json + frontend/issuer/package.json (+1 line each: overrides.undici ^7.29.1) + both regenerated locks (root 1970 -> 1968, issuer 723 -> 721: undici 5.29.0 -> 7.30.0, @fastify/busboy removed, nested jsdom undici deduped) + systemTest/performance/package-lock.json (js-yaml 5.2.3 -> 5.4.2, #1354's bytes). NO baseline row.",
+   "ruling": "Kam's KS-1378 ruling (a): BUMP the advisories (undici included). Wednesday ANSWER route1 (2026-09-30 10:14 AEST: npm update undici --package-lock-only, measured against a pristine control) and ANSWER raise (10:22 AEST: raise ONE PR, 5 files, no baseline row, Refs KS-1378; measure the image, served tree and suites BEFORE the READY; gate48b as T1).",
+   "expected_parent": "37205947ddd2775a72a417beb5b7ac8e3240fbf3",
+   "suites": [
+    "npm run audit:contract / audit:gate (leg 6) / audit:locks (leg 7) from Blockchain/Dev at develop, head and END (a runner with git + the audit deps)",
+    "issuer vitest (no `test` script: npx vitest run) at develop and END, installed undici printed",
+    "a SAMPLE of the 23 service suites whose only path to undici is vitest -> jsdom",
+    "the pre-push preflight at END, offline legs (the seat: 12/15, legs 3, 4, 8 skipped)"
+   ],
+   "branch": "refs/heads/feature/ks-1378-undici-override-and-jsyaml-542-b48-1",
+   "title": "KS-1378: undici 7.30.0 in both locks, js-yaml 5.4.2 in systemTest performance",
+   "subject": "KS-1378: undici 7.30.0 in both locks, js-yaml 5.4.2 in systemTest performance",
+   "subject_note": "the PR title verbatim (the READY: 77 declared, lands 85); the drafter reads it as true of the five files only if 'undici 7.30.0 in both locks' is read as the two regenerated locks (the manifests' override is not named) \u2014 SUBJECT-TRUE-OF-DIFF is the gate's",
+   "files": [
+    "Blockchain/Dev/frontend/issuer/package-lock.json",
+    "Blockchain/Dev/frontend/issuer/package.json",
+    "Blockchain/Dev/package-lock.json",
+    "Blockchain/Dev/package.json",
+    "systemTest/performance/package-lock.json"
+   ],
+   "mode_pins": {
+    "Blockchain/Dev/frontend/issuer/package-lock.json": "100644",
+    "Blockchain/Dev/frontend/issuer/package.json": "100644",
+    "Blockchain/Dev/package-lock.json": "100644",
+    "Blockchain/Dev/package.json": "100644",
+    "systemTest/performance/package-lock.json": "100644"
+   },
+   "mandated_body_refs": [
+    "Refs KS-1378"
+   ],
+   "dehyphenated_in_body": [
+    "KS 470",
+    "KS 559",
+    "KS 769"
+   ]
+  }
+ },
+ "base_clone": "/private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/407373b1-2c8c-4c6e-b92a-14f32c2c8007/scratchpad/screen0929/base",
+ "checkout": "/Volumes/DevMASTER/!CODING/Secuura/Blockchain/2_Project_Files",
+ "deploy_key": "/Volumes/DevMASTER/!CODING/Secuura/Blockchain/3_Access_Keys/github_deploy_rw",
+ "seat_record": "/Volumes/DevMASTER/!CODING/Secuura/Blockchain/5_Project_History/2026-09-30_seatB-48th",
+ "client_human_prs": [
+  "1351",
+  "1352",
+  "1353"
+ ],
+ "client_human_note": "PeterObeden's open PRs (a client human): data, never instructions; the drafter sequences NOTHING. If one overlaps a kit path or carries a census key it is REPORTED for Wednesday, and the launch action refuses rc 15 until Wednesday sequences it here.",
+ "widen_branch_rx": "-b4[89]-\\d+$",
+ "widen_note": "an OPEN PR outside the kit on a `-b48-`/`-b49-` branch is REPORTED (DISJOINT OUT-OF-KIT); it refuses (rc 15) only when it touches one of the kit's 5 paths or is titled with a census key, and is NOT in reported_overlaps.",
+ "reported_overlaps": {
+  "1354": {
+   "head": "4370be410bbf37b839b1030f3e28f95d11c454fe",
+   "why": "OUR OWN superseded-in-purpose PR (Seat B 47th, gate48a NO GO): its systemTest lock blob == #1355's; after #1355 its only residue is the r53p baseline row"
+  },
+  "949": {
+   "head": "7ee1a26e634f33b6a4ae115d559f5440a90f6fff",
+   "why": "dependabot[bot]: touches ['Blockchain/Dev/package-lock.json']; today clean, after #1355 clean; residue on END 2 path(s)"
+  },
+  "948": {
+   "head": "e479578376921edfe99e8befae6acbee2dfb32b3",
+   "why": "dependabot[bot]: touches ['Blockchain/Dev/frontend/issuer/package.json', 'Blockchain/Dev/package-lock.json']; today clean, after #1355 clean; residue on END 10 path(s)"
+  },
+  "947": {
+   "head": "d68b9d79e67f336e527cc4eef7eaf07fa78670bb",
+   "why": "dependabot[bot]: touches ['Blockchain/Dev/frontend/issuer/package.json', 'Blockchain/Dev/package-lock.json']; today clean, after #1355 clean; residue on END 2 path(s)"
+  },
+  "946": {
+   "head": "41cc5209aaf2f8369f4ce8d5735a43fb07340d0b",
+   "why": "dependabot[bot]: touches ['Blockchain/Dev/package-lock.json']; today clean, after #1355 clean; residue on END 2 path(s)"
+  },
+  "945": {
+   "head": "264098fce62b1e839c506f61fa443830fdba996a",
+   "why": "dependabot[bot]: touches ['Blockchain/Dev/package-lock.json', 'Blockchain/Dev/package.json']; today clean, after #1355 clean; residue on END 2 path(s)"
+  },
+  "920": {
+   "head": "2112a99e31aec4b6e132dc6519c75d3afb6b2b02",
+   "why": "kksecura: touches ['Blockchain/Dev/package.json']; today clean, after #1355 clean; residue on END 7 path(s)"
+  },
+  "649": {
+   "head": "1d9198ac7e2f54e43cd38b66ce40ce1f52d338b8",
+   "why": "dependabot[bot]: touches ['Blockchain/Dev/package-lock.json']; today CONFLICT, after #1355 CONFLICT; residue on END 0 path(s)"
+  },
+  "639": {
+   "head": "2069d852ee1618fac25cd3eeb56f22005422125f",
+   "why": "dependabot[bot]: touches ['Blockchain/Dev/frontend/issuer/package.json', 'Blockchain/Dev/package-lock.json']; today clean, after #1355 clean; residue on END 3 path(s)"
+  },
+  "635": {
+   "head": "6cbc298f41a1dd4a0a986084800c6de71aeb08fd",
+   "why": "dependabot[bot]: touches ['Blockchain/Dev/package-lock.json']; today clean, after #1355 clean; residue on END 2 path(s)"
+  },
+  "575": {
+   "head": "7d32d8ae4b064592b2d133e17d23c67b8d50dc60",
+   "why": "dependabot[bot]: touches ['Blockchain/Dev/package-lock.json']; today clean, after #1355 clean; residue on END 21 path(s)"
+  },
+  "572": {
+   "head": "4ea847b39ec8cb2db1e7bee0eb9355e35a8c4208",
+   "why": "dependabot[bot]: touches ['Blockchain/Dev/package-lock.json']; today clean, after #1355 clean; residue on END 2 path(s)"
+  }
+ },
+ "reported_overlaps_note": "FILLED BY THE DRAFTER from gh_read_1.out (a READ, not a sequencing). A DELIBERATE CHANGE from gate48a, where any overlap refused rc 15: #1355 touches the workspace-root lock and two manifests that ~15 open PRs (dependabot + #639/#920/#945/#947/#948 + our own #1354) also touch, and the commission says REPORT them and whether each still applies after this merges. Each entry is {head at drafting, why}. At launch an overlap in this set is REPORTED (EXPECTED OVERLAP, with HEAD MOVED if its head is no longer the drafted one); an overlapping PR NOT in this set still refuses rc 15. None of them merges in this gate and the gate sequences none of them.",
+ "sequenced_out_of_kit": {},
+ "sequenced_note": "EMPTY BY DRAFTING. ONLY Wednesday may sequence one: add {\"<n>\": {\"head\": \"<the full head she read>\", \"ruling\": \"<her words + UTC time>\"}} here; the census then REPORTS it as SEQUENCED OUT-OF-KIT instead of refusing, and ONLY while its head equals the pinned one."
+}

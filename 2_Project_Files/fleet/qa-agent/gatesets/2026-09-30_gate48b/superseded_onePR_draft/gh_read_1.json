@@ -1,0 +1,375 @@
+{
+ "read_at": "2026-09-30T00:57:15Z",
+ "prs": {
+  "1355": {
+   "title": "KS-1378: undici 7.30.0 in both locks, js-yaml 5.4.2 in systemTest performance",
+   "state": "open",
+   "user": "kksecura",
+   "head": "6fab9c0936d4790b15f9b95d59e2f70f00d29d08",
+   "branch": "feature/ks-1378-undici-override-and-jsyaml-542-b48-1",
+   "base": "develop",
+   "base_sha": "37205947ddd2775a72a417beb5b7ac8e3240fbf3",
+   "mergeable": true,
+   "mergeable_state": "unstable",
+   "files": [
+    [
+     "Blockchain/Dev/frontend/issuer/package-lock.json",
+     4,
+     26,
+     "modified"
+    ],
+    [
+     "Blockchain/Dev/frontend/issuer/package.json",
+     1,
+     0,
+     "modified"
+    ],
+    [
+     "Blockchain/Dev/package-lock.json",
+     5,
+     34,
+     "modified"
+    ],
+    [
+     "Blockchain/Dev/package.json",
+     1,
+     0,
+     "modified"
+    ],
+    [
+     "systemTest/performance/package-lock.json",
+     3,
+     3,
+     "modified"
+    ]
+   ],
+   "commits": [
+    [
+     "6fab9c0936d4790b15f9b95d59e2f70f00d29d08",
+     "KS-1378: undici 7.30.0 in both locks, js-yaml 5.4.2 in systemTest performance"
+    ]
+   ],
+   "body": "## What this changes\n\nAdds an **unscoped** `\"undici\": \"^7.29.1\"` to the `overrides` of both `Blockchain/Dev/package.json`\nand `Blockchain/Dev/frontend/issuer/package.json`, regenerates both locks, and carries the js-yaml\n`5.2.3 \u2192 5.4.2` fix in `systemTest/performance/package-lock.json`.\n\nBoth manifests already carried a **jsdom-scoped** `undici` override, which is why the top-level pin\nstayed at `5.29.0` in both trees. The top-level pin comes from `@connectrpc/connect-node`, which\ndeclares `undici ^5.28.3`.\n\n**Five files, +14/\u221263.** No baseline row. No `GRANDFATHERED_NO_EXPIRY` entry touched.\n`scripts/audit/audit-baseline.json` is byte-identical to develop's.\n\n## Why, and what it replaces\n\n`GHSA-r53p-7pc4-xj5r` (undici) and `GHSA-r3ph-w7gj-g6xm` (js-yaml) were published on 2026-09-29 and\nbetween them refuse **every** push from `develop` at preflight legs 6 and 7. This PR removes both\nadvisories by bumping, so it needs **no security acceptance at all**.\n\nThat is the difference from PR #1354, which fixes js-yaml and *accepts* undici on a dated baseline\nrow. **This PR supersedes #1354's purpose on the merits. #1354 is untouched by this PR** \u2014 not\nmerged, amended, closed or pushed to. Its js-yaml half is the same bytes: the\n`systemTest/performance/package-lock.json` blob here is `80c6752aab862bb6613cc014b1ebb0f2992967a6`,\nidentical to #1354's head.\n\nRefs KS-1378 \u00b7 context: KS 470, KS 559, KS 769, KS 1394\n\n## How the locks were regenerated\n\nBoth in `node:24-alpine` (npm **11.19.0**, node **v24.21.0**, printed in the same run):\n\n- **issuer lock** \u2014 issuer directory mounted, `npm install --package-lock-only --ignore-scripts`.\n- **root lock** \u2014 `Blockchain/Dev` mounted (the root lock carries **32 `file:` link entries**, so a\n  per-directory mount is the `EMISSINGTARGET` case recorded in KS 1394). This one needed\n  `npm update undici --package-lock-only --ignore-scripts`; `npm install --package-lock-only` left\n  the root lock's undici at `5.29.0`.\n\n\u26a0 **npm printed `up to date` on every one of these runs, including the ones that rewrote a lock.**\nThe byte comparison is the instrument, not the banner.\n\n**A pristine control tree at the same SHA, given the identical commands, did not move** \u2014 its\nundici stayed `5.29.0`. So the override supplies the direction and the `update` verb the\nre-resolution; neither alone moves it.\n\n## The delta, per lock, measured against that control\n\nBoth locks change the **same three entries and nothing else**:\n\n| | before | after |\n|---|---|---|\n| `node_modules/undici` | 5.29.0 | **7.30.0** |\n| `node_modules/@fastify/busboy` | 2.1.1 | removed |\n| `node_modules/jsdom/node_modules/undici` | 7.30.0 | removed (deduped) |\n\n- issuer lock **723 \u2192 721** entries \u00b7 root lock **1970 \u2192 1968** entries.\n- `integrity` and `resolved` of the new entry equal the registry's `dist` values for 7.30.0\n  (control: the same comparison against 7.29.1's integrity returns false).\n- \u26a0 **The root lock also carries 12 unrelated entry changes** \u2014 eleven `lightningcss-<platform>`\n  binaries and `magicast`, all `dev: true \u2192 null`. **These are npm's own bookkeeping, not this\n  change:** a pristine control tree given the identical commands produces the **same 12**, set-equal,\n  `only in mine: NONE`. Any future root-lock regeneration (KS 1380's fix included) will carry them.\n\n## Scope: who actually consumes undici\n\nDerived from the lock graph, not assumed:\n\n- **24 of 32 workspace members reach undici** \u2014 but **23 of them only via `vitest \u2192 jsdom`**, and\n  **`jsdom` resolves undici to `7.30.0` both before and after** (before: its nested copy; after: the\n  hoisted one). Their test tooling loads the same version either way.\n- **Exactly one member reaches undici through runtime `dependencies`: `frontend/issuer`**, via\n  `@meshsdk/core \u2192 @meshsdk/provider \u2192 @utxorpc/sdk \u2192 @connectrpc/connect-node \u2192 undici`.\n  (Control: the same runtime walker finds `express` reachable from 26 of 32, so it is not blind.)\n\nSo the real blast radius is the issuer frontend, which is the tree gate48a flagged.\n\n**NOT COVERED:** `Blockchain/Dev/mobile/secuura-app` is out of the audit corpus (KS 769, expires\n2026-10-19) and its undici 6.28.0 via `@expo/cli` is **unmeasured** \u2014 this PR does not touch it.\n\n## Leg 6's CLEANUP line, verbatim \u2014 and nothing is removed here\n\nWith this change, `audit:gate` drops from 24 reported advisories to 11 and prints:\n\n```\nCLEANUP (advisory): 14 baseline entries are no longer reported \u2014 remove:\n  - GHSA-2mjp-6q6p-2qxm (undici, KS-470)\n  - GHSA-35p6-xmwp-9g52 (undici, KS-470)\n  - GHSA-4992-7rv2-5pvq (undici, KS-470)\n  - GHSA-g8m3-5g58-fq7m (undici, KS-470)\n  - GHSA-g9mf-h72j-4rw9 (undici, KS-470)\n  - GHSA-p88m-4jfj-68fv (undici, KS-470)\n  - GHSA-v9p9-hfj2-hcw8 (undici, KS-470)\n  - GHSA-vrm6-8vpv-qv8q (undici, KS-470)\n  - GHSA-vxpw-j846-p89q (undici, KS-470)\n  - GHSA-v2v4-37r5-5v8g (ip-address, KS-470)\n  - GHSA-mwp4-54f8-5fhr (ip-address, KS-729)\n  - GHSA-8xcm-r25x-g524 (undici, KS-559)\n  - GHSA-m8rv-5g2x-5cg5 (undici, KS-559)\n  - GHSA-v3r7-h72x-cjcm (undici, KS-559)\nOK \u2014 no advisories outside the triaged baseline.\n```\n\n**Twelve undici rows and two ip-address rows. This PR removes NONE of them** \u2014 the baseline cleanup\nis a separate change, and note this is now *advisory* output on a **passing** leg.\n\n## Test Evidence\n\n**Touched:** `Blockchain/Dev/package.json`, `Blockchain/Dev/package-lock.json`,\n`Blockchain/Dev/frontend/issuer/package.json`, `Blockchain/Dev/frontend/issuer/package-lock.json`,\n`systemTest/performance/package-lock.json`.\n\n**Ran** (all on this branch's head unless stated):\n\n- `audit:contract` **rc 0** \u00b7 `audit:gate` (leg 6) **rc 0** \u00b7 `audit:locks` (leg 7) **rc 0**.\n  Each rc read on its own line, never through a pipe.\n  Measured across three configurations so the result is attributable:\n  | configuration | contract | leg 6 | leg 7 |\n  |---|---|---|---|\n  | develop | 0 | 1 (r53p) | 1 (r3ph + r53p) |\n  | + override only | 0 | **0** | 1 (r3ph only) |\n  | + override + js-yaml (this PR) | **0** | **0** | **0** |\n  Leg 7's denominator moves across the three \u2014 `20 advisories match, 18 baselined` \u2192 `7/6` \u2192 `6/6` \u2014\n  so the pass is not vacuous. Corpus as the tool states it: **43 standalone lockfiles**\n  (45 tracked \u2212 the Dev root \u2212 1 out of scope).\n- **Issuer image build** under undici 7.30.0: `docker compose -p b48probe build issuer-frontend`,\n  **rc 0**. `npm ci` genuinely re-ran \u2014 **666 packages** (develop: 671). Build only; nothing started,\n  pruned or removed.\n- **Served tree byte-identical to develop's.** The build exported the *same* image digest\n  (`sha256:061307f7b133\u2026`) as the develop build, and BuildKit reported\n  `COPY --from=builder /app/dist/` as `CACHED` \u2014 its cache key is the content digest, so the built\n  `dist/` hashed identical despite a different install. Served tree: **58 files, 7,388 KiB** \u2014\n  matching gate48a's develop measurement exactly. **0** served files mention undici\n  (controls: `react` 12, `secuura` 7; and the same extractor on the bare `nginx:1.30-alpine` base\n  returns 6 files, so it discriminates).\n\n**NOT run:**\n\n- **The 23 service suites** whose only path to undici is `vitest \u2192 jsdom`. Not skipped for\n  convenience: `jsdom` resolves undici to **7.30.0 on both sides**, measured from both locks, so\n  their behaviour through undici cannot change. Running them would add no information about *this*\n  change. Say if you want them run anyway.\n- No Schemathesis, no Akto, no k6, no Playwright. No deploy of any kind.\n- No `npm audit fix`, no lock hand-edit, no baseline edit.\n\n**Migrations + config:** none. No migration, no schema change, no environment variable, no\ncompose/service definition touched. `frontend/issuer/Dockerfile` copies only\n`frontend/issuer/package*.json` before `npm ci`, so the **root** manifest/lock change does not reach\nthe issuer image; the image result above is attributable to the **issuer** lock alone.\n\n### The pre-push preflight on this exact head\n\n**`12/15 legs ran, 3 SKIPPED, nothing failed.`** The hook prints, in its own words:\n*\"This is NOT a pass. Do not quote it as one \u2014 say which legs ran.\"* So: **it is not a pass, and the\nthree that did not run are legs 3, 4 and 8** \u2014 all `SKIP \u2014 local stack not up on\nhttp://localhost:6882`. Shell suites: **61 passed, 0 failed, 0 skipped (of 61)**.\n\nInside that run:\n\n- **Leg 6** (npm-audit gate): `audit-gate: 11 distinct advisories reported, 25 baselined.` \u2192\n  `OK \u2014 no advisories outside the triaged baseline.`\n- **Leg 7** (standalone-lock advisories): `43 standalone lockfiles \u2026 1611 distinct packages pinned \u2014\n  6 advisories match, 6 already baselined.` \u2192 `OK \u2014 no standalone-lock advisories outside the\n  triaged baseline.`\n- **Leg 2** (lockfile clean-room): `All 35 standalone lock(s) pass clean-room npm ci`, and its\n  `covered:` list names `frontend/issuer` \u2014 so the regenerated issuer lock is clean-room installable\n  by the repo's own guard, measured in the hook rather than by me.\n\n\u26a0 **Disclosure on the first push attempt:** it was refused, `push rc=1`, on **leg 14** (one shell\nsuite aborted: `packages/shared is not built \u2026 dist/index.js missing`, **0 of its 27 cells ran**) and\n**leg 1** (`DEPS MISSING \u2014 this working tree's workspace install is absent or incomplete. This is NOT\nspec drift.`). Both were the same environment condition \u2014 a fresh worktree with no workspace install\n\u2014 and neither reads any of the five files in this diff. Fixed with the remedy the hook itself\nprescribes (`npm ci` in `Blockchain/Dev`, then `npm run build -w packages/shared`), **not** with the\n`--no-verify` bypass the hook also offers. The commit SHA did not change between the two attempts, so\nthe files legs 6 and 7 passed are byte-identical. That first run counted **11/15**, not 12/15,\nbecause leg 1 did not run either.\n"
+  }
+ },
+ "census": {
+  "1354": {
+   "title": "KS-470: js-yaml 5.4.2 in systemTest/performance, accept GHSA-r53p build-tree only",
+   "user": "kksecura",
+   "created_at": "2026-09-29T21:48:04Z",
+   "head": "4370be410bbf37b839b1030f3e28f95d11c454fe",
+   "branch": "feature/ks-470-jsyaml-542-and-accept-ghsa-r53p-b47-3",
+   "base": "develop",
+   "n_files": 2,
+   "kit_paths_touched": [
+    "systemTest/performance/package-lock.json"
+   ],
+   "census_keys_in_title": [
+    "KS-470"
+   ],
+   "client_human": false
+  },
+  "1353": {
+   "title": "KS-1063: a format gate that examined nothing refuses instead of passing",
+   "user": "PeterObeden",
+   "created_at": "2026-09-29T14:37:49Z",
+   "head": "2b8414090bb86e8268c342e5fc49e08c650fff2b",
+   "branch": "feature/ks-1063-a-gate-that-examined-nothing-exits-0-check-package-format",
+   "base": "develop",
+   "n_files": 6,
+   "kit_paths_touched": [],
+   "census_keys_in_title": [],
+   "client_human": true
+  },
+  "1352": {
+   "title": "KS-981: the strict pre-suite arm reports what it did to the manifest, and names the real manifest file",
+   "user": "PeterObeden",
+   "created_at": "2026-09-29T14:37:46Z",
+   "head": "6e84a130dae7ecfd946ab5d8f2afad75a668edaa",
+   "branch": "feature/ks-981-the-round-4-quarantine-call-throws-out-of-a-never-throws",
+   "base": "develop",
+   "n_files": 8,
+   "kit_paths_touched": [],
+   "census_keys_in_title": [],
+   "client_human": true
+  },
+  "1351": {
+   "title": "KS-1386: systemTest names no stack slot it was not given, and types no slot value, in any harness",
+   "user": "PeterObeden",
+   "created_at": "2026-09-29T14:37:24Z",
+   "head": "eac2dae2afb7b08d679a37e3bd87290e0791d10f",
+   "branch": "feature/ks-1386-systemtest-api-explorer-hard-codes-slot-1s-gateway-6882-a",
+   "base": "develop",
+   "n_files": 297,
+   "kit_paths_touched": [],
+   "census_keys_in_title": [],
+   "client_human": true
+  },
+  "1253": {
+   "title": "KS-1297 GUARDGAPS: anchor the abort counts, cover the worktree, pin bare call sites",
+   "user": "kksecura",
+   "created_at": "2026-09-25T14:49:46Z",
+   "head": "91e066264004fdb22c67efb0c25fc44375ec6eac",
+   "branch": "feature/ks-1297-fixture-guard-anchor-and-two-gaps-l5-1",
+   "base": "develop",
+   "n_files": 1,
+   "kit_paths_touched": [],
+   "census_keys_in_title": [],
+   "client_human": false
+  },
+  "1250": {
+   "title": "KS-1302 + KS-1303 RSSTRAP: trap the runner's short TMPDIR, and drop the output pipe",
+   "user": "kksecura",
+   "created_at": "2026-09-25T14:28:57Z",
+   "head": "2b8dcb824dd2c5cd4b92757934d7de9d28813a22",
+   "branch": "feature/ks-1302-runner-tmpdir-residue-and-orphan-pipe-l5-1",
+   "base": "develop",
+   "n_files": 2,
+   "kit_paths_touched": [],
+   "census_keys_in_title": [],
+   "client_human": false
+  },
+  "1129": {
+   "title": "docs(history): 2026-09-21 local rebuild on develop 7be81d5c9, OOM diagnosis, preflight 15/15",
+   "user": "StuJam-Secuura",
+   "created_at": "2026-09-21T08:45:36Z",
+   "head": "25c31a0e82990844181a5b9c9a479722dc30baea",
+   "branch": "chore/history-2026-09-21-local-rebuild-preflight",
+   "base": "develop",
+   "n_files": 1,
+   "kit_paths_touched": [],
+   "census_keys_in_title": [],
+   "client_human": false
+  },
+  "995": {
+   "title": "KS-741: strip `x-emitter-internal` at originate's own inbound \u2014 the marker's non-spoofability no longer rests on an unstated convention",
+   "user": "kksecura",
+   "created_at": "2026-09-14T20:37:56Z",
+   "head": "b8155636e8e60ee9646b10217859fcd274ef87f5",
+   "branch": "feature/ks-741-x-emitter-internal-is-unstripped-on-the-originate-route-the",
+   "base": "develop",
+   "n_files": 5,
+   "kit_paths_touched": [],
+   "census_keys_in_title": [],
+   "client_human": false
+  },
+  "989": {
+   "title": "KS-973: the pre-suite step redacts the generated password, pins its DEGRADED stream, drives its second quarantine call \u2014 items 5, 6 + two residues; items 3/4 wait for #927; items 1/2 are L11/L12 files",
+   "user": "kksecura",
+   "created_at": "2026-09-14T07:22:52Z",
+   "head": "e62fd23cda1bc120716e5f592efac2b8abea97bf",
+   "branch": "feature/ks-973-ks-969-round-1-gate-residue-the-pre-suite-step-and-its-own",
+   "base": "develop",
+   "n_files": 5,
+   "kit_paths_touched": [],
+   "census_keys_in_title": [],
+   "client_human": false
+  },
+  "949": {
+   "title": "chore(deps-dev): bump prisma from 7.8.0 to 7.10.0 in /Blockchain/Dev",
+   "user": "dependabot[bot]",
+   "created_at": "2026-09-10T07:59:49Z",
+   "head": "7ee1a26e634f33b6a4ae115d559f5440a90f6fff",
+   "branch": "dependabot/npm_and_yarn/Blockchain/Dev/develop/prisma-7.10.0",
+   "base": "develop",
+   "n_files": 2,
+   "kit_paths_touched": [
+    "Blockchain/Dev/package-lock.json"
+   ],
+   "census_keys_in_title": [],
+   "client_human": false
+  },
+  "948": {
+   "title": "chore(deps): bump vite from 6.4.3 to 8.3.1 in /Blockchain/Dev",
+   "user": "dependabot[bot]",
+   "created_at": "2026-09-10T07:58:12Z",
+   "head": "e479578376921edfe99e8befae6acbee2dfb32b3",
+   "branch": "dependabot/npm_and_yarn/Blockchain/Dev/develop/vite-8.2.2",
+   "base": "develop",
+   "n_files": 10,
+   "kit_paths_touched": [
+    "Blockchain/Dev/frontend/issuer/package.json",
+    "Blockchain/Dev/package-lock.json"
+   ],
+   "census_keys_in_title": [],
+   "client_human": false
+  },
+  "947": {
+   "title": "chore(deps-dev): bump @testing-library/jest-dom from 6.9.1 to 7.0.1 in /Blockchain/Dev",
+   "user": "dependabot[bot]",
+   "created_at": "2026-09-10T07:46:52Z",
+   "head": "d68b9d79e67f336e527cc4eef7eaf07fa78670bb",
+   "branch": "dependabot/npm_and_yarn/Blockchain/Dev/develop/testing-library/jest-dom-7.0.1",
+   "base": "develop",
+   "n_files": 2,
+   "kit_paths_touched": [
+    "Blockchain/Dev/frontend/issuer/package.json",
+    "Blockchain/Dev/package-lock.json"
+   ],
+   "census_keys_in_title": [],
+   "client_human": false
+  },
+  "946": {
+   "title": "chore(deps): bump @fluentui/react-icons from 2.0.331 to 2.0.339 in /Blockchain/Dev",
+   "user": "dependabot[bot]",
+   "created_at": "2026-09-10T07:44:37Z",
+   "head": "41cc5209aaf2f8369f4ce8d5735a43fb07340d0b",
+   "branch": "dependabot/npm_and_yarn/Blockchain/Dev/develop/fluentui/react-icons-2.0.339",
+   "base": "develop",
+   "n_files": 2,
+   "kit_paths_touched": [
+    "Blockchain/Dev/package-lock.json"
+   ],
+   "census_keys_in_title": [],
+   "client_human": false
+  },
+  "945": {
+   "title": "chore(deps-dev): bump @axe-core/playwright from 4.11.3 to 4.13.0 in /Blockchain/Dev",
+   "user": "dependabot[bot]",
+   "created_at": "2026-09-10T07:43:47Z",
+   "head": "264098fce62b1e839c506f61fa443830fdba996a",
+   "branch": "dependabot/npm_and_yarn/Blockchain/Dev/develop/axe-core/playwright-4.13.0",
+   "base": "develop",
+   "n_files": 2,
+   "kit_paths_touched": [
+    "Blockchain/Dev/package-lock.json",
+    "Blockchain/Dev/package.json"
+   ],
+   "census_keys_in_title": [],
+   "client_human": false
+  },
+  "927": {
+   "title": "KS-1027: close Peter's four #904 follow-ups \u2014 the OTHER cp, the stash the refusal deleted, and the duplication nobody had justified",
+   "user": "kksecura",
+   "created_at": "2026-09-09T10:52:11Z",
+   "head": "1041d2d32d389a5f21cf622dfcf4d5be66e0ce2f",
+   "branch": "feature/ks-1027-ks992-followups",
+   "base": "develop",
+   "n_files": 2,
+   "kit_paths_touched": [],
+   "census_keys_in_title": [],
+   "client_human": false
+  },
+  "923": {
+   "title": "KS-736: the mount-auth check scored authenticateToken(false) as green, and could not see half its own surface",
+   "user": "kksecura",
+   "created_at": "2026-09-09T08:53:13Z",
+   "head": "d127dc7d4655a4e227d4f6e511f469c456eaabb7",
+   "branch": "kamilkreiser/ks-736-mount-auth-retag",
+   "base": "develop",
+   "n_files": 1,
+   "kit_paths_touched": [],
+   "census_keys_in_title": [],
+   "client_human": false
+  },
+  "920": {
+   "title": "KS-734: make tests/e2e runnable from a clean checkout, and baseline what it actually reports",
+   "user": "kksecura",
+   "created_at": "2026-09-09T07:38:52Z",
+   "head": "2112a99e31aec4b6e132dc6519c75d3afb6b2b02",
+   "branch": "kamilkreiser/ks-734-e2e-suite-installable",
+   "base": "develop",
+   "n_files": 7,
+   "kit_paths_touched": [
+    "Blockchain/Dev/package.json"
+   ],
+   "census_keys_in_title": [],
+   "client_human": false
+  },
+  "887": {
+   "title": "KS-961: run the workspace suites on the PR, advisory and non-blocking \u2014 and they are RED on develop today",
+   "user": "kksecura",
+   "created_at": "2026-09-07T01:41:26Z",
+   "head": "3aee3deed2e3ac557f0a52c0797c2a4a8df25f69",
+   "branch": "feature/ks-961-workspace-suites-advisory-on-pr",
+   "base": "develop",
+   "n_files": 2,
+   "kit_paths_touched": [],
+   "census_keys_in_title": [],
+   "client_human": false
+  },
+  "809": {
+   "title": "KS-693 (interim): guard the 8 M365/OneDrive/Teams unconfigured-503 ops so the merge gate reads a real floor",
+   "user": "kksecura",
+   "created_at": "2026-09-04T22:30:48Z",
+   "head": "aa2270fe14cf95dbe349fb8aae14f1473d2db5e7",
+   "branch": "feature/ks-693-tolerate-m365-unconfigured-503",
+   "base": "develop",
+   "n_files": 2,
+   "kit_paths_touched": [],
+   "census_keys_in_title": [],
+   "client_human": false
+  },
+  "649": {
+   "title": "chore(deps): bump pg and @types/pg in /Blockchain/Dev",
+   "user": "dependabot[bot]",
+   "created_at": "2026-08-05T12:16:10Z",
+   "head": "1d9198ac7e2f54e43cd38b66ce40ce1f52d338b8",
+   "branch": "dependabot/npm_and_yarn/Blockchain/Dev/develop/multi-8cb89e51b7",
+   "base": "develop",
+   "n_files": 22,
+   "kit_paths_touched": [
+    "Blockchain/Dev/package-lock.json"
+   ],
+   "census_keys_in_title": [],
+   "client_human": false
+  },
+  "639": {
+   "title": "chore(deps): bump @radix-ui/react-dropdown-menu from 2.1.16 to 2.1.24 in /Blockchain/Dev",
+   "user": "dependabot[bot]",
+   "created_at": "2026-08-03T20:46:50Z",
+   "head": "2069d852ee1618fac25cd3eeb56f22005422125f",
+   "branch": "dependabot/npm_and_yarn/Blockchain/Dev/develop/radix-ui/react-dropdown-menu-2.1.24",
+   "base": "develop",
+   "n_files": 3,
+   "kit_paths_touched": [
+    "Blockchain/Dev/frontend/issuer/package.json",
+    "Blockchain/Dev/package-lock.json"
+   ],
+   "census_keys_in_title": [],
+   "client_human": false
+  },
+  "635": {
+   "title": "chore(deps): bump cbor from 9.0.2 to 10.0.12 in /Blockchain/Dev",
+   "user": "dependabot[bot]",
+   "created_at": "2026-08-03T20:16:58Z",
+   "head": "6cbc298f41a1dd4a0a986084800c6de71aeb08fd",
+   "branch": "dependabot/npm_and_yarn/Blockchain/Dev/develop/cbor-10.0.12",
+   "base": "develop",
+   "n_files": 2,
+   "kit_paths_touched": [
+    "Blockchain/Dev/package-lock.json"
+   ],
+   "census_keys_in_title": [],
+   "client_human": false
+  },
+  "575": {
+   "title": "chore(deps): bump dotenv from 16.6.1 to 17.4.2 in /Blockchain/Dev",
+   "user": "dependabot[bot]",
+   "created_at": "2026-07-20T20:21:05Z",
+   "head": "7d32d8ae4b064592b2d133e17d23c67b8d50dc60",
+   "branch": "dependabot/npm_and_yarn/Blockchain/Dev/develop/dotenv-17.4.2",
+   "base": "develop",
+   "n_files": 21,
+   "kit_paths_touched": [
+    "Blockchain/Dev/package-lock.json"
+   ],
+   "census_keys_in_title": [],
+   "client_human": false
+  },
+  "572": {
+   "title": "chore(deps-dev): bump @types/office-js from 1.0.599 to 1.0.610 in /Blockchain/Dev in the types group across 1 directory",
+   "user": "dependabot[bot]",
+   "created_at": "2026-07-20T20:19:15Z",
+   "head": "4ea847b39ec8cb2db1e7bee0eb9355e35a8c4208",
+   "branch": "dependabot/npm_and_yarn/Blockchain/Dev/develop/types-1409c3626d",
+   "base": "develop",
+   "n_files": 2,
+   "kit_paths_touched": [
+    "Blockchain/Dev/package-lock.json"
+   ],
+   "census_keys_in_title": [],
+   "client_human": false
+  }
+ }
+}
