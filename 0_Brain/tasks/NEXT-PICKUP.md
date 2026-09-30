@@ -19,6 +19,15 @@ supersede: replace wholesale at the next pickup; do not append. Previous copy: N
 4. EXPIRING-GRANTS: "SPEND PAST THE 90%" is marked ENDED (account switched). Friday's "ignore the 90%" row is Friday's and is not touched.
 
 ### LIVE RIGHT NOW
+**🟠 70% CHECKPOINT 10:24 2026-09-30 (seat ffc4a192; READ FIRST, supersedes the 65% block below):**
+1. **Pushes are still blocked, and a NO-ACCEPTANCE FIX exists.** Seat B 48th (%79, round 44, brief `fleet/briefs_staged/2026-09-30_seatB48_build.md`) measured ONE PR: `overrides.undici ^7.29.1` in both manifests, both locks regenerated with `npm update undici --package-lock-only` (root 1970 → 1968), plus #1354's js-yaml lock bytes. contract / leg 6 / leg 7 = 0/0/0 with NO baseline row, and it retires 12 undici rows (3 HIGH). **It is being RAISED now** (`Refs KS-1378`; inside Kam's KS-1378 (a) bump ruling). The image build, served tree and suites are measured BEFORE its READY → **gate48b (T1)**; Wednesday drafts that kit on the READY.
+2. **Kam's card `secuura-undici-ghsa-r53p-exception-1354` was AMENDED** (the prior values kept): rec now (b), the fix. Default: the fix merges on gate48b's GO. **#1354 (the acceptance PR) stays OPEN and unmerged**; after the fix merges, #1354 is unnecessary (closing it is reversible and Wednesday's call; its js-yaml half is inside the fix).
+3. **After the fix merges:**
+   - B 48th rebases ITEM 1a (KS-1054 N-1350-1, `-b47-1` at `0ffb275b2`, local-only) → READY → gate;
+   - the 14-row baseline CLEANUP (12 undici + 2 ip-address, per leg 6's advisory line) is a separate ruled change. **Removing ip-address KS 729 changes the fuse's row count.**
+4. ITEM 1b (the KS-1015 Spark READY) and ITEM 2 (KS-1380/1387 design) are CARRIED. KS-1394 was filed (the cleanroom command). The fuse is 2026-10-09T00:00Z; four rows expire at develop.
+5. Wednesday's own lessons today are in the ledger: the no-expires ruling, the rung-5 self-reflection, and the subject token.
+
 **🟠 65% CHECKPOINT 09:12 2026-09-30 (seat ffc4a192, morning; READ FIRST, supersedes every block below):**
 1. **ALL SECUURA PUSHES ARE BLOCKED** (Peter's included). Legs 6 and 7 refuse two advisories published 2026-09-29. **js-yaml GHSA-r3ph** is fixed in #1354. **undici GHSA-r53p** is LOW and needs an acceptance.
    - **PR #1354** (KS-470, head `4370be410bbf`: the js-yaml lock line plus the r53p baseline row expiring 2026-10-09) got **gate48a NO GO on AUTHORITY only.** The 09-09 grant's exception fires: undici 5.29.0 is a production entry in the issuer lock, installed in the builder stage. Every technical check passed.
