@@ -21,6 +21,19 @@ status: live
 | HP-6 | Control Hub: is it part of Security Hub? | Clarification: where Control Hub sits, and whether the Playbook should reference it (C-30) | Emailed to Kam 2026-09-29 08:58 (AgentMail sent copy); not yet sent to HP |
 | HP-7 | Firmware vulnerability tool: access, and how to integrate or upload results | Bringing firmware-vulnerability results into the Playbook, possibly via Security Manager (C-30) | Emailed to Kam 2026-09-29 08:58 (AgentMail sent copy); not yet sent to HP |
 | HP-8 | Fleet Assessment tool: access and info (paid Security Manager module) | Fleet Assessment tool access; a paid Security Manager module, so any licence is Kam's call (C-30) | Emailed to Kam 2026-09-29 08:58 (AgentMail sent copy); not yet sent to HP |
+| HP-9 | PO number and approval date (to Peter (cc Steve); HPSMPOC-3, 97) | The SOW is executed only on PO approval; payment gate 1 | Emailed to Kam 2026-10-01 09:07 (AgentMail sent copy, B90-1); not yet sent to HP |
+| HP-10 | Reactivate Kam's HP CW account (via Lauren; Sameer approves) (to Peter (cc Paul); HPSMPOC-166) | Kam's HP logins are blocked | Emailed to Kam 2026-10-01 09:07 (AgentMail sent copy, B90-2); not yet sent to HP |
+| HP-11 | Access pack for Kam and team (to Steve; HPSMPOC-166) | Direct access to shared HP materials | Emailed to Kam 2026-10-01 09:07 (AgentMail sent copy, B90-3); not yet sent to HP |
+| HP-12 | FTA video, demo-asset zip, newer demo (to Steve; HPSMPOC-86, 166) | Position FTA correctly; avoid duplication | Emailed to Kam 2026-10-01 09:07 (AgentMail sent copy, B90-4); not yet sent to HP |
+| HP-13 | FTA syslog reference spreadsheet (to Steve; HPSMPOC-166) | Line up questions with monitored events | Emailed to Kam 2026-10-01 09:07 (AgentMail sent copy, B90-5); not yet sent to HP |
+| HP-14 | Running the FTA demo without HP VPN (to Steve (+HP R&D); HPSMPOC-166) | The demo is VPN-gated | Emailed to Kam 2026-10-01 09:07 (AgentMail sent copy, B90-6); not yet sent to HP |
+| HP-15 | Session with Jason O'Keefe's team (to Steve; HPSMPOC-94, 166) | Expert remediation content | Emailed to Kam 2026-10-01 09:07 (AgentMail sent copy, B90-7); not yet sent to HP |
+| HP-16 | HP reviewer for scoring, weights and traffic light; any HP scoring info (to Steve (cc Paul); HPSMPOC-87, 163) | C-32 #6 vetting; QA-105/106 | Emailed to Kam 2026-10-01 09:07 (AgentMail sent copy, B90-8); not yet sent to HP |
+| HP-17 | Steve's agentic-AI draft; HP's AI-at-the-printer facts and telemetry (to Steve; HPSMPOC-162) | Bounded phase-one AI message | Emailed to Kam 2026-10-01 09:07 (AgentMail sent copy, B90-9); not yet sent to HP |
+| HP-18 | Current generic partner Playbook deck; does it replace v3? (to Steve; HPSMPOC-167) | Align the phase pages | Emailed to Kam 2026-10-01 09:07 (AgentMail sent copy, B90-10); not yet sent to HP |
+| HP-19 | Amplify dates, venue, demo format, in-person decision (to Steve (cc Peter); HPSMPOC-5) | C-03 (1 Dec) vs Amplify (8–10 Dec) | Emailed to Kam 2026-10-01 09:07 (AgentMail sent copy, B90-11); not yet sent to HP |
+| HP-20 | Introduction to Alexa; brand guidelines; collateral coordination (to Steve; HPSMPOC-21) | HPSMPOC-21 (branding source); collateral | Emailed to Kam 2026-10-01 09:07 (AgentMail sent copy, B90-12); not yet sent to HP |
+| (updates 2026-10-01, meeting C-34) | HP-6 re-scoped: Control Hub is an SMB tool, the ask is now ACCESS (HPSMPOC-84). HP-4: Security Manager first, API/SDK docs (optional nudge, not emailed). HP-5/7/8 reconfirmed in the meeting, Steve owns them; HP-8 mostly answered by the demo (HPSMPOC-86). | — | Recorded, no email |
 
 ## Candidates, not yet asked (each needs your decision first)
 | # | Possible ask | What it is for | Why it is not asked yet |
