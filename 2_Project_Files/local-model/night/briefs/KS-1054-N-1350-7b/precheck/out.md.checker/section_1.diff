@@ -1,0 +1,12 @@
+--- a/Blockchain/Dev/deployment/azure/deploy-all.sh
++++ b/Blockchain/Dev/deployment/azure/deploy-all.sh
+@@ -309,6 +309,8 @@
+     smoke_skip "Startup migrations" "the check did not run — see above"
+     ;;
+   *)
+-    smoke_test "Startup migrations" "0 failed" "one or more failed"
++    # rc 1 is a failed count OR a count that could not be read (python3 missing, a non-integer
++    # `failed`), so the reported value must not claim the migrations were read (gate47 N-1350-7).
++    smoke_test "Startup migrations" "0 failed" "failed or could not be verified — see above"
+     ;;
+ esac

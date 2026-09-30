@@ -1,0 +1,13 @@
+--- a/Blockchain/Dev/deployment/azure/deploy.sh
++++ b/Blockchain/Dev/deployment/azure/deploy.sh
+@@ -854,7 +854,9 @@
+                 SKIPS=$((SKIPS + 1))
+                 ;;
+             *)
+-                log_error "  API Gateway: startup migrations FAILED — see above"
++                # rc 1 is a failed count OR a count that could not be read (python3 missing, a non-integer
++                # `failed`), so this line must not claim the migrations were read (gate47 N-1350-7).
++                log_error "  API Gateway: startup migrations FAILED or could not be read — see above"
+                 ERRORS=$((ERRORS + 1))
+                 ;;
+         esac

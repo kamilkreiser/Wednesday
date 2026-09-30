@@ -19,6 +19,19 @@ supersede: replace wholesale at the next pickup; do not append. Previous copy: N
 4. EXPIRING-GRANTS: "SPEND PAST THE 90%" is marked ENDED (account switched). Friday's "ignore the 90%" row is Friday's and is not touched.
 
 ### LIVE RIGHT NOW
+**🔵 50% CHECKPOINT 13:25 2026-09-30 (day seat cab52cfa, booted 13:05 as ffc4a192's successor; ctx 51%). READ FIRST; supersedes every block below:**
+1. **LIVE: Seat B 49th (%81, `Secuura/Blockchain`)**, launched 03:21:29Z. Brief `2_Project_Files/fleet/briefs_staged/2026-09-30_seatB49_build.md`, plus ADDENDUM 1 `…/2026-09-30_ADD1_seatB49_item1c.md` (at the destination 03:24:44Z). Rung 5 is PENDING: a background waiter of THIS seat greps %81 for rekey45 / push-lock-45 / inbox_watch45 / namecheck45; if this seat is gone, capture the pane yourself. **NEXT from it: the ITEM 0 plan-confirmation QUESTION → answer against the brief + ADDENDUM 1, with its ctx read off %81.**
+2. **Queue, Wednesday's rulings:**
+   - **0 → 1a → 1c → 2 → 3 → (4, 5 if ctx allows).**
+   - 1a = KS-1054 N-1350-1 rebase of `-b47-1`.
+   - 1c = the two Spark passes for gate47 N-1350-7: the `deploy.sh:857` and `deploy-all.sh:312` rc-1 messages, one PR, T1, wording ruled by Wednesday.
+   - **2 = the baseline CLEANUP, NARROWED by Q2:** remove only the NON-grandfathered dead row(s) neither leg reports (expected mwp4 alone; the fuse goes 4 → 3); r53p STAYS (Kam's (c)) with its stale clause corrected from gate48b `:63`; the docstring count; `Refs KS-729`; no third file, and the contract floor `baseline-contract.test.mjs:217` (> 20) is NOT lowered. **Residue: the 13 grandfathered dead rows (12 undici + v2v4). Removing them needs that floor revisited; Wednesday's to propose, no hurry.**
+   - 3 = KS-1015 carve; 4 = the KS-1380 design STATUS; 5 = measure-only for the three remaining fuse rows (feeds the ~Mon 5 Oct card).
+   - All READYs go to **gate49** (Wednesday drafts the kit when READYs land; 1a + 1c are T1, 2 + 3 T2). Hard line 75% by Wednesday's reading.
+3. **Spark today (this seat):** the residue screen (`0_Brain/reference/2026-09-30_residue-screen/SCREEN.md`) screened 36 items, 2 PASS first round (N-1350-7 + its deploy-all twin), both read by Wednesday and routed into 1c. **Undecided and not urgent:** KS-1394 (pointer text vs a per-lock command) and N-1354-7 (systemTest locks in the cleanroom): both are Wednesday-scope decisions; rule them when B 49th's round frees. Ornith stays PAUSED (measured reason) to 06:00 10-01.
+4. **Kam's KS-1054 card `secuura-ks1054-f9282-…` has NO delivered mark**: ITEM 1a's PR body quotes (a) verbatim; mark it `--delivered` after that merge. Kam today: only 11:03 (c), delivered; reconcile 0.
+5. Fuse 2026-10-09T00:00Z: 4 dated rows at develop (3 after ITEM 2). Card Kam by ~Mon 5 Oct if the real fixes are not merged. Usage 62%.
+
 **🔴 ROTATION HANDOVER 13:02 2026-09-30 (seat ffc4a192 → the next seat). FIRST ACTS; supersedes every block below:**
 0. Run `kam_rulings_today.sh` + `reconcile_rulings.py` first. Kam's only message today: 11:03 (c) on the undici card, now DELIVERED. **The floor is EMPTY** (wednesday + fleet-monitor); nothing is live, nothing unanswered.
 1. **Today: 4 Secuura merges, all verified at source:**
