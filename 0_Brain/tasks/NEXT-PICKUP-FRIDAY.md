@@ -12,6 +12,20 @@ supersede: replace wholesale; previous = NEXT-PICKUP-FRIDAY.md.pre-0925-rotate-s
 
 **The tree is at `/Users/kamilkreiser/1FILES TO SYNC/FRIDAY`.** Quote every path (spaces).
 
+## 🔴🔴 ROTATION HANDOVER 2026-09-30 ~16:4x (Friday, ctx ~77%) — READ FIRST; supersedes every block below where they differ
+**Kam's standing words today (terminal):** 12:3x "go ahead with the items quewed for tomorrow. no need to wait. ignore the limit" · 14:0x "keep going and keep fixing". Launches pass `WED_USAGE_STOP=100` (gauge 95%). No Kam rows since 12:02:58 (UNREAD 0 at every checkpoint).
+**DONE TODAY (HPSM-POC), all gated + head-pinned, main CI green on 7b9a4fa:** #61 #62 #63 #64 #65 #66 #67 #68 #69 → main **3ee9107**. Jira: 111/115/119/120 + 104–107, 113, 114, 116, 122–125, 93, 101, 108, 110, 121 Done (B72, B81). New tickets 122–144. Records on analysis main (B66–B77; #21 = records/b78-b81 merging in background job b71qbwd72, which also reads main CI on 3ee9107 — **if main CI on 3ee9107 is red, reopen HPSMPOC-110 (B81's own caveat)**).
+**LIVE — WAVE 2 (standing lines `HPSM-POC/1_Project_Definition/Briefs/2026-09-30_STANDING_wave-b82.md`, base 3ee9107, disjoint by files):**
+- **B82** %57 Datasec/HPSM-POC-A — api follow-up: HPSMPOC-129 (race: DB-level fix), 130 (tests), 131 (surrogate 500), 134, +128 API side if chosen. Owns the contract this wave.
+- **B83** %58 Datasec/HPSM-POC-B — guards: 136, 137, 138.
+- **B84** %59 Datasec/HPSM-POC-C — web: 132, 135, 142, 143, 144, +128 message side if chosen.
+- **B85** %60 Datasec/HPSM-POC-D — api hosted demo/showcase/test harness: 139 (MEASURE first), 140, 141, 133.
+- 128: B82 and B84 must agree in writing who fixes it (rule vs message); Friday rules if they disagree.
+**NEXT, per seat READY:** read the STATUS; answer questions (technical calls are Friday's under v1.3); open the PR (`friday_as.sh datasec gh pr create`); one tier-1 gate per 1–2 PRs (B78/B79 brief shape: `Briefs/2026-09-30_B78_QA-gate-PR65-PR66.md`); merge head-pinned one at a time, verify the delta file set = the PR's; main CI; then a board+records seat (B81 shape: `…_B81_board-records-after-wave-b73.md`).
+**Watch:** `friday/watch_status.sh <seen> ".../HPSM-POC/1_Project_Definition/Briefs/2026-09-30_B8[2-5]*STATUS*.md"` — **seed the seen file with the current READY counts first** (an empty seen file fires on old lines; happened twice today).
+**Tooling notes learned today:** tap text = `New file from Friday: <path>` only; addendum file names avoid every gate verb even as a noun ("deploy", "start", "merge"…: ledger w=4, w=5 today). Seats often write READY in the TITLE before finishing: wait for pane "done HH:MM" + filled placeholders before acting. `pane_close` "listeners UP" = other seats' new servers; identify by cwd.
+**FOR KAM (not agent work):** HPSMPOC-127 (FIPS name: validator exception?), 100, 98, 126 (Azure-only measurements before D-12/13), O-B74-3 (throwaway local SQL passwords in plain text in HPSM-POC `.tools/*sql.env`: remove/recreate the stopped containers — his call). Composer: nothing open. EXPIRING-GRANTS: today's rows are event-scoped (the queue list is done; the "keep fixing" words continue until he says otherwise or signs into a new account).
+
 ## 🔴🔴 STATE 2026-09-30 15:3x (70% checkpoint) — READ FIRST; supersedes every block below where they differ
 **Kam's standing words today:** 12:3x "ignore the limit" · 14:0x "keep going and keep fixing" → launches pass WED_USAGE_STOP=100.
 **HPSM-POC main = b3a196f** (merged today: #61 2fa034a · #62 9b655b5 · #63 a4ff52d · #64 b3a196f). Analysis main dc28828 (records B66–B72, B74, B77).
