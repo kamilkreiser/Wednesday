@@ -12,6 +12,19 @@ supersede: replace wholesale; previous = NEXT-PICKUP-FRIDAY.md.pre-0925-rotate-s
 
 **The tree is at `/Users/kamilkreiser/1FILES TO SYNC/FRIDAY`.** Quote every path (spaces).
 
+## 🔴🔴 STATE 2026-09-30 15:3x (70% checkpoint) — READ FIRST; supersedes every block below where they differ
+**Kam's standing words today:** 12:3x "ignore the limit" · 14:0x "keep going and keep fixing" → launches pass WED_USAGE_STOP=100.
+**HPSM-POC main = b3a196f** (merged today: #61 2fa034a · #62 9b655b5 · #63 a4ff52d · #64 b3a196f). Analysis main dc28828 (records B66–B72, B74, B77).
+**OPEN PRs (all built, CI read by Friday):**
+- **#65** B74 `b74/hosted-demo-robustness` @ e856236 (113, 116, 122, 114; CI 10/10) — gate **B78** (%53 Datasec/HPSM-POC-QA, STATUS `…_B78_STATUS.md`, verdict lines `PR #65:` / `PR #66:`).
+- **#66** B77 `b77/guards` @ d9f7257 (123, 124, 125, DraftRuleset pin) — gate B78.
+- **#67** B73 `b73/followup-hardening` @ 355f9b0 (104, 105+Q4, 106, 107 part; contract 0.11.2-draft incl. #65's 503) — gate **B79** (%54 Datasec/HPSM-POC-QA2, `…_B79_STATUS.md`).
+- **Merge order on GO:** #65 → #66 → #67 (re-read main between; #67's contract describes #65's 503). Head-pinned squash; compare tree/blob delta.
+**LIVE BUILDER:** B75 %50 (web: 93, 101, 108, 110, CodeQL #1) — its PR + a gate when READY. **HELD for fix rounds:** B73 %48 · B74 %49 · B77 %52 (close each after its PR merges).
+**Waits:** B78 verdict, B79 verdict (scratchpad loops; re-create: poll the STATUS for the `PR #N:` line + a trailing READY), wave watcher on `…_B7[345]*STATUS*.md` (seed the seen file first).
+**AFTER the merges — one closing seat (board + records):** Jira comments/transitions for 104, 105, 106, 107 (107: record Friday's Q-B73-2 (a) decision verbatim), 113, 114, 116, 122, 123, 124, 125 (+ B75's tickets); new tickets: web mock parity for 104/105; FollowUpPanel.tsx:67 still offers a returned question (B73); any gate notes; records for B73, B75, B78, B79 + B77's missing brief/history entry.
+**Kam items (not agent work):** HPSMPOC-127 (FIPS name: validator exception?), 100, 98, 126 (Azure).
+
 ## 🔴🔴 STATE 2026-09-30 14:4x (65% checkpoint) — supersedes the 14:1x block where they differ
 - **Merged today:** #61 (2fa034a) · #62 (9b655b5) · **#63 (a4ff52d, F-006 0.1.1/0.6.0 + pins; gate B76)**. Records analysis main a50adec; **#16 (records/b71) CONFLICTING → B71 ADDENDUM-2 rebases it** + a comments-only branch `b71/comment-followup` (B76 N-2) → Friday opens that PR (CI only).
 - **LIVE:** B71 %46 (ADDENDUM-2) · B73 %48 (api follow-up: 104–107) · B74 %49 (113, 116, 122, then ADDENDUM-1: 114) · B75 %50 (web: 93, 101, 108, 110, CodeQL #1) · B77 %52 (guards: 123, 124, 125 + DraftRuleset cross-check in infra/tests). Standing lines: `HPSM-POC/1_Project_Definition/Briefs/2026-09-30_STANDING_wave-b73.md`.
