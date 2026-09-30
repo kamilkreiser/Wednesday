@@ -12,6 +12,16 @@ supersede: replace wholesale; previous = NEXT-PICKUP-FRIDAY.md.pre-0925-rotate-s
 
 **The tree is at `/Users/kamilkreiser/1FILES TO SYNC/FRIDAY`.** Quote every path (spaces).
 
+## 🔴🔴 ROTATION HANDOVER 2026-09-30 ~17:4x (Friday, ctx ~79%) — READ FIRST; supersedes the 16:4x block where they differ
+**Main CI on 3ee9107: 8/8 green** (HPSMPOC-110 stays Done). Analysis main 58b6c2e (all records incl. B77's missing entry — read on main, present).
+**WAVE 2 BUILT; PRs OPEN; TWO GATES LIVE:**
+- **#70** B82 `b82/followup-wave2` @ fb39c09 (api+web contract; 129 DB-level race fix, 130, 131, 134 in part; 128: B82+B84 agreed the RULE stays, B84 builds the MESSAGE) — gate **B86** (%61 Datasec/HPSM-POC-QA, `…_B86_STATUS.md`) with **#73** B85 `b85/hosted-demo-wave2` @ 1c213f8 (api; 139 measured, 140, 141, 133).
+- **#71** B83 `b83/guards-wave2` @ 173a97c (infra+web guards; 136, 137, 138) — gate **B87** (%62 Datasec/HPSM-POC-QA2, `…_B87_STATUS.md`) with **#72** B84 `b84/web-wave2` @ dd3e622 (web; 132, 135, 142, 143, 144 part, 128 message).
+- Builders HELD for fix rounds: B82 %57, B83 %58, B84 %59, B85 %60 (idle wakes = by design; wake_ack them).
+**OPEN QUESTIONS (answer after the gates, technical = Friday's):** Q-B82-2 (134 N-8: widen the refused characters? the ticket says it needs a ruling — if it changes what a partner may type, card it for Kam) · Q-B82-3 (129 needed files outside its list: check the gate saw them) · Q-B84-2 (142 N-5: should a client printing their questions see the screen heading?) · Q-B84-3 (144: a per-request state space in the mock — accept if the gate agrees) · Q-B85-1 (resetShowcase's new 503 is not in the contract: a small contract follow-up after #70 merges, B82's lane) · Q-B85-2 (hosted start-up seed made all-or-nothing beyond the ticket: accept unless the gate objects) · Q-B85-3 (laptop start-up seed atomic too? a new ticket) · Q-B85-4 (a SQL Server container step in ci.yml so the SQL-only proofs become CI tests: a new ticket; ci.yml changes are Datasec-CodeQL-sensitive, not a seat's by default).
+**MERGE ORDER when gated:** #73 → #70 (both api; re-read main between; #70 carries the contract) → #71 → #72; head-pinned; verify each delta file set = its PR's; main CI; then a board+records seat (B81 shape).
+**WATCH (ARM IT AT BOOT — Friday 16:4x wrote this line and did NOT arm it; B83 sat READY ~25 min):** verdict loops on `…_B86_STATUS.md` / `…_B87_STATUS.md` (poll for `PR #7x:` lines + trailing READY).
+
 ## 🔴🔴 ROTATION HANDOVER 2026-09-30 ~16:4x (Friday, ctx ~77%) — READ FIRST; supersedes every block below where they differ
 **Kam's standing words today (terminal):** 12:3x "go ahead with the items quewed for tomorrow. no need to wait. ignore the limit" · 14:0x "keep going and keep fixing". Launches pass `WED_USAGE_STOP=100` (gauge 95%). No Kam rows since 12:02:58 (UNREAD 0 at every checkpoint).
 **DONE TODAY (HPSM-POC), all gated + head-pinned, main CI green on 7b9a4fa:** #61 #62 #63 #64 #65 #66 #67 #68 #69 → main **3ee9107**. Jira: 111/115/119/120 + 104–107, 113, 114, 116, 122–125, 93, 101, 108, 110, 121 Done (B72, B81). New tickets 122–144. Records on analysis main (B66–B77; #21 = records/b78-b81 merging in background job b71qbwd72, which also reads main CI on 3ee9107 — **if main CI on 3ee9107 is red, reopen HPSMPOC-110 (B81's own caveat)**).
