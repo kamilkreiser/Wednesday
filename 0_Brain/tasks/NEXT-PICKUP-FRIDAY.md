@@ -12,6 +12,17 @@ supersede: replace wholesale; previous = NEXT-PICKUP-FRIDAY.md.pre-0925-rotate-s
 
 **The tree is at `/Users/kamilkreiser/1FILES TO SYNC/FRIDAY`.** Quote every path (spaces).
 
+## 🔴🔴🔴 HANDOVER 2026-10-01 ~09:0x (Friday, ctx 70% checkpoint) — READ FIRST; supersedes the 08:1x block where they differ
+**Kam 08:20: "keep going. move the threshold from 70% to 90%"** → grant `learnings/2026-10-01_friday-cloud-threshold-90.md` (launch freely below 90%). Usage 79%.
+**Kam ~08:4x:** today's meeting transcript + 10 screenshots — MEASURED: it is the **Playbook POC = HPSM-POC** (not HPSM); notes say the POC SOW is SIGNED. Filed `HPSM-POC/1_Project_Definition/Source_Documents/2026-10-01_playbook-meeting/` (11 files, SHA256SUMS). **Kam ~08:5x: the FINAL SOW** ("make sure we deliver against the outlined deliverables. More is good but we have to deliver whats there") → `…/Source_Documents/2026-10-01_final-SOW/` (sha edb778c2…).
+**LIVE SEATS (watch their STATUS files; each ends READY FOR REVIEW):**
+1. **B90 Datasec/HPSM-POC-A** — meeting records (C-number, analysis of HP Fleet Threat Assessment screens + QRX slides, Jira actions, HP-ask email drafts + register rows IN ITS STATUS: Friday sends the emails and writes the register `0_Brain/reference/2026-09-27_hpsmpoc-hp-requests/HP_REQUESTS_REGISTER.md`; Kam-only items → cards). `HPSM-POC/1_Project_Definition/Briefs/2026-10-01_B90_*`.
+2. **B91 Datasec/HPSM-POC-B** — final SOW vs 23 Sep draft diff (C-number), deliverables matrix, a Jira ticket per PARTIAL/MISSING (label sow-deliverable), one-pager FOR-KAM. `…/Briefs/2026-10-01_B91_*`.
+3. **B03 Datasec/MPSCalc-A** — importer (tier 1 → needs a QA gate on READY) then API. `MPS/…/Briefs/2026-10-01_B03_*`.
+4. **B30 Datasec/Composer-E** — DONE; PR HPSM-light **#16** @ 60e42bb (tier 1); ADDENDUM-1 answers (Q4 root ff). **B31 Datasec/Composer-QA** gating #16. On GO: merge head-pinned; NOT deployed (demo = 0412eb6; 77609e2 + #16 await Kam's word).
+**Records PR HPSM-POC-analysis #22** (B82–B89, head 4f0990c): merge job in background (waits CodeQL SUCCESS; my first attempt misread pending checks and GitHub refused — never use --admin).
+**Owed to Kam:** Q-B82-2 (invisible chars, HPSMPOC-134) + Q-B84-2 (print heading, HPSMPOC-161) — not yet carded.
+
 ## 🔴🔴🔴 STATE 2026-10-01 08:1x — READ FIRST; supersedes the 07:0x block where they differ
 **FLOOR EMPTY (%0 + %1).** All of Kam's cards ruled and delivered.
 - **Composer:** 0412eb6 DEPLOYED + verified live by Friday (C-14). HPSM-light main is 77609e2 (PR #15 F1 surrogate guard) — NOT deployed; offered to Kam ("say 77609e2"). Root records main a31aa0d; one uncommitted ADDENDUM-1 section in the root B29 STATUS for the next Composer seat to commit.
