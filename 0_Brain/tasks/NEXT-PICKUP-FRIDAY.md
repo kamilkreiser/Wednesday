@@ -12,6 +12,17 @@ supersede: replace wholesale; previous = NEXT-PICKUP-FRIDAY.md.pre-0925-rotate-s
 
 **The tree is at `/Users/kamilkreiser/1FILES TO SYNC/FRIDAY`.** Quote every path (spaces).
 
+## 🔴🔴🔴 ROTATION HANDOVER 2026-09-30 ~19:3x (Friday, ctx 80%) — READ FIRST; supersedes every block below where they differ
+**Kam's standing words today (terminal):** "ignore the limit" (12:3x) · "keep going and keep fixing" (14:0x). Launches pass `WED_USAGE_STOP=100` (gauge ~97%). UNREAD 0 since 12:02:58.
+**HPSM-POC main = 5a35697, main CI 8/8 GREEN.** Merged today (all gated, head-pinned, deltas = PR file sets): #61–#73 except as noted. Records on analysis main 58b6c2e (to B81).
+**LIVE:**
+1. **PR #74** (B84 `b84/web-followup` @ c2b16dd, 6 web files) — **URGENT O-1**: without it the REQUIRED web check is red on main + every PR from **Fri 3 Oct 00:00 UTC (10:00 AEST)**. Gate **B88** (%63 Datasec/HPSM-POC-QA, `HPSM-POC/1_Project_Definition/Briefs/2026-09-30_B88_STATUS.md`, verdict `PR #74:`). **ARM A WAIT AT BOOT** (poll that STATUS for `PR #74:` + trailing READY). On GO: merge head-pinned (`friday_as.sh datasec gh pr merge 74 -R datasecau/HPSM-POC --squash --match-head-commit c2b16dd7a4ded605a896a91a31422dca608d575b`), verify the delta, read main CI. On NO GO: the O-1 hunk alone is test-only — split it into its own PR and merge on CI + your read; it cannot wait for a second round.
+2. **B83** (%58 `b83/guards-followup`, F-71-1/2) — watch `…_B83_STATUS.md` (READY count was 1 at 19:3x: seed the seen file with 1). On READY: PR, light gate, merge.
+3. **B84** (%59) is done: close its pane after #74 merges (keep until B88's verdict for a fix round).
+**THEN one board+records seat (B81 shape, `…_B81_board-records-after-wave-b73.md`):** Jira Done for 128–144 per the gates (134 and 144 in part — read B82/B84 STATUS), comments with merge SHAs; new tickets: B86 #70 notes (parser strictness vs BFF; create-vs-submit race; 409 busy under 4 creates), B87 F-71/F-72 residue if not fixed, O-B84-2/3/4 (O-B84-4: 7 RAW bidi characters in `api/tests/HpsmPoc.Api.Tests/FollowUp/FollowUpHardeningTests.cs` lines 30, 31, 77, 82), Q-B85-1 (resetShowcase 503 → contract), Q-B85-3, Q-B85-4; records for B82–B88 (open PRs for seat `records/b8x` branches; history.md conflicts → rebase keeping every entry).
+**Seat questions still open (technical ones are Friday's):** Q-B82-2 (widen refused characters → card Kam if it changes what partners may type) · Q-B84-2 (client print heading: content → card if needed) · Q-B84-3 (per-request mock state: accepted by gate B87) · Q-B85-1..4.
+**FOR KAM (no rush):** HPSMPOC-127 (FIPS name validator exception) · 100 · 98 · 126 (Azure) · O-B74-3 (plain-text local SQL passwords in HPSM-POC `.tools/*sql.env`: remove the stopped containers — his call).
+
 ## 🔴🔴 STATE 2026-09-30 19:1x — READ FIRST; supersedes the 18:3x/17:4x blocks where they differ
 - **Wave 2 MERGED:** #73 25c6942 · #70 42818ba · #71 bb4abcb · #72 **5a35697** = HPSM-POC main (gates B86, B87; deltas = PR file sets). Main CI on 5a35697: 8/8 GREEN (read 19:2x).
 - **LIVE follow-ups (held builders re-used):** **B84 %59** `b84/web-followup` — **URGENT O-1: `web/e2e/playbook-partner.spec.ts` fixed date 2026-11-02 turns the REQUIRED web check red from 3 Oct 00:00 UTC (10:00 AEST Fri 3 Oct)** + F-72-1/2/3 · **B83 %58** `b83/guards-followup` — F-71-1/2. On READY: PR, a light gate (tier 2; O-1 is test-only: CI + Friday's read is enough if it is alone), merge. **O-1 must merge before 3 Oct 10:00 AEST.**
