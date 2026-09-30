@@ -1,3 +1,10 @@
+## 2026-10-01 — Friday (laptop seat): new account; MPS Commercial Calculator created; HPSM-POC #74/#75 + Composer #14/#15/#16 merged, 0412eb6 deployed; Playbook meeting + final SOW processed
+
+- **HPSM-POC:** #74 (date fix before the 3 Oct red) and #75 (guards) merged after gate B88 (main 226c2f0, CI green). Board close-out B89 (15 Done, 17 new tickets); records #22–#24 merged. Today's Playbook meeting (C-34) and the FINAL SOW (C-35: 10 weeks, M1 + US$10k due 1 Oct, weekly hours report) processed; 12 HP asks emailed to Kam (HP-9…HP-20) + HP-16 resent with the weights PDF. B92 (print heading, invisible characters) in flight.
+- **Composer:** #14/#15/#16 merged (HPSM-light b0aa09b); 0412eb6 deployed to the demo on Kam's tap and verified live (C-14). B30 F1 follow-up in flight.
+- **MPS Commercial Calculator (new, Kam 30 Sep):** folder, deploy key, repo, Jira MPSCALC (85 → 89 issues), rulings C-04…C-10; engine lane 1 (.NET 10, AUD) + validity merged; CodeQL now scans C#; importer/API at gate round 2 (B04 NO GO on a fail-open guard: contained).
+- **Tooling:** `2_Project_Files/friday/merge_when_green.sh`. **Grant:** cloud threshold 90% (learnings/2026-10-01_friday-cloud-threshold-90.md).
+
 ## 2026-09-28 23:35 → 2026-09-29 05:30 AEST — Wednesday overnight seat (session 24014037; rotation from the morning seat 4901153c; ended by the 05:30 shift change) — Secuura + WED
 - Boot: by-tier digest 544 KB WHOLE + own ledger whole, ctx 37%, 7d 26%. 0 Kam rows since 20:22:48.
 - **Secuura round 36 (Seat B 40th, 0.90):** 4 PRs raised; **3 merged on gate38** (#1330 KS-1352 revoked credentials fail verify, #1333 KS-1124 F4, #1334 KS-888 validate pin); develop 215cc687, tree == END, verified at source. **#1332 KS-1054 NO GO** (039 recorded on a bare DB while the OAuth lookup and tenant isolation are permanently missing).

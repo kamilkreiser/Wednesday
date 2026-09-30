@@ -12,6 +12,14 @@ supersede: replace wholesale; previous = NEXT-PICKUP-FRIDAY.md.pre-0925-rotate-s
 
 **The tree is at `/Users/kamilkreiser/1FILES TO SYNC/FRIDAY`.** Quote every path (spaces).
 
+## 🔴🔴🔴 WRAP FOR KAM'S REBOOT 2026-10-01 ~09:4x — READ FIRST; supersedes every block below where they differ
+**Kam (terminal ~09:4x):** "wrap up for now. or when tasks finish as I will reboot the computer". All live seats were told (ADDENDUM-9 reboot-state) to push WIP, write a REBOOT STATE section, and stop. **After the reboot nothing is running** (no seats, no watchers, no caffeinate, no Spark tunnel).
+**FIRST at the next boot:** read each seat's REBOOT STATE, then decide what to relaunch (Kam's "keep going" + 90% grant still stand; usage ~82%):
+1. **MPS — B03 round 2 of 2** (`MPS/1_Project_Definition/Briefs/2026-10-01_B03_STATUS.md`, ADDENDUM-3): fail-closed allow-list guard (F-3 symlink, F-4 git error) + API F-1/F-2/F-6. Branches b03/importer, b03/api (PR #3 open, importer). Then gate B04 round 2 (the cap: a second NO GO → Kam). Merge with `friday/merge_when_green.sh`. Also B03 ADDENDUM-2 (C-09 rounding a, C-10 margin b) — check it landed.
+2. **HPSM-POC — B92** (`…/Briefs/2026-10-01_B92_*`): print heading (b92/print-heading, tier 2) + invisible characters (b92/invisible-chars, tier 1 → gate). RULED BY KAM in its brief: event date b (1 Dec), print heading a, invisible chars a.
+3. **Composer — B30 ADDENDUM-2** (F1 legacy-row removal must land before ANY deploy; N1/N2; demo-count SQL). HPSM-light main b0aa09b; demo = 0412eb6.
+**Open for Kam (nothing carded now):** 77609e2 + #16 not deployed (his word); the PO (HP-9); weekly-report hours source (SOW §4.1.5); HPSM-POC one-pager already sent.
+
 ## 🔴🔴🔴 HANDOVER 2026-10-01 09:09 (Friday, ctx 72% by statusline; rotation not yet due) — READ FIRST; supersedes every block below where they differ
 **Kam's standing: "keep going", cloud threshold 90% (grant 2026-10-01). Usage ~79%. UNREAD 0 since 08:21:30.**
 **DONE since 08:4x:** B89 records PR #22 merged (analysis 3d28b48). B90 meeting records DONE (C-34; Jira HPSMPOC-162…168 + 12 comments; SOW signed by both, NOT executed until HP's PO; event date clash: C-03 1 Dec vs Amplify 8–10 Dec). **12 HP asks emailed to Kam (kamil.kreiser@datasec.com.au) as HP-9…HP-20, each its own mail, sent copies read back; register updated** (`0_Brain/reference/2026-09-27_hpsmpoc-hp-requests/HP_REQUESTS_REGISTER.md`). B91 SOW traceability DONE (C-35; 10 weeks not 12; **M1 + US$10k due TODAY 1 Oct**; weekly status report with hours now required §4.1.5; AI tools list §4.1.4; matrix 36 rows: 5 done/23 partial/6 missing/2 obligation; 24 tickets labelled sow-deliverable incl. new HPSMPOC-169…176). One-pager sent to Kam's drawer + panel (bf-e45da4285c91d).
