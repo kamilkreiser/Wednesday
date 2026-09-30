@@ -23,6 +23,7 @@ supersede: replace wholesale; previous = NEXT-PICKUP-FRIDAY.md.pre-0925-rotate-s
 **LIVE BUILDER:** B75 %50 (web: 93, 101, 108, 110, CodeQL #1) — its PR + a gate when READY. **HELD for fix rounds:** B73 %48 · B74 %49 · B77 %52 (close each after its PR merges).
 **Waits:** B78 verdict, B79 verdict (scratchpad loops; re-create: poll the STATUS for the `PR #N:` line + a trailing READY), wave watcher on `…_B7[345]*STATUS*.md` (seed the seen file first).
 **AFTER the merges — one closing seat (board + records):** Jira comments/transitions for 104, 105, 106, 107 (107: record Friday's Q-B73-2 (a) decision verbatim), 113, 114, 116, 122, 123, 124, 125 (+ B75's tickets); new tickets: web mock parity for 104/105; FollowUpPanel.tsx:67 still offers a returned question (B73); any gate notes; records for B73, B75, B78, B79 + B77's missing brief/history entry.
+**GATE RESULTS so far:** B79 → #67 GO WITH NOTES (merge AFTER #65; notes N-1 dead-end "send again in a new link" → 422, N-2 follow-up race pre-existing, N-3 untested behaviours → tickets). B80 gating #68 (B75, PR opened 15:3x). B78 gating #65/#66.
 **Kam items (not agent work):** HPSMPOC-127 (FIPS name: validator exception?), 100, 98, 126 (Azure).
 
 ## 🔴🔴 STATE 2026-09-30 14:4x (65% checkpoint) — supersedes the 14:1x block where they differ
