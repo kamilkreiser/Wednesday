@@ -19,6 +19,21 @@ supersede: replace wholesale at the next pickup; do not append. Previous copy: N
 4. EXPIRING-GRANTS: "SPEND PAST THE 90%" is marked ENDED (account switched). Friday's "ignore the 90%" row is Friday's and is not touched.
 
 ### LIVE RIGHT NOW
+**🔴 ROTATION HANDOVER 13:02 2026-09-30 (seat ffc4a192 → the next seat). FIRST ACTS; supersedes every block below:**
+0. Run `kam_rulings_today.sh` + `reconcile_rulings.py` first. Kam's only message today: 11:03 (c) on the undici card, now DELIVERED. **The floor is EMPTY** (wednesday + fleet-monitor); nothing is live, nothing unanswered.
+1. **Today: 4 Secuura merges, all verified at source:**
+   - #1349 KS-1374 and #1350 KS-1054 (overnight, on gate47);
+   - #1354 KS-470 (GHSA-r53p accepted PERMANENTLY on Kam's (c)) and #1355 KS-1378 (the undici 5→7 override, the real fix), both on gate48b.
+   **develop `3e3a68260`**, tree `0693c2b391b6`. **The push freeze is OVER** (legs 6/7 rc 0 on the new develop).
+2. **YOUR FIRST WORK: launch Seat B 49th** (the morning autostart grant; necessity: raising, gating, docker) from `fleet/briefs_staged/2026-09-30_seatB48_build.md` + B 48th's handover `!CODING/Secuura/Blockchain/5_Project_History/HANDOVER-seatB48-2026-09-30.md` (27,759 B). Draft the brief with a subagent, as today. Queue:
+   - **ITEM 1a:** KS-1054 N-1350-1, the Spark fix already committed at `0ffb275b2` on local-only `-b47-1`. Rebase onto 3e3a68260, `cmp` against the READY, apply the exec-bit standing line, red-first on macOS + python:3.12-slim, push, READY → gate.
+   - **ITEM 1b:** the KS-1015 carve Spark READY (`night/READY_KS-1015-ENVELOPE-1_*`) + the YAML companion + `check:openapi`.
+   - **The 15-row baseline CLEANUP:** 13 undici (incl. r53p) + 2 ip-address, per leg 6's advisory. It is two files (`audit-baseline.json` + `baseline-contract.mjs` GRANDFATHERED), and **the Minor reason clause on r53p is amended at that touch.** ⚠ Removing ip-address KS 729 takes a row off the 2026-10-09 fuse (4 → 3). This is Wednesday-ruled cleanup of dead rows: gate it.
+   - **ITEM 2:** KS-1380/1387 (develop does not build three service images), DESIGN first, approved before build. The 12-entry npm drift trap on root-lock regens is in B 48th's handover.
+3. **The fuse: 2026-10-09T00:00Z, 4 rows** (react-router ×2 KS 528, @hono KS 530, ip-address mwp4 KS 729). Card Kam by ~Mon 5 Oct if the real fixes are not merged.
+4. **Held Spark READYs:** KS-1054-BROKENPY-1 is inside ITEM 1a; KS-1015-ENVELOPE-1 is ITEM 1b. Ornith is PAUSED until 06:00 10-01 (the delta screen reason). KS-1394 is filed.
+5. Standing lines added today: the `git apply` exec-bit drop. Ledger today: two typed clocks, the assumed-pane-state skip, the subject token (w=4), the no-expires ruling, the brief-vs-ANSWER collision (SUPERSEDES), and the rung-5 self-reflection.
+
 **⏩ 12:18 2026-09-30 (seat ffc4a192, ctx ~76%; READ FIRST, supersedes every block below):**
 1. **KAM RULED (c) at 11:03:17**, verbatim: "Decision secuura-undici-ghsa-r53p-exception-1354: c — Accept permanently, like the twelve siblings | note: And fix now". The card is ruled. It was told on the panel at 11:1x that the permanent row is dead on arrival once the fix merges; the default was "proceeding", and he had NOT withdrawn as of 11:2x.
 2. **gate48b LIVE (%80, `QA/Secuura-batch1355`, launched 02:17:17Z)** over develop 37205947ddd2, for **#1354** (PERMANENT at `88802586cebe`: the r53p row with no expires + the GRANDFATHERED line; the seat's brief prohibitions were lifted by SUPERSEDES for exactly those two lines) **then #1355** (the undici 5→7 override + js-yaml, `6fab9c0936d4`, Refs KS-1378). END_TREE `0693c2b391b6`. GO string `GO (Seat B 48th): merge 1354 1355 on gate48b`. Kit `fleet/qa-agent/gatesets/2026-09-30_gate48b/` (README §2 lists the items the gate must rule; the top one is connect-node's runtime reach, unmeasured, so no GO on a T1 unless measured).
