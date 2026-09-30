@@ -12,6 +12,16 @@ supersede: replace wholesale; previous = NEXT-PICKUP-FRIDAY.md.pre-0925-rotate-s
 
 **The tree is at `/Users/kamilkreiser/1FILES TO SYNC/FRIDAY`.** Quote every path (spaces).
 
+## 🔴🔴 STATE 2026-09-30 ~10:1x (successor seat, ctx 40%) — READ FIRST; supersedes the block below where they differ
+**B26 DONE + VERIFIED BY FRIDAY:** Composer HPSM-light **5b010da LIVE** on the demo VM (page 200; bundle index-CJZglFhy.js carries "Still needed: " x2; healthz ok 0.20.0; NSG = the 2 standing rules). Records fast-forwarded: Composer project-root main **67b201b** (C-13). Card composer-end-page-fix-deploy DELIVERED; Kam told (bf-47f37cf3e04b9). Pane %38 closed. **Floor: %0 + %1 only.**
+**Usage 88%** (renews in 3d 17h, early Sat 3 Oct; hard stop 90). The Spark tunnel answers 000 (unreachable).
+**OPEN CARD:** `hpsmpoc-before-hp-invite-fixes-at-88pct` (rec a HOLD until the Saturday renewal; b run both seats now; c web seat only). Default: nothing launched until renewal.
+**STAGED, NOT LAUNCHED (fill @BASE@ = HPSM-POC main at launch, @NOW@):**
+- `HPSM-POC/1_Project_Definition/Briefs/2026-09-30_B66_api_provenance-notes-and-worst-case-summary.md` (api/: HPSMPOC-111 + -115; tier 1)
+- `HPSM-POC/1_Project_Definition/Briefs/2026-09-30_B67_web_standalone-trace-and-signout-race.md` (web/: HPSMPOC-119 + -120; tier 1)
+Launch on Kam's b/c, or after the renewal on the default: `cockpit.sh add` + `friday/brief_seat.sh`, rung-5 check, watcher on `2026-09-30_B6[67]*STATUS*.md`. HPSMPOC-118 stays with the deploy (D-5..D-13). HPSM-POC main was 645f0a5 at staging.
+**Tap rule (ledger w=4 today):** a tap carries ONLY `New file from Friday: <path>`; no verb in the sentence or the file name.
+
 ## 🔴🔴 ROTATION HANDOVER 2026-09-30 ~10:0x (Friday, ctx ~80%) — READ FIRST; supersedes every block below where they differ
 **Kam ruled all 3 cards at 09:01–09:02 (live board, Friday tab):** composer-end-page-fix-deploy **a** · hpsmpoc-signin-hardening-third-round **a** · hpsmpoc-hosted-seed-owner **a (his own account)**. All receipted, reconciled, hidden. The last two are DELIVERED (C-33).
 **DONE this morning:** HPSM-POC **#60 MERGED** (B64 light round 3 = GO WITH NOTES) → main **645f0a5**. Records **#11** merged → analysis main **544d825** (B59, B61–B65 + C-33). Tickets HPSMPOC-119 (F-B64-1, before-d12: the build traces all of web/ into .next/standalone) + HPSMPOC-120 (F-B64-2).
