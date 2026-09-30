@@ -28,7 +28,7 @@ status: live
 | HP-13 | FTA syslog reference spreadsheet (to Steve; HPSMPOC-166) | Line up questions with monitored events | Emailed to Kam 2026-10-01 09:07 (AgentMail sent copy, B90-5); not yet sent to HP |
 | HP-14 | Running the FTA demo without HP VPN (to Steve (+HP R&D); HPSMPOC-166) | The demo is VPN-gated | Emailed to Kam 2026-10-01 09:07 (AgentMail sent copy, B90-6); not yet sent to HP |
 | HP-15 | Session with Jason O'Keefe's team (to Steve; HPSMPOC-94, 166) | Expert remediation content | Emailed to Kam 2026-10-01 09:07 (AgentMail sent copy, B90-7); not yet sent to HP |
-| HP-16 | HP reviewer for scoring, weights and traffic light; any HP scoring info (to Steve (cc Paul); HPSMPOC-87, 163) | C-32 #6 vetting; QA-105/106 | Emailed to Kam 2026-10-01 09:07 (AgentMail sent copy, B90-8); not yet sent to HP |
+| HP-16 | HP reviewer for scoring, weights and traffic light; any HP scoring info (to Steve (cc Paul); HPSMPOC-87, 163) | C-32 #6 vetting; QA-105/106 | Emailed to Kam 2026-10-01 09:07 (B90-8); RESENT with the draft-weights PDF 2026-10-01 at his request; not yet sent to HP |
 | HP-17 | Steve's agentic-AI draft; HP's AI-at-the-printer facts and telemetry (to Steve; HPSMPOC-162) | Bounded phase-one AI message | Emailed to Kam 2026-10-01 09:07 (AgentMail sent copy, B90-9); not yet sent to HP |
 | HP-18 | Current generic partner Playbook deck; does it replace v3? (to Steve; HPSMPOC-167) | Align the phase pages | Emailed to Kam 2026-10-01 09:07 (AgentMail sent copy, B90-10); not yet sent to HP |
 | HP-19 | Amplify dates, venue, demo format, in-person decision (to Steve (cc Peter); HPSMPOC-5) | C-03 (1 Dec) vs Amplify (8–10 Dec) | Emailed to Kam 2026-10-01 09:07 (AgentMail sent copy, B90-11); not yet sent to HP |
