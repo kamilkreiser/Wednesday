@@ -12,6 +12,12 @@ supersede: replace wholesale; previous = NEXT-PICKUP-FRIDAY.md.pre-0925-rotate-s
 
 **The tree is at `/Users/kamilkreiser/1FILES TO SYNC/FRIDAY`.** Quote every path (spaces).
 
+## 🔴🔴 STATE 2026-09-30 14:1x — supersedes the 13:3x block where they differ (Kam ~14:0x: "keep going and keep fixing")
+- **Merged today:** #61 (2fa034a), #62 (9b655b5). Jira: 111/115/119/120 Done; new 122–127. Records analysis main a50adec.
+- **LIVE:** B71 %46 (#63 F-006 0.1.1/0.6.0 + pins ADDENDUM-1; then a light gate + merge) · **wave B73 %48 / B74 %49 / B75 %50** (standing lines `HPSM-POC/1_Project_Definition/Briefs/2026-09-30_STANDING_wave-b73.md`; tickets 104–107 / 113, 116, 122 / 93, 101, 108, 110 + CodeQL #1). Watcher on B7[345] STATUS; B71 watcher separate.
+- **On each READY:** open the PR, then ONE batched QA gate for the wave (disjoint files), merge head-pinned one at a time, a board seat for Jira after. **After #63 merges:** HPSMPOC-114 + a guards lane (123/124/125).
+- The grant: Kam's terminal words (12:3x "ignore the limit", 14:0x "keep going and keep fixing"); launches pass WED_USAGE_STOP=100. Re-ask if he signs into the new account and says otherwise.
+
 ## 🔴🔴 STATE 2026-09-30 13:3x — supersedes the 12:3x block where they differ (Kam ~12:3x: "go ahead with the items quewed for tomorrow… ignore the limit")
 - **#62 MERGED** (B70 round 2 GO WITH NOTES) → HPSM-POC main **9b655b5**. #61 earlier → 2fa034a. Records: analysis main 52aef7d (B66, B67, B69).
 - **LIVE:** **B71** (Datasec/HPSM-POC-A, F-006 reword from 9b655b5, tier 2 → a light check before merge) · **B72** (Datasec/HPSM-POC-C, Jira + new tickets + records/b68-b70; no code). Watcher: `friday/watch_status.sh <seen> ".../Briefs/2026-09-30_B7[12]*STATUS*.md"`.
