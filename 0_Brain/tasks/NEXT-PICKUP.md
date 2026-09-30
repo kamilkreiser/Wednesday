@@ -19,6 +19,13 @@ supersede: replace wholesale at the next pickup; do not append. Previous copy: N
 4. EXPIRING-GRANTS: "SPEND PAST THE 90%" is marked ENDED (account switched). Friday's "ignore the 90%" row is Friday's and is not touched.
 
 ### LIVE RIGHT NOW
+**🟢 06:21 2026-10-01 (seat cb6b682a, morning session; ctx 53% checkpoint). READ FIRST; supersedes every block below:**
+0. Kam: 0 messages today; reconcile 0. **Two cards filed this morning** (defaults: nothing changes): `secuura-ks1397-server-nginx-header` (rec a: accept with a reason), `secuura-ks1398-typescript-7-move` (rec a: not now).
+1. **LIVE: Seat B 51st (%86, `Secuura/Blockchain`)**, brief `fleet/briefs_staged/2026-10-01_seatB51_build.md` (66 KB, read whole by Wednesday, ITEM 4 edited to gate-before-post). Queue: ITEM 0 plan (STOP; **rule Q1: one tracking-ref fetch** for base develop 4f18c59a89db, as the brief proposes: no --prune, config untouched, under lock-46) → ITEM 1 mwp4 dead row (Refs KS-729, fuse 4 → 3) → ITEM 2 KS-1015 carve (the Spark's held PASS) → ITEM 3 fuse measurement (MEASURE ONLY; feeds **the card to Kam by ~Mon 5 Oct**) → ITEM 4 the kintsugi RLS ticket TEXT → gate → post on GO. All READYs + the ITEM 4 text → ONE batched gate (Wednesday drafts it; GO names Seat B 51st). Rung 5 pending (the background waiter in this seat; if the seat is gone, capture %86 yourself).
+2. develop at origin **4f18c59a89db** (= 91a8f6b721bc + #1361, Peter's Akto). **#1360 still OPEN.** Kintsugi still runs 91a8f6b721bc (no redeploy needed for #1361: systemTest only).
+3. Ornith PAUSED to 06:00 10-02 (the morning delta screen: 13 tickets, 0 local-tier). KS-1015 raised by B 51st.
+4. The morning receipt was posted to the panel. Usage 74%.
+
 **🟢 22:38 2026-09-30 (evening seat cb6b682a, booted 19:2x; ctx ~40%). READ FIRST; supersedes every block below:**
 0. `kam_rulings_today.sh` + `reconcile_rulings.py` first. **Kam's 14:18 instruction is DELIVERED:** kintsugi deployed + told on the panel 22:3x ("tested and deployed"). Open card of his: `secuura-ks1380-peter-reverting-1358` (default a: leave #1360 to Peter). I offered to tell Stuart via a ticket comment on his word only.
 1. **KINTSUGI runs develop `91a8f6b721bc`** (tree d485add27eab; #1358 in, #1360 not), deployed by **Seat B 50th** (%85), verified on the running box and independently by Wednesday (public `/health/deep` 12:37:36Z: startupMigrations applied 47 failed 0). Rollback set `:pre-20260930` ×29. Brief `fleet/briefs_staged/2026-09-30_seatB50_kintsugi-deploy.md`. ⚠ **The KS-1054 probe on kintsugi is `/health/deep`, NOT `/health`** (nginx literal; ledger 22:3x).
