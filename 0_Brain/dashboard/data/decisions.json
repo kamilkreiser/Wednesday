@@ -21771,5 +21771,82 @@
    "CARD spark-studio-client-scope",
    "CARD hpsmpoc-client-followup-model"
   ]
+ },
+ {
+  "id": "mpscalc-software-margin-review",
+  "client_project": "Datasec/MPS Commercial Calculator",
+  "title": "MPS: every quote with HP software is flagged 'margin review' at default settings. Fix the rule or keep it?",
+  "bluf": "Workbook finding W-04 (Q-11, MPSCALC-77), now visible on real price-book data: the workbook does not gross HP software up to the target margin, so any quote containing software shows MARGIN REVIEW with default settings. It will appear on every demo quote with software.",
+  "default_action": "The engine keeps workbook parity (b) until Kam rules.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Gross software up to the target margin like hardware",
+    "detail": "Quotes with software stop tripping the review; software sell prices rise."
+   },
+   {
+    "key": "b",
+    "label": "Keep the workbook's behaviour (parity), keep the flag",
+    "detail": "Every software quote needs a margin review."
+   },
+   {
+    "key": "c",
+    "label": "Software gets its own target margin (tell me the %)",
+    "detail": ""
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-10-01T09:10:46.985069+10:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "seat": "friday",
+  "prior_rulings_overridden": [
+   "2026-09-01 17:25",
+   "CARD mpscalc-release1-users",
+   "CARD mpscalc-hosting-and-signin",
+   "CARD mpscalc-codeql-scan-csharp",
+   "CARD mpscalc-hosting-tenant-confirm",
+   "CARD mpscalc-pricebook-validity"
+  ]
+ },
+ {
+  "id": "mpscalc-cost-rounding",
+  "client_project": "Datasec/MPS Commercial Calculator",
+  "title": "MPS: may distributor cost be HP's buy price rounded to cents, as the workbook does?",
+  "bluf": "Q-12 (MPSCALC-78). The workbook silently rounds HP's estimated buy price to cents (half away from zero) before using it as cost; the importer copies that for parity. It changes margins by fractions of a cent per line.",
+  "default_action": "Workbook parity (a) until Kam rules.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Yes, round to cents, half away from zero (workbook parity)",
+    "detail": ""
+   },
+   {
+    "key": "b",
+    "label": "No, use the unrounded buy price",
+    "detail": "Round only the final customer figures."
+   },
+   {
+    "key": "c",
+    "label": "Round half-even (banker's)",
+    "detail": ""
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-10-01T09:10:49.102188+10:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "seat": "friday",
+  "prior_rulings_overridden": [
+   "CARD wed-ledger-boot-cost",
+   "CARD nexusai-customer-test-cost-bound",
+   "CARD mpscalc-release1-users",
+   "CARD mpscalc-hosting-and-signin",
+   "CARD mpscalc-codeql-scan-csharp",
+   "CARD mpscalc-hosting-tenant-confirm",
+   "CARD mpscalc-pricebook-validity"
+  ]
  }
 ]
