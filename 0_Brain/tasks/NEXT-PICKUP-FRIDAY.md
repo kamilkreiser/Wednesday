@@ -12,6 +12,15 @@ supersede: replace wholesale; previous = NEXT-PICKUP-FRIDAY.md.pre-0925-rotate-s
 
 **The tree is at `/Users/kamilkreiser/1FILES TO SYNC/FRIDAY`.** Quote every path (spaces).
 
+## 🔴🔴🔴 HANDOVER 2026-10-01 11:27 (Friday, 50% checkpoint by statusline) — READ FIRST; supersedes every block below where they differ
+**Kam's scope today (terminal ~10:0x):** HPSM-POC + Compliance Composer; he signs in to a fresh account tomorrow morning. MPS paused. Usage 86%: at 90% no new launches + a card. UNREAD 0 since 09:17:02; reconcile 0.
+**DONE since 10:1x:** HPSM-POC #76 (print heading) MERGED → dde09b9; records #25 (C-36) → analysis fa8ca83; HPSMPOC-161 Done; gate B94 GO WITH NOTES → **#77 (invisible chars) MERGED → main cfb16ec** (tree d51e506 = gated). Composer #17 (F1 legacy rows) MERGED → HPSM-light main **771ce4a** (tree = gated head). Not deployed anywhere.
+**LIVE:**
+1. **%2 Datasec/HPSM-POC-A = B93** on ADDENDUM-2 (`HPSM-POC/1_Project_Definition/Briefs/2026-10-01_B93_ADDENDUM-2_gate-b94-notes-followup.md`): branch b93/gate-b94-notes from cfb16ec (N-1 partner test, N-2 check-before-trim, N-3 mock parity; tier 2), Jira 134 comment + O-1 customer-name ticket (needs Kam), records/b94. On READY: open the PR + the records PR, Friday's read, merge_when_green.sh each; then close %2.
+2. **CARD `composer-771ce4a-deploy-before-paul`** (rec a; default nothing deployed, Paul reviews 0412eb6 Fri 2 Oct). On a: a deploy seat per `friday/composer_demo_deploy.md` + DEPLOY.md (backup, the read-only demo-row count FIRST and stop if non-zero, temp access removed + proved), Friday verifies live, `decision_queue.sh --delivered`.
+**Watcher:** `friday/watch_status.sh <seen> <B93 STATUS: main Briefs + .tools/wt-*>` — seed the seen file with the watcher's OWN count first (wt copies appear whenever a records worktree is made).
+**Lessons today:** a tap "queued behind a running turn" may never be read (B93, measured in its transcript) — re-check after that turn ends; an absence told to a seat mid-turn went stale (ledger w=3, seat_idle.sh owed).
+
 ## 🔴🔴🔴 STATE 2026-10-01 10:10 (Friday, after the reboot, ctx 40%) — READ FIRST; supersedes every block below where they differ
 **Kam (terminal ~10:0x), verbatim:** "I will log into another account in the morning.  It will be a fully reset account.  Keep going with the HPSM - POC and Compliance composer". Scope = those two; MPS B03 PAUSED (told to Kam; his word restarts it). At 90% gauge: no new launches, card him; never past the stop on Friday's reading.
 **LIVE:**

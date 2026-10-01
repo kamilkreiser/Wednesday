@@ -2042,5 +2042,26 @@
   "project": "Datasec",
   "ts": "2026-10-01T10:05:27.047326+10:00",
   "text": "Received, Kam. I'm on HPSM-POC and the Compliance Composer now, and you'll sign in to a fresh account in the morning.\n\nWhat's restarting: HPSM-POC B92, which is the print heading (already built, its PR comes next) and the invisible-characters fix (one test still failing, then a QA gate). And Composer B30, which is the Expert editor legacy-row fix that has to land before any deploy. Its checks were red on a network test and on one secret-scan finding I need to find first.\n\nThe MPS calculator stays paused unless you want it too. Usage is at 83%. If it reaches 90% before you switch, I'll stop new launches and put a card on the board, not go past it on my own reading."
+ },
+ {
+  "role": "wednesday",
+  "seat": "Kamils-MacBook-Pro.local",
+  "project": "Datasec",
+  "ts": "2026-10-01T10:33:34.406389+10:00",
+  "text": "HPSM-POC update. No action needed.\n\nThe print heading is merged into main.\n\nThe invisible-characters fix is built. Its last failing test turned out to be a real bug: after a refused send, the note box closed and hid what the client had typed. That's fixed too. It's PR 77, and a QA gate is testing it now. The records, with your three rulings as C-36, merge on their own once green.\n\nThe feedback comment box still lets those characters through, since your ruling covered notes and answers only. It's ticketed as HPSMPOC-177 for whenever you want it."
+ },
+ {
+  "role": "wednesday",
+  "seat": "Kamils-MacBook-Pro.local",
+  "project": "Datasec",
+  "ts": "2026-10-01T10:39:12.251047+10:00",
+  "text": "Composer: one decision for you on the Fleet activity board.\n\nThe legacy-row fix is merged, so main is now 771ce4a. That's the build the gate said had to land before any deploy. The demo still runs this morning's 0412eb6.\n\nThe card asks whether to deploy 771ce4a before Paul's review tomorrow. I recommend yes. If you don't answer, nothing is deployed and Paul sees 0412eb6."
+ },
+ {
+  "role": "wednesday",
+  "seat": "Kamils-MacBook-Pro.local",
+  "project": "Datasec",
+  "ts": "2026-10-01T11:09:07.879812+10:00",
+  "text": "HPSM-POC: the invisible-characters fix is merged. No action needed.\n\nThe QA gate passed it with notes. It tried all 141 refused characters on all 9 text fields: every one was refused with nothing saved, and the old code saved every one. Emoji joins, Persian and text pasted from Word all come back exactly. The note box now stays open after a refused send for both the client and the partner. Main is on the new build. Nothing is deployed.\n\nA small follow-up is in progress: a missing test, and two edge cases where a refused character at the very start or end of a name was trimmed off and let through.\n\nThe gate also found that a customer's name still accepts these characters, including the one that reverses text direction, and that name prints on the client's page. That's outside what you ruled, so it becomes a ticket for your word, like the feedback box."
  }
 ]
