@@ -12,6 +12,14 @@ supersede: replace wholesale; previous = NEXT-PICKUP-FRIDAY.md.pre-0925-rotate-s
 
 **The tree is at `/Users/kamilkreiser/1FILES TO SYNC/FRIDAY`.** Quote every path (spaces).
 
+## 🔴🔴🔴 STATE 2026-10-01 10:10 (Friday, after the reboot, ctx 40%) — READ FIRST; supersedes every block below where they differ
+**Kam (terminal ~10:0x), verbatim:** "I will log into another account in the morning.  It will be a fully reset account.  Keep going with the HPSM - POC and Compliance composer". Scope = those two; MPS B03 PAUSED (told to Kam; his word restarts it). At 90% gauge: no new launches, card him; never past the stop on Friday's reading.
+**LIVE:**
+1. **HPSM-POC PR #76** (b92/print-heading 93c46af, tier 2, Friday read the hunk) — `friday/merge_when_green.sh datasecau/HPSM-POC 76 93c46af…` running in the background (log in the seat's scratchpad; re-run it if the seat rotated).
+2. **%2 Datasec/HPSM-POC-A = B93** — brief `HPSM-POC/1_Project_Definition/Briefs/2026-10-01_B93_invisible-characters-finish-records-jira.md`. On READY: open the invisible-chars PR, commission a tier-1 QA gate (B88 shape), merge on GO with merge_when_green.sh; records/b92 PR on CodeQL green.
+3. **%3 Datasec/Composer-E = B32** — brief `Datasec Security Composer/1_Project_Definition/Briefs/2026-10-01_B32_f1-legacy-rows-ci-and-browser-check.md`. On READY: open the HPSM-light PR for b30/f1-legacy-rows, Friday's tier-2 read, merge on green. NO deploy without Kam (demo = 0412eb6; Paul reviews Fri 2 Oct).
+**Watcher:** `friday/watch_status.sh <seen> <B93 + B32 STATUS globs, main Briefs AND worktrees>` — re-arm after any rotation.
+
 ## 🔴🔴🔴 WRAP FOR KAM'S REBOOT 2026-10-01 ~09:4x — READ FIRST; supersedes every block below where they differ
 **Kam (terminal ~09:4x):** "wrap up for now. or when tasks finish as I will reboot the computer". All live seats were told (ADDENDUM-9 reboot-state) to push WIP, write a REBOOT STATE section, and stop. **After the reboot nothing is running** (no seats, no watchers, no caffeinate, no Spark tunnel).
 **FIRST at the next boot:** read each seat's REBOOT STATE, then decide what to relaunch (Kam's "keep going" + 90% grant still stand; usage ~82%):
