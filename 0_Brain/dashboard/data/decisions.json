@@ -22274,5 +22274,45 @@
    }
   ],
   "amended_ts": "2026-10-02T02:22:47.077364+10:00"
+ },
+ {
+  "id": "secuura-ks1402-lookup-refuses-connector-tokens",
+  "client_project": "Secuura/Blockchain",
+  "title": "KS-1402: your 2 Sep lookup ruling cannot take effect. Tap a to let K's user lookup accept S's connector token",
+  "bluf": "Tap a, b or c on this card. The ticket: https://linear.app/secuura/issue/KS-1402\n\nPeter found (1 Oct, measured on a local S+K pair: 4 of 4 calls refused) that every Platform-S rights-assign / rights-reassign gets 401 'Invalid token' from K's GET /api/users/lookup. S falls back to a flat anchor, so K never records the custody transfer. The cause: /lookup accepts only access tokens (users.ts:266, authenticate()), and S calls with a connector token. Wednesday read users.ts:266 and :357-359 and documents.ts:1665-1671 at develop 88e8877a2a0d: as Peter says.\n\nYour 2 Sep ruling on KS-739 was (b): S's connector key carries users:read and K does not widen its roles. That ruling cannot work today, because the token is refused before the scope is ever read. My 2 Sep card said 'K's lookup already honours it'. That was wrong, and it was my card's premise, not Peter's.\n\nPeter marked it your call. No K code has changed.",
+  "default_action": "Nothing merges and nothing reaches S. When the new account is in, Wednesday has a Claude seat build option a on a branch with a red-first test and runs the full gate, and the PR then waits for your tap. KS-1402 stays in Backlog until you rule.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Widen /lookup to accept a connector token, as /stub already does (KS-564)",
+    "detail": "This makes your 2 Sep ruling (b) work as you intended: the users:read scope becomes the gate. Small change on an auth route, so it gets a full tier-1 QA gate. Stuart must also put users:read on S's connector key (unmeasured whether it has it today). Merged on Wednesday's GO after the gate; then on kintsugi only on your deploy tap."
+   },
+   {
+    "key": "b",
+    "label": "originate looks the holder up with its own service credential",
+    "detail": "Removes the dependency on the caller's token type. But then your users:read scope no longer gates the lookup: any caller allowed to transfer custody can resolve an email. Not recommended."
+   },
+   {
+    "key": "c",
+    "label": "Platform S sends newHolderId instead of an email",
+    "detail": "No K change. S-side work for Stuart, and S does not know K user ids today."
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-10-02T06:04:50.451121+10:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "2026-08-22 19:55",
+   "2026-09-02 16:08",
+   "2026-09-02 19:34",
+   "2026-09-04 15:25",
+   "2026-09-06 10:52",
+   "2026-09-13 18:17",
+   "2026-09-16 13:32",
+   "2026-09-18 09:18",
+   "CARD secuura-ks739-lookup-role-scope"
+  ]
  }
 ]
