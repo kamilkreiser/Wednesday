@@ -12,6 +12,9 @@ supersede: replace wholesale; previous = NEXT-PICKUP-FRIDAY.md.pre-0925-rotate-s
 
 **The tree is at `/Users/kamilkreiser/1FILES TO SYNC/FRIDAY`.** Quote every path (spaces).
 
+## 🔴 STANDING HOLD FOR EVERY DATASEC/HPSM-POC BRIEF (from 2026-10-01 12:1x, card `hpsmpoc-restricted-docs-ai-input-25sep`'s default)
+**No HP Restricted document (the executive deck, the financial model, anything HP marks Restricted) is given to ANY AI tool — Claude seats, subagents, the product's model, Ornith or the Spark — without HP's written approval (signed SOW §4.1.4(c)).** Paste this line into the HOLDS of every HPSM-POC brief until Kam rules the card otherwise.
+
 ## 🔴🔴🔴 HANDOVER 2026-10-01 11:27 (Friday, 50% checkpoint by statusline) — READ FIRST; supersedes every block below where they differ
 **Kam's scope today (terminal ~10:0x):** HPSM-POC + Compliance Composer; he signs in to a fresh account tomorrow morning. MPS paused. Usage 86%: at 90% no new launches + a card. UNREAD 0 since 09:17:02; reconcile 0.
 **DONE since 10:1x:** HPSM-POC #76 (print heading) MERGED → dde09b9; records #25 (C-36) → analysis fa8ca83; HPSMPOC-161 Done; gate B94 GO WITH NOTES → **#77 (invisible chars) MERGED → main cfb16ec** (tree d51e506 = gated). Composer #17 (F1 legacy rows) MERGED → HPSM-light main **771ce4a** (tree = gated head). Not deployed anywhere.
