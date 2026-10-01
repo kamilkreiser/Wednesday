@@ -4,7 +4,7 @@ Written by the drafter, 2026-10-01 AEST (all times UTC from `date -u`; the host 
 
 ## 0. Status and what remains
 
-**KIT COMPLETE — READY to launch once the routing line (section 4) is added.** Launcher `--check` rc 0 before and after the controls (launcher_check_1.out, launcher_check_2.out). Launch-action `--dry-run` rc 0 (repin_dryrun_1.out): the ONLY report is the missing routing line; `BOTH INSTRUMENTS AGREE with the pin, 1 of 1`; census `0 touch a kit path or carry a kit key outside reported_overlaps | 0 expected overlap(s)`. Controls: see section 5 (CONTROLS_RESULT). **Still Wednesday's: the routing line and the launch (section 9).**
+**KIT COMPLETE — READY to launch once the routing line (section 4) is added.** Launcher `--check` rc 0 before and after the controls (launcher_check_1.out, launcher_check_2.out). Launch-action `--dry-run` rc 0 (repin_dryrun_1.out): the ONLY report is the missing routing line; `BOTH INSTRUMENTS AGREE with the pin, 1 of 1`; census `0 touch a kit path or carry a kit key outside reported_overlaps | 0 expected overlap(s)`. Controls normal **rc 0, 124/124 OK**; `--invert` **rc 1, 124/124 MISMATCH** (section 5). Final ls-remote 2026-10-01T00:31:14Z: develop `723dc0722b68`, #1364 `f7466281acf1` (final_lsremote_1.out). **Still Wednesday's: the routing line and the launch (section 9).**
 
 Drafted **PINNED**: Wednesday named PR #1364, head `f7466281acf18fd7ea47be19bfa88ececdb3dbb8`, base develop `723dc0722b68482a03de8577fdb5eb5b3359e725`; the drafter re-read both at 2026-09-30T23:48:40Z by `ls-remote` (develop, the branch AND `refs/pull/1364/head`, all as named) and by the PULLS API (gh_read_1.out: open, base develop @ 723dc0722b68, mergeable True / `unstable`). A new head is a RE-DRAFT (section 8).
 
@@ -64,7 +64,18 @@ QA/Secuura-batch1364|coagent@agentmail.to|yes
 Until it is present, step 0 of the launch action refuses rc 1 (control R1); R8 shows a routed temp file passing step 0 and stopping after 3b.
 
 ## 5. Controls: `controls_gate50b.sh <scratchpad> [--invert]`
-CONTROLS_RESULT
+- **124 controls, one unedited script** (`controls_gate50b.sh`, sha256 `6ab89b1a2180…`, identical before run 1 at 00:01:23Z, before/after run 2 and before/after run 3 at 00:30:35Z: controls_sha.txt). Normal (controls_1.out) **rc 0: `124 controls, OK 124, MISMATCH 0 | ssh-denied retries 0`**. `--invert` (controls_2.out) **rc 1: `124 controls, OK 0, MISMATCH 124 | ssh-denied retries 0`**.
+- **Instrument incident, kept:** the first inverted run (run 2) wrote its output straight into the kit. At 10:14 AEST every file in this directory got a new mtime: something, most likely the drive sync, rewrote the directory. `controls_2.out` froze at 50 lines (12,940 B), although all 124 controls ran (124 `.out` files in the plant dir) and the script exited rc 1. It is kept as `superseded_controls_2_truncated.*`. Run 3 (inverted, the same script sha) wrote to the scratchpad and was then copied in: it is `controls_2.out`. The other kit files were checked after the rewrite and their content is current. Wednesday: if a sync job touches this folder while a launch runs, expect the same.
+- Side effects, kept: R1 / R8 wrote `launch_<HHMMSS>.*` step outputs here; the PN simulations wrote `pins_gate50b.SIM-*.json`. `repin_dryrun_0_before_controls.*` is the first dry run (rc 0); `repin_dryrun_1.*` is the final one (rc 0).
+- **Coverage:**
+  - **PN0–PN6** (pin): the real head as a simulation, its END / modes / floor pin; `--develop` refused without `--simulate`; the floor lowered `> 19` in the test file → (K); a develop move on the baseline → (C); the baseline recorded 100755 → MODE MISMATCH; an unrelated develop move → NONE; a third file → (B).
+  - **BL0–BL6** (baseline): the real head, with its B5 / B10 / B11 controls; another row's reason edited → B3; frvp re-dated → B6 + B7; a GRANDFATHERED line removed → B8 + B9; one character of the r53p reason → B5; the extracted file with a trailing newline → B5; develop as head → B0 + B1.
+  - **SO0–SO3** (sources): the real reads, incl. the demo / production `proxy_hide_header Server` zeros beside nginx.conf's 1; the probe values; a tampered title → I0; the KS-1397 draft minus its header line reads NONE; a planted nginx.conf without :142 → N1.
+  - **KS0–KS7** (keyscan).
+  - **L0–L23 + LK1–LK29** (launcher: every exit, incl. 34 / 36 / 37 / 38 and the filename rule; L9 is the real non-TTY path).
+  - **R0–R8** (launch action: census, routing refusal, an extra kit path → OVERLAP #1360, a title key → OVERLAP, sequenced right / wrong head, DISJOINT, wrong head rc 11, old develop rc 10, a bad scratchpad rc 9, routed stop-after-3b).
+  - **PNZ / KJZ / PRZ**: pins, kit.json and the filled prompt are unchanged.
+- **Not controlled:** on a real launch, the usage gate (12), `cockpit.sh add` (14) and the override refusal (16); a `mergeable=False` refusal; a real re-pin across a develop move (only the dry run's rc 10 is controlled). gh_read, linear_read and fill are exercised by their real runs, not by plants.
 
 ## 6. Could not measure (the drafter)
 No audit leg, install, probe or suite: mwp4 being dead to both legs at develop, and every leg rc at the head, are the seat's claims until the gate runs them. No database read anywhere: the ITEM 4 facts are B 50th's recorded readings. Linear text was read but is not stored in the kit.
