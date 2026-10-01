@@ -12,6 +12,15 @@ supersede: replace wholesale; previous = NEXT-PICKUP-FRIDAY.md.pre-0925-rotate-s
 
 **The tree is at `/Users/kamilkreiser/1FILES TO SYNC/FRIDAY`.** Quote every path (spaces).
 
+## 🔴🔴🔴 WRAP 2026-10-01 18:11 (Friday; Kam 17:41 "don't launch anything new… wrap up neatly"; FLOOR EMPTY: %0 + %1) — READ FIRST; supersedes every block below where they differ
+**State at wrap:** every seat finished and closed. HPSM-POC main **799cc3e** (#76–#79 merged, CI green); analysis main **9f268a9** (#25–#29). Composer: HPSM-light main **771ce4a**, LIVE on the demo (C-15, verified by Friday); **PR #19** (B35: #36 per-caller cap + #37 #56 #65 #29 #31 #62) at **6215c4b**, OPEN and NOT merged (tier 1: gate first); project-root main 912f9a2. MPS: **b03/importer 74600a5 + b03/api 7f6ca4c**, fix round done, NOT merged.
+**FIRST on the fresh account (read a seat's statusline to confirm the account before trusting usage_gate):**
+1. Launch the STAGED MPS gate: `MPS/1_Project_Definition/Briefs/2026-10-01_B06_QA-gate-round-2-importer-and-api.md` (re-pin the heads; round 2 of 2; a NO GO → Kam). Then deliver card `datasec-90pct-gates-wait-for-fresh-account-1001`.
+2. A tier-1 QA gate on Composer **PR #19** (B21 shape: the #36 burst measurement on a local stack, other-tenant 200s, 429/Retry-After, 503 not 500; #37; #56's behaviour; #65's clone filter). Merge only on GO. NO deploy without Kam.
+3. Questions from B35 to raise: **Q3** #56 is a design choice (keep but don't use out-of-scope answers; delete is the alternative), Kam's if he wants it; **Q4** the 15 new plain-word error titles (`apps/web/src/api/problem.ts PLAIN_TITLES`) are user-facing, so offer them to Kam before any deploy; **Q5** Dependabot alert #1 on HPSM-light.
+4. HPSM-POC: point HPSMPOC-166's overlapping line at -181; -179 / -180 queued (agent work); -177 / -178 need Kam.
+**Waiting on Kam:** the Week-1 status report (hours + send; file in his drawer); M2 PO approver (C-37 open); HP's access package (HPSMPOC-181).
+
 ## 🔴🔴🔴 HANDOVER 2026-10-01 17:50 (Friday, 65% checkpoint) — READ FIRST; supersedes every block below where they differ
 **Kam 17:41:45 (live board), verbatim:** "don't launch anything new but let the agents finish their current tasks and wrap up neatly when ready.  Thanks for a great day". He signs in to a FRESH account tomorrow morning. Usage hit the 90% stop at 17:3x.
 **MERGED TODAY (all head-pinned, trees verified):** HPSM-POC #76 #77 #78 → main e6b5838 (+ #79 contract A1 merging on green, merge_when_green running); analysis #25 #26 #27 #28 (+ #29 merging). Composer #17 → HPSM-light 771ce4a, **DEPLOYED to the demo (C-15), verified live by Friday 13:1x**. MPS: B05 fix round done (b03/importer 74600a5, b03/api 7f6ca4c), NOT merged (needs round-2 gate).
