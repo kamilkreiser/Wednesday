@@ -1,0 +1,322 @@
+{
+ "read_at": "2026-10-01T15:03:26Z",
+ "prs": {
+  "1369": {
+   "title": "KS-530: scoped @prisma/dev override lifts the one vulnerable @hono/node-server copy",
+   "state": "open",
+   "user": "kksecura",
+   "head": "ce051988b787f510c7ca5db5bbc474ef4b8a8492",
+   "branch": "feature/ks-530-hono-node-server-override-b54-1",
+   "base": "develop",
+   "base_sha": "ea6fcecc3a6f71a4f397ea678da54a06df130cd7",
+   "mergeable": true,
+   "mergeable_state": "unstable",
+   "files": [
+    [
+     "Blockchain/Dev/package-lock.json",
+     0,
+     11,
+     "modified"
+    ],
+    [
+     "Blockchain/Dev/package.json",
+     3,
+     0,
+     "modified"
+    ],
+    [
+     "Blockchain/Dev/scripts/audit/audit-baseline.json",
+     0,
+     7,
+     "modified"
+    ]
+   ],
+   "commits": [
+    [
+     "ce051988b787f510c7ca5db5bbc474ef4b8a8492",
+     "KS-530: scoped @prisma/dev override lifts the one vulnerable @hono/node-server copy\n\nExactly one vulnerable @hono/node-server copy exists across all 45 tracked lockfiles:\nnode_modules/@prisma/dev/node_modules/@hono/node-server 1.19.11 in the workspace-root\nlock. Its parent @prisma/dev 0.24.3 declares \"@hono/node-server\": \"1.19.11\" EXACTLY, so\nno caret admits the patch. GHSA-frvp-7c67-39w9 has a v1 patched range (1.19.15), not only\nthe v2 one, so this is fixable without the semver-major bump.\n\nA scoped override in the root manifest redirects that one resolution onto the already\npresent hoisted 1.19.17. @prisma/dev imports the module as a bare external specifier\n(await import(\"@hono/node-server\")), so the override moves the executed code, not just the\nlockfile - unlike the valibot case noted at package.json:76, which is bundled and inert.\n\nValue is ^1.19.15, not >=1.19.15: 2.x is published (newest 2.1.3), so a bare >= would\nresolve the semver-major move this ticket exists to do properly.\n\nRefs KS-530"
+    ]
+   ],
+   "body": "## What this does\n\n`GHSA-frvp-7c67-39w9` (moderate, path traversal in `serve-static` on Windows via an encoded\nbackslash) is baselined with the reason *\"fix is >=2.0.5 only, a semver-MAJOR v1->v2 bump\"*.\n**That reason is wrong.** The advisory has a **v1 patched range, 1.19.15**, so it is fixable\nwithout the v2 migration. This PR fixes it with one scoped npm override and removes the\nbaseline row. **It narrows KS-530 and does not close it** \u2014 the v2 bump named in the ticket\ntitle is still outstanding.\n\n## The one vulnerable copy\n\nAll **45** tracked `package-lock.json` files parsed (not just the suspected ones):\n\n| lock | `@hono/node-server` |\n|---|---|\n| `Blockchain/Dev/package-lock.json` | `node_modules/@hono/node-server` **1.19.17** (hoisted, patched) and `node_modules/@prisma/dev/node_modules/@hono/node-server` **1.19.11** |\n| `Blockchain/Dev/services/mcp-server/package-lock.json` | **1.19.17** only |\n| the other 43 | no entry |\n\n**Vulnerable copies (< 1.19.15) across all 45 locks: exactly 1.** Its parent\n`node_modules/@prisma/dev` 0.24.3 (`devOptional`) declares `\"@hono/node-server\": \"1.19.11\"`\n**exactly**, so no caret admits the patch. The sole parent pulling `@prisma/dev` is\n`services/originate/node_modules/prisma` 7.8.0, the CLI that `services/originate/package.json`\ndeclares in devDependencies.\n\n**Correction to the record:** `services/originate/package.json:60` does **not** declare\n`@hono/node-server`. That line is inside originate's own `overrides` block, and npm honours\n`overrides` only in the ROOT manifest of an install \u2014 so it governs originate's standalone\nlock and is ignored by the workspace-root install. That is why the root lock still carried\n1.19.11. **No `package.json` anywhere declares `@hono/node-server` as a dependency.**\n\n## The override\n\n```json\n\"@prisma/dev\": { \"@hono/node-server\": \"^1.19.15\" }\n```\n\nin the `overrides` of `Blockchain/Dev/package.json` only, mirroring the existing scoped\n`\"jsdom\": { \"undici\": ... }` entry. Scoped rather than top-level because it names exactly the\none parent that pins the vulnerable copy; a top-level pin would also constrain mcp-server's\npath through the MCP SDK for no measured benefit (that path already resolves 1.19.17) and\nwould be a wider net to remember to remove when the v2 migration lands.\n\n**Why `^1.19.15` and not `>=1.19.15`:** measured, not reasoned \u2014 `npm view` shows **2.x is\npublished** (2.0.0 \u2026 newest **2.1.3**). A bare `>=` would resolve the semver-major move this\nticket exists to do properly.\n\n## It moves the EXECUTED code, not just the lockfile\n\nThe valibot entry in `// overrides KS 493` records an override that was **inert** because\n`@prisma/dev` bundles valibot. That is a real risk, so it was tested rather than assumed:\n\n- `bundledDependencies`: **None**.\n- `@prisma/dev` loads the module as a **bare external specifier** \u2014 `await import(\"@hono/node-server\")` \u2014 in three shipped dist files (`chunk-2O6J3K3T.js`, `index.cjs`, `daemon.cjs`).\n- Hono's own internals (`createAdaptorServer`, `getRequestListener`, `serveStatic`): **0 files**. No inlined copy.\n- The 31 shipped `.tar.gz` runtime assets: 0 contain the specifier (they are PostgreSQL extension tarballs; the decode instrument was checked by decompressing one).\n\n**Resolution, by action:**\n\n| | resolves `@hono/node-server` | path |\n|---|---|---|\n| from `@prisma/dev`, BEFORE | **1.19.11** | `node_modules/@prisma/dev/node_modules/...` |\n| from `@prisma/dev`, AFTER | **1.19.17** | `node_modules/@hono/node-server` (hoisted) |\n\nControls: a nonexistent module gives `MODULE_NOT_FOUND`; the two resolved directories differ.\nNote that `require.resolve('@hono/node-server/package.json', \u2026)` throws\n`ERR_PACKAGE_PATH_NOT_EXPORTED` \u2014 this package's `exports` map does not expose\n`./package.json` \u2014 so the main entry was resolved and the owning package directory walked.\n\n## How the lock was regenerated\n\nContainer `node:24-alpine`, **node v24.21.0 / npm 11.19.0**, both printed in the same run.\n`Blockchain/Dev` mounted **whole**: the root lock carries `file:` link entries for the\nworkspaces, so a per-directory mount is the `EMISSINGTARGET` case recorded in KS 1394 \u2014 and\nthat was confirmed the hard way, when a two-file control directory rewrote the lock for\nexactly that reason.\n\n**The ruled command alone was inert, and that is stated plainly rather than papered over.**\nBoth `npm update @hono/node-server --package-lock-only --ignore-scripts` and then\n`npm install --package-lock-only --ignore-scripts` printed `up to date` and left the lock\n**byte-identical** (sha256 `79a1c682199c9327bc475c00\u2026`, 674706 bytes, blob `c8cf17aa62a5`).\nnpm applies `overrides` when it BUILDS a tree; against an already-complete lock with no\nversion drift it never re-evaluates a newly added override against an exactly-pinned nested\ndependency.\n\nSo the one stale entry `node_modules/@prisma/dev/node_modules/@hono/node-server` was\n**removed by hand**, and the ruled command re-run; npm then validated the pruned tree\n(`npm install --package-lock-only` rc 0). **npm did not produce this edit unaided.**\n\nTwo things corroborate that the result is a real re-resolution rather than a hand-authored\nlock:\n\n1. **An independent from-scratch resolve gives the same shape.** A throwaway project with\n   `prisma@7.8.0` and this override, no lock, resolves `@hono/node-server` **1.19.17** with\n   **no nested entry at all** \u2014 it dedupes. The same project **without** the override resolves\n   **1.19.11**.\n2. **The result is idempotent.** Re-running `npm install --package-lock-only --ignore-scripts`\n   in the container returns rc 0 and leaves the lock byte-identical, and `npm ci\n   --ignore-scripts` from it succeeds.\n\n`npm`'s `up to date` banner is not evidence either way; the byte comparison is the instrument.\n\n## The delta, per lock \u2014 NO COLLATERAL\n\nBoth lock blobs parsed as JSON and their `packages` maps diffed key by key, not eyeballed:\n\n| | |\n|---|---|\n| entries | 1968 \u2192 **1967** |\n| added | **0** |\n| removed | **1** \u2014 `node_modules/@prisma/dev/node_modules/@hono/node-server` (was 1.19.11) |\n| changed | **0** |\n| `dev` / `devOptional` flag flips | **0** |\n\n- `node_modules/@prisma/dev` is **byte-identical**: its `dependencies` map records the\n  package's own manifest (`\"1.19.11\"`), not the override.\n- The hoisted `node_modules/@hono/node-server` is **unchanged at 1.19.17**, so no `integrity`\n  or `resolved` value is newly introduced.\n- The other **44** locks are untouched \u2014 `git diff --numstat` lists none of them.\n- Control: with a version change planted, the comparator reports 1 changed, so it can see a\n  difference.\n\nFor contrast, the comparable undici override in KS 1378 carried **12** dev-flag bookkeeping\nflips (eleven `lightningcss-*` binaries and `magicast`). None recurs here.\n\n**A pristine control:** a full tree at this PR's base, with **no** override, given the\nidentical container command, leaves the root lock **byte-identical** (sha256 unchanged,\n`cmp` rc 0). So the override supplies the direction and the command the re-resolution, and\nneither alone moves the lock.\n\n## The baseline row\n\n`GHSA-frvp-7c67-39w9` removed from `scripts/audit/audit-baseline.json` (it was at `:88`).\nExcised as a **text range**, not re-serialised: the diff is **0 added / 7 removed**, one JSON\nobject, trailing newline preserved.\n\n> A first attempt re-serialised the file with `json.dumps` and escaped every em-dash and\n> arrow to `\\uXXXX` across 7 unrelated rows. The JSON-level comparison passed \u2014 the decoded\n> values were equal \u2014 while the bytes had changed. It was reverted and redone surgically.\n> **Both the value-level and the byte-level comparison are reported below.**\n\nProved by parsing both blobs:\n\n- rows **25 \u2192 24**; removed exactly `{GHSA-frvp-7c67-39w9}`; added none.\n- surviving rows: **0** changed by value and **0** changed by raw bytes.\n- `$comment` byte-identical; top-level keys unchanged.\n- **no `expires` changed anywhere.** Dated rows 7 \u2192 6, and the 2026-10-09 cohort is now\n  exactly `GHSA-wrjc-x8rr-h8h6` and `GHSA-337j-9hxr-rhxg` (the react-router pair, KS 528).\n- `GRANDFATHERED_NO_EXPIRY` untouched; `baseline-contract.mjs` and\n  `baseline-contract.test.mjs` byte-identical by blob (`ef82d7c5211d`, `2379c0aeee6e`).\n  The contract floor at `baseline-contract.test.mjs:217` asserts more than 20 entries; 24\n  still passes and the floor is **not** lowered.\n- Control: a planted byte edit makes the comparator report 1 differing row.\n\n**The id still appears twice in the file after the removal** \u2014 inside the *reason* text of the\ntwo react-router rows, which quote the instruction mail that named it. So the removal was\nverified on the **row key**, never a substring search, which would have read as a failure\nafter a correct removal.\n\n## Red-first control\n\nWith the row removed and **no** override, leg 6 goes **rc 1**:\n`FAIL \u2014 1 NEW advisory not in the baseline:` naming `GHSA-frvp-7c67-39w9`, baselined count\n25 \u2192 24. So the row is load-bearing today, and the **override**, not the deletion, is what\nmakes this head green. The baseline was then restored byte-exact (blob back to\n`4e5f5daba207\u2026`, `git status --porcelain` empty, rows 25) before the real change was made.\n\n## The three audit legs\n\n| leg | at the base | at this head |\n|---|---|---|\n| `audit:contract` | rc 0 \u2014 pass 59, fail 0 | rc 0 \u2014 pass 59, fail 0 |\n| leg 6 `audit:gate` | rc 0 \u2014 `11 distinct advisories reported, 25 baselined.` | rc 0 \u2014 `9 distinct advisories reported, 24 baselined.` |\n| leg 7 `audit:locks` | rc 0 \u2014 43 standalone locks, 1611 packages, 6 match, 6 baselined | rc 0 \u2014 identical |\n\n**The denominators moved**: reported 11 \u2192 9, baselined 25 \u2192 24, and `frvp` appears in\n**neither** set at this head (0 mentions in leg 6's output).\n\n**leg 6's CLEANUP line at this head, verbatim:**\n\n```\nCLEANUP (advisory): 15 baseline entries are no longer reported \u2014 remove:\n```\n\n\ud83d\udd34 **It now names `GHSA-92pp-h63x-v22m` (@hono/node-server, KS 470)** \u2014 the second hono row,\nwhich was matching through the same 1.19.11 copy and no longer matches once it is lifted.\n**Nothing is removed for it here.** That row is in `GRANDFATHERED_NO_EXPIRY`\n(`baseline-contract.mjs:65`), and removing it would edit that set, which is not this PR.\nReported and left alone, following the KS 1378 precedent, which quoted its CLEANUP line and\nleft the cleanup to a separate change.\n\nLeg 7's CLEANUP block cannot see these rows at all: it filters on\n`e?.scope === 'standalone-locks'` (`audit-locks.mjs:299`) and no row carries a `scope`, so\nit is not evidence either way.\n\n## Prisma still runs\n\n| | base | this head |\n|---|---|---|\n| `prisma --version` | rc 0 \u2014 prisma 7.8.0, @prisma/client 7.8.0 | rc 0 \u2014 identical |\n| `prisma generate` | rc 0 \u2014 Generated Prisma Client (v7.8.0) | rc 0 \u2014 identical |\n| `prisma dev --help` | rc 0 \u2014 prisma dev v0.16.28 | rc 0 \u2014 identical |\n| `import(\"@prisma/dev\")` | OK, 11 exports | OK, 11 exports |\n\n`prisma generate` is the command `services/originate/Dockerfile:38` runs. It needs the schema\nthat `Dockerfile:36` copies from the **project root** (`COPY prisma/ ./prisma/`) \u2014 originate\nhas none of its own \u2014 so that copy was reproduced, the command run, and the copy deleted;\n`git status` is clean. The `@prisma/dev` entrypoint was identified from the importer, not\nguessed: `prisma/build/index.js` holds\n`[{startPrismaDevServer},{ServerState}] = await Promise.all([import(\"@prisma/dev\"), import(\"@prisma/dev/internal/state\")])`.\n\n## Images\n\n**No image reads a lock this PR changes, so nothing was built.** Over all **35** tracked\nDockerfiles, every manifest `COPY` is per-service or per-package\n(`services/<x>/package*.json`, `packages/shared/package*.json`, `frontend/<x>/package*.json`);\n**0** copy the workspace-root lock. Control that must hit:\n`services/originate/Dockerfile:28:COPY services/originate/package*.json ./`. Only originate\nuses Prisma, and its builder installs from its **own** standalone lock, which has no\n`@hono/node-server` entry at all \u2014 it resolves `prisma` 7.10.0 \u2192 `@prisma/dev` 0.24.17, a\nversion that no longer depends on the package.\n\n## Alternatives not taken\n\nBumping `prisma` in the root tree would pull `@prisma/dev` 0.24.17 and remove the vulnerable\ncopy with no override at all. It moves the Prisma CLI and many lock entries, which is\ncollateral outside this PR's shape, so it is recorded here and not built.\n\nNo `// overrides` note was added beside the entry, following KS 1378, which added none; this\nbody carries the reason.\n\n## Test Evidence\n\n**Touched:** `Blockchain/Dev/package.json` (+3/\u22120), `Blockchain/Dev/package-lock.json`\n(0/\u221211), `Blockchain/Dev/scripts/audit/audit-baseline.json` (0/\u22127). Three paths, all\n`100644`, exec bits unchanged.\n\n**Ran, at this head:**\n- `audit:contract` rc 0 \u2014 pass 59, fail 0\n- `audit:gate` (leg 6) rc 0 \u2014 9 reported, 24 baselined\n- `audit:locks` (leg 7) rc 0\n- `services/originate` unit suite (**jest**) rc 0 \u2014 **90 suites, 1062 tests, 0 failed**\n- `services/mcp-server` unit suite (**vitest**) rc 0 \u2014 **3 files, 5 tests, 0 failed**\n- `tsc --noEmit` for both services \u2014 rc 0, 0 errors each\n- `npm ci --ignore-scripts` from the new lock rc 0, then `npm run build --workspace=packages/shared` rc 0, with `@secuura/shared` proved to **resolve and require** (253 exports) from inside both services\n- in-hook preflight on the push: `PREFLIGHT INCOMPLETE \u2014 12/15 legs ran, 3 SKIPPED. Nothing failed.` All three skips carry one named reason, `SKIP \u2014 local stack not up on http://localhost:6882`. **Legs 6 and 7 ran inside the hook** and reproduced the figures above. Shell suites 67 passed / 0 failed / 0 skipped of 67; 13 code guards passed. 0 orphaned `login_stub` listeners.\n\n**NOT run:**\n- no service was started; no Schemathesis, Akto, k6 or Playwright\n- no `prisma dev` **server** was started \u2014 only `--help` and the module import, so the running Prisma Dev server on 1.19.17 is unverified\n- no image was built (nothing reads a changed lock)\n- the three preflight legs needing the local stack\n- `Blockchain/Dev/mobile/secuura-app` is outside the audit corpus (KS 769) and unmeasured\n- the two react-router rows (KS 528) are untouched and still expire 2026-10-09\n- the `GHSA-92pp-h63x-v22m` cleanup leg 6 now reports is deliberately left for a separate change\n\n**Migrations + config:** none. No schema, no environment variable, no compose file.\n\nRefs KS-530\n"
+  }
+ },
+ "census": {
+  "1360": {
+   "title": "KS-1380: revert #1358 (15 lockfiles) at Peter's request",
+   "user": "PeterObeden",
+   "created_at": "2026-09-30T07:38:55Z",
+   "head": "d0e99f181a4e23fcadcb8fdf7c81e4065e6d63f7",
+   "branch": "feature/ks-1380-revert-pr-1358",
+   "base": "develop",
+   "n_files": 15,
+   "kit_paths_touched": [
+    "Blockchain/Dev/package-lock.json"
+   ],
+   "census_keys_in_title": [],
+   "client_human": true
+  },
+  "1253": {
+   "title": "KS-1297 GUARDGAPS: anchor the abort counts, cover the worktree, pin bare call sites",
+   "user": "kksecura",
+   "created_at": "2026-09-25T14:49:46Z",
+   "head": "91e066264004fdb22c67efb0c25fc44375ec6eac",
+   "branch": "feature/ks-1297-fixture-guard-anchor-and-two-gaps-l5-1",
+   "base": "develop",
+   "n_files": 1,
+   "kit_paths_touched": [],
+   "census_keys_in_title": [],
+   "client_human": false
+  },
+  "1250": {
+   "title": "KS-1302 + KS-1303 RSSTRAP: trap the runner's short TMPDIR, and drop the output pipe",
+   "user": "kksecura",
+   "created_at": "2026-09-25T14:28:57Z",
+   "head": "2b8dcb824dd2c5cd4b92757934d7de9d28813a22",
+   "branch": "feature/ks-1302-runner-tmpdir-residue-and-orphan-pipe-l5-1",
+   "base": "develop",
+   "n_files": 2,
+   "kit_paths_touched": [],
+   "census_keys_in_title": [],
+   "client_human": false
+  },
+  "1129": {
+   "title": "docs(history): 2026-09-21 local rebuild on develop 7be81d5c9, OOM diagnosis, preflight 15/15",
+   "user": "StuJam-Secuura",
+   "created_at": "2026-09-21T08:45:36Z",
+   "head": "25c31a0e82990844181a5b9c9a479722dc30baea",
+   "branch": "chore/history-2026-09-21-local-rebuild-preflight",
+   "base": "develop",
+   "n_files": 1,
+   "kit_paths_touched": [],
+   "census_keys_in_title": [],
+   "client_human": false
+  },
+  "995": {
+   "title": "KS-741: strip `x-emitter-internal` at originate's own inbound \u2014 the marker's non-spoofability no longer rests on an unstated convention",
+   "user": "kksecura",
+   "created_at": "2026-09-14T20:37:56Z",
+   "head": "b8155636e8e60ee9646b10217859fcd274ef87f5",
+   "branch": "feature/ks-741-x-emitter-internal-is-unstripped-on-the-originate-route-the",
+   "base": "develop",
+   "n_files": 5,
+   "kit_paths_touched": [],
+   "census_keys_in_title": [],
+   "client_human": false
+  },
+  "989": {
+   "title": "KS-973: the pre-suite step redacts the generated password, pins its DEGRADED stream, drives its second quarantine call \u2014 items 5, 6 + two residues; items 3/4 wait for #927; items 1/2 are L11/L12 files",
+   "user": "kksecura",
+   "created_at": "2026-09-14T07:22:52Z",
+   "head": "e62fd23cda1bc120716e5f592efac2b8abea97bf",
+   "branch": "feature/ks-973-ks-969-round-1-gate-residue-the-pre-suite-step-and-its-own",
+   "base": "develop",
+   "n_files": 5,
+   "kit_paths_touched": [],
+   "census_keys_in_title": [],
+   "client_human": false
+  },
+  "949": {
+   "title": "chore(deps-dev): bump prisma from 7.8.0 to 7.10.0 in /Blockchain/Dev",
+   "user": "dependabot[bot]",
+   "created_at": "2026-09-10T07:59:49Z",
+   "head": "7ee1a26e634f33b6a4ae115d559f5440a90f6fff",
+   "branch": "dependabot/npm_and_yarn/Blockchain/Dev/develop/prisma-7.10.0",
+   "base": "develop",
+   "n_files": 2,
+   "kit_paths_touched": [
+    "Blockchain/Dev/package-lock.json"
+   ],
+   "census_keys_in_title": [],
+   "client_human": false
+  },
+  "948": {
+   "title": "chore(deps): bump vite from 6.4.3 to 8.3.1 in /Blockchain/Dev",
+   "user": "dependabot[bot]",
+   "created_at": "2026-09-10T07:58:12Z",
+   "head": "f6afb75d790c6c7e52b4c14e2c22054480a0628e",
+   "branch": "dependabot/npm_and_yarn/Blockchain/Dev/develop/vite-8.2.2",
+   "base": "develop",
+   "n_files": 10,
+   "kit_paths_touched": [
+    "Blockchain/Dev/package-lock.json"
+   ],
+   "census_keys_in_title": [],
+   "client_human": false
+  },
+  "947": {
+   "title": "chore(deps-dev): bump @testing-library/jest-dom from 6.9.1 to 7.0.1 in /Blockchain/Dev",
+   "user": "dependabot[bot]",
+   "created_at": "2026-09-10T07:46:52Z",
+   "head": "d68b9d79e67f336e527cc4eef7eaf07fa78670bb",
+   "branch": "dependabot/npm_and_yarn/Blockchain/Dev/develop/testing-library/jest-dom-7.0.1",
+   "base": "develop",
+   "n_files": 2,
+   "kit_paths_touched": [
+    "Blockchain/Dev/package-lock.json"
+   ],
+   "census_keys_in_title": [],
+   "client_human": false
+  },
+  "946": {
+   "title": "chore(deps): bump @fluentui/react-icons from 2.0.331 to 2.0.339 in /Blockchain/Dev",
+   "user": "dependabot[bot]",
+   "created_at": "2026-09-10T07:44:37Z",
+   "head": "41cc5209aaf2f8369f4ce8d5735a43fb07340d0b",
+   "branch": "dependabot/npm_and_yarn/Blockchain/Dev/develop/fluentui/react-icons-2.0.339",
+   "base": "develop",
+   "n_files": 2,
+   "kit_paths_touched": [
+    "Blockchain/Dev/package-lock.json"
+   ],
+   "census_keys_in_title": [],
+   "client_human": false
+  },
+  "945": {
+   "title": "chore(deps-dev): bump @axe-core/playwright from 4.11.3 to 4.13.0 in /Blockchain/Dev",
+   "user": "dependabot[bot]",
+   "created_at": "2026-09-10T07:43:47Z",
+   "head": "264098fce62b1e839c506f61fa443830fdba996a",
+   "branch": "dependabot/npm_and_yarn/Blockchain/Dev/develop/axe-core/playwright-4.13.0",
+   "base": "develop",
+   "n_files": 2,
+   "kit_paths_touched": [
+    "Blockchain/Dev/package-lock.json",
+    "Blockchain/Dev/package.json"
+   ],
+   "census_keys_in_title": [],
+   "client_human": false
+  },
+  "927": {
+   "title": "KS-1027: close Peter's four #904 follow-ups \u2014 the OTHER cp, the stash the refusal deleted, and the duplication nobody had justified",
+   "user": "kksecura",
+   "created_at": "2026-09-09T10:52:11Z",
+   "head": "1041d2d32d389a5f21cf622dfcf4d5be66e0ce2f",
+   "branch": "feature/ks-1027-ks992-followups",
+   "base": "develop",
+   "n_files": 2,
+   "kit_paths_touched": [],
+   "census_keys_in_title": [],
+   "client_human": false
+  },
+  "923": {
+   "title": "KS-736: the mount-auth check scored authenticateToken(false) as green, and could not see half its own surface",
+   "user": "kksecura",
+   "created_at": "2026-09-09T08:53:13Z",
+   "head": "d127dc7d4655a4e227d4f6e511f469c456eaabb7",
+   "branch": "kamilkreiser/ks-736-mount-auth-retag",
+   "base": "develop",
+   "n_files": 1,
+   "kit_paths_touched": [],
+   "census_keys_in_title": [],
+   "client_human": false
+  },
+  "920": {
+   "title": "KS-734: make tests/e2e runnable from a clean checkout, and baseline what it actually reports",
+   "user": "kksecura",
+   "created_at": "2026-09-09T07:38:52Z",
+   "head": "2112a99e31aec4b6e132dc6519c75d3afb6b2b02",
+   "branch": "kamilkreiser/ks-734-e2e-suite-installable",
+   "base": "develop",
+   "n_files": 7,
+   "kit_paths_touched": [
+    "Blockchain/Dev/package.json"
+   ],
+   "census_keys_in_title": [],
+   "client_human": false
+  },
+  "887": {
+   "title": "KS-961: run the workspace suites on the PR, advisory and non-blocking \u2014 and they are RED on develop today",
+   "user": "kksecura",
+   "created_at": "2026-09-07T01:41:26Z",
+   "head": "3aee3deed2e3ac557f0a52c0797c2a4a8df25f69",
+   "branch": "feature/ks-961-workspace-suites-advisory-on-pr",
+   "base": "develop",
+   "n_files": 2,
+   "kit_paths_touched": [],
+   "census_keys_in_title": [],
+   "client_human": false
+  },
+  "809": {
+   "title": "KS-693 (interim): guard the 8 M365/OneDrive/Teams unconfigured-503 ops so the merge gate reads a real floor",
+   "user": "kksecura",
+   "created_at": "2026-09-04T22:30:48Z",
+   "head": "aa2270fe14cf95dbe349fb8aae14f1473d2db5e7",
+   "branch": "feature/ks-693-tolerate-m365-unconfigured-503",
+   "base": "develop",
+   "n_files": 2,
+   "kit_paths_touched": [],
+   "census_keys_in_title": [],
+   "client_human": false
+  },
+  "649": {
+   "title": "chore(deps): bump pg and @types/pg in /Blockchain/Dev",
+   "user": "dependabot[bot]",
+   "created_at": "2026-08-05T12:16:10Z",
+   "head": "1d9198ac7e2f54e43cd38b66ce40ce1f52d338b8",
+   "branch": "dependabot/npm_and_yarn/Blockchain/Dev/develop/multi-8cb89e51b7",
+   "base": "develop",
+   "n_files": 22,
+   "kit_paths_touched": [
+    "Blockchain/Dev/package-lock.json"
+   ],
+   "census_keys_in_title": [],
+   "client_human": false
+  },
+  "639": {
+   "title": "chore(deps): bump @radix-ui/react-dropdown-menu from 2.1.16 to 2.1.24 in /Blockchain/Dev",
+   "user": "dependabot[bot]",
+   "created_at": "2026-08-03T20:46:50Z",
+   "head": "2069d852ee1618fac25cd3eeb56f22005422125f",
+   "branch": "dependabot/npm_and_yarn/Blockchain/Dev/develop/radix-ui/react-dropdown-menu-2.1.24",
+   "base": "develop",
+   "n_files": 3,
+   "kit_paths_touched": [
+    "Blockchain/Dev/package-lock.json"
+   ],
+   "census_keys_in_title": [],
+   "client_human": false
+  },
+  "635": {
+   "title": "chore(deps): bump cbor from 9.0.2 to 10.0.12 in /Blockchain/Dev",
+   "user": "dependabot[bot]",
+   "created_at": "2026-08-03T20:16:58Z",
+   "head": "6cbc298f41a1dd4a0a986084800c6de71aeb08fd",
+   "branch": "dependabot/npm_and_yarn/Blockchain/Dev/develop/cbor-10.0.12",
+   "base": "develop",
+   "n_files": 2,
+   "kit_paths_touched": [
+    "Blockchain/Dev/package-lock.json"
+   ],
+   "census_keys_in_title": [],
+   "client_human": false
+  },
+  "575": {
+   "title": "chore(deps): bump dotenv from 16.6.1 to 17.4.2 in /Blockchain/Dev",
+   "user": "dependabot[bot]",
+   "created_at": "2026-07-20T20:21:05Z",
+   "head": "7d32d8ae4b064592b2d133e17d23c67b8d50dc60",
+   "branch": "dependabot/npm_and_yarn/Blockchain/Dev/develop/dotenv-17.4.2",
+   "base": "develop",
+   "n_files": 21,
+   "kit_paths_touched": [
+    "Blockchain/Dev/package-lock.json"
+   ],
+   "census_keys_in_title": [],
+   "client_human": false
+  },
+  "572": {
+   "title": "chore(deps-dev): bump @types/office-js from 1.0.599 to 1.0.610 in /Blockchain/Dev in the types group across 1 directory",
+   "user": "dependabot[bot]",
+   "created_at": "2026-07-20T20:19:15Z",
+   "head": "4ea847b39ec8cb2db1e7bee0eb9355e35a8c4208",
+   "branch": "dependabot/npm_and_yarn/Blockchain/Dev/develop/types-1409c3626d",
+   "base": "develop",
+   "n_files": 2,
+   "kit_paths_touched": [
+    "Blockchain/Dev/package-lock.json"
+   ],
+   "census_keys_in_title": [],
+   "client_human": false
+  }
+ }
+}

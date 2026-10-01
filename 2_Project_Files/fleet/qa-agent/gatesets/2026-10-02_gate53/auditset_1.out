@@ -1,0 +1,22 @@
+auditset_gate53 2026-10-01T14:38:36Z | base ea6fcecc3a6f | head ce051988b787 | today (UTC, the lapse clock) 2026-10-01
+INFO BASE advisory report: LIVE `npm audit --json --package-lock-only` (npm 11.5.1) at ea6fcecc3a6f rc 1 (non-zero means advisories exist) -> /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/79817561-2a8e-42cd-8745-2ef3ab0b0516/scratchpad/g53_sp/npm_audit_base_143836.json
+INFO HEAD advisory report: LIVE `npm audit --json --package-lock-only` (npm 11.5.1) at ce051988b787 rc 1 (non-zero means advisories exist) -> /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/79817561-2a8e-42cd-8745-2ef3ab0b0516/scratchpad/g53_sp/npm_audit_head_143836.json
+BASE audit-gate: 11 distinct advisories reported, 25 baselined.
+BASE CLEANUP (advisory): 14 baseline entries are no longer reported — remove: GHSA-2mjp-6q6p-2qxm GHSA-35p6-xmwp-9g52 GHSA-4992-7rv2-5pvq GHSA-g8m3-5g58-fq7m GHSA-g9mf-h72j-4rw9 GHSA-p88m-4jfj-68fv GHSA-r53p-7pc4-xj5r GHSA-v9p9-hfj2-hcw8 GHSA-vrm6-8vpv-qv8q GHSA-vxpw-j846-p89q GHSA-v2v4-37r5-5v8g GHSA-8xcm-r25x-g524 GHSA-m8rv-5g2x-5cg5 GHSA-v3r7-h72x-cjcm
+BASE OK — no advisories outside the triaged baseline. (rc 0)
+HEAD audit-gate: 9 distinct advisories reported, 24 baselined.
+HEAD CLEANUP (advisory): 15 baseline entries are no longer reported — remove: GHSA-2mjp-6q6p-2qxm GHSA-35p6-xmwp-9g52 GHSA-4992-7rv2-5pvq GHSA-g8m3-5g58-fq7m GHSA-g9mf-h72j-4rw9 GHSA-p88m-4jfj-68fv GHSA-r53p-7pc4-xj5r GHSA-v9p9-hfj2-hcw8 GHSA-vrm6-8vpv-qv8q GHSA-vxpw-j846-p89q GHSA-v2v4-37r5-5v8g GHSA-92pp-h63x-v22m GHSA-8xcm-r25x-g524 GHSA-m8rv-5g2x-5cg5 GHSA-v3r7-h72x-cjcm
+HEAD OK — no advisories outside the triaged baseline. (rc 0)
+RED  audit-gate: 11 distinct advisories reported, 24 baselined.
+RED  CLEANUP (advisory): 14 baseline entries are no longer reported — remove: GHSA-2mjp-6q6p-2qxm GHSA-35p6-xmwp-9g52 GHSA-4992-7rv2-5pvq GHSA-g8m3-5g58-fq7m GHSA-g9mf-h72j-4rw9 GHSA-p88m-4jfj-68fv GHSA-r53p-7pc4-xj5r GHSA-v9p9-hfj2-hcw8 GHSA-vrm6-8vpv-qv8q GHSA-vxpw-j846-p89q GHSA-v2v4-37r5-5v8g GHSA-8xcm-r25x-g524 GHSA-m8rv-5g2x-5cg5 GHSA-v3r7-h72x-cjcm
+RED  FAIL — new ['GHSA-frvp-7c67-39w9'] | lapsed [] (rc 1)
+PASS A1 BASE: rc 0 True | reported 11 (want 11), baselined 25 (want 25), CLEANUP 14 (want 14) | GHSA-frvp-7c67-39w9 reported AND baselined: True
+PASS A2 HEAD: rc 0 True | reported 9 (want 9), baselined 24 (want 24), CLEANUP 15 (want 15) | GHSA-frvp-7c67-39w9 in neither set: True | CLEANUP names GHSA-92pp-h63x-v22m: True
+PASS A3 RED-FIRST: develop's tree + the head's baseline (row out, NO override) -> rc 1 with fresh == ['GHSA-frvp-7c67-39w9'] (want [GHSA-frvp-7c67-39w9]) and lapsed []
+WHY  no longer reported at head: GHSA-92pp-h63x-v22m @hono/node-server moderate range <1.19.13 via node(s) ['node_modules/@prisma/dev/node_modules/@hono/node-server'] | baselined at base: True | in GRANDFATHERED-style no-expiry: True
+WHY  no longer reported at head: GHSA-frvp-7c67-39w9 @hono/node-server moderate range <1.19.15 via node(s) ['node_modules/@prisma/dev/node_modules/@hono/node-server'] | baselined at base: True | in GRANDFATHERED-style no-expiry: False
+PASS A4 WHY 11 -> 9: gone ['GHSA-92pp-h63x-v22m', 'GHSA-frvp-7c67-39w9'], new NONE | every gone advisory was carried ONLY by node_modules/@prisma/dev/node_modules/@hono/node-server (the pruned copy): True | so the "two" are GHSA-frvp-7c67-39w9 itself and ['GHSA-92pp-h63x-v22m']; no third advisory moved
+INFO package @hono/node-server | base: moderate via ['GHSA-92pp-h63x-v22m', 'GHSA-frvp-7c67-39w9'] fixAvailable true | head: absent
+INFO package @prisma/dev | base: moderate via ['@hono/node-server', 'valibot'] fixAvailable true | head: moderate via ['valibot'] fixAvailable {"name": "prisma", "version": "6.12.0", "isSemVerMajor": true}
+INFO package prisma | base: high via ['@prisma/config', '@prisma/dev'] fixAvailable true | head: high via ['@prisma/config', '@prisma/dev'] fixAvailable {"name": "prisma", "version": "6.12.0", "isSemVerMajor": true}
+AUDITSET PASS: 0 FAIL of 4 checks | base ea6fcecc3a6f head ce051988b787 | reported 11 -> 9, baselined 25 -> 24, CLEANUP 14 -> 15, red-first fresh ['GHSA-frvp-7c67-39w9']
