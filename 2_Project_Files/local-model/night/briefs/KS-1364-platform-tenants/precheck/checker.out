@@ -1,0 +1,38 @@
+mode: code_patch
+diff_blocks=1 all_blocks=1 prose_outside_chars=0
+wrote /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/briefs/KS-1364-platform-tenants/precheck/out.md.checker/patch.diff lines=61
+PASS A1 output is exactly one fenced ```diff block, nothing outside it
+clone clean at pinned tip 0736d8b7849ef6c725c891d7254f2a3e21f42eb6
+runner: vitest
+--- baseline at the untouched tip (whole services/tenant-provisioning suite + tsc)
+baseline suite rc=0 total=13 passed=13 failed=0 suites_failed=0 loaded=1 failed_names=[]
+baseline tsc rc=0 (0 lines)
+sections=2 miscounted_sections=0
+section 1 Blockchain/Dev/services/tenant-provisioning/src/tenant-provisioning.openapi.ts: applies (strict)
+section 2 Blockchain/Dev/services/tenant-provisioning/src/__tests__/ks1364-platform-tenant-patch-body-required.test.ts: applies (strict)
+PASS A2 diff applies at the tip (strict git apply --check, every section, hunk headers consistent)
+touched files (2): Blockchain/Dev/services/tenant-provisioning/src/__tests__/ks1364-platform-tenant-patch-body-required.test.ts Blockchain/Dev/services/tenant-provisioning/src/tenant-provisioning.openapi.ts  (+49/-0)
+PASS A3 touched-file set == { Blockchain/Dev/services/tenant-provisioning/src/tenant-provisioning.openapi.ts , Blockchain/Dev/services/tenant-provisioning/src/__tests__/ks1364-platform-tenant-patch-body-required.test.ts }
+A3b: no must_change sites in the input — skipped
+A3c: measuring the product + test sections together (the test file is in the diff)
+PASS A3c every '+' line the brief adds is in the product hunk (1 line(s)), and no tip line is re-added as a '+' (A3d)
+A3i: every '+' line the brief adds is in the applied Blockchain/Dev/services/tenant-provisioning/src/tenant-provisioning.openapi.ts byte-exact incl. leading whitespace (apply mode strict): OK 1 line(s) byte-exact incl. leading whitespace (of 1; 1 line(s) added by the apply)
+test-only at tip: rc=1 total=4 passed=3 failed=1 suites_failed=2 loaded=1 failed_names=['KS-1364: PATCH /api/platform/tenants/{id} publishes a REQUIRED request body RED KS-1364 TP1: PATCH /api/platform/tenants/{id} marks its request body required']
+A4 declared red cell(s) (brief ## Red cells, assertion red): RED KS-1364 TP1: PATCH /api/platform/tenants/{id} marks its 
+PASS A4 RED-FIRST: src/__tests__/ks1364-platform-tenant-patch-body-required.test.ts fails at the untouched tip (1 failed / 4 run; controls green; assertion reds)
+test after product hunk: rc=0 total=4 passed=4 failed=0 suites_failed=0 loaded=1 failed_names=[]
+PASS A5 GREEN-AFTER: src/__tests__/ks1364-platform-tenant-patch-body-required.test.ts passes with the product hunk (4 passed / 4 run)
+INFO control cell present: 3 cell(s) passed BEFORE and 4 AFTER (the harness reaches the code both times)
+after suite rc=0 total=17 passed=17 failed=0 suites_failed=0 loaded=1 failed_names=[]
+baseline: total=13 failed=0 | after: total=17 failed=0
+develop's own reds (attributed, not counted): []
+NEW reds: []
+reds fixed by the patch: []
+tests added: 4
+PASS A6 whole services/tenant-provisioning suite: no NEW red vs the untouched tip
+PASS A7 tsc --noEmit for services/tenant-provisioning: rc 0 after the patch (baseline rc=0)
+INFO tsc on the test file alone (--types node,vitest/globals): rc=0 (0 lines; not gated — the runner does not type-check and the service tsconfig excludes __tests__)
+SUMMARY files=2 +49/-0 test=src/__tests__/ks1364-platform-tenant-patch-body-required.test.ts red_first=yes apply_mode=strict
+RESULT: PASS (7/7)
+PASS A2a ANCHOR: every hunk's old side sits at its header's start line at the tip (SUMMARY hunks=1 ok=1 bad=0 skipped_newfile=1)
+SPARK RESULT: PASS (checker rc 0 + A2a anchor OK)

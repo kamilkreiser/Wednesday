@@ -1,0 +1,59 @@
+--- a/Blockchain/Dev/services/originate/src/originate.openapi.ts
++++ b/Blockchain/Dev/services/originate/src/originate.openapi.ts
+@@ -2053,6 +2053,7 @@
+   ...sla('read'),
+   request: {
+     body: {
++      required: true,
+       content: {
+         'application/json': { schema: V2VerifyRequestSchema },
+       },
+--- /dev/null
++++ b/Blockchain/Dev/services/originate/src/__tests__/ks1364-v2-verification-verify-body-required.test.ts
+@@ -0,0 +1,46 @@
++// KS-1364 (sweep 4): the published contract for POST /api/v2/verification/verify did not mark the request body
++// required, so a spec-driven caller (Schemathesis) sent no body at all and the handler answered 400. The handler
++// (routes/verificationV2.ts) resolves a hash from hash, providedHash, contentHash or documentHash, else uses
++// documentId or documentData, and answers 400 when none is present. An absent body arrives as {} and is refused,
++// so the spec now says the body is required. This file renders the document the generator publishes, from the
++// shared registry the originate module populates on import. No server, no database, no network.
++import { generateOpenApiDocument } from '@secuura/shared';
++import '../originate.openapi';
++
++type AnyObj = Record<string, any>;
++
++const doc = generateOpenApiDocument({ title: 'originate (ks1364 pin)', version: '0.0.0' }) as AnyObj;
++
++const V2 = '/api/v2/verification/verify';
++
++function operation(path: string, method: string): AnyObj | undefined {
++  return doc.paths?.[path]?.[method];
++}
++
++function bodyRef(path: string): string | undefined {
++  return operation(path, 'post')?.requestBody?.content?.['application/json']?.schema?.$ref;
++}
++
++describe('KS-1364: POST /api/v2/verification/verify publishes a REQUIRED request body', () => {
++  it('RED KS-1364 VV1: POST /api/v2/verification/verify marks its request body required', () => {
++    expect(operation(V2, 'post')?.requestBody?.required).toBe(true);
++  });
++
++  it('control KS-1364 VC1: the v2 body keeps its schema and the route stays public (security [])', () => {
++    expect(bodyRef(V2)).toBe('#/components/schemas/V2VerifyRequest');
++    expect(operation(V2, 'post')?.security).toEqual([]);
++  });
++
++  it('control KS-1364 VC2: the v2 request schema keeps every field optional (the handler picks one)', () => {
++    const s = doc.components?.schemas?.V2VerifyRequest;
++    expect(s).toBeDefined();
++    expect(s?.required).toBeUndefined();
++    expect(Object.keys(s?.properties ?? {})).toEqual(
++      expect.arrayContaining(['hash', 'contentHash', 'providedHash', 'documentHash', 'documentId', 'documentData']),
++    );
++  });
++
++  it('control KS-1364 VC3: the v1 POST /api/verification/verify keeps its own request body schema', () => {
++    expect(bodyRef('/api/verification/verify')).toBe('#/components/schemas/VerifyRequest');
++  });
++});

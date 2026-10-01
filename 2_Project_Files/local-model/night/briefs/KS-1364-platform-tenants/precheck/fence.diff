@@ -1,0 +1,61 @@
+--- a/Blockchain/Dev/services/tenant-provisioning/src/tenant-provisioning.openapi.ts
++++ b/Blockchain/Dev/services/tenant-provisioning/src/tenant-provisioning.openapi.ts
+@@ -521,6 +521,7 @@
+   request: {
+     params: z.object({ id: z.string().openapi({ example: FX.tenant.id }) }),
+     body: {
++      required: true,
+       content: {
+         'application/json': { schema: TenantUpdateRequestSchema },
+       },
+--- /dev/null
++++ b/Blockchain/Dev/services/tenant-provisioning/src/__tests__/ks1364-platform-tenant-patch-body-required.test.ts
+@@ -0,0 +1,48 @@
++// KS-1364 (sweep 4): the published contract for PATCH /api/platform/tenants/{id} did not mark the request body
++// required, so a spec-driven caller (Schemathesis) sent no body at all and the handler answered 400. The handler
++// (index.ts, app.patch('/api/tenants/:id')) parses the body with a partial-update schema that accepts {}, then
++// refuses an update with no fields: "No fields to update", 400. An absent body arrives as {} and is refused, so
++// the spec now says the body is required. This file renders the document the generator publishes, from the
++// shared registry the tenant-provisioning module populates on import. No server, no database, no network.
++import { describe, it, expect } from 'vitest';
++import { generateOpenApiDocument } from '@secuura/shared';
++import '../tenant-provisioning.openapi';
++
++type AnyObj = Record<string, any>;
++
++const doc = generateOpenApiDocument({ title: 'tenant-provisioning (ks1364 pin)', version: '0.0.0' }) as AnyObj;
++
++const TENANT = '/api/platform/tenants/{id}';
++
++function operation(path: string, method: string): AnyObj | undefined {
++  return doc.paths?.[path]?.[method];
++}
++
++function bodyRef(path: string, method: string): string | undefined {
++  return operation(path, method)?.requestBody?.content?.['application/json']?.schema?.$ref;
++}
++
++describe('KS-1364: PATCH /api/platform/tenants/{id} publishes a REQUIRED request body', () => {
++  it('RED KS-1364 TP1: PATCH /api/platform/tenants/{id} marks its request body required', () => {
++    expect(operation(TENANT, 'patch')?.requestBody?.required).toBe(true);
++  });
++
++  it('control KS-1364 TC1: the PATCH body keeps its schema, bearerAuth and its 400', () => {
++    expect(bodyRef(TENANT, 'patch')).toBe('#/components/schemas/TenantUpdateRequest');
++    expect(operation(TENANT, 'patch')?.security).toEqual([{ bearerAuth: [] }]);
++    expect(Object.keys(operation(TENANT, 'patch')?.responses ?? {})).toEqual(expect.arrayContaining(['200', '400']));
++  });
++
++  it('control KS-1364 TC2: the update schema stays a partial update with no required fields', () => {
++    const s = doc.components?.schemas?.TenantUpdateRequest;
++    expect(s).toBeDefined();
++    expect(s?.required).toBeUndefined();
++  });
++
++  it('control KS-1364 TC3: the sibling PATCH /status and DELETE keep their own request body schemas', () => {
++    expect({ status: bodyRef(TENANT + '/status', 'patch'), del: bodyRef(TENANT, 'delete') }).toEqual({
++      status: '#/components/schemas/TenantStatusUpdateRequest',
++      del: '#/components/schemas/TenantDeleteRequest',
++    });
++  });
++});
