@@ -1,0 +1,49 @@
+specdiff_gate52 | base 0736d8b7849e | #1367 head ac3ceee7f440 | #1368 head 2a3dcd912a33 | END_B 48f5f8afa6ef | clone /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/79817561-2a8e-42cd-8745-2ef3ab0b0516/scratchpad/g52_sp/clone
+--- #1367 (KS-1015, A (merged FIRST))
+PASS #1367 S1 file set: 3 paths | extra [] | missing []
+    numstat Blockchain/Dev/docs/openapi/secuura-api.yaml +30/-1
+    numstat Blockchain/Dev/services/referral/src/__tests__/ks1015-referral-lookup-spec-declares-envelope.test.ts +76/-0
+    numstat Blockchain/Dev/services/referral/src/referral.openapi.ts +21/-1
+PASS #1367 S1 numstat: openapi.ts {'Blockchain/Dev/services/referral/src/referral.openapi.ts': '+21/-1'} (kit {'Blockchain/Dev/services/referral/src/referral.openapi.ts': '+21/-1'}) | yaml +30/-1 (kit +30/-1) | whole PR +127/-2 (the seat claimed +127/-2)
+    referral.openapi.ts: -1 +21 | the removed line(s): ["content: { 'application/json': { schema: ReferralCodeSchema } },"] | GET block :471-:510, its 200 :478-:501 | every changed line inside the 200: True
+PASS #1367 S2 only the GET 200 changed: one removed `ReferralCodeSchema` content line: True | 21 added lines all inside the 200 of GET /api/referrals/{code}: True
+    yaml +30/-1 | removed ['$ref: "#/components/schemas/ReferralCode"'] | every changed line (new 30, old 1) lands in (/api/referrals/{code}, get, 200): True | distinct locations [('/api/referrals/{code}', 'get', '200')]
+PASS #1367 S3 yaml: the one removed line is the ReferralCode $ref, all hunks in the GET 200: True
+    goldens (name, rc, offset lines, sha256): [('spark_secuura_2026-09-30_KS-1015-envelope', 0, 0, '45a105d11745')] | golden tree ab42b06aebed
+    golden == head __tests__/ks1015-referral-lookup-spec-declares-envelope.test.ts: True
+    golden == head referral.openapi.ts: True
+    CONTROL the yaml: golden tree == head: False (the goldens carry no yaml: must be False)
+PASS #1367 S4 goldens byte-equal: 2 of 2 non-yaml paths blob-equal to the golden(s) applied onto develop; golden sha256 == kit: True; yaml control differs: True
+PASS #1367 S5 yaml sha: sha256 43c71cf6d5f213b6 (the seat 43c71cf6d5f213b6) | 39889 lines (kit 39889) | '        required: true' lines 71 (kit 71)
+    ks1015-referral-lookup-spec-declares-envelope.test.ts: RED ['A1', 'A2', 'A3'] | control 3 | imports ['../referral.openapi', '@secuura/shared', 'vitest']
+PASS #1367 S6 red cells: RED ['A1', 'A2', 'A3'] (kit ['A1', 'A2', 'A3']) | control cells 3 (kit 3)
+PASS #1367 S7 no runtime path: outside prefixes NONE | non-test non-openapi source paths NONE | CONTROL the same listing on develop~2..develop~1 (#1364) reads 2 path(s), 2 of them non-test non-openapi source (must be > 0)
+--- #1368 (KS-1364, B (merged SECOND, onto A's squash))
+PASS #1368 S1 file set: 5 paths | extra [] | missing []
+    numstat Blockchain/Dev/docs/openapi/secuura-api.yaml +2/-0
+    numstat Blockchain/Dev/services/originate/src/__tests__/ks1364-v2-verification-verify-body-required.test.ts +46/-0
+    numstat Blockchain/Dev/services/originate/src/originate.openapi.ts +1/-0
+    numstat Blockchain/Dev/services/tenant-provisioning/src/__tests__/ks1364-platform-tenant-patch-body-required.test.ts +48/-0
+    numstat Blockchain/Dev/services/tenant-provisioning/src/tenant-provisioning.openapi.ts +1/-0
+PASS #1368 S1 numstat: openapi.ts {'Blockchain/Dev/services/originate/src/originate.openapi.ts': '+1/-0', 'Blockchain/Dev/services/tenant-provisioning/src/tenant-provisioning.openapi.ts': '+1/-0'} (kit {'Blockchain/Dev/services/tenant-provisioning/src/tenant-provisioning.openapi.ts': '+1/-0', 'Blockchain/Dev/services/originate/src/originate.openapi.ts': '+1/-0'}) | yaml +2/-0 (kit +2/-0) | whole PR +98/-0 (the seat claimed +98/-0)
+    originate.openapi.ts: -0 +1 | inserted `required: true,` 1 | other changed lines 0 | each inside request.body at head: [True]
+    tenant-provisioning.openapi.ts: -0 +1 | inserted `required: true,` 1 | other changed lines 0 | each inside request.body at head: [True]
+PASS #1368 S2 only `required: true` inserted: 2 inserted over 2 files, 0 replacements | files with another change: NONE
+    yaml +2/-0 | == '        required: true': 2 of 2 | directly under requestBody: 2 | ops [('/api/platform/tenants/{id}', 'patch'), ('/api/v2/verification/verify', 'post')]
+PASS #1368 S3 yaml: ops == kit yaml_ops [('/api/platform/tenants/{id}', 'patch'), ('/api/v2/verification/verify', 'post')]: True
+    goldens (name, rc, offset lines, sha256): [('spark_secuura_2026-10-01_KS-1364-platform-tenants', 0, 0, '495e6df123ed'), ('spark_secuura_2026-10-01_KS-1364-v2-verify', 0, 0, 'cc6dc4880a66')] | golden tree 6d9b4300e623
+    golden == head __tests__/ks1364-v2-verification-verify-body-required.test.ts: True
+    golden == head originate.openapi.ts: True
+    golden == head __tests__/ks1364-platform-tenant-patch-body-required.test.ts: True
+    golden == head tenant-provisioning.openapi.ts: True
+    CONTROL the yaml: golden tree == head: False (the goldens carry no yaml: must be False)
+PASS #1368 S4 goldens byte-equal: 4 of 4 non-yaml paths blob-equal to the golden(s) applied onto develop; golden sha256 == kit: True; yaml control differs: True
+PASS #1368 S5 yaml sha: sha256 39f027b63d4aa804 (the seat 39f027b63d4aa804) | 39862 lines (kit 39862) | '        required: true' lines 73 (kit 73)
+    ks1364-v2-verification-verify-body-required.test.ts: RED ['VV1'] | control 3 | imports ['../originate.openapi', '@secuura/shared']
+    ks1364-platform-tenant-patch-body-required.test.ts: RED ['TP1'] | control 3 | imports ['../tenant-provisioning.openapi', '@secuura/shared', 'vitest']
+PASS #1368 S6 red cells: RED ['TP1', 'VV1'] (kit ['TP1', 'VV1']) | control cells 6 (kit 6)
+PASS #1368 S7 no runtime path: outside prefixes NONE | non-test non-openapi source paths NONE | CONTROL the same listing on develop~2..develop~1 (#1364) reads 2 path(s), 2 of them non-test non-openapi source (must be > 0)
+--- the pair
+    CONTROL develop yaml sha256 7089242840e35885 (kit 7089242840e35885), 39860 lines, 71 required
+PASS S8 union yaml at END_B: END_B 48f5f8afa6ef yaml sha256 e761a0b3c1eac6a5 (the seat e761a0b3c1eac6a5) | 39891 lines (kit 39891) | 73 required (kit 73) | develop differs: True
+SPECDIFF PASS: 0 FAIL of 17 checks | base 0736d8b7849e | #1367 ac3ceee7f440 | #1368 2a3dcd912a33

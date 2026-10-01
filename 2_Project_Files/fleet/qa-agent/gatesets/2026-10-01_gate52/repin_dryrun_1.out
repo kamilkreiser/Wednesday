@@ -1,0 +1,29 @@
+LAUNCH ACTION gate52 (DRY RUN) 2026-10-01 20:13:36 AEST / 2026-10-01T10:13:36Z | launcher /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/gatesets/2026-10-01_gate52/launch_qa_secuura_batch1367.sh | pinned develop 0736d8b7849ef6c725c891d7254f2a3e21f42eb6 | END_TREE 48f5f8afa6ef1f03f2d64e4afa24fd9f75213ad7
+  pin #1367 ac3ceee7f440478431a317d3a31a42ab737f57c7 (refs/heads/feature/ks-1015-referral-lookup-spec-declares-envelope-b53-1)
+  pin #1368 2a3dcd912a33b1ced6b6769368d87fce82ab64bc (refs/heads/feature/ks-1364-two-operation-residue-body-required-b53-2)
+--- 0. the pane must be routed (inbox_routing.conf) or cockpit.sh say --mail fails silently
+  routing file /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/inbox_routing.conf — line present: 0 (grep rc=1; want 1 / rc 0)
+  (DRY RUN: reported, not refused — the real run refuses rc 1 here)
+--- 0b. the kit's home: launcher filled for /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/gatesets/2026-10-01_gate52 | this script lives in /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/gatesets/2026-10-01_gate52
+  AT HOME — no re-fill
+--- 1. instrument: git ls-remote origin (ONE read from the Secuura checkout, READ-ONLY)
+  ls-remote rc=0 at 10:13:39Z
+    0736d8b7849ef6c725c891d7254f2a3e21f42eb6	refs/heads/develop
+    ac3ceee7f440478431a317d3a31a42ab737f57c7	refs/heads/feature/ks-1015-referral-lookup-spec-declares-envelope-b53-1
+    2a3dcd912a33b1ced6b6769368d87fce82ab64bc	refs/heads/feature/ks-1364-two-operation-residue-body-required-b53-2
+    ac3ceee7f440478431a317d3a31a42ab737f57c7	refs/pull/1367/head
+    2a3dcd912a33b1ced6b6769368d87fce82ab64bc	refs/pull/1368/head
+--- 2. instrument: the GitHub PULLS API (an independent read of each head, and mergeable) + 2b the OVERLAP / WIDEN census
+  pulls API rc=0
+    API #1367 head ac3ceee7f440478431a317d3a31a42ab737f57c7 base develop mergeable True reads 1 state open
+    API #1368 head 2a3dcd912a33b1ced6b6769368d87fce82ab64bc base develop mergeable True reads 1 state open
+    CLIENT-HUMAN (reported, never sequenced by a gate) #1360 by PeterObeden | head d0e99f181a4e | 15 file(s), none a kit path, no census key
+    CENSUS 21 other open PR(s) read | 0 touch a kit path or carry a kit key outside reported_overlaps | 0 expected overlap(s) reported | 0 sequenced by Wednesday | 0 seat-branch PR(s) disjoint | 1 client-human PR(s) reported | 7 kit path(s), 2 kit key(s)
+  OVERLAP census clean
+--- 3. the heads, judged (both instruments == the pin, open, not mergeable:false, based on develop)
+  #1367  ls-remote pull/head ac3ceee7f440478431a317d3a31a42ab737f57c7 | branch ac3ceee7f440478431a317d3a31a42ab737f57c7 | API ac3ceee7f440478431a317d3a31a42ab737f57c7 (base develop, state open, mergeable True) | pinned ac3ceee7f440478431a317d3a31a42ab737f57c7
+  #1368  ls-remote pull/head 2a3dcd912a33b1ced6b6769368d87fce82ab64bc | branch 2a3dcd912a33b1ced6b6769368d87fce82ab64bc | API 2a3dcd912a33b1ced6b6769368d87fce82ab64bc (base develop, state open, mergeable True) | pinned 2a3dcd912a33b1ced6b6769368d87fce82ab64bc
+  BOTH INSTRUMENTS AGREE with the pins, 2 of 2.
+--- 3b. develop, read at launch: 0736d8b7849ef6c725c891d7254f2a3e21f42eb6 | the pinned develop 0736d8b7849ef6c725c891d7254f2a3e21f42eb6
+  UNMOVED since the fill — the END_TREE 48f5f8afa6ef1f03f2d64e4afa24fd9f75213ad7 stands
+DRY RUN COMPLETE 2026-10-01T10:13:51Z — every read agrees with the pins; the real run continues with the override check, the usage gate, --check and cockpit.sh add

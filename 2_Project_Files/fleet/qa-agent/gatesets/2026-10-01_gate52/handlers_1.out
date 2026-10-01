@@ -1,0 +1,28 @@
+handlers_gate52 | #1367 tree ac3ceee7f440 | #1368 tree 2a3dcd912a33 | clone /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/79817561-2a8e-42cd-8745-2ef3ab0b0516/scratchpad/g52_sp/clone
+RUNTIME Blockchain/Dev/package-lock.json at 2a3dcd912a33: express 4.22.3 | body-parser 1.20.8 | express-validator 7.3.2
+RUNTIME Blockchain/Dev/services/referral/package-lock.json at 2a3dcd912a33: express 4.22.3 | body-parser 1.20.8 | express-validator None
+RUNTIME Blockchain/Dev/services/tenant-provisioning/package-lock.json at 2a3dcd912a33: express 4.22.3 | body-parser 1.20.8 | express-validator None
+RUNTIME Blockchain/Dev/services/originate/package-lock.json at 2a3dcd912a33: express 4.22.3 | body-parser 1.20.8 | express-validator 7.3.2
+MOUNT referral: referral/src/index.ts:57 app.use(express.json({ limit: '10mb' }));
+MOUNT tenant-provisioning: tenant-provisioning/src/index.ts:19 app.use(express.json({ limit: '1mb' }));
+MOUNT originate: originate/src/index.ts:103 app.use(express.json({ limit: '10mb' }));
+=== PART 1 #1367 RL1 GET /api/referrals/{code} (tree ac3ceee7f440)
+    handler referral/src/routes/referrals.ts:95-120 | writes ['404@:101', '200@:105', 'next(error)@:118']
+    handler 200 body (:105): top ['data', 'success'] | data ['code:108', 'customLabel:111', 'isActive:109', 'isExpired:110', 'referredReward:113', 'referrerReward:114']
+    handler 404 body (:101): top ['error', 'success'] | error ['code', 'message'] | its condition (:100) 'if (!referralCode) {' references isActive: False
+    spec referral/src/referral.openapi.ts:471-510 | statuses ['400', '200', '404', '429', '500', '502', '503', '401'] | 200 z.object :486 top ['data', 'success'] | data .object :489 ['code', 'customLabel', 'isActive', 'isExpired', 'referredReward', 'referrerReward'] | optional ['customLabel']
+    yaml /api/referrals/{code} get 200 (:32172): required lists ["['code', 'isActive', 'isExpired', 'referredReward', 'referrerReward']@:32198", "['success', 'data']@:32204"]
+    shared ErrorResponseSchema (responses.ts:45): top ['error', 'requestId', 'success'] (required ['error', 'success']) | error ['code', 'details', 'message'] (required ['code', 'message'])
+OK   RL1 200 top keys: handler ['data', 'success'] == spec ['data', 'success']
+OK   RL1 200 data keys: handler ['code', 'customLabel', 'isActive', 'isExpired', 'referredReward', 'referrerReward'] == spec ['code', 'customLabel', 'isActive', 'isExpired', 'referredReward', 'referrerReward']
+OK   RL1 yaml required: yaml required lists [['code', 'isActive', 'isExpired', 'referredReward', 'referrerReward'], ['data', 'success']] == the spec's non-optional keys [['code', 'isActive', 'isExpired', 'referredReward', 'referrerReward'], ['data', 'success']]
+OK   RL1 statuses declared: handler writes ['200', '404', 'next(error)']; undeclared in the spec: NONE
+OK   RL1 404 envelope: 404 body top ['error', 'success'] error ['code', 'message'] within ErrorResponse top ['error', 'requestId', 'success'] (required ['error', 'success']) error ['code', 'details', 'message'] (required ['code', 'message'])
+=== PART 2 #1368 absent body (tree 2a3dcd912a33)
+OK   TP1 PATCH /api/platform/tenants/{id}: route tenant-provisioning/src/index.ts:440 | validator :442 (named zod .parse at :442, schema :431) | fields ['name?:432', 'domain?:433', 'industry?:434', 'country?:435', 'test_url?:436', 'live_url?:437'] | required NONE | 4xx branches after the validator ['455 if (sets.length === 0) {'] | guard 'if (sets.length === 0)' :455 answers 400: True | REJECTS-EMPTY (want REJECTS-EMPTY)
+OK   VV1 POST /api/v2/verification/verify: route originate/src/routes/verificationV2.ts:427 | validator :439 (express-validator chain) | fields ['documentId?:430', 'hash?:431', 'contentHash?:432', 'providedHash?:433', 'documentHash?:434', 'documentData?:435'] | required NONE | 4xx branches after the validator ['440 if (!validationErrors.isEmpty()) {', '452 if (!documentId && !hashToVerify && !documentData) {'] | guard 'if (!documentId && !hashToVerify && !documentData)' :452 answers 400: True | aliases ['hash', 'providedHash', 'contentHash', 'documentHash']: coalesce :451 'const hashToVerify = hash || providedHash || contentHash || documentHash;', destructure :450, all named: True | REJECTS-EMPTY (want REJECTS-EMPTY)
+OK   RG-CTL POST /api/referrals/generate: route referral/src/routes/referrals.ts:49 | validator :61 (named zod .parse at :61, schema :16) | fields ['customCode?:17', 'maxUses?:18', 'expiresInDays?:19', 'customLabel?:20'] | required NONE | 4xx branches after the validator NONE | guard None :- answers 400: False | ACCEPTS-EMPTY (want ACCEPTS-EMPTY)  <- CONTROL (PR B's claim)
+INFO RL1: spec statuses the handler never writes itself: ['400', '401', '429', '500', '502', '503'] (401 is jwtAuthenticate at the /api mount, the rest via next(error) / gateway / limiter — the gate rules each)
+INFO RL1: the 404 is described "Code not found / inactive" but its condition 'if (!referralCode) {' references isActive: False (an inactive code answers 200 with isActive:false?)
+INFO RL1: spec-optional data keys ['customLabel']; the handler writes each unconditionally (an undefined value drops from JSON; a null would not)
+HANDLERS PASS: 8 checks, 0 FAIL | envelope RL1 at ac3ceee7f440 | absent-body TP1/VV1 at 2a3dcd912a33 | control RG-CTL
