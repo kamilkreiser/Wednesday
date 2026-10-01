@@ -12,6 +12,16 @@ supersede: replace wholesale; previous = NEXT-PICKUP-FRIDAY.md.pre-0925-rotate-s
 
 **The tree is at `/Users/kamilkreiser/1FILES TO SYNC/FRIDAY`.** Quote every path (spaces).
 
+## 🔴🔴🔴 HANDOVER 2026-10-01 17:50 (Friday, 65% checkpoint) — READ FIRST; supersedes every block below where they differ
+**Kam 17:41:45 (live board), verbatim:** "don't launch anything new but let the agents finish their current tasks and wrap up neatly when ready.  Thanks for a great day". He signs in to a FRESH account tomorrow morning. Usage hit the 90% stop at 17:3x.
+**MERGED TODAY (all head-pinned, trees verified):** HPSM-POC #76 #77 #78 → main e6b5838 (+ #79 contract A1 merging on green, merge_when_green running); analysis #25 #26 #27 #28 (+ #29 merging). Composer #17 → HPSM-light 771ce4a, **DEPLOYED to the demo (C-15), verified live by Friday 13:1x**. MPS: B05 fix round done (b03/importer 74600a5, b03/api 7f6ca4c), NOT merged (needs round-2 gate).
+**LIVE at this checkpoint:** %10 Datasec/Composer-E = B35 (`Datasec Security Composer/1_Project_Definition/Briefs/2026-10-01_B35_backlog-36-37-56-65-and-small.md`; #36 is tier 1 → gate tomorrow). On its READY: open the PR, but DO NOT merge #36 without a gate; close the pane.
+**FIRST TOMORROW (fresh account; read the seat's statusline to confirm the account first):**
+1. Launch the STAGED MPS gate `MPS/1_Project_Definition/Briefs/2026-10-01_B06_QA-gate-round-2-importer-and-api.md` (re-pin heads; round 2 of 2 — a NO GO goes to Kam). Card `datasec-90pct-gates-wait-for-fresh-account-1001` default = this.
+2. A tier-1 gate on B35's Composer PR (#36 pool exhaustion).
+3. HPSM-POC small: point HPSMPOC-166's overlapping line at -181; HPSMPOC-179 (412 undeclared on two client writes) and -180 (schema tier) are ticketed; -177/-178 need Kam.
+**Waiting on Kam:** the Week-1 status report (his hours + send; file in his drawer; https://github.com/datasecau/HPSM-POC-analysis/blob/main/1_Project_Definition/Governance/status-reports/2026-10-01_weekly-status-report-W1_DRAFT-FOR-KAM.md); M2 Product Owner approver (C-37 open); HP access package (HPSMPOC-181).
+
 ## 🔴 STANDING HOLD FOR EVERY DATASEC/HPSM-POC BRIEF (from 2026-10-01 12:1x, card `hpsmpoc-restricted-docs-ai-input-25sep`'s default)
 **No HP Restricted document (the executive deck, the financial model, anything HP marks Restricted) is given to ANY AI tool — Claude seats, subagents, the product's model, Ornith or the Spark — without HP's written approval (signed SOW §4.1.4(c)).** Paste this line into the HOLDS of every HPSM-POC brief until Kam rules the card otherwise.
 
