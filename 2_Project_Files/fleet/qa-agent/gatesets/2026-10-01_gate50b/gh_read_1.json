@@ -1,0 +1,303 @@
+{
+ "read_at": "2026-09-30T23:52:51Z",
+ "prs": {
+  "1364": {
+   "title": "KS-729: remove the dead mwp4 baseline row, correct r53p's reason and the count",
+   "state": "open",
+   "user": "kksecura",
+   "head": "f7466281acf18fd7ea47be19bfa88ececdb3dbb8",
+   "branch": "feature/ks-729-remove-the-dead-mwp4-baseline-row-b51-1",
+   "base": "develop",
+   "base_sha": "723dc0722b68482a03de8577fdb5eb5b3359e725",
+   "mergeable": true,
+   "mergeable_state": "unstable",
+   "files": [
+    [
+     "Blockchain/Dev/scripts/audit/audit-baseline.json",
+     1,
+     8,
+     "modified"
+    ],
+    [
+     "Blockchain/Dev/scripts/audit/baseline-contract.mjs",
+     1,
+     1,
+     "modified"
+    ]
+   ],
+   "commits": [
+    [
+     "f7466281acf18fd7ea47be19bfa88ececdb3dbb8",
+     "KS-729: remove the dead mwp4 baseline row, correct r53p's reason and the count\n\nGHSA-mwp4-54f8-5fhr (ip-address) is reported by neither audit leg at this base,\nso its baseline row is dead weight. Removing it takes the rows from 26 to 25 and\nthe 2026-10-09 expiry cohort from 4 rows to 3.\n\nMeasured before the edit, at develop 723dc0722b68:\n  leg 6 audit:gate   CLEANUP lists 15 entries no longer reported\n  leg 7 audit:locks  reports 18 ids, NONE of those 15 among them\n  15 - 0 still-reported - 14 grandfathered = {GHSA-mwp4-54f8-5fhr}\nLeg 7's own CLEANUP block cannot see this: it filters on scope standalone-locks\nand no baseline row carries a scope field, so that block is empty by construction.\nThe reported map was read by a throwaway probe with a positive control instead.\n\nTwo stale statements corrected in the same pass, both of them measurements that\nhad drifted from what the files say:\n\n1. GHSA-r53p-7pc4-xj5r keeps its row and its grandfathered line. Its reason still\n   claimed \"build and suites UNMEASURED\", which stopped being true once the work\n   behind it was measured. Replaced with the re-measured text, byte-for-byte from\n   the extracted record (1948 B) rather than retyped. package, ticket and\n   decidedAt are untouched and it still carries no expires.\n\n2. baseline-contract.mjs's docstring said \"The 17 entries that predate the expires\n   requirement\" while GRANDFATHERED_NO_EXPIRY holds 18. One line, count only.\n\nDeliberately NOT changed:\n  - no GRANDFATHERED_NO_EXPIRY line removed; the block is byte-equal at 18 ids\n  - baseline-contract.test.mjs untouched, so the \"> 20\" floor is NOT lowered\n    (25 rows keeps it true)\n  - scripts/audit/expected-case-count untouched\n  - nothing re-dated: the three surviving 2026-10-09 rows keep that value\n    byte-equal, and no row's expires changed anywhere\n\nResidue, unchanged by this commit: the 14 grandfathered dead rows (13 undici plus\nGHSA-v2v4-37r5-5v8g) that leg 6's cleanup names on every run are dead\ngrandfathered rows; removal needs the contract floor revisited; Wednesday's to\npropose. Related work sits on KS 470, KS 559, KS 528, KS 530 and KS 1378.\n\nRefs KS-729\n\nCo-Authored-By: Claude Opus 5 <noreply@anthropic.com>"
+    ]
+   ],
+   "body": "## BLUF\n\n**`GHSA-mwp4-54f8-5fhr` (ip-address) is reported by neither audit leg at this base, so its baseline row is dead weight.** Removing it takes the `accepted` rows from **26 to 25** and the 2026-10-09 expiry cohort from **4 rows to 3**. Two stale statements are corrected in the same pass. **No `GRANDFATHERED_NO_EXPIRY` line removed, no third file, and the contract floor is not lowered.**\n\n## What changed \u2014 two files, +2/\u22129\n\n1. **`scripts/audit/audit-baseline.json`** \u2014 `GHSA-mwp4-54f8-5fhr` removed; `GHSA-r53p-7pc4-xj5r`'s `reason` replaced.\n2. **`scripts/audit/baseline-contract.mjs`** \u2014 one docstring line: \"The 17 entries\" \u2192 \"The 18 entries\", because `GRANDFATHERED_NO_EXPIRY` holds 18.\n\n`GHSA-r53p-7pc4-xj5r` **keeps** its row and its grandfathered line. Its `reason` still claimed \"build and suites UNMEASURED\", which stopped being true once that work was measured. The replacement is byte-for-byte from the extracted record (1948 B), not retyped. Its `package`, `ticket` and `decidedAt` are untouched and it still carries no `expires`.\n\n## How the removable set was established\n\nLeg 7's own CLEANUP block **cannot** see these rows: it filters on `e?.scope === 'standalone-locks'` (`audit-locks.mjs:299`) and **no** baseline row carries a `scope` field, so that block is empty by construction. Reading it would have produced a confident wrong answer. Its `reported` map was read instead, by a throwaway probe removed afterwards, with a positive control proving the probe can see rows.\n\n* leg 6 `audit:gate` CLEANUP lists **15** entries no longer reported\n* leg 7 `audit:locks` reports **18** ids \u2014 **none** of those 15 among them\n* **15 \u2212 0 still-reported \u2212 14 grandfathered = `{GHSA-mwp4-54f8-5fhr}`**, and 14 + 1 = 15 exactly\n\n## Test Evidence\n\n**Touched:** two files. `git diff --numstat` = `1 8` and `1 1`. Nothing else: `expected-case-count` and `baseline-contract.test.mjs` are both untouched, confirmed by name and by blob.\n\n**Ran, at head on base `723dc0722b68` (Darwin arm64, node v24.7.0):**\n\n* `npm run audit:gate` \u2014 **rc 0**. Reads `11 distinct advisories reported, 25 baselined` (25, down from 26). Its CLEANUP list is now **14** entries and **no longer names `GHSA-mwp4-54f8-5fhr`**; the 14 are 13 undici plus `GHSA-v2v4-37r5-5v8g`.\n* `npm run audit:locks` \u2014 **rc 0**, `6 advisories match, 6 already baselined`.\n* `npm run audit:contract` \u2014 **rc 0**, 59 tests pass, 0 fail.\n\n**Proved by parsing both blobs, not by reading the diff:**\n\n* rows 26 \u2192 25; removed set exactly `{GHSA-mwp4-54f8-5fhr}`, added set empty;\n* the only surviving row that differs from the base is `GHSA-r53p-7pc4-xj5r`, and the only field of it that differs is `reason`;\n* its new `reason` is character-identical to the 1948 B extracted file; the stale clause is present before and absent after;\n* **nothing re-dated**: the three surviving 2026-10-09 rows keep that value byte-equal, and **no** row's `expires` changed anywhere in the file;\n* `GRANDFATHERED_NO_EXPIRY` is **byte-equal** and still holds **18** ids;\n* `baseline-contract.mjs` differs on **exactly one line** (`:44`), line count unchanged at 228;\n* `baseline-contract.test.mjs` is blob-identical (`2379c0aeee6e`), so the `> 20` floor at `:217` is **not** lowered \u2014 and 25 rows keeps it true.\n\n**A refusal control per gate, each restored by byte copy with `cmp` rc 0 afterwards:**\n\n* **leg 6 + leg 7, baseline emptied** \u2192 both **rc 1**, each enumerating the ids it reports (11 and 6).\n* **leg 6 + leg 7, one still-reported row removed** (`GHSA-337j-9hxr-rhxg`) \u2192 both **rc 1**, each naming that exact id; leg 6 prints `FAIL \u2014 1 NEW advisory not in the baseline: - GHSA-337j-9hxr-rhxg`.\n* **`audit:contract`, a no-expiry row planted outside `GRANDFATHERED_NO_EXPIRY`** \u2192 **rc 1**, 6 tests failing with `the committed audit-baseline.json is malformed: GHSA-b51c-0nt-rol01 (expires)`.\n\nSo all three gates are green here **and** each is demonstrably able to go red.\n\n**NOT run:**\n\n* No service suite, no image build: this touches only `scripts/audit/`, which ships in no image and is consumed by no service at runtime.\n* No Schemathesis, Akto, Playwright or k6 \u2014 none reads the baseline.\n* No deploy anywhere.\n* The 14 grandfathered dead rows are **not** removed here (see Residue).\n\n**Migrations + config:** none.\n\n## Residue, unchanged by this PR\n\nThe 14 grandfathered dead rows (13 undici plus `GHSA-v2v4-37r5-5v8g`) that leg 6's cleanup names on every run are dead grandfathered rows; removal needs the contract floor revisited; Wednesday's to propose.\n\n## Fuse\n\nThe 2026-10-09 cohort goes from 4 rows to **3**: `GHSA-frvp-7c67-39w9` (KS 530), `GHSA-wrjc-x8rr-h8h6` and `GHSA-337j-9hxr-rhxg` (KS 528). The date itself is unchanged, and the real fixes stay on those tickets. Related work sits on KS 470, KS 559 and KS 1378.\n\nRefs KS-729\n"
+  }
+ },
+ "census": {
+  "1362": {
+   "title": "PS-929: history \u2014 Dashboard status-badge contrast fix, the axe \"incomplete\" blind spot, and the slot-3 pairing",
+   "user": "PeterObeden",
+   "created_at": "2026-09-30T12:58:08Z",
+   "head": "df674d23fdc7397d491716395fb1601962bbef97",
+   "branch": "feature/history-ps-929-dashboard-a11y",
+   "base": "develop",
+   "n_files": 1,
+   "kit_paths_touched": [],
+   "census_keys_in_title": [],
+   "client_human": true
+  },
+  "1360": {
+   "title": "KS-1380: revert #1358 (15 lockfiles) at Peter's request",
+   "user": "PeterObeden",
+   "created_at": "2026-09-30T07:38:55Z",
+   "head": "d0e99f181a4e23fcadcb8fdf7c81e4065e6d63f7",
+   "branch": "feature/ks-1380-revert-pr-1358",
+   "base": "develop",
+   "n_files": 15,
+   "kit_paths_touched": [],
+   "census_keys_in_title": [],
+   "client_human": true
+  },
+  "1253": {
+   "title": "KS-1297 GUARDGAPS: anchor the abort counts, cover the worktree, pin bare call sites",
+   "user": "kksecura",
+   "created_at": "2026-09-25T14:49:46Z",
+   "head": "91e066264004fdb22c67efb0c25fc44375ec6eac",
+   "branch": "feature/ks-1297-fixture-guard-anchor-and-two-gaps-l5-1",
+   "base": "develop",
+   "n_files": 1,
+   "kit_paths_touched": [],
+   "census_keys_in_title": [],
+   "client_human": false
+  },
+  "1250": {
+   "title": "KS-1302 + KS-1303 RSSTRAP: trap the runner's short TMPDIR, and drop the output pipe",
+   "user": "kksecura",
+   "created_at": "2026-09-25T14:28:57Z",
+   "head": "2b8dcb824dd2c5cd4b92757934d7de9d28813a22",
+   "branch": "feature/ks-1302-runner-tmpdir-residue-and-orphan-pipe-l5-1",
+   "base": "develop",
+   "n_files": 2,
+   "kit_paths_touched": [],
+   "census_keys_in_title": [],
+   "client_human": false
+  },
+  "1129": {
+   "title": "docs(history): 2026-09-21 local rebuild on develop 7be81d5c9, OOM diagnosis, preflight 15/15",
+   "user": "StuJam-Secuura",
+   "created_at": "2026-09-21T08:45:36Z",
+   "head": "25c31a0e82990844181a5b9c9a479722dc30baea",
+   "branch": "chore/history-2026-09-21-local-rebuild-preflight",
+   "base": "develop",
+   "n_files": 1,
+   "kit_paths_touched": [],
+   "census_keys_in_title": [],
+   "client_human": false
+  },
+  "995": {
+   "title": "KS-741: strip `x-emitter-internal` at originate's own inbound \u2014 the marker's non-spoofability no longer rests on an unstated convention",
+   "user": "kksecura",
+   "created_at": "2026-09-14T20:37:56Z",
+   "head": "b8155636e8e60ee9646b10217859fcd274ef87f5",
+   "branch": "feature/ks-741-x-emitter-internal-is-unstripped-on-the-originate-route-the",
+   "base": "develop",
+   "n_files": 5,
+   "kit_paths_touched": [],
+   "census_keys_in_title": [],
+   "client_human": false
+  },
+  "989": {
+   "title": "KS-973: the pre-suite step redacts the generated password, pins its DEGRADED stream, drives its second quarantine call \u2014 items 5, 6 + two residues; items 3/4 wait for #927; items 1/2 are L11/L12 files",
+   "user": "kksecura",
+   "created_at": "2026-09-14T07:22:52Z",
+   "head": "e62fd23cda1bc120716e5f592efac2b8abea97bf",
+   "branch": "feature/ks-973-ks-969-round-1-gate-residue-the-pre-suite-step-and-its-own",
+   "base": "develop",
+   "n_files": 5,
+   "kit_paths_touched": [],
+   "census_keys_in_title": [],
+   "client_human": false
+  },
+  "949": {
+   "title": "chore(deps-dev): bump prisma from 7.8.0 to 7.10.0 in /Blockchain/Dev",
+   "user": "dependabot[bot]",
+   "created_at": "2026-09-10T07:59:49Z",
+   "head": "7ee1a26e634f33b6a4ae115d559f5440a90f6fff",
+   "branch": "dependabot/npm_and_yarn/Blockchain/Dev/develop/prisma-7.10.0",
+   "base": "develop",
+   "n_files": 2,
+   "kit_paths_touched": [],
+   "census_keys_in_title": [],
+   "client_human": false
+  },
+  "948": {
+   "title": "chore(deps): bump vite from 6.4.3 to 8.3.1 in /Blockchain/Dev",
+   "user": "dependabot[bot]",
+   "created_at": "2026-09-10T07:58:12Z",
+   "head": "f6afb75d790c6c7e52b4c14e2c22054480a0628e",
+   "branch": "dependabot/npm_and_yarn/Blockchain/Dev/develop/vite-8.2.2",
+   "base": "develop",
+   "n_files": 10,
+   "kit_paths_touched": [],
+   "census_keys_in_title": [],
+   "client_human": false
+  },
+  "947": {
+   "title": "chore(deps-dev): bump @testing-library/jest-dom from 6.9.1 to 7.0.1 in /Blockchain/Dev",
+   "user": "dependabot[bot]",
+   "created_at": "2026-09-10T07:46:52Z",
+   "head": "d68b9d79e67f336e527cc4eef7eaf07fa78670bb",
+   "branch": "dependabot/npm_and_yarn/Blockchain/Dev/develop/testing-library/jest-dom-7.0.1",
+   "base": "develop",
+   "n_files": 2,
+   "kit_paths_touched": [],
+   "census_keys_in_title": [],
+   "client_human": false
+  },
+  "946": {
+   "title": "chore(deps): bump @fluentui/react-icons from 2.0.331 to 2.0.339 in /Blockchain/Dev",
+   "user": "dependabot[bot]",
+   "created_at": "2026-09-10T07:44:37Z",
+   "head": "41cc5209aaf2f8369f4ce8d5735a43fb07340d0b",
+   "branch": "dependabot/npm_and_yarn/Blockchain/Dev/develop/fluentui/react-icons-2.0.339",
+   "base": "develop",
+   "n_files": 2,
+   "kit_paths_touched": [],
+   "census_keys_in_title": [],
+   "client_human": false
+  },
+  "945": {
+   "title": "chore(deps-dev): bump @axe-core/playwright from 4.11.3 to 4.13.0 in /Blockchain/Dev",
+   "user": "dependabot[bot]",
+   "created_at": "2026-09-10T07:43:47Z",
+   "head": "264098fce62b1e839c506f61fa443830fdba996a",
+   "branch": "dependabot/npm_and_yarn/Blockchain/Dev/develop/axe-core/playwright-4.13.0",
+   "base": "develop",
+   "n_files": 2,
+   "kit_paths_touched": [],
+   "census_keys_in_title": [],
+   "client_human": false
+  },
+  "927": {
+   "title": "KS-1027: close Peter's four #904 follow-ups \u2014 the OTHER cp, the stash the refusal deleted, and the duplication nobody had justified",
+   "user": "kksecura",
+   "created_at": "2026-09-09T10:52:11Z",
+   "head": "1041d2d32d389a5f21cf622dfcf4d5be66e0ce2f",
+   "branch": "feature/ks-1027-ks992-followups",
+   "base": "develop",
+   "n_files": 2,
+   "kit_paths_touched": [],
+   "census_keys_in_title": [],
+   "client_human": false
+  },
+  "923": {
+   "title": "KS-736: the mount-auth check scored authenticateToken(false) as green, and could not see half its own surface",
+   "user": "kksecura",
+   "created_at": "2026-09-09T08:53:13Z",
+   "head": "d127dc7d4655a4e227d4f6e511f469c456eaabb7",
+   "branch": "kamilkreiser/ks-736-mount-auth-retag",
+   "base": "develop",
+   "n_files": 1,
+   "kit_paths_touched": [],
+   "census_keys_in_title": [],
+   "client_human": false
+  },
+  "920": {
+   "title": "KS-734: make tests/e2e runnable from a clean checkout, and baseline what it actually reports",
+   "user": "kksecura",
+   "created_at": "2026-09-09T07:38:52Z",
+   "head": "2112a99e31aec4b6e132dc6519c75d3afb6b2b02",
+   "branch": "kamilkreiser/ks-734-e2e-suite-installable",
+   "base": "develop",
+   "n_files": 7,
+   "kit_paths_touched": [],
+   "census_keys_in_title": [],
+   "client_human": false
+  },
+  "887": {
+   "title": "KS-961: run the workspace suites on the PR, advisory and non-blocking \u2014 and they are RED on develop today",
+   "user": "kksecura",
+   "created_at": "2026-09-07T01:41:26Z",
+   "head": "3aee3deed2e3ac557f0a52c0797c2a4a8df25f69",
+   "branch": "feature/ks-961-workspace-suites-advisory-on-pr",
+   "base": "develop",
+   "n_files": 2,
+   "kit_paths_touched": [],
+   "census_keys_in_title": [],
+   "client_human": false
+  },
+  "809": {
+   "title": "KS-693 (interim): guard the 8 M365/OneDrive/Teams unconfigured-503 ops so the merge gate reads a real floor",
+   "user": "kksecura",
+   "created_at": "2026-09-04T22:30:48Z",
+   "head": "aa2270fe14cf95dbe349fb8aae14f1473d2db5e7",
+   "branch": "feature/ks-693-tolerate-m365-unconfigured-503",
+   "base": "develop",
+   "n_files": 2,
+   "kit_paths_touched": [],
+   "census_keys_in_title": [],
+   "client_human": false
+  },
+  "649": {
+   "title": "chore(deps): bump pg and @types/pg in /Blockchain/Dev",
+   "user": "dependabot[bot]",
+   "created_at": "2026-08-05T12:16:10Z",
+   "head": "1d9198ac7e2f54e43cd38b66ce40ce1f52d338b8",
+   "branch": "dependabot/npm_and_yarn/Blockchain/Dev/develop/multi-8cb89e51b7",
+   "base": "develop",
+   "n_files": 22,
+   "kit_paths_touched": [],
+   "census_keys_in_title": [],
+   "client_human": false
+  },
+  "639": {
+   "title": "chore(deps): bump @radix-ui/react-dropdown-menu from 2.1.16 to 2.1.24 in /Blockchain/Dev",
+   "user": "dependabot[bot]",
+   "created_at": "2026-08-03T20:46:50Z",
+   "head": "2069d852ee1618fac25cd3eeb56f22005422125f",
+   "branch": "dependabot/npm_and_yarn/Blockchain/Dev/develop/radix-ui/react-dropdown-menu-2.1.24",
+   "base": "develop",
+   "n_files": 3,
+   "kit_paths_touched": [],
+   "census_keys_in_title": [],
+   "client_human": false
+  },
+  "635": {
+   "title": "chore(deps): bump cbor from 9.0.2 to 10.0.12 in /Blockchain/Dev",
+   "user": "dependabot[bot]",
+   "created_at": "2026-08-03T20:16:58Z",
+   "head": "6cbc298f41a1dd4a0a986084800c6de71aeb08fd",
+   "branch": "dependabot/npm_and_yarn/Blockchain/Dev/develop/cbor-10.0.12",
+   "base": "develop",
+   "n_files": 2,
+   "kit_paths_touched": [],
+   "census_keys_in_title": [],
+   "client_human": false
+  },
+  "575": {
+   "title": "chore(deps): bump dotenv from 16.6.1 to 17.4.2 in /Blockchain/Dev",
+   "user": "dependabot[bot]",
+   "created_at": "2026-07-20T20:21:05Z",
+   "head": "7d32d8ae4b064592b2d133e17d23c67b8d50dc60",
+   "branch": "dependabot/npm_and_yarn/Blockchain/Dev/develop/dotenv-17.4.2",
+   "base": "develop",
+   "n_files": 21,
+   "kit_paths_touched": [],
+   "census_keys_in_title": [],
+   "client_human": false
+  },
+  "572": {
+   "title": "chore(deps-dev): bump @types/office-js from 1.0.599 to 1.0.610 in /Blockchain/Dev in the types group across 1 directory",
+   "user": "dependabot[bot]",
+   "created_at": "2026-07-20T20:19:15Z",
+   "head": "4ea847b39ec8cb2db1e7bee0eb9355e35a8c4208",
+   "branch": "dependabot/npm_and_yarn/Blockchain/Dev/develop/types-1409c3626d",
+   "base": "develop",
+   "n_files": 2,
+   "kit_paths_touched": [],
+   "census_keys_in_title": [],
+   "client_human": false
+  }
+ }
+}
