@@ -19,6 +19,12 @@ supersede: replace wholesale at the next pickup; do not append. Previous copy: N
 4. EXPIRING-GRANTS: "SPEND PAST THE 90%" is marked ENDED (account switched). Friday's "ignore the 90%" row is Friday's and is not touched.
 
 ### LIVE RIGHT NOW
+**🟠 70% CHECKPOINT 23:49 2026-10-01 (afternoon/evening seat 79817561). READ FIRST; supersedes the blocks below where they differ:**
+- **LIVE: Seat B 54th (%93)**, frvp override, brief `fleet/briefs_staged/2026-10-01_seatB54_frvp-override.md`. Plan CONFIRMED 12:51Z; Q5 RULED (a) 13:01Z (the SSH auth probe suffices; NO dry-run push, which on git 2.51 RUNS the hook); the Q1 fetch done (1 moved); **Q3: NOT bundled, the override is a real fix.** Now on the BEFORE readings → red-first → override + regen in node:24-alpine → push → ONE READY → **gate53** (Wednesday drafts the kit from `fleet/qa-agent/gatesets/2026-10-01_gate52/`, single PR, T1, routing `QA/Secuura-batch<n>`, GO `GO (Seat B 54th): merge <n> on gate53`; the gate must re-prove: no collateral lock moves, Prisma entrypoints before/after, the row removal by key, red-first, legs 6/7/contract, images). Its watcher reads "2 alive": check for a duplicate at the next ANSWER.
+- Today: 5 Secuura merges (develop ea6fcecc3a6f). Kam's open card: `secuura-fuse-1009-measured-1001` (remind him Mon 5 Oct).
+- Ledger today has 3 new Wednesday rows (trailer mechanism, endorse-unread ×2). **Regenerate BOTH digests at the wrap or rotation** (`boot_digest.py --by-tier` AND bare), and run ledger 3c (rows dated 09-29).
+- Quiet hours: no voice.
+
 **🟢 21:30 2026-10-01 (afternoon seat 79817561; ctx 62%). READ FIRST; supersedes every block below:**
 0. `kam_rulings_today.sh` + `reconcile_rulings.py` first. Kam's newest: 17:40:22 (quota grant until his account switch on Fri 2 Oct morning; EXPIRING-GRANTS top row). **OPEN CARD of his: `secuura-fuse-1009-measured-1001`** (rec a: frvp FIXED by an npm override, the two react-router rows re-dated to Sat 31 Oct by his ONE email; default: nothing re-dated, the frvp override built + gated anyway, **remind him on the board Mon 5 Oct**; the freeze is Fri 9 Oct 10:00 AEST).
 1. **Today: 5 Secuura merges, all verified at source:** #1363, #1364, #1365, **#1367 (KS-1015 envelope)**, **#1368 (KS-1364, 13 of 17 now)**. develop **ea6fcecc3a6f**, tree 48f5f8afa6ef. gate52 0.98, B 53rd 0.96 (closed). **Floor: wednesday + fleet-monitor.**
