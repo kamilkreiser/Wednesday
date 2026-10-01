@@ -1,0 +1,74 @@
+--- a/Blockchain/Dev/services/billing/src/billing.openapi.ts
++++ b/Blockchain/Dev/services/billing/src/billing.openapi.ts
+@@ -738,6 +738,7 @@
+   request: {
+     body: {
+       content: { 'application/json': { schema: CheckoutCustomRequestSchema } },
++      required: true,
+     },
+   },
+   responses: {
+@@ -878,6 +879,7 @@
+     params: z.object({ customerId: z.string() }),
+     body: {
+       content: { 'application/json': { schema: SetDefaultPaymentMethodRequestSchema } },
++      required: true,
+     },
+   },
+   responses: {
+--- /dev/null
++++ b/Blockchain/Dev/services/billing/src/__tests__/ks1364-billing-checkout-custom-default-payment-method-body-required.test.ts
+@@ -0,0 +1,53 @@
++// KS-1364 (sweep 4): the published contracts for POST /api/billing/checkout/custom and
++// POST /api/billing/customers/{customerId}/default-payment-method did not mark the request body required, so a
++// spec-driven caller (Schemathesis) sent no body at all and both handlers answered 400 (routes/billing.ts:
++// PurchaseCustomSchema.parse for checkout/custom; the paymentMethodId string check for default-payment-method).
++// Both reject an absent body, so the spec now says the body is required. This file renders the document the
++// generator publishes, from the shared registry the billing module populates on import. No server, no database,
++// no network, no Stripe.
++import { describe, it, expect } from 'vitest';
++import { generateOpenApiDocument } from '@secuura/shared';
++import '../billing.openapi';
++
++type AnyObj = Record<string, any>;
++
++const doc = generateOpenApiDocument({ title: 'billing (ks1364 pin)', version: '0.0.0' }) as AnyObj;
++
++const CUSTOM = '/api/billing/checkout/custom';
++const DEFAULT_PM = '/api/billing/customers/{customerId}/default-payment-method';
++
++function operation(path: string, method: string): AnyObj | undefined {
++  return doc.paths?.[path]?.[method];
++}
++
++function bodyRef(path: string): string | undefined {
++  return operation(path, 'post')?.requestBody?.content?.['application/json']?.schema?.$ref;
++}
++
++describe('KS-1364: two billing POSTs publish a REQUIRED request body', () => {
++  it('RED KS-1364 BL1: POST /api/billing/checkout/custom marks its request body required', () => {
++    expect(operation(CUSTOM, 'post')?.requestBody?.required).toBe(true);
++  });
++
++  it('RED KS-1364 BL2: POST default-payment-method marks its request body required', () => {
++    expect(operation(DEFAULT_PM, 'post')?.requestBody?.required).toBe(true);
++  });
++
++  it('control KS-1364 BC1: both bodies keep their request schemas and both operations keep bearerAuth', () => {
++    expect({ custom: bodyRef(CUSTOM), pm: bodyRef(DEFAULT_PM) }).toEqual({
++      custom: '#/components/schemas/BillingCheckoutCustomRequest',
++      pm: '#/components/schemas/BillingSetDefaultPaymentMethodRequest',
++    });
++    expect(operation(CUSTOM, 'post')?.security).toEqual([{ bearerAuth: [] }]);
++    expect(operation(DEFAULT_PM, 'post')?.security).toEqual([{ bearerAuth: [] }]);
++  });
++
++  it('control KS-1364 BC2: the custom-checkout component still lists its required fields', () => {
++    const r = doc.components?.schemas?.BillingCheckoutCustomRequest?.required ?? [];
++    expect(r).toEqual(expect.arrayContaining(['quantity', 'successUrl', 'cancelUrl']));
++  });
++
++  it('control KS-1364 BC3: the sibling POST /api/billing/checkout/bundle keeps its request body schema', () => {
++    expect(bodyRef('/api/billing/checkout/bundle')).toBe('#/components/schemas/BillingCheckoutBundleRequest');
++  });
++});

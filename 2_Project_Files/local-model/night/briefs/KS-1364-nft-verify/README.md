@@ -1,0 +1,11 @@
+# KS-1364-nft-verify — Spark brief, golden and round 1
+
+Written 2026-10-01 10:10 AEST by a Spark brief-writer sub-agent for Wednesday (session cb6b682a). No PR, no merge, no post, no mail, no ticket or PR change. Linear and GitHub were READ only (GraphQL; REST GET; ls-remote). Nothing written under `!CODING/`; git write verbs ran only in this session's scratchpad clones.
+
+- **Carve:** KS-1364 (Backlog, Kamil; created by Peter 2026-09-28) lists 17 operations whose request body is not marked `required: true` though the handler's zod schema rejects an absent body; its direction is spelled out ("mark `requestBody.required: true` ... at the generator"). This brief: nft-certificate.openapi.ts, insertions after :1066 + :1093. **Refs KS-1364, does NOT close it.**
+- **Base:** develop `723dc0722b68482a03de8577fdb5eb5b3359e725` (ls-remote 09:47 and 10:10 AEST, unchanged).
+- **Files:** `KS-1364.md` (the brief; fences filled from the golden by script), `golden.diff` (product + new test), `KS-1364.openapi-yaml.companion.diff` (the regenerated YAML lines — NOT the model's; the raise seat applies it), `precheck/` (build_input rc 0 "WEDNESDAY BRIEF"; the CONTROL spark_checker run on the golden = PASS 7/7 strict + A2a; this is the golden dir hold_ready cites).
+- **Negative control:** the golden with one product `+` line mutated -> FAIL (A3c), except on nft-verify where a `required: !0` mutation of one of two identical `+` lines PASSED (A3c is set-based — IMPROVEMENTS row 2026-10-01); a `required: false` mutation there FAILED A5/A6.
+- **Round 1 (Spark deepseek-v4-flash, thinking OFF, one request):** 38.1 s, prompt 24,206, completion 993. **PASS 7/7 strict + A2a**; `patch.diff` BYTE-IDENTICAL to the golden (cmp rc 0); suite 38 -> 43, 0 new reds; tsc rc 0. Run dir `runs/spark_secuura_2026-10-01_KS-1364-nft-verify`. Ladder row 51.
+- **Held:** `night/READY_KS-1364-NFT-VERIFY-1_spark-dsv4flash_*` (hold_ready, --model-tag spark-dsv4flash). Wednesday reads the diff before any raise. A PASS is a candidate, not a merge.
+- **For the raise:** apply the READY's two model sections (strict `git apply -p1`), then this folder's YAML companion (or `npm run generate-openapi` and confirm), then `npm run check:openapi` (rc 0 measured with the companion; rc 1 without).

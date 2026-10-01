@@ -1,0 +1,46 @@
+--- /dev/null
++++ b/Blockchain/Dev/services/m365-integration/src/__tests__/ks1364-onedrive-file-sync-body-required.test.ts
+@@ -0,0 +1,43 @@
++// KS-1364 (sweep 4): the published contract for POST /api/onedrive/files/{id}/sync did not mark the request body
++// required, so a spec-driven caller (Schemathesis) sent no body at all and the handler (index.ts, the
++// connectionId truthy check) answered 400. The handler rejects an absent body, so the spec now says the body is
++// required. This file renders the document the generator publishes, from the shared registry the m365-integration
++// module populates on import. No server, no database, no network.
++import { describe, it, expect } from 'vitest';
++import { generateOpenApiDocument } from '@secuura/shared';
++import '../m365-integration.openapi';
++
++type AnyObj = Record<string, any>;
++
++const doc = generateOpenApiDocument({ title: 'm365-integration (ks1364 onedrive pin)', version: '0.0.0' }) as AnyObj;
++
++const SYNC = '/api/onedrive/files/{id}/sync';
++
++function operation(path: string, method: string): AnyObj | undefined {
++  return doc.paths?.[path]?.[method];
++}
++
++describe('KS-1364: POST /api/onedrive/files/{id}/sync publishes a REQUIRED request body', () => {
++  it('RED KS-1364 OD1: POST /api/onedrive/files/{id}/sync marks its request body required', () => {
++    expect(operation(SYNC, 'post')?.requestBody?.required).toBe(true);
++  });
++
++  it('control KS-1364 OC1: the inline body schema still requires a non-empty connectionId', () => {
++    const s = operation(SYNC, 'post')?.requestBody?.content?.['application/json']?.schema;
++    expect({ required: s?.required, minLength: s?.properties?.connectionId?.minLength }).toEqual({
++      required: ['connectionId'],
++      minLength: 1,
++    });
++  });
++
++  it('control KS-1364 OC2: the operation keeps bearerAuth and its path parameter id', () => {
++    const op = operation(SYNC, 'post');
++    expect(op?.security).toEqual([{ bearerAuth: [] }]);
++    expect((op?.parameters ?? []).map((q: AnyObj) => q.in + ':' + q.name)).toEqual(['path:id']);
++  });
++
++  it('control KS-1364 OC3: the sibling POST /api/teams/notify keeps its request body schema', () => {
++    const ref = operation('/api/teams/notify', 'post')?.requestBody?.content?.['application/json']?.schema?.$ref;
++    expect(ref).toBe('#/components/schemas/M365TeamsNotifyRequest');
++  });
++});

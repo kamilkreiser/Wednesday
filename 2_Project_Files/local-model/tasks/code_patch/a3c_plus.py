@@ -43,9 +43,25 @@ d = json.load(open(sys.argv[1], encoding="utf-8"))
 exp = d.get("defect_line", {}).get("expected_plus", [])
 sec = open(sys.argv[2], encoding="utf-8", errors="replace").read().split("\n")
 plus = [l[1:] for l in sec if l.startswith("+") and not l.startswith("+++")]
-added = {_norm(l) for l in plus}
-added_nocomment = {_without_trailing_comment(l) for l in plus}
-missing = [e for e in exp if e.strip() and e.strip() not in added and e.strip() not in added_nocomment]
+# 2026-10-01 10:3x (KS-1364 nft-verify precheck, IMPROVEMENTS row 2026-10-01): A3c was SET-based, so when the brief adds
+# the SAME line twice (two `      required: true,` insertions) one present copy satisfied both expectations, and a
+# negative control that mutated the OTHER copy to `required: !0,` PASSED 7/7. Now a MULTISET: each expected line
+# CONSUMES one '+' line (exact match first, then the trailing-comment strip), so N expected copies need N '+' copies.
+# Arm: local-model/tests/a3c_multiset_arm_2026-10-01.sh (two identical lines, one mutated -> exit 1; golden -> exit 0).
+_pool = [(_norm(l), _without_trailing_comment(l)) for l in plus]
+_used = [False] * len(_pool)
+missing = []
+for e in exp:
+    es = e.strip()
+    if not es:
+        continue
+    hit = next((i for i, (n, _) in enumerate(_pool) if not _used[i] and n == es), None)
+    if hit is None:
+        hit = next((i for i, (_, nc) in enumerate(_pool) if not _used[i] and nc == es), None)
+    if hit is None:
+        missing.append(e)
+    else:
+        _used[hit] = True
 for m in missing:
     print(m)
 if missing:

@@ -1,0 +1,53 @@
+--- /dev/null
++++ b/Blockchain/Dev/services/nft-certificate/src/__tests__/ks1364-nft-record-estimate-body-required.test.ts
+@@ -0,0 +1,50 @@
++// KS-1364 (sweep 4): the published contracts for POST /api/nft/record and POST /api/nft/estimate did not mark
++// the request body required, so a spec-driven caller (Schemathesis) sent no body at all and both handlers
++// (routes/nft.routes.ts, RecordMintSchema and EstimateCostSchema via safeParse) answered 400. Those zod objects
++// reject an absent body, so the spec now says the body is required. This file renders the document the generator
++// publishes, from the shared registry the nft-certificate module populates on import. No server, no database,
++// no network.
++import { describe, it, expect } from 'vitest';
++import { generateOpenApiDocument } from '@secuura/shared';
++import '../nft-certificate.openapi';
++
++type AnyObj = Record<string, any>;
++
++const doc = generateOpenApiDocument({ title: 'nft-certificate (ks1364 record/estimate pin)', version: '0.0.0' }) as AnyObj;
++
++function operation(path: string, method: string): AnyObj | undefined {
++  return doc.paths?.[path]?.[method];
++}
++
++function bodyRef(path: string): string | undefined {
++  return operation(path, 'post')?.requestBody?.content?.['application/json']?.schema?.$ref;
++}
++
++describe('KS-1364: POST /api/nft/record and /api/nft/estimate publish a REQUIRED request body', () => {
++  it('RED KS-1364 NR1: POST /api/nft/record marks its request body required', () => {
++    expect(operation('/api/nft/record', 'post')?.requestBody?.required).toBe(true);
++  });
++
++  it('RED KS-1364 NR2: POST /api/nft/estimate marks its request body required', () => {
++    expect(operation('/api/nft/estimate', 'post')?.requestBody?.required).toBe(true);
++  });
++
++  it('control KS-1364 NC1: both bodies keep their request schemas and both operations keep bearerAuth', () => {
++    expect({ record: bodyRef('/api/nft/record'), estimate: bodyRef('/api/nft/estimate') }).toEqual({
++      record: '#/components/schemas/NftRecordRequest',
++      estimate: '#/components/schemas/NftEstimateRequest',
++    });
++    expect(operation('/api/nft/record', 'post')?.security).toEqual([{ bearerAuth: [] }]);
++    expect(operation('/api/nft/estimate', 'post')?.security).toEqual([{ bearerAuth: [] }]);
++  });
++
++  it('control KS-1364 NC2: the request components still list required fields, which is why an absent body is refused', () => {
++    const s: AnyObj = doc.components?.schemas ?? {};
++    expect(s.NftRecordRequest?.required).toEqual(expect.arrayContaining(['certificationId', 'txHash', 'policyId']));
++    expect(s.NftEstimateRequest?.required).toEqual(expect.arrayContaining(['storageTier', 'chain']));
++  });
++
++  it('control KS-1364 NC3: the sibling POST /api/nft/mint keeps its request body schema', () => {
++    expect(bodyRef('/api/nft/mint')).toBe('#/components/schemas/NftMintRequest');
++  });
++});

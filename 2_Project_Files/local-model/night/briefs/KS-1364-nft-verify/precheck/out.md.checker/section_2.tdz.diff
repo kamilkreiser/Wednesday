@@ -1,0 +1,53 @@
+--- /dev/null
++++ b/Blockchain/Dev/services/nft-certificate/src/__tests__/ks1364-nft-verify-body-required.test.ts
+@@ -0,0 +1,50 @@
++// KS-1364 (sweep 4): the published contracts for POST /api/nft/verify/transaction and POST /api/nft/verify/asset
++// did not mark the request body required, so a spec-driven caller (Schemathesis) sent no body at all and both
++// handlers (routes/nft.routes.ts, an inline zod object per route via safeParse) answered 400. Those zod objects
++// reject an absent body, so the spec now says the body is required. Both routes stay public (KS-442). This file
++// renders the document the generator publishes, from the shared registry the nft-certificate module populates on
++// import. No server, no database, no network.
++import { describe, it, expect } from 'vitest';
++import { generateOpenApiDocument } from '@secuura/shared';
++import '../nft-certificate.openapi';
++
++type AnyObj = Record<string, any>;
++
++const doc = generateOpenApiDocument({ title: 'nft-certificate (ks1364 verify pin)', version: '0.0.0' }) as AnyObj;
++
++function operation(path: string, method: string): AnyObj | undefined {
++  return doc.paths?.[path]?.[method];
++}
++
++function bodyRef(path: string): string | undefined {
++  return operation(path, 'post')?.requestBody?.content?.['application/json']?.schema?.$ref;
++}
++
++describe('KS-1364: POST /api/nft/verify/transaction and /api/nft/verify/asset publish a REQUIRED request body', () => {
++  it('RED KS-1364 NV1: POST /api/nft/verify/transaction marks its request body required', () => {
++    expect(operation('/api/nft/verify/transaction', 'post')?.requestBody?.required).toBe(true);
++  });
++
++  it('RED KS-1364 NV2: POST /api/nft/verify/asset marks its request body required', () => {
++    expect(operation('/api/nft/verify/asset', 'post')?.requestBody?.required).toBe(true);
++  });
++
++  it('control KS-1364 VC1: both bodies keep their request schemas and both operations stay public', () => {
++    expect({ tx: bodyRef('/api/nft/verify/transaction'), asset: bodyRef('/api/nft/verify/asset') }).toEqual({
++      tx: '#/components/schemas/NftVerifyTransactionRequest',
++      asset: '#/components/schemas/NftVerifyAssetRequest',
++    });
++    expect(operation('/api/nft/verify/transaction', 'post')?.security).toEqual([]);
++    expect(operation('/api/nft/verify/asset', 'post')?.security).toEqual([]);
++  });
++
++  it('control KS-1364 VC2: the request components still list required fields, which is why an absent body is refused', () => {
++    const s: AnyObj = doc.components?.schemas ?? {};
++    expect(s.NftVerifyTransactionRequest?.required).toEqual(['txHash']);
++    expect(s.NftVerifyAssetRequest?.required).toEqual(expect.arrayContaining(['policyId', 'assetNameHex']));
++  });
++
++  it('control KS-1364 VC3: the sibling POST /api/nft/ipfs/upload keeps its request body schema', () => {
++    expect(bodyRef('/api/nft/ipfs/upload')).toBe('#/components/schemas/NftIpfsUploadRequest');
++  });
++});
