@@ -1,0 +1,357 @@
+{
+ "read_at": "2026-10-01T02:23:57Z",
+ "prs": {
+  "1365": {
+   "title": "KS-1364: mark eleven request bodies required where handlers reject an absent body",
+   "state": "open",
+   "user": "kksecura",
+   "head": "bf277eead26897bb648c801f92308681dbdaffdc",
+   "branch": "feature/ks-1364-mark-eleven-request-bodies-required-b52-1",
+   "base": "develop",
+   "base_sha": "c56dd7c32edf203177ade6c4d0c9040e624681b8",
+   "mergeable": true,
+   "mergeable_state": "unstable",
+   "files": [
+    [
+     "Blockchain/Dev/docs/openapi/secuura-api.yaml",
+     11,
+     0,
+     "modified"
+    ],
+    [
+     "Blockchain/Dev/services/analytics/src/__tests__/ks1364-analytics-reports-body-required.test.ts",
+     40,
+     0,
+     "added"
+    ],
+    [
+     "Blockchain/Dev/services/analytics/src/analytics.openapi.ts",
+     1,
+     1,
+     "modified"
+    ],
+    [
+     "Blockchain/Dev/services/billing/src/__tests__/ks1364-billing-checkout-custom-default-payment-method-body-required.test.ts",
+     53,
+     0,
+     "added"
+    ],
+    [
+     "Blockchain/Dev/services/billing/src/billing.openapi.ts",
+     2,
+     0,
+     "modified"
+    ],
+    [
+     "Blockchain/Dev/services/m365-integration/src/__tests__/ks1364-m365-sites-sync-verifyhash-body-required.test.ts",
+     58,
+     0,
+     "added"
+    ],
+    [
+     "Blockchain/Dev/services/m365-integration/src/__tests__/ks1364-onedrive-file-sync-body-required.test.ts",
+     43,
+     0,
+     "added"
+    ],
+    [
+     "Blockchain/Dev/services/m365-integration/src/m365-integration.openapi.ts",
+     4,
+     3,
+     "modified"
+    ],
+    [
+     "Blockchain/Dev/services/nft-certificate/src/__tests__/ks1364-nft-record-estimate-body-required.test.ts",
+     50,
+     0,
+     "added"
+    ],
+    [
+     "Blockchain/Dev/services/nft-certificate/src/__tests__/ks1364-nft-verify-body-required.test.ts",
+     50,
+     0,
+     "added"
+    ],
+    [
+     "Blockchain/Dev/services/nft-certificate/src/nft-certificate.openapi.ts",
+     4,
+     2,
+     "modified"
+    ]
+   ],
+   "commits": [
+    [
+     "bf277eead26897bb648c801f92308681dbdaffdc",
+     "KS-1364: mark eleven request bodies required where handlers reject an absent body\n\nEleven POST operations across four services declared a request body without\n`required: true`, so a spec-driven caller sent no body and the handler's zod\nschema answered 400. The published contract now says the body is required.\n\nCovers 11 of the ticket's 17 operations: it narrows KS-1364, it does not close it.\n\nProduct: nft-certificate, analytics, billing and m365-integration `*.openapi.ts`,\n+11/-6 in all. Six new vitest files pin each operation from the shared registry\n(no server, no database, no network), +294. The generated spec\n`docs/openapi/secuura-api.yaml` gains exactly eleven `required: true` lines, +11/-0,\nand `generate-openapi --check` confirms the on-disk YAML matches the generated one.\n\nLeft for later, with the screen's reason for each: POST /api/referrals/generate\n(referral.openapi.ts is the KS 1015 lane), POST /api/issuer-certs,\nPATCH /api/users/admin/{id} and POST /api/users/me/change-password (auth surfaces),\nPATCH /api/platform/tenants/{id} (its partial-update schema accepts {}, so the 400\ncomes from a \"No fields to update\" check, not from zod) and\nPOST /api/v2/verification/verify (the handler resolves one of four optional fields,\nnot a zod object, so the shape is not derivable without a ruling).\n\nRefs KS-1364\n\nCo-Authored-By: Claude Opus 5 <noreply@anthropic.com>"
+    ]
+   ],
+   "body": "## What this changes\n\nEleven POST operations across four services published a request body with no\n`required: true`. A spec-driven caller therefore sent **no body at all**, and the\nhandler's zod schema answered 400 \u2014 a contract defect, not a handler defect. The\npublished contract now marks those eleven bodies required.\n\n**This narrows KS-1364. It does not close it:** 11 of the ticket's 17 operations.\n\nRefs KS-1364\n\n## Shape\n\n| part | files | numstat |\n| -- | -- | -- |\n| product `*.openapi.ts` (nft-certificate, analytics, billing, m365-integration) | 4 | **+11 / -6** |\n| new vitest files, one per carve | 6 | **+294** |\n| generated spec `docs/openapi/secuura-api.yaml` | 1 | **+11 / -0** |\n\nEleven added YAML lines, all the identical string `        required: true` (one\n`uniq -c` group of 11). Five of the eleven product edits are replacements, six are\ninsertions. No `package.json`, no lockfile, no `scripts/`, no `referral.openapi.ts`.\n\n## Test Evidence\n\n**Touched:** `nft-certificate`, `analytics`, `billing`, `m365-integration` spec modules;\nthe shared generated spec.\n\n**Ran** (all local, this branch, base `c56dd7c32edf`; every figure re-measured from a\nfresh install \u2014 none of the upstream figures was carried):\n\n| service | before | after | failed |\n| -- | -- | -- | -- |\n| nft-certificate | 38 | **48** | 0 |\n| analytics | 28 | **32** | 0 |\n| billing | 93 | **98** | 0 |\n| m365-integration | 47 | **57** | 0 |\n\n- **Red-first, by assertion, per test:** with the product hunks reverted and the six new\n  tests present, **11 cells fail \u2014 exactly the 11 `RED KS-1364` cells \u2014 and 0 control\n  cells fail.** Unique failing names: NR1, NR2, NV1, NV2 (nft-certificate), AR1\n  (analytics), BL1, BL2 (billing), MS1, MS2, MS3, OD1 (m365-integration). The cells ran\n  (44/31/96/53 passed alongside), so this is a real red, not a load failure.\n- **Green after:** all four suites rc 0, 0 failed.\n- `npm run check:openapi` **rc 0** \u2014 `generate-openapi --check` reports\n  `CHECK PASS: on-disk YAML matches generated`, and `check-spec-examples` reports\n  `405 example blocks \u2014 every published example resolves to the fixture set`.\n  **Control:** with the YAML reverted to base, the same check goes **rc 1**\n  (`CHECK FAIL: generated YAML differs from on-disk version`), so the rc 0 is a reading.\n- `tsc --noEmit` **rc 0, 0 errors** in all four services (no-regression reading only).\n- `git apply --check` rc 0 for all twelve diffs; the two carves that share a file applied\n  strict on top of the first with **zero offsets**.\n\n**NOT run** (honest gaps, and the point of this block):\n- **No Schemathesis run and no live run.** That the no-body cases stop firing is a\n  *prediction* from the rendered spec, not a measurement.\n- The served `/api/docs/openapi.json` was not read.\n- The 15 pairs baselined in `systemTest/schemathesis` against KS 255 are not touched here;\n  un-baselining them is not in this change's scope.\n- `tsc` base rc was not captured; head is 0 errors, which cannot be worse than base.\n\n**Migrations + config:** none. No migration, no environment variable, no lockfile, no\n`package.json`. Nothing deployable beyond the spec these four services publish.\n\n## The six operations left, with the screen's reason for each\n\n- `POST /api/referrals/generate` \u2014 `referral.openapi.ts` belongs to the KS 1015 lane.\n- `POST /api/issuer-certs` \u2014 it lives in `auth.openapi.ts` (auth service).\n- `PATCH /api/users/admin/{id}` and `POST /api/users/me/change-password` \u2014 auth surfaces.\n- `PATCH /api/platform/tenants/{id}` \u2014 its `updateTenantSchema` is a partial-update schema\n  that **accepts `{}`**, so the 400 comes from a \"No fields to update\" check, not from the\n  zod schema; the ticket's clause \"where the handler's Zod schema rejects an absent body\"\n  does not hold. It is also a platform-admin surface.\n- `POST /api/v2/verification/verify` \u2014 the handler resolves one of four optional fields\n  (`hash|contentHash|documentId|documentData`), not a zod object, so the shape is not\n  derivable without a ruling; originate is on jest and has no spec-registry test to copy.\n\n\ud83e\udd16 Generated with [Claude Code](https://claude.com/claude-code)\n"
+  }
+ },
+ "census": {
+  "1362": {
+   "title": "PS-929: history \u2014 Dashboard status-badge contrast fix, the axe \"incomplete\" blind spot, and the slot-3 pairing",
+   "user": "PeterObeden",
+   "created_at": "2026-09-30T12:58:08Z",
+   "head": "df674d23fdc7397d491716395fb1601962bbef97",
+   "branch": "feature/history-ps-929-dashboard-a11y",
+   "base": "develop",
+   "n_files": 1,
+   "kit_paths_touched": [],
+   "census_keys_in_title": [],
+   "client_human": true
+  },
+  "1360": {
+   "title": "KS-1380: revert #1358 (15 lockfiles) at Peter's request",
+   "user": "PeterObeden",
+   "created_at": "2026-09-30T07:38:55Z",
+   "head": "d0e99f181a4e23fcadcb8fdf7c81e4065e6d63f7",
+   "branch": "feature/ks-1380-revert-pr-1358",
+   "base": "develop",
+   "n_files": 15,
+   "kit_paths_touched": [],
+   "census_keys_in_title": [],
+   "client_human": true
+  },
+  "1253": {
+   "title": "KS-1297 GUARDGAPS: anchor the abort counts, cover the worktree, pin bare call sites",
+   "user": "kksecura",
+   "created_at": "2026-09-25T14:49:46Z",
+   "head": "91e066264004fdb22c67efb0c25fc44375ec6eac",
+   "branch": "feature/ks-1297-fixture-guard-anchor-and-two-gaps-l5-1",
+   "base": "develop",
+   "n_files": 1,
+   "kit_paths_touched": [],
+   "census_keys_in_title": [],
+   "client_human": false
+  },
+  "1250": {
+   "title": "KS-1302 + KS-1303 RSSTRAP: trap the runner's short TMPDIR, and drop the output pipe",
+   "user": "kksecura",
+   "created_at": "2026-09-25T14:28:57Z",
+   "head": "2b8dcb824dd2c5cd4b92757934d7de9d28813a22",
+   "branch": "feature/ks-1302-runner-tmpdir-residue-and-orphan-pipe-l5-1",
+   "base": "develop",
+   "n_files": 2,
+   "kit_paths_touched": [],
+   "census_keys_in_title": [],
+   "client_human": false
+  },
+  "1129": {
+   "title": "docs(history): 2026-09-21 local rebuild on develop 7be81d5c9, OOM diagnosis, preflight 15/15",
+   "user": "StuJam-Secuura",
+   "created_at": "2026-09-21T08:45:36Z",
+   "head": "25c31a0e82990844181a5b9c9a479722dc30baea",
+   "branch": "chore/history-2026-09-21-local-rebuild-preflight",
+   "base": "develop",
+   "n_files": 1,
+   "kit_paths_touched": [],
+   "census_keys_in_title": [],
+   "client_human": false
+  },
+  "995": {
+   "title": "KS-741: strip `x-emitter-internal` at originate's own inbound \u2014 the marker's non-spoofability no longer rests on an unstated convention",
+   "user": "kksecura",
+   "created_at": "2026-09-14T20:37:56Z",
+   "head": "b8155636e8e60ee9646b10217859fcd274ef87f5",
+   "branch": "feature/ks-741-x-emitter-internal-is-unstripped-on-the-originate-route-the",
+   "base": "develop",
+   "n_files": 5,
+   "kit_paths_touched": [],
+   "census_keys_in_title": [],
+   "client_human": false
+  },
+  "989": {
+   "title": "KS-973: the pre-suite step redacts the generated password, pins its DEGRADED stream, drives its second quarantine call \u2014 items 5, 6 + two residues; items 3/4 wait for #927; items 1/2 are L11/L12 files",
+   "user": "kksecura",
+   "created_at": "2026-09-14T07:22:52Z",
+   "head": "e62fd23cda1bc120716e5f592efac2b8abea97bf",
+   "branch": "feature/ks-973-ks-969-round-1-gate-residue-the-pre-suite-step-and-its-own",
+   "base": "develop",
+   "n_files": 5,
+   "kit_paths_touched": [],
+   "census_keys_in_title": [],
+   "client_human": false
+  },
+  "949": {
+   "title": "chore(deps-dev): bump prisma from 7.8.0 to 7.10.0 in /Blockchain/Dev",
+   "user": "dependabot[bot]",
+   "created_at": "2026-09-10T07:59:49Z",
+   "head": "7ee1a26e634f33b6a4ae115d559f5440a90f6fff",
+   "branch": "dependabot/npm_and_yarn/Blockchain/Dev/develop/prisma-7.10.0",
+   "base": "develop",
+   "n_files": 2,
+   "kit_paths_touched": [],
+   "census_keys_in_title": [],
+   "client_human": false
+  },
+  "948": {
+   "title": "chore(deps): bump vite from 6.4.3 to 8.3.1 in /Blockchain/Dev",
+   "user": "dependabot[bot]",
+   "created_at": "2026-09-10T07:58:12Z",
+   "head": "f6afb75d790c6c7e52b4c14e2c22054480a0628e",
+   "branch": "dependabot/npm_and_yarn/Blockchain/Dev/develop/vite-8.2.2",
+   "base": "develop",
+   "n_files": 10,
+   "kit_paths_touched": [],
+   "census_keys_in_title": [],
+   "client_human": false
+  },
+  "947": {
+   "title": "chore(deps-dev): bump @testing-library/jest-dom from 6.9.1 to 7.0.1 in /Blockchain/Dev",
+   "user": "dependabot[bot]",
+   "created_at": "2026-09-10T07:46:52Z",
+   "head": "d68b9d79e67f336e527cc4eef7eaf07fa78670bb",
+   "branch": "dependabot/npm_and_yarn/Blockchain/Dev/develop/testing-library/jest-dom-7.0.1",
+   "base": "develop",
+   "n_files": 2,
+   "kit_paths_touched": [],
+   "census_keys_in_title": [],
+   "client_human": false
+  },
+  "946": {
+   "title": "chore(deps): bump @fluentui/react-icons from 2.0.331 to 2.0.339 in /Blockchain/Dev",
+   "user": "dependabot[bot]",
+   "created_at": "2026-09-10T07:44:37Z",
+   "head": "41cc5209aaf2f8369f4ce8d5735a43fb07340d0b",
+   "branch": "dependabot/npm_and_yarn/Blockchain/Dev/develop/fluentui/react-icons-2.0.339",
+   "base": "develop",
+   "n_files": 2,
+   "kit_paths_touched": [],
+   "census_keys_in_title": [],
+   "client_human": false
+  },
+  "945": {
+   "title": "chore(deps-dev): bump @axe-core/playwright from 4.11.3 to 4.13.0 in /Blockchain/Dev",
+   "user": "dependabot[bot]",
+   "created_at": "2026-09-10T07:43:47Z",
+   "head": "264098fce62b1e839c506f61fa443830fdba996a",
+   "branch": "dependabot/npm_and_yarn/Blockchain/Dev/develop/axe-core/playwright-4.13.0",
+   "base": "develop",
+   "n_files": 2,
+   "kit_paths_touched": [],
+   "census_keys_in_title": [],
+   "client_human": false
+  },
+  "927": {
+   "title": "KS-1027: close Peter's four #904 follow-ups \u2014 the OTHER cp, the stash the refusal deleted, and the duplication nobody had justified",
+   "user": "kksecura",
+   "created_at": "2026-09-09T10:52:11Z",
+   "head": "1041d2d32d389a5f21cf622dfcf4d5be66e0ce2f",
+   "branch": "feature/ks-1027-ks992-followups",
+   "base": "develop",
+   "n_files": 2,
+   "kit_paths_touched": [],
+   "census_keys_in_title": [],
+   "client_human": false
+  },
+  "923": {
+   "title": "KS-736: the mount-auth check scored authenticateToken(false) as green, and could not see half its own surface",
+   "user": "kksecura",
+   "created_at": "2026-09-09T08:53:13Z",
+   "head": "d127dc7d4655a4e227d4f6e511f469c456eaabb7",
+   "branch": "kamilkreiser/ks-736-mount-auth-retag",
+   "base": "develop",
+   "n_files": 1,
+   "kit_paths_touched": [],
+   "census_keys_in_title": [],
+   "client_human": false
+  },
+  "920": {
+   "title": "KS-734: make tests/e2e runnable from a clean checkout, and baseline what it actually reports",
+   "user": "kksecura",
+   "created_at": "2026-09-09T07:38:52Z",
+   "head": "2112a99e31aec4b6e132dc6519c75d3afb6b2b02",
+   "branch": "kamilkreiser/ks-734-e2e-suite-installable",
+   "base": "develop",
+   "n_files": 7,
+   "kit_paths_touched": [],
+   "census_keys_in_title": [],
+   "client_human": false
+  },
+  "887": {
+   "title": "KS-961: run the workspace suites on the PR, advisory and non-blocking \u2014 and they are RED on develop today",
+   "user": "kksecura",
+   "created_at": "2026-09-07T01:41:26Z",
+   "head": "3aee3deed2e3ac557f0a52c0797c2a4a8df25f69",
+   "branch": "feature/ks-961-workspace-suites-advisory-on-pr",
+   "base": "develop",
+   "n_files": 2,
+   "kit_paths_touched": [],
+   "census_keys_in_title": [],
+   "client_human": false
+  },
+  "809": {
+   "title": "KS-693 (interim): guard the 8 M365/OneDrive/Teams unconfigured-503 ops so the merge gate reads a real floor",
+   "user": "kksecura",
+   "created_at": "2026-09-04T22:30:48Z",
+   "head": "aa2270fe14cf95dbe349fb8aae14f1473d2db5e7",
+   "branch": "feature/ks-693-tolerate-m365-unconfigured-503",
+   "base": "develop",
+   "n_files": 2,
+   "kit_paths_touched": [],
+   "census_keys_in_title": [],
+   "client_human": false
+  },
+  "649": {
+   "title": "chore(deps): bump pg and @types/pg in /Blockchain/Dev",
+   "user": "dependabot[bot]",
+   "created_at": "2026-08-05T12:16:10Z",
+   "head": "1d9198ac7e2f54e43cd38b66ce40ce1f52d338b8",
+   "branch": "dependabot/npm_and_yarn/Blockchain/Dev/develop/multi-8cb89e51b7",
+   "base": "develop",
+   "n_files": 22,
+   "kit_paths_touched": [],
+   "census_keys_in_title": [],
+   "client_human": false
+  },
+  "639": {
+   "title": "chore(deps): bump @radix-ui/react-dropdown-menu from 2.1.16 to 2.1.24 in /Blockchain/Dev",
+   "user": "dependabot[bot]",
+   "created_at": "2026-08-03T20:46:50Z",
+   "head": "2069d852ee1618fac25cd3eeb56f22005422125f",
+   "branch": "dependabot/npm_and_yarn/Blockchain/Dev/develop/radix-ui/react-dropdown-menu-2.1.24",
+   "base": "develop",
+   "n_files": 3,
+   "kit_paths_touched": [],
+   "census_keys_in_title": [],
+   "client_human": false
+  },
+  "635": {
+   "title": "chore(deps): bump cbor from 9.0.2 to 10.0.12 in /Blockchain/Dev",
+   "user": "dependabot[bot]",
+   "created_at": "2026-08-03T20:16:58Z",
+   "head": "6cbc298f41a1dd4a0a986084800c6de71aeb08fd",
+   "branch": "dependabot/npm_and_yarn/Blockchain/Dev/develop/cbor-10.0.12",
+   "base": "develop",
+   "n_files": 2,
+   "kit_paths_touched": [],
+   "census_keys_in_title": [],
+   "client_human": false
+  },
+  "575": {
+   "title": "chore(deps): bump dotenv from 16.6.1 to 17.4.2 in /Blockchain/Dev",
+   "user": "dependabot[bot]",
+   "created_at": "2026-07-20T20:21:05Z",
+   "head": "7d32d8ae4b064592b2d133e17d23c67b8d50dc60",
+   "branch": "dependabot/npm_and_yarn/Blockchain/Dev/develop/dotenv-17.4.2",
+   "base": "develop",
+   "n_files": 21,
+   "kit_paths_touched": [],
+   "census_keys_in_title": [],
+   "client_human": false
+  },
+  "572": {
+   "title": "chore(deps-dev): bump @types/office-js from 1.0.599 to 1.0.610 in /Blockchain/Dev in the types group across 1 directory",
+   "user": "dependabot[bot]",
+   "created_at": "2026-07-20T20:19:15Z",
+   "head": "4ea847b39ec8cb2db1e7bee0eb9355e35a8c4208",
+   "branch": "dependabot/npm_and_yarn/Blockchain/Dev/develop/types-1409c3626d",
+   "base": "develop",
+   "n_files": 2,
+   "kit_paths_touched": [],
+   "census_keys_in_title": [],
+   "client_human": false
+  }
+ }
+}

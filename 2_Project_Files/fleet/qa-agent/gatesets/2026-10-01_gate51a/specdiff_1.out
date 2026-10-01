@@ -1,0 +1,45 @@
+specdiff_gate51a | base c56dd7c32edf | head bf277eead268 | clone /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/cb6b682a-5afd-4a5e-a1e3-be903cfa4469/scratchpad/g51a_sp/clone
+PASS S1 file set: 11 paths | extra [] | missing []
+    numstat Blockchain/Dev/docs/openapi/secuura-api.yaml +11/-0
+    numstat Blockchain/Dev/services/analytics/src/__tests__/ks1364-analytics-reports-body-required.test.ts +40/-0
+    numstat Blockchain/Dev/services/analytics/src/analytics.openapi.ts +1/-1
+    numstat Blockchain/Dev/services/billing/src/__tests__/ks1364-billing-checkout-custom-default-payment-method-body-required.test.ts +53/-0
+    numstat Blockchain/Dev/services/billing/src/billing.openapi.ts +2/-0
+    numstat Blockchain/Dev/services/m365-integration/src/__tests__/ks1364-m365-sites-sync-verifyhash-body-required.test.ts +58/-0
+    numstat Blockchain/Dev/services/m365-integration/src/__tests__/ks1364-onedrive-file-sync-body-required.test.ts +43/-0
+    numstat Blockchain/Dev/services/m365-integration/src/m365-integration.openapi.ts +4/-3
+    numstat Blockchain/Dev/services/nft-certificate/src/__tests__/ks1364-nft-record-estimate-body-required.test.ts +50/-0
+    numstat Blockchain/Dev/services/nft-certificate/src/__tests__/ks1364-nft-verify-body-required.test.ts +50/-0
+    numstat Blockchain/Dev/services/nft-certificate/src/nft-certificate.openapi.ts +4/-2
+PASS S1 openapi.ts numstat: {'Blockchain/Dev/services/analytics/src/analytics.openapi.ts': '+1/-1', 'Blockchain/Dev/services/billing/src/billing.openapi.ts': '+2/-0', 'Blockchain/Dev/services/m365-integration/src/m365-integration.openapi.ts': '+4/-3', 'Blockchain/Dev/services/nft-certificate/src/nft-certificate.openapi.ts': '+4/-2'} (kit {'Blockchain/Dev/services/nft-certificate/src/nft-certificate.openapi.ts': '+4/-2', 'Blockchain/Dev/services/analytics/src/analytics.openapi.ts': '+1/-1', 'Blockchain/Dev/services/billing/src/billing.openapi.ts': '+2/-0', 'Blockchain/Dev/services/m365-integration/src/m365-integration.openapi.ts': '+4/-3'}) | summed +11/-6
+    whole PR +316/-6 (the seat claimed +316/-6)
+    Blockchain/Dev/services/analytics/src/analytics.openapi.ts: -1 +1 | after stripping `required: true` the + side == the - side: True | `required: true` in a request.body block at head: 1 of 1
+    Blockchain/Dev/services/billing/src/billing.openapi.ts: -0 +2 | after stripping `required: true` the + side == the - side: True | `required: true` in a request.body block at head: 2 of 2
+    Blockchain/Dev/services/m365-integration/src/m365-integration.openapi.ts: -3 +4 | after stripping `required: true` the + side == the - side: True | `required: true` in a request.body block at head: 4 of 4
+    Blockchain/Dev/services/nft-certificate/src/nft-certificate.openapi.ts: -2 +4 | after stripping `required: true` the + side == the - side: True | `required: true` in a request.body block at head: 4 of 4
+PASS S2 only `required: true` added: 11 `required: true` added (6 replacements, 5 insertions; the PR body claims 5 replacements / 6 insertions) | files where another key moved: NONE
+    yaml +11/-0 | added lines == '        required: true': 11 of 11 | directly under `requestBody:`: 11 | ops: [('/api/analytics/reports', 'post'), ('/api/billing/checkout/custom', 'post'), ('/api/billing/customers/{customerId}/default-payment-method', 'post'), ('/api/m365/documents/sync', 'post'), ('/api/m365/outlook/verify-hash', 'post'), ('/api/m365/sites', 'post'), ('/api/nft/estimate', 'post'), ('/api/nft/record', 'post'), ('/api/nft/verify/asset', 'post'), ('/api/nft/verify/transaction', 'post'), ('/api/onedrive/files/{id}/sync', 'post')]
+    yaml lines == '        required: true': develop 60, head 71 (delta 11)
+PASS S3 yaml: +11/-0, 11 under requestBody, ops == the 11 kit operations: True (missing [], extra [])
+    goldens applied in order (name, rc, offset lines): [('nft-record-estimate', 0, 0), ('nft-verify', 0, 0), ('analytics-reports', 0, 0), ('billing', 0, 0), ('m365', 0, 0), ('onedrive', 0, 0)] | golden tree 737035d0b9a3
+    golden == head __tests__/ks1364-analytics-reports-body-required.test.ts: True
+    golden == head analytics.openapi.ts: True
+    golden == head __tests__/ks1364-billing-checkout-custom-default-payment-method-body-required.test.ts: True
+    golden == head billing.openapi.ts: True
+    golden == head __tests__/ks1364-m365-sites-sync-verifyhash-body-required.test.ts: True
+    golden == head __tests__/ks1364-onedrive-file-sync-body-required.test.ts: True
+    golden == head m365-integration.openapi.ts: True
+    golden == head __tests__/ks1364-nft-record-estimate-body-required.test.ts: True
+    golden == head __tests__/ks1364-nft-verify-body-required.test.ts: True
+    golden == head nft-certificate.openapi.ts: True
+    CONTROL the yaml: golden tree == head: False (the goldens carry no yaml: must be False)
+PASS S4 goldens byte-equal: 10 of 10 non-yaml paths blob-equal to the six goldens applied in order; yaml control differs: True
+    ks1364-analytics-reports-body-required.test.ts: RED ['AR1'] | control 3 | imports ['../analytics.openapi', '@secuura/shared', 'vitest']
+    ks1364-billing-checkout-custom-default-payment-method-body-required.test.ts: RED ['BL1', 'BL2'] | control 3 | imports ['../billing.openapi', '@secuura/shared', 'vitest']
+    ks1364-m365-sites-sync-verifyhash-body-required.test.ts: RED ['MS1', 'MS2', 'MS3'] | control 3 | imports ['../m365-integration.openapi', '@secuura/shared', 'vitest']
+    ks1364-onedrive-file-sync-body-required.test.ts: RED ['OD1'] | control 3 | imports ['../m365-integration.openapi', '@secuura/shared', 'vitest']
+    ks1364-nft-record-estimate-body-required.test.ts: RED ['NR1', 'NR2'] | control 3 | imports ['../nft-certificate.openapi', '@secuura/shared', 'vitest']
+    ks1364-nft-verify-body-required.test.ts: RED ['NV1', 'NV2'] | control 3 | imports ['../nft-certificate.openapi', '@secuura/shared', 'vitest']
+PASS S5 red cells: 11 RED cells ['AR1', 'BL1', 'BL2', 'MS1', 'MS2', 'MS3', 'NR1', 'NR2', 'NV1', 'NV2', 'OD1'] == kit red_cells: True | 18 control cells
+PASS S6 no runtime path: paths outside the allowed prefixes NONE | non-test non-openapi source paths NONE | CONTROL the same listing on develop^..develop (#1364) reads 2 path(s): ['Blockchain/Dev/scripts/audit/audit-baseline.json', 'Blockchain/Dev/scripts/audit/baseline-contract.mjs']
+SPECDIFF PASS: 0 FAIL of 7 checks | base c56dd7c32edf | head bf277eead268

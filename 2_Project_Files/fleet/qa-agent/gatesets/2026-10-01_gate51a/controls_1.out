@@ -1,0 +1,122 @@
+=== controls_gate51a  2026-10-01T02:34:36Z | develop c56dd7c32edf203177ade6c4d0c9040e624681b8 | develop^ 723dc0722b68482a03de8577fdb5eb5b3359e725 | #1365 bf277eead26897bb648c801f92308681dbdaffdc | END_TREE da849aa1d5c3d60f62b49b7f625fca01e3d59059 | plants /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/cb6b682a-5afd-4a5e-a1e3-be903cfa4469/scratchpad/g51a_sp/controls_023436
+--- pin_gate51a.py (head, shape, allowed prefixes, the move, alone, the squash, RECORDED modes + control, hook files, the unchanged HANDLER pins) — simulations write pins_gate51a.SIM-<name>.json only
+CONTROL PN0    expect rc 0 /why 'PASS: FAIL=0 -> pins_gate51a.SIM-real.json .* 11 paths \+316/-6' | got rc 0 -> OK | PASS: FAIL=0 -> pins_gate51a.SIM-real.json | develop c56dd7c32edf | head bf277eead268 | END_TREE da849aa1d5c3d60f62b49b7f625fca01e3d59059 | 11 paths +316/-6
+CONTROL PN0e   expect rc 0 /why 'END_TREE da849aa1d5c3d60f62b49b7f625fca01e3d59059 \| git diff --shortstat develop END: 11 files changed, 316 insertions\(\+\), 6 deletions\(-\)' | got rc 0 -> OK | (F) squash_sim 40fd38f76492025590f49780cf2363ef1b5c5167 | END_TREE da849aa1d5c3d60f62b49b7f625fca01e3d59059 | git diff --shortstat develop END: 11 files changed, 316 insertions(+), 6 deletio
+CONTROL PN0m   expect rc 0 /why 'MODE SUMMARY: 12 path\(s\) pinned \(11 PR, 1 control\), 12 OK .*100644.*100755' | got rc 0 -> OK |     MODE SUMMARY: 12 path(s) pinned (11 PR, 1 control), 12 OK | pins seen: ['100644', '100755'] (a pin set with only one mode value could not discriminate)
+CONTROL PN0k   expect rc 0 /why 'nft.routes.ts: develop 6df435dcb5df .*BYTE-EQUAL in every tree' | got rc 0 -> OK |     Blockchain/Dev/services/nft-certificate/src/routes/nft.routes.ts: develop 6df435dcb5df | head 6df435dcb5df | END 6df435dcb5df | BYTE-EQUAL in every tree
+CONTROL PN1    expect rc 1 /why 'REFUSING: --develop is a controls-only override' | got rc 1 -> OK | REFUSING: --develop is a controls-only override and needs --simulate <name> (it never writes the real pins)
+CONTROL PN2    expect rc 1 /why '\(K\) Blockchain/Dev/services/nft-certificate/src/routes/nft.routes.ts is not byte-equal' | got rc 1 -> OK |   - (K) Blockchain/Dev/services/nft-certificate/src/routes/nft.routes.ts is not byte-equal in every tree (the 4 nft handlers (record, estimate, verify/transaction, verify/asset) are untouche
+CONTROL PN3    expect rc 1 /why '\(C\) #1365: the develop move touches its own path' | got rc 1 -> OK |   - (C) #1365: the develop move touches its own path(s) ['Blockchain/Dev/docs/openapi/secuura-api.yaml'] — a rebase / re-draft decides
+CONTROL PN4    expect rc 1 /why 'Blockchain/Dev/docs/openapi/secuura-api.yaml: want 100644 .*MODE MISMATCH' | got rc 1 -> OK |     Blockchain/Dev/docs/openapi/secuura-api.yaml: want 100644 | {'head': '100755', 'alone': '100755', 'END': '100755'} | MODE MISMATCH
+CONTROL PN5    expect rc 0 /why '#1365 move [0-9a-f]{12}\.\.[0-9a-f]{12}: 1 path\(s\) \| reaches its own paths: NONE' | got rc 0 -> OK |     #1365 move c56dd7c32edf..25b48842b864: 1 path(s) | reaches its own paths: NONE
+CONTROL PN6    expect rc 1 /why '\(B\) paths outside the allowed prefixes \['Blockchain/Dev/BACKLOG.md'\]' | got rc 1 -> OK |   - (B) paths outside the allowed prefixes ['Blockchain/Dev/BACKLOG.md'] / manifest or lock paths [] in a spec-annotation PR
+--- specdiff_gate51a.py (requirement 1 prediction; the yaml control inside)
+CONTROL SD0    expect rc 0 /why 'SPECDIFF PASS: 0 FAIL of 7 checks' | got rc 0 -> OK | SPECDIFF PASS: 0 FAIL of 7 checks | base c56dd7c32edf | head bf277eead268
+CONTROL SD0r   expect rc 0 /why 'PASS S2 .*11 `required: true` added \(6 replacements, 5 insertions' | got rc 0 -> OK | PASS S2 only `required: true` added: 11 `required: true` added (6 replacements, 5 insertions; the PR body claims 5 replacements / 6 insertions) | files where another key moved: NONE
+CONTROL SD0g   expect rc 0 /why 'PASS S4 goldens byte-equal: 10 of 10 non-yaml paths .*yaml control differs: True' | got rc 0 -> OK | PASS S4 goldens byte-equal: 10 of 10 non-yaml paths blob-equal to the six goldens applied in order; yaml control differs: True
+CONTROL SD0y   expect rc 0 /why 'yaml lines == '        required: true': develop 60, head 71 \(delta 11\)' | got rc 0 -> OK |     yaml lines == '        required: true': develop 60, head 71 (delta 11)
+CONTROL SD1    expect rc 1 /why 'FAIL S2 only .*files where another key moved: \['Blockchain/Dev/services/analytics/src/analytics.openapi.ts'\]' | got rc 1 -> OK | FAIL S2 only `required: true` added: 11 `required: true` added (6 replacements, 5 insertions; the PR body claims 5 replacements / 6 insertions) | files where another key moved: ['Blockchain/
+CONTROL SD2    expect rc 1 /why 'FAIL S3 yaml' | got rc 1 -> OK | FAIL S3 yaml: +11/-0, 11 under requestBody, ops == the 11 kit operations: True (missing [], extra [])
+CONTROL SD3    expect rc 1 /why 'FAIL S4 goldens byte-equal: 9 of 10 non-yaml paths' | got rc 1 -> OK | FAIL S4 goldens byte-equal: 9 of 10 non-yaml paths blob-equal to the six goldens applied in order; yaml control differs: True
+CONTROL SD4    expect rc 1 /why 'FAIL S6 no runtime path: .*\['Blockchain/Dev/services/nft-certificate/src/routes/nft.routes.ts'\]' | got rc 1 -> OK | FAIL S6 no runtime path: paths outside the allowed prefixes NONE | non-test non-openapi source paths ['Blockchain/Dev/services/nft-certificate/src/routes/nft.routes.ts'] | CONTROL the same l
+CONTROL SD5    expect rc 1 /why 'FAIL S1 file set: 0 paths' | got rc 1 -> OK | FAIL S1 file set: 0 paths | extra [] | missing ['Blockchain/Dev/docs/openapi/secuura-api.yaml', 'Blockchain/Dev/services/analytics/src/__tests__/ks1364-analytics-reports-body-required.test.t
+--- handlers_gate51a.py (requirement 3 prediction; the TENANT-CTL control inside)
+CONTROL HD0    expect rc 0 /why 'HANDLERS PASS: 11 of 11 operations REJECTS-EMPTY at [0-9a-f]{12} \| control TENANT-CTL OK' | got rc 0 -> OK | HANDLERS PASS: 11 of 11 operations REJECTS-EMPTY at bf277eead268 | control TENANT-CTL OK | 0 FAIL
+CONTROL HD0c   expect rc 0 /why 'OK   TENANT-CTL .*required NONE \| ACCEPTS-EMPTY \(want ACCEPTS-EMPTY\)' | got rc 0 -> OK | OK   TENANT-CTL PATCH /api/platform/tenants/{id} | route tenant-provisioning/src/index.ts:440 | validator :442 (named zod .parse) | fields ['name?:432', 'domain?:433', 'industry?:434', 'coun
+CONTROL HD0m   expect rc 0 /why 'RUNTIME root lock at [0-9a-f]{12}: express 4\.[0-9.]+ \| body-parser 1\.[0-9.]+' | got rc 0 -> OK | RUNTIME root lock at bf277eead268: express 4.22.3 | body-parser 1.20.8
+CONTROL HD1    expect rc 1 /why 'FAIL NR2 POST /api/nft/estimate .*required NONE \| ACCEPTS-EMPTY \(want REJECTS-EMPTY\)' | got rc 1 -> OK | FAIL NR2 POST /api/nft/estimate | route nft-certificate/src/routes/nft.routes.ts:184 | validator :186 (named zod .safeParse) | fields ['storageTier?:36', 'chain?:37', 'metadataSize?:38', 'do
+CONTROL HD2    expect rc 1 /why 'FAIL NR1 POST /api/nft/record: validator .* not within 12 lines' | got rc 1 -> OK | FAIL NR1 POST /api/nft/record: validator 'RecordMintSchema.safeParse(req.body)' not within 12 lines of Blockchain/Dev/services/nft-certificate/src/routes/nft.routes.ts:128
+CONTROL HD3    expect rc 1 /why 'FAIL TENANT-CTL .*REJECTS-EMPTY \(want ACCEPTS-EMPTY\)' | got rc 1 -> OK | FAIL TENANT-CTL PATCH /api/platform/tenants/{id} | route tenant-provisioning/src/index.ts:440 | validator :442 (named zod .parse) | fields ['name:432', 'domain?:433', 'industry?:434', 'count
+--- keyscan_gate51a.py (subject, body, live surfaces)
+CONTROL KS0    expect rc 0 /why 'KEYSCAN PASS: 6 checks over 1 PR, 0 FAIL' | got rc 0 -> OK | KEYSCAN PASS: 6 checks over 1 PR, 0 FAIL, 0 FLAG line(s) (live surfaces; the gate rules them)
+CONTROL KS1    expect rc 1 /why 'FAIL #1365 S2' | got rc 1 -> OK | FAIL #1365 S2: declared subject carries no (#n) suffix
+CONTROL KS2    expect rc 1 /why 'FAIL #1365 S1' | got rc 1 -> OK | FAIL #1365 S1: subject keys ['KS-1015', 'KS-1364'] (own ['KS-1364'])
+CONTROL KS3    expect rc 1 /why 'FAIL #1365 S3: declared 85, lands at 93' | got rc 1 -> OK | FAIL #1365 S3: declared 85, lands at 93 (<= 92): 'KS-1364: mark eleven request bodies required where handlers reject an absent body0123'
+CONTROL KS4    expect rc 1 /why 'FAIL #1365 B1 KS-1364' | got rc 1 -> OK | FAIL #1365 B1 KS-1364: `Refs KS-1364` lines: 0
+CONTROL KS5    expect rc 1 /why 'FAIL #1365 B2' | got rc 1 -> OK | FAIL #1365 B2: closing keyword before a key: ['Closes']
+CONTROL KS6    expect rc 1 /why 'FAIL #1365 B3: .*foreign \['KS-1015'\]' | got rc 1 -> OK | FAIL #1365 B3: body key set ['KS-1015', 'KS-1364'] | foreign ['KS-1015']
+CONTROL KS7    expect rc 0 /why 'OUTSIDE any fence: \['KS-1015'\]' | got rc 0 -> OK | INFO #1365 PR body FOREIGN hyphenated keys INSIDE a fenced block: none | OUTSIDE any fence: ['KS-1015'] | de-hyphenated context keys present: {'KS 255': False, 'KS 1015': False}
+--- the launcher (--check; L9 the real launch path, non-TTY)
+CONTROL L0     expect rc 0 /why 'all guards pass' | got rc 0 -> OK | all guards pass:
+CONTROL L1     expect rc 6 /why '#1365 — .* is not at .* AND refs/pull/1365/head' | got rc 6 -> OK | REFUSING: #1365 — c56dd7c32edf203177ade6c4d0c9040e624681b8 is not at refs/heads/feature/ks-1364-mark-eleven-request-bodies-required-b52-1 AND refs/pull/1365/head on origin — the head moved (
+CONTROL L2     expect rc 17 /why 'origin develop .* != the pinned develop' | got rc 17 -> OK | REFUSING: origin develop 723dc0722b68482a03de8577fdb5eb5b3359e725 != the pinned develop c56dd7c32edf203177ade6c4d0c9040e624681b8 — run repin_and_launch_gate51a.sh (it re-pins and re-fills in
+CONTROL L3     expect rc 10 /why '#1365 — the compare is not the pinned' | got rc 10 -> OK | REFUSING: #1365 — the compare is not the pinned merge_base / ahead / behind / files:
+CONTROL L4     expect rc 26 /why 'merge authority / the GO string' | got rc 26 -> OK | REFUSING: merge authority / the GO string
+CONTROL L4b    expect rc 26 /why 'merge authority / the GO string' | got rc 26 -> OK | REFUSING: merge authority / the GO string
+CONTROL L5     expect rc 8 /why 'unfilled double-brace' | got rc 8 -> OK | REFUSING: the prompt carries an unfilled double-brace fill token
+CONTROL L5b    expect rc 8 /why 'unpinned PR placeholder' | got rc 8 -> OK | REFUSING: the prompt carries the unpinned PR placeholder
+CONTROL LK1    expect rc 33 /why 'by-name keyword 'PATHS-ELEVEN'' | got rc 33 -> OK | REFUSING: the prompt does not carry the by-name keyword 'PATHS-ELEVEN'
+CONTROL LK2    expect rc 33 /why 'by-name keyword 'REQUIRED-ONLY'' | got rc 33 -> OK | REFUSING: the prompt does not carry the by-name keyword 'REQUIRED-ONLY'
+CONTROL LK3    expect rc 33 /why 'by-name keyword 'YAML-ELEVEN'' | got rc 33 -> OK | REFUSING: the prompt does not carry the by-name keyword 'YAML-ELEVEN'
+CONTROL LK4    expect rc 33 /why 'by-name keyword 'GOLDENS-BYTE-EQUAL'' | got rc 33 -> OK | REFUSING: the prompt does not carry the by-name keyword 'GOLDENS-BYTE-EQUAL'
+CONTROL LK5    expect rc 33 /why 'by-name keyword 'GENERATOR-REPRODUCES'' | got rc 33 -> OK | REFUSING: the prompt does not carry the by-name keyword 'GENERATOR-REPRODUCES'
+CONTROL LK6    expect rc 33 /why 'by-name keyword 'CHECK-OPENAPI-RC'' | got rc 33 -> OK | REFUSING: the prompt does not carry the by-name keyword 'CHECK-OPENAPI-RC'
+CONTROL LK7    expect rc 33 /why 'by-name keyword 'HANDLER-REJECTS-ABSENT'' | got rc 33 -> OK | REFUSING: the prompt does not carry the by-name keyword 'HANDLER-REJECTS-ABSENT'
+CONTROL LK8    expect rc 33 /why 'by-name keyword 'NO-RUNTIME-CHANGE'' | got rc 33 -> OK | REFUSING: the prompt does not carry the by-name keyword 'NO-RUNTIME-CHANGE'
+CONTROL LK9    expect rc 33 /why 'by-name keyword 'RED-FIRST'' | got rc 33 -> OK | REFUSING: the prompt does not carry the by-name keyword 'RED-FIRST'
+CONTROL LK10   expect rc 33 /why 'by-name keyword 'CONTROLS-GREEN'' | got rc 33 -> OK | REFUSING: the prompt does not carry the by-name keyword 'CONTROLS-GREEN'
+CONTROL LK11   expect rc 33 /why 'by-name keyword 'SUITES-BASE-HEAD'' | got rc 33 -> OK | REFUSING: the prompt does not carry the by-name keyword 'SUITES-BASE-HEAD'
+CONTROL LK12   expect rc 33 /why 'by-name keyword 'TSC-NO-REGRESSION'' | got rc 33 -> OK | REFUSING: the prompt does not carry the by-name keyword 'TSC-NO-REGRESSION'
+CONTROL LK13   expect rc 33 /why 'by-name keyword 'SUBJECT-KEY-SCAN'' | got rc 33 -> OK | REFUSING: the prompt does not carry the by-name keyword 'SUBJECT-KEY-SCAN'
+CONTROL LK14   expect rc 33 /why 'by-name keyword 'SUBJECT-LANDS-AT'' | got rc 33 -> OK | REFUSING: the prompt does not carry the by-name keyword 'SUBJECT-LANDS-AT'
+CONTROL LK15   expect rc 33 /why 'by-name keyword 'SUBJECT-TRUE-OF-DIFF'' | got rc 33 -> OK | REFUSING: the prompt does not carry the by-name keyword 'SUBJECT-TRUE-OF-DIFF'
+CONTROL LK16   expect rc 33 /why 'by-name keyword 'REFS-OWN-KEY'' | got rc 33 -> OK | REFUSING: the prompt does not carry the by-name keyword 'REFS-OWN-KEY'
+CONTROL LK17   expect rc 33 /why 'by-name keyword 'NO-CLOSING-KEYWORD'' | got rc 33 -> OK | REFUSING: the prompt does not carry the by-name keyword 'NO-CLOSING-KEYWORD'
+CONTROL LK18   expect rc 33 /why 'by-name keyword 'DEHYPHENATED-KEYS'' | got rc 33 -> OK | REFUSING: the prompt does not carry the by-name keyword 'DEHYPHENATED-KEYS'
+CONTROL LK19   expect rc 33 /why 'by-name keyword 'SIX-REMAINING-NAMED'' | got rc 33 -> OK | REFUSING: the prompt does not carry the by-name keyword 'SIX-REMAINING-NAMED'
+CONTROL LK20   expect rc 33 /why 'by-name keyword 'NOT-COVERED-HONEST'' | got rc 33 -> OK | REFUSING: the prompt does not carry the by-name keyword 'NOT-COVERED-HONEST'
+CONTROL LK21   expect rc 33 /why 'by-name keyword 'PR-BODY-CLAIMS'' | got rc 33 -> OK | REFUSING: the prompt does not carry the by-name keyword 'PR-BODY-CLAIMS'
+CONTROL LK22   expect rc 33 /why 'by-name keyword 'CLEAN-MERGE'' | got rc 33 -> OK | REFUSING: the prompt does not carry the by-name keyword 'CLEAN-MERGE'
+CONTROL LK23   expect rc 33 /why 'by-name keyword 'END-TREE'' | got rc 33 -> OK | REFUSING: the prompt does not carry the by-name keyword 'END-TREE'
+CONTROL LK24   expect rc 33 /why 'by-name keyword 'MODES'' | got rc 33 -> OK | REFUSING: the prompt does not carry the by-name keyword 'MODES'
+CONTROL LK25   expect rc 33 /why 'by-name keyword 'COLLISION-CENSUS'' | got rc 33 -> OK | REFUSING: the prompt does not carry the by-name keyword 'COLLISION-CENSUS'
+CONTROL LK26   expect rc 33 /why 'by-name keyword 'TIERING'' | got rc 33 -> OK | REFUSING: the prompt does not carry the by-name keyword 'TIERING'
+CONTROL LK27   expect rc 33 /why 'by-name keyword 'DISK-ENOSPC'' | got rc 33 -> OK | REFUSING: the prompt does not carry the by-name keyword 'DISK-ENOSPC'
+CONTROL LK28   expect rc 33 /why 'by-name keyword 'REPORT-HASH-LAST'' | got rc 33 -> OK | REFUSING: the prompt does not carry the by-name keyword 'REPORT-HASH-LAST'
+CONTROL L6     expect rc 33 /why 'the filename rule' | got rc 33 -> OK | REFUSING: MEASURE, not conclude / RULE WHETHER IT BLOCKS / NAMES THE TREE / the printing control / the filename rule
+CONTROL L7     expect rc 20 /why 'do not both name #1365's head' | got rc 20 -> OK | REFUSING: the capture and the prompt do not both name #1365's head bf277eead26897bb648c801f92308681dbdaffdc in full
+CONTROL L8     expect rc 39 /why 'the HOLDS' | got rc 39 -> OK | REFUSING: the HOLDS
+CONTROL L8b    expect rc 39 /why 'the HOLDS' | got rc 39 -> OK | REFUSING: the HOLDS
+CONTROL L8c    expect rc 39 /why 'the HOLDS' | got rc 39 -> OK | REFUSING: the HOLDS
+CONTROL L8d    expect rc 39 /why 'the HOLDS' | got rc 39 -> OK | REFUSING: the HOLDS
+CONTROL L8g    expect rc 39 /why 'the HOLDS' | got rc 39 -> OK | REFUSING: the HOLDS
+CONTROL L9     expect rc 21 /why 'stdin is not a TTY' | got rc 21 -> OK | REFUSING: stdin is not a TTY — run this launcher in a cockpit pane, never inside a Bash tool
+CONTROL L10    expect rc 31 /why 'launch develop / the END_TREE' | got rc 31 -> OK | REFUSING: the launch develop / the END_TREE not in full
+CONTROL L11    expect rc 7 /why 'the tier line' | got rc 7 -> OK | REFUSING: the tier line / FROZEN at ONE / the round / the tiering rule
+CONTROL L11b   expect rc 7 /why 'the tiering rule' | got rc 7 -> OK | REFUSING: the tier line / FROZEN at ONE / the round / the tiering rule
+CONTROL L12    expect rc 32 /why 'BOTH state the ticket' | got rc 32 -> OK | REFUSING: the capture and the prompt do not BOTH state the ticket ('PR #1365 is KS-1364' / '#1365 (KS-1364)')
+CONTROL L13    expect rc 25 /why 'the MERGE ADDENDUM rules' | got rc 25 -> OK | REFUSING: the MERGE ADDENDUM rules / REPORT-HASH-LAST
+CONTROL L13b   expect rc 25 /why 'REPORT-HASH-LAST' | got rc 25 -> OK | REFUSING: the MERGE ADDENDUM rules / REPORT-HASH-LAST
+CONTROL L13c   expect rc 25 /why 'the MERGE ADDENDUM rules' | got rc 25 -> OK | REFUSING: the MERGE ADDENDUM rules / REPORT-HASH-LAST
+CONTROL L14    expect rc 23 /why 'the verdict subject' | got rc 23 -> OK | REFUSING: the verdict subject / sender / report dir
+CONTROL L15    expect rc 2 /why 'a MOVED KIT' | got rc 2 -> OK | REFUSING: this launcher lives in /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/cb6b682a-5afd-4a5e-a1e3-be903cfa4469/scratchpad/g51a_sp/controls_023436 but was filled for /Volumes/DevM
+CONTROL L16    expect rc 8 /why 'handlers_1.out is missing, empty, or not named' | got rc 8 -> OK | REFUSING: the kit file /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/gatesets/2026-10-01_gate51a/handlers_1.out is missing, empty, or not named in the prompt
+CONTROL L17    expect rc 8 /why 'READY_1365_CORRECTION_mail.md is missing, empty, or not named' | got rc 8 -> OK | REFUSING: the kit file /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/gatesets/2026-10-01_gate51a/READY_1365_CORRECTION_mail.md is missing, empty, or not named in the prompt
+CONTROL L18    expect rc 8 /why 'the previous round report' | got rc 8 -> OK | REFUSING: the prompt does not name the previous round report (gate50b)
+CONTROL L20    expect rc 34 /why 'the NO-RUNTIME rule' | got rc 34 -> OK | REFUSING: the NO-RUNTIME rule (no live server / no Schemathesis / no image / no database)
+CONTROL L21    expect rc 36 /why 'the RUNTIME-TRUTH rule' | got rc 36 -> OK | REFUSING: the RUNTIME-TRUTH rule (requirement 3 and its control)
+CONTROL L21b   expect rc 36 /why 'the RUNTIME-TRUTH rule' | got rc 36 -> OK | REFUSING: the RUNTIME-TRUTH rule (requirement 3 and its control)
+CONTROL L22    expect rc 37 /why 'the NOT-THE-GATE'S items' | got rc 37 -> OK | REFUSING: the NOT-THE-GATE'S items
+CONTROL L23    expect rc 38 /why 'the proportionality line' | got rc 38 -> OK | REFUSING: the proportionality line
+--- the launch action (repin: --dry-run; R1 and R8 real runs that stop before the usage gate)
+CONTROL R0     expect rc 0 /why 'DRY RUN COMPLETE' | got rc 0 -> OK | DRY RUN COMPLETE 2026-10-01T02:39:33Z — every read agrees with the pins; the real run continues with the override check, the usage gate, --check and cockpit.sh add
+CONTROL R0c    expect rc 0 /why 'CENSUS [0-9]+ other open PR\(s\) read \| 0 touch a kit path or carry a kit key outside reported_overlaps \| 0 expected overlap\(s\) reported \| 0 sequenced by Wednesday .*2 client-human PR\(s\) reported \| 11 kit path\(s\), 1 kit key\(s\)' | got rc 0 -> OK |     CENSUS 22 other open PR(s) read | 0 touch a kit path or carry a kit key outside reported_overlaps | 0 expected overlap(s) reported | 0 sequenced by Wednesday | 0 seat-branch PR(s) disjoi
+CONTROL R0h    expect rc 0 /why 'CLIENT-HUMAN \(reported, never sequenced by a gate\) #1360 by PeterObeden' | got rc 0 -> OK |     CLIENT-HUMAN (reported, never sequenced by a gate) #1360 by PeterObeden | head d0e99f181a4e | 15 file(s), none a kit path, no census key
+CONTROL R0b    expect rc 0 /why 'BOTH INSTRUMENTS AGREE with the pin, 1 of 1' | got rc 0 -> OK |   BOTH INSTRUMENTS AGREE with the pin, 1 of 1.
+CONTROL R1     expect rc 1 /why 'is not registered in inbox_routing.conf' | got rc 1 -> OK | REFUSING: QA/Secuura-batch1365 is not registered in inbox_routing.conf — add the line first (README.md section 4; the drafter did NOT write it)
+CONTROL R2     expect rc 15 /why 'OVERLAP #1360 .*paths \[.*'Blockchain/Dev/package-lock.json'' | got rc 15 -> OK |     OVERLAP #1360 feature/ks-1380-revert-pr-1358 | KS-1380: revert #1358 (15 lockfiles) at Peter's request | paths ['Blockchain/Dev/package-lock.json'] | title keys []
+CONTROL R3     expect rc 15 /why 'OVERLAP #1360 .*title keys \['KS-1380'\]' | got rc 15 -> OK |     OVERLAP #1360 feature/ks-1380-revert-pr-1358 | KS-1380: revert #1358 (15 lockfiles) at Peter's request | paths [] | title keys ['KS-1380']
+CONTROL R3s    expect rc 0 /why 'SEQUENCED OUT-OF-KIT #1360 .*head [0-9a-f]{12} == the head Wednesday sequenced' | got rc 0 -> OK |     SEQUENCED OUT-OF-KIT #1360 feature/ks-1380-revert-pr-1358 | head d0e99f181a4e == the head Wednesday sequenced | paths [] | title keys ['KS-1380'] | ruling: CONTROL stand-in, not a ruling
+CONTROL R3w    expect rc 15 /why 'OVERLAP #1360 .*SEQUENCED at head [0-9a-f]{12} but now [0-9a-f]{12} — refused' | got rc 15 -> OK |     OVERLAP #1360 feature/ks-1380-revert-pr-1358 | KS-1380: revert #1358 (15 lockfiles) at Peter's request | paths [] | title keys ['KS-1380'] | SEQUENCED at head bf277eead268 but now d0e99f
+CONTROL R4     expect rc 0 /why 'DISJOINT OUT-OF-KIT #1360 ' | got rc 0 -> OK |     DISJOINT OUT-OF-KIT #1360 feature/ks-1380-revert-pr-1358 | KS-1380: revert #1358 (15 lockfiles) at Peter's request | 15 file(s), none a kit path
+CONTROL R5     expect rc 11 /why 'a head moved' | got rc 11 -> OK | REFUSING TO LAUNCH: a head moved (the pin is stale), a PR is not open / not on develop, or GitHub reports mergeable:false — a new head needs a RE-DRAFT: README section 9
+CONTROL R6     expect rc 10 /why 'develop MOVED since the fill' | got rc 10 -> OK |   DRY RUN: develop MOVED since the fill — the real run RE-PINS here (pin -> specdiff -> handlers -> fill) in the same action
+CONTROL R7     expect rc 9 /why 'must be a Claude session scratchpad' | got rc 9 -> OK | REFUSING: argv[2] must be a Claude session scratchpad under /private/tmp/claude-501/
+CONTROL R8     expect rc 0 /why 'STOPPED AFTER 3b' | got rc 0 -> OK | STOPPED AFTER 3b (G51A_STOP_AFTER_3B — a controls-only switch) — develop c56dd7c32edf203177ade6c4d0c9040e624681b8 | END_TREE da849aa1d5c3d60f62b49b7f625fca01e3d59059
+CONTROL R8r    expect rc 0 /why 'line present: 1 \(grep rc=0' | got rc 0 -> OK |   routing file /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/cb6b682a-5afd-4a5e-a1e3-be903cfa4469/scratchpad/g51a_sp/controls_023436/routing_ok.conf — line present: 1 (grep rc=0; want
+  (R1 / R8 real runs wrote their step outputs as /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/gatesets/2026-10-01_gate51a/launch_<HHMMSS>.* — 2 routing file(s) now; kept, never deleted)
+--- the real pins, kit.json and the filled prompt are untouched by every control above
+CONTROL PNZ    expect rc 0 | got rc 0 -> OK | 
+CONTROL KJZ    expect rc 0 | got rc 0 -> OK | 
+CONTROL PRZ    expect rc 0 | got rc 0 -> OK | 
+SUMMARY gate51a: 112 controls, OK 112, MISMATCH 0 | ssh-denied retries 0
