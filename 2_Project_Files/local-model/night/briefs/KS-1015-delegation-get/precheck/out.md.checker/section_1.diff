@@ -1,0 +1,33 @@
+--- a/Blockchain/Dev/services/transfer/src/transfer.openapi.ts
++++ b/Blockchain/Dev/services/transfer/src/transfer.openapi.ts
+@@ -1193,7 +1193,29 @@
+     400: commonErrorResponses[400],
+     200: {
+       description: 'Delegation',
+-      content: { 'application/json': { schema: DelegationSchema } },
++      // KS-1015 (sweep 2026-09-29): the handler (routes/delegations.ts, GET /:id) answers a success/data
++      // envelope carrying the delegation and the chain buildDelegationChain() returns, not a bare Delegation,
++      // so the spec follows the runtime. The Delegation component is unchanged and is referenced inside data.
++      content: {
++        'application/json': {
++          schema: successEnvelope(
++            z
++              .object({
++                delegation: DelegationSchema,
++                chain: z
++                  .object({
++                    rootDelegatorId: z.string(),
++                    chain: z.array(z.record(z.string(), z.unknown())),
++                    totalDepth: z.number().int(),
++                    isValid: z.boolean(),
++                    invalidReason: z.string().optional(),
++                  })
++                  .passthrough(),
++              })
++              .passthrough(),
++          ),
++        },
++      },
+     },
+     401: commonErrorResponses[401],
+     404: commonErrorResponses[404],

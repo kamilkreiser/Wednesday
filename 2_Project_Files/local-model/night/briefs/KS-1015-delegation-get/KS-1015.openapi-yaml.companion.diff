@@ -1,0 +1,50 @@
+diff --git a/Blockchain/Dev/docs/openapi/secuura-api.yaml b/Blockchain/Dev/docs/openapi/secuura-api.yaml
+index 1ffd687b8..52310cab1 100644
+--- a/Blockchain/Dev/docs/openapi/secuura-api.yaml
++++ b/Blockchain/Dev/docs/openapi/secuura-api.yaml
+@@ -37317,7 +37317,44 @@ paths:
+           content:
+             application/json:
+               schema:
+-                $ref: "#/components/schemas/Delegation"
++                type: object
++                properties:
++                  success:
++                    type: boolean
++                    enum:
++                      - true
++                  data:
++                    type: object
++                    properties:
++                      delegation:
++                        $ref: "#/components/schemas/Delegation"
++                      chain:
++                        type: object
++                        properties:
++                          rootDelegatorId:
++                            type: string
++                          chain:
++                            type: array
++                            items:
++                              type: object
++                              additionalProperties: {}
++                          totalDepth:
++                            type: integer
++                          isValid:
++                            type: boolean
++                          invalidReason:
++                            type: string
++                        required:
++                          - rootDelegatorId
++                          - chain
++                          - totalDepth
++                          - isValid
++                    required:
++                      - delegation
++                      - chain
++                required:
++                  - success
++                  - data
+         "400":
+           description: Bad request — malformed payload, missing required fields, or wrong content-type. See
+             `error.code` for the specific cause.

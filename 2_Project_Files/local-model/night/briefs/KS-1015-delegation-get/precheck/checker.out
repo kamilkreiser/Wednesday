@@ -1,0 +1,38 @@
+mode: code_patch
+diff_blocks=1 all_blocks=1 prose_outside_chars=0
+wrote /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/briefs/KS-1015-delegation-get/precheck/out.md.checker/patch.diff lines=115
+PASS A1 output is exactly one fenced ```diff block, nothing outside it
+clone clean at pinned tip 88e8877a2a0d6a626b9c2a7c4b71d3a909e6f94e
+runner: vitest
+--- baseline at the untouched tip (whole services/transfer suite + tsc)
+baseline suite rc=0 total=70 passed=70 failed=0 suites_failed=0 loaded=1 failed_names=[]
+baseline tsc rc=0 (0 lines)
+sections=2 miscounted_sections=0
+section 1 Blockchain/Dev/services/transfer/src/transfer.openapi.ts: applies (strict)
+section 2 Blockchain/Dev/services/transfer/src/__tests__/ks1015-delegation-get-spec-declares-envelope.test.ts: applies (strict)
+PASS A2 diff applies at the tip (strict git apply --check, every section, hunk headers consistent)
+touched files (2): Blockchain/Dev/services/transfer/src/__tests__/ks1015-delegation-get-spec-declares-envelope.test.ts Blockchain/Dev/services/transfer/src/transfer.openapi.ts  (+102/-1)
+PASS A3 touched-file set == { Blockchain/Dev/services/transfer/src/transfer.openapi.ts , Blockchain/Dev/services/transfer/src/__tests__/ks1015-delegation-get-spec-declares-envelope.test.ts }
+A3b: no must_change sites in the input — skipped
+A3c: measuring the product + test sections together (the test file is in the diff)
+PASS A3c every '+' line the brief adds is in the product hunk (23 line(s)), and no tip line is re-added as a '+' (A3d)
+A3i: every '+' line the brief adds is in the applied Blockchain/Dev/services/transfer/src/transfer.openapi.ts byte-exact incl. leading whitespace (apply mode strict): OK 23 line(s) byte-exact incl. leading whitespace (of 23; 23 line(s) added by the apply)
+test-only at tip: rc=1 total=6 passed=3 failed=3 suites_failed=2 loaded=1 failed_names=['KS-1015: GET /api/delegations/{id} publishes the envelope its handler returns RED KS-1015 D1: the 200 body is the success/data envelope, not the bare Delegation record', 'KS-1015: GET /api/delegations/{id} publishes the envelope its handler returns RED KS-1015 D2: data carries the Delegation component and the chain, both required', 'KS-1015: GET /api/delegations/{id} publishes the envelope its handler returns RED KS-1015 D3: the chain declares the fields buildDelegationChain returns, invalidReason optional']
+A4 declared red cell(s) (brief ## Red cells, assertion red): RED KS-1015 D1: the 200 body is the success/data envelope, n | RED KS-1015 D2: data carries the Delegation component and th | RED KS-1015 D3: the chain declares the fields buildDelegatio
+PASS A4 RED-FIRST: src/__tests__/ks1015-delegation-get-spec-declares-envelope.test.ts fails at the untouched tip (3 failed / 6 run; controls green; assertion reds)
+test after product hunk: rc=0 total=6 passed=6 failed=0 suites_failed=0 loaded=1 failed_names=[]
+PASS A5 GREEN-AFTER: src/__tests__/ks1015-delegation-get-spec-declares-envelope.test.ts passes with the product hunk (6 passed / 6 run)
+INFO control cell present: 3 cell(s) passed BEFORE and 6 AFTER (the harness reaches the code both times)
+after suite rc=0 total=76 passed=76 failed=0 suites_failed=0 loaded=1 failed_names=[]
+baseline: total=70 failed=0 | after: total=76 failed=0
+develop's own reds (attributed, not counted): []
+NEW reds: []
+reds fixed by the patch: []
+tests added: 6
+PASS A6 whole services/transfer suite: no NEW red vs the untouched tip
+PASS A7 tsc --noEmit for services/transfer: rc 0 after the patch (baseline rc=0)
+INFO tsc on the test file alone (--types node,vitest/globals): rc=0 (0 lines; not gated — the runner does not type-check and the service tsconfig excludes __tests__)
+SUMMARY files=2 +102/-1 test=src/__tests__/ks1015-delegation-get-spec-declares-envelope.test.ts red_first=yes apply_mode=strict
+RESULT: PASS (7/7)
+PASS A2a ANCHOR: every hunk's old side sits at its header's start line at the tip (SUMMARY hunks=1 ok=1 bad=0 skipped_newfile=1)
+SPARK RESULT: PASS (checker rc 0 + A2a anchor OK)

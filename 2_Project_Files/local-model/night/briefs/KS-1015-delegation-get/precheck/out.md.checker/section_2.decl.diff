@@ -1,0 +1,82 @@
+--- /dev/null
++++ b/Blockchain/Dev/services/transfer/src/__tests__/ks1015-delegation-get-spec-declares-envelope.test.ts
+@@ -0,0 +1,79 @@
++// KS-1015 (sweep 2026-09-29): the published contract for GET /api/delegations/{id} declared a bare Delegation
++// record (id, delegatorId, delegateId, ...) as its 200 body, while the handler (routes/delegations.ts, GET /:id)
++// answers { success, data: { delegation, chain } }, the chain being what buildDelegationChain() returns.
++// Schemathesis flagged the 200 as response_schema_conformance. The spec now follows the runtime. This file renders
++// the document the generator publishes, from the shared registry the transfer module populates on import.
++// No server, no database, no network.
++import { describe, it, expect } from 'vitest';
++import { generateOpenApiDocument } from '@secuura/shared';
++import '../transfer.openapi';
++
++type AnyObj = Record<string, any>;
++
++const doc = generateOpenApiDocument({ title: 'transfer (ks1015 pin)', version: '0.0.0' }) as AnyObj;
++
++const ONE = '/api/delegations/{id}';
++
++function operation(path: string, method: string): AnyObj | undefined {
++  return doc.paths?.[path]?.[method];
++}
++
++function body(path: string, method: string, status: string): AnyObj | undefined {
++  return operation(path, method)?.responses?.[status]?.content?.['application/json']?.schema;
++}
++
++describe('KS-1015: GET /api/delegations/{id} publishes the envelope its handler returns', () => {
++  it('RED KS-1015 D1: the 200 body is the success/data envelope, not the bare Delegation record', () => {
++    const s = body(ONE, 'get', '200');
++    expect({ ref: s?.$ref, required: s?.required, success: s?.properties?.success }).toEqual({
++      ref: undefined,
++      required: ['success', 'data'],
++      success: { type: 'boolean', enum: [true] },
++    });
++  });
++
++  it('RED KS-1015 D2: data carries the Delegation component and the chain, both required', () => {
++    const d = body(ONE, 'get', '200')?.properties?.data;
++    expect({
++      required: [...(d?.required ?? [])].sort(),
++      delegation: d?.properties?.delegation?.$ref,
++      chain: d?.properties?.chain?.type,
++    }).toEqual({
++      required: ['chain', 'delegation'],
++      delegation: '#/components/schemas/Delegation',
++      chain: 'object',
++    });
++  });
++
++  it('RED KS-1015 D3: the chain declares the fields buildDelegationChain returns, invalidReason optional', () => {
++    const c = body(ONE, 'get', '200')?.properties?.data?.properties?.chain;
++    const types = Object.fromEntries(Object.entries(c?.properties ?? {}).map(([k, v]) => [k, (v as AnyObj).type]));
++    expect({ types, required: [...(c?.required ?? [])].sort() }).toEqual({
++      types: { rootDelegatorId: 'string', chain: 'array', totalDepth: 'integer', isValid: 'boolean', invalidReason: 'string' },
++      required: ['chain', 'isValid', 'rootDelegatorId', 'totalDepth'],
++    });
++  });
++
++  it('control KS-1015 C1: the GET operation keeps bearerAuth, its path parameter id, and its 404', () => {
++    const op = operation(ONE, 'get');
++    expect(op?.security).toEqual([{ bearerAuth: [] }]);
++    expect((op?.parameters ?? []).map((q: AnyObj) => q.in + ':' + q.name + ':' + q.required)).toEqual(['path:id:true']);
++    expect(Object.keys(op?.responses ?? {})).toEqual(expect.arrayContaining(['200', '404']));
++  });
++
++  it('control KS-1015 C2: the Delegation component stays published with its required fields', () => {
++    expect([...(doc.components?.schemas?.Delegation?.required ?? [])].sort()).toEqual(
++      ['createdAt', 'delegateId', 'delegationType', 'delegatorId', 'id', 'status', 'validFrom'],
++    );
++  });
++
++  it('control KS-1015 C3: the sibling list and per-document operations keep their own envelopes', () => {
++    expect({
++      list: body('/api/delegations', 'get', '200')?.$ref,
++      perDoc: body('/api/delegations/document/{documentId}', 'get', '200')?.$ref,
++    }).toEqual({
++      list: '#/components/schemas/DelegationListResponse',
++      perDoc: '#/components/schemas/DelegationDocumentListResponse',
++    });
++  });
++});
