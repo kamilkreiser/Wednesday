@@ -204,3 +204,83 @@ Billing and m365 look like the next two Spark briefs. `/generate` should be sequ
 4. The node_modules are farmed from `sparkfeed` (installed at `94c9c7aa`), not a fresh `npm ci` at the tip. nft-certificate's service modules ARE a fresh `npm ci` of the tip's service lock.
 5. Open PRs were read at ~09:55 AEST. A PR opened after that is not covered.
 6. The 132 re-used verdicts were not re-read. Their tickets show no create/update since 2026-09-30T20:00Z other than KS-1379 (excluded), per the board_count delta.
+
+---
+
+## Batch 2 — KS-1364 carves continued (appended 10:29 AEST 2026-10-01; nothing above was rewritten)
+
+This batch was commissioned by Wednesday after she read the three batch-1 PASS diffs line by line and accepted them. All KS-1364 READYs go up as ONE PR later. Nothing was raised. The tip is unchanged: develop `723dc0722b68` by `ls-remote`. The open PRs were re-read at 10:21: 23 PRs, none new, none touching these files.
+
+### Checker fix landed first: A3c is now a MULTISET
+
+- **The change:** `tasks/code_patch/a3c_plus.py`.
+  - The backup is `.pre-1001-multiset`; the file was written as a copy and then moved into place.
+  - Each expected `+` line now consumes one `+` line, so two identical expected lines need two copies.
+- **Red arm:** `local-model/tests/a3c_multiset_arm_2026-10-01.sh`. The subject is the nft-verify section, which has two identical lines.
+
+| Arm | Exit | Want |
+|---|---|---|
+| Golden | 0 | 0 |
+| One copy mutated to `required: !0,` | **1** | 1 (the old set-based file gave 0 on the same section) |
+| One copy dropped | 1 | 1 |
+| Today's three held runs | 0 each | 0 |
+
+- **End to end:**
+  - The full `spark_checker.sh` was re-run on the three batch-1 outputs in fresh clones: PASS 7/7 + A2a each.
+  - The 10:0x nft-verify negative now gives rc 1, FAIL A3c.
+  - The fix fired live again in the billing precheck below: two identical `+` lines, one mutated, FAIL A3c.
+
+### Operations chosen, grouped per file
+
+| Brief (`night/briefs/…`) | File · edit points | Ops |
+|---|---|---|
+| `KS-1364-billing/` | `billing.openapi.ts`: 2 pure insertions of `required: true,` after `:740`, `:880` | `POST /api/billing/checkout/custom`, `POST /api/billing/customers/{customerId}/default-payment-method` |
+| `KS-1364-m365/` | `m365-integration.openapi.ts`: 3 one-line replacements `:601`, `:706`, `:1019` | `POST /api/m365/sites`, `/documents/sync`, `/outlook/verify-hash` (stays public, KS-442) |
+| `KS-1364-onedrive/` | same file: 1 pure insertion after `:833` | `POST /api/onedrive/files/{id}/sync` |
+
+**Not briefed, each with its failing clause:**
+- `POST /api/referrals/generate`: `referral.openapi.ts` belongs to the KS-1015 lane.
+- `POST /api/issuer-certs`: it lives in `auth.openapi.ts` (auth service).
+- `PATCH /api/users/admin/{id}` and `POST /api/users/me/change-password`: auth surfaces.
+- `PATCH /api/platform/tenants/{id}` (tenant-provisioning `index.ts:440`):
+  - `updateTenantSchema` is a partial-update schema that ACCEPTS `{}`;
+  - the 400 comes from a "No fields to update" check (`:455`), not from the zod schema, so the ticket's clause "where the handler's Zod schema rejects an absent body" does not hold;
+  - it is also a platform-admin surface.
+- `POST /api/v2/verification/verify` (originate):
+  - the handler resolves one of four optional fields (`hash|contentHash|documentId|documentData`, `verificationV2.ts:17`), not a zod object, so the shape is not derivable without a ruling;
+  - originate is jest, and there is no originate spec-registry test to copy.
+
+These two are Wednesday's call if she wants them. **I stopped at 3 briefs, under the cap of 4, because the predicate ran out.**
+
+### Rounds (counter: original + one rebrief; none was needed)
+
+| Brief | Rounds | Result | Wall / prompt / completion | READY (`local-model/night/`) |
+|---|---|---|---|---|
+| `KS-1364-billing` | 1 of 2 | **PASS 7/7 strict + A2a**, BYTE-IDENTICAL (cmp rc 0). Red 2/5 → 5/5; billing 93 → 98; tsc rc 0 | 34.2 s / 20,311 / 984 | `READY_KS-1364-BILLING-1_spark-dsv4flash_BRIEFED-CODEPATCH-BILLING.OPENAPI-PASS-7of7_2026-10-01.diff.md` |
+| `KS-1364-m365` | 1 of 2 | **PASS 7/7 strict + A2a**, BYTE-IDENTICAL. Red 3/6 → 6/6; m365 47 → 53 | 40.3 s / 21,390 / 1,258 | `READY_KS-1364-M365-1_spark-dsv4flash_BRIEFED-CODEPATCH-M365-INTEGRATION.OPENAPI-PASS-7of7_2026-10-01.diff.md` |
+| `KS-1364-onedrive` | 1 of 2 | **PASS 7/7 strict + A2a**, BYTE-IDENTICAL. Red 1/4 → 4/4; m365 47 → 51 | 30.6 s / 20,155 / 775 | `READY_KS-1364-ONEDRIVE-1_spark-dsv4flash_BRIEFED-CODEPATCH-M365-INTEGRATION.OPENAPI-PASS-7of7_2026-10-01.diff.md` |
+
+**Before each round:**
+- the builder ran on the brief: rc 0, "WEDNESDAY BRIEF";
+- the golden CONTROL ran: PASS 7/7 + A2a;
+- the negative ran: FAIL A3c;
+- each edit point was reverted on its own, and each turned exactly its own RED cell red.
+
+The Spark answered 200 before every round, with no queueing. Ladder rows 53-55 are written, and there is an IMPROVEMENTS row (the checker fix, plus billing's `@types/pg` farm conflict).
+
+**Smoke:** the harness is today's batch-1 harness with ONE change, A3c. That change was proven by the arm and re-checks above, so the batch-1 smoke is cited for everything else.
+
+**Raise:**
+- All six product goldens and all six YAML companions apply strictly in sequence on one tree. Measured.
+- The KS-1015 envelope companion still applies on top (`--check`).
+- Not run: that the stacked YAML equals a fresh `generate-openapi` of the stacked tree. The raise seat runs `npm run check:openapi`.
+
+### KS-1364 coverage after batch 2: **11 of 17 operations**
+
+| Batch | Ops covered |
+|---|---|
+| Batch 1 | 5 (nft ×4, analytics ×1) |
+| Batch 2 | 6 (billing ×2, m365 ×3, onedrive ×1) |
+| **Total** | **11 of 17** |
+
+The 6 left are referrals/generate, issuer-certs, users/admin, users/me/change-password, platform/tenants and v2 verify, each with the reason given above. **Refs KS-1364, does NOT close it.**
