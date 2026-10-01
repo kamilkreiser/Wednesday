@@ -10,7 +10,12 @@ supersede: replace wholesale; previous = NEXT-PICKUP-FRIDAY.md.pre-0925-rotate-s
 
 # NEXT PICKUP — FRIDAY
 
-**The tree is at `/Users/kamilkreiser/1FILES TO SYNC/FRIDAY`.** Quote every path (spaces).
+**The tree is at `/Volumes/Laptop-DEV/FRIDAY` (the drive, since 2026-09-28).** Quote every path (spaces).
+
+## 🔴🔴🔴 STATE 2026-10-02 09:47 (Friday boot, ctx 45%) — READ FIRST; supersedes every block below where they differ
+**Kam has NOT switched accounts yet:** statusline 7d 97%, `usage_gate.sh` REFUSED rc 3. Asked action-first on the panel (bf-090fabb1798ff): `/login` in Friday's pane AND in a plain `claude` (the seats use the default `~/.claude` login; their launchers set no CLAUDE_CONFIG_DIR). **On the fresh account, read a NEW seat's own statusline at launch before trusting the gate** (ledger 09-25/09-27). Then the 18:11 block's FIRST list stands unchanged: (1) MPS gate B06 (re-pin heads) + deliver card `datasec-90pct-gates-wait-for-fresh-account-1001`; (2) tier-1 gate on Composer PR #19 @ 6215c4b; (3) B35 Q3/Q4/Q5 to Kam; (4) HPSMPOC-166 → -181 pointer, -179/-180.
+**Floor:** %0 + %1 only. Spark tunnel 000. caffeinate pid 1902. UNREAD 0; reconcile 0.
+**SHIPPED this boot (Friday's own tooling, claims released):** `2_Project_Files/friday/name_addendum.sh <briefs-dir> <id> <N> <noun-slug>` — USE IT for every addendum name (refuses a tap-gate word, reads cockpit.sh's own regex; ledger w=6 closed). `2_Project_Files/friday/seat_idle.sh <pane|name>` — RUN IT before any "X is missing" line to a seat that just wrote READY; send only on IDLE (ledger w=3 closed). Two lapsed Friday grants moved to Expired in EXPIRING-GRANTS.
 
 ## 🔴🔴🔴 WRAP 2026-10-01 18:11 (Friday; Kam 17:41 "don't launch anything new… wrap up neatly"; FLOOR EMPTY: %0 + %1) — READ FIRST; supersedes every block below where they differ
 **State at wrap:** every seat finished and closed. HPSM-POC main **799cc3e** (#76–#79 merged, CI green); analysis main **9f268a9** (#25–#29). Composer: HPSM-light main **771ce4a**, LIVE on the demo (C-15, verified by Friday); **PR #19** (B35: #36 per-caller cap + #37 #56 #65 #29 #31 #62) at **6215c4b**, OPEN and NOT merged (tier 1: gate first); project-root main 912f9a2. MPS: **b03/importer 74600a5 + b03/api 7f6ca4c**, fix round done, NOT merged.
