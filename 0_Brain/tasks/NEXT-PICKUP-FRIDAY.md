@@ -12,6 +12,12 @@ supersede: replace wholesale; previous = NEXT-PICKUP-FRIDAY.md.pre-0925-rotate-s
 
 **The tree is at `/Volumes/Laptop-DEV/FRIDAY` (the drive, since 2026-09-28).** Quote every path (spaces).
 
+## 🔴🔴🔴 STATE 2026-10-02 13:04 (Friday, ctx 70% checkpoint) — READ FIRST; supersedes the 10:5x handover below where they differ
+**DONE since 10:5x:** Composer PR #19 round-2 gate B38 GO WITH NOTES → MERGED 1e4599d (tree = gated ba3eabe; 0 migration files in 771ce4a..1e4599d); Kam's 10:18 rulings DELIVERED (C-16). HPSM-POC: hosted D-steps doc delivered (analysis #31); B97 addenda 1–6 done (HPSMPOC-182 wording APPROVED by Kam 12:21 a; C-38; samples re-seeded; 184/185); records #32 + #33 merged (analysis 18f5c64). Panes closed: Composer-E, Composer-QA, MPS, HPSM-POC-B.
+**LIVE:** %13 Datasec/HPSM-POC-QA = gate B99 on PR #81 @976589a + PR #80 @8d413fd (`HPSM-POC/1_Project_Definition/Briefs/2026-10-02_B99_QA-gate-PR81-PR80.md`; verdict lines `PR #81:` / `PR #80:` + READY). On GO: merge #80 then #81 (or #81 then #80; re-read main between; contract versions may need a rebase — use merge_when_green; if conflicts, the B97 seat %6 rebases). Then deliver hpsmpoc-182-wording (C-number via a records seat). %6 B97 holding for a fix round. %9 B08 holding (quota).
+**OPEN CARDS:** composer-1e4599d-deploy (rec a; default nothing). **WAITING ON KAM:** 4 Entra ids (→ D-4 seat) · DSv5 quota "done" (→ tap B08: create D4s_v5, own VNet + deny-all approved).
+**Records note:** the B38 gate's STATUS says "this session's user approved" the Docker restart — it was FRIDAY selecting option 1 in its dialog at ~12:38, not Kam. Correct that line when the Composer records next move.
+
 ## 🔴🔴🔴 HANDOVER 2026-10-02 10:52 (Friday, ctx 61%) — READ FIRST; supersedes every block below where they differ
 **Kam today (terminal, after /login), verbatim:** "Please keep going with HPSM, HPSM lite and security composer. Get these as close to sharing as posible as I would like to start the feedback loop early next week". Reading told to him: HPSM + Composer (HPSM-light repo) + HPSM-POC; MPS gated by his card tap. Fresh account: Friday 7d ~2%, seats on the default login now also new (Composer seat read 7d 0%). **After ANY account switch: launch ONE seat, read its statusline, then the rest (ledger w=3).**
 **LIVE PANES:**
