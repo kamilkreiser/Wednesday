@@ -5,6 +5,12 @@
 - **MPS Commercial Calculator (new, Kam 30 Sep):** folder, deploy key, repo, Jira MPSCALC (85 → 89 issues), rulings C-04…C-10; engine lane 1 (.NET 10, AUD) + validity merged; CodeQL now scans C#; importer/API at gate round 2 (B04 NO GO on a fail-open guard: contained).
 - **Tooling:** `2_Project_Files/friday/merge_when_green.sh`. **Grant:** cloud threshold 90% (learnings/2026-10-01_friday-cloud-threshold-90.md).
 
+## 2026-10-03 09:11 — Friday (laptop seat), session 2026-10-02 14:17 → wrap
+- Composer (Datasec): Kam's "messy" layout → UX review (B41) + rail variant (B43) → his 4 rulings (C-19) → build B42 → gate B44 NO GO (double-click false banner) → fix → round 2 GO WITH NOTES → PR #20 merged 5a983f0 → deployed to the demo on his word (B46, C-20), verified live by Friday. PR #21 (pre-existing e2e reds) merged ddfea2e. Repo renamed datasecau/Datasec-Security-Composer; separation from HPSM complete (C-18 + HPSM C-82).
+- HPSM-POC (Datasec): four approved wordings merged (#84, C-40); #83, #85 merged; hosted demo D-1..D-7 + D-11 done under Kam's login (B102; RG hpsm-poc-demo-rg, 31 resources, ~A$49/mo, budget A$150). Waiting on Kam: Key Vault Secrets Officer role, D-9/D-10 card.
+- Fleet: live_chat_poll restarted after a silent parse failure post DNS outage. Ledger +3 rows.
+- Next: see 0_Brain/tasks/NEXT-PICKUP-FRIDAY.md top block.
+
 ## 2026-09-28 23:35 → 2026-09-29 05:30 AEST — Wednesday overnight seat (session 24014037; rotation from the morning seat 4901153c; ended by the 05:30 shift change) — Secuura + WED
 - Boot: by-tier digest 544 KB WHOLE + own ledger whole, ctx 37%, 7d 26%. 0 Kam rows since 20:22:48.
 - **Secuura round 36 (Seat B 40th, 0.90):** 4 PRs raised; **3 merged on gate38** (#1330 KS-1352 revoked credentials fail verify, #1333 KS-1124 F4, #1334 KS-888 validate pin); develop 215cc687, tree == END, verified at source. **#1332 KS-1054 NO GO** (039 recorded on a bare DB while the OAuth lookup and tenant isolation are permanently missing).
