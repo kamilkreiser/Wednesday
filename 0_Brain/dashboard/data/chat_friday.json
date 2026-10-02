@@ -2455,5 +2455,12 @@
   "project": "Datasec",
   "ts": "2026-10-02T15:36:16.438939+10:00",
   "text": "HPSM-POC D-6 update: DONE and checked in Azure. The web app now has its sign-in return address, the password-less credential and the four sign-in permissions. Next, already running: D-8 (the session key goes straight into Key Vault, never shown) and D-11 (the code goes onto both sites). One card is on your tab, for D-9 and D-10, which the plan marks as yours."
+ },
+ {
+  "role": "wednesday",
+  "seat": "Kamils-MacBook-Pro.local",
+  "project": "Datasec",
+  "ts": "2026-10-02T16:06:41.700927+10:00",
+  "text": "I need you to give your own account permission to write secrets into the HPSM-POC Key Vault. It's one command; your Owner role doesn't include it, and I checked: Owner is the only role you hold on that vault.\n\n1. Open Terminal.\n\n2. Paste:\nexport AZURE_CONFIG_DIR='/Volumes/Laptop-DEV/!CODING/Datasec/HPSM-POC/4_Credentials/.azure'\n\n3. Paste:\naz role assignment create --assignee-object-id 60270b08-c180-446b-93a5-0fe9406c8e74 --assignee-principal-type User --role \"Key Vault Secrets Officer\" --scope /subscriptions/a6b8fe11-d1b5-4293-8727-b34aba08a705/resourceGroups/hpsm-poc-demo-rg/providers/Microsoft.KeyVault/vaults/kv-hpsmpoc-demo-en46o7\n\n4. Tell me done.\n\nWhy: the seat stopped at D-8 (the session key) because the vault refused your login. That ID is your account in that tenant. The role covers this one vault only, and you can remove it later.\n\nWhere things stand: the code is on both sites. The web answers, but sign-in stays off until D-8. The API waits for D-9's two feedback secrets before it will start, which is by design.\n\nAfter your done: the seat does D-8. If you tap 'a' on the D-9/D-10 card, it does those too, with secrets never shown, then stops for the smoke test with you."
  }
 ]
