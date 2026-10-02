@@ -12,6 +12,15 @@ supersede: replace wholesale; previous = NEXT-PICKUP-FRIDAY.md.pre-0925-rotate-s
 
 **The tree is at `/Volumes/Laptop-DEV/FRIDAY` (the drive, since 2026-09-28).** Quote every path (spaces).
 
+## 🔴🔴🔴 HANDOVER 2026-10-02 20:05 (Friday, ctx ~75%) — READ FIRST; supersedes every block below where they differ
+**Kam today, still standing:** "keep going" (~19:1x terminal). UNREAD 0 at 20:05; newest live Kam row 15:20:40 (his later words came by terminal). **Floor: %0 friday + %1 monitor + %20 Datasec/HPSM-POC-B (B102, holding, waiting on Kam).**
+**DONE since 16:4x (all verified at source):**
+- Composer: PR #20 (new Guided layout, C-19; gate B44 round 2 GO WITH NOTES) MERGED → 5a983f0; **DEPLOYED to the demo on Kam's word ("deploy it to the demo") by B46, verified LIVE by Friday** (gw-secnav-rail served; kam/paul 200; healthz 0.22.0); C-20; card delivered; Kam told with the live picture. PR #21 (B45: e2e reds #81/#82, test-only) MERGED → **Composer main ddfea2e** (not deployed: test-only).
+- HPSM-POC hosted: D-1…D-7 + D-11 done under Kam's login (B102); records #38 merged (analysis ee79dd2); #85 merged (main be2d648). Web https://app-hpsmpoc-web-demo-en46o7.azurewebsites.net answers (sign-in closed until D-8); API exits until D-9 (by design).
+**WAITING ON KAM (HPSM-POC):** (1) the Key Vault Secrets Officer command (sent bf-a22a2b076223a; object id 60270b08…); (2) card hpsmpoc-d9-d10-under-kams-login-1002 (rec a; default: Friday puts the D-9/D-10 steps on his tab, seat waits). On his "done": tap B102 (%20) with an addendum for D-8 (exact plan command; value never printed). On card a: D-9 (route A secrets from HPSM-POC .env via fd, never printed) + D-10 (H7 migration bundle + API DB user under his login) → then D-12 smoke test WITH Kam → D-13 his send → EMAIL (2) to kamil.kreiser@datasec.com.au with the link + Paul's access.
+**OWED (agent work):** Composer root records: `records/b45` (52d557d) is NOT in root main (B46 moved main first) → the next Composer seat merges it (keep every entry) — Friday cannot (another project's .git). Composer BACKLOG #78 (Tab order), #79, #83 (Start/End tiles → ask Kam with screenshots), #85, #86 (L1 aria-busy), #87. Quarantined artefacts to tidy (607 MB B42 Playwright, _wt_b42base). HPSM VM (B08) waits on Kam's DSv5 quota. Poller: restarted 19:24 (pid 95418) after a silent parse failure; owed to Wednesday: log the parse step's stderr.
+**Ledger today:** 3 new rows (false absence from pane scrollback; non-unique deploy marker; earlier ones). Digests not affected (ledger not an input).
+
 ## 🔴🔴🔴 70% CHECKPOINT 2026-10-02 19:27 (Friday) — READ FIRST; supersedes the blocks below where they differ
 **Kam ~19:1x terminal: "keep going".** UNREAD 0 (live board read directly 19:22; newest Kam row 15:20:40).
 **LIVE PANES:**
