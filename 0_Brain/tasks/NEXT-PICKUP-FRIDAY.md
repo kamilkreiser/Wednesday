@@ -12,6 +12,16 @@ supersede: replace wholesale; previous = NEXT-PICKUP-FRIDAY.md.pre-0925-rotate-s
 
 **The tree is at `/Volumes/Laptop-DEV/FRIDAY` (the drive, since 2026-09-28).** Quote every path (spaces).
 
+## 🔴🔴🔴 70% CHECKPOINT 2026-10-02 19:27 (Friday) — READ FIRST; supersedes the blocks below where they differ
+**Kam ~19:1x terminal: "keep going".** UNREAD 0 (live board read directly 19:22; newest Kam row 15:20:40).
+**LIVE PANES:**
+- %23 Datasec/Composer-QA = gate B44 ROUND 2 OF 2 on Composer PR #20 @ **5f6a17a** (`…/Briefs/2026-10-02_B44_ADDENDUM-1_round-2-head-5f6a17a.md`; verdict in a `ROUND 2` section of `…/2026-10-02_B44_STATUS.md`). On GO: `friday/merge_when_green.sh datasecau/Datasec-Security-Composer 20 5f6a17a56e68b0340d30d06f526e6b2038cd7644`; screenshots to Kam (1440/1280/390 + the rail) + card the demo deploy (his word, DEPLOY.md) + BACKLOG #83 Start/End tiles question. **A NO GO here goes to Kam (cap).**
+- %21 Datasec/Composer-E = B42 builder (held; 53% ctx).
+- %24 Datasec/Composer-D = B45: #81/#82 pre-existing e2e reds, test-only, branch b45/e2e-pre-existing-reds. On READY: verify, open PR, merge_when_green (tier 2).
+- %20 Datasec/HPSM-POC-B = B102, WAITING ON KAM (Key Vault Secrets Officer command, bf-a22a2b076223a; card hpsmpoc-d9-d10-under-kams-login-1002). Records #38 MERGED (ee79dd2).
+**POLLER:** live_chat_poll was restarted by Friday at 19:24 (pid 95418, detached) after a DNS outage left the old process failing every parse silently; health OK. If it fails again, read the log and restart the same way; the launcher's arm_live_poll is the reference.
+**Watchers:** B44 (seen_b44b), B45 (seen_b45) in the scratchpad.
+
 ## 🔴🔴🔴 STATE 2026-10-02 16:42 (Friday, ctx ~67%) — READ FIRST; supersedes the blocks below where they differ
 **LIVE PANES:** %23 Datasec/Composer-QA = gate B44 on Composer PR #20 @98f7321 (`Datasec Security Composer/1_Project_Definition/Briefs/2026-10-02_B44_QA-gate-PR20-guided-layout.md`; verdict line `PR #20:`). On GO: `friday/merge_when_green.sh datasecau/Datasec-Security-Composer 20 98f732105fc52ef5711a24d8de86cd750a291b3a`, then SCREENSHOTS TO KAM (both widths) + card the demo deploy (his word; DEPLOY.md runbook) + BACKLOG #83 Start/End tiles question. On NO GO: fix round to %21 (B42 builder, held), round 2 = the cap. · %21 Datasec/Composer-E = B42 builder, held. · %20 Datasec/HPSM-POC-B = B102, WAITING ON KAM.
 **WAITING ON KAM (HPSM-POC hosted):** (1) the Key Vault Secrets Officer role command (sent bf-a22a2b076223a; his object id 60270b08…, guest UPN does not resolve) → then a seat does D-8; (2) card hpsmpoc-d9-d10-under-kams-login-1002 (rec a; default steps to him). Then D-12 smoke test WITH Kam, D-13 his send, then EMAIL (2) link + Paul's access. Done today: D-1..D-7 + D-11 (code on both sites from main be2d648); web /api/health 200, sign-in closed until D-8; API exits until D-9 (by design). Records PR HPSM-POC-analysis #38: re-pin to records/b102's final head and merge (merge_when_green; it refused on the moved head as designed).
