@@ -2301,5 +2301,33 @@
   "project": "Datasec",
   "ts": "2026-10-02T13:55:07.094370+10:00",
   "text": "Datasec / Composer, one question: are the HPSM-lite site and the Security Composer the same thing for you? I checked, and there is one site, https://hpsm-composer-demo.australiaeast.cloudapp.azure.com. It is built from the HPSM-light repo, its page title is Policy Composer, and it has the Guided and Expert sign-ins from your review with Paul.\n\nIf you meant something else by HPSM-lite (for example the HPSM-POC Playbook showcase, which has no hosted link yet), tell me. Until then I treat them as one site.\n\nGetting it ready for Paul now: the 1e4599d deploy is running, then Paul gets his OWN site login (not yours). The seat proves Guided and Expert both work for him in a real browser, and I check it myself. Then I email you the link and his login details, to your Datasec address."
+ },
+ {
+  "role": "wednesday",
+  "seat": "Kamils-MacBook-Pro.local",
+  "project": "Datasec",
+  "ts": "2026-10-02T13:57:38.992867+10:00",
+  "text": "Received, thank you. Two separate things:\n\n1. Datasec / Security Composer (internal): https://hpsm-composer-demo.australiaeast.cloudapp.azure.com. The 1e4599d deploy is running now, then Paul gets his own login. I'll email you the link and his details when I've checked it live.\n\n2. HPSM, the work being done in line with the SOW: my reading is the Playbook POC (HPSM-POC), built against the final SOW you sent yesterday. That is the only SOW work with something running; the HPSM SOW-01 project is still readiness only, with no build. Today it runs only on a laptop, so Paul can't open a link yet. The link is the hosted demo you approved, and it needs your part first: the steps file I sent at 11:19 (providers, resource group, then the script, about 8 minutes) and the 4 ids it prints. After that, seats deploy it (about a day of seat work), and inviting Paul is your send.\n\nIf by 'HPSM' you meant something else, such as the readiness documents, say so and I'll send those instead."
+ },
+ {
+  "role": "wednesday",
+  "seat": "Kamils-MacBook-Pro.local",
+  "project": "Datasec",
+  "ts": "2026-10-02T13:58:08.779723+10:00",
+  "text": "Separate projects in their code, but the Composer still carries HPSM's name and lives in HPSM's places. Measured just now:\n\n1. HPSM (the HP SOW work): its own folder, code repo datasecau/HPSM, records repo datasecau/HPSM-analysis, Jira HPSM. Readiness only, no build.\n\n2. HPSM-POC (the Playbook POC under its own SOW): its own folder, repos datasecau/HPSM-POC and HPSM-POC-analysis, Jira HPSMPOC. Separate throughout.\n\n3. Security Composer (internal Datasec): its own folder since 24 Sep, but conflated in four places:\n- its code repo is named datasecau/HPSM-light;\n- an older clone of that repo still sits inside the HPSM folder (6_Policy_Composer), where the Composer started on 10 Sep;\n- its demo VM is called hpsm-composer-demo and runs in HPSM's Azure resource group (hpsm-dev-rg);\n- HPSM's credentials folder holds a file pointing at the Composer demo.\n\nThat is why I mixed them up this morning; my mistake.\n\nRecommendation: separate the Composer properly. Rename the repo (GitHub keeps the old name working as a redirect), move the stale clone out of the HPSM folder, and give the Composer demo its own resource group and name the next time it is rebuilt. I'll put that on a card with the cost and steps. Nothing changes until you choose."
+ },
+ {
+  "role": "wednesday",
+  "seat": "Kamils-MacBook-Pro.local",
+  "project": "Datasec",
+  "ts": "2026-10-02T14:00:21.974431+10:00",
+  "text": "Received: separate the Composer from HPSM fully (a). It happens in this order, so nothing collides with the Composer deploy running now:\n\n1. After the deploy is verified: rename the repo datasecau/HPSM-light to datasecau/Datasec-Security-Composer. GitHub redirects the old name. If my access can't rename it, you get the one click as a step.\n\n2. A Composer seat points its checkout at the new name and records the separation in the Composer's own records.\n\n3. An HPSM seat moves the old Composer copy (HPSM/6_Policy_Composer) and the pointer file into a dated quarantine folder inside HPSM. It checks nothing unpushed is in them first, and deletes nothing.\n\n4. The demo VM gets its own resource group and name at its next rebuild. That's recorded now; the running demo isn't touched."
+ },
+ {
+  "role": "wednesday",
+  "seat": "Kamils-MacBook-Pro.local",
+  "project": "Datasec",
+  "ts": "2026-10-02T14:04:24.251000+10:00",
+  "text": "Received: both visible and reachable from outside, hosted in Azure.\n\n1. Security Composer: already there. Checked just now: https://hpsm-composer-demo.australiaeast.cloudapp.azure.com resolves publicly (4.196.153.103), has a valid TLS certificate, and asks for a login before showing anything (401 without, 200 with). Paul gets his own login once the deploy finishes.\n\n2. HPSM-POC: not in Azure yet, and your sign-in is the only blocker. I need you to choose one of these:\n\nA. (my recommendation) Run the steps yourself, about 8 minutes, signed in as kamil@datasec-rd.com: the two commands I posted earlier, then the steps file from 11:19. Paste the 4 ids it prints back here. Your admin rights stay with you.\n\nB. In a terminal, run: az login --tenant ec01829b-fdcb-4503-9834-eb2ffbd99169 with AZURE_CONFIG_DIR set to HPSM-POC's 4_Credentials/.azure. A seat then runs the same steps under your login while you watch. Faster for you, but a seat holds your Owner rights for that session.\n\nAfter either, seats deploy it (about a day of seat work, with you present for three short steps), and I email you the link and Paul's access."
  }
 ]
