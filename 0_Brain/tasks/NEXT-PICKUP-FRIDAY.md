@@ -12,6 +12,17 @@ supersede: replace wholesale; previous = NEXT-PICKUP-FRIDAY.md.pre-0925-rotate-s
 
 **The tree is at `/Volumes/Laptop-DEV/FRIDAY` (the drive, since 2026-09-28).** Quote every path (spaces).
 
+## 🔴🔴🔴 WRAP 2026-10-04 06:1x (Friday) — READ FIRST; supersedes every block below where they differ
+**KAM, terminal ~06:0x, verbatim: "please wrap up when its safe and deploy it to the demo at next boot".** Card `composer-6d026a7-deploy-before-monday` RULED **a** (recorded by Friday from his terminal words; tile hidden).
+**🔴 FIRST WORK AT THE NEXT BOOT — the Composer demo deploy, Kam's word above is the authority:**
+1. Re-read Composer origin main: it should be **6d026a7** (if it moved, deploy 6d026a7 exactly, or card Kam if a newer merge must go too).
+2. Brief a Composer deploy seat (next free B-number; B46/B39 shape) per `2_Project_Files/friday/composer_demo_deploy.md` + the repo's `DEPLOY.md`: quarantine `composer.prev` first; **database backup BEFORE migration 0020** (proven readable); `remote-update.sh`; temporary access removed and proven.
+3. Friday's own live check: Basic auth (Composer `4_Credentials/.env`), page 200, a marker only this build has (e.g. "What happens next" on the Guided End page / the PDF cover), healthz, NSG = the 2 standing rules.
+4. `decision_queue.sh --delivered composer-6d026a7-deploy-before-monday <C-number>`; tell Kam on the panel with the check.
+**Floor at wrap:** %0 + %1 only (every seat closed; work on disk). Composer root records main 61efc74+ (C-01..C-32, BACKLOG to #173). caffeinate pid 23315.
+**Open cards (defaults stand):** composer-guided-wording-draft-1003 · composer-docker-networks-closed-seats-1003 · hpsmpoc-k14-demo-scenarios-1003 · the HPSM-POC 10-03 cards.
+**Owed tooling (Friday's own):** `watch_status.sh` treats a SKELETON STATUS (READY line present but body tokens like `@@BODY@@`, `__VERDICT__`, `CI-RUN2-LINE`, `CI_RESULT_PLACEHOLDER`) as a READY: add a skeleton-token exclusion (any `@@…@@`, `__[A-Z]+__`, `*PLACEHOLDER*`, `*-LINE`/`*-ROW`/`*-FILE` all-caps tokens) + arms. Seen 4× tonight (B57, B61, B62, B59); worked around by hand polls.
+
 ## 🔴🔴🔴 UPDATE 2026-10-04 05:1x (Friday, ctx ~73%) — supersedes the 03:0x block where they differ
 **Composer main = 6d026a7** (#32 B60 race → 461e083; #33 B61 Generate issues kept → 6d026a7; gates B62/B63 GO WITH NOTES; 0 open alerts). Root records main 61efc74+ (C-01..C-32, BACKLOG to #173). **No Composer seat live.** NOT deployed (demo 5a983f0).
 **FOR KAM THIS MORNING (cards on the Friday tab, all with defaults):** composer-6d026a7-deploy-before-monday (rec a: deploy now per `friday/composer_demo_deploy.md` + DEPLOY.md: backup BEFORE migration 0020, then verify live) · composer-guided-wording-draft-1003 · composer-docker-networks-closed-seats-1003 (the address-pool red hit 4 CI runs tonight) · hpsmpoc-k14-demo-scenarios-1003 · the HPSM-POC 10-03 cards. Three screenshots sent 05:1x.
