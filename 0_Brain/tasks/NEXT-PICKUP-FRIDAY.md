@@ -12,6 +12,14 @@ supersede: replace wholesale; previous = NEXT-PICKUP-FRIDAY.md.pre-0925-rotate-s
 
 **The tree is at `/Volumes/Laptop-DEV/FRIDAY` (the drive, since 2026-09-28).** Quote every path (spaces).
 
+## 🔴🔴🔴 STATE 2026-10-03 ~10:2x (Friday, Saturday boot, ctx ~50%) — READ FIRST; supersedes every block below where they differ
+**Kam today:** 10:11:44 ruled hpsmpoc-d9-d10-under-kams-login-1002 **a** (recorded, tile hidden). Terminal ~10:1x: "where is the security composer and HPSM for SOW at? is it ready to share? Once it is, send me the emails and I will test".
+**DONE:** Composer verified live by Friday (kam/paul 200, no auth 401, healthz 0.22.0, rail ×13 in /assets/index-8B3YdbdT.css) → EMAIL "[Security Composer] Ready to test" SENT to kamil.kreiser@datasec.com.au (read back). Kam told (bf-e886bd4072e27) + asked again for the Key Vault Secrets Officer role command.
+**LIVE PANES:**
+- %2 Datasec/HPSM-POC-B = **B103** (`HPSM-POC/1_Project_Definition/Briefs/2026-10-03_B103_hosted-d10-database-and-d8-d9-if-role.md`; STATUS `…_B103_STATUS.md`): D-10 now; D-8/D-9 only if the role is present. On READY: verify at source (migrations table, API user, secrets by NAME, /health, /health/ready, web home), open records PR (records/b103), merge_when_green, deliver card hpsmpoc-d9-d10-under-kams-login-1002 to its C-number. If D-8/D-9 waited on the role: on Kam's "done" write a B103 addendum for them. Then D-12 smoke test WITH Kam → D-13 his send → **EMAIL (2): HPSM-POC link + Paul's access** (Kam asked for it today; he will test).
+- %3 Datasec/Composer-E = **B47** (`Datasec Security Composer/1_Project_Definition/Briefs/2026-10-03_B47_rail-busy-skip-link-records-and-start-end-mock.md`; item 1 corrected: records/b45 already in root main). Tier 2, NO deploy (Kam is testing the live demo). On READY: read, PR on Datasec-Security-Composer, merge_when_green; show Kam the #83 Start/End pairs.
+**Watchers (scratchpad):** seen_b103, seen_b47 via friday/watch_status.sh — re-arm after rotation.
+
 ## 🔴🔴🔴 HANDOVER 2026-10-02 20:05 (Friday, ctx ~75%) — READ FIRST; supersedes every block below where they differ
 **Kam today, still standing:** "keep going" (~19:1x terminal). UNREAD 0 at 20:05; newest live Kam row 15:20:40 (his later words came by terminal). **Floor: %0 friday + %1 monitor + %20 Datasec/HPSM-POC-B (B102, holding, waiting on Kam).**
 **DONE since 16:4x (all verified at source):**
