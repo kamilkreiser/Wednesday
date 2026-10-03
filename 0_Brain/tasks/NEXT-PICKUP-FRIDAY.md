@@ -12,6 +12,12 @@ supersede: replace wholesale; previous = NEXT-PICKUP-FRIDAY.md.pre-0925-rotate-s
 
 **The tree is at `/Volumes/Laptop-DEV/FRIDAY` (the drive, since 2026-09-28).** Quote every path (spaces).
 
+## 🔴🔴🔴 UPDATE 2026-10-04 05:1x (Friday, ctx ~73%) — supersedes the 03:0x block where they differ
+**Composer main = 6d026a7** (#32 B60 race → 461e083; #33 B61 Generate issues kept → 6d026a7; gates B62/B63 GO WITH NOTES; 0 open alerts). Root records main 61efc74+ (C-01..C-32, BACKLOG to #173). **No Composer seat live.** NOT deployed (demo 5a983f0).
+**FOR KAM THIS MORNING (cards on the Friday tab, all with defaults):** composer-6d026a7-deploy-before-monday (rec a: deploy now per `friday/composer_demo_deploy.md` + DEPLOY.md: backup BEFORE migration 0020, then verify live) · composer-guided-wording-draft-1003 · composer-docker-networks-closed-seats-1003 (the address-pool red hit 4 CI runs tonight) · hpsmpoc-k14-demo-scenarios-1003 · the HPSM-POC 10-03 cards. Three screenshots sent 05:1x.
+**On deploy a:** brief a Composer deploy seat (B-number next free; B46/B39 shape), main 6d026a7, migration 0020 needs the backup step; Friday checks live (Basic auth; a string only this build has, e.g. the PDF cover / 'What happens next'); deliver the card; tell Kam with the check.
+**Low follow-ups queued (agent work, any time):** #162 PDF summary sentence; #168 pre-B61 released wording; B55-F1/#142 header breaks; #153/N-notes; #172/#173 (Acme per-caller — product question for Kam, not a fix).
+
 ## 🔴🔴🔴 HANDOVER 2026-10-04 03:0x (Friday, ctx ~68%, overnight) — READ FIRST; supersedes every block below where they differ
 **FIRST ACT:** `friday/seat_idle.sh` over every pane; read the LAST lines of each idle seat's STATUS. Watcher (upgraded 10-03 19:1x, c34f8bbd6): `friday/watch_status.sh [--seed] <seen> <glob…>` now wakes on READY FOR GATE, STOPPED / NEEDS FRIDAY, and (env `WATCH_PANES="%a %b"`) a seat going BUSY→not-busy. Seed a fresh seen file first. A READY in a skeleton STATUS (`__VERDICT__`, `CI_RESULT_PLACEHOLDER`) is not a READY: wait for the seat to be idle and the placeholder gone.
 **Kam:** silent since 10-03 12:31:34 (kam_rulings_today 10-04 = 0 rows at 00:56). Open cards (all with defaults): hpsmpoc-k14-demo-scenarios-1003 · composer-guided-wording-draft-1003 · composer-docker-networks-closed-seats-1003 · the six HPSM-POC cards from 10-03 · D-12 slot / Paul invite / Terry's 8 questions (his sends).
