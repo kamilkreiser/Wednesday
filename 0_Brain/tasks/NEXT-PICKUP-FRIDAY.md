@@ -12,6 +12,8 @@ supersede: replace wholesale; previous = NEXT-PICKUP-FRIDAY.md.pre-0925-rotate-s
 
 **The tree is at `/Volumes/Laptop-DEV/FRIDAY` (the drive, since 2026-09-28).** Quote every path (spaces).
 
+**UPDATE 16:2x (ctx 71%, checkpoint):** Composer #23 (#114 Feedback timer race) merged → Composer main **51bec14**. B108 DONE (SM catalogue 143 items; our 54: 36 match / 17 differ / 1 absent; FOR-KAM mapping on Kam's panel = K-13 input; scheduled CSV export proven); records #48 merging after rebase. NEW: %10 HPSM-POC-A = **B111 Lane B** (web screens, plan §2), %11 HPSM-POC-B = **B112 Lane C** (API reports + rules) — briefs point at the plan's own rows. B51 (%8) holds its push for B49 (answered (a); authz line ruled in). Watcher: Composer B49–B52 + HPSM-POC B111/B112.
+
 ## 🔴🔴🔴 HANDOVER 2026-10-03 15:1x (Friday, ctx 67%) — READ FIRST; supersedes every block below where they differ
 **Kam's open asks (no reply since 12:31):** D-12 slot (30 min Mon 5 or Tue 6, sign in to the hosted HPSM-POC while a seat runs the smoke test) · invite Paul as a guest in datasec-rd (then a seat gives Reader on hpsm-poc-sm-rg + his SM login via a secure channel) · forward Terry's 8 questions (copy-ready mail in his inbox) · 4 HPSM-POC cards with defaults: hpsmpoc-uat-before-hp-invite-1003, hpsmpoc-test-user-partner-1003, hpsmpoc-m2-po-approver-1003, hpsmpoc-branding-neutral-1003 · Composer deploy timing (default: BATCH with the Monday fixes after gates) · "more than 3 feedback items?" (default no).
 **LIVE PANES:**
