@@ -12,6 +12,19 @@ supersede: replace wholesale; previous = NEXT-PICKUP-FRIDAY.md.pre-0925-rotate-s
 
 **The tree is at `/Volumes/Laptop-DEV/FRIDAY` (the drive, since 2026-09-28).** Quote every path (spaces).
 
+## 🔴🔴🔴 HANDOVER 2026-10-03 15:1x (Friday, ctx 67%) — READ FIRST; supersedes every block below where they differ
+**Kam's open asks (no reply since 12:31):** D-12 slot (30 min Mon 5 or Tue 6, sign in to the hosted HPSM-POC while a seat runs the smoke test) · invite Paul as a guest in datasec-rd (then a seat gives Reader on hpsm-poc-sm-rg + his SM login via a secure channel) · forward Terry's 8 questions (copy-ready mail in his inbox) · 4 HPSM-POC cards with defaults: hpsmpoc-uat-before-hp-invite-1003, hpsmpoc-test-user-partner-1003, hpsmpoc-m2-po-approver-1003, hpsmpoc-branding-neutral-1003 · Composer deploy timing (default: BATCH with the Monday fixes after gates) · "more than 3 feedback items?" (default no).
+**LIVE PANES:**
+- %6 Datasec/Composer-B = **B49** ADDENDUM-1: rebase onto d22dc8e + re-run → `READY FOR GATE` → Friday launches a **tier-1 QA gate** (separate Composer-QA seat; B36/B44 gate shape) → merge_when_green → C-24 records (records/b49).
+- %7 Datasec/Composer-C = **B50** G-WORDS (Datasec's own question wording DRAFT, C-25; FOR-KAM table).
+- %8 Datasec/Composer-D = **B51** X-EXCEPTIONS (E-03 blocker first; contract only after B49 merges → tell it then). Tier 1 → gate.
+- %9 Datasec/Composer-E = **B52** Expert fixes (C-26; web only).
+- %11 Datasec/HPSM-POC-B = **B108** Lane E (SM catalogue + mapping FOR KAM + scheduled export).
+- %10 Datasec/HPSM-POC-A = idle (B107/B109/B110 done) → give it **Lane B or C** of the plan when load allows (`HPSM-POC-analysis Architecture/2026-10-03_working-copy-plan-to-13-oct_DETAIL.md` §2; ≤3 HPSM-POC build lanes + 1 gate).
+**DONE today (verified at source):** HPSM-POC #87 (C-44 exception) + #86 pill merged and LIVE on hosted (Friday checked); SM 3.16 on vm-hpsm-sm (ports closed, Friday probed); analysis records #43–#47 (C-44, C-45, B107 plan, B109, B110); Composer #22 (B47) merged → d22dc8e (NOT deployed); Composer root records main 2bdf936 (C-21..C-23, BACKLOG #1–#110).
+**Composer deploy:** only on Kam's word, after B49/B51 gates and B50/B52 merges; screenshots first; runbook `friday/composer_demo_deploy.md` + DEPLOY.md.
+**Watcher:** `friday/watch_status.sh <scratchpad>/seen_1225` over B108 + B49–B52 STATUS (+ worktrees); seed before re-arming.
+
 **UPDATE 14:3x (ctx 61%):** DONE: HPSM-POC #87 (C-44 exception) + #86 (pill) merged; pill LIVE on the hosted demo (Friday verified: health 200, new build id only, pill CSS served); records #43 (C-44) merged, both cards delivered. Composer #22 (B47) merged → main d22dc8e, NOT deployed (Kam asked: now or batch; default BATCH with the Monday fixes). B106 DONE: HP Security Manager 3.16.0.395 on vm-hpsm-sm (hpsm-poc-sm-rg, datasec-rd), 10-device licence, Bastion Developer access, logins kam.kreiser/paul.waite; ports closed (Friday probed); auto-shutdown 20:00; records PR analysis #44 merging (C-45, Jira HPSMPOC-191). Kam ASKED (panel bf-66235cea1246b): invite Paul as guest (his send), forward Terry's 8 questions (email in his inbox). On Paul's acceptance: a seat gives Reader on hpsm-poc-sm-rg + hands his SM login by a secure channel. LIVE: %6 Composer-B B49 · %7 Composer-C B50 · %8 Composer-D B51 · %9 Composer-E B52 (Expert fixes, C-26) · %10 HPSM-POC-A B107 (working-copy plan → then brief its lanes). Composer deploy (all lanes) needs Kam's word + screenshots; B49 and B51 need tier-1 QA gates first.
 
 ## 🔴🔴🔴 STATE 2026-10-03 12:2x (Friday, after Kam's restart, ctx ~40%) — READ FIRST; supersedes every block below where they differ
