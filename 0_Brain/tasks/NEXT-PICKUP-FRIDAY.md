@@ -12,6 +12,18 @@ supersede: replace wholesale; previous = NEXT-PICKUP-FRIDAY.md.pre-0925-rotate-s
 
 **The tree is at `/Volumes/Laptop-DEV/FRIDAY` (the drive, since 2026-09-28).** Quote every path (spaces).
 
+## 🔴🔴🔴 HANDOVER 2026-10-04 03:0x (Friday, ctx ~68%, overnight) — READ FIRST; supersedes every block below where they differ
+**FIRST ACT:** `friday/seat_idle.sh` over every pane; read the LAST lines of each idle seat's STATUS. Watcher (upgraded 10-03 19:1x, c34f8bbd6): `friday/watch_status.sh [--seed] <seen> <glob…>` now wakes on READY FOR GATE, STOPPED / NEEDS FRIDAY, and (env `WATCH_PANES="%a %b"`) a seat going BUSY→not-busy. Seed a fresh seen file first. A READY in a skeleton STATUS (`__VERDICT__`, `CI_RESULT_PLACEHOLDER`) is not a READY: wait for the seat to be idle and the placeholder gone.
+**Kam:** silent since 10-03 12:31:34 (kam_rulings_today 10-04 = 0 rows at 00:56). Open cards (all with defaults): hpsmpoc-k14-demo-scenarios-1003 · composer-guided-wording-draft-1003 · composer-docker-networks-closed-seats-1003 · the six HPSM-POC cards from 10-03 · D-12 slot / Paul invite / Terry's 8 questions (his sends).
+**COMPOSER — merged tonight (all gated where tier 1, NONE deployed; demo still 5a983f0):** #25 B49 Guided start → eb364cc · #26 B50 DRAFT wording → ab72877 · #27 B51 exceptions withdraw/bulk/approver summary (gate B54 NO GO → B55 GO WITH NOTES) → e00ffe9 · #28 B56 withdrawn exceptions visible (gate B57) → eda2623 · #29 B56b withdraw-form audience sentence + 'Not recorded' (CodeQL alert fixed in code) → d716dc3 · #30 B59 policy PDF cover + summary → ff751b8 · #31 B58 Guided End hand-off + summary → **3fad49a** (main 0 open alerts). Root records main: C-01..C-29 (+C-30 when B58 lands), BACKLOG to #164.
+**LIVE PANES:**
+- %17 Datasec/Composer-C = B58 ADDENDUM-1 (records/b58 → root main, C-30 + PR #31). On READY: read, close %17.
+- %19 Datasec/Composer-D = **B60** (#124 concurrent createGuidedClient duplicates; `engagements.ts` advisory lock; tier 1). Brief `Briefs/2026-10-04_B60_guided-client-create-race.md`. On READY FOR GATE: a tier-1 gate (B53/B55 shape: the 5-concurrent regression test red at 3fad49a, differential), merge_when_green, records.
+- %20 Datasec/Composer-E = **B61** (#98 Generate issues stored + read back; contract + maybe migration; tier 1). Brief `…/2026-10-04_B61_generate-issues-kept-with-the-version.md`. On READY FOR GATE: tier-1 gate (who may read; tenant; contract deep diff; stale labelling), merge, records, screenshots to Kam.
+- %10 / %11 HPSM-POC-A/B idle (nothing unblocked without Kam).
+**Kam's calls (not agent work):** E-06 email (#95), E-10 version 2 (#99), E-12 hide unbuilt (#101), the Composer deploy (default: one batch after the fixes, his word + screenshots: guided start, wording, exceptions, End page, PDF cover). Show him with the screenshots: #125 N1 invisible-char name, #129 N5 sheet email line, #143/#144 (390 pre-existing), #162 summary sentence.
+**Ledger 10-03/04:** gate-brief criterion contradicted Friday's own addendum (B55, row added). caffeinate pid 23315 (6 h from 03:0x).
+
 ## 🔴🔴🔴 ROTATION 2026-10-03 18:5x (Friday, ctx 80%) — READ FIRST; supersedes the 17:5x handover where they differ
 **🔴 FIRST ACT of the successor: run `friday/seat_idle.sh` over EVERY live pane and read the LAST LINE of each IDLE seat's STATUS — do not trust watch_status.sh alone** (it missed three seats today: it counts 'READY FOR REVIEW' only; ledger row 18:5x).
 **LIVE PANES:**
