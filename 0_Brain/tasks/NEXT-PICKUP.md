@@ -19,6 +19,13 @@ supersede: replace wholesale at the next pickup; do not append. Previous copy: N
 4. EXPIRING-GRANTS: "SPEND PAST THE 90%" is marked ENDED (account switched). Friday's "ignore the 90%" row is Friday's and is not touched.
 
 ### LIVE RIGHT NOW
+**🌅 05:30 2026-10-04 SHIFT-CHANGE HANDOVER (seat 73252fd5 → the 06:00 seat). READ FIRST; supersedes every block below:**
+0. Rulings + reconcile first. Kam: no rows since 10-02 10:00:10. **Usage 98%, renews ~13:00 today (statusline 'renews 7h 29m' at 05:30).** After the renewal the gauge reads low and the 90% stop opens by itself; the 10-01 17:40 grant (EVENT: his account switch) is then moot → move its EXPIRING-GRANTS row to Expired with that reason.
+1. **WEEK-INSTRUCTION valid_until = 2026-10-04 (TODAY, end of Sunday).** Tomorrow's seat: set `status: lapsed` and CARD Kam (the 09-06 expiry lesson); do not renew by inference.
+2. **After the renewal, launch ONE Secuura seat** (necessity: raise/gate/merge cannot be local): KS-1402 option a (Kam 09:58 10-02; T1) + the held Spark pass `night/READY_KS-1015-DELEGATION-GET-1_…_2026-10-02.diff.md` + yaml companion (T2) + read KS-1385 (Stuart: originate drops the identity block) and brief it if small. The react-router re-date (KS-528 → 2026-10-31) ONLY once his resent mail passes DKIM (none arrived by 05:30 10-04) or he says the tap suffices; **remind him Mon 5 Oct** with the exact line. Fuse Fri 9 Oct 10:00 AEST.
+3. Ornith PAUSE to 06:00 10-04 lapses now: re-screen at the sweep. Owed: rule N-1367-1; the PAUSE_QUEUE writer tool.
+4. Ledger 3c done (10-01 rows, 8 moved, 1300 == 1300); both digests regenerated (--check OK). Floor: wednesday + fleet-monitor.
+
 **🌅 05:30 2026-10-03 SHIFT-CHANGE HANDOVER (morning seat 73252fd5 → the 06:00 seat). READ FIRST; supersedes every block below:**
 0. `kam_rulings_today.sh` + `reconcile_rulings.py` first. Kam's newest: 10:00:10 on 10-02. **He has NOT switched accounts** (statusline 7d:98%, renews ~1d 6h ≈ Sun 4 Oct). His 17:40 (10-01) grant was tied to a switch "Fri morning" that has not happened: Spark-fed lanes only, as before. Any other cloud seat = the 90% stop → wait for the switch or the renewal, or his "go" (asked on the panel 10-02 09:59; unanswered).
 1. **ONE seat owed when launch is allowed** (Secuura/Blockchain): KS-1402 option a (Kam 09:58, T1: /lookup accepts a connector token; cells: connector reaches it, connector WITHOUT users:read → 403, access token still works) + raise the held Spark pass `night/READY_KS-1015-DELEGATION-GET-1_…_2026-10-02.diff.md` with its yaml companion (T2) + **the re-date (wrjc + 337j → 2026-10-31) ONLY once a passing DKIM mail exists or Kam says the tap suffices**. One gate. Template brief `fleet/briefs_staged/2026-10-01_seatB53_raise.md`.
