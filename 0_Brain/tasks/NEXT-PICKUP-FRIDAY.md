@@ -12,6 +12,15 @@ supersede: replace wholesale; previous = NEXT-PICKUP-FRIDAY.md.pre-0925-rotate-s
 
 **The tree is at `/Volumes/Laptop-DEV/FRIDAY` (the drive, since 2026-09-28).** Quote every path (spaces).
 
+## 🔴🔴🔴 ROTATION 2026-10-03 18:5x (Friday, ctx 80%) — READ FIRST; supersedes the 17:5x handover where they differ
+**🔴 FIRST ACT of the successor: run `friday/seat_idle.sh` over EVERY live pane and read the LAST LINE of each IDLE seat's STATUS — do not trust watch_status.sh alone** (it missed three seats today: it counts 'READY FOR REVIEW' only; ledger row 18:5x).
+**LIVE PANES:**
+- %12 Datasec/Composer-QA = **gate B53** on B49 @ `5071f08bc6022a3736a91a91dafcf131e5b959da` (tier 1, round 1 of 2). Verdict line `B49 5071f08: GO | GO WITH NOTES | NO GO`. On GO: `friday/merge_when_green.sh datasecau/Datasec-Security-Composer <PR> 5071f08bc6022a3736a91a91dafcf131e5b959da` (open the PR first: head `b49/guided-home-start`), then B49 (%6) merges records/b49 into root main, then **B51 ADDENDUM-2** (merged main sha; rebase, contract 0.24.0, authz line) → B51 tier-1 gate.
+- %7 Datasec/Composer-C = **B50** on ADDENDUM-1 (S-1 apply the GuidedWizard patch on its branch after rebasing onto 5a8254b; S-2 Friday-ruled budget ≤ 560 px + Next on screen). On READY: PR (tier 2) + send Kam the wording FOR-KAM table + 3 screenshots.
+- %8 Datasec/Composer-D = B51, HELD (see above). %6 Composer-B = B49 idle (records after the gate).
+- %11 Datasec/HPSM-POC-B = B112 idle: PRs HPSM-POC **#91** (C3 scenarios, 21306dc) + **#92** (C2 evidence, 1e7a705) — merge_when_green was running at rotation: CHECK their state; re-run if not merged. Then send Kam the K-14 page `HPSM-POC-analysis Architecture/2026-10-03_demonstration-scenarios_DRAFT-FOR-KAM.md` (after records/b112 merges). Its Azurite `hpsm-b112-azurite` may be stopped (no data of value).
+- %10 Datasec/HPSM-POC-A idle (no unblocked plan row without Kam).
+
 ## 🔴🔴🔴 ROTATION HANDOVER 2026-10-03 17:5x (Friday, ctx 78%) — READ FIRST; supersedes every block below where they differ
 **Kam:** silent since 12:31:34 (last panel read 16:23; re-run kam_rulings_today.sh + reconcile_rulings.py FIRST). His standing instruction (~12:1x, verbatim in the 12:2x block): Composer feedback + an end-to-end review → fix before Mon 5 Oct; HPSM-POC working copy by **Tue 13 Oct**; review with him **Tue 6 Oct**; Azure approval for Security Manager (grant `learnings/2026-10-03_hp-security-manager-azure-deploy-grant.md`; 12:24 "you choose a reasonable option and deploy").
 **OPEN WITH KAM (all carry defaults, nothing blocks):** D-12 slot (Mon 5 or Tue 6, 30 min) · invite Paul (guest, datasec-rd; then a seat: Reader on hpsm-poc-sm-rg + his SM login via a secure channel) · forward Terry's 8 questions (copy-ready mail sent 14:3x) · cards: hpsmpoc-uat-before-hp-invite-1003, hpsmpoc-test-user-partner-1003, hpsmpoc-m2-po-approver-1003, hpsmpoc-branding-neutral-1003, hpsmpoc-summary-customer-name-1003, hpsmpoc-r009-ai-refusal-1003 · Composer deploy (default: one batch after the Monday fixes are merged and gated; HIS WORD + screenshots first) · ">3 feedback items?" (default no).
