@@ -12,6 +12,8 @@ supersede: replace wholesale; previous = NEXT-PICKUP-FRIDAY.md.pre-0925-rotate-s
 
 **The tree is at `/Volumes/Laptop-DEV/FRIDAY` (the drive, since 2026-09-28).** Quote every path (spaces).
 
+**UPDATE 16:5x (ctx 74%):** Composer main **5a8254b** (#22 B47, #23 #114, #24 B52 merged; NOT deployed). **B49 (%6)**: ADDENDUM-2 = rebase onto 5a8254b → `READY FOR GATE` → fill @HEAD@/@HEAD7@ in the STAGED gate brief `Datasec Security Composer/1_Project_Definition/Briefs/2026-10-03_B53_QA-gate-B49-guided-start-engagement.md` and launch it as Datasec/Composer-QA (tier 1, round 1 of 2). On GO: merge_when_green B49 → then write **B51 ADDENDUM-2** (main SHA; rebase, contract 0.24.0, authz line) → B51's own tier-1 gate. **B52 (%9)**: ADDENDUM-1 (records into root main, stop pc-b52) then close %9. **B50 (%7)** wording still building. HPSM-POC: **B111 (%10)** Lane B, **B112 (%11)** Lane C (C1/C2 carded: hpsmpoc-summary-customer-name-1003, hpsmpoc-r009-ai-refusal-1003; defaults no change; C3 scenarios building). Kam silent since 12:31; all cards carry defaults.
+
 **UPDATE 16:2x (ctx 71%, checkpoint):** Composer #23 (#114 Feedback timer race) merged → Composer main **51bec14**. B108 DONE (SM catalogue 143 items; our 54: 36 match / 17 differ / 1 absent; FOR-KAM mapping on Kam's panel = K-13 input; scheduled CSV export proven); records #48 merging after rebase. NEW: %10 HPSM-POC-A = **B111 Lane B** (web screens, plan §2), %11 HPSM-POC-B = **B112 Lane C** (API reports + rules) — briefs point at the plan's own rows. B51 (%8) holds its push for B49 (answered (a); authz line ruled in). Watcher: Composer B49–B52 + HPSM-POC B111/B112.
 
 ## 🔴🔴🔴 HANDOVER 2026-10-03 15:1x (Friday, ctx 67%) — READ FIRST; supersedes every block below where they differ
