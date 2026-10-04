@@ -24282,9 +24282,9 @@
   ],
   "recommended": "a",
   "ts": "2026-10-04T18:45:13.363169+11:00",
-  "status": "open",
-  "ruled_choice": null,
-  "ruled_ts": null,
+  "status": "ruled",
+  "ruled_choice": "a",
+  "ruled_ts": "2026-10-04T18:58:59.305466+11:00",
   "prior_rulings_overridden": [
    "2026-09-10 09:01",
    "2026-09-10 09:08",
@@ -24340,6 +24340,87 @@
    "CARD hpsmpoc-client-print-heading",
    "CARD composer-ux-build-guided-1-4",
    "CARD composer-5a983f0-guided-layout-deploy"
+  ]
+ },
+ {
+  "id": "secuura-freeze5-high-no-fix-1004",
+  "client_project": "Secuura/Blockchain",
+  "title": "Push freeze 5: two HIGH advisories with no fix anywhere (braces, node-forge) block every push — accept, remove, or wait?",
+  "bluf": "Every Secuura push has been blocked since ~19:56 tonight: three old HIGH advisories had their ranges widened onto versions we pin. http-cache-semantics is fixed by an in-range lock refresh that moves nothing else (measured, 2 locks). braces and node-forge have NO newer version at all, so your 9 Sep rule (bump rather than accept) cannot apply to them as a bump. Measured by Seat B 55th, read-only, with controls: braces ships in ONE image (api-gateway; 10 other copies dev-only, never shipped), availability bug, 0 direct callers; node-forge ships in ONE image (timestamping), directly declared, but its vulnerable signature-verify path is never called. (Prior-ruling gate: read all 5 matches; the 9 Sep bump ruling shapes option b; the others are other packages or the NAS card.)",
+  "default_action": "Nothing is baselined and pushes stay frozen until Kam picks. Seats keep building and committing locally.",
+  "options": [
+   {
+    "key": "b",
+    "label": "Fix what can be fixed, remove node-forge, accept only braces",
+    "detail": "One T1 PR: the http-cache-semantics refresh + a braces baseline row (reason, ticket, expiry no later than 31 Oct). node-forge gets removed from timestamping in the same rework the separate unsigned-token card needs; until that lands it carries a baseline row with the same expiry. Honours your bump-over-accept preference where a removal exists."
+   },
+   {
+    "key": "a",
+    "label": "Accept both with expiry, fix http-cache-semantics",
+    "detail": "One T1 PR: two baseline rows (measured reasons, ticket, expiry no later than 31 Oct) + the in-range refresh. Fastest unfreeze; no code removed."
+   },
+   {
+    "key": "c",
+    "label": "Stay frozen",
+    "detail": "Nothing pushes or merges until upstream fixes exist (none announced)."
+   }
+  ],
+  "recommended": "b",
+  "ts": "2026-10-04T20:08:35.549225+11:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "2026-08-21 20:06",
+   "2026-09-05 15:04",
+   "2026-09-06 09:42",
+   "2026-09-08 07:07",
+   "2026-09-08 08:08",
+   "2026-09-09 10:29",
+   "2026-09-10 08:59",
+   "2026-09-10 09:01",
+   "2026-09-10 09:08",
+   "2026-09-10 09:08",
+   "2026-09-10 09:17",
+   "2026-09-10 10:29",
+   "2026-09-11 08:06",
+   "CARD secuura-advisories-high-and-prod-reaching",
+   "CARD hpsm-composer-remediate-high-reach",
+   "CARD secuura-audit-row-ip-address-high-override",
+   "CARD wed-nassync-rearm-shape-1004"
+  ]
+ },
+ {
+  "id": "secuura-tsa-accepts-unsigned-tokens-1004",
+  "client_project": "Secuura/Blockchain",
+  "title": "Timestamping accepts UNSIGNED timestamp tokens and labels them qualified — file and fix?",
+  "bluf": "Found tonight by Seat B 55th while measuring the node-forge advisory (read at develop 88e8877a2a0d, unmeasured at runtime): services/timestamping verifyRealToken (src/tsa/qualified-tsa.ts:365-456) never verifies a signature. It returns valid:true when the expected hash appears anywhere in the ASN.1 as an OCTET STRING plus any GeneralizedTime, and the response sets isQualified:true as a literal. rfc3161-client.ts calls verify 0 times. So any blob containing the hash passes as a qualified timestamp. It may be deliberate for the demo; nobody has asked yet. (Prior-ruling gate: its 2 matches are the KS-1402 card and the NAS card, unrelated: shared words only.)",
+  "default_action": "Wednesday files the ticket on our board (option b) and nothing else changes until Kam rules; no client message (Peter and Stuart see the ticket only).",
+  "options": [
+   {
+    "key": "a",
+    "label": "File a High ticket on our board, fix in a seat with red-first tests",
+    "detail": "Ticket text from the seat's measurement; fix = real RFC 3161 signature + certificate-chain verification (Node crypto, which also removes node-forge); full T1 gate; no deploy without your tap."
+   },
+   {
+    "key": "b",
+    "label": "File the ticket only, decide the fix later",
+    "detail": "Ticket on our board describing the gap; no code change until you rule."
+   },
+   {
+    "key": "c",
+    "label": "Leave it (deliberate for the demo)",
+    "detail": "Recorded as known; no ticket."
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-10-04T20:08:59.715416+11:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "CARD secuura-ks1402-lookup-refuses-connector-tokens",
+   "CARD wed-nassync-rearm-shape-1004"
   ]
  }
 ]
