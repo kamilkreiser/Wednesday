@@ -132,3 +132,4 @@ sees the claim rather than discovering it in a conflict.
 | 2026-10-02 09:45 | Kamils-MacBook-Pro | friday/seat_idle.sh: is a seat's TURN finished (done line after the last spinner/wait), reusing wake_watch.sh's own turn-status regexes; Friday ledger w=3 absence-stale family — Friday (laptop) | CLOSED |  2026-10-02 09:47 shipped, arms 14/14 |
 | 2026-10-03 19:10 | Kamils-MacBook-Pro | WED/friday watch_status.sh: wake on seat IDLE + READY FOR GATE/STOPPED/NEEDS FRIDAY (ledger 2026-10-03 owed mechanism) — Friday (laptop) | CLOSED |  2026-10-03 19:12 shipped c34f8bbd6, arms 9/9 |
 | 2026-10-04 18:59 | Kamils-Mac-Studio | NAS one-way push leg (Kam ruled a on wed-nassync-rearm-shape-1004): new scheduler/nas_push.sh, tests, not armed until Kam's go | OPEN | |
+| 2026-10-05 09:05 | Kamils-Mac-Studio | --force | OPEN | |
