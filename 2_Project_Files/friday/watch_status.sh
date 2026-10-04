@@ -34,6 +34,7 @@ for i in $(seq 1 "${WATCH_LOOPS:-110}"); do
     # IFS= : glob-expand WITHOUT word-splitting — every path here contains spaces ("1FILES TO SYNC"); an unset IFS
     # split them and the watcher grepped the pieces and never fired (Friday 2026-09-25).
     IFS= ; for f in $g; do unset IFS
+      [ -f "$f" ] || continue   # 2026-10-05: an unmatched glob or a not-yet-written STATUS is skipped, not grep'd (it errored 100+ lines per loop)
       # A seat's DRAFT carries a placeholder line ("READY FOR REVIEW `<when-filled>`", B05 2026-09-25): lines holding a
       # `<…>` placeholder are not a READY, or the watcher fires early and then misses the real one (same count).
       n=$(/usr/bin/grep -i -E 'READY FOR (REVIEW|RE-GATE|GATE)' "$f" | /usr/bin/grep -v -i -E '\bnot ready for' | /usr/bin/grep -v -E '<[a-z_-]+>|\b[A-Z]{3,}_[A-Z_]{3,}\b' | /usr/bin/grep -v -c -i -E '(\bat|until|end at|ends at|to|before)[ *`]+READY FOR (REVIEW|RE-GATE|GATE)')   # a line that PROMISES a future READY ("full table at READY FOR REVIEW", Composer B09 2026-09-25) is not one   # also READY_TIME-style tokens (Composer B06, 2026-09-25)   # "NOT READY FOR REVIEW" is not one (2026-10-03)
