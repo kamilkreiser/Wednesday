@@ -23,7 +23,15 @@
 # TEST MODE: NASPUSH_TEST_SRC / NASPUSH_TEST_DST point it at scratch trees (only under /private/tmp or the
 # session scratchpad); the mount check then requires only the marker file. Arms: fleet/tests/nas_push_arms.sh.
 #
+# STALL WATCHDOG (2026-10-05): the first ARMED run (03:30) sat 4 h with a 0-byte log and 0.03 s of CPU, then hit the
+#   cap. Cause, from the unified log: at 03:30:06 macOS raised a privacy (TCC) consent request for the launchd job and
+#   UserNotificationCenter put a dialog on screen at 3:30 a.m.; rsync blocked on it. So after NASPUSH_STALL_SECONDS
+#   (default 900) a run with an EMPTY log AND under 2 s of rsync CPU is stopped (rc 7) and the state line says so.
+#   A slow-but-working run is not touched: it either writes output or burns CPU scanning. --timeout (NASPUSH_IO_TIMEOUT,
+#   default 1800) makes a stalled SMB transfer exit instead of idling.
+#
 # Exit codes: 0 done · 2 refused (precondition) · 3 held · 4 killed by the run-time cap · 5 rsync error · 6 locked
+#             · 7 stalled (empty log, ~0 CPU: likely a macOS privacy prompt on screen)
 # NEVER add >/dev/null here (2026-08-06_never-discard-stderr).
 set -u
 
@@ -33,6 +41,8 @@ RSYNC=/opt/homebrew/bin/rsync
 LOG="${NASPUSH_LOG:-$HOME/Library/Logs/wednesday_naspush.log}"
 STATE="$HERE/state/naspush_last.txt"
 MAX_SECONDS="${NASPUSH_MAX_SECONDS:-14400}"
+STALL_SECONDS="${NASPUSH_STALL_SECONDS:-900}"
+IO_TIMEOUT="${NASPUSH_IO_TIMEOUT:-1800}"
 STAMP="$(date '+%Y%m%d-%H%M%S')"
 DRY=0; [ "${1:-}" = "--dry-run" ] && DRY=1   # --dry-run: rsync -n, writes nothing on either side (itemized list only)
 
@@ -53,6 +63,11 @@ if [ -n "${NASPUSH_TEST_SRC:-}" ] || [ -n "${NASPUSH_TEST_DST:-}" ]; then
     case "$p" in /private/tmp/*|/tmp/*) ;; *) refuse "TEST paths must live under /private/tmp (got $p)";; esac
   done
   MODE=test
+  # TEST-ONLY: a stub in place of rsync, so the stall arm can be exercised. Never honoured in real mode.
+  if [ -n "${NASPUSH_TEST_RSYNC:-}" ]; then
+    case "$NASPUSH_TEST_RSYNC" in /private/tmp/*|/tmp/*) RSYNC="$NASPUSH_TEST_RSYNC" ;; *) refuse "NASPUSH_TEST_RSYNC must live under /private/tmp";; esac
+    [ -x "$RSYNC" ] || refuse "test rsync stub $RSYNC is not executable"
+  fi
 else
   SRC=/Volumes/DevMASTER
   DST=/Volumes/Development
@@ -91,7 +106,7 @@ for n in Datasec TUESDAY node_modules worktrees .venv __pycache__ .next .turbo .
 done
 
 BACKUP_DIR="$DST/_nas_push_overwritten/$STAMP"
-ARGS=( -rlt --modify-window=2 --backup "--backup-dir=$BACKUP_DIR" --itemize-changes --stats "${EXCL[@]}" )
+ARGS=( -rlt "--timeout=$IO_TIMEOUT" --modify-window=2 --backup "--backup-dir=$BACKUP_DIR" --itemize-changes --stats "${EXCL[@]}" )
 [ "$DRY" = 1 ] && ARGS=( -n "${ARGS[@]}" )
 for a in "${ARGS[@]}"; do case "$a" in --delete*|--remove-source-files|--del|--prune-empty-dirs) refuse "forbidden flag $a";; esac; done
 
@@ -99,14 +114,31 @@ log "nas_push: START mode=$MODE dry=$DRY $SRC/ -> $DST/ (one-way, additive; cap 
 RUNLOG="$HERE/state/naspush_run_$STAMP.log"
 "$RSYNC" "${ARGS[@]}" "$SRC/" "$DST/" > "$RUNLOG" 2>&1 &
 RPID=$!
-SECS=0
+# cpu_secs <pid> — whole seconds of CPU used by <pid> and its children (rsync forks a receiver).
+cpu_secs() {
+  local pids="$1" c
+  for c in $(pgrep -P "$1"); do pids="$pids,$c"; done
+  ps -o time= -p "$pids" 2>&1 | awk '{ n=split($1,f,":"); s=f[n]+0; if(n>=2) s+=f[n-1]*60; if(n>=3) s+=f[n-2]*3600; t+=s } END { printf "%d\n", t }'
+}
+SECS=0; STALL_CHECKED=0
 while kill -0 "$RPID" 2>/dev/null; do
   sleep 5; SECS=$((SECS+5))
+  if [ "$STALL_CHECKED" = 0 ] && [ "$SECS" -ge "$STALL_SECONDS" ]; then
+    STALL_CHECKED=1
+    CPU="$(cpu_secs "$RPID")"
+    if [ ! -s "$RUNLOG" ] && [ "${CPU:-0}" -lt 2 ]; then
+      kill "$RPID" 2>/dev/null; sleep 3; kill -9 "$RPID" 2>/dev/null
+      wait "$RPID" 2>/dev/null
+      log "nas_push: STALLED — after ${SECS}s the run log is EMPTY and rsync used ${CPU}s CPU; stopped. Most likely a macOS privacy (TCC) prompt is waiting on the Studio's screen (see 2026-10-05). log $RUNLOG"
+      echo "$(ts) STALLED after ${SECS}s cpu=${CPU}s mode=$MODE dry=$DRY (empty log: likely a macOS privacy prompt on screen) log=$RUNLOG" > "$STATE"
+      exit 7
+    fi
+  fi
   if [ "$SECS" -ge "$MAX_SECONDS" ]; then
     kill "$RPID" 2>/dev/null; sleep 3; kill -9 "$RPID" 2>/dev/null
     wait "$RPID" 2>/dev/null
     log "nas_push: KILLED by the run-time cap after ${SECS}s (whole files only; the next run resumes). log $RUNLOG"
-    echo "$(ts) KILLED-CAP after ${SECS}s mode=$MODE log=$RUNLOG" > "$STATE"
+    echo "$(ts) KILLED-CAP after ${SECS}s mode=$MODE dry=$DRY log=$RUNLOG" > "$STATE"
     exit 4
   fi
 done
@@ -114,10 +146,10 @@ wait "$RPID"; RC=$?
 NEW=$(/usr/bin/grep -c '^>f+++' "$RUNLOG"); UPD=$(/usr/bin/grep -c '^>f[.c]' "$RUNLOG"); DEL=$(/usr/bin/grep -ci '^\*deleting' "$RUNLOG")
 if [ "$RC" -ne 0 ]; then
   log "nas_push: rsync rc=$RC after ${SECS}s (new=$NEW updated=$UPD). Tail of $RUNLOG:"; tail -5 "$RUNLOG" | tee -a "$LOG" >&2
-  echo "$(ts) RC=$RC after ${SECS}s new=$NEW updated=$UPD deleting=$DEL mode=$MODE log=$RUNLOG" > "$STATE"
+  echo "$(ts) RC=$RC after ${SECS}s new=$NEW updated=$UPD deleting=$DEL mode=$MODE dry=$DRY log=$RUNLOG" > "$STATE"
   exit 5
 fi
 log "nas_push: DONE in ${SECS}s — new=$NEW updated(backed up)=$UPD deleting=$DEL (must be 0) log=$RUNLOG"
-echo "$(ts) OK after ${SECS}s new=$NEW updated=$UPD deleting=$DEL mode=$MODE log=$RUNLOG" > "$STATE"
+echo "$(ts) OK after ${SECS}s new=$NEW updated=$UPD deleting=$DEL mode=$MODE dry=$DRY log=$RUNLOG" > "$STATE"
 [ "$DEL" -eq 0 ] || { log "nas_push: 🔴 rsync reported $DEL deletion line(s) — this must be impossible; investigate"; exit 5; }
 exit 0

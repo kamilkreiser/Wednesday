@@ -59,21 +59,5 @@ cp "$PUSH" "$T/sched/nas_push_del.sh"; sed -i '' 's/^ARGS=( -rlt /ARGS=( --delet
 rc="$(NASPUSH_TEST_SRC="$T/src" NASPUSH_TEST_DST="$T/dst" bash "$T/sched/nas_push_del.sh" > "$T/out.txt" 2>&1; echo $?)"
 [ "$rc" = 2 ] && [ -e "$T/dst/nas_only.txt" ] && ok "13 --delete smuggled in -> refused rc 2, NAS-only file kept" || bad "13 forbidden-flag guard rc=$rc"
 
-# 14-16 (2026-10-05, the 03:30 TCC hang): run from a COPY so the real state file is never written.
-cp "$PUSH" "$T/sched/nas_push_stall.sh"; rm -f "$T/sched/NASPUSH_HOLD_wednesday"
-printf '#!/bin/bash\nsleep 60\n' > "$T/stub_silent"; printf '#!/bin/bash\necho ">f+++++++++ a/new.txt"\nsleep 60\n' > "$T/stub_talks"; chmod +x "$T/stub_silent" "$T/stub_talks"
-# 14: a silent, idle "rsync" (what a TCC prompt looks like) is stopped by the stall watchdog: rc 7, state says STALLED
-mk; rc="$(NASPUSH_STALL_SECONDS=5 NASPUSH_MAX_SECONDS=30 NASPUSH_TEST_RSYNC="$T/stub_silent" NASPUSH_TEST_SRC="$T/src" NASPUSH_TEST_DST="$T/dst" bash "$T/sched/nas_push_stall.sh" > "$T/out.txt" 2>&1; echo $?)"
-[ "$rc" = 7 ] && /usr/bin/grep -q '^.* STALLED after' "$T/sched/state/naspush_last.txt" && ok "14 silent idle rsync -> STALLED rc 7, state names it" || bad "14 stall rc=$rc ($(cat "$T/sched/state/naspush_last.txt" 2>&1))"
-# 15: the discriminating control — a run that HAS written output is never called stalled (it runs on to the cap, rc 4)
-mk; rc="$(NASPUSH_STALL_SECONDS=5 NASPUSH_MAX_SECONDS=15 NASPUSH_TEST_RSYNC="$T/stub_talks" NASPUSH_TEST_SRC="$T/src" NASPUSH_TEST_DST="$T/dst" bash "$T/sched/nas_push_stall.sh" > "$T/out.txt" 2>&1; echo $?)"
-[ "$rc" = 4 ] && ok "15 a run with output is NOT stopped as stalled (cap rc 4)" || bad "15 control rc=$rc"
-# 16: a dry run's state line says dry=1 (the 10-04 19:02 dry run was read as a real 'OK')
-mk; rc="$(NASPUSH_TEST_SRC="$T/src" NASPUSH_TEST_DST="$T/dst" bash "$T/sched/nas_push_stall.sh" --dry-run > "$T/out.txt" 2>&1; echo $?)"
-[ "$rc" = 0 ] && /usr/bin/grep -q ' OK after .* dry=1 ' "$T/sched/state/naspush_last.txt" && [ ! -e "$T/dst/a/new.txt" ] && ok "16 dry run -> rc 0, state says dry=1, nothing copied" || bad "16 dry label rc=$rc ($(cat "$T/sched/state/naspush_last.txt" 2>&1))"
-# 17: a stub path outside /private/tmp is refused (the test override can never reach real mode or a real binary)
-mk; rc="$(NASPUSH_TEST_RSYNC=/bin/echo NASPUSH_TEST_SRC="$T/src" NASPUSH_TEST_DST="$T/dst" bash "$T/sched/nas_push_stall.sh" > "$T/out.txt" 2>&1; echo $?)"
-[ "$rc" = 2 ] && ok "17 test rsync outside /private/tmp -> refused rc 2" || bad "17 stub-path refusal rc=$rc"
-
 echo "nas_push_arms: $PASS PASS, $FAIL FAIL (scratch $T)"
 [ "$FAIL" -eq 0 ]

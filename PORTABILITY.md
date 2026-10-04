@@ -40,6 +40,11 @@ Keep this file updated whenever a new machine-local dependency appears.
     (launchd cannot even open stdio paths on the external drive — plists +
     installer point there since 2026-08-04; the scripts' own logs still land
     on-drive in scheduler/logs/ once execution is possible).
+15a. **NAS push TCC prompt (2026-10-05, Studio):** the first launchd run of `scheduler/nas_push.sh` (03:30) raised a
+    macOS privacy consent request for the homebrew rsync (adhoc-signed) reaching the NAS; the dialog waited on screen and
+    rsync blocked 4 h. Fix per machine: answer that dialog with Allow (or grant Full Disk Access to
+    `/opt/homebrew/bin/rsync`). Since 2026-10-05 the script stops a silent run after 15 min (rc 7, state `STALLED`), so an
+    ungranted machine fails loud and short.
 16. **Executable bits on scripts (check after every copy of the project):**
     copying the project through anything that doesn't preserve POSIX
     permissions (cloud-sync round trip, archive extraction, some copy tools)
