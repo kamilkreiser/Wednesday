@@ -12,6 +12,20 @@ supersede: replace wholesale; previous = NEXT-PICKUP-FRIDAY.md.pre-0925-rotate-s
 
 **The tree is at `/Volumes/Laptop-DEV/FRIDAY` (the drive, since 2026-09-28).** Quote every path (spaces).
 
+## 🔴🔴🔴 CHECKPOINT 2026-10-04 19:35 (Friday, ctx 65%) — READ FIRST; supersedes the 18:33 block where they differ
+**Kam:** 18:3x "deploy the wording fix once it's merged… get them as close to ready as you can so I can review tomorrow" + 18:5x "yes, I meant HPSM-POC". Review = Mon 5 Oct.
+**DONE tonight:** Composer demo = **d84aa46** (B64 6d026a7 + B70 wording; both verified live by Friday). Composer merged #34 (B65). HPSM-POC merged #93 (B115, gate B118 GO WITH NOTES) → main d5d8415; analysis #53 (B116 review pack + strings), #54 (B115+B117 records). Composer review pack `Architecture/2026-10-05_REVIEW-PACK_FOR-KAM.md` (B66); HPSM-POC review pack same name in HPSM-POC analysis (B116, refresh by B119).
+**LIVE PANES:**
+- %8 Composer-D = **B67** L1 tier 1 (contract field expert_setup_pending pushed f1a818d as CHECKPOINT 1; + #125/#126/#130/#132/#174; F1 fix-shape only, waits Kam card composer-guided-new-client-review-roles-1004). On READY FOR GATE → tier-1 gate → merge → then B69 follow-up for F2 web.
+- %9 Composer-B = **B68** L3 (bulk decide, #143, #107b, …). On READY: review, PR, merge_when_green.
+- %10 Composer-C = **B69** L4 (#74 etc. done on branch; ADDENDUM-1: Friday ruled (A) add validation-runs route to b65 test; item 3 held). On READY: PR, merge.
+- %11 Composer-Deploy = **B70** DONE (records/b70 C-38 finishing) → close the pane when idle.
+- %12 HPSM-POC-B = **B119** records (B118 report + evidence, Jira N-1..N-4, review-pack refresh).
+- **HPSM-POC PR #94** (B117 layout): CodeQL never started → close/reopen; background poll then merge_when_green (task b47jz19c9). If still OPEN: check check-runs on 551569e.
+**Watcher globs:** scratchpad `globs11` (B6[789]/B70/B119, Briefs root + records worktrees). NOT `B[67][06789]` (matches B60).
+**BY MORNING (owed):** both review packs to Kam's tab (pointer + file) + card: deploy HPSM-POC main (d5d8415+, hosted web c2dd403) — default nothing deployed; Composer merges after d84aa46 also need his word to deploy (card).
+**Owed tooling:** merge_when_green must require CodeQL/Analyze runs PRESENT (rc distinct), not only every present run complete.
+
 ## 🔴🔴🔴 CHECKPOINT 2026-10-04 18:33 (Friday, ctx 50%) — READ FIRST; supersedes every block below where they differ
 **KAM, terminal ~18:3x, verbatim: "deploy the wording fix once it's merged and keep working on the HPSM and security Composer projects.  Please get them as close to ready as you can so I can review tomorrow".** Receipted (bf-6d778bc3bb813); 'HPSM' read as HPSM-POC (correction offered, none yet). Review = **Mon 2026-10-05**.
 **DONE:** Composer demo = **6d026a7** (B64; Friday verified live 18:2x: kam/paul 200, 401, healthz 0.26.0, marker x1; backup before 0020; card delivered C-33; Kam told + 3 shots). watch_status skeleton fix shipped (arms 17/17).
