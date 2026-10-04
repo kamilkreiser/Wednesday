@@ -12,6 +12,22 @@ supersede: replace wholesale; previous = NEXT-PICKUP-FRIDAY.md.pre-0925-rotate-s
 
 **The tree is at `/Volumes/Laptop-DEV/FRIDAY` (the drive, since 2026-09-28).** Quote every path (spaces).
 
+## 🔴🔴🔴 FLOOR EMPTY 2026-10-05 00:14 (Friday, ctx ~56%) — READ FIRST; supersedes every block below where they differ
+**Kam:** no new rows since 2026-10-04 21:04:59 (all 10 rulings reconciled + delivered). **Review with Kam = today, Mon 5 Oct.** Floor: %0 friday + %1 monitor only; every seat closed, work on disk and merged.
+**MERGED since 21:50 (all head-pinned via merge_when_green; each delta = the PR's files; nothing deployed):**
+- **Composer:** #37 (B72: Guided wording APPROVED C-40 + pill clearance 201 px #190 + B42 cover #191) → eb24959 · #38 (B67: L1 API fixes + new-client reviewers/auditors copied, contract 0.27.0; gate B73 GO WITH NOTES) → **Composer main 3d92736**. Root records main ed6894f (C-35, C-40, BACKLOG to #198 = B73-F1 Low: U+2800/U+1D159 names pass #125). Cards DELIVERED: composer-guided-wording-draft-1003 (C-40), composer-guided-new-client-review-roles-1004 (C-35). **Demo still d84aa46.**
+- **HPSM-POC:** #96 (CI web job limit 20 → 30 min; main's web run was 19 m 46 s) → 4a922a7 · #95 (B121: R-009 1.0.2 PROPOSED-not-active + customer name at render, never to the model; gate B122 GO WITH NOTES) → 26d5d1a · #97 (host-level name-never-reaches-the-model test) → **HPSM-POC main 577c27c**. Analysis #58 (records/b121) → 9eec220. Jira: 38893/38894 comments; new HPSMPOC-197 (CRLF screen paragraph, Low), -198 (shard e2e, Medium), -199 (CJK/emoji name 503, Low). **Hosted still c2dd403.**
+**TOOL FIX:** `friday/merge_when_green.sh` rule 6 — only the LATEST check-run per name counts (a re-run supersedes its cancelled predecessor); arms 3/3; first real use #95.
+**MORNING (owed, before Kam reviews) — one panel message + cards, each with a default of nothing changing:**
+1. Panel: pointers to BOTH review packs (Composer `1_Project_Definition/Architecture/2026-10-05_REVIEW-PACK_FOR-KAM.md`; HPSM-POC-analysis same name) + what merged AFTER each pack was written (list above).
+2. CARD deploy Composer main 3d92736 to the demo (runbook `friday/composer_demo_deploy.md` + DEPLOY.md; any migration → backup first). Include in its BLUF every gate note marked deploy/demo (grep B72/B73 STATUS) — ledger 10-04 row.
+3. CARD deploy HPSM-POC main 577c27c to hosted (c2dd403 now).
+4. CARD approve template 1.0.2's words (`HPSM-POC-analysis 1_Project_Definition/Architecture/2026-10-04_template-1.0.2_DRAFT-FOR-KAM.md`); until then 1.0.1 runs.
+5. CARDS Q-B121-2 (PDF says the name was drawn in?) and Q-B121-3 (live name after a customer rename?), defaults nothing changes.
+6. Tell Kam: B50's Essential Eight timeframe note (P03/A02/A08) was never checked before he approved the wording as written.
+7. Test user + UAT (C-51/C-52): a Lane A seat with Kam around (his login); Kam said he will do an end-to-end test today.
+**Not to launch on the old pickup line alone:** the "F2 web follow-up (BACKLOG #185)" — B67's STATUS says B69 already merged the web half of #112; check at source first (#185 is now 'two untrue comments').
+
 ## 🔴🔴🔴 CHECKPOINT 2026-10-04 22:58 (Friday, ctx 51%) — READ FIRST; supersedes the 21:50 block where they differ
 **Kam:** no new rows since 21:04:59 (kam_rulings 22:58: 10, all reconciled; to rule 0). Usage 35%.
 **MERGED this seat:** Composer **#37** (B72: wording APPROVED C-40 + clearance 201 px #190 + B42 cover #191) → Composer main **eb24959** (delta = the 10 PR files; 0 open alerts). Card composer-guided-wording-draft-1003 DELIVERED. B72 records in root main (ccab18d). Panes %14 (B72), %17 (B122), %18 (B73) closed.
