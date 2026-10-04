@@ -1,0 +1,23 @@
+repin_and_launch_gate54f.sh — the LAUNCH ACTION for the gate54f kit (the directory this script lives in). ONE PR, whose number and head are
+INPUTS (they were not known when the kit was drafted). Re-pin and launch are ONE action (Kam 2026-09-18): it READS everything AT LAUNCH and
+never trusts a pin it did not just re-read. A NEW COPY of gate52's repin, re-keyed for one PR given on the command line:
+  (0)  the pane QA/Secuura-pr0-<PR> is routed (inbox_routing.conf) — rc 1;
+  (1)  the GitHub PULLS API: head sha, branch, base, state, merged, mergeable (re-read up to 3x while null) — rc 3;
+  (2)  ONE `git ls-remote` READ from the Secuura checkout: develop + refs/pull/<PR>/head + the branch — rc 2;
+  (2b) the OVERLAP census over every OTHER open PR (gh_census_gate54f.py): rc 15 on an overlap outside kit.json reported_overlaps;
+  (3)  rc 11 unless HEAD == the API head == pull/head == the branch (WHOLE-FIELD), the PR is open, not merged, based on develop, not
+       `mergeable: false`, and the branch matches kit branch_rx;
+  (3b) STALE BASE: rc 10 if origin develop != kit base. gate52 RE-PINNED over a moved develop here; this kit CANNOT (README section 6: every
+       C2-C6 expectation is drafted against the base blobs), so a move is a RE-DRAFT;
+  (3c) FILL: fill_gate54f.py writes the prompt, the launcher and pins_gate54f.json from the values read in (1)-(3) — rc 10 on refusal;
+  (3d) RACE: develop and the head re-read by ls-remote AFTER the fill — rc 10 / 11 if either moved meanwhile;
+  (4)  G54F_* overrides refuse a real launch — rc 16;  (5) the usage gate — rc 12;  (6) the filled launcher's own --check — rc 13
+       (it also refuses a pin older than 30 min, exit 9: STALE PIN);  (7) cockpit.sh add — rc 14, then a pane census.
+--dry-run: steps 0-3d with the fill done as a SIMULATION (`dry<HHMMSS>.SIM.*`, never the real pins), then the SIM launcher's --check; the
+routing line's absence is REPORTED, not refused; it stops before (4). READ-ONLY in the Secuura checkout: ls-remote only. Nothing is merged,
+deployed or commented. Every step's output is written beside this script as launch_<HHMMSS>.* (dry: dry_<HHMMSS>.*).
+Controls-only overrides: G54F_ROUTING (routing file), G54F_REPORTED (a JSON file standing in for reported_overlaps), G54F_OVERLAP_EXTRA (an
+extra kit path for the census).
+Usage: repin_and_launch_gate54f.sh <PR number> <HEAD 40-hex> [--dry-run]
+set -u
+GS="$(dirname "$(/bin/realpath "$0")")"

@@ -1,0 +1,26 @@
+c2_lockdiff_gate54f.py — gate54f C2: the three lockfiles, diffed ENTRY BY ENTRY and FIELD BY FIELD as parsed JSON, plus a text-level
+diff, base blob vs head blob, read from SHAs with read-only git verbs (no install, no network, no working tree).
+
+Per lock (kit.json `locks`):
+  L1 entries: changed == [kit bump_key] exactly; ADDED 0; REMOVED 0; every top-level key other than `packages` equal.
+  L2 fields of the one changed entry: changed fields subset of allowed_changed_fields (version/resolved/integrity); added fields subset of
+     allowed_added_fields (root only: resolved/integrity, because the base root entry carries ONLY version + license); removed fields 0;
+     head version == kit to_version; head resolved / integrity == kit's 4.3.0 values WHEN PRESENT (C3 recomputes them from the tarball).
+  L3 collateral: flag flips (dev / optional / devOptional / peer) across EVERY entry 0; libc: count of entries carrying `libc` == base ==
+     kit libc_base, and every libc array value-equal to base.
+  L4 kit untouched_key (@types/http-cache-semantics): value-equal AND raw text block byte-identical.
+  L5 text: every changed line lies inside the bump entry's block (base and head line ranges); printed as -n/+n.
+Verdict line: `LOCKDIFF PASS|FAIL: <n> FAIL of <m> checks | base <sha12> head <sha12>` then one `CHANGED-ENTRIES <lock> <n>` line per lock.
+
+--selftest  runs the SAME check function over in-memory plants built from the BASE blobs (no repo write):
+  T0 base vs base           -> must FAIL with 0 changed entries on every lock (the "0 changed" reading)
+  T1 the legitimate bump    -> must PASS (service: 3 field lines replaced; root: version replaced + resolved/integrity inserted)
+  T2 T1 + a dev flip        -> must FAIL and report flips 1 (planted `"dev": true` on another entry)
+  T3 T1 + a libc removal    -> must FAIL and report libc 10 -> 9 (service locks)
+  T4 T1 + @types touched    -> must FAIL on L1 (changed 2) and L4
+  T5 T1 + an added entry    -> must FAIL on L1 (ADDED 1)
+  rc 0 only if EVERY arm returns its expected verdict AND names the expected collateral.
+
+Usage: c2_lockdiff_gate54f.py --repo <your clone> --base <sha> --head <sha>
+       c2_lockdiff_gate54f.py --repo <any clone holding the base> --selftest
+rc 0 PASS / rc 1 FAIL / rc 2 usage.

@@ -1,0 +1,29 @@
+LAUNCH ACTION gate54f (DRY RUN) 2026-10-04 22:39:53 AEDT / 2026-10-04T11:39:53Z | PR #1373 | HEAD ce051988b787f510c7ca5db5bbc474ef4b8a8492 | kit base 88e8877a2a0d6a626b9c2a7c4b71d3a909e6f94e | pane QA/Secuura-pr0-1373
+--- 0. the pane must be routed (inbox_routing.conf) or cockpit.sh say --mail fails silently
+  routing file /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/inbox_routing.conf — line present: 0 (grep rc=1; want 1 / rc 0)
+  (DRY RUN: reported, not refused — the real run refuses rc 1 here; README section 4)
+--- 1. instrument A: the GitHub PULLS API (+ 2b the census, same read)
+  gh_census rc=0
+    API #1373 head d5dccb9f80ee4dbb5bc3d4e46e0a816134a61f91 base develop base_sha 88e8877a2a0d6a626b9c2a7c4b71d3a909e6f94e mergeable True reads 1 state open merged False branch feature/ks-1403-in-range-lock-refresh-and-two-baseline-rows-b56-1
+    EXPECTED OVERLAP (reported_overlaps; reported, never sequenced by a gate) #1360 PeterObeden | head d0e99f181a4e | paths ['Blockchain/Dev/package-lock.json', 'Blockchain/Dev/services/nft-certificate/package-lock.json'] | title keys []
+    EXPECTED OVERLAP (reported_overlaps; reported, never sequenced by a gate) #949 dependabot[bot] | head aebcfd54d193 | paths ['Blockchain/Dev/package-lock.json'] | title keys []
+    EXPECTED OVERLAP (reported_overlaps; reported, never sequenced by a gate) #948 dependabot[bot] | head f6afb75d790c | paths ['Blockchain/Dev/package-lock.json'] | title keys []
+    EXPECTED OVERLAP (reported_overlaps; reported, never sequenced by a gate) #947 dependabot[bot] | head d68b9d79e67f | paths ['Blockchain/Dev/package-lock.json'] | title keys []
+    EXPECTED OVERLAP (reported_overlaps; reported, never sequenced by a gate) #946 dependabot[bot] | head 41cc5209aaf2 | paths ['Blockchain/Dev/package-lock.json'] | title keys []
+    EXPECTED OVERLAP (reported_overlaps; reported, never sequenced by a gate) #945 dependabot[bot] | head 264098fce62b | paths ['Blockchain/Dev/package-lock.json'] | title keys []
+    EXPECTED OVERLAP (reported_overlaps; reported, never sequenced by a gate) #649 dependabot[bot] | head 1d9198ac7e2f | paths ['Blockchain/Dev/package-lock.json'] | title keys []
+    EXPECTED OVERLAP (reported_overlaps; reported, never sequenced by a gate) #639 dependabot[bot] | head 2069d852ee16 | paths ['Blockchain/Dev/package-lock.json'] | title keys []
+    EXPECTED OVERLAP (reported_overlaps; reported, never sequenced by a gate) #635 dependabot[bot] | head 6cbc298f41a1 | paths ['Blockchain/Dev/package-lock.json'] | title keys []
+    EXPECTED OVERLAP (reported_overlaps; reported, never sequenced by a gate) #575 dependabot[bot] | head 7d32d8ae4b06 | paths ['Blockchain/Dev/package-lock.json'] | title keys []
+    EXPECTED OVERLAP (reported_overlaps; reported, never sequenced by a gate) #572 dependabot[bot] | head 4ea847b39ec8 | paths ['Blockchain/Dev/package-lock.json'] | title keys []
+    CENSUS 21 other open PR(s) read | 0 touch a kit path or carry a kit key outside reported_overlaps | 11 expected overlap(s) reported | 0 client-human PR(s) reported apart | 4 kit path(s), keys ['KS-1403', 'KS-1404']
+--- 2. instrument B: git ls-remote origin (ONE read from the Secuura checkout, READ-ONLY)
+  ls-remote rc=0 at 11:40:23Z
+    88e8877a2a0d6a626b9c2a7c4b71d3a909e6f94e	refs/heads/develop
+    d5dccb9f80ee4dbb5bc3d4e46e0a816134a61f91	refs/heads/feature/ks-1403-in-range-lock-refresh-and-two-baseline-rows-b56-1
+    d5dccb9f80ee4dbb5bc3d4e46e0a816134a61f91	refs/pull/1373/head
+--- 2b. the census
+  OVERLAP census clean (11 expected overlap(s) reported)
+--- 3. the head, judged (input == API == pull/head == branch, open, not merged, on develop, not mergeable:false, branch rule)
+  input ce051988b787f510c7ca5db5bbc474ef4b8a8492 | API d5dccb9f80ee4dbb5bc3d4e46e0a816134a61f91 (state open, merged False, base develop, mergeable True) | pull/head d5dccb9f80ee4dbb5bc3d4e46e0a816134a61f91 | feature/ks-1403-in-range-lock-refresh-and-two-baseline-rows-b56-1 d5dccb9f80ee4dbb5bc3d4e46e0a816134a61f91
+REFUSING TO LAUNCH: the input head is not the PR's head on both instruments, or the PR is not open / merged / not on develop / mergeable:false / off the branch rule — a stale pin is never launched (re-run with the head both instruments read)

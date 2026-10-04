@@ -1,0 +1,15 @@
+c4_baseline_gate54f.py — gate54f C4: scripts/audit/audit-baseline.json, base blob vs head blob, PARSED (never grep) and by RAW BYTES.
+  B1 top level: same key set; `$comment` value-equal; rows base == kit baseline_rows_base (24).
+  B2 key sets: `accepted` ADDED == exactly the kit new_rows ids (+2); REMOVED none; kit forbidden_row (GHSA-ch52-4w7c-c8xp) absent at head.
+  B3 each new row: package / ticket / expires == kit (braces KS-1403, node-forge KS-1404, both 2026-10-31); `reason` a non-empty string;
+     its key set is ONE OF THE KEY SETS the base rows already use AND contains package/reason/ticket/expires; R2's exact shape
+     {expires, package, reason, ticket} reported separately (INFO R2-SHAPE exact | deviates).
+  B4 the 24 old rows: value-equal AND raw text block byte-identical (a re-serialisation that turns `→` into `\u2192` is value-equal and byte-different).
+  B5 text: only insertions, plus at most ONE replaced line whose only change is a trailing comma added (appending after the last row);
+     trailing newline as base. Fuse census: rows expiring 2026-10-31 base -> head; every dated row's expiry unchanged.
+Verdict: `BASELINE PASS|FAIL: <n> FAIL of <m> checks | rows <b> -> <h> | added <ids>`.
+--selftest (in memory, from the base blob; nothing written):
+  T0 base vs base -> FAIL with +0 rows | T1 the two legitimate rows appended -> PASS | T2 T1 + a ch52 row -> FAIL (B2)
+  T3 T1 + an old row's `→` re-escaped as \u2192 -> FAIL on B4 by raw bytes while values stay equal | T4 expiry 2026-11-01 -> FAIL (B3)
+  T5 tickets swapped -> FAIL (B3) | T6 T1 inserted MID-file (no comma edit) -> PASS (the second legitimate shape)
+Usage: c4_baseline_gate54f.py --repo <clone> --base <sha> --head <sha>  |  --repo <clone> --selftest.  rc 0 PASS / 1 FAIL / 2 usage.

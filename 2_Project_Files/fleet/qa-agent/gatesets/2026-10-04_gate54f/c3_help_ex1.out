@@ -1,0 +1,13 @@
+c3_integrity_gate54f.py — gate54f C3: recompute http-cache-semantics' integrity FROM THE REGISTRY TARBALLS ITSELF (public npm registry,
+read-only HTTPS GETs; tarballs are hashed in memory and never written), and match the locks at --head against it.
+  I1 4.3.0: sha512(tarball bytes) base64 == kit integrity 4.3.0 == the registry packument's dist.integrity; dist.tarball == kit resolved;
+     second instrument: sha1(tarball) == dist.shasum.
+  I2 4.2.0: the same, against kit integrity 4.2.0 (the base value).
+  I3 NEGATIVE CONTROL, same instrument: sha512(4.2.0) != sha512(4.3.0); one flipped byte of the 4.3.0 tarball gives a different sha512.
+  I4 the locks at --head: each lock's node_modules/http-cache-semantics: version == 4.3.0 AND integrity == the RECOMPUTED 4.3.0 value
+     (and != the recomputed 4.2.0 value). The root lock's base entry carries no integrity: an ABSENT integrity there is reported, and
+     PASSES only with version 4.3.0 (a doubt for the gate to rule — README D1). At the base SHA this check FIRES: every lock reads 4.2.0.
+  --advisories (optional, the drafter's C5 prediction): ONE POST to the registry's bulk advisory endpoint (a query; it writes nothing)
+     with the versions of http-cache-semantics, braces and node-forge pinned in every tracked package-lock.json at --head; reports which of
+     the three kit advisories match which version. Expectation at the base: all three match; ch52 matches 4.2.0 and NOT 4.3.0.
+Usage: c3_integrity_gate54f.py --repo <clone> --head <sha> [--advisories]   (rc 0 PASS / 1 FAIL / 2 usage / 3 network)

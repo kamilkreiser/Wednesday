@@ -1,0 +1,13 @@
+c6_scope_gate54f.py — gate54f C6: what this PR is NOT, measured, plus the NOT COVERED statements the verdict must carry.
+  S1 the changed path set (git diff --name-only base head) == exactly kit files (4 paths).
+  S2 0 test paths among them by kit test_path_rx (secuura-test-discipline §4 is triggered only by a test change), with a MUST-HIT CONTROL:
+     the same regex over the base tree matches >= 1 known test path (counted and two printed) and matches none of the 4 kit paths.
+  S3 0 runtime paths: every changed path is a package-lock.json or the baseline; 0 package.json; CONTROL: the same classifier calls
+     scripts/audit/audit-gate.mjs a non-lock path.
+  S4 the instruments did not move: the leg scripts and the code they import (kit legs + lock-discovery / baseline-contract /
+     could-not-check / advisory-fetch-stub, preflight.sh, .githooks/pre-push, scripts/audit package.json + lock) blob-equal base == head,
+     so legs 2/6/7 at HEAD are the SAME instruments as at the base control.
+  S5 out of gate scope, stated: kit out_of_scope_lock's package-lock.json blob-equal base == head, and the tree is still declared in
+     OUT_OF_SCOPE_LOCKS (lock-discovery.mjs at head) with ticket KS-769 — its expires date printed (after that date it returns to leg 7's corpus).
+  NC lines (printed, not checks): no runtime change; §5f NOT APPLICABLE; the mobile lock NOT COVERED (KS-769).
+Usage: c6_scope_gate54f.py --repo <clone> --base <sha> --head <sha>   (rc 0 PASS / 1 FAIL / 2 usage)

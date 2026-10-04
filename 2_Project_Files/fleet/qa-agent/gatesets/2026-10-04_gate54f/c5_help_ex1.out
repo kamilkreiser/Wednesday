@@ -1,0 +1,19 @@
+c5_legs_gate54f.sh — gate54f C5: the three pre-push preflight legs that refused every push (2 lockfile-cleanroom.sh, 6 audit-gate.mjs,
+7 audit-locks.mjs), run by the TESTER in its OWN worktree. macOS bash 3.2 compatible; zsh-safe: every rc is read as `cmd > f 2> g; rc=$?`
+on its own line, never through a pipe, and never from PIPESTATUS. Writes ONLY into <outdir>.
+
+  c5_legs_gate54f.sh --help
+  c5_legs_gate54f.sh plan <repo> <sha>                     READ-ONLY: the leg files exist at <sha>; both gates read AUDIT_BASELINE_PATH there.
+  c5_legs_gate54f.sh parse-selftest <outdir>               the advisory-name parser on planted lines: a FAIL line counts, a CLEANUP line does not.
+  c5_legs_gate54f.sh run <devdir> <label> <outdir> head|base
+       <devdir> = <your worktree>/Blockchain/Dev. Installs scripts/audit's OWN lock (npm ci --ignore-scripts), then legs 2, 6, 7.
+       head: want rc 0 on 2, 6 and 7, and 0 of the three advisories named.   base: want legs 6 AND 7 rc 1 and the three advisories
+       named across them (leg 2 reported). rc 2 = SKIP (registry unreachable) and is NEVER a pass; rc 3 = the gate REFUSED.
+  c5_legs_gate54f.sh bite <devdir> <outdir> [--prepare-only]
+       for EACH new row: a copy of the head baseline with ONLY that row removed, passed by AUDIT_BASELINE_PATH (the gates read it at
+       audit-gate.mjs:46 / audit-locks.mjs:64; the worktree is never edited). Want: leg 6 or 7 rc 1 naming that advisory. NO-OP CONTROL:
+       an unmodified copy by the same variable must give rc 0 on both (the path itself does not break the gates).
+Exit: 0 when every expectation of the mode held; 1 when one did not (the MISMATCH lines say which); 2 usage / refusal.
+set -u
+GS="$(dirname "$(/bin/realpath "$0")")"
+KJ() { python3 -c 'import json,sys; v=json.load(open(sys.argv[1]))[sys.argv[2]]; print(" ".join(sorted(v)) if isinstance(v,dict) else v)' "$GS/kit.json" "$1"; }
