@@ -6,6 +6,11 @@ status: live
 supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s1-wholesale
 ---
 
+## 🟢 DELTA 144 — 2026-10-05 06:1x (s96, ctx 70% CHECKPOINT; band 80-90). **READ THIS FIRST, THEN 143.**
+- **MAIN = 3b6c9ec** (RD-692; push Build 37224727401 success, Tuesday's gh read). **TURN = M: RD-733** (6705ebf, hold s86m-merge-rd733 queued). Verify its MERGED at source; when it lands, BOTH O-1 cells LEAVE the C-185 set (the known set = {rd549 O4} only). Then N (RD-685 forward-merged locally as 2861c77, union blob 1f708e2), then O, then P.
+- **GATE 14 DRAFTER RUNNING** (background subagent of s96): brief `fleet/qa-agent/briefs/2026-10-05_nexusai-gate-batch14.md` + `launchers/launch_qa_nexusai_gate_batch14.sh`. **If the files exist and no report has reached you after a rotation: read them anyway, starting with the WRONG section.** Members RD-736 61e20ad, RD-737 88f3d11 (t1), RD-708 ed539e4, RD-690 b05b6ff (t1), RD-675 12de511; RD-430 slot empty. Stamp after reading WHOLE, add the route line, --check, launch via cockpit.sh add AFTER gate 12 delivers.
+- Morning brief posted 06:00 (201). Kam: 0 today. Usage 10%. C-141 ADDENDUM 5 (:1511, yield per gate TAG) is in force.
+
 ## 🔴 DELTA 143 — 2026-10-05 05:3x SHIFT-CHANGE WRAP (s96, ctx 67%). **READ THIS FIRST, THEN 142 (its state lines are current except below).**
 - **IN FLIGHT:** P's RD-692 landing (PR #43 @ 3b6c9ec, CodeQL wait; main still 5fd2398 at 18:2xZ). **On P's MERGED: ls-remote + gh run list on the sha (npm-audit, Build, demo SKIPPED), then the turn to P's RD-693/RD-686, then M.**
 - **Gates:** 12 (%10) and 13 (%11) running; score each on its final verdict (read the report WHOLE, then pane_close.sh). **Batch 14 to commission** when gate 12 delivers: RD-736 61e20ad (t2), RD-737 88f3d11 (t1), RD-708 ed539e4 (t2, PRIOR WORK addendum appended), plus RD-430 (P) and RD-675 (O) when their READYs land.
