@@ -19,6 +19,14 @@ supersede: replace wholesale at the next pickup; do not append. Previous copy: N
 4. EXPIRING-GRANTS: "SPEND PAST THE 90%" is marked ENDED (account switched). Friday's "ignore the 90%" row is Friday's and is not touched.
 
 ### LIVE RIGHT NOW
+**🟠 65% CHECKPOINT 00:1x 2026-10-05 (seat 70536f16). READ FIRST; supersedes every block below:**
+0. Kam: last row 22:07 (TSA a). OPEN card: `secuura-mobile-dormant-fuse-lapses-1019b` (rec a; default re-raise Thu 15 Oct). Quiet hours: no voice.
+1. develop **e6daa806e79a** (#1373 merged). Two LIVE Secuura seats, partitioned, mutual two-lock (each holds its own lock, the other's absent; `.push-lock-c21` = STOP both sides):
+   - **Seat B 57th (%7, `Secuura/Blockchain`, lock `.push-lock-52`)**: ITEM 0 ANSWERED 13:08Z. Doing PR A (KS-1402: install, re-verify, AMEND d26d406020f7 with both §4 doc blocks, push) then PR B (KS-1015) stacked on A's final head; ONE READY → **gate54** (A T1, B T2). Assertion ruled: neither PR's diff vs develop may contain PR 0's 4 files. On READY: Wednesday drafts gate54's kit (shape: `fleet/qa-agent/gatesets/2026-10-04_gate54f/`), launches, GO per PR `GO (Seat B 57th): merge <n> on gate54`.
+   - **Seat D 2nd (%6, `Secuura/Blockchain-D`, lock `.push-lock-d2`, worktree `s-d2-ks1404`)**: KS-1404. Locks clean after restores; ruled 13:09Z: push on to a LOCAL commit of code+tests, stop at 65% if reached, hand over BEFORE the doc step. ON ITS WRAP: score, pane_close, brief **Seat D 3rd** (docs KS 1404 block in both HTML docs, amend, push, READY → **gateD2** T1) from its handover.
+2. THE DOC RULE: each PR adds its own self-contained per-ticket block to both platform-k HTML docs; second to merge rebases keeping both blocks; Seat C 21st's parked PR 1 (`s-c21-ks1382`, 99d653efc28a) rebases last.
+3. Scored tonight: Seat C 21st 0.90, B 56th 0.93, gate54f 1.0. KS-1405 needs assigning to our account (Seat C successor). Ledger rows tonight: see `_ledger.md` top.
+
 **🟠 53% CHECKPOINT 23:1x 2026-10-04 (seat 70536f16). READ FIRST; supersedes every block below:**
 0. Rulings + reconcile: 4 Kam rows today, to rule 0. Digests --check OK. Kam's OPEN card: `secuura-mobile-dormant-fuse-lapses-1019b` (rec a re-date the KS-769 mobile exclusion to Thu 31 Dec; default re-raise Thu 15 Oct). TSA card ruled a 22:07 (folded into the Seat D 2nd brief).
 1. **#1373 (KS-1403, PR 0) MERGED** → develop **e6daa806e79a** (verified by ls-remote 12:02:44Z). Push freeze 5 CLEARED. gate54f scored 1.0, pane closed.
