@@ -11,6 +11,7 @@
 #   5. (2026-10-04, PR HPSM-POC #94) a CodeQL run (named CodeQL or Analyze (…)) must be PRESENT on the head: the Datasec
 #      org ruleset requires it, and a PR whose CodeQL never started showed 5/5 green and was refused by the branch policy.
 #      Absent at the timeout = rc 7. Repos without CodeQL: MWG_REQUIRE_CODEQL=0.
+#   6. only the LATEST check-run per name counts (a re-run's success supersedes its cancelled predecessor).
 # Prints the new base-branch sha on success. Never uses --admin or --auto.
 set -u
 REPO="${1:?owner/repo}"; PR="${2:?pr number}"; HEAD="${3:?head sha}"; MAX="${4:-40}"
@@ -19,7 +20,10 @@ gh_() { bash "$FA" datasec gh "$@"; }
 for ((i=0; i<MAX*2; i++)); do
   cur=$(gh_ pr view "$PR" -R "$REPO" --json headRefOid --jq .headRefOid 2>&1) || { echo "merge_when_green: cannot read PR: $cur" >&2; exit 2; }
   [ "$cur" = "$HEAD" ] || { echo "merge_when_green: STOP — PR #$PR head is $cur, not the tested $HEAD" >&2; exit 3; }
-  runs=$(gh_ api "repos/$REPO/commits/$HEAD/check-runs?per_page=100" --jq '[.check_runs[] | {n:.name, s:.status, c:(.conclusion // "")}]' 2>&1) || { echo "merge_when_green: cannot read checks: $runs" >&2; exit 2; }
+  runs=$(gh_ api "repos/$REPO/commits/$HEAD/check-runs?per_page=100" --jq '[.check_runs[] | {n:.name, s:.status, c:(.conclusion // ""), id:.id}]' 2>&1) || { echo "merge_when_green: cannot read checks: $runs" >&2; exit 2; }
+  # Rule 6 (2026-10-04, HPSM-POC #95): a re-run leaves the OLD check-run on the same head; GitHub's required checks read the
+  # LATEST run per name, so this does too (highest id per name). Without it a cancelled-then-passed check stops the merge forever.
+  runs=$(echo "$runs" | python3 -c 'import sys,json;r=json.load(sys.stdin);b={};[b.__setitem__(x["n"],x) for x in sorted(r,key=lambda x:x["id"])];print(json.dumps(list(b.values())))')
   total=$(echo "$runs" | python3 -c 'import sys,json;print(len(json.load(sys.stdin)))')
   pending=$(echo "$runs" | python3 -c 'import sys,json;print(sum(1 for r in json.load(sys.stdin) if r["s"]!="completed"))')
   codeql=$(echo "$runs" | python3 -c 'import sys,json;print(sum(1 for r in json.load(sys.stdin) if r["n"]=="CodeQL" or r["n"].startswith("Analyze")))')
