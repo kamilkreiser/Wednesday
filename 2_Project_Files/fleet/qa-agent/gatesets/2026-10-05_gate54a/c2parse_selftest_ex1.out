@@ -1,0 +1,45 @@
+SELFTEST OK T0 real red at base: want PASS got PASS
+SELFTEST OK T1 green at head: want PASS got PASS
+SELFTEST OK T2 load failure is never a red: want FAIL got FAIL
+    PASS console/JSON agreement: no console file given
+    FAIL LOAD: the ks1402 file produced 0 cells (file status failed: Error: Cannot find module) — a load failure is never a red
+SELFTEST OK T3 a red with the wrong message (a 500, not the 401 door): want FAIL got FAIL
+    PASS console/JSON agreement: no console file given
+    FAIL CELL 1 at base: want fail with 'expected 401 to be 200' | got failed | expected 500 to be 200
+    PASS CELL 2 at base: want fail with 'expected 401 to be 403' | got failed | AssertionError: expected 401 to be 403
+    PASS CELL 3 at base: want pass | got passed 
+    PASS CELL 4 at base: want fail with 'expected 401 to be 404' | got failed | AssertionError: expected 401 to be 404
+SELFTEST OK T4 a skipped cell at head is not a pass: want FAIL got FAIL
+    PASS console/JSON agreement: no console file given
+    PASS CELL 1 at head: want pass | got passed 
+    PASS CELL 2 at head: want pass | got passed 
+    PASS CELL 3 at head: want pass | got passed 
+    FAIL CELL 4 at head: want pass | got skipped 
+SELFTEST OK T5 the control cell red at base: want FAIL got FAIL
+    PASS console/JSON agreement: no console file given
+    PASS CELL 1 at base: want fail with 'expected 401 to be 200' | got failed | AssertionError: expected 401 to be 200 // Object.is equality
+    PASS CELL 2 at base: want fail with 'expected 401 to be 403' | got failed | AssertionError: expected 401 to be 403
+    FAIL CELL 3 at base: want pass | got failed | expected 401 to be 200
+    PASS CELL 4 at base: want fail with 'expected 401 to be 404' | got failed | AssertionError: expected 401 to be 404
+SELFTEST OK T6 clean suite pair 77/836 -> 78/840: want PASS got PASS
+SELFTEST OK T7 a base-green test red at head: want FAIL got FAIL
+    PASS counts: base 77 files / 836 tests -> head 78 / 840 (want +1 / +4) | builder 77/836 -> 78/840
+    PASS new tests are exactly the ks1402 cells: new 4 ['KS-1402 CELL 1', 'KS-1402 CELL 2', 'KS-1402 CELL 3', 'KS-1402 CELL 4'] | vanished 0 []
+    FAIL no base-green test is red at head: 1 regression(s) [('f0.test.ts', 'f0 t0')]
+    FAIL head failed == 0: 1
+    INFO base failed 0 (a base red outside the ks1402 file is pre-existing; NAME it)
+SELFTEST OK T8 +5 tests (a fifth cell or a stray file): want FAIL got FAIL
+    FAIL counts: base 77 files / 836 tests -> head 78 / 841 (want +1 / +4) | builder 77/836 -> 78/840
+    FAIL new tests are exactly the ks1402 cells: new 5 ['KS-1402 CELL 1', 'KS-1402 CELL 2', 'KS-1402 CELL 3', 'KS-1402 CELL 4', 'KS-1402 CELL 5'] | vanished 0 []
+    PASS no base-green test is red at head: 0 regression(s) []
+    PASS head failed == 0: 0
+    INFO base failed 0 (a base red outside the ks1402 file is pre-existing; NAME it)
+SELFTEST OK T9 console agrees with JSON: want PASS got PASS
+SELFTEST OK T10 console disagrees with JSON: want FAIL got FAIL
+    FAIL console/JSON agreement: console Test Files 78 / Tests 840 vs JSON files 78 / tests 839
+    INFO suite: files 78 (failed files 0) | tests 839 (numTotalTests 839) | passed 839 failed 0 skipped 0 other 0
+SELFTEST OK T11 mutation users: 1/2 red: want PASS got PASS
+SELFTEST OK T12 mutation users that stays green (a vacuous cell set): want FAIL got FAIL
+    FAIL MUTATION users.ts reverted at head: cells {'CELL 1': 'passed', 'CELL 2': 'passed', 'CELL 3': 'passed', 'CELL 4': 'passed'} (want 1 and 2 RED, 3 GREEN; 4 also red at 401)
+SELFTEST OK T13 mutation authmw 4/4 green: want PASS got PASS
+SELFTEST OK 14 of 14 (fixture c2_selftest_console.fixture.txt)

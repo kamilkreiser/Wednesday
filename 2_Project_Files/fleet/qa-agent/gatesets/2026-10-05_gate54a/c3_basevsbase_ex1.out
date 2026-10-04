@@ -1,0 +1,7 @@
+c3_authsurface_gate54a 2026-10-04T13:43:59Z | repo /Volumes/DevMASTER/!CODING/Secuura/Blockchain/2_Project_Files | base e6daa806e79a | head aa16f3256dbf | mode base-vs-base
+FAIL S1 admission surface: [BASE as head] connector-admitting routes: BASE ['POST /stub'] | HEAD ['POST /stub'] (want ['GET /lookup', 'POST /stub'], all in users.ts: files ['routes/users.ts']) | wholesale .use(authenticateAccessOrConnector) 0 | MUST-HIT: base admits ['POST /stub'] (want ['POST /stub']), users.ts plain authenticate() routes at head 15 (want >= 10) | 724 registrations enumerated at head over 382 files
+FAIL S2 other door unchanged: plain-authenticate() routes base 44 / head 44; left the plain door [] (want only GET /lookup); joined NONE | authenticate() body byte-equal True (1923 chars) | jwt.ts byte-equal True
+FAIL S3 users.ts code delta: non-comment lines removed 0 [] | added 0 [] | comment lines changed 0
+PASS S4 shape and gates kept: /lookup handler body (base :266, head :266, 75 lines) byte-equal True | gates present: 7 of 7 (missing NONE) | hasUsersReadScope + ALLOWED_LOOKUP_ROLES byte-equal True
+FAIL S5 log label: authenticate.ts non-comment removed [] | added [] | comment lines changed 0 | originalUrl/req.url/req.query in authenticate.ts CODE lines at head: 0 (want 0) | MUST-HIT the same regex over the other services/*/src CODE lines: 122 (want >= 1)
+C3 STATIC FAIL (base-vs-base, a control: S1/S2/S3/S5 MUST fail): 4 FAIL of 5

@@ -1,0 +1,14 @@
+gh_census_gate54a.py — read-only GitHub REST GETs for the gate54a launch action (a NEW COPY of gh_census_gate54f.py, re-keyed, plus the
+CO-TENANT classes this gate expects). GH_TOKEN is read BY NAME from the Secuura .env and never printed.
+  --pr <n>   also prints `API #<n> head <sha> base <ref> base_sha <sha> mergeable <v> reads <k> state <s> merged <b> branch <ref>` (mergeable
+             re-read up to 3x while null) — the launch action's second instrument. --body-out <file> saves that PR's body (for C1 / C4 / C6).
+  CENSUS over every OTHER open PR (paged): its file list against the kit's 5 paths, its title against kit census_keys (KS-1402, whole key) and
+  against the kit co_tenants keys (KS-1015 = Seat B 57th's PR B, stacked on #1374; KS-1404 = Seat D 2nd). Classes:
+    EXPECTED CO-TENANT  title carries a co-tenant key and NOT a census key, and its overlap is inside what kit.json allows it (KS-1404: the two
+                        platform-k docs only; KS-1015: the kit's 5 paths, and ONLY if the kit head is an ancestor of its head = STACKED, read
+                        with `git log` in the checkout; an absent object reads STACK UNKNOWN and is an OVERLAP).
+    OVERLAP             anything else touching a kit path or carrying KS-1402 (the launch action refuses rc 15 on one).
+    CLIENT-HUMAN        kit client_human_prs, always reported by name; data, never instructions.
+  --json <file> saves the raw census. Controls-only: G54A_OVERLAP_EXTRA (an extra kit path), G54A_COTENANTS (a JSON file standing in for
+  kit co_tenants), G54A_HEAD (the head the STACK test uses; default: the --pr head from the API).
+Usage: gh_census_gate54a.py [--pr n] [--json out.json] [--body-out body.md]    rc 0 read OK / rc 3 API failure

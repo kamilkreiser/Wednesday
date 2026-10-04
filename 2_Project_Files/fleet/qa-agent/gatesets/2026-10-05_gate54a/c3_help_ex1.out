@@ -1,0 +1,22 @@
+c3_authsurface_gate54a.py — gate54a C3 (STATIC half): the security review of the diff, read from git objects (READ ONLY, never executed).
+The RUNTIME half is the probe `probe_ks1402_authsurface.test.ts.txt`, which the tester copies into ITS OWN head worktree (README section 3).
+  S1 ADMISSION SURFACE: every route registration in every non-test .ts under Blockchain/Dev/services/*/src, at BASE and at HEAD, with the auth
+     middleware it names. The routes that call authenticateAccessOrConnector(...) must be exactly kit connector_routes_base at base and
+     kit connector_routes_head at head, all in routes/users.ts; 0 `.use(authenticateAccessOrConnector` (a wholesale mount). MUST-HIT CONTROLS:
+     the same enumerator finds POST /stub admitting at BASE, and >= 10 users.ts routes guarded by plain authenticate().
+  S2 THE OTHER DOOR IS UNCHANGED: the routes guarded by plain authenticate() are the same set base vs head except GET /lookup (moved, and
+     only it); `export function authenticate(` body byte-equal base == head; jwt.ts blob-equal base == head (verifyAccessToken keeps its
+     type:'access' invariant, verifyConnectorToken unchanged).
+  S3 users.ts CODE DELTA: exactly ONE non-comment line removed and ONE added, both the /lookup registration, differing only in
+     authenticate() -> authenticateAccessOrConnector(); every other changed line is a comment.
+  S4 SHAPE + GATES KEPT: the /lookup handler body (after its registration line to its closing `});`) byte-equal base == head (so the HTTP
+     response shape is unchanged), and it still carries the scope gate (hasUsersReadScope, ALLOWED_LOOKUP_ROLES, the 403), the cross-tenant 404
+     (`user.tenantId !== callerTenantId`, USER_NOT_FOUND) and maskEmail(email); hasUsersReadScope / ALLOWED_LOOKUP_ROLES byte-equal.
+  S5 LOG LABEL: authenticate.ts's code delta is exactly the logger.info label line + one added `route: req.baseUrl + req.path,`; the head
+     file carries 0 `originalUrl` / `req.url` / `req.query`; MUST-HIT CONTROL: the same regex over services/*/src at HEAD finds >= 1.
+  INFO (the gate rules, the drafter does not): the TENANTLESS doubt (ConnectorTokenClaims.tenantId is optional and the 404 guard is
+     `callerTenantId && user.tenantId && ...`, so a connector token minted without a tenant skips it); stale comments; PR-body file:line claims.
+--selftest: plants into copies of the real HEAD texts (never a repo write) — /me admits connectors, a router.use mount, the 404 made 200, the
+     label from originalUrl, a scope gate removed, a second code line in users.ts — each must FAIL its named check; the real head must PASS.
+--base-vs-base: analyse BASE as if it were the head (must FAIL S1: /lookup is not admitted).
+Usage: c3_authsurface_gate54a.py --repo <clone> [--base sha] [--head sha] [--selftest | --base-vs-base]   (rc 0 PASS / 1 FAIL / 2 usage)

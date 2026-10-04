@@ -1,0 +1,29 @@
+c2_cells_gate54a.sh — gate54a C2 BEHAVIOUR (and the runtime half of C3). bash 3.2 / zsh safe: no associative arrays, no mapfile, no ${x,,},
+and NO rc is ever read through a pipe (every command: `cmd > out 2> err; rc=$?`, the rc written to its own .rc file).
+Subcommands (WS = the repo root of a worktree YOU created in YOUR scratch clone; OUT = your evidence dir):
+  plan                         READ-ONLY, from the shared checkout's object store (git show / cat-file only): the test file's cells (4),
+                               0 vi.mock of ../middleware/authenticate beside the must-hit count of every vi.mock( module mock, a REAL
+                               generateConnectorToken mint, users.ts:266 at base (authenticate()) and head (authenticateAccessOrConnector()),
+                               and tsconfig's exclude of src/__tests__ (so tsc never type-checks the new test). Prints the run plan.
+  parse-selftest               c2_parse_gate54a.py --selftest (14 arms: a load failure is never a red, a skipped cell is not a pass, ...).
+  install WS OUT               `npm ci --ignore-scripts` at Blockchain/Dev, then `npm run build --workspace=packages/shared` (X1).
+  run base WS OUT              WS at kit base: (1) the FULL auth suite pristine -> base_suite.json (builder: 77 files / 836 tests);
+                               (2) PLANT the head's ks1402 test (git show HEAD:<test> into WS), run it alone -> base_cells.json: cells 1,2,4
+                               RED with `expected 401 to be 200/403/404`, cell 3 GREEN; (3) QUARANTINE the planted file into OUT (never rm).
+  run head WS OUT              WS at the pinned head: the ks1402 file alone -> head_cells.json (4/4 GREEN); the FULL suite -> head_suite.json
+                               (builder: 78 / 840, 0 failed); then diff-suites base vs head (+1 file, +4 tests = the cells, 0 regressions).
+  tsc base|head WS OUT         `npx tsc --noEmit -p .` in services/auth: rc and `error TS` count; base == head is a NO-REGRESSION reading only.
+  mutate WS OUT                WS at the head: arm users = users.ts set to its BASE blob -> cells 1/2 RED (4 also red); arm authmw =
+                               authenticate.ts set to its BASE blob -> 4/4 GREEN (the PR's own claim: no cell covers the label). Each file is
+                               restored from the head blob and its sha256 proven equal to before; `git status --porcelain` empty after.
+  probe base|head WS OUT       the C3 runtime probe (probe_ks1402_authsurface.test.ts.txt) copied in as
+                               src/__tests__/zz-g54a-probe-authsurface.test.ts, run alone, judged, then QUARANTINED into OUT.
+Every write is inside WS (a worktree you created) or OUT. REFUSES (rc 2, before writing) a WS inside /Volumes/DevMASTER/!CODING/ (the shared
+checkout and every builder worktree live there), a WS whose HEAD is not the side's sha, or an OUT inside !CODING/ other than the report dir.
+Env: G54A_HEAD (the pinned head; default kit expected_head). rc: 0 PASS / 1 FAIL / 2 refusal or usage / 3 a tool step failed (rc printed).
+set -u
+GS="$(dirname "$(/bin/realpath "$0")")"
+KJ() { python3 -c 'import json,sys; v=json.load(open(sys.argv[1]))[sys.argv[2]]; print(v if isinstance(v,str) else json.dumps(v))' "$GS/kit.json" "$1"; }
+CHECKOUT="$(KJ checkout)"; BASE="$(KJ base)"; HEADSHA="${G54A_HEAD:-$(KJ expected_head)}"; TESTF="$(KJ test_file)"; USERS="$(KJ users_routes)"; AMW="$(KJ authenticate_mw)"
+PARSE="$GS/c2_parse_gate54a.py"; PROBE_SRC="$GS/probe_ks1402_authsurface.test.ts.txt"; PROBE_REL="Blockchain/Dev/services/auth/src/__tests__/zz-g54a-probe-authsurface.test.ts"
+usage() { sed -n '2,30p' "$0" | sed 's/^# \{0,1\}//'; }

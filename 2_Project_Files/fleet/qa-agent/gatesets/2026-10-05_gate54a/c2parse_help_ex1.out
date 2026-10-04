@@ -1,0 +1,14 @@
+c2_parse_gate54a.py — parse a vitest JSON report (written by `npx vitest run ... --reporter=default --reporter=json --outputFile=<f>`) and
+judge it against the kit's expectations. Two instruments in one: the JSON, and the console summary lines `Test Files  N ...` / `Tests  N ...`
+from the same run's stdout (--console <file>); the two must agree or the reading is refused.
+  cells <json> <base|head> [--console f]   the KS-1402 file: CELL 1..4 status vs kit cells.<n>.<side>; at base each red must be an ASSERTION
+                                           naming kit base_msg (`expected 401 to be 200` ...), never a load failure (0 tests / file error)
+  suite <json> [--console f] [--expect-files N --expect-tests N] [--expect-fail 0]   counts: files, tests, passed, failed, skipped
+  diff-suites <base.json> <head.json>      head files == base + 1, head tests == base + 4, the 4 new ones are exactly the ks1402 file's cells,
+                                           0 tests that passed at base fail at head (by fullName)
+  mutation <json> <arm>                    arm users: cells 1 and 2 RED (4 also red, it is 401 there); arm authmw: 4/4 GREEN (the PR's own
+                                           claim that authenticate.ts is covered by no cell)
+  probe <json> <base|head>                 the C3 runtime probe's arms: per-arm status; at head P1 P1C P2* P2C P3 P4 green, P5/P5b REPORTED
+  --selftest                               synthetic reports: a real red, a load failure, a skipped cell, a count mismatch, a console/JSON
+                                           disagreement, a base-pass-head-fail regression — each must be caught; a clean pair must pass
+rc 0 PASS / 1 FAIL / 2 usage or unreadable

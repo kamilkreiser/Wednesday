@@ -1,0 +1,8 @@
+fill_gate54a.py — FILL the gate54a prompt and launcher from their templates with the PR / HEAD / develop / branch the LAUNCH ACTION just read,
+and write pins_gate54a.json (a NEW COPY of fill_gate54f.py, re-keyed). Called by repin_and_launch_gate54a.sh immediately before launch (re-pin and
+launch are ONE action, Kam 2026-09-18); never trusted from an earlier run: the launcher refuses a pin older than G54A_MAX_PIN_AGE_S (exit 9).
+Refuses (rc 1) unless: PR is digits; HEAD and DEVELOP are 40 lowercase hex; DEVELOP == kit base (every C1-C6 expectation was drafted against it:
+a moved develop is a RE-DRAFT, not a fill); the branch matches kit branch_rx; gate54f's report still hashes to kit prev_report_sha256; the charter
+exists; every double-brace token is filled; the filled prompt carries every by-name keyword.
+--simulate <name>: write `<name>.SIM.prompt.txt`, `<name>.SIM.launcher.sh` and `pins_gate54a.SIM-<name>.json` instead (exercise only; never launched).
+Usage: fill_gate54a.py --pr <n> --head <sha> --develop <sha> --branch <ref-without-refs/heads/> [--simulate name]

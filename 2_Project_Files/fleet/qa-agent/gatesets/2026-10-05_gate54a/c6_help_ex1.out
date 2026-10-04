@@ -1,0 +1,12 @@
+c6_notcovered_gate54a.py — gate54a C6 NOT COVERED, stated WITH measurements (READ ONLY on git objects + the PR body file).
+  N1 §5f APPLIES: the skill's §5f at BASE reads "A runtime-behaviour change is not done ... on offline quality-gate green alone"; the diff carries
+     runtime source (non-test .ts under services/*/src: users.ts, authenticate.ts) -> a live sweep is owed and NOT done: NOT COVERED.
+     CONTROLS of the same classifier: it reads >= 1 on this diff AND 0 on PR 0's diff (kit base_parent..pr0_commit: lockfiles + a baseline).
+  N2 the PR body says §5f was NOT done and claims no Done (`§5f` + `no live sweep`).
+  N3 S-SIDE: the body says Platform S's connector key carrying `users:read` is NOT measurable from K (UNMEASURED; without it S moves 401 -> 403).
+  N4 NO DEPLOY: the body says no deploy; the gate deploys nothing.
+  N5 tsc BLIND TO THE TEST: tsconfig at head excludes src/__tests__ (read), and the body says so.
+  N6 no live S+K pair run, no Schemathesis / Akto: the body says so.
+Each N2-N6 is a regex over the body, printed with the matching sentence (the gate reads the sentence, not the regex).
+--body-file <f> (default gh_body_<expected_pr>.md). --selftest: the real body must PASS; each statement removed must FAIL its row.
+Usage: c6_notcovered_gate54a.py --repo <clone> [--base sha] [--head sha] [--body-file f] [--selftest]   rc 0 PASS / 1 FAIL / 2 usage

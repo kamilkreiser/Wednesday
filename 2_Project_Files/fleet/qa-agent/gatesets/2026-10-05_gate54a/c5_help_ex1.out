@@ -1,0 +1,18 @@
+c5_spec_gate54a.sh — gate54a C5 OPENAPI / SPEC. bash 3.2 / zsh safe; no rc read through a pipe.
+  static [REPO]          READ ONLY (git ls-tree / diff / log / rev-parse / show) on the shared checkout or your clone:
+                         SP1 docs/openapi/secuura-api.yaml blob at base == at head == kit spec_yaml_blob;
+                         SP2 0 paths matching kit openapi_ts_rx (*.openapi.ts) and 0 yaml in `git diff --name-only base head`;
+                             MUST-HIT CONTROL: the same two filters over the LAST develop commit that touched the yaml (found by
+                             `git log -1 -- <yaml>` from base) list >= 1 path, and the tree at head carries >= 1 *.openapi.ts;
+                         SP3 the /api/users/lookup operation in the yaml at head declares 200 400 401 403 404 (the statuses the
+                             handler can produce; the handler body is byte-equal base == head per C3 S4, so the shape is unchanged).
+  run WS OUT             in YOUR installed head worktree (c2 install first): `npm run check:openapi` at Blockchain/Dev, rc 0 wanted;
+                         CONTROL that can fail: a one-line plant appended to the yaml in WS -> check:openapi MUST go non-zero; the yaml
+                         is then restored from the head blob, sha256 proven equal, `git status --porcelain` empty.
+REFUSES (rc 2, before writing) a WS inside /Volumes/DevMASTER/!CODING/ or whose HEAD is not the pinned head; an OUT inside !CODING/
+other than the QA reports root. Env G54A_HEAD (default kit expected_head). rc 0 PASS / 1 FAIL / 2 refusal / 3 tool step failed.
+set -u
+GS="$(dirname "$(/bin/realpath "$0")")"
+KJ() { python3 -c 'import json,sys; v=json.load(open(sys.argv[1]))[sys.argv[2]]; print(v if isinstance(v,str) else json.dumps(v))' "$GS/kit.json" "$1"; }
+BASE="$(KJ base)"; HEADSHA="${G54A_HEAD:-$(KJ expected_head)}"; Y="$(KJ spec_yaml)"; YB="$(KJ spec_yaml_blob)"; ORX="$(KJ openapi_ts_rx)"
+usage() { sed -n '2,19p' "$0" | sed 's/^# \{0,1\}//'; }

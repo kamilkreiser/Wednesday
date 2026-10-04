@@ -1,0 +1,189 @@
+// gate54a C3 RUNTIME PROBE — NOT a repo file. The TESTER copies it, in ITS OWN scratch worktree only, to
+//   Blockchain/Dev/services/auth/src/__tests__/zz-g54a-probe-authsurface.test.ts
+// and runs `npx vitest run src/__tests__/zz-g54a-probe-authsurface.test.ts --reporter=verbose` in services/auth, at HEAD and at BASE.
+// It is never committed, pushed or left in a worktree it did not create. Drafted by the gate54a drafter, NOT executed in drafting
+// (no install was allowed): the tester reads it before trusting it, exactly as for every kit instrument.
+//
+// Same harness shape as the PR's own ks1402 test (real authenticator, real jwt service, a throwaway RS256 key; only the logger, the
+// user repository and the session layer are mocked). It does NOT mock ../middleware/authenticate.
+//
+// ARMS (expected AT HEAD; at BASE, P1 / P3-lookup / P4 / P5 read 401 because /lookup refuses the connector type there):
+//   P1   LOG LABEL: a connector call to /lookup?email=<addr> writes ONE 'connector token accepted' line whose route is exactly
+//        '/api/users/lookup', and NO logger call anywhere in the request carries the address in either form or the query string.
+//   P1C  MUST-HIT CONTROL for P1: in a separate tiny express app, the SAME request URL gives req.originalUrl CONTAINING the address — so the
+//        probe's request really carries it, and P1's zero is a measurement, not a probe that could not see a leak.
+//   P2   NOT A HOLE: a connector token carrying scopes ['*'] (maximum privilege) is refused 401 on every plain-authenticate() users route
+//        listed (C3 static S1 enumerated them; add any it lists that this table lacks). CONTROL: the same token on /lookup is NOT 401.
+//   P3   /stub still admits a connector token (KS-564, unchanged): not 401.
+//   P4   SCOPE STILL APPLIED: a connector token with NO scopes is 403 on /lookup (cell 2 used certifications:write; this is the empty set).
+//   P5   TENANTLESS (the drafter's doubt D1): a connector token minted WITHOUT a tenantId, carrying users:read, asks for an email whose user
+//        lives in TENANT B. The route's guard is `callerTenantId && user.tenantId && user.tenantId !== callerTenantId`, so a READ predicts
+//        200 here. This arm asserts the ISOLATION expectation (404); a RED here is the finding, and the gate rules whether it blocks.
+//   P5b  the same question for an interactive ACCESS token without a tenant (pre-existing behaviour, NOT this PR's change): it tells the
+//        gate whether P5 is new exposure or an old shape newly reachable by the connector type.
+import { describe, it, expect, beforeAll, afterAll, beforeEach, vi } from 'vitest';
+import type { AddressInfo } from 'node:net';
+import type { Server } from 'node:http';
+import express from 'express';
+import crypto from 'crypto';
+
+vi.setConfig({ testTimeout: 30000 });
+
+vi.mock('../utils/logger', () => ({
+  logger: { info: vi.fn(), warn: vi.fn(), error: vi.fn(), debug: vi.fn() },
+}));
+vi.mock('../repositories/userRepo', () => ({
+  getUserByEmail: vi.fn(async () => null),
+  createInvitedStub: vi.fn(async (email: string, tenantId?: string) => ({
+    user: { id: 'stub-g54a', status: 'INVITED', email, tenantId: tenantId ?? null },
+    alreadyExisted: false,
+  })),
+}));
+vi.mock('../services/session', () => ({
+  validateSession: vi.fn(async () => true),
+  updateSessionActivity: vi.fn(async () => undefined),
+  revokeAllUserSessions: vi.fn(async () => 0),
+}));
+
+const TENANT_A = 'tenant-a-g54a';
+const TENANT_B = 'tenant-b-g54a';
+const LEAK_ADDR = 'probe.leak.g54a@example.com';
+const LEAK_ENC = encodeURIComponent(LEAK_ADDR);
+const USER_IN_B = {
+  id: 'user-in-tenant-b-g54a', email: LEAK_ADDR, organizationId: 'org-b', tenantId: TENANT_B,
+  displayName: 'Probe B', verificationLevel: 'STANDARD',
+};
+
+let server: Server;
+let base = '';
+let jwtSvc: typeof import('../services/jwt');
+let userRepo: typeof import('../repositories/userRepo');
+let logger: typeof import('../utils/logger')['logger'];
+
+beforeAll(async () => {
+  const { privateKey } = crypto.generateKeyPairSync('rsa', { modulusLength: 2048 });
+  process.env.JWT_PRIVATE_KEY = Buffer.from(privateKey.export({ type: 'pkcs8', format: 'pem' }).toString()).toString('base64');
+  jwtSvc = await import('../services/jwt');
+  await jwtSvc.initJwtKeys();
+  userRepo = await import('../repositories/userRepo');
+  logger = (await import('../utils/logger')).logger;
+  const { userRoutes } = await import('../routes/users');
+  const { errorHandler } = await import('../middleware/errorHandler');
+  const app = express();
+  app.use(express.json());
+  app.use('/api/users', userRoutes);
+  app.use(errorHandler);
+  await new Promise<void>((resolve) => {
+    server = app.listen(0, '127.0.0.1', () => { base = 'http://127.0.0.1:' + String((server.address() as AddressInfo).port); resolve(); });
+  });
+});
+afterAll(async () => { await new Promise<void>((resolve) => server.close(() => resolve())); });
+beforeEach(() => {
+  vi.mocked(userRepo.getUserByEmail).mockReset();
+  vi.mocked(userRepo.getUserByEmail).mockResolvedValue(null as never);
+  for (const k of ['info', 'warn', 'error', 'debug'] as const) vi.mocked(logger[k]).mockClear();
+});
+
+function connector(scopes: string[], tenantId?: string) {
+  return jwtSvc.generateConnectorToken({ connectorId: 'g54a-probe', organizationId: 'org-a', ...(tenantId ? { tenantId } : {}), scopes }).token;
+}
+async function call(method: string, path: string, token: string, body?: unknown) {
+  const res = await fetch(base + path, {
+    method,
+    headers: { Authorization: 'Bearer ' + token, ...(body ? { 'Content-Type': 'application/json' } : {}) },
+    ...(body ? { body: JSON.stringify(body) } : {}),
+  });
+  let json: Record<string, any> = {};
+  try { json = (await res.json()) as Record<string, any>; } catch { /* empty body */ }
+  return { status: res.status, body: json };
+}
+function allLoggerCalls(): string {
+  return JSON.stringify((['info', 'warn', 'error', 'debug'] as const).map((k) => vi.mocked(logger[k]).mock.calls));
+}
+
+describe('gate54a C3 runtime probe — KS-1402 auth surface', () => {
+  it('P1 LOG LABEL — route is baseUrl+path and no logger call carries the queried address', async () => {
+    vi.mocked(userRepo.getUserByEmail).mockResolvedValue({ ...USER_IN_B, tenantId: TENANT_A } as never);
+    const r = await call('GET', '/api/users/lookup?email=' + LEAK_ENC, connector(['users:read'], TENANT_A));
+    console.log('G54A P1 status', r.status);
+    const accepted = vi.mocked(logger.info).mock.calls.filter((c) => String(c[0]).includes('connector token accepted'));
+    console.log('G54A P1 accepted-lines', JSON.stringify(accepted));
+    expect(accepted.length).toBe(1);
+    expect((accepted[0][1] as Record<string, unknown>).route).toBe('/api/users/lookup');
+    const all = allLoggerCalls();
+    expect(all.includes(LEAK_ADDR)).toBe(false);
+    expect(all.includes(LEAK_ENC)).toBe(false);
+    expect(all.includes('?email')).toBe(false);
+  });
+
+  it('P1C MUST-HIT CONTROL — the same URL puts the address in req.originalUrl', async () => {
+    const seen: string[] = [];
+    const app = express();
+    const r = express.Router();
+    r.get('/lookup', (req, res) => { seen.push(req.originalUrl, req.baseUrl + req.path); res.json({}); });
+    app.use('/api/users', r);
+    const s: Server = await new Promise((resolve) => { const x = app.listen(0, '127.0.0.1', () => resolve(x)); });
+    await fetch('http://127.0.0.1:' + String((s.address() as AddressInfo).port) + '/api/users/lookup?email=' + LEAK_ENC);
+    await new Promise<void>((resolve) => s.close(() => resolve()));
+    console.log('G54A P1C originalUrl / baseUrl+path', JSON.stringify(seen));
+    expect(seen[0].includes(LEAK_ENC)).toBe(true);
+    expect(seen[1]).toBe('/api/users/lookup');
+  });
+
+  const PLAIN: Array<[string, string, unknown?]> = [
+    ['GET', '/api/users'],
+    ['GET', '/api/users/admin/list'],
+    ['GET', '/api/users/admin/organizations'],
+    ['POST', '/api/users/admin/create', { email: 'x@example.com' }],
+    ['PATCH', '/api/users/admin/00000000-0000-4000-8000-000000000000', { status: 'ACTIVE' }],
+    ['GET', '/api/users/me'],
+    ['PATCH', '/api/users/me', { displayName: 'x' }],
+    ['POST', '/api/users/me/change-password', { currentPassword: 'a', newPassword: 'b' }],
+    ['POST', '/api/users/me/mfa/enable', {}],
+    ['POST', '/api/users/me/mfa/verify', { code: '000000' }],
+    ['POST', '/api/users/me/mfa/disable', { code: '000000' }],
+    ['POST', '/api/users/me/verification', {}],
+    ['GET', '/api/users/me/verification'],
+    ['POST', '/api/users/verification/00000000-0000-4000-8000-000000000000/review', { decision: 'approve' }],
+  ];
+  for (const [m, p, b] of PLAIN) {
+    it(`P2 NOT A HOLE — ${m} ${p} refuses a '*'-scoped connector token with 401`, async () => {
+      const r = await call(m, p, connector(['*'], TENANT_A), b);
+      console.log('G54A P2', m, p, r.status);
+      expect(r.status).toBe(401);
+    });
+  }
+  it('P2C CONTROL — the same *-scoped connector token is NOT 401 on /lookup', async () => {
+    const r = await call('GET', '/api/users/lookup?email=' + LEAK_ENC, connector(['*'], TENANT_A));
+    console.log('G54A P2C', r.status);
+    expect(r.status).not.toBe(401);
+  });
+
+  it('P3 /stub still admits a connector token (KS-564 unchanged)', async () => {
+    const r = await call('POST', '/api/users/stub', connector(['users:read'], TENANT_A), { email: LEAK_ADDR });
+    console.log('G54A P3', r.status);
+    expect(r.status).not.toBe(401);
+  });
+
+  it('P4 SCOPE STILL APPLIED — a connector token with NO scopes is 403 on /lookup', async () => {
+    vi.mocked(userRepo.getUserByEmail).mockResolvedValue({ ...USER_IN_B, tenantId: TENANT_A } as never);
+    const r = await call('GET', '/api/users/lookup?email=' + LEAK_ENC, connector([], TENANT_A));
+    console.log('G54A P4', r.status, JSON.stringify(r.body));
+    expect(r.status).toBe(403);
+  });
+
+  it('P5 TENANTLESS connector + users:read vs a tenant-B user — isolation expects 404', async () => {
+    vi.mocked(userRepo.getUserByEmail).mockResolvedValue(USER_IN_B as never);
+    const r = await call('GET', '/api/users/lookup?email=' + LEAK_ENC, connector(['users:read']));
+    console.log('G54A P5', r.status, JSON.stringify(r.body));
+    expect(r.status).toBe(404);
+  });
+
+  it('P5b TENANTLESS interactive ACCESS token (ISSUER_ADMIN) vs a tenant-B user — the pre-existing shape', async () => {
+    vi.mocked(userRepo.getUserByEmail).mockResolvedValue(USER_IN_B as never);
+    const caller = { id: 'caller-g54a', email: 'admin@example.com', role: 'ISSUER_ADMIN', organizationId: 'org-a', verificationLevel: 'STANDARD' } as never;
+    const r = await call('GET', '/api/users/lookup?email=' + LEAK_ENC, jwtSvc.generateAccessToken(caller, 'session-g54a'));
+    console.log('G54A P5b', r.status, JSON.stringify(r.body));
+    expect(r.status).toBe(404);
+  });
+});

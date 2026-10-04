@@ -1,0 +1,21 @@
+LAUNCH ACTION gate54a (DRY RUN) 2026-10-05 01:00:38 AEDT / 2026-10-04T14:00:38Z | PR #1374 | HEAD d26d406020f714a5feca85fe876d6b89c10c3d13 | kit base e6daa806e79a14a580f064db95e797c1fd671dc7 | pane QA/Secuura-ks1402-1374
+  NOTE: input is not the drafted #1374 @ aa16f3256dbf — the drafter's pred1374_* files do not describe it (the prompt says so)
+--- 0. the pane must be routed (inbox_routing.conf) or cockpit.sh say --mail fails silently
+  routing file /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/inbox_routing.conf — line present: 0 (grep rc=1; want 1 / rc 0)
+  (DRY RUN: reported, not refused — the real run refuses rc 1 here; README section 4)
+--- 1. instrument A: the GitHub PULLS API (+ 2b the census, same read)
+  gh_census rc=0
+    API #1374 head aa16f3256dbf86e654076a31ace1eb1b79a31e69 base develop base_sha e6daa806e79a14a580f064db95e797c1fd671dc7 mergeable True reads 1 state open merged False branch feature/ks-1402-lookup-accepts-connector-token-b55-1
+    API #1374 title 'KS-1402: accept a connector token on the users lookup route' | user kksecura | created 2026-10-04T13:29:53Z | mergeable_state unstable | body 12565 chars
+    CLIENT-HUMAN (reported, never sequenced by a gate) #1360 by PeterObeden | head d0e99f181a4e | 15 file(s), none a kit path
+    CENSUS 21 other open PR(s) read | 0 OVERLAP (touch a kit path or carry ['KS-1402'] outside the co-tenant allowances) | 0 expected co-tenant(s) | 1 client-human PR(s) reported apart | 5 kit path(s)
+--- 2. instrument B: git ls-remote origin (ONE read from the Secuura checkout, READ-ONLY)
+  ls-remote rc=0 at 14:01:09Z
+    e6daa806e79a14a580f064db95e797c1fd671dc7	refs/heads/develop
+    aa16f3256dbf86e654076a31ace1eb1b79a31e69	refs/heads/feature/ks-1402-lookup-accepts-connector-token-b55-1
+    aa16f3256dbf86e654076a31ace1eb1b79a31e69	refs/pull/1374/head
+--- 2b. the census
+  OVERLAP census clean (0 expected co-tenant(s) reported)
+--- 3. the head, judged (input == API == pull/head == branch, open, not merged, on develop, not mergeable:false, branch rule)
+  input d26d406020f714a5feca85fe876d6b89c10c3d13 | API aa16f3256dbf86e654076a31ace1eb1b79a31e69 (state open, merged False, base develop, mergeable True) | pull/head aa16f3256dbf86e654076a31ace1eb1b79a31e69 | feature/ks-1402-lookup-accepts-connector-token-b55-1 aa16f3256dbf86e654076a31ace1eb1b79a31e69
+REFUSING TO LAUNCH: the input head is not the PR's head on both instruments, or the PR is not open / merged / not on develop / mergeable:false / off the branch rule — a stale pin is never launched (re-run with the head both instruments read)

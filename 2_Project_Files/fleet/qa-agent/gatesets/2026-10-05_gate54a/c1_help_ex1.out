@@ -1,0 +1,18 @@
+c1_pin_gate54a.py — gate54a C1: pin the PR from TWO instruments and the commit from the clone (a NEW COPY of c1_pin_gate54f.py, re-keyed).
+  P1 ls-remote origin (from --repo): refs/pull/<PR>/head == HEAD == the PR's branch ref; develop at origin == the PR's base sha.
+  P2 the GitHub PULLS API (read-only GET; GH_TOKEN read BY NAME from the Secuura .env, never printed): state open, not merged, base.ref
+     develop, base.sha == develop, head.sha == HEAD, head.ref matches kit branch_rx; mergeable printed (null is re-read up to 3x).
+  P3 shape in the clone: HEAD's ONE parent == develop, ahead 1 / behind 0 (counted with `git log a..b`, no rev-list), develop == kit base (else
+     STALE BASE: every C2-C6 expectation was drafted against kit base, so a moved develop is a re-draft, not a pass).
+  P4 files: the API /files list == exactly kit files (5) AND `git diff --numstat develop HEAD` lists the same 5 with the same +/- per path;
+     INFO: each +/- against the builder's kit numstat_claim.
+  P5 NO TRAILER: `git log -1 --format=%(trailers)` on HEAD empty AND 0 `Co-Authored-By` lines in the whole message; CONTROL in the same run:
+     the same command on kit trailer_control_commit prints a Co-Authored-By trailer (the instrument can see one).
+  P6 keys: PR title, body, branch and commit message carry the hyphenated key KS-1402 and NO other hyphenated KS key (the branch carries it
+     lower-case); no closing keyword (close/fix/resolve + KS-n or #n); `Refs KS-1402` on its own line in the body.
+  P7 PR 0 ABSENT: none of kit pr0_files_absent (root lock, two service locks, audit-baseline.json) is in `git diff --name-only develop HEAD`,
+     and each is BLOB-EQUAL develop == HEAD; MUST-HIT CONTROL: the same filter over PR 0's own diff (kit base_parent .. kit pr0_commit) = 4.
+  P8 MODES: the 5 paths are 100644 at HEAD (git ls-tree; core.filemode is false); CONTROL kit mode_control_path reads 100755.
+  INFO END_TREE: HEAD^{tree} (parent == develop, so the squash lands on this tree while develop has not moved); develop^{tree} as the control.
+--pr-json <file> + --files-json <file>: read the PULLS API answers from files instead (controls / offline replays; P2 then says OFFLINE).
+Usage: c1_pin_gate54a.py --repo <clone, HEAD present in it> --pr <n> --head <40-hex>   (rc 0 PASS / 1 FAIL / 2 usage / 3 API)
