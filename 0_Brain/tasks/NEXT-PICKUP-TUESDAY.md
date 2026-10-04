@@ -6,6 +6,21 @@ status: live
 supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s1-wholesale
 ---
 
+## 🟢 DELTA 141 — 2026-10-04 21:2x (s96, ctx 50% CHECKPOINT; band 80-90). **READ THIS FIRST, THEN 140.**
+- **MERGED + VERIFIED:** RD-723 (N): main fae2aa1 -> **630bb24** (ls-remote by Tuesday; Build 37191653203 success, read by Tuesday's gh with NexusAI's GH_CONFIG_DIR; failing set empty per N). rd638 E2 has left C-185's set.
+- **TURN NOW O:** RD-707 forward-merged locally as 89a248e; hold s87o-merge-rd707 queued. On O's MERGED: ls-remote + gh run view the push Build + demo SKIPPED. Then P (RD-692, RD-693, RD-686 per P's card), then M (**RD-741 FIRST**, then RD-733, RD-618).
+- **RD-741 (M, 5db3f72, lockfile-only):** new advisories since the pause (axios, brace-expansion, http-cache-semantics); prod audit 0 at the head; hold s86m-rd741-hold queued; READY -> gate (tier 2) -> merge first in M's turn. **RD-742** (braces, dev-only, no patch except jest 30 major) RULED PARKED Low.
+- **RD-603 (M)** RULED (a) extract to services/healthProjection.js + fail-closed for non-object keyVaultEncryption; hold queued; READY -> gate.
+- **GATE 12 RESUMED** in %10 via `fleet/qa-agent/launchers/resume_qa_nexusai_gate_batch12.sh`; it was flagged at 19:06:46 and **switched to Opus 4.8 for that session only** at 19:08 (per Kam's 09-30 ruling (b): picker, Down to Opus 4.8, then "s", then confirm). Its H3 ran; H4 vFvG is queued.
+- **TOOLING OWED (shared, claim with Wednesday):** pane_prompt_check misreads 5-row panes (the transcript echo is read as TYPED-UNSENT); zoom the pane before a tap. The idle/frozen wakes fire every ~6 min for seats holding by design (lock queue). Launch seats sharing one launcher SEQUENTIALLY (ledger row 10-04).
+- Kam: nothing since "please resume"; reconcile 0 to rule; usage 5%.
+
+## 🟢 DELTA 140 — 2026-10-04 18:4x (s96). **KAM RESUMED. READ THIS FIRST; it supersedes 138/139's pause lines. 138's ON-RESUME order still applies.**
+- **Kam, terminal, verbatim:** "it should say - please resume" (correcting a Superwhisper-mangled "…resume"). Receipt on the live board (201). Vision STAYS PAUSED (09-29).
+- RESUME mailed (fleet/briefs_staged/2026-10-04_nexusai_all_RESUME.md). Seats relaunched ONE AT A TIME: %6 N · %7 O · %8 P · %9 M (the first parallel launch corrupted NexusAI/.claude/settings.local.json; ledger row; N is mailed to restore the playwright key).
+- Measured at resume: main fae2aa1; N 9ec73da/a415525 and P e4eab55 intact. The first merge turn is N's RD-723.
+- **OWED:** plan confirmations from M/N/O/P (verify rung 6); gate 12 via the NEW `fleet/qa-agent/launchers/resume_qa_nexusai_gate_batch12.sh` (a drafter is writing it; read its WRONG list and the file, then --check, then `cockpit.sh add`); next gate batch RD-614 + RD-629; ATTIO digest routing brief; my own pickup rewrite (wholesale).
+
 ## 🔴 DELTA 139 — 2026-10-04 17:50 WRAP for Kam's machine restart (s95). **READ THIS FIRST, THEN 138 (the pause and its resume recipe are still exact).**
 - **Kam, typed into Tuesday's terminal 2026-10-04:** "please wrap once its safe and I will restart as the machine needs to do an update". All panes close at the restart.
 - **THE PAUSE STILL STANDS** (Kam 09-30 12:03). Usage renewed to 0% on 10-04; at 05:30 Tuesday asked him on the live board to reply "resume" (default: stay paused). **No reply before the wrap.** First act of the next seat: kam_msgs.sh (note the live read's 3-day window) and the board for his answer. Nothing launches without it.
