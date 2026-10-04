@@ -1,0 +1,22 @@
+--- a/Blockchain/Dev/services/originate/src/routes/webhooks.ts
++++ b/Blockchain/Dev/services/originate/src/routes/webhooks.ts
+@@ -187,14 +187,16 @@
+     // KS-466: organization_id is a uuid column, so the bind param needs an
+     // explicit ::uuid cast — without it Postgres raises 42883 (uuid = text has
+-    // no operator). The error was silently swallowed by the .catch below, so
++    // no operator). The error was silently swallowed by a .catch on this query, so
+     // this list ALWAYS returned [] (a pre-existing bug, independent of RLS).
++    // KS-1345: that .catch is gone. A failed list query now reaches fail500 below
++    // (a constant 500, the error logged), never a 200 with an empty list.
+     const rows = await db.$queryRaw`
+       SELECT id, url, events, is_active, description, created_at, updated_at
+       FROM svc_webhooks
+       WHERE organization_id = ${userId}::uuid OR app_id IS NOT NULL
+       ORDER BY created_at DESC
+-    `.catch((e: any) => { logger.warn('webhooks list query failed', { error: e?.message }); return []; });
+-
++    `.catch(() => []);
++
+     res.json({ success: true, webhooks: rows });
+   } catch (err: any) {
+     fail500(res, 'Webhook list failed (GET /api/webhooks)', err);

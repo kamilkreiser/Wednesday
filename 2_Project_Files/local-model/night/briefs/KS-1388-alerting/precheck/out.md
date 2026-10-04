@@ -1,0 +1,29 @@
+```diff
+--- a/observability/config/alerting.env.example
++++ b/observability/config/alerting.env.example
+@@ -52,5 +52,5 @@
+ # SECUURA_PG_DSN=postgresql://secuura:secuura_dev_password@secuura-postgres:5432/secuura?sslmode=disable
+ # SECUURA_REDIS_ADDR=redis://secuura-redis:6379
+ # SECUURA_REDIS_PASSWORD=secuura_redis_dev
+-# SECUURA_NGINX_STATUS_URI=http://secuura-nginx-gateway:6882/stub_status
++# SECUURA_NGINX_STATUS_URI=http://secuura-nginx-gateway:80/stub_status
+ # SECUURA_KAFKA_BROKER=secuura-kafka:9092
+--- a/Blockchain/Dev/scripts/__tests__/prometheus_targets.test.sh
++++ b/Blockchain/Dev/scripts/__tests__/prometheus_targets.test.sh
+@@ -80,6 +80,14 @@
+     "$([[ -n "$service_ports" ]] && echo yes || echo no)"
+ expect "prometheus.yml yielded scrape targets to compare" "yes" \
+     "$([[ -n "$prom_targets" ]] && echo yes || echo no)"
+-
++
++# --- the alerting env example must not suggest the gateway's HOST port (KS-1388) ---
++# observability/config/alerting.env.example offers SECUURA_NGINX_STATUS_URI as a commented override. The
++# exporter runs on the container network, where only 80 exists (the 6882 host publish is unreachable
++# there). observability/docker-compose.yml already defaults to :80; the example must agree with it.
++expect "observability/config/alerting.env.example suggests the gateway's in-network status port" \
++    "# SECUURA_NGINX_STATUS_URI=http://secuura-nginx-gateway:80/stub_status" \
++    "$(grep -m1 'SECUURA_NGINX_STATUS_URI=' "$DEV_ROOT/../../observability/config/alerting.env.example")"
++
+ # --- every scraped target must name the port that service listens on ---------
+ mismatches=""
+```

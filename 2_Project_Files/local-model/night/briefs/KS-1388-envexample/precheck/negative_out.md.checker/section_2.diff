@@ -1,0 +1,18 @@
+--- a/Blockchain/Dev/scripts/__tests__/prometheus_targets.test.sh
++++ b/Blockchain/Dev/scripts/__tests__/prometheus_targets.test.sh
+@@ -103,6 +103,14 @@
+ # which nginx-exporter already scrapes and re-exports on 9113.
+ expect "no scrape target uses the gateway's published host port" "0" \
+     "$(grep -c "secuura-nginx-gateway:6882" <<<"$prom_live")"
+-
++
++# --- the stack env example must not suggest the gateway's HOST port either (KS-1388) ---
++# observability/.env.example offers SECUURA_NGINX_STATUS_URI as a commented override. The exporter runs on
++# the container network, as Prometheus does, so the rule above holds for it too: 80, never the 6882 host
++# publish. observability/docker-compose.yml already defaults to :80; the example must agree with it.
++expect "observability/.env.example suggests the gateway's in-network status port" \
++    "# SECUURA_NGINX_STATUS_URI=http://secuura-nginx-gateway:80/stub_status" \
++    "$(grep -m1 'SECUURA_NGINX_STATUS_URI=' "$DEV_ROOT/../../observability/.env.example")"
++
+ echo "prometheus_targets: ${PASS} passed, ${FAIL} failed"
+ (( FAIL == 0 ))
