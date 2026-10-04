@@ -24256,5 +24256,45 @@
    "2026-09-16 19:41",
    "CARD wed-allowance-pace-before-week-away"
   ]
+ },
+ {
+  "id": "wed-nassync-rearm-shape-1004",
+  "client_project": "WED",
+  "title": "NAS sync: how (and whether) to bring it back after tonight's deletions",
+  "bluf": "Wednesday's 03:30 NAS leg (two-way unison) ran ~14 h, was cut off by the 17:50 reboot, and copied false NAS-side deletions of ~200 tracked and ~245k untracked WEDNESDAY files onto DevMASTER (restored the same evening). It is HELD by three locks (launchctl disable; a hold file the script refuses on; the installer skips it; commit 4d1ce484). While held, the NAS copy only ages, so DevMASTER plus git is the only current copy of untracked files. (Prior-ruling gate: its 9 matches were read, all unrelated: Secuura fix-shape cards, a PR triage, the 09-16 Tuesday review; none rules the NAS leg.)",
+  "default_action": "Nothing re-arms. The sync stays held (all three locks) until Kam picks; Wednesday builds and runs nothing NAS-side on silence.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Rebuild it ONE-WAY, DevMASTER to NAS, additive",
+    "detail": "A copy that cannot write to DevMASTER at all, with a run-time cap and a refusal when the NAS listing looks incomplete; built and tested on a scratch tree, shown to Kam before it runs"
+   },
+   {
+    "key": "b",
+    "label": "Keep two-way unison plus a pre-flight",
+    "detail": "Dry run first; refuse if it proposes ANY deletion on the DevMASTER side; cap the run time; still the engine that did this"
+   },
+   {
+    "key": "c",
+    "label": "Leave it off",
+    "detail": "No NAS backup of WEDNESDAY's untracked files until Kam decides; git still carries tracked files"
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-10-04T18:45:13.363169+11:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "2026-09-10 09:01",
+   "2026-09-10 09:08",
+   "2026-09-10 09:08",
+   "2026-09-16 14:00",
+   "CARD secuura-ks695-ask3-shape-stuart",
+   "CARD secuura-ks695-ask3-shape-ab",
+   "CARD secuura-ks1041-fix-shape-demo-exposed",
+   "CARD secuura-ks1369-gateway-proxy-crash-guard-shape",
+   "CARD secuura-ks1360-wallet-session-delete-reply-shape"
+  ]
  }
 ]

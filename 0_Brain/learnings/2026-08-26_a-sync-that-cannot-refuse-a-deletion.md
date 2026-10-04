@@ -69,3 +69,12 @@ leg (unison, rsync `--delete`, any two-way engine) between drives Kam depends on
 with the two checks in front of the sync),
 [[2026-08-25_travel-drive-stale-pointers]] (day-two lesson of the same move),
 [[2026-08-07_a-check-that-cannot-fail]] (a green exit over a deletion), [[_ledger]]
+
+## RECURRENCE 2026-10-04 (w=2) — the lesson fired as DETECTION and never as PREVENTION, so the leg stayed armed
+**The case.** Wednesday's own nightly NAS leg (`scheduler/nas_sync.sh`, launchd `com.wednesday.nassync`, 03:30) ran ~14 h, was killed by Kam's 17:50 reboot, and had already propagated false NAS-side deletions of ~200 tracked + ~245k untracked WEDNESDAY files onto DevMASTER. Restored the same evening (git HEAD + an additive rsync from the NAS). Kam did not know the job existed.
+**Why the rule did not fire (the w=2 diagnosis).** This file's rules are written for a session STARTING a leg ("never start a sync leg without the two checks"). The 03:30 leg is started by launchd, so no session ever reached the decision point. The wrapper's own header said, honestly, that it could only DETECT a mass deletion after the run, and that honesty read as the risk being handled. Nobody re-asked whether a detect-only mechanism should run unattended at all. Detection after the fact is a post-mortem, not a guard.
+**The rule, extended:**
+1. **A scheduled mechanism that can destroy data and cannot PREVENT that is held, not armed.** It is carded to Kam with the prevention missing named. "We'd see it in the log" is not a reason to keep it running.
+2. **Holds use independent locks:** `launchctl disable` (which survives a login, unlike `bootout`), a hold file the script refuses on, the installer skipping it, and doctor reporting HELD. Any one of them alone gets undone by a well-meaning successor following a "missing job" hint.
+3. **The principal hears about every unattended destructive-capable job at least once**, in the morning receipt, with what it can and cannot prevent. A risk he has never heard of is a risk he never accepted.
+Locks: commit 4d1ce484. Card: `wed-nassync-rearm-shape-1004`.

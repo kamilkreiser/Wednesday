@@ -7,7 +7,7 @@ status: live
 
 # Boot digest — headline + rules of every lesson (open the file when it fires)
 
-Generated 2026-10-04 17:48 from 213 lesson files (975,769 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 12 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
+Generated 2026-10-04 18:45 from 213 lesson files (977,578 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 12 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
 
 ## The T9 SSD is the master — Wednesday must be fully portable
 `2026-07-31_fully-portable-drive.md` · principle · 2026-07-31 · status: superseded — the "T9 is the master" half by [[2026-08-25_one-drive-devmaster-is-master]] (2026-08-25); the portability principle itself still lives
@@ -2631,7 +2631,7 @@ dashboard, watcher, voice (fallback chain worked as designed).
 leg (unison, rsync `--delete`, any two-way engine) between drives Kam depends on.
 **Two checks, both cheap, neither of which I did on 2026-08-25:**
 
-sections (open the file for these): Why the existing lessons did not catch it · How to apply
+sections (open the file for these): Why the existing lessons did not catch it · How to apply · RECURRENCE 2026-10-04 (w=2) — the lesson fired as DETECTION and never as PREVENTION, so the leg stayed armed
 
 ## How to apply
 
@@ -2653,6 +2653,12 @@ sections (open the file for these): Why the existing lessons did not catch it ·
 5. **doctor / PORTABILITY:** the case probe belongs in the pre-travel checklist
    (PORTABILITY item 20) — a top-level `os.listdir` diff across every mounted
    replica before "Sync All Drives" runs.
+
+**The rule, extended:**
+1. **A scheduled mechanism that can destroy data and cannot PREVENT that is held, not armed.** It is carded to Kam with the prevention missing named. "We'd see it in the log" is not a reason to keep it running.
+2. **Holds use independent locks:** `launchctl disable` (which survives a login, unlike `bootout`), a hold file the script refuses on, the installer skipping it, and doctor reporting HELD. Any one of them alone gets undone by a well-meaning successor following a "missing job" hint.
+3. **The principal hears about every unattended destructive-capable job at least once**, in the morning receipt, with what it can and cannot prevent. A risk he has never heard of is a risk he never accepted.
+Locks: commit 4d1ce484. Card: `wed-nassync-rearm-shape-1004`.
 
 
 ## The chat mirror reports STATE, not intent — write it after the gate, from the gate's output

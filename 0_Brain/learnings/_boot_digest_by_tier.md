@@ -7,7 +7,7 @@ status: live
 
 # Boot digest BY TIER — W whole, M rules-only, every project case a handle
 
-Generated 2026-10-04 17:48 from 213 lesson files (975,979 B). M 36 · MIXED 5 · P-Datasec/HPSM-POC 1 · W 171. 5 project CASE sections inside MIXED files are reduced to one line each: the heading and the path to read it at. W blocks are exactly what the default digest carries; M blocks drop the section index and keep the rules; a P file is a single handle. The CASES behind every rule live only in the lesson files — open one the moment its rule fires.
+Generated 2026-10-04 18:45 from 213 lesson files (977,788 B). M 36 · MIXED 5 · P-Datasec/HPSM-POC 1 · W 171. 5 project CASE sections inside MIXED files are reduced to one line each: the heading and the path to read it at. W blocks are exactly what the default digest carries; M blocks drop the section index and keep the rules; a P file is a single handle. The CASES behind every rule live only in the lesson files — open one the moment its rule fires.
 
 ## The T9 SSD is the master — Wednesday must be fully portable
 `2026-07-31_fully-portable-drive.md` · principle · 2026-07-31 · status: superseded — the "T9 is the master" half by [[2026-08-25_one-drive-devmaster-is-master]] (2026-08-25); the portability principle itself still lives · tier: W
@@ -2617,6 +2617,12 @@ leg (unison, rsync `--delete`, any two-way engine) between drives Kam depends on
 5. **doctor / PORTABILITY:** the case probe belongs in the pre-travel checklist
    (PORTABILITY item 20) — a top-level `os.listdir` diff across every mounted
    replica before "Sync All Drives" runs.
+
+**The rule, extended:**
+1. **A scheduled mechanism that can destroy data and cannot PREVENT that is held, not armed.** It is carded to Kam with the prevention missing named. "We'd see it in the log" is not a reason to keep it running.
+2. **Holds use independent locks:** `launchctl disable` (which survives a login, unlike `bootout`), a hold file the script refuses on, the installer skipping it, and doctor reporting HELD. Any one of them alone gets undone by a well-meaning successor following a "missing job" hint.
+3. **The principal hears about every unattended destructive-capable job at least once**, in the morning receipt, with what it can and cannot prevent. A risk he has never heard of is a risk he never accepted.
+Locks: commit 4d1ce484. Card: `wed-nassync-rearm-shape-1004`.
 
 
 ## The chat mirror reports STATE, not intent — write it after the gate, from the gate's output
