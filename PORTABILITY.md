@@ -475,3 +475,5 @@ laptop, not in this repo: the ssh alias `ZGX-Nano-G1n` (written by **NVIDIA Sync
 On a new Mac: install NVIDIA Sync and sign in, then open the tunnel. The container on the Spark is stopped
 when its RAM is needed elsewhere; reload with `~/DeepSeek-v4-Flash-One-DGX-Spark/run-a2.sh` (~4-5 min).
 `doctor.sh` checks both for the friday seat only (warn, never fail).
+
+- **(2026-10-04) Homebrew rsync 3.4+ at /opt/homebrew/bin/rsync** — `2_Project_Files/scheduler/nas_push.sh` (the one-way NAS leg, `com.wednesday.naspush`, 03:30) refuses without it (rc 2). New machine: `brew install rsync`. macOS openrsync lacks `--backup-dir`/`--itemize-changes` parity.
