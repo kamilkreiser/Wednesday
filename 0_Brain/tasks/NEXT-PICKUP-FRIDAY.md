@@ -12,6 +12,18 @@ supersede: replace wholesale; previous = NEXT-PICKUP-FRIDAY.md.pre-0925-rotate-s
 
 **The tree is at `/Volumes/Laptop-DEV/FRIDAY` (the drive, since 2026-09-28).** Quote every path (spaces).
 
+## 🔴🔴🔴 CHECKPOINT 2026-10-05 10:23 (Friday, ctx 70%) — READ FIRST; supersedes every block below where they differ
+**DONE since 09:59:** Composer demo = **e36fcde** (B76; Friday verified live 10:1x: kam/paul 200, 401, healthz 0.27.0, APPROVED wording served, no DRAFT); card composer-3d92736-deploy-1005 DELIVERED (C-41). Tool fix: watch_status skips not-yet-written STATUS files.
+**C-NUMBERS (Friday ruled, by Kam's tap time):** C-53 B125 (renamed PDF) · C-54 B127 (1.0.2) · C-55 B126 (hosted deploy). B126's addendum was queued behind a running turn: confirm it read it.
+**LIVE PANES (briefs in each project's Briefs/, dated 2026-10-05):**
+- %25 HPSM-POC-C **B126** hosted deploy 577c27c (web + api) → verify live yourself (web /api/health 200, api /health + /health/ready, build id = 577c27c, a marker absent at c2dd403), deliver card hpsmpoc-577c27c-hosted-deploy-1005 (C-55), tell Kam (his E2E test today).
+- %24 HPSM-POC-B **B125** PDF current customer name (C-53) → READY FOR GATE → a gate brief (B122 shape) → merge_when_green.
+- %26 HPSM-POC-D **B127** done: **PR #99** @ 5cbd24d → gate **B128** on %27 HPSM-POC-QA2 (confirm it got the brief at its first STATUS). On GO: merge_when_green #99 5cbd24dd3f69251e372d5f843fb0789bfebcae32; records/b127; then a CARD: deploy the 1.0.2 build to hosted (Kam's word; his receipt already said this).
+- %21 HPSM-POC-A **B123** round 2 of 2 on PR #98 → READY FOR RE-GATE → B124 ADDENDUM-1 to %22 (held). Second NO GO → Kam.
+- %19 Composer-D **B74** pickers: full e2e 568/568 at 3810e3c, ci.sh running → READY FOR GATE → write gate B77 (B73 shape; note its STATUS l.99 "CreateEngagement not touched" is a pre-rebase census — the branch DOES change CreateEngagement.tsx, check only the version field moved).
+**Open card:** hpsmpoc-pdf-name-note-1005 (default no note). **Still owed to Kam:** E8 note (told 08:45); Composer pack questions for his review; test user + UAT seat while he's logged in.
+**Watcher:** globs41 + seen42 over B123/B124/B125/B126/B127/B128/B74; panes %19 %21 %22 %24 %25 %26 %27.
+
 ## 🔴🔴🔴 CHECKPOINT 2026-10-05 10:01 (Friday, ctx 65%) — READ FIRST; supersedes every block below where they differ
 **Kam this morning:** terminal ~08:4x "If you can, keep going" · ~09:5x "deploy the composer to the demo" · live board 09:57:47 renamed-customer-pdf **a** · 09:58:08 template-102-words **a** · 09:58:24 hosted-deploy **a** (all ruled + hidden + receipted). Open cards: hpsmpoc-pdf-name-note-1005 (default no note).
 **Mains:** Composer **e36fcde** (#39 B75 merged 09:37; records 13366d5). HPSM-POC **577c27c**. Demo d84aa46 → being deployed; hosted web c2dd403 / api be2d648 → being deployed.
