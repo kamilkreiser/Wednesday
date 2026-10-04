@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!-- TEMPLATE of record for the Ornith DAILY RECEIPT (Kam 2026-09-15 18:19: "know progress continues through the
+     week"; Monday-loop piece (e)). install_receipt.command substitutes the placeholders and writes the result to
+     ~/Library/LaunchAgents/com.<agent>.ornith-receipt.plist. Fires 06:45 local every day and posts ONE panel line
+     counted from the runner's own records (night/daily_receipt.sh - -post). Same shape as the ornith-loop job. -->
+<plist version="1.0">
+<dict>
+  <key>Label</key><string>com.@SEAT@.ornith-receipt</string>
+  <key>ProgramArguments</key>
+  <array>
+    <string>/bin/bash</string>
+    <string>@PROJECT_DIR@/2_Project_Files/local-model/night/daily_receipt.sh</string>
+    <string>--post</string>
+  </array>
+  <key>StartCalendarInterval</key>
+  <dict><key>Hour</key><integer>6</integer><key>Minute</key><integer>45</integer></dict>
+  <key>RunAtLoad</key><false/>
+  <key>EnvironmentVariables</key>
+  <dict>
+    <key>WED_AGENT</key><string>@SEAT@</string>
+    <key>PATH</key><string>/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin</string>
+  </dict>
+  <key>StandardOutPath</key><string>/Users/kam_code/Library/Logs/wednesday_ornith-receipt.out</string>
+  <key>StandardErrorPath</key><string>/Users/kam_code/Library/Logs/wednesday_ornith-receipt.err</string>
+</dict>
+</plist>
