@@ -1,0 +1,23 @@
+SELFTEST OK T0 head 25/25 green: want PASS got PASS
+SELFTEST OK T1 head with a skipped cell: want FAIL got FAIL
+    FAIL HEAD all 25 cells green, 0 skipped, 0 failed: got 25 cells, 24 passed, 1 skipped, 0 failed
+SELFTEST OK T2 head with 24 cells: want FAIL got FAIL
+    FAIL HEAD all 25 cells green, 0 skipped, 0 failed: got 24 cells, 24 passed, 0 skipped, 0 failed
+SELFTEST OK T3 base: the claimed red set by assertion: want PASS got PASS
+SELFTEST OK T4 base: cell 14 red on a LOAD error is not red-first: want FAIL got FAIL
+    FAIL BASE cell 14 (route POST /api/timestamps/verify reports verified:true for the unsigned token) RED BY ASSERTION: got failed | Error: Cannot find package '@secuura/shared'
+    FAIL BASE 1 cell(s) failed on a LOAD error, not an assertion: ['cell 14'] — fix the INSTRUMENT (workspace install), never count them
+SELFTEST OK T5 base: cell 12 green (the mock door already shut): want FAIL got FAIL
+    FAIL BASE cell 12 (forged mock JSON without mock) RED BY ASSERTION: got passed | 
+SELFTEST OK T6 0 cells (load failure): want FAIL got FAIL
+    FAIL LOAD: the KS 1404 file produced 0 cells — a load failure is never a red
+SELFTEST OK T7 clean suite pair 5 -> 6 files, +25: want PASS got PASS
+SELFTEST OK T8 a base-green test red at head: want FAIL got FAIL
+    FAIL 0 base-green tests red at head: 1 [('f0.test.ts', 'f0 t')]
+    FAIL head failed 0 and skipped 0: 1 / 0
+SELFTEST OK T9 mutation sig: cell 2 red: want PASS got PASS
+SELFTEST OK T10 mutation sig that stays green (vacuous): want FAIL got FAIL
+    FAIL MUTATION sig: want ['cell 2'] RED, nothing else red, no skip | red [] | extra reds NONE | skipped [] | cells 25
+SELFTEST OK T11 suite 2 files failed with 0 failed tests (load): want FAIL got FAIL
+    FAIL suite: 1 file(s) failed with 0 failed tests — a LOAD failure (the cheat sheet's own gotcha)
+SELFTEST OK 12 of 12

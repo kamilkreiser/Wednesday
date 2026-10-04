@@ -1,0 +1,23 @@
+c4_security_gateD2 2026-10-04T14:52:48Z | repo /Volumes/DevMASTER/!CODING/Secuura/Blockchain/2_Project_Files | base e6daa806e79a | head 9884b5588d7c | mode gate
+INFO fetched D-TRUST Root CA 1 2017 from https://www.d-trust.net/cgi-bin/D-TRUST_Root_CA_1_2017.crt: DER 1698 B sha256 4D:24:80:7B:9C:AD:51:10:F4:0E:D7:9D:93:43:46:D7:C9:B0:29:04:31:DC:9B:11:A4:0B:BB:86:FC:F2:AE:F6
+INFO fetched DigiCert Assured ID Root CA from https://cacerts.digicert.com/DigiCertAssuredIDRootCA.crt: DER 955 B sha256 3E:90:99:B5:01:5E:8F:48:6C:00:BC:EA:9D:11:1E:E7:21:FA:BA:35:5A:89:BC:F1:DF:69:56:1E:3D:C6:32:5C
+PASS V1 signature over signed attrs: [HEAD] SET OF substitution (0x31) True | IMPLICIT [0] asserted True | subtle.verify over signedBytes True
+PASS V2 messageDigest: messageDigest attr read True | compared to digest(eContent) True
+PASS V3 contentType attr: contentType attribute read and compared to id-ct-TSTInfo: True
+FAIL V4 signingCertificate(V2): ESS signingCertificate / V2 OIDs read in the verifier: 0 []  <- the commission names this check; RFC 3161 2.4.1 requires the attribute; the probe PF8 measures a token WITHOUT it (README D1)
+PASS V5 EKU: id-kp-timeStamping required: True
+PASS V6 validity at genTime: signer validity vs genTime True | chain checkDate = genTime True
+PASS V7 chain to anchors: engine args 'trustedCerts: anchors, certs: [signer], checkDate: genTime,' | result checked True
+INFO V7 the engine is given certs '[signer]' — intermediates carried in the token are NOT passed (probe PF5)
+PASS V8 fail closed first: the first two statements of verifyRfc3161Token: ['const anchors = parseTrustAnchors(opts.trustAnchorsPem);', "if (anchors.length === 0) return refuse('no trust anchor configured');"]
+PASS V9 no network at verify time: verify-module imports ['asn1js', 'node:crypto', 'pkijs'] (want asn1js, node:crypto, pkijs) | network tokens: verify module 0 [], qualified-tsa verifyTimestamp+readTrustAnchorsPem 0 [] (bodies read True) | MUST-HIT rfc3161-client.ts 1 ['fetch(']
+FAIL V10 strict DER: in parseStrictDer: findIndefinite False | trailing bytes False | canonical re-encode False
+PASS V11 isQualified dropped: isQualified in non-test code under Blockchain/Dev/services/timestamping/src: head 0 (want 0) | MUST-HIT base 3
+PASS V12 mock path closed: verifyMockToken in code 0 | JSON.parse in verifyTimestamp 0 | non-0x30 refused True | MUST-HIT base verifyMockToken 2
+PASS V13 DB-row branch unchanged: kit unchanged_must_equal blobs equal at base, head and kit: True {'index.ts': True, 'timestamping.openapi.ts': True, 'package.json': True, 'tsconfig.json': True, 'vitest.config.ts': True} | the DB-row SELECT line present in index.ts: True
+FAIL V14 committed bundle: bundle at head ABSENT (Blockchain/Dev/services/timestamping/config/tsa-trust-anchors.pem) | at base ABSENT | PEM blocks 0 (want 2) | fingerprints [] | == kit False | provider URLs recomputed {'D-TRUST Root CA 1 2017': ('4D:24:80:7B:9C:AD:51:10:F4:0E:D7:9D:93:43:46:D7:C9:B0:29:04:31:DC:9B:11:A4:0B:BB:86:FC:F2:AE:F6', 'DER', 1698), 'DigiCert Assured ID Root CA': ('3E:90:99:B5:01:5E:8F:48:6C:00:BC:EA:9D:11:1E:E7:21:FA:BA:35:5A:89:BC:F1:DF:69:56:1E:3D:C6:32:5C', 'DER', 955)}
+FAIL V15 env-only loader: readTrustAnchorsPem reads the env and returns undefined when unset, no default path: True | code / compose / Dockerfile files naming the bundle: 0 [] | MUST-HIT the README names it: False
+FAIL V16 README claims: README at head ABSENT | {'both CNs': False, 'both fingerprints': False, 'TSA_TRUST_ANCHORS_PEM': False, 'fail closed when unset': False} | repo paths it names that do NOT exist at head: NONE
+PASS V17 request writer quirks: at-most-one-zero strip line True | no sign-prefix insertion True | cell 16 present True | the BYTES: C3 request-bytes differential
+INFO signer fallback `?? certs[0]` present: True | SIG_ALG_BY_OID keys ['1.2.840.113549.1.1.11', '1.2.840.113549.1.1.12', '1.2.840.113549.1.1.13', '1.2.840.10045.4.3.2', '1.2.840.10045.4.3.3'] (rsaEncryption 1.2.840.113549.1.1.1 ABSENT) | ECDSA DER->P1363 conversion ABSENT | digest(eContent) uses the IMPRINT algorithm (hashAlg)
+C4 SECURITY FAIL: 5 FAIL of 17 checks | base e6daa806e79a | head 9884b5588d7c

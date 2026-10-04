@@ -1,0 +1,46 @@
+c2_baseline_gateD2 SELFTEST 2026-10-04T14:40:06Z | base e6daa806e79a | drafted head 9884b5588d7c (plants in memory)
+
+=== ARM T0 base-vs-base (expected FAIL) ===
+PASS B1 top level: keys equal True | $comment equal True | base rows 26 (kit 26)
+FAIL B2 key sets: rows 26 -> 26 | REMOVED [] (want [GHSA-86w9-cpqp-85rv]) | ADDED NONE
+FAIL B3 surviving rows: 26 surviving rows | changed by value 0 [] | by raw bytes 0 []
+FAIL B4 text: deletes [] (want ONE of 7 lines at base 153) | other hunks 0 (comma-only 0) | trailing newline equal True | expiry changed on a surviving row NONE
+ARM T0 base-vs-base: verdict FAIL (expected FAIL) | rows 26 -> 26 | named failure as expected ['B2 key sets'] -> OK
+
+=== ARM T1 the one row removed (expected PASS) ===
+PASS B1 top level: keys equal True | $comment equal True | base rows 26 (kit 26)
+PASS B2 key sets: rows 26 -> 25 | REMOVED ['GHSA-86w9-cpqp-85rv'] (want [GHSA-86w9-cpqp-85rv]) | ADDED NONE
+PASS B3 surviving rows: 25 surviving rows | changed by value 0 [] | by raw bytes 0 []
+PASS B4 text: deletes [(153, 7)] (want ONE of 7 lines at base 153) | other hunks 0 (comma-only 0) | trailing newline equal True | expiry changed on a surviving row NONE
+ARM T1 the one row removed: verdict PASS (expected PASS) | rows 26 -> 25 | named failure as expected True -> OK
+
+=== ARM T2 a second row removed (expected FAIL) ===
+PASS B1 top level: keys equal True | $comment equal True | base rows 26 (kit 26)
+FAIL B2 key sets: rows 26 -> 24 | REMOVED ['GHSA-2mjp-6q6p-2qxm', 'GHSA-86w9-cpqp-85rv'] (want [GHSA-86w9-cpqp-85rv]) | ADDED NONE
+FAIL B3 surviving rows: 24 surviving rows | changed by value 0 [] | by raw bytes 0 []
+FAIL B4 text: deletes [(4, 6), (153, 7)] (want ONE of 7 lines at base 153) | other hunks 0 (comma-only 0) | trailing newline equal True | expiry changed on a surviving row NONE
+ARM T2 a second row removed: verdict FAIL (expected FAIL) | rows 26 -> 24 | named failure as expected ['B2 key sets'] -> OK
+(T3 re-dates GHSA-wrjc-x8rr-h8h6 2026-10-09 -> 2099-01-01; plant landed: True)
+
+=== ARM T3 a surviving expiry changed (expected FAIL) ===
+PASS B1 top level: keys equal True | $comment equal True | base rows 26 (kit 26)
+PASS B2 key sets: rows 26 -> 25 | REMOVED ['GHSA-86w9-cpqp-85rv'] (want [GHSA-86w9-cpqp-85rv]) | ADDED NONE
+FAIL B3 surviving rows: 25 surviving rows | changed by value 1 ['GHSA-wrjc-x8rr-h8h6'] | by raw bytes 1 ['GHSA-wrjc-x8rr-h8h6']
+FAIL B4 text: deletes [(153, 7)] (want ONE of 7 lines at base 153) | other hunks 1 (comma-only 0) | trailing newline equal True | expiry changed on a surviving row ['GHSA-wrjc-x8rr-h8h6']
+ARM T3 a surviving expiry changed: verdict FAIL (expected FAIL) | rows 26 -> 25 | named failure as expected ['B4 text'] -> OK
+
+=== ARM T4 a surviving row re-escaped (expected FAIL) ===
+PASS B1 top level: keys equal True | $comment equal True | base rows 26 (kit 26)
+PASS B2 key sets: rows 26 -> 25 | REMOVED ['GHSA-86w9-cpqp-85rv'] (want [GHSA-86w9-cpqp-85rv]) | ADDED NONE
+FAIL B3 surviving rows: 25 surviving rows | changed by value 0 [] | by raw bytes 1 ['GHSA-2mjp-6q6p-2qxm']
+FAIL B4 text: deletes [(153, 7)] (want ONE of 7 lines at base 153) | other hunks 1 (comma-only 0) | trailing newline equal True | expiry changed on a surviving row NONE
+ARM T4 a surviving row re-escaped: verdict FAIL (expected FAIL) | rows 26 -> 25 | named failure as expected True -> OK
+
+=== ARM T5 the drafted head blob (expected PASS) ===
+PASS B1 top level: keys equal True | $comment equal True | base rows 26 (kit 26)
+PASS B2 key sets: rows 26 -> 25 | REMOVED ['GHSA-86w9-cpqp-85rv'] (want [GHSA-86w9-cpqp-85rv]) | ADDED NONE
+PASS B3 surviving rows: 25 surviving rows | changed by value 0 [] | by raw bytes 0 []
+PASS B4 text: deletes [(153, 7)] (want ONE of 7 lines at base 153) | other hunks 0 (comma-only 0) | trailing newline equal True | expiry changed on a surviving row NONE
+ARM T5 the drafted head blob: verdict PASS (expected PASS) | rows 26 -> 25 | named failure as expected True -> OK
+
+SELFTEST OK: 6 of 6 arms

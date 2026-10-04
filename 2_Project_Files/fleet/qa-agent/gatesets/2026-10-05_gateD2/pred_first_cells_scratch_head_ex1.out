@@ -1,0 +1,36 @@
+
+ RUN  v4.1.11 /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/70536f16-6704-4aed-a02d-638d9354a675/scratchpad/gD2/svc_head
+
+ ❯ src/__tests__/ks1404-verify-rfc3161.test.ts (25 tests | 3 failed) 693ms
+     ✓ cell 1 [RED at base]: refuses an UNSIGNED DER token that carries the expected imprint 1ms
+     ✓ cell 3 [RED at base]: reads the imprint from TSTInfo, not by searching the whole tree 0ms
+     ✓ cell 4 [CONTROL, refused at base AND head]: a wrong hash with no plant is refused 0ms
+     ✓ cell 11 truncated (refused at base AND head): is refused, and never throws out of verifyTimestamp 0ms
+     ✓ cell 11 trailingBytes (refused at base AND head): is refused, and never throws out of verifyTimestamp 0ms
+     ✓ cell 11 wrongOuterTag (refused at base AND head): is refused, and never throws out of verifyTimestamp 0ms
+     ✓ cell 11 indefiniteLength (RED at base — BER indefinite length is ACCEPTED by node-forge): is refused, and never throws out of verifyTimestamp 0ms
+     ✓ cell 11e [CONTROL]: the WELL-FORMED version of the same bytes DOES reach the verifier 0ms
+     ✓ cell 12 [RED at base]: a forged mock JSON token without `mock` does not verify 0ms
+     ✓ cell 12b [CONTROL, refused at base AND head]: mock JSON with a wrong hash is refused 0ms
+     ✓ cell 5 [GREEN CONTROL]: a genuine token chaining to the configured anchor is ACCEPTED 16ms
+     ✓ cell 6: the same token against an UNRELATED anchor is refused on the CHAIN 4ms
+     ✓ cell 7: with NO anchor configured it fails CLOSED 1ms
+     ✓ cell 2: one flipped signature byte is refused on the SIGNATURE 4ms
+     ✓ cell 10: TSTInfo swapped AFTER signing is refused 3ms
+     ✓ cell 10b: a tampered messageDigest attribute is refused on THAT attribute 3ms
+     ✓ cell 8: a signer without EKU id-kp-timeStamping is refused on the EKU 3ms
+     ✓ cell 9: a genTime outside the signer validity window is refused on VALIDITY 3ms
+     ✓ cell 3b: a genuine token verified against a DIFFERENT expected hash is refused on the IMPRINT 3ms
+     ✓ cell 11f: a GENUINE token re-wrapped in BER indefinite length is refused as non-DER 2ms
+     ✓ cell 11g: a GENUINE token with trailing bytes is refused 1ms
+     ✓ cell 16: buildTimestampRequest is BYTE-IDENTICAL for a fixed hash, nonce and certReq 0ms
+     × cell 14 [RED at base]: the route reports verified:false for an UNSIGNED token, in the published response shape 286ms
+     × cell 13 [GREEN at base AND head]: a STORED mock token still verifies through the DB-row branch, with the stored timestamp and tsaUrl and NO reason 56ms
+     × cell 13b [MUTATION ARM for cell 13]: the same stored row under a DIFFERENT proof does NOT verify — so cell 13 green can fail 32ms
+
+ Test Files  1 failed (1)
+      Tests  3 failed | 22 passed (25)
+   Start at  01:45:12
+   Duration  967ms (transform 93ms, setup 0ms, import 167ms, tests 693ms, environment 0ms)
+
+JSON report written to /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/gatesets/2026-10-05_gateD2/pred_first_cells_scratch_head_ex1.json

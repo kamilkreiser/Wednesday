@@ -1,0 +1,9 @@
+c2_integrity_gateD2.py — gateD2 C2: RECOMPUTE the added packages' integrity FROM THE REGISTRY TARBALLS (public npm registry, read-only HTTPS
+GETs; tarballs are hashed in memory and never written) and match both locks at --head (a NEW COPY of gate54f's c3_integrity, re-keyed).
+  I1 for each kit integrity_pkgs name@version: sha512(tarball) as SRI == the registry packument's dist.integrity; dist.tarball == the lock's
+     `resolved`; second instrument sha1(tarball) == dist.shasum.
+  I2 every ADDED entry of every kit lock at --head (root 5, service 7): `integrity` == the RECOMPUTED value and `resolved` == dist.tarball.
+     kit integrity_required (pkijs, asn1js) must be present in BOTH locks.
+  I3 NEGATIVE CONTROL, same instrument: one flipped byte of the pkijs tarball changes its sha512; pkijs 3.4.0's dist.integrity != 3.4.1's.
+  At the BASE sha I2 FIRES: no lock carries the added entries (base-vs-base reading).
+Usage: c2_integrity_gateD2.py --repo <clone> --head <sha>   (rc 0 PASS / 1 FAIL / 2 usage / 3 network)

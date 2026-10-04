@@ -1,0 +1,34 @@
+c4_security_gateD2.py — gateD2 C4 SECURITY REVIEW, static, from git objects (READ ONLY) plus, with --fetch-anchors, two HTTPS GETs of the
+providers' published root certificates. Every regex runs over CODE lines (comments blanked by lib code_lines) and sits beside a must-hit
+control of the same regex that fires somewhere it should.
+  V1 signature over the SIGNED ATTRIBUTES: the [0] tag replaced by SET OF (0x31) and webcrypto.subtle.verify over those bytes.
+  V2 messageDigest == digest(eContent) compared;  V3 contentType attribute == id-ct-TSTInfo checked.
+  V4 signingCertificate / signingCertificateV2 (OIDs 1.2.840.113549.1.9.16.2.12 / .2.47) checked — the COMMISSION names it; FAIL if the
+     verifier never reads it (the probe's PF8 measures the runtime consequence).
+  V5 EKU id-kp-timeStamping required;  V6 validity at genTime (notBefore / notAfter vs genTime) AND the chain engine's checkDate = genTime.
+  V7 chain to the configured anchors: CertificateChainValidationEngine({trustedCerts: anchors ...}); INFO the `certs:` it is given
+     (intermediates in the token are NOT passed when it is `[signer]` — the probe's PF5).
+  V8 FAIL CLOSED: `anchors.length === 0` refuses BEFORE any token parse (the first statement of verifyRfc3161Token).
+  V9 NO NETWORK AT VERIFY TIME: rfc3161-verify.ts imports exactly {node:crypto, asn1js, pkijs}; 0 fetch / http / https / net / axios / dns
+     tokens in its code and in qualified-tsa's verifyTimestamp + readTrustAnchorsPem bodies; MUST-HIT: the same regex finds `fetch(` (or an
+     http(s) client) in rfc3161-client.ts (the create path).
+  V10 strict DER: BER indefinite length refused (findIndefinite called inside parseStrictDer), trailing bytes refused, canonical re-encode.
+  V11 isQualified gone from non-test code under services/timestamping/src at HEAD; MUST-HIT: present at BASE.
+  V12 MOCK PATH CLOSED in qualified-tsa.ts: 0 `verifyMockToken`, 0 `JSON.parse` in verifyTimestamp; non-0x30 tokens refused; MUST-HIT: base has both.
+  V13 DB-ROW BRANCH UNCHANGED: index.ts blob == kit unchanged_must_equal == base blob, and its `SELECT * FROM ts_timestamps WHERE hash = $1 AND
+      proof = $2` line is present (every kit unchanged_must_equal path compared).
+  V14 THE COMMITTED BUNDLE (Wednesday 14:2xZ): config/tsa-trust-anchors.pem exists at HEAD, is ABSENT at base, parses into EXACTLY 2
+      certificates whose SHA-256 fingerprints == kit anchors (computed here from the DER in the PEM, independent of pkijs); with
+      --fetch-anchors each kit anchor is ALSO recomputed from its provider URL (redirects followed; DER or PEM) and must equal the bundle's.
+  V15 ENV-ONLY LOADER: no non-test code names the bundle file (0 `tsa-trust-anchors` in code under Blockchain/Dev, compose / Dockerfiles
+      included, MUST-HIT: the README names it); readTrustAnchorsPem reads process.env.TSA_TRUST_ANCHORS_PEM and returns undefined when unset
+      (no default path).
+  V16 config/README.md claims vs the tree: it names both CNs, both fingerprints (any separator / case), TSA_TRUST_ANCHORS_PEM, fail-closed
+      when unset; every repo path it names exists at HEAD (printed). The gate reads the README itself; this check only catches drift.
+  V17 request writer: der.ts strips AT MOST one leading 0x00 and adds no sign prefix (the code line), cell 16 exists; the BYTES are proven
+      by the C3 request-bytes differential (forge at base vs der.ts at head).
+  INFO: the signer fallback `?? certs[0]`; the SIG_ALG_BY_OID map (rsaEncryption absent -> PF6/PF11); ECDSA signatures passed to webcrypto
+  unconverted (DER vs P1363 -> PF12); the messageDigest digest algorithm taken from the IMPRINT, not SignerInfo.digestAlgorithm (PF7).
+--selftest: plants into copies of the HEAD texts (no repo write) — each removes one guard and must FAIL its row; the real head must PASS
+except the rows the drafter predicts FAIL (V4, and V14-V16 while the bundle commit is absent).  --base-vs-base: base as head (must FAIL).
+Usage: c4_security_gateD2.py --repo <clone> --head <sha> [--base sha] [--fetch-anchors] [--selftest | --base-vs-base]  rc 0 PASS / 1 FAIL / 2 usage

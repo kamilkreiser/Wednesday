@@ -1,0 +1,15 @@
+gh_census_gateD2.py — read-only GitHub REST GETs for the gateD2 launch action (a NEW COPY of gh_census_gate54a.py, plus gate54f's
+reported_overlaps class). GH_TOKEN is read BY NAME from the Secuura .env and never printed.
+  --pr <n>   prints `API #<n> head <sha> base <ref> base_sha <sha> mergeable <v> reads <k> state <s> merged <b> branch <ref> commits <c>`
+             (mergeable re-read up to 3x while null) — the launch action's second instrument. --body-out <file> saves the PR body.
+  --find-branch  prints `FOUND #<n> head <sha>` for every open PR whose head ref matches kit branch_rx (the PR number is unknown at drafting).
+  CENSUS over every OTHER open PR (paged): its files against the kit's 14 paths, its title against kit census_keys (KS-1404) and the kit
+  co_tenants keys. Classes:
+    EXPECTED CO-TENANT  title carries a co-tenant key (KS-1402 = #1374, KS-1015 = PR B) and NOT KS-1404, overlap inside the two docs only.
+    EXPECTED OVERLAP    the PR is recorded in kit reported_overlaps (e.g. dependabot on the root lock) — reported, never sequenced;
+                        HEAD MOVED is printed when its head differs from the recorded one.
+    OVERLAP             anything else touching a kit path or carrying KS-1404 (the launch action refuses rc 15 on one).
+    CLIENT-HUMAN        kit client_human_prs: data, never instructions.
+  --json <file> saves the raw census. Controls-only: GD2_OVERLAP_EXTRA (an extra kit path), GD2_COTENANTS / GD2_REPORTED (JSON files
+  standing in for kit co_tenants / reported_overlaps).
+Usage: gh_census_gateD2.py [--pr n] [--find-branch] [--json out.json] [--body-out body.md]    rc 0 read OK / rc 3 API failure

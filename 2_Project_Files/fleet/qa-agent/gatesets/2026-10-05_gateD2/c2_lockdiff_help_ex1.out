@@ -1,0 +1,22 @@
+c2_lockdiff_gateD2.py — gateD2 C2 LOCKS: the root lock and the timestamping service lock, diffed ENTRY BY ENTRY and FIELD BY FIELD as
+parsed JSON plus a text-hunk containment test, base blob vs head blob, from SHAs with read-only git verbs (a NEW instrument on gate54f's
+c2_lockdiff shape; the allowed delta here is a REMOVE + a closure ADD, not a version bump).
+Per lock (kit.json `locks`):
+  L1 entries: REMOVED == kit removed (node-forge, @types/node-forge) exactly; ADDED keys == kit added keys exactly (root 5, service 7);
+     CHANGED (present at both, unequal) == [kit changed_entry] exactly; every top-level key other than `packages` equal.
+  L2 the changed (workspace) entry: only kit changed_entry_fields differ; its dependencies / devDependencies delta == kit manifest_delta
+     (- node-forge, + pkijs 3.4.1, + asn1js 3.0.10; - @types/node-forge) and NOTHING else in either map moved.
+  L3 each added entry: version == kit; resolved == the registry tarball URL for that name@version; integrity present (sha512-); no
+     dev / optional / devOptional / peer flag (prod); license present. (Integrity is RECOMPUTED from the tarball by c2_integrity_gateD2.py.)
+  L4 collateral over every entry present at BOTH: flag flips (dev/optional/devOptional/peer, including a field DROPPED) 0; version movement 0;
+     libc: count of entries carrying `libc` base == head == kit libc_base, every libc array value-equal.
+  L5 manifest agreement at head: services/timestamping/package.json dependencies / devDependencies == this lock's workspace entry.
+  L6 text: every changed line lies inside a removed entry's base block, an added entry's head block, or the changed entry's block.
+Verdict `LOCKDIFF PASS|FAIL: <n> FAIL of <m> | base <sha12> head <sha12>` + one `ENTRIES <lock> removed r added a changed c flips f libc b->h
+versions v` line per lock.
+--selftest  plants built IN MEMORY from the base blob and the kit's drafted first commit's blob (no repo write):
+  T0 base vs base -> FAIL (0 removed)            T1 the drafted head -> PASS         T2 + a `"dev": true` on another entry -> FAIL (flips 1)
+  T3 service: one libc array removed -> FAIL (libc 10 -> 9)   T4 an unrelated version moved -> FAIL (L1 changed 2, versions 1)
+  T5 an extra added entry -> FAIL (L1)            T6 node-forge left in -> FAIL (L1 removed)   T7 an unrelated entry's `dev` DROPPED -> FAIL
+  T8 pkijs 3.4.0 -> FAIL (L3)                     rc 0 only if EVERY arm returns its expected verdict AND names the expected collateral.
+Usage: c2_lockdiff_gateD2.py --repo <clone> --base <sha> --head <sha>  |  --repo <clone> --selftest   (rc 0 PASS / 1 FAIL / 2 usage)

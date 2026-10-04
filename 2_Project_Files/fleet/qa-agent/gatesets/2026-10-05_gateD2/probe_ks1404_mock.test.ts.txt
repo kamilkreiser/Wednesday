@@ -1,0 +1,31 @@
+/**
+ * gateD2 C3 MOCK-PATH PROBE — written by the gate kit, NOT by the builder. Runs at BASE and at HEAD (it imports only
+ * ../tsa/qualified-tsa, which exists at both). Copied into a SCRATCH worktree only, as
+ * services/timestamping/src/__tests__/zz-gD2-probe-mock.test.ts, run alone, then QUARANTINED.
+ * Wednesday's ruling: a mock token verifies ONLY through the DB-row branch, so a NON-STORED {"hash"} token is refused WITH and WITHOUT `mock`.
+ *   M1 {"hash": H, "timestamp", "mock": true}   M2 the same without `mock`   M3 {"hash": H, "mock": false}   M4 a wrong hash (control)
+ * Want at HEAD: M1..M4 valid false. Want at BASE: M1, M2, M3 valid TRUE (the door this PR shuts; the probe can see it open) and M4 false.
+ * Each arm prints `GD2 MOCK <arm> valid=<v> qualified=<isQualified or ->`; the judge reads the vitest JSON (c3_parse_gateD2.py probe-mock).
+ */
+import { describe, it, expect } from 'vitest';
+import { verifyTimestamp } from '../tsa/qualified-tsa';
+
+const SIDE = process.env.GD2_SIDE === 'base' ? 'base' : 'head';
+const H = 'c'.repeat(64);
+const tok = (o: Record<string, unknown>) => Buffer.from(JSON.stringify(o), 'utf-8').toString('base64');
+const want = (arm: string) => (SIDE === 'base' && arm !== 'M4');
+
+describe(`gateD2 mock-path probe (${SIDE})`, () => {
+  for (const [arm, body, hash] of [
+    ['M1', { hash: H, timestamp: '20261004120000Z', mock: true }, H],
+    ['M2', { hash: H, timestamp: '20261004120000Z' }, H],
+    ['M3', { hash: H, timestamp: '20261004120000Z', mock: false }, H],
+    ['M4', { hash: 'd'.repeat(64), timestamp: '20261004120000Z', mock: true }, H],
+  ] as Array<[string, Record<string, unknown>, string]>) {
+    it(`${arm} non-stored mock token: valid === ${want(arm)} at ${SIDE}`, async () => {
+      const r: any = await verifyTimestamp(tok(body), hash);
+      console.log(`GD2 MOCK ${arm} side=${SIDE} valid=${r.valid} qualified=${r.tsaCertificate?.isQualified ?? '-'} error=${JSON.stringify(r.error ?? null)}`);
+      expect(r.valid).toBe(want(arm));
+    });
+  }
+});

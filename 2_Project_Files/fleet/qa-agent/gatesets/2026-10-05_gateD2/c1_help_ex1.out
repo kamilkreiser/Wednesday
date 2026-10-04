@@ -1,0 +1,22 @@
+c1_pin_gateD2.py — gateD2 C1: pin the PR from TWO instruments and the commits from the clone (a NEW COPY of c1_pin_gate54a.py, re-keyed for a
+TWO-COMMIT PR: Wednesday's 14:2xZ ruling adds a second commit carrying the committed PEM bundle).
+  P1 ls-remote origin (from --repo): refs/pull/<PR>/head == HEAD == the PR's branch ref; develop at origin read.
+  P2 the PULLS API (read-only GET; GH_TOKEN by name, never printed): open, not merged, base develop, base.sha == develop, head.sha == HEAD,
+     head.ref matches kit branch_rx, commits == kit n_commits; mergeable printed (null re-read up to 3x).
+  P3 shape: develop..HEAD is exactly kit n_commits (2) commits, LINEAR (each has one parent), the FIRST one's parent == develop, behind 0,
+     develop == kit base (else STALE BASE: run repin_base_gateD2.py — every C2-C6 expectation is base-specific; never guessed).
+  P4 files: API /files == exactly kit files (14) AND `git diff --numstat develop HEAD` lists the same 14 with the same +/- per path.
+     INFO per commit: its own name list (the second commit must ADD the two config/ files); the first commit's numstat vs the builder's claim.
+  P4b PATH GATE: every path in develop..HEAD matches kit path_allow_rx (services/timestamping/**, root lock, audit-baseline.json, the two
+     platform-k docs); MUST-HIT CONTROL: the same filter over PR 0's diff (kit pr0_parent..pr0_commit) leaves >= 1 path outside it.
+  P5 NO TRAILER on EVERY commit in develop..HEAD (`%(trailers)` empty, 0 Co-Authored-By); CONTROL kit trailer_control_commit prints one.
+  P6 keys: title, body, branch and EVERY commit message carry KS-1404 as the ONLY hyphenated KS key (branch lower-case), no closing keyword;
+     `Refs KS-1404` on its own line in the body.
+  P7 PR 0 ABSENT: the anchoring / nft-certificate locks are not in the diff and blob-equal develop == HEAD; MUST-HIT: PR 0's own diff lists
+     all 4 of kit pr0_files_all.
+  P8 MODES: the 14 paths are 100644 at HEAD (git ls-tree); CONTROL kit mode_control_path reads 100755.
+  INFO END_TREE: HEAD^{tree} (the squash lands on it while develop has not moved); develop^{tree} as the control that differs.
+--pr-json f --files-json f: read the PULLS answers from files (offline controls; P2 then says OFFLINE). --base <sha>: judge P3 against this
+base instead of kit base (a prediction run on the drafted first commit only; never on the gate).
+Usage: c1_pin_gateD2.py --repo <clone> --pr <n> --head <40-hex> [--no-remote]   (rc 0 PASS / 1 FAIL / 2 usage / 3 API)
+  --no-remote: skip P1/P2 (no ls-remote, no API) — for the drafter's prediction on an object-store commit before a PR exists.

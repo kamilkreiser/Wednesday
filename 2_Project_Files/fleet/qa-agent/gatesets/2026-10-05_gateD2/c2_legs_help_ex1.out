@@ -1,0 +1,21 @@
+c2_legs_gateD2.sh — gateD2 C2: the pre-push preflight legs 2 (lockfile-cleanroom.sh), 6 (audit-gate.mjs) and 7 (audit-locks.mjs), run by
+the TESTER in its OWN worktree (a NEW COPY of gate54f's c5_legs_gate54f.sh, re-keyed: this PR REMOVES the GHSA-86w9 row, so the reading
+that matters is the CLEANUP list). macOS bash 3.2 / zsh safe: every rc is read as `cmd > f 2> g; rc=$?` on its own line, never via a pipe.
+
+  c2_legs_gateD2.sh --help
+  c2_legs_gateD2.sh plan <repo> <sha>                 READ-ONLY: the leg files exist at <sha>; both gates read AUDIT_BASELINE_PATH there.
+  c2_legs_gateD2.sh parse-selftest <outdir>           the parsers on planted lines: a FAIL row counts as FAIL, a CLEANUP row as CLEANUP.
+  c2_legs_gateD2.sh run <devdir> <label> <outdir>     <devdir> = <your worktree>/Blockchain/Dev at the HEAD. Installs scripts/audit's OWN
+       lock (npm ci --ignore-scripts), then legs 2, 6, 7. Want: rc 0 0 0; GHSA-86w9-cpqp-85rv named NOWHERE (no FAIL row, no CLEANUP row);
+       the CLEANUP count printed (builder: 15). rc 2 from a leg = SKIP (registry unreachable) and is NEVER a pass.
+  c2_legs_gateD2.sh cleanup-control <devdir> <outdir> <base-baseline.json>
+       the MUST-HIT CONTROL: legs 6 and 7 at the HEAD tree with the BASE baseline passed by AUDIT_BASELINE_PATH (the worktree is never
+       edited; extract it with `git show <base>:Blockchain/Dev/scripts/audit/audit-baseline.json > <outdir>/base_baseline.json`). Want:
+       GHSA-86w9-cpqp-85rv named in a CLEANUP list (the dependency is gone, so the stale row is reported) — proving `named nowhere` at head
+       is a reading of an instrument that can see it. NO-OP CONTROL in the same run: the head baseline copied to <outdir> by the same
+       variable gives the same rc as `run`.
+Every write is inside <outdir>, which must lie under /private/tmp/claude-501/ or the QA reports root (checked LEXICALLY before any mkdir).
+Exit: 0 every expectation held; 1 one did not (MISMATCH lines say which); 2 usage / refusal.
+set -u
+GS="$(dirname "$(/bin/realpath "$0")")"
+RM="GHSA-86w9-cpqp-85rv"

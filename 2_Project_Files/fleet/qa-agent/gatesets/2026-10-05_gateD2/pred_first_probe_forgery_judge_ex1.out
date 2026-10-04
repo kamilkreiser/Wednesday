@@ -1,0 +1,46 @@
+PASS NETC: passed | NETC the network counter sees an explicit stubbed fetch (must-hit control)
+PASS G0: passed | G0 GREEN CONTROL: a genuine token, anchor rootA, is ACCEPTED
+PASS PF1: passed | PF1 a token signed under an UNTRUSTED CA is refused on the chain
+PASS PF1C: passed | PF1C the PF1 token with ITS root as anchor is accepted (PF1 was the chain, nothi
+PASS PF2: passed | PF2 one TSTInfo byte flipped after signing is refused on messageDigest
+PASS PF2b: passed | PF2b one signature byte flipped is refused on the signature
+PASS PF3: passed | PF3 a NON-STORED {"hash","mock":true} token does not verify
+PASS PF3b: passed | PF3b the same without mock does not verify
+PASS PF4: passed | PF4 fail closed: unset / empty / whitespace / garbage-PEM anchors refuse a GENUI
+PASS PF4b: passed | PF4b verifyTimestamp fails closed with TSA_TRUST_ANCHORS_PEM unset, and set to a
+PASS PF4c: passed | PF4c CONTROL: verifyTimestamp with TSA_TRUST_ANCHORS_PEM = rootA text accepts th
+PASS PF9: passed | PF9 a signer without EKU timeStamping is refused on the EKU
+PASS PF10: passed | PF10 a genTime outside the signer validity is refused on validity
+PASS NET: passed | NET no network call was made by any arm
+REPORT-ARM REPORT PF5 / PF5C intermediate chain: passed 
+REPORT-ARM REPORT PF6 rsaEncryption as SignerInfo.signatureAlgorithm: passed 
+REPORT-ARM REPORT PF7 SignerInfo digest SHA-512 with a SHA-256 imprint: passed 
+REPORT-ARM REPORT PF8 no signingCertificateV2 attribute: passed 
+REPORT-ARM REPORT PF11 / PF12 OpenSSL-made tokens: passed 
+REPORT-ARM REPORT PF13 the committed bundle through the product parser: passed 
+  GD2 ARM G0 valid=true reason=null
+  GD2 ARM PF1 valid=false reason="signer certificate does not chain to a configured trust anchor: No valid certificate paths found"
+  GD2 ARM PF1C valid=true reason=null
+  GD2 ARM PF2 valid=false reason="signed messageDigest does not match digest(eContent)"
+  GD2 ARM PF2b valid=false reason="signature over the signed attributes did not verify"
+  GD2 ARM PF3 valid=false reason="Timestamp proof is not a DER-encoded RFC 3161 token; a stored mock token verifies only through its database record"
+  GD2 ARM PF3b valid=false reason="Timestamp proof is not a DER-encoded RFC 3161 token; a stored mock token verifies only through its database record"
+  GD2 ARM PF4-unset valid=false reason="no trust anchor configured"
+  GD2 ARM PF4-empty valid=false reason="no trust anchor configured"
+  GD2 ARM PF4-spaces valid=false reason="no trust anchor configured"
+  GD2 ARM PF4-garbage valid=false reason="no trust anchor configured"
+  GD2 ARM PF4b-unset valid=false reason="no trust anchor configured"
+  GD2 ARM PF4b-missing-file valid=false reason="no trust anchor configured"
+  GD2 ARM PF4c valid=true reason=null
+  GD2 ARM PF9 valid=false reason="signer certificate does not carry EKU id-kp-timeStamping"
+  GD2 ARM PF10 valid=false reason="TSTInfo genTime falls outside the signer certificate validity window"
+  GD2 REPORT PF5 valid=false reason="signer certificate does not chain to a configured trust anchor: No valid certificate paths found"
+  GD2 REPORT PF5C valid=true reason=null
+  GD2 REPORT PF6 valid=false reason="unsupported signature algorithm (1.2.840.113549.1.1.1)"
+  GD2 REPORT PF7 valid=false reason="signed messageDigest does not match digest(eContent)"
+  GD2 REPORT PF8 valid=true reason=null
+  GD2 REPORT PF11 valid=false reason="unsupported signature algorithm (1.2.840.113549.1.1.1)"
+  GD2 REPORT PF12 valid=false reason="signature over the signed attributes did not verify"
+  GD2 REPORT PF13 bundle=ABSENT path=/private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/70536f16-6704-4aed-a02d-638d9354a675/scratchpad/gD2/svc_head/config/tsa-trust-anchors.pem
+  GD2 ARM NET calls=0
+C3-PARSE probe-forgery PASS

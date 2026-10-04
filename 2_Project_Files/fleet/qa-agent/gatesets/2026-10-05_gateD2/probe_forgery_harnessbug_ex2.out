@@ -1,0 +1,107 @@
+
+ RUN  v4.1.11 /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/70536f16-6704-4aed-a02d-638d9354a675/scratchpad/gD2/svc_head
+
+stdout | src/__tests__/zz-gD2-probe-forgery.test.ts > gateD2 forgery probe (independent tokens) > G0 GREEN CONTROL: a genuine token, anchor rootA, is ACCEPTED
+GD2 ARM G0 valid=false reason="TSTInfo genTime falls outside the signer certificate validity window"
+
+stdout | src/__tests__/zz-gD2-probe-forgery.test.ts > gateD2 forgery probe (independent tokens) > PF1 a token signed under an UNTRUSTED CA is refused on the chain
+GD2 ARM PF1 valid=false reason="TSTInfo genTime falls outside the signer certificate validity window"
+
+stdout | src/__tests__/zz-gD2-probe-forgery.test.ts > gateD2 forgery probe (independent tokens) > PF1C the PF1 token with ITS root as anchor is accepted (PF1 was the chain, nothing else)
+GD2 ARM PF1C valid=false reason="TSTInfo genTime falls outside the signer certificate validity window"
+
+stdout | src/__tests__/zz-gD2-probe-forgery.test.ts > gateD2 forgery probe (independent tokens) > PF2 one TSTInfo byte flipped after signing is refused on messageDigest
+GD2 ARM PF2 valid=false reason="signed messageDigest does not match digest(eContent)"
+
+stdout | src/__tests__/zz-gD2-probe-forgery.test.ts > gateD2 forgery probe (independent tokens) > PF2b one signature byte flipped is refused on the signature
+GD2 ARM PF2b valid=false reason="TSTInfo genTime falls outside the signer certificate validity window"
+
+stdout | src/__tests__/zz-gD2-probe-forgery.test.ts > gateD2 forgery probe (independent tokens) > PF3 a NON-STORED {"hash","mock":true} token does not verify
+GD2 ARM PF3 valid=false reason="Timestamp proof is not a DER-encoded RFC 3161 token; a stored mock token verifies only through its database record"
+
+stdout | src/__tests__/zz-gD2-probe-forgery.test.ts > gateD2 forgery probe (independent tokens) > PF3b the same without mock does not verify
+GD2 ARM PF3b valid=false reason="Timestamp proof is not a DER-encoded RFC 3161 token; a stored mock token verifies only through its database record"
+
+stdout | src/__tests__/zz-gD2-probe-forgery.test.ts > gateD2 forgery probe (independent tokens) > PF4 fail closed: unset / empty / whitespace / garbage-PEM anchors refuse a GENUINE token
+GD2 ARM PF4-unset valid=false reason="no trust anchor configured"
+
+stdout | src/__tests__/zz-gD2-probe-forgery.test.ts > gateD2 forgery probe (independent tokens) > PF4 fail closed: unset / empty / whitespace / garbage-PEM anchors refuse a GENUINE token
+GD2 ARM PF4-empty valid=false reason="no trust anchor configured"
+
+stdout | src/__tests__/zz-gD2-probe-forgery.test.ts > gateD2 forgery probe (independent tokens) > PF4 fail closed: unset / empty / whitespace / garbage-PEM anchors refuse a GENUINE token
+GD2 ARM PF4-spaces valid=false reason="no trust anchor configured"
+
+stdout | src/__tests__/zz-gD2-probe-forgery.test.ts > gateD2 forgery probe (independent tokens) > PF4 fail closed: unset / empty / whitespace / garbage-PEM anchors refuse a GENUINE token
+GD2 ARM PF4-garbage valid=false reason="no trust anchor configured"
+
+stdout | src/__tests__/zz-gD2-probe-forgery.test.ts > gateD2 forgery probe (independent tokens) > PF4b verifyTimestamp fails closed with TSA_TRUST_ANCHORS_PEM unset, and set to a missing file
+GD2 ARM PF4b-unset valid=false reason="no trust anchor configured"
+2026-10-05 01:44:15.100 [timestamping] [31merror[39m: [TSA] TSA_TRUST_ANCHORS_PEM points at a file that could not be read {"error":"ENOENT: no such file or directory, open '/private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/70536f16-6704-4aed-a02d-638d9354a675/scratchpad/gD2/pki2/no-such-bundle.pem'"}
+
+stdout | src/__tests__/zz-gD2-probe-forgery.test.ts > gateD2 forgery probe (independent tokens) > PF4b verifyTimestamp fails closed with TSA_TRUST_ANCHORS_PEM unset, and set to a missing file
+GD2 ARM PF4b-missing-file valid=false reason="no trust anchor configured"
+
+stdout | src/__tests__/zz-gD2-probe-forgery.test.ts > gateD2 forgery probe (independent tokens) > PF4c CONTROL: verifyTimestamp with TSA_TRUST_ANCHORS_PEM = rootA text accepts the genuine token (the env path is live)
+GD2 ARM PF4c valid=false reason="TSTInfo genTime falls outside the signer certificate validity window"
+
+stdout | src/__tests__/zz-gD2-probe-forgery.test.ts > gateD2 forgery probe (independent tokens) > PF9 a signer without EKU timeStamping is refused on the EKU
+GD2 ARM PF9 valid=false reason="signer certificate does not carry EKU id-kp-timeStamping"
+
+stdout | src/__tests__/zz-gD2-probe-forgery.test.ts > gateD2 forgery probe (independent tokens) > PF10 a genTime outside the signer validity is refused on validity
+GD2 ARM PF10 valid=false reason="TSTInfo genTime falls outside the signer certificate validity window"
+
+stdout | src/__tests__/zz-gD2-probe-forgery.test.ts > gateD2 forgery probe (independent tokens) > REPORT PF5 / PF5C intermediate chain
+GD2 REPORT PF5 valid=false reason="TSTInfo genTime falls outside the signer certificate validity window"
+
+stdout | src/__tests__/zz-gD2-probe-forgery.test.ts > gateD2 forgery probe (independent tokens) > REPORT PF5 / PF5C intermediate chain
+GD2 REPORT PF5C valid=false reason="TSTInfo genTime falls outside the signer certificate validity window"
+
+stdout | src/__tests__/zz-gD2-probe-forgery.test.ts > gateD2 forgery probe (independent tokens) > REPORT PF6 rsaEncryption as SignerInfo.signatureAlgorithm
+GD2 REPORT PF6 valid=false reason="TSTInfo genTime falls outside the signer certificate validity window"
+
+stdout | src/__tests__/zz-gD2-probe-forgery.test.ts > gateD2 forgery probe (independent tokens) > REPORT PF7 SignerInfo digest SHA-512 with a SHA-256 imprint
+GD2 REPORT PF7 valid=false reason="signed messageDigest does not match digest(eContent)"
+
+stdout | src/__tests__/zz-gD2-probe-forgery.test.ts > gateD2 forgery probe (independent tokens) > REPORT PF8 no signingCertificateV2 attribute
+GD2 REPORT PF8 valid=false reason="TSTInfo genTime falls outside the signer certificate validity window"
+
+stdout | src/__tests__/zz-gD2-probe-forgery.test.ts > gateD2 forgery probe (independent tokens) > REPORT PF11 / PF12 OpenSSL-made tokens
+GD2 REPORT PF11 valid=false reason="unsupported signature algorithm (1.2.840.113549.1.1.1)"
+
+stdout | src/__tests__/zz-gD2-probe-forgery.test.ts > gateD2 forgery probe (independent tokens) > REPORT PF11 / PF12 OpenSSL-made tokens
+GD2 REPORT PF12 valid=false reason="signature over the signed attributes did not verify"
+
+stdout | src/__tests__/zz-gD2-probe-forgery.test.ts > gateD2 forgery probe (independent tokens) > REPORT PF13 the committed bundle through the product parser
+GD2 REPORT PF13 bundle=ABSENT path=/private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/70536f16-6704-4aed-a02d-638d9354a675/scratchpad/gD2/svc_head/config/tsa-trust-anchors.pem
+
+stdout | src/__tests__/zz-gD2-probe-forgery.test.ts > gateD2 forgery probe (independent tokens) > NET no network call was made by any arm
+GD2 ARM NET calls=0
+
+ ❯ src/__tests__/zz-gD2-probe-forgery.test.ts (20 tests | 5 failed) 88ms
+     ✓ NETC the network counter sees an explicit stubbed fetch (must-hit control) 1ms
+     × G0 GREEN CONTROL: a genuine token, anchor rootA, is ACCEPTED 24ms
+     × PF1 a token signed under an UNTRUSTED CA is refused on the chain 6ms
+     × PF1C the PF1 token with ITS root as anchor is accepted (PF1 was the chain, nothing else) 7ms
+     ✓ PF2 one TSTInfo byte flipped after signing is refused on messageDigest 4ms
+     × PF2b one signature byte flipped is refused on the signature 4ms
+     ✓ PF3 a NON-STORED {"hash","mock":true} token does not verify 0ms
+     ✓ PF3b the same without mock does not verify 0ms
+     ✓ PF4 fail closed: unset / empty / whitespace / garbage-PEM anchors refuse a GENUINE token 2ms
+     ✓ PF4b verifyTimestamp fails closed with TSA_TRUST_ANCHORS_PEM unset, and set to a missing file 2ms
+     × PF4c CONTROL: verifyTimestamp with TSA_TRUST_ANCHORS_PEM = rootA text accepts the genuine token (the env path is live) 4ms
+     ✓ PF9 a signer without EKU timeStamping is refused on the EKU 4ms
+     ✓ PF10 a genTime outside the signer validity is refused on validity 4ms
+     ✓ REPORT PF5 / PF5C intermediate chain 8ms
+     ✓ REPORT PF6 rsaEncryption as SignerInfo.signatureAlgorithm 4ms
+     ✓ REPORT PF7 SignerInfo digest SHA-512 with a SHA-256 imprint 3ms
+     ✓ REPORT PF8 no signingCertificateV2 attribute 4ms
+     ✓ REPORT PF11 / PF12 OpenSSL-made tokens 7ms
+     ✓ REPORT PF13 the committed bundle through the product parser 0ms
+     ✓ NET no network call was made by any arm 0ms
+
+ Test Files  1 failed (1)
+      Tests  5 failed | 15 passed (20)
+   Start at  01:44:14
+   Duration  308ms (transform 45ms, setup 0ms, import 126ms, tests 88ms, environment 0ms)
+
+JSON report written to /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/70536f16-6704-4aed-a02d-638d9354a675/scratchpad/gD2/probe_try2.json

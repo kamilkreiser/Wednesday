@@ -1,0 +1,113 @@
+(!) Your Vite config uses features that are unsupported by `configLoader: 'native'`, which is planned to become the default in a future major version of Vite:
+  - ESM syntax in a file loaded as CommonJS (vitest.config.ts:1:1). Use a `.mjs` extension or set `"type": "module"` in the closest package.json
+Set `VITE_CONFIG_NATIVE_IGNORE_WARNING=true` to suppress this warning.
+
+⎯⎯⎯⎯⎯⎯ Failed Suites 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/__tests__/ks1404-verify-rfc3161.test.ts > KS 1404 — a genuine token is accepted, and each single defect is refused
+Error: Cannot find package 'pkijs' imported from /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/70536f16-6704-4aed-a02d-638d9354a675/scratchpad/gD2/svc_base/src/__tests__/ks1404-pki.ts
+ ❯ src/__tests__/ks1404-pki.ts:17:1
+     15|  * rather than to the token being generally broken.
+     16|  */
+     17| import * as pkijs from 'pkijs';
+       | ^
+     18| import * as asn1js from 'asn1js';
+     19| export const OID = {
+ ❯ src/__tests__/ks1404-verify-rfc3161.test.ts:144:15
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/8]⎯
+
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 7 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/__tests__/ks1404-verify-rfc3161.test.ts > KS 1404 — an unsigned RFC 3161 token must not verify > cell 1 [RED at base]: refuses an UNSIGNED DER token that carries the expected imprint
+AssertionError: expected true to be false // Object.is equality
+
+- Expected
++ Received
+
+- false
++ true
+
+ ❯ src/__tests__/ks1404-verify-rfc3161.test.ts:70:21
+     68|     const r = await verifyTimestamp(unsignedTokenCarryingHash(HASH), H…
+     69|     // At base this returns { valid: true, timestamp: '2026-10-04T12:0…
+     70|     expect(r.valid).toBe(false);
+       |                     ^
+     71|   });
+     72|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/8]⎯
+
+ FAIL  src/__tests__/ks1404-verify-rfc3161.test.ts > KS 1404 — an unsigned RFC 3161 token must not verify > cell 3 [RED at base]: reads the imprint from TSTInfo, not by searching the whole tree
+AssertionError: expected true to be false // Object.is equality
+
+- Expected
++ Received
+
+- false
++ true
+
+ ❯ src/__tests__/ks1404-verify-rfc3161.test.ts:75:21
+     73|   it('cell 3 [RED at base]: reads the imprint from TSTInfo, not by sea…
+     74|     const r = await verifyTimestamp(tokenWithPlantedHashElsewhere(OTHE…
+     75|     expect(r.valid).toBe(false);
+       |                     ^
+     76|   });
+     77|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/8]⎯
+
+ FAIL  src/__tests__/ks1404-verify-rfc3161.test.ts > KS 1404 — an unsigned RFC 3161 token must not verify > cell 11 indefiniteLength (RED at base — BER indefinite length is ACCEPTED by node-forge): is refused, and never throws out of verifyTimestamp
+AssertionError: indefiniteLength must not verify: expected true to be false // Object.is equality
+
+- Expected
++ Received
+
+- false
++ true
+
+ ❯ src/__tests__/ks1404-verify-rfc3161.test.ts:101:51
+     99|     // Must RESOLVE, never reject: a throw escaping verifyTimestamp is…
+    100|     const r = await verifyTimestamp(build[variant]().toString('base64'…
+    101|     expect(r.valid, `${variant} must not verify`).toBe(false);
+       |                                                   ^
+    102|   });
+    103|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/8]⎯
+
+ FAIL  src/__tests__/ks1404-verify-rfc3161.test.ts > KS 1404 — an unsigned RFC 3161 token must not verify > cell 12 [RED at base]: a forged mock JSON token without `mock` does not verify
+AssertionError: expected true to be false // Object.is equality
+
+- Expected
++ Received
+
+- false
++ true
+
+ ❯ src/__tests__/ks1404-verify-rfc3161.test.ts:113:21
+    111|     const r = await verifyTimestamp(mockJson({ hash: HASH, timestamp: …
+    112|     // At base: valid true AND tsaCertificate.isQualified true, becaus…
+    113|     expect(r.valid).toBe(false);
+       |                     ^
+    114|   });
+    115|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/8]⎯
+
+ FAIL  src/__tests__/ks1404-verify-rfc3161.test.ts > KS 1404 — the route POST /api/timestamps/verify > cell 14 [RED at base]: the route reports verified:false for an UNSIGNED token, in the published response shape
+ FAIL  src/__tests__/ks1404-verify-rfc3161.test.ts > KS 1404 — the route POST /api/timestamps/verify > cell 13 [GREEN at base AND head]: a STORED mock token still verifies through the DB-row branch, with the stored timestamp and tsaUrl and NO reason
+ FAIL  src/__tests__/ks1404-verify-rfc3161.test.ts > KS 1404 — the route POST /api/timestamps/verify > cell 13b [MUTATION ARM for cell 13]: the same stored row under a DIFFERENT proof does NOT verify — so cell 13 green can fail
+Error: Cannot find package '@secuura/shared' imported from /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/70536f16-6704-4aed-a02d-638d9354a675/scratchpad/gD2/svc_base/src/index.ts
+ ❯ src/index.ts:25:1
+     23| // unit suite can parse through the SHIPPED objects instead of a mirro…
+     24| import { createTimestampSchema, verifyTimestampSchema, batchTimestampS…
+     25| import { authenticate as jwtAuthenticate, enforceProductionConfig, err…
+       | ^
+     26|
+     27| dotenv.config();
+ ❯ driveVerify src/__tests__/ks1404-verify-rfc3161.test.ts:362:30
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/8]⎯
+

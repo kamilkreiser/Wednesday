@@ -1,0 +1,21 @@
+PASS NETC: passed | NETC the network counter sees an explicit stubbed fetch (must-hit control)
+FAIL G0: failed | G0 GREEN CONTROL: a genuine token, anchor rootA, is ACCEPTED | AssertionError: expected false to be true // Object.is equality
+FAIL PF1: failed | PF1 a token signed under an UNTRUSTED CA is refused on the chain | AssertionError: expected 'TSTInfo genTime falls outside the sig…' to match /chain|trust anchor/i
+FAIL PF1C: failed | PF1C the PF1 token with ITS root as anchor is accepted (PF1 was the chain, nothi | AssertionError: expected false to be true // Object.is equality
+PASS PF2: passed | PF2 one TSTInfo byte flipped after signing is refused on messageDigest
+FAIL PF2b: failed | PF2b one signature byte flipped is refused on the signature | AssertionError: expected 'TSTInfo genTime falls outside the sig…' to match /signature/i
+PASS PF3: passed | PF3 a NON-STORED {"hash","mock":true} token does not verify
+PASS PF3b: passed | PF3b the same without mock does not verify
+PASS PF4: passed | PF4 fail closed: unset / empty / whitespace / garbage-PEM anchors refuse a GENUI
+PASS PF4b: passed | PF4b verifyTimestamp fails closed with TSA_TRUST_ANCHORS_PEM unset, and set to a
+FAIL PF4c: failed | PF4c CONTROL: verifyTimestamp with TSA_TRUST_ANCHORS_PEM = rootA text accepts th | AssertionError: expected false to be true // Object.is equality
+PASS PF9: passed | PF9 a signer without EKU timeStamping is refused on the EKU
+PASS PF10: passed | PF10 a genTime outside the signer validity is refused on validity
+PASS NET: passed | NET no network call was made by any arm
+REPORT-ARM REPORT PF5 / PF5C intermediate chain: passed 
+REPORT-ARM REPORT PF6 rsaEncryption as SignerInfo.signatureAlgorithm: passed 
+REPORT-ARM REPORT PF7 SignerInfo digest SHA-512 with a SHA-256 imprint: passed 
+REPORT-ARM REPORT PF8 no signingCertificateV2 attribute: passed 
+REPORT-ARM REPORT PF11 / PF12 OpenSSL-made tokens: passed 
+REPORT-ARM REPORT PF13 the committed bundle through the product parser: passed 
+C3-PARSE probe-forgery FAIL

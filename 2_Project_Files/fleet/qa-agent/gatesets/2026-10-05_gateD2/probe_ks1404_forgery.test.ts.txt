@@ -1,0 +1,189 @@
+/**
+ * gateD2 C3 FORGERY PROBE — written by the gate kit, NOT by the builder. Copied into a SCRATCH worktree ONLY, as
+ * services/timestamping/src/__tests__/zz-gD2-probe-forgery.test.ts, run alone, then QUARANTINED (never committed, never rm'd).
+ *
+ * INDEPENDENCE. Tokens here are assembled by THIS file's own DER writer (not asn1js / pkijs, which the product uses to parse) and
+ * signed with node:crypto, over certificates the OpenSSL CLI made (probe_pki_gateD2.sh; env GD2_PKI = its outdir). Two tokens are
+ * made by OpenSSL ITSELF (`openssl ts -reply`). Nothing reaches a network: fetch / http / https / net are counted and stubbed.
+ *
+ * MANDATORY arms (the gate's C3 independent forgery probes; each must read as stated at HEAD):
+ *   G0   genuine token (sha256WithRSAEncryption, signed attrs incl. signingCertificateV2), anchor rootA      -> valid TRUE (the GREEN
+ *        control: without it every refusal below is uninterpretable)
+ *   PF1  the same shape signed by tsaB under the UNTRUSTED rootB, anchor rootA                         -> FALSE, reason names the chain
+ *   PF1C the PF1 token with anchor rootB                                                               -> TRUE (PF1 refused on the chain)
+ *   PF2  G0 with ONE TSTInfo byte flipped (serialNumber), signature untouched                         -> FALSE, reason messageDigest
+ *   PF2b G0 with its last signature byte flipped                                                       -> FALSE, reason signature
+ *   PF3  a NON-STORED {"hash": H, "mock": true} through verifyTimestamp                               -> FALSE
+ *   PF3b the same without `mock`                                                                       -> FALSE
+ *   PF4  G0 with the anchor bundle unset / '' / whitespace / a garbage PEM                             -> FALSE 'no trust anchor configured'
+ *   PF4b verifyTimestamp with TSA_TRUST_ANCHORS_PEM unset, and set to a path that does not exist        -> FALSE (fail closed)
+ *   PF4c verifyTimestamp with TSA_TRUST_ANCHORS_PEM = rootA's PEM text                                  -> TRUE (the env path is live)
+ *   PF9  signer without EKU timeStamping (tsaNoEku)                                                     -> FALSE, reason EKU
+ *   PF10 genTime 2099 (outside tsaA's validity)                                                        -> FALSE, reason validity
+ *   NET  0 network calls across the file; NETC the counter sees an explicit stubbed fetch (must-hit)
+ * REPORT arms (measured and printed `GD2 REPORT <arm> valid=<v> reason=<r>`; the GATE rules them — interoperability with real TSAs):
+ *   PF5  signer under an INTERMEDIATE (tsaI <- interA <- rootA), both certs in the token, anchor rootA   (does the engine get the
+ *        intermediate? the verifier passes certs: [signer] only)          PF5C the same with anchor rootA + interA
+ *   PF6  SignerInfo.signatureAlgorithm = rsaEncryption (1.2.840.113549.1.1.1), as OpenSSL / many TSAs write it
+ *   PF7  SignerInfo digestAlgorithm SHA-512 (messageDigest = SHA-512(eContent)) with a SHA-256 imprint
+ *   PF8  NO signingCertificateV2 attribute (RFC 3161 2.4.1 requires ESSCertID binding)
+ *   PF11 OpenSSL's own RSA token (openssl ts -reply), anchor rootA     PF12 OpenSSL's own ECDSA P-256 token, anchor rootA
+ *   PF13 the committed bundle (config/tsa-trust-anchors.pem), parsed by the PRODUCT's parseTrustAnchors: certificate count and
+ *        SHA-256 fingerprints (ABSENT is reported, and C4 fails on it)
+ */
+import { describe, it, expect, beforeAll, afterAll, vi } from 'vitest';
+import * as nodeCrypto from 'crypto';
+import * as fs from 'fs';
+import * as path from 'path';
+import { createRequire } from 'module';
+import { verifyRfc3161Token, parseTrustAnchors } from '../tsa/rfc3161-verify';
+import { verifyTimestamp } from '../tsa/qualified-tsa';
+
+const PKI = process.env.GD2_PKI || '';
+const rd = (f: string) => fs.readFileSync(path.join(PKI, f));
+const rdt = (f: string) => fs.readFileSync(path.join(PKI, f), 'utf-8');
+
+// ---------- network counters (installed before any arm) ----------
+let NET = 0;
+// the CJS export objects themselves (mutable, and the ones the product's own require() returns); an ESM namespace is frozen
+const cjs = createRequire(__filename); const http = cjs('http'); const https = cjs('https'); const net = cjs('net');
+const realReq = { h: http.request, hs: https.request, c: net.connect };
+beforeAll(() => {
+  if (!PKI || !fs.existsSync(path.join(PKI, 'rootA.pem'))) throw new Error('GD2_PKI is unset or holds no rootA.pem — run probe_pki_gateD2.sh first');
+  vi.stubGlobal('fetch', async () => { NET += 1; throw new Error('gateD2: no network'); });
+  (http as any).request = (...a: unknown[]) => { NET += 1; throw new Error('gateD2: no http'); };
+  (https as any).request = (...a: unknown[]) => { NET += 1; throw new Error('gateD2: no https'); };
+  (net as any).connect = (...a: unknown[]) => { NET += 1; throw new Error('gateD2: no net'); };
+});
+afterAll(() => { vi.unstubAllGlobals(); (http as any).request = realReq.h; (https as any).request = realReq.hs; (net as any).connect = realReq.c; });
+
+// ---------- a minimal DER writer + reader (independent of asn1js) ----------
+const len = (n: number) => { if (n < 0x80) return Buffer.from([n]); const b: number[] = []; let v = n; while (v > 0) { b.unshift(v & 0xff); v = Math.floor(v / 256); } return Buffer.from([0x80 | b.length, ...b]); };
+const tlv = (t: number, v: Buffer) => Buffer.concat([Buffer.from([t]), len(v.length), v]);
+const SEQ = (...p: Buffer[]) => tlv(0x30, Buffer.concat(p));
+const SET = (...p: Buffer[]) => tlv(0x31, Buffer.concat([...p].sort(Buffer.compare)));
+const OCT = (b: Buffer) => tlv(0x04, b);
+const INT = (n: number | Buffer) => { let b = typeof n === 'number' ? Buffer.from([n]) : n; if (b[0] & 0x80) b = Buffer.concat([Buffer.from([0]), b]); return tlv(0x02, b); };
+const NUL = Buffer.from([0x05, 0x00]);
+const OID = (s: string) => { const a = s.split('.').map(Number); const o = [a[0] * 40 + a[1]]; for (const x of a.slice(2)) { const t: number[] = []; let v = x; do { t.unshift(v & 0x7f); v = Math.floor(v / 128); } while (v > 0); for (let i = 0; i < t.length - 1; i++) t[i] |= 0x80; o.push(...t); } return tlv(0x06, Buffer.from(o)); };
+const GT = (s: string) => tlv(0x18, Buffer.from(s, 'ascii'));
+const CTX = (n: number, v: Buffer, constructed = true) => tlv((constructed ? 0xa0 : 0x80) | n, v);
+function readTLV(b: Buffer, off: number) { const tag = b[off]; let l = b[off + 1]; let h = 2; if (l & 0x80) { const k = l & 0x7f; l = 0; for (let i = 0; i < k; i++) l = l * 256 + b[off + 2 + i]; h = 2 + k; } return { tag, start: off, hdr: h, len: l, end: off + h + l }; }
+function children(b: Buffer, t: { start: number; hdr: number; end: number }) { const out = []; let o = t.start + t.hdr; while (o < t.end) { const c = readTLV(b, o); out.push(c); o = c.end; } return out; }
+/** issuer Name DER and serialNumber INTEGER DER from a certificate (TBSCertificate fields 1 and 3, after the optional [0] version). */
+function issuerAndSerial(cert: Buffer): Buffer {
+  const c = readTLV(cert, 0); const tbs = children(cert, c)[0]; const f = children(cert, tbs);
+  const i0 = f[0].tag === 0xa0 ? 1 : 0;
+  return SEQ(cert.subarray(f[i0 + 2].start, f[i0 + 2].end), cert.subarray(f[i0].start, f[i0].end));
+}
+
+const O = { sha256: '2.16.840.1.101.3.4.2.1', sha512: '2.16.840.1.101.3.4.2.3', rsaSha256: '1.2.840.113549.1.1.11', rsaEnc: '1.2.840.113549.1.1.1',
+  signedData: '1.2.840.113549.1.7.2', tstInfo: '1.2.840.113549.1.9.16.1.4', ct: '1.2.840.113549.1.9.3', md: '1.2.840.113549.1.9.4', scv2: '1.2.840.113549.1.9.16.2.47' };
+const alg = (o: string, withNull = true) => withNull ? SEQ(OID(o), NUL) : SEQ(OID(o));
+
+// genTime defaults to NOW (the OpenSSL certs are minted minutes before the run: a fixed past genTime precedes their notBefore)
+const NOW_GT = new Date().toISOString().replace(/[-:T]/g, '').slice(0, 14) + 'Z';
+interface Opt { signer: string; certs?: string[]; genTime?: string; sigAlg?: string; digest?: 'sha256' | 'sha512'; noScv2?: boolean; flipTst?: boolean; flipSig?: boolean; hashHex?: string; }
+function makeToken(o: Opt): string {
+  const hashHex = o.hashHex ?? rdt('data.sha256').trim();
+  const tst = SEQ(INT(1), OID('1.2.3.4.1'), SEQ(alg(O.sha256), OCT(Buffer.from(hashHex, 'hex'))), INT(Buffer.from('0a1b2c3d', 'hex')), GT(o.genTime ?? NOW_GT));
+  const signerDer = rd(o.signer + '.der');
+  const dg = o.digest ?? 'sha256';
+  const attrs = [
+    SEQ(OID(O.ct), SET(OID(O.tstInfo))),
+    SEQ(OID(O.md), SET(OCT(nodeCrypto.createHash(dg).update(tst).digest()))),
+  ];
+  if (!o.noScv2) attrs.push(SEQ(OID(O.scv2), SET(SEQ(SEQ(SEQ(OCT(nodeCrypto.createHash('sha256').update(signerDer).digest())))))));
+  const setOf = SET(...attrs);                                   // what is signed: the attributes as DER SET OF
+  const signedAttrs = Buffer.concat([Buffer.from([0xa0]), setOf.subarray(1)]);   // stored as IMPLICIT [0]
+  let sig = nodeCrypto.sign(dg, setOf, nodeCrypto.createPrivateKey(rdt(o.signer + '.key')));
+  if (o.flipSig) { sig = Buffer.from(sig); sig[sig.length - 1] ^= 0x01; }
+  const si = SEQ(INT(1), issuerAndSerial(signerDer), alg(O[dg]), signedAttrs, alg(o.sigAlg ?? O.rsaSha256), OCT(sig));
+  let tstFinal = tst;
+  if (o.flipTst) { tstFinal = Buffer.from(tst); const p = tstFinal.indexOf(Buffer.from('0a1b2c3d', 'hex')); tstFinal[p] ^= 0x01; }
+  const certs = (o.certs ?? [o.signer]).map((c) => rd(c + '.der'));
+  const sd = SEQ(INT(3), SET(alg(O[dg])), SEQ(OID(O.tstInfo), CTX(0, OCT(tstFinal))), CTX(0, Buffer.concat(certs)), SET(si));
+  return SEQ(OID(O.signedData), CTX(0, sd)).toString('base64');
+}
+const H = () => rdt('data.sha256').trim();
+const v = (tok: string, anchors: string | undefined) => verifyRfc3161Token({ tokenBase64: tok, expectedHashHex: H(), trustAnchorsPem: anchors });
+const report = (arm: string, r: { valid: boolean; reason?: string }) => console.log(`GD2 REPORT ${arm} valid=${r.valid} reason=${JSON.stringify(r.reason ?? null)}`);
+const mark = (arm: string, r: { valid: boolean; reason?: string }) => console.log(`GD2 ARM ${arm} valid=${r.valid} reason=${JSON.stringify(r.reason ?? null)}`);
+
+describe('gateD2 forgery probe (independent tokens)', () => {
+  it('NETC the network counter sees an explicit stubbed fetch (must-hit control)', async () => {
+    const before = NET; await (globalThis as any).fetch('https://example.invalid/').catch(() => undefined);
+    expect(NET).toBe(before + 1); NET = before;
+  });
+  it('G0 GREEN CONTROL: a genuine token, anchor rootA, is ACCEPTED', async () => {
+    const r = await v(makeToken({ signer: 'tsaA' }), rdt('rootA.pem')); mark('G0', r); expect(r.valid).toBe(true);
+  });
+  it('PF1 a token signed under an UNTRUSTED CA is refused on the chain', async () => {
+    const r = await v(makeToken({ signer: 'tsaB' }), rdt('rootA.pem')); mark('PF1', r);
+    expect(r.valid).toBe(false); expect(r.reason ?? '').toMatch(/chain|trust anchor/i);
+  });
+  it('PF1C the PF1 token with ITS root as anchor is accepted (PF1 was the chain, nothing else)', async () => {
+    const r = await v(makeToken({ signer: 'tsaB' }), rdt('rootB.pem')); mark('PF1C', r); expect(r.valid).toBe(true);
+  });
+  it('PF2 one TSTInfo byte flipped after signing is refused on messageDigest', async () => {
+    const r = await v(makeToken({ signer: 'tsaA', flipTst: true }), rdt('rootA.pem')); mark('PF2', r);
+    expect(r.valid).toBe(false); expect(r.reason ?? '').toMatch(/messageDigest/);
+  });
+  it('PF2b one signature byte flipped is refused on the signature', async () => {
+    const r = await v(makeToken({ signer: 'tsaA', flipSig: true }), rdt('rootA.pem')); mark('PF2b', r);
+    expect(r.valid).toBe(false); expect(r.reason ?? '').toMatch(/signature/i);
+  });
+  it('PF3 a NON-STORED {"hash","mock":true} token does not verify', async () => {
+    const tok = Buffer.from(JSON.stringify({ hash: H(), timestamp: '20261004120000Z', mock: true })).toString('base64');
+    const r = await verifyTimestamp(tok, H()); mark('PF3', { valid: r.valid, reason: r.error }); expect(r.valid).toBe(false);
+  });
+  it('PF3b the same without mock does not verify', async () => {
+    const tok = Buffer.from(JSON.stringify({ hash: H(), timestamp: '20261004120000Z' })).toString('base64');
+    const r = await verifyTimestamp(tok, H()); mark('PF3b', { valid: r.valid, reason: r.error }); expect(r.valid).toBe(false);
+  });
+  it('PF4 fail closed: unset / empty / whitespace / garbage-PEM anchors refuse a GENUINE token', async () => {
+    const tok = makeToken({ signer: 'tsaA' });
+    for (const [name, a] of [['unset', undefined], ['empty', ''], ['spaces', '   \n'], ['garbage', '-----BEGIN CERTIFICATE-----\nAAAA\n-----END CERTIFICATE-----\n']] as Array<[string, string | undefined]>) {
+      const r = await v(tok, a); mark('PF4-' + name, r); expect(r.valid, name).toBe(false); expect(r.reason, name).toBe('no trust anchor configured');
+    }
+  });
+  it('PF4b verifyTimestamp fails closed with TSA_TRUST_ANCHORS_PEM unset, and set to a missing file', async () => {
+    const prev = process.env.TSA_TRUST_ANCHORS_PEM; const tok = makeToken({ signer: 'tsaA' });
+    try {
+      delete process.env.TSA_TRUST_ANCHORS_PEM;
+      const r1 = await verifyTimestamp(tok, H()); mark('PF4b-unset', { valid: r1.valid, reason: r1.error }); expect(r1.valid).toBe(false);
+      process.env.TSA_TRUST_ANCHORS_PEM = path.join(PKI, 'no-such-bundle.pem');
+      const r2 = await verifyTimestamp(tok, H()); mark('PF4b-missing-file', { valid: r2.valid, reason: r2.error }); expect(r2.valid).toBe(false);
+    } finally { if (prev === undefined) delete process.env.TSA_TRUST_ANCHORS_PEM; else process.env.TSA_TRUST_ANCHORS_PEM = prev; }
+  });
+  it('PF4c CONTROL: verifyTimestamp with TSA_TRUST_ANCHORS_PEM = rootA text accepts the genuine token (the env path is live)', async () => {
+    const prev = process.env.TSA_TRUST_ANCHORS_PEM;
+    try { process.env.TSA_TRUST_ANCHORS_PEM = rdt('rootA.pem'); const r = await verifyTimestamp(makeToken({ signer: 'tsaA' }), H()); mark('PF4c', { valid: r.valid, reason: r.error }); expect(r.valid).toBe(true); }
+    finally { if (prev === undefined) delete process.env.TSA_TRUST_ANCHORS_PEM; else process.env.TSA_TRUST_ANCHORS_PEM = prev; }
+  });
+  it('PF9 a signer without EKU timeStamping is refused on the EKU', async () => {
+    const r = await v(makeToken({ signer: 'tsaNoEku' }), rdt('rootA.pem')); mark('PF9', r); expect(r.valid).toBe(false); expect(r.reason ?? '').toMatch(/EKU/);
+  });
+  it('PF10 a genTime outside the signer validity is refused on validity', async () => {
+    const r = await v(makeToken({ signer: 'tsaA', genTime: '20990101000000Z' }), rdt('rootA.pem')); mark('PF10', r); expect(r.valid).toBe(false); expect(r.reason ?? '').toMatch(/validity/);
+  });
+  it('REPORT PF5 / PF5C intermediate chain', async () => {
+    const tok = makeToken({ signer: 'tsaI', certs: ['tsaI', 'interA'] });
+    report('PF5', await v(tok, rdt('rootA.pem'))); report('PF5C', await v(tok, rdt('rootA.pem') + rdt('interA.pem')));
+  });
+  it('REPORT PF6 rsaEncryption as SignerInfo.signatureAlgorithm', async () => { report('PF6', await v(makeToken({ signer: 'tsaA', sigAlg: O.rsaEnc }), rdt('rootA.pem'))); });
+  it('REPORT PF7 SignerInfo digest SHA-512 with a SHA-256 imprint', async () => { report('PF7', await v(makeToken({ signer: 'tsaA', digest: 'sha512', sigAlg: '1.2.840.113549.1.1.13' }), rdt('rootA.pem'))); });
+  it('REPORT PF8 no signingCertificateV2 attribute', async () => { report('PF8', await v(makeToken({ signer: 'tsaA', noScv2: true }), rdt('rootA.pem'))); });
+  it('REPORT PF11 / PF12 OpenSSL-made tokens', async () => {
+    report('PF11', await v(rd('openssl_token_rsa.der').toString('base64'), rdt('rootA.pem')));
+    report('PF12', await v(rd('openssl_token_ec.der').toString('base64'), rdt('rootA.pem')));
+  });
+  it('REPORT PF13 the committed bundle through the product parser', async () => {
+    const p = path.resolve(__dirname, '../../config/tsa-trust-anchors.pem');
+    if (!fs.existsSync(p)) { console.log('GD2 REPORT PF13 bundle=ABSENT path=' + p); return; }
+    const certs = parseTrustAnchors(fs.readFileSync(p, 'utf-8'));
+    const fps = certs.map((c) => nodeCrypto.createHash('sha256').update(Buffer.from(c.toSchema().toBER(false))).digest('hex').toUpperCase().match(/../g)!.join(':'));
+    console.log(`GD2 REPORT PF13 bundle=PRESENT count=${certs.length} fingerprints=${JSON.stringify(fps)}`);
+  });
+  it('NET no network call was made by any arm', () => { console.log(`GD2 ARM NET calls=${NET}`); expect(NET).toBe(0); });
+});

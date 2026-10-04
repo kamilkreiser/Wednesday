@@ -1,0 +1,31 @@
+c3_cells_gateD2.sh — gateD2 C3 BEHAVIOUR: the KS 1404 cells, the suites, tsc, the mutation arms and the kit's two independent probes.
+A NEW COPY of gate54a's c2_cells_gate54a.sh, re-keyed for services/timestamping. bash 3.2 / zsh safe: NO rc is ever read through a pipe
+(every command: `cmd > out 2> err; rc=$?`, the rc written to its own .rc file). Never `cd` in the caller's shell (subshells only).
+WS = the REPO ROOT of a worktree YOU created in YOUR scratch clone under /private/tmp/claude-501/; OUT = your evidence dir.
+  plan                       READ-ONLY from the shared checkout (git show / cat-file): the KS 1404 file's cells by title, the route
+                             harness's mocks, whether `../tsa/rfc3161-verify` / `./ks1404-pki` exist at base (they must NOT), tsconfig's
+                             exclude of src/__tests__ (tsc never type-checks the cells), and the run plan.
+  parse-selftest             c3_parse_gateD2.py --selftest (12 arms).
+  pki OUT                    probe_pki_gateD2.sh OUT/pki (OpenSSL test PKI for the forgery probe).
+  install WS OUT             `npm ci --ignore-scripts` at Blockchain/Dev, then `npm run build --workspace=packages/shared` (the workspace
+                             install: a member-only install leaves suites unable to LOAD — the cheat sheet's own gotcha).
+  run base WS OUT            WS at the kit base: (1) the FULL timestamping suite pristine -> base_suite.json (builder: 5 files / 44 tests);
+                             (2) PLANT the head's KS 1404 test file AND ks1404-pki.ts, run the file alone -> base_cells.json: the red set
+                             (cells 1, 3, 11 indefiniteLength, 12, 14) RED BY ASSERTION, skips reported as a failed beforeAll;
+                             (3) QUARANTINE both planted files into OUT (never rm); `git status --porcelain` empty after.
+  run head WS OUT            WS at the pinned head: the KS 1404 file alone -> 25/25 green, 0 skipped; the FULL suite -> 6 / 69 (builder),
+                             0 failed; diff-suites vs OUT/base_suite.json (+1 file, +25 tests = the KS 1404 file, 0 regressions).
+  tsc base|head WS OUT       the NAMED hoisted binary <WS>/Blockchain/Dev/node_modules/.bin/tsc --noEmit -p services/timestamping;
+                             POSITIVE CONTROL in the same call: the same binary on a planted `const x: number = 'a'` in OUT -> rc 2 + TS2322.
+  mutate WS OUT              WS at the head: each c3_mutate_gateD2.py arm planted, the KS 1404 file run, judged (want its cell red and
+                             NOTHING else red), the file restored from the HEAD blob with sha256 proven equal; porcelain empty after.
+  probe base|head WS OUT     the kit's probes copied in as src/__tests__/zz-gD2-probe-*.test.ts, run alone, judged, QUARANTINED:
+                             head: the forgery probe (needs OUT/pki from `pki`) + the mock probe; base: the mock probe only (M1-M3 TRUE).
+REFUSES (rc 2, BEFORE any write) a WS outside /private/tmp/claude-501/ (the shared checkout and the builder's worktrees live under
+/Volumes/DevMASTER/!CODING/), a WS whose HEAD is not the side's sha, and an OUT outside /private/tmp/claude-501/ or the QA reports root —
+each tested on the LEXICAL path before mkdir (gate54a's exercise once created `Secuura/x` by testing after mkdir).
+Env: GD2_HEAD (the pinned head; REQUIRED for head-side modes — the kit has no drafted final head), GD2_BASE (default kit base).
+rc: 0 PASS / 1 FAIL / 2 refusal or usage / 3 a tool step failed (rc printed).
+set -u
+GS="$(dirname "$(/bin/realpath "$0")")"
+KJ() { python3 -c 'import json,sys; v=json.load(open(sys.argv[1]))[sys.argv[2]]; print(v if isinstance(v,str) else json.dumps(v))' "$GS/kit.json" "$1"; }
