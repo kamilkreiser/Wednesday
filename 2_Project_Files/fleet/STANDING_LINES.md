@@ -390,3 +390,5 @@ Rewriting audit-baseline.json with `json.dumps` re-escaped em-dashes in 7 unrela
 
 ## A seat token is not always two digits (2026-10-04, Seat C 21st found it at ITEM 0)
 - The re-keyed seat tools assumed a NUMERIC generation (`int(GEN)`, `range(20, int(GEN))`, `\d\d` stems, a `(4[0-9])` parked-file predicate). A lettered token like `c21` (or `50`, past 49) broke four sites: bannercheck int(), its banner regex matching `21` INSIDE `lockproofc21` (put the current generation FIRST in an alternation, longest-first, case-folded), stems() returning a VACUOUS CLEAN (0 checked; caught only by 0-checked-is-a-FAIL), and rekey_check failing in both directions. Every brief that re-keys a tool generation names this: grep the copied tools for `int(`, `\d\d`, `[0-9]{2}` and `4[0-9]` on the generation before the first run, and fix the predicate, not the map.
+
+- **Seat identity (2026-10-05, Seat D 5th's catch):** a seat reads its own pane id from `$TMUX_PANE` (or `tmux display -t "$TMUX_PANE" -p '#{pane_id}'`). A bare `tmux display -p '#{pane_id}'` returns the client's ACTIVE pane, which is usually the coordinator's.
