@@ -1,0 +1,23 @@
+c3_cells_gate55.sh — gate55 C3: the KS-1015 cells, the transfer suite before/after, and tsc (base == head, named binary, positive control).
+bash 3.2 / zsh safe; NO rc is read through a pipe (every command: `cmd > out 2> err; rc=$?`, the rc written to its own .rc file).
+WS = the REPO ROOT of a checkout YOU made in YOUR scratch (a by-SHA worktree of your clone); OUT = your evidence dir. Both guarded by
+guards_gate55.sh BEFORE any write (WS outside /Volumes/DevMASTER/!CODING/, clean, HEAD^{tree} == the side's kit tree; OUT lexical-first).
+  parse-selftest          c3_parse_gate55.py --selftest (14 arms).
+  install WS OUT          `npm ci --ignore-scripts` at Blockchain/Dev, then `npm run build --workspace=packages/shared` (X1). Either side.
+  run base WS OUT         WS at base: (1) the FULL transfer suite pristine -> base_suite.json (builder 4 files / 70 tests); (2) PLANT the
+                          head's ks1015 test (its blob, kit drafted_head_blobs) into the base WS, run it alone -> base_cells.json: D1-D3 RED,
+                          each an AssertionError, 0 load-failure markers; C1-C3 GREEN; (3) QUARANTINE the plant into OUT (never rm); clean.
+  run head WS OUT         WS at head: the ks1015 file alone -> 6/6 GREEN; the FULL suite -> 5 / 76, 0 failed; diff vs OUT/base_suite.json:
+                          +1 file, +6 tests that are exactly the cells, 0 NEW REDS.
+  tsc base|head WS OUT    the NAMED binary (Blockchain/Dev/node_modules/.bin/tsc, realpath + --version printed) `--noEmit -p .` in
+                          services/transfer: rc and `error TS` count; then `--listFilesOnly`: program size, files under __tests__ (the
+                          tsconfig excludes src/__tests__, so tsc base == head is a NO-REGRESSION reading of product code only).
+  tsc-control WS OUT      POSITIVE CONTROL at head: one type error appended to kit tsc_control_file (a non-excluded product file) -> tsc
+                          rc != 0 and >= 1 `error TS` naming that file; restored from its blob, sha256 proven, worktree clean.
+rc: 0 PASS / 1 FAIL / 2 refusal or usage / 3 a tool step failed.
+set -u
+GS="$(dirname "$(/bin/realpath "$0")")"
+. "$GS/guards_gate55.sh"
+PARSE="$GS/c3_parse_gate55.py"; TESTF="$(KJ test_file)"; TESTB="$(KB drafted_head_blobs "$(KJ test_file)")"
+SC() { python3 -c 'import json,sys; print(json.load(open(sys.argv[1]))["suite_claim"][sys.argv[2]])' "$GS/kit.json" "$1"; }
+usage() { sed -n '2,24p' "$0" | sed 's/^# \{0,1\}//'; }

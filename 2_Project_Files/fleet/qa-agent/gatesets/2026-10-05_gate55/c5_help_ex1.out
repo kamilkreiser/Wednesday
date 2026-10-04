@@ -1,0 +1,22 @@
+c5_handler_gate55.py — gate55 C5: the spec now declares what the HANDLER returns. READ ONLY on git objects (show / cat-file / rev-parse);
+prints only. Every claim prints file:line at the head so the gate can quote it.
+  H0  THE RUNTIME DID NOT MOVE: every kit runtime_unchanged file (the handler, the chain service, its types, the transfer index, the shared
+      response schemas) is blob-equal base == head — the PR changes the CONTRACT, never the behaviour it describes.
+  H1  THE HANDLER: exactly ONE `router.get('/:id',` in routes/delegations.ts; its body printed as a line range.
+  H2  SUCCESS SHAPE emitted: inside that body, the res.json literal with `success: true` and `data: { delegation, chain }`, and `chain` bound to
+      `delegationService.buildDelegationChain(delegation)` — each with file:line.
+  H3  ERROR PATHS reaching this handler: the handler's own `res.status(404).json({ success: false, error: { code: 'NOT_FOUND', message } })`;
+      and in services/transfer/src/index.ts `app.use('/api', jwtAuthenticate())` registered BEFORE `app.use('/api/delegations', ...)` (so a
+      bad token is a 401 from the shared middleware before the handler runs) — file:line each.
+  H4  THE CHAIN the service returns: the keys of buildDelegationChain()'s `return {` literal, and the `interface DelegationChain` fields with
+      their optionality (`?`) and TS types.
+  H5  THE SPEC at head (the YAML, parsed): GET /api/delegations/{id} 200 is NOT a bare $ref; required [success, data]; success enum [true];
+      data.required {delegation, chain}; data.delegation $ref Delegation; chain.properties == H4's return keys, chain.required == H4's
+      NON-optional fields, each type consistent with the TS type (string/string, number/integer, boolean/boolean, X[]/array).
+  H6  THE ERROR SHAPES: each status this handler path can emit (401, 404) is declared and references ErrorResponse, whose schema requires
+      success (enum [false]) and error {code, message} — the keys H3 found in the handler's literal.
+  H7  MUST-HIT CONTROL: the H5 comparator applied to the BASE yaml MUST FAIL (base declared the bare Delegation — the drift KS-1015 names).
+  INFO statuses declared but not emitted by this handler (pre-existing); async handler with no try/catch on Express 4 (READ ONLY, pre-existing);
+       the Delegation component's required set vs the TS `interface Delegation` (pre-existing, unchanged by this PR).
+--selftest: H5/H6 on SIM-mutated copies of the parsed head spec (each must fail) and on the real head (must pass).
+Usage: c5_handler_gate55.py --repo <clone or checkout> [--base sha] [--head sha] [--selftest]   rc 0 PASS / 1 FAIL / 2 usage

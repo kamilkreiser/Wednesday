@@ -1,0 +1,22 @@
+c1_pin_gate55.py — gate55 C1 PIN for Seat B 58th's PR B (KS-1015). Two instruments for the head (ls-remote + the PULLS API), the commit
+read from the clone with READ-ONLY git verbs. A NEW COPY of c1_pin_gate54a.py, re-keyed, plus P3b (head/tree == the drafted head: a MOVED
+HEAD is a re-draft) and P8 (0 co-tenant paths).
+  P1  ls-remote origin: refs/pull/<PR>/head == HEAD == the branch ref; develop present.
+  P2  PULLS API: open, not merged, base.ref develop, base.sha == origin develop, head.sha == HEAD, head.ref == kit branch_rx; mergeable shown.
+  P3  shape in the clone: HEAD's ONE parent == develop; ahead 1 / behind 0 (EXACTLY ONE commit over develop); develop == kit base, else
+      STALE BASE (every C2-C5 expectation was drafted against kit base: a re-draft, not a pass).
+  P3b HEAD == kit expected_head AND HEAD^{tree} == kit expected_tree, else HEAD MOVED since drafting (README section 7: a re-draft).
+  P4  files: API /files == clone `git diff --numstat develop HEAD` == EXACTLY the 5 declared paths, +/- equal per path; each vs the builder.
+  P5  NO TRAILER: `%(trailers)` on HEAD empty, 0 Co-Authored-By lines; CONTROL kit trailer_control_commit prints one.
+  P6  keys: title, body, branch and commit carry hyphenated KS-1015 and NO other hyphenated KS key (branch: lower-case ks-1015); no closing
+      keyword; `Refs KS-1015` on its own line in the body. INFO: the de-hyphenated context keys in the body.
+  P7  PR 0 (#1373) ABSENT: none of its 4 paths in develop..HEAD, each blob-equal develop == HEAD; MUST-HIT CONTROL: the same filter over
+      PR 0's own diff (kit pr0_range) lists 4.
+  P8  CO-TENANT ABSENT: 0 paths under kit cotenant_prefixes (services/timestamping/** = Seat D 4th's lane); MUST-HIT CONTROL: the same filter
+      over kit cotenant_control_range (Seat D 3rd's pushed KS-1404 head) lists >= 1.
+  P9  MODES: the 5 paths 100644 at HEAD (git ls-tree); CONTROL kit mode_control_path 100755.
+  INFO END_TREE: HEAD^{tree} (valid while develop == kit base) beside develop^{tree} (the control that differs).
+Controls-only inputs: --offline-dir <d> replays the PULLS API from pr_<PR>.json + files_<PR>.json (P2 then says OFFLINE);
+--lsremote-file <f> replays an ls-remote listing instead of reading origin (P1 then says REPLAY). A real gate uses neither.
+Usage: c1_pin_gate55.py --repo <clone with HEAD present> --pr <n> --head <40-hex> [--offline-dir d] [--lsremote-file f]
+rc 0 PASS / 1 FAIL / 2 usage / 3 API

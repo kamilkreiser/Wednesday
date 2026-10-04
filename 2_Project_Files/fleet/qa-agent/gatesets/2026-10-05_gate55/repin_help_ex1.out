@@ -1,0 +1,26 @@
+repin_and_launch_gate55.sh — the LAUNCH ACTION for the gate55 kit (the directory this script lives in). ONE PR, whose number and head are
+INPUTS taken from Seat B 58th's READY. Re-pin and launch are ONE action (Kam 2026-09-18): it READS everything AT LAUNCH and never trusts a
+pin it did not just re-read. A NEW COPY of repin_and_launch_gate54a.sh, re-keyed for gate55 (pane QA/Secuura-ks1015-<PR>, 5 paths, the
+KS-1404 co-tenant), plus step (3e) MOVED HEAD:
+  (0)  the pane QA/Secuura-ks1015-<PR> is routed (inbox_routing.conf) — rc 1;
+  (1)  the GitHub PULLS API: head sha, branch, base, state, merged, mergeable — rc 3; the PR body is saved beside this script (C4 / C6 read it);
+  (2)  ONE `git ls-remote` READ from the Secuura checkout: develop + refs/pull/<PR>/head + the branch — rc 2;
+  (2b) the OVERLAP census over every OTHER open PR: rc 15 on an OVERLAP; Seat D 4th's KS-1404 docs PR is REPORTED, never refused;
+  (3)  rc 11 unless HEAD == the API head == pull/head == the branch (WHOLE-FIELD), open, not merged, on develop, not `mergeable: false`,
+       and the branch matches kit branch_rx;
+  (3b) STALE BASE: rc 10 if origin develop != kit base (2d85b84e1012: a move is a RE-DRAFT);
+  (3e) MOVED HEAD: rc 18 if HEAD != kit expected_head (16784d620080: the blobs, numstat and doc-block lines are drafted there; a re-draft);
+  (3c) FILL: fill_gate55.py writes the prompt, the launcher and pins_gate55.json — rc 10 on refusal;
+  (3d) RACE: develop and the head re-read by ls-remote AFTER the fill — rc 10 / 11 if either moved meanwhile;
+  (4)  G55_* overrides refuse a real launch — rc 16;  (5) the usage gate — rc 12;  (6) the filled launcher's own --check — rc 13 (it also
+       refuses a pin older than 30 min, exit 9);  (7) cockpit.sh add — rc 14, then a pane census.
+--dry-run: steps 0-3d with the fill done as a SIMULATION (`dry<HHMMSS>.SIM.*`, never the real pins), then the SIM launcher's --check; the
+routing line's absence is REPORTED, not refused; it stops before (4). READ-ONLY in the Secuura checkout (ls-remote only). Nothing is merged,
+deployed or commented. Every step's output is written beside this script as launch_<HHMMSS>.* (dry: dry_<HHMMSS>.*).
+Controls-only overrides (any one set makes a real launch refuse at step 4): G55_ROUTING (routing file), G55_CENSUS_OFFLINE (a SIM fixture dir
+for the API + census), G55_EXPECTED_HEAD (stands in for kit expected_head), G55_PREV_REPORT / G55_PREV_SHA (the fill's previous-round
+report), G55_COMPARE_FILE (the SIM launcher's compare line).
+Usage: repin_and_launch_gate55.sh <PR number> <HEAD 40-hex> [--dry-run]
+set -u
+GS="$(dirname "$(/bin/realpath "$0")")"
+CHECKOUT='/Volumes/DevMASTER/!CODING/Secuura/Blockchain/2_Project_Files'

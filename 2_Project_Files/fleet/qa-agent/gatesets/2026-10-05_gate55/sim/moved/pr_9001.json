@@ -1,0 +1,21 @@
+{
+ "number": 9001,
+ "state": "open",
+ "merged": false,
+ "mergeable": true,
+ "mergeable_state": "clean",
+ "title": "KS-1015: the delegation GET spec declares the envelope its handler returns",
+ "body": "SIM \u2014 written by the gate55 drafter from Seat B 58th's brief (ITEM 3 step 3) and its 15:37Z / 15:44Z STATUS mails. NOT the PR body: the PR is not raised. Exercise input only.\n\n## What this does\n\nNarrows KS 1015, does not close it: the published contract for `GET /api/delegations/{id}` now declares the `{ success, data: { delegation, chain } }` envelope its handler (`routes/delegations.ts`, `GET /:id`) returns, instead of a bare `Delegation`. The spec follows the runtime.\n\nPR A (#1374, KS 1402) merged as `2d85b84e1012`; this PR was stacked on its pre-squash head `aa16f3256dbf86e654076a31ace1eb1b79a31e69` and is rebased onto develop.\n\n## Evidence\n\n- `npm run generate-openapi` reproduces the committed YAML byte-identically (sha256 `373ef7805f8896aa\u2026`); with the YAML reverted to its base blob, `npm run generate-openapi -- --check` returns rc 1 and writes nothing.\n- `npm run check:openapi` rc 0.\n- Red-first: D1-D3 red at base by AssertionError, C1-C3 green; 6/6 green at head. transfer suite 4 files / 70 tests -> 5 / 76.\n- pathgate53: 5 declared paths, 0 of PR 0's files, 0 co-tenant paths.\n\n## Docs (skill \u00a74)\n\nOne new KS 1015 block in each platform-k doc, after the KS 1402 block, additions only. Timing: at base `2d85b84e1012`, `services/transfer`, `generate-openapi` and `check:openapi` each hit 1 per doc and every hit sits inside the KS 1402 block, so 0 hits outside the KS 1402 block; must-hit control `auth` 68 / 67. No timing row changed.\n\n## NOT COVERED\n\n- Skill \u00a75f: no live sweep.\n- No live call to the delegation GET.\n- No live S+K pair run. No Schemathesis, no Akto.\n- No deploy.\n- `tsc` in `services/transfer` excludes `src/__tests__` (tsconfig.json:27), so the new test file is not type-checked.\n\nBranch adopted from Seat B 55th, carried by Seats B 56th and B 57th, finished by Seat B 58th.\n\nRefs KS-1015\n",
+ "user": {
+  "login": "kksecura"
+ },
+ "created_at": "SIM",
+ "head": {
+  "sha": "2971e504efce3c9a695f8a0a47cab5f3fabfd043",
+  "ref": "feature/ks-1015-delegation-get-spec-declares-envelope-b55-2"
+ },
+ "base": {
+  "ref": "develop",
+  "sha": "2d85b84e1012961c880daa3de70d8491fc0a2ff9"
+ }
+}

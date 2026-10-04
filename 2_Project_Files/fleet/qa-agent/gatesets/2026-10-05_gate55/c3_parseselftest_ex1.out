@@ -1,0 +1,77 @@
+SELFTEST OK T0 real reds at base (AssertionError x3, controls green): want PASS got PASS
+SELFTEST OK T1 6/6 green at head: want PASS got PASS
+SELFTEST OK T2 a load failure (0 cells) is never a red: want FAIL got FAIL
+    PASS console/JSON agreement: no console file given
+    FAIL LOAD: the ks1015 file produced 0 cells (file status failed: "Error: Cannot find module '@secuura/shared'") — a load failure is never a red
+SELFTEST OK T3 a red that is a TypeError, not an assertion: want FAIL got FAIL
+    PASS console/JSON agreement: no console file given
+    PASS load-failure markers in the file / its failures: NONE (want none)
+    PASS C1 at base: want pass | got passed
+    PASS C2 at base: want pass | got passed
+    PASS C3 at base: want pass | got passed
+    PASS D1 at base: want fail (an AssertionError) | got failed | AssertionError: expected { ref: '#/components/schemas/Delegation' } to deeply equal { ref: undefined }
+    FAIL D2 at base: want fail (an AssertionError) | got failed | TypeError: Cannot read properties of undefined
+    PASS D3 at base: want fail (an AssertionError) | got failed | AssertionError: expected { ref: '#/components/schemas/Delegation' } to deeply equal { ref: undefined }
+SELFTEST OK T4 a red carrying a load-failure marker: want FAIL got FAIL
+    PASS console/JSON agreement: no console file given
+    FAIL load-failure markers in the file / its failures: ['SyntaxError'] (want none)
+    PASS C1 at base: want pass | got passed
+    PASS C2 at base: want pass | got passed
+    PASS C3 at base: want pass | got passed
+    PASS D1 at base: want fail (an AssertionError) | got failed | AssertionError: expected { ref: '#/components/schemas/Delegation' } to deeply equal { ref: undefined }
+    PASS D2 at base: want fail (an AssertionError) | got failed | AssertionError: expected { ref: '#/components/schemas/Delegation' } to deeply equal { ref: undefined }
+    PASS D3 at base: want fail (an AssertionError) | got failed | AssertionError: x
+SELFTEST OK T5 a control cell red at base: want FAIL got FAIL
+    PASS console/JSON agreement: no console file given
+    PASS load-failure markers in the file / its failures: NONE (want none)
+    PASS C1 at base: want pass | got passed
+    FAIL C2 at base: want pass | got failed | AssertionError: expected { ref: '#/components/schemas/Delegation' } to deeply equal { ref: undefined }
+    PASS C3 at base: want pass | got passed
+    PASS D1 at base: want fail (an AssertionError) | got failed | AssertionError: expected { ref: '#/components/schemas/Delegation' } to deeply equal { ref: undefined }
+    PASS D2 at base: want fail (an AssertionError) | got failed | AssertionError: expected { ref: '#/components/schemas/Delegation' } to deeply equal { ref: undefined }
+    PASS D3 at base: want fail (an AssertionError) | got failed | AssertionError: expected { ref: '#/components/schemas/Delegation' } to deeply equal { ref: undefined }
+SELFTEST OK T6 a skipped cell at head is not a pass: want FAIL got FAIL
+    PASS console/JSON agreement: no console file given
+    PASS load-failure markers in the file / its failures: NONE (want none)
+    PASS C1 at head: want pass | got passed
+    PASS C2 at head: want pass | got passed
+    PASS C3 at head: want pass | got passed
+    FAIL D1 at head: want pass | got skipped
+    PASS D2 at head: want pass | got passed
+    PASS D3 at head: want pass | got passed
+SELFTEST OK T7 a D cell GREEN at base (the cell does not bite): want FAIL got FAIL
+    PASS console/JSON agreement: no console file given
+    PASS load-failure markers in the file / its failures: NONE (want none)
+    PASS C1 at base: want pass | got passed
+    PASS C2 at base: want pass | got passed
+    PASS C3 at base: want pass | got passed
+    FAIL D1 at base: want fail (an AssertionError) | got passed
+    PASS D2 at base: want fail (an AssertionError) | got failed | AssertionError: expected { ref: '#/components/schemas/Delegation' } to deeply equal { ref: undefined }
+    PASS D3 at base: want fail (an AssertionError) | got failed | AssertionError: expected { ref: '#/components/schemas/Delegation' } to deeply equal { ref: undefined }
+SELFTEST OK T8 clean suite pair 4/70 -> 5/76: want PASS got PASS
+SELFTEST OK T9 a base-green test red at head (a NEW RED): want FAIL got FAIL
+    PASS counts: base 4 files / 70 tests -> head 5 / 76 (want +1 / +6) | builder 4/70 -> 5/76
+    PASS the new tests are exactly the ks1015 cells: new 6 ['KS-1015 C1', 'KS-1015 C2', 'KS-1015 C3', 'KS-1015 D1', 'KS-1015 D2', 'KS-1015 D3'] | vanished 0 []
+    FAIL 0 NEW REDS (no base-green test red at head): 1 [('f0.test.ts', 'f0 t0')]
+    FAIL head failed == 0: 1
+    INFO base failed 0 (a base red is pre-existing; NAME it)
+SELFTEST OK T10 a seventh cell / +7 tests: want FAIL got FAIL
+    FAIL counts: base 4 files / 70 tests -> head 5 / 77 (want +1 / +6) | builder 4/70 -> 5/76
+    FAIL the new tests are exactly the ks1015 cells: new 7 ['KS-1015 C1', 'KS-1015 C2', 'KS-1015 C3', 'KS-1015 C4', 'KS-1015 D1', 'KS-1015 D2', 'KS-1015 D3'] | vanished 0 []
+    PASS 0 NEW REDS (no base-green test red at head): 0 []
+    PASS head failed == 0: 0
+    INFO base failed 0 (a base red is pre-existing; NAME it)
+SELFTEST OK T11 console agrees with JSON (5 / 76): want PASS got PASS
+SELFTEST OK T12 console disagrees with JSON: want FAIL got FAIL
+    FAIL console/JSON agreement: console Test Files 5 / Tests 76 vs JSON files 5 / tests 75
+    INFO suite: files 5 (failed files 0) | tests 75 (numTotalTests 75) | passed 75 failed 0 skipped 0 other 0
+SELFTEST MISS T13 an unexpected cell id: want FAIL got PASS
+    PASS console/JSON agreement: no console file given
+    PASS load-failure markers in the file / its failures: NONE (want none)
+    PASS C1 at head: want pass | got passed
+    PASS C2 at head: want pass | got passed
+    PASS C3 at head: want pass | got passed
+    PASS D1 at head: want pass | got passed
+    PASS D2 at head: want pass | got passed
+    PASS D3 at head: want pass | got passed
+SELFTEST BROKEN 13 of 14 (fixture c3_selftest_console.fixture.txt)

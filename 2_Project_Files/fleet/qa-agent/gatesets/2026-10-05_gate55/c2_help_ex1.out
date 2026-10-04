@@ -1,0 +1,19 @@
+c2_regen_gate55.sh — gate55 C2: the YAML is REGENERATED, not hand-patched; `check:openapi` rc 0. bash 3.2 / zsh safe; no rc via a pipe.
+  plan [REPO]             READ ONLY (git cat-file / rev-parse / show / grep on the shared checkout or your clone): the YAML blob at base and
+                          head == kit base_blobs / drafted_head_blobs (and they differ); the generator script + both npm scripts exist; the
+                          transfer.openapi.ts module is imported by the test and by NO non-test transfer source (so it is not runtime code).
+  regen WS OUT            head WS (installed): sha256 of the committed YAML (== kit spec_yaml_sha256_head) -> `npm run generate-openapi` at
+                          Blockchain/Dev -> sha256 AFTER == before and `git status --porcelain` empty (a byte-identical regeneration);
+                          POSITIVE ARM: `npm run generate-openapi -- --check` rc 0 with `CHECK PASS`. A different YAML is a FINDING: the
+                          regenerated file is kept in OUT, the committed blob restored, sha256 proven.
+  control WS OUT          head WS: the YAML set to its BASE blob -> `npm run generate-openapi -- --check` MUST be rc 1 with `CHECK FAIL:
+                          generated YAML differs`, and the file's sha256 UNCHANGED by the check (it wrote nothing); restored from the head
+                          blob, sha256 proven, worktree clean. (The control that proves the drift check can fail on THIS change.)
+  checkopenapi WS OUT     head WS: `npm run check:openapi` rc 0 (its two legs: generate --check + check:spec-examples; the example count
+                          printed); CONTROL: one planted YAML line -> rc != 0; restored, sha256 proven, worktree clean.
+REFUSES (rc 2, before writing) a WS inside /Volumes/DevMASTER/!CODING/, a dirty WS, a WS whose HEAD^{tree} is not kit expected_tree, an
+OUT inside !CODING/ other than the QA reports root (guards_gate55.sh). rc 0 PASS / 1 FAIL / 2 refusal / 3 a tool step failed.
+set -u
+GS="$(dirname "$(/bin/realpath "$0")")"
+. "$GS/guards_gate55.sh"
+Y="$(KJ spec_yaml)"; YB0="$(KB base_blobs "$(KJ spec_yaml)")"; YB1="$(KB drafted_head_blobs "$(KJ spec_yaml)")"; YSHA="$(KJ spec_yaml_sha256_head)"
