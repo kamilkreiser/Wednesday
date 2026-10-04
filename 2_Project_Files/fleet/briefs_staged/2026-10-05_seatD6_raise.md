@@ -220,4 +220,4 @@ PROVENANCE:
 - usage OK 19%; df 374919 MiB free; STANDING_LINES 395 lines sha256 d366d4fb81815d41 | usage_gate.sh --check, df -m, wc, shasum, 18:41Z | read 2026-10-05
 - template | /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/briefs_staged/2026-10-05_seatD5_successor.md (352 lines, read whole), cut down to ITEM 4 | read 2026-10-05
 
-SELF-CHECK: <placeholder: Wednesday re-reads end-to-end for contradictions before sending> | 2026-10-05 --:--
+SELF-CHECK: re-read end-to-end for contradictions | 2026-10-05 06:02

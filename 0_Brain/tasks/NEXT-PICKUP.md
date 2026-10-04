@@ -19,6 +19,12 @@ supersede: replace wholesale at the next pickup; do not append. Previous copy: N
 4. EXPIRING-GRANTS: "SPEND PAST THE 90%" is marked ENDED (account switched). Friday's "ignore the 90%" row is Friday's and is not touched.
 
 ### LIVE RIGHT NOW
+**🟢 06:0x 2026-10-05 MORNING (seat 8e88f5e9 continues as the morning seat; ctx ~76%). READ FIRST:**
+- Morning receipt POSTED (panel, Secuura, 201): Kam asked to resend his 10-02 KS-528 re-date mail unchanged to secuura-blockchain@ (or say the board tap suffices); fuse Fri 9 Oct 10:00.
+- **NAS push HUNG since 03:30** (pid 15632, rsync 15648 at 0.03 s CPU, 0-byte log; mount responsive). The 4 h cap ends it ~07:30 → read `scheduler/state/naspush_last.txt` (expect KILLED-CAP). OWED: rsync `--timeout` in `scheduler/nas_push.sh` (exercise both ways before re-arming).
+- **LIVE Seat D 6th (%14, KS-1404 ITEM 4)**, brief `fleet/briefs_staged/2026-10-05_seatD6_raise.md`. Its ITEM 0 answer must rule **Q-27**: recommended = declare the `# 27 cells` line (`:3738`, the file has 36) as a known figure defect to gateD2 (C5 D5 non-blocking on that one line) and carry the 27→36 fix in B 59th's PR alongside N-1375-1. Then: routing line `QA/Secuura-ks1404-<n>|coagent@agentmail.to|yes` → gateD2 `repin_and_launch_gateD2.sh <n> <head> --dry-run` → launch on its READY.
+- Sweep 06:0x: 6 KS updated since 10-04 08:00Z, all ours; 0 Peter/Stuart comments.
+
 **🌅 05:3x 2026-10-05 SHIFT-CHANGE HANDOVER (seat 8e88f5e9 → the 06:00 seat). FIRST ACTS; supersedes every block below:**
 0. `kam_rulings_today.sh` + `reconcile_rulings.py` first (0 Kam rows today at 05:3x). **MORNING (06:00):** (a) panel receipt, value first (below); (b) **KS-528 re-date reminder to Kam with the exact line** — the fuse is Fri 9 Oct 10:00 AEST, his 10-02 mail failed DKIM, so it needs a resend or his word that the board card suffices; (c) read `2_Project_Files/scheduler/state/naspush_last.txt` (first ARMED 03:30 run; expect OK + deleting=0) and tell Kam; (d) the morning sweep; (e) the empty dir `!CODING/Secuura/x` is Kam's to remove; (f) OPEN card `secuura-mobile-dormant-fuse-lapses-1019b`.
 1. **Floor: wednesday + fleet-monitor only.** develop `ef4901778710` (#1375 merged). KS-1404 branch `57fa9e31d7ce` PUSHED (merge-IN, tree 6d96b6e8 verified), **no PR yet**.
