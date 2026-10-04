@@ -25,5 +25,5 @@ prose and the second had to rediscover every name. **A deploy of the demo needs 
 5. **Verify live** behind Basic auth (`COMPOSER_DEMO_URL/USER/PASSWORD` in the project's `4_Credentials/.env`): page 200, and the new
    CSS/JS bundle carries a class that ONLY the change adds (c018e07: `pc-menu-button`).
 6. **Remove temp access and PROVE it:** strip the key line via run-command (backup `.pre-friday-removal-<date>`, `grep -c` = 0),
-   `az network nsg rule delete …`, list the rules (only the two standing ones), and `ssh … true` must time out.
+   `az network nsg rule delete …`, list the rules (only the two standing ones), and `ssh … true` must time out. **Exception (B64, 2026-10-04, BACKLOG #180):** if the laptop's public IP IS `default-allow-ssh`'s /32, port 22 stays open by the standing rule and a timeout cannot happen; prove closure by the temp key's refusal (`Permission denied (publickey)`) instead, and say which proof was used.
 7. Record the deploy on the card (`--delivered`), in Composer CLARIFICATIONS, and in the daily note.
