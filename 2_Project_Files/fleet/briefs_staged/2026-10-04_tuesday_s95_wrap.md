@@ -1,0 +1,3 @@
+BLUF: Tuesday s95 wrapped for Kam's machine restart. Datasec is PAUSED on Kam's word (09-30 12:03); usage renewed to 0% on 10-04, he was asked to reply "resume" (default: stay paused), no answer yet. The four NexusAI seats wrapped (handovers written; N holds two local unpushed merge commits, 9ec73da and a415525; P one); gate 12 is finishing its report. Next seat: read 0_Brain/tasks/NEXT-PICKUP-TUESDAY.md DELTA 139, then 138.
+Done this session: main red cleared and verified; RD-732 merged and verified (main fae2aa1); RD-430 re-pin ruled; gate 12 switched to Opus 4.8 per Kam (session only); pause carried out 5/5; ATTIO digest misrouting traced and owed; ledger 3c run (65 rows archived, conserved); 4 ledger rows.
+-- Tuesday
