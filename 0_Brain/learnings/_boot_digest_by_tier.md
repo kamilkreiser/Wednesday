@@ -7,7 +7,7 @@ status: live
 
 # Boot digest BY TIER — W whole, M rules-only, every project case a handle
 
-Generated 2026-10-05 09:02 from 214 lesson files (979,781 B). M 36 · MIXED 5 · P-Datasec/HPSM-POC 1 · W 172. 5 project CASE sections inside MIXED files are reduced to one line each: the heading and the path to read it at. W blocks are exactly what the default digest carries; M blocks drop the section index and keep the rules; a P file is a single handle. The CASES behind every rule live only in the lesson files — open one the moment its rule fires.
+Generated 2026-10-05 10:16 from 215 lesson files (981,795 B). M 36 · MIXED 5 · P-Datasec/HPSM-POC 1 · W 173. 5 project CASE sections inside MIXED files are reduced to one line each: the heading and the path to read it at. W blocks are exactly what the default digest carries; M blocks drop the section index and keep the rules; a P file is a single handle. The CASES behind every rule live only in the lesson files — open one the moment its rule fires.
 
 ## The T9 SSD is the master — Wednesday must be fully portable
 `2026-07-31_fully-portable-drive.md` · principle · 2026-07-31 · status: superseded — the "T9 is the master" half by [[2026-08-25_one-drive-devmaster-is-master]] (2026-08-25); the portability principle itself still lives · tier: W
@@ -6863,4 +6863,27 @@ which dialog option is inside the grant).
 3. Wednesday's own context is the constraint, not the work: delegate drafting (briefs, screens, gate kits) to subagents and keep the source reads.
 
 **Family:** [[2026-09-13_as-many-agents-as-possible-partitioned-by-code]] · [[2026-09-25_three-tier-routing-ornith-spark-cloud-always-on]] · [[2026-08-03_go-slow-earn-autonomy]] (rule 5: every grant recorded).
+
+
+## Grant: a board tap from Kam is enough authority for an audit re-date — no signed email needed
+`2026-10-05_board-taps-suffice-for-audit-redates.md` · grant · 2026-10-05 · status: live · tier: W
+
+**His words, verbatim (terminal, answering Wednesday's consolidated ask of 10:00):**
+> *"board taps are enough for audit re-dates"*
+
+**How to apply:**
+1. The brief or ANSWER that commissions the re-date quotes the ruled card (id, option key, his ruled
+   timestamp from the card store) AND this grant by file name, so the seat's authority is checkable
+   in its own inbox and in this brain.
+2. **Scope is re-dates only:** moving an existing dated row's date, with his ruled date. Adding a NEW
+   baseline row, removing one, or widening one to new advisories is not a re-date — those still need
+   his ruling on their own card.
+3. The re-date still goes through the normal path: a seat builds it, a QA gate proves it (the
+   frozen-clock proof), Wednesday GOs the merge. The grant removes the signed-mail step, not the gate.
+4. No expiry stated; it stands until he changes it (said so rather than assumed).
+
+**Family:** [[2026-08-07_authorship-is-checkable-dkim]] (DKIM remains the rule for approvals that
+arrive by MAIL; this names a second channel he accepts for one class) ·
+[[2026-08-03_go-slow-earn-autonomy]] (rule 5: every grant recorded) ·
+[[2026-08-07_protocol-v1.3-signed-delegation]].
 
