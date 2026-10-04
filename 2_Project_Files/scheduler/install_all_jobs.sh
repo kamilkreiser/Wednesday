@@ -77,6 +77,8 @@ for t in "$JOBS"/*.plist.template; do
   # ornith-* jobs are Wednesday's only. On any other seat they refused every cycle (G5: no ollama) and posted
   # duplicate receipts to the panel (Tuesday's 2026-09-22 04:26Z coordination; she booted them out by hand).
   case "$job" in ornith-*) if [ "$SEAT" != "wednesday" ]; then echo "skip $job — Ornith is Wednesday's; seat is $SEAT"; continue; fi ;; esac
+  # HELD 2026-10-04 (deletion incident): never (re)install a nassync leg whose hold file exists — re-arming is Kam's word.
+  if [ "$job" = "nassync" ] && [ -e "$PROJECT_DIR/2_Project_Files/scheduler/NASSYNC_HOLD_$SEAT" ]; then echo "skip $job — HELD (2_Project_Files/scheduler/NASSYNC_HOLD_$SEAT); re-arm only on Kam's word"; continue; fi
   label="com.$SEAT.$job"
   target="$AGENTS/$label.plist"
   # @HOME@ is a placeholder for the SAME reason as @PROJECT_DIR@ (2026-09-16, Tuesday's first run):

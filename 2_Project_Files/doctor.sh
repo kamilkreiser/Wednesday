@@ -411,6 +411,12 @@ if [ "$_DOC_AGENT" = "friday" ]; then
   _DOC_JOBS=""
 fi
 for job in $_DOC_JOBS; do
+  # HELD 2026-10-04 (the deletion incident): a nassync leg with its hold file present is STOPPED ON PURPOSE.
+  # Report it as held and never advise reinstalling it — re-arming is Kam's word (delete the hold + launchctl enable).
+  if [ "$job" = "com.${_DOC_AGENT}.nassync" ] && [ -e "$PROJECT_DIR/2_Project_Files/scheduler/NASSYNC_HOLD_${_DOC_AGENT}" ]; then
+    warn "scheduler $job HELD (by design, 2026-10-04 deletion incident)" "do NOT reinstall — re-arm only on Kam's word: see 2_Project_Files/scheduler/NASSYNC_HOLD_${_DOC_AGENT}"
+    continue
+  fi
   if launchctl print "gui/$(id -u)/$job" >/dev/null 2>&1; then
     lec=$(launchctl print "gui/$(id -u)/$job" 2>/dev/null | awk '/last exit code/{print $NF}')
     prog=$(launchctl list "$job" 2>/dev/null | awk -F'"' '/scheduler\/.*\.sh/{print $2; exit}')

@@ -49,6 +49,16 @@ if [ "$AGENT" = "friday" ]; then
   exit 2
 fi
 
+# HOLD (2026-10-04, after the 03:30 leg ran ~14 h, was killed by Kam's 17:50 reboot, and had already
+# propagated "deleted on the NAS" for ~200 tracked + ~245k untracked WEDNESDAY files onto DevMASTER).
+# While scheduler/NASSYNC_HOLD_<agent> exists this leg REFUSES before any log, state or engine call.
+# Removing the file is Kam's word only (it is the re-arm decision). Second lock beside
+# `launchctl disable gui/501/com.<agent>.nassync`, so neither a login reload nor an install_all_jobs re-run can fire it.
+if [ -e "$HERE/NASSYNC_HOLD_$AGENT" ]; then
+  echo "nas_sync: REFUSED — $HERE/NASSYNC_HOLD_$AGENT exists (held by Kam's decision after the 2026-10-04 deletion incident); nothing run" >&2
+  exit 3
+fi
+
 # >>> ruled-ignores — KAM'S RULINGS ON WHAT THIS LEG SYNCS
 # 2026-09-10 20:27 `stop-partition-rerun` + 20:28 `nas-shared-folders-owner = wednesday`:
 #   this leg does NOT walk Datasec or the TUESDAY tree — Tuesday's leg owns those.
