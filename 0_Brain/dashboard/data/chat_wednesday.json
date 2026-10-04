@@ -8266,5 +8266,117 @@
   "project": "WED",
   "ts": "2026-10-04T17:48:06.797970+11:00",
   "text": "A correction to my last message: I said about thirty merges, and I hadn't counted. Adding up the day totals in my notes, it was about 52 Secuura merges from 27 September to 2 October, then none over the weekend. That's taken from my notes rather than recounted on GitHub."
+ },
+ {
+  "role": "wednesday",
+  "seat": "Kamils-Mac-Studio.local",
+  "project": "Secuura",
+  "ts": "2026-10-04T17:50:14.026122+11:00",
+  "text": "The overnight sync to the NAS deleted 139 files and I want you to see that before you trust the drives.\n\nThat is above the threshold where I stop treating it as routine. It may be entirely correct — a deletion you made on purpose propagates like any other change — but nobody was awake to watch it, and this is the mechanism that cost us a day in August.\n\nEvery deleted file is recoverable. They are in the unison backup store on the machine that ran the leg, not on the drives themselves. The full list of paths is in /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/scheduler/state/nas_sync_ALERT_wednesday_2026-10-04_033004_5604.txt, and the run log is at /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/scheduler/logs/nas_sync_wednesday_2026-10-04_033004_5604.log."
+ },
+ {
+  "role": "wednesday",
+  "seat": "Kamils-Mac-Studio.local",
+  "project": "Secuura",
+  "ts": "2026-10-04T18:22:43.511973+11:00",
+  "text": "Ornith has had nothing queued since 19:37 — the coordinator owes it a brief or a reason (never-idle, 2026-09-15 18:19)."
+ },
+ {
+  "role": "wednesday",
+  "seat": "Kamils-Mac-Studio.local",
+  "project": "WED",
+  "ts": "2026-10-04T18:44:37.735173+11:00",
+  "text": "No action needed from you right now. The NAS sync can't run again until you say so.\n\nThat job is mine: Wednesday's nightly 03:30 NAS leg, set up on your 8 September instruction. You hadn't heard it was running because the morning receipts never mentioned it. It started at 03:30, was still going at your 17:50 reboot, and pushed the false deletions. I've put three locks on it, and the restored git files are pushed (commit 4d1ce484). First, launchd has it disabled permanently, so a reboot or login won't reload it. Second, the sync script refuses to start while a hold file exists. Third, the job installer skips it. The startup check now shows it as HELD rather than missing, so no seat will 'fix' it back on. I tested the refusal. I didn't run the sync itself.\n\nTwo restore gaps I've fixed: the live board's Python environment was never on the NAS (rebuilt), and the deploy key's permissions were reset (fixed). Board posts and git pushes work again.\n\nSpark: it's on the cable now, the Studio reaching it over Ethernet at under 1 ms. The model is healthy, and a test reply came back in 0.28 seconds. Starting Spark work next, plus the owed Secuura seat for KS-1402.\n\nThe NAS fix before any re-arm goes to you as a card: I'll recommend making it a one-way copy to the NAS that can never delete anything on DevMASTER."
+ },
+ {
+  "role": "wednesday",
+  "seat": "Kamils-Mac-Studio.local",
+  "project": "WED",
+  "ts": "2026-10-04T18:58:52.684030+11:00",
+  "text": "Received: option a, rebuild the NAS sync as a one-way copy. I'm building it now as a new script that only copies from DevMASTER to the NAS. It can't delete anything, and it won't write to DevMASTER at all. I'll test it on scratch folders first, then show you the results and a dry run against the real NAS. It doesn't run until you say go. The old two-way job stays locked."
+ },
+ {
+  "role": "wednesday",
+  "seat": "Kamils-Mac-Studio.local",
+  "project": "WED",
+  "ts": "2026-10-04T19:14:20.781426+11:00",
+  "text": "I need one word from you: go, to schedule the new one-way NAS backup nightly at 03:30.\n\nThe dry run against the real NAS has finished and wrote nothing. It checked 1.38 million files, about 1.1 terabytes, in 11 minutes. The first real run would copy 333 new files, update 315, and create 13 folders: about 113 megabytes, mostly my own tools and brain. Every NAS file it replaces is kept in a backup folder first. Deletions: zero, and it can't delete by design.\n\nI recommend go. It takes about 11 minutes a night now, against the old two-way sync's 14 hours, and it can't touch DevMASTER. The other options: run it by hand only when you ask, or leave it off. If I don't hear from you, it stays off and the NAS copy keeps getting older."
+ },
+ {
+  "role": "wednesday",
+  "seat": "Kamils-Mac-Studio.local",
+  "project": "Secuura",
+  "ts": "2026-10-04T19:37:57.415328+11:00",
+  "text": "Ornith has been gate-refused for 30 minutes on G2-panes — nothing has run since it started. Remedy: read night/log/night_2026-10-04.log for the refusal line."
+ },
+ {
+  "role": "wednesday",
+  "seat": "Kamils-Mac-Studio.local",
+  "project": "WED",
+  "ts": "2026-10-04T19:44:53.422586+11:00",
+  "text": "Received, two things. First: go on the nightly one-way NAS backup. I'm scheduling it for 03:30 now and will confirm once it's armed and checked. Second: as much Secuura work as possible with the Spark and Claude agents. I'm taking that as a standing instruction, read as until you change it. Seat B 55th is already building, and I'll line up more Spark tasks and parallel seats on separate code."
+ },
+ {
+  "role": "wednesday",
+  "seat": "Kamils-Mac-Studio.local",
+  "project": "Secuura",
+  "ts": "2026-10-04T19:46:32.547476+11:00",
+  "text": "I can't find the email with Stuart's and Peter's messages. Could you forward it to wednesday-agent@agentmail.to, or tell me which address you sent it to?\n\nWhat I checked: all ten agent inboxes (the Datasec ones by subject only) and your board messages in every tab. The newest mail from you anywhere is your 2 October re-date mail, and since the search found that one, it isn't simply blind. If yesterday's went to another address, like your Secuura or Datasec mailbox, it never reached me.\n\nSeparately: the NAS backup is scheduled for 03:30 tonight. It's armed and checked, and the old two-way sync stays locked."
+ },
+ {
+  "role": "wednesday",
+  "seat": "Kamils-Mac-Studio.local",
+  "project": "Secuura",
+  "ts": "2026-10-04T19:47:19.103628+11:00",
+  "text": "Got both messages, thanks; no need to forward the email.\n\nStuart, on KS-1402: you already picked option a on 2 October at 09:58, widening the lookup to accept connector tokens. Seat B 55th is building it now with tests, then a QA gate. If you want to answer him on WhatsApp, this is ready to paste:\n\nKS-1402: Kam picked option a on 2 Oct. The fix is being built now and will be on the ticket after QA. You'll need users:read on S's connector key for transfers to pass.\n\nPeter's slots set: 7 of the tickets are ours, on Platform K. They're mostly tooling that still points at slot 1. I'm briefing a second Claude seat on them now, running alongside B 55th on separate files, with the Spark taking any single-file piece. KS-1162 touches the GitHub workflow files, which stay yours, so it's carded rather than built. The 9 Platform S tickets are Stuart's and Peter's."
+ },
+ {
+  "role": "wednesday",
+  "seat": "Kamils-Mac-Studio.local",
+  "project": "Secuura",
+  "ts": "2026-10-04T20:02:03.370021+11:00",
+  "text": "No action needed yet. A decision card is coming in about 20 minutes.\n\nSecuura pushes are frozen again, the fifth time. This time nothing new was published: three old high-severity advisories had their affected version ranges widened on 1 and 2 October, so versions we already pin now count as vulnerable. They're in braces, node-forge and http-cache-semantics. One is fixable by refreshing two package locks. braces and node-forge have no fixed version anywhere, so the only way through the gate is a recorded exception, which for high severity is your decision.\n\nSeat B 55th's KS-1402 fix is committed locally and waiting. Nothing reached GitHub, and it didn't bypass the check. It's now measuring whether those two packages actually reach anything we ship, and whether our code calls the vulnerable functions, so your card carries facts rather than guesses."
+ },
+ {
+  "role": "wednesday",
+  "seat": "Kamils-Mac-Studio.local",
+  "project": "Secuura",
+  "ts": "2026-10-04T20:09:25.506058+11:00",
+  "text": "Two decisions for you on the Fleet panel, both on Secuura.\n\nFirst, the push freeze. I recommend b: fix the one package that can be fixed with a lock refresh that moves nothing else; record an exception for braces, which only ships in the API gateway and which none of our code calls; and remove node-forge from timestamping rather than accept it, as you preferred on 9 September. Until then node-forge gets an exception too, both expiring no later than 31 October. If you don't pick, pushes stay frozen and the seats keep working locally.\n\nSecond, a real defect the measurement turned up: our timestamping service never checks the signature on a timestamp token. Anything containing the right hash passes, and the response calls it qualified. I recommend a: a ticket plus a proper fix with tests and a full QA gate. If you don't pick, I'll file the ticket only.\n\nMeanwhile Seat B 55th is building the KS-1015 change locally, and Seat C 21st has started on Peter's slot-isolation tickets."
+ },
+ {
+  "role": "wednesday",
+  "seat": "Kamils-Mac-Studio.local",
+  "project": "Secuura",
+  "ts": "2026-10-04T21:06:16.666697+11:00",
+  "text": "Received all three.\n\nTimestamping, option a: I'll file the High ticket and brief a separate Claude seat to build real signature checking with tests that fail before the fix. That rework also removes node-forge.\n\nPush freeze, option b: Seat B 55th has all the measurements, so it'll build the unfreeze change first. That's the lock refresh for http-cache-semantics, plus recorded exceptions for braces and, until the rework lands, node-forge, both expiring no later than 31 October. It goes through its own QA gate and merges. Then both seats update their work onto it and push.\n\nWeek instruction, option a: renewed to Sunday 11 October. My reading is that your words from tonight set what it says: as much work as possible with the Spark and Claude agents. That replaces the old travel-week rule of cloud seats only when there's no other way. If you meant the old wording, tell me and I'll switch back."
+ },
+ {
+  "role": "wednesday",
+  "seat": "Kamils-Mac-Studio.local",
+  "project": "Secuura",
+  "ts": "2026-10-04T21:21:13.801640+11:00",
+  "text": "One more decision card, for the KS-1404 timestamping fix.\n\nTo fix it properly, the seat has to check each timestamp's signature against an authority we trust. None is set up anywhere today, and Node can't read that signature format without adding a library called pkijs. I recommend a: add pkijs and trust whichever timestamp provider each environment already uses. If you don't pick, the seat builds the safe version: reject every unsigned or untrusted token now, real verification later.\n\nAlso: Seat B 55th wrapped at its 70% limit with both fixes committed locally. It caught that my unfreeze plan missed the main lock file, so I've ruled to include that file and set both exceptions to expire 31 October. A successor seat is being briefed to finish the unfreeze."
+ },
+ {
+  "role": "wednesday",
+  "seat": "Kamils-Mac-Studio.local",
+  "project": "Secuura",
+  "ts": "2026-10-04T21:34:18.932604+11:00",
+  "text": "No action needed. I've rotated in and picked up the evening. Seat C 21st has PR 1 (the six test-slot sites) committed locally, frozen, and is wrapping. Seat B 56th is measuring its first question on the unfreeze PR; I'll answer it when it lands. Your three rulings from 21:05 are all recorded. The one card still open is the timestamping trust and library choice; its default is fail-closed."
+ },
+ {
+  "role": "wednesday",
+  "seat": "Kamils-Mac-Studio.local",
+  "project": "Secuura",
+  "ts": "2026-10-04T22:07:43.747055+11:00",
+  "text": "Received: timestamping uses pkijs and trusts the authority each environment's TSA_URL already points at. I'm writing it into the timestamping seat's brief now; that seat launches once the unfreeze PR merges."
+ },
+ {
+  "role": "wednesday",
+  "seat": "Kamils-Mac-Studio.local",
+  "project": "Secuura",
+  "ts": "2026-10-04T22:17:08.415375+11:00",
+  "text": "No action needed, but one correction to the freeze card you ruled tonight. The card said braces and node-forge each ship in one server image. Seat B 56th has now checked all 40 lock files: both also appear as production dependencies of the mobile app (node-forge at an older 1.3.3), and in the root lock. The mobile app's lock is outside the security gate's scope until 19 October (KS-769), and whether either package actually ends up in the built app is unmeasured. The unfreeze fix itself is proven: the three blocking checks fail on the old code and pass on the new, and each accepted advisory genuinely matters to the check. If the mobile exposure changes your ruling, say so; otherwise it stands."
  }
 ]
