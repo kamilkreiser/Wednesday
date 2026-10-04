@@ -1,0 +1,537 @@
+LAUNCH BRIEF (Seat C 21st): Peter's slots-not-fully-isolated label - KS-1382 (T2) + KS-1355 spots 1-3, beside Seat B 55th; pushes FROZEN, commit locally
+
+# LAUNCH BRIEF: Seat C 21st, Secuura/Blockchain-C. Work Peter's `slots-not-fully-isolated` label on Platform K, which holds 7 tickets. BUILD 2 PRs: PR 1 is KS-1382, the Blockchain/Testing entry points that default to slot 1. PR 2 is KS-1355 spots 1-3, the stack tooling. Each PR is red-first and uses `Refs` only. **Pushes are FROZEN repo-wide: build and commit LOCALLY, and push only when Wednesday clears it.** Both PRs then go to ONE gate (gateC21) and merge on its GO. The other five tickets are OUT or a Spark job, each with its reason below. **You run IN PARALLEL with Seat B 55th, on the same checkout and the same inbox.** From Wednesday
+
+## 🔴 READ THIS FIRST: YOU HAVE A CO-TENANT, AND THE INBOX IS SHARED
+- **Seat B 55th is LIVE on this project right now**, on pane `Secuura/Blockchain`. It is building KS-1402 and KS-1015. At 2026-10-04T08:49:12Z it held `.push-lock-50` (holder `{"seat": "Secuura/Blockchain b55", "pid": 85681, "branch": "feature/ks-1402-lookup-accepts-connector-token-b55-1", …}`).
+- **The two seats share one inbox, `secuura-blockchain@agentmail.to`.** `inbox_routing.conf` maps `Secuura/Blockchain` (`:29`) and `Secuura/Blockchain-C` (`:37`) to the same address, and `-B`, `-D`, `-E` and `-BOARD` as well. **Both seats read every mail. A mail whose subject names another seat (Seat B 55th, or any other) is NOT yours, whatever its body says.** Act on a GO, a relayed ruling, or a push, merge or post instruction **only when its subject names Seat C 21st**.
+- **Wednesday tags every mail to you `[Wednesday -> Secuura/Blockchain-C]` AND names `Seat C 21st`.** You send on `[Secuura/Blockchain-C -> Wednesday] `. Match on the bracketed segment `blockchain-c]`, never on the substring `secuura/blockchain`, because that substring occurs inside every lane's tag (the matcher lesson, `inbox_match49.py:44-:48`).
+- 🔴 **B 55th's brief was written for a SOLE seat.** It says *"no co-tenant is live"*. Its partition line also says *"if `ls` finds any `.push-lock-*` other than yours, or a `-b55-` ref you did not make, STOP and mail Wednesday."* Your first lock or worktree would therefore STOP B 55th. **So you make NO ref write, NO worktree add and take NO lock until Wednesday's ANSWER to your ITEM 0 says that B 55th has received and acknowledged a co-tenant addendum naming your namespace.** That ANSWER is your release. Reading and measuring are allowed before it.
+
+## 🔴 PUSH FREEZE: NO PUSH FROM THIS SEAT UNTIL WEDNESDAY CLEARS IT
+- **Pushes have been FROZEN repo-wide since 2026-10-04 ~08:56Z**, by pre-push preflight legs 6 and 7. Three HIGH advisories were range-widened onto versions the repo pins:
+  - `GHSA-vfj7-8cjw-p6xm`, braces 3.0.3;
+  - `GHSA-ch52-4w7c-c8xp`, http-cache-semantics 4.2.0;
+  - `GHSA-86w9-cpqp-85rv`, node-forge 1.4.0.
+  - Source: Seat B 55th's STOP mail, 2026-10-04T08:59:58Z, relayed by Wednesday. **The drafter did NOT re-measure it.**
+- **What you DO:** build, prove red-first and green-after, and **COMMIT LOCALLY** in your `s-c21-*` worktrees (no trailer, proved). You may also run the local landed-tree proof (`git merge-tree --write-tree` on your two LOCAL heads).
+- **What you do NOT do:**
+  - no `git push` and no `pushc21.sh` run that reaches origin;
+  - no PR open;
+  - no READY;
+  - **no `--no-verify`, ever**;
+  - **no edit to any `package-lock.json`, `package.json` manifest, `overrides` block or audit baseline**, and no dependency bump. The freeze fix is not this seat's.
+- Your advisory push-window lock `.push-lock-c21` is still taken for local ref writes (worktree add, commit), as the STANDING BLOCK says. It is not a package lock.
+- **You push, open the PRs and send the READY only after a Wednesday ANSWER whose subject names Seat C 21st and says that the freeze has cleared.** Until then:
+  - park with your watcher armed;
+  - say "FROZEN, committed locally at <sha>" in each STATUS;
+  - write the unpushed commits into your handover as UNRAISED, if you reach the wrap first.
+- If the preflight still blocks after that ANSWER, STOP and mail. Never route around it.
+
+## PROVENANCE (measured at draft time, 2026-10-04 19:48-19:57 AEDT = 08:48-08:57Z)
+⚠ Local time is **AEDT, UTC+11**, since 02:00 today. "06:00 local today" is 2026-10-03T19:00Z.
+
+| fact | value | instrument, when |
+|---|---|---|
+| develop at origin | **`88e8877a2a0d6a626b9c2a7c4b71d3a909e6f94e`**, unmoved since #1369 (2026-10-01T16:15:26Z) | `git -C /Volumes/DevMASTER/!CODING/Secuura/Blockchain/2_Project_Files ls-remote origin`, rc 0, 08:48:30Z and 08:53:20Z (2,045 refs) |
+| develop tree | `d0f0389e191820ff3dc2d9c98d9d661336eb90e3`, 4,877 entries, truncated false | REST `GET /git/trees/88e8877a…?recursive=1`, 08:49Z |
+| refs at origin | **0** refs ending `-c21-<n>` and 0 bounded `\bc21\b` (raw `c21` 28, all inside hex; re-measured 09:04:07Z), **0** `feature/ks-1382*`, **0** `feature/ks-1355*`, 0 refs for the other five keys. **0 `-b55-` refs yet** (B 55th's first push was in flight). One existing ref contains `-c1-`: `feature/ks-1217-ks1050-c1-pins-only-the-helper-message-prefix-plus-a-3-r15-testpinfullmessage-1` (`4ecb09cf2c1d`). It is kept as a FOREIGN namespace control (see NAMESPACE) | same `ls-remote`, filtered with `/usr/bin/grep -E`; control `-b54-` → 1 |
+| shared checkout | HEAD and `refs/heads/develop` **`c56dd7c32edf`**. `refs/remotes/origin/develop` **`88e8877a2a0d`**: **B 55th fetched it** (FETCH_HEAD `2026-10-04T08:34:45Z`, `TZ=UTC stat`; its STATUS mail 08:38:23Z, "fetch rc 0, exactly 1 ref moved"). `cat-file -t 88e8877a2a0d` → `commit`. `.git/config` sha256 `4f624a213933d54b`. tracked-modified 0 / untracked 17. `.git/worktrees` **485**. `core.hooksPath` = `.githooks`. git 2.51.0 | read verbs + `stat` + `shasum`, 08:53Z |
+| locks / worktrees | **`.push-lock-50` PRESENT** (B 55th's, heartbeat 19:52 local). `s-b55-ks1402` and `s-b55-ks1015` present (19:39 local). **0 `s-c21-*`. 0 `.push-lock-c21`.** Old Seat C worktrees exist: 14 `s-c16-*`, 7 `s-c18-*`, 13 `s-c19-*` (34 `s-c*`). **`s-c21-` is a prefix of none of them**; they stay FOREIGN controls | `ls -a /Volumes/DevMASTER/!CODING/Secuura/Blockchain/worktrees/`, 08:48Z and 08:53Z |
+| floor | 3 panes: `%0` (fleet:0.0, title "Ultrathink"), `%2` (fleet:0.1, title "Ultrathink Blockchain project launch"), `%1` (fleet:0.2). Which pane B 55th runs in is UNMEASURED by title. B 55th's claude pid per its lock holder is **85681** | `tmux list-panes -a -F …`, 08:53Z |
+| disk | DevMASTER **380,835 MiB** free (81% used) | `df -m /Volumes/DevMASTER`, 08:48Z |
+| open PRs | **21**, newest #1360 (PeterObeden, 2026-09-30). **0 of 21 touch** `Blockchain/Testing/**`, `Blockchain/Dev/scripts/{stack_guard,dev-reload,start-local,check-stack-safety,bootstrap-env,stack_env,auth-matrix-smoke,smoke-test}.sh`, `scripts/preflight/preflight.sh`, the four slot `__tests__`, `Blockchain/Dev/docker-compose.yml`, `observability/**`, `systemTest/slot-target.sh` or `.githooks/pre-push`. **Must-hit control, same filter:** #887 (kksecura) hits `.github/workflows/pr-platform-suites.yml`. #920 (kksecura, KS-734) hits 4 files under `Blockchain/Dev/tests/e2e/`. #575 and #649 (dependabot) hit `services/m365-integration/package.json` | REST `GET /pulls?state=open&per_page=100` + `/pulls/<n>/files` (paged), GH_TOKEN by name from `/Volumes/DevMASTER/!CODING/Secuura/Blockchain/4_Credentials/.env`, never printed, 08:50Z |
+| the label | `slots-not-fully-isolated` holds **7 KS** issues: KS-1389, KS-1388, KS-1382, KS-1381, KS-1355, KS-1162, KS-1038. It also holds 15 PS issues, which are platform-s and not this seat's | Linear `issues(filter:{labels:{name:{eq:…}}})`, 08:49Z |
+| usage | **OK, weekly 2% < 90%** | `bash /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/usage_gate.sh --check` rc 0, 08:55Z |
+| fuse | **111.1 h** to 2026-10-09T00:00:00Z, computed at 2026-10-04T08:55:38Z. 2 rows (react-router, KS-528). **Not this seat's.** | `python3` UTC arithmetic |
+
+---
+
+## BLUF
+You are **Seat C 21st**, on pane **`Secuura/Blockchain-C`**. **Your work is Peter's slot-isolation label.** Peter filed six of the seven tickets and the board account filed KS-1038.
+
+**THE SPLIT (drafter's reading, evidence in the ITEM sections):**
+- **IN, PR 1 (first, the easiest): KS-1382.** Five `Blockchain/Testing` entry points default `TARGET_BASE` to `http://localhost:6882`. Each one moves to a shared resolver that derives the URL from the named slot, and refuses when no slot is named locally. Tier: **T2** (test/audit tooling, no product file).
+- **IN, PR 2: KS-1355 spots 1, 2 and 3.**
+  - Spot 1: `stack_guard.sh` groups other stacks by project.
+  - Spot 2: `dev-reload.sh` and `start-local.sh` derive from `stack_env.sh`, with a `check-stack-safety.sh` pin.
+  - Spot 3: three `docker-compose.yml` defaults derive from `GATEWAY_PORT`/`WEBSITE_PORT`.
+  - **Spot 4 (`preflight.sh:94`) is OUT** and joins KS-1389.
+  - Tier: **T1 if spot 3 stays in.** `docker-compose.yml` is the product's runtime config, and spot 3 changes the gateway's CORS default and auth's `FRONTEND_URL` default. **Q3 offers carving spot 3 out to keep the gate T2.**
+- **SPARK candidate (you do NOT build it): KS-1388 §1.** Two commented example lines, `:6882` → `:80`.
+- **OUT:**
+  - **KS-1162**, by rule. It edits `.github/workflows/`, which is Kam's `kam-merges` class.
+  - **KS-1038.** Only a live stack can prove it, and the fix option has not been chosen.
+  - **KS-1381.** It needs scope rulings: the static guard's reach, and a runtime change on the M365 OAuth path.
+  - **KS-1389 + KS-1355 spot 4.** These are design pieces for Kam. They also edit the gate that your own push runs.
+  - **KS-1388 §2/§3.** Slot 1 is documented by decision; the alloy label default is a question.
+
+**Your queue:**
+- **ITEM 0:** plan confirmation (QUESTION `plan confirmation`). **STOP after sending it.** Write no ref, add no worktree, take no lock, install nothing and edit nothing before her ANSWER. That ANSWER also carries the co-tenant release.
+- 🔴 **PUSH FREEZE (see the block above):** ITEMs 1-2 BUILD and COMMIT LOCALLY. The push, the PR open and the READY wait for Wednesday's freeze-cleared ANSWER naming Seat C 21st.
+- **ITEM 1 (T2):** BUILD + COMMIT LOCALLY **PR 1, KS-1382**, red-first, `Refs KS-1382`. RAISE it only after the freeze clears. No READY yet.
+- **ITEM 2 (T1 or T2, per Q3):** BUILD + COMMIT LOCALLY **PR 2, KS-1355 spots 1-3**, red-first, `Refs KS-1355`. RAISE it only after the freeze clears. No READY yet.
+- **ITEM 3:** OUT and SPARK. Do nothing. Name each ticket in your handover with its reason. Its questions are in this brief, and Wednesday carries them.
+- **ITEM 4 (after the freeze clears and both PRs are raised):** **ONE READY for both PRs → gateC21.** HOLD for **`GO (Seat C 21st): merge <n…> on gateC21`**. Merge one at a time. Post the two gated ticket comments only when the GO relays their text. Then verify, write the handover, and WRAP.
+
+**Sequencing:** PR 1 touches `Blockchain/Testing/**` plus ONE new file in `Blockchain/Dev/scripts/__tests__/`. PR 2 touches `Blockchain/Dev/scripts/**` and `Blockchain/Dev/docker-compose.yml`. **The two are FILE-DISJOINT, and neither edits `stack_env.sh`.** If either PR needs `stack_env.sh`, `slot-target.sh`, `preflight.sh`, `.githooks/pre-push` or `run-shell-suites.sh`, **STOP and mail.**
+- Cut both PRs from `88e8877a2a0d` as siblings.
+- The default merge order is **PR 1 then PR 2**, chained: the second's END_TREE comes from `git merge-tree --write-tree`.
+
+**Seat identity (RULED by Wednesday, Q4):**
+- **Pane:** `Secuura/Blockchain-C`.
+- **Record folder:** `/Volumes/DevMASTER/!CODING/Secuura/Blockchain/5_Project_History/2026-10-04_seatC-21st/`. Put small text files only there.
+- **Token `c21`. Tool suffix `c21`** (`lockc21.sh`, `pushc21.sh`, `inbox_watchc21.sh`, `namecheckc21.py`, …). **Lock `/Volumes/DevMASTER/!CODING/Secuura/Blockchain/worktrees/.push-lock-c21`. Worktrees `s-c21-<tag>`.** Branches `feature/ks-<key>-<slug>-c21-<n>`.
+- **Handover:** `/Volumes/DevMASTER/!CODING/Secuura/Blockchain/5_Project_History/HANDOVER-seatC21-<date>.md`.
+
+**Budget. Hard line: 70% ctx.** Read your ctx off your own pane's statusline. If you cannot, ask in your STATUS ("Please read my ctx."). **Never estimate it.** Past 70%, finish the step in hand and start nothing else. Write the rest into the handover as UNRAISED / UNMEASURED / UNMERGED. Read by line range; `docker-compose.yml` is 100,482 B and 2,301 lines. **Never end a turn on a "next up" line with nothing running** (STANDING_LINES `:338-:341`).
+
+**The usage authority:** OK at 2%. **Necessity clause (cloud):** two multi-file PRs with red-first harnesses, a gate and merges. A local model cannot raise, gate or merge. The Spark-shaped piece (KS-1388 §1) is carved out to the Spark.
+
+🔴 **ARM `inbox_watchc21.sh` IN THE BACKGROUND AT BOOT, BEFORE ITEM 0's MAIL.** Run it as a tracked background job with `timeout: 7200000` (STANDING_LINES `:361-:362`). **Never `nohup … &` inside a shell that exits.** Note the re-arm deadline, and re-arm after every match. **Before acting on any GO or ruling, list the inbox via the API** and confirm the mail by subject and timestamp. A "no new mail" poll at the same second as a message's timestamp proves nothing (`:367-:368`). Any claim about what is RUNNING is a `ps` reading written to a FILE in the same action.
+
+**Authority:**
+- Kam's standing instruction, 2026-10-04 ~19:4x, terminal, verbatim: *"do as much work with the spark and claude agents on the secura projects as you can"* (learning `2026-10-04_as-much-secuura-work-as-possible-spark-and-claude.md`). It names Claude seats as a peer of the Spark and puts no expiry on it.
+- **The parallel-seat grant** (2026-09-09, with its 2026-09-22 EXTENSION).
+- **The merges:** Kam's delegated-merge grant of 2026-09-11, *"We approve and merge our own TESTED Platform K work"*, on a gate's GO. **`.github/workflows` PRs are outside it**, which is why KS-1162 is OUT.
+- Tiering (Kam, 2026-09-05). Aggregation (Kam, 2026-09-07): one PR per logical path or test pass, not one per ticket where tickets share a path.
+
+## 🔴 PARALLEL-SEAT STANDING BLOCK (from the 2026-09-22 EXTENSION; Wednesday sends B 55th the mirror of it in its addendum)
+**Yours vs NOT YOURS, by PATH.**
+- **YOURS:**
+  - `Blockchain/Testing/**`;
+  - `Blockchain/Dev/scripts/stack_guard.sh`, `dev-reload.sh`, `start-local.sh`, `check-stack-safety.sh`;
+  - NEW `Blockchain/Dev/scripts/__tests__/ks1382_*.test.sh` and `ks1355_*.test.sh`, and the existing `scripts/__tests__/stack_guard.test.sh`;
+  - `Blockchain/Dev/docker-compose.yml` (spot 3 lines only: `:503`, `:767`, `:2179`).
+- **NOT YOURS: Seat B 55th is in these right now.**
+  - `Blockchain/Dev/services/auth/src/routes/users.ts`;
+  - `services/auth/src/middleware/authenticate.ts`;
+  - `services/auth/src/__tests__/ks1402-*`;
+  - `services/transfer/src/transfer.openapi.ts`;
+  - `services/transfer/src/__tests__/ks1015-*`;
+  - `docs/openapi/secuura-api.yaml`;
+  - its worktrees `s-b55-*`, its lock `.push-lock-50`, its token `b55`, and its record folder `2026-10-04_seatB-55th/`.
+  - **You also stay out of all of `services/auth/**` and `services/transfer/**`.** If any step of yours reaches one of these paths, STOP and mail.
+- **PUSH-WINDOW LOCK.** There are TWO advisory `mkdir` locks OUTSIDE every worktree: yours, `.push-lock-c21`, and B 55th's, `.push-lock-50`. **Every ref write you make needs BOTH conditions at once:** you hold `.push-lock-c21`, AND `.push-lock-50` is ABSENT. Ref writes include `git worktree add`, a commit, a branch, a push, a merge-tree `--write-tree` and a worktree remove.
+  - If `.push-lock-50` is present, wait, bounded at 20 min, re-checking each minute. Then STOP and mail.
+  - Write the `holder` file (`{"seat": "Secuura/Blockchain-C c21", "pid": <your claude pid>, …}`) and a 60-s `heartbeat`. Take the lock before `snapshot` and release it after `verify`. The holder's `rmdir` is the one delete.
+  - **A stale lock (heartbeat > 5 min AND a dead pid) is reported, never removed by the non-holder.** That includes B 55th's.
+  - **Build this into `pushc21.sh` and `lockc21.sh`; do not rely on remembering it.** Prove with `lockproofc21.sh` that `pushc21.sh` refuses while a planted `.push-lock-50` directory exists in a SCRATCH copy of the worktrees dir, never the real one.
+- **ATTRIBUTION BY NAMESPACE, both conditions.** A foreign diff line in your ref/worktree snapshot is attributed to B 55th only when:
+  - **(a)** it matches B 55th's namespace BY NAME: an `s-b55-*` worktree, or a branch `feature/ks-1402-…-b55-<n>` / `feature/ks-1015-…-b55-<n>`; **AND**
+  - **(b)** origin holds YOUR branch at YOUR sha, or, while the PUSH FREEZE holds, your LOCAL branch or worktree HEAD is at the commit sha you recorded and origin has no ref of yours.
+  - Anything else is a STOP. `refs/remotes/origin/develop` moving to a B 55th squash on gate54 counts as B 55th's when the squash's PR head ref is one of its two branches (REST `GET /pulls/<n>`).
+- **THE BOARD GUARD, four conditions.** A NEW attachment on B 55th's KS-1402 or KS-1015 is attributed to it when ALL of these hold:
+  - the URL is a Distributed_Secuura PR;
+  - its head ref is `feature/ks-<that SAME key>-…-b55-<n>`;
+  - the author is the board login (`kksecura`) inside the round;
+  - the change is addition-only.
+  - **The only tolerated state change is the bot's walk into In Progress coincident with the PR open.** For KS-1402 that walk starts in Backlog. **For YOUR tickets (KS-1382, KS-1355) it starts in `Todo`.** Put your own PR open, its bot walk and a squash through the guard as its controls BEFORE you rely on it.
+- **PROCESS NAMESPACE.** Kill by ancestry only (`ps -o pid=,ppid=` filtered on YOUR claude pid) or by port + cwd. **Never kill by basename.** B 55th runs `inbox_watch50.sh`, `push50.sh` and the rest under the same basenames you will have before the suffix. Your long-running scripts carry `c21` in their argv.
+- **Test by its handle.** Each shared resource has an instrument that tells "mine" from "B 55th's". Name each one in ITEM 0 with a control that goes each way:
+  - the inbox (subject seat name + `blockchain-c]` segment);
+  - `.git` (namespace + origin sha);
+  - the process table (ancestry);
+  - the board (four conditions);
+  - the machine's load (`df -m` + `uptime` at each suite run).
+- **Conflicts are the PARTITION's failure.** Report them and they get re-partitioned; never merge through one.
+
+**🔴 NAMESPACE AND MATCHER, this round. `c21` is a SHORT token, the `d1` shape** (`inbox_match49.py:181`, Seat D 1st). It is safe only with segment anchoring:
+- **`namecheckc21`:** `MINE = "c21"`. **MINE_FORMS must anchor on segments:** `s-c21-` as a whole worktree prefix, `-c21-<digits>$` at the END of a branch name, and `seatc21`. **Never a bare `c21` substring, and never `s-c2`/`s-c21` without its trailing hyphen.** FOREIGN adds `"b55"`, `"b54"` and keeps the older ones and `"d1"`.
+  - **Controls, each going the other way on a REAL name:**
+    - `feature/ks-1217-ks1050-c1-pins-only-the-helper-message-prefix-plus-a-3-r15-testpinfullmessage-1` (`4ecb09cf2c1d`) **must read FOREIGN, never MINE.** It carries `-c1-` mid-name, a foreign token.
+    - The real worktree names `s-c16-batch`, `s-c18-ks1123` and `s-c19-ks1011` **must NOT read MINE.**
+    - `feature/ks-1402-lookup-accepts-connector-token-b55-1` reads FOREIGN.
+    - A planted `feature/ks-1382-x-c21-9` and a planted `s-c21-ks1382` read MINE.
+    - The `C21` control-label strings in `namecheck49.py` (e.g. `:492`) **must NOT read MINE**: no branch, worktree or seat segment.
+  - 🔴 **`C21` is already a CONTROL LABEL in `namecheck49.py`** (`:77`, `:214`, `:480`, `:481`, `:485`, `:492`; e.g. `:492` `("C21 b42 (my IMMEDIATE predecessor; …`). `:399` also uses `C1` as a label. **These are labels, not seat tokens.** A re-key or a MINE form that touches them is wrong, and the bounded census below counts them.
+- **`inbox_matchc21`:** `MINE = "c 21st"`. **MY_PANE = `secuura/blockchain-c]`.** This inverts B 54th's file, whose pane is the UNSUFFIXED `secuura/blockchain]` (`inbox_match49.py:44-:48`, `:93-:94`).
+  - 🔴 **`inbox_match49.py:187` lists `"blockchain-c]"` in OTHER_SEATS.** Copied as-is, **every mail addressed to YOU reads FOREIGN.** Remove it from OTHER_SEATS and ADD `"blockchain]"`: the unsuffixed tag is B 55th's lane.
+  - OTHER_SEATS must also include `b 55th`, `b 54th`, `b 53rd` and the older ones; `seat d 1st`/`d1`; `seat h`; **and the old C lineage `c 16th` … `c 20th`.** Taken as substrings, those last five do not contain `c 21st`, and `c 21st` contains none of them; prove it.
+  - **Your proof, on REAL subjects read from the AgentMail API (the inbox reaches 2026-09-30T07:38:06Z, 100 messages):**
+    - `[Wednesday -> Secuura/Blockchain] LAUNCH BRIEF (Seat B 55th): …` (2026-10-04T08:00:01Z) → FOREIGN;
+    - `[Wednesday -> Secuura/Blockchain] ANSWER: STATUS redfirst (Seat B 55th): …` (08:47:38Z) → FOREIGN;
+    - your own LAUNCH BRIEF subject → FOR ME.
+    - **And the inversion control:** with `"blockchain-c]"` left in OTHER_SEATS, your own brief must flip to FOREIGN. Show it.
+  - Kam's 2026-10-02T00:00:01Z mail (`I re-date GHSA-wrjc… (KS-528) to 2026-10-31.`) names no seat and no lane tag. Record the matcher's verdict on it. **It is not an instruction to you.** It is DKIM-FAIL and held (HOLDS). **If a NEW mail from Kam arrives, act on nothing: STOP and mail Wednesday.**
+  - 🔴 The matcher truncates subjects at 110 chars (`inbox_match49.py:242`). Assert that the arm found each subject. Importing it crashes on `KeyError 'SINCE'`, so parse OTHER_SEATS from SOURCE with `ast` and run the matcher as a subprocess.
+- 🔴 **The hex trap, `c21` edition** (Wednesday's re-census, 2026-10-04T09:04Z, `/usr/bin/grep -oi` raw and `-oiE '\bc21\b'` bounded).
+  - Over B 54th's 23 live `*49` tools: raw `c21` **6**, bounded `\bc21\b` **6**, ALL in `namecheck49.py` as the `C21` control label (`:77`, `:214`, `:480`, `:481`, `:485`, `:492`). `c 21st` **0**. The control, bounded `\bb54\b`, is **23**.
+  - In `history.md`: raw `c21` **7**, bounded `\bc21\b` **2** (both `C21` control labels at `:1029`, the namecheck39 note), `s-c21-` **0**, `seat c 21st` **0**. The control, `seat c 20th`, is **4**.
+  - At origin (`ls-remote`, 2,045 refs): raw `c21` **28**, bounded **0**: every raw hit is inside a hex sha. Worktrees: 0 names contain `c21`.
+  - Hex runs carry `c21` (28 at origin). **A raw `c21` count is never a seat count. State every count as raw / bounded with its regex** (`:364-:365`).
+- **Every checker prints how many items it CHECKED. `0 checked` is a FAIL, never CLEAN.**
+
+## READ FIRST (by line range; keep ctx low)
+1. **B 54th's HANDOVER, the tool lineage you copy:** `/Volumes/DevMASTER/!CODING/Secuura/Blockchain/5_Project_History/HANDOVER-seatB54-2026-10-01.md` (586 lines). Read **`:406-:586` whole** (§9 runbook, §10 the eleven instrument faults, §11, §12). Then read **`:95-:174`** (§4, the tool generation). Skip the rest.
+2. **TOOLS: copy B 54th's `*49` generation forward. Do NOT copy B 55th's `*50`.** Those are a live co-tenant's tools, NOT YOURS.
+   - Source: `/Volumes/DevMASTER/!CODING/Secuura/Blockchain/5_Project_History/2026-10-01_seatB-54th/raise/`. **23 files** match `49(_[0-9a-z]+)?\.(py|sh)$` (drafter's `ls`, 08:54Z). Plus `inert/one_merge46.sh` (INERT) and `templates/` (7 files).
+   - Quarantine B 54th's `rekey49.py` into `_b54_artefacts_NOT_MINE/` in YOUR record folder, with a sha256 equality proof and a 1-byte-mutation control kept OUTSIDE the scanned folder. **Hand-write `rekeyc21.py`**: it is in its own map, and it carries NO bare `"49"` and NO seat token. Run it ONCE, before the hand-fixes. Diff it against the originals and restore every lineage line it touched.
+   - **A bare `49 → c21` rule destroys:**
+     - `49th` ordinals;
+     - `b49` / `-b49-` / `s-b49` / `seatb49`;
+     - `KS-1349`;
+     - the real branches `…-b49-a`, `…-b49-1`, `…-b49-1c`;
+     - UUID fragments `…-49d2-…` and `…b499`;
+     - **Dependabot `#949`**.
+   - Then:
+     - `lockc21.sh` → `.push-lock-c21`, REQUIRED `LOCK_SEAT='Secuura/Blockchain-C c21'`, **plus the `.push-lock-50`-absent condition**. Its REFUSED example says `c21`.
+     - `pushc21.sh` takes `.push-lock-c21` itself and refuses while `.push-lock-50` is present. **Call it BARE** (`:373-:374`). Prove it with `lockproofc21.sh`.
+     - `raisec21.py` builds `s-c21-{tag}`, keeping `--existing-worktree` and `--expect-modified`.
+     - `mergec21.py` carries the `no_trailer` suppression on BOTH branches. Its composed branch has never run in anger, so read the `.DRY` body.
+     - `rekey_checkc21.py`: `THEIRS_DIR` → `2026-10-01_seatB-54th`, `THEIRS` derived from an `ls` and each asserted to EXIST.
+     - `bannercheckc21.py`.
+     - `namecheckc21` and `inbox_matchc21` as above.
+   - **`one_merge46.sh` stays INERT.** Write every docstring and authorship header by hand.
+   - 🔴 `lockc21.sh` REFUSES without `LOCK_SEAT`. Take and release in ONE invocation. Release with the pid the HOLDER FILE records, never `$$`. Put the take's rc on its own line.
+3. `/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/STANDING_LINES.md`: **389 lines**, sha256 `bfb6955c541af7d8`. The operative sections:
+   - `:17` READY as an artefact; `:72-:74` zsh `PIPESTATUS` is empty; `:76` HOLDS; `:278` a hyphenated key attaches; `:338-:341` never end on "next up"; `:343` read a repo file from a SHA; `:346` `cmp`;
+   - **`:352-:353` a client comment is HELD until its PR's gate has read it**;
+   - `:355` exec bit; `:358-:362` co-tenant / watcher timeout; `:364-:368` raw vs bounded census, same-second poll; `:370` a merge tool must not add attribution; `:373` `push<N>.sh` locks itself;
+   - `:382-:383` `git push --dry-run` RUNS the pre-push hook on git 2.51.
+4. **This brief's code reads** are in the ITEM sections. **Re-read each from YOUR base with `git show 88e8877a2a0d:<path>` and quote it in ITEM 0.**
+
+## STANDING: no attribution, on the branch commit AND in the squash body
+- **Branch commits:** NO `Co-Authored-By` and NO tool-attribution trailer. This overrides the repo's convention and your harness's commit guidance for this seat.
+  - **Prove it at the COMMIT step:** `git log -1 --format='%(trailers)' <sha>` prints nothing.
+  - Control: the same command on `bf277eead268` prints a co-author trailer. Re-measure its bytes.
+  - A commit that went out with a trailer is NOT amended or force-pushed. **STOP and mail.**
+- **Squash bodies:** `mergec21.py` with `no_trailer` on both branches. Check the `.DRY` body you SEND.
+- 🔴 **Mail guard:** describe git's trailer format in words. Any guard aborts on a missing figure, a surviving placeholder or a bare one-character figure, and its control asserts that its injection landed.
+- 🔴 **Shell rules:**
+  - rc ON ITS OWN LINE, never through a pipe: `cmd > "$REC/x.log" 2>&1; rc=$?`.
+  - Pass arguments LITERALLY, and iterate over an ARRAY.
+  - curl to a FILE, then parse the file. Use `TZ=UTC stat` and ABSOLUTE paths. **Never name a zsh variable `path`.**
+  - `git rev-parse <rev>:<path>` ECHOES a path that does not resolve: use `git cat-file -e` with a nonexistent-path control.
+  - `git ls-tree -r` from a subdirectory scopes to it.
+  - macOS has no `xargs -a`. Never send a measurement's stderr to `/dev/null`.
+  - BSD `sed '$a'` needs a backslash: use `printf >>`.
+
+## QUEUE
+0. **ITEM 0, plan confirmation (QUESTION `plan confirmation`, then STOP until the ANSWER).** It carries:
+   - **develop at boot** (`ls-remote`). If it moved past `88e8877a2a0d`, list the first-parent commits by PR number (REST compare), and say whether any touches YOUR paths or is B 55th's.
+   - **`cat-file -t 88e8877a2a0d`** in the shared store. Expect `commit`, because B 55th fetched it at 08:34:45Z. **If so, fetch NOTHING (Q1).**
+   - Whether the launcher's boot pull or fetch ran, with the reflog lines.
+   - Your tool census (raw and bounded), the re-key receipt with its lineage diff, the inversion proof for `blockchain-c]`, the namecheck controls, and the matcher's verdict on Kam's 2026-10-02 mail.
+   - Your watcher pid, READ from a ps FILE.
+   - **The test-by-handle table** for the five shared resources (STANDING BLOCK).
+   - **Read-only re-reads of KS-1382, KS-1355, KS-1381, KS-1389, KS-1388, KS-1162 and KS-1038** (state, assignee, newest comment, `comments(first:50)` sorted client-side). Name anything new since PROVENANCE.
+   - **Q1-Q6.**
+   - **Every launcher preflight warning VERBATIM** (B 54th saw `[F-02] No SSH identity available for git (keychain not seeded, on-disk fallback off).`).
+   - **Your ctx, read off your pane, or "Please read my ctx."**
+1. **ITEM 1, BUILD + COMMIT LOCALLY PR 1, KS-1382, `Refs KS-1382`, T2.** Send a STATUS before you start, after the red-first set, and after the local commit. **No push, no PR and no READY while the PUSH FREEZE holds.**
+2. **ITEM 2, BUILD + COMMIT LOCALLY PR 2, KS-1355 spots 1-3 (spot 3 per Q3), `Refs KS-1355`.** Use the same STATUS cadence, plus the landed-tree proof on the local heads. **No push, no PR and no READY while the PUSH FREEZE holds.**
+   - **After Wednesday's freeze-cleared ANSWER naming Seat C 21st:** push PR 1 then PR 2, each ONCE with `pushc21.sh` called bare, open both PRs, then go to ITEM 4.
+3. **ITEM 3: nothing to build.** KS-1388 §1 is a SPARK candidate. KS-1162, KS-1038, KS-1381, KS-1389 and KS-1388 §2/§3 are OUT. Name each in your handover's OUT list with its reason.
+4. **ITEM 4 (only after the freeze clears and both PRs are raised): ONE READY → gateC21, HOLD for `GO (Seat C 21st): merge <n…> on gateC21`.** Merge, post the two gated comments, verify. Then the handover and WRAP.
+
+## OPEN QUESTIONS for ITEM 0
+- **Q1: the base object.** At the drafter's read, `88e8877a2a0d` IS in the shared store (B 55th's fetch). **(a) PROPOSED:** fetch nothing. If your boot shows it ABSENT, propose ONE bounded fetch in B 54th's shape (handover §2 `:38-:57`), under BOTH lock conditions, and do not run it before the ANSWER.
+- **Q2: PR 1's resolver SHAPE.** The drafter proposes the following. Wednesday rules.
+  - (i) ONE new sourced helper, e.g. `Blockchain/Testing/lib/target_base.sh`, called by all five entry points right after `set -uo pipefail`, BEFORE any network or docker call.
+  - (ii) **Record whether a slot was ASKED FOR before sourcing `stack_env.sh`**, as `systemTest/slot-target.sh:51` does (`SECUURA_SLOT_REQUESTED="${SECUURA_STACK_SLOT:-${STACK_SLOT:-}}"`). `stack_env.sh` silently defaults an unnamed slot to 1, so checking afterwards cannot tell the cases apart (KS-1389's whole point).
+  - (iii) Set `PROJECT_ROOT` to the REPO root before sourcing. `stack_env.sh:20-:22` refuses without it.
+  - (iv) **Source `stack_env.sh` in a SUBSHELL and capture only `GATEWAY_PORT`, or `unset COMPOSE_PROJECT_NAME` immediately after**, as `slot-target.sh:67` does. `05-dast-zap.sh` runs docker, and a leaked `COMPOSE_PROJECT_NAME` is the KS-666 accident (`slot-target.sh:56-:66`).
+  - (v) The resolution rules:
+    - explicit `TARGET_BASE` + no slot → used unchanged (the CI path; `orchestrate_jobs.test.sh:21` passes a `file://` TARGET_BASE and must stay green);
+    - slot named + no `TARGET_BASE` → `http://localhost:${GATEWAY_PORT}`;
+    - slot named + a LOCAL `TARGET_BASE` on a different port → REFUSE (the KS-1373 split-target shape);
+    - no slot + no `TARGET_BASE`, locally → REFUSE with an example command;
+    - CI (`CI` truthy) + no `TARGET_BASE` → the drafter proposes REFUSE as well, since CI always passes it explicitly (ticket). Wednesday rules.
+  - (vi) **Say if you see a narrower shape.**
+- **Q3: PR 2's spot 3, IN or OUT?** **(a) PROPOSED: IN.**
+  - The defaults become `${FRONTEND_URL:-http://localhost:${GATEWAY_PORT:-6882}}` and `${CORS_ORIGINS:-…,http://localhost:${GATEWAY_PORT:-6882},http://localhost:${WEBSITE_PORT:-6881}}`. The `6100`-`6103` entries at `:503` stay, because `stack_env.sh` does not offset them (0 hits).
+  - Proved by a `docker compose config` render: **slot 1's render byte-identical to base**, and slots 2-4 changing only those three values.
+  - That makes gateC21 **T1** (gateway CORS and auth `FRONTEND_URL` defaults).
+  - **(b)** Carve spot 3 out to join KS-1381 (which also edits compose `:888`, the same "derive compose defaults" path), and keep gateC21 **T2**.
+- **Q4: seat identity. RULED by Wednesday, 2026-10-04: Seat C 21st.**
+  - Rule 4 of the 2026-09-09 grant: *"Derive each seat number from THAT PROJECT'S OWN `history.md`."* There, the newest Seat C entry is **Seat C 20th SUCCESSOR** (`history.md:1772`, 2026-09-22, pane `Secuura/Blockchain-C`, *"ROUND 19 … COMPLETE"*). Before it come C 19th (`:1811`), C 18th (`:1830`), C 17th (`:1842`) and C 16th (`:1860`), with `HANDOVER-seatC-{16..20}th-successor-2026-09-22.md` and folders `2026-09-22_seatC-{16..20}th`. By that rule this seat is **C 21st**.
+  - Wednesday ruled that the project's history rule wins, so the seat is Seat C 21st, gate gateC21. The pane and mail tag stay `Secuura/Blockchain-C`.
+  - Collisions: `C21` is a control label in `namecheck49.py` and `history.md:1029`. The old `s-c16-*`…`s-c19-*` worktrees and the ks-1217 `-c1-` branch stay FOREIGN controls.
+  - Token `c21`, suffix `c21`, lock `.push-lock-c21`: ruled. Report only a measured collision.
+- **Q5: push identity.** If `[F-02]` prints, re-prove identity with **an SSH auth probe** under the repo's own key, with a refused-key control and `ls-remote` rc 0. **NOT `git push --dry-run`**: on git 2.51 it runs the pre-push hook (`:382-:383`). STOP on failure.
+- **Q6: what `check-stack-safety.sh`'s new rule reaches (PR 2 spot 2).** KS-1355 asks that *"every script running `docker compose up|run|restart` must source"* `stack_env.sh`. **UNMEASURED: how many scripts in `Blockchain/Dev/scripts/` violate that today, besides `dev-reload.sh` and `start-local.sh`.** Measure it at your base with `git grep` (with a must-hit control) and report the list. **If anything beyond those two is hit, propose a KNOWN_EXCEPTIONS-style list against KS-1355, as `slot_is_local_host_only.test.sh:33-:50` does, rather than editing more scripts.** Wednesday rules.
+
+## ITEM 1 IN DETAIL (PR 1: KS-1382; T2)
+**What the ticket says** (Linear, read-only, 08:49Z). Peter filed it 2026-09-29T08:30:13Z. State **Todo**, board account, priority 2 (High), **0 comments**. Five entry points fall back to slot 1's gateway when `TARGET_BASE` is not passed. *"On a slot-N worktree, forgetting the variable points ZAP (active scan), the tenant-isolation job and the internal audit at whichever stack owns slot 1."*
+- **Acceptance (verbatim headings), "comprehensive slot unit tests in the same PR":**
+  - for each entry point × slot 1..4 with no `TARGET_BASE`, the target is that slot's gateway *"from `stack_env.sh`, not a copy of the arithmetic"*;
+  - locally with no slot named, it refuses with the example command;
+  - an explicit `TARGET_BASE` is used unchanged;
+  - `TARGET_BASE` and the named slot disagreeing refuses;
+  - a static guard over `Blockchain/Testing/**` fails on any literal published port of ANY slot 1..4, bite-checked;
+  - hermetic: identical results unslotted and under each slot's environment.
+
+**The code at `88e8877a2a0d`** (drafter's REST read, 08:52Z, blobs = the tree's):
+```
+Blockchain/Testing/ci/orchestrate.sh:37          TARGET_BASE="${TARGET_BASE:-http://localhost:6882}"          (blob 65247243f758; :14 doc line; :123-:126 health wait; :138, :159 forward it)
+Blockchain/Testing/ci/tools/run-schemathesis.sh:23  TARGET_BASE="${TARGET_BASE:-http://localhost:6882}"       (01f2b9f2f897; :37 runs scripts/run.py --base-url)
+Blockchain/Testing/jobs/05-dast-zap.sh:23        TARGET="${TARGET_BASE:-http://localhost:6882}"               (e3e8041e361e; :25 docker info)
+Blockchain/Testing/jobs/06-tenant-isolation.sh:31  TARGET="${TARGET_BASE:-http://localhost:6882}"             (4d077ab30259; :71 runs the tsx runner)
+Blockchain/Testing/run-internal-audit.sh:30      TARGET_BASE="${TARGET_BASE:-http://localhost:6882}"          (ce3a9c880786; :15 doc line; :103, :120 forward it)
+```
+- **None of the five sources `stack_env.sh` or `slot-target.sh`, or reads `SECUURA_STACK_SLOT`.** `/usr/bin/grep -lE 'stack_env|slot-target|SECUURA_STACK_SLOT'` over the five gives 0 files. The same files give 7 `6882` hits, which is the control.
+- `stack_env.sh` (blob `cffac9128964`): `:56` `GATEWAY_PORT=$(( 6882 + PORT_OFFSET ))`, `:73` exports it, `:20-:22` PROJECT_ROOT refusal.
+- `Blockchain/Testing` has **no shell tests** and no `package.json`. Its tests are `ci/aggregate.test.mjs` and `ci/tools/reconfirm-5xx.test.mjs`. **`Blockchain/Dev/scripts/__tests__/orchestrate_jobs.test.sh`** (blob `4653bc8a1d4a`, `:43-:45`) already drives `orchestrate.sh`, the jobs dir and `run-internal-audit.sh` hermetically, with a `file://` TARGET_BASE (`:21`).
+
+🔴 **WHERE THE NEW TEST GOES: `Blockchain/Dev/scripts/__tests__/`, NOT `Blockchain/Testing/`.**
+- `run-shell-suites.sh:47-:50` globs ONLY `Blockchain/Dev/scripts/__tests__` and `systemTest/__tests__`.
+- Its `--check-unreached` mode (`:99-:150`, run by preflight leg 12 at `preflight.sh:533`) **FAILS the push on any tracked `*.test.sh` the glob does not reach.**
+- Commit it **100755** (preflight `:77`). Name it e.g. `ks1382_testing_target_base_slot.test.sh`.
+
+🔴 **THE HARNESS MUST NEVER LET AN ENTRY POINT REACH A REAL TARGET.**
+- These scripts run ZAP, tenant-isolation probes and Schemathesis. Drive them only with every external binary they call (`curl`, `docker`, `python3`/`$PY`, `tsx`/`$TSX_BIN`, `node`) as a **PATH stub that logs its argv to a file and exits**, under `env -i` with an explicit minimal env. Copy the stub pattern from `stack_guard.test.sh` (`:1-:17` header, `:130`, `:291` `count_other_lines`).
+- **Canary:** one cell sets PATH to the stubs only and asserts that the run never resolved a real binary (`command -v` of each, inside the run, points into the stub dir).
+- **Never run an entry point outside the harness.** A run against any live slot is a STOP-and-ask.
+
+**The red-first cells** (the drafter's proposal; derive the exact set from the acceptance):
+1. For each of the 5 × slot ∈ {1,2,3,4}, with no `TARGET_BASE`: the stub log shows `http://localhost:<6882+100(N-1)>`, with the expected value taken FROM `stack_env.sh` in the test, not recomputed. **RED at base for slots 2-4** (base gives `:6882`). Slot 1 is GREEN at base and serves as the control.
+2. No slot and no `TARGET_BASE`, locally: a refusal exit code plus the example command, and **0 stub invocations**. **RED at base** (base proceeds to `:6882`).
+3. Explicit `TARGET_BASE` and no slot: used unchanged. **GREEN at base and head** (the control, and the CI path).
+4. Slot 2 + `TARGET_BASE=http://localhost:6882`: refuses. **RED at base.**
+5. A static guard: no `Blockchain/Testing/**` file carries a literal slot port (`6882`, `6982`, `7082`, `7182`, and the other published bases from `stack_env.sh :56-:66`). **RED at base**, with at least the 7 hits in the five scripts. **UNMEASURED:** hits in the rest of `Blockchain/Testing/**` (the two READMEs, `integration/github-actions-snippet.yml`, `tests/tenant-isolation/runner.ts`). Measure them at base. If a doc example must keep a literal, propose an explicit allowance in ITEM 0 rather than silently excluding it. **Bite-check:** plant one in a scratch copy, see it red, remove it.
+6. Hermetic: the same verdicts under `env -i` and under an env that pre-sets each slot's variables.
+- **Prove the cells test the product, not the harness:** run the suite against the BASE scripts (an override variable like `stack_guard.test.sh`'s `GUARD=`), and see the RED set exactly as predicted.
+
+**BUILD AND PROVE (each rc on its own line, with the SHA):**
+1. After the ANSWER and with both lock conditions held: `git worktree add --detach /Volumes/DevMASTER/!CODING/Secuura/Blockchain/worktrees/s-c21-ks1382 88e8877a2a0d`. **Never `-b`.** `cat-file -e` the five base blobs above, with a nonexistent-path control. The new paths must not exist at base.
+2. **Suites BEFORE, on a PRISTINE tree:** `bash Blockchain/Dev/scripts/run-shell-suites.sh` (totals only) and `orchestrate_jobs.test.sh` alone. No npm install is needed for bash suites. If a suite needs one, say which and STOP.
+3. **RED-FIRST by assertion:** the new test at base, product untouched, gives the predicted red set. Then the product change. Then **GREEN after**.
+4. **Suites AFTER:** 0 new reds. **`orchestrate_jobs.test.sh` must stay green**, since it is the explicit-`TARGET_BASE` path. Any red that is not red at develop is a STOP.
+5. `git diff --numstat 88e8877a2a0d` touches only `Blockchain/Testing/**` and the ONE new `__tests__` file. Exec bits: the five entry points keep their mode, and the new test is 100755.
+6. Update `Blockchain/Testing/README.md` and `ci/README.md` to show the slot form (the ticket notes they never mention slots). That is docs in the same path.
+
+**PR 1:**
+- Branch `feature/ks-1382-<slug>-c21-1`. Subject `KS-1382: …`, declared ≤ 84 so that it lands ≤ 92. Measure it.
+- Body: `Refs KS-1382` on its own line. **No closing keyword + reference anywhere.** **De-hyphenate every other key:** KS 1373, KS 1016, KS 1389, KS 1381, KS 1355, KS 666, PS 914.
+- The body states:
+  - the five spots before and after, with their lines;
+  - the cells and their red-first results;
+  - the subshell/`COMPOSE_PROJECT_NAME` handling;
+  - **NOT COVERED:** no run against any live slot; no ZAP, Schemathesis or tenant run; CI workflows untouched (they are KS 1162's).
+- Commit LOCALLY with **no trailer**, and prove it. 🔴 **PUSH FREEZE: do not push until Wednesday's freeze-cleared ANSWER names Seat C 21st.** Then **push ONCE with `pushc21.sh`, BARE**, and quote the preflight ratio and skipped legs as printed. **No `--no-verify`.**
+- **Expect KS-1382 to move ITSELF Todo → In Progress** on PR creation. Report the time. Do not revert it.
+
+## ITEM 2 IN DETAIL (PR 2: KS-1355 spots 1-3)
+**What the ticket says.** Peter filed it 2026-09-28T09:41:02Z. State **Todo**, board account, **priority 1 (Urgent)**, **0 comments**. *"A few pieces of stack tooling still assume slot 1 … Each fix is small and follows the existing `stack_env.sh` pattern."* Its "Verify" line: *"the guard prints a mixed-label project once; `SECUURA_STACK_SLOT=N ./scripts/dev-reload.sh api-gateway` finds `${STACK_PREFIX}-api-gateway`; an untouched `.env` renders slot-N URLs (`docker compose config`); … `check-stack-safety.sh` goes red on a revert of any of the four."*
+
+**The code at `88e8877a2a0d`** (REST, 08:53Z):
+- **Spot 1:** `Blockchain/Dev/scripts/stack_guard.sh` (blob `008401ffa483`) `:104-:110`, `list_other_stacks`. `:109` pipes `… | grep -v "^${project}|" | sort -u`, over `project|owner|branch` rows, so one project with a single `owner=unknown` container prints twice. Peter's live capture shows `secuura_slot3` listed twice. The test harness is `scripts/__tests__/stack_guard.test.sh` (blob `07be45f99b66`): a docker stub on PATH, `GUARD=` override for red-first against an old revision (`:20-:25`), and the existing de-dup case at `:283-:300` (`count_other_lines`).
+- **Spot 2:**
+  - `Blockchain/Dev/scripts/dev-reload.sh` (blob `f74b7aee6833`) `:45` `CONTAINER="secuura-$SVC"`; `:54` checks `docker ps` for it; `:71` `docker cp`; `:74` `docker restart`. It does not source `stack_env.sh`, which gives 0 hits; `CONTAINER=` gives 1, the control.
+  - `start-local.sh` (blob `687d5be838db`) runs `docker-compose up -d …` (`:108`, `:131`, `:179`) and `down` (`:197`). It does not source `stack_env.sh`.
+  - 🔴 **TRAP:** `start-local.sh:26` sets its OWN `PROJECT_ROOT` to **`Blockchain/Dev`**, while `stack_env.sh:17` requires the **REPO root**. Sourcing `stack_env.sh` under that variable passes the wrong root. Also, `:103` `source .env` runs AFTER, and can re-set ports. Handle both and pin both in a cell.
+  - `stack_env.sh:89-:93` sets `STACK_PREFIX` (`secuura-s<N>` above slot 1, `secuura` on slot 1).
+  - The `check-stack-safety.sh` extension (blob `894ba4612b16`) follows Q6. **`check-stack-safety.sh` is not run by preflight or by any npm script:** 0 hits in `preflight.sh` and `Blockchain/Dev/package.json`, against the control `GATEWAY_URL` with 2 hits in `preflight.sh`. So its new rule does not gate your own push. Verify that at your base.
+- **Spot 3:** `Blockchain/Dev/docker-compose.yml` (blob `effc5ef3c9d8`) `:503` `CORS_ORIGINS=${CORS_ORIGINS:-http://localhost:6100,…,http://localhost:6882,http://localhost:6881}` (gateway service); `:767` `FRONTEND_URL=${FRONTEND_URL:-http://localhost:6882}` (auth service); `:2179` `CORS_ORIGINS=${CORS_ORIGINS:-http://localhost:6882,http://localhost:6881}`. The publishes already derive: `:2276` `"${GATEWAY_PORT:-6882}:80"`, `:1973` `"${WEBSITE_PORT:-6881}:80"`.
+
+**The red-first cells:**
+1. **Spot 1:** a docker stub feeding one foreign project with one labelled container and one `owner=unknown` container → **exactly ONE line** for that project, carrying an `unknown` count. **RED at base** (2 lines). Keep the existing `:283-:300` control green.
+2. **Spot 2:** under a docker stub, `SECUURA_STACK_SLOT=2 dev-reload.sh api-gateway` looks for `secuura-s2-api-gateway`. **RED at base** (it looks for `secuura-api-gateway`). Slot 1 gives `secuura-api-gateway`, GREEN at base: the control. **The stub must make `npm run build` unreachable**, either by a cell that stops at the container check or by a stubbed `npm`. A real build or a real `docker cp`/`restart` is a STOP.
+3. **Spot 2:** `start-local.sh` resolves the slot's compose project and ports (a `docker-compose` stub logs its env). **RED at base.** Plus a cell proving the `PROJECT_ROOT` trap is handled.
+4. **Spot 2 pin:** `check-stack-safety.sh` goes RED when either script's `stack_env.sh` source line is reverted (scratch copy), and GREEN at head.
+5. **Spot 3 (if Q3 (a)):** a `docker compose config` render per slot 1..4, in the worktree, with env from `stack_env.sh`. Slot N's three values carry slot N's ports; **slot 1's full render `cmp`-equals base's slot-1 render.** **RED at base for slots 2-4.**
+   - 🔴 `docker compose config` **only**: no `up`, `run`, `pull`, `build`, `down` or `restart`, and no `-p` of any live project.
+   - Never run it in the shared checkout, whose `.env` may carry secrets.
+   - Never paste a render into a mail; quote the three lines.
+   - **If `config` needs the daemon or a missing `env_file`, STOP and mail** rather than creating files.
+
+**BUILD AND PROVE:**
+1. `s-c21-ks1355` at `88e8877a2a0d`, a SIBLING of PR 1. `cat-file -e` the four base blobs.
+2. Suites BEFORE (pristine): `run-shell-suites.sh` totals, `stack_guard.test.sh`, `check-stack-safety.sh`.
+3. RED-FIRST by assertion, then the product change, then GREEN.
+4. Suites AFTER: 0 new reds.
+5. 🔴 **THE LANDED-TREE PROOF, before the READY:** `git merge-tree --write-tree <PR 1 head> <PR 2 head>` (your LOCAL commits while frozen) → rc 0, no conflicts, under both lock conditions (it writes objects). Record the tree id: **that is PR 2's PREDICTED END_TREE chained after PR 1.** PR 1's is its own head tree while develop has not moved.
+6. `git diff --numstat 88e8877a2a0d`: only `stack_guard.sh`, `dev-reload.sh`, `start-local.sh`, `check-stack-safety.sh`, `docker-compose.yml` (if Q3 (a)), `stack_guard.test.sh` and NEW `ks1355_*.test.sh` (100755). **No `stack_env.sh`, `preflight.sh` or `.githooks/` change.**
+
+**PR 2:**
+- Branch `feature/ks-1355-<slug>-c21-2`. Subject `KS-1355: …`, ≤ 84 declared, measured.
+- Body: `Refs KS-1355`. **It narrows KS-1355 and does not close it: spot 4 is not in this PR.** Say why in one line (*"spot 4 moves with KS 1389, which changes what the pre-push hook and preflight leg 13 source"*). De-hyphenate: KS 1011, KS 666, KS 1034, KS 1373, KS 1353, KS 1381, KS 1389, KS 380.
+- The body names the sequencing: *"Lands after PR 1 (#<n>). The two PRs share no file. Landed tree after PR 1: `<id>`, proved."*
+- **NOT COVERED:** no stack brought up on any slot; `dev-reload.sh` not run against a container; spot 4.
+- Commit LOCALLY with no trailer. 🔴 **PUSH FREEZE: do not push until the freeze-cleared ANSWER.** Then **push ONCE with `pushc21.sh`, BARE.** Report KS-1355's self-move (Todo → In Progress).
+
+## ITEM 3: OUT AND SPARK (read by the drafter; you do nothing on these)
+**SPARK candidate (Wednesday briefs the Spark; this seat does not build it): KS-1388 §1.**
+- **Files:** `observability/.env.example:47` and `observability/config/alerting.env.example:55`, both `# SECUURA_NGINX_STATUS_URI=http://secuura-nginx-gateway:6882/stub_status`.
+- **Fix shape:** `:6882` → `:80` on both commented lines. That makes them agree with the compose default at `observability/docker-compose.yml:331` (`…secuura-nginx-gateway:80/stub_status`). The reason: `Blockchain/Dev/docker-compose.yml:2276` publishes `"${GATEWAY_PORT:-6882}:80"`, so only `:80` exists on the container network.
+- **Shape:** two files, one line each, mechanical, with no test needed beyond a `grep` red/green.
+- **KS-1388 is otherwise OUT.** §2 (observability is slot 1 only) is *"a documented decision, and that decision stands"*, for when KS-984 lands. **§3, the alloy default `slot = "slot1"` for every container (`observability/loki/alloy.river:84`, `:91`) → `unslotted`, is a QUESTION for Kam:** Peter calls it *"worth considering"*.
+
+**OUT, KS-1162 (by rule).**
+- It edits `.github/workflows/{pr,nightly,pre-merge}-platform-suites.yml`. **`.github/workflows` PRs are Kam's `kam-merges` class**, outside the 2026-09-11 merge grant.
+- Option 2 (delete the three dormant workflows) also *"needs Kam's nod"* (ticket).
+- Open PR **#887** (kksecura, KS-961) already touches `pr-platform-suites.yml`.
+- Peter's comment (2026-09-29T12:46:31Z) adds that, after KS-1386, the retired Akto jobs would be refused at start-up. *"No action is needed until this ticket is scheduled."*
+- **QUESTION for Kam:** option 1 (derive the ports per job) or option 2 (delete the three workflows)? Either way it is his merge.
+
+**OUT, KS-1038.**
+- The defect is a live race: wrong-password cells against `CREDENTIALS.issuer.email` lock the persona the rest of `auth-exhaustive.spec.ts` logs in with, under `playwright.config.ts:48` `fullyParallel: true`. At develop there is still no `describe.configure` (0 hits).
+- **Only a running stack + redis can show red or green**, which means a docker stack run on a slot, the STOP class.
+- The fix option (serialise the file vs a dedicated brute-force account) is *"suggested, not prescribed"*.
+- It is related to KS-734, which is In Review, and KS-734's open **#920** touches four files under `Blockchain/Dev/tests/e2e/`.
+- The ticket is unassigned.
+- **QUESTION for Wednesday/Kam:** which option, and is a stack run on a NAMED free slot granted to prove it? Option 1 is a one-line Spark shape, but nothing offline can test it.
+
+**OUT, KS-1381.**
+- **It needs scope rulings first:**
+  - (1) the acceptance wants *"a static guard … failing on any literal published port of ANY slot 1..4 outside `stack_env.sh`"*. **Its repo-wide reach is UNMEASURED.** `services/m365-integration/src/index.ts` alone has **9** `6882` literals (`:465 :469 :477 :481 :508 :515 :595 :993 :1292`), where the ticket names 3.
+  - (2) Making m365 refuse when neither `ENTRA_REDIRECT_URI` nor `FRONTEND_URL` is set **changes runtime behaviour on the OAuth callback**: a T1 product change.
+  - (3) `bootstrap-env.sh` writing four more keys into every developer's `.env`.
+- It also shares `docker-compose.yml` with PR 2 (`:888`, `:1841`, `:1876`, `:1910-:1912`), and `services/m365-integration/package.json` is touched by open #575 and #649 (dependabot).
+- Peter's own heading is *"Fix shape (Kamil's call)"*.
+- **QUESTION for Kam/Wednesday:** rule (1)-(3). Then it gets its own seat after PR 2 lands.
+
+**OUT, KS-1389, and with it KS-1355 spot 4 (`preflight.sh:94`).**
+- Peter asks *"for your view on one coordinated change"*, *"entirely your call"*, across `systemTest/slot-target.sh`, preflight leg 13 (`preflight.sh:589-:630`) and the pre-push hook.
+- 🔴 **It edits the gate your own push runs.** `.githooks/pre-push:281-:283` runs `bash -c 'cd "$(git rev-parse --show-toplevel)"; . systemTest/slot-target.sh …; cd Blockchain/Dev && bash scripts/preflight/preflight.sh'`. That is the PUSHING WORKTREE's own `preflight.sh` and `slot-target.sh`, so the branch carrying the change gates itself.
+- Leg 13's positive control refuses every push if `slot-target.sh` exports nothing when unslotted (ticket).
+- Spot 4 (*"fail loudly … when no slot is named locally"*) is the same coupling: from the hook, `GATEWAY_URL` arrives from `slot-target.sh:99` and the `:94` default never fires.
+- **QUESTION for Kam:** adopt Peter's three-piece shape (slot-target refuses when unslotted outside CI; leg 13 measures with an explicit slot; pre-push reports the stack legs SKIPPED when no slot is named)? If yes, it is its own seat, which lands all three together with a hook-specific red-first.
+
+## ITEM 4 IN DETAIL (ONE READY, HOLD, merge, post, verify). 🔴 This starts only after the PUSH FREEZE clears and both PRs are raised
+- **ONE READY:** `READY FOR QA (Seat C 21st): #<1> (KS-1382) + #<2> (KS-1355) …`, per STANDING_LINES `:17-:47`. It contains:
+  - both PR numbers and HEADs read from origin in the same action;
+  - each PR's cells with red-first results and NOT COVERED;
+  - the sequencing and BOTH predicted END_TREEs;
+  - both trailer proofs;
+  - **the TWO ticket comment DRAFTS, verbatim**, for the gate to check;
+  - the tier (T1 if spot 3 is in, T2 if not).
+- **Both PRs go to ONE gate, gateC21, at the higher tier. Wednesday drafts the gate kit.**
+- 🔴 **Compute every mailed figure in the SAME tool call that sends the mail.** Read every send's response: a 400 means nothing was sent. Use placeholder substitution, never an f-string, for prose with braces.
+- HOLD with the watcher armed. **Merge only on a signed `GO (Seat C 21st): merge <n…> on gateC21`**, after listing the inbox by API.
+- **Per PR, in the GO's order:**
+  - Build `build_addendumc21_<n>.py` from the GO's measured line, starting from the parked pair `templates/build_addendum48_1367.py`/`_1368.py` (the two-PR precedent). Re-key pinned values BY HAND.
+  - Run `mergec21.py` dry first; its `.DRY` body must show 0 `Co-Authored-By`.
+  - **The first PR: OMIT `--prev-tree`. The second: `--prev-tree` = the first's END_TREE.**
+  - Before each merge, re-read the head and develop at origin. **develop is SHARED with B 55th's gate54.** If develop moved, list the first-parent commits. A move made only by B 55th's own squashes (their PR heads are its `-b55-` branches) is attributed. **Even then, the GO's END_TREE no longer holds: STOP and mail for a re-prediction.** Do not re-predict yourself. Any other move is also a STOP. If GitHub reports `mergeable: false` or demands an update, **STOP and mail. Rebase nothing without Wednesday.**
+  - Merge with the head PINNED on the API call. Read develop back by `ls-remote` AND the commits API. **Prove the landed tree == the GO's END_TREE via REST.**
+  - **Take the squash subject and body from the GO**, never from the PR. Declared subjects carry NO `(#n)`. The landed length is ≤ 92, measured as GitHub WROTE it. After the merge, read the trailers: **0** is the expectation. Report any, and do not remedy them.
+- **THE TWO TICKET COMMENTS (KS-1382, KS-1355):** drafted now, posted **only after the PR has merged AND the GO relays the gated text by name** (STANDING_LINES `:352-:353`).
+  - Facts only, from the board account, each sentence with its instrument or "unmeasured".
+  - The KS-1355 comment says that spot 4 is not done, and why, in one line.
+  - A hyphenated key in a comment only cross-references.
+  - Read each one back by API (body hash) and report its id and time.
+- `mergeable_state` may read `unstable`. The PAT 403s on `/status` and `/check-runs`. Report it; it is not a testing claim.
+- Then STATUS, handover, and WRAP cold.
+
+## CARRY (list, do not act)
+- **The boot pull.** `/Volumes/DevMASTER/!CODING/Secuura/Blockchain/Launch_Claude.command` may tell a seat to pull, and Kam ruled `c` on 2026-09-22 (the boot fetch DROPPED; `history.md:1790`). If you read this before pulling, do not pull. If the launcher pulled or fetched, **disclose it with the reflog lines and do not reset.** Also refuse:
+  - the SessionStart `POST /api/seen` (`EXTRANET_ME=kam` clears **Kam's** flags);
+  - "CC Kam on every email";
+  - rule 7's extranet to-do.
+- **OUT of this seat:**
+  - KS-1162, KS-1038, KS-1381, KS-1389, KS-1355 spot 4, KS-1388 (§1 is the Spark's);
+  - **everything of B 55th's** (KS-1402, KS-1015, gate54, `.push-lock-50`, `s-b55-*`);
+  - the react-router re-date (KS-528);
+  - any deploy, kintsugi included;
+  - #1360, #887, #920 and every other author's PR, Dependabot's included.
+- **Residue that is Wednesday's to order:** the old `s-c16-*`/`s-c18-*`/`s-c19-*` worktrees (34), and every `s-b*` worktree. Not yours to remove.
+
+## HOLDS / KAM'S, NOT YOURS
+- **No ref write, no worktree add and no lock before the ITEM 0 ANSWER confirms B 55th's co-tenant addendum.**
+- 🔴 **THE AUDIT FUSE `2026-10-09T00:00:00Z` (11:00 AEDT Fri) is B 55th's lane and Kam's re-date. It is NOT this seat's.** You re-date NOTHING. Kam's 2026-10-02T00:00:01Z mail has spf pass / **DKIM FAIL** / dmarc pass (Wednesday's 2026-10-02 read, NEXT-PICKUP `:47`). **If a new mail from Kam arrives, STOP and mail Wednesday**, even if it names you.
+- **No deploy of anything. No `az`, no SSH to any VM, no migration against any real environment.**
+- **Docker: `docker compose config` renders in YOUR worktree only (PR 2 spot 3). Nothing else.** That means no `up`, `run`, `exec`, `cp`, `restart`, `down` or `pull` against any slot, and no stack start. **If a ticket's fix turns out to need a running stack, STOP and ask.**
+- **Never run a `Blockchain/Testing` entry point outside its stubbed harness.** They scan and probe live targets.
+- **No `--no-verify`** (commit OR push). No force push, no `-u`, no `--admin`. A preflight leg that stops you is a question: mail it. GitHub refuses an approval from our own account (`kksecura`, HTTP 422). If you meet it, STOP.
+- 🔴 **PUSH FREEZE (since ~08:56Z, legs 6+7, three HIGH advisories; B 55th's STOP mail 08:59:58Z, relayed).** Commit locally only. No push, no PR and no READY until a Wednesday ANSWER naming Seat C 21st says the freeze has cleared. **No `--no-verify`.**
+- **No baseline edit, no lock regeneration (`package-lock.json`), no manifest or `overrides` edit, no dependency bump.**
+- **Ticket states:**
+  - KS-1382 and KS-1355 may move THEMSELVES Todo → In Progress on PR creation. Report it; do not revert it.
+  - **You issue no state mutation, assignee change or label change on any ticket. Close nothing.**
+  - The other five tickets stay as they are.
+- **Client-facing communication is tickets and ticket comments only** (rule 7), facts only, from the board account. **This round's ONLY client-visible writes are the two PRs and the TWO gated comments.** Nothing on KS-1162, KS-1038, KS-1381, KS-1388 or KS-1389.
+- **No Kam cards from you.** Questions go to Wednesday.
+- **Read every repo file from a SHA** (`git show <sha>:<path>`), never from the shared checkout's working tree. **`2_Project_Files` stays read-only:** verify it clean before and after each worktree add, and say so.
+- **A check that prints nothing needs a control that prints. Never delete; quarantine.** Your own scratch worktree is the one removal that is yours, done under both lock conditions.
+- **Client isolation:** Secuura only.
+- Signature classes pause for Kam: production, money, external communication to any human beyond the gated comments, and anything irreversible.
+
+## MAIL FORMATS (all to `wednesday-agent@agentmail.to`, subject prefixed `[Secuura/Blockchain-C -> Wednesday] `, and every subject names `(Seat C 21st)`)
+- **Plan:** `QUESTION: plan confirmation (Seat C 21st)`, body per ITEM 0. Launcher warnings VERBATIM.
+- **STATUS:** `QUESTION: status <item> (Seat C 21st)`. One line of state, then your ctx or **"Please read my ctx."**
+- **READY:** ONE mail, both PRs plus the two comment drafts. It is sent only after the freeze has cleared and both PRs are raised.
+- **WRAP:** `WRAP (Seat C 21st): …`. It carries:
+  - what IS running, read from a ps file;
+  - the handover path + sha256 prefix + `wc -c`;
+  - the history entry at the TOP of `history.md` (**re-read the top immediately before you write it**, because B 55th writes there too);
+  - UNRAISED / UNMEASURED / UNMERGED;
+  - the comment ids (or "not posted" + reason);
+  - `df -m` before and after;
+  - mail counts COUNTED from the inbox, filtered to YOUR seat, with failed sends listed separately.
+- **Anything appended to the handover after the WRAP gets a second mail naming the new sha256.**
+
+## UNMEASURED (not provenance)
+- your ctx, pane id and claude pid;
+- develop at boot, if it moved;
+- whether the launcher pulled or fetched;
+- Q6's violator list for the `check-stack-safety.sh` rule;
+- whether `docker compose config` renders without the daemon and without a `.env` in a fresh worktree;
+- every suite, red-first and green-after figure;
+- KS-1381's static-guard reach across the repo;
+- whether B 55th has acknowledged the co-tenant addendum (Wednesday's ANSWER says);
+- the gate tier (T1 or T2 per Q3; the gate name gateC21 and the GO string are ruled);
+- **the push freeze itself**: relayed from B 55th's STOP mail and not re-measured by the drafter. When it clears is Wednesday's ANSWER.
+
+RULED BY KAM, NOT YET IN AN ARTEFACT
+- *"do as much work with the spark and claude agents on the secura projects as you can"*: Kam, terminal, 2026-10-04 ~19:4x (learning `2026-10-04_as-much-secuura-work-as-possible-spark-and-claude.md`). This is the authority for a second parallel seat. No PR body needs to carry it.
+
+RULED BY WEDNESDAY FOR THIS PROJECT, STILL OPERATIVE
+- **Parallel seats on one checkout carry the STANDING BLOCK** (push-window lock, attribution by namespace, the board guard, process namespace, test by handle). The seat number is derived from `history.md` (see Q4's flag).
+- **No attribution, on the branch commit AND in the squash body.**
+- **A gate that trips on the INSTRUMENT is fixed, re-proved and resumed. A gate that trips on a READING is a STOP and a mail.**
+- **Measure before the READY. Any red that is not red at develop is a STOP.**
+- **The GO composes squash subjects and bodies.** Declared squash subjects carry NO `(#n)`.
+- **A hyphenated foreign key in a PR title, body, branch or commit message ATTACHES that ticket: de-hyphenate every key but the PR's own.**
+- **A ticket that moves itself on PR creation is reported, not reverted.**
+- **A client comment is posted only after its gate, on the GO's relay.**
+- **One PR per logical path or test pass** (Kam 2026-09-07). Here that means one PR for the Testing harness and one for the stack tooling.
+- Merge only on a signed GO whose subject names Seat C 21st.
+- **Seat C 21st (token `c21`, gate gateC21)**: Wednesday's ruling 2026-10-04. The project's `history.md` rule wins over the first draft's number.
+- **PUSH FREEZE:** commit locally; no push, no PR, no READY and no `--no-verify` until a Wednesday ANSWER naming Seat C 21st clears it. No lockfile, manifest or baseline edit.
+
+VERIFIED BEFORE SENDING (Wednesday's drafter, 2026-10-04)
+PROVENANCE:
+- KS-1382 state (open: Todo, High, board account, last comment none, 0 comments; updatedAt 2026-10-01T11:18:32Z) | Linear ticket KS-1382 | read 2026-10-04
+- KS-1355 state (open: Todo, Urgent, board account, last comment none, 0 comments; updatedAt 2026-10-01T11:18:28Z) | Linear ticket KS-1355 | read 2026-10-04
+- KS-1381 state (open: Todo, High, board account, last comment none, 0 comments; OUT of this seat) | Linear ticket KS-1381 | read 2026-10-04
+- KS-1388 state (open: Backlog, no priority, board account, last comment none, 0 comments; section 1 SPARK, rest OUT) | Linear ticket KS-1388 | read 2026-10-04
+- KS-1389 state (open: Backlog, no priority, board account, last comment none, 0 comments; OUT of this seat) | Linear ticket KS-1389 | read 2026-10-04
+- KS-1162 state (open: Backlog, Low, board account, last comment Peter 2026-09-29T12:46:31Z; OUT by rule) | Linear ticket KS-1162 | read 2026-10-04
+- KS-1038 state (open: Backlog, High, UNASSIGNED, last comment none, 0 comments; OUT of this seat) | Linear ticket KS-1038 | read 2026-10-04
+- label census: slots-not-fully-isolated = 7 KS (KS-1389 KS-1388 KS-1382 KS-1381 KS-1355 KS-1162 KS-1038) + 15 PS; each KS ticket read whole (description + comments(first:50) sorted client-side + relations + attachments, 0 attachments on all 7) | Linear GraphQL, read-only, LINEAR_API_KEY by name from /Volumes/DevMASTER/!CODING/Secuura/Blockchain/4_Credentials/.env | read 2026-10-04 08:49Z
+- develop 88e8877a2a0d6a626b9c2a7c4b71d3a909e6f94e at origin; 0 -c21-<n> refs, raw c21 28 all hex, bounded 0 (09:04:07Z); one ref containing -c1- kept as a FOREIGN control (feature/ks-1217-ks1050-c1-pins-only-the-helper-message-prefix-plus-a-3-r15-testpinfullmessage-1 4ecb09cf2c1d); 0 -b55- refs at 08:53:20Z; control -b54- 1 | `git -C /Volumes/DevMASTER/!CODING/Secuura/Blockchain/2_Project_Files ls-remote origin` | read 2026-10-04 08:48Z and 08:53Z
+- shared checkout HEAD and develop c56dd7c32edf, origin/develop 88e8877a2a0d, cat-file -t commit, FETCH_HEAD 08:34:45Z, .git/config 4f624a213933d54b, 0 tracked-modified 17 untracked, 485 .git/worktrees, hooksPath .githooks | `git -C /Volumes/DevMASTER/!CODING/Secuura/Blockchain/2_Project_Files rev-parse` + `cat-file` + `status` + `TZ=UTC stat` + `shasum` | read 2026-10-04 08:53Z
+- B 55th live: .push-lock-50 holder {seat Secuura/Blockchain b55, pid 85681, branch feature/ks-1402-lookup-accepts-connector-token-b55-1, started 08:49:12Z}; s-b55-ks1402 and s-b55-ks1015 present; 0 s-c21-* (and 0 at 09:04Z); 34 s-c* (14 s-c16, 7 s-c18, 13 s-c19); record folder 2026-10-04_seatB-55th with 30 raise/ entries (*50 tools) | `ls -a` + `cat` of /Volumes/DevMASTER/!CODING/Secuura/Blockchain/worktrees/ and /Volumes/DevMASTER/!CODING/Secuura/Blockchain/5_Project_History/2026-10-04_seatB-55th/raise | read 2026-10-04 08:53Z
+- B 55th's brief says "no co-tenant is live" (:95) and "if ls finds any .push-lock-* other than yours ... STOP" (:403); its matcher brief lists blockchain-c] as foreign | /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/briefs_staged/2026-10-04_seatB55_build.md read whole | read 2026-10-04 08:46Z
+- inbox routing: Secuura/Blockchain :29 and Secuura/Blockchain-C :37 both secuura-blockchain@agentmail.to (also -B :36, -D :38, -E :39, -BOARD :47) | /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/inbox_routing.conf | read 2026-10-04 08:50Z
+- shared inbox: 100 messages back to 2026-09-30T07:38:06Z; newest Wednesday ANSWER STATUS redfirst (Seat B 55th) 08:47:38Z; B 55th LAUNCH BRIEF 08:00:01Z; B 55th STATUS fetch+R2 08:38:23Z (fetch rc 0, 1 ref moved); Kam 2026-10-02T00:00:01Z re-date mail; 0 subjects naming any Seat C | `GET https://api.agentmail.to/v0/inboxes/secuura-blockchain@agentmail.to/messages?limit=100` (AGENTMAIL_API_KEY by name from /Volumes/DevMASTER/WEDNESDAY/4_Credentials/.env, never printed) | read 2026-10-04 08:51Z
+- seat number: history.md newest Seat C entry Seat C 20th SUCCESSOR :1772 (2026-09-22); C 19th :1811, C 18th :1830, C 17th :1842, C 16th :1860; HANDOVER-seatC-16th..20th-successor-2026-09-22.md exist; bounded "seat c 21st" 0, "s-c21-" 0, "\bc21\b" 2 (C21 control labels :1029), raw c21 7, control "seat c 20th" 4; ruled Seat C 21st by Wednesday 2026-10-04 | /usr/bin/grep -oiE + -n over /Volumes/DevMASTER/!CODING/Secuura/Blockchain/5_Project_History/history.md (17,650 lines) + `ls` | read 2026-10-04 08:51Z and 08:55Z
+- B 54th tools: 23 files match 49(_[0-9a-z]+)?\.py or 49(_[0-9a-z]+)?\.sh; raw c21 6, bounded \bc21\b 6 (all namecheck49.py C21 control labels :77 :214 :480 :481 :485 :492); control bounded \bb54\b 23; inbox_match49.py OTHER_SEATS :185-:187 includes "blockchain-c]", MINE "b 54th" :93, pane notes :44-:48, d1 note :181 | `ls` + /usr/bin/grep -oiE / -noiE + sed -n over /Volumes/DevMASTER/!CODING/Secuura/Blockchain/5_Project_History/2026-10-01_seatB-54th/raise | read 2026-10-04 08:54Z
+- code at 88e8877a2a0d (every blob hash-object equal to the tree's): Testing orchestrate.sh 65247243f758 :14 :37 :123-:126 :138 :159; run-schemathesis.sh 01f2b9f2f897 :23 :37; 05-dast-zap.sh e3e8041e361e :23 :25; 06-tenant-isolation.sh 4d077ab30259 :31 :71; run-internal-audit.sh ce3a9c880786 :15 :30 :103 :120; 0 files of the five source stack_env/slot-target/SECUURA_STACK_SLOT, 7 lines with 6882 | `curl` REST contents?ref=88e8877a2a0d + `git hash-object` + /usr/bin/grep -n, GH_TOKEN by name | read 2026-10-04 08:52Z
+- code at 88e8877a2a0d: stack_env.sh cffac9128964 :17 :20-:22 :56 :58 :73 :89-:93; slot-target.sh 7a30270d9b7e :43 :51 :54 :56-:67 :99; stack_guard.sh 008401ffa483 :104-:110 (sort -u :109); stack_guard.test.sh 07be45f99b66 :1-:17 :20-:25 :130 :283-:300 :291; dev-reload.sh f74b7aee6833 :45 :54-:58 :71 :74; start-local.sh 687d5be838db :26 :103 :108 :131 :179 :197; check-stack-safety.sh 894ba4612b16 :1-:23; docker-compose.yml effc5ef3c9d8 :503 :767 :888 :1841 :1876 :1910-:1912 :1973 :2179 :2276; preflight.sh 270b8913c009 :77 :94 :533 :589-:630; .githooks/pre-push ffc25ebc37d4 :273-:286 (:281-:283 runs the worktree's own preflight); run-shell-suites.sh 85920863d704 :47-:50 :99-:150; orchestrate_jobs.test.sh 4653bc8a1d4a :21 :43-:45; slot_is_local_host_only.test.sh ae24e12c9b39 :33 :50; m365 index.ts 1d9ea9df2348 nine 6882 lines; observability .env.example e7a5b24dd459 :47, alerting.env.example e5e3790a0016 :55, observability docker-compose.yml 647818982afe :331, alloy.river 75928c106e01 :84 :91; auth-exhaustive.spec.ts d4ccb0318182 (0 describe.configure), e2e playwright.config.ts 97d43f9787a8 :48 | same REST read | read 2026-10-04 08:52-08:56Z
+- check-stack-safety.sh not invoked by preflight.sh or Blockchain/Dev/package.json 97f8e83fcdc4 (0 hits each; control GATEWAY_URL 2 hits in preflight.sh) | /usr/bin/grep -c over the REST copies | read 2026-10-04 08:54Z
+- open PRs 21; 0 touch the IN/OUT candidate paths except #887 (.github/workflows/pr-platform-suites.yml), #920 (4 files Blockchain/Dev/tests/e2e), #575 and #649 (m365 package.json) — the must-hit controls; 0 touch B 55th's files | `GET /repos/Secuura/Distributed_Secuura/pulls?state=open` + `GET …/pulls/<n>/files` paged, GH_TOKEN by name | read 2026-10-04 08:50Z
+- kam-merges class = .github/workflows PRs, outside the 2026-09-11 grant | /Volumes/DevMASTER/WEDNESDAY/0_Brain/learnings/2026-09-11_secuura-we-approve-and-merge-our-own-tested-work.md :44 | read 2026-10-04 08:54Z
+- tiers: T1 security surfaces/deploys, T2 tests/docs/config/CI | /Volumes/DevMASTER/WEDNESDAY/0_Brain/learnings/2026-09-05_qa-gate-tiers-and-the-two-nogo-cap.md | read 2026-10-04 08:54Z
+- parallel-seat standing block | /Volumes/DevMASTER/WEDNESDAY/0_Brain/learnings/2026-09-09_parallel-seats-on-one-project-grant.md (EXTENSION 2026-09-22) read whole | read 2026-10-04 08:46Z
+- Kam's instruction | /Volumes/DevMASTER/WEDNESDAY/0_Brain/learnings/2026-10-04_as-much-secuura-work-as-possible-spark-and-claude.md + /Volumes/DevMASTER/WEDNESDAY/0_Brain/tasks/WEEK-INSTRUCTION.md :1-:12 | read 2026-10-04 08:55Z
+- STANDING_LINES 389 lines sha256 bfb6955c541af7d8 | `wc -l` + `shasum` of /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/STANDING_LINES.md | read 2026-10-04 08:55Z
+- usage OK 2%; fuse 111.1 h at 08:55:38Z; disk 380,835 MiB; floor 3 panes | `bash /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/usage_gate.sh --check` + `python3` + `df -m` + `tmux list-panes -a` | read 2026-10-04 08:48-08:55Z
+- template | /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/briefs_staged/2026-10-04_seatB55_build.md (476 lines) read whole | read 2026-10-04 08:46Z
+- push freeze since ~08:56Z, preflight legs 6+7, GHSA-vfj7-8cjw-p6xm braces 3.0.3, GHSA-ch52-4w7c-c8xp http-cache-semantics 4.2.0, GHSA-86w9-cpqp-85rv node-forge 1.4.0 (NOT re-measured by the drafter) | Seat B 55th STOP mail 2026-10-04T08:59:58Z in secuura-blockchain@agentmail.to, relayed by Wednesday's coordinator message | read 2026-10-04 09:05Z
+- seat ruled Seat C 21st, token c21, gateC21; c21 re-census at origin raw 28 all hex, bounded 0, 0 -c21- refs, 0 c21 worktrees | Wednesday's coordinator ruling + `git -C /Volumes/DevMASTER/!CODING/Secuura/Blockchain/2_Project_Files ls-remote origin` + `ls -a` of /Volumes/DevMASTER/!CODING/Secuura/Blockchain/worktrees | read 2026-10-04 09:04Z
+
+Re-read record: the drafter re-read the brief from start to end against the PROVENANCE block. It checked:
+- develop is `88e8877a2a0d` everywhere;
+- the IN/OUT/SPARK split agrees in the BLUF, QUEUE, ITEM 3, CARRY and HOLDS;
+- the tier is stated the same way in the BLUF, Q3, ITEM 4 and the READY (T1 with spot 3, T2 without);
+- the no-ref-write-before-ANSWER release appears at the top, in ITEM 0 and in HOLDS;
+- the two-lock condition is the same in the STANDING BLOCK, the tools and the build steps;
+- the test location (`Blockchain/Dev/scripts/__tests__`, not `Blockchain/Testing`) is consistent;
+- docker is limited to `compose config` in every section;
+- spot 4 is OUT in every section that names KS-1355;
+- after the rename to Seat C 21st, no first-draft seat name or seat token is left; the only `c1` strings left are the FOREIGN controls (the ks-1217 branch, the `C1` label);
+- the PUSH FREEZE is stated wherever a push, PR open or READY is named (top block, BLUF, QUEUE, ITEM 1, ITEM 2, HOLDS, RULED BY WEDNESDAY).
+SELF-CHECK: re-read end-to-end for contradictions | 2026-10-04 20:06
