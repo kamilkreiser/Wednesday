@@ -6,6 +6,12 @@ status: live
 supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s1-wholesale
 ---
 
+## 🔴 DELTA 139 — 2026-10-04 17:50 WRAP for Kam's machine restart (s95). **READ THIS FIRST, THEN 138 (the pause and its resume recipe are still exact).**
+- **Kam, typed into Tuesday's terminal 2026-10-04:** "please wrap once its safe and I will restart as the machine needs to do an update". All panes close at the restart.
+- **THE PAUSE STILL STANDS** (Kam 09-30 12:03). Usage renewed to 0% on 10-04; at 05:30 Tuesday asked him on the live board to reply "resume" (default: stay paused). **No reply before the wrap.** First act of the next seat: kam_msgs.sh (note the live read's 3-day window) and the board for his answer. Nothing launches without it.
+- **The five NexusAI panes were told to WRAP** (fleet/briefs_staged/2026-10-04_nexusai_all_wrap_for_restart.md, --mail taps delivered x5): each writes its handover with branch, head and local-only commits. Known local-only work: N's RD-723 merge commit 9ec73da; P's rd-430 forward merge e4eab55 (origin rd-430 = 9ba6f1d). On RESUME, relaunch the seats through their own launchers (cockpit.sh launch), then send the RESUME mail.
+- **OWED ON RESUME:** everything in DELTA 138, plus the w=3 enforcement candidate in this seat's ledger (note_entry refuses receipt words without the quoted output; shared tooling, claim with Wednesday first), plus the wake detector's false fires on footer-hint changes (shared tooling).
+
 ## ⏸ DELTA 138 — 2026-09-30 12:04 (s95). **KAM PAUSED ALL WORK. READ THIS FIRST; it overrides every OWED/NEXT line below until Kam resumes.**
 - **Kam, live board 2026-09-30 12:03:42 (view=tuesday), verbatim:** "pause work for now as we are past 90%.  I will let you know if anything comes up and if I need anything". Receipt posted (201). Gauge 90% at the ruling.
 - **PAUSE mailed** (fleet/briefs_staged/2026-09-30_nexusai_all_PAUSE.md) to Datasec/NexusAI (M, N, O, P) and QA/NexusAI-batch12; five --mail taps delivered. Rules: start nothing, stop at a safe point, running holds may finish, act on no result, one-line state reply, then wait.
