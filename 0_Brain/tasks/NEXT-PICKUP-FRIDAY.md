@@ -12,7 +12,7 @@ supersede: replace wholesale; previous = NEXT-PICKUP-FRIDAY.md.pre-0925-rotate-s
 
 **The tree is at `/Volumes/Laptop-DEV/FRIDAY` (the drive, since 2026-09-28).** Quote every path (spaces).
 
-## 🔴🔴🔴 CHECKPOINT 2026-10-04 18:4x (Friday, ctx 50%) — READ FIRST; supersedes every block below where they differ
+## 🔴🔴🔴 CHECKPOINT 2026-10-04 18:33 (Friday, ctx 50%) — READ FIRST; supersedes every block below where they differ
 **KAM, terminal ~18:3x, verbatim: "deploy the wording fix once it's merged and keep working on the HPSM and security Composer projects.  Please get them as close to ready as you can so I can review tomorrow".** Receipted (bf-6d778bc3bb813); 'HPSM' read as HPSM-POC (correction offered, none yet). Review = **Mon 2026-10-05**.
 **DONE:** Composer demo = **6d026a7** (B64; Friday verified live 18:2x: kam/paul 200, 401, healthz 0.26.0, marker x1; backup before 0020; card delivered C-33; Kam told + 3 shots). watch_status skeleton fix shipped (arms 17/17).
 **LIVE PANES:**
