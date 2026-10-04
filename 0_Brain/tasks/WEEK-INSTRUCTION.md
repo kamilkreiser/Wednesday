@@ -2,7 +2,7 @@
 date: 2026-09-27
 type: week-instruction
 status: live
-valid_until: none (standing until Kam changes it; his 2026-10-04 ~19:4x terminal instruction replaced the 09-27 one)
+valid_until: 2026-10-11 (Kam ruled card wed-week-instruction-lapses-1004 = a, 2026-10-04 21:05:38 "Renew the same instruction to Sunday 11 Oct"; Wednesday's reading, told to him 21:0x: his 19:4x words are the content)
 given: "new account logged in.  1)with secuura work - this week, focus on you working on tasks with local models.  Use the spark as much as possible and only use cloud Opus 5.5 agents only when absolutely necessary." — Kam, terminal (typed right after /login, Login successful), 2026-09-27 ~13:15 AEST
 source: the previous instruction (2026-09-21 → end of Sunday 2026-09-27, "continue with the tickets … while I'm traveling") is in WEEK-INSTRUCTION.md.pre-0927-1316-lapsed; the unattended-week design is 1_Project_Definition/Architecture/2026-09-16_unattended-week-loop.md (piece a)
 ---
