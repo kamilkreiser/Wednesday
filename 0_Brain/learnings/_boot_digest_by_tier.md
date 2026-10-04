@@ -7,7 +7,7 @@ status: live
 
 # Boot digest BY TIER — W whole, M rules-only, every project case a handle
 
-Generated 2026-10-04 19:31 from 213 lesson files (977,788 B). M 36 · MIXED 5 · P-Datasec/HPSM-POC 1 · W 171. 5 project CASE sections inside MIXED files are reduced to one line each: the heading and the path to read it at. W blocks are exactly what the default digest carries; M blocks drop the section index and keep the rules; a P file is a single handle. The CASES behind every rule live only in the lesson files — open one the moment its rule fires.
+Generated 2026-10-04 19:48 from 214 lesson files (979,781 B). M 36 · MIXED 5 · P-Datasec/HPSM-POC 1 · W 172. 5 project CASE sections inside MIXED files are reduced to one line each: the heading and the path to read it at. W blocks are exactly what the default digest carries; M blocks drop the section index and keep the rules; a P file is a single handle. The CASES behind every rule live only in the lesson files — open one the moment its rule fires.
 
 ## The T9 SSD is the master — Wednesday must be fully portable
 `2026-07-31_fully-portable-drive.md` · principle · 2026-07-31 · status: superseded — the "T9 is the master" half by [[2026-08-25_one-drive-devmaster-is-master]] (2026-08-25); the portability principle itself still lives · tier: W
@@ -6850,4 +6850,17 @@ which dialog option is inside the grant).
 **Secrets:** the SFTP login lives only in `4_Credentials/clients/datasec/inbound/2026-10-03_hp-security-manager-3.16/sftp.env` (0600); the drop expires 2026-11-01. Never copied into a brief, a note or a tracked file.
 
 **Family:** [[2026-08-07_protocol-v1.3-signed-delegation]] (money is his, and he granted it here) · [[2026-08-03_go-slow-earn-autonomy]] (rule 5) · [[2026-09-08_name-the-field-that-says-whose-it-is]] (every resource names its subscription and RG).
+
+
+## Do as much Secuura work as possible with the Spark AND Claude agents (standing until Kam changes it)
+`2026-10-04_as-much-secuura-work-as-possible-spark-and-claude.md` · grant · 2026-10-04 · status: live · tier: W
+
+**His words, verbatim:** *"go — schedule the NAS backup nightly and do as much work with the spark and claude agents on the secura projects as you can"*
+
+**How to apply:**
+1. At every checkpoint: count the disjoint lanes and the Spark-briefable candidates; launch what fits, each with its partition named from both sides.
+2. Keep the Spark fed: always one brief in flight or queued; a held PASS is raised by the next seat on disjoint files.
+3. Wednesday's own context is the constraint, not the work: delegate drafting (briefs, screens, gate kits) to subagents and keep the source reads.
+
+**Family:** [[2026-09-13_as-many-agents-as-possible-partitioned-by-code]] · [[2026-09-25_three-tier-routing-ornith-spark-cloud-always-on]] · [[2026-08-03_go-slow-earn-autonomy]] (rule 5: every grant recorded).
 

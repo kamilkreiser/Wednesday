@@ -406,6 +406,8 @@ done
 # machines cannot collide, and so this check follows whichever seat is booting.
 # AGENT-AWARE 2026-09-09: all four labels now follow the booting seat, not just nassync.
 _DOC_JOBS="com.${_DOC_AGENT}.shiftchange com.${_DOC_AGENT}.wake com.${_DOC_AGENT}.close com.${_DOC_AGENT}.nassync"
+# 2026-10-04: the one-way NAS leg (nas_push.sh) is Wednesday's only — Kam ruled a, then "go".
+[ "$_DOC_AGENT" = "wednesday" ] && _DOC_JOBS="$_DOC_JOBS com.wednesday.naspush"
 if [ "$_DOC_AGENT" = "friday" ]; then
   ok "scheduler per-job sweep: friday seat — no scheduled jobs on the laptop (by design), skipped"
   _DOC_JOBS=""
