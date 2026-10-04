@@ -1,3 +1,10 @@
+## 2026-10-05 05:30 — Tuesday s96 (Mac mini seat), 2026-10-04 18:18 boot after the restart → 05:30 shift-change wrap
+- Kam resumed Datasec/NexusAI ("it should say - please resume"). Four NexusAI seats relaunched (sequentially, after a parallel-launch race corrupted NexusAI's settings.local.json; restored by its own launcher + N); RESUME mailed.
+- Merged + verified at source (ls-remote + gh): RD-723 → 630bb24, RD-707 → 55333df (C-185 known set extended to the O-1 sibling, C-185 ADDENDUM :1936), RD-741 security fix → 5fd2398 (npm-audit green; axios/http-cache-semantics/brace-expansion advisories closed). RD-692 landing at wrap (PR #43).
+- Gate 12 resumed via a new resume launcher (Opus 4.8 session-only switch at 19:08); gate 13 drafted, stamped, launched (RD-741 EARLY VERDICT GO WITH FINDINGS). Batch 14 READYs collected (RD-736, RD-737, RD-708).
+- Rulings: RD-603 extract + fail-closed; RD-741 (and RD-742 parked); RD-741 takes the turn ahead of P; RD-675 BAN; C-194 ratified (owner lines on accept/defer/waive entries); the gate-13 browser driver. Ledger: 2 rows (launch race; brief before reading queue dependencies).
+- Pushed; handover = NEXT-PICKUP-TUESDAY.md DELTA 143.
+
 ## 2026-10-04 17:50 — Tuesday s95 (Mac mini seat), 2026-09-30 09:38 → wrap (Kam restarting the machine for an update)
 - NexusAI: main red cleared by P's measurement (rd549 O4 = CI timing flake, cause undetermined; C-185 addendum; RD-740 filed), checked at source. Merges resumed: RD-732 landed at fae2aa1 (Build inside C-185, demo SKIPPED, npm-audit green for the first time). Ruled RD-430's RD-204 settings re-pins YES (C-175 ADDENDUM 2026-09-30). RD-629 READY saved for the next gate with RD-614.
 - Gate 12: flagged by Opus 5.5's safeguards at row f4; switched that pane only to Opus 4.8, session-only, per Kam's 09:07 (b). Its lock-free findings include RD-735's quadratic trim regex (the READY claimed linear).

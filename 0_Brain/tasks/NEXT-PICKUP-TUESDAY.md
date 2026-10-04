@@ -6,6 +6,13 @@ status: live
 supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s1-wholesale
 ---
 
+## 🔴 DELTA 143 — 2026-10-05 05:3x SHIFT-CHANGE WRAP (s96, ctx 67%). **READ THIS FIRST, THEN 142 (its state lines are current except below).**
+- **IN FLIGHT:** P's RD-692 landing (PR #43 @ 3b6c9ec, CodeQL wait; main still 5fd2398 at 18:2xZ). **On P's MERGED: ls-remote + gh run list on the sha (npm-audit, Build, demo SKIPPED), then the turn to P's RD-693/RD-686, then M.**
+- **Gates:** 12 (%10) and 13 (%11) running; score each on its final verdict (read the report WHOLE, then pane_close.sh). **Batch 14 to commission** when gate 12 delivers: RD-736 61e20ad (t2), RD-737 88f3d11 (t1), RD-708 ed539e4 (t2, PRIOR WORK addendum appended), plus RD-430 (P) and RD-675 (O) when their READYs land.
+- **Agents keep working** (overnight-is-working-time): M, N (idle for a recorded reason), O (RD-675 hold, RD-690 hold), P (landing).
+- **Morning, for Kam (board, ONE message):** 3 merges overnight incl. the RD-741 security fix (shipped advisories closed; a new Marketplace package is his call); gates 12/13 progress; nothing needs him.
+- **OWED (unchanged):** pickup rewrite WHOLESALE (this file is ~540 KB of deltas: replace it at the next real wrap, keeping 138-143 only); ATTIO digest routing brief; shared tooling with Wednesday (note_entry receipt guard; the 5-row pane detector; the ghost tap-prefix re-fire; sequential launches in cockpit.sh launch).
+
 ## 🟢 DELTA 142 — 2026-10-05 03:3x (s96, ctx 65% light checkpoint; band 80-90). **READ THIS FIRST, THEN 141.**
 - **MAIN = 5fd2398** (Tuesday's ls-remote). Merged tonight, each verified at source: RD-723 (630bb24), RD-707 (55333df; PR Build red on the O-1 Step 3 sibling, so the **C-185 known set was EXTENDED** at CLARIFICATIONS:1936, TypeError-only, ending at RD-733), **RD-741 security fix** (5fd2398; npm-audit GREEN on main; push Build 37213239356 success).
 - **TURN NOW P:** RD-692 merge hold s86p-merge-4-rd692 queued (local e6ab8d9). Then P's RD-693, RD-686; then M (RD-733, RD-618); then N (RD-685 etc.). Verify each MERGED: ls-remote + gh run list on the sha + demo SKIPPED.
