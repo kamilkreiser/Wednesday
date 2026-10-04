@@ -12,6 +12,18 @@ supersede: replace wholesale; previous = NEXT-PICKUP-FRIDAY.md.pre-0925-rotate-s
 
 **The tree is at `/Volumes/Laptop-DEV/FRIDAY` (the drive, since 2026-09-28).** Quote every path (spaces).
 
+## 🔴🔴🔴 CHECKPOINT 2026-10-04 18:4x (Friday, ctx 50%) — READ FIRST; supersedes every block below where they differ
+**KAM, terminal ~18:3x, verbatim: "deploy the wording fix once it's merged and keep working on the HPSM and security Composer projects.  Please get them as close to ready as you can so I can review tomorrow".** Receipted (bf-6d778bc3bb813); 'HPSM' read as HPSM-POC (correction offered, none yet). Review = **Mon 2026-10-05**.
+**DONE:** Composer demo = **6d026a7** (B64; Friday verified live 18:2x: kam/paul 200, 401, healthz 0.26.0, marker x1; backup before 0020; card delivered C-33; Kam told + 3 shots). watch_status skeleton fix shipped (arms 17/17).
+**LIVE PANES:**
+- %3 Datasec/Composer-E = **B65** (#168/#167/#162 wording; tier 2; branch b65/released-issues-wording; records C-34). On READY: read, PR, merge_when_green, then **DEPLOY to the demo on Kam's 18:3x word** (B64 shape: backup only if a migration — none expected; runbook + Friday's live check incl. a released example's S7 wording), tell Kam. Watcher: seen_b65.
+- %6 Datasec/Composer-QA = **B66** readiness review + FIX LIST (`CHECKPOINT 1 — FIX LIST READY`) + REVIEW PACK `Architecture/2026-10-05_REVIEW-PACK_FOR-KAM.md`. On checkpoint 1: launch fix lanes from its list (disjoint files, none of B65's), tier-1 lanes gated. Deploy of those = Kam's word (only B65's is pre-authorised).
+- %4 Datasec/HPSM-POC-A = **B115** Lane A5+A8 (HPSMPOC-118 forwarded address, -188 sign-in role; tier 1 → gate before merge).
+- %5 Datasec/HPSM-POC-B = **B116** REVIEW PACK + B5 screenshots + K-6/K-7 DRAFT strings + W2 refresh (analysis only).
+- Watcher: seen_wave2 (B115/B116/B66 + panes %4 %5 %6).
+**BY MORNING:** both review packs on Kam's Friday tab (pointer + file), plus a card to deploy HPSM-POC main (2c94bff+, hosted runs c2dd403) — default nothing deployed.
+**Ledger today:** deploy card omitted gate B63's #168 note (row). caffeinate pid 1865 (~6 h from 18:1x).
+
 ## 🔴🔴🔴 WRAP 2026-10-04 06:1x (Friday) — READ FIRST; supersedes every block below where they differ
 **KAM, terminal ~06:0x, verbatim: "please wrap up when its safe and deploy it to the demo at next boot".** Card `composer-6d026a7-deploy-before-monday` RULED **a** (recorded by Friday from his terminal words; tile hidden).
 **🔴 FIRST WORK AT THE NEXT BOOT — the Composer demo deploy, Kam's word above is the authority:**
