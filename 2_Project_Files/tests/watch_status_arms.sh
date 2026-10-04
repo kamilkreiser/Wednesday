@@ -2,10 +2,11 @@
 # Arms for friday/watch_status.sh (2026-10-03 upgrade: READY FOR GATE, STOPPED/NEEDS FRIDAY, --seed, WATCH_PANES).
 # The case: three seats sat waiting on Friday unnoticed on 2026-10-03 (ledger row of that date).
 # Runs the watcher from a temp copy beside a STUB seat_idle.sh (reads state_<pane> files), so no live pane is touched.
+# 2026-10-04: A8-A12 = a SKELETON STATUS (READY line + template tokens) must not fire until filled; red at the 10-03 version.
 # Red-proof: A1 and A4 return "leg expired" against the pre-upgrade watcher (checked by Friday 2026-10-03 19:2x).
 set -u
-SRC="$(cd "$(dirname "$0")/.." && pwd)/friday/watch_status.sh"
-T=$(mktemp -d); mkdir -p "$T/bin"; cp "$SRC" "$T/bin/"
+SRC="${WATCH_STATUS_SRC:-$(cd "$(dirname "$0")/.." && pwd)/friday/watch_status.sh}"   # override to arm a candidate before install
+T=$(mktemp -d); mkdir -p "$T/bin"; cp "$SRC" "$T/bin/watch_status.sh"
 cat > "$T/bin/seat_idle.sh" <<'EOF'
 #!/bin/bash
 cat "$(dirname "$0")/state_$(echo "$1" | tr -d %)" 2>/dev/null || echo "UNKNOWN — stub"
@@ -31,4 +32,18 @@ echo "BUSY — x" > "$T/bin/state_9"; ( sleep 1; echo "IDLE — turn ended" > "$
 chk "$(WATCH_PANES='%9' WATCH_LOOPS=4 WATCH_SLEEP=1 bash "$W" $d/seen "$d/*STATUS*" | tail -1)" "WAKE: pane %9 went IDLE (was BUSY)" "A6 a pane going BUSY -> IDLE fires"
 echo "IDLE — turn ended" > "$T/bin/state_8"
 chk "$(WATCH_PANES='%8' WATCH_LOOPS=2 WATCH_SLEEP=0 bash "$W" $d/seen "$d/*STATUS*" | tail -1 | cut -c1-30)" "$EXP" "A7 a pane staying IDLE is quiet"
+d=$T/a8; mkdir -p $d; : > $d/seen; printf 'READY FOR GATE\n## BLUF\n@@BODY@@\n' > $d/X_STATUS.md
+chk "$(run $d/seen "$d/*STATUS*" | cut -c1-30)" "$EXP" "A8 skeleton @@BODY@@ with a READY line does not fire"
+printf 'READY FOR GATE\n## BLUF\nGO WITH NOTES, all filled\n' > $d/X_STATUS.md
+chk "$(run $d/seen "$d/*STATUS*" | cut -c1-5)" "WAKE:" "A9 the same file once filled fires"
+for tok in '__VERDICT__' 'CI_RESULT_PLACEHOLDER' 'CI-RUN2-LINE'; do
+  d=$T/a10$tok; mkdir -p "$d"; : > "$d/seen"; printf 'READY FOR REVIEW\nci.sh: %s\n' "$tok" > "$d/X_STATUS.md"
+  chk "$(run "$d/seen" "$d/*STATUS*" | cut -c1-30)" "$EXP" "A10 skeleton token $tok holds the READY"
+done
+d=$T/a11; mkdir -p $d; : > $d/seen; printf 'READY FOR REVIEW\nci.sh run 2 line green; the CI-run log; __init__ untouched; PRE-LINE prose\n' > $d/X_STATUS.md
+chk "$(run $d/seen "$d/*STATUS*" | cut -c1-5)" "WAKE:" "A11 ordinary prose near the tokens does not hold a real READY"
+d=$T/a12; mkdir -p $d; : > $d/seen; printf 'STOPPED: NEEDS FRIDAY\n@@BODY@@\n' > $d/X_STATUS.md
+chk "$(run $d/seen "$d/*STATUS*" | cut -c1-5)" "WAKE:" "A12 a STOP in a skeleton still fires"
+d=$T/a13; mkdir -p $d; : > $d/seen; printf 'READY FOR REVIEW\nE-01: all 217 question texts are PLACEHOLDER; census 217 -> 0\nKNOWN_PLACEHOLDER_ENTRIES kept\n' > $d/X_STATUS.md
+chk "$(run $d/seen "$d/*STATUS*" | cut -c1-5)" "WAKE:" "A13 real finished-STATUS prose (bare PLACEHOLDER, KNOWN_PLACEHOLDER_ENTRIES) does not hold"
 wait; echo "pass=$pass fail=$fail"; [ "$fail" = 0 ]
