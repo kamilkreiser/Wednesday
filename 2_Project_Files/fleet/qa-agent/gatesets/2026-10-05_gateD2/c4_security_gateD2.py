@@ -18,7 +18,7 @@ control of the same regex that fires somewhere it should.
   V12 MOCK PATH CLOSED in qualified-tsa.ts: 0 `verifyMockToken`, 0 `JSON.parse` in verifyTimestamp; non-0x30 tokens refused; MUST-HIT: base has both.
   V13 DB-ROW BRANCH UNCHANGED: index.ts blob == kit unchanged_must_equal == base blob, and its `SELECT * FROM ts_timestamps WHERE hash = $1 AND
       proof = $2` line is present (every kit unchanged_must_equal path compared).
-  V14 THE COMMITTED BUNDLE (Wednesday 14:2xZ): config/tsa-trust-anchors.pem exists at HEAD, is ABSENT at base, parses into EXACTLY 2
+  V14 THE COMMITTED BUNDLE (Wednesday 14:2xZ): config/tsa-trust-anchors.crt exists at HEAD, is ABSENT at base, parses into EXACTLY 2
       certificates whose SHA-256 fingerprints == kit anchors (computed here from the DER in the PEM, independent of pkijs); with
       --fetch-anchors each kit anchor is ALSO recomputed from its provider URL (redirects followed; DER or PEM) and must equal the bundle's.
   V15 ENV-ONLY LOADER: no non-test code names the bundle file (0 `tsa-trust-anchors` in code under Blockchain/Dev, compose / Dockerfiles
@@ -49,13 +49,25 @@ norm_fp = lambda s: re.sub(r'[^0-9A-F]', '', s.upper())
 
 
 def func_body(code, name):
+    """the {...} body of `function name(...)`: the parameter list and a `: {...}` return type are skipped by bracket matching"""
     m = re.search(r'(?:async\s+)?function\s+%s\s*\(' % re.escape(name), code)
     if not m: return None
-    i = code.index('{', code.index(')', m.end())); d = 0
-    for j in range(i, len(code)):
-        d += {'{': 1, '}': -1}.get(code[j], 0)
-        if d == 0: return code[i:j + 1]
-    return None
+    def match(i, o, c):
+        d = 0
+        for j in range(i, len(code)):
+            d += (code[j] == o) - (code[j] == c)
+            if d == 0: return j
+        return None
+    j = match(m.end() - 1, '(', ')')
+    if j is None: return None
+    k = j + 1
+    while k < len(code) and code[k].isspace(): k += 1
+    if k < len(code) and code[k] == ':':
+        k += 1
+        while k < len(code) and code[k].isspace(): k += 1
+        if code[k] == '{': k = match(k, '{', '}') + 1
+    i = code.index('{', k); e = match(i, '{', '}')
+    return code[i:e + 1] if e is not None else None
 
 
 def pem_certs(text):
@@ -174,11 +186,20 @@ if '--base-vs-base' in A:
     print('C4 SECURITY %s (base-vs-base, a control: it MUST fail): %d FAIL of %d' % ('PASS' if n == 0 else 'FAIL', n, len(C.res))); raise SystemExit(1 if n else 0)
 T = load(HEAD)
 if '--selftest' in A:
+    SYN = ''
+    if T['bundle'] is None:   # the bundle commit is not in this head: SYNTHESISE the ruled bundle + README so V14-V16 have a passing reference
+        if fetched is None: print('REFUSING: --selftest on a head without the bundle needs --fetch-anchors (the synthetic bundle is built from the providers\' DER)'); raise SystemExit(2)
+        ders = []
+        for n, v in K['anchors'].items(): ders.append(fetch_anchor(v['url'])[0])
+        T = dict(T, bundle=''.join('-----BEGIN CERTIFICATE-----\n%s\n-----END CERTIFICATE-----\n' % '\n'.join(re.findall('.{1,64}', base64.b64encode(d).decode())) for d in ders),
+                 readme='# TSA trust anchors\n`config/tsa-trust-anchors.crt` pins %s. Loaded only from TSA_TRUST_ANCHORS_PEM; unset means every real token verifies false (fail closed).\n' % '; '.join('%s %s' % (n, v['sha256']) for n, v in K['anchors'].items()),
+                 readme_names_bundle=True, readme_missing_paths=[])
+        SYN = ' (SYNTHETIC bundle + README built from the fetched provider DER, because this head has no bundle commit)'
     def plant(key, a, b):
         t = dict(T); assert (t[key] or '').count(a) >= 1, 'plant anchor %r absent from %s' % (a, key); t[key] = t[key].replace(a, b, 1); return t
     FAKE_PEM = '\n'.join('-----BEGIN CERTIFICATE-----\n%s\n-----END CERTIFICATE-----' % base64.b64encode(b'not a real cert %d' % i).decode() for i in range(2))
     arms = [
-        ('T0 real head', T, None),
+        ('T0 real head' + SYN, T, None),
         ('T1 signature verify removed', plant('verify', 'subtle.verify(', 'subtle.noverify('), 'V1'),
         ('T2 messageDigest compare removed', plant('verify', 'declared.equals(actual)', 'true'), 'V2'),
         ('T3 EKU check removed', plant('verify', 'purposes.includes(OID.timeStamping)', 'true'), 'V5'),
@@ -186,9 +207,11 @@ if '--selftest' in A:
         ('T5 a fetch( in the verifier', plant('verify', 'const refuse =', 'void fetch("https://x");\nconst refuse ='), 'V9'),
         ('T6 an https import in the verifier', plant('verify', "import * as pkijs from 'pkijs';", "import * as pkijs from 'pkijs';\nimport * as https from 'https';"), 'V9'),
         ('T7 indefinite-length guard removed', plant('verify', 'findIndefinite(asn.result)', 'false'), 'V10'),
-        ('T8 the verifier names a default bundle path', plant('qtsa', 'const raw = process.env.TSA_TRUST_ANCHORS_PEM;', "const raw = process.env.TSA_TRUST_ANCHORS_PEM || 'config/tsa-trust-anchors.pem';"), 'V15'),
+        ('T8 the loader names a default bundle path', plant('qtsa', 'const raw = process.env.TSA_TRUST_ANCHORS_PEM;', "const raw = process.env.TSA_TRUST_ANCHORS_PEM || 'config/tsa-trust-anchors.crt';"), 'V15'),
         ('T9 a bundle of 2 non-root blobs', dict(T, bundle=FAKE_PEM), 'V14'),
         ('T10 chain result unchecked', plant('verify', 'if (!chain?.result) {', 'if (false) {'), 'V7'),
+        ('T12 the README loses a fingerprint', dict(T, readme=(T['readme'] or '').replace(K['anchors']['DigiCert Assured ID Root CA']['sha256'], 'REMOVED')), 'V16'),
+        ('T13 a third certificate in the bundle', dict(T, bundle=(T['bundle'] or '') + (T['bundle'] or '').split('-----END CERTIFICATE-----')[0] + '-----END CERTIFICATE-----\n'), 'V14'),
         ('T11 a JSON.parse mock path back in verifyTimestamp', plant('qtsa', 'const tokenBuf = Buffer.from(token, \'base64\');', 'const tokenBuf = Buffer.from(token, \'base64\'); JSON.parse("{}");'), 'V12'),
     ]
     ok = 0; real_fails = None
@@ -200,7 +223,7 @@ if '--selftest' in A:
             real_fails = f; good = True   # the real head's failures are the PREDICTION, printed; each plant must ADD its row
             print('SELFTEST REF %s: failed %s (the drafter-predicted rows; each plant below must ADD its own)' % (name, f or 'NONE'))
         else:
-            good = any(x.startswith(want) for x in f) and want not in ' '.join(real_fails or [])
+            good = any(x.startswith(want + ' ') for x in f) and not any(x.startswith(want + ' ') for x in (real_fails or []))
             print('SELFTEST %s %s: want a NEW FAIL on %s | failed %s' % ('OK' if good else 'MISS', name, want, f))
         ok += good
     print('SELFTEST %s %d of %d' % ('OK' if ok == len(arms) else 'BROKEN', ok, len(arms))); raise SystemExit(0 if ok == len(arms) else 1)

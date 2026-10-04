@@ -28,7 +28,7 @@
  *   PF7  SignerInfo digestAlgorithm SHA-512 (messageDigest = SHA-512(eContent)) with a SHA-256 imprint
  *   PF8  NO signingCertificateV2 attribute (RFC 3161 2.4.1 requires ESSCertID binding)
  *   PF11 OpenSSL's own RSA token (openssl ts -reply), anchor rootA     PF12 OpenSSL's own ECDSA P-256 token, anchor rootA
- *   PF13 the committed bundle (config/tsa-trust-anchors.pem), parsed by the PRODUCT's parseTrustAnchors: certificate count and
+ *   PF13 the committed bundle (config/tsa-trust-anchors.crt), parsed by the PRODUCT's parseTrustAnchors: certificate count and
  *        SHA-256 fingerprints (ABSENT is reported, and C4 fails on it)
  */
 import { describe, it, expect, beforeAll, afterAll, vi } from 'vitest';
@@ -179,7 +179,7 @@ describe('gateD2 forgery probe (independent tokens)', () => {
     report('PF12', await v(rd('openssl_token_ec.der').toString('base64'), rdt('rootA.pem')));
   });
   it('REPORT PF13 the committed bundle through the product parser', async () => {
-    const p = path.resolve(__dirname, '../../config/tsa-trust-anchors.pem');
+    const p = path.resolve(__dirname, '../../config/tsa-trust-anchors.crt');
     if (!fs.existsSync(p)) { console.log('GD2 REPORT PF13 bundle=ABSENT path=' + p); return; }
     const certs = parseTrustAnchors(fs.readFileSync(p, 'utf-8'));
     const fps = certs.map((c) => nodeCrypto.createHash('sha256').update(Buffer.from(c.toSchema().toBER(false))).digest('hex').toUpperCase().match(/../g)!.join(':'));

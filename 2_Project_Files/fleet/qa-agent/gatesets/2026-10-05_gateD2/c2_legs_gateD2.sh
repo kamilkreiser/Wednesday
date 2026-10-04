@@ -7,7 +7,7 @@
 #   c2_legs_gateD2.sh plan <repo> <sha>                 READ-ONLY: the leg files exist at <sha>; both gates read AUDIT_BASELINE_PATH there.
 #   c2_legs_gateD2.sh parse-selftest <outdir>           the parsers on planted lines: a FAIL row counts as FAIL, a CLEANUP row as CLEANUP.
 #   c2_legs_gateD2.sh run <devdir> <label> <outdir>     <devdir> = <your worktree>/Blockchain/Dev at the HEAD. Installs scripts/audit's OWN
-#        lock (npm ci --ignore-scripts), then legs 2, 6, 7. Want: rc 0 0 0; GHSA-86w9-cpqp-85rv named NOWHERE (no FAIL row, no CLEANUP row);
+#        lock (npm ci --ignore-scripts), then legs 2, 6, 7 and 9 (no-tracked-credentials.sh: the .crt bundle must pass it). Want: rc 0 0 0; GHSA-86w9-cpqp-85rv named NOWHERE (no FAIL row, no CLEANUP row);
 #        the CLEANUP count printed (builder: 15). rc 2 from a leg = SKIP (registry unreachable) and is NEVER a pass.
 #   c2_legs_gateD2.sh cleanup-control <devdir> <outdir> <base-baseline.json>
 #        the MUST-HIT CONTROL: legs 6 and 7 at the HEAD tree with the BASE baseline passed by AUDIT_BASELINE_PATH (the worktree is never
@@ -87,6 +87,9 @@ run)
   node "$DEV/scripts/audit/audit-locks.mjs" > "$OUT/leg7.out" 2> "$OUT/leg7.err"
   rc7=$?
   echo "$rc7" > "$OUT/leg7.rc"
+  bash "$DEV/scripts/preflight/no-tracked-credentials.sh" > "$OUT/leg9.out" 2> "$OUT/leg9.err"
+  rc9=$?
+  echo "$rc9" > "$OUT/leg9.rc"
   cat "$OUT/leg6.out" "$OUT/leg6.err" > "$OUT/leg6.all"; cat "$OUT/leg7.out" "$OUT/leg7.err" > "$OUT/leg7.all"
   fails "$OUT/leg6.all" > "$OUT/leg6.fail"; fails "$OUT/leg7.all" > "$OUT/leg7.fail"; cleanups "$OUT/leg6.all" > "$OUT/leg6.cleanup"; cleanups "$OUT/leg7.all" > "$OUT/leg7.cleanup"
   N="$(cat "$OUT/leg6.all" "$OUT/leg7.all" | grep -c "$RM")"
@@ -94,8 +97,9 @@ run)
   echo "  leg 6 rc $rc6 $(class $rc6) | FAIL rows: $(tr '\n' ' ' < "$OUT/leg6.fail") | CLEANUP rows $(wc -l < "$OUT/leg6.cleanup" | tr -d ' '): $(tr '\n' ' ' < "$OUT/leg6.cleanup")"
   echo "  leg 7 rc $rc7 $(class $rc7) | FAIL rows: $(tr '\n' ' ' < "$OUT/leg7.fail") | CLEANUP rows $(wc -l < "$OUT/leg7.cleanup" | tr -d ' '): $(tr '\n' ' ' < "$OUT/leg7.cleanup")"
   echo "  $RM mentioned anywhere in legs 6/7 output: $N (want 0)"
-  BAD=0; [ $rc2 -eq 0 ] && [ $rc6 -eq 0 ] && [ $rc7 -eq 0 ] && [ "$N" = 0 ] || BAD=1
-  echo "LEGS $LABEL: want 2/6/7 rc 0 0 0 and $RM named nowhere | got $rc2 $rc6 $rc7, $N mention(s) -> $([ $BAD -eq 0 ] && echo OK || echo MISMATCH)"; exit $BAD ;;
+  echo "  leg 9 (no tracked credentials, KS-646) rc $rc9 $(class $rc9) | last: $(tail -1 "$OUT/leg9.out")"
+  BAD=0; [ $rc2 -eq 0 ] && [ $rc6 -eq 0 ] && [ $rc7 -eq 0 ] && [ $rc9 -eq 0 ] && [ "$N" = 0 ] || BAD=1
+  echo "LEGS $LABEL: want 2/6/7/9 rc 0 0 0 0 and $RM named nowhere | got $rc2 $rc6 $rc7 $rc9, $N mention(s) -> $([ $BAD -eq 0 ] && echo OK || echo MISMATCH)"; exit $BAD ;;
 cleanup-control)
   guard_dev "${2:?devdir}"; guard_out "${3:?outdir}"; BB="${4:?base baseline json}"
   [ -s "$BB" ] && grep -q "\"$RM\"" "$BB" || { echo "REFUSING: $BB is empty or does not carry $RM (extract the BASE blob first)"; exit 2; }

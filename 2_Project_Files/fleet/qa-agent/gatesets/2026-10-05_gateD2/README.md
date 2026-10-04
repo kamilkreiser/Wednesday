@@ -1,0 +1,59 @@
+# Gateset 2026-10-05_gateD2 — README for Wednesday
+
+Drafted 2026-10-05 AEST; work 2026-10-04 14:2xZ – 15:0xZ UTC. Each figure names the kit file it came from.
+
+## 0. What this is, and its status
+**gateD2 is a T1 gate over ONE Secuura/Blockchain PR: KS-1404, Seat D 3rd (author + merger).** PR number and FINAL head are inputs (`repin_and_launch_gateD2.sh <PR> <HEAD>`).
+
+**Status: KIT COMPLETE, NOT LAUNCHABLE YET** — three things must happen first:
+1. Seat D 3rd raises the PR with its **second commit** (the `.crt` bundle + `config/README.md` + three comment fixes).
+2. **develop already moved**: `e6daa806e79a` → `2d85b84e1012` (#1374 KS-1402 squash, tree `082190611d1f`). The builder must rebase; then Wednesday runs `repin_base_gateD2.py --new-develop <develop> ` (report), reads it, and re-runs with `--write`. Exercised against the real move: **clean re-pin, only the two docs moved** (`repin_base_1374_ex1.out`, rc 0); control: a "develop" that moves timestamping files → RE-DRAFT rc 1 (`repin_base_redraft_control_ex1.out`).
+3. The routing line (section 4).
+
+**What the drafter did:** wrote only in this folder and under `/private/tmp/claude-501/`. In `!CODING/` ran only git read verbs (show, log, ls-tree, cat-file, ls-remote, rev-parse, diff). Network: GitHub REST GETs (census, compare, commits), npm registry (tarballs; `npm ci` of the timestamping service's OWN lock into scratch copies extracted with `git show`), two root-cert GETs. Every refusal arm pointed at a path **inside this kit folder**; `ls` proves none was created (`c2_legs_refusal_ls_ex1.out`, `c3_refusal_ls_ex1.out`, `probe_pki_refusal_ex1.out`). No clone, no worktree, no launch, no mail, no delete (scratch probe files were moved to a scratch quarantine).
+
+## 1. Drafter predictions — on the FIRST commit 9884b5588d7c only, at the OLD base
+| check | file | result |
+|---|---|---|
+| C1 | pred_first_c1_ex2.out | FAIL 3 of 9 **as expected for a one-commit head**: P3 (1 commit, want 2), P4 (12 of 14 paths), P8 (bundle absent). P4b path gate PASS (control 2 outside), P5/P6/P7/P9 PASS. numstat == builder's 12 rows. |
+| C2 lockdiff | pred_first_c2lock_ex3.out | **PASS 12/12**: root −2/+5, service −2/+7, workspace entries == manifest, 0 flips, libc 0→0 / 10→10, 0 version moves. **INFO L6-REORDER** root `http-cache-semantics` fields reordered (D4). |
+| C2 integrity | pred_first_c2integrity_ex1.out | **PASS 10/10** (7 tarballs recomputed; at-base control FAILS I2) |
+| C2 baseline | pred_first_c2baseline_ex1.out | **PASS 4/4**, 26 → 25, only GHSA-86w9 |
+| C2 legs | pred_first_c2legs_plan_ex1.out | plan OK only; **legs not run** (needs a full worktree) |
+| C3 cells (scratch, no workspace) | pred_first_cells_scratch_{base,head}_ex1.* | base: cells 1, 3, 11 indefiniteLength, 12 red by assertion, 12 skipped (failed beforeAll); route cells 13/13b/14 **load-failed** (no `@secuura/shared` in scratch) and the judge correctly REFUSES them. head: 22 non-route green. |
+| C3 mutation | pred_first_mutation_ex1.out | all 8 arms turn their cell red (strict judge needs `--allow-extra` in scratch only, `pred_first_mutation_judge_ex2.out`); mockpath REPORTED (no cell guards it alone). |
+| C3 forgery probe | pred_first_probe_forgery_ex1.* | **13/13 mandatory arms PASS**: G0 genuine accepted; untrusted CA, TSTInfo byte flip, signature flip, mock JSON ±mock, empty/garbage anchors, no EKU, bad validity all refused for the RIGHT reason; 0 network. REPORT: PF5 intermediate-issued signer **refused**; PF6/PF11 rsaEncryption **refused**; PF7 SHA-512 SignerInfo **refused**; PF8 no signingCertificateV2 **accepted**; PF12 ECDSA **refused**; PF13 bundle ABSENT. |
+| C3 mock probe | pred_first_probe_mock_{base,head}_ex1.* | base M1–M3 verify TRUE (door open), head all FALSE |
+| C3 request bytes | pred_first_reqbytes_compare_ex2.out | **72/72 byte-identical** forge(base) vs der.ts(head), both quirks present (ex1 rc 1 was a key-case bug in the judge, fixed) |
+| C4 | pred_first_c4_ex3.out | FAIL 4 of 17: **V4 signingCertificate(V2) never read**; V14–V16 bundle/README absent (expected until commit 2). Fingerprints recomputed from both providers == Wednesday's (D-Trust needs the 302 to www1). |
+| C5 | pred_first_c5_ex2.out | PASS 11/11 (figures 25 / 5-44 / 6-69 / 6-7-12 across both docs; shape 4 keys; OpenAPI `.passthrough()` INFO) |
+| C6 | pred_first_c6_ex1.out | commit message as stand-in: states §5f, compose, create-side, opentimestamps; **does NOT state** root-to-TSA binding, D-Trust second source, box TSA_URL, negative nonce, mobile node-forge (the PR body may). Measured: 0 compose files set TSA_TRUST_ANCHORS_PEM; mobile lock still has node-forge. |
+| census | gh_census_ex1.out | 21 others; 0 co-tenants open (#1374 merged); 11 root-lock overlaps recorded as `reported_overlaps` (10 dependabot + #1360) |
+
+## 2. Doubts for the GATE (the drafter rules none)
+- **D1** signingCertificate(V2) unchecked (commission names it; RFC 3161 §2.4.1); PF8 accepts a token without it.
+- **D2 (could block KS-1404's purpose)** interoperability: engine gets `certs: [signer]` only (intermediates dropped), no rsaEncryption OID, no ECDSA DER→P1363, digest from the imprint alg. Real D-Trust / DigiCert TSA signers chain via intermediates, so with roots-only anchors a genuine token may **never** verify. Fail-closed, not an acceptance hole.
+- **D3** service lock also adds @noble/hashes + tslib (commission names five).
+- **D4** root lock reorders `http-cache-semantics` fields (value-equal; normalises PR 0's hand edit).
+- **D5** signer fallback `?? certs[0]`. **D6** OpenAPI `.passthrough()`. **D7** docs say anchors are "committed as config" while the loader is env-only. **D8** both co-tenant flow-doc blocks may be numbered "9.". **D9** cell 12 is not individually guarded (mockpath mutation). **D10** route cells' base proof needs the workspace install. **D11** the mobile tree still carries node-forge. **D12** commit 2's "three code comments" are unread by the drafter.
+
+## 3. Instruments (each exercised; outputs `*_exN.*` beside it)
+`lib_gateD2.py` (read verbs only + `safe_out`); `gh_census_gateD2.py`; `c1_pin_gateD2.py` (help 0, short-sha 2, pred, control #1374-head FAIL); `c2_lockdiff_gateD2.py` (selftest 9/9; base-vs-base FAIL); `c2_integrity_gateD2.py`; `c2_baseline_gateD2.py` (selftest 6/6); `c2_legs_gateD2.sh` (plan base+head, parse-selftest, 2 refusals); `c3_cells_gateD2.sh` (plan, 3 refusals) + `c3_parse_gateD2.py` (selftest 12/12; load-fail and harness-bug JSON refused) + `c3_mutate_gateD2.py` + `c3_reqbytes_gateD2.py` (selftest 3/3) + `probe_pki_gateD2.sh` (ex1 rc 1 config bug, ex2 OK; OpenSSL verifies its own tokens) + three probe files; `c4_security_gateD2.py` (selftest 14/14 with a synthetic bundle from the fetched roots; base-vs-base 16 FAIL); `c5_docs_gateD2.py` (selftest 9/9; base-vs-base FAIL; no-`--measured` FAIL); `c6_notcovered_gateD2.py` (selftest 9/9); `fill_gateD2.py` (stale-base 1, bad-branch 1, SIM 0); `launcher_gateD2.TEMPLATE.sh.txt`; `repin_and_launch_gateD2.sh`; `repin_base_gateD2.py`; `prompt_gateD2.TEMPLATE.txt` (31 keywords).
+
+## 4. Routing line — NOT added
+Back up `/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/inbox_routing.conf`, then add, with the real PR number:
+```
+QA/Secuura-ks1404-<n>|coagent@agentmail.to|yes
+```
+
+## 5. Launch
+`repin_and_launch_gateD2.sh <n> <FINAL head 40-hex> --dry-run`, then without `--dry-run`. Steps as gate54a's, plus: the API must report `commits 2`, the compare `ahead=2`. rc 10 on any develop ≠ kit base (→ section 7).
+
+## 6. Not adapted / not measured
+- No clone / worktree / workspace install: route cells 13/13b/14, the full suites, tsc, legs 2/6/7/9 and the cleanup control have **no drafter rc**. Builder claims remain: 5/44 → 6/69, red-first 6/7/12 of 25, tsc 0.
+- The SIM launcher `--check` refuses (develop moved, rc 17; `launcher_check_sim_ex1`), and the dry run cannot run without a PR: the routing-present and full-pass launcher paths are unexercised.
+- gate54a's C3 auth-surface / C5 spec scripts have no counterpart (no auth or spec change); gate54f's lock-bump differ was rebuilt as remove+closure-add.
+- The bundle commit's content is unseen: V14–V16 and PF13 were exercised only against a synthetic bundle built from the providers' DER.
+
+## 7. Develop moved (now) or a new head
+1. Builder rebases onto develop (THE DOC RULE: keep the KS 1402 blocks). 2. `repin_base_gateD2.py --new-develop <sha>`; if clean, `--write` (backs up kit.json). 3. Re-run `c5_docs` (its D7 keep-both arm becomes live) and `c1 --no-remote` on the new head. 4. `repin_and_launch_gateD2.sh <n> <head> --dry-run`.

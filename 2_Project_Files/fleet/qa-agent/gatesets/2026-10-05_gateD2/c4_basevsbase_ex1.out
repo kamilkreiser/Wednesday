@@ -1,0 +1,20 @@
+c4_security_gateD2 2026-10-04T14:53:22Z | repo /Volumes/DevMASTER/!CODING/Secuura/Blockchain/2_Project_Files | base e6daa806e79a | head e6daa806e79a | mode base-vs-base
+FAIL V1 signature over signed attrs: [BASE as head] SET OF substitution (0x31) False | IMPLICIT [0] asserted False | subtle.verify over signedBytes False
+FAIL V2 messageDigest: messageDigest attr read False | compared to digest(eContent) False
+FAIL V3 contentType attr: contentType attribute read and compared to id-ct-TSTInfo: False
+FAIL V4 signingCertificate(V2): ESS signingCertificate / V2 OIDs read in the verifier: 0 []  <- the commission names this check; RFC 3161 2.4.1 requires the attribute; the probe PF8 measures a token WITHOUT it (README D1)
+FAIL V5 EKU: id-kp-timeStamping required: False
+FAIL V6 validity at genTime: signer validity vs genTime False | chain checkDate = genTime False
+FAIL V7 chain to anchors: engine args None | result checked False
+FAIL V8 fail closed first: the first two statements of verifyRfc3161Token: []
+FAIL V9 no network at verify time: verify-module imports [] (want asn1js, node:crypto, pkijs) | network tokens: verify module 0 [], qualified-tsa verifyTimestamp+readTrustAnchorsPem 0 [] (bodies read True) | MUST-HIT rfc3161-client.ts 1 ['fetch(']
+FAIL V10 strict DER: in parseStrictDer: findIndefinite False | trailing bytes False | canonical re-encode False
+FAIL V11 isQualified dropped: isQualified in non-test code under Blockchain/Dev/services/timestamping/src: head 3 (want 0) | MUST-HIT base 3
+FAIL V12 mock path closed: verifyMockToken in code 2 | JSON.parse in verifyTimestamp 0 | non-0x30 refused False | MUST-HIT base verifyMockToken 2
+PASS V13 DB-row branch unchanged: kit unchanged_must_equal blobs equal at base, head and kit: True {'index.ts': True, 'timestamping.openapi.ts': True, 'package.json': True, 'tsconfig.json': True, 'vitest.config.ts': True} | the DB-row SELECT line present in index.ts: True
+FAIL V14 committed bundle: bundle at head ABSENT (Blockchain/Dev/services/timestamping/config/tsa-trust-anchors.pem) | at base ABSENT | PEM blocks 0 (want 2) | fingerprints [] | == kit False | provider URLs recomputed not fetched (pass --fetch-anchors)
+FAIL V15 env-only loader: readTrustAnchorsPem reads the env and returns undefined when unset, no default path: False | code / compose / Dockerfile files naming the bundle: 0 [] | MUST-HIT the README names it: False
+FAIL V16 README claims: README at head ABSENT | {'both CNs': False, 'both fingerprints': False, 'TSA_TRUST_ANCHORS_PEM': False, 'fail closed when unset': False} | repo paths it names that do NOT exist at head: NONE
+FAIL V17 request writer quirks: at-most-one-zero strip line False | no sign-prefix insertion True | cell 16 present False | the BYTES: C3 request-bytes differential
+INFO signer fallback `?? certs[0]` present: False | SIG_ALG_BY_OID keys [] (rsaEncryption 1.2.840.113549.1.1.1 ABSENT) | ECDSA DER->P1363 conversion ABSENT | digest(eContent) uses other
+C4 SECURITY FAIL (base-vs-base, a control: it MUST fail): 16 FAIL of 17

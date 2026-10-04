@@ -16,6 +16,9 @@ TWO-COMMIT PR: Wednesday's 14:2xZ ruling adds a second commit carrying the commi
   P7 PR 0 ABSENT: the anchoring / nft-certificate locks are not in the diff and blob-equal develop == HEAD; MUST-HIT: PR 0's own diff lists
      all 4 of kit pr0_files_all.
   P8 MODES: the 14 paths are 100644 at HEAD (git ls-tree); CONTROL kit mode_control_path reads 100755.
+  P9 NO CREDENTIAL FILE / NO .gitignore NEGATION (Wednesday 01:5x AEDT: the bundle is a .crt because preflight leg 9 refuses a tracked
+     .pem): 0 .gitignore paths in the diff, 0 added `!` lines, 0 credential-shaped paths (kit credential_ext_rx); CONTROL: the filter flags
+     3 planted names. Leg 9 itself (no-tracked-credentials.sh) runs at the head in c2_legs_gateD2.sh `run` (want rc 0).
   INFO END_TREE: HEAD^{tree} (the squash lands on it while develop has not moved); develop^{tree} as the control that differs.
 --pr-json f --files-json f: read the PULLS answers from files (offline controls; P2 then says OFFLINE). --base <sha>: judge P3 against this
 base instead of kit base (a prediction run on the drafted first commit only; never on the gate).
@@ -139,6 +142,17 @@ if hc and dc:
     C.chk('P8 modes', all(m == '100644' for m in pm) and cm == '100755', 'the %d paths %s | CONTROL %s %s (want 100755)' % (len(pm), sorted(set(pm)) if len(set(pm)) == 1 else pm, K['mode_control_path'], cm))
 else:
     C.chk('P7 PR 0 locks absent', False, 'objects missing'); C.chk('P8 modes', False, 'objects missing')
+if names:
+    crx = re.compile(K['credential_ext_rx'])
+    gi = [nm for nm in names if nm.endswith('.gitignore')]
+    neg = []
+    for g_ in gi:
+        neg += [l for l in git(REPO, 'diff', dev, HEAD, '--', g_).splitlines() if l.startswith('+!')]
+    cred = [nm for nm in names if crx.search(nm)]
+    ctl = [x for x in ('a/b/key.pem', 'c/.env.local', 'd/id_rsa', K['bundle']) if crx.search(x)]
+    C.chk('P9 no credential file, no .gitignore negation', not gi and not neg and not cred and ctl == ['a/b/key.pem', 'c/.env.local', 'd/id_rsa'],
+          '.gitignore paths in develop..HEAD %s | added `!` negation lines %s | credential-shaped paths %s | the bundle %s is a .crt (not matched) | CONTROL the filter flags 3 of 3 planted names %s; RUNTIME: preflight leg 9 (%s) rc 0 at the head is run by c2_legs_gateD2.sh run' % (
+              gi or 'NONE', neg or 'NONE', cred or 'NONE', K['bundle'].split('/')[-1], ctl, K['leg9'].split('/')[-1]))
 n = C.nfail()
 print('PIN %s: %d FAIL of %d checks | PR #%s | HEAD %s | develop %s' % ('PASS' if n == 0 else 'FAIL', n, len(C.res), PR, HEAD[:12], (dev or '?')[:12]))
 raise SystemExit(1 if n else 0)

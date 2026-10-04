@@ -1,0 +1,11 @@
+repin_base_gateD2.py — the gateD2 answer to "develop moved since the builder's base" (#1374 KS-1402 squashes first): it REFUSES to guess.
+It reads, read-only, the GitHub compare kit-base...<new develop> and the commits API (and nothing is fetched or written in any repo), then:
+  R1 the new develop DESCENDS from kit base (compare status ahead, behind 0), each commit listed with its subject;
+  R2 NO non-doc kit path moved: none of kit files (except the two platform-k docs), kit unchanged_must_equal, anything under
+     services/timestamping/, kit pr0_files_all, or scripts/audit/** is in the compare's file list — any one of them is a RE-DRAFT (rc 1):
+     the lock / baseline / source expectations were drafted against the old blobs;
+  R3 prints the PROPOSED kit.json edits: base, base_tree, base_parent (= old base), the two docs' new base_blobs (blob shas from the compare),
+     base_history += the old base; and states what the re-pin does NOT change (cells / suites / locks: their files are blob-equal).
+--write (Wednesday's act, after reading the report): backs kit.json up to kit.json.pre-repin-<UTC> (never deleted) and writes the edits.
+The launch action still re-reads develop and refuses (rc 10) until kit base == develop; the BUILDER must also rebase onto it (C1 P3).
+Usage: repin_base_gateD2.py --new-develop <40-hex> [--write]   rc 0 clean re-pin (written or proposed) / 1 RE-DRAFT / 2 usage / 3 API

@@ -33,7 +33,7 @@ GS="$(dirname "$(/bin/realpath "$0")")"
 KJ() { python3 -c 'import json,sys; v=json.load(open(sys.argv[1]))[sys.argv[2]]; print(v if isinstance(v,str) else json.dumps(v))' "$GS/kit.json" "$1"; }
 CHECKOUT="$(KJ checkout)"; BASE="${GD2_BASE:-$(KJ base)}"; HEADSHA="${GD2_HEAD:-}"; TESTF="$(KJ test_file)"; PKIF="$(KJ pki_helper)"; SVC="$(KJ service)"
 PARSE="$GS/c3_parse_gateD2.py"; MUT="$GS/c3_mutate_gateD2.py"
-usage() { sed -n '2,32p' "$0" | sed 's/^# \{0,1\}//'; }
+usage() { sed -n '2,34p' "$0" | sed 's/^# \{0,1\}//'; }
 lex() { python3 -c 'import os,sys; print(os.path.abspath(sys.argv[1]))' "$1"; }
 guard_out() {
   _l="$(lex "$1")"

@@ -44,7 +44,8 @@
     "isQualified is dropped",
     "fail CLOSED on an empty / unset anchor bundle",
     "request bytes byte-identical to the old forge encoder, its two INTEGER quirks pinned (one leading 0x00 stripped at most; no sign prefix added)",
-    "a SECOND commit adds services/timestamping/config/tsa-trust-anchors.pem (D-TRUST Root CA 1 2017 + DigiCert Assured ID Root CA) and config/README.md and corrects three code comments; the loader stays ENV-ONLY with no default (unset -> fail closed); pin the FINAL head, END_TREE = the final head's tree"
+    "a SECOND commit adds services/timestamping/config/tsa-trust-anchors.crt (D-TRUST Root CA 1 2017 + DigiCert Assured ID Root CA) and config/README.md and corrects three code comments; the loader stays ENV-ONLY with no default (unset -> fail closed); pin the FINAL head, END_TREE = the final head's tree",
+    "the bundle is config/tsa-trust-anchors.crt, NOT .pem (preflight leg 9 refuses a tracked .pem as a credential; Wednesday 01:5x AEDT); leg 9 must pass at the head and no .gitignore negation may be added"
   ],
   "seat_brief": "/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/briefs_staged/2026-10-05_seatD3_successor.md",
   "charter": "/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/QA_AGENT_CHARTER.md",
@@ -52,7 +53,7 @@
     "Blockchain/Dev/package-lock.json",
     "Blockchain/Dev/scripts/audit/audit-baseline.json",
     "Blockchain/Dev/services/timestamping/config/README.md",
-    "Blockchain/Dev/services/timestamping/config/tsa-trust-anchors.pem",
+    "Blockchain/Dev/services/timestamping/config/tsa-trust-anchors.crt",
     "Blockchain/Dev/services/timestamping/package-lock.json",
     "Blockchain/Dev/services/timestamping/package.json",
     "Blockchain/Dev/services/timestamping/src/__tests__/ks1404-pki.ts",
@@ -66,7 +67,7 @@
   ],
   "files_new": [
     "Blockchain/Dev/services/timestamping/config/README.md",
-    "Blockchain/Dev/services/timestamping/config/tsa-trust-anchors.pem",
+    "Blockchain/Dev/services/timestamping/config/tsa-trust-anchors.crt",
     "Blockchain/Dev/services/timestamping/src/__tests__/ks1404-pki.ts",
     "Blockchain/Dev/services/timestamping/src/__tests__/ks1404-verify-rfc3161.test.ts",
     "Blockchain/Dev/services/timestamping/src/tsa/der.ts",
@@ -74,7 +75,7 @@
   ],
   "files_second_commit_expected": [
     "Blockchain/Dev/services/timestamping/config/README.md",
-    "Blockchain/Dev/services/timestamping/config/tsa-trust-anchors.pem"
+    "Blockchain/Dev/services/timestamping/config/tsa-trust-anchors.crt"
   ],
   "path_allow_rx": "^(Blockchain/Dev/services/timestamping/|Blockchain/Dev/package-lock\\.json$|Blockchain/Dev/scripts/audit/audit-baseline\\.json$|Projects Documents/(API_Security_Functional_Testing_Architecture_Flow_Diagrams|QA_Tool_Cheat_Sheet_Secuura_API_Testing)\\.html$)",
   "numstat_claim_first_commit": {
@@ -166,7 +167,7 @@
   "openapi_module": "Blockchain/Dev/services/timestamping/src/timestamping.openapi.ts",
   "test_file": "Blockchain/Dev/services/timestamping/src/__tests__/ks1404-verify-rfc3161.test.ts",
   "pki_helper": "Blockchain/Dev/services/timestamping/src/__tests__/ks1404-pki.ts",
-  "bundle": "Blockchain/Dev/services/timestamping/config/tsa-trust-anchors.pem",
+  "bundle": "Blockchain/Dev/services/timestamping/config/tsa-trust-anchors.crt",
   "bundle_readme": "Blockchain/Dev/services/timestamping/config/README.md",
   "bundle_env": "TSA_TRUST_ANCHORS_PEM",
   "anchors": {
@@ -450,5 +451,7 @@
   },
   "usage_gate": "/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/usage_gate.sh",
   "cockpit": "/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/cockpit/cockpit.sh",
-  "routing": "/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/inbox_routing.conf"
+  "routing": "/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/inbox_routing.conf",
+  "leg9": "Blockchain/Dev/scripts/preflight/no-tracked-credentials.sh",
+  "credential_ext_rx": "\\.(pem|key|p12|pfx|jks|keystore|env)$|(^|/)\\.env[^/]*$|id_(rsa|ed25519)$"
 }
