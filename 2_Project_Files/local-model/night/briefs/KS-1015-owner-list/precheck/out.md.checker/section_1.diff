@@ -1,0 +1,55 @@
+--- a/Blockchain/Dev/services/referral/src/referral.openapi.ts
++++ b/Blockchain/Dev/services/referral/src/referral.openapi.ts
+@@ -44,4 +44,5 @@
+-const ReferralCodeSchema = sharedRegistry.register(
++// gate52 N-1367-1: no operation returns the ReferralCode record any more; it stays a published component.
++sharedRegistry.register(
+   'ReferralCode',
+   z
+     .object({
+@@ -539,16 +540,42 @@
+   method: 'get',
+   path: '/api/referrals/user/{userId}',
+   tags: ['Referrals'],
+-  summary: 'List referral codes owned by a user',
++  summary: 'Get the referral code and stats of a user',
+   security: [{ bearerAuth: [] }],
+   request: { params: z.object({ userId: z.string().openapi({ example: FX.holder.id }) }) },
+   responses: {
+     400: commonErrorResponses[400],
+     200: {
+-      description: 'Codes',
++      description: 'Referral code and stats, or hasCode false when the user has none',
++      // gate52 N-1367-1: the handler (routes/referrals.ts, GET /user/:userId) answers a success/data envelope
++      // in one of two shapes told apart by hasCode: { hasCode: false, message } when the user has no code,
++      // else the primary code, its stats and the milestone progress. It never returns a codes array, so the
++      // spec follows the runtime (the issuer ReferralDashboard reads data.hasCode and data.referralCode).
+       content: {
+         'application/json': {
+-          schema: z.object({ codes: z.array(ReferralCodeSchema) }),
++          schema: successEnvelope(
++            z.union([
++              z.object({ hasCode: z.literal(false), message: z.string() }),
++              z.object({
++                hasCode: z.literal(true),
++                referralCode: z.object({
++                  code: z.string(),
++                  shareUrl: z.string(),
++                  isActive: z.boolean(),
++                  expiresAt: z.string().optional(),
++                }),
++                stats: z.object({
++                  totalReferrals: z.number().int(),
++                  qualifiedReferrals: z.number().int(),
++                  conversionRate: z.string(),
++                  totalRewardsEarned: z.string(),
++                  pendingRewards: z.string(),
++                }),
++                milestoneProgress: z.record(z.string(), z.unknown()),
++                pendingRewardsCount: z.number().int(),
++              }),
++            ]),
++          ),
+         },
+       },
+     },

@@ -1,0 +1,39 @@
+mode: code_patch
+diff_blocks=1 all_blocks=1 prose_outside_chars=0
+wrote /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/briefs/KS-1015-owner-list/precheck/out.md.checker/patch.diff lines=110
+PASS A1 output is exactly one fenced ```diff block, nothing outside it
+clone clean at pinned tip 88e8877a2a0d6a626b9c2a7c4b71d3a909e6f94e
+runner: vitest
+--- baseline at the untouched tip (whole services/referral suite + tsc)
+baseline suite rc=0 total=34 passed=34 failed=0 suites_failed=0 loaded=1 failed_names=[]
+baseline tsc rc=0 (0 lines)
+sections=2 miscounted_sections=0
+section 1 Blockchain/Dev/services/referral/src/referral.openapi.ts: applies (strict)
+section 2 Blockchain/Dev/services/referral/src/__tests__/ks1015-referral-lookup-spec-declares-envelope.test.ts: applies (strict)
+PASS A2 diff applies at the tip (strict git apply --check, every section, hunk headers consistent)
+touched files (2): Blockchain/Dev/services/referral/src/__tests__/ks1015-referral-lookup-spec-declares-envelope.test.ts Blockchain/Dev/services/referral/src/referral.openapi.ts  (+79/-7)
+PASS A3 touched-file set == { Blockchain/Dev/services/referral/src/referral.openapi.ts , Blockchain/Dev/services/referral/src/__tests__/ks1015-referral-lookup-spec-declares-envelope.test.ts }
+PASS A3b every must_change site the ticket names is changed by the product hunk (4 site(s))
+A3c: measuring the product + test sections together (the test file is in the diff)
+PASS A3c every '+' line the brief adds is in the product hunk (75 line(s)), and no tip line is re-added as a '+' (A3d)
+A3i: every '+' line the brief adds is in the applied Blockchain/Dev/services/referral/src/referral.openapi.ts byte-exact incl. leading whitespace (apply mode strict): OK 32 line(s) byte-exact incl. leading whitespace (of 75; 31 line(s) added by the apply) · NOTE not added by the diff: NOTADDED `it('RED gate52 N-1367-1 O1: the owner list 200 is the success/data envelope over two shape` NOTADDED `const s = body('/api/referrals/user/{userId}', 'get', '200');` NOTADDED `expect({ codes: s?.properties?.codes, required: s?.required, shapes: s?.properties?.data?.` 
+test-only at tip: rc=1 total=10 passed=7 failed=3 suites_failed=2 loaded=1 failed_names=['KS-1015: GET /api/referrals/{code} publishes the envelope its handler returns RED gate52 N-1367-1 O1: the owner list 200 is the success/data envelope over two shapes, not a codes array', 'KS-1015: GET /api/referrals/{code} publishes the envelope its handler returns RED gate52 N-1367-1 O2: the no-code shape is hasCode false with a message', 'KS-1015: GET /api/referrals/{code} publishes the envelope its handler returns RED gate52 N-1367-1 O3: the has-code shape carries the code, its stats and the milestone progress']
+A4 declared red cell(s) (brief ## Red cells, assertion red): RED gate52 N-1367-1 O1: the owner list 200 is the success/da | RED gate52 N-1367-1 O2: the no-code shape is hasCode false w | RED gate52 N-1367-1 O3: the has-code shape carries the code,
+PASS A4 RED-FIRST: src/__tests__/ks1015-referral-lookup-spec-declares-envelope.test.ts fails at the untouched tip (3 failed / 10 run; controls green; assertion reds)
+test after product hunk: rc=0 total=10 passed=10 failed=0 suites_failed=0 loaded=1 failed_names=[]
+PASS A5 GREEN-AFTER: src/__tests__/ks1015-referral-lookup-spec-declares-envelope.test.ts passes with the product hunk (10 passed / 10 run)
+INFO control cell present: 7 cell(s) passed BEFORE and 10 AFTER (the harness reaches the code both times)
+after suite rc=0 total=38 passed=38 failed=0 suites_failed=0 loaded=1 failed_names=[]
+baseline: total=34 failed=0 | after: total=38 failed=0
+develop's own reds (attributed, not counted): []
+NEW reds: []
+reds fixed by the patch: []
+tests added: 4
+PASS A6 whole services/referral suite: no NEW red vs the untouched tip
+PASS A7 tsc --noEmit for services/referral: rc 0 after the patch (baseline rc=0)
+INFO tsc test-file types: could not tell services/referral's test runner (jest:[jest, ts-jest] vitest:[vitest.config.ts, scripts.test=vitest, vitest]) — kept the old default --types node,vitest/globals
+INFO tsc on the test file alone (--types node,vitest/globals): rc=0 (0 lines; not gated — the runner does not type-check and the service tsconfig excludes __tests__)
+SUMMARY files=2 +79/-7 test=src/__tests__/ks1015-referral-lookup-spec-declares-envelope.test.ts red_first=yes apply_mode=strict
+RESULT: PASS (7/7)
+PASS A2a ANCHOR: every hunk's old side sits at its header's start line at the tip (SUMMARY hunks=3 ok=3 bad=0 skipped_newfile=0)
+SPARK RESULT: PASS (checker rc 0 + A2a anchor OK)

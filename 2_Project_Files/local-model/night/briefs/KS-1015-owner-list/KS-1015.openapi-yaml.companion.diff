@@ -1,0 +1,103 @@
+diff --git a/Blockchain/Dev/docs/openapi/secuura-api.yaml b/Blockchain/Dev/docs/openapi/secuura-api.yaml
+index 1ffd687b8..8a390fbe1 100644
+--- a/Blockchain/Dev/docs/openapi/secuura-api.yaml
++++ b/Blockchain/Dev/docs/openapi/secuura-api.yaml
+@@ -32337,7 +32337,7 @@ paths:
+     get:
+       tags:
+         - Referrals
+-      summary: List referral codes owned by a user
++      summary: Get the referral code and stats of a user
+       security:
+         - bearerAuth: []
+       parameters:
+@@ -32349,18 +32349,83 @@ paths:
+           in: path
+       responses:
+         "200":
+-          description: Codes
++          description: Referral code and stats, or hasCode false when the user has none
+           content:
+             application/json:
+               schema:
+                 type: object
+                 properties:
+-                  codes:
+-                    type: array
+-                    items:
+-                      $ref: "#/components/schemas/ReferralCode"
++                  success:
++                    type: boolean
++                    enum:
++                      - true
++                  data:
++                    anyOf:
++                      - type: object
++                        properties:
++                          hasCode:
++                            type: boolean
++                            enum:
++                              - false
++                          message:
++                            type: string
++                        required:
++                          - hasCode
++                          - message
++                      - type: object
++                        properties:
++                          hasCode:
++                            type: boolean
++                            enum:
++                              - true
++                          referralCode:
++                            type: object
++                            properties:
++                              code:
++                                type: string
++                              shareUrl:
++                                type: string
++                              isActive:
++                                type: boolean
++                              expiresAt:
++                                type: string
++                            required:
++                              - code
++                              - shareUrl
++                              - isActive
++                          stats:
++                            type: object
++                            properties:
++                              totalReferrals:
++                                type: integer
++                              qualifiedReferrals:
++                                type: integer
++                              conversionRate:
++                                type: string
++                              totalRewardsEarned:
++                                type: string
++                              pendingRewards:
++                                type: string
++                            required:
++                              - totalReferrals
++                              - qualifiedReferrals
++                              - conversionRate
++                              - totalRewardsEarned
++                              - pendingRewards
++                          milestoneProgress:
++                            type: object
++                            additionalProperties: {}
++                          pendingRewardsCount:
++                            type: integer
++                        required:
++                          - hasCode
++                          - referralCode
++                          - stats
++                          - milestoneProgress
++                          - pendingRewardsCount
+                 required:
+-                  - codes
++                  - success
++                  - data
+         "400":
+           description: Bad request — malformed payload, missing required fields, or wrong content-type. See
+             `error.code` for the specific cause.

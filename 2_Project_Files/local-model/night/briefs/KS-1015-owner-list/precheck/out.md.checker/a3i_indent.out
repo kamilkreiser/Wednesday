@@ -1,0 +1,44 @@
+NOTADDED `it('RED gate52 N-1367-1 O1: the owner list 200 is the success/data envelope over two shape`
+NOTADDED `const s = body('/api/referrals/user/{userId}', 'get', '200');`
+NOTADDED `expect({ codes: s?.properties?.codes, required: s?.required, shapes: s?.properties?.data?.`
+NOTADDED `codes: undefined,`
+NOTADDED `required: ['success', 'data'],`
+NOTADDED `shapes: 2,`
+NOTADDED `});`
+NOTADDED `});`
+NOTADDED `it('RED gate52 N-1367-1 O2: the no-code shape is hasCode false with a message', () => {`
+NOTADDED `const shapes: AnyObj[] = body('/api/referrals/user/{userId}', 'get', '200')?.properties?.d`
+NOTADDED `const none = shapes.find((b) => b?.properties?.hasCode?.enum?.[0] === false);`
+NOTADDED `expect({ required: none?.required, message: none?.properties?.message?.type }).toEqual({`
+NOTADDED `required: ['hasCode', 'message'],`
+NOTADDED `message: 'string',`
+NOTADDED `});`
+NOTADDED `});`
+NOTADDED `it('RED gate52 N-1367-1 O3: the has-code shape carries the code, its stats and the milesto`
+NOTADDED `const shapes: AnyObj[] = body('/api/referrals/user/{userId}', 'get', '200')?.properties?.d`
+NOTADDED `const has = shapes.find((b) => b?.properties?.hasCode?.enum?.[0] === true);`
+NOTADDED `const stats: AnyObj = has?.properties?.stats?.properties ?? {};`
+NOTADDED `expect({`
+NOTADDED `required: [...(has?.required ?? [])].sort(),`
+NOTADDED `code: [...(has?.properties?.referralCode?.required ?? [])].sort(),`
+NOTADDED `stats: Object.fromEntries(Object.entries(stats).map(([k, v]) => [k, (v as AnyObj).type])),`
+NOTADDED `}).toEqual({`
+NOTADDED `required: ['hasCode', 'milestoneProgress', 'pendingRewardsCount', 'referralCode', 'stats']`
+NOTADDED `code: ['code', 'isActive', 'shareUrl'],`
+NOTADDED `stats: {`
+NOTADDED `totalReferrals: 'integer',`
+NOTADDED `qualifiedReferrals: 'integer',`
+NOTADDED `conversionRate: 'string',`
+NOTADDED `totalRewardsEarned: 'string',`
+NOTADDED `pendingRewards: 'string',`
+NOTADDED `});`
+NOTADDED `});`
+NOTADDED `it('control gate52 N-1367-1 C4: the owner list keeps bearerAuth, its path parameter userId`
+NOTADDED `const op = operation('/api/referrals/user/{userId}', 'get');`
+NOTADDED `expect(op?.security).toEqual([{ bearerAuth: [] }]);`
+NOTADDED `expect((op?.parameters ?? []).map((q: AnyObj) => q.in + ':' + q.name + ':' + q.required)).`
+NOTADDED `expect(Object.keys(op?.responses ?? {})).toEqual(expect.arrayContaining(['200', '403']));`
+NOTADDED `});`
+NOTADDED `it('control KS-1015 C2: the ReferralCode component stays published though no operation ret`
+NOTADDED `expect(Object.keys(doc.components?.schemas ?? {})).toContain('ReferralCode');`
+OK 32 line(s) byte-exact incl. leading whitespace (of 75; 31 line(s) added by the apply)

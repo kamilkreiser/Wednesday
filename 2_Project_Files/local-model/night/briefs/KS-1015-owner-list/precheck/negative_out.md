@@ -1,0 +1,112 @@
+```diff
+--- a/Blockchain/Dev/services/referral/src/referral.openapi.ts
++++ b/Blockchain/Dev/services/referral/src/referral.openapi.ts
+@@ -44,4 +44,5 @@
+-const ReferralCodeSchema = sharedRegistry.register(
++// gate52 N-1367-1: no operation returns the ReferralCode record any more; it stays a published component.
++sharedRegistry.register(
+   'ReferralCode',
+   z
+     .object({
+@@ -539,16 +540,42 @@
+   method: 'get',
+   path: '/api/referrals/user/{userId}',
+   tags: ['Referrals'],
+-  summary: 'List referral codes owned by a user',
++  summary: 'Get the referral code and stats of a user',
+   security: [{ bearerAuth: [] }],
+   request: { params: z.object({ userId: z.string().openapi({ example: FX.holder.id }) }) },
+   responses: {
+     400: commonErrorResponses[400],
+     200: {
+-      description: 'Codes',
++      description: 'Referral code and stats, or hasCode false when the user has none',
++      // gate52 N-1367-1: the handler (routes/referrals.ts, GET /user/:userId) answers a success/data envelope
++      // in one of two shapes told apart by hasCode: { hasCode: false, message } when the user has no code,
++      // else the primary code, its stats and the milestone progress. It never returns a codes array, so the
++      // spec follows the runtime (the issuer ReferralDashboard reads data.hasCode and data.referralCode).
+       content: {
+         'application/json': {
+-          schema: z.object({ codes: z.array(ReferralCodeSchema) }),
++          schema: successEnvelope(
++            z.union([
++              z.object({ hasCode: z.literal(false), message: z.string() }),
++              z.object({
++                hasCode: z.literal(true),
++                referralCode: z.object({
++                  code: z.string(),
++                  shareUrl: z.string(),
++                  isActive: z.boolean(),
++                  expiresAt: z.string().optional(),
++                }),
++                stats: z.object({
++                  totalReferrals: z.number(),
++                  qualifiedReferrals: z.number().int(),
++                  conversionRate: z.string(),
++                  totalRewardsEarned: z.string(),
++                  pendingRewards: z.string(),
++                }),
++                milestoneProgress: z.record(z.string(), z.unknown()),
++                pendingRewardsCount: z.number().int(),
++              }),
++            ]),
++          ),
+         },
+       },
+     },
+--- a/Blockchain/Dev/services/referral/src/__tests__/ks1015-referral-lookup-spec-declares-envelope.test.ts
++++ b/Blockchain/Dev/services/referral/src/__tests__/ks1015-referral-lookup-spec-declares-envelope.test.ts
+@@ -64,4 +64,49 @@
++  it('RED gate52 N-1367-1 O1: the owner list 200 is the success/data envelope over two shapes, not a codes array', () => {
++    const s = body('/api/referrals/user/{userId}', 'get', '200');
++    expect({ codes: s?.properties?.codes, required: s?.required, shapes: s?.properties?.data?.anyOf?.length }).toEqual({
++      codes: undefined,
++      required: ['success', 'data'],
++      shapes: 2,
++    });
++  });
++
++  it('RED gate52 N-1367-1 O2: the no-code shape is hasCode false with a message', () => {
++    const shapes: AnyObj[] = body('/api/referrals/user/{userId}', 'get', '200')?.properties?.data?.anyOf ?? [];
++    const none = shapes.find((b) => b?.properties?.hasCode?.enum?.[0] === false);
++    expect({ required: none?.required, message: none?.properties?.message?.type }).toEqual({
++      required: ['hasCode', 'message'],
++      message: 'string',
++    });
++  });
++
++  it('RED gate52 N-1367-1 O3: the has-code shape carries the code, its stats and the milestone progress', () => {
++    const shapes: AnyObj[] = body('/api/referrals/user/{userId}', 'get', '200')?.properties?.data?.anyOf ?? [];
++    const has = shapes.find((b) => b?.properties?.hasCode?.enum?.[0] === true);
++    const stats: AnyObj = has?.properties?.stats?.properties ?? {};
++    expect({
++      required: [...(has?.required ?? [])].sort(),
++      code: [...(has?.properties?.referralCode?.required ?? [])].sort(),
++      stats: Object.fromEntries(Object.entries(stats).map(([k, v]) => [k, (v as AnyObj).type])),
++    }).toEqual({
++      required: ['hasCode', 'milestoneProgress', 'pendingRewardsCount', 'referralCode', 'stats'],
++      code: ['code', 'isActive', 'shareUrl'],
++      stats: {
++        totalReferrals: 'integer',
++        qualifiedReferrals: 'integer',
++        conversionRate: 'string',
++        totalRewardsEarned: 'string',
++        pendingRewards: 'string',
++      },
++    });
++  });
++
++  it('control gate52 N-1367-1 C4: the owner list keeps bearerAuth, its path parameter userId, and its 403', () => {
++    const op = operation('/api/referrals/user/{userId}', 'get');
++    expect(op?.security).toEqual([{ bearerAuth: [] }]);
++    expect((op?.parameters ?? []).map((q: AnyObj) => q.in + ':' + q.name + ':' + q.required)).toEqual(['path:userId:true']);
++    expect(Object.keys(op?.responses ?? {})).toEqual(expect.arrayContaining(['200', '403']));
++  });
++
+-  it('control KS-1015 C2: the ReferralCode component stays published and the owner list still returns it', () => {
+-    expect(doc.components?.schemas?.ReferralCode).toBeDefined();
+-    expect(body('/api/referrals/user/{userId}', 'get', '200')?.properties?.codes?.items?.$ref).toBe('#/components/schemas/ReferralCode');
++  it('control KS-1015 C2: the ReferralCode component stays published though no operation returns it', () => {
++    expect(Object.keys(doc.components?.schemas ?? {})).toContain('ReferralCode');
+   });
+```
