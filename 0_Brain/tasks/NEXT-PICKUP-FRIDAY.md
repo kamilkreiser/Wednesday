@@ -12,6 +12,20 @@ supersede: replace wholesale; previous = NEXT-PICKUP-FRIDAY.md.pre-0925-rotate-s
 
 **The tree is at `/Volumes/Laptop-DEV/FRIDAY` (the drive, since 2026-09-28).** Quote every path (spaces).
 
+## 🔴🔴🔴 HANDOVER 2026-10-04 21:06 (Friday, ctx ~76%) — READ FIRST; supersedes every block below where they differ
+**Kam 21:01–21:05 (live board, view=friday) ruled TEN cards, all reconciled + receipted:** composer-guided-new-client-review-roles a · composer-docker-networks a · composer-guided-wording-draft a · hpsmpoc-k14 a (+note "I will do an end to end test tomorrow") · hpsmpoc-r009 b · hpsmpoc-summary-customer-name c · hpsmpoc-branding b (HP branding: Kam asks HP; Friday EMAILS him the copy-ready ask once B120 drafts it) · hpsmpoc-m2-po a · hpsmpoc-test-user a · hpsmpoc-uat a. **Test user + UAT: a Lane A seat TOMORROW with Kam around (his login)** — told him so.
+**Composer merged tonight:** #34 B65 (deployed: demo = d84aa46), #35 B69 → main **7b73930** (NOT deployed). Card needed tomorrow: deploy Composer main after B67/B68/B72 merge (default nothing).
+**HPSM-POC merged:** #93, #94 → main **4abdfb2** (hosted web c2dd403). Card tomorrow: deploy hosted (default nothing).
+**LIVE PANES:**
+- %8 Composer-D **B67** L1 tier 1 + ADDENDUM-1 (b65 e2e block rewrite) + ADDENDUM-2 (F1: copy reviewer+auditor memberships). → READY FOR GATE → gate brief (one gate, whole branch; B53/B57 shape) → merge → follow-up B69-style seat for F2 web (BACKLOG #185).
+- %9 Composer-B **B68** L3: ADDENDUM-1 rebase onto 7b73930 + full e2e + records → READY → PR → merge_when_green.
+- %13 Composer-C **B71** docker stacks down (volumes kept; pc-b67*/b68* excluded) → read counts → deliver card composer-docker-networks-closed-seats-1003 to C-39.
+- %14 Composer-E **B72** wording APPROVED, DRAFT label off (C-40) → READY → PR → merge → deliver card composer-guided-wording-draft-1003.
+- %15 HPSM-POC-B **B120** records K-14 (C-46) + ADDENDUM-1 (r009/name/branding records + HP brand-asset email draft in Governance/hp-asks/) + ADDENDUM-2 (PO/test-user/UAT records) → records PR → EMAIL Kam the brand ask (copy-ready, plain text) → deliver the 8 HPSM-POC cards to their C-numbers.
+- %16 HPSM-POC-A **B121** tier 1: R-009 new template version (behind the switch, NOT active until Kam approves the words) + customer name at render (never to the model) → READY FOR GATE → gate → merge.
+**Watcher:** scratchpad `globs13` (+B121 needs adding: HPSM-POC B121 root + .tools/wt-B121-records).
+**MORNING:** both review packs (B66's Composer, B116/B119/B120's HPSM-POC) to Kam's tab + the two deploy cards.
+
 ## 🔴🔴🔴 CHECKPOINT 2026-10-04 20:12 (Friday, ctx 70%) — READ FIRST; supersedes the 19:3x block where they differ
 **Kam:** 18:3x deploy wording fix + "get them as close to ready as you can so I can review tomorrow"; 18:5x "HPSM-POC"; 19:4x "keep going". Card OPEN: composer-guided-new-client-review-roles-1004 (rec a; default: interim words only). kam_rulings 20:12: 0 Friday rows; reconcile 0.
 **DONE:** Composer demo = **d84aa46** (B64 + B70, both live-checked by Friday). HPSM-POC main **4abdfb2** (#93 B115 gated GO WITH NOTES; #94 B117 layout, CodeQL needed a rebase push). Analysis #53/#54/#55 merged, #56 merging. HPSM-POC review pack refreshed by B119 (#93 merged, #94 OPEN at 19:45 — now MERGED: correct it in the morning message, not by a new seat).
