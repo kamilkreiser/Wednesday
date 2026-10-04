@@ -19,6 +19,11 @@ supersede: replace wholesale at the next pickup; do not append. Previous copy: N
 4. EXPIRING-GRANTS: "SPEND PAST THE 90%" is marked ENDED (account switched). Friday's "ignore the 90%" row is Friday's and is not touched.
 
 ### LIVE RIGHT NOW
+**🟠 70% CHECKPOINT 04:5x 2026-10-05 (seat 8e88f5e9). READ FIRST; supersedes the 66% block below where they differ:**
+- **Seat D 5th (%13, KS-1404)**: ITEM 2 COMPLETE + amended LOCALLY → commit 2 `a1231d63c13b` (tree 894bb83d6f66), cells 36, suite 6/80, 14 paths (verified by Wednesday at the worktree). **ITEM 3 released 17:5xZ through the push only** (fetch if absent, rebase onto develop-at-that-moment, KS 1402/1015 byte-equal, block `11.`, ONE force-with-lease via pushd5_fwl.sh; no push past ~62%). **NEXT:** its post-push STATUS → rule ITEM 4 (raise PR + READY, or hand over at the pushed state). Then **re-pin gateD2** (`repin_base_gateD2.py --new-develop <the develop it rebased onto>`, set cells_head 36 + suite_claim 6/80 + n_commits 2 from its STATUS), routing line, dry run, launch on the READY.
+- PR body must carry: CHAIN-3's own-defect catch (leaf ordering), DigiCert G4 in NOT COVERED, ALG-ECDSA dropped, tsc excludes tests (33 → 48 errors), N-1375-1 dropped.
+- B 59th: staged, launch AFTER D 5th's PR merges (item 4 below).
+
 **🟠 66% CHECKPOINT 04:2x 2026-10-05 (seat 8e88f5e9). READ FIRST; supersedes every block below:**
 0. Kam: 0 rows today; reconcile 0; quiet hours. OPEN card `secuura-mobile-dormant-fuse-lapses-1019b`. MORNING OWED (06:00): panel receipt (value first: #1375 merged; D 4th/B 58th scored; Spark 3 PASS held); **KS-528 re-date reminder with the exact line** (fuse Fri 9 Oct 10:00 AEST; his 10-02 mail failed DKIM); `scheduler/state/naspush_last.txt` (first armed 03:30 run, expect OK + deleting=0); morning sweep; the empty dir `!CODING/Secuura/x` is Kam's to remove.
 1. **develop = ef4901778710** (#1375 KS-1015 merged 16:37:54Z, verified at source by Wednesday's scratch clone: tree == gate55 END_TREE 4e35c856, 1 parent 2d85b84e1012, 0 trailers, 5 paths). Tonight's merges: #1373, #1374, #1375. Scored: B 58th 0.96, D 4th 0.95, gate55 1.0 (panes closed).
