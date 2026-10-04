@@ -3,24 +3,14 @@
 Drafted 2026-10-05 AEST; work 2026-10-04 14:2xZ – 15:0xZ UTC. Each figure names the kit file it came from.
 
 ## 0. What this is, and its status
-**gateD2 is a T1 gate over ONE Secuura/Blockchain PR: KS-1404, Seat D 6th (raises + merges; the branch is Seats D 2nd-5th's).** *(RE-PINNED 2026-10-05 for Seat D 6th and the MERGE-IN branch — see section 0a; backups `*.pre-1005-d6`.)* *(Re-keyed 2026-10-05 from Seat D 3rd to Seat D 5th: kit.json `author_seat`, `merge_seat`, `go_template`, `verdict_subject_template`, plus this README, COMMISSION.md and the two templates' seat lines; backups `*.pre-1005-d5`. Base, files, `n_commits` and `unchanged_must_equal` NOT changed: re-pinned at launch by `repin_base_gateD2.py`.)* PR number and FINAL head are inputs (`repin_and_launch_gateD2.sh <PR> <HEAD>`).
+**gateD2 is a T1 gate over ONE Secuura/Blockchain PR: KS-1404, Seat D 5th (author + merger).** *(Re-keyed 2026-10-05 from Seat D 3rd to Seat D 5th: kit.json `author_seat`, `merge_seat`, `go_template`, `verdict_subject_template`, plus this README, COMMISSION.md and the two templates' seat lines; backups `*.pre-1005-d5`. Base, files, `n_commits` and `unchanged_must_equal` NOT changed: re-pinned at launch by `repin_base_gateD2.py`.)* PR number and FINAL head are inputs (`repin_and_launch_gateD2.sh <PR> <HEAD>`).
 
-**Status (2026-10-05 re-pin): base re-pinned to `ef4901778710`, the branch is pushed (merge-in, `57fa9e31d7ce`); NOT LAUNCHABLE until Seat D 6th raises the PR and the routing line (section 4) is added.** The three original pre-conditions, kept as history:
+**Status: KIT COMPLETE, NOT LAUNCHABLE YET** — three things must happen first:
 1. Seat D 5th raises the PR with its **second commit** (the `.crt` bundle + `config/README.md` + three comment fixes).
 2. **develop already moved**: `e6daa806e79a` → `2d85b84e1012` (#1374 KS-1402 squash, tree `082190611d1f`). The builder must rebase; then Wednesday runs `repin_base_gateD2.py --new-develop <develop> ` (report), reads it, and re-runs with `--write`. Exercised against the real move: **clean re-pin, only the two docs moved** (`repin_base_1374_ex1.out`, rc 0); control: a "develop" that moves timestamping files → RE-DRAFT rc 1 (`repin_base_redraft_control_ex1.out`).
 3. The routing line (section 4).
 
 **What the drafter did:** wrote only in this folder and under `/private/tmp/claude-501/`. In `!CODING/` ran only git read verbs (show, log, ls-tree, cat-file, ls-remote, rev-parse, diff). Network: GitHub REST GETs (census, compare, commits), npm registry (tarballs; `npm ci` of the timestamping service's OWN lock into scratch copies extracted with `git show`), two root-cert GETs. Every refusal arm pointed at a path **inside this kit folder**; `ls` proves none was created (`c2_legs_refusal_ls_ex1.out`, `c3_refusal_ls_ex1.out`, `probe_pki_refusal_ex1.out`). No clone, no worktree, no launch, no mail, no delete (scratch probe files were moved to a scratch quarantine).
-
-## 0a. Re-pin for Seat D 6th and the MERGE-IN branch (2026-10-05, 18:2x-18:4xZ)
-- **Seat:** `author_seat` / `merge_seat` **Seat D 6th**; GO `GO (Seat D 6th): merge {PR} on gateD2`; verdict subject `(Seat D6 author and merger; …)`; COMMISSION, both templates' merge-seat lines and the launcher's merge-seat `has()` guard likewise.
-- **Shape:** Seat D 5th's force-with-lease was refused by `.githooks/pre-push:46-70`; Wednesday's 18:05:26Z route (b) merged develop `ef4901778710` IN. The branch at origin is `57fa9e31d7ce0e5fea928b2f65c193ac404df451` = commit 1 `9884b5588d7c` (parent = the OLD base `e6daa806e79a`) + commit 2 `a1231d63c13b` + the merge (parents `a1231d63c13b`, `ef4901778710`), tree **`6d96b6e812754624569986ae00fdcfe815e8b86f`** (= kit `end_tree`). `n_commits` 2 → **3**.
-- **c1 P3 re-written:** no linear / first-parent requirement; it asserts develop is an ANCESTOR of HEAD (behind 0), `HEAD^{tree}` == `end_tree`, `git diff --name-only develop HEAD` == exactly the 14 kit paths, develop == kit base. The chain is INFO. P4's first-commit numstat and the second-commit ADDED list are now taken against each commit's OWN parent (the old code diffed against develop, which on a merge-in branch drags #1374 / #1375's files in).
-- **Base:** `repin_base_gateD2.py --new-develop ef4901778710…` report (R1 PASS ahead 2 behind 0; R2 PASS, 8 compare files, none a non-doc kit path) then `--write` (its own backup `kit.json.pre-repin-20261004T183219Z`). NOTE: it sets `base_parent` to the OLD base `e6daa806e79a` by design (develop's real parent is `2d85b84e1012`); no script reads `base_parent`.
-- **Claims:** `cells_head` 25 → **36**; `suite_claim` head 6/69 → **6/80** (base 5/44); `doc_figures_claim` re-read from Seat D 5th's handover. **`cells_base_claim` is NOT re-pinned** (the 36-cell file at base is unmeasured; INFO-only in c3_parse) — see `cells_base_claim_note`.
-- **Launcher / prompt:** compare `ahead=3`; MG-1 `3 commits (merge-in)`; head cells 36/36, suite 6/80; two new `has()` guards (`develop is an ANCESTOR of the head`, the END_TREE literal).
-- **c4 V15:** comment lines no longer count as "code naming the bundle" (commit 2's ruled comments, Wednesday 14:28:33Z (3), name `config/tsa-trust-anchors.crt`; V15 read them as a default path and failed at the real head, which also blinded self-test T8).
-- **Findings for the gate, NOT fixed (drafter rules none):** **D13** the cheat sheet's KS 1404 block at head carries `npx vitest run src/__tests__/ks1404-verify-rfc3161.test.ts   # 27 cells` (head `:3738`) — a stale figure (the file has 36); c5 D5 reads it. **D14** c5 `figures()` takes the LAST `N files / M tests` in a block as "after"; the flow doc's block ends with the history sentence "The pre-ITEM-2 figures were 6 files / 71 tests", so D5 reads `after 6/71` there though the doc's own after-row says 6/80 — a parser fragility. **D15** no mutation arm covers the ITEM 2 guards (ESS binding, sid match, chain order); CHAIN-3 is the builder's own order guard.
 
 ## 1. Drafter predictions — on the FIRST commit 9884b5588d7c only, at the OLD base
 | check | file | result |
@@ -57,7 +47,7 @@ QA/Secuura-ks1404-<n>|coagent@agentmail.to|yes
 ```
 
 ## 5. Launch
-`repin_and_launch_gateD2.sh <n> <FINAL head 40-hex> --dry-run`, then without `--dry-run`. Steps as gate54a's, plus: the API must report `commits 3`, the compare `ahead=3` (merge-in; re-pinned 2026-10-05). rc 10 on any develop ≠ kit base (→ section 7).
+`repin_and_launch_gateD2.sh <n> <FINAL head 40-hex> --dry-run`, then without `--dry-run`. Steps as gate54a's, plus: the API must report `commits 2`, the compare `ahead=2`. rc 10 on any develop ≠ kit base (→ section 7).
 
 ## 6. Not adapted / not measured
 - No clone / worktree / workspace install: route cells 13/13b/14, the full suites, tsc, legs 2/6/7/9 and the cleanup control have **no drafter rc**. Builder claims remain: 5/44 → 6/69, red-first 6/7/12 of 25, tsc 0.

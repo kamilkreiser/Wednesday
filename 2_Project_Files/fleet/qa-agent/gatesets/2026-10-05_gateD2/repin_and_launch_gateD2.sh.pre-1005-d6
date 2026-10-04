@@ -1,7 +1,7 @@
 #!/bin/bash
 # repin_and_launch_gateD2.sh — the LAUNCH ACTION for the gateD2 kit (the directory this script lives in). ONE PR, whose number and head are
 # INPUTS. Re-pin and launch are ONE action (Kam 2026-09-18): it READS everything AT LAUNCH and never trusts a pin it did not just re-read.
-# A NEW COPY of repin_and_launch_gate54f.sh, re-keyed for gateD2 (pane QA/Secuura-ks1404-<PR>, 14 paths, kit n_commits (3, MERGE-IN since 2026-10-05), the co-tenant + reported-overlap census classes):
+# A NEW COPY of repin_and_launch_gate54f.sh, re-keyed for gateD2 (pane QA/Secuura-ks1404-<PR>, 14 paths, 2 commits, the co-tenant + reported-overlap census classes):
 #   (0)  the pane QA/Secuura-ks1404-<PR> is routed (inbox_routing.conf) — rc 1;
 #   (1)  the GitHub PULLS API: head sha, branch, base, state, merged, mergeable (re-read up to 3x while null) — rc 3; the PR body is saved;
 #   (2)  ONE `git ls-remote` READ from the Secuura checkout: develop + refs/pull/<PR>/head + the branch — rc 2;
@@ -32,7 +32,7 @@ case "$PR" in ''|*[!0-9]*) echo "usage: repin_and_launch_gateD2.sh <PR number> <
 printf '%s' "$HEAD" | grep -qE '^[0-9a-f]{40}$' || { echo "REFUSING: HEAD must be the FULL 40-hex sha, got '$HEAD'"; exit 9; }
 PANE="QA/Secuura-ks1404-$PR"; T="$(date -u +%H%M%S)"; OUTP="$GS/launch_$T"; [ "$DRY" = 1 ] && OUTP="$GS/dry_$T"
 echo "LAUNCH ACTION gateD2$([ "$DRY" = 1 ] && echo ' (DRY RUN)') $(date '+%Y-%m-%d %H:%M:%S %Z') / $(date -u '+%Y-%m-%dT%H:%M:%SZ') | PR #$PR | HEAD $HEAD | kit base $BASE | pane $PANE"
-echo "  NOTE: kit expected_head ${EXPH:-null} (merge-in, END_TREE 6d96b6e8...; expected_pr ${EXPPR:-null}); the drafter's pred_first_* files describe only the first commit 9884b5588d7c"
+echo "  NOTE: the kit has NO drafted final head (expected_pr / expected_head null): the drafter's pred_first_* files describe only the first commit 9884b5588d7c"
 
 echo "--- 0. the pane must be routed (inbox_routing.conf) or cockpit.sh say --mail fails silently"
 /usr/bin/grep -c -x -F "$PANE|coagent@agentmail.to|yes" "$ROUTING" > "$OUTP.routing.out" 2> "$OUTP.routing.err"

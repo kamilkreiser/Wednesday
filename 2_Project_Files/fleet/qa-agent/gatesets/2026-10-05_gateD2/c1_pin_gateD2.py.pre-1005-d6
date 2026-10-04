@@ -1,14 +1,11 @@
 #!/usr/bin/env python3
 """c1_pin_gateD2.py — gateD2 C1: pin the PR from TWO instruments and the commits from the clone (a NEW COPY of c1_pin_gate54a.py, re-keyed for a
-TWO-COMMIT PR: Wednesday's 14:2xZ ruling adds a second commit carrying the committed PEM bundle; RE-SHAPED 2026-10-05 for the MERGE-IN branch:
-Wednesday's 18:05:26Z route (b) merged develop IN, because the repo's pre-push hook forbids a force push, so develop is an ANCESTOR, not the parent).
+TWO-COMMIT PR: Wednesday's 14:2xZ ruling adds a second commit carrying the committed PEM bundle).
   P1 ls-remote origin (from --repo): refs/pull/<PR>/head == HEAD == the PR's branch ref; develop at origin read.
   P2 the PULLS API (read-only GET; GH_TOKEN by name, never printed): open, not merged, base develop, base.sha == develop, head.sha == HEAD,
-     head.ref matches kit branch_rx, commits == kit n_commits (3: commit 1, commit 2, the merge of develop); mergeable printed (null re-read up to 3x).
-  P3 shape (MERGE-IN): develop is an ANCESTOR of HEAD (`git log HEAD..develop` empty = behind 0), HEAD^{tree} == kit end_tree (the verified tree),
-     `git diff --name-only develop HEAD` == exactly the kit files, develop == kit base (else STALE BASE: run repin_base_gateD2.py — every C2-C6
-     expectation is base-specific; never guessed). The commit count and the chain's shape are INFO here (no linear / first-parent requirement:
-     the first commit's parent is the OLD base e6daa806e79a by construction). A fix round would move HEAD and END_TREE: Wednesday re-pins.
+     head.ref matches kit branch_rx, commits == kit n_commits; mergeable printed (null re-read up to 3x).
+  P3 shape: develop..HEAD is exactly kit n_commits (2) commits, LINEAR (each has one parent), the FIRST one's parent == develop, behind 0,
+     develop == kit base (else STALE BASE: run repin_base_gateD2.py — every C2-C6 expectation is base-specific; never guessed).
   P4 files: API /files == exactly kit files (14) AND `git diff --numstat develop HEAD` lists the same 14 with the same +/- per path.
      INFO per commit: its own name list (the second commit must ADD the two config/ files); the first commit's numstat vs the builder's claim.
   P4b PATH GATE: every path in develop..HEAD matches kit path_allow_rx (services/timestamping/**, root lock, audit-baseline.json, the two
@@ -73,32 +70,26 @@ numstat = []; names = []; chain = []
 if not (hc and dc):
     C.chk('P3 shape', False, 'HEAD present %s | develop %s present %s — fetch refs/pull/%s/head and develop into YOUR clone first' % (hc, dev, dc, PR))
 else:
-    chain = [l.split() for l in git(REPO, 'log', '--topo-order', '--format=%H %P', '%s..%s' % (dev, HEAD)).splitlines() if l.strip()]   # newest first, topo
-    behind = count_range(REPO, HEAD, dev); ancestor = behind == 0
-    tree = git(REPO, 'rev-parse', HEAD + '^{tree}').strip(); et = K['end_tree']
-    pnames = sorted(l for l in git(REPO, 'diff', '--name-only', dev, HEAD).splitlines() if l)
-    merges = [c[0][:12] for c in chain if len(c) > 2]
-    C.chk('P3 shape (merge-in)', ancestor and tree == et and pnames == sorted(K['files']) and dev == KB,
-          'develop %s is an ANCESTOR of HEAD (git log HEAD..develop = %d commit(s)) %s | HEAD^{tree} %s == kit end_tree %s: %s | diff --name-only develop HEAD %d path(s) == the %d kit paths: %s (missing %s, extra %s) | develop == judged base %s: %s%s' % (
-              dev[:12], behind, ancestor, tree, et[:12], tree == et, len(pnames), len(K['files']), pnames == sorted(K['files']),
-              sorted(set(K['files']) - set(pnames)), sorted(set(pnames) - set(K['files'])), KB[:12], dev == KB,
+    chain = [l.split() for l in git(REPO, 'log', '--format=%H %P', '%s..%s' % (dev, HEAD)).splitlines() if l.strip()]   # newest first
+    linear = all(len(c) == 2 for c in chain) and all(chain[i][1] == chain[i + 1][0] for i in range(len(chain) - 1))
+    first_parent = chain[-1][1] if chain else None; behind = count_range(REPO, HEAD, dev)
+    C.chk('P3 shape', len(chain) == K['n_commits'] and linear and first_parent == dev and behind == 0 and dev == KB,
+          'develop..HEAD %d commit(s) (want %d) %s | linear one-parent chain %s | first commit parent %s == develop %s | behind %d | develop == judged base %s: %s%s' % (
+              len(chain), K['n_commits'], [c[0][:12] for c in chain], linear, (first_parent or '?')[:12], dev[:12], behind, KB[:12], dev == KB,
               '' if dev == KB else '  <- STALE BASE: repin_base_gateD2.py --new-develop %s (README section 7); never guessed' % dev))
-    print('INFO P3 chain develop..HEAD %d commit(s) (kit n_commits %d%s) %s | merge commit(s) %s | (no linear / first-parent requirement: merge-in shape)' % (
-        len(chain), K['n_commits'], '' if len(chain) == K['n_commits'] else '  <- DIFFERS', [(c[0][:12], [x[:12] for x in c[1:]]) for c in chain], merges or 'NONE'))
     numstat = [l.split('\t') for l in git(REPO, 'diff', '--numstat', dev, HEAD).splitlines() if l]
     names = [l for l in git(REPO, 'diff', '--name-only', dev, HEAD).splitlines() if l]
     print('INFO END_TREE: HEAD^{tree} %s | develop^{tree} %s (the control that differs)' % (git(REPO, 'rev-parse', HEAD + '^{tree}').strip(), git(REPO, 'rev-parse', dev + '^{tree}').strip()))
     for c in reversed(chain):
         cn = [l for l in git(REPO, 'diff', '--name-status', c[1], c[0]).splitlines() if l]
         print('INFO commit %s (parent %s) %r: %d path(s) %s' % (c[0][:12], c[1][:12], git(REPO, 'log', '-1', '--format=%s', c[0]).strip()[:90], len(cn), [x.replace('\t', ' ') for x in cn]))
-    own = [c for c in reversed(chain) if len(c) == 2]   # the non-merge commits, oldest first
-    if own:
-        fc = own[0][0]
-        for l in git(REPO, 'diff', '--numstat', fc + '^', fc).splitlines():   # against ITS OWN parent (merge-in: develop is not commit 1's parent)
+    if chain:
+        fc = chain[-1][0]
+        for l in git(REPO, 'diff', '--numstat', dev, fc).splitlines():
             a, d, f = l.split('\t'); cl = K['numstat_claim_first_commit'].get(f)
             print('INFO P4 first-commit claim %s: +%s/-%s | builder %s%s' % (f, a, d, '+%d/-%d' % tuple(cl) if cl else 'NONE', '' if cl and [int(a), int(d)] == cl else '  <- DIFFERS'))
-        if len(own) >= 2:
-            sc = [l.split('\t', 1)[1] for l in git(REPO, 'diff', '--name-status', own[1][0] + '^', own[1][0]).splitlines() if l.startswith('A\t')]
+        if len(chain) >= 2:
+            sc = [l.split('\t', 1)[1] for l in git(REPO, 'diff', '--name-status', chain[-1][0], chain[0][0]).splitlines() if l.startswith('A\t')]
             print('INFO second-commit ADDED paths %s | kit expects %s: %s' % (sc, K['files_second_commit_expected'], sorted(sc) == sorted(K['files_second_commit_expected'])))
 loc = sorted((x[2], int(x[0]), int(x[1])) for x in numstat if x[0].isdigit())
 if fl is None:

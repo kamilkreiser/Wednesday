@@ -3,7 +3,7 @@
 against gateD2's expectations (a NEW COPY of c2_parse_gate54a.py, re-keyed for the KS 1404 file's 25 cells). Two instruments: the JSON and
 the console summary (`Test Files N` / `Tests N`, --console <stdout file>); they must agree or the reading is refused.
   cells <json> base|head [--console f]
-      HEAD: every cell in the KS 1404 file PASSED, count == kit cells_head (36 since the 2026-10-05 re-pin), 0 skipped, 0 failed.
+      HEAD: every cell in the KS 1404 file PASSED, count == kit cells_head (25), 0 skipped, 0 failed.
       BASE: each kit red_set_commission cell (1, 3, 11 indefiniteLength, 12, 14) is FAILED BY ASSERTION (message ~ kit red_msg_rx), never by a
       load error (`Cannot find package|module`, SyntaxError, a 500); cell 13b's red and cell 13's green are reported against the builder's
       claim; SKIPPED cells are counted and reported as a FAILED beforeAll (never a pass, never a red); totals vs kit cells_base_claim.
@@ -165,11 +165,7 @@ def synth(cells, files=None):
 def selftest():
     names25 = ['cell 1', 'cell 3', 'cell 4', 'cell 11 truncated', 'cell 11 trailingBytes', 'cell 11 wrongOuterTag', 'cell 11 indefiniteLength', 'cell 11e', 'cell 12', 'cell 12b',
                'cell 5', 'cell 6', 'cell 7', 'cell 2', 'cell 10', 'cell 10b', 'cell 8', 'cell 9', 'cell 3b', 'cell 11f', 'cell 11g', 'cell 16', 'cell 14', 'cell 13', 'cell 13b']
-    # re-pin 2026-10-05 (cells_head 25 -> 36): the HEAD arms use the REAL head's 36 cells (the 25 + cell 17 / 17b + the nine ITEM 2 cells);
-    # the BASE arms keep the 25-name red-set fixture (cells_base_claim is NOT re-pinned; the base judge does not count against it)
-    names36 = names25 + ['cell 17', 'cell 17b', 'ESS-1', 'ESS-2', 'ESS-3', 'CHAIN-1', 'CHAIN-2', 'CHAIN-3', 'ALG-RSA', 'ALG-PSS', 'SID-1']
-    assert len(names36) == K['cells_head'] == 36, (len(names36), K['cells_head'])
-    G25 = {n: ('passed', '') for n in names25}; G36 = {n: ('passed', '') for n in names36}
+    G25 = {n: ('passed', '') for n in names25}
     A = 'AssertionError: expected true to be false // Object.is equality'
     BASE = dict(G25)
     for n in ('cell 1', 'cell 3', 'cell 12', 'cell 14', 'cell 13b'): BASE[n] = ('failed', A)
@@ -177,18 +173,17 @@ def selftest():
     for n in names25[10:22]: BASE[n] = ('skipped', '')
     LOAD = dict(BASE); LOAD['cell 14'] = ('failed', "Error: Cannot find package '@secuura/shared'")
     arms = [
-        ('T0 head 36/36 green', lambda: judge_cells(synth(G36), 'head'), True),
-        ('T1 head with a skipped cell', lambda: judge_cells(synth(dict(G36, **{'cell 5': ('skipped', '')})), 'head'), False),
-        ('T2 head with 35 cells', lambda: judge_cells(synth({k: v for k, v in G36.items() if k != 'cell 16'}), 'head'), False),
-        ('T2b head with the OLD 25 cells', lambda: judge_cells(synth(G25), 'head'), False),
+        ('T0 head 25/25 green', lambda: judge_cells(synth(G25), 'head'), True),
+        ('T1 head with a skipped cell', lambda: judge_cells(synth(dict(G25, **{'cell 5': ('skipped', '')})), 'head'), False),
+        ('T2 head with 24 cells', lambda: judge_cells(synth({k: v for k, v in G25.items() if k != 'cell 16'}), 'head'), False),
         ('T3 base: the claimed red set by assertion', lambda: judge_cells(synth(BASE), 'base'), True),
         ('T4 base: cell 14 red on a LOAD error is not red-first', lambda: judge_cells(synth(LOAD), 'base'), False),
         ('T5 base: cell 12 green (the mock door already shut)', lambda: judge_cells(synth(dict(BASE, **{'cell 12': ('passed', '')})), 'base'), False),
         ('T6 0 cells (load failure)', lambda: judge_cells(synth({}), 'base'), False),
-        ('T7 clean suite pair 5 -> 6 files, +36', lambda: judge_diff(synth(None, 5), synth(G36, 5)), True),
-        ('T8 a base-green test red at head', lambda: judge_diff(synth(None, 5), (lambda h: (h['testResults'][0]['assertionResults'][0].update(status='failed'), h)[1])(synth(G36, 5))), False),
-        ('T9 mutation sig: cell 2 red', lambda: judge_mutation(synth(dict(G36, **{'cell 2': ('failed', A)})), 'sig'), True),
-        ('T10 mutation sig that stays green (vacuous)', lambda: judge_mutation(synth(G36), 'sig'), False),
+        ('T7 clean suite pair 5 -> 6 files, +25', lambda: judge_diff(synth(None, 5), synth(G25, 5)), True),
+        ('T8 a base-green test red at head', lambda: judge_diff(synth(None, 5), (lambda h: (h['testResults'][0]['assertionResults'][0].update(status='failed'), h)[1])(synth(G25, 5))), False),
+        ('T9 mutation sig: cell 2 red', lambda: judge_mutation(synth(dict(G25, **{'cell 2': ('failed', A)})), 'sig'), True),
+        ('T10 mutation sig that stays green (vacuous)', lambda: judge_mutation(synth(G25), 'sig'), False),
         ('T11 suite 2 files failed with 0 failed tests (load)', lambda: judge_suite({'testResults': [{'name': 'a', 'status': 'failed', 'assertionResults': []}]}), False),
     ]
     ok = 0

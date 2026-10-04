@@ -1,13 +1,12 @@
 #!/bin/bash
 # {{LAUNCHER}} — cross-project QA agent, ONE gate (gateD2, round 54) over ONE Secuura/Blockchain PR, FROZEN at ONE:
-# #{{PR}} KS-1404 (T1, ROUND 1): real RFC 3161 verification, node-forge out of timestamping; THREE commits (commit 1, commit 2 with the .crt bundle
-# and the ESS / chain fix, and a merge of develop IN: develop is an ANCESTOR of the head, not its base parent — Wednesday's route (b), 18:05:26Z).
-# Merger: Seat D 6th (raises the PR; the branch is Seats D 2nd-5th's work). PINNED by repin_and_launch_gateD2.sh at {{PINNED_AT}} from its own ls-remote + PULLS API reads:
+# #{{PR}} KS-1404 (T1, ROUND 1): real RFC 3161 verification, node-forge out of timestamping; TWO commits (the second adds the .crt bundle).
+# Merger: Seat D 5th (the author). PINNED by repin_and_launch_gateD2.sh at {{PINNED_AT}} from its own ls-remote + PULLS API reads:
 # head {{HEAD}} on {{BRANCH}}, develop {{DEVELOP}}. A NEW COPY of gate54f's launcher (itself gate52's guards, one row), re-keyed.
 # exit 2:  QA project missing, or this launcher is not in the gateset dir it was filled for (a MOVED KIT).   exit 3-5: pins / prompt / repo missing.
 # exit 6:  the head is not at its branch AND refs/pull/<n>/head on origin.   exit 8: thinking directive / kit files / charter named / an unfilled token.
 # exit 9:  STALE PIN: the pin is older than GD2_MAX_PIN_AGE_S (default 1800 s) — re-pin and re-fill through repin_and_launch_gateD2.sh.
-# exit 10: the GitHub compare develop...head: merge_base / ahead 3 / behind 0 / files != the pins.   exit 17: origin develop != the pinned develop.
+# exit 10: the GitHub compare develop...head: merge_base / ahead 2 / behind 0 / files != the pins.   exit 17: origin develop != the pinned develop.
 # exit 20: the prompt names the head in full.   exit 7: tier + FROZEN + round + tiering rule.   exit 33: the by-name keyword ladder (as tokens).
 # exit 39: the HOLDS + the named exceptions.   exit 34: the six checks C1..C6 + the ruling's constraints + the controls.   exit 26: GO string.
 # exit 25: MERGE ADDENDUM + REPORT-HASH-LAST.   exit 23: verdict subject / sender / report dir.   exit 21: the LAUNCH path refuses when stdin
@@ -64,7 +63,7 @@ try:
 except Exception as e: print("ERROR %s" % e)
 PY
 )"
-[ "$COMPARE" = "$DEVELOP_SHA ahead=3 behind=0 files=$NFILES paths=$FILES" ] || { echo "REFUSING: #$PR — the compare is not the pinned merge_base / ahead 3 / behind 0 / the $NFILES paths:" >&2; echo "  got  $COMPARE" >&2; echo "  want $DEVELOP_SHA ahead=3 behind=0 files=$NFILES paths=$FILES" >&2; exit 10; }
+[ "$COMPARE" = "$DEVELOP_SHA ahead=2 behind=0 files=$NFILES paths=$FILES" ] || { echo "REFUSING: #$PR — the compare is not the pinned merge_base / ahead 2 / behind 0 / the $NFILES paths:" >&2; echo "  got  $COMPARE" >&2; echo "  want $DEVELOP_SHA ahead=2 behind=0 files=$NFILES paths=$FILES" >&2; exit 10; }
 grep -qwF "$_h" "$PROMPT_FILE" || { echo "REFUSING: the prompt does not name the head $_h in full" >&2; exit 20; }
 PROMPT_JOINED="$(python3 -c 'import re,sys; print(re.sub(r"\n\s*", " ", open(sys.argv[1], encoding="utf-8").read()))' "$PROMPT_FILE")"
 has() { printf '%s' "$PROMPT_JOINED" | grep -qF -- "$1"; }
@@ -75,11 +74,11 @@ for _w in {{KEYWORDS}}; do   # AS A TOKEN: bounded by a non-[A-Za-z0-9-] charact
 done
 has 'mock tokens verify ONLY through the DB-row branch' && has 'BER indefinite length refused' && has 'isQualified dropped' && has 'fail CLOSED on an empty / unset anchor bundle' && has 'byte-identical to the old forge encoder' && has 'config/tsa-trust-anchors.crt (NOT .pem' && has 'a load failure is NEVER a red' && has 'SELF-TEST ARM' && has 'NEGATIVE CONTROL' && has 'MUST-HIT' && has 'EACH RECOMPUTED BY YOU' && has '4D:24:80:7B:9C:AD:51:10:F4:0E:D7:9D:93:43:46:D7:C9:B0:29:04:31:DC:9B:11:A4:0B:BB:86:FC:F2:AE:F6' && has '3E:90:99:B5:01:5E:8F:48:6C:00:BC:EA:9D:11:1E:E7:21:FA:BA:35:5A:89:BC:F1:DF:69:56:1E:3D:C6:32:5C' && has 'NOT COVERED: KS-1404 stays In Progress' && has 'NEVER guess a new base' || { echo "REFUSING: the six checks / the rulings / the controls" >&2; exit 34; }
 has 'NO MERGE, NO PUSH to any PR branch, NO ticket state change' && has 'NO ticket filed' && has 'NEVER WRITE THE SHARED CHECKOUT. Findings only' && has 'Never `rm`' && has 'No `az` command of any kind' && has 'You NEVER reply to Peter' && has 'No image is built.' && has 'NO CALL TO ANY REAL TSA' && has 'THE NAMED EXCEPTIONS to those holds — these and NO others' && has 'TICKET STATE IS WEDNESDAY' || { echo "REFUSING: the HOLDS" >&2; exit 39; }
-has "WEDNESDAY'S signed GO naming the head" && has '{{GO}}' && has 'The merge seat is Seat D 6th' || { echo "REFUSING: merge authority / the GO string" >&2; exit 26; }
-has '## MERGE ADDENDUM' && has 'MG-1 {{N_FILES}} over {{N_FILES}} paths, 3 commits (merge-in)' && has 'develop is an ANCESTOR of the head' && has 'END_TREE 6d96b6e812754624569986ae00fdcfe815e8b86f' && has 'MG-11 subject <= 92' && has 'NO TRAILER' && has 'EVERY SUBJECT YOU PROPOSE MUST BE TRUE OF THE DIFF' && has 'is the LAST thing you write to report.md' && has 'sha256 report.md = <hex>' || { echo "REFUSING: the MERGE ADDENDUM rules / REPORT-HASH-LAST" >&2; exit 25; }
+has "WEDNESDAY'S signed GO naming the head" && has '{{GO}}' && has 'The merge seat is Seat D 5th' || { echo "REFUSING: merge authority / the GO string" >&2; exit 26; }
+has '## MERGE ADDENDUM' && has 'MG-1 {{N_FILES}} over {{N_FILES}} paths, 2 commits' && has 'MG-11 subject <= 92' && has 'NO TRAILER' && has 'EVERY SUBJECT YOU PROPOSE MUST BE TRUE OF THE DIFF' && has 'is the LAST thing you write to report.md' && has 'sha256 report.md = <hex>' || { echo "REFUSING: the MERGE ADDENDUM rules / REPORT-HASH-LAST" >&2; exit 25; }
 grep -qF -- '{{VERDICT_SUBJECT}}' "$PROMPT_FILE" && has 'FROM coagent@agentmail.to' && has 'reports/{{REPORT}}/' || { echo "REFUSING: the verdict subject / sender / report dir" >&2; exit 23; }
 _ANY_OVR="$(env | grep -c '^GD2_')"
-NOTE="origin develop $CUR_DEV == the pinned develop | #$PR T1 ${_h:0:12} at branch AND pull/head | compare ok (ahead 3, behind 0, $NFILES paths) | pin age ${_age}s"
+NOTE="origin develop $CUR_DEV == the pinned develop | #$PR T1 ${_h:0:12} at branch AND pull/head | compare ok (ahead 2, behind 0, $NFILES paths) | pin age ${_age}s"
 if [ "${1:-}" = "--check" ]; then
   echo "all guards pass:"
   echo "  $NOTE"

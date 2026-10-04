@@ -6,42 +6,28 @@
   "ticket": "KS-1404",
   "tier": "T1",
   "tier_reason": "security: the RFC 3161 verifier (an authenticity decision) is replaced, a forgeable mock-JSON path is closed, and a dependency (node-forge) leaves two lockfiles",
-  "author_seat": "Seat D 6th",
-  "merge_seat": "Seat D 6th",
-  "branch_provenance": "built by Seat D 2nd (local ba117c3ef659, never pushed); commit 1 9884b5588d7c pushed by Seat D 3rd; commit 2 (the .crt bundle, ESS binding, chain via intermediates) by Seat D 4th / Seat D 5th as a1231d63c13b; develop ef4901778710 MERGED IN by Seat D 5th as 57fa9e31d7ce (Wednesday 18:05:26Z route (b): the repo pre-push hook forbids force pushes); PR raised by Seat D 6th",
+  "author_seat": "Seat D 5th",
+  "merge_seat": "Seat D 5th",
+  "branch_provenance": "built by Seat D 2nd (local commit ba117c3ef659, never pushed), adopted, amended (cells 13/13b/14) and pushed by Seat D 3rd; a SECOND commit adds the committed PEM bundle (Wednesday's ruling to Seat D 3rd, 14:2xZ)",
   "expected_pr": null,
-  "expected_head": "57fa9e31d7ce0e5fea928b2f65c193ac404df451",
+  "expected_head": null,
   "drafted_first_commit": "9884b5588d7ca1061ea424a1782f385da1c36a49",
   "drafted_first_commit_seen": "refs/heads/feature/ks-1404-rfc3161-real-verification-d3-1 at origin, drafter ls-remote 2026-10-04T14:3xZ (lsremote_ex1.out); no PR yet",
   "drafted_first_commit_tree": "4f0904d5b5abba1a8602a3a7b4d58f01b8cac107",
-  "n_commits": 3,
+  "n_commits": 2,
   "branch_planned": "feature/ks-1404-rfc3161-real-verification-d3-1",
   "branch_rx": "^feature/ks-1404-rfc3161-real-verification-d3-1$",
   "pane_template": "QA/Secuura-ks1404-{PR}",
   "launcher_template_out": "launch_qa_secuura_ks1404_{PR}.sh",
   "prompt_template_out": "2026-10-05_secuura-ks1404-{PR}.prompt.txt",
   "report_template": "2026-10-05-ks1404-{PR}-gD2",
-  "go_template": "GO (Seat D 6th): merge {PR} on gateD2",
-  "verdict_subject_template": "[QA -> Wednesday] GATED2 #{PR} (Seat D6 author and merger; T1 security: real RFC 3161 verification, node-forge out of timestamping, KS-1404)",
-  "base": "ef4901778710adcae2889dd097fb99bb478bf6d0",
-  "base_tree": "4e35c85604231119a7848ade639a934a45642ff2",
-  "base_parent": "e6daa806e79a14a580f064db95e797c1fd671dc7",
-  "base_note": "develop re-pinned e6daa806e79a -> ef4901778710 by repin_base_gateD2.py (2026-10-04T18:32:19Z); only the platform-k docs moved",
-  "base_history": [
-    {
-      "base": "e6daa806e79a14a580f064db95e797c1fd671dc7",
-      "replaced_by": "ef4901778710adcae2889dd097fb99bb478bf6d0",
-      "at": "2026-10-04T18:32:19Z",
-      "commits": [
-        "2d85b84e1012961c880daa3de70d8491fc0a2ff9",
-        "ef4901778710adcae2889dd097fb99bb478bf6d0"
-      ],
-      "docs_moved": [
-        "Projects Documents/API_Security_Functional_Testing_Architecture_Flow_Diagrams.html",
-        "Projects Documents/QA_Tool_Cheat_Sheet_Secuura_API_Testing.html"
-      ]
-    }
-  ],
+  "go_template": "GO (Seat D 5th): merge {PR} on gateD2",
+  "verdict_subject_template": "[QA -> Wednesday] GATED2 #{PR} (Seat D5 author and merger; T1 security: real RFC 3161 verification, node-forge out of timestamping, KS-1404)",
+  "base": "e6daa806e79a14a580f064db95e797c1fd671dc7",
+  "base_tree": "3a55f42e9f84bd7e9d5d28480bb7e68c0321bf4e",
+  "base_parent": "88e8877a2a0d6a626b9c2a7c4b71d3a909e6f94e",
+  "base_note": "develop at drafting = PR 0 (#1373) squash. #1374 (KS-1402) is about to squash onto it: a moved develop is REFUSED (rc 10) until repin_base_gateD2.py re-derives the base-specific fields and Wednesday writes them",
+  "base_history": [],
   "pr0_commit": "e6daa806e79a14a580f064db95e797c1fd671dc7",
   "pr0_parent": "88e8877a2a0d6a626b9c2a7c4b71d3a909e6f94e",
   "checkout": "/Volumes/DevMASTER/!CODING/Secuura/Blockchain/2_Project_Files",
@@ -59,13 +45,9 @@
     "fail CLOSED on an empty / unset anchor bundle",
     "request bytes byte-identical to the old forge encoder, its two INTEGER quirks pinned (one leading 0x00 stripped at most; no sign prefix added)",
     "a SECOND commit adds services/timestamping/config/tsa-trust-anchors.crt (D-TRUST Root CA 1 2017 + DigiCert Assured ID Root CA) and config/README.md and corrects three code comments; the loader stays ENV-ONLY with no default (unset -> fail closed); pin the FINAL head, END_TREE = the final head's tree",
-    "the bundle is config/tsa-trust-anchors.crt, NOT .pem (preflight leg 9 refuses a tracked .pem as a credential; Wednesday 01:5x AEDT); leg 9 must pass at the head and no .gitignore negation may be added",
-    "N-1375-1 DROPPED (Q-C5, 17:23:24Z to Seat D 5th): the KS 1402 and KS 1015 blocks are BYTE-EQUAL to develop with no exception; c5 D2/D3/D7 stand unmodified",
-    "Q-N (17:23:24Z): the KS 1404 flow-doc block is numbered 11. (11.1 / 11.2 / 11.3), after develop's 9. (KS 1402) and 10. (KS 1015)",
-    "ALG-ECDSA DROPPED and SHA-1 NOT widened (17:32:59Z); DigiCert Trusted Root G4 NOT pinned, named in NOT COVERED",
-    "route (b) (18:05:26Z): NO force push of any kind; develop merged IN; the merge commit's tree must EQUAL 6d96b6e8 (the verified tree); END_TREE = 6d96b6e812754624569986ae00fdcfe815e8b86f"
+    "the bundle is config/tsa-trust-anchors.crt, NOT .pem (preflight leg 9 refuses a tracked .pem as a credential; Wednesday 01:5x AEDT); leg 9 must pass at the head and no .gitignore negation may be added"
   ],
-  "seat_brief": "/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/briefs_staged/2026-10-05_seatD6_raise.md",
+  "seat_brief": "/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/briefs_staged/2026-10-05_seatD3_successor.md",
   "charter": "/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/QA_AGENT_CHARTER.md",
   "files": [
     "Blockchain/Dev/package-lock.json",
@@ -153,8 +135,8 @@
     "Blockchain/Dev/services/timestamping/package.json": "a2365fde23896ca7e1a983f51ca4ef375d881bd9",
     "Blockchain/Dev/services/timestamping/src/tsa/qualified-tsa.ts": "7b7d9e8bc17264dc96122074c1d03bc06c175e96",
     "Blockchain/Dev/services/timestamping/src/tsa/rfc3161-client.ts": "032934bd1adfa658c41353e998fe790631e355f7",
-    "Projects Documents/API_Security_Functional_Testing_Architecture_Flow_Diagrams.html": "43f47cc65531609edc50082a6446de49616bb429",
-    "Projects Documents/QA_Tool_Cheat_Sheet_Secuura_API_Testing.html": "96e472149aa676fd0cc8599c903a411d24d4c9f9"
+    "Projects Documents/API_Security_Functional_Testing_Architecture_Flow_Diagrams.html": "fec4fc4a60b04c436bbef7651e75f920e591bcfe",
+    "Projects Documents/QA_Tool_Cheat_Sheet_Secuura_API_Testing.html": "29ad1e4ff5f12f5398dcaa0dad42d7d3502ca971"
   },
   "base_blobs_non_doc_note": "repin_base_gateD2.py requires every NON-doc base blob above (and index.ts, timestamping.openapi.ts, the root package.json) to be equal at a new develop; only the two docs may move (#1374 adds its KS 1402 block)",
   "unchanged_must_equal": {
@@ -292,7 +274,7 @@
     "7": "Blockchain/Dev/scripts/audit/audit-locks.mjs"
   },
   "cleanup_claim": "audit gate CLEANUP list 16 -> 15 entries and no longer names GHSA-86w9-cpqp-85rv (builder's commit body)",
-  "cells_head": 36,
+  "cells_head": 25,
   "cells_base_claim": {
     "red": 6,
     "pass": 7,
@@ -321,7 +303,7 @@
     "base_files": 5,
     "base_tests": 44,
     "head_files": 6,
-    "head_tests": 80
+    "head_tests": 69
   },
   "response_keys": [
     "reason",
@@ -330,15 +312,14 @@
     "verified"
   ],
   "doc_figures_claim": {
-    "cells": "36",
-    "suite_after": "6 files / 80 tests",
+    "cells": "25",
+    "suite_after": "6 files / 69 tests",
     "suite_before": "5 files / 44 tests",
-    "wall": "956 ms - 1.07 s",
-    "file_alone_ms": "855 ms - 1.01 s",
-    "pki_ms": "SUPERSEDED, not re-measured (12 certificates now)",
+    "wall": "765",
+    "file_alone_ms": "654",
+    "pki_ms": "196",
     "host": "Kamils-Mac-Studio",
-    "date": "2026-10-04 UTC",
-    "source": "Seat D 5th handover HANDOVER-seatD5-2026-10-05.md section 2 (sha256 6cb3125f005d4955...); READ, not measured by the kit"
+    "date": "2026-10-05"
   },
   "docs": [
     "Projects Documents/API_Security_Functional_Testing_Architecture_Flow_Diagrams.html",
@@ -361,16 +342,16 @@
   ],
   "co_tenants": {
     "KS-1402": {
-      "who": "#1374 (KS-1402), MERGED 2026-10-04T14:30:26Z as 2d85b84e1012; its KS 1402 block is ON develop",
+      "who": "Seat B 57th PR A #1374 (KS-1402), about to squash onto develop; edits BOTH platform-k docs in its own KS 1402 block",
       "allowed_overlap": "docs",
       "must_contain_head": false,
-      "note": "keep-both: every KS-1402-keyed line at develop must be present and identical in order at head (c5 D7); no exception"
+      "note": "if it merges first develop moves: rc 10, repin_base_gateD2.py, and Seat D 3rd rebases keeping BOTH blocks (THE DOC RULE)"
     },
     "KS-1015": {
-      "who": "#1375 (KS-1015), MERGED 2026-10-04T16:37:54Z as ef4901778710; its KS 1015 block is ON develop",
+      "who": "Seat B 57th PR B (KS-1015 delegation GET), stacked on #1374; edits BOTH platform-k docs in its own block",
       "allowed_overlap": "docs",
       "must_contain_head": false,
-      "note": "keep-both, no exception: N-1375-1 (27 -> 26) was DROPPED from this PR by Wednesday (Q-C5)"
+      "note": "REPORTED as a docs co-tenant, never sequenced by this gate"
     }
   },
   "client_human_prs": [
@@ -472,10 +453,5 @@
   "cockpit": "/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/cockpit/cockpit.sh",
   "routing": "/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/inbox_routing.conf",
   "leg9": "Blockchain/Dev/scripts/preflight/no-tracked-credentials.sh",
-  "credential_ext_rx": "\\.(pem|key|p12|pfx|jks|keystore|env)$|(^|/)\\.env[^/]*$|id_(rsa|ed25519)$",
-  "shape": "merge-in",
-  "shape_note": "MERGE-IN branch (Wednesday 18:05:26Z, route (b)): develop..HEAD = commit 1 9884b5588d7c (parent = the OLD base e6daa806e79a), commit 2 a1231d63c13b, and the merge commit 57fa9e31d7ce (parents a1231d63c13b + develop ef4901778710). develop is an ANCESTOR of the head, NOT the first commit's parent. c1 P3 therefore asserts: develop is an ancestor (behind 0), HEAD^{tree} == end_tree, and `git diff --name-only develop HEAD` == exactly the kit files; the commit count is n_commits (3) on the PULLS API and INFO in P3. The squash at merge collapses all three.",
-  "end_tree": "6d96b6e812754624569986ae00fdcfe815e8b86f",
-  "end_tree_note": "the tree Seat D 5th verified on the REBASED head 61035b4ebaf1 (cells, suites, keep-both, path gate, locks) and reproduced byte-exactly by the merge commit 57fa9e31d7ce; valid while develop == ef4901778710 and remains an ancestor of the head",
-  "cells_base_claim_note": "STALE, NOT RE-PINNED: cells_base_claim describes the 25-cell file planted at the OLD base. The 36-cell file at base ef4901778710 is UNMEASURED by the kit (c3_parse prints it INFO only). Seat D 5th's red-first was a DIFFERENT instrument: rfc3161-verify.ts alone reverted to b60ab7b6afbf, 7 of 9 new cells red by AssertionError, CHAIN-2 / CHAIN-3 green at both (regression guards)"
+  "credential_ext_rx": "\\.(pem|key|p12|pfx|jks|keystore|env)$|(^|/)\\.env[^/]*$|id_(rsa|ed25519)$"
 }

@@ -1,9 +1,9 @@
 #!/bin/bash
-# {{LAUNCHER}} — cross-project QA agent, ONE gate (gateD2, round 54) over ONE Secuura/Blockchain PR, FROZEN at ONE:
-# #{{PR}} KS-1404 (T1, ROUND 1): real RFC 3161 verification, node-forge out of timestamping; THREE commits (commit 1, commit 2 with the .crt bundle
+# d6repin.SIM.launcher.sh — cross-project QA agent, ONE gate (gateD2, round 54) over ONE Secuura/Blockchain PR, FROZEN at ONE:
+# #9999 KS-1404 (T1, ROUND 1): real RFC 3161 verification, node-forge out of timestamping; THREE commits (commit 1, commit 2 with the .crt bundle
 # and the ESS / chain fix, and a merge of develop IN: develop is an ANCESTOR of the head, not its base parent — Wednesday's route (b), 18:05:26Z).
-# Merger: Seat D 6th (raises the PR; the branch is Seats D 2nd-5th's work). PINNED by repin_and_launch_gateD2.sh at {{PINNED_AT}} from its own ls-remote + PULLS API reads:
-# head {{HEAD}} on {{BRANCH}}, develop {{DEVELOP}}. A NEW COPY of gate54f's launcher (itself gate52's guards, one row), re-keyed.
+# Merger: Seat D 6th (raises the PR; the branch is Seats D 2nd-5th's work). PINNED by repin_and_launch_gateD2.sh at 2026-10-04T18:39:28Z from its own ls-remote + PULLS API reads:
+# head 57fa9e31d7ce0e5fea928b2f65c193ac404df451 on feature/ks-1404-rfc3161-real-verification-d3-1, develop ef4901778710adcae2889dd097fb99bb478bf6d0. A NEW COPY of gate54f's launcher (itself gate52's guards, one row), re-keyed.
 # exit 2:  QA project missing, or this launcher is not in the gateset dir it was filled for (a MOVED KIT).   exit 3-5: pins / prompt / repo missing.
 # exit 6:  the head is not at its branch AND refs/pull/<n>/head on origin.   exit 8: thinking directive / kit files / charter named / an unfilled token.
 # exit 9:  STALE PIN: the pin is older than GD2_MAX_PIN_AGE_S (default 1800 s) — re-pin and re-fill through repin_and_launch_gateD2.sh.
@@ -13,21 +13,21 @@
 # exit 25: MERGE ADDENDUM + REPORT-HASH-LAST.   exit 23: verdict subject / sender / report dir.   exit 21: the LAUNCH path refuses when stdin
 # is not a TTY (`--check` is headless).   exit 16: a launch with a GD2_* test override set.
 # GD2_CUR_DEV / GD2_HEAD / GD2_PROMPT / GD2_PINS / GD2_NOW: test overrides (--check only). Opus by the configured default: the exec line carries NO --model.
-# Usage: {{LAUNCHER}} [--check]
+# Usage: d6repin.SIM.launcher.sh [--check]
 set -u
 QA_DIR='/Volumes/DevMASTER/!CODING/Testing Agent MAIN'
-GS='{{GS}}'
-PROMPT_FILE="${GD2_PROMPT:-$GS/{{PROMPT}}}"
-PINS="${GD2_PINS:-$GS/{{PINS}}}"
+GS='/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/gatesets/2026-10-05_gateD2'
+PROMPT_FILE="${GD2_PROMPT:-$GS/d6repin.SIM.prompt.txt}"
+PINS="${GD2_PINS:-$GS/pins_gateD2.SIM-d6repin.json}"
 REPO='/Volumes/DevMASTER/!CODING/Secuura/Blockchain/2_Project_Files'
 SECUURA_ENV='/Volumes/DevMASTER/!CODING/Secuura/Blockchain/4_Credentials/.env'
-PR='{{PR}}'
-HEAD_SHA='{{HEAD}}'
-BRANCH='refs/heads/{{BRANCH}}'
-DEVELOP_SHA='{{DEVELOP}}'
-PINNED_EPOCH='{{PINNED_EPOCH}}'
-FILES='{{FILES_CSV}}'
-NFILES='{{N_FILES}}'
+PR='9999'
+HEAD_SHA='57fa9e31d7ce0e5fea928b2f65c193ac404df451'
+BRANCH='refs/heads/feature/ks-1404-rfc3161-real-verification-d3-1'
+DEVELOP_SHA='ef4901778710adcae2889dd097fb99bb478bf6d0'
+PINNED_EPOCH='1791139168'
+FILES='Blockchain/Dev/package-lock.json,Blockchain/Dev/scripts/audit/audit-baseline.json,Blockchain/Dev/services/timestamping/config/README.md,Blockchain/Dev/services/timestamping/config/tsa-trust-anchors.crt,Blockchain/Dev/services/timestamping/package-lock.json,Blockchain/Dev/services/timestamping/package.json,Blockchain/Dev/services/timestamping/src/__tests__/ks1404-pki.ts,Blockchain/Dev/services/timestamping/src/__tests__/ks1404-verify-rfc3161.test.ts,Blockchain/Dev/services/timestamping/src/tsa/der.ts,Blockchain/Dev/services/timestamping/src/tsa/qualified-tsa.ts,Blockchain/Dev/services/timestamping/src/tsa/rfc3161-client.ts,Blockchain/Dev/services/timestamping/src/tsa/rfc3161-verify.ts,Projects Documents/API_Security_Functional_Testing_Architecture_Flow_Diagrams.html,Projects Documents/QA_Tool_Cheat_Sheet_Secuura_API_Testing.html'
+NFILES='14'
 [ -d "$QA_DIR" ]      || { echo "QA project missing: $QA_DIR" >&2; exit 2; }
 _here="$(dirname "$(/bin/realpath "$0")")"
 [ "$_here" = "$GS" ] || { echo "REFUSING: this launcher lives in $_here but was filled for $GS — a MOVED KIT: run repin_and_launch_gateD2.sh from its new home" >&2; exit 2; }
@@ -70,21 +70,21 @@ PROMPT_JOINED="$(python3 -c 'import re,sys; print(re.sub(r"\n\s*", " ", open(sys
 has() { printf '%s' "$PROMPT_JOINED" | grep -qF -- "$1"; }
 has "PR #$PR is KS-1404" && has "#$PR T1" && has 'THE GATE IS FROZEN at ONE PR' && has 'ROUND 1' && has 'round-1 NO GO goes back to the author for round 2' || { echo "REFUSING: the ticket / tier / FROZEN / round / tiering rule" >&2; exit 7; }
 has 'MEASURE, not conclude' && has 'RULE WHETHER IT BLOCKS' && has 'NAMES THE TREE' && has 'A check that prints nothing needs a control that prints' && has 'ASSERT THE FILENAME TOO' || { echo "REFUSING: the measurement rules" >&2; exit 33; }
-for _w in {{KEYWORDS}}; do   # AS A TOKEN: bounded by a non-[A-Za-z0-9-] character
+for _w in C1-PIN END-TREE MODES NO-TRAILER KEYSCAN-OWN-KEY PR0-ABSENT PATH-GATE NO-CREDENTIAL C2-LOCKDIFF C2-INTEGRITY C2-BASELINE C2-LEGS C3-CELLS C3-SUITES C3-TSC C3-MUTATION C3-FORGERY C3-MOCK C3-REQBYTES C4-SECURITY C4-BUNDLE C5-DOCS-S4 C5-SHAPE C6-NOT-COVERED METHOD-STATED PR-BODY-CLAIMS COLLISION-CENSUS NOT-TESTED-LIST TIERING DISK-ENOSPC REPORT-HASH-LAST; do   # AS A TOKEN: bounded by a non-[A-Za-z0-9-] character
   printf '%s' "$PROMPT_JOINED" | grep -qE -- "(^|[^A-Za-z0-9-])$_w([^A-Za-z0-9-]|\$)" || { echo "REFUSING: the prompt does not carry the by-name keyword '$_w'" >&2; exit 33; }
 done
 has 'mock tokens verify ONLY through the DB-row branch' && has 'BER indefinite length refused' && has 'isQualified dropped' && has 'fail CLOSED on an empty / unset anchor bundle' && has 'byte-identical to the old forge encoder' && has 'config/tsa-trust-anchors.crt (NOT .pem' && has 'a load failure is NEVER a red' && has 'SELF-TEST ARM' && has 'NEGATIVE CONTROL' && has 'MUST-HIT' && has 'EACH RECOMPUTED BY YOU' && has '4D:24:80:7B:9C:AD:51:10:F4:0E:D7:9D:93:43:46:D7:C9:B0:29:04:31:DC:9B:11:A4:0B:BB:86:FC:F2:AE:F6' && has '3E:90:99:B5:01:5E:8F:48:6C:00:BC:EA:9D:11:1E:E7:21:FA:BA:35:5A:89:BC:F1:DF:69:56:1E:3D:C6:32:5C' && has 'NOT COVERED: KS-1404 stays In Progress' && has 'NEVER guess a new base' || { echo "REFUSING: the six checks / the rulings / the controls" >&2; exit 34; }
 has 'NO MERGE, NO PUSH to any PR branch, NO ticket state change' && has 'NO ticket filed' && has 'NEVER WRITE THE SHARED CHECKOUT. Findings only' && has 'Never `rm`' && has 'No `az` command of any kind' && has 'You NEVER reply to Peter' && has 'No image is built.' && has 'NO CALL TO ANY REAL TSA' && has 'THE NAMED EXCEPTIONS to those holds — these and NO others' && has 'TICKET STATE IS WEDNESDAY' || { echo "REFUSING: the HOLDS" >&2; exit 39; }
-has "WEDNESDAY'S signed GO naming the head" && has '{{GO}}' && has 'The merge seat is Seat D 6th' || { echo "REFUSING: merge authority / the GO string" >&2; exit 26; }
-has '## MERGE ADDENDUM' && has 'MG-1 {{N_FILES}} over {{N_FILES}} paths, 3 commits (merge-in)' && has 'develop is an ANCESTOR of the head' && has 'END_TREE 6d96b6e812754624569986ae00fdcfe815e8b86f' && has 'MG-11 subject <= 92' && has 'NO TRAILER' && has 'EVERY SUBJECT YOU PROPOSE MUST BE TRUE OF THE DIFF' && has 'is the LAST thing you write to report.md' && has 'sha256 report.md = <hex>' || { echo "REFUSING: the MERGE ADDENDUM rules / REPORT-HASH-LAST" >&2; exit 25; }
-grep -qF -- '{{VERDICT_SUBJECT}}' "$PROMPT_FILE" && has 'FROM coagent@agentmail.to' && has 'reports/{{REPORT}}/' || { echo "REFUSING: the verdict subject / sender / report dir" >&2; exit 23; }
+has "WEDNESDAY'S signed GO naming the head" && has 'GO (Seat D 6th): merge 9999 on gateD2' && has 'The merge seat is Seat D 6th' || { echo "REFUSING: merge authority / the GO string" >&2; exit 26; }
+has '## MERGE ADDENDUM' && has 'MG-1 14 over 14 paths, 3 commits (merge-in)' && has 'develop is an ANCESTOR of the head' && has 'END_TREE 6d96b6e812754624569986ae00fdcfe815e8b86f' && has 'MG-11 subject <= 92' && has 'NO TRAILER' && has 'EVERY SUBJECT YOU PROPOSE MUST BE TRUE OF THE DIFF' && has 'is the LAST thing you write to report.md' && has 'sha256 report.md = <hex>' || { echo "REFUSING: the MERGE ADDENDUM rules / REPORT-HASH-LAST" >&2; exit 25; }
+grep -qF -- '[QA -> Wednesday] GATED2 #9999 (Seat D6 author and merger; T1 security: real RFC 3161 verification, node-forge out of timestamping, KS-1404)' "$PROMPT_FILE" && has 'FROM coagent@agentmail.to' && has 'reports/2026-10-05-ks1404-9999-gD2/' || { echo "REFUSING: the verdict subject / sender / report dir" >&2; exit 23; }
 _ANY_OVR="$(env | grep -c '^GD2_')"
 NOTE="origin develop $CUR_DEV == the pinned develop | #$PR T1 ${_h:0:12} at branch AND pull/head | compare ok (ahead 3, behind 0, $NFILES paths) | pin age ${_age}s"
 if [ "${1:-}" = "--check" ]; then
   echo "all guards pass:"
   echo "  $NOTE"
   echo "  pins, prompt, QA project and repo present; kit at its filled home; thinking directive; every kit file + gate54f report + the charter named; no unfilled token, no PR placeholder"
-  echo "  the prompt carries {{N_KW}} by-name keywords (as tokens), the tier lines, the six checks + the ruling's constraints + the controls, the holds + named exceptions, the GO string, the addendum + REPORT-HASH-LAST rules, the verdict subject + report dir, the head in full"
+  echo "  the prompt carries 31 by-name keywords (as tokens), the tier lines, the six checks + the ruling's constraints + the controls, the holds + named exceptions, the GO string, the addendum + REPORT-HASH-LAST rules, the verdict subject + report dir, the head in full"
   [ "$_ANY_OVR" != 0 ] && echo "  (a GD2_* TEST OVERRIDE is set)"
   echo "  a launch (not --check) will refuse unless stdin is a TTY (exit 21)"
   exit 0

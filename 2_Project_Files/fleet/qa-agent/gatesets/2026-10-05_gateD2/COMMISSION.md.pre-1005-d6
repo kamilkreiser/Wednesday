@@ -1,4 +1,4 @@
-# gateD2 COMMISSION — ONE Secuura PR: KS-1404 (T1, round 1); author and merger Seat D 6th (re-keyed 2026-10-05 from Seat D 3rd to D 5th, then to D 6th; re-pinned for the MERGE-IN branch)
+# gateD2 COMMISSION — ONE Secuura PR: KS-1404 (T1, round 1); author and merger Seat D 5th (re-keyed 2026-10-05 from Seat D 3rd)
 
 Drafted 2026-10-05 AEST (work 2026-10-04 14:2xZ – 15:0xZ UTC). PR number and FINAL head are INPUTS: `repin_and_launch_gateD2.sh <PR> <HEAD>` pins them at launch from the PULLS API and `ls-remote`. Nothing below is a pin.
 
@@ -7,15 +7,15 @@ Drafted 2026-10-05 AEST (work 2026-10-04 14:2xZ – 15:0xZ UTC). PR number and F
 |---|---|---|
 | PR | not raised at drafting (census 14:3xZ: no open PR on the branch) | gh_census_ex1.out |
 | title | `KS-1404: real RFC 3161 verification, node-forge out of timestamping` | commit 9884b5588d7c |
-| commits | **3, MERGE-IN**: commit 1 `9884b5588d7c` (parent = old base `e6daa806e79a`) + commit 2 `a1231d63c13b` (the `.crt` bundle + `config/README.md`, the comments, the ESS binding, the chain via intermediates, rsaEncryption + PSS, cells ESS-1..SID-1, both doc blocks) + a merge of develop `ef4901778710` IN (`57fa9e31d7ce0e5fea928b2f65c193ac404df451`, Wednesday route (b) 18:05:26Z: the repo forbids force pushes). develop is an ANCESTOR of the head. Pin the FINAL head. | Wednesday's messages; ls-remote 18:28Z |
+| commits | **2**: 9884b5588d7c (12 paths, pushed to the branch at drafting) + a SECOND commit (Wednesday 14:2xZ) adding `services/timestamping/config/tsa-trust-anchors.crt` + `config/README.md` and correcting three code comments. Pin the FINAL head. | Wednesday's messages |
 | branch | `feature/ks-1404-rfc3161-real-verification-d3-1` (rule: exact) | ls-remote 14:3xZ |
-| base | kit base **`ef4901778710`** (#1375 KS-1015 squash, tree `4e35c8560423`), re-pinned by `repin_base_gateD2.py --write` 2026-10-04T18:32Z (was `e6daa806e79a`). The launch refuses rc 10 if develop moves again. | ls-remote 18:28Z; repin_base report + write |
+| base | kit base `e6daa806e79a` (the builder's). **develop has ALREADY MOVED** to `2d85b84e1012` (#1374 KS-1402 squash, tree 082190611d1f = gate54a's END_TREE). The launch refuses rc 10 until `repin_base_gateD2.py --new-develop <sha> --write` (README §7) and the builder has rebased. | ls-remote; repin_base_1374_ex1.out |
 | files | 14 (kit.json `files`) | kit.json |
 | tier | T1 security | Wednesday |
 | pane | `QA/Secuura-ks1404-<PR>` | kit.json |
 | report dir | `/Volumes/DevMASTER/!CODING/Testing Agent MAIN/projects/secuura/reports/2026-10-05-ks1404-<PR>-gD2/` | kit.json |
-| GO string | `GO (Seat D 6th): merge <n> on gateD2` | Wednesday |
-| verdict mail | FROM coagent@agentmail.to TO wednesday-agent@agentmail.to, subject `[QA -> Wednesday] GATED2 #<n> (Seat D6 author and merger; T1 security: real RFC 3161 verification, node-forge out of timestamping, KS-1404)` | kit.json |
+| GO string | `GO (Seat D 5th): merge <n> on gateD2` | Wednesday |
+| verdict mail | FROM coagent@agentmail.to TO wednesday-agent@agentmail.to, subject `[QA -> Wednesday] GATED2 #<n> (Seat D5 author and merger; T1 security: real RFC 3161 verification, node-forge out of timestamping, KS-1404)` | kit.json |
 | authority | Kam: `secuura-tsa-accepts-unsigned-tokens-1004`=a, `secuura-freeze5-high-no-fix-1004`=b, `secuura-ks1404-tsa-trust-and-library-1004`=a | brief |
 | previous round | gate54f report, sha256 `55e0bc148a59…` | kit.json |
 
@@ -23,7 +23,7 @@ Drafted 2026-10-05 AEST (work 2026-10-04 14:2xZ – 15:0xZ UTC). PR number and F
 Wednesday: mock tokens verify only via the DB-row branch (C3 PF3/PF3b, mock probe; C4 V12/V13); BER indefinite refused (cell 11 indefiniteLength / 11f; V10; mutation `indef`); isQualified dropped (V11); fail closed on empty/unset anchors (PF4/PF4b, cell 7, V8, mutation `anchors`); request bytes byte-identical to forge, quirks pinned (cell 16 + the 72-case base-vs-head differential, V17); the bundle is a `.crt` because preflight leg 9 refuses a tracked `.pem` (C1 P9 + leg 9 in C2 legs); no `.gitignore` negation (C1 P9).
 
 ## Checks
-- **C1** `c1_pin_gateD2.py`: P1–P9 (MERGE-IN shape: develop an ancestor, HEAD^{tree} == END_TREE `6d96b6e8…`, diff develop..HEAD == the 14 paths; 14-path gate with PR 0 must-hit, trailers on all three commits, keys, PR 0 locks absent, modes, credential / .gitignore).
+- **C1** `c1_pin_gateD2.py`: P1–P9 (two-commit shape, 14-path gate with PR 0 must-hit, trailers on both commits, keys, PR 0 locks absent, modes, credential / .gitignore).
 - **C2** `c2_lockdiff_gateD2.py`, `c2_integrity_gateD2.py`, `c2_baseline_gateD2.py`, `c2_legs_gateD2.sh` (legs 2/6/7/9; the CLEANUP must-hit).
 - **C3** `c3_cells_gateD2.sh` (+ parser, mutation planter, three probes, OpenSSL PKI, request-bytes judge).
 - **C4** `c4_security_gateD2.py --fetch-anchors` (V1–V17, the bundle's two fingerprints recomputed from the providers).
@@ -32,4 +32,4 @@ Wednesday: mock tokens verify only via the DB-row branch (C3 PF3/PF3b, mock prob
 - **Census** `gh_census_gateD2.py`. Findings only.
 
 ## GO
-Subject `GO (Seat D 6th): merge <n> on gateD2`, else NO GO with its blockers. END_TREE is the FINAL head's tree (`6d96b6e812754624569986ae00fdcfe815e8b86f` at re-pin), valid while develop == the re-pinned base `ef4901778710` and remains an ancestor of the head.
+Subject `GO (Seat D 5th): merge <n> on gateD2`, else NO GO with its blockers. END_TREE is the FINAL head's tree, valid while develop == the re-pinned base.

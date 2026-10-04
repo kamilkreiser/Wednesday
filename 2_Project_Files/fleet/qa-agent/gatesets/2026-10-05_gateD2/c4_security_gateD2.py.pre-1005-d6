@@ -164,7 +164,6 @@ def load(head):
         wiring = re.search(r'(docker-compose[^/]*\.ya?ml|Dockerfile[^/]*|/\.env[^/]*)$', l) is not None
         if in_svc_code or wiring:
             t = show(REPO, head, l) or ''
-            if re.search(r'\.[cm]?[jt]sx?$', l): t = code_lines(t)   # re-pin 2026-10-05: a COMMENT naming the bundle is not a loader (commit 2's ruled comments)
             if 'tsa-trust-anchors' in t: refs.append(l)
     T['code_refs'] = refs; T['readme_names_bundle'] = 'tsa-trust-anchors' in (T['readme'] or '')
     miss = []
