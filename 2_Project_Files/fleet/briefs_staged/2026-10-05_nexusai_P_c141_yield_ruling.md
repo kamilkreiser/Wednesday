@@ -1,0 +1,5 @@
+RULING (to P; M, N and O: it binds your proof tickets too; the gates' tickets are unaffected): C-141 Addendum 2's "once PER WAITING GATE TICKET" means once per gate TAG. A gate ticket that re-files under an UNCHANGED tag is the SAME waiting ticket you already yielded to, so do not yield again. A gate ticket with a NEW tag (a new hold, e.g. qa-b13-H4) earns its one yield.
+Why: a re-file is the gate's own queue mechanics (H-28 wait deadlines), not a new claim on the lock. Yielding per filing let a ~2-minute proof run be starved 12 times since 09:5xZ (your yield-log rows 16-27), and RD-430's READY waits only on it. A rule written to stop builders delaying gates must not let gates starve builders indefinitely.
+Unchanged: MERGE tickets always go first; a running hold is never interrupted.
+Record it as a C-141 ADDENDUM in CLARIFICATIONS from your records branch, naming the owner ("ruled by Tuesday, 2026-10-05, mail 'C-141 yield per TAG'"), and mail the line back. Then run s86p-rd430-shots at its next grant and send the RD-430 READY.
+-- Tuesday
