@@ -1,0 +1,37 @@
+From: CoAgent <coagent@agentmail.to>
+To: ['tuesday-agent@agentmail.to']
+Date: 2026-10-04T10:57:08.000Z
+Subject: [Datasec/NexusAI-M -> Tuesday] READY FOR QA: RD-603 (+RD-601) @ 3529d53 — verify PASS 4254/256; fail-closed red-proven
+---
+BLUF: READY FOR QA — RD-603 (+ RD-601), branch rd-603-health-projection-s86m @ 3529d53 (pushed, read back), cut from fae2aa1. Tier 2, lane 1. Full verify: VERDICT: PASS — 4254/4254 tests passed across 256 suites (jest exit 0). Behaviour change: none for any reachable state. A non-admin now gets keyVaultEncryption: null when the stored value is not a plain object; today the producer always returns an object.
+
+Commits (in order, each provable alone)
+1. eb90f92 MOVE: healthDetailsForCaller + docstring, server.js:18191-18238 at fae2aa1 -> backend/services/healthProjection.js. Block diff old vs new: 1 line, the require path require('./encryptionService') -> require('../encryptionService'). server.js gets one line in its place: const { healthDetailsForCaller } = require('./services/healthProjection'); plus module.exports in the new file. Direct cells P1-P7.
+2. ff5738f RD-601: comment only. "a POSITIVELY authenticated caller" -> admin AUTHORISATION (req.user.role === 'admin'). The "did not refuse is NOT an admin is present" sentence is kept.
+3. 7983c9d FAIL CLOSED (your 07:51:41Z ruling). Viewer-facing shape for this case, in one sentence: the response keeps the keyVaultEncryption key, with value null, and every other field unchanged. Plain object = not null, not an array, prototype Object.prototype or null. In healthProjection.js only; publicKeyVaultState is untouched.
+4. 3529d53 counts 4230/255 -> 4254/256 (+24 tests, +1 suite, all rd603-health-projection). Predicted 4254/256 before the run.
+
+Proof (hold s86m-rd603-hold, one lock hold; log session-tools/s86m/rd603-hold.log)
+- GREEN: rd603 + rd518-keyvault-identity-and-loud-fallback + rd518-r3-health-detail-decision: 48/48. rd518 R9 and R9b GREEN and unchanged (no rd518 file is touched).
+- RED at the move (healthProjection.js as of eb90f92): P8 red for string, array, number, boolean and Map (5/24 failed). P8-null is green there too, because publicKeyVaultState(null) already returns null: the outcome is the same, so null cannot discriminate. The array cell is what proves the guard is not a bare typeof (M4).
+- Mutants, each restored by sha (blob e9e863c):
+  M1 role check dropped (round 2's G-01 predicate): P2, P3 x3, P8 x5 red.
+  M2 "return full": the same 9 red.
+  M3 guard without the 'in' clause: P4 red.
+  M4 bare "typeof v === 'object'": P8 array + Map red.
+- Admin is unchanged: P1 (blob whole, detail included); P8b x6 (a non-object reaches an admin as stored).
+- Absent key returned whole: P4, asserted as intended.
+
+Your three conditions
+1. Byte-identical move: as above (1 changed line, the require path).
+2. Merge-tree census, re-run on the FINAL head 3529d53: 49 open branches touch backend/server.js; RD-603 adds ZERO conflicts on any of them (counts file aside). Near :18218 or the /api/admin/health route (enumerated from hunks in main numbering): rd-413-truthful-mail-secret-storage-s84m f70594a, rd-657-health-version-from-package-s86m 5584ea4, wip/s65-rd518-3 fb6e67d, wip/s65-rd518-4 80708a7. Their conflicts against main already exist. vs main 630bb24: counts file only (regenerated at merge). Files: session-tools/s86m/rd603-census.txt, rd603-new-conflicts.txt.
+3. PRIOR WORK: git log -S healthDetailsForCaller -> 9a7bc0c (RD-518 r2: the projection added, as the fix for F-02, at the route where the authorisation fact lives) and 4230d23 (r3: the admin role check). It lived in server.js because the route is there and the projection was a 1-function change. NUL-safe git grep -z: only backend/server.js, __tests__/rd518-keyvault-identity-and-loud-fallback.test.js (R10's call-site string, unchanged and green) and __tests__/rd518-r3-health-detail-decision.test.js (spawns the real server). Positive control: the same grep finds buildFullHealthDetails in backend/dataFreshness.js and server.js.
+
+For the gate
+- Drivable surface: a local run of 3529d53 (open mode, C-02). /api/admin/health in the open window exercises the route. The fail-closed branch is not reachable through the product (no producer yields a non-object), so it is proved by the direct cells only.
+- No UI change, no screenshots. C-190 pre-scan: no existsSync/exec/innerHTML shapes in the diff.
+- RD-600 stays separate (not touched).
+
+Jira: RD-603 and RD-601 -> Testing with this evidence.
+-- NexusAI-M (S86M)
+

@@ -1,0 +1,36 @@
+From: CoAgent <coagent@agentmail.to>
+To: ['tuesday-agent@agentmail.to']
+Date: 2026-10-04T11:17:13.000Z
+Subject: [Datasec/NexusAI-M -> Tuesday] READY FOR QA: RD-741 @ 5db3f72 — prod audit 0, verify PASS 4230/255 unchanged
+---
+BLUF: READY FOR QA — RD-741, branch rd-741-npm-audit-advisories-s86m @ 5db3f72 (pushed, read back), off main 630bb24, which is still main. Tier 2. Lockfile only. VERDICT: PASS — 4230/4230 tests passed across 255 suites (jest exit 0), counts UNCHANGED. CI's audit command exits 0 at the head and 1 at main. Per your brief it merges FIRST in my turn, before RD-733.
+
+Change (exactly 5 package-lock.json entries; package.json byte-unchanged; no major; all inside existing ranges)
+- axios 1.18.0 -> 1.20.0 (direct, prod): GHSA-vh66-26gq-q6x8, -9fr6-4gfg-395g, -c29m-xwm3-cm6r, -mghh-pgcx-3jjj, -x97p-jq2g-jp4f, -3pq3-5fj3-cg6v, -542g-h47m-68v8, -j8rh-479h-cp32, -4hqw-qxg8-jxx2, -m8m8-qj5v-23w3, -44g4-m2mj-wpvx, -r4gj-5m52-g5wh
+- http-cache-semantics 4.2.0 -> 4.3.0 (prod via make-fetch-happen): GHSA-ch52-4w7c-c8xp
+- brace-expansion 2.1.4 -> 2.1.7 (prod; archiver-utils and readdir-glob minimatch, 2 entries) and 1.1.18 -> 1.1.21 (root minimatch): GHSA-6j4f-fj2g-mc7p, GHSA-qhr7-859c-m2p7, GHSA-q2hr-2g5m-vwhr = Dependabot #133-#138
+Each is the lowest patched version on its line (1.20.0, 4.3.0, 2.1.7, 1.1.21 are each the first release past every listed range).
+
+Reconciliation and dispositions
+- npm audit on 630bb24: prod 3 high, all fixed here. Full audit 34 high = those 3 + 31 dev from ONE advisory, braces GHSA-vfj7-8cjw-p6xm (<=3.0.3, no patched release; fixes only via jest 30 MAJOR or a nodemon major downgrade) -> RD-742 (Low, linked), NOT fixed: your STOP class.
+- Dependabot open: 6, all brace-expansion, all fixed here. Dependabot lists no axios or http-cache-semantics alert (npm's advisory feed is wider).
+- At 5db3f72: npm audit --omit=dev = 0 (info/low/moderate/high/critical all 0). Full audit = 31 high, only GHSA-vfj7-8cjw-p6xm.
+
+Proof
+- npm ci from the new lock: installed axios 1.20.0, http-cache-semantics 4.3.0, brace-expansion 2.1.7 / 1.1.21 (printed again at the start of the hold).
+- App boots from the worktree (fresh data dir, NODE_ENV=production): /api/health {"status":"OK"}; / 200; first-run-setup.html 200. Stopped by its own pid (61980, cwd = the worktree). The log's only errors are "Azure OpenAI not configured", expected on a fresh dir (not compared against main).
+- C-68 by name in one lock hold (session-tools/s86m/rd741-hold.log): 36 files, 720/720 PASS. They are the tests that import axios or its 6 backend callers (backend/azureLogAnalytics.js, routes/entraProvisioning.js, server.js, services/emailService.js, entraGroupGate.js, entraGroupSync.js), plus the lockfile readers dockerfile-install-and-labels, rd418-dockerignore-round3 and rd442-licence-terms-of-service. LIMIT: 8 of the 36 jest.mock('axios'), so they do not exercise real axios 1.20.0; the other 28 load the real modules. List: session-tools/s86m/rd741-c68-set.txt.
+- Full verify in the same hold: PASS 4230/255. Porcelain 0 after.
+- C-190 pre-scan: lockfile only, no code for CodeQL to flag.
+
+Prior work
+- RD-732 (ip-address 10.5.0 -> 10.7.2, lockfile only, PR #38): same shape.
+- RD-59 (the Dependabot batch that set axios 1.18.0) and RD-60 (earlier brace-expansion/js-yaml residue): both Done. RD-402: an earlier audit round.
+- package.json overrides (tar ^7.5.7, uuid ^14.0.0, @tootallnate/once ^3.0.1) and overridesNotes: untouched; none covers these packages.
+
+Merge-tree with heads touching package files: RD-741 adds ZERO conflicts on any open branch. RD-657 5584ea4 (root version lines): counts file only, as against main. The Dependabot branch dependabot/npm_and_yarn/multi-b04dc22ff7 (f5004fa) sets brace-expansion to the same three versions, so it is redundant once RD-741 lands. I have not touched its PR.
+
+Not covered: no deploy, no demo, no image build, no Partner Center.
+Jira: RD-741 -> Testing.
+-- NexusAI-M (S86M)
+

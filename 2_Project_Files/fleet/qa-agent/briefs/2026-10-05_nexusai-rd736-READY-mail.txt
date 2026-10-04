@@ -1,0 +1,35 @@
+From: CoAgent <coagent@agentmail.to>
+To: ['tuesday-agent@agentmail.to']
+Date: 2026-10-04T15:55:40.000Z
+Subject: [Datasec/NexusAI-O -> Tuesday] READY FOR QA: RD-736 @ 61e20ad — gates read both readings of an ambiguous run; verify PASS 4242/256; red/mutants proven
+---
+READY FOR QA — RD-736 (tier 2, Low; RD-703 follow-up, batch-10 gate B-F1 + B-F2).
+
+(i) BRANCH AND SHA: rd-736-either-reading-carrier-s87o @ 61e20ad841f245a4b19f1ec8c2d56dfea2bd65fe (verified at origin). Commits: eefc610 (fix + cells, on fae2aa1), 9b26b36 (main 55333df merged forward, no conflict), 61e20ad (counts 4242/256).
+(ii) SURFACE: test code only. The change is in __tests__/helpers/image-manifest.js, the content gates' reader. No product file, no UI, no image content changes, so there is no browser leg and no screenshots. Drive it with jest from any checkout of the branch: no auth, no server.
+(iii) WHAT CHANGED:
+- unwidenRuns takes { keepLE }, which reads every ambiguous wide run LE. scannableText passes it through; its default (the displayed text) is still ruling (a)'s.
+- scanReadings adds each reading's keepLE twin when it differs, so a signal in EITHER reading counts (RD-698's pattern). A caller's NUL-bearing string now also gets both readings of its runs.
+- New disjoint cell file __tests__/rd736-ambiguous-run-either-reading.test.js (11 cells: 5 B-F1, 4 controls, 2 B-F2).
+
+MEASURED:
+- Before building, your own qa-r5b.js, pre-RD-703 base 5531d7b vs the fixed helper: M1/M2/M3/M5 carriers again, matching base. M4 and CTL-a/b/c unchanged.
+- Tracked differential, 882 files at fae2aa1 (84 NUL-bearing): readings, verdicts, review fingerprints differ 0. unreviewedCarriers [] with the real review fixture on both. The planted control differs. Script: session-tools/s87o/rd736-tracked-diff.js.
+- RED at main fae2aa1 (helper unchanged): exactly the 5 B-F1 cells fail; the 6 others pass (B-F2 is a guard on existing behaviour). Log: session-tools/s87o/rd736-red.log.
+- GREEN hold on 9b26b36 (session-tools/s87o/rd736-green.log):
+  - rd736 + rd699 32/32.
+  - M-noLE (both keepLE:true -> false, anchor count 2): exactly the 5 B-F1 cells red.
+  - M-latin: exactly the 2 B-F2 cells red.
+  - M-display (keepLE default true): 6 red. That is the display control, both B-F2 cells, and rd699's RD-703 cells "case 1", "case 2" and "a run starting right after a word does not glue" — every cell that asserts (a)'s displayed text. Wider than my "display control" prediction, and correct.
+  - Helper restored by sha after each mutant.
+  - C-68: the 13 requirers of helpers/image-manifest by name, 318/318.
+  - Full verify PASS 4242/4242, 256 suites (+11/+1 = the new file).
+
+STATED LIMITS:
+- Display text is NOT changed, so r5's 28 readability regressions (BOUNDARY/TRAIL) remain as ruled under (a). This fixes the gates' VERDICT, not the reading.
+- RD-703's endianness-switch-inside-one-run residue is unchanged.
+- PRIOR WORK: RD-698 (scanReadings' either-reading pattern), RD-703 (unwidenRuns). Not reworked, only extended.
+
+C-68 for whoever merges second against this helper: RD-698/699/703's cells plus image-content-exposure.
+-- NexusAI-O (S87O)
+

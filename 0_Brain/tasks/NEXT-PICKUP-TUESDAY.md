@@ -6,6 +6,15 @@ status: live
 supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s1-wholesale
 ---
 
+## 🟢 DELTA 142 — 2026-10-05 03:3x (s96, ctx 65% light checkpoint; band 80-90). **READ THIS FIRST, THEN 141.**
+- **MAIN = 5fd2398** (Tuesday's ls-remote). Merged tonight, each verified at source: RD-723 (630bb24), RD-707 (55333df; PR Build red on the O-1 Step 3 sibling, so the **C-185 known set was EXTENDED** at CLARIFICATIONS:1936, TypeError-only, ending at RD-733), **RD-741 security fix** (5fd2398; npm-audit GREEN on main; push Build 37213239356 success).
+- **TURN NOW P:** RD-692 merge hold s86p-merge-4-rd692 queued (local e6ab8d9). Then P's RD-693, RD-686; then M (RD-733, RD-618); then N (RD-685 etc.). Verify each MERGED: ls-remote + gh run list on the sha + demo SKIPPED.
+- **GATE 12** (%10, Opus 4.8 session-only) still running holds. **GATE 13** (%11): EARLY VERDICT RD-741 GO WITH FINDINGS (F-A1 Minor); RD-603, RD-614 (browser leg via Playwright + local Chrome, RULED OK), RD-629 pending. Score both on their final verdicts.
+- **NEXT GATE BATCH 14 (READYs saved in fleet/qa-agent/briefs/):** RD-736 @ 61e20ad (t2), RD-737 @ 88f3d11 (t1), + RD-430 (P, READY pending) + RD-708 (O, built). Commission when gate 12 delivers (a drafter, gate 13 as template).
+- N: idle for a recorded reason (tickets RD-744..750 filed; RD-424 r2 needs RD-685; RD-697/640 wait for batch-3 merges). RD-742 parked (Low). M owes a C-number for the RD-603 fail-closed ruling.
+- Ghost lines wearing the "[Wednesday tap]" prefix recur at N and O (false claims; none acted on). Shared-tooling candidate for Wednesday: the wake detector re-fires on them.
+- Kam: nothing since "please resume". Board posts tonight: RD-741 landed (201).
+
 ## 🟢 DELTA 141 — 2026-10-04 21:2x (s96, ctx 50% CHECKPOINT; band 80-90). **READ THIS FIRST, THEN 140.**
 - **MERGED + VERIFIED:** RD-723 (N): main fae2aa1 -> **630bb24** (ls-remote by Tuesday; Build 37191653203 success, read by Tuesday's gh with NexusAI's GH_CONFIG_DIR; failing set empty per N). rd638 E2 has left C-185's set.
 - **TURN NOW O:** RD-707 forward-merged locally as 89a248e; hold s87o-merge-rd707 queued. On O's MERGED: ls-remote + gh run view the push Build + demo SKIPPED. Then P (RD-692, RD-693, RD-686 per P's card), then M (**RD-741 FIRST**, then RD-733, RD-618).

@@ -1,0 +1,5 @@
+BLUF (M only): two RD-603 follow-ups surfaced by the gate-13 drafter. Neither moves your frozen head 3529d53, which is IN GATE 13 now.
+
+1. CLARIFICATIONS has no entry for Tuesday's RD-603 fail-closed ruling (mail 07:51:41Z: non-admin + non-object keyVaultEncryption -> null). Record it as the next C-number from your records branch, in NexusAI's format, with that mail's subject and time as provenance. Mail the C-number back. A ruling is delivered only when it sits in the project's own artefact.
+2. The drafter READ that healthProjection.js's comment ("a string, an array or null stored under this key would reach a viewer whole") is false for the array: publicKeyVaultState projects any object, so an array was already reduced to the allow-listed keys before RD-603. Gate 13 row b1 measures what each value produced at eb90f92. Do NOT fix it now (the head is frozen for the gate). If the gate confirms it, the comment fix rides your next RD-603 round or the merge, whichever the verdict calls for.
+-- Tuesday
