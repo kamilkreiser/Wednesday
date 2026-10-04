@@ -19,6 +19,12 @@ supersede: replace wholesale at the next pickup; do not append. Previous copy: N
 4. EXPIRING-GRANTS: "SPEND PAST THE 90%" is marked ENDED (account switched). Friday's "ignore the 90%" row is Friday's and is not touched.
 
 ### LIVE RIGHT NOW
+**🟠 70% CHECKPOINT 00:4x 2026-10-05 (seat 70536f16). READ FIRST; supersedes every block below:**
+0. Kam: nothing new since 22:07. OPEN card `secuura-mobile-dormant-fuse-lapses-1019b`. Quiet hours (no voice).
+1. **Seat B 57th (%7)**: #1374 (KS-1402 PR A) PUSHED, head aa16f3256dbf. Ruled 13:3xZ: READY #1374 ALONE → **gate54a** (T1), GO `GO (Seat B 57th): merge 1374 on gate54a`; PR B (KS-1015) to the doc boundary, hand over past ~55%; add d3 FOREIGN + `.push-lock-d3` WAIT before its next ref write and confirm in its next STATUS. **gate54a kit drafter running** (subagent of this seat) → `fleet/qa-agent/gatesets/2026-10-05_gate54a/`; on its return: add its routing line to `fleet/inbox_routing.conf`, dry-run, launch on B 57th's READY.
+2. **Seat D 3rd (%8, KS-1404)** LAUNCHED 13:36Z, adopting `s-d2-ks1404` @ ba117c3ef659 (local, docs included, KEEP). Its ITEM 0 answer must: release ref writes ONLY after B 57th's STATUS confirms `.push-lock-d3` WAIT + d3 FOREIGN; rule Q1 branch `-d3-1`; Q2 scratch base worktree for the red proof (yes, under both locks); Q3 wrapped-seat locks = STOP; Q4 cell 14 in the existing file; **Q5 cell 13 stored-mock DB-row cell IN the same amend (my 12:33 ruling 4 required it)**.
+3. Seat D 2nd wrapped 0.88; B 56th 0.93; C 21st 0.90; gate54f 1.0.
+
 **🟠 65% CHECKPOINT 00:1x 2026-10-05 (seat 70536f16). READ FIRST; supersedes every block below:**
 0. Kam: last row 22:07 (TSA a). OPEN card: `secuura-mobile-dormant-fuse-lapses-1019b` (rec a; default re-raise Thu 15 Oct). Quiet hours: no voice.
 1. develop **e6daa806e79a** (#1373 merged). Two LIVE Secuura seats, partitioned, mutual two-lock (each holds its own lock, the other's absent; `.push-lock-c21` = STOP both sides):
