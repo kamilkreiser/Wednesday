@@ -12,6 +12,19 @@ supersede: replace wholesale; previous = NEXT-PICKUP-FRIDAY.md.pre-0925-rotate-s
 
 **The tree is at `/Volumes/Laptop-DEV/FRIDAY` (the drive, since 2026-09-28).** Quote every path (spaces).
 
+## 🔴🔴🔴 CHECKPOINT 2026-10-05 10:01 (Friday, ctx 65%) — READ FIRST; supersedes every block below where they differ
+**Kam this morning:** terminal ~08:4x "If you can, keep going" · ~09:5x "deploy the composer to the demo" · live board 09:57:47 renamed-customer-pdf **a** · 09:58:08 template-102-words **a** · 09:58:24 hosted-deploy **a** (all ruled + hidden + receipted). Open cards: hpsmpoc-pdf-name-note-1005 (default no note).
+**Mains:** Composer **e36fcde** (#39 B75 merged 09:37; records 13366d5). HPSM-POC **577c27c**. Demo d84aa46 → being deployed; hosted web c2dd403 / api be2d648 → being deployed.
+**LIVE PANES (all briefs in each project's 1_Project_Definition/Briefs/, dated 2026-10-05):**
+- %23 Composer-Deploy **B76** deploys e36fcde to the demo (Kam's word). On READY: verify live yourself (Basic auth, marker absent at d84aa46, no "DRAFT wording", Paul 200, healthz contract 0.27.0, NSG = 2 standing rules), deliver card composer-3d92736-deploy-1005 to its C-number, tell Kam.
+- %19 Composer-D **B74** pickers (#96/#121), rebased onto e36fcde, wiring the Create version field → READY FOR GATE → tier-1 gate (write a B77 gate brief, B73 shape) → merge_when_green.
+- %21 HPSM-POC-A **B123** fix round 2 of 2 on PR #98 (F-1 CodeQL chmod, F-2 runbook stop-on-refusal + test, N-1..N-5ab) → READY FOR RE-GATE → B124 ADDENDUM-1 (round 2, re-pin head) to %22 HPSM-POC-QA (held). A second NO GO → Kam.
+- %24 HPSM-POC-B **B125** PDF uses the CURRENT customer name (Kam a) → READY FOR GATE → gate → merge.
+- %25 HPSM-POC-C **B126** hosted deploy of 577c27c, web + api (Kam a; 37 api files, 0 migration files) → verify live yourself → deliver card hpsmpoc-577c27c-hosted-deploy-1005 → tell Kam (he does an end-to-end test today).
+- %26 HPSM-POC-D **B127** template 1.0.2 APPROVED (Kam a): registry switch + ONE live check → READY FOR GATE → gate → merge; then ask Kam for the deploy word (the switch is a new build).
+**Watcher:** one watch_status over globs40 (all STATUS files above) + all panes; re-seed BEFORE any addendum. merge_when_green rule 6 (latest check-run per name) is in.
+**Still owed to Kam (not carded):** B50's E8 timeframe note (P03/A02/A08) — told 08:45; Composer pack questions (Q2–Q7, #172, approver half of Q1) for his review; test user + UAT (C-51/C-52) need a seat while he is logged in.
+
 ## 🔴🔴🔴 FLOOR EMPTY 2026-10-05 00:14 (Friday, ctx ~56%) — READ FIRST; supersedes every block below where they differ
 **Kam:** no new rows since 2026-10-04 21:04:59 (all 10 rulings reconciled + delivered). **Review with Kam = today, Mon 5 Oct.** Floor: %0 friday + %1 monitor only; every seat closed, work on disk and merged.
 **MERGED since 21:50 (all head-pinned via merge_when_green; each delta = the PR's files; nothing deployed):**
