@@ -24438,5 +24438,43 @@
    "CARD secuura-ks1402-lookup-refuses-connector-tokens",
    "CARD wed-nassync-rearm-shape-1004"
   ]
+ },
+ {
+  "id": "secuura-ks1404-tsa-trust-and-library-1004",
+  "client_project": "Secuura/Blockchain",
+  "title": "KS-1404 timestamping fix: which timestamp authority do we trust, and may the fix add the pkijs library?",
+  "bluf": "To fix KS-1404 (your ruling a), the seat must check a timestamp's signature against a TRUSTED authority. Measured by the brief drafter at develop 88e8877a2a0d: NO trust anchors are configured anywhere, and Node's built-in crypto has no API for the signed-timestamp (CMS) format, so the choices are a new library (pkijs) or a hand-written DER parser. It also found a second forgeable path: a plain JSON {hash} token verifies too and reads as qualified. Which authority production uses (TSA_URL) is unmeasured. Nothing starts before the unfreeze PR merges. (Prior-ruling gate: matches are the TSA and freeze cards ruled tonight; this card asks what those did not.)",
+  "default_action": "Option c: the seat builds the fail-closed fix (refuse unsigned and untrusted tokens, both forgeable paths closed, no new dependency), red-first and gated; real verification waits for Kam's choice.",
+  "options": [
+   {
+    "key": "a",
+    "label": "pkijs + trust the authority each environment's TSA_URL already points at",
+    "detail": "The seat measures TSA_URL per environment first, pins that provider's published root in config, adds pkijs (a new dependency, gated T1). Every unsigned or untrusted token is refused; both forgeable paths closed."
+   },
+   {
+    "key": "b",
+    "label": "No new library; hand-written DER verifier",
+    "detail": "Same trust anchors; more code to get right on a security surface; slower; no new dependency."
+   },
+   {
+    "key": "c",
+    "label": "Fail closed for now",
+    "detail": "Verify refuses every real token until you choose an authority; the forgeable paths close today, real verification later."
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-10-04T21:21:00.641171+11:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "CARD secuura-org-trust-boundary-within-tenant",
+   "CARD hpsmpoc-pdf-library",
+   "CARD wed-week-instruction-lapses-1004",
+   "CARD wed-nassync-rearm-shape-1004",
+   "CARD composer-guided-new-client-review-roles-1004",
+   "CARD secuura-freeze5-high-no-fix-1004",
+   "CARD secuura-tsa-accepts-unsigned-tokens-1004"
+  ]
  }
 ]
