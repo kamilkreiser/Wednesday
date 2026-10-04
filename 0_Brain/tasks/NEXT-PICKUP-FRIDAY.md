@@ -12,6 +12,16 @@ supersede: replace wholesale; previous = NEXT-PICKUP-FRIDAY.md.pre-0925-rotate-s
 
 **The tree is at `/Volumes/Laptop-DEV/FRIDAY` (the drive, since 2026-09-28).** Quote every path (spaces).
 
+## 🔴🔴🔴 CHECKPOINT 2026-10-04 20:12 (Friday, ctx 70%) — READ FIRST; supersedes the 19:3x block where they differ
+**Kam:** 18:3x deploy wording fix + "get them as close to ready as you can so I can review tomorrow"; 18:5x "HPSM-POC"; 19:4x "keep going". Card OPEN: composer-guided-new-client-review-roles-1004 (rec a; default: interim words only). kam_rulings 20:12: 0 Friday rows; reconcile 0.
+**DONE:** Composer demo = **d84aa46** (B64 + B70, both live-checked by Friday). HPSM-POC main **4abdfb2** (#93 B115 gated GO WITH NOTES; #94 B117 layout, CodeQL needed a rebase push). Analysis #53/#54/#55 merged, #56 merging. HPSM-POC review pack refreshed by B119 (#93 merged, #94 OPEN at 19:45 — now MERGED: correct it in the morning message, not by a new seat).
+**LIVE PANES (Composer):**
+- %8 Composer-D = **B67** L1 tier 1: ADDENDUM-1 = Friday ruled (a) rewrite B65 e2e block 363-430 (NOT b65-generate-standing.test.tsx); then full e2e, HTTP differential, C-35, READY FOR GATE → write a tier-1 gate brief (B71) → merge → then a B69 follow-up for F2 web (Dashboard 'Set-up to complete').
+- %9 Composer-B = **B68** L3 (bulk decide etc.) — no report yet. On READY: read, PR, merge_when_green.
+- %10 Composer-C = **B69** L4: wrote READY ~20:10 while still busy — read when idle, then PR + merge_when_green.
+**Watcher:** scratchpad `globs11` (+ `seen_wave17`). **merge_when_green rule 5** (CodeQL present) shipped; pass path proven on analysis #55 and HPSM-POC #94.
+**MORNING (owed, before Kam reviews):** (1) panel message with BOTH review packs (Composer `Datasec Security Composer/1_Project_Definition/Architecture/2026-10-05_REVIEW-PACK_FOR-KAM.md`; HPSM-POC analysis `Architecture/2026-10-05_REVIEW-PACK_FOR-KAM.md` + strings file) — say what merged after each pack was written; (2) CARD: deploy HPSM-POC main 4abdfb2 to hosted (web c2dd403 now) — default nothing; (3) CARD: deploy Composer main after B67/B68/B69 merges — default nothing; (4) B66's Q2–Q9 are in the Composer pack (not carded unless he asks).
+
 ## 🔴🔴🔴 CHECKPOINT 2026-10-04 19:35 (Friday, ctx 65%) — READ FIRST; supersedes the 18:33 block where they differ
 **Kam:** 18:3x "deploy the wording fix once it's merged… get them as close to ready as you can so I can review tomorrow" + 18:5x "yes, I meant HPSM-POC". Review = Mon 5 Oct.
 **DONE tonight:** Composer demo = **d84aa46** (B64 6d026a7 + B70 wording; both verified live by Friday). Composer merged #34 (B65). HPSM-POC merged #93 (B115, gate B118 GO WITH NOTES) → main d5d8415; analysis #53 (B116 review pack + strings), #54 (B115+B117 records). Composer review pack `Architecture/2026-10-05_REVIEW-PACK_FOR-KAM.md` (B66); HPSM-POC review pack same name in HPSM-POC analysis (B116, refresh by B119).
