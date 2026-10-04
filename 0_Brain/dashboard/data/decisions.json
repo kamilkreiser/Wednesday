@@ -24795,5 +24795,103 @@
    "CARD hpsmpoc-customer-profile-fields",
    "CARD hpsmpoc-summary-customer-name-1003"
   ]
+ },
+ {
+  "id": "hpsmpoc-hosted-forwarded-address-settings-1005",
+  "client_project": "Datasec/HPSM-POC",
+  "title": "HPSM-POC hosted: switch on per-visitor address counting (forwarded-address settings)?",
+  "bluf": "I need a tap. Since this morning's deploy, the hosted API trusts no forwarded client address (safe), so it counts every visitor as one address (the web's). Per-visitor limits such as sign-in throttling are therefore shared by everyone, which could slow or block your test users together if one trips them. The fix is the settings B115 built (HPSMPOC-118), applied to the two hosted apps: a settings change, not a deploy, so it is yours. Found by B126 (O-B126-1). (Gate override: the matches share only the words 'hosted', '1005' or 'settings'; none decides these settings.)",
+  "default_action": "Nothing changes: all visitors share one address for limits.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Apply the settings now",
+    "detail": "A seat applies the infra settings (API trusted proxy list, web forwarding switch), checks the log line changes, and Friday verifies; no code change"
+   },
+   {
+    "key": "b",
+    "label": "After your test today",
+    "detail": ""
+   },
+   {
+    "key": "c",
+    "label": "Leave as is",
+    "detail": ""
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-10-05T10:26:11.715876+11:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "seat": "friday",
+  "prior_rulings_overridden": [
+   "2026-09-16 13:35",
+   "CARD nexusai-rd245-audit-log-leaves-settings",
+   "CARD secuura-audit-row-ip-address-high-override",
+   "CARD nexusai-rd516-undici-dependency-for-address-pinning",
+   "CARD nexusai-rd430-settings-response-form",
+   "CARD hpsmpoc-hosted-link-for-hp",
+   "CARD hpsmpoc-hosted-plan-approve",
+   "CARD hpsmpoc-hosted-seed-owner",
+   "CARD hpsmpoc-hosted-dsteps-start-today",
+   "CARD hpsmpoc-d5-deploy-hosted-demo-1002",
+   "CARD hpsmpoc-pill-hosted-deploy-1003",
+   "CARD composer-3d92736-deploy-1005",
+   "CARD hpsmpoc-577c27c-hosted-deploy-1005",
+   "CARD hpsmpoc-template-102-words-1005",
+   "CARD hpsmpoc-pdf-name-note-1005",
+   "CARD hpsmpoc-renamed-customer-pdf-1005"
+  ]
+ },
+ {
+  "id": "hpsmpoc-hosted-clean-old-static-files-1005",
+  "client_project": "Datasec/HPSM-POC",
+  "title": "HPSM-POC hosted: may future deploys remove the old build's leftover files (--clean)?",
+  "bluf": "Low, no functional effect. Our deploys keep every old build's static files on the hosted web (old builds still answer, unreferenced), because removing files is a deletion and that is yours. The project's own runbook says deploy with --clean, which replaces the folder each time. Found by B126 (O-B126-2). (Gate override: the matches share only the words 'hosted', '1005' or 'settings'; none decides these settings.)",
+  "default_action": "Nothing changes: old files stay.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Use --clean on future deploys",
+    "detail": "Old build files go; the previous build stays recoverable from its CI package"
+   },
+   {
+    "key": "b",
+    "label": "Keep everything",
+    "detail": "Old files stay; nothing deleted"
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-10-05T10:26:13.566153+11:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "seat": "friday",
+  "prior_rulings_overridden": [
+   "2026-08-26 10:51",
+   "2026-09-05 16:40",
+   "2026-09-10 19:43",
+   "2026-09-21 09:52",
+   "CARD nexusai-rd303-rd307-key-shaped-files-in-repo",
+   "CARD nexusai-rd310-which-of-three-files-are-customer-data",
+   "CARD secuura-admin-credential-rotation-183-files",
+   "CARD vault-add-a-stages-another-clients-files",
+   "CARD nexusai-release-package-files-into-main",
+   "CARD nexusai-package-files-scope",
+   "CARD secuura-ks1348-log-files-persist-secrets",
+   "CARD secuura-ks1348-r2-files-still-leak-allowlist",
+   "CARD hpsmpoc-hosted-link-for-hp",
+   "CARD hpsmpoc-hosted-plan-approve",
+   "CARD hpsmpoc-hosted-seed-owner",
+   "CARD hpsmpoc-hosted-dsteps-start-today",
+   "CARD hpsmpoc-d5-deploy-hosted-demo-1002",
+   "CARD hpsmpoc-pill-hosted-deploy-1003",
+   "CARD composer-3d92736-deploy-1005",
+   "CARD hpsmpoc-577c27c-hosted-deploy-1005",
+   "CARD hpsmpoc-template-102-words-1005",
+   "CARD hpsmpoc-pdf-name-note-1005",
+   "CARD hpsmpoc-renamed-customer-pdf-1005"
+  ]
  }
 ]
