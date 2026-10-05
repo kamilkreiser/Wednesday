@@ -7,7 +7,7 @@ status: live
 
 # Boot digest — headline + rules of every lesson (open the file when it fires)
 
-Generated 2026-10-05 11:06 from 216 lesson files (983,937 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 12 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
+Generated 2026-10-05 11:11 from 216 lesson files (985,067 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 12 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
 
 ## The T9 SSD is the master — Wednesday must be fully portable
 `2026-07-31_fully-portable-drive.md` · principle · 2026-07-31 · status: superseded — the "T9 is the master" half by [[2026-08-25_one-drive-devmaster-is-master]] (2026-08-25); the portability principle itself still lives
@@ -6968,6 +6968,8 @@ arrive by MAIL; this names a second channel he accepts for one class) ·
 **His words, verbatim:** *"push the spark harder, aim for 50 a day"* — after Wednesday measured the
 week (2026-09-29 → 10-05): 24 tasks, 24/24 first-round PASS, ~13 min of Spark time in total
 (median 39 s/task), against ~20 cloud-only merges.
+
+sections (open the file for these): RULED 2026-10-05 ~11:1x — Kam (terminal, verbatim): "go with your recommendation, use a review agent"
 
 **How to apply:**
 1. **The runner is durable and in-tree** (`2_Project_Files/local-model/spark/`), never a session

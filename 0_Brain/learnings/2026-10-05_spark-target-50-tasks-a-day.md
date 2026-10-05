@@ -36,3 +36,16 @@ merge. The Spark itself is never the limit at this scale.
 **Family:** [[2026-09-25_three-tier-routing-ornith-spark-cloud-always-on]] ·
 [[2026-10-04_as-much-secuura-work-as-possible-spark-and-claude]] ·
 [[2026-09-14_the-coordinator-adds-value-or-it-is-waste-three-duties-not-watching]] (duty 3).
+
+## RULED 2026-10-05 ~11:1x — Kam (terminal, verbatim): "go with your recommendation, use a review agent"
+**This AMENDS rule 6 of [[2026-09-23_spark-kit-running-a-local-coding-model]] ("Reading the diff against
+the brief is mine and cannot be delegated") for the Spark, at his word.** From now:
+1. **A Claude REVIEW AGENT does the first full read of every Spark PASS** against its brief (edit points,
+   what must not change, test cells red-first, premises), writing a verdict file beside the run
+   (`<run dir>/REVIEW.md`: HOLD / REJECT + reasons, with file:line). It never edits, raises or merges.
+2. **Wednesday reads personally:** every result touching an auth/token/credential/security/audit surface
+   (all of them, no sampling), plus a sample of **1 in 5** of the rest, chosen by her, never by the
+   reviewer. A disagreement between Wednesday's read and the reviewer's is a finding about the reviewer
+   (IMPROVEMENTS row), and the next 5 are read in full.
+3. **Unchanged:** the QA gate before every merge; the counter (original + one rebrief → Opus 5.5); local
+   passes never merge themselves; a Claude seat raises.
