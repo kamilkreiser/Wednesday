@@ -12,6 +12,21 @@ supersede: replace wholesale; previous = NEXT-PICKUP-FRIDAY.md.pre-0925-rotate-s
 
 **The tree is at `/Volumes/Laptop-DEV/FRIDAY` (the drive, since 2026-09-28).** Quote every path (spaces).
 
+## 🔴🔴🔴 HANDOVER 2026-10-05 16:26 (Friday, ctx ~78%) — READ FIRST; supersedes every block below where they differ
+**FIRST ACT:** `kam_rulings_today.sh` + `reconcile_rulings.py`; then `friday/seat_idle.sh` over every live pane and read each STATUS last line. All watchers/merge jobs DIE with this seat — re-seed and re-arm.
+**Kam today (latest):** 16:19:53 composer-555593a-deploy-1005 a · 16:2x terminal "What else should be done? Keep going with the POC and anything you can do on the security composer." (receipted). Earlier: ~12:4x "keep going. dont wait on reviews if you do not need" (email sent 13:17).
+**LIVE:** Composer demo **d09c895** → B83 deploying **555593a** · HPSM-POC hosted **fa77dca**. **MAINS:** Composer **555593a** · HPSM-POC **c2d321c** · HPSM-POC-analysis 954a6a5 · Composer root records 740a27a+.
+**LIVE PANES (briefs dated 2026-10-05 in each project's `1_Project_Definition/Briefs/`):**
+- Datasec/Composer-Deploy **B83** demo d09c895 → 555593a (+ B80/B81 records, BACKLOG #198 #194 #147 #156 #195 MERGED, new B81-N1/N2). On READY: Friday's OWN live check (no-creds 401; kam + paul 200; bundle markers from #43 e.g. "Set-up to complete" absent at d09c895; /api/healthz ok 0.28.0), deliver card composer-555593a-deploy-1005 to its C-number (C-44?), tell Kam.
+- Datasec/Composer-D **B84** tier 2 web: #127 #128 #149 #165 #175 #188 #200 (base 555593a). On READY: read diff at source (#165 must NOT change the contract), PR, `friday/merge_when_green.sh`, records addendum; tell Kam any NEW WORDS (non-blocking); deploy = his word (card).
+- Datasec/HPSM-POC-A **B134** tier 1 API lane: HPSMPOC-158, 153+134 (contract), 146, 145, 206, 160, 152. On READY FOR GATE: tier-1 QA gate (B81 shape: red at base, refusals narrow, contract diff = only 153's 503, differential, full CI) → merge on GO → B135's 159 can follow.
+- Datasec/HPSM-POC-B **B135**: item 0 = close 13 already-fixed tickets after source check (150 186 183 188 118 192 200 190 182 184 185 112 127); then 198 201 109(O-2) (ci.yml, tier 1 → gate) · 194 · 195 · 157 · 149 · 147 · 148 · 151. NOT 155, NOT 159.
+**OPEN CARDS (Friday tab):** hpsmpoc-c2d321c-hosted-deploy-1005 (rec b: after Kam's E2E test; default nothing).
+**Owed to Kam (told, not carded):** six NEW WORDS from B79 (sent 15:03); Composer review-pack decisions (Q1 approver half, #95, #99, #101, #172); Wednesday's 2 laptop copies (Blockchain 789 GB, Testing Agent 137 GB); POC week: E2E test, D-12 sign-in, test user + UAT (his login — launch that seat when he says he is testing), Paul invite, Tue 6 review, Thu 8 PO signature.
+**HPSM-POC Jira census (16:3x, read-only):** 126 open (approximate-count + full paging agree): 27 agent-now (2 lanes launched above; PDF 199/202/205 + 99 N-7/N-9 + 179 + 144/156 left for a next lane), 13 done-already (B135 item 0), 15 NEEDS-HP, 62 NEEDS-KAM.
+**Drives:** first pass DONE (Laptop-DEV 83→79%); Composer D-1 conditions apply at its next pass (≥2026-10-06/08); HPSM 15 GB second pass; policy MERGED rule corrected by Wednesday.
+**Tooling notes sent to Wednesday:** decision_queue stores other clients' card ids in prior_rulings_overridden (hers to fix).
+
 ## 🔴🔴🔴 CHECKPOINT 2026-10-05 15:00 (Friday, ctx 70%) — READ FIRST; supersedes every block below where they differ
 **Kam:** no live rows since 12:19:18; his ~12:4x "keep going" + email instruction DONE (Composer email 13:17).
 **LIVE PANES + what each needs from Friday:**
