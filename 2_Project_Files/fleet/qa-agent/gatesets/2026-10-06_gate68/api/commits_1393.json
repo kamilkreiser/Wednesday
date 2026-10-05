@@ -1,0 +1,248 @@
+[
+ {
+  "sha": "4a1620588819a35c180fb1a4a3d98d35f4814f3f",
+  "node_id": "C_kwDORcHGMdoAKDRhMTYyMDU4ODgxOWEzNWMxODBmYjFhNGEzZDk4ZDM1ZjQ4MTRmM2Y",
+  "commit": {
+   "author": {
+    "name": "Kam Kreiser",
+    "email": "kamil.kreiser@secuura.ai",
+    "date": "2026-10-05T11:55:42Z"
+   },
+   "committer": {
+    "name": "Kam Kreiser",
+    "email": "kamil.kreiser@secuura.ai",
+    "date": "2026-10-05T11:55:42Z"
+   },
+   "message": "KS-1278: revoke decides already-revoked in the UPDATE, not only on the read\n\nRefs KS-1278\n\nPOST /api/documents/:id/revoke decided \"already revoked\" on a READ\n(routes/documents.ts:2374) and then ran an unconditional UPDATE, so two overlapping\nrevokes could both pass that read: 200 + 200, two updates, two action_provenance\nrows and two anchor calls. updateDocument now takes an ifStatusIsNot option that\nadds the guard to the WHERE, and a guarded write that changed no row returns null.\nThe loser answers the same 400 and returns before recordOnBehalfOf, so it records\nnothing and anchors nothing. The row-lock alternative is not taken.\n\nRed-first: with both test sections and neither product hunk the cell file is rc 1,\n2 failed / 2 passed of 4 executed - R1 and R2 red, C1 and C2 green. Four executed,\nso an assertion red and not a load failure.\n\nOne tamper per conjunct, each applied alone: the clause deleted, and IS DISTINCT\nFROM inverted to =, both redden R2; removing the guardStatus not-null term reddens\nC2; affected === 0 changed to === -1 reddens R1. So C2 is the only arm guarding the\npass-through for callers that ask for no guard.\n\noriginate unit suite 90 suites / 1063 tests to 91 / 1067, 0 failed at both ends.\ntsc rc 0. Measured 2026-10-05, host Kamil Mac Studio (2), node v24.7.0, jest 29.7.0.\n\nBoth platform-k documents carry a new block: flow 15. between 14. and 19., cheat\nsheet a new last section, per the ruling. No stated timing row is amended and no\nAkto tier budget moves; 0 stated timings cover an originate unit suite (must-hit\ncontrols auth 76/75 and Akto 71/83).\n\nNOT COVERED: no live sweep (skill 5f), so KS-1278 does not move to Done on this\nchange account. The cells mock the Prisma driver, so atomicity is pinned at the SQL\ntext level plus the JS return path; that two concurrent transactions really\nserialise on this WHERE is UNMEASURED. A document deleted between the read and the\nguarded write answers 400 where 404 belongs - pre-existing, narrowed to a race\nwindow here, not introduced by it.",
+   "tree": {
+    "sha": "79b51d3f777f90d8bfb725455e84fc504037d3c9",
+    "url": "https://api.github.com/repos/Secuura/Distributed_Secuura/git/trees/79b51d3f777f90d8bfb725455e84fc504037d3c9"
+   },
+   "url": "https://api.github.com/repos/Secuura/Distributed_Secuura/git/commits/4a1620588819a35c180fb1a4a3d98d35f4814f3f",
+   "comment_count": 0,
+   "verification": {
+    "verified": false,
+    "reason": "unsigned",
+    "signature": null,
+    "payload": null,
+    "verified_at": null
+   }
+  },
+  "url": "https://api.github.com/repos/Secuura/Distributed_Secuura/commits/4a1620588819a35c180fb1a4a3d98d35f4814f3f",
+  "html_url": "https://github.com/Secuura/Distributed_Secuura/commit/4a1620588819a35c180fb1a4a3d98d35f4814f3f",
+  "comments_url": "https://api.github.com/repos/Secuura/Distributed_Secuura/commits/4a1620588819a35c180fb1a4a3d98d35f4814f3f/comments",
+  "author": {
+   "login": "kksecura",
+   "id": 258699643,
+   "node_id": "U_kgDOD2txew",
+   "avatar_url": "https://avatars.githubusercontent.com/u/258699643?v=4",
+   "gravatar_id": "",
+   "url": "https://api.github.com/users/kksecura",
+   "html_url": "https://github.com/kksecura",
+   "followers_url": "https://api.github.com/users/kksecura/followers",
+   "following_url": "https://api.github.com/users/kksecura/following{/other_user}",
+   "gists_url": "https://api.github.com/users/kksecura/gists{/gist_id}",
+   "starred_url": "https://api.github.com/users/kksecura/starred{/owner}{/repo}",
+   "subscriptions_url": "https://api.github.com/users/kksecura/subscriptions",
+   "organizations_url": "https://api.github.com/users/kksecura/orgs",
+   "repos_url": "https://api.github.com/users/kksecura/repos",
+   "events_url": "https://api.github.com/users/kksecura/events{/privacy}",
+   "received_events_url": "https://api.github.com/users/kksecura/received_events",
+   "type": "User",
+   "user_view_type": "public",
+   "site_admin": false
+  },
+  "committer": {
+   "login": "kksecura",
+   "id": 258699643,
+   "node_id": "U_kgDOD2txew",
+   "avatar_url": "https://avatars.githubusercontent.com/u/258699643?v=4",
+   "gravatar_id": "",
+   "url": "https://api.github.com/users/kksecura",
+   "html_url": "https://github.com/kksecura",
+   "followers_url": "https://api.github.com/users/kksecura/followers",
+   "following_url": "https://api.github.com/users/kksecura/following{/other_user}",
+   "gists_url": "https://api.github.com/users/kksecura/gists{/gist_id}",
+   "starred_url": "https://api.github.com/users/kksecura/starred{/owner}{/repo}",
+   "subscriptions_url": "https://api.github.com/users/kksecura/subscriptions",
+   "organizations_url": "https://api.github.com/users/kksecura/orgs",
+   "repos_url": "https://api.github.com/users/kksecura/repos",
+   "events_url": "https://api.github.com/users/kksecura/events{/privacy}",
+   "received_events_url": "https://api.github.com/users/kksecura/received_events",
+   "type": "User",
+   "user_view_type": "public",
+   "site_admin": false
+  },
+  "parents": [
+   {
+    "sha": "32e058975d4e3a9bbabe828f45e7084de4cfa7f0",
+    "url": "https://api.github.com/repos/Secuura/Distributed_Secuura/commits/32e058975d4e3a9bbabe828f45e7084de4cfa7f0",
+    "html_url": "https://github.com/Secuura/Distributed_Secuura/commit/32e058975d4e3a9bbabe828f45e7084de4cfa7f0"
+   }
+  ]
+ },
+ {
+  "sha": "97ce2f337ae6a8bfda1e60831c2890933242c3a3",
+  "node_id": "C_kwDORcHGMdoAKDk3Y2UyZjMzN2FlNmE4YmZkYTFlNjA4MzFjMjg5MDkzMzI0MmMzYTM",
+  "commit": {
+   "author": {
+    "name": "Kam Kreiser",
+    "email": "kamil.kreiser@secuura.ai",
+    "date": "2026-10-05T22:30:48Z"
+   },
+   "committer": {
+    "name": "Kam Kreiser",
+    "email": "kamil.kreiser@secuura.ai",
+    "date": "2026-10-05T22:30:48Z"
+   },
+   "message": "KS-1278: key the guarded revoke UPDATE on the row the read resolved, not external_id\n\nRefs KS-1278\n\nThe guarded UPDATE this branch added in round 1 decided already-revoked IN the statement, which\nis what KS-1278 asked for, but it still keyed on external_id. Both reads fall back to the primary\nkey for a UUID-shaped id (documentRepo.ts:244-251) and the API hands clients that key as\ndocumentUuid (:172), so a SEQUENTIAL, non-race revoke of a live, owned, unrevoked document\naddressed by its documentUuid matched 0 rows, the guarded write returned null, and the route\nanswered 400 Document\nis\nalready\nrevoked for a document nobody had revoked. That is gate65\nN-1393-1, and it is PROBED, not argued.\n\nThe guarded write now keys on the row the read resolved (:616): a COALESCE of two tenant-scoped\nscalar subqueries, external_id first and then the primary key, which is the read's own precedence\nrather than a new rule. The status guard stays in the same statement, so of two overlapping\nwriters exactly one still changes the row.\n\nNARROWED ON PURPOSE. Only the one opted-in caller changes key. 12 of the 13 production\nupdateDocument( callers pass no ifStatusIsNot and take a byte-identical statement, proved by cell\nN3. The census that establishes 13 production callers, 1 opted in, 12 others is on KS 1424, filed\nfor the pre-existing class: for an unguarded caller a UUID-addressed update matches 0 rows and\nreports success. That is NOT fixed here. The census also corrects the figure of 14 used while\nruling this fix; 14 counted the 13 calls plus one non-call line.\n\nA non-UUID external id never reaches the ::uuid cast, which would otherwise raise 22P02. The\nresolver binds null instead of casting, mirroring the isValidUuid guard the read already uses at\n:244. Cell N2 pins it and is green at both ends.\n\nRed-first, by assertion, at 4a1620588819: 1 failed / 6 passed of 7 EXECUTED. Only N1 is red; R1\nand R2 are green at that baseline because it already carries round 1 guard, so only the KEY was\nwrong. Seven executed, and both new controls are green, so the single red discriminates rather\nthan being a blanket failure. At this head: 7 passed of 7.\n\noriginate unit suite, same binary both ends: 91 suites / 1070 tests, 0 failed, 0 skipped, against\n91 / 1067 at round 1. Delta +3 tests, +0 suites, exactly the three new cells in the same file.\n12.174 s, measured 2026-10-05 22:24:34-22:24:47Z on Kamil Mac Studio (2), node v24.7.0, jest\n29.7.0. tsc -p services/originate --noEmit rc 0, and documentRepo.ts IS in that program (checked\nwith --listFilesOnly first); a planted TS2322 on the new declaration gives rc 2, restored\nbyte-identical. The tsconfig still excludes src/__tests__, so the CELL FILE is type-unchecked:\nNOT RUN, not coverage.\n\nR1 and R2 were strengthened per N-1393-2. R1 now also asserts 0 anchor emissions on the losing\npath, counted from the POST /api/anchors that emitLifecycleAnchor makes (documents.ts:1261; it is\nmodule-local and cannot be mocked). R2 now asserts the VALUE bound after IS DISTINCT FROM, not\nonly that the SQL text carries the clause.\n\nN1 could have passed vacuously and does not. A driver stubbed to a constant 1 is green at both\nends and a constant 0 is red at both, so the cell simulates what Postgres would answer for one\nfixture row, and THROWS if the UPDATE keys on neither shape it knows.\n\nBoth platform-k documents are updated in this same commit. The flow block 15. paragraph no longer\nclaims a null can only mean the row became revoked in between; it names each meaning of null with\nits instrument. Each document minus its own block is byte-identical to 4a1620588819.\n\nNOT COVERED: no live sweep (skill 5f), so KS-1278 does not move to Done on this change's account.\nThe cells mock the Prisma driver, so that two concurrent transactions really serialise on this\nWHERE is UNMEASURED. The round-2 tamper matrix was NOT RUN: round 1 T1-T4 still map as recorded,\nbut G7, G8, K1 and T5 re-checked against R2 new assertion were not executed, so whether R2 now\ncatches the declared-blind T5 is UNMEASURED. A document deleted inside the revoke window still\nanswers 400 where 404 belongs, unchanged, tracked as KS 1419. The four platform suites\n(Schemathesis, Akto, Playwright, k6) were NOT run.",
+   "tree": {
+    "sha": "ae3680c5e170c69f7142ef8390405764693e7975",
+    "url": "https://api.github.com/repos/Secuura/Distributed_Secuura/git/trees/ae3680c5e170c69f7142ef8390405764693e7975"
+   },
+   "url": "https://api.github.com/repos/Secuura/Distributed_Secuura/git/commits/97ce2f337ae6a8bfda1e60831c2890933242c3a3",
+   "comment_count": 0,
+   "verification": {
+    "verified": false,
+    "reason": "unsigned",
+    "signature": null,
+    "payload": null,
+    "verified_at": null
+   }
+  },
+  "url": "https://api.github.com/repos/Secuura/Distributed_Secuura/commits/97ce2f337ae6a8bfda1e60831c2890933242c3a3",
+  "html_url": "https://github.com/Secuura/Distributed_Secuura/commit/97ce2f337ae6a8bfda1e60831c2890933242c3a3",
+  "comments_url": "https://api.github.com/repos/Secuura/Distributed_Secuura/commits/97ce2f337ae6a8bfda1e60831c2890933242c3a3/comments",
+  "author": {
+   "login": "kksecura",
+   "id": 258699643,
+   "node_id": "U_kgDOD2txew",
+   "avatar_url": "https://avatars.githubusercontent.com/u/258699643?v=4",
+   "gravatar_id": "",
+   "url": "https://api.github.com/users/kksecura",
+   "html_url": "https://github.com/kksecura",
+   "followers_url": "https://api.github.com/users/kksecura/followers",
+   "following_url": "https://api.github.com/users/kksecura/following{/other_user}",
+   "gists_url": "https://api.github.com/users/kksecura/gists{/gist_id}",
+   "starred_url": "https://api.github.com/users/kksecura/starred{/owner}{/repo}",
+   "subscriptions_url": "https://api.github.com/users/kksecura/subscriptions",
+   "organizations_url": "https://api.github.com/users/kksecura/orgs",
+   "repos_url": "https://api.github.com/users/kksecura/repos",
+   "events_url": "https://api.github.com/users/kksecura/events{/privacy}",
+   "received_events_url": "https://api.github.com/users/kksecura/received_events",
+   "type": "User",
+   "user_view_type": "public",
+   "site_admin": false
+  },
+  "committer": {
+   "login": "kksecura",
+   "id": 258699643,
+   "node_id": "U_kgDOD2txew",
+   "avatar_url": "https://avatars.githubusercontent.com/u/258699643?v=4",
+   "gravatar_id": "",
+   "url": "https://api.github.com/users/kksecura",
+   "html_url": "https://github.com/kksecura",
+   "followers_url": "https://api.github.com/users/kksecura/followers",
+   "following_url": "https://api.github.com/users/kksecura/following{/other_user}",
+   "gists_url": "https://api.github.com/users/kksecura/gists{/gist_id}",
+   "starred_url": "https://api.github.com/users/kksecura/starred{/owner}{/repo}",
+   "subscriptions_url": "https://api.github.com/users/kksecura/subscriptions",
+   "organizations_url": "https://api.github.com/users/kksecura/orgs",
+   "repos_url": "https://api.github.com/users/kksecura/repos",
+   "events_url": "https://api.github.com/users/kksecura/events{/privacy}",
+   "received_events_url": "https://api.github.com/users/kksecura/received_events",
+   "type": "User",
+   "user_view_type": "public",
+   "site_admin": false
+  },
+  "parents": [
+   {
+    "sha": "4a1620588819a35c180fb1a4a3d98d35f4814f3f",
+    "url": "https://api.github.com/repos/Secuura/Distributed_Secuura/commits/4a1620588819a35c180fb1a4a3d98d35f4814f3f",
+    "html_url": "https://github.com/Secuura/Distributed_Secuura/commit/4a1620588819a35c180fb1a4a3d98d35f4814f3f"
+   }
+  ]
+ },
+ {
+  "sha": "b5adaba751d89fda0b138e0b8b74d702e2a2a429",
+  "node_id": "C_kwDORcHGMdoAKGI1YWRhYmE3NTFkODlmZGEwYjEzOGUwYjhiNzRkNzAyZTJhMmE0Mjk",
+  "commit": {
+   "author": {
+    "name": "Kam Kreiser",
+    "email": "kamil.kreiser@secuura.ai",
+    "date": "2026-10-05T22:58:11Z"
+   },
+   "committer": {
+    "name": "Kam Kreiser",
+    "email": "kamil.kreiser@secuura.ai",
+    "date": "2026-10-05T22:58:11Z"
+   },
+   "message": "KS-1278: pin the revoke guard by exact clause text and its own bound parameters\n\nRefs KS-1278\n\nA follow-up to 97ce2f337ae6 on the same branch. No product change: documentRepo.ts is untouched by\nthis commit. What changes is the strength of the cell that pins the guard, and the two documents\nthat describe it.\n\nR2 asserted that the UPDATE's SQL contained 'status IS DISTINCT FROM' and that its bound values\nCONTAINED 'revoked'. Both halves were too weak, and the round-2 tamper matrix is what showed it.\nT5 prefixes TRUE OR to the guard clause, which makes the guard vacuous and leaves that substring\nintact. G7 sets ifStatusIsNot to 'draft', and membership still passed because this UPDATE binds\n'revoked' THREE times: the SET clause's new status at index 1, and the guard at 9 and 10.\nMeasured with a throwaway probe cell, not reasoned from the source.\n\nR2 now pins the guard clause by EXACT text, so a prefix breaks it, and the guard's own two\nparameters BY POSITION. slice(-2) is used rather than the literal indices, because the guard is\nthe final clause in every variant of this statement while a changed SET list would shift a\nliteral index.\n\nMatrix at this head, each tamper alone, both product files restored and sha256-verified after\nevery row: G7 -> R2, G8 -> R1, K1 -> R1278 N1, T5 -> R2. FOUR of four caught, against two of four\nat 97ce2f337ae6. Round 1's T1-T4 are unchanged and still map as recorded.\n\nK1 needs its dead declaration removed in the same tamper or it measures nothing: reverting the key\nalone leaves idAsUuid unused, ts-jest refuses the file, and the suite reports 0 total and 0\nexecuted with no cell red AND no cell green. A load failure is not an inert tamper and only the\nexecuted count separates them.\n\noriginate unit suite, same binary: 91 suites / 1070 tests, 0 failed, 0 skipped - unchanged from\n97ce2f337ae6, because no cell was added. 10.163 s, measured 2026-10-05 22:57:18-22:57:28Z on\nKamil Mac Studio (2), node v24.7.0, jest 29.7.0. tsc -p services/originate --noEmit rc 0.\nThe cell file remains type-unchecked: that tsconfig excludes src/__tests__.\n\nBoth platform-k documents are corrected in this same commit. The cheat sheet row that claimed R2\nasserted the bound value is replaced, and it says so rather than quietly reading differently; its\ntamper row moves from NOT RUN to 4 of 4 with a row for the load-failure distinction. The flow\nblock 15. names the guard's instrument beside R1's. Each document minus its own KS-1278 block is\nbyte-identical to 97ce2f337ae6, one diff region each.\n\nNOT COVERED: unchanged by this commit. No live sweep (skill 5f), so KS-1278 does not move to Done\non this change's account. The driver is mocked, so serialisation on this WHERE is UNMEASURED. The\nfour platform suites were NOT run. KS 1419 is unchanged, and KS 1424 carries the pre-existing\nclass for the twelve unguarded callers.",
+   "tree": {
+    "sha": "82567f9205824287edae372474c6313edb025268",
+    "url": "https://api.github.com/repos/Secuura/Distributed_Secuura/git/trees/82567f9205824287edae372474c6313edb025268"
+   },
+   "url": "https://api.github.com/repos/Secuura/Distributed_Secuura/git/commits/b5adaba751d89fda0b138e0b8b74d702e2a2a429",
+   "comment_count": 0,
+   "verification": {
+    "verified": false,
+    "reason": "unsigned",
+    "signature": null,
+    "payload": null,
+    "verified_at": null
+   }
+  },
+  "url": "https://api.github.com/repos/Secuura/Distributed_Secuura/commits/b5adaba751d89fda0b138e0b8b74d702e2a2a429",
+  "html_url": "https://github.com/Secuura/Distributed_Secuura/commit/b5adaba751d89fda0b138e0b8b74d702e2a2a429",
+  "comments_url": "https://api.github.com/repos/Secuura/Distributed_Secuura/commits/b5adaba751d89fda0b138e0b8b74d702e2a2a429/comments",
+  "author": {
+   "login": "kksecura",
+   "id": 258699643,
+   "node_id": "U_kgDOD2txew",
+   "avatar_url": "https://avatars.githubusercontent.com/u/258699643?v=4",
+   "gravatar_id": "",
+   "url": "https://api.github.com/users/kksecura",
+   "html_url": "https://github.com/kksecura",
+   "followers_url": "https://api.github.com/users/kksecura/followers",
+   "following_url": "https://api.github.com/users/kksecura/following{/other_user}",
+   "gists_url": "https://api.github.com/users/kksecura/gists{/gist_id}",
+   "starred_url": "https://api.github.com/users/kksecura/starred{/owner}{/repo}",
+   "subscriptions_url": "https://api.github.com/users/kksecura/subscriptions",
+   "organizations_url": "https://api.github.com/users/kksecura/orgs",
+   "repos_url": "https://api.github.com/users/kksecura/repos",
+   "events_url": "https://api.github.com/users/kksecura/events{/privacy}",
+   "received_events_url": "https://api.github.com/users/kksecura/received_events",
+   "type": "User",
+   "user_view_type": "public",
+   "site_admin": false
+  },
+  "committer": {
+   "login": "kksecura",
+   "id": 258699643,
+   "node_id": "U_kgDOD2txew",
+   "avatar_url": "https://avatars.githubusercontent.com/u/258699643?v=4",
+   "gravatar_id": "",
+   "url": "https://api.github.com/users/kksecura",
+   "html_url": "https://github.com/kksecura",
+   "followers_url": "https://api.github.com/users/kksecura/followers",
+   "following_url": "https://api.github.com/users/kksecura/following{/other_user}",
+   "gists_url": "https://api.github.com/users/kksecura/gists{/gist_id}",
+   "starred_url": "https://api.github.com/users/kksecura/starred{/owner}{/repo}",
+   "subscriptions_url": "https://api.github.com/users/kksecura/subscriptions",
+   "organizations_url": "https://api.github.com/users/kksecura/orgs",
+   "repos_url": "https://api.github.com/users/kksecura/repos",
+   "events_url": "https://api.github.com/users/kksecura/events{/privacy}",
+   "received_events_url": "https://api.github.com/users/kksecura/received_events",
+   "type": "User",
+   "user_view_type": "public",
+   "site_admin": false
+  },
+  "parents": [
+   {
+    "sha": "97ce2f337ae6a8bfda1e60831c2890933242c3a3",
+    "url": "https://api.github.com/repos/Secuura/Distributed_Secuura/commits/97ce2f337ae6a8bfda1e60831c2890933242c3a3",
+    "html_url": "https://github.com/Secuura/Distributed_Secuura/commit/97ce2f337ae6a8bfda1e60831c2890933242c3a3"
+   }
+  ]
+ }
+]

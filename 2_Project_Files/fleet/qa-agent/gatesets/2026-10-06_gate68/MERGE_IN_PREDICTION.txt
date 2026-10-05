@@ -1,0 +1,32 @@
+gate68 — #1393 ROUND 2 — DOCS-ONLY MERGE-IN PREDICTION (drafter, 2026-10-05 ~23:14-23:17Z host clock)
+Instrument: c4_docs_gate68.py (composee5 :66 / :82 readers, extracted by hash f9ab42d9fc25f189), in the drafter's scratch clone.
+Every tree is for ONE (head, develop) pair; at launch repin_and_launch_gate68.sh RECOMPUTES it for the head and develop it re-reads.
+
+CURRENT PAIR: head b5adaba751d89fda0b138e0b8b74d702e2a2a429 (ls-remote 23:12:20Z, branch + pull/head)
+              develop 3f9ff4e1e1b93e2e704918a7825f13a72c9ec76f (ls-remote 23:12:20Z; #1385 KS-938 merged; fetched BY SHA into the scratch clone)
+  KEY-ANCHORED, cheat anchor `last` (gate66/67 rule)   1711f2b944a819ca69b1170d95d0fb5a9917bf6f   c4_predict_headb5ad_dev3f9f_key_ex1.out
+      flow  fed70e55ac6a  numbers 1..14 15 18 19 20, strictly ascending, 15. after 14.   READ-BACK OK, 0 markers, div +0
+      cheat 1d782d08e56f  keys …KS-1210 KS-1005 KS-938 KS-1278 (KS-1278 LAST)          READ-BACK OK, 0 markers, div +0
+  KEY-ANCHORED, cheat anchor `after-pred` (gate65 D7)   5dab555016b7cdfe61d62720c4e2eb1fcf7c8458   c4_predict_headb5ad_dev3f9f_afterpred_ex1.out
+      flow  fed70e55ac6a  (same)
+      cheat 1d5eaf58799c  keys …KS-1005 KS-1278 KS-938
+  -> THE TWO ANCHOR RULES GIVE DIFFERENT TREES ON THIS DEVELOP (they agreed on 22b2). RULINGS Q2.
+  WRONG-ORDER CONTROL                                   db268d9cd98c1ec6fda8102116c7ccc018d24acf   READ-BACK FAIL on both docs (fires)
+  POSITIVE CONTROL develop := branch base 32e058975d4e  82567f9205824287edae372474c6313edb025268 == the head's own tree (fires)
+  git merge-tree --write-tree b5adaba751d8 3f9ff4e1e1b9  rc 1, tree 6297e9c915bf028e84d9d55021b421061ec2b708   c4_mergetree_headb5ad_dev3f9f_ex1.out
+      CHEAT: CONFLICT (1 region :4439-:4508; OURS 66 lines, THEIRS 1). None of take-OURS / take-THEIRS / OURS+THEIRS / THEIRS+OURS
+             equals either key blob; take-OURS, OURS+THEIRS and THEIRS+OURS READ BACK right (the readers cannot see the difference;
+             qm M8 "M minus the block == develop" can).
+      FLOW:  NO CONFLICT, AUTO-MERGED MIS-ORDERED: numbers 1..14 18 15 19 20 (15. lands AFTER develop's 18.). A merger who accepts
+             git's flow ships a wrong document with no marker. Self-test arm "GIT-AUTO-MERGED-FLOW SIM" proves qm fails it on M1 + M8.
+  VERDICT: DIVERGENCE (merge-tree != key-anchored). WEDNESDAY RULES; the kit picks none.
+
+BATCH SIM (#1394 lands next): SIM develop e48964ad16297ea5eecd2f5bb502cb03b3ca6fdf = 3f9f + gate67's own `predict` tree on 3f9f
+  (6884601a03dc1685476b69e94efe29a9573d53a7; note gate67's kit figure e23888941fda was keyed to 22b2 and is now VOID)
+  gate68 `last`        0b4c3a265454343e8b39af71d2ee6e30bd1d6059   cheat …KS-1005 KS-938 KS-723 KS-1278
+  gate68 `after-pred`  a395bd88579b1eb43c452d0c9143dfd4cb75677c   cheat …KS-1005 KS-1278 KS-938 KS-723
+
+SUPERSEDED (kept for the record):
+  b5adaba751d8 on 22b268143a63                          17f04dd337d1198485ae4a589de3d67efe9999ad   c4_predict_headb5ad_dev22b2_key_ex1.out
+  stand-in 97ce2f337ae6 on 22b268143a63                 6b0502b92b62c760014a50e6dec294cef5099d97 (merge-tree 5dd99691d5e4; same flow trap)
+                                                        _quarantine/standin97ce_dev22b2_era/

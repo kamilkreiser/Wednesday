@@ -1,0 +1,24 @@
+# gate68 — OPEN QUESTIONS for Wednesday (the drafter rules none)
+
+Q1. **Merge seat.** Seat B 65th (the author) says it is "wrapping cold" in its new-head addendum. The kit therefore forbids 63rd, 64th and 65th in the GO; the repin script refuses rc 9 on those seats. Which B seat merges? Pass it as `--merge-seat <NNth>`.
+
+Q2. **The merge-in target tree on develop 3f9ff4e1e1b9.** The two KEY-ANCHORED cheat rules now disagree:
+- `last` (the gate66/67 rule) gives `1711f2b944a8`, with KS-1278 after KS-938.
+- `after-pred` (gate65 D7's "OURS above THEIRS") gives `5dab555016b7`, with KS-1278 directly after KS-1005 and before KS-938.
+
+git merge-tree conflicts on the cheat and auto-merges the flow MIS-ORDERED, so it is a DIVERGENCE either way. Which tree does Q-M M1 hold the merger to?
+
+Q3. **X9, real PostgreSQL.** Does the gate get a named exception to run `c3b_pgprobe_gate68.py`?
+- What it uses: homebrew PostgreSQL 18.3 on the host, initdb in the gate's scratch, 127.0.0.1 only. No Docker, not repo infra.
+- Why it matters: the repo's own Postgres is docker compose, which the hold forbids, so without X9 the C3-REAL-POSTGRES row is NOT RUN.
+- What the drafter measured on b5adaba751d8 (a prediction, not evidence): 9/9 PASS, with two concurrent sessions at 1/0 and the control (develop's unguarded statement) at 1/1. Its planted arms U1, T1, T5b and K1 each FAIL as intended.
+
+Q4. **Batching.** #1394 (gate67) is the other open PR that edits both docs. If it lands first, does KS-1278 go after KS-723 (`last`: `0b4c3a265454`) or after KS-1005 (`after-pred`: `a395bd88579b`)? gate67's own figure `e23888941fda` was keyed to 22b2 and is now void; on 3f9f its predict gives `6884601a03dc`.
+
+Q5. **Is a measured assertion-strength gap GO-blocking at round 2 of 2?** This covers T5 if it is still uncaught at launch, and the gate's own T5b. T5b appends ` OR TRUE` after the exact clause text. It is predicted BLIND to b5adaba's R2, which uses a substring match plus slice(-2). On a real database T5b updates every row of every tenant. The prompt asks the gate to rule; Wednesday may pre-rule.
+
+Q6. **Squash subject.** The PR title is still round 1's: "KS-1278: revoke decides already-revoked in the UPDATE, not only on the read" (75 chars). The commit subjects are those of 97ce2f (84 chars) and b5adaba (79 chars). Which one is the squash subject? The gate declares what is TRUE of the diff.
+
+Q7. **KS-TICKET placeholder.** documentRepo.ts:583 says "tracked separately -- see KS-TICKET." at both 97ce2f and b5adaba. Is that ticketed residue, or a fix-before-merge?
+
+Q8. **Routing.** The line in `ROUTING_LINE.txt` has not been added to `inbox_routing.conf`. The real launch refuses rc 1 until it is.

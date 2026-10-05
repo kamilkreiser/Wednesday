@@ -1,0 +1,9 @@
+INFO server PostgreSQL 18.3 (Homebrew) on aarch64-apple-darwin25.2.0, co on 127.0.0.1:52557 data /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/e2216636-d4a8-4372-af80-77a0943bf859/scratchpad/gate68/pgprobe/data
+PGPROBE head b5adaba751d8 | idAsUuid binding mode guarded | guarded statement 11 bindings
+PASS POSITIVE the real head passes P1-P8 + P8c (9 checked, fails [])
+PASS PLANTED U1 (idAsUuid = id): P3 FAILS with 22P02 | FAIL P3 NON-UUID 'doc-1278' (idAsUuid bound raw): rc 3 UPDATE None | 22P02 True ERROR:  invalid input syntax for type uuid: "doc-1278"
+PASS PLANTED T1 (guard clause deleted): P4 + P8 FAIL | fails ['P4', 'P8']
+PASS PLANTED T5b (` OR TRUE` appended after the guard: exact clause text survives): P4 + P5 FAIL (every row, every tenant) | fails ['P4', 'P5', 'P6', 'P7', 'P8']
+PASS PLANTED K1 (key reverted to external_id): P1 FAILS | fails ['P1', 'P8']
+SELFTEST 5/5
+INFO server stopped (data dir kept in scratch, never deleted): /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/e2216636-d4a8-4372-af80-77a0943bf859/scratchpad/gate68/pgprobe/data
