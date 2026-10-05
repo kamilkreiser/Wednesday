@@ -178,10 +178,3 @@ Product fix, no tamper. Measured: the new test alone at the tip **rc 1, 4 ok / 1
 ## Output
 
 Exactly ONE fenced ```diff block, nothing outside it: first the product hunk (`--- a/Blockchain/Dev/scripts/__tests__/check_shared_relink.test.sh`, `@@ -1218,7 +1218,9 @@`), then the new file (`--- /dev/null`, `+++ b/Blockchain/Dev/scripts/__tests__/ks948_backtick_check_sees_mixed_names.test.sh`, `@@ -0,0 +1,74 @@`). Every `+` line on its own physical line. Every context line keeps its leading space.
-
-## REBRIEF (round 2 of 2) — the ONE defect in round 1, read this before writing the test
-Round 1's product hunk was exactly right. **Its NEW TEST FILE was not:** at test line 31 it wrote `unescaped=$( )`
-where this brief's test block has `unescaped=\$( )` — the BACKSLASH before `$(` is REQUIRED. Inside double quotes,
-`$( )` without the backslash RUNS an empty command substitution, which is the very hazard KS-948 guards against.
-**Copy the test block in "## The test" byte for byte, every backslash included.** The reviewer compares your test file
-to this brief byte for byte.
