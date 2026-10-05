@@ -40,7 +40,7 @@ the `files` sets of every lane ticket and the three queued Spark briefs were int
 | L1 | `Blockchain/Dev/scripts/run-shell-suites.sh` + `scripts/__tests__/run_shell_suites.test.sh` (+ a NEW PTY harness) | KS-1330 → KS-1331 → KS-1325, in that order. Develop's runner has no trap at all, so 1330's signal handling lands first. |
 | L2 | `Blockchain/Dev/scripts/preflight/preflight.sh` + `scripts/run-code-guards.sh` (verdict/tally work; NOT `.githooks/pre-push`) | KS-1127 (leg 14 skip tally in the closing verdict), KS-1153 (R-925-A TAB tail `:173`, F-925-4 double-count) |
 | L3 | `Blockchain/Dev/services/auth/src/__tests__/` named files only: `ks431-oauth-app-update.test.ts`, `ks949-platform-admin-seed-identity.test.ts`, `ks963-preauth-rethrow.test.ts` | KS-825 (non-deterministic auth green), KS-1053 (ks949 seed flake), KS-1131 (ks963 regex/positional items 3-4; test-only, but on the reset-token surface, so not Spark) |
-| L4 | `Blockchain/Dev/scripts/audit/*.mjs` + `scripts/lockfile-cleanroom.sh` | KS-829 (baseline `scope` validation), KS-1209 (lock-discovery "missing expires" polish), KS-1394 (audit-locks regen pointer) |
+| L4 | `Blockchain/Dev/scripts/audit/*.mjs` + `scripts/preflight/lockfile-cleanroom.sh` (CORRECTED 2026-10-05 20:5x: `scripts/lockfile-cleanroom.sh` does not exist at develop f01c1da5717f, per Seat G 1st's `git cat-file` 09:36Z) | KS-829 (baseline `scope` validation), KS-1209 (lock-discovery "missing expires" polish), KS-1394 (audit-locks regen pointer) |
 
 Lane caveats:
 - **L3:** Seat E 3rd owns auth `routes/oauth.ts` / `mfa.ts` / `users.ts`. L3 touches only the three named test files. Whether
