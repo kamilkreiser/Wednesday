@@ -12,6 +12,16 @@ supersede: replace wholesale; previous = NEXT-PICKUP-FRIDAY.md.pre-0925-rotate-s
 
 **The tree is at `/Volumes/Laptop-DEV/FRIDAY` (the drive, since 2026-09-28).** Quote every path (spaces).
 
+## 🔴🔴🔴 CHECKPOINT 2026-10-05 20:35 (Friday, ctx 65%) — READ FIRST; supersedes every block below where they differ
+**Kam:** terminal ~19:5x "deploy main f5bfb0e to the hosted demo" → DONE (B143, C-61, PR #72; Friday checked live 20:2x). OPEN CARD **hpsmpoc-f1-redeploy-after-gate-1005** (rec a; default nothing deployed): redeploy PR #108's fix once gate B144 says GO.
+**MAINS:** HPSM-POC **f5bfb0e** = HOSTED (web + API) · analysis **09c0417** · Composer **fd9493f** = demo.
+**🔴 LIVE DEFECT on hosted (F-1, found by B142):** on Azure SQL's retrying strategy, a transient failure before commit makes demo reset answer 409 not-seeded / 503 instead of retrying (B139's verifySucceeded). Fixed on PR #108 (`b142/api-212` @ `e3a57caa09206c8be564e1de1f3aafbaca9fd3ec`).
+**LIVE PANES:**
+- Datasec/HPSM-POC-QA %52 **B144** gate on PR #108 (`Briefs/2026-10-05_B144_QA-gate-B142-212-and-F1.md`). On GO: `friday/merge_when_green.sh datasecau/HPSM-POC 108 e3a57caa09206c8be564e1de1f3aafbaca9fd3ec`; B142 records + Jira (212 Done); if Kam rules a → deploy seat (B143 shape incl. treecmp + targeted PUT) → own live check → tell Kam.
+- Datasec/HPSM-POC-A %50 **B142** idle (records after merge).
+**NEXT agent-now (B142 TRIAGE):** 179 = one `check_pack.py` change in the analysis repo (rows 1-12); 99 = N-7 + N-8 (Feedback module). N-9 waits for scale-out; N-4 Kam's.
+**Watcher:** seen_s17 over B144 STATUS + pane %52.
+
 ## 🔴🔴🔴 STATE 2026-10-05 19:53 (Friday, ctx 60%) — READ FIRST; supersedes every block below where they differ
 **Kam:** Composer deploy + login email DONE (demo fd9493f, emailed 19:4x, read back). No open cards. No board rows since 16:38:48.
 **MAINS:** HPSM-POC **f5bfb0e** (#104 #105 #106 #107 today) · analysis **c4514f9** (records #67–#71) · Composer **fd9493f** = demo (C-45). Hosted HPSM-POC still c2d321c (deploy = Kam's word).
