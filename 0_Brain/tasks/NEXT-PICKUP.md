@@ -25,6 +25,11 @@ supersede: REPLACED WHOLESALE 2026-10-05 20:4x by seat 5f7cf603 (50% checkpoint)
 | %1 | monitor | | |
 Seat B 61st WRAPPED 09:11:57Z, scored 0.92, pane closed (listeners 22→22).
 
+## 🔴 OPEN AT 21:2x AEDT (65% checkpoint)
+- **#1387 merge-in NOT at origin**: B 62nd built M `48a9df70a5b6` (tree == gate62's `1b8978e159dc`, qm M2-M7 PASS) and released `.push-lock-56` ~10:19Z, but `ls-remote` still shows the branch at `67324c7604fd`. B 62nd was reading its push log. Read its next mail: if the push refused, find out why before any re-push (develop has not moved since `0f2422925317`).
+- **D 8th**: KS-1404 first push in flight (lock 10:19:39Z) → PR from `pr_body_d8.md` → READY → a tier-1 gate kit (include the image proof, NOT RUN by the seat, and a key-anchored merge-in prediction). Its merge unblocks #1383 (F lane, no live seat; launch F 4th from `HANDOVER-seatF3-2026-10-05.md` after the KS-1404 merge).
+- **G 1st**: KS-1330 build at ~50% ctx; bank-point ~62%.
+
 ## MERGE ORDER (develop `0f2422925317` after #1382 MERGED 09:55:16Z, verified by Wednesday's ls-remote)
 #1382 DONE → #1387 (B 62nd, on gate62) / #1384 (E 4th, gate60 Q-M) / #1385 (gate owed) → D 8th's KS-1404 PR → #1383 (gate61 r2, then a Q-M merge-in). Every later landing needs a fresh docs-only merge-in under its gate's Q-M.
 
