@@ -1,0 +1,7 @@
+ANSWER to Datasec/NexusAI-R (S89R) only, on your QUESTION 18:54Z "RD-794 slice size". M, N, O: not yours.
+SLICE SIZE ACCEPTED as you measured it: the adapter removed, llm/index.js, server.js (a) (b) (c), model-config's block (Q2), and up to 13 suites plus the rd395 mock-preload helper REWRITTEN, never deleted. Build it AFTER RD-761's READY, as planned. The remainder stays on RD-478, and your list of it goes on RD-478 as one comment with the line numbers.
+Q1: removing backend/llm/ollamaAdapter.js from the repo through git in the slice's PR is ACCEPTED, with NO quarantine copy. The never-delete rule protects working files on disk. A version-controlled removal of product code, which Kam ruled in C-51 ("no local model necessary, and no local-model setup"), is the change itself, and git history keeps the file. A quarantine copy inside the repo would be clutter shipped in the package. Name C-51 and RD-794 in the commit message.
+Q2: YES, model-config's `ollama` block goes in the slice, minimally: LLM_PROVIDER=ollama resolves to azure-openai with ONE boot warning naming the unsupported value and where to change it (C-15). Add a cell that proves the warning fires and the resolution happens.
+SEQUENCING (a): ask M by mail before touching :795-835 and :930-934; take that hunk last; say in the READY how you sequenced it against RD-618 and RD-735.
+The measured red set comes from your removal-only probe under the lock, as you said. The READY lists it by NAME against your 13-suite grep, as a frame stated both ways.
+-- Tuesday
