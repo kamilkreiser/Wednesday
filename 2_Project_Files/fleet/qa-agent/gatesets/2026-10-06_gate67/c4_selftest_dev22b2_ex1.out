@@ -1,0 +1,17 @@
+PASS h2proof: 4/4 (tolerant HIT / old MISS on both docs + one-line controls) | []
+PASS predict key-anchored on 22b268143a63 -> e23888941fda2755a234590addfbeaaadf78bdcd
+PASS WRONG-ORDER CONTROL tree 6d498828dc57757f46ce369879750139e5bf8928 DIFFERS from the key tree
+PASS WRONG-ORDER CONTROL fails the read-back on BOTH docs (flow ok=False, cheat ok=False)
+PASS POSITIVE CONTROL: predict on develop = the base d784 reproduces END_TREE 644f23f36231 (got 644f23f36231)
+PASS predict refuses an absent develop BY NAME: "PREDICT REFUSED: develop unresolvable: 'ffffffffffffffffffffffffffffffffffffffff' is not a commit in /Volumes/"
+PASS predict refuses to write in the shared checkout: 'PREDICT REFUSED: predict writes objects; /Volumes/DevMASTER/!CODING/Secuura/Blockchain/2_P'
+PASS Q-M GOOD SIM b9d7938d1841: 8/8 PASS | fails []
+PASS Q-M WRONG-ORDER SIM: FAIL M1 + M8 (order) | got ['M1', 'M8']
+PASS Q-M TAKE-OURS SIM (reads back right on both docs, reverts #1390 formatting): FAIL M1 + M8 | got ['M1', 'M8']
+PASS Q-M TRAILER SIM (Co-Authored-By): FAIL exactly [M4] | got ['M4']
+PASS Q-M ABSENT DEVELOP (fabricated sha): refuses BY NAME, 0 checks run: "QM REFUSED: develop unresolvable: 'ffffffffffffffffffffffffffffffffffffffff' is not a commit in /Volumes/DevMASTER/WEDNESDAY/2_Pro"
+PASS Q-M REAL KIT-PATH CHANGE (SIM develop 4f3a7e183721 edits anchoring.openapi.ts): M6 RE-GATE by content: "FAIL M6 RE-GATE: develop advance touches kit path(s) ['Blockchain/Dev/services/anchoring/src/anchoring.openapi.ts']"
+PASS the two messages DIFFER: absent -> "develop unresolvable" (rc 2, no checks) vs kit-path -> "RE-GATE: … touches kit path(s)" (M6 FAIL)
+PASS Q-M absent merge-in head refuses BY NAME: "QM REFUSED: merge-in head unresolvable: 'eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee' is not a commit i"
+PASS Q-M single-parent SIM: FAIL M2 | got ['M2']
+SELFTEST 16/16

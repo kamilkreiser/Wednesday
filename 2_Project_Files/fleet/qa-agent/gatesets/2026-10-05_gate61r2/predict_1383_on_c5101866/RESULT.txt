@@ -1,0 +1,81 @@
+INDEPENDENT PREDICTION: docs-only merge-in of develop D INTO PR #1383 head H (KS-1401)
+Measured 2026-10-05 ~13:24Z UTC (date -u).
+Own clone: ./_scratch/clone (git clone --shared --no-checkout of the Blockchain checkout). D was fetched BY SHA from
+git@github.com:Secuura/Distributed_Secuura.git using the checkout's core.sshCommand. Clone origin was never fetched.
+Read verbs only against /Volumes/DevMASTER/!CODING. Nothing deleted, nothing mailed.
+
+D = c5101866ef5488297c76f198257685eb1f8d69d2  (Merge PR #1390, KS-1408; parents d784b613c81e + f29510d2108f; tree 731b60eace8c0852e2831ee77fa777ddc5e9102e)
+H = 32e8459bc0f51d1af492aae7c0b3d9754f78c9bf  (tree 8ba2c0c8e9d1313663b408973e914cb917fadb78)
+merge-base(D,H) = 46c3e20cfbd21acee0c67d544180c33deaa4c8ef (= round-1 kit develop)
+
+=== 1. Does the kit's reader survive #1390? NO. ===
+(a) is the kit's same-line regexes from c4_docs_gate61.py: flow_map, place() flow/cheat, and D4 numbered.
+(b) is a newline-tolerant reader: <h2\b[^>]*>(.*?)</h2> with DOTALL, inner whitespace normalised.
+                 raw "<h2" | (a) flow_map keyed | (a) D4 numbered | (b) total | (b) numbered | (b) keyed
+  flow  @D^1 d784     16  |        9          |       16        |    16     |     16       |     9
+  flow  @D            16  |        4          |       11        |    16     |     16       |     9    <- (a) UNDER-COUNTS
+  cheat @D^1           6  |  place-cheat 6    |        -        |     6     |      0       |     6
+  cheat @D             6  |  place-cheat 6    |        -        |     6     |      0       |     6
+  flow  @H            13  |        6          |       13        |    13     |     13       |     6
+  cheat @H             3  |  place-cheat 3    |        1        |     3     |      1       |     3
+At D, #1390 (prettier reflow) SPLIT 5 flow <h2>s across lines: 9 (KS-564, KS-1402), 10 (KS-1015), 13 (KS-1345),
+14 (KS-1388) and 18 (KS-1210). The cheat <h2>s are all still on one line.
+Plant test (scratchpad flow_D_planted99.html): "    <h2>\n  99. planted heading (KS-9999)\n    </h2>" before </body>.
+  (a) D4 regex hits 0 and flow_map hits 0, so (a) MISSES. (b) hits 1 (16 -> 17), so (b) HITS.
+VERDICT: the kit's predictor is NOT sound as-is on D. The prediction below was made with my own newline-tolerant
+implementation (scratchpad p1383/build.py). It is a SECOND implementation, not the kit.
+
+=== 2. Did #1390 add a numbered flow block or a keyed cheat section? NO. ===
+Flow <h2> numbers at D^1 and at D are the same: [1..14, 18, 19]. Cheat keys are the same:
+[KS-1404, KS-1333, KS-1345, KS-1388, KS-1210, KS-1005]. #1390's doc change is a status-banner rewrite, a new ck-item
+(Sweep outcome, KS-1408) inside existing section content, and prettier reflow. No flow number > 22 exists at D and no
+cheat key maps to a flow number > 22. So #1383's 22. goes LAST in the flow doc and 'KS-1401 / KS 1376' goes LAST in the
+cheat sheet, both directly before D's `  </body>`. This is the same position as on d784b613.
+Flow map at D (reader b): KS-666 8, KS-564/KS-1402 9, KS-1015 10, KS-1404 11, KS-1333 12, KS-1345 13, KS-1388 14,
+KS-1210 18, KS-1005 19.
+
+=== 3. Method A: git merge-tree --write-tree D H ===
+rc 1. Conflicted tree 407f806f08a4f9b37ca9f3bacf483d30ae7ad79d.
+Conflicted paths: EXACTLY the two platform-k docs, with one hunk each (flow markers at :2504/:2992/:3116, cheat at
+:4074/:4415/:4475). Both sides insert at base `  </body>`. Every other path auto-merged.
+The merge-tree result differs from D in 4 paths only: 049, the ks1401 suite, and the two docs.
+
+=== 4. Method B: key-anchored construction (build.py; anchor KEEP = D's `  </body>`) ===
+The H own-block is base->H for each doc: ONE replace op, `  </body>` -> block + `</body>`. Flow block 122 lines,
+cheat block 58 lines.
+PREDICTED TREE T (keep) = b1449c08eac2cf96785ba131014ab77e71b211f6
+  flow  blob a8d0b96f05947093ff2926f1fa9eb75e3a0774c9
+  cheat blob 7ed97f4d80f2b9b594d34ddd06307554e896f940
+  049 / suite blobs = H's (22761fd860f5 / 971fd15e3224). All other paths = D's.
+Route 2: merge-tree tree 407f806f with only the two docs replaced -> b1449c08eac2..., which equals route 1.
+D->T per doc is ONE pure insert of exactly H's block, at D's close-tag line (flow D:2990, cheat D:4413).
+For information only, anchor CARRY (H's `</body>`) = a5196317fe5959151fe1d83586c687bacab06525
+(flow 40c34c7126bc, cheat b84e525c7b56).
+
+Read-back from T:
+  flow <h2> numbers [1,2,3,4,5,6,7,8,9,10,11,12,13,14,18,19,22]: ascending, 22 present once.
+  cheat key order   [KS-1404, KS-1333, KS-1345, KS-1388, KS-1210, KS-1005, KS-1401(/KS 1376)]: KS-1401 last.
+  close tag: flow :3112 and cheat :4471, both '  </body>'. The tail from the close tag is byte-identical to D's.
+Control (wrong order: 22 / KS-1401 placed above KS-1005) = d7bd608f396e4100065c7d53e59c080c87b6b43f
+  (flow 19dd334ad7a2, cheat bb9e20171acc). It reads back flow [...,18,22,19] and cheat [...,KS-1210,KS-1401,KS-1005],
+  and it DIFFERS from T.
+Implementation cross-check: the same build.py on d784b613 gives 10c5716a4663eec99b4f961ed4a35c28523c850e,
+the kit's previous prediction exactly.
+
+=== 5. Agreement ===
+AGREE. Method A gives conflicts on exactly the two docs, each a single insertion-point conflict. Method B resolves them
+to T = b1449c08eac2cf96785ba131014ab77e71b211f6.
+Kit run for information (qm_gate61r2.sh predict, in a scratchpad clone because c4 refuses clones under /Volumes/DevMASTER):
+rc 0. M0 PASS. It predicts the SAME b1449c08... (carry a5196317..., control d7bd608f...); output is at
+scratchpad p1383/kit_predict_on_D.out. It agrees BY LUCK. With no number > 22 at D, its blind spot (5 split <h2>s)
+does not change placement. Block 19 is still on one line, so its control key is still KS-1005.
+
+=== 6. For Wednesday to rule ===
+W1. The kit's c4 place()/flow_map/D4 regexes are same-line only. On a later develop where a block numbered > 22 (for
+    example D 8th's possible 33.) has a prettier-split <h2>, the kit would place 22 AFTER it and predict wrongly.
+    Q-M M1 would then fail a correct merge-in, or pass a wrong one built the same way. Before Q-M on any develop past D,
+    rule whether c4 is patched with a newline-tolerant reader (a new kit sha256) or a second implementation is mandated.
+    Note: the c4/lib sha256 are pinned in kit.json.
+W2. On D itself the kit and the independent build agree (b1449c08...), so Q-M M1 on D would be sound.
+W3. #1390's advance d784b613..D touches 0 paths in migrations/, docker/init/ or ks1401*, so it is M6-disjoint on those
+    prefixes. The kit's writer_files list was not re-checked here.

@@ -1,0 +1,40 @@
+SELFTEST OK h2 proof on develop c5101866ef54: 4 checks, fails []
+    INFO H2COUNT-flow base d784 d784b613c81e: tolerant 16 h2 (0 split across lines, 16 numbered, 8 keyed) | old same-line regex 16 numbered, old same-line key finder 8 keyed || develop c5101866ef54: tolerant 16 h2 (5 split across lines, 16 numbered, 8 keyed) | old
+    PASS H2-HIT-flow tolerant reader on develop c5101866ef54 flow + planted `<h2>\n      99. ... (KS-99999)\n    </h2>`: HIT True (parsed 17 h2, was 16)
+    PASS H2-OLDMISS-flow old same-line regex '<h2[^>]*>(\\d+)\\.' on the same planted text: MISSES 99 True (it reads 11 numbered h2, tolerant reads 17)
+    INFO H2COUNT-cheat base d784 d784b613c81e: tolerant 6 h2 (0 split across lines, 0 numbered, 6 keyed) | old same-line regex 0 numbered, old same-line key finder 6 keyed || develop c5101866ef54: tolerant 6 h2 (0 split across lines, 0 numbered, 6 keyed) | old sam
+    PASS H2-HIT-cheat tolerant reader on develop c5101866ef54 cheat + planted `<h2>\n      99. ... (KS-99999)\n    </h2>`: HIT True (parsed 7 h2, was 6)
+    PASS H2-OLDMISS-cheat old same-line regex '<h2[^>]*>(\\d+)\\.' on the same planted text: MISSES 99 True (it reads 0 numbered h2, tolerant reads 1)
+SELFTEST OK reader REFUSES an unclosed h2: flow: h2 reader: 2 `<h2` opening tag(s) but 1 parsed h2 element(s) — a malformed / unclosed h2 is never skipped
+SELFTEST OK docs positive control (real base d784 / head blobs): 6 checked, fails []
+SELFTEST OK docs arm flow an edit OUTSIDE the block (in 19.): want NEW FAIL ['D2-flow'] | got ['D2-flow']
+SELFTEST OK docs arm flow 20. renumbered 17. (ascending broken): want NEW FAIL ['D3'] | got ['D3']
+SELFTEST OK docs arm flow own h2 SPLIT across lines (reader must still find it): want NEW FAIL NONE (must-NOT-fire arm) | got []
+SELFTEST OK docs arm cheat KS-938 h2 duplicated: want NEW FAIL ['D4'] | got ['D2-cheat', 'D4', 'D5-cheat']
+SELFTEST OK docs arm cheat block drops the red-first figure: want NEW FAIL ['D5-cheat'] | got ['D5-cheat']
+SELFTEST OK predict on D == base d784 reproduces END_TREE: 04fa3e0d1b48 vs 04fa3e0d1b48
+SELFTEST OK predict(key) on the REAL develop c5101866ef54: 36c1a881db305d034404a15fa4246cf6563c5199
+SELFTEST OK flow-NUMBERING reading == KEY reading on the real develop: 36c1a881db30 vs 36c1a881db30
+SELFTEST NOTE tail CONTROL on the real develop 36c1a881db30 (EQUALS the key tree — KS-1005 is the last section in both docs, so the tail coincides)
+SELFTEST OK SIM develop with a split-h2 KS-77777 after KS-1005: key tree db7a03a0e677 puts KS-938 ABOVE it ['1005', '938', '77777']; tail CONTROL 6d3674e8d0f2 differs
+SELFTEST OK SIM: flow-numbering (20 < 21) agrees with key: db7a03a0e677
+SELFTEST OK predict REFUSES an absent develop BY NAME: "PREDICT REFUSED: develop unresolvable: 'ffffffffffffffffffffffffffffffffffffffff' is not a commit in /Volumes/DevMASTER/"
+SELFTEST OK predict REFUSES a develop that changed users.ts: "PREDICT REFUSED: develop-after changed code / hook path(s) ['Blockchain/Dev/services/auth/src/routes/users.ts'"
+SELFTEST OK predict REFUSES a develop already carrying a SPLIT KS-938 h2: 'PREDICT REFUSED: cheat: develop ALREADY carries a KS-938 h2 (merged twice? re-gate)'
+SELFTEST OK predict REFUSES a develop without the predecessor KS-1005: 'PREDICT REFUSED: cheat: the predecessor key KS-1005 is not exactly once in develop (cheat: key KS-1005 found o'
+SELFTEST OK mergetree on the real develop prints a verdict (DIVERGENCE)
+SELFTEST OK Q-M GOOD SIM (merge-in at the predicted tree): 8 checked, fails []
+SELFTEST OK Q-M WRONG-ORDER SIM (cheat KS-938 above KS-1005): want FAIL M1 (+M8) | got ['M1', 'M8']
+SELFTEST OK Q-M HAND-RESOLUTION SIM (key order right, one `</div>` short): want FAIL M1 M8 | got ['M1', 'M8']
+SELFTEST OK Q-M CONFLICT-MARKERS SIM (git merge-tree tree committed as is): want FAIL M1 M8 | got ['M1', 'M8']
+SELFTEST OK Q-M TRAILER SIM (Co-Authored-By): want FAIL exactly [M4] | got ['M4']
+SELFTEST OK Q-M TRAILER SIM (Signed-off-by, raw trailers > 1 byte): want FAIL exactly [M4] | got ['M4']
+SELFTEST OK Q-M single parent: want FAIL M2 | got ['M2']
+SELFTEST OK Q-M extra non-kit path: want FAIL M1 M3 | got ['M1', 'M3']
+SELFTEST OK Q-M two new commits: want FAIL M2 M7 | got ['M2', 'M7']
+SELFTEST OK qm REFUSES an absent develop BY NAME (0 checks run, no false re-gate): "QM REFUSED: develop unresolvable: 'ffffffffffffffffffffffffffffffffffffffff' is not a commit in /Volumes/DevMASTER/WEDNE"
+SELFTEST OK qm on the SHARED CHECKOUT, where develop c5101866ef54 is genuinely absent: refuses BY NAME: "QM REFUSED: develop unresolvable: 'c5101866ef5488297c76f198257685eb1f8d69d2' is not a commit in /Volumes/DevMASTER/!CODI"
+SELFTEST OK qm REFUSES an absent merge-in head BY NAME: "QM REFUSED: merge-in head unresolvable: 'eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee' is not a commit in /Volumes"
+SELFTEST NOTE real develop c5101866ef54: key 36c1a881db30 num 36c1a881db30 tail 36c1a881db30; GOOD SIM M 15058e6e1a42 (objects in /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/gatesets/2026-10-06_gate66/_scratch/clone only; no ref written)
+SELFTEST OK 30 of 30
+CHECKED 30 arm(s)

@@ -1,0 +1,15 @@
+PASS W1 mfa.ts removed ['mfaSecret: undefined,', 'mfaBackupCodes: undefined,', 'mfaSecret: undefined,', 'mfaBackupCodes: undefined,'] added(code) ['mfaSecret: null,', 'mfaBackupCodes: null,', 'mfaSecret: null,', 'mfaBackupCodes: null,'] (+10 comment lines) | users.ts removed ['mfaSecret: undefined,'] added(code) ['mfaSecret: null,', 'mfaBackupCodes: null,'] (+5 comment lines)
+PASS W2 S1 head nulls both True / base shape True | S2 head nulls both True / base shape True | S3 head nulls both True / base shape True
+FAIL W3 `mfaEnabled: false` objects at head 10, nulling both [('auth.openapi.ts', False), ('auth.openapi.ts', False), ('auth.openapi.ts', False), ('userRepo.ts', False), ('auth.ts', False), ('auth.ts', False), ('mfa.ts', True), ('mfa.ts', True), ('users.ts', True), ('wallet.ts', False)] | `mfa*: undefined` head 0 (want 0), base CONTROL 5 (want > 0)
+PASS W4 users.ts `mfaSecret: undefined,` at d784 [1123], at develop [1123] (want [1123] both) | hunk headers ['@@ -1120,7 +1120,13 @@']
+PASS W5 userRepo.ts blobs head/d784/develop ['9060b308e6d6', '9060b308e6d6', '9060b308e6d6'] (one value: True) | undefined-skip present True | string-only encryption guard True
+INFO W6 users.ts /me/mfa/verify refuses with no seed (re-arm needs a seed; after a disable there is none): True
+INFO W6 re-enable via users.ts /me/mfa/verify OVERWRITES mfaBackupCodes: True
+INFO W6 re-enable via mfa.ts /setup/verify OVERWRITES both (pending.secret, hashedBackupCodes): True
+INFO W6 RESIDUE users.ts disable verifies TOTP only `if (user.mfaSecret && ...)`: True
+INFO W6 login gate refuses mfaEnabled with no seed (no bypass by a nulled seed): True
+INFO W6 users.ts /me/mfa/enable writes a PENDING seed while mfaEnabled stays false (no disable clears it: disable refuses when !mfaEnabled): True
+INFO W6 S1 revert uses NON-throwing updateUser (a failed revert leaves the row enabled WITH its seed; logged, not thrown): True
+INFO W6 users.ts /me/mfa/verify stores generated backup codes with NO hash call in the handler (pre-existing; not KS-938): True
+CHECKED 5
+1 FAIL (W3)
