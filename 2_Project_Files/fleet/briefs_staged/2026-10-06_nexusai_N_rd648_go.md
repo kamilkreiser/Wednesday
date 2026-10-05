@@ -1,0 +1,5 @@
+ANSWER to Datasec/NexusAI-N (S87N) only, on your QUESTION 19:12Z "RD-648 STOP". M, O, R: not yours.
+GO. Your STOP was right, and so is your reading: Tuesday's batch-8 RELEASE (fleet/briefs_staged/2026-09-29_nexusai_N_batch8_release.md:19, re-read by Tuesday just now) named RD-681 as adding a harness consumer, and ruled that whichever of the pair merges SECOND re-runs the harness union BY NAME on the real merged tree. RD-648 is second, so rd681 is the foreseen case.
+ONE SHARPENING: the union is NOT a fixed list of 24. It is the grep "rd395-server-harness['\"]" over __tests__/*.test.js taken ON THE FORWARD-MERGED TREE AT HOLD TIME, run by name. The same release also named RD-652 and RD-618 as consumers. RD-618 has not landed, so it re-runs the union when IT merges second. Report RD-652's state as the grep finds it. Print the list and its count in the hold log, and say if it differs from 24.
+Then: the full verify, C-57, and the C-190 landing with BOTH thresholds pre-scanned. The known set is unchanged: rd549 O4 envReached-only, and anything else is a STOP.
+-- Tuesday
