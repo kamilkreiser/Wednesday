@@ -1,0 +1,434 @@
+LAUNCH BRIEF (Seat R 1st): raise the FIVE Wednesday-held Spark passes (KS-1305, KS-1136, KS-998, KS-1313+KS-1326, KS-1164) as FIVE PRs, one ticket each, from develop 22b268143a63, ONE READY to gate68; a new lane `Secuura/Blockchain-R` beside live E 6th and the B lane. Product files measured DISJOINT from every live lane; the two platform docs are shared by all, so every PR merges AFTER #1385 and #1394 (both GO-pinned on 22b2). cloud: raise
+
+# LAUNCH BRIEF: Seat R 1st, Secuura/Blockchain, lane R (pane `Secuura/Blockchain-R`). You are a RAISE seat. Kam's 2026-10-06 09:37:54 rule is live (weekly allowance past 70%, so the Spark takes 80% of tasks). A Claude seat launches only to RAISE, GATE or MERGE local-model output, and **this seat's clause is "cloud: raise"**: the Spark cannot raise a PR, write §4 doc blocks against measured timings, or re-prove red-first at a new base. YOUR WORK: take five Spark passes, each PASS 7/7 in round 1 and each HELD by Wednesday's review agent (VERDICT: HOLD), and raise them as FIVE PRs from the SAME base. Each PR is ONE commit: product + test + its own block in BOTH platform-k docs. Then push each once, send ONE READY to gate68, and merge each only on its own GO. Secuura NEVER force-pushes. From Wednesday (DRAFT: staged by Wednesday's brief drafter, NOT sent, NOT launched)
+
+## PROVENANCE (measured 2026-10-05T22:47Z-23:00Z = 2026-10-06 09:47-10:00 AEDT by Wednesday's drafter. Read-only verbs only in the project. Every apply, commit-tree and merge-tree ran in the drafter's own `git clone --shared --no-checkout` scratch clone `/private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/e2216636-d4a8-4372-af80-77a0943bf859/scratchpad/raise5/vclone`, built from the shared checkout. Nothing was fetched into, locked in, written to or sent from the target project.)
+- P1 **develop at origin = `22b268143a6377c9a82cd03379daa596cd26d644`** (KS-1330 re-land, #1389, merged by G 2nd). This CONFIRMS the commission's `22b268143a63`. In the same read: `refs/pull/1385/head` `f6b49d68209d`, `/1393/head` `97ce2f337ae6`, `/1394/head` `a94ec8f6a2c6`. Read at 22:52:14Z, rc 0. Instrument: `GIT_SSH_COMMAND="$(git -C …/2_Project_Files config --get core.sshCommand)" git -C "/Volumes/DevMASTER/!CODING/Secuura/Blockchain/2_Project_Files" ls-remote origin refs/heads/develop refs/pull/{1385,1393,1394}/head 'refs/heads/feature/ks-{1256,998,1136,1164,1305,1313}*'`, output to `scratchpad/raise5/lsremote1.txt`. (That env prefix was the drafter's one-shot ls-remote. **YOU never export `GIT_SSH_COMMAND` in a shell that runs a push tool**: STANDING_LINES `:412`.)
+- P2 **The shared checkout is STALE (KS-1422): `refs/remotes/origin/develop` = `32e058975d4e`**, while local `develop` and `HEAD` = `c56dd7c32edf`. Instrument: `git -C …/2_Project_Files rev-parse`, 22:52Z. Even so, **`22b268143a63` IS in the shared object store**: `cat-file -t` returns `commit`, and so do `32e058975d4e`, `97ce2f337ae6`, `a94ec8f6a2c6`, `f6b49d68209d`, `46c3e20cfbd2`, `f01c1da5717f` and `3cb93b9c731e`. Control: `deadbeefdeadbeef` gives `Not a valid object name`. `32e058975d4e..22b268143a63` = 72 paths, of which 21 are `systemTest/akto` and 34 are `systemTest/schemathesis` (`git diff --name-only` in the scratch clone).
+- P3 develop's first-parent history since the stale ref: `22b268143` KS-1330 · `f01798064` #1391 · `c5101866e` #1390 (KS-1408: splits `<h2>` across lines in both docs) · `d784b613c` KS-1404 · `3cb93b9c7` #1392 · `232623892` KS-1210. Instrument: `git log --first-parent 32e058975d4e..22b268143a63`, scratch clone.
+- P4 **The five holds: NO `READY_*` file exists for any of them.** The positive control is that `READY_KS-1345-LIST-1_…` and `READY_KS-1388-*` ARE listed in the same directory. Instruments: `ls /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/` (count matching `READY_KS-(998|1136|1164|1305|1313)…2026-10-0[56]` = 0), and `hold_ready.py:404` (`out = os.path.join(NIGHT_DIR, fname)`, the only place a READY is written). **The HELD artefact for each is its run dir's `REVIEW.md`, verdict HOLD.** Rows: `local-model/spark/done.md` :29, :30, :32, :33, :34. Each REVIEW is read whole, 22:5xZ:
+
+| Hold | run dir (`…/local-model/runs/spark_secuura_2026-10-05_<tag>/`) | REVIEW verdict (line) | REVIEW B / sha256 | `round.json` tier, tip, golden | canonical `out.md.checker/patch.diff` B / sha256 |
+|---|---|---|---|---|---|
+| KS-998 | `KS-998-format-gate-grep-fixed` | `**VERDICT: HOLD (ready to raise).** Rung 1` (:5) | 4,194 / `1190723399ec1c11` | bash_patch, `46c3e20cfbd2`, DIFFERS (REVIEW: FALSE, trees equal `359c29d379aa`) | 5,599 / `a4905e4da54a6cf7` |
+| KS-1136 | `KS-1136-aggregate-unreadable-artefacts` | `**VERDICT: HOLD (ready to raise).** Rung 2` (:5) | 4,149 / `42e96118f80a9139` | bash_patch, `46c3e20cfbd2`, DIFFERS (REVIEW: FALSE, trees equal `cc1c9ded5c0d`) | 10,960 / `7c38ea016b155074` |
+| KS-1164 | `KS-1164-locale-count-cell` | `VERDICT: HOLD` (:1) | 8,644 / `e7dc8a5ba3732042` | code_patch (test-only), `f01c1da5717f`, DIFFERS (REVIEW: header lines only) | 4,643 / `5c5e586406ebe4b1` |
+| KS-1305 | `KS-1305-prisma-not-generated-diagnosis` | `VERDICT: HOLD` (:1) | 9,560 / `246e97b1ecfede4b` | code_patch, `3cb93b9c731e`, BYTE-IDENTICAL | 4,774 / `9556d9e11ea74b06` |
+| KS-1313 (+KS-1326) | `KS-1313-child-verdict-json-reporter` | `VERDICT: HOLD` (:1) | 10,655 / `adfa547d48ef8b4e` | code_patch (self-testing), `3cb93b9c731e`, BYTE-IDENTICAL | 9,252 / `59f5d73d68df586d` |
+
+  Instrument: `wc -c` + `shasum -a 256` + `/usr/bin/grep -n -m1 -i VERDICT` + `cat round.json`. **All five: found, PASS 7/7 (`checker_result`), HOLD. None is excluded.**
+- P5 **Every product file is UNCHANGED from its Spark tip to develop, and every new test path is ABSENT on both sides.** Instrument: `git ls-tree <rev> -- <path>` at `22b268143a63`, `46c3e20cfbd2`, `f01c1da5717f` and `3cb93b9c731e` (`scratchpad/raise5/blobs.sh`); the nonexistent-path control is empty on all four. Blobs, equal at all four revs: `systemTest/scripts/check-package-format.sh` 100644 `cfae0cc` · `Blockchain/Testing/jobs/09-aggregate-report.sh` **100755** `739ebab` · `systemTest/performance/gate/report.ts` 100644 `ac59af3` · `Blockchain/Dev/services/originate/src/db.ts` 100644 `0d7b767` · `systemTest/performance/tests/unit/utils/unitSuiteSlotIndependence.test.ts` 100644 `00103d9`.
+- P6 **STRICT apply at develop `22b268143a63`, rc 0 for all five**. Method: `read-tree` into a temp `GIT_INDEX_FILE`, then `git apply --cached --check`, then apply, `write-tree` and `commit-tree` (`scratchpad/raise5/partition.sh`, run once). **Tamper control:** one context byte changed in KS-998's product hunk (`Whose red`→`Whose RED`; `cmp` rc 1) gives strict-check **rc 1** `error: patch failed: systemTest/scripts/check-package-format.sh:177`, and the original still gives rc 0 (`ctl.sh`). Applied file sets, from `diff-tree --numstat`, with modes:
+  - **KS-998:** `systemTest/scripts/check-package-format.sh` +1/-1 (100644); NEW `systemTest/__tests__/ks998_format_gate_push_label_is_literal.test.sh` +94 (created 100644; its siblings are 14×100755 / 2×100644). Applied tree `dd3cbd8e2bcf`.
+  - **KS-1136:** `Blockchain/Testing/jobs/09-aggregate-report.sh` +14/-0 (**100755**, mode kept in the index); NEW `Blockchain/Dev/scripts/__tests__/ks1136_aggregate_report_unreadable_artefacts.test.sh` +164 (100644; 36 of 51 siblings are 100644). Tree `d35905e7b8c0`.
+  - **KS-1164:** NEW `systemTest/performance/tests/unit/gate/ks1164-breakdown-counts-are-locale-grouped.test.ts` +102. Test-only. Tree `72b272fc1dc3`.
+  - **KS-1305:** `Blockchain/Dev/services/originate/src/db.ts` +19/-0; NEW `…/originate/src/__tests__/ks1305-missing-generated-prisma-client-is-diagnosed.test.ts` +95. Tree `dc3f8be6fbda`.
+  - **KS-1313 (+KS-1326):** `systemTest/performance/tests/unit/utils/unitSuiteSlotIndependence.test.ts` +155/-9, 3 hunks. Tree `ad7f09724c60`.
+- P7 **The live lanes' file sets** (three-dot diff from develop `22b268143a63`, scratch clone, 22:5xZ):
+  - **#1393** (KS-1278, B lane, head `97ce2f337ae6`, merge-base `32e058975d4e`, 17 ahead / 2 behind): originate `repositories/documentRepo.ts`, `routes/documents.ts`, `__tests__/ks1278-…test.ts`, `__tests__/ks1293-originate-suite-is-hermetic.test.ts`, plus both docs.
+  - **#1394** (KS-723, head `a94ec8f6a2c6`, merge-base `d784b613c81e`): `docs/openapi/secuura-api.yaml`, anchoring `anchoring.openapi.ts`, `__tests__/ks723-…test.ts`, plus both docs.
+  - **#1385** (KS-938, E lane, head `f6b49d68209d`): auth `routes/mfa.ts`, `routes/users.ts`, `__tests__/ks938-…test.ts`, plus both docs.
+  - **E 6th's KS-1256** (unraised): `git -C …/worktrees/s-e6-ks1256 diff-index --name-only HEAD` gives exactly `Blockchain/Dev/services/api-gateway/src/routes/verification.ts`, at HEAD `22b268143a63`. E 6th's brief adds a NEW ks1256 test and block `21.` in both docs. `services/redis.ts` is READ by that lane, not edited (its brief P12, ITEM 1(a)). `git grep -i 'KS[- ]1256'` at develop = 0 lines. That grep has no control of its own: the same tree's `getNotificationSettings('platform-settings')` grep hits `admin.ts`, `verification.ts` and `health.ts`.
+- P8 **PARTITION, MEASURED** (`partition.sh` + `ctl.sh`, scratch clone):
+  - **Path intersection, each hold's set ∩ each lane's three-dot set = 0 in all 15 pairs.** Control: a lane ∩ itself = 5.
+  - **No hold path matches the KS-1256 area** (`verification\.ts|services/redis\.ts|api-gateway`): 0/0/0/0/0. Control: the s-e6 path matches, 1.
+  - **Holds pairwise, product only: 10/10 `merge-tree` rc 0.** With ONE simulated block per hold inserted before `</body>` in BOTH docs: **10/10 rc 1, the conflict paths are exactly the two `Projects Documents/*.html`**, so the instrument fires.
+  - 🔴 **Every hold vs each live lane head: rc 1, conflicts in the docs ONLY. The cause is NOT the holds.** Control: develop ITSELF vs each head is ALREADY rc 1 on the same docs (#1393: cheat; #1394: both; #1385: cheat). The lanes already owe develop a docs merge-in. The holds add only their own tail blocks.
+- P9 **The open-PR census.** Tool: Wednesday's GET-only `/Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-10-05_spark-screen/prs.py`, with `GH_TOKEN` read by name from `/Volumes/DevMASTER/!CODING/Secuura/Blockchain/4_Credentials/.env` and never printed. Run 22:56:14Z, rc 0. Output `scratchpad/raise5/prs.json`.
+  - **25 open PRs.** For each hold's paths/key pattern, open PRs touching them = **0, 0, 0, 0, 0**.
+  - Open PRs naming the five keys or KS-1326 in title or head = **0**.
+  - `Projects Documents/` is touched by **#1394, #1393, #1385 and #1383** (KS-1401, F lane, no live seat).
+  - Positive control: `package.json` hits 11 PRs, equal to the B 60th brief's figure.
+  - Adjacent, not colliding: **#949** (dependabot prisma 7.8.0→7.10.0, originate `package.json` + lock), named by KS-1305's REVIEW.
+- P10 **Origin refs: 2,086; highest `refs/pull/<n>/head` = 1394.** Old same-key branches exist and are NOT ancestors of develop (`merge-base --is-ancestor` rc 1): `feature/ks-1136-audit-jobs-a-per-image-…` `58e2fb66` (item 1; develop log has 1 KS 1136 subject); two `feature/ks-1164-…` (`c9ea1dc1`, `3a979eff`; develop has 2 KS 1164 subjects); `feature/ks-1313-readsuitecounts-label-set-l6-r24-1` `cb31a58c` (= #1245, closed unmerged per the REVIEW's `GET /pulls/1245`). **None is yours, and none is an open PR (P9).** Instrument: `ls-remote origin` to `lsremote_all.txt`, 22:5xZ.
+- P11 **Seat name and token (the commission said "R2 1st" unless a convention differs; it does):**
+  - Lanes are ONE letter + ordinal: B…G, panes `Secuura/Blockchain-<L>`. Pane-tag census over every 2026-10-05/06 brief: `-C` 57, `-D` 122, `-E` 168, `-F` 129, `-G` 67, `-R` **0**. `seat r ` 0 and `r 1st` / `r2 1st` 0 in `history.md` and in all staged briefs. Control: `e 6th` 39 in the briefs.
+  - 🔴 **Token `r1` is UNSAFE.** 4 origin refs END in `-r1-1` (`…-l3-r1-1`: KS-1179, KS-1181, KS-1288, KS-872), and `history.md` has 37 bounded `r1`.
+  - **`r2` / `r21` (the "R2" form) are worse:** 5 and 7 origin refs (`-r2-3-`, `-r21-readyaml-1`, …).
+  - **`ra1`: 0 origin refs (raw), 0 bounded in `history.md` (3 raw, inside words), 0 `s-ra1-*` worktrees.** Instrument: `/usr/bin/grep -c` over `lsremote_all.txt` and `history.md`, plus `ls worktrees/`; the `-b64-` control = 1.
+  - **PROPOSED: Seat R 1st, pane `Secuura/Blockchain-R`, token `ra1`** (Q-NAME).
+- P12 **Live floor, 22:53:10Z:**
+  - Panes: `%0 wednesday` (the drafter's `$TMUX_PANE`), `%51 Secuura/Blockchain` (B 65th), `%50 Secuura/Blockchain-E` (E 6th), `%1 fleet-monitor`.
+  - **Exactly ONE lock: `.push-lock-e4`**, holder `{"seat": "Secuura/Blockchain-E e6", "pid": 51867, "branch": "feature/ks-938-…-e3-2", "started_utc": "2026-10-05T22:48:18Z"}`. E 6th is on #1385's GO.
+  - 387 `s-*` entries in `worktrees/`. No `s-b65*`/`s-b66*` (B 65th works in `s-b63-ks1278`, per its READY). `s-b64-ks723` and `s-e6-ks1256` are present.
+  - Instrument: `tmux list-panes -a -F '#{pane_id} #{@cockpit_name} #{pane_pid}'` + `ls -1A worktrees/` + `cat .push-lock-e4/holder`.
+- P13 **The live lanes' lock tools do NOT know any R lock.**
+  - B 65th's `…/2026-10-05_seatB-65th/raise/lock56.sh`: own lock `-56` (`:212`); WAIT `-f3` `:274`, `-e4` `:287`, `-g1` `:288`, `-d8` `:289`; STOP 16 at `:319`; and the unattributed-lock code `unattributed_absent_or_stop()` `:355`, which STOPs on any lock it cannot name.
+  - E 6th's `…/2026-10-05_seatE-6th/raise/locke4.sh`: WAIT `-56`, `-f3`, `-g1`, `-d8`.
+  - **So a NEW `.push-lock-ra1` would read UNATTRIBUTED to both live seats, and each would STOP.**
+  - **`.push-lock-d8` is in BOTH live WAIT sets and is ABSENT** (P12). The D lane has no seat and no queued row (`0_Brain/tasks/NEXT-PICKUP.md` lanes table).
+  - Instrument: `/usr/bin/grep -n` over both tools.
+- P14 **Platform-k docs at develop** (newline-tolerant `<h2[^>]*>\s*(\d+)\.` reader, `re.S`, per STANDING_LINES `:409`). Control: a planted `<h2>\n 99.` is HIT by this reader and MISSED by the same-line one (`scratchpad/raise5/h2.py`).
+  - Flow: 2,991 lines, `</body>` :2990. Numbered blocks, in file order: 1-11, `12.` KS-1333 :2420, `13.` KS-1345 :2504, `14.` KS-1388 :2618, **`18.` KS-1210 :2734, `19.` KS-1005 :2848**. The same-line reader counts 11 of 16. **Block order is MERGE order, not number order.**
+  - Numbers already claimed by lanes: #1393 `15.`, #1394 `16.`, #1385 `20.`, KS-1256 `21.` (E 6th brief :11). `17.` is a gap (B 60th's KS-948 slot: 0 origin refs match `ks948|KS-948`, 0 develop subjects; where KS-948 went is UNMEASURED).
+  - Cheat: 4,414 lines, `</body>` :4413. Sections are unnumbered and KS-keyed; the last five are KS-1333, KS-1345, KS-1388, KS-1210, KS-1005.
+- P15 Project rules at develop:
+  - Skill `.claude/skills/secuura-test-discipline/SKILL.md`, blob `eaf43dfd4d98`, 642 lines (`git show 22b268143a63:…` to `SKILL_22b2.md`):
+    - §4 `:360-:420`: "Every test change updates its platform's two HTML docs, in the same commit"; "Test change" includes **systemTest** (`:363`); the timing rule `:380-:409`; "say so explicitly and why" if unaffected (`:417-:418`).
+    - Review authority `:30-:36`: **`systemTest/` → Peter's comments take precedence.** That covers KS-998, KS-1164 and KS-1313.
+    - §5b `:444-:452` red-on-broken / green-after.
+    - §5c `:454-:470`: the systemTest file cap is 400 lines (non-blank, non-comment). Applied KS-1313 file ≈188, KS-1164 ≈59, KS-998 test ≈51 (drafter's python approximation; ESLint `max-lines` is the instrument).
+    - §5d `:507-:516`; §5e `:518-:541` (systemTest docs go in `systemTest/CLAUDE.md`, never root); §5f `:543-:553`.
+  - The `.claude/skills/` folder does NOT exist beside the project's `CLAUDE.md` (`ls` → No such file). The skill lives in the repo tree only (`git ls-tree 22b268143a63 .claude/skills/` = `secuura-test-discipline`).
+  - Project `CLAUDE.md` (306 lines, sha256 `812663207c976c69`): Merge flow `:221-:276` (Test Evidence block `:230`; TESTED = gate GO at the current head `:237`; "Untested, or no GO → no merge"); rule-7 extranet ban `:187`.
+- P16 **Linear, read-only GraphQL**, `LINEAR_API_KEY` by name from the same `.env`, never printed, HTTP 200 ×6, 22:59:31Z:
+  - **KS-998** Backlog, assignee board account (kamil.kreiser@secuura.ai), 1 comment (2026-09-25), 0 attachments.
+  - **KS-1136** In Progress, board account, 1 comment (2026-09-18), attachment #1051.
+  - **KS-1164** In Progress, board account, 3 comments (newest 2026-09-25), attachments #1271, #1200.
+  - **KS-1305** Backlog, board account, 0 comments, 0 attachments.
+  - **KS-1313** In Progress, **assignee NULL**, 4 comments (newest 2026-09-26), attachment #1245.
+  - **KS-1326** Backlog, board account, 2 comments (2026-09-26), 0 attachments.
+  - **None is on Peter or Stuart.**
+- P17 Gate kits: the newest are `2026-10-06_gate66` and `2026-10-06_gate67`; **no gate68** (`ls …/fleet/qa-agent/gatesets/`).
+- P18 Usage: `usage_gate.sh --check` printed `⚠ ADVISORY — weekly usage 71% >= 70%` and `OK — weekly usage 71% < 90% (gauge age 4 min)`, 22:59:55Z. `df -m /Volumes/DevMASTER`: **700,604 MiB free**.
+- P19 Templates, read whole:
+  - `2026-10-05_seatB60_raise.md` (242 lines, sha256 `5cee617297e43c70`)
+  - `2026-10-05_seatB59_raise.md` (344, `146ea023f143c5d7`)
+  - `2026-10-05_seatD6_raise.md` (223, `0296a022771d4cf8`)
+  - STANDING_LINES (**412 lines**, sha256 `cc52dff8917c8563`; `:399-:412` are new since B 60th's 397)
+  - B 64th's handover `:64-:95` (KS-1422, sha256 `01158982a8bdd141`)
+  - `0_Brain/tasks/NEXT-PICKUP.md` `:10-:50`
+  - `0_Brain/learnings/2026-10-06_past-70pct-spark-takes-80pct-of-tasks.md`
+
+**UNMEASURED by the drafter. Each names the instrument that closes it:**
+- **Every suite, red-first, tsc, eslint and shell-suite figure AT `22b268143a63`.** The REVIEW figures ran at the Spark tips, on farmed or symlinked `node_modules`: expectations, never quotable. Closes at the seat's own worktree runs in ITEMS 1-5.
+- **The real (not simulated) doc-block conflicts and every T_k.** Closes at ITEM 6's chain prediction.
+- **How B 65th's and E 6th's inbox matchers classify a `[Wednesday -> Secuura/Blockchain-R] … (Seat R 1st)` subject.** Closes when Wednesday runs each seat's own matcher on the real subject. Expected: AMBIGUOUS, a wake but never an act (STANDING_LINES `:332` rule 2).
+- **Whether B 66th's lock tool, not yet copied, keeps `.push-lock-d8` in its WAIT set.** Closes with `/usr/bin/grep -n push-lock-d8` over its `lock*.sh` at its ITEM 0.
+- **The text of Kam's card `secuura-capped-prs-1245-1278-disposal-1005`.** Cited only through KS-1313's brief :9 and REVIEW. Closes with `bash /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/tools/decision_queue.sh show secuura-capped-prs-1245-1278-disposal-1005`.
+- **Whether the pre-push hook runs the PATCHED `check-package-format.sh` from the pushing worktree (PR 3).** Closes with PR 3's own push log.
+- **Where KS-948 (flow slot `17.`) went.** Closes with a GitHub `pulls?state=all&head=` search.
+- **The seat's ctx and pane id.**
+
+---
+
+## BLUF
+You are **Seat R 1st**, the first seat of a NEW lane, R for raise. You launch in a NEW cockpit pane named `Secuura/Blockchain-R`, beside two live seats:
+- **E 6th** (`%50`): holds `.push-lock-e4` now; merging #1385 on gate66, then KS-1256.
+- **The B lane** (`%51`): B 65th on #1393 round 2. B 66th follows it on the same pane, for #1394's body fix and merge.
+
+**develop is `22b268143a63`.** It is in the shared store even though the checkout's tracking ref is stale at `32e058975d4e` (P1-P2).
+
+**Your queue: FIVE PRs, one ticket each, all from the SAME base `22b268143a63`, in this order:**
+
+| PR | Ticket line | Held source (run dir) | Files (P6) | Tier (PROPOSED) | Flow `<h2>` |
+|---|---|---|---|---|---|
+| 1 | `Refs KS-1305` | `KS-1305-prisma-not-generated-diagnosis` | originate `src/db.ts`, NEW ks1305 test, the two docs | **T1** (`db.ts` is the tenant-isolation module; a runtime message change; §5f) | `22.` |
+| 2 | `Refs KS-1136` | `KS-1136-aggregate-unreadable-artefacts` | `Blockchain/Testing/jobs/09-aggregate-report.sh` (100755), NEW ks1136 test, the two docs | **T1** (security-audit aggregator, fail-open → fail-closed) | `23.` |
+| 3 | `Refs KS-998` | `KS-998-format-gate-grep-fixed` | `systemTest/scripts/check-package-format.sh`, NEW ks998 test, the two docs | **T2** (display label only; verdict untouched, per the REVIEW) | `24.` |
+| 4 | `Refs KS-1313` (+ KS-1326: **Q-1326**) | `KS-1313-child-verdict-json-reporter` | `systemTest/performance/tests/unit/utils/unitSuiteSlotIndependence.test.ts`, the two docs | **T2** (tooling unit test) | `25.` |
+| 5 | `Refs KS-1164` | `KS-1164-locale-count-cell` | NEW `systemTest/performance/tests/unit/gate/ks1164-…test.ts`, the two docs | **T2** (test-only) | `26.` |
+
+**Why this order (PROPOSED; Wednesday rules at ITEM 0):** the two T1s go first, while ctx is freshest and because a raised T1 is worth the most if you hand over cold. Then the three T2s, smallest last. **If you hand over cold, the next PR is the first unbuilt row.**
+
+### 🔴 THE BUNDLING DECISION, AND WHY: FIVE PRs, ONE READY, ONE GATE (gate68). NOT one bundled PR.
+- **Kam's 2026-09-18 batching (STANDING_LINES `:257`, "the gate duplication Kam ruled against") is met at the GATE, not the PR.** ONE READY carries all five heads plus each predicted merge-in tree T_k. ONE kit (gate68) gates them once, with per-PR tiers. Wednesday's B 60th ruling Q-M carries: a merge-in head whose tree == T_k, and whose diff from the gated head is ONLY the two docs, is covered by gate68 without a re-gate. So the five-PR shape adds **zero gates**.
+- **A single bundled PR with per-ticket commits was considered and is REJECTED, for four measured reasons:**
+  1. **Wednesday's standing ruling: no two `Refs` in one PR, because the board guard trips on them.** It is carried in B 60th `:37`, B 61st `:49`, F 1st `:54`/`:107` (Q-SPLIT RULED) and F 2nd `:42`. A five-key PR breaks it four times over.
+  2. **Mixed tiers (2× T1 + 3× T2) and mixed review authority.** systemTest is Peter's (skill `:34`), `db.ts` and the audit jobs are platform-k. One squash would put a T2 label change behind a T1 tenant-module review. **One NO GO on any ticket would block all five.**
+  3. **§5f differs per ticket.** KS-1305 is a runtime change (NOT Done, live sweep owed); the others are tooling or test. One squash body would have to carry five different closing states.
+  4. **Bundling saves NO doc conflict against the live lanes.** Every R PR conflicts with every live lane only in the two docs, and the lanes ALREADY conflict with develop there (P8 control). What bundling would save is the 4 intra-R merge-ins plus 4 pushes of ~8 min. That is a cost, not a safety issue, and Q-M already covers it without a re-gate.
+- **If Wednesday rules Q-BUNDLE the other way** (the board guard waived for this round), the fallback is ONE PR with FIVE per-ticket commits: product + test + that ticket's two doc blocks in EACH commit, so §4's "same commit" still holds commit by commit. One push, one merge-in per live-lane landing, one gate. **Do not build it without that ruling.**
+
+### 🔴 DOC SEQUENCING (both docs are touched by EVERY lane)
+- **Each PR carries its doc edits INSIDE its own single commit** (§4 MUST): a NEW self-contained flow block (`22.`-`26.`) and a NEW cheat-sheet section, KS-keyed and unnumbered (the cheat sheet's own convention, P14). Both go at the tail, before `</body>`, after whatever develop then holds. You touch NO existing block. Each PR is built as a sibling on the same base, never stacked.
+- **Numbers follow rulings, not merge order** (Q-N, carried). `22.`-`26.` are the next free numbers after E 6th's `21.` (P14). `17.` stays a gap.
+- **Merge order on develop: every R PR merges AFTER #1385 and #1394.** Their GOs or verdicts pin trees on develop `22b2`: #1385's GO tree `2203187daaa2`; #1394's key-anchored merge-in `e23888941fda` "void if develop moved" (NEXT-PICKUP :15, :17). An R merge first would void both, so **R is SEQUENCED-AFTER them in the docs.** Product files are disjoint (P8).
+- **For #1393 round 2 and E 6th's KS-1256** (neither gated yet), the order is whichever Wednesday's GOs name. The rule for you: **you never merge while a live lane's GO is pinned to the develop you would move.** Before each merge, list the inbox and ask Wednesday by STATUS mail if unsure.
+- **PRs 2-5 each catch up by MERGING develop IN, docs-only,** after the previous R PR lands and after any lane landing, and only on a ruling naming that PR. Never a rebase, never a force push. Resolve ONLY the two docs, keeping every block. Flow blocks keep develop's existing order, and yours append at the tail in number order. Any conflict outside the two docs is a STOP.
+
+**Every PR is a test change:** skill §4 (both platform-k docs, same commit), §5b (red on broken, green after), §5d (WHY + ticket on every changed line; the PR's own ticket URL), §5f (NOT COVERED by name; no ticket moves to Done on its account).
+
+**The queue:** ITEM 0 plan confirmation (STOP for the ANSWER) → ITEMS 1-5 build each PR to ONE local commit → ITEM 6 chain prediction, push each once, raise, ONE READY → gate68 → ITEM 7 merge on each GO (merge-in for 2-5), handover, WRAP.
+
+**Budget. Hand over COLD at ~62% ctx**, naming the NEXT PR and recording every built commit (head, tree, trailer proof, pathgate) as UNPUSHED unless ITEM 6 ran. 🔴 **Never START a new PR build past ~45%: go to ITEM 6 with what you have.** Read ctx off YOUR pane's statusline, or write "Please read my ctx." Never estimate it. Read files by line range; never `cat` an HTML doc or a lockfile whole. **Never end a turn on a "next up" line with nothing running** (STANDING_LINES `:338`).
+
+🔴 **ARM `inbox_watchra1.sh` IN THE BACKGROUND AT BOOT, BEFORE ITEM 0's MAIL** (`timeout: 7200000`, a tracked background job).
+- Re-arm after EVERY match, with `SINCE` = the newest mail you have READ, never a wall clock (STANDING_LINES `:399`).
+- After any long action (install, suite, push, merge), LIST the inbox by API before the next ref write.
+- Before acting on a GO or ruling: confirm subject, timestamp and `spf`/`dkim`/`dmarc` pass.
+- No mail leaves unless the watcher pid in it is non-empty and `ps -p` finds it alive.
+
+**Authority:**
+- Kam 2026-10-06 09:37:54 (live board): *"we are past 70% of the weekly allowance. We now need to switch to using the spark for 80% of tasks"*. Raising Spark output is the "cloud: raise" clause (P18: 71%).
+- Kam's 2026-09-11 TESTED merge grant: each merge only on a gate's GO naming the head SHA (`CLAUDE.md:237`).
+- Wednesday's DECISIONS-24 (2026-10-05 20:04): "KS-1313 + KS-1326 (one build …)" (KS-1313 brief :8).
+- **Necessity clause (cloud):** the Spark cannot raise, gate or merge, cannot author §4 doc blocks against measured timings, and cannot re-prove red-first at a new base.
+
+**Seat identity (PROPOSED for ITEM 0 to confirm; Q-NAME, Q-LOCK):**
+- **Pane `Secuura/Blockchain-R`** (new; Wednesday opens it).
+  - You send on `[Secuura/Blockchain-R -> Wednesday] `; Wednesday sends on `[Wednesday -> Secuura/Blockchain-R]`. **Every subject names `(Seat R 1st)`.** Routing tokens appear ONLY as the leading tag.
+  - Read your pane id from `$TMUX_PANE` (STANDING_LINES `:394`) and your cockpit tag from `#{@cockpit_name}`.
+- **Token `ra1`** (P11). **Record folder** `/Volumes/DevMASTER/!CODING/Secuura/Blockchain/5_Project_History/<UTC boot date>_seatR-1st/`. Small text files only.
+- **Lock: REUSE `/Volumes/DevMASTER/!CODING/Secuura/Blockchain/worktrees/.push-lock-d8`** with `LOCK_SEAT='Secuura/Blockchain-R ra1'` (P13; precedent: E 6th reuses `-e4`, and `-f3` was held by `f4`).
+  - Every attribution reads the holder file's `seat` field, never the path (STANDING_LINES `:408`).
+  - A `.push-lock-d8` whose holder `seat` is NOT `Secuura/Blockchain-R ra1` is a STOP-and-mail.
+- **Branches (new, yours):** `feature/ks-<n>-<slug>-ra1-<k>`, k = the PR row.
+- **Worktrees (new, yours, ABSOLUTE):** `/Volumes/DevMASTER/!CODING/Secuura/Blockchain/worktrees/s-ra1-ks{1305,1136,998,1313,1164}`.
+  - Create each with `git worktree add --detach <abs> 22b268143a6377c9a82cd03379daa596cd26d644` (full SHA, never `-b`), only after the ITEM 0 ANSWER, under THE LOCK RULE.
+  - You ADOPT nothing: `EXPECTED_ADOPTIONS = 0`.
+- **Gate `gate68`. GO string `GO (Seat R 1st): merge <n> on gate68`**, one PR per GO.
+
+## 🔴 PARTITION, FROM BOTH SIDES
+**Your side: what you may touch.**
+- Exactly the P6 sets per PR, plus ONE new block per doc per PR.
+- **Not yours:**
+  - every path in P7 (originate `documentRepo.ts`, `routes/documents.ts`, `ks1278`/`ks1293` tests; `secuura-api.yaml`, `anchoring.openapi.ts`, the `ks723` test; auth `mfa.ts`, `users.ts`, the `ks938` test; api-gateway `routes/verification.ts`, `services/redis.ts`, any ks1256 test);
+  - every existing doc block, including the lanes' `15.`/`16.`/`20.`/`21.` and their cheat sections when they land;
+  - any lockfile, manifest, `audit-baseline.json` or `secuura-api.yaml`.
+- Prove it mechanically with `pathgatera1.py` at every diff step, with a firing control: PR 1's head against PR 2's declared set must FAIL, naming the missing and the extra paths.
+
+**Their side: what the live seats see of you (the MIRROR).**
+- **Locks.** `lock56.sh` (B) and `locke4.sh` (E) WAIT on `.push-lock-d8` and would STOP on any lock they cannot name (P13). Reusing `-d8` therefore makes you a bounded WAIT for them, never a STOP. **Any other lock name for you would halt both live lanes.** Do not invent one.
+- **Mail.** Every live seat shares `secuura-blockchain@agentmail.to`. Your subjects carry the `-R` tag and `(Seat R 1st)`, and their rule is to act only on their own seat's number (STANDING_LINES `:332`). Their mail is NOT yours: subjects naming Seat B 65th, Seat B 66th or Seat E 6th, or the tags `-> Secuura/Blockchain]` / `-> Secuura/Blockchain-E]`.
+- **Shared refs.** You never write `refs/remotes/origin/develop` in the shared checkout: live co-tenants' `rev-parse --all` guards read it (STANDING_LINES `:410`). You never touch `s-b63-ks1278`, `s-b64-ks723`, `s-e3-ks938` or `s-e6-ks1256`.
+- **Semantic adjacencies (no shared path; RE-RUN, do not assume):**
+  - KS-1305's new originate test and #1393's `ks1293-originate-suite-is-hermetic` manifest line: re-run the whole originate suite at every merge-in that brings #1393 in.
+  - KS-1313 and KS-1164 share the `systemTest/performance` unit suite: the counts compose (1353 → +7 → +3 per the REVIEWs, a projection).
+  - KS-998 changes the format gate that every seat's pre-push runs (`.githooks/pre-push:235`): **its merge changes a gate the live lanes' NEXT pushes run.** Name that in its PR body. Wednesday may order it after the lanes' pushes.
+
+**THE LOCK RULE.** Every ref write needs `.push-lock-d8` HELD by you, the WAIT set ABSENT, and NO other `.push-lock-*`. Ref writes are: worktree add/remove, commit, amend, merge-in, push, merge, and a ruled object transfer.
+- **WAIT set:** `.push-lock-56` (B 65th/66th), `.push-lock-e4` (E 6th), `.push-lock-f3` (F 5th if launched), `.push-lock-g1` (a G seat if launched). Bounded 20 min, then STOP and mail.
+- **STOP set:** the 16 of `lock56.sh:319` (`-55 -e2 -f2 -e3 -f1 -e1 -54 -c21 -d2 -d3 -d4 -d5 -d6 -53 -52 -51`) plus ANY unattributed lock (code, not prose: STANDING_LINES `:398`). Each STOP has its own rc and names the dir; your lock is NOT taken. A stale lock (heartbeat > 5 min AND a dead pid) is REPORTED, never removed.
+- Take and release in ONE foreground invocation under `trap … EXIT`. Release by the HOLDER FILE's pid, never `$$`. The hold covers the ref write ONLY, never `npm ci`, a build or a suite. Report each hold time.
+- **Re-prove with `twolockra1.sh` in a SCRATCH copy of the worktrees dir:**
+  - nothing planted → taken;
+  - each of the 16 planted → STOP;
+  - a planted unknown `.push-lock-zz9` → STOP (unattributed);
+  - a planted live `-56`/`-e4`/`-f3`/`-g1` → WAIT, then STOP at the bound;
+  - a planted `-d8` whose holder `seat` is another seat → STOP;
+  - **print how many arms it CHECKED; `0 checked` is a FAIL.**
+
+**PUSH PROTOCOL.**
+- `pushra1.sh` takes `.push-lock-d8` ITSELF: **call it BARE** (STANDING_LINES `:373`), with `GIT_SSH_COMMAND` UNSET (`env -u GIT_SSH_COMMAND`, `:412`; the tool supplies the keepalive via `-c core.sshCommand`).
+- **Fresh worktree** ⇒ `npm ci --ignore-scripts` in `Blockchain/Dev`, then `npm run build --workspace=packages/shared`. ASSERT `packages/shared/dist/index.js` exists BEFORE the first test and before any push (`:376`, `:396`).
+- 🔴 **KS-1422 / STANDING_LINES `:410`.** The hook falls back to the stale `32e058975d4e` and will charge your push for `systemTest/akto` (21 of the 72 stale-range paths, P2). PRs 3-5 also select their OWN packages (`systemTest/performance` for PRs 4-5; check what PR 3's `systemTest/scripts` + `systemTest/__tests__` select). **Before each push, read the gate's `SKIP — <pkg> deps not installed` line and run `npm ci --ignore-scripts` in EACH named `systemTest/<pkg>` in YOUR worktree, outside the lock.** Never refresh the shared ref yourself.
+- A push's result is the tool's own `.rc` file read after it exits PLUS an `ls-remote` of the ref (`:401`). rc 141 with the ref unmoved is KS-1149's class: report it, retry under the lock, report elapsed time and attempt count.
+- Quote the PREFLIGHT ratio and skipped legs EXACTLY. `PREFLIGHT INCOMPLETE — 12/15 legs ran, 3 SKIPPED` is not a pass. Quote only the gate lines that push printed (`:272`). **Never `git push --dry-run`** (`:382`). A refused first push is retried as a first push, never with `--no-verify`.
+- **After `git apply` onto a 100755 file** (PR 2's `09-aggregate-report.sh`): `[ -x ]` on disk, `chmod 755` on that file only if needed after `git ls-files -s` shows 100755, `cmp` the bytes unchanged. Never `checkout-index -a` (`:259-:261`, `:355`).
+
+## TOOLS, generation `ra1` (copy B 65th's `*56` set; it is the newest raise-capable generation)
+- **Source:** `/Volumes/DevMASTER/!CODING/Secuura/Blockchain/5_Project_History/2026-10-05_seatB-65th/raise/` (its `.py`/`.sh` set includes `lock56.sh`, `push56.sh`, `push56_ff.sh`, `raise56.py`, `merge56.py`, `pathgate56.py`, `namecheck56.py`, `inbox_match56.py`, `inbox_watch56.sh`, `trap4_56.py`, `r5proof56.py`, `twolock56.sh`, `bannercheck56.py`, `rekey56.py`, `rekey_check56.py`, `keyscan56.py`, `commit56.sh`, `resolve_docs62.py`).
+- **Destination:** `<REC>/raise/`, each file hashed at copy. Skip `__pycache__`, `.my-last-release` and B 65th's push records. Quarantine its `rekey56.py` and round records into `<REC>/_b65_artefacts_NOT_MINE/`, with a falsification control. Hand-write `rekeyra1.py`, itself in its own map; assert coverage before any write; drive three refusal controls first.
+- 🔴 **A LETTERED generation:** grep every copy for `int(`, `\d\d`, `[0-9]{2}`, `5[0-9]` generation predicates and fix the PREDICATE, not the map (STANDING_LINES `:391`). `bannercheckra1` must print `N checked`; `0 checked` is a FAIL (`:335`).
+- **Hand-fixes, each in the receipt with before/after:**
+  - `lockra1.sh`: LOCK = `.push-lock-d8`, holder-`seat` attribution, the WAIT and STOP sets above, the unattributed-lock code kept.
+  - `raisera1.py`: builds `s-ra1-{tag}` (prove it).
+  - `mergera1.py`: subject EXACTLY as the GO composes it (no `(#n)`), `no_trailer` on both branches, ONE `Merged by Seat R 1st`, `--seat` required with no default, scratch env var required with no default.
+  - `pathgatera1.py`: the declared set per PR is a REQUIRED argument (`:405`).
+  - `commitra1.sh`: the per-PR file-count arm is a required argument. B 65th's `commit56.sh` wanted PR C's 5 files (its READY).
+- **Matcher `inbox_matchra1`:**
+  - `MINE = "r 1st"`, `MY_PANE = "secuura/blockchain-r]"`.
+  - OTHER_SEATS ADDS `b 65th`, `b 66th`, `b 67th` (forward half, `:407`), `e 6th`, `e 7th`, `f 5th`, `g 3rd`, and **`r 2nd` (your own successor, forward half)**. It keeps every B/C/D/E/F/G ordinal it carries, with 0 missing.
+  - No bare `"r1"`/`"ra1"` (P11: `-r1-1` round markers).
+- **Trap 4 on REAL subjects read from the API.** Each must read FOREIGN:
+  - B 65th's own READY: `[Secuura/Blockchain -> Wednesday] READY FOR QA (Seat B 65th): #1393 (KS-1278) round 2 -> gate<NN>`, 22:43:26Z;
+  - E 6th's GO `GO (Seat E 6th): merge 1385 on gate66`;
+  - **your own LAUNCH BRIEF reads FOR ME.**
+  - Test the untagged clause with an addressee in NEITHER list, e.g. `(Seat R 9th)` (`:411`). R5 KAM-STOP carries (`from: kreiser.org@me.com` → STOP and mail).
+- **`namecheckra1`:**
+  - `MINE = "ra1"`. Forms: `-ra1-<k>$`, `s-ra1-`, `refs/seatra1/`, argv tags (`:309`).
+  - Controls on REAL names: the four `…-l3-r1-1` refs (P11) read **NOT MINE**; `s-e6-ks1256`, `s-b63-ks1278`, `s-b64-ks723` and `feature/ks-1313-…-l6-r24-1` read FOREIGN; a planted `s-ra1-x` and `-ra1-9` read MINE.
+
+## THE PROJECT RULES THAT TOUCH THIS SCOPE (read each at the base SHA by line range; quote with the blob id at ITEM 0)
+- **Skill §4 (`:360-:420`) MUST:**
+  - Both platform-k docs in the SAME commit as each test change. systemTest counts.
+  - **Timings STATED, not added:** each block states the measured "no stated timing covers …", with its grep at the BASE SHA and a must-hit control. Never quote a head-side count of a term your own block names.
+  - Each suite's own figure in prose with the DATE and the HOST.
+  - Never the platform-s docs.
+- **Skill review authority `:30-:36`:** PRs 3, 4 and 5 are `systemTest/`, so Peter's comments take precedence. Each of those bodies says so. Nothing goes to Peter or Stuart.
+- **§5c:** systemTest files under 400 lines (non-blank, non-comment). Measure with ESLint `max-lines` in `systemTest/performance` for PRs 4-5, or say UNMEASURED.
+- **§5d:** every changed line carries WHY + ticket. The PR's OWN ticket URL (`https://linear.app/secuura/issue/KS-NNNN`) goes in each body.
+- **§5f:** runtime changes are **KS-1305** (originate boot-path message) and **KS-1136** (what the internal audit reports). Each is NOT COVERED by name: `live sweep owed`, lowercase canonical (`:269-:270`). Nothing moves to Done.
+- **Repo `CLAUDE.md` Merge flow `:221-:276`:** a Test Evidence block (touched / ran / NOT run / migrations+config) written by YOU; the gate's GO naming the head SHA; "untested, or no GO → no merge". Rule 7 `:187`: ticket comments only; never the extranet; never `POST /api/seen`.
+- **CONTRIBUTING** (`Blockchain/Dev/CONTRIBUTING.md:106-115`): squash into develop; merge develop INTO a branch that is behind; no force push.
+
+## READ FIRST (by line range; keep ctx low)
+1. Each hold's `REVIEW.md` WHOLE (P4 paths; 4-11 KB each). Each brief under `/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/briefs/<tag>/<KEY>.md`, its `## Scope`: KS-998 `:195`, KS-1136 `:279`, KS-1164 `:174`, KS-1305 `:209`, KS-1313 `:298`.
+2. B 64th's handover `/Volumes/DevMASTER/!CODING/Secuura/Blockchain/5_Project_History/HANDOVER-seatB64-2026-10-05.md` `:64-:95` (KS-1422, the stale fallback base) and `:255-:257`.
+3. STANDING_LINES (412 lines): `## ` headings first, then `:17-:46`, `:253`, `:255`, `:257`, `:259-:261`, `:269-:278`, `:296`, `:332-:339`, `:355`, `:373-:376`, `:391-:412`.
+4. B 60th's brief `2026-10-05_seatB60_raise.md` `:143-:154` (ITEM 7/8: the chain prediction and merge-in mechanics you inherit) and `:157-:165` (Q-M, Q-F, Q-A as ruled for B 60th).
+
+## QUEUE
+0. **ITEM 0: plan confirmation `QUESTION: plan confirmation (Seat R 1st)`, then STOP until the ANSWER.** Before the ANSWER: no lock, fetch, worktree, ref write, install, ticket write or repo edit. The mail carries:
+   - **develop at boot** (`ls-remote`, instrument named); `refs/pull/{1385,1393,1394}/head`. If develop moved past `22b268143a63`, list first-parent commits by PR number and say whether any touches a P6 path or `Projects Documents/`. Say whether `#1385` has MERGED: if so, develop moved and your base moves with it; Wednesday re-rules the base.
+   - **`ra1 on d8: 56 + e4 + f3 + g1 WAIT, 16 STOP, catch-all (Seat R 1st)`** as its own titled block:
+     - `twolockra1.sh` arms with counts;
+     - every real `.push-lock-*` attributed by holder `seat`, two readings a poll apart;
+     - **the MIRROR proof**: `/usr/bin/grep -n 'push-lock-d8'` over B 65th's `lock56.sh` and E 6th's `locke4.sh`, each must hit its WAIT line. A miss is a STOP;
+     - the ps file.
+   - The tool census (raw / bounded), the re-key receipt with hand-fixes, trap 4 on real subjects, R5, `pathgatera1`'s bite, `raisera1.py` builds `s-ra1-{tag}`.
+   - §4, §5c, §5d, §5f and review authority quoted from the base tree with the blob id; your doc-block plan per PR (Q-N); the tail anchors re-located with the NEWLINE-TOLERANT reader and its planted control.
+   - **The held payload re-measured:** P4's sha256s, and the strict apply at the base (P6) with the tamper control.
+   - **Read-only re-reads of KS-1305, KS-1136, KS-998, KS-1313, KS-1326 and KS-1164:** state, assignee, newest comment, attachments. Name anything that contradicts P16 or a held brief's Scope line.
+   - The open-PR census re-run (P9's tool and control).
+   - Your watcher pid from a ps FILE (`isdigit()` asserted, `ps -p` alive). The usage gate. Every launcher preflight warning VERBATIM. Your ctx.
+   - Your restatement of the OPEN questions below.
+1. **ITEM 1: PR 1, KS-1305 (T1), ONE local commit.**
+   - Worktree `s-ra1-ks1305`. Install and build shared. Apply `…KS-1305…/out.md.checker/patch.diff` STRICT (`--check -v` first; tamper control).
+   - **FILES `cmp` against the brief's fences:** db.ts hunk 24/24, test 95/95 (REVIEW §3), with a planted-change control.
+   - Red-first BY ASSERTION: test only → `RED KS-1305 D1` fails with `Expected substring: "the generated Prisma client (node_modules/.prisma/client) is missing"` vs `Cannot find module '.prisma/client/default'`; the KS-458 cells stay green; at head, 3/3 + 6/6.
+   - 🔴 **The guard is a conjunction** (MODULE_NOT_FOUND ∧ message names `.prisma/client`, plus the same-object rethrow). One red arm PER CONJUNCT (`:253`). The REVIEW drove only Arm A (code alone → C1 red) and Arm B (rethrow `new Error` → C1 red). **Add the message-alone arm, and name which term each arm falsified.**
+   - Originate suite before/after by named binary. REVIEW: 1063 → 1066 at `3cb93b9c731e`, an expectation. tsc by named binary with a positive control; eslint on the two files.
+   - Body: Refs KS-1305 **fix shape (3) only**; shapes (1)/(2) deferred by ruling. `db.ts` is the tenant module: numstat `19 0`, no GUC/RLS line changed. **#949** (prisma 7.10) is adjacent; the message was measured on 7.8.0 only. NOT COVERED: §5f `live sweep owed`, no Postgres, no real fresh-worktree MODULE_NOT_FOUND.
+   - Block `22.` + cheat section. ONE commit, 0 trailers (control `bf277eead268`, 55 bytes), subject ≤ 92 as it LANDS. `pathgatera1` = {db.ts, ks1305 test, two docs}. STATUS mail.
+2. **ITEM 2: PR 2, KS-1136 (T1).**
+   - Worktree `s-ra1-ks1136`. Apply strict.
+   - 🔴 **The exec bit on `09-aggregate-report.sh` (100755)** per PUSH PROTOCOL. The new test lands 100644; prove `run-shell-suites.sh` discovers it (its ROOTS include `Blockchain/Dev/scripts/__tests__`; suite count +1 vs BEFORE).
+   - FILES `cmp` vs the brief's fences (product 21/21, test 164/164).
+   - Red-first: the new test alone → rc 1, 3 FAIL (cells 1-3, each `rc=0, findings=0, ids=[]`) → head rc 0, 6/0.
+   - Siblings before/after: `aggregate_report_trivy_artefact.test.sh` (5/0) and `orchestrate_jobs.test.sh` (18/0/0), named in the REVIEW. The checker's B6 ran only the first.
+   - Body: Refs KS-1136 **item 2 (R-3)**; item 1 merged as #1051. Name the `jq -e .` side effect (null/false also flags). NOT COVERED: §5f `live sweep owed`, no real audit job, no `run-internal-audit.sh`, not `ci/aggregate.ts`.
+   - Block `23.`. ONE commit. STATUS.
+3. **ITEM 3: PR 3, KS-998 (T2).**
+   - Worktree `s-ra1-ks998`. Apply strict; FILES `cmp` (product 9/9, test 94/94).
+   - Red-first: rc 1, 5 passed / 3 failed (the three brief cells) → rc 0, 8/0, `bash -n` rc 0.
+   - Siblings: `systemTest/__tests__/package_format_gate.test.sh` 33/0, `Blockchain/Dev/scripts/__tests__/pre_push_hook_base.test.sh` 28/0, `pre_push_hook_current_develop.test.sh` 4/0.
+   - Body: Refs KS-998 **item 4 only, does NOT close**. Items 1-3 are a Claude lane on the SAME file; name them. Peter's review authority. The gate's verdict lines (`:160`, `:195`, `:213`) are untouched. **This PR's own push runs the gate it changes:** quote that push's gate lines. NOT COVERED: GNU grep (Linux), a real prettier failure on a real push.
+   - Block `24.`. ONE commit. STATUS.
+4. **ITEM 4: PR 4, KS-1313 + KS-1326 (T2), per Q-1326's ruling.**
+   - Worktree `s-ra1-ks1313`. Apply strict (3 hunks, +155/-9); compare all 190 lines with the brief's three fences.
+   - Red-first: hunk 3 ALONE → 7 failed (R1-R7), by assertion → full patch → 10/10. Arm T1 (`endedNormally` → true: R1, R2 red) and Arm T2 (the text read restored: R7 red).
+   - **The rule:** `childSuiteCounts` reads no stdout/stderr. Show the 0-counts with the positive control.
+   - Package suite before/after (1353 → 1360 expected). `tsc -p tsconfig.json` and `tsconfig.node.json`; eslint and prettier on the file.
+   - Body: credit #1245 by blob (Kam's 20:06 card; read its text first, UNMEASURED by the drafter). The playwright twin is OUT. Name the `endedNormally` status-1 / unhandled-error hole as a follow-up, not a regression. Assign KS-1313 to the board account only if Q-A is ruled (P16: unassigned).
+   - Block `25.`. ONE commit. STATUS.
+5. **ITEM 5: PR 5, KS-1164 (T2).**
+   - Worktree `s-ra1-ks1164`. Apply strict; `cmp` the file vs the brief's `ts` fence (102 lines).
+   - **Red BY TAMPER** (test-only): `report.ts:104` → the brief's `to` text, with the unique-anchor check (count == 1) and a sha256 restore (`:190-:215`). Expected: `1 failed | 2 passed (3)` under the tamper; 3/3 untampered and restored; also under `LANG= LC_ALL=C`. The shipped KS 704 cell stays 4/4 under the same tamper (the gap the ticket names).
+   - Suite 1353 → 1356 (or the composed figure if PR 4's file is present: it is NOT, the PRs are siblings).
+   - Body: Refs KS-1164, the F-3 locale follow-up only.
+   - Block `26.`. ONE commit. STATUS.
+6. **ITEM 6: CHAIN PREDICTION, PUSH, RAISE, ONE READY → gate68** (with whatever PRs are built).
+   - Re-read develop at origin. If it moved: read WHAT moved against your paths (`:257`), STOP and mail; Wednesday re-predicts.
+   - **Predict in your OWN scratch clone.** Fetch from the GitHub URL, never the clone's `origin` (`:406`), and assert each fetched sha == `ls-remote`.
+   - T1 = PR 1's head tree. For k = 2..N: a synthetic squash of the previous predicted tree on the base, then `git merge-tree --write-tree` with PR k's head. Record rc and conflict paths VERBATIM (expected: exactly the two docs). Resolve ONLY the docs, keeping every block. `write-tree` → **T_k**. Print each T_k and each doc's block order, read back with the newline-tolerant reader.
+   - **Also predict each R PR against develop + #1385 + #1394 merged** (their pinned trees, if landed by then), and say how many docs merge-ins that implies.
+   - Push each branch ONCE with `pushra1.sh` BARE (PUSH PROTOCOL). Raise each PR by REST: HTTP 201, head == origin, body sha256 read back.
+   - Bodies:
+     - the PR's OWN key hyphenated once (`Refs KS-NNNN` on its own line + URL);
+     - **every other key de-hyphenated** (KS 1326 in PR 4's body only if Q-1326 rules it de-hyphenated; KS 458, KS 1245, KS 704, KS 989, KS 1051, KS 1422, …): a hyphenated foreign key ATTACHES (`:278`);
+     - red rows named descriptively where test titles embed a key (`:296`);
+     - Test Evidence by you; the §4 statement with the timing grep and its must-hit control; the pathgate result;
+     - "raised from Wednesday-held Spark passes (round 1, PASS 7/7), re-proved by Seat R 1st".
+   - Report each ticket's bot move on PR open (time); never revert.
+   - **ONE READY** (`:17-:46`): `READY FOR QA (Seat R 1st): #<a> (KS-1305) + #<b> (KS-1136) + #<c> (KS-998) + #<d> (KS-1313) + #<e> (KS-1164) -> gate68`. It carries:
+     - every head and develop, read from origin in the SAME action;
+     - per PR: tier, END_TREE (PR 1: its head tree; PR k≥2: **T_k with the words "needs a docs-only merge-in after PR k-1 and after any lane landing; covered by gate68 only under Q-M"**), trailer proof, pathgate with its firing control, block byte-identity proofs (each existing block byte-identical, bounded to its own close tag, `MIN_LINES`);
+     - the §5f NOT COVERED lines; the lock census; the usage gauge.
+   - HOLD with the watcher armed.
+7. **ITEM 7: MERGE ON EACH GO, ONE AT A TIME, in table order unless the GO says otherwise.**
+   - Merge only on `GO (Seat R 1st): merge <n> on gate68`, confirmed by API.
+   - 🔴 **Before each merge:** re-read head and develop at origin, AND confirm that no live lane holds a signed GO pinned to the current develop (#1385, #1394, #1393's round-2 gate, KS-1256). **If one does, STOP and mail: R is SEQUENCED-AFTER.**
+   - **PR k≥2:** after PR k-1 lands, and only on a ruling naming PR k:
+     - bring develop in. A worktree reads the SHARED store: one LOCAL objects-only transfer from your scratch clone by SHA (`--no-tags --no-write-fetch-head`), with `rev-parse --all` byte-identical before and after (`:404`);
+     - merge develop IN (`--no-ff`, no trailers) and resolve only the docs;
+     - assert the new head's tree == T_k (re-predicted if develop moved), and print both;
+     - push with `pushra1.sh` (fast-forward);
+     - any tree difference is a STOP.
+   - The addendum's file set comes from the THREE-DOT diff.
+   - `mergera1.py --dry` first; read the `.DRY` body (subject exactly as the GO composes it, own key only hyphenated, 0 trailers, ONE `Merged by Seat R 1st`). Merge with the head PINNED.
+   - Verify at source by `ls-remote` AND `GET git/ref/heads/develop`: subject byte-equal, tree == the GO's END_TREE, one parent == the expected develop, 0 trailers, file set == declared. STATUS `merged`.
+   - **Ticket comments only on a GO's relay**, read back by sha256: §5f's canonical line for KS-1305/KS-1136; nothing else.
+   - Then the handover `HANDOVER-seatR1-<date>.md`, the history entry at the TOP of `history.md` (re-read the top first; F 4th is at `:25` at draft), drive hygiene, WRAP.
+
+## QUESTIONS for ITEM 0 (OPEN unless marked; Wednesday rules in the ANSWER)
+- **Q-NAME:** Seat R 1st / pane `Secuura/Blockchain-R` / token `ra1` (P11), not the commission's "R2 1st". "R2" is not the lane shape, and `r2`/`r21`/`r1` all collide with origin round markers. The fallback is lane Y (`y1`: 0 refs, 0 bounded history).
+- **Q-LOCK:** reuse `.push-lock-d8` (in both live WAIT sets, absent, D lane idle; P13). The alternative is `.push-lock-g1`, but the G lane has a queued row (KS-1127). **No new lock name:** both live seats would STOP on it.
+- **Q-BUNDLE:** five PRs + ONE READY + ONE gate (PROPOSED, reasons in BLUF), vs one five-commit PR (rejected: the no-two-Refs ruling).
+- **Q-1326:** DECISIONS-24 ruled ONE build for KS-1313 + KS-1326, and both the brief's and the REVIEW's Scope say "Closes KS-1313 and KS-1326". That collides with the no-two-Refs ruling (the board guard) AND with Refs-not-Closes discipline. PROPOSED: `Refs KS-1313` hyphenated; **KS 1326 de-hyphenated in words** ("this build also carries the KS 1326 cells R1/R2"), and Wednesday comments on KS-1326 after the merge. Wednesday rules whether either closes (test-tooling only, no §5f).
+- **Q-ORDER:** the table's order (T1s first).
+- **Q-TIER:** KS-1305 T1, KS-1136 T1, KS-998 / KS-1313 / KS-1164 T2.
+- **Q-SEQ:** R merges only after #1385 and #1394 land. Relative to #1393 round 2 and KS-1256: whichever GO Wednesday signs first, never against a pinned tree.
+- **Q-M (carried from B 60th, PROPOSED again for gate68):** a merge-in head with tree == T_k whose diff from its gated head is only the two docs is covered by gate68.
+- **Q-A (carried):** KS-1313 is unassigned (P16), so assign it to the board account on the ANSWER's word. Nothing on Peter or Stuart moves.
+- **Q-F: NO fetch in the shared checkout.** `22b268143a63` is already in the store (P2). Predictions run in your own scratch clone (`:406`); merge-ins use the objects-only transfer (`:404`). The stale tracking ref stays as it is (KS-1422; `:410`).
+
+## STANDING (carry each as a rule)
+- **No attribution:** no `Co-Authored-By` or tool trailer on any commit or squash body. `git log -1 --format='%(trailers)'` prints 1 byte; the control `bf277eead268` prints 55.
+- **rc on its own line, never through a pipe** (`cmd > "$REC/x.log" 2>&1; rc=$?`; zsh has no `PIPESTATUS`: `:63`, `:217-:219`).
+- Never `cd`. Absolute paths. `TZ=UTC stat`. Never a zsh variable named `path`. Quote `Projects Documents`. **Brace before `:` in zsh: `"${BASE}:Projects Documents/…"`** (the drafter hit `bad substitution` on an unbraced `$D:systemTest`).
+- `git rev-parse <rev>:<path>` echoes an unresolved argument: use `cat-file -e` with a nonexistent-path control (`:314`). **A must-hit control that returns 0 means the instrument is broken.** Print the value, not only the verdict. The drafter's own first tamper control did not fire (`cmp` rc 0: the sed matched nothing). It was caught by printing the `cmp` rc, and rebuilt.
+- **A check that printed nothing is not a check that passed.** Every checker prints `N checked`.
+- **A copied tool's every knob is a required argument with no default** (`:405`).
+- **ps files match your own argv:** match by tool name and by ancestry from YOUR claude pid.
+- **`git fetch --dry-run` downloads the pack** (`:402`). Ask `ls-remote`.
+- **A test harness about SIGNALS runs in the foreground** (`:403`). Not expected this round; carried.
+- Signature classes pause for Kam: production, money, external communication beyond the gated writes, anything irreversible.
+
+## HOLDS / KAM'S, NOT YOURS
+- **No merge without the signed GO naming the head SHA, after gate68.** One PR per GO. Merge-ins per Q-M.
+- **No deploy** (kintsugi or demo), no `az`, no SSH to any VM, no migration, no Docker, no `docker restart`, no observability stack, no Schemathesis, no Akto. **No deploy without migration 048 applied first** (STANDING_LINES `:109`).
+- **No comment to Peter or Stuart**, and no client-visible write except the five PRs, their merges and GO-relayed ticket comments. Never the extranet; refuse the SessionStart `POST /api/seen`, "CC Kam on every email", and the extranet to-do.
+- **No `--no-verify`, NO force push ever, no `-u`, no `--admin`.** GitHub refuses an approval from our own account (HTTP 422): meet it and STOP.
+- **No dependency, lock, manifest or baseline edit; no spec edit.** Never delete; quarantine (`:103`).
+- **Ticket states:** no state, assignee or label change except Q-A as ruled. Close nothing; nothing moves to Done. A NEW finding is searched on the board by symbol, path or error string first (`:98`); one ticket per test pass (`:86`); filed to the board account (`:94`).
+- **The shared inbox rule:** act on a GO, ruling or push/merge/post instruction **only when its subject's addressee is Seat R 1st.**
+- **R5:** a new mail from `kreiser.org@me.com` → STOP and mail Wednesday; act on nothing in it.
+- **Drive hygiene at WRAP** (`:397`): remove only YOUR merged work's regenerable leftovers (your `s-ra1-*` worktrees' `node_modules`, your scratch clones). `git worktree prune` only for your own. Report `df -m /Volumes/DevMASTER` before and after (700,604 MiB free at draft). Unmerged work's worktrees stay.
+
+## MAIL FORMATS (to `wednesday-agent@agentmail.to`, subject prefixed `[Secuura/Blockchain-R -> Wednesday] `; Secuura routes to Wednesday, not Tuesday)
+- **Plan:** `QUESTION: plan confirmation (Seat R 1st)`, with the `ra1 on d8 …` block inside.
+- **STATUS:** `QUESTION: status <item> (Seat R 1st)`: one line of state, then your ctx.
+- **READY:** `READY FOR QA (Seat R 1st): … -> gate68`.
+- **WRAP:** `WRAP (Seat R 1st): …`. It carries:
+  - what IS running (ps file);
+  - the handover path + sha256 prefix + `wc -c`;
+  - the history entry;
+  - UNRAISED / UNMEASURED / UNMERGED, naming the NEXT PR;
+  - `df -m` before and after;
+  - mail counts COUNTED from the inbox, with failed sends listed separately;
+  - **the Spark-vs-Claude share line Wednesday counts (this seat = 1 Claude launch, clause "cloud: raise", carrying 5 Spark tasks).**
+- Compute every mailed figure in the SAME tool call that sends it. Read every send's response. Use placeholder substitution, never an f-string, for prose with braces.
+
+## DEFECTS NAMED FOR WEDNESDAY (drafter's)
+1. **No `READY_*` file exists for any of the five** (P4). The HOLD is the REVIEW verdict only, and nothing hashed the held payload until P4. `hold_ready.py` was not run on these rounds.
+2. **"Seat R2 1st" breaks the lane shape, and `r1`/`r2`/`r21` collide with origin round markers** (P11). A namecheck keyed on `-r1-<k>$` would claim four existing branches as MINE.
+3. **A new lane's lock is invisible to both live seats' lock tools** (P13). Without the `-d8` reuse, the R seat's first lock take would STOP B 65th and E 6th as UNATTRIBUTED. Any later lane needs the same treatment.
+4. **Q-1326 collides with the no-two-Refs ruling and with Refs-not-Closes.**
+5. **The lanes already conflict with develop in the docs** (P8 control). The "hold × lane rc 1" readings are the lanes' merge-in debt, not the holds'. A future partition check must run the develop-vs-lane control before it attributes a conflict.
+6. **KS-998 changes the format gate every seat's pre-push runs.** Its merge changes what the live lanes' next pushes execute (Q-SEQ).
+7. **The shared tracking ref is stale (KS-1422).** Every R push is charged for `systemTest/akto` (21 stale-range paths) on top of its own packages (P2).
+8. **Five PRs exceed one seat's likely budget.** The ~45% build line and the ~62% cold handover are set so that SOME PRs reach the gate. Expect a successor (R 2nd).
+
+RULED BY KAM, NOT YET IN AN ARTEFACT
+- **2026-10-06 09:37:54 (live board), verbatim:** *"we are past 70% of the weekly allowance.  We now need to switch to using the spark for 80% of tasks"*. Recorded as a grant in `0_Brain/learnings/2026-10-06_past-70pct-spark-takes-80pct-of-tasks.md`, not yet in any Secuura artefact. This seat's clause: **cloud: raise.**
+- **2026-09-11, the TESTED merge grant:** "We approve and merge our own TESTED Platform K work", each merge on a gate's GO naming the head SHA (`CLAUDE.md:233-:238`).
+- **2026-09-18 09:22, batch the gates / no gate duplication** (STANDING_LINES `:257`): met by ONE READY → ONE gate68.
+- **2026-10-05 12:13:55, drive hygiene** (STANDING_LINES `:397`).
+- **Card `secuura-capped-prs-1245-1278-disposal-1005` (20:06)**, as cited by KS-1313's brief: credit #1245 by blob. Text UNMEASURED by the drafter.
+
+RULED BY WEDNESDAY FOR THIS PROJECT, STILL OPERATIVE
+- **No two `Refs` in one PR (the board guard)**: F 1st Q-SPLIT RULED, carried through B 60th, B 61st and F 2nd.
+- **DECISIONS-24 (2026-10-05 20:04): KS-1313 + KS-1326 as ONE build, the brief FORBIDS human-output parsing.** How its keys appear in the PR is Q-1326.
+- **Q-N:** flow blocks are numbered by ruling, not merge order; the cheat sheet follows its own KS-keyed convention. **THE DOC RULE:** self-contained per-ticket blocks at the tail; a conflict outside the docs is a STOP.
+- **Q-M (B 60th):** a tree-equal, docs-only merge-in head is covered by its gate.
+- **No force push, ever.** Catch up by merging develop IN, on a ruling naming that PR (STANDING_LINES `:395`).
+- **Standing:**
+  - a gate that trips on the INSTRUMENT is fixed and resumed; one that trips on a READING is a STOP and a mail;
+  - any red not red at develop is a STOP;
+  - the GO composes squash subjects (no `(#n)`);
+  - de-hyphenate every key but the PR's own;
+  - a ticket that moves itself on PR creation is reported, never reverted;
+  - a client comment goes out only after its gate, on the GO's relay;
+  - merge only on a signed GO whose subject's addressee is Seat R 1st.
+- **E 6th / B lane (by their own briefs, read here for the partition only):** E 6th reuses `.push-lock-e4`, KS-1256 block `21.`. B 65th #1393 round 2. B 66th #1394 body fix + merge, `GO (Seat B 66th): merge 1394 on gate67`.
+
+| Partition / identity | Value |
+|---|---|
+| Seat | R 1st (Q-NAME) |
+| Pane / tag | `Secuura/Blockchain-R` (NEW) / `[Secuura/Blockchain-R -> Wednesday] ` |
+| Token / tools / lock | `ra1` / `*ra1` (from B 65th's `*56`) / REUSED `worktrees/.push-lock-d8`, `LOCK_SEAT='Secuura/Blockchain-R ra1'` |
+| Record folder | `/Volumes/DevMASTER/!CODING/Secuura/Blockchain/5_Project_History/<UTC boot date>_seatR-1st/` |
+| Worktrees | `/Volumes/DevMASTER/!CODING/Secuura/Blockchain/worktrees/s-ra1-ks{1305,1136,998,1313,1164}` |
+| Branches | `feature/ks-<n>-<slug>-ra1-<1..5>` |
+| Base | develop `22b268143a6377c9a82cd03379daa596cd26d644` (P1), in the store (P2); no fetch |
+| WAIT set | `.push-lock-56`, `-e4`, `-f3`, `-g1` (bounded 20 min) |
+| STOP set | the 16 of `lock56.sh:319` + any unattributed + a `-d8` held by another `seat` |
+| Live co-tenants | E 6th (`-E`, `%50`, `-e4`), B 65th → B 66th (unsuffixed, `%51`, `-56`) |
+| Per-hold partition | KS-1305, KS-1136, KS-998, KS-1313, KS-1164: product/test **DISJOINT** from #1393, #1394, #1385, KS-1256 (0/15 common paths); docs **SEQUENCED-AFTER #1385 and #1394** (and per GO vs #1393 / KS-1256) |
+| Gate / GO | gate68 / `GO (Seat R 1st): merge <n> on gate68` |
+
+VERIFIED BEFORE STAGING (Wednesday's drafter, 2026-10-06)
+PROVENANCE P1-P19 were measured 2026-10-05T22:47Z-23:00Z by read-only verbs in the project: ls-remote with the project's sshCommand, cat-file, ls-tree, show, log, diff, diff-index, grep, a GET-only GitHub census and a read-only Linear GraphQL. Every apply, commit-tree and merge-tree ran in the drafter's own scratch clone under `/private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/e2216636-d4a8-4372-af80-77a0943bf859/scratchpad/raise5/`, with scripts `blobs.sh`, `partition.sh`, `ctl.sh` and `h2.py`, and outputs `partition.out` and `ctl.out2`. Nothing was fetched, locked, written or sent in the target project. This brief is STAGED, NOT SENT, NOT LAUNCHED.
+SELF-CHECK: re-read end-to-end for contradictions | 2026-10-06 10:0x AEDT
