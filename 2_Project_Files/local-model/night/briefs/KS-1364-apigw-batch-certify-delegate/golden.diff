@@ -1,0 +1,77 @@
+diff --git a/Blockchain/Dev/services/api-gateway/src/__tests__/ks1364-batch-certifications-delegations-body-required.test.ts b/Blockchain/Dev/services/api-gateway/src/__tests__/ks1364-batch-certifications-delegations-body-required.test.ts
+new file mode 100644
+index 000000000..b6ab0e9a2
+--- /dev/null
++++ b/Blockchain/Dev/services/api-gateway/src/__tests__/ks1364-batch-certifications-delegations-body-required.test.ts
+@@ -0,0 +1,51 @@
++// KS-1364 (85 request bodies not marked required): the published contract for POST /api/batch/certifications and
++// POST /api/batch/delegations did not mark the request body required, although each body's schema has a non-empty
++// `required` list (BatchCertifyRequest: documentIds; BatchDelegationsRequest: documentIds, delegateUserId) - the
++// ticket's spec-lint rule. The handlers (routes/batch.ts validateBatchCertify / validateBatchDelegate) answer 400
++// for an absent or empty body. POST /api/batch/verify is the control: every field of its schema is optional, so
++// its body stays optional here. This file renders the document the generator publishes, from the shared registry
++// the gateway module populates on import. No server, no database, no network.
++import { describe, it, expect } from 'vitest';
++import { generateOpenApiDocument } from '@secuura/shared';
++import '../api-gateway.openapi';
++
++type AnyObj = Record<string, any>;
++
++const doc = generateOpenApiDocument({ title: 'api-gateway (ks1364 batch pin)', version: '0.0.0' }) as AnyObj;
++
++function operation(path: string, method: string): AnyObj | undefined {
++  return doc.paths?.[path]?.[method];
++}
++
++describe('KS-1364: POST /api/batch/certifications and /api/batch/delegations publish a REQUIRED request body', () => {
++  it('RED KS-1364 BA1: POST /api/batch/certifications marks its request body required', () => {
++    expect(operation('/api/batch/certifications', 'post')?.requestBody?.required).toBe(true);
++  });
++
++  it('RED KS-1364 BA2: POST /api/batch/delegations marks its request body required', () => {
++    expect(operation('/api/batch/delegations', 'post')?.requestBody?.required).toBe(true);
++  });
++
++  it('control KS-1364 BAC1: both bodies keep their request schemas and both operations keep bearerAuth', () => {
++    expect(operation('/api/batch/certifications', 'post')?.requestBody?.content?.['application/json']?.schema?.$ref).toBe(
++      '#/components/schemas/BatchCertifyRequest',
++    );
++    expect(operation('/api/batch/delegations', 'post')?.requestBody?.content?.['application/json']?.schema?.$ref).toBe(
++      '#/components/schemas/BatchDelegationsRequest',
++    );
++    expect(operation('/api/batch/certifications', 'post')?.security).toEqual([{ bearerAuth: [] }]);
++    expect(operation('/api/batch/delegations', 'post')?.security).toEqual([{ bearerAuth: [] }]);
++  });
++
++  it('control KS-1364 BAC2: the two request components still carry their required lists', () => {
++    const certify = doc.components?.schemas?.BatchCertifyRequest?.required ?? [];
++    const delegate = doc.components?.schemas?.BatchDelegationsRequest?.required ?? [];
++    expect([...certify].sort()).toEqual(['documentIds']);
++    expect([...delegate].sort()).toEqual(['delegateUserId', 'documentIds']);
++  });
++
++  it('control KS-1364 BAC3: POST /api/batch/verify (every field optional) keeps an OPTIONAL body', () => {
++    expect(operation('/api/batch/verify', 'post')?.requestBody?.required).toBeUndefined();
++    expect(doc.components?.schemas?.BatchVerifyRequest?.required ?? []).toEqual([]);
++  });
++});
+diff --git a/Blockchain/Dev/services/api-gateway/src/api-gateway.openapi.ts b/Blockchain/Dev/services/api-gateway/src/api-gateway.openapi.ts
+index 029e4a581..49fd2d9a3 100644
+--- a/Blockchain/Dev/services/api-gateway/src/api-gateway.openapi.ts
++++ b/Blockchain/Dev/services/api-gateway/src/api-gateway.openapi.ts
+@@ -350,6 +350,7 @@ sharedRegistry.registerPath({
+   security: [{ bearerAuth: [] }],
+   request: {
+     body: {
++      required: true,
+       content: {
+         'application/json': { schema: BatchCertifyRequestSchema },
+       },
+@@ -404,6 +405,7 @@ sharedRegistry.registerPath({
+   security: [{ bearerAuth: [] }],
+   request: {
+     body: {
++      required: true,
+       content: {
+         'application/json': { schema: BatchDelegationsRequestSchema },
+       },

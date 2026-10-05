@@ -1,0 +1,140 @@
+===== [Secuura/Blockchain-E -> Wednesday] QUESTION: STOP on ks1195 - it PINS the no-Redis create at 201, so KS-1256 collides with it (Seat E 6th) AUTH {'spf': 'pass', 'dkim': 'pass', 'dmarc': 'pass'}
+QUESTION: STOP on ks1195 (Seat E 6th). Ruling A is APPLIED to 6 of the 7 and they are clean. The 7th
+is not a missing-method case and I am not touching it without your word, because the only fixes
+available to me are the two things your own ruling forbids.
+
+BLUF
+1. **Ruling A applied to 6 files: 33 insertions, 0 deletions, 0 `expect(` lines touched.** Suite is
+   **91 of 92 files and 816 of 818 tests passing.** Your gate for committing was "0 failed", so I have
+   NOT committed. Nothing pushed.
+2. 🔴 **THE SPLIT IS 3 AND 4, NOT 6 AND 1.** Only ks1204, ks1176 and ks1231 inject a `redisService`
+   double. ks1234, ks1223, ks1238 and ks1195 all do `await import('../index')` -- they boot the REAL
+   gateway and use the REAL redis module, so there is no double to add a method to. For three of them
+   I used the partial-passthrough `vi.mock` idiom those same files already use for `../db`, inside the
+   file only, which is your point 2 generalised. That worked and they are green.
+3. 🔴 **ks1195 IS A PRODUCT COLLISION, NOT A TEST DEFECT, and it is the real finding of this round.**
+   Its subject IS the no-Redis state. At `:164` it asserts as an explicit precondition
+   `expect(redis.isRedisAvailable(), 'precondition: no Redis, so this is the in-memory degrade path').toBe(false)`,
+   and at `:172` that the limiter logged `DEGRADED` / `redis-not-ready`. Then at `:168` it pins that a
+   connector create in that state answers **201**.
+   KS-1256 says that same state must answer **503**. Measured: `[503, 503, 429, 429, 429]` where it
+   expects `[201, 201, 429, 429, 429]`, and `docsPosted` 0 where it expects 2. The 429s are unaffected
+   -- 10 of its 12 cells still pass, so the rate limiter itself is fine.
+   **Both cannot be true.** Either a connector create survives a Redis outage (ks1195's pin, fail
+   open on the allow-list) or it does not (KS-1256, fail closed). That is a product decision about
+   availability, not a fixture to repair.
+
+WHY I CANNOT FIX IT UNDER RULING A
+  (a) Mock `isRedisAvailable: () => true` in ks1195 -> its OWN `:164` precondition fails, and the
+      file stops testing the degrade path it exists to test. That is the opposite of "keep their
+      original meaning".
+  (b) Change its assertions 201 -> 503 and 2 -> 0 -> that is an ASSERTION change, which your point 3
+      forbids as a class ("a grep proving no assertion line changed") and which would have me
+      rewriting another ticket's pinned behaviour to make my own change pass.
+  Neither needs anything outside ks1195's file, so your literal STOP trigger is not met -- but both
+  exceed what you authorised, so I am stopping on the stronger reading.
+
+WHAT I THINK THE ANSWER IS, for you to accept or reject
+  KS-1256's fail-closed should win on security grounds -- that is the whole ticket. But it has a
+  consequence worth stating plainly rather than letting a red test reveal it later:
+  **once this ships, a Redis outage stops connector document creation entirely**, where today it
+  degrades to in-memory rate limiting and keeps creating. ks1195 is the artefact that was pinning the
+  old promise. If you accept that, the honest change to ks1195 is to RE-POINT its two cells at the new
+  contract and say so in its header -- an assertion change, made deliberately, on your ruling, and
+  named in both the PR body and KS-1195's ticket. I will not make it on my own authority.
+  If you would rather not take that availability hit, then (d)(ii) needs narrowing instead -- e.g.
+  503 only when a restricted entry for the caller is known to exist -- and that is a different build.
+
+STATE, all measured in the call that sent this
+  Worktree `s-e6-ks1256`, UNCOMMITTED. verification.ts blob 94285d3cbacf. My own ks1256 cell file is
+  6/6 green and untouched by any of this.
+  The 6 applied files, by `git diff --numstat`: 33 added, **0 deleted**, and a `git diff -U0` grep
+  finds **0** changed lines containing `expect(` -- the proof you asked for in point 3.
+  Suite: 92 files / 818 tests executed; 1 file and 2 tests red, both in ks1195, both the collision above.
+  develop 3f9ff4e1e1b93e2e704918a7825f13a72c9ec76f. #1385 stays merged at 3f9ff4e1e1b9. Watcher pid 25081 alive. NOTE: the previous watcher fired on your 23:03Z ANSWER and
+  exited by design, and my send guard REFUSED this mail the first time for naming a dead pid --
+  the SECOND time this round. The guard is doing its job; my re-arm discipline is the weak link, and
+  it belongs in the read step, not after it. No lock held. No ticket state changed. Nothing pushed.
+
+TWO ASKS
+  A. Rule on ks1195: re-point its two cells (and I will name it in the PR and on KS-1195), or narrow
+     (d)(ii). Either way I finish to READY from there.
+  B. You told me to commit locally before the docs step, but your point 3 gates the commit on a
+     0-failed suite and it is 2-red. Do you want a local-only commit of the current state now, so a
+     cold handover has a sha to name, or do I hold until ks1195 is ruled? Your last ctx reading was
+     51% and I have run two full suites and a merge since.
+
+===== [Secuura/Blockchain -> Wednesday] READY ADDENDUM (Seat B 65th): #1393 round 2 new head AUTH {'spf': 'pass', 'dkim': 'pass', 'dmarc': 'pass'}
+READY ADDENDUM (Seat B 65th) — #1393 round 2, NEW HEAD. G7 AND T5 are both closed, 4 of 4 tamper
+rows now caught, by ONE assertion pair and NO new cell. Your items 1-6 are done; wrapping cold next.
+
+=== THE FOLLOW-UP COMMIT ===
+b5adaba751d89fda0b138e0b8b74d702e2a2a429, tree 82567f9205824287edae372474c6313edb025268, ONE parent
+97ce2f337ae6 (no amend, no force). 3 files +27/-8. Subject 79 chars:
+"KS-1278: pin the revoke guard by exact clause text and its own bound parameters".
+%(trailers) 0 bytes against the control's 53; 0 Co-Authored-By; only KS-1278 hyphenated; 0 closing
+words. commit56.sh 16 arms, 16 PASSED, 0 failed (last round it was 15/1, and the 1 was the tool).
+NO product change: documentRepo.ts is untouched by this commit. The fix itself is unchanged.
+PUSH: ONE attempt, .rc 0 from s-b63-ks1278-ff-b5adaba751d8-push.rc read after the wrapper exited,
+22:58:22Z -> 23:07:56Z (574 s), no rc 141, GIT_SSH_COMMAND unset, under the lock, floor back to 0.
+CONFIRMED AT SOURCE: branch AND refs/pull/1393/head both b5adaba751d8.
+Preflight verbatim, NOT a pass: PREFLIGHT INCOMPLETE — 12/15 legs ran, 3 SKIPPED. Nothing failed.
+Beside it: shell suites 67 passed / 0 failed / 0 skipped (of 67); OK — 13 code guards passed.
+
+=== ITEM 2 AND ITEM 3, BOTH CLOSED BY THE SAME ASSERTION PAIR ===
+R2 now asserts (a) the guard clause by EXACT text
+'AND (?::text IS NULL OR status IS DISTINCT FROM ?::text)' and (b) the guard's own two parameters
+BY POSITION, both equal to 'revoked'. The membership check is dropped.
+ONE exact-text assertion DID catch T5, so per your item 3 I added it rather than leaving T5 blind —
+a TRUE OR prefix cannot survive an exact match on the clause. No SQL simulator was built.
+I used slice(-2) rather than the literal indices 9 and 10 you named. Reason, stated because it is a
+deviation from your wording: the guard is the FINAL clause in every variant of this statement,
+guarded and unguarded alike, so the last two bindings are the guard's by construction, whereas a
+literal 9/10 would silently shift if the SET list ever changed. Same positions today, more durable.
+
+=== THE MATRIX AT THE NEW HEAD — 4 OF 4 ===
+Each tamper alone; BOTH product files restored and sha256-verified after every row (documentRepo.ts
+6236b04acea7d031, routes/documents.ts 0bdef0d61e8b0eff, identical before and after all four).
+  G7  ifStatusIsNot 'revoked' -> 'draft'                -> R2   (1 failed / 6 passed of 7)
+  G8  emitLifecycleAnchor before the null check         -> R1   (1 failed / 6 passed of 7)
+  K1  guarded key reverted to WHERE external_id         -> N1   (1 failed / 6 passed of 7)
+  T5  TRUE OR prefixed to the guarded status guard      -> R2   (1 failed / 6 passed of 7)
+Clean run at the new head first: 7 passed of 7. Round 1's T1-T4 unchanged and still mapping.
+K1 is the CORRECTED form. The naive form removes only the key, leaves idAsUuid unused, ts-jest
+refuses the file, and the run is 0 total / 0 executed with no cell red AND no cell green. I kept
+that measurement in the record because the distinction is the whole point: a load failure is not an
+inert tamper, and only the executed count separates them.
+
+=== ITEM 4, DOCS, IN THE SAME COMMIT ===
+Cheat sheet: the row that claimed R2 asserted "the bound value" is REPLACED and says so, rather than
+quietly reading differently; the tamper row moves from NOT RUN to 4 of 4, and a new row carries the
+load-failure distinction. Flow block 15.: the guard's instrument is named beside R1's. Containment:
+ONE diff region per document (cheat pre-line 3956-3957, inside the KS-1278 section that starts at
+3917; flow pre-line 2284, inside block 15.). Outside those spans both files are byte-identical to
+97ce2f337ae6.
+SUITE: 91 suites / 1070 tests, 0 failed, 0 skipped — UNCHANGED, because no cell was added.
+10.163 s, 2026-10-05 22:57:18-22:57:28Z, Kamil's Mac Studio (2), node v24.7.0, jest 29.7.0.
+tsc -p services/originate --noEmit rc 0. The cell file is still type-unchecked (tsconfig excludes
+src/__tests__) and the PR body still says so.
+
+=== ITEM 6, THE PR BODY ===
+PATCHed and re-read by a SEPARATE GET: sha256 6e69d924e0b8eb96 -> 8d8d2c59871447e6, 8,766 UTF-8
+bytes = 8,714 characters, IDENTICAL both ways. It now carries the 4-of-4 matrix at the new head, the
+reason the earlier R2 forms were too weak, and the K1 load-failure distinction. Head reads
+b5adaba751d8.
+
+=== ONE THING THAT MOVED UNDER ME ===
+develop is now 3f9ff4e1e1b93e2e704918a7825f13a72c9ec76f — its FIFTH move in my window (f0179806 ->
+22b268143a63 -> 3f9ff4e1e1b9). I did not identify this one: no merge-in this round, so it changes
+nothing for me, and I am not spending ctx on a read I do not need. mergeable_state stays dirty for
+the reason already recorded.
+
+=== WHAT IS STILL NOT COVERED ===
+Unchanged by this commit: no live sweep (skill 5f), so KS-1278 does not move to Done on this
+change's account. The driver is mocked, so serialisation on this WHERE is UNMEASURED. The four
+platform suites were NOT run. KS 1419 is unchanged and its correction text stays HELD for your
+relay. KS 1424 carries the pre-existing class for the twelve unguarded callers.
+
+CTX: please read my ctx. I am below your 62% stop as far as I can tell, but I will not estimate it.
+Watcher pid 31017 LIVE, SINCE 2026-10-05T22:54:23.000Z. Wrapping cold now.
+
