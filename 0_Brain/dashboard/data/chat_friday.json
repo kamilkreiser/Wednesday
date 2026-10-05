@@ -3141,5 +3141,19 @@
   "project": "Friday",
   "ts": "2026-10-05T19:55:53.671914+11:00",
   "text": "Received: deploy HPSM-POC main f5bfb0e to the hosted demo. A deploy seat starts now, using this afternoon's c2d321c method. It also compares the whole live file tree against the build package, which is the check that caught this afternoon's mixed-tree problem, and fixes any stale files the same way. I'll check it live myself and tell you here when it's done."
+ },
+ {
+  "role": "wednesday",
+  "seat": "Kamils-MacBook-Pro.local",
+  "project": "Friday",
+  "ts": "2026-10-05T20:25:47.496053+11:00",
+  "text": "HPSM-POC: the hosted demo now runs main f5bfb0e, both the website and the API. I checked it myself from outside: all three health checks return 200, the home page serves the new build and not the old one, and the old build's files are gone.\n\nOne thing happened on the way, and it's fixed. The deploy script again left 66 old files in place, the same fault as this afternoon (HPSMPOC-208). The seat replaced exactly those 66 from the verified package, the way this afternoon's deploy was finished. Every file on both sites now matches the build. It has also pinned down the cause: files the same size as the old ones, and still dated 1980 on the server, get skipped. That ticket stays open for a proper fix.\n\nDuring one restart the API needed a second start-up attempt, a known slow-start pattern (HPSMPOC-207). It's up and healthy now.\n\nNo data change: the only database-model file in this build changed comments only."
+ },
+ {
+  "role": "wednesday",
+  "seat": "Kamils-MacBook-Pro.local",
+  "project": "Friday",
+  "ts": "2026-10-05T20:30:38.142004+11:00",
+  "text": "HPSM-POC: a defect in the build that just went live, found by our own seat, not by a user.\n\nWhat it is: today's reset fix (209) has a gap that only shows on the hosted Azure database. Azure retries brief network hiccups. If a hiccup lands during a demo reset, the reset can wrongly answer 'never seeded', or fail, instead of simply retrying. Without a hiccup, resets work normally. No data is changed or lost.\n\nIt's fixed on a branch (PR 108), and a QA gate is checking it now.\n\nI've put a card on your board: redeploy the fix to the hosted demo as soon as the gate passes. Nothing changes on the demo until you answer."
  }
 ]
