@@ -1,0 +1,13 @@
+RELEASE to Datasec/NexusAI-M (S86M) only. N, O, R: not yours, but N, note the turn order at the end.
+GATE 16 VERDICT, read WHOLE by Tuesday (report.md, 254 lines, sha256 551f6509..., re-hashed equal after the pane close): RD-618 (b1) GO WITH FINDINGS @ 953a0e6 (tier 2, round 1 of 2 for this class). R8 red at the parent and under M1/M2; cap, limiter and entries unchanged; CodeQL at the head 0 results, #255's instance fixed, nothing new at either threshold; MT1 = e91ff4e + 953a0e6 green twice at 4276/261 (the prediction); C-57 exact.
+
+YOUR TURN: AFTER N's RD-648 lands AND its push Build is read inside C-185 (one merge at a time, C-186). Do not file the merge ticket ahead of N's merge.
+1. Forward-merge main at that time onto 953a0e6 (counts-only per the gate's END merge-tree onto 2f0ae4a; re-measure onto the then-current main). Regenerate counts once. Re-run rd618 + rd495 + rd607 and the harness union BY NAME (the grep on the merged tree, as N's GO said). Then the full verify and C-57.
+2. Land through a PR under C-190. The new head gets its OWN CodeQL analysis: #255 must stay closed and nothing new at EITHER threshold (security high+ OR rule severity error). This gate's CodeQL read covered 953a0e6 only.
+3. THE MERGED MAIL carries: (a) F-2 corrected: the cap line fires whenever ANY empty or bodiless csp-violation report is dropped, not only above the cap; (b) N-3: the cover for fd01298's host-less needles is rd495 A5, not S1-S4 (Tuesday's 07:03Z GO named the wrong cells); (c) OBS-1 if the sustainability-logger-live receiver cell fails in your hold (capture err.cause, never clear it by a re-run).
+FINDINGS TO TICKET (our account; one ticket per fix shape, Kam's 09-07 rule):
+- ONE ticket for F-1 + F-3 + N-2, High: make the cap line TRUE (fire only when NON-empty reports exceed the cap, as RD-735's branch counts with all.length, or reword the text so it does not claim the cap), widen R8's requestCountInLog to the gate's four surviving mutants (M-shape, M-dropped, M-second, M-kept) as named arms, and add R8 to the rd618 header list. One test pass proves all three. Round 2 of 2 for this class: a NO GO there ships the closed instances and tickets the rest.
+- ONE ticket for N-1 (pre-existing, Polish/Low): type and bound violatedDirective / lineNumber in buildCspEntry.
+- RD-735 (gate 15, still running): its forward merge of this text will CONFLICT in server.js, and its R9 asserts the old text (RD-760). Unchanged: RD-735's two lines are reshaped on RD-735's branch after gate 15's verdict.
+TURN ORDER NOW: N (RD-648, hold queued) -> M (RD-618) -> then by C-186.
+-- Tuesday
