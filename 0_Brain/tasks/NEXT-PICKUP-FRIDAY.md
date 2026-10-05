@@ -12,6 +12,17 @@ supersede: replace wholesale; previous = NEXT-PICKUP-FRIDAY.md.pre-0925-rotate-s
 
 **The tree is at `/Volumes/Laptop-DEV/FRIDAY` (the drive, since 2026-09-28).** Quote every path (spaces).
 
+## 🔴🔴🔴 STATE 2026-10-05 17:27 (Friday successor, ctx ~42%) — READ FIRST; supersedes every block below where they differ
+**Kam:** no rows since 16:38:48; reconcile 0. No open cards (hpsmpoc-c2d321c-hosted-deploy-1005 DELIVERED → C-60, analysis PR #67 → 7468efc).
+**MAINS:** HPSM-POC **e787727** (PR #104 B134 merged on gate B137 GO WITH NOTES) · analysis 7468efc · Composer 555593a. Hosted c2d321c; Composer demo 555593a.
+**LIVE PANES:**
+- Datasec/HPSM-POC-A **B134** on `B134_ADDENDUM-1_gate-b137-findings-and-records.md` (records/b134, Jira Done/comments, file 160(b)+N-1+N-2, N-3 into 152). On READY: open analysis PR for records/b134, merge_when_green, read ticket keys, close pane.
+- Datasec/HPSM-POC-B **B135** idle-holding (PR **#105** @ `ad04ba689e68c0399aafb2758fcfd685195fb6e4`, opened by Friday). Keep for records/fix round.
+- Datasec/HPSM-POC-QA2 **B138** gate on #105 (`Briefs/2026-10-05_B138_QA-gate-B135-ci-infra-web-lane-b.md`, tier 1 round 1 of 2). On GO: `friday/merge_when_green.sh datasecau/HPSM-POC 105 ad04ba689e68c0399aafb2758fcfd685195fb6e4` (0 files shared with #104); then B135 records + Jira Done; tell Kam the 147 NEW WORDS (B135 STATUS §NEW WORDS).
+- Datasec/Composer-D **B84** on `B84_ADDENDUM-1_s1-s2-rulings.md` (#149 (a) build from kept Generate; #175 (b) keep sticky, C-05/#80). On READY: diff at source, PR, merge_when_green, records, NEW WORDS to Kam; deploy = his card.
+**Watcher:** seen_s2 (scratchpad) over B134/B138/B84 STATUS + panes %40 %41 %45 — dies with the seat.
+**Open, Friday's call later:** B135 FOUND 1 (127 needs one live Azure OpenAI explanation call — check the hosted grant before commissioning).
+
 ## 🔴🔴🔴 ROTATION HANDOVER 2026-10-05 17:16 (Friday, ctx 80%) — READ FIRST; supersedes every block below where they differ
 **FIRST ACT:** `kam_rulings_today.sh` + `reconcile_rulings.py`; `friday/seat_idle.sh` over every live pane; read each STATUS last line (watch for SKELETONS: `HEADSHA`, `__X__`). Every watcher/merge job died with the old seat — re-seed + re-arm. Load was 13–22 at 17:1x: start nothing heavy until it falls.
 **Kam:** no new rows since 16:38:48 (hosted c2d321c a). Standing: "Keep going with the POC and anything you can do on the security composer" (16:2x). **No open cards** (deliver `hpsmpoc-c2d321c-hosted-deploy-1005` → C-60 once records/b136 merges).
