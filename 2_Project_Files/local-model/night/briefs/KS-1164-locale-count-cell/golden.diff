@@ -1,0 +1,108 @@
+diff --git a/systemTest/performance/tests/unit/gate/ks1164-breakdown-counts-are-locale-grouped.test.ts b/systemTest/performance/tests/unit/gate/ks1164-breakdown-counts-are-locale-grouped.test.ts
+new file mode 100644
+index 000000000..cdc33036c
+--- /dev/null
++++ b/systemTest/performance/tests/unit/gate/ks1164-breakdown-counts-are-locale-grouped.test.ts
+@@ -0,0 +1,102 @@
++/**
++ * KS-1164 follow-up (ruled by Wednesday 2026-09-14 from the #988 gate F-3): the status-code breakdown
++ * line under a FAILED rate gate prints its counts with `toLocaleString()` (`gate/report.ts`), but the
++ * KS-704 cell builds its expectations with `String(n)` - the two agree only below 1,000, and the
++ * recorded smoke summary's counts are all below 1,000, so the grouped form is pinned by no cell.
++ * Changing the product to `String(...)` left every shipped cell green.
++ *
++ * This file adds the cell the ruling names: a synthetic `http_server_error` with counts of 1,000 or
++ * more, expected in the runner's own grouped form. A control proves the runner's locale DOES group
++ * thousands (otherwise the red cell could not tell the two forms apart), and a second control keeps
++ * the below-1,000 recorded counts printing exactly as before.
++ *
++ * Harness: the KS-704 suite's (printReport with a failed rate gate over the recorded
++ * `smoke-summary.json`, console streams spied and joined). No k6 run, no stack.
++ *
++ * @module tests/unit/gate/ks1164-breakdown-counts-are-locale-grouped.test
++ */
++
++import * as fs from 'node:fs';
++import * as path from 'node:path';
++import { fileURLToPath } from 'node:url';
++
++import { afterEach, beforeEach, describe, expect, it, vi, type MockInstance } from 'vitest';
++
++import type { GateResult } from '../../../gate/evaluate.ts';
++import { printReport } from '../../../gate/report.ts';
++import type { K6Summary } from '../../../types/index.ts';
++
++const HERE = path.dirname(fileURLToPath(import.meta.url));
++
++/** The recorded smoke summary - every counter in it is below 1,000. */
++const SUMMARY = JSON.parse(
++    fs.readFileSync(path.join(HERE, '..', 'fixtures', 'smoke-summary.json'), 'utf8'),
++) as K6Summary;
++
++/** A failed rate gate on `http_req_failed`: the only shape that prints the breakdown line. */
++const FAILED_RATE_GATE: GateResult = {
++    name: 'threshold: http_req_failed rate<0.01',
++    passed: false,
++    actual: '100.0000%',
++    limit: 'rate<0.01',
++};
++
++/** Synthetic counts at and above 1,000, so the grouped and ungrouped forms differ. */
++const BIG_PASSES = 1234;
++const BIG_FAILS = 56789;
++
++let logSpy: MockInstance<typeof console.log>;
++let errorSpy: MockInstance<typeof console.error>;
++
++/**
++ * Join every argument of every call on a spy into one string.
++ *
++ * @param {MockInstance<typeof console.log>} spy - A `console.log` / `console.error` spy.
++ * @returns {string} The stream's lines, newline-joined.
++ */
++function joined(spy: MockInstance<typeof console.log>): string {
++    return spy.mock.calls.map((call: unknown[]) => call.map(String).join(' ')).join('\n');
++}
++
++beforeEach(() => {
++    logSpy = vi.spyOn(console, 'log').mockImplementation(() => undefined);
++    errorSpy = vi.spyOn(console, 'error').mockImplementation(() => undefined);
++});
++
++afterEach(() => {
++    vi.restoreAllMocks();
++});
++
++describe('KS-1164 follow-up: the breakdown counts print in the locale-grouped form', () => {
++    it('RED KS-1164 F-3: a 5xx count of 1,234 / 56,789 prints grouped, not as bare digits', () => {
++        const metrics: K6Summary['metrics'] = {
++            ...SUMMARY.metrics,
++            http_server_error: { passes: BIG_PASSES, fails: BIG_FAILS, value: 0.0213 },
++        };
++
++        printReport([FAILED_RATE_GATE], 'smoke', true, metrics);
++
++        const error = joined(errorSpy);
++        expect(error).toContain(
++            `http_server_error [5xx] passes=${BIG_PASSES.toLocaleString()} fails=${BIG_FAILS.toLocaleString()}`,
++        );
++        expect(joined(logSpy) + error).not.toContain(`passes=${String(BIG_PASSES)} `);
++    });
++
++    it('CONTROL KS-1164 F-3c: the runner locale groups thousands, so the two forms really differ', () => {
++        expect(BIG_PASSES.toLocaleString()).not.toBe(String(BIG_PASSES));
++        expect(BIG_FAILS.toLocaleString()).not.toBe(String(BIG_FAILS));
++    });
++
++    it('CONTROL KS-1164 F-3r: the recorded below-1,000 counts still print exactly as the KS-704 cell reads them', () => {
++        printReport([FAILED_RATE_GATE], 'smoke', true, SUMMARY.metrics);
++
++        const server = SUMMARY.metrics['http_server_error'];
++        if (!server || !('passes' in server)) {
++            throw new Error('fixture lost http_server_error - the control cannot mean anything');
++        }
++        expect(joined(errorSpy)).toContain(
++            `http_server_error [5xx] passes=${String(server.passes)} fails=${String(server.fails)}`,
++        );
++    });
++});

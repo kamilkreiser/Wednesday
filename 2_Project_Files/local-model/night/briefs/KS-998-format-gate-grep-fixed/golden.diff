@@ -1,0 +1,113 @@
+diff --git a/systemTest/__tests__/ks998_format_gate_push_label_is_literal.test.sh b/systemTest/__tests__/ks998_format_gate_push_label_is_literal.test.sh
+new file mode 100644
+index 000000000..7c15f60b8
+--- /dev/null
++++ b/systemTest/__tests__/ks998_format_gate_push_label_is_literal.test.sh
+@@ -0,0 +1,94 @@
++#!/usr/bin/env bash
++# =============================================================================
++# TESTS for systemTest/scripts/check-package-format.sh - KS-998 item 4: the
++# "is this red file in the push?" comparison must match the path LITERALLY.
++# =============================================================================
++# The gate labels each red file `(in this push)` or `(NOT in this push -
++# inherited red)` by comparing it with the pushed paths using `grep -qx "$full"`,
++# which reads the path as a REGEX. So a `.` in a red file's name matches any
++# character (a different pushed file claims the red), and a `[id]` segment is a
++# bracket expression that cannot match its own literal text (the author's own
++# red reads as inherited). The label is the only thing affected: the pass/fail
++# verdict and the exit code never change, and the CONTROL cells pin that.
++#
++# Same fixture method as package_format_gate.test.sh: a copy of the gate inside
++# a temp tree, fixture packages whose `format:check` is plain shell, so no npm
++# install and no real prettier is needed.
++#
++# Usage: bash systemTest/__tests__/ks998_format_gate_push_label_is_literal.test.sh
++# =============================================================================
++
++set -uo pipefail
++
++HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
++GATE_SRC="${PACKAGE_FORMAT_GATE_SH:-$HERE/../scripts/check-package-format.sh}"
++PASS=0; FAIL=0
++
++[[ -f "$GATE_SRC" ]] || { echo "FATAL: gate script not found at $GATE_SRC" >&2; exit 2; }
++
++FIX="$(mktemp -d "${TMPDIR:-/tmp}/secuura-ks998-label.XXXXXX")"
++trap 'rm -rf "$FIX"' EXIT INT TERM
++
++check() {
++    local desc="$1" want="$2" got="$3"
++    if [[ "$got" == "$want" ]]; then PASS=$((PASS+1)); printf 'ok   %s\n' "$desc"
++    else FAIL=$((FAIL+1)); printf 'FAIL %s\n       want "%s", got "%s"\n' "$desc" "$want" "$got"; fi
++}
++
++GATE="$FIX/systemTest/scripts/check-package-format.sh"
++mkdir -p "$FIX/systemTest/scripts"
++cp "$GATE_SRC" "$GATE"
++
++# mk_pkg <name> <format:check shell command> - deps always present
++mk_pkg() {
++    local name="$1" cmd="$2"
++    local dir="$FIX/systemTest/$name"
++    mkdir -p "$dir/node_modules/.bin"
++    cat > "$dir/package.json" <<JSON
++{ "name": "fixture-$name", "version": "0.0.0", "scripts": { "format:check": "$cmd" } }
++JSON
++    printf '#!/bin/sh\nexit 0\n' > "$dir/node_modules/.bin/prettier"
++    chmod +x "$dir/node_modules/.bin/prettier"
++}
++
++mk_pkg dotted  "echo '[warn] src/a.b.ts'; exit 1"
++mk_pkg bracket "echo '[warn] src/[id].ts'; exit 1"
++mk_pkg plain   "echo '[warn] src/a.ts'; exit 1"
++
++run_gate() { printf '%s\n' "$1" | bash "$GATE" 2>&1; }
++
++# --- CELL 1 (RED at the tip): a `.` must not match another character -----------
++# The push carries src/aXb.ts, NOT the red file src/a.b.ts. As a regex `a.b`
++# matches `aXb`, so the tip labels the red as the author's own.
++out="$(run_gate 'systemTest/dotted/src/aXb.ts')"; rc=$?
++check "a red src/a.b.ts NOT in the push (push has src/aXb.ts) is labelled inherited" "1" \
++    "$(printf '%s\n' "$out" | grep -cF 'systemTest/dotted/src/a.b.ts   (NOT in this push')"
++check "...and is NOT labelled as in this push" "0" \
++    "$(printf '%s\n' "$out" | grep -cF 'systemTest/dotted/src/a.b.ts   (in this push)')"
++
++# --- CELL 2 (RED at the tip): a `[id]` segment must match its own literal path --
++# The push carries the red file itself. As a regex `[id]` is a one-character
++# bracket expression, so the exact path does not match and the tip calls the
++# author's own red "inherited".
++out="$(run_gate 'systemTest/bracket/src/[id].ts')"
++check "a red src/[id].ts IN the push is labelled (in this push)" "1" \
++    "$(printf '%s\n' "$out" | grep -cF 'systemTest/bracket/src/[id].ts   (in this push)')"
++
++# --- CELL 3 (CONTROL, tip AND after): the verdict never depends on the label ----
++check "CONTROL the dotted run still fails (exit 1)" "1" "$rc"
++out="$(run_gate 'systemTest/bracket/src/[id].ts')"; rc=$?
++check "CONTROL the bracket run still fails (exit 1)" "1" "$rc"
++check "CONTROL the bracket run trailer counts one failure" "1" \
++    "$(printf '%s\n' "$out" | grep -cF '1 package(s) checked, 0 skipped, 1 failed')"
++
++# --- CELL 4 (CONTROL, tip AND after): plain paths keep both labels ---------------
++out="$(run_gate 'systemTest/plain/src/a.ts')"
++check "CONTROL a plain red file IN the push is labelled (in this push)" "1" \
++    "$(printf '%s\n' "$out" | grep -cF 'systemTest/plain/src/a.ts   (in this push)')"
++out="$(run_gate 'systemTest/plain/docs/other.md')"
++check "CONTROL a plain red file NOT in the push is labelled inherited" "1" \
++    "$(printf '%s\n' "$out" | grep -cF 'systemTest/plain/src/a.ts   (NOT in this push')"
++
++echo ""
++echo "ks998_format_gate_push_label_is_literal: ${PASS} passed, ${FAIL} failed"
++(( FAIL == 0 ))
+diff --git a/systemTest/scripts/check-package-format.sh b/systemTest/scripts/check-package-format.sh
+index cfae0cc6f..3de6c3a20 100644
+--- a/systemTest/scripts/check-package-format.sh
++++ b/systemTest/scripts/check-package-format.sh
+@@ -177,7 +177,7 @@ while IFS= read -r p; do
+         # Whose red is this? The whole point of the ticket is that the bill
+         # lands on the wrong person. If the file is not in this push, say so —
+         # the reader should not have to work that out.
+-        if [ "$MODE" != "all" ] && printf '%s\n' "$changed_paths" | grep -qx "$full"; then
++        if [ "$MODE" != "all" ] && printf '%s\n' "$changed_paths" | grep -qxF "$full"; then
+             echo "[format-gate]   $full   (in this push)" >&2
+         elif [ "$MODE" = "all" ]; then
+             echo "[format-gate]   $full" >&2

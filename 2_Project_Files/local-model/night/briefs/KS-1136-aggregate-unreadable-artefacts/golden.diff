@@ -1,0 +1,195 @@
+diff --git a/Blockchain/Dev/scripts/__tests__/ks1136_aggregate_report_unreadable_artefacts.test.sh b/Blockchain/Dev/scripts/__tests__/ks1136_aggregate_report_unreadable_artefacts.test.sh
+new file mode 100644
+index 000000000..2c4381a37
+--- /dev/null
++++ b/Blockchain/Dev/scripts/__tests__/ks1136_aggregate_report_unreadable_artefacts.test.sh
+@@ -0,0 +1,164 @@
++#!/usr/bin/env bash
++# =============================================================================
++# TESTS for Blockchain/Testing/jobs/09-aggregate-report.sh - KS-1136 item 2 (R-3):
++# an artefact of jobs 01/02/03/05/06/07/08 that EXISTS but does not PARSE
++# =============================================================================
++# KS-878 made a truncated 04 artefact loud (04-trivy/unreadable-artefact, high).
++# Every other job's block still reads its artefact with `jq -r ... 2>/dev/null`
++# (08 with a bare jq whose failure only reaches stderr), so a truncated artefact
++# yields zero findings and rc 0 - the same clean-result silence. The fix gives
++# each present, unparseable artefact its own HIGH finding `<job>/unreadable-artefact`.
++#
++# The fixture runs the REAL aggregator end to end exactly as
++# aggregate_report_trivy_artefact.test.sh does (TARGET_BASE RUN_DIR SELF FAIL_ON
++# AUDIT_RUNS_DIR exported, `bash jobs/09-...` from $SELF). Every case has its own
++# fixture root and its own runs/ directory, so there is never a previous run:
++# 09 fails only on NEW findings (R-1), and a shared runs/ would make the second
++# case read `new 0 / rc 0`. No docker, no scanners, no stack.
++#
++# Usage: bash Blockchain/Dev/scripts/__tests__/ks1136_aggregate_report_unreadable_artefacts.test.sh
++#        AGG_SH=/path/to/other/09-aggregate-report.sh bash ...   (red-proof)
++# =============================================================================
++set -uo pipefail
++
++HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
++REPO_ROOT="$(cd "$HERE/../../../.." && pwd)"
++if [ "${AGG_SH+set}" = set ] && [ -z "$AGG_SH" ]; then
++  echo "FATAL: AGG_SH is set but EMPTY - refusing to silently grade the shipped aggregator." >&2
++  exit 2
++fi
++AGG="${AGG_SH-$REPO_ROOT/Blockchain/Testing/jobs/09-aggregate-report.sh}"
++[ -f "$AGG" ] || { echo "FATAL: 09-aggregate-report.sh not found at $AGG" >&2; exit 2; }
++[ -r "$AGG" ] || { echo "FATAL: AGG_SH is not readable at $AGG" >&2; exit 2; }
++command -v jq >/dev/null 2>&1 || { echo "FATAL: jq is not on PATH - the subject cannot run, so nothing here can be graded" >&2; exit 2; }
++printf 'SUBJECT %s\n        sha256 %s\n\n' "$AGG" "$(shasum -a 256 "$AGG" | cut -d" " -f1)"
++
++WORK="$(mktemp -d "${TMPDIR:-/tmp}/ks1136.XXXXXX")"
++trap 'rm -rf "$WORK"' EXIT
++
++pass=0; fail=0
++ok()  { printf '  ok   %s\n' "$1"; pass=$((pass + 1)); }
++bad() { printf '  FAIL %s\n     %s\n' "$1" "$2"; fail=$((fail + 1)); }
++
++# The seven non-04 artefacts, as <file basename>:<job id 09 emits under>.
++ARTS="01-dependency-audit:01-deps 02-secret-scan:02-secrets 03-sast-semgrep:03-sast 05-dast-zap:05-dast 06-tenant-isolation:06-tenant 07-license-compliance:07-licenses 08-aiken-tests:08-aiken"
++
++# A well-formed artefact with nothing to report, per file.
++valid_of() {
++  case "$1" in
++    01-dependency-audit|07-license-compliance) echo '{"runs":[]}' ;;
++    05-dast-zap) echo '{"alerts":[]}' ;;
++    08-aiken-tests) echo '{"tests":{"passed":10,"failed":0}}' ;;
++    *) echo '{"findings":[]}' ;;
++  esac
++}
++
++# $1 = fixture root. Fresh Testing/ tree + ONE run dir under a fresh runs/.
++new_fixture() {
++  rm -rf "$1"; mkdir -p "$1/Testing/jobs" "$1/runs/2026-10-05_fixture"
++  cp "$AGG" "$1/Testing/jobs/09-aggregate-report.sh"
++}
++run_of() { printf '%s/runs/2026-10-05_fixture' "$1"; }
++# $1 = root, $2 = file basename: the truncated shape (`{"x":[` + newline) - exists, not JSON.
++truncate_art() { printf '{"x":[\n' > "$(run_of "$1")/$2.json"; }
++valid_art()    { valid_of "$2" > "$(run_of "$1")/$2.json"; }
++
++run_aggregator() {
++  local root="$1"
++  ( export TARGET_BASE="fixture" RUN_DIR="$(run_of "$root")" SELF="$root/Testing" FAIL_ON="high" AUDIT_RUNS_DIR="$root/runs"
++    cd "$SELF" && bash jobs/09-aggregate-report.sh ) >"$root/out.txt" 2>&1
++  echo $?
++}
++report_of()      { printf '%s/REPORT.json' "$(run_of "$1")"; }
++findings_count() { jq '.findings | length' "$(report_of "$1")" 2>/dev/null || echo '<no report>'; }
++finding_ids()    { jq -r '[.findings[].id] | sort | join(",")' "$(report_of "$1")" 2>/dev/null; }
++high_ids()       { jq -r '[.findings[] | select(.severity == "high") | .id] | sort | join(",")' "$(report_of "$1")" 2>/dev/null; }
++
++# ---------------------------------------------------------------------------
++# CELL 1 (RED at the tip) - a truncated 01 artefact (a jq -r ... 2>/dev/null read)
++# emits exactly 01-deps/unreadable-artefact at high, and the run exits 1.
++# ---------------------------------------------------------------------------
++new_fixture "$WORK/t01"; truncate_art "$WORK/t01" 01-dependency-audit
++rc="$(run_aggregator "$WORK/t01")"
++if [ "$rc" = 1 ] && [ "$(findings_count "$WORK/t01")" = 1 ] \
++   && [ "$(high_ids "$WORK/t01")" = "01-deps/unreadable-artefact" ]; then
++  ok "a truncated 01 artefact emits exactly 01-deps/unreadable-artefact (high) and the run exits 1"
++else
++  bad "a truncated 01 artefact emits exactly 01-deps/unreadable-artefact (high) and the run exits 1" \
++      "rc=$rc, findings=$(findings_count "$WORK/t01"), ids=[$(finding_ids "$WORK/t01")] - rc 0 with 0 findings is the clean-result silence"
++fi
++
++# ---------------------------------------------------------------------------
++# CELL 2 (RED at the tip) - a truncated 08 artefact (the bare-jq read: stderr-loud,
++# rc-silent) emits exactly 08-aiken/unreadable-artefact at high, and exits 1.
++# ---------------------------------------------------------------------------
++new_fixture "$WORK/t08"; printf '{"tests":{\n' > "$(run_of "$WORK/t08")/08-aiken-tests.json"
++rc="$(run_aggregator "$WORK/t08")"
++if [ "$rc" = 1 ] && [ "$(findings_count "$WORK/t08")" = 1 ] \
++   && [ "$(high_ids "$WORK/t08")" = "08-aiken/unreadable-artefact" ]; then
++  ok "a truncated 08 artefact emits exactly 08-aiken/unreadable-artefact (high) and the run exits 1"
++else
++  bad "a truncated 08 artefact emits exactly 08-aiken/unreadable-artefact (high) and the run exits 1" \
++      "rc=$rc, findings=$(findings_count "$WORK/t08"), ids=[$(finding_ids "$WORK/t08")]"
++fi
++
++# ---------------------------------------------------------------------------
++# CELL 3 (RED at the tip) - all seven non-04 artefacts truncated in ONE run: one
++# unreadable-artefact HIGH per job, seven in all, and the run exits 1.
++# ---------------------------------------------------------------------------
++new_fixture "$WORK/tall"
++for a in $ARTS; do truncate_art "$WORK/tall" "${a%%:*}"; done
++want=""; for a in $ARTS; do want="$want${want:+,}${a#*:}/unreadable-artefact"; done
++want="$(printf '%s' "$want" | tr ',' '\n' | sort | paste -sd, -)"
++rc="$(run_aggregator "$WORK/tall")"
++if [ "$rc" = 1 ] && [ "$(findings_count "$WORK/tall")" = 7 ] && [ "$(high_ids "$WORK/tall")" = "$want" ]; then
++  ok "seven truncated artefacts (01 02 03 05 06 07 08) emit one <job>/unreadable-artefact HIGH each, and the run exits 1"
++else
++  bad "seven truncated artefacts emit one <job>/unreadable-artefact HIGH each, and the run exits 1" \
++      "rc=$rc, findings=$(findings_count "$WORK/tall"), ids=[$(finding_ids "$WORK/tall")]"
++fi
++
++# ---------------------------------------------------------------------------
++# CELL 4 (GREEN CONTROL, tip AND after) - seven WELL-FORMED artefacts with nothing
++# to report yield 0 findings and rc 0: the guard admits valid JSON.
++# ---------------------------------------------------------------------------
++new_fixture "$WORK/vall"
++for a in $ARTS; do valid_art "$WORK/vall" "${a%%:*}"; done
++rc="$(run_aggregator "$WORK/vall")"
++if [ "$rc" = 0 ] && [ "$(findings_count "$WORK/vall")" = 0 ]; then
++  ok "CONTROL seven well-formed empty artefacts yield 0 findings and rc 0"
++else
++  bad "CONTROL seven well-formed empty artefacts yield 0 findings and rc 0" \
++      "rc=$rc, findings=$(findings_count "$WORK/vall"), ids=[$(finding_ids "$WORK/vall")]"
++fi
++
++# ---------------------------------------------------------------------------
++# CELL 5 (GREEN CONTROL, tip AND after) - a well-formed 08 with failing tests still
++# emits only tests-failed:2 (critical), rc 1: the existing reads still run.
++# ---------------------------------------------------------------------------
++new_fixture "$WORK/v08"; printf '%s\n' '{"tests":{"passed":10,"failed":2}}' > "$(run_of "$WORK/v08")/08-aiken-tests.json"
++rc="$(run_aggregator "$WORK/v08")"
++if [ "$rc" = 1 ] && [ "$(finding_ids "$WORK/v08")" = "tests-failed:2" ]; then
++  ok "CONTROL a well-formed 08 with 2 failing tests still emits exactly tests-failed:2 and exits 1"
++else
++  bad "CONTROL a well-formed 08 with 2 failing tests still emits exactly tests-failed:2 and exits 1" \
++      "rc=$rc, findings=$(findings_count "$WORK/v08"), ids=[$(finding_ids "$WORK/v08")]"
++fi
++
++# ---------------------------------------------------------------------------
++# CELL 6 (GREEN CONTROL, tip AND after) - a truncated 04 artefact still emits
++# 04-trivy/unreadable-artefact EXACTLY ONCE (KS-878's own guard; not doubled).
++# ---------------------------------------------------------------------------
++new_fixture "$WORK/t04"; truncate_art "$WORK/t04" 04-container-trivy
++rc="$(run_aggregator "$WORK/t04")"
++if [ "$rc" = 1 ] && [ "$(findings_count "$WORK/t04")" = 1 ] \
++   && [ "$(finding_ids "$WORK/t04")" = "04-trivy/unreadable-artefact" ]; then
++  ok "CONTROL a truncated 04 artefact still emits 04-trivy/unreadable-artefact exactly once and exits 1"
++else
++  bad "CONTROL a truncated 04 artefact still emits 04-trivy/unreadable-artefact exactly once and exits 1" \
++      "rc=$rc, findings=$(findings_count "$WORK/t04"), ids=[$(finding_ids "$WORK/t04")]"
++fi
++
++printf '\n  %d passed, %d failed\n' "$pass" "$fail"
++[ "$fail" -eq 0 ] && [ "$pass" -eq 6 ] || exit 1
++exit 0
+diff --git a/Blockchain/Testing/jobs/09-aggregate-report.sh b/Blockchain/Testing/jobs/09-aggregate-report.sh
+index 739ebab8c..22a247985 100755
+--- a/Blockchain/Testing/jobs/09-aggregate-report.sh
++++ b/Blockchain/Testing/jobs/09-aggregate-report.sh
+@@ -213,6 +213,20 @@ is_baselined() {
+   grep -Fxq "$1" "$BASE_FP"
+ }
+ 
++# KS-1136 R-3: KS-878 guarded 04's artefact only. Every other job's block above
++# reads its artefact with `jq -r ... 2>/dev/null` (08 with a bare jq), so an
++# artefact that EXISTS but does not PARSE gave zero findings and rc 0 - a clean
++# result. Each present, unparseable artefact gets its own HIGH finding, as 04's
++# does. It runs before ALL_FINDINGS reads $TMP below, so it is reported in full.
++for _art in 01-dependency-audit:01-deps 02-secret-scan:02-secrets 03-sast-semgrep:03-sast \
++            05-dast-zap:05-dast 06-tenant-isolation:06-tenant 07-license-compliance:07-licenses \
++            08-aiken-tests:08-aiken; do
++  _f="$RUN_DIR/${_art%%:*}.json"; _job="${_art#*:}"
++  if [ -f "$_f" ] && ! jq -e . "$_f" >/dev/null 2>&1; then
++    emit "$_job" "high" "$_job/unreadable-artefact" "${_art%%:*}.json exists but is not valid JSON - the job aborted mid-write"
++  fi
++done
++
+ # Annotate each finding with .baselined: true|false
+ ALL_FINDINGS=$(jq '.' "$TMP")
+ ANNOTATED="[]"
