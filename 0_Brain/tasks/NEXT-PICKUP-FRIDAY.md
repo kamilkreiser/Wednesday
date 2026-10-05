@@ -12,6 +12,14 @@ supersede: replace wholesale; previous = NEXT-PICKUP-FRIDAY.md.pre-0925-rotate-s
 
 **The tree is at `/Volumes/Laptop-DEV/FRIDAY` (the drive, since 2026-09-28).** Quote every path (spaces).
 
+## 🔴🔴🔴 HANDOVER 2026-10-06 01:42 (Friday, ctx 76%, overnight) — READ FIRST; supersedes every block below where they differ
+**FIRST ACT:** `kam_rulings_today.sh` + `reconcile_rulings.py`; `friday/seat_idle.sh` over every live pane; read each STATUS last line (watch for SKELETONS: `@@X@@`, `__X__`). Every watcher dies with the seat — re-seed + re-arm.
+**Kam:** no open cards; last board row 2026-10-05 20:59:03. Nothing deployed since hosted 1046e24 (C-62). **Morning summary owed** (receipt shape: lead with the overnight result): HPSM-POC merged overnight #109 (99 N-7/N-8), #110 (208 deploy-script fix + live-check), #111 (215 + 214) → main **e7a2cc7**, NOT deployed; Jira closed 179 213 214; filed 214 215 216; **Dependabot alert #1 (high, `braces` GHSA-vfj7-8cjw-p6xm, web/package-lock.json, no patched version, open since 3 Oct)** — tell him; **the next hosted deploy is his word** and is the real proof of 208 (brief line: record deploy-from-ci.sh's two `live-check` lines, expect differ 0 / missing 0 / site-only 0, plus B146's treecmp once; then close 208; watch 215 N-3/N-6).
+**MAINS:** HPSM-POC **e7a2cc7** · hosted **1046e24** · analysis **92b00f1** · Composer **fd9493f** = demo.
+**LIVE PANE:** Datasec/HPSM-POC-A %60 **B152** (`Briefs/2026-10-06_B152_ci-sqlserver-leg-216.md`): 216 SQL Server CI job (red-proof on B150's all-NULL CASE), not a required check (Kam's call — card it if B152 recommends it), + B151 N-1..N-3. On READY FOR GATE: PR, tier-1 gate (B151 shape), merge on GO, records.
+**Remaining agent-only HPSM-POC:** 207 (API slow start on Azure — needs hosted evidence; likely Kam's word for any probe), 127 (one live Azure OpenAI call — Friday's call). Composer: review-pack decisions are Kam's.
+**Rotation:** band 80–90; rotate at a safe boundary with `wednesday_rotate.sh --self` detached and read its log's last line.
+
 ## 🔴🔴🔴 STATE 2026-10-05 23:34 (Friday, ctx ~74%, quiet hours) — READ FIRST; supersedes every block below where they differ
 **Kam:** no open cards; last board row 20:59:03. **MAINS:** HPSM-POC **722b33c** (PR #110 deploy-script fix merged; #109 feedback merged) — NEITHER deployed; hosted is **1046e24** (C-62). Analysis **a4125c5**. Composer **fd9493f** = demo.
 **The next hosted deploy (Kam's word) is the real proof of HPSMPOC-208's fix:** brief it with B148's line — record deploy-from-ci.sh's two `live-check` lines (expect differ 0 / missing 0 / site-only 0) and run B146's treecmp once as a cross-check; then close 208.
