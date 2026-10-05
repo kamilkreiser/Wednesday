@@ -12,6 +12,13 @@ supersede: replace wholesale; previous = NEXT-PICKUP-FRIDAY.md.pre-0925-rotate-s
 
 **The tree is at `/Volumes/Laptop-DEV/FRIDAY` (the drive, since 2026-09-28).** Quote every path (spaces).
 
+## 🔴🔴🔴 STATE 2026-10-06 05:00 (Friday successor, overnight, ctx ~40%) — READ FIRST; supersedes every block below where they differ
+**Kam:** 0 rows today (newest 2026-10-05 20:59:03); reconcile 0. OPEN CARD unchanged: `hpsmpoc-require-sqlserver-ci-check-1006`. Today = Tue 6 Oct review with Kam (HPSM-POC + SM 3.16); Thu 8 PO signature.
+**MAINS (GitHub API 04:59):** HPSM-POC **6f6bc96** · analysis **a8b492a** · Composer **fd9493f** = demo. Dependabot #1 (braces, high, no patch) still OPEN.
+**LIVE PANE:** Datasec/HPSM-POC-A **%62 B154** on HPSMPOC-217 (`HPSM-POC/1_Project_Definition/Briefs/2026-10-06_B154_sqlserver-leg-followups-217.md`). On READY FOR GATE: PR, tier-1 gate (B153 shape: SQL-Server-only planted defect, YAML-parse CI identity, no weakened assertion, actionlint 0), merge on GO, records + Jira.
+**Watcher:** `friday/watch_status.sh <scratchpad>/seen_b154` + WATCH_PANES %62 — dies with the seat; re-seed + re-arm.
+**Morning summary to Kam:** due 06:0x on the Friday tab (timer armed in this seat) — if this block still says due, post it first: overnight merges #109–#112 (none deployed), Jira closed 179 213 214 216, filed 215 216 217, the open card, Dependabot #1, B154 running, the hosted deploy = his word.
+
 ## 🔴🔴🔴 ROTATION HANDOVER 2026-10-06 04:35 (Friday, ctx ~79%, overnight) — READ FIRST; supersedes every block below where they differ
 **FIRST ACT:** `kam_rulings_today.sh` + `reconcile_rulings.py`; `friday/seat_idle.sh` over every live pane; read each STATUS last line (SKELETON check: `@@X@@`, `__X__`). Every watcher died with the old seat — re-seed + re-arm.
 **Kam:** last board row 2026-10-05 20:59:03. **OPEN CARD:** `hpsmpoc-require-sqlserver-ci-check-1006` (rec b; default: advisory, nothing changes). On a: give him the exact steps on the panel after MEASURING the live branch-protection/ruleset page (gh api `repos/datasecau/HPSM-POC/branches/main/protection` + rulesets) — never from this card's text.
