@@ -110,21 +110,8 @@ _expected = {e.strip() for e in exp} | {_without_trailing_comment(e) for e in ex
 # duplicated in the applied file (the applied runner was byte-identical to the hand fix). A3d's target is DUPLICATION
 # (KS-1133: a context line added beside its original). So a '+' tip line that the section also REMOVES is a rewrite,
 # not a context-marked-as-addition, and is not flagged. A '+' tip line with no matching '-' still is.
-# 2026-10-05 13:3x (KS-593 adminconfig, Spark output byte-identical to its golden, FAILed A3d): when the checker hands
-# A3c the product + NEW test sections together (the 09-28 union), A3d compared the TEST file's '+' lines against the
-# PRODUCT tip, so a common test line (`  return {`) that also exists in adminConfig.ts read as a duplicated context line.
-# A3d's subject is duplication INSIDE the product file, so it now considers only '+' lines from the section whose
-# `+++` path is the A3d target (_pf); a diff with no `+++` headers keeps the old behaviour (all '+' lines).
-_cur = None; _have_hdr = False; plus_a3d = []
-for _l in sec:
-    if _l.startswith("+++ "):
-        _have_hdr = True; _hp = _l[4:].strip()
-        _hp = _hp[2:] if _hp.startswith("b/") else _hp
-        _cur = bool(_pf) and (_hp == _pf or _hp.endswith("/" + _pf) or _pf.endswith("/" + _hp))
-    elif _l.startswith("+") and (_cur or not _have_hdr):
-        plus_a3d.append(_l[1:])
 _removed = {_norm(l[1:]) for l in sec if l.startswith("-") and not l.startswith("---")}
-context_as_plus = [l for l in plus_a3d if len(_norm(l)) >= 8 and _norm(l) not in _expected
+context_as_plus = [l for l in plus if len(_norm(l)) >= 8 and _norm(l) not in _expected
                    and _without_trailing_comment(l) not in _expected and _norm(l) in _tip
                    and _norm(l) not in _removed]
 for c in context_as_plus:
