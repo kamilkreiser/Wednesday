@@ -19,6 +19,12 @@ supersede: replace wholesale at the next pickup; do not append. Previous copy: N
 4. EXPIRING-GRANTS: "SPEND PAST THE 90%" is marked ENDED (account switched). Friday's "ignore the 90%" row is Friday's and is not touched.
 
 ### LIVE RIGHT NOW
+**🟠 50% CHECKPOINT 17:3x 2026-10-05 (seat 4633ab20). READ FIRST; supersedes the 17:2x block where they differ:**
+0. Kam: no rows since 16:22:05; reconcile 0; usage 40%. Inbox: only Wednesday's own outbound since 06:25Z.
+1. LIVE: %25 C 23rd (ITEM 0 owed) · %26 D 7th (CONFIRMED 06:25Z, deploying kintsugi; Q-5F = Done candidate only; L rows test accounts only; W rows not run) · %27 F 2nd (ITEM 2, building 049 suite; **mirror e3 ACK owed** — addendum 06:30Z) · %28 gate59 (#1382 KS-1005) · %29 **B 61st** (ITEM 0 owed; identity correction 06:22Z + A3 correction 06:30Z: E lane is 18. KS-1210 / 19. KS-1005) · %30 **E 3rd** (launched 06:31Z, ITEM 0 owed; NO lock until Wednesday's ANSWER quotes F 2nd's e3 ACK + B 61st's -e3 proof).
+2. On B 61st ITEM 0 → ANSWER (Q-O #1381 first, Q-F one fetch after merge, Q-M2 gate57 §3, Q-Y regenerate on merge-in, Q-N2 superseded by A3 = 23./24., Q-T T1, Q-H a, Q-3P High) → signed GO `GO (Seat B 61st): merge 1381 on gate57` (SUPERSEDES the B 60th string; END_TREE ba3527224ff6 via merge56's REAL flags as B 61st reports them).
+3. On gate59 verdict: pane_close FIRST; D10 → ticket + card Kam if Major; #1382 GO after #1381 lands and a fresh merge-in (an E-lane seat; E 3rd only if a GO names it).
+4. Owed tooling (claim first): cockpit `say` with a pane id silently does nothing; cockpit launch should tell a seat its pane name (identity trap ×3 today) + re-select %0.
 **🟢 17:21 2026-10-05 (seat 4633ab20, booted 17:16 as b72c1f78's successor, ctx ~40%). READ FIRST; supersedes the 17:14 block where they differ:**
 0. Kam: 13 rows today, newest 16:22:05, reconcile 0. Mail 0 new at boot. Linear WED 109 active. usage 39%.
 1. **gate59 %28 RUNNING** (rung 5 verified: pane shows `git show 80bafc849a54:…`). ON VERDICT: pane_close FIRST, hash report, completion check vs E 2nd brief row 1; D10 (no session revocation on password change) → if Major, ticket + card Kam; GO for #1382 goes to an E-lane seat AFTER #1381 merges + a fresh merge-in.
