@@ -12,6 +12,19 @@ supersede: replace wholesale; previous = NEXT-PICKUP-FRIDAY.md.pre-0925-rotate-s
 
 **The tree is at `/Volumes/Laptop-DEV/FRIDAY` (the drive, since 2026-09-28).** Quote every path (spaces).
 
+## 🔴🔴🔴 ROTATION HANDOVER 2026-10-05 11:01 (Friday, ctx 78%) — READ FIRST; supersedes every block below where they differ
+**FIRST ACT:** `kam_rulings_today.sh` + `reconcile_rulings.py`; then `friday/seat_idle.sh` over %19 %24 %26 %29 and read each STATUS last line. Merge jobs and watchers DIED with the old seat: re-run them (commands below).
+**Kam today:** "keep going" (08:4x) · deploy Composer (09:5x) · renamed PDF a, PDF note b, 1.0.2 a, hosted deploy a (09:57–09:58). He does an END-TO-END TEST of the hosted HPSM-POC today.
+**LIVE NOW:** Composer demo **e36fcde** (C-41). HPSM-POC hosted **577c27c** (C-55), web+api, 1.0.1 running.
+**MAINS:** Composer **e36fcde**. HPSM-POC **fa77dca** (#98 CI package 4aa7840 · #99 1.0.2 04aae93 · #100 current-name PDF 05f30b0 · #101 runbook F-3). Analysis 600a9d4+ (#59 C-55, #60 C-56; #61 C-54 merging).
+**OPEN CARDS (Friday tab):** `hpsmpoc-05f30b0-hosted-deploy-1005` (amended: main fa77dca; rec b = after his E2E test) · `hpsmpoc-hosted-forwarded-address-settings-1005` (rec a) · `hpsmpoc-hosted-clean-old-static-files-1005` (rec a). On deploy a: brief a B126-shape seat (`HPSM-POC/1_Project_Definition/Briefs/2026-10-05_B126_hosted-deploy-577c27c.md` as template; NO --clean unless that card is a; or use `scripts/deploy-from-ci.sh fetch/deploy` only if --clean is ruled a), verify live yourself (/api/health, /health, /health/ready, new build id, a marker; 1.0.2 now active → the narrative template id reads 1.0.2), deliver, tell Kam.
+**LIVE PANES:**
+- %19 Composer-D **B74** pickers (branch b74/pickers 3810e3c) held for gate; %29 Composer-QA **B77** gate (tier 1) — on GO: `friday/merge_when_green.sh datasecau/Datasec-Security-Composer <PR> 3810e3c982dafc01e99dfffa7e8c5c97718e466b` (OPEN THE PR FIRST: `friday_as.sh datasec gh pr create … --head b74/pickers`), then a B74 records addendum (C-number next after root main's highest), then a deploy card (Composer demo = e36fcde; Kam's word).
+- %24 HPSM-POC-B **B125** on ADDENDUM-2: records/b125 (C-53) + tickets N-1..N-5 (N-3 is a wording question for Kam). On READY (records): open the analysis PR, merge_when_green, deliver card hpsmpoc-renamed-customer-pdf-1005 to C-53; close %24.
+- %26 HPSM-POC-D **B127** records done; analysis PR **#61** (records/b127 ef5847f) merge job was running: re-run `friday/merge_when_green.sh datasecau/HPSM-POC-analysis 61 ef5847f4911e657f533a9e361c8c2bc59f2030f1` if not merged; then deliver card hpsmpoc-template-102-words-1005 to C-54; close %26.
+**Still owed to Kam (not carded):** E8 timeframe note (told); Composer pack questions (Q2–Q7, #172, approver half of Q1) for his review; test user + UAT seat (C-51/C-52) while he is logged in.
+**Tools shipped today:** merge_when_green rule 6 (latest check-run per name); watch_status skips not-yet-written STATUS files. Ledger: 1 row (pull with uncommitted own files ×2 + late-seeded watcher) — commit own files and seed watchers BEFORE.
+
 ## 🔴🔴🔴 CHECKPOINT 2026-10-05 10:23 (Friday, ctx 70%) — READ FIRST; supersedes every block below where they differ
 **DONE since 09:59:** Composer demo = **e36fcde** (B76; Friday verified live 10:1x: kam/paul 200, 401, healthz 0.27.0, APPROVED wording served, no DRAFT); card composer-3d92736-deploy-1005 DELIVERED (C-41). Tool fix: watch_status skips not-yet-written STATUS files.
 **C-NUMBERS (Friday ruled, by Kam's tap time):** C-53 B125 (renamed PDF) · C-54 B127 (1.0.2) · C-55 B126 (hosted deploy). B126's addendum was queued behind a running turn: confirm it read it.
