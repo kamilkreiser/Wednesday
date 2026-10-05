@@ -7,7 +7,7 @@ status: live
 
 # Boot digest — headline + rules of every lesson (open the file when it fires)
 
-Generated 2026-10-05 16:06 from 216 lesson files (985,067 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 12 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
+Generated 2026-10-05 16:42 from 217 lesson files (987,908 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 12 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
 
 ## The T9 SSD is the master — Wednesday must be fully portable
 `2026-07-31_fully-portable-drive.md` · principle · 2026-07-31 · status: superseded — the "T9 is the master" half by [[2026-08-25_one-drive-devmaster-is-master]] (2026-08-25); the portability principle itself still lives
@@ -6960,6 +6960,20 @@ which dialog option is inside the grant).
 arrive by MAIL; this names a second channel he accepts for one class) ·
 [[2026-08-03_go-slow-earn-autonomy]] (rule 5: every grant recorded) ·
 [[2026-08-07_protocol-v1.3-signed-delegation]].
+
+
+## Grant: through October, deploy everything that is READY to BOTH kintsugi and demo, without a card per deploy
+`2026-10-05_october-deploy-both-boxes-when-ready.md` · grant · 2026-10-05 · status: live
+
+**His words, verbatim (16:21:39):**
+> *"for the month of October, keep pushing, keep publishing, deploy all that works and is ready but only when its ready.  Deploy to both servers, demo and kintsugi"*
+
+**How to apply:**
+1. Every deploy brief names this file and the ruled card(s) as its authority, and states the box, the develop SHA and the rollback tag.
+2. Report each deploy to Kam on the panel after it is verified on the running box: what went where, the SHA, what the live sweep found. The grant removes the pause, not the receipt.
+3. **Expiry is a check, not a note:** the row in `tasks/EXPIRING-GRANTS.md`; on 1 November demo returns to Peter's nod and each deploy returns to Kam's tap. Do not renew by inference.
+
+**Family:** [[2026-09-10_kintsugi-first-then-demo-behind-gates]] · [[2026-09-10_deploy-both-boxes-grant-expires-sunday]] (the September precedent, same shape) · [[2026-09-11_secuura-we-approve-and-merge-our-own-tested-work]] (its demo clause is lifted for October) · [[2026-09-06_a-scoped-override-carries-its-own-expiry]] · [[2026-08-03_go-slow-earn-autonomy]] (rule 5).
 
 
 ## The Spark's target is 50 tasks a day — push it harder; the bottleneck is ours, so build the pipeline, not the effort
