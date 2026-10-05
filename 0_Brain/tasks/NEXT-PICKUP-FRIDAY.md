@@ -12,6 +12,16 @@ supersede: replace wholesale; previous = NEXT-PICKUP-FRIDAY.md.pre-0925-rotate-s
 
 **The tree is at `/Volumes/Laptop-DEV/FRIDAY` (the drive, since 2026-09-28).** Quote every path (spaces).
 
+## 🔴🔴🔴 STATE 2026-10-05 14:03 (Friday, ctx 64%) — READ FIRST; supersedes every block below where they differ
+**Kam today since 12:1x:** four cards a (12:18–12:19; all delivered: Composer C-43, hosted C-57/C-58/C-59) · terminal ~12:4x "keep going. dont wait on reviews if you do not need. Tell me once the composer is ready for my review. Send me an email with links and user details" → DONE: email sent 13:17 (msg 010001a109d9d1fa…, read back), panel told.
+**LIVE:** Composer demo **d09c895** (B78, C-43, Friday verified 13:2x). HPSM-POC hosted **fa77dca** (B132, C-57..59, Friday verified 12:5x; forwarded settings on; --clean done). **MAINS:** Composer d09c895 · HPSM-POC **c2d321c** (#102 CRLF screen fix + #103 demo.bicepparam — neither on hosted; next deploy needs Kam's word) · analysis 954a6a5.
+**LIVE PANES:**
+- Datasec/Composer-D **B79** (tier 2 web: #185 Dashboard shows Guided set-ups waiting, #186, #187, #181/#196, #192 + STALE backlog rows) — brief `Composer Briefs/2026-10-05_B79_expert-flow-honesty-185-186-187-181-196.md`. On READY FOR REVIEW: read diff at source, PR, merge_when_green; NEW WORDS FOR KAM section → tell Kam after merge (non-blocking).
+- Datasec/Composer-QA **B81** gate on B80 (PR #42 @ ad11f94e3caa7467cc19fdc15344620a6f79618a; tier 1 round 1 of 2). On GO: `friday/merge_when_green.sh datasecau/Datasec-Security-Composer 42 ad11f94e3caa7467cc19fdc15344620a6f79618a`, then a records seat (B80 pane CLOSED; successor from branch + STATUS) → C-entry not needed (no ruling) unless the seat finds one. On NO GO: fix round by a successor seat (round 2 = cap).
+**Watcher:** `friday/watch_status.sh <scratchpad>/seen_b81` over B81 + B79 STATUS (root + `_wt_b79*`) — dies with the seat.
+**DRIVES (Kam 12:13:55 via Wednesday, policy `1_Project_Definition/Policies/2026-10-05_drive-hygiene-policy.md`):** Laptop-DEV 81% (1.5Ti/1.8Ti); laptop Data 28%. Survey (`du -sk` per top folder → scratchpad survey_top.txt) still running at 13:4x (on HPSM-POC .tools). Then: per-project cleanup seats (each project's own agent; merged+clean worktrees >7 d → G-DRIVE Scratch Files; node_modules/.next etc >14 d removed by owner; never records/creds/<3 d/live-seat paths) → one-line-per-drive report to Kam + one-line receipt to Wednesday ("first pass done"). `~/1FILES TO SYNC/` laptop copies = Kam's call.
+**Owed small:** HPSM-POC: nothing agent-only left in the plan (Jira backlog sweep is the next source). Composer: review-pack decisions are Kam's (Q1 approver half, #95, #99, #101, #172).
+
 ## 🔴🔴🔴 CHECKPOINT 2026-10-05 12:00 (Friday, ctx 50%) — READ FIRST; supersedes every block below where they differ
 **Kam:** no live rows since 09:58:24 (kam_rulings 12:00; reconcile to-rule 0). Usage 40%.
 **LIVE PANES (both tier 2, briefs in HPSM-POC `1_Project_Definition/Briefs/`, dated 2026-10-05; partition disjoint):**
