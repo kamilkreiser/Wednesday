@@ -1,0 +1,60 @@
+diff --git a/Blockchain/Dev/services/billing/src/__tests__/ks1364-billing-credits-use-body-required.test.ts b/Blockchain/Dev/services/billing/src/__tests__/ks1364-billing-credits-use-body-required.test.ts
+new file mode 100644
+index 000000000..eef47a67a
+--- /dev/null
++++ b/Blockchain/Dev/services/billing/src/__tests__/ks1364-billing-credits-use-body-required.test.ts
+@@ -0,0 +1,42 @@
++// KS-1364 (85 request bodies not marked required): the published contract for POST /api/billing/credits/use did not
++// mark the request body required, so a spec-driven caller (Schemathesis) may send no body at all. The handler
++// (routes/billing.ts, UseCreditsSchema.parse) requires customerId and credits and answers a ZodError with 400, so an
++// absent body (express.json() leaves it as {}) is always refused. The spec now says the body is required - the
++// multi-line shape the KS-1364 billing carve landed in this file. This file renders the document the generator
++// publishes, from the shared registry the billing module populates on import. No server, no database, no network,
++// no Stripe.
++import { describe, it, expect } from 'vitest';
++import { generateOpenApiDocument } from '@secuura/shared';
++import '../billing.openapi';
++
++type AnyObj = Record<string, any>;
++
++const doc = generateOpenApiDocument({ title: 'billing (ks1364 credits/use pin)', version: '0.0.0' }) as AnyObj;
++
++const USE = '/api/billing/credits/use';
++
++function operation(path: string, method: string): AnyObj | undefined {
++  return doc.paths?.[path]?.[method];
++}
++
++describe('KS-1364: POST /api/billing/credits/use publishes a REQUIRED request body', () => {
++  it('RED KS-1364 CU1: POST /api/billing/credits/use marks its request body required', () => {
++    expect(operation(USE, 'post')?.requestBody?.required).toBe(true);
++  });
++
++  it('control KS-1364 CUC1: the body keeps its request schema and the operation keeps bearerAuth', () => {
++    expect(operation(USE, 'post')?.requestBody?.content?.['application/json']?.schema?.$ref).toBe(
++      '#/components/schemas/BillingUseCreditsRequest',
++    );
++    expect(operation(USE, 'post')?.security).toEqual([{ bearerAuth: [] }]);
++  });
++
++  it('control KS-1364 CUC2: the request component still requires customerId and credits', () => {
++    const r = doc.components?.schemas?.BillingUseCreditsRequest?.required ?? [];
++    expect([...r].sort()).toEqual(['credits', 'customerId']);
++  });
++
++  it('control KS-1364 CUC3: the landed KS-1364 billing carve keeps its required body', () => {
++    expect(operation('/api/billing/checkout/custom', 'post')?.requestBody?.required).toBe(true);
++  });
++});
+diff --git a/Blockchain/Dev/services/billing/src/billing.openapi.ts b/Blockchain/Dev/services/billing/src/billing.openapi.ts
+index 93ace536f..301d781fc 100644
+--- a/Blockchain/Dev/services/billing/src/billing.openapi.ts
++++ b/Blockchain/Dev/services/billing/src/billing.openapi.ts
+@@ -985,6 +985,7 @@ sharedRegistry.registerPath({
+   request: {
+     body: {
+       content: { 'application/json': { schema: UseCreditsRequestSchema } },
++      required: true,
+     },
+   },
+   responses: {

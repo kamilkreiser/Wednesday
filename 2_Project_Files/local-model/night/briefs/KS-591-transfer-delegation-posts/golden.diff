@@ -1,0 +1,101 @@
+diff --git a/Blockchain/Dev/services/transfer/src/__tests__/ks591-transfer-delegation-posts-body-required.test.ts b/Blockchain/Dev/services/transfer/src/__tests__/ks591-transfer-delegation-posts-body-required.test.ts
+new file mode 100644
+index 000000000..9cae9d6a2
+--- /dev/null
++++ b/Blockchain/Dev/services/transfer/src/__tests__/ks591-transfer-delegation-posts-body-required.test.ts
+@@ -0,0 +1,64 @@
++// KS-591 (positive_data_acceptance register) + KS-1364 (85 request bodies not marked required): the published
++// contracts for POST /api/transfers, POST /api/delegations and POST /api/delegations/validate did not mark the
++// request body required, so a spec-driven caller (Schemathesis) may send no body at all. Each handler parses the
++// body with a zod object that has required fields (index.ts initiateTransferSchema; routes/delegations.ts
++// createDelegationSchema and validateDelegationSchema), so an absent body (express.json() leaves it as {}) is
++// always a 400. The spec now says each body is required - the KS-444 shape its siblings already have. This file
++// renders the document the generator publishes, from the shared registry the transfer module populates on import.
++// No server, no database, no network.
++import { describe, it, expect } from 'vitest';
++import { generateOpenApiDocument } from '@secuura/shared';
++import '../transfer.openapi';
++
++type AnyObj = Record<string, any>;
++
++const doc = generateOpenApiDocument({ title: 'transfer (ks591 body pin)', version: '0.0.0' }) as AnyObj;
++
++function operation(path: string, method: string): AnyObj | undefined {
++  return doc.paths?.[path]?.[method];
++}
++
++function bodyRef(path: string): string | undefined {
++  return operation(path, 'post')?.requestBody?.content?.['application/json']?.schema?.$ref;
++}
++
++describe('KS-591: three transfer-service POSTs publish a REQUIRED request body', () => {
++  it('RED KS-591 TB1: POST /api/transfers marks its request body required', () => {
++    expect(operation('/api/transfers', 'post')?.requestBody?.required).toBe(true);
++  });
++
++  it('RED KS-591 TB2: POST /api/delegations marks its request body required', () => {
++    expect(operation('/api/delegations', 'post')?.requestBody?.required).toBe(true);
++  });
++
++  it('RED KS-591 TB3: POST /api/delegations/validate marks its request body required', () => {
++    expect(operation('/api/delegations/validate', 'post')?.requestBody?.required).toBe(true);
++  });
++
++  it('control KS-591 TBC1: the three bodies keep their request schemas and their bearerAuth', () => {
++    expect({
++      transfer: bodyRef('/api/transfers'),
++      create: bodyRef('/api/delegations'),
++      validate: bodyRef('/api/delegations/validate'),
++    }).toEqual({
++      transfer: '#/components/schemas/TransferInitiateRequest',
++      create: '#/components/schemas/DelegationCreateRequest',
++      validate: '#/components/schemas/DelegationValidateRequest',
++    });
++    for (const p of ['/api/transfers', '/api/delegations', '/api/delegations/validate']) {
++      expect(operation(p, 'post')?.security).toEqual([{ bearerAuth: [] }]);
++    }
++  });
++
++  it('control KS-591 TBC2: each request component still lists required fields, which is why an absent body is refused', () => {
++    const s: AnyObj = doc.components?.schemas ?? {};
++    expect(s.TransferInitiateRequest?.required).toEqual(expect.arrayContaining(['documentId', 'transferType', 'currentOwnerId', 'newOwnerId']));
++    expect(s.DelegationCreateRequest?.required).toEqual(expect.arrayContaining(['delegateId', 'delegationType']));
++    expect(s.DelegationValidateRequest?.required).toEqual(expect.arrayContaining(['documentId', 'requiredPermissions']));
++  });
++
++  it('control KS-591 TBC3: the KS-444 siblings (transfer approve, delegation revoke) keep their required bodies', () => {
++    expect(operation('/api/transfers/{id}/approve', 'post')?.requestBody?.required).toBe(true);
++    expect(operation('/api/delegations/{id}/revoke', 'post')?.requestBody?.required).toBe(true);
++  });
++});
+diff --git a/Blockchain/Dev/services/transfer/src/transfer.openapi.ts b/Blockchain/Dev/services/transfer/src/transfer.openapi.ts
+index eebffb596..056fe79ee 100644
+--- a/Blockchain/Dev/services/transfer/src/transfer.openapi.ts
++++ b/Blockchain/Dev/services/transfer/src/transfer.openapi.ts
+@@ -895,7 +895,7 @@ sharedRegistry.registerPath({
+     'recipient).',
+   security: [{ bearerAuth: [] }],
+   request: {
+-    body: { content: { 'application/json': { schema: TransferInitiateRequestSchema } } },
++    body: { content: { 'application/json': { schema: TransferInitiateRequestSchema } }, required: true },
+   },
+   responses: {
+     201: {
+@@ -1142,7 +1142,7 @@ sharedRegistry.registerPath({
+   summary: 'Create a delegation',
+   security: [{ bearerAuth: [] }],
+   request: {
+-    body: { content: { 'application/json': { schema: DelegationCreateRequestSchema } } },
++    body: { content: { 'application/json': { schema: DelegationCreateRequestSchema } }, required: true },
+   },
+   responses: {
+     201: {
+@@ -1292,7 +1292,7 @@ sharedRegistry.registerPath({
+     'to act on document Y for scope Z?" and get an authoritative answer.',
+   security: [{ bearerAuth: [] }],
+   request: {
+-    body: { content: { 'application/json': { schema: DelegationValidateRequestSchema } } },
++    body: { content: { 'application/json': { schema: DelegationValidateRequestSchema } }, required: true },
+   },
+   responses: {
+     200: {

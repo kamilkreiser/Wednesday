@@ -1,0 +1,98 @@
+diff --git a/Blockchain/Dev/services/nft-certificate/src/__tests__/ks1364-nft-ipfs-pin-unpin-estimate-size-body-required.test.ts b/Blockchain/Dev/services/nft-certificate/src/__tests__/ks1364-nft-ipfs-pin-unpin-estimate-size-body-required.test.ts
+new file mode 100644
+index 000000000..b210c1b46
+--- /dev/null
++++ b/Blockchain/Dev/services/nft-certificate/src/__tests__/ks1364-nft-ipfs-pin-unpin-estimate-size-body-required.test.ts
+@@ -0,0 +1,62 @@
++// KS-1364 (85 request bodies not marked required): the published contracts for POST /api/nft/ipfs/pin,
++// POST /api/nft/ipfs/unpin and POST /api/nft/metadata/estimate-size did not mark the request body required, so a
++// spec-driven caller (Schemathesis) may send no body at all. Each handler (routes/nft.routes.ts) safeParses the body
++// with a zod object that has required fields (cid; storageTier and privacyLevel) and answers 400 on failure, so an
++// absent body (express.json() leaves it as {}) is always refused. The spec now says each body is required - the
++// shapes the KS-1364 nft carves landed in this file. This file renders the document the generator publishes, from
++// the shared registry the nft-certificate module populates on import. No server, no database, no network.
++import { describe, it, expect } from 'vitest';
++import { generateOpenApiDocument } from '@secuura/shared';
++import '../nft-certificate.openapi';
++
++type AnyObj = Record<string, any>;
++
++const doc = generateOpenApiDocument({ title: 'nft-certificate (ks1364 ipfs pin)', version: '0.0.0' }) as AnyObj;
++
++function operation(path: string, method: string): AnyObj | undefined {
++  return doc.paths?.[path]?.[method];
++}
++
++function bodyRef(path: string): string | undefined {
++  return operation(path, 'post')?.requestBody?.content?.['application/json']?.schema?.$ref;
++}
++
++describe('KS-1364: three nft POSTs publish a REQUIRED request body', () => {
++  it('RED KS-1364 NP1: POST /api/nft/ipfs/pin marks its request body required', () => {
++    expect(operation('/api/nft/ipfs/pin', 'post')?.requestBody?.required).toBe(true);
++  });
++
++  it('RED KS-1364 NP2: POST /api/nft/ipfs/unpin marks its request body required', () => {
++    expect(operation('/api/nft/ipfs/unpin', 'post')?.requestBody?.required).toBe(true);
++  });
++
++  it('RED KS-1364 NP3: POST /api/nft/metadata/estimate-size marks its request body required', () => {
++    expect(operation('/api/nft/metadata/estimate-size', 'post')?.requestBody?.required).toBe(true);
++  });
++
++  it('control KS-1364 NPC1: the three bodies keep their request schemas and their bearerAuth', () => {
++    expect({
++      pin: bodyRef('/api/nft/ipfs/pin'),
++      unpin: bodyRef('/api/nft/ipfs/unpin'),
++      size: bodyRef('/api/nft/metadata/estimate-size'),
++    }).toEqual({
++      pin: '#/components/schemas/NftIpfsPinRequest',
++      unpin: '#/components/schemas/NftIpfsPinRequest',
++      size: '#/components/schemas/NftMetadataSizeRequest',
++    });
++    for (const p of ['/api/nft/ipfs/pin', '/api/nft/ipfs/unpin', '/api/nft/metadata/estimate-size']) {
++      expect(operation(p, 'post')?.security).toEqual([{ bearerAuth: [] }]);
++    }
++  });
++
++  it('control KS-1364 NPC2: the request components still list their required fields', () => {
++    const s: AnyObj = doc.components?.schemas ?? {};
++    expect(s.NftIpfsPinRequest?.required).toEqual(['cid']);
++    expect(s.NftMetadataSizeRequest?.required).toEqual(expect.arrayContaining(['storageTier', 'privacyLevel']));
++  });
++
++  it('control KS-1364 NPC3: the landed KS-1364 nft carves keep their required bodies', () => {
++    expect(operation('/api/nft/record', 'post')?.requestBody?.required).toBe(true);
++    expect(operation('/api/nft/verify/transaction', 'post')?.requestBody?.required).toBe(true);
++  });
++});
+diff --git a/Blockchain/Dev/services/nft-certificate/src/nft-certificate.openapi.ts b/Blockchain/Dev/services/nft-certificate/src/nft-certificate.openapi.ts
+index 7b0359768..23e061d77 100644
+--- a/Blockchain/Dev/services/nft-certificate/src/nft-certificate.openapi.ts
++++ b/Blockchain/Dev/services/nft-certificate/src/nft-certificate.openapi.ts
+@@ -1144,7 +1144,7 @@ sharedRegistry.registerPath({
+   summary: 'Pin a CID to ensure persistence',
+   security: [{ bearerAuth: [] }],
+   request: {
+-    body: { content: { 'application/json': { schema: NftIpfsPinRequestSchema } } },
++    body: { content: { 'application/json': { schema: NftIpfsPinRequestSchema } }, required: true },
+   },
+   responses: {
+     200: {
+@@ -1169,7 +1169,7 @@ sharedRegistry.registerPath({
+   summary: 'Unpin a CID',
+   security: [{ bearerAuth: [] }],
+   request: {
+-    body: { content: { 'application/json': { schema: NftIpfsPinRequestSchema } } },
++    body: { content: { 'application/json': { schema: NftIpfsPinRequestSchema } }, required: true },
+   },
+   responses: {
+     200: {
+@@ -1259,6 +1259,7 @@ sharedRegistry.registerPath({
+   request: {
+     body: {
+       content: { 'application/json': { schema: NftMetadataSizeRequestSchema } },
++      required: true,
+     },
+   },
+   responses: {

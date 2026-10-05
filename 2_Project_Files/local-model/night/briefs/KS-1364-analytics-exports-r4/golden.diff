@@ -1,0 +1,64 @@
+diff --git a/Blockchain/Dev/services/analytics/src/__tests__/ks1364-analytics-exports-body-required.test.ts b/Blockchain/Dev/services/analytics/src/__tests__/ks1364-analytics-exports-body-required.test.ts
+new file mode 100644
+index 000000000..ed5ad0fe6
+--- /dev/null
++++ b/Blockchain/Dev/services/analytics/src/__tests__/ks1364-analytics-exports-body-required.test.ts
+@@ -0,0 +1,45 @@
++// KS-1364 (85 request bodies not marked required): the published contract for POST /api/analytics/exports did not
++// mark the request body required, so a spec-driven caller (Schemathesis) may send no body at all. The handler
++// (routes/analytics.ts) parses the body with ExportRequestSchema (types/analytics.types.ts: type, period and format
++// required) and answers 400 on a ZodError, so an absent body (express.json() leaves it as {}) is always refused.
++// The spec now says the body is required - the shape its sibling POST /api/analytics/reports already has. This file
++// renders the document the generator publishes and runs the handler's own validator. No server, no database, no
++// network.
++import { describe, it, expect } from 'vitest';
++import { generateOpenApiDocument } from '@secuura/shared';
++import '../analytics.openapi';
++import { ExportRequestSchema } from '../types/analytics.types';
++
++type AnyObj = Record<string, any>;
++
++const doc = generateOpenApiDocument({ title: 'analytics (ks1364 exports pin)', version: '0.0.0' }) as AnyObj;
++
++function operation(path: string, method: string): AnyObj | undefined {
++  return doc.paths?.[path]?.[method];
++}
++
++describe('KS-1364: POST /api/analytics/exports publishes a REQUIRED request body', () => {
++  it('RED KS-1364 AE1: POST /api/analytics/exports marks its request body required', () => {
++    expect(operation('/api/analytics/exports', 'post')?.requestBody?.required).toBe(true);
++  });
++
++  it('control KS-1364 AEC1: the body keeps its request schema and the operation keeps bearerAuth', () => {
++    const body = operation('/api/analytics/exports', 'post')?.requestBody;
++    expect(body?.content?.['application/json']?.schema?.$ref).toBe('#/components/schemas/AnalyticsExportRequest');
++    expect(operation('/api/analytics/exports', 'post')?.security).toEqual([{ bearerAuth: [] }]);
++  });
++
++  it('control KS-1364 AEC2: the validator the handler runs refuses an absent body (it arrives as {})', () => {
++    expect(ExportRequestSchema.safeParse({}).success).toBe(false);
++  });
++
++  it('control KS-1364 AEC3: the request component still requires type, period and format', () => {
++    const r = doc.components?.schemas?.AnalyticsExportRequest?.required ?? [];
++    expect([...r].sort()).toEqual(['format', 'period', 'type']);
++  });
++
++  it('control KS-1364 AEC4: the sibling POST /api/analytics/reports keeps its required body and GET /exports stays bodiless', () => {
++    expect(operation('/api/analytics/reports', 'post')?.requestBody?.required).toBe(true);
++    expect(operation('/api/analytics/exports', 'get')?.requestBody).toBeUndefined();
++  });
++});
+diff --git a/Blockchain/Dev/services/analytics/src/analytics.openapi.ts b/Blockchain/Dev/services/analytics/src/analytics.openapi.ts
+index 72731b05b..b375f37af 100644
+--- a/Blockchain/Dev/services/analytics/src/analytics.openapi.ts
++++ b/Blockchain/Dev/services/analytics/src/analytics.openapi.ts
+@@ -847,7 +847,7 @@ sharedRegistry.registerPath({
+   ...rateLimit('global'),
+   ...sla('report'),
+   request: {
+-    body: { content: { 'application/json': { schema: ExportRequestSchema } } },
++    body: { content: { 'application/json': { schema: ExportRequestSchema } }, required: true },
+   },
+   responses: {
+     202: acceptedResponse({

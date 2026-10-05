@@ -1,0 +1,86 @@
+diff --git a/Blockchain/Dev/services/m365-integration/src/__tests__/ks1364-teams-webhook-config-notify-body-required.test.ts b/Blockchain/Dev/services/m365-integration/src/__tests__/ks1364-teams-webhook-config-notify-body-required.test.ts
+new file mode 100644
+index 000000000..d476a48ae
+--- /dev/null
++++ b/Blockchain/Dev/services/m365-integration/src/__tests__/ks1364-teams-webhook-config-notify-body-required.test.ts
+@@ -0,0 +1,58 @@
++// KS-1364 (85 request bodies not marked required): the published contracts for POST /api/teams/webhook-config and
++// POST /api/teams/notify did not mark the request body required, so a spec-driven caller (Schemathesis) may send no
++// body at all. Both handlers (index.ts) refuse an absent body with 400: webhook-config parses it with
++// teamsWebhookSchema (channelName and webhookUrl required), notify with teamsNotifyRequestSchema (event required,
++// non-empty). So the spec now says each body is required - the one-line shape the KS-1364 m365 carves landed. This
++// file renders the document the generator publishes, from the shared registry the m365-integration module populates
++// on import, and runs the notify validator itself. No server, no database, no network.
++import { describe, it, expect } from 'vitest';
++import { generateOpenApiDocument } from '@secuura/shared';
++import '../m365-integration.openapi';
++import { teamsNotifyRequestSchema } from '../teamsNotifyRequest';
++
++type AnyObj = Record<string, any>;
++
++const doc = generateOpenApiDocument({ title: 'm365-integration (ks1364 teams pin)', version: '0.0.0' }) as AnyObj;
++
++function operation(path: string, method: string): AnyObj | undefined {
++  return doc.paths?.[path]?.[method];
++}
++
++function bodyRef(path: string): string | undefined {
++  return operation(path, 'post')?.requestBody?.content?.['application/json']?.schema?.$ref;
++}
++
++describe('KS-1364: the two Teams POSTs publish a REQUIRED request body', () => {
++  it('RED KS-1364 TW1: POST /api/teams/webhook-config marks its request body required', () => {
++    expect(operation('/api/teams/webhook-config', 'post')?.requestBody?.required).toBe(true);
++  });
++
++  it('RED KS-1364 TW2: POST /api/teams/notify marks its request body required', () => {
++    expect(operation('/api/teams/notify', 'post')?.requestBody?.required).toBe(true);
++  });
++
++  it('control KS-1364 TWC1: both bodies keep their request schemas and their bearerAuth', () => {
++    expect({ config: bodyRef('/api/teams/webhook-config'), notify: bodyRef('/api/teams/notify') }).toEqual({
++      config: '#/components/schemas/M365TeamsWebhookConfigRequest',
++      notify: '#/components/schemas/M365TeamsNotifyRequest',
++    });
++    expect(operation('/api/teams/webhook-config', 'post')?.security).toEqual([{ bearerAuth: [] }]);
++    expect(operation('/api/teams/notify', 'post')?.security).toEqual([{ bearerAuth: [] }]);
++  });
++
++  it('control KS-1364 TWC2: the notify validator the handler runs refuses an absent body (it arrives as {})', () => {
++    expect(teamsNotifyRequestSchema.safeParse({}).success).toBe(false);
++    expect(teamsNotifyRequestSchema.safeParse({ event: 'certified' }).success).toBe(true);
++  });
++
++  it('control KS-1364 TWC3: the request components still list their required fields', () => {
++    const s: AnyObj = doc.components?.schemas ?? {};
++    expect(s.M365TeamsWebhookConfigRequest?.required).toEqual(expect.arrayContaining(['channelName', 'webhookUrl']));
++    expect(s.M365TeamsNotifyRequest?.required).toEqual(expect.arrayContaining(['event']));
++  });
++
++  it('control KS-1364 TWC4: the GET /api/teams/webhook-config list stays bodiless and the landed m365 carve keeps its required body', () => {
++    expect(operation('/api/teams/webhook-config', 'get')?.requestBody).toBeUndefined();
++    expect(operation('/api/m365/sites', 'post')?.requestBody?.required).toBe(true);
++  });
++});
+diff --git a/Blockchain/Dev/services/m365-integration/src/m365-integration.openapi.ts b/Blockchain/Dev/services/m365-integration/src/m365-integration.openapi.ts
+index 75d19f653..5a6bbebcd 100644
+--- a/Blockchain/Dev/services/m365-integration/src/m365-integration.openapi.ts
++++ b/Blockchain/Dev/services/m365-integration/src/m365-integration.openapi.ts
+@@ -861,7 +861,7 @@ sharedRegistry.registerPath({
+   summary: 'Register a Teams incoming webhook for notifications',
+   security: [{ bearerAuth: [] }],
+   request: {
+-    body: { content: { 'application/json': { schema: M365TeamsWebhookConfigRequestSchema } } },
++    body: { content: { 'application/json': { schema: M365TeamsWebhookConfigRequestSchema } }, required: true },
+   },
+   responses: {
+     201: {
+@@ -958,7 +958,7 @@ sharedRegistry.registerPath({
+     'lifecycle events (certified / revoked / verified).',
+   security: [{ bearerAuth: [] }],
+   request: {
+-    body: { content: { 'application/json': { schema: M365TeamsNotifyRequestSchema } } },
++    body: { content: { 'application/json': { schema: M365TeamsNotifyRequestSchema } }, required: true },
+   },
+   responses: {
+     200: {

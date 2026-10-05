@@ -1,0 +1,102 @@
+diff --git a/Blockchain/Dev/services/anchoring/src/__tests__/ks1171-b1-absent-boundary-is-inclusive.test.ts b/Blockchain/Dev/services/anchoring/src/__tests__/ks1171-b1-absent-boundary-is-inclusive.test.ts
+new file mode 100644
+index 000000000..0e4e25c9d
+--- /dev/null
++++ b/Blockchain/Dev/services/anchoring/src/__tests__/ks1171-b1-absent-boundary-is-inclusive.test.ts
+@@ -0,0 +1,96 @@
++/**
++ * KS-1171 gate finding B1 (Minor, #1228 merge record): the INCLUSIVE 60 s boundary of rule (c) is pinned by no cell.
++ * `reconfirmKnownSubmission` reads a transaction as ABSENT (and lets guard 3 schedule a second, fee-paying
++ * transaction) only when at least ABSENT_MIN_ANSWERED_POLLS attempts answered AND the last answer came
++ * `lastAnsweredElapsedMs >= ABSENT_MIN_LAST_ANSWER_MS` after polling began. The ks1171b cells use 59 s and 61 s,
++ * so changing `>=` to `>` left every shipped cell green. The gate's fix shape: two cells, one AT the constant and
++ * one at the constant minus 1.
++ *
++ * Harness: the ks1171b suite's (createAnchorSubmitter with every dependency injected; a submit that signs TX_A and
++ * then fails with the node's "inputs are spent" 400; a confirm that reports how many polls answered and when).
++ * No chain, no database, no network.
++ */
++import { describe, it, expect, vi, beforeEach } from 'vitest';
++import { BlockfrostServerError } from '@blockfrost/blockfrost-js';
++import {
++  createAnchorSubmitter,
++  ABSENT_MIN_ANSWERED_POLLS,
++  ABSENT_MIN_LAST_ANSWER_MS,
++  type AnchorSubmissionDeps,
++  type AnchorSnapshot,
++} from '../anchorSubmission';
++import type { ConfirmationResult } from '../cardano/confirmation';
++
++vi.mock('../cardano/provider', async (importOriginal) => {
++  const orig = await importOriginal<typeof import('../cardano/provider')>();
++  return { ...orig, getTransaction: vi.fn() };
++});
++
++const TX_A = '408e72087942198b69d686401829b5b9419d018dc4cc64917283aa3cdb084994';
++const ANCHOR_ID = 'anchor_6b1d2f0e-1171-4b10-9b11-c0bff6f5c171';
++
++function makeLock() {
++  let chain: Promise<unknown> = Promise.resolve();
++  return function lock<T>(fn: () => Promise<T>): Promise<T> {
++    const next = chain.catch(() => undefined).then(() => fn());
++    chain = next.catch(() => undefined);
++    return next;
++  };
++}
++
++function run(elapsedMs: number) {
++  const row: AnchorSnapshot = {
++    id: ANCHOR_ID, status: 'pending', transactionHash: undefined, retryCount: 0,
++    metadataLabel: 674, metadataPayload: { documentId: 'doc-1787874883988-04d3e171' },
++  };
++  const scheduleRetry = vi.fn();
++  const confirmResult: ConfirmationResult = {
++    confirmed: false,
++    polled: ABSENT_MIN_ANSWERED_POLLS,
++    errored: 1,
++    lastAnsweredAttempt: ABSENT_MIN_ANSWERED_POLLS,
++    lastAnsweredElapsedMs: elapsedMs,
++  };
++  const deps: AnchorSubmissionDeps = {
++    getAnchor: vi.fn(async () => ({ ...row })),
++    submit: vi.fn(async (_label: number, _payload: object, options?: { onSigned?: (txHash: string) => Promise<void> }) => {
++      if (options?.onSigned) { await options.onSigned(TX_A); }
++      throw new BlockfrostServerError({
++        status_code: 400,
++        error: 'Bad Request',
++        message: 'Transaction submission failed: ConwayMempoolFailure All inputs are spent',
++        url: 'x',
++      });
++    }),
++    confirm: vi.fn(async () => confirmResult),
++    updateStatus: vi.fn(async (_id: string, updates: Record<string, unknown>) => {
++      if (typeof updates.status === 'string') row.status = updates.status as AnchorSnapshot['status'];
++      if (typeof updates.transactionHash === 'string') row.transactionHash = updates.transactionHash;
++    }),
++    bumpRetryCount: vi.fn(async () => { row.retryCount += 1; }),
++    scheduleRetry,
++    log: vi.fn(),
++    withWalletLock: makeLock(),
++  };
++  return { deps, scheduleRetry };
++}
++
++beforeEach(() => { vi.clearAllMocks(); });
++
++describe('KS-1171 B1: the 60 s boundary of rule (c) is INCLUSIVE, and pinned at the constant', () => {
++  it('RED KS-1171 B1: the last answer EXACTLY at ABSENT_MIN_LAST_ANSWER_MS (with enough answered polls) is absent: the retry is scheduled', async () => {
++    const h = run(ABSENT_MIN_LAST_ANSWER_MS);
++    await createAnchorSubmitter(h.deps)(ANCHOR_ID);
++    expect(h.scheduleRetry).toHaveBeenCalledTimes(1);
++  }, 60_000);
++
++  it('CONTROL KS-1171 B1c: one millisecond earlier (ABSENT_MIN_LAST_ANSWER_MS - 1) is NOT absent: no retry, the row rests', async () => {
++    const h = run(ABSENT_MIN_LAST_ANSWER_MS - 1);
++    await createAnchorSubmitter(h.deps)(ANCHOR_ID);
++    expect(h.scheduleRetry).toHaveBeenCalledTimes(0);
++  }, 60_000);
++
++  it('CONTROL KS-1171 B1r: the constants are the ruled values', () => {
++    expect([ABSENT_MIN_ANSWERED_POLLS, ABSENT_MIN_LAST_ANSWER_MS]).toEqual([2, 60_000]);
++  });
++});

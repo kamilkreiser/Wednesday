@@ -1,0 +1,142 @@
+diff --git a/Blockchain/Dev/scripts/__tests__/ks808_run_migrations_counts_skips_apart.test.sh b/Blockchain/Dev/scripts/__tests__/ks808_run_migrations_counts_skips_apart.test.sh
+new file mode 100644
+index 000000000..7c12d2fd8
+--- /dev/null
++++ b/Blockchain/Dev/scripts/__tests__/ks808_run_migrations_counts_skips_apart.test.sh
+@@ -0,0 +1,104 @@
++#!/usr/bin/env bash
++# =============================================================================
++# TESTS for Blockchain/Dev/scripts/run-migrations.sh - KS-808 (2): the summary's
++# applied=N must not count migrations that were SKIPPED as already applied.
++# =============================================================================
++# apply_one returns 0 on the already-applied path as well as on a real apply, and
++# the caller counted every 0 as an application, so a run that applied nothing and
++# skipped two files printed "applied=2". psql and pg_isready are stubs on a private
++# PATH: no database is ever needed and no migration is ever executed. PSQL_DONE
++# names the migration basenames the tracker query reports as already applied;
++# PSQL_FAIL names the ones the psql stub must fail.
++# Usage: bash Blockchain/Dev/scripts/__tests__/ks808_run_migrations_counts_skips_apart.test.sh
++# =============================================================================
++
++set -uo pipefail
++
++HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
++SUBJ="${RUN_MIGRATIONS_SH:-$HERE/../run-migrations.sh}"
++[[ -r "$SUBJ" ]] || { echo "FATAL: run-migrations.sh not readable at $SUBJ" >&2; exit 2; }
++WORK="$(mktemp -d "${TMPDIR:-/tmp}/ks808.XXXXXX")"
++trap 'rm -rf "$WORK"' EXIT
++PASS=0
++FAIL=0
++DB_URL="postgresql://secuura:pw@localhost:5432/secuura"
++
++mkdir -p "$WORK/bin"
++cat > "$WORK/bin/pg_isready" <<'STUB'
++#!/bin/sh
++exit 0
++STUB
++cat > "$WORK/bin/psql" <<'STUB'
++#!/bin/sh
++for a in "$@"; do
++  case "$a" in
++    *"FROM _secuura_migrations WHERE filename"*)
++      for d in $PSQL_DONE; do
++        case "$a" in *"'$d'"*) echo 1; exit 0 ;; esac
++      done
++      exit 0 ;;
++    *.sql) case " $PSQL_FAIL " in *" ${a##*/} "*) echo "ERROR: 22P02 (stub)" >&2; exit 1 ;; esac ;;
++  esac
++done
++exit 0
++STUB
++chmod +x "$WORK/bin/pg_isready" "$WORK/bin/psql"
++
++run_case() {   # $1 = name, $2 = PSQL_DONE, $3 = PSQL_FAIL -> prints rc; output in $WORK/$1/out.txt
++  mkdir -p "$WORK/$1/scripts" "$WORK/$1/migrations"
++  cp "$SUBJ" "$WORK/$1/scripts/run-migrations.sh"
++  echo "SELECT 1;" > "$WORK/$1/migrations/047_ok.sql"
++  echo "SELECT 1;" > "$WORK/$1/migrations/048_ok.sql"
++  (
++    export PATH="$WORK/bin:/usr/bin:/bin" PSQL_DONE="$2" PSQL_FAIL="$3" DATABASE_URL="$DB_URL"
++    unset PLATFORM_DATABASE_URL
++    cd "$WORK/$1" && sh scripts/run-migrations.sh
++  ) >"$WORK/$1/out.txt" 2>&1
++  echo $?
++}
++
++RC_ONE="$(run_case one_skipped "047_ok.sql" "")"
++RC_ALL="$(run_case all_skipped "047_ok.sql 048_ok.sql" "")"
++RC_CLEAN="$(run_case clean "" "")"
++RC_FAILED="$(run_case one_failed "" "048_ok.sql")"
++summary() { grep -F 'Summary:' "$WORK/$1/out.txt" | head -1; }
++
++# CELL 1 (RED at the tip) - one applied, one skipped: applied=1, and the skip is counted apart.
++if [[ "$RC_ONE" == "0" ]] && grep -qF 'Summary: applied=1 failed=0 skipped=1' "$WORK/one_skipped/out.txt" \
++   && grep -qF 'Migration runner finished (applied=1, failed=0).' "$WORK/one_skipped/out.txt"; then
++  echo "PASS: one applied + one already applied reports applied=1 skipped=1, and the closing line says applied=1"; PASS=$((PASS+1))
++else
++  echo "FAIL: one applied + one skipped: rc=$RC_ONE, $(summary one_skipped), $(grep -F 'Migration runner finished' "$WORK/one_skipped/out.txt")"; FAIL=$((FAIL+1))
++fi
++
++# CELL 2 (RED at the tip) - nothing applied, two skipped: applied=0, never applied=2.
++if [[ "$RC_ALL" == "0" ]] && grep -qF 'Summary: applied=0 failed=0 skipped=2' "$WORK/all_skipped/out.txt"; then
++  echo "PASS: a run that only skips reports applied=0 skipped=2"; PASS=$((PASS+1))
++else
++  echo "FAIL: a run that only skips: rc=$RC_ALL, $(summary all_skipped)"; FAIL=$((FAIL+1))
++fi
++
++# CELL 3 (GREEN CONTROL, tip AND after) - the skip is still announced per file.
++if grep -qF '[main] Skipping 047_ok.sql (already applied)' "$WORK/one_skipped/out.txt" \
++   && grep -qF '[main] Applying 048_ok.sql...' "$WORK/one_skipped/out.txt"; then
++  echo "PASS: CONTROL the per-file Skipping / Applying lines are unchanged"; PASS=$((PASS+1))
++else
++  echo "FAIL: CONTROL per-file lines changed: $(grep -F '[main]' "$WORK/one_skipped/out.txt" | tr '\n' ' ')"; FAIL=$((FAIL+1))
++fi
++
++# CELL 4 (GREEN CONTROL, tip AND after) - a clean run still applies both and exits 0.
++if [[ "$RC_CLEAN" == "0" ]] && grep -qF 'Summary: applied=2 failed=0' "$WORK/clean/out.txt"; then
++  echo "PASS: CONTROL two clean migrations still print applied=2 failed=0 and exit 0"; PASS=$((PASS+1))
++else
++  echo "FAIL: CONTROL clean run: rc=$RC_CLEAN, $(summary clean)"; FAIL=$((FAIL+1))
++fi
++
++# CELL 5 (GREEN CONTROL, tip AND after) - a failed migration still exits 3 with failed=1 (KS-1031).
++if [[ "$RC_FAILED" == "3" ]] && grep -qF 'Summary: applied=1 failed=1' "$WORK/one_failed/out.txt"; then
++  echo "PASS: CONTROL one failed migration still exits 3 and reports applied=1 failed=1"; PASS=$((PASS+1))
++else
++  echo "FAIL: CONTROL one failed migration: rc=$RC_FAILED, $(summary one_failed)"; FAIL=$((FAIL+1))
++fi
++
++echo "ks808_run_migrations_counts_skips_apart: $PASS passed, $FAIL failed"
++[[ "$FAIL" -eq 0 && "$PASS" -eq 5 ]]
+diff --git a/Blockchain/Dev/scripts/run-migrations.sh b/Blockchain/Dev/scripts/run-migrations.sh
+index 7318c392c..0c4e91cfb 100755
+--- a/Blockchain/Dev/scripts/run-migrations.sh
++++ b/Blockchain/Dev/scripts/run-migrations.sh
+@@ -118,6 +118,7 @@ apply_one() {
+   already_applied=$(psql "$TARGET_URL" -tAc "SELECT 1 FROM _secuura_migrations WHERE filename = '$fname' LIMIT 1;" 2>/dev/null)
+   if [ "$already_applied" = "1" ]; then
+     echo "[$TARGET_NAME] Skipping $fname (already applied)"
++    skipped_count=$((skipped_count + 1))
+     return 0
+   fi
+ 
+@@ -142,6 +143,7 @@ fi
+ 
+ failed_count=0
+ applied_count=0
++skipped_count=0
+ for f in migrations/*.sql; do
+   [ -f "$f" ] || continue
+   fname=$(basename "$f")
+@@ -166,7 +168,10 @@ for f in migrations/*.sql; do
+   fi
+ done
+ 
+-echo "Summary: applied=$applied_count failed=$failed_count"
++# KS-808 (2): apply_one returns 0 for a SKIP as well as for an apply, so the loop counted skips as
++# applications. apply_one counts its skips; take them back out before anything reports applied=.
++applied_count=$((applied_count - skipped_count))
++echo "Summary: applied=$applied_count failed=$failed_count skipped=$skipped_count"
+ 
+ if [ "$failed_count" -gt 0 ]; then
+   echo "WARN: $failed_count migration(s) failed (see logs above). Pre-existing"

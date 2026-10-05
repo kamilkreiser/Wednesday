@@ -1,0 +1,98 @@
+diff --git a/Blockchain/Dev/services/originate/src/__tests__/ks1364-share-system-errors-body-required.test.ts b/Blockchain/Dev/services/originate/src/__tests__/ks1364-share-system-errors-body-required.test.ts
+new file mode 100644
+index 000000000..2603945b8
+--- /dev/null
++++ b/Blockchain/Dev/services/originate/src/__tests__/ks1364-share-system-errors-body-required.test.ts
+@@ -0,0 +1,64 @@
++// KS-1364 (85 request bodies not marked required): the published contracts for POST /api/documents/{id}/share,
++// POST /api/system-errors/ingest and POST /api/system-errors/resolve-by-service did not mark the request body
++// required, so a spec-driven caller (Schemathesis) may send no body at all. Each handler refuses an absent body
++// (it arrives as {}) with 400: share's express-validator chain requires a non-empty recipients array
++// (routes/documents.ts), ingest requires service and message and resolve-by-service requires service
++// (routes/systemErrors.ts zod objects). The spec now says each body is required. POST /api/system-errors/client-errors
++// declares every field optional and its handler accepts {}, so its body stays OPTIONAL. This file renders the
++// document the generator publishes, from the shared registry the originate module populates on import. No server,
++// no database, no network.
++import { generateOpenApiDocument } from '@secuura/shared';
++import '../originate.openapi';
++
++type AnyObj = Record<string, any>;
++
++const doc = generateOpenApiDocument({ title: 'originate (ks1364 share/system-errors pin)', version: '0.0.0' }) as AnyObj;
++
++const SHARE = '/api/documents/{id}/share';
++const INGEST = '/api/system-errors/ingest';
++const RESOLVE = '/api/system-errors/resolve-by-service';
++
++function operation(path: string, method: string): AnyObj | undefined {
++  return doc.paths?.[path]?.[method];
++}
++
++function bodyRef(path: string): string | undefined {
++  return operation(path, 'post')?.requestBody?.content?.['application/json']?.schema?.$ref;
++}
++
++describe('KS-1364: three originate POSTs publish a REQUIRED request body', () => {
++  it('RED KS-1364 OB1: POST /api/documents/{id}/share marks its request body required', () => {
++    expect(operation(SHARE, 'post')?.requestBody?.required).toBe(true);
++  });
++
++  it('RED KS-1364 OB2: POST /api/system-errors/ingest marks its request body required', () => {
++    expect(operation(INGEST, 'post')?.requestBody?.required).toBe(true);
++  });
++
++  it('RED KS-1364 OB3: POST /api/system-errors/resolve-by-service marks its request body required', () => {
++    expect(operation(RESOLVE, 'post')?.requestBody?.required).toBe(true);
++  });
++
++  it('control KS-1364 OBC1: the three bodies keep their request schemas and their bearerAuth', () => {
++    expect({ share: bodyRef(SHARE), ingest: bodyRef(INGEST), resolve: bodyRef(RESOLVE) }).toEqual({
++      share: '#/components/schemas/DocumentShareRequest',
++      ingest: '#/components/schemas/SystemErrorIngestRequest',
++      resolve: '#/components/schemas/SystemErrorResolveByServiceRequest',
++    });
++    for (const p of [SHARE, INGEST, RESOLVE]) {
++      expect(operation(p, 'post')?.security).toEqual([{ bearerAuth: [] }]);
++    }
++  });
++
++  it('control KS-1364 OBC2: the request components still list their required fields', () => {
++    const s: AnyObj = doc.components?.schemas ?? {};
++    expect(s.DocumentShareRequest?.required).toEqual(expect.arrayContaining(['recipients']));
++    expect(s.SystemErrorIngestRequest?.required).toEqual(expect.arrayContaining(['service', 'message']));
++    expect(s.SystemErrorResolveByServiceRequest?.required).toEqual(['service']);
++  });
++
++  it('control KS-1364 OBC3: client-errors (every field optional, {} accepted) keeps an OPTIONAL body, and the landed v2 verify carve keeps its required one', () => {
++    expect(operation('/api/system-errors/client-errors', 'post')?.requestBody?.required).toBeUndefined();
++    expect(operation('/api/v2/verification/verify', 'post')?.requestBody?.required).toBe(true);
++  });
++});
+diff --git a/Blockchain/Dev/services/originate/src/originate.openapi.ts b/Blockchain/Dev/services/originate/src/originate.openapi.ts
+index 62234903e..0102dbe2c 100644
+--- a/Blockchain/Dev/services/originate/src/originate.openapi.ts
++++ b/Blockchain/Dev/services/originate/src/originate.openapi.ts
+@@ -1601,6 +1601,7 @@ sharedRegistry.registerPath({
+   request: {
+     params: documentIdPathParams,
+     body: {
++      required: true,
+       content: { 'application/json': { schema: DocumentShareRequestSchema } },
+     },
+   },
+@@ -3763,6 +3764,7 @@ sharedRegistry.registerPath({
+     'it here for centralised tracking + admin dashboarding.',
+   request: {
+     body: {
++      required: true,
+       content: {
+         'application/json': { schema: SystemErrorIngestRequestSchema },
+       },
+@@ -3911,6 +3913,7 @@ sharedRegistry.registerPath({
+   security: [{ bearerAuth: [] }],
+   request: {
+     body: {
++      required: true,
+       content: {
+         'application/json': { schema: SystemErrorResolveByServiceRequestSchema },
+       },
