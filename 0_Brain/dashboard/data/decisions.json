@@ -24984,18 +24984,18 @@
   "id": "composer-7377099-deploy-1005",
   "client_project": "Datasec/Datasec Security Composer",
   "title": "Deploy the version and model pickers (main 7377099) to the Composer demo?",
-  "bluf": "I need your word to deploy, or to wait an hour. Composer main 7377099 adds pickers for the HPSM version (Create engagement) and the model family, firmware band and version (Device estate). Its QA gate B77 said GO WITH NOTES: e2e 568/568, CI 19/19, access unchanged except the one new read. No database migration (0 migration files in e36fcde..7377099). What you would see on the demo: the demo's content release lists ONE synthetic version (SYNTHETIC-DEMO-1), so the version box becomes a picker offering that one, plus 'Another version...' to type 5.9.0 as before. Two small known issues ship if we deploy now: typing under 'Another version...' adds a changing entry to the dropdown (gate B77-F1, Low; the stored value is right), and one hint on Create engagement repeats itself (N2). The builder is fixing both now in a small follow-up PR.",
-  "default_action": "Nothing is deployed. The demo stays on e36fcde; Friday merges the follow-up and asks again with the combined main.",
+  "bluf": "I need your word to deploy. The follow-up is now merged, so ONE deploy carries everything: Composer main d09c895 = the version and model pickers (PR #40, gate B77 GO WITH NOTES: e2e 568/568, CI 19/19, access unchanged except the one new read) + the two small fixes (PR #41: the dropdown no longer changes while you type under 'Another version...', and the repeated hint is gone). No database migration (0 migration files in e36fcde..d09c895). What you would see on the demo: the demo's content release lists ONE synthetic version (SYNTHETIC-DEMO-1), so the version box becomes a picker offering that one, plus 'Another version...' to type 5.9.0 as before.",
+  "default_action": "Nothing is deployed. The demo stays on e36fcde until you say.",
   "options": [
    {
     "key": "a",
     "label": "Deploy 7377099 now",
-    "detail": "A deploy seat runs the usual runbook (backup first, live check by Friday: logins 200, a marker only this build has, healthz). The two small issues go live and are fixed in a later deploy."
+    "detail": "Now the same as b: the follow-up is merged, so either key deploys d09c895 (pickers + both fixes)."
    },
    {
     "key": "b",
     "label": "Wait for the follow-up, then deploy both in one go",
-    "detail": "Friday merges the F1/N2 follow-up after its checks (about an hour), then deploys that main in one go and tells you. Your 'b' is the deploy word for that combined main only."
+    "detail": "Deploy d09c895 now (pickers + both fixes, one deploy). A deploy seat runs the usual runbook (backup first); Friday checks it live (logins 200, a marker only this build has, healthz) and tells you."
    },
    {
     "key": "c",
@@ -25045,6 +25045,33 @@
    "CARD hpsmpoc-template-102-words-1005",
    "CARD hpsmpoc-pdf-name-note-1005",
    "CARD hpsmpoc-renamed-customer-pdf-1005"
-  ]
+  ],
+  "amendments": [
+   {
+    "ts": "2026-10-05T11:54:07.493792+11:00",
+    "reason": "PR #41 (B77-F1 + N2 follow-up) merged 11:5x: Composer main is now d09c895 (delta 7377099..d09c895 = its 2 files; 0 open alerts; 0 migrations since e36fcde)",
+    "changed": [
+     "bluf",
+     "default_action",
+     "option:b"
+    ],
+    "before": {
+     "bluf": "I need your word to deploy, or to wait an hour. Composer main 7377099 adds pickers for the HPSM version (Create engagement) and the model family, firmware band and version (Device estate). Its QA gate B77 said GO WITH NOTES: e2e 568/568, CI 19/19, access unchanged except the one new read. No database migration (0 migration files in e36fcde..7377099). What you would see on the demo: the demo's content release lists ONE synthetic version (SYNTHETIC-DEMO-1), so the version box becomes a picker offering that one, plus 'Another version...' to type 5.9.0 as before. Two small known issues ship if we deploy now: typing under 'Another version...' adds a changing entry to the dropdown (gate B77-F1, Low; the stored value is right), and one hint on Create engagement repeats itself (N2). The builder is fixing both now in a small follow-up PR.",
+     "default_action": "Nothing is deployed. The demo stays on e36fcde; Friday merges the follow-up and asks again with the combined main.",
+     "option:b": "Friday merges the F1/N2 follow-up after its checks (about an hour), then deploys that main in one go and tells you. Your 'b' is the deploy word for that combined main only."
+    }
+   },
+   {
+    "ts": "2026-10-05T11:54:20.034773+11:00",
+    "reason": "Option a described the pre-follow-up deploy (7377099 with the two issues); since PR #41 merged, a and b deploy the same main d09c895",
+    "changed": [
+     "option:a"
+    ],
+    "before": {
+     "option:a": "A deploy seat runs the usual runbook (backup first, live check by Friday: logins 200, a marker only this build has, healthz). The two small issues go live and are fixed in a later deploy."
+    }
+   }
+  ],
+  "amended_ts": "2026-10-05T11:54:20.034795+11:00"
  }
 ]

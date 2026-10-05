@@ -12,6 +12,14 @@ supersede: replace wholesale; previous = NEXT-PICKUP-FRIDAY.md.pre-0925-rotate-s
 
 **The tree is at `/Volumes/Laptop-DEV/FRIDAY` (the drive, since 2026-09-28).** Quote every path (spaces).
 
+## 🔴🔴🔴 STATE 2026-10-05 11:55 (Friday, post-rotation seat) — READ FIRST; supersedes every block below where they differ
+**FLOOR EMPTY:** %0 friday + %1 monitor only. Kam: no live rows since 09:58:24 (kam_rulings 11:53; reconcile to-rule 0).
+**DONE this seat:** gate B77 GO WITH NOTES on B74 → Composer **PR #40 MERGED → 7377099** → follow-up **PR #41 (B77-F1 dropdown, N2 hint) MERGED → Composer main d09c895** (both head-pinned via merge_when_green; deltas = the PRs' files; 0 open alerts; 0 migration files e36fcde..d09c895). records/b74 in Composer root main (3c2ed69; C-42; BACKLOG #203/#204). Panes %29 (B77) and %19 (B74) closed.
+**OPEN CARD:** `composer-7377099-deploy-1005` (amended to main **d09c895**; a = b = deploy d09c895; rec b; default nothing deployed). On a/b: deploy seat B78 (B76 shape, `Composer Briefs/2026-10-05_B76_demo-vm-e36fcde.md` as template; no migration), Friday's own live check (kam/paul 200, 401 without creds, healthz 0.28.0, a marker absent at e36fcde e.g. the 'Another version…' option text in the bundle), deliver the card to the next C-number (C-43), tell Kam.
+**Still open from the 11:01 block:** HPSM-POC hosted deploy card `hpsmpoc-05f30b0-hosted-deploy-1005` (main fa77dca; rec b after Kam's E2E test) · `hpsmpoc-hosted-forwarded-address-settings-1005` · `hpsmpoc-hosted-clean-old-static-files-1005` · test user + UAT seat (C-51/C-52) when Kam says he is testing (asked on the panel 11:1x).
+**Small owed (next Composer seat):** BACKLOG #203/#204 read "fixed on branch" → mark MERGED (PR #41, d09c895).
+**Upstream ruling to apply to any Spark work:** Kam 2026-10-05 ~11:1x (Wednesday's terminal) — a Claude REVIEW AGENT does the first read of every Spark PASS; the coordinator reads all security-surface results + 1 in 5 (`learnings/2026-10-05_spark-target-50-tasks-a-day.md`).
+
 ## 🔴🔴🔴 ROTATION HANDOVER 2026-10-05 11:01 (Friday, ctx 78%) — READ FIRST; supersedes every block below where they differ
 **FIRST ACT:** `kam_rulings_today.sh` + `reconcile_rulings.py`; then `friday/seat_idle.sh` over %19 %29 (the only live seats; B74 + its gate B77) and read each STATUS last line. Merge jobs and watchers DIED with the old seat: re-run them (commands below).
 **Kam today:** "keep going" (08:4x) · deploy Composer (09:5x) · renamed PDF a, PDF note b, 1.0.2 a, hosted deploy a (09:57–09:58). He does an END-TO-END TEST of the hosted HPSM-POC today.
