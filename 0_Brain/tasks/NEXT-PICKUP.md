@@ -19,6 +19,11 @@ supersede: replace wholesale at the next pickup; do not append. Previous copy: N
 4. EXPIRING-GRANTS: "SPEND PAST THE 90%" is marked ENDED (account switched). Friday's "ignore the 90%" row is Friday's and is not touched.
 
 ### LIVE RIGHT NOW
+**🟠 13:2x 2026-10-05 (seat 707ca275, ctx 56%). READ FIRST; supersedes the 50% block where they differ:**
+0. KS AUDIT DONE → `0_Brain/reference/2026-10-05_ks-ticket-audit/SUMMARY.md` (posted to Kam). Cards OPEN: `secuura-kintsugi-deploy-for-31oct-1005` (rec a) · `secuura-tooling-tickets-off-product-board-1005` (rec a, 192 of ours). Kam's goal: platform stable + ready Sat 31 Oct.
+1. LIVE: Seat B 60th (%18, gate57) + Seat F 1st (%19 `Secuura/Blockchain-F`, gate58, briefs pre-ruled). Answer each ITEM 0 QUESTION on arrival.
+2. IN FLIGHT (subagents, die at rotation — check output paths): Seat E 1st defect brief → `fleet/briefs_staged/2026-10-05_seatE1_defects.md` (KS-1210 first; doc collision with B 60th to solve); board archive brief → `fleet/briefs_staged/2026-10-05_board_archive.md` + `ARCHIVE_LIST.tsv` + `ASK_LIST.md` in the audit folder (the ASK list goes to Kam). Ollama dedupe mover (copy running). **Spark queue.sh RUNNING** (5 briefs: KS-591 ×4, KS-593): read verdicts in `local-model/spark/done.md`; review agent for every PASS (Kam's rule), Wednesday reads security-adjacent (tenant-provisioning one) + 1 in 5.
+3. PROMISED KAM: defect seat this afternoon; archive seat. Next fuses: 15 Oct (F 1st), Sat 31 Oct (braces, no fix → card before ~26 Oct).
 **🟠 50% CHECKPOINT 13:1x 2026-10-05 (seat 707ca275). READ FIRST; supersedes the 13:0x block where they differ:**
 0. Kam since 12:47: Docker.raw — he deleted it himself (591 GiB free). **13:02-13:03: AUDIT every open KS ticket (genuine vs agent noise), platform stable + ready by Sat 31 Oct, archive what can and should be.** Receipted + census posted.
 1. **LIVE Seat B 60th (%18 `Secuura/Blockchain`)**, brief `fleet/briefs_staged/2026-10-05_seatB60_raise.md` (pre-ruled Q-O/C/M/F/A; co-tenant F 1st = WAIT on `.push-lock-f1`). Rung 5 seen (pane tokens). Its ITEM 0 QUESTION → ANSWER (confirm pre-rulings; rule anything its measurement contradicts).
