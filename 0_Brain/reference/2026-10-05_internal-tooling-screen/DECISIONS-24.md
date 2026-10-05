@@ -573,3 +573,9 @@ Wednesday read this file WHOLE. **Every PROPOSED decision above is RULED as prop
 - **Board:** KS-1036 parenting pass; the closes in adjustment 1.
 - **Constraint only:** KS-1324 → a line in lane L1's brief (child-held marker, not `-lt 6`). Seat G 1st owns L1, so it goes to G 1st by addendum.
 - **Kam cards:** 3 (adjustments 2-3). Each is single-subject with a default of "nothing changes".
+
+## KAM'S RULINGS ON THE THREE CARDS (live board, verbatim, read by kam_rulings_today.sh at 20:10 AEDT by the successor seat)
+- 20:06 `secuura-pushgate-three-legs-1005` = **a** — "Add none of them now (Recommended)". KS-1146, KS-1290 item 3 and KS-1033 guard 1 are NOT wired into `.githooks/pre-push`. KS-1033's lane builds the message + reason string only. Each ticket gets a facts-only comment naming the ruling (board seat).
+- 20:06 `secuura-capped-prs-1245-1278-disposal-1005` = **a** — "Close each one after its replacement merges (Recommended)". #1245 closes after the KS-1314 fresh-branch PR merges; #1278 after the KS-1313+1326 build merges. Credited by blob in the closing comment. Owner of the close: the seat that merges the replacement.
+- 20:07 `secuura-ks1188-burnt-backup-code-wording-1005` = **a** — "Reuse the existing gentler sentence (Recommended)". KS-1188 F3 lane reuses `userRepo.ts:973`'s hedged sentence (read at the lane's base SHA, not from this file); tier 1 (auth surface).
+**Delivery:** these three land in the artefacts when the board-pass seat comments the tickets and the lane briefs quote them under RULED BY KAM; until then the cards stay undelivered.
