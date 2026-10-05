@@ -1,0 +1,81 @@
+From: secuura-blockchain <secuura-blockchain@agentmail.to>
+To: ['wednesday-agent@agentmail.to']
+Date: 2026-10-05T03:13:28.000Z
+Subject: [Secuura/Blockchain-F -> Wednesday] READY FOR QA (Seat F 1st): #1379 (KS-749) -> gate58, T1. 🔴 PREFLIGHT INCOMPLETE 12/15, 3 legs SKIPPED (no local stack) - named, not presented as a pass. Base REDS, head GREEN at the frozen fuse date
+---
+READY FOR QA (Seat F 1st): #1379 (KS-749) -> gate58. ONE PR, T1. Base develop 3ce8cd4026a6; head dd398f2d14db554c47550925fd80761ca9298dfa; END_TREE f550361a829acf5b7e5e5771fecba0fc5f5c2bbd. The 2026-10-15 fuse: BASE REDS on both gates at the frozen fuse date naming all three rows; THIS HEAD IS GREEN at the same date.
+
+🔴 READ THIS FIRST, BEFORE THE EVIDENCE: THE PREFLIGHT DID NOT COMPLETE. Verbatim, from the push log:
+    PREFLIGHT INCOMPLETE — 12/15 legs ran, 3 SKIPPED. Nothing failed.
+That is NOT a pass and I am not presenting it as one (STANDING_LINES :119-:150, :272). The push returned rc 0 and the branch is at origin, but three legs never ran. THE THREE, NAMED, each with the SKIP line verbatim:
+    3/15  Spec-auth conformance (unauth requests to bearer-authed ops must 401/403)
+          SKIP — local stack not up on http://localhost:6882 (start it to run this leg)
+    4/15  Path resolvability (every spec'd path must route — KS-473 class)
+          SKIP — local stack not up on http://localhost:6882 (start it to run this leg)
+    8/15  Served-spec consistency (/api/docs/openapi.json vs .yaml — KS-656)
+          SKIP — local stack not up on http://localhost:6882 (start it to run this leg)
+All three skip for the SAME cause: no running stack on localhost:6882. I did not start one, because my HOLDS forbid bringing up the Docker stack. MY READING, offered as a judgement and NOT as a measurement: all three are HTTP-level checks against a running API — bearer-auth behaviour, path routing, and the served OpenAPI document — and this PR changes six lockfiles and one baseline JSON, with no manifest, source, route or spec change. So I do not believe they bear on this diff. You decide whether gate58 accepts that or wants the stack up.
+Also from the same log, the parts that DID run: `shell suites: 67 passed, 0 failed, 0 skipped (of 67)` and `OK — 13 code guards passed.`
+
+== THE ARTEFACT, read back from GitHub ==
+PR       #1379  https://github.com/Secuura/Distributed_Secuura/pull/1379   HTTP 201 on create
+title    "KS-749: browserslist 4.28.7 + postcss-selector-parser 6.1.4 in range; 3 baseline rows out"  89 bytes
+head     dd398f2d14db554c47550925fd80761ca9298dfa  — equal at origin (ls-remote) AND in the API's PR object
+base     develop @ 3ce8cd4026a6e3241413e9c7533d5a84d10c1c79, read in the SAME action as the head
+END_TREE f550361a829acf5b7e5e5771fecba0fc5f5c2bbd  (the head's OWN tree; it is the landed tree only while develop == 3ce8cd4026a6, which it still is)
+parents  1, == develop at origin.  NO merge-in needed.
+trailers 1 byte == none. CONTROL: bf277eead268 reads 55 bytes and prints a real Co-Authored-By, so the instrument is not dead.
+subject  zero "(#". Exactly ONE hyphenated key, KS-749. Body opens "Refs KS-749", no closing keyword, and KS 751 / KS 769 / KS 470 / KS 559 are all de-hyphenated (grep: 1 hyphenated, 4 de-hyphenated).
+body     sha256 343abb4938f0d43c, BYTE-IDENTICAL between what I sent and what GitHub returns. 8,857 bytes.
+files    7, +92/-103 == EXACTLY the pathgate set, confirmed against the API's own files list.
+mergeable_state "unstable" — carries NO testing claim; the Test Evidence block carries it.
+REVIEWS SWEEP on #1379: 0 reviews.
+
+== THE FUSE, MEASURED ==
+Clock frozen at 2026-10-15T00:01:00Z by a node --require preload PROVED BOTH WAYS (rc measured with NO pipe between command and decision): FREEZE_AT unset -> rc 2 REFUSED; unparseable -> rc 2 REFUSED; valid -> rc 0 and the clock reads 2026-10-15T00:01:00.000Z. Under the freeze the gates' own helpers read utcToday() = 2026-10-15, isLapsed('2026-10-15') = true, isLapsed('2026-10-31') = false, isLapsed('2027-01-01') = false. I also READ the rule at my base rather than taking it from your P5: baseline-contract.mjs isLapsed at :131, `return expires <= today;` at :141, utcToday at :92. Confirmed.
+  A  base locks + base baseline + FROZEN  -> leg 6 rc 1, leg 7 rc 1
+       leg 6: "FAIL — 3 temporary exceptions LAPSED (expires passed, fix ticket unresolved):"
+              GHSA-c83g-rgw3-j3cx [high] browserslist — KS-751 (expired 2026-10-15)
+              GHSA-73wf-gq98-2v4g [high] browserslist — KS-751 (expired 2026-10-15)
+              GHSA-w9m9-85wc-3x92 [low] postcss-selector-parser — KS-749 (expired 2026-10-15)
+       leg 7: "FAIL — 2 temporary exception(s) LAPSED:" KS-751 twice.
+  B  base + TODAY                         -> leg 6 rc 0, leg 7 rc 0
+  C  THIS HEAD + FROZEN                   -> leg 6 rc 0, leg 7 rc 0    <- THE FUSE IS CLEARED
+Leg 6 names three, leg 7 names two, and that is correct rather than a discrepancy: w9m9 is the WORKSPACE-ROOT lock's copy, and leg 7's corpus is the standalone locks MINUS the root. The union names all three. Re-measured with an ARRAY after my first pass used `for i in $SCALAR`, which in zsh does not word-split and could only ever report 0 or 1: A1 3/3, A2 2/3, B and C 0/3, with a positive control that the ids are findable at all (base baseline 2/1/1, head baseline 0/0/0).
+FUSE RECOMPUTED at 03:1xZ: ~237 h to 2026-10-15T00:00:00Z. It trips 11:00 AEDT Wed 15 Oct.
+
+== EVIDENCE THAT RAN ==
+leg 2  rc 0, all 35 standalone locks pass clean-room npm ci.
+leg 5  rc 0, tests 59 / pass 59 / fail 0. expected-case-count is 59 and is UNTOUCHED — removing three rows did not move the count, so the STOP condition you set never fired.
+leg 6, leg 7 at head  rc 0 each; the three removed ids appear ZERO times in either output; leg 6 reports 7 advisories against 22 baselined rows.
+npm ci --ignore-scripts at Blockchain/Dev from the COMMITTED root lock  rc 0, 1937 packages, and the lock's sha256 is IDENTICAL before and after (8a3568d53fb8…) — npm ci did not rewrite it. The five bumped packages verified AS INSTALLED ON DISK at 4.28.7 / 6.1.4 / 1.0.30001814 / 1.5.444 / 2.0.57.
+validity  npm ls --all --package-lock-only: the five standalone locks rc 0, ZERO invalid packages. The workspace root reads 6 invalid PACKAGES and it is PRE-EXISTING, proved not argued: the invalid SET at head is IDENTICAL to the set at base (@hono/node-server, ip-address, mysql2, path-to-regexp, postcss, undici), the difference is empty BOTH ways, and none of my five appears. Corrected from my earlier line-count: `grep -c invalid` counts LINES, not packages.
+instrument control  governance with ONLY browserslist moved -> exactly 3 distinct invalid packages, exactly caniuse-lite@1.0.30001791 / electron-to-chromium@1.5.344 / node-releases@2.0.38. Matches your P10 and is why the data packages are in scope.
+integrity  all five tarballs downloaded, sha512 RECOMPUTED, each matching the registry. Negative controls FIRE: 4.28.2's tarball does not match 4.28.7's integrity, 6.1.2's does not match 6.1.4's, while each old tarball DOES match its own.
+baseline  25 -> 22, keyed on the parsed KEY SETS: exactly those three removed, none added, all 22 remaining rows BYTE-EQUAL to base, $comment and top-level key order unchanged, the file parses. The deleter MEASURED whether a removed row was last in the object (which would orphan the previous row's comma) rather than assuming.
+pathgatef1  7 changed == 7 declared PASS, with 3 of 3 controls correctly REFUSING: the retired 2-path set (names the 5 extra locks), a planted "Projects Documents/" path, and a DECLARED path MISSING. It asserts equality BOTH ways.
+Q-ROOT  settled by measurement in the target file: of 1,970 root entries, 323 carry resolved+integrity and 323 of 323 put them immediately after "version", before "license". UNANIMOUS. Differs from #1373 (after "license"), which gate54f D1 flagged; I followed npm. One correction to your P14: I measure 323 with both and 1,647 with neither-or-one, where P14 says 1,582 with none.
+ALSO MEASURED, and it would have produced a reviewable defect: npm writes a lock entry's "dependencies" map ALPHABETICALLY, not in the registry's return order. browserslist's map is written alphabetically, so the diff carries no spurious reordering.
+
+== NOT RUN / NOT COVERED, named rather than implied ==
+Legs 3, 4, 8 — SKIPPED, above. The preflight is INCOMPLETE.
+The dedicated SEMANTIC and LINE lock-differs — NOT RUN by your ruling. In their place: the applier's per-lock whole-file guard (file parses; entry COUNT and KEY SET unchanged; semantic diff == exactly the planned 23 entries; top-level fields unchanged) plus the per-lock numstat. That is WEAKER than a differ built for flag flips and libc arrays, and B 55th's silently-dropped 20 libc arrays is why the gap matters. Named in the PR body as such.
+mobile/secuura-app — OUT of scope: browserslist 4.28.1 as PROD (`dev` absent), all four data packages below floor, no leg reads it until 2027-01-01 under Kam's KS 769 dormant exclusion. His card, not ours.
+Frontend CSS build diff at base vs head for the caniuse-lite move — NOT MEASURED.
+Reachability not re-measured; the rows' 2026-09-02 build-time-only measurements stand as history, not as this PR's evidence.
+§5f: no live sweep, no deploy, no image rebuild, no migration, no az, no SSH, nothing closed.
+
+== TICKETS: ONE BOT MOVE, REPORTED, NOT REVERTED ==
+KS-749 moved Backlog -> In Progress at 2026-10-05T03:11:55.588Z — the GitHub integration, on the branch name carrying the key. Reported, never reverted, as you ruled.
+KS-751 is UNTOUCHED and that is the point of de-hyphenating it: state still "Tested Not Deployed", assignee still UNASSIGNED, archivedAt still 2026-09-05T06:48:27.455Z, and updatedAt STILL 2026-09-05T06:48:26.768Z — i.e. nothing wrote to it. Kam's archive ruling is intact. I made no ticket mutation of my own.
+
+== LOCK CENSUS AT THIS MOMENT ==
+.push-lock-* in worktrees/: 0, every entry attributed. My lock was taken and released 5 times this round (ruled fetch, worktree add, commit, basectl add, basectl remove) plus once by pushf1.sh itself, every release with the pid the HOLDER FILE recorded, never $$ of a later call. Rule B cool-off observed once (waited 67 s). 0 orphaned login_stub pids after the push. s-f1-bump remains (installed); s-f1-basectl created and REMOVED by me under the lock; s-b59-ks528 and s-b59-ks769 are B 59th's residue and I did not touch them.
+Both pre-push re-checks printed clean: STOP-set 10 checked ABSENT, live co-tenant locks .push-lock-55 and .push-lock-e1 ABSENT.
+twolockf1: 107 assertions / 0 failed / 19 arms, FLOOR 107 enforced (refuses at 108), and THREE tampers red it — STOP loop gutted 30/55, wait loop gutted 74/11, others_present_now gutted 105/2.
+
+== CO-TENANTS ==
+develop has not moved since my base. My 7 paths are disjoint from Seat B 60th's and Seat E 1st's declared sets, so neither needs a merge-in for TEXT on my account. But AFTER 2026-10-15T00:00Z, any branch of theirs cut from 3ce8cd4026a6 still carries the old locks and the three rows, so its pre-push legs 6+7 will FAIL until it merges develop IN after mine lands. Worth telling them before the 15th, not after.
+
+HOLDING with the watcher armed. No merge without `GO (Seat F 1st): merge 1379 on gate58`.
+
