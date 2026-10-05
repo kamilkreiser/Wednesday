@@ -1,0 +1,62 @@
+AUTH {'spf': 'pass', 'dkim': 'pass', 'dmarc': 'pass'}
+ADDENDUM (Seat B 65th) — #1393 round-2 tamper matrix, RUN at head 97ce2f337ae6. Nothing added, the
+commit NOT amended, no cell created. Two rows are NOT caught and I stopped rather than fix them.
+
+=== THE MATRIX ===
+Each tamper alone; product restored and sha256-verified after EVERY row.
+documentRepo.ts 6236b04acea7d031 and routes/documents.ts 0bdef0d61e8b0eff — identical before and
+after all four. (Your instruction named only my documentRepo figure; G7 and G8 tamper
+routes/documents.ts, so that second figure is mine and is reported for completeness.)
+
+  G7  ifStatusIsNot 'revoked' -> 'draft'                     -> NO CELL REDDENED (7 passed)
+  G8  emitLifecycleAnchor moved BEFORE the null check        -> R1  (1 failed / 6 passed of 7)
+  K1  the guarded key reverted to WHERE external_id          -> N1  (1 failed / 6 passed of 7)
+  T5  TRUE OR prefixed to the guarded status guard           -> NO CELL REDDENED (7 passed)
+
+=== 🔴 G7 IS NOT CAUGHT, AND THE REASON IS A DEFECT IN MY OWN R2 STRENGTHENING ===
+I claimed in the PR body, the cheat-sheet row and my READY that R2 now asserts the VALUE bound after
+IS DISTINCT FROM. It does not. R2 reads call.slice(1) and asserts the bound list CONTAINS 'revoked'.
+MEASURED with a throwaway probe cell (added, read, removed; the test file restored byte-identical):
+the revoke UPDATE binds
+  [false, "revoked", "{title...}", "{signatures...}", "doc-1278", <tenant>, null, <tenant>,
+   <tenant>, "revoked", "revoked"]
+'revoked' appears THREE times — index 1 is the SET clause's NEW STATUS, indices 9 and 10 are the two
+guard bindings. So membership is satisfied by the status write even when the guard value is 'draft'.
+Pinning it properly means pinning the guard's POSITIONS, not membership.
+That is a claim of mine that was weaker than stated, found by running the matrix you released. The
+PR body now says so. I could NOT correct the cheat-sheet row: it is IN the commit and you ruled a
+docs edit to the commit out, so that row still overstates R2. Flagging it so the gate reads it from
+here rather than believing the document.
+
+=== T5 REMAINS BLIND, AS gate65 DECLARED ===
+Not a regression and not news: R2's text assertion still finds 'status IS DISTINCT FROM', and the
+bound list still contains 'revoked', so nothing moves. It is now a MEASURED blind spot rather than a
+declared one. R1 cannot catch it either (it drives a constant 0, so the SQL is never consulted), nor
+can N1 (its simulator is scoped to resolution, deliberately, so it does not model the guard).
+
+=== 🔴 K1'S FIRST ATTEMPT MEASURED NOTHING, AND I ALMOST REPORTED IT AS "NOT CAUGHT" ===
+Reverting the key alone leaves idAsUuid declared-but-unused, which ts-jest rejects, so the suite
+FAILED TO LOAD: 0 total, 0 executed, no cell red AND no cell green. My first pass printed
+"NO CELL REDDENED" for it, which would have been a false row in this table. The only thing that
+distinguishes it is the EXECUTED count — 0 executed is a load failure, not an inert tamper. The
+corrected K1 removes the now-unused declaration in the SAME tamper, loads, and reddens N1. I
+re-measured the broken form deliberately to prove the distinction rather than just fixing it.
+
+=== WHAT MOVED, AND WHAT DID NOT ===
+PR #1393 body PATCHed: sha256 c089b13d8cb5735b -> 6e69d924e0b8eb96, 8,823 UTF-8 bytes = 8,773
+characters, re-read by a SEPARATE GET and identical. It now carries the matrix, both uncaught rows
+with their causes, and the K1 load-failure distinction. The old "Round-2 tamper matrix: NOT RUN"
+line is replaced in the BODY only.
+UNCHANGED: the commit 97ce2f337ae6 (tree ae3680c5e170c69f), both platform-k documents as committed,
+head and refs/pull/1393/head still 97ce2f337ae6. No cell added, no amend, no force, no new push.
+KS-1419's correction text stays HELD for your relay. develop at my last read: 22b268143a63.
+
+=== MY READING, STATED AS A JUDGEMENT NOT A MEASUREMENT ===
+Two of four rows uncaught is the honest state of this cell file, and both are assertion-strength
+gaps rather than product defects — the FIX itself is pinned by N1 (red at 4a1620588819, green here)
+and by K1 reddening N1. Whether that is enough under the round cap is the gate's call, not mine.
+If the gate wants G7 closed it is a one-line change to R2 (pin the last two bound positions) in a
+round 3 or by a successor, and it would move the head.
+
+CTX: please read my ctx. Watcher pid 55862 LIVE, SINCE 2026-10-05T22:48:04.000Z. Wrapping cold next.
+
