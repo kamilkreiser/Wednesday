@@ -12,6 +12,15 @@ supersede: replace wholesale; previous = NEXT-PICKUP-FRIDAY.md.pre-0925-rotate-s
 
 **The tree is at `/Volumes/Laptop-DEV/FRIDAY` (the drive, since 2026-09-28).** Quote every path (spaces).
 
+## 🔴🔴🔴 CHECKPOINT 2026-10-05 12:00 (Friday, ctx 50%) — READ FIRST; supersedes every block below where they differ
+**Kam:** no live rows since 09:58:24 (kam_rulings 12:00; reconcile to-rule 0). Usage 40%.
+**LIVE PANES (both tier 2, briefs in HPSM-POC `1_Project_Definition/Briefs/`, dated 2026-10-05; partition disjoint):**
+- %30 Datasec/HPSM-POC-A **B130** HPSMPOC-197: CRLF summary paragraphs on screen (`ApiNarrative.tsx:115`, `name-at-render.ts:34`, base fa77dca). On `READY FOR REVIEW`: read the diff at source (B28 citations unchanged for LF), open the PR, `friday/merge_when_green.sh datasecau/HPSM-POC <PR> <head>`, then records/b130.
+- %31 Datasec/HPSM-POC-B **B131** F5/F6 handover docs vs what landed (analysis repo `Governance/handover/**` only; DRAFT-FOR-KAM kept). **Confirm at its first STATUS that it received B131** (pane had not echoed it at 12:00; argv carries the brief). On READY: read it (nothing claimed done that is not — A5 hosted stays pending), open the analysis PR, merge_when_green.
+**Watcher:** `friday/watch_status.sh <scratchpad>/seen_b13x` over `HPSM-POC/1_Project_Definition/Briefs/2026-10-05_B13[01]_STATUS.md` + `.tools/wt-B13[01]-records/…` — dies with this seat; re-seed + re-arm after a rotation.
+**Open cards unchanged:** composer-7377099-deploy-1005 (main d09c895) · hpsmpoc-05f30b0-hosted-deploy-1005 (fa77dca) · hpsmpoc-hosted-forwarded-address-settings-1005 · hpsmpoc-hosted-clean-old-static-files-1005. Test user + UAT seat waits for Kam's 'testing now'.
+**HPSM-POC plan:** every row DONE or waiting on Kam/HP (census 11:5x, B123 STATUS l.26-69 re-checked). After B130/B131, no agent-only HPSM-POC work remains without a new source (Jira backlog sweep is the next place to look).
+
 ## 🔴🔴🔴 STATE 2026-10-05 11:55 (Friday, post-rotation seat) — READ FIRST; supersedes every block below where they differ
 **FLOOR EMPTY:** %0 friday + %1 monitor only. Kam: no live rows since 09:58:24 (kam_rulings 11:53; reconcile to-rule 0).
 **DONE this seat:** gate B77 GO WITH NOTES on B74 → Composer **PR #40 MERGED → 7377099** → follow-up **PR #41 (B77-F1 dropdown, N2 hint) MERGED → Composer main d09c895** (both head-pinned via merge_when_green; deltas = the PRs' files; 0 open alerts; 0 migration files e36fcde..d09c895). records/b74 in Composer root main (3c2ed69; C-42; BACKLOG #203/#204). Panes %29 (B77) and %19 (B74) closed.
