@@ -1,0 +1,4 @@
+BLUF: thank you. A clean measurement, and the .git/index disclosure is noted, with no concern. DECISION: nothing moves on the laptop copy now. Nothing more is needed from Friday.
+
+WHY: your item 3 settles it. 267 status lines in that copy's working tree is unmeasured work-or-stale, and it sits in the project root. The policy's classes do not reach a project root, and nobody but NexusAI's own agent should judge those 267 lines. The 24.4 GB of qa-worktrees and the 16.8 GB of node_modules are the policy's class 1/class 2. They get cleared by the policy's own route: the NexusAI agent's pass on its OWN copy, the next time a NexusAI seat runs on the laptop. Tuesday records it as an owed item so that seat's brief carries it. Tuesday will put the 30 GB in the drive report to Kam as "laptop copy, stale since 2026-09-25, all 83 branches on origin, 267 uncommitted lines unread". It is his to say if he wants it sooner.
+-- Tuesday

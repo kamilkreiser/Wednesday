@@ -6,6 +6,14 @@ status: live
 supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s1-wholesale
 ---
 
+## 🟢 DELTA 148 — 2026-10-05 14:3x (s97, ctx ~45%). **READ THIS FIRST, THEN 147 (its gate-14 and drive lines still stand).**
+- **MAIN = d4386e7** (RD-685 landed, push Build 37251427120 success read 02:08Z). **TURN = P: RD-693** (merge hold s86p-merge-5-rd693 holds the jest lock since 02:19Z; at 03:27Z it was on the C-57 MERGED jest run, alive by process tree). Queue behind it: N s87n-rd424-df2-red, then qa-b12-H12-unions. On P's MERGED: ls-remote + gh run list on the sha (npm-audit, Build, demo SKIPPED). Next turn after P: M (C-186 ADDENDUM order O, P, M, N; O has no gated merge until gate 14).
+- **GATE 13 DONE:** scored 0.98, pane %11 closed, RELEASE mailed. RD-614 then RD-629 sit at the END of N's queue, and RD-603 at the end of M's. M fixes F-B1 at merge (a comment-only commit) and filed L-B2 as RD-756.
+- **GATE 12 WAS STALLED ~7 h** (05:34 to 12:39 AEDT; ledger row). It was CONTINUEd and is alive: plan H9-H14, each hold a backgrounded command that exits and wakes it; candidate MAJOR on RD-591 (a foreign dial greens rd549's positive-arrival cells). Gate 14 still launches only after gate 12 delivers.
+- **RD-721:** ANSWERED, accepted 1-4 with Bootstrap 5.3.0 plus 3 conditions; C-182 ADDENDUM verified at CLARIFICATIONS.md:1902. Its rounds wait for RD-719's gate (batch 15).
+- **DRIVES:** O's class 2 is DONE (18.68 GB freed). Class 1 (234 trees to G-DRIVE) is running, 4-8 h. The 65 C1? trees are KEPT: 17 sit in a live queue (O's TSV session-tools/s87o/drive-c1q-references-2026-10-05.tsv). On O's report: the one-line-per-drive report to Kam, with the PROPOSAL to widen class 1 to "unmerged AND referenced nowhere" (48 trees). **OWED:** the LAPTOP NexusAI copy (30 GB, stale since 09-25, 83/83 branches on origin, 267 uncommitted lines unread; Friday's measurement 03:30Z) is cleared by the NEXT NexusAI seat launched on the laptop, on its own copy. Put it in that seat's brief.
+- **LEDGER this seat:** 2 rows (the stray write, w=3 REGRESSION with its hook-clause candidate; gate 12 "running" copied forward unmeasured, w=1).
+
 ## 🔴 DELTA 147 — 2026-10-05 12:2x ROTATION-READY HANDOVER (s96, ctx 78%; rotate at the first safe boundary in 80-90). **READ THIS FIRST, THEN 146 (its gate-14 lines are exact).**
 ### FIRST WORK FOR THE NEXT SEAT
 1. **N's RD-685 landing: #250 FIXED by d09c8e9, which raised #251 (insecure temp file); a SECOND test-only commit (read-then-lstat) was GO'd 12:23, ROUND 2 OF 2 (a third CodeQL objection = STOP; Tuesday picks a ticket + re-gate or Kam).** on N's MERGED, verify main by ls-remote, gh run list on the sha (npm-audit, Build, demo SKIPPED), and #250 closed (most_recent_instance state "fixed", NOT dismissed: the alert-level "state" field reads null, so read the instance). Then the turn passes to O, P, M.
