@@ -12,6 +12,15 @@ supersede: replace wholesale; previous = NEXT-PICKUP-FRIDAY.md.pre-0925-rotate-s
 
 **The tree is at `/Volumes/Laptop-DEV/FRIDAY` (the drive, since 2026-09-28).** Quote every path (spaces).
 
+## 🔴🔴🔴 CHECKPOINT 2026-10-06 10:16 (Friday, ctx 60%) — READ FIRST; supersedes every block below where they differ
+**Kam today (all receipted):** 07:06 deploy a → DONE (hosted **646870e**, B157, C-63, HPSMPOC-208 proven 0/0/0, Friday verified live 09:4x); 07:07 SQL Server check b (advisory; re-ask after a few clean PRs with run history + click path); ~09:1x "keep going"; ~09:4x FTI zip "file, review and apply" (B160); 09:50 "was SM deployed by you?" (answered: yes, B106, 3 Oct); 09:52 SM access for him + Paul (steps on the panel bf-86002f6ebe0c9; PASSWORDS NOT SENT — B106: secure channel only; **asked which channel for Paul's — open**) + screen-by-screen SM survey (B161). Bastion Basic ≈A$203/mo = his money call (told).
+**MAINS:** HPSM-POC **8798fa7** (#113 646870e + #114 ci-only) · hosted **646870e** · analysis **11bbac9** (records #80–#83 merged) · Composer fd9493f = demo.
+**LIVE PANES (briefs in HPSM-POC `1_Project_Definition/Briefs/`, dated 2026-10-06):**
+- Datasec/HPSM-POC-B %68 **B160** FTI review build: file → review on laptop (127.0.0.1, Playwright) → `CHECKPOINT 1 — REVIEW READY` (Friday reads the note before apply) → apply on vm-hpsm-sm via Bastion only (no new resource/port) → records/b160 + C-entry.
+- Datasec/HPSM-POC-D %69 **B161** SM 3.16 screen-by-screen + lift-out matrix FOR-KAM (read-only on SM; IsPassword rule; same VM as B160) → `CHECKPOINT 1 — SCREEN MAP` → matrix → records/b161.
+**Watchers:** seen_b160, seen_b161 (scratchpad) — die with the seat.
+**Owed:** C-44 braces exception lapses 2026-10-31 → renew-or-change card before then (HPSMPOC-218). Jira closed today: 216 217 208 215 219; filed 217 218 219.
+
 ## 🔴🔴🔴 STATE 2026-10-06 05:00 (Friday successor, overnight, ctx ~40%) — READ FIRST; supersedes every block below where they differ
 **Kam:** 0 rows today (newest 2026-10-05 20:59:03); reconcile 0. OPEN CARD unchanged: `hpsmpoc-require-sqlserver-ci-check-1006`. Today = Tue 6 Oct review with Kam (HPSM-POC + SM 3.16); Thu 8 PO signature.
 **MAINS (GitHub API 04:59):** HPSM-POC **6f6bc96** · analysis **a8b492a** · Composer **fd9493f** = demo. Dependabot #1 (braces, high, no patch) still OPEN.
