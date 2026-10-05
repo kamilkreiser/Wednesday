@@ -6,6 +6,15 @@ status: live
 supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s1-wholesale
 ---
 
+## 🔴 DELTA 153 — 2026-10-05 22:2x ROTATION HANDOVER (s97, ctx 81%, safe boundary). **READ THIS FIRST, THEN 152 (its items 1, 3-6 are current).**
+### FIRST WORK FOR THE NEXT SEAT
+1. **GATE 16 LAUNCHED 22:2x** (pane %14, `fleet/qa-agent/launchers/launch_qa_nexusai_gate_batch16.sh`, brief stamped; RD-618 (b1) @ 953a0e6). **Verify its receipt:** `reports/2026-10-05-gate-batch16/evidence/` exists. On its verdict, M re-enters the merge order for RD-618 (PR #47 is CONFLICTING on counts; M forward-merges at its landing hold).
+2. **Read RD-314's push Build 37297263168 conclusion** (main e91ff4e). On green the turn goes O (none) -> P (RD-686) -> M (after gate 16) -> N.
+3. Gates 14 (%12), 15 (%13) and 16 (%14) are LIVE on the jest lock FIFO. On each verdict: read the report WHOLE, score it, pane_close, RELEASE per owner. RD-735's two log lines are reshaped AFTER gate 15's verdict (Tuesday's ANSWER).
+4. Kam's alert census (152 item 5) is OWED; Kam was told it is the default.
+### FLOOR
+%0 tuesday · %6 N · %7 O · %8 P · %9 M · %12 g14 · %13 g15 · %14 g16 · %1 monitor. Usage 21%. Kam: 0 board messages today.
+
 ## 🔴 DELTA 152 — 2026-10-05 21:4x (s97, ctx 78%; ROTATION-READY: rotate at the first safe boundary in 80-90). **READ THIS FIRST, THEN 151 and 150.**
 ### FIRST WORK FOR THE NEXT SEAT
 1. **MAIN = e91ff4e** (RD-314, PR #48; Tuesday verified ls-remote + npm-audit/gitleaks success, demo SKIPPED; **push Build 37297263168 was IN PROGRESS at 21:4x — read its conclusion first**). On green the turn goes O (none gated) -> **P: RD-686** (per HANDOVER-S86P) -> M (RD-618 after gate 16's GO) -> N (RD-700 next in its queue).
