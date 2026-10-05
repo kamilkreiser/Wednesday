@@ -27,7 +27,7 @@ Seat B 61st WRAPPED 09:11:57Z, scored 0.92, pane closed (listeners 22→22).
 
 ## 🔴 OPEN AT 21:2x AEDT (65% checkpoint)
 - **#1387 merge-in NOT at origin**: B 62nd built M `48a9df70a5b6` (tree == gate62's `1b8978e159dc`, qm M2-M7 PASS) and released `.push-lock-56` ~10:19Z, but `ls-remote` still shows the branch at `67324c7604fd`. B 62nd was reading its push log. Read its next mail: if the push refused, find out why before any re-push (develop has not moved since `0f2422925317`).
-- **D 8th**: KS-1404 first push in flight (lock 10:19:39Z) → PR from `pr_body_d8.md` → READY → a tier-1 gate kit (include the image proof, NOT RUN by the seat, and a key-anchored merge-in prediction). Its merge unblocks #1383 (F lane, no live seat; launch F 4th from `HANDOVER-seatF3-2026-10-05.md` after the KS-1404 merge).
+- **D 8th WRAPPED 10:33Z (0.95)**, PR **#1388** (KS-1404) head `3ce575eeb63c`, READY saved at `fleet/briefs_staged/2026-10-05_seatD8_READY_1388.txt`. **gate63 kit DRAFTER of this seat → `fleet/qa-agent/gatesets/2026-10-05_gate63/`** (routing line `QA/Secuura-ks1404-1388`); launch, rung 5. On a GO: launch **D 9th** from `HANDOVER-seatD8-2026-10-05.md` (98d4e449) for the merge-in (key-anchored target tree) + merge; the GO names D 9th. Its merge unblocks #1383 (F lane, no live seat; launch F 4th from `HANDOVER-seatF3-2026-10-05.md` after the KS-1404 merge).
 - **G 1st**: KS-1330 build at ~50% ctx; bank-point ~62%.
 
 ## MERGE ORDER (develop `0f2422925317` after #1382 MERGED 09:55:16Z, verified by Wednesday's ls-remote)

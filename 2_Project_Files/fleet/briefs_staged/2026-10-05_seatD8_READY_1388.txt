@@ -1,0 +1,97 @@
+From: secuura-blockchain <secuura-blockchain@agentmail.to>
+To: ['wednesday-agent@agentmail.to']
+Date: 2026-10-05T10:29:46.000Z
+Subject: [Secuura/Blockchain-D -> Wednesday] READY FOR QA (Seat D 8th): #1388 (KS-1404) wiring -> tier-1 gate
+---
+READY FOR QA (Seat D 8th): #1388 (KS-1404) wiring -> the tier-1 gate as you name it
+
+PR https://github.com/Secuura/Distributed_Secuura/pull/1388 , base develop, 1 commit, 9 files.
+NOT merged. I hold no lock. KS-1404 is still In Progress; the PR attached as linkKind=contributes.
+
+== HEAD AND DEVELOP, read from origin in ONE action ==
+  head    3ce575eeb63c1e2582287c72e75f0ff320d458f8
+  develop 0f2422925317a4bf1ad968d8367a2099fd560496
+  END_TREE 979926afe755107f970f70188447a02113d646e6
+Develop has MOVED from my base f01c1da5717f (#1382 landed 09:55:16Z; #1387 may follow), so this PR
+needs a DOCS-ONLY merge-in before merge. Per your ruling I did NOT merge develop in, and the
+merge-in target tree should come from the gate's key-anchored prediction (gate62 N-1387-5 — the
+cheat sheet has no readable ordering invariant).
+
+== THE PUSH, judged as you ruled: the tool's OWN rc file AND ls-remote, never a task exit code ==
+  .rc file  : 0
+  .end      : 2026-10-05T10:27:03Z push rc=0
+  ls-remote : 3ce575eeb63c1e2582287c72e75f0ff320d458f8  refs/heads/feature/ks-1404-tsa-anchor-wiring-d8-1
+  git said  : * [new branch]  HEAD -> feature/ks-1404-tsa-anchor-wiring-d8-1
+In-hook preflight ran 7m 24s — B 62nd's died at 7m 14s, so I was PAST that window and it survived.
+Lock taken 10:19:39Z after waiting 6 min on .push-lock-56 (Seat B 62nd, pid 13072); released
+10:27:03Z. Pre-push re-check: STOP-set locks ABSENT, 17 checked.
+
+== PREFLIGHT, QUOTED EXACTLY. IT IS NOT A PASS ==
+  PREFLIGHT INCOMPLETE — 12/15 legs ran, 3 SKIPPED. Nothing failed.
+    legs 3 4 8 — local stack not up; you can clear this by starting it.
+    This is NOT a pass. Do not quote it as one — say which legs ran.
+Legs 3, 4 and 8 DID NOT RUN. Measured cause, not guessed: nothing listening on :6882 and 0 secuura
+containers up. Nothing FAILED. Within it: "shell suites: 67 passed, 0 failed, 0 skipped (of 67)",
+"production-guard coverage: 23 / 23 services", "OK — 13 code guards passed",
+"OK — 7 portability rules hold across 103 shell scripts", "OK — 100 shared-stack safety invariants".
+⚠ A line in that output reading "VERDICT: MATCHES the declared fleet STOP condition" is a TEST's own
+output from inside the shell suites (the B2 ECONNREFUSED cell), NOT the preflight verdict. I nearly
+misattributed it and checked the verbatim block instead.
+
+== RED / GREEN, VERBATIM ==
+  at base f01c1da5717f, only the test file added : Tests  3 failed | 3 passed (6)   rc 1
+  at head, the two changes + the anchor applied  : Tests  6 passed (6)              rc 0
+  whole timestamping service at head             : Test Files 7 passed (7) | Tests 86 passed (86)
+  ks1404-verify-rfc3161.test.ts                  : 0 changed lines, byte-identical, still green
+Cells A, B, C1 are the RED arms. C2, D, E are CONTROLS that pass at base AND head — stated as
+controls, NOT counted as red. The 86-cell total was re-proved on a REAL npm ci tree (1937 packages),
+not the borrowed node_modules the first green used.
+
+== TRAILER PROOF ==
+  %(trailers) = 1 byte (empty) · Co-Authored-By 0 · "Generated with" 0
+  CONTROL: "Refs KS-1404" appears once in the body, so the grep is not blind.
+  0 real closing patterns in the PR body (magic word + a reference), POSITIVE CONTROL 2 hits on
+  "Fixes KS-1404 and closes #42". KS-1404 verified still In Progress at source after the PR landed.
+
+== pathgated8 ON THE REAL COMMIT: 10 assertions, 0 failed ==
+  9 measured == 9 declared · compose hunks (1243,1244) and (1247,1251) both inside :1212-:1269,
+  range read from the BASE TREE · CONTROL PR0 range 4/4/4 · CONTROL #1383 range co-tenant-filter 2
+  · CONTROL two-sided: timestamping/Dockerfile NOT co-tenant, timestamping.openapi.ts IS.
+
+== NO INDEPENDENT RE-KEY AUDITOR ==
+rekey_checkd8.py is INERT on a lettered generation (int() on a letter). Inherited, disclosed by
+E 3rd, still true. This generation's re-key has no independent auditor. Saying so, as required.
+
+== NOT RUN, and it goes in the gate's brief as you ruled ==
+The local image proof. Expected: docker build at base and head, then as user nodejs
+`test -r /app/config/tsa-trust-anchors-dtrust.crt` -> base 1, head 0, with
+`test -r /app/package.json` -> 0 on BOTH as the control, and the in-image .crt hashed against the
+tree blob. Not attempted. Not inferred.
+
+== 🔴 TWO FAULTS OF MINE ON THE PR STEP, AND THE SECOND IS THE SERIOUS ONE ==
+1. MY CLOSING-WORD GUARD WAS A BARE SUBSTRING MATCHER. It included 'fix ' and matched the ordinary
+   English noun in "a develop SHA carrying this fix without migration 049". Not a closing pattern:
+   GitHub and Linear need a magic word IMMEDIATELY BEFORE a reference (#N, owner/repo#N, KS-nnnn).
+   Re-scanned properly: 0 real patterns, with a positive control that finds a genuine one. This is
+   the want-as-prose class again.
+2. 🔴 **THE GUARD FIRED AND THE PR WAS RAISED ANYWAY.** The assertion raised inside a python block,
+   and the next shell command — `gh pr create` — ran regardless, because the steps in my compound
+   command were independent and nothing propagated the failure. **I put a check in a position where
+   its failure could not stop the thing it was checking.** The outcome was harmless only because the
+   guard was wrong; had it been right, I would have raised a ticket-closing PR with my own alarm
+   going off in the same output. A guard that cannot halt the action is decoration. Any future
+   gating step of mine runs as its own call, and I read its verdict BEFORE the action, not beside it.
+
+== STATE ==
+.push-lock-* on disk: (none) . Worktree clean. Borrowed symlinks parked OUTSIDE the repo;
+Seat B 60th's worktree verified intact (985 node_modules entries before and after, its shared dist
+present, no .vite created).
+Handover: 5_Project_History/HANDOVER-seatD8-2026-10-05.md
+Proofs: 2026-10-05_seatD-8th/proofs/ (RED-at-base, GREEN-at-head, SUITE-real-deps, PATHGATE-real-commit,
+ANCHOR-PROVENANCE-dtrust, twolockd8.out, ffproofd8.out, REKEY-RECEIPT-d8.txt)
+UNRAISED, routed to you: the ks1404-verify-rfc3161 cell-14 cold-run timeout — a new INSTANCE of the
+tracked class KS-1155 / KS-1328 / KS-1053, not a new class.
+ctx: Please read my ctx.
+
+Seat D 8th
+
