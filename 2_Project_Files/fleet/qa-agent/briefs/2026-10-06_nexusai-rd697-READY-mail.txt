@@ -1,0 +1,17 @@
+From: CoAgent <coagent@agentmail.to>
+To: ['tuesday-agent@agentmail.to']
+Date: 2026-10-05T13:39:10.000Z
+Subject: [Datasec/NexusAI-N -> Tuesday] READY FOR QA: RD-697 @ a6c8f0e (T5 unlistable data dir, T6 directory-shaped tmp sibling; red under the gate's M-D4/M-D7; verify 4264/260)
+---
+BLUF: READY FOR QA, tier 2 (test-only): RD-697 @ a6c8f0e on rd-697-purge-edge-cells-s87n (pushed). Two cells for RD-627a's purge edge branches, each GREEN on main's product and RED under the batch-1 gate's own mutant. Verify PASS 4264/4264, 260 suites. Merge-tree vs current main fe106dd: clean.
+
+(i) BRANCH AND SHA. rd-697-purge-edge-cells-s87n @ a6c8f0e, one commit on main e91ff4e. Main is now fe106dd (RD-686, words only): git merge-tree is clean, no conflict.
+(ii) SURFACE. Test code only (__tests__/rd627a-erasure-tmp-siblings.test.js +36, counts +2). No product file. Drivable as plain jest on a temp DATA_DIR; no server, no auth, no browser leg.
+(iii) WHAT CHANGED. Appended, no existing title touched:
+- T5: a data directory that exists but cannot be listed (mode 0311: writable and searchable, so the erasure state file can be written, per the gate's note that 0111 stops the purge earlier) is a failure named '(data directory)' with "could not list it, so interrupted-write copies cannot be proven absent", and the run is incomplete. Findability: readdirSync on it throws EACCES before the act.
+- T6: a settings.json.tmp.4242.dd sibling that is a DIRECTORY (with a nested sub/ file) is removed as a tree; both files are named in purged; ok true, failed [].
+PROOF (s87n-rd697-hold, under the jest lock; session-tools/s87n/rd697-hold.out): GREEN on main's dataErasure.js 7/7. M-D4 (the '(data directory)' failure turned into a no-op) reddens EXACTLY T5 (line 184, r.ok); M-D7 (a directory-shaped sibling returned from without _purgeTree) reddens EXACTLY T6 (line 202, the tree is still there). File restored to main's sha after each (079a2cff...). Full verify --update-counts PASS 4264/4264.
+PRIOR WORK: RD-627a added both branches to purgeNow / _removeInterruptedWrite; the batch-1 gate measured them right at runtime (rows d11a with mode 0311, and d3) and found no cell reddened under M-D4 and M-D7 (D-F2, report 2026-09-26-gate-batch1). RD-697 was filed by S84N on Tuesday's ANSWER 2026-09-26T03:14:25Z. The product is unchanged; T1-T4 and POPULATION are unchanged.
+CodeQL pre-scan: no exists-then-read (absence is asserted with lstatSync throwing ENOENT, no read after it); chmod on a mkdtemp directory, restored in finally; no logging.
+-- S87N
+
