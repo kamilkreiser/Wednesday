@@ -1,0 +1,192 @@
+--- a/systemTest/performance/tests/unit/utils/unitSuiteSlotIndependence.test.ts
++++ b/systemTest/performance/tests/unit/utils/unitSuiteSlotIndependence.test.ts
+@@ -23,4 +23,5 @@
+ import { spawnSync } from 'node:child_process';
+-import { readFileSync, readdirSync, statSync } from 'node:fs';
++import { existsSync, mkdtempSync, readFileSync, readdirSync, rmSync, statSync } from 'node:fs';
++import { tmpdir } from 'node:os';
+ import path from 'node:path';
+ import { fileURLToPath } from 'node:url';
+@@ -80,27 +81,92 @@
++/** The parts of a `spawnSync` result the child's verdict is read from - never its stdout or stderr. */
++interface ChildSpawn {
++    readonly status: number | null;
++    readonly signal: NodeJS.Signals | null;
++    readonly error?: Error;
++}
++
++/**
++ * Whether the child ended on its own: no spawn error, no signal, and an exit status of 0 or 1.
++ *
++ * @param {ChildSpawn} spawn - The spawn outcome.
++ * @returns {boolean} True only when vitest itself ended the run.
++ * @example
++ *   endedNormally({ status: 143, signal: null, error: new Error('ETIMEDOUT') }); // false
++ */
++function endedNormally(spawn: ChildSpawn): boolean {
++    return spawn.error === undefined && spawn.signal === null && (spawn.status === 0 || spawn.status === 1);
++}
++
++/**
++ * The child's verdict, from its spawn outcome and vitest's JSON report - NEVER from its human-readable
++ * output (KS-1313 / KS-1326: three rounds of summary-line parsing each misread a real shape). A child that
++ * did not end normally (a spawn error, a signal, or an exit status other than 0 or 1) is refused before the
++ * report is read, so a child killed by the spawn timeout cannot read as a pass.
++ *
++ * @param {ChildSpawn} spawn - The spawn outcome.
++ * @param {string | null} reportJson - The JSON reporter's file content, or null when no file was written.
++ * @returns {SuiteCounts} `{ passed, failed }` = the report's `numPassedTests` / `numFailedTests`.
++ * @example
++ *   countsFromSpawn({ status: 1, signal: null }, '{"numPassedTests":3,"numFailedTests":2}'); // { passed: 3, failed: 2 }
++ */
++function countsFromSpawn(spawn: ChildSpawn, reportJson: string | null): SuiteCounts {
++    if (!endedNormally(spawn)) {
++        throw new Error(
++            `the child vitest did not end normally (status ${String(spawn.status)}, signal ${String(spawn.signal)}, error ${String(spawn.error)})`,
++        );
++    }
++    if (reportJson === null) {
++        throw new Error('the child vitest wrote no JSON report');
++    }
++    let report: unknown;
++    try {
++        report = JSON.parse(reportJson);
++    } catch {
++        throw new Error(`the child vitest JSON report is not JSON: ${reportJson.slice(0, 200)}`);
++    }
++    const { numPassedTests, numFailedTests } = (report ?? {}) as Record<string, unknown>;
++    if (typeof numPassedTests !== 'number' || typeof numFailedTests !== 'number') {
++        throw new Error(
++            `the child vitest JSON report carries no numPassedTests / numFailedTests: ${reportJson.slice(0, 200)}`,
++        );
++    }
++    return { passed: numPassedTests, failed: numFailedTests };
++}
++
+ /**
+  * Run the slot-sensitive files as a child vitest with exactly the given slot variables and return
+- * vitest's own `Tests` totals, parsed from its summary line.
++ * vitest's own totals, from the JSON report it writes to a temporary file.
+  *
+  * @param {Record<string, string>} vars - The slot family for the child's shell (empty = no slot).
+- * @returns {SuiteCounts} `{ passed, failed }` from `Tests  N failed | M passed (T)` / `Tests  M passed (T)`.
++ * @returns {SuiteCounts} `{ passed, failed }` from the child's JSON report, read by `countsFromSpawn`.
+  * @example
+  *   childSuiteCounts({ SECUURA_STACK_SLOT: '<n>' }).failed; // 0
+  */
+ function childSuiteCounts(vars: Record<string, string>): SuiteCounts {
+     const env = envWithoutSlot(vars);
+     // vitest marks its own worker processes; the child is a fresh top-level run, not a worker.
+     Reflect.deleteProperty(env, 'VITEST');
+     Reflect.deleteProperty(env, 'VITEST_WORKER_ID');
+     Reflect.deleteProperty(env, 'VITEST_POOL_ID');
++    const reportDir = mkdtempSync(path.join(tmpdir(), 'slot-independence-report-'));
++    const reportFile = path.join(reportDir, 'report.json');
+     const result = spawnSync(
+         VITEST_BIN,
+-        ['run', '--config', 'vitest.unit.config.ts', '--reporter=default', ...SLOT_SENSITIVE_FILES],
++        [
++            'run',
++            '--config',
++            'vitest.unit.config.ts',
++            '--reporter=default',
++            '--reporter=json',
++            `--outputFile.json=${reportFile}`,
++            ...SLOT_SENSITIVE_FILES,
++        ],
+         { env, cwd: PACKAGE_ROOT, encoding: 'utf8', timeout: 180_000 },
+     );
+-    const output = `${result.stdout}\n${result.stderr}`;
+-    const summary = /Tests\s+(?:(\d+) failed \| )?(\d+) passed \((\d+)\)/.exec(output);
+-    if (summary === null) {
+-        throw new Error(`could not read the child vitest summary:\n${output.slice(-1500)}`);
++    let reportJson: string | null = null;
++    if (existsSync(reportFile)) {
++        reportJson = readFileSync(reportFile, 'utf8');
+     }
+-    return { passed: Number(summary[2]), failed: Number(summary[1] ?? '0') };
++    rmSync(reportDir, { recursive: true, force: true });
++    return countsFromSpawn(result, reportJson);
+ }
+@@ -108,1 +174,81 @@
++describe('KS-1313 + KS-1326: the child verdict comes from the spawn outcome and the JSON report, never from text', () => {
++    /** A child that ended normally: exit status 0 or 1, no signal, no spawn error. */
++    const ENDED_FAILING = { status: 1, signal: null } as const;
++    const ENDED_PASSING = { status: 0, signal: null } as const;
++
++    /**
++     * The pure reader, asserted to exist first, so a tree without it reds by assertion.
++     *
++     * @returns {typeof countsFromSpawn} The reader under test.
++     */
++    function reader(): typeof countsFromSpawn {
++        expect(typeof countsFromSpawn, 'countsFromSpawn is the pure reader childSuiteCounts calls').toBe('function');
++        return countsFromSpawn;
++    }
++
++    it('KS-1326 R1 - a child killed by its spawnSync timeout (status 143, ETIMEDOUT) throws, even beside a passing report', () => {
++        const read = reader();
++        const killed = {
++            status: 143,
++            signal: null,
++            error: Object.assign(new Error('spawnSync ETIMEDOUT'), { code: 'ETIMEDOUT' }),
++        };
++        expect(() => read(killed, '{"numPassedTests":7,"numFailedTests":0}')).toThrow('did not end normally');
++    });
++
++    it('KS-1326 R2 - a child ended by a signal throws, even beside a passing report', () => {
++        const read = reader();
++        expect(() => read({ status: null, signal: 'SIGTERM' }, '{"numPassedTests":7,"numFailedTests":0}')).toThrow(
++            'did not end normally',
++        );
++    });
++
++    it('KS-1313 R3 - a child that wrote no JSON report throws', () => {
++        const read = reader();
++        expect(() => read(ENDED_FAILING, null)).toThrow('wrote no JSON report');
++    });
++
++    it('KS-1313 R4 - an unparsable JSON report throws', () => {
++        const read = reader();
++        expect(() => read(ENDED_FAILING, '{"numPassedTests":')).toThrow('is not JSON');
++    });
++
++    it('KS-1313 R5 - a report without numPassedTests and numFailedTests throws', () => {
++        const read = reader();
++        expect(() => read(ENDED_PASSING, '{"success":true}')).toThrow('carries no numPassedTests');
++    });
++
++    it('KS-1313 R6 - fail-only, skip-only, todo-only, mixed and errors-line runs read their real counts', () => {
++        const read = reader();
++        // Fields captured from real vitest 4.1.9 JSON reports (one child run per shape, 2026-10-05).
++        expect(read(ENDED_FAILING, '{"numTotalTests":1,"numPassedTests":0,"numFailedTests":1}')).toEqual({
++            passed: 0,
++            failed: 1,
++        });
++        expect(
++            read(ENDED_PASSING, '{"numTotalTests":1,"numPassedTests":0,"numFailedTests":0,"numPendingTests":1}'),
++        ).toEqual({ passed: 0, failed: 0 });
++        expect(
++            read(ENDED_PASSING, '{"numTotalTests":1,"numPassedTests":0,"numFailedTests":0,"numTodoTests":1}'),
++        ).toEqual({ passed: 0, failed: 0 });
++        expect(read(ENDED_FAILING, '{"numTotalTests":5,"numPassedTests":3,"numFailedTests":2}')).toEqual({
++            passed: 3,
++            failed: 2,
++        });
++        expect(read(ENDED_FAILING, '{"numTotalTests":2,"numPassedTests":2,"numFailedTests":0}')).toEqual({
++            passed: 2,
++            failed: 0,
++        });
++    });
++
++    it('KS-1313 R7 - childSuiteCounts hands the spawn result to countsFromSpawn and reads no stdout or stderr', () => {
++        const source = readFileSync(SELF, 'utf8');
++        const start = source.indexOf('function childSuiteCounts(');
++        expect(start, 'childSuiteCounts is declared in this file').toBeGreaterThan(-1);
++        const body = source.slice(start, source.indexOf('\n}\n', start));
++        expect(body).toContain('return countsFromSpawn(result, reportJson);');
++        expect(body).not.toMatch(/result\.(stdout|stderr)/);
++    });
++});
++
+ describe('unit-suite slot independence', () => {

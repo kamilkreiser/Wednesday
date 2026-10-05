@@ -1,0 +1,124 @@
+--- a/Blockchain/Dev/services/originate/src/db.ts
++++ b/Blockchain/Dev/services/originate/src/db.ts
+@@ -113,4 +113,23 @@
+ function getPrismaClient() {
+   if (!prismaClient) {
+     // Dynamic import to avoid loading Prisma when using pg pools
++    // KS-1305: a fresh worktree has @prisma/client installed but NOT generated
++    // (npm ci runs with ignore-scripts, so prisma generate never ran); the bare
++    // require below then fails as a module error that reads like a product
++    // defect. Load it once here and name the cause and the command instead;
++    // every other error is rethrown unchanged. On success the require below
++    // reads the module cache.
++    try {
++      require('@prisma/client');
++    } catch (err: any) {
++      if (err?.code === 'MODULE_NOT_FOUND' && String(err?.message).includes('.prisma/client')) {
++        throw new Error(
++          '[DB] the generated Prisma client (node_modules/.prisma/client) is missing: npm ci runs with ' +
++            'ignore-scripts, so prisma generate never ran. From Blockchain/Dev/services/originate run: ' +
++            'cp -R ../../prisma ./prisma && npx prisma generate (KS-1305)',
++          { cause: err },
++        );
++      }
++      throw err;
++    }
+     const { PrismaClient } = require('@prisma/client');
+--- /dev/null
++++ b/Blockchain/Dev/services/originate/src/__tests__/ks1305-missing-generated-prisma-client-is-diagnosed.test.ts
+@@ -0,0 +1,95 @@
++/**
++ * KS-1305 - a fresh worktree has `@prisma/client` installed but the GENERATED
++ * client (`node_modules/.prisma/client`) absent: `npm ci` runs with
++ * ignore-scripts, so `prisma generate` never ran. The bare
++ * `require('@prisma/client')` in `getPrismaClient()` (src/db.ts) then throws
++ * `Cannot find module '.prisma/client/default'` - a module error that reads
++ * like a product defect. The fix rethrows that one error as a sentence naming
++ * the cause and the working command; every other load error is unchanged.
++ *
++ * Harness: the KS-458 suite's (`@prisma/client` replaced by a jest.mock
++ * factory, single-tenant branch of `withTenant`). No database, no generate.
++ */
++
++process.env.DATABASE_URL = 'postgresql://user:pass@localhost:5432/db';
++delete process.env.MULTI_TENANCY_ENABLED;
++
++/** The error the next `require('@prisma/client')` throws; null = load the fake client. */
++let mockLoadError: (Error & { code?: string }) | null = null;
++let mockCallbackRan = false;
++
++jest.mock('@prisma/client', () => {
++  if (mockLoadError) throw mockLoadError;
++  return {
++    PrismaClient: class {
++      async $executeRawUnsafe() {
++        return 1;
++      }
++      async $transaction(fn: (tx: any) => Promise<any>) {
++        return fn(this);
++      }
++      async $disconnect() {}
++    },
++  };
++});
++
++import { withTenant } from '../db';
++
++/**
++ * The error jest's resolver raises when the generated client is absent.
++ *
++ * @param {string} message - The module error's message.
++ * @returns {Error & { code?: string }} An error carrying code MODULE_NOT_FOUND.
++ */
++function moduleNotFound(message: string): Error & { code?: string } {
++  const err: Error & { code?: string } = new Error(message);
++  err.code = 'MODULE_NOT_FOUND';
++  return err;
++}
++
++describe('KS-1305: a missing generated Prisma client is diagnosed, not reported as a module error', () => {
++  beforeEach(() => {
++    mockCallbackRan = false;
++  });
++
++  it('RED KS-1305 D1: the missing .prisma/client names the cause and the generate command', async () => {
++    mockLoadError = moduleNotFound(
++      "Cannot find module '.prisma/client/default' from 'node_modules/@prisma/client/default.js'",
++    );
++
++    const run = withTenant('t-1305', async () => {
++      mockCallbackRan = true;
++      return 'never';
++    });
++
++    await expect(run).rejects.toThrow('the generated Prisma client (node_modules/.prisma/client) is missing');
++    await expect(run).rejects.toThrow('cp -R ../../prisma ./prisma && npx prisma generate');
++    expect(mockCallbackRan).toBe(false);
++  });
++
++  it('CONTROL KS-1305 C1: any other load error is rethrown unchanged (the same object)', async () => {
++    const other = moduleNotFound("Cannot find module '@prisma/client' from 'src/db.ts'");
++    mockLoadError = other;
++
++    let caught: unknown = null;
++    try {
++      await withTenant('t-1305', async () => 'never');
++    } catch (err) {
++      caught = err;
++    }
++
++    expect(caught).toBe(other);
++  });
++
++  it('CONTROL KS-1305 C2: with the client generated, withTenant runs its callback as before', async () => {
++    mockLoadError = null;
++
++    const result = await withTenant('t-1305', async () => {
++      mockCallbackRan = true;
++      return 'ran';
++    });
++
++    expect(result).toBe('ran');
++    expect(mockCallbackRan).toBe(true);
++  });
++});
