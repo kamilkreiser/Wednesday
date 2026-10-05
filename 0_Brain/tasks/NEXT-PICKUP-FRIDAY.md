@@ -12,6 +12,14 @@ supersede: replace wholesale; previous = NEXT-PICKUP-FRIDAY.md.pre-0925-rotate-s
 
 **The tree is at `/Volumes/Laptop-DEV/FRIDAY` (the drive, since 2026-09-28).** Quote every path (spaces).
 
+## 🔴🔴🔴 STATE 2026-10-05 19:53 (Friday, ctx 60%) — READ FIRST; supersedes every block below where they differ
+**Kam:** Composer deploy + login email DONE (demo fd9493f, emailed 19:4x, read back). No open cards. No board rows since 16:38:48.
+**MAINS:** HPSM-POC **f5bfb0e** (#104 #105 #106 #107 today) · analysis **c4514f9** (records #67–#71) · Composer **fd9493f** = demo (C-45). Hosted HPSM-POC still c2d321c (deploy = Kam's word).
+**LIVE PANE:** Datasec/HPSM-POC-A %50 **B142** (`Briefs/2026-10-05_B142_api-212-and-triage-99-179.md`): 212 tier 1 → on READY FOR GATE: PR, gate (B141 shape), merge on GO, records; plus its TRIAGE of 99/179 → brief whatever is agent-now.
+**Watcher:** seen_s15 over B142 STATUS + pane %50 — dies with the seat.
+**HPSM-POC deferred:** 127 (one live Azure OpenAI call — Friday's call). Tickets closed today: 158 153 146 206 198 201 194 195 157 147 151 209 210 211 160 199 202 156 205 144; filed 209 210 211 212.
+**Spotlight** (mds_stores) holds load ~17 since ~17:00 — not ours.
+
 ## 🔴🔴🔴 CHECKPOINT 2026-10-05 18:19 (Friday, ctx 50%) — READ FIRST; supersedes every block below where they differ
 **Kam:** board rows none since 16:38:48 (reconcile 0). TERMINAL ~18:1x: Composer deploy + login email (see OWED line in the 17:27 block below — deadline before 08:00 Tue 6 Oct).
 **MAINS:** HPSM-POC **0a85b89** (#104 + #105 merged; records #67/#68/#69 → analysis 814b538) · Composer 555593a. Hosted c2d321c · Composer demo 555593a.
