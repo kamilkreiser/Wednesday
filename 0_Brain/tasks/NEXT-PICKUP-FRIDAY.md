@@ -12,6 +12,13 @@ supersede: replace wholesale; previous = NEXT-PICKUP-FRIDAY.md.pre-0925-rotate-s
 
 **The tree is at `/Volumes/Laptop-DEV/FRIDAY` (the drive, since 2026-09-28).** Quote every path (spaces).
 
+## 🔴🔴🔴 STATE 2026-10-05 22:29 (Friday, ctx 71%) — READ FIRST; supersedes every block below where they differ
+**Kam:** no open cards; last board row 20:59:03. All of today's deploys done + verified (Composer demo fd9493f + login email; hosted HPSM-POC 1046e24, C-62; HPSMPOC-213 Done).
+**MAINS:** HPSM-POC **042db0c** (PR #109 B145 merged, NOT deployed — hosted is 1046e24; a deploy needs Kam's word) · analysis **c5e7484** · Composer **fd9493f** = demo.
+**LIVE PANE:** Datasec/HPSM-POC-A **B148** (`Briefs/2026-10-05_B148_deploy-script-208.md`): HPSMPOC-208 deploy-script fix + self-check, local proof only. On READY FOR GATE: PR, tier-1 gate (B137 shape; deploy path), merge on GO, records. The real proof is the next hosted deploy (Kam's word).
+**Follow-ups filed today, not started:** HPSMPOC-212 done; 213 done; **214** (B147 F-1/N-1/N-2/N-3, Feedback); 207 (API slow start); 127 (needs one live Azure OpenAI call — Friday's call).
+**Watcher:** seen_s25 over B148 STATUS.
+
 ## 🔴🔴🔴 CHECKPOINT 2026-10-05 21:35 (Friday, ctx 70%) — READ FIRST; supersedes every block below where they differ
 **Kam:** last board row 20:59:03 (redeploy card a → DONE). No open cards. Today's deploys all done + verified by Friday: Composer demo fd9493f (+ login email), HPSM-POC hosted f5bfb0e (C-61) then **1046e24 (C-62, the F-1 fix)**.
 **MAINS:** HPSM-POC **1046e24** = HOSTED · analysis **1d24691** · Composer **fd9493f** = demo.
