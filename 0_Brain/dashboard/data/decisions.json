@@ -26135,5 +26135,50 @@
    }
   ],
   "amended_ts": "2026-10-06T06:26:19.107722+11:00"
+ },
+ {
+  "id": "secuura-ks1402-s-key-cannot-carry-users-read-1006",
+  "client_project": "Secuura/Blockchain",
+  "title": "KS-1402: your 2 Sep ruling (S's key carries users:read) cannot happen. Stuart measured it. Pick how K resolves the holder instead",
+  "bluf": "Kam needs to pick a or b. Stuart measured it live on 5 Oct (KS-1402, 09:53Z): with #1374 merged, every Platform-S custody transfer now gets 403 instead of 401, and the transfer is still refused (7 of 7). Your 2 Sep ruling on KS-739 (b: S's connector key carries users:read, Stuart provisions it) has no mechanism. K mints S's scopes at register-connector (platform.ts:485-489, Stuart's reading). users:read was left out on purpose by the section-8 sign-off at :477-478. S cannot override the set (:529-535). Wednesday has not re-read those lines at source; they are Stuart's citations. Platform-S needs no change under either option.",
+  "default_action": "If there is no ruling by 18:00 today, Wednesday briefs option a as a BUILD round (a Spark brief if one file fits, else a Claude seat), gated, with NOTHING merged until you rule. No key is rotated and nothing goes to Stuart or Peter.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Originate resolves the holder with its own service credential (Stuart's option 2)",
+    "detail": "No scope change and no re-mint of any live key. Keeps 'on-behalf-of resolution is K-side'. A K build round, then the QA gate, then a merge. The cross-tenant guard must be proved by the gate."
+   },
+   {
+    "key": "b",
+    "label": "Add users:read to the minted S scope set and re-mint existing keys (Stuart's option 1)",
+    "detail": "Reverses the section-8 sign-off. Every registered Organisation keeps its old scopes until its key is rotated, which is platform-admin only. Rotating live client keys is your signature class."
+   },
+   {
+    "key": "c",
+    "label": "Hold: no change yet",
+    "detail": "Platform-S transfers stay refused (403). PS-992 stays red."
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-10-06T09:52:31.896660+11:00",
+  "status": "ruled",
+  "ruled_choice": "a",
+  "ruled_ts": "2026-10-06T09:58:21.119827+11:00",
+  "prior_rulings_overridden": [
+   "2026-08-24 11:27",
+   "2026-09-02 16:08",
+   "2026-09-07 09:04",
+   "2026-09-10 09:01",
+   "2026-09-10 09:08",
+   "2026-09-10 09:08",
+   "CARD wed-boot-read-exceeds-the-context-window",
+   "CARD nexusai-authorized-users-md-remove",
+   "CARD composer-outputs-carry-no-answers",
+   "CARD secuura-ks1370-validate-when-the-revoke-check-cannot-read",
+   "CARD mpscalc-release1-users",
+   "CARD secuura-ks1402-lookup-refuses-connector-tokens",
+   "CARD hpsmpoc-require-sqlserver-ci-check-1006",
+   "CARD hpsmpoc-6f6bc96-hosted-deploy-1006"
+  ]
  }
 ]
