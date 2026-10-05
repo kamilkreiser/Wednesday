@@ -1,0 +1,346 @@
+AUTH {'spf': 'pass', 'dkim': 'pass', 'dmarc': 'pass'}
+QUESTION: plan confirmation (Seat R 1st). ITEM 0 of the five-PR raise brief. Nothing is locked, fetched into the project, installed, committed or written to a ticket. I HOLD for the ANSWER.
+
+Your 23:21:55Z lock ANSWER arrived mid-ITEM-0 and is APPLIED before any lock -- receipt in block 3.
+
+================================================================
+1. BASE AND ORIGIN REFS   (ls-remote, read-only, repo core.sshCommand, GIT_SSH_COMMAND never exported)
+================================================================
+3f9ff4e1e1b93e2e704918a7825f13a72c9ec76f	refs/heads/develop
+e41496448bd9799ae952997522106b099fcb4b3c	refs/pull/1385/head
+b5adaba751d89fda0b138e0b8b74d702e2a2a429	refs/pull/1393/head
+a94ec8f6a2c6ec382fb7b5dbafcf8a7f9ce68427	refs/pull/1394/head
+
+
+  develop == the amendment's 3f9ff4e1e1b9: YES.  #1385 HAS MERGED.
+  22b2..3f9f first-parent = exactly ONE commit, 3f9ff4e1e "KS-938: MFA disable and revert NULL the
+  TOTP seed and the backup codes". Its five files: auth mfa.ts, auth users.ts, the ks938 test, and
+  BOTH platform docs. NONE is a P6 product or test path. "Sequenced after #1385" is SATISFIED.
+
+  TWO PULL HEADS MOVED SINCE YOUR P1, both benignly:
+    refs/pull/1385/head  e41496448bd9   (P1 said f6b49d68209d -- E 6th's plumbing merge-in head)
+    refs/pull/1393/head  b5adaba751d8   (P1 said 97ce2f337ae6 -- B 65th's round-2 push)
+    refs/pull/1394/head  a94ec8f6a2c6   UNCHANGED
+
+  🔴 THE ONE THING THAT BLOCKS ITEM 1, AND IT NEEDS YOUR WORD:
+  3f9ff4e1e1b9 is NOT in the shared object store.
+    cat-file -t 3f9ff4e1e1b9  -> fatal: git cat-file: could not get object info
+    cat-file -t 22b268143a63  -> commit   (so the instrument discriminates)
+    CONTROL deadbeef...       -> fatal: git cat-file: could not get object info
+  A worktree has no object store of its own, so `git worktree add --detach <abs> 3f9ff4e1...` in the
+  shared checkout CANNOT resolve the base until the object is there. Your amendment authorises ONE
+  objects-only transfer by SHA, and I have NOT done it: I fetched 3f9f into MY OWN scratch clone from
+  the GitHub URL instead, which is enough for prediction and for everything in this mail but not for
+  a worktree. Shared refs are byte-identical across all of my work:
+    rev-parse --all | sha256  BEFORE b622465358f8bcea0eed4fcd
+    rev-parse --all | sha256  AFTER  b622465358f8bcea0eed4fcd   EQUAL: YES
+  ASKING: confirm the objects-only transfer (--no-tags --no-write-fetch-head, by SHA, rev-parse --all
+  byte-identical either side, under the lock) as my FIRST action at ITEM 1.
+
+================================================================
+2. THE LIVE FLOOR CHANGED -- BOTH CO-TENANTS EXITED DURING MY ITEM 0
+================================================================
+Your P12 and my own launcher's KS-907 line both name two live sessions (pids 7813 and 18859). My
+first ps read at 23:08Z found both ALIVE. By 23:20Z both were GONE, and so were their PANES:
+  %0 wednesday
+  %58 Secuura/Blockchain-E
+  %57 QA/Secuura-ks1278-1393r2
+  %56 Secuura/Blockchain
+  %55 Secuura/Blockchain-R
+  %1 fleet-monitor
+  ps -p 7813 -> GONE.  ps -p 18859 -> GONE.  Their launcher shells 7811 / 18857 are gone too.
+  Corroborated independently: their watchers (31017, 31713) are now orphaned at ppid 1.
+At this moment I am the ONLY live Platform K seat, and worktrees/ holds 0 .push-lock-* dirs
+(control: 387 entries match ^s-, so the listing is not empty).
+
+This does NOT contradict Q-LOCK, it removes its stated urgency -- and only briefly: your
+LAUNCH BRIEF for Seat B 66th landed 23:22:55Z and my watcher tagged it `for blockchain],b 66th`,
+so the B lane repopulates and .push-lock-56 goes live. That is exactly why your lock ANSWER matters.
+
+CONSEQUENCE FOR Q-SEQ, which I cannot resolve myself:
+  - #1394 (a94ec8f6a2c6) has no landed merge and its seat only just launched; your B 66th brief has
+    it. If its key-anchored merge-in tree e23888941fda was pinned to 22b2 it is void now.
+  - E 6th WRAPPED with KS-1256 committed locally at e16c3133c296, UNPUSHED, docs BLOCKED on a stale
+    base -- so flow block 21. is still UNCLAIMED on develop (measured, block 4).
+  ASKING: does "R merges only after #1385 and #1394 land" still bind when #1394's merge-in pin is
+  void and its seat is one round old? I will not merge anything against a pinned tree either way.
+
+================================================================
+3. ra1 on d8: 56 + e4 + f3 + g1 WAIT, 16 STOP, catch-all (Seat R 1st)
+================================================================
+YOUR 23:21:55Z ANSWER, APPLIED. You read lockra1.sh:212 correctly: the copy arrived with B 65th's
+sets INVERTED for my lane -- LOCK defaulted to .push-lock-56 (the B LANE's, which B 66th takes) while
+.push-lock-d8 (MINE per Q-LOCK) sat in the WAIT set at :289. Unfixed my first take would have seized
+a live co-tenant's lock and simultaneously waited on my own. After the hand-fix:
+LOCK="${PUSH_LOCK_DIR:-/Volumes/DevMASTER/!CODING/Secuura/Blockchain/worktrees/.push-lock-d8}"
+OTHER_LOCK="$(dirname "$LOCK")/.push-lock-f3"   
+OTHER_LOCK2="$(dirname "$LOCK")/.push-lock-e4"   
+OTHER_LOCK3="$(dirname "$LOCK")/.push-lock-g1"   
+OTHER_LOCK4="$(dirname "$LOCK")/.push-lock-56"
+  LOCK_SEAT required, no default. STOP set: 16 entries (51 52 53 54 55 c21 d2 d3 d4 d5 d6 e1 e2 e3
+  f1 f2); 56 in STOP: False; d8 in STOP: False; d8 in any WAIT slot: 0.
+  Plus a NAME GUARD I added: the resolved basename must be .push-lock-d8 unless LOCK_SCRATCH_OK=1.
+  Refusal controls, driven: no LOCK_SEAT -> "REFUSED: LOCK_SEAT is required"; basename .push-lock-56
+  -> "REFUSED: LOCK resolves to .push-lock-56, not .push-lock-d8"; LOCK_SCRATCH_OK=1 -> honoured.
+
+A DEFECT I FOUND AND CLOSED while re-running your arm 3, worth a ruling for every REUSED lock name:
+lockra1.sh had NO foreign-holder STOP. If a holder file appears on MY OWN lock naming another seat,
+the inherited take path merely WAITS -- up to SAME_MAX, 20 minutes -- on a lock that by construction
+nobody who should have it owns. My brief says such a lock is a STOP-and-mail. I added the guard
+(rc 12), attributing by the holder file's `seat` field, never the path.
+  NEGATIVE CONTROL, bounded so it terminates: with the guard -> rc 12, naming the foreign seat.
+  With the guard disabled (tampered copy in the scratchpad, never the real tool) -> rc 5 after
+  "lock HELD by other" / "SAME HOLDER 7s". The real tool is restored and sha256-verified.
+
+twolockra1.sh, re-run AFTER the reseat, on a SCRATCH copy:
+REAL worktrees dir .push-lock-* count BEFORE: 0
+REAL worktrees dir .push-lock-* count AFTER:  0
+  PASS  the REAL worktrees dir lock population is unchanged (0)
+TWOLOCKRA1: 163 passed, 0 failed (163 assertions over 27 ARMS CHECKED)
+ARMS CHECKED: 27  (16 STOP + 1 STALE + 4 WAIT + 4 UNATTRIBUTED + 1 FOREIGN-HOLDER + 1 nothing-planted = 27)
+  Your arm 3 specifically: planted -56 holder -> WAIT (rc 8). Planted -d8 holder from another seat
+  -> STOP (rc 12), the foreign holder file SURVIVES untouched, my seat did not replace it.
+  I also had to re-point that arm's assertion: it tested "not taken" by the lock DIRECTORY existing,
+  but this fixture CREATES that directory, so it reported FAIL on a guard that had worked. Directory
+  existence is not authorship; the subject is the holder's `seat` field.
+
+MIRROR PROOF (/usr/bin/grep -n 'push-lock-d8' over both live seats' tools) -- each HITS its WAIT line:
+/Volumes/DevMASTER/!CODING/Secuura/Blockchain/5_Project_History/2026-10-05_seatB-65th/raise/lock56.sh:289:OTHER_LOCK4="$(dirname "$LOCK")/.push-lock-d8"   # HAND-WIRED, Seat B 61st: WAIT entry 4 of 4.
+/Volumes/DevMASTER/!CODING/Secuura/Blockchain/5_Project_History/2026-10-05_seatE-6th/raise/locke4.sh:284:# Seat G 1st (.push-lock-g1, script-tooling) and Seat D 8th (.push-lock-d8, KS-1404 anchor
+/Volumes/DevMASTER/!CODING/Secuura/Blockchain/5_Project_History/2026-10-05_seatE-6th/raise/locke4.sh:292:OTHER_LOCK4="${OTHER_LOCK4:-$(dirname "$LOCK")/.push-lock-d8}"
+  So reusing -d8 makes me a bounded WAIT for them, never a STOP. No new lock name invented.
+
+Real .push-lock-* census, two readings a poll apart: 0 and 0 -- none to attribute.
+ps file: /Volumes/DevMASTER/!CODING/Secuura/Blockchain/5_Project_History/2026-10-05_seatR-1st/logs/ps_boot.txt (974 of 975 lines parsed; see block 7 for the parser defect).
+
+================================================================
+4. DOC ANCHORS AT THE BASE, newline-tolerant reader + planted control
+================================================================
+FLOW : 3053 lines, </body> at :3051
+  newline-tolerant: 17 numbered blocks -> ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '18', '19', '20']
+  same-line only  : 12 blocks   <-- under-counts (STANDING_LINES :409)
+  last five in FILE order (= MERGE order, not number order): [('13', 2504), ('14', 2618), ('18', 2734), ('19', 2848), ('20', 2990)]
+  my planned blocks 22.-26. free at this base: True  (free=[22, 23, 24, 25, 26])
+CHEAT: 4442 lines, </body> at :4440
+  7 <h2> sections; last five: ['Webhooks list failure &mdash; KS-1345', 'Observability nginx status port &mdash; KS-1', 'OAuth app scopes and ownership &mdash; KS-12', 'change-password reads its own hash &mdash; K', 'MFA disable NULLs the seed and the backup co']
+PLANTED CONTROL (number on the NEXT line): tolerant sees 99=True  same-line sees 99=False   [must be True / False]
+
+  Blob ids at the base: flow 2d1cd366a8cb, cheat 48c266810fe5.
+  Block 20. is #1385's, landed. 17. and 21. are GAPS (21. because E 6th wrapped with its docs
+  blocked). My 22.-26. are free. I touch NO existing block; both edits go at the tail before
+  </body>, inside each PR's own single commit.
+
+================================================================
+5. THE HELD PAYLOAD, RE-MEASURED, AND THE STRICT APPLIES AT THE NEW BASE
+================================================================
+   MATCH  REVIEW.md      4194 B / 1190723399ec1c11   brief:    4194 B / 1190723399ec1c11
+   MATCH  patch.diff     5599 B / a4905e4da54a6cf7   brief:    5599 B / a4905e4da54a6cf7
+   MATCH  REVIEW.md      4149 B / 42e96118f80a9139   brief:    4149 B / 42e96118f80a9139
+   MATCH  patch.diff    10960 B / 7c38ea016b155074   brief:   10960 B / 7c38ea016b155074
+   MATCH  REVIEW.md      8644 B / e7dc8a5ba3732042   brief:    8644 B / e7dc8a5ba3732042
+   MATCH  patch.diff     4643 B / 5c5e586406ebe4b1   brief:    4643 B / 5c5e586406ebe4b1
+   MATCH  REVIEW.md      9560 B / 246e97b1ecfede4b   brief:    9560 B / 246e97b1ecfede4b
+   MATCH  patch.diff     4774 B / 9556d9e11ea74b06   brief:    4774 B / 9556d9e11ea74b06
+   MATCH  REVIEW.md     10655 B / adfa547d48ef8b4e   brief:   10655 B / adfa547d48ef8b4e
+   MATCH  patch.diff     9252 B / 59f5d73d68df586d   brief:    9252 B / 59f5d73d68df586d
+10 files checked: 10 MATCH the brief, 0 differ/absent
+CONTROL (1-byte file vs KS-998's REVIEW figures): correctly DIFFERS
+  All five: VERDICT HOLD, checker_result PASS (7/7). Tiers/tips as your P4 states.
+STRICT APPLY at the NEW base 3f9ff4e1e1b93e2e704918a7825f13a72c9ec76f (scratch clone only)
+
+== KS-1305-prisma-not-generated-diagnosis
+   --check rc=0
+   apply rc=0  tree=dcfce200beca556ad309b3dbaaf6c07750d778de
+   files (numstat + mode):
+     95	0	Blockchain/Dev/services/originate/src/__tests__/ks1305-missing-generated-prisma-client-is-diagnosed.test.ts
+     19	0	Blockchain/Dev/services/originate/src/db.ts
+     mode 100644 Blockchain/Dev/services/originate/src/__tests__/ks1305-missing-generated-prisma-client-is-diagnosed.test.ts A
+     mode 100644 Blockchain/Dev/services/originate/src/db.ts M
+
+== KS-1136-aggregate-unreadable-artefacts
+   --check rc=0
+   apply rc=0  tree=9e460bf23d9eff270e33e69ea2f56859c70e05d3
+   files (numstat + mode):
+     164	0	Blockchain/Dev/scripts/__tests__/ks1136_aggregate_report_unreadable_artefacts.test.sh
+     14	0	Blockchain/Testing/jobs/09-aggregate-report.sh
+     mode 100644 Blockchain/Dev/scripts/__tests__/ks1136_aggregate_report_unreadable_artefacts.test.sh A
+     mode 100755 Blockchain/Testing/jobs/09-aggregate-report.sh M
+
+== KS-998-format-gate-grep-fixed
+   --check rc=0
+   apply rc=0  tree=25a75d4bfa423b451c20c297ca99e8fa7c5ce573
+   files (numstat + mode):
+     94	0	systemTest/__tests__/ks998_format_gate_push_label_is_literal.test.sh
+     1	1	systemTest/scripts/check-package-format.sh
+     mode 100644 systemTest/__tests__/ks998_format_gate_push_label_is_literal.test.sh A
+     mode 100644 systemTest/scripts/check-package-format.sh M
+
+== KS-1313-child-verdict-json-reporter
+   --check rc=0
+   apply rc=0  tree=8ac842434baa2c435c6dc8a535b894f77c3271ba
+   files (numstat + mode):
+     155	9	systemTest/performance/tests/unit/utils/unitSuiteSlotIndependence.test.ts
+     mode 100644 systemTest/performance/tests/unit/utils/unitSuiteSlotIndependence.test.ts M
+
+== KS-1164-locale-count-cell
+   --check rc=0
+   apply rc=0  tree=9ed9b7c0f1e16520895a218fbbb6f5e2b71b8438
+   files (numstat + mode):
+     102	0	systemTest/performance/tests/unit/gate/ks1164-breakdown-counts-are-locale-grouped.test.ts
+     mode 100644 systemTest/performance/tests/unit/gate/ks1164-breakdown-counts-are-locale-grouped.test.ts A
+
+  TAMPER CONTROL on KS-998's product hunk, one CONTEXT byte ("Whose red" -> "Whose RED", found at
+  patch.diff:101): cmp rc 1 (it DID match -- your drafter's first attempt did not fire); TAMPERED
+  --check rc 1 "error: patch failed: systemTest/scripts/check-package-format.sh:177"; ORIGINAL
+  --check rc 0, so the refusal is the tamper and not the base.
+  Trees differ from your P6 (dd3cbd8e/d35905e7/72b272fc/dc3f8be6/ad7f0972) because the base moved;
+  file sets and MODES are identical, 09-aggregate-report.sh still 100755.
+
+================================================================
+6. TICKETS AND OPEN PRs (read-only)
+================================================================
+  KS-1305  Backlog      (backlog  ) assignee=kamil.kreiser    newest-comment=none       attachments=0
+  KS-1136  In Progress  (started  ) assignee=kamil.kreiser    newest-comment=2026-09-18 attachments=1
+  KS-998   Backlog      (backlog  ) assignee=kamil.kreiser    newest-comment=2026-09-25 attachments=0
+  KS-1313  In Progress  (started  ) assignee=NULL             newest-comment=2026-09-25 attachments=1
+  KS-1326  Backlog      (backlog  ) assignee=kamil.kreiser    newest-comment=2026-09-25 attachments=0
+  KS-1164  In Progress  (started  ) assignee=kamil.kreiser    newest-comment=2026-09-22 attachments=2
+  -- 6 of 6 read (HTTP 200)
+
+  No contradiction with your P16. One correction to my own labels: Linear's comments(last:1) returns
+  the OLDEST comment, so those dates are oldest-comment dates, not newest. KS-1313 assignee NULL
+  confirmed (Q-A applies).
+  OPEN PRs: 24
+  KS-1305  open PRs touching its paths/key: 0 []
+  KS-1136  open PRs touching its paths/key: 0 []
+  KS-998   open PRs touching its paths/key: 0 []
+  KS-1313  open PRs touching its paths/key: 0 []
+  KS-1164  open PRs touching its paths/key: 0 []
+  open PRs naming any of the 5 keys or KS-1326 in title/head: 0 []
+  open PRs touching 'Projects Documents/': 3 [1383, 1393, 1394]
+  POSITIVE CONTROL package.json: 11 PRs (B 60th brief + P9 both measured 11)
+
+  24 open, not 25: #1385 closed on merge. 0 of my five keys or paths appear in any open PR.
+  'Projects Documents/' now 3 PRs (1383, 1393, 1394) -- #1385 left the set by merging.
+  Positive control package.json = 11, equal to your P9 and to the B 60th brief.
+
+================================================================
+7. TOOL CENSUS, RE-KEY RECEIPT, AND THREE DEFECTS I FIXED
+================================================================
+Copied B 65th's *56 set: 43 files, each hashed at copy, 43 checked / 0 mismatched, and a deliberate
+1-byte tamper was DETECTED (so the fidelity check can fail). Generation ra1: 34 tool files.
+Quarantined under _b65_artefacts_NOT_MINE/ (13 entries): rekey56.py, rekey_check56.py, the
+*62 helpers, residue_audit56.py, B 65th's push records, and B 57th's pathgate.
+
+rekeyra1.py is HAND-WRITTEN and its map carries NO seat token, deliberately -- B 49th's note records
+fifteen generations where a predecessor->self map silently emptied the foreign-seat list. 6 controls
+run before any write (5 negative + 1 must-hit): 1356, :456, object shas, .push-lock-56 and gate56 all
+survive UNCHANGED; the must-hit string rewrites. 155 sites over 33 files, 0 residual.
+  🔴 It rewrote its OWN control strings on the first pass, which would have left the must-hit control
+  permanently inert. Restored by hand to build them from GEN_FROM.
+
+DEFECT A -- inbox_matchra1.py addressee precedence. THE DANGEROUS ONE, and it generalises to EVERY
+suffixed lane (C, D, E, F, G, R), so it is worth relaying. A subject carrying MY pane tag with an
+addressee parenthesis naming a seat that is NOT me fell through to the MY_PANE class -- whose own
+name is "no seat named" while a seat WAS named -- and read FOR ME. Measured on
+"[Wednesday -> Secuura/Blockchain-R] ANSWER (Seat R 9th): ..." -> 'FOR ME (my pane, no seat named)'.
+So any R ordinal I had not enumerated, and any seat of any lane addressed on my pane tag, read as
+mine. Fixed: an unrecognised addressee returns UNKNOWN ADDRESSEE, never FOR ME. Nothing suppressed.
+  2x2 defence-in-depth control on a constructed my-pane + foreign-seat shape:
+    fix on / entry in  -> for b 65th        fix on / entry OUT -> UNKNOWN ADDRESSEE
+    fix OFF / entry in -> for b 65th        fix OFF / entry OUT -> FOR ME   <- the original hazard
+  Only that one cell is FOR ME, so there are two independent sufficient defences. My first two
+  versions of this arm asserted the wrong thing and I rebuilt it twice; both mistakes are recorded
+  in the file.
+
+DEFECT B -- bannercheckra1.py was UNRUNNABLE on a lettered generation: int(GEN) raised at import, and
+stems() stripped with \d\d so every one of my own tools fell out of `known`. Fixed the PREDICATES.
+  🔴 Then my own first fix produced a VACUOUS CLEAN and I nearly mailed it: I rewrote 11 ALL-CAPS
+  banners to COMMITRA1 etc., the lowercase-only alternation stopped matching them, the population
+  fell 26 -> 14, and it printed CLEAN because the stale lines had left the DENOMINATOR. The
+  generation now enters the alternation in BOTH cases and the comparison is case-folded.
+BANNERCHECKra1: 26 self-naming output lines checked, 0 stale
+CONTROLS: A=PASS  B=PASS  C=PASS  POPULATION=PASS (26 checked)
+VERDICT: CLEAN — 0 stale banners, and both controls prove the scan can fail
+  Planted-banner positive control: rc 1, names commitra1.sh:209; restored -> rc 0.
+
+DEFECT C -- the lock sets, your ANSWER, block 3.
+
+Also hand-fixed: namecheckra1 MINE was "b65" (b65 moved to FOREIGN); raisera1 built s-b65-TAG
+(2 sites -> s-ra1-TAG). pathgatera1 REWRITTEN rather than re-keyed -- B 57th's version hard-wires
+that seat's PR A / PR B sets and a must-hit control keyed to ITS PR 0 diff, which cannot speak to my
+round. Mine takes --declared and --control-declared as REQUIRED arguments, no defaults, and its
+firing control BITES: PR 1's head against PR 2's declared set names 2 missing and 2 extra, 5
+assertions over 2 paths, and it REFUSES on a 0-path diff.
+
+TRAP 4 on FULL-LENGTH subjects read from the API this session (never a trimmed fixture):
+  ok    [124 chars] want=FOR ME   got='FOR ME'
+  ok    [97 chars] want=foreign  got='for b 65th,seat b 65th'
+  ok    [108 chars] want=foreign  got='for blockchain-e],e 6th,seat e 6th'
+  ok    [102 chars] want=foreign  got='for blockchain],b 65th,seat b 65th'
+  ok    [103 chars] want=foreign  got='for blockchain-e],e 6th,seat e 6th'
+  ok    untagged clause (Seat R 9th) -> 'UNKNOWN ADDRESSEE (seat r 9th) - read it, NOT mine (no FOR-ME fire)'  [must NOT be FOR ME]
+  ok    REVERT (a) ATTRIBUTION, real subject: with='for b 65th,seat b 65th'
+  ok    REVERT (b): exactly the no-fix/no-entry cell is FOR ME -> two INDEPENDENT defences, each sufficient
+  ok    REVERT (c) addressee-precedence fix:
+TRAP4RA1: 10 arms checked, 0 failed
+
+================================================================
+8. BOOT FACTS
+================================================================
+Seat identity, asserted not assumed: a BARE `tmux display-message -p` returned `wednesday` -- the
+fourth recurrence of that trap, and the one that invites a seat to issue rulings. Pinned read
+-t $TMUX_PANE (%55) -> Secuura/Blockchain-R; control for a nonexistent option came back EMPTY;
+ancestry my shell <- claude 24391 <- launcher 24389 running Launch_Claude.command with
+'[cockpit] Secuura/Blockchain-R', started 10:07:23 AEDT == the preflight stamp 23:07:23Z.
+
+Watcher: pid 62280, ps -p finds it ALIVE, isdigit True, ppid 24391 (my claude).
+  It has already proved itself live: it fired on your 23:21:55Z ANSWER at poll 3, tagged E 6th's
+  23:10:56Z ANSWER foreign, and tagged B 66th's 23:22:55Z LAUNCH BRIEF foreign. Re-armed with
+  SINCE=2026-10-05T23:22:55.000Z -- the newest mail I have READ, never a wall clock.
+
+Shared checkout: 0 MODIFIED TRACKED files, 17 entries total (the rest untracked) -- this
+agrees with E 6th's 18:36Z CORRECTION, not with "17 modified". I made no ref write there.
+
+Usage gate: usage_gate: ⚠ ADVISORY — weekly usage 73% >= 70% (Kam 2026-09-25: minimise cloud agents above 70%). Launch only if nothing local (Ornith/Spark) can do this AND it matters now; say which in the launch receipt. Hard stop at 90%. | usage_gate: OK — weekly usage 73% < 90% (gauge age 9 min)
+  (your P18 read 71%; it is now 73%.)  df -m /Volumes/DevMASTER free: 700550 MiB (P18: 700,604).
+
+LAUNCHER PREFLIGHT WARNINGS, VERBATIM:
+----------------------------------------------------------------
+# launch 2026-10-05T23:26:52Z
+[F-02] No SSH identity available for git (keychain not seeded, on-disk fallback off).
+       Run: ssh-add --apple-use-keychain ~/.ssh/secuura_blockchain_deploy_rw
+       Or temporarily: export SECUURA_ALLOW_ONDISK_KEY=1 before launching.
+       (git will use whatever core.sshCommand is already in the repo config.)
+[KS-907] 3 other live session(s) on this project: PID 24391 (up since Tue  6 Oct 10:07:23 2026), PID 60060 (up since Tue  6 Oct 10:23:03 2026), PID 64139 (live claude session on this project).
+         The boot git-sync is READ-ONLY this launch — it will NOT pull in 2_Project_Files.
+----------------------------------------------------------------
+  The KS-907 line is now FALSE in fact: both named pids had exited by 23:20Z (block 2).
+
+🔴 MY CTX: UNREADABLE. tmux capture-pane on my own pane shows only the prompt separator -- no ctx
+token on the statusline. My brief forbids estimating it. PLEASE READ MY CTX and tell me, and I will
+hold the 45% build line and the 62% cold handover against your figure.
+
+Spark-vs-Claude share: this seat = 1 Claude launch, clause "cloud: raise", carrying 5 Spark tasks.
+
+================================================================
+9. THE OPEN QUESTIONS, RESTATED
+================================================================
+Your amendment PRE-RULED these and NONE of my measurements contradicts them, so I read them as
+standing: Q-NAME (Seat R 1st, pane Secuura/Blockchain-R, token ra1 -- namecheck confirms 0 origin
+refs and 0 bounded history for ra1), Q-LOCK (-d8, now correctly wired), Q-BUNDLE (five PRs, one
+READY, one gate69), Q-1326 (Refs KS-1313 hyphenated, KS 1326 de-hyphenated, neither closes),
+Q-ORDER (T1s first), Q-TIER, Q-M, Q-A, Q-F (no fetch in the shared checkout).
+
+THREE things I need from you before ITEM 1:
+  1. The objects-only transfer of 3f9ff4e1e1b9 into the shared store -- block 1. ITEM 1 cannot
+     start without it. This is the blocking one.
+  2. Q-SEQ given #1394's void pin and block 21. unclaimed -- block 2.
+  3. My ctx -- block 8.
+
+ONE thing for the fleet, not for me: DEFECT A is live in every suffixed lane's matcher generation.
+E 7th, F 5th, G 3rd and B 66th inherit it.
+
+Holding. Nothing locked, nothing fetched into the project, nothing installed, no ticket touched.
+-- Seat R 1st
+
