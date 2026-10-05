@@ -20,6 +20,7 @@ supersede: replace wholesale at the next pickup; do not append. Previous copy: N
 
 ### LIVE RIGHT NOW
 **🔴 ROTATION-READY HANDOVER 16:4x 2026-10-05 (seat b72c1f78, ctx 76%). FIRST ACTS; supersedes every block below:**
+**ADDED 16:5x (seat b72c1f78 at 79%, rotating):** E 2nd's mirror ACK is IN (05:47:39Z + correction 05:48:23Z; WAIT -56/-f2, -55 STOP, bare f2 kept FOREIGN): **quote it in F 2nd's and B 61st's ITEM 0 ANSWERs to release their locks.** E 2nd ctx 51% at 16:5x, building KS-1210 (no YAML edit needed, measured); KS-938 deferred to a successor E seat. **Agent panes are 7 rows: to read a seat's ctx, `tmux resize-pane -t %NN -y 14`, read, resize back; guard every interpolated reading with `${C:?}`.** Pending ITEM 0 mails: C 23rd, D 7th, F 2nd (none arrived by 16:5x). Spark: 15 HOLDs reviewed; queue empty.
 **ADDED 16:4x after the B 61st drafter returned (brief `fleet/briefs_staged/2026-10-05_seatB61_successor.md`, 251 lines, sha256 cef4e016…, NOT yet read by Wednesday):**
 - 🔴 **MERGE ORDER: #1381 FIRST, then #1382.** gate57's cover for #1381's merge-in lapses if develop's next advance touches `Projects Documents/` — and #1382 (E 2nd) adds doc block 19. So gate59's GO to E 2nd waits until #1381 has merged (say so in the gate59 GO; E 2nd then merges develop IN under Q-M before its own merge).
 - 🔴 **DOC NUMBERS (one ruling for both seats):** `22.` = KS-1401 (F 2nd); B 61st's KS-591 = `23.`, KS-593 = `24.` (the B 61st drafter proposed 22/23: SUPERSEDE by name in its ITEM 0 ANSWER).
