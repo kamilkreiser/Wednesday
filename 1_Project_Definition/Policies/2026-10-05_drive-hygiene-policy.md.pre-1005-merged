@@ -13,8 +13,6 @@ status: live
 
 ## What is stale (move it)
 1. Working copies whose work is MERGED and whose tree is clean (git worktrees, scratch clones, QA run clones), older than 7 days.
-   **"MERGED", measured (corrected 2026-10-05 15:0x on Friday's finding: in a SQUASH-merge repo `git merge-base --is-ancestor <HEAD> <main>` is NEVER true, so that test alone made class 1 empty).** A working copy's work is merged when ANY of: (a) its branch's PR is MERGED (`gh pr list --head <branch> --state merged`, through the PROJECT's own identity); (b) its HEAD tree equals the tree of a commit on main/develop; (c) `--is-ancestor` holds (merge-commit repos). Name which test fired in the report. None fires → not class 1.
-   **Worktree registrations pointing into other sessions' scratch folders** (`/private/tmp/...`): `git worktree prune` drops a registration only when its folder is gone — a seat prunes only registrations it created, never another session's.
 2. Regenerable leftovers older than 14 days: `node_modules`, `.venv`, `.next`, `.turbo`, `dist`, `build`, `coverage`, caches.
    Prefer letting the owning project's own agent REMOVE these (they reinstall with `npm ci`); copying millions of
    small files to the G-DRIVE costs hours (Kam 2026-09-29: regenerable leftovers are not kept).
