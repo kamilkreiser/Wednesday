@@ -1,0 +1,39 @@
+LAUNCH ACTION gate60 (DRY RUN) 2026-10-05 18:54:05 AEDT / 2026-10-05T07:54:05Z | PR #1384 | HEAD 852fc927632095fb603583cb543050d5edd66111 | kit develop 46c3e20cfbd21acee0c67d544180c33deaa4c8ef | pane QA/Secuura-ks1210-1384
+--- 0. the pane must be routed (inbox_routing.conf) or cockpit.sh say --mail fails silently
+  routing file /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/inbox_routing.conf — line present: 0 (grep rc=1; want 1 / rc 0)
+  (DRY RUN: reported, not refused — the real run refuses rc 1 here; README section 4)
+--- 1. instrument A: the GitHub PULLS API (+ 2b the census, same read)
+  gh_census rc=0
+    API #1384 head 852fc927632095fb603583cb543050d5edd66111 base develop base_sha 46c3e20cfbd21acee0c67d544180c33deaa4c8ef mergeable True reads 1 state open merged False branch feature/ks-1210-oauth-app-scopes-and-ownership-e3-1 changed_files 6
+    CONTROL the classifier on #1384 ITSELF (must print OAUTH and OVERLAP, or a zero below proves nothing): FIRES
+    EXPECTED OVERLAP (reported_overlaps; reported, never sequenced by a gate) #1385 head 79c87b8aaa48 | paths ['Projects Documents/API_Security_Functional_Testing_Architecture_Flow_Diagrams.html', 'Projects Documents/QA_Tool_Cheat_Sheet_Secuura_API_Testing.htm
+    EXPECTED OVERLAP (reported_overlaps; reported, never sequenced by a gate) #1383 head 7eccb131f2d6 | paths ['Projects Documents/API_Security_Functional_Testing_Architecture_Flow_Diagrams.html', 'Projects Documents/QA_Tool_Cheat_Sheet_Secuura_API_Testing.htm
+    EXPECTED OVERLAP (reported_overlaps; reported, never sequenced by a gate) #1382 head 80bafc849a54 | paths ['Projects Documents/API_Security_Functional_Testing_Architecture_Flow_Diagrams.html', 'Projects Documents/QA_Tool_Cheat_Sheet_Secuura_API_Testing.htm
+    EXPECTED OVERLAP (reported_overlaps; reported, never sequenced by a gate) #1381 head 82e6bfa9de85 | paths ['Projects Documents/API_Security_Functional_Testing_Architecture_Flow_Diagrams.html', 'Projects Documents/QA_Tool_Cheat_Sheet_Secuura_API_Testing.htm
+    CENSUS 25 other open PR(s) read | 0 touch routes/oauth.ts or services/oauth.ts | 0 touch a kit path or carry a kit key outside reported_overlaps | 4 expected overlap(s) reported | 6 kit path(s), keys ['KS-1210']
+    stderr: RETRY pulls/649/files?per_page=100&page=1: <urlopen error _ssl.c:1063: The handshake operation timed out>
+--- 2. instrument B: git ls-remote origin (ONE read from the Secuura checkout, READ-ONLY)
+  ls-remote rc=0 at 07:55:57Z
+    46c3e20cfbd21acee0c67d544180c33deaa4c8ef	refs/heads/develop
+    852fc927632095fb603583cb543050d5edd66111	refs/heads/feature/ks-1210-oauth-app-scopes-and-ownership-e3-1
+    852fc927632095fb603583cb543050d5edd66111	refs/pull/1384/head
+--- 2b. the census
+  OVERLAP census clean (4 expected overlap(s) reported, 0 other PR(s) touching routes/oauth.ts or services/oauth.ts; control: FIRES)
+--- 3. the head, judged (input == kit head == API == pull/head == branch, open, not merged, on develop, not mergeable:false, kit branch)
+  input 852fc927632095fb603583cb543050d5edd66111 | kit 852fc927632095fb603583cb543050d5edd66111 | API 852fc927632095fb603583cb543050d5edd66111 (state open, merged False, base develop, mergeable True, files 6) | pull/head 852fc927632095fb603583cb543050d5edd66111 | feature/ks-1210-oauth-app-scopes-and-ownership-e3-1 852fc927632095fb603583cb543050d5edd66111
+  BOTH INSTRUMENTS AGREE with the input head, 1 of 1.
+--- 3b. develop, read at launch: 46c3e20cfbd21acee0c67d544180c33deaa4c8ef | kit develop 46c3e20cfbd21acee0c67d544180c33deaa4c8ef
+  UNMOVED since drafting
+--- 3c. FILL from the values just read
+  fill rc=0
+    FILLED 2026-10-05T07:55:57Z | PR #1384 head 852fc9276320 develop 46c3e20cfbd2 | dry075405.SIM.prompt.txt, dry075405.SIM.launcher.sh, pins_gate60.SIM-dry075405.json | 33 keywords | prompt sha256 a6bd7aadf849cef4
+--- 3d. RACE: re-read develop and the head AFTER the fill
+  ls-remote rc=0 | develop 46c3e20cfbd21acee0c67d544180c33deaa4c8ef | pull/head 852fc927632095fb603583cb543050d5edd66111
+--- 6 (dry). the SIM launcher's own --check
+  SIM launcher --check rc=0
+    all guards pass:
+      origin develop 46c3e20cfbd21acee0c67d544180c33deaa4c8ef == the pinned develop | #1384 T1 852fc9276320 at branch AND pull/head | compare ok (ahead 1, behind 0, 6 paths) | pin age 6s
+      pins, prompt, QA project and repo present; kit at its filled home; thinking directive; every kit file + the gate59 report + the READY named; no unfilled token, no PR placeholder
+      the prompt carries 33 by-name keywords (as tokens), the tier lines, the checks C1..C6 + C3b + Q-M, the holds + named exceptions, the GO string, the addendum + REPORT-HASH-LAST rules, the verdict subject + report dir, the head in full
+      a launch (not --check) will refuse unless stdin is a TTY (exit 21)
+DRY RUN COMPLETE 2026-10-05T07:56:12Z — every read agrees with the input; the real run fills the REAL pins and continues with the override check, the usage gate, --check and cockpit.sh add

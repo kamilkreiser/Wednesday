@@ -1,0 +1,337 @@
+// gate60 PROBE (the GATE's own cells, never committed; copied into YOUR scratch worktree by c3b_probe_gate60.py and MOVED out after each run).
+// KS-1210 security probe on /api/oauth/apps*. INDEPENDENT of the PR's harness in the one place that matters: the PR's file MOCKS
+// services/oauth (getAppById / updateApp / rotateSecret are vi.fn()s that return whatever the cell wants); THIS file runs the REAL
+// services/oauth over an in-memory `oauth_apps` table behind a mocked `../db` (it answers the exact SQL the service emits: INSERT, SELECT by
+// id / created_by / all, the auth_find_oauth_app_by_client_id carve-out, UPDATE … WHERE id = $n), so a denied write is measured as the ROW
+// NOT CHANGING, not as a spy not being called. The REAL oauthRouter, the REAL authenticate() and errorHandler run; verifyAccessToken is a
+// token -> payload table (a 'connector' token is refused by it, as a token the access verifier cannot verify).
+// PRINCIPALS: owner (user, tenant A), peer (user, tenant A, not the creator), stranger (user, tenant B), orgA / orgB (ORG_ADMIN, tenant A / B),
+//   issuerA (ISSUER_ADMIN, tenant A), plat (SYSTEM_ADMIN, no tenant), superLower (super_admin), caseRole ('system_admin' — NOT in either list),
+//   conn (a connector principal: 401).
+// ASSERTED CELLS (expected: develop RED = V1 P1 P2 P3 O1 O3 O4 O7 L2; every other cell GREEN at both; HEAD 23 / 23):
+//   X0 harness control: an app created through the route is read back through the route by its owner (the in-memory table is faithful).
+//   V1 the closed vocabulary, for a PLATFORM ADMIN: 12 escalation strings each -> 400 and NO row inserted ('subjects:erase', '*', 'made:up',
+//      'Admin:read', ' admin:read', 'admin:read ', 'admin:*', 'admin:read<NUL>', Cyrillic 'аdmin:read', fullwidth-colon 'admin：read', '',
+//      a mixed legal+illegal list).          V2 control: scopes as a STRING -> 400 at both.
+//   V3 control: duplicates ['documents:read','documents:read'] -> 201 at both (recorded: what is stored).   V4 control: omitted -> the default four.
+//   P1 the admin pair by role: user / ORG_ADMIN / ISSUER_ADMIN / 'system_admin' -> 403, no row; SYSTEM_ADMIN / SUPER_ADMIN / admin / super_admin -> 201.
+//   P2 ['admin:read','admin:read'] by a user -> 403 (a duplicate does not slip past).   P4 control: certifications:write / webhooks:manage by a user -> 201 (ruled NOT privileged).
+//   P3 PATCH scopes ['admin:read'] on the owner's app: owner -> 403 and the row's allowed_scopes UNCHANGED; plat -> 200 and changed.
+//   O1 the ownership matrix on the owner's app: peer and stranger -> 404 on GET / PATCH / DELETE / rotate, and the ROW is unchanged (name,
+//      is_active, client_secret_hash).   O2 control: owner, orgA, issuerA, plat -> 2xx on the same four.
+//   O3 non-disclosure: a peer's 404 on an EXISTING app (GET, and PATCH asking admin:write) is byte-identical to the 404 for an id that does not exist.
+//   O4 DELETE of an id that does not exist -> 404 (develop answered 200 — the PR's stated "consequence beyond the ticket").
+//   O5 control: a non-UUID id -> 404 on all four by-id routes at both.   O6 control: the connector principal -> 401 on all six /apps routes (POST + GET /apps and the four by-id),
+//      and no /apps registration in routes/oauth.ts mounts authenticateAccessOrConnector (source read, filename asserted).
+//   O7 an app with created_by NULL: a plain user -> 404, ORG_ADMIN -> 200.   O8 control: GET /apps lists only the caller's own apps.
+//   L1 a LEGACY app (owner = plain user, holding subjects:erase + admin:write): PATCH {name} by the owner -> 200 and the legacy scopes are
+//      STILL THERE (not migrated).   L2 the owner cannot RE-ASSERT them (PATCH the legacy list -> 400) but CAN shed them (-> ['documents:read'], 200).
+//   L3 token-time: the REAL validateScopes still grants a legacy app its subjects:erase + admin:write; a '*' row grants nothing (KS-839).
+//   L4 the plain-user owner of the legacy admin:write app may rotate its secret (200) — it keeps working admin-scoped credentials.
+// OBSERVATION CELLS (always green; they RECORD into $GATE60_OBS_OUT for the gate to rule):
+//   H1 the six-role bypass is not scope-aware: orgA PATCHes redirectUris of a PLATFORM ADMIN's admin:write app in tenant A, then rotates
+//      its secret — statuses and whether a secret came back.
+//   R1 an RLS MODEL (the in-memory table filtered by the tenant GUC the request runs under — a model of migration 039, NOT the database):
+//      orgB / stranger / plat on tenant A's app, with and without the model; the handlers carry no tenant predicate of their own.
+import { describe, it, expect, vi, beforeEach, afterAll } from 'vitest';
+import express from 'express';
+import fs from 'node:fs';
+import path from 'node:path';
+
+type Row = Record<string, any>;
+const S = vi.hoisted(() => ({
+  rows: [] as Row[],
+  rls: false,
+  n: 0,
+  obs: {} as Record<string, unknown>,
+  tokens: {} as Record<string, Record<string, unknown> | 'CONNECTOR'>,
+  uuid: /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i,   // hoisted: the db mock factory reads it
+  Unauth: null as null | (new (m: string) => Error),   // the SAME UnauthorizedError class authenticate()'s errorHandler knows (set after import)
+}));
+
+const TA = 'a1000000-0000-4000-8000-0000000000aa';
+const TB = 'b2000000-0000-4000-8000-0000000000bb';
+const DEFAULT_TENANT = 'a0000000-0000-4000-8000-000000000001';
+
+vi.mock('../db', async () => {
+  const shared = await vi.importActual<any>('@secuura/shared');
+  const guc = (explicit?: string) => explicit || (typeof shared.currentTenantId === 'function' ? shared.currentTenantId() : undefined);
+  const visible = (explicit?: string) => (S.rls ? S.rows.filter((r) => r.tenant_id === guc(explicit)) : S.rows);
+  const badId = (v: unknown) => { if (!S.uuid.test(String(v))) throw Object.assign(new Error('invalid input syntax for type uuid: "' + String(v) + '"'), { code: '22P02' }); };
+  const query = vi.fn(async (sql: string, values: unknown[] = [], tenantId?: string) => {
+    const t = String(sql).replace(/\s+/g, ' ').trim();
+    if (/^INSERT INTO oauth_apps/i.test(t)) {
+      const v = values as any[];
+      S.n += 1;
+      const id = `c0000000-0000-4000-8000-${String(S.n).padStart(12, '0')}`;
+      S.rows.push({ id, name: v[0], description: v[1], client_id: v[2], client_secret_hash: v[3], redirect_uris: v[4], allowed_scopes: v[5], app_type: v[6],
+        organization_id: v[7], tenant_id: v[8], logo_url: v[9], website_url: v[10], privacy_policy_url: v[11], created_by: v[12], is_active: true,
+        created_at: new Date(Date.UTC(2026, 9, 5, 0, 0, S.n)).toISOString(), _guc: guc(tenantId) });
+      return { rows: [], rowCount: 1 };
+    }
+    if (/auth_find_oauth_app_by_client_id/i.test(t)) {   // SECURITY DEFINER carve-out (039): no RLS, is_active pinned
+      return { rows: S.rows.filter((r) => r.client_id === values[0] && r.is_active).slice(0, 1), rowCount: 1 };
+    }
+    let m = t.match(/^SELECT \* FROM oauth_apps WHERE id = \$1$/i);
+    if (m) { badId(values[0]); const rows = visible(tenantId).filter((r) => r.id === values[0]); return { rows, rowCount: rows.length }; }
+    m = t.match(/^SELECT \* FROM oauth_apps WHERE created_by = \$1 ORDER BY created_at DESC$/i);
+    if (m) { const rows = visible(tenantId).filter((r) => r.created_by === values[0]); return { rows, rowCount: rows.length }; }
+    m = t.match(/^SELECT \* FROM oauth_apps ORDER BY created_at DESC$/i);
+    if (m) { const rows = visible(tenantId).slice(); return { rows, rowCount: rows.length }; }
+    m = t.match(/^UPDATE oauth_apps SET (.+) WHERE id = \$(\d+)$/i);
+    if (m) {
+      const id = (values as any[])[Number(m[2]) - 1]; badId(id);
+      const sets = m[1].split(/,\s*/).map((s) => s.split(/\s*=\s*/)).filter(([, rhs]) => /^\$\d+$/.test(rhs));
+      const rows = visible(tenantId).filter((r) => r.id === id);
+      for (const r of rows) for (const [col, rhs] of sets) r[col] = (values as any[])[Number(rhs.slice(1)) - 1];
+      return { rows: [], rowCount: rows.length };
+    }
+    throw new Error('gate60 probe db: unmodelled SQL: ' + t.slice(0, 160));
+  });
+  return { query, isDbAvailable: () => true };
+});
+vi.mock('../services/jwt', () => ({
+  verifyAccessToken: vi.fn((tok: string) => {
+    const p = S.tokens[tok];
+    if (!p || p === 'CONNECTOR') throw (S.Unauth ? new S.Unauth('Invalid or expired token') : new Error('gate60 probe: UnauthorizedError not bound'));
+    return p;
+  }),
+  verifyConnectorToken: vi.fn(), generateTokenPair: vi.fn(), verifyRefreshToken: vi.fn(),
+}));
+vi.mock('../services/session', () => ({ validateSession: vi.fn(async () => true), updateSessionActivity: vi.fn(async () => undefined), createSession: vi.fn() }));
+vi.mock('../services/refreshDenylist', () => ({ isRefreshJtiDenylisted: vi.fn() }));
+vi.mock('../repositories/userRepo', () => ({}));
+vi.mock('../services/passwordLoginGate', () => ({ enforcePasswordLoginGates: vi.fn(), mfaCodeRuntimeSchema: { safeParse: () => ({ success: true }) } }));
+vi.mock('../utils/logger', () => ({ logger: { info: vi.fn(), warn: vi.fn(), error: vi.fn(), debug: vi.fn() } }));
+
+const { oauthRouter } = await import('../routes/oauth');
+const { errorHandler, UnauthorizedError } = await import('../middleware/errorHandler');
+S.Unauth = UnauthorizedError as any;
+const { validateScopes } = await import('../services/oauth');
+const app = express();
+app.use('/api/oauth', express.json(), oauthRouter);
+app.use(errorHandler as any);
+
+const P = {
+  owner: { userId: 'u-owner', role: 'user', tenantId: TA }, peer: { userId: 'u-peer', role: 'user', tenantId: TA },
+  stranger: { userId: 'u-stranger', role: 'user', tenantId: TB }, orgA: { userId: 'u-orgA', role: 'ORG_ADMIN', tenantId: TA },
+  orgB: { userId: 'u-orgB', role: 'ORG_ADMIN', tenantId: TB }, issuerA: { userId: 'u-issuerA', role: 'ISSUER_ADMIN', tenantId: TA },
+  plat: { userId: 'u-plat', role: 'SYSTEM_ADMIN' }, platUpper: { userId: 'u-plat2', role: 'SUPER_ADMIN' }, platAdmin: { userId: 'u-plat3', role: 'admin' },
+  superLower: { userId: 'u-plat4', role: 'super_admin' }, caseRole: { userId: 'u-case', role: 'system_admin', tenantId: TA },
+} as const;
+type Who = keyof typeof P | 'conn';
+for (const [k, v] of Object.entries(P)) S.tokens['g60-' + k] = { ...v, sessionId: 's-' + k, email: k + '@g60.test' };
+S.tokens['g60-conn'] = 'CONNECTOR';
+
+async function call(who: Who, method: string, url: string, body?: unknown): Promise<{ status: number; json: any; text: string }> {
+  const server = app.listen(0, '127.0.0.1');
+  try {
+    await new Promise<void>((r) => server.once('listening', () => r()));
+    const port = (server.address() as { port: number }).port;
+    const r = await fetch(`http://127.0.0.1:${port}${url}`, {
+      method, headers: { 'Content-Type': 'application/json', Authorization: 'Bearer g60-' + who },
+      body: body === undefined ? undefined : JSON.stringify(body),
+    });
+    const text = await r.text(); let json: any = null;
+    try { json = JSON.parse(text); } catch { json = null; }
+    return { status: r.status, json, text };
+  } finally { server.close(); }
+}
+
+const ids = { A: 'd0000000-0000-4000-8000-00000000000a', PA: 'd0000000-0000-4000-8000-0000000000ab', L1: 'd0000000-0000-4000-8000-0000000000c1', L2: 'd0000000-0000-4000-8000-0000000000c2', N: 'd0000000-0000-4000-8000-0000000000d0' };
+const GHOST = 'e0000000-0000-4000-8000-00000000dead';
+function seed(id: string, over: Row) {
+  S.rows.push({ id, name: 'app ' + id.slice(-2), description: null, client_id: 'sec_' + id.slice(-4), client_secret_hash: 'h-' + id.slice(-2), redirect_uris: ['https://example.com/cb'],
+    allowed_scopes: ['documents:read'], app_type: 'confidential', organization_id: null, tenant_id: TA, logo_url: null, website_url: null, privacy_policy_url: null,
+    created_by: 'u-owner', is_active: true, created_at: '2026-10-05T00:00:00.000Z', ...over });
+}
+const row = (id: string) => S.rows.find((r) => r.id === id)!;
+const snap = (id: string) => JSON.stringify({ n: row(id).name, a: row(id).is_active, h: row(id).client_secret_hash, s: row(id).allowed_scopes, u: row(id).redirect_uris });
+const CREATE = (scopes?: unknown) => ({ name: 'g60 app', redirectUris: ['https://example.com/cb'], appType: 'confidential', ...(scopes === undefined ? {} : { scopes }) });
+const BYID = (id: string) => [['GET', `/api/oauth/apps/${id}`, undefined], ['PATCH', `/api/oauth/apps/${id}`, { name: 'g60 renamed' }], ['DELETE', `/api/oauth/apps/${id}`, undefined], ['POST', `/api/oauth/apps/${id}/rotate-secret`, undefined]] as const;
+
+beforeEach(() => {
+  S.rows.length = 0; S.rls = false; S.n = 0;
+  seed(ids.A, {});
+  seed(ids.PA, { created_by: 'u-plat', allowed_scopes: ['admin:write'] });
+  seed(ids.L1, { allowed_scopes: ['subjects:erase', 'admin:write', 'documents:read'] });
+  seed(ids.L2, { allowed_scopes: ['*', 'documents:read'] });
+  seed(ids.N, { created_by: null });
+});
+afterAll(() => { if (process.env.GATE60_OBS_OUT) fs.writeFileSync(process.env.GATE60_OBS_OUT, JSON.stringify(S.obs, null, 1)); });
+
+describe('gate60 probe KS-1210', () => {
+  it('gate60 X0 harness control: created through the route, read back through the route by its owner', async () => {
+    const c = await call('owner', 'POST', '/api/oauth/apps', CREATE(['documents:read']));
+    expect(c.status).toBe(201);
+    const g = await call('owner', 'GET', `/api/oauth/apps/${c.json.app.id}`);
+    expect(g.status).toBe(200);
+    expect(g.json.app.allowedScopes).toEqual(['documents:read']);
+    expect(row(c.json.app.id).tenant_id).toBe(TA);
+  });
+
+  it('gate60 V1 the closed vocabulary: 12 escalation strings -> 400 and no row, even for a platform admin', async () => {
+    const bad: unknown[][] = [['subjects:erase'], ['*'], ['made:up'], ['Admin:read'], [' admin:read'], ['admin:read '], ['admin:*'], ['admin:read\u0000'],
+      ['аdmin:read'], ['admin：read'], [''], ['documents:read', 'subjects:erase']];
+    const got: Array<[string, number]> = [];
+    for (const s of bad) {
+      const r = await call('plat', 'POST', '/api/oauth/apps', CREATE(s));
+      got.push([JSON.stringify(s), r.status]);
+    }
+    S.obs.V1 = got;
+    expect(got.filter(([, st]) => st !== 400)).toEqual([]);
+    expect(S.rows.length).toBe(5);
+  });
+
+  it('gate60 V2 control: scopes as a string -> 400 at both', async () => {
+    expect((await call('owner', 'POST', '/api/oauth/apps', CREATE('admin:read'))).status).toBe(400);
+  });
+
+  it('gate60 V3 control: duplicate legal scopes -> 201 (stored as sent)', async () => {
+    const r = await call('owner', 'POST', '/api/oauth/apps', CREATE(['documents:read', 'documents:read']));
+    expect(r.status).toBe(201);
+    S.obs.V3_stored = row(r.json.app.id).allowed_scopes;
+  });
+
+  it('gate60 V4 control: scopes omitted -> the default four, none privileged', async () => {
+    const r = await call('owner', 'POST', '/api/oauth/apps', CREATE());
+    expect(r.status).toBe(201);
+    expect(row(r.json.app.id).allowed_scopes).toEqual(['verify:read', 'documents:read', 'certifications:read', 'users:read']);
+  });
+
+  it('gate60 P1 the admin pair by role: only the FOUR platform roles register it', async () => {
+    const got: Record<string, number> = {};
+    for (const who of ['owner', 'orgA', 'issuerA', 'caseRole', 'plat', 'platUpper', 'platAdmin', 'superLower'] as const) {
+      got[who + ':' + P[who].role] = (await call(who, 'POST', '/api/oauth/apps', CREATE(['admin:read', 'admin:write']))).status;
+    }
+    S.obs.P1 = got;
+    expect(got).toEqual({ 'owner:user': 403, 'orgA:ORG_ADMIN': 403, 'issuerA:ISSUER_ADMIN': 403, 'caseRole:system_admin': 403,
+      'plat:SYSTEM_ADMIN': 201, 'platUpper:SUPER_ADMIN': 201, 'platAdmin:admin': 201, 'superLower:super_admin': 201 });
+    expect(S.rows.filter((r) => (r.allowed_scopes || []).includes('admin:read')).length).toBe(4);
+  });
+
+  it('gate60 P2 a duplicated privileged scope does not slip past -> 403', async () => {
+    expect((await call('owner', 'POST', '/api/oauth/apps', CREATE(['admin:read', 'admin:read']))).status).toBe(403);
+    expect(S.rows.length).toBe(5);
+  });
+
+  it('gate60 P3 PATCH to admin:read: the owner is refused and the row is unchanged; a platform admin is not', async () => {
+    const before = snap(ids.A);
+    const o = await call('owner', 'PATCH', `/api/oauth/apps/${ids.A}`, { scopes: ['admin:read'] });
+    expect(o.status).toBe(403);
+    expect(snap(ids.A)).toBe(before);
+    const p = await call('plat', 'PATCH', `/api/oauth/apps/${ids.A}`, { scopes: ['admin:read'] });
+    expect(p.status).toBe(200);
+    expect(row(ids.A).allowed_scopes).toEqual(['admin:read']);
+  });
+
+  it('gate60 P4 control: certifications:write and webhooks:manage are NOT privileged (ruled) -> 201 for a user', async () => {
+    expect((await call('owner', 'POST', '/api/oauth/apps', CREATE(['certifications:write', 'webhooks:manage']))).status).toBe(201);
+  });
+
+  it('gate60 O1 peer and stranger: 404 on all four by-id routes, and the row does not change', async () => {
+    const got: Record<string, number> = {}; const before = snap(ids.A);
+    for (const who of ['peer', 'stranger'] as const) for (const [m, u, b] of BYID(ids.A)) got[`${who} ${m} ${u.endsWith('rotate-secret') ? 'rotate' : ''}`.trim()] = (await call(who, m, u, b)).status;
+    S.obs.O1 = got;
+    expect(Object.values(got).filter((s) => s !== 404)).toEqual([]);
+    expect(snap(ids.A)).toBe(before);
+  });
+
+  it('gate60 O2 control: owner, orgA, issuerA, plat reach all four (2xx)', async () => {
+    const got: Record<string, number> = {};
+    for (const who of ['owner', 'orgA', 'issuerA', 'plat'] as const) {
+      S.rows.length = 0; seed(ids.A, {});
+      for (const [m, u, b] of BYID(ids.A)) got[`${who} ${m}${u.endsWith('rotate-secret') ? ' rotate' : ''}`] = (await call(who, m, u, b)).status;
+    }
+    S.obs.O2 = got;
+    expect(Object.values(got).filter((s) => s < 200 || s > 299)).toEqual([]);
+  });
+
+  it('gate60 O3 non-disclosure: a peer\'s 404 on an existing app == the 404 for a missing one, byte for byte', async () => {
+    const e1 = await call('peer', 'GET', `/api/oauth/apps/${ids.A}`); const m1 = await call('peer', 'GET', `/api/oauth/apps/${GHOST}`);
+    const e2 = await call('peer', 'PATCH', `/api/oauth/apps/${ids.A}`, { scopes: ['admin:write'] }); const m2 = await call('peer', 'PATCH', `/api/oauth/apps/${GHOST}`, { scopes: ['admin:write'] });
+    S.obs.O3 = { get: [e1.status, m1.status], patch_admin: [e2.status, m2.status] };
+    expect([e1.status, e1.text]).toEqual([404, m1.text]);
+    expect([e2.status, e2.text]).toEqual([404, m2.text]);
+  });
+
+  it('gate60 O4 DELETE of an id that does not exist -> 404', async () => {
+    expect((await call('owner', 'DELETE', `/api/oauth/apps/${GHOST}`)).status).toBe(404);
+  });
+
+  it('gate60 O5 control: a non-UUID id -> 404 on all four by-id routes', async () => {
+    const got = [] as number[];
+    for (const [m, u, b] of BYID('not-a-uuid')) got.push((await call('owner', m, u, b)).status);
+    expect(got).toEqual([404, 404, 404, 404]);
+  });
+
+  it('gate60 O6 control: a connector principal -> 401 on all six /apps routes; no /apps route mounts the connector authenticator', async () => {
+    const routes: Array<[string, string, unknown]> = [['POST', '/api/oauth/apps', CREATE(['documents:read'])], ['GET', '/api/oauth/apps', undefined], ...BYID(ids.A).map((x) => [x[0], x[1], x[2]] as [string, string, unknown])];
+    const got = [] as number[];
+    for (const [m, u, b] of routes) got.push((await call('conn', m, u, b)).status);
+    expect(got).toEqual([401, 401, 401, 401, 401, 401]);
+    const file = path.join(__dirname, '..', 'routes', 'oauth.ts');
+    expect(path.basename(file)).toBe('oauth.ts');
+    const src = fs.readFileSync(file, 'utf8');
+    const apps = src.split('\n').filter((l) => /^oauthRouter\.(get|post|patch|delete)\('\/apps/.test(l));
+    expect(apps.length).toBe(6);
+    expect(apps.filter((l) => /authenticateAccessOrConnector/.test(l))).toEqual([]);
+  });
+
+  it('gate60 O7 an app with created_by NULL: a plain user -> 404, ORG_ADMIN -> 200', async () => {
+    expect((await call('owner', 'GET', `/api/oauth/apps/${ids.N}`)).status).toBe(404);
+    expect((await call('orgA', 'GET', `/api/oauth/apps/${ids.N}`)).status).toBe(200);
+  });
+
+  it('gate60 O8 control: GET /apps lists only the caller\'s own apps', async () => {
+    const peer = await call('peer', 'GET', '/api/oauth/apps'); const own = await call('owner', 'GET', '/api/oauth/apps'); const plat = await call('plat', 'GET', '/api/oauth/apps');
+    S.obs.O8 = { peer: peer.json?.apps?.length, owner: own.json?.apps?.length, plat: plat.json?.apps?.length };
+    expect(peer.json.apps.map((a: any) => a.id)).not.toContain(ids.A);
+    expect(own.json.apps.map((a: any) => a.id)).toContain(ids.A);
+  });
+
+  it('gate60 L1 a legacy app keeps its now-refused scopes across an owner PATCH (NOT migrated)', async () => {
+    const r = await call('owner', 'PATCH', `/api/oauth/apps/${ids.L1}`, { name: 'still legacy' });
+    expect(r.status).toBe(200);
+    expect(row(ids.L1).allowed_scopes).toEqual(['subjects:erase', 'admin:write', 'documents:read']);
+  });
+
+  it('gate60 L2 the owner cannot re-assert the legacy list, but can shed it', async () => {
+    expect((await call('owner', 'PATCH', `/api/oauth/apps/${ids.L1}`, { scopes: ['subjects:erase', 'admin:write', 'documents:read'] })).status).toBe(400);
+    expect((await call('owner', 'PATCH', `/api/oauth/apps/${ids.L1}`, { scopes: ['documents:read'] })).status).toBe(200);
+    expect(row(ids.L1).allowed_scopes).toEqual(['documents:read']);
+  });
+
+  it('gate60 L3 token-time: validateScopes still grants a legacy row its refused scopes; a wildcard row grants nothing', () => {
+    const legacy = validateScopes(['subjects:erase', 'admin:write'], ['subjects:erase', 'admin:write', 'documents:read']);
+    const wild = validateScopes(['documents:read'], ['*', 'documents:read']);
+    S.obs.L3 = { legacy, wild };
+    expect(legacy).toEqual(['subjects:erase', 'admin:write']);
+    expect(wild).toEqual([]);
+  });
+
+  it('gate60 L4 the plain-user owner of a legacy admin:write app may rotate its secret', async () => {
+    const r = await call('owner', 'POST', `/api/oauth/apps/${ids.L1}/rotate-secret`);
+    S.obs.L4 = { status: r.status, secret_returned: typeof r.json?.clientSecret === 'string' };
+    expect(r.status).toBe(200);
+  });
+
+  it('gate60 H1 OBSERVATION the six-role bypass is not scope-aware: ORG_ADMIN re-points and re-keys a platform admin\'s admin:write app', async () => {
+    const p = await call('orgA', 'PATCH', `/api/oauth/apps/${ids.PA}`, { redirectUris: ['https://attacker.example/cb'] });
+    const r = await call('orgA', 'POST', `/api/oauth/apps/${ids.PA}/rotate-secret`);
+    S.obs.H1 = { patch_redirect: p.status, redirect_now: row(ids.PA).redirect_uris, rotate: r.status, secret_returned: typeof r.json?.clientSecret === 'string', scopes: row(ids.PA).allowed_scopes };
+    expect(typeof p.status).toBe('number');
+  });
+
+  it('gate60 R1 OBSERVATION an RLS MODEL (tenant GUC filter on the in-memory table — a model of 039, not Postgres)', async () => {
+    const out: Record<string, unknown> = {};
+    for (const rls of [false, true]) {
+      S.rls = rls;
+      for (const who of ['orgA', 'orgB', 'stranger', 'plat'] as const) out[`${rls ? 'RLS' : 'noRLS'} ${who} GET A`] = (await call(who, 'GET', `/api/oauth/apps/${ids.A}`)).status;
+      out[`${rls ? 'RLS' : 'noRLS'} orgB rotate A`] = (await call('orgB', 'POST', `/api/oauth/apps/${ids.A}/rotate-secret`)).status;
+      S.rows.length = 0; seed(ids.A, {});
+    }
+    S.rls = false; S.obs.R1 = out;
+    expect(Object.keys(out).length).toBe(10);
+  });
+});

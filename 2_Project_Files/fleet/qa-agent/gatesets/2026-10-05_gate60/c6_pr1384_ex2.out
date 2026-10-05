@@ -1,0 +1,16 @@
+c6_notcovered_gate60 2026-10-05T07:46:25Z | REPLAY /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/4633ab20-117b-4d2e-a571-ce5d0598b988/scratchpad/g60/pr1384_body.md
+PASS N1 section: `## NOT COVERED` headings 1 (want 1) | section 734 chars
+PASS N2 required items in the section: CHECKED 4 item(s): live_sweep_5f: True | gateway_no_role_gate: True | existing_apps_not_migrated: True | tenant_bound_source_read: True
+FAIL N3 tenant bound is about the tenant: the "tenant bound" item names RLS / the tenant GUC / cross-tenant access: False | its text: '**The tenant bound is SOURCE-READ, not live.** Both role lists were verified by reading `users.ts`, not by exercising a tenant boundary at runtime.'
+INFO the GATE's own NOT COVERED seed (kit gate_not_covered_seed), each against the PR body by a KEYWORD HEURISTIC (NAMED-BY-PR? is a hint to read, never a measurement):
+INFO   NAMED-BY-PR? | the §5f live sweep (no stack; the gate starts none) — KS-1210 is a runtime change and is not Done on offline green
+INFO   NOT-NAMED   | a real Postgres: oauth_apps is FORCE RLS since migration 039; the cross-TENANT bound of the six-role bypass (an ORG_ADMIN of tenant B on tenant A's app) rests on RLS + seedTenantGuc alone — the handlers carry no tenant predicate; UNMEASURED without Postgres (the probe's RLS-emulation arm is a model, not the database)
+INFO   NAMED-BY-PR? | the gateway edge: no role gate for /api/oauth/apps (residue, named by the PR)
+INFO   NAMED-BY-PR? | existing apps already holding a now-refused scope (subjects:erase, made-up strings, admin:* held by a non-platform owner): not migrated, not audited; validateScopes still mints any scope the row holds (only '*' grants nothing, KS-839)
+INFO   NOT-NAMED   | token-time enforcement: /authorize and /token validate requested scopes against app.allowedScopes only, never against AVAILABLE_SCOPES or the caller's role
+INFO   NAMED-BY-PR? | ORG_ADMIN / ISSUER_ADMIN may PATCH redirectUris of, and rotate the secret of, a PLATFORM ADMIN's admin-scoped app (the six-role bypass is not scope-aware) — ruled as built (C7), consequence unmeasured end to end
+INFO   NAMED-BY-PR? | a principal with no userId: listApps(undefined) returns EVERY app (services/oauth.ts:177-181) — reachable only if authenticate() admits a userId-less payload (test tokens are off in production)
+INFO   NAMED-BY-PR? | preflight legs 3 / 4 / 8 (no stack)
+INFO   NAMED-BY-PR? | the four platform suites (Schemathesis, Akto, Playwright, k6)
+INFO   NAMED-BY-PR? | the KS-855 Linear comment and the KS-1210 bot move (board facts; not the gate's)
+C6 NOT COVERED FAIL: 1 FAIL of 3 checks | #1384

@@ -1,0 +1,23 @@
+c2_hunk_gate60 2026-10-05T07:33:55Z | clone /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/4633ab20-117b-4d2e-a571-ce5d0598b988/scratchpad/g60/clone | develop 46c3e20cfbd2 | head 852fc9276320
+FAIL H1 scope of change: byte-identical develop->head: {'oauth.ts': True, 'users.ts': True, 'authenticate.ts': True} | oauth.ts non-comment removed 4 line(s) == the kit 4: True | added 41 (kit 43) | pgSafeStringSchema in an added line: False
+PASS H2 vocabulary: scopes lines in oauth.ts 2, both the closed enum: True | services/oauth.ts AVAILABLE_SCOPES == kit nine: True (9) | createApp default ['verify:read', 'documents:read', 'certifications:read', 'users:read'] within the nine, no privileged: True
+INFO H2 the ks1210 test MOCKS AVAILABLE_SCOPES with NINE 9 == the real nine: True (nothing in the PR pins the mock to the source; ks855 pins the real list)
+PASS H3 role lists: privileged ['admin:read', 'admin:write'] | platform oauth ['SYSTEM_ADMIN', 'SUPER_ADMIN', 'admin', 'super_admin'] users ['SYSTEM_ADMIN', 'SUPER_ADMIN', 'admin', 'super_admin'] | app-admin oauth ['SYSTEM_ADMIN', 'ORG_ADMIN', 'ISSUER_ADMIN', 'admin', 'super_admin', 'SUPER_ADMIN'] users ['SYSTEM_ADMIN', 'ORG_ADMIN', 'ISSUER_ADMIN', 'admin', 'super_admin', 'SUPER_ADMIN'] | CHECKED 5 lists against the kit
+PASS H4 by-id gate (class hunt): CHECKED 4 by-id handler(s) (want 4) | gated before any service call, 404 on falsy: [("get('/apps/:id'", True), ("patch('/apps/:id'", True), ("delete('/apps/:id'", True), ("post('/apps/:id/rotate-secret'", True)] | the set == kit by_id_routes: True
+INFO H4 get('/apps/:id': tenant mentions in the handler body 0 (0 = the cross-tenant bound is RLS + seedTenantGuc alone)
+INFO H4 patch('/apps/:id': tenant mentions in the handler body 0 (0 = the cross-tenant bound is RLS + seedTenantGuc alone)
+INFO H4 delete('/apps/:id': tenant mentions in the handler body 0 (0 = the cross-tenant bound is RLS + seedTenantGuc alone)
+INFO H4 post('/apps/:id/rotate-secret': tenant mentions in the handler body 0 (0 = the cross-tenant bound is RLS + seedTenantGuc alone)
+INFO H4 other route oauthRouter.get('/authorize'                                 reads ['getAppByClientId']
+INFO H4 other route oauthRouter.get('/consent.js', (_req: Request, res: Response reads NONE
+INFO H4 other route oauthRouter.post('/authorize'                                reads NONE
+INFO H4 other route oauthRouter.post('/token'                                    reads ['getAppByClientId']
+INFO H4 other route oauthRouter.post('/revoke'                                   reads ['getAppById', 'appVisibleTo']
+INFO H4 other route oauthRouter.post('/apps', authenticate(), seedTenantGuc      reads ['createApp', 'authenticate(']
+INFO H4 other route oauthRouter.get('/apps', authenticate(), seedTenantGuc       reads ['listApps', 'authenticate(']
+INFO H4 other route oauthRouter.get('/scopes', (_req: Request, res: Response) => reads NONE
+PASS H5 order: PATCH ownership-404 at +1372 before privileged-403 at +1629: True | POST privileged check at +850 before createApp at +1204: True, on isOauthPlatformAdmin: True (isOauthAppAdmin: False)
+PASS H6 appVisibleTo: owner test present: True | admin bypass via isOauthAppAdmin: True | else null: True | isOauthPlatformAdmin reads the FOUR list: True | isOauthAppAdmin reads the SIX list: True
+PASS H7 siblings fixture-only: ks431 it( 13->13, normalised expect() multiset equal: True (18->18) | ks451 it( 4->4, normalised expect() multiset equal: True (4->4)
+INFO listApps: a falsy userId takes the unfiltered branch (True) — every app, every tenant RLS admits
+C2 HUNK FAIL: 1 FAIL of 7 checks | head 852fc9276320
