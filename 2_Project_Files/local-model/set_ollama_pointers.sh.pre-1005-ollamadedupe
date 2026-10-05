@@ -12,11 +12,9 @@
 #   2. GUI apps, this session  -> launchctl setenv (dies at logout)
 #   3. GUI apps, after reboot  -> a LaunchAgent that re-runs the setenv at login
 #
-# The FLEET's store is NOT set by these pointers: night_run.sh and doctor.sh RESOLVE it with
-# lib/ollama_store.sh (override -> SYSTEM -> in-tree, each only if it holds ornith/35b) and never read the
-# global OLLAMA_MODELS, so a global Kam re-points cannot send the fleet to a store without ornith.
-# (Until 2026-10-05 they pinned 2_Project_Files/local-model/models; that copy was a byte-identical
-# duplicate of SYSTEM and was moved to G-DRIVE Scratch Files — see night_run.sh's store comment.)
+# The FLEET's own store is deliberately NOT changed: night_run.sh and start_ollama.sh pin
+# 2_Project_Files/local-model/models unconditionally, because the fleet's weights travel with the
+# WEDNESDAY folder (the portability rule) and must not follow a global that Kam may re-point.
 #
 # Usage: bash set_ollama_pointers.sh [--check]
 set -u
@@ -31,19 +29,14 @@ report() {
   echo "launchctl (session): $(launchctl getenv OLLAMA_MODELS 2>/dev/null || echo '<unset>')"
   echo "LaunchAgent (boot):  $([ -f "$AGENT" ] && echo present || echo absent)"
   # The claim is "the fleet does not follow the global", so MEASURE that rather than grepping for a
-  # word: run the fleet's own resolver (the one night_run.sh sources) with a deliberately wrong global
-  # in the environment, in a clean child shell.
-  local resolved rrc
-  resolved="$(OLLAMA_MODELS=/deliberately/wrong bash -c '. "$1/lib/ollama_store.sh" && ollama_store_resolve ""' _ "$(cd -P "$(dirname "${BASH_SOURCE[0]}")" && pwd)" 2>&1)"; rrc=$?
-  echo "fleet store resolves to: $resolved (rc $rrc)"
-  if [ "$rrc" -ne 0 ]; then
-    echo "  ⚠ NO STORE HOLDS ornith/35b — night_run's G5 will refuse (G5-store)"
-  else
-    case "$resolved" in
-      /deliberately/wrong*) echo "  ⚠ THE FLEET FOLLOWS THE GLOBAL — the resolver must not read OLLAMA_MODELS" ;;
-      *) echo "  ok — resolved, not inherited; a global OLLAMA_MODELS cannot redirect the fleet" ;;
-    esac
-  fi
+  # word: resolve the runner's own expression with a deliberately wrong global in the environment.
+  local resolved
+  resolved="$(OLLAMA_MODELS=/deliberately/wrong bash -c 'LM_DIR="'"$(dirname "${BASH_SOURCE[0]}")"'"; echo "${NIGHT_OLLAMA_MODELS:-$LM_DIR/models}"')"
+  echo "fleet store resolves to: $resolved"
+  case "$resolved" in
+    /deliberately/wrong*) echo "  ⚠ THE FLEET FOLLOWS THE GLOBAL — night_run.sh must pin its own path" ;;
+    *) echo "  ok — pinned; a global OLLAMA_MODELS cannot redirect the fleet" ;;
+  esac
 }
 [ "${1:-}" = "--check" ] && { report; exit 0; }
 

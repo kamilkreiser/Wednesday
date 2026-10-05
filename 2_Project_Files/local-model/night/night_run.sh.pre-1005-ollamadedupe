@@ -72,29 +72,14 @@ NIGHT_TMUX_SOCKET="${NIGHT_TMUX_SOCKET:-}"
 NIGHT_HOUR_OVERRIDE="${NIGHT_HOUR_OVERRIDE:-}"
 NIGHT_QA_PGREP="${NIGHT_QA_PGREP:-launch_qa_}"
 OLLAMA_URL="${OLLAMA_URL:-http://127.0.0.1:11434}"
-# MODEL STORE — RESOLVED, never inherited (lib/ollama_store.sh is the one resolver; doctor.sh and
-# set_ollama_pointers.sh use the same function).
-# History: 2026-09-16 13:5x this line PINNED $LM_DIR/models, because Kam's personal store was moving to
-# /Volumes/DevMASTER/SYSTEM/ollama, a global OLLAMA_MODELS was about to exist, and that store did NOT
-# then hold ornith:35b — inheriting the global would have made G5 refuse forever / self-heal into the
-# wrong store (a global env var is a floating pointer: 2026-08-05_identities-float-verify-always).
-# MEASURED 2026-10-05 (Wednesday, drive cleanup): the SYSTEM store now holds all four fleet manifests
-# (gpt-oss/120b, gpt-oss/20b, ornith/35b, ornith/35b-q8_0), byte-identical (cmp) to the in-tree copies,
-# every blob present (0_Brain/reference/2026-10-05_dev-drive-survey/SURVEY.md); launchd's OLLAMA_MODELS
-# and start_ollama.sh both use SYSTEM. So the pin's reason is gone and the 128 GB in-tree copy was moved
-# to G-DRIVE Scratch Files. ORDER: NIGHT_OLLAMA_MODELS (deliberate override) → SYSTEM → in-tree.
-# The 09-16 protection STAYS: a global OLLAMA_MODELS is never read, and a candidate WITHOUT the ornith
-# manifest is never chosen — an override lacking it, or no store holding it, refuses at G5 (rc 3).
-# shellcheck source=../lib/ollama_store.sh
-. "$LM_DIR/lib/ollama_store.sh"
-OLLAMA_STORE_ERR=""
-if _store="$(ollama_store_resolve "${NIGHT_OLLAMA_MODELS:-}" 2>/dev/null)"; then
-  export OLLAMA_MODELS="$_store"
-else
-  OLLAMA_STORE_ERR="$(ollama_store_resolve "${NIGHT_OLLAMA_MODELS:-}" 2>&1 >/dev/null)"
-  export OLLAMA_MODELS="/Volumes/DevMASTER/SYSTEM/ollama/models"   # never the inherited global; G5 refuses below
-fi
-unset _store
+# 2026-09-16 13:5x — PINNED, not defaulted. Kam is moving his personal 141 GB ollama store to
+# /Volumes/DevMASTER/SYSTEM/ollama and a global OLLAMA_MODELS is about to exist. With the old
+# `${OLLAMA_MODELS:-...}` form this runner would INHERIT it and look for ornith:35b in Kam's
+# personal store, where it is not — G5 would refuse forever, and now self-heal into the wrong
+# store. A global env var is a floating pointer (2026-08-05_identities-float-verify-always);
+# the fleet's model path is a property of this tree, so it is set here unconditionally.
+# NIGHT_OLLAMA_MODELS is the deliberate override, named so it cannot be set by accident.
+export OLLAMA_MODELS="${NIGHT_OLLAMA_MODELS:-$LM_DIR/models}"
 export PATH="/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:$PATH"   # launchd hands a minimal env
 SRC="${NIGHT_SOURCE_CHECKOUT:-/Volumes/DevMASTER/!CODING/Secuura/Blockchain/2_Project_Files}"
 export NIGHT_SOURCE_CHECKOUT="$SRC"
@@ -188,7 +173,7 @@ if ! mkdir "$LOCKDIR" 2>/dev/null; then
 fi
 echo $$ > "$LOCKDIR/pid"
 trap 'rmdir "$LOCKDIR" 2>/dev/null || { rm -f "$LOCKDIR/pid" 2>/dev/null; rmdir "$LOCKDIR" 2>/dev/null; }' EXIT
-log "START night_run model=$NIGHT_MODEL think=$NIGHT_THINK num_ctx=$NIGHT_NUM_CTX max=$NIGHT_MAX_TICKETS dry=$NIGHT_DRY_RUN queue=$NIGHT_QUEUE socket=${NIGHT_TMUX_SOCKET:-default} store=$OLLAMA_MODELS"
+log "START night_run model=$NIGHT_MODEL think=$NIGHT_THINK num_ctx=$NIGHT_NUM_CTX max=$NIGHT_MAX_TICKETS dry=$NIGHT_DRY_RUN queue=$NIGHT_QUEUE socket=${NIGHT_TMUX_SOCKET:-default}"
 
 # ---------------------------------------------------------------- gates
 GATE_FAIL=""
@@ -257,10 +242,6 @@ gates() {
   # server already holding the port — so a foreign listener still reaches the refusal below, which is
   # the case that genuinely needs a human.
   local tags rc
-  # Store first (2026-10-05): no store with the ornith manifest = nothing to serve; refuse, never guess.
-  if [ -n "$OLLAMA_STORE_ERR" ]; then
-    log "GATE G5 ollama: $OLLAMA_STORE_ERR — REFUSE"; GATE_FAIL="G5-store"; return 1
-  fi
   tags="$(curl -sS -m 10 "$OLLAMA_URL/api/tags" 2>&1)"; rc=$?
   if [ "$rc" -eq 0 ] && echo "$tags" | /usr/bin/grep -q "\"$NIGHT_MODEL\""; then
     log "GATE G5 ollama: $OLLAMA_URL/api/tags lists $NIGHT_MODEL — pass"

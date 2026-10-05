@@ -159,11 +159,7 @@ fi
 # Qwen 3 30b ... use it within the workflow"). Machine-local (Homebrew ollama)
 # + weights on the drive (PORTABILITY item added same day). Warn-level only —
 # the fleet runs fine without the local model, this just says the seat is dark.
-# Store RESOLVED, not pinned (2026-10-05): the same resolver night_run.sh uses — SYSTEM store first, then the
-# in-tree fallback, a candidate only if it holds ornith/35b (local-model/lib/ollama_store.sh). The in-tree
-# 128 GB copy was a byte-identical duplicate of SYSTEM and moved to G-DRIVE Scratch Files that day.
-. "$PROJECT_DIR/2_Project_Files/local-model/lib/ollama_store.sh" 2>/dev/null
-LM_MODELS_DIR="$(ollama_store_resolve "" 2>/dev/null)" || LM_MODELS_DIR="/Volumes/DevMASTER/SYSTEM/ollama/models"
+LM_MODELS_DIR="$PROJECT_DIR/2_Project_Files/local-model/models"
 LM_MODEL_TAG="qwen3/30b-a3b"
 LM_MANIFEST="$LM_MODELS_DIR/manifests/registry.ollama.ai/library/$LM_MODEL_TAG"
 # PARKED 2026-09-14 14:2x — Kam, panel 14:25: "Please remove Quen from the system as we won't use
@@ -174,7 +170,7 @@ if [ "${LM_UNPARK:-0}" != "1" ]; then
 elif ! command -v ollama >/dev/null 2>&1; then
   warn "ollama not on PATH" "brew install ollama — local-model harness unavailable (PORTABILITY: local-model)"
 elif [ ! -f "$LM_MANIFEST" ]; then
-  warn "qwen3:30b-a3b manifest missing under $LM_MODELS_DIR" "OLLAMA_MODELS=$LM_MODELS_DIR ollama pull qwen3:30b-a3b (~18 GB; PORTABILITY: local-model)"
+  warn "qwen3:30b-a3b manifest missing under local-model/models" "OLLAMA_MODELS=$LM_MODELS_DIR ollama pull qwen3:30b-a3b (~18 GB; PORTABILITY: local-model)"
 else
   LM_TAGS=$(curl -sS -m 4 http://127.0.0.1:11434/api/tags 2>&1)
   LM_TAGS_RC=$?
@@ -194,7 +190,7 @@ fi
 # Wednesday's seat only — on another agent's Mac the job is expected absent, so only an INFO line.
 NIGHT_DIR="$PROJECT_DIR/2_Project_Files/local-model/night"
 NIGHT_MODEL_TAG="ornith/35b"
-NIGHT_MANIFEST="$LM_MODELS_DIR/manifests/registry.ollama.ai/library/$NIGHT_MODEL_TAG"   # resolved store (above)
+NIGHT_MANIFEST="$PROJECT_DIR/2_Project_Files/local-model/models/manifests/registry.ollama.ai/library/$NIGHT_MODEL_TAG"
 if [ "$_DOC_AGENT" != "wednesday" ]; then
   ok "ornith night job: not this seat's (Wednesday only) — skipped"
 elif [ ! -f "$NIGHT_DIR/night_run.sh" ]; then
@@ -231,7 +227,7 @@ else
       warn "ornith:35b on the drive but Ollama not serving it" "bash 2_Project_Files/local-model/start_ollama.sh (PORTABILITY 14/15) — it uses the drive-local binary + OLLAMA_MODELS, the two things a hand-start gets wrong; night_run's G5 also calls it itself now (2026-09-16)"
     fi
   else
-    warn "ornith:35b manifest missing in every candidate store (SYSTEM, in-tree)" "OLLAMA_MODELS=/Volumes/DevMASTER/SYSTEM/ollama/models ollama pull ornith:35b (~20 GB; PORTABILITY 15) — or restore the 2026-10-05 copy from G-DRIVE Scratch Files (MOVED.txt there)"
+    warn "ornith:35b manifest missing under local-model/models" "OLLAMA_MODELS=<local-model>/models ollama pull ornith:35b (~20 GB; PORTABILITY 15)"
   fi
   NIGHT_Q=$(grep -v -E '^[[:space:]]*(#|$)' "$NIGHT_DIR/queue.md" 2>/dev/null | wc -l | tr -d ' ')
   if [ "${NIGHT_Q:-0}" -gt 0 ]; then
