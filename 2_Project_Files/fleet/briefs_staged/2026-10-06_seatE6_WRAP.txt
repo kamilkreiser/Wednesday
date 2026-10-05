@@ -1,0 +1,70 @@
+AUTH {'spf': 'pass', 'dkim': 'pass', 'dmarc': 'pass'}
+WRAP (Seat E 6th): round e6 COLD. ks1195 ruled and applied; KS-1256 is COMMITTED LOCALLY and GREEN;
+the docs + push + PR + READY are NOT done, and there is a base finding the successor must act on
+BEFORE composing them.
+
+BLUF
+1. **#1385 (KS-938) MERGED as 3f9ff4e1e1b9** — reported and accepted at 23:0xZ.
+2. **KS-1256 is committed LOCALLY as `e16c3133c296eb5b57f098f23e16e5770439b419`, UNPUSHED.**
+   Suite **92 files / 818 tests, 0 failed, 0 skipped**, which is exactly the figure you predicted.
+   9 files, 318 insertions, 3 deletions, trailers 1 byte, 0 Co-Authored-By, subject 65 chars, no
+   `.env` staged. Your commit gate (0 failed) is met, so I committed.
+3. 🔴 **STOP-WORTHY FOR THE SUCCESSOR: my worktree's base PREDATES MY OWN MERGE, so its two platform
+   docs are a generation stale, and the doc blocks must NOT be composed on it.** Measured in the
+   worktree: flow `<h2>` = `[1..14, 18, 19]` — **no 20** — and the cheat sheet's keyed sections end at
+   **KS-1005**, with **no KS-938 section**. #1385 added both, and #1385 is my own squash.
+   Compose `21.` on this base and you get a 20-shaped gap; anchor the KS-1256 cheat section here and
+   it lands after KS-1005 instead of after KS-938. Your point 5 named develop 3f9ff4e1e1b9 as the
+   base, and this is the concrete consequence of that: **merge develop IN first, then compose.**
+   `3f9ff4e1e1b9` is ABSENT from the shared store (server-side squash), so it needs the ruled
+   objects-only transfer.
+4. 🔴 **`composee5.py` will actively mislead the next seat.** It is hardcoded to #1385's job: it
+   asserts `20.` lands after `19.`, that the cheat keys END with `KS-938`, and it anchors on the
+   `KS-1005` heading line. Re-point to `21.`/`20.` and `KS-1256`/`KS-938`, or write a new one. Keep
+   its POSITION predicate and its inverted control — its own comments record that the ascending
+   number reader ALONE does not catch a wrong-side insertion.
+
+ks1195, YOUR 23:10:56Z RULING — APPLIED AND PROVED THREE WAYS
+  head + new values  GREEN 12/12
+  base + new values  RED   2 failed   (base blob b8cdee1bc408, verified == develop's)
+  base + old values  GREEN 12/12
+  So the old values were right for the old contract and the new ones genuinely discriminate.
+  The two changed lines, verbatim, for the READY:
+    -    expect(r1.map((r) => r.status)).toEqual([201, 201, 429, 429, 429]);
+    +    expect(r1.map((r) => r.status)).toEqual([503, 503, 429, 429, 429]);
+    -    expect(docsPosted('ks1195-r1-')).toBe(2);
+    +    expect(docsPosted('ks1195-r1-')).toBe(0);
+  Its `:164` no-Redis precondition and its DEGRADED / redis-not-ready assertion are UNCHANGED, and a
+  header comment names KS 1256 de-hyphenated as the reason. The other 10 cells are untouched. These
+  are the ONLY assertion changes in the PR.
+  🔴 **A residue I did NOT fix, deliberately:** that cell's TITLE still says "...creating documents is
+  refused 429 from request 3". With 503s the first two are no longer created, so the title is now
+  imprecise. You named exactly the two `expect(` lines, so I left it rather than widen on my own
+  authority. Rule it or hand it on.
+
+THE OTHER SIX, and the correction to your ruling's premise
+  The split was **3 and 4, not 6 and 1**. Only ks1204/ks1176/ks1231 inject a double. ks1234/ks1223/
+  ks1238 `await import('../index')` — real gateway, real redis module, no double at all — so they got
+  the partial-passthrough `vi.mock` idiom those same files already use for `../db`, inside each file
+  only, which is your point 2 generalised. Those six: **33 insertions, 0 deletions, and a `git diff
+  -U0` grep finds 0 changed lines containing `expect(`** — the proof you asked for.
+
+VERIFICATION THAT TRAVELS
+  verification.ts blob `94285d3cbacf` (base `b8cdee1bc408`). My cell file 6/6 at head, 4-of-6 RED at
+  base. tsc rc 0 **with a planted positive control** (planted error → rc 2); blob restored after.
+  🔴 tsc does NOT cover my test file — that tsconfig excludes `src/__tests__` and `--listFilesOnly`
+  finds it 0 times. It is NOT RUN in the PR, never a green. `check:openapi` rc 0; no spec edit needed.
+
+HANDOVER + STATE
+  `5_Project_History/HANDOVER-seatE6-2026-10-05.md`, 145 lines, 10,920 bytes, sha256 c37f6b1f6e94d24c.
+  It names the commit sha four times and carries the 7-step remaining plan.
+  develop 3f9ff4e1e1b93e2e704918a7825f13a72c9ec76f · locks 0 · watcher pid 31713 ALIVE · df 700530 MiB.
+  `s-e6-ks1256` must NOT be reclaimed — it holds the unpushed commit. `s-e3-ks938`'s akto
+  node_modules stays load-bearing. I removed nothing.
+  No push, no PR, no READY, no ticket state change, no comment on KS-1195, no extranet write,
+  no deploy, no az, no docker.
+
+TWO THINGS I OWE AND DID NOT DO
+  The history.md entry and the daily-note session line. Context ran out ahead of them; the handover
+  file carries everything they would have said. Flagging rather than leaving you to find it.
+
