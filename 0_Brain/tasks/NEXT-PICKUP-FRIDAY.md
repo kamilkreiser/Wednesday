@@ -13,14 +13,14 @@ supersede: replace wholesale; previous = NEXT-PICKUP-FRIDAY.md.pre-0925-rotate-s
 **The tree is at `/Volumes/Laptop-DEV/FRIDAY` (the drive, since 2026-09-28).** Quote every path (spaces).
 
 ## 🔴🔴🔴 ROTATION HANDOVER 2026-10-05 11:01 (Friday, ctx 78%) — READ FIRST; supersedes every block below where they differ
-**FIRST ACT:** `kam_rulings_today.sh` + `reconcile_rulings.py`; then `friday/seat_idle.sh` over %19 %24 %26 %29 and read each STATUS last line. Merge jobs and watchers DIED with the old seat: re-run them (commands below).
+**FIRST ACT:** `kam_rulings_today.sh` + `reconcile_rulings.py`; then `friday/seat_idle.sh` over %19 %29 (the only live seats; B74 + its gate B77) and read each STATUS last line. Merge jobs and watchers DIED with the old seat: re-run them (commands below).
 **Kam today:** "keep going" (08:4x) · deploy Composer (09:5x) · renamed PDF a, PDF note b, 1.0.2 a, hosted deploy a (09:57–09:58). He does an END-TO-END TEST of the hosted HPSM-POC today.
 **LIVE NOW:** Composer demo **e36fcde** (C-41). HPSM-POC hosted **577c27c** (C-55), web+api, 1.0.1 running.
 **MAINS:** Composer **e36fcde**. HPSM-POC **fa77dca** (#98 CI package 4aa7840 · #99 1.0.2 04aae93 · #100 current-name PDF 05f30b0 · #101 runbook F-3). Analysis 600a9d4+ (#59 C-55, #60 C-56; #61 C-54 merging).
 **OPEN CARDS (Friday tab):** `hpsmpoc-05f30b0-hosted-deploy-1005` (amended: main fa77dca; rec b = after his E2E test) · `hpsmpoc-hosted-forwarded-address-settings-1005` (rec a) · `hpsmpoc-hosted-clean-old-static-files-1005` (rec a). On deploy a: brief a B126-shape seat (`HPSM-POC/1_Project_Definition/Briefs/2026-10-05_B126_hosted-deploy-577c27c.md` as template; NO --clean unless that card is a; or use `scripts/deploy-from-ci.sh fetch/deploy` only if --clean is ruled a), verify live yourself (/api/health, /health, /health/ready, new build id, a marker; 1.0.2 now active → the narrative template id reads 1.0.2), deliver, tell Kam.
 **LIVE PANES:**
 - %19 Composer-D **B74** pickers (branch b74/pickers 3810e3c) held for gate; %29 Composer-QA **B77** gate (tier 1) — on GO: `friday/merge_when_green.sh datasecau/Datasec-Security-Composer <PR> 3810e3c982dafc01e99dfffa7e8c5c97718e466b` (OPEN THE PR FIRST: `friday_as.sh datasec gh pr create … --head b74/pickers`), then a B74 records addendum (C-number next after root main's highest), then a deploy card (Composer demo = e36fcde; Kam's word).
-- %24 HPSM-POC-B **B125**: records PR analysis **#62** (records/b125) CONFLICTED (3 behind) → ADDENDUM-3 rebase onto 773d94f keeping every entry. On `READY FOR REVIEW (records, rebased)`: merge_when_green #62 at the new head, deliver card hpsmpoc-renamed-customer-pdf-1005 to C-53, close %24.
+- B125 DONE: analysis #62 merged b0271cf; card hpsmpoc-renamed-customer-pdf-1005 DELIVERED (C-53); pane %24 closed.
 - B127 DONE: analysis #61 merged 773d94f; card hpsmpoc-template-102-words-1005 DELIVERED (C-54); pane %26 closed.
 **Still owed to Kam (not carded):** E8 timeframe note (told); Composer pack questions (Q2–Q7, #172, approver half of Q1) for his review; test user + UAT seat (C-51/C-52) while he is logged in.
 **Tools shipped today:** merge_when_green rule 6 (latest check-run per name); watch_status skips not-yet-written STATUS files. Ledger: 1 row (pull with uncommitted own files ×2 + late-seeded watcher) — commit own files and seed watchers BEFORE.
