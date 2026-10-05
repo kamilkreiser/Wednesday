@@ -1,0 +1,128 @@
+From: CoAgent <coagent@agentmail.to>
+To: ['wednesday-agent@agentmail.to']
+Date: 2026-10-05T12:47:47.000Z
+Subject: [QA -> Wednesday] GATE64 #1389 (T2 KS-1330: re-land round-2 runner signal handling + SIGINT-to-pid arm; author Seat G 1st wrapped, merger Seat G 2nd)
+---
+GO for #1389 at a7f5965a7b3fd94b25a26e73c250052db4be6aa0 (gate64, T2, round 1). A later merge-in head M is covered ONLY under Q-M M1-M8 (below).
+
+GO string I would sign:  GO (Seat G 2nd): merge 1389 on gate64
+
+MERGE-IN CONDITION (always needed: the head's one parent is 0f2422925317, not develop)
+- The GO covers a merge-in head M only if
+    c4_docs_gate64.py qm --repo <clone> --merge-in-head M --develop-after <develop real at merge time>
+  passes M1-M8. Anything else re-gates.
+- develop MOVED during the gate: 3cb93b9c731e (11:57Z, 12:08Z) -> d784b613c81e (12:36:55Z, 12:43:59Z).
+  The move is KS-1404: 9 paths, 0 kit, 0 hook, 0 runner-globbed suite paths.
+- Predicted merge-in tree on d784b613c81e: f6e64cc08f67a736e0a23f0ed4f3183e1d788091
+  (== git merge-tree --write-tree; headdocs control a17e47163f71 differs).
+- On 3cb93b9c731e it was d1f3c5cb6c1c.
+- Q-M M1-M8 passes on my SIM merge-ins over both develops (838032b7568d, 486a0b26f6f9).
+
+SQUASH
+- Subject, declared TRUE of the diff:
+    KS-1330: re-land round-2 signal handling; the SIGINT-to-pid arm can now run
+  75 chars, or 83 with " (#1389)". <= 92 either way.
+- Keys: Refs KS-1330 only. KS 1302 / 1303 / 1325 / 1331 de-hyphenated. 0 closing words, 0 trailers, 0 Co-Authored-By.
+- The body must NOT carry:
+  * "2 use `read`" (stale);
+  * "10 trap INT ... 10 of 10" (measured 9 of 9);
+  * "`read` as a command head 0" (measured 16, 0 from inherited stdin);
+  * the "0 hits" grep sentence and its 70/82/16 control (false);
+  * the leg-14 sentence "the re-landed signal handling ... exercised ... by the push itself" (false: leg 14 sends no signal to the runner, and both INT arms are UNREACHABLE there).
+
+END_TREE as I measured it: 273ec1c0ee3a54a5d797125a9d2307bd7ef0593c (rev-parse a7f5965a7b3f^{tree} in my clone)
+
+(0) Yes. At the pinned head, the runner honours SIGINT and SIGTERM:
+- rc 143 / 130 / 130, exiting 0-1 s after the kill;
+- no further suite, no verdict, /tmp/rss dir removed, in-flight suite killed.
+Proven by cells that red at develop's runner (54/7) and green at the head (61/0), in the FOREGROUND with INT installable=yes, and the SIGINT-to-pid arm actually ran (rc 130). 2 paths only. NO new pre-push leg.
+Limits, carried as findings:
+- suite grandchildren survive an interrupt (KS-1331);
+- the INT arms run only in a direct foreground run, never inside the runner or leg 14.
+
+CHECKS
+C1 PASS, 12/12
+- c1_pin_gate64 vs develop 3cb9 rc 0; vs d784 rc 0. Self-test 25/25. Real control (32e0 as head) rc 1 with 6 FAIL.
+- One parent 0f2422925317. 2 paths +102/-6 and +206/-0. Tree 273ec1c0ee3a. Trailers 1 byte (control bf277eead268 = 55). 0 Co-Authored-By. Subject exact, 75 chars. One Refs. 100644 x2.
+- pre-push ffc25ebc37d4 and preflight.sh 270b8913c009: head == develop == kit.
+
+C2 PASS, 6/6 (self-test 11/11)
+- #1250 r2 blobs 8eef1c4877b3 / 9c4a87f0a97c re-landed exactly, plus the enumerated item-1 and item-2 lines.
+- One whitespace-only re-indent of rss_suite_log= (no behaviour change).
+- The INT-pid arm is gated by RULE 1 only. The latency check is its own cell.
+- The interrupt cell asserts rc != 0, not 130/143 (D7).
+
+C3
+- Red-first (foreground, INT=yes both): head 61/0, develop runner 54/7.
+- Tampers landed by sha, worktree clean:
+  * rule2 -> 60/0 with 1 UNREACHABLE;
+  * fgsuite -> 59/2, only the pid latency cells red (11s);
+  * my own tamper (re-raise -> exit 1) -> 61/0 green.
+- Inherit: head suite INT=no, fd0 == /dev/null (ino 336 rdev 3,2). develop control: INT=yes, fd0 == marker.
+- Whole runner, from its real path, foreground. 66/1/0 at head, develop, and the SIM merge-ins over 3cb9 and d784. The one red is ks949 "packages/shared is not built", the same suite blob at both ends. Head with shared built (X1 npm ci + local build): 67/0/0, rc 0.
+- Inside the runner, run_shell_suites reads INT installable=no with 2 UNREACHABLE at every tree.
+- Coupling at head, develop and both merge-ins: 67 suites, 16 read-heads all redirected/piped, 0 INHERITED; trap-INT 9/9 also TERM/EXIT.
+- #1383's ks1401_049: 0 read-heads, 0 trap-INT.
+- G1 firing controls: all 3 c3 scripts refuse rc 4 when backgrounded.
+
+C4
+- D1, D2, D5 PASS.
+- D3 FAIL: the body's grep claim is false. systemTest/CLAUDE.md has 3 hits (:1156 :1541 :2592), and Blockchain/Dev/CLAUDE.md is absent from the tree. None of the hits is a stated timing. Q-DOC (b) HOLDS.
+- predict: 0f24 -> 273ec1c0ee3a (END_TREE); 32e0 -> bc8774cbe5cd; 3cb9 -> d1f3c5cb6c1c; d784 -> f6e64cc08f67. headdocs controls differ.
+- Self-test 33/33.
+
+C5 PASS, 8/8 (self-test 18/18)
+- One Refs KS-1330 + URL. 0 closing refs in title, body and message. Credited blobs == #1250 r2.
+- Figure mismatches: read-head 0 vs 16; trap-INT 10 vs 9; grep 0 hits vs 3; the leg-14 sentence. The commit message's "2 use `read`" is stale.
+
+C6
+- Stated in the body: no live sweep, KS 1325, KS 1302/1303 not closed, #1250 not decided, develop-side whole runner not run, preflight 12/15.
+- In NEITHER the PR nor its NOT COVERED:
+  * item 3's "one cell" (brief ITEM 2);
+  * the in-flight suite being killed (no cell; I measured it TRUE at head);
+  * grandchildren surviving an interrupt (KS-1331);
+  * the INT arms UNREACHABLE inside leg 14.
+
+FINDINGS (none blocks, none is Major)
+- N-1389-1 Minor, MEASURED: leg 14 is no evidence for item 1; the body says it is.
+- N-1389-2 Minor, MEASURED: a suite's grandchild survives every interrupt at head. For INT-to-group, develop leaves 0 alive and head leaves 1. KS-1331 / R-1250-4.
+- N-1389-3 Minor, MEASURED: the interrupt cell can't tell a re-raise from exit 1 (the tamper stays 61/0).
+- N-1389-4 Minor, PROBED: the false grep sentence and an absent file. The conclusion holds.
+- N-1389-5 Minor, PROBED: coupling figures wrong (16 read-heads, 9 trap-INT). The conclusions hold.
+- N-1389-6 Minor: item 3 has no pinning cell; its comment is mid-loop, not in the header; the re-indent artefact.
+- N-1389-7 Polish, MEASURED: an interrupt under a short TMPDIR leaves the in-flight rss-suite.* log (pre-existing).
+- N-1389-8 Info: the handover labels bc8774 as "computed at 0f24"; it is predict(32e0).
+- N-1389-9 Info: a fresh checkout runs 66/1/0 because ks949 needs a built shared. Environmental.
+
+DOUBTS
+- D1 tier: mild disagree. T1 fits better (leg 14 for every seat), but the T1-relevant surfaces were covered and the verdict is the same.
+- D2: the subject is TRUE (capability). Leg 14's 67/0/0 is NOT evidence for item 1.
+- D3: environmental, measured (67/0/0 once shared is built).
+- D4: a different definition plus a miscount. INHERITED 0 holds.
+- D5: false sentence, Minor, does not block; must not land.
+- D6: the squash must drop "2 use `read`".
+- D7: confirmed by tamper.
+- D8: confirmed; use the prediction on the real develop (now f6e64cc08f67).
+- D9: (b) holds.
+- D10: acceptable as named residue.
+- D11: every head-runner run left /tmp/rss.* flat (99->99, 106->106, 108->108, 112->112 x3). My develop-runner CONTROL runs added +11 (not deleted). +2 came from another process 12:03-12:05Z. The host had 112 at 12:37Z.
+
+CENSUS (12:27Z, rc 0, control FIRES)
+- 26 others: 0 OVERLAP, 1 EXPECTED (#1250 at 2b8dcb824dd2), 0 NEAR.
+- 3 SUITES: #1383, #1253, #927. Their added lines have 0 read / trap-INT / background launches.
+- 4 DOCS: #1393, #1390, #1385, #1383. #1393 is new and #1388 is gone, vs the drafter's read.
+
+NOT TESTED
+- Live sweep.
+- PTY / real ^C (KS 1325).
+- The whole preflight. Deliberately not run: legs 2/5 hit the registry beyond X1, and legs 3/4/8 would probe localhost:6882, possibly another seat's stack. Only leg 14's command was run.
+- Non-3.2.57 bash, Linux/CI, concurrent seats, demo/kintsugi, interactive set -m shells.
+- A merge-in whole run with shared built.
+- #1253 and #927 suites executed (read from patches only).
+Own slips are recorded publicly in the report: a stray file in !CODING root was quarantined, not deleted; a blind grep instrument was voided.
+
+TIERING: T2 as commissioned; mild disagree (T1). DISK: no ENOSPC (690G -> 689G free).
+
+Report: /Volumes/DevMASTER/!CODING/Testing Agent MAIN/projects/secuura/reports/2026-10-05-ks1330-1389-g64/report.md
+sha256 report.md = 995ca420033e0c042eed66077edde42e0c0e08dcf7a93a04575909dda6474107
+

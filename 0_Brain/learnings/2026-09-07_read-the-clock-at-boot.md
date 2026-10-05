@@ -11,7 +11,7 @@ tier: W
 **The operative case, so the headline matches it:** Wednesday is booting and about to
 greet Kam, speak aloud, call it "morning," or describe how long an agent has been idle.
 **Stop. Run `date '+%H:%M %Z'` first and read the day-phase from it — never infer the
-time from fleet mail timestamps (they are UTC ≈ AEST−10) or from the fact that the boot's
+time from fleet mail timestamps (they are UTC: local minus 10 in AEST, minus 11 in AEDT — read `date +%z`) or from the fact that the boot's
 date just rolled over.** A greeting ritual, the voice channel, and the morning-vs-overnight
 framing all depend on knowing what o'clock it actually is locally.
 
@@ -27,7 +27,11 @@ not exist (rule-only); it does now (`speak.sh` quiet-hours guard).
 1. **First tool action after the brain load that touches time: `date`.** The statusline
    `ctx:NN%` is the context instrument; `date` is the clock instrument. Read both; infer
    neither from the harness counters, the mail, or the date-rollover.
-2. **Fleet mail timestamps are UTC.** Local AEST ≈ UTC + 10. A mail "13:56" is 23:56 local.
+2. **Fleet mail timestamps are UTC.** The offset is SEASONAL: AEST = UTC + 10 (April → first Sunday of
+   October), **AEDT = UTC + 11 (first Sunday of October → first Sunday of April)**. Read it from
+   `date +%z`, never from this line. *(Corrected 2026-10-05 23:5x by the overnight seat: this line said
+   "+10" as a constant; daylight saving began Sun 4 Oct 2026 and `date` printed AEDT.)* In AEDT a mail
+   "13:56" is 00:56 local the next day.
    Convert before reasoning about "how long ago" or "overnight vs today".
 3. **Day-phase gates rituals:** 06:00–23:00 = speech allowed + a greeting is appropriate;
    23:00–06:00 = quiet hours (no voice; `speak.sh` now enforces it — override only
