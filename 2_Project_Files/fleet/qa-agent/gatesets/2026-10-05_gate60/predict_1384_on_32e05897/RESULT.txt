@@ -1,0 +1,28 @@
+INDEPENDENT PREDICTION — merge develop D=32e058975d4e3a9bbabe828f45e7084de4cfa7f0 into PR #1384 head H=852fc927632095fb603583cb543050d5edd66111 (KS-1210)
+2026-10-05, own clone: ./clone (git clone --shared --no-checkout of the Blockchain checkout; no fetch needed)
+merge-base: 46c3e20cfbd21acee0c67d544180c33deaa4c8ef
+
+Conflicts from `git merge --no-ff --no-commit D` on H: ONLY the two docs
+  Projects Documents/API_Security_Functional_Testing_Architecture_Flow_Diagrams.html
+  Projects Documents/QA_Tool_Cheat_Sheet_Secuura_API_Testing.html
+(both sides were pure insertions vs base at the same point, just before `  </body>`; D also edited one cheat table row upstream, auto-merged)
+
+Resolution (build.py): H's inserted chunk carried verbatim; FLOW: placed immediately before D's `    <h2>19.` line;
+CHEAT: placed immediately before D's `<h2>... KS-1005</h2>` line (anchored on heading key, not the div). Everything else = D/3-way.
+
+PREDICTED TREE: 517a962cb1d914164266d92ec2be14a03d2fe10d
+Builder claim:  517a962cb1d914164266d92ec2be14a03d2fe10d  -> MATCH
+
+Controls
+ (1) wrong order (KS-1210 section after KS-1005, before </body>): tree 30428c4328d9c0e89a65b140dc393a13949306ae  -> DIFFERENT (control discriminates)
+ (2) re-derived from result tree: FLOW 1 2 3 4 5 6 7 8 9 10 11 12 13 14 18 19
+                                  CHEAT KS-1404 KS-1333 KS-1345 KS-1388 KS-1210 KS-1005
+     tail from `  </body>` byte-identical to D in both docs (sha1 8d6381a5... both sides)
+ (3) git diff --name-only D <tree>  (6 files):
+     Blockchain/Dev/services/auth/src/__tests__/ks1210-oauth-app-scopes-and-ownership.test.ts
+     Blockchain/Dev/services/auth/src/__tests__/ks431-oauth-app-update.test.ts
+     Blockchain/Dev/services/auth/src/__tests__/ks451-oauth-app-nul-scope.test.ts
+     Blockchain/Dev/services/auth/src/routes/oauth.ts
+     Projects Documents/API_Security_Functional_Testing_Architecture_Flow_Diagrams.html
+     Projects Documents/QA_Tool_Cheat_Sheet_Secuura_API_Testing.html
+Merge commit itself was not created (tree via write-tree only); the builder's commit 1e2c78c52e25 was not examined.
