@@ -1,0 +1,34 @@
+c2b_docfix_gate57 2026-10-05T04:00:59Z | repo /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/707ca275-d40c-45a7-8ba2-785b7c4e078a/scratchpad/gate57/clone | cut_base 3ce8cd4026a6 | #1380 ac9f67a661ea | #1381 7b356195a5e4 | mode selftest
+SELFTEST OK T0 real #1380 head: want PASS | failed NONE
+SELFTEST OK T1 Q-27 with a 3-character change: want FAIL on F1  | failed ['F1 Q-27 character diff']
+    FAIL F1 Q-27 character diff: base :3738 == kit old True | head == kit new False | same length True (71) | differing indices [63, 64, 70] (want 2, the digits 27 -> 36: False) | counts {'# 27 cells QA_To base': 1} MISMATCH vs {'# 27 cells QA_To base': 1, '# 36 c
+SELFTEST OK T2 Q-27 written "# 36  cells" (length +1): want FAIL on F1  | failed ['F1 Q-27 character diff', 'F1c 36 cells counted']
+    FAIL F1 Q-27 character diff: base :3738 == kit old True | head == kit new False | same length False (72) | differing indices n/a (prefix/suffix (63, 6)) (want 2, the digits 27 -> 36: False) | counts {'# 27 cells QA_To base': 1} MISMATCH vs {'# 27 cells QA_To b
+SELFTEST OK T3 a trailing space on the N-1375-1 flow line: want FAIL on F2 N-1375-1 API_S | failed ['F2 N-1375-1 API_S']
+    FAIL F2 N-1375-1 API_S: base :1875 carries the old sentence once: True | head == base with ONLY the sentence replaced: False | prefix (8 chars) and suffix byte-identical: True | required elements missing NONE | "other 27 KS-1015" base 1 -> head 0
+SELFTEST OK T4 "26 remain" dropped from the cheat sentence: want FAIL on F2 N-1375-1 QA_To | failed ['F2 N-1375-1 QA_To']
+    FAIL F2 N-1375-1 QA_To: base :3721 carries the old sentence once: True | head == base with ONLY the sentence replaced: False | prefix (678 chars) and suffix byte-identical: True | required elements missing ['26 remain'] | "other 27 KS-1015" base 1 -> head 0
+SELFTEST OK T5 a second sentence edited on the cheat N-1375-1 line: want FAIL on F2 N-1375-1 QA_To | failed ['F2 N-1375-1 QA_To']
+    FAIL F2 N-1375-1 QA_To: base :3721 carries the old sentence once: True | head == base with ONLY the sentence replaced: False | prefix (678 chars) and suffix byte-identical: False | required elements missing NONE | "other 27 KS-1015" base 1 -> head 0
+SELFTEST MISS T6 another line of the cheat KS 1404 block touched: want FAIL on F3 KS1404 QA_To | failed NONE
+    PASS F0 block bounds: API_Se KS1015 1734-1886 (153 lines) opens '<h2>10. API contract — the del': True | API_Se KS1404 1887-1999 (113 lines) opens '<h2>11. RFC 3161 Timestamp Tok': True | QA_Too KS1015 3689-3724 (36 lines) opens '<div class="sec-head">': True 
+    PASS F1 Q-27 character diff: base :3738 == kit old True | head == kit new True | same length True (71) | differing indices [63, 64] (want 2, the digits 27 -> 36: True) | counts {'# 27 cells QA_To base': 1, '# 36 cells QA_To head': 1}
+    PASS F1c 36 cells counted: ks1404-verify-rfc3161.test.ts at 3ce8cd4026a6: it( 32 + it.each rows 4 = 36 (kit 36) | CONTROL the it( count alone 32 != 36: True | firing control: a 3-character mutation of the base line reads 3 differing indices
+    PASS F2 N-1375-1 API_S: base :1875 carries the old sentence once: True | head == base with ONLY the sentence replaced: True | prefix (8 chars) and suffix byte-identical: True | required elements missing NONE | "other 27 KS-1015" base 1 -> head 0
+    PASS F2 N-1375-1 QA_To: base :3721 carries the old sentence once: True | head == base with ONLY the sentence replaced: True | prefix (678 chars) and suffix byte-identical: True | required elements missing NONE | "other 27 KS-1015" base 1 -> head 0
+    PASS F4 only ruled lines replaced API_S: replaced base lines [1875] (ruled [1875]) | other hunks [('insert', 2000, 1999, 2000, 2066)] (want exactly ONE insert before '</body>')
+    PASS F3 KS1015 API_S byte-identical but ruled: base 1734-1886 (153 lines): lines differing at the same line number in the head [1875] (want exactly the ruled [1875])
+    PASS F3 KS1404 API_S byte-identical but ruled: base 1887-1999 (113 lines): lines differing at the same line number in the head [] (want exactly the ruled [])
+    PASS F4 only ruled lines replaced QA_To: replaced base lines [3721, 3738] (ruled [3721, 3738]) | other hunks [('insert', 3779, 3778, 3779, 3811)] (want exactly ONE insert before '</body>')
+    PASS F3 KS1015 QA_To byte-identical but ruled: base 3689-3724 (36 lines): lines differing at the same line number in the head [3721] (want exactly the ruled [3721])
+    PASS F3 KS1404 QA_To byte-identical but ruled: base 3725-3778 (54 lines): lines differing at the same line number in the head [3738] (want exactly the ruled [3738])
+    PASS F5 PR 2 leaves the ruled lines: at #1381's head ('# 27 cells', 'other 27 KS-1015') per doc {'API_S': (0, 1), 'QA_To': (1, 1)} (want flow (0, 1), cheat (1, 1))
+SELFTEST OK T7 N-1375-1 fixed in the cheat sheet only: want FAIL on F2 N-1375-1 API_S | failed ['F2 N-1375-1 API_S', 'F4 only ruled lines replaced API_S', 'F3 KS1015 API_S byte-identical but ruled']
+    FAIL F2 N-1375-1 API_S: base :1875 carries the old sentence once: True | head == base with ONLY the sentence replaced: False | prefix (8 chars) and suffix byte-identical: True | required elements missing ['28', '#1367', 'referral lookup pair', '#1375', 'delega
+SELFTEST OK T8 a deleted line in the flow KS 1015 block: want FAIL on F4 | failed ['F2 N-1375-1 API_S', 'F4 only ruled lines replaced API_S', 'F3 KS1015 API_S byte-identical but ruled', 'F3 KS1404 API_S byte-identical but ruled']
+    FAIL F4 only ruled lines replaced API_S: replaced base lines [1875] (ruled [1875]) | other hunks [('delete', 1738, 1738, 1738, 1737), ('insert', 2000, 1999, 1999, 2065)] (want exactly ONE insert before '</body>')
+SELFTEST OK T9 PR 2 had changed "# 27 cells" too: want FAIL on F5 | failed ['F5 PR 2 leaves the ruled lines']
+    FAIL F5 PR 2 leaves the ruled lines: at #1381's head ('# 27 cells', 'other 27 KS-1015') per doc {'API_S': (0, 1), 'QA_To': (0, 1)} (want flow (0, 1), cheat (1, 1))
+SELFTEST OK T10 a line outside both blocks touched (head): want FAIL on F4 | failed ['F4 only ruled lines replaced API_S']
+    FAIL F4 only ruled lines replaced API_S: replaced base lines [256, 1875] (ruled [1875]) | other hunks [('insert', 2000, 1999, 2000, 2066)] (want exactly ONE insert before '</body>')
+SELFTEST BROKEN 10 of 11

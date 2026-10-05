@@ -1,0 +1,10 @@
+c3_ks1345_gate57 shape 2026-10-05T04:02:48Z | repo /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/707ca275-d40c-45a7-8ba2-785b7c4e078a/scratchpad/gate57/clone | head 7b356195a5e4 | cut_base 3ce8cd4026a6
+PASS W1 webhooks.ts exactly the described change: non-comment lines removed ["`.catch((e: any) => { logger.warn('webhooks list query failed', { erro"] | added ['`;'] | comment lines added 3 (carry KS-1345: True) | .catch( lines 4 -> 3, every other .catch line byte-identical and in order: True | "webhooks list query failed" 1 -> 0
+INFO W1 -     // no operator). The error was silently swallowed by the .catch below, so
+INFO W1 -     `.catch((e: any) => { logger.warn('webhooks list query failed', { error: e?.message }); return []; });
+INFO W1 +     // no operator). The error was silently swallowed by a .catch on this query, so
+INFO W1 +     // KS-1345: that .catch is gone. A failed list query now reaches fail500 below
+INFO W1 +     // (a constant 500, the error logged), never a 200 with an empty list.
+INFO W1 +     `;
+PASS W2 test titles: `it(` titles 6 -> 7 | removed ['control KS-1341 A0: a REJECTED list query is still'] | added ['RED KS-1345 A0: a REJECTED list query reaches the ', 'control KS-1345 C: a list query that RESOLVES stil']
+C3 SHAPE PASS: 0 FAIL of 2 checks | head 7b356195a5e4

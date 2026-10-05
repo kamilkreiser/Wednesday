@@ -1,0 +1,18 @@
+SELFTEST OK T0 PR 1 at its READY head: want PASS | failed NONE
+SELFTEST OK T1 PR 2 at its READY head: want PASS | failed NONE
+SELFTEST OK T2 PR 1 judged as PR 2 (wrong file set + subject): want FAIL on P4 | failed ['P4 files (clone)', 'P6 subject']
+    FAIL P4 files (clone): 3 path(s) | MISSING ['Blockchain/Dev/services/originate/src/__tests__/ks1341a-webhooks-500-never-answers-err-message.test.ts', 'Blockchain/Dev/services/originate/src/routes/webhooks.ts'] | EXTRA ['Blockchain/Dev/servi
+    FAIL P6 subject: subject 'KS-1333: a cell pinning that GET /api/anchors/:id answers blockNumber as a number' (81 chars; READY says 77; kit byte-equal False) | contains "(#" False | lands as 89 chars with " (#1381)" (MG-11 <= 92)
+SELFTEST OK T3 a trailer on the commit (Co-Authored-By): want FAIL on P5 | failed ['P5 no trailer']
+    FAIL P5 no trailer: HEAD trailers 'Co-Authored-By: Sim <sim@x>' (1 Co-Authored-By) | CONTROL bf277eead268 prints 'Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>' (1)
+SELFTEST OK T4 subject carries " (#1380)": want FAIL on P6 | failed ['P6 subject']
+    FAIL P6 subject: subject 'KS-1333: a cell pinning that GET /api/anchors/:id answers blockNumber as a number (#1380)' (89 chars; READY says 81; kit byte-equal False) | contains "(#" True | lands as 97 chars with " (#1380)" (MG-11 <= 92)
+SELFTEST OK T5 parent is not cut_base (stacked on PR 2): want FAIL on P3 | failed ['P3 shape']
+    FAIL P3 shape: parents ['7b356195a5e4'] (want exactly [cut_base 3ce8cd4026a6]) | develop at origin NOT READ (--
+SELFTEST OK T6 develop advanced by a commit touching a kit doc: want FAIL on P3 | failed ['P3 shape']
+    FAIL P3 shape: parents ['3ce8cd4026a6'] (want exactly [cut_base 3ce8cd4026a6]) | develop at origin 7b356195a5e4 | develop ADVANCED 3ce8cd4026a6 -> 7b356195a5e4: 4 path(s) moved, overlapping kit paths ['Blockchain/Dev/services/originate/src/
+SELFTEST OK T7 develop advanced by a disjoint commit (allowed): want PASS | failed NONE
+SELFTEST OK T8 one-character subject change: want FAIL on P6 | failed ['P6 subject']
+    FAIL P6 subject: subject 'KS-1333: a cell pinning that GET /api/anchors/:id answers blockNumber as a numbr' (80 chars; READY says 81; kit byte-equal False) | contains "(#" False | lands as 88 chars with " (#1380)" (MG-11 <= 92)
+SELFTEST OK T9 G57_FILES_DROP (a planted wrong expectation): want FAIL on P4 | failed ['P4 files (clone)']
+SELFTEST OK 10 of 10 (local checks P3-P6; P1 / P2 / P4-API need the network and are exercised only by a real run)

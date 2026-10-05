@@ -1,0 +1,51 @@
+LAUNCH ACTION gate57 (DRY RUN) 2026-10-05 15:15:55 AEDT / 2026-10-05T04:15:55Z | #1380 ac9f67a661eababfff30a1128f14c853803bd584 + #1381 7b356195a5e41d530c11f8e9286a6284be55b7c2 | cut_base 3ce8cd4026a6e3241413e9c7533d5a84d10c1c79 | pane QA/Secuura-ks1333-1345-1380
+--- 0. the pane must be routed (inbox_routing.conf) or cockpit.sh say --mail fails silently
+  routing file /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/inbox_routing.conf — line present: 0 (grep rc=1; want 1 / rc 0)
+  (DRY RUN: reported, not refused — the real run refuses rc 1 here; README section 4)
+--- 1. instrument A: the GitHub PULLS API, per PR (+ 2b the census, same read)
+  gh_census rc=0 / 0
+    API #1380 head ac9f67a661eababfff30a1128f14c853803bd584 base develop base_sha 3ce8cd4026a6e3241413e9c7533d5a84d10c1c79 mergeable True reads 1 state open merged False branch feature/ks-1333-blocknumber-pin-b60-1
+    API #1380 title 'KS-1333: a cell pinning that GET /api/anchors/:id answers blockNumber as a number' | user kksecura | mergeable_state unstable | body 4699 chars
+    EXPECTED OVERLAP (kit reported_overlaps; reported, never sequenced) #995 kksecura | head b8155636e8e6 unmoved | paths ['Blockchain/Dev/services/anchoring/src/index.ts'] | drafter census census_ex1.out 2026-10-05T04:09Z: #995 (KS 741, merge-base 0f37b85c80b
+    CENSUS 21 other open PR(s) read | 0 OVERLAP (a kit path or a Projects Documents file) | 1 EXPECTED OVERLAP (reported) | 0 SAME-KEY (['KS-1333', 'KS-1345']) | excluded ['1380', '1381']
+    API #1381 head 7b356195a5e41d530c11f8e9286a6284be55b7c2 base develop base_sha 3ce8cd4026a6e3241413e9c7533d5a84d10c1c79 mergeable True reads 1 state open merged False branch feature/ks-1345-webhooks-list-500-b60-2
+    API #1381 title 'KS-1345: a failed webhooks list query answers 500, not 200 with an empty list' | user kksecura | mergeable_state unstable | body 5978 chars
+    EXPECTED OVERLAP (kit reported_overlaps; reported, never sequenced) #995 kksecura | head b8155636e8e6 unmoved | paths ['Blockchain/Dev/services/anchoring/src/index.ts'] | drafter census census_ex1.out 2026-10-05T04:09Z: #995 (KS 741, merge-base 0f37b85c80b
+    CENSUS 21 other open PR(s) read | 0 OVERLAP (a kit path or a Projects Documents file) | 1 EXPECTED OVERLAP (reported) | 0 SAME-KEY (['KS-1333', 'KS-1345']) | excluded ['1380', '1381']
+--- 2. instrument B: git ls-remote origin (ONE read from the Secuura checkout, READ-ONLY)
+  ls-remote rc=0 at 04:16:40Z
+    fe6daca343c143c32b1eb76d681668b4edbe4074	refs/heads/develop
+    ac9f67a661eababfff30a1128f14c853803bd584	refs/heads/feature/ks-1333-blocknumber-pin-b60-1
+    7b356195a5e41d530c11f8e9286a6284be55b7c2	refs/heads/feature/ks-1345-webhooks-list-500-b60-2
+    ac9f67a661eababfff30a1128f14c853803bd584	refs/pull/1380/head
+    7b356195a5e41d530c11f8e9286a6284be55b7c2	refs/pull/1381/head
+--- 2b. the census
+  OVERLAP census clean (1 expected overlap(s) reported, 0 SAME-KEY)
+--- 3. each head, judged (input == API == pull/head == branch, open, not merged, on develop, not mergeable:false, branch rule)
+  PR 1 #1380: input ac9f67a661eababfff30a1128f14c853803bd584 | API ac9f67a661eababfff30a1128f14c853803bd584 (state open, merged False, base develop, mergeable True) | pull/head ac9f67a661eababfff30a1128f14c853803bd584 | feature/ks-1333-blocknumber-pin-b60-1 ac9f67a661eababfff30a1128f14c853803bd584
+    BOTH INSTRUMENTS AGREE with the input head.
+  PR 2 #1381: input 7b356195a5e41d530c11f8e9286a6284be55b7c2 | API 7b356195a5e41d530c11f8e9286a6284be55b7c2 (state open, merged False, base develop, mergeable True) | pull/head 7b356195a5e41d530c11f8e9286a6284be55b7c2 | feature/ks-1345-webhooks-list-500-b60-2 7b356195a5e41d530c11f8e9286a6284be55b7c2
+    BOTH INSTRUMENTS AGREE with the input head.
+--- 3b. develop, read at launch: fe6daca343c143c32b1eb76d681668b4edbe4074 | cut_base 3ce8cd4026a6e3241413e9c7533d5a84d10c1c79
+    ADVANCE behind=1 files=7 overlap=NONE status=ahead merge_base=3ce8cd4026a6e3241413e9c7533d5a84d10c1c79
+    ADVANCE-PATH Blockchain/Dev/frontend/admin/package-lock.json
+    ADVANCE-PATH Blockchain/Dev/frontend/outlook-addin/package-lock.json
+    ADVANCE-PATH Blockchain/Dev/frontend/verifier/package-lock.json
+    ADVANCE-PATH Blockchain/Dev/package-lock.json
+    ADVANCE-PATH Blockchain/Dev/scripts/audit/audit-baseline.json
+    ADVANCE-PATH Blockchain/Dev/services/governance/package-lock.json
+    ADVANCE-PATH Blockchain/Dev/services/referral/package-lock.json
+  ADVANCED by 1 commit(s), DISJOINT from every kit path and Projects Documents/ — accepted (README section 7); T2 must be re-derived on this develop by C4-PREDICT (--develop)
+--- 3c. FILL from the values just read
+  fill rc=0
+    FILLED 2026-10-05T04:16:51Z | #1380 ac9f67a661ea + #1381 7b356195a5e4 | develop fe6daca343c1 (behind 1) | dry041555.SIM.prompt.txt, dry041555.SIM.launcher.sh, pins_gate57.SIM-dry041555.json | 30 keywords | prompt sha256 cbf8ee8661b0ad9e
+--- 3d. RACE: re-read develop and both heads AFTER the fill
+  ls-remote rc=0 | develop fe6daca343c143c32b1eb76d681668b4edbe4074 | pull/1380 ac9f67a661eababfff30a1128f14c853803bd584 | pull/1381 7b356195a5e41d530c11f8e9286a6284be55b7c2
+--- 6 (dry). the SIM launcher's own --check
+  SIM launcher --check rc=0
+    all guards pass:
+      origin develop fe6daca343c143c32b1eb76d681668b4edbe4074 == the pinned develop (behind 1 from cut_base) | #1380 ac9f67a661ea and #1381 7b356195a5e4 at branch AND pull/head | compares ok (ahead 1, their own paths) | pin age 3s
+      pins, prompt, QA project and repo present; kit at its filled home; thinking directive; every kit file + both previous reports + the charter + the READY named; no unfilled token
+      the prompt carries 30 by-name keywords (as tokens), the tier lines, the checks + controls, the holds + named exceptions, both GO strings, the addendum + REPORT-HASH-LAST rules, the verdict subject + report dir, both heads and T2 in full
+      a launch (not --check) will refuse unless stdin is a TTY (exit 21)
+DRY RUN COMPLETE 2026-10-05T04:17:01Z — every read agrees with the input; the real run fills the REAL pins and continues with the override check, the usage gate, --check and cockpit.sh add

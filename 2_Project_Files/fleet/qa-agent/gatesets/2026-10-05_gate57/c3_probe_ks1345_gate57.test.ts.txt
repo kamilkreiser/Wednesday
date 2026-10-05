@@ -1,0 +1,83 @@
+// gate57 PROBE (QA kit file, NOT a repo test): copied by c3_ks1345_gate57.py into YOUR scratch worktree as
+// services/originate/src/__tests__/zz-gate57-probe-ks1345.test.ts, run at cut_base and at #1381's head, then MOVED OUT (quarantined) by
+// the checker. Harness shape copied from ks1341a-webhooks-500-never-answers-err-message.test.ts at the base.
+// P1 / P2 assert the HEAD behaviour, so they are RED at the base BY ASSERTION (200 with an empty list) and GREEN at the head.
+// C1 / C2 are controls that hold on BOTH sides.
+const mockQueryRaw = jest.fn();
+const mockExecuteRaw = jest.fn();
+const mockLoggerError = jest.fn();
+let mockUserId = '11111111-2222-4333-8444-555555555555';
+
+jest.mock('../db', () => ({
+  prisma: { $queryRaw: mockQueryRaw, $executeRaw: mockExecuteRaw, $executeRawUnsafe: jest.fn() },
+}));
+jest.mock('../middleware/auth', () => ({
+  authenticate: () => (req: any, _res: unknown, next: () => void) => {
+    req.user = { userId: mockUserId };
+    next();
+  },
+}));
+jest.mock('@secuura/shared', () =>
+  require('./helpers/sharedModuleMock').makeSharedMock({
+    encryptField: jest.fn(() => 'v1:mock-ciphertext'),
+    decryptField: jest.fn(() => ''),
+    runWithTenantId: jest.fn(async (_tenantId: unknown, fn: () => unknown) => fn()),
+    assertSafeOutboundUrl: jest.fn(async (raw: unknown) => ({ ok: true as const, url: String(raw) })),
+  }),
+);
+jest.mock('../utils/logger', () => ({
+  logger: { info: jest.fn(), warn: jest.fn(), error: mockLoggerError, debug: jest.fn() },
+}));
+
+import express from 'express';
+import type { AddressInfo } from 'net';
+import { webhooksRouter } from '../routes/webhooks';
+
+const CONSTANT_BODY = { success: false, error: { code: 'INTERNAL_ERROR', message: 'Internal server error' } };
+const CONTEXT = 'Webhook list failed (GET /api/webhooks)';
+const app = express();
+app.use('/api/webhooks', express.json(), webhooksRouter);
+let server: ReturnType<typeof app.listen>;
+let baseUrl = '';
+beforeAll(async () => {
+  await new Promise<void>((resolve) => { server = app.listen(0, '127.0.0.1', () => resolve()); });
+  baseUrl = 'http://127.0.0.1:' + (server.address() as AddressInfo).port;
+});
+afterAll(() => { server?.close(); });
+beforeEach(() => { jest.clearAllMocks(); mockUserId = '11111111-2222-4333-8444-555555555555'; });
+
+describe('gate57 probe KS-1345 (GET /api/webhooks list query failure)', () => {
+  it('gate57 P1: a REJECTED list query answers the constant 500 and is logged once', async () => {
+    mockQueryRaw.mockRejectedValueOnce(new Error('connect ECONNREFUSED 10.0.4.17:5432 gate57-probe'));
+    const res = await fetch(baseUrl + '/api/webhooks');
+    const body = JSON.parse(await res.text());
+    expect({ status: res.status, body }).toEqual({ status: 500, body: CONSTANT_BODY });
+    expect(mockLoggerError.mock.calls.map((c) => c[0])).toEqual([CONTEXT]);
+  });
+
+  it('gate57 P2: a NON-UUID userId (Postgres 22P02 on the ::uuid cast) answers the constant 500, not 200 []', async () => {
+    mockUserId = 'not-a-uuid';
+    mockQueryRaw.mockImplementationOnce(() =>
+      Promise.reject(Object.assign(new Error('invalid input syntax for type uuid: "not-a-uuid"'), { code: '22P02' })));
+    const res = await fetch(baseUrl + '/api/webhooks');
+    const body = JSON.parse(await res.text());
+    expect({ status: res.status, body }).toEqual({ status: 500, body: CONSTANT_BODY });
+  });
+
+  it('gate57 C1 (control, both sides): a list query that RESOLVES answers 200 with its rows and logs nothing', async () => {
+    const row = { id: '6f0e2c1a-1b2c-4d3e-8f40-5a6b7c8d9e0f', url: 'https://partner.example.com/hooks' };
+    mockQueryRaw.mockResolvedValueOnce([row]);
+    const res = await fetch(baseUrl + '/api/webhooks');
+    expect({ status: res.status, body: JSON.parse(await res.text()) }).toEqual({ status: 200, body: { success: true, webhooks: [row] } });
+    expect(mockLoggerError).not.toHaveBeenCalled();
+  });
+
+  it('gate57 C2 (control, both sides): the userId reaches the ::uuid bind parameter of the list query', async () => {
+    mockUserId = 'not-a-uuid';
+    mockQueryRaw.mockResolvedValueOnce([]);
+    await fetch(baseUrl + '/api/webhooks');
+    const call = mockQueryRaw.mock.calls[0] || [];
+    const sql = Array.isArray(call[0]) ? (call[0] as string[]).join('?') : String(call[0]);
+    expect({ uuidCast: /\?::uuid/.test(sql), bound: call.slice(1).includes('not-a-uuid') }).toEqual({ uuidCast: true, bound: true });
+  });
+});
