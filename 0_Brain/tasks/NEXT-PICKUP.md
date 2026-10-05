@@ -19,6 +19,12 @@ supersede: replace wholesale at the next pickup; do not append. Previous copy: N
 4. EXPIRING-GRANTS: "SPEND PAST THE 90%" is marked ENDED (account switched). Friday's "ignore the 90%" row is Friday's and is not touched.
 
 ### LIVE RIGHT NOW
+**🟠 65% CHECKPOINT 13:4x 2026-10-05 (seat 707ca275). READ FIRST; supersedes the 13:2x block:**
+0. Kam: no new rows since 13:03. OPEN cards (all Secuura, defaults = nothing changes): `secuura-kintsugi-deploy-for-31oct-1005` · `secuura-tooling-tickets-off-product-board-1005` · `secuura-tenant-isolation-migration-ks1401-1005` · `secuura-connector-allowlist-missing-setting-ks1256-1005` · `wed-old-docker-image-232gb-1005` (moot: Kam deleted it, 591 GiB free — close it). ASK_LIST.md sent to his panel (46 Peter/Stuart tickets).
+1. **FOUR LIVE SECUURA SEATS:** B 60th %18 (raise 6, gate57; brief `fleet/briefs_staged/2026-10-05_seatB60_raise.md`) · F 1st %19 `-F` (ONE PR `Refs KS-749`, both bumps, 3 rows out, gate58 — ANSWERED 13:30, released to ITEM 1; KS-751 is ARCHIVED, never touch) · C 22nd %20 `-C` (board-only archive, 34 rows; ITEM 0 pending) · E 1st %21 `-E` (KS-1210/1005/938 + stretch 1256, gate59; pre-ruled; ITEM 0 pending). **ADDENDA sent to B 60th + F 1st (13:4x): add `.push-lock-e1` to WAIT; each must ACK. E 1st takes NO lock until its ANSWER says both ACKs are in.** E 1st's ITEM 0 must name the admin role list for KS-1210 (Wednesday confirms).
+2. Spark: 4 HOLDs reviewed (KS-591 ×4, REVIEW.md in run dirs) → next raise seat (after B 60th). KS-593 was a HARNESS false FAIL (A3d fix in `tasks/code_patch/a3c_plus.py`, committed, arms green) → re-running (queue.sh bg). KS-591-timestamps brief held (stale install). Today ~15 rounds.
+3. Ollama dedupe mover: removal pass running (copy verified at G-DRIVE). Check `df` + its commit when it reports.
+4. Next fuses: 15 Oct (F 1st), Sat 31 Oct (braces, no fix → card before ~26 Oct).
 **🟠 13:2x 2026-10-05 (seat 707ca275, ctx 56%). READ FIRST; supersedes the 50% block where they differ:**
 0. KS AUDIT DONE → `0_Brain/reference/2026-10-05_ks-ticket-audit/SUMMARY.md` (posted to Kam). Cards OPEN: `secuura-kintsugi-deploy-for-31oct-1005` (rec a) · `secuura-tooling-tickets-off-product-board-1005` (rec a, 192 of ours). Kam's goal: platform stable + ready Sat 31 Oct.
 1. LIVE: Seat B 60th (%18, gate57) + Seat F 1st (%19 `Secuura/Blockchain-F`, gate58, briefs pre-ruled). Answer each ITEM 0 QUESTION on arrival.
