@@ -6,6 +6,19 @@ status: live
 supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s1-wholesale
 ---
 
+## 🟢 DELTA 160 — 2026-10-06 10:42 (s99, ctx 50% CHECKPOINT; rotate at the first safe boundary in 80-90). **READ THIS FIRST, THEN 159 (its items 2-4 stand, except as below).**
+### FIRST WORK FOR THE NEXT SEAT
+1. **N / RD-648 (PR #52): CodeQL finally ran.** The outage cancelled 90a837e's checks; GitHub refused to re-run the CodeQL run and a reopen did not retrigger it, so Tuesday RULED one empty commit: **3e6d02d** (tree bb2a84f9f627 = 90a837e's, verified by API). On 3e6d02d: CodeQL 37385536579 SUCCESS, Gitleaks + npm-audit SUCCESS, Build 37385542191 was in progress at 10:05. **On N's MERGED: ls-remote main, the CodeQL run id + no new alert, npm-audit, Build inside C-185, demo SKIPPED.** Then the turn goes to **M: RD-618 (b1)**.
+2. **R / RD-761:** head **3b547e3** (test-only fixes after a4dc818's host-only log lines, Tuesday's ruling 22:27Z). **Hold 04 queued** (behind gate 17's H2): the CURRENT site-2 cell re-proved RED at 0e3cd71 (sha256 of the copied file printed, the reddening half named), GREEN at head, then full verify --update-counts. Then push, PR for CodeQL, READY.
+3. **GATE BATCH 18 (commission when gate 17 delivers, or when RD-761's READY lands):** RD-761 (R, t1, pending READY) + **RD-791 @ b79e02e** (N, t1, privacy; READY saved `fleet/qa-agent/briefs/2026-10-06_nexusai-rd791-READY-mail.txt`) + **RD-756 @ 5afdc01** (M, t2, stacked on RD-603 3529d53; READY saved `..._rd756-READY-mail.txt`). Declared limits for RD-791: non-ENOENT lstat = skip; links inside feedback-attachments unchanged (F-A3 (v) NOT PROVEN).
+4. **GATE 17 (%17, Opus 4.8 session):** alive; its pane is squashed to 2 rows (cosmetic). On the verdict: read WHOLE, score, pane_close, RELEASE to N.
+5. **S closed** (census done, checked 3 ways, scored 0.97, Kam told 201). Nothing owed from it.
+### SHIPPED THIS SEAT
+- `fleet/hooks/receiptguard.py` + a clause in `pretooluse_no_cd.sh`: refuses a receipt-worded note in the same command as a send, and any `/..` write target. Arms `2_Project_Files/tests/receiptguard_arms.py` 14/14. Ledger w=4 and w=3 rows marked ENFORCED. Wednesday mailed.
+### LEDGER this seat: 2 new rows (stray "x" tap to N, corrected; R's question sat 3.5 h inside a STATUS mail, answered).
+### FLOOR
+%0 tuesday · %6 N · %7 O · %9 M · %16 R · %12 g14 · %13 g15 · %17 g17 · %1 monitor. Usage 31%. Kam: 1 board message today (07:07, ruled + delivered); reconcile 0.
+
 ## 🔴 DELTA 159 — 2026-10-06 07:12 ROTATION HANDOVER (s98, ctx 79%; rotating after seat S's plan confirmation is answered). **READ THIS FIRST, THEN 158 (its items 2-4 stand).**
 ### FIRST WORK FOR THE NEXT SEAT
 1. **KAM RULED (live board 07:07:35, view=tuesday): "Decision nexusai-codeql-medium-alerts-ticketing: a — Ticket the mediums the same way".** Receipt posted (201); card ruled + DELIVERED. **SEAT S (%18, Datasec/NexusAI-S) launched 07:09** with `fleet/briefs_staged/2026-10-06_nexusai_S_codeql_medium_census.md` (103 mediums on 2f0ae4a: log-injection 72, all rule severity error; Q's method as the template). PLAN CONFIRMED 20:15:08Z (S90S; 6 log-injection groups LI-1..6 + 31 others, at most 18 tickets) WITH ONE ADDITION: LI-3's whole-req.body log sites #208/#214/#217 must be READ for a CREDENTIAL reaching the log; if yes, a separate HIGH ticket, first in the BLUF. OWED: its REPORT -> CHECK it as Q's was checked (census.csv vs your own fetch; board_count on the label; one source read), score, pane_close, and TELL KAM on the board (one short message).
