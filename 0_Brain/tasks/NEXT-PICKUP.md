@@ -13,7 +13,7 @@ supersede: REPLACED WHOLESALE 2026-10-05 22:5x by seat 9a78af86 (53% checkpoint)
 1. Read `inbox_digest.sh --inbound` WHOLE; full bodies via `inbox_digest.sh full <inbox> '<id>'`.
 2. **develop = d784b613c81e** (#1388 KS-1404 squash, VERIFIED AT SOURCE by Wednesday: tree f65ddbbd560c, 1 parent 3cb93b9c731e). Present history tonight: #1384 232623892f24 → Peter's #1392 3cb93b9c731e → #1388 d784b613c81e.
 3. **D 9th (%43)**: merged #1388; expect its follow-up ticket (N-1388-1..6, board account) + WRAP → verify handover hash, score, pane_close.
-4. **F lane**: Kam's merge-order card satisfied. **F 4th brief drafter running** → `fleet/briefs_staged/2026-10-05_seatF4_successor.md` (#1383 docs-only merge-in, tree to Wednesday before push, GO `GO (Seat F 4th): merge 1383 on gate61`). If missing after a rotation, re-commission from `HANDOVER-seatF3-2026-10-05.md`. Read the brief WHOLE before `brief_and_launch.sh` (run it BARE — a `script -q` wrapper failed with tcgetattr tonight; the gate launcher needs `script`, brief_and_launch does not). The send gate needs a Linear provenance line for EVERY ticket id in the QUEUE.
+4. **F lane**: Kam's merge-order card satisfied. **F 4th LAUNCHED %47 12:40:04Z** — ITEM 0 owed (rule Q-AKTO yes, Q-1376 leave; its merge-in tree must be checked by Wednesday before push; GO string `GO (Seat F 4th): merge 1383 on gate61`). Brief was → `fleet/briefs_staged/2026-10-05_seatF4_successor.md` (#1383 docs-only merge-in, tree to Wednesday before push, GO `GO (Seat F 4th): merge 1383 on gate61`). If missing after a rotation, re-commission from `HANDOVER-seatF3-2026-10-05.md`. Read the brief WHOLE before `brief_and_launch.sh` (run it BARE — a `script -q` wrapper failed with tcgetattr tonight; the gate launcher needs `script`, brief_and_launch does not). The send gate needs a Linear provenance line for EVERY ticket id in the QUEUE.
 5. **B 64th (%46)** launched 12:26:48Z: ITEM 0 owed (PR C KS-723 anchors-tx; #1393 merge-in on gate65's GO).
 6. **E 5th (%45)** launched 12:04:53Z: ITEM 0 owed. Rule Q-1256-CLOSE (if a Redis close returns NULL, the close cell stays open under Kam's b → maybe a fresh card), Q-SEAT5, Q-WAIT5, Q-F5 (develop is now in the shared store).
 7. **gate64 (%44)** on #1389: running the whole runner at the sim merge-in. On GO: launch **G 2nd** from `HANDOVER-seatG1-2026-10-05.md`; its merge-in tree re-predicted on the CURRENT develop (gate64's d1f3c5cb6c1c was on 3cb93b9c731e, now stale).
@@ -25,11 +25,11 @@ supersede: REPLACED WHOLESALE 2026-10-05 22:5x by seat 9a78af86 (53% checkpoint)
 | lane | seat / pane | state | next |
 |---|---|---|---|
 | B | B 64th %46 | ITEM 0 | PR C; #1393 merge on gate65 GO |
-| D | D 9th %43 | #1388 MERGED | wrap → score → D lane idle (KS-1404 live sweep owed, Kam's card) |
-| F | none | #1383 gate61r2 GO, unblocked | F 4th (brief drafting) |
+| D | none (D 9th WRAPPED 0.95) | #1388 MERGED d784b613c81e | idle; owed: C6 image proof at the next kintsugi deploy; N-1388-2 doc sentence follow-up |
+| F | F 4th %47 | ITEM 0 | #1383 merge-in → GO → merge |
 | G | none; gate64 %44 | #1389 under gate | G 2nd on GO |
 | E | E 5th %45 | ITEM 0 | #1385 merge-in → gate; KS-1256 b |
-Scored tonight (this seat): E 4th 0.93 · B 63rd 0.95.
+Scored tonight (this seat): E 4th 0.93 · B 63rd 0.95 · D 9th 0.95. E 5th %45 ITEM 0 ANSWERED 12:3xZ (re-predict on d784b613c81e; KS-1256 Redis-down = 503 ruled inside Kam's card, Kam told on panel).
 
 ## OWED (added this seat)
 - Gate-kit defect (D 9th's finding): `c4_docs_gate63.py predict` on an ABSENT develop returns None for every blob → a false M6 "re-gate" refusal. predict must refuse "develop unresolvable" by name; carry into every new kit.
