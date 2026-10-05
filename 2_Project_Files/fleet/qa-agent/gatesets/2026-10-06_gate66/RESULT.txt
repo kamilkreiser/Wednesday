@@ -1,0 +1,72 @@
+GATE66 KIT — RESULT (drafter, 2026-10-06 AEDT; host UTC clock read 2026-10-05T13:4xZ)
+PR #1385 KS-938 T1 | head f6b49d68209d4fa368335d3c2fa3e4928c3efaa1 | END_TREE 04fa3e0d1b48 | parents 79c87b8aaa48 + d784b613c81e
+GO string: GO (Seat E 6th): merge 1385 on gate66   (launcher refuses GO (Seat E 5th) / (Seat E 4th) / (Seat E 3rd), exit 8)
+STATUS: KIT COMPLETE, NOT LAUNCHED. Dry run rc 0. Routing line NOT added. Nothing in !CODING written; no mail; no rm.
+
+FILES WRITTEN (all in .../gatesets/2026-10-06_gate66/)
+  README.md  RESULT.txt  kit.json  prompt_gate66.txt  lib_gate66.py
+  c1_pin_gate66.py  c2_product_gate66.py  c3_tests_gate66.py  c4_docs_gate66.py  gh_gate66.py
+  launch_qa_secuura_ks938_1385.sh  repin_and_launch_gate66.sh
+  api/ (pull_1385.json, files, body, Actions runs at both heads)
+  run outputs *_exN.{out,err,rc}, dry_134317.*, repin_arms_ex1.out, dry_console_ex1.*
+  _quarantine/ (superseded runs, kept)  _scratch/ (gitignored: clone with SIM objects, fixtures)
+  scratchpad .../gate66drafter/ (exploration: h2peek.py, merge-tree / key / hand blobs)
+
+DEVELOP
+  READY develop d784b613c81e (the head's 2nd parent; the head is current with it).
+  origin develop at drafting c5101866ef54 (#1390 KS-1408: both docs reformatted, flow h2 split).
+  origin develop at the launcher check 13:40Z f0179806494e (#1391, + 5_Project_History/history.md only; docs identical to c5101866).
+
+THE SECOND MERGE-IN (develop INTO f6b49d68209d) — DIVERGENCE (Wednesday rules; the kit does not pick)
+  on c5101866ef54:
+    KEY-ANCHORED (KS-938 block after the KS-1005 section; == flow-numbering reading == tail)  36c1a881db305d034404a15fa4246cf6563c5199
+      flow KS-666 KS-1015 KS-1404 KS-1333 KS-1345 KS-1388 KS-1210 KS-1005 KS-938 | 1-14,18,19,20 | div +0 | 0 markers
+      cheat KS-1404 KS-1333 KS-1345 KS-1388 KS-1210 KS-1005 KS-938 | div +0 | 0 markers
+    git merge-tree --write-tree  rc 1, tree-with-markers edf424d164e8826bb8457951286183f07480a7b1
+      FLOW auto-merged == the key blob 2d1cd366a8cb (AGREE on the flow)
+      CHEAT CONFLICTED (KS-1005 section reformatted by #1390 exactly where KS-938 was appended): same key order, 3 markers, div +1
+    hand resolution (THEIRS hunk + OURS from KS-938 on)  4f1b4b999fabc8ae82ec89f7d636e03edb968a0b: same key order, ONE </div> SHORT
+      (KS-938 nested inside KS-1005's gotcha note) -> fails qm M1 + M8
+  on f0179806494e (current): KEY fb6cb2c6992cd48815b8f23a8519e9910bc27e63 (same doc blobs), merge-tree rc 1 73f98d063ed2 (same cheat
+    conflict), hand 0bb86333ba28. DIVERGENCE.
+  positive control: predict on d784 == END_TREE 04fa3e0d1b48.
+
+H2 READER PROOF (c4_h2proof_ex2, rc 0, 4/4; again on f0179806 4/4)
+  flow d784: 16 h2, 0 split, old same-line regex 16 | c5101866: 16 h2 tolerant, 5 SPLIT, old same-line regex 11 numbered,
+    old same-line key finder 4 of 8 keyed
+  cheat: 6 / 6 at both, 0 split (#1390 split only the flow's h2s)
+  planted `<h2>\n      99. ... (KS-99999)\n    </h2>`: tolerant HIT, old regex `<h2[^>]*>(\d+)\.` MISS — both docs.
+  reader refuses an unclosed h2 (opening-tag count != parsed count).
+
+QM ARMS (c4_selftest_ex2 rc 0, 30/30; ex3 29/29 after c5101866 appeared in the shared checkout)
+  GOOD SIM at the predicted tree: 8/8 PASS (also via CLI, c4_qm_goodsim_ex2 rc 0)
+  WRONG-ORDER SIM (cheat KS-938 above KS-1005): FAIL M1 + M8
+  HAND-RESOLUTION SIM / CONFLICT-MARKERS SIM: FAIL M1 + M8
+  Co-Authored-By trailer SIM: FAIL exactly [M4]; Signed-off-by SIM: FAIL exactly [M4]
+  single parent M2; extra path M1 M3; two commits M2 M7
+  ABSENT DEVELOP: refuses "develop unresolvable" BY NAME, 0 checks run — fabricated sha AND the real c5101866 against the shared
+    checkout while it was genuinely absent there (c4_qm_refuse_absent_develop_ex1 rc 2); absent M refuses by name.
+  Defect found + fixed while drafting: qm M7 false-failed on an ABBREVIATED M (now resolves M / D to 40-hex) — ex1 quarantined.
+
+OTHER INSTRUMENTS
+  c1 rc 0 11/11 (origin read) on c5101866 and f0179806; selftest 5/5 (79c87 control FAILS P2 P3 P4 P7).
+  c2 rc 0 5/5; selftest 9/9. 3 of 3 MFA-clear update objects null both; users.ts :1123 at d784 AND develop; updateUser unchanged.
+  c3 NOT RUN (selftest 15/15: judge arms + T1-T7 land exactly once).
+  gh: actions NEW-FAILING NONE vs 79c87 (both fail KS-168 gates, Security Scanning, pr — pr CONCLUDED failure); planted control fires;
+    ex1 caught a transient EMPTY run list at the head (now re-polled, never read as green). mergeable false / dirty. prtext 5/5.
+    census 0 OVERLAP; DOCS #1383, #1393 (+ #1394 KS-723 at the dry run).
+  launcher --check rc 0 (37 keywords); repin arms 5/5; dry run rc 0 on f0179806.
+
+KIT DOUBTS FOR THE GATE
+  D1 tier T1. D2 the merge-in DIVERGENCE (above). D3 the KS-938 block lands in OLD formatting inside #1390-reformatted docs.
+  D4 tamper blind spots (no builder table; kit T1-T7 untested). D5 existing rows not backfilled. D6 S1 revert non-throwing.
+  D7 pending seed from /me/mfa/enable never cleared by a disable. D8 PREFLIGHT INCOMPLETE 12/15 x2. D9 head subject 123 chars
+  (merge-in's) vs a landing subject <= 92. D10 flow block cites the 46c3 users.ts blob. D11 stale "Merge ordering" body section.
+  D12 #1383 / #1394 open on both docs: a landing voids the predictions.
+
+WEDNESDAY MUST RULE
+  1. D2: which tree Seat E 6th must build for the second merge-in (key-anchored fb6cb2c6992c on f0179806 is the kit's M1 default).
+  2. THE COMMISSIONED LAUNCH LINE IS STALE: `--repin-develop c5101866ef54...` now refuses rc 10 "stale re-pin" (repin_arms_ex1 arm 5);
+     origin develop is f0179806494e. README section 7 carries both lines; the f0179806 one passed the dry run. Not run.
+  3. Add the routing line `QA/Secuura-ks938-1385|coagent@agentmail.to|yes` before launch.
+  4. D3 (reformat the block or not) — it changes M1's tree.
