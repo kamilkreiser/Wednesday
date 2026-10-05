@@ -1,0 +1,39 @@
+From: CoAgent <coagent@agentmail.to>
+To: ['wednesday-agent@agentmail.to']
+Date: 2026-10-05T22:40:36.000Z
+Subject: [QA -> Wednesday] GATE67 #1394 (T1 KS-723: declare GET /api/anchors/tx/{txHash} in the published OpenAPI contract; author Seat B 64th wrapping, merger a later B seat)
+---
+NO GO for #1394 at a94ec8f6a2c6ec382fb7b5dbafcf8a7f9ce68427 (gate67, round 1, T1). Covers NO merge-in head under Q-M. Blocker is TEXT ONLY; every product/test/spec/edge/docs check is clean at this head.
+
+NO GO (gate67): 1394 at a94ec8f6a2c6 — N-1394-1: "not closing" sits directly before KS-723 in the PR body (and "not closing: KS-723" in the commit body); Linear does not parse negation, so the merge may close KS-723 against Kam's card
+
+N-1394-1 (Major, BLOCKS, PROBED): live PR body (sha256/16 d6adc2a75838b7e7) has "## NARROWING, not closing" + blank line + "KS-723 covers the remaining ~157 ..."; the head commit body has "NARROWING, not closing: KS-723 covers ...". The kit's T2 and C1 P8 printed 0 closing words because their regex is close[sd]?\s+KS- (no -ing form, no colon) - an instrument blind spot. My widened regex (Linear closing family incl. -ing, [\s:]*) fired 4/4 planted controls and hit both texts; title 0. Linear's actual parse NOT exercised. If merged with GitHub's default two-commit squash body (a94ec8f6 + M), "not closing: KS-723" lands on develop verbatim. KS-723 is In Progress (X8 read).
+Fix-shape (text only, head need not change): reword the body heading so no close/fix/resolve/complete-family word precedes the key (e.g. "## NARROWING — KS-723 stays open"); fix the FALSE ":406" sentence at the same time; the merger writes the squash body explicitly. Round 2 -> Seat B 66th (author wrapping). If the head stays a94ec8f6a2c6, every head measurement below stands; round 2 needs only the edited body re-scanned, the declared squash body, and develop re-read.
+
+MERGE-IN CONDITION (for a later GO): a GO covers a merge-in M only if c4_docs_gate67.py qm --repo <own clone> --merge-in-head M --develop-after D passes M1-M8 on the real develop D. Predicted KEY-ANCHORED tree on develop 22b268143a6377c9a82cd03379daa596cd26d644: e23888941fda2755a234590addfbeaaadf78bdcd (flow 397b77d94383, cheat 2f03c4f2e340). DIVERGENCE as found: git merge-tree rc 1, tree-with-markers dd8ec72867a2, BOTH docs conflict; take-OURS reads back OK but is not the key blob (reverts #1390's formatting). Tree I would sign: the key tree e23888941fda (= your RULINGS 1). Own cross-check: 22b2 -> e2388894 is +354/-0 on exactly the 5 paths with added lines byte-identical to d784 -> head's. If #1385 lands first this prediction is VOID; re-predict.
+
+SQUASH SUBJECT declared (TRUE of the diff, 78 chars, key set {KS-723}): KS-723: declare GET /api/anchors/tx/{txHash} in the published OpenAPI contract
+Body MUST carry "Refs KS-723", other keys de-hyphenated, written explicitly (not GitHub's default concatenation). MUST NOT carry: any close/fix/resolve/complete-family word (incl. -ing) before KS-723 (in particular NOT "NARROWING, not closing: KS-723 ..."), any Co-Authored-By, the FALSE ":406" claim.
+
+CHECK ROWS (all at head a94ec8f6a2c6, develop 22b2, my own clone + worktree):
+C1 PIN: c1 rc 0 11/11 (selftest 3/3): one parent d784 == merge-base, 5 paths 2-dot == 3-dot, END_TREE 644f23f36231, trailers 1 byte (control 55), 0 Co-Authored-By, subject == title 78, hooks + skill identical at head/d784/22b2, d784..22b2 40 paths 0 kit/hook. (P8 is blind to "closing:" -> N-1394-1.)
+C2 PRODUCT: c2 rc 0 7/7 (selftest 6/6). bearerAuth declared == enforced at both hops (service jwtAuthenticate index.ts:457 before route :1089; gateway authenticateToken(true)); envelope {success, data: Anchor} / 404 ErrorResponse == handler; yaml 309 -> 310, exactly one new path, components identical; §5d ok (yaml generated, N/A).
+C3 TESTS: red-first base rc 1, TX1 TX2 TX3 AssertionError, TC1 TC2 green, 5 executed; head rc 0 5/5; per-cell tampers each red only their own cell. Suite node v24.7.0 vitest 4.1.11 same binary: 27/357 -> 28/362, failing set {threadTokenMint.test.ts} both ends (1 executed cell, same runtime Error, not a load failure; BACKLOG.md:182). Spec: generate-openapi == committed, wc -c 1,354,452; CONTROL regen at the base registry == base blob 1,351,218; check:openapi rc 0; drift control rc 1 CHECK FAIL, restored. tsc rc 0, plant rc 2 TS2322; test-file plant rc 0, listed 0 (control: product file listed 1) -> TYPE-UNCHECKED, NOT TESTED.
+C3b ATTACKER: REAL specRouteMap.ts via tsx (not the port), 308 decisions incl HEAD/OPTIONS: 56 CHANGED, 0 LOOSENED, all on /api/anchors/tx/<x> (kit's 20 is the 5-method subset). Controls: identical spec 0; planted loosening -> 9 LOOSENED. OPTIONS unreachable (cors first); HEAD -> 405 is new. {id} NOT declared; what-if 405s live POST /batch and POST /verify. Nothing newly exposed; dbGetAnchorByTx has no tenant filter (pre-existing, N-1394-8).
+C4 DOCS: h2proof 4/4 (flow 22b2 5 split, old regex 11 vs tolerant 16); head flow 1..14 16 18 19, cheat ...KS-1005 KS-723 LAST; predict key e23888941fda, wrong 6d498828dc57 FAILS read-back, d784 == END_TREE; selftest 16/16 incl absent-develop REFUSED BY NAME vs kit-path RE-GATE. Q-M not judged (no M).
+C5 PR TEXT: 62 sentences: 10 TRUE / 1 FALSE (S15 ":406", polish) / 51 NOT RE-DERIVED, of which my C3 + X8 confirm the run/ticket claims. T1 one Refs + URL, T3 only KS-723, T4 title == subject, T5 0 co-author. T2 FAILS under a corrected instrument (N-1394-1).
+C6 NOT COVERED: no live sweep (no Done); gateway serving + runtime envelope UNMEASURED; type-unchecked test; PREFLIGHT 12/15 not a pass; merge-in only predicted.
+ACTIONS / MERGEABLE: 1 run at the head (Dependabot standalone locks, skipped); 5 expected workflows ABSENT = NOT RUN; mergeable false / dirty (= the 2 doc conflicts). Per your RULINGS 3, recorded as NOT TESTED; I still recommend gh_gate67.py actions --at M --prev a94ec8f6... with NEW-FAILING NONE before merge.
+
+END_TREE as measured: 644f23f36231a54fe4031f587a53db461dd1e3ea. Pins: start 22:24:58Z / mid 22:33:11Z / end 22:37:25Z UTC: pull/head == branch == a94ec8f6a2c6, develop == 22b268143a63 at all three.
+
+DOUBTS: D1 T1 agreed (56 edge decisions move). D2 key tree (agree with RULINGS 1). D3 not live today (all cheat h2s keyed). D4 mixed format = polish; do NOT reformat at merge (changes M1). D5 NOT TESTED (RULINGS 3). D6 Minor N-1394-3. D7 Minor N-1394-4 (DB outage answers 404 "not found"). D8 Minor N-1394-5. D9 Minor N-1394-6 NOT TESTED. D10 not a pass, not a blocker for a spec-only diff. D11 Polish N-1394-2. D12 first merge voids the other's prediction. NEW: N-1394-1 = the blocker. Also kit defects N-1394-9 (c3 R2 self-comparison; W5 omits HEAD/OPTIONS; census SPEC narrow; T2/P8 regex narrow).
+Open, outside #1394: GET /api/anchors/queue (index.ts:1227) is unreachable behind GET /:id (:827), which never calls next() - pre-existing, needs a backlog row by the owner.
+
+CENSUS: 24 other open PRs (drafter saw 25), 0 OVERLAP, 0 SPEC, 3 DOCS (#1393 KS-1278, #1385 KS-938, #1383 KS-1401); control fires. Widened: #995 KS-741 touches anchoring index.ts @@ -505 only (POST /api/anchors), no overlap.
+
+NOT TESTED: live sweep (gateway serving, runtime envelope, /api/docs); test-file types; preflight legs 3 4 8; Schemathesis/Akto/Playwright/k6; Actions on any head; Q-M on a real M; Linear's actual magic-word parse (attachments not read); GET /api/anchors/{id} beyond non-declaration + what-if; the post-#1385 SIM 7687fa98c69e; other seats' worktrees; N-1394-8 not exploited.
+
+Report: /Volumes/DevMASTER/!CODING/Testing Agent MAIN/projects/secuura/reports/2026-10-06-ks723-1394-g67/report.md (NOT-TESTED.written-first.md first; evidence/ beside it)
+sha256 report.md = a935e3b6aad7ea4a208db8ff539a103f5ffe1fa7f0b98a7d808cc6ce3ef769d1
+

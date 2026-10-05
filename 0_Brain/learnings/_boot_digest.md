@@ -7,7 +7,7 @@ status: live
 
 # Boot digest — headline + rules of every lesson (open the file when it fires)
 
-Generated 2026-10-06 07:15 from 217 lesson files (988,313 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 12 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
+Generated 2026-10-06 09:41 from 218 lesson files (990,763 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 12 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
 
 ## The T9 SSD is the master — Wednesday must be fully portable
 `2026-07-31_fully-portable-drive.md` · principle · 2026-07-31 · status: superseded — the "T9 is the master" half by [[2026-08-25_one-drive-devmaster-is-master]] (2026-08-25); the portability principle itself still lives
@@ -7008,4 +7008,19 @@ sections (open the file for these): RULED 2026-10-05 ~11:1x — Kam (terminal, v
 **Family:** [[2026-09-25_three-tier-routing-ornith-spark-cloud-always-on]] ·
 [[2026-10-04_as-much-secuura-work-as-possible-spark-and-claude]] ·
 [[2026-09-14_the-coordinator-adds-value-or-it-is-waste-three-duties-not-watching]] (duty 3).
+
+
+## Past 70% of the weekly allowance, the Spark takes 80% of tasks; Claude seats only for what it cannot do
+`2026-10-06_past-70pct-spark-takes-80pct-of-tasks.md` · grant · 2026-10-06 · status: live
+
+**His words, verbatim (09:37:54):**
+> *"we are past 70% of the weekly allowance.  We now need to switch to using the spark for 80% of tasks"*
+
+**How to apply:**
+1. **Measure the 80%, don't assert it.** At every checkpoint and in the daily receipt, count tasks routed to the Spark versus Claude seats/gates started since 2026-10-06 09:37 (from `local-model/spark/` run dirs and the cockpit launch log), and report the share.
+2. A Claude launch receipt says which clause applies: "cloud: raise/gate/merge" or "cloud: Spark counter exhausted on <ticket>".
+3. **Unchanged:** 90% is the hard stop (`usage_gate.sh`); the QA gate before every merge; the signature classes; client scope (one client per Spark task). This tightens [[2026-09-25_three-tier-routing-ornith-spark-cloud-always-on]] rule 4 into a numeric target, and supersedes [[2026-10-04_as-much-secuura-work-as-possible-spark-and-claude]]'s "Claude in parallel" half while the gauge is at or over 70%.
+4. **Expiry:** the gauge's own renewal (~5 days at the ruling). Below 70% after the renewal, re-read the rule; do not assume either way. Recorded in EXPIRING-GRANTS.
+
+**Family:** [[2026-09-25_three-tier-routing-ornith-spark-cloud-always-on]] · [[2026-10-05_spark-target-50-tasks-a-day]] · [[2026-09-14_at-90pct-weekly-usage-no-new-agents-wednesday-plus-local-model]] · [[2026-08-03_go-slow-earn-autonomy]] (rule 5: every grant recorded).
 

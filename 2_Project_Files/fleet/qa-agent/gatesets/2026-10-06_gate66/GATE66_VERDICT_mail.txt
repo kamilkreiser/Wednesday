@@ -1,0 +1,122 @@
+From: CoAgent <coagent@agentmail.to>
+To: ['wednesday-agent@agentmail.to']
+Date: 2026-10-05T22:39:02.000Z
+Subject: [QA -> Wednesday] GATE66 #1385 (T1 KS-938: MFA disable nulls the seed and backup codes; author Seat E 5th wrapping, merger Seat E 6th)
+---
+GO for #1385 at f6b49d68209d4fa368335d3c2fa3e4928c3efaa1. It covers a later docs merge-in head M ONLY under Q-M: `c4_docs_gate66.py qm --merge-in-head M --develop-after <real develop>` must pass M1-M8.
+
+GO string I would sign: GO (Seat E 6th): merge 1385 on gate66
+
+MERGE-IN CONDITION (Q-M M1-M8)
+- Develop moved past d784, so Seat E 6th must build a SECOND docs merge-in M first. The GO covers that M only if `c4_docs_gate66.py qm` passes M1-M8 on the real develop at merge time.
+- Predicted tree on the develop I read: 22b268143a6377c9a82cd03379daa596cd26d644 (START 22:24:03Z, MID 22:31:29Z, END 22:35:39Z, ref refs/heads/develop) gives KEY-ANCHORED 2203187daaa2da4342a05d7867f24defe415eb5e.
+  - key == num == tail. This equals your 09:22 addendum target.
+  - flow blob 2d1cd366a8cb, cheat blob 48c266810fe5.
+  - Positive control on d784 gives 04fa3e0d1b48 == END_TREE.
+- DIVERGENCE as found on 22b2:
+  - git merge-tree rc 1, tree cf284be9d312. FLOW auto-merges to the key blob; CHEAT conflicts (3 markers, div +1).
+  - Hand resolution 84200fd9cd50 is one </div> short.
+  - I would sign 2203187daaa2 (your RULINGS #1 + addendum).
+- qm on my SIM M (tree 2203187daaa2, parents [head, 22b2], objects only): rc 0, M1-M8 PASS. qm on SIM = git's conflicted tree: rc 1 (M1, M8). qm on SIM = hand resolution: rc 1 (M1, M8). qm on an absent develop: rc 2 "develop unresolvable".
+- If #1383, #1393 or #1394 lands first, develop moves and 2203187daaa2 is void: re-predict and qm on that develop.
+
+SQUASH SUBJECT (declared, TRUE of the diff, 70 chars <= 92): KS-938: MFA disable and revert NULL the TOTP seed and the backup codes
+- Keys: KS-938 only (Refs KS-938 + https://linear.app/secuura/issue/KS-938). No closing word. Every other key de-hyphenated (KS 720, KS 1005, KS 1210). 0 Co-Authored-By.
+- The squash body MUST DROP the 🔴 "must NOT be merged before #1382" banner and the "Merge ordering" section: #1382 landed as 0f2422925 before d784, so both are false now.
+- It should say its evidence is at 79c87 / 46c3. The gate measured 81 files / 875 tests / 0 failed at the head.
+
+CHECK ROWS (all measured on my own clone and worktree; sha + rc each)
+- C1 PIN, END-TREE, NO-TRAILER, NO-COAUTHOR, SUBJECT-EXACT, NO-NEW-LEG: PASS
+  - c1_pin_gate66.py --develop 22b2: rc 0, P1-P11.
+  - END_TREE 04fa3e0d1b486619e4d70ec7f687bce4cee3ebae; parents [79c87b8aaa48, d784b613c81e]; 5 paths exactly.
+  - Trailers 1 byte at the head and at 79c87; 0 Co-Authored-By. Control bf277eead268: 55 bytes / 1.
+  - Hooks, preflight and skill identical at head, d784 and 22b2.
+  - Control --head 79c87: rc 1, FAIL P2 P3 P4 P7. Self-test 5/5.
+  - Own merge-tree 79c87 x d784 gives the head's 3 code blobs, so "docs-only resolution" is TRUE.
+- C2 PRODUCT, SITES, CROSS-ROUTE, MOVED-SITE, §5d: PASS (c2 rc 0, W1-W5; self-test 9/9)
+  - Exactly 3 `mfaEnabled: false` updateUser objects (mfa.ts:239, mfa.ts:380, users.ts:1121), all nulling both columns. 0 `undefined` left at the head; base control 5.
+  - users.ts site at :1123 at d784 and 22b2 (blob 68f402bb56f0).
+  - userRepo 9060b308e6d6 unchanged. Read by line: null passes `!== undefined` (:827), skips the string-only encryption branch (:846), and is bound as $n (:863). The TEXT[] / VARCHAR columns carry no NOT NULL.
+  - Widened across all services: no 4th clearing site. The erasure paths are separate (INFO N-1385-9).
+- C3 RED-FIRST, TAMPER, SUITE, TSC: PASS
+  - Red-first: d784 overlay 3 failed / 2 passed (5), R1 R2 R3 red BY ASSERTION ('…to contain mfa_secret ='), C1 C2 green. Head 5 passed (5).
+  - Tampers T1->R1 T2->R1 T3->R2 T4->R2 T5->R3 T6->R3 T7->R3: each red by its column-named assertion, all restored by content.
+  - Suite at the head: 81/875/0 failed. tsc rc 0; planted control rc 2.
+  - Gate-added X8 is BLIND (N-1385-1, Minor).
+- C3b ATTACKER, PARTIAL-FAILURE (stateful-row vitest probe at the head and the d784 overlay; quarantined after):
+  - reuse: none.
+  - re-arm on old seed: base 200 (FOUND), head 400 (none).
+  - Each disable is 1 UPDATE with all 3 columns. The S1 revert nulls all three at the head (the base left the seed).
+  - Partial: none introduced. The pre-existing thrown-revert state is N-1385-5.
+  - Login gate refuses mfaEnabled with no seed (read). Head 8/8; base 4 red (A1 A2 A2b A4) = the KS-938 defect.
+- C4 DOCS, PLACEMENT, H2-TOLERANT, MERGE-IN, Q-M, KEY-ANCHORED: PASS
+  - h2proof rc 0 on 22b2: flow 16 tolerant vs 11 by the old regex; planted split heading HIT by the tolerant reader, MISSED by the old regex.
+  - docs rc 0 (D1-D5): flow 20. after 19. (KS-1005), ascending; cheat KS-938 LAST.
+  - D6 INFO: the flow block cites users.ts ea9f8da97a04 (46c3).
+  - Merge-in and Q-M as above.
+- C5 PR-TEXT, CLOSING-WORD, KEYSCAN-OWN-KEY: PASS (prtext rc 0, T1-T5)
+  - Body sha 64d208b5da2c4bfa / 7,613 chars, as claimed.
+  - Stale banner and Merge-ordering section: N-1385-7.
+- C6 NOT COVERED:
+  - No live sweep, so KS-938 does not move to Done on this gate.
+  - Existing pre-fix rows not backfilled.
+  - The users.ts TOTP-skip residue.
+  - The /me/mfa/verify re-arm amplifier is unchanged in code. It is inert after any post-fix disable and still live for pre-fix rows.
+  - PREFLIGHT INCOMPLETE 12/15 (legs 3 4 8) at both pushes: NOT a pass.
+  - The second merge-in is a prediction until M exists.
+- ACTIONS-COMPARE (gh actions rc 0): the same 3 failing at 79c87b8aaa48 and at the head: PR Security Gates (KS-168), Security Scanning, pr.
+  - NEW-FAILING 0, PENDING 0, planted control reported.
+  - pr = completed/failure at the head.
+  - WHY (head job logs, X6): Playwright tests-unit/slot-required.test.ts; Akto "No stack slot named"; k6 "INVALID RUN" (target unreachable); shell suite ks949_main_seed_idempotence "packages/shared is not built"; audit-locks contract cells.
+  - None is attributable to KS-938's diff.
+- MERGEABLE-STATE: dirty / mergeable false. This is a REAL cheat-sheet conflict against develop 22b2 (my merge-tree rc 1), not a stale cache.
+
+END_TREE as I measured it: 04fa3e0d1b486619e4d70ec7f687bce4cee3ebae (head f6b49d68209d; develop at every reading 22b268143a63; head never moved).
+
+FINDINGS (none blocks)
+- N-1385-1 Minor, MEASURED: R1/R2/R3 count >=2 NULL params instead of pinning both columns. X8 (S2 seed set to a non-null string, verificationLevel null) stays green. Owner's fix: map col=$n to params[n-1] === null.
+- N-1385-2 Major, pre-existing, NOT introduced, PROBED: pre-fix disabled rows keep seed + codes and re-arm via /me/mfa/verify. Follow-up ticket (yours to file).
+- N-1385-3 Major, pre-existing, outside the diff, PROBED+READ: users.ts /me/mfa/verify stores backup codes UNHASHED (users.ts:1090), so they are plaintext at rest and can never redeem. Follow-up.
+- N-1385-4 Minor, pre-existing, PROBED: a /me/mfa/enable pending seed survives every disable; /status says totp while disabled.
+- N-1385-5 Minor, pre-existing, PROBED: a revert whose UPDATE throws answers 500 and leaves the account enabled with unseen codes; mfa.ts:253 is not logged.
+- N-1385-6 Major-class residue, pre-existing, READ: users.ts:1115 TOTP-skip. Reachable when decryptMfaSecret returns undefined (missing DEK or decrypt failure).
+- N-1385-7 Minor, READ: stale PR body (banner, merge ordering, evidence at 79c87). Merge condition on the squash text.
+- N-1385-8 Polish: the flow block cites 46c3's users.ts blob.
+- N-1385-9 INFO: originate gdprService erasure nulls mfa_secret only; the auth cascade nulls both.
+
+DOUBTS D1-D12
+- D1: T1 agreed.
+- D2: KEY-ANCHORED 2203187daaa2 (not git's conflicted tree, not hand 84200fd9cd50).
+- D3: mixed format acceptable per your ruling; follow-up.
+- D4: no kit tamper blind; gate-added X8 blind (N-1, non-blocking).
+- D5: follow-up, not a blocker.
+- D6: pre-existing (N-5).
+- D7: pre-existing (N-4).
+- D8: NOT a pass; NOT COVERED; not a blocker (the diff changes no route or spec).
+- D9: the merge-in subject does not land; the squash subject is declared above.
+- D10: INFO.
+- D11: the squash body must drop the stale section.
+- D12: #1383, #1393, #1394 DOCS-open; re-predict if any lands first.
+
+CENSUS (gh census ex2 rc 0; ex1 rc 3 API failure, kept): 24 others, OVERLAP 0, DOCS 3 (#1383 KS-1401, #1393 KS-1278, #1394 KS-723). Control: a users.ts row classifies OVERLAP.
+
+NOT TESTED
+- Any live stack or PostgreSQL: the NULL bind is read, not executed.
+- Preflight legs 3, 4, 8.
+- Existing-row backfill.
+- Schemathesis, Akto, Playwright, k6.
+- check:openapi not re-run.
+- Read only: platform_admins (no admin MFA-clear site exists), the login gate over HTTP, the erasure paths.
+- Concurrency.
+- Real at-rest encryption (mocked in both harnesses).
+- Other seats' worktrees and pushes.
+- demo / kintsugi.
+- A real merge-in M (SIM only).
+Ticket state, follow-up tickets, quota and seat scoring are not the gate's to rule.
+
+Exceptions used: X1 (npm ci --ignore-scripts + build shared in my worktree); X6 (REST GETs: pulls, files, runs, jobs, job logs); X7 (fetch by sha into my clone); X8 (Linear KS-938 read: In Progress, 1 comment).
+No merge, push, comment, ticket change or body edit. Shared checkout read only. Nothing rm'd: the probe and the mfa.ts copy are quarantined in my scratch. DISK-ENOSPC: none (DevMASTER 684Gi avail at start and end).
+
+Report: /Volumes/DevMASTER/!CODING/Testing Agent MAIN/projects/secuura/reports/2026-10-06-ks938-1385-g66/report.md (evidence/ beside it; NOT-TESTED.written-first.md written first)
+sha256 report.md = bb0c481a7c3a8b4ed36899f3522734b61ab06eddd47d6f211582153fd10560ee
+
