@@ -135,3 +135,4 @@ sees the claim rather than discovering it in a conflict.
 | 2026-10-05 09:05 | Kamils-Mac-Studio | --force | CLOSED |  2026-10-05 09:06 mis-filed: argument order slip (flag passed first); the real claim follows |
 | 2026-10-05 09:06 | Kamils-Mac-Studio | nas_push.sh hang fix: diagnose the 03:30 stall (0-byte log, KILLED-CAP 07:35), add rsync --timeout + dry/real state label, exercise both ways (forced: the open 10-04 18:59 NAS claim is this same Studio Wednesday seat lineage's own) | OPEN | |
 | 2026-10-05 10:37 | Kamils-Mac-Studio | Dev-drive cleanup survey + move stale files to /Volumes/G-DRIVE/Scratch Files (Kam 2026-10-05 ~10:2x terminal) + G-DRIVE network share | OPEN | |
+| 2026-10-05 11:05 | Kamils-Mac-Studio | Spark 50/day pipeline: durable in-tree Spark round runner + queue loop (local-model/spark/), replacing scratchpad round scripts (Kam 2026-10-05 ~11:0x 'aim for 50 a day') | OPEN | |
