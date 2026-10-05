@@ -8,5 +8,4 @@
 #              spark.pins are read first; pins here win per key.
 # When a round ends its line is REMOVED from here and a row goes to spark/done.md. Lines starting with # are ignored.
 # Only queue a brief whose builder already ran rc 0 on it (kit 03 "BEFORE HAND-OVER"): `round.sh <dir> --dry-run` does that.
-KS-998-format-gate-grep-fixed
-KS-1136-aggregate-unreadable-artefacts
+KS-865-header-lists-checked-files-r2

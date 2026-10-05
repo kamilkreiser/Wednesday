@@ -1,0 +1,92 @@
+diff --git a/Blockchain/Dev/scripts/__tests__/ks865_header_lists_checked_files.test.sh b/Blockchain/Dev/scripts/__tests__/ks865_header_lists_checked_files.test.sh
+new file mode 100644
+index 000000000..6c5255e1b
+--- /dev/null
++++ b/Blockchain/Dev/scripts/__tests__/ks865_header_lists_checked_files.test.sh
+@@ -0,0 +1,73 @@
++#!/usr/bin/env bash
++# =============================================================================
++# TESTS for Blockchain/Dev/scripts/check-no-latest-tags.sh - KS-865 residual:
++# the header's "What's checked:" list must name exactly the files CHECK_FILES reads.
++# =============================================================================
++# #1229 removed .github/workflows/deploy-staging.yml from CHECK_FILES (its target is
++# gone) but left it in the header, so the header advertised six inputs while the
++# script reads five. The cells compare the two sets by BASENAME: every file-looking
++# token (*.yml, *.yaml, *.json, *.bicep) on a "#   - " line under "# What's checked:"
++# against the entries between "CHECK_FILES=(" and ")". Read-only: nothing is run.
++# Usage: bash Blockchain/Dev/scripts/__tests__/ks865_header_lists_checked_files.test.sh
++# =============================================================================
++
++set -uo pipefail
++
++HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
++SUBJ="${CHECK_NO_LATEST_TAGS_SH:-$HERE/../check-no-latest-tags.sh}"
++[[ -r "$SUBJ" ]] || { echo "FATAL: check-no-latest-tags.sh not readable at $SUBJ" >&2; exit 2; }
++PASS=0
++FAIL=0
++
++header_names() {   # basenames named on the header's "What's checked:" list, sorted, one per line
++  sed -n "/^# What's checked:/,/^#\$/p" "$SUBJ" | grep -E '^#   - ' \
++    | grep -oE '[A-Za-z0-9_./-]+\.(yml|yaml|json|bicep)' | sed 's#.*/##' | sort -u
++}
++list_names() {     # basenames in the CHECK_FILES array, sorted, one per line
++  sed -n '/^CHECK_FILES=(/,/^)/p' "$SUBJ" | grep -oE '"[^"]+"' | tr -d '"' | sed 's#.*/##' | sort -u
++}
++
++HDR="$(header_names)"
++LST="$(list_names)"
++N_HDR="$(printf '%s\n' "$HDR" | grep -c . || true)"
++N_LST="$(printf '%s\n' "$LST" | grep -c . || true)"
++
++# CELL 1 (RED at the tip) - the header names nothing CHECK_FILES does not read.
++EXTRA="$(comm -23 <(printf '%s\n' "$HDR") <(printf '%s\n' "$LST") | grep . | tr '\n' ' ')"
++if [[ -z "$EXTRA" ]]; then
++  echo "PASS: the header's What's checked list names no file outside CHECK_FILES"; PASS=$((PASS+1))
++else
++  echo "FAIL: the header's What's checked list names file(s) CHECK_FILES does not read: $EXTRA"; FAIL=$((FAIL+1))
++fi
++
++# CELL 2 (RED at the tip) - the two sets are the same size.
++if [[ "$N_HDR" == "$N_LST" ]]; then
++  echo "PASS: the header lists $N_HDR file(s) and CHECK_FILES reads $N_LST"; PASS=$((PASS+1))
++else
++  echo "FAIL: the header lists $N_HDR file(s) but CHECK_FILES reads $N_LST"; FAIL=$((FAIL+1))
++fi
++
++# CELL 3 (GREEN CONTROL, tip AND after) - every file CHECK_FILES reads is named in the header.
++MISSING="$(comm -13 <(printf '%s\n' "$HDR") <(printf '%s\n' "$LST") | grep . | tr '\n' ' ')"
++if [[ -z "$MISSING" ]]; then
++  echo "PASS: CONTROL every CHECK_FILES entry is named in the header"; PASS=$((PASS+1))
++else
++  echo "FAIL: CONTROL CHECK_FILES entries missing from the header: $MISSING"; FAIL=$((FAIL+1))
++fi
++
++# CELL 4 (GREEN CONTROL, tip AND after) - the readers saw something: five list entries, at least five header names.
++if [[ "$N_LST" -eq 5 && "$N_HDR" -ge 5 ]]; then
++  echo "PASS: CONTROL the readers found the list (5 entries) and the header ($N_HDR names)"; PASS=$((PASS+1))
++else
++  echo "FAIL: CONTROL the readers found $N_LST list entries and $N_HDR header names (expected 5 and >= 5)"; FAIL=$((FAIL+1))
++fi
++
++# CELL 5 (GREEN CONTROL, tip AND after) - the KS-865 comment explaining the removal stays.
++if grep -qF '# KS-865: ".github/workflows/deploy-staging.yml" was the sixth entry' "$SUBJ"; then
++  echo "PASS: CONTROL the comment explaining the removed deploy-staging.yml entry is kept"; PASS=$((PASS+1))
++else
++  echo "FAIL: CONTROL the comment explaining the removed deploy-staging.yml entry is gone"; FAIL=$((FAIL+1))
++fi
++
++echo "ks865_header_lists_checked_files: $PASS passed, $FAIL failed"
++[[ "$FAIL" -eq 0 && "$PASS" -eq 5 ]]
+diff --git a/Blockchain/Dev/scripts/check-no-latest-tags.sh b/Blockchain/Dev/scripts/check-no-latest-tags.sh
+index 6fc1237f4..ba4a60acc 100644
+--- a/Blockchain/Dev/scripts/check-no-latest-tags.sh
++++ b/Blockchain/Dev/scripts/check-no-latest-tags.sh
+@@ -14,7 +14,7 @@
+ #   - docker-compose.production.yml
+ #   - deployment/azure/services.bicep / services.parameters.json
+ #   - deployment/azure/main.bicep / main.parameters.json
+-#   - .github/workflows/deploy-staging.yml (staging is also pinned in CI)
++#   (five files; KS-865 removed a sixth, retired input - see the note under CHECK_FILES)
+ #
+ # What's allowed:
+ #   - docker-compose.yml (dev compose, can use :latest implicit)
