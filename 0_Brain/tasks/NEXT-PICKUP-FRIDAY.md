@@ -21,7 +21,7 @@ supersede: replace wholesale; previous = NEXT-PICKUP-FRIDAY.md.pre-0925-rotate-s
 **LIVE PANES:**
 - %19 Composer-D **B74** pickers (branch b74/pickers 3810e3c) held for gate; %29 Composer-QA **B77** gate (tier 1) — on GO: `friday/merge_when_green.sh datasecau/Datasec-Security-Composer <PR> 3810e3c982dafc01e99dfffa7e8c5c97718e466b` (OPEN THE PR FIRST: `friday_as.sh datasec gh pr create … --head b74/pickers`), then a B74 records addendum (C-number next after root main's highest), then a deploy card (Composer demo = e36fcde; Kam's word).
 - %24 HPSM-POC-B **B125** on ADDENDUM-2: records/b125 (C-53) + tickets N-1..N-5 (N-3 is a wording question for Kam). On READY (records): open the analysis PR, merge_when_green, deliver card hpsmpoc-renamed-customer-pdf-1005 to C-53; close %24.
-- %26 HPSM-POC-D **B127** records done; analysis PR **#61** (records/b127 ef5847f) merge job was running: re-run `friday/merge_when_green.sh datasecau/HPSM-POC-analysis 61 ef5847f4911e657f533a9e361c8c2bc59f2030f1` if not merged; then deliver card hpsmpoc-template-102-words-1005 to C-54; close %26.
+- B127 DONE: analysis #61 merged 773d94f; card hpsmpoc-template-102-words-1005 DELIVERED (C-54); pane %26 closed.
 **Still owed to Kam (not carded):** E8 timeframe note (told); Composer pack questions (Q2–Q7, #172, approver half of Q1) for his review; test user + UAT seat (C-51/C-52) while he is logged in.
 **Tools shipped today:** merge_when_green rule 6 (latest check-run per name); watch_status skips not-yet-written STATUS files. Ledger: 1 row (pull with uncommitted own files ×2 + late-seeded watcher) — commit own files and seed watchers BEFORE.
 
