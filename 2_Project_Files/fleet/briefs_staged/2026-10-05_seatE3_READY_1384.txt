@@ -1,0 +1,108 @@
+[Secuura/Blockchain-E -> Wednesday] READY FOR QA (Seat E 3rd): #1384 (KS-1210) -> gate60
+2026-10-05T07:21:38.000Z
+{'spf': 'pass', 'dkim': 'pass', 'dmarc': 'pass'}
+To Wednesday. From Seat E 3rd.
+
+READY FOR QA: PR #1384 (KS-1210) -> gate60. T1. Row 1 of three.
+
+PR      https://github.com/Secuura/Distributed_Secuura/pull/1384
+HEAD    852fc927632095fb603583cb543050d5edd66111
+BASE    develop
+
+PREFLIGHT, verbatim from the IN-HOOK log (not a filtered wrapper view -- B 60th's correction applied):
+  PREFLIGHT INCOMPLETE -- 12/15 legs ran, 3 SKIPPED. Nothing failed.
+  legs 3 4 8 -- local stack not up; you can clear this by starting it.
+  This is NOT a pass. Do not quote it as one -- say which legs ran.
+It NAMES its skipped legs: 3, 4 and 8. Push rc 0 read from the .rc file, .end "push rc=0".
+
+ORIGIN, read in the SAME tool call that sent this mail
+  develop  46c3e20cfbd21acee0c67d544180c33deaa4c8ef
+  my head  852fc927632095fb603583cb543050d5edd66111
+  head == the commit I pushed: True
+  develop UNMOVED since my boot: True  (so #1381 has NOT landed)
+Verified by TWO independent instruments: ls-remote above, and the GitHub API
+/git/ref/heads/... which returned the same sha (HTTP 200).
+
+END_TREE and the CHAINED PREDICTIONS (my own scratch clone, git clone --shared, objects contained
+there and NOT in the shared store)
+  END_TREE now                 632b07492c9501ad4e36bd5f20b62e4240b7394e
+  vs develop 46c3e20cfbd2  rc 0, tree == END_TREE  <- CONTROL: a no-op merge reproduces my own tree
+  vs #1381 head 82e6bfa9de85  rc 1, conflicts EXACTLY the two Projects Documents html, predicted
+                              tree 299fd1c2de24776c2edb091e9c7c4fc6728688bb
+  vs #1382 head 80bafc849a54  rc 1, conflicts EXACTLY the two Projects Documents html, predicted
+                              tree 7904aab89f157da6daa3bffb22fabed6453e20ee
+  NO product-file conflict with either. So: this PR NEEDS A DOCS-ONLY MERGE-IN AFTER #1381 AND #1382
+  LAND (Q-M), blocks placed in NUMBER order -- 13. above 18., 18. above 19.
+
+TRAILER PROOF
+  git log -1 --format=%(trailers) -> 1 byte. CONTROL bf277eead268 -> 55 bytes.
+  one bare "Refs KS-1210", 0 attribution lines, subject 76 chars, contains '(#' = 0.
+  PR body read back: 7,231 bytes, sha256 75c76aa6f87c095f86ffb626, byte-identical to what I sent.
+  GitHub reports changed_files 6, +529/-15 -- agrees with my own diff --shortstat.
+
+PATHGATE, with its bite DRIVEN
+  POSITIVE: rc 0, "CHECKED: 6 assertions over 6 measured paths, 0 failed", VERDICT PASS.
+  BITE (row 1's head against row 2's declared set): rc 1, VERDICT FAIL, naming
+    missing: routes/mfa.ts, routes/users.ts
+    extra  : the 4 auth paths + the 2 docs
+  So the guard discriminates; a PASS from it is a measurement.
+
+LOCK CENSUS
+  locks on disk right now: 0  (none)
+  CONTROL: the same glob finds a planted name in scratch (1).
+  My hold: TAKEN 07:11:32Z, RELEASED 07:17:54Z = 382 s, for the ref write ONLY. Suites, build and
+  install all ran OUTSIDE the lock. Poll 1, waited 0 s. STOP set 14 checked, both WAIT locks absent,
+  re-check clear after the take, and my new UNATTRIBUTED guard logged "0 lock dir(s) on disk CHECKED
+  against 17 known names" in the real push path.
+  CORRECTION, mine: my monitor printed "after 39986s" -- a macOS date -j parse that silently failed.
+  The real duration is 382 s, computed from the .start and .rc mtimes. Do not quote the 39986.
+
+TEST EVIDENCE -- MINE, at this head, and ONE READING WAS NOT GREEN
+  24-cell KS-1210 file: 24 passed (24), rc 0.
+  services/auth full suite, TWO readings, both reported:
+    run 1  79 files / 864 tests -- 862 passed, 2 FAILED
+    run 2  79 files / 864 tests -- 864 passed, 0 failed, rc 0
+  The 2 reds: both "Test timed out in 5000ms" (5009, 5003) in ks949-platform-admin-seed-identity,
+  repo-walk guards, wall-clock not assertions. Blob BYTE-IDENTICAL base/head (4f03e6f4f132; control
+  oauth.ts 3ae75ea1351a -> 72819e0e7622), and ALONE at the head 30/30 in 1.05 s, with 4 sibling panes
+  loading the box (load avg 3.01). Known pre-existing ks949 residue, in the PR body as a named flake.
+  npm run check:openapi rc 0, 405 example blocks. 0 YAML/spec files in the diff (control: 6 paths).
+  tsc NOT RUN at this head by me -- E 2nd ran it (rc 0, positive control rc 2). Say if you want it.
+  RED-FIRST is E 2nd's, not mine (17 failed | 7 passed at base -> 24 passed at head), and the PR body
+  says so explicitly rather than presenting it as my measurement.
+
+NO INDEPENDENT RE-KEY AUDITOR (Q-RK, as you parked it). rekey_checke3.py is INERT on a lettered
+generation -- driven, rc 1, "AssertionError: 0 files derived". Coverage for generation e3 rests on
+rekeye3's own asserts plus my eleven-plus hand-fixes, each with before/after in REKEY-RECEIPT-e3.txt
+and each driven. Four checkers green: namecheck 76 OK / 0 BAD / 24-of-24 controls; bannercheck 29
+checked / 0 stale / controls A B C PASS; trap4 24 arms / 0 wrong / 9-of-9 controls; twolock 46 pass /
+0 fail / 23 arms; pushproof 25/25.
+
+THE KS-855 COMMENT IS POSTED, as you authorised
+  comment id 7ad014dd-634d-4925-86b3-6a1c27d8376c, created 07:19:27Z
+  sha256 01d3fd486c5788ab3364161a3114fc328014564412153c4dbd103b8fa932d758, byte-identical to what I
+  sent; 334 chars; suggestion_userMentions nodes: 0 (control: bodyData is real text, 419 bytes).
+  Your text, with ONLY "#N" -> "#1384". Proof the substitution was that and nothing else: the template
+  with the placeholder stripped equals the posted text with the number stripped.
+  AND THE THING I FLAGGED DID HAPPEN: your hyphenated KS-1210 ATTACHED. KS-855 now carries
+  inverseRelations [('related', 'KS-1210')] where it had none. I did not revert it -- it is arguably
+  the right link, since the two tickets are coupled -- but it is a board change your wording caused,
+  so you should know rather than discover it.
+
+BOT MOVE ON PR OPEN, reported and NOT reverted: KS-1210 moved Backlog -> In Progress at 07:19:06Z,
+with #1384 attached as its one attachment.
+
+mergeable_state reads "unstable". Per the repo CLAUDE.md that carries NO testing claim -- the Test
+Evidence above carries it. I am not quoting it as a gate.
+
+NOT COVERED, in the PR body and repeated here: live sweep owed (section 5f, this is a runtime change
+and is not Done on offline green); the gateway edge has no role gate for /api/oauth/apps; existing
+apps carrying a now-refused scope are NOT migrated; the tenant bound is SOURCE-READ not live.
+
+NEXT: I will FILE your session-revocation ticket now (board search first, KS-1005 as the must-hit
+control) and name its identifier. Then KS-938 per your Q-E3-NEXT ruling -- build, and push + raise,
+with its merge held until after #1382 lands; I will ask in its READY for a gate after #1382.
+
+Shared checkout still NEVER written: HEAD c56dd7c32edf, 17 pre-existing untracked files, no fetch.
+ctx was 40% at your 07:17:03Z reading. Please read it again when you need it current.
+
