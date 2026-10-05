@@ -25895,13 +25895,13 @@
   "id": "hpsmpoc-f1-redeploy-after-gate-1005",
   "client_project": "Datasec/HPSM-POC",
   "title": "Redeploy the reset fix (PR 108) to the hosted demo once its gate passes?",
-  "bluf": "The hosted demo (f5bfb0e, live since 20:1x) has a gap in today's reset fix: if Azure SQL has a brief hiccup during a demo reset, the reset may answer 'never seeded' or fail instead of retrying. No data is changed. PR 108 fixes it (B142); gate B144 is checking it now. (Prior-ruling gate read: each earlier HPSM-POC deploy card ruled one named earlier build; none covers a build after f5bfb0e.)",
+  "bluf": "The hosted demo (f5bfb0e) has a gap in today's reset fix: if Azure SQL has a brief hiccup during a demo reset, an admin's reset can be refused with a false 'never seeded' reason. Repeating the request works, and no data is ever harmed (gate B144: low to medium severity). The fix is MERGED: gate B144 said GO WITH NOTES, and HPSM-POC main is now 1046e24. Deploying 1046e24 to the hosted demo removes the gap. (Prior-ruling gate read: each earlier HPSM-POC deploy card ruled one named earlier build; none covers a build after f5bfb0e.)",
   "default_action": "Nothing is deployed. Friday merges PR 108 if the gate passes; the hosted demo stays on f5bfb0e until you choose.",
   "options": [
    {
     "key": "a",
     "label": "Deploy it as soon as the gate says GO",
-    "detail": "Friday merges PR 108 on a GO, a seat deploys the new main the same way as tonight (with the whole-tree check), Friday checks it live and tells you"
+    "detail": "A seat deploys main 1046e24 the same way as tonight (with the whole-tree check and the targeted fix if files are left stale); Friday checks it live and tells you"
    },
    {
     "key": "b",
@@ -25954,6 +25954,21 @@
    "CARD secuura-pushgate-three-legs-1005",
    "CARD secuura-ks1188-burnt-backup-code-wording-1005",
    "CARD secuura-capped-prs-1245-1278-disposal-1005"
-  ]
+  ],
+  "amendments": [
+   {
+    "ts": "2026-10-05T20:49:03.297816+11:00",
+    "reason": "Gate B144 GO WITH NOTES and PR 108 merged at 20:4x; the card now names the build to deploy",
+    "changed": [
+     "bluf",
+     "option:a"
+    ],
+    "before": {
+     "bluf": "The hosted demo (f5bfb0e, live since 20:1x) has a gap in today's reset fix: if Azure SQL has a brief hiccup during a demo reset, the reset may answer 'never seeded' or fail instead of retrying. No data is changed. PR 108 fixes it (B142); gate B144 is checking it now. (Prior-ruling gate read: each earlier HPSM-POC deploy card ruled one named earlier build; none covers a build after f5bfb0e.)",
+     "option:a": "Friday merges PR 108 on a GO, a seat deploys the new main the same way as tonight (with the whole-tree check), Friday checks it live and tells you"
+    }
+   }
+  ],
+  "amended_ts": "2026-10-05T20:49:03.297845+11:00"
  }
 ]
