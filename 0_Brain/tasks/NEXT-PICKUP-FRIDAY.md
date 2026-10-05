@@ -12,6 +12,15 @@ supersede: replace wholesale; previous = NEXT-PICKUP-FRIDAY.md.pre-0925-rotate-s
 
 **The tree is at `/Volumes/Laptop-DEV/FRIDAY` (the drive, since 2026-09-28).** Quote every path (spaces).
 
+## 🔴🔴🔴 CHECKPOINT 2026-10-05 21:35 (Friday, ctx 70%) — READ FIRST; supersedes every block below where they differ
+**Kam:** last board row 20:59:03 (redeploy card a → DONE). No open cards. Today's deploys all done + verified by Friday: Composer demo fd9493f (+ login email), HPSM-POC hosted f5bfb0e (C-61) then **1046e24 (C-62, the F-1 fix)**.
+**MAINS:** HPSM-POC **1046e24** = HOSTED · analysis **1d24691** · Composer **fd9493f** = demo.
+**LIVE PANES:**
+- Datasec/HPSM-POC-C %54 **B146** on `B146_ADDENDUM-1_hpsmpoc-213-closure.md` (transition HPSMPOC-213 Done). Then close the pane.
+- Datasec/HPSM-POC-QA %55 **B147** gate on PR #109 (`Briefs/2026-10-05_B147_QA-gate-B145-feedback-99.md`). On GO: `friday/merge_when_green.sh datasecau/HPSM-POC 109 b5ecd156977d5ec1d14965cfb533e5e9b64bb49a`; then B145 (%53, idle) records + Jira (99 stays open for N-4/N-9; 179's 412 half done — check_pack merged as analysis #74 → 28dbc85). Deploy of 109 = Kam's word.
+**Watcher:** seen_s22 over B146/B147 STATUS + panes %54 %55.
+**Owed (no rush):** HPSMPOC-208 (deploy script skips same-size 1980-dated files; 3 instances today, each completed by targeted PUT) and -207 (API slow start) are the real fixes for the deploy path. Composer review-pack decisions are Kam's.
+
 ## 🔴🔴🔴 CHECKPOINT 2026-10-05 20:35 (Friday, ctx 65%) — READ FIRST; supersedes every block below where they differ
 **Kam:** terminal ~19:5x "deploy main f5bfb0e to the hosted demo" → DONE (B143, C-61, PR #72; Friday checked live 20:2x). OPEN CARD **hpsmpoc-f1-redeploy-after-gate-1005** (rec a; default nothing deployed): redeploy PR #108's fix once gate B144 says GO.
 **MAINS:** HPSM-POC **f5bfb0e** = HOSTED (web + API) · analysis **09c0417** · Composer **fd9493f** = demo.
