@@ -1,0 +1,58 @@
+# BLUF — NEW SEAT Datasec/NexusAI-Q: a READ-ONLY CENSUS of NexusAI main's open CodeQL alerts, mapped to Jira. Scope: the 5 CRITICAL and 138 HIGH. For each alert, find the RD ticket that already covers it, or file ONE grouped ticket per fix shape for the untracked ones. NEVER dismiss an alert. No code changes, no pushes, no jest. Deliverable: a census file and a REPORT mail to Tuesday. Tuesday posts the summary to Kam.
+
+**Addressed to the cockpit seat `Datasec/NexusAI-Q` ONLY.** `Datasec/NexusAI-M`, `-N`, `-O` and `-P` are live and share this inbox (datasec-nexusai@). A brief naming another seat is not yours. Establish your seat from your own pane's cockpit name (`tmux display -p '#{@cockpit_name}'`), your launcher and your process tree, never from which mail thread looks familiar. Derive your session number from `5_Project_History/history.md` and suffix it with q.
+
+## AUTHORITY
+- Kam, live board 2026-10-05 (Tuesday's post 18:30:54 told him the default, and he has not objected). The default as he read it, verbatim: *"My default, unless you say otherwise: the next seat has an agent map the 5 critical and 138 high alerts to existing tickets. It files one ticket per group for anything untracked, and posts the summary here. Nothing gets dismissed."* Tuesday posts the summary. You never write to Kam or to any human.
+- Ticket creation and comments on RD are inside the v1.3 delegated scope. Kam's standing NexusAI grant (Tuesday's terminal, 2026-09-25): *"Please work your way through the tickets and merge once tested."*
+
+## WHAT IS MEASURED (Tuesday, 2026-10-05 22:2x AEDT)
+- main = e91ff4e (RD-314, PR #48) by git ls-remote. The push Build on it was still in progress at 22:2x. That does not affect a read-only census.
+- `gh api --paginate "repos/datasecau/Reporting_Dashboard_Au/code-scanning/alerts?state=open&ref=refs/heads/main&per_page=100"` (NexusAI's GH_CONFIG_DIR) returned **246 open, all CodeQL**. By security severity: **5 critical, 138 high, 103 medium**. By rule severity: 91 error, 155 warning. Controls: fixed #248 is ABSENT, known-open #239 is PRESENT.
+- **All 246 were created 2026-09-28 18:58Z to 19:01Z**, which reads as the FIRST CodeQL analysis of main (Tuesday's inference from the created_at range, not measured; the org policy reached the fleet 2026-09-29 morning AEST, C-190). Treat them as the pre-existing baseline until a ticket shows otherwise.
+- The 5 critical are all `js/request-forgery`: #23, #24, #25, #26 in `backend/azureLogAnalytics.js` and #27 in `backend/llm/ollamaAdapter.js`.
+- By area (Tuesday's path split, approximate): backend 147, test paths 74, static 13, scripts 7, .github 5.
+- Top high rules: js/insecure-temporary-file 29, js/file-system-race 19, js/polynomial-redos 14, js/user-controlled-bypass 10, js/incomplete-multi-character-sanitization 10, js/xss-through-dom 9, js/regex/missing-regexp-anchor 8, js/bad-tag-filter 8, js/incomplete-url-substring-sanitization 7, js/missing-rate-limiting 7, js/remote-property-injection 5.
+- **Re-fetch the set yourself at start and quote your own count.** Tuesday's figures are a cross-check, not your input.
+
+## DO, in this order
+1. **PRIOR-WORK CHECK first.** Before filing anything, look for what already covers these alerts. Search RD by the RULE ID, the FILE PATH and the alert NUMBER, never by your own phrasing. Look at the Security Review tickets (the secreview rounds filed RD tickets in September; a separate Datasec security Jira board may also exist since ~2026-09-29, which is UNMEASURED by Tuesday, so search it read-only if your token reaches it and say whether it did), CLARIFICATIONS (C-190 and its ADDENDUM at :2029; C-185; anything accepting a limitation), the HANDOVER-S86M/S87N/S87O/S86P queues, and open PRs. For every alert, record the covering ticket, or "searched <rule> + <path>, 0 open hits". A not-mine control needs its pair: an unfiled search.
+2. **The 5 CRITICAL, at source, first.** Read each flagged sink and its source at e91ff4e (`git show e91ff4e:<path>`). Say whether the URL reaching the request is user-controlled, config-sourced, or unclear. Give the instrument for each claim, or say "unmeasured". **This is a reading, not a dismissal.** It goes on the ticket as evidence. Never dismiss an alert in GitHub, whatever the reading.
+3. **The 138 HIGH.** Map each one to a ticket. For the untracked ones, file **ONE ticket per fix shape**: same rule, same module, and fixed by one change and proved by one test pass (Kam 2026-09-07: one ticket when one test pass proves it; split only for separate workloads or separate fixes). Keep test-code alerts in their own tickets, separate from product-code ones. Each ticket lists its alert numbers, the rule, the path:line of each, and the alert URLs. Follow the conventions in `2_Project_Files/JIRA.md` (component, labels, priority) and add the label `codeql-baseline`. Assign to OUR account. Priority: critical rule → the top priority JIRA.md allows for security; high → High.
+4. **Existing tickets that already cover an alert get ONE comment** listing the alert numbers they now cover. Edit nothing else on them.
+5. **The 103 MEDIUM: counts only.** List them by rule in the census, as an appendix. File nothing for them. Tuesday asks Kam separately.
+6. **Do not file a duplicate of work in flight.** If #255 (log-injection, server.js:881) is in the open set, it is a MEDIUM, so it goes in the appendix only, marked in-flight against RD-618 (b1) @ 953a0e6, which is under gate 16. RD-735's two same-shape lines are on RD-735's branch, NOT on main (Tuesday's reading of M's 08:24Z mail, unverified here), so they cannot be in this set. Any CRITICAL or HIGH alert a live seat's READY already fixes is marked in-flight against that ticket, never filed again.
+
+## DELIVERABLE (durable paths, not a scratchpad)
+- `<NexusAI>/evidence-s<N>q-codeql-census/census.csv`: one row per alert (number, rule, security severity, rule severity, path:line, ticket key, `existing`|`filed`|`in-flight`, group id, the search terms used).
+- `<NexusAI>/evidence-s<N>q-codeql-census/summary.md`: FOUND / TESTED / HOW (the API call, the pagination proof, the controls, the Jira searches and their controls). Then the 5 critical readings, the filed tickets with their alert counts, and the medium appendix.
+- **REPORT mail** `[Datasec/NexusAI-Q -> Tuesday] REPORT: CodeQL open-alert census`. BLUF first, with this shape: *"246 open (5 C · 138 H · 103 M). C+H 143: covered by existing tickets <n> · in-flight <n> · newly filed <n> in <g> grouped tickets (keys) · none dismissed. Critical: <one line each>."* Every number comes from census.csv, counted in the same action as writing the line.
+
+## BOUNDARIES
+- **Read-only on code.** In `2_Project_Files` use read verbs only (show, log, grep, ls-tree, rev-parse, ls-remote). A `fetch` is allowed only if e91ff4e is missing locally. Never checkout, worktree, commit, push or stash. Never touch another seat's worktree. No jest, so no lock ticket is needed.
+- **Never dismiss, reopen or alter any code-scanning alert.** Dismissing one is Kam's call (C-190). Never ask for or use a ruleset bypass.
+- No demo, production, Azure, Partner Center or money. No mail to any human, and Kam is told only through Tuesday. Never delete files (quarantine).
+- Comments and new tickets only on RD. Do not transition or re-prioritise existing tickets, and do not reassign a ticket that is already on someone.
+
+## PLAN CONFIRMATION
+Mail `[Datasec/NexusAI-Q -> Tuesday] QUESTION: plan confirmation` with your re-fetched count and the grouping rule you will use. Start step 1 without waiting. If a group is ambiguous, mail ONE question and carry on with the rest.
+
+## WRAP
+After the REPORT: write `HANDOVER-S<N>Q.md`, a history entry, and a wrap mail to tuesday-agent@. The seat is retired by hand.
+
+RULED BY KAM, NOT YET IN AN ARTEFACT
+- Two NexusAI cards still carry no delivery mark in Tuesday's queue: `rd104-gh-identity-acceptance-false-premise` (ruled 2026-09-07) and `t9-nas-leg-direction` (ruled 2026-09-21). They are old paperwork marks, not re-checked tonight, and neither bears on this census. Nothing for you to do with them.
+
+RULED BY WEDNESDAY FOR THIS PROJECT, STILL OPERATIVE
+- Tuesday 2026-10-05 19:24 (RD-618 (b1)): #255 is fixed by a reshaped log line, not dismissed. The C-190 ADDENDUM records BOTH ruleset thresholds (security severity high+ AND alerts_threshold = errors).
+- Standing, C-190 (2026-09-29): every merge goes through a PR; no NEW high+ alert in changed code, test code included; never dismiss alerts.
+
+PROVENANCE:
+- 246 open alerts, by severity, rule severity, rule and creation time | the GitHub code-scanning alerts API (state open, ref main, paginated) read by Tuesday with NexusAI's gh identity; controls #248 absent and #239 present; the raw file is not durable, so re-fetch it yourself | read 2026-10-05 22:2x
+- main = e91ff4e | git ls-remote origin refs/heads/main in /Volumes/KK_T9_External_HDD/!CODING/Datasec/NexusAI/2_Project_Files | read 2026-10-05 22:2x
+- Kam's default wording | Tuesday's live-board post 2026-10-05 18:30:54 in /Volumes/KK_T9_External_HDD/TUESDAY/0_Brain/dashboard/data/chat_log.json | read 2026-10-05 22:2x
+- the C-190 ADDENDUM at CLARIFICATIONS.md:2029 (both thresholds) | Tuesday s97's read at source 19:25, in /Volumes/KK_T9_External_HDD/TUESDAY/0_Brain/daily_tuesday/2026-10-05.md; not re-read by s98 | read 2026-10-05
+- #255 in flight in RD-618 (b1) @ 953a0e6 under gate 16 | M's READY 10:55Z in tuesday-agent@ + gate 16's evidence dir pin-START.txt in /Volumes/KK_T9_External_HDD/!CODING/Testing Agent MAIN/projects/nexusai/reports/2026-10-05-gate-batch16/evidence | read 2026-10-05 22:2x
+- ticket conventions, the Jira site and project RD | /Volumes/KK_T9_External_HDD/!CODING/Datasec/NexusAI/CLAUDE.md:284-297 (points at 2_Project_Files/JIRA.md) | read 2026-10-05
+Self-check note: re-read whole; fixed three defects before sending (composed 22:3x stamps -> 22:2x from date; #255 is MEDIUM so appendix-only, RD-735 lines are not on main; the CodeQL-enablement hour marked as inference).
+SELF-CHECK: re-read end-to-end for contradictions | 2026-10-05 22:23
