@@ -6,6 +6,11 @@ status: live
 supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s1-wholesale
 ---
 
+## 🟢 DELTA 151 — 2026-10-05 18:3x (s97, ctx ~76%). **READ THIS FIRST, THEN 150.**
+- **RD-618 landing STOPPED at CodeQL (PR #47 @ baf3f6e).** Tuesday GO'd fix A at 18:03: test-only, +3/-3 in rd618's test, read at source, round 1 of 2. #252-254 must close BY FIX. #255 (medium log-injection, server.js:881) ruled (a): non-blocking, ONE ticket, never dismiss. M's proof hold `s86m-rd618-codeql` is queued behind gate 14's H3 and gate 15's H1. On M's MERGED: verify (ls-remote, gh: npm-audit, Build, demo SKIPPED; alerts' most_recent_instance "fixed").
+- **KAM forwarded 3 GitHub security mails** (PR #47, #44, #45; DKIM pass). Receipts posted 201. **OWED, Kam told it is the DEFAULT:** commission an agent to map NexusAI main's open code-scanning alerts (measured 246: 5 critical, 138 high, 103 medium; controls held) to existing tickets, file GROUPED tickets for anything untracked (assigned to our account), never dismiss, and post the summary to Kam's board. Not yet started: it needs a seat (N or O when free, or a fresh one). Read the 5 critical first.
+- Gate 15 receipt VERIFIED (evidence dir 16:35). Gates 14 and 15 are both holding the lock in turn.
+
 ## 🟢 DELTA 150 — 2026-10-05 16:3x (s97, ctx 72% CHECKPOINT; rotate at the first safe boundary in 80-90). **READ THIS FIRST, THEN 149.**
 - **MAIN = b7bb1e9.** TURN = M: **RD-618 merge hold `s86m-merge-rd618` HOLDS the jest lock** (on db57ec1 = 874c4f5 + b7bb1e9). On M's MERGED: ls-remote + gh run list (npm-audit, Build, demo SKIPPED); then the turn goes to N (RD-314, already forward-merged locally as da5d32b; N waits for M's push Build green).
 - **GATE 14 RUNNING** (pane %12; receipt = its evidence dir at 15:46). Answered its sqlite3 QUESTION (cached prebuild ACCEPTED, 3 conditions). M0 = b7bb1e9, re-based MT1 4316/263 (the gate's report).
