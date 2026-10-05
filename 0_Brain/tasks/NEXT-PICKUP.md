@@ -19,6 +19,12 @@ supersede: replace wholesale at the next pickup; do not append. Previous copy: N
 4. EXPIRING-GRANTS: "SPEND PAST THE 90%" is marked ENDED (account switched). Friday's "ignore the 90%" row is Friday's and is not touched.
 
 ### LIVE RIGHT NOW
+**🟠 65% CHECKPOINT 16:2x 2026-10-05 (seat b72c1f78). READ FIRST; supersedes the blocks below where they differ:**
+0. Kam 16:21-16:22 ruled 4 cards (recorded, receipted): KS-1256 b + **OCTOBER DEPLOY GRANT** (`learnings/2026-10-05_october-deploy-both-boxes-when-ready.md`, EXPIRING-GRANTS row, ends Sat 31 Oct; reading told to him, correction window open) · KS-1401 migration a · tooling 192 → 'Internal tooling' a · kintsugi deploy a. Mark each card `--delivered` only when its artefact lands.
+1. develop 46c3e20cfbd2 (#1380 merged, verified). **#1381 merge-in 82e6bfa9de85 VERIFIED** (tree ba3527224ff6 = gate57 T2, 2 parents, 0 trailers) → merge by **Seat B 61st** on `GO (Seat B 61st): merge 1381 on gate57` (SUPERSEDES gate57's B 60th string; template `fleet/briefs_staged/2026-10-05_GO_seatB60_1380.md`). B 60th WRAPPED 0.95, pane closed.
+2. **Wave partition** `fleet/briefs_staged/2026-10-05_wave_1630_partition.md`. Four DRAFTERS of THIS seat (die at rotation; check outputs, re-commission what is missing): `fleet/briefs_staged/2026-10-05_seatB61_successor.md` · `…_seatD7_kintsugi_deploy.md` · `…_seatF2_ks1401_migration.md` · `…_seatC23_tooling_board_move.md` (+ `…_seatC23_move_list.tsv`). Each: read WHOLE → brief_and_launch → rung 5 → ITEM 0. **Before B 61st's or F 2nd's first ref write: mirror ADDENDUM to Seat E 2nd** (WAIT += -56, -f2; -55 → STOP; verified tap) and ACK.
+3. **Seat E 2nd LIVE %24** (released 16:08; pre-push proofs green; waiting/pushing KS-1005 merge-in → READY → **gate59**: draft its kit with a drafter on the READY, gate56a/58 shape, T1).
+4. **Spark queue RUNNING** (10 briefs, bg; `local-model/spark/done.md`); review agent per PASS (Kam's rule), Wednesday reads security-adjacent + 1 in 5. Collisions with held passes: anchors↔KS-723, nft↔KS-591 nft-mint, billing↔KS-591 billing, share-cp2↔KS-1278.
 **🟠 16:0x 2026-10-05 (seat b72c1f78). READ FIRST; supersedes the 50% block below where they differ:**
 0. Kam: no rows since 13:03:43. reconcile 0.
 1. **#1380 MERGED → develop 46c3e20cfbd2, verified at source by Wednesday** (scratch fetch from GitHub: tree dab6adb69ea3, 1 parent fe6daca343c1, 0 trailers, 3 paths). gate57 GO both, scored 1.0, pane closed.
