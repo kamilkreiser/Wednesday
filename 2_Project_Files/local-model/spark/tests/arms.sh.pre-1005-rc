@@ -86,8 +86,8 @@ mkw() { # mkw <dir> <run_dir> <pid> [row]   — a work dir as round.sh makes it 
 }
 : > "$PW/done.md"
 mkw "$PW/work/r_done" "$PW/runs/r_done" "$DEADPID" row
-"${PENV[@]}" python3 "$HERE/prune_work.py" "$PW/work/r_done" > "$T/A8.out" 2>&1; rc=$?
-if [ "$rc" = 0 ] && [ ! -e "$PW/work/r_done" ] && [ -d "$PW/runs/r_done" ] && grep -q '^prune: REMOVED' "$T/A8.out"; then ok "A8 removal :: $(cut -c1-200 "$T/A8.out")"
+"${PENV[@]}" python3 "$HERE/prune_work.py" "$PW/work/r_done" > "$T/A8.out" 2>&1
+if [ ! -e "$PW/work/r_done" ] && [ -d "$PW/runs/r_done" ] && grep -q '^prune: REMOVED' "$T/A8.out"; then ok "A8 removal :: $(cut -c1-200 "$T/A8.out")"
 else bad "A8 removal: $(cat "$T/A8.out")"; fi
 
 mkw "$PW/outside/x" "$PW/runs/x" "$DEADPID" row
@@ -95,35 +95,30 @@ mkdir -p "$PW/work/nomarker/clone"; echo "| arms | t | PASS | 1 | 1 | - | - | $P
 ln -s "$PW/outside/x" "$PW/work/link_out"
 mkw "$PW/work/pid1" "$PW/runs/pid1" 1 row
 for target in "$PW/outside/x" "$PW/work/nomarker" "$PW/work/link_out" "$PW/work/pid1" "$PW/work" ""; do
-  o="$("${PENV[@]}" python3 "$HERE/prune_work.py" "$target" 2>&1)"; rc=$?
-  if [ "$rc" = 2 ] && echo "$o" | grep -q '^prune: REFUSED' && { [ -z "$target" ] || [ -e "$target" ]; }; then ok "A9 refusal '${target#$PW/}' survives :: $(echo "$o" | cut -c1-170)"
+  o="$("${PENV[@]}" python3 "$HERE/prune_work.py" "$target" 2>&1)"
+  if echo "$o" | grep -q '^prune: REFUSED' && { [ -z "$target" ] || [ -e "$target" ]; }; then ok "A9 refusal '${target#$PW/}' survives :: $(echo "$o" | cut -c1-170)"
   else bad "A9 refusal '${target}': $o"; fi
 done
 [ -f "$PW/outside/x/clone/sub/f" ] && ok "A9b the outside target's contents are intact" || bad "A9b outside target damaged"
 
 mkw "$PW/work/r_locked" "$PW/runs/r_locked" "$DEADPID" row
 echo $$ > "$PW/state/round.lock/pid"; echo "$PW/work/r_locked" > "$PW/state/round.lock/work"
-o="$("${PENV[@]}" python3 "$HERE/prune_work.py" "$PW/work/r_locked" 2>&1)"; rc=$?
-if [ "$rc" = 3 ] && [ -d "$PW/work/r_locked" ] && echo "$o" | grep -q 'KEPT.*round.lock'; then ok "A10 locked round kept :: $(echo "$o" | cut -c1-170)"; else bad "A10 locked: $o"; fi
+o="$("${PENV[@]}" python3 "$HERE/prune_work.py" "$PW/work/r_locked" 2>&1)"
+if [ -d "$PW/work/r_locked" ] && echo "$o" | grep -q 'KEPT.*round.lock'; then ok "A10 locked round kept :: $(echo "$o" | cut -c1-170)"; else bad "A10 locked: $o"; fi
 mv "$PW/state/round.lock" "$PW/state/round.lock.released"
 mkw "$PW/work/r_live" "$PW/runs/r_live" "$$" row
-o="$("${PENV[@]}" python3 "$HERE/prune_work.py" "$PW/work/r_live" 2>&1)"; rc=$?
-if [ "$rc" = 3 ] && [ -d "$PW/work/r_live" ] && echo "$o" | grep -q 'KEPT.*still running'; then ok "A10b live-pid round kept :: $(echo "$o" | cut -c1-150)"; else bad "A10b live: $o"; fi
+o="$("${PENV[@]}" python3 "$HERE/prune_work.py" "$PW/work/r_live" 2>&1)"
+if [ -d "$PW/work/r_live" ] && echo "$o" | grep -q 'KEPT.*still running'; then ok "A10b live-pid round kept :: $(echo "$o" | cut -c1-150)"; else bad "A10b live: $o"; fi
 
 mkw "$PW/work/r_norow" "$PW/runs/r_norow" "$DEADPID"
-o="$("${PENV[@]}" python3 "$HERE/prune_work.py" "$PW/work/r_norow" 2>&1)"; rc=$?
-if [ "$rc" = 3 ] && [ -d "$PW/work/r_norow" ] && echo "$o" | grep -q 'KEPT.*no verdict row'; then ok "A11 no-verdict-row kept :: $(echo "$o" | cut -c1-150)"; else bad "A11 norow: $o"; fi
+o="$("${PENV[@]}" python3 "$HERE/prune_work.py" "$PW/work/r_norow" 2>&1)"
+if [ -d "$PW/work/r_norow" ] && echo "$o" | grep -q 'KEPT.*no verdict row'; then ok "A11 no-verdict-row kept :: $(echo "$o" | cut -c1-150)"; else bad "A11 norow: $o"; fi
 
 mkw "$PW/work/r_old" "$PW/runs/r_old" "$DEADPID" row; touch -t 202610030000 "$PW/work/r_old"
 mkw "$PW/work/r_fresh" "$PW/runs/r_fresh" "$DEADPID" row
-o="$("${PENV[@]}" python3 "$HERE/prune_work.py" --older-than-hours 24 2>&1)"; rc=$?
-if [ "$rc" = 0 ] && [ ! -e "$PW/work/r_old" ] && [ -d "$PW/work/r_fresh" ] && [ -d "$PW/work/r_norow" ] && [ -d "$PW/work/nomarker" ]; then ok "A12 catch-up removed only the >24h recorded clone :: $(echo "$o" | grep -E 'REMOVED|catch-up' | tr '\n' ' ' | cut -c1-220)"
+o="$("${PENV[@]}" python3 "$HERE/prune_work.py" --older-than-hours 24 2>&1)"
+if [ ! -e "$PW/work/r_old" ] && [ -d "$PW/work/r_fresh" ] && [ -d "$PW/work/r_norow" ] && [ -d "$PW/work/nomarker" ]; then ok "A12 catch-up removed only the >24h recorded clone :: $(echo "$o" | grep -E 'REMOVED|catch-up' | tr '\n' ' ' | cut -c1-220)"
 else bad "A12 catch-up: $o"; fi
-# A12b — catch-up over an OLD unmarked dir must exit 2 (a refusal is not a success; fixed 2026-10-05) and leave it in place
-touch -t 202610030000 "$PW/work/nomarker"
-o="$("${PENV[@]}" python3 "$HERE/prune_work.py" --older-than-hours 24 2>&1)"; rc=$?
-if [ "$rc" = 2 ] && [ -d "$PW/work/nomarker" ] && echo "$o" | grep -q 'refused 1'; then ok "A12b catch-up refusal exits 2, dir kept :: $(echo "$o" | tail -1 | cut -c1-150)"
-else bad "A12b catch-up refusal rc=$rc: $o"; fi
 
 # A7 — one REAL round, THROUGH queue.sh (scratch queue + done) so the post-row prune path runs
 CODE="$(curl -s -m 10 -o /dev/null -w '%{http_code}' http://127.0.0.1:47788/v1/models 2>&1)"

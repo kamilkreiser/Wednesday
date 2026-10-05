@@ -15,9 +15,7 @@ A work dir is removed ONLY when ALL hold (each refusal is printed with its reaso
   4. the round is not live: the marker's pid is not alive, and spark/state/round.lock (if held by a live pid) does not
      name this work dir. A marker pid that is empty or <= 1 is malformed -> refused.
 Env: SPARK_WORK_ROOT, SPARK_DONE, SPARK_STATE (same defaults as round.sh / queue.sh).
-rc (single path): 0 REMOVED · 2 REFUSED (a guard failed: malformed/outside/unmarked) · 3 KEPT (live round or no verdict row
-yet, i.e. try later) · 64 usage. Catch-up mode: 0, or 2 if ANY dir under the root was REFUSED (fixed 2026-10-05: a
-refusal used to exit 0, a refusal that read as success). queue.sh does not branch on it; a human or a test can. Python 3 stdlib.
+rc 0 (removals and refusals both printed) · 64 usage. Python 3 stdlib.
 """
 import os
 import shutil
@@ -66,43 +64,43 @@ def locked_work():
 
 def prune(path):
     if not path or not path.strip():
-        print("prune: REFUSED empty path"); return "refused"
+        print("prune: REFUSED empty path"); return False
     if not ROOT or not os.path.isabs(ROOT):
-        print(f"prune: REFUSED work root is not absolute: {ROOT!r}"); return "refused"
+        print(f"prune: REFUSED work root is not absolute: {ROOT!r}"); return False
     root = os.path.realpath(ROOT)
     real = os.path.realpath(path)
     if real == root or not real.startswith(root + os.sep):
-        print(f"prune: REFUSED {path} — resolves to {real}, not strictly under {root}/"); return "refused"
+        print(f"prune: REFUSED {path} — resolves to {real}, not strictly under {root}/"); return False
     if not os.path.isdir(real):
-        print(f"prune: REFUSED {real} — not a directory"); return "refused"
+        print(f"prune: REFUSED {real} — not a directory"); return False
     mk = os.path.join(real, MARKER)
     if not os.path.isfile(mk):
-        print(f"prune: REFUSED {real} — no {MARKER} marker (not created by round.sh)"); return "refused"
+        print(f"prune: REFUSED {real} — no {MARKER} marker (not created by round.sh)"); return False
     m = read_kv(mk)
     run, pid_s = m.get("run_dir", "").strip(), m.get("pid", "").strip()
     if not run:
-        print(f"prune: REFUSED {real} — marker names no run_dir"); return "refused"
+        print(f"prune: REFUSED {real} — marker names no run_dir"); return False
     try:
         pid = int(pid_s)
     except ValueError:
         pid = 0
     if pid <= 1:
-        print(f"prune: REFUSED {real} — marker pid {pid_s!r} is empty or <= 1 (malformed)"); return "refused"
+        print(f"prune: REFUSED {real} — marker pid {pid_s!r} is empty or <= 1 (malformed)"); return False
     if alive(pid):
-        print(f"prune: KEPT {real} — its round (pid {pid}) is still running"); return "kept"
+        print(f"prune: KEPT {real} — its round (pid {pid}) is still running"); return False
     lw = locked_work()
     if lw is not None and (lw == real or lw.startswith("<")):
-        print(f"prune: KEPT {real} — round.lock is held by a live round ({lw})"); return "kept"
+        print(f"prune: KEPT {real} — round.lock is held by a live round ({lw})"); return False
     try:
         rows = open(DONE, encoding="utf-8").read()
     except OSError:
         rows = ""
     if f"| {run} |" not in rows:
-        print(f"prune: KEPT {real} — no verdict row for {run} in {DONE}"); return "kept"
+        print(f"prune: KEPT {real} — no verdict row for {run} in {DONE}"); return False
     size = subprocess.run(["du", "-sh", real], capture_output=True, text=True).stdout.split("\t")[0].strip() or "?"
     shutil.rmtree(real)
     print(f"prune: REMOVED {real} ({size}) — round recorded in done.md; run dir {run} kept")
-    return "removed"
+    return True
 
 
 def main():
@@ -112,16 +110,15 @@ def main():
         root = os.path.realpath(ROOT)
         if not os.path.isdir(root):
             print(f"prune: no work root at {root}"); return 0
-        n = refused = 0
+        n = 0
         for name in sorted(os.listdir(root)):
             p = os.path.join(root, name)
             if os.path.isdir(p) and os.path.getmtime(p) < cutoff:
-                r = prune(p)
-                n += r == "removed"; refused += r == "refused"
-        print(f"prune: catch-up (> {hours:g} h) removed {n}, refused {refused}")
-        return 2 if refused else 0
+                n += prune(p)
+        print(f"prune: catch-up (> {hours:g} h) removed {n}")
+        return 0
     if len(a) == 1:
-        return {"removed": 0, "refused": 2, "kept": 3}[prune(a[0])]
+        prune(a[0]); return 0
     print("usage: prune_work.py <work_dir> | --older-than-hours H", file=sys.stderr)
     return 64
 
