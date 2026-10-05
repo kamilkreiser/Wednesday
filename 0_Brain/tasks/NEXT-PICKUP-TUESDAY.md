@@ -6,6 +6,17 @@ status: live
 supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s1-wholesale
 ---
 
+## 🔴 DELTA 147 — 2026-10-05 12:2x ROTATION-READY HANDOVER (s96, ctx 78%; rotate at the first safe boundary in 80-90). **READ THIS FIRST, THEN 146 (its gate-14 lines are exact).**
+### FIRST WORK FOR THE NEXT SEAT
+1. **N's RD-685 landing (CodeQL #250 test-only fix, GO'd 11:27 with conditions):** on N's MERGED, verify main by ls-remote, gh run list on the sha (npm-audit, Build, demo SKIPPED), and #250 closed (most_recent_instance state "fixed", NOT dismissed: the alert-level "state" field reads null, so read the instance). Then the turn passes to O, P, M.
+2. **GATE 14: read the brief WHOLE, stamp, launch AFTER gate 12 delivers** (DELTA 146 lists the open rulings; RD-708's widened scope is RULED IN = C-201).
+3. **KAM'S DRIVE INSTRUCTION (12:13, via Wednesday; policy `1_Project_Definition/Policies/2026-10-05_drive-hygiene-policy.md`):** O is commissioned for the NexusAI tree (survey + class-2 removal; moves listed only). **Kam asked on the board (201) to mount the G-DRIVE on the mini; default: moves wait.** Next: on O's report, the one-line-per-drive report to Kam; then commission HPSM (15G, its agent is not live: brief it at its next launch) and myPKI/CypherKey only by their own agents. Cadence: weekly + at 85%.
+4. **RD-719 (P) READY due:** Chart.js VENDORED. Its gate (batch 15) must check the file is byte-identical to the official release, the MIT licence/attribution, CSP script-src, PRIOR WORK.
+5. **RD-753 (palette, Kam's):** one line on the next board digest, default "stays as is".
+### FLOOR
+%0 tuesday · %10 gate 12 (Opus 4.8 session) · %11 gate 13 · %9 M · %8 P · %7 O (wrapped, kept for verdicts, drive survey) · %6 N (RD-685 landing) · %1 monitor. Main cf0462f; C-185 set {rd549 O4}. Usage ~10-12%. Kam: 0 messages today; the drive instruction came via Wednesday.
+### LEDGER this session: 4 rows (launch race; N queue brief; RD-741-era none; the w=4 receipt regression, with its enforcement candidate OVERDUE).
+
 ## 🟢 DELTA 146 — 2026-10-05 09:2x (s96, ctx ~74%). **READ THIS FIRST; it supersedes 145's gate-14 lines.**
 - **MAIN = cf0462f** (RD-733 landed via PR #44 with 1 test-only CodeQL commit; alerts #248/#249 FIXED, not dismissed; push Build 37237863717 in progress at 09:13). **The C-185 known set is now {rd549 O4 envReached-only}; any O-1 failure is a STOP.** TURN = N (RD-685, local 2861c77, union blob 1f708e2) once that Build is green; verify its MERGED.
 - **GATE 14 REVISED (unstamped), 8 MEMBERS:** `fleet/qa-agent/briefs/2026-10-05_nexusai-gate-batch14.md` (616 lines) + `launchers/launch_qa_nexusai_gate_batch14.sh`. Merge order 736 → 709 → 737 → 708 → 690 → 675 → 430 → 694. **Read WHOLE, then rule at stamp:** (1) tier-1 image legs as manifest checks vs a docker leg; (2) node_modules = offline npm ci from a clone of ~/.npm/_cacache with --ignore-scripts; (3) RD-708 widened scope RULED IN 09:2x (mail "RD-708 widened scope RULED IN"); (4) RD-694 vs M0: the fixture `entries` differ by RD-733's change, not RD-694's; (5) RD-689 coupling after RD-708. Add the route line (with a .pre backup), stamp, --check, cockpit.sh add, **ONLY AFTER GATE 12 DELIVERS.**

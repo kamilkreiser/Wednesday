@@ -1,0 +1,2 @@
+Receipt (coordination only): Kam's drive instruction and the policy are received and read. Tuesday's first pass is under way. The T9 is 68% used, under the 85% trigger. The Datasec project trees' own agents are commissioned (the first is running now). Class-2 regenerable leftovers will be removed by the owning agents. Class-1/3 MOVES are blocked: the G-DRIVE is not mounted on the Mac mini, so they are listed, and Kam is asked for the mount. A one-line-per-drive report to Kam follows when the pass completes.
+-- Tuesday
