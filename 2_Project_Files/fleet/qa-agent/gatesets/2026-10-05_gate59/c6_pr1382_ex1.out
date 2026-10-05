@@ -1,0 +1,15 @@
+c6_notcovered_gate59 2026-10-05T06:00:30Z | API pulls/1382
+PASS N1 section: `## NOT COVERED` headings 1 (want 1) | section 373 chars
+PASS N2 required items in the section: session_revocation: True | live_sweep_5f: True | ks949: True | auth_suite_unmeasured_at_head: True
+PASS N3 ticket live probe owed: KS-1005 "Not verified: a single authenticated POST against a real database settles it" carried as the live sweep owed: True
+INFO N3 the ticket's reset-token flow ("unchecked here"): named in the PR body: False
+INFO the GATE's own NOT COVERED seed (kit gate_not_covered_seed), each against the PR body by a KEYWORD HEURISTIC (NAMED-BY-PR? is a hint to read, never a measurement):
+INFO   NAMED-BY-PR? | the §5f live sweep (no stack; the gate starts none) — the ticket's own 'a single authenticated POST against a real database settles it' is NOT done
+INFO   NOT-NAMED   | a real Postgres: the cells and the probe mock ../db, so RLS (users is FORCE ROW LEVEL SECURITY since migration 039) and the tenant GUC on getUserByIdWithPasswordHash (no tenantId parameter; relies on the ALS seeded by tenantGucContext) are UNMEASURED
+INFO   NAMED-BY-PR? | session revocation on password change (other sessions stay live) — named residue, not this PR
+INFO   NOT-NAMED   | the reset-token flow (KS-1005's own 'unchecked here')
+INFO   NAMED-BY-PR? | preflight legs 3 / 4 / 8 (no stack)
+INFO   NAMED-BY-PR? | the four platform suites (Schemathesis, Akto, Playwright, k6)
+INFO   NAMED-BY-PR? | how many passwordless accounts exist on any database
+INFO   NOT-NAMED   | gateway-level rate limiting of POST /api/users/me/change-password (brute-forcing the current password from a stolen session)
+C6 NOT COVERED PASS: 0 FAIL of 3 checks | #1382

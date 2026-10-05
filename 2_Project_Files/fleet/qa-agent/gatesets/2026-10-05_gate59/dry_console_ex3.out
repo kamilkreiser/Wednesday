@@ -1,0 +1,35 @@
+LAUNCH ACTION gate59 (DRY RUN) 2026-10-05 17:10:27 AEDT / 2026-10-05T06:10:27Z | PR #1382 | HEAD 80bafc849a54a9368810fd0fcd1ee1184fa608bf | kit develop 46c3e20cfbd21acee0c67d544180c33deaa4c8ef | pane QA/Secuura-ks1005-1382
+--- 0. the pane must be routed (inbox_routing.conf) or cockpit.sh say --mail fails silently
+  routing file /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/inbox_routing.conf — line present: 0 (grep rc=1; want 1 / rc 0)
+  (DRY RUN: reported, not refused — the real run refuses rc 1 here; README section 4)
+--- 1. instrument A: the GitHub PULLS API (+ 2b the census, same read)
+  gh_census rc=0
+    API #1382 head 80bafc849a54a9368810fd0fcd1ee1184fa608bf base develop base_sha 46c3e20cfbd21acee0c67d544180c33deaa4c8ef mergeable True reads 1 state open merged False branch feature/ks-1005-change-password-reads-the-hash-it-verifies-e2-1 changed_files 4
+    CONTROL the classifier on #1382 ITSELF (must print USERS.TS and OVERLAP, or a zero below proves nothing): FIRES
+    EXPECTED OVERLAP (reported_overlaps; reported, never sequenced by a gate) #1381 head 82e6bfa9de85 | paths ['Projects Documents/API_Security_Functional_Testing_Architecture_Flow_Diagrams.html', 'Projects Documents/QA_Tool_Cheat_Sheet_Secuura_API_Testing.htm
+    CENSUS 22 other open PR(s) read | 0 touch routes/users.ts | 0 touch a kit path or carry a kit key outside reported_overlaps | 1 expected overlap(s) reported | 4 kit path(s), keys ['KS-1005']
+--- 2. instrument B: git ls-remote origin (ONE read from the Secuura checkout, READ-ONLY)
+  ls-remote rc=0 at 06:11:09Z
+    46c3e20cfbd21acee0c67d544180c33deaa4c8ef	refs/heads/develop
+    80bafc849a54a9368810fd0fcd1ee1184fa608bf	refs/heads/feature/ks-1005-change-password-reads-the-hash-it-verifies-e2-1
+    80bafc849a54a9368810fd0fcd1ee1184fa608bf	refs/pull/1382/head
+--- 2b. the census
+  OVERLAP census clean (1 expected overlap(s) reported, 0 other PR(s) touching users.ts; control: FIRES)
+--- 3. the head, judged (input == kit head == API == pull/head == branch, open, not merged, on develop, not mergeable:false, kit branch)
+  input 80bafc849a54a9368810fd0fcd1ee1184fa608bf | kit 80bafc849a54a9368810fd0fcd1ee1184fa608bf | API 80bafc849a54a9368810fd0fcd1ee1184fa608bf (state open, merged False, base develop, mergeable True, files 4) | pull/head 80bafc849a54a9368810fd0fcd1ee1184fa608bf | feature/ks-1005-change-password-reads-the-hash-it-verifies-e2-1 80bafc849a54a9368810fd0fcd1ee1184fa608bf
+  BOTH INSTRUMENTS AGREE with the input head, 1 of 1.
+--- 3b. develop, read at launch: 46c3e20cfbd21acee0c67d544180c33deaa4c8ef | kit develop 46c3e20cfbd21acee0c67d544180c33deaa4c8ef
+  UNMOVED since drafting
+--- 3c. FILL from the values just read
+  fill rc=0
+    FILLED 2026-10-05T06:11:09Z | PR #1382 head 80bafc849a54 develop 46c3e20cfbd2 | dry061027.SIM.prompt.txt, dry061027.SIM.launcher.sh, pins_gate59.SIM-dry061027.json | 27 keywords | prompt sha256 2bdaed1877fe96e1
+--- 3d. RACE: re-read develop and the head AFTER the fill
+  ls-remote rc=0 | develop 46c3e20cfbd21acee0c67d544180c33deaa4c8ef | pull/head 80bafc849a54a9368810fd0fcd1ee1184fa608bf
+--- 6 (dry). the SIM launcher's own --check
+  SIM launcher --check rc=0
+    all guards pass:
+      origin develop 46c3e20cfbd21acee0c67d544180c33deaa4c8ef == the pinned develop | #1382 T1 80bafc849a54 at branch AND pull/head | compare ok (ahead 2, behind 0, 4 paths) | pin age 7s
+      pins, prompt, QA project and repo present; kit at its filled home; thinking directive; every kit file + the gate57 report + the READY named; no unfilled token, no PR placeholder
+      the prompt carries 27 by-name keywords (as tokens), the tier lines, the checks C1..C6 + C3b + Q-M, the holds + named exceptions, the GO string, the addendum + REPORT-HASH-LAST rules, the verdict subject + report dir, the head in full
+      a launch (not --check) will refuse unless stdin is a TTY (exit 21)
+DRY RUN COMPLETE 2026-10-05T06:11:24Z — every read agrees with the input; the real run fills the REAL pins and continues with the override check, the usage gate, --check and cockpit.sh add

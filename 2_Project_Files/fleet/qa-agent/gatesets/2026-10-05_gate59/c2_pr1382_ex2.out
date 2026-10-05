@@ -1,0 +1,32 @@
+c2_hunk_gate59 2026-10-05T05:51:46Z | clone /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/b72c1f78-0eff-4438-a1d7-6dcd846422fb/scratchpad/g59/clone | develop 46c3e20cfbd2 | head 80bafc849a54
+INFO blobs: users.ts develop ea9f8da97a04 head 68f402bb56f0 | userRepo.ts develop 9060b308e6d6 head 9060b308e6d6
+PASS H1 shape: non-comment removed ['const user = await userRepo.getUserById(req.user!.userId);'] | added ['const user = await userRepo.getUserByIdWithPasswordHash(req.user!.userId);'] | removed lines total 1 (want 1) | comment lines added 7, carry KS-1005: True, state the prior call ("was getUserById"): True
+INFO H1 -     const user = await userRepo.getUserById(req.user!.userId);
+INFO H1 +     // KS-1005: was getUserById, whose column list (userRepo.ts USER_COLS, commented "All user
+INFO H1 +     // columns EXCEPT password_hash") omits password_hash — so `user.passwordHash` was ALWAYS
+INFO H1 +     // undefined and the next line threw NotFoundError for every password account. The endpoint
+INFO H1 +     // answered 404 whether the current password was right or wrong, so it could not even tell
+INFO H1 +     // the two apart. getUserByIdWithPasswordHash is the existing hash-carrying variant.
+INFO H1 +     const user = await userRepo.getUserByIdWithPasswordHash(req.user!.userId);
+INFO H1 +     // KS-1005: unchanged on purpose. A passwordless account (social / wallet, password_hash NULL)
+INFO H1 +     // still answers 404 — ruled by Wednesday 2026-10-05, not incidental.
+PASS H2 same-hash: handler at head :963 (56 code lines) | hash-carrying loader 1 time(s), verifyPassword(user.passwordHash) 1 time(s), loader BEFORE verify: True | statements assigning `user`: 1 (want 1) | writes to user / user.passwordHash between them: NONE
+PASS H3 Q-1005 404 kept: guard "if (!user || !user.passwordHash) throw new NotFoundError('User');" at develop: True, at head: True, the next code line after the loader: True
+PASS H4 counts: getUserById( lines 8 -> 7 (kit 8 -> 7) | getUserByIdWithPasswordHash( 0 -> 1 (want 0 -> 1) | the surviving getUserById lines byte-identical and in order: True
+PASS H5 repo: userRepo.ts identical develop vs head: True | USER_COLS 31 columns, password_hash in it: False | CONTROL mfa_secret in it: True | getUserByIdWithPasswordHash SELECTs ${USER_COLS}, password_hash: True
+INFO H6 getUserByIdWithPasswordHash body: `return fromRow(` without await: True (getUserById: `return await fromRow`: True) — KS-999 sibling: a throw inside fromRow escapes the 503 classifier on THIS path
+INFO H6 getUserByIdWithPasswordHash takes a tenantId parameter: False (getUserById does: True) — RLS rests on the ALS tenant GUC; UNMEASURED without a real Postgres
+INFO H6 class census — every non-test `.passwordHash` READ in services/auth/src at head (the gate reads each loader; `hunt the class`):
+INFO H6   Blockchain/Dev/services/auth/src/repositories/userRepo.ts:703:      user.passwordHash || null,
+INFO H6   Blockchain/Dev/services/auth/src/routes/auth.ts:347:      const isValid = await verifyPassword(data.password, platformAdmin.passwordHash);
+INFO H6   Blockchain/Dev/services/auth/src/routes/auth.ts:357:      if (shouldRehashAfterVerify(platformAdmin.passwordHash)) {
+INFO H6   Blockchain/Dev/services/auth/src/routes/auth.ts:376:        passwordHash: platformAdmin.passwordHash,
+INFO H6   Blockchain/Dev/services/auth/src/routes/auth.ts:536:    if (user.passwordHash && shouldRehashAfterVerify(user.passwordHash)) {
+INFO H6   Blockchain/Dev/services/auth/src/routes/mfa.ts:346:    if (user.passwordHash) {
+INFO H6   Blockchain/Dev/services/auth/src/routes/mfa.ts:352:      if (!data.password || !(await verifyPassword(data.password, user.passwordHash))) {
+INFO H6   Blockchain/Dev/services/auth/src/routes/users.ts:974:    if (!user || !user.passwordHash) throw new NotFoundError('User');
+INFO H6   Blockchain/Dev/services/auth/src/routes/users.ts:976:    const isValid = await verifyPassword(data.currentPassword, user.passwordHash);
+INFO H6   Blockchain/Dev/services/auth/src/services/passwordLoginGate.ts:366:  if (!user.passwordHash) {
+INFO H6   Blockchain/Dev/services/auth/src/services/passwordLoginGate.ts:373:  if (!(await verifyPassword(password, user.passwordHash))) {
+INFO H6 class census: 11 reader line(s) (git grep rc 0); MUST-HIT control: the change-password verify line is among them: True
+C2 HUNK PASS: 0 FAIL of 5 checks | head 80bafc849a54

@@ -1,0 +1,137 @@
+// gate59 PROBE (the GATE's own cells, never committed; copied into YOUR scratch worktree by c3b_probe_gate59.py and MOVED out after each run).
+// KS-1005 security probe on POST /api/users/me/change-password. Same faithful-db harness as the PR's ks1005 file (it returns password_hash
+// ONLY when the SELECT names it, as Postgres would), but INDEPENDENT assertions:
+//   P1 a WRONG current password is REFUSED: 400 'Current password is incorrect', and NOTHING is written.
+//   P2 the RIGHT current password is ACCEPTED: 200; the FIRST users SELECT (the loader) named password_hash and is the ONLY one that did
+//      (the hash verified is the hash that SELECT read; a later SELECT is updateUser's read-back); the written hash verifies the NEW password and NOT the old one.
+//   P3 a PASSWORDLESS account (password_hash NULL) -> 404 (Q-1005), nothing written.                       [control: 404 at develop too]
+//   P4 the STRENGTH gate is REACHED: right current password + 'password1' (passes zod min(8), fails checkPasswordStrength) -> 400/422 naming
+//      'too weak', nothing written. (The PR's control F sends 'short', which zod refuses BEFORE the route body runs: it never reaches it.)
+//   P5 PASS-THE-HASH: the stored hash string itself offered as currentPassword -> 400, nothing written.
+//   P6 a body with no currentPassword -> 400 from zod at both develop and head, nothing written.            [control: precedes the loader]
+//   T1 TIMING NOTE (always green; records): median ms of 7 requests each for wrong / right / passwordless, written to $GATE59_TIMING_OUT.
+// Expected at DEVELOP: P1 P2 P4 P5 RED by assertion (404 received), P3 P6 T1 green. At HEAD: 7 / 7 green.
+import { describe, it, expect, beforeAll, afterAll, beforeEach, vi } from 'vitest';
+import type { AddressInfo } from 'node:net';
+import type { Server } from 'node:http';
+import { writeFileSync } from 'node:fs';
+import express from 'express';
+
+const USER_ID = 'gate59-probe-user';
+const CURRENT = 'gate59-Current-Passw0rd!';
+const NEW_PW = 'gate59-Replacement-Passw0rd!';
+type Call = { sql: string; values: unknown[] };
+const selects: Call[] = [];
+const updates: Call[] = [];
+let storedHash: string | null = null;
+
+vi.mock('@secuura/shared', async (importOriginal) => {
+  const actual = await importOriginal<Record<string, unknown>>();
+  return { ...actual, encryptField: (v: string) => v, decryptField: (v: string) => v, encryptFieldWithDek: (v: string) => v,
+    decryptFieldWithDek: (v: string) => v, isSubjectDekCiphertext: () => false, isEncryptedPii: () => false, lookupHash: (v: string) => 'hash:' + v };
+});
+vi.mock('../services/subjectDeks', () => ({ subjectDeks: { getDek: vi.fn(async () => Buffer.from('g59-dek')), getOrCreateDek: vi.fn(async () => Buffer.from('g59-dek')) } }));
+vi.mock('../utils/logger', () => ({ logger: { info: vi.fn(), warn: vi.fn(), error: vi.fn(), debug: vi.fn() } }));
+vi.mock('../db', () => ({
+  isDbAvailable: () => true,
+  query: vi.fn(async (sql: string, values: unknown[] = []) => {
+    const text = String(sql);
+    if (text.includes('UPDATE users')) { updates.push({ sql: text, values }); return { rows: [{ id: USER_ID, email: 'g59@example.test', status: 'active', role: 'user' }], rowCount: 1 }; }
+    if (text.includes('SELECT') && text.includes('users')) {
+      selects.push({ sql: text, values });
+      const row: Record<string, unknown> = { id: USER_ID, email: 'g59@example.test', status: 'active', role: 'user', auth_method: 'password',
+        created_at: '2026-01-01T00:00:00.000Z', updated_at: '2026-01-01T00:00:00.000Z' };
+      if (text.includes('password_hash')) row.password_hash = storedHash;
+      return { rows: [row], rowCount: 1 };
+    }
+    return { rows: [], rowCount: 0 };
+  }),
+}));
+vi.mock('../middleware/authenticate', () => {
+  const inject = () => (req: any, _res: any, next: () => void) => { req.user = { userId: USER_ID, role: 'user' }; next(); };
+  return { authenticate: inject, authenticateAccessOrConnector: inject };
+});
+vi.mock('../services/session', () => ({ revokeAllUserSessions: vi.fn(async () => 0) }));
+
+let server: Server; let base = '';
+let hashPassword: (p: string) => Promise<string>;
+let verifyPassword: (p: string, h: string) => Promise<boolean>;
+beforeAll(async () => {
+  const pw = await import('../services/password'); hashPassword = pw.hashPassword; verifyPassword = pw.verifyPassword;
+  const { userRoutes } = await import('../routes/users'); const { errorHandler } = await import('../middleware/errorHandler');
+  const app = express(); app.use(express.json()); app.use('/api/users', userRoutes); app.use(errorHandler);
+  await new Promise<void>((r) => { server = app.listen(0, '127.0.0.1', () => { base = 'http://127.0.0.1:' + String((server.address() as AddressInfo).port); r(); }); });
+});
+afterAll(async () => { await new Promise<void>((r) => server.close(() => r())); });
+beforeEach(() => { selects.length = 0; updates.length = 0; });
+
+async function post(body: unknown) {
+  const res = await fetch(base + '/api/users/me/change-password', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) });
+  return { status: res.status, body: await res.json().catch(() => ({})) };
+}
+const pwWrites = () => updates.filter((c) => c.sql.includes('password_hash'));
+const msg = (b: any) => String(b?.error?.message ?? b?.message ?? '');
+
+describe('gate59 probe KS-1005', () => {
+  it('gate59 P1 a WRONG current password is refused 400 and writes nothing', async () => {
+    storedHash = await hashPassword(CURRENT);
+    const r = await post({ currentPassword: 'gate59-not-it', newPassword: NEW_PW });
+    expect(r.status, 'wrong current password').toBe(400);
+    expect(msg(r.body)).toMatch(/current password is incorrect/i);
+    expect(pwWrites().length).toBe(0);
+  });
+  it('gate59 P2 the RIGHT current password is accepted; ONE select read the verified hash; the new hash is written', async () => {
+    storedHash = await hashPassword(CURRENT);
+    const r = await post({ currentPassword: CURRENT, newPassword: NEW_PW });
+    expect(r.status, 'right current password').toBe(200);
+    // The FIRST users SELECT (the loader, before verifyPassword) names password_hash, and it is the ONLY one that does; a later SELECT is
+    // updateUser's post-write read-back (getUserById, USER_COLS). Drafter's ex1 asserted "exactly ONE SELECT": wrong premise, corrected.
+    expect(selects.length, 'users SELECTs issued').toBeGreaterThan(0);
+    expect(selects[0].sql, 'the loader SELECT names password_hash').toContain('password_hash');
+    expect(selects[0].values, 'the loader SELECT is for the caller').toContain(USER_ID);
+    expect(selects.filter((c) => c.sql.includes('password_hash')).length, 'SELECTs that read the hash').toBe(1);
+    const w = pwWrites(); expect(w.length).toBe(1);
+    const written = w[0].values.find((v) => typeof v === 'string' && (v.startsWith('$argon2') || v.startsWith('$2'))) as string;
+    expect(written).toBeTruthy();
+    expect(written).not.toBe(storedHash);
+    await expect(verifyPassword(NEW_PW, written)).resolves.toBe(true);
+    await expect(verifyPassword(CURRENT, written)).resolves.toBe(false);
+  });
+  it('gate59 P3 a PASSWORDLESS account answers 404 and writes nothing (Q-1005)', async () => {
+    storedHash = null;
+    const r = await post({ currentPassword: CURRENT, newPassword: NEW_PW });
+    expect(r.status).toBe(404);
+    expect(pwWrites().length).toBe(0);
+  });
+  it('gate59 P4 the strength gate is REACHED: a weak 9-char new password is refused naming too weak', async () => {
+    storedHash = await hashPassword(CURRENT);
+    const r = await post({ currentPassword: CURRENT, newPassword: 'password1' });
+    expect([400, 422], 'weak new password').toContain(r.status);
+    expect(msg(r.body)).toMatch(/too weak/i);
+    expect(pwWrites().length).toBe(0);
+  });
+  it('gate59 P5 pass-the-hash: the stored hash offered as the current password is refused 400', async () => {
+    storedHash = await hashPassword(CURRENT);
+    const r = await post({ currentPassword: storedHash, newPassword: NEW_PW });
+    expect(r.status, 'the hash is not the password').toBe(400);
+    expect(pwWrites().length).toBe(0);
+  });
+  it('gate59 P6 (control) no currentPassword -> 400 from zod, before the loader', async () => {
+    storedHash = await hashPassword(CURRENT);
+    const r = await post({ newPassword: NEW_PW });
+    expect(r.status).toBe(400);
+    expect(selects.length, 'zod refuses before any SELECT').toBe(0);
+    expect(pwWrites().length).toBe(0);
+  });
+  it('gate59 T1 timing note (records, never fails)', async () => {
+    const med = (a: number[]) => a.slice().sort((x, y) => x - y)[Math.floor(a.length / 2)];
+    const time = async (body: unknown, hash: string | null) => { const t: number[] = []; for (let i = 0; i < 7; i++) { storedHash = hash; const s = performance.now(); await post(body); t.push(performance.now() - s); } return t; };
+    const h = await hashPassword(CURRENT);
+    const wrong = await time({ currentPassword: 'gate59-not-it', newPassword: NEW_PW }, h);
+    const right = await time({ currentPassword: CURRENT, newPassword: NEW_PW }, h);
+    const none = await time({ currentPassword: CURRENT, newPassword: NEW_PW }, null);
+    const out = { wrong_ms: med(wrong), right_ms: med(right), passwordless_ms: med(none), n: 7, hash_prefix: h.slice(0, 9) };
+    if (process.env.GATE59_TIMING_OUT) writeFileSync(process.env.GATE59_TIMING_OUT, JSON.stringify(out) + '\n');
+    expect(true).toBe(true);
+  }, 120000);
+});

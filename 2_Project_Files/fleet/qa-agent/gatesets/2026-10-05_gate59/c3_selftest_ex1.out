@@ -1,0 +1,22 @@
+SELFTEST OK R-0 the real red shape (positive control): want PASS | failed NONE
+SELFTEST OK R-1 a load failure: want FAIL on R1 | failed ['R1 red-first BY ASSERTION at develop']
+SELFTEST OK R-2 a 5th red (F red at develop): want FAIL on R1 | failed ['R1 red-first BY ASSERTION at develop']
+SELFTEST OK R-3 D red by TIMEOUT, not assertion: want FAIL on R1 | failed ['R1 red-first BY ASSERTION at develop']
+SELFTEST OK R-4 green at develop (nothing red): want FAIL on R1 | failed ['R1 red-first BY ASSERTION at develop']
+SELFTEST OK R-5 control E red at develop: want FAIL on R1 | failed ['R1 red-first BY ASSERTION at develop']
+SELFTEST OK R-6 A red for the wrong status (500): want FAIL on R1 | failed ['R1 red-first BY ASSERTION at develop']
+SELFTEST OK R-7 6/6 green at head: want PASS | failed NONE
+SELFTEST MISS S-0 clean suite (positive control): want PASS | failed ['S3 the 6 cells in the full run']
+PASS S1 totals: develop 5 tests / 2 files | head 11 tests / 3 files (want +6 / +1)
+PASS S2 no NEW reds: NEW reds outside the known class NONE | NAMED known-class 0 | load-failure files develop NONE head NONE
+FAIL S3 the 6 cells in the full run: 11 KS-1005 cell(s) in the head run, all passed: True
+
+SELFTEST MISS S-1 a ks949 TIMEOUT at head is NAMED and does not fail S2: want PASS | failed ['S3 the 6 cells in the full run']
+PASS S1 totals: develop 5 tests / 2 files | head 11 tests / 3 files (want +6 / +1)
+NAMED known class (ks949-platform-admin-seed-identity): _/ks949-platform-admin-seed-identity.test.ts :: KS-1005 — change-password reads the hash it verifies seed walk | 10 ms | Error: Test timed out in 5000ms.
+PASS S2 no NEW reds: NEW reds outside the known class NONE | NAMED known-class 1 | load-failure files develop NONE head NONE
+FAIL S3 the 6 cells in the full run: 11 KS-1005 cell(s) in the head run, all passed: False
+
+SELFTEST OK S-2 an unknown NEW red: want FAIL on S2 | failed ['S3 the 6 cells in the full run', 'S2 no NEW reds', 'S3 the 6 cells in the full run']
+SELFTEST OK S-3 the ks1005 file missing from the head run: want FAIL on S3 | failed ['S2 no NEW reds', 'S3 the 6 cells in the full run']
+SELFTEST BROKEN 10 of 12

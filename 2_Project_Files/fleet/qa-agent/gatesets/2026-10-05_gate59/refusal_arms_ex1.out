@@ -1,0 +1,78 @@
+== launcher stale pin (G59_NOW +3600) want 9
+REFUSING: STALE PIN — pinned 3631s ago (max 1800s); run repin_and_launch_gate59.sh, which re-pins and re-fills in the same action
+rc=9
+== launcher develop moved (G59_CUR_DEV) want 17
+REFUSING: origin develop ffffffffffffffffffffffffffffffffffffffff != the pinned develop 46c3e20cfbd21acee0c67d544180c33deaa4c8ef — run repin_and_launch_gate59.sh (a moved develop is a RE-DRAFT for this kit)
+rc=17
+== launcher head moved (G59_HEAD) want 6
+REFUSING: #1382 — eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee is not at refs/heads/feature/ks-1005-change-password-reads-the-hash-it-verifies-e2-1 AND refs/pull/1382/head on origin — the head moved (or the pin is wrong); a verdict is valid ONLY at its head
+46c3e20cfbd21acee0c67d544180c33deaa4c8ef	refs/heads/develop
+80bafc849a54a9368810fd0fcd1ee1184fa608bf	refs/heads/feature/ks-1005-change-password-reads-the-hash-it-verifies-e2-1
+80bafc849a54a9368810fd0fcd1ee1184fa608bf	refs/pull/1382/head
+rc=6
+== launcher no TTY, no --check (stdin /dev/null) want 21
+REFUSING: stdin is not a TTY — run this launcher in a cockpit pane, never inside a Bash tool
+rc=21
+== repin short sha want 9
+REFUSING: HEAD must be the FULL 40-hex sha, got '80bafc849a54'
+rc=9
+== repin wrong PR want 9
+REFUSING: PR #1381 is not this kit's PR (#1382)
+rc=9
+== repin wrong head (develop sha) want 11
+LAUNCH ACTION gate59 (DRY RUN) 2026-10-05 17:07:20 AEDT / 2026-10-05T06:07:20Z | PR #1382 | HEAD 46c3e20cfbd21acee0c67d544180c33deaa4c8ef | kit develop 46c3e20cfbd21acee0c67d544180c33deaa4c8ef | pane QA/Secuura-ks1005-1382
+--- 0. the pane must be routed (inbox_routing.conf) or cockpit.sh say --mail fails silently
+  routing file /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/inbox_routing.conf — line present: 0 (grep rc=1; want 1 / rc 0)
+  (DRY RUN: reported, not refused — the real run refuses rc 1 here; README section 4)
+--- 1. instrument A: the GitHub PULLS API (+ 2b the census, same read)
+  gh_census rc=0
+    API #1382 head 80bafc849a54a9368810fd0fcd1ee1184fa608bf base develop base_sha 46c3e20cfbd21acee0c67d544180c33deaa4c8ef mergeable True reads 1 state open merged False branch feature/ks-1005-change-password-reads-the-hash-it-verifies-e2-1 changed_files 4
+    CONTROL the classifier on #1382 ITSELF (must print USERS.TS and OVERLAP, or a zero below proves nothing): FIRES
+    EXPECTED OVERLAP (reported_overlaps; reported, never sequenced by a gate) #1381 head 82e6bfa9de85 | paths ['Projects Documents/API_Security_Functional_Testing_Architecture_Flow_Diagrams.html', 'Projects Documents/QA_Tool_Cheat_Sheet_Secuura_API_Testing.htm
+    CENSUS 22 other open PR(s) read | 0 touch routes/users.ts | 0 touch a kit path or carry a kit key outside reported_overlaps | 1 expected overlap(s) reported | 4 kit path(s), keys ['KS-1005']
+--- 2. instrument B: git ls-remote origin (ONE read from the Secuura checkout, READ-ONLY)
+  ls-remote rc=0 at 06:07:59Z
+    46c3e20cfbd21acee0c67d544180c33deaa4c8ef	refs/heads/develop
+    80bafc849a54a9368810fd0fcd1ee1184fa608bf	refs/heads/feature/ks-1005-change-password-reads-the-hash-it-verifies-e2-1
+    80bafc849a54a9368810fd0fcd1ee1184fa608bf	refs/pull/1382/head
+--- 2b. the census
+  OVERLAP census clean (1 expected overlap(s) reported, 0 other PR(s) touching users.ts; control: FIRES)
+--- 3. the head, judged (input == kit head == API == pull/head == branch, open, not merged, on develop, not mergeable:false, kit branch)
+  input 46c3e20cfbd21acee0c67d544180c33deaa4c8ef | kit 80bafc849a54a9368810fd0fcd1ee1184fa608bf | API 80bafc849a54a9368810fd0fcd1ee1184fa608bf (state open, merged False, base develop, mergeable True, files 4) | pull/head 80bafc849a54a9368810fd0fcd1ee1184fa608bf | feature/ks-1005-change-password-reads-the-hash-it-verifies-e2-1 80bafc849a54a9368810fd0fcd1ee1184fa608bf
+REFUSING TO LAUNCH: the input head is not the kit head / the PR's head on both instruments, or the PR is not open / merged / not on develop / mergeable:false / off the kit branch — a stale pin is never launched (a NEW head is a RE-DRAFT: README section 7)
+rc=11
+== repin census with reported_overlaps EMPTY (G59_REPORTED) want 15
+LAUNCH ACTION gate59 (DRY RUN) 2026-10-05 17:07:59 AEDT / 2026-10-05T06:07:59Z | PR #1382 | HEAD 80bafc849a54a9368810fd0fcd1ee1184fa608bf | kit develop 46c3e20cfbd21acee0c67d544180c33deaa4c8ef | pane QA/Secuura-ks1005-1382
+--- 0. the pane must be routed (inbox_routing.conf) or cockpit.sh say --mail fails silently
+  routing file /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/inbox_routing.conf — line present: 0 (grep rc=1; want 1 / rc 0)
+  (DRY RUN: reported, not refused — the real run refuses rc 1 here; README section 4)
+--- 1. instrument A: the GitHub PULLS API (+ 2b the census, same read)
+  gh_census rc=0
+    API #1382 head 80bafc849a54a9368810fd0fcd1ee1184fa608bf base develop base_sha 46c3e20cfbd21acee0c67d544180c33deaa4c8ef mergeable True reads 1 state open merged False branch feature/ks-1005-change-password-reads-the-hash-it-verifies-e2-1 changed_files 4
+    CONTROL the classifier on #1382 ITSELF (must print USERS.TS and OVERLAP, or a zero below proves nothing): FIRES
+    OVERLAP #1381 | KS-1345: a failed webhooks list query answers 500, not 200 with an empty list | paths ['Projects Documents/API_Security_Functional_Testing_Architecture_Flow_Diagrams.html', 'Projects Documents/QA_Tool_Cheat_Sheet_Secuura_API_Testing.html'] 
+    CENSUS 22 other open PR(s) read | 0 touch routes/users.ts | 1 touch a kit path or carry a kit key outside reported_overlaps | 0 expected overlap(s) reported | 4 kit path(s), keys ['KS-1005']
+--- 2. instrument B: git ls-remote origin (ONE read from the Secuura checkout, READ-ONLY)
+  ls-remote rc=0 at 06:08:41Z
+    46c3e20cfbd21acee0c67d544180c33deaa4c8ef	refs/heads/develop
+    80bafc849a54a9368810fd0fcd1ee1184fa608bf	refs/heads/feature/ks-1005-change-password-reads-the-hash-it-verifies-e2-1
+    80bafc849a54a9368810fd0fcd1ee1184fa608bf	refs/pull/1382/head
+--- 2b. the census
+REFUSING TO LAUNCH: another open PR touches a kit path or carries a kit key outside reported_overlaps — Wednesday sequences it; a re-draft decides
+rc=15
+== fill with a changed READY (G59_READY scratch copy +1 byte) want 1
+REFUSING: the READY sha256 0833e637a8d0ac00bce9e6700091fbd705bffe215118222c29fc9b05fb424617 != kit 42d3ae585c32caa151b7286f01f17937bc3578fb214519d2fba90a02c3437827 (it changed since drafting)
+rc=1
+== fill with a moved develop want 1
+REFUSING: STALE BASE: develop fe6daca343c143c32b1eb76d681668b4edbe4074 != kit develop 46c3e20cfbd21acee0c67d544180c33deaa4c8ef — RE-DRAFT, or judge a later merge-in with c4 qm (README section 7)
+rc=1
+== lib guard: c3 worktree under a (scratch stand-in) forbidden root want 2
+REFUSING: worktree /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/b72c1f78-0eff-4438-a1d7-6dcd846422fb/scratchpad/g59/fakeroot/proj/wt is under /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/b72c1f78-0eff-4438-a1d7-6dcd846422fb/scratchpad/g59/fakeroot — write / run only in YOUR OWN scratch clone or worktree, never the shared checkout or a builder worktree (nothing was run)
+rc=2
+== lib guard: c3b --out under the stand-in root want 2
+REFUSING: /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/b72c1f78-0eff-4438-a1d7-6dcd846422fb/scratchpad/g59/fakeroot/proj/out is inside /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/b72c1f78-0eff-4438-a1d7-6dcd846422fb/scratchpad/g59/fakeroot but not under the QA reports root (nothing was created or run)
+rc=2
+== lib guard: c4 clone under the stand-in root (symlink into it) want 2
+REFUSING: clone /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/b72c1f78-0eff-4438-a1d7-6dcd846422fb/scratchpad/g59/link_into_root is under /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/b72c1f78-0eff-4438-a1d7-6dcd846422fb/scratchpad/g59/fakeroot — write / run only in YOUR OWN scratch clone or worktree, never the shared checkout or a builder worktree (nothing was run)
+rc=2
+== created? 0 entries under the stand-in root; out_refusal exists: no
