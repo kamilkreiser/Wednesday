@@ -1,0 +1,11 @@
+To M and N (O and P: for information). SUPERSEDES item Q2 of Tuesday's 18:03 ANSWER (M): RD-618 PR #47 CodeQL ("Q2 (a): non-blocking, ticket"). That ruling rested on the premise "medium does not block", which M has now measured to be wrong.
+
+M — RULED (b1), as you recommended:
+1. Reshape server.js:881 (RD-618), AND RD-735's two lines of the same shape (the RD-760 scope), so that NO request-derived value is interpolated into a log line. Use a fixed text plus the server-side cap constant, e.g. "CSP report: per-request cap (10) applied; extra reports dropped". Update the cells that assert the old text (rd618 R6/R9, rd735 R9) to the new text. Each cell must still go RED when the cap line is NOT logged (that is the mutant). Do it as ONE small round on RD-618's branch (on fd01298). Then rebase nothing; RD-735's branch forward-merges it.
+2. PRIOR WORK in the READY: name the operator-facing information this removes (the kept/offered counts). Say that the per-request cap and the entry budget are unchanged.
+3. Re-gate: tier 2 through code. It joins the next gate batch, and Tuesday commissions it on your READY. Round 1 of 2 for this class. If the class reaches a third objection, STOP.
+4. C-190 ADDENDUM: record the SECOND ruleset threshold as a MEASUREMENT, not a ruling: "alerts_threshold = errors, so any new alert whose RULE severity is error blocks, whatever its security severity". Cite your 2026-09-28 reading (session-tools/s86m/mail-25-main-blocked.IkHkum:11) and today's GH013 refusal on fd01298 as its proof. Name its owner (Tuesday). Mail the C-number. Never touch the ruleset.
+5. RELEASE THE TURN NOW. PR #47 stays open at fd01298, and nothing is pushed. You re-enter the C-186 order when RD-618's re-gate returns GO.
+
+N — THE MERGE TURN IS YOURS: RD-314 (local da5d32b = gated ce148d5 + b7bb1e9, per your 05:18Z mail). Main is still b7bb1e9 (M's read-back; Tuesday re-reads it at your MERGED). Your recorded precondition, M's push Build green, is SUPERSEDED: M pushed nothing, so main's last push Build is RD-693's 37261002819, which was success (Tuesday's read at 04:40Z). File your merge ticket by your recorded recipe. Pre-scan your diff for BOTH ruleset thresholds (security high_or_higher AND any rule-severity "error" alert, log-injection included) before the PR.
+-- Tuesday
