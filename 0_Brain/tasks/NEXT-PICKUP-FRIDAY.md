@@ -12,6 +12,19 @@ supersede: replace wholesale; previous = NEXT-PICKUP-FRIDAY.md.pre-0925-rotate-s
 
 **The tree is at `/Volumes/Laptop-DEV/FRIDAY` (the drive, since 2026-09-28).** Quote every path (spaces).
 
+## 🔴🔴🔴 ROTATION HANDOVER 2026-10-05 17:02 (Friday, ctx ~79%) — READ FIRST; supersedes every block below where they differ
+**FIRST ACT:** `kam_rulings_today.sh` + `reconcile_rulings.py`; `friday/seat_idle.sh` over every live pane; read each STATUS last line. Every watcher/merge job DIED with the old seat — re-seed and re-arm. **Load was 13 with 5 seats: start nothing new until it falls.**
+**Kam:** last rows 16:19:53 (Composer deploy a) and 16:38:48 (hosted c2d321c deploy a), both reconciled. Standing: "Keep going with the POC and anything you can do on the security composer" (16:2x). **No open cards.**
+**LIVE:** Composer demo **555593a** (C-44, verified 16:3x). HPSM-POC hosted **fa77dca** → B136 deploying **c2d321c**. MAINS: Composer 555593a · HPSM-POC c2d321c.
+**LIVE PANES (briefs dated 2026-10-05 in each project's `1_Project_Definition/Briefs/`):**
+- **Datasec/HPSM-POC-C B136** hosted deploy c2d321c (`…_B136_hosted-deploy-c2d321c.md`). On READY: Friday's own live check (web /api/health, API /health + /health/ready 200; new build id, fa77dca's `NkV1iebYZFFpDBvxKYcNs` ×0; fa77dca `_buildManifest.js` 404; C-59 settings still present), records PR (records/b136, analysis), deliver card `hpsmpoc-c2d321c-hosted-deploy-1005` to its C-number, tell Kam.
+- **Datasec/HPSM-POC-QA B137** gate on B134 = PR #104 @ `e761cca4a816afc4df1e245400a14a4809f19835` (tier 1 round 1 of 2). On GO: `friday/merge_when_green.sh datasecau/HPSM-POC 104 e761cca4a816afc4df1e245400a14a4809f19835`; then B134 records (pane Datasec/HPSM-POC-A — still open) + Jira comments/Done; **ruled: 160 option (b) verify-then-retry = its OWN small ticket** (B134 files it). Then B135's 159 may start.
+- **Datasec/HPSM-POC-A B134** idle after READY (keep for records/fix round).
+- **Datasec/HPSM-POC-B B135** close 13 done-already tickets + CI/infra/web lane (`…_B135_ci-infra-web-lane-and-done-tickets.md`). ci.yml items are tier 1 → gate before merge.
+- **Datasec/Composer-D B84** seven web Lows (`Composer …_B84_web-lows-127-128-149-165-175-188-200.md`, base 555593a). On READY: diff at source (#165 no contract change), PR, merge_when_green, records, NEW WORDS to Kam; deploy = his word (card).
+- **Datasec/Composer-Deploy B83** DONE (C-44 on root main) — close its pane (`pane_close.sh <id>`).
+**Owed to Kam:** six NEW WORDS (sent 15:03), B134's new words (its STATUS §New words), Composer review-pack decisions, Wednesday's two laptop copies, POC week items (E2E test, D-12, test user + UAT on his login, Paul invite, Tue 6 review, Thu 8 PO signature).
+
 ## 🔴🔴🔴 HANDOVER 2026-10-05 16:26 (Friday, ctx ~78%) — READ FIRST; supersedes every block below where they differ
 **FIRST ACT:** `kam_rulings_today.sh` + `reconcile_rulings.py`; then `friday/seat_idle.sh` over every live pane and read each STATUS last line. All watchers/merge jobs DIE with this seat — re-seed and re-arm.
 **Kam today (latest):** 16:19:53 composer-555593a-deploy-1005 a · 16:2x terminal "What else should be done? Keep going with the POC and anything you can do on the security composer." (receipted). Earlier: ~12:4x "keep going. dont wait on reviews if you do not need" (email sent 13:17).
