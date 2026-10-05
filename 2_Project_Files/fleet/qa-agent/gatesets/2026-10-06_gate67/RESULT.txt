@@ -1,0 +1,74 @@
+gate67 KIT — #1394 KS-723 (T1) — head a94ec8f6a2c6ec382fb7b5dbafcf8a7f9ce68427 — DRAFTER RESULT
+STATUS: KIT COMPLETE. NOT LAUNCHED. Repin script NOT run (not even --dry-run). C3 NOT run by the drafter. No mail, no rm, no ref written.
+
+LIVE DEVELOP — IT MOVED DURING DRAFTING
+  brief / READY  f0179806494e42df254b9580168be3cd4a35f307 (ls-remote 13:42:45Z, host clock)
+  NOW            22b268143a6377c9a82cd03379daa596cd26d644 (ls-remote 14:02:58Z and 22:11:39Z, host clock; the clock jumped between reads)
+                 "KS-1330: re-land round-2 signal handling", one parent f0179806; f017..22b2 = Blockchain/Dev/scripts/run-shell-suites.sh
+                 + scripts/__tests__/run_shell_suites.test.sh ONLY: 0 kit paths, 0 hook paths, both docs byte-identical. NOT in the shared
+                 checkout's store (fetched BY SHA into _scratch/clone). The kit is keyed to 22b2 (kit.json develop_at_draft).
+  head unmoved: refs/pull/1394/head == branch == a94ec8f6a2c6 at every read.
+
+PREDICTED DOCS-ONLY MERGE-IN (c4_docs_gate67.py, composee5 readers)
+  develop 22b2 (LIVE)  KEY-ANCHORED  e23888941fda2755a234590addfbeaaadf78bdcd
+                       git merge-tree dd8ec72867a242945ba1993a7256e1b9c3a01c2b rc 1, BOTH docs CONFLICTED   -> DIVERGENCE
+                       wrong-order control 6d498828dc57 (differs; READ-BACK FAIL both docs)
+  develop f0179806     KEY-ANCHORED  df1f8b7c61ad076c397de298c90b886ec8b2f554
+                       git merge-tree 1680a8a97dae606419beeb78a9ad30fd2ba08f1d rc 1, BOTH docs CONFLICTED   -> DIVERGENCE
+                       wrong-order control eb39b4f8c65f (differs; READ-BACK FAIL both docs)
+  develop d784 (positive control) -> 644f23f36231 == END_TREE
+  read-back of the key tree (both develops): flow 1..14 16 18 19 (17 h2, strictly ascending, 16 between 14/18);
+                       cheat KS-1404 KS-1333 KS-1345 KS-1388 KS-1210 KS-1005 KS-723 (KS-723 LAST), 0 markers, div +0
+  HAND READINGS of git's conflict: take-OURS READS BACK RIGHT on both docs but is NOT the key tree (reverts #1390's formatting of
+                       develop's own 18. h2 and KS-1005 tail). M8 now also requires "M minus the block == develop byte for byte".
+  BATCH SIM: develop = f0179806 + #1385 landed as gate66's key tree fb6cb2c6992c (SIM d3dac1d1e737) -> gate67 key 7687fa98c69e
+                       (cheat ...KS-1005 KS-938 KS-723; flow ...14 16 18 19 20); merge-tree again conflicts on both docs.
+
+READER PROOF (composee5_copy.py sha256 f9ab42d9fc25f189…, :66 flow nums / :82 cheat keys, extracted not re-typed)
+  flow  d784: 16 <h2, 0 split, tolerant 16, old same-line 16 | develop (f017 == 22b2): 16 <h2, 5 SPLIT, tolerant 16, old same-line 11
+  cheat d784: 6 / 6, 0 split | develop: 6 / 6, 0 split
+  planted `<h2>\n      99. … &mdash; KS-99999\n    </h2>`: tolerant HIT, old MISS, both docs, both develops; one-line plant hit by BOTH (4/4)
+
+QM ARMS (c4_selftest_dev22b2_ex1 16/16, c4_selftest_ex1 16/16, CLI arms)
+  GOOD SIM 8/8 (22b2 b9d7938d1841; f017 204f9ae6d29d; also by 12-hex abbreviations)
+  WRONG-ORDER SIM FAIL [M1 M8] · TAKE-OURS SIM FAIL [M1 M8] · TRAILER SIM FAIL exactly [M4] · single parent FAIL M2
+  ABSENT DEVELOP, fabricated sha -> "QM REFUSED: develop unresolvable", rc 2, CHECKED 0
+  ABSENT DEVELOP, GENUINE (22b2 vs the shared checkout) -> same refusal BY NAME, rc 2, CHECKED 0 (gate63/64's scenario, no false M6)
+  REAL KIT-PATH CHANGE (SIM develop editing anchoring.openapi.ts) -> "FAIL M6 RE-GATE: develop advance touches kit path(s) [...]" — a
+    DIFFERENT message from the absent-develop refusal (asserted in the self-test)
+
+PRODUCT (c2_pr1394_ex1 7/7, c2 selftest 6/6; c1 11/11 at 22b2 and f017; gh)
+  security: declared bearerAuth == service jwtAuthenticate (index.ts:457 before route :1089) == gateway authenticateToken(true)
+  envelope: handler {success:true, data: formatAnchorResponse} == declared {success, data->Anchor}; 404 -> ErrorResponse
+  spec: 309 -> 310 paths, exactly one new, nothing else changed; wc -c 1,351,218 -> 1,354,452; chars 1,349,709 (= generator's "bytes")
+  attacker (port of specRouteMap.ts): 20 edge decisions changed, 0 LOOSENED (tx path: GET no-cred -> 401, other verbs -> 405)
+  {id} NOT declared; what-if would 405 POST /api/anchors/batch + POST /api/anchors/verify (PR's reason re-derived)
+  PR text: 62 sentences, 10 TRUE, 1 FALSE ("one hunk at `:406`"; real -U3 @@ -407,6 +407,49 @@), 51 NOT RE-DERIVED; keys/closing/title/trailers clean
+  Actions: 1 run at head (Dependabot, skipped); 5 expected workflows NOT RUN (mergeable_state dirty); control fires
+  census: 25 others, 0 OVERLAP, 0 SPEC, 3 DOCS (#1393, #1385, #1383)
+
+KIT DOUBTS (README §2, D1-D12)
+  D1 tier T1 (spec drives the edge gate) · D2 DIVERGENCE · D3 :82 reader straddles an unkeyed h2 (kit refuses) · D4 mixed formatting
+  D5 Actions NOT RUN (dirty) · D6 undeclared merkleRoot/merkleProof/slot · D7 handler emits only 200/404; DB error -> 404
+  D8 bearerAuth-only vs sk_ keys · D9 test file type-unchecked · D10 preflight 12/15 · D11 FALSE `:406` sentence · D12 batching
+  Plus: W5 is a Python PORT of specRouteMap.ts (2 fidelity arms), not the TS itself; expected-Actions set read off #1385.
+
+WEDNESDAY MUST RULE
+  1. D2: which tree the merger builds (kit default: KEY-ANCHORED e23888941fda on 22b2); git cannot auto-merge either doc.
+  2. The merge seat <NN> for --merge-seat (never 64th / 63rd).
+  3. Batching order with gate66: whoever merges first voids the other's prediction; gate66's kit is keyed to f0179806 and develop is now 22b2.
+  4. Whether the GO requires `gh_gate67.py actions --at M --prev a94ec8f6a2c6…` NEW-FAILING NONE (no workflow has run on #1394).
+  5. Add the routing line QA/Secuura-ks723-1394|coagent@agentmail.to|yes (NOT added).
+
+LAUNCH (NOT RUN):
+  script -q /dev/null bash /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/gatesets/2026-10-06_gate67/repin_and_launch_gate67.sh 1394 a94ec8f6a2c6ec382fb7b5dbafcf8a7f9ce68427 --merge-seat <NN> --repin-develop 22b268143a6377c9a82cd03379daa596cd26d644
+
+FILES WRITTEN (kit dir; sha256/16)
+  README.md · RESULT.txt · kit.json 97515d9b7658b111 · prompt_gate67.txt 137d31a8a1eb8644 (template, {{MERGE_SEAT}} x4)
+  composee5_copy.py f9ab42d9fc25f189 (verbatim, never executed) · lib_gate67.py 59dbd482532887ad
+  c1_pin_gate67.py b2f035477438731a · c2_product_gate67.py 59eb3b38fdb2a3ec · c3_tests_gate67.py f0962bf4389adc4d
+  c4_docs_gate67.py cd06394fc964649b · gh_gate67.py e3cef557ee11418a
+  launch_qa_secuura_ks723_1394.sh 0f312c860dfe82f4 · repin_and_launch_gate67.sh c6eaa300e92f2790
+  api/ (pull_1394.json, body_1394.md, files_1394.json, runs_head_a94ec8f6a2c6.json) · every *_ex<N>.{out,err,rc} · _quarantine/ (superseded)
+  _scratch/clone (shared clone; objects only: develop 22b2 fetched BY SHA; SIM commits / predicted trees) · _scratch/{selftest,predict,mergetree,qm,cliarms,g66sim}
+  scratchpad/gate67drafter/: index.ts, anchoring.openapi.ts copies, rendered prompt copies for the launcher --check arms
