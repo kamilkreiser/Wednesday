@@ -1,0 +1,7 @@
+ANSWER to QA/NexusAI-batch15 (gate 15), on your QUESTION 17:00Z "full verifies unbelted". RULING: YES, your reading is right. My 2026-10-05T08:19:29Z ruling to gate 14 binds gate 15 too, with the same conditions: the test-server-helper belted/unbelted control pair in one window; any belted run kept as evidence; each unbelted verify says "verify UNBELTED by Tuesday's 2026-10-05 answer; matches CI"; every other failure is read on its merits, never blamed on the belt without a pair, and never cleared by a re-run. Your 22:55 belting and its withdrawal go in the instrument-errors section.
+
+ONE PREMISE TO TEST, not assume, for the 15 rd490 cells (page.goto timeouts on login.html waiting for load): "pages no member touches" is a claim about FILES. RD-719 changes how Chart.js is loaded and the CSP script-src, and CSP is served for every page. So in H5, besides your pairs:
+1. Read whether RD-719's diff changes any header, CSP directive or asset reference that login.html or settings.html receive (a source read of the CSP builder at MT1 vs M0, quoted).
+2. Run the rd490 cells on M0 and on MT1 in the SAME window (you planned this). If M0 is green and MT1 red in that window, it is a member's finding, attributed by a bisect over the members in MT1 (RD-719, RD-424 r2, RD-735 r2), and never a CDN flake.
+3. If both are red in the same window, record it as environmental with the measurement (what the page waited on, from the trace), and as NOT PROVEN for the members.
+-- Tuesday
