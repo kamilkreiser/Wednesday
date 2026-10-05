@@ -1,0 +1,53 @@
+KS-1404: timestamping ships its trust anchors and compose points the verifier at them
+
+#1376 closed the forgeable paths in the verifier and committed the roots, but nothing ever
+DELIVERED an anchor to a running service. Measured read-only on both live boxes 2026-10-05:
+TSA_URL PRESENT-but-EMPTY, TSA_TRUST_ANCHORS_PEM ABSENT, /app/config absent from the image. So
+readTrustAnchorsPem() returned undefined, zero anchors parsed, and rfc3161-verify.ts refused every
+real DER token with "no trust anchor configured" regardless of what the TSA did.
+
+Two changes close that:
+
+1. docker-compose.yml passes TSA_TRUST_ANCHORS_PEM to the timestamping service, defaulting to
+   /app/config/tsa-trust-anchors-dtrust.crt. The default is what makes the anchor effective with
+   no .env edit on any box; a box .env can still override it. Neither box has a TSA override.
+
+2. The timestamping Dockerfile's runtime stage copies config/ to /app/config, BEFORE the
+   chmod -R a+rX. Order is load-bearing: the service runs as the unprivileged nodejs user, so a
+   file copied after the chmod ships unreadable.
+
+Scope is ONE provider's root, per Kam's card secuura-ks1404-tsa-trust-and-library-1004 = a.
+config/tsa-trust-anchors-dtrust.crt holds D-TRUST Root CA 1 2017 ALONE, byte-identical to block 1
+of the already-committed two-root bundle (2,354 bytes; DER SHA-256
+4d24807b9cad5110f40ed79d934346d7c9b0290431dc9b11a40bbb86fcf2aef6, matching config/README.md).
+Nothing was fetched and no new root is introduced. Both boxes resolve to D-Trust -- /health reports
+it from inside each container -- so the bundle's DigiCert root is needed by neither.
+
+Tests: src/__tests__/ks1404-wiring.test.ts, six cells. 3 failed / 3 passed at base
+f01c1da5717fdcb80a5e1aeeaa8ff9f0f00edd80; 6 passed at head. Cells A, B and C1 are the red arms.
+C2, D and E are CONTROLS that pass at base AND head and are labelled as such, not counted as red.
+C2 is worth its place: the pre-existing KS-1404 suite passes the anchor as INLINE PEM TEXT
+everywhere, so the readFileSync branch -- the one the compose default makes every box use -- had no
+coverage at all. Whole timestamping suite at head: 7 files, 86 passed, 0 failed.
+ks1404-verify-rfc3161.test.ts is byte-identical, 0 changed lines.
+
+The three "nothing is wired into any environment" comments are corrected. They were true of #1376
+and false here. tsc COPIES JSDoc into the emitted JS, so a cmp of dist/ is not the right proof and
+does not come out equal; the proof is that all 9 emitted .js files are identical once comments are
+stripped, with controls both ways, and that the only other dist change is .js.map mappings shifting.
+tsc reports the same single pre-existing error at base and head (rfc3161-verify.ts TS2345), its line
+moving 344->349: zero new.
+
+Docs: flow-diagram block 11 gains 11.4 IN PLACE -- no new top-level number, nothing renumbered,
+since KS-1404 already owns 11. The cheat sheet's KS-1404 table gains the matching row. Both files'
+now-false sentences are corrected rather than deleted, and say what they used to claim.
+
+NOT proved by this change, and not claimed: that D-Trust's TSA signs under this root today.
+config/README.md already records that binding as UNVERIFIED and there is no real DER token on either
+box to check it against -- ts_timestamps holds 0 rows on kintsugi (lifetime inserts 0) and exactly
+1 row on demo, which is a mock ("D-Trust GmbH (mock)", eidas_qualified false, 2026-07-30). Also not
+covered: CRL/OCSP revocation and TSA policy OIDs. Deploying this changes kintsugi's answer for a
+real token from false to true only if the box reaches D-Trust, which remains an open measurement.
+
+Refs KS-1404
+

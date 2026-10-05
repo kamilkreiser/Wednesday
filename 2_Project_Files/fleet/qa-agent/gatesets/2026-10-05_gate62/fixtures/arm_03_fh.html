@@ -1,0 +1,2251 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>API Security/Functional Testing Architecture & Flow Diagrams</title>
+    <script
+      src="https://cdn.jsdelivr.net/npm/mermaid@11.10.0/dist/mermaid.min.js"
+      integrity="sha384-PY+AFiXLIHkR5jE4nk0JwPQQmmQlT4mJXFlgeT4jJeuARaBQBK+nSwwxzrPRAtUM"
+      crossorigin="anonymous"
+    ></script>
+    <style>
+      body {
+        font-family:
+          -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu,
+          Cantarell, sans-serif;
+        line-height: 1.6;
+        color: #333;
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 20px;
+        background: #f5f5f5;
+      }
+      h1 {
+        color: #1a73e8;
+        border-bottom: 3px solid #1a73e8;
+        padding-bottom: 10px;
+      }
+      h2 {
+        color: #1a73e8;
+        margin-top: 40px;
+        border-left: 4px solid #1a73e8;
+        padding-left: 15px;
+      }
+      .diagram-container {
+        background: white;
+        border-radius: 8px;
+        padding: 20px;
+        margin: 20px 0;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        overflow-x: auto;
+      }
+      .diagram-title {
+        font-weight: bold;
+        color: #1a73e8;
+        margin-bottom: 15px;
+        font-size: 16px;
+      }
+      .description {
+        background: #e8f0fe;
+        border-left: 4px solid #1a73e8;
+        padding: 15px;
+        margin: 15px 0;
+        border-radius: 4px;
+      }
+      .timeline {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 15px;
+        margin: 20px 0;
+      }
+      .phase-box {
+        background: white;
+        border: 2px solid #ddd;
+        border-radius: 8px;
+        padding: 15px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+      }
+      .phase-box.phase1 {
+        border-left: 4px solid #4285f4;
+      }
+      .phase-box.phase2 {
+        border-left: 4px solid #ea4335;
+      }
+      .phase-box.phase3 {
+        border-left: 4px solid #fbbc04;
+      }
+      .phase-box.phase4 {
+        border-left: 4px solid #34a853;
+      }
+      .phase-box h3 {
+        margin: 0 0 10px 0;
+        font-size: 14px;
+        text-transform: uppercase;
+      }
+      .phase-box .duration {
+        color: #666;
+        font-size: 13px;
+        margin: 5px 0;
+      }
+      .phase-box .tasks {
+        font-size: 12px;
+        color: #555;
+        list-style: none;
+        padding: 0;
+        margin: 10px 0 0 0;
+      }
+      .phase-box .tasks li {
+        margin: 3px 0;
+        padding-left: 15px;
+        position: relative;
+      }
+      .phase-box .tasks li:before {
+        content: "✓";
+        position: absolute;
+        left: 0;
+        color: #34a853;
+        font-weight: bold;
+      }
+      .comparison-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 20px 0;
+      }
+      .comparison-table th {
+        background: #1a73e8;
+        color: white;
+        padding: 12px;
+        text-align: left;
+        font-weight: 600;
+      }
+      .comparison-table td {
+        padding: 12px;
+        border-bottom: 1px solid #ddd;
+      }
+      .comparison-table tr:nth-child(even) {
+        background: #f9f9f9;
+      }
+      .comparison-table tr:hover {
+        background: #f0f7ff;
+      }
+      .winner {
+        background: #c6e7ff;
+        font-weight: bold;
+        color: #1a73e8;
+      }
+      .code-block {
+        background: #f4f4f4;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        padding: 12px;
+        margin: 10px 0;
+        font-family: "Courier New", monospace;
+        font-size: 12px;
+        overflow-x: auto;
+      }
+      .highlight {
+        background: #fff3cd;
+        padding: 2px 6px;
+        border-radius: 3px;
+      }
+      .success {
+        color: #34a853;
+        font-weight: bold;
+      }
+      .warning {
+        color: #fbbc04;
+        font-weight: bold;
+      }
+      .critical {
+        color: #ea4335;
+        font-weight: bold;
+      }
+      .mermaid {
+        display: flex;
+        justify-content: center;
+      }
+      /* ── COLOUR KEY (documents the mermaid node fills + §7 tier colours) ── */
+      .ckey {
+        background: white;
+        border-radius: 8px;
+        padding: 16px 20px;
+        margin: 20px 0;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      }
+      .ckey h3 {
+        color: #1a73e8;
+        font-size: 15px;
+        margin: 0 0 6px 0;
+      }
+      .ckey .ck-note {
+        font-size: 12px;
+        color: #666;
+        margin-bottom: 10px;
+      }
+      .ckey .ck-group {
+        font-weight: 600;
+        font-size: 12px;
+        color: #555;
+        margin: 12px 0 5px;
+      }
+      .ck-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px 20px;
+      }
+      .ck-item {
+        display: flex;
+        align-items: center;
+        gap: 7px;
+        font-size: 12px;
+        color: #333;
+      }
+      .ck-sw {
+        width: 18px;
+        height: 14px;
+        border-radius: 3px;
+        flex: 0 0 auto;
+        border: 1px solid rgba(0, 0, 0, 0.18);
+      }
+      /* Node-fill swatches — colours copied verbatim from the mermaid style/classDef fills below */
+      .ck-live {
+        background: #c6f0c1;
+      }
+      .ck-success {
+        background: #34a853;
+      }
+      .ck-int {
+        background: #ffe0b2;
+        border-color: #f57f17;
+      }
+      .ck-notwired {
+        background: #fce5cd;
+      }
+      .ck-fail {
+        background: #f4cccc;
+        border-color: #d32f2f;
+      }
+      .ck-tool {
+        background: #c6e7ff;
+      }
+      .ck-infra {
+        background: #e8f0fe;
+      }
+      .ck-stage {
+        background: #fff3cd;
+      }
+      /* §7 tier swatches */
+      .ck-pr {
+        background: #dbeafe;
+        border-color: #1d4ed8;
+      }
+      .ck-premerge {
+        background: #ffedd5;
+        border-color: #c2410c;
+      }
+      .ck-nightly {
+        background: #f3e8ff;
+        border-color: #7e22ce;
+      }
+      .ck-local {
+        background: #dcfce7;
+        border-color: #15803d;
+      }
+    </style>
+  </head>
+  <body>
+    <div
+      style="
+        background: #dcfce7;
+        border: 1px solid #86efac;
+        border-radius: 6px;
+        padding: 10px 16px;
+        margin-bottom: 16px;
+        font-size: 12px;
+        color: #14532d;
+      "
+    >
+      <strong>Status 2026-09-28</strong> (Schemathesis pin 4.28.0 under KS-1353
+      — the first minor since the 4.27.x line:
+      <code>st run --help</code> byte-identical, report formats and the
+      check/phase registries unchanged, one new warning
+      <code>low_valid_rate</code> triaged informational, and the KS-1271
+      NDJSON-completeness gate corrected after it counted the coverage phase’s
+      undeclared-method probes as operations; k6 pin 2.3.0 under KS-1354 — was
+      2.1.0; runs pass <code>--features freeze-env</code>,
+      <code>--log-ns-timestamps</code> and static remote-write labels
+      <code>perf_scenario</code> / <code>k6_image</code>, record the k6 image,
+      and report an unknown <code>--features</code> name as an INVALID run;
+      previously 2026-09-21: Schemathesis pin 4.27.5 under KS-1285 — the KS-1270
+      NDJSON-writer hold lifted, upstream fixed in 4.27.4; post-run gates +
+      outcome taxonomy added under KS-684 at Schemathesis 4.25.2; re-reconciled
+      against <code>.github/workflows</code> + <code>systemTest/</code> under
+      KS-519; previously stated 2026-08-12): Schemathesis ✅ local PR gate
+      (author-run) &nbsp;·&nbsp; Playwright ✅ local PR gate (author-run)
+      &nbsp;·&nbsp; k6 ✅ local PR gate (author-run, smoke scenario,
+      <code>SECUURA_STACK_SLOT=1 npm run test:smoke</code> — replace
+      <code>1</code> with your stack slot; a local run that names no slot is
+      refused (KS-1386) — read the printed
+      <code>Status:</code> line, not the exit code) &nbsp;·&nbsp; Akto ✅ local
+      PR gate (author-run: <code>SECUURA_STACK_SLOT=1 npm run test:pr</code>, BOLA/BFLA/Broken-Auth
+      27 templates across all 347 endpoints (measured slot 2, 2026-09-28, Akto
+      2.35.6)) and local pre-merge (<code>SECUURA_STACK_SLOT=1 npm run test:pre-merge</code>, +
+      Security Misconfiguration, 91 templates initiated on the paced run;
+      KS-413). Both replaying tiers (pre-merge, security) feed authenticated
+      HAR traffic first; since KS-1363 a skipped replay is recorded in the run
+      directory (<code>har-replay.json</code>) and shown as a
+      <strong>&#9888; COVERAGE DEGRADED</strong> line on the console, the run
+      artifacts, the HTML Execution tab and the cross-check — the verdict is
+      unchanged, but a thinner-authz PASS no longer reads like a full one.
+      Akto image pin 2.36.4 (KS-1363, 2026-09-30). <strong>Pre-merge and nightly are paced</strong> at 0.75 &times;
+      the platform's limit through Akto's own <code>globalRateLimit</code>, set from
+      systemTest (KS-709/KS-1286; the limit is read from the local
+      <code>RATE_LIMIT_MAX_REQUESTS</code> since KS-1374, 10,000 locally, so 7,500
+      requests/min) — measured slot 4 of the Mac, 2026-09-30, Akto 2.36.4 (KS-1363):
+      pr 30 s unthrottled, pre-merge 3 m 42 s, nightly 13 m 46 s, and 0 of 50,018
+      full-scan results refused. Previously, at a fixed 1,500/min (slot 2,
+      2026-09-28): pre-merge 19 m 28 s, nightly 60 m 52 s, where the unpaced run
+      lost 8,735. A run Akto
+      holds <code>RUNNING</code> with no progress for 150 s is stopped and
+      scored, flagged <em>STALLED — partial</em> on console, JSON and HTML.
+      Whether the platform's limit should change for local scans is an open
+      decision with Kamil (KS-1374); coverage is not reduced either way
+      &nbsp;·&nbsp;
+      <!-- KS-1365: the four lines above said Schemathesis and Playwright were ✅ live as the `pr` gate, k6 was live on the `pr` tier via pr-platform-suites.yml, and Akto was live and blocking on the `pr` tier and blocking via the pre-merge-platform-suites.yml akto job; Actions retired 2026-08-27 -->
+      <strong>No workflow runs</strong> — GitHub Actions is retired for this
+      repo (Kam, 2026-08-27). The PR author runs the four platform suites plus
+      touched unit suites locally and records them in the PR's Test Evidence
+      block (touched / ran / NOT run / migrations+config); a QA GO at the PR
+      head follows; commands in
+      <code>Blockchain/Dev/docs/DEV-PROCESS.md</code> §Manual CI-gate
+      equivalents. Never dispatch
+      <code>pre-merge-platform-suites.yml</code> (KS-441) &nbsp;·&nbsp; OWASP
+      ZAP ❌ not wired in any pipeline (no workflow references it — superseded
+      the earlier "deployed" status below) &nbsp;·&nbsp; Integration (anchoring
+      integrity) ⏳ Local · pre-merge + nightly —
+      <strong
+        >an integration mode of Schemathesis, co-located in
+        <code>systemTest/schemathesis</code> (not a separate tool)</strong
+      >: the KS-489-D / KS-492 orchestrated fail-closed + verify-vs-chain tests,
+      plus the KS-587/KS-589 anchor-honesty family (hash⇄flag, cross-surface
+      agreement, orphaned references) which read
+      <code>anchor_store</code> read-only via the stack’s Postgres container;
+      its own isolated stack (gateway 7282), check-run
+      <code>Integration suite</code>; NOT a PR gate (KS-416 precedent)
+      &nbsp;·&nbsp; Nightly is no longer a single "full" cron box — the four
+      nightly suites are <strong>implemented-but-disabled</strong> jobs (five
+      suites) under one caller (<code>nightly-platform-suites.yml</code>:
+      schemathesis-soak, playwright-nightly (check-run
+      <code>Playwright nightly</code>), performance-nightly, akto-security,
+      integration), each gated behind <code>workflow_dispatch</code> until
+      manually promoted to a cron schedule. APIFuzzer/Nuclei are not part of any
+      current plan.
+    </div>
+    <div
+      style="
+        background: #e0f2fe;
+        border: 1px solid #7dd3fc;
+        border-radius: 6px;
+        padding: 10px 16px;
+        margin-bottom: 16px;
+        font-size: 12px;
+        color: #0c4a6e;
+      "
+    >
+      <!-- KS-1365: added the historical marker below; this banner read as current CI; Actions retired 2026-08-27 -->
+      <strong>Historical — none of this runs today:</strong> GitHub Actions is
+      retired for this repo (Kam, 2026-08-27), so the workflows and required
+      checks named here are dormant; the suites run locally (DEV-PROCESS.md
+      §Manual CI-gate equivalents).<br />
+      <strong
+        >CI topology migrated 2026-07-06 — build-once →
+        clone-across-isolated-stacks.</strong
+      >
+      The four PR suites then ran under ONE workflow,
+      <code>pr-platform-suites.yml</code> (nightly:
+      <code>nightly-platform-suites.yml</code>): a single reusable
+      <code>_build-images.yml</code> job builds all 15 platform images
+      <em>fresh per run</em> and pushes them to ghcr, then each suite job PULLS
+      those exact images and boots a config-isolated stack (unique
+      <code>COMPOSE_PROJECT_NAME</code>/<code>STACK_PREFIX</code> + per-suite
+      host-port offset, each tool pointed at its own gateway — schemathesis
+      6882, playwright 6982, performance 7082, akto 7182). The tool
+      live/disabled status above and in every diagram below is unchanged; only
+      the orchestration changed. The per-suite workflow files named in the
+      diagrams (<code>pr-schemathesis.yml</code>,
+      <code>pr-playwright.yml</code>, <code>performance-pr.yml</code>,
+      <code>akto-pr.yml</code> + the four nightly files) have been
+      <strong>removed</strong> (folded into the two callers).
+      <strong>Cutover:</strong> repoint branch-protection required checks to the
+      new <strong>check-run display names</strong> (GitHub matches by display
+      name, not job id): <code>build</code>, <code>Schemathesis suite</code>,
+      <code>Playwright suite</code>, <code>Performance suite (k6 smoke)</code>,
+      <code>Akto suite (PR)</code> (renamed from
+      <code>Akto suite (PR-gate subset)</code> — KS-413), plus the pre-merge
+      checks <code>Akto pre-merge (full)</code>, <code>Integration suite</code>,
+      <code>Schemathesis pre-merge sweep</code> and <code>quality</code>.
+    </div>
+    <h1>🔐 API Security/Functional Testing Architecture & Flow Diagrams</h1>
+
+    <!-- ===== COLOUR KEY ===== -->
+    <div class="ckey">
+      <h3>
+        🛡️ Post-run gates — judging the RUN, not its assertions (KS-517 ·
+        KS-684)
+      </h3>
+      <div class="ck-note">
+        Three gates run <em>after</em> a Schemathesis sweep and feed the exit
+        code alongside the check results. They exist because every
+        assertion-based gate shares one blind spot:
+        <strong>a check that never ran cannot fail</strong>, so a run that
+        tested nothing scores clean everywhere. Each of these answers &ldquo;did
+        this run have the standing to say anything?&rdquo; rather than
+        &ldquo;what did it say?&rdquo;
+      </div>
+      <div class="ck-group">The three gates</div>
+      <div class="ck-row">
+        <div class="ck-item">
+          <span class="ck-sw ck-live"></span>
+          <strong>Authenticated coverage (KS-517)</strong> — a sweep that loses
+          its session still calls every operation, but the requests die at the
+          auth middleware and never reach a handler. Measured from
+          <code>schemathesis-metrics.jsonl</code>. Caught 240/309 operations
+          stuck at 401.
+        </div>
+        <div class="ck-item">
+          <span class="ck-sw ck-live"></span>
+          <strong>Run validity (KS-684)</strong> — declares a run
+          <strong>INVALID</strong> when errors dominate: more than
+          <strong>10%</strong> of operations erroring, <em>or</em>
+          <strong>5+</strong> operations sharing one identical error message.
+          Read from the run&rsquo;s own JUnit XML, deliberately not from the
+          report&rsquo;s parsers, so the gate can disagree with the report.
+          Reconstructed against the 2026-08-24 incident (310 of 318 operations =
+          97.5%) &rarr; INVALID.
+        </div>
+        <div class="ck-item">
+          <span class="ck-sw ck-live"></span>
+          <strong>Report reconciliation (KS-517)</strong> — the HTML
+          report&rsquo;s headline numbers must equal Schemathesis&rsquo; own
+          console summary. Enforces the three-way parity MUST:
+          <code>console = results.json = HTML report</code>. Fails closed — a
+          missing artefact is &ldquo;cannot verify&rdquo;, never a pass.
+        </div>
+      </div>
+      <div class="ck-group">
+        The same blind spot in Akto — a template that was selected but never ran
+        (KS-710 · KS-717)
+      </div>
+      <div class="ck-note">
+        Akto&rsquo;s version of &ldquo;a check that never ran cannot
+        fail&rdquo;. The test-id catalog is generated from the template
+        <strong>files</strong>, and <code>check-test-ids</code> diffs that
+        render against the committed catalog — both sides file-derived, so it is
+        <em>structurally incapable</em> of noticing that Akto never loaded a
+        template. A selected-but-absent id produces no
+        <code>testing_run_result</code> document at all, and Akto reports
+        <code>vulnerable 0</code> exactly as it does for a template that ran and
+        found nothing. Measured on the full OWASP run, 2026-08-28, Akto 2.22.2:
+        <strong>207 ids selected, 193 exercised, verdict PASS</strong>.
+        Re-measured on slot 2, 2026-09-28, Akto 2.35.6 (KS-1286):
+        <strong
+          >194 templates initiated, 50,018 result docs across 347
+          endpoints</strong
+        >
+        — the regenerated catalog is byte-identical to 2.22.2’s, and
+        207&rarr;194 is KS-717 dropping ids Akto could never execute rather than
+        lost coverage.
+      </div>
+      <div class="ck-row">
+        <div class="ck-item">
+          <span class="ck-sw ck-live"></span>
+          <strong>Catalog vs loaded library (KS-717)</strong> — a live assertion
+          in <code>SECUURA_STACK_SLOT=1 npm run test:setup</code> reads
+          <code>yaml_templates</code> straight from Mongo
+          (<code>src/setup/loadedTemplates.ts</code>, slot-aware via
+          <code>AKTO_PREFIX</code>) and diffs it against the catalog
+          <strong>in both directions</strong>, failing on drift either way.
+          Accepted differences are ticketed entries in
+          <code>KNOWN_CATALOG_DRIFT</code>, and the test also fails when a
+          listed entry <em>stops</em> drifting — an exemption cannot outlive its
+          reason.
+        </div>
+        <div class="ck-item">
+          <span class="ck-sw ck-live"></span>
+          <strong>Excluded from the catalog</strong> — an id Akto can never
+          execute must not be selected. 8 Threat-Protection rules carry no
+          <code>execute:</code> block (KS-710); 5 carry upstream&rsquo;s
+          <code>inactive: true</code>, which Akto stores but its engine skips
+          via <code>fetchOnlyActive</code> (KS-717 §3). 1 more
+          (<code>BYPASS_CAPTCHA_REMOVING_COOKIE</code>) Akto refuses to store,
+          because its <code>info.references:</code> is empty and Jackson cannot
+          coerce that to a list. Catalog
+          <strong>207 &rarr; 199 &rarr; 194 ids</strong>.
+        </div>
+        <div class="ck-item">
+          <span class="ck-sw ck-live"></span>
+          <strong>Reported, never silent</strong> —
+          <code>load-templates</code> names every file Akto rejected and
+          Akto&rsquo;s own <code>actionErrors</code>;
+          <code>generate-test-ids</code> reports exclusions and, separately,
+          files with a YAML defect Akto tolerates and we now tolerate too (which
+          ARE catalogued — <code>LFI_IN_HEADERS_LINUX</code> had never executed
+          once). The HTML report renders
+          <strong>exercised / selected</strong> with the shortfall named, not a
+          bare count.
+        </div>
+      </div>
+      <div class="ck-group">
+        Outcome taxonomy — five categories, shared across all three surfaces
+      </div>
+      <div class="ck-note">
+        The taxonomy is <strong>closed and shared</strong>: a category exists in
+        the console, in <code>results.json</code> and in the HTML report, with
+        the same label and the same count, or it is a design error.
+        <code>results.json</code> is the source of truth; the other two are
+        renderings of it.
+      </div>
+      <div class="ck-row">
+        <div class="ck-item">
+          <span class="ck-sw ck-success"></span> <strong>PASS</strong> —
+          exercised, no violation
+        </div>
+        <div class="ck-item">
+          <span class="ck-sw ck-fail"></span> <strong>FAIL</strong> — exercised,
+          violated a check
+        </div>
+        <div class="ck-item">
+          <span class="ck-sw ck-notwired"></span> <strong>UNVERIFIED</strong> —
+          should have run, did not; gates the run (KS-478)
+        </div>
+        <div class="ck-item">
+          <span class="ck-sw ck-infra"></span> <strong>OUT OF SCOPE</strong> —
+          excluded by mode, not by accident (KS-519)
+        </div>
+        <div class="ck-item">
+          <span class="ck-sw ck-tool"></span> <strong>SKIPPED</strong> — a
+          precondition was never met (KS-684)
+        </div>
+      </div>
+      <div class="ck-note">
+        <strong>SKIPPED is new in KS-684.</strong> Previously the banner
+        rendered a strict PASSED/FAILED binary, so
+        <code>API_TOKEN not found</code> turned
+        <strong>four healthy suites</strong> — GDPR IDOR (KS-258), live
+        integration (KS-416), anchoring integrity (KS-489-D) and state-machine
+        preconditions (KS-478) — into <strong>FAILED</strong> on the 2026-08-24
+        run, sending readers after defects that did not exist. An unmet
+        precondition is not a test result. A SKIPPED suite now contributes
+        <em>neither</em> a pass nor a failure to <code>OVERALL</code>, and each
+        row carries its reason — the two skip causes (&ldquo;no credentials
+        configured&rdquo; vs &ldquo;the platform did not answer&rdquo;) stay
+        distinguishable because they need different remedies. Counting a skip as
+        a <em>pass</em> would be the opposite and worse error.
+      </div>
+
+      <h3>🎨 Colour key — what every node colour means</h3>
+      <div class="ck-note">
+        The diagrams below use the same fill colours throughout. Swatch colours
+        are copied verbatim from the mermaid <code>style</code>/<code
+          >classDef</code
+        >
+        fills.
+      </div>
+      <div class="ck-group">Node status (all diagrams)</div>
+      <div class="ck-row">
+        <div class="ck-item">
+          <span class="ck-sw ck-live"></span> Live / completed — a suite or
+          check that runs today (✅)
+        </div>
+        <div class="ck-item">
+          <span class="ck-sw ck-success"></span> Terminal success — consolidated
+          report / complete stack
+        </div>
+        <div class="ck-item">
+          <span class="ck-sw ck-int"></span> Schemathesis Integration mode —
+          anchoring integrity + stored-state invariants, Local · pre-merge +
+          nightly (⏳, not a PR gate)
+        </div>
+        <div class="ck-item">
+          <span class="ck-sw ck-notwired"></span> Not wired / absent — planned
+          or superseded (e.g. OWASP ZAP ❌)
+        </div>
+        <div class="ck-item">
+          <span class="ck-sw ck-fail"></span> Failure / blocked — build fails,
+          investigation, critical risk
+        </div>
+        <div class="ck-item">
+          <span class="ck-sw ck-tool"></span> Tool / detail node — DAST tool,
+          auth step, risk factor
+        </div>
+        <div class="ck-item">
+          <span class="ck-sw ck-infra"></span> Entry / support / infra node
+          (neutral)
+        </div>
+        <div class="ck-item">
+          <span class="ck-sw ck-stage"></span> Parallel-stage header /
+          aggregation hub
+        </div>
+      </div>
+      <div class="ck-group">Tiered execution model (§7)</div>
+      <div class="ck-row">
+        <!-- KS-1365: was "pr tier — blocking, runs on every PR"; Actions retired 2026-08-27 -->
+        <div class="ck-item">
+          <span class="ck-sw ck-pr"></span> pr tier — run locally by the PR
+          author before handover, recorded in the Test Evidence block (no CI job
+          runs it)
+        </div>
+        <div class="ck-item">
+          <span class="ck-sw ck-premerge"></span> pre-merge tier — blocking once
+          promoted (currently disabled)
+        </div>
+        <div class="ck-item">
+          <span class="ck-sw ck-nightly"></span> nightly tier — report-only
+          (disabled)
+        </div>
+        <div class="ck-item">
+          <span class="ck-sw ck-local"></span> local_debug — on-demand developer
+          loop
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== COMPLETE PIPELINE ===== -->
+    <h2>1. Complete Tool Security/Functional Pipeline with Parallel Stages</h2>
+
+    <div class="diagram-container">
+      <div class="diagram-title">
+        1. End-to-End Security/Functional Testing Pipeline Flow
+      </div>
+      <pre class="mermaid">
+graph TD
+    Start["🚀 Security Pipeline Start<br/>Code Repository & Infrastructure"]
+
+    Start --> S1Header["⚡ STAGE 1<br/>Parallel Static Analysis"]
+
+    S1Header --> S1["STAGE 1: Run All Concurrently"]
+    S1 --> T1["Api-Explorer<br/>✅ Completed"]
+    S1 --> T2["npm audit<br/>✅ Completed"]
+    S1 --> T3["gitleaks<br/>✅ Completed"]
+    S1 --> T4["semgrep & eslint<br/>✅ Completed"]
+    S1 --> T5["trivy<br/>✅ Completed"]
+    S1 --> T8["license-checker<br/>🌙 nightly only (internal-audit.yml)"]
+
+    T1 --> Join["🔗 API Server Up<br/>Join Point"]
+    T2 --> Join
+    T3 --> Join
+    T4 --> Join
+    T5 --> Join
+    T8 --> Join
+
+    Join --> T7["tenant-isolation<br/>✅ Completed"]
+    T7 --> T9["aiken<br/>✅ Completed"]
+    T9 --> T10["aggregator<br/>Results Consolidation"]
+
+    T10 --> S2Header["⚡ STAGE 2<br/>Parallel Security & Functional Testing"]
+
+    S2Header --> S2["STAGE 2: Run All Concurrently<br/>Each in Separate KS Instance"]
+    S2 --> T6["OWASP ZAP<br/>❌ Not wired<br/>(no pipeline references it)"]
+    %% KS-1365: these four nodes were labelled Live as a CI pr gate; GitHub Actions retired 2026-08-27, now the author-run local PR gate
+    S2 --> T11["Schemathesis<br/>✅ Local PR gate<br/>author-run · Test Evidence<br/>Own docker instance"]
+    S2 --> T12["Akto<br/>✅ Local PR gate<br/>author-run · Test Evidence<br/>BOLA/BFLA/Broken-Auth · all endpoints<br/>(+SM at pre-merge)<br/>endpoint-scoped known-FPs (2 public reads) excluded from verdict<br/>KS-417 runtime guard: stale suppression fails fast<br/>KS-524: 404 (route gone) also fails; 5xx inconclusive"]
+    S2 --> T15["K6<br/>✅ Local PR gate<br/>author-run · Test Evidence<br/>smoke scenario"]
+    S2 --> E2E["Playwright<br/>✅ Local PR gate<br/>author-run · Test Evidence<br/>Own docker instance"]
+    S2 --> INT["Schemathesis · Integration mode<br/>⏳ Local · pre-merge + nightly<br/>Anchoring integrity (fail-closed · verify-vs-chain · hash⇄flag honesty · cross-surface · orphan refs)<br/>Co-located in systemTest/schemathesis · own docker instance (gateway 7282)"]
+    INT -.->|read-only SQL<br/>STACK_PREFIX-resolved| PG[("Postgres<br/>anchor_store · documents<br/>stored-state invariants KS-589")]
+
+    T11 --> Report["✅ Consolidated Report"]
+    T12 --> Report
+    T15 --> Report
+    E2E --> Report
+    INT --> Report
+
+    Report --> Final["✨ Complete Security<br/>& Performance Stack"]
+
+    style Start fill:#e8f0fe
+    style S1Header fill:#fff3cd
+    style S2Header fill:#fff3cd
+    style S1 fill:#fff8e1,stroke:#ffc107,stroke-width:2px
+    style S2 fill:#fff8e1,stroke:#ffc107,stroke-width:2px
+    style Join fill:#c6f0c1
+    style T1 fill:#c6f0c1
+    style T2 fill:#c6f0c1
+    style T3 fill:#c6f0c1
+    style T4 fill:#c6f0c1
+    style T5 fill:#c6f0c1
+    style T6 fill:#fce5cd
+    style T7 fill:#c6f0c1
+    style T8 fill:#c6f0c1
+    style T9 fill:#c6f0c1
+    style T10 fill:#c6f0c1
+    style T11 fill:#c6f0c1
+    style T12 fill:#c6f0c1
+    style T15 fill:#c6f0c1
+    style E2E fill:#c6f0c1
+    style INT fill:#ffe0b2,stroke:#f57f17,stroke-width:2px
+    style Report fill:#34a853,color:#fff
+    style Final fill:#34a853,color:#fff
+        </pre>
+    </div>
+
+    <!-- ===== TOOL COVERAGE MATRIX ===== -->
+    <h2>2. Tool Coverage by Phase & Implementation Status</h2>
+
+    <div class="diagram-container">
+      <div class="diagram-title">
+        2. Tool Coverage by Phase & Implementation Status
+      </div>
+      <pre class="mermaid">
+graph TB
+    Pipeline["Tool Security Pipeline"]
+
+    Pipeline --> S1["STAGE 1: Parallel Static Analysis<br/>All Run Concurrently"]
+    Pipeline --> Support["Support Layer<br/>Sequential After Stage 1"]
+    Pipeline --> S2["STAGE 2: Parallel Security & Functional Testing<br/>All Run Concurrently in Separate KS Instances"]
+
+    S1 --> T1["Api-Explorer<br/>✅ Complete"]
+    S1 --> T2["npm audit<br/>✅ Complete"]
+    S1 --> T3["gitleaks<br/>✅ Complete"]
+    S1 --> T4["semgrep<br/>✅ Complete"]
+    S1 --> T5["trivy<br/>✅ Complete"]
+    S1 --> T8["license-checker<br/>🌙 nightly only (internal-audit.yml)"]
+
+    Support --> T7["tenant-isolation<br/>✅ Complete"]
+    Support --> T9["aiken<br/>✅ Complete"]
+    Support --> T10["aggregator<br/>✅ Complete"]
+
+    S2 --> T6["OWASP ZAP<br/>❌ Not wired"]
+    %% KS-1365: these four nodes were labelled Live as a CI pr gate; GitHub Actions retired 2026-08-27, now the author-run local PR gate
+    S2 --> T11["Schemathesis<br/>✅ Local PR gate<br/>author-run · Test Evidence<br/>Separate KS"]
+    S2 --> T12["Akto<br/>✅ Local PR gate<br/>author-run · Test Evidence<br/>Separate KS"]
+    S2 --> T15["K6<br/>✅ Local PR gate<br/>author-run · Test Evidence<br/>Separate KS"]
+    S2 --> Playwright["Playwright<br/>✅ Local PR gate<br/>author-run · Test Evidence<br/>Separate KS Instance"]
+    S2 --> INT["Schemathesis · Integration mode<br/>⏳ Local · pre-merge + nightly<br/>Anchoring integrity (KS-489-D / KS-492 / KS-587 / KS-589)<br/>Co-located in systemTest/schemathesis · Separate KS Instance"]
+    INT -.->|read-only SQL| PG2[("Postgres<br/>stored-state invariants (KS-589)")]
+
+    T11 --> Complete["Complete<br/>Tool Stack"]
+    T12 --> Complete
+    T15 --> Complete
+    Playwright --> Complete
+    INT --> Complete
+
+    style Pipeline fill:#e8f0fe
+    style S1 fill:#fff8e1,stroke:#ffc107,stroke-width:2px
+    style S2 fill:#fff8e1,stroke:#ffc107,stroke-width:2px
+    style Support fill:#e8f0fe
+    style T1 fill:#c6f0c1
+    style T2 fill:#c6f0c1
+    style T3 fill:#c6f0c1
+    style T4 fill:#c6f0c1
+    style T5 fill:#c6f0c1
+    style T6 fill:#fce5cd
+    style T7 fill:#c6f0c1
+    style T8 fill:#c6f0c1
+    style T9 fill:#c6f0c1
+    style T10 fill:#c6f0c1
+    style T11 fill:#c6f0c1
+    style T12 fill:#c6f0c1
+    style T15 fill:#c6f0c1
+    style Playwright fill:#c6f0c1
+    style INT fill:#ffe0b2,stroke:#f57f17,stroke-width:2px
+    style Complete fill:#34a853,color:#fff
+        </pre>
+    </div>
+
+    <!-- ===== DAST TOOL COVERAGE MATRIX ===== -->
+    <h2>3. DAST Tool Coverage Matrix - What Each Tool Uniquely Catches</h2>
+
+    <div class="diagram-container">
+      <div class="diagram-title">
+        3. DAST Security/Functional Testing Tools - Coverage & Overlap Matrix
+      </div>
+      <pre class="mermaid">
+graph TB
+    Start["DAST Testing Stack<br/>OpenAPI Specification"]
+
+    Start --> OWASP["OWASP ZAP<br/>❌ Not wired — no workflow references it"]
+    %% KS-1365: Schemathesis, K6 and Akto nodes were labelled Live as a CI pr gate; GitHub Actions retired 2026-08-27, now the author-run local PR gate
+    Start --> Schema["Schemathesis<br/>✅ Local PR gate<br/>author-run · Test Evidence<br/>Property-Based Testing"]
+    Start --> AktoPrep["Akto Preparation<br/>API Surface Discovery"]
+    Start --> K6["K6<br/>✅ Local PR gate — smoke scenario<br/>author-run · Test Evidence<br/>Performance & Load Testing"]
+    Start --> INT["Schemathesis · Integration mode<br/>⏳ Local · pre-merge + nightly<br/>Orchestrated env-flip / service-stop + read-only DB sweeps (co-located in systemTest/schemathesis)"]
+
+    AktoPrep --> AktoSource["API Surface Ingest:<br/>Option A: OpenAPI Spec Import<br/>Option B: Fixture Traffic Replay<br/>(⚠️ Not Production Traffic<br/>PII & Tenant Isolation Safe)"]
+    AktoSource --> Akto["Akto<br/>✅ Local PR gate<br/>author-run · Test Evidence<br/>Business Logic Discovery<br/>w/ Discovered API Surface"]
+
+    OWASP --> OWASP_C["Would catch (if wired):<br/>Active Scanning · Cookie/Session Handling<br/>Spider & Crawl · Standard OWASP Top 10"]
+    Schema --> Schema_C["✓ Property-Based Testing<br/>✓ Schema Violations<br/>✓ Boundary Testing<br/>✓ Type Mismatches<br/>✓ Cross-Tenant IDOR (user-admin — KS-467, fixed &amp; active)<br/>✓ Cross-tenant/cross-owner document isolation (BUG-ISOLATION-001 / KS-4): read + KS-513 write vectors (cross-tenant mutate/transfer-custody · forged x-tenant-id · api-key) + cross-owner read/revoke within a tenant<br/>✓ Custom security checks: integration_5xx_guard (KS-268 + KS-499 + KS-544, 14 by-design-503 ops) · public_operation_auth_conformance (KS-425) · control_byte_acceptance_guard (KS-472, HARD GATE — red until the platform fix lands) · by_design_input_tolerance_guard (KS-662, 4 ruled ops) · by_design_501_guard (KS-686 — POST /api/wallets/verify fail-closed 501 tolerated until KS-627; tripwire test_wallet_verify_stub.py)<br/>✓ Review-G security regressions (KS-492, Known Failure = pytest xfail / skip until platform fix): notification BOLA (KS-486-A) · webhook SSRF guard (KS-487-B) · seed-demo gate · wallet-verify fail-closed 501 (KS-686 tripwire, RED when KS-627 lands) &amp; F-06 account-lockout tripwire + principal shield (KS-575) &amp; KYC-callback auth &amp; billing idempotency (KS-488-C)<br/>✓ State-machine / precondition refusals (KS-478, KS-466 §11): 10 ops driven to their unmet precondition → clean enveloped business 4xx, never a raw 5xx / silent 2xx (dedicated Preconditions report tab; contract-side fix = stateful links, KS-188)"]
+    Akto --> Akto_C["✓ 1000+ Custom Tests<br/>✓ Business Logic Flaws<br/>✓ API Coverage from Spec/Fixtures<br/>✓ Sensitive Data Detection<br/>✓ BOLA / Privilege Escalation"]
+    K6 --> K6_C["✓ Load Testing<br/>✓ Performance Baselines<br/>✓ Stress Testing<br/>✓ Response Time Metrics"]
+    INT --> INT_C["Uniquely catches (needs env-flip + service-stop no other suite does):<br/>✓ Anchor fabrication fail-closed (anchoring down · SIMULATE_ANCHORING=false)<br/>✓ Mock-TSA fallback fail-closed (dead TSA — no qualified timestamp)<br/>✓ Anchor-verify reflects the chain, not a DB row<br/>✓ Local revoked/draft overrides a chain positive (F-DEMO-VERIFY-01)"]
+
+    Schema_C --> CONSOLIDATE["Consolidated Report:<br/>Deduplicated Findings<br/>By Tool & Discovery Type"]
+    Akto_C --> CONSOLIDATE
+    K6_C --> CONSOLIDATE
+    INT_C --> CONSOLIDATE
+
+    style Start fill:#e8f0fe
+    style OWASP fill:#fce5cd
+    style Schema fill:#c6e7ff
+    style AktoPrep fill:#fff9c4,stroke:#f57f17,stroke-width:2px
+    style AktoSource fill:#fff9c4,stroke:#f57f17,stroke-width:2px
+    style Akto fill:#c6e7ff
+    style K6 fill:#c6e7ff
+    style OWASP_C fill:#fce5cd
+    style Schema_C fill:#c6e7ff
+    style Akto_C fill:#c6e7ff
+    style K6_C fill:#c6e7ff
+    style INT fill:#ffe0b2,stroke:#f57f17,stroke-width:2px
+    style INT_C fill:#ffe0b2,stroke:#f57f17,stroke-width:2px
+    style CONSOLIDATE fill:#34a853,color:#fff
+        </pre>
+    </div>
+
+    <!-- ===== AUTH INFRASTRUCTURE ===== -->
+    <h2>4. Authentication Infrastructure - Critical Prerequisite for tools</h2>
+
+    <div class="diagram-container">
+      <div class="diagram-title">
+        4. Authentication Setup for Authenticated Endpoints (tools)
+      </div>
+      <pre class="mermaid">
+graph TD
+    Start["Authentication-Dependent Tools<br/>Schemathesis (incl. its anchoring-integrity Integration mode), Akto<br/>K6 (Load Testing), Playwright (E2E)<br/>Need Auth Tokens for Authenticated Endpoints"]
+
+    Start --> Azure["Azure Key Vault<br/>Secrets Management"]
+
+    Azure --> Tenant["Sandbox Tenant<br/>Isolated Test Environment<br/>(Production Data Excluded)"]
+    Azure --> ServiceAcct["Service Account User<br/>Seeded in Sandbox Tenant<br/>Limited Permissions<br/>(Test Data Only)"]
+    Azure --> Token["Short-Lived Token<br/>KV-Backed Token Store<br/>Refresh on Expiry<br/>(Minutes/Hours TTL)"]
+
+    Tenant --> CI["CI Pipeline Startup"]
+    ServiceAcct --> CI
+    Token --> CI
+
+    CI --> Auth["Authentication Bundle<br/>Username (from Azure)<br/>Password (from Azure)<br/>Token/API Key (refreshed)"]
+
+    Auth --> Schema["Schemathesis<br/>✓ Authenticated Property-Based<br/>✓ Hits Authenticated Endpoints<br/>✓ With Service Account Creds"]
+    Auth --> Akto["Akto<br/>✓ API Discovery with Auth<br/>✓ Business Logic Tests<br/>✓ Service Account Perms"]
+    Auth --> K6["K6<br/>✓ Load Testing<br/>✓ Performance Baselines<br/>✓ Authenticated User Session"]
+    Auth --> Playwright["Playwright<br/>✓ E2E Functional Testing<br/>✓ Browser Session Login<br/>✓ Service Account Credentials"]
+    Auth --> INT["Schemathesis · Integration mode<br/>⏳ Local · pre-merge + nightly<br/>✓ Issuer bearer (create) · anon (public verify)<br/>✓ Reuses session tokens across env-flips (login IP-throttled)<br/>✓ KS-191 limiter seeded into the compose-restart subprocess"]
+
+    Schema --> Results["Consolidated Results<br/>Deduplicated Findings"]
+    Akto --> Results
+    K6 --> Results
+    Playwright --> Results
+    INT --> Results
+
+    Results --> Cleanup["Cleanup:<br/>Revoke Short-Lived Token<br/>Reset Service Account<br/>(Keep Sandbox Tenant)"]
+
+    style Start fill:#e8f0fe
+    style Azure fill:#fff9c4,stroke:#f57f17,stroke-width:2px
+    style Tenant fill:#c6e7ff
+    style ServiceAcct fill:#c6e7ff
+    style Token fill:#c6e7ff
+    style CI fill:#e8f0fe
+    style Auth fill:#fff9c4,stroke:#f57f17,stroke-width:2px
+    style Schema fill:#c6e7ff
+    style Akto fill:#c6e7ff
+    style K6 fill:#c6e7ff
+    style Playwright fill:#c6e7ff
+    style INT fill:#ffe0b2,stroke:#f57f17,stroke-width:2px
+    style Results fill:#34a853,color:#fff
+    style Cleanup fill:#fce5cd
+        </pre>
+    </div>
+
+    <!-- ===== CI/CD PIPELINE ===== -->
+    <h2>5. GitHub Actions CI/CD Execution Pipeline</h2>
+    <!-- KS-1365: added this note; the diagram below read as a pipeline that runs today; Actions retired 2026-08-27 -->
+    <p style="font-size: 12px; color: #7c2d12">
+      <strong>Historical — this pipeline does not run.</strong> GitHub Actions
+      is retired for this repo (Kam, 2026-08-27). The diagram records the former
+      CI shape; today the PR author runs the four platform suites (Schemathesis
+      · Akto · Playwright · k6 smoke) plus touched unit suites locally and
+      records them in the PR's Test Evidence block — see
+      <code>Blockchain/Dev/docs/DEV-PROCESS.md</code> §Manual CI-gate
+      equivalents.
+    </p>
+
+    <div class="diagram-container">
+      <div class="diagram-title">
+        5. GitHub Actions Workflow with Parallel Stages
+      </div>
+      <pre class="mermaid">
+graph LR
+    Trigger["PR / Push"]
+    Trigger --> Checkout["Checkout"]
+    Checkout --> Install["Install<br/>Tools"]
+    Install --> S1Header["⚡ STAGE 1<br/>Parallel Static"]
+
+    S1Header --> S1["STAGE 1<br/>Run All Concurrently"]
+    S1 --> T1["Api-Explorer"]
+    S1 --> T2["npm audit"]
+    S1 --> T3["gitleaks"]
+    S1 --> T4["semgrep"]
+    S1 --> T5["trivy"]
+    S1 --> T8["license-check<br/>🌙 nightly only"]
+
+    T1 --> Join["🔗 API Up"]
+    T2 --> Join
+    T3 --> Join
+    T4 --> Join
+    T5 --> Join
+    T8 --> Join
+
+    Join --> T7["tenant-isolate"]
+    T7 --> T9["aiken"]
+    T9 --> T10["aggregator"]
+
+    T10 --> S2Header["⚡ STAGE 2<br/>Parallel Security<br/>& Functional"]
+
+    S2Header --> S2["STAGE 2<br/>Run All Concurrently<br/>Separate KS"]
+    S2 --> T6["OWASP ZAP ❌<br/>Not wired"]
+    S2 --> T11["Schemathesis ✅<br/>KS"]
+    S2 --> T12["Akto ✅<br/>KS"]
+    S2 --> T15["K6 ✅<br/>KS"]
+    S2 --> E2E["Playwright ✅<br/>Separate KS Instance"]
+    S2 --> INT["Schemathesis · Integration mode ⏳<br/>Local · pre-merge + nightly<br/>(anchoring integrity; not the PR gate — KS-416 precedent)"]
+
+    T11 --> Parse["Parse<br/>Results"]
+    T12 --> Parse
+    T15 --> Parse
+    E2E --> Parse
+    INT --> Parse
+
+    Parse --> Agg["Aggregate"]
+    Agg --> Check{Issues<br/>Found?}
+
+    Check -->|No Issues| Pass["✓ Build Passes"]
+    Check -->|Serious/Critical Issues| Fail["❌ Build Fails<br/>Block Deployment"]
+
+    Pass --> Upload["Deploy to<br/>Staging"]
+    Upload --> Success["✅ Deployment<br/>Complete"]
+
+    Fail --> Investigate["🔍 Investigation<br/>Required"]
+    Investigate --> Fix["🔧 Fix Issues<br/>Commit & Push"]
+    Fix --> Trigger
+
+    style Trigger fill:#e8f0fe
+    style S1 fill:#fff8e1,stroke:#ffc107,stroke-width:2px
+    style S2 fill:#fff8e1,stroke:#ffc107,stroke-width:2px
+    style S1Header fill:#fff3cd
+    style S2Header fill:#fff3cd
+    style Join fill:#c6f0c1
+    style T1 fill:#c6f0c1
+    style T2 fill:#c6f0c1
+    style T3 fill:#c6f0c1
+    style T4 fill:#c6f0c1
+    style T5 fill:#c6f0c1
+    style T6 fill:#fce5cd
+    style T7 fill:#c6f0c1
+    style T8 fill:#c6f0c1
+    style T9 fill:#c6f0c1
+    style T10 fill:#c6f0c1
+    style T11 fill:#c6f0c1
+    style T12 fill:#c6f0c1
+    style T15 fill:#c6f0c1
+    style E2E fill:#c6f0c1
+    style INT fill:#ffe0b2,stroke:#f57f17,stroke-width:2px
+    style Fail fill:#f4cccc,stroke:#d32f2f,stroke-width:2px
+    style Pass fill:#c6f0c1
+    style Check fill:#fff3cd
+    style Upload fill:#c6f0c1
+    style Investigate fill:#f4cccc,stroke:#d32f2f,stroke-width:2px
+    style Fix fill:#fff9c4,stroke:#f57f17,stroke-width:2px
+    style Success fill:#34a853,color:#fff
+        </pre>
+    </div>
+
+    <!-- ===== SUCCESS CRITERIA ===== -->
+    <h2>6. Deployment Success Criteria & Validation</h2>
+
+    <div class="diagram-container">
+      <div class="diagram-title">
+        6. Implementation Checkpoints - Tools in Parallel by Stage
+      </div>
+      <pre class="mermaid">
+graph TD
+    Start["🚀 Tool Stack Deployment"]
+
+    Start --> S1H["⚡ STAGE 1: Parallel Static Analysis<br/>All Tools Run Concurrently"]
+
+    S1H --> V1["✓ Api-Explorer Complete"]
+    S1H --> V2["✓ npm audit Complete"]
+    S1H --> V3["✓ gitleaks Complete"]
+    S1H --> V4["✓ semgrep Complete"]
+    S1H --> V5["✓ trivy Complete"]
+    S1H --> V8["🌙 license-checker — nightly only (internal-audit.yml), not a pr gate"]
+
+    V1 --> Join["🔗 API Server Up<br/>Join Point"]
+    V2 --> Join
+    V3 --> Join
+    V4 --> Join
+    V5 --> Join
+    V8 --> Join
+
+    Join --> V7["✓ tenant-isolation Complete"]
+    V7 --> V9["✓ aiken Complete"]
+    V9 --> V10["✓ aggregator Complete"]
+
+    V10 --> S2H["⚡ STAGE 2: Parallel Security & Functional Testing<br/>All Tools Run Concurrently<br/>Each in Separate KS Instance"]
+
+    S2H --> V6["❌ OWASP ZAP — not wired"]
+    %% KS-1365: these four nodes were labelled Live as a CI pr gate; GitHub Actions retired 2026-08-27, the suites are now the author-run local PR gate
+    S2H --> V11["✅ Schemathesis — local PR gate (author-run)<br/>Separate KS Instance"]
+    S2H --> V12["✅ Akto — local PR gate (author-run)<br/>Separate KS Instance"]
+    S2H --> V15["✅ K6 — local PR gate (author-run)<br/>Separate KS Instance"]
+    S2H --> VE2E["✅ Playwright — local PR gate (author-run)<br/>Separate KS Instance"]
+    S2H --> VINT["⏳ Schemathesis · Integration mode<br/>anchoring integrity — pre-merge + nightly<br/>NOT a pr gate"]
+
+    V11 --> VCheck["Consolidate Results"]
+    V12 --> VCheck
+    V15 --> VCheck
+    VE2E --> VCheck
+    VINT --> VCheck
+
+    VCheck --> VTime["✓ Complete < 30 Minutes<br/>All Tools Execution"]
+    VTime --> VFalse["✓ False Positives < 5%"]
+    VFalse --> VTeam["✓ Team Trained"]
+    VTeam --> VDocs["✓ Documentation Complete"]
+    VDocs --> VMonitor["✓ Monitoring & Alerts Setup"]
+    VMonitor --> Success["✅ Full Tool Stack Ready<br/>Parallel Execution<br/>Separate KS Instances<br/>API Server Join Point"]
+
+    style Start fill:#e8f0fe
+    style S1H fill:#fff3cd,stroke:#ffc107,stroke-width:2px
+    style S2H fill:#fff3cd,stroke:#ffc107,stroke-width:2px
+    style Join fill:#c6f0c1,stroke:#34a853,stroke-width:2px
+    style V1 fill:#c6f0c1
+    style V2 fill:#c6f0c1
+    style V3 fill:#c6f0c1
+    style V4 fill:#c6f0c1
+    style V5 fill:#c6f0c1
+    style V6 fill:#fce5cd
+    style V7 fill:#c6f0c1
+    style V8 fill:#c6f0c1
+    style V9 fill:#c6f0c1
+    style V10 fill:#c6f0c1
+    style V11 fill:#c6f0c1
+    style V12 fill:#c6f0c1
+    style V15 fill:#c6f0c1
+    style VCheck fill:#c6f0c1
+    style VE2E fill:#c6f0c1
+    style VINT fill:#ffe0b2,stroke:#f57f17,stroke-width:2px
+    style VTime fill:#c6f0c1
+    style VFalse fill:#c6f0c1
+    style VTeam fill:#fce5cd
+    style VDocs fill:#fce5cd
+    style VMonitor fill:#fce5cd
+    style Success fill:#34a853,color:#fff
+        </pre>
+    </div>
+
+    <!-- ===== RISK ASSESSMENT & TIERING ===== -->
+    <h2>7. Risk Assessment & Tiered Execution Model</h2>
+
+    <div class="diagram-container">
+      <div class="diagram-title">
+        7. Risk Analysis & CI/CD Overhead Mitigation
+      </div>
+      <pre class="mermaid">
+graph TD
+    Risks["Tool Stack Risks & Mitigations"]
+
+    Risks --> R1["Tool Integration<br/>Complexity"]
+    Risks --> R2["DAST Tool Overlap<br/>Duplicate Findings"]
+    Risks --> R3["CI/CD Overhead<br/>Test Time Impact"]
+    Risks --> R4["False Positives<br/>Alert Fatigue"]
+
+    R1 --> R1S["Likelihood: Low<br/>Impact: Medium"]
+    R1S --> R1M["Mitigation:<br/>Parallel Execution<br/>Separate KS Instances<br/>Aggregator Deduplication"]
+
+    R2 --> R2S["Likelihood: High<br/>Impact: Medium"]
+    R2S --> R2M["Mitigation:<br/>Tool-Specific Coverage Matrix<br/>Group by Strength (discovery,<br/>logic, mutation)<br/>Prioritize Tool Output"]
+
+    R3 --> R3S["Likelihood: Medium<br/>Impact: High<br/>⚠️ KEY ISSUE:<br/>Cannot Block All on PR"]
+    R3S --> R3M["Mitigation:<br/>TIERED EXECUTION MODEL"]
+
+    R4 --> R4S["Likelihood: Medium<br/>Impact: Medium"]
+    R4S --> R4M["Mitigation:<br/>Environment Controls<br/>Baseline Thresholds<br/>Confidence Scoring"]
+
+    R3M --> TIER["TIERED EXECUTION MODEL:<br/>Four-Track Approach<br/>(TIER input: api-contract-tests.yml · orchestrate.sh)"]
+
+    %% KS-1365: pr node said pull_request, BLOCKING, pr-platform-suites.yml and that the suites are ALL BLOCKING; GitHub Actions retired 2026-08-27
+    TIER --> PR["🔵 pr<br/>(run LOCALLY by the PR author before handover · recorded in the Test Evidence block · formerly the pull_request job in pr-platform-suites.yml, which no longer runs)<br/>Stage 1 static: npm audit · gitleaks · semgrep · trivy · license-checker · aiken<br/>→ tenant-isolation<br/>Stage 2: Schemathesis · Playwright · k6 smoke · Akto PR tier (BOLA/BFLA/Broken-Auth, all endpoints)<br/>Quality gate in PR CI for Playwright ONLY (KS-399 — quality:static + test:unit); every other suite runs only its functional check: Schemathesis KS-380 spec-auth · Playwright e2e · Performance k6 smoke · Akto BOLA/BFLA/Broken-Auth (~30 ids, all 324 endpoints (measured 2026-08-12)) were ALL BLOCKING in CI (complete-then-block; KS-413 — the Akto scan always covered every endpoint, now blocking after the poll ceiling was raised above its ~440s runtime; SM at pre-merge, full OWASP nightly)<br/>the FULL quality gate — static checks + unit/integration tests (npm run quality / run.py quality across all four) — runs locally, MANDATORY before every systemTest PR, not in PR CI<br/>GATE: FAIL_ON=HIGH = Block Merge"]
+
+    TIER --> PREMERGE["🟠 pre-merge<br/>(pre-merge-platform-suites.yml · build-once/fan-out · quality-gated · DISABLED, workflow_dispatch only)<br/>quality → build → Schemathesis all-checks + Akto pre-merge (akto job)<br/>run.py pre-merge (all checks + 4 phases) = the comprehensive property sweep (KS-98 moved here from the PR gate; persona auth on by default)<br/>+ full live integration pytest suite (pytest tests/, KS-416) — runs before the sweep, gates pre-merge; under the real 2000/60s limit, NOT on the PR gate<br/>Akto pre-merge: BOLA/BFLA/Broken-Auth + Security Misconfiguration (~94 ids) across all endpoints, BLOCKING (KS-413)<br/>Integration suite (⏳ Local · pre-merge + nightly — Schemathesis Integration mode, co-located in systemTest/schemathesis) → anchoring-integrity fail-closed + verify-vs-chain (KS-489-D / KS-492), run as its own isolated pytest invocation before the sweep, own isolated stack (gateway 7282), complete-then-block<br/>GATE (once promoted): FAIL_ON=HIGH = Block Merge"]
+
+    TIER --> FULL["🌙 Nightly (consolidated caller nightly-platform-suites.yml — ALL jobs implemented but DISABLED, workflow_dispatch only). Schedule DISABLED and workflow_dispatch dead — GitHub Actions is RETIRED for this repo, NOT pending an AWS migration (KS-418 / PR #891). Kam ruled 2026-08-27 the billing will not be fixed; 20 most recent runs 100% startup_failure (measured 2026-09-09). Run the suites LOCALLY — Blockchain/Dev/docs/DEV-PROCESS.md §Manual CI-gate equivalents. If Actions ever returns, target 0 14 * * * = 14:00 UTC ≈ midnight Sydney / 22:00 Singapore — all four share one schedule, start simultaneously<br/>schemathesis-soak job → nightly profile, ~4hr extended soak + full live integration pytest suite (pytest tests/, KS-416)<br/>playwright-nightly job → named pr-nightly, same suite as pr, scheduled<br/>performance-nightly job → ALL scenarios SERIAL on one docker instance: smoke → auth-spike → 15m → smoke → spike → 15m → smoke → stress → 15m → smoke → scalability → 15m → smoke → nightly soak (~4h4m); 15m 429 cooldowns; ~5.9–6.1h, near the 6h job cap — soak thresholds copied, unvalidated at 4h (KS-379)<br/>akto-security job → full OWASP scan<br/>integration job → Integration suite (⏳ Local · pre-merge + nightly — Schemathesis Integration mode, co-located in systemTest/schemathesis): anchoring-integrity fail-closed + verify-vs-chain (KS-489-D / KS-492), gateway 7282<br/>REPORT-ONLY — never blocks a merge, even once promoted<br/>(APIFuzzer / Nuclei not part of any current plan)"]
+
+    TIER --> LOCAL["💻 local_debug<br/>(On demand · ~1–2 min)<br/>Schemathesis run.py test-fast (or targeted run)<br/>swap profile for rejection / negative debugging<br/>Single tool only — match to bug under investigation"]
+
+    PR --> RESULT1["Fast Feedback<br/>Low CI overhead<br/>Static + Schemathesis read-only at PR time"]
+
+    PREMERGE --> RESULT2["Comprehensive contract coverage<br/>before merge<br/>all checks + stateful"]
+
+    FULL --> RESULT3["Deep nightly coverage per project<br/>(each disabled pending manual promotion)<br/>report-only — never blocks a merge"]
+
+    LOCAL --> RESULT4["Rapid Dev Feedback<br/>1–2 min loop<br/>No CI overhead"]
+
+    %% KS-1365: success node said pr blocks fast; GitHub Actions retired 2026-08-27, the pr tier is the author-run local gate
+    RESULT1 --> SUCCESS["✅ Balanced Risk Posture:<br/>pr = author-run local gate (SC + Playwright + k6 smoke + Akto PR tier BOLA/BFLA/Broken-Auth), recorded in the Test Evidence block<br/>pre-merge blocks deep (SC all-checks + Akto pre-merge +SM, disabled pending promotion)<br/>nightly-platform-suites.yml jobs report only, never block<br/>local_debug = dev loop"]
+    RESULT2 --> SUCCESS
+    RESULT3 --> SUCCESS
+    RESULT4 --> SUCCESS
+
+    style Risks fill:#e8f0fe
+    style R1S fill:#c6e7ff
+    style R2S fill:#fce5cd
+    style R3S fill:#f4cccc,stroke:#d32f2f,stroke-width:2px
+    style R4S fill:#fce5cd
+    style TIER fill:#fff9c4,stroke:#f57f17,stroke-width:2px
+    style PR fill:#dbeafe,stroke:#1d4ed8,stroke-width:2px
+    style PREMERGE fill:#ffedd5,stroke:#c2410c,stroke-width:2px
+    style FULL fill:#f3e8ff,stroke:#7e22ce,stroke-width:2px
+    style LOCAL fill:#dcfce7,stroke:#15803d,stroke-width:2px
+    style RESULT1 fill:#dbeafe
+    style RESULT2 fill:#ffedd5
+    style RESULT3 fill:#f3e8ff
+    style RESULT4 fill:#dcfce7
+    style SUCCESS fill:#34a853,color:#fff
+        </pre>
+    </div>
+    <p style="font-size: 12px; color: #57534e; margin-top: -8px">
+      <strong>Note on "Separate KS Instance":</strong> under the consolidated
+      build-once/fan-out topology each suite job boots its own fully-isolated
+      stack — unique <code>COMPOSE_PROJECT_NAME</code>/<code>STACK_PREFIX</code>
+      <em>and</em> a per-suite host-port offset, with each tool pointed at its
+      own gateway: schemathesis 6882, playwright 6982, performance 7082, akto
+      7182 (each an isolated stack). Isolation now comes from both the per-suite
+      ports and GitHub-hosted runners being single-tenant/ephemeral (one stack
+      per runner), not from a shared default port.
+    </p>
+
+    <h2>8. Local Stack Slots — Running Four Configurations at Once (KS-666)</h2>
+
+    <div class="diagram-container">
+      <div class="diagram-title">
+        8a. A LOCAL run must name its slot (KS-1016, 2026-09-11)
+      </div>
+      <p>
+        Every harness &mdash; Schemathesis, k6, Playwright, Akto and the shared
+        provisioning step &mdash; refuses to start against a
+        <strong>local</strong> target (<code>localhost</code>,
+        <code>127.0.0.1</code>, <code>[::1]</code>,
+        <code>host.docker.internal</code>) when neither
+        <code>SECUURA_STACK_SLOT</code> nor the platform-s alias
+        <code>STACK_SLOT</code> is set, and prints the command to run instead:
+      </p>
+      <pre>
+No stack slot named. Every LOCAL system-test run must say which Docker stack it targets
+(target: http://localhost:6882/api). Name the slot and run again, for example:
+  SECUURA_STACK_SLOT=&lt;n&gt; python3 scripts/run.py pr
+  or: systemTest/run-in-slot.sh &lt;n&gt; python3 scripts/run.py pr
+Remote targets need no slot; CI (CI=true) is exempt.</pre>
+      <p>
+        <strong>Local only.</strong> A remote target carries no slot and is left
+        alone; CI is exempt because its isolated per-suite stacks are local by
+        construction and deliberately unslotted (<code>CI=true</code>). Before
+        this rule an unset slot meant slot 1 silently &mdash; another ticket's
+        stack on a shared machine. Proven on slot 2: no slot &rarr; exit 2, 0
+        docker calls, nothing provisioned; <code>STACK_SLOT=2</code> &rarr;
+        1,759 requests to :6982.
+      </p>
+    </div>
+
+    <div class="diagram-container">
+      <div class="diagram-title">
+        8. One ticket, one worktree, one stack, one set of results
+      </div>
+      <pre class="mermaid">
+graph TD
+    W1["worktree ks-123<br/>STACK_SLOT=1"] --> K1["platform-k slot 1<br/>gateway :6882"]
+    WN["worktree ks-456<br/>STACK_SLOT=N (N = 1–4)"] --> KN["platform-k slot N<br/>gateway :6882 + 100·(N−1)"]
+    K1 --> R1["results *-slot1<br/>k6 dash :5665"]
+    KN --> RN["results *-slotN<br/>k6 dash :5665 + 100·(N−1)"]
+    R1 --> OBS["ONE observability stack (KS-971)<br/>slot picker, not a copy per slot<br/>k6 series + Loki streams + Pushgateway groups carry slot=<br/>cAdvisor carries NO name on Docker Desktop:<br/>container panels get name+slot by joining secuura_container_name_info<br/>app /metrics not implemented on any slot"]
+    RN --> OBS
+    W1 -.pairs with.-> S1["platform-s slot 1<br/>app :5122"]
+    WN -.pairs with.-> SN["platform-s slot N<br/>app :5122 + 100·(N−1)"]
+        </pre>
+    </div>
+
+    <p>
+      <strong
+        >Four slots per platform, and the numbering is shared with platform-s
+        (PS-622).</strong
+      >
+      Every published port is the historic one plus
+      <code>100 &times; (N &minus; 1)</code>, so
+      <strong
+        >platform-s slot N and platform-k slot N pair up with no
+        configuration</strong
+      >: platform-k slot N's gateway lands on
+      <strong>6882 + 100 &times; (N &minus; 1)</strong>.
+      platform-s exports <code>STACK_SLOT</code>; platform-k reads
+      <code>SECUURA_STACK_SLOT</code>
+      and falls back to it, so a single export in a worktree drives both
+      platforms. Four is a deliberate ceiling &mdash; the two platforms first
+      collide at platform-s slot 9, where its PMA proxy (8081) meets platform-k
+      tokenomics (8881).
+    </p>
+
+    <p>
+      <strong
+        >&#9888; The same four ports mean different things locally and in
+        CI.</strong
+      >
+      Section 5 assigns 6882 / 6982 / 7082 / 7182 <em>per suite</em> &mdash;
+      schemathesis, playwright, performance, akto &mdash; because each CI job
+      boots its own single-tenant stack on an ephemeral runner. Locally the same
+      four ports are <em>per stack slot</em>, and every suite targets whichever
+      slot it was pointed at. Reading a local port as a CI suite (or the
+      reverse) will attribute a result to the wrong thing.
+    </p>
+
+    <p>
+      <strong
+        >Every harness follows the slot, and every result names it.</strong
+      >
+      Source <code>systemTest/slot-target.sh</code> and Schemathesis
+      (<code>SECUURA_BASE_URL</code>), Playwright (<code>GATEWAY_URL</code>),
+      Akto (<code>SECUURA_API_URL</code>, plus its own side-stack, mongo volume
+      and dashboard port) and the performance runner
+      (<code>PERF_BASE_URL</code>) all aim at the same stack. Akto and the
+      performance runner used to default to <code>localhost:6882</code> on
+      their own, so a run silently tested slot 1 whichever slot was meant;
+      since KS-1386 an unslotted local run is refused instead &mdash; there is
+      no default URL.
+      <strong>Playwright is the exception since KS-682:</strong>
+      <code>config/stackSlot.ts</code> reads
+      <code>SECUURA_STACK_SLOT</code> itself, derives the gateway, refuses a
+      malformed or out-of-range slot and a label naming another slot, writes
+      <code
+        >results/playwright-report-&lt;ticket&gt;-&lt;ts&gt;-slot&lt;N&gt;</code
+      >
+      behind a <code>results/latest-slot&lt;N&gt;</code> pointer, and serves the
+      report on 9324 + 100&middot;(N&minus;1). Pinned by 292 unit cases in
+      <code>systemTest/playwright/tests-unit/</code> (Mac, 2026-09-10) —
+      including a boundary suite: an explicit slot outside 1&ndash;4 derives no
+      port, a suffix that spells the slot any way but the wrapper's
+      (<code>-slot01</code>) is refused, and a pinned report port must be
+      decimal digits; KS-1056 tracks the other three.
+    </p>
+
+    <p>
+      <strong
+        >A fresh local stack needs its bootstrap admin, or every harness
+        degrades.</strong
+      >
+      Actor provisioning (<code>fixtures/provision-actors.ts</code>) grants
+      roles as <code>admin@secuura.com</code>; that account is seeded only when
+      the auth service receives <code>ADMIN_USER_PASSWORD</code> at build time.
+      <code>docker-compose.yml</code> forwards it since 2026-09-10 (KS-682, from
+      KS-971) &mdash; before that the templated value never reached the
+      container, the account was never seeded, and provisioning collapsed every
+      actor to <code>OWNER</code> and refused the manifest (KS-969, KS-972).
+      <code>check-stack-safety.sh</code> now holds the forward as an invariant.
+      Since 2026-09-10 Playwright's <code>global-setup</code> also passes its
+      slot-derived gateway to provisioning (<code>--base-url</code>): an
+      unsourced <code>SECUURA_STACK_SLOT=N</code> run provisions on slot N
+      rather than on slot 1, which it did before &mdash; found on the slot-2
+      rotation, invisible on slot 1. A superseded manifest keeps its slot
+      segment (<code>actors-slot&lt;N&gt;.superseded-&lt;ts&gt;.json</code>)
+      &mdash; found on the slot-4 rotation.
+    </p>
+
+    <p>
+      <strong>Schemathesis resolves its own slot (KS-1016).</strong> It no
+      longer depends on that export: <code>src/slot.py</code> reads
+      <code>SECUURA_STACK_SLOT</code> (or platform-s's <code>STACK_SLOT</code>)
+      and derives the gateway by the same
+      <code>historic + 100 &times; (N &minus; 1)</code> rule, so
+      <code>SECUURA_STACK_SLOT=&lt;n&gt;</code> alone targets
+      <code>:6882 + 100&middot;(n&minus;1)</code>. It is
+      <em>one</em> resolver for the runner, the hooks and the persona logins.
+      Those three used to answer differently &mdash;
+      <code>constants.py</code> preferred <code>API_BASE_URL</code>,
+      <code>cli.py</code> preferred <code>SECUURA_BASE_URL</code>, and
+      <code>config/settings.py</code> and
+      <code>config/fixtures.py</code> ignored <code>API_BASE_URL</code> entirely
+      &mdash; so a shell carrying only one of the pair drove the runner to one
+      slot and every login to another, within a single run, with nothing
+      reporting it. The checked-in <code>[tool.schemathesis] base-url</code> in
+      <code>pyproject.toml</code> is gone for the same reason: a file in git
+      cannot know which slot a run is aimed at, and a direct
+      <code>st run</code> consulted nothing else. The resolver's edges are
+      pinned in <code>tests/unit/test_slot_resolver_edges.py</code>: padding
+      around the slot, a trailing slash or a missing <code>/api</code> on either
+      base-URL variable, a blank-but-present <code>SECUURA_BASE_URL</code>, and
+      &mdash; found by probing after the four-slot live series &mdash; a
+      whitespace <code>SECUURA_STACK_SLOT</code> that used to mask a valid
+      <code>STACK_SLOT</code> and default the run to slot 1. Four further
+      modules close the branches around the fix:
+      <code>test_stack_postgres_fixture.py</code> (the fixture the migrated call
+      site runs through: skip, cross-slot refusal, the guard actually called),
+      <code>test_compose_project_resolution.py</code> (which compose project a
+      recreate is aimed at: slot-prefixed probe order, blank label, fallback,
+      explicit override),
+      <code>test_slot_rule_executes_like_the_shell.py</code> (sources
+      <code>stack_env.sh</code> per slot and compares what it exports, so the
+      pin is on behaviour rather than text),
+      <code>test_observability_best_effort.py</code> (a refused Pushgateway or
+      Grafana degrades to False, never to a red run); and the no-hardcoded-slot
+      guard now walks <code>src/</code>, <code>scripts/</code> and
+      <code>config/</code> as well as <code>tests/</code>. The resolver refuses
+      what <code>stack_env.sh</code> refuses &mdash; <code>0</code>,
+      <code>01</code>, <code>abc</code>, <code>5</code> &mdash; and
+      <code>test_slot_rule_executes_like_the_shell.py</code> sources the shell
+      per slot to prove both sides agree on behaviour, not text.
+    </p>
+
+    <p>
+      <strong
+        >Proven by rotation, one slot at a time (KS-1016,
+        2026-09-10/11).</strong
+      >
+      Slots 4 &rarr; 3 &rarr; 2 &rarr; 1, each built from an empty host with
+      every other slot torn down, launched with no slot-targeting variable set
+      and every <code>docker</code> call audited: every request to the slot's
+      own gateway, zero to any other, zero <code>docker</code> calls, artifacts
+      and <code>latest-slotN</code> carrying the slot. On 2026-09-11, with
+      develop forwarding <code>ADMIN_USER_PASSWORD</code>, the first
+      <em>valid</em> sweeps ran (0 of 316 operations errored) and the four
+      harnesses ran in series on slot 4 &mdash; Schemathesis <code>pr</code>, k6
+      smoke, Playwright <code>ci:e2e</code>, Akto pre-merge &mdash; with slots
+      1&ndash;3 empty throughout.
+      <strong
+        >Rule from that series: export <code>BOOTSTRAP_ADMIN_PASSWORD</code> on
+        every suite run, Schemathesis included.</strong
+      >
+      The first provisioning on a fresh stack creates the generated actors;
+      without the variable they are created as <code>OWNER</code> and every
+      later harness &mdash; k6, Playwright, Akto &mdash; inherits them
+      (DEGRADED, and Playwright <code>400</code>s at auth-setup) until the
+      slot's database is reset.
+      <strong>Since KS-1016 provisioning refuses instead</strong> (<code
+        >assertBootstrapAvailable</code
+      >
+      in <code>fixtures/provision-actors.ts</code>, unit-tested in
+      <code>performance/tests/unit/fixtures/</code>): an unavailable bootstrap
+      admin throws before the first registration, so nothing is created and the
+      next run with the variable set provisions correctly. And every slot reader
+      &mdash; the shared writer, Playwright, k6, Akto, Schemathesis's manifest
+      reader and <code>src/slot.py</code> &mdash; honours platform-s's
+      <code>STACK_SLOT</code> alias in <code>stack_env.sh:37</code>'s order
+      (<code>SECUURA_STACK_SLOT</code> wins, blank falls through, a malformed
+      alias is refused), pinned per harness and by
+      <code>__tests__/manifest_readers_agree.test.sh</code>.
+    </p>
+
+    <p>
+      <strong
+        >DEGRADED reports what it did to the manifest, strict arm included
+        (KS-981, 2026-09-29).</strong
+      >
+      When provisioning fails, the pre-suite moves any manifest on disk aside so
+      no harness reads stale actors &mdash; with or without
+      <code>SYSTEMTEST_REQUIRE_PROVISIONED</code>. The strict banner used to
+      print only <em>FATAL</em>, so a manifest that could not be moved, and is
+      still on disk for the next run on that slot, went unreported. Both arms
+      now print moved-to / none-on-disk / could-not-move, the last naming the
+      file consumers read (<code>actors-slotN.json</code>, not the pre-KS-971
+      <code>actors.json</code>). Pinned by
+      <code>__tests__/quarantine_call_sites.test.sh</code>: 5 cells red on the
+      previous code, 17 of 17 green after.
+    </p>
+
+    <p>
+      <strong
+        >A failed login now says which cause, and a refused connection names its
+        port (KS-1167, 2026-09-14).</strong
+      >
+      The shared pre-suite login dropped the HTTP status, so
+      <code>bootstrap admin: UNAVAILABLE</code> explained every non-200 as
+      &ldquo;check the password&rdquo; &mdash; a
+      <strong>429 from the per-IP login limiter</strong> included, on the first
+      step every harness runs. <code>fixtures/login-outcome.ts</code> classifies
+      the attempt (unreachable &gt; rate-limited &gt; rejected &gt; unexpected)
+      and each branch names a different next step; the <code>fetch</code> in
+      <code>fixtures/provision.ts</code> was unguarded, so a refused connection
+      reached the DEGRADED banner as the bare <code>fetch failed</code> with the
+      <code>ECONNREFUSED &lt;host&gt;:&lt;port&gt;</code> lost in an
+      empty-message AggregateError; <code>fixtures/describe-error.ts</code> now
+      renders it. Playwright's <code>auth-setup</code> diagnoses its own login
+      the same way (limiter / EMPTY password from a withheld manifest / rejected
+      / unhealthy) and its global-setup refuses on a 429 ping rather than
+      proceeding into provisioning inside a cooldown. Proven red&rarr;green
+      against a stub gateway answering one fixed status and a port proven closed
+      (<code>__tests__/bootstrap_login_diagnosis.test.sh</code>: 10 of 16 cells
+      red on the previous fixtures), with no stack.
+    </p>
+
+    <p>
+      <strong
+        >The API Explorer resolves its stack slot too (KS-1386,
+        2026-09-29).</strong
+      >
+      It was the last <code>systemTest</code> package fixed to slot 1: an
+      explorer generated while working on slot N offered slot 1's gateway as its
+      <em>Local</em> server and printed slot 1's health-check curls, and a server
+      chosen on one slot's page was reused by another's (every explorer opened
+      from disk shares one browser-storage origin). Generation now takes
+      <code>SECUURA_STACK_SLOT</code> (or <code>STACK_SLOT</code>) and refuses a
+      generation that names neither &mdash; under CI too, since it has no URL
+      of its own &mdash; and the page ignores a stored server it does not
+      offer. Pinned by per-slot unit tests derived from slot 1, a parity test
+      against <code>fixtures/slot.ts</code>, and a guard that keeps slot 1's
+      port out of every other file under <code>api-explorer/src/</code>.
+    </p>
+
+    <p>
+      <strong
+        >Nothing defaults to slot 1 any more, in any harness (KS-1386,
+        2026-09-29).</strong
+      >
+      Five slot resolvers turned an unnamed slot into slot 1, so an unslotted
+      run could provision, log in, scan or stop containers on slot 1 while the
+      rest of it was aimed elsewhere &mdash; Schemathesis's setup minted an admin
+      API key there, Akto checked its scan target but not its own dashboard,
+      and <code>prove-slot-isolation.sh</code> defaulted its victim slot to 3.
+      Every stack-touching entry point now refuses a local run that names no
+      slot; CI and remote targets stay exempt from naming one, but with no slot
+      and no URL every harness refuses; an exempt run is labelled
+      <code>unslotted</code>, never <code>slot1</code>. No slot 2&ndash;4 value is
+      typed anywhere: tests derive them from slot 1, and
+      <code>__tests__/no_hardcoded_slot_literals.test.sh</code> scans every
+      harness. Same branch: the Akto offline gate no longer spawns docker, no
+      script prints part of the API token, api-explorer's golden snapshot
+      is tracked, the Schemathesis offline suites fail any test that writes
+      into the real <code>output/reports/</code>, and the Akto and Performance
+      no-slot refusals name the npm script that was run. <code>slot-target.sh</code> (KS-1389) and
+      <code>observability/</code> (KS-1388) are tracked separately.
+    </p>
+
+    <p>
+      <strong
+        >The slot gate is driven as a process, and the offline unit suites are
+        slot-independent (KS-1167).</strong
+      >
+      Playwright and k6 proved the KS-1016 guard was <em>called</em> by reading
+      the runner as text; both now spawn the real entry point with the slot
+      family stripped and read the exit code &mdash; and
+      <code>npm run report</code> (Playwright), which resolved slot 1 silently,
+      consults the rule (<code>SECUURA_STACK_SLOT=1 npm run report</code>). Measured the same day: the Playwright unit suite was
+      348/348 from an unslotted shell and 345&ndash;347/348 from a slotted one;
+      Performance 1077/1077 versus 1060&ndash;1067. The suites' verdicts
+      depended on which worktree ran them &mdash; files cleared the slot family
+      only in <code>afterEach</code>, never the <code>STACK_SLOT</code> alias,
+      and k6's runner modules freeze their slot at import. Both now strip the
+      slot family before every file (Playwright: clear-before-each plus a
+      <code>childEnv()</code> door for spawns; Performance: a vitest
+      <code>setupFiles</code> entry), and each carries a matrix that re-runs the
+      suite under no slot and slots 1&ndash;4 &mdash; both variables and the
+      wrapper's suffix shape &mdash; demanding identical counts. 371/371 and
+      1083/1083 under every shape after the fix.
+    </p>
+
+    <p>
+      <strong
+        >The push-time format gate no longer passes having checked nothing
+        (KS-1063, 2026-09-29).</strong
+      >
+      For a systemTest-only push the hook skips the platform preflight by
+      design, so <code>systemTest/scripts/check-package-format.sh</code> is the
+      one gate that runs. It skips a package whose deps are not installed, and
+      when it skipped <em>every</em> package it touched it exited 0 on
+      <code>0 package(s) checked, N skipped, 0 failed</code> &mdash; the same
+      observable as a clean check. It now refuses with
+      <code>NOTHING CHECKED</code> and says it is not a formatting failure; a
+      run that checked at least one package still passes. Pinned by
+      <code>__tests__/package_format_gate.test.sh</code> (4 cells red before, 33
+      of 33 after).
+    </p>
+
+    <p>
+      <strong
+        >&#9888; A cross-slot read is refused, not merely improbable
+        (KS-1016).</strong
+      >
+      The anchoring DB sweeps and the compose controller both compare the
+      container's slot with the target gateway's slot and stop if they differ,
+      naming both sides. Before this, <code>test_anchor_read_honesty</code> ran
+      <code>docker exec secuura-postgres</code> with the name hardcoded &mdash;
+      slot 1's container and only slot 1's &mdash; so a slot-3 run created a
+      document on slot 3 and then counted contradictory rows in
+      <strong>slot 1's</strong> <code>anchor_store</code>. Nothing refused the
+      connection, because every slot ships the same Postgres password (KS-731),
+      so the answer came back and read as authoritative. The compose path had no
+      guard at all and is the more dangerous of the two: it
+      <em>stops and recreates</em>
+      containers, so an unsourced shell would have taken another ticket's stack
+      down while asserting against this one. An unidentifiable slot on either
+      side &mdash; the isolated CI stack, a demo target &mdash; is allowed
+      through; only two known, differing slots are refused.
+    </p>
+
+    <p>
+      <strong>Run metrics are grouped per slot (KS-1016).</strong> The
+      Pushgateway key is
+      <code>/job/integration/environment/&lt;env&gt;/slot/&lt;N&gt;</code>.
+      There is a single shared <code>secuura-obs-pushgateway</code> on host
+      <code>:9099</code>, so the URL cannot be per-slot; and a push to an
+      existing key <em>replaces</em> that group. Two concurrent slots therefore
+      overwrote each other's run summary, both reported success, and the
+      surviving series described whichever slot pushed last. Slot isolation
+      covered the stack under test but not the record of what was tested.
+    </p>
+
+    <p>
+      <strong>Result isolation is a MUST, with no exception.</strong> Folders
+      and files both carry the Linear ticket and the slot &mdash;
+      <code>results-ks-666-slot&lt;n&gt;.json</code>,
+      <code>output/reports-slot&lt;n&gt;/pr-ks-666-&lt;ts&gt;</code>,
+      <code>test-fast-ks-666-&lt;ts&gt;-slot&lt;n&gt;</code>. Slot 1 is labelled too: an
+      unlabelled <code>results-ks-666.json</code> was the one set nobody could
+      relate back to a slot or port. Three of the four harnesses name runs by
+      the second, so two slots finishing together resolved to a single path
+      &mdash; measured on this Mac 2026-08-20, where concurrent Playwright runs
+      on slots 1 and 3 shared the start time <code>10:55:12.567Z</code>, and
+      Schemathesis and Akto both produced identical timestamps. The
+      <code>latest</code> pointer is slot-scoped for the same reason.
+    </p>
+
+    <p>
+      <strong>&#9888; Within a slot, suites run in SERIES.</strong> Slots run in
+      parallel with each other; suites within one slot do not. The reason is the
+      platform's <strong>per-IP login rate limiter</strong>, not resource
+      contention &mdash; every harness authenticates through the same gateway as
+      the same personas, and from the stack's point of view every local suite
+      shares one IP. <strong>All four harnesses are affected</strong> &mdash;
+      Akto, Schemathesis, Playwright and the performance suite alike. Any can
+      trip the limiter and any can be starved by another; Schemathesis is simply
+      where it was first seen, because its report names the cause, while the
+      others surface it as login failures, empty result sets or timeouts that
+      read as product bugs.
+      <strong
+        >Once rate limiting appears, wait 15 minutes before starting any further
+        tests</strong
+      >
+      &mdash; the window has to drain, and restarting inside it both wastes the
+      run and pushes the window out. Measured 2026-08-20 running Playwright,
+      Schemathesis and k6 together against slot 1: Schemathesis logged
+      <strong>300 engine errors across 289 operations</strong>, every one
+      <code>login for persona=super_admin is rate-limited</code>.
+    </p>
+
+    <p>
+      That failure lies twice, which is why it is worth naming here. The report
+      was headed
+      <strong>PASSED</strong> &mdash; the operations were never exercised, so
+      nothing could fail &mdash; and the errors are filed as
+      <em>engine</em> errors, reading as a Schemathesis fault rather than the
+      platform's limiter doing its job. Use
+      <code>systemTest/run-in-slot.sh &lt;slot&gt; &lt;command&gt;</code>, which
+      holds an exclusive per-slot lock.
+      <code>LOCAL_LOGIN_LIMITER_DISABLED=true</code> (KS-191) suppresses the
+      limiter, but only if the stack was <em>started</em> with it, and it
+      changes the system under test.
+    </p>
+
+    <p>
+      <strong>Measured on this Mac, 2026-08-20.</strong> Four platform-k stacks
+      (33 containers each, 132 total) plus a platform-s stack ran together in
+      <strong>7.2 GiB</strong> of a <strong>31.3 GiB / 6 CPU</strong> Docker
+      Desktop allocation, with all 31 bound ports attributable to a platform and
+      slot and no collision.
+      <strong>Memory is not the constraint; CPU is</strong> &mdash; load
+      averaged ~23 with four stacks idle, so four concurrent <em>suites</em> is
+      a different question and has not been measured.
+    </p>
+
+    <div class="diagram-container">
+      <div class="diagram-title">
+        8b. Akto refuses a cross-slot run — the four guards and where each fires
+        (KS-687)
+      </div>
+      <pre class="mermaid">
+graph TD
+    SRC["source slot-target.sh<br/>SECUURA_STACK_SLOT=N"] --> V["validate()<br/>src/config/slot.ts"]
+    V -->|"pieces name different slots<br/>or SECUURA_STACK_SLOT unusable<br/>or artefact suffix is a path"| R1["REFUSED<br/>before any container is touched"]
+    V -->|coherent| PF["pre-flight<br/>probes the SAME origin the scan is sent to<br/>(buildScanOptions → origin + /health)"]
+    PF -->|unreachable from akto-sN-testing| R2["REFUSED<br/>no scan, no false PASS"]
+    PF -->|reachable| SCAN["scan → persistReportArtifact<br/>output/reports-slotN/"]
+    SCAN --> LEAK["slotLeakCheck<br/>every URL in the artefact<br/>local host on another slot's port?"]
+    LEAK -->|yes| R3["RUN FAILS<br/>artefact kept as evidence<br/>nothing pushed to Grafana"]
+    LEAK -->|no| OK["PASS / FAIL on findings<br/>pushed with label slot=slotN"]
+    CP["npm run start / db:ui"] --> G["assert-compose-project.sh<br/>COMPOSE_PROJECT_NAME ≠ akto_sN?"]
+    G -->|mismatch| R4["REFUSED<br/>the write path that once deleted a platform slot"]
+        </pre>
+    </div>
+
+    <p>
+      <strong
+        >Slot isolation used to be opt-in, and forgetting was silent
+        (KS-687).</strong
+      >
+      Every slot-carrying value the Akto harness used arrived from
+      <code>slot-target.sh</code>; the package itself read
+      <code>SECUURA_STACK_SLOT</code> in one place, to word an error.
+      Correctness was a property of the operator. It is now a property of the
+      code: <code>validate()</code> refuses a run whose pieces name different
+      slots, an unusable slot request (<code>5</code>, <code>abc</code>,
+      <code>3.5</code> &mdash; never defaulted to slot 1, matching
+      <code>stack_env.sh</code>), and an artefact suffix that is a path;
+      pre-flight derives its probe from the same function the scan uses, so it
+      cannot vouch for a neighbour (the first live slot-4 run passed pre-flight
+      on <code>host.docker.internal:7182</code> while the scan went to
+      <code>localhost:7182</code> inside the container &mdash;
+      <strong>8,816 connectivity skips under a PASS in 25 s</strong>); and after
+      every scan the persisted artefact is walked and any local URL on another
+      slot's port <strong>fails the run</strong>. Proven live on all four slots
+      on 2026-09-10 — 8,902–8,933 executed, 0 vulnerable, 2,619–2,635 references
+      to the slot's own gateway, zero to any other — and again on slot 4 from
+      the develop-merged tree on 2026-09-11 (9,105 / 9,138 executed, zero
+      foreign); the leak check names the foreign hosts the moment the same
+      artefact is claimed for a different slot.
+    </p>
+
+    <p>
+      <strong
+        >And the gate that could not see the original defect now can (KS-687
+        F2).</strong
+      >
+      <code>check-akto-container-names.sh</code> scans
+      <code>src/ bin/ scripts/</code> for <code>*.ts *.sh *.mjs</code>, matches
+      a slot-1 container name as a literal
+      <em>or as a defaulted variable</em> (<code>${VAR:-akto-mongo}</code>,
+      <code>?? 'akto-testing'</code>), and its non-vacuity assert names the
+      directories the corpus must contribute rather than counting files &mdash;
+      the count passed over the directory F1 lived in. Red-first: F1's original
+      line is the first fixture.
+    </p>
+
+    <h2>9. Auth surface — connector tokens on the users routes (KS-564, KS-1402)</h2>
+
+    <div class="diagram-container">
+      <div class="diagram-title">
+        9a. KS-1402 — <code>GET /api/users/lookup</code> accepts a connector token
+        (Kam ruling 2026-10-02, option (a))
+      </div>
+      <p>
+        <strong>What it pins.</strong> Platform S authenticates with an
+        <code>sk_</code> connector key, so its token is a
+        <code>type: 'connector'</code> token rather than an interactive access
+        token. Before KS-1402 only <code>POST /api/users/stub</code> accepted
+        one (KS-564, Option A); <code>GET /api/users/lookup</code> still used
+        plain <code>authenticate()</code>, so every Platform-S
+        transfer-custody call 401'd and fell back. Both routes now go through
+        <code>authenticateAccessOrConnector()</code>.
+        <strong>The token type is not the permission.</strong> The route's own
+        role/scope gate still runs afterwards, so <code>users:read</code> is
+        the effective gate on <code>/lookup</code>, and a cross-tenant lookup
+        still returns <strong>404</strong> — not 200-empty, so positive
+        existence is not readable from the response shape.
+      </p>
+      <p>
+        <strong>The audit label is route-neutral, deliberately.</strong> The
+        connector-accepted log line read <code>users/stub: …</code>
+        unconditionally, so once a second route accepted connector tokens every
+        <code>/lookup</code> call would have written an audit line naming a
+        route it never touched. It now carries
+        <code>route: req.baseUrl + req.path</code>.
+        <code>req.originalUrl</code> was rejected for this field because it
+        carries the query string: measured on
+        <code>GET /api/users/lookup?email=alice%40example.com</code>,
+        <code>req.originalUrl</code> is
+        <code>/api/users/lookup?email=alice%40example.com</code> while
+        <code>req.baseUrl + req.path</code> is
+        <code>/api/users/lookup</code> — so <code>originalUrl</code> would put
+        the email address in the clear in the audit log, which is the very
+        thing <code>maskEmail()</code> exists to prevent.
+      </p>
+      <div class="diagram-title">9b. The suite cells, and how to run them</div>
+      <p>
+        File:
+        <code
+          >Blockchain/Dev/services/auth/src/__tests__/ks1402-lookup-accepts-connector-token.test.ts</code
+        >
+        — 183 lines, four cells, each minting a <em>real</em>
+        <code>type: 'connector'</code> token via
+        <code>generateConnectorToken</code>. The authenticator is
+        <strong>never mocked</strong> (0 mocks of
+        <code>../middleware/authenticate</code>, against a must-hit control of
+        9 <code>vi.mock</code> calls elsewhere in the same file), because a
+        mocked authenticator cannot observe the thing the ticket is about.
+      </p>
+      <pre>
+# Run it (services/auth). NOTE: `npm test` here is WATCH mode — use the explicit run form.
+cd Blockchain/Dev/services/auth
+npx vitest run                                                       # the whole suite
+npx vitest run src/__tests__/ks1402-lookup-accepts-connector-token.test.ts   # just these cells
+
+CELL 1  a connector token carrying users:read REACHES the handler          200
+CELL 2  a connector token WITHOUT users:read is refused 403, not 401       403
+CELL 3  an interactive ACCESS token still works                            200   &lt;- the CONTROL
+CELL 4  a tenant-A connector token cannot read a tenant-B-only email       404</pre>
+      <p>
+        <strong>Red-first / green-after, measured 2026-10-04.</strong> With the
+        new test against base product code: <strong>cells 1, 2 and 4 red</strong>
+        (<code>expected 401 to be 200</code>, <code>… to be 403</code>,
+        <code>… to be 404</code>) and <strong>cell 3 green</strong>. Cell 3 is
+        the control that makes those three flips a statement about the product
+        rather than about the harness. At the PR head: <strong>4/4 green</strong>.
+        Suite totals moved <strong>77 → 78 files</strong> and
+        <strong>836 → 840 tests</strong>, both sides measured on the same base.
+      </p>
+      <p>
+        <strong>Timing — and what is deliberately NOT changed here.</strong>
+        No stated timing in either platform-k document covers the
+        <code>services/auth</code> vitest suite: grepped at the base SHA,
+        <code>services/auth</code> 0 hits, <code>services/transfer</code> 0,
+        <code>generate-openapi</code> 0 and <code>check:openapi</code> 0 in both
+        documents, against a must-hit control of <code>auth</code> 52 hits in
+        this document and 59 in the cheat sheet. The single <code>vitest</code>
+        hit in each is a <code>setupFiles</code> note in the Performance
+        harness, not a timing. <strong>So no tier budget or timing row is
+        touched, and none is left looking re-measured.</strong> For the record,
+        the figure this change does own, measured rather than estimated:
+        <strong>the auth vitest suite runs 78 files / 840 tests in 2.51–2.55 s
+        reported (3.31–3.43 s wall) over three consecutive runs on
+        2026-10-04</strong>, host <strong>Kamils-Mac-Studio</strong> (Apple M3
+        Ultra, 28 logical cores). That is a developer workstation, not CI, and
+        per §4 a figure without a host is meaningless — do not plan CI around it.
+      </p>
+      <p>
+        <strong>NOT COVERED, stated rather than skipped.</strong> The
+        <code>authenticate.ts</code> change in this PR is
+        <em>not exercised by any test</em>: reverted on its own, the whole auth
+        suite stays green at 78 files / 840 tests and all four KS-1402 cells
+        pass. What it changes is the audit-log line — its text and the new
+        <code>route</code> field — for <strong>both</strong>
+        <code>/stub</code> and <code>/lookup</code>, and no assertion reads the
+        logger. The route-neutrality of that label is therefore argued and
+        measured above, not test-guarded. Also unverified: no live sweep
+        (skill §5f), no Platform-S ↔ Platform-K pair run, and whether S's
+        connector key actually carries <code>users:read</code> is not
+        measurable from this side. <code>tsc</code> excludes
+        <code>src/__tests__</code>, so the new test file is not typechecked.
+      </p>
+    </div>
+
+    <h2>10. API contract — the delegation GET spec declares its own envelope (KS-1015)</h2>
+
+    <div class="diagram-container">
+      <div class="diagram-title">
+        10a. KS-1015 &mdash; <code>GET /api/delegations/{id}</code> publishes the
+        envelope its handler returns
+      </div>
+      <p>
+        <strong>What it pins.</strong> The published contract for
+        <code>GET /api/delegations/{id}</code> declared a <em>bare</em>
+        <code>Delegation</code> record as its 200 body, while the handler
+        (<code>routes/delegations.ts</code>, <code>GET /:id</code>) answers
+        <code>{ success, data: { delegation, chain } }</code> &mdash; the
+        <code>chain</code> being whatever <code>buildDelegationChain()</code>
+        returns. Schemathesis flagged the 200 as
+        <code>response_schema_conformance</code> in the sweep of
+        <strong>2026-09-29</strong>. <strong>The spec now follows the
+        runtime</strong>, not the other way round: the 200 content is a
+        <code>successEnvelope(...)</code> whose <code>data</code> carries the
+        unchanged <code>Delegation</code> component by <code>$ref</code>
+        alongside the chain object. <code>invalidReason</code> is declared
+        optional because the chain only carries it when
+        <code>isValid</code> is false.
+      </p>
+      <p>
+        <strong>It NARROWS KS-1015, it does not close it.</strong> The ticket is
+        a sweep finding covering <strong>28 check/operation pairs with no live
+        owner</strong>; this change owns <strong>one</strong> of them. The
+        remaining pairs stay open on the ticket.
+      </p>
+      <div class="diagram-title">10b. The suite cells, and how to run them</div>
+      <p>
+        File:
+        <code
+          >Blockchain/Dev/services/transfer/src/__tests__/ks1015-delegation-get-spec-declares-envelope.test.ts</code
+        >
+        &mdash; 79 lines, six cells. It renders <em>the document the generator
+        publishes</em>, from the shared registry the transfer module populates on
+        import, and asserts against that. <strong>No server, no database, no
+        network, and zero mocks</strong> (<code>vi.mock</code> count in this file
+        is <strong>0</strong>) &mdash; there is nothing to mock, because the
+        subject is the emitted contract rather than a response.
+      </p>
+      <pre>
+# Run it (services/transfer). The explicit run form, never watch mode.
+cd Blockchain/Dev/services/transfer
+npx vitest run                                                                 # the whole suite
+npx vitest run src/__tests__/ks1015-delegation-get-spec-declares-envelope.test.ts   # just these cells
+
+D1  the 200 body is the success/data envelope, not the bare Delegation record
+D2  data carries the Delegation component and the chain, both required
+D3  the chain declares the fields buildDelegationChain returns, invalidReason optional
+C1  the GET operation keeps bearerAuth, its path parameter id, and its 404      &lt;- CONTROL
+C2  the Delegation component stays published with its required fields           &lt;- CONTROL
+C3  the sibling list and per-document operations keep their own envelopes       &lt;- CONTROL
+
+# And the generator, which is what actually publishes the YAML:
+cd Blockchain/Dev
+npm run generate-openapi              # REGENERATE. Never hand-patch docs/openapi/secuura-api.yaml.
+npm run generate-openapi -- --check   # read-only: rc 0 if on-disk matches generated, rc 1 if it drifted
+npm run check:openapi                 # 405 example blocks must resolve to the fixture set</pre>
+      <p>
+        <strong>Red-first / green-after, measured 2026-10-04 at base
+        <code>2d85b84e1012</code>.</strong> With the new test against base
+        product code: <strong>D1, D2 and D3 red &mdash; and all three reds are
+        <code>AssertionError</code></strong> (3 of 3), with
+        <code>Cannot find module</code> / <code>SyntaxError</code> /
+        <code>Failed to load</code> / <code>Transform failed</code> all at
+        <strong>0</strong>. That distinction is the point: a revert that broke
+        the import would redden the file without any cell exercising anything.
+        <strong>C1, C2 and C3 stayed green in the same run</strong>, which is
+        what makes the three flips a statement about the contract rather than
+        about the harness. At the PR head: <strong>6/6 green</strong>. Suite
+        totals moved <strong>4 &rarr; 5 files</strong> and
+        <strong>70 &rarr; 76 tests</strong>, both sides measured on the same base.
+      </p>
+      <p>
+        <strong>The YAML is REGENERATED, never patched</strong>, and that was
+        verified both ways. <code>npm run generate-openapi</code> reproduces the
+        committed blob <code>52310cab1874</code>
+        <strong>byte-identically</strong> (sha256
+        <code>373ef7805f8896aa&hellip;</code>, 39,928 lines, 219
+        <code>required: true</code>, 0 tracked changes after the run). The
+        negative arm: with the YAML reverted to its base blob,
+        <code>generate-openapi -- --check</code> returns <strong>rc 1</strong>
+        with <code>CHECK FAIL: generated YAML differs from on-disk version</code>
+        <em>and the file's sha256 is unchanged</em> &mdash; so the check path is
+        read-only and the refusal is a refusal, not a silent rewrite. The
+        positive arm at the PR head returns <strong>rc 0</strong>,
+        <code>CHECK PASS: on-disk YAML matches generated</code>.
+        <code>npm run check:openapi</code> is rc 0.
+      </p>
+      <p>
+        <strong>Timing &mdash; no row touched, and that is a measurement.</strong>
+        Measured <strong>at the base SHA <code>2d85b84e1012</code>, before this
+        block existed</strong>, in <strong>both</strong> platform-k documents:
+        <code>services/transfer</code>, <code>generate-openapi</code> and
+        <code>check:openapi</code> each returned a raw count of
+        <strong>1</strong>, and <strong>every one of those hits sat inside the
+        KS-1402 block of section 9</strong> (this document lines 1703&ndash;1704;
+        the cheat sheet line 3684), within that block's own "no row touched"
+        sentence. So <strong>no stated timing outside the KS-1402 block covered
+        the transfer vitest suite or the OpenAPI drift check</strong>, and
+        <code>KS-1015</code> and <code>delegation</code> returned 0 in both.
+        Must-hit control at that SHA: <code>auth</code> 68 hits here and 67 in
+        the cheat sheet. <strong>No tier budget or timing row is changed and
+        none is left looking re-measured.</strong>
+        <em>Re-running that grep on the PR head will not reproduce 1</em>
+        &mdash; this block is itself the first text outside section 9 to name
+        those commands, so it raises the count it reports. A measurement has to
+        name the tree it was taken on, which is why the SHA is stated above and
+        <strong>no head-side count is quoted here</strong>: any number printed
+        inside this document about this document moves when the sentence
+        printing it is edited, and two drafts of this paragraph proved exactly
+        that. What is stable, and is the claim: <strong>every added hit is prose
+        in this block or in the cheat sheet's, and none of them is a timing row
+        or a tier budget.</strong>
+      </p>
+      <p>
+        The figure this change does own, measured rather than estimated:
+        <strong>the transfer vitest suite runs 5 files / 76 tests in
+        373&ndash;375&nbsp;ms reported (0.79&ndash;0.83&nbsp;s wall) over three
+        consecutive runs on 2026-10-04</strong>, host
+        <strong>Kamils-Mac-Studio</strong> (Apple M3 Ultra, 28 logical cores).
+        A developer workstation, <strong>not CI</strong> &mdash; per &sect;4 a
+        figure without a host is meaningless, so do not plan CI around it.
+      </p>
+      <p>
+        <strong>NOT COVERED, stated rather than skipped.</strong> These cells
+        assert the <em>published document</em>, not a live response: with no
+        server, database or network in the run, <strong>nothing here re-measures
+        that the handler still answers that shape at runtime.</strong> The
+        evidence that it does is the handler source and the 2026-09-29
+        Schemathesis finding, not this suite. No live sweep was run (skill
+        &sect;5f), so no ticket state moves on its account.
+        <code>tsc -p .</code> in <code>services/transfer</code> is rc 0 at base
+        and at head, but it <strong>does not typecheck this file</strong>:
+        <code>tsconfig.json:27</code> lists <code>src/__tests__</code> under
+        <code>exclude</code>, and <code>--listFilesOnly</code> puts 475 files in
+        the program of which <strong>0</strong> are under <code>__tests__</code>.
+        That is pre-existing and applies to all five test files in this suite.
+        The sweep covers 28 pairs: #1367 owns the referral lookup pair and #1375 owns the delegation GET pair, so 26 remain unowned.
+      </p>
+    </div>
+
+    <script>
+      mermaid.initialize({
+        startOnLoad: true,
+        securityLevel: "strict",
+        theme: "default",
+      });
+    </script>
+  
+    <h2>11. RFC 3161 Timestamp Token Verification (KS-1404)</h2>
+    <p>
+      <strong>What changed.</strong> <code>services/timestamping</code> accepted an
+      <strong>unsigned</strong> timestamp token as valid. The old
+      <code>verifyRealToken</code> walked the ASN.1 tree and returned
+      <code>valid: true</code> whenever <em>any</em> OCTET STRING equalled the expected
+      document digest &mdash; no signature check, no certificate chain, no TSTInfo parse, no
+      algorithm-OID check. A second path accepted a JSON <code>{"hash":"&hellip;"}</code>
+      token outright. Both are closed.
+    </p>
+    <h3>11.1 The verification chain, in order</h3>
+    <p>
+      <strong>KS-1404 ITEM 2 (Seat D 5th):</strong> the verifier binds the signer certificate via
+      <code>signingCertificate(V2)</code> and builds the chain from the token's own certificates to
+      a pinned root. The signer is selected by an <strong>exact</strong>
+      <code>SignerIdentifier</code> match &mdash; issuer+serial or <code>subjectKeyIdentifier</code>
+      &mdash; and the previous <code>?? certs[0]</code> fallback is gone, so a token whose
+      <code>SignerInfo</code> names nothing it carries is refused rather than checked against
+      whichever certificate happened to be first. The token's other certificates are passed to the
+      chain engine as <strong>untrusted intermediates</strong>; <code>trustedCerts</code> remains the
+      configured anchors alone, so carrying an intermediate can never create trust.
+      <code>rsaEncryption</code> (digest taken from <code>digestAlgorithm</code>) and
+      <code>RSASSA-PSS</code> (parameters <strong>parsed, never defaulted</strong>) are accepted,
+      because those are the algorithms the pinned providers measurably use.
+    </p>
+    <div class="note">
+      <strong>A defect of this PR, found and fixed inside it, and the cell that caught it.</strong>
+      The first version of the chain fix passed <code>certs: [signer, ...intermediates]</code>.
+      pkijs treats the <strong>LAST</strong> element of <code>certs</code> as the end-entity &mdash;
+      its own documented example is <code>certs: [rootCa, intermediateCa, leafCert]</code> &mdash; so
+      an <em>intermediate</em> was validated as the leaf, and a token whose signer chained to nothing
+      was ACCEPTED whenever some certificate it carried chained to an anchor. The order is now
+      <code>[...intermediates, signer]</code>. <strong>CHAIN-3 is the only cell that fails on the
+      reversed order, and it stays in the suite for that reason.</strong>
+    </div>
+    <ol>
+      <li><strong>Strict DER</strong> &mdash; definite, minimal lengths, nothing trailing.
+        BER indefinite-length encoding is refused: a genuine token re-wrapped as
+        <code>30 80 &hellip; 00 00</code> was accepted before this change.</li>
+      <li><strong>ContentInfo</strong> is <code>id-signedData</code>; SignedData's
+        <code>eContentType</code> is <code>id-ct-TSTInfo</code>.</li>
+      <li><strong>TSTInfo is parsed</strong>, and the message imprint is read from
+        <code>messageImprint.hashedMessage</code> &mdash; never searched for in the tree.</li>
+      <li><strong>Exactly one SignerInfo</strong>, whose signed attributes carry
+        <code>contentType = id-ct-TSTInfo</code> and
+        <code>messageDigest = digest(eContent)</code>.</li>
+      <li><strong>The signature</strong> over the signed attributes re-encoded as
+        <code>SET OF</code>, against the signer certificate's public key.</li>
+      <li><strong>The signer certificate</strong> carries EKU
+        <code>id-kp-timeStamping</code>, is valid at <code>genTime</code>, and
+        <strong>chains to a configured trust anchor</strong>.</li>
+    </ol>
+    <h3>11.2 Fail-closed, and what that means operationally</h3>
+    <p>
+      Trust anchors come from <code>TSA_TRUST_ANCHORS_PEM</code> (PEM text, or a path to a
+      bundle), committed as config. <strong>Unset or empty means every real DER token verifies
+      <code>false</code></strong> with reason <code>no trust anchor configured</code>. Stored
+      tokens continue to verify through the database-row branch (same hash and byte-identical
+      proof), which this change does not touch. Compose and per-environment wiring is a
+      separate step, so <strong>which environments have an anchor in effect is not covered
+      here</strong>.
+    </p>
+    <h3>11.3 Test surface and timings</h3>
+    <p>
+      New unit file <code>src/__tests__/ks1404-verify-rfc3161.test.ts</code>, with a test PKI
+      generated <strong>in-process at run time</strong> by pkijs
+      (<code>src/__tests__/ks1404-pki.ts</code>). <strong>No private key is committed</strong>,
+      and no cell ever calls a real TSA.
+    </p>
+    <table>
+      <tr><th>Figure</th><th>Value</th></tr>
+      <tr><td>Cells in the KS-1404 file</td><td><strong>36</strong>, all passing at head, 0 skipped (was 27 before ITEM 2 added nine)</td></tr>
+      <tr><td>ITEM 2 cells (KS-1404, added by Seat D 5th)</td><td><strong>ESS-1</strong> no <code>signingCertificate(V2)</code> &rarr; refused; <strong>ESS-2</strong> a V2 hashing a different certificate &rarr; refused; <strong>ESS-3</strong> a correct V2 and the SHA-1 v1 form &rarr; accepted, and carrying BOTH forms &rarr; refused; <strong>CHAIN-1</strong> root &rarr; intermediate &rarr; signer with the intermediate in the token and the root pinned &rarr; accepted; <strong>CHAIN-2</strong> the same shape under an unpinned root &rarr; refused; <strong>CHAIN-3</strong> a pinned root with an intermediate it did not sign &rarr; refused; <strong>ALG-RSA</strong> a bare <code>rsaEncryption</code> SignerInfo &rarr; accepted when valid, refused when flipped; <strong>ALG-PSS</strong> a PSS intermediate under a PSS root &rarr; accepted when valid, refused when flipped; <strong>SID-1</strong> a <code>SignerIdentifier</code> matching no carried certificate &rarr; refused. <strong>ALG-ECDSA was dropped</strong>: zero ECDSA was measured on either pinned provider's published certificates, so the cell would have had no subject.</td></tr>
+      <tr><td>ITEM 2 red-first, measured at <code>b60ab7b6afbf</code></td><td><strong>7 of the 9 RED</strong>, every one an <code>AssertionError</code>, 0 load or import failures, and the file LOADED in the same run (29 of 36 passing), so this is not a load failure reddening everything. Red: ESS-1, ESS-2, ESS-3, CHAIN-1, ALG-RSA, ALG-PSS, SID-1. <strong>CHAIN-2 and CHAIN-3 are green at base and at head</strong> &mdash; they are regression guards, <em>not</em> red-first cells, and are stated as such: CHAIN-2 proves that passing the token's own intermediates did not create trust, and CHAIN-3 is the arm that caught this PR's own leaf-order defect. Measured by reverting <code>rfc3161-verify.ts</code> alone to <code>b60ab7b6afbf</code> and restoring it byte-identically afterwards (<code>cmp</code> equal).</td></tr>
+      <tr><td>Committed trust anchors</td><td><code>services/timestamping/config/tsa-trust-anchors.crt</code> (<code>.crt</code> because push preflight leg 9 refuses a tracked <code>*.pem</code> as a credential &mdash; KS-646 &mdash; and these are public CA roots exactly as the CAs publish them; the bytes are unchanged PEM text) pins <strong>D-TRUST Root CA 1 2017</strong> and <strong>DigiCert Assured ID Root CA</strong>, with each source URL, SHA-256 fingerprint, read time and second-source status in <code>config/README.md</code>. <strong>Cell 17</strong> asserts the file parses, through the product's own <code>parseTrustAnchors</code>, to exactly those two certificates at exactly those digests, so the README's figures are checked by the suite; <strong>cell 17b</strong> corrupts one base64 character and requires the count to drop. The verifier reads the bundle only when <code>TSA_TRUST_ANCHORS_PEM</code> points at it &mdash; <strong>nothing is wired into any environment by this change</strong>, and unset still fails closed.</td></tr>
+      <tr><td>Route-level cells (KS-1404, added by Seat D 3rd)</td><td><strong>cell 14</strong> drives <code>POST /api/timestamps/verify</code> with an unsigned DER token and pins the published response shape; <strong>cell 13</strong> proves a <em>stored</em> mock token still verifies through the DB-row branch; <strong>cell 13b</strong> is cell 13's mutation arm &mdash; the same row under a different <code>proof</code> does not verify</td></tr>
+      <tr><td>Red-first set measured at base <code>e6daa806e79a</code></td><td><strong>6 red, 7 pass, 12 skipped</strong> of 25. Red: cells 1, 3, 11 <code>indefiniteLength</code>, 12, and the two route cells 14 and 13b. The 12 skips are a <strong>failed <code>beforeAll</code></strong> &mdash; the base install has no <code>pkijs</code>, so <code>./ks1404-pki</code> cannot resolve &mdash; <em>not</em> 12 passes. Earlier figure 4 red / 6 pass was the same measurement before the route cells existed. <strong>Cells 17 and 17b are NOT in that measurement</strong>: it was taken before they were written, and the scratch base worktree has since been removed. They are green at head ONLY, by construction rather than by a re-run &mdash; both <code>config/tsa-trust-anchors.crt</code> and the exported <code>parseTrustAnchors</code> are new in this PR, so at the base commit neither exists. That is a READING, not a measurement, and it is stated as one.</td></tr>
+      <tr><td>Test PKI generation</td><td>The in-process PKI now issues <strong>12</strong> certificates, <strong>three of them RSA-PSS</strong> (a PSS root, a PSS intermediate and a PSS TSA, the shape the pinned D-TRUST root produces). The earlier <strong>~196 ms</strong> figure was for the 5-certificate version and is <strong>NOT re-measured here</strong>: it cannot be isolated from the suite's <code>beforeAll</code> without adding an instrument, so the suite wall clock below is given instead. Stated as superseded rather than carried forward as if it still applied.</td></tr>
+      <tr><td>timestamping unit suite, before</td><td><strong>5 files / 44 tests</strong>, rc 0</td></tr>
+      <tr><td>timestamping unit suite, after</td><td><strong>6 files / 80 tests</strong>, rc 0, 0 skipped, wall clock <strong>956 ms &ndash; 1.07 s</strong> over 2 consecutive runs, measured <strong>2026-10-04 UTC</strong> on host <strong>Kamils-Mac-Studio</strong> (Apple silicon, node v24.7.0, npm 11.5.1). The KS-1404 file alone: <strong>36 tests, rc 0, 855 ms &ndash; 1.01 s</strong> over 2 consecutive runs on the same host and date. The pre-ITEM-2 figures were 6 files / 71 tests and 27 tests; both were re-measured, not adjusted by arithmetic.</td></tr>
+      <tr><td><code>tsc</code>, and a gap it does not cover</td><td>Project config, named binary <code>Blockchain/Dev/node_modules/.bin/tsc</code> (Version 5.9.3): <strong>rc 0</strong>, with a positive control &mdash; a planted one-line type error gives <strong>rc 2</strong>, <code>error TS2322</code> &mdash; removed afterwards with no trace in <code>status --porcelain</code>. <strong>But <code>services/timestamping/tsconfig.json:18</code> excludes <code>src/__tests__</code>, and <code>--listFilesOnly</code> puts 0 test files in the program</strong>, so that rc 0 vouches for product code only. Forcing them in with a one-off config whose <code>exclude</code> is emptied (<code>extends</code> inherits the exclusion) puts 7 test files in the program and reports <strong>33 type errors at the base and 48 at this head</strong>. Pre-existing and latent; fixing the test typing is out of this PR's scope and is named in NOT COVERED.</td></tr>
+    </table>
+    <p>
+      <strong>Dependency change in the same commit:</strong> <code>node-forge</code> and
+      <code>@types/node-forge</code> are removed from this service (advisory
+      <code>GHSA-86w9-cpqp-85rv</code> has no upstream fix), replaced by
+      <code>pkijs 3.4.1</code> + <code>asn1js 3.0.10</code> for verification and a local
+      97-line DER writer (<code>src/tsa/der.ts</code>) for request building. The request bytes
+      are <strong>byte-identical</strong> to the previous output, pinned by a cell.
+    </p>
+    <p>
+      <strong>Not covered (ITEM 2 additions):</strong> the <strong>root-to-TSA binding</strong> and
+      the <code>signatureAlgorithm</code> a real token's <code>SignerInfo</code> carries &mdash; both
+      need a call to a live TSA, which is forbidden for this change, so the algorithm table was built
+      from <strong>published certificates only</strong>. <strong>DigiCert's current-generation
+      timestamping CA</strong> (<code>DigiCert Trusted G4 RSA4096 SHA256 TimeStamping CA</code>)
+      chains to <code>DigiCert Trusted Root G4</code>, which is <strong>not pinned</strong>; only the
+      older <code>DigiCert SHA2 Assured ID Timestamping CA</code> chains to the root this change pins.
+      If an environment's <code>TSA_URL</code> is DigiCert and it issues under G4, genuine tokens stay
+      refused &mdash; fail-closed, but non-functional for that provider. Which hierarchy
+      <code>timestamp.digicert.com</code> issues under today is <strong>unmeasured</strong>, and so is
+      which environment uses which TSA: that is the half of the governing ruling not yet done.
+      <strong>ALG-ECDSA</strong> is not covered either, for the stated reason that no pinned provider
+      measurably uses ECDSA. Test-file type checking is not covered (see the <code>tsc</code> row).
+    </p>
+    <p>
+      <strong>Not covered:</strong> a live sweep on a rebuilt stack (skill &sect;5f) &mdash; this
+      change was not exercised against a running service, so KS-1404 stays In Progress after
+      merge. Also out: CRL/OCSP revocation, a TSA policy-OID allowlist,
+      <code>accuracy</code>/<code>ordering</code>, create-side verify-on-receipt and the nonce
+      comparison, and the <code>opentimestamps</code>/<code>blockchain</code> JSON proof paths,
+      which are forgeable in the same way and are not RFC 3161.
+    </p>
+    <h2>12. GET /api/anchors/:id reports blockNumber as a number (KS-1333)</h2>
+    <p>
+      <strong>What this pins.</strong> <code>services/originate/src/services/anchorStateSync.ts</code>
+      has <strong>four</strong> writers that persist <code>blockHeight: anchor.blockNumber || 0</code>
+      without shaping the value, and <code>anchor.blockNumber</code> arrives from
+      <code>GET /api/anchors/:id</code>. KS-1333's first step is to <em>measure</em> whether that
+      route can hand them a raw <code>pg</code> <code>int8</code> <strong>string</strong>. Measured at
+      source: it cannot. <code>rowToAnchor</code> converts <code>block_number</code> through
+      <code>Number()</code> (<code>services/anchoring/src/index.ts:1317</code>), and the handler
+      answers the mapped <code>anchor.blockNumber || null</code> rather than the raw row. So the
+      route answers a number or <code>null</code>, and the ticket's own rule applies &mdash;
+      <em>a recorded reason and a cell pinning it, not a coercion.</em> This block is that cell.
+    </p>
+    <h3>12.1 The cells, and why the guard is source-text</h3>
+    <p>
+      Three cells in
+      <code>services/anchoring/src/__tests__/ks1333-get-by-id-blocknumber-is-a-number.test.ts</code>.
+      <code>index.ts</code> calls <code>app.listen</code> at import, so no test imports it; the
+      guard therefore reads <code>index.ts</code> as <strong>text</strong> over the two lines that
+      make the answer a number. <strong>B1</strong> pins the <code>Number()</code> conversion in
+      <code>rowToAnchor</code>. <strong>C1</strong> pins that the handler answers the mapped value
+      and never <code>row.block_number</code>. <strong>C2</strong> pins that the by-id lookup maps
+      its row through <code>rowToAnchor</code> at all &mdash; without C2, B1 could pass while the
+      handler read a different row path entirely.
+    </p>
+    <h3>12.2 Running it</h3>
+    <pre><code>cd Blockchain/Dev/services/anchoring
+npx vitest run src/__tests__/ks1333-get-by-id-blocknumber-is-a-number.test.ts   # 3 cells
+npx vitest run                                                                 # 357 tests</code></pre>
+    <h3>12.3 Figures, measured</h3>
+    <p>
+      The anchoring suite goes <strong>354 &rarr; 357 tests</strong>, passing
+      <strong>353 &rarr; 356</strong>, with <strong>no new red</strong>. One cell is red at base and
+      at head &mdash; <code>threadTokenMint</code>'s emulator round-trip, which is
+      <strong>KS 562</strong> and pre-existing, not this change. The three new cells run in
+      <strong>104&ndash;135 ms</strong> reported (0.36&ndash;0.55 s wall) over three consecutive
+      runs, 2026-10-05, host Kamil's Mac Studio (2), node v24.7.0.
+    </p>
+    <p>
+      <strong>Red-first, by tamper.</strong> The red is demonstrated rather than asserted:
+      removing <code>Number(&hellip;)</code> from <code>index.ts:1317</code> turns B1 red with
+      <code>expected [ true, false ] to deeply equal [ true, true ]</code> while C1 and C2 stay
+      green, and all three cells still <em>run</em> &mdash; so the tamper is inert to loading, not a
+      load failure masquerading as a red. <code>index.ts</code> was restored by content and
+      re-asserted by <code>sha256</code> (<code>31422a6ab3c74804</code>&hellip; both sides) with the
+      tamper anchor proved unique first.
+    </p>
+    <h3>12.4 Timing</h3>
+    <p>
+      <strong>No stated timing covers the anchoring suite.</strong> Measured at the base SHA
+      <code>3ce8cd4026a6</code> in both platform-k docs: <strong>0</strong> stated timings name the
+      anchoring suite, against a must-hit control of <strong>23</strong> (flow) and
+      <strong>35</strong> (cheat sheet) duration figures present overall &mdash; so the zero is a
+      measurement and not a blind grep. This change therefore touches no stated timing row; the
+      figure above is this block's own, not an amendment to anyone else's.
+    </p>
+    <p>
+      <strong>Not covered.</strong> A live sweep (skill &sect;5f) &mdash; nothing here was exercised
+      against a running service, so KS-1333 does not move to Done on this change's account. The
+      guard is <strong>source-text</strong>, which means it pins the text of two lines: commenting
+      those lines out would leave the strings present and the cells green. Closing that properly
+      needs <code>index.ts</code> to be loadable without listening, which is out of this scope.
+      Also out, and open on the ticket for a human: whether
+      <code>anchorStateSync</code>'s four writers should use <code>??</code> instead of
+      <code>|| 0</code>, which is a behaviour question about the value <code>0</code> and not about
+      the shape this block pins.
+    </p>
+    <h2>13. A failed webhooks list query answers 500, not 200 with an empty list (KS-1345)</h2>
+    <p>
+      <strong>What this pins.</strong> <code>GET /api/webhooks</code> chained
+      <code>.catch()</code> onto its list query and returned
+      <code>200 { success: true, webhooks: [] }</code> on failure, so a database error was
+      indistinguishable from "this organisation has no webhooks" &mdash; to the client, and on
+      this route to the log as well. That <code>.catch</code> is gone. A rejected query now
+      reaches the route's existing <code>fail500</code>: a <strong>constant</strong> 500 body,
+      the error logged once server-side, never a 200 with an empty list.
+    </p>
+    <p>
+      <strong>Numbering.</strong> This block is <strong>13</strong> and the document has no
+      <strong>12</strong> yet. That is deliberate, not a gap to be closed: block numbers belong to
+      <em>tickets</em>, not to merge order. 12 is reserved for KS-1333, which is raised separately;
+      whichever lands first, each block sits in number order and nothing is renumbered.
+    </p>
+    <h3>13.1 The cells</h3>
+    <p>
+      Nine cells in
+      <code>services/originate/src/__tests__/ks1341a-webhooks-500-never-answers-err-message.test.ts</code>.
+      The change <strong>flips an existing control into a red cell</strong>: what was
+      <code>control KS 1341 A0</code>, pinning the swallow as pre-existing behaviour, is now
+      <code>RED KS-1345 A0</code>, asserting a rejected list query reaches the catch with a
+      constant 500 logged once. A new <code>control KS-1345 C</code> pins that a query which
+      <em>resolves</em> still answers 200 with its rows and logs nothing &mdash; without it, A0
+      would be satisfied by the route answering 500 unconditionally.
+    </p>
+    <h3>13.2 Running it</h3>
+    <pre><code>cd Blockchain/Dev/services/originate
+npx jest src/__tests__/ks1341a-webhooks-500-never-answers-err-message.test.ts   # 9 cells
+npx jest                                                                       # 1063 tests</code></pre>
+    <h3>13.3 Figures, measured</h3>
+    <p>
+      The <code>services/originate</code> suite goes <strong>1062 &rarr; 1063 tests</strong>, 0
+      failed at both ends, <strong>0 new reds</strong>, 90 suites. The nine cells run in
+      <strong>1.169&ndash;2.537 s</strong> reported (1.47&ndash;3.26 s wall) over three
+      consecutive runs, 2026-10-05, host Kamil's Mac Studio (2), node v24.7.0, jest 29.7.0.
+    </p>
+    <p>
+      <strong>Red-first, by assertion.</strong> With the test section applied and the product
+      change withheld, the file runs <strong>1 failed / 9</strong> and the red is
+      <code>RED KS-1345 A0</code> failing on its own assertion &mdash;
+      <code>status: 500</code> expected, <code>200</code> received, which is the swallow itself.
+      The four load-failure signatures (<code>Cannot find module</code>,
+      <code>SyntaxError</code>, <code>Failed to load</code>, <code>Transform failed</code>) are
+      each 0 in that run, so it is an assertion red and not a file that failed to load. Applying
+      the product section takes it to <strong>9/9</strong>.
+    </p>
+    <p>
+      <strong>Applied == held, proved on files.</strong> The held patch carries no-op blank
+      <code>-</code>/<code>+</code> pairs, so <code>git</code> regenerates it as
+      <code>webhooks.ts</code> <strong>+4/-2</strong> and the test <strong>+22/-9</strong> where
+      the source patch declares +5/-3 and +23/-10. The two are therefore not
+      <code>cmp</code>-equal as <em>diffs</em>, and the proof is on the <em>files</em>: an
+      independent strict apply of the same sections onto the same base blobs, in a separate
+      repository, produced byte-identical results (<code>sha256</code>
+      <code>2f8828ba0246</code>&hellip; and <code>bca6c7da5118</code>&hellip; on both sides), with a
+      firing control showing both differ from the base blob.
+    </p>
+    <p>
+      <strong>Type checking.</strong> <code>tsc</code> 5.9.3 by named binary,
+      <code>-p services/originate --noEmit</code>, is rc 0 at base and rc 0 at head, with a
+      positive control (the same binary on a one-line type error) returning rc 2 and TS2322 &mdash;
+      so the rc 0 is a result, not a binary that does nothing. Note
+      <code>tsconfig.json:19</code> excludes <code>src/__tests__</code> and
+      <code>src/**/*.test.ts</code>, so <code>tsc</code> never typechecks this test file.
+    </p>
+    <h3>13.4 Timing</h3>
+    <p>
+      <strong>No stated timing covers this suite.</strong> Measured at the base SHA
+      <code>3ce8cd4026a6</code> in both platform-k docs: <code>services/originate</code>
+      <strong>0</strong> and <code>jest</code> <strong>0</strong> occurrences, against a must-hit
+      control of <code>auth</code> at <strong>70</strong> (flow) and <strong>69</strong> (cheat
+      sheet). So the zeroes are measurements, not a blind grep, and no stated timing row is
+      amended by this change.
+    </p>
+    <p>
+      <strong>Behaviour change, stated plainly.</strong> A rejected list query now answers a
+      constant 500 where it previously answered <code>200 []</code>. A second case follows from
+      the same removal: a non-UUID <code>userId</code> makes Postgres raise 22P02 on the
+      <code>::uuid</code> cast, which also used to be swallowed into <code>200 []</code> and now
+      answers 500. <strong>Which principals can carry a non-UUID organisation id is
+      UNMEASURED</strong> here, and is the part of this change most worth a second look.
+    </p>
+    <p>
+      <strong>Not covered.</strong> A live sweep (skill &sect;5f) &mdash; nothing was exercised
+      against a running service, so KS-1345 does not move to Done on this change's account. The
+      <strong>deliveries half</strong> of the ticket (<code>webhooks.ts:412</code>) is untouched,
+      as is <code>dispatchEvent</code> s <code>.catch</code> at <code>:513</code>; both swallow in
+      the same shape and stay open on the ticket.
+    </p>
+    <h2>14. Both observability env examples point the nginx status URI at :80 (KS-1388)</h2>
+    <p>
+      <strong>What this pins.</strong> Both commented examples of
+      <code>SECUURA_NGINX_STATUS_URI</code> &mdash; in <code>observability/.env.example</code> and
+      <code>observability/config/alerting.env.example</code> &mdash; suggested
+      <code>http://secuura-nginx-gateway:6882/stub_status</code>. <strong>6882 is the gateway's
+      published HOST port</strong> and is not reachable from the exporter's network; the
+      in-network port is <strong>80</strong>, which is what
+      <code>observability/docker-compose.yml:331</code> already defaults to. Both examples now say
+      <code>:80</code>, so a reader who uncomments either line gets a URI that resolves on the
+      compose network instead of one that cannot.
+    </p>
+    <p>
+      <strong>Scope.</strong> This is KS-1388 <strong>&sect;1 only</strong>, and the ticket is
+      <em>narrowing</em>, not closing. <code>observability/</code> reaches the platform by slot 1's
+      container names by a <strong>documented decision that stands</strong>; &sect;2 and &sect;3 of
+      the ticket record what would have to change to make the stack slot-agnostic, and neither is
+      touched here.
+    </p>
+    <p>
+      <strong>Both files are at the repository ROOT</strong>, not under <code>Blockchain/Dev/</code>.
+      A reader looking for <code>Blockchain/Dev/observability/</code> will find nothing.
+    </p>
+    <h3>14.1 The cells</h3>
+    <p>
+      Two new cells in the existing KS-971 shell suite
+      <code>Blockchain/Dev/scripts/__tests__/prometheus_targets.test.sh</code>, one per env
+      example. Each pins the commented URI's port by source text. The suite's four pre-existing
+      cells &mdash; which compare compose service ports against the scrape targets &mdash; are
+      unchanged.
+    </p>
+    <h3>14.2 Running it</h3>
+    <pre><code>bash Blockchain/Dev/scripts/__tests__/prometheus_targets.test.sh   # 6 cells
+bash Blockchain/Dev/scripts/run-shell-suites.sh                  # 67 suites</code></pre>
+    <h3>14.3 Figures, measured</h3>
+    <p>
+      The KS-971 suite goes <strong>4 &rarr; 6 cells</strong>, 0 failed at both ends. The whole
+      shell-suite set reads <strong>67 passed, 0 failed, 0 skipped (of 67)</strong> both before and
+      after &mdash; the <em>same suite count</em>, because these are two new cells in an existing
+      suite and not a new suite file. Measured <strong>2026-10-05</strong>, host
+      <strong>Kamil's Mac Studio (2)</strong>, bash 3.2.57.
+    </p>
+    <p>
+      <strong>Red-first, by assertion.</strong> With both test sections applied and neither product
+      hunk, the suite runs <strong>rc 1, 4 passed / 2 failed</strong> &mdash; one failure per env
+      example, each printing its own <code>want</code>/<code>got</code> pair with
+      <code>:80</code> against <code>:6882</code>. That is an assertion red: <code>bash -n</code>
+      on the modified suite is rc 0, so the file parses and the reds are not a load failure.
+    </p>
+    <p>
+      <strong>A cross-control per cell, which is the part worth reading.</strong> Each product hunk
+      was applied <em>alone</em> and the suite re-run. The <code>.env.example</code> hunk alone
+      leaves <strong>5 passed / 1 failed</strong> and the surviving failure names
+      <code>alerting.env.example</code>; the <code>alerting.env.example</code> hunk alone leaves
+      <strong>5 passed / 1 failed</strong> naming <code>.env.example</code>. So each cell is keyed
+      to its own file and neither cell can be satisfied by the other file's fix. Both hunks
+      together: <strong>rc 0, 6 passed, 0 failed</strong>.
+    </p>
+    <p>
+      <strong>Applied == held, proved on files.</strong> The two held carves were applied
+      independently, in the same order, onto the same base blobs with a separate index in a
+      separate repository (tree <code>04d226e93b48</code>), and all three resulting files are
+      <code>cmp</code>-equal to this worktree's. A firing control shows each differs from its base
+      blob, so the equality is a measurement. The <em>diffs</em> are not comparable: the suite
+      file's change is the union of two carves' hunks, so no single held diff can
+      <code>cmp</code>-equal it.
+    </p>
+    <p>
+      <strong>Exec bit.</strong> <code>prometheus_targets.test.sh</code> is <code>100755</code> in
+      the index, and <code>git apply</code> left it <strong>non-executable on disk</strong> under
+      this repository's <code>filemode=false</code>. It was restored with <code>chmod +x</code> on
+      that one file &mdash; never <code>checkout-index -a</code> &mdash; and re-asserted
+      executable, as was <code>.githooks/pre-push</code>.
+    </p>
+    <h3>14.4 Timing</h3>
+    <p>
+      <strong>No stated timing covers this suite.</strong> Instrument, printed so it can be re-run:
+      <code>/usr/bin/grep -c -i -E</code> over both platform-k docs at the base SHA
+      <code>f01c1da5717f</code>. <code>run-shell-suites</code> <strong>0</strong> flow /
+      <strong>0</strong> cheat; <code>shell suite</code> <strong>0</strong> / <strong>0</strong>;
+      <code>prometheus_targets</code> <strong>0</strong> flow / <strong>1</strong> cheat, and that
+      one hit is prose inside the KS-971 block (cheat <code>:2695</code>), not a timing row.
+      Must-hit control <code>auth</code>: <strong>71</strong> flow / <strong>70</strong> cheat, so
+      the zeroes are measurements and not a blind grep. No stated timing row is amended.
+    </p>
+    <p>
+      <strong>Not covered.</strong> A live sweep (skill &sect;5f) &mdash; nothing was exercised
+      against a running stack, so KS-1388 does not move to Done on this change's account, and the
+      observability stack was never started. KS-1388 &sect;2 and &sect;3 are untouched. Whether any
+      deployment actually consumes either commented line is <strong>UNMEASURED</strong>: both are
+      comments, and nothing here proves a reader ever uncommented one.
+    </p>
+  </body>
+</html>

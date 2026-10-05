@@ -1,0 +1,42 @@
+(!) Your Vite config uses features that are unsupported by `configLoader: 'native'`, which is planned to become the default in a future major version of Vite:
+  - ESM syntax in a file loaded as CommonJS (vitest.config.ts:1:1). Use a `.mjs` extension or set `"type": "module"` in the closest package.json
+Set `VITE_CONFIG_NATIVE_IGNORE_WARNING=true` to suppress this warning.
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/__tests__/ks1404-wiring.test.ts > KS-1404 — the trust anchor reaches the running service > cell A [RED at base]: compose passes TSA_TRUST_ANCHORS_PEM to the timestamping container
+AssertionError: the timestamping environment list has no TSA_TRUST_ANCHORS_PEM entry. It currently passes: TZ, NODE_ENV, LOG_LEVEL, PORT, DATABASE_URL, PLATFORM_DATABASE_URL, MULTI_TENANCY_ENABLED, REDIS_URL, JWT_PUBLIC_KEY, PII_ENCRYPTION_KEY, PII_ENCRYPTION_KEY_VERSION, PII_LOOKUP_HMAC_KEY, TSA_URL, TSA_AUTH_KEY: expected undefined to be defined
+ ❯ src/__tests__/ks1404-wiring.test.ts:110:7
+    108|       `the timestamping environment list has no TSA_TRUST_ANCHORS_PEM …
+    109|         `It currently passes: ${[...env.keys()].join(', ')}`,
+    110|     ).toBeDefined();
+       |       ^
+    111|     const dflt = composeDefault(raw as string);
+    112|     expect(dflt, `TSA_TRUST_ANCHORS_PEM must carry a \${VAR:-default};…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/3]⎯
+
+ FAIL  src/__tests__/ks1404-wiring.test.ts > KS-1404 — the trust anchor reaches the running service > cell B [RED at base]: the Dockerfile runtime stage ships config/ BEFORE the chmod
+AssertionError: the runtime stage never copies config/. At base it copies only /app/dist, which is why /app/config does not exist in the running image on either box.: expected -1 to be greater than -1
+ ❯ src/__tests__/ks1404-wiring.test.ts:131:7
+    129|       'the runtime stage never copies config/. At base it copies only …
+    130|         '/app/config does not exist in the running image on either box…
+    131|     ).toBeGreaterThan(-1);
+       |       ^
+    132|
+    133|     const chmodAt = runtime.findIndex((l) => /chmod -R a\+rX/.test(l));
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/3]⎯
+
+ FAIL  src/__tests__/ks1404-wiring.test.ts > KS-1404 — the trust anchor reaches the running service > cell C1 [RED at base]: the path compose names exists in the tree and is the D-Trust root alone
+AssertionError: cell A must pass before this one can mean anything: expected undefined to be defined
+ ❯ src/__tests__/ks1404-wiring.test.ts:143:71
+    141|   it('cell C1 [RED at base]: the path compose names exists in the tree…
+    142|     const raw = env.get('TSA_TRUST_ANCHORS_PEM');
+    143|     expect(raw, 'cell A must pass before this one can mean anything').…
+       |                                                                       ^
+    144|     const imagePath = composeDefault(raw as string) as string;
+    145|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/3]⎯
+

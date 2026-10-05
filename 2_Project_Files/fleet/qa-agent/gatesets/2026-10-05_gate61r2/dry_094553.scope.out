@@ -1,0 +1,30 @@
+scope 32e8459bc0f5 over 7eccb131f2d6 in /Volumes/DevMASTER/!CODING/Secuura/Blockchain/2_Project_Files
+PASS S1 ONE parent == round-1 head, fast-forward | parents ['7eccb131f2d6'] (want [7eccb131f2d6]) | ancestor True
+PASS S2 tree == claimed tree (control: parent tree differs) | H tree 8ba2c0c8e9d1 | claimed 8ba2c0c8e9d1 | parent tree b393b20f29b4
+PASS S3 numstat P..H == EXACTLY the 4 declared paths and +/- | got {'049_ks1401_tenant_isolation_after_039.sql': [22, 0], 'ks1401_049_tenant_isolation_after_039.test.sh': [60, 0], 'API_Security_Functional_Testing_Architecture_Flow_Diagrams.html': [22, 0], 'QA_Tool_Cheat_Sheet_Secuura_API_Testing.html': [23, 4]}
+PASS S4 ls-tree modes | got {'049_ks1401_tenant_isolation_after_039.sql': '100644', 'ks1401_049_tenant_isolation_after_039.test.sh': '100755', 'API_Security_Functional_Testing_Architecture_Flow_Diagrams.html': '100644', 'QA_Tool_Cheat_Sheet_Secuura_API_Testing.html': '100644'}
+PASS S5 trailers raw 1 byte (control 55) | head 1 | control bf277eead268 55
+PASS S6a subject <= 92, no (# | 83 chars: "KS-1401: 049's backfill takes the platform bypass so a non-bypass owner fills NULLs"
+PASS S6b hyphenated keys in the message == {KS-1401} | keys ['KS-1401']
+PASS S6c STRICT closing refs in the message == 0 (control fires) | hits NONE | control ['Closes KS-1401']
+INFO commit message WIDE predicate (closing word within 120 chars of a key): [' owner fills NULLs  Fixes gate61 finding N-1383-1 on #1']
+PASS S7a 049 one pure insertion | opcodes [('insert', 101, 101, 101, 123)]
+PASS S7b the insert is EXACTLY one live statement: the bypass, is_local true | 1 live line(s) inserted at old :102: ["PERFORM set_config('app.tenant_scope_bypass', 'platform_admin', true);"]
+PASS S7c H minus the insert == P byte-for-byte | inserted 22 line(s) (21 comment/blank)
+PASS S7d the bypass is the FIRST live statement after BEGIN; lock_timeout next | BEGIN at :101 | first "PERFORM set_config('app.tenant_scope_bypass', 'platform_admin', true);" | second "PERFORM set_config('lock_timeout', '5s', true);"
+PASS S7e no session-level bypass anywhere live | session-level hits NONE
+PASS S7f live tenant_scope_bypass mentions: old + 1 == new | old 2 (the policy carve-outs) -> new 3
+PASS S7g sha256(049 at H) == kit | got c5dc307fbbdeca0d want c5dc307fbbdeca0d
+PASS S8a API_Security_Functio block 22. and ONE close tag on both sides | old span (2066, 2166) close [2166] | new span (2066, 2188) close [2188]
+PASS S8b API_Security_Functio every changed line inside block 22. | 1 hunk(s); outside block 22.: NONE
+PASS S8c API_Security_Functio close tag unchanged | old '</body>' -> new '</body>'
+PASS S8d API_Security_Functio <h2>/<h3> list unchanged | 23 -> 23 headings; first difference NONE
+PASS S8a QA_Tool_Cheat_Sheet_ block 22. and ONE close tag on both sides | old span (3811, 3850) close [3850] | new span (3811, 3869) close [3869]
+PASS S8b QA_Tool_Cheat_Sheet_ every changed line inside block 22. | 3 hunk(s); outside block 22.: NONE
+PASS S8c QA_Tool_Cheat_Sheet_ close tag unchanged | old '</body>' -> new '</body>'
+PASS S8d QA_Tool_Cheat_Sheet_ <h2>/<h3> list unchanged | 7 -> 7 headings; first difference NONE
+PASS S9a suite: pure insertion(s) only | opcodes ['insert']
+PASS S9b suite cells 11 -> 12 | cell lines 11 -> 12
+PASS S9c the new cell names N-1383-1 and the override exists | new cell(s) ['cell "N-1383-1: 049 run as a NON-BYPASS OWNER fills the NULLs, and the NOTICE equals the r'] | KS1401_F049_UNDER_TEST present True
+INFO suite: `|| no "` assertion sites 41 -> 50 (a SOURCE count; the gate measures 62 at runtime)
+CHECKED 26 | PASS 26 | FAIL 0

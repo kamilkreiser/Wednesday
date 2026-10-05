@@ -1,0 +1,44 @@
+(!) Your Vite config uses features that are unsupported by `configLoader: 'native'`, which is planned to become the default in a future major version of Vite:
+  - ESM syntax in a file loaded as CommonJS (vitest.config.ts:1:1). Use a `.mjs` extension or set `"type": "module"` in the closest package.json
+Set `VITE_CONFIG_NATIVE_IGNORE_WARNING=true` to suppress this warning.
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/__tests__/zz_gate63_probe.test.ts > gate63 probe — the anchor as the wired path delivers it > P2: the real per-provider file parses to exactly 1 anchor at the D-Trust digest; CONTROL bundle -> 2
+AssertionError: expected +0 to be 1 // Object.is equality
+
+- Expected
++ Received
+
+- 1
++ 0
+
+ ❯ src/__tests__/zz_gate63_probe.test.ts:80:24
+     78|     rec('P2', { file: DTRUST_FILE, count: one.length, fingerprints: fp…
+     79|     expect(two.length, 'CONTROL: the instrument counts the two-root bu…
+     80|     expect(one.length).toBe(1);
+       |                        ^
+     81|     expect(fp[0]).toBe(DTRUST_SHA256);
+     82|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  src/__tests__/zz_gate63_probe.test.ts > gate63 probe — the anchor as the wired path delivers it > P1: the REAL file delivered by path is read AND parsed (refusal is "does not chain", not "no anchor")
+AssertionError: expected 'no trust anchor configured' to match /does not chain to a configured trust …/
+
+- Expected:
+/does not chain to a configured trust anchor/
+
++ Received:
+"no trust anchor configured"
+
+ ❯ src/__tests__/zz_gate63_probe.test.ts:88:21
+     86|     rec('P1', { path: DTRUST_FILE, valid: r.valid, error: r.error });
+     87|     expect(r.valid).toBe(false);
+     88|     expect(r.error).toMatch(/does not chain to a configured trust anch…
+       |                     ^
+     89|     expect(r.error).not.toMatch(/no trust anchor configured/);
+     90|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+

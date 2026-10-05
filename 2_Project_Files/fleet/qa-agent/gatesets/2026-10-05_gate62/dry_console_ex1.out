@@ -1,0 +1,28 @@
+LAUNCH ACTION gate62 (DRY RUN) 2026-10-05 20:33:05 AEDT / 2026-10-05T09:33:05Z | PR #1387 | HEAD 67324c7604fd871637b197395139841da9913122 | kit develop f01c1da5717fdcb80a5e1aeeaa8ff9f0f00edd80 | pane QA/Secuura-ks1388-1387
+--- 0. routing: the pane must be in inbox_routing.conf
+  /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/inbox_routing.conf — exact line present: 0 (grep rc=1; want 1 / rc 0). CONTROL: lines in the file = 148
+  (DRY RUN: reported, not refused — the real run refuses rc 1; README §4)
+--- 1. census + PULLS API
+    API #1387 head 67324c7604fd871637b197395139841da9913122 branch feature/ks-1388-observability-env-examples-status-uri-80-b61-1 base develop state open merged False changed_files 5
+    CONTROL the classifier on #1387 ITSELF: FIRES
+    DOCS #1385 | KS-938: MFA disable and revert NULL the TOTP seed and the backup codes | ['API_Security_Functional_', 'QA_Tool_Cheat_Sheet_Secu'] | head 79c87b8aaa48
+    DOCS #1384 | KS-1210: close OAuth app scopes to the published nine, gate the by-id  | ['API_Security_Functional_', 'QA_Tool_Cheat_Sheet_Secu'] | head 852fc9276320
+    DOCS #1383 | KS-1401: migration 049 restores tenant isolation where 039 is already  | ['API_Security_Functional_', 'QA_Tool_Cheat_Sheet_Secu'] | head 32e8459bc0f5
+    DOCS #1382 | KS-1005: change-password reads the hash it verifies | ['API_Security_Functional_', 'QA_Tool_Cheat_Sheet_Secu'] | head ba3598df64f7
+    CENSUS 25 other open PR(s): 0 OVERLAP, 4 DOCS (expected), control FIRES
+  census rc=0
+--- 2. ONE ls-remote (read verb) from the checkout
+  ls-remote rc=0 | develop f01c1da5717fdcb80a5e1aeeaa8ff9f0f00edd80 | pull/head 67324c7604fd871637b197395139841da9913122 | branch 67324c7604fd871637b197395139841da9913122
+--- 3. the head: input == kit == API == pull/head == branch; open, not merged, on develop
+  input 67324c7604fd871637b197395139841da9913122 | kit 67324c7604fd871637b197395139841da9913122 | API 67324c7604fd871637b197395139841da9913122 (open, merged False, base develop, branch feature/ks-1388-observability-env-examples-status-uri-80-b61-1) | pull/head 67324c7604fd871637b197395139841da9913122 | branch 67324c7604fd871637b197395139841da9913122
+  BOTH INSTRUMENTS AGREE with the input head.
+--- 3b. develop: f01c1da5717fdcb80a5e1aeeaa8ff9f0f00edd80 | kit f01c1da5717fdcb80a5e1aeeaa8ff9f0f00edd80
+  UNMOVED since drafting
+--- 6 (dry). the launcher's own --check
+    all guards pass:
+      origin develop f01c1da5717f == pinned | #1387 67324c7604fd at branch AND pull/head | prompt sha256 0871c7b6b178510c
+      QA project, kit, prompt, repo present; kit at its home; thinking directive; 8 kit files named; report dir; GO placeholder; no wrapped seat in a GO; head in full; fabricated tree forbidden; no fill token
+      a launch (not --check) will refuse unless stdin is a TTY (exit 21)
+  launcher --check rc=0
+DRY RUN COMPLETE 2026-10-05T09:33:51Z — the real run continues with the override check, the usage gate, --check and cockpit.sh add
+rc=0

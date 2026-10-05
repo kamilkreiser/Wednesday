@@ -1,0 +1,29 @@
+ARM-OK Q049 the fix shape | must be quiet | failed NONE
+ARM-OK T049a is_local false | must fire S7b | failed ['S7b the insert is EXACTLY one live statement: the bypass, is_local true', 'S7d the bypass is the FIRST live statement after BEGIN; lock_timeout next', 'S7e no session-level bypass anywhere live']
+ARM-OK T049b a second live line (row_security off) | must fire S7b | failed ['S7b the insert is EXACTLY one live statement: the bypass, is_local true', 'S7d the bypass is the FIRST live statement after BEGIN; lock_timeout next']
+ARM-OK T049c bypass placed AFTER lock_timeout | must fire S7d | failed ['S7d the bypass is the FIRST live statement after BEGIN; lock_timeout next']
+ARM-OK T049d an existing line edited too | must fire S7a | failed ['S7a 049 one pure insertion']
+ARM-OK T049e session-level SET instead | must fire S7b | failed ['S7b the insert is EXACTLY one live statement: the bypass, is_local true', 'S7d the bypass is the FIRST live statement after BEGIN; lock_timeout next', 'S7e no session-level bypass anywhere live']
+ARM-OK T049f the fix line commented out | must fire S7b | failed ['S7b the insert is EXACTLY one live statement: the bypass, is_local true', 'S7d the bypass is the FIRST live statement after BEGIN; lock_timeout next', 'S7f live tenant_scope_bypass mentions: old + 1 == new']
+ARM-OK QDOC an edit inside block 22. | must be quiet | failed NONE
+ARM-OK TDOCa an edit in block 12. | must fire S8b | failed ['S8b sim every changed line inside block 22.']
+ARM-OK TDOCb the close tag re-indented | must fire S8 | failed ['S8b sim every changed line inside block 22.', 'S8c sim close tag unchanged']
+ARM-OK TDOCc a new <h2> inside block 22. | must fire S8d | failed ['S8d sim <h2>/<h3> list unchanged']
+ARM-OK QSUITE one inserted cell | must be quiet | failed NONE
+ARM-OK TSUITEa an existing line edited | must fire S9a | failed ['S9a suite: pure insertion(s) only']
+ARM-OK TSUITEb no new cell | must fire S9b | failed ['S9b suite cells 11 -> 12', 'S9c the new cell names N-1383-1 and the override exists']
+ARM-OK QMSG a clean message (Fixes gate61 ... #1383 is NOT strict) | must be quiet | failed NONE
+ARM-OK TMSGa "fixes #1383" | must fire S6c | failed ['S6c STRICT closing refs in the message == 0 (control fires)']
+ARM-OK TMSGb "does not close KS-1401" (Linear ignores negation) | must fire S6c | failed ['S6c STRICT closing refs in the message == 0 (control fires)']
+ARM-OK TMSGc KS-1376 hyphenated | must fire S6b | failed ['S6b hyphenated keys in the message == {KS-1401}']
+ARM-OK TMSGd "(#1383)" in the subject | must fire S6a | failed ['S6a subject <= 92, no (#']
+ARM-OK QBODY a clean body | must be quiet | failed NONE
+ARM-OK TBODYa "Closes: KS-1401" | must fire B2 | failed ['B2 STRICT closing refs == 0, planted control in the same run adds exactly 1']
+ARM-OK TBODYb "resolves #1383" | must fire B2 | failed ['B2 STRICT closing refs == 0, planted control in the same run adds exactly 1']
+ARM-OK TBODYc a second Refs line | must fire B3 | failed ['B3 ONE `Refs KS-1401`, hyphenated keys == {KS-1401}']
+ARM-OK TBODYd never-demo removed | must fire B4 | failed ['B4 never-demo + kintsugi deploy']
+ARM-OK TBODYe KS-1376 hyphenated | must fire B3 | failed ['B3 ONE `Refs KS-1401`, hyphenated keys == {KS-1401}']
+ARM-OK TBODYf "This does not close KS-1401" (the round-1 D1 class) | must fire B2 | failed ['B2 STRICT closing refs == 0, planted control in the same run adds exactly 1']
+ARM-OK QREAL scope at the kit head over the round-1 head | must be quiet | failed NONE
+ARM-OK TREAL scope with the ROUND-1 head posing as the round-2 commit | must fire S1 | failed ['S1 ONE parent == round-1 head, fast-forward', 'S2 tree == claimed tree (control: parent tree differs)', 'S3 numstat P..H == EXACTLY the 4 declared paths and +/-', 'S7a 049 one pure insertion', 'S8b API_Security_Functio every changed line inside block 22.', 'S8b QA_Tool_Cheat_Sheet_ every changed line inside block 22.', 'S9a suite: pure insertion(s) only', 'S9b suite cells 11 -> 12', 'S9c the new cell names N-1383-1 and the override exists']
+SELFTEST 28/28 arms behave (2 on real objects) | CHECKED 28

@@ -1,0 +1,41 @@
+KS-1388: both observability env examples point the nginx status URI at :80
+
+Both commented SECUURA_NGINX_STATUS_URI examples suggested the gateway's
+published HOST port, 6882, which is not reachable from the exporter's network.
+The in-network port is 80, which observability/docker-compose.yml:331 already
+defaults to. Both examples now say :80, so uncommenting either line yields a
+URI that resolves on the compose network.
+
+Both files are at the repository ROOT, not under Blockchain/Dev/.
+
+Two new cells in the existing KS 971 shell suite
+Blockchain/Dev/scripts/__tests__/prometheus_targets.test.sh pin the port by
+source text, one per env example. Red-first with both test sections and no
+product hunk: rc 1, 4 passed / 2 failed, one failure per file; bash -n rc 0, so
+the reds are assertions and not a load failure. Each product hunk applied alone
+leaves exactly its own cell failing, so neither cell can be satisfied by the
+other file's fix. Both hunks: rc 0, 6 passed. The whole shell-suite set reads
+67 passed, 0 failed, 0 skipped of 67 at both ends - the same suite count,
+because these are cells in an existing suite and not a new suite file.
+
+prometheus_targets.test.sh is 100755 in the index and git apply left it
+non-executable on disk under filemode=false; restored with chmod +x on that one
+file.
+
+Covers KS 1388 section 1 only; the ticket is narrowing, not closing. Sections 2
+and 3, which record what would make the observability stack slot-agnostic, are
+untouched - observability/ reaching the platform by slot 1's container names is
+a documented decision that stands.
+
+Both platform-k documents carry a new KS 1388 block in this same commit, flow
+block 14, placed in number order. This commit also appends the measurement host
+to the two cheat-sheet timing rows that carried a date and no host (gate
+findings N-1380-3 and N-1381-2), which is a one-row edit on each, outside this
+change's own block.
+
+NOT COVERED: no live sweep, so KS 1388 does not move to Done on this account
+and the observability stack was never started. Whether any deployment consumes
+either commented line is UNMEASURED - both are comments.
+
+Refs KS-1388
+
