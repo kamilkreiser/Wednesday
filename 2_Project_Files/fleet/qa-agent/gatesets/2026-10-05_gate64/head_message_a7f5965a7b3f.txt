@@ -1,0 +1,94 @@
+KS-1330: re-land round-2 signal handling; the SIGINT-to-pid arm can now run
+
+Refs KS-1330
+
+run-shell-suites.sh had no signal handling at all (`trap` appeared 0 times).
+A ^C or a kill mid-run left the suite it was running alive and left the
+run's own /tmp/rss.* directory behind. The round-2 work that fixes this was
+written for PR #1250, which took a NO GO at its round-2 cap and ships
+nothing; #1250 stays open and untouched. Its two blobs are re-landed here
+unchanged and then corrected:
+
+  scripts/run-shell-suites.sh                  8eef1c4877b30f7dfeb485dbb1955a53a6122fd5
+  scripts/__tests__/run_shell_suites.test.sh   9c4a87f0a97c462ae59e98d9f35aeab8fba89f27
+
+Three corrections on top, one per the ticket's three items.
+
+ITEM 1 - an arm that could not come out either way.
+The SIGINT-to-pid cell was skipped on "RULE 2" unconditionally, so it
+reported UNREACHABLE on every run in every environment. Rule 2 as the
+comment stated it - bash ignores SIGINT in a background job "regardless of
+the parent's disposition" - is true only while job control is off, and
+signal_run enables it. Measured both ways, /bin/bash 3.2.57(1) arm64, one
+host, backgrounding a separate bash exactly as signal_run does:
+
+  set +m, kill -INT <pid>   handler never fired, rc 0
+  set -m, kill -INT <pid>   handler fired,       rc 130
+  set -m, kill -INT -<pid>  handler fired,       rc 130
+
+The arm is now gated on RULE 1 via sig_installable alone, like the group
+arm beside it, and the rules and the matrix are corrected to say rule 2 is
+conditional. A note is added that an empty `trap -p INT` means the DEFAULT
+disposition, not an ignored one - the inverse reading is easy to make and
+sig_installable is correct because it installs a trap before looking.
+
+ITEM 2 - a kill that is honoured and a kill that is waited out read alike.
+The cells asserted a non-zero rc, no further suite, no verdict line and a
+removed directory. A runner that ignored the signal and died only when the
+fixture's own sleep ended satisfies every one of those. signal_run now
+returns the kill-to-exit gap and it is asserted as its own cell, bounded at
+half the fixture's sleep, with that sleep lifted to a named constant so the
+bound is derived from it rather than guessed. At develop's runner the new
+cell reports kill_to_exit=11s against a 12s fixture sleep - the defect made
+visible.
+
+ITEM 3 - two inherited conditions, documented, not changed.
+Each suite is launched asynchronously and this runner never enables job
+control, so bash hands every suite two dispositions a suite author would
+not expect. Both measured on this host, not inferred:
+  SIGINT is ignored in the suite - a kill -INT to the backgrounded child is
+  discarded and the parent sees rc 0.
+  stdin is /dev/null - the child's fd 0 and /dev/null share inode 336 and
+  rdev 3,2, while the same child given a real file reads inode 171878651
+  rdev 0,0 and run synchronously reads inode 343324 rdev 0,0.
+Neither is altered here; both were invisible, and a suite written against
+the opposite assumption fails in a way that reads as a flake.
+
+RED-FIRST, one test file against both runners via the harness's own
+RUNNER_SH override, suite in the foreground so SIGINT is installable:
+
+  develop's runner   54 passed, 7 failed
+  this head          61 passed, 0 failed
+
+At develop's runner: SIGINT to the pid rc 0 (the signal did nothing),
+SIGINT to the group and SIGTERM to the pid both leave /tmp/rss behind, and
+the item 2 bound fires at 11s. At this head all three arms interrupt the
+runner - rc 143, 130, 130 - the directory is removed each time and every
+latency cell is within bound. TAMPER: restoring the unconditional rule 2
+gate returns the cell to UNREACHABLE and drops the total from 61 to 60,
+so the gate is what makes the arm exist.
+
+CO-TENANT COUPLING, measured rather than assumed. This runner globs every
+tracked *.test.sh, so it runs other seats' suites. develop's runner ran a
+suite in a foreground pipeline; this one runs it asynchronously, which is
+what changes stdin and SIGINT. Across all 67 tracked suites: 2 use `read`
+as a command head and neither is affected by stdin at /dev/null in its own
+right; 10 trap INT, and all 10 also trap TERM or EXIT, so the runner's own
+TERM to the suite still reaches their cleanup. The ks1401 suite on PR #1383
+uses `read` as a command head 0 times and traps INT 0 times.
+
+Documentation: no block in either platform-k HTML doc. The test-discipline
+skill scopes section 4 by defining a "test change" as "backend unit,
+integration, or systemTest"; these are tooling suites that test the
+pre-push harness itself, under Blockchain/Dev/scripts, and are none of the
+three. Section 4 also states "If a change genuinely does not affect either
+doc, say so explicitly and why - do not silently skip", which is this
+paragraph. No stated timing is affected either: grepped -i -E
+'run-shell-suites|shell suites|leg 14|leg-14' over both HTML docs, both
+CLAUDE.md files and the skill for 0 hits, against a must-hit control of
+70, 82 and 16 hits for 'Akto' and an inverted control of 0.
+
+NOT COVERED: no live sweep - these files have no runtime product surface.
+A PTY harness asserting a FOREGROUND INT is KS 1325 and is not here. The
+residue items KS 1302 and KS 1303 own are not closed by this commit.
+

@@ -1,0 +1,168 @@
+{
+ "kit": "2026-10-05_gate64",
+ "round": 1,
+ "drafted": "2026-10-05T10:59Z-11:xxZ (21:59-22:xx AEDT) by a Wednesday drafting subagent; every figure re-derived by the gate",
+ "client_project": "Secuura/Blockchain",
+ "pr": "1389",
+ "ticket": "KS-1330",
+ "ticket_url": "https://linear.app/secuura/issue/KS-1330",
+ "tier": "T2",
+ "tier_note": "Wednesday commissioned T2 (through-code). The builder's brief (seatG1_scripts_lane.md :79, Q-TIER :267) PROPOSED T1 for KS-1330 because the runner is pre-push leg 14 for every seat. The gate grades the tiering.",
+ "author_seat": "Seat G 1st (LIVE at READY 10:58:40Z)",
+ "merge_seat": "Seat G 1st",
+ "go": "GO (Seat G 1st): merge 1389 on gate64",
+ "no_go": "NO GO (gate64): 1389 at a7f5965a7b3f — <N-1389-n: the blocker, one line>",
+ "pane": "QA/Secuura-ks1330-1389",
+ "routing_line": "QA/Secuura-ks1330-1389|coagent@agentmail.to|yes",
+ "routing": "/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/inbox_routing.conf",
+ "report_dir": "/Volumes/DevMASTER/!CODING/Testing Agent MAIN/projects/secuura/reports/2026-10-05-ks1330-1389-g64",
+ "verdict_subject": "[QA -> Wednesday] GATE64 #1389 (T2 KS-1330: re-land round-2 runner signal handling + SIGINT-to-pid arm; author and merger Seat G 1st)",
+ "head": "a7f5965a7b3fd94b25a26e73c250052db4be6aa0",
+ "branch": "feature/ks-1330-run-shell-suites-re-land-round-2-signal-handling-g1-1",
+ "develop": "32e058975d4e3a9bbabe828f45e7084de4cfa7f0",
+ "develop_tree": "1b8978e159dcf930bdc4d2fbd3a19d205805c7bf",
+ "parent": "0f2422925317a4bf1ad968d8367a2099fd560496",
+ "parent_tree": "df1344507d8cc13d23a767914ee85046c019a30c",
+ "parent_note": "the head's ONE parent is 0f2422925317 (KS-1005 #1382's squash), NOT develop 32e058975d4e: develop advanced by ONE commit (#1387 KS-1388, 21:43:36 AEDT) before the head was committed (21:47:15 AEDT). The advance touches prometheus_targets.test.sh, both observability env examples and both platform-k docs, 0 of the two kit paths.",
+ "end_tree": "273ec1c0ee3a54a5d797125a9d2307bd7ef0593c",
+ "merge_in_predicted_tree": "bc8774cbe5cd409000d8f11f989dbe768050884d",
+ "merge_in_note": "git merge-tree --write-tree develop head in the drafter's own clone, rc 0, == the builder's PREDICTED CHAINED MERGE-IN TREE",
+ "subject": "KS-1330: re-land round-2 signal handling; the SIGINT-to-pid arm can now run",
+ "subject_max": 92,
+ "runner": "Blockchain/Dev/scripts/run-shell-suites.sh",
+ "test": "Blockchain/Dev/scripts/__tests__/run_shell_suites.test.sh",
+ "files": {
+  "Blockchain/Dev/scripts/run-shell-suites.sh": [
+   102,
+   6
+  ],
+  "Blockchain/Dev/scripts/__tests__/run_shell_suites.test.sh": [
+   206,
+   0
+  ]
+ },
+ "modes": {
+  "Blockchain/Dev/scripts/run-shell-suites.sh": "100644",
+  "Blockchain/Dev/scripts/__tests__/run_shell_suites.test.sh": "100644"
+ },
+ "head_blobs": {
+  "Blockchain/Dev/scripts/run-shell-suites.sh": "cace851427103444b2d9982074162e35d7414f71",
+  "Blockchain/Dev/scripts/__tests__/run_shell_suites.test.sh": "04f87f5e9095e99a738d4897d206528d91b7a21c"
+ },
+ "develop_blobs": {
+  "Blockchain/Dev/scripts/run-shell-suites.sh": "85920863d70454db21b0198cc66fc06e92ff8223",
+  "Blockchain/Dev/scripts/__tests__/run_shell_suites.test.sh": "d000d7b65837ddade5173f40f2284c5ff30ad18f"
+ },
+ "r2_blobs": {
+  "Blockchain/Dev/scripts/run-shell-suites.sh": "8eef1c4877b30f7dfeb485dbb1955a53a6122fd5",
+  "Blockchain/Dev/scripts/__tests__/run_shell_suites.test.sh": "9c4a87f0a97c462ae59e98d9f35aeab8fba89f27"
+ },
+ "r2_delta_numstat": {
+  "Blockchain/Dev/scripts/run-shell-suites.sh": [
+   20,
+   1
+  ],
+  "Blockchain/Dev/scripts/__tests__/run_shell_suites.test.sh": [
+   51,
+   11
+  ]
+ },
+ "r2_code_added": {
+  "Blockchain/Dev/scripts/run-shell-suites.sh": [
+   "rss_suite_log=\"$(mktemp \"${TMPDIR:-/tmp}/rss-suite.XXXXXX\")\""
+  ],
+  "Blockchain/Dev/scripts/__tests__/run_shell_suites.test.sh": [
+   "T1302S_SLEEP=12",
+   "T1302S_KILL_LATENCY_MAX=$(( T1302S_SLEEP / 2 ))",
+   "signal_run() {   # $1 = signal, $2 = \"pid\"|\"group\" -> \"<rc>|<suites_started>|<verdict_lines>|<dir_left>|<kill_to_exit_s>\"",
+   "  suite_with \"$repo\" \"$PRIMARY_ROOT/t1302s-1-slow.test.sh\" \"sleep $T1302S_SLEEP\" 0",
+   "    _ks=$(date +%s)",
+   "    echo \"$(( $(date +%s) - _ks ))\" > \"$out.lat\"",
+   "  lat=\"$(cat \"$out.lat\" 2>/dev/null || echo 999)\"",
+   "  printf '%s|%s|%s|%s|%s' \"$rc\" \"$started\" \"$verdict\" \"$left\" \"$lat\"",
+   "  if [ \"$_s\" = INT ] && [ \"$INT_INSTALLABLE\" != yes ]; then",
+   "  _verdict=\"${_rest2%%|*}\"; _rest3=\"${_rest2#*|}\"; _left=\"${_rest3%%|*}\"; _lat=\"${_rest3#*|}\"",
+   "  fi",
+   "  if [ \"$_lat\" != 999 ] && [ \"$_lat\" -le \"$T1302S_KILL_LATENCY_MAX\" ]; then",
+   "    check \"KS-1330: SIG$_s to the $_t exits ${_lat}s after the kill, within ${T1302S_KILL_LATENCY_MAX}s (half the fixture's ${T1302S_SLEEP}s sleep)\" OK OK",
+   "  else",
+   "    check \"KS-1330: SIG$_s to the $_t must exit within ${T1302S_KILL_LATENCY_MAX}s of the kill (half the fixture's ${T1302S_SLEEP}s sleep)\" \\",
+   "      OK \"kill_to_exit=${_lat}s\""
+  ]
+ },
+ "r2_code_removed": {
+  "Blockchain/Dev/scripts/run-shell-suites.sh": [
+   "  rss_suite_log=\"$(mktemp \"${TMPDIR:-/tmp}/rss-suite.XXXXXX\")\""
+  ],
+  "Blockchain/Dev/scripts/__tests__/run_shell_suites.test.sh": [
+   "signal_run() {   # $1 = signal, $2 = \"pid\"|\"group\" -> \"<rc>|<suites_started>|<verdict_lines>|<dir_left>\"",
+   "  suite_with \"$repo\" \"$PRIMARY_ROOT/t1302s-1-slow.test.sh\" 'sleep 12' 0",
+   "  printf '%s|%s|%s|%s' \"$rc\" \"$started\" \"$verdict\" \"$left\"",
+   "  if [ \"$_s\" = INT ] && [ \"$_t\" = pid ]; then",
+   "    _skip=\"RULE 2: bash ignores SIGINT in a background job (trap -p INT empty there, rc 0), so no handler can exist to signal. A real terminal ^C hits the process GROUP — the arm below.\"",
+   "  elif [ \"$_s\" = INT ] && [ \"$INT_INSTALLABLE\" != yes ]; then",
+   "  _verdict=\"${_rest2%%|*}\"; _left=\"${_rest2#*|}\""
+  ]
+ },
+ "pr1250": {
+  "pr": "1250",
+  "head": "2b8dcb824dd2c5cd4b92757934d7de9d28813a22",
+  "branch": "feature/ks-1302-runner-tmpdir-residue-and-orphan-pipe-l5-1",
+  "base_commit": "6e2a00bfed577528de1ee02b41cb5a0e99172b35"
+ },
+ "hook_blobs": {
+  ".githooks/pre-push": "ffc25ebc37d46a4a461f2cd952ac8fc082947a93",
+  "Blockchain/Dev/scripts/preflight/preflight.sh": "270b8913c009a360759ea18bf7cf250f466cf67e"
+ },
+ "hook_ruling": "Kam 20:06 AEDT, card secuura-pushgate-three-legs-1005 = (a): the PR adds NO new pre-push leg",
+ "skill": ".claude/skills/secuura-test-discipline/SKILL.md",
+ "skill_blob": "eaf43dfd4d985bf9b0badbfc7e85561c13407e1f",
+ "skill_quote_lines": {
+  "s4_scope": [
+   362,
+   363
+  ],
+  "s4_say_why": [
+   417,
+   418
+  ]
+ },
+ "flow": "Projects Documents/API_Security_Functional_Testing_Architecture_Flow_Diagrams.html",
+ "cheat": "Projects Documents/QA_Tool_Cheat_Sheet_Secuura_API_Testing.html",
+ "roots": [
+  "Blockchain/Dev/scripts/__tests__",
+  "systemTest/__tests__"
+ ],
+ "trailer_control_commit": "bf277eead268",
+ "trailer_control_bytes_raw": 55,
+ "trailer_head_bytes_raw": 1,
+ "pr1383_head_for_census": "32e8459bc0f51d1af492aae7c0b3d9754f78c9bf",
+ "ks1401_suite_glob": "ks1401_049",
+ "claims": {
+  "redfirst_develop_runner": "54 passed, 7 failed",
+  "redfirst_head": "61 passed, 0 failed",
+  "tamper_rule2": "61 -> 60, INT-pid UNREACHABLE",
+  "whole_runner_head": "67 passed, 0 failed, 0 skipped (of 67)",
+  "census": "0 of 67 use read as a command head; 10 trap INT, all 10 also TERM or EXIT; ks1401_049 0/0",
+  "latency_develop": "kill_to_exit=11s vs 12s fixture sleep",
+  "head_arm_rcs": "TERM pid 143, INT pid 130, INT group 130"
+ },
+ "checkout": "/Volumes/DevMASTER/!CODING/Secuura/Blockchain/2_Project_Files",
+ "forbidden_root": "/Volumes/DevMASTER/!CODING",
+ "secuura_env": "/Volumes/DevMASTER/!CODING/Secuura/Blockchain/4_Credentials/.env",
+ "gh_repo": "Secuura/Distributed_Secuura",
+ "qa_dir": "/Volumes/DevMASTER/!CODING/Testing Agent MAIN",
+ "charter": "/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/QA_AGENT_CHARTER.md",
+ "ready": "/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/briefs_staged/2026-10-05_seatG1_READY_1389.txt",
+ "seat_brief": "/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/briefs_staged/2026-10-05_seatG1_scripts_lane.md",
+ "seat_amendment": "/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/briefs_staged/2026-10-05_seatG1_AMENDMENT.md",
+ "pr1250_gate_report": "/Volumes/DevMASTER/!CODING/Testing Agent MAIN/projects/secuura/reports/2026-09-26-batch1250r2-t2d/report.md",
+ "usage_gate": "/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/usage_gate.sh",
+ "cockpit": "/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/cockpit/cockpit.sh",
+ "prompt": "prompt_gate64.txt",
+ "launcher": "launch_qa_secuura_ks1330_1389.sh",
+ "ready_sha256": "26467293779c00d66005098bbcc54460d7c277fe306ba35347cde410705b2978",
+ "seat_brief_sha256": "8a35a7461a0b6879f6372755ee4b3831d63b30a05c9c96c01277251163c4cd6b",
+ "seat_amendment_sha256": "7c67f4ef84fdb5db64471651a8856d87f16cdf280a744e78b4a94de92231b34c",
+ "pr1250_gate_report_sha256": "6060051ccdee979395007802c4ca8282318dae45696fbefce708785192a409de"
+}

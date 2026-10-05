@@ -1,0 +1,12 @@
+c2_relanded_gate64 repo /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/gatesets/2026-10-05_gate64/_scratch/clone head a7f5965a7b3fd94b25a26e73c250052db4be6aa0 r2 {'run-shell-suites.sh': '8eef1c4877b3', 'run_shell_suites.test.sh': '9c4a87f0a97c'}
+PASS R1 #1250 head blobs {'run-shell-suites.sh': '8eef1c4877b3', 'run_shell_suites.test.sh': '9c4a87f0a97c'} == kit r2 {'run-shell-suites.sh': '8eef1c4877b3', 'run_shell_suites.test.sh': '9c4a87f0a97c'}; develop blobs {'run-shell-suites.sh': '85920863d704', 'run_shell_suites.test.sh': 'd000d7b65837'} == #1250 base blobs {'run-shell-suites.sh': '85920863d704', 'run_shell_suites.test.sh': 'd000d7b65837'}
+PASS R2 runner r2->head +20/-1 (kit [20, 1]); code added 1 removed 1, == kit True, whitespace-only True; item-3 header True; code added ['rss_suite_log="$(mktemp "${TMPDIR:-/tmp}/rss-suite.XXXXXX")"']
+PASS R3 test r2->head +51/-11 (kit [51, 11]); code lines added 16 removed 7; unexpected added [] removed []; kit lines absent added [] removed []
+PASS R4 RULE-2 _skip lines 0; pid conditions 0; RULE-1-only INT gate 1 (want 1); INT_INSTALLABLE from sig_installable 1; signal_run: `set -m` at body+[8], background launch at body+[10]
+PASS R5 old matrix bullet 0 (want 0); RULE 2 conditional 1 (want 1); PID bullet reachable 1 (want 1)
+PASS R6 SLEEP ['T1302S_SLEEP=12']; bound ['T1302S_KILL_LATENCY_MAX=$(( T1302S_SLEEP / 2 ))']; slow fixture uses the constant 1; latency check lines 2 (OK + FAIL branch) after the interrupt cell [698]; interrupt cell condition mentions _lat: False
+INFO ARM-RC the interrupt cell passes on: 'if [ "$_rc" != 0 ] && [ "$_rc" != 999 ] && [ "$_started" -le 1 ] && [ "$_verdict" -eq 0 ] && [ "$_left" = 0 ]; then' — it asserts rc != 0 (and != 999), NOT rc == 130; the 130/143 the body quotes appear only in the cell LABEL (`rc $_rc`)
+INFO ITEM3 runner header claims: ['#   1. SIGINT is IGNORED in the suite. MEASURED, /bin/bash 3.2.57(1) arm64, this launch shape:', '#   2. stdin is /dev/null. MEASURED by identity, not inferred from a read returning EOF:']
+INFO INDENT rss_suite_log line(s) at head: ["'rss_suite_lo'"] (r2 had two-space indent inside the for-loop)
+CHECKED 6
+0 FAIL
