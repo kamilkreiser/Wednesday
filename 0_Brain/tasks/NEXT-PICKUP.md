@@ -3,28 +3,34 @@ date: 2026-10-05
 type: pickup
 scope: SECUURA + all general/generic work. Datasec is TUESDAY's; FRIDAY (laptop) works both and claims before driving.
 status: live
-supersede: REPLACED WHOLESALE 2026-10-05 22:0x by seat 5f7cf603 (70% checkpoint). The 236 KB stacked copy from before this seat is kept verbatim at NEXT-PICKUP.md.pre-1005-2040-wholesale. Replace wholesale again; never stack.
+supersede: REPLACED WHOLESALE 2026-10-05 22:5x by seat 9a78af86 (53% checkpoint). Replace wholesale again; never stack.
 ---
 
 # NEXT PICKUP
 
-## 🔴 FIRST ACTS (rotation handover 22:2x AEDT 2026-10-05, seat 5f7cf603 at ~80% ctx)
-0. Run `kam_rulings_today.sh` + `reconcile_rulings.py`. At 22:03: 26 Kam rows today, newest 20:07:00, nothing to reconcile.
-1. **Read `inbox_digest.sh --inbound` output WHOLE, never through grep.** A `[QUESTION]`-class line hid behind an `INBOUND` filter for 20 min tonight (ledger row).
-2. Check rung 5 on B 63rd (%42) and D 9th (%43) — both launched this hour, neither seen at rung 5 yet. Their ITEM 0 QUESTIONs are the next mails.
-3. **DRAFTERS OF THIS SEAT DIE AT ROTATION: gate64's kit drafter (#1389) may not have finished.** If `fleet/qa-agent/gatesets/2026-10-05_gate64/README.md` lacks a launch command, re-commission from READY `briefs_staged/2026-10-05_seatG1_READY_1389.txt` (tier 2; gate62's shape; GO names G 2nd, a seat that must be launched from `HANDOVER-seatG1-2026-10-05.md`).
-4. **ORDER RISK: #1384 (E 4th) and #1388 (D 9th) both touch the docs.** Whichever lands first voids the other's merge-in target. Each GO already says: re-read develop; if it moved, STOP and mail. Many agent panes are 1-7 rows; to read a seat's ctx use `tmux resize-pane -t %NN -y 14`, read it, then resize back. A 1-row pane often cannot be read at all: say UNMEASURED.
+## 🔴 FIRST ACTS (checkpoint 22:5x AEDT 2026-10-05, seat 9a78af86, ctx ~55%)
+0. `kam_rulings_today.sh` + `reconcile_rulings.py`. At 22:31: 26 Kam rows, newest 20:07:00, nothing to reconcile.
+1. Read `inbox_digest.sh --inbound` WHOLE; full bodies via `inbox_digest.sh full <inbox> '<id>'`.
+2. **develop = 3cb93b9c731e** (11:54:11Z) = Peter's "Merge pull request #1392" (KS-1411 Akto, touches BOTH platform docs) on top of #1384's squash 232623892f24 (verified at source by Wednesday). Every target tree predicted on 32e058975d4e is VOID.
+3. **D 9th (%43) holds a signed GO** `GO (Seat D 9th): merge 1388 on gate63` with target tree **f65ddbbd560c on 3cb93b9c731e** (SUPERSEDES 549e05e3ecec). Expect `STATUS: merged 1388` → verify at source (scratch repo fetch by SHA from git@github.com:Secuura/Distributed_Secuura.git; `git init` the scratch dir by LITERAL path — the no-cd hook refuses `git -C $VAR init`) → score + pane_close → launch **F 4th** from `HANDOVER-seatF3-2026-10-05.md` for #1383 (Kam ruled #1388 merges first).
+4. **gate64 LAUNCHED 11:57:07Z (%44 `QA/Secuura-ks1330-1389`)** for #1389 (KS-1330) at a7f5965a7b3f, repinned develop 3cb93b9c731e. Rung 5 NOT yet seen. Kit doubts D1-D11 in its README (incl. D3 whole runner 66/1 vs claimed 67/0; D5 body's docs-grep claim false). Key-anchored merge-in tree on 3cb9 = d1f3c5cb6c1c (voided if #1388 lands first). On GO: launch **G 2nd** from `HANDOVER-seatG1-2026-10-05.md` (GO string `GO (Seat G 2nd): merge 1389 on gate64`).
+5. **B 63rd (%42)**: PR B (KS-1278) released 11:35Z (build at 32e05897; STATUS + stop before push if develop moved → Wednesday rules a docs-only merge-in with a key-anchored tree). Develop-moved ADDENDUM sent 11:42Z.
+6. **E lane has NO seat.** E 4th WRAPPED 11:51Z (0.93). **E 5th brief drafter running** → `fleet/briefs_staged/2026-10-05_seatE5_successor.md` (#1385 KS-938 merge-in + gate, then KS-1256 b; reuses `.push-lock-e4`). If the file is missing/partial after a rotation, re-commission from `HANDOVER-seatE4-2026-10-05.md`.
+7. **Spark brief drafter running** (KS-1305, KS-1313+1326, KS-1141 site 1 from DECISIONS-24) → appends to `local-model/spark/queue.md` after `round.sh --dry-run` OK. Then START `spark/queue.sh` (background) + review agent per PASS.
+8. Read seat ctx only after `tmux resize-pane -t %NN -y 16`; then `tmux select-pane -t %0`. macOS has no `timeout`.
 
-## SECUURA LANES (develop `32e058975d4e` = #1387 merged, verified at source)
+## SECUURA LANES
 | lane | seat / pane | state | next |
 |---|---|---|---|
-| **B** | **B 63rd LAUNCHED 11:11:10Z, pane %42** (brief `fleet/briefs_staged/2026-10-05_seatB63_successor.md`, verified at destination; B 62nd WRAPPED 0.94) | rung 5 + its ITEM 0 owed. Rule Q-WAIT (recommend keep all four WAIT), Q-DOC15 (flow 15. between 14. and 19.; the cheat-sheet position comes from a gate prediction), Q-PR1390 (Peter's #1390 touches both docs: a ruled merge-in if it lands first) | Read the brief WHOLE, check every Kam card it cites against the card's option text (`decision_queue.sh show <id>`), then `brief_and_launch.sh --to Secuura/Blockchain`. Next row **PR B (KS-1278, T1)**; then PR C (anchors-tx ONLY), D, E (4 carves), F. If the drafter died, re-commission from this row + B 62nd's handover. |
-| **D** | **gate63 = GO on #1388 (11:19Z, report a68b1497; pane closed). **D 9th LAUNCHED 11:27:25Z, pane %43** (brief `briefs_staged/2026-10-05_seatD9_merge_1388.md`; Kam-card quotes corrected by Wednesday before launch). Next: its ITEM 0 → ANSWER (Q-TOOLS: re-seat the four tools as proposed; Q-ASSIGNEE: the board account = the project `.env`'s Linear identity, the same as KS-1415's) → its `QUESTION: merge-in pushed 1388 at <M12>` → send `GO (Seat D 9th): merge 1388 on gate63` naming M (target tree 549e05e3ecec on develop 32e058975d4e; recompute if develop moved — #1384 may land first!).** Was: none: D 8th WRAPPED 10:33Z (0.95, handover `HANDOVER-seatD8-2026-10-05.md` 98d4e449) | **#1388 (KS-1404)** head `3ce575eeb63c` → **gate63 LAUNCHED 11:03:25Z, pane %41** (`QA/Secuura-ks1404-1388`, kit `fleet/qa-agent/gatesets/2026-10-05_gate63/`). Rung 5 NOT yet seen at 22:03 | On the verdict: `pane_close.sh`, hash the report. On a GO: launch **D 9th** from D 8th's handover for the docs-only merge-in (TARGET TREE = gate63's key-anchored prediction; `549e05e3ecec` on `32e058975d4e`, recompute if develop moved) + merge; the GO names D 9th. Docker was DOWN, so the image proof is likely NOT RUN (the kit forbids starting Docker Desktop). Kit doubts to watch: D4 (the whole `config/` ships, including the DigiCert bundle), D5 (a missing anchor fails closed but `/health` is silent). |
-| **F** | none: F 3rd WRAPPED 10:15Z (0.93, handover `HANDOVER-seatF3-2026-10-05.md` 12e692cf) | **#1383 (KS-1401)** gate61 r2 GO at `32e8459bc0f5`; GO mail SENT, but the merge comes only AFTER #1388 merges (Kam's card) | After #1388 merges: launch **F 4th** from F 3rd's handover → `qm_gate61r2.sh` merge-in M0-M7 (key-anchored order) → merge. KS-1412 (follow-ups) is UNASSIGNED: assign it at a board pass. |
-| **G** | none: G 1st WRAPPED 11:04Z (0.93, handover `HANDOVER-seatG1-2026-10-05.md` 76fd9d72, pane closed) — next row KS-1127 | **#1389 (KS-1330)** head `a7f5965a7b3f` READY (`briefs_staged/2026-10-05_seatG1_READY_1389.txt`) | **gate64 (tier 2) kit DRAFTER of seat 5f7cf603 → `fleet/qa-agent/gatesets/2026-10-05_gate64/`** (routing `QA/Secuura-ks1330-1389`): launch it, rung 5. On a gate64 GO: launch **G 2nd** from its handover for the gate64 GO + merge, then KS-1127. If the drafter died, re-commission from the READY file. |
-| **E** | **E 4th** %34 (`.push-lock-e4`) | #1382 MERGED. **#1384: conditional GO SENT ~11:2xZ** (merge-in M 1e2c78c52e25, tree 517a962cb1d9 confirmed by an independent prediction + gate60 qm 8/8; body edit for N-1384-1 first). Lock fix (a) built (12/0). #1385 needs its own gate | Its mails. D10 = ONE High ticket after #1384 merges. Its lock fix (a) (PPID in the holder) is due now (after #1382). |
-Scored tonight (scoreboard): B 61st 0.92 · F 3rd 0.93 · G 1st 0.93 · B 62nd 0.94 · D 8th 0.95. **Only E 4th (%34) is live as a builder; gate63 (%41) is running.**
+| B | B 63rd %42 | PR B KS-1278 building | its STATUS; then PR C (anchors-tx only), D (KS-948), E (KS-591 ×4), F (KS-593) |
+| D | D 9th %43 | GO for #1388 at f65ddbbd560c | merged STATUS → verify → wrap → score |
+| F | none | #1383 (KS-1401) gate61r2 GO at 32e8459bc0f5; waits on #1388 | F 4th from F 3rd's handover after #1388 merges; re-predict on the new develop |
+| G | none; gate64 %44 | #1389 under gate | G 2nd on gate64 GO |
+| E | none | #1385 ungated at 79c87b8aaa48; KS-1256 unstarted | E 5th (brief drafting) |
+Scored tonight (this seat): E 4th 0.93.
 
+## OWED (added this seat)
+- Gate-kit defect (D 9th's finding): `c4_docs_gate63.py predict` on an ABSENT develop returns None for every blob → a false M6 "re-gate" refusal. predict must refuse "develop unresolvable" by name; carry into every new kit.
 ## RULES LEARNED TONIGHT (in STANDING_LINES / the ledger)
 - Doc merge-ins: the cheat sheet has NO readable ordering invariant. **The target tree from a gate's key-anchored prediction is the authority**, never a div-anchored M1.
 - A push is judged by the push tool's `.rc` file + `ls-remote`. rc 141 = KS-1149: retry under the lock, no transport change. A first push uses the seat's first-push tool.
