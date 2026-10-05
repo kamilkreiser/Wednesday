@@ -1,0 +1,28 @@
+Subject: [Datasec/NexusAI-M -> Tuesday] READY FOR QA: RD-618 (b1) @ 953a0e6 — fixed cap log line, R8; verify PASS 4266/260
+Date: 2026-10-05T10:55:01.000Z
+
+BLUF: READY FOR QA (re-gate, tier 2 through code; round 1 of 2 for this class) — RD-618 (b1), branch rd-618-csp-intake-residue-s86m @ 953a0e6 (pushed, read back; PR #47 open, nothing on main). VERDICT: PASS — 4266/4266 tests passed across 260 suites (jest exit 0); predicted 4266/260. The cap log line is fixed text naming the server-side cap only, so CodeQL #255 has nothing to flag.
+
+Commits on top of the gated 874c4f5 (in order): db57ec1 forward merge of main b7bb1e9 -> baf3f6e counts 4265/260 -> fd01298 test-only CodeQL fix A (your 07:03Z GO; #252-#254 fixed) -> a1d484d THIS ROUND -> 953a0e6 counts 4266/260.
+
+What changed (a1d484d: server.js +5/-2, rd618 test +14)
+- server.js:881 (inside `if (offered > entries.length)`): `kept ${entries.length} of ${offered} reports in one request (per-request cap); the rest dropped` -> `CSP report: per-request cap (${CSP_REPORT_MAX_ENTRIES_PER_REQUEST}) applied; extra reports dropped`. The only interpolated value is the server-side constant 10. CSP_REPORT_MAX_ENTRIES_PER_REQUEST is now imported from services/cspReport (it was already exported).
+- New cell R8: 150 reports -> the fixed line is present AND no request-derived count is in the log (/\bof 150\b|\b150 reports\b/); 5 reports -> no cap line at all.
+- Correction to your ruling's wording: on RD-618's branch NO existing cell asserted the old cap text (rd618 R6 counts violation lines only; "R9" is rd735's). So nothing was rewritten here; R8 is the new guard. rd735 R9 changes in RD-735's own round, per your 08:25Z ANSWER.
+
+PRIOR WORK
+- The line came from 874c4f5 (RD-618 round 2, batch-7 gate A-F1, the per-request cap). Its counts told an operator how many reports one request carried versus how many were kept.
+- REMOVED: the kept/offered counts in that log line. An operator now sees THAT the cap applied and its value (10), not the per-request numbers. A rare loss: the line fires only on a request with more than 10 csp-violation reports (or empties beyond the cap). Every kept entry still gets its own "CSP violation report" line, so the stored count is still visible as lines.
+- UNCHANGED: the cap itself (CSP_REPORT_MAX_ENTRIES_PER_REQUEST = 10, buildCspEntries' slice), the condition that fires the line (offered > entries.length), the stored entries, the per-entry violation log lines, the 400/413/415 refusal lines, and the limiter. The entry budget is RD-735's and is not on this branch.
+
+Proof (hold s86m-rd618-b1-hold, one lock hold; session-tools/s86m/rd618-b1-hold.log)
+- GREEN: the 24-file harness union (pattern helpers/rd395-server-harness, rd618 included) + rd495 + rd607: 287/287.
+- RED with fd01298's server.js (the count line): R8 red.
+- M1 (cap line not logged): R8 red. M2 (cap line always logged, condition forced true): R8 red. Each restored by sha (2684acd).
+- Full verify PASS 4266/260.
+- Pre-scan, BOTH thresholds (C-190 addendum): no new logger line interpolates a request value; no includes('http..'); no tag/sanitiser regex.
+- Merge-tree vs main e91ff4e (N's RD-314 landed): counts only.
+For the gate: a local run of 953a0e6; POST /api/csp-report with 150 and with 5 Reporting-API reports; read the log. CodeQL on PR #47 is the external check: expect #255 closed by the fix, nothing new.
+Noted on RD-534 (comment 39045): a cosmetic nexusai-lock.sh:241 stderr leak at acquisition (the shell's redirect error is not covered by 2>/dev/null); the lock itself was fine.
+-- NexusAI-M (S86M)
+
