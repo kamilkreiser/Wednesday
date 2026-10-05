@@ -1,0 +1,19 @@
+c2_migration_gate61 2026-10-05T07:06:19Z | clone /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/4633ab20-117b-4d2e-a571-ce5d0598b988/scratchpad/g61/clone | head 7eccb131f2d6 | develop 46c3e20cfbd2
+INFO 049 at 7eccb131f2d6: 11961 bytes, sha256 6ad3a01ac278021819ae0b3965113e4c7b4802275de8fda2a80ca34c48847e2c
+PASS L0 live-SQL guard: 64 live line(s) after stripping (want > 20) | still carries {'DO $': True, 'CREATE POLICY': True, 'END': True} | comment line(s) stripped 139 (CONTROL > 0) | raw 214 lines
+PASS M1 one DO block: DO blocks 1 (want 1) | live text outside the block ''
+PASS M2 lock_timeout: lock_timeout set_config('lock_timeout', '5s', true) at offset 6495 | first ALTER TABLE at 7609 | before it: True
+PASS M3 no SET NOT NULL: `SET NOT NULL` count 0
+PASS M4 absent table RAISEs: IF NOT EXISTS(information_schema.tables) THEN RAISE EXCEPTION: True | NOTICE-and-CONTINUE on absence: False
+PASS M5 must-not: counts {'INSERT INTO _secuura_migrations': 0, 'DELETE FROM': 0, 'TRUNCATE': 0, 'DROP TABLE': 0, 'DROP/ALTER COLUMN': 0, 'CREATE/DROP/ALTER FUNCTION': 0, 'GRANT/REVOKE': 0, 'DISABLE ROW LEVEL': 0, 'NO FORCE': 0, 'top-level BEGIN;/COMMIT;/ROLLBACK;': 0, 'oauth_apps_auth_lookup': 0} | policy names touched ['tenant_isolation'] (only tenant_isolation allowed; non-empty) | foreign NONE
+PASS M6 NULL-only backfill: 1 UPDATE statement(s), 1 of them `SET tenant_id = $1 WHERE tenant_id IS NULL` exactly | ['public.%I SET tenant_id = $1 WHERE tenant_id IS NULL']
+PASS M7 tables: ARRAY literals 1 | tables ['certifications', 'charge_events', 'oauth_apps', 'svc_webhooks'] (kit ['certifications', 'charge_events', 'oauth_apps', 'svc_webhooks']) | statements with a literal target NONE
+PASS M8 policy literal == 039: 049 $p$ literal 798b85ba1c4f30f2 | 039 (develop) $p$ literal 798b85ba1c4f30f2 | byte-equal True | CONTROL 039 literal found and carries platform_admin: True
+PASS M9 no other migration: name-status develop..head under migrations/ [('A', 'Blockchain/Dev/migrations/049_ks1401_tenant_isolation_after_039.sql')] (want [A 049_ks1401_tenant_isolation_after_039.sql]) | 038a blob e835095a6113 (kit e835095a6113) | 039 blob eb0909b4e259 (kit eb0909b4e259)
+PASS M10 name: 049_ks1401_tenant_isolation_after_039.sql | "platform" in name: False | sorts after all 50 .sql at develop (last 048_ks754_widen_processed_by_to_text.sql): True | 049_* at head ['049_ks1401_tenant_isolation_after_039.sql']
+PASS M11 ENABLE + FORCE + replace: ENABLE True | FORCE True | DROP POLICY IF EXISTS tenant_isolation True before CREATE POLICY tenant_isolation True: True
+PASS M12 ADD COLUMN guarded: 1 ADD COLUMN tenant_id, each under IF NOT EXISTS(information_schema.columns … tenant_id) or IF NOT EXISTS: True
+INFO CREATE POLICY targets ['%I'] vs ALTER/DROP targets ['%I', 'public.%I'] — a mixed qualification resolves CREATE POLICY through search_path (039 uses bare %I throughout)
+INFO the UPDATE runs before this file's ENABLE/FORCE but UNDER any FORCE already on the table (certifications, oauth_apps, svc_webhooks on kintsugi): as a non-bypass, non-superuser OWNER it sees 0 rows and the NOTICE reads "0 NULL rows" — the probe X7 measures it
+CHECKED 13 check(s)
+C2 MIGRATION PASS: 0 FAIL of 13 checks | 049 at 7eccb131f2d6

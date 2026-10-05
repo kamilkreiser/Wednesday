@@ -1,0 +1,21 @@
+LAUNCH ACTION gate61 (DRY RUN) 2026-10-05 18:21:14 AEDT / 2026-10-05T07:21:14Z | PR #1383 | HEAD 7eccb131f2d627a628d41b2cd537e81ce9e52fc4 | kit develop 46c3e20cfbd21acee0c67d544180c33deaa4c8ef | pane QA/Secuura-ks1401-1383
+--- 0. the pane must be routed (inbox_routing.conf) or cockpit.sh say --mail fails silently
+  routing file /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/inbox_routing.conf — line present: 0 (grep rc=1; want 1 / rc 0)
+  (DRY RUN: reported, not refused — the real run refuses rc 1 here; README section 4)
+--- 1. instrument A: the GitHub PULLS API (+ 2b the census, same read)
+  gh_census rc=0
+    API #1383 head 7eccb131f2d627a628d41b2cd537e81ce9e52fc4 base develop base_sha 46c3e20cfbd21acee0c67d544180c33deaa4c8ef mergeable True reads 1 state open merged False branch feature/ks-1401-tenant-isolation-after-039-f2-1 changed_files 4
+    CONTROL the classifier on #1383 ITSELF (must print MIGRATION and OVERLAP, or a zero below proves nothing): FIRES
+    OVERLAP #1384 | KS-1210: close OAuth app scopes to the published nine, gate the by-id  | paths ['Projects Documents/API_Security_Functional_Testing_Architecture_Flow_Diagrams.html', 'Projects Documents/QA_Tool_Cheat_Sheet_Secuura_API_Testing.html'] | migra
+    EXPECTED OVERLAP (reported_overlaps; reported, never sequenced by a gate) #1382 head 80bafc849a54 | paths ['Projects Documents/API_Security_Functional_Testing_Architecture_Flow_Diagrams.html', 'Projects Documents/QA_Tool_Cheat_Sheet_Secuura_API_Testing.htm
+    EXPECTED OVERLAP (reported_overlaps; reported, never sequenced by a gate) #1381 head 82e6bfa9de85 | paths ['Projects Documents/API_Security_Functional_Testing_Architecture_Flow_Diagrams.html', 'Projects Documents/QA_Tool_Cheat_Sheet_Secuura_API_Testing.htm
+    WRITER #995 head b8155636e8e6 | KS-741: strip `x-emitter-internal` at originate's own inbound — the ma | ['Blockchain/Dev/services/originate/src/index.ts']
+    EXPECTED OVERLAP (reported_overlaps; reported, never sequenced by a gate) #995 head b8155636e8e6 | paths [] | title keys []
+    CENSUS 24 other open PR(s) read | 0 add/change a migration .sql | 1 touch a charge_events writer | 1 OVERLAP outside reported_overlaps | 3 expected overlap(s) reported | 4 kit path(s), keys ['KS-1376', 'KS-1401']
+--- 2. instrument B: git ls-remote origin (ONE read from the Secuura checkout, READ-ONLY)
+  ls-remote rc=0 at 07:21:32Z
+    46c3e20cfbd21acee0c67d544180c33deaa4c8ef	refs/heads/develop
+    7eccb131f2d627a628d41b2cd537e81ce9e52fc4	refs/heads/feature/ks-1401-tenant-isolation-after-039-f2-1
+    7eccb131f2d627a628d41b2cd537e81ce9e52fc4	refs/pull/1383/head
+--- 2b. the census
+REFUSING TO LAUNCH: another open PR touches a kit path or carries a kit key outside reported_overlaps — Wednesday sequences it; a re-draft decides

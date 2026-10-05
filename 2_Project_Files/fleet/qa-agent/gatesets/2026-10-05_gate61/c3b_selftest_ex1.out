@@ -1,0 +1,25 @@
+SELFTEST OK P-0 the expected readings (positive control): want PASS | failed NONE
+SELFTEST OK P-1 secuura_app bypasses RLS: want FAIL on X0 | failed ['X0 non-bypass roles']
+SELFTEST OK P-2 B rows still visible to A: want FAIL on X1 | failed ['X1 cross-tenant SELECT']
+SELFTEST OK P-3 no-GUC still 8 (fail-open): want FAIL on X2 | failed ['X2 no-GUC fail-closed']
+SELFTEST OK P-4 cross-tenant INSERT accepted: want FAIL on X3 | failed ['X3 cross-tenant INSERT']
+SELFTEST OK P-5 WITH CHECK refuses the RIGHT tenant too: want FAIL on X3 | failed ['X3 cross-tenant INSERT']
+SELFTEST OK P-6 the platform_admin carve-out broken: want FAIL on X4 | failed ['X4 platform_admin bypass']
+SELFTEST OK P-7 FORCE dropped: owner still sees 8: want FAIL on X5 | failed ['X5 FORCE binds the owner']
+SELFTEST OK P-8 certifications still default-deny: want FAIL on X6 | failed ['X6 own certification']
+SELFTEST OK P-9 superuser backfill missed the NULL row: want FAIL on X7 | failed ['X7 NULL row backfill (superuser apply)']
+SELFTEST OK P-10 fresh shape: certifications no policy: want FAIL on X8 | failed ['X8 fresh shape at head']
+SELFTEST OK P-11 a function body changed: want FAIL on X9 | failed ['X9 nothing else touched']
+SELFTEST OK P-12 oauth_apps_auth_lookup changed: want FAIL on X9 | failed ['X9 nothing else touched']
+SELFTEST OK P-13 a weakened qual on charge_events: want FAIL on X10 | failed ['X10 policy text == 039 users']
+SELFTEST OK P-14 the filtered dump unstable: want FAIL on X11 | failed ['X11 dump nonce filtered']
+SELFTEST OK P-15 lock_timeout NOT honoured (applied under the lock): want FAIL on X12 | failed ['X12 lock_timeout honoured']
+SELFTEST OK P-16 a partial commit under the lock: want FAIL on X12 | failed ['X12 lock_timeout honoured']
+SELFTEST OK W-0 the drafter's census shape (positive control): want PASS | failed NONE
+SELFTEST OK W-1 a NEW writer (UPDATE charge_events in metering.ts): want FAIL on W1 | failed ['W1 writer census == kit']
+SELFTEST OK W-2 a writer GONE (the INSERT moved): want FAIL on W1 | failed ['W1 writer census == kit']
+SELFTEST OK W-3 a NEW caller of createChargeEvent: want FAIL on W1 | failed ['W1 writer census == kit']
+SELFTEST OK W-4 a blind control (no billing_charge_events line): want FAIL on W1 | failed ['W1 writer census == kit']
+SELFTEST OK W-5 a billing_charge_events INSERT is EXCLUDED, never a WRITE: {'WRITE': 0, 'DDL': 0, 'CALLER': 0, 'READ': 0, 'OTHER': 0, 'EXCLUDED': 1}
+SELFTEST OK 23 of 23
+CHECKED 23 arm(s)

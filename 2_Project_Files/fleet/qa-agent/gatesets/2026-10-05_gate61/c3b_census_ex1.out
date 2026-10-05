@@ -1,0 +1,18 @@
+c3b census 2026-10-05T07:10:39Z | head 7eccb131f2d6 | git grep rc 0 | 29 line(s) under ['Blockchain/Dev/services/originate/src', 'Blockchain/Dev/services/api-gateway/src', 'Blockchain/Dev/packages/shared/src'] (tests excluded)
+WRITE  Blockchain/Dev/services/originate/src/services/chargeEvents.ts:180 | INSERT INTO charge_events (id, event_type, certification_id, initiated_by, tenant_id, amount, currency, status | runWithPlatformScope within 60 lines above: False | prisma.$executeRaw (GUC proxy) within 5 above: True
+WRITE  Blockchain/Dev/services/originate/src/services/gdprService.ts:561 | DELETE FROM charge_events WHERE initiated_by = ${userId} | runWithPlatformScope within 60 lines above: True | prisma.$executeRaw (GUC proxy) within 5 above: True
+DDL    Blockchain/Dev/services/api-gateway/src/startup-migrations.ts:332 | `CREATE TABLE IF NOT EXISTS charge_events (
+DDL    Blockchain/Dev/services/originate/src/index.ts:458 | CREATE TABLE IF NOT EXISTS charge_events (
+CALLER Blockchain/Dev/services/originate/src/routes/certifications.ts:593 | signCharge = await createChargeEvent('certification_sign', id, issuer.id, tenantId, { | tenant argument (4th): 'tenantId'
+CALLER Blockchain/Dev/services/originate/src/routes/certifications.ts:596 | anchorCharge = await createChargeEvent('blockchain_anchor', id, issuer.id, tenantId, { | tenant argument (4th): 'tenantId'
+CALLER Blockchain/Dev/services/originate/src/routes/certifications.ts:966 | const verifyCharge = await createChargeEvent('verification', id, verifier?.id || 'anonymous', getReqTenantId(r | tenant argument (4th): 'getReqTenantId(req'
+CALLER Blockchain/Dev/services/originate/src/routes/certifications.ts:1071 | const shareCharge = await createChargeEvent('share', id, user.id, getReqTenantId(req), { | tenant argument (4th): 'getReqTenantId(req'
+CALLER Blockchain/Dev/services/originate/src/routes/certifications.ts:1219 | const recertCharge = await createChargeEvent('verification_certificate', id, user.id, tenantId, { | tenant argument (4th): 'tenantId'
+CALLER Blockchain/Dev/services/originate/src/routes/certifications.ts:1357 | const exportCharge = await createChargeEvent('evidence_export', id, exporter?.id || 'anonymous', tenantId); | tenant argument (4th): 'tenantId'
+READ   Blockchain/Dev/services/originate/src/services/chargeEvents.ts:205 | SELECT * FROM charge_events
+READ   Blockchain/Dev/services/originate/src/services/chargeEvents.ts:273 | FROM charge_events
+READ   Blockchain/Dev/services/originate/src/services/gdprService.ts:998 | SELECT id, event_type, certification_id, amount, currency, fee_status, created_at FROM charge_events WHERE ini
+EXCLUDED (control) 0 billing_charge_events line(s); OTHER (comments / types / imports) 16
+FAIL W1 writer census == kit: WRITE 2 DDL 2 CALLER 6 READ 3 OTHER 16 | CONTROL billing_charge_events EXCLUDED 0 (> 0) | NEW/GONE NONE
+CHECKED 1 check(s)
+C3B CENSUS FAIL: 1 FAIL of 1 checks

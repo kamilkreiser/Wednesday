@@ -1,0 +1,303 @@
+{
+ "kit": "gate61",
+ "round": 61,
+ "drafted": "2026-10-05",
+ "client_project": "Secuura/Blockchain",
+ "ticket": "KS-1401",
+ "ticket_url": "https://linear.app/secuura/issue/KS-1401",
+ "tier": "T1",
+ "tier_reason": "tenant isolation (row-level security) on four tables, one of which (charge_events) holds billing rows; a migration that a gateway applies at boot and that every seat's pre-push runs via ks949",
+ "merge_seat": "Seat F 2nd",
+ "author_seat": "Seat F 2nd (pane Secuura/Blockchain-F, token f2)",
+ "pr": "1383",
+ "branch": "feature/ks-1401-tenant-isolation-after-039-f2-1",
+ "branch_rx": "^feature/ks-1401-tenant-isolation-after-039-f2-1$",
+ "pane_template": "QA/Secuura-ks1401-{PR}",
+ "launcher_template_out": "launch_qa_secuura_ks1401_{PR}.sh",
+ "prompt_template_out": "2026-10-05_secuura-ks1401-{PR}.prompt.txt",
+ "report_template": "2026-10-05-ks1401-{PR}-g61",
+ "go_template": "GO (Seat F 2nd): merge {PR} on gate61",
+ "verdict_subject_template": "[QA -> Wednesday] GATE61 #{PR} (Seat F 2nd author and merger; T1 KS-1401: migration 049 restores tenant isolation where 039 is already recorded; single-parent head, Q-M for a later merge-in)",
+ "head": "7eccb131f2d627a628d41b2cd537e81ce9e52fc4",
+ "end_tree": "b393b20f29b44be8e53a3258193c803cb4e6fb26",
+ "develop": "46c3e20cfbd21acee0c67d544180c33deaa4c8ef",
+ "develop_tree": "dab6adb69ea3c7966ec17111a139bb5bcfadb68c",
+ "develop_note": "develop at drafting = #1380's squash (KS-1333); read by Wednesday's ls-remote 06:54:27Z and by the drafter's ls-remote 06:55:59Z and fetch 06:56:30Z",
+ "squash_subject_declared": "KS-1401: migration 049 restores tenant isolation where 039 is already recorded",
+ "subject_max": 92,
+ "files": {
+  "Blockchain/Dev/migrations/049_ks1401_tenant_isolation_after_039.sql": [213, 0],
+  "Blockchain/Dev/scripts/__tests__/ks1401_049_tenant_isolation_after_039.test.sh": [320, 0],
+  "Projects Documents/API_Security_Functional_Testing_Architecture_Flow_Diagrams.html": [101, 1],
+  "Projects Documents/QA_Tool_Cheat_Sheet_Secuura_API_Testing.html": [40, 1]
+ },
+ "modes": {
+  "Blockchain/Dev/migrations/049_ks1401_tenant_isolation_after_039.sql": "100644",
+  "Blockchain/Dev/scripts/__tests__/ks1401_049_tenant_isolation_after_039.test.sh": "100755",
+  "Projects Documents/API_Security_Functional_Testing_Architecture_Flow_Diagrams.html": "100644",
+  "Projects Documents/QA_Tool_Cheat_Sheet_Secuura_API_Testing.html": "100644"
+ },
+ "migration": "Blockchain/Dev/migrations/049_ks1401_tenant_isolation_after_039.sql",
+ "migration_039": "Blockchain/Dev/migrations/039_rls_fail_closed.sql",
+ "migration_038a": "Blockchain/Dev/migrations/038a_ks1054_core_tables_before_039.sql",
+ "migrations_dir": "Blockchain/Dev/migrations/",
+ "test": "Blockchain/Dev/scripts/__tests__/ks1401_049_tenant_isolation_after_039.test.sh",
+ "ks949": "Blockchain/Dev/scripts/__tests__/ks949_main_seed_idempotence.test.sh",
+ "install_dir": "Blockchain/Dev",
+ "shared_dist": "Blockchain/Dev/packages/shared/dist/index.js",
+ "tables": ["charge_events", "certifications", "oauth_apps", "svc_webhooks"],
+ "default_tenant": "a0000000-0000-4000-8000-000000000001",
+ "suite": {
+  "assertions": 53,
+  "cells": 11,
+  "summary_rx": "^KS-1401: (\\d+) passed, (\\d+) failed \\(of (\\d+) assertions over (\\d+) cells\\)$",
+  "skip_rx": "KS-1401: SKIP|0/0 cells run",
+  "keg_rx": "^KS-1401: keg (.*)$",
+  "nonbypass_line": "CONTROL secuura_app is false/false",
+  "red_at_base_pass": [
+   "CONTROL secuura_app is false/false",
+   "RED GUC=A sees ALL 8 charge_events rows",
+   "RED tenant B's 3 rows leak to tenant A",
+   "RED with NO tenant GUC the table still returns 8",
+   "CONTROL superuser sees tenant A's certification",
+   "RED GUC=A sees 0 of its OWN certifications",
+   "charge_events @fixture = charge_events|12|true|false|false|0 (== B 50th)"
+  ],
+  "red_at_base_fail": [
+   "049 did not report a backfill of exactly 1 row",
+   "charge_events @head = ",
+   "certifications @head = ",
+   "charge_events policy text differs from 039's",
+   "certifications policy text differs from 039's",
+   "cross-tenant leak persists",
+   "no-GUC returns 8, want 0",
+   "certifications still denies the owner",
+   "cross-tenant INSERT was not refused"
+  ],
+  "stub_049": "-- gate61 RED-FIRST STUB: 049 replaced by a no-op so the suite measures the BASE state end to end (never committed)\nSELECT 1;\n",
+  "tampers": {
+   "T-FORCE": {
+    "anchor": "    EXECUTE format('ALTER TABLE public.%I FORCE ROW LEVEL SECURITY', t);\n",
+    "replace": "",
+    "must_fail": ["charge_events @head = charge_events|12|true|true|false|1"]
+   },
+   "T-QUAL": {
+    "anchor": "        USING (\n          (\n            current_setting('app.current_tenant_id', true) IS NOT NULL\n            AND current_setting('app.current_tenant_id', true) <> ''\n            AND tenant_id::text = current_setting('app.current_tenant_id', true)\n          )\n",
+    "replace": "        USING (\n          (\n            true\n          )\n",
+    "must_fail": ["charge_events policy text differs from 039's", "cross-tenant leak persists", "no-GUC returns 8, want 0"]
+   },
+   "T-GUARD": {
+    "anchor": "'UPDATE public.%I SET tenant_id = $1 WHERE tenant_id IS NULL'",
+    "replace": "'UPDATE public.%I SET tenant_id = $1'",
+    "must_fail": ["a pre-existing row changed", "049 did not report a backfill of exactly 1 row"]
+   }
+  }
+ },
+ "docs": [
+  "Projects Documents/API_Security_Functional_Testing_Architecture_Flow_Diagrams.html",
+  "Projects Documents/QA_Tool_Cheat_Sheet_Secuura_API_Testing.html"
+ ],
+ "platform_s_docs": [
+  "docs/platform_s_testing_architecture_flow_diagrams.html",
+  "docs/platform_s_testing_cheat_sheet.html"
+ ],
+ "doc_close_anchor_develop": "  </body>",
+ "doc_close_anchor_head": "</body>",
+ "flow_block_number": 22,
+ "flow_numbers_develop": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
+ "flow_numbers_head": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 22],
+ "block_lines": {
+  "Projects Documents/API_Security_Functional_Testing_Architecture_Flow_Diagrams.html": 100,
+  "Projects Documents/QA_Tool_Cheat_Sheet_Secuura_API_Testing.html": 39
+ },
+ "flow_h2": "<h2>22. Migration 049 restores tenant isolation where 039 is already recorded (KS-1401, KS 1376)</h2>",
+ "cheat_h2": "<h2>22. KS-1401 / KS 1376 &mdash; migration 049 tenant-isolation suite</h2>",
+ "cheat_prev_h2": "GET /api/anchors/:id blockNumber &mdash; KS-1333",
+ "timing_grep": {
+  "keys_rx": "ks1401|049_ks1401|tenant_isolation_after_039",
+  "control_rx": "Schemathesis",
+  "control_claimed": 54
+ },
+ "skill": ".claude/skills/secuura-test-discipline/SKILL.md",
+ "skill_blob": "eaf43dfd4d985bf9b0badbfc7e85561c13407e1f",
+ "blobs": {
+  "develop": {
+   "flow": "fc8b521e4a9e54551144c2dfe68a262683753f8d",
+   "cheat": "82dc1387af38b33712cfaa3cd5517b867f2bd362",
+   "039": "eb0909b4e25975c3f1ae3add59435e72070730f7",
+   "038a": "e835095a6113ecb6438beb3609aa373f63bf1077"
+  },
+  "head": {
+   "migration": "a1e8e39b1bbdaeebbb21a93d78fbf03140e205a7",
+   "test": "1c8d0910b0aed77d3355d0c976e5c51eb6e7444e",
+   "flow": "46135e10439351a89b22ea88264bfbc623a157cc",
+   "cheat": "dd185b250747476c689ea15d2e046103dea1f81a",
+   "039": "eb0909b4e25975c3f1ae3add59435e72070730f7",
+   "038a": "e835095a6113ecb6438beb3609aa373f63bf1077"
+  }
+ },
+ "trailer_control_commit": "bf277eead268",
+ "trailer_control_bytes_raw": 55,
+ "trailer_head_bytes_raw": 1,
+ "pr_text": {
+  "refs_line_rx": "(?m)^Refs KS-1401\\s*$",
+  "any_refs_rx": "(?m)^Refs\\b.*$",
+  "url": "https://linear.app/secuura/issue/KS-1401",
+  "closing_rx": "(?i)\\b(close[sd]?|closing|fix(e[sd])?|fixing|resolve[sd]?|resolving|complete[sd]?|completing)\\s*:?\\s*(KS-1401|#\\d+)",
+  "own_key": "KS-1401",
+  "test_evidence_rx": "(?m)^##\\s+Test Evidence\\b",
+  "never_demo_rx": "(?i)never reaches demo|never demo",
+  "kintsugi_only_rx": "(?i)kintsugi deploy",
+  "figures": {
+   "53 passed": "53 passed, 0 failed",
+   "11 cells": "11 cells",
+   "100755": "100755",
+   "block 22.": "`22.`",
+   "PostgreSQL 15.14": "PostgreSQL 15.14"
+  }
+ },
+ "not_covered_heading_rx": "(?mi)^##\\s+(NOT COVERED|Not covered)\\b.*$",
+ "not_covered_required": {
+  "live_sweep_5f": "(?i)live sweep",
+  "live_apply_owed": "(?i)apply round|not applied|applied to no|live apply",
+  "per_tenant_dbs": "(?i)per-tenant",
+  "expiry_checker": "(?i)expiry-checker",
+  "kintsugi_unmeasured_nulls_role": "(?is)unmeasured.{0,80}NULL count.{0,120}connecting role",
+  "suite_cost_every_push": "(?i)every seat's push|every push"
+ },
+ "not_covered_brief_item4": {
+  "applied on NO real database (in the section)": "(?i)applied to no real database|not applied to any|no real database",
+  "column nullability on kintsugi": "(?i)nullab",
+  "whether originate sets the GUC (ITEM 0's answer)": "(?i)GUC",
+  "038a false header": "(?i)038a",
+  "gateway-runner end state source-read": "(?i)gateway-runner|runStartupMigrations|source-read"
+ },
+ "gate_not_covered_seed": [
+  "the live apply and the §5f live sweep on kintsugi (049 is applied to no real database; the gate applies it to none)",
+  "the gateway-runner shape: runStartupMigrations() with CORE before and after 049 (source-read by the seat; the gate MAY measure it, budget-last)",
+  "the role the gateway applies migrations as on kintsugi (superuser / owner / BYPASSRLS): the NULL-only backfill under an already-FORCEd table is a silent no-op for a non-bypass owner (probe X7)",
+  "kintsugi's 8 rows' NULL count, tenant_id nullability, MULTI_TENANCY_ENABLED",
+  "per-tenant databases (CORE only, never file migrations)",
+  "originate's runtime GUC on every charge_events write path (source-read census only; no live request)",
+  "lock_timeout honoured inside the runners' own connection settings (the probe measures psql only)",
+  "demo: 049 never reaches it (Kam's card); nothing in the repo enforces that once 049 is on develop",
+  "preflight legs 3 / 4 / 8 (no stack)",
+  "the four platform suites (Schemathesis, Akto, Playwright, k6)"
+ ],
+ "writer_files": [
+  "Blockchain/Dev/services/originate/src/services/chargeEvents.ts",
+  "Blockchain/Dev/services/originate/src/db.ts",
+  "Blockchain/Dev/services/originate/src/index.ts",
+  "Blockchain/Dev/services/originate/src/routes/certifications.ts",
+  "Blockchain/Dev/services/originate/src/routes/metering.ts",
+  "Blockchain/Dev/services/originate/src/services/gdprService.ts",
+  "Blockchain/Dev/services/api-gateway/src/routes/proxy.ts",
+  "Blockchain/Dev/services/api-gateway/src/startup-migrations.ts",
+  "Blockchain/Dev/packages/shared/src/db/tenant-guc.ts",
+  "Blockchain/Dev/scripts/run-migrations.sh"
+ ],
+ "qm_disjoint_prefixes": [
+  "Blockchain/Dev/migrations/",
+  "Blockchain/Dev/scripts/__tests__/ks1401",
+  "Blockchain/Dev/docker/init/"
+ ],
+ "writer_census_roots": [
+  "Blockchain/Dev/services/originate/src",
+  "Blockchain/Dev/services/api-gateway/src",
+  "Blockchain/Dev/packages/shared/src"
+ ],
+ "writer_census_expected": {
+  "WRITE": [
+   "Blockchain/Dev/services/originate/src/services/chargeEvents.ts:180",
+   "Blockchain/Dev/services/originate/src/services/gdprService.ts:561"
+  ],
+  "DDL": [
+   "Blockchain/Dev/services/api-gateway/src/startup-migrations.ts:332",
+   "Blockchain/Dev/services/originate/src/index.ts:458"
+  ],
+  "CALLER": [
+   "Blockchain/Dev/services/originate/src/routes/certifications.ts:593",
+   "Blockchain/Dev/services/originate/src/routes/certifications.ts:596",
+   "Blockchain/Dev/services/originate/src/routes/certifications.ts:966",
+   "Blockchain/Dev/services/originate/src/routes/certifications.ts:1071",
+   "Blockchain/Dev/services/originate/src/routes/certifications.ts:1219",
+   "Blockchain/Dev/services/originate/src/routes/certifications.ts:1357"
+  ]
+ },
+ "probe": {
+  "tenant_a": "c0000000-0000-4000-8000-00000000000a",
+  "tenant_b": "b0000000-0000-4000-8000-000000000002",
+  "tenant_note": "the probe's tenant A is deliberately NOT the platform default tenant (the author's suite uses the default AS tenant A, so its 'A sees 5' mixes the backfill into the isolation count); here the backfilled rows land in a third tenant and X1/X2/X6 read isolation alone",
+  "owner_role": "g61_owner",
+  "app_role": "secuura_app"
+ },
+ "q_m": "Wednesday's ruling for this round (kit drafter commission, 2026-10-05 ~17:5x AEDT), gate57/gate59's M1-M4 extended: a LATER merge-in head M of #1383 over a develop D that moved is covered iff (M1) its tree == c4_docs_gate61.py's prediction recomputed on D (blocks in NUMBER order: 13. and 19. above 22.; the close-tag variant named by --anchor, default carry = #1383's own `</body>`), (M2) exactly two parents [the gated head 7eccb131f2d6, D], (M3) `git show --remerge-diff M` touches ONLY the two platform-k docs, (M4) 0 trailers, (M5) D descends from 46c3e20cfbd2, (M6) develop's advance 46c3e20cfbd2..D is path-disjoint from Blockchain/Dev/migrations/, scripts/__tests__/ks1401*, docker/init/ and every charge_events writer file in kit writer_files, and (M7) M is the ONLY new commit. Anything else re-gates.",
+ "ruling": "Kam's card secuura-tenant-isolation-migration-ks1401-1005 ruled a (2026-10-05 16:22:50 AEDT): write the migration now, apply with the kintsugi deploy, backfill = existing rows take the platform's default tenant, NEVER demo; Wednesday's ITEM 0 ANSWER to Seat F 2nd (2026-10-05 ~16:5x AEDT): Q-NAME 049, Q-ATOMIC one DO block, Q-BACKFILL (a) Kam's literal default-tenant rule NULL-only, Q-NOTNULL no SET NOT NULL, Q-ABSENT RAISE EXCEPTION, Q-LOCKTIMEOUT 5s, Q-HARNESS (a) scripts/__tests__ keg suite, Q-BLOCK 22., Q-KEYS Refs KS-1401 only (KS 1376 de-hyphenated, not attached); Wednesday's demo ruling: demo deploys under the October grant hold at develop SHAs that predate 049; Kam's 2026-09-11 TESTED merge grant",
+ "seat_brief": "/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/briefs_staged/2026-10-05_seatF2_ks1401_migration.md",
+ "seat_brief_sha256": "303f05529c72c029eea2a34db208d415abde27e2da3535fd0e06ee76f59485a9",
+ "seat_ready": "/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/briefs_staged/2026-10-05_seatF2_READY_1383.txt",
+ "seat_ready_sha256": "9ed2ab171eca7d01ebef154e810ee2d74dde9c427cc34aa8e9be2c91e77d43b1",
+ "b50_handover": "/Volumes/DevMASTER/!CODING/Secuura/Blockchain/5_Project_History/HANDOVER-seatB50-kintsugi-deploy.md",
+ "checkout": "/Volumes/DevMASTER/!CODING/Secuura/Blockchain/2_Project_Files",
+ "forbidden_root": "/Volumes/DevMASTER",
+ "secuura_env": "/Volumes/DevMASTER/!CODING/Secuura/Blockchain/4_Credentials/.env",
+ "gh_repo": "Secuura/Distributed_Secuura",
+ "qa_dir": "/Volumes/DevMASTER/!CODING/Testing Agent MAIN",
+ "reports_root": "/Volumes/DevMASTER/!CODING/Testing Agent MAIN/projects/secuura/reports",
+ "prev_report": "/Volumes/DevMASTER/!CODING/Testing Agent MAIN/projects/secuura/reports/2026-10-05-ks1333-1345-1380-1381-g57/report.md",
+ "prev_report_sha256": "02afc7eea195ed03eff6372fe41f494739c675c1e4d36e958e605a3ce06ea44d",
+ "prev_report_note": "gate57: the Q-M ruling (its :86-:97, M1-M4) this gate extends to M1-M7 for a later merge-in of #1383",
+ "sibling_report": "/Volumes/DevMASTER/!CODING/Testing Agent MAIN/projects/secuura/reports/2026-10-05-ks1005-1382-g59/report.md",
+ "sibling_report_sha256": "fe523893ab2b1ad14fc97cae7873d28b6511d9a3ab48555b885c494f8fa00daa",
+ "charter": "/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/QA_AGENT_CHARTER.md",
+ "compare_ahead": 1,
+ "usage_gate": "/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/usage_gate.sh",
+ "cockpit": "/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/cockpit/cockpit.sh",
+ "routing": "/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/inbox_routing.conf",
+ "census_keys": ["KS-1401", "KS-1376"],
+ "census_migration_rx": "^Blockchain/Dev/migrations/[^/]+\\.sql$",
+ "reported_overlaps": {
+  "1381": {
+   "head": "82e6bfa9de85e4d3b0da67afd4d3bf3698ad0584",
+   "paths": [
+    "Projects Documents/API_Security_Functional_Testing_Architecture_Flow_Diagrams.html",
+    "Projects Documents/QA_Tool_Cheat_Sheet_Secuura_API_Testing.html"
+   ],
+   "note": "KS-1345, Seat B 61st merges it FIRST (merge-in head 82e6bfa9de85, tree ba3527224ff6): adds block 13. to both docs before `  </body>`. After it lands #1383 needs a docs-only merge-in judged by c4_docs_gate61.py qm (M1-M7)."
+  },
+  "1384": {
+   "head": "852fc927632095fb603583cb543050d5edd66111",
+   "paths": [
+    "Projects Documents/API_Security_Functional_Testing_Architecture_Flow_Diagrams.html",
+    "Projects Documents/QA_Tool_Cheat_Sheet_Secuura_API_Testing.html"
+   ],
+   "note": "KS-1210 (Seat E 3rd, branch feature/ks-1210-oauth-app-scopes-and-ownership-e3-1), raised 2026-10-05 ~07:1xZ after the drafter's first census: doc block 18. (Q-E1) in both docs. If it lands before #1383, 18. sits above 22. in the merge-in; the SIM covers #1381 only. Drafter dry run 07:21Z."
+  },
+  "995": {
+   "head": "b8155636e8e60ee9646b10217859fcd274ef87f5",
+   "paths": ["Blockchain/Dev/services/originate/src/index.ts"],
+   "writer_ok": true,
+   "note": "KS-741 (x-emitter-internal stripped at originate's inbound), 5 files, open since long before this wave: it touches originate/src/index.ts, the file that wires the req.tenantId default + x-tenant-id fallback and tenantGucContext() (index.ts:245-257 at the head). Drafter census 2026-10-05T07:1xZ. REPORTED: the gate reads its index.ts patch (GET pulls/995/files) and rules whether it moves the tenant middleware; never sequenced by this gate."
+  },
+  "1382": {
+   "head": "80bafc849a54a9368810fd0fcd1ee1184fa608bf",
+   "paths": [
+    "Projects Documents/API_Security_Functional_Testing_Architecture_Flow_Diagrams.html",
+    "Projects Documents/QA_Tool_Cheat_Sheet_Secuura_API_Testing.html"
+   ],
+   "note": "KS-1005, gate59: adds block 19. to both docs before `  </body>`; if it lands before #1383, 19. sits above 22. in the merge-in."
+  }
+ },
+ "pr_body_read": {
+  "bytes": 10155,
+  "chars": 10082,
+  "sha256": "fc18d2c9a748b6fea556cff1adc56720f7b11b92ceb1e289601846ae9e22e6da",
+  "read": "drafter GET pulls/1383 2026-10-05T06:5xZ (scratch pr1383_body.md)"
+ },
+ "predictions_by_develop": {
+  "46c3e20cfbd21acee0c67d544180c33deaa4c8ef": {
+   "end_tree": "b393b20f29b44be8e53a3258193c803cb4e6fb26",
+   "how": "single-parent head on develop: the squash tree IS the head tree while develop is unmoved"
+  }
+ }
+}

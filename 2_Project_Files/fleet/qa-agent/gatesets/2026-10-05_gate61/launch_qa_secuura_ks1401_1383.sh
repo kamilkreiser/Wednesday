@@ -1,0 +1,95 @@
+#!/bin/bash
+# launch_qa_secuura_ks1401_1383.sh — cross-project QA agent, ONE gate (gate61, round 61) over ONE Secuura/Blockchain PR, FROZEN at ONE:
+# #1383 KS-1401 (T1, ROUND 1): migration 049 restores tenant isolation where 039 is already recorded (charge_events, certifications,
+# oauth_apps, svc_webhooks) + a 53-assertion keg suite (100755) + block 22. in both platform-k docs; a SINGLE-PARENT head. Merger: Seat F 2nd. PINNED by repin_and_launch_gate61.sh at
+# 2026-10-05T07:25:10Z from its own ls-remote + PULLS API reads: head 7eccb131f2d627a628d41b2cd537e81ce9e52fc4 on feature/ks-1401-tenant-isolation-after-039-f2-1, develop 46c3e20cfbd21acee0c67d544180c33deaa4c8ef. Shape copied from gate59's
+# launcher (a NEW COPY, never an edit).
+# exit 2:  QA project missing, or this launcher is not in the gateset dir it was filled for (a MOVED KIT).   exit 3-5: pins / prompt / repo missing.
+# exit 6:  the head is not at its branch AND refs/pull/<n>/head on origin.   exit 8: thinking directive / kit files named / an unfilled token.
+# exit 9:  STALE PIN: the pin is older than G61_MAX_PIN_AGE_S (default 1800 s) — re-pin and re-fill through repin_and_launch_gate61.sh.
+# exit 10: the GitHub compare develop...head: merge_base / ahead / behind / files != the pins.   exit 17: origin develop != the pinned develop.
+# exit 20: the prompt names the head in full.   exit 7: tier + FROZEN + round + tiering rule.   exit 33: the by-name keyword ladder (as tokens).
+# exit 39: the HOLDS + the named exceptions.   exit 34: the checks C1..C6 + C3b + Q-M by name.   exit 26: GO string.
+# exit 25: MERGE ADDENDUM + REPORT-HASH-LAST.   exit 23: verdict subject / sender / report dir.   exit 21: the LAUNCH path refuses when stdin
+# is not a TTY (`--check` is headless).   exit 16: a launch with a G61_* test override set.
+# G61_CUR_DEV / G61_HEAD / G61_PROMPT / G61_PINS / G61_NOW: test overrides (--check only). Opus by the configured default: the exec line carries NO --model.
+# Usage: launch_qa_secuura_ks1401_1383.sh [--check]
+set -u
+QA_DIR='/Volumes/DevMASTER/!CODING/Testing Agent MAIN'
+GS='/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/gatesets/2026-10-05_gate61'
+PROMPT_FILE="${G61_PROMPT:-$GS/2026-10-05_secuura-ks1401-1383.prompt.txt}"
+PINS="${G61_PINS:-$GS/pins_gate61.json}"
+REPO='/Volumes/DevMASTER/!CODING/Secuura/Blockchain/2_Project_Files'
+SECUURA_ENV='/Volumes/DevMASTER/!CODING/Secuura/Blockchain/4_Credentials/.env'
+PR='1383'
+HEAD_SHA='7eccb131f2d627a628d41b2cd537e81ce9e52fc4'
+BRANCH='refs/heads/feature/ks-1401-tenant-isolation-after-039-f2-1'
+DEVELOP_SHA='46c3e20cfbd21acee0c67d544180c33deaa4c8ef'
+PINNED_EPOCH='1791185110'
+FILES='Blockchain/Dev/migrations/049_ks1401_tenant_isolation_after_039.sql,Blockchain/Dev/scripts/__tests__/ks1401_049_tenant_isolation_after_039.test.sh,Projects Documents/API_Security_Functional_Testing_Architecture_Flow_Diagrams.html,Projects Documents/QA_Tool_Cheat_Sheet_Secuura_API_Testing.html'
+[ -d "$QA_DIR" ]      || { echo "QA project missing: $QA_DIR" >&2; exit 2; }
+_here="$(dirname "$(/bin/realpath "$0")")"
+[ "$_here" = "$GS" ] || { echo "REFUSING: this launcher lives in $_here but was filled for $GS — a MOVED KIT: run repin_and_launch_gate61.sh from its new home" >&2; exit 2; }
+[ -s "$PINS" ]        || { echo "pins missing or empty: $PINS" >&2; exit 3; }
+[ -s "$PROMPT_FILE" ] || { echo "prompt file missing or empty: $PROMPT_FILE" >&2; exit 4; }
+[ -d "$REPO" ]        || { echo "repo under test missing: $REPO" >&2; exit 5; }
+_age=$(( ${G61_NOW:-$(date +%s)} - PINNED_EPOCH ))
+[ "$_age" -le "${G61_MAX_PIN_AGE_S:-1800}" ] || { echo "REFUSING: STALE PIN — pinned ${_age}s ago (max ${G61_MAX_PIN_AGE_S:-1800}s); run repin_and_launch_gate61.sh, which re-pins and re-fills in the same action" >&2; exit 9; }
+[ "$(python3 -c 'import json,sys; p=json.load(open(sys.argv[1])); print(p["pr"], p["head"], p["develop"])' "$PINS")" = "$PR $HEAD_SHA $DEVELOP_SHA" ] || { echo "REFUSING: pins_gate61.json and this launcher disagree (a re-fill was interrupted)" >&2; exit 3; }
+[ "$(head -n 1 "$PROMPT_FILE")" = "ultrathink" ] || { echo "REFUSING: the prompt does not open with the thinking directive" >&2; exit 8; }
+for _f in README.md COMMISSION.md kit.json lib_gate61.py c1_pin_gate61.py c2_migration_gate61.py c3_run_gate61.py c3b_probe_gate61.py c4_docs_gate61.py c5_prtext_gate61.py c6_notcovered_gate61.py gh_census_gate61.py; do
+  [ -s "$GS/$_f" ] && grep -qF "$GS/$_f" "$PROMPT_FILE" || { echo "REFUSING: the kit file $GS/$_f is missing, empty, or not named in the prompt" >&2; exit 8; }
+done
+grep -qF "2026-10-05-ks1333-1345-1380-1381-g57/report.md" "$PROMPT_FILE" || { echo "REFUSING: the prompt does not name the previous round report (gate57)" >&2; exit 8; }
+grep -qF "2026-10-05_seatF2_READY_1383.txt" "$PROMPT_FILE" || { echo "REFUSING: the prompt does not name the seat's READY" >&2; exit 8; }
+grep -qE '\{\{[A-Z0-9_]+\}\}' "$PROMPT_FILE" && { echo "REFUSING: the prompt carries an unfilled double-brace fill token" >&2; exit 8; }
+grep -qF '<''PR>' "$PROMPT_FILE" && { echo "REFUSING: the prompt carries the unpinned PR placeholder" >&2; exit 8; }   # spelled split so this file carries no placeholder
+_LS="$(git -C "$REPO" ls-remote origin refs/heads/develop "$BRANCH" "refs/pull/$PR/head")"   # ONE read of origin
+CUR_DEV="${G61_CUR_DEV:-$(printf '%s\n' "$_LS" | awk '$2=="refs/heads/develop"{print $1}')}"
+[ "$CUR_DEV" = "$DEVELOP_SHA" ] || { echo "REFUSING: origin develop $CUR_DEV != the pinned develop $DEVELOP_SHA — run repin_and_launch_gate61.sh (a moved develop is a RE-DRAFT for this kit)" >&2; exit 17; }
+_h="${G61_HEAD:-$HEAD_SHA}"
+if [ "$(printf '%s\n' "$_LS" | awk -v h="$_h" -v r="$BRANCH" '$1==h && $2==r' | wc -l | tr -d ' ')" != 1 ] || [ "$(printf '%s\n' "$_LS" | awk -v h="$_h" -v r="refs/pull/$PR/head" '$1==h && $2==r' | wc -l | tr -d ' ')" != 1 ]; then
+  echo "REFUSING: #$PR — $_h is not at $BRANCH AND refs/pull/$PR/head on origin — the head moved (or the pin is wrong); a verdict is valid ONLY at its head" >&2
+  printf '%s\n' "$_LS" >&2; exit 6
+fi
+COMPARE="$(set -a; . "$SECUURA_ENV"; set +a   # the token lives only in this subshell, never in the exec'd agent's env
+H="$_h" DEV="$CUR_DEV" python3 - <<'PY'
+import json, os, urllib.request
+t = os.environ.get("GH_TOKEN", "")
+try:
+    c = json.load(urllib.request.urlopen(urllib.request.Request("https://api.github.com/repos/Secuura/Distributed_Secuura/compare/%s...%s" % (os.environ["DEV"], os.environ["H"]), headers={"Authorization": "Bearer " + t, "Accept": "application/vnd.github+json"}), timeout=60))
+    fs = sorted(x["filename"] for x in (c.get("files") or []))
+    print("%s ahead=%d behind=%d files=%d paths=%s" % (c["merge_base_commit"]["sha"], c["ahead_by"], c["behind_by"], len(fs), ",".join(fs)))
+except Exception as e: print("ERROR %s" % e)
+PY
+)"
+[ "$COMPARE" = "$DEVELOP_SHA ahead=1 behind=0 files=4 paths=$FILES" ] || { echo "REFUSING: #$PR — the compare is not the pinned merge_base / ahead 1 (the one commit) / behind 0 / the 4 paths:" >&2; echo "  got  $COMPARE" >&2; echo "  want $DEVELOP_SHA ahead=1 behind=0 files=4 paths=$FILES" >&2; exit 10; }
+grep -qwF "$_h" "$PROMPT_FILE" || { echo "REFUSING: the prompt does not name the head $_h in full" >&2; exit 20; }
+PROMPT_JOINED="$(python3 -c 'import re,sys; print(re.sub(r"\n\s*", " ", open(sys.argv[1], encoding="utf-8").read()))' "$PROMPT_FILE")"
+has() { printf '%s' "$PROMPT_JOINED" | grep -qF -- "$1"; }
+has "PR #$PR is KS-1401" && has "#$PR T1" && has 'THE GATE IS FROZEN at ONE PR' && has 'ROUND 1' && has 'round-1 NO GO goes back to the author for round 2' || { echo "REFUSING: the ticket / tier / FROZEN / round / tiering rule" >&2; exit 7; }
+has 'MEASURE, not conclude' && has 'RULE WHETHER IT BLOCKS' && has 'NAMES THE TREE' && has 'A check that prints nothing needs a control that prints' && has 'ASSERT THE FILENAME TOO' || { echo "REFUSING: the measurement rules" >&2; exit 33; }
+for _w in C1-PIN END-TREE NO-TRAILER SUBJECT-EXACT EXEC-BIT C2-MIGRATION LIVE-SQL-GUARD MUST-NOT NULL-ONLY-BACKFILL C3-SUITE C3-RED-FIRST C3-TAMPER NON-BYPASS IDEMPOTENCE-NONCE DATA-SAFETY POLICY-FIDELITY C3B-PROBE WRITER-CENSUS C4-DOCS C4-MERGE-IN Q-M C5-PR-TEXT CLOSING-WORD NEVER-DEMO C6-NOT-COVERED KEYSCAN-OWN-KEY READY-CLAIMS PR-BODY-CLAIMS PREFLIGHT-INCOMPLETE COLLISION-CENSUS NOT-TESTED-LIST TIERING DISK-ENOSPC REPORT-HASH-LAST; do   # AS A TOKEN: bounded by a non-[A-Za-z0-9-] character
+  printf '%s' "$PROMPT_JOINED" | grep -qE -- "(^|[^A-Za-z0-9-])$_w([^A-Za-z0-9-]|\$)" || { echo "REFUSING: the prompt does not carry the by-name keyword '$_w'" >&2; exit 33; }
+done
+has 'RED-FIRST at DEVELOP with a STUB 049' && has 'THREE INDEPENDENT TAMPERS' && has 'rolbypassrls=false' && has "the GATE's OWN cells" && has 'FORCE binds the OWNER' && has 'strip the comments FIRST' && has 'an INDEPENDENT number-order resolution' && has 'remerge-diff' && has 'path-disjoint' && has 'SECTION-BOUNDED' && has 'SELF-TEST ARM' && has 'BASELINE' && has 'never reaches demo' && has 'does not close KS-1401' && has 'PREFLIGHT-INCOMPLETE 12/15' || { echo "REFUSING: the checks C1..C6 / C3b / Q-M by name" >&2; exit 34; }
+has 'NO MERGE, NO PUSH to any PR branch, NO ticket state change' && has 'NO ticket filed' && has 'NEVER WRITE THE SHARED CHECKOUT. Findings only' && has 'Never `rm`' && has 'No `az` command of any kind' && has 'You NEVER reply to Peter' && has 'No image is built.' && has 'NEVER apply 049 to any database you did not create' && has 'THE NAMED EXCEPTIONS to those holds — these and NO others' && has 'TICKET STATE IS WEDNESDAY' && has '(X9) a throwaway PostgreSQL 15 keg cluster' || { echo "REFUSING: the HOLDS" >&2; exit 39; }
+has "WEDNESDAY'S signed GO naming the head" && has 'GO (Seat F 2nd): merge 1383 on gate61' && has 'The merge seat is Seat F 2nd' || { echo "REFUSING: merge authority / the GO string" >&2; exit 26; }
+has '## MERGE ADDENDUM' && has 'MG-1 4 over 4 paths' && has 'MG-11 subject <= 92' && has 'NO TRAILER' && has 'EVERY SUBJECT YOU PROPOSE MUST BE TRUE OF THE DIFF' && has 'is the LAST thing you write to report.md' && has 'sha256 report.md = <hex>' || { echo "REFUSING: the MERGE ADDENDUM rules / REPORT-HASH-LAST" >&2; exit 25; }
+grep -qF -- '[QA -> Wednesday] GATE61 #1383 (Seat F 2nd author and merger; T1 KS-1401: migration 049 restores tenant isolation where 039 is already recorded; single-parent head, Q-M for a later merge-in)' "$PROMPT_FILE" && has 'FROM coagent@agentmail.to' && has 'reports/2026-10-05-ks1401-1383-g61/' || { echo "REFUSING: the verdict subject / sender / report dir" >&2; exit 23; }
+_ANY_OVR="$(env | grep -c '^G61_')"
+NOTE="origin develop $CUR_DEV == the pinned develop | #$PR T1 ${_h:0:12} at branch AND pull/head | compare ok (ahead 1, behind 0, 4 paths) | pin age ${_age}s"
+if [ "${1:-}" = "--check" ]; then
+  echo "all guards pass:"
+  echo "  $NOTE"
+  echo "  pins, prompt, QA project and repo present; kit at its filled home; thinking directive; every kit file + the gate57 report + the READY named; no unfilled token, no PR placeholder"
+  echo "  the prompt carries 34 by-name keywords (as tokens), the tier lines, the checks C1..C6 + C3b + Q-M, the holds + named exceptions, the GO string, the addendum + REPORT-HASH-LAST rules, the verdict subject + report dir, the head in full"
+  [ "$_ANY_OVR" != 0 ] && echo "  (a G61_* TEST OVERRIDE is set)"
+  echo "  a launch (not --check) will refuse unless stdin is a TTY (exit 21)"
+  exit 0
+fi
+[ -t 0 ] || { echo "REFUSING: stdin is not a TTY — run this launcher in a cockpit pane, never inside a Bash tool" >&2; exit 21; }
+[ "$_ANY_OVR" = 0 ] || { echo "REFUSING: a launch with test overrides set" >&2; exit 16; }
+echo "$NOTE" >&2
+cd "$QA_DIR" || { echo "cannot enter $QA_DIR" >&2; exit 16; }
+exec claude --dangerously-skip-permissions "$(cat "$PROMPT_FILE")"

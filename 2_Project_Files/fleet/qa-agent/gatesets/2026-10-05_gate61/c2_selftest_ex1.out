@@ -1,0 +1,27 @@
+c2_migration_gate61 2026-10-05T07:06:26Z | clone /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/4633ab20-117b-4d2e-a571-ce5d0598b988/scratchpad/g61/clone | head 7eccb131f2d6 | develop 46c3e20cfbd2
+INFO 049 at 7eccb131f2d6: 11961 bytes, sha256 6ad3a01ac278021819ae0b3965113e4c7b4802275de8fda2a80ca34c48847e2c
+SELFTEST OK U1 a `--` inside a quoted string survives the stripper: stripped "SELECT 'a -- b'; SELECT 1;"
+SELFTEST OK U2 a /* */ comment (nested) is removed, live SQL after it kept: stripped 'CREATE POLICY y;'
+SELFTEST OK U3 a `--` inside a DO body is a comment, its quoted string is not: stripped "DO $q$ BEGIN RAISE NOTICE 'x -- y'; END $q$;"
+SELFTEST OK T0 the REAL 049 (positive control): want PASS | failed NONE
+SELFTEST OK T1 everything commented out (a blanked live-SQL guard): want FAIL on L0 | failed ['L0 live-SQL guard']
+SELFTEST OK T2 lock_timeout removed: want FAIL on M2 | failed ['M2 lock_timeout']
+SELFTEST OK T3 SET NOT NULL added: want FAIL on M3 | failed ['M3 no SET NOT NULL', 'M5 must-not']
+SELFTEST OK T4 absent table NOTICE-and-CONTINUE (039's old behaviour): want FAIL on M4 | failed ['M4 absent table RAISEs']
+SELFTEST OK T5 a self-insert into _secuura_migrations after the block: want FAIL on M1 | failed ['M1 one DO block', 'M5 must-not']
+SELFTEST OK T5b the same self-insert INSIDE the block: want FAIL on M5 | failed ['M5 must-not']
+SELFTEST OK T6 a DELETE inside the block: want FAIL on M5 | failed ['M5 must-not']
+SELFTEST OK T7 a DROP FUNCTION inside the block: want FAIL on M5 | failed ['M5 must-not']
+SELFTEST OK T8 oauth_apps_auth_lookup dropped: want FAIL on M5 | failed ['M5 must-not', 'M7 tables']
+SELFTEST OK T9 the NULL-only guard removed: want FAIL on M6 | failed ['M6 NULL-only backfill']
+SELFTEST OK T10 a top-level ALTER outside the DO block: want FAIL on M1 | failed ['M1 one DO block', 'M7 tables']
+SELFTEST OK T11 a second DO block: want FAIL on M1 | failed ['M1 one DO block']
+SELFTEST OK T12 a 5th table in the array: want FAIL on M7 | failed ['M7 tables']
+SELFTEST OK T13 one byte of the policy literal changed: want FAIL on M8 | failed ['M8 policy literal == 039']
+SELFTEST OK T14 038a edited in the same PR: want FAIL on M9 | failed ['M9 no other migration']
+SELFTEST OK T15 a second 049_ file at head: want FAIL on M10 | failed ['M10 name']
+SELFTEST OK T16 FORCE removed: want FAIL on M11 | failed ['M11 ENABLE + FORCE + replace']
+SELFTEST OK T17 ADD COLUMN unguarded: want FAIL on M12 | failed ['M12 ADD COLUMN guarded']
+SELFTEST OK T18 a literal table name in an ALTER: want FAIL on M7 | failed ['M7 tables']
+SELFTEST OK 23 of 23
+CHECKED 23 arm(s)
