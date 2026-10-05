@@ -44,11 +44,11 @@ Written 2026-10-05, 11:3x-11:4x AEDT (brief stamps from the shell: 11:35 AEDT), 
 
 | Brief | Rung | sha256 | Golden measured (scratch clone at 57fa9e31d7ce) | Queue status |
 |---|---|---|---|---|
-| `KS-723-anchors-tx/KS-723.md` | 4 | `cde0bd9bdd1c…` | red 3/5 → 5/5; anchoring 353 → 364 (+11, both carves stacked), the 1 failure the same pre-existing threadTokenMint/KS-562; tsc rc 0; YAML regen + spec-examples OK; strict | see Addendum |
-| `KS-723-anchors-get/KS-723.md` | 4 | `fae4c8ff635c…` | red 4/6 → 6/6; same suite figures; strict; stacks with tx | see Addendum |
+| `KS-723-anchors-tx/KS-723.md` | 4 | `cde0bd9bdd1c…` | red 3/5 → 5/5; anchoring 353 → 364 (+11, both carves stacked), the 1 failure the same pre-existing threadTokenMint/KS-562; tsc rc 0; YAML regen + spec-examples OK; strict | queued (Addendum) |
+| `KS-723-anchors-get/KS-723.md` | 4 | `fae4c8ff635c…` | red 4/6 → 6/6; same suite figures; strict; stacks with tx | queued (Addendum) |
 | `KS-1278-revoke-atomic/KS-1278.md` | 3 | `e949f1506da0…` | red 2/4 → 4/4; originate 90/1062 → 91/1066, 0 failed; tsc rc 0; negative control (no manifest line) → 1 failed; brief fences produce files sha1-identical to the golden | queued by Wednesday (see BLUF 5) |
-| `KS-948-mixed-backtick/KS-948.md` | 1 | `5488890f243a…` | red rc 1 (1 FAIL) → rc 0 (5 ok); subject suite 106/0 both sides; strict | see Addendum |
-| `KS-1333-blocknumber-pin/KS-1333.md` | 1 (test-only) | `8a65c5cb229f…` | green 3/3 at the tip; under the `:1317` tamper 1 red (B1) and 2 controls green | see Addendum |
+| `KS-948-mixed-backtick/KS-948.md` | 1 | `5488890f243a…` | red rc 1 (1 FAIL) → rc 0 (5 ok); subject suite 106/0 both sides; strict | queued (Addendum) |
+| `KS-1333-blocknumber-pin/KS-1333.md` | 1 (test-only) | `8a65c5cb229f…` | green 3/3 at the tip; under the `:1317` tamper 1 red (B1) and 2 controls green | queued (Addendum) |
 
 Each folder holds `golden.diff` (the writer's verified golden, git form). The KS-723 folders also hold `yaml_companion.diff` (the served YAML, which the raise seat regenerates). Folders that needed builder pins hold `spark.pins`.
 
@@ -132,3 +132,13 @@ So the ticket's own rule applies: pin it, do not coerce. The Linear reason comme
 - Open PRs were NOT censused (GitHub was not read). Wednesday's queue step should run `prs.py` on the briefs' files.
 - No Schemathesis, live stack or real Postgres. KS-1278's `$executeRaw` affected-count semantics and KS-723's declared shapes versus real bodies are reasoned.
 - node_modules come from the checkout's own install (HEAD `c56dd7c32`), not a fresh `npm ci`.
+
+## Addendum — the runner, the KS-1278 round and the queue (after Wednesday's message)
+
+- **KS-1278 round** (Wednesday-run, `spark/done.md` 11:40:00): verdict `FAIL — stopped at A3 (cannot sequence red-first without exactly one test file)`, 278 s wall, 85.6 s model, 25,639 + 3,414 tokens. This writer compared the model's `out.md.checker/patch.diff` with this brief's fences: every `+`/`-` line across all 4 files is IDENTICAL (`diff` rc 0). Classification: **harness, not model, not brief**. It is the A3 one-test/one-product clause named in BLUF 3. The model did rung 3 correctly on round 1. Counter: do not count it against KS-1278. Re-run when A3/A5 take multiple product and test files.
+- **Pins added** (`spark.pins`):
+  - KS-723 ×2: `ref=` the analytics ks1364 spec-render test (the same generateOpenApiDocument shape; anchoring has no spec test of its own), plus `line=410` / `line=484`.
+  - KS-948: `ref=` ks1054_deploy_sh_rc1_message.test.sh.
+  - KS-1333: `tier=code_patch` (its TEST-ONLY tamper mode, parsed by the builder: "TEST-ONLY tamper … index.ts:1317"), `ref=` ks1175-getid-view-wired.test.ts, `line=1317`, `ctx=65536` (the prompt is about 26K tokens).
+  - KS-1333 also gained a `Tier:` line and a `## The exact change` section saying "none in the product".
+- **`spark/round.sh --dry-run`: DRY-RUN OK** for KS-723-anchors-tx, KS-723-anchors-get, KS-948-mixed-backtick and KS-1333-blocknumber-pin, all at 14d40d4455c7. **All four were appended to `spark/queue.md`** (11:4x). `queue.sh` was not run.
