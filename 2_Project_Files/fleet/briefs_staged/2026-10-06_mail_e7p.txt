@@ -1,0 +1,240 @@
+AUTH {'spf': 'pass', 'dkim': 'pass', 'dmarc': 'pass'}
+QUESTION: plan confirmation (Seat E 7th). Measured 2026-10-05T23:52:20Z. READ-ONLY so far: no lock, no fetch, no
+transfer, no merge, no commit, no install, no ticket write, no repo edit. Holding for the ANSWER.
+
+SEAT IDENTITY — three instruments, agreeing
+  1. pane: $TMUX_PANE=%58, show-options -p -t %58 -> @cockpit_name = Secuura/Blockchain-E.
+     The BARE read returned 'wednesday' (%0, the real Wednesday session, pane title
+     "Wednesday agent bootstrap"). That is the FIFTH consecutive generation to hit it
+     (B 63rd, B 64th, B 65th, D 7th, me). I ran the assert in my FIRST tool call and never
+     announced the wrong seat. Control: #{@not_a_real_option} came back EMPTY.
+  2. process chain: my shell -> claude 74868 -> launcher 74866 running Launch_Claude.command
+     with '[cockpit] Secuura/Blockchain-E'. NOT Launch_Wednesday.command (that is pid 7118/47582).
+  3. brief interval: my LAUNCH BRIEF landed 23:26:50Z, launch 23:26:52Z = 2 s.
+  Co-tenants live: %56 Secuura/Blockchain (B 66th, pid 60060), %55 -R (Seat R 1st, pid 24391),
+  %57 QA/Secuura-ks1278-1393r2 (gate68, pid 64139). Matches the preflight KS-907 line.
+
+REFS AT BOOT (one ls-remote, 5 patterns, 23:34:41Z rc 0; develop re-read 2026-10-05T23:52:20Z)
+  develop              3f9ff4e1e1b93e2e704918a7825f13a72c9ec76f
+  refs/pull/1385/head  e41496448bd9799ae952997522106b099fcb4b3c
+  refs/pull/1393/head  b5adaba751d89fda0b138e0b8b74d702e2a2a429
+  refs/pull/1394/head  a94ec8f6a2c6ec382fb7b5dbafcf8a7f9ce68427
+  refs/heads/feature/ks-1256*  -> 0 refs
+  develop == P3's 3f9ff4e1e1b9: YES. So NO first-parent census and NO re-prediction was owed.
+  GIT_SSH_COMMAND is UNSET in my env and I never exported it; the repo's core.sshCommand carries
+  the key (preflight F-02 notwithstanding) and ls-remote ran rc 0.
+
+WORKTREE RE-READ (no writes)
+  s-e6-ks1256 HEAD = e16c3133c296eb5b57f098f23e16e5770439b419
+  abbrev-ref = HEAD (detached)   porcelain = 0
+  packages/shared/dist/index.js PRESENT, 17,746 B.
+  e16c3133: parent 22b268143a63, tree eaf5d58248bf, subject "KS-1256: an unreadable connector
+  allow-list fails closed with 503", %(trailers) EMPTY. 9 paths, NEITHER platform doc among them
+  (grep count 0, with a POSITIVE control: the same grep over develop's 5 paths returns 2).
+
+MERGE-IN PREDICTION, re-run in MY OWN scratch clone (clone --shared + a separate 'gh' remote,
+fetched BY SHA with -c core.sshCommand, never an export)
+  merge-base            22b268143a63
+  merge-tree --write-tree rc 0, tree 9c6cf01711271bdd87400b2893a78ddc62075962
+  expected 9c6cf01711271bdd87400b2893a78ddc62075962 -> MATCH
+  conflicted entries    0, parsed to the blank line
+  CONTROL: my first control (e16 vs its own parent) proved NOTHING, so I built a real one — a
+  synthetic two-sided edit in a throwaway repo: rc 1 and THREE stage entries. The parser does
+  report conflicts, so the 0 above is a measurement.
+  Doc blobs: merged tree flow=2d1cd366a8cb cheat=48c266810fe5 == develop's; e16c3133's
+  flow=6f573e6ca768 cheat=2e91250dbd3a == 22b2's. e16c3133 does not touch either doc.
+
+COLLISION CENSUS (measured)
+  22b2..3f9f = 5 paths (auth ks938 test A, mfa.ts M, users.ts M, both platform docs M).
+  e16c3133 = 9 paths. INTERSECTION = 0. Control: comm of the 9-path list with itself = 9.
+  SHARED STORE untouched by my clone+fetch: 3f9ff4e1e1b9 ABSENT, deadbeef... ABSENT,
+  rev-parse --all = 1599 lines (== P5).
+
+DOCS AT develop, newline-tolerant <h2> reader, with controls
+  flow  numbers tolerant = 1-14,18,19,20 (17);  same-line = 12. P8's under-count REPRODUCES.
+  cheat keys  = KS-1404 KS-1333 KS-1345 KS-1388 KS-1210 KS-1005 KS-938 (7).
+  '  </body>' exact-line unique: flow :3051 of 3053, cheat :4440 of 4442.
+  8 controls, 0 broken (planted <h2>\n form HIT by tolerant and MISSED by same-line, both for
+  the number and the key form; two negative <p> controls MISSED; both censuses non-vacuous).
+  TWO DEFECTS IN MY OWN FIRST READER, found by driving it, not reading it:
+   (a) '\s' matches a newline WHETHER OR NOT re.S is set — re.S governs only '.'. My "same-line"
+       arm was written with \s* and so was not same-line at all; its control could not fail.
+   (b) The cheat sheet puts the key at the END of the heading (<h2>Title &mdash; KS-938</h2>),
+       not the start. My reader anchored just after '>' and returned 0 keys. I reported it as a
+       FAIL rather than as an empty document (STANDING :335).
+  Consequence for ITEM 3: flow block 21. after 20.; cheat KS-1256 section after KS-938. Confirmed.
+
+e7 seat on e4 lock: 56 + d8 + f3 + g1 WAIT, 16 STOP, catch-all (Seat E 7th)
+  Reading 1 @ 23:41:36Z: real .push-lock-* = 0.  Reading 2 @ 23:43:04Z: 0.  Now: 0.
+  Control on the glob form: worktrees/s-e* = 4 (non-zero), so a 0 is a measurement, not a
+  broken glob. Nothing to attribute: no holder file exists to read a 'seat' field from.
+  (worktrees/ does hold lock-holder.json and lock-released.txt — neither is a .push-lock-*.)
+  *** P11 IS WRONG, AND IN MY FAVOUR. *** pushe4.sh ALREADY exposes FOUR wait slots:
+    :163 OTHER_LOCK_CHK  = .push-lock-56      :166 OTHER_LOCK2_CHK = .push-lock-f3
+    :171 OTHER_LOCK3_CHK = .push-lock-g1      :172 OTHER_LOCK4_CHK = .push-lock-d8
+  and the pre-push re-check loop at :205 iterates all four (counted: 4 OTHER_LOCK tokens in the
+  for-list). locke4.sh matches it (:275, :276, :291, :292) and STOP_LOCKS is 16 entries — your
+  block title's "16 STOP" is exact. So Q-WAIT7's contingency (write pushe7.sh for the missing
+  slots) is NOT needed: .push-lock-d8, Seat R 1st's LIVE lock, is already re-checked.
+  THE ONE REAL GAP IS A DRIFTED MESSAGE, not a missing check: :213 prints
+    "pre-push re-check: live co-tenant locks ABSENT ($OTHER_LOCK_CHK, $OTHER_LOCK2_CHK) ..."
+  — it names TWO while the loop checked FOUR. That is the drifted-message class this project keeps
+  recording (B 65th's commit56.sh file-count arm). PROPOSAL: copy pushe4.sh to pushe7.sh in MY
+  record folder, fix only that echo to name all four, and drive the WAIT/STOP arms with
+  OTHER_LOCK4 pointed at a planted dir in MY OWN scratchpad — NOT by planting .push-lock-d8 in
+  the shared worktrees/, which would impersonate Seat R 1st's live lock. Never editing E 6th's file.
+
+DEFECT A (your ADDENDUM 23:41:22Z) — ABSENT FROM MY COPY, 2x2 DRIVEN
+  My watcher caught your addendum itself on poll 4 at 23:41:34Z, classified FOR ME, and read the
+  B 66th and R 1st copies of it FOREIGN. It then exited, and I re-armed INSIDE the read step.
+  Your 2x2, as commissioned (fix ON/OFF x addressee LISTED/UNLISTED), 12 cells:
+    fix ON  + UNLISTED (Seat E 9th / X 9th / D 12th) -> "UNTAGGED - read it (addressee unknown)"  x3
+    fix OFF + the same three                          -> "FOR ME (my pane, no seat named)"        x3
+    fix ON  + LISTED (E 6th, E 8th) -> FOREIGN;  fix ON + (Seat E 7th) -> FOR ME
+  fix-ON leaks = 0. fix-OFF fires = 3, so the test is NOT blind.
+  THE FIX ALREADY EXISTS IN LANE E's LINEAGE and is Seat E 1st's work: the pane fallback carries
+  the conjunct 'and _addr is None' —
+      if _named(MY_PANE, s) and not others and _addr is None:
+  E 1st's own comment names the exact failure you describe ("ANSWER (Seat E 5th) classified FOR ME")
+  and says the fallback now requires that NO addressee parenthesis exists at all.
+  *** USEFUL TO SEAT R 1st: it does not need to design a fix. Removing that one conjunct is what
+  reproduces the defect; adding it verbatim is the whole repair. Credit to R 1st for finding it —
+  its lane descends from a generation that predates E 1st's conjunct. ***
+
+RE-SEAT RECEIPT (HAND-FIXES 1-6, every count printed)
+  Record folder 2026-10-06_seatE-7th created; 41 tools copied from E 6th's raise/, 0 differing by
+  cmp, manifest COPY-MANIFEST-e7.sha256 = 41 lines. 9 skipped (__pycache__, 3 merge54 logs,
+  5 s-e3-ks938 push records); .my-last-release excluded because the glob does not match dotfiles.
+  0 HANDOVER-seatE7* files exist. E 6th's handover: present.
+  HF1 trap 4 — MINE "e 6th"->"e 7th"; 9 constants added to OTHER_SEATS (e 6th, seat e 6th, b 66th,
+    seat b 66th, r 1st, seat r 1st, e 8th, seat e 8th, AND blockchain-r] — the R-lane PANE tag,
+    absent from every prior generation because lane R did not exist before today).
+    trap4_e7: 13 arms (7 REAL full-length subjects from the API, 6 constructed), 0 wrong;
+    10 tampers, 0 inert. Your E 6th-era forward arm 'GO (Seat E 7th)' now names ME and reads FOR ME;
+    E 6th's real GO reads FOREIGN; '(Seat E 9th)' reads UNTAGGED as :411 asks.
+    I then found my own tampers were WEAK: 8 of 10 only changed the ATTRIBUTION STRING
+    ('for e 6th,seat e 6th' -> 'for seat e 6th') while the WAKE CLASS stayed FOREIGN. That proves a
+    constant is READ, not that it GUARDS. So I added a defence-in-depth matrix: 4 shipped arms
+    (0 FOR-ME leaks), 10 one-guard-removed arms (0 leaks), 4 all-guards-removed arms (4 caught).
+    HONEST RESIDUAL: with ALL THREE B-lane guards stripped, '(Seat B 66th) ... beside E 7th on
+    lane E' reads FOR ME — the Seat B 56th prose-mention defect, re-opening exactly as documented.
+    Two independent guards hold it today (the foreign pane tag AND the two ordinals); E/R fall
+    through to UNTAGGED instead, which is safe by construction.
+  HF2 namechecke4.py — MINE e6->e7; b66/seatb66/ra1 added to FOREIGN. See the CONTRADICTION below.
+    Final run: rc 0, 7 checks, 0 bad, 24/24 controls fired, 1 positive OK.
+  HF3 locke4.sh — LOCK_SEAT example e6->e7 (1); LIVE echo/printf text 'Seat E 6th'->'Seat E 7th'
+    (1 line; comment prose left alone deliberately). bash -n OK.
+  HF4 raisee4.py REC and wdproofe4.sh:3 re-pointed to MY folder (1 occurrence each; grep for the
+    E 6th path now returns 0 in both). Set == read.
+  HF5 residue_audite4.py PREV_GEN e5->e6. STANDING :392 digit grep run first: no int()/\d\d/5[0-9]
+    assumptions in that file (control: 'def ' hits 1). Run: CHECKED 30 files, 5 excluded by name,
+    24 residue rows, CONTROL A and CONTROL B both discriminate.
+    I CLASSIFIED the 24 rather than quoting them: 8 are SHA substring artefacts ('e6' inside
+    88e8877a...909e6f94e, e6daa806e79a, 325131e1efae6d...) — E 6th's documented class — and 16 are
+    genuine e6 tokens, ALL of them in namechecke4.py (15) and raisee4.py (1) and ALL deliberate:
+    MY_FORMS, the plant list, FOREIGN's own e6 entry, my adopted branch and my adopted worktree.
+    GENUINE UNJUSTIFIED RESIDUE = 0.
+    The tool still prints 'VERDICT: FAIL — the lineage exemption matched NOTHING, so it is dead
+    code'. That is a complaint about the TOOL's own exemption pattern not matching my comment
+    style, not a finding about my tree. Reported, not suppressed; I did not chase it green.
+  HF6 every checker prints CHECKED: namecheck 7 checks / 24 controls; residue CHECKED 30 files;
+    trap4_e7 13 arms + 10 tampers; decisive matrix 18 cells; h2 census 8 controls; defectA 12 cells;
+    send guard 3 arms. No run checked 0.
+
+*** CONTRADICTION BETWEEN HAND-FIX 2 AND Q-BRANCH7 — the one thing I want your ruling on ***
+  HAND-FIX 2 says put 'e6' in namechecke4's FOREIGN. Q-BRANCH7 rules my branch name is
+  'feature/ks-1256-thrown-settings-read-refuses-connector-create-e6-1' in worktree 's-e6-ks1256'.
+  So THIS ROUND HAS TWO NAMESPACES: my SEAT token is e7 (lock seat, record folder), but the only
+  ref I will ever push carries e6. namechecke4 conflates them across three constants —
+  MINE (:69, used by verdict()), MY_FORMS (:270, used by ref_forms_report()), and FOREIGN (:139).
+  I drove every combination rather than guessing. What I landed on, rc 0:
+    - MINE = "e7" (your HAND-FIX, unchanged).
+    - MY_FORMS stays keyed e6 — it MUST match the ref that will actually exist.
+    - _planted reverted to e6 to AGREE with MY_FORMS. I had re-keyed it to e7 first; all four
+      ref forms went BLIND (plant no longer matched the table) and bad went to 1 — plant-vs-table
+      disagreement, which is exactly what E 6th recorded, re-earned by me.
+    - 'e6' IS in FOREIGN. Removing it made my branch read NEITHER when pulled out of ADOPTIONS and
+      the arm reported "an adoption that survives its own removal is a namespace licence" — the
+      declaration was doing no work. With e6 in FOREIGN the control discriminates properly:
+      ADOPTED -> removed FOREIGN -> restored ADOPTED.
+    - 'seate6' is NOT in FOREIGN: it IS MY_FORMS["ref namespace"] verbatim, and holding it in both
+      lists would make one spelling of my own namespace read MINE and FOREIGN at once.
+    - ADOPTIONS re-pointed from E 5th/E 6th's merged ks-938 branch to MY branch;
+      ADOPTED_WORKTREE from s-e3-ks938 to s-e6-ks1256; and a stale BRANCHES fixture row naming the
+      merged ks-938 branch removed (re-pointing it duplicated my own branch).
+  So lane E's backward FOREIGN coverage for E 6th is carried by the MAIL matcher (OTHER_SEATS
+  'e 6th'/'seat e 6th', HF1 — no collision there, because subjects spell it with a space), NOT by
+  the ref scanner. CONFIRM that reading, or tell me to key MINE/MY_FORMS to e6 instead and accept
+  that E 6th's other refs then read MINE.
+
+SKILL RULES at develop (blob eaf43dfd4d98, 642 lines)
+  §4 :362-:363 "Every test change updates its platform's two HTML docs, in the same commit — not a
+    follow-up." "Test change" means backend unit, integration, *or* systemTest.
+  :380-:385 the HTML docs carry the TIMINGS; stale timings are a defect; every per-tier/per-suite
+    wall-clock figure in CLAUDE.md / systemTest/CLAUDE.md / the skill must also appear in BOTH docs
+    and AGREE; the timing moves in the same commit; quote a MEASUREMENT with the date, never an
+    estimate. I will carry the HOST on every timing row.
+  :417-:418 if a change genuinely does not affect either doc, say so explicitly and why.
+  I will say in the PR body and the READY exactly what ITEM 5 prescribes: on the BRANCH the test
+  change (e16c3133) and the docs (my commit) are SEPARATE commits, and the squash merge lands them
+  on develop as ONE. I will not claim the branch satisfies "same commit" literally.
+
+TOOLS I WILL DRIVE, flags read
+  pushe4.sh <worktree> <branch> <seat> — :107-:110 refuse with no $3 ("seat has NO default; it
+    names the lock holder"); :151 takes .push-lock-e4 ITSELF, so I never wrap it; four WAIT slots
+    as above; push via -c core.sshCommand (:216), result in <TAG>-push.rc.
+  raisee4.py — required flags :53-:58 are --ready --tag --tip. *** IT DOES NOT FIT, and the reason
+    is stronger than "awkward": grep for 'pulls|pr create|api.github|POST' over the whole file
+    returns ZERO. It contains NO PR-creation code at all. It extracts a diff block from a READY and
+    git-applies it to a worktree, verifying HEAD == --tip. My branch is ALREADY COMMITTED: there is
+    no patch to apply and no PR for it to open. So I take Q-RAISE7's alternative as REQUIRED, not
+    merely accepted: a plain REST raise, HTTP 201, head == origin read in the same action, body
+    sha256 read back.
+
+MECHANICS
+  Watcher: pid 12238, ALIVE, re-armed INSIDE the addendum read step with SINCE=2026-10-05T23:41:22Z
+    (the newest mail I have actually READ, never a wall clock). Its ps file was written in an
+    earlier call. Fire rule driven BOTH ways via WATCHE7_FEED before arming: a FOR-ME feed fired on
+    poll 1 and exited; a foreign-only feed polled 12 times and stayed alive. I also re-keyed the
+    banner (it still said 'Seat E 6th') and the env prefix WATCHE4_* -> WATCHE7_* so a predecessor's
+    exported var cannot steer my watcher; no WATCH* was set in my env.
+  Send guard: driven three ways in one call — EMPTY pid rc 3, DEAD pid rc 4, LIVE pid rc 0.
+  df -m /Volumes/DevMASTER available: 698281 MiB (B 65th wrapped at 700,598; other seats are writing).
+  Worktrees: s-e* = 4 (s-e1-ks1005, s-e2-ks1210, s-e3-ks938, s-e6-ks1256). I touch only the last.
+  My ctx: I cannot read my own statusline. PLEASE READ MY CTX. I have not started ITEM 1.
+
+LAUNCHER PREFLIGHT WARNINGS, VERBATIM (4_Credentials/.launch_preflight_last.txt)
+  # launch 2026-10-05T23:26:52Z
+  [F-02] No SSH identity available for git (keychain not seeded, on-disk fallback off).
+         Run: ssh-add --apple-use-keychain ~/.ssh/secuura_blockchain_deploy_rw
+         Or temporarily: export SECUURA_ALLOW_ONDISK_KEY=1 before launching.
+         (git will use whatever core.sshCommand is already in the repo config.)
+  [KS-907] 3 other live session(s) on this project: PID 24391 (up since Tue  6 Oct 10:07:23 2026), PID 60060 (up since Tue  6 Oct 10:23:03 2026), PID 64139 (live claude session on this project).
+           The boot git-sync is READ-ONLY this launch — it will NOT pull in 2_Project_Files.
+  On F-02: it is accurate and it did NOT bite. The repo-local core.sshCommand names
+  3_Access_Keys/github_deploy_rw with IdentitiesOnly=yes, and ls-remote ran rc 0. I will NOT
+  export GIT_SSH_COMMAND (STANDING :412; F 4th's rc-141 root cause).
+
+PRE-RULED, CONFIRMED READ: Q-BRANCH7 (branch created only at the push, as the tool's <branch>);
+  Q-COMMIT7 (ONE new commit on top, not an amend); Kam's card a = no time hold; the ks1195 TITLE
+  ruling; Q-SEAT7 (.push-lock-e4, *e4 tools, token e7, folder 2026-10-06_seatE-7th); Q-XFER7
+  (transfer outside the lock, proven by rev-parse --all cmp); Q-RAISE7 (REST raise).
+  Q-WAIT7: CONFIRMED but its premise is void — all four slots already exist (see the lock block).
+
+MY OPEN QUESTIONS
+  Q1. Confirm the namespace resolution above (MINE=e7, MY_FORMS/_planted=e6, e6 in FOREIGN,
+      seate6 out, adoption declared), or rule the alternative.
+  Q2. Confirm pushe7.sh as a COPY for the :213 message fix only, with the WAIT/STOP arms driven
+      via OTHER_LOCK4 against a planted dir in MY scratchpad — never planting .push-lock-d8 in the
+      shared worktrees/ while Seat R 1st is live.
+  Q3. KS-1256 is a RUNTIME change and ITEM 6 says to ASK before pushing on PREFLIGHT 12/15 with the
+      stack down. Docker is untouched so far. Do you want me to bring a LOCAL stack up for the
+      preflight legs, or to push on 12/15 and report the ratio verbatim?
+  Q4. KS-1256 is in BACKLOG state with 0 comments (read-only; negative control KS-99999 ->
+      "Entity not found"). The HOLDS forbid any ticket state change, so I leave it. Confirm.
+
+PLAN, in order, on your ANSWER: ITEM 1 adopt -> ITEM 2 transfer then merge --no-ff under
+.push-lock-e4 -> ITEM 3 compose both doc blocks on the merged tree -> ITEM 4 ks1195 title only
+-> ITEM 5 one new commit + suite/tsc/check:openapi -> ITEM 6 push, REST raise, ONE READY
+-> ITEM 7 history, handover, WRAP. No merge. No force push. No deploy.
+
