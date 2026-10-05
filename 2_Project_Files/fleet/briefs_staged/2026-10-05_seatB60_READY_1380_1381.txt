@@ -1,0 +1,130 @@
+From: secuura-blockchain <secuura-blockchain@agentmail.to>
+To: ['wednesday-agent@agentmail.to']
+Date: 2026-10-05T03:45:55.000Z
+Subject: [Secuura/Blockchain -> Wednesday] READY FOR QA (Seat B 60th): #1380 (KS-1333) + #1381 (KS-1345) -> gate57
+---
+To Wednesday. From Seat B 60th. READY FOR QA: #1380 (KS-1333) + #1381 (KS-1345) -> gate57.
+
+Two PRs, one ticket each, both PUSHED and RAISED, both from base develop 3ce8cd4026a6e3241413e9c7533d5a84d10c1c79. I am HOLDING
+with the watcher armed. The remaining four briefed rows (KS-1388, KS-1278, KS-723, KS-948) are
+UNRAISED and handed over; the next row is PR 3, KS-1388.
+
+ALL REFS READ FROM ORIGIN IN THE SAME ACTION AS THIS MAIL
+  develop  3ce8cd4026a6e3241413e9c7533d5a84d10c1c79
+  #1380    ac9f67a661eababfff30a1128f14c853803bd584
+  #1381    7b356195a5e41d530c11f8e9286a6284be55b7c2
+  Both heads == the commits I built; the branch-not-found control returns nothing.
+
+PR 1 -> #1380  KS-1333 + the two owed doc fixes   TIER T2
+  url        https://github.com/Secuura/Distributed_Secuura/pull/1380
+  head       ac9f67a661eababfff30a1128f14c853803bd584
+  END_TREE   0dab53e2536639a66443021ce92a2e3e033124f9  <- its OWN head tree. PR 1 is first in
+             your table order and merges CLEAN onto develop: no merge-in, so the END_TREE is the
+             head tree with nothing predicted about it.
+  parent     3ce8cd4026a6 == the base
+  subject    81 chars, byte-equal, contains '(#' False
+  trailers   1 byte against the 55-byte control bf277eead268; 0 co-author lines
+  files      3: ks1333 test +33/-0, flow +68/-1, cheat +35/-2
+  pathgate55 PASS, 6 assertions over 3 measured paths, 0 failed, own must-hit controls firing.
+             FIRING CONTROL: this head against PR 2's declared set FAILS, naming
+             missing ['documentRepo.ts','routes/documents.ts'] and extra ['ks1333 test','cheat'].
+  suites     anchoring 354 -> 357 tests, 353 -> 356 passed, 1 failed BOTH ends, 0 NEW reds.
+             The red is threadTokenMint's emulator round-trip = KS 562, pre-existing, named.
+  red-first  BY TAMPER. index.ts:1317 Number(...) removed -> B1 red with
+             'expected [ true, false ] to deeply equal [ true, true ]', C1 and C2 GREEN, and all
+             three cells still RAN (so not a loadfail). Anchor proved unique first; restored by
+             content and re-asserted by sha256 31422a6ab3c74804 both sides, git clean.
+  golden     applied file byte-identical to the held golden, 33/33 '+' lines; 1-char control reads 1.
+
+PR 2 -> #1381  KS-1345                            TIER T1
+  url        https://github.com/Secuura/Distributed_Secuura/pull/1381
+  head       7b356195a5e41d530c11f8e9286a6284be55b7c2
+  END_TREE   fb53feacdf1d03e3e949f7cf3a607254e8e5d9c6
+             THIS NEEDS A MERGE-IN AFTER PR 1 LANDS, and Wednesday decides whether gate57 covers
+             a merge-in head whose tree == T2. Its own head tree is
+             22d84d9141c266ec25d3ffc46b74b66e04ace823; T2 is the PREDICTED post-merge-in tree.
+  prediction computed in a `git clone --shared` scratch clone, never in the shared store:
+             synthetic squash of PR 1 on the base -> merge-tree --write-tree with PR 2's head
+             -> rc 1, and the conflict is on EXACTLY the two Projects Documents files
+             (verbatim: "CONFLICT (content): Merge conflict in Projects Documents/
+             API_Security_..." and the same for QA_Tool_Cheat_Sheet). EVERY other path
+             auto-merged. Resolved by keeping each block in NUMBER order; the resolved tree
+             differs from the conflicted tree in exactly those two paths, and differs from PR 2's
+             head tree only in those two plus PR 1's own ks1333 test file.
+             Read back from T2: flow <h2> numbers [1..13] with 12 BEFORE 13; and PR 1's two ruled
+             edits SURVIVE the merge-in -- '# 36 cells' 1, '# 27 cells' 0,
+             'other 27 KS-1015' 0, '26 remain unowned' 1.
+  parent     3ce8cd4026a6 == the base
+  subject    77 chars (your brief PROPOSED 77; it measures 77), contains '(#' False
+  trailers   1 byte vs the 55-byte control; 0 co-author lines
+  files      4: ks1341a +22/-9, routes/webhooks.ts +4/-2, flow +91/-0, cheat +37/-0
+  pathgate55 PASS, 6 assertions over 4 measured paths, 0 failed, own controls firing.
+             FIRING CONTROL: this head against PR 1's declared set FAILS, naming 1 missing and
+             2 extra.
+  suites     originate 1062 -> 1063 tests, 0 failed BOTH ends, 0 NEW reds, 90/90 suites.
+  red-first  BY ASSERTION. Test section alone -> 1 failed / 9, the red being RED KS-1345 A0 on
+             'status: 500' expected vs '200' received, which is the swallow itself. All FOUR
+             loadfail signatures 0 in that run. Both sections -> 9/9.
+  files-cmp  applied == held proved on FILES: an INDEPENDENT strict apply onto the same base
+             blobs in a separate repo gives byte-identical results, sha256 2f8828ba0246 and
+             bca6c7da5118 on both sides. git regenerates +4/-2 and +22/-9 where the held patch
+             declares +5/-3 and +23/-10 (its no-op blank pairs), so the two are NOT cmp-equal as
+             DIFFS and I am not claiming they are.
+  tsc        5.9.3 named binary, rc 0 at base AND head, positive control rc 2 / TS2322.
+
+DOC BLOCK BYTE-IDENTITY
+  PR 1: exactly ONE replaced line in the flow (:1875) and TWO in the cheat (:3721, :3738),
+        0 deletions, measured by a line-level diff; everything else in both documents is an
+        addition. Q-27 proved by CHARACTER diff: same line length 71, exactly two differing
+        indices (63, 64); firing control on a 3-character mutation reads 3.
+  PR 2: PURE APPENDS, 0 replaced and 0 deleted lines in either document. Its tree still carries
+        '# 27 cells' 1 and 'other 27 KS-1015' 1 -- correct, those are PR 1's to change.
+
+PREFLIGHT, both pushes, quoted exactly and identically
+  "PREFLIGHT INCOMPLETE - 12/15 legs ran, 3 SKIPPED. Nothing failed."
+  "shell suites: 67 passed, 0 failed, 0 skipped (of 67)" / "OK - 13 code guards passed."
+  THE 3 SKIPPED LEGS ARE NOT NAMED, on purpose: .githooks/pre-push:273 says they are the
+  stack-dependent legs the verdict lists as SKIPPED when the stack is down (KS-1046), "not
+  enumerated here, an enumeration drifts". No local stack is up, which is that skip condition.
+  push rc 0 both; #1380 8m31s, #1381 6m40s; 0 orphaned login_stub pids under either worktree.
+
+MERGE-STATE READING, with its limit stated
+  Both PRs: mergeable True, mergeable_state 'unstable'. I cannot tell you WHY: the
+  check-runs and combined-status endpoints both return HTTP 403 to this PAT, so I have no
+  instrument for it and I am not guessing. 'unstable' means mergeable with a NON-REQUIRED check
+  failing or pending; it is not a blocker and it is NOT a statement that anything was tested --
+  the Test Evidence block carries the testing claim. What I COULD read:
+  /rules/branches/develop -> HTTP 200, rules ['deletion','non_fast_forward','pull_request'],
+  so there is a pull-request rule and NO required-status-checks rule on develop.
+
+TICKET STATE, and the 5f trap I closed
+  KS-1333 In Progress (self-moved on PR open, the integration's doing, reported and NOT reverted)
+  KS-1345 In Progress
+  Both attachments carry linkKind 'contributes' / 'contributes' -- the NON-closing kind, so neither
+  merge will move its ticket to Done. Proved rather than assumed: across 538 of this team's
+  issues the github attachments carry contributes 367, closes 65, links 7, so the field
+  discriminates and a real 'closes' link exists in the data (KS-1386 / PR #897). GitHub's side
+  agrees: 0 occurrences of Closes/Fixes/Resolves in either stored body.
+  Both bodies hyphenate ONLY their own key; every foreign key is de-hyphenated. 0 cross-repo refs.
+  Both bodies read back BYTE-IDENTICAL after the raise: sha256 4c7ab30afe78e293 (#1380) and
+  b32871e0af79840e (#1381).
+
+THE KS-1333 TICKET COMMENT, DRAFTED AND NOT POSTED
+  Per your ITEM 1 the recorded reason is yours, so I put it in the PR body and draft it here.
+  I will post it ONLY if a GO relays it. Draft:
+    "Measured at source, this route cannot hand the anchorStateSync writers a raw pg int8
+     string: rowToAnchor converts block_number through Number() at
+     services/anchoring/src/index.ts:1317, and the GET /api/anchors/:id handler answers the
+     mapped anchor.blockNumber || null, never the raw row. Pinned by three cells in
+     services/anchoring/src/__tests__/ks1333-get-by-id-blocknumber-is-a-number.test.ts (PR
+     #1380), red-proved by tamper. The guard is source-text because index.ts calls app.listen
+     at import. live sweep owed. Still open for a human: whether the four writers should use ??
+     rather than || 0, which is a question about the value 0, not about the shape pinned here."
+
+LOCK CENSUS: none. FUSE: 236.2 h to 2026-10-15T00:00:00Z, 3 rows, Seat F 1st's lane, I
+re-date nothing. ZERO fetches all session (Seat F 1st's fetch covered me under the shared rule,
+so Q-F's release is UNSPENT). No deploy, no az, no Docker, no migration, no ticket closed,
+nothing to Peter or Stuart, no POST /api/seen.
+
+HOLDING for your GO, one PR per GO, in table order: #1380 first.
+
