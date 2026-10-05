@@ -26000,5 +26000,47 @@
    "CARD nexusai-codeql-ruleset-main-pushes",
    "CARD mpscalc-codeql-scan-csharp"
   ]
+ },
+ {
+  "id": "hpsmpoc-require-sqlserver-ci-check-1006",
+  "client_project": "Datasec/HPSM-POC",
+  "title": "Make the new 'api on SQL Server' CI check required before merging?",
+  "bluf": "HPSM-POC CI now also runs the API and feedback tests on SQL Server (PR 112, merged as 6f6bc96 on gate B153 GO WITH NOTES). It caught B150's near-miss defect and a second planted one that the existing SQLite check misses, and it runs in parallel (PR 112's run: 9.1 min total). Today it reports but does not block merges; requiring it is a branch-protection setting, so it is yours. Today's required checks, as B152 read them: api, web, infra, secrets, dependency review. Both builder and gate recommend requiring it after a few clean PRs. (Prior-ruling gate read: the 10 matches share only the word 'required'; none is about this repo's CI checks.)",
+  "default_action": "Nothing changes: the check keeps running on every PR and Friday reads it before every merge, but it does not block.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Require it now",
+    "detail": "On https://github.com/datasecau/HPSM-POC/settings/branches → the rule for main → Require status checks → add 'api on SQL Server' → Save"
+   },
+   {
+    "key": "b",
+    "label": "Require it after a few more clean PRs",
+    "detail": "Friday watches the next PRs and re-asks with the run history and the exact click path"
+   },
+   {
+    "key": "c",
+    "label": "Leave it advisory",
+    "detail": "It keeps running and reporting; merges never wait on it"
+   }
+  ],
+  "recommended": "b",
+  "ts": "2026-10-06T04:35:17.976965+11:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "seat": "friday",
+  "prior_rulings_overridden": [
+   "2026-08-21 12:41",
+   "2026-08-21 13:58",
+   "2026-08-21 21:05",
+   "2026-09-03 16:21",
+   "2026-09-07 13:06",
+   "2026-09-07 13:23",
+   "2026-09-10 10:32",
+   "2026-09-11 16:55",
+   "2026-09-16 07:01",
+   "2026-09-21 09:52"
+  ]
  }
 ]
