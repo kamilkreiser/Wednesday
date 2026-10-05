@@ -19,6 +19,12 @@ supersede: replace wholesale at the next pickup; do not append. Previous copy: N
 4. EXPIRING-GRANTS: "SPEND PAST THE 90%" is marked ENDED (account switched). Friday's "ignore the 90%" row is Friday's and is not touched.
 
 ### LIVE RIGHT NOW
+**🟠 16:0x 2026-10-05 (seat b72c1f78). READ FIRST; supersedes the 50% block below where they differ:**
+0. Kam: no rows since 13:03:43. reconcile 0.
+1. **#1380 MERGED → develop 46c3e20cfbd2, verified at source by Wednesday** (scratch fetch from GitHub: tree dab6adb69ea3, 1 parent fe6daca343c1, 0 trailers, 3 paths). gate57 GO both, scored 1.0, pane closed.
+2. **#1381 (KS-1345, T1):** B 60th (%18, ctx 70%) builds the merge-in, sends STATUS `merge-in 1381 ready` with M1-M4 (M1 tree == ba3527224ff6, M2 two parents [7b356195a5e4, 46c3e20cfbd2], M3 remerge-diff docs only, M4 0 trailers), then WRAPS cold (budget ANSWER 16:0x). **Then: verify M1-M4 yourself, launch a B 61st successor whose ITEM 1 = merge #1381 on `GO (Seat B 61st): merge 1381 on gate57` (the GO string changes seat; say SUPERSEDES), then file the N-1381-1 ticket (connector principals on webhooks), then PRs 3-6 (KS-1388, 1278, 723, 948) + the 5 Spark HOLDs (KS-591 ×4 one PR, KS-593).** GO template `fleet/briefs_staged/2026-10-05_GO_seatB60_1380.md`.
+3. **Seat E 2nd LIVE %24** (`Secuura/Blockchain-E`), brief `fleet/briefs_staged/2026-10-05_seatE2_successor.md`, in ITEM 0 (read-only). B 60th ACKED the e2 lock mirror 04:51Z (accepted 15:5x) → **E 2nd's ITEM 0 ANSWER quotes that ACK and releases its lock; rule Q-F2 (one bounded fetch at ITEM 2), Q-ROLES (local copies + drift cell), Q-BATCH (KS-1005 → gate59 now; 1210+938 → gate60), Q-ADOPT (push `-e2-1`).** Co-tenant for E 2nd changes when B 61st launches: mirror addenda both ways.
+4. Spark brief batch drafter (subagent of THIS seat) still running → check `local-model/night/briefs/` + `local-model/spark/queue.md`, then start `local-model/spark/queue.sh` (bg) + review agent per PASS.
 **🟠 50% CHECKPOINT 15:3x 2026-10-05 (seat b72c1f78, booted 15:27 as 707ca275's successor). READ FIRST; the 15:2x block below still holds where this does not speak:**
 0. Kam: 9 rows today, newest 13:03:43, all recorded; reconcile 0. Card `wed-old-docker-image-232gb-1005` WITHDRAWN (moot, file absent). Open Secuura cards unchanged: kintsugi deploy · tooling-off-board · KS-1401 migration · KS-1256.
 1. LIVE: gate57 %23 (#1380 + #1381, C4 predictions at 15:3x, ctx 22%) → on verdict follow the 15:2x item 2 exactly. B 60th %18 working (pane 9 rows: resize to 14 before reading ctx).
