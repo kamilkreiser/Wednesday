@@ -12,6 +12,17 @@ supersede: replace wholesale; previous = NEXT-PICKUP-FRIDAY.md.pre-0925-rotate-s
 
 **The tree is at `/Volumes/Laptop-DEV/FRIDAY` (the drive, since 2026-09-28).** Quote every path (spaces).
 
+## 🔴🔴🔴 CHECKPOINT 2026-10-06 10:53 (Friday, ctx 65%) — READ FIRST; supersedes every block below where they differ
+**Kam since 10:4x (all receipted):** ~10:4x terminal "Look into my feedback from Policy composer and action these as a priority" (B86) · 10:50:07 review the Threat Assessment tool PROPERLY, work with the agent; Composer work "disappointing" (ledger row; diagnosis owed after B86's list) · 10:51:40 FTI Q1 yes (show beyond HP) Q4 yes (keep running); both tools externally available in Azure; per-engagement link or upload/sync with configurable source + secrets · 10:52:24 agrees with the approach.
+**LIVE PANES:**
+- Datasec/Composer-D %70 **B86** Kam's Composer feedback (`Composer …/Briefs/2026-10-06_B86_kam-feedback-triage-and-fix-lanes.md`): CHECKPOINT 1 FEEDBACK LIST → Friday reads before fixes go far → fixes on b86/kam-feedback-1006 → no deploy without a card.
+- Datasec/HPSM-POC-B %68 **B160** on ADDENDUM-2 (C-entry for Kam's 10:51 answers + note update on records/b160) → then Friday opens the records PR (records/b160 was db1df5f, 69 files).
+- Datasec/HPSM-POC-C %71 **B162** FTA+SM input design, THREE STOPS (CP1 FTA data inventory · CP2 input map · CP3 design FOR-KAM) — Friday reviews each against sources, answers by addendum. ADDENDUM-1 = Kam's link/sync + secrets requirement.
+- Datasec/HPSM-POC-D %69 **B161** SM lift-out matrix (`Content/hpsm-sm-3.16/2026-10-06_SM-lift-out-matrix_FOR-KAM.md`) finishing; Friday owes an addendum: headline "13 of 16" vs the list's 14 + records PR; then tell Kam (8 HP questions + K-B161-1 baseline-policy question → cards).
+- Datasec/HPSM-POC-E %72 **B163** external access options for SM + FTA, priced, NOTHING opened → a card for Kam.
+**Watchers:** seen_b86 seen_b160 seen_b162 seen_b163 (+ a background idle-wait on %69) — die with the seat.
+**Open with Kam:** the channel for Paul's SM password.
+
 ## 🔴🔴🔴 CHECKPOINT 2026-10-06 10:16 (Friday, ctx 60%) — READ FIRST; supersedes every block below where they differ
 **Kam today (all receipted):** 07:06 deploy a → DONE (hosted **646870e**, B157, C-63, HPSMPOC-208 proven 0/0/0, Friday verified live 09:4x); 07:07 SQL Server check b (advisory; re-ask after a few clean PRs with run history + click path); ~09:1x "keep going"; ~09:4x FTI zip "file, review and apply" (B160); 09:50 "was SM deployed by you?" (answered: yes, B106, 3 Oct); 09:52 SM access for him + Paul (steps on the panel bf-86002f6ebe0c9; PASSWORDS NOT SENT — B106: secure channel only; **asked which channel for Paul's — open**) + screen-by-screen SM survey (B161). Bastion Basic ≈A$203/mo = his money call (told).
 **MAINS:** HPSM-POC **8798fa7** (#113 646870e + #114 ci-only) · hosted **646870e** · analysis **11bbac9** (records #80–#83 merged) · Composer fd9493f = demo.
