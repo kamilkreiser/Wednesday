@@ -19,6 +19,11 @@ supersede: replace wholesale at the next pickup; do not append. Previous copy: N
 4. EXPIRING-GRANTS: "SPEND PAST THE 90%" is marked ENDED (account switched). Friday's "ignore the 90%" row is Friday's and is not touched.
 
 ### LIVE RIGHT NOW
+**🟠 50% CHECKPOINT 15:3x 2026-10-05 (seat b72c1f78, booted 15:27 as 707ca275's successor). READ FIRST; the 15:2x block below still holds where this does not speak:**
+0. Kam: 9 rows today, newest 13:03:43, all recorded; reconcile 0. Card `wed-old-docker-image-232gb-1005` WITHDRAWN (moot, file absent). Open Secuura cards unchanged: kintsugi deploy · tooling-off-board · KS-1401 migration · KS-1256.
+1. LIVE: gate57 %23 (#1380 + #1381, C4 predictions at 15:3x, ctx 22%) → on verdict follow the 15:2x item 2 exactly. B 60th %18 working (pane 9 rows: resize to 14 before reading ctx).
+2. IN FLIGHT (in-session drafters of THIS seat; they die at rotation, check outputs): (a) Seat E 2nd brief → `2_Project_Files/fleet/briefs_staged/2026-10-05_seatE2_successor.md` (KS-1005 push+raise → KS-1210 per Q-1210 + KS-855 comment → KS-938; co-tenant B 60th FOREIGN; e1→STOP, `.push-lock-e2`); read WHOLE → brief_and_launch to `Secuura/Blockchain-E` → rung 5 → ITEM 0. (b) Spark brief batch (≤10, excludes B 60th + E 2nd files + auth) → `local-model/night/briefs/<TAG>/` + lines APPENDED to `local-model/spark/queue.md` after dry-run OK → Wednesday starts `local-model/spark/queue.sh` (bg) → review agent per PASS (Kam's rule).
+3. Spark raise seat for the 5 HOLDs (KS-591 ×4 one PR + KS-593) still owed — fold into B 61st after B 60th wraps, or a parallel seat if partition allows.
 **🔴 ROTATION HANDOVER 15:2x 2026-10-05 (seat 707ca275 → the next seat, ctx 78%). FIRST ACTS; supersedes every block below:**
 0. `kam_rulings_today.sh` + `reconcile_rulings.py` first. Kam's last row 13:03. OPEN cards (Secuura): kintsugi deploy · tooling tickets off the board (192) · tenant-isolation migration KS-1401/1376 · KS-1256 missing-setting; WED card `wed-old-docker-image-232gb-1005` MOOT (he deleted it) → close it. Panel asks pending: laptop copies 926 GB → G-DRIVE? (default stay) · ASK_LIST (46 Peter/Stuart tickets).
 1. **develop = fe6daca343c1** (#1379 KS-749 merged, VERIFIED at source by a GitHub fetch into the seat's own scratch clone; 15-Oct fuse CLEARED). Next fuse Sat 31 Oct (4 rows; braces KS-1403 no fix) → card Kam before ~Mon 26 Oct.
