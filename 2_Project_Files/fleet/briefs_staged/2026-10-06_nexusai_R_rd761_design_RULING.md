@@ -1,0 +1,16 @@
+RULING to Datasec/NexusAI-R (S89R) only, on your QUESTION 18:42Z "RD-761 design". M, N, O: not yours. Record the rulings below as ONE new C-number in CLARIFICATIONS (owner Tuesday, this mail) and mail me the line.
+
+(a) ACCEPTED as you designed it: a new backend/services/lawEndpointPolicy.js; a frozen host -> CONSTANT base URL map; https only, no userinfo, no port, exact host, path '' or /v1 only, no query or fragment. The sink sends the map's constant and resolves the base at request time BEFORE getAccessToken(), so a refused endpoint mints no token and sends nothing. The writers get an early 400 from the same module (C-15, C-41). maxRedirects: 0 on the three bearer-carrying calls, ACCEPTED.
+  - The hosts: api.loganalytics.azure.com, api.loganalytics.io, api.loganalytics.us. KEEP .us: it is sourced and Microsoft-operated, so it sends no token to a third party; whether it can work is RD-792's question. .cn and regional hosts are OFF (unsourced, C-74 Q3).
+  - No address-class layer: these are Microsoft's fixed public hosts, and an exact match on a constant is the stronger control. Your reasoning is right.
+  - Your C-76 marking stands: whether a constant closes #23/#24/#26 for CodeQL is measured by the PR run, never assumed.
+(b) ACCEPTED: adminGateRefuses on the four writers (:14589, :15501, :15527, :16950). The open window is unchanged by construction (C-01/C-41/C-178), and SEC-01 remediation 2 is untouched. The named residual (sign-in configured + first run incomplete, the RD-437 state) goes on RD-761 in one sentence, as C-178 ruled it. Shape (ii) is REJECTED for the reason you gave.
+  - The OTHER mutators (DELETE /api/data-sources/:id, the tables POST/DELETE, DELETE /api/setup/data-sources/:id): a SEPARATE ticket, High, our account, linked to RD-761, with your four line numbers. Keep RD-761 the CodeQL fix. File it now.
+(c) ACCEPTED: refuse at use, named (LAW_ENDPOINT_NOT_ALLOWED); log the HOST only; say where to fix it; never migrate or rewrite. Your cell measures the boot-probe/DEGRADED path; do not assume it.
+(d) ACCEPTED: GUID check on all four writers when tenantId is present, and at the sink in getTokenViaServicePrincipal. Report #25's state from the PR run.
+(e) ACCEPTED, the slice, AFTER RD-761: the runtime Ollama path only (ollamaAdapter.js, the 'ollama' case in llm/index.js, the ai-test and ai-config Ollama branches, isOllamaEndpointAllowed). Dependent cells are rewritten, never deleted. TICKETS: file a NEW ticket for the SLICE (Highest, carrying #27/#19/#20, linked to RD-478). The REMAINDER stays on RD-478. RD-478 returns to Medium only AFTER the slice MERGES, with one comment saying so. Send me the exact slice size (files, suites, server.js lines) before you build it, and sequence the :795-835 edit with M (RD-618/RD-735 are in that neighbourhood).
+
+Gate: RD-761 is TIER 1 (a security control on a credential-bearing path), round 1 of 2. The slice is its own tier-1 READY. Both READYs carry PRIOR WORK (your seven points are a model of it) and the CodeQL pre-scan for BOTH thresholds.
+RD-792 (sovereign-cloud support) is Kam's product call. Tuesday puts it to him as one line; not blocking.
+You may now edit product code for RD-761.
+-- Tuesday
