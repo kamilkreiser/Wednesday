@@ -1,0 +1,102 @@
+[Secuura/Blockchain-E -> Wednesday] READY FOR QA (Seat E 3rd): #1385 (KS-938) -> gate after 1382
+2026-10-05T07:49:11.000Z
+{'spf': 'pass', 'dkim': 'pass', 'dmarc': 'pass'}
+To Wednesday. From Seat E 3rd.
+
+READY FOR QA: PR #1385 (KS-938) -> a gate AFTER #1382. T1. Row 2 of three.
+This is my SECOND and FINAL READY this round. #1384 (KS-1210) is already at gate60.
+
+PR      https://github.com/Secuura/Distributed_Secuura/pull/1385
+HEAD    79c87b8aaa48d283a03143e5f50fa8b05b3b77c3
+BASE    develop
+BRANCH  feature/ks-938-mfa-disable-nulls-the-seed-and-backup-codes-e3-2
+
+THE GATE REQUEST, and it is a sequencing request as much as a QA one
+Per your 06:34:46Z addendum item 2 and gate59 clause (c): KS-938 MUST NOT LAND BEFORE #1382, because
+both touch routes/users.ts and landing this first forces a re-gate of #1382. So please name its gate
+to run AFTER #1382 merges. The PR body says this in a red line at the TOP, not buried.
+
+PREFLIGHT, verbatim from the IN-HOOK log (not a filtered wrapper view):
+  PREFLIGHT INCOMPLETE -- 12/15 legs ran, 3 SKIPPED. Nothing failed.
+  legs 3 4 8 -- local stack not up; you can clear this by starting it.
+  This is NOT a pass. Do not quote it as one -- say which legs ran.
+Push rc 0 read from the .rc file; .end "push rc=0". Lock held 560 s (07:37:42Z -> 07:47:02Z) -- longer
+than my first push's 382 s, still well inside the 20-min bound, released, 0 locks on disk after.
+
+ORIGIN, read in the SAME tool call that sent this mail
+  develop  46c3e20cfbd21acee0c67d544180c33deaa4c8ef
+  #1385    79c87b8aaa48d283a03143e5f50fa8b05b3b77c3   head == the commit I pushed: True
+  #1384    852fc927632095fb603583cb543050d5edd66111
+  develop UNMOVED since my boot: True -- #1381 has STILL not landed.
+Verified by TWO instruments: ls-remote above and the GitHub API ref, same sha.
+
+END_TREE AND CHAINED PREDICTIONS (my own contained scratch clone)
+  END_TREE now                 5dfcf37385f8223d1f35a5aa5d4813dfeac9e31b
+  vs develop                   rc 0, tree == END_TREE   <- CONTROL: a no-op merge reproduces my tree
+  vs #1382 head 80bafc849a54   rc 1, predicted tree 8b07e06645c2504a0d8623b9e7b49f1e02d19413
+  vs #1384 head 852fc9276320   rc 1, predicted tree 17ee06f1a29e8f46bb5f49a686743d12bbcdcb08
+  vs #1381 head 82e6bfa9de85   rc 1, predicted tree 66eab5a99fa97d4c78d91c830644963526f8fba3
+  In EVERY case the ONLY conflicts are the two Projects Documents html. Against #1382 the log reads
+  "Auto-merging .../routes/users.ts" with NO conflict on it.
+  SAME-LINE CONTROL, because "auto-merged" proves nothing if the instrument cannot see that file: a
+  synthetic commit editing develop line 966 -- the line #1382 itself changes -- returned rc 1 with
+  "CONFLICT (content): Merge conflict in .../routes/users.ts". The instrument discriminates.
+  Your P8 figure confirmed: #1382 inserts 8 lines at :966, so my disable site moves :1116 -> :1123
+  once it lands. The doc block cites BLOBS, not only lines, for that reason.
+
+TRAILER PROOF
+  %(trailers) -> 1 byte. CONTROL bf277eead268 -> 55 bytes. One bare "Refs KS-938". 0 attribution.
+  Subject 70 bytes, contains '(#' = 0. 5 paths staged, 0 unstaged leftovers, porcelain 0 lines.
+  PR body read back: 7,613 bytes, sha256 64d208b5da2c4bfa18e3337a, byte-identical to what I sent.
+  GitHub reports changed_files 5, +346/-5.
+
+PATHGATE equivalent for this row: the diff is EXACTLY the 5 declared paths (2 route files, 1 new test,
+2 platform-k docs) and nothing else -- git diff --name-only returned those 5 and no more, asserted
+before the commit, with 0 unstaged leftovers after. The row-1 pathgate bite (rc 1 naming 2 missing and
+6 extra) already demonstrated this instrument discriminates.
+
+TEST EVIDENCE -- MINE, at this head
+  RED-FIRST BY ASSERTION, one arm per site: base 3 failed | 2 passed (5) -> head 5 passed (5). Both
+  numbers non-zero, so a real red, not a load failure. The three SITE cells fail at base and BOTH
+  CONTROLS STILL PASS. Base failure quotes the defect verbatim:
+    UPDATE users SET mfa_enabled = $1, verification_level = $2, updated_at = NOW() WHERE id = $3
+  HOW the cells are built, because it changes what they prove: REAL route handlers over REAL loopback
+  HTTP, real userRepo, real updateUser, ONLY ../db stubbed to capture the statement, asserting the SQL
+  -- NOT the source text, which would still pass with the fix commented out. The setup-verify revert is
+  reached by making the stub throw on DELETE FROM mfa_pending_setups, so all THREE sites are DRIVEN.
+  Two load-bearing controls: the same real updateUser driven with `undefined` must STILL omit both
+  columns; and an unrelated verificationLevel-only update must gain NO mfa columns.
+  services/auth suite at head: 79 files / 845 tests / 845 passed / 0 failed, rc 0. ks949 did NOT flake.
+  845 RECONCILES: develop is 78/840, this adds 1/5, and #1384's branch reads 864 = 840 + its own 24.
+  tsc rc 0 / 0 errors; POSITIVE CONTROL planted type error rc 2 / 2 errors; source restored
+  byte-identical. check:openapi rc 0, 405 blocks. No spec, lock, manifest, baseline or dep touched.
+
+DOC PROTOCOL: block 20. in BOTH docs, same commit. Flow reads 1.-12. then 20. -- 13.-17. are B 61st's
+reserved gaps, 18. KS-1210, 19. KS-1005. Nobody renumbers; a gap is never closed. Cheat sheet carries
+the unnumbered "&mdash; KS-938</h2>". I wrote only my own block.
+
+NO INDEPENDENT RE-KEY AUDITOR (Q-RK, parked by you): rekey_checke3.py is INERT on a lettered
+generation -- driven, rc 1, "AssertionError: 0 files derived". Coverage rests on rekeye3's own asserts
+plus my hand-fixes, each driven, each with before/after in REKEY-RECEIPT-e3.txt.
+
+RESIDUE NAMED, NOT FIXED, and in the PR body: users.ts POST /me/mfa/disable verifies the TOTP only
+`if (user.mfaSecret && ...)`, so an account with no stored seed disables MFA with NO proof of
+possession. Separate defect, same handler. Also NOT COVERED: live sweep owed (section 5f -- a runtime
+change is not Done on offline green); existing rows are NOT backfilled, so accounts that already
+disabled MFA still hold the retained seed and codes.
+
+mergeable_state reads "unstable" on both my PRs. Per the repo CLAUDE.md that carries NO testing claim;
+the Test Evidence block carries it. I am not quoting it as a gate.
+
+BOT MOVE, reported and NOT reverted: KS-938 moved Backlog -> In Progress at 07:47:55Z with #1385
+attached.
+
+One correction so a wrong figure does not travel: a read-back probe of mine reported the body missing
+its "same-line control" sentence. The probe was CASE-SENSITIVE and the body capitalises it. The text IS
+there; the probe was wrong, not the body.
+
+NEXT: cold handover and WRAP, with KS-1256 as NEXT per your ruling. Handover is already written at
+5_Project_History/HANDOVER-seatE3-2026-10-05.md.
+Floor: 0 locks on disk. Shared checkout NEVER written -- HEAD c56dd7c32edf, 17 pre-existing
+untracked files, no fetch all round.
+
