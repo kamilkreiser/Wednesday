@@ -1,0 +1,14 @@
+c5 bite 2026-10-05T03:32:17Z | tree dd398f2d14db554c47550925fd80761ca9298dfa | base for reverts 3ce8cd4026a6 | outdir /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/707ca275-d40c-45a7-8ba2-785b7c4e078a/scratchpad/gate58/ev/bite_head
+  scripts/audit npm ci rc 0 | semver resolvable True
+  bite_noop_leg6             rc 0 PASS               | audit-gate: 7 distinct advisories reported, 22 baselined. | FAIL-NEW - | FAIL-LAPSED - | CLEANUP rows 15 | real clock (no preload)
+  bite_noop_leg7             rc 0 PASS               | audit-locks: 43 standalone lockfiles (45 tracked, minus the Blockchain/Dev/package-lock.json workspace root which audit-gate covers, minus 1 declared out of scope = 45 - 1 - 1 = 43; reproduce the trac | FAIL-NEW - | FAIL-LAPSED - | CLEANUP rows 0 | real clock (no preload)
+  OK       NO-OP CONTROL (unmodified baseline copy by AUDIT_BASELINE_PATH): legs 6 / 7 rc 0 / 0 (want 0 / 0)
+  bite_package_lock.json_leg6 rc 1 FAIL               | audit-gate: 10 distinct advisories reported, 22 baselined. | FAIL-NEW ['GHSA-c83g-rgw3-j3cx', 'GHSA-73wf-gq98-2v4g', 'GHSA-w9m9-85wc-3x92'] | FAIL-LAPSED - | CLEANUP rows 15 | real clock (no preload)
+  bite_package_lock.json_leg7 rc 0 PASS               | audit-locks: 43 standalone lockfiles (45 tracked, minus the Blockchain/Dev/package-lock.json workspace root which audit-gate covers, minus 1 declared out of scope = 45 - 1 - 1 = 43; reproduce the trac | FAIL-NEW - | FAIL-LAPSED - | CLEANUP rows 0 | real clock (no preload)
+  OK       restore package-lock.json: head bytes back (sha256 8a3568d53fb8a8fc) True | git status clean True
+  OK       BITE root reverted: leg 6 rc 1 (want 1) naming as NEW ['GHSA-73wf-gq98-2v4g', 'GHSA-c83g-rgw3-j3cx', 'GHSA-w9m9-85wc-3x92'] (want all three); leg 7 rc 0 (its corpus excludes the root)
+  bite_services_governance_package_lock.json_leg6 rc 0 PASS               | audit-gate: 7 distinct advisories reported, 22 baselined. | FAIL-NEW - | FAIL-LAPSED - | CLEANUP rows 15 | real clock (no preload)
+  bite_services_governance_package_lock.json_leg7 rc 1 FAIL               | audit-locks: 43 standalone lockfiles (45 tracked, minus the Blockchain/Dev/package-lock.json workspace root which audit-gate covers, minus 1 declared out of scope = 45 - 1 - 1 = 43; reproduce the trac | FAIL-NEW ['GHSA-c83g-rgw3-j3cx', 'GHSA-73wf-gq98-2v4g'] | FAIL-LAPSED - | CLEANUP rows 0 | real clock (no preload)
+  OK       restore services/governance/package-lock.json: head bytes back (sha256 ead3283500a6095e) True | git status clean True
+  OK       BITE services/governance/package-lock.json reverted: leg 7 rc 1 (want 1) naming as NEW ['GHSA-73wf-gq98-2v4g', 'GHSA-c83g-rgw3-j3cx'] (want c83g + 73wf) in lock lines ['services/governance', 'services/governance'] (want services/governance named)
+BITE OK

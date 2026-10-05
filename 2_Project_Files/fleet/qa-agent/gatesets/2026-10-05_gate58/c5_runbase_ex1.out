@@ -1,0 +1,10 @@
+c5 run base-3ce8cd4026a6 (base) 2026-10-05T03:30:37Z | tree 3ce8cd4026a6e3241413e9c7533d5a84d10c1c79 | node v24.7.0 | npm 11.5.1 | freeze 2026-10-15T00:01:00.000Z | outdir /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/707ca275-d40c-45a7-8ba2-785b7c4e078a/scratchpad/gate58/ev/legs_base
+  scripts/audit npm ci rc 0 | semver resolvable True
+  leg6_today                 rc 0 PASS               | audit-gate: 10 distinct advisories reported, 25 baselined. | FAIL-NEW - | FAIL-LAPSED - | CLEANUP rows 15 | real clock (no preload)
+  leg6_frozen                rc 1 FAIL               | audit-gate: 10 distinct advisories reported, 25 baselined. | FAIL-NEW - | FAIL-LAPSED ['GHSA-c83g-rgw3-j3cx', 'GHSA-73wf-gq98-2v4g', 'GHSA-w9m9-85wc-3x92'] | CLEANUP rows 15 | c5_freeze_clock: clock pinned to 2026-10-15T00:01:00.000Z
+  leg7_today                 rc 0 PASS               | audit-locks: 43 standalone lockfiles (45 tracked, minus the Blockchain/Dev/package-lock.json workspace root which audit-gate covers, minus 1 declared out of scope = 45 - 1 - 1 = 43; reproduce the trac | FAIL-NEW - | FAIL-LAPSED - | CLEANUP rows 0 | real clock (no preload)
+  leg7_frozen                rc 1 FAIL               | audit-locks: 43 standalone lockfiles (45 tracked, minus the Blockchain/Dev/package-lock.json workspace root which audit-gate covers, minus 1 declared out of scope = 45 - 1 - 1 = 43; reproduce the trac | FAIL-NEW - | FAIL-LAPSED ['GHSA-c83g-rgw3-j3cx', 'GHSA-73wf-gq98-2v4g'] | CLEANUP rows 0 | c5_freeze_clock: clock pinned to 2026-10-15T00:01:00.000Z
+  OK       BASE today CONTROL: legs 6 / 7 rc 0 / 0 (want 0 / 0 — the rows still protect the base before the 15th)
+  OK       BASE FROZEN leg 6: rc 1 (want 1, not 2), LAPSED names ['GHSA-73wf-gq98-2v4g', 'GHSA-c83g-rgw3-j3cx', 'GHSA-w9m9-85wc-3x92'] (want all three ['GHSA-73wf-gq98-2v4g', 'GHSA-c83g-rgw3-j3cx', 'GHSA-w9m9-85wc-3x92'])
+  OK       BASE FROZEN leg 7: rc 1 (want 1), LAPSED names ['GHSA-73wf-gq98-2v4g', 'GHSA-c83g-rgw3-j3cx'] (want c83g + 73wf; w9m9 is leg 6's corpus only)
+LEGS base-3ce8cd4026a6 base: OK

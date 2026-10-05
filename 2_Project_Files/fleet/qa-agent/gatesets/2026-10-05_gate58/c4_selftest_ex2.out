@@ -1,0 +1,69 @@
+c4_baseline_gate58 SELFTEST 2026-10-05T03:28:22Z | repo /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/707ca275-d40c-45a7-8ba2-785b7c4e078a/scratchpad/gate58/clone | base 3ce8cd4026a6 (plants in memory)
+
+=== ARM T0 base-vs-base (expected FAIL) ===
+PASS B1 top level: keys (ordered) ['$comment', 'accepted'] == ['$comment', 'accepted'] | $comment value-equal True, byte-present True | base rows 25 (kit 25)
+FAIL B2 key sets: rows 25 -> 25 (kit 22) | REMOVED NONE (want ['GHSA-73wf-gq98-2v4g', 'GHSA-c83g-rgw3-j3cx', 'GHSA-w9m9-85wc-3x92']) | ADDED NONE | the removed rows at base == kit package/ticket/expires: True 
+FAIL B3 remaining rows: 25 remaining rows | changed by value 0 [] | by raw bytes 0 [] | order preserved True
+FAIL B4 text: 0 hunk(s): 0 deleted line(s) inside the 3 removed rows (their blocks span 21 lines) | 0 comma-only edit(s) | other edits 0 [] | inserted/replaced lines 0 | trailing newline True == base True
+FAIL B5 fuses: expiry changed on a remaining row: NONE | cohorts 2026-10-15 3 -> 3 | 2026-10-31 4 -> 4
+ARM T0 base-vs-base: verdict FAIL (expected FAIL) | rows 25 -> 25 | failed ['B2 key sets', 'B3 remaining rows', 'B4 text', 'B5 fuses'] | named as expected True -> OK
+
+=== ARM T1 the three rows deleted (expected PASS) ===
+PASS B1 top level: keys (ordered) ['$comment', 'accepted'] == ['$comment', 'accepted'] | $comment value-equal True, byte-present True | base rows 25 (kit 25)
+PASS B2 key sets: rows 25 -> 22 (kit 22) | REMOVED ['GHSA-73wf-gq98-2v4g', 'GHSA-c83g-rgw3-j3cx', 'GHSA-w9m9-85wc-3x92'] (want ['GHSA-73wf-gq98-2v4g', 'GHSA-c83g-rgw3-j3cx', 'GHSA-w9m9-85wc-3x92']) | ADDED NONE | the removed rows at base == kit package/ticket/expires: True 
+PASS B3 remaining rows: 22 remaining rows | changed by value 0 [] | by raw bytes 0 [] | order preserved True
+PASS B4 text: 1 hunk(s): 21 deleted line(s) inside the 3 removed rows (their blocks span 21 lines) | 0 comma-only edit(s) | other edits 0 [] | inserted/replaced lines 0 | trailing newline True == base True
+PASS B5 fuses: expiry changed on a remaining row: NONE | cohorts 2026-10-15 3 -> 0 | 2026-10-31 4 -> 4
+ARM T1 the three rows deleted: verdict PASS (expected PASS) | rows 25 -> 22 | failed NONE | named as expected True -> OK
+
+=== ARM T2 only two deleted (w9m9 kept) (expected FAIL) ===
+PASS B1 top level: keys (ordered) ['$comment', 'accepted'] == ['$comment', 'accepted'] | $comment value-equal True, byte-present True | base rows 25 (kit 25)
+FAIL B2 key sets: rows 25 -> 23 (kit 22) | REMOVED ['GHSA-73wf-gq98-2v4g', 'GHSA-c83g-rgw3-j3cx'] (want ['GHSA-73wf-gq98-2v4g', 'GHSA-c83g-rgw3-j3cx', 'GHSA-w9m9-85wc-3x92']) | ADDED NONE | the removed rows at base == kit package/ticket/expires: True 
+FAIL B3 remaining rows: 23 remaining rows | changed by value 0 [] | by raw bytes 0 [] | order preserved True
+FAIL B4 text: 1 hunk(s): 14 deleted line(s) inside the 3 removed rows (their blocks span 21 lines) | 0 comma-only edit(s) | other edits 0 [] | inserted/replaced lines 0 | trailing newline True == base True
+FAIL B5 fuses: expiry changed on a remaining row: NONE | cohorts 2026-10-15 3 -> 1 | 2026-10-31 4 -> 4
+ARM T2 only two deleted (w9m9 kept): verdict FAIL (expected FAIL) | rows 25 -> 23 | failed ['B2 key sets', 'B3 remaining rows', 'B4 text', 'B5 fuses'] | named as expected True -> OK
+
+=== ARM T3 an extra row (vfj7) deleted (expected FAIL) ===
+PASS B1 top level: keys (ordered) ['$comment', 'accepted'] == ['$comment', 'accepted'] | $comment value-equal True, byte-present True | base rows 25 (kit 25)
+FAIL B2 key sets: rows 25 -> 21 (kit 22) | REMOVED ['GHSA-73wf-gq98-2v4g', 'GHSA-c83g-rgw3-j3cx', 'GHSA-vfj7-8cjw-p6xm', 'GHSA-w9m9-85wc-3x92'] (want ['GHSA-73wf-gq98-2v4g', 'GHSA-c83g-rgw3-j3cx', 'GHSA-w9m9-85wc-3x92']) | ADDED NONE | the removed rows at base == kit package/ticket/expires: True 
+FAIL B3 remaining rows: 21 remaining rows | changed by value 0 [] | by raw bytes 0 [] | order preserved True
+FAIL B4 text: 1 hunk(s): 0 deleted line(s) inside the 3 removed rows (their blocks span 21 lines) | 0 comma-only edit(s) | other edits 1 [('delete', 130, 158, 130, 130)] | inserted/replaced lines 0 | trailing newline True == base True
+PASS B5 fuses: expiry changed on a remaining row: NONE | cohorts 2026-10-15 3 -> 0 | 2026-10-31 4 -> 3
+ARM T3 an extra row (vfj7) deleted: verdict FAIL (expected FAIL) | rows 25 -> 21 | failed ['B2 key sets', 'B3 remaining rows', 'B4 text'] | named as expected True -> OK
+(T4 re-escapes the arrows of GHSA-2mjp-6q6p-2qxm; values equal: True)
+
+=== ARM T4 a remaining row re-escaped (expected FAIL) ===
+PASS B1 top level: keys (ordered) ['$comment', 'accepted'] == ['$comment', 'accepted'] | $comment value-equal True, byte-present True | base rows 25 (kit 25)
+PASS B2 key sets: rows 25 -> 22 (kit 22) | REMOVED ['GHSA-73wf-gq98-2v4g', 'GHSA-c83g-rgw3-j3cx', 'GHSA-w9m9-85wc-3x92'] (want ['GHSA-73wf-gq98-2v4g', 'GHSA-c83g-rgw3-j3cx', 'GHSA-w9m9-85wc-3x92']) | ADDED NONE | the removed rows at base == kit package/ticket/expires: True 
+FAIL B3 remaining rows: 22 remaining rows | changed by value 0 [] | by raw bytes 1 ['GHSA-2mjp-6q6p-2qxm'] | order preserved True
+FAIL B4 text: 2 hunk(s): 21 deleted line(s) inside the 3 removed rows (their blocks span 21 lines) | 0 comma-only edit(s) | other edits 1 [('replace', 5, 6, 5, 6)] | inserted/replaced lines 1 | trailing newline True == base True
+PASS B5 fuses: expiry changed on a remaining row: NONE | cohorts 2026-10-15 3 -> 0 | 2026-10-31 4 -> 4
+ARM T4 a remaining row re-escaped: verdict FAIL (expected FAIL) | rows 25 -> 22 | failed ['B3 remaining rows', 'B4 text'] | named as expected True -> OK
+
+=== ARM T5 re-dated instead of removed (expected FAIL) ===
+PASS B1 top level: keys (ordered) ['$comment', 'accepted'] == ['$comment', 'accepted'] | $comment value-equal True, byte-present True | base rows 25 (kit 25)
+FAIL B2 key sets: rows 25 -> 25 (kit 22) | REMOVED NONE (want ['GHSA-73wf-gq98-2v4g', 'GHSA-c83g-rgw3-j3cx', 'GHSA-w9m9-85wc-3x92']) | ADDED NONE | the removed rows at base == kit package/ticket/expires: True 
+FAIL B3 remaining rows: 25 remaining rows | changed by value 3 ['GHSA-c83g-rgw3-j3cx', 'GHSA-73wf-gq98-2v4g', 'GHSA-w9m9-85wc-3x92'] | by raw bytes 3 ['GHSA-c83g-rgw3-j3cx', 'GHSA-73wf-gq98-2v4g', 'GHSA-w9m9-85wc-3x92'] | order preserved True
+FAIL B4 text: 3 hunk(s): 0 deleted line(s) inside the 3 removed rows (their blocks span 21 lines) | 0 comma-only edit(s) | other edits 3 [('replace', 136, 137, 136, 137), ('replace', 143, 144, 143, 144)] | inserted/replaced lines 3 | trailing newline True == base True
+FAIL B5 fuses: expiry changed on a remaining row: ['GHSA-73wf-gq98-2v4g', 'GHSA-c83g-rgw3-j3cx', 'GHSA-w9m9-85wc-3x92'] | cohorts 2026-10-15 3 -> 0 | 2026-10-31 4 -> 7
+ARM T5 re-dated instead of removed: verdict FAIL (expected FAIL) | rows 25 -> 25 | failed ['B2 key sets', 'B3 remaining rows', 'B4 text', 'B5 fuses'] | named as expected True -> OK
+
+=== ARM T6 T1 + a planted new row (expected FAIL) ===
+PASS B1 top level: keys (ordered) ['$comment', 'accepted'] == ['$comment', 'accepted'] | $comment value-equal True, byte-present True | base rows 25 (kit 25)
+FAIL B2 key sets: rows 25 -> 23 (kit 22) | REMOVED ['GHSA-73wf-gq98-2v4g', 'GHSA-c83g-rgw3-j3cx', 'GHSA-w9m9-85wc-3x92'] (want ['GHSA-73wf-gq98-2v4g', 'GHSA-c83g-rgw3-j3cx', 'GHSA-w9m9-85wc-3x92']) | ADDED ['GHSA-zzzz-gate-58pl'] | the removed rows at base == kit package/ticket/expires: True 
+PASS B3 remaining rows: 22 remaining rows | changed by value 0 [] | by raw bytes 0 [] | order preserved True
+FAIL B4 text: 1 hunk(s): 0 deleted line(s) inside the 3 removed rows (their blocks span 21 lines) | 0 comma-only edit(s) | other edits 1 [('replace', 131, 151, 131, 135)] | inserted/replaced lines 4 | trailing newline True == base True
+PASS B5 fuses: expiry changed on a remaining row: NONE | cohorts 2026-10-15 3 -> 0 | 2026-10-31 4 -> 4
+ARM T6 T1 + a planted new row: verdict FAIL (expected FAIL) | rows 25 -> 23 | failed ['B2 key sets', 'B4 text'] | named as expected True -> OK
+(T7 json.dump of the whole file: remainder value-equal True, bytes equal to T1 False)
+
+=== ARM T7 json.dump re-serialisation (expected FAIL) ===
+FAIL B1 top level: keys (ordered) ['$comment', 'accepted'] == ['$comment', 'accepted'] | $comment value-equal True, byte-present False | base rows 25 (kit 25)
+PASS B2 key sets: rows 25 -> 22 (kit 22) | REMOVED ['GHSA-73wf-gq98-2v4g', 'GHSA-c83g-rgw3-j3cx', 'GHSA-w9m9-85wc-3x92'] (want ['GHSA-73wf-gq98-2v4g', 'GHSA-c83g-rgw3-j3cx', 'GHSA-w9m9-85wc-3x92']) | ADDED NONE | the removed rows at base == kit package/ticket/expires: True 
+FAIL B3 remaining rows: 22 remaining rows | changed by value 0 [] | by raw bytes 5 ['GHSA-2mjp-6q6p-2qxm', 'GHSA-v9p9-hfj2-hcw8', 'GHSA-848j-6mx2-7j84'] | order preserved True
+FAIL B4 text: 7 hunk(s): 21 deleted line(s) inside the 3 removed rows (their blocks span 21 lines) | 0 comma-only edit(s) | other edits 6 [('replace', 1, 2, 1, 2), ('replace', 5, 6, 5, 6)] | inserted/replaced lines 6 | trailing newline True == base True
+PASS B5 fuses: expiry changed on a remaining row: NONE | cohorts 2026-10-15 3 -> 0 | 2026-10-31 4 -> 4
+ARM T7 json.dump re-serialisation: verdict FAIL (expected FAIL) | rows 25 -> 22 | failed ['B1 top level', 'B3 remaining rows', 'B4 text'] | named as expected True -> OK
+
+SELFTEST OK: 8 of 8 arms returned their expected verdict
