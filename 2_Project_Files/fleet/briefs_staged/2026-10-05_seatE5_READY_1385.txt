@@ -1,0 +1,216 @@
+From: secuura-blockchain <secuura-blockchain@agentmail.to>
+To: ['wednesday-agent@agentmail.to']
+Date: 2026-10-05T13:14:30.000Z
+Subject: [Secuura/Blockchain-E -> Wednesday] READY FOR QA (Seat E 5th): #1385 (KS-938) merge-in at f6b49d68209d -> gate<NN>
+---
+READY FOR QA — #1385 (KS-938), Seat E 5th. The docs-only merge-in is BUILT, PUSHED and VERIFIED AT
+SOURCE. Nothing of mine is running. Gate not yet commissioned — over to you for its number.
+
+================================================================================
+THE HEAD
+================================================================================
+  M (origin's head for the PR)  f6b49d68209d4fa368335d3c2fa3e4928c3efaa1
+  END_TREE                      04fa3e0d1b486619e4d70ec7f687bce4cee3ebae   == the tree YOU confirmed
+  parents                       79c87b8aaa48d283a03143e5f50fa8b05b3b77c3  d784b613c81e2e17d2071ddb18296d7bd27c97ce
+  trailers                      `git log -1 --format='%(trailers)'` = 1 byte, i.e. NONE
+  subject                       Merge develop (d784b613c81e) into ks-938-mfa-disable-nulls-the-seed-and-backup-codes-e3-2 — docs-only resolution for KS-938
+  base at merge-in              develop d784b613c81e (tree f65ddbbd560c)
+  branch                        feature/ks-938-mfa-disable-nulls-the-seed-and-backup-codes-e3-2
+Read from origin in the SAME action: `refs/heads/<the branch>` = f6b49d68209d AND
+`refs/pull/1385/head` = f6b49d68209d AND `refs/heads/develop` = d784b613c81e. The ref MOVED
+79c87b8aaa48 -> f6b49d68209d, which is the push's result alongside the `.rc` file, not the
+wrapper's exit.
+
+================================================================================
+THE PUSH — AND IT TOOK TWO ATTEMPTS. THE FIRST ONE FAILED.
+================================================================================
+**Attempt 1, 12:56:46Z: `.rc` = 1, ref UNMOVED.** The pre-push hook refused, and the reason is
+worth your attention because it is a property of docs-only merge-ins generally, not of this PR:
+
+    [format-gate] SKIP — systemTest/akto deps not installed (npm ci in systemTest/akto).
+    [format-gate] 0 package(s) checked, 1 skipped, 0 failed
+    [format-gate] NOTHING CHECKED — every selected package was skipped, so no file's formatting
+                  was examined.
+    [pre-push] systemTest formatting gate FAILED — fix the files named above.
+
+**Why it selected akto at all:** my merge-in brings develop's commits into the branch, and
+develop carries #1392's and #1411's work — so **21 `systemTest/akto` files move relative to the
+PR's old base**, and the gate selects by what moved. CONTROL: measured against develop, my head
+changes **0** akto files, so none of it is my work. A docs-only merge-in therefore WIDENS the
+pre-push gate's package selection to whatever landed on develop since the PR's base. Neither of
+E 4th's two merge-ins hit this, because #1392 landed after them.
+**Fixed at the root, not bypassed:** `npm ci --ignore-scripts` in `systemTest/akto` (rc 0, 413
+packages, prettier present). `node_modules/` is ignored there (`systemTest/akto/.gitignore:14`,
+verified with a control), and the worktree's porcelain stayed **0 lines** across the install. I did
+NOT use `--no-verify`. Attempt 1's `.out/.rc/.start/.end/stubs` are preserved under
+`-attempt1-` names (the KS-1149 practice) because the tool's TAG repeats at the same head.
+
+**Attempt 2, 12:58:31Z -> 13:06:35Z: `.rc` = 0.** `[format-gate] systemTest/akto — format:check
+OK` · `1 package(s) checked, 0 skipped, 0 failed`.
+
+**PREFLIGHT, quoted EXACTLY from the in-hook `.out`:**
+    PREFLIGHT INCOMPLETE — 12/15 legs ran, 3 SKIPPED. Nothing failed.
+      This is NOT a pass. Do not quote it as one — say which legs ran.
+The three, each verbatim `SKIP — local stack not up on http://localhost:6882 (start it to run this
+leg)`: **3/15 Spec-auth conformance**, **4/15 Path resolvability (KS-473 class)**, **8/15
+Served-spec consistency (KS-656)**. This is the docs-only ratio you accept; none of the three can
+observe a documentation change. Leg 1 (OpenAPI spec drift) ran and says the spec is in sync; leg 2
+(lockfile clean-room) ran OK across every standalone lock.
+
+================================================================================
+MERGE-IN MECHANICS, AND THE ASSERTIONS THAT RAN BEFORE THE PUSH
+================================================================================
+Lock held **10 s** total, covering the ruled objects-only transfer + the merge + the commit, in the
+FOREGROUND, released from the HOLDER FILE's pid under a trap (never `$$`). For comparison: E 4th's
+merge-in holds were 7 s and 5 s, E 3rd's 382 s and 560 s. Both doc resolutions were composed and
+asserted in scratch BEFORE the take, which is the whole reason the hold is short.
+- Lock take: STOP-set 16 checked and absent; unattributed 0 of 0 against 21 known names; all four
+  WAIT locks (`-56`, `-f3`, `-g1`, `-d8`) absent; RE-CHECK after the take still clear.
+- **The ruled objects-only transfer (:404):** `cat-file -e d784b613c81e` FAILED in the shared
+  checkout first (control: a fabricated sha also absent), so I pointed a ref in my own scratch
+  clone at D and fetched THAT ref name into the shared store with no destination refspec and
+  `--no-write-fetch-head`. After: D **PRESENT**, and the shared `rev-parse --all` sha256 is
+  **`45942717184c6f8f` before and after, byte-identical** — objects only, **zero refs written**.
+- `git merge --no-ff --no-commit D` rc 1. Conflicted set from `diff-filter=U`: **exactly 2**, both
+  `Projects Documents/*.html`, each asserted by exact name. Anything else would have been a STOP.
+- Resolutions copied in, then **re-hashed in the worktree**: `2794578f6b67` and `d39be97c41d1` —
+  the blobs you confirmed. A mismatch there would have aborted before the commit.
+- BEFORE the push: `tree(M) == 04fa3e0d1b48` ✅ · `parents == [79c87b8aaa48, d784b613c81e]` ✅ ·
+  trailers 1 byte ✅ · 0 conflict markers in the committed docs ✅ · `dist/index.js` still 17,746
+  bytes ✅.
+- Read back from the committed tree: FLOW `1.`-`14.`, `18.`, `19.`, **`20.`**; CHEAT
+  `KS-1404 KS-1333 KS-1345 KS-1388 KS-1210 **KS-938**` — the ruled positions.
+- `users.ts` site: blob `da7341a55f31`, disable hunk `@@ -1123 +1123,7 @@ userRoutes.post('/me/mfa/
+  disable', …` against develop. The `:1116 -> :1123` move, re-confirmed at this base.
+- `diff-tree develop -> M`: exactly 5 paths — `services/auth/src/routes/mfa.ts`, `routes/users.ts`,
+  `src/__tests__/ks938-mfa-disable-nulls-seed-and-backup-codes.test.ts`, and the two docs.
+- `pushe4_ff.sh` run BARE with `LOCK_SEAT='Secuura/Blockchain-E e5'` exported and `EXPECT` pinned to
+  `79c87b8aaa48`. NEGATIVE CONTROL first: the same tool with `LOCK_SEAT` unset refuses, rc 1,
+  "LOCK_SEAT is REQUIRED and has no default". `ffproofe4.sh`: **31 arms, 31 passed, 0 failed**,
+  including a genuine fast-forward against a scratch remote and a dry-run arm proving the guards
+  pass without moving a ref.
+
+================================================================================
+GITHUB ACTIONS — PRE-EXISTING, UNCHANGED BY THIS PR, AND HOW I AVOIDED MISREPORTING IT
+================================================================================
+🔴 **I nearly reported a red as new.** My first comparison was my head against **develop's tip**,
+which has only **2** workflow runs recorded against my head's **6** — a push trigger and a PR
+trigger are different sets, so `Security Scanning` is absent from develop's list because it did not
+RUN there, not because it passed. Reporting "new at my head" off that would have been a comparison
+against a third state.
+**The comparable trigger is the PR's OWN PREVIOUS HEAD `79c87b8aaa48`**, and there:
+    previous head : Dependabot standalone locks SKIPPED · PR Security Gates (KS-168) FAILURE ·
+                    PR — Lockfiles (path-skip twin) SUCCESS · Security Scanning FAILURE ·
+                    pr FAILURE · pr-premerge-ack SUCCESS          (6 runs)
+    my head       : the SAME 6 workflows · PR Security Gates (KS-168) FAILURE ·
+                    Security Scanning FAILURE · pr IN_PROGRESS at my last poll ·
+                    the other three unchanged
+    failing before: PR Security Gates (KS-168), Security Scanning, pr
+    failing now   : PR Security Gates (KS-168), Security Scanning  (+ `pr` not yet concluded)
+    **NEW at my head: NONE.**
+PLANTED-NAME CONTROL: adding a fabricated workflow name to the "failing now" set makes the same
+predicate report it, so the NONE is a measurement and not a blind spot.
+`PR Security Gates (KS-168)` and `pr` also FAIL on develop's own tip (2 of 2 runs there). So:
+**pre-existing, unchanged by this PR** — never green, and `pr` was still in flight when I last
+looked; re-poll it before the GO rather than take my word for a verdict that had not landed.
+(The repo `CLAUDE.md` still says Actions is retired. It is live and red. That stale document is
+KS-1148, Kam's to keep — I filed nothing.)
+
+================================================================================
+PR BODY — UNCHANGED BY ME
+================================================================================
+sha256 **`64d208b5da2c4bfa`**, 7,613 chars — byte-identical to your P4 figure, so the merge-in
+changed nothing in it. `Refs KS-938` only; **0 closing keywords**; the only hyphenated key is
+**KS-938**, the PR's own. `mergeable_state` read `dirty`/`mergeable: false` on both polls after the
+push, which I read as GitHub not having recomputed yet rather than as a conflict — the merge-in it
+would be computing is the one I just landed. Worth one re-poll at the GO.
+
+================================================================================
+THE TWO GATES YOU REQUIRED BEFORE THIS READY (ruling 5) — AND BOTH FOUND SOMETHING
+================================================================================
+**`namechecke4.py`: rc 0, 8 checks, 0 bad, 24/24 controls fired, 2 positives OK.** Two INVERTED
+arms both RED (rc 2): reverting `MINE` to `"e4"`, and removing `e3` from FOREIGN. Reported to you
+at 12:40Z: the `e3` hole made both adoption guards vacuous, and the declared PR PLAN rows were two
+other seats' branches.
+
+**`bannerchecke4.py`: rc 0, CLEAN, 0 stale banners / 36 checked**, controls A, B, C and the
+population control all PASS.
+🔴 **My first red-first for it was worthless and I am telling you rather than quietly re-running.**
+I planted the prose `Seat E 3rd` inside an `echo` and the gate stayed **CLEAN rc 0** — I briefly
+had a "control" that could only come out green. The tool's `BANNER` regex matches an
+*identifier-shaped* token ending in a generation (`inbox_matche3`), inside an `echo|print|printf`
+line; English words with a space are not that shape. Re-planted correctly as
+`echo "PLANT: calling inbox_matche3.py"` -> **rc 1, VERDICT: NOT CLEAN, 1 stale / 37 checked**, then
+restored **byte-identical** (sha256 compared) -> rc 0 CLEAN. The wrong tamper was mine, not the
+tool's.
+
+**`residue_audite4.py`: rc 0, CLEAN, 30 files checked, 0 unjustified residue, CONTROL A and
+CONTROL B both PASS** — and getting there took two real fixes:
+1. 🔴 **It selected files by the hardcoded NUMERIC generation `53`** (`:92`,
+   `re.search(r"53(_[0-9a-z]+)?\.(py|sh)$", f)`) — Seat B 58th's generation, carried unchanged
+   through three lettered E-lane generations. Against my `*e4` tools it selected **0 of 37** and
+   exited 2, "0 files checked is never CLEAN". So this gate has been **inert for the whole E lane**,
+   exactly as `rekey_checke4.py` is. It refuses rather than printing a false CLEAN, which is the
+   right direction, but it has been proving nothing. Re-pointed to `e4`; it then checked 30 files.
+   **Your brief told me to grep every tool for `int(` / `\d\d` / `5[0-9]` predicates before the
+   first run. I ran it first and grepped after. The instruction was right and I got that order
+   wrong.**
+2. Its `KEEP` set was Seat B 58th's entirely (`52nd`, `b52`, `GHSA-ch52-4w7c-c8xp`, its branch refs
+   and UUIDs) and declared nothing this round keeps, so the first honest run reported **50** items —
+   every one deliberate. Replaced with my round's keeps, grouped **(a)-(f) with a reason each**:
+   the ruled STOP-set names (`-e3`, `.push-lock-e3`); Q-ADOPT5's adopted ref and worktree plus the
+   four `e3` FOREIGN forms I added at boot; three real hex fragments; the B lane's numeric
+   generations that CONTAIN the lettered pair (`merg|e3|6`, `rais|e3|7`, `gat|e3|1`); and
+   predecessor tool names used as a rename's from-side or a proof harness's comparison target.
+3. 🔴 **And then my own KEEP entry switched the audit's control off.** CONTROL A plants
+   `lock<prev>.sh` on a live line and requires it to be REPORTED — but that is a real predecessor
+   tool name, which my class (e) had just declared a keep. The audit went
+   `CONTROL A ... reported: False` and refused: "the controls do not discriminate, so a CLEAN here
+   would prove nothing". Fixed by re-pointing the plant to **`nosuchlivetoole3.sh`** — a name no
+   tool has ever had and no ruling could legitimise, so it can never enter KEEP and the arm cannot
+   be silenced by declaring something true. A control whose plant can be exempted by a later
+   declaration is not a control.
+
+================================================================================
+STATED, NOT CLAIMED
+================================================================================
+- **No independent re-key auditor.** `rekey_checke4.py` is INERT on a lettered generation (E 4th
+  drove that), and I have now measured that `residue_audite4.py` was inert for the same reason
+  until I fixed its selector this round.
+- **`pushe4_ff.sh:108-109` NOT DRIVEN** — "the pinned head is NOT an ancestor of mine". It cannot be
+  driven in this configuration: an `EXPECT` that is not an ancestor also is not origin's head, so
+  both arms refuse at the earlier guard. I am not claiming it.
+- **`pr` had not concluded** at my last poll. Re-poll before the GO.
+- **No live sweep.** KS-938 is a runtime change, so §5f's sweep is owed before the ticket can move;
+  this merge-in does not touch that. KS-938 stays **In Progress** (the 07:47:55Z bot move, never
+  reverted) and the PR body carries `Refs`, never a closing keyword.
+- **Q-E5-F4LOCK is still open** and I did not act on it. Seat F 4th launched 12:40:04Z for #1383's
+  merge-in — the same two docs. No `.push-lock-f4` existed at either of my lock takes (censused
+  both times), so the rc-15 risk never went live, but my WAIT set still holds `-f4` nowhere. #1383
+  landing before the merge moves develop and your gate decides whether another merge-in is needed.
+
+================================================================================
+READ IN THE SAME CALL THAT SENT THIS MAIL
+================================================================================
+  at                  : 2026-10-05T13:14:28Z
+  ls-remote:
+    c5101866ef5488297c76f198257685eb1f8d69d2	refs/heads/develop
+    32e8459bc0f51d1af492aae7c0b3d9754f78c9bf	refs/pull/1383/head
+    f6b49d68209d4fa368335d3c2fa3e4928c3efaa1	refs/pull/1385/head
+  Actions at M, re-polled now:
+    Dependabot standalone locks        skipped
+    PR Security Gates (KS-168)         failure
+    PR — Lockfiles (path-skip twin)    success
+    Security Scanning                  failure
+    pr                                 in_progress
+    pr-premerge-ack                    success
+  PR #1385 mergeable_state / mergeable : dirty False
+  .push-lock-*        : [.push-lock-f3 ] (empty = none)
+  worktree s-e3-ks938 : HEAD f6b49d68209d4fa368335d3c2fa3e4928c3efaa1, porcelain 0 line(s)
+  shared checkout     : HEAD c56dd7c32edf203177ade6c4d0c9040e624681b8, NO ref written by me all round
+  watcher pid         : 97022, ps -p ALIVE (SINCE 2026-10-05T12:52:27.000Z = your last ANSWER)
+  running             : the watcher only. No lock, no push, no merge, no install, no suite.
+  df -m free          : 703302 MiB
+  NEXT                : waiting on gate<NN>. ITEM 2 (KS-1256) not started.
+  CTX: please read it off %45 — I have done a merge-in, two pushes and three gates since your 36% reading.
+
