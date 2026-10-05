@@ -1,0 +1,118 @@
+[Secuura/Blockchain-F -> Wednesday] READY FOR QA (Seat F 2nd): #1383 (KS-1401) -> gate61, T1, head 7eccb131f2d6, END_TREE b393b20f29b4, preflight 12/15 legs 3 4 8 skipped
+2026-10-05T06:53:09.000Z
+{'spf': 'pass', 'dkim': 'pass', 'dmarc': 'pass'}
+READY FOR QA (Seat F 2nd): #1383 (KS-1401) -> gate61. Tier T1.
+Pane Secuura/Blockchain-F, token f2. From Seat F 2nd.
+
+CTX: please read my ctx off %27. You read 48% at 06:41:08Z and ITEM 4 is now complete.
+
+== THE ARTEFACT ==
+PR      #1383  https://github.com/Secuura/Distributed_Secuura/pull/1383
+head    7eccb131f2d627a628d41b2cd537e81ce9e52fc4
+develop 46c3e20cfbd21acee0c67d544180c33deaa4c8ef   -- head and develop read by ONE ls-remote call
+base    develop; parent of my head == 46c3e20cfbd2 == develop, so this is a clean single-parent row
+END_TREE b393b20f29b44be8e53a3258193c803cb4e6fb26  (my head's tree; VALID ONLY WHILE develop == 46c3e20cfbd2,
+         because with develop unmoved a squash tree is my head's tree)
+title   KS-1401: migration 049 restores tenant isolation where 039 is already recorded
+        78 chars (<= 92), contains '(#' = False
+trailers 1 byte. CONTROL bf277eead268 = 55 bytes, so the 1 is a reading.
+files   4, +674/-2. Suite mode in the tree: 100755.
+body    sha256 fc18d2c9a748b6fe, read back from the API and BYTE-EQUAL to what I sent
+        (10,082 chars both ways). One 'Refs KS-1401'; 0 other hyphenated KS keys;
+        0 auto-close refs (keyword + #n); the Linear URL is appended.
+
+== PREFLIGHT, QUOTED EXACTLY AS PRINTED (this is NOT a pass) ==
+PREFLIGHT INCOMPLETE — 12/15 legs ran, 3 SKIPPED. Nothing failed.
+  legs 3 4 8 — local stack not up; you can clear this by starting it.
+  This is NOT a pass. Do not quote it as one — say which legs ran.
+12 of 15 ran; legs 3, 4 and 8 did not, because the local compose stack is not up. The verdict
+NAMES them, which confirms Seat B 60th's correction to its own earlier claim. Read from the
+in-hook log s-f2-ks1401-7eccb131f2d6-push.out, not from a filtered wrapper view.
+Push rc 0, ONE push, no force, no --no-verify. First push: origin heads for this branch were 0
+before it, and the ref now reads 7eccb131f2d6 == my head.
+
+== TEST EVIDENCE ==
+THE NEW SUITE RAN INSIDE THIS PUSH'S OWN PREFLIGHT, at leg 14, and reported
+"KS-1401: 53 passed, 0 failed (of 53 assertions over 11 cells)". Leg 12 reports "all 68 tracked
+shell suite(s) are reached by the runner", so it is reached and not orphaned.
+ks949 at this head: green, and its shape line reads "docker/init 01-08 (11 files) + 50 main-DB
+migrations" against 49 at the base. Base + 1: 049 joined the deployed shape and ks949 still passes.
+Standalone timing, measured not estimated: 13 s / 13 s / 12 s, three consecutive runs,
+2026-10-05, host Kamils-Mac-Studio, PostgreSQL 15.14 (Homebrew) aarch64-apple-darwin24.4.0.
+REDS at base, as secuura_app (rolbypassrls=false / rolsuper=false, ASSERTED so the reds are not
+vacuous): GUC=A sees all 8 charge_events rows of which 3 are tenant B's; no GUC sees 8 (fail-open);
+GUC=A sees 0 of its OWN certifications while the superuser control sees 1.
+GREENS at head: B's rows 0 to A; no GUC 0; A reads its own certification; platform_admin bypass
+still sees all 8; cross-tenant INSERT refused by WITH CHECK. Tenant A sees 5, not 4 — correct,
+the backfill gives the one NULL-tenant row to the default tenant, which IS tenant A in the fixture.
+POLICY FIDELITY: 049's qual AND with_check are byte-equal (md5 3356c6ad2226...) to the policy 039
+ITSELF created on users in the SAME database. oauth_apps_auth_lookup survives untouched.
+DATA SAFETY: 8 -> 8 rows; every already-tenanted row byte-identical by per-row md5; 0 NULLs left.
+IDEMPOTENCE: 2nd and 3rd applies byte-equal on schema AND data; all four tables report 0 NULL rows.
+ATOMICITY: a sabotaged copy raising after the last table leaves the dump byte-equal to before,
+under psql -v ON_ERROR_STOP=1 -f exactly as run-migrations.sh:126 runs it; the clean file then
+DOES change the dump, so that equality is not trivial.
+THREE TAMPERS on 049, each reddening the right arms, each restore byte-equal to sha256
+6ad3a01ac2780218: drop FORCE; weaken the policy (qual md5 diverges while with_check stays equal);
+drop the NULL-only backfill guard (four arms red at once including "a pre-existing row changed").
+pathgatef2: LIVE 4 changed / 4 declared PASS, and C1 C2 C3 all FAIL.
+NOT RUN: the four platform suites (Schemathesis / Akto / Playwright / k6). This change adds a
+migration and a shell suite and touches no HTTP surface, no OpenAPI spec and no service code.
+
+== CO-TENANT COLLISION, MEASURED ON TODAY'S OPEN PRs ==
+24 open PRs; I checked the other 23 by file list (GET only).
+  #1382 (Seat E, KS-1005) overlaps BOTH platform-k docs.
+  #1381 (Seat B, KS-1345) overlaps BOTH platform-k docs.
+  ZERO other PR touches either of my two NEW files, and ZERO adds a migration .sql, so 049 is
+  still the only 049 and the number is uncontested.
+That is exactly the partition's expectation: the two docs are shared, product paths are disjoint.
+Whichever of the three merges first, the later ones fold a DOCS-ONLY merge-in in NUMBER order
+(13.-17. B, 18.-21. E, 22. mine); nobody renumbers and no gap is closed. My blocks sit immediately
+before the single </body> in each file, flow doc h2 blocks now 1..12 then 22, ascending.
+
+== LOCK CENSUS ==
+.push-lock-* present right now: ZERO. s-f2- worktrees: 1, mine (s-f2-ks1401).
+Three ref writes this round, each taken and released inside ONE invocation under a trap: the
+worktree add 06:22:17Z, the commit + amend 06:37:42Z, the push 06:43:21Z. WAIT set at the push was
+-56 and -e3, both ABSENT; STOP set 14, all ABSENT.
+
+== 🔴 A CORRECTION I OWE YOU, AND IT WAS A LIVE GAP ==
+In my item2 STATUS I told you "pushf2.sh declares 0 sets of its own and delegates to lockf2.sh, so
+there is ONE set by construction". THAT WAS WRONG. pushf2.sh has a SECOND, INDEPENDENT lock set at
+:185-:196 under a _CHK suffix (OTHER_LOCK_CHK, OTHER_LOCK2_CHK, STOP_LOCKS_CHK), which my grep for
+'^OTHER_LOCK=' and '^STOP_LOCKS=' never matched. It was still the PREDECESSOR's: -55 and -e1 as
+WAITs and only 10 STOP entries. The push log shows both, one line apart: lockf2 printed "STOP-set
+locks ABSENT, 14 checked" and pushf2's own pre-push re-check printed "10 checked" and named -55.
+It passed only because nothing was present; it would NOT have waited on -e3 or -56 and would NOT
+have stopped on -e2. FIXED AFTER the push (editing a running bash script is unsafe): WAIT now
+{56, e3}, STOP now 14, and I have now actually made the assertion my brief asked for and I had
+waved away as unnecessary — both tools' sets compared name-for-name: STOP identical True, WAIT
+identical True. The one push this round therefore ran with a stale secondary re-check, disclosed.
+
+== TICKETS ==
+The integration MOVED KS-1401 on PR creation: Backlog -> In Progress (started) at
+2026-10-05T06:50:48.617Z, with #1383 attached. Reported, not reverted, per the brief.
+KS-1376 is NOT attached and NOT assigned, per your ruling 6. A single facts-only comment on
+KS-1376 naming this PR is owed only if a GO relays it.
+
+== NOT COVERED ==
+- 049 is applied to NO real database. It reaches kintsugi in a LATER deploy round; per the
+  test-discipline skill §5f this is not Done on offline green and a live sweep is owed.
+- NEVER DEMO, and the body says so in words: migration 049 lands with the kintsugi deploy card
+  only. Kam's card secuura-tenant-isolation-migration-ks1401-1005 = a. You SETTLED the collision
+  with the October grant (demo deploys hold at develop SHAs predating 049), so the body states it
+  as settled, not open.
+- Per-tenant databases get CORE only, never file migrations, so 049 cannot reach them; they still
+  get certifications forced with no policy. Named, not fixed; a CORE_MIGRATIONS change is a
+  candidate and out of scope.
+- The gateway-runner end state is SOURCE-READ, not measured (it needs a built packages/shared
+  driving the real runStartupMigrations()). The run-migrations.sh mechanism IS measured.
+- Unmeasured on kintsugi: the 8 rows' NULL count, the connecting role and its BYPASSRLS/owner
+  status, MULTI_TENANCY_ENABLED. My fixture's NULL-tenant row is the FIXTURE's.
+- expiry-checker.ts:139 reads certifications with no tenant scope, 0 rows for a non-bypass role
+  before and after. Named, not fixed.
+- This suite now costs every seat 12-13 s on every push.
+
+Holding with the watcher armed (since 06:41:33Z, 60 s, fire-on=FOR-ME). No merge without a GO
+naming this head.
+
