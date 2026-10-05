@@ -1,0 +1,10 @@
+c3_clock_gate56a 2026-10-05T00:01:06Z | pr4 KS-769 Blockchain/Dev/scripts/audit/lock-discovery.mjs | base 14d40d4455c7 | head NONE (base state) | OUT /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/b2564a3d-3c6c-421c-b7dd-2321e8df0eda/scratchpad/g56a/ev/c3_pr4_base | node v24.7.0
+PASS S0 semantics base: baseline-contract.mjs:141 'return expires <= today;' | utcToday baseline-contract.mjs:93 | lock-discovery.mjs ['239 export function validateOutOfScope(trackedLocks, entries = OUT_OF_SCOPE_LOCKS) {', '258 } else if (nonEmpty(entry.expires) && isLapsed(entry)) {', '312 validateOutOfScope(locks);']
+INFO S0 MEANING: `expires <= today` -> a written day D is DEAD from D 00:00:00Z, valid THROUGH D-1 (UTC). Old 2026-10-19 valid through 2026-10-18; new 2027-01-01 valid through 2026-12-31 (UTC; AEDT = UTC+11 from 2026-10-04, so the head value dies at 2027-01-01 11:00 AEDT).
+PASS K0 clock self-test: pinned 2026-10-20 -> today 2026-10-20 | CONTROL unpinned -> 2026-10-05 (real UTC 2026-10-05) | malformed pin rc 97 (want 97) | stderr 'c3_freeze_clock: clock pinned to 2026-10-20T12:00:00.000Z'
+PASS A1 before_old (base only): @2026-10-18T23:59:59.999Z: base today 2026-10-18 lapsed False (want False) | base expires [['Blockchain/Dev/mobile/secuura-app', '2026-10-19']]
+PASS A2 at_old (base only): @2026-10-19T00:00:00.000Z: base today 2026-10-19 lapsed True (want True) | base expires [['Blockchain/Dev/mobile/secuura-app', '2026-10-19']]
+PASS A3 between (base only): @2026-10-20T12:00:00.000Z: base today 2026-10-20 lapsed True (want True) | base expires [['Blockchain/Dev/mobile/secuura-app', '2026-10-19']]
+PASS A4 last_valid_new (base only): @2026-12-31T23:59:59.999Z: base today 2026-12-31 lapsed True (want True) | base expires [['Blockchain/Dev/mobile/secuura-app', '2026-10-19']]
+PASS A5 at_new (base only): @2027-01-01T00:00:00.000Z: base today 2027-01-01 lapsed True (want True) | base expires [['Blockchain/Dev/mobile/secuura-app', '2026-10-19']]
+C3 pr4 NO PR YET — base state only: 0 FAIL of 7 base-side arms (rc 4; never a PASS)

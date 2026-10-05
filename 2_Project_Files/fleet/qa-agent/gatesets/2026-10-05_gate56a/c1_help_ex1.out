@@ -1,0 +1,23 @@
+c1_pin_gate56a.py — gate56a C1 PIN + PATH for ONE of Seat B 59th's two re-date PRs (run it once per PR: --which pr3, --which pr4).
+Two instruments for the head (ls-remote + the PULLS API), the commit read from the clone with READ-ONLY git verbs.
+  P1  ls-remote origin: refs/pull/<PR>/head == HEAD == the branch ref; develop present.
+  P2  PULLS API: open, not merged, base.ref develop, base.sha == origin develop, head.sha == HEAD, branch carries the PR's own key
+      (kit branch_rx, lower-case ks-528 / ks-769) and NOT the sibling's; mergeable shown.
+  P3  shape: HEAD has ONE parent, EXACTLY ONE commit over develop. develop == kit base (14d40d4455c7) -> parent == develop, ahead 1 / behind 0.
+      SIBLING-ADVANCE (the other gate56a PR merged first): develop's ONE parent == kit base, develop's subject == the sibling's kit subject
+      EXACTLY, kit base..develop changes ONLY the sibling's path -> parent == kit base, ahead 1 / behind 1, PASS with that named. Anything
+      else: STALE BASE (a re-draft).
+  P4  ONE PATH: API /files == clone `git diff --numstat HEAD^ HEAD` == EXACTLY [the PR's kit path]; +/- printed (pr3 want +2/-2, or +4/-4
+      with the appended reason notes; pr4 the expires line plus its comment lines).
+  P5  NO TRAILER: `%(trailers)` empty and 0 Co-Authored-By; CONTROL kit trailer_control_commit prints one.
+  P6  SUBJECT EXACT: the commit subject == kit subject byte-for-byte (69 / 67 chars) and carries no `(#`; the PR title == the same string.
+  P7  KEY SET == {own}: title, body, commit message carry the hyphenated own key and NO other hyphenated KS key (the sibling's key, KS 493,
+      KS 763 ... must be de-hyphenated); branch carries only the lower-case own key; no closing keyword; `Refs <own>` on its own body line.
+  P8  MODES: the path 100644 at HEAD; CONTROL kit mode_control_path 100755.
+  P9  BASE BLOB: the path's blob at HEAD^ == kit base_blob (the edit starts from the drafted file).
+  INFO END_TREE: HEAD^{tree} (the squash's tree while develop == HEAD^) beside develop^{tree} (the control that differs).
+Base-state run (--base-state, no PR): ls-remote develop == kit base, both kit paths' blobs at develop == kit base_blob, P5/P8 controls fire;
+  rc 4 "NO PR YET" (never a PASS).
+Controls-only inputs: --offline-dir <d> replays the PULLS API from pr_<PR>.json + files_<PR>.json; --lsremote-file <f> replays ls-remote.
+Usage: c1_pin_gate56a.py --which pr3|pr4 --repo <clone> (--pr <n> --head <40-hex> | --base-state) [--offline-dir d] [--lsremote-file f]
+rc 0 PASS / 1 FAIL / 2 usage / 3 API / 4 base state only

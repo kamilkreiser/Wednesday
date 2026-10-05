@@ -1,0 +1,8 @@
+c2_diffshape_gate56a 2026-10-05T00:05:39Z | pr4 KS-769 Blockchain/Dev/scripts/audit/lock-discovery.mjs | repo /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/b2564a3d-3c6c-421c-b7dd-2321e8df0eda/scratchpad/g56a/simrepo | base 14d40d4455c7 | head 44cb8a604f7692dbbeb2c5b3ba85b162e5d6bdfe
+PASS L1 region + prefix: ticket line at base :201 head :201 | every line up to it byte-equal True
+PASS L2 suffix: every line after expires byte-equal: True (base :210.. 126 lines, head :210.. 126 lines)
+PASS L3 expires literal: base :209 "expires: '2026-10-19'," (want "expires: '2026-10-19',") | head :209 "expires: '2027-01-01'," (want "expires: '2027-01-01',")
+PASS L4 comments only: between ticket and expires: base 7 lines (:202-:208) head 7 lines (:202-:208), all `//` comments True
+PASS L5 one literal: `expires: '<date>'` literals base 1 head 1 (want 1 each)
+WARN L6 stale comment: head comment lines naming the OLD expiry: ['// exclusion kept, fuse re-dated to the end of Sunday 2026-10-18 Sydney time (AEDT).', "// value lapses 00:00Z Mon 19 Oct = 11:00 AEDT ('2026-10-18' would blow 13 h early)."]
+C2 pr4 PASS: 0 FAIL of 5 | Blockchain/Dev/scripts/audit/lock-discovery.mjs

@@ -1,0 +1,27 @@
+LAUNCH ACTION gate56a (DRY RUN) 2026-10-05 11:13:12 AEDT / 2026-10-05T00:13:12Z | #9903 fcd8c906a63316b0bc558f9710c6605971daa5bd + #9904 44cb8a604f7692dbbeb2c5b3ba85b162e5d6bdfe | kit base 14d40d4455c7da3c31c71d614fc7c4d1d4ffc2fb | pane QA/Secuura-ks528-769-9903
+--- 0. the pane must be routed (inbox_routing.conf) or cockpit.sh say --mail fails silently
+  routing file /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/b2564a3d-3c6c-421c-b7dd-2321e8df0eda/scratchpad/g56a/routing_empty.conf G56A_PREV_REPORT=/private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/b2564a3d-3c6c-421c-b7dd-2321e8df0eda/scratchpad/g56a/prev_report_standin.md G56A_COMPARE_FILE=/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/gatesets/2026-10-05_gate56a/sim/compare_ok.txt — line present:  (grep rc=2; want 1 / rc 0)
+  (DRY RUN: reported, not refused — the real run refuses rc 1 here; README section 4)
+--- 1. instrument A: the GitHub PULLS API, per PR (+ 2b the census, same read)  [SIM REPLAY: G56A_CENSUS_OFFLINE]
+  gh_census rc=0 / 0
+    OFFLINE census replay from /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/gatesets/2026-10-05_gate56a/sim/census_overlap (SIM fixtures, never evidence)
+    API #9903 head fcd8c906a63316b0bc558f9710c6605971daa5bd base develop base_sha 14d40d4455c7da3c31c71d614fc7c4d1d4ffc2fb mergeable True reads 1 state open merged False branch feature/ks-528-react-router-rows-redate-b59-3
+    API #9903 title 'KS-528: the two react-router baseline rows are re-dated to 2026-10-31' | user SIM | created 2026-10-05T00:00:00Z | mergeable_state clean | body 1077 chars
+    SAME-KEY (reported, never refused) #9911 SIM | feature/ks-528-frontends-react-router-v6-v7-migration | KS-528: react-router v6 -> v7 in the three portals (SIM) | 1 file(s), no kit path
+    OVERLAP #9910 SIM | feature/ks-729-tidy | KS-729: baseline tidy (SIM) | kit paths ['Blockchain/Dev/scripts/audit/audit-baseline.json'] | title keys []
+    CENSUS 2 other open PR(s) read | 1 OVERLAP (touch a kit path) | 1 SAME-KEY (['KS-528', 'KS-769'] in the title, no kit path) | excluded ['9903', '9904']
+    OFFLINE census replay from /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/gatesets/2026-10-05_gate56a/sim/census_overlap (SIM fixtures, never evidence)
+    API #9904 head 44cb8a604f7692dbbeb2c5b3ba85b162e5d6bdfe base develop base_sha 14d40d4455c7da3c31c71d614fc7c4d1d4ffc2fb mergeable True reads 1 state open merged False branch feature/ks-769-mobile-exclusion-redate-b59-4
+    API #9904 title 'KS-769: the mobile-tree dormant exclusion is re-dated to 2027-01-01' | user SIM | created 2026-10-05T00:00:00Z | mergeable_state clean | body 1147 chars
+    SAME-KEY (reported, never refused) #9911 SIM | feature/ks-528-frontends-react-router-v6-v7-migration | KS-528: react-router v6 -> v7 in the three portals (SIM) | 1 file(s), no kit path
+    OVERLAP #9910 SIM | feature/ks-729-tidy | KS-729: baseline tidy (SIM) | kit paths ['Blockchain/Dev/scripts/audit/audit-baseline.json'] | title keys []
+    CENSUS 2 other open PR(s) read | 1 OVERLAP (touch a kit path) | 1 SAME-KEY (['KS-528', 'KS-769'] in the title, no kit path) | excluded ['9903', '9904']
+--- 2. instrument B: git ls-remote origin (ONE read from the Secuura checkout, READ-ONLY)  [REPLAY: G56A_LSREMOTE_FILE]
+  ls-remote rc=0 at 00:13:12Z
+    14d40d4455c7da3c31c71d614fc7c4d1d4ffc2fb	refs/heads/develop
+    fcd8c906a63316b0bc558f9710c6605971daa5bd	refs/pull/9903/head
+    fcd8c906a63316b0bc558f9710c6605971daa5bd	refs/heads/feature/ks-528-react-router-rows-redate-b59-3
+    44cb8a604f7692dbbeb2c5b3ba85b162e5d6bdfe	refs/pull/9904/head
+    44cb8a604f7692dbbeb2c5b3ba85b162e5d6bdfe	refs/heads/feature/ks-769-mobile-exclusion-redate-b59-4
+--- 2b. the census
+REFUSING TO LAUNCH: another open PR touches audit-baseline.json or lock-discovery.mjs — Wednesday sequences it; a re-draft decides
