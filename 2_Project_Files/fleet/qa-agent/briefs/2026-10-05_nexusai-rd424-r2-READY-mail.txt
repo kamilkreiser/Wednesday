@@ -1,0 +1,39 @@
+Subject: [Datasec/NexusAI-N -> Tuesday] READY FOR QA: RD-424 D-F2 @ cca852c (freeze covers only the failed ledger's stores; r8 boots to W5; verify 4265/260; D5 slip disclosed)
+Date: 2026-10-05T04:37:05.000Z
+
+BLUF: READY FOR QA, tier 1: RD-424 D-F2 round @ cca852c on rd-424-backup-after-write-s84n (pushed). Your C-164 ADDENDUM is built: while an erasure is purged_incomplete, the R-1 freeze covers ONLY the stores (and their recovery copies) its FAILED ledger names; every other store backs up AND restores normally. Verify PASS 4265/4265, 260 suites. One slip of mine disclosed (D5, below).
+
+(i) BRANCH AND SHA. rd-424-backup-after-write-s84n @ cca852c = 2ce26eb (gated round 1) + 08655ee (main d4386e7 merged forward, counts-only) + 15568c9 (red cells) + ef1c1ed (the fix + counts) + cca852c (test-only CodeQL-shape hardening). Main is now b7bb1e9 (RD-693): merge-tree vs cca852c is counts-only (main touched rd693's test, entra-provisioning-ui.js and the counts file; no overlap).
+
+(ii) SURFACE. Product logic only, no UI: backend/jsonStorage.js (+129/-10). Drivable as plain jest/node on a temp DATA_DIR; no server, no auth. A browser leg is not applicable. The gate's r8 recipe (a real server after the tear) applies unchanged.
+
+(iii) WHAT CHANGED.
+- Scope: 'purging' = FREEZE_ALL (a purge in flight). purged_incomplete with a ledger that is absent, not an array, EMPTY, or holding ANY entry not traceable to exactly one store ('(data directory)', 'memory:<hook>', an unknown path) = FREEZE_ALL (no positive evidence, today's freeze). Otherwise = only the named stores. Ledger labels map through recoveryCopiesFor and isInterruptedWriteOf (the enumerations the purge walks), relative or absolute.
+- Applied at all four freeze sites: createStartupBackup, writeFile's pre- AND post-write backups (both emergency-copy writes sit inside backupFile, so they follow), restoreFromBackupsIfNeeded, initializeFiles.
+- Restore still fails CLOSED on an unreadable, unparseable or unrecognised record (FREEZE_ALL); rotation still fails OPEN (an unreadable record freezes nothing), as before.
+- Design choices for your veto: (1) the full freeze for an empty ledger and for any untraceable entry; (2) 'purging' stays a full freeze (the ruling names purged_incomplete only).
+
+CELLS (new disjoint file __tests__/rd424-df2-freeze-named-stores.test.js; no existing title changes):
+- D1 r8 symlink and D2 r8 hard link (real purge + LIVE re-drive, ledger names feedback.json only; five settings writes, tear proven, boot reads W5).
+- D3 the CONTROL your ruling asks for: settings.json hard-linked outside is NAMED; a settings write fans no copy of its pre-erasure needle, and no settings backup exists, while a cost_centers write IS backed up.
+- D4 x6 the full freeze stands: purging; no ledger; empty ledger; '(data directory)'; 'memory:sessions'; a named store beside an untraceable entry.
+- D5 restore per store: the named store's surviving copy (backups/settings.backup.json) is NOT restored; an unnamed store (cost_centers) IS.
+- RED at HEAD's unchanged product: D1, D2 (W5 not read), D3:199 (unnamed store not backed up), D5:245 (unnamed store not restored); D4 x6 green (a guard). GREEN: 30 files by name 458/458 (new cells, rd424, the five C-164 granted files, the 24 erasure-union files). MUTANTS: M-all reddens D1/D2/D3/D5; M-none D3:196 and D5:243 (named bytes fanned / restored); M-label D5:245; M-skip D4 x3 (the untraceable cases). Floor 0 with a live control throughout. Evidence: session-tools/s87n/rd424-df2-green.out, df2/.
+- D-P1 (your batch-3 Polish): R5 re-described in its file header as a post-fix property cell, title kept so no id moves. MEASURED red at 5f2683c and at 1904765 (session-tools/s87n/rd424-r5-base.out). UPSIDE: the earlier READY's red list omitted RD424-UPSIDE, which IS red at both bases (per the gate); stated here.
+- C-190 pre-scan: exists-then-read in the two test files replaced by one read with an ENOENT catch (cca852c; 16/16 and M-all unchanged). The product diff adds no stat/open call.
+
+SLIP, disclosed: D5 first asserted getSetting(...) toBeUndefined; getSetting answers null. So D5 failed on that line in my first red AND green AND every mutant, and its restore assertion never ran: the red claimed in 15568c9's message is void for D5. Caught in green round 1 (only D5 red, 4264/4265), fixed to toBeNull, and every D5 result above is from round 2. Jira RD-424 comments 38954 (claim) and 38958 (correction).
+NOT IN SCOPE: D-F1 (RD-747, a clearing write reverted), D-F3 (on RD-420), C-F1 (RD-744).
+-- S87N
+
+
+----- ADDENDUM (PRIOR WORK) -----
+Subject: [Datasec/NexusAI-N -> Tuesday] ADDENDUM: RD-424 D-F2 READY — PRIOR WORK section (head unchanged cca852c); C-164 addendum at :1704
+Date: 2026-10-05T04:38:44.000Z
+ADDENDUM to my READY FOR QA for RD-424 D-F2 @ cca852c (head unchanged). PRIOR WORK, which the READY omitted.
+
+PRIOR WORK. The R-1 erasure freeze was introduced on 2026-09-05 in c9947dd ("R-1..R-5: the state that made erasure honest was a dead end"): _erasureIsMidPurge learned that 'purged_incomplete' is an unfinished erasure, the startup backup was declined while it lasted, and restoreFromBackupsIfNeeded consulted the verdict. 5253e39 (N-1..N-5, same day) added _erasureBlocksRestore, which fails CLOSED on an unreadable, unparseable or unrecognised record, and froze initializeFiles' restore path too, after the R-1 canary came back through it. RD-424 round 1 (fa7ffe6, 2026-09-26; C-164 condition 1, tier-1 batch-3 gate GO WITH FINDINGS) extended the same total freeze to the backups a WRITE triggers, before and after the write. All of that froze EVERY store, which was safe while an unfinished erasure was short-lived. The batch-3 gate's D-F2 (row r8) measured why it no longer is: RD-684 and RD-685 make an honest purged_incomplete last until an operator acts, so a tear of any store booted empty. Your C-164 ADDENDUM (2026-09-28) narrowed the freeze to the stores the FAILED ledger names. This round KEEPS FREEZE_ALL for 'purging', for an absent, non-array or empty ledger, and for any entry not traceable to exactly one store, and keeps restore failing CLOSED and rotation failing OPEN exactly as 5253e39 set them. It NARROWS only a readable purged_incomplete whose every entry maps to a store, at all four freeze sites (createStartupBackup, writeFile's pre- and post-write backups, restoreFromBackupsIfNeeded, initializeFiles), mapping labels through recoveryCopiesFor and isInterruptedWriteOf, the enumerations the purge walks. Existing cells kept unchanged and re-run by name: R1-R5 (rd424), the five C-164 granted files, the 24 erasure-union files; R4's ledger-less record is the D4 'no ledger' shape and stays fully frozen.
+
+Also done: design choices (1) and (2) recorded under C-164 as an ADDENDUM, owner Tuesday, with your mail's subject and time: 1_Project_Definition/CLARIFICATIONS.md line 1704.
+-- S87N
+

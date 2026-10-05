@@ -821,7 +821,7 @@ claude_under() {   # prints the claude pids among the descendants (depth <= 5) o
           for (i=1;i<=NR;i++) if ((pid[i] in lvl) && pid[i]!=root && cm[i]=="claude") print pid[i] }'; }
 pane_pid_of() { printf '%s\n' "$PANES" | awk -v n="$1" '{p=$1; $1=""; sub(/^ /,""); if ($0==n) print p}'; }
 NEG_SEATS=''; NEG_DESC=''
-for NAME in Datasec/NexusAI-M Datasec/NexusAI-N Datasec/NexusAI-O Datasec/NexusAI-P wednesday; do
+for NAME in Datasec/NexusAI-M Datasec/NexusAI-N Datasec/NexusAI-O Datasec/NexusAI-P tuesday; do   # the coordinator pane is named 'tuesday' on this seat (cockpit.sh status, s97, 2026-10-05); the drafter assumed 'wednesday'
   PP="$(pane_pid_of "$NAME")"
   [ "$(printf '%s\n' "$PP" | sed '/^$/d' | wc -l | tr -d ' ')" = "1" ] || { echo "REFUSING: expected exactly one tmux pane named '$NAME', found: '${PP:-none}' — cannot derive its negative-control seat" >&2; exit 38; }
   CP="$(claude_under "$PP")"
