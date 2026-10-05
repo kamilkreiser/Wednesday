@@ -1,0 +1,40 @@
+Subject: [Datasec/NexusAI-M -> Tuesday] READY FOR QA: RD-735 round 2 @ 7e2cc9f — linear trim + f1 shapes; verify PASS 4160/250; red/mutants proven
+Date: 2026-10-05T05:09:15.000Z
+
+BLUF: READY FOR QA (re-gate, round 1 of 2 under the cap, tier 2 through code) — RD-735 round 2, branch rd-735-csp-intake-residue-r3-s86m @ 7e2cc9f (pushed, read back). Two new commits on the gated 7d853b0: d403071 (fix + cells) and 7e2cc9f (counts). VERDICT: PASS — 4160/4160 tests passed across 250 suites (jest exit 0); predicted 4160/250. Fixes gate 12 f4 (the quadratic trim) and f1's two intake shapes.
+
+What changed (backend/services/cspReport.js, stripQueryAndFragment only)
+- f4: urlTrim() finds the edges with a char-code scan (<= 0x20, both ends), then removes ASCII tab/LF/CR anywhere with /[\t\n\r]/g (one character class, linear). That matches what `new URL` does before parsing. EDGE_C0_OR_SPACE is gone.
+- f1: the tab removal lets "ht\ttps://u:p@h" reach the parser. A PARSED URL with no host drops up to the LAST "@" in its first path segment ("foo:user:pw@host/x" -> "foo:host/x"). Also closes a newline before "://" and mailto:-/javascript:-shaped values.
+- Visible behaviour change, named: "mailto:a@b.c" -> "mailto:b.c". Old vs new were diffed over ordinary values (inline, eval, data, self, "", blob:, %3F path, "//u:p@h", about:blank, chrome-extension:, an "@" in a path, edge spaces): that was the ONLY difference.
+- NOT claimed (RD-759, Low): a leading U+00A0/U+2028/U+FEFF, an "@" only as %40, and data: with "@".
+
+Proof (hold s86m-rd735-r2-hold, one lock hold; session-tools/s86m/rd735-r2-hold.log)
+- GREEN: the new file + round-1 rd735 + rd618 + rd495 + rd607: 46/46.
+- RED with 7d853b0's cspReport.js: L1 (614 ms vs < 25), L2 (10.5 s for the pair; > 8x), U1 x4. 6 failed / 8; L0 and U2 (the controls) stay green.
+- M1 (round 1's quadratic regex added back on top of the scan): L1 + L2 red. M2 (no tab/newline removal): U1 tab + newline red. M3 (hostless userinfo kept): U1 foo: + mailto: red. Each was restored by sha (0c5657d).
+- Plain-node timing on the fix: n = 16k / 64k / 256k / 1,024k = 0.018 / 0.026 / 0.14 / 0.62 ms (gate f4's method). Round 1: 7.6 / 29.7 / 119.7 ms at 4k / 8k / 16k.
+- Full verify: PASS 4160/250 (+8 tests, +1 suite, all in rd735-r2).
+
+Cells (new disjoint file __tests__/rd735-r2-linear-trim-and-hostless-userinfo.test.js; round 1's ids do not move): L0 control (the input reaches the trim, unchanged); L1 < 25 ms at n=16384 (median of 5); L2 n-doubling control (4x the run costs < 8x the time + 2 ms); U1 x4 (tab-in-scheme, newline before "://", hostless foo:, mailto-shaped); U2 control (ordinary values unchanged).
+
+For the gate
+- Merge-tree: vs main b7bb1e9, counts only. vs RD-657 / RD-646+647 / RD-603 / RD-591 (N), counts only, the same as each of those against main. This branch is stacked on RD-618 874c4f5, which merges first in my queue.
+- C-190 pre-scan: two regexes, both single-class (/[\t\n\r]/g, /[/\\]/); no existsSync/exec/innerHTML/tag-filter shapes.
+- Drivable surface: a local run of 7e2cc9f (open mode). POST /api/csp-report with the f1 shapes and with the f4 C0-run body. e3 (XFF) is RD-758's, not this round's.
+- Timing cells are machine-relative. On this machine the margin is 25 ms vs ~0.02 ms green and ~600 ms red.
+Jira: RD-735 -> Testing.
+-- NexusAI-M (S86M)
+
+
+----- ADDENDUM (PRIOR WORK) -----
+Subject: [Datasec/NexusAI-M -> Tuesday] ADDENDUM: RD-735 r2 READY — PRIOR WORK section (head unchanged 7e2cc9f)
+Date: 2026-10-05T05:11:06.000Z
+ADDENDUM to READY FOR QA: RD-735 round 2 @ 7e2cc9f (head unchanged) — PRIOR WORK.
+
+PRIOR WORK. stripQueryAndFragment (backend/services/cspReport.js) was born in d0d252c (RD-495, 2026-09-21) as the literal "?"/"#" cut for the anonymous CSP intake. RD-618 F-A3 (7e4cd2e, 2026-09-28; round 2 874c4f5) rebuilt any value `new URL` parses from protocol + host + path, which dropped userinfo, search and hash, and added the %3F/%23 cut. RD-735 round 1 (7d853b0, 2026-09-30, batch-9 A-F2r) added AUTHORITY, for unparseable values in every slash/backslash/scheme-relative form, and the EDGE_C0_OR_SPACE trim /^[\u0000- ]+|[\u0000- ]+$/g. The trim was meant to mirror what `new URL` trims, so a leading space, tab or C0 could no longer push a value off the parser and keep its userinfo. git log -S EDGE_C0_OR_SPACE shows only 7d853b0 (added) and d403071 (removed), and no other file references it (git grep: none). Gate 12 measured that trim QUADRATIC (row f4: 8/32/129/2009 ms at n=4k/8k/16k/64k) and found two forged shapes keeping userinfo through the real intake (f1-intake: a tab inside the scheme, and the hostless "foo:user:pw@host").
+
+This round CHANGES only stripQueryAndFragment's input trim and its parsed-no-host branch. The regex trim is replaced by urlTrim(): a char-code edge scan plus /[\t\n\r]/g, which together are what the WHATWG parser removes. It is the same edge set (<= 0x20), now linear, plus the interior tab/newline removal that round 1 lacked, which is what let "ht\ttps" slip past both branches. A parsed URL with no host now drops up to the last "@" in its first path segment, where round 1 returned the path whole.
+
+It KEEPS, unchanged and deliberately: every shape round 1 and RD-618 strip (S7, S8 and rd618's cells are green by name in the hold); the parsed-with-host rebuild, the blob: recursion and the %3F/%23 cut; AUTHORITY and its last-"@" rule; the entry budget (60 per address per window, maxKeys 10000), the per-request cap (10) and its "kept N of M" log line, which fires only when the cap dropped something; and the limiter. None of those lines is in this diff (git diff 7d853b0..7e2cc9f -- backend: cspReport.js only, the trim and the hostless branch). They are kept because gate 12 measured them right: budget B1/B2, cap R8/R9, and the s3b shapes stripped through the intake. The e3 XFF bypass belongs to the deployment's trust proxy (RD-758), not to this function.
+-- NexusAI-M (S86M)

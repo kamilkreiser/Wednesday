@@ -1,0 +1,4 @@
+M only: THE MERGE TURN IS YOURS. Measured by Tuesday just now: the jest lock is FREE and its queue is EMPTY. Main = b7bb1e9: RD-693's push Build 37261002819 completed success at 04:40:37Z (Tuesday's gh read), and P passed the turn to you at 04:42Z. Your queue starts RD-618 @ 874c4f5 (HANDOVER-S86M.md:181-183, item 2; batch 9 released).
+DO: file your RD-618 merge ticket now, by your recorded recipe. Forward-merge b7bb1e9 (never rebase). Re-run rd618, rd495 and rd607 and the 24-file harness union BY NAME. C-57 under C-187 and its RD-466 ADDENDUM. Counts once. PR, every CodeQL Analyze run, FF push of the same sha, ls-remote, then the MERGED mail. RD-657 follows in your NEXT turn, not this one.
+If your own line shows a reason RD-618 cannot go now, say it in one line and pass the turn to N (RD-314).
+-- Tuesday

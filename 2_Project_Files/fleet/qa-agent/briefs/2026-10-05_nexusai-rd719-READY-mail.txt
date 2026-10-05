@@ -1,0 +1,39 @@
+Subject: [Datasec/NexusAI-P -> Tuesday] READY FOR QA: RD-719 @ 7861a06 — Chart.js vendored; offline: main 0 charts painted, branch 4; online pixel-identical; verify PASS 4240/257 (tier 1)
+Date: 2026-10-05T01:23:21.000Z
+
+BLUF: READY FOR QA — RD-719 @ 7861a06 (branch rd-719-vendor-chartjs-s86p, at origin; off main 3b6c9ec). Chart.js 3.9.1 is vendored, so the dashboard's trend charts draw on an install with no internet access. Measured in Chrome with every non-loopback request blocked: main paints 0 of the dashboard's charts, this branch paints 4 (the same 4 as online). Online, main and branch are pixel-identical. verify PASS 4240/4240 across 257 suites. Tier 1 per your ruling (it changes the image's contents); asks you to commission the gate.
+
+(i) HEAD: 0cb584d (red-first cells) + 7861a06 (the vendoring). Never rebased. Main has not moved since 3b6c9ec as of this mail.
+
+(ii) DRIVABLE SURFACE: a local run in open mode (C-02), same commit, NOT the demo (RD-76). In a checkout of 7861a06, with a fresh DATA_DIR containing settings.json = {"firstRunComplete": true} (so /index.html is the dashboard and not the wizard; no users, so sign-in stays open; RD-172, as scripts/qa-surface-up.sh seeds it): `NODE_ENV=development SEED_DEMO_DATA=true PORT=<p> DATA_DIR=<dir> DB_PATH=<dir>/printer_logs.db SESSION_SECRET=<64 hex> node backend/server.js`, then /index.html. Offline = block every non-loopback request (Playwright route abort). My harness: session-tools/s86p/rd719-shots/run.sh + shots.js + diff.js, under one jest-lock hold, main 3b6c9ec on :37821 vs 7861a06 on :37822.
+
+(iii) WHAT CHANGED
+- static/vendor/chart-3.9.1.min.js (NEW, ships: static/ is copied wholesale, no .dockerignore rule touches it): fetched ONCE 2026-09-27T15:57:19Z from https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js; 199,560 bytes; sha256 fbc45926...e710; sha384 = index.html's pinned integrity value (re-verified 2026-10-05).
+- static/index.html:15: src -> "vendor/chart-3.9.1.min.js" (same-origin); integrity attribute KEPT byte-equal; crossorigin kept.
+- __tests__/rd719-chartjs-3.9.1-provenance.json (NEW, not shipped): RD-204's record shape (source, fetched, fetchCommand, sha384, pinnedBy) + sha256, bytes, licence (MIT, the file's own banner).
+- __tests__/rd719-chartjs-vendored.test.js (NEW, disjoint, C-182 (a)): V1 sha384 = record; V2 index.html loads exactly that file same-origin with that integrity; V3 no shipped page references a Chart.js CDN URL (population and positive controls); V4 record shape.
+- scripts/verify-expected-counts.json: 4236/256 -> 4240/257.
+- NOT changed: CSP (scriptSrc already allows 'self'; the CDN hosts stay for RD-721's libraries), static/js/index.js, any other page.
+
+(iv) PROOF A, one lock hold 00:12:44Z-00:35:28Z, floor 0 with live controls (session-tools/s86p/rd719-hold.log):
+RED at 3b6c9ec: V1-V4 4/4 fail. Fix -> GREEN 4/4. Mutants, each red exactly where predicted: CDN tag restored -> V2+V3; one byte appended to the vendored file -> V1; integrity dropped -> V2; a cdnjs Chart.js tag added to settings.html -> V3. Restored -> GREEN 4/4. C-68: rd490-open-access-banner-browser (the one verify suite that drives index.html in Chromium) by name: PASS 66/66. Full verify --update-counts: VERDICT: PASS — 4240/4240 tests passed across 257 suites (jest exit 0). gitleaks pre-commit scanned ~201 KB incl. the vendored file: no leaks.
+
+(v) PROOF B, real browser, Chrome 153, 1366x900, seeded 1445 rows on both, runs 2 and 3 identical (session-tools/s86p/rd719-shots/run2.log, run3.log):
+- main online:    landed /index.html, Chart.js 3.9.1 loaded (CDN), 13 canvases, 4 painted, 0 console errors  <- the positive control
+- main offline:   Chart.js NOT loaded, 4 -> 0 painted  <- X-1 reproduced
+- branch online:  Chart.js 3.9.1 loaded (vendor/), 4 painted, 0 console errors
+- branch offline: Chart.js 3.9.1 loaded (vendor/), 4 painted  <- the fix
+- Pixel diff (browser canvas; diff.js): main-online vs branch-online = 0 of 1,229,400 px changed. Offline vs online = 455,004 px on BOTH sides alike (the CDN stylesheets are blocked too, RD-721).
+- Images: before/after-{online,offline}{,-full,-chart1}.png in session-tools/s86p/rd719-shots/. The -chart1 crops show it: "Daily Usage Trend" blank offline on main; the full line chart (axes, legend, Jan-Apr data) offline on the branch. I viewed both.
+- A first run (void-run1/) is VOID and kept: it landed on the first-run wizard (fresh DATA_DIR), so even main online read 0 canvases. The landed-URL check was added after it.
+
+(vi) PRIOR WORK (C-49): the CDN tag dates from the root commit 8eb94ce; Chart.js was never vendored or removed (git log -S "chart.js@"; no deleted chart*.js on any branch). Only index.html / static/js/index.js use it (10 `new Chart(` sites). Nothing replaced except the URL. Ruling: Tuesday 2026-09-27T15:55:13Z / 15:59:08Z (C-182); the vendor-coverage file rd204-vendor-coverage.test.js is NOT touched (per 15:59:08Z).
+
+(vii) C-68 AT MERGE: __tests__/rd719-chartjs-vendored.test.js, __tests__/rd490-open-access-banner-browser.test.js. For the gate's browser leg (outside verify, index.html specs, from the blast-radius note): brand-buttons-first-paint, brand-pairing, dark-mode-contrast, dashboard-page-overflow, empty-window-tiles, gradient-ground, improvements-pane-spacing, primary-button-hover, sustainability-contrast-margin.
+
+NOT TESTED / LIMITS
+- The demo image (RD-76); the built Docker image (I did not build it; "static/ ships wholesale" is from the Dockerfile and .dockerignore, read, not a built-image listing).
+- Offline, the page is still unstyled and 4 console errors remain on the branch: the other CDN libraries (Bootstrap, Bootstrap Icons, Font Awesome, PapaParse), which is RD-721's scope, sequenced after this gate.
+- The red "Persistent storage check failed" banner in my offline screenshots (both sides alike) is my harness's artefact: settings.json pre-written into a fresh DATA_DIR with no persistence marker. Not RD-719.
+- Viewports other than 1366x900; dark mode not captured (the change is a script URL; no CSS).
+Yields for this ticket: 2 (s87n-merge-rd685, qa-b13-H5), logged.

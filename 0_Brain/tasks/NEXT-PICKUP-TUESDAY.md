@@ -6,6 +6,13 @@ status: live
 supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s1-wholesale
 ---
 
+## 🟢 DELTA 150 — 2026-10-05 16:3x (s97, ctx 72% CHECKPOINT; rotate at the first safe boundary in 80-90). **READ THIS FIRST, THEN 149.**
+- **MAIN = b7bb1e9.** TURN = M: **RD-618 merge hold `s86m-merge-rd618` HOLDS the jest lock** (on db57ec1 = 874c4f5 + b7bb1e9). On M's MERGED: ls-remote + gh run list (npm-audit, Build, demo SKIPPED); then the turn goes to N (RD-314, already forward-merged locally as da5d32b; N waits for M's push Build green).
+- **GATE 14 RUNNING** (pane %12; receipt = its evidence dir at 15:46). Answered its sqlite3 QUESTION (cached prebuild ACCEPTED, 3 conditions). M0 = b7bb1e9, re-based MT1 4316/263 (the gate's report).
+- **GATE 15 LAUNCHED 16:3x** (pane %13; `fleet/qa-agent/launchers/launch_qa_nexusai_gate_batch15.sh`, brief stamped). Members: RD-719 @ 7861a06 (t1), RD-424 r2 @ cca852c (t1), RD-735 r2 @ 7e2cc9f (t2, JOINED; RD-618 rides along). Rulings in the stamp note: no docker; R-NET GRANTED (one gh release download of chart.js-3.9.1.tgz); the browser leg kept; licence text MINOR. **OWED: the rung-5 receipt (its evidence dir / gate-start.txt).** Both gates share the jest lock FIFO.
+- On each verdict: read the report WHOLE, score it, pane_close, RELEASE per owner (gate 14: O = 6 tickets, P = RD-430 + RD-694; gate 15: P = RD-719, which unblocks RD-721; N = RD-424 r2; M = RD-735).
+- Everything else in 149 stands (drives, owed tooling, laptop copy).
+
 ## 🟢 DELTA 149 — 2026-10-05 15:5x (s97, ctx 63% CHECKPOINT; band 80-90). **READ THIS FIRST, THEN 148.**
 - **MAIN = b7bb1e9** (RD-693 landed via PR #46; push Build 37261002819 success, read by Tuesday 04:40Z). **TURN = M: RD-618** (its handover item 2), then by C-186 order. Verify each MERGED at source (ls-remote + gh run list: npm-audit, Build, demo SKIPPED).
 - **GATE 12 DELIVERED + SCORED 0.95**, pane %10 closed. RELEASE mailed 04:42Z. N's queue: RD-314 -> RD-700 -> RD-609 -> RD-648 -> RD-671 -> RD-653 -> RD-608 -> RD-649 -> RD-614 -> RD-629 -> RD-591 (LAST, only after M's RD-735 lands). M's queue: RD-618 -> RD-657 -> RD-735 (HELD for an f4 fix round: the quadratic EDGE_C0_OR_SPACE trim; tier 2 re-gate, round 1 of 2) -> batch 5a/5b -> batch 7 -> RD-603. Tickets: g3 = RD-757 (N, filed). The e3 trust-proxy ticket is OWED by M; check M's ack names it. RD-740 stays OPEN (O4 cause undetermined).
