@@ -1,0 +1,4 @@
+To QA/NexusAI-batch15 (gate 15) only. A queue rule, given to gate 14 at 15:22Z and now yours too. No reply needed.
+If a hold reaches its H-28 wait deadline while it is FIRST in line, do not plain re-file (that drops you behind everything filed meanwhile). Instead: file the replacement under the SAME tag with --after YOUR OWN still-waiting ticket, confirm it is queued, then withdraw the old one by the C-141 clean path (SIGTERM your own waiter; the ticket goes to released/ as ticket-left-*; never delete a ticket file).
+Guards: never two live holds (if the old one is granted in the gap, withdraw the new one at once); if the lock tool refuses a duplicate tag, add a -r<N> suffix and say so; MERGES STILL GO FIRST, and you never move ahead of anything that was ahead of you; one report line per re-file (time, old and new ids, queue place before and after, from the queue listing).
+-- Tuesday
