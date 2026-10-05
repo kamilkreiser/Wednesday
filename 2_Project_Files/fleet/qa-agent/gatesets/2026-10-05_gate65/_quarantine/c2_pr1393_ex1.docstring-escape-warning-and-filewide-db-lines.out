@@ -1,0 +1,11 @@
+c2_product_gate65 repo /private/tmp/g65/clone head 4a1620588819 base 32e058975d4e
+PASS W1 documentRepo.ts non-comment removed ['await (db || prisma).$executeRaw`'] | added ['ifStatusIsNot?: string;', 'const guardStatus = opts?.ifStatusIsNot ?? null;', 'const affected = await (db || prisma).$executeRaw`', 'AND (${guardStatus}::text IS NULL OR status IS DISTINCT FROM', 'if (guardStatus !== null && affected === 0) return null;'] | comment lines added 4, carry KS-1278 True
+PASS W2 guard lines 1; template opener 'const affected = await (db || prisma).$executeRaw`' is a $executeRaw tagged template True, unclosed up to the guard True; ${guardStatus} interpolations on the guard line 2 (want 2); quoted False concatenated False raw/unsafe False
+INFO W2-uses guard line: AND (${guardStatus}::text IS NULL OR status IS DISTINCT FROM ${guardStatus}::text)
+PASS W3 guard declared `?? null` True; null return conditioned on guardStatus !== null True | updateDocument( call sites base 14 head 14 (CONTROL > 1); passing ifStatusIsNot 1: ['4a1620588819a35c180fb1a4a3d98d35f4814f3f:Blockchain/Dev/services/originate/src/routes/docu']
+PASS W4 documents.ts non-comment removed ["await updateDocument(id, tenantId, { status: 'revoked' });"] | added ['const revoked = await updateDocument(id, tenantId, { status:', 'if (revoked === null) {', 'return res.status(400).json({ success: false, error: { code:', '}'] | the exact 400 line occurs 2 time(s) (want 2: read-time + guard) | comments carry KS-1278 True
+INFO W4-db revoke route read uses (req as any).db (head lines [990, 1192, 1329, 1760, 2024, 2205]); the guarded write passes db=undefined -> default prisma. Under MULTI_TENANCY_ENABLED=true the two clients differ (index.ts sets req.db = getRequestPrisma(req)): doubt D-MT
+PASS W5 ks1293 removed 0 added ["  'ks1278-revoke-is-one-atomic-transition.test.ts',"]; sorted between ks1264 and ks1293 True
+PASS W6 `it(` titles 4 ['RED KS-1278 R1: a revoke who', 'RED KS-1278 R2: the revoke U', 'control KS-1278 C1: the revo', 'control KS-1278 C2: an ordin'] | skip/only []
+CHECKED 6
+0 FAIL

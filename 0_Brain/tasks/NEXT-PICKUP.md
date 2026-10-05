@@ -8,28 +8,27 @@ supersede: REPLACED WHOLESALE 2026-10-05 22:5x by seat 9a78af86 (53% checkpoint)
 
 # NEXT PICKUP
 
-## 🔴 FIRST ACTS (65% checkpoint 23:3x AEDT 2026-10-05, seat 9a78af86)
-0. `kam_rulings_today.sh` + `reconcile_rulings.py`. Kam silent since 20:07.
-1. Read `inbox_digest.sh --inbound` WHOLE; full bodies via `inbox_digest.sh full <inbox> '<id>'`.
-2. **develop = d784b613c81e** (#1388 KS-1404 squash, VERIFIED AT SOURCE by Wednesday: tree f65ddbbd560c, 1 parent 3cb93b9c731e). Present history tonight: #1384 232623892f24 → Peter's #1392 3cb93b9c731e → #1388 d784b613c81e.
-3. **D 9th (%43)**: merged #1388; expect its follow-up ticket (N-1388-1..6, board account) + WRAP → verify handover hash, score, pane_close.
-4. **F lane**: Kam's merge-order card satisfied. **F 4th LAUNCHED %47 12:40:04Z** — ITEM 0 owed (rule Q-AKTO yes, Q-1376 leave; its merge-in tree must be checked by Wednesday before push; GO string `GO (Seat F 4th): merge 1383 on gate61`). Brief was → `fleet/briefs_staged/2026-10-05_seatF4_successor.md` (#1383 docs-only merge-in, tree to Wednesday before push, GO `GO (Seat F 4th): merge 1383 on gate61`). If missing after a rotation, re-commission from `HANDOVER-seatF3-2026-10-05.md`. Read the brief WHOLE before `brief_and_launch.sh` (run it BARE — a `script -q` wrapper failed with tcgetattr tonight; the gate launcher needs `script`, brief_and_launch does not). The send gate needs a Linear provenance line for EVERY ticket id in the QUEUE.
-5. **B 64th (%46)** launched 12:26:48Z: ITEM 0 owed (PR C KS-723 anchors-tx; #1393 merge-in on gate65's GO).
-6. **E 5th (%45)** launched 12:04:53Z: ITEM 0 owed. Rule Q-1256-CLOSE (if a Redis close returns NULL, the close cell stays open under Kam's b → maybe a fresh card), Q-SEAT5, Q-WAIT5, Q-F5 (develop is now in the shared store).
-7. **gate64 (%44)** on #1389: running the whole runner at the sim merge-in. On GO: launch **G 2nd** from `HANDOVER-seatG1-2026-10-05.md`; its merge-in tree re-predicted on the CURRENT develop (gate64's d1f3c5cb6c1c was on 3cb93b9c731e, now stale).
-8. **gate65 kit drafter running** → `fleet/qa-agent/gatesets/2026-10-05_gate65/` for #1393 (B 63rd's KS-1278, head 4a1620588819). On kit: routing line (backup), dry run, launch under `script -q /dev/null`, rung 5.
-9. **Spark**: queue empty. HOLDs awaiting a raise seat: KS-998, KS-1136, KS-1164, KS-1305, KS-1313 (reviews in run dirs). Tunnel re-opened 23:0x (`ssh -f -N … -L 47788:127.0.0.1:8888 Spark`); check /health first. Pool thin: carve tickets.
-10. Read seat ctx only after `tmux resize-pane -t %NN -y 16`; then `tmux select-pane -t %0`. macOS has no `timeout`. The no-cd hook refuses `git -C $VAR <write verb>` → use literal paths for scratch-repo writes.
+## 🔴 FIRST ACTS (rotation handover 23:5x AEDT 2026-10-05, seat 9a78af86 at ~78%)
+0. `kam_rulings_today.sh` + `reconcile_rulings.py`. Kam silent since 20:07 (a KS-1256 reading was posted to his panel 23:3x with a correction offer: Redis DOWN = 503, Redis up + unset = no restriction).
+1. Read `inbox_digest.sh --inbound` WHOLE; bodies via `inbox_digest.sh full <inbox> '<id>'`.
+2. **develop = d784b613c81e** (#1388 squash, verified at source). ABSENT from the shared store at 23:3x; seats bring it in by the STANDING_LINES objects-only route.
+3. **E 5th (%45)**: #1385 (KS-938) tree **04fa3e0d1b48 CONFIRMED** by an independent verifier; merge-in + push RELEASED 12:5xZ. Expect its READY → **commission a gate kit for #1385 at its merge-in head M** (tier 1: MFA disable nulls the seed), then GO `GO (Seat E 5th): merge 1385 on gate<NN>`. Then E 5th's KS-1256 (ruling 7: thrown read → 503; Redis unavailable → 503 except deliberate no-Redis config, measured first; unset with Redis up → no restriction).
+4. **B 64th (%46)**: plan ANSWERED 12:5xZ, PR C (KS-723 anchors-tx) building. Expect its READY → gate kit (tier 1). Also holds #1393's merge on gate65's GO.
+5. **gate65 (pane `QA/Secuura-ks1278-1393`) LAUNCHED 12:48:43Z** on #1393 at 4a1620588819 over d784b613c81e. Rung 5 NOT yet checked. Kit doubt D1: revoking by UUID may now answer 400 (UPDATE matches external_id only) — likely NO GO material. On GO: `GO (Seat B 64th): merge 1393 on gate65` with the gate's key-anchored merge-in tree (predicted 6e5de2a1395b on d784b613c81e). On NO GO: a fix round for B lane.
+6. **F 4th (%47)** launched 12:40:04Z: ITEM 0 owed. Rule Q-AKTO yes (npm ci in systemTest/akto, not under the lock), Q-1376 leave. Its merge-in tree needs an INDEPENDENT prediction before the push GO (drafter predicted 10c5716a4663 on d784b613c81e; copy tonight's predict_1385 verifier commission shape). Merge only on `GO (Seat F 4th): merge 1383 on gate61`.
+7. **G lane**: gate64 GO on #1389 (report sha256 995ca420033e0c04; squash subject + five sentences the body must NOT carry in the verdict). **Seat G 2nd brief drafter was running at rotation** → `fleet/briefs_staged/2026-10-05_seatG2_merge_1389.md`. If absent/partial: re-commission (gate64 verdict saved in the previous seat's scratchpad will be gone — re-read the verdict mail from wednesday-agent@ by subject `GATE64 #1389`). Read WHOLE before `brief_and_launch.sh` (run BARE, not under `script`).
+8. **Spark**: queue empty; HOLDs awaiting a raise seat: KS-998, KS-1136, KS-1164, KS-1305, KS-1313 (REVIEW.md in each run dir). Tunnel: check /health first.
+9. Send-gate format for briefs: every PROVENANCE line `- Pn fact | instrument | read YYYY-MM-DD` on ONE line, absolute paths, a Linear line per QUEUE ticket. Pane ctx: `tmux resize-pane -t %NN -y 16` then `tmux select-pane -t %0`.
 
 ## SECUURA LANES
 | lane | seat / pane | state | next |
 |---|---|---|---|
-| B | B 64th %46 | ITEM 0 | PR C; #1393 merge on gate65 GO |
-| D | none (D 9th WRAPPED 0.95) | #1388 MERGED d784b613c81e | idle; owed: C6 image proof at the next kintsugi deploy; N-1388-2 doc sentence follow-up |
-| F | F 4th %47 | ITEM 0 | #1383 merge-in → GO → merge |
-| G | none; gate64 %44 | #1389 under gate | G 2nd on GO |
-| E | E 5th %45 | ITEM 0 | #1385 merge-in → gate; KS-1256 b |
-Scored tonight (this seat): E 4th 0.93 · B 63rd 0.95 · D 9th 0.95. E 5th %45 ITEM 0 ANSWERED 12:3xZ (re-predict on d784b613c81e; KS-1256 Redis-down = 503 ruled inside Kam's card, Kam told on panel).
+| B | B 64th %46 | PR C building | READY → gate; #1393 merge on gate65 GO |
+| D | none | idle | C6 image proof at next kintsugi deploy; N-1388-2 doc sentence |
+| E | E 5th %45 | #1385 merge-in released | READY → gate → GO; KS-1256 |
+| F | F 4th %47 | ITEM 0 | merge-in (independent tree check) → GO |
+| G | none | #1389 gate64 GO | G 2nd (brief drafting) |
+Scored this seat: E 4th 0.93 · B 63rd 0.95 · D 9th 0.95 · gate64 1.0. STANDING_LINES added tonight: worktree object store; inherited tools fail closed; scratch-clone origin trap; trap-4 forward half.
 
 ## OWED (added this seat)
 - Gate-kit defect (D 9th's finding): `c4_docs_gate63.py predict` on an ABSENT develop returns None for every blob → a false M6 "re-gate" refusal. predict must refuse "develop unresolvable" by name; carry into every new kit.

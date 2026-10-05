@@ -1,0 +1,34 @@
+SELFTEST OK T0 positive control (the REAL blobs, fixtures c4_real_*.html): 6 checked, fails []
+SELFTEST OK flow an edit OUTSIDE the block (in 14.) (landed, fixture c4_arm_01_fh.html): want NEW FAIL ['D3'] | got ['D3']
+SELFTEST OK flow 15. renumbered 16. (landed, fixture c4_arm_02_fh.html): want NEW FAIL ['D3'] | got ['D3']
+SELFTEST OK flow block placed AFTER 19. (ascending broken) (landed, fixture c4_arm_03_fh.html): want NEW FAIL ['D3'] | got ['D3', 'D5-flow']
+SELFTEST OK flow close tag rewritten (landed, fixture c4_arm_04_fh.html): want NEW FAIL ['D3'] | got ['D3']
+SELFTEST OK flow block drops UNMEASURED (landed, fixture c4_arm_05_fh.html): want NEW FAIL ['D5-flow'] | got ['D5-flow']
+SELFTEST OK cheat block not LAST (moved above KS-1005) (landed, fixture c4_arm_06_ch.html): want NEW FAIL ['D4'] | got ['D4', 'D5-cheat']
+SELFTEST OK cheat an edit in the KS-1388 section (landed, fixture c4_arm_07_ch.html): want NEW FAIL ['D4'] | got ['D4']
+SELFTEST OK cheat KS-1278 h2 duplicated (landed, fixture c4_arm_08_ch.html): want NEW FAIL ['D4'] | got ['D4', 'D5-cheat', 'D6']
+SELFTEST OK cheat block claims an ordering invariant (landed, fixture c4_arm_09_ch.html): want NEW FAIL ['D6'] | got ['D6']
+SELFTEST OK cheat block drops the base sha (landed, fixture c4_arm_10_ch.html): want NEW FAIL ['D5-cheat'] | got ['D5-cheat']
+SELFTEST OK base flow timing control blinded (auth renamed) (landed, fixture c4_arm_11_fb.html): want NEW FAIL ['D7'] | got ['D3', 'D7']
+SELFTEST OK predict on D == base gives END_TREE: 79b51d3f777f vs 79b51d3f777f
+SELFTEST OK the REAL develop d784b613c81e: key 6e5de2a1395b | tail CONTROL 558a76317e29 | succ CONTROL f20f2612c8d5 (at least one differs)
+SELFTEST OK cross-check: `git merge-tree --write-tree` rc 1 (flow conflicts) — its CHEAT blob 806e4a4d6de1 == the key prediction's 806e4a4d6de1
+SELFTEST OK predicted flow h2 numbers ascending with 15.: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 18, 19]
+SELFTEST MISS SIM post-#1388 develop d37c7ad49ef7 (tree f65ddbbd560c): predicted 6e5de2a1395b, differs from the 3cb9 prediction 6e5de2a1395b
+SELFTEST OK SIM appended-after-KS-1005 develop: key tree 62c88af07220 puts KS-1278 ABOVE KS-938 [3965, 4007], DIVERGENCE printed True; tail CONTROL ff588d87992c differs
+SELFTEST OK predict REFUSES an absent develop BY NAME: "PREDICT REFUSED: develop unresolvable: 'ffffffffffffffffffffffffffffffffffffffff' is not a commit in /private/"
+SELFTEST OK predict REFUSES a develop that changed documents.ts: "PREDICT REFUSED: develop-after changed code path(s) ['Blockchain/Dev/services/originate/src/routes/d"
+SELFTEST OK predict REFUSES a develop already carrying KS-1278: 'PREDICT REFUSED: cheat: develop ALREADY carries a KS-1278 h2 (merged twice? re-gate)'
+SELFTEST OK predict REFUSES a develop without the predecessor key KS-1388: "PREDICT REFUSED: flow: the predecessor key KS-1388 is not exactly once in develop (key '(KS-1388)</h"
+SELFTEST OK Q-M positive control (SIM merge-in at the predicted tree): fails []
+SELFTEST OK Q-M block at the wrong place (control tree): want FAIL ['M1'] | got ['M1']
+SELFTEST OK Q-M single parent: want FAIL ['M2'] | got ['M2']
+SELFTEST OK Q-M an extra non-kit path: want FAIL ['M1', 'M3'] | got ['M1', 'M3']
+SELFTEST OK Q-M a Co-Authored-By trailer: want FAIL ['M4'] | got ['M4']
+SELFTEST OK Q-M develop's advance touches documents.ts: want FAIL ['M1', 'M6'] | got ['M1', 'M6']
+SELFTEST OK Q-M two new commits: want FAIL ['M2', 'M7'] | got ['M2', 'M7']
+SELFTEST OK Q-M D == base (no advance): want FAIL ['M5'] | got ['M5']
+SELFTEST OK qm REFUSES an absent merge-in head BY NAME: "QM REFUSED: merge-in head unresolvable: 'eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee' is not a commit i"
+SELFTEST NOTE real develop d784b613c81e key 6e5de2a1395b tail 558a76317e29 succ f20f2612c8d5; SIM merge-in 87eef05d440b (objects in /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/9a78af86-ad55-484b-851f-80e896094699/scratchpad/g65/clone only; no ref written)
+SELFTEST BROKEN 30 of 31
+CHECKED 31 arm(s)

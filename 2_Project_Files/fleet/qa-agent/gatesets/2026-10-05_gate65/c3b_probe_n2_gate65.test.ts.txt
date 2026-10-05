@@ -1,0 +1,158 @@
+/**
+ * gate65 PROBE N2 (QA scratch only, never committed): a revoke addressed by the document's UUID. Derived from the KS-1278 cell file's
+ * harness. getDocument falls back to `WHERE id = ${id}::uuid`; the guarded UPDATE matches only `external_id = ${id}`, so a real database
+ * reports 0 rows for it — planted here as $executeRaw resolving 0 ONLY for a UUID-addressed request. Run at the BASE and the HEAD.
+ *
+ * (original header follows) KS-1278 - POST /api/documents/:id/revoke decided "already revoked" on a READ and then ran an unconditional
+ * UPDATE, so two overlapping revokes could both pass the read: 200 + 200, two updates, two provenance rows and two
+ * anchor calls (batch gate N60-2, measured in-process). The fix moves the decision INTO the UPDATE: the revoke's
+ * write refuses a row that is already revoked, and a revoke whose write changed no row answers the same 400 and
+ * records nothing.
+ *
+ * Harness: the ks1264 suite's route harness, but with the REAL documentRepo over a mocked prisma (the ks521 shape),
+ * so one request drives both product files. "The other revoke won" is planted as $executeRaw resolving 0 rows.
+ */
+process.env.DATABASE_URL = process.env.DATABASE_URL || 'postgresql://test:test@127.0.0.1:1/test';
+process.env.SIMULATE_ANCHORING = 'true';
+// The revoke anchor goes to a refused loopback port, so it degrades to no anchor id (port 1 is a fetch bad port).
+process.env.ANCHORING_SERVICE_URL = 'http://127.0.0.1:2';
+
+const mockQueryRaw = jest.fn();
+const mockExecuteRaw = jest.fn();
+const mockRecord = jest.fn(async (_rec: Record<string, unknown>) => undefined);
+
+jest.mock('../db', () => ({
+  prisma: { $queryRaw: mockQueryRaw, $executeRaw: mockExecuteRaw, $executeRawUnsafe: jest.fn() },
+  getTenantManager: jest.fn(() => null),
+}));
+jest.mock('../repositories/certificationRepo', () => ({
+  initRepo: jest.fn(async () => undefined),
+  getCertification: jest.fn(),
+  saveCertification: jest.fn(async () => undefined),
+  listCertifications: jest.fn(),
+  saveShare: jest.fn(),
+  getSharesByCertification: jest.fn(),
+  getLineageEvents: jest.fn(),
+}));
+jest.mock('../services/chargeEvents', () => ({ createChargeEvent: jest.fn(async () => ({ id: 'charge-1' })), getChargeEventsByCertification: jest.fn() }));
+jest.mock('../utils/notificationClient', () => ({ notifyDocumentCertified: jest.fn(async () => undefined), notifyDocumentRevoked: jest.fn(async () => undefined), notifyDocumentShared: jest.fn(async () => undefined) }));
+jest.mock('../repositories/shareRepo', () => ({ createShare: jest.fn() }));
+jest.mock('../repositories/lifecycleEventRepo', () => ({ createLifecycleEvent: jest.fn(), setLifecycleEventAnchor: jest.fn(), listLifecycleEvents: jest.fn() }));
+jest.mock('../events', () => ({ publishEvent: jest.fn(async () => undefined), EventTypes: { DOCUMENT_CREATED: 'document.created', DOCUMENT_OWNERSHIP_TRANSFERRED: 'document.ownership_transferred', DOCUMENT_VERSIONED: 'document.versioned', CERTIFICATION_ISSUED: 'certification.issued' } }));
+jest.mock('../services/threadTokenClient', () => ({ mintAndRegisterThreadToken: jest.fn(async () => ({})) }));
+jest.mock('../routes/verification', () => ({ registerInPlatformRegistry: jest.fn(async () => undefined) }));
+jest.mock('../services/anchorStateSync', () => ({ pollAnchorUntilConfirmed: jest.fn(async () => undefined), reconcileDocumentAnchorState: jest.fn(async (d: any) => d) }));
+jest.mock('../services/provenance', () => {
+  const actual = jest.requireActual('../services/provenance');
+  return {
+    ...actual,
+    recordActionProvenance: (rec: Record<string, unknown>) => mockRecord(rec),
+    resolveOnBehalfOf: jest.fn(async () => null),
+    getCreationProvenance: jest.fn(async () => null),
+    wasCreatedByConnector: jest.fn(async () => false),
+  };
+});
+jest.mock('@secuura/shared', () =>
+  require('./helpers/sharedModuleMock').makeSharedMock({
+    hasNulByte: jest.requireActual('@secuura/shared').hasNulByte,
+    runWithTenantId: jest.requireActual('@secuura/shared').runWithTenantId,
+    encryptField: jest.requireActual('@secuura/shared').encryptField,
+    decryptField: jest.requireActual('@secuura/shared').decryptField,
+    lookupHash: jest.requireActual('@secuura/shared').lookupHash,
+  }),
+);
+jest.mock('../middleware/auth', () => ({
+  authenticate: () => (req: any, _res: unknown, next: () => void) => {
+    req.user = JSON.parse(String(req.headers['x-probe-user'] || '{}'));
+    next();
+  },
+}));
+jest.mock('../utils/logger', () => ({ logger: { info: jest.fn(), warn: jest.fn(), error: jest.fn(), debug: jest.fn() } }));
+
+import express from 'express';
+import { documentsRouter } from '../routes/documents';
+import { updateDocument } from '../repositories/documentRepo';
+
+const TENANT = 'a0000000-0000-4000-8000-000000000001';
+const CONNECTOR = { userId: 'connector:ks1278-conn', role: 'connector', scopes: ['documents:write', 'documents:read'], organizationId: 'd0000000-0000-4000-8000-000000001278', tenantId: TENANT };
+const OBO = { email: 'person.1278@example.com', displayName: 'Person 1278' };
+const DOC_ID = 'doc-1278';
+
+/** A documents row as getDocument's SELECT projects it (the ks521 shape), owned by the connector, not revoked. */
+function dbRow(status = 'draft'): Record<string, unknown> {
+  return {
+    id: '2539dc16-c5f1-4d8c-b7e4-2d3ff3551278',
+    external_id: DOC_ID,
+    document_type: 'general',
+    status,
+    owner_user_id: CONNECTOR.userId,
+    title: 'KS-1278 doc',
+    description: null,
+    content_hash: 'sha256:' + 'a'.repeat(64),
+    metadata: {},
+    certification_metadata: {},
+    created_at: new Date('2026-09-19T00:00:00.000Z'),
+    updated_at: new Date('2026-09-19T00:00:00.000Z'),
+  };
+}
+
+/** The revoke UPDATE among $executeRaw's calls (the one binding status 'revoked'). */
+function revokeUpdateCall(): unknown[] | undefined {
+  return mockExecuteRaw.mock.calls.find((c) => (c[0] as readonly string[]).join('?').includes('UPDATE documents SET') && c.slice(1).includes('revoked'));
+}
+
+const app = express();
+app.use((req: any, _res, next) => { req.tenantId = TENANT; next(); });
+app.use('/api/documents', express.json(), documentsRouter);
+let base = '';
+let server: ReturnType<typeof app.listen>;
+beforeAll(async () => {
+  await new Promise<void>((r) => { server = app.listen(0, '127.0.0.1', () => r()); });
+  const a = server.address();
+  base = 'http://127.0.0.1:' + String(typeof a === 'object' && a ? a.port : 0);
+});
+afterAll(() => { server?.close(); });
+const UUID = '2539dc16-c5f1-4d8c-b7e4-2d3ff3551278';
+beforeEach(() => {
+  mockQueryRaw.mockReset();
+  mockExecuteRaw.mockReset();
+  mockRecord.mockClear();
+  // external_id lookups miss for the UUID, the id::uuid fallback hits (both tenant-scoped in the product SQL)
+  mockQueryRaw.mockImplementation(async (strings: readonly string[], ...vals: unknown[]) => {
+    const sql = strings.join('?');
+    if (sql.includes('WHERE external_id =') && vals[0] === UUID) return [];
+    return [dbRow('draft')];
+  });
+  // the UPDATE is keyed `external_id = ${id}`: for the UUID it matches 0 rows on a real database
+  mockExecuteRaw.mockImplementation(async (strings: readonly string[], ...vals: unknown[]) => (strings.join('?').includes('UPDATE documents SET') && vals.includes(UUID) ? 0 : 1));
+});
+
+/** POST /:id/revoke as the connector; returns the status, the error code and the provenance rows recorded. */
+async function revoke(target: string = DOC_ID) {
+  const res = await fetch(base + '/api/documents/' + target + '/revoke', {
+    method: 'POST',
+    headers: { 'content-type': 'application/json', 'x-probe-user': JSON.stringify(CONNECTOR) },
+    body: JSON.stringify({ reason: 'ks1278', onBehalfOf: OBO }),
+  });
+  const j: any = await res.json().catch(() => null);
+  // recordActionProvenance is fire-and-forget; let its microtask settle before counting.
+  await new Promise((r) => setImmediate(r));
+  return { status: res.status, code: j?.error?.code ?? null, rows: mockRecord.mock.calls.length };
+}
+
+// ts-jest typechecks with noUnusedLocals: keep the harness's helpers referenced (v1 of this probe was a LOAD FAILURE, TS6133)
+void updateDocument; void revokeUpdateCall;
+
+describe('gate65 PROBE N2', () => {
+  it('gate65 N2-P: a LIVE, owned, not-revoked document revoked BY ITS UUID', async () => {
+    const r = await revoke(UUID);
+    // record what happens; the gate reads the printed tuple at the base and the head
+    // eslint-disable-next-line no-console
+    console.log('N2-P tuple', JSON.stringify([r.status, r.code, r.rows]));
+    expect([r.status, r.code, r.rows]).toEqual([200, null, 1]);
+  });
+  it('gate65 N2-C control: the same document revoked by its external_id', async () => {
+    const r = await revoke(DOC_ID);
+    expect([r.status, r.rows]).toEqual([200, 1]);
+  });
+});

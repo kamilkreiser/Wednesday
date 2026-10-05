@@ -1,0 +1,9 @@
+c3b_security_gate65 repo /private/tmp/g65/clone head 4a1620588819
+PASS S1 head lines: 401 [2350] | read [2359] | 404 [2362, 2367] | 403 [2371] | 400 [2375, 2400] | obo [2393] | guarded write [2398] | null-check [2399] | record [2404] | anchor [2410] | res.json [2417] | each found once (404 >= 1, 400 == 2) True | ascending True
+PASS S2 status(400) lines [2375, 2400] == the two exact-message lines [2375, 2400]: True | non-blank lines between the guarded write and its null check []
+INFO N3 the route read at [2359] passes req.db; the guarded write passes db=undefined (default prisma)
+PASS S3 getDocument tenant-scoped SELECTs 2 (want 2: external_id and uuid) | updateDocument `if (!doc) return null;` at +26 before the UPDATE at +58 | UPDATE scoped external_id AND tenant_id True
+INFO N2 the guarded UPDATE matches external_id ONLY (True) while both reads fall back to the uuid: a uuid-addressed revoke of a live document -> 0 rows -> null -> 400 "already revoked"
+INFO N1 a row deleted between the route read and the inner read/UPDATE -> null -> 400 (KS 1419, the PR's named residual)
+CHECKED 3
+0 FAIL
