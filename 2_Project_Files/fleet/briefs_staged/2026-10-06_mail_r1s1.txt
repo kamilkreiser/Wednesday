@@ -1,0 +1,68 @@
+AUTH {'spf': 'pass', 'dkim': 'pass', 'dmarc': 'pass'}
+QUESTION: status item 1 (Seat R 1st). PR 1 (KS-1305) is built and green, and one measurement needs your call before I commit it.
+
+CONTEXT
+  Worktree s-ra1-ks1305 at develop 3f9ff4e1e1b9. Objects-only transfer done as ruled (7 s hold on
+  .push-lock-d8, refs byte-identical, FETCH_HEAD mtime 13 h older than my fetch so --no-write-fetch-head
+  held). Patch applies STRICT, numstat 19 0, byte-compare against the brief's fences 24/24 and 95/95
+  IDENTICAL with both planted controls firing.
+  Product: Blockchain/Dev/services/originate/src/db.ts
+  Test:    Blockchain/Dev/services/originate/src/__tests__/ks1305-missing-generated-prisma-client-is-diagnosed.test.ts
+
+RED-FIRST AND ONE ARM PER CONJUNCT, as your brief required
+  red-first (test alone at base): Tests:       1 failed, 8 passed, 9 total
+      D1 fails on exactly the predicted assertion: Expected substring "the generated Prisma client
+      (node_modules/.prisma/client) is missing" vs Received "Cannot find module '.prisma/client/default'".
+  head: Tests:       9 passed, 9 total   = 3 ks1305 cells + 6 ks458 cells, each observed per-cell under --verbose.
+
+  The guard is a three-term conjunction:
+      err?.code === 'MODULE_NOT_FOUND'  AND  String(err?.message).includes('.prisma/client')
+      ... else  throw err   (the same object)
+
+  ARM A  drop the MESSAGE term            -> Tests:       1 failed, 8 passed, 9 total   C1 RED. Term COVERED.
+  ARM B  break the SAME-OBJECT rethrow    -> Tests:       1 failed, 8 passed, 9 total   C1 RED. Term COVERED.
+         (✕ CONTROL KS-1305 C1: any other load error is rethrown unchanged (the same object) (1 ms))
+  ARM C  drop the MODULE_NOT_FOUND term   -> Tests:       9 passed, 9 total   NOTHING RED.
+
+🔴 THE FINDING: the `code === 'MODULE_NOT_FOUND'` term is NOT COVERED by any shipped cell.
+  Why, from the fixtures rather than inference. D1 uses code=MODULE_NOT_FOUND with a message
+  containing `.prisma/client`; C1 uses code=MODULE_NOT_FOUND with a message that does NOT
+  ('@prisma/client', an at-sign, not a dot). So no cell presents an error whose MESSAGE matches while
+  its CODE does not, and removing the code test changes no verdict. The REVIEW drove Arms A and B and
+  reported the guard pinned; it is pinned on two of its three terms.
+  Consequence if it ever matters: a non-MODULE_NOT_FOUND error that happens to mention `.prisma/client`
+  would be rewritten into the KS-1305 sentence and its own cause buried as `cause`. Low likelihood,
+  and it is a diagnostic path, not a security or tenancy path -- db.ts numstat is 19 0 and no GUC/RLS
+  line is touched (the 6 KS-458 tenant-GUC cells are green).
+
+TWO THINGS I GOT WRONG AND FIXED, recorded because they changed a verdict
+  - My first Arm B replaced every `throw err;` in db.ts (there are 2, at :133 and :341) and broke
+    compilation: jest printed `Tests: 0 total`, which is a LOAD FAILURE, not an inert tamper. Re-driven
+    line-scoped at :133 with tsc rc 0 and 0 lines, and then C1 reds. An arm that cannot compile
+    proves nothing about the guard.
+  - My first check that the KS-458 cells stayed green grepped for `KS-458` in cell titles and counted
+    0 -- those titles are descriptive and carry no key, and my control counted 0 too, so the check
+    could not discriminate either way. Replaced with a per-cell --verbose reading.
+
+QUESTION (one): do I ship PR 1 as the Spark's byte-identical payload and name the uncovered conjunct
+in the body as a NOT COVERED line plus a follow-up ticket, or do I add ONE control cell (C3: message
+contains `.prisma/client`, code is something else -> rethrown as the same object) which closes the
+term and makes Arm C bite, at the cost of the patch no longer being byte-identical to the brief?
+  My recommendation: ADD C3. It is ~10 lines in the same file, the same ticket, no product change, and
+  it converts a prose caveat into a cell. Byte-identity to the Spark payload is evidence about the
+  Spark's fidelity, which Arms A/B and the two fence compares already establish; it is not a property
+  the PR owes develop. But it is your call -- it is a deviation from the approved payload and I will
+  not take it on my own.
+
+MEANWHILE: continuing with the full originate suite before/after at MY base (the REVIEW's 1063 -> 1066
+was measured at 3cb93b9c731e and is an expectation, not quotable), then tsc, eslint, and the two doc
+blocks for `22.`. I will NOT commit PR 1 until you answer, because the answer changes the commit.
+
+NEEDED-BY: before my commit of PR 1, so within roughly the next 20 minutes of work. If you have not
+answered by then I will build the byte-identical version with the NOT COVERED line, file the follow-up
+ticket, and say so -- the reversible choice.
+
+ctx: 34% at your 23:41Z reading; I have not been able to read it myself (capture-pane shows no ctx
+token on my pane). Watcher pid 12051, armed SINCE 2026-10-05T23:41:22.000Z.
+-- Seat R 1st
+

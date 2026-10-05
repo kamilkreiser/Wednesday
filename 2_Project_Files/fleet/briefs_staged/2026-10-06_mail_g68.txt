@@ -1,0 +1,194 @@
+AUTH None
+GO for #1393 at b5adaba751d89fda0b138e0b8b74d702e2a2a429. It covers a later merge-in head M ONLY under Q-M M1-M8, run on the real develop.
+
+GO (Seat B 67th): merge 1393 on gate68
+
+MERGE-IN CONDITION
+- The head's chain starts at 32e058975d4e, not at develop, so the merge needs a DOCS-ONLY merge-in M first.
+- This GO covers M only if `c4_docs_gate68.py qm --repo <own clone> --head b5adaba751d89fda0b138e0b8b74d702e2a2a429 --merge-in-head M --develop-after <real develop>` passes M1-M8.
+- M1 is THE AUTHORITY: tree(M) == the TAIL-rule KEY prediction on that develop.
+- Predicted tree on the develop I read (3f9ff4e1e1b93e2e704918a7825f13a72c9ec76f): 1711f2b944a819ca69b1170d95d0fb5a9917bf6f.
+  - flow: 1..14 15 18 19 20
+  - cheat: ...KS-1005 KS-938 KS-1278 (KS-1278 last)
+- Before the merge, `gh_gate68.py actions --at M --prev b5adaba751d89fda0b138e0b8b74d702e2a2a429` must read NEW-FAILING NONE and PENDING NONE. The PR is `dirty` today, so it gets no pull_request runs.
+- DIVERGENCE, as I found it: git merge-tree gives rc 1, tree 6297e9c915bf.
+  - The CHEAT conflicts. None of take-OURS, take-THEIRS, OURS+THEIRS or THEIRS+OURS equals the key blob.
+  - THE FLOW AUTO-MERGES WITH NO MARKER BUT MIS-ORDERED (14 18 15 19 20). Do not accept git's flow.
+  - The after-pred rule would give 5dab555016b7. You ruled TAIL (Q2), so 1711f2b944a8.
+- If #1394 (KS-723, DOCS) lands first, re-predict on the then-develop with the TAIL rule (Q4). I did NOT re-derive the drafter's #1394-first SIM tree.
+
+SQUASH SUBJECT
+- I sign your Q6 subject as TRUE of the whole diff 32e0..b5adaba: "KS-1278: key the guarded revoke UPDATE on the row the read resolved, not external_id" (84 chars; 92 with " (#1393)", at the limit).
+- It is incomplete against develop: it presupposes a guard that develop never had, because the squash itself introduces it.
+- Optional alternative, also TRUE: "KS-1278: revoke decides already-revoked in its UPDATE, on the row the read resolved" (83; 91 with the suffix).
+- Key set: KS-1278 is the only hyphenated key.
+
+The squash body MUST carry:
+- `Refs KS-1278` + URL
+- KS 1419 and KS 1424, de-hyphenated
+- the three meanings of null
+- the base / round-1 / head table exactly as the PR body states it (base = 200 + 1 provenance row, status never written)
+- the tamper matrix as measured, with T5b and U1 NOT CAUGHT named as residue
+- NOT COVERED: no live sweep (KS-1278 not Done), RLS, multi-tenant, the type-unchecked cell file
+
+The squash body must NOT carry:
+- "a null can only mean..."
+- 97ce2f's "R2 now asserts the VALUE bound after IS DISTINCT FROM"
+- "N2 ... proves the cast is never reached (22P02)"
+- "At the branch base ... answered 400"
+- KS-TICKET
+- the word-per-line "Document\nis\nalready\nrevoked"
+- "K1 -> R1278 N1"
+- any closing word, Co-Authored-By, or a hyphenated KS 1419 / KS 1424
+
+CHECK ROWS (all at b5adaba751d8 over develop 3f9ff4e1e1b9; rc, UTC and tree are in each evidence/*.meta)
+- C1 PIN: c1_pin_gate68.py rc 0, 12/12 (self-test 4/4).
+  - Chain: 32e0 -> 4a16 -> 97ce2f -> b5adaba. ONE parent 97ce2f; merge-base 32e0.
+  - 6 paths; 97ce2f..head is test + flow + cheat only.
+  - Trailers (content, raw) (0,1)/(0,1); control bf277eead268 (53,55).
+  - 0 Co-Authored-By; subjects 84 / 79; only KS-1278; 0 closing words; 100644.
+  - NO-NEW-LEG: hooks and skill identical at head, 32e0 and develop. 32e0..3f9f touches 0 code paths.
+- C2 THROUGH-CODE: c2_product_gate68.py rc 1, 6/7, the one FAIL being W6 (self-test 12/12). Read by me as well.
+  - Key: COALESCE(external_id arm, then pkey arm), each tenant-scoped with LIMIT 1. The outer tenant scope is kept and the guard sits inside the statement. Values are bound.
+  - external_id is UNIQUE (01-schema.sql:132; ON CONFLICT(external_id) at :454/:480 depends on it).
+  - Cast: ${id}::uuid x1 (:248, getDocument); ${idAsUuid}::uuid x1.
+  - N3: the unguarded template equals round 1's byte for byte (624c23a64753040f, 487 B). It is NOT equal to develop's (one extra guard line, bound NULL). On real PG that line is a no-op (own arm U: 1 row on a draft row and 1 on a revoked row, develop control 1/1).
+  - Census: 13 / 1 / 12. Grep lines are 23 at 32e0, 24 at 4a16, 26 at 97ce2f and b5adaba.
+  - W6: KS-TICKET placeholder at documentRepo.ts:583.
+  - slice(-2) pins the guard's own bindings in every variant (the guard is the final clause; indices 9/10 of 11 guarded, 6/7 of 8 unguarded).
+- C3:
+  - red-first rc 0: 4a16 + the head's cells gives 7 executed, red [N1] BY ASSERTION ([400,"BAD_REQUEST",0]). R2 stays green there, as I predicted before the run. ks1293 10/10. The head is 17/17.
+  - suite rc 0: round 1 91/1067/0/0, head 91/1070/0/0, same node v24.7.0 / jest 29.7.0.
+  - tsc rc 0: 5.9.3 rc 0 at both ends. documentRepo.ts is in the program. The cell file is listed 0 times (TYPE-UNCHECKED). The planted TS2322 gives rc 2.
+- C3-REAL-POSTGRES (X9, granted in Q3):
+  - Setup: PG 18.3, private cluster at <scratch>/g68/gate68_pgprobe/pgprobe/data, 127.0.0.1 only. Stopped, LEFT IN PLACE for you to dispose of.
+  - pgprobe self-test 5/5 (planted U1 -> 22P02; T1 -> P4+P8; T5b -> P4-P8; K1 -> P1).
+  - run 9/9: P1 UUID 1, P2 1, P3 non-UUID with no 22P02, P4 0, P5 cross-tenant 0/0 untouched, P6 precedence, P7 0, P8 two sessions 1/0 against control P8c 1/1.
+  - OWN arms 4/4:
+    - NULL external_id by UUID: guarded 1, unguarded 0 (KS 1424's latent half, measured)
+    - UUID-shaped external_id: 1
+    - two sessions on one row, A by UUID and B by external_id: 1/0, B blocked 1.32 s; control 1/1
+  - A DDL subset as superuser: RLS NOT exercised.
+- C4:
+  - self-test 17/17.
+  - containment 5/5: flow 1 region and cheat 4, all inside the KS-1278 block; each doc minus its block == 32e0; both commits touch the test and both docs.
+  - h2proof 4/4: the develop flow has 17 h2, 5 split; the tolerant reader counts 17, the old 12.
+  - predict: last 1711f2b944a8, after-pred 5dab555016b7, wrong-order control db268d9cd98c (FAILS read-back), positive control on 32e0 == the head's tree 82567f920582.
+  - mergetree: DIVERGENCE (above).
+- C5:
+  - prtext rc 0: 1 Refs KS-1278, 0 closing references (my widened -ing/colon scan also finds 0; its control fires), only KS-1278 hyphenated, 0 Co-Authored-By.
+  - Body judged: sha256/16 8d8d2c59871447e6, 8,766 B = 8,714 chars, updated 23:09:00Z. It equals the new-head addendum; the READY's 6,584 B body is superseded.
+  - Title: round 1's (75).
+- ACTIONS / MERGEABLE: one Dependabot run at each head (skipped). NEW-FAILING NONE; planted-name control reported. Mergeable false / dirty, consistent with mergetree.
+- COLLISION-CENSUS: 23 others, 0 OVERLAP, 2 DOCS (#1394 KS-723, #1383 KS-1401); the control fires.
+
+TAMPER MATRIX, measured by me at b5adaba (each alone, landed, restored by content, status clean, 7 executed every row, final clean run 7/7):
+- G7 -> R2 (guardBindings ['draft','draft'])
+- G8 -> R1 (anchorFetches 1: the positive control for R1's counter)
+- K1 (corrected) -> N1
+- T5 -> R2 (exact-text substring false)
+- T1 -> R2, T2 -> R2, T3 -> C2, T4 -> R1, T6 -> R1, K2 -> N3
+- U1 -> NOT CAUGHT (measured blind)
+- T5b -> NOT CAUGHT (measured blind)
+- At 97ce2f I re-ran G7 and T5: both NOT CAUGHT. That matches the author's tamper addendum.
+
+T5b and U1 are assertion-strength gaps, not product defects: real PG catches both. Under Q5 they are NOT GO-blocking; they are RESIDUE for ONE ticket. R2 should be an anchored WHERE-tail match, e.g. /AND \(\?::text IS NULL OR status IS DISTINCT FROM \?::text\)\s*$/, and N2 needs a 22P02-raising double.
+
+END_TREE (as I measured it): 82567f9205824287edae372474c6313edb025268.
+Pin, three ls-remote readings (pull/1393/head and the branch, then develop):
+- 23:25:41Z b5adaba / b5adaba / 3f9f
+- 23:30:44Z same
+- 23:45:53Z same
+Neither moved.
+
+ROUND-1 FINDINGS
+- N-1393-1 Major: CLOSED.
+  - Product, measured: N1 red at 4a16 and green at head; K1 -> N1; PG P1/P6/P8/O3.
+  - Text: "can only mean" occurs 0 times at head in the flow, cheat, code and body (control: 1 in the 4a16 flow).
+- N-1393-2: CLOSED (G7, G8, T5 caught). New residue: T5b.
+- N-1393-3: CLOSED (KS 1419 named).
+- N-1393-4: CLOSED for :573/:574/:586/:588, which are now under KS-1278 why-comments. New: the KS-TICKET placeholder.
+- N-1393-5: CARRIED, latent. Re-measured at b5adaba and 3f9f: PROVISION_PER_TENANT_DB is set by no committed config.
+- N-1393-6: CLOSED.
+- N-1393-7: CLOSED. Ruled: 53 (content) and 55 (raw) are both true of their instruments; the READY's "the 55 is WRONG" compares the two and is itself wrong.
+
+NEW FINDINGS (none blocks)
+- N-1393-8 Minor, MEASURED. Flow 15. (:2298 at b5adaba) says the branch base answered 400 with 0 provenance rows. FALSE.
+  - My overlay of the head's cells on 32e0's product gives N1 GREEN [200,null,1] and R1 showing 1 anchor fetch: base = 200 + 1 provenance row + an anchor, status never written.
+  - It cannot ride in the docs-only merge-in (it would fail M1/M8 and re-gate). It needs a follow-up.
+- N-1393-9 Minor. Flow 15.1-15.3 still carry round-1 figures (4 cells / 14 tests / 1067) at a head with 7 / 17 / 1070. The cheat was updated.
+- N-1393-10 Minor, MEASURED. "N2 proves the ::uuid cast is never reached (22P02)" (cheat, flow, body, 97ce2f message) is false of the instrument: U1 is NOT CAUGHT. The property is true by READ and on real PG.
+- N-1393-11 Minor, MEASURED. T5b blind: R2 is a substring check. Residue ticket, together with U1.
+- N-1393-12 Minor §5d: KS-TICKET at documentRepo.ts:583. Residue per Q7.
+- N-1393-13 Minor. Code comment at documentRepo.ts:629-630 still says a 0-row guarded write "means the row's status already equalled guardStatus". P7 shows a missing row also gives 0 (KS 1419 window). Comment residue.
+- N-1393-14 Polish: stale or loose text (body "this head 97ce2f", "+214/-19"; commit-message items; "instrument: cell N3" for byte-identity; the "24" figure).
+- N-1393-15 Polish: the title is round 1's.
+- N-1393-16 INFORMATION, pre-existing on develop and FIXED going forward by this PR. On develop, a revoke addressed by documentUuid answers 200, writes a provenance PII row and a revoke anchor, and never writes the status, so the document keeps verifying. Whether any client ever did this is UNMEASURED. A historical-data question for you; I filed nothing.
+
+KS-1419 CORRECTION, read sentence by sentence (not posted)
+1. "Correcting one sentence": DOES NOT HOLD as scope. The description also carries "a null can only mean the row became revoked in between" (false at 4a16), which the comment leaves uncorrected.
+2. Quotes "a race, not a reachable sequential path": HOLDS (X8).
+3. "a SEQUENTIAL ... revoke ... addressed by its documentUuid reached the same 400": HOLDS AT 4a1620588819 ONLY.
+   - At 32e0/develop it answered 200 + 1 row + an anchor, status unwritten (own overlay).
+   - At b5adaba it answers 200 with the status written.
+   - Name the tree (round 1, never merged).
+4. "both reads fell back to the primary key (documentRepo.ts:244-251)": HOLDS at 32e0, 4a16, 97ce2f, b5adaba and 3f9f (same lines).
+5. "the guarded UPDATE keyed on external_id": HOLDS at 4a16 (past tense).
+6. "N1 red at 4a1620588819 and green at 97ce2f337ae6": HOLDS.
+   - Red is measured.
+   - Green by identity: same product blobs and same N1 text as b5adaba, measured green there.
+   - Suggest naming b5adaba751d8.
+7. "So a reachable sequential path to that 400 existed": HOLDS, on the round-1 branch only.
+8. "deleted between the route's read and the guarded write still answers 400 where 404 belongs, because the resolver finds no row and the guarded write returns null": HOLDS IN PART. There are TWO windows:
+   - (a) between :2359 and updateDocument's own read: getDocument returns null and :543 returns null before the resolver runs
+   - (b) between :542 and the UPDATE: the COALESCE gives NULL, 0 rows (PG P7), :633 returns null
+   - The sentence describes only (b).
+9. "UNMEASURED - no live instrument": HOLDS. P7 measures the statement, not reachability.
+10. "the cells mock the Prisma driver": HOLDS (jest.mock('../db') at :20-:23).
+
+KS1424-EXISTS: YES.
+- Backlog, assignee kamil.kreiser, created 2026-10-05T22:27:41Z.
+- The description carries the 13-line census naming documents.ts:1224/:1408, verification.ts:396 and anchorStateSync.ts:376/:414 as reachable.
+- It says the silent success is "unmeasured against a live database". The gate has now measured it on PG: P9 0, O1u 0.
+
+DOUBTS
+- D1: T1 agreed.
+- D2: divergence measured; TAIL ruled; qm catches it.
+- D3: rules differ on 3f9f; TAIL ruled; re-predict at the GO.
+- D4: KS-TICKET, Minor residue.
+- D5: MEASURED false (N-1393-8), Minor, follow-up.
+- D6: MEASURED (N-1393-10).
+- D7: G8 is the control and it fired; C1 asserts no winner anchor (Polish).
+- D8: 24 at 4a16, 26 at head.
+- D9: both true.
+- D10: Q6 subject TRUE; alternative offered.
+- D11: judged body 8d8d2c59871447e6.
+- D12: T5 caught; T5b blind is residue, not GO-blocking (Q5).
+
+RESIDUE TO TICKET (yours / the merger's, per Q5 and Q7; I filed nothing)
+1. One assertion-strength ticket: anchored R2 (T5b), a 22P02 double for N2 (U1), optionally a C1 winner-anchor assertion.
+2. The KS-TICKET -> KS 1424 line.
+3. A flow follow-up for N-1393-8, -9 and -10.
+4. The documentRepo.ts:629-630 comment -> KS 1419.
+5. N-1393-16's historical-data question.
+
+NOT TESTED
+- no live sweep
+- RLS, and the full schema and migrations (PG was a superuser DDL subset)
+- the type-unchecked cell file
+- preflight legs 3/4/8 and the whole preflight
+- Schemathesis, Akto, Playwright, k6
+- multi-tenant runtime
+- whether any client revokes by UUID, and the historical data
+- other seats' worktrees
+- the real merge-in M (none exists)
+- the #1394-first SIM tree
+- the reachability of KS 1419's windows
+- the NULL-external_id data population
+
+Named exceptions used: X1, X6, X7, X8, X9 (tokens read by name, never printed). No push, merge, ticket write, comment, PR edit, az, SSH or Docker. The shared checkout was read only. Disk: 682Gi / 366Gi free, no ENOSPC.
+
+Report: /Volumes/DevMASTER/!CODING/Testing Agent MAIN/projects/secuura/reports/2026-10-06-ks1278-1393r2-g68/report.md
+
+sha256 report.md = 9c1cf863a1882d39517a224810e9d84a582089436f14e0cc0fc4fd350be02791
+

@@ -26182,5 +26182,92 @@
    "CARD hpsmpoc-require-sqlserver-ci-check-1006",
    "CARD hpsmpoc-6f6bc96-hosted-deploy-1006"
   ]
+ },
+ {
+  "id": "secuura-ks1256-redis-outage-stops-connector-creates-1006",
+  "client_project": "Secuura/Blockchain",
+  "title": "KS-1256: closing the fail-open means a Redis outage STOPS Platform-S document creation. Accept, or narrow it?",
+  "bluf": "No action needed unless you want to narrow it. E 6th measured that the KS-1256 fix (fail closed when Redis is down) collides with an older test, ks1195, which pins that connector creates keep working (201) during a Redis outage. Both cannot be true. Wednesday ruled fail-closed, which is your ruling 7 as Wednesday read it. Once this ships, a Redis outage makes every connector document create answer 503 until Redis is back, where today it degrades and keeps creating (and lets restricted document types through). Nothing merges before a QA gate, so you can still narrow it.",
+  "default_action": "If there is no ruling, (a) stands. E 6th finishes the build with ks1195's two cells re-pointed and named in the PR body, then the QA gate. Wednesday does not GO the merge before 18:00 today, so you have the day to choose (b) or (c).",
+  "options": [
+   {
+    "key": "a",
+    "label": "Accept: fail closed (503) during a Redis outage",
+    "detail": "Security first: no restricted document type slips through while the allow-list cannot be read. Cost: Platform-S cannot create documents while K's Redis is down."
+   },
+   {
+    "key": "b",
+    "label": "Narrow: keep creating during an outage, refuse only types known to be restricted",
+    "detail": "A different build. K would need a copy of the allow-list that survives a Redis outage; without one, 'known restricted' cannot be known while Redis is down."
+   },
+   {
+    "key": "c",
+    "label": "Hold KS-1256 for a design conversation",
+    "detail": "The fail-open stays in production meanwhile."
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-10-06T10:11:20.539817+11:00",
+  "status": "ruled",
+  "ruled_choice": "a",
+  "ruled_ts": "2026-10-06T10:22:29.296054+11:00",
+  "prior_rulings_overridden": [
+   "2026-09-02 19:28",
+   "2026-09-09 17:52",
+   "2026-09-13 16:55",
+   "CARD nexusai-redis-down-fail-closed-policy",
+   "CARD nexusai-redis-down-revisit-after-resubmission",
+   "CARD secuura-ks1402-lookup-refuses-connector-tokens",
+   "CARD secuura-connector-allowlist-missing-setting-ks1256-1005",
+   "CARD hpsmpoc-require-sqlserver-ci-check-1006",
+   "CARD hpsmpoc-6f6bc96-hosted-deploy-1006",
+   "CARD secuura-ks1402-s-key-cannot-carry-users-read-1006"
+  ]
+ },
+ {
+  "id": "secuura-uuid-revokes-never-wrote-status-history-1006",
+  "client_project": "Secuura/Blockchain",
+  "title": "Did any document get 'revoked' by UUID in the past and silently stay valid? Measure kintsugi and demo read-only?",
+  "bluf": "No action needed unless you want to stop it. gate68 measured that on develop (and on any box running it), revoking a document by its UUID answers 200 and writes a revoke anchor and a provenance row, but never sets the status, so the document keeps verifying. #1393 fixes this going forward (gate68 GO, merging soon). Whether it ever happened to a real document is unmeasured. Wednesday recommends one read-only query per box for revoke provenance rows whose document is not revoked, done by a seat that writes nothing.",
+  "default_action": "If there is no ruling by tomorrow's morning sweep, Wednesday measures nothing and re-raises this once in the morning receipt. No box is queried without your tap.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Measure read-only on kintsugi and demo",
+    "detail": "A seat runs a SELECT only (no write, no restart) and reports the count and ids. If any exist, a second card asks you what to do with them."
+   },
+   {
+    "key": "b",
+    "label": "Measure kintsugi only",
+    "detail": "Demo is UAT; leave it until Peter's next pass."
+   },
+   {
+    "key": "c",
+    "label": "Don't measure",
+    "detail": "The forward fix ships; history stays unknown."
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-10-06T10:50:26.927232+11:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "2026-09-09 17:03",
+   "2026-09-10 20:27",
+   "2026-09-17 08:47",
+   "CARD secuura-workspace-suites-never-run-on-a-pr",
+   "CARD wed-nas-nightly-leg-has-never-completed",
+   "CARD secuura-fourteen-merged-own-pr-tickets-never-moved",
+   "CARD secuura-ks1102-public-status-what-may-show",
+   "CARD secuura-ks692-status-revoke-interim-posture",
+   "CARD secuura-apikey-rate-limiter-never-fires",
+   "CARD secuura-ks1163-start-script-never-waits-for-five-services",
+   "CARD composer-sow-history-rewrite",
+   "CARD hpsmpoc-require-sqlserver-ci-check-1006",
+   "CARD hpsmpoc-6f6bc96-hosted-deploy-1006",
+   "CARD secuura-ks1402-s-key-cannot-carry-users-read-1006",
+   "CARD secuura-ks1256-redis-outage-stops-connector-creates-1006"
+  ]
  }
 ]
