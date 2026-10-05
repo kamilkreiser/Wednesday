@@ -12,6 +12,16 @@ supersede: replace wholesale; previous = NEXT-PICKUP-FRIDAY.md.pre-0925-rotate-s
 
 **The tree is at `/Volumes/Laptop-DEV/FRIDAY` (the drive, since 2026-09-28).** Quote every path (spaces).
 
+## 🔴🔴🔴 CHECKPOINT 2026-10-05 18:19 (Friday, ctx 50%) — READ FIRST; supersedes every block below where they differ
+**Kam:** board rows none since 16:38:48 (reconcile 0). TERMINAL ~18:1x: Composer deploy + login email (see OWED line in the 17:27 block below — deadline before 08:00 Tue 6 Oct).
+**MAINS:** HPSM-POC **0a85b89** (#104 + #105 merged; records #67/#68/#69 → analysis 814b538) · Composer 555593a. Hosted c2d321c · Composer demo 555593a.
+**LIVE PANES (briefs in each project's `1_Project_Definition/Briefs/`, dated 2026-10-05):**
+- Datasec/HPSM-POC-A %46 **B139** (209/210/211, tier 1) → on READY FOR GATE: PR, tier-1 gate (B137 shape), merge on GO, records.
+- Datasec/HPSM-POC-B %47 **B140** (PDF 199/202/205 + web tests 144/156, tier 2) → on READY: read diff at source, PR, merge_when_green, records, NEW WORDS to Kam.
+- Datasec/Composer-D %40 **B84** (seven web Lows; S-1/S-2 ruled in ADDENDUM-1) → on READY: diff at source, PR, merge_when_green, records, then the DEPLOY + live check + email (OWED).
+**Watcher:** seen_s8 (scratchpad, globs7) over B139/B140/B84 + panes %40 %46 %47 — dies with the seat.
+**Deferred HPSM-POC:** 99, 179, 127 (127 needs one live Azure OpenAI call).
+
 ## 🔴🔴🔴 STATE 2026-10-05 17:27 (Friday successor, ctx ~42%) — READ FIRST; supersedes every block below where they differ
 **Kam:** no rows since 16:38:48; reconcile 0. No open cards (hpsmpoc-c2d321c-hosted-deploy-1005 DELIVERED → C-60, analysis PR #67 → 7468efc).
 **MAINS:** HPSM-POC **e787727** (PR #104 B134 merged on gate B137 GO WITH NOTES) · analysis 7468efc · Composer 555593a. Hosted c2d321c; Composer demo 555593a.
