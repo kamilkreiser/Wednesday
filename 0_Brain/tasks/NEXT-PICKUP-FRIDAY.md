@@ -12,6 +12,15 @@ supersede: replace wholesale; previous = NEXT-PICKUP-FRIDAY.md.pre-0925-rotate-s
 
 **The tree is at `/Volumes/Laptop-DEV/FRIDAY` (the drive, since 2026-09-28).** Quote every path (spaces).
 
+## 🔴🔴🔴 CHECKPOINT 2026-10-05 15:00 (Friday, ctx 70%) — READ FIRST; supersedes every block below where they differ
+**Kam:** no live rows since 12:19:18; his ~12:4x "keep going" + email instruction DONE (Composer email 13:17).
+**LIVE PANES + what each needs from Friday:**
+- Datasec/Composer-D **B79** DONE (records/b79 in `_wt_b79rec`; 51 STALE rows marked, #109 held, new #205–#207). **Composer PR #43 @ 2ed1aeccff455423e07c1cf66c01d40eeff9209e** — merge_when_green running in THIS seat (dies on rotation: re-run). On merge: verify delta = 15 web files; B79 addendum: records/b79 → Composer root main (C-entry only if needed); then tell Kam the SIX NEW WORDS (B79 STATUS §NEW WORDS FOR KAM) — non-blocking; then a deploy card (demo = d09c895; Kam's word).
+- Datasec/Composer-QA **B81** gate on B80 (PR #42 @ ad11f94e3caa7467cc19fdc15344620a6f79618a). Its STATUS was a SKELETON at 14:57 (`__E2E__`, `__CI__`, no verdict). A poll in this seat waits for placeholders 0 + verdict (dies on rotation: re-check by hand). On GO: `friday/merge_when_green.sh datasecau/Datasec-Security-Composer 42 ad11f94e3caa7467cc19fdc15344620a6f79618a`; records by a successor (B80 pane closed).
+- Datasec/HPSM-POC-B **B133** on ADDENDUM-1 (D-1 removal of untracked regenerable folders in worktrees older than 3 days, no live seat, no kits/quarantine; ~160 GB possible). On `READY FOR REVIEW (D-1 done)`: read counts + df; then the one-line-per-drive report to Kam + the "first pass done" receipt to Wednesday (`[Friday -> Wednesday]`, client-neutral).
+**Composer D-1 REVERSAL owed:** the same D-1 conditions apply to Composer at its next pass (B82 found 4.55 GiB; Friday said no at 14:4x, then yes for HPSM-POC at 14:5x — consistency).
+**Drives:** Laptop-DEV 83%. Blockchain 789 GB + Testing Agent 137 GB = Wednesday raising with Kam; NexusAI 30 GB = Tuesday (nothing moves now). Policy MERGED fix in (Wednesday).
+
 ## 🔴🔴🔴 STATE 2026-10-05 14:03 (Friday, ctx 64%) — READ FIRST; supersedes every block below where they differ
 **Kam today since 12:1x:** four cards a (12:18–12:19; all delivered: Composer C-43, hosted C-57/C-58/C-59) · terminal ~12:4x "keep going. dont wait on reviews if you do not need. Tell me once the composer is ready for my review. Send me an email with links and user details" → DONE: email sent 13:17 (msg 010001a109d9d1fa…, read back), panel told.
 **LIVE:** Composer demo **d09c895** (B78, C-43, Friday verified 13:2x). HPSM-POC hosted **fa77dca** (B132, C-57..59, Friday verified 12:5x; forwarded settings on; --clean done). **MAINS:** Composer d09c895 · HPSM-POC **c2d321c** (#102 CRLF screen fix + #103 demo.bicepparam — neither on hosted; next deploy needs Kam's word) · analysis 954a6a5.
