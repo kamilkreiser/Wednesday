@@ -8476,5 +8476,54 @@
   "project": "WED",
   "ts": "2026-10-05T10:45:59.783905+11:00",
   "text": "Correction to my last message: I said the Studio's second address, 192.168.7.159, is the Spark's link. I didn't check that, and my notes have the Spark on the 192.168.8 network, so I don't know which network that address is on. Use the name, or 192.168.8.61."
+ },
+ {
+  "role": "wednesday",
+  "seat": "Kamils-Mac-Studio.local",
+  "project": "Secuura",
+  "ts": "2026-10-05T10:59:51.608735+11:00",
+  "text": "Received: the Spark hasn't done many tickets this past week. Measuring exactly what it ran, day by day, before I answer — a few minutes."
+ },
+ {
+  "role": "wednesday",
+  "seat": "Kamils-Mac-Studio.local",
+  "project": "Secuura",
+  "ts": "2026-10-05T11:01:07.359390+11:00",
+  "text": "The Spark is performing very well. The problem is how much I'm giving it.\n\nLast 7 days, from its run log: 24 tasks across 12 tickets, and all 24 passed their checks on the first attempt, with no second tries needed. By day: 7, 4 and 8 tasks from 29 September to 1 October, then 1, 0, 1 and 3 since.\n\nFrom my notes rather than a fresh GitHub count, at least 4 merged PRs carried its work: #1365, #1367, #1368 and #1375.\n\nWhy it dropped after 1 October: I was only giving it one-file tickets where the fix is spelled out, and that pool ran dry. This morning's screen found 2 such tickets out of 277. Almost everything it did sat on the two easiest levels; it never got harder work, so we don't know its limit yet. Also, the allowance hit 97% on 2 October, which stopped the Claude agents that write its briefs, and its connection was down for part of 4 October after the reboot.\n\nFix, already running: a helper is re-screening the backlog with a wider rule (2 to 3 files, looser briefs, and splitting big tickets into Spark-sized pieces), and writing 6 to 8 briefs for it today. I'll queue them as soon as I've read them."
+ },
+ {
+  "role": "wednesday",
+  "seat": "Kamils-Mac-Studio.local",
+  "project": "Secuura",
+  "ts": "2026-10-05T11:02:58.450867+11:00",
+  "text": "No action needed, just so you know. The KS-528 re-date is being written as 31 October, exactly as your card said. The audit check treats a row as expired ON its date, so that keeps pushes open through Friday 30 October and the fuse returns on Saturday 31 October at 11am. The KS-769 one is written as 1 January so 31 December is covered, as you chose. If you want Saturday 31 October covered too, say so and it becomes 1 November."
+ },
+ {
+  "role": "wednesday",
+  "seat": "Kamils-Mac-Studio.local",
+  "project": "Secuura",
+  "ts": "2026-10-05T11:03:31.820579+11:00",
+  "text": "Yes, it can use far more. It's nearly idle.\n\nMeasured from its log: 20 of last week's tasks took 13 minutes of Spark time in total, a median of 39 seconds each. It handles one task at a time, so in raw capacity that's 50 to 90 tasks an hour. Over the week it worked about 13 minutes.\n\nThe limit is entirely on our side. Each task needs a careful written brief, its result checked, then a Claude agent to turn it into a PR and a QA gate before it merges. I've been writing too few briefs and only for the easiest tickets.\n\nWhat I'm changing: a helper is writing 6 to 8 briefs right now, including harder ones, so we find out where it actually breaks. From there I'll keep a queue of briefs always waiting and batch its passes into PRs, aiming for 20 or more tasks a day this week rather than 3. I'll report the daily count to you each morning."
+ },
+ {
+  "role": "wednesday",
+  "seat": "Kamils-Mac-Studio.local",
+  "project": "Secuura",
+  "ts": "2026-10-05T11:04:04.829826+11:00",
+  "text": "For comparison, same 7 days, from develop's history in my own read-only copy of the repo:\n\n42 changes merged in total.\n\n9 of them are plain GitHub merges whose authors I haven't checked here.\n\nThe other 33 went through our seats. Matching them by ticket and topic against the Spark's log, about 13 carried a change the Spark wrote, and about 20 were written entirely by cloud agents. Every one of the 33, Spark or not, was raised, gated and merged by a cloud agent.\n\nSo the Spark wrote roughly 40% of our merged work while running for 13 minutes all week. The cloud agents took the harder tickets: security fixes, dependency freezes, and KS-1404's verification work, which took six agent sessions.\n\nThe matching is mine, by ticket name, not a field in GitHub, so treat the 13 as approximate."
+ },
+ {
+  "role": "wednesday",
+  "seat": "Kamils-Mac-Studio.local",
+  "project": "Secuura",
+  "ts": "2026-10-05T11:05:03.256911+11:00",
+  "text": "Received: push the Spark harder, aim for 50 tasks a day. Setting up the machinery for it now; I'll tell you what's in place and the one thing I need from you."
+ },
+ {
+  "role": "wednesday",
+  "seat": "Kamils-Mac-Studio.local",
+  "project": "Secuura",
+  "ts": "2026-10-05T11:06:07.089570+11:00",
+  "text": "Kam, one decision for the 50-a-day target.\n\nI need you to choose who does the first read of each Spark result.\n\nRight now I read every Spark change line by line against its brief before it's held for a PR. That's my rule from the Spark kit, and at 50 a day it becomes the bottleneck, because each read uses my context and makes me rotate more often.\n\nMy recommendation: a Claude review agent does the first full read of every result against its brief. I personally read every one that touches anything security-related, plus one in five of the rest, and every merge still goes through the QA gate as now. That gets close to 50.\n\nThe other option is that I keep reading all of them myself. That's safer per change, but I'd expect around 25 a day.\n\nIf I don't hear from you, I keep reading them all myself.\n\nAlready moving: the scripts that run the Spark used to live in temporary session folders and got lost at every rotation, which is part of why it went quiet. A helper is building a permanent queue runner now, and another is writing the next batch of briefs, including harder tickets."
  }
 ]

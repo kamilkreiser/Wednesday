@@ -7,7 +7,7 @@ status: live
 
 # Boot digest BY TIER — W whole, M rules-only, every project case a handle
 
-Generated 2026-10-05 10:16 from 215 lesson files (981,795 B). M 36 · MIXED 5 · P-Datasec/HPSM-POC 1 · W 173. 5 project CASE sections inside MIXED files are reduced to one line each: the heading and the path to read it at. W blocks are exactly what the default digest carries; M blocks drop the section index and keep the rules; a P file is a single handle. The CASES behind every rule live only in the lesson files — open one the moment its rule fires.
+Generated 2026-10-05 11:06 from 216 lesson files (984,147 B). M 36 · MIXED 5 · P-Datasec/HPSM-POC 1 · W 174. 5 project CASE sections inside MIXED files are reduced to one line each: the heading and the path to read it at. W blocks are exactly what the default digest carries; M blocks drop the section index and keep the rules; a P file is a single handle. The CASES behind every rule live only in the lesson files — open one the moment its rule fires.
 
 ## The T9 SSD is the master — Wednesday must be fully portable
 `2026-07-31_fully-portable-drive.md` · principle · 2026-07-31 · status: superseded — the "T9 is the master" half by [[2026-08-25_one-drive-devmaster-is-master]] (2026-08-25); the portability principle itself still lives · tier: W
@@ -6886,4 +6886,32 @@ which dialog option is inside the grant).
 arrive by MAIL; this names a second channel he accepts for one class) ·
 [[2026-08-03_go-slow-earn-autonomy]] (rule 5: every grant recorded) ·
 [[2026-08-07_protocol-v1.3-signed-delegation]].
+
+
+## The Spark's target is 50 tasks a day — push it harder; the bottleneck is ours, so build the pipeline, not the effort
+`2026-10-05_spark-target-50-tasks-a-day.md` · preference · 2026-10-05 · status: live · tier: W
+
+**His words, verbatim:** *"push the spark harder, aim for 50 a day"* — after Wednesday measured the
+week (2026-09-29 → 10-05): 24 tasks, 24/24 first-round PASS, ~13 min of Spark time in total
+(median 39 s/task), against ~20 cloud-only merges.
+
+**How to apply:**
+1. **The runner is durable and in-tree** (`2_Project_Files/local-model/spark/`), never a session
+   scratchpad script: the round tooling died with its scratchpad twice (IMPROVEMENTS 2026-09-30,
+   2026-10-05), which is rebuild cost at every rotation.
+2. **A standing brief queue:** every checkpoint counts briefs waiting; under ~15 waiting, commission
+   brief-writing drafters (parallel, partitioned by ticket) the same action. Brief-writing is the
+   real cost ([[2026-09-18_ornith-is-cheap-the-brief-is-the-cost]]).
+3. **Climb the ladder to widen the pool** ([[2026-09-25_spark-calibrate-like-ornith-start-high-oversight]]):
+   multi-file, looser briefs, carves of big tickets. 50/day is not reachable on rung 1-2 alone.
+4. **Raises are batched:** a raise seat takes many held passes per round, file-disjoint, gated in
+   batches ([[2026-09-18_minimise-gate-duplication-batch-them]]).
+5. **Report the count daily** in the morning receipt: tasks run, PASS rate, merged, and the stage
+   that limited the day. The target is a measurement, not a feeling.
+6. Unchanged: the counter (original + one rebrief, then Opus 5.5), the QA gate before every merge,
+   client scope (one client's content per task), the signature classes.
+
+**Family:** [[2026-09-25_three-tier-routing-ornith-spark-cloud-always-on]] ·
+[[2026-10-04_as-much-secuura-work-as-possible-spark-and-claude]] ·
+[[2026-09-14_the-coordinator-adds-value-or-it-is-waste-three-duties-not-watching]] (duty 3).
 
