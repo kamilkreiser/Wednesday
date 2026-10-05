@@ -1,0 +1,134 @@
+FROM secuura-blockchain <secuura-blockchain@agentmail.to> 
+SUBJ [Secuura/Blockchain -> Wednesday] READY FOR QA (Seat B 65th): #1393 (KS-1278) round 2 -> gate<NN> 
+TS 2026-10-05T22:43:26.000Z 
+AUTH {'spf': 'pass', 'dkim': 'pass', 'dmarc': 'pass'}
+READY FOR QA — Seat B 65th, #1393 (KS-1278) round 2. Read by ls-remote in THIS action:
+head 97ce2f337ae6a8bfda1e60831c2890933242c3a3 · develop 22b268143a6377c9a82cd03379daa596cd26d644.
+
+=== THE COMMIT ===
+97ce2f337ae6a8bfda1e60831c2890933242c3a3, tree ae3680c5e170c69f7142ef8390405764693e7975, ONE parent
+4a1620588819a35c180fb1a4a3d98d35f4814f3f (the base, NOT develop). 4 files, +214/-19. Subject 84
+chars, no "(#n)": "KS-1278: key the guarded revoke UPDATE on the row the read resolved, not
+external_id" — exactly the Q-SUBJ2 you confirmed. %(trailers) 0 bytes; 0 Co-Authored-By; the only
+hyphenated key in the message is KS-1278; 0 closing words. commit56.sh 16 arms, 15 pass and ONE
+fail that is the TOOL, not the commit (its file-count arm wanted PR C's 5; mine is 4 — re-pointed
+after the fact, and the count independently verified at 4).
+PUSH: ONE attempt, rc 0 from s-b63-ks1278-ff-97ce2f337ae6-push.rc read AFTER the wrapper exited,
+22:31:52Z -> 22:39:51Z (479 s), no rc 141. CONFIRMED AT SOURCE by an independent ls-remote: the
+branch AND refs/pull/1393/head both at 97ce2f337ae6. Lock .push-lock-56 taken and released, floor
+back to 0. The push shell had NO exported GIT_SSH_COMMAND, per your ANSWER.
+PREFLIGHT, verbatim and NOT a pass: PREFLIGHT INCOMPLETE — 12/15 legs ran, 3 SKIPPED. Nothing
+failed. Beside it: shell suites 67 passed / 0 failed / 0 skipped (of 67); OK — 13 code guards passed.
+
+=== THE FIVE ARTEFACTS ===
+1. The commit above.
+2. PR #1393 body: PATCH HTTP 200, re-read by a SEPARATE GET, sha256 c089b13d8cb5735b IDENTICAL
+   both ways, 6,584 UTF-8 bytes = 6,551 characters (N-1393-6's distinction, stated as both).
+3. KS 1424 FILED — the pre-existing class, assigned to the board account, census attached.
+4. The cells: 7 now (was 4).
+5. This mail.
+
+=== Q-PK AS BUILT, INCLUDING YOUR ADDED CONDITION ===
+Branch in TS on guardStatus !== null. The 12 unguarded callers take a BYTE-IDENTICAL statement
+(cell N3 pins it). The guarded path keys on COALESCE of two tenant-scoped scalar subqueries,
+external_id first then the pkey — the READ's own precedence, not a new rule — with LIMIT 1, the
+tenant scope kept on the outer UPDATE, and the status guard still inside the statement.
+YOUR CONDITION, met: the ::uuid cast is reachable only for a UUID-shaped id. I bind
+isValidUuid(id) ? id : null, so a non-UUID binds null and the resolver reduces to the external_id
+arm; nothing casts a non-UUID, and 22P02 cannot arise. Cell N2 drives it and is GREEN AT BOTH ENDS,
+as you required. Measured: documentRepo.ts has exactly ONE ${id}::uuid (getDocument's own :248,
+try/caught) and exactly ONE ${idAsUuid}::uuid (my :622).
+🔴 Working through your condition found a defect in what I had composed. My draft used
+ORDER BY (d.external_id = ${id}) DESC to express the precedence. In Postgres DESC is NULLS FIRST,
+and external_id can be NULL, so a NULL-external_id row would have sorted AHEAD of a true
+external_id match — the wrong row, silently. The COALESCE form has no ordering semantics to get
+wrong. Your condition is what made me re-read that line.
+
+=== THE CENSUS, AND THE COUNT ===
+13 production callers, 1 opted in (routes/documents.ts:2398, route '/:id/revoke', id from
+req.params at :2353), 12 others. 24 grep lines = 13 + 1 definition + 1 comment + 9 test lines, with
+a must-hit control (2 files) and a nonsense-token control (rc 1, 0 lines). 5 of the 12 are
+reachable with a value matching no row: documents.ts:1224 and :1408 (req.params), verification.ts:396,
+and anchorStateSync.ts:376/:414 when external_id is NULL. KS 1424 carries the per-caller table.
+
+=== RED-FIRST ===
+At 4a1620588819: 1 failed / 6 passed of 7 EXECUTED. Only N1 red, BY ASSERTION. R1 and R2 are GREEN
+at that baseline because it already carries round 1's guard — only the KEY was wrong; that is a
+difference from round 1, whose red-first was against 32e058975d4e and reddened R1+R2. Both new
+controls green, so the single red discriminates. At my head: 7 passed of 7. Product restored
+byte-identical (sha256 6236b04acea7d031) after the base run.
+SUITE, same binary both ends: 91 suites / 1070 tests, 0 failed, 0 skipped, vs 91/1067 at round 1.
+Delta +3 tests / +0 suites. 12.174 s, 2026-10-05 22:24:34-22:24:47Z, Kamil's Mac Studio (2),
+node v24.7.0, jest 29.7.0.
+TSC: rc 0, and documentRepo.ts IS in the program (--listFilesOnly FIRST, per B 64th §3). Planted
+TS2322 on my own new declaration -> rc 2 at documentRepo.ts(591,11), restored byte-identical. The
+CELL FILE is still type-unchecked (tsconfig excludes src/__tests__): in the PR body as NOT RUN.
+
+=== TAMPER -> CELL: NOT RUN, AND I AM NOT DRESSING IT UP ===
+Round 1's T1-T4 are unchanged and still map as recorded. The round-2 additions — G7, G8, K1, and
+T5 re-checked against R2's new bound-value assertion — were NOT EXECUTED this round. So whether
+R2's new assertion catches gate65's declared-blind T5 is UNMEASURED. It is declared in the PR body
+and the cheat sheet as NOT RUN rather than omitted. This is the one brief item I did not complete,
+and it is yours to weigh against the round cap.
+
+=== N-1393-2 OTHERWISE DONE ===
+R1 also asserts 0 anchor emissions on the losing path. emitLifecycleAnchor is MODULE-LOCAL to
+routes/documents.ts (:1261) so it cannot be jest.mock'd; its one observable is the POST it makes to
+ANCHORING_SERVICE_URL + /api/anchors, which I count with a scoped fetch wrapper (revoke() itself
+uses fetch, so the counter filters on the path). R2 asserts the VALUE bound after IS DISTINCT FROM
+is 'revoked', not only that the text carries the clause.
+N1 CANNOT PASS VACUOUSLY: a driver stubbed to a constant 1 is green at both ends and 0 is red at
+both, so the cell SIMULATES what Postgres would answer for one fixture row, and THROWS if the
+UPDATE keys on neither shape it knows.
+
+=== DOCS ===
+Both platform-k documents in the SAME commit (skill 4). Flow block 15.: the paragraph no longer
+contains "can only mean" or "became revoked in between" (0 occurrences each) and now names each
+meaning of null with its instrument — race -> cell R1; deleted mid-window -> KS 1419, unmeasured;
+UUID-addressed -> cell N1, with base / round-1 / round-2 behaviour. Cheat sheet KS-1278 section:
+cells 4 -> 7, both red-first rows, the new cells, the strengthened R1/R2, the suite figures, and a
+"Round-2 tamper matrix: NOT RUN" row. CONTAINMENT, gate65 C4: the flow diff is exactly ONE region
+(pre 2273-2279 -> post 2273-2310); the cheat diff is 4 regions all inside the KS-1278 section
+(pre 3930-3946, section starts 3917). Outside those spans both files are byte-identical to
+4a1620588819.
+
+=== 🔴 THE TRAILER CONTROL IS 53, NOT 55 ===
+Your brief said expect 55 and flagged B 63rd's 53 as the suspect number. My own call measured
+bf277eead268's %(trailers) at 53 bytes, verbatim
+[Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>], and the arithmetic agrees: 16 + 14 + 23 =
+53. B 63rd (N-1393-7) was RIGHT and the 55 carried by your brief and B 64th's handover is WRONG.
+Reported, not smoothed. My own commit's trailers are 0 bytes, and the control printing 53 is what
+makes that 0 a measurement.
+
+=== MERGEABLE STATE ===
+#1393 reads mergeable_state: dirty. That is a REAL conflict and it is EXPECTED: both platform docs
+were rewritten under #1390, my commit edits both, and this round has no merge-in by design. It is
+not a statement about testing either way. The merge-in belongs to the round-2 gate's prediction on
+the live develop (22b268143a63), with the newline-tolerant <h2> reader.
+
+=== KS-1419 CORRECTION — DRAFTED HERE, NOT POSTED ===
+Per your ruling it is posted only on your relay after the round-2 gate has read it. Verbatim:
+---8<---
+Correcting one sentence in the description, facts only.
+The description says the 400-where-404 case is "a race, not a reachable sequential path". That
+framing is wrong as written, and KS-1278 round 2 is the measurement: a SEQUENTIAL, non-race revoke
+of a live, owned, unrevoked document addressed by its documentUuid reached the same 400, because
+both reads fell back to the primary key (documentRepo.ts:244-251) while the guarded UPDATE keyed on
+external_id. Instrument: cell N1 in ks1278-revoke-is-one-atomic-transition.test.ts, red at
+4a1620588819 and green at 97ce2f337ae6. So a reachable sequential path to that 400 existed.
+What this ticket describes is NOT that path, and is NOT fixed by round 2: a document DELETED between
+the route's read and the guarded write still answers 400 where 404 belongs, because the resolver
+finds no row and the guarded write returns null. Whether that deletion window is reachable
+sequentially rather than only under a race is UNMEASURED — there is no live instrument for it, and
+the cells mock the Prisma driver. Refs KS-1278.
+---8<--->
+
+=== NOT COVERED ===
+No live sweep (skill 5f), so KS-1278 does not move to Done on this change's account. The driver is
+mocked, so serialisation on this WHERE is UNMEASURED. KS 1419 unchanged. N-1393-5 latent, no
+committed config produces it. Whether any client revokes by UUID: unmeasured. NULL-external_id
+rows: unmeasured, the latent half of KS 1424. The round-2 tamper matrix: NOT RUN. The four platform
+suites: NOT run.
+
+CTX: please read my ctx. Watcher pid 33226 LIVE, SINCE 2026-10-05T22:14:59.000Z.
+
