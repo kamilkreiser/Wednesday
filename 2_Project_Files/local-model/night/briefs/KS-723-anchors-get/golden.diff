@@ -1,0 +1,131 @@
+diff --git a/Blockchain/Dev/services/anchoring/src/__tests__/ks723-anchors-get-by-id-is-declared.test.ts b/Blockchain/Dev/services/anchoring/src/__tests__/ks723-anchors-get-by-id-is-declared.test.ts
+new file mode 100644
+index 000000000..46983216e
+--- /dev/null
++++ b/Blockchain/Dev/services/anchoring/src/__tests__/ks723-anchors-get-by-id-is-declared.test.ts
+@@ -0,0 +1,60 @@
++// KS-723 (slice 3, the Platform-S hot path named on the ticket 2026-09-29): GET /api/anchors/{id} is routed by index.ts
++// and Platform S polls it for every in-flight anchor, but the published contract did not declare it, so a change to
++// its response shape was invisible offline. Its 200 body is FLAT (no success/data envelope). This file renders the
++// document the generator publishes, from the shared registry the anchoring module populates on import.
++// No server, no database, no network.
++import { describe, it, expect } from 'vitest';
++import { generateOpenApiDocument } from '@secuura/shared';
++import '../anchoring.openapi';
++
++type AnyObj = Record<string, any>;
++
++const doc = generateOpenApiDocument({ title: 'anchoring (ks723 get-by-id pin)', version: '0.0.0' }) as AnyObj;
++
++function operation(path: string, method: string): AnyObj | undefined {
++  return doc.paths?.[path]?.[method];
++}
++
++function okSchema(path: string): AnyObj | undefined {
++  return operation(path, 'get')?.responses?.['200']?.content?.['application/json']?.schema;
++}
++
++const FLAT_KEYS = ['blockNumber', 'contentHash', 'documentId', 'errorMessage', 'network', 'retryCount', 'status', 'transactionHash', 'verified'];
++
++describe('KS-723: GET /api/anchors/{id} is declared in the published contract', () => {
++  it('RED KS-723 G1: the operation exists, carries bearerAuth and a required id path parameter', () => {
++    const op = operation('/api/anchors/{id}', 'get');
++    const p = (op?.parameters ?? []).find((x: AnyObj) => x.name === 'id');
++    expect([op !== undefined, op?.security, p?.in, p?.required]).toEqual([true, [{ bearerAuth: [] }], 'path', true]);
++  });
++
++  it('RED KS-723 G2: the 200 body is FLAT and declares the fields the handler returns', () => {
++    const s = okSchema('/api/anchors/{id}');
++    const keys = Object.keys(s?.properties ?? {});
++    expect([s?.type, keys.includes('success'), keys.includes('data'), FLAT_KEYS.filter((k) => !keys.includes(k))]).toEqual([
++      'object',
++      false,
++      false,
++      [],
++    ]);
++  });
++
++  it('RED KS-723 G3: verified is a boolean and retryCount an integer', () => {
++    const p = okSchema('/api/anchors/{id}')?.properties ?? {};
++    expect([p.verified?.type, p.retryCount?.type]).toEqual(['boolean', 'integer']);
++  });
++
++  it('RED KS-723 G4: the route\'s 404 (no anchor for that id) is declared', () => {
++    expect(operation('/api/anchors/{id}', 'get')?.responses?.['404']).toBeDefined();
++  });
++
++  it('control KS-723 GC1: the sibling GET /api/anchors/document/{documentId} still lists Anchor rows', () => {
++    const s = okSchema('/api/anchors/document/{documentId}');
++    expect(s?.properties?.data?.properties?.anchors?.items?.$ref).toBe('#/components/schemas/Anchor');
++  });
++
++  it('control KS-723 GC2: POST /api/anchors still answers 202 and keeps bearerAuth', () => {
++    const op = operation('/api/anchors', 'post');
++    expect([op?.responses?.['202'] !== undefined, op?.security]).toEqual([true, [{ bearerAuth: [] }]]);
++  });
++});
+diff --git a/Blockchain/Dev/services/anchoring/src/anchoring.openapi.ts b/Blockchain/Dev/services/anchoring/src/anchoring.openapi.ts
+index 5d0a1b9eb..6dbc16df3 100644
+--- a/Blockchain/Dev/services/anchoring/src/anchoring.openapi.ts
++++ b/Blockchain/Dev/services/anchoring/src/anchoring.openapi.ts
+@@ -481,6 +481,60 @@ sharedRegistry.registerPath({
+   },
+ });
+ 
++// KS-723 (slice 3, the Platform-S hot path): GET /api/anchors/{id} (index.ts) was routed but undeclared.
++// Its 200 body is FLAT - the handler's res.json, field for field; no success/data envelope.
++sharedRegistry.registerPath({
++  method: 'get',
++  path: '/api/anchors/{id}',
++  tags: ['Anchoring'],
++  summary: 'Get an anchor by anchor id (or by document id, for backwards compatibility)',
++  description:
++    'Returns the authoritative state of one anchor. An id that is not an anchor id is looked up as a ' +
++    'document id. A simulated placeholder is surfaced as simulatedTxRef with simulated: true, never as ' +
++    'transactionHash (KS-587). Platform S polls this for every in-flight anchor.',
++  security: [{ bearerAuth: [] }],
++  request: {
++    params: z.object({
++      id: z.string().openapi({ description: 'Anchor id, or a document id', example: FX.anchor.id }),
++    }),
++  },
++  responses: {
++    400: commonErrorResponses[400],
++    200: {
++      description: 'The anchor (flat body, no envelope)',
++      content: {
++        'application/json': {
++          schema: z.object({
++            documentId: z.string(),
++            transactionId: z.string().nullable(),
++            transactionHash: z.string().nullable(),
++            simulated: z.boolean().optional(),
++            simulatedTxRef: z.string().optional(),
++            status: z.enum(['pending', 'submitting', 'submitted', 'confirmed', 'failed']),
++            blockNumber: z.number().int().nullable(),
++            network: z.string(),
++            anchoredAt: z.string().nullable(),
++            createdAt: z.string().nullable(),
++            contentHash: z.string(),
++            verified: z.boolean(),
++            identityCommitment: z.string().nullable(),
++            identity: z.record(z.unknown()).nullable(),
++            errorMessage: z.string().nullable(),
++            retryCount: z.number().int(),
++          }),
++        },
++      },
++    },
++    401: commonErrorResponses[401],
++    404: { ...commonErrorResponses[404], description: 'No anchor found for the given id' },
++    403: commonErrorResponses[403],
++    429: commonErrorResponses[429],
++    500: commonErrorResponses[500],
++    502: commonErrorResponses[502],
++    503: commonErrorResponses[503],
++  },
++});
++
+ sharedRegistry.registerPath({
+   method: 'get',
+   path: '/api/anchors/document/{documentId}',

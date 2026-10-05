@@ -1,0 +1,97 @@
+diff --git a/Blockchain/Dev/docs/openapi/secuura-api.yaml b/Blockchain/Dev/docs/openapi/secuura-api.yaml
+index 52310cab1..c5b631d47 100644
+--- a/Blockchain/Dev/docs/openapi/secuura-api.yaml
++++ b/Blockchain/Dev/docs/openapi/secuura-api.yaml
+@@ -14462,6 +14462,92 @@ paths:
+               schema:
+                 $ref: "#/components/schemas/ErrorResponse"
+       operationId: postAnchors
++  /api/anchors/tx/{txHash}:
++    get:
++      tags:
++        - Anchoring
++      summary: Get the anchor recorded for a transaction hash
++      description: Returns the single anchor record whose transaction hash matches. Platform S polls this
++        for every in-flight anchor. Readable by any authenticated user, like the by-document lookup.
++      security:
++        - bearerAuth: []
++      parameters:
++        - schema:
++            type: string
++            description: Cardano transaction hash
++            example: "0000000000000000000000000000000000000000000000000000000000000000"
++          required: true
++          name: txHash
++          in: path
++      responses:
++        "200":
++          description: The anchor recorded for the transaction hash
++          content:
++            application/json:
++              schema:
++                type: object
++                properties:
++                  success:
++                    type: boolean
++                  data:
++                    $ref: "#/components/schemas/Anchor"
++                required:
++                  - success
++                  - data
++        "400":
++          description: Bad request — malformed payload, missing required fields, or wrong content-type. See
++            `error.code` for the specific cause.
++          content:
++            application/json:
++              schema:
++                $ref: "#/components/schemas/ErrorResponse"
++        "401":
++          description: Unauthenticated — missing, expired, or invalid bearer token. Acquire a fresh token via
++            `POST /api/auth/login`.
++          content:
++            application/json:
++              schema:
++                $ref: "#/components/schemas/ErrorResponse"
++        "403":
++          description: Forbidden — caller is authenticated but lacks the role, tenant scope, or feature flag
++            to perform the action.
++          content:
++            application/json:
++              schema:
++                $ref: "#/components/schemas/ErrorResponse"
++        "404":
++          description: No anchor found for the given transaction hash
++          content:
++            application/json:
++              schema:
++                $ref: "#/components/schemas/ErrorResponse"
++        "429":
++          description: Rate limit exceeded — retry after the duration in the `Retry-After` header. See route
++            extensions for the applicable limit class.
++          content:
++            application/json:
++              schema:
++                $ref: "#/components/schemas/ErrorResponse"
++        "500":
++          description: Internal server error.
++          content:
++            application/json:
++              schema:
++                $ref: "#/components/schemas/ErrorResponse"
++        "502":
++          description: Upstream / blockchain error — a downstream service or chain provider failed. `details`
++            may carry chain context.
++          content:
++            application/json:
++              schema:
++                $ref: "#/components/schemas/ErrorResponse"
++        "503":
++          description: Service unavailable — temporary outage or required dependency down.
++          content:
++            application/json:
++              schema:
++                $ref: "#/components/schemas/ErrorResponse"
++      operationId: getAnchorsTxByTxHash
+   /api/anchors/thread-mint:
+     post:
+       tags:

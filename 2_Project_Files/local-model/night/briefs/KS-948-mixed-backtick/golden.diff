@@ -1,0 +1,95 @@
+diff --git a/Blockchain/Dev/scripts/__tests__/check_shared_relink.test.sh b/Blockchain/Dev/scripts/__tests__/check_shared_relink.test.sh
+index 867ce728a..261db6e31 100755
+--- a/Blockchain/Dev/scripts/__tests__/check_shared_relink.test.sh
++++ b/Blockchain/Dev/scripts/__tests__/check_shared_relink.test.sh
+@@ -1218,7 +1218,9 @@ USER secuura' "runs BEFORE the last instruction"
+ # surfaced only because a RED-PROOF run printed yarn and pnpm output inside its
+ # FAIL lines. So this check exists to make the hazard fail loudly instead of
+ # silently mutating the working tree.
+-unescaped=$(grep -n '^expect "' "${BASH_SOURCE[0]}" | grep '`' | grep -v '\\`' || true)
++# KS-948: strip the ESCAPED backticks first, then look for any left - a `grep -v` on an escaped one
++# dropped the whole line, so a name carrying both kinds passed while its unescaped one would run.
++unescaped=$(grep -n '^expect "' "${BASH_SOURCE[0]}" | sed 's/\\`//g' | grep '`' || true)
+ if [ -n "$unescaped" ]; then
+     bad "case names must escape backticks — an unescaped one is command substitution and RUNS: $unescaped"
+ else ok; fi
+diff --git a/Blockchain/Dev/scripts/__tests__/ks948_backtick_check_sees_mixed_names.test.sh b/Blockchain/Dev/scripts/__tests__/ks948_backtick_check_sees_mixed_names.test.sh
+new file mode 100644
+index 000000000..534cc55fe
+--- /dev/null
++++ b/Blockchain/Dev/scripts/__tests__/ks948_backtick_check_sees_mixed_names.test.sh
+@@ -0,0 +1,74 @@
++#!/usr/bin/env bash
++# =============================================================================
++# TESTS for KS-948 (the #879 review, finding 3) — check_shared_relink.test.sh's
++# case-name backtick check must catch a name that mixes an ESCAPED backtick with
++# an UNESCAPED one
++# =============================================================================
++# The check piped `grep -n '^expect "'` through `grep '`'` and then `grep -v` on an
++# escaped backtick, which drops the WHOLE line when it carries any escaped one. So
++# `expect "KS-x: \`safe\` and `evil`"` passed the check while its `evil` would RUN.
++# The suite's own check line is extracted by its `unescaped=$(` prefix and EXECUTED
++# against fixture files (the shape of ks1054_deploy_sh_rc1_message.test.sh).
++#
++# Usage: bash Blockchain/Dev/scripts/__tests__/ks948_backtick_check_sees_mixed_names.test.sh
++# =============================================================================
++set -uo pipefail
++#
++HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
++SUBJ="$HERE/check_shared_relink.test.sh"
++#
++pass=0; fail=0
++ok()  { printf '  ok   %s\n' "$1"; pass=$((pass + 1)); }
++bad() { printf '  FAIL %s\n       %s\n' "$1" "$2"; fail=$((fail + 1)); }
++#
++[[ -f "$SUBJ" ]] || { echo "FATAL: subject not found at $SUBJ" >&2; exit 2; }
++#
++WORK="$(mktemp -d "${TMPDIR:-/tmp}/ks948.XXXXXX")"
++trap 'rm -rf "$WORK"' EXIT
++#
++CHECK_HITS=$(grep -c '^unescaped=\$(' "$SUBJ" || true)
++if [[ "$CHECK_HITS" == "1" ]]; then
++  ok "B0 the suite's backtick check line is locatable (1 occurrence of unescaped=\$( )"
++else
++  bad "B0 the suite's backtick check line is locatable" "expected 1 occurrence, found $CHECK_HITS"
++fi
++CHECK_LINE=$(grep '^unescaped=\$(' "$SUBJ" | head -1)
++# The check scans its own file through "${BASH_SOURCE[0]}"; the driver scans "$1" instead.
++printf '%s\n' "$CHECK_LINE" | sed 's/"\${BASH_SOURCE\[0\]}"/"$1"/' > "$WORK/drive.sh"
++printf 'printf "%%s" "$unescaped"\n' >> "$WORK/drive.sh"
++#
++cat > "$WORK/mixed.txt" <<'FIX'
++expect "KS-x: \`safe\` and `evil`" 1 'body'
++FIX
++cat > "$WORK/bare.txt" <<'FIX'
++expect "KS-y: `bare`" 1 'body'
++FIX
++cat > "$WORK/safe.txt" <<'FIX'
++expect "KS-z: \`safe\` only" 1 'body'
++FIX
++scan() { bash "$WORK/drive.sh" "$1" 2>/dev/null; }
++#
++if [[ -n "$(scan "$WORK/mixed.txt")" ]]; then
++  ok "🔴 B1 a name with an escaped AND an unescaped backtick is flagged"
++else
++  bad "🔴 B1 a name with an escaped AND an unescaped backtick is flagged" "the check printed nothing for: $(cat "$WORK/mixed.txt")"
++fi
++if [[ -n "$(scan "$WORK/bare.txt")" ]]; then
++  ok "B2 CONTROL a name with only an unescaped backtick is still flagged"
++else
++  bad "B2 CONTROL a name with only an unescaped backtick is still flagged" "the check printed nothing for: $(cat "$WORK/bare.txt")"
++fi
++if [[ -z "$(scan "$WORK/safe.txt")" ]]; then
++  ok "B3 CONTROL a name whose backticks are all escaped is not flagged"
++else
++  bad "B3 CONTROL a name whose backticks are all escaped is not flagged" "flagged: $(scan "$WORK/safe.txt")"
++fi
++if [[ -z "$(scan "$SUBJ")" ]]; then
++  ok "B4 CONTROL the suite's own case names scan clean (18 of them carry escaped backticks)"
++else
++  bad "B4 CONTROL the suite's own case names scan clean" "flagged: $(scan "$SUBJ" | head -3)"
++fi
++#
++echo
++echo "ks948 backtick check: $pass passed, $fail failed"
++[[ "$fail" -eq 0 ]] || exit 1

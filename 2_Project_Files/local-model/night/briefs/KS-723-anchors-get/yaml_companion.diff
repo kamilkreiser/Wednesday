@@ -1,0 +1,162 @@
+diff --git a/Blockchain/Dev/docs/openapi/secuura-api.yaml b/Blockchain/Dev/docs/openapi/secuura-api.yaml
+index 52310cab1..1505c2373 100644
+--- a/Blockchain/Dev/docs/openapi/secuura-api.yaml
++++ b/Blockchain/Dev/docs/openapi/secuura-api.yaml
+@@ -14626,6 +14626,157 @@ paths:
+               schema:
+                 $ref: "#/components/schemas/ErrorResponse"
+       operationId: getAnchorsThreadStateByDocumentId
++  /api/anchors/{id}:
++    get:
++      tags:
++        - Anchoring
++      summary: Get an anchor by anchor id (or by document id, for backwards compatibility)
++      description: "Returns the authoritative state of one anchor. An id that is not an anchor id is
++        looked up as a document id. A simulated placeholder is surfaced as simulatedTxRef with
++        simulated: true, never as transactionHash (KS-587). Platform S polls this for every
++        in-flight anchor."
++      security:
++        - bearerAuth: []
++      parameters:
++        - schema:
++            type: string
++            description: Anchor id, or a document id
++            example: anchor_00000000-0000-4000-8000-000000000032
++          required: true
++          name: id
++          in: path
++      responses:
++        "200":
++          description: The anchor (flat body, no envelope)
++          content:
++            application/json:
++              schema:
++                type: object
++                properties:
++                  documentId:
++                    type: string
++                  transactionId:
++                    type:
++                      - string
++                      - "null"
++                  transactionHash:
++                    type:
++                      - string
++                      - "null"
++                  simulated:
++                    type: boolean
++                  simulatedTxRef:
++                    type: string
++                  status:
++                    type: string
++                    enum:
++                      - pending
++                      - submitting
++                      - submitted
++                      - confirmed
++                      - failed
++                  blockNumber:
++                    type:
++                      - integer
++                      - "null"
++                  network:
++                    type: string
++                  anchoredAt:
++                    type:
++                      - string
++                      - "null"
++                  createdAt:
++                    type:
++                      - string
++                      - "null"
++                  contentHash:
++                    type: string
++                  verified:
++                    type: boolean
++                  identityCommitment:
++                    type:
++                      - string
++                      - "null"
++                  identity:
++                    type:
++                      - object
++                      - "null"
++                    additionalProperties: {}
++                  errorMessage:
++                    type:
++                      - string
++                      - "null"
++                  retryCount:
++                    type: integer
++                required:
++                  - documentId
++                  - transactionId
++                  - transactionHash
++                  - status
++                  - blockNumber
++                  - network
++                  - anchoredAt
++                  - createdAt
++                  - contentHash
++                  - verified
++                  - identityCommitment
++                  - identity
++                  - errorMessage
++                  - retryCount
++        "400":
++          description: Bad request — malformed payload, missing required fields, or wrong content-type. See
++            `error.code` for the specific cause.
++          content:
++            application/json:
++              schema:
++                $ref: "#/components/schemas/ErrorResponse"
++        "401":
++          description: Unauthenticated — missing, expired, or invalid bearer token. Acquire a fresh token via
++            `POST /api/auth/login`.
++          content:
++            application/json:
++              schema:
++                $ref: "#/components/schemas/ErrorResponse"
++        "403":
++          description: Forbidden — caller is authenticated but lacks the role, tenant scope, or feature flag
++            to perform the action.
++          content:
++            application/json:
++              schema:
++                $ref: "#/components/schemas/ErrorResponse"
++        "404":
++          description: No anchor found for the given id
++          content:
++            application/json:
++              schema:
++                $ref: "#/components/schemas/ErrorResponse"
++        "429":
++          description: Rate limit exceeded — retry after the duration in the `Retry-After` header. See route
++            extensions for the applicable limit class.
++          content:
++            application/json:
++              schema:
++                $ref: "#/components/schemas/ErrorResponse"
++        "500":
++          description: Internal server error.
++          content:
++            application/json:
++              schema:
++                $ref: "#/components/schemas/ErrorResponse"
++        "502":
++          description: Upstream / blockchain error — a downstream service or chain provider failed. `details`
++            may carry chain context.
++          content:
++            application/json:
++              schema:
++                $ref: "#/components/schemas/ErrorResponse"
++        "503":
++          description: Service unavailable — temporary outage or required dependency down.
++          content:
++            application/json:
++              schema:
++                $ref: "#/components/schemas/ErrorResponse"
++      operationId: getAnchorsById
+   /api/anchors/document/{documentId}:
+     get:
+       tags:

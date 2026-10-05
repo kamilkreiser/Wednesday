@@ -1,0 +1,39 @@
+diff --git a/Blockchain/Dev/services/anchoring/src/__tests__/ks1333-get-by-id-blocknumber-is-a-number.test.ts b/Blockchain/Dev/services/anchoring/src/__tests__/ks1333-get-by-id-blocknumber-is-a-number.test.ts
+new file mode 100644
+index 000000000..f40491c29
+--- /dev/null
++++ b/Blockchain/Dev/services/anchoring/src/__tests__/ks1333-get-by-id-blocknumber-is-a-number.test.ts
+@@ -0,0 +1,33 @@
++/**
++ * KS-1333 - originate's four anchorStateSync writers persist `anchor.blockNumber || 0` from GET /api/anchors/:id,
++ * and the ticket's first step is to MEASURE whether that route can hand them a raw pg int8 STRING. Read at source:
++ * the route answers `blockNumber: anchor.blockNumber || null` from the row dbGetAnchorById maps through rowToAnchor,
++ * and rowToAnchor converts `block_number` with Number(). So the route answers a number (or null), and the
++ * ticket's own rule applies: "a recorded reason and a cell pinning it, not a coercion".
++ *
++ * index.ts calls app.listen on import, so no test imports it (the ks1175-getid-view-wired shape): this is a
++ * SOURCE-TEXT guard over the two lines that make the answer a number.
++ */
++import { describe, it, expect } from 'vitest';
++import { readFileSync } from 'fs';
++import { resolve } from 'path';
++const SRC = readFileSync(resolve(__dirname, '..', 'index.ts'), 'utf8');
++function block(opener: string, lastLine: string): string {
++  const from = SRC.indexOf(opener);
++  const end = from < 0 ? -1 : SRC.indexOf(lastLine, from);
++  return from < 0 || end < 0 ? '' : SRC.slice(from, end + lastLine.length);
++}
++const ROW_TO_ANCHOR = block('function rowToAnchor(row: any): Anchor {', 'updatedAt: new Date(row.updated_at),');
++const GET_BY_ID = block("app.get('/api/anchors/:id',", 'retryCount: anchor.retryCount ?? 0,');
++describe('KS-1333 GET /api/anchors/:id reports blockNumber as a NUMBER (source guard: index.ts is bootless)', () => {
++  it('RED KS-1333 B1: rowToAnchor converts the BIGINT block_number with Number(), so the row never carries a string', () => {
++    expect([ROW_TO_ANCHOR.length > 0, ROW_TO_ANCHOR.includes('blockNumber: row.block_number ? Number(row.block_number) : undefined,')]).toEqual([true, true]);
++  });
++  it('CONTROL KS-1333 C1: the GET /api/anchors/:id handler answers the mapped value (number or null), not the raw row', () => {
++    expect([GET_BY_ID.length > 0, GET_BY_ID.includes('blockNumber: anchor.blockNumber || null,'), GET_BY_ID.includes('row.block_number')]).toEqual([true, true, false]);
++  });
++  it('CONTROL KS-1333 C2: the by-id lookup the handler calls maps its row through rowToAnchor', () => {
++    const lookup = block('async function dbGetAnchorById(id: string)', 'return rowToAnchor(result.rows[0]);');
++    expect(lookup.length > 0).toBe(true);
++  });
++});

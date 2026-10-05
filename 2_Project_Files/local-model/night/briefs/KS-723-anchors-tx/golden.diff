@@ -1,0 +1,106 @@
+diff --git a/Blockchain/Dev/services/anchoring/src/__tests__/ks723-anchors-tx-lookup-is-declared.test.ts b/Blockchain/Dev/services/anchoring/src/__tests__/ks723-anchors-tx-lookup-is-declared.test.ts
+new file mode 100644
+index 000000000..aa1a46bb9
+--- /dev/null
++++ b/Blockchain/Dev/services/anchoring/src/__tests__/ks723-anchors-tx-lookup-is-declared.test.ts
+@@ -0,0 +1,50 @@
++// KS-723 (slice 3, the Platform-S hot path named on the ticket 2026-09-29): GET /api/anchors/tx/{txHash} is routed by
++// index.ts and answers { success: true, data: <one anchor> }, but the published contract did not declare it, so a
++// change to its response shape was invisible offline. This file renders the document the generator publishes, from
++// the shared registry the anchoring module populates on import. No server, no database, no network.
++import { describe, it, expect } from 'vitest';
++import { generateOpenApiDocument } from '@secuura/shared';
++import '../anchoring.openapi';
++
++type AnyObj = Record<string, any>;
++
++const doc = generateOpenApiDocument({ title: 'anchoring (ks723 tx lookup pin)', version: '0.0.0' }) as AnyObj;
++
++function operation(path: string, method: string): AnyObj | undefined {
++  return doc.paths?.[path]?.[method];
++}
++
++function okSchema(path: string): AnyObj | undefined {
++  return operation(path, 'get')?.responses?.['200']?.content?.['application/json']?.schema;
++}
++
++describe('KS-723: GET /api/anchors/tx/{txHash} is declared in the published contract', () => {
++  it('RED KS-723 TX1: the operation exists, carries bearerAuth and a required txHash path parameter', () => {
++    const op = operation('/api/anchors/tx/{txHash}', 'get');
++    const p = (op?.parameters ?? []).find((x: AnyObj) => x.name === 'txHash');
++    expect([op !== undefined, op?.security, p?.in, p?.required]).toEqual([true, [{ bearerAuth: [] }], 'path', true]);
++  });
++
++  it('RED KS-723 TX2: the 200 body is the success envelope around ONE Anchor (not an array, not a list wrapper)', () => {
++    const s = okSchema('/api/anchors/tx/{txHash}');
++    expect([s?.type, Object.keys(s?.properties ?? {}).sort(), s?.properties?.data?.$ref]).toEqual([
++      'object',
++      ['data', 'success'],
++      '#/components/schemas/Anchor',
++    ]);
++  });
++
++  it('RED KS-723 TX3: the route\'s 404 (no anchor for that transaction hash) is declared', () => {
++    expect(operation('/api/anchors/tx/{txHash}', 'get')?.responses?.['404']).toBeDefined();
++  });
++
++  it('control KS-723 TC1: the sibling GET /api/anchors/document/{documentId} still lists Anchor rows', () => {
++    const s = okSchema('/api/anchors/document/{documentId}');
++    expect(s?.properties?.data?.properties?.anchors?.items?.$ref).toBe('#/components/schemas/Anchor');
++  });
++
++  it('control KS-723 TC2: POST /api/anchors still answers 202 and keeps bearerAuth', () => {
++    const op = operation('/api/anchors', 'post');
++    expect([op?.responses?.['202'] !== undefined, op?.security]).toEqual([true, [{ bearerAuth: [] }]]);
++  });
++});
+diff --git a/Blockchain/Dev/services/anchoring/src/anchoring.openapi.ts b/Blockchain/Dev/services/anchoring/src/anchoring.openapi.ts
+index 5d0a1b9eb..1dc506dc4 100644
+--- a/Blockchain/Dev/services/anchoring/src/anchoring.openapi.ts
++++ b/Blockchain/Dev/services/anchoring/src/anchoring.openapi.ts
+@@ -407,6 +407,45 @@ sharedRegistry.registerPath({
+   },
+ });
+ 
++// KS-723 (slice 3, the Platform-S hot path): GET /api/anchors/tx/{txHash} (index.ts) was routed but undeclared.
++// It answers { success: true, data: <one anchor> } - the formatAnchorResponse rows /document/{documentId} lists.
++sharedRegistry.registerPath({
++  method: 'get',
++  path: '/api/anchors/tx/{txHash}',
++  tags: ['Anchoring'],
++  summary: 'Get the anchor recorded for a transaction hash',
++  description:
++    'Returns the single anchor record whose transaction hash matches. Platform S polls this for ' +
++    'every in-flight anchor. Readable by any authenticated user, like the by-document lookup.',
++  security: [{ bearerAuth: [] }],
++  request: {
++    params: z.object({
++      txHash: z.string().openapi({ description: 'Cardano transaction hash', example: FX.anchor.txHash }),
++    }),
++  },
++  responses: {
++    400: commonErrorResponses[400],
++    200: {
++      description: 'The anchor recorded for the transaction hash',
++      content: {
++        'application/json': {
++          schema: z.object({
++            success: z.boolean(),
++            data: AnchorSchema,
++          }),
++        },
++      },
++    },
++    401: commonErrorResponses[401],
++    404: { ...commonErrorResponses[404], description: 'No anchor found for the given transaction hash' },
++    403: commonErrorResponses[403],
++    429: commonErrorResponses[429],
++    500: commonErrorResponses[500],
++    502: commonErrorResponses[502],
++    503: commonErrorResponses[503],
++  },
++});
++
+ sharedRegistry.registerPath({
+   method: 'post',
+   path: '/api/anchors/thread-mint',

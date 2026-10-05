@@ -67,6 +67,19 @@ node_modules are symlinked FROM the Secuura checkout INTO the cache). It never d
 accumulate in `cache/work/`; quarantine old ones by hand (`mv cache/work/<old> <dated quarantine>`), the queue stops
 before the disk fills.
 
+## Tiers
+
+- `code_patch` — 1 product + 1 test (tasks/code_patch). `bash_patch` — tasks/bash_patch.
+- `code_patch2` (2026-10-05, rung 3) — 1-3 products + 1-2 tests (new or modified), declared by the brief header's
+  `File:` and `Test …:` lines. Select with `tier=code_patch2` or `Tier: \`code_patch2\``. Input: tasks/code_patch2/
+  build_input2.sh (night/build_input.sh for the first product, then the declared set). Task text: code_patch's task.md
+  with rules 3/4 replaced at run time (make_task.py, written into the run dir). Checker: tasks/code_patch2/checker.sh —
+  code_patch's checker runs unchanged through A2, then A3 = the declared set exactly, A4 = all test sections with no
+  product section must red by assertion, A5 = all product sections green, A6/A7 as code_patch; the predicates are read
+  out of code_patch/checker.sh at run time, not copied. Arms: tests/code_patch2_arms.sh.
+- A brief whose header says NOT RUNNABLE is refused unless pinned `override_not_runnable=<reason>` (recorded in
+  round.json); a header declaring more files than the tier's contract is refused.
+
 ## Base and node_modules
 
 The base is develop as `git -C <Secuura checkout> ls-remote origin refs/heads/develop` reads it (override `SPARK_TIP`).

@@ -15,13 +15,17 @@
 #                        INTO the cache (never the reverse); refuses if Blockchain/Dev/node_modules is absent there.
 #   5. stale brief       the brief's files must be unchanged between its `Tip:` and the pinned base -> rc 2 (pin
 #                        allow_drift=1 to override)
-#   6. input             night/build_input.sh (code_patch) | tasks/bash_patch/build_bash_input.sh (bash_patch), with
+#   6. input             night/build_input.sh (code_patch) | tasks/code_patch2/build_input2.sh (code_patch2: the same
+#                        builder for the first product, plus the declared multi-file set) |
+#                        tasks/bash_patch/build_bash_input.sh (bash_patch), with
 #                        NIGHT_SOURCE_CHECKOUT=cache/src, NIGHT_BRIEFS_DIR=<brief_dir>; builder rc 2 -> rc 2 REFUSED
 #   7. clone             `git clone --shared --no-checkout cache/src` + `checkout --detach <tip>` under
 #                        spark/cache/work/<run-id>/clone; code_patch: tasks/code_patch/prepare_clone.sh
 #   8. model             local_model_task.sh with LM_BACKEND=spark, SPARK_THINK=0 (thinking OFF, always), the
 #                        harness's own timeouts (10 s health, SPARK_HTTP_TIMEOUT 1800 s in lib/spark_call.py)
 #   9. checker           code_patch: tasks/code_patch/spark_checker.sh (checker.sh + A2a)
+#                        code_patch2: tasks/code_patch2/checker.sh, then A2a as for bash_patch (task.md DERIVED from
+#                        code_patch's by tasks/code_patch2/make_task.py into the run dir)
 #                        bash_patch: tasks/bash_patch/checker.sh, then A2a (code_patch/a2a_anchor.py over
 #                        sections_with_n.json) appended to checker.out with the same PASS/FAIL A2a + SPARK RESULT lines
 #  10. golden            `cmp` of out.md.checker/patch.diff against <brief_dir>/golden.diff when one exists
@@ -227,7 +231,9 @@ else
 fi
 mkdir -p "$RUN"
 say "run dir: $RUN"
-if [ "$B_TIER" = code_patch ]; then
+if [ "$B_TIER" = code_patch2 ]; then
+  NIGHT_SOURCE_CHECKOUT="$SRC" NIGHT_BRIEFS_DIR="$BDIR" bash "$LM/tasks/code_patch2/build_input2.sh" "$B_TICKET" "$RUN/input.json" "$B_BRIEF" ${B_PINS_ARR[@]+"${B_PINS_ARR[@]}"} > "$RUN/build_input.out" 2>&1; BRC=$?
+elif [ "$B_TIER" = code_patch ]; then
   NIGHT_SOURCE_CHECKOUT="$SRC" NIGHT_BRIEFS_DIR="$BDIR" bash "$LM/night/build_input.sh" "$B_TICKET" "$RUN/input.json" ${B_PINS_ARR[@]+"${B_PINS_ARR[@]}"} > "$RUN/build_input.out" 2>&1; BRC=$?
 else
   NIGHT_SOURCE_CHECKOUT="$SRC" bash "$LM/tasks/bash_patch/build_bash_input.sh" "$B_TICKET" "$RUN/input.json" "$B_BRIEF" ${B_PINS_ARR[@]+"${B_PINS_ARR[@]}"} > "$RUN/build_input.out" 2>&1; BRC=$?
@@ -237,7 +243,7 @@ if [ "$BRC" -ne 0 ]; then
   if [ "$BRC" -eq 2 ]; then finish 2 "REFUSED — builder rc 2: $(grep -m1 -i 'REFUSED' "$RUN/build_input.out" | cut -c1-240)" "$RUN"; fi
   finish 5 "HARNESS — builder rc $BRC: $(tail -1 "$RUN/build_input.out" | cut -c1-240)" "$RUN"
 fi
-if [ "$B_TIER" = code_patch ] && ! grep -q 'WEDNESDAY BRIEF' "$RUN/build_input.out"; then
+if [ "$B_TIER" != bash_patch ] && ! grep -q 'WEDNESDAY BRIEF' "$RUN/build_input.out"; then
   finish 2 "REFUSED — the builder did not read the brief as the prompt (no 'WEDNESDAY BRIEF' in build_input.out): a ticket-description fallback is a refusal (kit 02 §1)" "$RUN"
 fi
 IN_TIP="$(python3 -c 'import json,sys; d=json.load(open(sys.argv[1])); print(d.get("tip") or d.get("repo",{}).get("tip",""))' "$RUN/input.json")"
@@ -245,6 +251,11 @@ IN_TIP="$(python3 -c 'import json,sys; d=json.load(open(sys.argv[1])); print(d.g
 SELFTEST="$(python3 -c 'import json,sys; print(1 if json.load(open(sys.argv[1])).get("self_testing") else 0)' "$RUN/input.json")"
 TASK_MD="$LM/tasks/$B_TIER/task.md"
 [ "$B_TIER" = bash_patch ] && [ "$SELFTEST" = 1 ] && TASK_MD="$LM/tasks/bash_patch/task_selftest.md"
+if [ "$B_TIER" = code_patch2 ]; then
+  TASK_MD="$RUN/task.md"
+  python3 "$LM/tasks/code_patch2/make_task.py" "$TASK_MD" > "$RUN/make_task.out" 2>&1 || finish 5 "HARNESS — make_task.py could not derive the code_patch2 task: $(tail -1 "$RUN/make_task.out" | cut -c1-200)" "$RUN"
+fi
+[ -n "$B_OVERRIDE_NOT_RUNNABLE" ] && say "WARNING the brief's header says NOT RUNNABLE; overridden by pin override_not_runnable=$B_OVERRIDE_NOT_RUNNABLE"
 say "input: $(tail -1 "$RUN/build_input.out" | cut -c1-200)"
 
 if [ "$DRY" -eq 1 ]; then
@@ -263,7 +274,7 @@ git clone -q --shared --no-checkout "$SRC" "$CLONE" > "$WORK/clone.out" 2>&1 \
   || finish 5 "HARNESS — clone failed: $(tail -2 "$WORK/clone.out" | tr '\n' ' ')" "$RUN"
 [ "$(git -C "$CLONE" rev-parse HEAD)" = "$TIP" ] || finish 5 "HARNESS — clone HEAD is not $TIP" "$RUN"
 say "clone: $CLONE at ${TIP:0:12}"
-if [ "$B_TIER" = code_patch ]; then
+if [ "$B_TIER" = code_patch ] || [ "$B_TIER" = code_patch2 ]; then
   bash "$LM/tasks/code_patch/prepare_clone.sh" "$RUN/input.json" "$CLONE" > "$RUN/prepare_clone.out" 2>&1 \
     || finish 5 "HARNESS — prepare_clone.sh failed: $(tail -2 "$RUN/prepare_clone.out" | tr '\n' ' ' | cut -c1-240)" "$RUN"
   say "prepare: $(grep -m1 'shared built' "$RUN/prepare_clone.out" || tail -1 "$RUN/prepare_clone.out")"
@@ -290,7 +301,7 @@ fi
 if [ "$B_TIER" = code_patch ]; then
   bash "$LM/tasks/code_patch/spark_checker.sh" "$RUN/input.json" "$RUN/out.md" "$CLONE" > "$RUN/checker.out" 2>&1; CRC=$?
 else
-  bash "$LM/tasks/bash_patch/checker.sh" "$RUN/input.json" "$RUN/out.md" "$CLONE" > "$RUN/checker.out" 2>&1; BCRC=$?
+  bash "$LM/tasks/$B_TIER/checker.sh" "$RUN/input.json" "$RUN/out.md" "$CLONE" > "$RUN/checker.out" 2>&1; BCRC=$?
   REP="$RUN/out.md.checker"
   # A2a for bash_patch — the leg the bash checker lacks (IMPROVEMENTS 2026-09-30 02:40, 2026-10-05 02:3x), run exactly
   # as it was run by hand on 09-30 and 10-05: sections.json + a 1-based `n`, then code_patch/a2a_anchor.py.
@@ -322,9 +333,9 @@ elif [ -n "$B_GOLDEN" ]; then GOLD="no-patch"; fi
 if [ "$CRC" -eq 0 ]; then VERDICT=PASS; else VERDICT=FAIL; fi
 [ "$CONTROL" -eq 1 ] && VERDICT="CONTROL-$VERDICT"
 WALL=$(( $(date +%s) - T0 ))
-python3 - "$RUN" "$VERDICT" "$WALL" "$TIP" "$B_TIER" "$BDIR" "$GOLD" "$WORK" "${RESULT:-}" "${SRESULT:-}" "${B_PINS:-}" <<'PY'
+python3 - "$RUN" "$VERDICT" "$WALL" "$TIP" "$B_TIER" "$BDIR" "$GOLD" "$WORK" "${RESULT:-}" "${SRESULT:-}" "${B_PINS:-}" "${B_OVERRIDE_NOT_RUNNABLE:-}" <<'PY'
 import json, os, sys
-run, verdict, wall, tip, tier, bdir, gold, work, result, sresult, pins = sys.argv[1:12]
+run, verdict, wall, tip, tier, bdir, gold, work, result, sresult, pins, override = sys.argv[1:13]
 m = {}
 try: m = json.load(open(os.path.join(run, "out.md.meta.json")))
 except Exception: pass
@@ -333,7 +344,8 @@ json.dump({"verdict": verdict, "tier": tier, "brief_dir": bdir, "pins": pins, "t
            "checker_result": result, "spark_result": sresult, "round_wall_s": int(wall),
            "model_wall_s": m.get("wall_clock_seconds"), "prompt_tokens": u.get("prompt_tokens"),
            "completion_tokens": u.get("completion_tokens"), "finish_reason": m.get("finish_reason"),
-           "model": m.get("model"), "work_dir": work}, open(os.path.join(run, "round.json"), "w"), indent=1)
+           "model": m.get("model"), "work_dir": work,
+           "override_not_runnable": override or None}, open(os.path.join(run, "round.json"), "w"), indent=1)
 PY
 MW="$(python3 -c 'import json,sys; d=json.load(open(sys.argv[1])); print("no model (control)" if d.get("model_wall_s") is None else "%ss model, %s+%s tok" % (d.get("model_wall_s"), d.get("prompt_tokens"), d.get("completion_tokens")))' "$RUN/round.json")"
 finish "$([ "$CRC" -eq 0 ] && echo 0 || echo 1)" "$VERDICT — ${SRESULT:-$RESULT} · golden $GOLD · tip ${TIP:0:12} · ${WALL}s round, $MW · $RUN" "$RUN"

@@ -15,7 +15,11 @@ REFUSES (rc 2, one `REFUSED <reason>` line per reason on stderr):
   - a required header line or heading is missing (kit 03_BRIEF_TEMPLATE; case-insensitive);
   - the brief names a client other than Secuura (a `Client:` line that is not Secuura, a `!CODING/<other>/` path,
     or another client's name) — the Spark takes Secuura work under Kam's 2026-09-25 ruling, one client per task;
-  - the tier is not one round.sh runs (code_patch, bash_patch); test_only has its own builder and is not wired here;
+  - the tier is not one round.sh runs (code_patch, code_patch2, bash_patch); test_only is not wired here;
+  - the HEADER (the lines before the first `## `) says "NOT RUNNABLE" — unless the pin
+    `override_not_runnable=<reason>` is given (recorded in round.json; for a brief written before its tier existed);
+  - the header's DECLARED touched set (`File:` lines = products; `Test …:` lines = tests) exceeds the tier's
+    contract (code_patch / bash_patch: 1 product + at most 1 test; code_patch2: 1-3 products + 1-2 tests);
   - bash_patch B-mode without a `ref=` pin (build_bash_input.sh requires one).
 rc 0 ok · 2 refused · 1 usage. Read-only. Python 3 stdlib.
 """
@@ -42,7 +46,13 @@ REQUIRED_HEADINGS = [
 # direction; a Secuura brief has no reason to name any of these.
 OTHER_CLIENTS = [r"datasec", r"nexus\s*ai", r"vision sales portal", r"cypherkey", r"mypki", r"lead_bot",
                  r"task_dispatcher", r"feedback_system"]
-ROUND_ONLY = {"tier", "allow_drift"}
+ROUND_ONLY = {"tier", "allow_drift", "override_not_runnable"}
+# The declared touched set each tier's checker can sequence (products, tests): (min, max) each.
+TIER_CONTRACT = {
+    "code_patch": ((1, 1), (0, 1)),    # tasks/code_patch/checker.sh A3: { product_file, ONE test file }
+    "bash_patch": ((1, 1), (0, 1)),    # tasks/bash_patch/checker.sh B3: { product, one test } (self-testing: one file)
+    "code_patch2": ((1, 3), (1, 2)),   # tasks/code_patch2/checker.sh A3: the declared set, 1-3 products + 1-2 tests
+}
 
 
 def read_pins(path):
@@ -117,7 +127,7 @@ def main():
     runner = (m_run.group(1).lower() if m_run else "")
     tier = pins.get("tier")
     if not tier:
-        m_tier = re.search(r"(?i)\bTier:\s*\**`?(code_patch|bash_patch|test_only|doc_patch)\b", text)
+        m_tier = re.search(r"(?i)\bTier:\s*\**`?(code_patch2|code_patch|bash_patch|test_only|doc_patch)\b", text)
         if m_tier:
             tier = m_tier.group(1).lower()
         elif re.search(r"^##+\s*Tampers?\b", text, re.M | re.I):
@@ -126,8 +136,24 @@ def main():
             tier = "bash_patch"
         elif runner in ("vitest", "jest"):
             tier = "code_patch"
-    if tier not in ("code_patch", "bash_patch"):
-        reasons.append(f"TIER: {tier or 'undetermined'} — round.sh runs code_patch and bash_patch only "
+    # --- the header: declared touched set + NOT RUNNABLE ---
+    header = re.split(r"(?m)^##\s", text, maxsplit=1)[0]
+    products = re.findall(r"(?m)^File:\s*`([^`]+)`", header)
+    tests = re.findall(r"(?im)^Test[^:\n`]*:\s*`([^`]+)`", header)
+    if re.search(r"NOT\s+RUNNABLE", header, re.I):
+        if pins.get("override_not_runnable", "").strip():
+            pass
+        else:
+            reasons.append("NOT RUNNABLE: the brief's own header says it is NOT RUNNABLE — fix the brief, or pin "
+                           "override_not_runnable=<reason> when the tier it names as missing now exists")
+    if tier in TIER_CONTRACT:
+        (pmin, pmax), (tmin, tmax) = TIER_CONTRACT[tier]
+        if not (pmin <= len(products) <= pmax) or not (tmin <= len(tests) <= tmax):
+            reasons.append(f"CONTRACT: the header declares {len(products)} product file(s) {products} and {len(tests)} test "
+                           f"file(s) {tests}; tier {tier} takes {pmin}-{pmax} product(s) + {tmin}-{tmax} test(s)"
+                           + (" — a multi-file brief is tier code_patch2" if tier == "code_patch" else ""))
+    if tier not in ("code_patch", "code_patch2", "bash_patch"):
+        reasons.append(f"TIER: {tier or 'undetermined'} — round.sh runs code_patch, code_patch2 and bash_patch only "
                        f"(test_only has its own builder, tasks/test_only/build_test_only_input.sh; not wired here). "
                        f"Pin tier= or add `Tier: \\`<tier>\\`` to the brief")
     selftest = bool(re.search(r"^##+\s*Self-testing\b", text, re.M | re.I))
@@ -143,7 +169,7 @@ def main():
     builder_pins = {k: v for k, v in pins.items() if k not in ROUND_ONLY}
     if "product" not in builder_pins and not (tier == "bash_patch" and selftest):
         builder_pins["product"] = m_file.group(1)
-    drift = [m_file.group(1)]
+    drift = [m_file.group(1)] + products + tests
     if m_test:
         drift.append(m_test.group(1))
     if builder_pins.get("ref"):
@@ -163,6 +189,9 @@ def main():
         "B_ALLOW_DRIFT": "1" if pins.get("allow_drift") in ("1", "yes", "true") else "0",
         "B_GOLDEN": golden if os.path.isfile(golden) else "",
         "B_DRIFT_PATHS": " ".join(dict.fromkeys(drift)),
+        "B_PRODUCTS": " ".join(products),
+        "B_TESTS": " ".join(tests),
+        "B_OVERRIDE_NOT_RUNNABLE": pins.get("override_not_runnable", ""),
     }
     for k, v in out.items():
         print(f"{k}={shlex.quote(v)}")
