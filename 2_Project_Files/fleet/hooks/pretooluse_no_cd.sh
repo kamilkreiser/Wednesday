@@ -178,4 +178,37 @@ MSG
   fi
 fi
 
+# ── RECEIPT CHAIN + DOT-DOT WRITE (2026-10-06, Tuesday s99; claimed in wed_claim.sh first) ──
+# Two refusals owed as enforcement by Tuesday's ledger: a note receipt ("sent", "HTTP 201")
+# written in the SAME command as the send it reports (REGRESSION w=4, 2026-10-06 06:13), and a
+# scratch write to `$VAR/../file`, which lands outside the seat tree (REGRESSION w=3, 2026-10-05).
+# Logic in receiptguard.py beside this file (no single-quoted python here — see above), proven by
+# 2_Project_Files/tests/receiptguard_arms.py (14 arms: the real ledger shapes refuse; quoted
+# prose, plain scratch redirects, 2>&1 and reads of `..` pass) BEFORE this block was added.
+# Fail-open on a guard error, like PATHGUARD: a hook bug must not brick every Bash call.
+RECEIPTGUARD="$(dirname "${BASH_SOURCE[0]}")/receiptguard.py"
+if [ -f "$RECEIPTGUARD" ]; then
+  RGCHK=$(printf '%s' "$CMD" | python3 "$RECEIPTGUARD")
+  if [ -n "$RGCHK" ]; then
+    RGC="${RGCHK%%|*}"; RGD="${RGCHK#*|}"
+    if [ "$RGC" = "receipt-chain" ]; then
+      cat >&2 <<MSG
+REFUSED by receiptguard.py (receipt chain): $RGD.
+A receipt written in the same command as the send it reports is composed BEFORE the send's
+output exists — four times in Tuesday's ledger, twice while the send had REFUSED (w=4, 2026-10-06).
+Make it three tool calls: (1) the send, (2) the tap, (3) note_entry.sh quoting the send's
+actual output line. Never chain them.
+MSG
+    else
+      cat >&2 <<MSG
+REFUSED by receiptguard.py (dot-dot write): $RGD.
+A write through \`..\` from a project root lands OUTSIDE the seat tree — hard rule 1; three times in
+Tuesday's ledger (w=3, 2026-10-05). Write scratch output to the session scratchpad by its absolute
+path, never \`\$VAR/..\`.
+MSG
+    fi
+    exit 2
+  fi
+fi
+
 exit 0
