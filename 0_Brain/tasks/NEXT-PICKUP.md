@@ -8,26 +8,28 @@ supersede: REPLACED WHOLESALE 2026-10-05 22:5x by seat 9a78af86 (53% checkpoint)
 
 # NEXT PICKUP
 
-## 🔴 FIRST ACTS (checkpoint 22:5x AEDT 2026-10-05, seat 9a78af86, ctx ~55%)
-0. `kam_rulings_today.sh` + `reconcile_rulings.py`. At 22:31: 26 Kam rows, newest 20:07:00, nothing to reconcile.
+## 🔴 FIRST ACTS (65% checkpoint 23:3x AEDT 2026-10-05, seat 9a78af86)
+0. `kam_rulings_today.sh` + `reconcile_rulings.py`. Kam silent since 20:07.
 1. Read `inbox_digest.sh --inbound` WHOLE; full bodies via `inbox_digest.sh full <inbox> '<id>'`.
-2. **develop = 3cb93b9c731e** (11:54:11Z) = Peter's "Merge pull request #1392" (KS-1411 Akto, touches BOTH platform docs) on top of #1384's squash 232623892f24 (verified at source by Wednesday). Every target tree predicted on 32e058975d4e is VOID.
-3. **D 9th (%43) holds a signed GO** `GO (Seat D 9th): merge 1388 on gate63` with target tree **f65ddbbd560c on 3cb93b9c731e** (SUPERSEDES 549e05e3ecec). Expect `STATUS: merged 1388` → verify at source (scratch repo fetch by SHA from git@github.com:Secuura/Distributed_Secuura.git; `git init` the scratch dir by LITERAL path — the no-cd hook refuses `git -C $VAR init`) → score + pane_close → launch **F 4th** from `HANDOVER-seatF3-2026-10-05.md` for #1383 (Kam ruled #1388 merges first).
-4. **gate64 LAUNCHED 11:57:07Z (%44 `QA/Secuura-ks1330-1389`)** for #1389 (KS-1330) at a7f5965a7b3f, repinned develop 3cb93b9c731e. Rung 5 NOT yet seen. Kit doubts D1-D11 in its README (incl. D3 whole runner 66/1 vs claimed 67/0; D5 body's docs-grep claim false). Key-anchored merge-in tree on 3cb9 = d1f3c5cb6c1c (voided if #1388 lands first). On GO: launch **G 2nd** from `HANDOVER-seatG1-2026-10-05.md` (GO string `GO (Seat G 2nd): merge 1389 on gate64`).
-5. **B 63rd (%42)**: PR B (KS-1278) released 11:35Z (build at 32e05897; STATUS + stop before push if develop moved → Wednesday rules a docs-only merge-in with a key-anchored tree). Develop-moved ADDENDUM sent 11:42Z.
-6. **E lane has NO seat.** E 4th WRAPPED 11:51Z (0.93). **E 5th brief drafter running** → `fleet/briefs_staged/2026-10-05_seatE5_successor.md` (#1385 KS-938 merge-in + gate, then KS-1256 b; reuses `.push-lock-e4`). If the file is missing/partial after a rotation, re-commission from `HANDOVER-seatE4-2026-10-05.md`.
-7. **Spark brief drafter running** (KS-1305, KS-1313+1326, KS-1141 site 1 from DECISIONS-24) → appends to `local-model/spark/queue.md` after `round.sh --dry-run` OK. Then START `spark/queue.sh` (background) + review agent per PASS.
-8. Read seat ctx only after `tmux resize-pane -t %NN -y 16`; then `tmux select-pane -t %0`. macOS has no `timeout`.
+2. **develop = d784b613c81e** (#1388 KS-1404 squash, VERIFIED AT SOURCE by Wednesday: tree f65ddbbd560c, 1 parent 3cb93b9c731e). Present history tonight: #1384 232623892f24 → Peter's #1392 3cb93b9c731e → #1388 d784b613c81e.
+3. **D 9th (%43)**: merged #1388; expect its follow-up ticket (N-1388-1..6, board account) + WRAP → verify handover hash, score, pane_close.
+4. **F lane**: Kam's merge-order card satisfied. **F 4th brief drafter running** → `fleet/briefs_staged/2026-10-05_seatF4_successor.md` (#1383 docs-only merge-in, tree to Wednesday before push, GO `GO (Seat F 4th): merge 1383 on gate61`). If missing after a rotation, re-commission from `HANDOVER-seatF3-2026-10-05.md`. Read the brief WHOLE before `brief_and_launch.sh` (run it BARE — a `script -q` wrapper failed with tcgetattr tonight; the gate launcher needs `script`, brief_and_launch does not). The send gate needs a Linear provenance line for EVERY ticket id in the QUEUE.
+5. **B 64th (%46)** launched 12:26:48Z: ITEM 0 owed (PR C KS-723 anchors-tx; #1393 merge-in on gate65's GO).
+6. **E 5th (%45)** launched 12:04:53Z: ITEM 0 owed. Rule Q-1256-CLOSE (if a Redis close returns NULL, the close cell stays open under Kam's b → maybe a fresh card), Q-SEAT5, Q-WAIT5, Q-F5 (develop is now in the shared store).
+7. **gate64 (%44)** on #1389: running the whole runner at the sim merge-in. On GO: launch **G 2nd** from `HANDOVER-seatG1-2026-10-05.md`; its merge-in tree re-predicted on the CURRENT develop (gate64's d1f3c5cb6c1c was on 3cb93b9c731e, now stale).
+8. **gate65 kit drafter running** → `fleet/qa-agent/gatesets/2026-10-05_gate65/` for #1393 (B 63rd's KS-1278, head 4a1620588819). On kit: routing line (backup), dry run, launch under `script -q /dev/null`, rung 5.
+9. **Spark**: queue empty. HOLDs awaiting a raise seat: KS-998, KS-1136, KS-1164, KS-1305, KS-1313 (reviews in run dirs). Tunnel re-opened 23:0x (`ssh -f -N … -L 47788:127.0.0.1:8888 Spark`); check /health first. Pool thin: carve tickets.
+10. Read seat ctx only after `tmux resize-pane -t %NN -y 16`; then `tmux select-pane -t %0`. macOS has no `timeout`. The no-cd hook refuses `git -C $VAR <write verb>` → use literal paths for scratch-repo writes.
 
 ## SECUURA LANES
 | lane | seat / pane | state | next |
 |---|---|---|---|
-| B | B 63rd %42 | PR B KS-1278 building | its STATUS; then PR C (anchors-tx only), D (KS-948), E (KS-591 ×4), F (KS-593) |
-| D | D 9th %43 | GO for #1388 at f65ddbbd560c | merged STATUS → verify → wrap → score |
-| F | none | #1383 (KS-1401) gate61r2 GO at 32e8459bc0f5; waits on #1388 | F 4th from F 3rd's handover after #1388 merges; re-predict on the new develop |
-| G | none; gate64 %44 | #1389 under gate | G 2nd on gate64 GO |
-| E | none | #1385 ungated at 79c87b8aaa48; KS-1256 unstarted | E 5th (brief drafting) |
-Scored tonight (this seat): E 4th 0.93.
+| B | B 64th %46 | ITEM 0 | PR C; #1393 merge on gate65 GO |
+| D | D 9th %43 | #1388 MERGED | wrap → score → D lane idle (KS-1404 live sweep owed, Kam's card) |
+| F | none | #1383 gate61r2 GO, unblocked | F 4th (brief drafting) |
+| G | none; gate64 %44 | #1389 under gate | G 2nd on GO |
+| E | E 5th %45 | ITEM 0 | #1385 merge-in → gate; KS-1256 b |
+Scored tonight (this seat): E 4th 0.93 · B 63rd 0.95.
 
 ## OWED (added this seat)
 - Gate-kit defect (D 9th's finding): `c4_docs_gate63.py predict` on an ABSENT develop returns None for every blob → a false M6 "re-gate" refusal. predict must refuse "develop unresolvable" by name; carry into every new kit.
