@@ -1,0 +1,56 @@
+diff --git a/Blockchain/Dev/services/timestamping/src/__tests__/ks591-timestamps-verify-body-required.test.ts b/Blockchain/Dev/services/timestamping/src/__tests__/ks591-timestamps-verify-body-required.test.ts
+new file mode 100644
+index 000000000..06106a293
+--- /dev/null
++++ b/Blockchain/Dev/services/timestamping/src/__tests__/ks591-timestamps-verify-body-required.test.ts
+@@ -0,0 +1,38 @@
++// KS-591 (positive_data_acceptance register): the published contract for POST /api/timestamps/verify did not
++// mark the request body required, so a spec-driven caller (Schemathesis) sent no body at all and the handler
++// (index.ts, verifyTimestampSchema.parse) answered 400. That zod object requires hash, proof and timestampType, so
++// it rejects an absent body; the spec now says the body is required - the KS-1364 shape, and the shape its sibling
++// POST /api/timestamps already has (KS-444). This file renders the document the generator publishes, from the
++// shared registry the timestamping module populates on import. No server, no database, no network.
++import { describe, it, expect } from 'vitest';
++import { generateOpenApiDocument } from '@secuura/shared';
++import '../timestamping.openapi';
++
++type AnyObj = Record<string, any>;
++
++const doc = generateOpenApiDocument({ title: 'timestamping (ks591 verify pin)', version: '0.0.0' }) as AnyObj;
++
++function operation(path: string, method: string): AnyObj | undefined {
++  return doc.paths?.[path]?.[method];
++}
++
++describe('KS-591: POST /api/timestamps/verify publishes a REQUIRED request body', () => {
++  it('RED KS-591 TV1: POST /api/timestamps/verify marks its request body required', () => {
++    expect(operation('/api/timestamps/verify', 'post')?.requestBody?.required).toBe(true);
++  });
++
++  it('control KS-591 TVC1: the verify body keeps its request schema and the operation keeps bearerAuth', () => {
++    const op = operation('/api/timestamps/verify', 'post');
++    expect(op?.requestBody?.content?.['application/json']?.schema?.$ref).toBe('#/components/schemas/TimestampVerifyRequest');
++    expect(op?.security).toEqual([{ bearerAuth: [] }]);
++  });
++
++  it('control KS-591 TVC2: the request component still lists its required fields, which is why an absent body is refused', () => {
++    const s: AnyObj = doc.components?.schemas ?? {};
++    expect(s.TimestampVerifyRequest?.required).toEqual(expect.arrayContaining(['hash', 'proof', 'timestampType']));
++  });
++
++  it('control KS-591 TVC3: the KS-444 sibling POST /api/timestamps keeps its required body', () => {
++    expect(operation('/api/timestamps', 'post')?.requestBody?.required).toBe(true);
++  });
++});
+diff --git a/Blockchain/Dev/services/timestamping/src/timestamping.openapi.ts b/Blockchain/Dev/services/timestamping/src/timestamping.openapi.ts
+index 7dd6c299a..4e3d45a93 100644
+--- a/Blockchain/Dev/services/timestamping/src/timestamping.openapi.ts
++++ b/Blockchain/Dev/services/timestamping/src/timestamping.openapi.ts
+@@ -460,6 +460,7 @@ sharedRegistry.registerPath({
+       content: {
+         'application/json': { schema: TimestampVerifyRequestSchema },
+       },
++      required: true,
+     },
+   },
+   responses: {

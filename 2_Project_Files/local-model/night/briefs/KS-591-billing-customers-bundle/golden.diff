@@ -1,0 +1,86 @@
+diff --git a/Blockchain/Dev/services/billing/src/__tests__/ks591-billing-customers-bundle-body-required.test.ts b/Blockchain/Dev/services/billing/src/__tests__/ks591-billing-customers-bundle-body-required.test.ts
+new file mode 100644
+index 000000000..54ab04837
+--- /dev/null
++++ b/Blockchain/Dev/services/billing/src/__tests__/ks591-billing-customers-bundle-body-required.test.ts
+@@ -0,0 +1,60 @@
++// KS-591 (positive_data_acceptance register): the published contracts for POST /api/billing/customers and
++// POST /api/billing/checkout/bundle did not mark the request body required, so a spec-driven caller (Schemathesis)
++// sent no body at all and each handler (routes/billing.ts, CreateCustomerSchema / PurchaseBundleSchema via .parse)
++// answered 400. Those zod objects reject an absent body, so the spec now says the body is required - the KS-1364
++// shape. PUT /api/billing/customers/{id} is the control: its handler accepts an empty body, so its body stays
++// optional. This file renders the document the generator publishes, from the shared registry the billing module
++// populates on import. No server, no database, no network.
++import { describe, it, expect } from 'vitest';
++import { generateOpenApiDocument } from '@secuura/shared';
++import '../billing.openapi';
++
++type AnyObj = Record<string, any>;
++
++const doc = generateOpenApiDocument({ title: 'billing (ks591 customers/bundle pin)', version: '0.0.0' }) as AnyObj;
++
++function operation(path: string, method: string): AnyObj | undefined {
++  return doc.paths?.[path]?.[method];
++}
++
++function bodyRef(path: string, method: string): string | undefined {
++  return operation(path, method)?.requestBody?.content?.['application/json']?.schema?.$ref;
++}
++
++describe('KS-591: POST /api/billing/customers and POST /api/billing/checkout/bundle publish a REQUIRED request body', () => {
++  it('RED KS-591 BC1: POST /api/billing/customers marks its request body required', () => {
++    expect(operation('/api/billing/customers', 'post')?.requestBody?.required).toBe(true);
++  });
++
++  it('RED KS-591 BC2: POST /api/billing/checkout/bundle marks its request body required', () => {
++    expect(operation('/api/billing/checkout/bundle', 'post')?.requestBody?.required).toBe(true);
++  });
++
++  it('control KS-591 BCC1: both bodies keep their request schemas and both operations keep bearerAuth', () => {
++    expect({
++      customers: bodyRef('/api/billing/customers', 'post'),
++      bundle: bodyRef('/api/billing/checkout/bundle', 'post'),
++    }).toEqual({
++      customers: '#/components/schemas/BillingCustomerCreateRequest',
++      bundle: '#/components/schemas/BillingCheckoutBundleRequest',
++    });
++    expect(operation('/api/billing/customers', 'post')?.security).toEqual([{ bearerAuth: [] }]);
++    expect(operation('/api/billing/checkout/bundle', 'post')?.security).toEqual([{ bearerAuth: [] }]);
++  });
++
++  it('control KS-591 BCC2: the request components still list required fields, which is why an absent body is refused', () => {
++    const s: AnyObj = doc.components?.schemas ?? {};
++    expect(s.BillingCustomerCreateRequest?.required).toEqual(expect.arrayContaining(['email', 'userId']));
++    expect(s.BillingCheckoutBundleRequest?.required).toEqual(expect.arrayContaining(['bundleId', 'successUrl', 'cancelUrl']));
++  });
++
++  it('control KS-591 BCC3: PUT /api/billing/customers/{id} keeps an OPTIONAL body (its handler accepts an empty one)', () => {
++    const op = operation('/api/billing/customers/{id}', 'put');
++    expect(op?.requestBody?.content?.['application/json']?.schema?.$ref).toBe('#/components/schemas/BillingCustomerUpdateRequest');
++    expect(op?.requestBody?.required).toBeUndefined();
++  });
++
++  it('control KS-591 BCC4: the KS-1364 sibling POST /api/billing/checkout/custom keeps its required body', () => {
++    expect(operation('/api/billing/checkout/custom', 'post')?.requestBody?.required).toBe(true);
++  });
++});
+diff --git a/Blockchain/Dev/services/billing/src/billing.openapi.ts b/Blockchain/Dev/services/billing/src/billing.openapi.ts
+index 93ace536f..b4a8c3995 100644
+--- a/Blockchain/Dev/services/billing/src/billing.openapi.ts
++++ b/Blockchain/Dev/services/billing/src/billing.openapi.ts
+@@ -579,6 +579,7 @@ sharedRegistry.registerPath({
+   request: {
+     body: {
+       content: { 'application/json': { schema: CustomerCreateRequestSchema } },
++      required: true,
+     },
+   },
+   responses: {
+@@ -711,6 +712,7 @@ sharedRegistry.registerPath({
+   request: {
+     body: {
+       content: { 'application/json': { schema: CheckoutBundleRequestSchema } },
++      required: true,
+     },
+   },
+   responses: {
