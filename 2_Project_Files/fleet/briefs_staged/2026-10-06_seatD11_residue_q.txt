@@ -1,0 +1,91 @@
+QUESTION: residue ticket text (Seat D 11th). ONE ticket for N-1397-7 / D-7. Drafted, NOT filed.
+I file on your ANSWER. #1397 is merged (add9a3b8bec3) and the §5f comment is posted and read back.
+
+== WHAT I SEARCHED, BY SYMBOL, run by me with includeArchived, not inherited ==
+searchIssues(first:20, includeArchived:true) on: lockfile-cleanroom, cleanroom, npm ci --dry-run,
+clean-room, realci, standalone lock, whatsapp-bot, maxdepth 2, leg 2.
+  realci -> 0 hits, matching your P14. The other eight return 20 hits each, which is the page cap,
+  so "20" means AT LEAST 20 and the count carries no relevance. searchIssues is fuzzy.
+I then read the three nearest candidates in full rather than trusting titles:
+  KS-768 [Backlog] -- audit-locks scans 35 of 45 lockfiles. Same four-directory class, but it is
+    audit-locks.mjs:77-88, which is LEG 7. Your nearest-sibling call is right. NOT a duplicate.
+  KS-773 [Done] -- lockfile-cleanroom skips services/mcp-server. A DIFFERENT mechanism: an explicit
+    SKIP= constant for a path that is INSIDE the find scope, not the scope itself. NOT a duplicate.
+  KS-1394 [Backlog] -- NEW, and your P14 did not name it. It is about leg 7's refusal message
+    pointing at a regen command that cannot regenerate systemTest/performance's lock -- but its
+    description QUOTES THE EXACT LINE my ticket is about, "find services packages frontend scripts
+    -max...", and names systemTest. So it is a SECOND sibling, closer in text than KS-768, though
+    its subject is the refusal message and not the unscanned locks. Still not a duplicate.
+  Nothing I found covers leg 2's own directory scope. I am satisfied this is not a re-file, and I am
+  naming KS-1394 so you can decide whether it should absorb this instead.
+
+== THE DRAFTER'S INFERENCE: CONFIRMED, AND IT TURNS OUT NOT TO BE AN INFERENCE ==
+You asked me to confirm 5 + root = 6 against the gate report before writing it. gate70 states 6
+DIRECTLY, at its own N-1397-7 line: "leg 2 is npm ci --dry-run over services/packages/frontend/
+scripts only, so 6 changed locks are outside it." Its section 4 separately reports realci 5/5 and
+its C6 reports the root-lock npm ci. So the gate's 6 and the 5+root arithmetic agree, and I can cite
+the gate's own figure rather than my sum. I ALSO measured it myself: of the 36 changed lockfiles, 30
+fall inside the find scope and 6 do not, and my 6 are byte-identical to your P15 list.
+
+== PROPOSED TICKET ==
+Team Secuura-PK. Assignee kamil.kreiser@secuura.ai. Priority: Medium (3).
+Project: I propose NONE unless you want "Dependency and Version Currency" -- say which, since §5d
+placement is not mine to pick.
+Title:
+  Preflight leg 2's clean-room install scans four directories, so 6 of the 36 locks #1397 changed
+  were never clean-room installed
+Description:
+
+  ## BLUF
+  `lockfile-cleanroom.sh` (preflight leg 2) prints "All 35 standalone lock(s) pass" and reads like a
+  total. It is a surface. Its file list comes from four hardcoded directories, so lockfiles under
+  `connectors/`, `systemTest/` and the workspace root are never clean-room installed by that leg.
+  On #1397 (KS-1425) that was 6 of the 36 changed lockfiles.
+
+  ## Measured
+  `Blockchain/Dev/scripts/preflight/lockfile-cleanroom.sh`, blob
+  `518bffeeaf4a3c47a4660f594f822f34e26c2d15` -- identical at develop `4eaf7741a6a4` and at #1397's
+  head `3e7be2044fe8`, and the file is NOT one of the 37 paths #1397 changed, so this is not a
+  regression introduced by that PR.
+  - `:46` builds the whole file list:
+    `done < <(find services packages frontend scripts -maxdepth 2 -name package-lock.json | sort)`
+  - `:73` and `:87` are the install itself: `npm ci --dry-run --ignore-scripts`
+    (`:87` adds `--no-workspaces`).
+  The 6 changed locks outside that scope, from #1397's own file list:
+  - `Blockchain/Dev/package-lock.json` (the workspace root)
+  - `Blockchain/Dev/connectors/whatsapp-bot/package-lock.json`
+  - `systemTest/akto/package-lock.json`
+  - `systemTest/api-explorer/package-lock.json`
+  - `systemTest/performance/package-lock.json`
+  - `systemTest/playwright/package-lock.json`
+  Measured by classifying #1397's 36 changed `package-lock.json` paths against the `find` line
+  above: 30 inside, 6 outside.
+
+  ## Why it did not bite on #1397
+  It was covered, but by checks OUTSIDE leg 2, and only because the gate chose to run them:
+  gate70's `realci` really installed the 5 standalone locks outside leg 2 (rc 0, locks unchanged),
+  its C6 ran `npm ci` from the root lock (rc 0, 1,937 packages, root-lock sha256 `c7306d84307789ac`
+  unchanged), and its C3 verified every tarball's integrity. gate70 recorded this as N-1397-7 Minor:
+  "so 6 changed locks are outside it. Covered for this PR by realci + install + c3. Wants a ticket."
+  None of those three is leg 2, and none runs on an ordinary push.
+
+  ## Not claimed
+  - That any of the 6 locks is actually broken. They were installed and passed on #1397.
+  - A fix. Widening `find` would add install time to every push and `--no-workspaces` behaviour
+    differs for the root lock; `systemTest/*` locks also sit at indent 4 and inside Prettier's scope
+    for two of the four packages, so a naive change there has its own blast radius.
+
+  ## Sibling, not duplicate
+  KS-768 is the same four-directory class in LEG 7 (`audit-locks.mjs:77-88`, 35 of 45 lockfiles).
+  KS-1394 quotes this same `find` line, but its subject is leg 7's refusal message pointing at a
+  regen command. KS-773 (Done) is a different mechanism: an explicit `SKIP=` for a path already
+  inside the scope.
+
+  Discovered 2026-10-06 during the #1397 / KS-1425 merge (gate70 finding N-1397-7, Wednesday's Q4
+  ruled it residue).
+
+== TWO THINGS I WANT YOUR WORD ON BEFORE I FILE ==
+R1. Project placement: none, or "Dependency and Version Currency"? §5d says placement is not the
+    merge seat's call, and I would rather ask than guess.
+R2. Priority: I propose Medium. gate70 graded the finding Minor and nothing is currently broken, so
+    High would overstate it; but it is a gate blind spot, which is the class that bites later.
