@@ -1,0 +1,72 @@
+The guarded revoke UPDATE now keys on the row the read found: COALESCE
+of two tenant-scoped scalar subqueries, external_id first, then the
+primary key, which is the read's own precedence (documentRepo.ts
+:238-251). The tenant scope stays on the outer UPDATE and the status
+guard stays inside the statement, so of two overlapping writers exactly
+one changes the row. Values are bound parameters. A non-UUID id binds
+null instead of being cast to uuid, mirroring the isValidUuid guard the
+read uses at :244. Only POST /:id/revoke (routes/documents.ts:2398)
+opts in. The other 12 production updateDocument callers pass no
+ifStatusIsNot and take an unguarded statement byte-identical to round
+1's. Against develop that statement carries one more guard line, bound
+to NULL; on gate68's PostgreSQL probe it is a no-op (1 row on a draft
+row and 1 on a revoked row, the same as develop).
+
+A revoke addressed by documentUuid (the primary key), as the PR body
+states it:
+- branch base 32e058975d4e: 200 + 1 provenance row, but the UPDATE
+  matched 0 rows so the status was never written
+- round 1 4a1620588819: 400 "Document is already revoked", 0 provenance rows, status never written
+- this head b5adaba751d8: 200, status written, exactly 1 provenance
+  row
+A non-UUID external_id: 200, 1 row at all three. A genuine race: both
+writers passed the read at the base; 400 for the loser at round 1 and
+at this head.
+
+A null from the guarded write has three meanings, and the route must
+not read it as one condition:
+1. A genuine race: another revoke changed the row between this
+   request's read and its write. The UPDATE refuses, so exactly one of
+   two overlapping writers wins; the loser answers 400 with 0
+   provenance rows and 0 anchor emissions (cells R1, R2).
+2. The row was deleted inside the revoke window: 400 where 404
+   belongs. Unchanged here and tracked as KS 1419; no live instrument.
+3. A revoke addressed by documentUuid: at round 1 it matched 0 rows
+   and returned null. At this head it keys on the row the read found
+   and answers 200 (cell N1, red at 4a1620588819, green here).
+
+Cells, in ks1278-revoke-is-one-atomic-transition.test.ts (7): R1, R2,
+C1, C2, N1, N2, N3. N2 shows a non-UUID external id still revokes and
+is green at both ends. That a non-UUID never reaches the ::uuid cast
+holds by reading documentRepo.ts and on gate68's PostgreSQL probe; N2
+does not measure it (tamper U1 below).
+
+Tamper matrix, measured by gate68 at b5adaba751d8, each tamper alone,
+7 cells executed in every row:
+- G7 guard value 'revoked' -> 'draft': R2
+- G8 anchor emitted before the null check: R1
+- K1 guarded key reverted to external_id: N1
+- T5 TRUE OR prefixed to the guard clause: R2
+- T1 -> R2, T2 -> R2, T3 -> C2, T4 -> R1, T6 -> R1, K2 -> N3
+- T5b OR TRUE appended after the guard clause: NOT CAUGHT
+- U1 the isValidUuid binding removed: NOT CAUGHT
+T5b and U1 are assertion-strength gaps, not product defects: gate68's
+PostgreSQL probe catches both. They are residue for one follow-up
+ticket (an anchored R2 match, and a 22P02-raising double for N2).
+
+Test evidence: red-first at 4a1620588819, 1 failed / 6 passed of 7
+executed (N1 only). services/originate suite 91 suites / 1070 tests, 0
+failed, node v24.7.0, jest 29.7.0. tsc rc 0 with documentRepo.ts in the
+program. gate68 real PostgreSQL 18.3 probe 9/9, two concurrent
+sessions on one row 1/0 against the unguarded control's 1/1. In-hook
+preflight at the author's push, verbatim and not a pass:
+PREFLIGHT INCOMPLETE — 12/15 legs ran, 3 SKIPPED. Nothing failed.
+
+NOT COVERED: no live sweep, so this change does not move its ticket to
+Done (secuura-test-discipline 5f). RLS is not exercised (the probe ran
+as superuser on a DDL subset). Multi-tenant runtime is not exercised.
+The cell file is type-unchecked: its tsconfig excludes src/__tests__.
+Whether any client revokes by UUID is unmeasured. The 12 unguarded
+callers' own UUID-addressed no-op is KS 1424, not changed here.
+
+Refs KS-1278 https://linear.app/secuura/issue/KS-1278
