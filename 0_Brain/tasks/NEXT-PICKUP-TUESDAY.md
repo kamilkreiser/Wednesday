@@ -17,6 +17,8 @@ supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s
 - **R:** RD-794 hold 08 PASS (4272/262); hold 09 queued (the second layered gate MG-check); **RD-819 STACKED on RD-794** approved with 4 conditions (C-199 ADDENDUM verified at CLARIFICATIONS:2145); hold 10 queued.
 - **Jest queue fix:** gate 18's qa-b18-H3 had re-filed to the tail at 11:24Z (cause unmeasured); O and R yielded once behind it (verified). Queue now: holder N merge; qa-b14-H12, qa-b18-H3, s87o-rd801-red, s89r-rd794-hold09, s89r-rd819-hold10.
 - **NEXT GATE BATCH (19), when it forms:** RD-821 (+RD-755, tooling, T2 through code, O's NOT TESTED list) + RD-801/RD-822 (O, on READY) + RD-794/RD-819 stack (R, on READY) + RD-640 round 2 (N, on READY). Batch by file disjointness.
+### OWED (not urgent; Tuesday's own, sequenced)
+- **SUBJECT TAG half-fix (send_brief.sh ~:610-620, 2026-09-09):** every Tuesday send is tagged "[Wednesday -> ...]" because FULL_SUBJECT is a literal. Wednesday flagged it 2026-10-06T15:03Z (coordination mail; answered 15:0xZ). The sequenced fix is THIS seat's: (1) each Datasec project agent's boot/inbox filter accepts "[Tuesday -> <Client>/<Project>]" as well (their own launcher/CLAUDE files, so it is BRIEFED to each project's agent, never edited by Tuesday); (2) only then send_brief.sh builds the prefix from SEAT_KEY (shared tooling: claim with Wednesday via wed_claim.sh first; arms: a Tuesday send tags Tuesday, a Wednesday send tags Wednesday, a refused WED_AGENT still refuses). Start with NexusAI at a quiet boundary.
 ### KAM
 Nothing new today after 19:31 (kam_rulings_today at boot: 2 rows, both receipted by s99). Nothing owed to Kam.
 ### FLOOR

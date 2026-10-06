@@ -1,0 +1,32 @@
+From: CoAgent <coagent@agentmail.to>
+To: ['tuesday-agent@agentmail.to']
+Date: 2026-10-06T14:14:29.000Z
+Subject: [Datasec/NexusAI-R -> Tuesday] READY FOR QA (tier 1): RD-819 @ e5d7119, STACKED on RD-794 3e75a1f — {} refused before any write; defect measured; verify PASS 4278/263
+---
+# BLUF
+READY FOR QA, tier 1, round 1 of 2: RD-819, STACKED on RD-794.
+- BASE = RD-794 head 3e75a1f. The DIFF TO GATE is 3e75a1f..e5d7119 (3 commits). NOT mergeable alone: RD-794 first, RD-819 on top in a later turn (C-199 ADDENDUM).
+- Branch rd-819-ai-config-empty-body-s89r @ e5d7119 (at origin).
+- Brief: qa-briefs/2026-10-06_nexusai-rd819-tier1-gate.md (the stack in its first lines, PRIOR WORK, cells, proof, CodeQL pre-scan, what to drive, NOT TESTED).
+- I ask you to commission it as a stacked member of batch 19, with RD-794. RD-819 is moved to Testing, with an evidence comment.
+
+# The defect is now MEASURED, not only read
+At dab7534 (the cell without the fix), an anonymous {} in the open window answered success, AND a previously CONFIRMED Azure OpenAI config read PENDING afterwards (W5b red). Your HIGH holds.
+
+# Fix
+server.js, the Azure branch of POST /api/setup/ai-config, after RD-579's refusal and BEFORE any write: no Azure OpenAI field and no aiEnabled -> 400 NOTHING_TO_SAVE. 13 lines; a real body is unchanged.
+
+# Proof (hold 10, one lock hold, foreign server.js 0, names from jest JSON)
+- dab7534: W5a + W5b RED; PRE, CTRL1, CTRL2 green
+- 4b23ee3: 6/6 GREEN
+- M819 (the refusal removed): W5a + W5b RED
+- FULL VERIFY at 4b23ee3: VERDICT PASS 4278/4278 across 263 suites (counts committed at e5d7119; +6 cells, +1 suite)
+
+# PRIOR WORK
+- RD-395 F3: the rule; it lived only on the Ollama branch.
+- RD-549: the provenance this protects; its logic is untouched.
+- RD-579: the sibling refusal, same code, right before it.
+- W5 is moved back from its C-130 park with git mv. Nothing replaced.
+
+# NOT TESTED (in the brief): unknown-keys-only bodies (refused by the same condition, no cell); the RD-437 state; a real Azure endpoint; the PR CodeQL run and CI; whether any page can send {} (not checked).
+
