@@ -1,0 +1,173 @@
+Subject: [QA -> Wednesday] GATE71 (T1+T2): #1404 KS-1436 job 06 stderr, #1398 KS-1136 unreadable security artefact
+From: CoAgent <coagent@agentmail.to>
+Timestamp: 2026-10-06T16:18:23.000Z
+Auth: {"spf": "pass", "dkim": "pass", "dmarc": "pass"}
+
+GO — #1404 (KS-1436) at c117c0160684d1ae72b220a8d2ccfe9aafb8eb8d (T2; merges FIRST; squash WITH the re-composed docs merge-in M, `qm` green)
+GO — #1398 (KS-1136 item 2, R-3, round 1 of 2) at 9414aa54e92ca243565d0d967aad991dc4c13840 (T1) — CONDITIONAL: only AFTER #1404 has merged, on the REAL post-#1404 develop, with its own re-composed docs merge-in (flow `28.`) and its own `qm` read-back on that develop
+
+GO strings (merge order; Seat R 5th is the ruled merge seat, neither author named):
+  1. GO (Seat R 5th): merge 1404 on gate71
+  2. GO (Seat R 5th): merge 1398 on gate71  -- ONLY after #1404 has merged
+
+Merge-in conditions:
+- #1404: squash of c117c0160684 onto develop b39051390ff6 WITH the re-composed docs merge-in M built from recomposed_2026-10-07/1404_* VERBATIM (W-Q3); `c4_docs_gate71.py qm --pr 1404 --merge-in-head M --develop-after <develop>` must pass Q1-Q6; predicted tree(M) d717255d5376c7c8cf22e57c0bc88b7437b2553d, guard 12/0. If develop moves (watch #1383, a DOCS PR), re-predict.
+- #1398: AFTER #1404 lands; M on the REAL post-#1404 develop, flow number 28 (ruled W-Q2), recomposed_2026-10-07/1398_* verbatim; the kit's 960e71800ea1e9bce95c681d8547293147c6010b is a prediction on SIM 391bdbffa023 and must be re-predicted on the real develop, then `qm` (W-Q8).
+
+Declared squash subjects (TRUE of the diff, without the suffix):
+- #1404: "KS-1436: the tenant-isolation runner's stderr goes to its own file" (66, lands 74)
+- #1398: "KS-1136: report a present but unparseable security artefact instead of a clean scan" (83, lands 91)
+Squash bodies: #1404 = the head COMMIT MESSAGE body verbatim (clean; NOT the PR body, see N-1404-1/2). #1398 = from the PR body per Q4: 0 trailers, Refs KS-1136, KS 878 / KS 1305 de-hyphenated, the measured runner sentence (ks1136 6 passed, 0 failed on the runner) instead of the commit message's "unmeasured" (line 60).
+
+## The check rows
+
+| check | PR | FOUND (sha) | TESTED (command, rc) | HOW (instrument; the control that fired) |
+|---|---|---|---|---|
+| C1 PIN | #1404 | head c117c0160684, tree ec95d1995880, parent d75bfe2deb80, develop b39051390ff6 | `c1_pin_gate71.py --pr 1404 --repo <clone> --head c117c016… --develop b3905139…` rc 0, 14 checked 0 FAIL | P1 ls-remote; P3 4 paths +177 -1 exact; P4 END_TREE; P4b pre-docs tree 5d1ca2fe9ece78a9a9e6acf334ecf45433999343 (INFO, no author claim; == drafter's 5d1ca2fe9ece); P5 trailers 0 content bytes (raw 1) vs CONTROL bf277eead268 53; P6 Co-Authored-By 0 vs control 1; P7 66 chars, LANDS 74; P8 only KS-1436, `Refs KS-1436` x1, 0 closing, KS 1136 / KS 1382 de-hyphenated; P9 modes 100755->100755, test A 100644; P10 21 identical + the skill ACCEPTED BY NAME eaf43dfd->b59b74a5; P12 190 base..develop paths, 0 shared with code/tooling. Independent: my numstat/raw-mode read agrees (evidence/mine_c1_independent.out) |
+| C1 PIN | #1398 | head 9414aa54e92c, tree 2ee602cba3c9, parent d75bfe2deb80 | `c1 … --pr 1398 …` rc 0, 14/0 | +349 -0; END_TREE 2ee602cba3c9; P4b 074705eebd81 == author; trailers 0 vs 53; 83 chars LANDS 91; only KS-1136 (KS 878, KS 1305 de-hyphenated); NO-NEW-LEG as above |
+| 1 JOB06-GUARD | #1404 | 06 blob base 4d077ab30259 -> head 6bd87f1308d4 | `c5_job06_gate71.py guard06 --pr 1404 --repo <clone> --head c117c016…` rc 0, 6/0 | G1 ONE contiguous replacement at :71 (the `2>&1` line out; 3 comment lines + `2> "$OUT.stderr"` in; the runner line is now :74); G2 WHY comment carries KS-1436 and the prior `2>&1`; G3 runner `2>&1` head 0 vs CONTROL base 1 (the `command -v node >/dev/null 2>&1` at :41 is not counted); G4 `Writes:` header + both swallow lines present once at base and head; G5 100755/100755; G6 5 run-dir glob/upload lines. Read whole at the head by me. |
+| 1 GUARD-READ | #1398 | 09 blob base 739ebab8c64e -> head 22a24798560f | `c2_product_gate71.py guard --pr 1398 --repo <clone> --head 9414aa54…` rc 0, 6/0 | G1 pure 14-line insertion :216-:229; G2 after `is_baselined()` :211, before `ALL_FINDINGS=` :231; G3 loop == the file's 7 blocks minus 04, ids == each block's first emit; G4 guard line once, 2 conjuncts; G5 04's block byte-identical. Read whole at the head by me. |
+| 2 RED-FIRST + ARMS | #1404 | suite blob 008fa7a7238b | `c5 suite06 --pr 1404 --repo <clone> --head c117c016… --out <fresh>` rc 0, 6/0 | S1 5/0 rc 0 (2.64 s); S2 base job blob 4d077ab30259: rc 1, **1 passed / 4 failed**, CONTROL cell 1 green, red cells 2-5, each red READ: `got 0 unparseable unparseable` / `tested=? cross-tenant_findings=?` / sidecar count 0; S3 DEVNULL (sha 1bab4bfad1c2, anchor x1, bash -n 0) **4/1**, only cell 4 red (`want 1, got 0`: stderr not kept); WRONGNAME `2> "$OUT.err"` (sha e7898923f588) **4/1**, only cell 4 — the suite pins the sidecar's NAME; S4 re-run 5/0 |
+| 2 RED-FIRST + ARMS | #1398 | suite blob 2c4381a37f5f | `c2 suite --pr 1398 --repo <clone> --head 9414aa54… --wt <wt1398> --out <fresh>` rc 0, 9/0 | S1 6/0 (1.49 s); S2 base blob 739ebab8c64e rc 1, 3/3, red cells **1-3**, controls 4-6 green; A (drop `[ -f "$_f" ] &&`, sha 1f3880482fa6) **2/4**, red 1, 2, 5, 6 — falsifies EXISTS (absent artefacts flagged); B (drop `! jq -e .`, sha bde36506d860) **4/2**, red 4, 5 — falsifies PARSES (well-formed flagged); C (08 out of the loop) 4/2, red 2, 3; D (loop below ALL_FINDINGS) 3/3, red 1-3 — proves the placement; `AGG_SH=''` rc 2; S6 6/0 |
+| 3 SHAPES (09 matrix) | #1398 | head 09 22a24798560f vs base 739ebab8c64e | `c2 shapes --pr 1398 --repo <clone> --head 9414aa54… --out <fresh>` rc 0, **90/90** | 7 jobs x 12 shapes + 06 stderr-merged clean / LEAK = 86 rows; CLEAN (absent, valid-zero, own SKIP, two values) stay clean; FINDINGS == base, no unreadable id; every UNREADABLE shape exactly one `<job>/unreadable-artefact` HIGH + base ids, rc 1; 04 truncated once; all-7; CONTROL: head rules on the BEFORE column = **51 violations** |
+| 3 SHAPES stacked | both | stack tree 960e71800ea1 (09 == 22a24798560f, 06 == 6bd87f1308d4, asserted) | `c2 shapes … --on-tree 960e71800ea1… --out <fresh>` rc 0, **90/90** | identical, CONTROL 51; REPEAT unchanged |
+| 3 CHAIN 06->09 | both | 06 {4d077ab, 6bd87f1} x 09 {739ebab, 22a2479} | `c5 chain --pr 1404 --repo <clone> --head c117c016… --head-1398 9414aa54… --out <fresh>` rc 0, **36/36**; `… --stack-tree 960e71800ea1…` rc 0, **37/37** | 32 cells (table below); CH-SIDECAR (sidecar == the stderr exactly; 09 ids equal with it removed); CH-SUMMARY HEAD `tested=3 cross-tenant_findings=0` vs BASE `tested=? …=?`; CH-CONTROL 3 BEFORE violations. MY OWN instrument (evidence/chain_mine.sh + emu_runner.js: REAL node replaying runner.ts's control flow and console.error/console.log order, 9 shapes incl. a REAL SIGKILL mid-write) agrees on every shared shape |
+| 4 CALLERS | #1398 | at 9414aa54e92c | `c2 callers --pr 1398 --repo <clone> --head 9414aa54… --wt <wt1398> --out <fresh>` rc 0, 4/0 | K0 09 names itself / fabricated 0; K1 all expected consumers; K4 **69** baseline fingerprints over 4 files, **0** carry `unreadable-artefact`; K3 trivy suite 5/0 vs head AND base → blind to the loop |
+| 4 JOB06-REACH static | both | develop b39051390ff6, c117c0160684, 9414aa54e92c | `c5 reach06 --pr 1404 --repo <clone> --rev <rev>` x3, rc 0 each, 3/0 | 17 workflows; 2 reach job 06 (api-contract-tests.yml via ci/orchestrate.sh; internal-audit.yml via run-internal-audit.sh), both `workflow_dispatch` only; per-PR 0; CONTROLS positive 2, fabricated 0. Mine (evidence/mine_reach06_transitive.out): no package.json script, no other workflow, docker-build.sh mentions orchestrate.sh in a COMMENT only; integration/github-actions-snippet.yml is not under .github/workflows |
+| 4 JOB06-REACH by log line | both | runs at 9414aa54e92c (7), c117c0160684 (1), b39051390ff6 (2) | `gh_gate71.py job06 --pr 1404 --at 9414aa54… --at c117c016… --at b3905139…` rc 1 (kit: "LIVE 4") | 25 job logs read (##[group] > 0 each, fabricated 0). The 4 "LIVE" lines (2 per PR Security Gates log, at 9414aa54e92c and at develop) READ BY ME: `SUBJECT …/Blockchain/Testing/ci/orchestrate.sh` and `ok the WORKING path is intact — run-internal-audit.sh still passes RUN_DIR + SELF …`, both inside `=== Blockchain/Dev/scripts/__tests__/orchestrate_jobs.test.sh ===` (log lines 588-596 / 563-571): stub-suite output. **0 live job-06 runs in any per-PR check.** 6 job logs 404 "blob does not exist" — all SKIPPED jobs (no log), listed by conclusion in evidence/X6_jobs_9414.out |
+| 5 SHELL-SET | #1404 | wt1404 at c117c0160684 (X1) | `c3 list --pr 1404 --wt-base <wtBase> --wt-head <wt1404>` rc 0 3/0; `c3 full --pr 1404 --wt <wt1404> --wt-base <wtBase> --out <fresh>` rc 0, 6/0 | 67 -> 68, difference exactly tenant_isolation_stderr_own_file.test.sh, `--check-unreached` OK (68); full: **"shell suites: 68 passed, 0 failed, 0 skipped (of 68)"** = 68/68, rc 0, 336 s, new suite 5/0 under its own header, 83 headers |
+| 5 SHELL-SET | #1398 | wt1398 at 9414aa54e92c (X1) | `c3 list --pr 1398 …` rc 0 3/0; `c3 full --pr 1398 …` `c3 full --pr 1398 --wt <wt1398> --wt-base <wtBase> --out <fresh>` rc 0, 6/0 | 67 -> 68, exactly ks1136_aggregate_report_unreadable_artefacts.test.sh, unreached OK; full: **"shell suites: 68 passed, 0 failed, 0 skipped (of 68)"** = 68/68, rc 0, 331 s, new suite 6/0 under its own header |
+| 5 SHELL-SET stacked | both | wtStack (SIM 018f3a56409b, tree 960e71800ea1, X1) | `run-shell-suites.sh --list` rc 0: **70**; `--check-unreached` rc 0 "all 70 … reached"; full run `bash Blockchain/Dev/scripts/run-shell-suites.sh` (TMPDIR /private/tmp/claude-501/g71s) rc 0, 335 s | develop b39051390ff6 lists 68; stack = develop's 68 + exactly the two new suites (comm). Full: **"shell suites: 70 passed, 0 failed, 0 skipped (of 70)"** = 70/70 (own denominator 70): tenant_isolation_stderr_own_file 5/0, ks1136 6/0, html_docs_matrix 12/0 |
+| 6 DOCS | #1404 | head c117c0160684 vs base | `c4 docs --pr 1404 --repo <clone> --head c117c016…` rc 0, 11/0 | D1 flow one span 5204 B / cheat 2331 B, each once, 1-byte-altered CONTROL FALSE; D2 46-line / 29-line block LAST before `</body>`; D3 flow ..20 21 22 **27**, 17 a GAP, UNIQUE, KEYED (KS-1436); cheat ..KS-1305 KS-1436; split-h2 control hit/missed; D4 only KS-1436 (KS 1136, KS 1382), KS-9999 control found; D5 `<h2` 22 == 22 / 12 == 12, div balance 0 == 0; D6 the cheat block is NOT section-wrapped (polish, W-Q4). Mine (evidence/mine_boundary_free.out, difflib on lines): ONE pure insert of 46 / 29 lines just before `  </body>`; splice-out == base; 1-byte control → 2 opcodes. AGREES |
+| 6 DOCS | #1398 | head 9414aa54e92c vs base | `c4 docs --pr 1398 …` rc 0, 11/0 | flow span 8161 B / cheat 5446 B, once, control FALSE; 105 / 66-line blocks LAST; flow ..22 **23**, 17 a GAP, UNIQUE, KEYED; cheat ..KS-1305 KS-1136; only KS-1136 (KS 878); D6 section card. Mine agrees (105 / 66-line single inserts) |
+| 7 MERGE-IN | #1404 | develop b39051390ff6 | `c4 targets --pr 1404 --repo <clone> --develop-after b3905139… --out <fresh>` rc 0, 4/0 | T1 RE-COMPOSED (flow 46->45 lines, cheat 29->25, visible text conserved), key-anchored before `</body>`, read-back own 27 x1 LAST, prefix kept, UNIQUE → **d717255d5376c7c8cf22e57c0bc88b7437b2553d** == kit; develop's guard RUN on it: **12 passed, 0 failed** rc 0; SIM 391bdbffa023 |
+| 7 MERGE-IN | #1398 | develop + #1404 SIM 391bdbffa023 | same run | T2 23 -> **28** (ruled W-Q2), re-composed (105->103, 66->64), read-back own 28 x1 LAST, UNIQUE → **960e71800ea1e9bce95c681d8547293147c6010b** == kit; guard **12/0**; T2x AS AUTHORED (23.) REFUSES: "develop ALREADY carries 23 — UNIQUE would break"; T-CTL old-format block tail-appended (tree ac33baec33b5) FAILS the guard rc 1, 10/2, `prose outside a table` x7. Mine (evidence/mine_verbatim_targets.out): the 4 recomposed_2026-10-07 blocks inserted VERBATIM before `</body>` reproduce blobs f9935e1cfe8c / 191bb32270c5 / df566caf8916 / b938c3291299 exactly; CONTROL (1404 flow block onto the wrong base) → 1ee9967df560 ≠; develop..target diffs are exactly the row paths |
+| 7 MERGE-TREE | both | — | (same run) cross-check, never picked | #1404 onto b3905139: rc 1, tree 018b88920692, conflicted = both docs (1 marker block each), 0 paths differ outside the docs → **DIVERGENCE (docs only)**; #1398 onto 391bdbffa023: rc 1, tree ea1c9135e4bc, both docs conflicted, 0 outside → **DIVERGENCE (docs only)** |
+| 8 PR TEXT | #1404 | live PR #1404 | `gh api --pr 1404 --head c117c016…` rc 0; `gh prtext --pr 1404 --head c117c016…` rc 1 (K-2, instrument) | open, unmerged, base develop, mergeable False, **mergeable_state dirty**, 1 commit / 4 files / +177 -1, body sha256/16 **56d358ebe4544bec** == READY; T1 `Refs KS-1436` x1 at line 1, no closing word within 3 lines; T2 0; T3 only KS-1436 (KS 1136, KS 1382, KS 571); T4 title == subject, LANDS 74; T5 0 |
+| 8 PR TEXT | #1398 | live PR #1398 | `gh api --pr 1398 …` rc 0; `gh prtext --pr 1398 …` rc 0 | open, unmerged, develop, mergeable False, **dirty**, 1 / 4 / +349 -0, body **aba1d9423478a0b6** == READY; T1-T5 pass; T6 all 7 body figures == my measurements; T7 the "unmeasured" sentence is STRUCK THROUGH in the body and replaced by the measured runner result; the COMMIT MESSAGE (line 60) still carries it |
+| 9 ACTIONS | #1404 | runs at c117c0160684 | wrapper → kit `actions --pr 1404 --at c117c016… --wait` rc 0 | CONTROL fabricated sha 0 runs; **1 run**: Dependabot standalone locks (pull_request_target) **skipped**, created 14:56:53Z; two consecutive agreeing terminal reads. 0 failing → nothing to classify. NO pull_request workflow ran at this head (no PR Security Gates / Security Scanning / pr) |
+| 9 ACTIONS | #1398 | runs at 9414aa54e92c | wrapper → kit `actions` (Playwright, k6 KNOWN-CLASS, then 503) + mine (evidence/joblog.py, mine_actions_classify.out) + `c3 classify --pr 1398 --log <CI log>` rc 0 5/0 | 7 runs (fabricated 0), two agreeing terminal reads; failing jobs: (1) Security Scanning / Dependency Audit `Cannot find package 'semver'` x2 (##[group] 19) == at 1bdfbe0f2f06 x2; (2) PR Security Gates / Code Security Gates `packages/shared is not built` x1, verdict **62 passed, 6 failed, 0 skipped (of 68)**, failing SET == the known six, ks1136 suite **6/0** under its own header, same six + needle at develop b3905139 (push run); (3) pr / Playwright `No stack slot named` x1 (==4 develop-side heads), k6 `k6 smoke failed (outcome=failure)` x1 (==4), Akto `AKTO_DASHBOARD_URL is not set` x1 (== d75bfe2deb80). Own-path tokens 0 in Playwright/k6/Akto/DepAudit; in the KS-168 log 3 hits, all READ: the PR's own suite header and two `SUBJECT …/09-aggregate-report.sh` lines of PASSING suites. **0 unclassified.** |
+
+## CHECK 3 — the chain table (06 x 09 x shape), rc and ids from REAL bash runs (evidence/c5_chain_1404.out, chain.json; mine: mine_chain.out, mine_chain_sigkill.out, mine_chain_stack.out)
+
+| shape | BEFORE (06 base x 09 base) | #1398 alone (06 base x 09 #1398) | #1404 alone (06 head x 09 base) | BOTH (06 head x 09 #1398) and the stacked tree |
+|---|---|---|---|---|
+| quiet-clean | CLEAN rc 0 | CLEAN | CLEAN | **CLEAN rc 0** |
+| fallback-clean (verifier@ fails, holder@ used) | CLEAN (artefact unparseable, swallowed) | **UNREADABLE HIGH rc 1 — the FALSE ALARM** | CLEAN | **CLEAN rc 0** (artefact parses, sidecar 91 B) |
+| both-logins-fail | CLEAN | UNREADABLE | CLEAN | CLEAN |
+| runner-error-caught (`{"error":…}`) | CLEAN | CLEAN | CLEAN | CLEAN (tested 0 — see N-1404-6) |
+| quiet-leak | LEAK critical rc 1 | LEAK | LEAK | **LEAK `/api/documents:saw=tenant-b:want=tenant-a` critical, rc 1** |
+| fallback-leak | **CLEAN — a real leak read clean** | UNREADABLE rc 1, the leak id NOT emitted | **LEAK critical rc 1 (newly visible)** | **LEAK critical rc 1** |
+| truncated | CLEAN | UNREADABLE | **CLEAN (still silent: #1398's fix)** | **UNREADABLE HIGH rc 1** |
+| crash-no-stdout (0-byte artefact) | CLEAN | UNREADABLE | CLEAN | UNREADABLE |
+| MINE tenantA-login-fail (:74 then :117) | CLEAN | UNREADABLE | CLEAN | CLEAN (tested 0) |
+| MINE node-warning on stderr | CLEAN (summary garbled `tested=3\n?`) | UNREADABLE (false alarm) | CLEAN | CLEAN |
+| MINE throw (caught) | CLEAN | CLEAN | CLEAN | CLEAN |
+| MINE REAL SIGKILL mid-write (node killed after 49 B) | CLEAN | UNREADABLE | CLEAN | **UNREADABLE HIGH rc 1** |
+
+Kit rule cells: 32/32 PASS plain, 32/32 on the stacked tree; CH-CONTROL 3 BEFORE violations. Sidecar: holds exactly the stderr; 09's ids `['/api/documents:saw=tenant-b:want=tenant-a']` with and without it.
+
+09 matrix BEFORE vs NOW (86 rows per run, plain and stacked identical): every UNREADABLE shape (0-byte, whitespace, truncated, null, false, mode 000, 06 stderr-merged clean and LEAK) read **0 findings rc 0 BEFORE (the clean-scan silence)** for all 7 jobs, and NOW exactly one `<job>/unreadable-artefact` HIGH rc 1; trailing-garbage read the job's own ids BEFORE and NOW own ids + the HIGH; CLEAN shapes 0 / rc 0 both columns; all-7 truncated BEFORE rc 0 [] → NOW 7 ids rc 1; 04 truncated once both columns.
+
+### The four answers
+(a) **With both applied, a clean-scan report on a present-but-unparseable artefact of jobs 01-08 is impossible on a first sight**: every unreadable shape (kit 7 x 8 shapes + 06 stderr shapes; my real SIGKILL) emits the HIGH, rc 1, under FAIL_ON=high (the default in run-internal-audit.sh:32 and internal-audit.yml:128). Measured boundaries (evidence/mine_bounds09_stack.out, tree 960e71800ea1, each beside a control that reds): the REPEAT shape — the same unreadable artefact on run 2 — exits **rc 0, NEW [], totals.high 1**, REPORT.md "NEW … _None._" while "All findings" lists it (inherited R-1 semantics, RULINGS Q1: not a blocker); `FAIL_ON=critical` → rc 0 with the HIGH in the report (a chosen threshold); a baseline line `01-deps:high:01-deps/unreadable-artefact` → rc 0, NEW [] (K4: 0 such lines today; a non-matching planted baseline control stays rc 1). In all three the REPORT.json totals carry the HIGH — the exit code and the NEW section read clean, the report does not.
+(b) **Yes, every genuinely clean scan still reads clean**, including every legitimate job-06 run I could construct: quiet, the designed fallback, both logins failing, a node warning on stderr, the caught-error JSON, and my tenant-A login failure all read 0 findings rc 0 with both applied. Every 01-08 writer emits a JSON object (READ: 01 :22/:26-:75, 02 :19/:37/:40, 03 :24/:59/:81, 05 :26/:34/:57/:83, 06 :37/:42/:49/:66/:74 + runner.ts :117/:153/:262/:267, 07 :25/:34-:67, 08 :23/:30/:50-:53).
+(c) **Q2's merge condition is MET by #1404**: with both applied the designed fallback run reads CLEAN rc 0 (kit + mine + stacked tree), a real leak reads critical rc 1, a truncated artefact (and a real SIGKILL) reads `06-tenant/unreadable-artefact` HIGH rc 1. Nothing about it blocks either PR. It holds ONLY in merge order: #1398 alone reds every fallback run (and any node warning) with a false cause and hides the leak id.
+(d) JSON `null` / `false` read as unreadable (jq -e exit 1 on jq-1.7.1). **No job writes either legitimately** (READ of every writer above, all objects). The PR body names this side effect. The CI runner's jq version is unread.
+
+### Q2 — does job 06 run inside any per-PR check?
+**No.** STATIC: 2 of 17 workflows reach job 06 (api-contract-tests.yml via ci/orchestrate.sh :133-:144, internal-audit.yml via run-internal-audit.sh), both `workflow_dispatch` only, at develop and both heads; 0 per-PR (pull_request / pull_request_target / push / merge_group). BY LOG LINE: 25 job logs at 9414aa54e92c / c117c0160684 / b39051390ff6, 0 live job-06 lines (the 4 the kit printed are orchestrate_jobs.test.sh's own output). So "#1398 alone would redden every PR" is ABSENT; the false alarm would hit manual internal-audit / api-contract runs, and #1404 removes it.
+Shell suites that drive job 06 inside PR Security Gates (pr-security-gates.yml:100 and security-scan.yml:495 both run `bash scripts/run-shell-suites.sh`): tenant_isolation_stderr_own_file.test.sh (the REAL 06 with node / curl / tsx stubbed; new in #1404) and orchestrate_jobs.test.sh (its own stub job scripts named 06-tenant-isolation). The 09 suites aggregate_report_trivy_artefact.test.sh and ks1136_aggregate_report_unreadable_artefacts.test.sh drive the real 09 over fixture artefacts.
+SIBLING (residue, never a blocker here): `Blockchain/Testing/ci/aggregate.ts:241-243` — `catch` → `console.error("[aggregate] skipping unparseable …")` → `continue` (read at the stack tree). It only reads `*.json`, so `06-tenant-isolation.json.stderr` is not read by it either.
+
+## FINDINGS
+
+| id | severity | BLOCKS | finding | class | evidence |
+|---|---|---|---|---|---|
+| N-1404-1 | Minor (claim) | no | The live PR #1404 BODY says "Live 06 runs where `verifier@` cannot log in will go RED once #1398 merges, by design". Measured: with #1404 + #1398 the fallback run reads CLEAN, rc 0. The COMMIT MESSAGE does not carry the sentence, so a squash body taken from it is clean. Oracle: Product (internal consistency). | MEASURED AT RUNTIME | c5_chain_1404.out CH-head-1398-fallback-clean; mine_chain.out 06N09N; pr1404_body.md |
+| N-1404-2 | Polish (claim) | no | Body: "Whether the suite is green on a CI runner is **unmeasured** -- GitHub Actions is retired for this repo." The UNMEASURED part is TRUE: no pull_request run exists at c117c0160684 (1 run, Dependabot, skipped). The REASON is not: PR Security Gates ran at develop b3905139 (push, 14:57Z) and on #1398 (pull_request, 12:08Z). Inference, not measured: no pull_request run was created because the PR is `dirty`. | PROBED | X6_runtimes.out, X6_jobs_c117.out, X6_gh_api_1404.out |
+| N-1404-3 | Polish (W-Q5) | no | The doc blocks, body and commit message cite BASE line numbers (`:71`, swallow `:74`-`:75`); at the head they are `:74` and `:77`-`:78`. | READ ONLY | c5_guard06_1404.out G1; wt1404 cat -n |
+| N-1404-4 | Polish (W-Q4, ruled) | no | The cheat block is not wrapped in `<div class="section">`. "11 -> 12 KS-keyed sections" is true of h2s, not of section cards. Kept AS AUTHORED. | READ ONLY | c4_docs_1404.out D6 |
+| N-1404-5 | INFO | no | The new sidecar `06-tenant-isolation.json.stderr` lands in the run dir that internal-audit.yml uploads `if: always()` (:137-:143, not only on failure). It holds runner diagnostics (login-failure lines: email, HTTP status, response body). That text was already inside the uploaded JSON before #1404: no new exposure. 09 and ci/aggregate.ts do not read it (`*.json` only). | READ ONLY + MEASURED | c5_guard06_1404.out G6; mine_chain.out (sidecar sizes); internal-audit.yml |
+| N-1404-6 | INFO / residue (sibling class) | no | Job 06's "tested nothing" artefacts read CLEAN at 09: `{"error":…}` (runner missing, node missing, target unreachable, tsx missing, tenant-A login failure, caught throw) and the both-principals warning, before AND after both PRs. With #1398 alone, tenant-A login failure and both-fail would read UNREADABLE (a false cause); #1404 returns them to the BEFORE silence. Not introduced by either PR. This is the KS-676 class ("a scan that examined nothing must reach the report") for job 06. Search the board before filing (`06-tenant-isolation`, `tested=0`, `could not log in tenant-A`). | MEASURED AT RUNTIME | mine_chain.out (tenantA-login-fail, both-fail, throw rows); c2 shapes SH-06-skip-error |
+| N-1404-7 | INFO (coverage) | no | No CI run exercised #1404's suite or the shell set at its head. Its 68/68 is my local run (336 s) and the author's (339 s). | PROBED | X6_jobs_c117.out; c3_full_1404.out |
+| N-1398-1 | Polish (Q5, ruled) | no | READY "LANDS 90": measured 83 + 8 = **91** <= 92. | MEASURED | c1_1398.out P7 |
+| N-1398-2 | Polish (D-2) | no | The body's arm-A explanation ("breaks both main cells and both well-formed controls") is half right. Measured red cells 1, 2, 5 (well-formed 08), 6 (truncated-04 control); cell 4 (all-seven well-formed) stays GREEN. The figure 2/4 holds. | MEASURED | c2_suite_1398.out S3-A; out/c2suite_a/suite_armA.out |
+| N-1398-3 | Polish (D-3, code) | no | The finding text "… exists but is not valid JSON - the job aborted mid-write" asserts a cause 09 never observes. Measured other causes: 06's merged stderr (base 06), mode 000, JSON null / false, the 0-byte artefact a failed `jq … > "$OUT"` normaliser leaves. | MEASURED | c2_shapes_1398.out; c2_guard_1398.out G6 |
+| N-1398-4 | Minor (Q4, ruled) | no — the squash body ruling resolves it | The head COMMIT MESSAGE (line 60) still says "**Whether this suite is green on the CI runner is unmeasured.**". It is measured: 6/0 on the runner (CI log, c3 classify X4). A squash that takes the commit message lands a retracted sentence. | MEASURED | commitmsg_1398.txt:60; c3_classify_ci_1398.out |
+| N-1398-5 | INFO (Q1, ruled residue) | no | REPEAT: a persisting unreadable artefact gives run 2 rc 0, NEW [], totals.high 1. A planted baseline line or FAIL_ON=critical also exit 0 (each beside a control that reds). | MEASURED AT RUNTIME | c2_shapes_*.out SH-REPEAT; mine_bounds09_stack.out |
+| N-1398-6 | INFO (Q3, ruled residue) | no | The sibling `ci/aggregate.ts:241-243` skips unparseable files with a stderr line. | READ ONLY | (stack tree read) |
+| N-1398-7 | MERGE CONDITION (Q2, ruled) | **yes for #1398 if it lands without #1404** (not otherwise) | #1398 alone turns every designed fallback run of job 06, and any node / tsx warning on stderr, into `06-tenant/unreadable-artefact` HIGH with a false cause. A real fallback leak reads unreadable with the leak id NOT emitted. MET by #1404 merging first. | MEASURED AT RUNTIME | c5_chain_1404.out (base-1398 column); mine_chain.out 06B09N |
+| N-1398-8 | INFO | no | 09's guard depends on `jq -e` exit semantics measured on jq-1.7.1-apple only (empty 4 / null / false 1 / truncated 5). The CI runner's jq is unread. | MEASURED (local) | — |
+
+No finding is a blocker. No Major is open on either PR. Every polish item above is named and none was rounded into a pass.
+
+## READY-CLAIMS
+#1404 (READY_1404, sha256 4b4aa9df…). Every item HOLDS unless marked otherwise:
+- head c117c0160684 / END_TREE ec95d1995880 / ONE parent d75bfe2: **HOLD** (c1).
+- 4 files +177/-1, mode 100755: **HOLD**.
+- trailers 0 vs a 53-byte control: **HOLD**.
+- LANDS 74: **HOLD**.
+- red-first 1/4 -> 5/0 with the control green: **HOLD** (c5 S1/S2, cells read).
+- `2>/dev/null` arm 4/1: **HOLD**.
+- 67 -> 68: **HOLD**.
+- 68/68 in 339 s: **HOLDS as a ratio**; I measured 68/68 in 336 s.
+- flow tail 22 -> 27: **HOLD**.
+- cheat 11 -> 12 KS-keyed sections: **HOLDS for h2s**; the new one is not a section card (N-1404-4, polish).
+- body 56d358ebe4544bec: **HOLD** (API).
+- merge-tree rc 1, 2 conflicted paths, both docs, 0 outside: **HOLD** at b3905139 (docs blobs identical to 40270d26).
+- 189 paths vs the base at 40270d26: **HOLD** (189: systemTest 170, observability 15, docs 2, CLAUDE.md 1, .claude 1). The READY's breakdown omits observability 15. Polish.
+- flow +1544/-1871, cheat +2030/-2908: **HOLD**.
+- 0 runs at its head vs 7 at #1398's and 2 at develop: **HELD AT ITS TIME.** The one run at c117 (Dependabot, skipped) was created 14:56:53Z, 50 s after the READY. 7 and 2 (at 40270d26) HOLD.
+- "Actions … retired for gating": see N-1404-2.
+- `mergeable_state dirty` (the CORRECTION): **HOLD**.
+
+#1398 (READY_1398, sha256 ec203996…; KIT_REPORT §3). Every item HOLDS unless marked otherwise:
+- head / END_TREE 2ee602cba3c9 / ONE parent: **HOLD**.
+- 4 files +349 -0 and modes: **HOLD**.
+- pre-docs 074705eebd81: **HOLD**.
+- 83 chars: **HOLD**.
+- "LANDS 90": **DOES NOT HOLD** (91; polish, Q5).
+- 0 trailers, 1 raw byte vs a 55-raw-byte control: **HOLD** (53 content + 2).
+- suite 6/0: **HOLD**.
+- red-first cells 1-3: **HOLD**.
+- arms A 2/4 and B 4/2: **HOLD**; the arm-A explanation is half right (N-1398-2).
+- 67 -> 68: **HOLD**.
+- 68/68 in 342 s: **HOLDS as a ratio** (mine 68/68 in 331 s).
+- boundary-free docs, flow 1-16 18-23, cheat tail KS-1136, only KS-1136: **HOLD**.
+- Actions 7 runs, 3 failing runs all pre-existing by log line: **HOLD** (my classification agrees).
+- KS-168 `62 passed, 6 failed, 0 skipped (of 68)` with the known six and the ks1136 suite 6/0: **HOLD**.
+- "none of my paths in any of the nine logs": **HOLDS** for the nine pr-job logs (own tokens 0). The KS-168 log carries the PR's own passing suite and two SUBJECT lines. Read; benign.
+- "Item 1 merged as #1051": not looked up (NOT TESTED).
+
+## COLLISION-CENSUS (report only)
+`gh_gate71.py census --pr 1398` rc 0, CONTROL fires: 22 other open PRs.
+- OVERLAP (either row's code paths, or titled KS-1436 / KS-1136): **0**.
+- DOCS: **1**, #1383 (head 32e8459bc0f5, "KS-1401: migration 049 restores tenant isolation …"). It touches a platform doc, so whichever of #1383 / #1404 / #1398 lands later needs a re-composed docs merge-in against the then-current develop.
+- Order: if #1383 lands before #1404, #1404's target d717255d5376 is void and must be re-predicted, and #1398's after it.
+- Other: 21. #1278 and #1245 were only listed, never touched.
+
+## TIERING
+- #1404 graded **T2**: **agree.** It is a one-line runtime change to a security job's I/O. On its own (with base 09) it only makes the artefact parseable: a silent leak becomes visible, and no clean shape changes (measured). It is the merge condition of a T1.
+- #1398 graded **T1**, round 1 of 2: **agree.** It changes what the security aggregation reports. No Major is open, so a round 2 is needed only if the merge seat's `qm` or a moved develop forces a new head.
+
+Kit defects found by running (K-1..K-6) are listed in report.md "Self-tests".
+
+## NOT TESTED
+See NOT-TESTED.written-first.md (written before any check). Restated and extended:
+1. No real scanner and no real runner.ts ran. Job 06 ran with stubs, or with my node emulation of runner.ts's control flow. No stack, no network.
+2. The real mid-write abort was approximated: my SIGKILL of a node process after 49 bytes of output, in a fixture. There was no kill of the real runner on a stack.
+3. The live job-06 runner's real stderr on this stack was not observed.
+4. The REPORT.md / REPORT.json writers were asserted beyond ids, totals and NEW only where noted (the REPEAT REPORT.md lines).
+5. The CI runner's jq and bash versions were not read.
+6. internal-audit.yml and api-contract-tests.yml were not run end to end (workflow_dispatch only).
+7. ci/aggregate.ts was read only.
+8. Ticket states (KS-1436, KS-1136) were not read. The kit has no Linear read (Q8).
+9. The re-composed docs were not rendered in a browser; the guard is static.
+10. #1404's suite on a CI runner: no run exists (N-1404-7).
+11. `qm` was NOT RUN: no merge-in commit M exists yet. It is the read-back each GO requires.
+12. "Item 1 merged as #1051", the authors' push / preflight / lock / path-gate figures, and the packages/shared dist size were not re-measured. These are the authors' logs in their worktrees.
+13. The Actions classification for #1398 was finished by my own job-id reader after the kit run hit HTTP 503 (egress limit); Akto / DepAudit develop-side comparison used ONE develop-side head each (d75bfe2deb80 / 1bdfbe0f2f06), not all four. Nothing else was skipped for budget.
+
+Report: /Volumes/DevMASTER/!CODING/Testing Agent MAIN/projects/secuura/reports/2026-10-06-gate71/report.md (evidence/ beside it; NOT-TESTED.written-first.md written first)
+sha256 report.md = 5cbc607a8def344670f315442090693d946c770c70477b25c6ca916f1eecd0ef

@@ -1,0 +1,19 @@
+Refs KS-1436
+https://linear.app/secuura/issue/KS-1436
+
+`jobs/06-tenant-isolation.sh:71` ran its runner as `> "$OUT" 2>&1`, folding stderr into
+the JSON artefact. `runner.ts:150-151` falls back `verifier@` -> `holder@` by design, and
+the first failed login prints `console.error` (`runner.ts:74`), so a legitimate run left
+`$OUT` unparseable and the job printed `tested=? cross-tenant_findings=?` while exiting 0.
+stderr now goes to `$OUT.stderr` -- kept, not discarded.
+
+This is the merge condition gate71 set for pull request #1398 (KS 1136): before that
+change an unreadable artefact read as a CLEAN scan; after it, every routine fallback run
+reds with a false cause unless this lands first. KS 1382 is a different line (`:31`).
+
+Red-first 1 passed / 4 failed -> 5 passed / 0 failed, CONTROL cell green in the red arm.
+A `2>/dev/null` arm reads 4 passed / 1 failed, failing only "stderr is kept".
+Discovery 67 -> 68. Whole shell-suite set 68 passed, 0 failed, 0 skipped (of 68), 339s.
+Both platform-k HTML docs move in this commit (flow block 27., cheat section KS-1436).
+Runtime change to a security-harness job -- live sweep owed.
+
