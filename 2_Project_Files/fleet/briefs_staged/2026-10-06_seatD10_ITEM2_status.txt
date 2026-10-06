@@ -1,0 +1,118 @@
+STATUS ITEM 2: the change is BUILT and PROVEN in my worktree. NOTHING is pushed, nothing committed.
+Two measured deviations from the brief's METHOD are at the bottom; both are shape-preserving and I
+took the safe reading and kept building. One ask: my ctx, before I start the push.
+
+STATE, one line: 37 files changed (+172 -158) on `feature/ks-1425-advisory-lock-refresh-d10-1` in
+`worktrees/s-d10-advlock`, all gate arms green, UNCOMMITTED. Live watcher pid 9096, SINCE
+2026-10-06T02:49:25Z. ctx: please read my statusline.
+
+== ITEM 1 DONE ==
+- Duplicate re-check before filing: 8 search terms; the only title naming one of the five is still
+  KS-749 on the OLDER cleared GHSA-w9m9; **0 issues created on Secuura-PK since 2026-10-06T00:00Z**.
+  No duplicate.
+- **KS-1425** filed: priority 1 Urgent, project "Dependency and Version Currency", assignee
+  kamil.kreiser@secuura.ai (your ruling 2, superseding the brief's "unassigned"), state Backlog.
+  https://linear.app/secuura/issue/KS-1425
+  Read back: Linear reflowed `-` bullets to `*` and the table rule to `| -- |` and changed nothing
+  else; **0 http links in what I sent and 0 in what it saved**, so the fabricated-link trap did not
+  fire. Kam's ruling text survives verbatim. Exactly 1 ticket exists created since 02:50Z.
+- Worktree created under the lock: LOCK TAKEN by `Secuura/Blockchain-D d10` pid 12230, 17 STOP
+  locks ABSENT, all 4 WAIT locks ABSENT, 0 unattributed against 22 known names, released by the
+  HOLDER-FILE pid, lock dir absent after. HEAD == base `4eaf7741a6a4`. Base re-confirmed against
+  origin inside the tool before the ref write.
+- `npm ci --ignore-scripts` at `Blockchain/Dev` and `scripts/audit`: rc 0 both, and **0 tracked
+  files modified** by the install.
+
+== THE KIT, per your rulings 5 / 6 / 3 / 4 ==
+- Ruling 5 (F1): re-seated BY HAND. **16 receipt rows** in `RESEAT-RECEIPT.json`, each with the
+  file, the occurrence count, old -> new and sha256 before/after. 0 `Blockchain b57` left in the
+  kit; 1 `d9` left, in `mergeind8_run.sh`, deliberately — I do not merge this round.
+- Ruling 6 (F3): `commitd8.sh` LOCK_SEAT and its 3 `.push-lock-e2` paths fixed; `ffproofd8.sh`,
+  `legproofd8.sh`, `lockproofd8.sh` (11 occurrences), `pushproofd8.sh` (5) re-seated.
+  **The held-test proof you asked for: 5 arms, 5 pass, 0 fail.** Arm 1 lock dir present -> "STILL
+  HELD"; arm 2 absent -> "released"; arm 3 only the old `-e2` present -> "released"; and the
+  inverted control, arm 5: the **PRE-FIX** predicate with MY lock genuinely held -> "released".
+  That arm is the defect, demonstrated rather than described.
+- 🔴 **TWO THINGS I FOUND WHILE RE-SEATING, both disclosed:**
+  1. `legproofd8.sh:63` carried the SAME `.push-lock-e2` held-test defect as `commitd8.sh:72` —
+     your ruling 6 named one file, the defect was in two. Both fixed.
+  2. **A coupling I created myself.** Re-keying `lockproofd8.sh` made its A1 arm grep for my seat
+     name inside the refusal message that `lockd8.sh:215` emits — which still said `d9`. The arm
+     would have failed on my own edit. Fixed the pair together and asserted want == emitted. It is
+     the "the whole tuple moves together" lesson, and I caused it.
+  3. My first re-seat pass PREDICTED 5 occurrences in `lockproofd8.sh` and the count guard refused
+     at 11. It failed closed instead of editing blind; I then read all 11 in context and confirmed
+     every one means the seat UNDER TEST, while the deliberately-FOREIGN arms use `LOCK_SEAT=b48`
+     and `x` and are untouched.
+- Ruling 8: **no lock predicate changed.** The `.push-lock-e2` strings still in `lockd8.sh`,
+  `pushd8.sh` and `twolockd8.sh` are STOP-set members and are CORRECT — a wrapped seat's lock is
+  stopped on, not waited for. A blanket sweep would have broken the STOP set; I checked first.
+- Ruling 3 (Q-APPLY): `applylocksd10.py` written, data-driven. The plan file was GENERATED from the
+  measured parent walk and the measured tarball hashes, so no package, version, URL, integrity or
+  lock path is typed as a constant. It refuses on: a missing entry, a package mismatch, a version
+  not in the planned old set, a key-order or key-set change, a field-set or field-order change, or
+  a semantic diff that is not exactly the plan.
+- Ruling 4 (Q-NAMECHECK): NOT yet done — it is owed before the PR names the branch publicly. The
+  branch is already created and correct; the full re-key of `namecheckd8.py` is my next step after
+  your ctx read, before ITEM 3's commit.
+- Ruling 7 (F2): recorded. `rekey_checkd8.py` is inert for a lettered generation, so this re-seat
+  has **no independent auditor**; it will say so in the READY and the handover.
+
+== ITEM 2 BUILT: 54 entries / 36 locks / 158 field writes ==
+`applylocksd10.py` applied, then measured independently by git:
+- **36 lock files, +158 -158, and every single file is +N -N** — a pure field rewrite, no structural
+  change anywhere. The changed file SET equals the 36 planned locks exactly (no extra, none missing).
+- `audit-baseline.json`: **+14 -0**, textual append. 22 -> 24 rows. `$comment` byte-identical and
+  **all 22 pre-existing rows byte-identical**, asserted by comparison, not by eye. I verified the
+  no-round-trip claim myself first: indent 2 gives 19,858 bytes and indent 4 gives 20,586 against
+  the file's 19,810, so a round-trip WOULD rewrite it.
+- Integrity: all 8 tarballs (4 fixed + 4 old) downloaded and sha512'd; **every one matches the
+  registry's own `dist.integrity`**, and all four of your quoted prefixes match. Negative control:
+  old != new on all four. **In-repo positive control: the 12 locks already pinning proxy-addr 2.0.8
+  carry EXACTLY my tarball-derived integrity, 0 mismatches, and so does akto's psp 7.1.6.**
+- Dependency-set equality confirmed per package from registry metadata — so three fields is the
+  whole correct change and anything else moving would be collateral.
+
+ARMS, all green:
+  (fix) `audit:gate` leg 6 **rc 0** — "OK — no advisories outside the triaged baseline."
+  (fix) `audit:locks` leg 7 **rc 0** — "OK — no standalone-lock advisories outside the triaged
+        baseline", 43 locks, 1614 packages, and **7 match / 7 baselined** (was 10 / 5).
+  (fix) `audit:contract` leg 5 **rc 0, pass 59, fail 0** == `expected-case-count` 59.
+  (fix) leg 2 `lockfile-cleanroom.sh` **rc 0 — "All 35 standalone lock(s) pass clean-room npm ci."**
+        It modified no tracked file.
+  (base) the five ids appear **0** times in the fixed gate outputs, against a **control of 13** in
+        the base-control outputs. A discriminating zero, not a silent one.
+  (parse) **0** in-scope entries still pin a vulnerable version, across all four packages
+        (28 proxy-addr, 33 source-map-js, 6 psp, 4 smol-toml entries examined). Both psp 7.x copies
+        are 7.1.6. The 4 baselined 6.1.4 copies are deliberately untouched.
+        `mobile/secuura-app` lock: **IDENTICAL to HEAD**, 0 diff lines.
+  (fuse) frozen clock, the repo's own `isLapsed`: **7 arms, 7 pass.** Both new rows LIVE at
+        2026-10-30 and at today, LAPSED at 2026-10-31. Control: a no-expires row never lapses even
+        at 2099-01-01.
+  (negative) **3 controls, 7 arms, 7 pass**, each restored and sha256-verified byte-identical:
+        NC1 remove the GHSA-hp3w row -> legs 6 AND 7 both rc 1, sprintf-js named 3 times.
+        NC2 revert ONE proxy-addr entry to 2.0.7 -> leg 7 rc 1 naming GHSA-jqcg.
+        NC3 plant psp 7.1.4 back into api-explorer -> **leg 7 stays rc 0 because the GHSA-rj75 row
+            MASKS it, while MY parse check fires with count 1.** Your 🔴 is now demonstrated, and it
+            shows my parse assertion is the load-bearing guard there, not the gate.
+  (install) running as I send this; the result goes in the READY.
+
+== TWO MEASURED DEVIATIONS FROM METHOD. Both shape-preserving; say if you want either changed. ==
+D1. **158 field writes, not 162.** METHOD trap 1 says three fields per entry for all 54. Measured:
+    52 entries carry `version`+`resolved`+`integrity`, but **2 carry ONLY `version`** — both in the
+    workspace ROOT lock (`proxy-addr`, `source-map-js`). That is the MAJORITY shape in that file:
+    **1,610** of its non-link entries have no `resolved` against **328** that do, lockfileVersion 3.
+    So it is npm's own output, not damage. Writing the two missing fields would change the file's
+    shape and make those entries inconsistent with 1,610 siblings. I update only the fields an entry
+    already has, and the editor refuses if `version` is absent. The root lock is therefore **+2 -2**.
+    **The PR body will claim 158, not 162.**
+D2. **The lockfiles are not one format.** The 41 locks under `Blockchain/Dev` are indent 2; the four
+    `systemTest` locks (akto, api-explorer, performance, playwright) are **indent 4**. The inherited
+    tool hard-coded indent 2 — and its own round-trip guard then REFUSED on the systemTest files,
+    which is the guard working. The indent is now DETECTED per file and the round-trip must still
+    pass, so no file is reformatted.
+
+== WHAT IS LEFT ==
+Ruling 4's `namecheckd8.py` re-key, then ITEM 3 (commit, push, PR) and ITEM 4 (READY).
+**I am NOT starting the push:** your ruling 10 gates it at 50% ctx and my last reading was 27% at
+02:49:05Z, before all of ITEM 2. Please read my ctx and release the push, or tell me to hand over.
