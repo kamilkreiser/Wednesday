@@ -1,0 +1,167 @@
+READY FOR QA (Seat D 10th): #1397 (KS-1425) -> a T1 gate, yours to commission. Tier 1.
+Head `3e7be2044fe80ebced9c497bfc278a7333018a83`, read from origin in the same action as this send.
+No merge from me: the merge needs the gate and a GO.
+
+WHAT IT IS
+#1397 unfreezes the repo's pre-push gate. Five advisories published since develop's baseline was
+last refreshed were failing preflight legs 6 and 7 on EVERY push, one of them critical; #1393,
+#1395 and #1396 are all held behind it. Four are refreshed in range; two have no in-range remedy
+and are accepted with a dated row. Kam ruled the card
+`secuura-five-new-advisories-freeze-every-push-1006` = (a) fix forward, 13:15:04 +11:00.
+
+THE COMMIT AND THE PR
+- branch `feature/ks-1425-advisory-lock-refresh-d10-1`, head `3e7be2044fe80ebced9c497bfc278a7333018a83`
+- tree `0b06d3c18a1e116cb5c550a505e2cb8884315f63`, ONE parent `4eaf7741a6a4b2c82752d0d94f8bbacb5493aabe`
+- base `develop` = `4eaf7741a6a4b2c82752d0d94f8bbacb5493aabe`, unmoved from my ITEM 0 reading
+- subject 77 chars, **0 trailers** (`%(trailers)` = 0 bytes on mine; the control commit
+  `f0179806494e42df` prints one, so the check discriminates)
+- PR #1397 OPEN, not draft, MERGEABLE, base develop, 37 files, +172 -158. Body byte-identical to
+  what I sent (9,936 chars), `Refs KS-1425` on line 1, Test Evidence block present.
+- Linear: KS-1425 filed Urgent / "Dependency and Version Currency" / board account, ONE comment
+  linking the PR, body byte-identical. **I changed no ticket state.**
+
+THE 37 PATHS, with per-file numstat
+  +3    -3    D/connectors/whatsapp-bot/package-lock.json
+  +3    -3    D/frontend/admin/package-lock.json
+  +3    -3    D/frontend/demo-overlay/package-lock.json
+  +3    -3    D/frontend/issuer/package-lock.json
+  +3    -3    D/frontend/outlook-addin/package-lock.json
+  +3    -3    D/frontend/verifier/package-lock.json
+  +3    -3    D/frontend/website/package-lock.json
+  +2    -2    D/package-lock.json
+  +14   -0    D/scripts/audit/audit-baseline.json
+  +6    -6    D/services/analytics/package-lock.json
+  +3    -3    D/services/anchoring/package-lock.json
+  +3    -3    D/services/api-gateway/package-lock.json
+  +3    -3    D/services/auth/package-lock.json
+  +6    -6    D/services/billing/package-lock.json
+  +3    -3    D/services/demo-service/package-lock.json
+  +3    -3    D/services/governance/package-lock.json
+  +3    -3    D/services/guardian/package-lock.json
+  +6    -6    D/services/kyc/package-lock.json
+  +3    -3    D/services/m365-integration/package-lock.json
+  +6    -6    D/services/mcp-server/package-lock.json
+  +6    -6    D/services/nft-certificate/package-lock.json
+  +3    -3    D/services/prism/package-lock.json
+  +3    -3    D/services/queue/package-lock.json
+  +6    -6    D/services/referral/package-lock.json
+  +3    -3    D/services/security/package-lock.json
+  +6    -6    D/services/shared/package-lock.json
+  +6    -6    D/services/staking/package-lock.json
+  +6    -6    D/services/tenant-provisioning/package-lock.json
+  +3    -3    D/services/timestamping/package-lock.json
+  +6    -6    D/services/tokenisation/package-lock.json
+  +6    -6    D/services/transfer/package-lock.json
+  +6    -6    D/services/vc-issuer/package-lock.json
+  +6    -6    D/services/wallet-connector/package-lock.json
+  +6    -6    systemTest/akto/package-lock.json
+  +9    -9    systemTest/api-explorer/package-lock.json
+  +6    -6    systemTest/performance/package-lock.json
+  +3    -3    systemTest/playwright/package-lock.json
+
+Read it as: every lock is +N -N with N a multiple of 3 (three fields per entry), EXCEPT
+`D/package-lock.json` at **+2 -2** (its two entries carry only `version`) and the baseline at
+**+14 -0** (a textual append). 54 entries, **158 field writes, not 162**.
+
+THE ARMS TABLE
+| arm | result |
+|---|---|
+| leg 6 `audit:gate` | rc 0 — "no advisories outside the triaged baseline" |
+| leg 7 `audit:locks` | rc 0 — 43 locks, 1614 packages, 7 match / 7 baselined (was 10 / 5) |
+| leg 5 `audit:contract` | rc 0 — 59 pass, 0 fail, == `expected-case-count` |
+| leg 2 `lockfile-cleanroom.sh` | rc 0 — "All 35 standalone lock(s) pass clean-room npm ci" |
+| install | `npm ci --ignore-scripts` from the committed root lock: rc 0, 1937 packages, root-lock sha256 IDENTICAL before and after |
+| integrity | 8 tarballs sha512'd, every one == the registry's `dist.integrity`; in-repo control: the 12 locks already at proxy-addr 2.0.8 carry exactly that integrity, 0 mismatches |
+| base control | both legs rc 1 at `4eaf`; the five ids appear 0 times post-change vs a control of 13 pre-change |
+| parse | 0 in-scope entries still pin a vulnerable version; both 7.x copies at 7.1.6; the 4 baselined 6.1.4 copies untouched; `mobile/secuura-app` identical to HEAD |
+| fuse | frozen clock on the repo's own `isLapsed`: 7 arms, 7 pass; both rows live 2026-10-30, lapsed 2026-10-31; control = a no-expires row never lapses at 2099-01-01 |
+| negative controls | 3 controls, 7 arms, 7 pass, each restored sha256-verified: removing the sprintf-js row reddens legs 6 AND 7; reverting one proxy-addr entry reddens leg 7; planting 7.1.4 back leaves leg 7 GREEN while the parse assertion fires |
+| format | `format:check` rc 0 in all four systemTest packages |
+| namecheck | rc 0, 3 checks, 0 bad, 24/24 controls fired; 5 MINE / 45 FOREIGN / 9 NEITHER arms |
+
+THE IN-HOOK PREFLIGHT LINE, VERBATIM, AND ITS OWN CAVEAT
+    PREFLIGHT INCOMPLETE — 12/15 legs ran, 3 SKIPPED. Nothing failed.
+      legs 3 4 8 — local stack not up; you can clear this by starting it.
+      This is NOT a pass. Do not quote it as one — say which legs ran.
+Legs that RAN and passed: 1, 2, 5, 6, 7, 9, 10, 11, 12, 13, 14, 15. Legs SKIPPED: 3, 4, 8, all
+three because the local stack is not up. **Nothing FAILED.** Also in-hook: shell suites 67 passed /
+0 failed / 0 skipped of 67 (299 s wall clock), 13 code guards passed, 21 tracked guards accounted
+for. Accepted on Q-PF exactly as you ruled it; the ratio is not the verdict.
+
+PUSH RECORD
+- attempt 1 rc **1** — a REAL refusal, not rc 141, ref unmoved. `[pre-push] systemTest formatting
+  gate FAILED` because all four systemTest packages were SKIPPED for missing deps and the gate now
+  fails closed on `NOTHING CHECKED`. That is B 67th's "rc 0 when every package is skipped" hole,
+  since hardened — and it caught a real gap: a fresh worktree has no systemTest deps. Records
+  archived as `attempt1-*`.
+- attempt 2 rc **0**, 374 s (03:16:43Z -> 03:22:57Z), ONE attempt, **no rc 141**,
+  `GIT_SSH_COMMAND` unexported throughout. Ref moved `absent -> 3e7be2044fe80ebc`, confirmed by
+  `ls-remote`. Lock taken and released by `Secuura/Blockchain-D d10`, 17 STOP and 4 WAIT locks
+  absent, 0 unattributed against 22 known names. **Never `--no-verify`.**
+
+ACTIONS ON THE HEAD — AND THE PROJECT PREMISE IS STALE
+🔴 **GitHub Actions are NOT retired for this repo.** Repo `CLAUDE.md` and my brief both say they
+are (billing, "will not be fixed"). **Seven workflows triggered on #1397.** The whole
+manual-Test-Evidence process rests on that premise, so this matters past my round.
+
+  COMPLETED success   PR — Lockfiles                      <- the workflow ABOUT lockfiles, on a lockfile PR
+  COMPLETED success   PR — Lockfiles (path-skip twin)
+  COMPLETED success   pr-premerge-ack
+  COMPLETED skipped   Dependabot standalone locks
+  COMPLETED failure   Security Scanning                   <- PRE-EXISTING, measured below
+  COMPLETED failure   PR Security Gates (KS-168)          <- PRE-EXISTING, measured below
+  PENDING             pr  (the pr-* workflow family; still in_progress at this send)
+
+🔴 **BOTH FAILURES ARE PRE-EXISTING AND NOT CAUSED BY THIS PR. Measured, not assumed:**
+- **`Security Scanning`** -> job `Dependency Audit` -> step "Audit-contract suites (the gates' own
+  validator)": `fail 7`. Root cause in the log:
+  `Error [ERR_MODULE_NOT_FOUND]: Cannot find package 'semver' imported from .../Blockchain/Dev/scripts/audit/...`
+  The CI job never installs `scripts/audit`'s deps, so seven cases that expect exit 2 or 3 get the
+  crash's exit 1. **I pulled the same log for `585171bc2c29` — #1394's head, which MERGED — and it
+  is the SAME `fail 7`, the same seven assertions in the same order, and the same
+  `Cannot find package 'semver'`.** The last 6 runs of that workflow failed on 6 unrelated SHAs.
+  My LOCAL `audit:contract` passes **59/59** precisely because I did install those deps.
+- **`PR Security Gates (KS-168)`** failed on **`4eaf7741a6a4` — develop's own head** — and on
+  #1394, #1395 and #1396's heads.
+Neither is in scope for a lock-only PR and I did not touch either workflow. **They want their own
+ticket.** I could not add them to `2_Project_Files/BACKLOG.md` because the brief forbids writing the
+shared checkout's working tree, so they come to you, which is where a ticket gets commissioned.
+
+⚠ A LEG HEADER IS NOT EVIDENCE A LEG RAN. All **15** leg headers print in the hook output, including
+for skipped legs. The ran count comes from the verdict line naming `legs 3 4 8` plus three
+`SKIP — local stack not up` lines. 12 ran, 3 skipped, 0 failed. I nearly quoted the header count.
+
+DISCLOSURE: KS-1425 MOVED STATE, AND NOT BY ME
+Filed **Backlog**; it now reads **In Progress**, `updatedAt 2026-10-06T03:23:44.559Z` — the same
+second #1397 was created. **The Linear GitHub integration moved it on PR link.** My only Linear
+writes were `issueCreate`, one `commentCreate`, and one `commentUpdate` to remove a nested-bold
+artefact my own placeholder substitution introduced (`****PR #1397**...**`). No state mutation from
+me. Flagging because "change no state" was an explicit hold and the outcome still changed.
+
+THE TWO METHOD DEVIATIONS, AS YOU RULED THEM
+- **158 field writes, not 162** (your ruling 2), with the census as the reason: 52 entries carry all
+  three fields, 2 carry only `version`, both in the workspace root lock where **1,610** non-link
+  entries have no `resolved` against **328** that do. Root lock +2/-2. Stated in the PR body.
+- **41 x indent-2 / 4 x indent-4** (your ruling 3), detected per file, round-trip still byte-exact,
+  no file reformatted. **It is load-bearing:** `systemTest/akto` (`**/*.json`) and
+  `systemTest/api-explorer` (`--ignore-path .gitignore`) have their lockfiles inside Prettier's
+  scope, and `format:check` passes in all four packages ONLY because the indent was preserved.
+  Reformatting to indent 2 would have traded the advisory failure for a formatting failure.
+
+NO INDEPENDENT AUDITOR FOR THE RE-SEAT (your ruling 7, stated as you asked)
+`rekey_checkd8.py` parses `MY_GEN` with `int()`, which raises on a lettered generation, so it is
+INERT for `d8`. The parse-level proofs carry it: the per-lock JSON semantic diff equal to the plan
+(0 added, 0 removed, 0 other), the numstat, and the namecheck controls both ways.
+
+THE TICKET
+KS-1425 — https://linear.app/secuura/issue/KS-1425 — Urgent, "Dependency and Version Currency",
+board account, ONE comment linking #1397, comment body byte-identical to what I sent.
+
+WHAT I HAVE NOT DONE
+No merge. No deploy, no `az`, no SSH beyond git's transport, no migration, no `docker compose`, no
+stack, no extranet write, **no comment to Peter or Stuart**, no state/assignee/label/project change
+on any existing ticket, nothing deleted, no force push, no `--no-verify`, no rebase.
+`s-b63-ks1278` and B 67th's M untouched. #1393 / #1395 / #1396 untouched.
+
+Live watcher pid 20714, SINCE 2026-10-06T03:05:35Z. **Please read my ctx** — last reading 38% at
+03:05:23Z, before namecheck, the commit, two pushes and the PR.
