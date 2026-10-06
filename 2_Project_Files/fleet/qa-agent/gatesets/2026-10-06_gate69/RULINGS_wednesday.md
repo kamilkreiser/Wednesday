@@ -1,0 +1,57 @@
+# gate69 — RULINGS for Wednesday
+
+## PRE-RULED by Wednesday (binding on the gate; carried from Wednesday's message to the drafter, ~00:2xZ 2026-10-06)
+
+P1. **Merge seats.** `GO (Seat R 2nd): merge 1395 on gate69` and `GO (Seat E 8th): merge 1396 on gate69`. The authors will have wrapped, so these GOs supersede the READYs' own "GO (Seat R 1st)" and "a signed GO naming (Seat E 7th)". The launcher refuses any other GO set (rc 8).
+
+P2. **PR B is included.** #1396 (KS-1256) landed while the kit was being drafted. Seat E 7th's READY is `briefs_staged/2026-10-06_seatE7_READY_1396.txt`. The kit still renders an A-only gate if the repin script is run without `--b-pr/--b-head`.
+
+P3. **E 7th's db.retry fake-timer wall-clock timeout goes to the gate.** The READY lists it as NOT COVERED. The gate classifies it as pre-existing or caused by this change: prompt item DB-RETRY-CLASSIFY, instrument `c3_tests_gate69.py dbretry`.
+
+P4. **TAIL rule.** The new block goes last in merge order. Numbers are by ticket and never renumbered: flow `21.` = KS-1256, `22.` = KS-1305. Both merge-ins are predicted on the develop the launch reads.
+
+## OPEN — the drafter rules none of these
+
+**Q1. Merge order, and the flow's numeric order.**
+- If #1395 merges first, TAIL puts KS-1256's `21.` after `22.`, so the flow reads …20 22 21. On 4eaf that is A-then-B tree `622d7b8b4a60`.
+- If #1396 merges first, the flow reads …20 21 22. On 4eaf that is B-then-A tree `883d4b70343c`.
+- The kit's read-back requires only "own block once and LAST, develop prefix kept". Numeric ascent is INFO only.
+- **Rule one of these:**
+  - (a) sequence #1396 before #1395; or
+  - (b) accept 22-before-21 under TAIL; or
+  - (c) insert by number, which is NOT what the kit predicts and would need a re-draft of M1.
+
+**Q2. The DIVERGENCE on develop 4eaf7741a6a4.** For each PR alone, git conflicts on the CHEAT and auto-merges the FLOW. The auto-merged flow is identical to the TAIL blob. For the second PR, git conflicts on BOTH docs. The hand resolution "THEIRS then OURS" equals the TAIL blob in every case but one: the second PR's CHEAT. There it reads back OK but is NOT byte-equal. Q-M M8 catches that. Is the TAIL-predicted tree the M1 authority? It is printed by `c4 chain` and recomputed at launch.
+
+**Q3. #1396 commit messages carry foreign hyphenated keys.** These are KS-1231 and KS-1233 in e16c3133c296, and KS-938 in e6eb53fe2658. c1 P8 FAILS. The READY says "Only KS-1256 is hyphenated in the title, body and both commit messages", and that is false for the commit messages. The title and body ARE clean. Rule one:
+- block; or
+- a squash-body instruction to the merger (strip or de-hyphenate); or
+- polish.
+
+The bot attaches links by hyphenated key, so a squash body that keeps them would link #1396 to KS-1231, KS-1233 and KS-938. Seat R 1st's READY describes exactly this class of mistake, which it caught for KS-1422.
+
+**Q4. X10: may the gate run `npx prisma generate` in its own wtA, after `realshape`?** The full originate jest suite may not LOAD without the generated client. That missing client is the KS-1305 condition itself.
+- Without X10, C3-SUITE for #1395 can be NOT RUN.
+- With X10, the gate generates in its scratch worktree only. That may download Prisma engines over the network, which X1 does not cover.
+
+**Q5. `Security Scanning` FAILED at both heads (pull_request), and develop has no baseline for it.** `PR Security Gates (KS-168)` and `pr` also fail, but they fail on develop 3f9f's push too, so they are pre-existing. The gate is told to read the job log (X6) and classify. Does a pre-existing-class failure block a T1 GO?
+
+**Q6. #1396's PR title is its DOCS commit's subject.** The title is "KS-1256: both platform docs get the fail-closed block, plus the ks1195 cell title" (81 chars, 89 squashed). It does not name the product change (fail-closed 503). Should the squash subject be the code commit's ("KS-1256: an unreadable connector allow-list fails closed with 503", 65 / 73)? The gate declares one that is TRUE of the diff.
+
+**Q7. Skill §4 "in the same commit" for #1396.** The test change is in e16c and the docs are in e6eb, which are separate commits on the branch. The READY says so plainly. A squash lands them as one commit. Does the squash satisfy §4?
+
+**Q8. Routing.** `ROUTING_LINE.txt` (`QA/Secuura-gate69-batch|coagent@agentmail.to|yes`) is NOT in `inbox_routing.conf`. The real launch refuses with rc 1 until it is.
+
+**Q9. Other DOCS PRs.** #1393 (KS-1278, gate68) and #1383 (KS-1401) also edit both docs. Whichever lands before this batch moves develop. The repin script then requires `--repin-develop` and recomputes, and it refuses if a batch code path moved.
+
+---
+## RULED BY WEDNESDAY before launch (2026-10-06 ~11:5x AEDT). Final for this gate unless the gate measures one wrong; if it does, say so in the verdict.
+- **Q1 (a): #1396 merges BEFORE #1395**, so the flow ascends …20 21 22 (B-then-A, `883d4b70343c` on 4eaf). If develop moves first (#1393 is next, by Seat B 67th), each merger re-predicts the TAIL tree at its GO.
+- **Q2:** the key-anchored TAIL tree is the target and Q-M M8 decides. A hand resolution that reads back OK but is not byte-equal FAILS. Never accept git's auto-merged flow without the kit's read-back.
+- **Q3: a squash-body instruction, not a block.** The merger writes the squash body explicitly with KS 1231, KS 1233 and KS 938 de-hyphenated; only KS-1256 is hyphenated. Branch commit messages do not land when the squash body is explicit. The READY's false "only KS-1256" sentence is Polish, named.
+- **Q4: X10 GRANTED.** `npx prisma generate` in the gate's OWN scratch worktree only, after `realshape`. Engine downloads into that worktree are allowed. No global install; nothing written in the shared checkout.
+- **Q5:** read the Security Scanning job log (X6). A failure caused by this diff BLOCKS; a pre-existing or unrelated one is named and does not block. State which, with the log line as the instrument.
+- **Q6:** the #1396 squash subject names the PRODUCT change: `KS-1256: an unreadable connector allow-list fails closed with 503` (e16c's subject). The gate states it is TRUE of the whole diff, or proposes one of 92 chars or fewer.
+- **Q7:** yes. The squash lands test + docs as ONE commit on develop, which satisfies §4 there; the PR body says so. The gate states it.
+- **Q8:** routing line added by Wednesday before launch.
+- **Q9:** as the kit has it. `--repin-develop` recomputes; it refuses if a batch code path moved.

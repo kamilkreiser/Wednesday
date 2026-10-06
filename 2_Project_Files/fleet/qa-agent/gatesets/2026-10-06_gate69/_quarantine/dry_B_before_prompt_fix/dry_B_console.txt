@@ -1,0 +1,47 @@
+LAUNCH ACTION gate69 (DRY RUN) 2026-10-06 11:44:53 AEDT / 2026-10-06T00:44:53Z | #1395 1bdfbe0f2f06bbf52f14ed5c6eab9f3261944660 | PR B #1396 e6eb53fe26587bc8375154a6acfd112ddea58278 | kit develop 4eaf7741a6a4b2c82752d0d94f8bbacb5493aabe | repin-develop none | pane QA/Secuura-gate69-batch
+--- A. each head must be the one its READY names
+  #1395: /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/briefs_staged/2026-10-06_seatR1_READY_1395.txt (sha256/16 b9d8465922bf4156): lines naming the head in full 3 | naming #1395 3 | CONTROL lines naming 'READY' 2
+  PR B: /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/briefs_staged/2026-10-06_seatE7_READY_1396.txt (sha256/16 04f324220006b5da): lines naming the head in full 2 | naming #1396 2 | CONTROL lines naming 'READY' 3
+--- 2. ONE ls-remote (read verb) from the checkout
+  ls-remote rc=0 at 00:45:00Z | develop 4eaf7741a6a4b2c82752d0d94f8bbacb5493aabe | #1395 pull/head 1bdfbe0f2f06bbf52f14ed5c6eab9f3261944660 branch 1bdfbe0f2f06bbf52f14ed5c6eab9f3261944660 | #1396 pull/head e6eb53fe26587bc8375154a6acfd112ddea58278 branch e6eb53fe26587bc8375154a6acfd112ddea58278
+--- R. render the prompt (develop 4eaf7741a6a4b2c82752d0d94f8bbacb5493aabe)
+  rendered HEAD_A x8 HEAD_B x8 PR_B x21 DEVELOP x4, PR B INCLUDED -> /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/gatesets/2026-10-06_gate69/prompt_gate69.rendered.txt (31136 bytes); head file /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/gatesets/2026-10-06_gate69/head_at_launch.txt
+--- 0. routing: the pane must be in inbox_routing.conf
+  /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/inbox_routing.conf — exact line present: 0 (grep rc=1; want 1 / rc 0). CONTROL: agentmail lines in the file = 162
+  (DRY RUN: reported, not refused — the real run refuses rc 1; ROUTING_LINE.txt)
+--- 1. PULLS API (per PR) + census
+    API #1395 head 1bdfbe0f2f06bbf52f14ed5c6eab9f3261944660 branch feature/ks-1305-prisma-not-generated-diagnosis-ra1-1 base develop state open merged False mergeable False mergeable_state dirty
+    BODY sha256/16 e3e2ba5f26d1e033 chars 8839 utf8-bytes 8891 (READY claim: HTTP 201; body sha256/16 e3e2ba5f26d1e033 read back EQUAL) | title 'KS-1305: diagnose a missing generated Prisma client instead of a module error' (77 chars) | com
+    API #1396 head e6eb53fe26587bc8375154a6acfd112ddea58278 branch feature/ks-1256-thrown-settings-read-refuses-connector-create-e6-1 base develop state open merged False mergeable False mergeable_state dirty
+    BODY sha256/16 4a3dc5d9ba5de7d9 chars 7876 utf8-bytes 7928 (READY claim: HTTP 201; body 7,876 bytes, sha256/16 4a3dc5d9ba5de7d9) | title 'KS-1256: both platform docs get the fail-closed block, plus the ks1195 cell title' (81 chars) | co
+    CENSUS 23 other open PR(s) (excluding ['1395', '1396']): {'DOCS': 2, 'other': 21} | CONTROL fires True
+      DOCS #1393 b5adaba751d8 KS-1278: revoke decides already-revoked in the UPDATE, not only on the
+      DOCS #1383 32e8459bc0f5 KS-1401: migration 049 restores tenant isolation where 039 is already 
+  api A rc=0 B rc=0 census rc=0
+--- 3. the heads: input == READY == API == pull/head == branch; open, not merged, on develop
+  ALL INSTRUMENTS AGREE with the input head(s).
+--- 3b. develop: origin 4eaf7741a6a4b2c82752d0d94f8bbacb5493aabe | kit (at drafting) 4eaf7741a6a4b2c82752d0d94f8bbacb5493aabe
+  UNMOVED since drafting (both PRs branch from 3f9ff4e1e1b9: each still needs the docs-only merge-in).
+--- 3c. the kit's own clone: fetch by sha, C1 per PR, the merge-in predictions RECOMPUTED on the develop read now
+  c1 A rc=0 | CHECKED 10 0 FAIL 
+  c1 B rc=1 | CHECKED 11 | 1 FAIL (P8)
+    FAIL P8 per commit ["e6eb53fe2658 keys ['KS-1256', 'KS-938'] closing 0 Refs 0", "e16c3133c296 keys ['KS-1231', 'KS-1233', 'KS-1256'] closing 0 Refs 1"] | `Refs KS-1256` lines in total 1 (want 1)
+  (P8 alone: the drafter's MEASURED defect — foreign hyphenated keys in the commit messages; the gate rules it)
+  c4 chain rc=0
+    A alone on D          -> 37773febc7152ac06554a7e7e3cd69f9796299b2
+    B alone on D          -> b0214dad053df3f9433da22f951264b62230abe7
+    B on SIM squash(A) fe490421035a -> 622d7b8b4a60a076fee2f9855ddf048b6402e4e7   [order: A first, then B]
+    A on SIM squash(B) 70ac072ba17e -> 883d4b70343c6a6b7e797ae27c796db4e566bd0e   [order: B first, then A]
+    FINAL trees by order: A-then-B 622d7b8b4a60 | B-then-A 883d4b70343c | paths differing ['Projects Documents/API_Security_Functional_Testing_Architecture_Flow_Diagrams.html', 'Projects Documents/QA_
+  PR A: DIVERGENCE: merge-tree f3c420fd4f62 (rc 1) vs tail-predicted 37773febc715 — Wednesday rules; this kit does not pick
+      conflicted paths (1): ['Projects Documents/QA_Tool_Cheat_Sheet_Secuura_API_Testing.html']
+  PR B: DIVERGENCE: merge-tree 925b3ee375bc (rc 1) vs tail-predicted b0214dad053d — Wednesday rules; this kit does not pick
+      conflicted paths (1): ['Projects Documents/QA_Tool_Cheat_Sheet_Secuura_API_Testing.html']
+--- 6 (dry). the launcher's own --check
+    all guards pass:
+      #1395 1bdfbe0f2f06 + #1396 e6eb53fe2658 at pull/head AND branch | origin develop 4eaf7741a6a4 RECORDED (NOT in the local store: descent NOT checked here (the gate checks it in ITS OWN clone, X7; the repin script checked it in the kit clone)) | GO (Seat E 8th): merge 1396 on gate69|GO (Seat R 2nd): merge 1395 on gate69 | prompt sha256 a80bf431d760f955
+      QA project, kit, rendered prompt, head file, repo present; kit at its home; thinking directive; 9 kit files named; report dir; no fill token / marker; the pre-ruled GO set; no forbidden seat; heads in full
+      the prompt carries the measurement rules, the head-parameter / TAIL / per-conjunct rules, 42 by-name keywords (as tokens), the holds + named exceptions, the addendum + REPORT-HASH-LAST rules, the verdict subject + sender
+      a launch (not --check) will refuse unless stdin is a TTY (exit 21)
+  launcher --check rc=0
+DRY RUN COMPLETE 2026-10-06T00:45:43Z — #1395 1bdfbe0f2f06bbf52f14ed5c6eab9f3261944660, #1396 e6eb53fe26587bc8375154a6acfd112ddea58278, develop 4eaf7741a6a4b2c82752d0d94f8bbacb5493aabe; the real run continues with the override check, the usage gate, --check and cockpit.sh add

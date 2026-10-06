@@ -1,0 +1,19 @@
+LAUNCH ACTION gate69 (DRY RUN) 2026-10-06 11:46:54 AEDT / 2026-10-06T00:46:54Z | #1395 1bdfbe0f2f06bbf52f14ed5c6eab9f3261944660 | PR B NOT INCLUDED | kit develop 4eaf7741a6a4b2c82752d0d94f8bbacb5493aabe | repin-develop none | pane QA/Secuura-gate69-batch
+--- A. each head must be the one its READY names
+  #1395: /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/briefs_staged/2026-10-06_seatR1_READY_1395.txt (sha256/16 b9d8465922bf4156): lines naming the head in full 3 | naming #1395 3 | CONTROL lines naming 'READY' 2
+--- 2. ONE ls-remote (read verb) from the checkout
+  ls-remote rc=0 at 00:46:59Z | develop 4eaf7741a6a4b2c82752d0d94f8bbacb5493aabe | #1395 pull/head 1bdfbe0f2f06bbf52f14ed5c6eab9f3261944660 branch 1bdfbe0f2f06bbf52f14ed5c6eab9f3261944660
+--- R. render the prompt (develop 4eaf7741a6a4b2c82752d0d94f8bbacb5493aabe)
+  rendered HEAD_A x8 HEAD_B x8 PR_B x20 DEVELOP x4, PR B CUT (A-only) -> /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/gatesets/2026-10-06_gate69/prompt_gate69.rendered.txt (23812 bytes); head file /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/gatesets/2026-10-06_gate69/head_at_launch.txt
+--- 0. routing: the pane must be in inbox_routing.conf
+  /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/inbox_routing.conf — exact line present: 0 (grep rc=1; want 1 / rc 0). CONTROL: agentmail lines in the file = 162
+  (DRY RUN: reported, not refused — the real run refuses rc 1; ROUTING_LINE.txt)
+--- 1. PULLS API (per PR) + census
+    API #1395 head 1bdfbe0f2f06bbf52f14ed5c6eab9f3261944660 branch feature/ks-1305-prisma-not-generated-diagnosis-ra1-1 base develop state open merged False mergeable False mergeable_state dirty
+    BODY sha256/16 e3e2ba5f26d1e033 chars 8839 utf8-bytes 8891 (READY claim: HTTP 201; body sha256/16 e3e2ba5f26d1e033 read back EQUAL) | title 'KS-1305: diagnose a missing generated Prisma client instead of a module error' (77 chars) | com
+    CENSUS 24 other open PR(s) (excluding ['0', '1395']): {'OVERLAP': 1, 'DOCS': 2, 'other': 21} | CONTROL fires True
+      OVERLAP #1396 e6eb53fe2658 KS-1256: both platform docs get the fail-closed block, plus the ks1195
+      DOCS #1393 b5adaba751d8 KS-1278: revoke decides already-revoked in the UPDATE, not only on the
+      DOCS #1383 32e8459bc0f5 KS-1401: migration 049 restores tenant isolation where 039 is already 
+  api A rc=0 B rc=0 census rc=1
+REFUSING: an OVERLAP on a batch code path (or a KS-1305 / KS-1256 title) — read it first

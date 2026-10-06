@@ -1,0 +1,15 @@
+gate69 launcher --check arms (drafter, 2026-10-06 ~00:50Z; launch_qa_secuura_gate69_batch.sh --check, stdin /dev/null)
+Stand-ins live in _scratch/arms/ (rendered_B.txt, rendered_Aonly.txt, forbidden_go.txt, ls_real.txt, ls_Bmoved.txt, headfile_noBpr.txt, headfile_Aonly.txt).
+  arm                          override                                   rc  refusal
+  renderedB                    none (batch render)                        0   all guards pass
+  Aonly                        (A-only render, dry_Aonly/)                0   all guards pass (dry_Aonly/launcher_check_Aonly_ex1.out)
+  unrendered                   G69_PROMPT=prompt_gate69.txt               8   unfilled token / [[B]] marker
+  forbiddenGO                  G69_PROMPT=forbidden_go.txt (+E 7th GO)    8   GO set != the pre-ruled set
+  BheadMoved                   G69_LS=ls_Bmoved.txt (#1396 at c6564b8)    6   pull/head / branch != head
+  headfileNoBpr                G69_HEADFILE=headfile_noBpr.txt            7   B line malformed
+  AonlyPromptWithBheadfile     G69_PROMPT=rendered_Aonly.txt              8   GO set mismatch (render and head file disagree)
+  BpromptWithAonlyHeadfile     G69_HEADFILE=headfile_Aonly.txt            8   GO set mismatch
+Outputs: launcher_check_<arm>_ex1.{out,err,rc}.
+Render guards measured during drafting (quarantined runs): the token-count guard refused rc 9 (_quarantine/dry_render_threshold_refused/);
+the A-only render refused rc 9 on a stray {{PR_B}} outside a [[B]] block (_quarantine/dry_Aonly_render_refused/), fixed in the template;
+the A-only census refused rc 15 when #1396 was classed OVERLAP by the batch scope (_quarantine/dry_Aonly_census_overlap/), fixed with census --a-only.

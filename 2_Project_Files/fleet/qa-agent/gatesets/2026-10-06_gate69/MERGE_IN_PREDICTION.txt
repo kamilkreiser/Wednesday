@@ -1,0 +1,26 @@
+gate69 MERGE-IN PREDICTION. These are the drafter's PREDICTIONS; the launch recomputes them (repin step 3c).
+Rule: TAIL. Each PR's block goes immediately before `  </body>` on both docs, last in merge order.
+Instrument: c4_docs_gate69.py in the drafter's scratch clone.
+
+develop 4eaf7741a6a4b2c82752d0d94f8bbacb5493aabe (CURRENT at 00:35:15Z; #1394 KS-723 squash, tree 6884601a03dc)
+  #1395 alone      37773febc7152ac06554a7e7e3cd69f9796299b2   flow ...14 16 18 19 20 22 | cheat ...KS-938 KS-723 KS-1305
+  #1396 alone      b0214dad053df3f9433da22f951264b62230abe7   flow ...14 16 18 19 20 21 | cheat ...KS-938 KS-723 KS-1256
+  B then A         SIM squash(#1396) 70ac072ba17e -> #1395 merge-in 883d4b70343c6a6b7e797ae27c796db4e566bd0e   flow ...20 21 22 (ascending)
+  A then B         SIM squash(#1395) fe490421035a -> #1396 merge-in 622d7b8b4a60a076fee2f9855ddf048b6402e4e7   flow ...20 22 21 (NOT ascending; RULINGS Q1)
+  git merge-tree   #1395 on 4eaf: rc 1, tree f3c420fd4f62. The cheat CONFLICTS. The flow auto-merges and == the TAIL blob ec542a58ef14.
+                   #1396 on 4eaf: rc 1, tree 925b3ee375bc. Same shape; flow == 39a62cd29a9d.
+                   #1396 over SIM(#1395): rc 1, ea04a0f055e4. #1395 over SIM(#1396): rc 1, 35658fda564c. BOTH docs conflict.
+  DIVERGENCE       on every pair; Wednesday rules (RULINGS Q2).
+                   The hand reading "THEIRS then OURS" == the TAIL blob, EXCEPT on the second PR's cheat. There it reads back OK
+                   but is not byte-equal; Q-M M8 catches it.
+  evidence         c4_chain_dev4eaf_ex1.out, c4_mergetree_{A,B,BoverSimA,AoverSimB}_dev4eaf_ex1.out, c4_selftest_dev4eaf_ex1.out (29/29)
+
+develop 3f9ff4e1e1b9 (SUPERSEDED; the develop at both READYs)
+  #1395 alone      924908aeefe1 == #1395's own END_TREE (positive control). git AGREE.
+  #1396 alone      e034a458fa52 == #1396's own END_TREE (positive control). git AGREE.
+  B then A         31700f84b2ee      A then B 36e4f42ce758      second-over-first: DIVERGENCE (both docs conflict)
+  evidence         c4_*_dev3f9f_ex1.out, c4_selftest_dev3f9f_ex2.out (29/29)
+
+SIM 3f9f + #1394 (built before #1394 landed): c4_sim1394_dev3f9f_ex1.out. SUPERSEDED by the real develop 4eaf.
+  The KEY-rule SIM's docs equal the real landing's docs. Its tree differs (38c7421875d6 vs 6884601a03dc) only because the SIM did not
+  carry #1394's 3 code / spec paths.
