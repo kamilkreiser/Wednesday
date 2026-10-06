@@ -1,0 +1,420 @@
+ITEM 0 plan confirmation, Seat B 67th, pane `Secuura/Blockchain` %60. READ-ONLY: no lock taken,
+no fetch into the shared store, no objects transfer, no worktree write, no ref write, no install,
+no ticket write, no comment, no PR edit. Writes confined to my record folder and my scratch clone.
+
+Brief read END TO END (489 lines, sha256 6352f30ff852783923ee68bf8137a19fae5d5e4901dc3cf254eb2b68028cfb35),
+copied to boot/brief_b67.txt. I am Seat B 67th.
+
+== 0. IDENTITY, AND THE SIXTH CONSECUTIVE MISREAD ==
+Bare `tmux display-message -p '#{@cockpit_name}'` returned `wednesday`. That is the SIXTH
+consecutive generation (B 63rd, B 64th, B 65th, D 7th, E 7th, me). Pinned read
+`-t "$TMUX_PANE"` ($TMUX_PANE = %60) gives `Secuura/Blockchain`. Control: a nonexistent option on
+the same pane returns 1 byte (bare \n by `od -c`) against 19 for the real one, so the instrument
+discriminates. Process ancestry: my shell <- claude 9000 <- launcher 8998 running
+Launch_Claude.command, started Tue 6 Oct 11:57:09 AEDT = 00:57:09Z, the preflight stamp exactly.
+Panes live now: %0 wednesday, %1 fleet-monitor, %59 QA/Secuura-gate69-batch (pid 95269 - this is
+the "other live session" my launcher named as 95271), %60 me. I ran the pinned read in my FIRST
+tool call and never announced a wrong seat.
+
+== 1. LAUNCHER PREFLIGHT, VERBATIM (538 B, stamp 2026-10-06T00:57:09Z) ==
+# launch 2026-10-06T00:57:09Z
+[F-02] No SSH identity available for git (keychain not seeded, on-disk fallback off).
+       Run: ssh-add --apple-use-keychain ~/.ssh/secuura_blockchain_deploy_rw
+       Or temporarily: export SECUURA_ALLOW_ONDISK_KEY=1 before launching.
+       (git will use whatever core.sshCommand is already in the repo config.)
+[KS-907] 1 other live session(s) on this project: PID 95271 (live claude session on this project).
+         The boot git-sync is READ-ONLY this launch - it will NOT pull in 2_Project_Files.
+NOT clean. F-02 did not bite: the checkout's own core.sshCommand
+(`ssh -i .../3_Access_Keys/github_deploy_rw -o IdentitiesOnly=yes -o StrictHostKeyChecking=accept-new`)
+served every remote read, with GIT_SSH_COMMAND unset (`env | grep -c` = 0) throughout.
+
+== 2. HANDOVERS RE-HASHED - NEITHER MOVED ==
+B 66th: 149 lines, 12,103 B, mtime 6 Oct 11:36, sha256
+342363bfa7da433c7f47634b063a278386ccaadd72916d35355279fb983875a7 == P5. UNCHANGED.
+B 65th: 203 lines, 16,008 B, sha256
+53b7b9f2ed1ab2d79f4b306ab0a383d0acf192796aedd64dd29347694d11bb23 == P4. So the merge_note prefix
+`53b7b9f2ed1ab2d7` is confirmed; I will re-measure it again in the call that writes the addendum.
+
+== 3. REFS BY ls-remote (instrument: git ls-remote with -c core.sshCommand, GIT_SSH_COMMAND unset),
+      01:00:27Z-01:00:32Z, rc 0 - ALL SEVEN REPRODUCE THE BRIEF ==
+develop                                        4eaf7741a6a4b2c82752d0d94f8bbacb5493aabe
+refs/heads/feature/ks-1278-revoke-atomic-b63-1  b5adaba751d89fda0b138e0b8b74d702e2a2a429
+refs/pull/1393/head                             b5adaba751d89fda0b138e0b8b74d702e2a2a429
+refs/pull/1394/head                             585171bc2c29ea7d5ee38b11ddaacfdf19875537
+refs/pull/1395/head                             1bdfbe0f2f06bbf52f14ed5c6eab9f3261944660
+refs/pull/1396/head                             e6eb53fe26587bc8375154a6acfd112ddea58278
+refs/pull/1383/head                             32e8459bc0f51d1af492aae7c0b3d9754f78c9bf
+develop HAS NOT MOVED. Identified: tree 6884601a03dc1685476b69e94efe29a9573d53a7 (== B 66th's
+ruled T), ONE parent 3f9ff4e1e1b93e2e704918a7825f13a72c9ec76f, kksecura 2026-10-06T11:32:59+11:00,
+subject "KS-723: declare GET /api/anchors/tx/{txHash} in the published OpenAPI contract" = #1394.
+merge-base(b5adaba, 4eaf) = 32e058975d4e3a9bbabe828f45e7084de4cfa7f0. 3f9f..4eaf = 5 files +354/-0.
+
+== 4. SHARED CHECKOUT, UNTOUCHED ==
+`git status` only, per KS-907. Branch develop, HEAD c56dd7c32edf203177ade6c4d0c9040e624681b8,
+17 untracked files (all systemTest docs + two 2026-07-03 conflict snapshots + a generated
+testIdCatalog), 0 tracked modifications, 0 staged, 0 conflicts. origin/develop in that store is
+STALE at 32e058975d4e. Remote develop 4eaf is NOT in the local object store, so I CANNOT count
+ahead/behind without a fetch and did not do one: HEAD c56dd7c3 vs remote 4eaf7741, both present-
+state only. rev-parse --all sha256 f6e82c429a3735fddc453e96a195a2513a08658467b2c057ea2a0addf1b95cb0
+and .git/config sha256 4f624a213933d54b6f76f5f420818de564c6c8ff954d18f9e516cfde02b6ee98, both
+BYTE-IDENTICAL before and after my scratch fetch (cmp rc 0). No ref written.
+
+Shared-store census, reproducing P10: 4eaf rc 128 ABSENT; 3f9f rc 0; b5adaba rc 0; 32e0 rc 0;
+deadbeef... control rc 128 - the SAME rc as 4eaf, which is why the control matters. Q-F67's
+objects-only transfer IS needed at ITEM 1.
+
+== 5. MY SCRATCH CLONE, the :406 way ==
+`git clone --shared --no-checkout` of 2_Project_Files into my scratchpad; `git remote -v` confirms
+origin is the LOCAL checkout path, not GitHub. Fetched BY SHA (4eaf, b5adaba) from
+git@github.com:Secuura/Distributed_Secuura.git with -c core.sshCommand, --no-tags
+--no-write-fetch-head, rc 0 read DIRECTLY (not after a pipe), 6 s. In the clone: 4eaf/b5adaba/
+3f9f/32e0 all rc 0 commit, deadbeef control rc 128.
+
+== 6. M6 - NO RE-GATE ==
+32e0..develop = 78 paths. Hits on documentRepo.ts | routes/documents.ts | ks1278 | ks1293 |
+.githooks/pre-push | scripts/preflight/preflight.sh | secuura-test-discipline: **0**.
+POSITIVE CONTROL: the identical grep over 32e0..HEAD returns **4**, so it discriminates.
+56 of the 78 are systemTest/ paths. Four control blobs IDENTICAL at head and at 4eaf:
+pre-push ffc25ebc37d4, preflight.sh 270b8913c009, SKILL eaf43dfd4d98, audit-baseline 4ef11079242c.
+KS-1278 count in each doc at develop: 0 and 0; positive control at HEAD: 3 and 4.
+
+== 7. THE MERGE-IN PREDICTION, SECOND HAND - Q-T67 PRE-CONFIRMED ==
+Kit by path, sha256 pinned and equal to kit.json script_sha256, and UNCHANGED after all runs:
+c4_docs_gate68.py 598e49a764bec041f09b31c1b2ebc7f4895cd3ed38afa84b3a9a2c9619f28a7d
+lib_gate68.py     0eaebb0648d8af6ecc410ea3354a2babe7157f6bad4bf006b6a083363494b50f
+composee5_copy.py f9ab42d9fc25f189e62ccb4ad8e738a136cf17fb743ce7cbcbb3ee11d73cfee1
+G68_SCRATCH under my scratchpad; every run --head b5adaba751d8... --repo <my clone>.
+
+run 1 predict --cheat-anchor last --develop-after 4eaf  -> 0b4c3a265454343e8b39af71d2ee6e30bd1d6059
+   flow 3bfddd0fd582 | 1..14 15 16 18 19 20 | ascending True | neighbours 14/16 | READ-BACK OK
+   cheat 48c102b4f4e1 | ... KS-1005 KS-938 KS-723 KS-1278 | LAST True | predecessor KS-723 | OK
+run 2 --order wrong (CONTROL)                           -> da0072908789a12574ba8ce8b395351a79181fcf
+   flow bf2f00e5b95c `14 16 15 18` READ-BACK FAIL; cheat 7a26723a7faa KS-1278 LAST False, FAIL.
+   The control comes out RED, so the instrument can fail.
+run 3 mergetree                                          -> rc 0, tree e3f0dc92a5f2891b4b6006a281228fc8f88c36eb,
+   0 conflicted paths; flow 2caee14b9858 `14 16 18 15 19 20` neighbours 18/19 READ-BACK FAIL;
+   cheat 48c102b4f4e1 == key, READ-BACK OK; DIVERGENCE: yes. Exactly the new trap: git auto-merges
+   the flow doc silently and WRONGLY, and only the flow doc.
+run 4 predict on 3f9f (CONTROL)                          -> 1711f2b944a819ca69b1170d95d0fb5a9917bf6f
+   == gate68's own tree. The control reproduces the gate.
+run 5 --cheat-anchor after-pred (informational)          -> a395bd88579b1eb43c452d0c9143dfd4cb75677c
+   NOT the target (Q2/Q4 supersede it).
+
+**I reproduce the drafter's target 0b4c3a265454343e8b39af71d2ee6e30bd1d6059 on the real develop
+4eaf7741a6a4. Q-T67's condition HOLDS, so I am NOT sending the separate predicted-tree QUESTION.**
+
+Cross-check: `diff --stat develop..keytree` = exactly the 6 kit paths, 6 files +540/-2, and
+`32e0..b5adaba` is the IDENTICAL shape; the two --name-only lists are cmp-equal.
+
+== 8. FINDING 1 - P11's ADDED-LINE DIGEST IS NOT REPRODUCIBLE, THOUGH ITS CLAIM IS ==
+P11 gives the sorted added-line multiset as sha256 48a933559ffd02713ea10fe6ae33acfb9ffe1082c186c90ffdfccbba9e628d9b
+"both sides". The PROPERTY reproduces: under my pipeline both sides give
+e0c9382136ef61a8d16595485795854af44a630efb0f0b132b2b6ea502f0da44, equal, and a deliberately wrong
+pair (develop..1711f2b944a8) gives f79f4a83cc8a - so the comparison discriminates. The ABSOLUTE
+digest does not: I tried seven instrument variants (LC_ALL=C sort, strip the leading '+' before or
+after sorting, sort -u, -U0 diff, and combinations) and NONE yields 48a9335. Four distinct values
+appeared, every one of them agreeing between the two sides.
+So: the conclusion P11 supports is sound and independently confirmed; the figure itself I cannot
+reproduce. My instrument, named: `git diff <a> <b> | grep '^+' | grep -v '^+++' | sort | shasum -a 256`
+under the default locale. Not GO-blocking. Worth a line in the gate's kit so the next seat is not
+chasing a digest.
+
+== 9. THE 53-vs-55 TRAILER CONTROL, SETTLED BY MECHANISM ==
+bf277eead268's %(trailers) ends `.com>\n\n` (od -c). THREE instruments on the same object:
+raw stream | wc -c = 55; raw stream | python len() = 55; `$( )` capture + ${#V} = **53**, because
+command substitution strips TRAILING newlines. Both prior figures were right about different
+instruments, and the difference is exactly two newlines - not a method mystery. On develop 4eaf the
+same three give 1 / 1 / **0**, i.e. genuinely ZERO trailers. I will quote `wc -c` and say so.
+
+== 10. THE ADOPTED WORKTREE, READ WITHOUT WRITING (--no-optional-locks) ==
+worktrees/s-b63-ks1278: HEAD b5adaba751d8, branch feature/ks-1278-revoke-atomic-b63-1,
+porcelain 0 lines, packages/shared/dist/index.js present, Blockchain/Dev/node_modules present,
+.githooks/pre-push test -x rc 0. BOTH systemTest trees exist (./systemTest and
+./Blockchain/Dev/systemTest) and akto/node_modules is ABSENT in BOTH - so I expect the format gate
+to print `SKIP - akto deps not installed` on my push, and my range (32e0..4eaf, 56 systemTest
+paths) is the same class B 66th hit. I will measure it rather than assume, and install per the
+brief if it SKIPs.
+
+== 11. LOCKS ==
+worktrees/ holds 502 entries and **0** `.push-lock-*`; positive control: the same grep finds
+`s-b63-ks1278` (1), so it is not a blind zero. Lock floor is 0; nothing to attribute, nothing to
+stop. (502 vs the brief's 501 at 00:48:32Z: the newest two entries are s-ra1-ks1305 10:42 and
+s-e6-ks1256 09:22, both pre-existing; no lock appeared.)
+:414 WAIT-SET PARITY, extracted from BOTH tools:
+  push56_ff.sh - **0** `push-lock-*` literals; delegates at :110 `lock56.sh take` and :117 release.
+  lock56.sh    - own lock :212 `.push-lock-56`; WAIT :274 -f3, :287 -e4, :288 -g1, :289 -d8.
+  `-56` appears in **0** WAIT lines. Since the push tool carries no set of its own there is no
+  second set to compare, which is the configuration the standing line prefers.
+lockparity62.py: 9 assertions, 9 PASS, 0 fail - WAIT sets identical AND same order, STOP identical,
+my own lock path identical, my own lock in NEITHER set, population 1 mine + 4 WAIT + 16 STOP = 21;
+and THREE controls (swapped WAIT pair, dropped STOP entry, renamed WAIT slot) each correctly DIFFER.
+The unattributed census `unattributed_absent_or_stop()` self-excludes by `$(basename "$LOCK")` -
+i.e. it names MY OWN `.push-lock-56`, derived from LOCK, not hardcoded. R 1st's inversion defect
+does NOT apply to me: I keep this lane's own lock rather than reusing a wrapped seat's name.
+twolock56.sh (FOREGROUND, :403): **158 assertions over 26 ARMS, 0 failed** (16 STOP + 1 STALE +
+4 WAIT + 4 UNATTRIBUTED + 1 nothing-planted). Every plant went into MY scratchpad; control
+afterwards: the shared worktrees/ still holds 0 `.push-lock-*`.
+Q-LOCK67 CONFIRMED: generation *56 held, `worktrees/.push-lock-56`, LOCK_SEAT='Secuura/Blockchain b67'.
+
+== 12. THE MATCHER / NAMECHECK BLOCK ==
+reseat62.py (seat-only, 66 -> 67, recdir 2026-10-05_seatB-66th -> 2026-10-06_seatB-67th), with
+--keep-literal for BOTH real refs. B 66th SS4 check FIRST: `feature/ks-1278-revoke-atomic-b63-1` is
+PRESENT in the source corpus at 6 sites (namecheck56.py x5 + commit56.sh:24), and
+`feature/ks-723-anchors-tx-b64-1` at 2 - so each --keep-literal has something to protect and the
+keep-literal-guards-presence-not-correctness trap does not bite. B 66th's own fabricated
+`feature/ks-723-anchors-tx-b65-1` is GONE (0 hits) - it was fixed.
+Controls 7/7 PASS. 104 rewrites, 92 lines, 24 of 46 files. Receipt + audit in boot/.
+After apply: the ONLY `-b67-` branch literals anywhere are 5 SYNTHETIC fixtures
+(ks-9999-planted-own-namespace, ks-9999-planted, ks-9999-b67-segment-only, ks-9999-beside-the-
+cotenant, ks-1-thing) - no fabricated real name, and both real refs survived byte-identical.
+0 residual live `b66`/`seatb66` in code.
+Hand surgery, each replacement asserted UNIQUE before writing:
+  inbox_match56.py MINE = "b 67th". OTHER_SEATS: REMOVED "b 67th"/"seat b 67th" (my own ordinal,
+  which B 66th had listed as its successor); ADDED "b 66th"/"seat b 66th" (predecessor),
+  "b 68th"/"seat b 68th" (successor), and - all three ABSENT, as the brief asked me to say -
+  "r 2nd"/"seat r 2nd", "e 7th"/"seat e 7th", "e 8th"/"seat e 8th". 121 entries. `r 1st`, `e 6th`,
+  `b 65th` and older kept. DEFECT_A_FIX stays True.
+  namecheck56.py MINE = "b67"; FOREIGN gains "b66","seatb66"; ADOPTIONS =
+  {'feature/ks-1278-revoke-atomic-b63-1'}; ADOPTED_WORKTREE = ['s-b63-ks1278'];
+  B 66th's -b64- adoption REMOVED and it now reads FOREIGN.
+namecheck56.py: rc 0, 71 OK, 0 BAD. ADOPTION-CONTROL A (non-member FOREIGN -> planted ADOPTED ->
+removed FOREIGN, set back to 1), B (member round-trips), and the worktree arm
+({'s-b63-ks1278': 'FOREIGN'}, control s-d1-ks1380 FOREIGN, mine s-b67-planted MINE) all OK.
+TAMPER EACH WAY: EXPECTED_ADOPTIONS 1->0 fires rc 1; ADOPTED_WORKTREE 1->2 entries fires rc 1;
+restore is byte-identical (cmp rc 0) and rc 0.
+
+== 13. FINDING 2 - THREE INHERITED FIXTURE DEFECTS, AND ONE MY RE-SEAT EXPOSED ==
+(a) namecheck56.py's ADOPTED_WORKTREE assert MESSAGE said `[s-b63-ks1278]` while B 66th's
+DECLARATION read `['s-b64-ks723']`. The message was WRONG for B 66th's round and is RIGHT for
+mine - so had I fixed only the declaration, the agreement would have been ACCIDENTAL and the drift
+invisible. Re-worded to state my round and to record that history. Both ADOPTIONS assert copies
+re-worded too; the second one still described gate65's NO GO.
+(b) namecheck56.py's "my own branch must NOT fire" POSITIVES row still named B 66th's
+`feature/ks-723-anchors-tx-b64-1`. With that ref correctly out of ADOPTIONS it reads FOREIGN, so
+the row came out BAD-POSITIVE - an inherited fixture carrying the predecessor's round, which the
+comment three lines above it already warns about. Re-pointed the WHOLE (name, keys) tuple to
+('feature/ks-1278-revoke-atomic-b63-1', ["KS-1278"]).
+(c) **trap4_56.py was UNRUNNABLE, and had been in B 66th's round too.** Its :119/:120 read
+`assert "b 66th" in lst` then `assert "b 66th" not in lst` - mutually exclusive, in B 66th's own
+unmodified copy. So that tool cannot have been run last round. My re-seat rewrote both to
+"b 67th" and preserved the contradiction. Fixed: :118 predecessor b 64th -> b 66th (it was TWO
+generations stale AND PASSING, because b 64th happens to be in the list - a passing assert on the
+wrong subject); :119 successor -> b 68th; :120 mine stays "b 67th" not in lst. Added a long-form
+presence assert so arm 2's two-form removal really can move 2 entries.
+(d) The re-seat ALSO collapsed arm 4c's inverse into a NO-OP: B 66th's line was
+`src4.replace('MINE = "b 66th"', 'MINE = "b 67th"')`, and rewriting both sides gave
+`replace('MINE = "b 67th"', 'MINE = "b 67th"')` while its assert still claimed "the inverse did not
+change MINE". Restored to -> "b 68th", with an added assert that the old value is GONE.
+And arms 2/3/4b's REMOVAL TOKENS and the FOREIGN_WANT constant all still named b 64th / b 67th
+after I re-pointed the subjects, which made the inverse arms INERT - the whole
+(subject, want, removal token) tuple has to move together, as the brief says.
+
+== 14. FINDING 3 - trap4_56's COMPOSITE PREDICATE CONTRADICTED B 66th's OWN FIX ==
+With the fixtures right, the run still came out FAIL. Cause: the composite `ok` required the
+inverse arms to read `FOR ME` - the PRE-DEFECT_A behaviour, where removing the addressee entry let
+the mail fall through to MY_PANE. B 66th SHIPPED DEFECT_A_FIX (which returns UNKNOWN ADDRESSEE
+instead) and left this predicate asserting the defect. **With the fix ON the tool could ONLY FAIL,
+and an arm that can only come out red proves nothing.** Re-expressed: the arm's real property is
+that the entry is LOAD-BEARING (removing it must CHANGE the verdict), with the fix's guarantee
+(never FOR ME) asserted separately, and reachability of FOR ME proved by the fix-OFF half of the
+2x2 instead. trap4_56.py now: **rc 0, 13 classifications, VERDICT PASS.**
+  ARM 1 real B 66th GO + ANSWER   -> 'for b 66th,seat b 66th'  (FOREIGN, attributed)
+  ARM 2/3 inverse (b 66th removed) -> 'UNKNOWN ADDRESSEE (seat b 66th) - read it, do not act'
+  ARM 4a my own launch brief       -> 'FOR ME'
+  ARM 4b constructed (Seat B 68th) -> 'for b 68th,seat b 68th'; inverse -> UNKNOWN ADDRESSEE
+  ARM 4c same bytes now mine       -> 'FOR ME'; inverse (MINE->b 68th) -> 'for b 67th,seat b 67th'
+
+== 15. THE DEFECT_A 2x2 (new tool, defect_a_2x2_b67.py) - PASS, 0 bad of 7 ==
+Cells keyed against the LIVE list, not assumed: LISTED='Seat B 66th' (asserted in OTHER_SEATS),
+UNLISTED='Seat B 99th' (asserted absent, so the cell is not vacuous). Carrier is a REAL Wednesday
+message; only the subject is replaced. The fix-OFF variant differs by EXACTLY ONE line (asserted).
+  fix ON  | listed   -> 'for b 66th,seat b 66th'                                FOR ME=False  want False
+  fix ON  | UNLISTED -> 'UNKNOWN ADDRESSEE (seat b 99th) - read it, do not act'  FOR ME=False  want False
+  fix OFF | listed   -> 'for b 66th,seat b 66th'                                FOR ME=False  want False
+  fix OFF | UNLISTED -> 'FOR ME (my pane, no seat named)'                        FOR ME=True   want True
+ONLY fix-off + unlisted reads FOR ME. Note the defective verdict's own text says "no seat named"
+while a seat WAS named - R 1st's finding, reproduced verbatim.
+The three named real readings, all OK:
+  `GO (Seat B 67th): merge 1393 on gate68` -> FOR ME     (so the GO WILL fire my watcher)
+  `GO (Seat B 66th): merge 1394 on gate67` -> for b 66th  (FOREIGN)
+  `GO (Seat B 68th): merge 9999 on gate99` -> for b 68th  (NOT FOR ME)
+DISCLOSED DEFECT OF MY OWN: my first extractor took `line.rsplit("|",1)[-1]`, which returns the
+SUBJECT, not the verdict - the matcher's line is NEW|<ts>|<verdict>|<subject>. Every cell read
+FOR ME=False and TWO came out BAD for MY bug, not the matcher's. I measured the field layout before
+believing either reading, and fixed it to field 2 with maxsplit=3 so a "|" in a subject cannot
+shift it. Had I trusted the first run I would have reported a live matcher defect that does not exist.
+
+== 16. STALE KNOBS, listed BEFORE any run ==
+AST-parse: 26 of 26 .py OK, 0 fail. `bash -n`: 21 of 21 .sh OK, 0 fail. 47 files CHECKED.
+22 UUID hits and 4 /private/tmp paths, enumerated:
+  merge56.py:118 MERGE56_SCRATCH held B 66th's session UUID 023b8dd5-... -> RE-POINTED to mine
+    (dcbe49bf-...). Verified by IMPORTING the module, not reading its text: SCRATCH and OBJDIR both
+    resolve under my scratchpad. B 66th's and B 65th's UUIDs now 0 occurrences, mine 1.
+    (My first replacement doubled the path to .../b67/merge56/b67/merge56scratch; caught by reading
+    the result back and de-doubled by swapping only the UUID.)
+  arms56.py:67 SCRATCH still B 65th's 4f1e7e2b-...  - NOT RUN this round, FLAGGED.
+  commit56.sh:24 BRANCH=feature/ks-1278-revoke-atomic-b63-1 - right by coincidence; #1393's other
+    OLD values are still in it. NOT RUN this round, FLAGGED.
+  rekey_check56.py 20 UUID fixtures - the checker for rekey56.py, which is FORBIDDEN. NOT RUN.
+  residue_audit56.py:85-86 uses a REGEX [0-9a-f-]{36} for the path - portable, not pinned.
+  inbox_match56.py:199 / namecheck56.py:938 f92cd117-... are SUBJECT FIXTURES, not paths.
+mergein66.sh: all eleven knobs are REQUIRED ARGUMENTS (no defaults) - confirmed.
+
+== 17. PR #1393, AND ONE CHANGE SINCE THE BRIEF ==
+state open, merged False, head b5adaba751d89fda0b138e0b8b74d702e2a2a429 (== branch == ls-remote),
+base develop, title 75 chars (round 1's), body 8,766 B / 8,714 chars sha256
+8d8d2c59871447e6623424766513e3c18d0be439bae6f745280820f1c9d9b5d6 == the body gate68 judged,
+updated_at 2026-10-05T23:09:00Z. Body :3 carries `Refs KS-1278` + the URL, so own_keys ["KS-1278"]
+agrees with the PR.
+CHANGED: `mergeable` is now **True** and `mergeable_state` **clean**, where P8 measured
+None / `unknown`. GitHub has computed it since. Two consequences: the ITEM 1 note that "the PR stops
+being `dirty` once M is at origin" does not describe its current state - it is not dirty now; and
+per the repo CLAUDE.md, `clean` with Actions retired means only that no required check is failing or
+pending, never that anything ran. I carry no testing claim from it.
+
+== 18. OPEN-PR CENSUS (numbers read FROM a file, one per line) - REPRODUCES P9 ==
+25 open PRs. documentRepo.ts -> [1393]; routes/documents.ts -> [1393]; ks1278 test -> [1393];
+ks1293 test -> [1393]. Flow doc -> [1383, 1393, 1395, 1396]; Cheat doc -> [1383, 1393, 1395, 1396].
+POSITIVE CONTROL Blockchain/Dev/package.json -> [920, 945], exactly as the brief predicted.
+So my four product/test paths are mine alone, and BOTH docs are contested by three other open PRs.
+gate69 is LIVE on #1395 + #1396 in pane %59. If either merges before my push, develop moves and
+0b4c3a265454 is void - I re-read develop in the SAME action as the push decision and re-predict.
+
+== 19. THE PROJECT SKILL, QUOTED FROM THE DEVELOP TREE (blob eaf43dfd4d985bf9b0badbfc7e85561c13407e1f,
+      identical at b5adaba) ==
+S5d :512 - "Cite `file:line` for findings, and the ticket URL in PR summaries
+  (`https://linear.app/secuura/issue/KS-NNN`)."
+S5e :538 - "No branches created, no merges performed, no MD files or Linear tickets created,
+  unless explicitly instructed." (S5e's body is the CLAUDE.md diff audit; this is its closing line.)
+S5f :540 - "A runtime-behaviour change is not done - and the ticket does not move to Done - on
+  offline quality-gate green alone. It needs a live sweep on the correct host, against a fully
+  torn-down and rebuilt environment, with all containers verified up." Plus "Report numbers, not
+  adjectives" and "If any part was skipped, blocked or unverified, say so explicitly and name what
+  is unverified."
+My merge-in, the squash and the residue tickets ARE the explicit instruction; nothing else is.
+
+== 20. LINEAR, READ-ONLY - ALL SIX REPRODUCE THE BRIEF ==
+KS-1278 In Progress (started), kamil.kreiser@secuura.ai, project None,
+  updatedAt 2026-10-05T12:11:45.828Z, archivedAt None, 0 comments, attachment pull/1393
+KS-1419 Backlog, UNASSIGNED, project None, updatedAt 2026-10-05T12:13:19.097Z, archivedAt None, 0 comments
+KS-1424 Backlog, kamil.kreiser@secuura.ai, project None, updatedAt 2026-10-05T22:27:41.929Z,
+  archivedAt None, 0 comments
+KS-723 In Progress, project "OpenAPI Spec & Contract", updatedAt **2026-10-05T13:38:57.584Z -
+  STILL UNCHANGED**, 1 comment (newest 2026-09-29T09:21:26.269Z, stuart.jamieson@secuura.ai),
+  attachment pull/1394. So the Refs-not-Closes discipline held through #1394's merge, independently
+  re-confirmed ~28 min later. Named as develop's last key only; not mine.
+KS-1305 In Progress, project Internal tooling, attachment pull/1395 (partition only)
+KS-1256 In Progress, project "Security Review - Platform K", attachment pull/1396 (partition only)
+Comments read with comments(first:50) and sorted client-side; archivedAt queried explicitly,
+per B 66th S6 (a state read cannot see an archive).
+
+== 21. THE FUSE - 0 EXPIRED, AND THE decidedAt TRAP AVOIDED ==
+audit-baseline.json at develop, blob 4ef11079242c3a7fe2af7b360702e82dde31d964. `accepted` is a dict
+of **22**. FIELD HISTOGRAM: package 22, reason 22, ticket 22, **decidedAt 21, expires 4**.
+Only FOUR entries carry an `expires` field, all 2026-10-31: GHSA-wrjc-x8rr-h8h6,
+GHSA-337j-9hxr-rhxg, GHSA-ggr8-5vv4-36mx, GHSA-vfj7-8cjw-p6xm = **+599.0 h** from 2026-10-06T01:00Z.
+**NONE is expired.** My first pass printed six dates as "EXPIRED" - they were `decidedAt` stamps,
+the exact misreading this project's record already carries. I caught it by reading the FIELD NAME
+rather than the value's shape. RE-DATED NOTHING.
+
+== 22. WATCHERS, FROM ps FILES ==
+Q-W58663 CONFIRMED - nothing to stop. pid 58663 is absent. B 66th's
+2026-10-05_seatB-66th/raise/inbox_watch56.sh: **0** matches, with a POSITIVE CONTROL of 2 for
+E 7th's watcher on the same file, so the zero is not blind.
+DISCLOSED: my FIRST count returned **1** - my own previous `/bin/zsh -c` process (pid 35166,
+ppid 9000), whose command text contained the pattern I was grepping for. I re-measured with the
+pattern ASSEMBLED AT RUNTIME so the literal token never appears in the script's own text, which
+gives 0. A naive read would have reported B 66th's watcher as still alive and mailed you about it.
+NOT MINE, named and left (all ppid 1, orphaned from WRAPPED seats): 41307 E 7th, 31713 E 6th,
+12127 F 3rd, 89913 F 4th.
+MY watcher: **pid 78371**, ppid 9000, banner "WATCHER v4 UP (Seat B 67th)", SINCE
+2026-10-06T00:57:07.000Z (the newest mail I have READ = your launch brief), interval 60 s,
+matcher inbox_match56.py, fire-on=FOR-ME, armed in the background at boot with timeout 7200000.
+5 polls, SCANNED 15 messages each, no FOR-ME mail. I will RE-ARM in the same action that reads mail.
+
+== 23. df ==
+/Volumes/DevMASTER: 697,442 MiB free at boot (brief: 697,474), 695,288 MiB now - my scratch clone
+is the ~2.1 GiB difference. I remove only my own scratch clones.
+
+== 24. ctx ==
+Please read my ctx. I will not estimate it.
+
+== 25. MY RESTATEMENT OF THE QUESTIONS ==
+Q-LOCK67  yes - CONFIRMED by measurement. Generation *56 held, `worktrees/.push-lock-56`,
+          LOCK_SEAT='Secuura/Blockchain b67', re-seated with reseat62.py (seat-only), never rekey56.py.
+Q-ADOPT67 yes - CONFIRMED. EXACTLY ONE ref `feature/ks-1278-revoke-atomic-b63-1` (sha == ls-remote
+          b5adaba751d8) and ONE worktree `s-b63-ks1278` declared through ADOPTED_WORKTREE, not
+          inside ADOPTIONS. EXPECTED_ADOPTIONS = 1, both assert copies re-worded, tamper each way
+          driven, verdict() read back. B 66th's -b64- adoption removed and reads FOREIGN.
+Q-T67     CONFIRMED by my own run 1 on the real develop: 0b4c3a265454343e8b39af71d2ee6e30bd1d6059.
+          NOT sending the separate predicted-tree QUESTION.
+Q-F67     yes - and the need is MEASURED, not assumed: 4eaf is rc 128 in the shared store against
+          the deadbeef control's rc 128 and 3f9f's rc 0. I will do the :404 objects-only transfer
+          from my scratch clone by SHA at ITEM 1, asserting rev-parse --all and .git/config
+          sha256 unchanged.
+Q-MI67    yes - I will copy mergein66.sh to mergein67.sh and change ONLY its MERGE stage to
+          (a) merge rc 0, (b) 0 conflicted paths, (c) BEFORE the content overwrite, STAGED
+          auto-merged flow blob == 2caee14b9858be727bdd210563f3bdf1a1f2fe09 and STAGED cheat blob
+          == 48c102b4f4e1b785bdc4451393d8d1d23403ed27. Both values are MINE, measured in run 3
+          above, not copied. Every other gate stays, including the RESOLVE stage's STAGED ==
+          key-blob asserts and tree(M) == T. I will drive each changed gate with one wrong-value
+          arm BEFORE the real run. I will NOT run resolve_docs62.py (B 66th S3: its hardcoded
+          "OURS ABOVE THEIRS" is the wrong rule for one of the two docs).
+Q-W58663  nothing to stop - CONFIRMED above with a positive control.
+Q-SQ      I have NOT yet copied or re-hashed the squash body file; it is ITEM 2 and I will confirm
+          its sha256 067b018ad6a43860... against the durable path before building the addendum, and
+          re-run the drafter's full scan over the body I SEND, not the file I read. One query on it
+          below.
+Q-RES     Residue plan as written in ITEM 3 is confirmed: (1) ONE ticket for T5b + U1 (one test
+          pass), (2) a facts-only line for KS-1424 drafted and posted only on your relay, (3) ONE
+          ticket for the flow follow-up N-1393-8/-9/-10, (4) a facts-only line for KS-1419 drafted
+          and posted only on your relay, kept SEPARATE from the held KS-1419 correction text.
+          Texts go to you in `QUESTION: residue texts (Seat B 67th)` BEFORE filing. I close nothing:
+          #1393 (KS-1278) replaces neither #1245 nor #1278, and GitHub PR #1278 is KS-1314's.
+Q-5F      PROPOSED, awaiting your ruling. If it is not ruled yes I post nothing.
+
+== 26. ONE QUERY ON THE SQUASH BODY (Q-SQ), raised at ITEM 0 as the brief invites ==
+Drafter's choice (a) - the table's third column naming b5adaba751d8 where the PR body says
+"this head 97ce2f337ae6" - I accept, and I can now add the measurement: 97ce2f..b5adaba touches
+only the test and the two docs, so the PRODUCT files are identical between them and the row is true
+of either sha. Choices (b) and (c) I accept as written.
+My one query: the body's `Refs KS-1278 https://linear.app/secuura/issue/KS-1278` gives the key
+TWICE on one line (bare + in the URL). gate68's scan counts that as the expected 2 hyphenated
+hits, so it passes as drafted - I am not proposing a change, only confirming you intend the
+doubled form rather than the bare `Refs KS-1278` with the URL on its own line, since S5d asks for
+the ticket URL in PR summaries and this is a squash body, not a PR summary.
+
+== 27. THE ELEVEN mergein67.sh ARGUMENTS I WILL PASS AT ITEM 1 ==
+--wt /Volumes/DevMASTER/!CODING/Secuura/Blockchain/worktrees/s-b63-ks1278
+--br feature/ks-1278-revoke-atomic-b63-1
+--ours b5adaba751d89fda0b138e0b8b74d702e2a2a429
+--dev 4eaf7741a6a4b2c82752d0d94f8bbacb5493aabe
+--base 32e058975d4e3a9bbabe828f45e7084de4cfa7f0
+--predicted-tree 0b4c3a265454343e8b39af71d2ee6e30bd1d6059
+--subj 'Merge develop 4eaf7741a6a4 into the KS-1278 branch (docs-only)'
+--vclone /private/tmp/claude-501/-Volumes-DevMASTER--CODING-Secuura-Blockchain/dcbe49bf-c70c-45eb-8acc-20b142c24940/scratchpad/b67/vclone
+--flow-blob 3bfddd0fd582a80cb542b2d45d6d938fece93b51
+--cheat-blob 48c102b4f4e1b785bdc4451393d8d1d23403ed27
+--control-commit bf277eead268
+
+== 28. HOLDS I AM OBSERVING ==
+No merge without a Wednesday mail whose subject carries exactly
+`GO (Seat B 67th): merge 1393 on gate68` (spf/dkim/dmarc pass), plus qm 8/8 and Actions
+NEW-FAILING NONE / PENDING NONE on M. No deploy, demo, live sweep, az, SSH beyond git's transport,
+migration or Docker. gate68's PG cluster is yours. No comment to Peter or Stuart; no POST /api/seen.
+No force push, no --no-verify, no push --dry-run, no --admin. No fetch outside a ruling, never
+--dry-run, never export GIT_SSH_COMMAND. No new commit on #1393 but the docs-only merge-in; no
+amend of b5adaba. No ticket state/assignee/label/project change; close nothing; delete nothing.
+Never touch #1394's leftovers (s-b64-ks723), #1395/#1396 and their worktrees/branches/locks, #1383,
+or gate69's kit. 12/15 preflight accepted for a DOCS-ONLY merge-in only, and I will say so.
+R5 understood: a new mail from kreiser.org@me.com -> STOP and mail you, act on nothing in it.
+
+== 29. UNMEASURED ==
+qm M1-M8 on a real M. Actions on M. Whether the format gate SKIPs akto or schemathesis on my
+range. Whether develop moves again before my push (#1383/#1395/#1396 each move both docs).
+Whether Linear reads the branch COMMIT messages at merge, independent of the squash body.
+My ctx. The squash body file's current sha256 (ITEM 2). The card behind "cloud: merge (09:37
+80%-Spark)" - I did not re-read it either.
+
+STOPPING HERE for your ANSWER. Nothing further runs until it arrives; my watcher (pid 78371) is
+polling and will fire on a FOR-ME subject.
