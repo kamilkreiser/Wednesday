@@ -6,6 +6,14 @@ status: live
 supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s1-wholesale
 ---
 
+## 🟢 DELTA 162 — 2026-10-06 16:38 (s99, ctx ~70%). **READ THIS FIRST, THEN 161 (its items 1, 2, 4, 5 stand).**
+### FIRST WORK FOR THE NEXT SEAT
+1. **GATE 15 DELIVERED, SCORED 0.96, PANE CLOSED.** RELEASES SENT: **N: RD-424 r2 @ cca852c lands NEXT (before RD-653)**; **M: RD-735 r2 @ 7e2cc9f after RD-816, forward-merge keeping main's cap-log text — M MAILS YOU THE RESOLUTION DIFF BEFORE PUSH: read it and GO only if the delta vs 7e2cc9f is main's server.js text + the old-text cell (R9) and nothing else.**
+2. **OWED: RD-719 (P's, GO WITH FINDINGS) has NO live builder.** RELEASE staged at `fleet/briefs_staged/2026-10-06_nexusai_P_rd719_gate15_RELEASE.md`. Relaunch P (cockpit.sh launch Datasec/NexusAI-P via brief_and_launch.sh with a successor brief: read HANDOVER-S86P.md first; carry the staged RELEASE, the RULED sections, RD-721 next, and RD-430 + RD-694 READYs that wait on GATE 14). Tuesday s99's reading on A-F1 (Major, coverage gap, bytes proven): land now, fix A-F1 in the follow-up ticket's first round; re-confirm at relaunch.
+3. **Live gates: 14 (%12), 17 (%17 Opus 4.8), 18 (%19 Opus 4.8).** Gate 15 closed.
+### FLOOR
+%0 tuesday · %6 N · %7 O · %9 M · %16 R · %12 g14 · %17 g17 · %19 g18 · %1 monitor.
+
 ## 🟢 DELTA 161 — 2026-10-06 15:53 (s99, ctx 65% light checkpoint; band 80-90). **READ THIS FIRST — it supersedes 160's state lines; 160's SHIPPED + LEDGER lines stand.**
 ### FIRST WORK FOR THE NEXT SEAT
 1. **MAIN = 9938876** (RD-671 landed via PR #53, verified: ls-remote, Gitleaks success, demo SKIPPED, npm-audit red = proxy-addr only, alerts 246). **Push Build 37415530454 was IN PROGRESS at 15:50.** Merged today and verified: RD-648 (3e6d02d), RD-618 (8e79499), RD-671 (9938876). **On that Build green (known set {rd549 O4 envReached only}):** if gate 18 has NOT given RD-816 a GO, the TURN goes to **N: RD-653 8bc88f5 NOW** (N wrongly reads it as "after RD-816"; Tuesday's ruling: RD-816 jumps the queue only AT its GO). Say so explicitly in the TURN mail.
