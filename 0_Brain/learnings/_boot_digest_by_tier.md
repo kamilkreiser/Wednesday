@@ -7,7 +7,7 @@ status: live
 
 # Boot digest BY TIER — W whole, M rules-only, every project case a handle
 
-Generated 2026-10-07 08:20 from 220 lesson files (995,322 B). M 36 · MIXED 5 · P-Datasec/HPSM-POC 1 · W 178. 5 project CASE sections inside MIXED files are reduced to one line each: the heading and the path to read it at. W blocks are exactly what the default digest carries; M blocks drop the section index and keep the rules; a P file is a single handle. The CASES behind every rule live only in the lesson files — open one the moment its rule fires.
+Generated 2026-10-07 08:54 from 221 lesson files (998,158 B). M 36 · MIXED 5 · P-Datasec/HPSM-POC 1 · W 179. 5 project CASE sections inside MIXED files are reduced to one line each: the heading and the path to read it at. W blocks are exactly what the default digest carries; M blocks drop the section index and keep the rules; a P file is a single handle. The CASES behind every rule live only in the lesson files — open one the moment its rule fires.
 
 ## The T9 SSD is the master — Wednesday must be fully portable
 `2026-07-31_fully-portable-drive.md` · principle · 2026-07-31 · status: superseded — the "T9 is the master" half by [[2026-08-25_one-drive-devmaster-is-master]] (2026-08-25); the portability principle itself still lives · tier: W
@@ -6990,4 +6990,17 @@ sections (open the file for these): RULED 2026-10-05 ~11:1x — Kam (terminal, v
 **Unchanged:** the v1.3 signature classes (production, money, comms to humans, irreversible); the QA gate before every merge; KS-535; Phase 0 re-tag; client scope (one client per Spark task).
 
 **Family:** [[2026-10-06_past-70pct-spark-takes-80pct-of-tasks]] · [[2026-09-14_at-90pct-weekly-usage-no-new-agents-wednesday-plus-local-model]] (the stop this lifts, for this seat) · [[2026-10-05_october-deploy-both-boxes-when-ready]] · [[2026-09-06_a-scoped-override-carries-its-own-expiry]] · [[2026-08-03_go-slow-earn-autonomy]] (rule 5: every grant recorded).
+
+
+## Disk running out? ARCHIVE old builds and other unneeded bulk to G-DRIVE first, and clear the archive after about a month
+`2026-10-07_archive-bulky-leftovers-to-g-drive-clear-after-a-month.md` · preference · 2026-10-07 · status: live · tier: W
+
+**The operative case, so the headline matches it:** a drive is filling (a box, DevMASTER, a deploy host), or a round is about to free space, and the plan says *delete* or *prune* old builds, rollback images, scratch clones or other bulk that is not needed now. **Before any deletion, ask whether it can be MOVED to G-DRIVE instead**, dated, and cleared there after about a month.
+
+**How to apply:**
+1. **Archive before delete.** A space-freeing plan lists what can go to G-DRIVE first; deletion is for what cannot be moved (or is regenerable and Kam's 2026-09-29 rule already covers it). This narrows, never widens, what a seat may delete.
+2. **Dated, findable, and sized.** Archive under a dated folder naming the project and the source (`/Volumes/G-DRIVE/<Client>/<Project>/archive/<YYYY-MM-DD>_<what>/`), with a manifest (what, from where, sizes, sha256 where practical) beside it. One client per folder (hard rule 2).
+3. **"Clear after a month or so"** is a review, not an automatic delete: at the monthly check, archives older than ~30 days are listed to Kam (or cleared under his standing word, stated as Wednesday's reading). Never a silent sweep.
+4. **Remote boxes:** for images on a VM (demo, kintsugi), the archive route is `docker save` streamed to G-DRIVE over SSH; measure its size and time before relying on it. A secret never goes into an archive (no `.env`, no keys).
+5. **Briefs carry it:** any disk-freeing brief names the G-DRIVE option and its path before any deletion step.
 

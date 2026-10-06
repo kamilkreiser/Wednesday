@@ -2597,3 +2597,8 @@ INCLUDED until he says otherwise.
 > "here is the transcript from this mornings Meeting with HP" + the Teams transcript paste (kept verbatim at 0_Brain/reference/2026-09-29_hpsm-hp-meeting/transcript_partial_verbatim.txt)
 
 *Note:* the paste covers ~3 of ~56 minutes; filed and summarised; asked Kam for the Teams download before briefing HPSM.
+
+## 2026-10-07 08:54 — Kam (live board (view=wednesday), verbatim)
+> Also, with regards to running out of hard disk space, don't forget about G-Drive. You can put the old builds on there and then clear them after a month or so. This goes for other things that are taking up space but not necessary.
+
+*Note:* filed as learnings/2026-10-07_archive-bulky-leftovers-to-g-drive-clear-after-a-month.md; receipted on the panel
