@@ -1,0 +1,62 @@
+READ runs: at 4a400d7aa9dd 6 workflows | develop b39051390ff6 2 | #1397 head b39051390ff6 2
+RUN Dependabot standalone locks              head completed/skipped      develop ABSENT/-               #1397 ABSENT/-
+RUN PR Security Gates (KS-168)               head completed/failure      develop completed/failure      #1397 completed/failure
+RUN PR — Lockfiles                           head completed/success      develop ABSENT/-               #1397 ABSENT/-
+RUN Security Scanning                        head completed/failure      develop ABSENT/-               #1397 ABSENT/-
+RUN pr                                       head in_progress/None       develop completed/failure      #1397 completed/failure
+RUN pr-premerge-ack                          head completed/success      develop ABSENT/-               #1397 ABSENT/-
+NEW-FAILING vs develop ['Security Scanning'] | PENDING ['pr'] | PLANTED-NAME CONTROL reported: True
+RED PR Security Gates (KS-168) (run 37530576312)
+  JOB Code Security Gates          failing steps ['All shell test suites (KS-666 / KS-731 — globbed, not listed)'] | log 150619 B, ##[group] 24, failure-signature lines 9, kit needles {'a REAL finding still FAILS (1) — the bound does not convert findings into skips (KS-788)': 0, 'expected exit 3 (refused), got 1': 0, 'expected exit 2 (COULD-NOT-CHECK), got 1': 0}, change needles 0, fabricated 0
+      SIG ##[error]Process completed with exit code 1.
+      SIG 0 passed, 1 failed (of 27 cells) — aborted
+      SIG 0 passed, 5 failed
+      SIG PASS: CONTROL two clean migrations still apply, print applied=2 failed=0, and exit 0
+      SIG bootstrap_login_diagnosis.test.sh: 17 passed, 1 failed
+      SIG manifest_readers_agree: 9 passed, 15 failed
+      SIG run_migrations_failure_exit_code: 6 passed, 1 failed
+      SIG run_shell_suites: 57 passed, 4 failed
+      SIG shell suites: 62 passed, 6 failed, 0 skipped (of 68)
+ COMPARATOR develop run 37483332608
+  JOB Code Security Gates          failing steps ['All shell test suites (KS-666 / KS-731 — globbed, not listed)'] | log 149863 B, ##[group] 24, failure-signature lines 9, kit needles {'a REAL finding still FAILS (1) — the bound does not convert findings into skips (KS-788)': 0, 'expected exit 3 (refused), got 1': 0, 'expected exit 2 (COULD-NOT-CHECK), got 1': 0}, change needles 0, fabricated 0
+      SIG ##[error]Process completed with exit code 1.
+      SIG 0 passed, 1 failed (of 27 cells) — aborted
+      SIG 0 passed, 5 failed
+      SIG PASS: CONTROL two clean migrations still apply, print applied=2 failed=0, and exit 0
+      SIG bootstrap_login_diagnosis.test.sh: 17 passed, 1 failed
+      SIG manifest_readers_agree: 9 passed, 15 failed
+      SIG run_migrations_failure_exit_code: 6 passed, 1 failed
+      SIG run_shell_suites: 57 passed, 4 failed
+      SIG shell suites: 62 passed, 6 failed, 0 skipped (of 68)
+ COMPARATOR pr1397 run 37483332608
+  JOB Code Security Gates          failing steps ['All shell test suites (KS-666 / KS-731 — globbed, not listed)'] | log 149863 B, ##[group] 24, failure-signature lines 9, kit needles {'a REAL finding still FAILS (1) — the bound does not convert findings into skips (KS-788)': 0, 'expected exit 3 (refused), got 1': 0, 'expected exit 2 (COULD-NOT-CHECK), got 1': 0}, change needles 0, fabricated 0
+      SIG ##[error]Process completed with exit code 1.
+      SIG 0 passed, 1 failed (of 27 cells) — aborted
+      SIG 0 passed, 5 failed
+      SIG PASS: CONTROL two clean migrations still apply, print applied=2 failed=0, and exit 0
+      SIG bootstrap_login_diagnosis.test.sh: 17 passed, 1 failed
+      SIG manifest_readers_agree: 9 passed, 15 failed
+      SIG run_migrations_failure_exit_code: 6 passed, 1 failed
+      SIG run_shell_suites: 57 passed, 4 failed
+      SIG shell suites: 62 passed, 6 failed, 0 skipped (of 68)
+ HISTORY last 12 runs of PR Security Gates (KS-168): {'failure': 12} | on develop: ['2677a1258daa', '40270d263ab0', '8a8d7b9694c9', '9d8bc3b8533d', 'b39051390ff6']
+ CLASSIFY PR Security Gates (KS-168): PRE-EXISTING 
+RED Security Scanning (run 37530576133)
+  JOB Dependency Audit             failing steps ["Audit-contract suites (the gates' own validator)"] | log 44102 B, ##[group] 19, failure-signature lines 15, kit needles {'a REAL finding still FAILS (1) — the bound does not convert findings into skips (KS-788)': 2, 'expected exit 3 (refused), got 1': 1, 'expected exit 2 (COULD-NOT-CHECK), got 1': 1}, change needles 0, fabricated 0
+      SIG ##[error]Process completed with exit code 1.
+      SIG AssertionError [ERR_ASSERTION]: AUDIT_ADVISORY_TIMEOUT_MS=abc should be refused, got 1
+      SIG AssertionError [ERR_ASSERTION]: The input did not match the regular expression /GHSA-redp-roof-0001/. Input:
+      SIG AssertionError [ERR_ASSERTION]: expected exit 0 (clean), got 1
+      SIG AssertionError [ERR_ASSERTION]: expected exit 2 (COULD-NOT-CHECK), got 1
+      SIG AssertionError [ERR_ASSERTION]: expected exit 3 (refused), got 1
+      SIG AssertionError [ERR_ASSERTION]: expected exit 3, got 1
+      SIG ✖ audit-locks: POSITIVE CONTROL — a reachable endpoint with no advisories is 0, not 1 and not 2
+      SIG ✖ audit-locks: a REAL finding still FAILS (1) — the bound does not convert findings into skips (KS-788)
+      SIG ✖ audit-locks: a malformed baseline entry exits 3, not 1 and not 2
+      SIG ✖ audit-locks: an UNPARSEABLE baseline exits 3, not 1 (KS-763 QA F3)
+      SIG ✖ audit-locks: an endpoint that never answers is SKIP (2), not a hang (KS-788)
+ COMPARATOR develop: ABSENT
+ COMPARATOR pr1397: ABSENT
+ HISTORY last 12 runs of Security Scanning: {'failure': 12} | on develop: []
+ CLASSIFY Security Scanning: UNCLASSIFIED ["Dependency Audit: no comparator (develop / #1397) shows the same job + step with a failure signature covering the head's 15 lines"]
+NOTE: CI `Dependency Audit` runs the audit gates' own VALIDATOR suite in a CI checkout — a different instrument from the in-hook legs 6 / 7.

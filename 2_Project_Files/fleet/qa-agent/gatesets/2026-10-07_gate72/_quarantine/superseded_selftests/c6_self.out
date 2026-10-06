@@ -1,0 +1,8 @@
+PASS COPY --from a FULL-ci builder ships its node_modules WITH dev deps
+PASS final-stage `npm ci --omit=dev` ships prod deps only
+PASS PLANTED root `COPY package*.json` + npm ci FIRES R1
+PASS a service-dir COPY does not read as the root lock
+PASS PLANTED `COPY . .` + npm ci FIRES R1 (a whole-context copy carries the root lock)
+PASS a dist-only COPY --from does NOT ship node_modules
+PASS continuation lines join; comments drop
+SELFTEST 7/7

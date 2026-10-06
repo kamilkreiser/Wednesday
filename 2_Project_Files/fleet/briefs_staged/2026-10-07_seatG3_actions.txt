@@ -1,0 +1,55 @@
+STATUS: #1406's two red Actions are PRE-EXISTING, proved BY LOG, not by D 10th's say-so. Material to
+gate72, so sending it now rather than letting the gate rediscover it. Still HOLDING, not wrapping.
+
+WHAT WENT RED. Since my READY, two of the three in_progress workflows completed as FAILURE on head
+4a400d7aa9dd:
+  Security Scanning ............ FAILURE -> job `Dependency Audit`
+                                 step "Audit-contract suites (the gates' own validator)"
+  PR Security Gates (KS-168) ... FAILURE -> job `Code Security Gates`
+                                 step "All shell test suites (KS-666 / KS-731 — globbed, not listed)"
+  Still green/neutral: PR — Lockfiles **success**, pr-premerge-ack **success**,
+  Dependabot standalone locks skipped, `pr` still in_progress.
+  PR reads OPEN / MERGEABLE / UNSTABLE.
+
+🔴 I DID NOT ASSUME THESE WERE THE KNOWN PRE-EXISTING PAIR. D 10th's finding 9 says to name them BY
+LOG, and the first one lands in exactly the area my change touches — the audit contract — so an
+assumption would have been worthless here. I fetched the logs and a control.
+
+THE ACTUAL FAILURE TEXT (job log 44,102 B; POSITIVE CONTROL: 56 occurrences of "audit" in it, so it
+is not a swallowed 302 reading as zero):
+  `✖ audit-locks: a REAL finding still FAILS (1) — the bound does not convert findings into skips (KS-788)`
+  `AssertionError [ERR_ASSERTION]: expected exit 3 (refused), got 1`  (x3)
+  `AssertionError [ERR_ASSERTION]: expected exit 2 (COULD-NOT-CHECK), got 1`
+These are the audit gate's OWN validator asserting exit codes, not an advisory finding.
+For contrast my local `npm run audit:contract` ran **59 pass / 0 fail**, matching
+`scripts/audit/expected-case-count` = 59.
+
+CONTROL 1 — the workflow's own history, 12 most recent `Security Scanning` runs: **12 of 12 FAILURE**,
+across unrelated branches — ks-571-b package refresh, ks-571-d docs and html, ks-571-c observability,
+ks-1136, ks-1305 prisma, ks-1256, ks-1278 revoke, a dependabot branch, ks-723 — and
+**`feature/ks-1425-advisory-lock-refresh-d10-1`**, D 10th's own round, which MERGED.
+
+CONTROL 2 — `PR Security Gates (KS-168)`, 10 most recent runs: **10 of 10 FAILURE, 0 success**, and
+**three of them are on `develop` ITSELF**, one at **`b39051390f`** — which is my own parent commit.
+So develop fails this workflow at the exact sha I branched from.
+
+CONTROL 3 — the CLOSEST comparable, D 10th's merged lock-refresh run: same workflow, same job
+`Dependency Audit`, **same failing step** "Audit-contract suites (the gates' own validator)", and its
+log carries the **same KS-788 assertion 6 times** and `expected exit 3` **3 times**. Log sizes 44,064
+there vs 44,102 here.
+
+CONCLUSION: both reds reproduce on develop and on the closest comparable merged PR, and neither
+mentions shell-quote, @modelcontextprotocol/sdk or pbkdf2. They are not caused by #1406. I am
+reporting them, not "fixing" them, and I have filed nothing new — if you want a ticket for the
+audit-contract validator drift (`expected exit 3, got 1`), say so and name the lane; it is not in my
+brief and I will not file it unasked.
+⚠ Note the shape of it though: the failing step is **the audit gate's own validator**, on the same PR
+whose purpose is to clear the audit gate. The two legs that matter ran IN-HOOK and passed
+(push.out:66 and :88, three ids 0 times against a 15-id control). But a reviewer who sees "Dependency
+Audit FAILURE" on an advisory PR will reasonably stop, so the gate should have this in hand.
+
+UNCHANGED since READY: #1406 OPEN, head 4a400d7aa9dd, develop still b39051390ff6, 0 locks held,
+0 writes anywhere since the PR. Handover written at
+`5_Project_History/HANDOVER-seatG3-2026-10-06.md` (132 lines, 10,120 B, sha256/16 b44c85a66479f72c)
+so a successor can take the GO if my line is crossed. Daily note appended, 13 headings unchanged.
+Watcher pid 16829 armed, SINCE 2026-10-06T21:04:03.000Z. HOLDING for gate72.

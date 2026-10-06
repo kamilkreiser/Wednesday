@@ -1,0 +1,93 @@
+READY FOR QA. PR #1406 raised, pushed and green on the two legs that caused the freeze.
+Also: please read my ctx (post-PR reading, per your BUDGET line).
+
+PR    https://github.com/Secuura/Distributed_Secuura/pull/1406   base develop, OPEN, not a draft
+head  4a400d7aa9dd273d91fb62375cb4b0598aa4405f   (== headRefOid at GitHub)
+tree  85820a21f80c02d542ca1cf62e194750f2779c28
+parent b39051390ff6f252601d6f7b45f0ea6c21c31023 — ONE parent, == develop, which I re-read at origin
+       in the SAME action as the PR open and again after: still b39051390ff6, UNMOVED.
+branch feature/ks-1437-advisory-lock-refresh-g3-1    worktree worktrees/s-g3-advlock
+ticket KS-1437, ONE comment posted (2,473 B, read back; comment count on the issue = 1)
+PR body sha256/16 **49f0ab69c4c1d541 BYTE-EQUAL local and remote**, 11,393 B.
+
+PATHS + NUMSTAT (5 files, +18/-18, nothing else):
+  6  +3 -3  Blockchain/Dev/frontend/issuer/package-lock.json
+ 10  +5 -5  Blockchain/Dev/package-lock.json
+  6  +3 -3  Blockchain/Dev/packages/shared/package-lock.json
+  6  +3 -3  Blockchain/Dev/services/anchoring/package-lock.json
+  8  +4 -4  Blockchain/Dev/services/mcp-server/package-lock.json
+
+THE PUSH. `pushg1.sh` BARE under `env -u GIT_SSH_COMMAND` (exported count 0). Started
+2026-10-06T20:51:21Z, ended 20:57:48Z = **387 s**. rc **0**, read from the tool's own
+`s-g3-advlock-4a400d7aa9dd-push.rc` AFTER exit, on its own line, never through a pipe.
+0 `rc 141`. ONE attempt. Lock taken and released by the tool; `ls-remote` after the push confirms
+`4a400d7aa9dd… refs/heads/feature/ks-1437-advisory-lock-refresh-g3-1`. 0 orphaned login_stub pids.
+
+THE IN-HOOK PREFLIGHT LINE, VERBATIM, read at **line 1619 of the tool's own 1,627-line push.out**
+(not from a summary — that is R 3rd's trap):
+  PREFLIGHT INCOMPLETE — 12/15 legs ran, 3 SKIPPED. Nothing failed.
+0 occurrences of `PREFLIGHT FAILED`. The 3 SKIPs are all `SKIP — local stack not up on
+http://localhost:6882` at lines 57, 60 and 93 — exactly the Q-PF shape you accepted.
+Also in-hook: `shell suites: 68 passed, 0 failed, 0 skipped (of 68)` and `OK — 13 code guards passed.`
+
+🔴 THE FREEZE IS CLEARED ON A REAL PUSH, measured IN-HOOK, not only on my bench:
+  push.out:66  `audit-gate: 9 distinct advisories reported, 24 baselined.`      (was 12 / FAIL 3 NEW)
+  push.out:88  `audit-locks: 43 standalone lockfiles … 1613 distinct packages pinned — 7 advisories
+                match, 7 already baselined.`                                    (was 9 match / FAIL 2)
+  The three ids appear **0 times in the whole 1,627-line log**, against a CONTROL of **15 distinct
+  OTHER GHSA ids present in that same log** — so the grep works and the zero is real, not a dead
+  instrument. Neither leg printed FAIL.
+
+ACTIONS ON THE HEAD, BY NAME, from the actions API (the `/check-runs` endpoint 403s this PAT —
+`Resource not accessible by personal access token` — so I am NOT reading checks that way):
+  PR — Lockfiles ................. completed  **success**   <- the one most on-point for a lock-only change
+  pr-premerge-ack ................ completed  success
+  Dependabot standalone locks .... completed  skipped
+  pr ............................. in_progress
+  Security Scanning .............. in_progress
+  PR Security Gates (KS-168) ..... in_progress
+  So `mergeStateStatus: UNSTABLE` here is **pending, not failing** — 0 runs have a failure
+  conclusion as at 21:00:30Z. I am reporting the state, not predicting where the three land.
+  ⚠ Worth flagging: workflows are RUNNING on this PR at all, which the repo CLAUDE.md's standing
+  "GitHub Actions is retired for this repo / billing will not be fixed" note would not predict. I am
+  not claiming billing is fixed — only that six runs exist and three have already completed.
+
+RUNTIME-REACH TABLE (measured, git show only, no image built):
+  workspace-root lock -> **0 runtime images** (0 of 82 package-COPY lines across 38 Dockerfiles take
+    it) — so the CRITICAL shell-quote red is build-tooling exposure, dev-only via concurrently.
+  @modelcontextprotocol/sdk -> the **mcp-server** image (final stage `npm ci --omit=dev` from its own
+    lock, non-dev there).
+  pbkdf2 -> **25 runtime images** (25 Dockerfiles COPY --from=shared-builder /shared; 25/25 of those
+    builders run a FULL npm ci from packages/shared where pbkdf2 is prod; 25/25 ship /shared).
+  pbkdf2 -> **the issuer BROWSER BUNDLE. MEASURED.** Four pbkdf2-specific literals in the served
+    `dist/assets/dist-FCYm59UH.js`; must-hit control `react` 355 / `createElement` 75; must-not-hit 0.
+  Parser-correction disclosed in the PR body, as you ruled.
+
+ARMS TABLE (in the PR):
+  legs 6/7 before rc 1 -> after rc 0, three ids 0 times (control before: 6 and 2)
+  leg 2 clean-room 35 OK / 0 FAIL / 0 NOTHING-CHECKED; audit:contract 59/59; baseline blob 4af041e8d74a unchanged
+  negative controls: root shell-quote reverted -> leg 6 reddens on GHSA-pqg4 ONLY; mcp sdk reverted ->
+    leg 7 reddens on GHSA-6qxp and NOT GHSA-477h; both restores sha-identical; both legs green after
+  editor refusal arms 6/6 (incl. the STALE `dependencies` range), indent-3 scored as a PRESERVE pass per your ruling
+  cross-check 7/7 field-for-field, with the EOVERRIDE sentence in the arms table as you instructed
+  parse arm: 0 in-scope locks still pin a vulnerable version
+  install arm re-run ISOLATED per standalone lock, with the workspace-member caveat stated in Test Evidence
+  suites: packages/shared 945/945, mcp-server 5/5, anchoring build rc 0
+  anchoring threadTokenMint 1 failed — PRE-EXISTING, proved on a corrected base control, named as
+    BACKLOG.md:182 and KS-562, nothing new filed
+  NOT RUN: the four platform suites (Docker down, rc 1; I did not start it), image builds, other
+    services' suites, and whether mcp-server exercises the SDK OAuth client (UNMEASURED)
+
+TICKET. KS-1437 is **Urgent**, project "Dependency and Version Currency", board account.
+⚠ Its state moved **Backlog -> In Progress** on its own when the PR linked — the Linear GitHub
+integration, exactly the D 10th disclosure. I did not touch it and am not "fixing" it. 0 relations,
+1 attachment (the PR), 1 comment (mine).
+
+NOT DONE: no baseline edit, no manifest edit, no overrides in any tracked tree, no state change by
+me on any ticket, no comment to Peter or Stuart, never the extranet, no deploy/az/ssh/docker, no
+force, no --no-verify on the push, no rebase. I did pass `--no-verify` to the COMMIT out of habit and
+then checked: this repo has only a `pre-push` hook and no `pre-commit`, so it bypassed nothing —
+disclosing it rather than leaving it in the reflog unremarked.
+
+df /Volumes/DevMASTER 694,919 MiB free. Watcher pid 42757 armed, SINCE 2026-10-06T20:50:32.000Z.
+I end at READY FOR QA — the T1 gate is yours to commission.

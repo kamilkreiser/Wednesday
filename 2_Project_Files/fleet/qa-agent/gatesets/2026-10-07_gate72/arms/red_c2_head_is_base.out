@@ -1,0 +1,16 @@
+C2 diff #1406 head b39051390ff6f252601d6f7b45f0ea6c21c31023 base b39051390ff6f252601d6f7b45f0ea6c21c31023
+INFO PLAN from the BASE b39051390ff6 + the registry: 44 in-scope locks of 45 tracked; 7 vulnerable entries in 5 locks: ['frontend/issuer pbkdf2', 'package-lock.json @modelcontextprotocol/sdk', 'package-lock.json pbkdf2', 'package-lock.json shell-quote', 'packages/shared pbkdf2', 'services/anchoring pbkdf2', 'services/mcp-server @modelcontextprotocol/sdk']
+FAIL L1 changed 0 paths == planned 5 locks: extra none missing ['Blockchain/Dev/frontend/issuer/package-lock.json', 'Blockchain/Dev/package-lock.json', 'Blockchain/Dev/packages/shared/package-lock.json'] | out-of-scope touched none
+PASS M0 MODEL CONTROL: the model fed the OLD packument reproduces 7 base entries exactly 
+PASS L2 0 entries added, 0 removed, key order + top-level fields unchanged, no overrides, in 5 locks 
+FAIL L3 SEMANTIC: changed entries 0 == plan 7; every changed entry == its base+registry model at every leaf and in key order ["Blockchain/Dev/frontend/issuer/package-lock.json: changed entries: extra [] missing ['node_modules/pbkdf2']", "Blockchain/Dev/package-lock.json: changed entries: extra [] missing ['node_modules/@modelcontextprotocol/sdk', 'node_modules/pbkdf2', 'node_modules/shell-quote']", "Blockchain/Dev/packages/shared/package-lock.json: changed entries: extra [] missing ['node_modules/pbkdf2']"]
+PASS L4 one integrity per new version {} | == registry dist.integrity True | == DOWNLOADED sri (NOT GIVEN: L4b NOT RUN) None
+FAIL L5 entries 0 (kit 7) | leaf field writes 0 (kit 18) | per package {} | per-entry field sets == kit prediction False {}
+PASS L6 indent preserved + byte-exact round-trip at base AND head in 5 locks  | head indents [2]
+PASS LT TEXTUAL: per lock -/+ lines == leaf writes, every line carries a planned old/new value 
+PASS W1 IN RANGE must-pass: 0 entries walked, 0 parent ranges NOT admitting the new version [], 0 orphans []
+FAIL W1f IN RANGE must-fail: parent ranges admitting the NEXT MAJOR 0 []
+PASS W2 parent declarations identical base vs head 
+FAIL W4 NO CASCADE: every dependency of every changed head entry resolves and satisfies its range  | widened ranges: []
+CHECKED 12
+5 FAIL (L1 L3 L5 W1f W4)

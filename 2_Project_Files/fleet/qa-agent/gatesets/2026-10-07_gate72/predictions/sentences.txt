@@ -1,0 +1,96 @@
+  1  Preflight legs 6 (`audit-gate`, KS-470) and 7 (`audit-locks`, KS-531) fail on develop `b39051390ff6` for three newly published advisories, freezing every push in the repo — PR #1404's verified merge-in, #1398 and three unraised PRs are all blocked behind this.
+  2  This is the in-range, lock-only refresh that clears them, and it is gated T1 (security) and merges first.
+  3  Refs KS-1437 https://linear.app/secuura/issue/KS-1437
+  4  Kam's ruling on card `secuura-advisory-freeze-3-ghsa-1007`, verbatim (live board 2026-10-07 06:46:01 AEDT):
+  5  > Decision secuura-advisory-freeze-3-ghsa-1007:
+  6  5 locks, 7 entries, **18 field writes**.
+  7  0 manifests, 0 baseline rows, 0 source files.
+  8  | GHSA-pqg4-j6r4-53mv | critical | shell-quote | 1.9.0 → 1.11.0 |
+  9  | GHSA-6qxp-vccf-f47h | high | @modelcontextprotocol/sdk | 1.29.0 → 1.31.0 |
+ 10  | GHSA-477h-4r7f-fvrx | moderate | pbkdf2 | 3.1.5 / 3.1.6 → 3.1.7 |
+ 11  | root | shell-quote | `version` |
+ 12  | root | sdk | `version`, `dependencies[@hono/node-server]` |
+ 13  | root | pbkdf2 | `version`, `dependencies[to-buffer]` |
+ 14  | services/mcp-server | sdk | `version`, `resolved`, `integrity`, `dependencies[@hono/node-server]` |
+ 15  | frontend/issuer · packages/shared · services/anchoring | pbkdf2 | `version`, `resolved`, `integrity` |
+ 16  Root entries carry no `resolved`/`integrity` and keep none.
+ 17  sdk 1.29.0 → 1.31.0 widens its own `@hono/node-server` range to `^1.19.9 || ^2.0.5`;
+ 18  pbkdf2 3.1.5 → 3.1.7 moves `to-buffer` to `^1.2.2`.
+ 19  **No cascade** — the pinned `@hono/node-server` 1.19.17 and `to-buffer` 1.2.2 already satisfy both widened ranges.
+ 20  **No manifest edit was needed.** The only manifest-level declarer of any of the three is `services/mcp-server → @modelcontextprotocol/sdk ^1.27.0`, and 1.31.0 satisfies it.
+ 21  Read from Dockerfiles at `b39051390ff6` via `git show`;
+ 22  - **The workspace-root lock reaches no runtime image.** Of 82 COPY lines naming `package*.json` across 38 Dockerfiles, **0** copy the `Blockchain/Dev` root manifest or lock.
+ 23  The critical shell-quote finding is build-tooling exposure (it arrives via `concurrently`, dev-only), not shipped code.
+ 24  - **The MCP SDK reaches the mcp-server runtime image** — its final stage copies mcp-server's own lock and runs `npm ci --ignore-scripts --omit=dev`, where the SDK is non-dev.
+ 25  - **pbkdf2 reaches 25 runtime images, not the 3 locks leg 7 names.** 25 Dockerfiles copy `--from=shared-builder /shared`;
+ 26  **25 of 25** of those builder stages run a *full* `npm ci` (not `--omit=dev`) from `packages/shared`, whose lock pins pbkdf2 as production, and **25 of 25** copy `/shared` into their final stage.
+ 27  the first instrument used to classify those 25 stages returned a uniform "no npm ci" for all of them, including two Dockerfiles already read by hand.
+ 28  `npm update` resolves to **latest-in-range** (sdk 1.32.1, shell-quote 1.12.0), so it cannot write the ruled lowest-clearing pins without a manifest edit or an `overrides` entry, and on the root lock it also produces **12 collateral dev-flag flips** plus a field-shape change (it adds `resolved`/`integrity` to root entries that carry neither).
+ 29  all **7 of 7** planned entries are field-for-field identical to the surgical output.
+ 30  > `overrides` cannot move a *direct* dependency — npm refuses with `EOVERRIDE:
+ 31  Override for @modelcontextprotocol/sdk@^1.27.0 conflicts with direct dependency`, and at the workspace root it skips that entry silently with rc 0.
+ 32  The two sdk entries were therefore witnessed by an explicit install instead, which rewrites `package.json` — which is precisely why that path is scratch-only and the committed result is surgical.
+ 33  `scripts/audit/audit-baseline.json` stays byte-identical at blob `4af041e8d74a`.
+ 34  - Leg 6's CLEANUP advisory listing **15** baseline entries no longer reported is out of scope here (disposition KS-767).
+ 35  - `mobile/secuura-app` untouched (KS-769, declared out of scope;
+ 36  it pins shell-quote 1.8.3, below the advisory's 1.8.4 floor, so it is not vulnerable to this one either).
+ 37  - No manifest, `overrides`, range or source change.
+ 38  JSON lockfiles cannot carry comments, so the per-change WHY lives in the commit body and here (the KS-1425 precedent).
+ 39  All runs local, macOS 27.0.0 arm64, node v24.7.0 / npm 11.5.1, in worktree `s-g3-advlock` at base `b39051390ff6`.
+ 40  **Touched:** 5 package-lock.json (root, services/mcp-server, frontend/issuer, packages/shared, services/anchoring).
+ 41  `git diff --shortstat` = **5 files changed, 18 insertions(+), 18 deletions(-)** — exactly the planned field set, and unchanged after a full `npm ci`.
+ 42  | leg 6 `audit-gate.mjs` **before** | rc 1 — `12 distinct advisories reported, 24 baselined` / `FAIL — 3 NEW advisories` |
+ 43  | leg 6 **after** | **rc 0** — `9 distinct advisories reported, 24 baselined` / `OK — no advisories outside the triaged baseline` |
+ 44  | leg 7 `audit-locks.mjs` **before** | rc 1 — `43 standalone lockfiles … 1613 distinct packages pinned — 9 advisories match, 7 already baselined` / `FAIL — 2 advisories` |
+ 45  | leg 7 **after** | **rc 0** — `… 7 advisories match, 7 already baselined` / `OK — no standalone-lock advisories outside the triaged baseline` |
+ 46  | the three GHSA ids in either leg's FAIL section, after | **0** (control:
+ 47  before = 6 in leg 6, 2 in leg 7) |
+ 48  | leg 2 `lockfile-cleanroom.sh` | rc 0 — 35 `OK` lines, 0 FAIL, 0 `NOTHING CHECKED` |
+ 49  | `npm run audit:contract` | **59 pass / 0 fail**, matching `expected-case-count` = 59 |
+ 50  | `audit-baseline.json` | byte-identical, blob `4af041e8d74a`, 0 diff lines |
+ 51  | revert root shell-quote → 1.9.0 | leg 6 **reddens** rc 1, names GHSA-pqg4 only;
+ 52  | revert mcp-server sdk → 1.29.0 | leg 7 **reddens** rc 1, names GHSA-6qxp and **not** GHSA-477h (specific);
+ 53  | both restored | both legs rc 0 again |
+ 54  | editor refusal arms | 6/6 — wrong current version, **stale `dependencies` range**, missing entry, byte round-trip failure all REFUSED;
+ 55  indent 3 detected and preserved |
+ 56  | parse arm | 8 entries scanned across 45 locks;
+ 57  **0 in-scope locks** still pin a vulnerable version |
+ 58  | independent regen cross-check | **7/7 planned entries field-for-field identical** to the surgical output |
+ 59  | byte-unchanged | 0 manifests, 0 source files, mobile/secuura-app 0, baseline 0 |
+ 60  | `npm ci --ignore-scripts` ×5 from the committed locks | rc 0 each, every lock byte-unchanged |
+ 61  | isolated `npm ci` per standalone lock (as each Dockerfile does it) | rc 0 ×4 — **sdk 1.31.0** on disk in mcp-server;
+ 62  **pbkdf2 3.1.7** on disk in issuer, packages/shared, anchoring |
+ 63  | hoisted root tree after `npm ci` | sdk **1.31.0**, pbkdf2 **3.1.7**, shell-quote **1.11.0** |
+ 64  | `packages/shared` build + unit suite | build rc 0, `dist/index.js` present;
+ 65  **48 files, 945 tests, 945 passed** |
+ 66  | `services/mcp-server` build + unit suite | build rc 0 (tsc);
+ 67  **3 files, 5 tests, 5 passed** |
+ 68  | `services/anchoring` build | rc 0 (tsc) |
+ 69  | `frontend/issuer` production build | rc 0, built in 19.08s, 48 assets |
+ 70  The issuer Dockerfile build was reproduced in isolation (`COPY frontend/issuer/package*.json`, `npm ci`, vendored `frontend/shared` with `ENV SHARED_DIR=./vendor/shared/src`, `npm run build`).
+ 71  **pbkdf2 IS in the served bundle:** four pbkdf2-specific string literals (`No callback provided to pbkdf2`, `Iterations not a number`, `Key length not a number`, `Digest algorithm not supported`) each appear in `dist/assets/dist-FCYm59UH.js`.
+ 72  Must-hit control `react` = 355 / `createElement` = 75;
+ 73  must-not-hit control = 0.
+ 74  So the moderate pbkdf2 advisory had a **browser-facing** surface in the Issuer Portal, not only a server-side one.
+ 75  This upgrades the ITEM 0 reading from "indicated" to measured.
+ 76  `services/anchoring` unit suite:
+ 77  **1 failed | 361 passed (362)**.
+ 78  `src/__tests__/threadTokenMint.test.ts > parameterises mint + spend with a deterministic per-seed policyId`,
+ 79  throwing `Error:
+ 80  Unsupported type` inside
+ 81  `@lucid-evolution/plutus/dist/index.js:272` via `applyParamsToScript` at `threadTokenMint.test.ts:71`.
+ 82  **It is not mine.** The same single test was run at base `b39051390ff6` with the locks restored
+ 83  0 lock modifications, anchoring lock pbkdf2 = 3.1.6, hoisted
+ 84  pbkdf2 = 3.1.5) and it fails there identically — `1 failed (1)`, same `Unsupported type` error.
+ 85  A pbkdf2 patch bump cannot reach Cardano Plutus script parameterisation, and the measurement agrees.
+ 86  `BACKLOG.md:182` already records "anchoring unit suite:
+ 87  `threadTokenMint.test.ts` fails on develop — `@lucid-evolution` cannot serialize the mint seed
+ 88  parameter" at the same file and line, and **KS-562** records "anchoring threadTokenMint test fails
+ 89  - **The four platform suites** (Schemathesis · Akto · Playwright · Performance/k6) — all require the
+ 90  local Docker stack, and Docker is DOWN on this host (`docker info` rc 1).
+ 91  - **Other services' unit suites** (the ~20 services beyond mcp-server, anchoring and packages/shared) —
+ 92  - **Whether mcp-server exercises the SDK's OAuth client** (the subject of GHSA-6qxp) — **UNMEASURED**.
+ 93  It imports only `server/mcp.js` and `server/stdio.js`, which is a suggestion, not a measurement of
+ 94  - **Runtime behaviour of the 25 images that now carry pbkdf2 3.1.7** — not exercised here.
+ 95  discipline skill §5f, a runtime-behaviour change does not go to Done on offline green:
+ 96  production dependency of a shipped service, and that is what the T1 gate and Peter's pass are for.

@@ -1,0 +1,81 @@
+BLOCKED on ITEM 1b. `docker rmi <id>` is REFUSED for 4 of the 33 ids and the only remedy Docker
+offers is `-f`, which the brief forbids. I stopped at the FIRST refusal and forced nothing.
+Partial state, measured, below. develop re-read = b39051390ff6 == D0 at 20:33Z, unmoved.
+
+== WHAT RAN, AND WHAT IT DID ==
+Phase 0 PASS (before any delete): 31 images re-tagged :latest -> :pre-20261006, 0 failed.
+  fresh set pre-20261006 count=31 fp=513d475d9af77d2d  <-- the rollback set, RECORD IT
+  pre-20260910 UNCHANGED 33 at 969f8db925918256; latest 33 before and after; distinct ids 82 both sides
+  every member's :pre-20261006 id == its :latest id, 0 mismatches
+  Wrong-keep-fp arm proved first ON THE BOX: rc 4, refused BEFORE any tag, stamp count still 0.
+Post-Phase-0 re-derivation GATE PASSED: deletable set byte-identical to ITEM 0's
+  (33 ids, 0 only-in-either, 38 tag rows both sides, 0 held). Tags went 107 -> 138, distinct ids 82.
+The guard re-run immediately before the first rmi, as you required, QUOTED VERBATIM:
+    deletable ids              = 33
+    carrying a NON-retire tag  = 0  (must be 0)
+    in use by any container    = 0  (must be 0)
+    INJECTION CONTROL: a kept id -> non-retire tags found = 2 (must be >0, else vacuous)
+    GUARD PASSES. wrote 33 ids to delete_cmds_d14.txt   sha16 f7eee633e7224849
+  Delete-tool arms proved first: wrong list sha -> REFUSE; wrong count -> REFUSE; both deleted nothing.
+
+== THE REFUSAL, VERBATIM ==
+  [1] rmi 23a9faa82faf rc=0
+  [2] rmi 2f88de133108 rc=0
+  **REFUSED** 33dad6e7d91c rc=1 out=[Error response from daemon: conflict: unable to delete
+  33dad6e7d91c (must be forced) - image is referenced in multiple repositories]
+  STOPPING: a refusal is a STOP, never a retry with force.
+  deleted OK=2  REFUSED=1.  Loop ended there by design.
+
+== STATE RIGHT NOW ==
+  distinct image ids 82 -> 80 (exactly the 2 deleted, nothing else)
+  free 11,484 MB -> 11,951 MB  (+467 from two images)
+  2 of my 33 deleted: 23a9faa82faf (dev-admin-frontend:rollback-2026-09-03),
+                      2f88de133108 (dev-referral:rollback-2026-09-03) — both retire-only, confirmed
+                      against the PRE-delete inventory
+  31 ids remain, carrying 36 references. Sets now: pre-20260910 33, pre-20261006 31,
+  rollback-2026-09-03 30, rollback-2026-08-27-ks661 2, pre-ks488 2, rollback-20260901-prefix 1, pre-ks719 1
+  Nothing built, nothing swapped, no migration, no secret, no prune, no rsync yet. Kintsugi untouched.
+
+== THE DIAGNOSIS, AND DOCKER'S MESSAGE IS MISLEADING ==
+Docker says "multiple repositories". It is NOT multiple repositories — it is multiple REFERENCES,
+and for these four they are all in the SAME repository under different tags. I measured both ways:
+ids spanning >1 repository NAME = 0; ids with >1 repo:tag reference = 4. The second is what `rmi <id>`
+refuses on. My own first reading chased the word "repositories" and came back 0, which is how I know
+the distinction matters.
+  33dad6e7d91c  dev-auth:pre-ks488 + dev-auth:rollback-2026-09-03                                  (2)
+  6651408c9314  dev-originate:pre-ks488 + dev-originate:rollback-2026-09-03                        (2)
+  f13157f4fe9d  dev-anchoring:rollback-2026-08-27-ks661 + dev-anchoring:rollback-2026-09-03        (2)
+  f7276dbebe55  dev-api-gateway:pre-ks719 + :rollback-2026-08-27-ks661 + :rollback-2026-09-03      (3)
+  27 ids carry exactly 1 reference and a bare `rmi <id>` succeeds on them (2 already have).
+  Arithmetic closes: 27x1 + 2+2+2+3 = 36 references over 27+4 = 31 ids.
+So ITEM 1b's prescribed mechanism — "Delete by image ID, one `docker rmi <id>` per ID, no -f" — CANNOT
+complete for 4 of the 33. That is a brief item that does not work, not a box problem, so I stopped.
+
+== WHAT I PROPOSE, AND WHY IT IS NOT A FORCE ==
+Delete by REFERENCE instead of by id: `docker rmi <repo>:<tag>` for each of the 36 remaining
+references, one per invocation, still no -f. An untag is not a force. Docker removes the image
+automatically when its LAST reference is dropped, so the end state is identical to the card's intent:
+the five sets gone, 31 images freed, nothing else touched.
+  AUTHORISATION, measured: references outside the five retire sets = 0 of 36. Every single reference
+  I would remove is a tag Kam's card (a) names. pre-20260910 and pre-20261006 are not in the list.
+  List at boot/remaining_refs_d14.txt, 36 lines, sha16 4a08cac1ff18c87e.
+  I would keep the same guard (re-derived in the same action, non-retire tag or container = STOP),
+  add an arm that refuses if any reference's tag is outside the five sets, and assert afterwards:
+  the five sets read 0, pre-20260910 33 at 969f8db925918256, pre-20261006 31 at 513d475d9af77d2d,
+  latest 33 unchanged, every container's image id unchanged, distinct ids down by exactly 31.
+
+== QUESTION (one) ==
+Do I proceed with delete-by-REFERENCE (36 x `docker rmi <repo>:<tag>`, no -f) to finish ITEM 1b?
+If you would rather not vary the card's mechanism, the alternative is to stop ITEM 1b here with 2 of
+33 removed — but then the disk forecast does not clear and the deploy cannot run, so that is
+effectively option (c) on Kam's card and I would wrap cold.
+
+== MEANWHILE ==
+BLOCKED. Deletion is irreversible and the mechanism is a brief deviation, so I am not choosing it
+myself. Nothing further runs on demo. Phase 0's rollback set is in place and proven, so the box is in
+a SAFE state either way: `latest` is untouched and every running container still has its image.
+Re-checking the inbox for your ANSWER; I will not re-arm past it.
+
+== NEEDED-BY ==
+Soon, while ctx is 31% and the build budget (<50%) is still comfortably open. If this turns into a
+cold wrap instead, I would rather spend the remaining budget on a clean handover than a rushed build.

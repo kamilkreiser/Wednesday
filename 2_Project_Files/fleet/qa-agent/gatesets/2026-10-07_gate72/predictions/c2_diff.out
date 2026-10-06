@@ -1,0 +1,24 @@
+C2 diff #1406 head 4a400d7aa9dd273d91fb62375cb4b0598aa4405f base b39051390ff6f252601d6f7b45f0ea6c21c31023
+INFO PLAN from the BASE b39051390ff6 + the registry: 44 in-scope locks of 45 tracked; 7 vulnerable entries in 5 locks: ['frontend/issuer pbkdf2', 'package-lock.json @modelcontextprotocol/sdk', 'package-lock.json pbkdf2', 'package-lock.json shell-quote', 'packages/shared pbkdf2', 'services/anchoring pbkdf2', 'services/mcp-server @modelcontextprotocol/sdk']
+PASS L1 changed 5 paths == planned 5 locks: extra none missing none | out-of-scope touched none
+WALK frontend/issuer/package-lock.json pbkdf2 3.1.7: parents ["node_modules/@cardano-sdk/crypto dependencies '^3.1.3'", "node_modules/@cardano-sdk/dapp-connector/node_modules/@cardano-sdk/crypto dependencies '^3.1.3'", "node_modules/@cardano-sdk/key-management dependencies '^3.1.3'", "node_modules/@cardano-sdk/key-management/node_modules/@cardano-sdk/crypto dependencies '^3.1.3'", "node_modules/crypto-browserify dependencies '^3.1.2'", "node_modules/parse-asn1 dependencies '^3.1.5'"]
+WALK package-lock.json @modelcontextprotocol/sdk 1.31.0: parents ["services/mcp-server dependencies '^1.27.0'"]
+WALK package-lock.json pbkdf2 3.1.7: parents ["node_modules/@cardano-sdk/crypto dependencies '^3.1.3'", "node_modules/@cardano-sdk/dapp-connector/node_modules/@cardano-sdk/crypto dependencies '^3.1.3'", "node_modules/@cardano-sdk/key-management dependencies '^3.1.3'", "node_modules/@cardano-sdk/key-management/node_modules/@cardano-sdk/crypto dependencies '^3.1.3'", "node_modules/crypto-browserify dependencies '^3.1.2'", "node_modules/parse-asn1 dependencies '^3.1.5'"]
+WALK package-lock.json shell-quote 1.11.0: parents ["node_modules/concurrently dependencies '^1.8.1'"]
+WALK packages/shared/package-lock.json pbkdf2 3.1.7: parents ["node_modules/@cardano-sdk/crypto dependencies '^3.1.3'"]
+WALK services/anchoring/package-lock.json pbkdf2 3.1.7: parents ["node_modules/@cardano-sdk/crypto dependencies '^3.1.3'"]
+WALK services/mcp-server/package-lock.json @modelcontextprotocol/sdk 1.31.0: parents ["<root> dependencies '^1.27.0'"]
+PASS M0 MODEL CONTROL: the model fed the OLD packument reproduces 7 base entries exactly 
+PASS L2 0 entries added, 0 removed, key order + top-level fields unchanged, no overrides, in 5 locks 
+PASS L3 SEMANTIC: changed entries 7 == plan 7; every changed entry == its base+registry model at every leaf and in key order 
+PASS L4 one integrity per new version {'pbkdf2': 'sha512-nS4mvFgVwUrecPTRd', '@modelcontextprotocol/sdk': 'sha512-UvTMgnNlnIBO/22ob'} | == registry dist.integrity True | == DOWNLOADED sri (NOT GIVEN: L4b NOT RUN) None
+PASS L5 entries 7 (kit 7) | leaf field writes 18 (kit 18) | per package {'pbkdf2': 4, '@modelcontextprotocol/sdk': 2, 'shell-quote': 1} | per-entry field sets == kit prediction True 
+PASS L6 indent preserved + byte-exact round-trip at base AND head in 5 locks  | head indents [2]
+PASS LT TEXTUAL: per lock -/+ lines == leaf writes, every line carries a planned old/new value 
+PASS W1 IN RANGE must-pass: 7 entries walked, 0 parent ranges NOT admitting the new version [], 0 orphans []
+PASS W1f IN RANGE must-fail: parent ranges admitting the NEXT MAJOR 0 []
+PASS W2 parent declarations identical base vs head 
+PASS W4 NO CASCADE: every dependency of every changed head entry resolves and satisfies its range  | widened ranges: ["root @modelcontextprotocol/sdk dependencies/@hono/node-server '^1.19.9' -> '^1.19.9 || ^2.0.5'", "root pbkdf2 dependencies/to-buffer '^1.2.1' -> '^1.2.2'", "mcp-server @modelcontextprotocol/sdk dependencies/@hono/node-server '^1.19.9' -> '^1.19.9 || ^2.0.5'"]
+JSON /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/0e6aaa67-f803-42db-8f5a-54406fea138e/scratchpad/g72/c2_diff.json
+CHECKED 12
+0 FAIL

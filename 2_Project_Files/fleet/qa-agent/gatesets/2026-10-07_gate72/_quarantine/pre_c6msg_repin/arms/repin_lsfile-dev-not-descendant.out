@@ -1,0 +1,19 @@
+--- V. required arguments, each well-formed and == the kit's pin (a wrong value refuses BY NAME)
+  7 required arguments present, well-formed and == kit.json
+LAUNCH ACTION gate72 (DRY RUN) 2026-10-07 08:31:18 AEDT / 2026-10-06T21:31:18Z | #1406 4a400d7aa9dd273d91fb62375cb4b0598aa4405f | base b39051390ff6f252601d6f7b45f0ea6c21c31023 x1 | tree 85820a21f80c02d542ca1cf62e194750f2779c28 | develop b39051390ff6f252601d6f7b45f0ea6c21c31023 | repin-develop none | pane QA/Secuura-gate72
+--- A. the head must be the one the READY names
+  /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/briefs_staged/2026-10-07_seatG3_READY_1406.txt (sha256/16 56371be81fbeb4c4): lines naming the head in full 1 | naming #1406 1 | CONTROL lines naming 'READY' 4
+--- 2. ONE ls-remote (read verb) from the checkout, GIT_SSH_COMMAND unset, the checkout's own core.sshCommand
+  (CONTROL: ls-remote output read from the stand-in /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/gatesets/2026-10-07_gate72/_scratch/arms/ls_dev_not_descendant.txt)
+  ls-remote rc=0 at 21:31:18Z | develop 3e7be2044fe80ebced9c497bfc278a7333018a83 | #1406 pull/head 4a400d7aa9dd273d91fb62375cb4b0598aa4405f | branch 4a400d7aa9dd273d91fb62375cb4b0598aa4405f
+--- 1. PULLS API + census
+  SKIPPED BY NAME (--no-api, dry run only): the API state and the census are NOT read here
+--- 3b. develop: origin 3e7be2044fe80ebced9c497bfc278a7333018a83 | --develop b39051390ff6f252601d6f7b45f0ea6c21c31023
+  DEVELOP MOVED: b39051390ff6f252601d6f7b45f0ea6c21c31023 -> 3e7be2044fe80ebced9c497bfc278a7333018a83 (step 3c checks descent and that the advance touches none of the 5 paths / tooling)
+--- 3c. the kit's own clone: fetch by sha if absent, C1 with every pin on the develop read now, the c2 prediction
+  c1 rc=1 | CHECKED 13 4 FAIL (P2b P8 P10 P12) 
+    FAIL P2b develop 3e7be2044fe8 descends from the base b39051390ff6; merge-base(head, develop) = 4eaf7741a6a4
+    FAIL P8 hyphenated keys in the message ['KS-1425', 'KS-1437', 'KS-470', 'KS-531', 'KS-767', 'KS-769'] (want only KS-1437) | closing none | de-hyphenated mentions 0
+    FAIL P10 NO-NEW-LEG: 25 tooling paths present and identical at base / head / develop [".claude/skills/secuura-test-discipline/SKILL.md ['ac3c7df40f5c', 'ac3c7df40f5c', '561c13407e1f']", "CLAUDE.md ['906913e1a6e4', '906913e1a6e4', 'a6ca7
+    FAIL P12 base..develop: 205 path(s), 2 shared with the PR / tooling ['.claude/skills/secuura-test-discipline/SKILL.md', 'CLAUDE.md']
+REFUSING TO LAUNCH: C1 FAILED at the head on a pin (3 hard FAIL; P8 alone is reported, not refused)
