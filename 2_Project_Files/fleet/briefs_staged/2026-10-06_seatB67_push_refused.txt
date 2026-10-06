@@ -1,0 +1,77 @@
+PUSH REFUSED BY THE PRE-PUSH HOOK. Not rc 141 — a real preflight FAILURE on legs 6 and 7, caused by
+FIVE newly published advisories that are not in develop's audit baseline. The fix is a dependency /
+lock / baseline edit, which my HOLDS forbid outright, so I have stopped. The ref never moved.
+
+== THE EXACT PREFLIGHT LINE, QUOTED, AND IT IS NOT THE ACCEPTED SHAPE ==
+  PREFLIGHT FAILED on leg(s) 6 7 - fix the above before pushing. (12/15 legs ran)
+Please do NOT read that 12/15 as the ratio you accept for a docs-only merge-in. The accepted shape
+is "PREFLIGHT INCOMPLETE — 12/15 legs ran, 3 SKIPPED. Nothing failed." Mine says FAILED. Two legs
+ran and FAILED; the 3 skips are the usual stack-down legs (3, 4, 8).
+
+== PUSH FACTS ==
+  wrapper exit 1; `.rc` file read AFTER the wrapper exited: 1
+  PUSH START 2026-10-06T02:03:19Z -> push rc=1 2026-10-06T02:10:20Z = 421 s, ONE attempt, NO rc 141
+  `ls-remote` after: feature/ks-1278-revoke-atomic-b63-1 still b5adaba751d89fda0b138e0b8b74d702e2a2a429
+  develop re-read in the SAME action as the push decision at 02:03:07Z: 4eaf7741a6a4, unmoved
+  FAST-FORWARD confirmed before the attempt; GIT_SSH_COMMAND unexported (`env | grep -c` 0)
+  lock taken by "Secuura/Blockchain b67" pid 15591, all four WAITs absent, 16 STOP locks checked,
+  0 unattributed; RELEASED by the same pid. 0 lock dirs now. Orphaned login_stub pids: 0.
+  Worktree porcelain 0, HEAD still M 944231047b27399ec6418ac9ff32f672fd84cf36.
+  MY FORMAT GATE WORKED: in-hook `package_format_gate: 33 passed, 0 failed` and
+  "ok   one package checked, none failed". The akto install did its job.
+  Shell suites in-hook: 67 passed, 0 failed, 0 skipped (of 67). 13 code guards passed.
+
+== LEG 6 — npm-audit gate (KS-470): 11 distinct advisories reported, 22 baselined, 4 NEW ==
+  GHSA-rj75-hqrm-r3gf [moderate] postcss-selector-parser — quadratic flat-selector parsing, CPU exhaustion
+  GHSA-jqcg-44mw-7w3h [critical] proxy-addr — IP spoofing via IPv4-mapped IPv6 trust subnet
+  GHSA-68fv-2mgg-jv7q [high]     source-map-js — event-loop DoS via indexed source-map section offsets
+  GHSA-hp3w-g68c-fv3c [moderate] sprintf-js — DoS via unbounded precision specifiers
+  It also prints a CLEANUP advisory: 15 baseline entries are NO LONGER REPORTED and can be removed
+  (12 undici + ip-address + @hono/node-server under KS-470, 3 undici under KS-559). Advisory only,
+  it does not fail the leg.
+
+== LEG 7 — standalone-lock advisories (KS-531): 43 locks, 1614 pinned packages, 10 match, 5 unbaselined ==
+  The same four, plus GHSA-r4xh-jqrq-34v2 [moderate] smol-toml (quadratic parse()), pinned 1.8.0 in
+  the four systemTest locks. Blast radius as the leg measured it:
+    proxy-addr 2.0.7            in 15 service locks (analytics, billing, governance, kyc, mcp-server,
+                                 nft-certificate, referral, shared, staking, tenant-provisioning,
+                                 tokenisation, transfer, vc-issuer, wallet-connector, whatsapp-bot)
+    source-map-js 1.2.1         in 32 locks (all five frontends, 20 services, 3 systemTest)
+    postcss-selector-parser 6.1.4 / 7.1.4  in 4 locks (3 frontends + systemTest/api-explorer)
+    sprintf-js 1.0.3            in 4 locks (governance, originate, referral, vc-issuer)
+    smol-toml 1.8.0             in 4 systemTest locks
+
+== IT IS NOT MY CHANGE, AND I MEASURED THAT RATHER THAN ASSERTING IT ==
+  - `diff DEV..M` (my PR's own six paths) contains NO package-lock.json, NO package.json and NO
+    audit-baseline.json. Zero.
+  - `diff OURS..M` names exactly one manifest, systemTest/akto/package.json, and that arrived IN
+    with develop's advance (it is one of develop's 78 paths), not from me.
+  - The baseline blob at M is 4ef11079242c3a7fe2af7b360702e82dde31d964 — BYTE-IDENTICAL to
+    develop's. I did not touch it.
+  - All five advisory ids appear 0 times in develop's baseline, against a POSITIVE CONTROL of 9
+    occurrences for a baselined id (GHSA-2mjp-6q6p-2qxm). So the zero is a measurement.
+  Conclusion: this is develop's current state — advisories published since the baseline was last
+  refreshed. It freezes EVERY push from this repo, not just mine. **#1395 and #1396 will hit the
+  same two legs when E 8th and R 2nd try to push.** Worth telling them before they spend a seat on it.
+
+== WHY I HAVE NOT FIXED IT ==
+My HOLDS say "No dependency, lock, manifest or baseline edit." Both remedies the gate itself offers
+are exactly that: bump the pins (containerised per-dir regen via lockfile-cleanroom.sh), or add
+reasoned baseline entries with reason + ticket + expires. I am not doing either without your ruling.
+This is the recurring class this project already has history for — the in-range lock refresh of
+KS-1378 / KS-1403, where the existing carets already admitted the patch. I have NOT verified that
+the carets admit these five; that is a measurement someone should make rather than assume.
+
+== WHAT I NEED FROM YOU ==
+One of:
+  (a) a ruling that lifts the no-lock/no-baseline hold for a scoped in-range lock refresh plus
+      baseline triage, with a ticket — in which case say whether the 15 stale CLEANUP rows come out
+      in the same pass or stay;
+  (b) route it to a seat whose brief owns dependencies, and I hand over COLD with M built, verified
+      and UNPUSHED;
+  (c) something else.
+I am not pushing again, not using --no-verify, and not editing a lock or the baseline. M is safe
+where it is: committed, qm 8/8, tree 0b4c3a265454, and the branch at origin is untouched.
+
+LIVE watcher pid: 15221, SINCE 2026-10-06T02:02:04.000Z. Please read my ctx when you reply —
+the push window spent one 97 KB hook log.
