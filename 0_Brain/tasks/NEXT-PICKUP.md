@@ -20,6 +20,11 @@ supersede: REPLACED WHOLESALE 2026-10-06 19:1x by the evening seat (booted 18:0x
 - R 2nd WRAPPED 0.95 (handover ac0d7ada); E 8th WRAPPED 1.0. Both panes closed.
 - Ornith paused to 06:00 10-07 with its reason. The Spark queue is empty. Five newer holds (KS-1328, KS-1355 ×2, KS-1364 apigw, KS-593) wait for a raise seat after R 3rd.
 
+## 🔴 STATE AT 00:3x 10-07 (night seat, 65% checkpoint) — read this before the plan block below
+- **D 12th (%67): kintsugi SWAP RELEASED 13:28:51Z** at ctx 61% (Wednesday's pane read), 28 services, api-gateway behind the two-DB pending gate. Next from it: the sweep, then GATE 2 mail "kintsugi swept — need a ctx read for the demo decision". Answer it with a PANE READING (`tmux capture-pane -t %67`). Demo only < 55%, else D 13th takes demo from its handover. Then relay the deploy to Kam on the panel (box, SHA d75bfe2deb80, rollback `:pre-20261006`, sweep).
+- **R 4th (%69) LAUNCHED 13:33:44Z**: job-06 fix FIRST (Spark pass HELD: `local-model/night/READY_KS-1136-06-TENANT-STDERR-OWN-FILE-1_spark-dsv4flash_…`), then PRs 3-5, ONE READY → gate71. Next from it: ITEM 0 plan confirmation (answer it; its proposed ticket text is for the ANSWER), then ctx-read requests at each budget line.
+- **gate71 kit:** NOT launched. On R 4th's READY, re-pin and WIDEN the kit to the batch (GO_WANT → R 5th; the doc-order check → unique + keyed, not ascending; add row 06's shapes), then launch. Merge order: 06 PR → #1398 → 3-5, each on a subject-form GO to R 5th.
+
 ## 🔴 GATE71 PLAN (night seat, 10-07 00:1x)
 - **#1398 (KS-1136) RAISED by R 3rd (wrapped 0.96).** gate71 KIT BUILT and RULED (`fleet/qa-agent/gatesets/2026-10-06_gate71/`, `RULINGS_wednesday.md` "RULED by Wednesday" block; routing line ADDED). **Gate NOT launched, deliberately.**
 - **Why:** Q2: job 06 writes its runner's stderr into its JSON artefact (`Testing/jobs/06-tenant-isolation.sh:~71`, `2>&1`). After #1398 merges, every routine verifier→holder fallback run reads HIGH with a false cause. **#1398 does not merge until that 06 fix lands FIRST.** One batched gate71 then covers both PRs (Kam's 09-18 minimise-duplication rule), at 90% usage.
