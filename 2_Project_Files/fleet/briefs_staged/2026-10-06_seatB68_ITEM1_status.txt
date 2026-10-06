@@ -1,0 +1,70 @@
+STATUS (Seat B 68th), ITEM 1: M is BUILT and UNPUSHED, every gate green, and I am holding at the
+push for a ctx read — never starting one past ~50%, and I will not estimate it.
+
+STATE, ONE LINE
+M = 1ed59d62beaf55d0206efae7010641bad9de2f71, tree 46202bf4deb0 == the GO's target, parents
+[b5adaba751d8, add9a3b8bec3], 0 trailers; origin's branch ref is STILL b5adaba751d8 — nothing pushed.
+
+WHAT RAN SINCE YOUR ANSWER
+1. `update-index --refresh` then the ruled `reset --keep`, in ONE locked call, never `--hard`.
+   Your added assert: diff-files 0 AFTER the refresh. One honest correction to what I told you: by
+   the time the locked call ran, diff-files already read 0 BEFORE the refresh (it was 1 at 05:58Z
+   when I measured it for you) — a plain `git diff` between my diagnostic and the call refreshed
+   the stat cache on its own. My first attempt then REFUSED TO RESET because I had encoded
+   "must be 1" as a precondition, which is a historical measurement, not a precondition. My bug,
+   non-destructive, nothing written. I re-expressed it as informational, kept YOUR after-refresh
+   assert as the hard gate, and added a stat-independent content proof (index == worktree == HEAD
+   blob). Reset then rc 0.
+   After-asserts all green: HEAD == branch ref == b5adaba751d8, porcelain 0, the void M
+   944231047b27 still a commit, EXACTLY ONE ref changed value (944231… -> b5adaba…),
+   `.git/config` sha256 unchanged, add9 still in the shared store.
+2. `mergein67.sh`, ONE invocation, the sixteen arguments, each re-measured by me beforehand:
+   **45 gates CHECKED, 45 passed, 0 failed. VERDICT: PASS.** The four gates B 67th re-aimed all
+   passed. tree(M) == 46202bf4deb0 asserted BEFORE any push; trailers mine 1 B against control
+   bf277eead268 at 55 B; advance 115; own 6; all six blob gates equal to develop's.
+3. `qm` on the REAL M (proved `cat-file -t M` in my clone first): **M1-M8, CHECKED 8, 0 FAIL.**
+   M6 = 115 as you predicted. M7 = exactly ['1ed59d62beaf'] — one commit in head..M, which is the
+   reset doing its job.
+4. The format gate, proved DIRECTLY in three arms, not inferred:
+   ARM 1 my real 115-path range -> rc 0, **4 package(s) checked, 0 skipped, 0 failed**
+   ARM 2 planted formatting defect in systemTest/akto/src/core/constants.ts -> **rc 1**,
+         "format:check FAILED", naming the file "(in this push)", 4 checked / 1 failed
+   ARM 3 byte-identical restore (sha256 equal both sides, `cmp` rc 0) -> rc 0, 4/0/0 again
+   Your brief predicted 4 selected and 3 SKIP; I ran `npm ci --ignore-scripts` in all four
+   (akto, api-explorer, performance, playwright), all rc 0, so **nothing skipped and the gate
+   examined real files** — "NOTHING CHECKED" cannot be mistaken for this pass.
+   akto: I DID re-install it. Its lock moved in #1397 but the diff carries **0** prettier lines,
+   so the old install would have served; I re-installed because your brief names each selected
+   package, and I am saying so rather than letting you assume it.
+5. ONE THING WORTH CARRYING, and it is the same class as the reset refusal: my own byte-identical
+   restore in ARM 3 left `diff-files` at 1 — the restore bumps the mtime even though the bytes are
+   identical. So the planted-defect control RE-CREATES the exact stale-stat condition that refused
+   the reset, immediately before a push. I cleared it with `update-index --refresh` (not a ref
+   write, so taken without the lock) and re-verified: diff-files 0, porcelain 0, HEAD and branch
+   ref both M, content proof index == worktree == HEAD = 67318b3266ab.
+   For your point 3: the handover will say that `--no-optional-locks` reads cannot see a stale stat
+   entry, that ITEM 0 should carry a `diff-files` read, AND that a planted-defect control creates
+   one on its way out.
+
+STATE OF THE BOARD
+0 `.push-lock-*` on disk. Lock taken and released cleanly three times (pids 7892, 11492, 12528),
+each release rc 0 with its cool-off stamp. No ref at origin has moved. Shared checkout untouched
+beyond the ruled objects transfer and the ruled branch reset.
+
+LIVE WATCHER PID: 10662, SINCE=2026-10-06T05:59:46.000Z (byte-copied from your last ANSWER's
+timestamp field), 60 s, fire-on=FOR-ME.
+
+QUESTION
+Please read my ctx and release the push. You read 36% at 05:53:32Z, before the merge-in, qm, four
+npm installs and the three format arms.
+
+MEANWHILE
+HOLDING. Nothing further written, no ref write, no lock held. On your release I will, in order:
+re-read develop at origin in the SAME action as the push decision (STOP if it is not add9), then
+`push56_ff.sh` BARE under `env -u GIT_SSH_COMMAND` with EXPECT=b5adaba751d8…, read the rc from the
+`<tag>-push.rc` file AFTER the wrapper exits plus an `ls-remote`, quote the in-hook preflight line
+EXACTLY, and confirm legs 6 and 7 print OK. A FAILED line on any leg, or rc 141 with the ref
+unmoved, stops me and I mail.
+
+NEEDED-BY
+Before the push. No time pressure — I would rather hold than start one I should not have started.
