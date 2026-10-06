@@ -1,0 +1,111 @@
+Subject: [Secuura/Blockchain-D -> Wednesday] Session wrap 2026-10-07 (Seat D 13th)
+Timestamp: 2026-10-06T18:39:09.000Z
+Auth: {"spf": "pass", "dkim": "pass", "dmarc": "pass"}
+
+WRAP (Seat D 13th): round d13 COLD. **DEMO IS NOT DEPLOYED** and the reason is a measurement, not a
+failure. ITEM 0 COMPLETE and every STOP ruled. Blocked on ONE thing: Kam's disk card.
+Wrapping on the 05:30 checkpoint because my queue is DRY — blocked on a signature class, which the
+checkpoint says still pauses for Kam. 18:4xZ (local Wed 7 Oct 05:4x AEDT).
+
+=== WHY I WRAPPED RATHER THAN HELD ===
+Held **3 h 40 m** after your 14:50:13Z ANSWER. Watcher r3: **214 polls, 0 fires, 0 BROKEN polls**, and
+**no GO for Seat D 13th anywhere in the window**. Seat R ran two further seats beside me in that time
+(R 4th wrapped, R 5th ran a whole round and wrapped cold at 18:14Z with #1404 unmerged). Nothing in my
+queue is actionable without Kam's ruling, so idling would have burned the seat for nothing.
+
+=== FINAL STATE ===
+Demo still runs `0f8fb33c3416eaa5a79b980402deb845312b20ae` (s169, 2026-09-10). **0 writes to demo.**
+No image built, no tag written, no service swapped, no migration applied, no secret edited, no prune,
+no deletion, no `az`, no SSH to kintsugi.
+`2_Project_Files` HEAD is `c56dd7c32edf203177ade6c4d0c9040e624681b8` — **the exact value read at boot**
+— 0 tracked modifications, the same 17 untracked systemTest docs. No pull, no fetch (not even
+`--dry-run`), no ref write, no lock, no push, no ticket write, 0 locks, 0 worktrees.
+
+=== DEVELOP MOVED A THIRD TIME, AND I MEASURED IT ===
+`b39051390ff6f252601d6f7b45f0ea6c21c31023` — #1405, "project history entry for the 2026-10-06
+systemTest batch". Compare `d75bfe2deb80...b39051390ff6` (GitHub compare API, HTTP 200, no object
+written anywhere): **ahead_by 10, behind_by 0, merge_base = `d75bfe2deb80`**. DEPLOY_SHA remains a
+**strict ancestor** — nothing in my build has been removed or rewritten. 190 files:
+systemTest 170 · observability 15 · Projects Documents 2 · CLAUDE.md · .claude · **5_Project_History 1**.
+**0 under `Blockchain/`** → **0 image inputs**. Rebuild set **31** and swap set **28** unchanged across
+all three moves (`8a8d7b9694c9` → `40270d263ab0` → `b39051390ff6`).
+Also measured: `refs/pull/1404/head` = `c117c0160684d1ae72b220a8d2ccfe9aafb8eb8d`, **UNMERGED** — R 5th's
+#1404 merge did not land (its legs 6/7 refused the push). `refs/pull/1383/head` `32e8459bc0f5`, still
+unmerged, so Q8 holds.
+
+=== 🔴 A FINDING I WANT KAM TO SEE: TWO `history.md` FILES, DIVERGING, WITH TWO LIVE WRITERS ===
+`#1405` modified `5_Project_History/history.md` — and that is **not** the file the seats write.
+  `2_Project_Files/5_Project_History/history.md`  **TRACKED in the repo**, **798 lines**, 104,000 B,
+      sha16 `c1df104851280035`, mtime 30 Sep — this is what #1405 touched.
+  `<project root>/5_Project_History/history.md`   **UNTRACKED**, **20,449 lines**, 3,613,957 B,
+      sha16 `cc1b6590736b0968` — this is the operational log every seat prepends to, including me.
+Different inodes, different content, **25× apart**. A reader of the repo gets a 798-line fiction of
+this project's history, and a PR that "adds a history entry" adds it to the copy nobody reads.
+This is the same class as the `systemTest/` and `BACKLOG.md` root-vs-`Blockchain/Dev` collisions that
+demo's own `REVISION` file carries an explicit ⚠ warning about (with differing sha prefixes for the two
+BACKLOG.md files) — but this pair has **two live writers**, which the others do not.
+I touched **only** the root copy; `git status` for the repo copy reads 0 lines. Not filed — no ticket
+write is in scope this round. **Over to you to card.**
+
+=== THE ONE BLOCKER ===
+Kam's card `secuura-demo-disk-retire-old-rollback-sets-1007`. Default is **nothing deleted, demo not
+deployed**, and that default is still in force. For whoever gets the GO:
+  - If **(a)**: the GO names the card and the exact sets. **Re-measure free space before Phase 0 — do
+    not trust my 11,519 MiB**, it is hours old and the box is live.
+  - If **(b)** grow the disk: re-run `boot/disk_forecast_d13.py` with the new `F0`; every input is a
+    named constant, so it is one edit.
+  - If **(c)**: nothing to do; the handover is the deliverable.
+  - A GO must name the seat **AND** `d75bfe2deb80` **AND** demo. D 12th's
+    `GO (Seat D 12th): … to kintsugi then demo` is **not** one, and no R-lane GO is.
+
+=== ARTEFACTS ===
+Handover `5_Project_History/HANDOVER-seatD13-demo-deploy.md` — **320 lines, 26,034 B, sha16
+`077d2879ec4dff8b`**. FINAL STATE first, then four READ-THIS-FIRST traps, the numbers not to re-derive,
+the rollback recipe, your six rulings logged verbatim, every measurement with its control, the sweep
+plan, nine named instrument traps, and Open/next.
+History entry prepended to the **root** `history.md`, anchored on the **current** first heading
+(R 5th's — the one I read at boot was already stale, so a line-number anchor would have been wrong).
+**No-loss proven properly:** excising my 18-line entry reproduces the old file at **both** 20,431 lines
+AND 3,606,504 bytes, with a tamper control that fails. ⚠ My first predicate (`old in new`) read False —
+that was **my check being wrong**, not a loss: I inserted into the middle of `old`, so `old` is no
+longer a contiguous substring. Replaced with the excision test.
+Records in `5_Project_History/2026-10-07_seatD-13th/` (`boot/` 20 instruments + outputs, `mail/` 4
+bodies + send logs + read-backs). Build clone `deploy-clones/seatD13-d75bfe2deb80` (612 MB) **STAYS** —
+HEAD `d75bfe2deb80`, tree `c39aeeca92b9`, porcelain 0, own `.git`, no alternates. **Nothing deleted.**
+
+=== PROJECT REPO: NOTHING TO COMMIT, AND THAT IS MEASURED ===
+0 tracked modifications; `5_Project_History/` is what git itself calls *"outside repository"* relative
+to the `2_Project_Files` working tree, so none of my records is stageable. Nothing pushed. I am saying
+this rather than omitting the step.
+
+=== VAULT ===
+My three earlier daily-note sections were **already committed and pushed by R 5th's wrap commit
+`853995a`** (worktree == HEAD at 21,893 B; all three sections present in the committed blob; control
+string reads 0). I appended my wrap section and committed **only** `daily/2026-10-07.md` — deliberately
+**not** `git add -A`, because 8 other daily notes and 10 untracked conflict files from other machines
+are dirty in that vault and are not mine to commit. Verified exactly 1 file staged and 8 M + 10 ??
+still untouched afterwards. Pushed: `1e46542f5e0b12a299d476377f1e4c2489386a39`, local == remote.
+
+=== df, PER YOUR ITEM 8 ===
+Demo `/`: 11,519 MiB free — **unchanged from my ITEM 0 reading**, because I wrote nothing to that box.
+DevMASTER: 697,854 MiB free. Clone 612 MB (retained).
+
+=== NINE INSTRUMENT TRAPS, ALL MINE, EVERY ONE CAUGHT BEFORE A CLAIM RESTED ON IT ===
+Named in full in the handover. The three worth carrying fleet-wide:
+1. **Trap 12, SIXTH recurrence, on my FIRST tool call** — a bare `tmux display-message` named me
+   `wednesday`. Six for six across seats now. This is not a seat being careless; it is a tool whose
+   default target is wrong for this use. Worth a STANDING_LINES entry stronger than "prefer $TMUX_PANE".
+2. **`git status` under-counts by 23 in a seat round.** It said "behind by 15"; the truth is **38**. It
+   compares a stale remote-tracking ref, and under KS-907 you cannot fetch to refresh it. So
+   `git status`'s ahead/behind must **never** be quoted in a read-only round — only `ls-remote` +
+   `rev-list`.
+3. **A read-only probe is not side-effect-free on a log.** My wrong-password DB control wrote
+   `FATAL: password authentication failed` into postgres's log at 14:23:48Z. It is inside my own BEFORE
+   so my diff is unaffected, but a successor comparing against s169 will read it as new. Attributed.
+Plus: the error normaliser wrong **twice**; trap 4's forward half (D 12th's real GO read **FOR ME**, my
+own GO read FOREIGN — 12 arms, 5 verdicts changed); a non-discriminating probe declared NOT RUN; a
+`.RO` template key that does not exist; my own `CREATE TABLE` count of 5 against the truth of 4; and the
+root-vs-Dev name collision shown rather than fallen into.
+
+Watcher r3 retired at wrap. Nothing is holding. A successor can start cold from the handover.
+— Seat D 13th
