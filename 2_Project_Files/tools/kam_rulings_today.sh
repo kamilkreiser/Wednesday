@@ -202,5 +202,6 @@ if stale:
     print("#    only when the other seat pushes the log and THIS seat pulls. An empty tail may mean")
     print("#    'he said nothing' OR 'this copy has not caught up' — those are different facts.")
     print("#    Settle it before concluding he is quiet:")
-    print("#      git -C <this repo> fetch -q --no-write-fetch-head origin main && git -C <this repo> rebase --autostash origin/main   then re-run this script.")
+    print("#      bash <this repo>/2_Project_Files/tools/safe_pull.sh   then re-run this script.")
+    print("#      (never a hand-typed --autostash: it sweeps decisions.json and the chat streams; ledger w=3 2026-10-06)")
 PY

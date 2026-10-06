@@ -581,6 +581,25 @@ else
   fail "pathguard.py missing" "the file-write half of the two-agent gate is gone; only git verbs are guarded"
 fi
 
+# --- No hand-typed autostash (ledger w=3, 2026-10-06: dashboard STATE swept by a stash, three times
+# in one day). The hook must exist, be registered in the TRACKED template (the launcher renders
+# settings.local.json from it, so a hook only in the local file dies at the next boot), and FIRE:
+# refuse a known-bad command and pass a known-good one. Both probes are strings, never run.
+NA="$PROJECT_DIR/2_Project_Files/fleet/hooks/pretooluse_no_autostash.sh"
+if [ -f "$NA" ] && [ -x "$PROJECT_DIR/2_Project_Files/tools/safe_pull.sh" ]; then
+  na_probe() { python3 -c 'import json,sys;print(json.dumps({"tool_input":{"command":sys.argv[1]}}))' "$1" | bash "$NA" 2>/dev/null; echo $?; }
+  NA_BAD="$(na_probe 'git pull --rebase --autostash')"; NA_GOOD="$(na_probe 'git pull --rebase --no-autostash')"
+  if ! grep -q 'pretooluse_no_autostash' "$PROJECT_DIR/.claude/settings.template.json" 2>/dev/null; then
+    fail "no-autostash hook NOT in settings.template.json" "it lives only until the next render — add it to the template"
+  elif [ "$NA_BAD" = 2 ] && [ "$NA_GOOD" = 0 ]; then
+    ok "no-autostash hook armed" "refuses a hand autostash pull, passes --no-autostash; safe_pull.sh present"
+  else
+    fail "no-autostash hook INERT or over-broad" "bad→$NA_BAD (want 2), good→$NA_GOOD (want 0) — run fleet/hooks/tests/no_autostash_arms.sh"
+  fi
+else
+  fail "no-autostash hook or safe_pull.sh missing" "hand pulls can sweep decisions.json/chat streams into a stash again"
+fi
+
 # --- Chat streams (Phase 0, Kam's 2026-09-08 11:50 two-agent commission) ---------
 # chat_log.json is DERIVED from chat_legacy.json + one stream per writer, and it is
 # gitignored: a generated file that two seats both regenerate is what corrupted Kam's

@@ -1,0 +1,128 @@
+Subject: [Secuura/Blockchain-R -> Wednesday] QUESTION: status ITEM 3 -- PR 2 KS-1136 BUILT 9414aa54e92c, UNPUSHED, need my ctx (Seat R 3rd)
+From: secuura-blockchain <secuura-blockchain@agentmail.to>
+Timestamp: 2026-10-06T11:53:15.000Z
+Auth: {"spf": "pass", "dkim": "pass", "dmarc": "pass"}
+
+STATE: PR 2 (KS-1136) is BUILT and UNPUSHED. ITEM 1 and ITEM 2 are DONE. Watcher pid 31372, alive,
+poll 22, SCANNED 15, SINCE 2026-10-06T11:28:32.000Z. develop at origin re-read in this same action:
+d75bfe2deb8075583cfb55af0921e4964e7c6f0e -- RAISE_BASE, UNMOVED. 0 .push-lock-*. df 702,357 MiB.
+
+ONE QUESTION, AND IT GATES THE PUSH: please read my ctx. Brief :71 says never START a push past
+~50%, and a push here is ~6-7 minutes in-hook. You read 30% at 11:28:25Z; I have since built PR 2
+end to end. I will not start the push on a guess.
+
+== ITEM 1, DONE, lock held 33 s (11:31:29Z -> 11:32:02Z) ==
+- OBJECTS-ONLY TRANSFER (:404): `git -C <shared> fetch --no-tags --no-write-fetch-head <my scratch
+  clone> d75bfe2deb80` rc 0. d75bfe2deb80 went ABSENT (rc 128) -> PRESENT (rc 0); control
+  deadbeef... still 128. `rev-parse --all` sha256 `388096ada4101665` and `.git/config`
+  `4f624a213933d54b` BOTH cmp rc 0 before and after -- NO REF WRITTEN. FETCH_HEAD mtime still
+  2026-10-05T10:46:17Z (TZ=UTC).
+- YOUR ORDER on s-ra1-ks1305: all three conditions RE-READ at the lock -- HEAD
+  7015376e4f412658e872f2ee6668f38607b8e326, porcelain 0, refs/pull/1395/head equal.
+  `worktree remove`, NO --force, rc 0. Directory ABSENT, `worktree list` names it 0 times.
+  **df delta +2,873 MiB**, du said 2,758 -- I am NOT attributing the whole delta to my removal:
+  Seat D 12th is building on the same volume, so the du figure is the honest one for my action and
+  the df delta is the volume's. Branch ref
+  `refs/heads/feature/ks-1305-prisma-not-generated-diagnosis-ra1-1` LEFT IN PLACE at
+  7015376e4f41; no `git worktree prune`.
+- `git worktree add --detach .../s-ra3-ks1136 d75bfe2deb80...` rc 0, HEAD == RAISE_BASE, porcelain
+  0, and NO branch ref written (two-component for-each-ref glob for ra3 reads none).
+
+== ITEM 2, DONE: commitra3.sh written fresh, 22 ARMS CHECKED, 0 MISMATCHES ==
+Every per-PR value is a required argument with no default (--wt --base --branch --subject --files
+--control-commit --body-file --rec --path, repeatable); LOCK_SEAT from the env with no default; the
+lock dir is PARSED OUT OF lockra1.sh's own `LOCK=` line, so the two cannot disagree. One
+wrong-value arm per knob (the B 65th/KS-1278 value FAILS) AND one missing arm per knob (rc 2
+naming the knob), plus a PASSING baseline as the positive control -- without that baseline every
+refusal below it would prove nothing.
+ 🔴 ONE OF MY OWN ARMS FOUND A HOLE AND I CLOSED IT: a WRONG `--rec` read PASS, because
+commitra3.sh uses --rec only for its logs and lock record -- so a predecessor's path would have put
+MY lock and commit logs in ANOTHER SEAT'S record folder. Same class as raisera1.py:46, one layer
+quieter. Now guarded by the tool's OWN location (`$R/..`, derived, never a literal): B 65th's
+folder and R 2nd's folder both REFUSE, mine passes.
+
+== PR 2, BUILT ==
+- head **9414aa54e92ca243565d0d967aad991dc4c13840**, END_TREE
+  **2ee602cba3c99b3a75fa62e623011dc5d8b57665**, ONE parent == RAISE_BASE.
+- branch `feature/ks-1136-aggregate-unreadable-artefacts-ra3-2`, worktree `s-ra3-ks1136`,
+  1 commit ahead of base, porcelain 0.
+- subject `KS-1136: report a present but unparseable security artefact instead of a clean scan`,
+  83 chars, LANDS 90 with " (#NNNN)", ASCII, no closing verb.
+- 4 files: new test +164 (100644 A), 09-aggregate-report.sh +14 (100755 -> 100755 M), flow +105,
+  cheat +66. 0 trailers (1 byte) against the control bf277eead268 at 55 bytes, so the zero
+  discriminates. 0 Co-Authored-By.
+- APPLIED TREE == MY ITEM 0 PREDICTION: 074705eebd8103d3d4cecbcb2219cc06a75dbd8b, before the docs.
+- pathgatera1.py VERDICT PASS, 5 assertions over 4 measured paths, 0 failed, with the FIRING
+  control against PR 3's declared set naming both missing and both extra paths.
+
+== THE FIGURES ==
+- new suite alone: 6 passed, 0 failed, rc 0, 1.332 s.
+- RED-FIRST, product reverted to its base blob 739ebab: rc 1, **3 failed** (cells 1-3, each
+  `rc 0, findings=0, ids=[]`). All THREE control cells stay green in that arm, so the red is the
+  guard not the harness. Restored sha256-identical, exec bit re-asserted.
+- ONE RED ARM PER CONJUNCT of the two-term guard, each with `bash -n` rc 0 first so neither red is
+  a load failure: A, drop `[ -f ]` -> 2 passed / 4 failed; B, drop `! jq -e .` -> 4 passed /
+  2 failed.
+- DISCOVERY: `run-shell-suites.sh --list` 67 -> 68, my suite listed 1 after / 0 before, measured by
+  moving the file aside and back and proving the restore sha256-identical.
+- WHOLE SHELL-SUITE SET: **68 passed, 0 failed, 0 skipped (of 68)**, rc 0, 342 s (11:40:22Z ->
+  11:46:04Z). So all 68 are green LOCALLY and the six the runner reds are runner-only.
+- §4 timings: 0 stated timings cover the shell-suite set or 09-aggregate-report.sh at
+  d75bfe2deb80; must-hit controls by the SAME instrument read Akto 4, pre-merge 7, Schemathesis 2.
+  No tier budget moves. HOST macOS 27.0.1 arm64, bash 3.2.57(1)-release, jq-1.7.1-apple.
+- DOCS: flow TAIL is now 23. (order 1-16 18-23 ascending, 17. still a gap); cheat TAIL is KS-1136.
+  **The claim is boundary-free: `after.replace(fragment,"",1) == the blob at RAISE_BASE`, TRUE for
+  both docs**, fragment occurring exactly once, and the control (removing a 1-byte-altered
+  fragment) FALSE. Inside each new block the only hyphenated key is KS-1136; the foreign key is
+  de-hyphenated as "KS 878" (control: the same regex finds a planted KS-9999 and 88 distinct keys
+  across the whole doc).
+
+== CI TRIAGE, FOR WHOEVER GATES THIS ==
+The pre-existing shell-suite class is quoted as `61 passed, 6 failed, 0 skipped (of 67)`. **At this
+head the denominator is 68**, so that line will NOT match verbatim. A seventh red is NOT that class.
+Whether my new suite is green on the runner is UNMEASURED.
+
+== FIVE OF MY OWN FAILURES THIS ROUND, each caught before a figure was quoted ==
+1. `git apply` DROPPED THE EXEC BIT. `git ls-files -s` still read 100755 while the file on disk was
+   -rw-r--r-- and `[ -x ]` FALSE. Restored with `chmod 755` on that one file, authorised by the
+   index mode, proved to change NO byte (cmp rc 0, identical sha256; a 1-byte-altered copy makes
+   the same cmp rc 1). Never `checkout-index -a`.
+2. `git commit --no-verify=false` -- I wrote it to be EXPLICIT about not skipping hooks. git rejects
+   it outright ("option `no-verify' takes no value"), so the commit failed closed AFTER the branch
+   was created and the paths staged. A flag is not a boolean knob. The EXIT trap released the lock;
+   no ref damage beyond my own branch. Fixed, and a precisely-scoped RESUME shape added with four
+   arms (RESUME unset -> REFUSE; correct state -> PASS; wrong declared set -> REFUSE; another
+   lane's branch -> REFUSE).
+3. **A PLACEHOLDER LANDED IN THE COMMIT MESSAGE.** The body doubles as the message, and the path
+   gate can only be MEASURED once the commit exists, so `@@PATHGATE@@` was in the message at line
+   98. Filled and AMENDED -- **the amend CHANGED THE SHA from 5d823721c19737ebe595d793a198f3cc9df
+   14361 to 9414aa54e92c, with the tree UNCHANGED at 2ee602cba3c9**. Nothing was pinned to the old
+   sha and nothing was pushed. A gate now REFUSES any body carrying an unresolved @@TOKEN@@.
+   Note honestly: the after-check reads 0 placeholders and its fabricated control ALSO reads 0, so
+   that control discriminates nothing -- what carries the claim is that the SAME grep read 1 on the
+   old commit.
+4. My open-PR control read `package.json` = 0 against your drafter's 11, because I matched the
+   exact ROOT path and no open PR touches a root package.json. On a basename match it reads the
+   same 11. The raise-path readings use full repo-relative paths and were never affected.
+5. A doc-order read I quoted was pointed at the WRONG REVISION (`h2ra3.py <wt> HEAD` reads
+   `git show HEAD:<path>`, i.e. the base blob, not my working tree) and so reported tail 22. and
+   KS-1136=0. Re-read against the working tree: tail 23., KS-1136 = 1 in each doc. And two
+   "only KS-1136" lines were VOID because I double-escaped `KS-\\d+` inside a QUOTED heredoc, where
+   no escaping was needed -- it matched a literal backslash and read []. Re-measured with a firing
+   control.
+Also: my first per-block doc comparator reported block 22. CHANGED when the only difference was
+TRAILING WHITESPACE (its old slice ended at the two spaces before </body>, its new slice at my
+fragment's indent). A false positive on the one check that protects existing content is worse than
+no check, so the tool's PRIMARY claim is now the boundary-free one above, with the per-block form
+kept as a second reading with trailing whitespace normalised, each with its own firing control.
+
+== NEXT, ON YOUR CTX READ ==
+If ctx allows: push PR 2 ONCE with pushra1.sh BARE under `env -u GIT_SSH_COMMAND`, re-reading
+develop at origin in the SAME action as the push decision; quote the PREFLIGHT ratio and skipped
+legs exactly; legs 6 and 7 must print OK on my range; then raise by REST and classify Actions by
+LOG LINE with a ##[group] positive control and a waiter whose fire string is copied from the
+instrument's real output and fires on a STABLE reading. Then PR 3 (KS-998), if ctx allows a new
+build at all. If not, I wrap COLD naming PR 2 as BUILT-UNPUSHED with the head and tree above.
+
+UNRAISED: PRs 3, 4, 5 (KS-998, KS-1313 +KS 1326, KS-1164) -- no branch, no worktree, no commit.
+Nothing merged, nothing pushed, no ticket write, no comment, no deploy, no az/SSH/Docker.
