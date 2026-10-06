@@ -1,0 +1,161 @@
+AUTH {'spf': 'pass', 'dkim': 'pass', 'dmarc': 'pass'}
+READY FOR QA (Seat B 66th): #1394 (KS-723) round 2, TEXT ONLY -> gate67 T2.
+The head did NOT change, so every gate67 head measurement stands.
+
+== THE FIVE READY ARTEFACTS ==
+1. PR: https://github.com/Secuura/Distributed_Secuura/pull/1394 — open, not draft, base develop,
+   title UNCHANGED at 78 chars, byte-equal to the declared squash subject.
+2. HEAD: a94ec8f6a2c6ec382fb7b5dbafcf8a7f9ce68427. By ls-remote at 2026-10-05T23:53:29Z, in the SAME
+   action as the develop read below: refs/pull/1394/head == refs/heads/feature/ks-723-anchors-tx-b64-1
+   == a94ec8f6a2c6. NO new commit, NO amend, NO force push. mergeable_state `dirty` — expected, it is
+   the two doc conflicts the merge-in resolves.
+3. TICKET: KS-723, In Progress, kamil.kreiser@secuura.ai, project "OpenAPI Spec & Contract",
+   attachment https://github.com/Secuura/Distributed_Secuura/pull/1394 PRESENT, 1 comment
+   (Stuart's, 2026-09-29T09:21:26.269Z, the two Platform-S hot-path reads). Kam's card
+   secuura-ks723-whose-to-raise-1005 = a keeps it OPEN; it is NOT moved to Done at merge or after.
+4. TEST EVIDENCE: B 64th's block, UNCHANGED in substance. Its "Touched" line for
+   anchoring.openapi.ts now carries the corrected `:410`-`:452` wording (that WAS the N-1394-2 fix).
+   Red-first rc 1 3-failed/2-passed of 5 EXECUTED; head rc 0 5/5; anchoring suite 27/357 -> 28/362,
+   failing set {threadTokenMint.test.ts} at BOTH ends (BACKLOG.md:182); spec regen rc 0 310 paths,
+   1,351,218 -> 1,354,452 bytes, drift control rc 1 then restored; pathgate 6/0.
+5. NOT COVERED (carried, unchanged): live sweep owed (§5f) — gateway serving, runtime envelope and
+   /api/docs UNMEASURED, which is why KS-723 does not move; the new test file is TYPE-UNCHECKED
+   (B 64th §3: anchoring's tsconfig excludes src/__tests__, a planted error inside it still gives
+   tsc rc 0); PREFLIGHT 12/15 is NOT a pass; Linear's ACTUAL magic-word parse is still NOT exercised
+   (this round changes the text, it does not test Linear); the merge-in is ONLY PREDICTED.
+
+== WHAT CHANGED: TWO LINES, NOTHING ELSE ==
+OLD body: 6,437 UTF-8 bytes / 6,381 chars / sha256
+          d6adc2a75838b7e7b6aa1b69bcbaf2b0295b155d110a95cf98846136ecef886f
+          (re-asserted equal to gate67's P5 IMMEDIATELY BEFORE composing; a mismatch was my STOP)
+NEW body: 6,503 UTF-8 bytes / 6,445 chars / sha256
+          b6a3686b169002617b11de2d0aabee76509ddd8d422245f68badad4713779e0c
+45 content lines both, LF only, no CR, trailing newline preserved.
+
+THE LINE DIFF — exactly two hunks, `5c5` and `16c16`:
+  :5  -  ## NARROWING, not closing
+  :5  +  ## NARROWING — KS-723 stays open
+  :16 -  - `…/anchoring.openapi.ts` — the registration (one hunk at `:406`)
+  :16 +  - `…/anchoring.openapi.ts` — the registration (one hunk adding `:410`-`:452` at this head; `@@ -409,0 +410,43 @@` at `-U0`)
+BYTE-IDENTITY OF THE REST, PROVEN: delete lines 5 and 16 from both bodies and `cmp` the remainder ->
+rc 0, all other 43 lines byte-identical. CONTROL: `cmp` on the FULL files DIFFERS, so that rc 0 is a
+measurement and not a vacuous comparison.
+:24 ("406 example blocks resolve") and :45 (`@@ -406,7 +406,44 @@`, the held carve's history) are
+PRESERVED verbatim — different sentences, and the gate did not call them false.
+
+== THE CLOSING-WORD SCAN, RUN ON THE BODY READ BACK FROM GITHUB (not on my file) ==
+Widened regex, case-insensitive:
+  (close[sd]?|closing|fix(e[sd])?|fixing|resolve[sd]?|resolving|complete[sd]?|completing)[\s:,—-]*(KS-\d+|#\d+|https://linear\.app/\S*KS-\d+)
+plus a WINDOW scan: any closing-family word within 3 lines BEFORE a KS-723 occurrence.
+  PLANTED POSITIVES, all 5 HIT:
+    "Closes KS-723"                                   -> wide 1, window 1
+    "## NARROWING, not closing\n\nKS-723 covers"       -> wide 1 (match spans the blank line), window 1
+    "fixing: KS-723"                                  -> wide 1, window 1
+    "Resolves https://linear.app/secuura/issue/KS-723" -> wide 1, window 1
+    "completes #1394"                                 -> wide 1
+  REAL POSITIVE CONTROL — the OLD live body: HIT, wide match 'closing\n\nKS-723',
+    window "line 5 'closing' -> key at line 7". That is N-1394-1, reproduced.
+  THE NEW BODY AS GITHUB NOW HOLDS IT: wide 0, window 0, narrow 0 -> READS 0.
+  NEGATIVE CONTROL: a clean text reads 0.
+  THE INSTRUMENT BLIND SPOT, REPRODUCED AS ASKED: the gate's own `close[sd]?\s+KS-` reads **0 hits on
+  the OLD body** — no -ing form, no colon, no newline span — which is exactly why T2 and C1-P8 passed
+  it. My widened regex reads 1 on that same text, so the two instruments discriminate.
+
+== KEY / TRAILER SCAN on the body READ BACK ==
+Hyphenated keys: {KS-723: 7} and nothing else. De-hyphenated: "KS 1005" (correct — a foreign key
+stays de-hyphenated). `Refs KS-723` present at :1 with the full Linear URL. Co-Authored-By: 0.
+`:406` occurrences: 0 (was 1, at :16).
+
+== THE PATCH ITSELF ==
+PATCH /repos/Secuura/Distributed_Secuura/pulls/1394 with `{"body": …}` ONLY — title not in the
+payload. HTTP 200. Then a SEPARATE GET: body read back is 6,503 bytes / 6,445 chars,
+sha256 b6a3686b1690… == my local file's, asserted BOTH directions (local->remote and remote->local)
+and `cmp` rc 0 both ways. CONTROL: the read-back differs from the OLD body, so the PATCH landed.
+Returned head a94ec8f6a2c6 and title unchanged. updated_at 2026-10-05T23:52:47Z.
+No lock was taken: a PR-body PATCH is an API write, not a ref write.
+
+== THE DECLARED SQUASH BODY, VERBATIM (your ANSWER item 2 confirmed it; the GO repeats it) ==
+SUBJECT (78 chars; 86 as it lands with " (#1394)"):
+KS-723: declare GET /api/anchors/tx/{txHash} in the published OpenAPI contract
+BODY:
+---8<---
+Refs KS-723 — https://linear.app/secuura/issue/KS-723
+
+GET /api/anchors/tx/{txHash} has been routed since services/anchoring/src/index.ts:1089 and answers
+{ success: true, data: <one anchor> }, but the published OpenAPI document did not declare it. An
+undeclared operation is invisible offline: the contract suites have nothing to generate against it
+and a change to its response shape breaks no test. This registers it on the shared registry that
+anchoring.openapi.ts populates on import, so `npm run generate-openapi` emits it. No route and no
+handler is changed.
+
+NARROWING — KS-723 stays open. This declares ONE of the remaining ~157 routed-but-undocumented
+/api operations. The second endpoint Stuart named on the ticket, GET /api/anchors/{id}, is
+deliberately left out, not rejected: declaring it on this registry would make the gateway answer 405
+to two live POST routes sharing the prefix. Kam ruled card secuura-ks723-whose-to-raise-1005 = a,
+and the ticket stays open for that endpoint.
+
+Touched, 5 files, +354/-0: the registration in anchoring.openapi.ts (one hunk adding :410-:452);
+a new ks723 declaration test, 5 cells; docs/openapi/secuura-api.yaml REGENERATED, never pasted;
+and both platform-k documents.
+
+NOT RUN: the new test file is type-unchecked — anchoring's tsconfig excludes src/__tests__, so a
+planted error inside it still gives tsc rc 0. No live sweep was run, so KS-723 stays In Progress.
+
+Merged by Seat B 66th
+---8<---
+It will be written EXPLICITLY, never GitHub's default concatenation — the default would carry the
+head commit's own "NARROWING, not closing: KS-723 covers …" onto develop verbatim. I will run the
+scan above over the body I SEND, not over my file.
+
+== MY REPRODUCED MERGE-IN PREDICTION, on the develop I read ==
+develop D = 3f9ff4e1e1b93e2e704918a7825f13a72c9ec76f, read by ls-remote at 23:53:29Z in the same
+action as the head above. UNCHANGED since your brief, so your drafter's values stand and mine are a
+second hand on them, not a replacement.
+  KEY-ANCHORED TREE  : 6884601a03dc1685476b69e94efe29a9573d53a7   <- the merge-in target
+      flow blob 9a015f632039 — h2 18, numbers 1..14,16,18,19,20 strictly ascending, 16. once,
+        neighbours 14/18, 0 markers, READ-BACK OK
+      cheat blob 31fa671bc193 — h2 8, … KS-1005 KS-938 KS-723, KS-723 LAST, predecessor KS-938,
+        0 markers, READ-BACK OK
+  GIT MERGE-TREE     : 21c445285cb338bca666abce9ff582e7ddc249a3, rc 1, BOTH docs CONFLICTED
+  DIVERGENCE         : YES
+  WRONG-ORDER CONTROL: 582e3a4d9fb3ee4f3752ea48a3d07ecfb83d6657, READ-BACK FAIL on both docs
+  CONTROL ON 22b2    : e23888941fda2755a234590addfbeaaadf78bdcd — reproduces gate67's own value
+  TAKE-OURS IS THE TRAP, MEASURED: on BOTH docs take-OURS != the key blob while READ-BACK reads OK.
+    On the cheat doc, OURS-then-THEIRS and THEIRS-then-OURS also read back OK and are also != key.
+    Only the key-anchored blobs are the target, per your RULINGS 1.
+  CROSS-CHECK: `git diff --stat D 6884601a03dc` = exactly the 5 paths, +354/-0.
+  ADDED-LINE MULTISET: byte-identical on both sides, driven NINE ways (default ctx and -U0;
+    with/without +++; leading + kept/stripped; LC_ALL=C and locale sort; sort -u) — all nine
+    SIDES-EQUAL, 354 added lines each side. My value, under grep '^+' | drop '+++' | LC_ALL=C sort |
+    sha256, is 763449a071a8476e82f2f647319f7f92cb85e628535c74818e8643eced7f7ea6 on BOTH sides.
+    Control: 22b2..3f9f (#1385's own diff) gives 5ea5f669ad299d31… — different, so the equality is
+    not vacuous. Per your ANSWER item 3, the drafter's 512bf16e88e19adf… is recorded as
+    NOT REPRODUCED (drafter's constant, from a pipeline not re-read), and the PROPERTY is accepted.
+  Kit pinned and byte-identical before/after: c4_docs_gate67.py cd06394fc964649b…,
+    lib_gate67.py 59dbd48253288…, composee5_copy.py f9ab42d9fc25f189… (== kit.json reader_source).
+
+== ALSO TRUE AT THIS HEAD ==
+d784b613c81e2e17d2071ddb18296d7bd27c97ce..D touches 43 paths and 0 kit/hook paths; the positive
+control (the same grep on d784..head) hits 3, so that 0 is a measurement. pre-push ffc25ebc37d4,
+preflight 270b8913c009, SKILL eaf43dfd4d98 and the fuse 4ef11079242c are IDENTICAL at head and D —
+no RE-GATE. Fuse `accepted` is a dict of 22 with 4 `expires` entries, all 2026-10-31, +600 h LIVE;
+I re-dated nothing. Open-PR census: 24 open, the 5 kit paths -> [1394] alone, both docs ->
+[1383, 1393, 1394], control Blockchain/Dev/package.json -> [920, 945].
+Worktree s-b64-ks723: HEAD a94ec8f6a2c6, porcelain 0, shared dist present, akto node_modules
+present, pre-push executable.
+FLAGGED FOR THE MERGE, NOT FOR THIS RE-CHECK: the KS-1422 precondition is live — the shared
+checkout's origin/develop is 32e058975d4e, three develops behind, and of the four format:check
+packages only akto has deps (api-explorer, performance, playwright do not). Per your ANSWER item 4
+I will `npm ci --ignore-scripts` each package the gate's SKIP line names, in my worktree, outside
+the lock, and prove the gate green with a planted defect. Never --no-verify.
+
+== STATE ==
+Nothing merged, nothing pushed, no ref write anywhere, no lock held, no ticket write, no extranet
+write, no comment to Peter or Stuart, no az/ssh/docker. #1393, s-b63-ks1278, block 15. and the
+cheat KS-1278 section all untouched — noted that gate68 GO'd #1393 at 23:47Z with Seat B 67th as its
+merger, after me.
+Watcher: pid re-armed on SINCE 2026-10-05T23:49:43.000Z (the newest mail I have read), 60 s, on the
+Defect-A-fixed matcher. ctx: 31% as you read it at 23:49Z.
+
+HOLDING for the T2 re-check and then the GO. I will do nothing further until a mail names (Seat B 66th).
+
