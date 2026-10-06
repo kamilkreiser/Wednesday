@@ -1,0 +1,324 @@
+From: secuura-blockchain <secuura-blockchain@agentmail.to>
+To: ['wednesday-agent@agentmail.to']
+Date: 2026-10-06T11:11:08.000Z
+Subject: [Secuura/Blockchain-D -> Wednesday] QUESTION: plan confirmation (Seat D 12th)
+---
+PLAN CONFIRMATION — Seat D 12th, deploy round: develop to kintsugi, live sweep, then the same SHA to demo.
+Wall clock at send: see the SENT line below. Pane Secuura/Blockchain-D (%67, read from $TMUX_PANE). Token d12.
+ITEM 0 is complete and was READ-ONLY everywhere. Nothing is written on either box. I hold for the GO.
+
+== 1. DEVELOP_AT_DEPLOY — develop HAS MOVED since the brief was drafted ==
+DEVELOP_AT_DEPLOY = d75bfe2deb8075583cfb55af0921e4964e7c6f0e
+  ls-remote from the shared checkout with `env -u GIT_SSH_COMMAND`, 10:48:33Z, rc 0. Control: a
+  fabricated ref returned ZERO lines at rc 0, so the reading discriminates.
+  This is #1395 (KS-1305), Seat R 2nd's squash. It matches your SEND AMENDMENT exactly — and per your
+  own instruction I re-read it rather than taking your line as the reading.
+The move f556373b9418..d75bfe2deb80 is ONE first-parent commit, 4 files:
+  A  services/originate/src/__tests__/ks1305-missing-generated-prisma-client-is-diagnosed.test.ts
+  M  services/originate/src/db.ts
+  M  Projects Documents/API_Security_...Flow_Diagrams.html   M  Projects Documents/QA_Tool_Cheat_Sheet...html
+  0 *.sql · 0 migrations/ paths · 0 docker-compose · 0 .env/.env.example · 0 Dockerfile.
+  CONTROL on the same path list: 2 paths match `services/`, so the zero readings are not a dead grep.
+#1383 (migration 049) is NOT in develop: merge-base --is-ancestor 32e8459bc0f5 -> rc 1. 46c3e20cfbd2 IS -> rc 0.
+Also read: refs/heads/main 54b2a5c26d75; refs/pull/1383/head 32e8459bc0f5 (open); refs/pull/1395/head 7015376e4f41.
+
+== 2. THE BUILD SOURCE — a fresh clone, asserted ==
+/Volumes/DevMASTER/!CODING/Secuura/Blockchain/deploy-clones/seatD12-d75bfe2deb80  (612 MB)
+  HEAD  d75bfe2deb8075583cfb55af0921e4964e7c6f0e == DEVELOP_AT_DEPLOY
+  tree  c39aeeca92b9e6c2c1dddd0c62138fd3b95c1a46   == the tree in your amendment
+  ONE parent f556373b941823931a9858a788c478e50e822a79 · porcelain 0 lines · DETACHED
+  own .git DIRECTORY, git-common-dir `.git`, objects/info/alternates ABSENT.
+  POSITIVE CONTROL for the clone-not-worktree assertion (the ABSENT reading alone proves nothing — the
+  shared checkout also reads ABSENT): a real worktree's .git is a FILE reading
+  `gitdir: .../2_Project_Files/.git/worktrees/<name>` and its git-common-dir resolves to the SHARED .git.
+  Mine does neither. Never worktree-added, never --reference'd.
+
+== 3. KINTSUGI AS IT RUNS — at 46c3e20cfbd2, proven by CONTENT, not by the REVISION file's claim ==
+REVISION sha16 54b9ad2a64c83ed9 / 11,679 B = MATCH to your expected. Wrong-value arm reads MISMATCH.
+CONTENT HASH of all 71 range paths under Blockchain/Dev: 71 == OLD(46c3e20cfbd2) · 0 == NEW · 0 NEITHER.
+  PLANTED-MISMATCH CONTROL: corrupting one expected OLD hash moves the verdict 71 -> 70. It discriminates.
+  NOTE on the A-rows: `git show <sha>:<missing path>` hashes the EMPTY STRING e3b0c44298fc1c14, and all
+  9 added-in-range paths came out of my generator carrying that value. Left alone it would have "matched"
+  any absent file. Normalised to ABSENT before the check ran; 0 occurrences of e3b0c44… remain in the file.
+Census: 35 containers · 33 running · 32 healthy · 1 unhealthy (demo-service) · 2 exited(0) (migrations,
+  demo-overlay — one-shots). restarts>0 on exactly ONE container: demo-service at 8,392 (now 8,394),
+  SAME Id 39b34c120cf6, SAME Created 2026-09-30T12:24:12, same image — D 7th's 6,806 plus ~25 h at one
+  restart per ~65 s. The SAME KS-641 loop, judged by Id + Created + image, not by health.
+ROLLBACK SETS: TEN, every one fingerprint-identical to D 7th's record —
+  pre-20261005 17 38db468630789d0d · pre-20260930 29 a07a76adebb7ee72 · pre-20260923 29 6b7a5bf6dc94db38 ·
+  pre-20260922 29 11910b7520c17cd4 · pre-20260919c 3 472c387774d52634 · pre-20260919b 3 e93bf25cc3beec77 ·
+  pre-20260919 33 91562601706ce9d2 · pre-20260918 33 45d143d2b7172ce5 · pre-2026-09-12 33 efea511098dd68e9 ·
+  pre-20260910 31 67e2eb26a798470c.  240 tagged images across 10 sets. `new-*` count 0 — nothing was ever
+  rolled back on this box.
+yaml bind mount: host inode == container inode 1310850; md5 5de556ced1e5fa4290fb7f81b56ff817 both sides,
+  and that md5 EQUALS the spec at 46c3e20cfbd2 in my clone — independent confirmation of the base.
+/health/deep (NEVER /health): ready true, status healthy, startupMigrations {ran:true, applied:46,
+  failed:0, lastRunAt 2026-10-05T07:55:26.183Z}, checks 5 up / 0 down, redis up 2 ms.
+  /health is the nginx literal: 179 B, sha16 59476e2e34dac6bd, startupMigrations occurrences 0. The control.
+  External from the Mac: https://kintsugi.secuura.net/health/deep HTTP 200 in 1.009 s, same block, redis 1 ms.
+NODE_ENV=development (so KS-1348 stays unsweepable here). Compose project `dev`, config files
+  docker-compose.yml + docker-compose.override.yml — read from the RUNNING container labels. Never -f.
+Box up 27 days 1 h: no live-migration/reboot event since the 2026-09-09 recovery.
+SSH rc 0 on both boxes. My egress is 157.211.46.215 — the same /32 that matched on 10-05. No NSG read, no az call.
+
+== 4. THE REBUILD SET — 30 images, re-derived in my own clone ==
+service_mapd12.py (D 7th's logic BYTE-IDENTICAL below the two header lines; it carries no pinned sha,
+path or count — it takes REPO/OLD/NEW as arguments) over 46c3e20cfbd2..d75bfe2deb80, rc 0, 190 lines.
+Range: 136 files · 71 under Blockchain/Dev. The set is EXACTLY the 30 your brief names:
+  admin-frontend analytics anchoring api-gateway auth billing demo-overlay demo-service governance
+  guardian issuer-frontend kyc m365-integration mcp-server migrations nft-certificate originate prism
+  queue referral security staking tenant-provisioning timestamping tokenisation transfer vc-issuer
+  verifier-frontend wallet-connector website-frontend
+All 7 mapping controls discriminate, both negatives included: adminConfig.ts -> [migrations, originate];
+kyc/src/index.ts -> [kyc]; the spec yaml -> [api-gateway] + its bind mount; run-migrations.sh ->
+[migrations, originate]; packages/shared/src/index.ts -> 29 services; docs/VOCABULARY.md -> NONE;
+scripts/preflight/preflight.sh -> NONE.
+
+== 5. DISK — THIS IS THE ONE THING THAT MAY STOP THE ROUND. Q-DISK ==
+Kintsugi free, settled: 12,578 MB (D 7th left 12,657; −79 MB over 27 h, so it IS settled).
+Guard 4,000 MB  ->  HEADROOM = 8,578 MB.  My set is 30 images.
+The two precedents, from their own per-image logs (D 7th's .rebuild-seatD7/rc.txt read on the box today,
+B 50th's build results from D 7th's boot copy):
+  D 7th  17 images: start 19,290 -> trough 11,068 (anchoring) = DIP 8,222 MB.  originate alone 15,539 ->
+         11,253 = 4,286 MB. The 11 backends BEFORE originate cost 3,751 MB = 341 MB each.
+  B 50th 29 images: start 23,641 -> trough 18,009 (migrations) = DIP 5,632 MB. originate 22,365 ->
+         18,270 = 4,095 MB. The 21 images before originate cost 1,276 MB = 61 MB each.
+The per-image accumulation differs 5.6x between the two rounds while originate is near-constant, so the
+count is not the driver — the accumulated layer churn is. Forecast, both ways, for MY 30:
+  on D 7th's rate : 26 light x 341 = 8,866 + originate 4,286 = 13,152 MB needed vs 8,578 available
+                    -> CROSSES the guard by 4,574 MB.
+  on B 50th's rate: 26 light x 61  = 1,586 + originate 4,286 =  5,872 MB -> clears by 2,706 MB.
+  top-down        : D 7th consumed 8,222 MB of transient headroom for 17 images. I have 8,578 MB for 30.
+SAYING IT PLAINLY, as your brief asks: THE FORECAST DOES NOT CLEAR THE GUARD. On the most recent
+same-box precedent — the figure your brief tells me to prefer over B 50th's — it crosses it decisively,
+and even the top-down reading leaves 356 MB against a single originate build whose own dip moved 466 MB
+between the last two rounds.
+WHAT A GUARD TRIP ACTUALLY COSTS, because it bounds the decision: the build loop reads free space before
+EVERY build and STOPS at 4,000 MB. It swaps nothing. The box keeps running 46c3e20cfbd2 and every one of
+the ten rollback sets. So the downside of attempting is build time (D 7th's 17 took 1 h 19 m; 30 will be
+longer) plus a STOP mail — not an outage and not a partial deploy.
+CONTEXT FOR A PRUNING RULING, which is yours and Kam's, not mine: `docker system df` reads Images 263
+total / 35 active / 92.89 GB with 58.92 GB (63%) RECLAIMABLE, and Build Cache 210 entries / 16.23 GB with
+12.95 GB reclaimable. There is ample space if a prune is ruled. I FREE NOTHING and have pruned nothing.
+MY RECOMMENDATION: let me start the build with the guard armed, and treat a trip as the STOP it is
+designed to be. If you would rather not spend the build time on a run that may halt, rule on the prune
+first. Either way I need your word before Phase 0.
+
+== 6. PHASE 0 STAMP ==
+pre-20261006, taken from the BOX's own UTC clock (2026-10-06T10:53:23Z, hostname secuura02-kintsugi-vm).
+  Count by NAME 0 · count by ID 0 — free on both. CONTROL pre-20261005 reads 17, so the matcher works.
+  `.rebuild-seatD12` does not exist on the box (16 older .rebuild* dirs do; none is mine).
+I will assert the re-tagged count equals the rebuild set actually tagged, by name AND by id, and that the
+ten older sets are fingerprint-identical before and after. No prune, no deletion, no --remove-orphans
+(it deletes guardian + queue), no down, no -v, no rm.
+
+== 7. ORDERED SWAP PLAN, with the rollback for every service ==
+Rollback for ANY service: docker tag dev-<svc>:pre-20261006 dev-<svc>:latest && docker compose -p dev
+  --profile phase2 up -d --no-deps --force-recreate <svc>   (never -f, never --remove-orphans)
+Order:
+  (a) 22 backends: analytics auth billing demo-service governance guardian kyc m365-integration mcp-server
+      nft-certificate originate prism queue referral security staking tenant-provisioning timestamping
+      tokenisation transfer vc-issuer wallet-connector   — health read between every swap
+  (b) anchoring, then api-gateway  — LAST among the backends, as your brief requires
+  (c) 5 frontends: admin-frontend demo-overlay issuer-frontend verifier-frontend website-frontend
+  migrations: REBUILT and NOT recreated (one-shot, nothing new to apply), as D 7th did.
+  timestamping's recreate is what applies the new compose TSA_TRUST_ANCHORS_PEM default — I read its env
+  and /app/config straight after it, not at the end.
+  After api-gateway: the yaml bind mount's container inode == host inode, and the served yaml md5 ==
+  my clone's 0b82a6f5703329925abedd24b7bd6ca6 (the box serves 5de556ced1e5fa4290fb7f81b56ff817 today).
+ONE THING I NEED YOU TO ACCEPT IN ADVANCE: demo-service is in the KS-641 restart loop and can NEVER read
+  healthy. Its swap verdict will be "recreated, new image id, STILL LOOPING (KS-641, pre-existing)" and I
+  will not treat that as a swap failure or roll it back. Say so if you disagree.
+
+== 8. MIGRATIONS — a measured NO-OP, both DBs, with the routing read at source in MY clone ==
+startup-migrations.ts:101 isPlatform = /platform/i.test(filename); :134-135 main skips platform files and
+platform skips non-platform. migrations/ holds 52 tree entries = 50 .sql + config.js + __tests__/.
+The 50 split 49 main + 1 platform (003_platform_tenancy.sql) — derived from MY clone, not transcribed.
+  [secuura]           routed 49  tracker 49  PENDING 0
+  [secuura_platform]  routed  1  tracker  1  PENDING 0
+  CONTROL main + a planted fake -> 1 (exactly +1).  CONTROL platform + a planted fake -> 1 (exactly +1).
+  048 recorded 1 · 039 recorded 1 · 038a recorded 1 · a fake filename 0 · 003_platform_tenancy in the
+  MAIN tracker 0 (correct — it is the platform file).
+  WRONG-WAY CONTROL, run deliberately: the whole 50-file set against ONE tracker reads 1 pending on main
+  and 49 on platform — reproducing B 50th's shape and its spurious STOP exactly. My shape is the right one.
+  Rows written today 0. CONTROL rows since 2026-09-01 = 6, so the date predicate discriminates.
+  Newest applied_at still 2026-09-30 12:27:47.916738+00.
+The migration file SET is byte-identical between 46c3e20cfbd2 and DEVELOP_AT_DEPLOY (comm both ways
+empty; control: the shared list is non-empty). 0 new .sql in range, as your brief says.
+
+== 9. KS-535 BEFORE — clean, and NOT demo's ==
+.env mnemonic 695d09df873ff42b = MATCH · container mnemonic 695d09df873ff42b = MATCH
+.env blockfrost 142098c9528d0188 · container blockfrost 142098c9528d0188
+COLLISION WITH DEMO (12ea1a07174c3f50): env DIFFERENT · container DIFFERENT
+WRONG-VALUE ARM against a fabricated hash: MISMATCH, so the comparison is not stuck.
+Three controls all discriminating: $HOME expands to /home/nodejs · the literal-string artefact reads
+1d99a769a815b299 · the empty string reads e3b0c44298fc1c14.
+.env sha16 634e99a79cbc6ee5 / 16,719 B = MATCH to D 7th's record. CARDANO_NETWORK preview.
+No value, prefix or length was printed anywhere. I will re-verify AFTER the restart, which is the point.
+
+== 10. TIMESTAMPING + REDIS BEFORE ==
+TSA_URL PRESENT-EMPTY · TSA_TRUST_ANCHORS_PEM ABSENT · /app/config ABSENT (ls: No such file or directory)
+  CONTROL PORT reads PRESENT-NONEMPTY · CONTROL /app/package.json EXISTS · CONTROL a fabricated path ABSENT
+  .env on the box does NOT define TSA_TRUST_ANCHORS_PEM (0 hits; TSA_URL 1 hit) — so the NEW COMPOSE
+  DEFAULT WILL TAKE EFFECT with no .env edit. I edit no secret and no env file.
+BOTH HALVES of D 7th's open KS-1404 finding are in this range, read at source in my clone:
+  docker-compose.yml:1251  TSA_TRUST_ANCHORS_PEM=${TSA_TRUST_ANCHORS_PEM:-/app/config/tsa-trust-anchors-dtrust.crt}
+  services/timestamping/Dockerfile:49  COPY --from=builder /app/config ./config   (before the chmod, so
+  it is readable by the unprivileged `nodejs` user) — the commit's own comment says exactly that.
+  The shipped file is services/timestamping/config/tsa-trust-anchors-dtrust.crt, ADDED in range. NOTE the
+  pre-existing tsa-trust-anchors.crt (no -dtrust) also ships; the default points at the -dtrust one.
+REDIS: available. /health/deep reports redis up, 2 ms internal and 1 ms external, from the gateway, which
+  is the reader KS-1256 actually depends on. The `platform-settings` key's existence is UNMEASURED — see
+  finding (d) below. Behaviour to name in STATUS: a Redis outage on a box now stops Platform-S connector
+  document creates with 503 (cards ...allowlist-missing-setting = b, ...redis-outage = a).
+
+== 11. THE SWEEP PLAN — 14 rows, proposed now, run after the swap ==
+Every row's §5f status stays `live sweep owed`: a kintsugi in-place PASS is a DONE CANDIDATE ONLY
+(your ruling 7). dist-bytes uses the newest rollback tag that PREDATES each fix, walked newest->oldest to
+the first image where the marker is genuinely ABSENT — a byte measurement, not an ancestry inference.
+Shared-package code lives at /app/node_modules/@secuura/shared/dist, not /app/dist.
+  KS-1404 | R | TSA_TRUST_ANCHORS_PEM PRESENT = /app/config/tsa-trust-anchors-dtrust.crt, the file EXISTS
+          |   | and is readable by uid 1001 (control: a fabricated path reads ABSENT) + /app/config is a DIR
+          |   | NO dist-bytes: both src files changed COMMENT-ONLY (see finding (f)). A real-token verify
+          |   | is W — not run unless you name it.
+  KS-723  | R | served yaml declares GET /api/anchors/tx/{txHash} (control: a fabricated path reads 0) and
+          |   | md5 == my clone's 0b82a6f5703329925abedd24b7bd6ca6. dist marker `/api/anchors/tx/{txHash}`:
+          |   | 0 hits at 46c3e20cfbd2, 2 at DEVELOP_AT_DEPLOY — two-sided, apostrophe-free.
+  KS-1256 | R | redis reads available; dist marker `if (!redisService.isRedisAvailable()) {` 0 at base,
+          |   | 1 at NEW — two-sided. The 503 path needs a Redis outage: I never stop Redis on a box.
+  KS-1005 | L | change-password with a WRONG current password -> not 404 (the defect was 404 for EVERY
+          |   | user). Writes nothing. dist marker getUserByIdWithPasswordHash: 0 at base, 1 at NEW.
+  KS-1210 | L | register an OAuth app with a scope outside the published nine -> refused. CONTROL: the
+          |   | valid-scope response is NOT sent — it would write. dist marker OAUTH_PRIVILEGED_SCOPES two-sided.
+  KS-1345 | X | DELETION fix. A PRESENT-marker check is VACUOUS. Inverse proof: `webhooks list query
+          |   | failed` PRESENT at 46c3e20cfbd2 (1 hit), ABSENT at DEVELOP_AT_DEPLOY. Two-sided.
+  KS-1305 | X | dist marker `is missing: npm ci runs with` 0 at base, 1 at NEW. Needs a missing generated
+          |   | Prisma client to exercise — dist-bytes only.
+  KS-938  | W | MFA enable/disable WRITES rows: NOT run unless you name it. (marker mfaBackupCodes: null — two-sided)
+  KS-1278 | W | a revoke WRITES: NOT run unless you name it. NO SELECT over past revokes (card = c, "Don't
+          |   | measure"). (marker ifStatusIsNot two-sided)
+  KS-1425 | X | lockfiles only. The reading IS the per-image NEW-ID/SAME-ID result. A SAME-ID rebuild is a
+          |   | real reading, proved with a NEW-ID control in the same run (D 7th's admin-frontend).
+  KS-1330 KS-1388 KS-1408 KS-1411 | X | no image input (service_map: NONE). Recorded as such.
+L rows run ONLY as admin@secuura.com, a seeded test account, one login, token reused (KS-724 caps logins).
+Never a human's account. demo@secuura.io / issuer@ / verifier@ are NOT seeded on kintsugi (each 401 for D 7th).
+Per row: dist-bytes DEPLOYED/NOT DEPLOYED with marker + control, then PASS/FAIL/UNMEASURED-with-reason,
+raw values beside every verdict, ratios as N/N and never "all". One drafted line per row, POSTED BY NOBODY.
+
+== 12. YOUR OPEN QUESTIONS ==
+Q-DISK      — answered in §5. The forecast does NOT clear the guard. I recommend attempting with the
+              guard armed (a trip swaps nothing), but it is your call, and a prune is Kam-class.
+Q-DEMO-STOP — I agree with your recommendation: each of STOP 1-demo and STOP 2-demo needs its own ANSWER
+              under this same GO, with no new GO subject. Confirm.
+Q-PETER-MERGES — I agree: deploy DEVELOP_AT_DEPLOY whole and record #1390/#1391/#1392 as "no image input".
+              Measured independently in my own clone: KS-1408 and KS-1411 map to NONE, and KS-1330/KS-1388
+              likewise. Nothing in those three reaches an image.
+Q-1383      — I agree: hold #1383 until my demo DEPLOYED mail. If it lands earlier it is a develop move,
+              which is a STOP-and-mail, and it is NOT deployed this round. I never chase develop.
+Q-SWEEP-DEMO — I agree with your recommendation, with one correction I measured: D 7th's
+              markers_live.tsv is 15 rows and its handover counts 22 shipped-code rows, so the two figures
+              are not the same set. I will carry D 7th's shipped-code markers as a dist-bytes check on
+              demo (it has never received them) and report the row count I actually probe, not either
+              inherited figure. Confirm the 15-row file is the one you mean.
+
+== 13. THE LAUNCHER'S PREFLIGHT WARNINGS, VERBATIM ==
+# launch 2026-10-06T10:44:17Z
+[F-02] No SSH identity available for git (keychain not seeded, on-disk fallback off).
+       Run: ssh-add --apple-use-keychain ~/.ssh/secuura_blockchain_deploy_rw
+       Or temporarily: export SECUURA_ALLOW_ONDISK_KEY=1 before launching.
+       (git will use whatever core.sshCommand is already in the repo config.)
+[KS-907] 1 other live session(s) on this project: PID 36144 (up since Tue  6 Oct 19:25:07 2026).
+         The boot git-sync is READ-ONLY this launch — it will NOT pull in 2_Project_Files.
+On F-02: it did not block anything. The repo's own core.sshCommand carries the on-disk deploy key and
+ls-remote returned rc 0; the clone used an explicit -c core.sshCommand with the same key.
+On KS-907: that other session is Seat R 2nd (%66). I made NO ref write, no fetch and no pull in the
+shared checkout. Its read-only state: HEAD c56dd7c32edf on develop, 15 behind its CACHED origin/develop
+32e058975d4e — and that cached ref is ITSELF stale, because the true remote tip d75bfe2deb80 is not
+present in that object store (cat-file -t fails). So the real behind count is AT LEAST 15 and I cannot
+measure it exactly without a fetch, which I will not do. 17 untracked files, all long-standing
+systemTest docs and two "(conflict_on_2026-07-03)" snapshots. 0 tracked modifications, staged or unstaged.
+I REFUSE the launcher's "pull latest if safe" line, as your TOP LINE requires, and say so here.
+I also refuse the SessionStart hook's POST /api/seen — the extranet is INPUT ONLY.
+
+== 14. WHAT MY MEASUREMENT CONTRADICTS IN YOUR BRIEF ==
+(1) develop is d75bfe2deb80, not f556373b9418. Your amendment already says so; I confirm it independently.
+(2) "`check-startup-migrations.sh` rc" — the script is at deployment/azure/, NOT scripts/, and it takes
+    the HEALTH BODY as $1 or on stdin, not a file path. See finding (c).
+(3) The 46c3e20cfbd2 range figures move with the develop move: 136 files / 71 under Dev, not 134 / 69.
+    The +2 are #1395's two Dev paths; the two Projects Documents files were already in range.
+(4) KS-1404's sweep row cannot use dist-bytes at all — both its src files changed comment-only.
+(5) Q-SWEEP-DEMO's "markers_live.tsv, 15 rows, and its handover counts 22 shipped-code rows" names two
+    different sets as if one. I will report what I probe.
+Nothing else in the brief failed against measurement. Every pin I could check reproduced: the tree, the
+30-image set, the ten fingerprints, the REVISION sha16 and size, the .env sha16 and size, both KS-535
+hashes, the five error lines, the compose line and the Dockerfile COPY.
+
+== 15. MY OWN FINDINGS — instruments that were wrong before any claim rested on them ==
+(a) I LEAKED A CREDENTIAL AND SCRUBBED IT. My redaction of the redis container's command line was
+    `sed -E 's/(requirepass)[^,]*/\1 <redacted>/'`. In the JSON array the value is the NEXT element,
+    past a comma, so `[^,]*` stopped short and the 64-hex requirepass argument printed in full into
+    boot/probe3_d12.out. Scrubbed to 0 occurrences; CONTROL: a pre-scrub copy still matched, so the
+    sweep discriminated, and that copy is deleted. 5_Project_History sits OUTSIDE the repo working tree
+    (`ls-files` refuses it as outside the repository), so it was never stageable. Reporting it rather
+    than hiding it. If you want the value rotated, that is a Kam-class call and I have not touched it.
+(b) THE ERROR BASELINE CANNOT BE READ FROM A TAIL WINDOW, and a tail reading would have manufactured a
+    STOP. `--tail 400` found 2 of the 5 recorded lines. security, staking and issuer-frontend started
+    2026-09-30 and their lines are BOOT lines; demo-service has flooded 8,394. Probed by signature over
+    each WHOLE log: 5/5 PRESENT, with a control string reading ABSENT in the same log. Had I kept the
+    tail reading, every swapped container's boot lines would have re-entered the window AFTER the swap
+    and I would have reported three NEW error lines and stopped the round on my own instrument.
+(c) check-startup-migrations.sh: my first run passed a FILENAME. All four arms returned the IDENTICAL
+    rc 2 "body is not JSON" — a set that could not discriminate anything, and I would have had to call
+    it a pass or a fail with no evidence either way. Re-run with the body as $1: rc 0 "0 failed", and
+    FIVE controls each with a DISTINCT message — failed->1 rc 1, ran->false rc 2, the nginx literal rc 2
+    "field ABSENT", an empty body rc 2 "EMPTY body", a broken python3 shim rc 1.
+(d) MY REDIS PROBE WAS BLIND TWICE AND ITS CONTROL WAS BLIND WITH IT. Unauthenticated redis-cli returns
+    NOAUTH; with the container's own $REDIS_PASSWORD it returns WRONGPASS — and the wrong-password
+    control returned the SAME string, so neither run separated instrument from reading. Redis
+    availability therefore comes from /health/deep, the gateway's own read. `EXISTS platform-settings`
+    is UNMEASURED. I can measure it from the .env credential inside a pipe without printing it if you
+    want the card-b "unset = no restriction" state confirmed on this box — say so and I will.
+(e) A PORTAL 200 IS NOT A PATH READING. https://kintsugi.secuura.net/zz-no-such-path-d12 returns 200 —
+    the SPA fallback serves index.html for anything. So "/ 200, /verify/ 200, /admin/ 200" proves the
+    portals are up and nothing about any route. /health/deep carries real content and does discriminate.
+(f) KS-1404 SHIPS NO src CODE CHANGE: both qualified-tsa.ts and rfc3161-verify.ts changed comment-only
+    (0 non-comment changed lines). Its entire runtime effect is the compose variable and the Dockerfile
+    COPY. A dist-bytes row for it would have been a comment-derived marker — D 7th's trap 5 — so it has
+    an R-probe instead.
+(g) KS-1345 IS A DELETION, so a PRESENT-marker dist-bytes row would be vacuous. Inverted, as above.
+(h) `tmux display-message -p` WITHOUT `-t` read the ACTIVE pane: my first identity read said `wednesday`
+    (%0). Targeted at $TMUX_PANE it reads Secuura/Blockchain-D (%67). This is D 7th's trap 1, one
+    generation later, in a session where the active pane happened to be the coordinator's. Nothing was
+    written during the ambiguity.
+(i) THE INHERITED INBOX MATCHER ALREADY CONTAINED MY OWN ORDINAL. D 11th wrote "d 12th"/"seat d 12th"
+    into OTHER_SEATS as its forward half, and MINE arrived reading "d 11th". Inherited unchanged, MY OWN
+    GO would have classified FOREIGN and the watcher would not have fired on it. Re-keyed BY HAND into a
+    new file inbox_matchd12.py, read and verified with AST (never a regex — a quoted token in a comment
+    is picked up as a list member, which cost D 11th a false alarm): MINE = "d 12th"; my ordinal REMOVED;
+    backward d 11th and forward d 13th ADDED; r 1st/r 2nd/r 3rd, e 8th/e 9th, b 69th ADDED;
+    "blockchain-r]" added to the foreign pane list; "blockchain-d]" kept OUT because foreign-pane
+    precedence returns before MINE. DRIVEN, not read: on 60 REAL inbox messages my own LAUNCH BRIEF
+    reads FOR ME and D 11th's, D 10th's, R 2nd's, E 8th's and B 68th's all read FOREIGN. Plus 9
+    constructed arms, 9/9: my real GO subject FOR ME; D 13th FOREIGN (forward half); D 11th FOREIGN
+    (backward); R 2nd's GO FOREIGN; an unknown seat UNTAGGED-read-it; fleet-wide FOR ME; my pane with no
+    seat named FOR ME (the m1-in-item1a collision); a Kam mail tagged by SENDER; and a NEGATIVE arm —
+    my exact GO text from a non-Wednesday sender does not enter the window at all.
+(j) THE COPIED TOOLSET CARRIES 61 LIVE HEX CONSTANTS, 90 absolute paths and 77 predecessor tokens
+    (swept with comments stripped; controls: a planted hex in live code is found, the same hex inside a
+    comment is not). Per the standing line I did NOT swap literals: the tools I ran this round take every
+    expected value as a REQUIRED ARGUMENT with a wrong-value arm. probe_remote_d12.sh refuses at rc 64 if
+    it is not given all ten. service_mapd12.py needed no re-key at all — its body is byte-identical to
+    D 7th's and carries no pinned sha, path or count, which I proved by diff rather than asserting.
+    The un-run inherited scripts (phase0/build/phase4/verify/distbytes/sweeps) are NOT yet re-keyed;
+    I re-key and prove each one before its first use, after the GO, never before.
+(k) BACKLOG.md is still uncommissioned on both items D 10th and D 11th left it: "Actions are not retired"
+    0 hits and "pre-existing CI" 0 hits, with a `retired` control reading 5 so the grep is live.
+
+== 16. WHAT I AM HOLDING FOR ==
+A mail from you whose SUBJECT is exactly:
+  [Wednesday -> Secuura/Blockchain-D] GO (Seat D 12th): deploy d75bfe2deb80 to kintsugi then demo
+The same words in a body are not a GO (your ruling on Seat E 8th). An ANSWER confirming this plan is not
+the GO. I will not act on a GO naming another seat, another SHA or only one box — I will read it and mail
+that I held. The inbox watcher is armed with SINCE = the newest mail I have READ.
+Until then: no lock, no fetch, no ref write, no PR edit, no ticket write, no comment, no box write.
+
