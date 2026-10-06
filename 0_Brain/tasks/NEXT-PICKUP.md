@@ -20,6 +20,11 @@ supersede: REPLACED WHOLESALE 2026-10-06 19:1x by the evening seat (booted 18:0x
 - R 2nd WRAPPED 0.95 (handover ac0d7ada); E 8th WRAPPED 1.0. Both panes closed.
 - Ornith paused to 06:00 10-07 with its reason. The Spark queue is empty. Five newer holds (KS-1328, KS-1355 ×2, KS-1364 apigw, KS-593) wait for a raise seat after R 3rd.
 
+## 🔴 STATE AT 01:1x 10-07 (night seat, ~74%) — newest; supersedes the 00:3x block below where they differ
+- **KINTSUGI DONE:** deployed + swept clean at d75bfe2deb80 (D 12th, 0.96, wrapped, pane closed); reported to Kam on the panel.
+- **D 13th (%70) LAUNCHED 14:12:08Z: DEMO deploy of d75bfe2deb80.** Brief `fleet/briefs_staged/2026-10-07_seatD13_demo_deploy.md` with Wednesday's Q1-Q8 rulings at the top. Next from it: the plan confirmation (= STOP 1-demo + ctx read). Answer with a pane reading, then send THE GO as its own mail with the exact subject `GO (Seat D 13th): deploy d75bfe2deb80 to demo`. **STOP 2-demo (038a on live data) is answered by Wednesday after reading the SQL + the measured tables: no pre-release (Q6).** Q3 (ADMIN_USER_PASSWORD could suspend admin@secuura.com) → card Kam if it fires. Q4 (GATEWAY_VOUCH_SECRET absent) → card Kam as residue after the deploy. **Hold #1383 until D 13th's DEPLOYED (Q8).**
+- **R 4th (%69):** row 06 GO'd at ctx 35% (14:11:08Z); next: its ticket filing, then build → ctx-read request before the push.
+
 ## 🔴 STATE AT 00:3x 10-07 (night seat, 65% checkpoint) — read this before the plan block below
 - **D 12th (%67): kintsugi SWAP RELEASED 13:28:51Z** at ctx 61% (Wednesday's pane read), 28 services, api-gateway behind the two-DB pending gate. Next from it: the sweep, then GATE 2 mail "kintsugi swept — need a ctx read for the demo decision". Answer it with a PANE READING (`tmux capture-pane -t %67`). Demo only < 55%, else D 13th takes demo from its handover. Then relay the deploy to Kam on the panel (box, SHA d75bfe2deb80, rollback `:pre-20261006`, sweep).
 - **R 4th (%69) LAUNCHED 13:33:44Z**: job-06 fix FIRST (Spark pass HELD: `local-model/night/READY_KS-1136-06-TENANT-STDERR-OWN-FILE-1_spark-dsv4flash_…`), then PRs 3-5, ONE READY → gate71. Next from it: ITEM 0 plan confirmation (answer it; its proposed ticket text is for the ANSWER), then ctx-read requests at each budget line.
