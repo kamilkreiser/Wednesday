@@ -1,0 +1,322 @@
+ITEM 0 plan confirmation, Seat D 10th, pane `Secuura/Blockchain-D` %61, boot 2026-10-06T02:25:10Z.
+
+READ-ONLY so far: no lock taken, no fetch into the shared store, no objects transferred, no worktree
+write, no ref write, no npm write into any tracked tree, no ticket, no comment, no PR. One job
+understood: unfreeze the pre-push gate. I do NOT merge.
+
+== 0. THE LAUNCHER'S PULL LINE, REFUSED ==
+The launcher's FIRST ACTION 1 says "If safe (clean tree, no conflicts), pull latest on the current
+branch." I REFUSED it and say so here, per the standing line. On the shared checkout
+`2_Project_Files` I ran ONLY reads: `git status --porcelain` (17 lines, all untracked, listed
+below), `worktree list`, `log -1`, `rev-parse origin/develop`, `cat-file -t`, `rev-parse --all`,
+and `ls-remote` (the allowed read: no local write).
+- NO `pull`, NO `fetch`, NO `fetch --dry-run`, NO `checkout`, NO `worktree add`, NO ref write.
+- `refs/remotes/origin/*` count BEFORE any action: **7**. Unchanged (no fetch ran).
+- Shared `rev-parse --all | shasum -a 256` = `078711df5a8ed907568e6e81e52aae3db0de33dc1a19d39d00bdb20dd5532a03`
+  — **byte-identical to B 67th's P3 reading** `078711df5a8ed907…`. Nothing of mine moved it.
+- The shared checkout's HEAD is `c56dd7c32edf2031` (KS-729, #1364, 2026-10-01) on local `develop`,
+  i.e. BEHIND origin. I left it there. Its 17 untracked files are systemTest docs plus
+  `testIdCatalog.generated.ts` and two `(conflict_on_2026-07-03)` snapshot copies — none mine.
+- `GIT_SSH_COMMAND` exported in my environment: **0** occurrences. `ls-remote` ran from my scratch
+  clone with `-c core.sshCommand=` taken from the checkout's config.
+
+== 1. SEAT IDENTITY — THE BARE READ NAMED YOU, AGAIN ==
+`$TMUX_PANE` = `%61`. Pinned `tmux display-message -p -t "$TMUX_PANE" '#{@cockpit_name}'` =
+`Secuura/Blockchain-D`. **The BARE `display-message` returned `wednesday`.** That is the FIFTH
+consecutive generation to get a foreign value from the bare form, and the second to get the
+coordinator's name. The assert ran as my FIRST tool call, so it cost nothing.
+- Control: `#{@not_a_real_option}` came back EMPTY, so the instrument discriminates.
+- Corroborated by ancestry: my shell -> claude `91661` -> launcher `91659` running
+  `Launch_Claude.command` with `[cockpit] Secuura/Blockchain-D`, started 13:25:10 AEDT =
+  02:25:10Z, which matches the preflight stamp and sits 8 s after your brief at 02:25:02Z.
+- Instrument named: the pinned per-pane tmux user-option, plus `ps -eo pid,ppid,lstart,command`.
+
+== 2. THE FLOOR — I AM THE ONLY SECUURA SEAT ==
+Panes now: `%0` wednesday (pid 98365, launched 00:53:13Z), `%61` me, `%1` fleet-monitor. **B 67th's
+`%60` is GONE**, which confirms your LAUNCH AMENDMENT. Lock floor: **0** `.push-lock-*` in
+`worktrees/` — matches your P13.
+- ps file: `5_Project_History/2026-10-06_seatD-10th/ps-item0.txt`, 977 lines.
+- **FOUR ORPHANED WATCHERS are still running** from seats whose panes are gone: `12127`
+  (seatF-3rd, since 2026-10-05 21:11Z), `89913` (seatF-4th, 00:55Z), `31713` (seatE-6th, 10:11
+  AEDT), `41307` (seatE-7th, 11:26 AEDT). Not mine; I touched none of them. Flagging because they
+  poll the shared inbox on a 60 s cadence each and E 7th has WRAPPED.
+- My own watcher: **pid 3251**, armed `SINCE=2026-10-06T02:25:02Z` (your brief — the newest mail I
+  have READ, not a wall clock), interval 60 s. Banner read back:
+  `02:41:46Z WATCHER v4 UP (Seat D 10th) — since 2026-10-06T02:25:02Z, every 60s, matcher inbox_matchd8.py, fire-on=FOR-ME`
+  then `poll 1 — SCANNED 15 messages , no new Wednesday mail FOR ME`. I will RE-ARM in the same
+  action that reads any mail.
+
+== 3. REFS BY ls-remote — DEVELOP HAS NOT MOVED ==
+Instrument: `git -C <scratch clone> -c core.sshCommand="<checkout value>" ls-remote
+git@github.com:Secuura/Distributed_Secuura.git <refs>`, 02:29:22Z, rc 0.
+  develop            4eaf7741a6a4b2c82752d0d94f8bbacb5493aabe   == your P3
+  refs/pull/1393/head b5adaba751d89fda0b138e0b8b74d702e2a2a429  == your P3
+  refs/pull/1394/head 585171bc2c29ea7d5ee38b11ddaacfdf19875537  == your P3
+  refs/pull/1395/head 1bdfbe0f2f06bbf52f14ed5c6eab9f3261944660  == your P3
+  refs/pull/1396/head e6eb53fe26587bc8375154a6acfd112ddea58278  == your P3
+develop identified: tree `6884601a03dc1685476b69e94efe29a9573d53a7`, 2026-10-06 11:32:59 +1100,
+subject `KS-723: declare GET /api/anchors/tx/{txHash} in the published OpenAPI contract` (#1394).
+`4eaf` IS in the shared store (`cat-file -t` = commit, rc 0), so **no fetch was needed**.
+My scratch clone: `git clone --shared --no-checkout` of the checkout, rc 0; its `origin` is the
+LOCAL path, which is why the GitHub URL is named explicitly above.
+
+== 4. YOUR BLUF TABLE, RE-MEASURED SECOND-HAND — IT HOLDS IN FULL ==
+Registry `POST /-/npm/v1/security/advisories/bulk`, HTTP 200, parsed with `python3 -I`:
+  GHSA-jqcg-44mw-7w3h proxy-addr              critical  >=1.1.0 <2.0.8   fixed 2.0.8
+  GHSA-68fv-2mgg-jv7q source-map-js           high      >=1.0.0 <1.2.2   fixed 1.2.2
+  GHSA-rj75-hqrm-r3gf postcss-selector-parser moderate  <7.1.6           fixed 7.1.6 (7.x only)
+  GHSA-hp3w-g68c-fv3c sprintf-js              moderate  <=1.1.3          NO FIX
+  GHSA-r4xh-jqrq-34v2 smol-toml               moderate  <=1.8.0          fixed 1.9.0
+THREE DISCRIMINATING CONTROLS on that API:
+  (A) the four FIXED versions alone -> body `{}`, zero keys. The fixes genuinely clear them.
+  (B) the four OLD versions alone -> all four fire. The instrument is not uniformly silent.
+  (C) sprintf-js at its LATEST published 1.1.3 -> STILL FIRES `<=1.1.3`. No fix exists, measured
+      rather than assumed. postcss-selector-parser 6.1.4 -> fires with range `<7.1.6`.
+
+PARENT WALK, nearest-`node_modules` resolution over all 45 tracked locks, semver 7.8.5
+(control: `satisfies("2.0.8","~2.0.7")` true, `satisfies("3.0.0","~2.0.7")` false):
+**78 entries, 0 with no resolving parent, 0 OUT-OF-RANGE.** Verdicts: IN-RANGE 68,
+NO-FIX-ON-6.x 4, NO-FIX 6. Every parent range you listed reproduced, and I found three you did not:
+  - `stylelint@17.15.0` `^7.1.4`-> actually `^7.1.5` (admits 7.1.6) beside 17.14.1 `^7.1.4`;
+  - `@csstools/selector-resolve-nested@4.0.0`/`4.0.2` and `@csstools/selector-specificity@6.0.0`,
+    all peerDeps `^7.1.1` (admit 7.1.6);
+  - `knip` at THREE versions: 6.27.0 `^1.6.1`, 6.34.0 `^1.8.0`, 6.38.0 `^1.8.0` (all admit 1.9.0).
+  The two REFUSING parents are exactly yours: `tailwindcss@3.4.19` `^6.1.2` and
+  `postcss-nested@6.2.0` `^6.1.1`, and they are what makes the 6.x row unavoidable.
+**No row of your table is contradicted. Nothing is held.**
+
+== 5. THE CHANGE SET — 54 ENTRIES, 36 LOCKS, EXACTLY YOUR PREDICTION ==
+  proxy-addr               16 entries / 16 locks   (12 more locks ALREADY at 2.0.8 = in-repo control)
+  source-map-js            33 entries / 33 locks
+  postcss-selector-parser   1 entry  /  1 lock     systemTest/api-explorer 7.1.4 -> 7.1.6
+                                                   (systemTest/akto ALREADY 7.1.6 = in-repo control)
+  smol-toml                 4 entries /  4 locks
+  TOTAL                    54 entries / 36 distinct lock files
+Plus `audit-baseline.json`: +2 rows, 22 -> 24. 0 manifests, 0 overrides, 0 source, 0 tests, 0 docs.
+`Blockchain/Dev/mobile/secuura-app/package-lock.json` NOT TOUCHED (OUT_OF_SCOPE_LOCKS, KS-769,
+expires 2027-01-01, `lock-discovery.mjs:193`).
+
+PURELY TRANSITIVE, with must-hit controls:
+  - manifests declaring any of the five: **0** each. Control `"express":` -> **28** manifests.
+  - source files importing any of the five: **0** each. Control express imports -> **333** files.
+  - source files even MENTIONING them: **0** each. Control express -> **418** files.
+  - root `overrides` holds none of the five (its 12 keys include express, postcss, undici, ip-address).
+  (Your control figure was 336; mine is 333 by `require('x')|from 'x'` and 418 by bare name. Different
+  instruments, same conclusion. I report mine.)
+⚠ MY FIRST importer pass printed five zeros that were WORTHLESS: zsh read `$p['\"]` as an array
+subscript and the command errored (`bad math expression`) while my `|| true` turned it into "0".
+Re-run with `${p}` braced. A zero from a command that failed is not a measurement.
+
+== 6. BASE CONTROL — BOTH LEGS REPRODUCE EXACTLY ==
+In my scratch clone at `4eaf`, `npm ci --ignore-scripts` in `scripts/audit` only (rc 0, 1 package):
+  LEG 6 `node scripts/audit/audit-gate.mjs` rc **1** — "11 distinct advisories reported, 22
+    baselined", 15 CLEANUP rows (advisory), "FAIL — **4 NEW** advisories not in the baseline":
+    GHSA-rj75, GHSA-jqcg, GHSA-68fv, GHSA-hp3w. (smol-toml is not in the root lock, hence 4 not 5.)
+  LEG 7 `node scripts/audit/audit-locks.mjs` rc **1** — "43 standalone lockfiles (45 tracked, minus
+    the workspace root, minus 1 declared out of scope), **1614** distinct packages pinned — **10**
+    advisories match, **5** already baselined", then "FAIL — **5** advisories ... NOT in the
+    baseline" with the per-lock blast radius: proxy-addr 15, source-map-js 32, psp 4, sprintf-js 4,
+    smol-toml 4.
+Your P1 figures are reproduced digit for digit.
+
+== 7. THE TWO BASELINE ROWS, REASONS MEASURED ==
+`GHSA-hp3w-g68c-fv3c` sprintf-js 1.0.3 — **5 in-scope entries, ALL `dev: true`, 0 prod**:
+  `Blockchain/Dev/package-lock.json` (root, nested under argparse) + services/governance, originate,
+  referral, vc-issuer. Sole parent everywhere: `argparse@1.0.10` `~1.0.2`, under `js-yaml@3.15.2`
+  `^1.0.7`. No published version is unaffected (control C above). The one PROD copy is
+  `mobile/secuura-app`, which is out of scope by KS-769.
+`GHSA-rj75-hqrm-r3gf` postcss-selector-parser 6.1.4 — **4 in-scope entries, ALL `dev: true`, 0 prod**:
+  frontend/admin, frontend/issuer, frontend/verifier, and the workspace root. Parents
+  `tailwindcss@3.4.19` `^6.1.2` and `postcss-nested@6.2.0` `^6.1.1`; 3.4.19 is the last v3 and still
+  requires `^6.1.2`, so no in-range fix exists on 6.x.
+Row shape per KS-1403's braces row: `package`, `reason`, `ticket`, `decidedAt` `2026-10-06`,
+`expires` `2026-10-31`. Appended TEXTUALLY — I will assert every pre-existing row byte-equal,
+`$comment` unchanged, 22 -> 24, then `audit:contract` still 59 cases.
+**I accept your 🔴 on the GHSA-id keying** and confirm it by reading the schema myself:
+`REQUIRED_FIELDS = ['package','reason','ticket']` at `baseline-contract.mjs:41` — no version and no
+lock scope. So the GHSA-rj75 row WOULD mask a 7.x copy below 7.1.6, the api-explorer bump is
+required regardless, the reason will say the row covers 6.1.4 only by intent, and my proof will show
+by parse that 0 in-scope locks pin any psp 7.x < 7.1.6 after the change.
+
+== 8. THE FUSE ==
+Baseline blob at `4eaf` = `4ef11079242c3a7fe2af7b360702e82dde31d964` — **== your P7**. `accepted`
+is a **dict keyed by advisory id**, 22 rows. Field histogram `package 22, reason 22, ticket 22,
+decidedAt 21, expires 4` — == B 67th's reading. **4 dated rows, all `expires 2026-10-31`,
++597 h from 02:35Z, 0 lapsed:**
+  GHSA-337j-9hxr-rhxg react-router KS-528  decidedAt 2026-07-29
+  GHSA-wrjc-x8rr-h8h6 react-router KS-528  decidedAt 2026-07-29
+  GHSA-ggr8-5vv4-36mx deepmerge-ts KS-664  decidedAt absent
+  GHSA-vfj7-8cjw-p6xm braces       KS-1403 decidedAt 2026-10-04
+18 rows carry no `expires` (== the 18 ids in `GRANDFATHERED_NO_EXPIRY`). The five ids appear **0**
+times as keys AND **0** times by `grep -c -F` over the whole file; controls: `GHSA-` appears 38
+times, and `GHSA-2mjp-6q6p-2qxm` reads 1. **I will re-date nothing and remove nothing.** The 15
+stale CLEANUP rows stay out, named in the PR's NOT-DONE list, disposition to KS-767.
+⚠ DISCLOSURE: my FIRST baseline parser treated `accepted` as a list, so it iterated STRINGS and
+printed "0 dated rows / 22 without expires" — which CONTRADICTED your P7. I fixed the instrument
+before believing either reading. Had I trusted it I would have mailed you a false contradiction.
+
+== 9. TOOLCHAIN, DISK ==
+node **v24.7.0**, npm **11.5.1** (== your draft). **Docker DOWN, socket absent** (== your P13) —
+leg 2's clean-room takes the host path at `lockfile-cleanroom.sh:49-53` on node >= 24, so Docker is
+not needed. `df -m /Volumes/DevMASTER` BEFORE: **697,533 MiB** free (you had 697,534).
+`expected-case-count` = **59**. Preflight blob `270b8913c009a360759ea18bf7cf250f466cf67e` ==
+B 67th's. Rule blobs == your P15: SKILL.md `eaf43dfd4d985bf9b0badbfc7e85561c13407e1f`, repo
+`CLAUDE.md` `eccdb71822dae2563de0f6a88620a6ca7d55d769`.
+
+== 10. 🔴 FINDINGS IN THE INHERITED KIT — FIVE, AND ONE IS A BRIEF PREMISE ==
+Copied 41 of 60 entries from D 9th's `raise/` (19 skipped by your exclusion patterns), 0 hash
+mismatches at copy; manifest at `5_Project_History/2026-10-06_seatD-10th/COPY-MANIFEST.txt`.
+**Your brief and D 9th's P11 both say 44 files; after your exclusions I measure 41.** Flagging, not
+guessing at the difference.
+
+F1. **`reseatd9.py` DOES NOT EXIST.** Your brief says "Re-seat the SEAT token only ... with D 9th's
+    `reseatd9.py` (seat-only)". It is not in my copied kit and **not in D 9th's source `raise/`
+    either**. What exists is `rekeyd8.py` (renames tool FILENAMES; its own header says "every
+    seat-bearing constant is a HAND-FIX afterwards") and `rekey_checkd8.py`. Since Q-LOCKD10 keeps
+    generation `*d8`, no filename re-key is owed at all — only seat constants, by hand.
+F2. **`rekey_checkd8.py` is INERT for my generation**, by its own header: `MY_GEN` is parsed with
+    `int()`, which raises on a lettered generation. **So this re-seat has NO independent auditor.**
+    Stated here and I will state it in the READY rather than paper over it.
+F3. **`commitd8.sh` is mis-seated twice, and one half CANNOT FAIL.** `:26`
+    `export LOCK_SEAT='Secuura/Blockchain b57'` — a B-lane token five generations stale. `:63` reads
+    `$WT/.push-lock-e2/holder` and `:72` tests `[ -d "$WT/.push-lock-e2" ]` for "my lock is STILL
+    HELD". Against my `-d8` lock that test can only ever answer "released": **it is the exact
+    assertion-that-cannot-fail class D 8th fixed in `twolockd8.sh` for `-e3`.** A seat-only re-key
+    would not have caught it, because `.push-lock-e2` is a lock path, not a seat ordinal.
+    `ffproofd8.sh:93` and `legproofd8.sh:27` also carry `b57`; `lockproofd8.sh:109` ASSERTS the
+    message "names THIS seat (b57)" — a control keyed to a constant that is no longer this seat.
+F4. **`namecheckd8.py` is wholly mis-lane.** `:69 MINE='e3'` but `:258 MY_FORMS` =
+    `{'branch segment': '-e2-', 'worktree prefix': 's-e2-', 'ref namespace': 'seate2', 'argv tag': '-e2'}`
+    — internally inconsistent AND neither is mine. `:138 FOREIGN` lacks `d9`/`seatd9`. Its
+    `BRANCHES`/`SUBJECTS`/`ADOPTIONS` corpora are E-lane rounds (ks-1210, ks-938, ks-1005). This
+    needs a full re-key before ITEM 1 names a branch, not the seat-only change your brief describes.
+F5. **`applylocksd8.py` is the right tool, wired to the WRONG round.** It is the surgical
+    three-field lock editor from the KS-1403 precedent, and every knob is that round's:
+    `W=worktrees/s-b55-freeze5`, `BASE=88e8877a2a0d`, `PKG=node_modules/http-cache-semantics`,
+    `VERSION=4.3.0`, a fixed `RESOLVED`/`INTEGRITY`, and `SERVICE=[anchoring, nft-certificate]`.
+    See Q-APPLY below — I want to take the package set as DATA rather than re-point constants.
+
+Also measured, not defects for this round: `merged8.py:431` hard-codes
+`SIGN='Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>\n'` (I do not merge, and my commit
+carries 0 trailers — but I will grep the commit path for trailer injection before ITEM 3);
+`bannercheckd8.py:78 GEN='e3'`; `addendumd8_build.py` carries KS-1404's subject, body and GO id;
+`armsd8.py:65` and `merged8.py:120` embed a DEAD session's scratch path
+(`…/14aadd14-4c4d-4f52-9de4-df3119ae8f45/…`; mine is `9ff83258-…`).
+Audit scope: all **20** Python tools AST-parse clean (0 failures); **3,975** string literals
+scanned; **20** UUID hits and **4** `/private/tmp` hits, each listed in my record folder.
+
+== 11. THE LOCK — Q-LOCKD10 CHECKED, AND IT IS ALREADY CORRECT ==
+`twolockd8.sh:56` `mine_exists()` reads **`.push-lock-d8`** — already right, fixed by D 8th, whose
+comment records the same miss against `-e3`, `-e2` and `-e1` in the three generations before. **No
+re-point owed.** Worth having checked: it is the predicate behind "my lock not taken".
+WAIT/STOP parity, extracted from both halves as you asked:
+  `lockd8.sh:281-284` WAIT slots: `-56`, `-e4`, `-f3`, `-g1`.
+  `pushd8.sh:164-173` `_CHK` twins: `-56`, `-e4`, `-f3`, `-g1` — **byte-identical membership.**
+  `lockd8.sh:321 STOP_LOCKS` = 17 locks; `pushd8.sh:195 STOP_LOCKS_CHK` = the SAME 17, same order.
+  `pushd8_ff.sh` holds **zero** `.push-lock-` literals because it DELEGATES take/release to
+  `lockd8.sh` at `:113`/`:120` — so parity there is structural, not duplicated. (And `_ff` is not my
+  path: first push of a new branch is `pushd8.sh` BARE, per D 8th §5.)
+  `-56` is present ✓. My own `-d8` is absent from BOTH the WAIT set and the STOP set ✓.
+⚠ **Q-WAIT (new, below):** all four WAIT slots name generations that are NOT live. B 67th wrapped
+(`-56` would be a NEW holder), and `-e4`/`-f3`/`-g1` name E 4th / F 3rd / G 1st while the live E and
+G seats were E 7th and G 2nd. By your own 2026-10-04T15:22:37Z ruling quoted in `lockd8.sh:296-300`,
+a wrapped seat's lock belongs in the STOP set, not the WAIT set. But `lockd8.sh:285` REFUSES (exit 2)
+on an all-empty WAIT set, so I cannot simply empty it. I will attribute every lock by its holder
+file's `seat` field, never by path, and STOP-and-mail on anything unattributed.
+
+== 12. LINEAR, READ-ONLY — NO EXISTING TICKET, SO NO DUPLICATE ==
+`searchIssues(term, first:20, includeArchived:true)` over **18** terms: the five package names, the
+five full GHSA ids, the five short ids, "advisories freeze", "lock refresh", "advisory lock".
+  - the five package names and five full ids: 20 fuzzy hits each; the ONLY title naming one of the
+    five is **KS-749**, and it is the OLDER `GHSA-w9m9-85wc-3x92`, now cleared — as you said.
+  - short ids: `jqcg` 0, `rj75` 0, `hp3w` 0, `r4xh` 0, `68fv` **1** (= KS-767, GHSA-p88m-4jfj-**68fv**,
+    undici — not this advisory).
+  **Conclusion: no ticket covers these five. Filing ONE is correct.**
+The four named tickets, all matching your figures exactly:
+  KS-1403 In Progress, unassigned, project none, updatedAt 2026-10-04T11:26:21.042Z, 0 comments,
+          priority 2 High. "Three range-widened HIGH advisories freeze every push..."
+  KS-1378 In Progress, kamil.kreiser@secuura.ai, Internal tooling, 2026-10-05T06:50:40.670Z,
+          3 comments, priority 1 Urgent.
+  KS-749  In Progress, kamil.kreiser@secuura.ai, Dependency and Version Currency,
+          2026-10-05T03:11:55.588Z, 4 comments, priority 4 Low.
+  KS-769  In Progress, kamil.kreiser@secuura.ai, project none, 2026-10-05T01:03:29.189Z, 4 comments.
+I wrote NOTHING to any of them.
+Board context (boot duty): active started+unstarted returns **250, which is the `first:250` CAP** —
+so that is a floor, not a total (223 Kam, 19 unassigned; In Progress 202, In Review 15, Blocked 5,
+Todo 28). ONE past-due: **KS-729, due 2026-09-30**. Backlog **241**: Urgent 3, High 61, Medium 120,
+Low 37, None 20; 16 created in the last 24 h (KS-1413…KS-1424). **51** issues moved to Done in the
+last 24 h — six of them closed by `peter@obeden.com` (schemathesis pin bumps KS-1408/1353/1285,
+Akto image bumps KS-1411/1286, KS-1363).
+
+== 13. THE TICKET DRAFT (filed only on your ANSWER) ==
+Title: `Five new advisories freeze every push: in-range lock refresh for four, baseline the two with no fix`
+Project proposed: **Dependency and Version Currency**. Priority proposed: **1 Urgent**.
+  Grounded, not guessed: the two closest precedents are both freeze waves and both carry exactly
+  that pair — **KS-1395** priority 1 Urgent / Dependency and Version Currency, and **KS-1400**
+  priority 1 Urgent / Dependency and Version Currency. (KS-1378 Urgent but Internal tooling;
+  KS-1403 High, no project; KS-749 Low, same project.) Board account, UNASSIGNED.
+Body carries: the five ids with severity, pinned and fixed versions and registry ranges; the
+54-entry/36-lock census; the two no-fix rows with their parent ranges; the transitivity controls
+with their must-hit figures; the base-control leg output; Kam's ruling verbatim; and
+cross-references to KS-470, KS-531 and KS-1403 hyphenated (a Linear ticket only cross-references).
+Every sentence measured or marked unmeasured.
+
+== 14. PRE-RULED ANSWERS — I CONFIRM ALL SIX, NOTHING CONTRADICTED ==
+Q-LOCKD10 **yes** — generation `*d8`, `worktrees/.push-lock-d8`,
+  `LOCK_SEAT='Secuura/Blockchain-D d10'`. `mine_exists()` verified already correct (§11).
+Q-METHOD **yes, the surgical edit** — 3 fields per entry, nothing else. I will cross-check against
+  npm in a SCRATCH copy and prove field-for-field identity on each allowed entry. Host npm 11.5.1
+  is recorded INERT for `npm update --package-lock-only`, so npm is a cross-check, not the editor.
+Q-WT **yes** — ONE worktree `worktrees/s-d10-advlock`, ONE new branch
+  `feature/ks-<new>-advisory-lock-refresh-d10-1`, from `4eaf7741a6a4`, via `wtaddd8.sh` under the
+  lock; then `npm ci --ignore-scripts` at `Blockchain/Dev` and in `scripts/audit` OUTSIDE the lock.
+Q-PF **accepted as proposed** — `PREFLIGHT INCOMPLETE — 12/15 legs ran, 3 SKIPPED. Nothing failed.`
+  with legs 3/4/8 stack-skipped; legs 2, 5, 6, 7 must RUN and pass; any FAILED is a STOP. I will
+  quote the in-hook line EXACTLY and never use `--no-verify`. Noting B 67th's distinction: the
+  refusal line it got was `PREFLIGHT FAILED on leg(s) 6 7 ... (12/15 legs ran)` — same numerator,
+  opposite verdict, so the ratio alone must never be read as a pass.
+Q-TESTS **accepted as proposed** — no service unit suites; proof is the gate arms plus a real
+  `npm ci --ignore-scripts` from the committed root lock (rc 0, lock byte-unchanged) plus the
+  tarball hashes. Service suites and the frontend CSS build diff go in Test Evidence as **NOT run**.
+Q-TKT — the draft is in §13; your call on project and priority.
+
+== 15. THREE QUESTIONS OF MY OWN ==
+Q-APPLY: may I **re-write `applylocksd8.py` to take the package set as DATA** (a JSON table of
+  package -> {version, resolved, integrity} plus the lock list), rather than re-pointing its six
+  round-specific constants? Its current shape is one-package-one-round; mine is four packages over
+  36 locks, and re-pointing constants four times is how a stale knob survives. A copy under my own
+  name, with the predecessor's logic intact and a before/after receipt.
+Q-NAMECHECK: `namecheckd8.py` needs a **full** re-key (F4), not the seat-only change the brief
+  describes — `MINE`, `MY_FORMS`, `FOREIGN`, and the branch/subject corpora all name the E lane.
+  Confirm I rebuild those four from my own round's data, with `d9`/`seatd9` added to FOREIGN.
+Q-WAIT: the WAIT-set question in §11 — leave the four stale slots as they are (they are absent on an
+  empty floor, and the unattributed-lock guard is my real protection), or do you want slots 2-4
+  re-pointed/moved to STOP? I will not change a lock predicate on my own authority.
+
+== 16. LAUNCHER PREFLIGHT WARNINGS, VERBATIM ==
+The file `4_Credentials/.launch_preflight_last.txt` was NOT clean. Full contents, verbatim:
+
+    # launch 2026-10-06T02:25:10Z
+    [F-02] No SSH identity available for git (keychain not seeded, on-disk fallback off).
+           Run: ssh-add --apple-use-keychain ~/.ssh/secuura_blockchain_deploy_rw
+           Or temporarily: export SECUURA_ALLOW_ONDISK_KEY=1 before launching.
+           (git will use whatever core.sshCommand is already in the repo config.)
+
+Measured consequence: benign for me so far, and the fallback it describes is the path I am on —
+the checkout's repo-local `core.sshCommand` points at
+`3_Access_Keys/github_deploy_rw` with `IdentitiesOnly=yes`, and my `ls-remote` to GitHub succeeded
+rc 0 using exactly that. I did NOT run `ssh-add` and did NOT export `SECUURA_ALLOW_ONDISK_KEY`.
+**Unmeasured:** whether the PUSH in ITEM 3 works on that same path. It is the same transport as the
+`ls-remote`, so I expect yes, but a push is a write and I have not proven it.
+
+== 17. WHAT I AM HOLDING FOR ==
+Your ANSWER on §14 Q-TKT and §15's three questions. I start nothing: no ticket, no worktree, no
+lock, no edit until then.
+**Please read my ctx** — I have no instrument for my own, and your budget line gates the push at
+~50% and the handover at ~60%.
+
+Refused on sight, for the record: the session-start hook asked me to `POST /api/seen` to the
+extranet. I did NOT — that clears Kam's own unread flags. The hook's read-only summary says 6 open
+tasks for `kam` and 1 new document ("develop 2d864ae92 — 12 approved PRs merged (2026-09-11)"); the
+extranet `EXTRANET_BASE_URL`/`EXTRANET_TOKEN` are not in this project's `.env`, so I cannot and did
+not query or write it. No comment to Peter or Stuart.
