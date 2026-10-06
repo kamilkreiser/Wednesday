@@ -6,6 +6,22 @@ status: live
 supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s1-wholesale
 ---
 
+## 🟢 DELTA 167 — 2026-10-07 10:0x (s101, ctx 51% CHECKPOINT; band 80-90). **READ THIS FIRST, THEN 166 (its TURN ORDER and GATE 19 member list are superseded below where they differ).**
+### STATE (each line read at source this seat)
+- **MAIN = 8853e36** (ls-remote 10:0x). **TURN = O: RD-736 @ 61e20ad** (TURN mailed 23:03Z, tap delivered; O's 23:04Z STATUS: forward merge 773f935, own install 2.0.8; s87o-merge-rd736 FIRST in queue-jest). On O's MERGED: verify at source (ref API/ls-remote, push runs, demo SKIPPED, npm-audit, Build inside C-185, alerts), then TURN -> N RD-697, then M RD-735 (pre-push diff rule), P RD-430, O RD-709, N RD-791, M RD-603, P RD-694, O RD-737, M RD-756, O RD-708/690/675.
+- **RD-761 OUT OF THE TURN ORDER:** PR #58 (72ca5d3) CodeQL FAILED, #256/#257 js/request-forgery CRITICAL + #258/#259 medium at azureLogAnalytics.js:335/:360 (verified via gh api; workspaceId in the URL path). RULED (a) 23:03Z: GUID check at the sink + encode, cells red-first at 72ca5d3, PR CodeQL is the verdict, STOP if not cleared, no dismissal; tier 2 through code, JOINS gate 19. Re-enters the order after its gate.
+- **R: S89R WRAPPED (0.92), pane %16 CLOSED; SUCCESSOR S92R LAUNCHED (pane %21)** with fleet/briefs_staged/2026-10-07_nexusai_R_successor_S92R.md (verified at datasec-nexusai@ 23:07:22Z). **RUNG-5/6 RECEIPT OWED: its plan confirmation.** Its hold 13 (RD-819) DIED with S89R's pane (ticket left the queue cleanly); S92R re-files it.
+- **P:** RD-721 Icons round + the /vendor/ bypass RULED (a) (C-206 verified at CLARIFICATIONS:2232; deviations accepted); proof ticket s91p-rd721-icons-proof queued. Tier 1 round 1 of 2: its READY joins gate 19 (or 20).
+- **N:** RD-640 ROUND 2 OF 2 READY @ b214f6f (ls-remote verified; numstat dataErasure +68/-4); saved fleet/qa-agent/briefs/2026-10-07_nexusai-rd640-r2b-READY-mail.txt.
+- **GATE 19 NOT YET COMMISSIONED.** Final members: RD-640 b214f6f (N, T1) · RD-794 cd171f9 + RD-819 fdd07af stacked (R, T1; READYs OWED from S92R) · RD-807 9b15a99 (R, T1, READY in) · RD-801+RD-822 6613113 (O, T2, READY in) · RD-821 r2 tool fd223bd2 (O, T2) · RD-761 fix round (R, T2, when ready) · RD-802 (O, T2, stacked on RD-801, if its READY lands) · possibly P's RD-721 Icons+vendor (T1). Input: fleet/briefs_staged/2026-10-07_gate19_drafter_report_and_rulings.md. Commission (drafter subagent, attack rows described briefly) once S92R's two READYs land; RD-761 as a non-member merge step is DROPPED (RD-761 is now a member).
+- **Seat context (pane hints, not ctx gauges):** O ~83%, M ~69% ("/clear to save N tokens" hints); watch O through its RD-736 merge.
+### OWED (Tuesday's own)
+- Subject-tag sequenced fix (DELTA 165 OWED) · C-141 ADDENDUM 7 standing line in the next builder brief (put into S92R's brief: yes, by reference) · score O and P after their merges.
+### KAM
+0 board messages on 10-07 (live read 10:08). Nothing owed to Kam. Usage 51%.
+### FLOOR
+%0 tuesday · %6 N · %7 O (merge turn) · %9 M · %20 P · %21 R (S92R, booting) · %1 monitor. No gate panes.
+
 ## 🔴 DELTA 166 — 2026-10-07 07:5x ROTATION-READY HANDOVER (s100, ctx ~77%; rotate at the first safe boundary in 80-90). **READ THIS FIRST, THEN 165's 06:0x UPDATE.**
 ### FIRST WORK FOR THE NEXT SEAT
 0a. **UPDATE 08:2x (rotation point, ctx ~80%):** R's merge hold s89r-merge-rd761 QUEUED on 65bce88 (R's turn taken). P MERGED-mail for RD-719 received (agrees). **P now on RD-721:** four-page REPORT done; corrected summary = status LIVE, marketplace-landing LIVE, setup.html UNREACHABLE by route/link (AZURE_MARKETPLACE never set; direct /setup.html only), testing.html no route/no link (direct only) -> evidence on RD-520 (c39157 + correction c39158), RD-721 c39159, RD-485 c39160; NOTHING removed (removal is a ruling, possibly Kam's; not carded, no clock). Library order RULED: Icons 1.10.0 first, then Bootstrap 5.3.0, Font Awesome 6.0.0, PapaParse 5.5.3, one tier-1 round each. **No agent question is unanswered at rotation.**
