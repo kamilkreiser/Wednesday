@@ -1,0 +1,30 @@
+gate70 launcher --check arms (drafter, 2026-10-06 ~04:00Z, AT THE FINAL PINS; `env <override> bash launch_qa_secuura_gate70.sh --check < /dev/null`)
+Stand-ins live in _scratch/arms/ (built by the drafter from the real kit: kit_badpin.json = kit.json with c2's pin's first hex flipped;
+kit_nopin.json = gh_gate70.py's pin deleted; kit_missing/ = a copy of every pinned file + README + RULINGS minus c3_registry_gate70.py;
+kit_tampered/ = the same copy with ONE newline appended to c4_baseline_gate70.py; forbidden_go.txt = the rendered prompt + a D 10th GO;
+headfile_*.txt; ls_*.txt; a copy of the launcher for the moved-kit arm).
+  arm                 override                                        rc  refusal
+  rendered            none (the dry run's render)                     0   all guards pass, 10 pins EQUAL, live ls-remote
+  badpin              G70_KITJSON=kit_badpin.json                     31  BAD PIN — c2_locks_gate70.py sha256 f772d8740717bc45 != pin 0772d8740717bc45
+  nopin               G70_KITJSON=kit_nopin.json                      30  gh_gate70.py has NO sha256 pin
+  missingfile         G70_FILES_DIR=kit_missing/                      30  c3_registry_gate70.py is MISSING or empty
+  tamperedfile        G70_FILES_DIR=kit_tampered/                     31  BAD PIN — c4_baseline_gate70.py a29d9dbb01fcb62b != pin 419e01e76fbf9f67
+  unrendered          G70_PROMPT=prompt_gate70.txt                    8   unfilled double-brace token
+  forbiddenGO         G70_PROMPT=forbidden_go.txt (+ D 10th GO)       8   GO set != the pre-ruled one
+  headfileMalformed   G70_HEADFILE=headfile_malformed.txt (no sha)    7   head file malformed
+  headfileTwoLines    G70_HEADFILE=headfile_two_lines.txt             7   head file malformed (two P lines)
+  lsReal              G70_LS=ls_real.txt                              0   all guards pass (positive control for the ls stand-ins)
+  headMoved           G70_LS=ls_headmoved.txt (pull/head = 4eaf)      6   pull/head != head
+  branchMoved         G70_LS=ls_branchmoved.txt (branch = 4eaf)       6   branch != head
+  devNotDescendant    G70_LS=ls_dev_not_descendant.txt (3f9ff4e1e1b9) 17  develop does not descend from 4eaf
+  movedKit            the launcher COPIED into _scratch/arms/         2   a MOVED KIT
+  launchNonTTY        no --check, stdin /dev/null (+ G70_LS set)      21  stdin is not a TTY (and rc 16 would follow: an override is set) — NOTHING LAUNCHED
+Outputs: launcher_check_<arm>_ex2.{out,err,rc}, launcher_launch_nonTTY_ex2.{out,err,rc}. (The identical _ex1 set, run before c5 realci was
+added and the kit re-pinned, is in _quarantine/pre_realci_repin_dry_and_arms/ with its stand-ins: same 15 rcs.)
+
+Repin-level arms (`repin_and_launch_gate70.sh … --dry-run`):
+  headMoved           G70_LSFILE=_scratch/arms/ls_headmoved.txt       11  "origin pull/head … != the input head … — MISMATCH" (stops before render: the rendered prompt is untouched)
+  wrongHead           input head 4eaf7741a6a4… (develop, not the PR)   11  head != kit expected head. NOTE: step A did NOT refuse (rc 18) because the READY names 4eaf in full
+                                                                          as the PR's parent; the kit-expected-head pin is what stopped it. Outputs: repin_arm_*_ex2.{out,err,rc}.
+Render guard measured during drafting (quarantined, _quarantine/dry_render_threshold_refused/): the token-count guard refused rc 9
+(DEVELOP x1, want >= 2): the threshold was the drafter's error (the template carries {{DEVELOP}} once by design), fixed to >= 1, re-pinned.
