@@ -1,0 +1,102 @@
+STOPPED at ITEM 1, before the push, on your ruling 1: "If any of your tools' gates disagree with
+this mail, the tool wins: stop and tell me." mergein67.sh's VERDICT is FAIL. I believe all four
+failures are misdirected gates and the commit is right, but that is your call, not mine.
+
+== WHERE THINGS STAND ==
+The merge-in commit EXISTS and is UNPUSHED:
+  M        944231047b27399ec6418ac9ff32f672fd84cf36
+  tree     0b4c3a265454343e8b39af71d2ee6e30bd1d6059   == the ruled target T
+  parents  b5adaba751d89fda0b138e0b8b74d702e2a2a429 4eaf7741a6a4b2c82752d0d94f8bbacb5493aabe
+  subject  Merge develop 4eaf7741a6a4 into the KS-1278 branch (docs-only)   (byte-equal, no (#n))
+  trailers 1 byte by `wc -c` on the raw stream, against control bf277eead268 at 55 B -> 0 trailers
+  Co-Authored-By 0 | closing-family words 0 | worktree porcelain 0 | MERGE_HEAD absent
+NOT pushed. NOT merged. The branch ref at origin is still b5adaba751d8.
+
+**qm M1-M8: 8/8 PASS, 0 FAIL.**
+  M1 tree(M) 0b4c3a265454 vs key-anchored prediction 0b4c3a265454 - THE AUTHORITY
+  M2 parents [b5adaba751d8, 4eaf7741a6a4] as wanted
+  M3 D..M paths 6; non-kit []; code paths off the head blob []
+  M4 trailers raw 1 byte, Co-Authored-By 0
+  M5 base 32e058975d4e is an ancestor of D; D moved: True
+  M6 develop's advance 78 paths, 0 kit paths among them
+  M7 commits in head..M not on D: exactly [944231047b27]
+  M8 READ-BACK at M: flow 15 after 14 strictly ascending, cheat KS-1278 per the anchor rule,
+     M minus the KS-1278 block == develop byte-for-byte on BOTH docs, 0 markers
+My --shared clone sees M through alternates (cat-file -t M = commit; deadbeef control rc 128),
+proved before running qm.
+
+== THE FOUR FAILED GATES, MEASURED ==
+mergein67.sh: 45 gates CHECKED, 41 passed, 4 failed. All four are B 66th's round's shape:
+
+(1-3) A block asserting three paths "must be EXACTLY the head's":
+  anchoring.openapi.ts, ks723-anchors-tx-lookup-is-declared.test.ts, secuura-api.yaml.
+  Those are DEVELOP's paths - #1394's contribution, arriving through my merge-in. Measured:
+    anchoring.openapi.ts  head 5d0a1b9eb19b | dev b18bb656f3e7 | M b18bb656f3e7  -> M == DEV
+    ks723-...test.ts      ABSENT at head    | dev aa1a46bb9252 | M aa1a46bb9252  -> M == DEV
+    secuura-api.yaml      head 52310cab1874 | dev 2577a35fadab | M 2577a35fadab  -> M == DEV
+  M == DEV on all three, which is exactly what a merge-in of develop should produce. The gate was
+  correct for B 66th, whose PR WAS #1394 and so owned those files. It is inverted for #1393.
+  🔴 WORSE THAN A FALSE FAIL: ks723-...test.ts does not exist at the head at all, so
+  `rev-parse "$OURS:$f"` ECHOED the rev string b5adaba751d8 instead of failing, and the gate
+  compared that echo to a real blob. A path that exists at neither side would have made the two
+  echoes EQUAL and produced a FALSE PASS. I added --verify --quiet and a non-empty check to both
+  sides.
+(4) `diff DEV..M == 5 paths (#1394's own)` -> got 6. The literal 5 was #1394's count. #1393's own
+  six paths are documentRepo.ts, routes/documents.ts, the ks1278 and ks1293 tests and the two docs
+  - exactly the six my ITEM 0 open-PR census attributed to #1393, and exactly what gate68's own
+  qm M3 reads independently ("D..M paths 6").
+
+RE-VERIFIED, correctly directed, read-only against M: **4 pass, 0 fail.**
+INVERTED CONTROL, so the change is load-bearing and not a weakening: with the OLD head-side
+direction, secuura-api.yaml reads 52310cab1874 vs M's 2577a35fadab - DIFFERENT, i.e. the old gate
+still fails on the old question. I did not relax a gate; I re-aimed it and kept a failing arm.
+
+== FINDING: P12's KNOB CLAIM IS INCOMPLETE BY FOUR CONSTANTS, NOT TWO ==
+My brief says "mergein66.sh: all eleven knobs are REQUIRED ARGUMENTS (good)". True of those
+eleven - `need` enforces each, and omitting one refuses by name (driven: `REFUSED:
+--automerge-cheat is required and has NO default`). But FOUR round-specific constants were
+hardcoded in gate predicates and were NOT among the eleven:
+  :75  parent sha 22b268143a6377c9a82cd03379daa596cd26d644 - that is KS-1330's commit, B 66th's
+       develop's parent. 4eaf's parent is 3f9ff4e1e1b9, so this gate STOPPED my first run.
+  :160 advance count 43 - mine is 78.
+  the head-side blob block (3 paths) - direction, not a literal.
+  diff DEV..M count 5 - mine is 6.
+mergein67.sh now takes SIXTEEN required arguments: the eleven plus --dev-parent, --advance-paths,
+--automerge-flow, --automerge-cheat and --own-paths. Every added value is MY own measurement and
+three of them (78, 6, and the tree) are independently confirmed by qm M6/M3/M1.
+
+== A DEFECT OF MY OWN, DISCLOSED PLAINLY ==
+**I created M through a run I had labelled a control.** Driving the --dev-parent arm, my first
+attempt was confounded (4eaf was still absent from the shared store, so the parent and merge-base
+gates failed consequentially rather than on my knob). After the objects transfer I re-drove it as a
+pair: a WRONG value, then what I called "ARM A' (control): the RIGHT value - must PASS the
+pre-gates". mergein67.sh is not a dry-run tool. With every value correct it went past the
+pre-gates, took the lock, merged, resolved and COMMITTED. The GO authorises exactly that action, so
+nothing happened that was out of scope - but my framing was wrong, and had any value been subtly
+wrong I would have written a bad commit while believing I was running a control. A tool that
+performs the operation has no control arm that reaches past its first failing gate; the arm has to
+be driven against a copy. Which is what I should have done, and in fact did do for the merge
+itself: a full rehearsal in my own clone and a scratch worktree produced tree 0b4c3a265454 with
+parents [b5adaba751d8, 4eaf7741a6a4], 0 trailers and 78 advance paths BEFORE I touched the shared
+repo - so the values were proven, which is the only reason the accident was harmless.
+
+== OTHER ITEM 1 STATE ==
+develop re-read at origin 01:41:48Z: still 4eaf7741a6a4; branch still b5adaba751d8. I will re-read
+again in the SAME action as the push decision.
+Objects-only transfer DONE under the lock (take and release in ONE call, holder pid 1289, seat
+"Secuura/Blockchain b67", all four WAIT locks ABSENT, 16 STOP locks checked and absent):
+4eaf went ABSENT -> commit in the shared store, deadbeef control still ABSENT, `rev-parse --all`
+sha256 f6e82c429a3735fd UNCHANGED before and after, .git/config sha256 4f624a213933d54b UNCHANGED.
+No ref written. Lock released by the same pid; 0 lock dirs remain.
+Actions on M: NOT RUN and cannot be - M is unpushed, so no run exists on it.
+The format gate: NOT yet measured. akto/node_modules is absent in BOTH systemTest trees, so I
+expect `SKIP - akto deps not installed` and will install per the brief, outside the lock, with a
+planted-defect control, before any push.
+
+== MY QUESTION ==
+Do I accept M 944231047b27399ec6418ac9ff32f672fd84cf36 as it stands and proceed to the push, on
+qm 8/8 plus the re-verified four, with mergein67.sh's FAIL recorded as four misdirected gates now
+fixed? Or do you want M discarded and rebuilt under the corrected tool for a clean single verdict?
+I can reset the worktree to b5adaba751d8 and re-run; the tree is deterministic, so a rebuild would
+give the same tree with a different commit sha and timestamp.
+I am NOT pushing until you answer. Nothing else runs. Watcher re-armed, pid from my next STATUS.
