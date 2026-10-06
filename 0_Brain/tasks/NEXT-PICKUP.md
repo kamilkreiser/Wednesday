@@ -13,14 +13,15 @@ supersede: REPLACED WHOLESALE 2026-10-06 12:40 by day seat 2 (booted 11:5x) at i
 1. `inbox_digest.sh --inbound` WHOLE + `--all` for `[QUESTION]` rows in the last 12 h, each matched to a later ANSWER.
 2. develop = **4eaf7741a6a4** (ls-remote 00:56:40Z). It moves when B 67th merges #1393.
 
-## LIVE NOW (refreshed 13:50)
-- **Seat D 10th — pane `Secuura/Blockchain-D`.** It unfreezes the pre-push gate: Kam ruled card `secuura-five-new-advisories-freeze-every-push-1006` = a at 13:15. ITEM 0 was answered 02:49Z (Q-TKT assigned to the board account; Q-APPLY yes; Q-NAMECHECK full re-key; F3 HELD/released proof; Q-WAIT unchanged). ctx 27% at 02:49Z. **Next from it:** ticket filed, then build, PR, and ONE READY → commission a **T1 gate** → merge seat → develop moves → every held merge re-predicts.
-- **Held behind the freeze (all three gated or GO'd):**
-  - #1393 KS-1278: B 67th WRAPPED cold 0.97, handover `HANDOVER-seatB67-2026-10-06.md` (52485edb), M 944231047b27 in `s-b63-ks1278` VOID once develop moves. Next is **B 68th**, re-predicting with the 16-argument mergein67.sh.
-  - #1396 KS-1256: E 8th, brief `fleet/briefs_staged/2026-10-06_seatE8_1396_merge.md` (placeholders).
-  - #1395 KS-1305: R 2nd, brief `fleet/briefs_staged/2026-10-06_seatR2_1395_merge_and_raise.md`.
-  - Order after D 10th's merge: **#1393 → #1396 → #1395** (each seat re-predicts on the live develop). Every brief must re-pin develop and is read WHOLE before send.
-- **Spark:** queue empty. HELD with READY_: KS-1328, KS-1355 stack_guard (label corrected), KS-1364, KS-593. **KS-1355 dev-reload round 2 PASSED 7/7 BYTE-IDENTICAL at 13:01** (rebrief named the dropped backslash). It is OWED a REVIEW.md + `night/hold_ready.py` READY_ (positional args; read its header). Then a raise seat for all held passes, after the freeze clears.
+## LIVE NOW (refreshed 15:23, 65% checkpoint)
+- **Fleet floor:** %0 wednesday + %1 monitor only. D 10th wrapped 0.96; gate70 GO, scored 1.0.
+- **#1397 (KS-1425, the advisory lock refresh that UNFREEZES pre-push legs 6/7): gate70 = GO at 3e7be2044fe8.** Verdict `fleet/briefs_staged/2026-10-06_mail_g70.txt`. Squash = tree 0b06d3c18a1e onto 4eaf. Subject `KS-1425: in-range lock refresh clears three advisories, baseline the other two`. PR-body polish N-1397-1..6,9 before the squash. Residue ticket N-1397-7.
+- **D 11th merge brief DRAFTING** (subagent) → `fleet/briefs_staged/2026-10-06_seatD11_1397_merge.md` + squash body beside it. READ WHOLE, then `brief_and_launch.sh --to "Secuura/Blockchain-D"` (clause `cloud: merge`). On D 11th's `STATUS: merged 1397`: VERIFY AT SOURCE (tree 0b06d3c18a1e, one parent 4eaf, 0 trailers; KS-1425 still In Progress). Then order `s-d10-advlock` removed.
+- **Then the held merges, one at a time, each re-predicting on the live develop (which now carries #1397's locks):**
+  1. **B 68th → #1393 KS-1278.** Brief: base it on `2026-10-06_seatB67_1393_merge.md` + B 67th's handover `HANDOVER-seatB67-2026-10-06.md` (52485edb). M 944231047b27 is VOID; re-predict with the 16-arg mergein67.sh. gate68 GO string re-signed for B 68th. Q-5F = yes.
+  2. **E 8th → #1396 KS-1256** (`2026-10-06_seatE8_1396_merge.md`, placeholders).
+  3. **R 2nd → #1395 KS-1305** + raise PRs 2-5 (`2026-10-06_seatR2_1395_merge_and_raise.md`).
+- **Spark:** queue empty. HELD with READY_: KS-1328, KS-1355 stack_guard, KS-1364, KS-593. **KS-1355 dev-reload r2 PASS BYTE-IDENTICAL**, owed a REVIEW.md + `night/hold_ready.py` READY_. A raise seat for all held passes comes after the merges.
 
 ## THE QUEUE, in order (80%-Spark rule: each Claude launch names its clause)
 1. **On B 67th's STATUS merged 1393:** fill the placeholders in `fleet/briefs_staged/2026-10-06_seatE8_1396_merge.md` (develop, its PR, T1396 predicted with the gate69 kit on the REAL develop, send time). READ IT WHOLE, then launch **E 8th** (`cloud: merge`). gate69 GO = `GO (Seat E 8th): merge 1396 on gate69`; verdict `briefs_staged/2026-10-06_mail_g69.txt`.
