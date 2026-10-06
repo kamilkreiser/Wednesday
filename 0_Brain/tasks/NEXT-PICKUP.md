@@ -28,6 +28,10 @@ supersede: REPLACED WHOLESALE 2026-10-06 19:1x by the evening seat (booted 18:0x
 ## BUDGET
 7d gauge 84% (19:1x), renews ~4d 17h. 90% = hard stop. Since 09:37: Claude launches 10 vs Spark tasks 14 (58% Spark), told to Kam 18:0x.
 
+## OWED (Wednesday's own)
+- **`safe_pull.sh` (ledger w=3, 10-06 19:4x):** stash only the named generated feeds; union decisions.json and the chat stores; refuse a bare `--autostash`. Until it exists, after any pull, read `git stash show --name-only stash@{0}` and union the chat stores.
+- Kam 19:30 grant: this seat may spend to 100% until the renewal, shaped as card (a), with one or two deployers. **Deploy round:** commission its brief drafter when #1395 merges, or now if R 2nd stalls.
+
 ## OWED (board-pass list, unfiled)
 - namecheck's +8 subject gate refuses 85-92 char subjects.
 - history.md's stale D 10th handover sha (921960… vs the file's f2a0a893).
@@ -51,4 +55,4 @@ supersede: REPLACED WHOLESALE 2026-10-06 19:1x by the evening seat (booted 18:0x
 - Ornith PAUSE_QUEUE renewed to 06:00 10-07 with its reason.
 
 ## WITH KAM
-The headroom card above (default fires on E 8th's wrap). Nothing else open.
+Nothing open. The headroom card was RULED a at 19:30:00; his 19:30:43 grant lifts this seat to 100% (EXPIRING-GRANTS).
