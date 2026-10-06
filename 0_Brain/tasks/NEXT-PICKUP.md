@@ -13,9 +13,14 @@ supersede: REPLACED WHOLESALE 2026-10-06 12:40 by day seat 2 (booted 11:5x) at i
 1. `inbox_digest.sh --inbound` WHOLE + `--all` for `[QUESTION]` rows in the last 12 h, each matched to a later ANSWER.
 2. develop = **4eaf7741a6a4** (ls-remote 00:56:40Z). It moves when B 67th merges #1393.
 
-## LIVE NOW
-- **Seat B 67th — pane `Secuura/Blockchain`.** ITEM 0 answered 01:37:23Z with the signed `GO (Seat B 67th): merge 1393 on gate68` (target tree 0b4c3a265454 on 4eaf). Q-5F = yes. It may remove `s-b64-ks723` at WRAP. ctx 34% at 01:36Z. **Next from it:** `STATUS: merged 1393` → VERIFY AT SOURCE (own fetch from the GitHub URL: tree == 0b4c3a265454, one parent 4eaf, 0 trailers; KS-1278 still In Progress). Then the residue QUESTION (ticket texts) → ANSWER → WRAP → score, close the pane, and order `s-b63-ks1278` removed.
-- **Spark review agent** (subagent) on 3 PASSes from 12:23-12:25: KS-1328 db-retry describe budget, KS-1355 dev-reload slot container, KS-1355 stack_guard. It writes REVIEW.md + READY_ via hold_ready.py. Spark queue is now EMPTY.
+## LIVE NOW (refreshed 13:50)
+- **Seat D 10th — pane `Secuura/Blockchain-D`.** It unfreezes the pre-push gate: Kam ruled card `secuura-five-new-advisories-freeze-every-push-1006` = a at 13:15. ITEM 0 was answered 02:49Z (Q-TKT assigned to the board account; Q-APPLY yes; Q-NAMECHECK full re-key; F3 HELD/released proof; Q-WAIT unchanged). ctx 27% at 02:49Z. **Next from it:** ticket filed, then build, PR, and ONE READY → commission a **T1 gate** → merge seat → develop moves → every held merge re-predicts.
+- **Held behind the freeze (all three gated or GO'd):**
+  - #1393 KS-1278: B 67th WRAPPED cold 0.97, handover `HANDOVER-seatB67-2026-10-06.md` (52485edb), M 944231047b27 in `s-b63-ks1278` VOID once develop moves. Next is **B 68th**, re-predicting with the 16-argument mergein67.sh.
+  - #1396 KS-1256: E 8th, brief `fleet/briefs_staged/2026-10-06_seatE8_1396_merge.md` (placeholders).
+  - #1395 KS-1305: R 2nd, brief `fleet/briefs_staged/2026-10-06_seatR2_1395_merge_and_raise.md`.
+  - Order after D 10th's merge: **#1393 → #1396 → #1395** (each seat re-predicts on the live develop). Every brief must re-pin develop and is read WHOLE before send.
+- **Spark:** queue empty. HELD with READY_: KS-1328, KS-1355 stack_guard (label corrected), KS-1364, KS-593. **KS-1355 dev-reload round 2 PASSED 7/7 BYTE-IDENTICAL at 13:01** (rebrief named the dropped backslash). It is OWED a REVIEW.md + `night/hold_ready.py` READY_ (positional args; read its header). Then a raise seat for all held passes, after the freeze clears.
 
 ## THE QUEUE, in order (80%-Spark rule: each Claude launch names its clause)
 1. **On B 67th's STATUS merged 1393:** fill the placeholders in `fleet/briefs_staged/2026-10-06_seatE8_1396_merge.md` (develop, its PR, T1396 predicted with the gate69 kit on the REAL develop, send time). READ IT WHOLE, then launch **E 8th** (`cloud: merge`). gate69 GO = `GO (Seat E 8th): merge 1396 on gate69`; verdict `briefs_staged/2026-10-06_mail_g69.txt`.
@@ -42,4 +47,4 @@ supersede: REPLACED WHOLESALE 2026-10-06 12:40 by day seat 2 (booted 11:5x) at i
 - ~335 MB × 4 Spark control clones under `spark/cache/work/` (regenerable; `prune_work.py`).
 
 ## WITH KAM
-Nothing open. Grants live: October deploy (to 31 Oct), week instruction (to Sun 11 Oct), 80%-Spark (to the allowance renewal).
+Nothing open (freeze card ruled a 13:15; UUID card c 12:03). His 13:00 "proceed prompt" was on his own screen, not the fleet. Asked which app, no answer yet. Grants live: October deploy (to 31 Oct), week instruction (to Sun 11 Oct), 80%-Spark (to the allowance renewal).
