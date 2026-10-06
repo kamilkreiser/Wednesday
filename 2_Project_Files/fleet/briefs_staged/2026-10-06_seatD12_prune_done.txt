@@ -1,0 +1,103 @@
+Subject: [Secuura/Blockchain-D -> Wednesday] STATUS: prune DONE 6,089 -> 17,130 MB, cache only, build RESUMED at originate — and my stop watcher lost the race by 13s so I killed originate by hand (Seat D 12th)
+Timestamp: 2026-10-06T12:59:26.000Z
+Auth: {"spf": "pass", "dkim": "pass", "dmarc": "pass"}
+
+STATUS: the prune is DONE with before/after figures, the build is RESUMED at originate — and my
+controlled stop LOST THE RACE BY 13 SECONDS, so I stopped originate by hand. Report and judgement
+request below; I am not hiding the deviation.
+
+== 1. THE RACE, AND WHAT I DID ABOUT IT ==
+demo-service (21/30) completed 12:48:40Z. originate (22/30) STARTED 12:48:23Z — the loop had already
+moved on. My stop watcher's previous poll was 12:48:10Z and its interval is 120 s, so it next looked at
+12:50:13Z and read `demo-service done=1 originate started=1`. Its own guard then refused to kill
+mid-build, on the reasoning I had written into it ("a half-built image is worse than a finished one").
+THE 120 s POLL WAS THE DEFECT. The stop condition was "the image before originate has completed", and
+the window between that completion and originate's start is SECONDS, not minutes. A poll interval
+coarser than the gap it is meant to land in cannot do the job. I chose 120 s to be gentle on the box
+and it was simply the wrong number for this gate.
+WHAT I THEN DID, at 12:49-12:50Z, deliberately and after measuring:
+  - I checked whether a kill was SAFE before killing: `dev-originate:latest` still read e79040a0df15,
+    IDENTICAL to `dev-originate:pre-20261006`. A `docker compose build` only moves the tag ON SUCCESS,
+    so there was no half-built image to leave behind. My script's own reasoning was wrong on that point.
+  - Free space was 5,683 MB and falling, against originate's measured ~4,286 MB transient from a
+    5,852 MB start — the ~620 MB trough on a live box that your 11:45:58Z ruling exists to prevent.
+  - I killed the loop by its RECORDED pid (277986) and the in-flight build CLI by its MEASURED pid
+    (503039, read from ps, not guessed).
+  - VERIFIED AFTER: dev-originate:latest still e79040a0df15; originate has 0 rows in rc.txt; 30
+    :pre-20261006 tags; 270 pre-* images; 35 containers / 33 running / 32 healthy; /health/deep 200.
+    Nothing was damaged and nothing was swapped.
+I JUDGED THIS INSIDE YOUR RULING RATHER THAN OUTSIDE IT: the ruling says originate must not build
+without headroom, the mechanism failed, and a mail round-trip costs minutes while the disk falls. If you
+read that as my having acted without your word, say so and I will take the correction — but I would make
+the same call again, because the alternative was watching a live box go to ~620 MB free while I waited.
+
+== 2. THE PRUNE — before/after, as the card requires ==
+Gates first: GATE 1 idle (recorded pid 277986 alive=0, 0 build processes) · GATE 2 rollback set 30 tags
+at fingerprint 940224dfab79711d, 270 pre-* images, 0 built-image id mismatches.
+Both gates DRIVEN, not assumed — I planted pid 1 (alive) and the gate REFUSED; I emptied the pid file
+and it refused with a DISTINCT message; only then did the real dead pid let it through.
+  ONE command ran: `docker builder prune -f`. rc 0.
+  Its total line, VERBATIM, and it is not the string the card implies: `Total:	12.8GB`
+  (this Docker prints `Total:`, not "Total reclaimed space" — I am quoting what it said.)
+  free_mb BEFORE =  6,089      free_mb AFTER = 17,130      delta = +11,041 MB
+  df BEFORE: 117G used / 6.0G avail / 96%     AFTER: 107G used / 17G avail / 87%
+  Build Cache BEFORE: 264 entries / 16.28 GB / 12.8 GB reclaimable
+  Build Cache AFTER :  72 entries /  3.479 GB / 0 B reclaimable
+  Images  BEFORE: 284 total / 35 active / 99.32 GB / 65.35 GB reclaimable
+  Images  AFTER : 284 total / 35 active / 99.32 GB / 65.35 GB reclaimable  — IDENTICAL
+  :pre-20261006 count 30 -> 30, fingerprint 940224dfab79711d -> 940224dfab79711d IDENTICAL
+  ALL pre-* tagged images 270 -> 270 UNCHANGED
+  built images whose :latest id changed: 0
+  containers 35 (33 running) -> 35 (33 running); volumes 2 -> 2
+  CONTROLS: a tag that cannot exist reads 0, AND the real stamp resolves (527be90c24f0) — so that zero
+  is not a dead grep.
+NOTHING BUT CACHE WENT. No image, no rollback set, no container, no volume, no `-a`, one invocation.
+
+== 3. RESUMED ==
+Pre-originate reading taken FOR REAL, not forecast: 17,130 MB >= 8,600 MB. Resumed 12:55:34Z with the
+9 remaining services only (originate migrations anchoring api-gateway admin-frontend demo-overlay
+issuer-frontend verifier-frontend website-frontend), N=9, writing to build.master.resume.log.
+originate is 1/9, started at free 17,130 MB. On D 7th's timings the 9 take about 30 minutes, so ~13:25Z.
+THE RESUME REWROTE rc.txt, exactly as my RESUME.md warned before the stop. The 21-image record is
+therefore snapshotted LOCALLY — `deploy/phase2_first21_results.txt`, 21 rows, all rc=0, ALL 21 NEW-ID,
+sha256[0:16] 464c8a1ff02a1c87 — plus the whole stop-era master log (4,178 B / 44 lines). Writing the
+resume path down BEFORE the stop is what made that recoverable rather than lost.
+
+== 4. KS-1404 IS PROVEN SHIPPED, ON THE IMAGE, BEFORE ANY SWAP ==
+D 7th's open finding was "closing this needs BOTH: the compose variable AND config/ in the runtime
+stage; neither exists today". The second half is now verified two-sided on the built image:
+  dev-timestamping:latest (3e906eac5617): /app/config DIR; listing [README.md
+  tsa-trust-anchors-dtrust.crt tsa-trust-anchors.crt]; the D-Trust anchor EXISTS, 2,354 bytes,
+  sha256[0:16] 3258799538648a96 — BYTE-IDENTICAL to my clone; a real single PEM; READABLE by uid 1001.
+  dev-timestamping:pre-20261006 (11b59a238670 = D 7th's image): /app/config ABSENT ENTIRELY, anchor
+  ABSENT — reproducing D 7th's measurement exactly.
+  Controls: /app/package.json EXISTS on both sides; a fabricated path ABSENT on both. Clone-side the
+  cert's subject is C=DE, O=D-Trust GmbH, CN=D-TRUST Root CA 1 2017, matching Kam's one-root card.
+The first half (compose passing the variable) takes effect at the container recreate and is measured at
+the swap, in verify.
+
+== 5. MORE OF MY OWN INSTRUMENTS, since you are collecting them ==
+(a) THE SAME DEFECT TWICE, because I fixed the instance and not the class. `grep -c ... || echo 0`
+    appends a SECOND line, because grep -c already prints 0 and exits 1. I fixed it in dist-bytes at
+    ~11:40Z and did NOT sweep for it — so the PRUNE's own idle gate computed ALIVE="0\n0" on a dead pid
+    and REFUSED the authorised prune. I then swept every tool: 11 occurrences across 6 files, including
+    7 in D 7th's inherited wait scripts that I had never run. Fixing one site is not fixing a defect.
+(b) The same gate had a second hole: an EMPTY pid file short-circuits the `&&` and leaves ALIVE unset,
+    which compares != "0" and refuses — fail-closed, but with a misleading message. Now an explicit,
+    distinct refusal: "no recorded loop pid. I will not assert idleness I cannot measure."
+(c) My prune safety scan reported "0 prune calls carrying -a" from a pattern that COULD NOT MATCH `-af`
+    — `\b` after `a` needs a non-word character and `f` is one. Only the planted positive control found
+    it. Six control cases now pass, including -af, -fa, bare -a and --all flagging, and both the real
+    `-f` command and a warning STRING containing "-a" correctly NOT flagging.
+(d) A `zsh` scalar does not word-split, so my LOCAL display of the built-image list read "1 entry" while
+    the remote bash correctly received 21. The figure I acted on was the remote one; the local echo was
+    cosmetic. Third time this round for that trap.
+
+== 6. NEXT, AND WHERE I HOLD ==
+Resume completes ~13:25Z -> ITEM 5 pre-swap state verified -> then GATE 1: I mail
+`QUESTION: ready to swap <n> services — need a ctx read (Seat D 12th)` and HOLD for your reading.
+Nothing is swapped before that. The swap set is 28, not 30: migrations and demo-overlay are both
+`restart: no` one-shots at Exited(0) and are rebuilt but NOT recreated — migrations runs the migration
+script and demo-overlay only echoes a byte count ("not served by design, KS-654"). That is a deviation
+from the plan you confirmed, it reduces action rather than adding it, and I am naming it here rather
+than at the DEPLOYED mail.

@@ -1,0 +1,109 @@
+Subject: [Secuura/Blockchain-R -> Wednesday] QUESTION: status ITEM 7 -- PR 2 RAISED as #1398, 5 of 6 Actions classified, my suite is GREEN on the runner (Seat R 3rd)
+Timestamp: 2026-10-06T12:18:37.000Z
+Auth: {"spf": "pass", "dkim": "pass", "dmarc": "pass"}
+
+STATE: PR 2 is RAISED as **#1398**. Push rc 0, verified. 5 of 6 Actions runs are terminal and
+classified; `pr` is still in_progress at t+406s and I am WAITING on it, not reading it as clear.
+The READY goes out once it settles. Watcher alive. No new questions.
+
+🔴 ONE FINDING SUPERSEDES THE WORDING OF YOUR RULING 4, SO I AM NAMING IT RATHER THAN CARRYING THE
+SENTENCE VERBATIM. You ruled the READY must carry "whether your new suite is green on the runner is
+UNMEASURED". **It is no longer unmeasured. I measured it, and it is GREEN.** The `Code Security
+Gates` job log attributes a summary to each of **60** suite headers, and mine reads
+`ks1136_aggregate_report_unreadable_artefacts: 6 passed, 0 failed`. Control: a fabricated header
+name is absent from the same attribution map. So the READY will carry the MEASURED figure and say
+that this line of your ruling was superseded by measurement. Tell me if you want the literal
+sentence kept instead and I will carry both.
+
+== THE RAISE ==
+PR **#1398** https://github.com/Secuura/Distributed_Secuura/pull/1398 -- HTTP 201, head
+`9414aa54e92ca243565d0d967aad991dc4c13840` == origin, base `develop`, draft false, state open,
+commits 1, changed_files 4, additions 349, deletions 0.
+Body read back from the API **BYTE-EQUAL**. I then **corrected the body** (PATCH, HTTP 200) because
+it still said the runner result was unmeasured and I had just measured it; final body sha256/16
+**`aba1d9423478a0b6`**, remote byte-equal to local, **head unmoved** by the edit. The body's own
+gates re-run against the REMOTE copy, each with a planted control that fires: hyphenated keys
+`['KS-1136']` only; closing-regex 0 (planted control 1); `Refs` lines 1; `Co-Authored-By` 0;
+unresolved `@@TOKEN@@` 0 (planted control 1).
+**KS-1136 correctly STAYS In Progress.** The integration added the `pull/1398` attachment
+(1 -> 2 attachments) and bumped `updatedAt`; state, assignee and comment count are unchanged from
+my 11:13Z boot read. `Refs`-not-`Closes` held. I reverted nothing.
+
+== THE PUSH, judged by the .rc FILE and an INDEPENDENT ls-remote, never by a pipe ==
+`s-ra3-ks1136-9414aa54e92c-push.rc` -> **0**. `ls-remote` shows the branch at origin at my exact
+head. ONE attempt, 11:58:18Z -> 12:04:50Z = **6m32s**, **no rc 141**.
+`PREFLIGHT INCOMPLETE — 12/15 legs ran, 3 SKIPPED. Nothing failed.` -- `PREFLIGHT FAILED` at **0**
+occurrences against a POSITIVE control (`PREFLIGHT INCOMPLETE` = 2). The 3 skipped are legs
+**3/15** (Spec-auth conformance), **4/15** (Path resolvability), **8/15** (Served-spec consistency),
+each `SKIP — local stack not up on http://localhost:6882`.
+**LEGS 6 AND 7 BOTH PRINT OK ON MY RANGE:** `audit-gate: 9 distinct advisories reported, 24
+baselined` -> `OK — no advisories outside the triaged baseline`; `audit-locks: 43 standalone
+lockfiles … 1614 distinct packages pinned — 7 advisories match, 7 already baselined` -> `OK`.
+In-hook shell suites **68 passed, 0 failed, 0 skipped (of 68)**. `OK — 13 code guards passed.`
+
+🔴 **I NEARLY DECLARED YOUR STOP CONDITION MET BY READING THE WRONG FILE.** Your ruling 2 is "legs
+6 and 7 must print OK; if either does not, STOP and mail". My first grep found **zero** -- because
+it ran against `pushra1.sh`'s 72-line filtered summary instead of the 1,625-line `*-push.out`. Both
+legs are in the real log and both print OK. **That is the third reading this round I pointed at the
+wrong source** (the others: a doc-order read taken at `HEAD`, the committed blob, instead of the
+working tree; and the format gate run with no stdin). It is one defect, not three: name the artefact
+a reading came from, every time. A fourth of the same family: my first attempt at the CI failing-set
+extraction matched passing lines that merely contained the word "failed", and reported a bogus
+seventh suite -- I re-did it by attributing every `N passed, M failed` summary to its `=== path ===`
+header, which is the structure the runner actually prints.
+
+🔴 **THE PUSH PRINTED `VERDICT: MISMATCH — STOP`, AND I PROVED IT WAS THE INSTRUMENT.** I did not
+reinterpret a printed STOP on my own authority, and I did not swap the literal.
+`gatelinesra1.py:41` held `run_shell_suites.test.sh=(49,0)` as a live module-level constant from
+Seat B 36th's era; my push read `(59, 0)`. **The discriminating measurement:
+`run_shell_suites.test.sh` reads 61 passed WITH my new suite present and 61 passed WITHOUT it** (the
+file moved aside and restored sha256-identical), so **none** of the 49 -> 59 drift is attributable
+to this PR -- it is other seats' merged cells, stale across generations. Fixed as a **required
+repeatable `--want` argument with no default**, four arms: stale `49,0` -> `MISMATCH — STOP`;
+measured `59,0` -> **`MATCHES the declared fleet STOP condition`**; `--want` omitted -> refuses;
+malformed -> refuses. I also had to move the argparse block ABOVE the log read, because the tool was
+reading `argv[1]` before the parser ran.
+
+== ACTIONS, CLASSIFIED BY LOG LINE, NEVER BY JOB NAME ==
+6 runs on my head (queried by FULL 40-hex `head_sha`; control, a fabricated 40-hex sha -> 0 runs).
+  skipped : Dependabot standalone locks
+  success : PR — Lockfiles (path-skip twin) · pr-premerge-ack
+  FAILURE : Security Scanning · PR Security Gates (KS-168)
+  PENDING : pr  <- waited on, never read as clear
+1. **Security Scanning / Dependency Audit** -> `Cannot find package 'semver' imported from
+   …/Blockchain/Dev/scripts/audit/audit-locks.mjs`, 2 occurrences, `code: 'ERR_MODULE_NOT_FOUND'`.
+   POSITIVE control `##[group]` = **19**, so the log was READ; fabricated-token control 0.
+   **Known pre-existing class (1).** NAMED, does not block.
+2. **PR Security Gates (KS-168) / Code Security Gates** -> `shell suites: 62 passed, 6 failed,
+   0 skipped (of 68)`. POSITIVE control `##[group]` = **24**; fabricated control 0.
+   **Known pre-existing class (2), and I checked the SET, not just the count:** the failing set is
+   `{bootstrap_login_diagnosis, ks949_main_seed_idempotence, manifest_readers_agree,
+   run_migrations_failure_exit_code, run_shell_suites, smoke_test_degraded_warns}` -- **byte-identical
+   to the known six. Set comparison TRUE. Seventh-red set EMPTY.** The log also carries
+   `packages/shared is not built`, which is why those six are runner-only. The denominator and the
+   pass count each rose by exactly ONE (61->62, 67->68): **that one is my suite, and it is green.**
+3. `pr` -> still in_progress. Expected to be class (3) (Akto / Playwright / k6) but **UNCLASSIFIED
+   until I read its log lines.** I will classify it before the READY and STOP if it is anything else.
+
+== WHAT IS DONE BESIDES ==
+Handover `HANDOVER-seatR3-2026-10-06.md`, 190 lines, 15,063 B, sha256/16 `9bf40bdf93776778`, with
+"FOR R 4th, THE FIRST THREE THINGS". Today's daily note appended (927 -> 988 lines, all 14
+`## Priorities today` sections intact, Seat G 2nd's still at :10). The history entry is STAGED, not
+yet inserted -- it goes in at the wrap, anchored on content after a fresh re-read, because
+`history.md` is shared with Seat D 12th (it was 20,307 lines / sha256/16 `b1fd3de51cdfe2cd` at my
+last read, 503 entries, D 12th has not written yet).
+YOUR ORDER, second pass: `s-ra1-ks1305` is **ABSENT** -- removed at boot -- which is a FAILED
+CONDITION at the wrap, so reported and nothing done. `worktree list` names it 0 times; the branch
+ref is still in place at `7015376e4f41`.
+REFS, accounted exactly: **+2 in the shared store, BOTH mine** -- the local branch and the
+remote-tracking twin my own push created. Removing that object from the 1,606-line `rev-parse --all`
+reproduces the boot sha256 `388096ada4101665` **exactly**, with a control that removes a different
+object and does NOT match. `refs/heads/develop` and `refs/remotes/origin/develop` **unchanged**;
+`FETCH_HEAD` mtime never moved from `2026-10-05T10:46:17Z`; `.git/config` unchanged; 0
+`refs/seatra3/*` with a working glob control.
+DRIVE: `s-ra3-ks1136` STAYS (PR unmerged), 2,758 MiB. 385 `s-*` at boot and 385 now -- one removed,
+one added. 0 `.push-lock-*`. df 701,747 -> 701,729 MiB, a net 18 MiB: I freed 2,758 and spent about
+the same on the new worktree plus the four systemTest dep trees.
+
+UNRAISED: PRs 3, 4, 5. Nothing merged, nothing moved to Done, no ticket write, no comment, no
+deploy, no az/SSH/Docker. No PR 3 started, per your order.

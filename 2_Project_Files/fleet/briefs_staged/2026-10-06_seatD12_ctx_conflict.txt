@@ -1,0 +1,53 @@
+Subject: [Secuura/Blockchain-D -> Wednesday] QUESTION: ctx line 1 conflicts with the tools — I cannot read my own statusline, driven both ways; propose you read it at the two gates (Seat D 12th)
+Timestamp: 2026-10-06T12:13:58.000Z
+Auth: {"spf": "pass", "dkim": "pass", "dmarc": "pass"}
+
+QUESTION: line 1 conflicts with the tools, and you asked me to say which. The budget itself I accept
+without change.
+
+THE CONFLICT
+Line 1: "Read your own statusline in the same action as the swap decision."
+I cannot. MEASURED THIS TURN, not inherited from a predecessor:
+  - A statusLine IS configured, in two places: this project's `.claude/settings.local.json`
+    (`sh '/Volumes/DevMASTER/Setup and System/statusline.sh' '[Secuura/Blockchain]'`) and
+    `~/.claude/settings.json` (`bash ~/.claude/statusline-command.sh`). So "no statusline configured"
+    — which an earlier D-lane seat wrote — is wrong, and B 68th already corrected it.
+  - But the harness feeds that command its JSON on STDIN. When I run it myself I supply that stdin, so
+    whatever it prints is a function of MY input, not of the session.
+  - BOTH ARMS, driven: fed `{}` it prints `Unknown Model | ctx:? used:?%`. Fed a FABRICATED
+    `{"context":{"used_pct":99}}` it prints the IDENTICAL `Unknown Model | ctx:? used:?%`. The output
+    does not move with the input, so the instrument is not reading session state when I drive it. A
+    number obtained this way would be mine, not a measurement.
+And my brief forbids estimating ctx rather than reading it, which I take to cover inferring it from
+how much work I have done.
+
+SO THE TOOL WINS, AND WHAT I PROPOSE INSTEAD
+You already supply this reading — 47% at 11:45:51Z, 51% at 12:10Z, both from your side. Keep it that
+way and make the handshake explicit:
+  - When all 30 images are built, the prune is done and ITEM 5's pre-swap state is verified, I mail
+    `QUESTION: ready to swap <n> services — need a ctx read (Seat D 12th)` and HOLD. Your ANSWER
+    carries the reading and either releases the swap or sends me to WRAP COLD with the RESUME record.
+  - Same shape for line 3: after the kintsugi sweep I mail `QUESTION: kintsugi swept — need a ctx read
+    for the demo decision (Seat D 12th)` and HOLD.
+That costs one round-trip at each of two gates and keeps the 65% and 55% thresholds yours to apply
+against a real reading. The alternative is me guessing, which is the thing your line is there to prevent.
+If you would rather I proceed on the LAST reading you sent plus a stated assumption, say so and I will —
+but I will label it an assumption in the handover, not a measurement.
+
+WHAT I ACCEPT UNCHANGED
+  - Line 1's RULE: no swap at or over 65%; at or over, I write RESUME (built ids, rollback tags, the
+    exact swap command) into the handover, mail you and WRAP COLD. Built images are not lost.
+  - Line 2: a swap once started is FINISHED whatever the reading, then the kintsugi live sweep.
+  - Line 3: demo only below 55% after a completed kintsugi sweep; otherwise WRAP COLD and demo goes to
+    D 13th from my handover. Recorded as the EXPECTED case, not a failure.
+
+STATUS, unchanged otherwise
+12 of 30 built at the last reading, all rc 0 NEW-ID, nothing swapped. Rate steady ~354 MB/image. The
+controlled stop before originate is armed; the prune tool is written and verified — exactly ONE mutating
+command, `docker builder prune -f`, no `-a`, gated on the loop being idle by RECORDED pid (it refuses
+right now, mid-build, which I drove rather than assumed).
+One more of my own instruments, for your collection: my safety scan of that prune script first reported
+"0 prune calls carrying -a" from a pattern that COULD NOT MATCH `-af` — `\b` after `a` needs a non-word
+character and `f` is one. The zero was unfalsifiable and only the planted positive control found it.
+Fixed; six control cases now pass, including `-af`, `-fa`, bare `-a` and `--all` flagging, and both the
+real `-f` command and a warning string containing "-a" correctly NOT flagging.
