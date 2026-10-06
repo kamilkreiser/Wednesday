@@ -16,17 +16,17 @@ chk(){ if [ "$1" = "$2" ]; then pass=$((pass+1)); echo "PASS $3"; else fail=$((f
 run(){ WATCH_LOOPS=2 WATCH_SLEEP=0 bash "$W" "$@" 2>&1 | tail -1; }
 EXP="WAKE: watcher leg expired (55 "
 d=$T/a1; mkdir -p $d; : > $d/seen; printf 'x\nREADY FOR GATE\n' > $d/X_STATUS.md
-chk "$(run $d/seen "$d/*STATUS*" | cut -c1-5)" "WAKE:" "A1 READY FOR GATE fires"
+chk "$(run $d/seen "$d/*STATUS*" | cut -c1-7)" "WAKE: /" "A1 READY FOR GATE fires"
 chk "$(run $d/seen "$d/*STATUS*" | cut -c1-30)" "$EXP" "A2 a seen READY does not re-fire"
 d=$T/a3; mkdir -p $d; : > $d/seen; printf 'NOT READY FOR REVIEW yet\n' > $d/X_STATUS.md
 chk "$(run $d/seen "$d/*STATUS*" | cut -c1-30)" "$EXP" "A3 NOT READY FOR REVIEW does not fire"
 d=$T/a4; mkdir -p $d; : > $d/seen; printf 'STOPPED: NEEDS FRIDAY (S-1)\n' > $d/X_STATUS.md
-chk "$(run $d/seen "$d/*STATUS*" | cut -c1-5)" "WAKE:" "A4 STOPPED: NEEDS FRIDAY fires"
+chk "$(run $d/seen "$d/*STATUS*" | cut -c1-7)" "WAKE: /" "A4 STOPPED: NEEDS FRIDAY fires"
 d=$T/a5; mkdir -p $d; : > $d/seen; printf 'READY FOR REVIEW\n' > $d/X_STATUS.md
 chk "$(WATCH_LOOPS=2 WATCH_SLEEP=0 bash "$W" --seed $d/seen "$d/*STATUS*" | cut -c1-7)" "seeded:" "A5a --seed records and exits"
 chk "$(run $d/seen "$d/*STATUS*" | cut -c1-30)" "$EXP" "A5b a seeded READY does not fire"
 printf 'READY FOR REVIEW\n' >> $d/X_STATUS.md
-chk "$(run $d/seen "$d/*STATUS*" | cut -c1-5)" "WAKE:" "A5c a NEW READY after seeding fires"
+chk "$(run $d/seen "$d/*STATUS*" | cut -c1-7)" "WAKE: /" "A5c a NEW READY after seeding fires"
 d=$T/a6; mkdir -p $d; : > $d/seen; : > $d/X_STATUS.md
 echo "BUSY — x" > "$T/bin/state_9"; ( sleep 1; echo "IDLE — turn ended" > "$T/bin/state_9" ) &
 chk "$(WATCH_PANES='%9' WATCH_LOOPS=4 WATCH_SLEEP=1 bash "$W" $d/seen "$d/*STATUS*" | tail -1)" "WAKE: pane %9 went IDLE (was BUSY)" "A6 a pane going BUSY -> IDLE fires"
@@ -35,15 +35,23 @@ chk "$(WATCH_PANES='%8' WATCH_LOOPS=2 WATCH_SLEEP=0 bash "$W" $d/seen "$d/*STATU
 d=$T/a8; mkdir -p $d; : > $d/seen; printf 'READY FOR GATE\n## BLUF\n@@BODY@@\n' > $d/X_STATUS.md
 chk "$(run $d/seen "$d/*STATUS*" | cut -c1-30)" "$EXP" "A8 skeleton @@BODY@@ with a READY line does not fire"
 printf 'READY FOR GATE\n## BLUF\nGO WITH NOTES, all filled\n' > $d/X_STATUS.md
-chk "$(run $d/seen "$d/*STATUS*" | cut -c1-5)" "WAKE:" "A9 the same file once filled fires"
+chk "$(run $d/seen "$d/*STATUS*" | cut -c1-7)" "WAKE: /" "A9 the same file once filled fires"
 for tok in '__VERDICT__' 'CI_RESULT_PLACEHOLDER' 'CI-RUN2-LINE'; do
   d=$T/a10$tok; mkdir -p "$d"; : > "$d/seen"; printf 'READY FOR REVIEW\nci.sh: %s\n' "$tok" > "$d/X_STATUS.md"
   chk "$(run "$d/seen" "$d/*STATUS*" | cut -c1-30)" "$EXP" "A10 skeleton token $tok holds the READY"
 done
 d=$T/a11; mkdir -p $d; : > $d/seen; printf 'READY FOR REVIEW\nci.sh run 2 line green; the CI-run log; __init__ untouched; PRE-LINE prose\n' > $d/X_STATUS.md
-chk "$(run $d/seen "$d/*STATUS*" | cut -c1-5)" "WAKE:" "A11 ordinary prose near the tokens does not hold a real READY"
+chk "$(run $d/seen "$d/*STATUS*" | cut -c1-7)" "WAKE: /" "A11 ordinary prose near the tokens does not hold a real READY"
 d=$T/a12; mkdir -p $d; : > $d/seen; printf 'STOPPED: NEEDS FRIDAY\n@@BODY@@\n' > $d/X_STATUS.md
-chk "$(run $d/seen "$d/*STATUS*" | cut -c1-5)" "WAKE:" "A12 a STOP in a skeleton still fires"
+chk "$(run $d/seen "$d/*STATUS*" | cut -c1-7)" "WAKE: /" "A12 a STOP in a skeleton still fires"
 d=$T/a13; mkdir -p $d; : > $d/seen; printf 'READY FOR REVIEW\nE-01: all 217 question texts are PLACEHOLDER; census 217 -> 0\nKNOWN_PLACEHOLDER_ENTRIES kept\n' > $d/X_STATUS.md
-chk "$(run $d/seen "$d/*STATUS*" | cut -c1-5)" "WAKE:" "A13 real finished-STATUS prose (bare PLACEHOLDER, KNOWN_PLACEHOLDER_ENTRIES) does not hold"
+chk "$(run $d/seen "$d/*STATUS*" | cut -c1-7)" "WAKE: /" "A13 real finished-STATUS prose (bare PLACEHOLDER, KNOWN_PLACEHOLDER_ENTRIES) does not hold"
+# 2026-10-07: A14-A15 (they compare "WAKE: /" — a STATUS path — because the expiry line also starts "WAKE:", so a cut -c1-5 arm cannot fail) = a seat that REPLACES its single READY line (B174/B166/B92/B168, ~8 h unwoken). Red at the 10-06 version.
+d=$T/a14; mkdir -p $d; : > $d/seen; printf '## Round 1\nfindings\nREADY FOR REVIEW\n' > $d/X_STATUS.md
+chk "$(run $d/seen "$d/*STATUS*" | cut -c1-7)" "WAKE: /" "A14a first READY fires"
+printf '## Round 1\nfindings\n## Round 2\nnew findings\nREADY FOR REVIEW\n' > $d/X_STATUS.md
+chk "$(run $d/seen "$d/*STATUS*" | cut -c1-7)" "WAKE: /" "A14b the single READY REPLACED lower down (count still 1) fires"
+d=$T/a15; mkdir -p $d; : > $d/seen; printf 'body\nREADY FOR REVIEW\n' > $d/X_STATUS.md
+run $d/seen "$d/*STATUS*" >/dev/null; printf '## ADDENDUM-1 note appended below\n' >> $d/X_STATUS.md
+chk "$(run $d/seen "$d/*STATUS*" | cut -c1-30)" "$EXP" "A15 text appended BELOW a seen READY stays quiet"
 wait; echo "pass=$pass fail=$fail"; [ "$fail" = 0 ]

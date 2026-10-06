@@ -14,6 +14,12 @@
 #     not-busy state (seat_idle.sh's verdict), because a seat that ends its turn is the event, whatever it wrote.
 #   * --seed as the first argument records the CURRENT keys in the seen file and exits 0 (the successor's first step;
 #     an unseeded file fires on old READY lines).
+# 2026-10-07 (ledger w=3 of the watcher-miss family: seats REPLACED their single READY line, the count stayed 1,
+#   the key READY#1 was already seen, so four READYs sat ~8 h): the READY key now carries the LINE NUMBER of the last
+#   READY line (READY#<count>@L<line>). A replaced READY lands on a new line and fires; text appended BELOW a READY
+#   does not move it and stays quiet. Same day: a -LINE/-ROW/-FILE skeleton token needs TWO segments before it
+#   (CI-RUN2-LINE), so prose like PRE-LINE no longer holds a real READY (arm A11 had hidden this: its cut -c1-5 matched
+#   the expiry line's own "WAKE:"). Old-format seen files do not match: --seed once at boot after this change.
 SEED=0; [ "${1:-}" = "--seed" ] && { SEED=1; shift; }
 shopt -s nullglob
 SEEN="${1:?seen-file}"; shift; [ $# -gt 0 ] || { echo "usage: $0 [--seed] <seen-file> <glob>…" >&2; exit 2; }
@@ -37,18 +43,19 @@ for i in $(seq 1 "${WATCH_LOOPS:-110}"); do
       [ -f "$f" ] || continue   # 2026-10-05: an unmatched glob or a not-yet-written STATUS is skipped, not grep'd (it errored 100+ lines per loop)
       # A seat's DRAFT carries a placeholder line ("READY FOR REVIEW `<when-filled>`", B05 2026-09-25): lines holding a
       # `<…>` placeholder are not a READY, or the watcher fires early and then misses the real one (same count).
-      n=$(/usr/bin/grep -i -E 'READY FOR (REVIEW|RE-GATE|GATE)' "$f" | /usr/bin/grep -v -i -E '\bnot ready for' | /usr/bin/grep -v -E '<[a-z_-]+>|\b[A-Z]{3,}_[A-Z_]{3,}\b' | /usr/bin/grep -v -c -i -E '(\bat|until|end at|ends at|to|before)[ *`]+READY FOR (REVIEW|RE-GATE|GATE)')   # a line that PROMISES a future READY ("full table at READY FOR REVIEW", Composer B09 2026-09-25) is not one   # also READY_TIME-style tokens (Composer B06, 2026-09-25)   # "NOT READY FOR REVIEW" is not one (2026-10-03)
+      rl=$(/usr/bin/grep -n -i -E 'READY FOR (REVIEW|RE-GATE|GATE)' "$f" | /usr/bin/grep -v -i -E '\bnot ready for' | /usr/bin/grep -v -E '<[a-z_-]+>|\b[A-Z]{3,}_[A-Z_]{3,}\b' | /usr/bin/grep -v -i -E '(\bat|until|end at|ends at|to|before)[ *`]+READY FOR (REVIEW|RE-GATE|GATE)')
+      n=$(printf '%s' "$rl" | /usr/bin/grep -c .); ln=$(printf '%s\n' "$rl" | tail -1 | cut -d: -f1)   # a line that PROMISES a future READY ("full table at READY FOR REVIEW", Composer B09 2026-09-25) is not one   # also READY_TIME-style tokens (Composer B06, 2026-09-25)   # "NOT READY FOR REVIEW" is not one (2026-10-03)
       # A SKELETON STATUS (READY line written first, body still template tokens: @@BODY@@, __VERDICT__,
       # CI_RESULT_PLACEHOLDER, CI-RUN2-LINE) is not a READY yet: count none until every token is gone, so the
       # filled file is the one that fires (seen 4x on 2026-10-04: B57, B59, B61, B62). STOP lines still fire.
       # NOT bare PLACEHOLDER: finished Composer STATUS files say it in prose (the question texts ARE placeholders, E-01),
       # and KNOWN_PLACEHOLDER_ENTRIES is a real identifier (HPSM-POC B111): only *_PLACEHOLDER as a whole token holds.
-      s=$(/usr/bin/grep -c -E '@@[A-Za-z0-9_]+@@|__[A-Z][A-Z0-9_]*__|(^|[^A-Za-z0-9_])[A-Z0-9]+(_[A-Z0-9]+)*_PLACEHOLDER([^A-Za-z0-9_]|$)|(^|[^A-Za-z0-9-])[A-Z0-9]+(-[A-Z0-9]+)*-(LINE|ROW|FILE)([^A-Za-z0-9-]|$)' "$f")
+      s=$(/usr/bin/grep -c -E '@@[A-Za-z0-9_]+@@|__[A-Z][A-Z0-9_]*__|(^|[^A-Za-z0-9_])[A-Z0-9]+(_[A-Z0-9]+)*_PLACEHOLDER([^A-Za-z0-9_]|$)|(^|[^A-Za-z0-9-])[A-Z0-9]+(-[A-Z0-9]+)+-(LINE|ROW|FILE)([^A-Za-z0-9-]|$)' "$f")
       [ "$s" -gt 0 ] && n=0
       m=$(/usr/bin/grep -c -E '^(\*\*State:\*\* *)?(BLOCKED|STOP)|STOPPED|NEEDS FRIDAY' "$f")
       if [ "$n" -gt 0 ] || [ "$m" -gt 0 ]; then
-        for key in "$f READY#$n" "$f STOP#$m"; do
-          case "$key" in *"#0") continue;; esac
+        for key in "$f READY#$n@L${ln:-0}" "$f STOP#$m"; do
+          case "$key" in *"#0"|*"#0@L"*) continue;; esac
           if ! /usr/bin/grep -qxF "$key" "$SEEN"; then echo "$key" >> "$SEEN"; [ "$SEED" = 1 ] && continue; echo "WAKE: $f ($key)"; exit 0; fi
         done
       fi
