@@ -62,4 +62,4 @@ supersede: REPLACED WHOLESALE 2026-10-06 17:41 by day seat 2 (booted 11:5x) ahea
 - Close a gate's pane in the same action as reading its verdict. Quoted heredocs only.
 
 ## WITH KAM
-Nothing open. Grants live: October deploy (to 31 Oct), week instruction (to Sun 11 Oct), 80%-Spark (to the allowance renewal). Nothing deployed today: three merges (KS-938, KS-723, KS-1425, KS-1278 → four counting KS-1278) are on develop, and the October grant allows kintsugi then demo once READY. A deploy round is a candidate when the merge queue drains.
+Nothing open. Grants live: October deploy (to 31 Oct), week instruction (to Sun 11 Oct), 80%-Spark (to the allowance renewal). Nothing deployed today: four merges (KS-938, KS-723, KS-1425, KS-1278) are on develop, and the October grant allows kintsugi then demo once READY. A deploy round is a candidate when the merge queue drains.
