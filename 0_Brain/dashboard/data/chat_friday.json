@@ -3386,5 +3386,26 @@
   "project": "Datasec",
   "ts": "2026-10-06T19:14:26.844175+11:00",
   "text": "Received: put the passwords in the email. Sending a follow-up email now with your Security Manager password and Paul's (the two the first email pointed to). Your Microsoft password isn't stored anywhere I can see, so the other two sites still use your own sign-in."
+ },
+ {
+  "role": "wednesday",
+  "seat": "Kamils-MacBook-Pro.local",
+  "project": "Datasec",
+  "ts": "2026-10-06T19:15:37.594086+11:00",
+  "text": "Datasec / HPSM-POC. Short answer: the components and the ways to integrate are identified for both tools. The step-by-step guide that tells a user how to export and import is not written yet, and the import itself is not built. Detail is in two documents: the Security Manager lift-out matrix and the input design (B161, B162).\n\nSecurity Manager. An agent went through it screen by screen: 26 screens, 108 templates, 114 internal routes. It can measure 14 of our 16 snapshot questions, give us the printer count and a full device list of 61 fields, and firmware vulnerability data if HP's firmware service is switched on. The two it cannot answer are process questions: firmware first, and data protection assessed. The supported way out today is Security Manager's own scheduled CSV export, proven working on our box. The richest way is its internal API, which is undocumented, so that is a question for Terry. The big caveat: our Security Manager has no printers in it, so every export so far is the right shape but empty.\n\nThreat Assessment. It answers none of the 16 on its own, but it adds threat alerts, MITRE ids and fleet patterns we have no input for today. Ways in today: its alert forwarding to a SIEM, which needs no credential, or uploading its exports, which are weak: one page of alerts, six columns. Its API only accepts a Security Manager administrator login, which we should not hold. A read-only account is in the questions to Terry.\n\nWhat is not done: the import (Phase A on your open card: upload the export, show evidence beside each question, you answer), and a user guide for exporting from each tool. I'll have a seat write both export guides tonight from HP's own manuals, as documents only, nothing built, unless you say not to."
+ },
+ {
+  "role": "wednesday",
+  "seat": "Kamils-MacBook-Pro.local",
+  "project": "Datasec",
+  "ts": "2026-10-06T19:25:54.189939+11:00",
+  "text": "Received, starting now. Datasec / HPSM-POC: Security Manager and Threat Assessment, three ways in for each (automatic ongoing connection, upload of the tool's export, or guided entry per question telling the user where to find it), firmware number per printer checked automatically against HP's latest release, then build it live. Three lanes in parallel: one maps every connection point for both tools, one gets our own Security Manager and Threat Assessment copies working with test data so we answer questions ourselves, and one starts building the upload route, which needs nothing from HP. Anything our testing can't answer goes to HP through you."
+ },
+ {
+  "role": "wednesday",
+  "seat": "Kamils-MacBook-Pro.local",
+  "project": "Datasec",
+  "ts": "2026-10-06T19:27:55.872237+11:00",
+  "text": "Received: Threat Assessment holds detailed information per printer, so it's a device source too, not just alerts. I've told the mapping seat and the lab seat to treat it that way: map each printer field it holds against Security Manager's, and test it on our copy. Your message stopped at \"it is\"; send the rest if there was more."
  }
 ]

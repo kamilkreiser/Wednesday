@@ -12,6 +12,16 @@ supersede: replace wholesale; previous = NEXT-PICKUP-FRIDAY.md.pre-0925-rotate-s
 
 **The tree is at `/Volumes/Laptop-DEV/FRIDAY` (the drive, since 2026-09-28).** Quote every path (spaces).
 
+## 🔴🔴🔴 CHECKPOINT 2026-10-06 19:28 (Friday, ctx 65%) — READ FIRST; supersedes every block below where they differ
+**Kam today (evening):** "deploy the composer to the demo" → DONE (B91; demo = 19c5e8a, healthz 0.29.0, Friday's own probe; card delivered C-46). Logins email sent (no passwords) + on his word "put the passwords in the email too" a second mail with Kam's + Paul's SM passwords (read back by comparison). **19:25:15 (verbatim in `HPSM-POC Briefs/B166_ADDENDUM-1_connection-map-scope.md`): map SM + FTA connection points in THREE models (automated ongoing / upload of the tool's export / guided per-question entry), firmware number per printer + latest firmware + align automatically, then START INTEGRATING, live ASAP; test on our own copies; HP only if testing can't answer.** Card `hpsmpoc-input-phase-a-1006` RULED a on it. **19:27:23: FTA has granular per-printer info (message ends mid-sentence at "it is") → relayed to B166/B167 as ADDENDA.**
+**MAINS:** Composer 19c5e8a = demo · HPSM-POC 8798fa7 · analysis 03c7fd5 (+ records/b166-8 pending).
+**LIVE PANES (HPSM-POC briefs dated 2026-10-06 in `HPSM-POC/1_Project_Definition/Briefs/`):**
+- Datasec/HPSM-POC-A %80 **B166** connection map (both tools × 3 models, firmware alignment, the two export guides inside it) → **CHECKPOINT 1 — CONNECTION MAP READY → Friday reads before build uses it**; records/b166 (analysis) → Friday PR.
+- Datasec/HPSM-POC-B %81 **B167** LAB on our Azure copies (hpsm-poc-sm-rg only): devices into our SM (emulator/sim), firmware field + FSS/latest source, real-shaped sample exports → `Briefs/2026-10-06_B167_evidence/samples/` (tell B168 when they land), FTA↔our SM, FTA per-device fields. >A$50/mo or any inbound port → STOP → card. May move TONIGHT's 20:00 auto-shutdown to 23:00 once.
+- Datasec/HPSM-POC-C %82 **B168** Phase A build in the CODE repo from 8798fa7: tickets → A1 (provenance, observed→verified, useSnapshot seam, contract bump; tier 1 → GATE) → A2+A3 (import store; SM 4 CSVs + Devices export with FIRMWARE required; FTA 2 CSVs). Stop after A3.
+**Watcher:** scratchpad seen_hp over B16[678] STATUS + panes %80 %81 %82 (re-arm after rotation).
+**Still open with Kam:** Guided view / E8 / policy target / yes-no rule / SM-admin opt-in cards; Terry email forward; P1 purchase; Paul's directory invite.
+
 ## 🔴🔴🔴 CHECKPOINT 2026-10-06 13:40 (Friday, ctx 50%) — READ FIRST; supersedes every block below where they differ
 **Kam:** no rows since 11:08:43; reconcile 0; usage 61%. 7 cards still OPEN (see 11:43 block). Told on the panel: HP asks emailed (forward to Terry), dashboard screenshots (bf-91b34355894dc).
 **MAINS:** Composer **02c90ba** (#45 B86 Lane 1 via gate B89 GO WITH NOTES → d059501; #47 B86 follow-up F1+F2, tier 2, Friday read the diff → 02c90ba). NOT deployed (Composer demo still fd9493f; a deploy = a card to Kam once #46 lands). Analysis (HPSM-POC) **03c7fd5** (#88 merged). HPSM-POC 8798fa7.
