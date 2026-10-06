@@ -12,6 +12,21 @@ supersede: replace wholesale; previous = NEXT-PICKUP-FRIDAY.md.pre-0925-rotate-s
 
 **The tree is at `/Volumes/Laptop-DEV/FRIDAY` (the drive, since 2026-09-28).** Quote every path (spaces).
 
+## 🔴🔴🔴 ROTATION HANDOVER 2026-10-06 20:07 (Friday, ctx ~79%) — READ FIRST; supersedes every block below where they differ
+**FIRST ACT:** kam_rulings_today.sh + reconcile_rulings.py; seat_idle.sh on every pane below; read each STATUS's last lines; re-seed + re-arm ONE watcher: `friday/watch_status.sh <scratchpad>/seen_all "<HPSM-POC>/1_Project_Definition/Briefs/2026-10-06_B1[67][0-9]*STATUS*.md" "<HPSM-POC>/.tools/*/1_Project_Definition/Briefs/2026-10-06_B1[67][0-9]*STATUS*.md" "<Composer>/1_Project_Definition/Briefs/2026-10-06_B9[2-9]*STATUS*.md"` with WATCH_PANES = the live panes (seed first with --seed).
+**GRANT (Kam 19:31, scope confirmed in terminal):** READY (gate passed + Friday's check + merged via CodeQL) → deploy to the Composer demo AND hosted HPSM-POC WITHOUT a card; runbooks unchanged; report each deploy. NOT a content release that makes engagements read-only (that one is a card).
+**OPEN CARDS (Friday tab):** composer-e8-level-after-policy-1006 · composer-66-no-changes-setting-1006 · composer-unanswered-items-warn-1006 · composer-wording-asd-fixes-1006 · hpsmpoc-demo-login-role-1006. **Asked on the panel:** Q-7 the two E8 mapping checkers' names; whether to email the demo login's password + authenticator key (B171) — only on his word.
+**MAINS:** Composer 19c5e8a = demo; Composer root records main 01906d4 (C-47, C-48) · HPSM-POC code 8798fa7 (hosted 646870e) · analysis **188c004** (#89 B166 map/guides/yes-no/warning C-67/C-68; #90 B171).
+**LIVE PANES:**
+- %80 HPSM-POC-A **B166** (idle): owed = fold B167's drill-down fields into map §4c → new records branch. Prompts on its records commits: read the pending call in its transcript before answering a dialog.
+- %81 HPSM-POC-B **B167** lab: devices, firmware, **FSS ON our copy (card a)**, FTA device fields, drill-downs. Samples → tell B168 (`Briefs/2026-10-06_B167_evidence/samples/`).
+- %82 HPSM-POC-C **B168** Phase A: A1 tier 1 → GATE, then A2+A3.
+- %85 HPSM-POC-D **B169**: **PR #115 (burger, 577ec24) OPEN, NOT merged — CI 'npm audit' red** (run 37439409385; main was green at 8798fa7; only Dependabot alert = braces/C-44). ADDENDUM-2 = diagnose first (new advisory? patched bump on b169/audit-fix → Friday merges it, re-runs #115; no fix → card to Kam). Then Lane 2 attachments (tier 1; contract in one commit; second of B168-A1/B169-L2 to merge rebases + next minor). After #115 merges → deploy hosted under the grant (B157 deploy shape).
+- %86 HPSM-POC-E **B170**: Kam's Playbook feedback items FIRST, then home three-phase flow (mocks CHECKPOINT; no logos; image in scratchpad kam_att/ → the seat files it).
+- %83 Composer-D **B92** hide Guided (one switch; was holding on its own runs) → PR → merge → deploy under the grant → then commission lane 1 (66 editable in Expert, web only, per B93 design) as a new seat.
+**Closed tonight:** B91 (deploy 19c5e8a, C-46), B88, B90, B93, B165, B171. Composer demo = 19c5e8a (Friday probed live).
+**Owed:** Terry list follow-up = B166's G1-*/G2-*/M-* questions (in B166 STATUS) as ONE copy-ready mail to Kam (the 13 already went at 11:5x). C-44 braces renew card before 2026-10-31.
+
 ## 🔴🔴🔴 STATE 2026-10-06 19:49 (Friday, ctx ~74%) — READ FIRST; supersedes every block below where they differ
 **FIRST ACT after rotation:** kam_rulings_today.sh + reconcile_rulings.py; seat_idle.sh on every pane; read each STATUS's last lines; re-seed + re-arm ONE watcher (scratchpad seen_all pattern: `HPSM-POC Briefs/2026-10-06_B1[67][0-9]*STATUS*.md`, its `.tools/*/…` twin, `Composer Briefs/2026-10-06_B9[23]*STATUS*.md`, WATCH_PANES = all live seat panes).
 **GRANT:** push READY changes to the Composer demo + hosted HPSM-POC without a card (Kam 19:31 + confirmed). See the 19:39 block.
