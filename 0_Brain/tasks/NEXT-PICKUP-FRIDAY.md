@@ -12,6 +12,19 @@ supersede: replace wholesale; previous = NEXT-PICKUP-FRIDAY.md.pre-0925-rotate-s
 
 **The tree is at `/Volumes/Laptop-DEV/FRIDAY` (the drive, since 2026-09-28).** Quote every path (spaces).
 
+## 🔴🔴🔴 ROTATION HANDOVER 2026-10-06 11:43 (Friday, ctx ~79%) — READ FIRST; supersedes every block below where they differ
+**FIRST ACT:** `kam_rulings_today.sh` + `reconcile_rulings.py`; `friday/seat_idle.sh` over every live pane; read each STATUS's last lines. Every watcher died with the old seat: re-seed + re-arm (`friday/watch_status.sh <seen> <glob> …` with WATCH_PANES).
+**Kam's OPEN cards (all with defaults):** `hpsmpoc-input-phase-a-1006` (rec a) · `hpsmpoc-sm-admin-optin-1006` (rec a: not offered) · `hpsmpoc-yes-no-rule-1006` (rec a: SME) · `composer-guided-view-1006` (rec c) · `composer-e8-mapping-1006` (rec a) · `composer-policy-target-1006` (rec a) · `composer-prior-unreleased-1006` (rec a). RULED today: hosted deploy a (C-63, done), SQL Server check b (re-ask after a few clean PRs), external access a (FTA half DONE C-66; SM half WAITS on Kam buying 1 x Entra ID P1 → then a seat does Entra Application Proxy per `HPSM-POC Briefs/2026-10-06_B163_STATUS.md` §5a; confirm guest-P1 need before a 2nd seat).
+**Kam's hands (asked on the panel):** buy the P1 · the secure channel for Paul's SM password (B106 rule: never plain email/chat) · Paul's guest invite.
+**LIVE:** hosted HPSM-POC **646870e** (verified) · FTA demo **https://calm-smoke-080e4e200.3.azurestaticapps.net** (Entra, Kam only; anonymous → 302, Friday probed; render after real sign-in unproven) · FTA also on vm-hpsm-sm 127.0.0.1:5174 (task FTA-Review-Portal) · Composer demo fd9493f.
+**MAINS:** HPSM-POC 8798fa7 · analysis (records #80–#86 merged; **#87 records/b162 merging**) · Composer fd9493f.
+**LIVE PANES (Composer briefs in `Datasec Security Composer/1_Project_Definition/Briefs/`, dated 2026-10-06):**
+- Datasec/Composer-D %70 **B86** Lane 1 (K4 approvers from tenant + K6 prior-engagement explanation), tier 1 (authz + contract 0.29.0) → on READY FOR GATE: PR, tier-1 gate, merge on GO, records. No deploy without Kam's card.
+- Datasec/Composer-E %74 **B87** Lane 2 (K2 dashboard layout + K3 burger, collapsed by default = Friday's ruling) → on READY: diff at source + screenshots, PR, merge_when_green, records.
+- Datasec/Composer-F %75 **B88** WHY Kam saw "no questions" in Guided (local stack, findings only) → tell Kam plainly; then diagnose the ledger row 'Composer disappointing' (built wrong / wrong spec / checked shallowly) and answer him.
+**OWED:** the HP asks as ONE copy-ready list for Kam to send Terry (B161 Q-B161-1..8 + the design §9 asks: FTA README + 2 install guides, read-only account, SIEM/CEF mapping, live /reports/csv, syslog catalogue); C-44 braces exception lapses 2026-10-31 (renew card before then, HPSMPOC-218); close FB-1..FB-5 in Composer FeedbackAdmin after Kam's rulings.
+**Ledger today (4 rows):** credential-email promise · Composer 'disappointing' (diagnosis owed after B88) · _override_prior first-attempt (w=2) · (B86 none). Note: daily_friday/2026-10-06.md is current to 11:43.
+
 ## 🔴🔴🔴 CHECKPOINT 2026-10-06 11:14 (Friday, ctx 70%) — READ FIRST; supersedes every block below where they differ
 **Kam since 11:0x:** 11:08:43 card `hpsmpoc-sm-fta-external-access-1006` **a** (approve both, ≈A$23/mo) → ruled + hidden; steps on panel (bf-28837cdb9b38a): **Kam buys 1 x Entra ID P1** (menu path unmeasured) → on his 'done', commission the SM half: Entra Application Proxy per `HPSM-POC Briefs/2026-10-06_B163_STATUS.md` §5a (connector on vm-hpsm-sm, MFA Conditional Access, Kam assigned; Paul after his invite; confirm guest-P1 need before a 2nd seat). Deliver the card to its C-number when both halves are done (B164 writes one for the FTA half).
 **MAINS:** HPSM-POC 8798fa7 · hosted 646870e · analysis **e12f12c** (records #80–#85 merged) · Composer fd9493f = demo.
