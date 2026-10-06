@@ -1,0 +1,134 @@
+AUTH {'spf': 'pass', 'dkim': 'pass', 'dmarc': 'pass'}
+READY FOR QA (Seat E 7th): #1396 (KS-1256) -> gate TBD (yours to commission). Tier 1. Head e6eb53fe2658, read from
+origin in the same action as this send. No merge from me: the merge needs the gate and a signed
+GO naming (Seat E 7th).
+
+1. WHAT IS UP FOR REVIEW
+   PR  #1396  https://github.com/Secuura/Distributed_Secuura/pull/1396
+   branch  feature/ks-1256-thrown-settings-read-refuses-connector-create-e6-1
+   base    develop 3f9ff4e1e1b9
+   head    e6eb53fe26587bc8375154a6acfd112ddea58278   (origin == local, read in this send)
+   Two commits on the branch:
+     c6564b8ff04f  merge of develop 3f9ff4e1e1b9, tree 9c6cf017112712 == the PREDICTED tree,
+                   0 conflicts, trailers 1 byte (control commit prints 55)
+     e6eb53fe2658  the docs + the ks1195 title. ONE parent, tree e034a458fa52, 3 files,
+                   trailers 1 byte, 0 Co-Authored-By, subject 81 chars -> LANDS at 89.
+   Only KS-1256 is hyphenated in the title, body and both commit messages. Every foreign key is
+   de-hyphenated (KS 1195, KS 1231, KS 1233, KS 1328, KS 377). Body carries "Refs KS-1256", not
+   "Closes" — deliberately, so the Linear link kind stays a reference.
+
+2. WHAT CHANGED, AND THE CONTRACT
+   An unreadable connector allow-list now FAILS CLOSED with 503 instead of reading as "no
+   restriction". Four outcomes: a THROWN read -> 503; Redis UNAVAILABLE -> 503 and the read is
+   never performed; Redis available with the key ABSENT -> still no restriction (Kam's ruling b);
+   a MALFORMED container -> 403, unchanged.
+   The two unreadable paths do NOT share a mechanism: when Redis is unavailable
+   getNotificationSettings resolves NULL WITHOUT THROWING, so a catch can never observe it and the
+   availability test must precede the read. And retryStrategy sets fallbackMode with NO NODE_ENV
+   guard, so production reached the fail-open state on a runtime blip despite refusing to START
+   without Redis.
+
+3. A REDIS OUTAGE NOW REFUSES CONNECTOR CREATES (503); ks1195's TWO CELLS RE-POINTED DELIBERATELY
+   Kam, card secuura-ks1256-redis-outage-stops-connector-creates-1006 = a, VERBATIM:
+     "Accept: fail closed (503) during a Redis outage" / "Security first: no restricted document
+      type slips through while the allow-list cannot be read. Cost: Platform-S cannot create
+      documents while K's Redis is down."
+   Kam, card secuura-connector-allowlist-missing-setting-ks1256-1005 = b, VERBATIM:
+     "Keep 'no restriction' when unset" / "No behaviour change; the gap stays for fresh installs."
+   The two changed assertions, verbatim as committed:
+     expect(r1.map((r) => r.status)).toEqual([503, 503, 429, 429, 429]);
+     expect(docsPosted('ks1195-r1-')).toBe(0);
+   THESE TWO ARE THE ONLY ASSERTION CHANGES IN THE PR.
+   The TITLE-ONLY change on that cell, also mine:
+     "R1 / A3: with Redis unavailable the allow-list cannot be read, so a key at 2 per 60 s
+      creating documents is refused 503 twice, then 429 from request 3"
+   Proven: git diff -U0 shows exactly ONE -/+ pair on :173, and 0 changed lines containing an
+   expect( call, against a CONTROL that counts 4 over a diff which does change such lines.
+
+4. TEST EVIDENCE, written by me, all on the FINAL head
+   api-gateway suite   92 files / 818 tests, 0 failed, rc 0. 7.42 s wall, 52.88 s test time.
+                       HOST Kamils-Mac-Studio, 2026-10-06, vitest 4.1.11, node v24.7.0.
+   KS-1256 cells       6 passed (6).    ks1195 file   12 passed (12).
+   red-first           4 of 6 RED at base -> 6/6 at head. SEAT E 6th's MEASUREMENT, cited as
+                       theirs, not re-run by me. The two CONTROL cells are green at base BY
+                       DESIGN: they pin behaviour this change does not touch.
+   ks1195 three-way    head+new green 12/12, base+new RED, base+old green 12/12 — ALSO E 6th's,
+                       cited as theirs.
+   tsc                 rc 0, 0 errors, with a PLANTED POSITIVE CONTROL: rc 2, 1 error at
+                       verification.ts(415,9) TS2322. Source restored BYTE-IDENTICAL, sha256
+                       051e3143c6cb0c2b before and after, porcelain 0.
+   test-file tsc       NOT RUN — NOT a green. tsconfig.json:20 excludes src/__tests__ and
+                       --listFilesOnly finds the new test file 0 times, against a CONTROL showing
+                       verification.ts present 1 time.
+   check:openapi       rc 0, "405 example blocks ... every published example resolves". NO spec
+                       edit: 503 is already declared in docs/openapi/secuura-api.yaml, and the
+                       spec is in 0 of the PR's files.
+   format gate         rc 0, 1 package checked, 0 skipped, 0 failed — with a CONTROL (prettier
+                       hidden) that correctly produced "SKIP — systemTest/akto deps not
+                       installed" at rc 1, so the 0-skipped reading is a measurement.
+   PREFLIGHT, VERBATIM from the in-hook output:
+     ok   🔴 KS-1279 a real leg-11 failure with legs 3 4 5 skipped and no install counts leg 1 as NOT run - eleven legs ran
+     ok   CONTROL a clean run with nothing exported exits 0 and says PREFLIGHT PASSED
+     ok   CONTROL a run where nothing fails exits 0 and says PREFLIGHT PASSED
+       ok   KS-1127 CONTROL: ...and prints no SKIPPED: block (=0)
+     PREFLIGHT INCOMPLETE — 12/15 legs ran, 3 SKIPPED. Nothing failed.
+       This is NOT a pass. Do not quote it as one — say which legs ran.
+
+5. ON "IN THE SAME COMMIT" (skill §4 :362-:363)
+   On the BRANCH the test change (e16c3133c296) and the docs (e6eb53fe2658) are SEPARATE commits.
+   The SQUASH MERGE lands them on develop as ONE commit. I am saying that plainly rather than
+   claiming the branch satisfies the rule literally. Whether the squash satisfies it is the
+   reviewer's call, not mine.
+
+6. NOT COVERED
+   - the live sweep is OWED and was not run from this seat;
+   - the fresh-install gap STAYS OPEN, by Kam's ruling b;
+   - FIVE other readers of the same settings key are UNAUDITED and may carry the same fail-open
+     shape: admin.ts:1119, :1144, :1154, health.ts:52, verification.ts:1283;
+   - PREFLIGHT INCOMPLETE 12/15, stack down. KS-1256 is a RUNTIME change; Wednesday ruled to
+     push on 12/15 and quote the ratio rather than bring a local stack up;
+   - a WALL-CLOCK TEST TIMEOUT THAT IS NOT CAUSED BY THIS PR. One NON-quiescent full-suite run
+     (two tsc jobs competing; import phase 93.83 s vs 18.45 s quiet) came out 1 failed / 817
+     passed: db.retry.test.ts > db availability retry (KS 377) > "reports available immediately
+     when the probe succeeds at boot", "Error: Test timed out in 5000ms", cell at 6699 ms. It is
+     a wall-clock timeout on a fake-timer cell; the file is in NEITHER this PR nor develop's
+     merge and imports only vitest and a mocked pg. It then passed 7/7 on THREE consecutive
+     quiescent runs and the full suite passed 92/818 green. KS 1328 ALREADY HOLDS THIS EXACT
+     CLASS ("services/kyc db.retry.test.ts exceeds vitest's 5 s default under fleet load —
+     11498 ms loaded vs 675 ms alone"), as does BACKLOG.md:1182. Mine is that class in a SECOND
+     service, services/api-gateway. I changed NOTHING to make it pass: no testTimeout, no skip,
+     no weakened assertion. Per Wednesday's ruling I did NOT file or card it from this seat.
+   - the ticket COMMENT on KS-1256 and KS 1195 is HELD for Wednesday's relay after the gate, per
+     the HOLDS. This is the one ruled exception to the STANDING :34 ticket-comment item.
+
+7. THINGS THE REVIEWER SHOULD KNOW ABOUT HOW THIS WAS CHECKED
+   - NO INDEPENDENT RE-KEY AUDITOR. I re-keyed my own inherited tools and drove my own controls.
+   - The namespace configuration in namechecke4.py was CONFIRMED by Wednesday after I drove every
+     combination: MINE=e7, MY_FORMS/_planted=e6, e6 in FOREIGN, seate6 out, adoption declared.
+     rc 0, 7 checks, 0 bad, 24/24 controls fired.
+   - I found the INHERITED doc-composer position predicate VACUOUS for the cheat job (every cheat
+     section ends with the same closing div as develop's pre-close line, so last-line equality
+     holds on the WRONG side too). composee7.py adds a SLICE predicate that discriminates, keeps
+     the inherited one, and PRINTS which caught it. The composition was always correct; the
+     CONTROL was blind.
+   - I committed an OVER-LENGTH subject once (my own check printed "LANDS at 97" and I did not
+     gate on it). Fixed by amend BEFORE any push; the gate now refuses rather than prints.
+
+
+THE PREFLIGHT'S OWN WORDS, honoured: it prints "This is NOT a pass. Do not quote it as
+one - say which legs ran." So: 12 of 15 legs RAN, NOTHING FAILED, and the 3 SKIPPED are all the
+same cause, each printing:
+     SKIP - local stack not up on http://localhost:6882 (start it to run this leg)
+That is the stack-down condition you ruled to accept rather than bring a local stack up.
+
+PUSH RESULT, from the .rc file and an INDEPENDENT ls-remote, not from the wrapper's banner:
+  .rc = 0; ls-remote at source gives e6eb53fe26587bc8375154a6acfd112ddea58278 == local HEAD.
+  ONE attempt, 7m06s (00:15:05Z -> 00:22:11Z), rc 0, NO rc 141. That is a THIRD clean datum at
+  7+ minutes for the KS 1149 class (Seat E 6th logged 7m23s), with GIT_SSH_COMMAND never exported.
+  Lock .push-lock-e4 released at 00:22:12Z by the holder pid. Nothing of mine is held.
+
+RAISE RECEIPT: HTTP 201 (a 200 would not be a create). Head at GitHub == origin == local.
+  Body 7,876 bytes, sha256 4a3dc5d9ba5de7d9 SENT and READ BACK IDENTICAL. base develop, state open.
+  mergeable_state reads "unknown" seconds after a create - that is GitHub still computing it, and
+  per KS 660 it carries no testing claim either way. The Test Evidence above carries that claim.
+
