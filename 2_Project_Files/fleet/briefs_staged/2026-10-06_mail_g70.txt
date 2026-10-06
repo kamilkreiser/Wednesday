@@ -1,0 +1,101 @@
+GO for #1397 at 3e7be2044fe80ebced9c497bfc278a7333018a83
+
+GO string I would sign: GO (Seat D 11th): merge 1397 on gate70
+Squash condition: the GO covers a SQUASH of exactly tree 0b06d3c18a1e onto develop 4eaf7741a6a4. Develop was unmoved at all 3 readings (04:03:42Z / 04:09:11Z / 04:16:35Z; pull/head == branch == 3e7be2044fe8). If develop moves before the merge and base..develop touches any of the 37 paths or the audit / preflight tooling, re-run legs 6 and 7 on the merge result first.
+Declared squash subject, TRUE of the diff (78 chars, 86 squashed): KS-1425: in-range lock refresh clears three advisories, baseline the other two
+The PR's own subject says "clears four ... the other two", which counts 6 over five advisories. That is N-1397-9 (polish).
+END_TREE 0b06d3c18a1e116cb5c550a505e2cb8884315f63
+
+CHECKS (every figure is at head 3e7be2044fe8 / base 4eaf7741a6a4; rc in evidence/*.rc)
+C1 PIN: c1 rc 0, 13/13.
+  - One parent 4eaf; 37 paths +172/-158, every lock +N -N.
+  - 0 trailers (control bf277eead268: 53 B). 0 Co-Authored-By (control 1).
+  - Subject 77/85. Only KS-1425 hyphenated. My widened closing scan (with -ing forms) found 0 refs; control 3/3.
+  - 14 tooling paths identical at base/head/develop. 0 manifests.
+1 LOCK-DIFF: c2 diff rc 0, 9/9.
+  - 54 entries, 158 writes (54 v / 52 r / 52 i), 2 version-only (root), per package 16/33/1/4, 0 added, 0 removed, 0 other.
+  - My own recursive leaf diff (plan derived from the advisory ranges) AGREES. Textual +158/-158, every line a v/r/i field.
+  - Node round-trip exact at base and head; indent kept. Census 40x2 / 5x4.
+2 INTEGRITY: c3 tarballs rc 0, 5/5.
+  - 52/52 == downloaded sri; openssl agrees on all 8 tarballs.
+  - Old tarballs differ (negative control). 12 + 1 in-repo positives, 0 mismatches.
+3 WALK: kit W1-W3 rc 0, and my walk with the repo's own semver 7.8.5 (rc 0) AGREES on all 54.
+  - 79 parent ranges, 0 outside, 0 orphans.
+  - Control: the psp 6.1.4 parents (^6.1.1, ^6.1.2) refuse 7.1.6, 8/8.
+4 LEGS:
+  - BASE: leg 6 rc 1, leg 7 rc 1 (10 match / 5 baselined), the five ids 13x.
+  - HEAD: leg 6 rc 0, leg 7 rc 0, 43 locks / 1614 packages / 7 / 7, the five ids 0x.
+  - Contract rc 0, 59/59 == expected-case-count.
+  - Leg 2 cleanroom rc 0, "All 35 standalone lock(s) pass", status clean.
+  - realci rc 0: 5/5 locks outside leg 2 really installed, locks unchanged.
+5 ROWS: c4 rows rc 0, 7/7. Pure insertion: +14 -0, 3,581 B at byte 19,803; 22 -> 24; all 22 old rows byte-equal.
+  - Shape == braces row. KS-1425 / 2026-10-06 / 2026-10-31.
+  - Fuse (the head's own isLapsed): live at 2026-10-30, lapsed at 2026-10-31. Control: GHSA-2mjp never lapses at 2099. validateBaseline control reported.
+  - Advisories rc 0: hp3w and rj75 both MODERATE; sprintf-js latest 1.1.3 still affected; old versions return all 4 (control).
+  - PSP7 parse at head: 0 (base control 16/33/4/1). Mobile blob untouched, and still seen by the parser.
+6 INSTALL: npm ci rc 0, 1937 packages, root lock sha256 c7306d84307789ac unchanged.
+  - The 2 version-only root entries were fetched by version with no integrity pin. Their installed files == the verified tarballs (5/5, 18/18; old-tarball control differs).
+7 PR TEXT: body sha256/16 b33786f6a554af24, 9,936 chars = 9,964 B (READY EQUAL).
+  - Refs KS-1425 + URL on line 1, once. 0 closing refs. Only KS-1425 hyphenated. Title == subject. 0 trailers.
+  - prtext rc 1 on CL-INDENT only (41/4 stated vs 40/4 measured).
+  - Linear KS-1425: In Progress, not archived.
+8 ACTIONS: api open, mergeable true, unstable.
+  - NEW-FAILING (comparator): Security Scanning. PENDING: none.
+
+NEGATIVE CONTROLS (mine, each plant asserted LANDED and restored sha256-identical; status 0 lines after):
+- NC1: proxy-addr 2.0.7 planted in connectors/whatsapp-bot -> leg 7 rc 1, "FAIL - 1 advisory ... GHSA-jqcg".
+- NC2: hp3w row removed -> leg 6 rc 1 AND leg 7 rc 1, both naming GHSA-hp3w / sprintf-js.
+- NC3: psp 7.1.4 planted in api-explorer -> leg 7 rc 0 (MASKED) while c2 parse rc 1 with psp7 = 1.
+- format:check: rc 0 in all 4 systemTest packages. Control: a 4->2 reindent of the api-explorer or akto lock -> rc 1, naming package-lock.json.
+
+SECURITY SCANNING CLASSIFICATION: PRE-EXISTING, named, does NOT block (Q1 rule).
+- Job Dependency Audit, step "Audit-contract suites (the gates' own validator)".
+- Log line at the head (job 112092222255) AND at 585171bc2c29 (job 112046792706):
+  "Error [ERR_MODULE_NOT_FOUND]: Cannot find package 'semver' imported from .../Blockchain/Dev/scripts/audit/audit-locks.mjs", with "fail 7" in both.
+- The same 7 failing cases, identical once durations are stripped.
+- pr (k6 / Akto / Playwright) and PR Security Gates (KS-168) fail with identical normalised failure lines on develop 4eaf's own push: pre-existing.
+- "Actions are retired" is stale (Q2, outside this gate).
+
+FINDINGS: 0 Blocker, 0 Major.
+- N-1397-6 Minor: the PR body never states the 12/15 preflight ratio or the skipped legs 3/4/8; it defers to the READY (skill 5f). Body edit.
+- N-1397-7 Minor, D-7 residue: leg 2 is npm ci --dry-run over services/packages/frontend/scripts only, so 6 changed locks are outside it. Covered for this PR by realci + install + c3. Wants a ticket.
+- N-1397-8 Info: the version-only root entries carry no integrity pin. This is the root lock's majority shape; installed bytes == the verified tarballs.
+- N-1397-1 Polish: D-1, indent 40/5 not 41/4.
+- N-1397-2 Polish: D-2, the baseline DOES round-trip byte-exact.
+- N-1397-3 Polish, NEW: the body says "Friday 31 October"; 2026-10-31 is a SATURDAY.
+- N-1397-4 Polish, NEW: body :19 says "0 whose remedy falls outside its parent's range"; measured 4 (psp 6.1.4), contradicting body :45.
+- N-1397-5 Polish, NEW: Kam's ruling is quoted "verbatim" with an ASCII " - " where the relayed text has " — ". This is in both rows, the commit and the body.
+- N-1397-9 Polish, NEW: the subject counts 4 + 2 over 5 advisories.
+- N-1397-10 Info: the Actions failures, all pre-existing.
+
+README section 2:
+- D-1 HOLDS (polish). D-2 HOLDS (polish).
+- D-3 HOLDS as definitional (1,609 without the root "", 1,610 with it).
+- D-4 HOLDS (EQUAL). D-5 HOLDS (pre-existing by log). D-6 HOLDS (11). D-7 HOLDS (finding).
+
+CENSUS: 25 other open PRs, 11 OVERLAP (Q3: non-blocking, report only).
+- Not stale: #1360 (KS-1380 revert of #1358, 15 lockfiles, Peter, updated 2026-10-05). It will conflict.
+- Stale Dependabot: #949, #948, #947, #946, #945, #649, #639, #635, #575, #572.
+- #1393 / #1395 / #1396 are not OVERLAP.
+
+NOT TESTED:
+- proxy-addr 2.0.8 trust-proxy runtime (no live sweep; no Done on this green).
+- The frontend CSS build.
+- The service unit suites.
+- Preflight legs 3/4/8 (12/15 in-hook, Q-PF).
+- The four platform suites, run locally.
+- The mobile app's own 81 advisories (KS-769).
+- Lifecycle scripts (--ignore-scripts).
+- npm install drift.
+- Non-npmjs registries.
+- The merge result (unneeded while develop == base).
+- KS-1425 project/register placement (5d; X8 read state only).
+- Who moved KS-1425.
+- Kam's board text itself.
+
+Tiering: T1, I agree.
+Disk: no ENOSPC (352 Gi free at end).
+Kit: all 10 pins EQUAL; self-tests 7/16/4/10/10/10, all planted arms fired.
+
+Report: /Volumes/DevMASTER/!CODING/Testing Agent MAIN/projects/secuura/reports/2026-10-06-gate70/report.md
+sha256 report.md = d345f3100ad26fd412fef3dfcdffed788332d8175691d696ec6ab251e86a72cd
