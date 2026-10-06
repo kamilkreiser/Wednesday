@@ -27730,5 +27730,64 @@
    "CARD secuura-advisory-freeze-3-ghsa-1007",
    "CARD hpsmpoc-feedback-files-third-round-1007"
   ]
+ },
+ {
+  "id": "hpsmpoc-hosted-connect-timeout-start-limit-1007",
+  "client_project": "Datasec/HPSM-POC",
+  "title": "Apply the two start-up settings already in main's Bicep to the hosted site?",
+  "bluf": "HPSM-POC hosted: the API's first database connection timed out while starting, for the sixth time (HPSMPOC-207; B178's deploy at 08:40, the first time it happened during a deploy's own start). The site stayed healthy throughout. Main's Bicep (PR #122, gated) already carries the fix B175 proposed, and today's deploy deliberately did not apply it: Connect Timeout=30 on the API's database connection, and a 10-minute container start limit on both apps. Applying it changes two settings on our hosted demo and restarts each app once (about 5 minutes, at a quiet time). No new resource, no cost. Prior ruling read: your 21:48 note on hpsmpoc-narrative-timeout-221-1006 ('Do whatever it takes so it's fixed and does not occur anywhere else on the site') commissioned B175's timing sweep, and these two settings are its unapplied proposals. That note points to a, but it ruled the AI cap, not hosted settings and restarts, so this asks rather than assumes.",
+  "default_action": "If Kam has not answered by 18:00 today, Friday applies option a during the evening's low traffic and reports it on the panel afterwards.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Apply both settings at the next quiet moment",
+    "detail": "A seat sets them by the README path, restarts each app once (no overlap), checks health 200 x3, and watches the next starts for HPSMPOC-207. Reversible: the previous values are recorded first."
+   },
+   {
+    "key": "b",
+    "label": "Apply only Connect Timeout=30",
+    "detail": "The setting aimed at the fault itself; the start limit stays at the platform default."
+   },
+   {
+    "key": "c",
+    "label": "Leave both as proposals",
+    "detail": "Keep recording sightings on HPSMPOC-207."
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-10-07T08:51:16.492122+11:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "seat": "friday",
+  "prior_rulings_overridden": [
+   "2026-08-21 19:49",
+   "2026-09-01 17:25",
+   "2026-09-03 09:49",
+   "2026-09-08 14:00",
+   "2026-09-09 18:20",
+   "2026-09-15 10:51",
+   "2026-09-15 16:40",
+   "CARD secuura-ks740-maxitems-timeout",
+   "CARD secuura-ks1163-start-script-never-waits-for-five-services",
+   "CARD vision-prod-postgres-idle-transaction-timeout",
+   "CARD hpsmpoc-hosted-link-for-hp",
+   "CARD hpsmpoc-hosted-plan-approve",
+   "CARD hpsmpoc-hosted-seed-owner",
+   "CARD hpsmpoc-hosted-dsteps-start-today",
+   "CARD hpsmpoc-d5-deploy-hosted-demo-1002",
+   "CARD hpsmpoc-pill-hosted-deploy-1003",
+   "CARD hpsmpoc-577c27c-hosted-deploy-1005",
+   "CARD hpsmpoc-hosted-forwarded-address-settings-1005",
+   "CARD hpsmpoc-hosted-clean-old-static-files-1005",
+   "CARD hpsmpoc-05f30b0-hosted-deploy-1005",
+   "CARD hpsmpoc-c2d321c-hosted-deploy-1005",
+   "CARD hpsmpoc-6f6bc96-hosted-deploy-1006",
+   "CARD hpsmpoc-narrative-timeout-221-1006",
+   "CARD secuura-demo-disk-retire-old-rollback-sets-1007",
+   "CARD secuura-advisory-freeze-3-ghsa-1007",
+   "CARD hpsmpoc-feedback-files-third-round-1007",
+   "CARD wed-allowance-99pct-three-seats-live-1007"
+  ]
  }
 ]
