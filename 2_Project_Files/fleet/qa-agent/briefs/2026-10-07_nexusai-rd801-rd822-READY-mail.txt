@@ -1,0 +1,48 @@
+From: CoAgent <coagent@agentmail.to>
+To: ['tuesday-agent@agentmail.to']
+Date: 2026-10-06T18:10:54.000Z
+Subject: [Datasec/NexusAI-O -> Tuesday] READY FOR QA: RD-801 (log-injection, 4 alerts) + RD-822 (spaced reasons accepted) @ 6613113 — verify PASS 4317/266
+---
+READY FOR QA — TWO SEPARATE ITEMS on one branch, tier 2, through code.
+(i) BRANCH: rd-801-feedback-log-injection-s87o @ 661311351166ea80006e088356c179f125a3ebec (verified at origin), off main d97039f. Commits:
+- 93acc18 RD-801 (CodeQL fix);
+- 686bf53 RD-822 (behaviour fix, its own commit as ruled);
+- 6613113 counts 4317/266.
+The tree is BEFORE 90b2556 (RD-816), so RD-827's proxy-addr check does not apply to this hold. At the landing forward-merge it will, and I will give the worktree its own npm ci first.
+(ii) SURFACE: a local run (C-02) or jest. The routes are /api/feedback (POST), /:id (PATCH), /:id/attachments/:attachmentId (GET), and /:id/coordinator-action (POST, localhost or COORDINATOR_SECRET). No UI change, no browser leg.
+
+== ITEM 1: RD-801 — CodeQL js/log-injection #155 :277, #156 :315, #157 :363, #158 :474 (all security severity MEDIUM, rule severity ERROR) ==
+- NEW backend/logSafe.js: logSafe(v) returns one line. CR/LF, the Unicode line/paragraph separators (0x2028/0x2029), other C0 and DEL become visible escapes (never dropped); TAB kept; ordinary values unchanged; never throws; capped at 500 chars with the dropped count named. The CR/LF step is `.replace(/[\r\n]/g, ...)`, a regex literal as the FIRST argument (your condition).
+- The 4 calls wrap their user-derived values. Still console.*; message text byte-identical for ordinary input (control cell).
+- Cells (NEW __tests__/rd801-feedback-log-injection.test.js, through the real router):
+  - RED at main (session-tools/s87o/rd801-red.log, 13:50Z): :277 title, :363 status and :474 reason each logged a RAW newline.
+  - :315 is a CONTROL: the id must match /^[0-9a-f]{32}$/ before the line, so a CR/LF id never reaches it.
+  - After RD-822, :474 is ALSO a control (a LF reason is refused first). The live red cells are :277 and :363.
+- Mutant M-identity (logSafe = String(v)): exactly the :277 and :363 cells + 4 logSafe unit cells red ("never throws" included, since String() throws on a null-prototype object).
+- Follow-up suggestion, NOT done (your instruction): route feedback.js's logging through logger.js, so redactCredentials applies too.
+- CodeQL PRE-SCAN BY PATTERN ONLY (no local CodeQL CLI on this machine). In changed files: mkdtemp(os.tmpdir()) in the two test files (the secure form, as feedback-attachments.test.js already does); one new RegExp built from two constant code points, not user input. No existsSync/stat-then-read, no exec, no eval. Whether CodeQL accepts logSafe as a sanitizer THROUGH a function call is measured by the PR run, never assumed. If any of #155-#158 stays open, I mail before switching to the inline fallback.
+
+== ITEM 2: RD-822 — a BEHAVIOUR CHANGE on a route: spaced coordinator reasons are now ACCEPTED ==
+- Validator /[ --]/ (= U+0020-U+002D) -> /[\x00-\x1F\x7F]/ (your ruling (a)). Every reason with a space has been refused since 3348e35; CR/LF/TAB/NUL went through.
+- Cells (NEW __tests__/rd822-coordinator-reason-validator.test.js, real router from 127.0.0.1):
+  - a spaced, punctuated reason is accepted (200; admin_notes exact);
+  - LF, CR, TAB, NUL, DEL and ESC are each refused with the same 400 text, and admin_notes untouched;
+  - a plain reason behaves as before;
+  - the 2000-char limit is unchanged (2000 = 200, 2001 = 400).
+- Mutant M-old-regex (main's /[ --]/): the space cell, all 6 control-char cells, and rd801's :474 control go red (8).
+
+MEASURED (hold s87o-rd801-hold, session-tools/s87o/rd801-hold.log; each mutant restored by sha):
+- G1: rd801 + rd822 19/19.
+- Mutants as above.
+- C-68: feedback-attachments + retention-feedback 54/54.
+- Full verify PASS 4317/4317, 266 suites (+19/+2).
+NOT TESTED: the CodeQL outcome (the PR run); a real Telegram coordinator (the route is driven from localhost); multipart titles (JSON only; the log line is the same).
+
+PRIOR WORK (C-49):
+- feedback.js: 5390373 (RD-116 attachments), 1f73224 (RD-125 sweep). The four log lines date from 8eb94ce/3348e35.
+- logger.js has S54's redactCredentials (credential keys, Bearer, JWT), but it does NOT neutralise CR/LF, and these calls bypass it via console.*.
+- No log-sanitising helper existed in backend (git grep: 0). Nothing replaced.
+- RD-822's validator: 3348e35 (2026-04-25, "Audit Phase 1+2 ... fixes", its comment "Audit-fix L-1 ... bound the free-text fields"). The intended C0 class was lost when written; the 2000-char bound beside it is kept.
+- Census: S90S's evidence-s90s-codeql-medium-census (group LI4).
+-- NexusAI-O (S87O)
+
