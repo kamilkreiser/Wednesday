@@ -1,0 +1,47 @@
+gate71 launcher --check arms (drafter, 2026-10-06 ~13:01Z, AT THE FINAL PINS; `env <override> bash launch_qa_secuura_gate71.sh --check < /dev/null`)
+Stand-ins live in _scratch/arms/ (gitignored), built from the real kit: kit_badpin.json = kit.json with c2's pin's first hex flipped;
+kit_nopin.json = gh_gate71.py's pin deleted; kit_missing/ = a copy of every pinned file + README + RULINGS + KIT_REPORT minus c3_suites_gate71.py
+(moved aside, not deleted); kit_tampered/ = the same copy with ONE newline appended to c4_docs_gate71.py; forbidden_go.txt = the rendered prompt
++ an R 3rd GO; headfile_*.txt; ls_*.txt; empty_clone/ = a `git init` with no objects; prompt_devFAB.txt = the rendered prompt with develop
+replaced by deadbeef x5; a copy of the launcher for the moved-kit arm.
+  arm                 override                                                    rc  refusal
+  rendered            none (the dry run's render; LIVE ls-remote)                 0   all guards pass, 10 pins EQUAL
+  badpin              G71_KITJSON=kit_badpin.json                                 31  BAD PIN — c2_product_gate71.py f14914025ca00cb8 != pin 014914025ca00cb8
+  nopin               G71_KITJSON=kit_nopin.json                                  30  gh_gate71.py has NO sha256 pin
+  missingfile         G71_FILES_DIR=kit_missing/                                  30  c3_suites_gate71.py is MISSING or empty
+  tamperedfile        G71_FILES_DIR=kit_tampered/                                 31  BAD PIN — c4_docs_gate71.py 36ec03437621c319 != pin 8ecbaf57371170b4
+  unrendered          G71_PROMPT=prompt_gate71.txt                                8   unfilled double-brace token
+  forbiddenGO         G71_PROMPT=forbidden_go.txt (+ R 3rd GO)                    8   GO set != the pre-ruled one
+  headfileMalformed   G71_HEADFILE=headfile_malformed.txt (no sha)                7   head file malformed
+  headfileNoD         G71_HEADFILE=headfile_noD.txt (no D line)                   7   head file malformed (the develop line is required)
+  lsReal              G71_LS=ls_real.txt                                          0   all guards pass (positive control for the ls stand-ins)
+  headMoved           G71_LS=ls_headmoved.txt (pull/head = d75bfe2)               6   pull/head != head — the HEAD MOVED
+  branchMoved         G71_LS=ls_branchmoved.txt (branch = d75bfe2)                6   branch != head — the HEAD MOVED
+  devMoved            G71_LS=ls_devmoved.txt (develop = f556373b9418)             17  origin develop != the develop the prompt was rendered for
+  absentHead          G71_CLONE=empty_clone/                                      19  REFUSING BY NAME: the head 9414aa54e92c… is ABSENT from the kit clone
+  absentDevelop       G71_LS=ls_devFAB + G71_HEADFILE=headfile_devFAB + G71_PROMPT=prompt_devFAB (develop deadbeef x5)
+                                                                                  19  REFUSING BY NAME: the develop deadbeef… is ABSENT from the kit clone
+  movedKit            the launcher COPIED into _scratch/arms/                     2   a MOVED KIT
+  launchNonTTY        no --check, stdin /dev/null (+ G71_LS set)                  21  stdin is not a TTY — NOTHING LAUNCHED
+Outputs: launcher_check_<arm>_ex1.{out,err,rc}, launcher_launch_nonTTY_ex1.{out,err,rc}. 17 arms, every one firing as intended.
+
+Repin-level arms (`script -q /dev/null repin_and_launch_gate71.sh … --dry-run --no-api`), outputs repin_arm_<arm>_ex1.{out,rc}:
+(their step files are dry_130146 … dry_130201.*; the clean dry runs are dry_130002.* (ex1) and dry_130221.* (ex2))
+  headMoved           G71_LSFILE=ls_headmoved.txt                                 11  "origin pull/head … != the input head … — MISMATCH (a MOVED HEAD)" (stops before render)
+  wrongHead           input head d75bfe2deb80… (develop, not the PR)              11  head != kit expected head. Step A did NOT refuse (rc 18): the READY names
+                                                                                      d75bfe2 in full as the PR's base; the kit-expected-head pin is what stopped it
+  shortHead           input head 9414aa54e92c (12-hex)                            9   HEAD must be the FULL 40-hex sha
+  noApiRealLaunch     --no-api without --dry-run                                  9   --no-api is a dry-run option only
+  devNotDescendant    G71_LSFILE=ls_devmoved.txt (develop = f556373b9418, an ANCESTOR of the base)
+                                                                                  13  C1 FAILED (P2b: develop does not descend from the base)
+  devAbsent           G71_LSFILE=ls_devFAB.txt (develop = deadbeef x5)             19  REFUSING BY NAME: the develop … is ABSENT from the kit clone after a by-sha fetch
+                                                                                      (the fetch from GitHub failed, as it must; nothing was written)
+  devMovedNoRepin     G71_LSFILE=ls_devSIM.txt (develop = SIM 4f7cb2adeb47, base + a planted foreign flow 24. / cheat KS-9998, OBJECTS ONLY in the kit clone)
+                                                                                  10  develop moved; c1 13/0 (P12d: 2 doc paths moved -> docs merge-in); prediction printed:
+                                                                                      flow ...22 24 23 (read-back OK, ascent INFO False), cheat ...KS-9998 KS-1136,
+                                                                                      PREDICTED tree d67e85459d10, git merge-tree 23422d9c8fbd DIVERGENCE (both docs conflict)
+  devMovedStaleRepin  same + --repin-develop d75bfe2…                             10  stale re-pin
+  devMovedRepinned    same + --repin-develop 4f7cb2adeb47…                         13  the repin script rendered SIM, then the launcher's OWN live ls-remote read develop
+                                                                                      d75bfe2 != the rendered SIM -> launcher rc 17 -> dry run rc 13. The stand-in fooled the
+                                                                                      repin script and NOT the launcher. The final clean dry run (dry_run_console_ex2) then
+                                                                                      re-rendered at the real pins: head_at_launch.txt D == d75bfe2 again.

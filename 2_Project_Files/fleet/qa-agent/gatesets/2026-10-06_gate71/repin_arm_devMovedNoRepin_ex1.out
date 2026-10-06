@@ -1,0 +1,23 @@
+^DLAUNCH ACTION gate71 (DRY RUN) 2026-10-07 00:01:56 AEDT / 2026-10-06T13:01:56Z | #1398 9414aa54e92ca243565d0d967aad991dc4c13840 | kit develop d75bfe2deb8075583cfb55af0921e4964e7c6f0e | repin-develop none | pane QA/Secuura-gate71
+--- A. the head must be the one the READY names
+  /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/briefs_staged/2026-10-06_seatR3_READY_1398.txt (sha256/16 ec203996aa444666): lines naming the head in full 1 | naming #1398 2 | CONTROL lines naming 'READY' 3
+--- 2. ONE ls-remote (read verb) from the checkout, GIT_SSH_COMMAND unset, the checkout's own core.sshCommand
+  (CONTROL: ls-remote output read from the stand-in /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/gatesets/2026-10-06_gate71/_scratch/arms/ls_devSIM.txt)
+  ls-remote rc=0 at 13:01:56Z | develop 4f7cb2adeb47f2f7f7ab7a0d1d3f2d5fda1b7d42 | #1398 pull/head 9414aa54e92ca243565d0d967aad991dc4c13840 | branch 9414aa54e92ca243565d0d967aad991dc4c13840
+--- 1. PULLS API + census
+  API NOT READ (--no-api, dry run only): the drafter holds no GitHub identity. A real launch reads it and refuses on any disagreement.
+--- 3b. develop: origin 4f7cb2adeb47f2f7f7ab7a0d1d3f2d5fda1b7d42 | kit (at drafting) d75bfe2deb8075583cfb55af0921e4964e7c6f0e
+  DEVELOP MOVED: d75bfe2deb8075583cfb55af0921e4964e7c6f0e -> 4f7cb2adeb47f2f7f7ab7a0d1d3f2d5fda1b7d42  (3c checks descent, the code paths / tooling, and predicts the docs merge-in)
+--- 3c. the kit's own clone: fetch by sha if absent, refuse by name if still absent, C1 + guard + merge-in prediction
+  kit clone origin: git@github.com:Secuura/Distributed_Secuura.git (must be the GitHub URL, never the local checkout)
+  head 9414aa54e92c PRESENT
+  develop 4f7cb2adeb47 PRESENT
+  base d75bfe2deb80 PRESENT
+  c1 rc=0 | CHECKED 13 0 FAIL 
+    INFO P12d develop moved 2 doc path(s) since the base: a DOCS MERGE-IN is required — run c4 predict + mergetree
+  c2 guard rc=0 | c4 predict rc=0 | c4 mergetree rc=1 (PREDICTIONS for the gate, never refused here)
+      flow: TAIL insert into develop -> read-back OK: own 23 x1, LAST True, develop prefix kept True, tail [22, 24, 23], ascending False (INFO)
+      cheat: TAIL insert into develop -> read-back OK: own KS-1136 x1, LAST True, develop prefix kept True, tail ['KS-1305', 'KS-9998', 'KS-1136']
+    PASS M1 PREDICTED squash tree on develop 4f7cb2adeb47: d67e85459d10ae7c008aa8dbff9d185d3bac8c9c
+    FAIL MT DIVERGENCE (printed, never picked: the TAIL prediction is the target, RULINGS Q-M): merge-tree 23422d9c8fbd vs predicted d67e85459d10
+REFUSING TO LAUNCH: develop moved (c1 says it touched no code path / tooling; the docs merge-in prediction is above). To re-pin and launch over it, re-run with:  --repin-develop 4f7cb2adeb47f2f7f7ab7a0d1d3f2d5fda1b7d42

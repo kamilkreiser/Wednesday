@@ -20,6 +20,12 @@ supersede: REPLACED WHOLESALE 2026-10-06 19:1x by the evening seat (booted 18:0x
 - R 2nd WRAPPED 0.95 (handover ac0d7ada); E 8th WRAPPED 1.0. Both panes closed.
 - Ornith paused to 06:00 10-07 with its reason. The Spark queue is empty. Five newer holds (KS-1328, KS-1355 ×2, KS-1364 apigw, KS-593) wait for a raise seat after R 3rd.
 
+## 🔴 GATE71 PLAN (night seat, 10-07 00:1x)
+- **#1398 (KS-1136) RAISED by R 3rd (wrapped 0.96).** gate71 KIT BUILT and RULED (`fleet/qa-agent/gatesets/2026-10-06_gate71/`, `RULINGS_wednesday.md` "RULED by Wednesday" block; routing line ADDED). **Gate NOT launched, deliberately.**
+- **Why:** Q2: job 06 writes its runner's stderr into its JSON artefact (`Testing/jobs/06-tenant-isolation.sh:~71`, `2>&1`). After #1398 merges, every routine verifier→holder fallback run reads HIGH with a false cause. **#1398 does not merge until that 06 fix lands FIRST.** One batched gate71 then covers both PRs (Kam's 09-18 minimise-duplication rule), at 90% usage.
+- **Route:** the 06 fix goes to the SPARK (Kam 19:30: "Spark on all tickets"). A brief drafter is running, writing the report to `0_Brain/reference/2026-10-07_spark-screen/BRIEF_06_STDERR.md` and queueing only on a passing dry-run + control. Next: read the brief whole, run the Spark queue, review + hold_ready. Then **R 4th** (staged brief NOT yet written) files or locates the ticket, raises the 06 fix + PRs 3-5 (KS-998, KS-1313 + KS 1326, KS-1164) from R 3rd's handover, and sends ONE READY. Gate71 is re-pinned and widened to the batch. Merge order: 06 fix → #1398 → 3-5.
+- Usage 90% at 00:1x: launches pass `WED_USAGE_STOP=100` naming the EXPIRING-GRANTS 100% row; card (a) shape only.
+
 ## THE QUEUE, in order
 1. D 12th deploy (LIVE) and R 3rd raises (drafting): see LIVE NOW.
 2. One batched gate for R 2nd's raised PRs (name the gate number in the ANSWER; it is NOT gate69).
