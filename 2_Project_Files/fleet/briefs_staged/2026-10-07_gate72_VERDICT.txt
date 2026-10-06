@@ -1,0 +1,52 @@
+GO — #1406 at 4a400d7aa9dd273d91fb62375cb4b0598aa4405f (gate72, T1, round 1)
+
+GO string for Wednesday to sign (pre-ruled, ANSWER_ready.md:3): GO (Seat G 3rd): merge 1406 on gate72
+
+MERGE CONDITIONS (RULINGS #1-#3; none moves the head):
+ (a) PR body edited to de-hyphenate every key except KS-1437 (KS-470, KS-531, KS-562, KS-767, KS-769, KS-1425 are hyphenated now);
+ (b) the squash body the merge seat lands is de-hyphenated (the head commit message hyphenates KS-470/531/767/769/1425);
+ (c) the author seat edits the KS-1437 comment in place, says it was edited, BEFORE the merge: the "client-side surface" sentence (N-1406-2) and "38 Dockerfiles" -> 37 (N-1406-3), each with its instrument; the mobile sentence (N-1406-4) is corrected in the PR body and the squash body (it is not in the comment).
+Squash condition on develop: develop did NOT move (b39051390ff6 at 21:41:17Z, 21:46:10Z, 21:52:50Z); base..develop = 0 paths, so no re-run of legs 6/7 is needed. If develop moves before the merge and base..develop touches the 5 locks or tooling, legs 6 and 7 must be re-run on the merge result first.
+Squash subject (TRUE of the diff): KS-1437: in-range lock refresh clears shell-quote, MCP SDK and pbkdf2 advisories (#1406)  [88 <= 92]
+END_TREE 85820a21f80c02d542ca1cf62e194750f2779c28
+
+CHECK ROWS
+C1  c1_pin rc 1, 13/14: P1-P7, P9-P12 PASS (25 tooling paths identical by ls-tree, baseline 4af041e8d74a, 0 manifests/mobile, trailer control bf277eead268 53 B, CoAuthor control 1); P8 FAIL = hyphenated foreign keys (N-1406-1).
+1   c2 diff rc 0 12/12 (M0 7/7, 18 writes, LT line diff clean, indent 2 round-trip exact); own leaf diff over 45 locks: change 18, add 0, remove 0, order 0, 18/18 == registry. AGREES.
+2   c3 tarballs rc 0 5/5; own openssl sha512: 4/4 changed integrity == downloaded tarball; old sri only at base. AGREES.
+3   c3 advisories rc 0 (targets -> {} exactly); legs base 6:1 7:1 (ids 6x / 2x), head 6:0 7:0 (ids 0); contract 59/59; cleanroom rc 0 "All 35 standalone lock(s) pass".
+4   c2 W1/W1f/W2/W4 PASS; repo semver 7.8.5 cross-check: 17/17 parent ranges admit, 0 admit next major, all children satisfy. AGREES.
+5   iso 4/4 (pbkdf2 3.1.7 x3, sdk 1.31.0 on disk); rootci rc 0 1937 pkgs hoisted 1.11.0/1.31.0/3.1.7; isolated suites base=head (mcp 5/5, anchoring 362/362, issuer build rc 0); workspace base=head (shared 945/945, mcp 5/5, anchoring 1 failed|361 threadTokenMint). KNOWN-FAILURE identical in both modes. Issuer --ignore-scripts = named divergence (X1).
+6   reach rc 0: Dockerfiles 37 (basename) / 38 (substring, +check-dockerfile-non-root.sh); 82 COPY lines; root lock 0 images; sdk 1 (mcp-server); pbkdf2 25. Own grep agrees.
+7   PR body: T1/T2/T4/T5 pass, T3 FAIL (6 foreign keys), CL-COPYLINES 38 vs 37. KS-1437 In Progress, not archived, 1 comment. mergeable true / unstable.
+8   Actions: 3 reds, 3 PRE-EXISTING (see below). pr now completed (not PENDING).
+
+NEGATIVE CONTROLS (mine, on wtHead, each asserted landed, restored sha256-identical, porcelain 0):
+ NC1 root shell-quote -> 1.9.0: leg 6 rc 1, pqg4 2x, 6qxp 0, 477h 0
+ NC2 mcp-server sdk -> 1.29.0: leg 7 rc 1, 6qxp 1x, 477h 0, pqg4 0
+ NC3 packages/shared pbkdf2 -> 3.1.6: leg 7 rc 1, 477h 1x, others 0
+
+ACTIONS (logs fetched by the tool; my grep: change needles 0 in all 6 head logs, ##[group] 19-31, fabricated 0)
+ PR Security Gates (KS-168): PRE-EXISTING, 9 signature lines == develop run 37483332608. Head log :1674 "shell suites: 62 passed, 6 failed, 0 skipped (of 68)"
+ Security Scanning: PRE-EXISTING vs #1397 run 37408769083 (develop has no run; comparator accepted per RULINGS #4). Head log :322 "AssertionError [ERR_ASSERTION]: expected exit 3 (refused), got 1". Validator suite in CI, not legs 6/7 (local audit:contract 59/59).
+ pr: PRE-EXISTING, 4 jobs == develop run 37483333102. Head log :759 "AssertionError [ERR_ASSERTION]: Missing expected exception: slot 1"
+
+BUNDLE DELTA: the issuer dist is BYTE-IDENTICAL at base (pbkdf2 3.1.6) and head (3.1.7), 57/57 files (own shasum; kit 56/56). Input-changed control: installed lib/sync.js differs (cmp rc 1); lib/sync-browser.js is identical. The browser map replaces sync.js. pbkdf2 IN the bundle HOLDS; "the advisory had a browser-facing / client-side surface" DOES NOT HOLD (N-1406-2).
+
+FINDINGS (none blocks)
+ N-1406-1 Minor, merge condition: hyphenated foreign keys in the commit message + PR body (KS-562 still Backlog; the other 5 tickets UNMEASURED, outside X8)
+ N-1406-2 Minor, merge condition: the "browser/client-side surface" sentence (PR body :113, KS-1437 comment)
+ N-1406-3 Minor: "38 Dockerfiles" is 37 (PR body, commit body, comment)
+ N-1406-4 Minor, residue for KS 769: the mobile sentence is literally true for pqg4, but 1.8.3 (PROD) is affected by GHSA-w7jw-789q-3m8p critical and GHSA-395f-4hp3-45gv high
+ N-1406-5 Minor: "11,393 B" / "2,473 B" are chars (11,489 / 2,492 bytes)
+
+KIT_REPORT §3: D-1 HOLDS, D-2 HOLDS, D-3 HOLDS, D-4 HOLDS, D-5 HOLDS, D-6 HOLDS (workspace mode only; absent isolated), D-7 HOLDS (workspace only), D-8 HOLDS (named divergence). The root pbkdf2 6 declarers is not a defect.
+
+CENSUS: 24 other open PRs, 11 OVERLAP, all on the root lock: #1360, #949, #948, #947, #946, #945, #649, #639, #635, #575, #572. #1404 and #1398 are not overlap.
+
+TIERING: T1 agreed.
+
+NOT TESTED: the four platform suites (docker info rc 1, not started); image builds and runtime of the 25 pbkdf2 images and mcp-server; the other ~20 services' suites; SDK OAuth client reachability (UNMEASURED); preflight legs 3/4/8; the mobile app's own advisories (KS 769); issuer install scripts; packages/shared isolated test (no vitest); the foreign tickets' state; the KS-1437 description; builder-only claims (regen 7/7, EOVERRIDE, 12 flips, refusal arms, react 355).
+
+Report: /Volumes/DevMASTER/!CODING/Testing Agent MAIN/projects/secuura/reports/2026-10-07-gate72/report.md
+sha256 report.md = f3021e35b342d0be85d2e3e1fb05d7c182e1c92a63052af8d36b96aebaa25d0e
