@@ -4149,5 +4149,47 @@
   "project": "Datasec",
   "ts": "2026-10-06T07:20:43.090363+11:00",
   "text": "Datasec / NexusAI — your ruling (a) on the medium code-scanning alerts is done. No action needed.\n\nAll 103 medium alerts on main are now tracked: 1 was already covered (RD-769) and 102 are filed in 18 grouped tickets, RD-798 to RD-815, all Medium, on our account. Nothing was dismissed. I checked the seat's work against my own fetch of the alerts (the same 103), the Jira board (exactly 18 new tickets) and one code read.\n\nThe credential question came back clean: none of the three setup routes that log a whole request body can log a secret. One thing worth your eye when you next read the security board: RD-808 is a real bug in shipped code, not only a scanner note — the setup page never strips the trailing slash from the Azure OpenAI endpoint."
+ },
+ {
+  "role": "wednesday",
+  "seat": "Kamils-Mac-mini.localdomain",
+  "project": "Datasec",
+  "ts": "2026-10-06T13:14:30.698747+11:00",
+  "text": "Datasec / NexusAI — FYI, no action needed.\n\nA critical security advisory was published overnight for proxy-addr, a package NexusAI ships through Express (IP spoofing via an IPv4-mapped IPv6 address; fixed in 2.0.8). Main carries the affected 2.0.7, so main's next dependency-audit check will show red until it is fixed. It is ticketed as RD-816 (Highest). M is building the fix now: a lockfile-only bump to 2.0.8, plus a test showing whether our configuration can actually reach the bug. It gets a test gate, then merges ahead of the other queued work."
+ },
+ {
+  "role": "wednesday",
+  "seat": "Kamils-Mac-mini.localdomain",
+  "project": "Datasec",
+  "ts": "2026-10-06T13:18:50.666078+11:00",
+  "text": "Datasec / NexusAI — update on the proxy-addr advisory (RD-816): it does not reach NexusAI as configured. No action needed.\n\nThe bug only runs when the app trusts proxies by address or subnet. NexusAI trusts by hop count (one hop), which uses a different code path. M measured both library versions side by side, with a control proving the probe could see the bug, and I confirmed the setting in main's code. The fix still lands, to clear the red dependency audit and as a guard: a new test fails if that trust setting ever changes to an address or subnet."
+ },
+ {
+  "role": "wednesday",
+  "seat": "Kamils-Mac-mini.localdomain",
+  "project": "Datasec",
+  "ts": "2026-10-06T16:59:35.323642+11:00",
+  "text": "Datasec / NexusAI — FYI, no action needed: a new High was found and is queued for a fix.\n\nRD-819: during the setup window, before sign-in is configured, an anonymous caller can send an empty AI-config save. The app answers success and silently un-confirms a previously confirmed AI configuration, so AI stops using it until someone re-confirms. It was found by R while removing the old Ollama code, read in the code, not yet run. The setup window itself is your accepted risk (C-42) and is not being changed. The fix only refuses an empty save before anything is written. R takes it next, after the Ollama removal, with a full test gate."
+ },
+ {
+  "role": "wednesday",
+  "seat": "Kamils-Mac-mini.localdomain",
+  "project": "Datasec",
+  "ts": "2026-10-06T19:32:08.773358+11:00",
+  "text": "Received, thank you, Kam. Keeping going. Nothing needed from you right now. Today NexusAI got four merges in (each verified), a full medium-alert census, and fixes underway for RD-761, RD-816 and the new High, RD-819. If anything needs your hands, it will come to this board as a card, with a default."
+ },
+ {
+  "role": "wednesday",
+  "seat": "Kamils-Mac-mini.localdomain",
+  "project": "Datasec",
+  "ts": "2026-10-06T19:32:21.425412+11:00",
+  "text": "Correction to my last message: it was six NexusAI merges today, not four, each verified at source: RD-686, RD-700 and RD-609 overnight, then RD-648, RD-618 and RD-671. I wrote the number from memory instead of from the record."
+ },
+ {
+  "role": "wednesday",
+  "seat": "Kamils-Mac-mini.localdomain",
+  "project": "Datasec",
+  "ts": "2026-10-06T21:10:20.220848+11:00",
+  "text": "Coordinator seat rotated automatically at 21:10 — planned rotation inside Kam's 80-90% context band. A fresh seat is booting now (about ten minutes); agents' mail waits for it. A liveness check runs 25 s after the respawn and will alarm here if the fleet session or any agent pane was lost."
  }
 ]
