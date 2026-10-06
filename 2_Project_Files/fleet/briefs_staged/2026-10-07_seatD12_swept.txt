@@ -1,0 +1,116 @@
+Subject: [Secuura/Blockchain-D -> Wednesday] STATUS: kintsugi swept at d75bfe2deb80 — PASS 4 / FAIL 0 / UNMEASURED 0 / X 10 of 14 (Seat D 12th)
+Timestamp: 2026-10-06T13:55:29.000Z
+Auth: {"spf": "pass", "dkim": "pass", "dmarc": "pass"}
+
+STATUS: kintsugi swept at d75bfe2deb80 — PASS 4 / FAIL 0 / UNMEASURED 0 / X 10 of 14. SWEPT CLEAN by
+your definition: every row DEPLOYED by dist-bytes or by a NEW-ID reading, 0 FAIL, 0 new error lines,
+KS-535 PASS.
+
+⚠ EVERY ROW'S §5f STATUS STAYS `live sweep owed`. Kintsugi was swapped in place and is never torn down
+(live data, KS-535, no prune of images), so per your ruling 7 an in-place PASS is a DONE CANDIDATE ONLY.
+No ticket moved, no comment posted, nothing drafted was sent.
+
+== THE TABLE ==
+| ticket  | cls | dist-bytes (absent side :pre-20261006)        | behaviour |
+|---------|-----|-----------------------------------------------|-----------|
+| KS-1404 | R   | NONE POSSIBLE — both src files changed        | PASS. Variable PRESENT-NONEMPTY =
+|         |     | COMMENT-ONLY, so a marker would be a          | /app/config/tsa-trust-anchors-dtrust.crt;
+|         |     | comment fragment (D 7th trap 5). Proven       | file EXISTS, READABLE by uid 1001, real PEM,
+|         |     | instead TWO-SIDED ON THE IMAGE: /app/config   | 2,354 B, sha16 3258799538648a96 == clone.
+|         |     | DIR in :latest, ABSENT in :pre-20261006.      | Controls: PORT PRESENT-NONEMPTY 4004; a
+|         |     |                                               | fabricated path ABSENT. `.env` defines it 0
+|         |     |                                               | times -> COMPOSE DEFAULT, not an override.
+| KS-723  | R   | DEPLOYED two-sided. running=2 pre=0           | PASS. Served spec declares
+|         |     | /app/dist/anchoring.openapi.js ::             | GET /api/anchors/tx/{txHash} (1 hit);
+|         |     | /api/anchors/tx/{txHash}                      | fabricated path 0; md5
+|         |     |                                               | 0b82a6f5703329925abedd24b7bd6ca6 == clone,
+|         |     |                                               | host inode == container inode 1311120.
+| KS-1256 | R/X | DEPLOYED two-sided. running=1 pre=0           | X on the 503 path: it needs a Redis OUTAGE
+|         |     | /app/dist/routes/verification.js ::           | and I NEVER stop Redis on a box. R part:
+|         |     | isRedisAvailable                              | Redis reads AVAILABLE via /health/deep (the
+|         |     |                                               | gateway's own read, 2 ms internal/1 ms ext).
+| KS-1005 | L   | DEPLOYED two-sided. running=2 pre=0           | PASS. Wrong current password -> HTTP 400
+|         |     | /app/dist/routes/users.js ::                  | "Current password is incorrect", NOT the 404
+|         |     | getUserByIdWithPasswordHash                   | the defect gave every password account.
+|         |     |                                               | TWO controls, both load-bearing: a fabricated
+|         |     |                                               | route under the same prefix reads 404 (so 404
+|         |     |                                               | IS reachable and means not-found); and the
+|         |     |                                               | login SUCCEEDED WITH A PASSWORD, so this is a
+|         |     |                                               | password account — without that, a 404 could
+|         |     |                                               | have been the RULED passwordless behaviour
+|         |     |                                               | (users.ts:972-974) and the row unreadable.
+|         |     |                                               | Wrote nothing.
+| KS-1210 | L   | DEPLOYED two-sided. running=2 pre=0           | PASS. A scope outside the published nine ->
+|         |     | /app/dist/routes/oauth.js ::                  | 400 with details[].code invalid_enum_value,
+|         |     | OAUTH_PRIVILEGED_SCOPES                       | received "zz:no-such-scope-d12" and the nine
+|         |     |                                               | in options. CONTROL: a MISSING-FIELD body is
+|         |     |                                               | ALSO 400 but names 'scope' 0 times while the
+|         |     |                                               | scope refusal names it 1 — so the refusal is
+|         |     |                                               | SCOPE-SPECIFIC, which is exactly D 7th's trap
+|         |     |                                               | (three of its rows got the identical refusal
+|         |     |                                               | for the valid control and would have been
+|         |     |                                               | three FALSE PASSES). Created nothing:
+|         |     |                                               | d12-probe occurrences 0 in the app list.
+| KS-938  | W   | DEPLOYED two-sided. running=2 pre=0           | NOT RUN — you did not name it. MFA
+|         |     | /app/dist/routes/mfa.js :: mfaBackupCodes:null| enable/disable writes rows.
+| KS-1278 | W   | DEPLOYED two-sided. running=3 pre=0           | NOT RUN — you did not name it. A revoke
+|         |     | documentRepo.js :: ifStatusIsNot              | writes. NO SELECT over past revokes (card
+|         |     |                                               | ...uuid-revokes... = c, "Don't measure").
+| KS-1345 | X   | DEPLOYED — TWO-SIDED **DELETION** PROOF.      | X. Needs a failed DB query to exercise.
+|         |     | running=0 pre=1, inverted sense, because the  |
+|         |     | fix REMOVES the `.catch` that swallowed a     |
+|         |     | failed list query. A PRESENT-marker row here  |
+|         |     | would have been VACUOUS.                      |
+| KS-1305 | X   | DEPLOYED two-sided. running=1 pre=0           | X. Needs a missing generated Prisma client.
+|         |     | /app/dist/db.js :: is missing: npm ci runs    |
+| KS-1425 | X   | n/a — lockfiles only. THE READING IS the      | X. 30/30 images NEW-ID.
+|         |     | per-image NEW-ID result.                      |
+| KS-1330 | X   | no image input (service_map: NONE)            | X |
+| KS-1388 | X   | no image input                                | X |
+| KS-1408 | X   | no image input                                | X |
+| KS-1411 | X   | no image input                                | X |
+
+DIST-BYTES CONTROLS, and they bracket the verdict so DEPLOYED is only reachable by a genuine split:
+  an impossible marker -> 0 on BOTH sides -> NOT TWO-SIDED (correctly not DEPLOYED)
+  `exports`, in every compiled file -> 6 on BOTH sides -> NOT TWO-SIDED (correctly not DEPLOYED)
+  `exports` under the INVERTED sense -> also NOT TWO-SIDED (so the inverted arm cannot pass vacuously)
+EVERY marker is scoped to the compiled file ITS OWN fix changed, and every path is a .js (the script
+refuses a .d.ts, because a type-surface hit proves nothing about runtime). The absent side
+:pre-20261006 is a GENUINE control for this range — it was tagged from the pre-swap images, which
+predate every fix here. D 7th's :pre-20261005 was vacuous for 29 of its 32 rows.
+`@secuura/shared` dist is a DIR at /app/node_modules/@secuura/shared/dist — checked, because a
+/app/dist probe for a shared-package fix reads a FALSE absent.
+
+L ROWS ran as admin@secuura.com ONLY — a seeded test account, never a human's — ONE login, token reused
+(KS-724 caps logins per user). The only write caused is that account's own lastLoginAt. A garbage token
+reads 401, so the authenticated probes are genuinely authenticated.
+
+== ONE NEW FINDING, cosmetic, NOT a failure ==
+KS-1210's invalid-scope refusal carries the WRONG top-level message: `"name and redirectUris (array)
+are required"` — naming fields that were both supplied. The `details[]` array is correct
+(invalid_enum_value on the scope). So a caller reading only `message` is told to fix the wrong thing.
+Worth a ticket; I filed none, as instructed.
+
+== DRAFTED LINES, NOT POSTED, one per row ==
+PASS rows, in your prescribed shape:
+  KS-1404: Swept live on kintsugi at d75bfe2deb80 2026-10-06T13:5xZ: TSA_TRUST_ANCHORS_PEM ->
+    /app/config/tsa-trust-anchors-dtrust.crt, file EXISTS and READABLE by uid 1001, 2,354 B, sha16
+    3258799538648a96; control: a fabricated path ABSENT. NOT Done per secuura-test-discipline §5f —
+    live sweep owed (torn-down rebuilt stack, all containers verified up), unverified: a real RFC 3161
+    token verify, and TSA_URL remains PRESENT-but-EMPTY.
+  KS-723: ... served spec declares GET /api/anchors/tx/{txHash} -> 1 hit, md5 == clone; control: a
+    fabricated path 0. NOT Done per §5f — live sweep owed, unverified: a live call to the route.
+  KS-1005: ... wrong current password -> HTTP 400 "Current password is incorrect"; control: a
+    fabricated route -> 404. NOT Done per §5f — live sweep owed, unverified: the passwordless-account
+    404 branch, deliberately unchanged.
+  KS-1210: ... an out-of-vocabulary scope -> 400 invalid_enum_value; control: a missing-field body ->
+    400 naming no scope. NOT Done per §5f — live sweep owed, unverified: the positive arm (a valid
+    scope), deliberately not sent because it writes.
+Every other row carries the canonical shape with its own `unverified:` clause.
+
+== THE BOX, AFTER THE SWEEP ==
+Unchanged from my DEPLOYED mail: 35 containers / 33 running / 32 healthy, restarts only on the KS-641
+loop, ZERO new error lines, migration tracker 49/1 with 0 rows written today, KS-535 both hashes
+unchanged and NOT demo's, /health/deep ready. No anchor written. No Redis stopped. No `az` call. No
+secret read beyond a sha256 inside a pipe. Nothing merged, pushed, raised or coded. No ticket state,
+label or comment. Nothing sent to Peter or Stuart.

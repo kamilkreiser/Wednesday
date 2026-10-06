@@ -1,0 +1,91 @@
+Subject: [Secuura/Blockchain-D -> Wednesday] Session wrap 2026-10-06 (Seat D 12th)
+Timestamp: 2026-10-06T14:01:24.000Z
+Auth: {"spf": "pass", "dkim": "pass", "dmarc": "pass"}
+
+WRAP (Seat D 12th): round d12 COLD. KINTSUGI DEPLOYED AT d75bfe2deb80 AND SWEPT CLEAN. Demo NOT started —
+ctx 67% at Gate 2, handed to D 13th as the planned case.
+
+== FINAL STATE PER BOX ==
+KINTSUGI (secuura02-kintsugi-vm, 20.198.226.148): runs develop
+  **d75bfe2deb8075583cfb55af0921e4964e7c6f0e** (tree c39aeeca92b9) as of 13:36:26Z, verified to 13:55Z.
+  28 swapped / 0 FAILED / 0 ROLLED BACK / 0 skipped-same-id. new-20261006 count 0.
+  Rollback tag `:pre-20261006`, 30 images, fingerprint 940224dfab79711d. ELEVEN sets, 270 tagged images,
+  the ten older ones fingerprint-identical before the deploy, after the prune AND after the swap.
+  NO DB ROLLBACK EXISTS OR IS NEEDED: zero migrations applied, zero tracker rows written.
+  Final REVISION sha16 b8439e537da83a3c / 12,279 B, 0 occurrences of "IN PROGRESS".
+  Settled 327 s after the last swap: 35 containers / 33 running / 32 healthy / restarts>0 on the KS-641
+  loop only. ZERO NEW ERROR LINES. postgres, redis and pgbouncer never restarted.
+DEMO (20.212.118.59): **UNTOUCHED.** Not started, nothing read beyond ITEM 0's read-only probes.
+
+== SWEEP: PASS 4 / FAIL 0 / UNMEASURED 0 / X 10 of 14 ==
+PASS: KS-1404, KS-723, KS-1005, KS-1210. W NOT RUN (not named): KS-938, KS-1278. X: KS-1256 (needs a
+Redis outage — never stopped Redis), KS-1345, KS-1305, KS-1425, KS-1330/1388/1408/1411 (no image input).
+All 8 rows with markers DEPLOYED **two-sided**, with three controls bracketing the verdict so DEPLOYED is
+only reachable by a genuine split. **Every §5f status stays `live sweep owed`** — an in-place kintsugi PASS
+is a DONE CANDIDATE ONLY. No ticket moved, no comment posted, nothing drafted was sent.
+**KS-1404 IS CLOSED ON THIS BOX** — both halves of what D 7th measured and could not fix: the compose
+variable and the Dockerfile shipping config/. Anchor EXISTS, READABLE by uid 1001, 2,354 B, sha16
+3258799538648a96 == the clone, and `.env` defines the variable 0 times so it is the COMPOSE DEFAULT —
+which is why it should reproduce on demo.
+
+== THE PRUNE WAS NECESSARY, NOT MERELY PRUDENT ==
+Kam's card = (a) at 12:05:25Z. ONE `docker builder prune -f`: free **6,089 → 17,130 MB**, its own total
+line verbatim `Total: 12.8GB`, images / rollback sets / containers / volumes IDENTICAL before and after.
+**originate's REAL transient measured 5,689 MB against my 4,286 MB forecast.** Unpruned it was projected
+to start at ~5,150 MB, so it would have taken the disk NEGATIVE — not to the ~620 MB I first told you —
+and the 4,000 MB floor could never have stopped it, because the floor is a PRE-BUILD admission test.
+
+== ARTEFACTS ==
+Handover `5_Project_History/HANDOVER-seatD12-deploy.md` — **256 lines, 21,056 B, sha256[0:16]
+218141a7cb930710**. FINAL STATE per box first; then `FOR D 13th, THE FIRST THREE THINGS` (measure demo's
+disk and do not trust a cross-box forecast; Phase 0 re-tag first against s169's 33 tags; the two STOPs
+with 038a ADDED / 039 MODIFIED on live data, the filename-tracking consequence for an already-recorded
+039, and docker/init inert on an initialised dir), then demo's KS-535 (`12ea1a07174c3f50`, must DIFFER
+from kintsugi's), `ADMIN_USER_PASSWORD` and `GATEWAY_VOUCH_SECRET` as the two needing a source with
+NAME-only reporting and the compose:789-811 seeder-skip question, ARM64 one-image-at-a-time on 4 GiB, the
+~600-commit range, and demo's UNMEASURED compose project/profile.
+History entry at the TOP of `history.md`: 504 → 505 dated entries, **content-anchored on the first dated
+heading, not a line number** — and that mattered: **R 3rd's entry had appeared above my earlier read
+between then and the write.** The previous top entry is verified still present.
+Records in `5_Project_History/2026-10-06_seatD-12th/` — boot/ (clone driver, three read-only probes,
+per-path hashes at both bases, the re-keyed service map, the routed migration lists derived from my clone,
+the re-keyed matcher + watcher and their 9-arm proof), deploy/ (phase0, rsync dry-run/real/pre-and-post
+stat, build, the content re-check, the prune with before/after, phase4 with the two-DB gate, verify, the
+settled census, dist-bytes, the L probes, the pre-swap verifier, RESUME.md, the migration-condition
+re-read, both build-log snapshots), mail/ (all eleven bodies + send logs + read-backs).
+
+== TWELVE TRAPS OUTLIVE THE ROUND, ELEVEN OF THEM MINE ==
+Named in the handover. The four that cost real time or nearly cost a false claim:
+1. **The 120 s poll race.** My controlled stop before originate lost by 13 seconds. A stop-gate's poll
+   must be finer than the gap it lands in, or the gate belongs inside the loop. I then killed the build by
+   hand after establishing a kill was safe — a build only moves `:latest` ON SUCCESS, so there is no
+   half-built image, and my own script's reasoning on that was wrong.
+2. **`grep -c … || echo 0`.** Fixed in dist-bytes, NOT swept — and it then refused the authorised prune by
+   computing `ALIVE="0\n0"` on a dead pid. Swept: 11 occurrences across 6 files, 7 in D 7th's inherited
+   scripts. **Fixing one site is not fixing a defect.**
+3. **The `-af` pattern that could not match**, in the safety scan guarding the one irreversible command of
+   the round. Only a planted positive control found it.
+4. **A credential I leaked through my own redaction** (`[^,]*` stopped at the comma before the value in a
+   JSON argv array) and scrubbed to 0 with a control. Never stageable. **Rotation is Kam's call.**
+Plus: the Gate 1 list that summed to 29 while declaring 28; a tail-window baseline that would have
+manufactured three NEW error lines; a settle guard pinned permanently fresh by the KS-641 restarter; a
+migrations check whose four arms all returned the same rc; a Redis probe blind twice with its control
+blind alongside it; a "taper" from a 5-image window on two GC rebounds, reported to Kam and withdrawn;
+and `tmux display-message` without `-t` naming me `wednesday` at boot, the fifth recurrence across seats.
+I ALSO ACCEPT the :338 stall correction: my turn after the DEPLOYED mail ended on a stated next step with
+nothing running. That is not a trigger, and the sweep turn afterwards ran to the end before stopping.
+
+== DISK, AS REQUESTED ==
+kintsugi: `/dev/root 125896 119569 6312 95% /` — **6,311 MB free**, settled (started 12,578; the prune
+returned 11,041 and 30 image builds consumed the rest; build cache regrew to 12.38 GB).
+DevMASTER: `/dev/disk7s1 1907529 1205889 701353 64%` — **701,353 MB free** (~1,001 MB consumed this
+round, almost all of it the clone).
+**Build clone `deploy-clones/seatD12-d75bfe2deb80` = 607 MB and it STAYS** (drive hygiene excludes
+anything under 3 days old). Nothing deleted; nothing pruned but build cache.
+
+== HELD AND UNTOUCHED ==
+No production. No money. No secret edited on either box. No `az` call. No anchor written. No Redis
+stopped. No prune of any image, rollback set, container or volume. No ref write, no lock, no fetch, no
+pull in the shared checkout — and I refused the launcher's "pull latest if safe" line and the SessionStart
+hook's `POST /api/seen`. Nothing merged, pushed, raised or coded. No ticket state, assignee, label or
+comment. Nothing sent to Peter or Stuart.

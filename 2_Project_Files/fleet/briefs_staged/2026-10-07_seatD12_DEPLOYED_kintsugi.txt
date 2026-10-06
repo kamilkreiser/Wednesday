@@ -1,0 +1,104 @@
+Subject: [Secuura/Blockchain-D -> Wednesday] DEPLOYED: kintsugi at d75bfe2deb80 (Seat D 12th)
+Timestamp: 2026-10-06T13:45:43.000Z
+Auth: {"spf": "pass", "dkim": "pass", "dmarc": "pass"}
+
+DEPLOYED: kintsugi at d75bfe2deb80. 28 services swapped, 0 FAILED, 0 ROLLED BACK. Going straight on to
+the live sweep.
+
+BOX           secuura02-kintsugi-vm (20.198.226.148), stack /home/secuura/secuura/Dev, compose project
+              `dev` --profile phase2, read from the running container labels. Never -f.
+FULL SHA      d75bfe2deb8075583cfb55af0921e4964e7c6f0e   tree c39aeeca92b9e6c2c1dddd0c62138fd3b95c1a46
+              (#1395 / KS-1305's squash. develop moved once before my ITEM 0, so this is NOT the brief's
+              f556373b9418. Re-read by ls-remote immediately before the first swap: UNMOVED.)
+ROLLBACK TAG  :pre-20261006 — 30 images, fingerprint 940224dfab79711d, 0 id mismatches.
+              docker tag dev-<svc>:pre-20261006 dev-<svc>:latest && docker compose -p dev --profile
+              phase2 up -d --no-deps --force-recreate <svc>
+              NO DB ROLLBACK EXISTS OR IS NEEDED: zero migrations applied, zero tracker rows written.
+FINAL REVISION on the box: sha16 b8439e537da83a3c, 12,279 B, 0 occurrences of "IN PROGRESS". The
+              in-progress copy and D 7th's are both kept under .rebuild-seatD12/.
+
+== THE SWAP ==
+PHASE4 SWAPPED 28 skipped-same-id=0 already=0 of 28, 13:36:26Z. 27 OK + 1 OK-LOOPING. 0 FAIL.
+new-20261006 count 0 — nothing was ever rolled back on this box.
+Per-service container and image transitions (old -> new), in swap order:
+  analytics a1df637a8735->34293f5ff8bd f078e2858e48->31bc4deb85dd | auth 909f6cba2d17->53f6d7bf0ad3 8ece42d07a3c->6465706cd594
+  billing bcb838f2a083->83eebdcf25a0 7f3ed43fc3d7->eb8f7a14118b | governance 1f6fd2ad8b4e->f64dd553b83a 21f4cadeb099->0c1ae847f5c4
+  guardian 87be358f035c->31601e472ca4 869d884aa2a0->b88db67f868a | kyc bbe97c79abc6->5a979d84bff2 f34d2a435320->7dc49da179d7
+  m365-integration 435fc13aec8f->b822e6fabb44 c70744bcf6c9->aa9e1fa0c6d3 | mcp-server 60b2e42db748->b480d93868fc 0e8eaa012d43->b004d0cab799
+  nft-certificate 8434ae7cc2f9->4dfb87288344 9ff35c0d8367->be5e89166baf | originate 9da0b727fecf->5697b53ded39 e79040a0df15->a321399093bc
+  prism 1cf1e2f410f1->28e93d13346d 3d5ed8aec0e4->9245596681b2 | queue ca6ecba96343->1ea7fb89c53c 23ab15645a97->8ca428ce52c2
+  referral 30d11daa4065->ea4c0b01e0be ae0add521232->5ec21db9b052 | security cf095a368034->d452c3b550a9 33608cb74d15->a3d7bdf33230
+  staking cb6b96a7ab7f->555f794ec363 9d4338fd640c->75ae564c9fad | tenant-provisioning 08272307e045->775c74f5f0b0 8a0b062a06b4->c2670d2dd5c3
+  timestamping 5bbdd15da39e->a5809bd6662e 11b59a238670->3e906eac5617 | tokenisation b19eaff4be97->e051c503c388 2df532d97256->5d82fe228059
+  transfer 4d317a41ddc0->b09ef1025ba8 665128b2b0ae->32cbbb64b576 | vc-issuer add7906bcf37->ccf908ef15c0 f9da9c0b8bed->512f7efee230
+  wallet-connector 7ef16805d799->0def89ebb42d c2958fec47fc->4b31dc319270
+  demo-service 39b34c120cf6->44ae41d4a366 5a2fc9426c42->659c3d3dc14a  [OK-LOOPING]
+  anchoring c2f1594fb79d->2185d47eeb40 7f3baff48c27->f0b3fe93e683 | api-gateway a58beb4dfacf->9e135832b2f6 527be90c24f0->72e20bec327b
+  admin-frontend e70db4b8533f->856504edc165 43873dc7d584->1d129d16db73 | issuer-frontend 126e75f69573->a4295316886c c15a0896ee21->f1a19ce729c9
+  verifier-frontend 571d231169cc->c69e1169b51e bd1a0b4059c8->c72b84e9f0a6 | website-frontend 0b3028754247->3b349d2fdfac 0176bc555586->b0d6929761fd
+NOT SWAPPED, by design and on your condition: migrations (rebuilt a02b076a85cc, NOT recreated) and
+demo-overlay (rebuilt 6be04acfdf07, NOT recreated). Both `restart: no` one-shots at Exited(0).
+🔴 A CORRECTION TO MY OWN GATE 1 MAIL, caught before I acted on it: that mail listed FIVE frontends
+INCLUDING demo-overlay while declaring the set to be 28 — its own list summed to 29 and contradicted its
+own count. I verified the order by set arithmetic instead of re-reading my prose: exactly 28, the
+excluded pair is precisely migrations + demo-overlay, 0 duplicates, nothing outside the built set. The
+substance you accepted was right; my frontend list was wrong.
+📌 FOR SUCCESSORS: demo-service's KS-641 loop container is NOW 44ae41d4a366, created 2026-10-06, not
+D 7th's 39b34c120cf6. D 7th's instruction is to judge that loop by Id + Created + image, and all three
+just changed. A mismatch against 39b34c120cf6 is this recreate, not a new fault.
+
+== MIGRATIONS: NOTHING APPLIED ==
+THE GATE, in the same action as the api-gateway recreate: [secuura] 49 routed / 49 tracker / 0 pending;
+[secuura_platform] 1 routed / 1 tracker / 0 pending; BOTH planted-fake controls +1 EXACTLY; 048, 039 and
+038a each recorded once; a fake filename 0. GATE PASSED.
+Tracker after: 49 / 1. Rows written today 0 (CONTROL: 6 rows since 2026-09-01, so the date predicate
+discriminates). Newest applied_at still 2026-09-30 12:27:47.916738+00.
+/health/deep's startupMigrations lastRunAt moved to 2026-10-06T13:35:51.306Z with applied:46, failed:0 —
+the new gateway RE-APPLIED the already-recorded set in memory and wrote ZERO rows, as D 7th saw.
+
+== RAW /health/deep, AFTER ==
+{"ready":true,"status":"healthy","startupMigrations":{"ran":true,"applied":46,"failed":0,"lastRunAt":"2026-10-06T13:35:51.306Z"},"checks":{"redis":{"status":"up","latencyMs":2},"postgres":{"status":"up","latencyMs":2},"auth":{"status":"up","latencyMs":3},"anchoring":{"status":"up","latencyMs":5},"originate":{"status":"up","latencyMs":5}},"summary":{"total":5,"up":5,"down":0,"degraded":0},"timestamp":"2026-10-06T13:37:50.889Z"}
+check-startup-migrations.sh rc 0 on that body, with FOUR controls each giving a DIFFERENT message:
+failed->1 rc 1 · the nginx /health literal rc 2 "field ABSENT" · a broken python3 shim rc 1 · an empty
+body rc 2. /health itself is still the 179 B literal, sha16 59476e2e34dac6bd, startupMigrations 0.
+
+== KS-535, RE-VERIFIED AFTER THE RESTART ==
+.env mnemonic 695d09df873ff42b MATCH · container mnemonic 695d09df873ff42b MATCH
+.env blockfrost 142098c9528d0188 · container blockfrost 142098c9528d0188
+COLLISION WITH DEMO (12ea1a07174c3f50): env DIFFERENT · container DIFFERENT
+.env BYTE-IDENTICAL: sha16 634e99a79cbc6ee5 / 16,719 B. CARDANO_NETWORK preview.
+Wrong-value arm against a fabricated hash: MISMATCH, so the comparison is not stuck. Three controls
+discriminating ($HOME -> /home/nodejs; literal artefact 1d99a769a815b299; empty string e3b0c44298fc1c14).
+No value, prefix or length printed anywhere.
+
+== TIMESTAMPING ENV — KS-1404 IS CLOSED ON THIS BOX ==
+Read straight after its recreate, not at the end, on container a5809bd6662e / image 3e906eac5617:
+  TSA_TRUST_ANCHORS_PEM  PRESENT-NONEMPTY  [/app/config/tsa-trust-anchors-dtrust.crt]
+  TSA_URL                PRESENT-EMPTY     []          PORT (control) PRESENT-NONEMPTY [4004]
+  /app/config  DIR  [README.md tsa-trust-anchors-dtrust.crt tsa-trust-anchors.crt]
+  the anchor  EXISTS · READABLE by uid 1001 · real PEM · 2,354 B · sha16 3258799538648a96 == the clone
+  a fabricated path ABSENT · `.env` defines TSA_TRUST_ANCHORS_PEM 0 times -> this is the COMPOSE DEFAULT,
+  not a box override, which is what makes it reproducible on demo.
+D 7th measured BOTH halves missing yesterday (variable ABSENT, /app/config absent from the image
+entirely) and fixed nothing. Both shipped in this range and both are live. Proven two-sided on the IMAGE
+before any swap as well: :pre-20261006 has /app/config ABSENT.
+
+== SETTLED CENSUS, 327 s after the last swap ==
+Taken by a guard that REFUSED at 234 s and again at 283 s before passing — and that EXCLUDES the KS-641
+restarter BY NAME, because the newest StartedAt over all running containers is permanently fresh and the
+guard could otherwise never be satisfied.
+  35 containers · 33 running · 32 healthy · restarts>0 on demo-service ONLY (15, fresh container)
+  unhealthy/restarting: demo-service only. Exited(0): migrations, demo-overlay — correctly untouched.
+  postgres / redis / pgbouncer StartedAt UNCHANGED: 2026-09-09, 2026-09-09, 2026-09-10.
+  yaml bind mount REBOUND: host inode == container inode 1311120; md5 0b82a6f5703329925abedd24b7bd6ca6
+  on host, in the container and in the clone; the old 5de556ced1e5fa4290fb7f81b56ff817 is gone.
+  disk settled 6,312 MB free.
+ERROR BASELINE: ZERO NEW LINES. 4 of the 5 recorded lines PRESENT with a control string ABSENT in the
+same log. The fifth (issuer nginx "GET /.git/config") is ABSENT and that is NOT a regression: those
+lines were logged 2026-10-02/03 by the OLD container, which no longer exists; the new one was created
+13:36:02Z and holds 23 lines from 13:36:04. A historical line leaving with its container.
+postgres was never restarted: 24 `previous_state` errors dated 2026-08-20 -> 2026-09-30, 0 today, 0
+since the swap, and 0 errors of ANY kind since the swap (CONTROL: --since returns 2 lines of other
+kinds, so the zero is a reading).
+
+Going straight on to ITEM 6, the live sweep. STATUS with the sweep table follows, then GATE 2.
