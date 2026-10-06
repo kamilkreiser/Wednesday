@@ -1,0 +1,69 @@
+Preflight legs 6 and 7 refused every push on five advisories published
+after develop's audit baseline was last refreshed, one of them critical.
+This refreshes 36 lockfiles inside their declared ranges and accepts two
+advisories with a dated baseline row. Measured at develop 4eaf7741a6a4.
+
+The five advisories, by outcome:
+- GHSA-jqcg-44mw-7w3h proxy-addr 2.0.7 -> 2.0.8, critical: 16 entries
+  in 16 locks, cleared.
+- GHSA-68fv-2mgg-jv7q source-map-js 1.2.1 -> 1.2.2, high: 33 entries in
+  33 locks, cleared.
+- GHSA-r4xh-jqrq-34v2 smol-toml 1.8.0 -> 1.9.0, moderate: 4 entries in
+  4 locks, cleared.
+- GHSA-rj75-hqrm-r3gf postcss-selector-parser, moderate, ACCEPTED: its
+  one 7.x copy (systemTest/api-explorer) goes 7.1.4 -> 7.1.6, but the
+  four 6.1.4 copies have no remedy their parents admit (tailwindcss
+  3.4.19 requires ^6.1.2, postcss-nested ^6.1.1; 7.1.6 is outside both).
+- GHSA-hp3w-g68c-fv3c sprintf-js 1.0.3, moderate, ACCEPTED: no published
+  version is unaffected (1.1.3, the latest, still fires); five in-scope
+  entries under argparse 1.0.10.
+
+Both accepted rows carry decidedAt 2026-10-06 and expires 2026-10-31.
+Every copy they cover is a dev dependency, 0 production. Under the
+repo's own isLapsed they are live at 2026-10-30 and lapsed at
+2026-10-31T00:00Z, 11:00 AEDT on Saturday 31 October. A baseline row is
+keyed by advisory id with no version scope, so the rj75 row would also
+hide a 7.x copy below 7.1.6; by parse, 0 in-scope locks carry one.
+
+What changed: 37 paths, +172/-158. 36 lockfiles, 54 entries, 158 field
+writes, every lock +N -N, 0 entries added or removed. 52 entries carry
+version, resolved and integrity; the 2 in the workspace root lock carry
+only version, which is the majority shape of that file. Each lock keeps
+its own indent (of 45 tracked locks, 40 are indent 2 and 5 indent 4).
+scripts/audit/audit-baseline.json is +14/-0, 22 rows to 24, every
+earlier row byte-equal. 0 manifests, 0 overrides, 0 source files, 0
+tests, 0 docs. The mobile app's lock is out of scope (KS 769) and
+unchanged.
+
+Evidence, by the author and re-run by gate70 at 3e7be2044fe8:
+- leg 6 audit:gate rc 0; leg 7 audit:locks rc 0, 43 locks, 1614
+  packages, 7 match / 7 baselined. Both rc 1 at the base, naming the
+  five.
+- leg 5 audit:contract rc 0, 59 of 59, equal to expected-case-count.
+- leg 2 lockfile-cleanroom rc 0, all 35 standalone locks.
+- npm ci --ignore-scripts from the root lock rc 0, 1937 packages, root
+  lock unchanged. gate70 also installed the 5 standalone locks outside
+  leg 2 for real, locks unchanged.
+- 52 of 52 integrity values equal the downloaded tarballs' sha512.
+- gate70's own parent walk: 79 parent ranges, 0 outside, 0 orphans.
+- format:check rc 0 in all four systemTest packages.
+- Negative controls: removing the sprintf-js row reddens legs 6 and 7;
+  planting proxy-addr 2.0.7 back reddens leg 7; planting
+  postcss-selector-parser 7.1.4 back leaves leg 7 green while the parse
+  assertion fires, which is the masking described above.
+In-hook preflight at the author's push, verbatim and not a pass:
+PREFLIGHT INCOMPLETE — 12/15 legs ran, 3 SKIPPED. Nothing failed.
+Legs 3, 4 and 8 were skipped (no local stack).
+
+NOT COVERED: no live sweep, so the ticket does not move to Done
+(secuura-test-discipline 5f). Unverified: the runtime behaviour of
+proxy-addr 2.0.8 on trust proxy in the 16 locks where it is a
+production dependency, and the frontend CSS build under source-map-js
+1.2.2 and postcss-selector-parser 7.1.6. The service unit suites were
+not run. Leg 2 runs npm ci --dry-run over services, packages, frontend
+and scripts only, so 6 of the changed locks sit outside it; that gap
+is ticketed separately. The Security Scanning audit-contract step
+fails on a missing semver install, the same 7 cases as at
+585171bc2c29, and is pre-existing.
+
+Refs KS-1425 https://linear.app/secuura/issue/KS-1425
