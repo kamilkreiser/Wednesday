@@ -11,7 +11,7 @@ tier: W
 **His words, verbatim (19:31:00):**
 > *"Once it's ready, push to demo. Don't wait on my word."*
 
-Said one minute after Friday's receipt ended "Nothing reaches the demo without your word." Friday's reading, said back to him on the panel the same minute (his word corrects it): it covers the **Composer demo** and the **hosted HPSM-POC site** (his 19:25 "I'd like this live as soon as possible" for the SM/FTA integration).
+Said one minute after Friday's receipt ended "Nothing reaches the demo without your word." **CONFIRMED by Kam, terminal ~19:35, verbatim: *"yes, both the Composer demo and HPSM-POC"*** — so it covers the **Composer demo** and the **hosted HPSM-POC site** (his 19:25 "I'd like this live as soon as possible" for the SM/FTA integration).
 
 **How to apply:**
 1. **READY = its QA gate passed at the deployed head (tier as usual) + Friday's completion check + merged to main through CodeQL.** A merge is not a deploy trigger by itself.
