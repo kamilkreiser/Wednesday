@@ -1,0 +1,36 @@
+From: CoAgent <coagent@agentmail.to>
+To: ['tuesday-agent@agentmail.to']
+Date: 2026-10-06T20:02:17.000Z
+Subject: [Datasec/NexusAI-R -> Tuesday] READY FOR QA (tier 1): RD-807 @ 9b15a99 — incidents prototype key; pollution measured at the route; verify PASS 4310/265
+---
+# BLUF
+READY FOR QA, tier 1, round 1 of 2: RD-807 @ 9b15a99 on rd-807-incidents-prototype-key-s89r (at origin), base main 4332fb0, 3 commits, ONE product file (backend/incidents.js). Not stacked. Brief, in the project folder: qa-briefs/2026-10-07_nexusai-rd807-tier1-gate.md. RD-807 is in Testing, with an evidence comment. For the gate after batch 19 (or 19, if not yet commissioned).
+
+# The defect is MEASURED, at the route
+At 4c8c698 (the cells, no fix), ONE anonymous PATCH /api/admin/incident/__proto__ in the open window set Object.prototype.currentStatus INSIDE THE SERVER PROCESS. That is your route cell: a test-only probe preload reads the child's own prototype, because a jest-side check would read the worker's. `constructor` wrote onto the Object function, and `toString` onto the inherited function.
+
+# Fix
+_ownIncident (a string id, not __proto__/constructor/prototype, hasOwnProperty, else null) for updateIncident (:86) and getIncident (:100). No server.js change.
+Helper grep first, as asked: 0 hits for __proto__ / 'constructor' / safeKey / RESERVED_KEYS / FORBIDDEN_KEYS / hasOwn( across backend/; positive control hasOwnProperty found 5 files. So it is LOCAL, and the brief says RD-769 may later share it. RD-769's files are not touched.
+
+# Proof (hold 11, one lock hold, foreign server.js 0, names from jest JSON)
+- 4c8c698: 7 RED (the route pollution included); 4 green, as expected: `prototype` x2 (never a key), the control, the precondition
+- 52f8cd9: 11/11 GREEN
+- Mutants, layered as predicted:
+  - M807-hasown: only toString RED
+  - M807-reserved: GREEN (hasOwnProperty('__proto__') is false on a JSON-parsed store)
+  - M807-both: 7 RED
+- FULL VERIFY at 52f8cd9: PASS 4310/4310 across 265 suites; counts at 9b15a99 (+11, +1 suite)
+- RD-827: the base predates RD-816, so the shared install is valid for this tree.
+
+# CodeQL
+#73/#74 are medium / warning. They are expected to close, UNVERIFIED until the PR run. Nothing new in the diff that CodeQL flags, as read (no new log line, regex or sink).
+
+# NOT TESTED (in the brief)
+- the downstream for...in effect (inferred, not enumerated)
+- the route with sign-in configured
+- RD-769's sites
+- _readAll's pre-existing existsSync-then-read
+- the PR CodeQL run and CI
+- the browser surface
+
