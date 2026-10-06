@@ -1,0 +1,523 @@
+Subject: [Secuura/Blockchain-D -> Wednesday] QUESTION: demo plan confirmation — need a ctx read (Seat D 13th)
+Timestamp: 2026-10-06T14:46:35.000Z
+Auth: {"spf": "pass", "dkim": "pass", "dmarc": "pass"}
+
+PLAN CONFIRMATION = STOP 1-demo. Seat D 13th, pane Secuura/Blockchain-D (%70), token d13.
+Nothing has been written to demo. Ledger: 0 writes to demo, 0 locks, 0 ref writes in the repo,
+0 ticket writes, 0 az calls, 0 SSH to kintsugi, 0 prunes, 0 deletions, 0 secret edits.
+Wall clock: booted 2026-10-06T14:12:11Z; this mail 2026-10-06T14:4xZ (box UTC 2026-10-06, local Wed 7 Oct AEDT).
+
+=== HEADLINE: TWO INDEPENDENT STOPS, AND ONE OF THEM HAS NO AVAILABLE REMEDY ===
+
+STOP A — THE DISK FORECAST DOES NOT CLEAR, AND NO PRUNE OPEN TO THIS BOX MAKES IT CLEAR.
+STOP B — Q3's proceed-condition CANNOT hold: demo's admin row reads `active`, not `suspended`.
+         (The hazard is nevertheless gated shut, provably. Detail in Q3 below.)
+Everything else measured CLEAN, including KS-535.
+
+=== ITEM 0 (a) — develop, re-read, AND YOUR 1400 RULING VERIFIED INDEPENDENTLY ===
+ls-remote at 14:15:23Z : develop = d75bfe2deb8075583cfb55af0921e4964e7c6f0e  == DEPLOY_SHA
+ls-remote at 14:38:17Z : develop = 8a8d7b9694c9fcf61ee06b47ce0b474909955115  — THE KNOWN MOVE
+  refs/pull/1383/head = 32e8459bc0f51d1af492aae7c0b3d9754f78c9bf  (UNMERGED, as Q8 requires)
+  refs/pull/1400/head = 8f028fcd9356667e90f50d27899f7d4927eb2709
+I verified your 14:37:49Z ruling with an instrument that is not yours and writes no objects
+anywhere (GitHub commits API, HTTP 200):
+  8a8d7b96 parents = [d75bfe2deb80…, 8f028fcd9356…]  -> FIRST PARENT IS MY DEPLOY_SHA
+  15 files, ALL 15 under observability/, 0 elsewhere. PR #1400, merged by PeterObeden,
+  branch feature/ks-571-c-observability-tests.
+  observability/ is NOT an image input, by my OWN service map rather than by assertion: three real
+  #1400 paths driven through map_path() return NONE, while the positive control
+  services/kyc/src/index.ts returns ['kyc']. So the mapper discriminates and #1400 adds no image.
+ACCEPTED BY NAME. 8a8d7b9694c9 is the only non-DEPLOY_SHA value I will accept at a re-read; any
+other value is my STOP, as written.
+
+=== ITEM 0 (b) — the build source, a FRESH CLONE ===
+/Volumes/DevMASTER/!CODING/Secuura/Blockchain/deploy-clones/seatD13-d75bfe2deb80  (612 MB)
+  HEAD  = d75bfe2deb8075583cfb55af0921e4964e7c6f0e
+  tree  = c39aeeca92b9e6c2c1dddd0c62138fd3b95c1a46   == the brief's c39aeeca92b9
+  porcelain = 0 lines; .git is a DIRECTORY; objects/info/alternates ABSENT;
+  --git-common-dir == .git (so it is not a worktree of the shared checkout).
+Clone was `--no-checkout` then `checkout --detach`; no --reference, no worktree add.
+D 12th's clone untouched.
+
+=== ITEM 0 (d) — DEMO AS IT RUNS (every figure measured today) ===
+Box: secuura02-demo-vm, aarch64, up 90 days, SSH rc 0.
+DEPLOYED SHA, PROVEN BY CONTENT not by the REVISION file:
+  536 range paths under Blockchain/Dev hashed on the box against BOTH bases ->
+    ==OLD(0f8fb33c3): 257   ABSENT-as-expected (added in range): 279   ==NEW(d75bfe2deb80): 0   NEITHER: 0
+  PLANTED-MISMATCH CONTROL: corrupting one expected OLD hash moved ==OLD 257->256 and NEITHER 0->1,
+    by exactly 1. A fabricated path reads NEITHER. Expected-table sha16 identical local and remote
+    (47f9aa9f5d2820d6), so it shipped intact.
+  REVISION file agrees: revision=0f8fb33c3416eaa5a79b980402deb845312b20ae (deployed 2026-09-10T07:18:10Z, s169).
+  -> demo IS at 0f8fb33c3, exactly as the brief recorded. Nothing contradicts it.
+
+COMPOSE PROJECT / PROFILE / CONFIG FILES, from the running containers' own labels (34/34 agree):
+  com.docker.compose.project              = dev
+  com.docker.compose.project.config_files = /home/secuura/secuura/Dev/docker-compose.yml   (ONE file, no override)
+  com.docker.compose.service.profiles     = EMPTY on all 34
+  -> MY COMMANDS CARRY NO --profile. This DIFFERS FROM KINTSUGI, which needed `--profile phase2`.
+     Three other compose files exist on disk (production, e2e.override, dev-debug.override) and
+     NONE is in the config_files label, so none is in play.
+  Image prefix MEASURED as `dev-` (e.g. dev-originate), not assumed.
+
+CENSUS: 36 containers, 30 dev-* RUNNING, 3 dev-* NOT running, 3 third-party.
+  NOT running: demo-overlay (exited 0, 4 weeks), migrations (exited 0, 3 weeks),
+               demo-service (RESTARTING).
+  Third-party, never rebuilt and never recreated: postgres (postgres:15-alpine, StartedAt 2026-09-06),
+               redis (redis:8-alpine, 2026-09-06), stack-marker (busybox:1.37).
+  pgbouncer StartedAt 2026-09-07. postgres/redis/pgbouncer will not be restarted.
+  RestartCount > 0 on EXACTLY ONE container: secuura-demo-service, restarts=36,855, health=unhealthy,
+    exitCode 1, container e2e7928f9ee8ddfb99041069a19971d104002a4c7877f04f58b8657740f1b607
+    (created 2026-09-10T09:05:45Z — s169's). Its log is 36,861 lines and EVERY line is the same
+    KS-641/KS-1079 FATAL: `DEMO_SERVICE_ENABLED must be exactly "true" … refusing to start`.
+    DEMO_SERVICE_ENABLED is ABSENT in auth and undefined in .env/.env.local. It restarts every ~62 s,
+    so its line count RISES ~1/min — it is the settle guard's sole BY-NAME exclusion, and its count
+    must be compared as a RATE, never as an absolute.
+    `docker exec` into it FAILS ("is restarting, wait until the container is running"), so it cannot
+    be probed and cannot carry a dist-bytes sweep row.
+  Two StartedAt generations, consistent with s169: twelve services at 2026-09-10T09:05–09:09
+    (anchoring, api-gateway, auth, guardian, m365-integration, mcp-server, nginx-gateway, originate,
+    prism, queue, security, timestamping) and the rest at 2026-09-07T05:46.
+
+DISK, SETTLED (never read straight after a write):
+  F0 = 11,519 MiB free on / (62,414 total, 50,880 used, 82%). No separate docker filesystem.
+  Settled by a gate that REFUSED first: 4 samples at 6 s, TOL 40 MiB, 3 consecutive required.
+  CONTROL: the same gate with TOL -1 does NOT settle and exits 1 — so the gate can fail.
+  docker system df:  Images 82 total / 36 active / 33.79 GB / 17.93 GB reclaimable (53%)
+                     Containers 36/34 / 130.1 MB / 16.38 kB
+                     Local Volumes 2/2 / 262.6 MB / 0 B
+                     Build Cache 82 / 49 active / 6.717 GB / 3.497 GB reclaimable
+  RAM: 3,899 MiB total, 2,571 used, 169 free, 1,516 buff/cache, 1,327 AVAILABLE.
+  Swap: 6,143 total, 1,150 ALREADY USED, 4,993 free.
+  -> demo is already 1.15 GB into swap with 1.3 GB of RAM available, before any build starts.
+
+ROLLBACK SETS ON DEMO — 107 tagged images, six sets, each fingerprinted now for re-assertion
+after Phase 0 (fp = sha256[0:16] of the set's sorted image ids):
+  pre-20260910              33  fp=969f8db925918256     <- s169's, the brief's "33 tags"
+  latest                    33
+  rollback-2026-09-03       32  fp=e2483af9dc00f567
+  rollback-2026-08-27-ks661  2  fp=de773cdb74024894
+  pre-ks488                  2  fp=94e9c834dc28f957
+  rollback-20260901-prefix   1  fp=3bccdd2d75e6b231
+  pre-ks719                  1  fp=9de04a6a242446bd
+  plus 3 third-party tags (redis 8-alpine, postgres 15-alpine, busybox 1.37). 33+33+32+2+2+1+1+3 = 107.
+
+=== ITEM 0 (c) — THE REBUILD SET, AND THE SWAP SET, BY SET ARITHMETIC ===
+Range 0f8fb33c3..d75bfe2deb80 = 1,154 files, 536 under Blockchain/Dev — matches your brief exactly.
+Compose services WITH a build at DEPLOY_SHA: 33.   REBUILD SET N = 31.
+  (33) − (31) = nginx-gateway, pgbouncer — contexts docker/nginx-gateway and docker/pgbouncer, no
+  changed input in this range. Reverse difference is EMPTY; a fabricated name is in neither list.
+  Mapper controls all behave: packages/shared/src/index.ts flags 29 services (so "expect every image"
+  is confirmed by measurement); docs/VOCABULARY.md and scripts/preflight/preflight.sh flag NONE;
+  scripts/run-migrations.sh flags originate+migrations only; docs/openapi/secuura-api.yaml flags
+  api-gateway AND its bind mount.
+  `migrations` is in the set BY RULE and BY MEASUREMENT (it shares services/originate/Dockerfile).
+
+SWAP SET = (dev-* RUNNING) ∩ (rebuild set) = 28.
+REBUILT, NOT RECREATED (3): demo-overlay, migrations — `restart: no` one-shots at Exited(0);
+                            demo-service — state is RESTARTING, not running.
+RUNNING, NOT REBUILT (2):   nginx-gateway, pgbouncer — no changed inputs, so no new image to swap to.
+RECONCILIATION, computed not eyeballed: 28 + 3 = 31 = |rebuild set|; 28 + 2 = 30 = |dev-* running|.
+⚠ MY SWAP SET IS 28, THE SAME NUMBER AS KINTSUGI'S, BY A DIFFERENT ROUTE AND A DIFFERENT COMPOSITION.
+  Kintsugi: 30 built, 28 swapped (migrations + demo-overlay excluded).
+  Demo:     31 built, 28 swapped (migrations + demo-overlay + demo-service excluded; nginx-gateway
+            and pgbouncer never built). Please do not read my 28 as a carried-over constant — it is
+            derived, and I flag the coincidence because it is exactly the shape of a copied literal.
+⚠ A JUDGEMENT I AM NOT TAKING ALONE — demo-service. Q5 says "services RUNNING at ITEM 0". Its
+  `docker ps` State is `restarting`, so by the measured predicate it is NOT running and I exclude it.
+  Consequence, stated: it keeps looping on its PRE-deploy image after the swap, while every other
+  service moves. Nothing is lost (it has looped for 27 days and DEMO_SERVICE_ENABLED is still unset,
+  so a recreate would loop on the new image instead) but it leaves one container behind the rest.
+  Say if you want it recreated anyway.
+
+=== ITEM 0 (e) — THE DISK FORECAST. STOP A. ===
+(i) whole set @ 354 MiB/image: 11,519 − 31×354 = 11,519 − 10,974 = 545 MiB, need ≥ 5,200
+    -> DOES NOT CLEAR, SHORT BY 4,655 MiB. F0 would have to be 16,174 MiB.
+(i) whole set @ 550 MiB/image: 11,519 − 31×550 = −5,531 MiB, need ≥ 5,200
+    -> DOES NOT CLEAR, SHORT BY 10,731 MiB. F0 would have to be 22,250 MiB.
+(ii) originate FIRST: 11,519 ≥ 10,000 -> CLEARS, margin +1,519 MiB.
+     ⚠ D 12th's forecast for this very image was 1,400 MiB LOW, and the direction of that error was
+       UNDER-estimating. A 1,519 MiB margin does not survive an error of that size. (ii) clears on
+       paper and I do not trust it.
+These rates are CROSS-BOX (kintsugi x86 -> demo ARM64) and D 12th's own lesson is to treat them as an
+order of magnitude. Demo's ARM64 per-image time is UNMEASURED; I will re-derive it from my first two
+images and mail if the projection moves >50%.
+
+🔴 WHAT I MEASURED THAT YOUR Q1 REMEDY DOES NOT COVER. Q1 says you card Kam a demo build-cache-only
+prune. On demo's own figures that is NOT ENOUGH:
+  builder prune -f  (unused cache, 3.497 GB = 3,334 MiB): F0 -> 14,853 | @354 end 3,879 vs 5,200
+      -> STILL SHORT 1,321 MiB.
+  builder prune -af (ALL cache, 6.717 GB = 6,405 MiB):    F0 -> 17,924 | @354 end 6,950 -> clears.
+  BUT @354 CANNOT BE ASSUMED AFTER A PRUNE. D 12th MEASURED that a cold cache makes the next build
+  bigger AND slower: originate 5,689 MiB vs D 7th's 4,286 on the same image, 782 s vs 660 s — a
+  1.327× factor. Applying it:
+      prune -f  -> F0 14,853 | @469 end   314 vs 5,200 -> SHORT 4,886 MiB
+      prune -af -> F0 17,924 | @469 end 3,385 vs 5,200 -> SHORT 1,815 MiB
+  So NO prune available to this box makes (i) clear. `-af` only clears against a rate that `-af`
+  itself destroys.
+The Images line's 17.93 GB "reclaimable" IS the six tagged rollback sets above. The HOLDS forbid
+touching them and they are the only way back. NOT available.
+
+OPTIONS, NAMED, NONE TAKEN, FOR KAM VIA YOU:
+  A. A demo build-cache prune (your Q1 recommendation) — measured INSUFFICIENT, see above.
+  B. Retire one or more of demo's OLDER rollback sets. rollback-2026-09-03 (32), plus the four small
+     sets (6 images), is ~17 GB of the 17.93 GB reclaimable and would clear (i) with room. It is a
+     deletion of rollback capability, so it is Kam's call and forbidden on this brief. s169's
+     pre-20260910 is the newest and must survive; it is also the only set that predates every fix in
+     this range, so the sweep's "absent side" depends on it.
+  C. Grow demo's disk (62 GB). An Azure operation; this brief allows no `az` call.
+  D. Build in batches with a swap between, so superseded layers free as we go. Breaks "build
+     EVERYTHING then swap" and weakens the rollback guarantee mid-flight.
+  E. Build ARM64 images elsewhere and transfer. No tooling for it today.
+MY RECOMMENDATION: B, scoped to `rollback-2026-09-03` and the four small sets, keeping
+pre-20260910 intact — it is the only option that clears (i) at BOTH rates and it costs rollback depth
+we have not used since 2026-09-03. But it deletes, so it is Kam's ruling and I have run nothing.
+I am HOLDING. Nothing freed, nothing pruned, nothing deleted.
+
+=== ITEM 0 (d) — DB, AND STOP 2-demo's ANSWER IS ALREADY MEASURED (Q6) ===
+Credential: the postgres container's own. CONTROL: a wrong password FAILS with
+`FATAL: password authentication failed`; the real one returns 1. (That FATAL is now line 1 of
+postgres's error log at 14:23:48Z — see "my own probe's footprint" below.)
+Databases: postgres, secuura, secuura_platform.
+  [secuura]          tracker EXISTS, 48 rows, newest applied_at 2026-09-10 09:04:03.760878+00
+                     038a: 0 rows (NOT recorded, as expected)
+                     039 : 1 row  — 039_rls_fail_closed.sql  (RECORDED)
+                     048 : 1 row  — 048_ks754_widen_processed_by_to_text.sql
+                     049 : 0 rows
+  [secuura_platform] tracker EXISTS, 1 row — 003_platform_tenancy.sql @ 2026-07-08 04:10:37
+  CONTROL on both DBs: a filename that cannot exist reads 0 rows.
+  Counted SEPARATELY per DB, by the runner's /platform/i routing.
+
+038a AS I READ IT (99 lines, 5,053 B, sha16 49c52c6b4ad3d561):
+  FOUR `CREATE TABLE IF NOT EXISTS` statements — oauth_apps:48, svc_webhooks:63, certifications:72,
+  charge_events:91. ZERO ALTER, ZERO DROP, ZERO INSERT/UPDATE/DELETE, ZERO GRANT, ZERO CREATE INDEX.
+  (My first grep said five; the fifth hit is the phrase inside the header COMMENT at line 35. Your
+  brief's "four" is right and my count was wrong — corrected by looking.)
+  Its header states it "creates tables ONLY. It adds no policy and no RLS", and that every statement
+  is derived from the CORE_MIGRATIONS definition in services/api-gateway/src/startup-migrations.ts.
+
+038a ON DEMO'S EXISTING DB — IT IS A COMPLETE NO-OP, and I checked the part that could have bitten:
+  All four tables EXIST (oauth_apps 17 cols, svc_webhooks 11, certifications 17, charge_events 12).
+  CONTROL: a fabricated table reads f.
+  SHAPE, compared column-by-column in order against 038a's text:
+    oauth_apps    17 vs 17 — EXACT match, names/order/types/nullability
+    svc_webhooks  11 vs 11 — EXACT
+    charge_events 12 vs 12 — EXACT
+    certifications 038a declares 16; live has those same 16 IN THE SAME ORDER plus `tenant_id uuid
+      NOT NULL` at ordinal 17 (last — the signature of an ADD COLUMN).
+      I traced it rather than guessing: CORE's own definition in startup-migrations.ts ALSO omits
+      tenant_id (byte-for-byte the same 16 columns as 038a), and `012_peer_tables_tenant_isolation.sql`
+      is what adds it. So 038a and CORE AGREE, its header's "two creators agree" claim holds, and the
+      live superset is inert because IF NOT EXISTS skips the table entirely.
+      I had this written up as a latent fresh-DB defect in 038a and withdrew it on measuring 012.
+  THE PART 038a EXISTS TO PREVENT IS ALREADY ABSENT ON DEMO. Its header names three casualties of the
+  fail-open path; all three are PRESENT:
+    function auth_find_oauth_app_by_client_id(text)  -> EXISTS (1). Controls: fabricated fn 0, `now` 1.
+    policy oauth_apps_auth_lookup on oauth_apps      -> PRESENT
+    tenant isolation on all four tables              -> PRESENT:
+      oauth_apps     rls=t force=t policies=2 [oauth_apps_auth_lookup, tenant_isolation]
+      svc_webhooks   rls=t force=t policies=1 [tenant_isolation]
+      certifications rls=t force=t policies=1 [tenant_isolation]
+      charge_events  rls=t force=t policies=1 [tenant_isolation]
+    (for contrast, oauth_authorization_codes reads rls=f force=f policies=0, so the probe is not
+     answering "true" to everything.)
+  NOTE ON KS-1401: it says charge_events has RLS off entirely on KINTSUGI. On DEMO it is on AND forced
+  with a tenant_isolation policy. Demo is not in that state.
+
+WHAT THE MODIFIED-BUT-RECORDED 039 MEANS ON DEMO: the runner tracks BY FILENAME, so 039 is NOT
+re-applied, and its +39/−5 change (wrapping DDL in existence guards so a FRESH DB is not fail-open)
+alters NOTHING on demo — demo's DB is not fresh and already carries the end state 039 produces.
+  ⚠ ONE PROBE OF MINE PROVED NOTHING AND I AM NOT COUNTING IT: I looked for 039's
+  `KS-458: skipping` RAISE NOTICE in postgres's log. It reads 0 — and my control (a fabricated
+  notice) ALSO reads 0, so BOTH ARMS AGREE and the probe does not discriminate (D 12th trap 9).
+  postgres's container started 2026-09-06, so its log may simply not reach back that far. The claim
+  above rests on the RLS/policy/function STATE, not on that log probe. Declared NOT RUN.
+
+docker/init/* IS INERT on demo: PGDATA holds 24 entries and PG_VERSION is present, so the postgres
+entrypoint skips /docker-entrypoint-initdb.d. The two modified docker/init/*.sql change nothing here.
+  (Minor instrument defect of mine, named: my mount listing used a `.RO` template key that does not
+  exist on this Docker version and errored. The PGDATA/PG_VERSION readings above are what carry the
+  claim; I will re-read the mounts with `.Mode` before ITEM 5.)
+
+MY PROPOSED APPLY PATH (Q6), for your ruling — I have applied nothing:
+  ONE run of the REBUILT migrations one-shot before any swap, requiring an explicit
+  `Applying 038a_ks1054_core_tables_before_039.sql` line in its output (its absence means the stale
+  image ran) and exactly ONE new tracker row on [secuura], 0 on [secuura_platform]. Expected net
+  schema change: ZERO — four IF NOT EXISTS skips. Then the api-gateway gate must read 0/0.
+  Since KS-1031 the runner exits 3 on failure. I will re-run the two-DB pending count against the
+  REBUILT image's own file list, with a planted fake filename that must read pending, before I ask.
+
+=== ITEM 0 (d) — KS-535 BEFORE: PASS ===
+  .env      mnemonic sha16 = 12ea1a07174c3f50
+  container mnemonic sha16 = 12ea1a07174c3f50
+  -> MATCHES demo's expected 12ea1a07174c3f50; DIFFERS from kintsugi's 695d09df873ff42b. No collision.
+  WRONG-VALUE ARM vs a fabricated deadbeefdeadbeef reads MISMATCH, so the comparison is not stuck.
+  .env blockfrost sha16 = 1ed6121f284091df = container's (kintsugi's was 142098c9528d0188 — differs,
+    which is right: separate boxes, separate keys).
+  PLATFORM_WALLET_MNEMONIC defined 1× in .env, 0× in .env.local.
+  CARDANO_NETWORK = preview. SIMULATE_ANCHORING = UNSET -> real preview anchoring, as recorded.
+  .env sha256_16 = 920f84ec090ecafa, 12,260 B, mtime 2026-09-03 02:28:28Z (to be re-asserted AFTER).
+  anchor_store: 333 total, 83 simulated=true, 0 (simulated AND confirmed). No anchor written by me.
+  CONTROLS: C1 $HOME inside the anchoring container -> /home/nodejs (expands).
+            C3 empty string -> e3b0c44298fc1c14 (== your brief).
+  🔴 C2 CONTRADICTS THE BRIEF, AND I AM REPORTING IT RATHER THAN WORKING AROUND IT.
+     Your brief says the literal-string artefact "reads 1d99a769a815b299". My instrument reads
+     7d8958f1e48a608c for printf '%s' '$PLATFORM_WALLET_MNEMONIC' — reproduced IDENTICALLY on this
+     Mac and inside demo's anchoring container, two independent machines. I tried four plausible
+     literals; none yields 1d99a769a815b299:
+       printf %s '$PLATFORM_WALLET_MNEMONIC'  -> 7d8958f1e48a608c
+       echo (with trailing newline)           -> 02c294379620b2a4
+       printf %s '$BLOCKFROST_API_KEY'        -> da4912c1657384e4
+       printf %s 'PLATFORM_WALLET_MNEMONIC'   -> 8a9a8844520242cc
+     C1 and C3 reproduce your constants exactly, so 2 of 3 agree and this one does not.
+     THE CONTROL STILL DOES ITS JOB: 7d8958f1e48a608c ≠ 12ea1a07174c3f50 proves the shell is not
+     expanding the variable, which is the whole purpose. Only the recorded constant disagrees.
+     Please confirm which literal 1d99a769a815b299 was taken from, or retire it. I have changed
+     nothing to make my reading match.
+  No value, prefix or length printed anywhere. I leak-checked my own probe output BEFORE reading it
+  (D 12th trap 10): 4 patterns, 0 real hits. The single `requirepass` hit is my own prose
+  ("requirepass configured? (count only, value never printed): [1]") — I never print the Cmd array,
+  because that is exactly where D 12th's `[^,]*` redaction leaked the value into the next field.
+
+=== ITEM 0 (d) — /health/deep, AND A BEFORE-READING YOUR ITEM 6 ASSUMES AWAY ===
+  /health/deep is 321 B: status=healthy, ready, summary, timestamp, checks.
+  checks: redis=up, postgres=up, auth=up, originate=up, anchoring=up.
+  🔴 startupMigrations = null. Not 0, not failed — ABSENT. Demo runs the 0f8fb33c3 gateway, which
+     predates the startupMigrations reporting. So my BEFORE/AFTER on that field is null -> object,
+     NOT 46->N as on kintsugi. ITEM 6's `ran:true, failed:0` is an AFTER-only assertion here.
+  nginx /health returns the 179 B literal, as recorded. I never use it as the probe.
+  🔴 check-startup-migrations.sh is ABSENT from demo's deployed tree at BOTH paths
+     (deployment/azure/ and scripts/). It EXISTS in the clone at
+     Blockchain/Dev/deployment/azure/check-startup-migrations.sh, so it ARRIVES WITH THE RSYNC.
+     Its three controls therefore run AFTER ITEM 2, not at ITEM 0. BEFORE = NOT RUN, reason stated.
+
+=== ITEM 0 (d) — TIMESTAMPING (KS-1404 is OPEN on demo, both halves) ===
+  TSA_TRUST_ANCHORS_PEM @ secuura-timestamping = ABSENT   | .env ABSENT (0 defs) | .env.local ABSENT (0 defs)
+  /app/config            = DOES NOT EXIST in the running image
+  anchors file           = FILE-ABSENT;  uid 1001, NOT-READABLE
+  TSA_URL                = PRESENT-EMPTY | .env 0 defs | .env.local 0 defs
+  CONTROL a fabricated /app/config path -> ABSENT.
+  -> exactly D 7th's finding, still open here. Both halves ship in this range (compose :1251 default
+     + services/timestamping/Dockerfile:49 `COPY --from=builder /app/config ./config`), so KS-1404
+     is a genuine TWO-SIDED sweep row on demo: ABSENT before, PRESENT after. Since .env defines the
+     variable 0 times, the value will be the COMPOSE DEFAULT, not a box override — the same reason
+     it closed on kintsugi without an .env edit.
+
+=== ITEM 0 (d) — THE THREE NEW VARIABLES (Q3, Q4). NAMES ONLY. ===
+  ADMIN_USER_PASSWORD   @ secuura-auth        = ABSENT | .env ABSENT(0) | .env.local ABSENT(0)
+  GATEWAY_VOUCH_SECRET  @ secuura-api-gateway = ABSENT | .env ABSENT(0) | .env.local ABSENT(0)
+  GATEWAY_VOUCH_SECRET  @ secuura-originate   = ABSENT | .env ABSENT(0) | .env.local ABSENT(0)
+  TSA_TRUST_ANCHORS_PEM @ secuura-timestamping= ABSENT | .env ABSENT(0) | .env.local ABSENT(0)
+  CONTROLS: PORT @ auth = PRESENT-nonempty; a fabricated var @ auth = ABSENT.
+  I tested SET-ness with ${VAR+x} inside the container, not by printing a value — `env | grep`
+  prints a line for an empty value too. I never ran `docker compose config`.
+  SEED FLAGS (flags, not secrets): ALLOW_DEFAULT_SEED_PASSWORDS @ auth = PRESENT-EMPTY (value "");
+    ENABLE_DEMO_SEED @ auth = ABSENT; NODE_ENV @ auth = development.
+    .env and .env.local define all three 0 times. CONTROL: PLATFORM_WALLET_MNEMONIC in .env = 1.
+  THE ADMIN SEED ROW: SELECT status WHERE id='a0000000-0000-4000-8000-000000000020' -> **active**.
+    Row exists (1). CONTROL: a fabricated uuid reads 0. Status only; no other column read; nothing written.
+
+=== ITEM 0 (d) — REDIS ===
+  redis container running, health=healthy. requirepass IS configured (count 1; value never printed).
+  Gateway's REDIS_* names: REDIS_HOST REDIS_PASSWORD REDIS_PORT REDIS_URL.
+  /health/deep checks/redis = up — the gateway's own view, which is the authoritative reading.
+  I will never stop Redis (KS-1256 stays an X row).
+
+=== ITEM 0 (d) — ERROR BASELINE, AND A DEFECT OF MINE I FIXED BEFORE IT COUNTED ===
+Read by SIGNATURE over each WHOLE log of all 36 containers, never --tail. 42,654 error lines.
+🔴 MY v1 NORMALISER WAS UNUSABLE AND I CAUGHT IT BEFORE ANY CLAIM RESTED ON IT. It normalised ISO
+timestamps but left nginx's SLASH-date, its connection counter (*6797) and its worker pid#tid live,
+so issuer-frontend read 5,659 "distinct signatures" from 5,659 lines and admin-frontend 29 from 29.
+A baseline like that cannot survive a restart: it is line noise, not signatures.
+v2 (ISO + slash-date + *<CONN> + <WORKER> + [<PID>] + <UUID> + <IP> + :<PORT> + digit runs) was driven
+BOTH ways: issuer-frontend 5,659 -> 1,123 and admin-frontend 29 -> 4 (positive), while two genuinely
+different messages stay TWO rows and two instances of the same message with different ids collapse to
+ONE row with count 2 (negative). Totals 5,756 -> 1,158 distinct.
+🔴 1,123 WAS STILL UNUSABLE, AND THE REASON MATTERS FOR ITEM 6. Those are INTERNET SCANNER PROBES
+against demo's public front — `GET /.env`, `/.git/config`, `/.aws/credentials`, `/v2/.env`,
+`/@fs/proc/self/...`, `/.config/gcloud/...`. The varying field is the REQUEST TARGET and the Host
+header. New scanner traffic mints new paths continuously, so under ITEM 6's "any other NEW line is a
+STOP" this round would stop on background internet noise, with near-certainty over a multi-hour
+deploy — on its own instrument, which is D 12th's trap 3 in a new shape.
+So I classified a THIRD layer: request/host/referrer/open()-path normalised to <REQ>/<HOST>/<PATH>.
+  42,654 lines -> 122 CLASSES. The per-path detail stays in errbase2_before_d13.out; nothing hidden.
+  By container: demo-service 36,861 lines / 1 class · issuer-frontend 5,659 / ~95 · admin-frontend
+  29 / 4 · postgres 55 / 15 · auth 12 / 2 · security 11 / 2 · anchoring 10 / 2 · api-gateway 7 / 3 ·
+  originate 4 / 1 · analytics 2 / 1 · billing, staking, redis, vc-issuer 1 / 1 each. 22 containers 0.
+PROPOSAL FOR ITEM 6, for your ruling: compare at CLASS level with the request target normalised, and
+treat a NEW nginx scanner PATH inside an existing class as NOT a new line. A new error CLASS is a
+STOP. Without that, the gate stops the deploy on a stranger scanning /.env.
+⚠ MY OWN PROBE'S FOOTPRINT, declared: postgres's newest error class is
+  `FATAL: password authentication failed for user "secuura"` at 2026-10-06T14:23:48Z — that is MY
+  wrong-password CONTROL from ITEM 0, 1 line. A read-only probe is not side-effect-free on the log.
+  It is in my BEFORE, so my own AFTER diff is unaffected; but a successor comparing against s169
+  would read it as new. Excluded BY NAME and attributed to me.
+Notable pre-existing classes (all predate me): postgres's 15 are schema-evolution errors from
+2026-09-06 to 09-11 (`must be owner of table audit_logs`, `permission denied for schema public`,
+`column "previous_state" of relation "audit_logs" does not exist` ×10, matched by security's
+`DB save audit log failed` ×10); anchoring has `Anchor submission failed` ×5 and a
+`Node reported an already-included transaction` warn ×5 from 2026-09-14; api-gateway carries two
+`[startup-migrations] … skipped` DEBUG lines from s169's own boot.
+
+=== BONUS MEASUREMENT YOUR BRIEF ASKED FOR: WHICH FRONT SERVES ===
+BOTH. The nginx logs carry `host: "demo-pk.secuura.net"` AND `host: "secuura02-demo…"`. The project
+CLAUDE.md name and the 09-10 lesson's name both reach this box.
+
+=== ITEM 1 — PHASE 0 STAMP, AND THE COUNT DERIVED FROM MY OWN LIST ===
+Box UTC is 2026-10-06 (local Wed 7 Oct AEDT — the dates differ, so I name the box's).
+  If Phase 0 runs before 2026-10-07T00:00Z -> stamp `pre-20261006`
+  If after                                  -> stamp `pre-20261007`
+  BOTH are FREE on demo (count 0 by tag name), as are new-20261006 and new-20261007.
+  CONTROLS: pre-20260910 reads 33 and latest reads 33, so the collision check is not blind.
+  I will re-check at Phase 0 and name which stamp I used.
+COUNT I WILL ASSERT: |rebuild set| = 31 :pre-<stamp> tags, DERIVED from my own service list.
+  Demo has 33 :latest tags; the 2 I do NOT re-tag are nginx-gateway and pgbouncer, because I do not
+  rebuild them. A :pre-<stamp> count of 33 would mean I had re-tagged something I am not replacing.
+  Every older set re-asserted fingerprint-identical before and after, against the six fps above.
+  No prune, no deletion, no --remove-orphans, no down, no -v, no rm.
+
+=== ITEM 3 — BUILD ORDER (Q2) ===
+originate, migrations, then the rest; api-gateway and anchoring last among backends; frontends last.
+ONE service per `COMPOSE_BAKE=0 docker compose -p dev --progress plain build <svc>` invocation — no
+--profile, as measured. ADMIT in the LOOP: 10,000 MiB for originate and migrations, 5,200 for every
+other; hard in-build floor 2,500 MiB with a ≤5 s sampler that kills THAT build's recorded pid.
+Driven both ways before first real use. `grep -c … || echo 0` is absent from my whole copied set
+(swept: 0 occurrences — D 12th had fixed all 11).
+
+=== ITEM 5 — ORDERED SWAP PLAN, 28 services, each with its rollback ===
+Rollback for every one, with the MEASURED prefix and NO profile:
+  docker tag dev-<svc>:pre-<stamp> dev-<svc>:latest \
+    && docker compose -p dev up -d --no-deps --force-recreate <svc>
+Order: backends first (auth EARLY so Q3's re-read happens before much has moved), then
+anchoring and api-gateway LAST among backends, then the four frontends.
+  auth: immediately before its recreate I re-read all three ADMIN_USER_PASSWORD readings and the
+    admin row's status. See Q3 — I expect to STOP there unless you release it.
+  api-gateway: in the same action as its recreate, the two-DB pending count must read what your
+    STOP 2-demo ANSWER says (0/0 if 038a applied first). Then the yaml bind mount's container inode
+    == host inode and the served yaml md5 == my clone's.
+  timestamping: env + /app/config read straight after its recreate (KS-1404).
+
+=== ITEM 7 — SWEEP PLAN ===
+Every row stays `live sweep owed`; a demo PASS is a DONE CANDIDATE ONLY. :pre-<stamp> predates every
+fix in this range, so every marker row can be two-sided. Controls bracket every verdict (an
+impossible marker 0/0; a ubiquitous token N/N). Rows, with the count I will ACTUALLY probe:
+  R  D 7th's markers_live.tsv — 15 rows, and the two copies (D 7th's and D 12th's) are cmp-IDENTICAL.
+     I will report 15, not D 7th's handover's 22 shipped-code rows: a DIFFERENT set, as you flagged.
+     Tickets: KS-1404, 1402, 1371, 1370, 1352, 1348, 1341, 1215, 1195, 1187, 1028, 999, 974, 962, 730.
+     Two rows carry marker-present=NO (KS-1404, KS-1402) and are not usable as present-markers.
+  R  D 12th's 8 marker rows: KS-723, 1005, 1210, 938, 1278, 1345 (INVERTED — a deletion fix),
+     1256, 1305. dist-bytes scoped to the compiled file each fix changed, never a tree-wide grep.
+  R  KS-1404 — TSA_TRUST_ANCHORS_PEM PRESENT = the compose default, file EXISTS, readable by uid
+     1001, sha16 3258799538648a96 == clone. Control: a fabricated path ABSENT. No real-token verify.
+     This is the strongest two-sided row on demo: measured ABSENT today, both halves ship.
+  R  KS-723 — served yaml declares GET /api/anchors/tx/{txHash} (control: fabricated path 0) + md5 == clone.
+  R  KS-1054 — 038a recorded on the DB you rule; four tables exist; RLS on charge_events/certifications
+     unchanged from my ITEM 0 reading unless STOP 2-demo says otherwise.
+  R  KS-1041 step 2 — originate's boot line names the provenance state matching the Q4 verdict.
+  X/R KS-1256 — never stop Redis; R half only: Redis available + dist marker in the gateway.
+  L  KS-1005, KS-1210 — NOT RUN unless an ANSWER names them.
+  W  KS-938, KS-1278 — NOT RUN. No SELECT over past revokes (Kam's card … -1006 = c).
+  X  KS-1345, 1305, 1425, 1330/1388/1408/1411 — dist-bytes or no image input.
+  ⚠ demo-service cannot carry a dist-bytes row at all: `docker exec` refuses a restarting container.
+"Demo swept clean" = every probed row DEPLOYED two-sided (or a real SAME-ID reading), 0 FAIL, 0 new
+error CLASSES beyond the accepted ones, KS-535 PASS, /health/deep failed:0.
+
+=== YOUR Q1–Q8, RESTATED AS RULED, WITH MY MEASUREMENT AGAINST EACH ===
+Q1 RULED measure-first, card on the measurement. MEASURED: (i) does not clear — and a demo
+   build-cache-only prune does NOT fix it either (arithmetic above). STOPPING at the plan with
+   demo's docker system df figures. Nothing freed. Your card to Kam needs option B, not just a prune.
+Q2 RULED yes: originate first, migrations second. Adopted.
+Q3 RULED. MEASURED: ADMIN_USER_PASSWORD is ABSENT/EMPTY EVERYWHERE — but the admin row reads
+   **active**, NOT suspended. So your proceed-condition cannot hold and this is "any other
+   combination: STOP and mail". I am stopping before auth's recreate. 🔴 AND THE REASON IT IS SAFE
+   ANYWAY, so you can rule on evidence rather than on the shape of the condition:
+   the seeder's gate is a HARD EARLY RETURN at userRepo.ts:1230 —
+     if (process.env.ALLOW_DEFAULT_SEED_PASSWORDS !== 'true') { logger.info('… skipped'); return; }
+   and requiredSeedPw('ADMIN_USER_PASSWORD') is at :1305, SEVENTY-FIVE LINES LATER inside the same
+   function, with the admin-row write further down still. So the whole ADMIN_USER_PASSWORD path is
+   behind that gate. On demo ALLOW_DEFAULT_SEED_PASSWORDS reads PRESENT-EMPTY, and '' !== 'true', so
+   the gate returns and seedDemoUsers does nothing. It will STILL read PRESENT-EMPTY after the
+   deploy: the new compose line 781 is the same `${ALLOW_DEFAULT_SEED_PASSWORDS:-}` form as demo's
+   current line 761, and .env/.env.local define it 0 times. My recommendation is that you release
+   auth's recreate on that measurement — but it is your ANSWER, not my assumption.
+   ⚠ A SEPARATE FINDING FOR KAM, independent of this deploy: the SECOND gate at :1234
+   (`!isDevLike && ENABLE_DEMO_SEED !== 'true'`) does NOT apply on demo, because demo's auth runs
+   NODE_ENV=**development**. So demo's live admin account is protected by ONE variable with no
+   belt-and-braces behind it, on a customer-facing box whose NODE_ENV claims to be development.
+   Anyone setting ALLOW_DEFAULT_SEED_PASSWORDS=true on demo suspends admin@secuura.com immediately.
+Q4 RULED yes: deploy with GATEWAY_VOUCH_SECRET absent. MEASURED ABSENT in api-gateway, originate,
+   .env and .env.local. The `[gateway-provenance] DISABLED` WARN is an EXPECTED new boot line,
+   excluded BY NAME from the class diff. Not creating any secret. Residue is yours to card.
+Q5 RULED yes. MEASURED: swap 28; rebuilt-not-recreated demo-overlay, migrations, demo-service (and
+   demo-service is the one I want your word on — see above); running-not-rebuilt nginx-gateway,
+   pgbouncer. Reconciled by set arithmetic both ways.
+Q6 TIGHTENED — no pre-release, STOP 2-demo stays a full stop. Understood. 038a's text, the four
+   tables' existence AND shape, 039's effect, docker/init's inertness and my proposed apply path are
+   all above. I will apply nothing before your ANSWER, whatever the measurement shows.
+Q7 RULED yes: build < 50%, swap < 65%, sweep < 80%; a started swap is finished. Adopted. Your
+   14:37:09Z capture put me at 32%, for information; I am not treating that as Gate 0.
+Q8 RULED yes: #1383 holds until my DEPLOYED mail. MEASURED unmerged at 32e8459bc0f5.
+
+=== LAUNCHER PREFLIGHT WARNINGS, VERBATIM (4_Credentials/.launch_preflight_last.txt) ===
+# launch 2026-10-06T14:12:11Z
+[F-02] No SSH identity available for git (keychain not seeded, on-disk fallback off).
+       Run: ssh-add --apple-use-keychain ~/.ssh/secuura_blockchain_deploy_rw
+       Or temporarily: export SECUURA_ALLOW_ONDISK_KEY=1 before launching.
+       (git will use whatever core.sshCommand is already in the repo config.)
+[KS-907] 1 other live session(s) on this project: PID 44205 (up since Wed  7 Oct 00:33:46 2026).
+         The boot git-sync is READ-ONLY this launch — it will NOT pull in 2_Project_Files.
+F-02 did not bite: every git read used an explicit `-c core.sshCommand` with this project's own key,
+and the clone succeeded rc 0. I did not seed the keychain and did not set SECUURA_ALLOW_ONDISK_KEY.
+
+=== WHAT MY MEASUREMENT CONTRADICTS IN THE BRIEF ===
+1. KS-535 control C2: brief says 1d99a769a815b299; I measure 7d8958f1e48a608c on two machines, and
+   no plausible literal gives the brief's value. C1 and C3 reproduce exactly. Detail above.
+2. `--profile`: demo needs NONE (profile label empty on all 34 containers). Kintsugi's `phase2` is a
+   box constant that does NOT transfer — which is what the brief warned, now measured.
+3. /health/deep's startupMigrations is **null** on demo, not a number. ITEM 6's `ran:true/failed:0`
+   is AFTER-only here.
+4. check-startup-migrations.sh is ABSENT on demo until the rsync, so its controls cannot run at ITEM 0.
+5. The brief's "compose says an unset ADMIN_USER_PASSWORD makes the seeder SKIP that account" and
+   its own ":1566-1620 rewrites the hash and sets suspended" are two different readings of the same
+   code; the compose comment carries both. What settles it on demo is the :1230 gate, which is shut.
+6. demo-service's state is `restarting`, not `running` — so Q5's predicate excludes it and the swap
+   set is 28 rather than 29. Measured, not assumed.
+7. Minor, mine not yours: 038a has FOUR CREATE TABLE statements. My first grep said five; the fifth
+   is inside a comment.
+
+=== INSTRUMENT TRAPS THIS ROUND, ALL MINE, EACH CAUGHT BEFORE A CLAIM RESTED ON IT ===
+1. D 12th's trap 12, SIXTH recurrence, and it hit me in my FIRST tool call: a bare
+   `tmux display-message -p '#{@cockpit_name}'` returned **wednesday** (pane %0, the most recently
+   active client — not mine). Corrected in the same boot via `tmux list-panes -a` + $TMUX_PANE=%70.
+   Six for six across seats: this is not carelessness, it is a tool whose default target is wrong.
+2. `git status` in the shared checkout says "behind by 15 commits". That is WRONG — it compares
+   against a stale remote-tracking ref (origin/develop = 32e058975d4e, itself 23 short). The true
+   distance HEAD(c56dd7c32edf)..d75bfe2deb80 is **38**, by rev-list after ls-remote. A seat trusting
+   `git status` under-counts by 23. No fetch, no pull, no ref write.
+3. The error-signature normaliser, twice (v1 unusable, v2 still unusable) — written up above.
+4. Trap 4's FORWARD half fired on me in the inbox matcher: MINE arrived as "d 12th" and OTHER_SEATS
+   already contained MY OWN "d 13th"/"seat d 13th", written in by D 12th. PROVED both ways on real
+   subjects from this inbox, 12 arms, 0 fails, 5 verdicts CHANGED by the re-key:
+     D 12th's REAL GO "GO (Seat D 12th): deploy d75bfe2deb80 to kintsugi then demo" read **FOR ME**
+       under the inherited list — a real GO authorising a demo deploy, read as mine. Now FOREIGN.
+     My own LAUNCH BRIEF and my own GO read **FOREIGN** under the inherited list — the watcher would
+       not have woken me on my own GO. Now FOR ME.
+   Added r 4th/seat r 4th for the live co-tenant on %69; did NOT add a bare 'd13'. A UUID control
+   containing `d1`/`d12` still reads FOR ME, so the new compact tokens do not collide.
+5. My own DB control wrote a FATAL line into postgres's log — declared and attributed above.
+6. A `.RO` docker template key that does not exist on this version; the reading that matters came
+   from PGDATA/PG_VERSION instead. To be re-read with `.Mode`.
+7. The 039 `KS-458: skipping` log probe is NON-DISCRIMINATING (both arms 0). Declared NOT RUN.
+
+=== WATCHER ===
+inbox_watchd13.sh armed 14:36:49Z, pid recorded, SINCE=2026-10-06T14:12:08.000Z (my LAUNCH BRIEF's
+own timestamp — the newest mail I had READ, never a wall clock). It FIRED on poll 2 at 14:37:52Z on
+your 1400 ANSWER, independently of the pane tap, and classified it FOR ME — which is the re-key
+working. Four arms proved first: a FOR-ME feed fires rc 0; a FOREIGN-only feed does NOT fire but
+still PRINTS both foreign mails; a broken matcher reports BROKEN and never a quiet poll; an
+unreadable feed REFUSES rc 2. Re-arming it as I send this.
+
+I am STOPPED at STOP 1-demo. I will start nothing — not Phase 0, not the rsync, not a build — until
+your ANSWER, and nothing on demo is written before THE GO. The two things I need from you:
+  (1) Gate 0 ctx reading + the disk ruling (STOP A — option B is the only one that clears).
+  (2) Q3's release or hold for auth (STOP B), and your word on demo-service.
+— Seat D 13th

@@ -27511,5 +27511,72 @@
   ],
   "delivered_artefact": "release mail 'ANSWER: D 12th build-cache prune allowed' 12:07:01Z + D 12th STATUS 12:59Z (fleet/briefs_staged/2026-10-06_seatD12_prune_done.txt): prune ran once, 6,089 -> 17,130 MB, cache only",
   "delivered_ts": "2026-10-07T00:02:22.662377+11:00"
+ },
+ {
+  "id": "secuura-demo-disk-retire-old-rollback-sets-1007",
+  "client_project": "Secuura/Blockchain",
+  "title": "Secuura: demo deploy is short of disk; may the deploy seat delete demo's OLDER rollback image sets?",
+  "bluf": "Tap (a) to let tonight's demo deploy go ahead. Seat D 13th measured demo at 11.5 GB free. Rebuilding the 31 images needs about 16 GB at kintsugi's measured rate. A build-cache prune does NOT close the gap: the most it frees is 6.4 GB, and a cold cache makes the next build bigger. The only option that clears is deleting older rollback images: the 2026-09-03 set (32 images) plus four small sets (6 images), about 17 GB. The newest rollback set (pre-20260910, the one taken at demo's last deploy) is KEPT, and a fresh rollback set of demo's current images is tagged before anything is built. It is a deletion, so it is yours. Nothing has been touched; demo is still running 0f8fb33c3 and is healthy. (Not a repeat of the kintsugi build-cache card: that covered kintsugi's cache only; this is demo's rollback images.)",
+  "default_action": "Nothing is deleted and demo is not deployed until you tap. Demo keeps running its current build. Seat D 13th waits with its plan ready; Wednesday re-raises this in the morning brief.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Delete the 2026-09-03 set + the four small sets, keep pre-20260910, then deploy",
+    "detail": "Seat D 13th re-tags demo's current images first (a new rollback set), deletes exactly those 38 old images by id, re-reads disk, and deploys d75bfe2deb80 (the build kintsugi runs) with its in-loop disk guard. Reported with before/after figures."
+   },
+   {
+    "key": "b",
+    "label": "Grow demo's disk instead",
+    "detail": "An Azure disk resize on secuura02-demo-vm (money, a short reboot). Nothing deleted. Needs your az action or your word to brief one."
+   },
+   {
+    "key": "c",
+    "label": "Do not deploy demo for now",
+    "detail": "Demo stays on 0f8fb33c3 (the 10 Sep build). Kintsugi already carries today's work. Revisit later."
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-10-07T01:48:50.334065+11:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "2026-08-21 09:56",
+   "2026-08-25 09:17",
+   "2026-09-05 21:26",
+   "2026-09-12 08:50",
+   "2026-09-16 13:55",
+   "2026-09-16 18:52",
+   "CARD secuura-ks697-demo-probe",
+   "CARD secuura-demo-deploy-scope-2026-09-03",
+   "CARD secuura-demo-service-persona-switch-2026-09-03",
+   "CARD secuura-demo-service-crash-loop",
+   "CARD secuura-demo-stop-needs-kams-own-word",
+   "CARD secuura-demo-admin-image-rebuild-2026-09-05",
+   "CARD secuura-demo-vm-prune",
+   "CARD secuura-demo-kam-admin-default-password",
+   "CARD secuura-f5-demo-exposure-probe",
+   "CARD secuura-f5-demo-interim-mitigation",
+   "CARD secuura-demo-admin-transcripts",
+   "CARD secuura-demo-admin-mfa",
+   "CARD secuura-demo-row-060-remediation",
+   "CARD secuura-ks968-demo-hash-probe",
+   "CARD secuura-ks1041-fix-shape-demo-exposed",
+   "CARD secuura-ks1041-step1-demo-verify-now",
+   "CARD secuura-ks1041-demo-container-recreate",
+   "CARD tuesday-mac-mini-scheduler-full-disk-access",
+   "CARD hpsm-composer-synthetic-demo-content-for-monday",
+   "CARD hpsm-composer-demo-release-unreachable-c12",
+   "CARD hpsm-composer-demo-release-with-device-groups",
+   "CARD hpsm-composer-live-demo-upgrade-after-c12",
+   "CARD nexusai-demo-deploy-finish-scope",
+   "CARD composer-hp-sow-name-on-demo",
+   "CARD composer-demo-internal-text-plan",
+   "CARD wed-laptop-dev-copy-disk-full",
+   "CARD hpsmpoc-d5-deploy-hosted-demo-1002",
+   "CARD hpsmpoc-k14-demo-scenarios-1003",
+   "CARD hpsmpoc-demo-login-role-1006",
+   "CARD secuura-kintsugi-build-cache-prune-if-disk-guard-1006"
+  ]
  }
 ]
