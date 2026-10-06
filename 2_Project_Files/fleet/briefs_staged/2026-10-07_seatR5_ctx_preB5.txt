@@ -1,0 +1,106 @@
+Subject: [Secuura/Blockchain-R -> Wednesday] QUESTION: legs 6/7 refuse the 1404 push (Seat R 5th)
+Timestamp: 2026-10-06T18:04:31.000Z
+Auth: {"spf": "pass", "dkim": "pass", "dmarc": "pass"}
+
+QUESTION: legs 6/7 refuse the #1404 push, and both remedies are outside my brief (Seat R 5th).
+STOP. Nothing pushed. Watcher LIVE pid 48831, SINCE 2026-10-06T17:52:39Z.
+
+ONE QUESTION, plus a ctx read: who triages three NEWLY PUBLISHED advisories that are develop's,
+not #1404's? My brief forbids me the only two remedies the gate itself offers.
+And: what does my pane read now? I was 47% at your 17:52Z capture and the push has run since.
+
+== WHAT HAPPENED ==
+`pushra1_ff.sh` BARE under `env -u GIT_SSH_COMMAND`, GIT_SSH_COMMAND asserted `<unset>` first.
+FF_DRYPROOF=1 ran first and passed every guard (origin held exactly 1 head; origin head ==
+c117c0160684 == EXPECT; FAST-FORWARD confirmed, EXPECT an ancestor of M), pushing nothing.
+Then the real push: 17:55:00Z -> 18:01:31Z = 391 s. Judged by the tool's OWN `.rc` file:
+`s-ra4-ks1436-ff-7849f0a23d06-push.rc` -> **1**. 0 occurrences of `rc 141`, 0
+`^FIXTURE BUILD FAILED`, 0 `MISMATCH`, against a positive control of 660 `^ok   ` lines in the same
+1,647-line push.out — so those zeros are measurements.
+THE PREFLIGHT LINE, VERBATIM, from the FULL push.out at :1645, not the tool's summary:
+  PREFLIGHT FAILED on leg(s) 6 7 - fix the above before pushing. (12/15 legs ran)
+The 3 legs that did not run are 3/15, 4/15 and 8/15, each `SKIP — local stack not up on
+http://localhost:6882 (start it to run this leg)`.
+
+== WHAT PASSED, INCLUDING THE THING YOUR GO REQUIRED ==
+`shell suites: 69 passed, 0 failed, 0 skipped (of 69)` — 69 because M's tree is develop's 68 plus
+#1404's own new suite. **`html_docs_matrix` is GREEN IN-HOOK: 12 passed, 0 failed**, and its 12
+include all ten of its own controls (a bare paragraph, a list item, a note, a combo row, long text
+in a flex ck-item, a long unwrapped run, a placeholder row, a Mermaid block with no diagram type,
+one with an unbalanced bracket, and a correct page reporting nothing). `OK — 13 code guards passed.`
+
+== LEGS 6 AND 7, VERBATIM ==
+6/15 npm-audit gate (advisories vs triaged baseline — KS-470):
+  audit-gate: 12 distinct advisories reported, 24 baselined.
+  FAIL — 3 NEW advisories not in the baseline:
+    - GHSA-6qxp-vccf-f47h [high] @modelcontextprotocol/sdk: OAuth client could send credentials to
+      an authorization server chosen by the MCP server
+    - GHSA-477h-4r7f-fvrx [moderate] pbkdf2: rehashes long passwords on every iteration, enabling DoS
+    - GHSA-pqg4-j6r4-53mv [critical] shell-quote: `quote()` command injection via a line terminator
+      in a token after a `{ comment }` token
+  Triage it: fix the dependency, or add a reasoned entry (reason + ticket) to
+  scripts/audit/audit-baseline.json.
+7/15 standalone-lock advisories (each service's OWN lock — KS-531):
+  audit-locks: 43 standalone lockfiles, 1613 distinct packages pinned — 9 advisories match, 7
+  already baselined.
+  FAIL — 2 advisories in standalone locks and NOT in the baseline:
+    - GHSA-6qxp-vccf-f47h [high] @modelcontextprotocol/sdk, pinned 1.29.0, in 1 lock: services/mcp-server
+    - GHSA-477h-4r7f-fvrx [moderate] pbkdf2, pinned 3.1.6, in 3 locks: frontend/issuer,
+      packages/shared, services/anchoring
+  Triage each: bump the pin (containerised per-dir regen), or a reasoned baseline entry with a
+  ticket + expires.
+Leg 6 also repeats R 4th's CLEANUP advisory: 15 baseline entries are no longer reported (12 undici
++ ip-address + @hono/node-server under KS-470, 3 undici under KS-559). I made NO baseline edit, as
+in R 4th's round.
+
+== THIS IS DEVELOP'S RED, NOT #1404's — MEASURED FOUR WAYS ==
+1. `git diff --name-only D M` is EXACTLY #1404's four paths: the new shell suite, the job-06 script,
+   and the two platform docs. Nothing else.
+2. The same diff filtered to `*package-lock.json`, `*package.json` and `scripts/audit/audit-baseline.json`
+   returns **0 paths**.
+3. `scripts/audit/audit-baseline.json` is the **SAME BLOB** at develop and at M: 4af041e8d74a.
+4. `@modelcontextprotocol/sdk`, `pbkdf2` and `shell-quote` each appear **0 times** in the whole D..M
+   diff text.
+The audit legs read the installed tree and the tracked locks, and both are byte-identical to
+develop's at M. So a push of develop itself, today, fails these two legs the same way. The cause is
+the advisory database moving, not the merge-in. This is the [[newly-published-advisories-freeze-every-push]]
+class, and it is the fifth freeze I know of in this project.
+
+== WHY I STOPPED RATHER THAN FIXED IT ==
+The gate offers exactly two remedies and my brief forbids BOTH: "No dependency, lock, manifest,
+baseline or spec edit." And `PREFLIGHT FAILED on leg(s) …` is itself named a STOP, with
+"never `--no-verify`, never a lock or baseline edit". I did none of those. The worktree is
+porcelain 0 — I edited nothing.
+
+== THE OPTIONS, AND MY RECOMMENDATION ==
+(a) A SEPARATE advisory-triage change owns it, and #1404's push waits on it. This is the project's
+    own precedent: your gate71 Q2 made the small 06-stderr PR the MERGE CONDITION of #1398 rather
+    than widening #1398. The triage is develop-wide (5 locks across mcp-server, issuer,
+    packages/shared, anchoring, plus the root tree), it touches files my brief puts out of scope,
+    and it will block EVERY lane's push until it lands — so it is worth its own ticket and its own
+    author. **I recommend this.**
+(b) You grant me a scoped, reasoned baseline-entry exception for exactly these 3 GHSAs (reason +
+    ticket + expires), which is a baseline edit and needs your word by name. Fastest, but it puts a
+    critical (shell-quote) and a high (MCP SDK OAuth credential leak) behind a baseline row that I
+    would be writing without having assessed either.
+(c) An in-range lock refresh for pbkdf2 and @modelcontextprotocol/sdk. That is the usual fix for
+    this class, but it is a lock edit, it is 4+ locks, and it needs a containerised regen plus its
+    own test pass — not a thing to bolt onto a docs merge-in.
+I am not choosing between (b) and (c) for you: both change what lands on develop, and (b) in
+particular is a security judgement about a critical advisory, which pauses for Kam by my own
+brief's signature classes.
+
+== STATE, measured in this call ==
+M = 7849f0a23d0609f618736c69a0a33a6a38c6f077 RETAINED locally, tree d717255d5376 == your T, qm 8/8.
+origin's feature/ks-1436-…-ra4-6 is STILL c117c0160684 — the push moved NOTHING.
+develop at origin 2026-10-06T18:04:29Z = b39051390ff6f252601d6f7b45f0ea6c21c31023 — unmoved, so your GO's T and
+its D both still stand.
+`rev-parse --all` 1,608 lines, sha256/16 33d8f598ca21a5b4 — BYTE-IDENTICAL to the post-merge
+reading, so the failed push wrote no ref. Locks 0 (the tool took and released .push-lock-d8 as pid
+50263 inside its own run). df -m 697815 MB available.
+Nothing deployed, no az, no SSH, no docker, no migration, no ticket write, no comment anywhere.
+
+== WHAT I DO NOT DO WITHOUT YOUR WORD ==
+No `--no-verify`. No baseline, lock or manifest edit. No force. No retry of the same push, because
+the same three advisories will refuse it identically — a retry would burn 391 s to re-learn this.
+B5 (the squash) cannot run: it needs M at origin.

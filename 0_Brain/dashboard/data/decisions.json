@@ -27578,5 +27578,53 @@
    "CARD hpsmpoc-demo-login-role-1006",
    "CARD secuura-kintsugi-build-cache-prune-if-disk-guard-1006"
   ]
+ },
+ {
+  "id": "secuura-advisory-freeze-3-ghsa-1007",
+  "client_project": "Secuura/Blockchain",
+  "title": "Three newly published advisories now block EVERY push (one critical, one high): pick the fix",
+  "bluf": "I need you to tap one option. Since tonight, every push to Secuura/Blockchain fails the pre-push audit legs 6/7 on three advisories that are develop's, not any PR's: shell-quote GHSA-pqg4-j6r4-53mv (CRITICAL, command injection), @modelcontextprotocol/sdk GHSA-6qxp-vccf-f47h (HIGH, in services/mcp-server), pbkdf2 GHSA-477h-4r7f-fvrx (moderate, in frontend/issuer, packages/shared, services/anchoring). Seat R 5th measured it four ways: the #1404 merge-in changes no lock, manifest or baseline (same baseline blob as develop), so develop itself fails the same way. Nothing was pushed or edited. My standing advisory grant does not cover this: high/critical are never mine, and pbkdf2 sits in shipped trees. UNMEASURED: whether shell-quote or the MCP SDK reach a runtime image. Blocked behind it: the #1404 merge (built and verified, M kept locally), #1398, PRs 3-5, and every other lane's push. PRECEDENT: you ruled (a) fix-forward on yesterday's five-advisory freeze (card secuura-five-new-advisories-freeze-every-push-1006, 13:15), and option (a) here is the same shape. These three are a DIFFERENT set, so that ruling does not cover them by scope.",
+  "default_action": "If you do not tap: nothing is baselined, bumped or pushed. Seat R 5th wraps cold with the #1404 merge-in kept locally, and the push is named as R 6th's first act after the freeze clears. Wednesday re-raises this in the morning brief. D 13th's demo deploy is unaffected (it deploys an already-merged develop).",
+  "options": [
+   {
+    "key": "a",
+    "label": "Fix the dependencies: one Claude seat does an in-range lock refresh",
+    "detail": "A dedicated seat bumps the three packages within range in the affected locks (containerised per-dir regen), measures whether each reaches a runtime image, then raises ONE PR gated T1 and merged first. #1404, #1398 and PRs 3-5 then push. Costs one build seat beyond your 19:30 card-(a) shape (raise/gate/merge/deploy only), so it needs this tap; usage is 95%, under this seat's 100% line."
+   },
+   {
+    "key": "b",
+    "label": "Baseline all three (reason + ticket + shared expiry)",
+    "detail": "Fastest: a reasoned baseline row per advisory with a ticket and the shared re-triage date, written by a seat on your word. Puts a CRITICAL and a HIGH behind a baseline row with their runtime reach unmeasured."
+   },
+   {
+    "key": "c",
+    "label": "Hold everything until the allowance renews (~Sun 11 Oct)",
+    "detail": "Nothing pushes on Secuura until then. #1404's merge-in is kept locally and goes first after the fix."
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-10-07T05:07:25.935411+11:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "2026-08-21 20:06",
+   "2026-09-05 15:04",
+   "2026-09-06 09:42",
+   "2026-09-08 07:07",
+   "2026-09-08 08:08",
+   "2026-09-08 09:57",
+   "2026-09-10 09:01",
+   "2026-09-10 09:08",
+   "2026-09-10 09:08",
+   "2026-09-10 10:29",
+   "2026-09-10 17:10",
+   "CARD secuura-ks1024-advisory-baseline",
+   "CARD secuura-advisory-gate-moving-set",
+   "CARD secuura-allowance-89-before-the-0930-freeze",
+   "CARD secuura-undici-ghsa-r53p-exception-1354",
+   "CARD hpsmpoc-braces-advisory-no-patch-1003",
+   "CARD secuura-five-new-advisories-freeze-every-push-1006"
+  ]
  }
 ]
