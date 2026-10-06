@@ -1,0 +1,92 @@
+Subject: [Secuura/Blockchain-D -> Wednesday] QUESTION: ready to swap 28 services — need a ctx read (Seat D 12th)
+Timestamp: 2026-10-06T13:27:42.000Z
+Auth: {"spf": "pass", "dkim": "pass", "dmarc": "pass"}
+
+QUESTION: ready to swap 28 services — need a ctx read. All 30 images are built and the pre-swap state is
+verified. I am HOLDING and will not touch a container until your reading comes back.
+
+== BUILD COMPLETE: 30 of 30, every one rc 0 ==
+BUILD DONE 9/9 at 13:24:53Z on the resume log; 21 + 9 = 30 rows, 30 distinct services (none built
+twice), total build time 6,970 s. Record assembled from BOTH logs and snapshotted locally:
+  deploy/phase2_all30_results.txt, sha256[0:16] b1d9d2e8d3a77e8e
+  (the stop-era 21 are in phase2_first21_results.txt, 464c8a1ff02a1c87, because the resume rewrote
+  rc.txt exactly as my RESUME.md predicted before the stop.)
+ALL 30 ARE NEW-ID. ZERO SAME-ID — which DIFFERS FROM D 7th and matters:
+  D 7th got SAME-ID on admin-frontend and explained it at source (KS-1399's lockfile bumps changed no
+  emitted byte of the admin bundle). This range's lockfile refresh DID change it: admin-frontend is
+  NEW-ID 1d129d16db73. Consequence to record honestly: phase4's `:latest == :pre` SKIP BRANCH WILL NOT
+  FIRE this round, so it goes UNEXERCISED. I am not claiming it verified.
+
+== originate: MY FORECAST WAS OPTIMISTIC BY 1,403 MB, AND THE PRUNE WAS NECESSARY NOT MERELY PRUDENT ==
+originate rc 0 NEW-ID a321399093bc, 782 s (D 7th: 660 s), started at free 17,130 -> minfree 11,441.
+  ITS ACTUAL TRANSIENT WAS 5,689 MB. I forecast ~4,286 MB from D 7th's log.
+  Without the prune it was projected to START at ~5,150 MB. 5,150 - 5,689 = -539 MB: IT WOULD HAVE
+  EXHAUSTED THE DISK, not dipped to the ~620 MB I told you. Both the longer build and the bigger
+  transient are the cold cache the prune created — pruning cuts both ways and I had not said so.
+  Build cache has regrown to 12.38 GB (4.259 GB reclaimable) from the builds themselves.
+
+== PRE-SWAP STATE, VERIFIED READ-ONLY (deploy/preswap_d12.out) ==
+  30/30 built · 0 missing · 0 SAME-ID · 0 ALREADY-SWAPPED
+  Every service reads "running-OLD (correct, not yet swapped)": the container's .Image == its
+  :pre-20261006 id. CONTROL: secuura-auth .Image 8ece42d07a3c == dev-auth:pre-20261006 exactly.
+  ROLLBACK SET: :pre-20261006 count 30, fingerprint 940224dfab79711d (identical to the pre-prune
+  reading); 270 pre-* tagged images across 11 distinct sets; new-* tags 0 — nothing has ever been
+  rolled back on this box.
+  REVISION still says `status=IN PROGRESS - DO NOT READ AS DEPLOYED`, which is correct: the containers
+  are not on d75bfe2deb80 yet.
+  /health/deep 200, startupMigrations {ran:true, applied:46, failed:0, lastRunAt 2026-10-05T07:55:26Z}
+  — still D 7th's run, nothing applied by me.
+  census 35 / 33 running / 32 healthy; restarts>0 is ONLY demo-service (8,548, the KS-641 loop).
+  yaml host inode 1311120 vs container inode 1310850 — DIFFERENT, correct until the api-gateway recreate.
+  KS-535 UNCHANGED through all of it: .env sha16 634e99a79cbc6ee5 / 16,719 B (D 7th's exact figures),
+  mnemonic 695d09df873ff42b, not demo's 12ea1a07174c3f50.
+  disk free 6,235 MB.
+
+== YOUR CONDITION ON THE 28-SERVICE SET IS SATISFIED, WITH A FALSIFYING CONTROL ==
+Re-measured at 13:02:02Z (deploy/migration_condition_d12.out), earlier than ITEM 5 because it GATES the
+28-vs-30 decision and so belongs before the swap:
+  migrations/ holds 50 .sql at BOTH 46c3e20cfbd2 and d75bfe2deb80; listings BYTE-IDENTICAL; 0 added,
+  0 removed; 0 rows in `diff --name-status -- migrations/`; 0 *.sql anywhere in the range
+  (CONTROL: 57 services/ paths in the same range, so the grep is live).
+  THE CONTROL THAT PROVES THE CHECK CAN FAIL: the same instrument pointed at #1383 finds
+  `A Blockchain/Dev/migrations/049_ks1401_tenant_isolation_after_039.sql` — 1 row. So my zero is a
+  reading, not a dead grep.
+  => the migrations one-shot has nothing new to apply; rebuild-without-recreate stands; the swap set is 28.
+ONE DETAIL I OWE YOU, because my own tool's wording was alarming and the fact is not: the
+secuura-migrations CONTAINER reads .Image 12494f8d5187, which is NEITHER :latest nor :pre-20261006. It
+was created 2026-09-18T22:15:26Z, ran 1.2 s, exited 0 and has never been recreated, and that image
+still exists tagged `dev-migrations:pre-20260922`. It is an 18-day-old one-shot pinned to a
+two-generation-stale image — the accumulated, intended consequence of rebuild-without-recreate, not a
+service running the wrong thing. demo-overlay's container does match :pre-20261006.
+
+== THE SWAP I AM ASKING TO START ==
+28 services, one at a time, `docker compose -p dev --profile phase2 up -d --no-deps --force-recreate
+<svc>`, health read between each, never -f, never --remove-orphans, no down, no -v.
+ORDER: 22 backends (analytics auth billing governance guardian kyc m365-integration mcp-server
+nft-certificate originate prism queue referral security staking tenant-provisioning timestamping
+tokenisation transfer vc-issuer wallet-connector demo-service) -> anchoring -> api-gateway LAST among
+the backends -> 5 frontends (admin-frontend demo-overlay issuer-frontend verifier-frontend
+website-frontend). migrations: rebuilt, NOT recreated.
+  Immediately before the api-gateway recreate, IN THE SAME ACTION: the two-DB pending gate, with the
+  routed lists derived from MY OWN clone (49 main + 1 platform by /platform/i on the filename), both
+  planted-fake controls required to read exactly +1, and the WRONG-WAY control that reproduces B 50th's
+  false 1-main/49-platform reading. Anything other than 0/0 is STOP 2.
+  demo-service's verdict will be "recreated, new image id, STILL LOOPING (KS-641, pre-existing)" per
+  your 11:12:21Z acceptance — judged by image id, never by health.
+  timestamping's recreate is what applies the new compose TSA_TRUST_ANCHORS_PEM default; I read its env
+  and /app/config straight after it, not at the end.
+  After api-gateway: container inode == host inode, and served yaml md5 == my clone's
+  0b82a6f5703329925abedd24b7bd6ca6 (the box serves 5de556ced1e5fa4290fb7f81b56ff817 now).
+Tooling is written, argument-driven and its refusal arms DRIVEN not asserted: phase4 (refuses on bad
+args), verify, settled census (settle guard refuses an absurd requirement and passes a satisfiable one,
+with the KS-641 restarter excluded BY NAME), dist-bytes (every marker scoped to the compiled file its
+fix changed, controls bracketing the verdict), the L-row probes (one login, no valid-scope request,
+both arms discriminated by error BODY not status), and the final REVISION writer (refuses an empty body
+and refuses a body still saying IN PROGRESS).
+
+== WHAT I NEED ==
+Your ctx reading. Below 65% I start the swap and, per your line 2, finish it whatever the reading goes
+to, then run the kintsugi live sweep and come back to you at GATE 2. At or over 65% I write RESUME into
+the handover — the 30 built ids, the rollback tag, the exact swap command and order — mail you and WRAP
+COLD, and a successor swaps from the record with nothing lost.
+HOLDING. No lock, no ref write, no container touched, no migration applied, no ticket, no comment.

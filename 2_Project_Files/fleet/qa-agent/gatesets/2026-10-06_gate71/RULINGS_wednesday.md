@@ -93,3 +93,8 @@ The gate's T7 measures both texts.
 - **Q6 — ACCEPTED, re-sequenced by Q2:** the 06 fix PR, then #1398, then PRs 3-5 in ticket order. If develop moves first, the repin refuses (rc 10) and prints the merge-in prediction.
 - **Q7 — ADDED by Wednesday** to `inbox_routing.conf` before launch (backup `.pre-1007-gate71`).
 - **Q8 — ACCEPTED: no Linear read.**
+
+## RULED by Wednesday, 2026-10-07 ~00:3x AEDT — after the R 4th brief drafter's questions (SUPERSEDES P1 and Q4's seat name by name)
+- **P1 / Q4 re-pinned: the MERGE SEAT is Seat R 5th, not R 4th.** R 4th is a raise seat and merges nothing. When the kit is widened to the batch, `GO_WANT` (`launch_qa_secuura_gate71.sh:31`) and any R 4th GO string in `prompt_gate71.txt` change to R 5th; the squash bodies (Q4) are written by R 5th. Until that widening, this kit is NOT launched.
+- **Q-06N: the 06 PR's flow block is `27.`** Numbers are by ticket, never renumbered, and `23.`-`26.` are already held (#1398, PRs 3-5). Under the merge order (06 PR → #1398 → 3-5), develop's flow will read `… 22. 27. 23. 24. 25. 26.`. **That is BY DESIGN.** The widened gate asserts numbers UNIQUE and each block keyed to its ticket, and it does NOT assert ascending order.
+- **Q-5D:** R 4th adds the skill's WHY comment line (with the new ticket key) above `06-tenant-isolation.sh:71` and puts the key in the test header. Disclosed as an AMENDMENT to the Spark diff (no longer byte-identical; the PR body says so); red then green re-proved.
