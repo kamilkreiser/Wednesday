@@ -1,0 +1,122 @@
+Subject: [Secuura/Blockchain-R -> Wednesday] QUESTION: ctx read (Seat R 5th)
+Timestamp: 2026-10-06T17:08:01.000Z
+Auth: {"spf": "pass", "dkim": "pass", "dmarc": "pass"}
+
+QUESTION: ctx read (Seat R 5th). B2 is COMPLETE. HOLDING for your pane reading before B3 (the
+merge-in), per the brief's handshake and your ruling 6. Watcher LIVE pid 10305, SINCE
+2026-10-06T16:42:50Z. Nothing is running but the watcher, and that hold is the one you called
+"by design".
+
+ONE QUESTION: what does my pane statusline read? I cannot read my own.
+
+== B2 — THE FOUR MERGE TOOLS, COPIED, SWEPT, RE-KEYED, EVERY ARM DRIVEN ==
+COPY RECEIPT, all four EQUAL to P16 on both sha256/16 and byte count, cmp True, with a firing
+control: mergeinra2_1395.sh 970347679239d69a 14,764 B; mergera1.py a044894656247a7b 43,089 B;
+build_addendumra2_1395.py af0f502b6ded78a3 11,070 B; pushra1_ff.sh dd8b1083a37fb82d 9,346 B.
+THE SWEEP ran BEFORE any first run, 12 patterns each, "N checked = 12" on all four, none 0.
+What it found: mergeinra2_1395.sh ra1/ra2 at :69/:92, refs/seatra2/ x2 at :116, LOCK_SEAT= at :92,
+hex12+ at :36 (a comment) and :77 (a deadbeef control); build_addendumra2_1395.py an absolute path
+to YOUR R-2nd record folder at :23 and five hex constants; mergera1.py 11 *_SCRATCH sites and an
+absolute path to a DEAD SESSION's scratchpad at :118; pushra1_ff.sh CLEAN on every seat, lock, hex
+and path pattern.
+
+== THE FIVE PR-SPECIFIC GATES OF mergeinra2_1395.sh — EACH ONE'S DISPOSITION (your ruling 5) ==
+NONE IS REMOVED. All five became required arguments, so by your ruling 5 none needs a separate
+ruling. I am naming them anyway so you can refuse any of them.
+1. :157 the closing-word gate's label said "before KS-723" -> `--own-key`, REQUIRED. Note the
+   PREDICATE was already generic (it greps `KS-` not `KS-723`); only the label was stale, and a
+   stale label on a passing gate is how a gate gets trusted for the wrong reason. Arms: non-key,
+   two keys, de-hyphenated — all refuse rc 2.
+2. :159-:166 develop's three non-document paths -> `--dev-paths`, REQUIRED, comma-separated. For
+   #1404 I pass CLAUDE.md, systemTest/__tests__/html_docs_matrix.test.sh and
+   systemTest/performance/package-lock.json, each measured blob-equal at DEV and T.
+3. :167-:173 #1394's three non-document paths -> `--head-paths`, REQUIRED. #1404 has TWO, not
+   three: Blockchain/Dev/scripts/__tests__/tenant_isolation_stderr_own_file.test.sh (100644) and
+   Blockchain/Testing/jobs/06-tenant-isolation.sh (100755). So the literal COUNT was wrong as well
+   as the literal paths.
+4. :175 the literal 43 -> `--expect-ours-paths`, REQUIRED. #1404 measures 190 off T.
+5. :176 the literal 5 -> `--expect-dev-paths`, REQUIRED. #1404 measures 4 off T.
+ONE GATE ADDED, a pure addition: "EVERY non-doc path in OURS..M carries develop's blob". A named
+list can only cover three; this covers all 188 of develop's non-doc advance, so no develop change
+can slip through unasserted.
+Two more from P16, outside that stage, same treatment: :92 LOCK_SEAT='…ra2' -> `--lock-seat`
+REQUIRED, and :116 refs/seatra2/* -> `--my-ref-ns` REQUIRED. They are CROSS-CHECKED against each
+other ("seat$token"), because a holder file and a ref-namespace gate naming different seats is
+exactly the drift R 2nd's :92/:116 pair had.
+
+== F-5, A DEFECT THE BRIEF DOES NOT NAME, FOUND BY MY OWN POSITIVE CONTROL ==
+mergeinra2_1395.sh's pre-gate "DEV is a commit with ONE parent == <sha>" CANNOT PASS FOR ANY MERGE
+COMMIT, and its display hid that. It compared the whole `%P` output — space-separated, ALL parents —
+to a single sha, while PRINTING `cut -c1-12` of that output, which shows only the first parent and so
+always LOOKS like the expected value. develop's tip is PeterObeden's merge of #1405: `%P` reads two
+words, so the equality is false by construction, and the label said "ONE parent" about a commit with
+two. Measured: word count 2, raw string NOT EQUAL to --dev-parent, first word EQUAL.
+R 2nd's copy printed VERDICT: FAIL, 5 of 43, on its own merge; this is a candidate for one of them.
+NOT removed — SPLIT into the three claims it conflated: "DEV is a commit", "DEV has exactly N
+parent(s)" with N a REQUIRED `--dev-parent-count`, and "DEV's FIRST parent == <sha>". Driven three
+ways: correct values all three PASS; a wrong count fails ONLY the count gate; a wrong first parent
+fails ONLY the first-parent gate.
+
+== ARMS DRIVEN, counts and dispositions ==
+mergeinra5_1404.sh (sha256/16 572a49f53bfcc8fb, 253 lines, bash -n rc 0):
+  20 omit-arms — every required argument omitted refuses by NAME, rc 2, 20/20.
+  13 wrong-value arms, all rc 2: lock-seat with no trailing token; lock-seat on lane -D;
+  lock-seat naming the PREDECESSOR ra4; my-ref-ns drifted to seatra4; my-ref-ns in the wrong form;
+  own-key not a key / two keys / de-hyphenated; both counts non-integer; dev-paths with an absolute
+  entry; head-paths with an empty entry; an unknown argument.
+  POSITIVE CONTROL: the good set + ONE deliberately wrong --base reaches the PRE-GATES and 11 of 12
+  PASS with my real #1404 values (origin develop == DEV, origin branch == OURS, DEV present in the
+  shared store with a firing deadbeef control, DEV is a commit, 2 parents, first parent 40270d263ab0,
+  WT exists, WT HEAD == OURS, WT on the branch, WT porcelain 0, both key blobs reachable in my clone,
+  both key blobs IN T). It then dies at `endstage PRE-GATES` — BEFORE the LOCK stage. 0 "== LOCK =="
+  lines in any arm, 0 locks after all of them.
+build_addendumra5_1404.py (f394a743f067ee6f, 194 lines, py_compile OK): written NARROW TO MY GO, which is what
+  that file's own header prescribes ("Reusing those regexes would fail every one() assert, and
+  loosening them to pass is exactly the drift this project keeps recording"). Every gate preserved:
+  the exactly-one-match parse, the parents/tree/trailer asserts, the single-Merged-by composition,
+  the closing regex with its firing control, the key census. 12 required env arguments, no defaults;
+  12 missing-arms refuse BY NAME; 9 wrong-value arms refuse.
+  🔴 MY OWN CLAUSE LIST WAS WRONG AND THE GUARD CAUGHT IT. I inherited R 2nd's clause list, which
+  asserts "NEW-FAILING" and "PENDING NONE" are present in the GO. Grepped against YOUR GO both are
+  ABSENT — it words the same facts as "0 failing, nothing to classify". I fixed the LIST to my GO
+  (and added an inverse assert that R 2nd's wording has NOT appeared) rather than dropping the
+  guard, which is the whole point of it.
+  POSITIVE CONTROL: it parses all ten pinned values out of your GO, each exactly once — develop D,
+  PR head, T, both doc blobs, the subject, its 66/74 lengths, the body's 1136 bytes and sha256, and
+  the merge_note — then stops at `TREE == GO_TREE` because the adopted worktree is still at the PR
+  head (tree ec95d19958803c) and no M exists yet. NEGATIVE: delete the develop line from the GO and
+  it refuses "GO develop D: want exactly ONE match, got 0".
+mergera1.py (aaf230e7d1975213, py_compile OK): :113's `os.environ.get("MERGE56_SCRATCH", <Seat B 65th's
+  SESSION scratchpad, UUID 4f1e7e2b-…>)` -> `--scratch`, REQUIRED, no default and NO env fallback.
+  I checked: that path does NOT exist, so the dead default would have had merge-tree write contained
+  objects into a vanished session's tree. The docstring also said MERGE27_SCRATCH while the code read
+  MERGE56_SCRATCH — two generations stale, the same drift the file records at :24-:26 about B 32nd;
+  both now name the argument. Guards: must exist, be a directory, be writable, and must NOT be
+  inside the shared checkout. Arms: omitted (argparse rc 2), non-existent, inside the shared
+  checkout, and the dead default itself — all refuse. --seat / --gate / --go-ts / --addendum each
+  refuse when omitted. POSITIVE: a valid --scratch gives 0 --scratch refusals and proceeds.
+pushra1_ff.sh: CLEAN — nothing seat-, PR- or gate-keyed. WT/TARGET/EXPECT are required positionals,
+  LOCK_SEAT is required with no default, the lock is derived, and a non-fast-forward is exit 3 rather
+  than a force. 7 arms, SEVEN DISTINCT exit codes: LOCK_SEAT unset 1, zero positionals 1, two
+  positionals 1, missing worktree 6, target with 0 heads at origin 4, EXPECT != origin head 3,
+  CUR == my head 0. 0 locks, origin's branch ref unmoved at c117c0160684, 0 push records written.
+  🔴 AND MY FIRST ATTEMPT AT THESE ARMS WAS VACUOUS: without LOCK_SEAT all four hit the SAME :82
+  guard, so I had one arm driven four times while my grep for a guessed word printed nothing. I only
+  saw it because I read the RAW output instead of trusting the grep. Re-driven with LOCK_SEAT set.
+  NOT DRIVEN, and I am saying so: the FF_DRYPROOF=1 all-guards-pass control needs CUR==EXPECT,
+  CUR!=HEAD and EXPECT an ancestor of HEAD — a local commit ahead of origin, which exists only AFTER
+  the merge-in. I drive it immediately before the real push, not now.
+
+== LEDGER, measured in this call ==
+develop at origin 2026-10-06T17:06:33Z: b39051390ff6f252601d6f7b45f0ea6c21c31023 — unmoved from your GO's D and from your ANSWER's 16:33:57Z read.
+Shared store rev-parse --all 1608 lines, sha256/16 1d486de42c80b2bc — unchanged since boot, so B1's
+transfer and every arm above added no ref. FETCH_HEAD still 2026-10-05T10:46:17Z. Locks 0.
+df -m /Volumes/DevMASTER 697826 MB available. No deploy, no az, no SSH, no docker, no migration,
+no ticket write, no comment anywhere, nothing pushed.
+
+== WHAT I RUN THE MOMENT YOU ANSWER ==
+B3: re-read develop in the same action (a value other than D is a STOP), then mergeinra5_1404.sh
+with the full argument set, in the ADOPTED s-ra4-ks1436 — merge --no-ff --no-commit, rc 1 with
+exactly the two docs conflicted, resolved BY CONTENT to your blobs from my clone, STAGED blob ids
+asserted, 0 markers, tree(M) == d717255d5376, parents [c117c0160684, D], 0 trailers against a
+non-empty control. Then qm on M. Then the ctx-read mail before B4's push.
