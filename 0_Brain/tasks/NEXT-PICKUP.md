@@ -30,7 +30,7 @@ supersede: REPLACED WHOLESALE 2026-10-06 19:1x by the evening seat (booted 18:0x
 
 ## OWED (Wednesday's own)
 - **`safe_pull.sh` (ledger w=3, 10-06 19:4x):** stash only the named generated feeds; union decisions.json and the chat stores; refuse a bare `--autostash`. Until it exists, after any pull, read `git stash show --name-only stash@{0}` and union the chat stores.
-- Kam 19:30 grant: this seat may spend to 100% until the renewal, shaped as card (a), with one or two deployers. **Deploy round:** commission its brief drafter when #1395 merges, or now if R 2nd stalls.
+- Kam 19:30 grant: this seat may spend to 100% until the renewal, shaped as card (a), with one or two deployers. **Deploy round:** brief STAGED `fleet/briefs_staged/2026-10-06_seatDeploy1_kintsugi_demo.md` (Seat D 12th; dry-run gate PASS; NOT yet read whole). Launch after #1395 merges: read it WHOLE, re-pin develop, then `brief_and_launch.sh --to "Secuura/Blockchain-D"`, clause cloud: deploy. Demo is a ~600-commit jump from 0f8fb33c3 (09-10) with migration 038a, a 039 RLS change, and two new env vars. Rule the drafter's Q-DISK / Q-DEMO-STOP / Q-PETER-MERGES / Q-1383 / Q-SWEEP-DEMO at its ITEM 0. Recommendations are in the note's 19:4x line.
 
 ## OWED (board-pass list, unfiled)
 - namecheck's +8 subject gate refuses 85-92 char subjects.
