@@ -12,6 +12,19 @@ supersede: replace wholesale; previous = NEXT-PICKUP-FRIDAY.md.pre-0925-rotate-s
 
 **The tree is at `/Volumes/Laptop-DEV/FRIDAY` (the drive, since 2026-09-28).** Quote every path (spaces).
 
+## 🔴🔴🔴 CHECKPOINT 2026-10-07 06:49 (Friday, ctx 70%) — READ FIRST; supersedes every block below where they differ
+**FIRST ACT:** kam_rulings_today.sh + reconcile_rulings.py; seat_idle.sh on every pane AND read every STATUS's last ~20 lines (seats REPLACE their single READY line, so the watcher's READY-count key misses them — ledger 2026-10-07; always arm with WATCH_PANES on the busy panes, never `--seed` after boot, globs `2026-10-0[67]_…`, harness background mode).
+**Kam overnight:** 23:07 printer on his network (OWED block below: discuss options today). ~06:4x terminal: "There are lots of ancient windows. Are they all finished or have they all stalled?" → answered on the panel (mostly finished, the watcher missed them; closed %81 %86 %89). **OPEN CARD:** `hpsmpoc-feedback-files-third-round-1007` (rec a: a short third round for attachments; default nothing merges).
+**MAINS:** HPSM-POC **19c57ee** = HOSTED (B173 round 2: A1 migration applied, narrative cap 25 s set + read back, warm-up logged; Friday probed 200 ×3 + build id) · analysis 95657e0 (+ records/b173 round 2 to PR) · Composer **85e1ece** (#49 hide Guided) + **PR #50** (ASD wording, 600c562, merge_when_green running) · Composer demo still 19c5e8a.
+**LIVE PANES:**
+- %83 Composer-D **B92**: after #50 merges → ONE demo deploy of Composer main (hide Guided + wording) per ADDENDUM-2 item 6 (grant quoted verbatim in ADDENDUM-4; B92 judged it sufficient) → tap it with a pointer once #50 is MERGED.
+- %88 QA **B172** narrowed re-check of B168 R2 fixes on PR #119 @ b3b7728 (ADDENDUM-2) → GO: merge #119 → a hosted deploy must run the R2-6 GRANT (README step 3) + the import switch stays OFF on hosted.
+- %92 QA3 **B176 round 2** (last under cap) on PR #122 @ 3d4b9d4 (B175 allow-list fix) — working (transcript 06:49).
+- %85 D **B169**: preparing R2-1 (upload budget + min rate) + R2-2 (test) on PR #120, NO merge until Kam rules the card.
+- %90 QA2 B174 (idle; keep for a possible third round) · %82 C B168 (idle) · %91 G B175 (idle) · %80 A B166 (map update READY 22:02: review + records PR owed).
+**OWED:** the 66-in-Expert/policy-target Composer build (RULED BY KAM: unanswered-items warn a, 66-no-changes a (C-11), e8-level-after-policy a; B92 Q1 back-links) after B92's deploy · records PRs: B173 round 2, B166 · C-number clash (B169 drafted C-72; B170 comments cite C-72; B173 told to reconcile) · deploy-runbook line (low-traffic window + warm-up probe) · tickets: flaky F-22 test + web-settings 5 s test · Dependabot: 2 moderate on Composer main (B92 reported) · C-44 braces before 31 Oct.
+**Ledger since 20:07:** composed run id · watcher not re-armed · --seed swallowed a READY (w=2) · READY-count key misses replaced lines (owed row).
+
 ## 🔴🔴🔴 CHECKPOINT 2026-10-06 23:36 (Friday, ctx 65%) — READ FIRST; supersedes every block below where they differ
 **FIRST ACT:** kam_rulings_today.sh + reconcile_rulings.py; seat_idle.sh on every pane; re-arm ONE watcher WITHOUT `--seed` (seeding swallows READYs: ledger 2026-10-06 w=2) on the scratchpad seen file or a fresh one seeded ONCE at boot; globs as in the 20:43 block; run it with the harness's background mode (never nohup).
 **Kam since 20:43 (all reconciled + receipted):** feedback-files-route a (webhook + Admin download) · narrative-timeout-221 **b (25 s) + note "Do whatever it takes so it's fixed and does not occur anywhere else on the site"** · 23:07 *"I have a printer on our network so let’s discuss how we can use this tomorrow"* (OWED block above). OPEN CARDS: none of Friday's. Still asked: printer model / web page reachable; Q-7 E8 checkers; demo-login password+TOTP by mail (his word only).
