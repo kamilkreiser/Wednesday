@@ -13,18 +13,15 @@ supersede: REPLACED WHOLESALE 2026-10-06 19:1x by the evening seat (booted 18:0x
 1. `inbox_digest.sh --inbound` WHOLE (never through `tail`: at 19:1x the inbound view's tail cut off E 8th's STATUS, and only the `--all` read caught it) + `--all` for `[QUESTION]` rows in the last 12 h, each matched to a later ANSWER.
 2. **develop = f556373b9418** (#1396 KS-1256, squashed by E 8th). VERIFIED AT SOURCE 19:15 by Wednesday's own scratch fetch: tree 1aa966ca162b, one parent f42161da3f96, 11 files, 0 trailers; KS-1256 In Progress.
 
-## LIVE NOW (refreshed 20:1x, 65% checkpoint)
-- **Seat R 2nd** (pane `Secuura/Blockchain-R`, %66), launched 19:24 by card (a). Kam ruled (a) at 19:30.
-  - The subject-form GO `GO (Seat R 2nd): merge 1395 on gate69` was sent at 08:47:42Z, carrying develop f556373b941823931a9858a788c478e50e822a79 and T c39aeeca92b9e6c2c1dddd0c62138fd3b95c1a46.
-  - **Merge-in M = 7015376e4f41, BUILT, not yet pushed.** Tree == c39aeeca (Wednesday read it at 09:11:32Z); qm 8/8; originate suite 92/1074/0.
-  - The merge-in tool's 5 stale #1394 gates were overridden for this commit only (09:11:51 ANSWER); a `--dev-parent` 12th argument was added.
-  - Next from it: push (legs 6/7) → Actions by log line → squash → `STATUS: merged 1395`.
-  - **On that STATUS:** verify at source (own scratch fetch: tree c39aeeca, one parent f556373b, 4 files, KS-1305 In Progress) → score → then R 2nd raises PRs 2-5 (KS-1136, KS-998, KS-1313 + KS 1326, KS-1164; all four STRICT-apply at f556373b) until 60%, then cold.
-- **Deploy seat D 12th: brief STAGED** `fleet/briefs_staged/2026-10-06_seatDeploy1_kintsugi_demo.md`. Launch after #1395 merges (see OWED).
-- Ornith paused to 06:00 10-07 with its reason. The Spark queue is empty.
+## LIVE NOW (refreshed 21:5x, 70% checkpoint)
+- **develop = d75bfe2deb80** (#1395 KS-1305, squashed by R 2nd). VERIFIED AT SOURCE 21:43 by Wednesday's own scratch fetch: tree c39aeeca92b9, one parent f556373b9418, 4 files; KS-1305 In Progress. **Today's merges: #1385, #1394, #1397, #1393, #1396, #1395.** All verified at source; none deployed yet.
+- **Seat D 12th, the deploy seat** (pane `Secuura/Blockchain-D`, %67), LAUNCHED 21:44 (10:44:09Z verified). Brief `fleet/briefs_staged/2026-10-06_seatDeploy1_kintsugi_demo.md`, read whole, with the send amendment on top. Kintsugi first, then demo; one deploy round under the October grant, card (a) and Kam 19:30:43. Next from it: ITEM 0 → `QUESTION: plan confirmation (Seat D 12th)`. Rule Q-DISK / Q-DEMO-STOP / Q-PETER-MERGES / Q-1383 / Q-SWEEP-DEMO using the drafter's recommendations (the note's 19:4x line). **Then send the GO as its OWN mail whose SUBJECT is exactly `GO (Seat D 12th): deploy <develop12> to kintsugi then demo`.** Demo's STOP 1-demo and STOP 2-demo (038a on live data) each need an ANSWER. Report every deploy to Kam on the panel (box, SHA, rollback tag, sweep).
+- **Seat R 3rd: brief being DRAFTED** by a subagent → `fleet/briefs_staged/2026-10-06_seatR3_raise_prs2to5.md` (RAISE_BASE d75bfe2; four PRs: KS-1136, KS-998, KS-1313 + KS 1326, KS-1164; one READY; the `s-ra1-ks1305` removal ordered with conditions). On delivery: read it WHOLE, then launch with `brief_and_launch.sh --to "Secuura/Blockchain-R"` (WED_USAGE_STOP=100, naming the 19:30:43 grant). Its raises open PRs only and do not move develop, so D 12th is undisturbed.
+- R 2nd WRAPPED 0.95 (handover ac0d7ada); E 8th WRAPPED 1.0. Both panes closed.
+- Ornith paused to 06:00 10-07 with its reason. The Spark queue is empty. Five newer holds (KS-1328, KS-1355 ×2, KS-1364 apigw, KS-593) wait for a raise seat after R 3rd.
 
 ## THE QUEUE, in order
-1. R 2nd (LIVE): merge #1395 → raises.
+1. D 12th deploy (LIVE) and R 3rd raises (drafting): see LIVE NOW.
 2. One batched gate for R 2nd's raised PRs (name the gate number in the ANSWER; it is NOT gate69).
 3. Deploy round: today's merges (#1385 KS-938, #1394 KS-723, #1397 KS-1425, #1393 KS-1278, #1396 KS-1256, then #1395) to kintsugi, then demo, under the October grant (EXPIRING-GRANTS). Phase 0 re-tag; KS-535 wallet rule; report each deploy on the panel.
 4. Five newer Spark holds for a later raise seat (READY_ files in `local-model/night/`): KS-1328, KS-1355 stack_guard, KS-1355 dev-reload (r2, held 18:0x), KS-1364 apigw, KS-593.
