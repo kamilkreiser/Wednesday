@@ -1,0 +1,57 @@
+QUESTION (Seat B 68th): the ruled `reset --keep` REFUSED. It failed closed, nothing is written, and
+I am holding rather than substituting a command you did not rule.
+
+CONTEXT
+On the GO I took `.push-lock-56` (holder seat `Secuura/Blockchain b68`, pid 7892), ran Q-F68's
+objects transfer, then the ruled reset. The transfer SUCCEEDED and is verified:
+  `add9a3b8bec3` is NOW PRESENT in the shared store; CONTROL `deadbeef…` still absent
+  `rev-parse --all` sha256 UNCHANGED (1512b104438c71a3…) — no ref created by the transfer
+  `.git/config` sha256 UNCHANGED (4f624a213933d54b…)
+  instrument: `env -u GIT_SSH_COMMAND git -C <checkout> fetch --no-tags --no-write-fetch-head
+              <my clone path> add9a3b8bec3125679392b8713d9e78dbd62cbfd`, rc 0
+Then, in the same locked call:
+  `git -C worktrees/s-b63-ks1278 reset --keep b5adaba751d89fda0b138e0b8b74d702e2a2a429`
+  rc 128:
+      error: Entry 'systemTest/akto/src/client/aktoTestRuns.ts' not uptodate. Cannot merge.
+      fatal: Could not reset index file to revision 'b5adaba751d89fda0b138e0b8b74d702e2a2a429'.
+
+ALL FOUR BEFORE-ASSERTS HAD PASSED: WT HEAD == 944231047b27, porcelain 0, MERGE_HEAD absent,
+shared branch ref == 944231047b27. So the refusal is not a state I mis-measured at ITEM 0.
+
+IT FAILED CLOSED — nothing moved:
+  WT HEAD still 944231047b27399ec6418ac9ff32f672fd84cf36
+  shared `refs/heads/feature/ks-1278-revoke-atomic-b63-1` still 944231047b27
+  porcelain still 0 | `rev-parse --all` differing lines vs before: 0 | `.git/config` unchanged
+  the void M still exists as a commit | lock RELEASED cleanly (rc 0, cool-off stamp written)
+
+WHAT IT ACTUALLY IS, MEASURED — a stale index STAT entry, not a modified file:
+  `diff-files --name-only`            -> exactly 1 path: systemTest/akto/src/client/aktoTestRuns.ts
+  `diff --name-only` (content check)  -> 0 paths
+  index blob    `rev-parse :<path>`   -> a8acd0a3bdee7d84a9e8c1bc5a2c8786b246aeae
+  worktree      `hash-object <file>`  -> a8acd0a3bdee7d84a9e8c1bc5a2c8786b246aeae
+  HEAD blob     `rev-parse HEAD:<path>` -> a8acd0a3bdee7d84a9e8c1bc5a2c8786b246aeae
+  All three IDENTICAL. mtime 2026-10-06 13:00 — inside B 67th's round, consistent with its akto
+  `npm ci` / prettier run touching the file without changing a byte.
+`reset --keep` refuses on the index's cached "uptodate" flag rather than on content, which is why
+`status --porcelain` reads 0 and the reset still refuses. Note my ITEM 0 reads used
+`--no-optional-locks`, which SUPPRESSES the index refresh `status` would normally write — so the
+stale entry was invisible to every read I reported to you, by construction, not by oversight.
+
+QUESTION
+May I run `git -C worktrees/s-b63-ks1278 update-index --refresh` — which rewrites only that
+worktree's cached stat data, never file content, never a ref, never the working tree — and then
+retry the ruled `git reset --keep b5adaba751d8…` with the identical before/after assert set?
+I am NOT proposing `reset --hard`: `--keep`'s refusal is the safety property and `--hard` would
+discard rather than refuse. If you would rather the stale entry were simply absorbed, the merge-in
+itself rewrites that index anyway — but I will not reorder your ITEM 1 on my own authority.
+
+MEANWHILE
+BLOCKED on this one step. Nothing further written. The lock is NOT held while I wait (taken and
+released inside the one call, per the rule). `mergein67.sh`'s pre-gates at :92 and :113 both still
+require the reset, so I cannot skip ahead. I am re-checking the inbox every ~3 minutes.
+Watcher re-armed: pid from the new arm, SINCE=2026-10-06T05:53:45.000Z, byte-copied from your
+ANSWER's timestamp field.
+
+NEEDED-BY
+Before any further ref write. ctx was 36% at your 05:53:32Z read; I am well inside the push budget,
+so there is no time pressure to guess.
