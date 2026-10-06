@@ -1,0 +1,74 @@
+Subject: [Secuura/Blockchain-R -> Wednesday] QUESTION: status row 06 built, need a ctx read before the push (Seat R 4th)
+Timestamp: 2026-10-06T14:35:34.000Z
+Auth: {"spf": "pass", "dkim": "pass", "dmarc": "pass"}
+
+STATUS: row 06 is BUILT and COMMITTED LOCALLY. UNPUSHED. Holding for a ctx read before the push,
+per your amendment and the brief's "never START a push past ~50%".
+
+STATE
+- Ticket FILED once: KS-1436, Backlog, board account, project Internal tooling, 0 relations,
+  0 attachments, 0 hyphenated foreign keys in the body, exactly ONE ticket with that title
+  (duplicate check run). Read back in full.
+- Commit c117c0160684d1ae72b220a8d2ccfe9aafb8eb8d
+  tree ec95d19958803c4f6f00b5ce097949e3dc18bc3a  | ONE parent == 8a8d7b9694c9fcf61ee06b47ce0b474909955115 (= RAISE_BASE, re-read in THIS call, unmoved)
+  branch feature/ks-1436-tenant-isolation-stderr-own-file-ra4-6, LOCAL ONLY.
+- commitra3.sh: 21 passed / 0 failed. 0 trailers against a 53-byte control. Subject
+  "KS-1436: the tenant-isolation runner's stderr goes to its own file" = 66 chars, LANDS 74-75
+  at a 4-5 digit PR number. 4 staged paths == 4 declared.
+- pathgatera1.py VERDICT PASS, 5 assertions / 4 paths / 0 failed, FIRING control naming both
+  the missing and the extra paths.
+- Locks 0. Watcher pid 81725 (ALIVE). Nothing pushed, no PR, no comment.
+
+FIGURES, all mine, macOS 27.0.1 arm64, bash 3.2.57(1), 2026-10-06 UTC
+- RED-FIRST, product reverted to base blob 4d077ab30: rc 1, **1 passed / 4 failed** -> fixed:
+  rc 0, **5 passed / 0 failed**. The CONTROL cell is GREEN IN THE RED ARM, so the red is the
+  guard and not a broken harness. bash -n rc 0 run BEFORE each red arm.
+  The red text is the defect itself: "got 0 unparseable unparseable" and
+  "output: -> tested=? cross-tenant_findings=?".
+- 2>/dev/null ARM: **4 passed / 1 failed**, and the ONLY failure is "the runner's stderr is
+  kept". So the suite distinguishes KEPT-IN-ITS-OWN-FILE from DISCARDED -- the fix is not
+  merely "make the JSON parse". Restored sha256-identically after every arm.
+- Discovery **67 -> 68**, mine 0 before / 1 after, by moving the file aside and back with the
+  restore proved sha256-identical.
+- Sibling orchestrate_jobs.test.sh: 18 passed, 0 failed, 0 skipped (checker expectation met).
+- WHOLE shell-suite set: **68 passed, 0 failed, 0 skipped (of 68)**, rc 0, **339 s**.
+- packages/shared dist: ABSENT -> PRESENT, 17,746 B (a real transition, not an assumption).
+- Timing coverage: 0 stated timings cover job 06 or the shell-suite set; must-hit controls
+  Akto 11 / pre-merge 9 / Schemathesis 5 TIMING-BEARING lines. No tier budget moves.
+
+DOCS, both in THIS commit (S4)
+docblockra3.py rc 0, 0 failed. Flow tail 22. -> 27.; cheat tail KS-1305 -> KS-1436, 11 -> 12
+sections. The boundary-free claim PASSED on BOTH docs -- "the ONLY difference from the blob at
+--base IS this fragment, byte for byte" -- each with a 1-byte-altered-fragment CONTROL that
+fails it, plus "all 21 pre-existing blocks byte-identical" against a control proving a
+one-character edit to block 1 IS detected. Read from the WORKING TREE, not git show HEAD.
+
+THREE THINGS YOU SHOULD RULE ON OR KNOW
+1. 🔴 **I deviated from "ONE comment line above :71" and wrapped it over THREE lines.** One line
+   carrying WHY + the prior 2>&1 behaviour + the key measures **217 chars**; the file's own
+   maximum line is **132** and my three lines are 92. I measured rather than assumed, but it is
+   a departure from your wording -- say if you want it as one 217-char line.
+2. 🔴 **The brief's commitra3 arm "a -ra3- branch must FAIL" CANNOT BE DRIVEN: no such guard
+   exists.** commitra3.sh has only `[ -n "$BRANCH" ]` (:47) -- no seat-token check at all. I
+   am not claiming an arm I did not run. What I DID drive, from MY copy, 4 refusal arms each
+   with a DISTINCT message and nothing created (HEAD unchanged, branch count unchanged, 0 locks):
+   --rec = R 3rd's folder REFUSED; --rec = B 65th's folder REFUSED; --rec omitted REFUSED;
+   no --path REFUSED. The -ra3- protection lives in namecheckra1.py, which reads R 3rd's real
+   branch FOREIGN. If you want it in commitra3.sh too, that is a change I have not made.
+3. **END_TREE is NOT the ITEM 0 pure-payload tree f1dfb0e9a10b, by design.** numstat reads
+   +98 on the test and +4/-1 on the job, not +97 and +1/-1: the extra +1 is "# Refs: KS-1436"
+   in the test header and the extra +3 is the §5d WHY comment. Both are the disclosed Q-5D (a)
+   amendment, and the PR body will quote the diff from the Spark payload. Before the amendment
+   and before the docs, the two product blobs were byte-identical to ITEM 0's prediction
+   (4ec348cf02bf... and 2898d820590b...), which I verified by hash-object.
+
+MY OWN INSTRUMENT SLIPS THIS ITEM
+- I printed "rc 0" twice from $? AFTER A PIPE through tail/head -- which measures tail, not the
+  tool. Once on jq, once on the docblock scratch pre-drive, where the tool had in fact exited 2.
+  Both withdrawn; every rc above is read without a pipe.
+- The docblock SCRATCH pre-drive proved 9 assertions then correctly REFUSED at the boundary-free
+  claim, because it derives the git-relative path from --flow and a scratch path is not in the
+  repo. That is the documented limit of a scratch arm, not a tool defect.
+
+NEEDED: a ctx read. If I am under ~50% I push row 06 and raise it; if not, I hand over COLD with
+the commit named as UNPUSHED and the branch LOCAL ONLY.
