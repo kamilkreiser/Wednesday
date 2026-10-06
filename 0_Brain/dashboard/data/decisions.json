@@ -26269,5 +26269,58 @@
    "CARD secuura-ks1402-s-key-cannot-carry-users-read-1006",
    "CARD secuura-ks1256-redis-outage-stops-connector-creates-1006"
   ]
+ },
+ {
+  "id": "hpsmpoc-sm-fta-external-access-1006",
+  "client_project": "Datasec/HPSM-POC",
+  "title": "Approve outside access to Security Manager and the FTA demo for named Datasec people (about A$23 a month)?",
+  "bluf": "You asked for both tools to be reachable from outside Azure (10:51). Seat B163 priced the options, read-only, with nothing opened (prices from the Azure Retail Prices API, read 10:55; licences measured: the directory has NO Entra P1 today). Recommendation: (1) Security Manager through Entra Application Proxy: each person signs in with their own Microsoft account plus MFA, then their own SM login. No inbound port opens, because a small Microsoft connector on the SM server dials out. Cost: 1 x Entra ID P1, AU$10.50 a month on a yearly commitment (AU$126). Unconfirmed: whether each GUEST also needs a P1, which would be +AU$10.50 per person per month; Friday will ask before any second seat. (2) The FTA demo moved off the VM to an Azure Static Web App (Standard) behind the same Entra sign-in, limited to the people you assign: A$12.82 a month. It then stays up when the VM switches off at 20:00. Together about A$23 a month. What it opens: two web addresses on the internet, each behind Entra sign-in with MFA. Unchanged: the server, its network rules, SM's settings, and Bastion, kept as the admin back door. Paul's guest invite is still your send. Full comparison (Bastion Basic A$203 a month; App Gateway WAF about A$563; an IP allow-list rejected because it exposes SM's own login page): HPSM-POC Briefs/2026-10-06_B163_STATUS.md.",
+  "default_action": "Nothing changes: both tools stay reachable only through Bastion, one person at a time, and nothing is bought or opened.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Approve both (about A$23 a month)",
+    "detail": "You buy 1 x Entra ID P1 for the datasec-rd directory (Microsoft 365 admin centre, Billing, Purchase services, Microsoft Entra ID P1). Then a seat installs the connector, publishes SM, deploys the FTA demo to a Static Web App, sets the MFA rule, and Friday checks it from outside before telling you"
+   },
+   {
+    "key": "b",
+    "label": "FTA demo only (A$12.82 a month, no licence)",
+    "detail": "A seat moves the FTA demo to a Static Web App with Entra sign-in; Security Manager stays behind Bastion"
+   },
+   {
+    "key": "c",
+    "label": "Keep Bastion only",
+    "detail": "A$0; one person at a time; nothing changes"
+   },
+   {
+    "key": "d",
+    "label": "Bastion Basic instead (A$202.79 a month)",
+    "detail": "Still a remote desktop in the browser; about 2 people at once"
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-10-06T11:08:12.748790+11:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "seat": "friday",
+  "prior_rulings_overridden": [
+   "2026-08-17 20:23",
+   "2026-08-22 19:55",
+   "2026-08-28 09:37",
+   "2026-09-02 17:34",
+   "2026-09-02 20:14",
+   "2026-09-10 09:01",
+   "2026-09-10 09:08",
+   "2026-09-10 09:08",
+   "2026-09-17 08:04",
+   "2026-09-21 09:52",
+   "CARD tuesday-mac-mini-scheduler-full-disk-access",
+   "CARD hpsmpoc-showcase-phone-access",
+   "CARD hpsmpoc-require-sqlserver-ci-check-1006",
+   "CARD hpsmpoc-6f6bc96-hosted-deploy-1006",
+   "CARD secuura-ks1402-s-key-cannot-carry-users-read-1006",
+   "CARD secuura-ks1256-redis-outage-stops-connector-creates-1006"
+  ]
  }
 ]
