@@ -12,6 +12,17 @@ supersede: replace wholesale; previous = NEXT-PICKUP-FRIDAY.md.pre-0925-rotate-s
 
 **The tree is at `/Volumes/Laptop-DEV/FRIDAY` (the drive, since 2026-09-28).** Quote every path (spaces).
 
+## 🔴🔴🔴 CHECKPOINT 2026-10-06 11:14 (Friday, ctx 70%) — READ FIRST; supersedes every block below where they differ
+**Kam since 11:0x:** 11:08:43 card `hpsmpoc-sm-fta-external-access-1006` **a** (approve both, ≈A$23/mo) → ruled + hidden; steps on panel (bf-28837cdb9b38a): **Kam buys 1 x Entra ID P1** (menu path unmeasured) → on his 'done', commission the SM half: Entra Application Proxy per `HPSM-POC Briefs/2026-10-06_B163_STATUS.md` §5a (connector on vm-hpsm-sm, MFA Conditional Access, Kam assigned; Paul after his invite; confirm guest-P1 need before a 2nd seat). Deliver the card to its C-number when both halves are done (B164 writes one for the FTA half).
+**MAINS:** HPSM-POC 8798fa7 · hosted 646870e · analysis **e12f12c** (records #80–#85 merged) · Composer fd9493f = demo.
+**LIVE PANES (briefs dated 2026-10-06):**
+- Datasec/Composer-D %70 **B86** Kam's Composer feedback (PRIORITY) → read its CHECKPOINT 1 table before fixes go far; then diagnose the 'disappointing' ledger row (built wrong / wrong spec / checked shallowly) and answer Kam; deploy only on a card.
+- Datasec/HPSM-POC-C %71 **B162** FTA+SM input design: CP1 ACCEPTED (ADDENDUM-2: evidence-with-provenance ruling, X1 SM-admin-token risk, HP asks list); now CP2 (input map) → Friday reviews → CP3 design FOR-KAM.
+- Datasec/HPSM-POC-D %69 **B161** SM lift-out matrix, finishing (background job). OWED on READY: addendum (headline '13 of 16' vs list 14 → fix; records/b161 PR) + tell Kam the matrix + card the 8 HP questions / K-B161-1 (baseline policy in SM).
+- Datasec/HPSM-POC-F %73 **B164** FTA build → Static Web App Standard + Entra auth (Kam assigned; anonymous must 302/401) → Friday checks from outside → send Kam the URL.
+**Open with Kam:** P1 purchase; the channel for Paul's SM password; Paul's guest invite.
+**Ledger today:** credential-email promise (w=1), Composer 'disappointing' (w=1, diagnosis owed), _override_prior first-attempt (w=2).
+
 ## 🔴🔴🔴 CHECKPOINT 2026-10-06 10:53 (Friday, ctx 65%) — READ FIRST; supersedes every block below where they differ
 **Kam since 10:4x (all receipted):** ~10:4x terminal "Look into my feedback from Policy composer and action these as a priority" (B86) · 10:50:07 review the Threat Assessment tool PROPERLY, work with the agent; Composer work "disappointing" (ledger row; diagnosis owed after B86's list) · 10:51:40 FTI Q1 yes (show beyond HP) Q4 yes (keep running); both tools externally available in Azure; per-engagement link or upload/sync with configurable source + secrets · 10:52:24 agrees with the approach.
 **LIVE PANES:**
