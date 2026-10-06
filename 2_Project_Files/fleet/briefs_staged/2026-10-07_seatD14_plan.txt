@@ -1,0 +1,188 @@
+ITEM 0 COMPLETE. Every gate PASSES and the deploy CLEARS after ITEM 1b on the LOWER bound.
+Nothing written on demo: no tag, no delete, no build, no swap, no migration, no secret, no prune.
+No az call, no SSH to kintsugi, no ref write, no git lock, no pull, no fetch (not even --dry-run),
+no ticket write, nothing to the extranet.
+
+== THE HEADLINE: THE DISK BLOCKER CLEARS, AND BY A WIDER MARGIN THAN THE CARD ASSUMED ==
+Instrument: `docker system df -v` UNIQUE SIZE / SIZE columns, read-only.
+  F0 settled (df -m / Available, 4 samples TOL 40, control at TOL -1 REFUSED) = 11,493 MiB
+  DELETABLE unique size, LOWER bound (layers no OTHER image shares) = 8,878 MiB
+  F0 + lower = 20,371 MiB  vs required 16,174  -> CLEARS, margin +4,197 MiB
+  vs the 550 MiB/image bar (22,250) -> SHORT 1,879 (not required; the in-loop guard is the backstop)
+  Before ITEM 1b, today: SHORT 4,681 @354 — D 13th's 4,655 plus exactly the 26 MiB free-space drop.
+So Q-C is satisfied: nothing is deleted on a projection that cannot clear.
+
+** CONTRADICTION TO THE BRIEF, AND IT IS GOOD NEWS. ** UNMEASURED said `docker system df -v`
+"came back header-only (probe1:174-177)". That was D 13th's OWN INSTRUMENT, not the box:
+`probe1_structure_d13.sh` pipes `docker system df -v` through `head -3`. My full run returned
+217 lines with per-image SHARED/UNIQUE SIZE. The unique-size measurement was available all along,
+so Q-C's fallback-to-bounds is not needed: the LOWER bound alone clears.
+
+== ITEM 1b RETIRE PLAN (send amendment 1's gate) ==
+  five sets' TAG count = 38  == the card's 38  -> GATE PASSES
+  distinct image IDs carrying them = 33   DELETABLE = 33   NOT deletable = 0
+  tag distribution over the 33: rollback-2026-09-03 32, pre-ks488 2, rollback-2026-08-27-ks661 2,
+    rollback-20260901-prefix 1, pre-ks719 1  = 38, all five sets, nothing outside.
+  33 < 38 is the EXPECTED shape (38 is tags; 5 ids carry two tags each).
+  This CLOSES the brief's UNMEASURED item: NO retire-set image id is shared with a kept tag or any
+  container. The sets are disjoint from `latest` and from `pre-20260910`.
+  Commands: 33 x `docker rmi sha256:<64hex>`, one per invocation, NO -f/--force, no prune, no filter,
+    `cmd > out 2>&1` then rc=$?. List at 5_Project_History/2026-10-07_seatD-14th/boot/delete_cmds_d14.txt
+
+RED FLAG I CAUGHT ON MYSELF, REPORTED BECAUSE IT WAS ONE STEP FROM IRREVERSIBLE.
+`inv_analyse_d14.py` wrote its deletable set to a FIXED filename. My two discrimination controls ran
+AFTER the real case and clobbered it, so the artefact on disk was CONTROL 2's — 13 ids whose only tags
+are `pre-20260910`, THE SET KAM'S CARD SAYS TO KEEP. I had begun building the delete list from it and
+the tags in the output are what stopped me. Had it gone through, 13 images of the kept rollback set
+would have been deleted by id. Fixed three ways: the out path is now a REQUIRED argument (rc 1 when
+absent, measured without a pipe); the artefact RECORDS the keep/retire lists that produced it and the
+builder ASSERTS they are the real run's; and a guard refuses if any deletable id carries a non-retire
+tag or a container, with an injection control that fires (1 non-retire tag found) so it is not vacuous.
+All guards pass on the re-run: 38 tags, 33 ids, 33 deletable, 0 held.
+
+== ITEM 0 (a) develop. D0 = b39051390ff6f252601d6f7b45f0ea6c21c31023 ==
+  Read 2026-10-06T20:00:09Z, `ls-remote` only. Same value as the drafter's 19:48:18Z read.
+  d75bfe2deb80..D0 via the GitHub compare API (read-only, no object written):
+    status ahead, ahead_by 10, behind_by 0, merge_base = d75bfe2deb80 -> DEPLOY_SHA a STRICT ANCESTOR
+    190 files, 0 under `Blockchain/` (exact prefix). Top-level dirs touched: .claude, 5_Project_History,
+    CLAUDE.md, Projects Documents, observability, systemTest. No `Blockchain` top-level dir at all.
+    Trap 8 handled: 170 of the 190 are root `systemTest/*` or `BACKLOG.md` — NAME collisions with
+    Blockchain/Dev paths, counted by a separate predicate, so the zero is not a vacuous zero.
+    Independent confirmation from the box: demo's own REVISION states the rsync root is <repo>/Blockchain/Dev
+    and names the repo-root paths ABSENT from the box (.github/, Projects Documents/, systemTest/, BACKLOG.md).
+    Service map controls fire: services/kyc -> ['kyc']; packages/shared -> 29 services;
+    docs/VOCABULARY.md -> NONE; scripts/preflight/preflight.sh -> NONE.
+  refs/pull/1383/head = 32e8459bc0f51d1af492aae7c0b3d9754f78c9bf; PR 1383 state open, merged false -> UNMERGED (Q8 holds good).
+  refs/pull/1404/head = c117c0160684d1ae72b220a8d2ccfe9aafb8eb8d, unmerged (R 5th's push was refused).
+  D0 is now the ONLY accepted develop value at every later re-read.
+
+== ITEM 0 (b) build source: deploy-clones/seatD13-d75bfe2deb80 — ALL ASSERTIONS PASS ==
+  HEAD d75bfe2deb8075583cfb55af0921e4964e7c6f0e | tree c39aeeca92b9e6c2c1dddd0c62138fd3b95c1a46
+  porcelain 0 | own .git directory | --git-common-dir == .git | objects/info/alternates ABSENT | 608 MB
+
+== ITEM 0 (c)(d) demo as it runs ==
+  SHA BY CONTENT = 0f8fb33c3416eaa5a79b980402deb845312b20ae.
+    536 paths: ==OLD 257 / ABSENT-as-expected 279 / ==NEW 0 / NEITHER 0.
+    Planted-mismatch control moved ==OLD 257->256 by exactly 1; fabricated-path control NEITHER 1.
+    The inherited expectation table was VERIFIED against the clone first: 536/536 agree on BOTH bases.
+    (My first verify read 0/536 because the table is BOX-relative; the repo prefix Blockchain/Dev/ is required.)
+    REVISION file agrees independently.
+  Compose: project `dev`, ONE config file /home/secuura/secuura/Dev/docker-compose.yml, 34 containers,
+    service.profiles EMPTY on all 34 -> NO --profile on demo. Image prefix `dev-`, DERIVED (31 of 34).
+  Census 36 = 33 running + 1 restarting + 2 exited. restarts: demo-service 37,194 (health unhealthy,
+    the KS-641/KS-1079 restarter, 37,197 FATAL lines, excluded BY NAME and compared as a RATE);
+    every other container reads 0.
+  REBUILD SET = 31, DERIVED: 33 buildable of 39 compose services, minus nginx-gateway and pgbouncer
+    (the only two with no changed input). Reverse difference EMPTY.
+  SWAP SET = 28, reconciled BOTH ways: 28 + 3 rebuilt-not-recreated (demo-overlay, migrations,
+    demo-service) = 31 = |rebuild|; 28 + 2 running-not-rebuilt = 30 = |truly-running dev-*|.
+    3 third-party never touched (postgres, redis, stack-marker). I flag again that 28 equals
+    kintsugi's number by a DIFFERENT composition — derived here, not carried.
+  Mounts read with .Mode: api-gateway openapi yaml bind mode=[ro] rw=false. The .RO control ERRORS
+    ("map has no entry for key RO") -> D 13th trap 6 confirmed live; my instrument uses .Mode.
+  KS-535 BEFORE: PASS. container mnemonic == .env mnemonic == 12ea1a07174c3f50 (MATCH);
+    vs kintsugi 695d09df873ff42b DIFFERS; wrong-value arm MISMATCH. blockfrost 1ed6121f284091df both sides.
+    .env sha256_16 920f84ec090ecafa / 12,260 B. .env.local 5,910 B / ead906b8a5c7d12c.
+    CARDANO_NETWORK preview, SIMULATE_ANCHORING UNSET. Controls: C1 $HOME expands (/home/nodejs);
+    C2 7d8958f1e48a608c OK; C3 e3b0c44298fc1c14 OK. No value, prefix or length printed anywhere.
+  ** C2: I verified your replacement rather than adopting it. ** sha256("$PLATFORM_WALLET_MNEMONIC")[0:16]
+    computes to 7d8958f1e48a608c, so your ruled value is right. The inherited 1d99a769a815b299 matches
+    NO string I can construct, so that control was simply broken and would have read FAIL on a correct box.
+  Variables: ADMIN_USER_PASSWORD ABSENT; GATEWAY_VOUCH_SECRET ABSENT at api-gateway AND originate (Q4);
+    TSA_TRUST_ANCHORS_PEM ABSENT; TSA_URL PRESENT-EMPTY. Controls: PORT PRESENT-nonempty, impossible var ABSENT.
+    ALLOW_DEFAULT_SEED_PASSWORDS / ENABLE_DEMO_SEED / DEMO_SERVICE_ENABLED all PRESENT-EMPTY. NODE_ENV=development.
+    Admin row a0000000-...-0020 status = active, row exists 1, impossible-uuid control 0.
+  timestamping BEFORE: /app/config does NOT exist, anchors FILE-ABSENT, uid 1001 NOT-READABLE,
+    fabricated-path control ABSENT. No mounts on that container -> the PEM ships inside the image.
+  /health/deep: status healthy, startupMigrations NULL (AFTER-only assertion), 321 B,
+    keys [checks, ready, status, summary, timestamp]. nginx /health literal 179 B, a different endpoint.
+  Redis running/healthy, requirepass configured (count 1, Cmd array never printed, D 12th trap 10);
+    gateway carries REDIS_HOST/PASSWORD/PORT/URL.
+  DB: credential proved real (wrong password FAILS, right returns 1). [secuura] tracker 48 rows,
+    038a 0 (PENDING), 039_ 1, 048_ 1, 049_ 0. [secuura_platform] 1 row, all four 0. Planted-fake
+    filename control 0 on both. Four 038a tables exist, columns 17/11/17/12, impossible-table control f.
+    RLS: certifications / charge_events / documents / users all rowsecurity=t force=t, policies 1/1/1/2,
+    policy name tenant_isolation. anchor_store 333 total / 83 simulated / 0 simulated-and-confirmed.
+  ERROR BASELINE (class level, your 14:50:13Z ruling): 42,991 lines -> 122 CLASSES.
+    Same class count as D 13th's 122, so no new class in the interval. v2 layer 1,158 signatures;
+    issuer-frontend 1,123 signatures collapse to 87 classes. Negative controls fire: two different
+    messages stay two rows; the same message with different ids collapses to one row count 2.
+    MY OWN FATAL, NAMED: the class `FATAL: password authentication failed for user "secuura"` now reads
+    count 2, first-seen 2026-10-06T14:23:48 — D 13th's control plus mine from this boot's DB probe.
+    Pre-existing class, so under the class ruling it is not new. I ran the DB probe BEFORE the baseline
+    deliberately so my own line sits inside my own BEFORE.
+
+== PHASE 0 ==
+  Box UTC date is 2026-10-06, so the stamp is pre-20261006, re-read in the same action at Phase 0.
+  FREE by name on demo, count 0: pre-20261006, pre-20261007, new-20261006, new-20261007.
+  Controls: present-tag `latest` 33 (>0); absent-tag pre-20991231 0. Count to assert = 31, DERIVED from
+  my own service list, never a literal. All six set fingerprints reproduce ON THE BOX and in my local
+  computation and match the handover: pre-20260910 33/969f8db925918256, rollback-2026-09-03 32/e2483af9dc00f567,
+  rollback-2026-08-27-ks661 2/de773cdb74024894, pre-ks488 2/94e9c834dc28f957,
+  rollback-20260901-prefix 1/3bccdd2d75e6b231, pre-ks719 1/9de04a6a242446bd.
+  Negative control: fp('latest') = 5e3669abb51a54dd, collides with none of the six.
+  Tag histogram reconciles: 33+33+32+2+2+1+1+3 third-party = 107 tags over 82 distinct ids.
+  Rollback recipe: docker tag dev-<svc>:pre-<stamp> dev-<svc>:latest && docker compose -p dev up -d
+  --no-deps --force-recreate <svc>  (NO --profile, measured).
+
+== STOP 2-demo PRECONDITION, READ NOW ==
+  pending on [secuura] == {038a} (038a recorded 0 rows, 039/048 present), and {} on [secuura_platform].
+  It holds as of this reading. I re-read it against the REBUILT image's own file list before applying.
+
+== ORDER I WILL FOLLOW AFTER THE GO ==
+  re-read develop (== D0) -> Phase 0 re-tag 31 -> prove fresh set + pre-20260910 33/969f8db925918256 intact
+  -> ITEM 1b delete 33 ids -> settled disk re-read + forecast on the new F0 -> rsync -> Gate B
+  -> build 31 one at a time with the guard IN the loop (originate, migrations, then the rest;
+  api-gateway and anchoring last among backends; frontends last) -> STOP 2-demo -> Gate S
+  -> swap 28 one at a time (auth early, anchoring and api-gateway last among backends) -> verify
+  -> DEPLOYED -> Gate W -> sweep -> STATUS.
+
+== SWEEP PLAN (ITEM 7) ==
+  Inputs verified: markers_live.tsv is cmp-identical in D 12th's and D 13th's boot (sha16 30b1067420470be3),
+  15 rows, KS-1404 and KS-1402 carrying marker-present=NO. D 12th's 8 rows carried as the second block.
+  Every row keeps §5f `live sweep owed`; a demo PASS is a DONE CANDIDATE ONLY. Dist-bytes scoped to the
+  compiled file each fix changed, two-sided against :pre-<stamp>, KS-1345 INVERTED, controls bracketing
+  every verdict (impossible marker 0/0, ubiquitous token N/N). L rows (KS-1005, KS-1210) NOT RUN unless
+  an ANSWER names them; W rows (KS-938, KS-1278) NOT RUN under card -1006 = c.
+
+== LAUNCHER PREFLIGHT WARNINGS, VERBATIM ==
+# launch 2026-10-06T19:55:29Z
+[F-02] No SSH identity available for git (keychain not seeded, on-disk fallback off).
+       Run: ssh-add --apple-use-keychain ~/.ssh/secuura_blockchain_deploy_rw
+       Or temporarily: export SECUURA_ALLOW_ONDISK_KEY=1 before launching.
+       (git will use whatever core.sshCommand is already in the repo config.)
+  F-02 did not bite: every repo verb I ran was a READ, and ls-remote ran under `env -u GIT_SSH_COMMAND`
+  and returned rc 0. I push nothing this round.
+
+== REFUSED, AS THE BRIEF DIRECTS ==
+  The launcher's boot "pull latest if safe" line — REFUSED. No pull, no fetch, not even --dry-run
+  (a --dry-run writes objects). The shared checkout stayed at c56dd7c32edf with its 17 untracked
+  systemTest docs; I never quote its ahead/behind (D 13th trap 2, it under-counts by 23).
+  The SessionStart hook's POST /api/seen — REFUSED (it clears Kam's unread flags).
+
+== INSTRUMENT TRAPS THIS BOOT, ALL MINE ==
+  1. The clobbered deletable artefact, above — one step from deleting the kept set.
+  2. `grep -c ... || echo 0` used once at boot, the banned shape (D 12th trap 4); dropped for the round.
+  3. My re-keyed phase0 stamp check put its required-arg guards AFTER the first output, so it printed a
+     FREE verdict for a malformed tag before refusing. Rewritten with the guards first; both arms now
+     refuse with zero prior output.
+  4. My "no table arg must refuse" arm for hashcheck was measured on macOS, where the refusal was `cd`
+     failing, not my guard (which sits after it). Re-run ON THE BOX: the guard refuses, and a
+     nonexistent table path reads TABLE ABSENT.
+  5. The table-verify path-domain error (box-relative vs repo-relative), above.
+  6. D 13th's trap 4, forward half, CONFIRMED LIVE AND CLOSED. Its OTHER_SEATS contained 'd14',
+     'seat d 14th', 'd 14th' — MY OWN ordinal. Under its list MY OWN LAUNCH BRIEF and MY OWN GO both
+     classify FOREIGN and the watcher would never fire on them. Re-keyed: MINE 'd 13th'->'d 14th';
+     removed my three forms; added backward d13 and forward d15 and the live R 5th/R 6th. Verified by
+     AST import (131 entries, 0 duplicates, MY_PANE unchanged), then DRIVEN on real inbox subjects:
+     11 arms, 0 FAILS, 5 verdicts CHANGED by the re-key, including my own GO FOREIGN -> FOR ME.
+  Wall clock: boot 19:55:29Z, ITEM 0 complete ~20:25Z.
+
+== WHAT I NEED ==
+  1. A ctx read (I cannot read my own).
+  2. THE GO, subject `GO (Seat D 14th): deploy d75bfe2deb80 to demo`, body naming card
+     secuura-demo-disk-retire-old-rollback-sets-1007 and the five sets — without the card named in the
+     body, ITEM 1b does not run.
+  3. Confirmation you accept the LOWER-bound projection (8,878 MiB) as clearing Q-C, given that
+     `docker system df -v` does render and the header-only reading was D 13th's own head -3.
+I am holding. Watcher armed. Nothing on demo is written before THE GO.

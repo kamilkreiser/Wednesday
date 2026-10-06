@@ -1,0 +1,276 @@
+ITEM 0 — plan confirmation (Seat G 3rd). Pane Secuura/Blockchain-G (%74). STOPPING here for your ANSWER.
+Please read my ctx.
+
+== IDENTITY, and the bare read named you AGAIN ==
+Pinned `tmux display-message -p -t "$TMUX_PANE" '#{@cockpit_name}'` = Secuura/Blockchain-G (pane %74).
+BARE `tmux display-message -p '#{@cockpit_name}'` = **wednesday**. That is the SIXTH recurrence.
+The assert caught it inside my first identity call, before any claim rested on it.
+Control: `#{@not_a_real_option_xyz}` on my own pane returns EMPTY, so the instrument is not reading
+everything as set. Independent corroboration: launcher pid 78211 runs
+`[cockpit] Secuura/Blockchain-G`; my claude pid 78213; boot 2026-10-06T19:59:16Z.
+Brief landed 19:59:08Z = 8 s before launch, inside the 2-8 s pattern.
+Live panes: %0 wednesday, %1 fleet-monitor, %73 Secuura/Blockchain-D (pid 73162/73164, booted
+19:55:29Z = Seat D 14th), %74 me. CONFIRMS amendment 6: no live R seat. Only watcher in a ps file
+is mine, pid 92362. R 5th's pid 22699 is ABSENT.
+
+== LAUNCHER PREFLIGHT WARNINGS, VERBATIM ==
+# launch 2026-10-06T19:59:16Z
+[F-02] No SSH identity available for git (keychain not seeded, on-disk fallback off).
+       Run: ssh-add --apple-use-keychain ~/.ssh/secuura_blockchain_deploy_rw
+       Or temporarily: export SECUURA_ALLOW_ONDISK_KEY=1 before launching.
+       (git will use whatever core.sshCommand is already in the repo config.)
+[KS-907] 1 other live session(s) on this project: PID 73164 (up since Wed  7 Oct 06:55:29 2026).
+         The boot git-sync is READ-ONLY this launch — it will NOT pull in 2_Project_Files.
+(end verbatim)
+I REFUSED the launcher's step-1 pull. In 2_Project_Files I ran `git status` and `ls-remote` ONLY:
+no fetch, no pull, no ref write. HEAD there c56dd7c32edf, 0 tracked modifications, 17 untracked
+(all pre-existing systemTest docs + 2 conflict-named snapshots). Local develop is 0 ahead / 48
+behind b3905 — measured against the ls-remote sha, not a tracking ref.
+
+== WED_USAGE_STOP ==
+My reading is **<unset>**, not 100. The brief says I am launched with WED_USAGE_STOP=100. I did not
+set it and am not setting it. Reporting the discrepancy as instructed.
+
+== REFS, by ls-remote, 2026-10-06T20:11:29Z, from 2_Project_Files, GIT_SSH_COMMAND count 0 ==
+develop        b39051390ff6f252601d6f7b45f0ea6c21c31023   == the brief's P3. DEVELOP HAS NOT MOVED.
+refs/pull/1404/head c117c0160684d1ae72b220a8d2ccfe9aafb8eb8d  == P3
+refs/pull/1398/head 9414aa54e92ca243565d0d967aad991dc4c13840  == P3
+So no re-measurement of your table was needed and no fetch was made. b3905 resolves in my
+`git clone --shared --no-checkout` scratch clone (control: a fabricated deadbeef sha does NOT).
+
+== TOOLCHAIN / DISK ==
+node v24.7.0, npm 11.5.1 (== P13). `docker info` rc **1 — DOWN**. I did NOT start Docker Desktop.
+df /Volumes/DevMASTER = 697,786 MiB free (== P13).
+
+== (a) LOCK CENSUS at b3905 ==
+45 tracked package-lock.json (control: a bogus pattern = 0; package.json = 49, so ls-tree sees more
+than locks). **8 entries over 6 locks** — your P4 exactly. In scope: **5 locks, 7 entries**, your
+predicted change set, confirmed:
+  root  Blockchain/Dev/package-lock.json   shell-quote 1.9.0 [dev] | sdk 1.29.0 [prod] | pbkdf2 3.1.5 [prod]  — NO resolved/integrity (D 10th D1)
+  services/mcp-server   sdk 1.29.0 [prod]      res+int
+  frontend/issuer       pbkdf2 3.1.6 [prod]    res+int
+  packages/shared       pbkdf2 3.1.6 [prod]    res+int
+  services/anchoring    pbkdf2 3.1.6 [prod]    res+int
+OUT OF SCOPE, untouched: mobile/secuura-app shell-quote 1.8.3.
+All 5 in-scope locks are lockfileVersion 3, **indent 2**, and NONE is under systemTest — your trap 5
+assertion holds, measured not assumed.
+MANIFEST DECLARERS: the ONLY manifest-level declarer of any of the three is
+`services/mcp-server` -> `@modelcontextprotocol/sdk ^1.27.0` (as a workspace member in the root
+lock, as lock-root in its own). pbkdf2 and shell-quote are purely transitive in all 5. So an
+in-range bump needs **0 manifest edits**.
+IN RANGE, semver 7.8.0, 8 must-pass + 2 must-fail arms, all 10 correct:
+  shell-quote 1.11.0 vs concurrently ^1.8.1              -> true
+  sdk 1.31.0 vs mcp-server ^1.27.0                       -> true
+  pbkdf2 3.1.7 vs ^3.1.3 / ^3.1.2 / ^3.1.5               -> true (4 parents)
+  MUST-FAIL sdk 2.0.0 vs ^1.27.0 -> false; pbkdf2 4.0.0 vs ^3.1.3 -> false
+No major bump, no override, no manifest edit, no out-of-range target. Nothing to STOP on.
+
+== (b) FIXED VERSIONS, instrument = leg 7's own bulk API ==
+CONTROL B (pinned must fire), HTTP 200:
+  shell-quote 1.9.0  critical  GHSA-pqg4-j6r4-53mv  vulnerable >=1.8.4 <1.11.0
+  sdk 1.29.0         high      GHSA-6qxp-vccf-f47h  vulnerable >=1.12.0 <1.31.0
+  pbkdf2 3.1.5/3.1.6 moderate  GHSA-477h-4r7f-fvrx  vulnerable <=3.1.6
+CONTROL A (targets must clear), HTTP 200: body is exactly `{}` for
+  shell-quote 1.11.0 + sdk 1.31.0 + pbkdf2 3.1.7.
+REGISTRY METADATA + INTEGRITY FROM THE TARBALL (your trap 3), 3/3 computed sha512 == dist.integrity:
+  shell-quote 1.11.0  sha512-JdxDPD0DBTyu08pq0kPC0xSNet/qsU07qT6IsX1AS8oO2ICNRY4ldNa8OAI6PuwAH8tG3lxEhbqmyp4Dw4036g==
+  sdk 1.31.0          sha512-UvTMgnNlnIBO/22ob2RcVGDlcvOslQs8T59+FTGdA0L27a39fdGF/EDETNtDVK4DZGpwomlsYpRdA8UXcVL/pw==
+  pbkdf2 3.1.7        sha512-nS4mvFgVwUrecPTRdpdseM2fwpdfnX0/HibA8DgBRQtihUAzHQYJFU2l+OlEtiXtpqkrMvCPDwyXMUnASDt6Qw==
+  NEGATIVE CONTROL: the pbkdf2@3.1.6 tarball does NOT match 3.1.7's integrity — comparator discriminates.
+LOCK-RELEVANT FIELD DIFFS — your "THREE FIELDS PER ENTRY breaks" is CONFIRMED, and I measured the
+exact per-entry field set, which is NOT uniform:
+  root/shell-quote  1.9.0 -> 1.11.0 : `version` ONLY (all other fields equal; entry has no deps field)
+  root/sdk          1.29.0-> 1.31.0 : `version` + `dependencies[@hono/node-server]` ^1.19.9 -> "^1.19.9 || ^2.0.5"
+  root/pbkdf2       3.1.5 -> 3.1.7  : `version` + `dependencies[to-buffer]` ^1.2.1 -> ^1.2.2
+  mcp-server/sdk    1.29.0-> 1.31.0 : `version` + `resolved` + `integrity` + `dependencies[@hono/node-server]`
+  issuer/shared/anchoring pbkdf2 3.1.6 -> 3.1.7 : `version` + `resolved` + `integrity` ONLY
+    (their `dependencies[to-buffer]` is ALREADY ^1.2.2, so it does not move — 3.1.6->3.1.7 is field-equal)
+NO CASCADE: root pins @hono/node-server 1.19.17 (satisfies "^1.19.9 || ^2.0.5") and to-buffer 1.2.2
+(satisfies ^1.2.2); mcp pins @hono/node-server 1.19.17; issuer/shared/anchoring pin to-buffer 1.2.2.
+So 7 entries move and nothing else has to.
+
+== (c) RUNTIME REACH — MEASURED. git show only, no docker build. This is bigger than the leads. ==
+  * **The workspace-ROOT lock reaches NO runtime image.** Across 38 Dockerfiles there are 82 COPY
+    lines naming package*.json and **0** of them COPY the Blockchain/Dev root package*.json.
+    (Control: the same scan counts 82, so it is not blind.) => root shell-quote (dev-only, via
+    concurrently) reaches no image at all. It is still leg 6's **critical** red.
+  * **sdk REACHES the mcp-server runtime image.** mcp-server/Dockerfile FINAL stage `:45`: `:56`
+    COPYs mcp-server's own package.json+lock, `:57` runs `npm ci --ignore-scripts --omit=dev`, and
+    sdk is non-dev in that lock. Shipped. CMD `node dist/http-server.js`.
+  * **pbkdf2 REACHES 25 RUNTIME IMAGES, not 3.** 25 Dockerfiles COPY `--from=shared-builder /shared`,
+    and I parsed each stage properly: **25/25** shared-builder stages run a FULL `npm ci
+    --ignore-scripts` (NOT --omit=dev) from `packages/shared/package*.json`, and **25/25** copy
+    /shared into their FINAL stage. packages/shared's lock pins pbkdf2 3.1.6 as **prod**.
+    anchoring additionally installs it directly (`:38`-`:39`, ci --omit=dev from its own lock).
+    🔴 I had this WRONG first: an awk stage-range returned "no npm ci" for all 25, including
+    mcp-server and anchoring, which I had already READ by hand at `:13`/`:11`. A uniform answer with
+    two known-false cases is a blind instrument, so I rewrote it as a real FROM-stage parser and
+    re-drove it; the two hand-read files are the positive control and they now agree.
+    Control: a non-existent stage name matches 0 Dockerfiles.
+  * **frontend/issuer: STRONGLY INDICATED, NOT MEASURED.** Final stage is nginx serving `/app/dist`
+    (`:45`), so no node_modules ships. 0 direct imports of pbkdf2 in issuer/src (control: react hits
+    57 files). pbkdf2 arrives via `crypto-browserify ^3.12.1`, a DIRECT issuer dependency, and
+    `vite.config.ts:16`-`:17` configures `nodePolyfills({ include: ['buffer','crypto','stream',
+    'process','util'] })` for @meshsdk/core — and that polyfill's `crypto` implementation IS
+    crypto-browserify, which depends on pbkdf2. So it very likely lands in the browser bundle, but I
+    will not call it measured without a build. Your widened Q-TESTS includes `frontend/issuer npm run
+    build`; I propose settling it there by grepping the built dist, and reporting the answer.
+  * mcp-server imports only `@modelcontextprotocol/sdk/server/mcp.js` and `server/stdio.js`.
+    GHSA-6qxp is about the OAuth CLIENT. Whether it is exercised stays UNMEASURED (import lines are
+    not a measurement of reachability).
+
+== (e) BASE CONTROL — both legs reproduce your P1 EXACTLY, in my scratch clone at b3905 ==
+(`npm ci --ignore-scripts` in scripts/audit only, rc 0, that lock byte-unchanged)
+  leg 6 `node scripts/audit/audit-gate.mjs` rc **1**:
+    "audit-gate: 12 distinct advisories reported, 24 baselined."
+    "FAIL — 3 NEW advisories not in the baseline:" GHSA-6qxp [high], GHSA-477h [moderate], GHSA-pqg4 [critical]
+    plus the CLEANUP advisory listing **15** baseline entries no longer reported. I made NO baseline edit.
+  leg 7 `node scripts/audit/audit-locks.mjs` rc **1**:
+    "43 standalone lockfiles ... 1613 distinct packages pinned — 9 advisories match, 7 already baselined."
+    "FAIL — 2 advisories": sdk pinned 1.29.0 in 1 lock (services/mcp-server); pbkdf2 pinned 3.1.6 in
+    3 locks (frontend/issuer, packages/shared, services/anchoring).
+
+== (d) Q-METHOD — I measured BOTH paths, and the regen CANNOT deliver your ruled target ==
+docker info rc 1, so the card's containerised per-dir regen cannot run as written; I did not start Docker.
+I measured the HOST regen (node 24 / npm 11.5.1) in throwaway scratch copies, never a tracked tree:
+  1. packages/shared, `npm update pbkdf2 --package-lock-only --no-workspaces`: **CLEAN** — exactly 1
+     entry changed, 3 fields (version/resolved/integrity), 0 added, 0 removed, 0 collateral, 0
+     top-level key changes, manifest byte-identical. Its new integrity == the value I computed from
+     the tarball independently.
+  2. 🔴 **mcp-server: `npm update` produced sdk 1.32.1, NOT the ruled 1.31.0.** And on the root lock
+     it produced shell-quote **1.12.0** (not 1.11.0) and sdk **1.32.1**. `npm update` resolves to
+     LATEST-IN-RANGE by construction. Your amendment 1 rules the LOWEST clearing version and says
+     latest-in-range is not wanted. So for 2 of 3 packages the regen path cannot produce the ruled
+     result at all; pinning 1.31.0/1.11.0 would need `npm install <pkg>@<ver>` (rewrites package.json
+     — a manifest edit you forbid) or an `overrides` entry (forbidden).
+  3. Root lock regen collateral, measured correctly (full workspace present, no --no-workspaces):
+     3 planned entries + **12 COLLATERAL dev-flag flips** — 11 lightningcss platform binaries and
+     magicast — reproducing B 56th's §3a precedent. It also ADDS `resolved`+`integrity` to the three
+     root entries, which have NEITHER at base: a shape change on top of the wrong versions.
+     (A first attempt of mine showed the root lock collapsing 677,474 -> 133,858 bytes with sdk
+     ABSENT. That was MY error — I had copied only the root manifest+lock without the workspace
+     members, so --no-workspaces re-resolved a tree that was not there. I re-ran it properly rather
+     than report it, and the correct run touches 0 manifests and grows the lock by 816 bytes.)
+**PROPOSAL: (i) SURGICAL**, a data-driven editor extended from applylocksd10.py under my own name.
+It is the only path that writes the RULED lowest-clearing versions with 0 collateral and 0 manifest
+bytes. It must write a per-entry field set that is NOT uniform (table in (b)), so I will extend
+D 10th's three-field writer (`:70`) to carry `dependencies` where (b) shows it moves, and to write
+NO resolved/integrity on root entries that have none. CROSS-CHECK as you require: the regen output
+is the independent witness where the targets coincide (pbkdf2 3.1.7 in packages/shared — already
+proven field-identical above), and registry metadata + tarball sha512 for the rest. If you would
+rather I produce a full regen cross-check at the ruled pins, the only way I see is a TEMPORARY
+`overrides` in a throwaway scratch copy purely to generate the comparison artefact, never committed
+— I have NOT done that and will not without your ruling.
+
+== PROJECT RULES, quoted from develop with blob ids ==
+.claude/skills/secuura-test-discipline/SKILL.md (blob b59b74a592e9), the only skill at b3905:
+ §1 a written plan before any edit — THIS mail is it. §5d every changed line carries a WHY + ticket
+ comment; JSON locks cannot carry comments, so the WHY goes in the commit body and the PR, per the
+ KS-1425 precedent — saying so explicitly. §5e no branches/tickets unless instructed — both are
+ instructed here, on your ANSWER; no .env read or staged. §5f a runtime-behaviour change does not go
+ Done on offline green — sdk is a prod dependency of a shipped service, so I will report numbers and
+ name what is unverified. §6e LTS only: node 24 / node:24-alpine.
+repo CLAUDE.md blob ff426ce6097d: register rule, preflight rule, leg 6 audits the HOISTED root tree,
+leg 7 reads each standalone lock, and `npm audit` inside a member does not read that member's lock.
+
+== LINEAR, read-only. NO DUPLICATE EXISTS. ==
+searchIssues over shell-quote / modelcontextprotocol / pbkdf2 / the three full GHSA ids / pqg4 /
+6qxp / 477h / "advisory freeze" / "lock refresh", includeArchived.
+  * The three SHORT ids return **0** each. CONTROL: `mwp4` (which is written into KS-729's title)
+    returns **8** — so the zeros are real, not a dead search.
+  * The three FULL GHSA ids return 25 fuzzy hits each and **0 LITERAL** matches in title or
+    description. CONTROL: `GHSA-mwp4-54f8-5fhr` returns **6 LITERAL** (KS-729, KS-635, KS-559,
+    KS-1378, KS-1395, KS-1399) — so the literal test can find an id that is really there.
+  * Neighbours: KS-1425 In Progress, Urgent, project "Dependency and Version Currency" (the
+    precedent). KS-1426 Backlog. KS-1403 In Progress (three range-widened HIGHs, different ids).
+  * Backlog census 245: Urgent 3, High 61, Medium 123, Low 38, None 20.
+    Done in the last 24 h: 7 (KS-1386, KS-1133, KS-588, KS-572, KS-571, KS-568, KS-502).
+
+== TICKET DRAFT (filed only on your ANSWER) ==
+Title: "Three new advisories freeze every push: in-range lock refresh for shell-quote, MCP SDK and pbkdf2"
+Project "Dependency and Version Currency", priority **Urgent**, board account (same assignee as KS-1425).
+Body carries: the three ids/severities/pinned/target; the 5-lock 7-entry change set; the measured
+runtime-reach table (root lock reaches 0 images; sdk -> mcp-server image; pbkdf2 -> 25 images via
+/shared; issuer bundle indicated-not-measured); the base-control leg 6/7 output; "no baseline row
+this round" and the 15 stale CLEANUP rows left out (KS-767); cross-refs KS-470, KS-531, KS-1425; and
+Kam's ruling VERBATIM as the authority line.
+
+== RE-SEAT (g2 -> g3), done in my record folder, with receipts ==
+36 tools copied, 0 hash mismatches (control: two different files mismatch). `reseat_g3.py`,
+plan-then---apply, exact-string with asserted counts, refuse-before-write: **20 edits, 0 unresolved**.
+All 21 .py AST-parse and all 16 .sh pass `bash -n`.
+🔴 **A REAL KIT DEFECT, not a rename.** namecheckg1.py drove branch, worktree AND lock ownership from
+ONE knob MINE="g1", but Q-LOCK keeps `.push-lock-g1` while Q-WT names `s-g3-advlock` / `-g3-1`.
+MEASURED on the unmodified kit, FOUR wrong readings:
+   my branch `...-g3-1`        -> NOT mine
+   my worktree `s-g3-advlock`  -> NOT mine
+   `s-g1-ks1330` (G 1st's)     -> **MINE**  (your HOLDS say leave it)
+   `s-ra4-ks1436` and `-ra4-6` -> **NEITHER mine nor foreign**
+The last is the live hazard: that worktree holds R 5th's UNPUSHED M 7849f0a23d06, which I am
+forbidden to read-write or remove, and the guard could not see it. The whole `ra` lane was absent
+from FOREIGN — it was created after G 2nd re-seated. Same class as the `e3`-absent defect.
+FIX: MINE -> "g3"; `_MINE_LOCK` PINNED to the literal ".push-lock-g1"; the g1 namespace made foreign
+by ANCHORED forms (`s-g1-`, `-g1-<k>$`) and deliberately NOT by a bare "g1" token, because
+`.push-lock-g1` segs to ['.push','lock','g1'] and a bare token would make MY OWN LOCK read foreign —
+measured, not assumed; ra1..ra6 added to FOREIGN.
+🔴 AND the kit held TWO INDEPENDENT foreignness computations: `scan_ns` and `verdict`. My anchored
+forms landed in only the first, so `s-g1-planted` read FOREIGN through one and NEITHER through the
+other IN THE SAME RUN. Both now call one `foreign_of`, so a later generation cannot fix half of it.
+PROOF, 9 real names, all 9 correct: my branch/worktree/lock MINE; s-g1-ks1330 + G 1st's branch
+FOREIGN; s-ra4-ks1436 + the ra4 branch + s-ra3-ks1136 FOREIGN; and
+`feature/ks-539-g1-split-ruling` still NEITHER, preserving G 1st's own documented rule that a bare
+g1 segment is not ownership.
+namecheck selftest: 7 checks, 0 bad, **24/24 controls fired**.
+trap4: **41 arms, 0 wrong, 9 of 9 must-fire controls** — including your required arms: a real
+`GO (Seat G 2nd): merge 1389 on gate64` reads FOREIGN, a real `-R` subject reads
+`for blockchain-r],r 5th,seat r 5th`, and the UNTAGGED arm `(Seat G 9th)` still fires because I
+added g 4th (not g 9th) to OTHER_SEATS. OTHER_SEATS gained g 2nd, g 4th, r 5th, r 6th, d 13th,
+d 14th AND the `blockchain-r]` pane tag, which no generation had.
+Also re-keyed, because they carried my predecessor's identity: the planted MINE fixtures (s-g1-
+-> s-g3-), the BRANCHES row table (G 1st's eight-ticket queue -> my ONE row) and the SUBJECTS table
+(the E lane's three auth subjects -> my one). I am the THIRD generation to record that row-table
+correction. Stale knobs re-pointed out of G 2nd's dead session: armsg1.py:65, mergeg1.py:120 and
+`mergeing2.sh:7`, which your §3.3 did not name.
+⚠ `rekey_checkg1.py` keys on a TWO-DIGIT generation, so a lettered seat has **no independent re-key
+auditor**. Saying so, as §3.9 requires: every re-seat claim above is my own instrument on itself.
+My row key is the placeholder `@@KS@@` until ITEM 1 files the ticket, and I BUILT the gate that
+refuses to scan an unresolved row — driven 3 ways: no override -> rc 2 and refuses; ALLOW_UNRESOLVED=1
+-> runs and SAYS it scanned a placeholder; key resolved -> clean, 0 bad. (R 4th shipped a comment
+naming a gate that did not exist; this is that comment's gate, built.)
+Your prescribed commit subject validates: 80 chars declared, LANDS 88 with " (#NNNN)", ASCII, 0 bad.
+
+== LOCKS AND PARTITION ==
+0 `.push-lock-*` in worktrees/ at boot (control: `find` sees 499 dirs there, so the zero is real;
+a bogus lock name returns 0). WAIT-set parity: lockg1.sh `:279`-`:282` and pushg1.sh `:163`-`:168`
+BOTH default to {-56, -e4, -f3, -d8}, identical, and `-g1` is each file's OWN lock, not a wait
+entry — so the parity you asked for holds. Note all four named seats (B 61st, E 4th, F 3rd, D 8th)
+have wrapped; the live D 14th is a DEPLOY seat that takes no push lock, and `-d8` is the R lane's
+lock (lockra1.sh:217), so the set is still live-correct if R 6th launches.
+
+== QUESTIONS ==
+Q-TARGET: ACCEPT as ruled — shell-quote 1.11.0, sdk 1.31.0, pbkdf2 3.1.7. All three clear (control
+  A `{}`), all three in range, smallest delta. I am NOT proposing latest-in-range.
+Q-METHOD: I propose **(i) SURGICAL**, for the measured reason in (d): the regen path cannot produce
+  the ruled lowest-clearing versions for 2 of 3 without a forbidden manifest edit or override, and
+  it carries 12 collateral dev-flag flips plus a field-shape change on the root lock. Please rule,
+  and rule on whether a throwaway-scratch `overrides` cross-check is permitted.
+Q-WT: ACCEPT — worktree `worktrees/s-g3-advlock`, branch `feature/ks-<new>-advisory-lock-refresh-g3-1`,
+  from b3905, under the lock. Both names now read MINE on the re-seated namecheck.
+Q-PF: ACCEPT — in-hook `PREFLIGHT INCOMPLETE — 12/15 legs ran, 3 SKIPPED. Nothing failed.` with
+  legs 3/4/8 stack-skipped. Legs 2, 5, 6, 7 must RUN and pass. Any FAILED is a STOP; I will never
+  read the ratio alone.
+Q-TESTS: ACCEPT the widened set. Note my (c) makes `frontend/issuer npm run build` load-bearing —
+  it is the arm that settles whether pbkdf2 reaches the browser bundle. Everything not run goes in
+  Test Evidence as NOT run, with why.
+Q-TKT: ACCEPT — ONE ticket, Urgent, "Dependency and Version Currency", board account, filed only
+  after your ANSWER. Duplicate search is above and reads 0 with both controls firing.
+
+== WHAT I HAVE NOT DONE ==
+No lock take, no fetch, no worktree add, no ref write, no npm write into any tracked tree, no ticket
+write, no comment, no PR, no baseline edit, no manifest edit, no deploy/az/ssh/docker. I did not
+touch deploy-clones/, local-deploy/, the demo box, s-ra4-ks1436, s-ra3-ks1136, s-g1-ks1330, any ra*
+branch, mobile/secuura-app, or the gate kits. All npm writes were in throwaway scratch copies under
+my session scratchpad. Record folder 5_Project_History/2026-10-06_seatG-3rd/.
+
+STOPPING for your ANSWER. Watcher pid 92362 armed, SINCE 2026-10-06T19:59:08.000Z (my brief, the
+newest mail I have read), 60 s, fire-on FOR-ME.
