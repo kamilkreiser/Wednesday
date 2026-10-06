@@ -26997,9 +26997,9 @@
   ],
   "recommended": "a",
   "ts": "2026-10-06T19:58:21.730878+11:00",
-  "status": "open",
-  "ruled_choice": null,
-  "ruled_ts": null,
+  "status": "ruled",
+  "ruled_choice": "a",
+  "ruled_ts": "2026-10-06T20:41:45.628631+11:00",
   "seat": "friday",
   "prior_rulings_overridden": [
    "2026-08-17 20:10",
@@ -27053,9 +27053,9 @@
   ],
   "recommended": "a",
   "ts": "2026-10-06T19:58:23.529681+11:00",
-  "status": "open",
-  "ruled_choice": null,
-  "ruled_ts": null,
+  "status": "ruled",
+  "ruled_choice": "a",
+  "ruled_ts": "2026-10-06T20:41:42.698584+11:00",
   "seat": "friday",
   "prior_rulings_overridden": [
    "2026-08-10 08:45",
@@ -27129,9 +27129,9 @@
   ],
   "recommended": "a",
   "ts": "2026-10-06T19:58:25.386169+11:00",
-  "status": "open",
-  "ruled_choice": null,
-  "ruled_ts": null,
+  "status": "ruled",
+  "ruled_choice": "a",
+  "ruled_ts": "2026-10-06T20:40:45.968518+11:00",
   "seat": "friday",
   "prior_rulings_overridden": [
    "2026-08-17 20:10",
@@ -27182,9 +27182,9 @@
   ],
   "recommended": "a",
   "ts": "2026-10-06T19:58:27.207599+11:00",
-  "status": "open",
-  "ruled_choice": null,
-  "ruled_ts": null,
+  "status": "ruled",
+  "ruled_choice": "a",
+  "ruled_ts": "2026-10-06T20:40:42.764136+11:00",
   "seat": "friday",
   "prior_rulings_overridden": [
    "2026-08-17 20:10",
@@ -27241,9 +27241,9 @@
   ],
   "recommended": "a",
   "ts": "2026-10-06T20:03:35.626152+11:00",
-  "status": "open",
-  "ruled_choice": null,
-  "ruled_ts": null,
+  "status": "ruled",
+  "ruled_choice": "a",
+  "ruled_ts": "2026-10-06T20:40:38.822835+11:00",
   "seat": "friday",
   "prior_rulings_overridden": [
    "2026-09-07 06:42",
@@ -27299,6 +27299,136 @@
    "CARD secuura-headroom-before-90pct-stop-1006",
    "CARD hpsmpoc-optin-warning-text-1006",
    "CARD hpsmpoc-lab-fss-t2-1006"
+  ]
+ },
+ {
+  "id": "hpsmpoc-narrative-timeout-221-1006",
+  "client_project": "Datasec/HPSM-POC",
+  "title": "Your executive-summary error: the AI answered after the 12-second cap. What should happen then?",
+  "bluf": "The error you hit on the narrative page (HPSMPOC-221, 08:34 and 08:40 UTC) was the AI taking 7 s and 16.5 s to answer, past the 12-second cap you set for live AI (C-28 b). Nothing is broken; the cap refused the late answer as designed. Measured by seat B170 from the hosted audit rows and Azure OpenAI's own metrics (both requests returned 200 to the API, too late). Meanwhile I am having the start-up delay (~4.8 s before the model call, likely the first token and connection) removed, which needs no ruling but would only have saved the first attempt.",
+  "default_action": "Nothing on the product's failure behaviour changes until you choose. The start-up delay fix proceeds anyway (engineering only, gated before merge).",
+  "options": [
+   {
+    "key": "a",
+    "label": "Keep 12 s; on a timeout, show the template summary automatically, labelled as such",
+    "detail": "The presenter never sees an error on stage. Changes what the product does on failure, so it is your call."
+   },
+   {
+    "key": "b",
+    "label": "Raise the cap to 25 s",
+    "detail": "Reverses your C-28 b ruling; a 16 s wait on stage."
+   },
+   {
+    "key": "c",
+    "label": "Ask for a shorter summary (fewer tokens / new template version)",
+    "detail": "Faster, but changes approved AI text (C-54), so it comes back to you to approve."
+   },
+   {
+    "key": "d",
+    "label": "Only the start-up fix, nothing else",
+    "detail": "A slow model answer still shows the error."
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-10-06T20:40:01.606168+11:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "seat": "friday",
+  "prior_rulings_overridden": [
+   "2026-08-17 20:23",
+   "2026-09-08 11:41",
+   "CARD secuura-ks740-maxitems-timeout",
+   "CARD vision-prod-postgres-idle-transaction-timeout",
+   "CARD hpsmpoc-require-sqlserver-ci-check-1006",
+   "CARD hpsmpoc-6f6bc96-hosted-deploy-1006",
+   "CARD secuura-ks1402-s-key-cannot-carry-users-read-1006",
+   "CARD secuura-ks1256-redis-outage-stops-connector-creates-1006",
+   "CARD secuura-uuid-revokes-never-wrote-status-history-1006",
+   "CARD hpsmpoc-sm-fta-external-access-1006",
+   "CARD composer-guided-view-1006",
+   "CARD composer-e8-mapping-1006",
+   "CARD composer-policy-target-1006",
+   "CARD composer-prior-unreleased-1006",
+   "CARD hpsmpoc-input-phase-a-1006",
+   "CARD hpsmpoc-sm-admin-optin-1006",
+   "CARD hpsmpoc-yes-no-rule-1006",
+   "CARD secuura-five-new-advisories-freeze-every-push-1006",
+   "CARD composer-19c5e8a-deploy-1006",
+   "CARD secuura-headroom-before-90pct-stop-1006",
+   "CARD hpsmpoc-optin-warning-text-1006",
+   "CARD hpsmpoc-lab-fss-t2-1006"
+  ]
+ },
+ {
+  "id": "hpsmpoc-feedback-files-route-1006",
+  "client_project": "Datasec/HPSM-POC",
+  "title": "Feedback attachments: should the files land on the Jira issue itself, or stay in the Playbook?",
+  "bluf": "Feedback can now carry files (screenshots, PDFs, logs; up to 5 files, 10 MB each, 20 MB in all), built by seat B169 and going to a full test gate now. Today feedback reaches Jira through your Jira Automation webhook, which cannot carry a file. Files can land ON the issue only through the Jira API with a service-account token, which does not exist yet. Measured by B169 from the code (route A webhook on, route B built and tested against stubs only). Your 29 Sep ruling (hpsmpoc-c30-feedback-route, a) chose the webhook; option a keeps it.",
+  "default_action": "Option c: files are kept in the Playbook and listed on the issue, nothing new is built until you choose.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Keep the webhook: files stay in the Playbook, the issue lists them, and an Admin can download them",
+    "detail": "No new token. Adds an Admin-only download in the Playbook."
+   },
+   {
+    "key": "b",
+    "label": "Create a Jira service-account token so files land on the issue",
+    "detail": "Reverses your 29 Sep choice (card hpsmpoc-c30-feedback-route: the webhook over a service account). A service account may cost an Atlassian seat; you would create the token (I give the exact steps). Files then attach to the issue automatically."
+   },
+   {
+    "key": "c",
+    "label": "Keep the webhook, no download for now",
+    "detail": "The issue says files are held in the Playbook; nobody can open them yet."
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-10-06T20:43:04.018885+11:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "seat": "friday",
+  "prior_rulings_overridden": [
+   "CARD nexusai-feedback-loop-mechanism",
+   "CARD nexusai-rd135-scim-route",
+   "CARD nexusai-rd303-rd307-key-shaped-files-in-repo",
+   "CARD nexusai-rd310-which-of-three-files-are-customer-data",
+   "CARD secuura-admin-credential-rotation-183-files",
+   "CARD vault-add-a-stages-another-clients-files",
+   "CARD secuura-ks953-anchor-grammar-for-the-non-route-site",
+   "CARD vision-portal-feedback-report-unauthenticated",
+   "CARD nexusai-release-package-files-into-main",
+   "CARD nexusai-package-files-scope",
+   "CARD secuura-ks1348-log-files-persist-secrets",
+   "CARD secuura-ks1348-r2-files-still-leak-allowlist",
+   "CARD hpsmpoc-c30-feedback-route",
+   "CARD composer-ux-feedback-button-place",
+   "CARD hpsmpoc-feedback-pill-colour-1003",
+   "CARD hpsmpoc-hosted-clean-old-static-files-1005",
+   "CARD hpsmpoc-require-sqlserver-ci-check-1006",
+   "CARD hpsmpoc-6f6bc96-hosted-deploy-1006",
+   "CARD secuura-ks1402-s-key-cannot-carry-users-read-1006",
+   "CARD secuura-ks1256-redis-outage-stops-connector-creates-1006",
+   "CARD secuura-uuid-revokes-never-wrote-status-history-1006",
+   "CARD hpsmpoc-sm-fta-external-access-1006",
+   "CARD composer-guided-view-1006",
+   "CARD composer-e8-mapping-1006",
+   "CARD composer-policy-target-1006",
+   "CARD composer-prior-unreleased-1006",
+   "CARD hpsmpoc-input-phase-a-1006",
+   "CARD hpsmpoc-sm-admin-optin-1006",
+   "CARD hpsmpoc-yes-no-rule-1006",
+   "CARD secuura-five-new-advisories-freeze-every-push-1006",
+   "CARD composer-19c5e8a-deploy-1006",
+   "CARD secuura-headroom-before-90pct-stop-1006",
+   "CARD hpsmpoc-optin-warning-text-1006",
+   "CARD hpsmpoc-lab-fss-t2-1006",
+   "CARD composer-e8-level-after-policy-1006",
+   "CARD composer-66-no-changes-setting-1006",
+   "CARD composer-unanswered-items-warn-1006",
+   "CARD composer-wording-asd-fixes-1006",
+   "CARD hpsmpoc-demo-login-role-1006"
   ]
  }
 ]

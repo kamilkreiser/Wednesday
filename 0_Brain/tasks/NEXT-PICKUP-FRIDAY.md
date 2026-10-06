@@ -12,6 +12,23 @@ supersede: replace wholesale; previous = NEXT-PICKUP-FRIDAY.md.pre-0925-rotate-s
 
 **The tree is at `/Volumes/Laptop-DEV/FRIDAY` (the drive, since 2026-09-28).** Quote every path (spaces).
 
+## 🔴🔴🔴 CHECKPOINT 2026-10-06 20:43 (Friday successor, ctx 50%) — READ FIRST; supersedes every block below where they differ
+**FIRST ACT after rotation:** kam_rulings_today.sh + reconcile_rulings.py; seat_idle.sh on every pane below; read each STATUS's last lines; re-seed + re-arm ONE watcher (globs: `HPSM-POC/1_Project_Definition/Briefs/2026-10-06_B1[67][0-9]*STATUS*.md`, its `.tools/*/…` twin, `Composer Briefs/2026-10-06_B9[2-9]*STATUS*.md`, `Composer/_wt_b9*/…/2026-10-06_B9[2-9]*STATUS*.md`; WATCH_PANES = every pane below).
+**Kam since 20:07 (all reconciled + hidden + receipted):** composer-wording-asd-fixes a → B92 ADDENDUM-1 (after its hide-Guided round) · composer-unanswered-items-warn a, composer-66-no-changes-setting a (keep C-11), composer-e8-level-after-policy a → **OWED: all three under RULED BY KAM in the 66-in-Expert / policy-target build brief (not yet commissioned; launch after B92 merges)** · hpsmpoc-demo-login-role a (Admin stays; C-number owed in next HPSM-POC records; re-raise before HP gets the login).
+**OPEN CARDS (Friday tab):** `hpsmpoc-narrative-timeout-221-1006` (rec a: template summary on timeout; HPSMPOC-221 = AI 7.2 s / 16.5 s vs your 12 s cap C-28 b) · `hpsmpoc-feedback-files-route-1006` (rec a: webhook stays, Admin download; b reverses the 29 Sep route ruling). Still asked on the panel before 20:07: Q-7 E8 checkers' names; whether to email the demo login's password + authenticator key (only on his word).
+**MAINS:** HPSM-POC **019cf9b** (#118 source-map-js, #117 home flow, #115 burger, merged by merge_when_green) · hosted 646870e until B173 lands · analysis 188c004 · Composer 19c5e8a = demo.
+**LIVE PANES:**
+- %80 HPSM-POC-A B166 idle: fold B167's drill-down fields into map §4c (new records branch) when B167's samples land.
+- %81 HPSM-POC-B B167 lab (FSS on our copy). %82 HPSM-POC-C B168 A2+A3 (A1 = PR #116).
+- %85 HPSM-POC-D B169: Lane 2 attachments READY FOR GATE → gate below; lanes 1 + audit fix MERGED.
+- %86 HPSM-POC-E B170: ADDENDUM-3 = AI warm-up on start-up (no model call), branch b170/ai-warmup from 019cf9b. Hosted logging is ON (left on). HPSMPOC-224 deferred.
+- %88 HPSM-POC-QA **B172** tier-1 gate on B168 A1 (PR #116 @ f2532dd) → on GO: merge_when_green #116 (rebase/next minor vs B169 L2's 0.12.0 — second to merge rebases).
+- %89 HPSM-POC-F **B173** hosted deploy of 019cf9b (ci run 37443907629; ADDENDA 1 run id, 2 slow 4–6 min container boot) → on READY: Friday checks live (health, build id, signed-in home flow + burger), report deploy on the panel, records PR.
+- %90 HPSM-POC-QA2 **B174** tier-1 gate on B169 L2 (b169/feedback-attachments @ 6807c2b; behind main by 3) → on GO: PR + merge.
+- %83 Composer-D B92 hide Guided: waiting on its OFF e2e + ci.sh (ON 605/605) → READY → PR/merge/deploy demo under the grant → then ADDENDUM-1 (ASD wording #232/#233).
+**OWED:** ticket B169's load-sensitive `web/src/web-settings.test.ts` timeout (via a seat) · C-44 braces renew card before 2026-10-31.
+**Ledger tonight:** composed CI run id in B173 brief (corrected in a minute); `echo ===` in zsh killed a queued merge.
+
 ## 🔴🔴🔴 ROTATION HANDOVER 2026-10-06 20:07 (Friday, ctx ~79%) — READ FIRST; supersedes every block below where they differ
 **FIRST ACT:** kam_rulings_today.sh + reconcile_rulings.py; seat_idle.sh on every pane below; read each STATUS's last lines; re-seed + re-arm ONE watcher: `friday/watch_status.sh <scratchpad>/seen_all "<HPSM-POC>/1_Project_Definition/Briefs/2026-10-06_B1[67][0-9]*STATUS*.md" "<HPSM-POC>/.tools/*/1_Project_Definition/Briefs/2026-10-06_B1[67][0-9]*STATUS*.md" "<Composer>/1_Project_Definition/Briefs/2026-10-06_B9[2-9]*STATUS*.md"` with WATCH_PANES = the live panes (seed first with --seed).
 **GRANT (Kam 19:31, scope confirmed in terminal):** READY (gate passed + Friday's check + merged via CodeQL) → deploy to the Composer demo AND hosted HPSM-POC WITHOUT a card; runbooks unchanged; report each deploy. NOT a content release that makes engagements read-only (that one is a card).
