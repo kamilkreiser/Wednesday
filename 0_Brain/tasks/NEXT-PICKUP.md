@@ -3,7 +3,7 @@ date: 2026-10-06
 type: pickup
 scope: SECUURA + all general/generic work. Datasec is TUESDAY's; FRIDAY (laptop) works both and claims before driving.
 status: live
-supersede: REPLACED WHOLESALE 2026-10-06 19:2x by the evening seat (booted 18:0x) at its 52% checkpoint. Replace wholesale again; never stack.
+supersede: REPLACED WHOLESALE 2026-10-06 19:1x by the evening seat (booted 18:0x) at its 52% checkpoint. Replace wholesale again; never stack.
 ---
 
 # NEXT PICKUP
@@ -15,7 +15,7 @@ supersede: REPLACED WHOLESALE 2026-10-06 19:2x by the evening seat (booted 18:0x
 
 ## LIVE NOW
 - **Seat E 8th** (pane `Secuura/Blockchain-E`, %65): merged #1396, ordered to WRAP COLD (19:16 ANSWER, verified 08:16:48Z) with two conditional worktree removals (`s-e6-ks1256` if HEAD == 91d441e42c0d; `s-d10-advlock` if HEAD == 3e7be2044fe8; both porcelain 0, no --force). On its WRAP: re-hash the handover, check the history entry, score it (rec 1.0: three of its own instruments failed and it caught all three itself), then `pane_close`.
-- **Seat R 2nd: READY TO LAUNCH on E 8th's wrap.** Brief `fleet/briefs_staged/2026-10-06_seatR2_1395_merge_and_raise.md` (READ WHOLE by Wednesday 19:2x; backup `.pre-1006-send`). Send amendment staged at `<this seat's scratchpad>/amend_r2.md`. It is NOT durable, so re-derive it if this seat is gone. Its content: #1396 merged at f556373b; run 1 = `predict`, not `chain`; Wednesday's first-hand @T1395@ = **c39aeeca92b9e6c2c1dddd0c62138fd3b95c1a46** on f556373b (both READ-BACK OK; wrong-order control 68e6cfbff63c FAIL; own `--shared` scratch clone, shared rev-parse --all unchanged); Q-BASE2 ruled (raise base = develop at ANSWER); Q-5F2 yes; budget: merge first, cold at 60%. To send: replace `@DEVELOP_LAUNCH@` → f556373b941823931a9858a788c478e50e822a79 and `@SEND_UTC@` → the send time throughout, prepend the amendment, then `brief_and_launch.sh --to "Secuura/Blockchain-R"` (clause cloud: merge + raise). **The GO goes as its OWN mail whose SUBJECT IS `GO (Seat R 2nd): merge 1395 on gate69`** (brief :171; ledger 10-06 w=2 GO-shape). Body carries @DEVELOP_1396@ = f556373b… and @T1395@ = c39aeeca…, and states #1396 merged.
+- **Seat R 2nd: READY TO LAUNCH on E 8th's wrap.** Brief `fleet/briefs_staged/2026-10-06_seatR2_1395_merge_and_raise.md` (READ WHOLE by Wednesday 19:1x; backup `.pre-1006-send`). Send amendment staged at `<this seat's scratchpad>/amend_r2.md`. It is NOT durable, so re-derive it if this seat is gone. Its content: #1396 merged at f556373b; run 1 = `predict`, not `chain`; Wednesday's first-hand @T1395@ = **c39aeeca92b9e6c2c1dddd0c62138fd3b95c1a46** on f556373b (both READ-BACK OK; wrong-order control 68e6cfbff63c FAIL; own `--shared` scratch clone, shared rev-parse --all unchanged); Q-BASE2 ruled (raise base = develop at ANSWER); Q-5F2 yes; budget: merge first, cold at 60%. To send: replace `@DEVELOP_LAUNCH@` → f556373b941823931a9858a788c478e50e822a79 and `@SEND_UTC@` → the send time throughout, prepend the amendment, then `brief_and_launch.sh --to "Secuura/Blockchain-R"` (clause cloud: merge + raise). **The GO goes as its OWN mail whose SUBJECT IS `GO (Seat R 2nd): merge 1395 on gate69`** (brief :171; ledger 10-06 w=2 GO-shape). Body carries @DEVELOP_1396@ = f556373b… and @T1395@ = c39aeeca…, and states #1396 merged.
 
 ## THE QUEUE, in order
 1. R 2nd launch (above) → ITEM 0 ANSWER → subject-form GO → merge #1395 → raises.
