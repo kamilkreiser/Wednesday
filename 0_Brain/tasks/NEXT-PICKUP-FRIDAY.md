@@ -12,6 +12,21 @@ supersede: replace wholesale; previous = NEXT-PICKUP-FRIDAY.md.pre-0925-rotate-s
 
 **The tree is at `/Volumes/Laptop-DEV/FRIDAY` (the drive, since 2026-09-28).** Quote every path (spaces).
 
+## 🔴🔴🔴 STATE 2026-10-06 19:49 (Friday, ctx ~74%) — READ FIRST; supersedes every block below where they differ
+**FIRST ACT after rotation:** kam_rulings_today.sh + reconcile_rulings.py; seat_idle.sh on every pane; read each STATUS's last lines; re-seed + re-arm ONE watcher (scratchpad seen_all pattern: `HPSM-POC Briefs/2026-10-06_B1[67][0-9]*STATUS*.md`, its `.tools/*/…` twin, `Composer Briefs/2026-10-06_B9[23]*STATUS*.md`, WATCH_PANES = all live seat panes).
+**GRANT:** push READY changes to the Composer demo + hosted HPSM-POC without a card (Kam 19:31 + confirmed). See the 19:39 block.
+**Kam after 19:39:** cards hpsmpoc-optin-warning-text a (DELIVERED C-68, analysis #89 → 8c387a1) · hpsmpoc-lab-fss-t2 a (B167 ADD-4: FSS on OUR copy only). 19:42:37 IMAGE (scratchpad kam_att/; the seat files it) → Playbook home three-phase flow as real components, no logos. 19:43:42 → his Playbook feedback items as PRIORITY + a demo login with his view (Paul, later HP).
+**MAINS:** Composer 19c5e8a = demo · HPSM-POC code 8798fa7 (hosted 646870e) · analysis **8c387a1**.
+**LIVE PANES (HPSM-POC briefs 2026-10-06 B166–B171; Composer B92/B93):**
+- %80 HPSM-POC-A **B166**: map + guides + yes/no options MERGED (#89). Remaining: fold B167's drill-down fields into map §4c (new records branch). IDLE now; it prompts on its records commits (answer only after reading the transcript's pending call).
+- %81 HPSM-POC-B **B167** lab (devices, firmware, FSS on our copy, FTA device fields, drill-downs). Samples → tell B168.
+- %82 HPSM-POC-C **B168** Phase A (A1 tier 1 → GATE; then A2+A3).
+- %85 HPSM-POC-D **B169** Lane 1 burger (reading A) → READY FOR REVIEW; Lane 2 attachments (tier 1) on own branch, contract in ONE commit; **second of B168-A1 / B169-L2 to merge rebases + takes next minor**.
+- %86 HPSM-POC-E **B170** Kam's feedback items FIRST, then home flow (mocks CHECKPOINT).
+- %87 HPSM-POC-F **B171** demo login (roles measured; prefer view-equal non-writing role if Admin writes; password only in HPSM-POC/4_Credentials/.env; Kam sends to Paul).
+- %83 Composer-D **B92** hide Guided (one switch) → gate → merge → DEPLOY under the grant → then commission B93's lane 1 (66 editable in Expert) as a new build seat.
+- %84 Composer-E **B93** design → when READY: card Q-2…Q-5 + the release consequence (4 of 20 demo engagements go read-only).
+
 ## 🔴🔴🔴 CHECKPOINT 2026-10-06 19:39 (Friday, ctx 70%) — READ FIRST; supersedes every block below where they differ
 **FIRST ACT after rotation:** kam_rulings_today.sh + reconcile_rulings.py; seat_idle.sh on every pane below; read each STATUS's last lines; re-seed + re-arm watchers (they die with the seat).
 **STANDING GRANT (Kam 19:31 + confirmed in terminal "yes, both the Composer demo and HPSM-POC"):** once READY (gate passed + Friday's check + merged via CodeQL) deploy to the Composer demo AND the hosted HPSM-POC site WITHOUT a card; runbook unchanged; report each deploy after. Lesson `2026-10-06_push-to-demo-when-ready-no-card`; EXPIRING-GRANTS row (no expiry). NOT: money, humans, a content release that makes engagements read-only (card it).
