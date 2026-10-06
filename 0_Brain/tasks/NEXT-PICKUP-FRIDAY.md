@@ -12,6 +12,17 @@ supersede: replace wholesale; previous = NEXT-PICKUP-FRIDAY.md.pre-0925-rotate-s
 
 **The tree is at `/Volumes/Laptop-DEV/FRIDAY` (the drive, since 2026-09-28).** Quote every path (spaces).
 
+## 🔴🔴🔴 STATE 2026-10-06 11:53 (Friday successor, ctx ~36%) — READ FIRST; supersedes every block below where they differ
+**Kam:** 8 rows today, newest 11:08:43; reconcile 0. The 7 cards in the 11:43 block are still OPEN (defaults stand).
+**DONE since the rotation:** B88 pane %75 closed (pane_close, listeners 15→15; B88's records still owed: fold into the next Composer records branch). HP asks for Terry EMAILED to Kam (Datasec address, msg thread 8b2f2df0…, read back) as 13 follow-up questions on top of the 10-03 eight; panel told action-first (bf-a31d0da5e96d7). That OWED item is closed.
+**LIVE PANES:**
+- Datasec/Composer-D %70 **B86** Lane 1 (K4+K6, tier 1): holding on its own full e2e (f842ed4) then ci.sh → READY FOR GATE → PR, tier-1 gate, merge on GO, records.
+- Datasec/Composer-E %74 **B87** Lane 2 (K2+K3): holding on its own full e2e (26/593 at 11:47) → red-proof the drawer fix, rebuild, AFTER shots, ci.sh, push b87/lane2-dashboard-burger, STATUS → diff at source + screenshots, PR, merge_when_green, records (fold B88's records in).
+- Datasec/HPSM-POC-B %76 **B165** merge analysis main 1cf5b3e into records/b164 (PR #88, head 29996ed), plain push → then `friday/merge_when_green.sh datasecau/HPSM-POC-analysis 88 <new head>`; after merge deliver card hpsmpoc-sm-fta-external-access-1006's FTA half is C-66 (SM half still waits on Kam's P1).
+**Watchers (die with the seat):** scratchpad seen_b8x (B86/B87 STATUS + panes %70 %74), seen_b165 (+ pane %76).
+**Spark 80% ruling (Kam 09:37:54) is view=wednesday** and its premise is a gauge past 70%; Friday's gauge reads 60% (statusline 11:5x). Friday's standing preference (2026-09-23) still routes fit Datasec tasks to the Spark; today's work (design, survey, records, infra) has had no Spark-shaped task. Re-measure if Friday's gauge passes 70%.
+**OWED (unchanged):** a clear 'this engagement is released: start a new one' message on locked Guided engagements — WAITS on card composer-guided-view-1006 (rec c hides Guided; if ruled c the message only matters for Expert opening a Guided engagement). C-44 braces exception renew card before 2026-10-31 (HPSMPOC-218). FB-1..FB-5 close in FeedbackAdmin (LIVE per B86; fold into a Composer seat).
+
 ## 🔴🔴🔴 ROTATION HANDOVER 2026-10-06 11:43 (Friday, ctx ~79%) — READ FIRST; supersedes every block below where they differ
 **FIRST ACT:** `kam_rulings_today.sh` + `reconcile_rulings.py`; `friday/seat_idle.sh` over every live pane; read each STATUS's last lines. Every watcher died with the old seat: re-seed + re-arm (`friday/watch_status.sh <seen> <glob> …` with WATCH_PANES).
 **Kam's OPEN cards (all with defaults):** `hpsmpoc-input-phase-a-1006` (rec a) · `hpsmpoc-sm-admin-optin-1006` (rec a: not offered) · `hpsmpoc-yes-no-rule-1006` (rec a: SME) · `composer-guided-view-1006` (rec c) · `composer-e8-mapping-1006` (rec a) · `composer-policy-target-1006` (rec a) · `composer-prior-unreleased-1006` (rec a). RULED today: hosted deploy a (C-63, done), SQL Server check b (re-ask after a few clean PRs), external access a (FTA half DONE C-66; SM half WAITS on Kam buying 1 x Entra ID P1 → then a seat does Entra Application Proxy per `HPSM-POC Briefs/2026-10-06_B163_STATUS.md` §5a; confirm guest-P1 need before a 2nd seat).
