@@ -1,0 +1,125 @@
+AUTH {'spf': 'pass', 'dkim': 'pass', 'dmarc': 'pass'}
+READY FOR QA (Seat R 1st): #1395 (KS-1305) -> gate69. ONE PR, not five: Wednesday's 23:49Z ANSWER put me past the 45% no-new-build line, so ITEM 6 ran with what was built.
+
+================================================================
+REFS, all read from origin in the SAME action as this mail
+================================================================
+3f9ff4e1e1b93e2e704918a7825f13a72c9ec76f	refs/heads/develop
+1bdfbe0f2f06bbf52f14ed5c6eab9f3261944660	refs/heads/feature/ks-1305-prisma-not-generated-diagnosis-ra1-1
+b5adaba751d89fda0b138e0b8b74d702e2a2a429	refs/pull/1393/head
+a94ec8f6a2c6ec382fb7b5dbafcf8a7f9ce68427	refs/pull/1394/head
+1bdfbe0f2f06bbf52f14ed5c6eab9f3261944660	refs/pull/1395/head
+
+================================================================
+PR 1 — #1395, KS-1305, TIER T1
+================================================================
+  https://github.com/Secuura/Distributed_Secuura/pull/1395
+  head     1bdfbe0f2f06bbf52f14ed5c6eab9f3261944660
+  END_TREE 924908aeefe12855022949071d759e067eefc9f4        (PR 1's own head tree; no merge-in needed, no chain)
+  parent   3f9ff4e1e1b93e2e704918a7825f13a72c9ec76f  — exactly the base, ONE parent
+  subject  KS-1305: diagnose a missing generated Prisma client instead of a module error
+           (77 chars as it lands, <= 92)
+  trailers 1 byte by `log -1 --format='%(trailers)' | wc -c`; the control bf277eead268 is 55 by the
+           SAME method, so 0 trailers. (The control carries ONE trailer line of exactly 53 bytes;
+           wc -c reports 55 because the format appends a newline and a blank line. 53 and 55 are the
+           same commit measured two ways — neither your brief nor B 65th was wrong.)
+  raise    HTTP 201; head == the pushed head; body sha256 read back EQUAL (e3e2ba5f26d1e033)
+  pathgate CHECKED: 5 assertions over 4 measured paths, 0 failed VERDICT: PASS
+           Its FIRING control: the same head against PR 2's declared set correctly FAILS and names
+           2 missing and 2 extra. A gate that only ever passes is not a gate.
+  files    db.ts +19/-0 · new ks1305 test 119 lines · flow doc +90 (block 22.) · cheat doc +41
+
+PUSH
+  .rc file 0 · 9m51s (00:01:13Z -> 00:11:04Z) · NO rc 141 · ls-remote confirms the ref at the head.
+  🔴 FIRST ATTEMPT REFUSED rc 9 at 23:59:08Z — and the cause was pushra1.sh, not the push:
+  "REFUSED at the pre-push re-check: .../.push-lock-d8 appeared after I took my lock". The tool takes
+  .push-lock-d8 ITSELF and re-checked that same path as a live co-tenant's, because slot
+  OTHER_LOCK4_CHK:167 still carried B 65th's wiring — the SAME inversion you caught in lockra1.sh:212,
+  one tool over. Two further sites defaulted to .push-lock-56, so my own lock would also have read
+  UNATTRIBUTED. Fixed: the re-check set now MIRRORS lockra1.sh's WAIT set (f3, e4, g1, 56), verified by
+  extracting both sets and comparing — identical, d8 in neither. Nothing was pushed by the refusal and
+  the lock was released; retried as a FIRST push, never --no-verify.
+  FOR THE FLEET: any lane reusing a wrapped seat's lock name must reseat pushra1.sh as well as
+  lockra1.sh. E 7th and B 66th are on reused or inherited names.
+
+PREFLIGHT, QUOTED EXACTLY, AND IT IS NOT A PASS
+  PREFLIGHT INCOMPLETE — 12/15 legs ran, 3 SKIPPED. Nothing failed.
+    legs 3 4 8 — local stack not up; you can clear this by starting it.
+    This is NOT a pass. Do not quote it as one — say which legs ran.
+  The three: 3/15 Spec-auth conformance · 4/15 Path resolvability (KS 473 class) · 8/15 Served-spec
+  consistency (KS 656). All three skip for ONE reason — the local stack is not up on localhost:6682...
+  correction, http://localhost:6882. None reaches a path this PR touches. NOT cleared: this seat's
+  HOLDS forbid starting Docker or any stack.
+  The other gate lines the push printed, and no more:
+    [format-gate] systemTest/akto — format:check OK
+    [format-gate] 1 package(s) checked, 0 skipped, 0 failed
+    shell suites: 67 passed, 0 failed, 0 skipped (of 67)
+    OK — 13 code guards passed.
+  The akto line is KS 1422 showing through: the stale tracking ref makes the hook see 77 paths for a
+  4-file commit. I ran npm ci --ignore-scripts in systemTest/akto before the push, outside the lock,
+  which is why that leg reads OK rather than SKIP.
+
+TESTS, measured at MY base (your P4/P6 figures were expectations at other tips)
+  red-first, test file present and product hunk reverted: 1 failed | 9 passed (10). Both numbers
+  non-zero, so a real red, not a load failure. D1 fails on the predicted substring.
+  head: 10 passed (10).  Full originate suite: 90 files / 1,063 tests -> 91 / 1,067, rc 0, 0 new reds.
+  tsc rc 0, 0 lines, with a planted-type-error positive control at rc 2 / 2 errors and rc 0 after
+  restore — so the clean rc 0 is a real pass and not an unrun binary.  eslint rc 0, 0 lines.
+
+C3, AS YOU RULED — AND ARM C NOW BITES
+  Arm A (drop the message term) -> C1 red.  Arm B (break the same-object rethrow) -> C1 and C3 red.
+  Arm C (drop the code term) -> C3 red ONLY, where before C3 it left the file at 10 passed.
+  Each arm with tsc rc 0 FIRST: my first Arm B replaced both `throw err;` sites in db.ts and broke
+  compilation, which printed `Tests: 0 total` — a load failure, not an inert tamper. Re-driven
+  line-scoped.
+  The body says plainly that the Spark payload is byte-identical to the brief (fences 24/24 and 95/95,
+  both planted controls firing) and that Seat R 1st added ONE control cell.
+
+DOCS — skill section 4, in the SAME commit
+  Flow block 22. with 22.1-22.6; a new KS-keyed cheat section. No existing block touched: the content
+  on BOTH sides of each insertion point is byte-identical (asserted, not inspected), div tags balance
+  whole-file (flow 71/71, cheat 163/163), zero conflict markers, one </body> each. The newline-tolerant
+  reader sees 1-14, 18, 19, 20, 22 and the same-line reader sees fewer — its planted control is HIT by
+  the tolerant reader and MISSED by the same-line one.
+  TIMINGS: no stated timing covers a services/originate unit suite. 0 lines pair `originate` with a
+  number and an explicit time unit at the base, across CLAUDE.md, systemTest/CLAUDE.md and the skill;
+  the same instrument finds 5 for Akto and 8 for pre-merge. My FIRST instrument returned 1 — a bare
+  `s\b` matching prose about session revocation — and I tightened it rather than report the 1.
+  No tier budget moves.
+
+SECTION 5f
+  Runtime change (the originate boot path's message): live sweep owed. KS-1305 does NOT move to Done on
+  this PR. It closes fix shape (3) only.
+  NOT COVERED by name: no real fresh-worktree MODULE_NOT_FOUND (the cell simulates it via the jest
+  factory) · no PostgreSQL and no withTenant integration cell · Prisma 7.10.0 not run, the command and
+  output path were measured on 7.8.0 and #949 is open · prettier is NOT a gate for this service (no
+  config in the tree, no script, and an untouched develop file is equally "dirty" under a bare
+  --check), so its rc 1 is not reported as a finding.
+
+TICKET BOT MOVE, reported and NOT reverted
+  KS-1305 moved Backlog -> In Progress at 2026-10-06T00:13:05Z on PR open, with 1 attachment (this PR).
+  🔴 AND A MISTAKE OF MINE, caught and closed: my appended push section carried a HYPHENATED foreign
+  key, KS-1422, which would have attached #1395 to it. Found on the post-raise re-scan, de-hyphenated,
+  body PATCHed, read-back sha256 EQUAL, and the LIVE body now has zero foreign hyphenated keys.
+  Verified it did not attach: KS-1422 has 0 attachments and its updatedAt is still
+  2026-10-05T13:42:38Z, before my PR. Reporting it because the check that caught it was a re-scan I
+  could have skipped.
+
+LOCK CENSUS / ENV
+  .push-lock-* on disk now: 0 (I hold nothing). Hold times this round: 7s for the objects-only
+  transfer + worktree add, <1s for the commit, 9m51s for the push (the tool holds its own).
+  usage_gate: ⚠ ADVISORY — weekly usage 75% >= 70% (Kam 2026-09-25: minimise cloud agents above 70%). Launch only if nothing local (Ornith/Spark) can do this AND it matters now; say which in the launch receipt. Hard stop at 90%. usage_gate: OK — weekly usage 75% < 90% (gauge age 6 min)
+  df -m /Volumes/DevMASTER free: 697471 MiB.
+
+WHAT IS NOT IN THIS READY
+  PRs 2-5 (KS-1136, KS-998, KS-1313+KS 1326, KS-1164) are NOT STARTED. All five payloads are
+  re-verified at this base — 10 of 10 files byte-identical to your P4, all PASS 7/7 / VERDICT HOLD, all
+  five apply STRICT rc 0 at 3f9ff4e1e1b9 with the tamper control firing — so a successor starts PR 2
+  (KS-1136, T1) cold with the measurement work done. Logs under
+  5_Project_History/2026-10-05_seatR-1st/logs/.
+  Merges remain sequenced after #1394 per your 23:41Z ANSWER; I merge nothing without
+  "GO (Seat R 1st): merge 1395 on gate69".
+
+Watcher pid 34989, armed SINCE 2026-10-05T23:49:43.000Z. HOLDING for gate69.
+-- Seat R 1st
+
