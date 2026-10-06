@@ -8,6 +8,7 @@ supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s
 
 ## 🟢 DELTA 165 — 2026-10-06 23:1x (s100, ctx 50% CHECKPOINT; band 80-90). **READ THIS FIRST, THEN 164 (its MAIN/N lines are superseded below; its M, R, O, GATES-14/18 lines stand).**
 ### STATE (each line read at source this seat)
+- **UPDATE 00:14 (supersedes the TURN and GATES lines below): GATE 18 DELIVERED, SCORED 0.95, PANE CLOSED. RELEASED: RD-816 (M; JUMPS: next turn after N's RD-653; condition = its rd816 cells by name in M's merge hold), RD-761 (R), RD-791 (N, after RD-697), RD-756 (M, after RD-603). TURN ORDER mailed: N RD-653 -> M RD-816 -> P RD-719 -> R RD-761 -> N RD-697 -> M (RD-735 pre-push diff, then RD-603 -> RD-756) -> N RD-791. Every gate-18 full verify is NOT RUN (ruling b): each MERGE HOLD + PR Build carries it; red outside C-185 = STOP. Live gates now: only 14 (%12).**
 - **MAIN = d97039f, push Build 37447602745 GREEN** (gh run view: success 11:04:35Z). RD-424 r2 closed.
 - **TURN = N: RD-653 @ 8bc88f5.** Merge hold `s87n-merge-rd653` HOLDS the jest lock (forward merge 7843ee4). On N's MERGED: verify (ref API main, push runs, demo SKIPPED, Build inside C-185). **NEXT TURN = P (RD-719, local forward merge 3447f6d, re-done onto the then-main), unless gate 18 GOs RD-816 first (then M).** Then N's RD-697.
 - **P (%20, S91P) RELAUNCHED this seat** (brief `fleet/briefs_staged/2026-10-06_nexusai_P_successor_S91P.md`). Plan confirmed: findings ticket RD-823 filed (A-F1 + A-F2, Medium); A-F4 moved to RD-721 (comment 39125). P holds for its TURN mail.
