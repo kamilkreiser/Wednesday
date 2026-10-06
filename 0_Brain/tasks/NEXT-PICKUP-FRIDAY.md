@@ -12,6 +12,15 @@ supersede: replace wholesale; previous = NEXT-PICKUP-FRIDAY.md.pre-0925-rotate-s
 
 **The tree is at `/Volumes/Laptop-DEV/FRIDAY` (the drive, since 2026-09-28).** Quote every path (spaces).
 
+## 🔴🔴🔴 CHECKPOINT 2026-10-06 13:40 (Friday, ctx 50%) — READ FIRST; supersedes every block below where they differ
+**Kam:** no rows since 11:08:43; reconcile 0; usage 61%. 7 cards still OPEN (see 11:43 block). Told on the panel: HP asks emailed (forward to Terry), dashboard screenshots (bf-91b34355894dc).
+**MAINS:** Composer **02c90ba** (#45 B86 Lane 1 via gate B89 GO WITH NOTES → d059501; #47 B86 follow-up F1+F2, tier 2, Friday read the diff → 02c90ba). NOT deployed (Composer demo still fd9493f; a deploy = a card to Kam once #46 lands). Analysis (HPSM-POC) **03c7fd5** (#88 merged). HPSM-POC 8798fa7.
+**LIVE PANES:**
+- Datasec/Composer-D %70 **B86**: ADDENDUM-2 item 2 = records/b86 (B86 + B88 + B89 STATUS/evidence, BACKLOG #213/#214 merged, #220/#221 F1/F2 fixed, #115 recurrence, history) → Friday opens the records PR + merge_when_green. Then close %70.
+- Datasec/Composer-E %74 **B87**: rebased onto d059501 (local db13453), full e2e (~33 min from 13:27) → ci.sh → force-with-lease push → READY. NOTE main moved to 02c90ba since (#47, no file overlap): merge_when_green #46 on its new head is fine (squash). Then records/b87.
+**After both merge → deploy CARD to Kam** for Composer main (K2/K3/K4/K6 + F1/F2), BLUF listing every gate/seat note marked deploy/demo (ledger 10-04 row), NEW WORDS from B86 (6 + 1) and B87 (steps), screenshots.
+**Watcher:** scratchpad seen_b8x over `Composer Briefs/2026-10-06_B8*STATUS*.md` + panes %70 %74 (re-arm after rotation).
+
 ## 🔴🔴🔴 STATE 2026-10-06 11:53 (Friday successor, ctx ~36%) — READ FIRST; supersedes every block below where they differ
 **Kam:** 8 rows today, newest 11:08:43; reconcile 0. The 7 cards in the 11:43 block are still OPEN (defaults stand).
 **DONE since the rotation:** B88 pane %75 closed (pane_close, listeners 15→15; B88's records still owed: fold into the next Composer records branch). HP asks for Terry EMAILED to Kam (Datasec address, msg thread 8b2f2df0…, read back) as 13 follow-up questions on top of the 10-03 eight; panel told action-first (bf-a31d0da5e96d7). That OWED item is closed.
