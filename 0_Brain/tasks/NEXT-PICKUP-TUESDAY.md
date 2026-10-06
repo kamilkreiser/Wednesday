@@ -6,6 +6,16 @@ status: live
 supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s1-wholesale
 ---
 
+## 🟢 DELTA 161 — 2026-10-06 15:53 (s99, ctx 65% light checkpoint; band 80-90). **READ THIS FIRST — it supersedes 160's state lines; 160's SHIPPED + LEDGER lines stand.**
+### FIRST WORK FOR THE NEXT SEAT
+1. **MAIN = 9938876** (RD-671 landed via PR #53, verified: ls-remote, Gitleaks success, demo SKIPPED, npm-audit red = proxy-addr only, alerts 246). **Push Build 37415530454 was IN PROGRESS at 15:50.** Merged today and verified: RD-648 (3e6d02d), RD-618 (8e79499), RD-671 (9938876). **On that Build green (known set {rd549 O4 envReached only}):** if gate 18 has NOT given RD-816 a GO, the TURN goes to **N: RD-653 8bc88f5 NOW** (N wrongly reads it as "after RD-816"; Tuesday's ruling: RD-816 jumps the queue only AT its GO). Say so explicitly in the TURN mail.
+2. **GATE 18 (%19) LIVE on OPUS 4.8, SESSION ONLY** (switched by Tuesday 14:53:12 under Kam's 2026-09-30 (b); "Set model to Opus 4.8 for this session only"; NOT automatic). Members: RD-816 @ 92e11a8 (t2, JOINS), RD-791 @ b79e02e (t1), RD-761 @ 141d7ea (t1), RD-756 @ 5afdc01 (t2, on RD-603 3529d53). Brief `fleet/qa-agent/briefs/2026-10-06_nexusai-gate-batch18.md` (stamped 14:24, T1-T9 ruled). Receipt verified (evidence dir). Early findings (its report): a2/a3 hold; a wording Minor on the refusal text. **On the verdict: read WHOLE, score, pane_close, RELEASE per owner (M: RD-816 + RD-756; N: RD-791; R: RD-761). RD-816's merge then jumps the queue.**
+3. **GATES 14 (%12), 15 (%13), 17 (%17, Opus 4.8 session) LIVE**, alive by evidence mtimes (g14 H10.out 15:44, g15 H10.out 14:48). On each verdict: read WHOLE, score, pane_close, RELEASE.
+4. **R (%16):** RD-794 (the Ollama runtime slice) started; probe 43c916e; hold07 queued (red set by name). RULED: the widened unknown-LLM_PROVIDER warning ACCEPTED with 3 cells; isOllamaEndpointAllowed is R's to remove (M answered 02:16Z).
+5. **M (%9):** RD-816 READY (in gate 18). Next per its queue.
+### FLOOR
+%0 tuesday · %6 N · %7 O · %9 M · %16 R · %12 g14 · %13 g15 · %17 g17 · %19 g18 · %1 monitor. Usage 35%. Kam: 1 board message today (07:07, done); 3 FYIs posted to him (census, proxy-addr critical, proxy-addr not reachable). reconcile 0.
+
 ## 🟢 DELTA 160 — 2026-10-06 10:42 (s99, ctx 50% CHECKPOINT; rotate at the first safe boundary in 80-90). **READ THIS FIRST, THEN 159 (its items 2-4 stand, except as below).**
 ### FIRST WORK FOR THE NEXT SEAT
 1. **N / RD-648 (PR #52): CodeQL finally ran.** The outage cancelled 90a837e's checks; GitHub refused to re-run the CodeQL run and a reopen did not retrigger it, so Tuesday RULED one empty commit: **3e6d02d** (tree bb2a84f9f627 = 90a837e's, verified by API). On 3e6d02d: CodeQL 37385536579 SUCCESS, Gitleaks + npm-audit SUCCESS, Build 37385542191 was in progress at 10:05. **On N's MERGED: ls-remote main, the CodeQL run id + no new alert, npm-audit, Build inside C-185, demo SKIPPED.** Then the turn goes to **M: RD-618 (b1)**.
