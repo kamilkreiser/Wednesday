@@ -6,6 +6,21 @@ status: live
 supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s1-wholesale
 ---
 
+## 🔴 DELTA 164 — 2026-10-06 21:07 ROTATION HANDOVER (s99, ctx ~80%, safe boundary). **READ THIS FIRST, THEN 162 (RD-719/P item) and 161.**
+### STATE (each line read at source this evening)
+- **MAIN = 9938876** (6 merges today, each verified: RD-686, RD-700, RD-609, RD-648, RD-618, RD-671). Its push Build was 1/4281 red on rd549 C2/C10 envReached-only -> C-185 ADDENDUM at CLARIFICATIONS:1973 (known set {O4, C2/C10} envReached-only, not reproduced locally) -> CLOSED.
+- **N: RD-424 r2 merge hold `s87n-merge-rd424-r2` HOLDS the jest lock** (fresh re-run under the C-185 LOCAL rule at :1978: the first hold's verify was 1/4298 red on O4 envReached-only; a second consecutive known-set red = STOP + both logs to Tuesday). On N's MERGED: verify (ls-remote, npm-audit red = RD-816 only, Build inside C-185, demo SKIPPED). Then N: RD-653 8bc88f5.
+- **M:** RD-816 READY in gate 18; RD-735 forward-merge PROOF passed 47/47 on 01ac11a; **M's merge turn for RD-735 comes after RD-816 lands; M MAILS THE PRE-PUSH DIFF: GO only if it is the cap hunk (main's text), the budget hunk (fixed text), the cell hunks, counts.** RD-817 (C-F2) filed.
+- **R:** RD-794 (b) — re-anchors c36005b, hold 08 proof queued; MG-vc-fn named a SURVIVOR (RD-820 filed: extract validateConditionWithAI + direct cell; also its Ollama-shaped body to Azure). **RD-819 (High, anonymous {} on ai-config's Azure branch un-confirms a live config) is R's NEXT**, ruled narrow (C-203 ADDENDUM :2181-2186). Kam told (no action).
+- **O:** COMMISSIONED 21:0x: nexusai-lock.sh `--replace` (same-place handover; gate 14 lost 1-2 places per handover) + merge tickets ahead of builder proofs; .new + arms on a scratch queue + atomic mv; READY to Tuesday (tier 2). Check O's plan/READY.
+- **GATES:** 14 (%12, re-filing; 4 single-verify holds + C-57 left), 17 (%17, Opus 4.8; HF done, HF2 queued), 18 (%19, Opus 4.8 since 14:53; H1 done, H2 queued). Gate 15 DELIVERED, scored 0.96, closed. On each verdict: read WHOLE, score, pane_close, RELEASE.
+- **OWED: RD-719 (P's, GO WITH FINDINGS) needs a P relaunch** — 162 item 2 + `fleet/briefs_staged/2026-10-06_nexusai_P_rd719_gate15_RELEASE.md`.
+### KAM
+19:31:36 "Thank you very much. Keep going and let me know if there's anything you need." Receipted; a merge-count slip corrected on the board (six, not four). Nothing owed to Kam.
+### LEDGER this seat: 4 new rows (stray "x" tap; a question inside a STATUS; four-vs-six merges w=3; the 06:13 w=4 + 10-05 w=3 rows now ENFORCED by receiptguard).
+### FLOOR
+%0 tuesday · %6 N · %7 O · %9 M · %16 R · %12 g14 · %17 g17 · %19 g18 · %1 monitor. Usage ~35%.
+
 ## 🟢 DELTA 163 — 2026-10-06 16:41 (s99, ctx 70% CHECKPOINT; band 80-90). **READ THIS FIRST, THEN 162 and 161.**
 - **M / RD-735:** GO'd (05:38Z) to reshape ALSO its own BUDGET log line (server.js:891 at 7e2cc9f) to fixed text in the forward-merge round (the 10-05 08:23Z ruling). Conditions: no request value in either line; cells to the rd618-R8 rule; a both-directions cell for the cap-condition side effect; rd618 by name on the merged tree, any red = STOP; **pre-push diff to Tuesday limited to the cap hunk (main's text), the budget hunk, the cell hunks, counts.** RD-817 filed (C-F2).
 - **N / RD-424 r2:** prepared 315dab3 (9938876 forward-merged into cca852c, counts-only); lands when main's push Build 37415530454 is green.
