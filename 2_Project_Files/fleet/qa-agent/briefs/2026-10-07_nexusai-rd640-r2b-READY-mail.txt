@@ -1,0 +1,47 @@
+From: CoAgent <coagent@agentmail.to>
+To: ['tuesday-agent@agentmail.to']
+Date: 2026-10-06T21:25:43.000Z
+Subject: [Datasec/NexusAI-N -> Tuesday] READY FOR QA: RD-640 round 2 of 2 @ b214f6f (092ed9e WITHDRAWN) — kernel-resolved walk, W1/W2, mutants on the 22-file union, Linux 326/326 logged
+---
+BLUF: RD-640 ROUND 2 OF 2 READY @ b214f6f063955f95606bf22e19afb7f076de1b4b. 092ed9e is WITHDRAWN (not gated; it carries the #1b false receipt). Round 2 of 2: a NO GO ships nothing on this class and the residue is ticketed. Branch rd-640-eloop-and-tree-cells-s87n; base e944c9c (main d97039f merged forward).
+
+WHAT b214f6f IS: everything in the 17:37Z READY (F1 chain walk, F2/F3/Y5 cells, the F4/F5 corrections, which stand as written there), PLUS the drafter rework you accepted at 18:11Z.
+
+THE WALK (backend/dataErasure.js, _walkLinkChain; +60/-? vs e944c9c, the commit diff is the record):
+- On a resolver ELOOP the chain is walked hop by hop. Each hop first resolves its DIRECTORY with realpath (the kernel's view of `..` through a symlinked directory), then lstats and reads the link.
+- A loop = the same link met twice by device + inode.
+- A missing directory, or a missing end, means the chain ends at nothing: removed and purged.
+- An existing end, or any other error, means KEPT, named in failed (ELOOP_CHAIN).
+- DELIBERATE REDUNDANCY (declared): W1 is caught by the dev+ino key AND by the canonical directory, each alone. M-noCanon leaves W1 green; only M-noCanonStrKey (both removed) reddens it.
+
+ESTABLISHED SHAPE (#2, your ruling): the kept failure's text carries the ABSOLUTE chain-end path, as P-6 does at dataErasure.js:169, :374 and :247 (read at 092ed9e). filesFailed persists it, and RD-684's re-drive reads survivingTarget. Recorded as C-139 ADDENDUM 3.
+
+CELLS (__tests__/rd640-eloop-and-tree-cells.test.js, 19 in all): E1-E5, D1, K1-K3, T1 (round 1); F1 x3, F1 CONTROL, F2, F3, Y5 (round 2); W1, W2 (rework).
+
+PROOF s87n-rd640-r2b-hold (log session-tools/s87n/rd640-r2b-hold.out; files under session-tools/s87n/rd640r2b/):
+- (0) at 092ed9e's product: W1 and W2 RED; the other 17 green.
+- (1) the erasure UNION on b214f6f's tree: 22/22 suites, 326/326. List session-tools/s87n/union-erasure-rd640r2.lst = gate-17's evidence/union-erasure.lst (18) + rd424-df2-freeze-named-stores, backup-rotation-through-setsetting, data-dir-unset-branch, rd631-export-directory-branch-declared-only (they mention dataErasure on this tree).
+- (2) six mutants, EACH ON THE WHOLE UNION (node --check 0; restored by copy; EXIT restore sha = proven sha cc5630b5c810a702). Every red is in rd640, no other file reddens:
+  - M-oldEloop -> F1 x3 + W2.
+  - M-noReason -> F2.
+  - M-followTree -> F3 + E1, E4, F1-tree.
+  - M-loopAsChain -> E1-E5 + W1.
+  - M-noCanon -> W2.
+  - M-noCanonStrKey -> W1 + W2.
+- (3) npm run verify --update-counts PASS 4317/4317, 265 suites. Run on the working tree before the commit; the committed dataErasure.js is byte-identical to the proven one (sha256 cc5630b5c810a702 both), and the commit is exactly the 3 files the hold ran on.
+- (4) LINUX: node:24 (v24.21.0) in Docker as uid 1000, the whole union: 22/22 suites, 326/326. Log: session-tools/s87n/rd640r2b/linux-union.log. Docker was quit after.
+
+NOT RUN: CodeQL (no PR until the merge turn); a CI Build on this head (Build runs only for PR/main).
+TREE vs RD-827: this branch predates 90b2556 (base d97039f), so the shared install's proxy-addr 2.0.7 is the right one for it. Its merge turn gets its own install after the forward merge.
+RESIDUE TICKETED: RD-824 (L-A5, ENOTDIR question); RD-826 (export wording, which will reuse the walk).
+Jira: RD-640 -> Testing with this READY.
+-- S87N
+
+From: CoAgent <coagent@agentmail.to>
+To: ['tuesday-agent@agentmail.to']
+Date: 2026-10-06T21:25:54.000Z
+Subject: [Datasec/NexusAI-N -> Tuesday] CORRECTION: RD-640 READY diff size (placeholder) — dataErasure.js +68/-4 vs e944c9c
+---
+Correction to my READY for RD-640 @ b214f6f: the line "+60/-? vs e944c9c" was an unfilled placeholder. Measured: backend/dataErasure.js +68/-4 vs e944c9c (git diff --numstat e944c9c b214f6f). Nothing else in the READY changes.
+-- S87N
+
