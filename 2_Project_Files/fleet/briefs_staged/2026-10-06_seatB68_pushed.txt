@@ -1,0 +1,83 @@
+STATUS (Seat B 68th), ITEM 1 COMPLETE except its last GO condition: M IS PUSHED, the advisory
+freeze is genuinely clear, and I am HOLDING on three PENDING Actions runs. Not merging on PENDING.
+
+THE PUSH LANDED
+  push rc = 0, read from `s-b63-ks1278-ff-1ed59d62beaf-push.rc` AFTER the wrapper exited (not from
+  the wrapper's own exit), with `-push.end` reading "2026-10-06T06:16:59Z push rc=0".
+  INDEPENDENT ls-remote confirms the ref moved, measured separately from the tool that moved it:
+    refs/heads/feature/ks-1278-revoke-atomic-b63-1   1ed59d62beaf55d0206efae7010641bad9de2f71
+    refs/pull/1393/head                              1ed59d62beaf55d0206efae7010641bad9de2f71
+    refs/heads/develop                               add9a3b8bec3125679392b8713d9e78dbd62cbfd  (unmoved)
+  Elapsed 06:10:35Z -> 06:16:59Z = 6m24s, one attempt, no rc 141. FAST-FORWARD was confirmed by the
+  wrapper before it pushed (b5adaba is an ancestor of M), and origin's head count read exactly 1.
+
+THE IN-HOOK PREFLIGHT LINE, QUOTED EXACTLY:
+
+    PREFLIGHT INCOMPLETE — 12/15 legs ran, 3 SKIPPED. Nothing failed.
+
+That is the ACCEPTED shape, for this DOCS-ONLY merge-in, and I am saying so explicitly as the rule
+requires. `PREFLIGHT FAILED` appears **0** times in my 1,603-line hook output — B 67th's refused
+line was `PREFLIGHT FAILED on leg(s) 6 7 … (12/15 legs ran)`, and the matching 12/15 numerator is
+exactly what must not be read as a pass.
+
+LEGS 6 AND 7 — THE TWO THAT FROZE B 67th — BOTH PRINT OK:
+  6/15 npm-audit gate (KS-470):  "audit-gate: 9 distinct advisories reported, 24 baselined."
+                                 "OK — no advisories outside the triaged baseline."
+  7/15 standalone locks (KS-531): "audit-locks: 43 standalone lockfiles … 1614 distinct packages
+                                 pinned — 7 advisories match, 7 already baselined."
+                                 "OK — no standalone-lock advisories outside the triaged baseline."
+Those are the figures your P12 predicted on the synthetic content at 05:12Z, now reproduced on the
+REAL pushed commit against the live registry. The freeze is clear for this range, measured not
+assumed. I edited no lock, no manifest and no baseline, and never used --no-verify.
+Other hook results: shell suites 67 passed / 0 failed / 0 skipped (of 67); package_format_gate
+33 passed / 0 failed; 13 code guards OK.
+
+ACTIONS ON M — THE ONE CONDITION NOT YET MET
+  `gh_gate68.py actions --at 1ed59d62beaf --prev b5adaba751d8`, total_count 6 at M vs 1 at prev:
+    NEW-FAILING   NONE
+    PENDING       ['PR Security Gates (KS-168)', 'Security Scanning', 'pr']
+    NOT RUN       NONE
+    PLANTED-NAME CONTROL reported: True  (so the reader is not blind)
+  Already completed at M: "PR — Lockfiles (path-skip twin)" success, "pr-premerge-ack" success,
+  "Dependabot standalone locks" skipped.
+  The GO requires PENDING NONE, so I am WAITING, not merging. Polling every 60 s with a watcher
+  whose filter fires on a new failure as well as on completion — a filter that only matched success
+  would be silent through a crashloop. I will classify any failure against the gate69/gate70 Q1
+  rule (pre-existing ONLY when its log line is proven on a develop-side head) and STOP on anything
+  I cannot classify.
+
+ITEM 2 IS PREPARED BUT NOT RUN
+  `build_addendum68_1393.py` written fresh (159 lines) and run: rc 0.
+  It is NOT a copy of B 66th's, and the reason is measured: my GO states its pins as prose on ONE
+  line ("Head …, develop …, target tree …"), so gate67's regexes (`develop at origin ==`,
+  `the head ==`, `**<40hex>**`, "Subject byte-equal") match NOTHING in it. Loosening them to pass
+  would be the drift this project keeps recording.
+  Two structural differences, both deliberate and both asserted:
+   1. THE SUBJECT IS NOT IN MY GO — it is RULINGS Q6. Parsed from the rulings file by an
+      exactly-one-match regex: "KS-1278: key the guarded revoke UPDATE on the row the read
+      resolved, not external_id", 84 bare / 92 as it lands, and I assert the rulings file itself
+      states "(84 chars; 92 with ` (#1393)`)" so the lengths are READ, not computed and hoped.
+   2. body_verbatim is used WHOLE, not stripped. Your corrected file carries ZERO "Merged by", and
+      the builder ASSERTS that count is 0 — using B 67th's file by mistake is exactly what the
+      correction exists to prevent, so it refuses by name rather than silently landing two claims.
+  Cross-checks against my own git reads: tree == the GO's target, parents == [gated head, develop],
+  M's trailers empty, 6 paths vs develop, mode census {100644: 6}.
+  Artefact digest RE-MEASURED in the same call that wrote the addendum: 53b7b9f2ed1ab2d7 — matches
+  the ruled prefix, so merge_note is valid.
+  Composed/SENT body: 4,097 B / 4,095 chars, sha256
+  32e8c0b9e64250a8833c4b826a66deca3f96ee326c2c382211fb4154bcd3eac1 — byte-for-byte the figure you
+  confirmed in Q-SQ. Exactly ONE "Merged by", naming Seat B 68th; "Seat B 67th" 0; hyphenated keys
+  == {KS-1278} only; closing-word regex 0 with its "Closes KS-1278" control at 1.
+
+BOARD STATE
+  0 `.push-lock-*` on disk; the wrapper took and released its own lock (pid 18082), release rc 0.
+  develop unmoved at add9a3b8bec3. Shared checkout touched only by the two ruled operations.
+  LIVE WATCHER PID: 10662, SINCE=2026-10-06T06:09:08.000Z (byte-copied from your last ANSWER).
+
+NEXT, ON PENDING NONE AND NEW-FAILING NONE
+  `merge56.py --dry` first, READ the .DRY file and check its body digest is 32e8c0b9… with exactly
+  one "Merged by" naming me; then the merge with the head PINNED to M, never --admin; then verify by
+  ls-remote AND an API read of the new develop commit (tree 46202bf4deb0, ONE parent add9a3b8bec3,
+  0 trailers, the 6 paths); then re-read KS-1278 — it must still be In Progress — then
+  `STATUS: merged 1393`, which is what frees E 8th.
+  No ctx read needed to proceed; I will ask before anything that resembles a second push.
