@@ -1,0 +1,68 @@
+Subject: [Secuura/Blockchain-D -> Wednesday] QUESTION: image-10 rate 354/image steady (NOT tapering — I withdraw the 188 reading), originate short by ~3,400 MB (Seat D 12th)
+Timestamp: 2026-10-06T12:05:08.000Z
+Auth: {"spf": "pass", "dkim": "pass", "dmarc": "pass"}
+
+QUESTION: image-10 rate re-derivation, as you asked — and a CORRECTION to a taper I reported an hour ago
+that was an artefact of my own window choice.
+
+10 of 30 built, all rc 0 NEW-ID. queue is 11/30 in flight. Nothing swapped. The controlled stop before
+originate is ARMED (pid recorded, kills by pid, never by basename) per your 11:45:58Z point 2.
+
+PRE-BUILD FREE SERIES (the guard's OWN reading, image by image)
+  image  1  analytics         12,575 MB
+  image  2  auth              11,250 MB
+  image  3  billing           11,474 MB
+  image  4  governance        11,358 MB
+  image  5  guardian          10,651 MB
+  image  6  kyc               10,749 MB
+  image  7  m365-integration  10,488 MB
+  image  8  mcp-server         9,832 MB
+  image  9  nft-certificate    9,898 MB
+  image 10  prism              9,573 MB
+  image 11  queue              9,038 MB
+
+RATE, three windows
+  images 1->6   (my first report)  1,826 MB /  5 images =   365 MB/image
+  images 1->11  (whole run)        3,537 MB / 10 images =   354 MB/image
+  images 6->11  (recent trend)     1,711 MB /  5 images =   342 MB/image
+
+PROJECTION TO originate (image 22), from image 11 at 9,038 MB
+  at   354 MB/image (whole-run rate    ) -> starts with   5,147 MB; needs 8,600; SHORT BY 3,453 MB
+  at   342 MB/image (recent-trend rate ) -> starts with   5,274 MB; needs 8,600; SHORT BY 3,326 MB
+
+  The 4,000 MB pre-build floor alone would not refuse until about image 25 on the whole-run rate — which is exactly why the floor is
+  not the instrument that protects originate.
+
+🔴 THE CORRECTION, AND IT MATTERS BECAUSE I PUT A NUMBER IN FRONT OF KAM
+At image 9 I computed a "recent trend" over images 5->9 and got 188 MB/image, concluded the rate was
+tapering hard, and told Kam the prune needed was "on the order of 1.2 GB" rather than the full 12.95 GB.
+THAT WAS WRONG, and the defect was my window, not the data. Images 6 and 9 both read HIGHER than their
+predecessors because Docker's GC returned space between builds; a 5-image window landing on two of those
+rebounds reads as a taper that is not there. With images 10 and 11 in, the recent trend is 342 MB/image
+and the whole run is 354 — the same number, steady, no taper.
+  So the real shortfall at originate is about 3,300-3,450 MB, NOT ~1,150 MB.
+I have corrected it to Kam directly as well. The lesson I am recording: a rate over a short window on a
+series with GC rebounds is not a trend, and I should have required the window to be monotonic or long
+before calling a taper.
+
+WHAT STILL HOLDS, UNCHANGED
+  - originate (image 22) is projected to START with ~5,150-5,270 MB on either rate.
+  - It needs >= 8,600 MB (the 4,000 floor plus its measured ~4,286 MB transient plus margin).
+  - It is SHORT on every window I can measure, so the controlled stop stands.
+  - The 4,000 MB pre-build floor would not refuse until about image 25, which is why the floor is not
+    the instrument that protects originate. That reading is unchanged from my 11:45Z mail.
+  - Per your rule I take the REAL free-space reading immediately before originate at the stop, mail it,
+    and do NOT build originate on any forecast of mine — including these.
+
+MEANWHILE
+CONTINUING with images 12-21. Guard armed at 4,000 MB, running script unedited, nothing freed, pruned,
+deleted or swapped. The resume path is written down BEFORE the stop rather than improvised at it
+(`5_Project_History/2026-10-06_seatD-12th/deploy/RESUME.md`): the build loop has ZERO already-built
+branches — I read that off the box's own copy, 0 matches for skip/already — so a resume must be launched
+with ONLY the 9 remaining services and must write to build.master.resume.log, or it overwrites the very
+rc.txt rows the stop report is built from.
+Image 21 (demo-service) is projected to finish around 12:50Z at the observed ~250 s/image.
+
+NEEDED-BY
+Nothing new from you. This is the checkpoint you asked for plus a correction I owed. The prune still
+needs Kam's tap and your exact-subject mail; my watcher is armed on it.

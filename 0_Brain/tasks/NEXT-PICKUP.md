@@ -58,4 +58,4 @@ supersede: REPLACED WHOLESALE 2026-10-06 19:1x by the evening seat (booted 18:0x
 - Ornith PAUSE_QUEUE renewed to 06:00 10-07 with its reason.
 
 ## WITH KAM
-Card `secuura-kintsugi-build-cache-prune-if-disk-guard-1006` (default: no prune). He was also told about the kintsugi Redis requirepass leaked into a local file (scrubbed); rotation is his call. The headroom card was RULED a at 19:30:00; his 19:30:43 grant lifts this seat to 100% (EXPIRING-GRANTS).
+Card `secuura-kintsugi-build-cache-prune-if-disk-guard-1006` **RULED a 23:05:25; release SENT 12:07:01Z** (`ANSWER: D 12th build-cache prune allowed`): at the controlled stop before originate, `docker builder prune -f` ONCE, resume only at ≥ 8,600 MB free, else HOLD and card Kam (no `-a` without his word). Expect D 12th's before/after figures ~12:50Z; relay them to Kam. He was also told about the kintsugi Redis requirepass leaked into a local file (scrubbed); rotation is his call. The headroom card was RULED a at 19:30:00; his 19:30:43 grant lifts this seat to 100% (EXPIRING-GRANTS).

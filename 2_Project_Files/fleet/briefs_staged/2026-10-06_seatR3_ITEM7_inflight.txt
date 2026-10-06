@@ -1,0 +1,57 @@
+Subject: [Secuura/Blockchain-R -> Wednesday] QUESTION: status ITEM 7 -- PR 2 push IN FLIGHT, KS-991 format-gate trap hit and fixed (Seat R 3rd)
+Timestamp: 2026-10-06T12:02:15.000Z
+Auth: {"spf": "pass", "dkim": "pass", "dmarc": "pass"}
+
+STATE: PR 2's push is IN FLIGHT, not finished. I am reporting it rather than ending a turn on a
+"next up" line (STANDING_LINES :338).
+
+PUSH START 2026-10-06T11:58:18Z, ONE attempt, `pushra1.sh` called BARE under
+`env -u GIT_SSH_COMMAND` (GIT_SSH_COMMAND was `<unset>` in my shell before the `env -u`, asserted
+and printed). It took `.push-lock-d8` ITSELF -- holder `{"seat": "Secuura/Blockchain-R ra3",
+"pid": 42947}` -- and its own pre-push re-check printed: STOP-set locks ABSENT, 16 checked; live
+co-tenant locks ABSENT (f3, e4, g1, 56) and parked c21 ABSENT; no UNATTRIBUTED lock dirs, 1 lock
+dir CHECKED (mine). The in-hook preflight is the long part; a watcher is streaming its terminal
+state to me and I will report the ratio and skipped legs verbatim.
+
+PUSH DECISION, made in the SAME action as the push: develop at origin read
+`d75bfe2deb8075583cfb55af0921e4964e7c6f0e` = RAISE_BASE, UNMOVED; my branch ABSENT at origin
+(0 hits for `aggregate-unreadable-artefacts-ra3-2`); 0 `.push-lock-*` on disk before the tool took
+its own. Head pushed: `9414aa54e92ca243565d0d967aad991dc4c13840`.
+
+🔴 THE KS-991 TRAP WAS LIVE AND WOULD HAVE FAILED THIS PUSH CLOSED. I read the format gate BEFORE
+pushing, as :410 says, and the first reading was worthless: `check-package-format.sh` takes its
+changed-path list on **stdin**, so run bare it read EOF, selected nothing, and exited **0 with ZERO
+BYTES** -- the gate's own "say nothing, cost nothing" path. A silent rc 0 is not a pass. Fed the
+hook's real range instead:
+  - the hook falls back to `refs/remotes/origin/develop` in the SHARED checkout, which is the stale
+    `32e058975d4e` -- so the range is **132 paths**, not my 4, and it selects FOUR systemTest
+    packages (akto, api-explorer, performance, playwright). Control: against MY OWN base the same
+    command reads 4 paths and **0** systemTest.
+  - with deps absent in all four the gate printed four `SKIP -- systemTest/<p> deps not installed`
+    lines, then `0 package(s) checked, 4 skipped, 0 failed` and `NOTHING CHECKED -- every selected
+    package was skipped, so no file's formatting was examined`, **rc 1**. That is a refusal, and it
+    would have stopped the push.
+  - FIXED the ruled way: `npm ci --ignore-scripts` in each of the four, in MY worktree, OUTSIDE the
+    lock. All four rc 0, prettier PRESENT in all four, worktree tracked state still 0 porcelain
+    (node_modules is gitignored), df 702,354 -> 701,735 MiB.
+  - RE-READ: `4 package(s) checked, 0 skipped, 0 failed`, **rc 0**. SKIP lines 4 -> 0, NOTHING
+    CHECKED 1 -> 0. Never `--no-verify`, and I did NOT refresh the shared `origin/develop` ref --
+    a co-tenant's byte-identity guard reads it.
+
+ALSO DONE WHILE THE PUSH RUNS (no refs touched): the handover is written at
+`5_Project_History/HANDOVER-seatR3-2026-10-06.md`, 190 lines, 15,063 B, sha256/16
+`9bf40bdf93776778`, carrying "FOR R 4th, THE FIRST THREE THINGS" and naming PRs 3-5 as UNRAISED
+with their payload hashes, applied trees and flow block numbers. The READY mail is composed with
+the push block, the raised PR number, the body sha and the Actions classification left as explicit
+placeholders -- I will fill them from measurement, and a gate in `commitra3.sh` now refuses any
+body carrying an unresolved `@@TOKEN@@` (that gate exists because a placeholder landed in PR 2's
+commit message earlier this round).
+
+NEXT, no new questions: judge the push by the tool's `.rc` file plus my own `ls-remote` (branch ==
+9414aa54e92c), quote PREFLIGHT's ratio and skipped legs verbatim, assert legs 6 and 7 print OK on
+my range and STOP+mail if either does not; then raise by REST, read the body back by sha, classify
+Actions by LOG LINE with the `##[group]` positive control and a waiter whose fire string is copied
+from the instrument's real output and fires on a STABLE reading; then ONE READY naming PR 2 only to
+gate71; then WRAP COLD. No PR 3.
+
+UNRAISED: PRs 3, 4, 5. Nothing merged, no ticket write, no comment, no deploy, no az/SSH/Docker.
