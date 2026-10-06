@@ -12,6 +12,18 @@ supersede: replace wholesale; previous = NEXT-PICKUP-FRIDAY.md.pre-0925-rotate-s
 
 **The tree is at `/Volumes/Laptop-DEV/FRIDAY` (the drive, since 2026-09-28).** Quote every path (spaces).
 
+## 🔴🔴🔴 CHECKPOINT 2026-10-07 08:20 (Friday successor, ctx 50%) — READ FIRST; supersedes every block below where they differ
+**FIRST ACT:** kam_rulings_today.sh + reconcile_rulings.py; seat_idle.sh on every pane AND read every live STATUS's last ~20 lines. Arm ONE watcher in harness background mode, WITHOUT `--seed` except ONCE at boot (the key format changed today: `READY#n@L<line>`, so an old seen file must be seeded once). WATCH_PANES = every live seat pane. Globs: `HPSM-POC/1_Project_Definition/Briefs/2026-10-0[67]_B1[6-9][0-9]*STATUS*.md`, its `.tools/*/…` twin, and the Composer `2026-10-0[67]_B9[2-9]*STATUS*.md` + `_wt_b9*/…`. A new records worktree full of STATUS copies fires once per copy: seed ONLY that worktree's glob.
+**SHIPPED this seat:** watcher keyed on the READY line's position (ledger w=3 mechanism, arms 20/20; the old arms could not fail). Commit pushed (af44d8a66).
+**MERGED (merge_when_green, read back):** HPSM-POC **#120 B169 attachments → main `547d3ea`** (gate B177 resolution re-check GO WITH NOTES at 317c569; all 20 CI jobs incl. e2e). Analysis records: #93 b170 (C-72), #94 b166b (map), #95 b168 (C-73), #96 b173 (C-74) → analysis main **a068419**.
+**LIVE PANES:**
+- **%94 HPSM-POC-F B178** = hosted deploy of `547d3ea`. Brief `HPSM-POC/1_Project_Definition/Briefs/2026-10-07_B178_hosted-deploy-547d3ea.md`: two migrations (Assessment ImportStore, Feedback AddFeedbackAttachments) + the api-identity.sql grants (response_provenance + feedback_attachment) + import switch OFF + one hosted attachment check (feedback row kept) + records/b178 (C-76+). It STOPS if any runtime setting or resource is missing. On READY: Friday probes live (health, build id, old absent) → panel report to Kam → records PR.
+- **%85 HPSM-POC-D B169** = records/b169 (ADDENDUM-6): C-75 = Kam's feedback-files rulings (route a + third round a), A1-N1 to HPSMPOC-226 → Friday PR + merge.
+- **%83 Composer-D B92** = BACKLOG #115 (ADDENDUM-6: best-of-N or a serial pool, bounds NOT raised, quadratic-mutant red-proof, tier 2) → Friday reads the diff, PR, merge.
+- %80 HPSM-POC-A B166: idle since 22:03, nothing owed (map merged as #94). Close it when convenient (pane_close.sh).
+- Closed this seat: %93 B177 (gate done), %82 B168 (records done), via pane_close (listeners 14 → 14 each).
+**OWED (unchanged unless noted):** the printer discussion with Kam (block below) · the Composer 66-in-Expert build brief (RULED: unanswered-items warn a, 66-no-changes a, e8-level-after-policy a; + B92 Q1 back-links; + Paul's guide note draft) · deploy-runbook line (low traffic + warm-up probe) · tickets: F-22 flake + web-settings 5 s (B177 A1-N2 saw web-settings + client-content time out under load) · Composer Dependabot (PR #18 open) · C-44 before 31 Oct · B178's hosted test feedback row: decide keep or erase.
+
 ## 🔴🔴🔴 ROTATION HANDOVER 2026-10-07 07:43 (Friday, ctx ~79%) — READ FIRST; supersedes every block below where they differ
 **FIRST ACT:** as the 07:1x block (rulings + reconcile; seat_idle + read every live STATUS tail; ONE watcher, background mode, no `--seed`, WATCH_PANES on busy panes).
 **MERGED since 07:1x (all via merge_when_green, read back):** #123 sharp → 679486e · #119 B168 A2+A3 → 7d073ca · **#122 B175 timing → main `228032a`** (first CI attempt red on 2 Feedback tests that B175 never touched, the "unreachable" stub answered HTTP 404 = environmental; ONE re-run → green → merged).
