@@ -26535,5 +26535,87 @@
    "CARD secuura-ks1256-redis-outage-stops-connector-creates-1006",
    "CARD hpsmpoc-sm-fta-external-access-1006"
   ]
+ },
+ {
+  "id": "hpsmpoc-sm-admin-optin-1006",
+  "client_project": "Datasec/HPSM-POC",
+  "title": "Allow the opt-in 'FTA via a Security Manager admin login' route at all?",
+  "bluf": "FTA's own interface accepts only a Security Manager ADMINISTRATOR session, and HP's build shows no read-only account (design §3). So a live FTA link today means either receiving FTA's alerts through its SIEM forwarding (no credential at all), or a customer handing over a full SM admin login. An SM admin can change policies on every printer, and storing that login makes us a path into the customer's fleet. The SM lockout after 5 bad tries could also lock out the customer's own admin.",
+  "default_action": "Not offered: SIEM forwarding and uploads only.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Not offered until HP gives a read-only account",
+    "detail": "FTA comes in through SIEM forwarding and uploads only"
+   },
+   {
+    "key": "b",
+    "label": "Offered, opt-in, with a written warning to the customer",
+    "detail": "The admin login lives with the connector inside the customer's network, never with us"
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-10-06T11:43:03.661741+11:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "seat": "friday",
+  "prior_rulings_overridden": [
+   "2026-08-17 20:10",
+   "2026-08-17 20:15",
+   "2026-08-22 19:55",
+   "2026-09-12 11:34",
+   "CARD secuura-demo-admin-image-rebuild-2026-09-05",
+   "CARD secuura-demo-kam-admin-default-password",
+   "CARD secuura-demo-admin-transcripts",
+   "CARD secuura-demo-admin-mfa",
+   "CARD secuura-ks949-round2-and-the-second-admin",
+   "CARD secuura-admin-credential-rotation-183-files",
+   "CARD secuura-ks1304-withtenant-tenant-pool-and-admin-writes",
+   "CARD nexusai-setup-window-admin-gate-scope",
+   "CARD hpsmpoc-require-sqlserver-ci-check-1006",
+   "CARD hpsmpoc-6f6bc96-hosted-deploy-1006",
+   "CARD secuura-ks1402-s-key-cannot-carry-users-read-1006",
+   "CARD secuura-ks1256-redis-outage-stops-connector-creates-1006",
+   "CARD hpsmpoc-sm-fta-external-access-1006"
+  ]
+ },
+ {
+  "id": "hpsmpoc-yes-no-rule-1006",
+  "client_project": "Datasec/HPSM-POC",
+  "title": "Who sets the rule for how many compliant printers make a 'yes'?",
+  "bluf": "With Security Manager feeding in, a question like 'is stored data encrypted?' comes with evidence such as '41 of 47 printers meet HPR-042-044'. Turning that into yes, no or unsure is a security-policy rule we must not invent (project CLAUDE.md). Until someone sets it, the design shows the evidence and leaves the answer for a person to choose (mock 3).",
+  "default_action": "No rule: a person always answers with the evidence shown.",
+  "options": [
+   {
+    "key": "a",
+    "label": "The SME sets it (Paul or HP), Datasec drafts options for them",
+    "detail": "Friday has a seat draft 2-3 rule options with their consequences for the SME to pick"
+   },
+   {
+    "key": "b",
+    "label": "You set it",
+    "detail": "The same options, to you"
+   },
+   {
+    "key": "c",
+    "label": "No rule: a person always answers",
+    "detail": "Evidence shown, never a suggested answer"
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-10-06T11:43:06.732743+11:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "seat": "friday",
+  "prior_rulings_overridden": [
+   "CARD hpsmpoc-f006-title-trips-compliance-rule",
+   "CARD hpsmpoc-require-sqlserver-ci-check-1006",
+   "CARD hpsmpoc-6f6bc96-hosted-deploy-1006",
+   "CARD secuura-ks1402-s-key-cannot-carry-users-read-1006",
+   "CARD secuura-ks1256-redis-outage-stops-connector-creates-1006",
+   "CARD hpsmpoc-sm-fta-external-access-1006"
+  ]
  }
 ]
