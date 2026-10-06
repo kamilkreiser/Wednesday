@@ -7,7 +7,7 @@ status: live
 
 # Boot digest BY TIER — W whole, M rules-only, every project case a handle
 
-Generated 2026-10-06 17:59 from 218 lesson files (990,973 B). M 36 · MIXED 5 · P-Datasec/HPSM-POC 1 · W 176. 5 project CASE sections inside MIXED files are reduced to one line each: the heading and the path to read it at. W blocks are exactly what the default digest carries; M blocks drop the section index and keep the rules; a P file is a single handle. The CASES behind every rule live only in the lesson files — open one the moment its rule fires.
+Generated 2026-10-06 19:31 from 219 lesson files (992,793 B). M 36 · MIXED 5 · P-Datasec/HPSM-POC 1 · W 177. 5 project CASE sections inside MIXED files are reduced to one line each: the heading and the path to read it at. W blocks are exactly what the default digest carries; M blocks drop the section index and keep the rules; a P file is a single handle. The CASES behind every rule live only in the lesson files — open one the moment its rule fires.
 
 ## The T9 SSD is the master — Wednesday must be fully portable
 `2026-07-31_fully-portable-drive.md` · principle · 2026-07-31 · status: superseded — the "T9 is the master" half by [[2026-08-25_one-drive-devmaster-is-master]] (2026-08-25); the portability principle itself still lives · tier: W
@@ -6949,4 +6949,20 @@ sections (open the file for these): RULED 2026-10-05 ~11:1x — Kam (terminal, v
 4. **Expiry:** the gauge's own renewal (~5 days at the ruling). Below 70% after the renewal, re-read the rule; do not assume either way. Recorded in EXPIRING-GRANTS.
 
 **Family:** [[2026-09-25_three-tier-routing-ornith-spark-cloud-always-on]] · [[2026-10-05_spark-target-50-tasks-a-day]] · [[2026-09-14_at-90pct-weekly-usage-no-new-agents-wednesday-plus-local-model]] · [[2026-08-03_go-slow-earn-autonomy]] (rule 5: every grant recorded).
+
+
+## Grant: once a change is READY, Friday deploys it to the Composer demo (and the hosted HPSM-POC site) without a card — report every deploy after it
+`2026-10-06_push-to-demo-when-ready-no-card.md` · grant · 2026-10-06 · status: live · tier: W
+
+**His words, verbatim (19:31:00):**
+> *"Once it's ready, push to demo. Don't wait on my word."*
+
+**How to apply:**
+1. **READY = its QA gate passed at the deployed head (tier as usual) + Friday's completion check + merged to main through CodeQL.** A merge is not a deploy trigger by itself.
+2. Every deploy follows the project's runbook unchanged: backup first, previous build kept (rollback), migrations listed, temp access removed and proven, live check by Friday herself.
+3. **Report, do not request** (the grant removes the pause, not the receipt): a panel message after each deploy with what went live, the SHA, and the live check.
+4. **Not covered:** production (there is none for these), money (a new paid resource still stops), anything to HP, Peter, Stuart or any human, a content release that makes existing engagements read-only (that changes what users can do — card it), and other clients' environments.
+5. **No expiry stated** — it stands until he changes it; said so rather than assumed.
+
+**Family:** [[2026-08-07_protocol-v1.3-signed-delegation]] · [[2026-10-05_october-deploy-both-boxes-when-ready]] (the Secuura twin, Wednesday's) · [[2026-08-03_go-slow-earn-autonomy]] (rule 5: every grant recorded).
 
