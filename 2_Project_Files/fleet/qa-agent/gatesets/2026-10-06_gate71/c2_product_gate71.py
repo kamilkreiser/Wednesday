@@ -1,5 +1,9 @@
 #!/usr/bin/env python3
 r"""c2_product_gate71.py — the PRODUCT checks for #1398 (KS-1136): Blockchain/Testing/jobs/09-aggregate-report.sh. THE HEAD IS A PARAMETER.
+ROW 1398 ONLY (`--pr 1398`; any other row is REFUSED: #1404's product is job 06, measured by c5_job06_gate71.py).
+WIDENED 2026-10-07: `shapes --on-tree <tree-ish>` runs the SAME matrix with 09 read from that tree (a stacked target: develop + #1404 +
+#1398), after asserting tree:09 == the head's 09 blob AND tree:06 == #1404's 06 blob — "#1398's shapes ON TOP OF #1404". The 09-only
+matrix does not read job 06's code, so it must equal the plain run; the composed job06 -> 09 behaviour is c5 `chain`.
 Every aggregator run is a REAL `bash jobs/09-aggregate-report.sh` from a fresh fixture `Testing/` tree, exactly as run-internal-audit.sh:119-121
 and both suites call it (TARGET_BASE RUN_DIR SELF FAIL_ON=high AUDIT_RUNS_DIR exported, cwd $SELF). Nothing is written outside --out.
 
@@ -32,7 +36,7 @@ MODES (all: --repo <YOUR clone> --head <40-hex> --out <a FRESH dir of yours>)
 rc 0 pass / 1 FAIL / 2 refused (absent object, bad args)."""
 import hashlib, json, os, re, shutil, stat, subprocess, sys, tempfile, time
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from lib_gate71 import K, P, Tally, git, git_bytes, refuse_absent, opt
+from lib_gate71 import K, P, ROW, Tally, git, git_bytes, refuse_absent, opt
 
 PR = K['product']; PATH = PR['path']; JOBS = PR['loop_jobs']
 TS = 'runs/2026-10-05_fixture'
@@ -356,6 +360,7 @@ def main():
     A = sys.argv[1:]
     if '--selftest' in A: return selftest()
     if not A or A[0] not in ('guard', 'suite', 'shapes', 'callers') or not opt(A, '--repo'): print(__doc__); return 2
+    if ROW != '1398': print('REFUSED: c2 measures #1398 (09-aggregate-report.sh) only; row %s is measured by c5_job06_gate71.py' % ROW); return 2
     repo = opt(A, '--repo'); head = opt(A, '--head', P['head_expected'])
     rr = refuse_absent(repo, [('head', head), ('base', P['parents'][0])])
     if rr: return rr
@@ -370,7 +375,16 @@ def main():
         if not opt(A, '--wt'): print('REFUSED: suite needs --wt <worktree at the head>'); return 2
         return suite(repo, head, opt(A, '--wt'), out)
     if A[0] == 'shapes':
-        return shapes(out, git_bytes(repo, head, PATH), git_bytes(repo, P['parents'][0], PATH))
+        hb = git_bytes(repo, head, PATH); ot = opt(A, '--on-tree')
+        if ot:
+            p6 = K['product_1404']
+            tb = git_bytes(repo, ot, PATH); t6 = git_bytes(repo, ot, p6['path'])
+            ok = blob_sha(tb) == blob_sha(hb) and blob_sha(t6) == p6['head_blob']
+            print('ON-TREE %s: 09 blob %s == head 09 blob %s: %s | 06 blob %s == #1404 06 blob %s: %s' % (
+                ot[:12], blob_sha(tb)[:12], blob_sha(hb)[:12], blob_sha(tb) == blob_sha(hb), blob_sha(t6)[:12], p6['head_blob'][:12], blob_sha(t6) == p6['head_blob']))
+            if not ok: print('REFUSED: --on-tree %s is not develop + #1404 + #1398 at these heads' % ot); return 1
+            hb = tb
+        return shapes(out, hb, git_bytes(repo, P['parents'][0], PATH))
     return callers(repo, head, opt(A, '--wt'), out)
 
 

@@ -98,3 +98,49 @@ The gate's T7 measures both texts.
 - **P1 / Q4 re-pinned: the MERGE SEAT is Seat R 5th, not R 4th.** R 4th is a raise seat and merges nothing. When the kit is widened to the batch, `GO_WANT` (`launch_qa_secuura_gate71.sh:31`) and any R 4th GO string in `prompt_gate71.txt` change to R 5th; the squash bodies (Q4) are written by R 5th. Until that widening, this kit is NOT launched.
 - **Q-06N: the 06 PR's flow block is `27.`** Numbers are by ticket, never renumbered, and `23.`-`26.` are already held (#1398, PRs 3-5). Under the merge order (06 PR → #1398 → 3-5), develop's flow will read `… 22. 27. 23. 24. 25. 26.`. **That is BY DESIGN.** The widened gate asserts numbers UNIQUE and each block keyed to its ticket, and it does NOT assert ascending order.
 - **Q-5D:** R 4th adds the skill's WHY comment line (with the new ticket key) above `06-tenant-isolation.sh:71` and puts the key in the test header. Disclosed as an AMENDMENT to the Spark diff (no longer byte-identical; the PR body says so); red then green re-proved.
+
+## WIDENING 2026-10-07 — rulings received and OPEN questions (drafting subagent; the RULED sections above are untouched)
+
+### RULED by Wednesday, 2026-10-07, mid-widening message (quoted as Wednesday's; recorded by the drafter)
+> "1. develop MOVED to b39051390ff6f252601d6f7b45f0ea6c21c31023 (ls-remote, read just now). It is PR #1405 on top of 40270d26 and changes 5_Project_History/history.md ONLY (git diff --stat, 1 file +36). Pin the kit and every merge-in prediction to b3905139 (re-read it at your end, and if it has moved again use the new value and say so). #1398's head is still 9414aa54e92c and #1404's is still c117c0160684.
+> 2. #1402 RENUMBERED the flow doc. At b3905139, `Projects Documents/API_Security_Functional_Testing_Architecture_Flow_Diagrams.html` ends `22.` (Measured timings), `23.` (KS-571 refresh), `24.` (A missing GENERATED Prisma client, which is KS-1305's block and was `22.` at d75bfe2). So #1398's ruled `23.` COLLIDES with develop's own block.
+> 3. RULED, superseding Q-06N's number for #1398 only: #1404 (KS-1436) keeps `27.`. **#1398 (KS-1136) becomes `28.`** in its re-composed merge-in. (PRs 3-5 are outside this gate: KS-998 becomes `29.`, KS-1313 + KS 1326 stays `25.`, KS-1164 stays `26.`.) The docs check asserts UNIQUE and KEYED and never ascending. Add an arm in which a re-composition that keeps `23.` for #1398 FAILS on uniqueness against develop's real block."
+
+Drafter's measurement beside it (independent, before the message arrived):
+- develop b39051390ff6f252601d6f7b45f0ea6c21c31023 by ONE ls-remote at 2026-10-06T15:03:46Z (`ev_widen/lsremote_drafter_150346Z.out`); re-read 15:33:06Z, 15:33:53Z, 15:37:21Z, unmoved. `git diff --stat 40270d263ab0 b39051390ff6`: 1 file, `5_Project_History/history.md` +36. Both docs and the skill have the SAME blobs at 40270d26 and b3905139.
+- flow sequence at b3905139 (lib newline-tolerant reader): `… 16 18 19 20 21 22 23 24`; 22 Measured timings, 23 KS-571 refresh, 24 KS-1305 (22 at d75bfe2).
+- Applied: kit.json `docs.recompose.1398.num_map {"23": 28}`, status RULED. Arm `C02_1398_keeps_23_fails_UNIQUE`: `c4 predict --pr 1398 --num-map 23:23` onto develop + #1404 -> rc 1 `REFUSED: flow: develop ALREADY carries 23 — UNIQUE would break`; control arm `C03_1398_ruled_28_predicts` rc 0, tree 960e71800ea1 (`ev_widen/LAUNCHER_ARMS_WIDEN.txt`). The same refusal is `T2x` inside `c4 targets`.
+
+### OPEN — the drafter rules none of these (recommendation given for each)
+
+**W-Q1. The skill moved on develop; the kit ACCEPTS it BY NAME.** `.claude/skills/secuura-test-discipline/SKILL.md` is a NO-NEW-LEG tooling path; develop moved it eaf43dfd -> b59b74a5 (`git diff d75bfe2 b3905139 -- <skill>`: one hunk, `### 6e. Runtime versions — LTS only` appended, +17/-0). Unaccepted, c1 P10/P12 FAIL and the repin refuses rc 13 (arm R09 proves a DIFFERENT skill blob still refuses).
+*Recommendation:* accept by name at exactly that blob pair (implemented: kit.json `develop_tooling_accepted`). §6e changes no rule the gate applies except "quote every measurement as taken on LTS versions"; the prompt carries it (SKILL-MUSTS).
+
+**W-Q2 (ANSWERED by the ruling above).** #1398's flow number: 28. Nothing open.
+
+**W-Q3. How the merge seat builds each docs merge-in.** The kit's targets are built from `recompose_gate71.py`, which reproduces #1402's own conversion of KS-1305's blocks BYTE FOR BYTE on both docs (`ev_widen/recompose_calibrate_ex1.out`), but reproduces only 4 of 32 older blocks byte for byte (#1402 also hand-merged adjacent paragraphs and edited text in 7 flow blocks). A seat that composes its own re-expression will not match `qm` Q2 (tree == prediction) even if it is correct.
+*Recommendation:* R 5th takes the bytes in `recomposed_2026-10-07/` VERBATIM (Q2 strict). If R 5th composes its own, Q2 is waived BY NAME and Q3-Q6 (read-back, UNIQUE, M minus block == develop, code blobs, the guard on tree(M)) must all pass.
+
+**W-Q4. #1404's cheat block has no `<div class="section">` wrapper.** `c4 docs --pr 1404` D6: the block opens with `<h2>` straight after the previous section's `</div>`, where every other KS section (and #1398's) is wrapped. It still passes the guard and D1-D5 (div balance 0). The author's "11 -> 12 KS-keyed sections" is true for h2s, not for section cards.
+*Recommendation:* polish, not a blocker. Either R 5th wraps it in the merge-in (disclosed; Q2 then needs the kit block re-cut) or a follow-up. The kit target keeps it AS AUTHORED.
+
+**W-Q5. #1404's doc block cites base line numbers.** The flow block says `:71` and the swallow at `:74`-`:75`; at the head those lines are `:74` and `:77`-`:78` (the 3 comment lines were inserted above; `c5 guard06` G1 places the replacement at :71). The commit message says the same.
+*Recommendation:* polish; name it in the verdict.
+
+**W-Q6. Merge-tree DIVERGENCE (printed, never picked).** For both PRs `git merge-tree --write-tree` exits 1 with BOTH docs conflicted (1 conflict marker block per doc) and 0 differing paths outside the docs, vs the key-anchored target. Any "take both sides" resolution puts old-format prose into a matrix doc: the positive control (old block tail-appended) FAILS the guard 10/2. The author's "merge-tree rc 1, 2 conflicted paths, both docs, 0 outside" HOLDS.
+*Recommendation:* the key-anchored re-composed target is the target for both; no ruling needed beyond confirming that.
+
+**W-Q7. Job 06 in per-PR checks.** Static (`c5 reach06` at develop and both heads): job 06 is reached only by `api-contract-tests.yml` (ci/orchestrate.sh) and `internal-audit.yml` (run-internal-audit.sh), both `workflow_dispatch` only; 0 per-PR. `pr-security-gates.yml` (pull_request, push) runs the shell suites, which drive a STUBBED job 06 (the #1404 suite, orchestrate_jobs). The by-log-line half (`gh job06`) needs GitHub and is the gate's.
+*Recommendation:* if the gate's log read agrees (0 LIVE lines), Q2's "redden every PR" risk is absent; the false alarm then only bites manual audit runs, and #1404 removes it anyway.
+
+**W-Q8. The squash order makes #1398's merge-in depend on #1404's actual squash.** The kit predicts #1398 on a SIM commit (develop + #1404 target, 391bdbffa023). The real squash of #1404 will be a different commit (and develop may move). `c4 qm` must then be run with `--develop-after <the real post-#1404 develop>`.
+*Recommendation:* the GO for #1398 names the real post-#1404 develop and requires its own `qm` read-back on it.
+
+## RULED by Wednesday, 2026-10-07 ~02:4x AEDT — the WIDENING's open questions (after reading this file's WIDENING section and the drafter's summary)
+- **W-Q1 — ACCEPTED as recommended.** The skill is accepted BY NAME at exactly eaf43dfd -> b59b74a5 (only §6e, LTS-only, appended; the R 5th brief drafter measured the first 642 lines byte-identical, independently). Any other skill blob refuses.
+- **W-Q3 — ACCEPTED: VERBATIM.** The merge seat (R 5th) takes the bytes in `recomposed_2026-10-07/` verbatim, and `qm` Q2 (tree == prediction) stays STRICT. A self-composed re-expression is a STOP-and-mail, not a waiver.
+- **W-Q4 — POLISH, kept AS AUTHORED.** No wrap in the merge-in (it would re-cut the block and break Q2). Name it in the verdict; a follow-up.
+- **W-Q5 — POLISH.** Name it in the verdict.
+- **W-Q6 — CONFIRMED.** The key-anchored re-composed targets (d717255d5376 for #1404 on b3905139; 960e71800ea1 for #1398 on develop + #1404) are the targets. Merge-tree is a cross-check, printed and never picked.
+- **W-Q7 — the gate reads the logs.** If the per-PR log read shows 0 LIVE job-06 lines, Q2's "redden every PR" risk is recorded as absent. The merge order stays #1404 -> #1398 either way.
+- **W-Q8 — ACCEPTED.** The GO for #1398 names the REAL post-#1404 develop and requires its own `qm` read-back on it. Wednesday re-predicts (or has the kit re-predict) on that develop before writing that GO.

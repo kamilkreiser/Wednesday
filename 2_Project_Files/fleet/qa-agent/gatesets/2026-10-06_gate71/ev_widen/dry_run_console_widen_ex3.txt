@@ -1,0 +1,42 @@
+LAUNCH ACTION gate71 (WIDENED: #1404 then #1398) (DRY RUN) 2026-10-07 02:37:15 AEDT / 2026-10-06T15:37:15Z | #1404 c117c0160684d1ae72b220a8d2ccfe9aafb8eb8d | #1398 9414aa54e92ca243565d0d967aad991dc4c13840 | kit develop b39051390ff6f252601d6f7b45f0ea6c21c31023 | repin-develop none | pane QA/Secuura-gate71
+--- A. each head must be the one its READY names
+  #1404 /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/briefs_staged/2026-10-07_seatR4_READY_1404.txt (sha256/16 4b4aa9df2f6949db): lines naming the head in full 3 | naming #1404 5 | CONTROL lines naming 'READY' 4
+  #1398 /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/briefs_staged/2026-10-06_seatR3_READY_1398.txt (sha256/16 ec203996aa444666): lines naming the head in full 1 | naming #1398 2 | CONTROL lines naming 'READY' 3
+--- 2. ONE ls-remote (read verb) from the checkout, GIT_SSH_COMMAND unset, the checkout's own core.sshCommand
+  ls-remote rc=0 at 15:37:21Z | develop b39051390ff6f252601d6f7b45f0ea6c21c31023 | #1404 pull/head c117c0160684d1ae72b220a8d2ccfe9aafb8eb8d branch c117c0160684d1ae72b220a8d2ccfe9aafb8eb8d | #1398 pull/head 9414aa54e92ca243565d0d967aad991dc4c13840 branch 9414aa54e92ca243565d0d967aad991dc4c13840
+--- 1. PULLS API (per row) + census
+  API NOT READ (--no-api, dry run only): the drafter holds no GitHub identity. A real launch reads it and refuses on any disagreement.
+--- 3b. develop: origin b39051390ff6f252601d6f7b45f0ea6c21c31023 | kit (at widening) b39051390ff6f252601d6f7b45f0ea6c21c31023
+  UNMOVED since the widening (the kit's target trees apply as pinned).
+--- 3c. the kit's own clone: fetch by sha if absent, refuse by name if still absent, C1 x2 + guards + the merge-in chain
+  kit clone origin: git@github.com:Secuura/Distributed_Secuura.git (must be the GitHub URL, never the local checkout)
+  head 1404 c117c0160684 PRESENT
+  head 1398 9414aa54e92c PRESENT
+  develop b39051390ff6 PRESENT
+  base d75bfe2deb80 PRESENT
+  c1 #1404 rc=0 | CHECKED 13 0 FAIL 
+    INFO P12a base..develop moved ['.claude/skills/secuura-test-discipline/SKILL.md']: ACCEPTED BY NAME (kit develop_tooling_accepted; P10 asserted the exact blob pair)
+    INFO P12d develop moved 2 doc path(s) since the base: a DOCS MERGE-IN is required — run c4 predict + mergetree
+  c1 #1398 rc=0 | CHECKED 13 0 FAIL 
+    INFO P12a base..develop moved ['.claude/skills/secuura-test-discipline/SKILL.md']: ACCEPTED BY NAME (kit develop_tooling_accepted; P10 asserted the exact blob pair)
+    INFO P12d develop moved 2 doc path(s) since the base: a DOCS MERGE-IN is required — run c4 predict + mergetree
+  c2 guard (#1398) rc=0 | c5 guard06 (#1404) rc=0 | c4 targets rc=0 (PREDICTIONS for the gate)
+    PASS T1 #1404 onto develop b39051390ff6 -> TARGET TREE d717255d5376c7c8cf22e57c0bc88b7437b2553d | develop's guard on it: rc 0 (12, 0) (/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/gatesets/2026-10-06_gate71/dry_153715.targets.d/run/guard_T1_
+    PASS T2 #1398 onto develop + #1404 (391bdbffa023), CANDIDATE num-map {23: 28} -> TARGET TREE 960e71800ea1e9bce95c681d8547293147c6010b | guard rc 0 (12, 0) (/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/gatesets/2026-10-06_gate71/dry_153715.ta
+    PASS T2x #1398 AS AUTHORED (flow 23.) onto develop + #1404 REFUSES: flow: develop ALREADY carries 23 — UNIQUE would break (merged twice, or a number collision: RULING NEEDED)
+    PASS T-CTL POSITIVE CONTROL: #1404's OLD-format block tail-appended to develop (tree ac33baec33b5) FAILS develop's guard: rc 1 (10, 2), `prose outside a table` x7 (/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/gatesets/2026-10-06_gate71/dry_1
+    CROSS-CHECK merge-tree #1404 onto b39051390ff6: rc 1 tree 018b88920692 conflicted ['Projects Documents/API_Security_Functional_Testing_Architecture_Flow_Diagrams.html', 'Projects Documents/QA_Tool_Cheat_Sheet_Secuura_API_Testing.html'] | flow DIVERGENCE (m
+    CROSS-CHECK merge-tree #1398 onto 391bdbffa023: rc 1 tree ea1c9135e4bc conflicted ['Projects Documents/API_Security_Functional_Testing_Architecture_Flow_Diagrams.html', 'Projects Documents/QA_Tool_Cheat_Sheet_Secuura_API_Testing.html'] | flow DIVERGENCE (m
+  targets on the KIT develop: #1404 d717255d5376c7c8cf22e57c0bc88b7437b2553d (kit d717255d5376c7c8cf22e57c0bc88b7437b2553d) | #1398 960e71800ea1e9bce95c681d8547293147c6010b (kit 960e71800ea1e9bce95c681d8547293147c6010b) -> EQUAL
+--- R. render the prompt (#1404 c117c0160684d1ae72b220a8d2ccfe9aafb8eb8d, #1398 9414aa54e92ca243565d0d967aad991dc4c13840, develop b39051390ff6f252601d6f7b45f0ea6c21c31023)
+  rendered HEAD_1404 x8 HEAD_1398 x10 DEVELOP x2 -> /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/gatesets/2026-10-06_gate71/prompt_gate71.rendered.txt (31452 bytes); head file /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/gatesets/2026-10-06_gate71/head_at_launch.txt
+--- 0. routing: the pane must be in inbox_routing.conf
+  /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/inbox_routing.conf — exact line present: 1 (grep rc=0; want 1 / rc 0). CONTROL: agentmail lines in the file = 166
+--- 6 (dry). the launcher's own --check
+    all guards pass:
+      #1404 c117c0160684 + #1398 9414aa54e92c at pull/head AND branch | origin develop b39051390ff6 == rendered | heads + develop PRESENT in the kit clone | GO (Seat R 5th): merge 1398 on gate71|GO (Seat R 5th): merge 1404 on gate71 | 12 pins EQUAL | prompt sha256 748625d9023c343b
+      QA project, kit at its home, kit.json, 12 pinned kit files present and hashing to their pins, rendered prompt, head file (2 P + D), repo; thinking directive; 10 kit files named; report dir; no fill token; EXACTLY the two R 5th GO strings; no R 3rd / R 4th GO; both heads and develop in full
+      the prompt carries the measurement rules, 47 by-name keywords (as tokens), the holds + named exceptions, the addendum + REPORT-HASH-LAST rules, the verdict subject + sender
+      a launch (not --check) will refuse unless stdin is a TTY (exit 21)
+  launcher --check rc=0
+DRY RUN COMPLETE 2026-10-06T15:37:32Z — #1404 c117c0160684d1ae72b220a8d2ccfe9aafb8eb8d, #1398 9414aa54e92ca243565d0d967aad991dc4c13840, develop b39051390ff6f252601d6f7b45f0ea6c21c31023; the real run continues with the API, the override check, the usage gate, --check and cockpit.sh add

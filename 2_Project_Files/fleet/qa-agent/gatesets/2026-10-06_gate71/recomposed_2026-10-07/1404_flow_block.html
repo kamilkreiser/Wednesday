@@ -1,0 +1,45 @@
+<h2>27. The tenant-isolation job's stderr goes to its own file, so a legitimate run's artefact stays parseable (KS-1436)</h2>
+<table class="pmatrix"><tr><td class="pm-topic" rowspan="4"><strong>What this fixes.</strong></td><td> <code>Blockchain/Testing/jobs/06-tenant-isolation.sh:71</code> ran its
+        runner as <code>&gt; "$OUT" 2&gt;&amp;1</code>, folding <strong>stderr into the same file as the JSON
+        result</strong>. </td></tr><tr><td>The runner writes its result to stdout
+        (<code>tests/tenant-isolation/runner.ts:262</code>) and its diagnostics to stderr
+        (<code>runner.ts:74</code>, <code>console.error("login failed for …")</code>), so any stderr line
+        corrupted the artefact. </td></tr><tr><td>This is reached on a <em>routine</em> run, not an error path:
+        <code>runner.ts:150-151</code> is a deliberate two-principal fallback
+        (<code>verifier@</code> <code>||</code> <code>holder@</code>), and whenever the first login cannot
+        succeed the <code>console.error</code> line is emitted and the fallback proceeds as designed. </td></tr><tr><td>The job
+        still exited 0, while <code>:74</code> and <code>:75</code> read the artefact through
+        <code>jq … 2&gt;/dev/null || echo "?"</code> — so the parse failure was swallowed and the
+        job printed <code>tested=? cross-tenant_findings=?</code>.
+      </td></tr></table>
+<h3>27.1 Why it had to land before the aggregator change</h3>
+<table class="pmatrix"><tr><td class="pm-topic" rowspan="1">
+        Before KS 1136's change an unreadable artefact was reported as a <strong>clean</strong> scan, so a
+        genuine cross-tenant finding on a fallback run read as no findings. </td><td>After KS 1136 lands the aggregator
+        reports the artefact as unreadable instead, which turns every routine <code>verifier@</code>-fallback
+        run <strong>red with a false cause</strong>. That is why this one-line fix is the merge condition for
+        that pull request and lands first. KS 1382 is a <em>different</em> line in the same file
+        (<code>:31</code>, <code>TARGET_BASE</code> defaulting to slot 1's gateway) and is not addressed here.
+      </td></tr></table>
+<h3>27.2 The change, and what is deliberately NOT changed</h3>
+<table class="pmatrix"><tr><td class="pm-topic" rowspan="1">
+        One product line: <code>2&gt;&amp;1</code> becomes <code>2&gt; "$OUT.stderr"</code>. </td><td>The stderr content
+        is <strong>kept</strong>, not discarded — it is the diagnostic that explains a fallback, and a
+        <code>2&gt;/dev/null</code> variant is driven as its own red arm below. The file's
+        <code>Writes:</code> header line (<code>:23</code>) is unchanged: the new sidecar is a diagnostic, not
+        a declared artefact. The <code>jq … || echo "?"</code> swallow at <code>:74</code>-<code>:75</code>
+        is left in place; this ticket fixes the cause, not that symptom.
+      </td></tr></table>
+<h3>27.3 Figures, all measured on this change</h3>
+<table>
+<tr><th>Measurement</th><th>Value</th></tr>
+<tr><td>red-first, base blob <code>4d077ab30</code> → fixed</td><td><strong>1 passed / 4 failed (rc 1)</strong> → <strong>5 passed / 0 failed (rc 0)</strong>. The CONTROL cell is <em>green in the red arm</em>, so the red is the guard and not a broken harness</td></tr>
+<tr><td>the four red cells' own text</td><td><code>got 0 unparseable unparseable</code> and <code>got 0, output: → tested=? cross-tenant_findings=?</code> — the defect itself</td></tr>
+<tr><td><code>2&gt;/dev/null</code> arm (stderr discarded)</td><td><strong>4 passed / 1 failed</strong>; the only failure is “the runner's stderr is kept”, so the suite distinguishes <em>kept in its own file</em> from <em>discarded</em></td></tr>
+<tr><td><code>bash -n</code></td><td>rc 0 on both files, and run <em>before</em> each red arm so no red is a load failure</td></tr>
+<tr><td>suite discovery</td><td><strong>67 → 68</strong>, mine 0 before and 1 after, measured by moving the file aside and back with the restore proved sha256-identical</td></tr>
+<tr><td>sibling <code>orchestrate_jobs.test.sh</code></td><td>18 passed, 0 failed, 0 skipped</td></tr>
+<tr><td>whole shell-suite set</td><td><strong>68 passed, 0 failed, 0 skipped (of 68)</strong>, rc 0, <strong>339 s</strong>. Measured <strong>2026-10-06 UTC</strong>, macOS 27.0.1 arm64, bash 3.2.57(1)</td></tr>
+<tr><td>Timing coverage</td><td><strong>0</strong> stated timings cover job 06 or the shell-suite set. Raw word mentions read 4, all in <code>systemTest/CLAUDE.md</code>, and <strong>none carries a time figure or budget</strong>; must-hit controls by the same filter read Akto <strong>11</strong>, pre-merge <strong>9</strong>, Schemathesis <strong>5</strong> timing-bearing lines. No tier budget moves</td></tr>
+<tr><td>NOT covered</td><td>No real runner, no live stack and no network (node, curl and tsx are stubs on a private PATH); the aggregator half of this defect's shapes belongs to the gate, not here; a runner that crashes before printing any JSON (artefact empty, text in the sidecar) is untested; whether the suite is green on a CI runner is unmeasured — GitHub Actions is retired for this repo. Runtime change to a security-harness job — live sweep owed</td></tr>
+</table>

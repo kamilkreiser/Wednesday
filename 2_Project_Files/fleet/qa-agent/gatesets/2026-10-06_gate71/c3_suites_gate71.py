@@ -1,5 +1,8 @@
 #!/usr/bin/env python3
-r"""c3_suites_gate71.py — the WHOLE SHELL-SUITE SET for #1398 (KS-1136). THE HEAD IS A PARAMETER.
+r"""c3_suites_gate71.py — the WHOLE SHELL-SUITE SET for ONE ROW (`--pr 1404`: the new suite tenant_isolation_stderr_own_file, 5 cells;
+`--pr 1398`: ks1136_aggregate_report_unreadable_artefacts, 6 cells). WIDENED 2026-10-07. THE HEAD IS A PARAMETER. Each head is gated
+on its own base d75bfe2 (67 -> 68). On develop b39051390ff6 the denominator is NOT 67: systemTest/__tests__ is a runner ROOT and develop
+adds html_docs_matrix.test.sh there (kit shell_suites.count_develop_note) — a run on a stacked tree states its own denominator.
 
 MODES
   list      --wt-base <wt AT the base> --wt-head <wt AT the head>   L1 `run-shell-suites.sh --list` 67 at base, 68 at head; L2 the
@@ -19,9 +22,9 @@ MODES
 rc 0 pass / 1 FAIL / 2 refused."""
 import os, re, subprocess, sys, time
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from lib_gate71 import K, P, Tally, git, opt
+from lib_gate71 import K, P, ROW, Tally, git, opt
 
-SS = K['shell_suites']; RUNNER = SS['runner']; NEW = K['product']['suite']
+SS = K['shell_suites']; RUNNER = SS['runner']; NEW = SS['new_suites'][ROW]; NEW_CELLS = SS['new_suite_cells'][ROW]
 VERDICT = re.compile(SS['verdict_rx'], re.M); HEADER = re.compile(SS['header_rx'])
 SUMMARY = re.compile(r'^\s*(\d+) passed, (\d+) failed\b')
 
@@ -57,7 +60,7 @@ def classify_text(text, t):
     t.check('X3', not seventh, 'failing SET %s | known KS-168 six %s | NOT in the six (a seventh red BLOCKS unless classified): %s' % (
         fs, 'subset' if set(fs) <= set(known) else 'DIFFERS', seventh or 'none'))
     mine = [k for k in per if k.endswith(os.path.basename(NEW))]
-    t.check('X4', len(mine) == 1 and per[mine[0]] == (K['product']['suite_cells'], 0), 'the new suite under its own header: %s' % ([per.get(m) for m in mine] or 'ABSENT'))
+    t.check('X4', len(mine) == 1 and per[mine[0]] == (NEW_CELLS, 0), 'the new suite (#%s) under its own header: %s (want (%d, 0))' % (ROW, [per.get(m) for m in mine] or 'ABSENT', NEW_CELLS))
     t.info('X5', 'verdict %d passed, %d failed, %d skipped (of %d); cause line %r present: %s' % (p, f, s, n, SS['known_runner_cause_line'], SS['known_runner_cause_line'] in text))
 
 
@@ -104,7 +107,7 @@ def selftest():
             L += ['', '=== %s ===' % s]
             if extra_pass_line and stem(s) == 'a': L += ['  ok   the retry failed once then passed']
             r = stem(s) in reds
-            L += ['', '  %d passed, %d failed' % ((5, 1) if r else ((6, 0) if s == NEW else (4, 0)))]
+            L += ['', '  %d passed, %d failed' % ((5, 1) if r else ((NEW_CELLS, 0) if s == NEW else (4, 0)))]
         L += ['', 'shell suites: %d passed, %d failed, 0 skipped (of %d)' % (len(suites) - len(reds), len(reds), SS['count_head'])]
         L += ['FAILED: Blockchain/Dev/scripts/__tests__/%s.test.sh' % s for s in reds]
         if ts: L = ['2026-10-06T12:00:00.0000000Z ' + l for l in L]

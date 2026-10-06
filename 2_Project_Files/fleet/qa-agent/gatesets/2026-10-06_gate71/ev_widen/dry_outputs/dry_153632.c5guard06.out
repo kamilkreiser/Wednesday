@@ -1,0 +1,10 @@
+C5 guard06 row #1404 head c117c0160684d1ae72b220a8d2ccfe9aafb8eb8d | #1398 head 9414aa54e92ca243565d0d967aad991dc4c13840 | repo /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/gatesets/2026-10-06_gate71/_scratch/clone
+PASS G0 base blob 4d077ab30259 (kit 4d077ab30259) | head blob 6bd87f1308d4 (kit 6bd87f1308d4)
+PASS G1 ONE contiguous replacement at :71: removed ['TARGET_BASE="$TARGET" "$TSX_BIN" "$RUNNER" > "$OUT" 2>&1 || true'] | added 3 comment line(s) + ['TARGET_BASE="$TARGET" "$TSX_BIN" "$RUNNER" > "$OUT" 2> "$OUT.stderr" || true']
+PASS G2 the WHY comment carries KS-1436 and names the prior `2>&1` (skill §5d): ["# KS-1436: stderr goes to its OWN file. This was `2>&1`, which folded runner.ts login()'s"]
+PASS G3 non-comment runner invocations with `2>&1`: head 0 (want 0) | CONTROL base 1 (want 1) | every `2>&1` at the head (INFO): 1
+PASS G4 the `Writes:` header and both `jq … || echo "?"` swallow lines present once at base AND head (left in place by design)
+PASS G5 mode base 100755 head 100755 (want 100755 both)
+INFO G6 lines that glob / upload the run dir (the sidecar `06-tenant-isolation.json.stderr` is a NEW file there): 5 ['.github/workflows/internal-audit.yml:140:          path: Blockchain/Testing/a', '.github/workflows/internal-audit.yml:153:          content-filepath: Blockcha', 'Blockchain/Testing/integration/github-actions-snippet.yml:91:          path: harness/tests/interna', 'Blockchain/Testing/integration/github-actions-snippet.yml:98:          content-filepath: harness/t', 'Blockchain/Testing/jobs/09-aggregate-report.sh:319:  for f in "$RUN_DIR"/*.json; do']
+CHECKED 6
+0 FAIL

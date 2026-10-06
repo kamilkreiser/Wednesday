@@ -1,5 +1,8 @@
 #!/usr/bin/env python3
-"""c1_pin_gate71.py — C1 PIN for #1398 (KS-1136). THE HEAD IS A PARAMETER (--head). Read verbs, plus ONE temp-index tree build in YOUR clone (P4b).
+"""c1_pin_gate71.py — C1 PIN for ONE ROW (`--pr 1404` KS-1436 T2, or `--pr 1398` KS-1136 T1; WIDENED 2026-10-07). THE HEAD IS A PARAMETER
+(--head). Read verbs, plus ONE temp-index tree build in YOUR clone (P4b). Every figure below is the ROW's own (kit.json rows.<pr>).
+  P10/P12 WIDENED: a tooling path develop moved is ACCEPTED only BY NAME at the exact blob pair in kit.json develop_tooling_accepted
+  (the skill, eaf43dfd -> b59b74a5: section 6e only); any other move of a tooling path still FAILS (re-gate).
 
   P1  origin refs/pull/1398/head == refs/heads/<branch> == --head   (ls-remote; NOT RUN by name with --no-remote)
   P2  ONE parent == the kit base d75bfe2deb80;  P2b --develop descends from the base; merge-base(head, develop) printed
@@ -68,6 +71,18 @@ def pre_docs_tree(repo, base, head):
     return o.strip() if rc == 0 and r == 0 else 'FAILED rc %d/%d %s' % (rc, r, e.strip()[:120])
 
 
+def tooling_verdict(blobs, accepted):
+    """blobs {path: [base, head, develop]} -> (moved-not-accepted, accepted-by-name). A path is clean when all three are equal and present;
+    it is ACCEPTED when base == head == accepted.base and develop == accepted.develop exactly; anything else is MOVED (fails)."""
+    moved, acc = [], []
+    for p, (b, h, d) in blobs.items():
+        if b and b == h == d: continue
+        a = accepted.get(p)
+        if a and b == h == a['base'] and d == a['develop']: acc.append(p); continue
+        moved.append('%s %s' % (p, [x[:12] for x in (b, h, d)]))
+    return moved, acc
+
+
 def run(repo, head, develop, remote):
     t = Tally(); base = P['parents'][0]
     rr = refuse_absent(repo, [('head', head), ('base', base), ('develop', develop), ('trailer control', K['trailer_control'])])
@@ -90,7 +105,10 @@ def run(repo, head, develop, remote):
     tree = git(repo, 'rev-parse', head + '^{tree}').strip()
     t.check('P4', tree == P['end_tree'], 'END_TREE %s == kit %s' % (tree[:12], P['end_tree'][:12]))
     pdt = pre_docs_tree(repo, base, head)
-    t.check('P4b', pdt == P['pre_docs_tree'], 'base + the 2 code blobs (no docs) = tree %s == author ITEM-0 prediction %s' % (pdt[:40], P['pre_docs_tree'][:12]))
+    if P['pre_docs_tree']:
+        t.check('P4b', pdt == P['pre_docs_tree'], 'base + the 2 code blobs (no docs) = tree %s == author ITEM-0 prediction %s' % (pdt[:40], P['pre_docs_tree'][:12]))
+    else:
+        t.check('P4b', bool(re.fullmatch(r'[0-9a-f]{40}', pdt)), 'base + the 2 code blobs (no docs) = tree %s (INFO: %s)' % (pdt[:40], P.get('pre_docs_tree_note', 'no author claim')))
     tr = git(repo, 'log', '-1', '--format=%(trailers)', head); ctl = git(repo, 'log', '-1', '--format=%(trailers)', K['trailer_control'])
     t.check('P5', tr.strip() == '' and ctl.strip() != '', 'trailers content %d bytes (raw %d) | CONTROL %s content %d bytes' % (
         len(tr.strip()), len(tr), K['trailer_control'][:12], len(ctl.strip())))
@@ -99,7 +117,7 @@ def run(repo, head, develop, remote):
     co_ctl = msg_findings(git(repo, 'log', '-1', '--format=%B', K['trailer_control']))[2]
     t.check('P6', co == 0 and co_ctl >= 1, 'Co-Authored-By in the message %d | CONTROL %s carries %d' % (co, K['trailer_control'][:12], co_ctl))
     subj = msg.split('\n', 1)[0]; ok, lands = subject_check(subj)
-    t.check('P7', ok, 'subject %r %d chars (<= %d), LANDS %d with %r (<= %d) — the READY says "LANDS 90"; == kit %s' % (
+    t.check('P7', ok, 'subject %r %d chars (<= %d), LANDS %d with %r (<= %d); == kit %s' % (
         subj, len(subj), P['subject_max_commit'], lands, P['squash_suffix'], P['squash_max'], subj == P['subject']))
     t.check('P8', keys == [P['ticket']] and not closing and refs == 1 and closes_line == 0,
             'hyphenated keys in the message %s (want only %s) | closing refs %s | `Refs %s` lines %d | Closes/Fixes/Resolves lines %d | de-hyphenated %s' % (
@@ -111,16 +129,17 @@ def run(repo, head, develop, remote):
         if gb != mb or gh != mh: modes_bad.append('%s base %s head %s (kit %s %s)' % (p.split('/')[-1], gb, gh, mb, mh))
     summ = git(repo, 'diff', '--summary', base, head).strip()
     t.check('P9', not modes_bad and summ == P['summary_expected'], 'modes %s | diff --summary %r' % (modes_bad or '== kit', summ[:160]))
-    moved = []
-    for p in K['tooling_paths_unchanged']:
-        b = [blob_at(repo, r, p) for r in (base, head, develop)]
-        if not (b[0] and b[0] == b[1] == b[2]): moved.append('%s %s' % (p, [x[:12] for x in b]))
-    t.check('P10', not moved, 'NO-NEW-LEG: %d tooling paths identical at base / head / develop %s' % (len(K['tooling_paths_unchanged']), moved[:3] or ''))
+    tb = {p: [blob_at(repo, r, p) for r in (base, head, develop)] for p in P['tooling_paths_unchanged']}
+    moved, accepted = tooling_verdict(tb, K.get('develop_tooling_accepted', {}))
+    t.check('P10', not moved, 'NO-NEW-LEG: %d tooling paths: %d identical at base / head / develop, %d moved on develop ACCEPTED BY NAME at the exact blob pair %s%s' % (
+        len(tb), len(tb) - len(accepted) - len(moved), len(accepted), accepted or '', (' | NOT ACCEPTED (FAIL): %s' % moved[:3]) if moved else ''))
     forb = [p for p in ns if re.search(r'(package(-lock)?\.json|audit-baseline\.json|\.ya?ml|openapi|/baselines/)', p)]
     code = sorted(p for p in ns if not p.startswith('Projects Documents/'))
     t.check('P11', not forb and code == sorted(CODE), 'forbidden-class paths %s | code paths %s' % (forb or 0, [c.split('/')[-1] for c in code]))
     adv = [l for l in git(repo, 'diff', '--name-only', base, develop).split('\n') if l]
-    hit = sorted(set(adv) & (set(CODE) | set(K['tooling_paths_unchanged'])))
+    acc = set(p for p in accepted)
+    hit = sorted((set(adv) & (set(CODE) | set(P['tooling_paths_unchanged']))) - acc)
+    if acc & set(adv): t.info('P12a', 'base..develop moved %s: ACCEPTED BY NAME (kit develop_tooling_accepted; P10 asserted the exact blob pair)' % sorted(acc & set(adv)))
     dochit = sorted(set(adv) & set(DOCS))
     t.check('P12', not hit, 'base..develop: %d path(s); %d shared with the CODE paths / tooling %s' % (len(adv), len(hit), hit[:5]))
     if dochit: t.info('P12d', 'develop moved %d doc path(s) since the base: a DOCS MERGE-IN is required — run c4 predict + mergetree' % len(dochit))
@@ -134,15 +153,22 @@ def selftest():
     want = P['numstat']
     rep(not numstat_bad(dict(want), want), 'numstat: the exact kit set passes')
     rep(numstat_bad(dict(want, **{'x/package-lock.json': [1, 1]}), want), 'PLANTED extra lock path FAILS')
-    rep(numstat_bad(dict(want, **{K['product']['path']: [15, 0]}), want), 'PLANTED 09 +15 FAILS')
+    rep(numstat_bad(dict(want, **{CODE[1]: [want[CODE[1]][0] + 1, want[CODE[1]][1]]}), want), 'PLANTED %s one extra line FAILS' % CODE[1].split('/')[-1])
     rep(numstat_bad({k: v for k, v in want.items() if 'Cheat' not in k}, want), 'PLANTED missing cheat FAILS')
-    k, c, co, r, cl = msg_findings('KS-1136: x\n\nRefs KS-1136\n\nKS 878 guarded 04.\n')
-    rep(k == ['KS-1136'] and not c and co == 0 and r == 1 and cl == 0, 'message: de-hyphenated KS 878 is not a key; one Refs line')
-    k, c, co, r, cl = msg_findings('KS-1136: x\n\nCloses KS-1136\nFixes KS-878.\nCo-Authored-By: X <x@y>\n')
-    rep(k == ['KS-1136', 'KS-878'] and c and co == 1 and r == 0 and cl == 2, 'PLANTED `Closes KS-1136` + `Fixes KS-878` + trailer: all FIRE')
-    rep(subject_check(P['subject']) == (True, 91), 'subject: the kit subject passes and LANDS 91 (83 + 8)')
-    rep(not subject_check(P['subject'] + ' (#1398)')[0], 'PLANTED `(#1398)` suffix FAILS')
-    rep(not subject_check(P['subject'] + ' and more words here')[0], 'PLANTED 104-char subject FAILS')
+    tk = P['ticket']
+    k, c, co, r, cl = msg_findings('%s: x\n\nRefs %s\n\nKS 878 guarded 04.\n' % (tk, tk))
+    rep(k == [tk] and not c and co == 0 and r == 1 and cl == 0, 'message: de-hyphenated KS 878 is not a key; one `Refs %s` line' % tk)
+    k, c, co, r, cl = msg_findings('%s: x\n\nCloses %s\nFixes KS-878.\nCo-Authored-By: X <x@y>\n' % (tk, tk))
+    rep(k == sorted([tk, 'KS-878']) and c and co == 1 and r == 0 and cl == 2, 'PLANTED `Closes %s` + `Fixes KS-878` + trailer: all FIRE' % tk)
+    want_lands = P['subject_len'] + len(P['squash_suffix'])
+    rep(subject_check(P['subject']) == (True, want_lands), 'subject (#%s): the kit subject passes and LANDS %d (%d + %d)' % (P['pr'], want_lands, P['subject_len'], len(P['squash_suffix'])))
+    rep(not subject_check(P['subject'] + P['squash_suffix'])[0], 'PLANTED `%s` suffix FAILS' % P['squash_suffix'].strip())
+    rep(not subject_check(P['subject'] + ' and more words here' + 'x' * 10)[0], 'PLANTED over-long subject FAILS')
+    acc = {'S': {'base': 'a' * 40, 'develop': 'b' * 40}}
+    rep(tooling_verdict({'S': ['a' * 40, 'a' * 40, 'b' * 40]}, acc) == ([], ['S']), 'tooling: a develop move at the EXACT accepted blob pair is ACCEPTED BY NAME')
+    rep(tooling_verdict({'S': ['a' * 40, 'a' * 40, 'c' * 40]}, acc)[0], 'PLANTED develop blob other than the accepted one FAILS (re-gate)')
+    rep(tooling_verdict({'T': ['a' * 40, 'a' * 40, 'b' * 40]}, acc)[0], 'PLANTED move of a tooling path NOT in the accepted list FAILS')
+    rep(tooling_verdict({'S': ['a' * 40, 'c' * 40, 'b' * 40]}, acc)[0], 'PLANTED head that changed the accepted path FAILS (the PR may not touch it)')
     print('SELFTEST %d/%d' % (sum(res), len(res))); return 0 if all(res) else 1
 
 
@@ -151,7 +177,7 @@ def main():
     if '--selftest' in A: return selftest()
     if not opt(A, '--repo'): print(__doc__); return 2
     head = opt(A, '--head', P['head_expected']); develop = opt(A, '--develop', K['develop_at_draft'])
-    print('C1 #%s head %s develop %s repo %s' % (P['pr'], head, develop, opt(A, '--repo')))
+    print('C1 row #%s (%s, %s) head %s develop %s repo %s' % (P['pr'], P['ticket'], P['tier'], head, develop, opt(A, '--repo')))
     return run(opt(A, '--repo'), head, develop, '--no-remote' not in A)
 
 

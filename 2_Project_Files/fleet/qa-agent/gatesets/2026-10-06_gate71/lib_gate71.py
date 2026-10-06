@@ -1,5 +1,9 @@
 #!/usr/bin/env python3
-"""lib_gate71.py — shared helper for the gate71 kit (#1398 KS-1136, T1: an unparseable security artefact must not read as a clean scan).
+"""lib_gate71.py — shared helper for the gate71 kit. WIDENED 2026-10-07 to TWO ROWS: #1404 (KS-1436, T2, job 06 stderr to its own file,
+#1398's merge condition, merges FIRST) and #1398 (KS-1136, T1: an unparseable security artefact must not read as a clean scan).
+
+  ROW / P              the PR row: `--pr <1404|1398>` on the command line, else G71_ROW, else 1398 WITH A STDERR NOTE (never silent).
+                       P = K['rows'][ROW]. Every script prints its row in its first line.
 
   K                    the kit (kit.json beside this file; G71_KITJSON overrides it for the self-tests only).
   git(repo, *args)     READ verbs only. Any other verb raises.
@@ -11,7 +15,7 @@
   gh_job_log(job_id)   the job-logs endpoint 302s to a signed URL: the redirect is followed WITHOUT the Authorization header (a reader
                        that follows it with the header, or swallows the error, returns a placeholder and every needle reads 0).
 """
-import hashlib, json, os, re, subprocess, urllib.request, urllib.error
+import hashlib, json, os, re, subprocess, sys, urllib.request, urllib.error
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 SCRATCH = os.environ.get('G71_SCRATCH', os.path.join(HERE, '_scratch'))
@@ -20,7 +24,21 @@ READ_VERBS = {'show', 'ls-files', 'log', 'diff', 'ls-tree', 'cat-file', 'rev-par
               'grep', 'status', 'for-each-ref'}
 WRITE_VERBS = {'merge-tree', 'hash-object', 'mktree', 'commit-tree', 'read-tree', 'update-index', 'write-tree', 'worktree', 'fetch'}
 FORBIDDEN = os.environ.get('G71_FORBIDDEN_ROOT', K['forbidden_root'])
-P = K['pr']; D = K['docs']
+D = K['docs']
+
+
+def _row():
+    a = sys.argv
+    if '--pr' in a and a.index('--pr') + 1 < len(a): r = a[a.index('--pr') + 1]
+    elif os.environ.get('G71_ROW'): r = os.environ['G71_ROW']
+    else:
+        r = '1398'; sys.stderr.write('lib_gate71: NOTE row defaulted to 1398 (pass --pr <1404|1398>)\n')
+    if r not in K['rows']: raise SystemExit('lib_gate71: REFUSED — unknown row %r (kit rows %s)' % (r, list(K['rows'])))
+    return r
+
+
+ROW = _row()
+P = K['rows'][ROW]
 
 
 # ---------------- composee5's readers, extracted, never re-typed ----------------
@@ -40,7 +58,13 @@ def _load_readers():
 
 READERS = _load_readers()
 FLOW_NUM_RX = READERS['flow_num']        # <h2[^>]*>\s*(\d+)\.                    (re.S | re.I)
-CHEAT_KEY_RX = READERS['cheat_key']      # <h2[^>]*>.*?&mdash;\s*(KS-\d+)\s*</h2>  (re.S | re.I)
+CHEAT_KEY_RX_PINNED = READERS['cheat_key']   # <h2[^>]*>.*?&mdash;\s*(KS-\d+)\s*</h2>  (re.S | re.I) — BLIND on develop after #1402
+if CHEAT_KEY_RX_PINNED.pattern.count('&mdash;') != 1:
+    raise SystemExit('lib_gate71: REFUSED — the pinned cheat reader no longer carries exactly one `&mdash;` to widen')
+# WIDENED 2026-10-07: #1402 rewrote the cheat sheet with the CHARACTER U+2014 where the pinned reader wants the ENTITY `&mdash;`, so the
+# pinned reader reads 0 keys on develop. The widened reader is DERIVED from the pinned one (one substitution, asserted), never re-typed.
+CHEAT_KEY_RX = re.compile(CHEAT_KEY_RX_PINNED.pattern.replace('&mdash;', '(?:&mdash;|\u2014)'), re.S | re.I)
+CLOSE_RX = re.compile(D['close_tag_rx'])
 OLD_SAMELINE_RX = re.compile(K['old_sameline_rx'])
 H2_OPEN_RX = re.compile(r'<h2\b', re.I)
 
@@ -60,6 +84,14 @@ def cheat_key_pos(text):
 
 
 def cheat_keys(text): return [k for k, _ in cheat_key_pos(text)]
+def cheat_keys_pinned(text): return CHEAT_KEY_RX_PINNED.findall(text)
+
+
+def close_idx(lines):
+    """the index of the ONE `</body>` line (any indentation: base `  </body>`, develop `</body>`), else ValueError."""
+    c = [i for i, l in enumerate(lines) if CLOSE_RX.match(l)]
+    if len(c) != 1: raise ValueError('close tag %r matched %d line(s) (want 1)' % (D['close_tag_rx'], len(c)))
+    return c[0]
 
 
 # ---------------- git ----------------

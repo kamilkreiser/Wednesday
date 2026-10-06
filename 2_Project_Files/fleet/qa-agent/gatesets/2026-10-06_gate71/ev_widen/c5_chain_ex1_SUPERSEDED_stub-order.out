@@ -1,0 +1,40 @@
+C5 chain row #1404 head c117c0160684d1ae72b220a8d2ccfe9aafb8eb8d | #1398 head 9414aa54e92ca243565d0d967aad991dc4c13840 | repo /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/gatesets/2026-10-06_gate71/_scratch/clone
+PASS CH0 blobs: 06 base 4d077ab30259 head 6bd87f1308d4 | 09 base 739ebab8c64e #1398 22a24798560f (== kit)
+PASS CH-base-base-quiet-clean 06 base x 09 base quiet-clean         -> CLEAN      (want CLEAN     ) job rc 0 | artefact files ['06-tenant-isolation.json']
+PASS CH-base-1398-quiet-clean 06 base x 09 1398 quiet-clean         -> CLEAN      (want CLEAN     ) job rc 0 | artefact files ['06-tenant-isolation.json']
+PASS CH-head-base-quiet-clean 06 head x 09 base quiet-clean         -> CLEAN      (want CLEAN     ) job rc 0 | artefact files ['06-tenant-isolation.json', '06-tenant-isolation.json.stderr']
+PASS CH-head-1398-quiet-clean 06 head x 09 1398 quiet-clean         -> CLEAN      (want CLEAN     ) job rc 0 | artefact files ['06-tenant-isolation.json', '06-tenant-isolation.json.stderr']
+PASS CH-base-base-fallback-clean 06 base x 09 base fallback-clean      -> CLEAN      (want CLEAN     ) job rc 0 | artefact files ['06-tenant-isolation.json']
+PASS CH-base-1398-fallback-clean 06 base x 09 1398 fallback-clean      -> UNREADABLE (want UNREADABLE) job rc 0 | artefact files ['06-tenant-isolation.json'] | #1398 ALONE: the FALSE ALARM Q2 named (a legitimate run reds, cause text false)
+PASS CH-head-base-fallback-clean 06 head x 09 base fallback-clean      -> CLEAN      (want CLEAN     ) job rc 0 | artefact files ['06-tenant-isolation.json', '06-tenant-isolation.json.stderr']
+PASS CH-head-1398-fallback-clean 06 head x 09 1398 fallback-clean      -> CLEAN      (want CLEAN     ) job rc 0 | artefact files ['06-tenant-isolation.json', '06-tenant-isolation.json.stderr'] | BOTH: the fallback run reads CLEAN (the false alarm is gone)
+PASS CH-base-base-both-logins-fail 06 base x 09 base both-logins-fail    -> CLEAN      (want CLEAN     ) job rc 0 | artefact files ['06-tenant-isolation.json']
+PASS CH-base-1398-both-logins-fail 06 base x 09 1398 both-logins-fail    -> UNREADABLE (want UNREADABLE) job rc 0 | artefact files ['06-tenant-isolation.json']
+PASS CH-head-base-both-logins-fail 06 head x 09 base both-logins-fail    -> CLEAN      (want CLEAN     ) job rc 0 | artefact files ['06-tenant-isolation.json', '06-tenant-isolation.json.stderr']
+PASS CH-head-1398-both-logins-fail 06 head x 09 1398 both-logins-fail    -> CLEAN      (want CLEAN     ) job rc 0 | artefact files ['06-tenant-isolation.json', '06-tenant-isolation.json.stderr']
+PASS CH-base-base-runner-error-caught 06 base x 09 base runner-error-caught -> CLEAN      (want CLEAN     ) job rc 0 | artefact files ['06-tenant-isolation.json']
+PASS CH-base-1398-runner-error-caught 06 base x 09 1398 runner-error-caught -> CLEAN      (want CLEAN     ) job rc 0 | artefact files ['06-tenant-isolation.json']
+PASS CH-head-base-runner-error-caught 06 head x 09 base runner-error-caught -> CLEAN      (want CLEAN     ) job rc 0 | artefact files ['06-tenant-isolation.json', '06-tenant-isolation.json.stderr']
+PASS CH-head-1398-runner-error-caught 06 head x 09 1398 runner-error-caught -> CLEAN      (want CLEAN     ) job rc 0 | artefact files ['06-tenant-isolation.json', '06-tenant-isolation.json.stderr']
+PASS CH-base-base-quiet-leak 06 base x 09 base quiet-leak          -> LEAK       (want LEAK      ) job rc 0 | artefact files ['06-tenant-isolation.json']
+PASS CH-base-1398-quiet-leak 06 base x 09 1398 quiet-leak          -> LEAK       (want LEAK      ) job rc 0 | artefact files ['06-tenant-isolation.json']
+PASS CH-head-base-quiet-leak 06 head x 09 base quiet-leak          -> LEAK       (want LEAK      ) job rc 0 | artefact files ['06-tenant-isolation.json', '06-tenant-isolation.json.stderr']
+PASS CH-head-1398-quiet-leak 06 head x 09 1398 quiet-leak          -> LEAK       (want LEAK      ) job rc 0 | artefact files ['06-tenant-isolation.json', '06-tenant-isolation.json.stderr']
+FAIL CH-base-base-fallback-leak 06 base x 09 base fallback-leak       -> LEAK       (want CLEAN     ) job rc 0 | artefact files ['06-tenant-isolation.json'] | BEFORE: a REAL LEAK READ CLEAN (the original silence)
+FAIL CH-base-1398-fallback-leak 06 base x 09 1398 fallback-leak       -> OTHER [('/api/documents:saw=tenant-b:want=tenant-a', 'critical'), ('06-tenant/unreadable-artefact', 'high')] rc 1 (want UNREADABLE) job rc 0 | artefact files ['06-tenant-isolation.json'] | #1398 ALONE: a true alarm, but the leak id is NOT emitted (cause text false)
+PASS CH-head-base-fallback-leak 06 head x 09 base fallback-leak       -> LEAK       (want LEAK      ) job rc 0 | artefact files ['06-tenant-isolation.json', '06-tenant-isolation.json.stderr']
+PASS CH-head-1398-fallback-leak 06 head x 09 1398 fallback-leak       -> LEAK       (want LEAK      ) job rc 0 | artefact files ['06-tenant-isolation.json', '06-tenant-isolation.json.stderr']
+PASS CH-base-base-truncated 06 base x 09 base truncated           -> CLEAN      (want CLEAN     ) job rc 0 | artefact files ['06-tenant-isolation.json']
+PASS CH-base-1398-truncated 06 base x 09 1398 truncated           -> UNREADABLE (want UNREADABLE) job rc 0 | artefact files ['06-tenant-isolation.json']
+PASS CH-head-base-truncated 06 head x 09 base truncated           -> CLEAN      (want CLEAN     ) job rc 0 | artefact files ['06-tenant-isolation.json', '06-tenant-isolation.json.stderr'] | #1404 ALONE: a truncated artefact still reads clean (that is #1398's fix, not this one)
+PASS CH-head-1398-truncated 06 head x 09 1398 truncated           -> UNREADABLE (want UNREADABLE) job rc 0 | artefact files ['06-tenant-isolation.json', '06-tenant-isolation.json.stderr']
+PASS CH-base-base-crash-no-stdout 06 base x 09 base crash-no-stdout     -> CLEAN      (want CLEAN     ) job rc 0 | artefact files ['06-tenant-isolation.json']
+PASS CH-base-1398-crash-no-stdout 06 base x 09 1398 crash-no-stdout     -> UNREADABLE (want UNREADABLE) job rc 0 | artefact files ['06-tenant-isolation.json']
+PASS CH-head-base-crash-no-stdout 06 head x 09 base crash-no-stdout     -> CLEAN      (want CLEAN     ) job rc 0 | artefact files ['06-tenant-isolation.json', '06-tenant-isolation.json.stderr']
+PASS CH-head-1398-crash-no-stdout 06 head x 09 1398 crash-no-stdout     -> UNREADABLE (want UNREADABLE) job rc 0 | artefact files ['06-tenant-isolation.json', '06-tenant-isolation.json.stderr']
+PASS CH-SIDECAR sidecar 06-tenant-isolation.json.stderr holds exactly the runner stderr: True | 09 ids WITH the sidecar ['/api/documents:saw=tenant-b:want=tenant-a'] == WITHOUT it ['/api/documents:saw=tenant-b:want=tenant-a'] (CONTROL: removing it changes nothing)
+FAIL CH-SUMMARY job 06 summary on a fallback run: HEAD '→ tested=3 cross-tenant_findings=0' | BASE '→ tested=3\n? cross-tenant_findings=0\n?'
+PASS CH-CONTROL the BOTH rules applied to the BEFORE column (06 base x 09 base) report 2 violation(s) (> 0: the matrix discriminates)
+CHAIN MATRIX written: /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/c1dbe0b9-3952-4b2c-840a-a2d427b7f022/scratchpad/ev_c5chain_ex1/chain.json (32 cells)
+CHECKED 36
+3 FAIL (CH-base-base-fallback-leak CH-base-1398-fallback-leak CH-SUMMARY)

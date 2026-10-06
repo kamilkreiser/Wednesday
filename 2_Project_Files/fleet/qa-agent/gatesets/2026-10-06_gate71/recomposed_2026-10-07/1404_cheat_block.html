@@ -1,0 +1,25 @@
+<h2>The tenant-isolation job keeps stderr out of its JSON artefact — KS-1436</h2>
+<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="4"><strong>What to know.</strong></td><td> <code>jobs/06-tenant-isolation.sh:71</code> used
+          <code>&gt; "$OUT" 2&gt;&amp;1</code>, so the runner's <code>console.error</code> landed <em>inside</em>
+          <code>06-tenant-isolation.json</code>. </td></tr><tr><td>It is a routine path, not an error path:
+          <code>runner.ts:150-151</code> deliberately falls back <code>verifier@</code> →
+          <code>holder@</code>, and the first failed login prints to stderr. </td></tr><tr><td>The artefact was then unparseable,
+          the job printed <code>tested=? cross-tenant_findings=?</code> and still exited 0. </td></tr><tr><td>Now
+          <code>2&gt; "$OUT.stderr"</code> — kept, not discarded.
+        </td></tr></table></div>
+<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="4"><strong>Why the order matters.</strong></td><td> Before KS 1136 an unreadable artefact read as a CLEAN scan,
+          so a real cross-tenant leak on a fallback run was invisible. </td></tr><tr><td>After KS 1136 it reads as unreadable,
+          which reds every routine fallback run with a false cause. </td></tr><tr><td>This fix therefore merges FIRST and is
+          that pull request's merge condition. </td></tr><tr><td>KS 1382 is a different line in the same file (<code>:31</code>).
+        </td></tr></table></div>
+<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="3"><strong>Gotcha when you run this locally.</strong></td><td> No stack is needed — node, curl and tsx are
+          all stubs on a private PATH. </td></tr><tr><td>But run <code>bash -n</code> before trusting any red: a syntax error
+          reds every cell with no message. </td></tr><tr><td>And check the exec bit: <code>git apply</code> drops it while the
+          index still reads <code>100755</code>, so the job will not run until <code>chmod 755</code>.
+        </td></tr></table></div>
+<div class="note"><table class="pmatrix"><tr><td class="pm-topic" rowspan="5"><strong>Figures.</strong></td><td> Red-first <strong>1 passed / 4 failed → 5 passed / 0 failed</strong>,
+          with the CONTROL cell green in the red arm. </td></tr><tr><td>A <code>2&gt;/dev/null</code> arm reads
+          <strong>4 passed / 1 failed</strong>, failing only on “stderr is kept”. </td></tr><tr><td>Discovery
+          <strong>67 → 68</strong>. </td></tr><tr><td>Whole set <strong>68 passed, 0 failed, 0 skipped (of 68)</strong> in
+          <strong>339 s</strong>, 2026-10-06 UTC, macOS 27.0.1 arm64. </td></tr><tr><td>Runtime change — live sweep owed.
+        </td></tr></table></div>

@@ -1,3 +1,7 @@
+> **WIDENED 2026-10-07: this README describes the ONE-PR kit as first drafted.** The kit now gates TWO PRs in merge order: #1404 (KS-1436, T2, job 06 stderr to its own file; #1398's MERGE CONDITION) then #1398. Merge seat **Seat R 5th** for both. develop **b39051390ff6**. #1398's flow block becomes **28.** (ruled). Read `KIT_REPORT.md` § WIDENED 2026-10-07 and the new heading in `RULINGS_wednesday.md` first. The launch command is now:
+> `script -q /dev/null bash /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/gatesets/2026-10-06_gate71/repin_and_launch_gate71.sh 1404:c117c0160684d1ae72b220a8d2ccfe9aafb8eb8d 1398:9414aa54e92ca243565d0d967aad991dc4c13840`
+> The routing line is ALREADY in inbox_routing.conf (dry run: 1 exact line).
+
 # Gateset 2026-10-06_gate71 — README for Wednesday
 
 **gate71** is a **T1 gate, round 1 of 2**, on one Secuura/Blockchain PR: **#1398 (KS-1136 item 2, R-3, author Seat R 3rd)**.
