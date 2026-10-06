@@ -1,0 +1,25 @@
+diff --git a/Blockchain/Dev/services/kyc/src/__tests__/db.retry.test.ts b/Blockchain/Dev/services/kyc/src/__tests__/db.retry.test.ts
+index 179bbfa18..398fe4068 100644
+--- a/Blockchain/Dev/services/kyc/src/__tests__/db.retry.test.ts
++++ b/Blockchain/Dev/services/kyc/src/__tests__/db.retry.test.ts
+@@ -36,4 +36,7 @@ async function importDb() {
+ const DB_UP = { rows: [{ ok: 1 }] };
+-
+-describe('db availability retry (KS-377)', () => {
++
++// KS-1328: this file runs on a 60 s budget instead of vitest's 5 s default. Under fleet load the first cell
++// timed out at 11498 ms while passing in 675 ms alone: the overrun is scheduling, not work (the KS-1155 class).
++// The budget sits on this describe only, so every other kyc suite keeps the 5 s default.
++describe('db availability retry (KS-377)', { timeout: 60_000 }, () => {
+   // Silence db.ts's structured console.log lines; restored per test below.
+@@ -133,2 +136,10 @@ describe('db availability retry (KS-377)', () => {
+   });
++
++  it('KS-1328: every cell in this file carries the 60 s budget, not the 5 s default', ({ task }) => {
++    const cells = task.suite?.tasks ?? [];
++    expect(cells.length).toBe(6);
++    for (const cell of cells) {
++      expect((cell as { timeout?: number }).timeout).toBe(60_000);
++    }
++  });
+ });

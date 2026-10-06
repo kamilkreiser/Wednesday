@@ -1,0 +1,68 @@
+--- a/Blockchain/Dev/scripts/__tests__/stack_guard.test.sh
++++ b/Blockchain/Dev/scripts/__tests__/stack_guard.test.sh
+@@ -316,3 +316,37 @@ expect_val "three distinct foreign stacks are listed three times" "3" \
+ mine|alice|feature/mine|abc1234|2026-08-19T10:00:00Z")"
+-
++
++# --- KS-1355 spot 1: one line per PROJECT under mixed owner labels --------------
++# A stack with one container started outside start-secuura.sh carries
++# owner=unknown beside its real owner's labels (the KS-1011 case), and `sort -u`
++# on the label tuple listed that project twice - seen 2026-09-28 bringing up
++# slot 4 beside slot 3. The guard lists the project ONCE, under its real owner,
++# and counts the owner=unknown containers onto that line.
++other_stacks_out() {
++  local labels="$1"
++  local tmp; tmp="$(mktemp -d)"
++  make_repo "$tmp/repo"
++  make_docker_stub "$tmp/bin" "$labels" 33
++  PATH="$tmp/bin:$PATH" REPO_ROOT="$tmp/repo" USER=alice SUDO_USER=alice \
++    STACK_PROJECT=mine bash "$GUARD" 2>&1
++  rm -rf "$tmp"
++}
++
++KS1355_MIXED="theirs|bob|feature/theirs|dead1234|2026-08-19T11:00:00Z
++theirs|bob|feature/theirs|dead1234|2026-08-19T11:00:00Z
++theirs|unknown|unknown|unknown|unknown
++mine|alice|feature/mine|abc1234|2026-08-19T10:00:00Z"
++
++expect_val "KS-1355: a stack with an owner=unknown container is listed ONCE" "1" \
++  "$(count_other_lines "$KS1355_MIXED")"
++
++expect_val "KS-1355: ...under its real owner, with the owner=unknown count" "1" \
++  "$(other_stacks_out "$KS1355_MIXED" | grep -cF 'owner bob, branch feature/theirs (+1 container(s) with owner unknown)')"
++
++# Control: a stack whose containers ALL read owner=unknown has no real owner to
++# name, so it is still listed, once, as owner unknown.
++expect_val "KS-1355 CONTROL: an all-unknown stack is still listed once, as owner unknown" "1" \
++  "$(other_stacks_out "theirs|unknown|unknown|unknown|unknown
++theirs|unknown|unknown|unknown|unknown
++mine|alice|feature/mine|abc1234|2026-08-19T10:00:00Z" | grep -cF 'owner unknown, branch unknown')"
++
+ echo ""
+--- a/Blockchain/Dev/scripts/stack_guard.sh
++++ b/Blockchain/Dev/scripts/stack_guard.sh
+@@ -103,2 +103,6 @@ read_stack_labels() {
+ # but the operator should still know the host is shared before they act.
++# KS-1355: ONE line per PROJECT. A stack with one container started outside
++# start-secuura.sh carries owner=unknown beside its real owner's labels, and
++# `sort -u` on the label tuple listed that project twice. The first labelled
++# tuple names the stack; its owner=unknown containers are counted onto it.
+ list_other_stacks() {
+@@ -108,3 +112,16 @@ list_other_stacks() {
+     --format '{{.Label "com.docker.compose.project"}}|{{.Label "com.secuura.stack.owner"}}|{{.Label "com.secuura.stack.branch"}}' \
+-    2>/dev/null | grep -v "^${project}|" | sort -u || true
++    2>/dev/null | grep -v "^${project}|" \
++    | awk -F'|' '
++        $1 == "" { next }
++        !($1 in seen) { seen[$1] = 1; order[++n] = $1 }
++        $2 == "unknown" { unk[$1]++; next }
++        !($1 in tuple) { tuple[$1] = $2 "|" $3 }
++        END {
++          for (i = 1; i <= n; i++) {
++            p = order[i]
++            if (!(p in tuple)) { print p "|unknown|unknown"; continue }
++            print p "|" tuple[p] (unk[p] ? " (+" unk[p] " container(s) with owner unknown)" : "")
++          }
++        }' \
++    | sort || true
+ }
