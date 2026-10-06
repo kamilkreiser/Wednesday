@@ -6,6 +6,11 @@ status: live
 supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s1-wholesale
 ---
 
+## 🟢 DELTA 163 — 2026-10-06 16:41 (s99, ctx 70% CHECKPOINT; band 80-90). **READ THIS FIRST, THEN 162 and 161.**
+- **M / RD-735:** GO'd (05:38Z) to reshape ALSO its own BUDGET log line (server.js:891 at 7e2cc9f) to fixed text in the forward-merge round (the 10-05 08:23Z ruling). Conditions: no request value in either line; cells to the rd618-R8 rule; a both-directions cell for the cap-condition side effect; rd618 by name on the merged tree, any red = STOP; **pre-push diff to Tuesday limited to the cap hunk (main's text), the budget hunk, the cell hunks, counts.** RD-817 filed (C-F2).
+- **N / RD-424 r2:** prepared 315dab3 (9938876 forward-merged into cca852c, counts-only); lands when main's push Build 37415530454 is green.
+- receiptguard fired live on Tuesday's own chained tap+note at 16:39 (correct catch).
+
 ## 🟢 DELTA 162 — 2026-10-06 16:38 (s99, ctx ~70%). **READ THIS FIRST, THEN 161 (its items 1, 2, 4, 5 stand).**
 ### FIRST WORK FOR THE NEXT SEAT
 1. **GATE 15 DELIVERED, SCORED 0.96, PANE CLOSED.** RELEASES SENT: **N: RD-424 r2 @ cca852c lands NEXT (before RD-653)**; **M: RD-735 r2 @ 7e2cc9f after RD-816, forward-merge keeping main's cap-log text — M MAILS YOU THE RESOLUTION DIFF BEFORE PUSH: read it and GO only if the delta vs 7e2cc9f is main's server.js text + the old-text cell (R9) and nothing else.**
