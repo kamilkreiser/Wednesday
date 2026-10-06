@@ -13,12 +13,18 @@ supersede: REPLACED WHOLESALE 2026-10-06 19:1x by the evening seat (booted 18:0x
 1. `inbox_digest.sh --inbound` WHOLE (never through `tail`: at 19:1x the inbound view's tail cut off E 8th's STATUS, and only the `--all` read caught it) + `--all` for `[QUESTION]` rows in the last 12 h, each matched to a later ANSWER.
 2. **develop = f556373b9418** (#1396 KS-1256, squashed by E 8th). VERIFIED AT SOURCE 19:15 by Wednesday's own scratch fetch: tree 1aa966ca162b, one parent f42161da3f96, 11 files, 0 trailers; KS-1256 In Progress.
 
-## LIVE NOW
-- **Seat E 8th** (pane `Secuura/Blockchain-E`, %65): merged #1396, ordered to WRAP COLD (19:16 ANSWER, verified 08:16:48Z) with two conditional worktree removals (`s-e6-ks1256` if HEAD == 91d441e42c0d; `s-d10-advlock` if HEAD == 3e7be2044fe8; both porcelain 0, no --force). On its WRAP: re-hash the handover, check the history entry, score it (rec 1.0: three of its own instruments failed and it caught all three itself), then `pane_close`.
-- **Seat R 2nd: READY TO LAUNCH on E 8th's wrap.** Brief `fleet/briefs_staged/2026-10-06_seatR2_1395_merge_and_raise.md` (READ WHOLE by Wednesday 19:1x; backup `.pre-1006-send`). Send amendment staged at `<this seat's scratchpad>/amend_r2.md`. It is NOT durable, so re-derive it if this seat is gone. Its content: #1396 merged at f556373b; run 1 = `predict`, not `chain`; Wednesday's first-hand @T1395@ = **c39aeeca92b9e6c2c1dddd0c62138fd3b95c1a46** on f556373b (both READ-BACK OK; wrong-order control 68e6cfbff63c FAIL; own `--shared` scratch clone, shared rev-parse --all unchanged); Q-BASE2 ruled (raise base = develop at ANSWER); Q-5F2 yes; budget: merge first, cold at 60%. To send: replace `@DEVELOP_LAUNCH@` → f556373b941823931a9858a788c478e50e822a79 and `@SEND_UTC@` → the send time throughout, prepend the amendment, then `brief_and_launch.sh --to "Secuura/Blockchain-R"` (clause cloud: merge + raise). **The GO goes as its OWN mail whose SUBJECT IS `GO (Seat R 2nd): merge 1395 on gate69`** (brief :171; ledger 10-06 w=2 GO-shape). Body carries @DEVELOP_1396@ = f556373b… and @T1395@ = c39aeeca…, and states #1396 merged.
+## LIVE NOW (refreshed 20:1x, 65% checkpoint)
+- **Seat R 2nd** (pane `Secuura/Blockchain-R`, %66), launched 19:24 by card (a). Kam ruled (a) at 19:30.
+  - The subject-form GO `GO (Seat R 2nd): merge 1395 on gate69` was sent at 08:47:42Z, carrying develop f556373b941823931a9858a788c478e50e822a79 and T c39aeeca92b9e6c2c1dddd0c62138fd3b95c1a46.
+  - **Merge-in M = 7015376e4f41, BUILT, not yet pushed.** Tree == c39aeeca (Wednesday read it at 09:11:32Z); qm 8/8; originate suite 92/1074/0.
+  - The merge-in tool's 5 stale #1394 gates were overridden for this commit only (09:11:51 ANSWER); a `--dev-parent` 12th argument was added.
+  - Next from it: push (legs 6/7) → Actions by log line → squash → `STATUS: merged 1395`.
+  - **On that STATUS:** verify at source (own scratch fetch: tree c39aeeca, one parent f556373b, 4 files, KS-1305 In Progress) → score → then R 2nd raises PRs 2-5 (KS-1136, KS-998, KS-1313 + KS 1326, KS-1164; all four STRICT-apply at f556373b) until 60%, then cold.
+- **Deploy seat D 12th: brief STAGED** `fleet/briefs_staged/2026-10-06_seatDeploy1_kintsugi_demo.md`. Launch after #1395 merges (see OWED).
+- Ornith paused to 06:00 10-07 with its reason. The Spark queue is empty.
 
 ## THE QUEUE, in order
-1. R 2nd launch (above) → ITEM 0 ANSWER → subject-form GO → merge #1395 → raises.
+1. R 2nd (LIVE): merge #1395 → raises.
 2. One batched gate for R 2nd's raised PRs (name the gate number in the ANSWER; it is NOT gate69).
 3. Deploy round: today's merges (#1385 KS-938, #1394 KS-723, #1397 KS-1425, #1393 KS-1278, #1396 KS-1256, then #1395) to kintsugi, then demo, under the October grant (EXPIRING-GRANTS). Phase 0 re-tag; KS-535 wallet rule; report each deploy on the panel.
 4. Five newer Spark holds for a later raise seat (READY_ files in `local-model/night/`): KS-1328, KS-1355 stack_guard, KS-1355 dev-reload (r2, held 18:0x), KS-1364 apigw, KS-593.
@@ -26,7 +32,7 @@ supersede: REPLACED WHOLESALE 2026-10-06 19:1x by the evening seat (booted 18:0x
 6. Spark queue empty; a brief drafter runs only if the gauge is under 87% after R 2nd launches.
 
 ## BUDGET
-7d gauge 84% (19:1x), renews ~4d 17h. 90% = hard stop. Since 09:37: Claude launches 10 vs Spark tasks 14 (58% Spark), told to Kam 18:0x.
+7d gauge 86% (20:1x); Kam 19:30 grant lifts this seat to 100% until the renewal, renews ~4d 17h. 90% = hard stop. Since 09:37: Claude launches 10 vs Spark tasks 14 (58% Spark), told to Kam 18:0x.
 
 ## OWED (Wednesday's own)
 - **`safe_pull.sh` (ledger w=3, 10-06 19:4x):** stash only the named generated feeds; union decisions.json and the chat stores; refuse a bare `--autostash`. Until it exists, after any pull, read `git stash show --name-only stash@{0}` and union the chat stores.
