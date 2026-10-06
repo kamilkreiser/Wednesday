@@ -12,6 +12,22 @@ supersede: replace wholesale; previous = NEXT-PICKUP-FRIDAY.md.pre-0925-rotate-s
 
 **The tree is at `/Volumes/Laptop-DEV/FRIDAY` (the drive, since 2026-09-28).** Quote every path (spaces).
 
+## 🔴🔴🔴 CHECKPOINT 2026-10-06 19:39 (Friday, ctx 70%) — READ FIRST; supersedes every block below where they differ
+**FIRST ACT after rotation:** kam_rulings_today.sh + reconcile_rulings.py; seat_idle.sh on every pane below; read each STATUS's last lines; re-seed + re-arm watchers (they die with the seat).
+**STANDING GRANT (Kam 19:31 + confirmed in terminal "yes, both the Composer demo and HPSM-POC"):** once READY (gate passed + Friday's check + merged via CodeQL) deploy to the Composer demo AND the hosted HPSM-POC site WITHOUT a card; runbook unchanged; report each deploy after. Lesson `2026-10-06_push-to-demo-when-ready-no-card`; EXPIRING-GRANTS row (no expiry). NOT: money, humans, a content release that makes engagements read-only (card it).
+**Kam's rulings since 19:2x (all reconciled):** hpsmpoc-input-phase-a a · hpsmpoc-yes-no-rule a · hpsmpoc-sm-admin-optin b · composer-prior-unreleased a (delivered) · composer-policy-target a · composer-e8-mapping a · composer-guided-view c.
+**OPEN CARDS (Friday tab):** `hpsmpoc-optin-warning-text-1006` (rec a; text in the map §4) · `hpsmpoc-lab-fss-t2-1006` (rec a; FSS sends model/serial/firmware to HP — B167 waits on it).
+**MAINS:** Composer 19c5e8a = demo · HPSM-POC 8798fa7 = code main (hosted 646870e) · analysis 03c7fd5.
+**LIVE PANES:**
+- HPSM-POC-A %80 **B166**: map CHECKPOINT 1 ACCEPTED (ADD-4); now the yes/no options doc (ADD-3) → fold B167 drill-down fields into §4c → records/b166 (Friday PR; PDFs git-ignored, kept in .tools/b166/out). Friday answered ONE permission dialog in %80 at 19:4x (its own records cp + secret scan) — recorded as Friday's choice.
+- HPSM-POC-B %81 **B167** lab on Azure (ADD-1 FTA device source, ADD-2 drill-down fields, ADD-3 T2 waits on card).
+- HPSM-POC-C %82 **B168** Phase A: tickets → A1 (tier 1 GATE) → A2+A3. Tell it when B167's samples land.
+- HPSM-POC-D %85 **B169** Playbook burger menu (mocks first) + Feedback attachments (tier 1); STOP if contract collides with B168. Deploy under the grant after its gate.
+- Composer-D %83 **B92** hide Guided behind one switch + Paul's guide note → gate → merge → deploy under the grant.
+- Composer-E %84 **B93** design (Policy section, 66 questions in Expert, E8 DRAFT mapping) → CHECKPOINT 1 for Friday; docs only.
+**Watchers:** scratchpad seen_hp (B16x/B17x + %80 %81 %82 %85), seen_c9x (B92/B93 + %83 %84).
+**Owed:** Terry list = add B166's G1-*/G2-* questions to the 13 already emailed (a follow-up mail to Kam when B166 lists them).
+
 ## 🔴🔴🔴 CHECKPOINT 2026-10-06 19:28 (Friday, ctx 65%) — READ FIRST; supersedes every block below where they differ
 **Kam today (evening):** "deploy the composer to the demo" → DONE (B91; demo = 19c5e8a, healthz 0.29.0, Friday's own probe; card delivered C-46). Logins email sent (no passwords) + on his word "put the passwords in the email too" a second mail with Kam's + Paul's SM passwords (read back by comparison). **19:25:15 (verbatim in `HPSM-POC Briefs/B166_ADDENDUM-1_connection-map-scope.md`): map SM + FTA connection points in THREE models (automated ongoing / upload of the tool's export / guided per-question entry), firmware number per printer + latest firmware + align automatically, then START INTEGRATING, live ASAP; test on our own copies; HP only if testing can't answer.** Card `hpsmpoc-input-phase-a-1006` RULED a on it. **19:27:23: FTA has granular per-printer info (message ends mid-sentence at "it is") → relayed to B166/B167 as ADDENDA.**
 **MAINS:** Composer 19c5e8a = demo · HPSM-POC 8798fa7 · analysis 03c7fd5 (+ records/b166-8 pending).
