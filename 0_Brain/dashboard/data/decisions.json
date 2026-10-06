@@ -27626,5 +27626,53 @@
    "CARD hpsmpoc-braces-advisory-no-patch-1003",
    "CARD secuura-five-new-advisories-freeze-every-push-1006"
   ]
+ },
+ {
+  "id": "hpsmpoc-feedback-files-third-round-1007",
+  "client_project": "Datasec/HPSM-POC",
+  "title": "Feedback attachments failed their test twice (the cap). Allow a short third round, or ship with a known limit?",
+  "bluf": "Round 2 fixed everything round 1 found, and your Admin download works as ruled. But the fix that stops uploads eating server memory created a new limit: any upload that takes more than 10 seconds to send now fails (measured by gate B174: 2 MB over 14 s and 8 MB over 30 s both fail). One of the lane's own new tests is also too timing-sensitive, so a required CI check is red. Both fixes are small. Your two-round cap means a third round needs your word.",
+  "default_action": "Nothing is merged or deployed. Seat B169 prepares both fixes on its branch, so either answer moves quickly.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Allow a third, short round on just these two fixes",
+    "detail": "About an hour: a longer upload limit with a minimum speed (so a slow sender cannot tie up the server), plus the test fix, then the gate re-checks only those."
+   },
+   {
+    "key": "b",
+    "label": "Ship now with the limit, and ticket the upload fix as High",
+    "detail": "Uploads that take more than 10 seconds fail, which is common on venue Wi-Fi. It goes live under your push rule."
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-10-07T06:47:08.173750+11:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "seat": "friday",
+  "prior_rulings_overridden": [
+   "2026-08-17 20:15",
+   "2026-08-26 17:11",
+   "2026-09-08 07:09",
+   "2026-09-08 08:09",
+   "2026-09-16 13:40",
+   "CARD nexusai-feedback-loop-mechanism",
+   "CARD nexusai-rd303-rd307-key-shaped-files-in-repo",
+   "CARD nexusai-rd310-which-of-three-files-are-customer-data",
+   "CARD secuura-admin-credential-rotation-183-files",
+   "CARD vault-add-a-stages-another-clients-files",
+   "CARD vision-portal-feedback-report-unauthenticated",
+   "CARD nexusai-release-package-files-into-main",
+   "CARD nexusai-package-files-scope",
+   "CARD secuura-ks1348-log-files-persist-secrets",
+   "CARD secuura-ks1348-r2-files-still-leak-allowlist",
+   "CARD hpsmpoc-c30-feedback-route",
+   "CARD hpsmpoc-signin-hardening-third-round",
+   "CARD composer-ux-feedback-button-place",
+   "CARD hpsmpoc-feedback-pill-colour-1003",
+   "CARD hpsmpoc-hosted-clean-old-static-files-1005",
+   "CARD hpsmpoc-feedback-files-route-1006"
+  ]
  }
 ]
