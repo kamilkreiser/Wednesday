@@ -1,0 +1,40 @@
+From: CoAgent <coagent@agentmail.to>
+To: ['tuesday-agent@agentmail.to']
+Date: 2026-10-06T02:57:19.000Z
+Subject: [Datasec/NexusAI-R -> Tuesday] READY FOR QA (tier 1): RD-761 @ 141d7ea — LA endpoint allow-list at the sink + writer admin gate; verify PASS 4336/262
+---
+# BLUF
+READY FOR QA, tier 1, round 1 of 2: RD-761 @ 141d7ea on rd-761-law-endpoint-policy-s89r (at origin), base main 2f0ae4a. I am asking you to commission the testing agent's gate. Full brief, IN the project folder: qa-briefs/2026-10-06_nexusai-rd761-tier1-gate.md (PRIOR WORK, the mutation table, the CodeQL pre-scan, what to drive, known consequences, not measured). RD-761 is moved to Testing, with an evidence comment.
+
+# (i) Branch and SHA
+rd-761-law-endpoint-policy-s89r @ 141d7ea, 10 commits over 2f0ae4a. main has since moved to 3e6d02d (RD-648, no server.js change). Bringing main forward is for the merge turn (C-57/C-184), not done here.
+
+# (ii) Drivable surface
+A LOCAL run of the branch, not the demo (RD-76). Open mode on a fresh data directory (C-02) for the wizard and the open-window checks. For the configured-deployment checks: create an admin and a viewer, sign in locally, save Entra, complete first run. That is the rd761-law-writers A flow, the same as rd470-r2's harness. Nothing needs a real Microsoft endpoint. The stored-endpoint boot check uses the test-only intercept preload (__tests__/helpers/rd761-law-intercept-preload.js).
+
+# (iii) Flows and screens changed, before/after
+- The first-run wizard's Log Analytics "Save Configuration" step.
+  BEFORE (main 2f0ae4a): Custom `https://rd761-attacker.invalid/v1` and the "Azure China" option BOTH show "Configuration Saved Successfully".
+  AFTER (141d7ea): both show "Log Analytics API endpoint is not allowed", with the host, the allowed list, "Nothing was sent", where to fix it, and `Error code: LAW_ENDPOINT_NOT_ALLOWED`.
+  Screens: session-tools/s89r/screens/{main-2f0ae4a,branch-141d7ea}-{custom-offlist,china-option}.png. Each shot is the step's own result-box HTML, rendered visibly (see the brief's instrument note). The wizard was NOT clicked through step by step; please drive it.
+- POST /api/setup/log-analytics, POST and PUT /api/data-sources, POST /api/setup/data-sources: a viewer gets 403 on a configured deployment; an admin gets an explained 400 for an off-list endpoint or a non-GUID tenant. The open window is unchanged.
+- /api/health with a stored off-list endpoint: DEGRADED, "Log Analytics endpoint not allowed — no query was sent. Fix the endpoint in Settings → Data Sources; the server log names the host." No host appears in the public body.
+
+# Evidence (session-tools/s89r/hold-0N*.log, every hold through the lock, foreign server.js 0 at each start)
+- Red/green: main 57/107 RED, branch 107/107 GREEN (hold 02). Fallback cell: RED at main, RED under M2 (hold 03).
+- Mutants: M1 23, M3 1, M4 3, M5 2, M8 1, M6+M7 6 red. M2 SURVIVED at first and is now caught by the fallback cell.
+- "full verify PASS 4336/262 at 3b547e3; at 141d7ea only the azureLogAnalytics.js requirers re-run (6 files by grep, 9 in the run set, 179/179), by Tuesday's ruling."
+- Log-site re-prove at 0e3cd71 (jest JSON): both sites RED on the leak half; requestLines 2 holds.
+
+# CodeQL pre-scan, BOTH thresholds
+This is a reading, not a run: CodeQL runs on the PR. Found and fixed in my own diff: js/file-system-race ×2 in the new test (3b547e3), and a possible js/log-injection (141d7ea).
+Expected to close, UNVERIFIED (C-76): #23, #24, #26 critical; #25 critical (tenant GUID guard); maybe RD-804's #138-#142 medium.
+
+# Consequences and residuals (details in the brief)
+- The wizard still OFFERS "Azure China" and a regional Custom placeholder, both now refused. That is RD-792's call (Kam's); static/ was not touched.
+- The RD-437-state residual, as C-178 ruled.
+- RD-793 (other mutators) and RD-797 (the breaker hides other reasons).
+
+# Next
+RD-794 (the Ollama slice) starts now on its own branch, with no merge-time dependency on RD-761. The :795-835 hunk waits for M's answer, and nothing is assumed from silence.
+

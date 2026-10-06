@@ -1,0 +1,29 @@
+From: CoAgent <coagent@agentmail.to>
+To: ['tuesday-agent@agentmail.to']
+Date: 2026-10-06T03:20:35.000Z
+Subject: [Datasec/NexusAI-M -> Tuesday] READY FOR QA: RD-816 @ 92e11a8 — proxy-addr 2.0.8 (NOT REACHABLE under trust proxy=1); verify PASS 4269/262; red cell proven
+---
+BLUF: READY FOR QA — RD-816 (tier 2, dependency patch on shipped code, round 1 of 2), branch rd-816-proxy-addr-2-0-8-s86m @ 92e11a8 (pushed, read back), off main 3e6d02d. proxy-addr 2.0.7 -> 2.0.8 (GHSA-jqcg-44mw-7w3h, critical). VERDICT: PASS — 4269/4269 tests passed across 262 suites (jest exit 0); predicted 4269/262. The advisory is NOT REACHABLE under the app's trust proxy = 1 (measured, with a positive control). The lock still moves, so the audit is green and the floor holds.
+
+Change
+- 745978b, package-lock.json ONLY: node_modules/proxy-addr 2.0.7 -> 2.0.8 (version, resolved, integrity, plus the "funding" field 2.0.8 declares). Exactly one lock entry; package.json untouched; inside express's ^2.0.7; no other package moved; no major.
+- 931f621, cells: new file __tests__/rd816-proxy-addr-mapped-subnet.test.js. P1 x3 is the library red cell; P2 is the source-level reachability guard on the app's trust setting.
+- 92e11a8: counts 4265/261 -> 4269/262 (+4 tests, +1 suite).
+- npm audit --omit=dev = 0 at the head (CI's --audit-level=moderate exits 0; main 3e6d02d's lock: 1 critical).
+
+Reachability (step 4): NOT REACHABLE, and why. 2.0.8 changes only proxy-addr's subnet matching (trustSingle/trustMulti). backend/server.js:1071 `app.set('trust proxy', 1)` is the only trust setting (git grep over backend, azure-marketplace, scripts and the Dockerfile). Express compiles a number into its own hop function, so that code never runs. 2.0.7 and 2.0.8 give identical req.ip for IPv4, IPv4-mapped and plain sockets under it. Positive control: under subnet trusts ("::ffff:0:0/80", "::ffff:0:0/95", "::/1") 2.0.7 trusts an IPv4 peer and returns the forged X-Forwarded-For, and 2.0.8 returns the socket (20 differing cases). Details are in my 02:2xZ STATUS and on RD-816.
+
+Proof (hold s86m-rd816-hold; session-tools/s86m/rd816-hold.log)
+- installed proxy-addr 2.0.8 (npm ci from the new lock).
+- C-68 by name, by grep (trust proxy / req.ip / X-Forwarded-For / limiters / proxy-addr / package-lock) = 19 files (the 18 + the new rd816 file): 302/302.
+- P1 + P2 GREEN at 2.0.8, 4/4. RED with proxy-addr 2.0.7 swapped into node_modules: P1 x3 red, P2 green (correct: P2 reads the source). 2.0.8 was moved back (the 2.0.7 copy moved aside to the scratchpad, never deleted) and version-checked.
+- Full verify PASS 4269/262.
+- The app boots from the worktree: /api/health OK, / 200, POST /api/csp-report with X-Forwarded-For ::ffff:10.0.0.1 -> 204. Stopped by pid (cwd = the worktree).
+- Pre-scan, both thresholds: test-only code plus a lockfile; no logger line, no includes('http'), no regex filter.
+
+PRIOR WORK: nothing replaced or removed. The same shape as RD-741 (lockfile-only advisory refresh, PR #42) and RD-732. package.json overrides (tar, uuid, @tootallnate/once) are untouched. RD-758 (forged XFF behind the real ingress) is unchanged: the hop-count trust honours a client XFF identically in both versions.
+Merge-tree vs main 8e79499 (RD-618 landed): counts only.
+Also noted: a new DEV-only moderate (sprintf-js GHSA-hp3w-g68c-fv3c, no patched release, via jest's istanbul chain), parked on RD-742 (comment 39103); CI's --omit=dev audit does not see it.
+Jira: RD-816 -> Testing.
+-- NexusAI-M (S86M)
+
