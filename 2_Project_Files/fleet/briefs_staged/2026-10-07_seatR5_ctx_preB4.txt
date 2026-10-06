@@ -1,0 +1,91 @@
+Subject: [Secuura/Blockchain-R -> Wednesday] QUESTION: ctx read (Seat R 5th)
+Timestamp: 2026-10-06T17:50:28.000Z
+Auth: {"spf": "pass", "dkim": "pass", "dmarc": "pass"}
+
+QUESTION: ctx read (Seat R 5th). B3 is DONE — the #1404 merge-in EXISTS and qm passes 8/8.
+HOLDING for your pane reading before B4 (the push), and for ONE decision below.
+Watcher LIVE pid 26185, SINCE 2026-10-06T17:09:23Z.
+
+TWO QUESTIONS, one of them a decision only you can make:
+Q1. What does my pane statusline read?
+Q2. mergeinra5_1404.sh's FIRST RUN printed `VERDICT: FAIL`, 44 of 45 gates passed, and the ONE
+    failure was MY OWN ADDED GATE raising two false positives (F-6 below). The merge COMMIT is
+    correct and independently verified. Do you want the whole script RE-RUN for a clean VERDICT
+    line — which means resetting the branch and producing a NEW merge commit SHA, and a fresh qm —
+    or do you accept the corrected gate re-driven standalone against the EXISTING M? I have not
+    reset anything and will not without your word.
+
+== THE MERGE-IN, AS IT STANDS ==
+M = 7849f0a23d0609f618736c69a0a33a6a38c6f077, in the ADOPTED s-ra4-ks1436.
+  tree(M)   = d717255d5376c7c8cf22e57c0bc88b7437b2553d — BYTE-EQUAL to your GO's T.
+  parents   = [c117c0160684… , b39051390ff6…] — OURS first, then D, in that order.
+  trailers  = 1 byte (empty) against the control bf277eead268 at 55 bytes (a real Co-Authored-By).
+  subject   = `Merge develop b39051390ff6 into the KS-1436 branch (docs re-composition)`, no (#n).
+  0 Co-Authored-By. 0 closing-family word before KS-1436.
+Resolution was BY CONTENT, never take-ours: both docs extracted from your kit's blobs out of MY
+clone, then the STAGED blob ids asserted — flow f9935e1cfe8c, cheat 191bb32270c5, both equal to the
+GO's. 0 conflicts remained, nothing unstaged, no untracked, 0 conflict markers in either doc.
+The merge itself behaved exactly as predicted: rc 1, exactly TWO conflicted files, both under
+`Projects Documents/`, 0 outside.
+
+== qm ON M — 8 CHECKED, 0 FAIL, rc 0 ==
+`c4_docs_gate71.py qm --repo <my clone> --head c117c0160684… --pr 1404 --merge-in-head M
+ --develop-after b39051390ff6… --out <my scratch>`
+  Q1 parents ['c117c0160684', 'b39051390ff6'] == [head, develop]
+  Q2 tree(M) d717255d5376 == predicted d717255d5376
+  Q3-flow  own 27 x1, LAST True, develop prefix kept True, UNIQUE True, tail [22, 23, 24, 27]
+  Q4-flow  M minus its block == develop byte for byte
+  Q3-cheat own KS-1436 x1, LAST True, prefix kept True, UNIQUE True, tail ['KS-1278','KS-1256','KS-1305','KS-1436']
+  Q4-cheat M minus its block == develop byte for byte
+  Q5 code paths at M == the head blobs
+  Q6 develop's static guard on tree(M): rc 0, (12, 0)
+So Q-N5's `27.` lands unique and keyed, and the guard is green ON THE MERGED TREE, not just on your
+kit's files. One instrument note: the mode must be argv[1]. My first call put `--repo` first, the
+banner printed `C4 --repo row #1404`, every mode branch missed and it returned rc 2 with the
+docstring. rc 2 there is "refused by name", not a failing gate — worth knowing before someone reads
+a 2 as a verdict.
+
+== F-6 — MY OWN ADDED GATE WAS WRONG, TWO BUGS, BOTH MINE ==
+It reported `DIFFERS: systemTest/schemathesis/tests/test_billing_idempotency.py  dev=b39051390ff6
+M=HEAD:systemT` and the same for test_seed_demo_gate.py. Neither column is a blob id, and that is
+the tell.
+BUG 1, THE INSTRUMENT. `git rev-parse <sha>:<path>` for an unresolvable path writes `fatal:` to
+STDERR and ECHOES THE ARGUMENT TO STDOUT, exiting 128. So `$(git rev-parse "$DEV:$f" 2>/dev/null ||
+echo MISSING-AT-DEV)` captured the echoed `<sha>:<path>` and the `|| echo` NEVER FIRED — and
+`${A:0:12}` then printed the sha prefix, which formats exactly like a blob id. A failure that looks
+like a measurement. `--verify` does not help; it exits 128 the same way. FIXED to `git ls-tree`,
+which prints an empty line and exits 0 for an absent path.
+BUG 2, NO CASE FOR A DELETION. `diff --name-only OURS..M` lists paths develop DELETED. MEASURED:
+both files are 100644 at OURS (4e5e3634f454 and 6314e915f6b2), ABSENT at develop, ABSENT at M,
+status `D` in OURS..M. That is develop's deletion CORRECTLY CARRIED THROUGH — a PASS, which my gate
+had no branch for. The three states are now scored apart, so "absent on ONE side only" still FAILS.
+RE-DRIVEN standalone against the existing M: **188 checked, 2 deletions carried, 0 differ — PASS**,
+with all three failure arms still firing (dev-present/M-absent FAILS, dev-absent/M-present FAILS,
+both present with different blobs FAILS).
+WHY THIS MATTERS BEYOND MY GATE: the 188-path check was the gate I ADDED to cover what a 3-path
+list cannot. It was right to add and wrong as written, and it is the only gate in the file that
+looks at deletions at all. The five gates you ruled on are untouched by this and all passed.
+
+== LEDGER, measured in this call ==
+`rev-parse --all` is still 1,608 lines; the sha256/16 moved from 1d486de42c80b2bc to 33d8f598ca21a5b4
+and `diff` against the boot copy is EXACTLY ONE LINE: c117c0160684… -> 7849f0a23d06…. That is my
+own branch ref moving to M and nothing else.
+refs/heads/develop in the shared checkout still c56dd7c32edf; refs/remotes/origin/develop still
+32e058975d4e — NEITHER written by me, the KS-991 stale ref left stale for the co-tenant.
+origin's feature/ks-1436-…-ra4-6 is STILL c117c0160684 — M is UNPUSHED.
+develop at origin 2026-10-06T17:49:09Z: b39051390ff6f252601d6f7b45f0ea6c21c31023 — unmoved, so your GO's T stands.
+Locks 0 (the merge-in took .push-lock-d8 as pid 27177 and released it in the same call;
+90 s cool-off stamp written). df -m /Volumes/DevMASTER 697829 MB available.
+namecheckra1.py now declares the adoption — ADOPTED_WORKTREE ["s-ra4-ks1436"], ADOPTIONS the one
+exact branch name, EXPECTED_* both 1 — and re-runs rc 0, 7 checks, 0 bad, 24/24 controls fired.
+ADOPTION-CONTROL B now has a real subject and drives both ways: ADOPTED -> removed -> FOREIGN ->
+restored -> ADOPTED. Before this it reported "NOT APPLICABLE by construction, 0 declared members".
+
+== WHAT I RUN ON YOUR ANSWER, IF YOU ACCEPT THE STANDALONE RE-VERIFICATION ==
+B4: the FF_DRYPROOF=1 all-guards-pass control first (CUR==EXPECT, CUR!=HEAD, EXPECT an ancestor of
+HEAD are all true now, so it is finally drivable), then `pushra1_ff.sh` BARE under
+`env -u GIT_SSH_COMMAND` with WT / TARGET / EXPECT = the worktree, the branch, c117c0160684.
+Legs 6 and 7 read from the FULL push.out, never the summary; `html_docs_matrix` green in the in-hook
+shell suites; the PREFLIGHT line quoted exactly. Never --no-verify, never a force.
+If you want the re-run instead, say so and I reset the branch to c117c0160684, re-run the whole
+script for a clean VERDICT, and re-run qm on the new M before any push.
