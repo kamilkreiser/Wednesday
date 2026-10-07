@@ -1,0 +1,7 @@
+PASS S1 ONE line, `.uuid()` inserted on newHolderId: ["-      newHolderId: z.string().optional().openapi({ description: 'Resolved new rights-holder user id.' }),", "+      newHolderId: z.string().uuid().optional().openapi({ description: 'Resolved new rights-holder user id.' "]
+PASS S2 YAML diff ['+          format: uuid']; under TransferCustodyRequest.properties.newHolderId: ['type: string', '          format: uuid', '          description: Resolved new rights-holder user id.']
+PASS S3 TransferCustodyRequestSchema references 2 (['Blockchain/Dev/services/originate/src/originate.openapi.ts:1626', 'Blockchain/Dev/services/originate/src/originate.openapi.ts:1727']) | runtime (safe)parse of it 0 | CONTROL `.parse(`/`.safeParse(` elsewhere in originate/src 77
+PASS S4 the runtime handler documents.ts byte-identical base == head True; carries its own UUID refusal True => the spec now states what the handler ALREADY enforced (no runtime branch moves)
+FAIL S5 §5d: a `KS-591` WHY comment within 3 lines of :[1630]: False | CONTROL the same reader finds KS-665 near :[61]: True => FINDING (§5d MUST)
+CHECKED 5
+1 FAIL (S5)

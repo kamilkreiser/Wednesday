@@ -41,6 +41,15 @@ def diff_lines(repo, a, b, path):
     return [l for l in out.split('\n') if l and l[0] in '+-' and not l.startswith(('+++', '---'))]
 
 
+def changed_line_nos(repo, a, b, path):
+    """the NEW-side line numbers of every added line, from the -U0 hunk headers (never a text search: an identical line elsewhere in the
+    file would be found first — measured: #1408's `signature: z.string().optional(),` also sits in approveTransferSchema at :403)."""
+    out = git(repo, 'diff', '-U0', a, b, '--', path); nos = []
+    for m in re.finditer(r'^@@ -\d+(?:,\d+)? \+(\d+)(?:,(\d+))? @@', out, re.M):
+        start, n = int(m.group(1)), int(m.group(2) or '1'); nos += list(range(start, start + n))
+    return nos
+
+
 def why_near(text, needle_line_no, key, span=3):
     L = text.split('\n'); lo = max(0, needle_line_no - 1 - span); hi = min(len(L), needle_line_no + span)
     return any(key in l for l in L[lo:hi])
@@ -61,10 +70,10 @@ def static(repo, r, head):
         ht = git_bytes(repo, head, p).decode()
         sib = [(i + 1, l.strip()) for i, l in enumerate(ht.split('\n')) if re.search(r'\bgrep\b[^|]*"[^"]*\$', l) and '-qxF' not in l and not l.lstrip().startswith('#')]
         t.info('S2', 'sibling greps reading a VARIABLE as a regex pattern at the head (residue, not this PR\'s): %s' % sib)
-        n = line_no(ht, 'grep -qxF "$full"')
-        hit = bool(n) and why_near(ht, n[0], 'KS-998'); ctl_n = line_no(ht, 'KS-1063'); ctl = bool(ctl_n) and why_near(ht, ctl_n[0], 'KS-1063')
-        t.check('S3', hit, '§5d: a `KS-998` WHY comment within 3 lines of the changed line :%s: %s | CONTROL the same reader finds KS-1063 near :%s: %s%s' % (
-            n[:1], hit, ctl_n[:1], ctl, '' if hit else ' => FINDING (§5d MUST: "Every changed line carries a comment saying WHY it changed and the Linear ticket number")'))
+        n = changed_line_nos(repo, BASE, head, p)
+        hit = bool(n) and all(why_near(ht, x, 'KS-998') for x in n); ctl_n = line_no(ht, 'KS-1063'); ctl = bool(ctl_n) and why_near(ht, ctl_n[0], 'KS-1063')
+        t.check('S3', hit, '§5d: a `KS-998` WHY comment within 3 lines of the changed line(s) :%s: %s (KS-998 in the whole file: %d) | CONTROL the same reader finds KS-1063 near :%s: %s%s' % (
+            n, hit, ht.count('KS-998'), ctl_n[:1], ctl, '' if hit else ' => FINDING (§5d MUST: "Every changed line carries a comment saying WHY it changed and the Linear ticket number")'))
     elif r == '1409':
         p = 'systemTest/performance/tests/unit/utils/unitSuiteSlotIndependence.test.ts'
         bt, ht = git_bytes(repo, BASE, p).decode(), git_bytes(repo, head, p).decode()
@@ -93,10 +102,10 @@ def static(repo, r, head):
         t.check('S3', 'type: string' in sigtxt and 'nullable' not in sigtxt and (req is None or 'signature' not in req.group(1)),
                 'published TransferRejectRequest.signature: %r; required %s => a string, OPTIONAL, NOT nullable: null -> 400 at the head is spec-consistent (a NAMED behaviour change: base answered 200)' % (
                     sigtxt.strip().split('\n')[:2], re.findall(r'- (\w+)', req.group(1)) if req else None))
-        n = line_no(ht, 'signature: z.string().optional(),')
-        hit = bool(n) and why_near(ht, n[0], 'KS-1435'); ctl_n = [i + 1 for i, l in enumerate(ht.split('\n')) if re.search(r'KS-\d+', l)]
-        t.check('S4', hit, '§5d: a `KS-1435` WHY comment within 3 lines of :%s: %s | CONTROL the file carries %d KS-keyed line(s), so the reader can see one%s' % (
-            n[:1], hit, len(ctl_n), '' if hit else ' => FINDING (§5d MUST)'))
+        n = changed_line_nos(repo, BASE, head, p)
+        hit = bool(n) and all(why_near(ht, x, 'KS-1435') for x in n); k518 = line_no(ht, 'KS-518'); ctl = bool(k518) and why_near(ht, k518[0], 'KS-518')
+        t.check('S4', hit, '§5d: a `KS-1435` WHY comment within 3 lines of the changed line(s) :%s: %s (KS-1435 in the whole file: %d) | CONTROL the SIBLING line\'s KS-518 WHY comment (approveTransferSchema.reason, :%s) is found by the same reader: %s%s' % (
+            n, hit, ht.count('KS-1435'), k518[:1], ctl, '' if hit else ' => FINDING (§5d MUST)'))
         sch = {mm.group(1): re.findall(r'^  (\w+):', mm.group(2), re.M) for mm in re.finditer(r'const (\w+Schema) = z\.object\(\{(.*?)\n\}\)', ht, re.S)}
         t.info('S5', 'sibling class (KS-1435 is a narrowing; no other schema audited by the author): %d z.object schemas in transfer/src/index.ts: %s' % (len(sch), sch))
         # S6 THE CLASS, measured: every transfer body schema vs its PUBLISHED request schema. A published property the zod schema does
@@ -135,10 +144,10 @@ def static(repo, r, head):
         same = obj_at(repo, BASE, dp) == obj_at(repo, head, dp); dt = git_bytes(repo, head, dp).decode()
         t.check('S4', same and 'newHolderId must be a valid UUID' in dt, 'the runtime handler %s byte-identical base == head %s; carries its own UUID refusal %s => the spec now states what the handler ALREADY enforced (no runtime branch moves)' % (
             os.path.basename(dp), same, 'newHolderId must be a valid UUID' in dt))
-        ht = git_bytes(repo, head, p).decode(); n = line_no(ht, 'newHolderId: z.string().uuid()')
-        hit = bool(n) and why_near(ht, n[0], 'KS-591'); ctl_n = line_no(ht, 'KS-665')
-        t.check('S5', hit, '§5d: a `KS-591` WHY comment within 3 lines of :%s: %s | CONTROL the same reader finds KS-665 near :%s: %s%s' % (
-            n[:1], hit, ctl_n[:1], bool(ctl_n) and why_near(ht, ctl_n[0], 'KS-665'), '' if hit else ' => FINDING (§5d MUST)'))
+        ht = git_bytes(repo, head, p).decode(); n = changed_line_nos(repo, BASE, head, p)
+        hit = bool(n) and all(why_near(ht, x, 'KS-591') for x in n); ctl_n = line_no(ht, 'KS-665')
+        t.check('S5', hit, '§5d: a `KS-591` WHY comment within 3 lines of the changed line(s) :%s: %s (KS-591 in the whole file: %d) | CONTROL the same reader finds KS-665 near :%s: %s%s' % (
+            n, hit, ht.count('KS-591'), ctl_n[:1], bool(ctl_n) and why_near(ht, ctl_n[0], 'KS-665'), '' if hit else ' => FINDING (§5d MUST)'))
     return t.end()
 
 

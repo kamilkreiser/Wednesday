@@ -32,6 +32,7 @@ from lib_gate73 import K, ROWS, Tally, opt, row_arg, gh_get, gh_pages, gh_job_lo
 
 CLASS_WF = {'Security Scanning': 1, 'PR Security Gates (KS-168)': 2, 'pr': 3}
 NEEDLES_1 = K['actions']['classes']['1']['needles']
+STEP_1 = K['actions']['classes']['1']['failed_step_prefix']
 SUITES4 = ['Schemathesis', 'Akto', 'Playwright', 'erformance']
 
 
@@ -112,7 +113,7 @@ def classify(head_wf, dev_wf, hist1=None):
         hs = set(h['failing'])
         if c == 1:
             ok = hs <= {'Dependency Audit'} and bool(hs) and h.get('needles1', False)
-            rows.append((wf, 'class (1) advisory-freeze %s: failing %s SUBSET of {Dependency Audit} %s; audit-contract needles in its log %s%s' % (
+            rows.append((wf, 'class (1) advisory-freeze %s: failing %s SUBSET of {Dependency Audit} %s; the ONLY failed step is the audit-contract step AND its log says `expected exit 0 (clean), got 1`: %s%s' % (
                 'HOLDS' if ok else 'DOES NOT HOLD', sorted(hs), hs <= {'Dependency Audit'}, h.get('needles1'),
                 ('; history %s' % hist1) if hist1 else ''), h))
             if not ok: outside.append(wf)
@@ -142,7 +143,12 @@ def read_head(sha, log_needles=True):
                     e['logs'][j['name']] = {'bytes': len(lg), 'groups': lg.count('##[group]'), 'fabricated_needle': lg.count('gate73-fabricated-needle-zz'),
                                             'needles1': {n: lg.count(n) for n in NEEDLES_1}}
                     if wf == 'Security Scanning' and j['name'] == 'Dependency Audit':
-                        e['needles1'] = all(lg.count(n) > 0 for n in NEEDLES_1) and lg.count('##[group]') > 0
+                        fsteps = [s_['name'] for s_ in j.get('steps', []) if s_.get('conclusion') == 'failure']
+                        e['logs'][j['name']]['failed_steps'] = fsteps
+                        # the class is proved by BOTH the jobs API's failed step (ONLY the audit-contract step) and its log line, with
+                        # the `##[group]` control proving the log arrived
+                        e['needles1'] = all(lg.count(n) > 0 for n in NEEDLES_1) and lg.count('##[group]') > 0 and \
+                            len(fsteps) == 1 and fsteps[0].startswith(STEP_1)
         out[wf] = e
     return runs, out
 
