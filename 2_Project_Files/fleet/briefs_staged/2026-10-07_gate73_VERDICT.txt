@@ -1,0 +1,74 @@
+GO for #1407 at 3be1a5317735c11b377b89fa98e1ac5595f84ef0 — order 1407 -> 1409 -> 1408 -> 1410; lands 1st, no merge-in (squash tree == END_TREE e1d3f4a6424b).
+GO for #1409 at c8899a95dc445fd3ac87ec3db33835f5acb1e155 — lands 2nd, after #1407, docs-only keep-both merge-in onto develop + #1407 (predicted tree 2a0a72036139).
+GO for #1408 at ce33ec8b3eae5ea5ad63fc1b4871d8367fe2a95e — lands 3rd, after #1407 + #1409, docs-only keep-both merge-in onto develop + #1407 + #1409 (predicted tree 640d33ddd73e). Live sweep OWED; KS-1435 stays In Progress.
+GO for #1410 at c976c9f72ba019d76a2a575f2e4ff5c19c7af505 — lands 4th, after #1407 + #1409 + #1408, docs-only keep-both merge-in onto develop + #1407 + #1409 + #1408 (predicted tree 54c2c6ddb653).
+
+GO STRINGS I SIGN, in the landing order (each the SUBJECT of its own GO mail, sent in this order):
+  GO (Seat R 10th): merge 1407 on gate73
+  GO (Seat R 10th): merge 1409 on gate73
+  GO (Seat R 10th): merge 1408 on gate73
+  GO (Seat R 10th): merge 1410 on gate73
+No NO GO. No Blocker, no Major found.
+
+MERGE-IN CONDITION (every lander after #1407): build M from the kit's composed_2026-10-07/ docs VERBATIM (step 2/3/4 files; all 8 re-verified == MANIFEST sha256 and == my own independent composer, byte for byte). M's parents EXACTLY [head, develop-after-earlier-landers]; run c4_docs_gate73.py qm --pr <n> ... --predicted-tree <T> and get Q1-Q6 all PASS BEFORE the squash. NEVER git merge-file --union, NEVER an edit of git's conflict hunk — measured: the union drops one </table> (step 2) and </table> + </div> (step 4) in the CHEAT doc and the repo guard still reads 12/0. If develop moves (e.g. #1383 lands), re-run c4 chain --develop <real develop> --order <rows still to land> and take ITS composed docs.
+
+SQUASH SUBJECTS (TRUE of the diff, WITHOUT (#n)):
+  #1407 "KS-998: the format gate reads its in-this-push label literally, not as a regex" (lands 86)
+  #1409 "KS-1313: the child vitest verdict comes from the JSON report, never from its text" (lands 89)
+  #1408 "KS-1435: transfer reject refuses a wrong-typed signature with 400" (lands 73)
+  #1410 "KS-591: declare newHolderId a uuid on the transfer custody request" (lands 74)
+SQUASH BODY RULINGS (each = the head commit message body, 0 trailers, 0 Co-Authored-By, exactly one Refs <own key>, other keys de-hyphenated), with:
+  #1407 drop the second, mid-line "Refs KS-998 item 4." (the message carries it twice) — N-1407-6.
+  #1409 reword "Neither KS-1313 nor KS 1326 is closed by this." so no closing-family word sits near a key (e.g. "...moves to Done with this change.") — N-1409-3.
+  #1408 ADD one sentence: signature: null, previously stripped (200, reject ran), is now refused with 400, as the published schema (string, optional, not nullable) requires (Q-NULL). Keep "a live sweep is owed" / "does not move to Done".
+  #1410 CORRECT the inverted sentence "Schemathesis scored the operation as accepting bad data": the register is positive_data_acceptance = the API REJECTING schema-valid data (the handler already refused non-UUIDs, KS 697 guard); the PR's own test file says this correctly — N-1410-1.
+
+CHECK ROWS (all four; evidence in the report dir):
+  C1 PIN: c1 15/15 rc 0 x4 (head, 1 parent 147ae442074c, END_TREE, numstat, trailers 1 raw byte vs control 55, 0 Co-Authored-By, subject, own key only, modes, NO-NEW-LEG 17 paths, DISJOINT, P13 PRE-EXISTING MISMATCH files byte-identical — confirmed and recorded, not a finding).
+  Pins read 06:37:40Z / 06:49:27Z / 07:05:24Z: develop 147ae442074c and all 4 pull refs + 4 branches == the heads at every reading. Develop unmoved: the kit trees stand.
+  Self-tests: c1 10/10, c2 6/6, c4 15/15, gh 14/14, all rc 0; PLANTED WRONG RULE (G73_DOCS_DEMAND_ASCENDING=1) c4 14/15 rc 1 — fired. 10 kit scripts re-hashed: ALL EQUAL.
+  CHECK 1: c2 static S1-S4 PASS x4 (the §5d reader FAILs at #1407/#1408/#1410 — see 5D). #1408 S6 class audit: 0 undeclared published properties on the 3 transfer body schemas (base control: rejectTransferSchema missing signature). #1410 contract-only: 0 runtime parses of the registry schema (control 77), routes/documents.ts byte-identical and already refusing a non-uuid.
+  CHECK 2: red-first below. CHECK 3: every id == want at base and head (K1-K9, V1-V5, T1-T4, J1-J4b; table in the report). CHECK 4: c4 docs 11/11 x4 + my own git-hunk + html.parser instrument agrees (planted unclosed table control fired). CHECK 5: c4 chain == the 4 kit trees; my independent composer (git apply --cached + my own blocks) == the 4 trees; control order gives different trees == kit table; 24/24 orders == kit table; re-predict from post-#1407 == steps 2-4. CHECK 6: gh api 4/0 + prtext 6/0 x4, body hashes == READY x4. CHECK 7: below. CHECK 8: NOT TESTED below.
+
+SUITES (base -> head, one JSON parser): #1407 K2 33/0, K3 28/0, K4 4/0, K5 12/0 both; list 70 -> 71; whole shell set "shell suites: 70 passed, 0 failed, 0 skipped (of 70)" -> "71 passed, 0 failed, 0 skipped (of 71)". #1409 V1 3/0 -> 10/0; V2 (X9) 1353/0 (248) -> 1360/0 (249), compare subset 0 within 0 with planted control firing; tsc/eslint/prettier rc 0. #1408 T1 52/0 -> 55/0; TRC1 1/0; T3 76/0 -> 79/0 (5 files); tsc rc 0. #1410 J1 3/0; J2 1074/0 (92) -> 1077/0 (93); tsc rc 0; J4a/J4b rc 0.
+
+RED-FIRST AND ARMS (measured by me):
+  #1407 head suite x BASE script rc 1, 5 passed / 3 failed (dotted x2 + bracket), 0 CONTROL red -> 8/0. NOANCHOR arm 8/0 (no cell pins -x; polish, ruled). My own label matrix: head right 21/21, base wrong 8, NOANCHOR caught by my suffix/dir rows; verdict + rc identical base vs head.
+  #1409 the seven cells without the reader: 3 passed / 7 failed = exactly R1-R7 (assertions) -> 10/0. T1 (endedNormally -> true) 8/2 R1+R2; T2 (text read restored) 9/1 R7; base file 3/0. MY arms: each single clause of endedNormally removed/loosened -> 10/0 (no cell pins any one clause; polish N-1409-1). Node's real spawnSync timeout shape measured {status null, signal SIGTERM, ETIMEDOUT} — R1's fixture (status 143) is not a real shape (polish).
+  #1408 base index.ts swapped in: transfer.test.ts 53/2 (TR1 + TR2, "expected 200 to be 400") -> 55/0. My zod-level instrument (schema source at base vs head): 8 shapes move OK -> REFUSED on signature, 4 unchanged — agrees with the drive.
+  #1410 base product: 2/1 (TC1 Expected "uuid", Received undefined) -> 3/0. check:openapi with the base yaml rc 1 "CHECK FAIL: generated YAML differs from on-disk version" vs head rc 0 CHECK PASS; examples rc 0 (406 blocks).
+  Every swap/mutation asserted LANDED and RESTORED sha256-identical; every worktree porcelain 0 at the end.
+
+#1408 DRIVE (in-process, base 147ae442074c -> head ce33ec8b3eae; c2 compare1435 11/11; create 201 precondition held in every cell):
+  G1 {} / G2 42 / G3 [] / G4 true / G5 null : base 200 + rejected -> head 400 + pending_approval, 400 names signature
+  G6 "0xabc123" / G7 absent / G8 "" / G9 unknown key : 200 + rejected at BOTH
+  G10 {} + non-uuid rejectorId : 400 + pending at BOTH (head names rejectorId, signature)
+  NULL-SIGNATURE: accepted per Q-NULL; in-repo callers sending null: 0 (git grep at the head); out-of-repo clients NOT READ.
+
+SKILL-5D RULING (Wednesday Q-5D binds): MEASURED that none of #1407 check-package-format.sh:180, #1408 transfer/src/index.ts:412, #1410 originate.openapi.ts:1630 carries a WHY + ticket comment (own key 0 times per file; controls KS-1063 / KS-518 / KS-665 found by the same reader). A named MINOR, NOT a NO GO, OWED: Seat R 10th lands the one comment-only follow-up straight after the batch (tier 3) + the BRIEF_TEMPLATE line.
+
+ACTIONS (gh actions --wait x4, two agreeing reads, 0 pending, a fabricated sha reads 0 runs; every failing job's log read):
+  (1) Security Scanning: only Dependency Audit fails; its only failed step "Audit-contract suites (the gates' own validator)"; log line "AssertionError [ERR_ASSERTION]: expected exit 0 (clean), got 1"; 12 of the last 12 completed Security Scanning runs repo-wide failed across 12 branches — ADVISORY-FREEZE, holds x4.
+  (2) PR Security Gates (KS-168): {Code Security Gates} within develop's {Code Security Gates} x4. Read INSIDE the job: the same 6 shell suites fail at all 4 heads and develop (ks949_main_seed_idempotence, run_migrations_failure_exit_code, run_shell_suites, smoke_test_degraded_warns, bootstrap_login_diagnosis, manifest_readers_agree); #1407 "65 passed, 6 failed (of 71)" vs develop "64 passed, 6 failed (of 70)" — the new suite passes in CI.
+  (3) pr: #1407 / #1408 {Akto, Performance (k6 smoke), Playwright} a strict subset of develop's four — Schemathesis PASSES there (named, no cause claimed); #1409 / #1410 all four == develop's (Schemathesis fails on its "Install Schemathesis suite" step, as on develop).
+  No red outside the three classes.
+
+END_TREEs: #1407 e1d3f4a6424bb21c8d55d2ac3c0a42bc1dc9b14e | #1409 d81cea2ebdd64061d0e22afe635b8f46265244e6 | #1408 f5bf012e6094f7f39584219a2e07d4f4bfd15b93 | #1410 9c4f936bd0493c9cde430828fbbbda8a3a4bb24a
+PREDICTED TREES at develop 147ae442074c, order 1407 -> 1409 -> 1408 -> 1410 (kit == c4 chain == my instrument): e1d3f4a6424bb21c8d55d2ac3c0a42bc1dc9b14e | 2a0a720361391a6cd736e7fb12264f0170d82967 | 640d33ddd73e3f9eb3e568d21dfb50b668a397a1 | 54c2c6ddb653a33513a81c4b063de340a8826dfe ; guard 12/0 every step; merge-tree DIVERGENCE on both docs for every later lander (never picked).
+
+READY-CLAIMS: HOLD — heads / END_TREEs / one parent; files and modes; trailers 1 vs 55 raw (53 content); #1407 5/3 -> 8/0, 33/0 28/0 4/0, 70 -> 71, shell set 71/0 (of 71) locally; #1409 7/3 -> 10/0 (by the author's own definition), T1 8/2, T2 9/1, 1353 -> 1360 (248 -> 249); #1408 2/77 of 79 -> 79/79, TRC1 by name, tsc rc 0; #1410 1/2 -> 3/3, 1074 -> 1077 (92 -> 93), check:openapi 1 -> 0, one YAML line, 406 examples; matrix 12/0 each; Actions classes; body hashes x4.
+  DO NOT HOLD — subjects "land at 85 / 88" (they land 86 / 89; polish); #1410 / E10 READY "Schemathesis scored the operation as accepting bad data" (inverted; Minor, fixed in the squash body). KIT-side: "T3 79/0, 30 files" is 5 files / 30 describe-suites (the PR body's "5 files" holds).
+  NOT RE-MEASURED — #1409 tsc listFilesOnly asymmetry; author tools (21-PASS doc check, pathgate, commit arms, push-hook prints, #1407 leg-6 advisory).
+
+OTHER FINDINGS (non-blocking): N-1408-2 Minor — the reject handler never stores signature (a string one is validated then discarded); N-1408-3 Minor — the Schemathesis baseline still waives negative_data_rejection::POST /api/transfers/{id}/reject (ticket KS-1435, expires 2026-10-31): retire it after the live sweep; N-1408-4 Open, pre-existing — reject records rejectorId from the body, not req.user; N-1410-2 Minor — 22 of the 27 waived positive_data_acceptance cases on transfer-custody ("One of newHolderId or newHolderEmail is required") are untouched; N-ENV-1 — every JS figure ran on node v24.7.0 (no LTS tag; §6e). Polish: cheat wrappers absent at #1407/#1409 (Q-WRAP); #1407 body "15 of the 17" is the base count (head has 18).
+
+CENSUS: 26 open PRs; only #1383 (KS-1401) collides — BOTH docs, no code overlap. If it lands first, re-predict with c4 chain on the real develop (Q-1383).
+TIERING: all four T2 — agree (#1408 with the drive).
+
+NOT TESTED: the four platform suites (UNMEASURED, stack down); #1408 behind the gateway and its owed live sweep; #1410 end to end by Schemathesis; a real prettier on a real red package (#1407); a genuinely killed child vitest (#1409); browser render of the composed docs; the CI runner toolchain; Linear states; out-of-repo null-signature clients; a REAL merge-in M (qm only on my SIM Ms: good 8/8, reversed parents Q1 FAIL, union cheat Q2/Q3/Q4 FAIL with the guard still 12/0); the drafter's 26-cell V2 TMPDIR figure; author-side tools.
+
+Named exceptions used: X1, X6, X8, X9 (X7 not needed — every sha was already in my clone). No push, merge, comment, ticket, Docker, az, SSH. Shared checkout read only. Disk: 304Gi free at end, no ENOSPC.
+
+Report: /Volumes/DevMASTER/!CODING/Testing Agent MAIN/projects/secuura/reports/2026-10-07-gate73/report.md
+sha256 report.md = 2cdbd6d99a71dbaabce72b6d9dcbfdcb9e5d9a6c2078463c83ff3535165cd082
+
