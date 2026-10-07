@@ -28053,5 +28053,76 @@
    "CARD secuura-followup-deploy-disk-archive-1007",
    "CARD composer-expert-66-demo-deploy-1007"
   ]
+ },
+ {
+  "id": "secuura-demo-disk-too-small-to-rebuild-1007",
+  "client_project": "Secuura / Blockchain",
+  "title": "Demo box cannot rebuild its own stack: grow its disk, or keep demo where it is",
+  "bluf": "Seat D 16th stopped the demo deploy of 69f2045 after a 3-image probe. Measured by settled df: 2,590.7 MiB of disk per image, 4.63x the threshold; all 29 need ~75 GB against ~16 GB headroom. The demo VM (secuura02-demo-vm) has a 61 GiB disk, and ~39.6 GB of it is images + build cache. Your archive card bought 8.2 GB and two and a half images spent it. Nothing was swapped or pruned: demo still runs d75bfe2 with its rollback intact, and kintsugi already runs 69f2045. A cache prune would make it worse (it deletes the shared layers the other 26 builds would reuse). Disk size and price are UNMEASURED: a seat reads the VM's disk SKU and the Azure price before any change.",
+  "default_action": "(c) Nothing changes: demo stays on d75bfe2deb80, no resize, no deletion. Seat D 16th wraps cold, and its handover lets a later seat resume from the 3 built images.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Grow the demo VM's disk (money: your call)",
+    "detail": "A deploy seat measures the disk SKU, the target size (~128 GiB) and the monthly price in the Secuura subscription, then cards you the exact figure before resizing. Demo deploy resumes after the resize."
+   },
+   {
+    "key": "b",
+    "label": "Retire demo's pre-20261006 rollback set (archive to G-DRIVE first), then rebuild in batches",
+    "detail": "Space freed is UNMEASURED (31 refs; its size is shared with other sets). Demo is rebuilt across seats with an intermediate state written down. On D 16th's numbers it probably still won't fit a cold rebuild."
+   },
+   {
+    "key": "c",
+    "label": "Leave demo on d75bfe2 for now",
+    "detail": "Demo stays fully working on the previous build. Kintsugi carries the new work. Revisit when the disk question is settled."
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-10-07T17:43:22.637212+11:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "2026-08-21 09:47",
+   "2026-09-09 12:38",
+   "CARD secuura-ks697-demo-probe",
+   "CARD secuura-demo-deploy-scope-2026-09-03",
+   "CARD secuura-demo-service-persona-switch-2026-09-03",
+   "CARD secuura-demo-service-crash-loop",
+   "CARD secuura-demo-stop-needs-kams-own-word",
+   "CARD secuura-demo-admin-image-rebuild-2026-09-05",
+   "CARD secuura-demo-vm-prune",
+   "CARD secuura-demo-kam-admin-default-password",
+   "CARD secuura-f5-demo-exposure-probe",
+   "CARD secuura-f5-demo-interim-mitigation",
+   "CARD secuura-demo-admin-transcripts",
+   "CARD secuura-demo-admin-mfa",
+   "CARD secuura-demo-row-060-remediation",
+   "CARD secuura-ks968-demo-hash-probe",
+   "CARD secuura-ks1041-fix-shape-demo-exposed",
+   "CARD secuura-ks1041-step1-demo-verify-now",
+   "CARD secuura-ks1041-demo-container-recreate",
+   "CARD secuura-kintsugi-whole-estate-rebuild",
+   "CARD tuesday-mac-mini-scheduler-full-disk-access",
+   "CARD hpsm-composer-synthetic-demo-content-for-monday",
+   "CARD hpsm-composer-demo-release-unreachable-c12",
+   "CARD hpsm-composer-demo-release-with-device-groups",
+   "CARD hpsm-composer-live-demo-upgrade-after-c12",
+   "CARD nexusai-demo-deploy-finish-scope",
+   "CARD composer-hp-sow-name-on-demo",
+   "CARD composer-demo-internal-text-plan",
+   "CARD wed-laptop-dev-copy-disk-full",
+   "CARD hpsmpoc-d5-deploy-hosted-demo-1002",
+   "CARD hpsmpoc-k14-demo-scenarios-1003",
+   "CARD hpsmpoc-demo-login-role-1006",
+   "CARD secuura-kintsugi-build-cache-prune-if-disk-guard-1006",
+   "CARD secuura-demo-disk-retire-old-rollback-sets-1007",
+   "CARD secuura-advisory-freeze-3-ghsa-1007",
+   "CARD hpsmpoc-feedback-files-third-round-1007",
+   "CARD wed-allowance-99pct-three-seats-live-1007",
+   "CARD hpsmpoc-hosted-connect-timeout-start-limit-1007",
+   "CARD secuura-followup-deploy-disk-archive-1007",
+   "CARD composer-expert-66-demo-deploy-1007"
+  ]
  }
 ]

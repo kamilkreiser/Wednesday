@@ -1,0 +1,138 @@
+# CACHE PROBE AFTER 3 IMAGES — Seat D 16th. The probe did its job and the answer is NO.
+# 3/3 built clean. The rate is 4.63x your threshold. I am STOPPED. Nothing swapped. No prune.
+
+## BLUF
+**Measured, settled, cross-checked: 2,590.7 MiB of REAL DISK per image, against your 559.5
+threshold — 4.63x over.** All 29 would need **75,129 MiB** against the 16,225 MiB of headroom that
+existed at Gate B. **It does not clear on any reading I can construct, including a deliberately
+charitable one.** So per your Gate B rule: STOPPED, the 3 built images stay, nothing is swapped,
+nothing is pruned. **The probe was the right call — it cost 17 minutes and 7,772 MiB and it
+replaced an unresolvable argument with a number.**
+
+The build itself was clean: **3/3 rc=0, all NEW-ID, 0 kills, 0 guard refusals, 0 FLOOR breaches**,
+swap used steady at ~1,185 MB, min free 13,654 (well above the 2,500 FLOOR).
+
+## 1. THE MEASUREMENT
+
+  image        startfree    endfree    REAL disk  cache delta  image MiB    secs
+  originate        21425      15383       6042.0       4351.6      516.9     728
+  migrations       15383      15383          0.0          0.0      516.9       4
+  auth             15383      13653       1730.0       1430.5      124.3     274
+  TOTAL                                   7772.0
+
+Cross-check: settled `df` **21,425 → 13,653 = 7,772.0 MiB**, and that equals the sum of the
+per-image chain exactly. Both endpoints are settled readings (3 polls, delta 0). Build cache
+**7,206.9 → 12,989.0 MiB** by the tool; `docker system df` now reads **13.62 GB / 187 records**
+(was 7.557 GB / 142).
+
+**The threshold test**
+  measured REAL disk per image      2,590.7 MiB   vs your threshold 559.5  ->  4.63x OVER
+  all 29 at that rate               75,129 MiB    vs 16,225 headroom       ->  short 58,904
+
+**And going forward from where I am now** — free 13,653 − ADMIT_STD 5,200 = **8,453 MiB usable**,
+26 images left, so the budget is **325.1 MiB/image**:
+  at the measured 3-image average      2,590.7/ea -> need 67,357 -> SHORT by 58,904
+  at auth alone (distinct service, base already warm)
+                                       1,730.0/ea -> need 44,980 -> SHORT by 36,527
+  at a charitable "half the rest are migrations-like"
+                                         865.0/ea -> need 22,490 -> SHORT by 14,037
+**The cheapest thing measured this round that actually rebuilt anything is auth at 1,730 MiB. The
+budget is 325. There is no reading on which the remaining 26 fit.**
+
+## 2. 🔴 MY ALL-IN METRIC WAS WRONG IN BOTH DIRECTIONS — the settled df delta is the real number
+I built the ALL-IN column (image bytes + cache delta) and reported 6,940.2 MiB at Gate B. It is not
+a disk forecast, and I am withdrawing it as one:
+ (a) **DOUBLE COUNT.** `originate` and `migrations` have **IDENTICAL layer sets**
+     (`cca1e966b7f36495` for both) because both build `services/originate/Dockerfile` from context
+     `.` — I measured the layer-set hashes rather than assume. migrations' "516.9 MiB image" **is
+     originate's same 516.9 MiB**, counted a second time. That is also why migrations took **4
+     seconds** and grew the cache by **0.0**: it is a pure cache hit, not a cheap build. **It is not
+     an independent sample and it flatters any average that includes it.**
+ (b) **UNDERSTATED.** My ALL-IN summed 6,940.2 while the box actually lost **7,772.0**. `docker
+     system df`'s Build Cache total does not capture everything a build consumes — image layers
+     land in the image store, not in the cache-record total.
+Net: the two errors run opposite ways and neither cancels the other usefully. **Everything above
+quotes the settled `df` delta**, which is the quantity the ADMIT/FLOOR guard and the disk actually
+care about. My Gate B mail's ALL-IN figures should be read as cache+image accounting, not forecast.
+
+## 3. THE REGIME QUESTION — now answered for demo by direct measurement, still unexplained
+My build put demo squarely in the **high-growth regime**: +5,782 MiB of cache across 3 images.
+So the operative fact is settled: **for THIS content, on THIS box, now, the rate is ~2,590
+MiB/image and the stack cannot be rebuilt in the space available.**
+
+**What is still unexplained is D 14th's reading, and I want to be straight that my STOP-1
+refutation stands as a refutation of an EXPLANATION, not of the outcome.** D 14th's 31-image build
+on this same box consumed 23,243 → 13,221 = **10,022 MiB, i.e. 323 MiB/image** — **8x cheaper than
+mine** — while changing **34 lockfiles and 28 manifests** against my 5 and 1. A smaller source
+change is costing 8x more per image. I have no mechanism I can demonstrate for that, and I am not
+going to invent a third story after measurement killed my first two.
+The one candidate I can name but **cannot test from demo**: demo's cache may already have held
+`d75bfe2`'s dependency layers when D 14th built it, whereas it has **never** seen `69f2045`'s —
+D 15th built that content on **kintsugi**, not here. That would make D 14th's build a largely warm
+one and mine cold. Testing it means comparing against kintsugi, which my brief forbids. **Flagging
+it for whoever is allowed to look at both boxes; not adopting it.**
+
+## 4. 🔴 A PRUNE WOULD PROBABLY MAKE THIS WORSE, NOT BETTER
+Kam's `secuura-standing-build-cache-prune-1007` is OPEN and I am **not asking for it**. But since it
+is the obvious next thought, here is the measurement against it: cache reclaimable went
+**4.238 → 10.3 GB**, i.e. **the reclaimable growth (~6.06 GB) is almost exactly the cache my own
+three builds just created.** That is precisely the shared base-layer content the remaining 26
+services would **hit** — `migrations` built in 4 seconds and 0 MiB purely because it hit it.
+**Pruning it would free ~10.3 GB and simultaneously force every one of the 26 to re-create what it
+would otherwise have reused**, on a regime where the first cold build of a base cost 6,042 MiB.
+So a prune is not just unauthorised here — on this round's own numbers it is the wrong lever.
+
+## 5. WHAT I THINK THE REAL PROBLEM IS, AND WHAT I RECOMMEND
+This box is **structurally too small to rebuild its own stack**: a 60.95 GiB disk currently holding
+**26.01 GB of images + 13.62 GB of build cache = ~39.6 GB**, for a 29-image stack whose cold
+rebuild measures ~75 GB of transient. Kam's archive card bought 8,229 MiB and that was spent in two
+and a half images. **Every lever inside the current pattern is now exhausted or counterproductive.**
+
+My recommendation, for you to carry to Kam — **I am asking for nothing and doing nothing meanwhile**:
+ 1. **STOP the demo deploy this round.** Kintsugi is already deployed and swept at this SHA, so the
+    fleet is not blocked; demo stays on `d75bfe2deb80`, fully functional, with its rollback intact.
+ 2. **The decision Kam actually needs is disk capacity, not deletion** — grow
+    `secuura02-demo-vm`'s disk, or accept that demo is rebuilt in batches across seats with a
+    documented intermediate state. A 61 GiB disk cannot cold-rebuild a 29-image Node monorepo.
+ 3. If a deletion lever is wanted anyway, the only one left inside the existing pattern is
+    retiring **`pre-20261006`** (31 refs, D 14th's older rollback set) — **that needs its own Kam
+    card; card (a) authorised `pre-20260910` and nothing else, and I have not touched it.**
+ 4. Do **not** prune the build cache for this purpose, per §4.
+
+## 6. STATE OF THE BOX — nothing swapped, everything reversible
+**Proven, not asserted:** all three running containers are still on the OLD images —
+`secuura-originate` on `e0efefd0b7e0`, `secuura-migrations` on `f0051e4363e1`, `secuura-auth` on
+`555845d2c01f`, each equal to its `:pre-20261007` id and NOT to the new `:latest`.
+Kept sets: `pre-20261007` **29, fp 0f1aa7adf14a692e** unchanged · `pre-20261006` **31, fp
+513d475d9af77d2d** unchanged.
+`latest` fp moved `88f016c5d9b74bea → 2904b5ba9789ab10` — **expected and correct**: the build moved
+exactly 3 `:latest` tags onto new ids. Flagging it so it is not read later as drift.
+`REVISION` still says **state=IN PROGRESS** and says in terms that the containers are on the old
+images, which is now the durable truth rather than a transient one. 3 new images are on disk and
+are **not lost** — a later seat can resume from them.
+Anchor baseline holds: **0 rows since my boot**, against a 333-since-2026-01-01 positive control.
+
+## 7. TWO SMALL FINDINGS WORTH CARRYING
+ 1. **Demo's sampler is NOT starved this round, contrary to the record.** D 14th measured ~8 s at a
+    4 s setting. Mine: originate **181 samples over 728 s = 4.02 s**; auth **69 over 274 s =
+    3.97 s**. At its 4 s setting the poll held. The starvation figure in the brief should not be
+    carried forward unqualified.
+ 2. **A backtick span inside a QUOTED heredoc still executes — on the REMOTE shell.** `<<'EOS'`
+    stopped my local zsh expanding it, and the remote bash then ran `` `migrations` `` as a command
+    (`bash: line 9: migrations: command not found`). Cosmetic — it was inside an `echo` label and no
+    measurement touched it — but the standing lesson "an unquoted heredoc runs backtick spans" needs
+    "...and a quoted one still does, one layer down" appended to it.
+
+## QUESTION
+ 1. **A ctx read.** My last was 39% at 06:15:30Z; I have since run the build and this analysis.
+ 2. **Confirm the STOP** and tell me how to close out: wrap this seat cold with the handover and the
+    history entry (my default, and what I will do absent a different instruction), or anything else
+    you want measured on demo while I still have the context to do it read-only.
+ 3. **Carry §5 to Kam** — the capacity decision, not a prune. If he wants the `pre-20261006`
+    retirement instead, that is a new card and a new GO; I will not touch it on this one.
+
+MEANWHILE: **STOPPED and holding. Nothing is building, nothing is swapped, nothing is pruned,
+nothing is deleted.** Watcher re-armed on `secuura-blockchain@agentmail.to` filtering
+`[Wednesday -> Secuura/Blockchain-D]` + `(Seat D 16th)`.
+NEEDED-BY: at your convenience — demo is in a stable, fully-reversible state and there is no clock.
+

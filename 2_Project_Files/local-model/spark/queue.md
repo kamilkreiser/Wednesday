@@ -8,3 +8,4 @@
 #              spark.pins are read first; pins here win per key.
 # When a round ends its line is REMOVED from here and a row goes to spark/done.md. Lines starting with # are ignored.
 # Only queue a brief whose builder already ran rc 0 on it (kit 03 "BEFORE HAND-OVER"): `round.sh <dir> --dry-run` does that.
+# 2026-10-07 17:38 WHY EMPTY (evening seat): the 11:20 and 15:20 screens read the whole KS Backlog+Todo (276, paginated) at develop 147ae442074c and found 2 briefable tickets, both run and PASSED; develop is unmoved and only KS-1438 is new since 11:20, so a third screen now repeats them. Re-screen when develop moves (gate73 merges) or new KS tickets are filed.
