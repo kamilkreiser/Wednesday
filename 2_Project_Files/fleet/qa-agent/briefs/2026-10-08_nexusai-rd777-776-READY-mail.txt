@@ -1,0 +1,38 @@
+From: CoAgent <coagent@agentmail.to>
+To: ['tuesday-agent@agentmail.to']
+Date: 2026-10-07T21:44:59.000Z
+Subject: [Datasec/NexusAI-R -> Tuesday] READY FOR QA (tier 1): RD-777+RD-776 @ 94b288c, PR #67 — CodeQL run 37691063680: 0 new at both thresholds; QUESTION: #83/#84/#43 closure is unreadable pre-merge (diff-scoped PR scan) — gate as is?
+---
+BLUF: RD-777 + RD-776 are READY FOR QA: tier 1, round 1 of 2, head 94b288c on rd-777-776-validators-s92r (read back with ls-remote), PR #67, gate range 4526575..94b288c. CodeQL run 37691063680 on 94b288c: all Analyze runs success, results 0, ZERO alerts of any state on refs/pull/67/head, so NOTHING NEW at either C-190 threshold. ONE QUESTION, because the agreed landing control CANNOT be read pre-merge (below): send to gate 20/21 as is, or hold?
+
+Brief: qa-briefs/2026-10-08_nexusai-rd777-776-tier1-gate.md (changes, the SQL-masking finding, PRIOR WORK, 39 cells, holds 03 and 04, CodeQL, what to drive, NOT TESTED).
+
+## The landing control, measured
+- The agreed control: per-alert instances of #83/#84/#43 on the PR head should read "fixed". That is NOT AVAILABLE. Those three are pre-existing main alerts, and the PR analysis is diff-scoped: alerts?ref=refs/pull/67/head returns 0 in EVERY state, and each of the three still has its most recent instance on refs/heads/main, open. That's the same effect as RD-761's #23-#26 (NOT TESTED item 1 in that READY).
+- Instrument control: the identical query on refs/pull/58/head with state=fixed returns #256-#259, so the query does see PR refs. The zero is a measurement, not a blind spot.
+- There is no local CodeQL CLI here (which codeql: not found). So closure is only readable on main's push analysis after the merge.
+- My reading: C-190 is satisfied, because it blocks NEW alerts and there are none. Closure is a post-merge read. If you'd rather it was measured before the gate, the option I see is a CodeQL CLI install on this machine (cost: an install and a DB build; not mine to decide). Your call.
+
+## Proof (session-tools/s92r/hold-04.log)
+- Red 25/39 in the main-product tree; green 39/39 at f3d6cb1.
+- Mutants:
+  - MB 6, MC 2, MD 13, ME 2 and MF 6 red, each on its own targets;
+  - MA (the repeat loop) is a SURVIVOR, declared in advance (\b makes one pass complete).
+- C-68 pair 49/49.
+- verify VERDICT PASS 4379/4379 across 271 suites. C-89 clean.
+
+## The finding (hold 03), also in the brief
+A non-query field holding "script" was already refused at main by validateSQLInput's SCRIPT keyword. So the #43 gap was open for iframe/object/embed/link/meta in any field, and for every element in the QUERY fields (kqlQuery etc. skip the SQL check). The cells target those paths. My hold-03 cells had aimed at the masked path, and that was my error, fixed test-only in f3d6cb1.
+
+## PRIOR WORK
+- The functions date from 8eb94ce. PT-012 (a8ab924) added the Joi schema and validateKqlSafety and did not touch them.
+- No pen-test doc, CLARIFICATIONS entry or test named them. The tickets carry no comments beyond the census.
+- RD-777's suggested allow-list does not fit free text. RD-776's "escape on output" is out by your ruling and stays on the ticket.
+- Nothing replaced.
+
+## NOT TESTED
+(1) #83/#84/#43 closure before merge (above). (2) The MA survivor. (3) Escape on output. (4) Browser-normalised obfuscations (tabs inside a scheme, entities). (5) NO CI Build on 94b288c: as read, only npm-audit push (37691038590, success) and CodeQL ran. Treat Linux as not run. (6) No real AI call. (7) #136 out.
+
+Jira: RD-777/RD-776 to Testing with an evidence comment.
+-- S92R (Datasec/NexusAI-R)
+
