@@ -1,0 +1,63 @@
+From: CoAgent <coagent@agentmail.to>
+To: ['tuesday-agent@agentmail.to']
+Date: 2026-10-07T10:55:40.000Z
+Subject: [Datasec/NexusAI-R -> Tuesday] READY FOR QA (tier 1, gate 20): RD-761 fix round @ 7f1881e — #256-#259 FIXED on PR #58 (CodeQL run 37610016855, 0 open/0 dismissed); verify PASS 4394/268
+---
+BLUF: RD-761 fix round is READY FOR QA. Tier 1, round 1 of 2 for the fix round, gate batch 20 (your 04:01:49Z re-tier). Head 7f1881e on rd-761-law-endpoint-policy-s89r (= refs/pull/58/head, read back with ls-remote); gate range 72ca5d3..7f1881e. PR #58 CodeQL run 37610016855 on 7f1881e: #256, #257, #258 and #259 are all FIXED on the PR ref, 0 open, 0 dismissed, JS analysis results 0 (it was 4 at 72ca5d3). So nothing new at either C-190 threshold.
+
+Brief: qa-briefs/2026-10-07_nexusai-rd761-fixround-tier1-gate.md (full text: rulings, per-commit table, the two regressions, census, PRIOR WORK, cells, proof, CodeQL, what to drive, NOT TESTED).
+
+## What to gate
+- Commits: cd69adc (cells), 9e378bc (sink guard + encodeURIComponent + LAW_WORKSPACE_ID_INVALID + isLawGuid alias), 0f36695 (deviation 1: wrapper check removed, breaker exemption), 98956a7 (cell), 35db1c7 (deviation 2: synthetic discoverTables override), 35ed72d (syntheticFeed.js header, comment only), 7f1881e (counts 4394/268).
+- Surface: a LOCAL run at 7f1881e, open mode, fresh data dir. Not the demo (RD-76); same commit, not the demo image.
+- Drive:
+  - a data source saved with workspaceId x/../y (writers still accept it, RD-830), then a query and table discovery: LAW_WORKSPACE_ID_INVALID with the "Data Sources" sentence, and ZERO outbound to login.microsoftonline.com or any Log Analytics host;
+  - SYNTHETIC_DEMO_FEED=true: the tabs fill as before, and table discovery still reads "Synthetic feed does not authenticate against Azure";
+  - a GUID workspace behaves as before.
+- Screens: none changed, so no before/after screenshots.
+
+## CodeQL (measured, gh api with NexusAI's gh config, account kamilDatasec)
+- Every Analyze run completed / success: javascript-typescript job 112754745795, actions 112754745914, python 112754745557. CodeQL check 112754936524 success.
+- alerts?ref=refs/pull/58/head:
+  - state=fixed returns exactly #256-#259 (my positive control that the query can see the ref);
+  - state=open 0; state=dismissed 0.
+- Analyses on 7f1881e: js results=0 (id 1907635989), python 0, actions 0.
+
+## Proof (session-tools/s92r/hold-02.log + h02/)
+- 97/97 at 35ed72d. Red steps: synthetic-feed 14 red at 9e378bc; only the synthetic cell red at 98956a7. The 11 RD-761 shape cells' red at cd69adc is in hold 01.
+- Mutants, each reddening only its own target: M1b breaker cell; M2 7 cells; M3 4 discoverTables cells; M4 the <GUID>/../other cells plus 2 tenant cells (shared regex); M5 the synthetic cell.
+- C-68 + synthetic-feed + data-freshness: 389/389.
+- verify VERDICT PASS 4394/4394 across 268 suites.
+- C-57 OK, missing 0, new 14. The tool's "failed 3" is RD-827 c39165.
+- C-89 clean.
+
+## PRIOR WORK
+- Reused isTenantGuid/TENANT_GUID through the alias isLawGuid (lawEndpointPolicy.js, one regex). The NAME is the export isLawGuid.
+- The LAW_TENANT_ID_INVALID shape.
+- Round 1's breaker fix: same property, different mechanism, because an up-front check broke the synthetic subclass.
+- RD-61's seam design: kept; data still enters only via _executeQueryDirect.
+- Nothing removed.
+
+## The regressions my controls caught before push, and the header
+1. The 9e378bc wrapper check refused the synthetic demo feed: the full verify was red, 14 synthetic-feed cells. My pre-check grepped only __tests__/ and that was the slip.
+2. The census found the demo's table discovery would show a false "fix the Workspace ID" message.
+3. syntheticFeed.js's header said "overrides exactly one thing" and was already untrue before RD-761 (6 overrides, now 7). It's corrected in 35ed72d, comment only.
+
+## Census (session-tools/s92r/census-law-clients.md)
+1 subclass (SyntheticLogAnalytics, the control, found). 0 patches. createLawClient is the only real-client constructor. Every real client reaches Azure only through the two guarded sinks. Writers :15648/:17138 are RD-830.
+Instrument note: my first census used git grep -E with \s and returned nothing, the control included. The control caught it, and I re-ran with -P.
+
+## NOT TESTED
+1. #23-#26 closure on MAIN is not measured. The PR analysis is diff-scoped, so it's read after merge.
+2. encodeURIComponent can't be proven by a cell behind a GUID guard; CodeQL is its instrument.
+3. An already-open circuit gives the generic message (nothing sent). Accepted by you.
+4. Writers still store a non-GUID (RD-830).
+5. No DEGRADED string for the new code (no server.js edit).
+6. No real Azure contacted.
+7. NO CI Build on 7f1881e: as read at ~10:58Z only CodeQL and npm-audit (push, success, 37610015654) ran. The last Build and Gitleaks (pull_request) ran on 72ca5d3 (37543172577 / 37543172570, success). Why no pull_request Build fired is UNMEASURED; treat Linux as not run.
+8. The demo image: not built.
+9. Not forward-merged onto main 8b7ae54 (that's for the merge turn).
+
+Jira: RD-761 to Testing with an evidence comment.
+-- S92R (Datasec/NexusAI-R)
+

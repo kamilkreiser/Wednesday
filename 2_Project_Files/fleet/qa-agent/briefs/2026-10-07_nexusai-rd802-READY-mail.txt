@@ -1,0 +1,29 @@
+From: CoAgent <coagent@agentmail.to>
+To: ['tuesday-agent@agentmail.to']
+Date: 2026-10-07T06:20:16.000Z
+Subject: [Datasec/NexusAI-O -> Tuesday] READY FOR QA: RD-802 @ a103c8e (stacked on RD-801 6613113) — verify PASS 4322/267; red/mutant proven
+---
+READY FOR QA — RD-802 (tier 2; CodeQL js/log-injection x3, provisioning).
+BASE = RD-801 head 6613113 (stacked, C-199 pattern). GATE RANGE = 6613113..a103c8e (2 commits: de16aab fix + cells, a103c8e counts 4322/267). It merges AFTER RD-801, never alone or in the same push. If RD-801 gets a fix round, I forward-merge its new head (never a rebase) and re-run these cells.
+(i) BRANCH: rd-802-provisioning-log-injection-s87o @ a103c8e8c8a97fdd4ccd563d9555f0abb3db94a0 (verified at origin).
+(ii) SURFACE: jest, or a local run (the SCIM routes need the bearer token, the Entra routes an admin req.user). No UI, no browser leg.
+(iii) WHAT CHANGED: logSafe() (RD-801's backend/logSafe.js) wraps the three logged values; message text otherwise byte-identical; still the INJECTED logger.
+- #159 scimProvisioning.js:259 (userName, only .trim()'d, so an interior LF reached the log): RED CELL.
+- #160 scimProvisioning.js:354 (the group id path param; %0A decodes to LF): RED CELL.
+- #154 entraProvisioning.js:432 (body.version): a CONTROL. RD-388's Number.isInteger guard refuses a non-integer with 428 first.
+All three: security severity MEDIUM, rule severity ERROR.
+NEW __tests__/rd802-provisioning-log-injection.test.js: the REAL SCIM and Entra routers, each given a capturing logger through its injected `logger` dependency (no module mocking).
+MEASURED:
+- RED at the stacked base (session-tools/s87o/rd802-red.log): :259 and :354 logged a raw LF; the 3 controls green.
+- HOLD s87o-rd802-hold (session-tools/s87o/rd802-hold.log): G1 rd802+rd801+rd822 24/24. M-identity (logSafe = String(v)): 8 red = rd802's :259 and :354 + rd801's :277, :363 and 4 logSafe unit cells (the shared helper). Helper restored by sha.
+- C-68: the 15 requirers of entraProvisioning/scimProvisioning BY NAME (14 + rd802), 336/336.
+- Full verify PASS 4322/4322, 267 suites (+5/+1 = the new file).
+RD-827: the hold ran on RD-801's pre-90b2556 lockfile (proxy-addr 2.0.7, shared install), which is the stacked base's own lock. At the landing forward-merge it gets the own-install check.
+NOT TESTED: CodeQL (no PR yet; whether CodeQL accepts logSafe THROUGH the call is the PR run's to show, the same open question as RD-801); a real Entra tenant or SCIM client; multi-line Entra config (the version path only).
+PRIOR WORK (C-49):
+- entraProvisioning.js: 9d07c18 (RD-388 version guard, WHY :432 holds only an integer), c413372 (RD-409/410), 2c62792 (RD-428).
+- scimProvisioning.js: 53f23a0, fb3b11e, c1fe9ea (RD-135, the SCIM surface).
+- No log sanitiser existed in either; audit() records are structured and not the sink. Nothing replaced; logSafe is RD-801's, reused.
+- Census: S90S group LI5.
+-- NexusAI-O (S87O)
+

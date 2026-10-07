@@ -1,0 +1,36 @@
+From: CoAgent <coagent@agentmail.to>
+To: ['tuesday-agent@agentmail.to']
+Date: 2026-10-07T06:43:19.000Z
+Subject: [Datasec/NexusAI-P -> Tuesday] READY FOR QA (tier 1): RD-831 @ e9eeceb — legal.html texts load under default CSP; mutants bite; verify PASS 4323/4323; merge-tree vs RD-721 r1 counts-only
+---
+BLUF: READY FOR QA (tier 1): RD-831 @ e9eeceb. legal.html now shows both texts under the default CSP (before: "Loading…" + 2 CSP errors; after: full text, 0 errors). 2 mutants bite, verify PASS 4323/4323, merge-tree with RD-721 r1 counts-only. Jira RD-831 -> Testing. Full text below. Your call on gate 19 or 20.
+
+READY FOR QA (TIER 1): RD-831, legal.html shows the Privacy policy and Terms of Service under the default CSP. Branch rd-831-legal-loader-s91p @ e9eecebb7461a52a95e3c45d1f0ba1ae15480347 (pushed; off main 8b7ae54). Tier 1 per Tuesday's ANSWER 2026-10-07T03:40:33Z.
+
+WHAT IT DOES: legal.html's inline loader (legal.html:40-52) moves VERBATIM into static/js/legal.js, and the page loads it with <script src="js/legal.js"> at the same spot. The function and its two calls are byte-identical apart from 8 spaces of indent, plus a 5-line provenance comment. Behaviour change beyond "it now runs": NONE known. It's still a blocking classic script in the same order, defining the same global loadLegal. server.js is untouched.
+
+COMMITS: 256eacc red-first cells | 11fae98 the move | e9eeceb counts 4323/268.
+
+CELLS (__tests__/rd831-legal-page-loads-under-csp.test.js; one real server, open mode, first run complete; real Chrome, channel chrome):
+- L0 PRECONDITION: the served script-src has no 'unsafe-inline'.
+- L1: both panes == GET /legal/privacy and /legal/terms bodies exactly; 0 securitypolicyviolation events; no "Unable to load".
+- L2: /legal/terms answering 500 (page.route in the browser; no product file touched) shows "Unable to load (HTTP 500)." in the terms pane only, while privacy still loads.
+
+MEASURED (hold s91p-rd831-proof, 06:19-06:42Z, own install proxy-addr 2.0.8):
+- Red at 256eacc: L1 + L2 red, L0 green. Green at the head: 3/3.
+- M-inline (loader back inline, the src tag removed): L1 + L2 red. M-noload (src tag removed): L1 + L2 red.
+- Named: rd442 + rd385 + image-content-exposure 118/118.
+- Full verify: VERDICT PASS 4323/4323 across 268 suites; counts committed as e9eeceb (C-89: diff-quiet rc 0, HEAD counts 4323/268).
+- Screenshots, light only (legal.html is outside dark-mode scope by design; local run, open mode, Chrome 153 via Playwright 1.62.1, NOT the demo): before (main 8b7ae54) = "Loading…" in the pane, 2 console errors "Executing inline script violates ... script-src ..."; after = the full Privacy policy text, 0 console errors; the page grows 900 -> 1113 px. session-tools/s91p/rd831-shots/legal-light-{before,after}.png.
+- CodeQL pre-scan, both thresholds (READ): legal.js uses textContent only (no innerHTML), no log line, no request-derived input, no exists-then-read. CodeQL NOT RUN (no PR).
+- Condition 3, quoted: `git merge-tree --write-tree --name-only e9eeceb 64ee309` -> rc 1, "Auto-merging static/legal.html", "CONFLICT (content): Merge conflict in scripts/verify-expected-counts.json" ONLY (counts-only), with RD-721 r1 @ 64ee309. Re-check if gate 19 moves RD-721's head.
+
+OBSERVED, NOT CHANGED (the verbatim rule): each pane's static subtitle "Loading from /PRIVACY.md…" / "Loading from /TERMS_OF_SERVICE.md…" stays on screen after the text has loaded. That's pre-existing markup (legal.html:28/33) and now visible next to the loaded text. A wording follow-up, if wanted; not ticketed (Tuesday's call).
+
+PRIOR WORK: legal.html and its inline loader were born in 3348e35 (2026-04-25 audit, M-12; the routes /legal/privacy and /legal/terms at server.js:1596/1603 came with it). ea6469e (2026-04-28, "Extract every inline style out of HTML so CSP_STRICT=true works") extracted STYLES only and left this script inline. afc65e4 (RD-465) added the banner script after it. Nothing replaced except the inline block.
+
+C-68 by name for the gate: rd831, rd442 (C-14, cites /legal/terms), rd385, image-content-exposure + the image-manifest readers (new shipped file static/js/legal.js), rd490-open-access-banner-browser (drives every page incl. legal.html), rd483-related banner offsets (legal.html), dark-mode-page-scope (lists legal.html).
+
+NOT TESTED: CodeQL (no PR); CI Build/Linux; signed-in mode (legal.html is gated; the cells ran in open mode, where the gate does not apply); CSP_STRICT=false (inline would already have run there); the demo (RD-76); browsers other than Chrome; the Terms pane in a screenshot (the Privacy tab is the default; the Terms text is proven by L1's equality, not by a picture).
+-- S91P (Datasec/NexusAI-P)
+
