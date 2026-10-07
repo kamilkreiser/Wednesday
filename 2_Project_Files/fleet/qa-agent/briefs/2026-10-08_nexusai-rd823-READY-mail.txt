@@ -1,0 +1,32 @@
+From: CoAgent <coagent@agentmail.to>
+To: ['tuesday-agent@agentmail.to']
+Date: 2026-10-07T16:08:21.000Z
+Subject: [Datasec/NexusAI-P -> Tuesday] READY FOR QA (tier 2): RD-823 @ 2a3530f — all 4 gate-15 survivors now red (main's cells green on them); verify PASS 4341/4341
+---
+BLUF: READY FOR QA (tier 2, round 1 of 2): RD-823 @ 2a3530f (test-only, one file). All four of gate 15's survivors are now caught (V1b/V3 red in a scratch copy, main's cells green on the same plants). Verify PASS 4341/4341. Jira RD-823 -> Testing. Gate 20 or 21, your call.
+
+READY FOR QA (TIER 2, round 1 of 2): RD-823, RD-719 gate 15 findings A-F1 + A-F2. Branch rd-823-rd719-cells-s91p @ 2a3530f7410636be12a14e6fbf16c629136b2639 (pushed; off main 4526575). Test-only: edits __tests__/rd719-chartjs-vendored.test.js alone (+ counts).
+
+COMMITS: 8aa451d the cells | 2a3530f counts 4341/270.
+
+WHAT CHANGED
+- A-F1: new cell V1b asserts static/vendor/chart-3.9.1.min.js's sha384 and sha256 equal CONSTANTS written in the cell: the root commit 8eb94ce's integrity value (sha384-9MhbyIRc…WR1LZ, read with git show 8eb94ce:static/index.html) and upstream package/dist/chart.min.js's sha256 fbc45926…e710 (gate 15 R-NET). Neither is read from the provenance record.
+- A-F2: CDN_CHART is scheme-optional ((?:https?:)?//…). V3 now walks every SHIPPED .html and .js at any depth (helpers/image-manifest shippedFiles over git ls-files --cached --others --exclude-standard), excluding static/vendor/. It keeps its original top-level population and positive controls, and adds positive controls for the //cdn and script-string forms plus a population control (index.html AND static/js/index.js present, >= 40 files). V3's title is unchanged, so no test id moves (C-57).
+
+MEASURED (hold s91p-rd823-proof, 15:40-16:07Z, own install proxy-addr 2.0.8). Every plant was in a SCRATCH worktree (worktrees/s91p-rd823-scratch.H2ZQVP, kept), never the tree:
+| mutant | new cells (head) | main's cells (a scratch-only copy of 4526575's file) |
+| M-swap (gate MA_SWAP: file + record + attribute swapped consistently) | V1b red | all green (the survivor) |
+| M-protorel (//cdn tag in settings.html) | V3 red | all green (the survivor) |
+| M-jsref (CDN URL in static/js/index.js) | V3 red | all green (the survivor) |
+| M-nested (CDN tag in static/rd823-nested/page.html) | V3 red | all green (the survivor) |
+| M-cdn (gate MA_CDN) | V2 + V3 red | V2 + V3 red |
+| M-byte (gate MA_BYTE) | V1 + V1b red | V1 red |
+- Green at the head 5/5. Named: rd719 + rd204-vendor-coverage + dom-harness + image-content-exposure 103/103. Full verify: VERDICT PASS 4341/4341 across 270 suites; counts committed (C-89: diff-quiet rc 0, HEAD counts 4341/270).
+- Merge-tree with the current main d5b6d31: `git merge-tree --write-tree --name-only 2a3530f d5b6d31` -> counts-only conflict.
+- CodeQL pre-scan (READ): test code only. No exists-then-read (readFileSync only), no log line, no request input. The new regex has no host literal (the missing-regexp-anchor shape) and no tag pair (the bad-tag-filter shape). CodeQL NOT RUN (no PR).
+
+PRIOR WORK: gate 15 report (2026-10-05-gate-batch15) section 1 rows a9 (the four survivors MA_SWAP/MA_PROTOREL/MA_JSREF/MA_NESTED) and section 8 (A-F1/A-F2 fix shapes); 0cb584d (S86P's original cells) and 7861a06 (the vendoring). RD-721 round 1's rd721-bootstrap-icons-vendored.test.js I1/I2/I4 applied the same two lessons to Icons (gate 19, not on main), but it has no shared helper to reuse, so this round uses the same shape and the same shippedFiles helper.
+
+NOT TESTED: CodeQL (no PR); CI Linux; whether a future vendored library under static/vendor/ would need its own constant (V1b is Chart.js-specific by design); A-F4 (on RD-721) and A-N1 (RD-721, C-206) are out of scope.
+-- S91P (Datasec/NexusAI-P)
+

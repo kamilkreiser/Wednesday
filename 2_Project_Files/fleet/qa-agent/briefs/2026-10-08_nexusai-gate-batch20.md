@@ -465,7 +465,7 @@ Verdict format:
 
 ## ADDENDUM SLOTS — S1 (RD-777 + RD-776), S2 (RD-823) and S3 (RD-747) (EMPTY at drafting; Tuesday fills them at stamp)
 S1 SLOT: EMPTY
-S2 SLOT: EMPTY
+ADDENDUM S2 RD-823 JOINS @ 2a3530f7410636be12a14e6fbf16c629136b2639 ON rd-823-rd719-cells-s91p TIER 2 | READY /Volumes/KK_T9_External_HDD/TUESDAY/2_Project_Files/fleet/qa-agent/briefs/2026-10-08_nexusai-rd823-READY-mail.txt  (joined MID-GATE by Tuesday's ADDENDUM mail 2026-10-08 ~03:0x AEDT; the launcher's slot guards did not run on it, the gate runs them itself)
 S3 SLOT: EMPTY
 *To join a slot (Tuesday, at stamp, by hand, only once its READY has landed in `briefs/` and its branch is on origin): replace that slot's EMPTY line with ONE line of the exact form*
 `ADDENDUM S1 RD-777 JOINS @ <40-hex head> ON rd-777-776-validators-s92r TIER <1|2> | READY <absolute path of its READY mail in briefs/>`
