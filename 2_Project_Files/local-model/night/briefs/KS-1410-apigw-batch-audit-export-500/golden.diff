@@ -1,0 +1,216 @@
+--- a/Blockchain/Dev/services/api-gateway/src/routes/batch.ts
++++ b/Blockchain/Dev/services/api-gateway/src/routes/batch.ts
+@@ -13,7 +13,19 @@
+ import { Router, Request, Response } from 'express';
++import { logger } from '../utils/logger';
+-
++
+ const router = Router();
+-
++
++/**
++ * KS-1410: the only place in this router that turns a caught error into a 500. The three route catch blocks below put the
++ * thrown error's own text in the 500 body with NO NODE_ENV guard, so it reached the client in every environment,
++ * production included. Same shape as originate's fail500 (KS-1334, KS-730): log the thrown text server-side with
++ * the route named, answer the constant body.
++ */
++function fail500(res: Response, context: string, err: unknown): void {
++  logger.error(context, { error: err instanceof Error ? err.message : String(err) });
++  res.status(500).json({ success: false, error: { code: 'INTERNAL_ERROR', message: 'Internal server error' } });
++}
++
+ // ---------------------------------------------------------------------------
+ // Inline validators (api-gateway does not depend on zod)
+ // ---------------------------------------------------------------------------
+@@ -164,5 +176,5 @@
+     res.json(buildBatchResponse(results));
+   } catch (err: any) {
+-    res.status(500).json({ success: false, error: { code: 'INTERNAL_ERROR', message: err.message || 'Internal server error' } });
++    fail500(res, 'Batch certify failed (POST /api/batch/certifications)', err);
+   }
+ });
+@@ -212,5 +224,5 @@
+     res.json(buildBatchResponse(results));
+   } catch (err: any) {
+-    res.status(500).json({ success: false, error: { code: 'INTERNAL_ERROR', message: err.message || 'Internal server error' } });
++    fail500(res, 'Batch verify failed (POST /api/batch/verify)', err);
+   }
+ });
+@@ -260,5 +272,5 @@
+     res.json(buildBatchResponse(results));
+   } catch (err: any) {
+-    res.status(500).json({ success: false, error: { code: 'INTERNAL_ERROR', message: err.message || 'Internal server error' } });
++    fail500(res, 'Batch delegate failed (POST /api/batch/delegations)', err);
+   }
+ });
+--- a/Blockchain/Dev/services/api-gateway/src/routes/audit-export.ts
++++ b/Blockchain/Dev/services/api-gateway/src/routes/audit-export.ts
+@@ -13,7 +13,19 @@
+ import { Router, Request, Response } from 'express';
++import { logger } from '../utils/logger';
+-
++
+ const router = Router();
+-
++
++/**
++ * KS-1410: the only place in this router that turns a caught error into a 500. The route's catch block below put the
++ * thrown error's own text in the 500 body with NO NODE_ENV guard, so it reached the client in every environment,
++ * production included. Same shape as originate's fail500 (KS-1334, KS-730): log the thrown text server-side with
++ * the route named, answer the constant body.
++ */
++function fail500(res: Response, context: string, err: unknown): void {
++  logger.error(context, { error: err instanceof Error ? err.message : String(err) });
++  res.status(500).json({ success: false, error: { code: 'INTERNAL_ERROR', message: 'Internal server error' } });
++}
++
+ // ---------------------------------------------------------------------------
+ // Types
+ // ---------------------------------------------------------------------------
+@@ -193,6 +205,6 @@
+       data: entries,
+     });
+   } catch (err: any) {
+-    res.status(500).json({ success: false, error: { code: 'INTERNAL_ERROR', message: err.message || 'Internal server error' } });
++    fail500(res, 'Audit export failed (GET /api/admin/audit/export)', err);
+   }
+ });
+--- /dev/null
++++ b/Blockchain/Dev/services/api-gateway/src/__tests__/ks1410-batch-and-audit-export-500-never-answer-err-message.test.ts
+@@ -0,0 +1,136 @@
++/**
++ * KS-1410 (api-gateway routes/batch.ts + routes/audit-export.ts): four catch blocks answered a 500 whose body
++ * carried the thrown error's own text (`err.message || 'Internal server error'`) with NO NODE_ENV guard, so it
++ * reached the client in every environment, production included (batch.ts :166 :214 :262, audit-export.ts :196 at
++ * develop 147ae442074c). The fix gives each file a fail500 helper, the shape of originate's (KS-1334, KS-730): log
++ * the thrown text server-side with the route named, answer the constant body.
++ *
++ * Harness: the fake req/res dispatch of notifications.test.ts (the real routers, no server, no network).
++ * HOW EACH CATCH IS REACHED: every route reads req.user FIRST, inside its try. The fake request's user carries a
++ * getter that throws LEAK on the field the route reads (batch: userId; audit export: role), so the throw lands in
++ * the catch under test and no upstream is called. R3 reaches the certify catch the real way: a null entry in
++ * `documents` makes validateBatchCertify throw a TypeError.
++ */
++import { describe, it, expect, vi, afterEach, beforeEach } from 'vitest';
++import type { Request, Response, Router } from 'express';
++
++const mockLoggerError = vi.hoisted(() => vi.fn());
++vi.mock('../utils/logger', () => ({
++  logger: { error: mockLoggerError, warn: vi.fn(), info: vi.fn(), debug: vi.fn() },
++}));
++
++import batchRouter from '../routes/batch';
++import auditExportRouter from '../routes/audit-export';
++
++// THE FIXTURE IS LOAD-BEARING: a private host:port and a marker no other code path could produce.
++const LEAK = 'connect ECONNREFUSED 10.0.4.17:5432 ks1410-private-detail';
++const CONSTANT_BODY = { success: false, error: { code: 'INTERNAL_ERROR', message: 'Internal server error' } };
++const NODE_ENVS = ['production', 'development', 'test'];
++
++type CapturedRes = Response & { _status: number; _json: unknown };
++
++function makeRes(onFinish: () => void): CapturedRes {
++  const res: any = {
++    _status: 200,
++    _json: null,
++    status(code: number) {
++      res._status = code;
++      return res;
++    },
++    json(body: unknown) {
++      res._json = body;
++      onFinish();
++      return res;
++    },
++    setHeader() {
++      return res;
++    },
++  };
++  return res;
++}
++
++function dispatch(router: Router, opts: { method: string; url: string; user?: unknown; body?: unknown }): Promise<CapturedRes> {
++  return new Promise((resolve, reject) => {
++    const res = makeRes(() => resolve(res));
++    const req = {
++      method: opts.method,
++      url: opts.url,
++      headers: {},
++      body: opts.body,
++      query: {},
++      user: opts.user,
++      get(name: string) {
++        return (this as any).headers[name?.toLowerCase()];
++      },
++    } as unknown as Request;
++    router(req, res as any, (err: unknown) => (err ? reject(err) : resolve(res)));
++  });
++}
++
++/** A req.user whose `field` throws LEAK when the route reads it. */
++function throwingUser(field: string): Record<string, unknown> {
++  return Object.defineProperty({}, field, {
++    enumerable: true,
++    get() {
++      throw new Error(LEAK);
++    },
++  });
++}
++
++const ROUTES = [
++  { label: 'batch POST /certifications', router: batchRouter, method: 'POST', url: '/certifications', field: 'userId', context: 'Batch certify failed (POST /api/batch/certifications)' },
++  { label: 'batch POST /verify', router: batchRouter, method: 'POST', url: '/verify', field: 'userId', context: 'Batch verify failed (POST /api/batch/verify)' },
++  { label: 'batch POST /delegations', router: batchRouter, method: 'POST', url: '/delegations', field: 'userId', context: 'Batch delegate failed (POST /api/batch/delegations)' },
++  { label: 'audit GET /export', router: auditExportRouter, method: 'GET', url: '/export', field: 'role', context: 'Audit export failed (GET /api/admin/audit/export)' },
++];
++
++beforeEach(() => mockLoggerError.mockClear());
++afterEach(() => vi.unstubAllEnvs());
++
++describe('KS-1410 api-gateway batch + audit export: a 500 never answers the thrown text', () => {
++  it.each(ROUTES)('RED KS-1410 R1 $label: the thrown message is not in the 500 body under production, development or test', async (route) => {
++    for (const nodeEnv of NODE_ENVS) {
++      vi.stubEnv('NODE_ENV', nodeEnv);
++      mockLoggerError.mockClear();
++      const res = await dispatch(route.router, { method: route.method, url: route.url, user: throwingUser(route.field), body: {} });
++      expect({ nodeEnv, status: res._status, leaked: JSON.stringify(res._json).includes(LEAK) }).toEqual({ nodeEnv, status: 500, leaked: false });
++      expect(res._json).toEqual(CONSTANT_BODY);
++      // REACHED, not merely clean: only fail500 logs this route's context with the thrown text.
++      expect(mockLoggerError.mock.calls.at(-1)).toEqual([route.context, { error: LEAK }]);
++    }
++  });
++
++  it.each(ROUTES)('RED KS-1410 R2 $label: the thrown message is logged once, server-side, with this route named', async (route) => {
++    vi.stubEnv('NODE_ENV', 'production');
++    const res = await dispatch(route.router, { method: route.method, url: route.url, user: throwingUser(route.field), body: {} });
++    expect(res._status).toBe(500);
++    expect(mockLoggerError.mock.calls).toEqual([[route.context, { error: LEAK }]]);
++  });
++
++  it('RED KS-1410 R3 batch POST /certifications: a null document entry (a real TypeError) answers the constant 500 body', async () => {
++    vi.stubEnv('NODE_ENV', 'production');
++    const res = await dispatch(batchRouter, { method: 'POST', url: '/certifications', user: { userId: 'u-ks1410' }, body: { documents: [null] } });
++    expect(res._status).toBe(500);
++    expect(res._json).toEqual(CONSTANT_BODY);
++    expect(mockLoggerError.mock.calls).toEqual([['Batch certify failed (POST /api/batch/certifications)', { error: expect.stringContaining('documentHash') }]]);
++  });
++
++  it('control KS-1410 C1: no req.user still answers 401 UNAUTHORIZED on batch and on the audit export', async () => {
++    const batch = await dispatch(batchRouter, { method: 'POST', url: '/certifications', body: {} });
++    const audit = await dispatch(auditExportRouter, { method: 'GET', url: '/export' });
++    expect([batch._status, (batch._json as any).error.code, audit._status, (audit._json as any).error.code]).toEqual([401, 'UNAUTHORIZED', 401, 'UNAUTHORIZED']);
++    expect(mockLoggerError).not.toHaveBeenCalled();
++  });
++
++  it('control KS-1410 C2: a malformed batch body still answers 400 BAD_REQUEST with its validator message', async () => {
++    const res = await dispatch(batchRouter, { method: 'POST', url: '/delegations', user: { userId: 'u-ks1410' }, body: {} });
++    expect(res._status).toBe(400);
++    expect(res._json).toEqual({ success: false, error: { code: 'BAD_REQUEST', message: 'delegations array required' } });
++  });
++
++  it('control KS-1410 C3: a non-admin role still answers 403 FORBIDDEN on the audit export', async () => {
++    const res = await dispatch(auditExportRouter, { method: 'GET', url: '/export', user: { role: 'user' } });
++    expect(res._status).toBe(403);
++    expect((res._json as any).error.code).toBe('FORBIDDEN');
++  });
++});

@@ -1,0 +1,208 @@
+--- a/Blockchain/Dev/services/api-gateway/src/routes/notifications.ts
++++ b/Blockchain/Dev/services/api-gateway/src/routes/notifications.ts
+@@ -13,7 +13,19 @@
+ import { Router, Request, Response } from 'express';
+ import crypto from 'crypto';
+ import { authenticateToken } from '../middleware/auth';
++import { logger } from '../utils/logger';
+-
++
+ const router = Router();
+-
++
++/**
++ * KS-1410: the only place in this router that turns a caught error into a 500. The six route catch blocks below put
++ * the thrown error's own text in the 500 body with NO NODE_ENV guard, so it reached the client in every environment,
++ * production included. Same shape as originate's fail500 (KS-1334, KS-730): log the thrown text server-side with
++ * the route named, answer the constant body.
++ */
++function fail500(res: Response, context: string, err: unknown): void {
++  logger.error(context, { error: err instanceof Error ? err.message : String(err) });
++  res.status(500).json({ success: false, error: { code: 'INTERNAL_ERROR', message: 'Internal server error' } });
++}
++
+ // KS-375: every notifications operation is documented as bearer-authed
+@@ -123,6 +135,6 @@
+       },
+     });
+   } catch (err: any) {
+-    res.status(500).json({ success: false, error: { code: 'INTERNAL_ERROR', message: err.message || 'Internal server error' } });
++    fail500(res, 'Notification list failed (GET /api/notifications)', err);
+   }
+ });
+@@ -145,5 +157,5 @@
+     res.json({ success: true, data: { unreadCount } });
+   } catch (err: any) {
+-    res.status(500).json({ success: false, error: { code: 'INTERNAL_ERROR', message: err.message || 'Internal server error' } });
++    fail500(res, 'Unread count failed (GET /api/notifications/unread/count)', err);
+   }
+ });
+@@ -174,5 +186,5 @@
+     res.json({ success: true, data: notification });
+   } catch (err: any) {
+-    res.status(500).json({ success: false, error: { code: 'INTERNAL_ERROR', message: err.message || 'Internal server error' } });
++    fail500(res, 'Mark read failed (PATCH /api/notifications/:id/read)', err);
+   }
+ });
+@@ -202,5 +214,5 @@
+     res.json({ success: true, data: { updatedCount } });
+   } catch (err: any) {
+-    res.status(500).json({ success: false, error: { code: 'INTERNAL_ERROR', message: err.message || 'Internal server error' } });
++    fail500(res, 'Mark all read failed (PATCH /api/notifications/read-all)', err);
+   }
+ });
+@@ -232,5 +244,5 @@
+     res.json({ success: true, message: 'Notification deleted' });
+   } catch (err: any) {
+-    res.status(500).json({ success: false, error: { code: 'INTERNAL_ERROR', message: err.message || 'Internal server error' } });
++    fail500(res, 'Notification delete failed (DELETE /api/notifications/:id)', err);
+   }
+ });
+@@ -288,5 +300,5 @@
+     res.status(201).json({ success: true, data: notification });
+   } catch (err: any) {
+-    res.status(500).json({ success: false, error: { code: 'INTERNAL_ERROR', message: err.message || 'Internal server error' } });
++    fail500(res, 'Notification create failed (POST /api/notifications)', err);
+   }
+ });
+--- /dev/null
++++ b/Blockchain/Dev/services/api-gateway/src/__tests__/ks1410-notifications-500-never-answers-err-message.test.ts
+@@ -0,0 +1,138 @@
++/**
++ * KS-1410 (api-gateway routes/notifications.ts): six catch blocks answered a 500 whose body carried the thrown
++ * error's own text (`err.message || 'Internal server error'`) with NO NODE_ENV guard, so it reached the client in
++ * every environment, production included (:126 :147 :176 :204 :234 :290 at develop 147ae442074c). The fix gives the
++ * file a fail500 helper, the shape of originate's (KS-1334, KS-730): log the thrown text server-side with the route
++ * named, answer the constant body.
++ *
++ * Harness: the fake req/res dispatch of notifications.test.ts (the real router, no server, no network), with the
++ * router-wide authenticateToken replaced by a pass-through, so req.user is exactly what the cell sets.
++ * HOW EACH CATCH IS REACHED: five routes read req.user FIRST, inside their try, and the fake request's user carries
++ * a userId getter that throws LEAK; POST / destructures req.body first, and its body carries the throwing getter.
++ */
++import { describe, it, expect, vi, afterEach, beforeEach } from 'vitest';
++import type { Request, Response, Router } from 'express';
++
++const mockLoggerError = vi.hoisted(() => vi.fn());
++vi.mock('../utils/logger', () => ({
++  logger: { error: mockLoggerError, warn: vi.fn(), info: vi.fn(), debug: vi.fn() },
++}));
++vi.mock('../middleware/auth', () => ({
++  authenticateToken: () => (_req: unknown, _res: unknown, next: () => void) => next(),
++}));
++
++import notificationsRouter from '../routes/notifications';
++
++// THE FIXTURE IS LOAD-BEARING: a private host:port and a marker no other code path could produce.
++const LEAK = 'connect ECONNREFUSED 10.0.4.17:5432 ks1410-private-detail';
++const CONSTANT_BODY = { success: false, error: { code: 'INTERNAL_ERROR', message: 'Internal server error' } };
++const NODE_ENVS = ['production', 'development', 'test'];
++
++type CapturedRes = Response & { _status: number; _json: unknown };
++
++function makeRes(onFinish: () => void): CapturedRes {
++  const res: any = {
++    _status: 200,
++    _json: null,
++    status(code: number) {
++      res._status = code;
++      return res;
++    },
++    json(body: unknown) {
++      res._json = body;
++      onFinish();
++      return res;
++    },
++    setHeader() {
++      return res;
++    },
++  };
++  return res;
++}
++
++function dispatch(router: Router, opts: { method: string; url: string; user?: unknown; body?: unknown }): Promise<CapturedRes> {
++  return new Promise((resolve, reject) => {
++    const res = makeRes(() => resolve(res));
++    const req = {
++      method: opts.method,
++      url: opts.url,
++      headers: {},
++      body: opts.body,
++      query: {},
++      user: opts.user,
++      get(name: string) {
++        return (this as any).headers[name?.toLowerCase()];
++      },
++    } as unknown as Request;
++    router(req, res as any, (err: unknown) => (err ? reject(err) : resolve(res)));
++  });
++}
++
++/** An object whose `field` throws LEAK when the route reads it. */
++function throwing(field: string): Record<string, unknown> {
++  return Object.defineProperty({}, field, {
++    enumerable: true,
++    get() {
++      throw new Error(LEAK);
++    },
++  });
++}
++
++const ROUTES = [
++  { label: 'GET /', method: 'GET', url: '/', via: 'user', context: 'Notification list failed (GET /api/notifications)' },
++  { label: 'GET /unread/count', method: 'GET', url: '/unread/count', via: 'user', context: 'Unread count failed (GET /api/notifications/unread/count)' },
++  { label: 'PATCH /:id/read', method: 'PATCH', url: '/n-ks1410/read', via: 'user', context: 'Mark read failed (PATCH /api/notifications/:id/read)' },
++  { label: 'PATCH /read-all', method: 'PATCH', url: '/read-all', via: 'user', context: 'Mark all read failed (PATCH /api/notifications/read-all)' },
++  { label: 'DELETE /:id', method: 'DELETE', url: '/n-ks1410', via: 'user', context: 'Notification delete failed (DELETE /api/notifications/:id)' },
++  { label: 'POST /', method: 'POST', url: '/', via: 'body', context: 'Notification create failed (POST /api/notifications)' },
++];
++
++function arm(route: (typeof ROUTES)[number]) {
++  return route.via === 'user'
++    ? { method: route.method, url: route.url, user: throwing('userId'), body: {} }
++    : { method: route.method, url: route.url, user: { userId: 'u-ks1410' }, body: throwing('userId') };
++}
++
++beforeEach(() => mockLoggerError.mockClear());
++afterEach(() => vi.unstubAllEnvs());
++
++describe('KS-1410 api-gateway notifications: a 500 never answers the thrown text', () => {
++  it.each(ROUTES)('RED KS-1410 N1 $label: the thrown message is not in the 500 body under production, development or test', async (route) => {
++    for (const nodeEnv of NODE_ENVS) {
++      vi.stubEnv('NODE_ENV', nodeEnv);
++      mockLoggerError.mockClear();
++      const res = await dispatch(notificationsRouter, arm(route));
++      expect({ nodeEnv, status: res._status, leaked: JSON.stringify(res._json).includes(LEAK) }).toEqual({ nodeEnv, status: 500, leaked: false });
++      expect(res._json).toEqual(CONSTANT_BODY);
++      // REACHED, not merely clean: only fail500 logs this route's context with the thrown text.
++      expect(mockLoggerError.mock.calls.at(-1)).toEqual([route.context, { error: LEAK }]);
++    }
++  });
++
++  it.each(ROUTES)('RED KS-1410 N2 $label: the thrown message is logged once, server-side, with this route named', async (route) => {
++    vi.stubEnv('NODE_ENV', 'production');
++    const res = await dispatch(notificationsRouter, arm(route));
++    expect(res._status).toBe(500);
++    expect(mockLoggerError.mock.calls).toEqual([[route.context, { error: LEAK }]]);
++  });
++
++  it('control KS-1410 NC1: no req.user still answers 401 UNAUTHORIZED on GET /', async () => {
++    const res = await dispatch(notificationsRouter, { method: 'GET', url: '/' });
++    expect(res._status).toBe(401);
++    expect((res._json as any).error.code).toBe('UNAUTHORIZED');
++    expect(mockLoggerError).not.toHaveBeenCalled();
++  });
++
++  it('control KS-1410 NC2: a POST / missing its fields still answers 400 BAD_REQUEST', async () => {
++    const res = await dispatch(notificationsRouter, { method: 'POST', url: '/', user: { userId: 'u-ks1410' }, body: { userId: 'r-ks1410' } });
++    expect(res._status).toBe(400);
++    expect((res._json as any).error.code).toBe('BAD_REQUEST');
++  });
++
++  it('control KS-1410 NC3: create then list still answers 201 then 200 with the created row', async () => {
++    const created = await dispatch(notificationsRouter, { method: 'POST', url: '/', user: { userId: 'u-ks1410' }, body: { userId: 'reader-ks1410', type: 'system', title: 'T', message: 'M' } });
++    const listed = await dispatch(notificationsRouter, { method: 'GET', url: '/', user: { userId: 'reader-ks1410' } });
++    expect([created._status, listed._status, (listed._json as any).data.map((n: any) => n.title)]).toEqual([201, 200, ['T']]);
++    expect(mockLoggerError).not.toHaveBeenCalled();
++  });
++});
