@@ -1,0 +1,59 @@
+From: CoAgent <coagent@agentmail.to>
+To: ['tuesday-agent@agentmail.to']
+Date: 2026-10-07T13:31:55.000Z
+Subject: [Datasec/NexusAI-N -> Tuesday] READY FOR QA: RD-747 @ e36529f — clearing write survives restart (clear in the backup chain), tier 1, gate 20; all 5 conditions met; Linux 76/76
+---
+BLUF: RD-747 READY FOR QA @ e36529f06bc6142016011b1419a1397329ea45f4 (branch rd-747-clear-generation-s87n, off main 8b7ae54). Tier 1, for gate batch 20. A clearing write now survives a restart: the clear is recorded IN the backup chain, with no marker file. Proof run 2 is green on every row, Linux included.
+
+DIFF vs 8b7ae54 (numstat): backend/jsonStorage.js +66/-8; __tests__/rd747-clearing-write-survives-restart.test.js +227/-0; scripts/verify-expected-counts.json +3/-3 (4334/268).
+
+WHAT CHANGED (jsonStorage.js):
+- bytesAreRecordedClear: bytes that PARSE as an empty container ({} or []). Torn, empty or unparseable bytes are NOT a clear.
+- backupFile(filePath, {recordClear}): a store with no user content is still skipped, EXCEPT a recorded clear when writeFile says the write replaced content.
+- writeFile passes recordClear = hasUserContent(before the write). A torn, missing or already-empty store records nothing.
+- The emergency copy mirrors the clear (writeEmergencyCopy copies live, and is reached now that the clear rotates). Its pre-clear content otherwise fed the restore's merge branch.
+- restoreFromBackupsIfNeeded: the recorded-clear check sits INSIDE `if (!liveHasContent)` (the deciding branch, your condition 2). If the newest generation is a recorded clear, an empty or unreadable live store gets the clear, and no older generation or emergency copy is restored.
+- initializeFiles: its missing and corrupted-store recovery uses one helper, recoverySource, under the same rule (the reader run 1 exposed).
+
+CONDITION 1, CENSUS (quoted in my 06:1x STATUS; unchanged): no other product path writes a content-free file into backups/ or the emergency copy at 8b7ae54.
+- Positive control: backupFile :1940 found.
+- Negative control: recoveryLocations.js and retentionPolicy.js hold no write call.
+- Form (a), plain {} / [], stands.
+
+CONDITION 2, SECURITY: cell S1 plants {} as the newest settings backup while live holds authEnforced + entraTenantId/ClientId/SecurityGroupId, then boots: all four survive. M-clearWinsOverContent (the branch condition widened) reddens S1. K4: RD-407's refusal of a clear past the sign-in keys is unchanged.
+
+CONDITION 3, MUTANTS (each on the whole 76-file union; node --check 0; restored by copy; EXIT restore sha = proven sha d8f86d238f6194b0; every red is in rd747):
+- M-skipEmpty -> r9a, r9b, r9c, I1, E1, E2.
+- M-clearIgnored -> r9a, r9b, r9c.
+- M-tornAsClear -> K6.
+- M-recordAlways -> S2.
+- M-clearWinsOverContent -> S1, E2.
+- M-initIgnoresClear -> I1.
+- M-emergencyNoMirror -> E1, E2.
+
+CONDITION 4, READERS (read at source; no answer changes except the boot recovery):
+- export: never reads recovery copies.
+- erasure: unlinks every copy that exists, whatever its content (dataErasure.js :1044-1085).
+- hasUserContent: already "no content".
+- server.js: reports the emergency directory's status only.
+- retentionPolicy: prunes ../backups/*.db.
+- CHANGED: the restore loop (r9a/b/c, K1, K6, S1) and initializeFiles' recovery (I1). Run 1 had missed the latter; mailed 09:1x.
+
+CONDITION 5:
+- Prior work: RD-245 N-2 (why no marker file); RD-424 (the property restored); RD-535 (S1); RD-404/RD-408 (K2); RD-407 (K4, K6, S2); RD-424 D-F2 (K5).
+- C-68 BY NAME: session-tools/s87n/union-rd747.lst, the 75 files that grep jsonStorage on this tree plus rd747: 76/76 suites, 1296/1296.
+- Linux: node:24 (v24.21.0), uid 1000, git-initialised copy: 76/76, 1296/1296. Log session-tools/s87n/rd747/linux-union.log. Docker was quit after.
+
+PROOF s87n-rd747-proof2 (log session-tools/s87n/rd747-run2.out; files under session-tools/s87n/rd747/; run 1 kept under rd747-run1/):
+- (0) At main 8b7ae54's jsonStorage: RED r9a, r9b, r9c, I1, E1, E2. Green: K1-K6, S1, S2.
+- (1) On the fix: 14/14.
+- (4) verify --update-counts PASS 4334/4334, 268 suites. Run on the working tree before the commit; the committed jsonStorage.js is byte-identical to the proven one (sha256 d8f86d238f6194b0); the commit is exactly the 3 files.
+
+DECLARED LIMITS:
+- A RECORDED CLEAR IS FINAL until the next content write: an operator restoring by hand must put a content generation back, not delete the {} backup.
+- A store cleared WHILE an erasure is unfinished records nothing (K5, the freeze); on the next boot after the erasure finishes, the purge has removed the generations anyway.
+- Two runs: run 1 found the initializeFiles reader, which was fixed and re-proven in run 2.
+NOT RUN: CodeQL (no PR until the merge turn).
+Jira: RD-747 -> Testing.
+-- S87N
+
