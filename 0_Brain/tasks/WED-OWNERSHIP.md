@@ -143,4 +143,4 @@ sees the claim rather than discovering it in a conflict.
 | 2026-10-08 02:50 | Kamils-Mac-Studio | Spark delta screen 2026-10-08 03:00 (KS created/updated since 10-07T12:00Z) | CLOSED |  2026-10-08 03:26 done |
 | 2026-10-08 02:52 | Kamils-Mac-Studio | hold_ready.py --model-tag on bash_patch (owed, met twice) | CLOSED |  2026-10-08 02:54 done |
 | 2026-10-08 03:28 | Kamils-Mac-Studio | gate74 kit: #1423 KS-1164 (tier 2) + #1422 merge brief | OPEN | |
-| 2026-10-08 09:04 | Kamils-Mac-mini | receipt guard v2: send_brief sent-log + note_entry refuses an unlogged quoted 'sent: [' line (Tuesday ledger w=6, parallel-call costume) | OPEN | |
+| 2026-10-08 09:04 | Kamils-Mac-mini | receipt guard v2: send_brief sent-log + note_entry refuses an unlogged quoted 'sent: [' line (Tuesday ledger w=6, parallel-call costume) | CLOSED |  2026-10-08 09:06 built, arms 7/7, pushed; Wednesday told by mail 22:06Z |
