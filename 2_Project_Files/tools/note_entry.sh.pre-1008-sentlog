@@ -44,31 +44,6 @@ else
   exit 2
 fi
 [ -n "$TEXT" ] || { echo "note_entry: refusing empty text" >&2; exit 2; }
-# SENT-RECEIPT GUARD (2026-10-08, Tuesday ledger w=6): a body quoting a send ("sent: [Who -> Whom] subject")
-# must quote one that is IN send_brief's sent log — i.e. a send that returned 200. The 10-08 failures were a
-# receipt written in a PARALLEL tool call beside a send that then refused, which receiptguard (one command at a
-# time) cannot see. Each quoted subject is matched as a substring of a logged line (quotes may be truncated).
-# Override for quoting someone else's send (state why in the body): NOTE_ALLOW_UNLOGGED_SENT=1.
-if [ "${NOTE_ALLOW_UNLOGGED_SENT:-0}" != 1 ]; then
-  SENT_LOG="${SEND_BRIEF_SENT_LOG:-$PROJECT_DIR/2_Project_Files/fleet/state/sent_log.txt}"
-  MISSING="$(python3 - "$TEXT" "$SENT_LOG" <<'PYSENT'
-import re, sys, os
-text, log = sys.argv[1], sys.argv[2]
-quotes = re.findall(r'sent: (\[[^\]]+\][^"\n]*)', text)
-if not quotes: sys.exit(0)
-body = open(log, encoding='utf-8', errors='replace').read() if os.path.exists(log) else ''
-for q in quotes:
-    q = q.strip().rstrip('.;,)')
-    if q and q not in body: print(q)
-PYSENT
-)"
-  if [ -n "$MISSING" ]; then
-    echo "note_entry: REFUSED — the body quotes a send that is NOT in the sent log ($SENT_LOG):" >&2
-    printf '  %s\n' "$MISSING" >&2
-    echo "  Read the send's output first, then write the note (ledger w=6). Quoting another seat's send: NOTE_ALLOW_UNLOGGED_SENT=1." >&2
-    exit 3
-  fi
-fi
 STAMP="${NOTE_ENTRY_TEST_STAMP:-$(date +%H:%M)}"   # the test seam exists only for the arms below
 # TYPED-CLOCK ADVISORY (2026-09-21; ledger w>=3 on 2026-09-19 — three typed clocks in one day, all
 # "felt near-future" times for acts already done, written into bodies this script stamps but does

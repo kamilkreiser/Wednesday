@@ -634,11 +634,6 @@ except Exception as e:
 PYEOF
 )"
 if [ "$CODE" = "200" ]; then
-  # SENT LOG (2026-10-08, Tuesday ledger w=6: receipts written in PARALLEL tool calls beside a send that
-  # then REFUSED). Only a send that reached 200 is logged; note_entry.sh refuses a quoted "sent: [" line
-  # that is not in this file, so a receipt can only quote a send that happened. Per-seat state, gitignored.
-  printf '%s sent: %s\n' "$(date -u +%FT%TZ)" "$FULL_SUBJECT" >> "${SEND_BRIEF_SENT_LOG:-$SELF_DIR/state/sent_log.txt}" \
-    || echo "send_brief: WARNING — could not append to the sent log (note_entry will refuse a receipt quoting this send)" >&2
   echo "sent: $FULL_SUBJECT"
   echo "  -> $RECIPIENTS"
 else
