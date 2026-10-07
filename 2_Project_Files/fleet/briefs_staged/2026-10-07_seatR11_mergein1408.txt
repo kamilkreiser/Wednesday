@@ -1,0 +1,84 @@
+[Secuura/Blockchain-R -> Wednesday] STATUS: merge-in 1408 built, qm green, push pending installs (Seat R 11th)
+STATUS: merge-in 1408 built, qm green, push pending installs (Seat R 11th)
+
+M-1 through M-5 are DONE on GO v2. M is built and qm-green. The push is the only
+thing between here and your ADDENDUM; its installs are running now (S-1).
+
+## M (the merge-in commit)
+  M      = c19520e1929424169ad9508d4039de4ad24e9194
+  tree   = 8ba73beba304e8a93f94f0b0fd84711525edcb8b  == the GO's T', exactly
+  parents= [ce33ec8b3eae, eb67b965994057a3311efcc299393757d764ed8a]  OURS first, then D
+  subject= Merge develop eb67b9659940 into the KS-1435 branch (docs keep-both, gate73 step 3)
+  Built in a FRESH DETACHED worktree `s-ra11-m1408` (abbrev-ref returns the literal
+  `HEAD`), porcelain 0 at cut, branch ref never moved off ce33ec8b3eae.
+
+## M-4 — **46 gates CHECKED, 46 passed, 0 failed.** VERDICT: PASS
+Resolved BY CONTENT to the composed blobs (never take-ours): staged flow
+`9fbf93ec26b8` and cheat `6d4cfc3a9206` == the key blobs, 0 conflicts remaining,
+0 conflict markers, nothing unstaged, no untracked.
+Blob gates: 3 named develop paths exactly develop's, 2 head non-doc paths exactly the
+head's, and the catch-all read **36 non-doc paths checked, 0 deletions carried,
+0 differ** — so no develop change slipped through unasserted.
+Change sets, both measured off T' in advance: diff OURS..M = **38**, diff DEV..M = **4**.
+
+## ⚠ TWO PLACES THE BRIEF'S EXPECTATION WAS STALE, AND THE TOOL DECIDED BOTH
+1. **`--dev-parent-count`: the brief says 1; D is now a MERGE with TWO parents.**
+   `%P` of eb67b965 = `74a91addcd75… 214978d6e9ff…`, word count 2. I passed
+   `--dev-parent-count 2` and `--dev-parent 74a91addcd75…` (the FIRST parent).
+   No STOP was needed: R 5th's F-5 already SPLIT that gate into "DEV has exactly N
+   parent(s)" and "DEV's FIRST parent == --dev-parent" precisely because a GitHub merge
+   commit has two. Both passed. The brief's "1 / 7bcc2ed545e4" described the original D
+   (841e4ab1, a squash); it is simply out of date, not wrong-headed.
+2. `--dev-paths`/`--head-paths`: docs excluded from BOTH, per R 10th. I verified that
+   is REQUIRED rather than stylistic: in T' the flow blob is `9fbf93ec26b8` where OURS
+   has `98d8903a0e56` and DEV has `2bdf7061c0ce`; the cheat blob is `6d4cfc3a9206`
+   where OURS has `4e31d0f83f8d` and DEV has `cf82aa1398b6`. **T differs from BOTH
+   sides on both docs** — keep-both is a genuine third value, so naming a doc in either
+   blob-gate list would make that gate fail by construction.
+
+## M-5 qm — GREEN. 8 CHECKED, 0 FAIL
+  Q1 parents EXACTLY [head, develop], count 2 · Q2 tree(M) == predicted ·
+  Q3-flow own 30 x1, LAST, prefix kept, UNIQUE, balance (0,0) == develop ·
+  Q4-flow head block x1 and M-minus-it == develop BYTE FOR BYTE ·
+  Q3-cheat own KS-1435 x1, same shape · Q4-cheat same, byte for byte ·
+  Q5 code blobs in M == the head's, [] ·
+  Q6 the guard ON tree(M): rc 0, (12, 0).
+So `qm Q2 STRICT` and `qm green` are both satisfied for the squash.
+
+## 🔴 Q-55 IS RECONCILED — it is an INSTRUMENT difference, not a wrong figure
+On `bf277eead268`:
+  `git log -1 --format='%(trailers)' | wc -c`  = **55**  <- the kit's figure, exactly
+  the raw `Co-Authored-By:` LINE, `wc -c`        = **54**  <- R 10th's instrument
+  CONTROL, M itself (no trailer), `%(trailers)` = **1**
+The kit's 55 is git's rendered trailer BLOCK; R 10th measured the LINE. Both readings
+were correct about different things. The control proves the reader returns 1 on a
+trailer-free commit, so 55 is a measurement and not an artefact. My own M reads
+**1 byte / 0 trailers against that non-empty 55-byte control** — I assert the
+non-zero control per your Q-55 ruling and do not rest anything on the figure itself.
+Your call whether to write 55 back into `kit.json` with the instrument named beside it.
+
+## M-3 — the transfer arm you said was intact FIRED
+eb67b965 ABSENT from the shared store before (with `deadbeef` absent and `841e4ab1`
+reading `commit`, so the instrument discriminated three ways), `commit` after.
+Objects-only: `rev-parse --all` **1,618 / 937c4e7ae8e6e9ab byte-identical before and
+after** — no ref written. Lock taken as `Secuura/Blockchain-R ra11` pid 79833 with all
+four co-tenant locks ABSENT, released by the same pid in the same invocation.
+
+## M-6 IN FLIGHT
+DRYPROOF rc 0 at 10:01:21Z: origin head for the branch is exactly 1 and still
+`ce33ec8b3eae`, fast-forward to M confirmed. Installs running in the pushing worktree:
+`npm ci --ignore-scripts` in `Blockchain/Dev`, then `packages/shared` build with the
+`dist/index.js` assert, then **`npm ci` in `systemTest/performance` (S-1)** — M's push
+delta carries #1409's `unitSuiteSlotIndependence.test.ts`, so I expect the format gate
+to SELECT that package and, since #1407, to REFUSE rather than skip if it is absent.
+I will quote PREFLIGHT, legs 6/7 and `html_docs_matrix` exactly as that push prints
+them, read rc with no pipe, and mail `STATUS: merge-in 1408 pushed` with the Actions.
+
+## NOT DONE
+No push yet. No squash. develop was `eb67b965` == D at my M-2 (09:55:42Z) and I will
+re-read it at M-7 before the squash, per your GO.
+
+## WATCHER
+pid 78603, armed with SINCE `2026-10-07T09:54:20.000Z` = your GO v2. From
+`boot/ps_watcher_m4.txt`: 1 real watcher, positive control 1, negative control 0.
+

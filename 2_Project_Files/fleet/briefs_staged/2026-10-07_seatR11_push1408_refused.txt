@@ -1,0 +1,68 @@
+[Secuura/Blockchain-R -> Wednesday] STATUS: push 1408 refused by the format gate, akto installed, re-push in flight (Seat R 11th)
+STATUS: push 1408 refused by the format gate, akto installed, re-push in flight (Seat R 11th)
+
+**The first push of M FAILED, rc 1. Nothing landed. I fixed the root cause the gate's
+own way and the re-push is running.** Reporting it rather than folding it into a later
+success line, and it REFINES your S-1.
+
+## 🔴 THE WRAPPER SAID SUCCESS AND THE PUSH HAD FAILED
+My background runner reported **exit code 0** for the push command while the push
+itself read **rc 1**. Three instruments agree it failed, none of them the wrapper:
+  the tool's log line      `2026-10-07T10:03:54Z push rc=1`
+  the tool's own .rc file  `s-ra11-m1408-ff-c19520e19294-push.rc` = **1**
+  `ls-remote` after       branch still `ce33ec8b3eae` — UNMOVED
+Had I taken the exit code I would have reported a landed merge-in that does not exist.
+This is the `wrapper-banner-is-not-a-result` class, one layer out: the wrapper's rc
+measured the wrapper.
+
+## THE REFUSAL, quoted EXACTLY as that push printed it
+[format-gate] SKIP — systemTest/akto deps not installed (npm ci in systemTest/akto).
+[format-gate] 0 package(s) checked, 1 skipped, 0 failed
+[format-gate] NOTHING CHECKED — every selected package was skipped, so no file's formatting was examined.
+[format-gate]   This is NOT a formatting failure: the gate could not run. Install the deps it names above
+[format-gate]   (npm ci in each skipped systemTest/<package>), then push again.
+[pre-push] systemTest formatting gate FAILED — fix the files named above.
+           (bypass, sparingly: git push --no-verify)
+**I did not take the bypass.** KS-998 refusing here is Kam's 2026-09-22 ruling working.
+
+## S-1 IS RIGHT IN MECHANISM AND ITS PREDICTION NAMED THE WRONG PACKAGE
+Your brief predicted the gate would select `systemTest/performance` (#1409's
+`unitSuiteSlotIndependence.test.ts`). I installed it before the push, as instructed.
+**Measured: `performance` IS in the push delta — and the gate did NOT select it.
+It selected `systemTest/akto` alone.**
+  push delta OURS..M, systemTest packages:  akto **31 files**, performance 1 file,
+  plus `scripts`, `__tests__` and `CLAUDE.md` which are not packages.
+  `performance` node_modules PRESENT (my install); `akto` MISSING.
+  "1 skipped / every selected package was skipped" ⇒ exactly ONE package was selected.
+**The reason is structural and it will recur: a MERGE-IN's push delta is `OURS..M`,
+which carries DEVELOP'S ADVANCE, not just the PR's own work.** Peter's #1411 put 31
+akto files into develop, so akto entered my delta through no act of mine. The brief
+predicted from #1409's content; the selection follows whatever develop has landed
+since the PR head.
+**The durable form of S-1 is therefore: before a merge-in push, enumerate the
+systemTest packages in `diff OURS..M` that have a `package.json`, and install EVERY
+one — do not predict which from the PR's own content.** For this M that set is
+{akto, performance}; I had one of the two. Worth putting in STANDING_LINES, since the
+next merge-in seat inherits exactly this shape.
+
+## THE FIX, and it is the gate's own instruction
+`npm ci` in `systemTest/akto`: rc 0, 255 node_modules entries, and the local
+`prettier` the gate needs resolves at **3.9.9**. No lockfile, manifest or baseline
+touched — `npm ci` installs from the committed lock, and the worktree still reads
+**0 modified**.
+
+## THE FAILED PUSH LEFT NOTHING BEHIND — verified, not assumed
+  origin branch `ce33ec8b3eae` (unmoved)  ·  lock FREE  ·  worktree HEAD still
+  `c19520e1929424169ad9508d4039de4ad24e9194`  ·  0 modified  ·  and the tool's own
+  orphaned-`login_stub` census read **0** for this worktree.
+M itself is untouched and still qm-green; nothing needs rebuilding.
+
+## IN FLIGHT
+Re-push started 10:06:01Z, same tool, same pinned `ce33ec8b3eae`, called BARE. I will
+read the result from the .rc file and `ls-remote`, never the wrapper, and quote
+PREFLIGHT, legs 6/7 and `html_docs_matrix` exactly as THIS push prints them.
+develop was `eb67b965` == D at 09:55:42Z; I re-read it at M-7 before any squash.
+
+## WATCHER
+pid 78603, SINCE `2026-10-07T09:54:20.000Z` = your GO v2.
+
