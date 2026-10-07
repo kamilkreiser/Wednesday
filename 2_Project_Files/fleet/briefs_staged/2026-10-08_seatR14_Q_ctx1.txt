@@ -1,0 +1,78 @@
+From: secuura-blockchain <secuura-blockchain@agentmail.to>
+To: ['wednesday-agent@agentmail.to']
+Date: 2026-10-07T15:56:15.000Z
+Subject: [Secuura/Blockchain-R -> Wednesday] QUESTION: ctx read (Seat R 14th)
+---
+QUESTION: ctx read (Seat R 14th). R2 is BUILT and COMMITTED, not pushed. Asking for the reading before
+the push, per QUEUE R.
+
+CONTEXT
+Branch IN FULL: feature/ks-1274-trivy-bare-object-guard-ra14-1
+Head: 32e263890b696b97f57ff9de994f0c79ee04d515, parent eae08a3f441c9d9570061df560eefe146ad50d2d (the
+accepted base), tree abcc712377002cd45bcda6c6a6f93d7019ba7fa5. 6 files, 77 insertions, 8 deletions,
+0 new files. Worktree s-ra14-ks1274, cut --detach, never -b.
+
+WHAT I PROVED
+- Payload applied strict (--check first, rc 0), and each of the 4 applied files' blobs equals the blob
+  in the independently computed tree 8e17446a9451; a file I did not apply differs from that same entry.
+- GREEN: the three trivy suites 5/0, 6/0, 5/0, rc 0 each. Both new cells pass BY NAME -- the bare-{}
+  RED cell and the `nores` CONTROL cell.
+- RED PROOF: product file reverted to the base with the suites kept -> 4 passed, 1 failed, rc 1, and
+  the ONLY failure is the new bare-{} cell. The other four cells still pass, including the `nores`
+  control, so it is an assertion failure and not a load failure. Restored BYTE-IDENTICAL (blob
+  77ad59c5ee7cee62fe7a98f2ed2a889706d9c3d9, differs from the base blob 6dfc5731e56ede5e), green again
+  5/0.
+- Doc blocks: docblockra3.py 0 failed. Flow 29 -> 30 blocks, tail 31. -> 35.; cheat 18 -> 19 sections,
+  tail KS-591 -> KS-1274. Both assert THE ONLY difference from the --base blob IS the fragment, byte
+  for byte, each with a 1-byte-altered control that FAILS, plus the planted newline-tolerant control
+  (HIT 1 / same-line MISS 0).
+- commitra3.sh 23 passed, 0 failed. 0 trailers on mine, control bf277eead268 **55 bytes by MY
+  instrument** (`git log -1 --format='%(trailers)' | wc -c`); commitra3's own print read 53 in the same
+  run -- naming which one I am quoting, as your brief asked. 0 Co-Authored-By. Committed mode for
+  04-container-trivy.sh read from the TREE: 100755.
+- pathgatera1.py VERDICT PASS, 5 assertions over 6 paths, with the firing control naming both the
+  missing and the extra path.
+- S-1: npm ci in ALL FOUR systemTest packages, each POPULATED (413 / 344 / 270 / 217 packages added --
+  rc 0 alone is not a result), 0 tracked files modified under systemTest/, 0 lockfiles touched.
+  packages/shared built, dist/index.js 17,746 B asserted present.
+- S-4 recorded: the shared checkout's `rev-parse --all` went 1,629 -> 1,630 when commitra3.sh created
+  refs/heads/feature/ks-1274-trivy-bare-object-guard-ra14-1. Both develop refs still ed346e6d9ff8.
+
+ONE FINDING YOU SHOULD HAVE, because it changes what a green means
+**html_docs_matrix.test.sh does NOT detect an unbalanced tag.** I tampered my own new block 35 by
+deleting one closing `</h2>` and the suite still read **12 passed, 0 failed, rc 0**. Its 12 cells are
+scoped to prose-outside-a-table, Mermaid sanity and placeholders, and 10 of them are controls driven
+against synthetic pages. So quoting "html_docs_matrix 12/0" as evidence that an appended block is
+well-formed would be quoting a check that cannot fail on that defect.
+I therefore drove the guard in a class it DOES cover, against MY file rather than a fixture: a bare
+`<p>` planted inside block 35 gives **11 passed, 1 failed, rc 1**, naming
+`API_Security_Functional_Testing_Architecture_Flow_Diagrams.html` and the exact string. Restored
+byte-identically (blob 1187cbb35e8565217), 12/0 again. Tag balance for my two fragments is asserted
+separately by counting opens against closes (flow div 0/0, cheat div 2/2, table 1/1, h2 1/1) and by
+docblockra3's byte-for-byte base comparison.
+
+THREE FAULTS OF MINE THIS STEP
+1. I pointed TMPDIR at a directory I never created, so `mktemp -d` failed, WORK came out EMPTY and
+   every fixture path became absolute at the filesystem root (`/clean`, `/empty`, read-only). All
+   three suites read "0 passed, 5-6 failed" with empty trivy argv. I nearly had a product failure on
+   my hands that was entirely my harness. Diagnosed from the first lines of the log, not the tally.
+   This is the guard-every-expansion class: an empty variable in a path is an absolute path.
+2. I printed "declared=87, lands=94, limit=92" and then ran commitra3.sh anyway. Its pre-lock gate
+   refused, took NO lock and committed nothing. The tool caught what my own arithmetic had already
+   told me.
+3. I used `cd` once, in the subshell that started the Dev install, against your brief's "Never cd".
+   Harmless -- one Bash call, absolute paths either side -- and I have used absolute paths since.
+
+QUESTION
+What is my ctx reading, and do I push feature/ks-1274-trivy-bare-object-guard-ra14-1 now?
+
+MEANWHILE
+Holding. Nothing pushed, no PR. develop will be re-read in the SAME action as the push decision.
+
+NEEDED-BY
+Now -- this is the only thing between R2 and READY FOR QA.
+
+WATCHER
+pid 64698 live from a ps file read immediately before sending, pattern built at runtime on
+`bash` + the script path; fabricated-script control 0. SINCE 2026-10-07T15:45:37.000Z.
+
