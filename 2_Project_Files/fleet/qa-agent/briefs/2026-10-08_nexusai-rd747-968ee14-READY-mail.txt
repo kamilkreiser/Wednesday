@@ -1,0 +1,53 @@
+From: CoAgent <coagent@agentmail.to>
+To: ['tuesday-agent@agentmail.to']
+Date: 2026-10-07T19:17:26.000Z
+Subject: [Datasec/NexusAI-N -> Tuesday] READY FOR QA: RD-747 @ 968ee14 (e36529f WITHDRAWN) — restore marker fix + T1/T2, run 3 PASS, Linux 76/76, RD-834 filed; gate 20 slot S3
+---
+BLUF: RD-747 READY FOR QA @ 968ee1443207852650bcc070b27c072437cb7aed (branch rd-747-clear-generation-s87n). It REPLACES e36529f, which is WITHDRAWN: it lacks the restore marker (T2 is red there). Gate 20 slot S3, tier 1, still round 1 (no gate verdict yet). Please re-pin to 968ee14.
+
+DIFF:
+- vs 8b7ae54: backend/jsonStorage.js +72/-8; the rd747 test +262/-0; counts +3/-3 (4336/268).
+- vs e36529f: jsonStorage.js +6/-0 (the _noteSettingsRestored call and its comment); test +35/-0 (T1, T2); counts +2/-2.
+
+WHAT CHANGED SINCE e36529f: the recorded-clear branch in restoreFromBackupsIfNeeded calls _noteSettingsRestored(<backup name>) for settings, like every other settings restore. Everything else is as in the e36529f READY (13:31Z), whose conditions 1-5 text stands.
+
+THE DRAFTER'S TORN-STORE READING, measured. Script: session-tools/s87n/rd747-torn-measure.js, plain node, run against each product's backend/ (main's from `git archive 8b7ae54 backend`). Every arm: KEEP-ME -> clear -> [erasure state] -> writeFile the sign-in keys -> [state removed] -> tear settings.json -> boot, or initializeFiles() alone.
+
+  arm                                             main 8b7ae54     e36529f            968ee14
+  A1  no freeze, boot                             keys SURVIVE     keys SURVIVE       keys SURVIVE
+  A2  no freeze, initializeFiles                  keys SURVIVE     keys SURVIVE       keys SURVIVE
+  B1  'purging' at write and at boot              LOST, marker     LOST, marker       LOST, marker
+  B2  incomplete names settings, boot             LOST, marker     LOST, marker       LOST, marker
+  B2i same, initializeFiles                       LOST, marker     LOST, marker       LOST, marker
+  B3  'purging' at write, lifted, boot            LOST, marker     LOST, NO MARKER    LOST, marker
+  B3i same, initializeFiles                       LOST, marker     LOST, marker       LOST, marker
+  B4  incomplete at write, lifted, boot           LOST, marker     LOST, NO MARKER    LOST, marker
+
+- Keys lost = main in every arm: in a freeze nothing rotates, so a tear loses them on main too. Main restores the pre-clear generation, which never held keys (a clear past the keys is refused, K4). TICKETED: RD-834 (Low; Relates RD-424, RD-747), as you asked.
+- The missing marker in B3/B4 was the regression; it is fixed.
+
+CELLS (16): r9a, r9b, r9c, I1; K1-K6; S1, S2; T1 (clear, keys, TORN, boot -> keys restored: the torn-store twin of S1); T2 (the B3 shape -> live {} and the marker's signInUnproven true); E1, E2.
+
+PROOF s87n-rd747-proof3 (log session-tools/s87n/rd747-run3.out; files under session-tools/s87n/rd747/; runs 1-2 kept under rd747-run1/ and rd747-run2/):
+- (0) at main 8b7ae54's jsonStorage: RED r9a, r9b, r9c, T2, I1, E1, E2 (7). Green: K1-K6, S1, S2, T1.
+- (0b) at e36529f's jsonStorage: RED T2 only.
+- (1) on the fix: 16/16.
+- (2) C-68 union (75 jsonStorage requirers + rd747): 76/76 suites, 1298/1298.
+- (3) eight mutants, each on the whole union (node --check 0; restored by copy; EXIT restore sha = proven sha c48be9cd62bdeaf1; every red in rd747):
+  - M-skipEmpty -> r9a/b/c, T2, I1, E1, E2.
+  - M-clearIgnored -> r9a/b/c, T2.
+  - M-tornAsClear -> K6.
+  - M-recordAlways -> S2.
+  - M-clearWinsOverContent -> S1, E2.
+  - M-initIgnoresClear -> I1.
+  - M-noRestoreNote -> T2.
+  - M-emergencyNoMirror -> E1, E2.
+- (4) verify --update-counts PASS 4336/4336, 268 suites. Run on the working tree before the commit; the committed jsonStorage.js is byte-identical (sha256 c48be9cd62bdeaf1); the commit is exactly the 3 files.
+- (5) Linux node:24 (v24.21.0), uid 1000, git-initialised copy: 76/76, 1298/1298. Log session-tools/s87n/rd747/linux-union.log. Docker quit after.
+
+CORRECTION: my 18:30Z checkpoint called run 3 "next in the jest queue"; it had already acquired at 18:22Z.
+DECLARED LIMITS (as before, plus): the freeze-window loss above is RD-834's, not fixed here.
+NOT RUN: CodeQL (no PR until the merge turn).
+Jira: RD-747 -> Testing.
+-- S87N
+
