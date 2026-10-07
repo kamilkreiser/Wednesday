@@ -3673,5 +3673,26 @@
   "project": "Friday",
   "ts": "2026-10-07T18:19:03.152605+11:00",
   "text": "HPSM-POC: the two start-up settings you approved this morning are now on the hosted site. No action needed from you.\n\nThey went on at 6pm. The seat waiting for a quiet half-hour had a fault, so it never saw one: it counted its own log reads as visitors. That cost a few hours, nothing else. Each app restarted once, and the site stayed healthy the whole time. I've checked it since.\n\nThe fix for the error you saw at 9:12 is merged, and goes live tonight: a slow page now tries once more instead of showing \"could not be loaded\". The last piece, keeping database connections ready so pages don't wait on a new one, is being finished now. One deploy will put all of it live tonight."
+ },
+ {
+  "role": "wednesday",
+  "seat": "Kamils-MacBook-Pro.local",
+  "project": "Friday",
+  "ts": "2026-10-07T19:36:06.719720+11:00",
+  "text": "Fresh Friday seat after a planned rotation. No action needed from you.\n\nDatasec / HPSM-POC: tonight's deploy of the three timing fixes is on the hosted site, settings unchanged. The seat is waiting out a 10-minute quiet window to prove the connection pool stays warm, then I check it live, make the one AI draft I told you about, and report back.\n\nStill waiting on Paul's notes whenever you have them."
+ },
+ {
+  "role": "wednesday",
+  "seat": "Kamils-MacBook-Pro.local",
+  "project": "Friday",
+  "ts": "2026-10-07T19:41:01.237592+11:00",
+  "text": "Datasec / HPSM-POC: got your 19:39 forward of the CodeQL alert on PR #126. Already handled, nothing needed.\n\nThe builder fixed it in code before the merge, never dismissed. I just re-read it: main c28343a no longer has the flagged line, and main has 0 open code-scanning alerts. That fixed version is what is live on the hosted site tonight."
+ },
+ {
+  "role": "wednesday",
+  "seat": "Kamils-MacBook-Pro.local",
+  "project": "Friday",
+  "ts": "2026-10-07T19:53:48.858646+11:00",
+  "text": "Datasec / HPSM-POC: everything is live tonight. No action needed.\n\nWhat went live: the three fixes for this morning's 'narrative could not be loaded' error, on the hosted site since 19:24. Reads retry once on a timeout, file downloads get 30 seconds, and the database keeps warm connections.\n\nWhat I measured: the warm connections held through a 13-minute idle, where before they fell away within 5 minutes. Reads after the idle took a third of a second at most at the server. I checked the site myself: healthy, new version served, old one gone.\n\nThe AI draft: one executive summary on the Banksia sample, first press, no retry. It came back in 20 seconds, inside the 25-second limit, and replaced the old 'took too long' message. It is waiting for review on that page.\n\nStill slower than it should be: in the browser those same reads take up to about a second. The extra time is in the web app on the small shared hosting plan. Before I ask you about a bigger plan, which costs money, I will have it measured properly. Separately, the very first visit after a restart is slow; a warm-up fix for that is next.\n\nReady for Paul tomorrow."
  }
 ]
