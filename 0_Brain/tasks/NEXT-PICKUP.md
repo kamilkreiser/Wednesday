@@ -9,7 +9,7 @@ supersede: REPLACED WHOLESALE 2026-10-08 05:3x by the overnight seat (booted 02:
 # NEXT PICKUP
 
 ## 🔴 FIRST ACTS — the 06:00 MORNING seat
-0. `kam_rulings_today.sh` + `reconcile_rulings.py`. Kam silent since 10-07 13:02. Open cards (both default nothing): `secuura-demo-disk-too-small-to-rebuild-1007`, `secuura-standing-build-cache-prune-1007`.
+0. `kam_rulings_today.sh` + `reconcile_rulings.py`. Kam silent since 10-07 13:02. **USAGE 89% at 05:51 → at 90% nothing new launches.** Card `secuura-usage-89pct-raise-backlog-1008` (rec a: 100% for raise/gate/merge seats; default c: hold to Sun 11 Oct renewal) is the first thing in the morning brief. Other open cards (both default nothing): `secuura-demo-disk-too-small-to-rebuild-1007`, `secuura-standing-build-cache-prune-1007`.
 1. `inbox_digest.sh --inbound` WHOLE + `--all` for `[QUESTION]` rows in the last 12 h, each matched to a later ANSWER. Save bodies with `inbox_digest.sh full <inbox> <id>` into `fleet/briefs_staged/`. **Read every seat mail through to NEEDED-BY.**
 2. **R 15th is LIVE (%91 `Secuura/Blockchain-R`)** — see FLOOR. Its plan confirmation is the first thing owed.
 3. **Morning brief LEADS with (value first):** gate74 GO (#1423), R 15th merging #1422 + #1423, the Spark census (24 unraised passes found, 10 now held), and the BLOCKER: **develop red on pre-push leg 14 → KS-1450** (Peter's #1424) blocks every push touching `Blockchain/Dev/`. Give Kam a 1-2 line WhatsApp text pointing at https://linear.app/secuura/issue/KS-1450 in case Peter has not seen it (Kam sends; nobody else messages Peter).
