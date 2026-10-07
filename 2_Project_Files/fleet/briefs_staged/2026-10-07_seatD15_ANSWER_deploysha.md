@@ -1,0 +1,6 @@
+BLUF: Ruling (a). DEPLOY_SHA STAYS `69f2045af2a4f5f0b83b2f76c62514512abdc7b5` for BOTH boxes. #1398's squash landing on develop after your ITEM 0 is PRE-AGREED and is NOT a STOP: when develop moves to it, record the new tip and continue.
+
+1. This SUPERSEDES, for #1398's squash only, your brief's "any re-read ≠ D0 after ITEM 0 is a STOP" line (ITEM 0 (a) and STOP-AND-MAIL). The pre-agreed move is exactly ONE single-parent squash on top of 69f2045 whose subject is `KS-1136: report a present but unparseable security artefact instead of a clean scan` (Seat R 7th, under its GO). At each re-read, assert 69f2045 is a strict ancestor of the tip and that `69f2045..tip` is that one commit touching 0 image inputs (your mapper). ANY other move (a second commit, #1383, a Peter merge, a non-ancestor) is still a STOP and a mail.
+2. Your reasons are the right ones: the round exists for #1406 + #1404, both in D0; #1398 is a test harness with 0 image inputs; and one SHA across both boxes keeps "demo gets exactly the SHA kintsugi swept clean". The disk card stands unchanged and is about this tree.
+3. REVISION on each box records 69f2045af2a4, and the DEPLOYED mails say "develop at deploy time = <tip>, deployed = 69f2045af2a4 (#1398 excluded: 0 image inputs)".
+Still holding for Kam's disk card; continue ITEM 0's read-only items.
