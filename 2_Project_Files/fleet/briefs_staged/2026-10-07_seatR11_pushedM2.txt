@@ -1,0 +1,87 @@
+STATUS: merge-in 1408 pushed (Seat R 11th)
+
+**M2 IS ON THE BRANCH.** `8b0d48aaf4becd127006bb3dbb7d98340a6c5109`, one attempt,
+rc 0. Substitute Q1 driven as you ruled. Actions still settling; classification
+follows. **And one prediction of mine was WRONG in a way that only luck covered —
+that is the most useful thing in this mail.**
+
+## SUBSTITUTE Q1 (your ruling 10:43:42Z) — each fact read separately, each with an arm
+**1. parents(M2) == [M, D], count 2.**
+   %P = `c19520e1929424169ad9508d4039de4ad24e9194 eef784a32a13d2c3308ba02fafdf4bb8895f0e54`
+   count 2 · first == M · second == D. **PASS.**
+   arm: is the first parent the GATED head instead? **NO** — so the fact discriminates.
+**2. parents(M) == [GATED head, eb67b965], count 2.**
+   %P = `ce33ec8b3eae5ea5ad63fc1b4871d8367fe2a95e eb67b965994057a3311efcc299393757d764ed8a`
+   count 2 · first == the GATED head · second == eb67b965. **PASS — the gated code
+   lineage is asserted one level down, which is what the kit's Q1 was reaching for.**
+   arm: is M's first parent M2 or D? **NO** — discriminates.
+**3. Q5's content proof, re-read directly off the trees.**
+   `index.ts`          gated `ea2c55322e4e` == M2 `ea2c55322e4e`  EQUAL
+   `transfer.test.ts`  gated `9cf62998ebbd` == M2 `9cf62998ebbd`  EQUAL
+   **arm: develop's OWN blob for `index.ts` is `18b4449cdfbb`, which DIFFERS from the
+   gated one** — so "M2's code == the gated head's" is not passing because develop
+   happens to carry the same bytes. Without that arm the fact would have been vacuous.
+Plus qm's own Q2-Q6, all PASS, from the run in my last mail.
+
+## M2 LANDED — three instruments, none of them the wrapper
+  tool log    `2026-10-07T10:52:11Z push rc=0`
+  .rc file    `s-ra11-m1408-ff-8b0d48aaf4be-push.rc` = **0**
+  ls-remote   `8b0d48aaf4becd127006bb3dbb7d98340a6c5109  refs/heads/feature/ks-1435-…-e10-1`
+  API         `pull/1408` head = `8b0d48aaf4becd12`, open, merged False, `unstable`
+  arm         the branch no longer reads M `c19520e19294` ✓
+6m30s in-hook (10:45:41Z → 10:52:11Z), ONE attempt, 0 rc 141, orphaned
+`login_stub` pids for this worktree **0**, lock taken and released by pid 80395.
+
+## 🔴 MY DELTA-ENUMERATION UNDER-PREDICTS THE GATE, AND THIS PUSH ONLY PASSED BY LUCK
+I told you the install set was empty because `diff M..M2` touches only
+`systemTest/schemathesis` — a PYTHON harness with no `package.json`. **Measured now:
+`diff M..M2` contains ZERO `systemTest/akto/` paths. The gate nevertheless SELECTED
+akto:**
+[format-gate] systemTest/akto — format:check OK
+[format-gate] 1 package(s) checked, 0 skipped, 0 failed
+**It passed only because akto was still installed from the FIRST push's failure.** Had
+this been a fresh worktree, or had I pruned, this push would have failed exactly as
+that one did — and I would have been surprised by a gate I had just told you could not
+fire. So the refined S-1 I gave you is **too narrow**: the hook's selection is NOT
+`diff <origin head>..<pushed head>`. I have not established what it IS and I am not
+going to guess; what I can say is that enumerating the NEW-COMMIT delta is unsafe.
+**The safe rule, until someone reads the hook: keep EVERY `systemTest/*` package with
+a `package.json` installed in any worktree you push from.** On this tree that is
+`akto`, `api-explorer`, `performance`, `playwright` — I have akto and performance
+installed; **`api-explorer` and `playwright` are NOT**, and a future push whose delta
+reaches them would refuse. Worth a line in STANDING_LINES and a note to R 12th.
+
+## IN-HOOK RESULTS, quoted as THIS push printed them
+  `ok   one package checked, none failed` · `package_format_gate: 33 passed, 0 failed`
+  `ks998_format_gate_push_label_is_literal: 8 passed, 0 failed`
+  `shell suites: 71 passed, 0 failed, 0 skipped (of 71)` · `slot_target: 174 passed, 0 failed`
+  `OK — 13 code guards passed.`
+  **leg 6:** `audit-gate: 9 distinct advisories reported, 24 baselined.` ·
+  `OK — no advisories outside the triaged baseline.` · **`CLEANUP (advisory): 15
+  baseline entries are no longer reported`** — still 15, untouched, now riding another seat.
+  **leg 7:** `audit-locks: 43 standalone lockfiles …, 1613 distinct packages pinned —
+  7 advisories match, 7 already baselined.` · `OK — no standalone-lock advisories
+  outside the triaged baseline.`
+  **html_docs_matrix: 12 passed, 0 failed**, ten of the twelve being inverted controls
+  that FIRE, so both composed docs passing is a measurement.
+  **Platform suites UNMEASURED:** `SKIP — local stack not up on http://localhost:6882`
+  ×3 and `PREFLIGHT INCOMPLETE — 12/15 legs ran, 3 SKIPPED. Nothing failed.` Never a pass.
+
+## ACTIONS ON M2 — 6 runs, 3 in flight; classification in its own mail
+  pr · PR Security Gates (KS-168) · Security Scanning        in_progress
+  pr-premerge-ack · PR — Lockfiles (path-skip twin)          success
+  Dependabot standalone locks                                skipped
+CONTROL: fabricated `head_sha` returns total_count **0**.
+develop's own recent FAILING set, for the SUBSET test: **{PR Security Gates (KS-168),
+pr}**, both seen at `eef784a32a13`. I will classify by SUBSET (`set(mine) <= set(develop)`),
+never equality, with a fabricated-job-name predicate control, and `##[group]` positive
+controls on any log grep. Polling for TWO AGREEING TERMINAL reads.
+
+## STATE
+develop still **D `eef784a32a13`** at 10:52Z — unmoved across the whole push.
+Worktree HEAD M2, 0 modified. Nothing merged to develop. #1245 remains my only
+ticket-side write. Before M-7 I re-read develop and ask for a ctx reading, per your rule.
+
+## WATCHER
+pid 79448, count 1, SINCE `2026-10-07T10:43:42.000Z` = your substitute-Q1 ANSWER.
+

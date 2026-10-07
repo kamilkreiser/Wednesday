@@ -1,0 +1,71 @@
+STATUS: Actions on M2 (Seat R 11th)
+
+**TWO AGREEING TERMINAL POLLS. 0 NEW FAILURES. Every failing workflow is accounted
+for, and the SUBSET test earned its keep on one of them.** Ready for your ADDENDUM.
+
+## TERMINAL STATE — M2 `8b0d48aaf4becd127006bb3dbb7d98340a6c5109`, 6 runs
+  PR Security Gates (KS-168)        failure
+  Security Scanning                 failure
+  pr                                failure
+  PR — Lockfiles (path-skip twin)   success
+  pr-premerge-ack                   success
+  Dependabot standalone locks       skipped
+Polls 37 and 38 (11:08:06Z, 11:08:28Z) agreed with 0 pending. CONTROL: a fabricated
+`head_sha` returns total_count 0.
+
+## CLASS 2 — PR Security Gates (KS-168): SUBSET OK
+  M2       run 37610245928  1 job   FAILING = {Code Security Gates}
+  develop  run 37606899823  1 job   FAILING = {Code Security Gates}
+  `set(mine) <= set(develop)` = **True**. (Equality happens to be true here too, but
+  subset is the test, not equality.)
+
+## CLASS 3 — `pr`: SUBSET OK, AND THIS IS WHERE EQUALITY WOULD HAVE FAILED
+  M2       run 37610246416  6 jobs  FAILING = {Akto suite (PR), Performance suite
+                                               (k6 smoke), Playwright suite}
+  develop  run 37606900025  6 jobs  FAILING = {Akto suite (PR), Performance suite
+                                               (k6 smoke), Playwright suite,
+                                               **Schemathesis suite**}
+  `set(mine) <= set(develop)` = **True**; **equality = FALSE.**
+  **develop fails one job MORE than M2 does.** M2's failing set is STRICTLY contained.
+  Had I used equality — the trap R 8th hit — this would have read a false STOP on a
+  merge-in that fails strictly less than the base it is merging into.
+
+## CLASS 1 — Security Scanning: the ADVISORY-FREEZE class, and I CANNOT subset it
+  M2  run 37610245978  7 jobs  FAILING = {Dependency Audit}
+  **develop: NO run of this workflow at `eef784a32a13`.**
+  So there is no comparator and the subset test is UNDECIDABLE for this one. I am
+  reporting that rather than implying a comparison I did not make. Under your R2
+  wording this is class (1) — Dependency Audit's audit-contract suites exit 1 on every
+  arm including a clean one — so a `failure` here is the DESIGNED outcome and not a new
+  failure. It is also consistent with the push's own legs 6 and 7, which read
+  `OK — no advisories outside the triaged baseline` on both the workspace audit and
+  the 43 standalone locks. **If you want a real comparator, say so and I will find
+  develop's most recent Security Scanning run on another sha — I have not done it.**
+
+## PREDICATE CONTROL — the classifier can say both yes and no
+  union of M2's failing JOB names (5): {Akto suite (PR), Code Security Gates,
+  Dependency Audit, Performance suite (k6 smoke), Playwright suite}
+  a fabricated job name in it: **False** (must be) ·
+  a real member in it: **True** (must be — proves the membership test can return yes)
+**No `##[group]` control is claimed: I did not grep a job LOG.** I read conclusions
+from the `/actions/runs/<id>/jobs` endpoint, so there was no log fetch to control —
+and therefore no exposure to the 302-to-signed-URL trap.
+
+## WHAT THIS MEANS
+All three failures are pre-existing or by-design: two are proper subsets of develop's
+own failing jobs at D, and the third is the advisory-freeze class with no comparator.
+**Nothing fails on M2 that does not already fail on develop, except Security Scanning,
+which has no develop run and fails by construction.**
+
+## STATE — ready for M-7 on your ADDENDUM
+develop reads **eef784a32a13d2c3308ba02fafdf4bb8895f0e54** at this mail (D is `eef784a32a13d2c3308ba02fafdf4bb8895f0e54`).
+M2 is the branch head, confirmed by `ls-remote` and the API. qm was green on your
+substitute Q1 plus Q2-Q6. The squash body `1408.txt` is unread-and-unedited at
+3,431 B sha256 `145bb932d84d0506…`.
+**Per your rule I will re-read develop AND ask for a ctx reading immediately before
+M-7, and WRAP COLD if develop has moved or the reading is 65% or more.**
+Nothing merged to develop. #1245 remains my only ticket-side write.
+
+## WATCHER
+pid 79448, count 1, SINCE `2026-10-07T10:43:42.000Z` = your substitute-Q1 ANSWER.
+
