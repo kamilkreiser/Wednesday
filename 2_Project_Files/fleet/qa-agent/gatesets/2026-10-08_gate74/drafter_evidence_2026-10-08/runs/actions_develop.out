@@ -1,0 +1,35 @@
+PASS X0 runs at the FULL head sha 6 | CONTROL a fabricated sha reads 0 | polls 1
+INFO LOG PR Security Gates (KS-168) / Code Security Gates: {'bytes': 153338, 'groups': 24, 'fabricated_needle': 0, 'needles1': {'expected exit 0 (clean), got 1': 0}}
+INFO LOG Security Scanning / Dependency Audit: {'bytes': 43884, 'groups': 19, 'fabricated_needle': 0, 'needles1': {'expected exit 0 (clean), got 1': 1}, 'failed_steps': ["Audit-contract suites (the gates' own validator)"]}
+INFO LOG pr / Performance suite (k6 smoke): {'bytes': 562433, 'groups': 30, 'fabricated_needle': 0, 'needles1': {'expected exit 0 (clean), got 1': 0}}
+INFO LOG pr / Schemathesis suite: {'bytes': 503325, 'groups': 28, 'fabricated_needle': 0, 'needles1': {'expected exit 0 (clean), got 1': 0}}
+INFO LOG pr / Playwright suite: {'bytes': 80142, 'groups': 21, 'fabricated_needle': 0, 'needles1': {'expected exit 0 (clean), got 1': 0}}
+INFO LOG pr / Akto suite (PR): {'bytes': 734308, 'groups': 31, 'fabricated_needle': 0, 'needles1': {'expected exit 0 (clean), got 1': 0}}
+  -- against develop (THE RULED COMPARATOR): OUTSIDE ['pr']
+     Dependabot standalone locks        skipped
+     PR Security Gates (KS-168)         class (2) HOLDS: head failing ['Code Security Gates'] SUBSET of develop's ['Code Security Gates']: True
+     PR — Lockfiles (path-skip twin)    success
+     Security Scanning                  class (1) advisory-freeze HOLDS: failing ['Dependency Audit'] SUBSET of {Dependency Audit} True; the ONLY failed step is the audit-contract step AND its log says `expected exit 0 (clean), got 1`: True; history 12 of the last 12 completed Security Scanning runs repo-wide FAILED across 9 branches
+     pr                                 class (3) DOES NOT HOLD: head failing ['Akto suite (PR)', 'Performance suite (k6 smoke)', 'Playwright suite', 'Schemathesis suite'] SUBSET of develop's ['Akto suite (PR)', 'Performance suite (k6 smoke)', 'Playwright suite']: False
+     pr-premerge-ack                    success
+  -- against base: OUTSIDE none
+     Dependabot standalone locks        skipped
+     PR Security Gates (KS-168)         class (2) HOLDS: head failing ['Code Security Gates'] SUBSET of develop's ['Code Security Gates']: True
+     PR — Lockfiles (path-skip twin)    success
+     Security Scanning                  class (1) advisory-freeze HOLDS: failing ['Dependency Audit'] SUBSET of {Dependency Audit} True; the ONLY failed step is the audit-contract step AND its log says `expected exit 0 (clean), got 1`: True; history 12 of the last 12 completed Security Scanning runs repo-wide FAILED across 9 branches
+     pr                                 class (3) HOLDS: head failing ['Akto suite (PR)', 'Performance suite (k6 smoke)', 'Playwright suite', 'Schemathesis suite'] SUBSET of develop's ['Akto suite (PR)', 'Performance suite (k6 smoke)', 'Playwright suite', 'Schemathesis suite']: True
+     pr-premerge-ack                    success
+  -- against union: OUTSIDE none
+     Dependabot standalone locks        skipped
+     PR Security Gates (KS-168)         class (2) HOLDS: head failing ['Code Security Gates'] SUBSET of develop's ['Code Security Gates']: True
+     PR — Lockfiles (path-skip twin)    success
+     Security Scanning                  class (1) advisory-freeze HOLDS: failing ['Dependency Audit'] SUBSET of {Dependency Audit} True; the ONLY failed step is the audit-contract step AND its log says `expected exit 0 (clean), got 1`: True; history 12 of the last 12 completed Security Scanning runs repo-wide FAILED across 9 branches
+     pr                                 class (3) HOLDS: head failing ['Akto suite (PR)', 'Performance suite (k6 smoke)', 'Playwright suite', 'Schemathesis suite'] SUBSET of develop's ['Akto suite (PR)', 'Performance suite (k6 smoke)', 'Playwright suite', 'Schemathesis suite']: True
+     pr-premerge-ack                    success
+INFO X4 Security Scanning: the head fails ['Dependency Audit'] which develop eae08a3f441c PASSES (named; no cause claimed)
+INFO X4 pr: the head fails ['Schemathesis suite'] which develop eae08a3f441c PASSES (named; no cause claimed)
+FAIL X1 reds OUTSIDE the three classes (or a class that does not hold): ['pr']
+PASS X2 PENDING (never a pass): none
+INFO X3 develop eae08a3f441c: {'PR Security Gates (KS-168)': ('failure', ['Code Security Gates']), 'pr': ('failure', ['Akto suite (PR)', 'Performance suite (k6 smoke)', 'Playwright suite'])} | base b280b74ff07b: {'PR Security Gates (KS-168)': ('failure', ['Code Security Gates']), 'pr': ('failure', ['Akto suite (PR)', 'Performance suite (k6 smoke)', 'Playwright suite', 'Schemathesis suite'])}
+CHECKED 3
+1 FAIL (X1)

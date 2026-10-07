@@ -1,0 +1,1655 @@
+
+=== 1/15  OpenAPI spec drift (generated spec vs Zod source) ===
+OK — workspace install present (root tsx + packages/shared's nested @types/node).
+OK — spec is in sync
+
+=== 2/15  Lockfile clean-room (npm ci --dry-run per standalone lock) ===
+OK    frontend/admin
+OK    frontend/demo-overlay
+OK    frontend/issuer
+OK    frontend/outlook-addin
+OK    frontend/verifier
+OK    frontend/website
+OK    packages/shared
+OK    scripts/audit
+OK    scripts/openapi-examples
+OK    scripts/preflight
+OK    services/analytics
+OK    services/anchoring
+OK    services/api-gateway
+OK    services/auth
+OK    services/billing
+OK    services/demo-service
+OK    services/governance
+OK    services/guardian
+OK    services/kyc
+OK    services/m365-integration
+OK    services/mcp-server
+OK    services/nft-certificate
+OK    services/originate
+OK    services/prism
+OK    services/queue
+OK    services/referral
+OK    services/security
+OK    services/shared
+OK    services/staking
+OK    services/tenant-provisioning
+OK    services/timestamping
+OK    services/tokenisation
+OK    services/transfer
+OK    services/vc-issuer
+OK    services/wallet-connector
+
+All 35 standalone lock(s) pass clean-room npm ci.
+  covered: frontend/admin frontend/demo-overlay frontend/issuer frontend/outlook-addin frontend/verifier frontend/website packages/shared scripts/audit scripts/openapi-examples scripts/preflight services/analytics services/anchoring services/api-gateway services/auth services/billing services/demo-service services/governance services/guardian services/kyc services/m365-integration services/mcp-server services/nft-certificate services/originate services/prism services/queue services/referral services/security services/shared services/staking services/tenant-provisioning services/timestamping services/tokenisation services/transfer services/vc-issuer services/wallet-connector
+OK — all locks clean-room-installable
+
+=== 3/15  Spec-auth conformance (unauth requests to bearer-authed ops must 401/403) ===
+SKIP — local stack not up on http://localhost:6882 (start it to run this leg)
+
+=== 4/15  Path resolvability (every spec'd path must route — KS-473 class) ===
+SKIP — local stack not up on http://localhost:6882 (start it to run this leg)
+(first run — installing scripts/audit deps)
+
+=== 5/15  Audit-contract suites (the validator BOTH gates import — KS-763) ===
+OK — 59 audit-contract cases pass (expected 59)
+
+=== 6/15  npm-audit gate (advisories vs triaged baseline — KS-470) ===
+audit-gate: 9 distinct advisories reported, 24 baselined.
+
+CLEANUP (advisory): 15 baseline entries are no longer reported — remove:
+  - GHSA-2mjp-6q6p-2qxm (undici, KS-470)
+  - GHSA-35p6-xmwp-9g52 (undici, KS-470)
+  - GHSA-4992-7rv2-5pvq (undici, KS-470)
+  - GHSA-g8m3-5g58-fq7m (undici, KS-470)
+  - GHSA-g9mf-h72j-4rw9 (undici, KS-470)
+  - GHSA-p88m-4jfj-68fv (undici, KS-470)
+  - GHSA-r53p-7pc4-xj5r (undici, KS-470)
+  - GHSA-v9p9-hfj2-hcw8 (undici, KS-470)
+  - GHSA-vrm6-8vpv-qv8q (undici, KS-470)
+  - GHSA-vxpw-j846-p89q (undici, KS-470)
+  - GHSA-v2v4-37r5-5v8g (ip-address, KS-470)
+  - GHSA-92pp-h63x-v22m (@hono/node-server, KS-470)
+  - GHSA-8xcm-r25x-g524 (undici, KS-559)
+  - GHSA-m8rv-5g2x-5cg5 (undici, KS-559)
+  - GHSA-v3r7-h72x-cjcm (undici, KS-559)
+OK — no advisories outside the triaged baseline.
+OK — no advisories outside the triaged baseline
+
+=== 7/15  standalone-lock advisories (each service's OWN lock — KS-531) ===
+audit-locks: 43 standalone lockfiles (45 tracked, minus the Blockchain/Dev/package-lock.json workspace root which audit-gate covers, minus 1 declared out of scope = 45 - 1 - 1 = 43; reproduce the tracked count with `git ls-files '*package-lock.json' | wc -l`; out of scope: Blockchain/Dev/mobile/secuura-app (KS-769, expires 2027-01-01: React Native app tree, not built by any compose file (0 references against a control of 2 for services/originate) or by any workflow (0 against a control of 3 referencing services/). 81 advisories (2 critical, 45 high) pending their own triage rather than 81 unmeasured baseline rows.)), 1613 distinct packages pinned — 7 advisories match, 7 already baselined.
+OK — no standalone-lock advisories outside the triaged baseline.
+OK — no standalone-lock advisories outside the triaged baseline
+
+=== 8/15  Served-spec consistency (/api/docs/openapi.json vs .yaml — KS-656) ===
+SKIP — local stack not up on http://localhost:6882 (start it to run this leg)
+
+=== 9/15  No tracked credentials (KS-646 — negation made the hardening unable to hold) ===
+OK — no tracked credential files, no un-ignoring negations.
+
+=== 10/15  Bare-path shell scripts must be executable in the INDEX (KS-667 F-16 / KS-751) ===
+OK — 4 bare-path .sh invocation(s) are tracked at mode 100755 (21 invoked via an interpreter, mode not applicable) across 49 tracked package.json files opened of 49 enumerated, a count two independent enumerations of the index agreed on.
+
+=== 11/15  Pinned actions must say what is pinned (KS-751 ask 4) ===
+OK — 66 SHA-pinned action reference(s) across 12 distinct SHA(s), every one labelled and every SHA labelled consistently.
+
+=== 12/15  Every shell test suite must be REACHED by the runner (KS-731 / QA F-800-07) ===
+OK — all 71 tracked shell suite(s) are reached by the runner.
+
+=== 13/15  The runtime stage must re-link @secuura/shared (KS-921 + the KS-490 sibling) ===
+OK — 25 Dockerfile(s) consume shared-builder; all re-link @secuura/shared in the final stage after the last node_modules write and before USER.
+     derived: 4 copy a builder's node_modules, 21 re-install their own.
+     dev-tree (KS-490): 25 of 25 clean.
+
+=== 14/15  Every shell test suite must actually RUN (KS-731 / QA FR-800-03) ===
+de-slotted 39 variable(s) for the suite run
+git environment: cleared for the suites: (none were set) — of 15 repository-local name(s) git lists (KS-1086)
+
+=== Blockchain/Dev/scripts/__tests__/aggregate_report_trivy_artefact.test.sh ===
+SUBJECT /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/c6ce62ad-66de-4b90-a27a-53acf64beaa3/scratchpad/g74/wt/merged/Blockchain/Testing/jobs/09-aggregate-report.sh
+        sha256 e16486471474225b7694977e39abdd17b20fe065d1e13f13bc875f3eb748ee7d
+
+  ok   an artefact that exists but does not PARSE emits exactly one finding, 04-trivy/unreadable-artefact at high, and the run exits 1
+  ok   CONTROL — a well-formed no-images artefact still emits exactly 04-trivy/scan-examined-nothing (high) and exits 1
+  ok   CONTROL — an ABSENT artefact still yields 0 findings and rc 0 (the guard fires on presence, not absence)
+  ok   CONTROL — a well-formed CLEAN scan yields 0 findings and rc 0 (the guard admits valid JSON)
+  ok   CONTROL — a well-formed scan with one HIGH CVE still emits that CVE's finding and exits 1
+
+  5 passed, 0 failed
+
+=== Blockchain/Dev/scripts/__tests__/bootstrap_env_canonical_template.test.sh ===
+PASS: every variable in env.example reached the generated .env
+PASS: the canonical-only variable API_GATEWAY_PORT is in the generated .env
+PASS: the script reports the canonical template by name
+PASS: the script resolves the canonical template path under DEV_DIR
+PASS: CONTROL bootstrap exits 0 and DATABASE_URL still carries the slot-1 port 6432
+PASS: CONTROL a tree carrying only .env.example still bootstraps (the fallback)
+
+PASS: a tree carrying NEITHER template is refused by name (rc 1, No env template found)
+bootstrap_env_canonical_template: 7 passed, 0 failed
+
+=== Blockchain/Dev/scripts/__tests__/bootstrap_env_slot_ports.test.sh ===
+ok   unslotted (VM/CI shape): bootstrap exits 0
+ok   unslotted (VM/CI shape): DATABASE_URL port unchanged
+ok   unslotted (VM/CI shape): REDIS_URL port unchanged
+ok   unslotted (VM/CI shape): stack_env.sh was NOT consulted
+ok   slot 1 (SECUURA_STACK_SLOT only): bootstrap exits 0
+ok   slot 1 (SECUURA_STACK_SLOT only): DATABASE_URL port = 6432 + 100*(1-1)
+ok   slot 1 (SECUURA_STACK_SLOT only): REDIS_URL port = 6379 + 100*(1-1)
+ok   slot 2 (SECUURA_STACK_SLOT only): bootstrap exits 0
+ok   slot 2 (SECUURA_STACK_SLOT only): DATABASE_URL port = 6432 + 100*(2-1)
+ok   slot 2 (SECUURA_STACK_SLOT only): REDIS_URL port = 6379 + 100*(2-1)
+ok   slot 3 (SECUURA_STACK_SLOT only): bootstrap exits 0
+ok   slot 3 (SECUURA_STACK_SLOT only): DATABASE_URL port = 6432 + 100*(3-1)
+ok   slot 3 (SECUURA_STACK_SLOT only): REDIS_URL port = 6379 + 100*(3-1)
+ok   slot 4 (SECUURA_STACK_SLOT only): bootstrap exits 0
+ok   slot 4 (SECUURA_STACK_SLOT only): DATABASE_URL port = 6432 + 100*(4-1)
+ok   slot 4 (SECUURA_STACK_SLOT only): REDIS_URL port = 6379 + 100*(4-1)
+ok   STACK_SLOT=1 alias: bootstrap exits 0
+ok   STACK_SLOT=1 alias: DATABASE_URL port
+ok   STACK_SLOT=1 alias: REDIS_URL port
+ok   STACK_SLOT=2 alias: bootstrap exits 0
+ok   STACK_SLOT=2 alias: DATABASE_URL port
+ok   STACK_SLOT=2 alias: REDIS_URL port
+ok   STACK_SLOT=3 alias: bootstrap exits 0
+ok   STACK_SLOT=3 alias: DATABASE_URL port
+ok   STACK_SLOT=3 alias: REDIS_URL port
+ok   STACK_SLOT=4 alias: bootstrap exits 0
+ok   STACK_SLOT=4 alias: DATABASE_URL port
+ok   STACK_SLOT=4 alias: REDIS_URL port
+ok   shell ports for slot 1, no slot named: bootstrap exits 0
+ok   shell ports for slot 1, no slot named: DATABASE_URL takes the shell's port over the template's
+ok   shell ports for slot 1, no slot named: REDIS_URL takes the shell's port over the template's
+ok   shell ports for slot 2, no slot named: bootstrap exits 0
+ok   shell ports for slot 2, no slot named: DATABASE_URL takes the shell's port over the template's
+ok   shell ports for slot 2, no slot named: REDIS_URL takes the shell's port over the template's
+ok   shell ports for slot 3, no slot named: bootstrap exits 0
+ok   shell ports for slot 3, no slot named: DATABASE_URL takes the shell's port over the template's
+ok   shell ports for slot 3, no slot named: REDIS_URL takes the shell's port over the template's
+ok   shell ports for slot 4, no slot named: bootstrap exits 0
+ok   shell ports for slot 4, no slot named: DATABASE_URL takes the shell's port over the template's
+ok   shell ports for slot 4, no slot named: REDIS_URL takes the shell's port over the template's
+ok   F-731-03: bootstrap exits 0
+ok   F-731-03: edited .env port wins when the shell is unset
+ok   F-731-03: edited .env Redis port wins when shell is unset
+ok   existing clone: fixture has the sentinel port before the run
+ok   existing clone: bootstrap exits 0 under SECUURA_STACK_SLOT=3
+ok   existing clone: DATABASE_URL untouched
+ok   existing clone: REDIS_URL untouched
+ok   existing clone: exactly one DATABASE_URL line
+ok   bad slot: bootstrap exits non-zero
+ok   bad slot: names the slot in its output
+ok   bad slot: no DATABASE_URL was generated
+
+bootstrap_env_slot_ports: 51 passed, 0 failed
+
+=== Blockchain/Dev/scripts/__tests__/check_akto_container_names.test.sh ===
+ok   F1's original line in scripts/*.sh is flagged (red-first)
+ok   TS  ?? 'akto-testing' defaulted variable is flagged
+ok   TS  || 'akto-mongo' defaulted variable is flagged
+ok   shell ${VAR:-akto-dashboard} with any variable name is flagged
+ok   literal docker exec akto-testing is still flagged
+ok   literal *_CONTAINER = 'akto-…' const is still flagged
+ok   literal docker logs akto-mongo in scripts/*.sh is flagged (axis 1 alone)
+ok   F1's FIX (derived from AKTO_PREFIX) is clean
+ok   TS derived `${AKTO_PREFIX ?? 'akto'}-testing` is clean
+ok   comment lines explaining the defect are clean
+ok   scripts/ absent → refused (exit 2) even with 14 TS files
+ok   scripts/ present but no *.sh → refused (exit 2)
+ok   bin/ absent → refused (exit 2)
+ok   src/ absent → refused (exit 2)
+ok   package directory absent → refused (exit 2)
+ok   coverage gap outranks a violation (exit 2, not 1)
+ok   real systemTest/akto is complete and clean
+
+check_akto_container_names: 17 passed, 0 failed
+
+=== Blockchain/Dev/scripts/__tests__/check_container_isolation.test.sh ===
+check_container_isolation:
+check_container_isolation: 52 passed, 0 failed
+
+=== Blockchain/Dev/scripts/__tests__/check_no_demo_mutation_base.test.sh ===
+PASS: a develop-based branch touching no demo path exits 0
+PASS: the guard reports no demo-shaping paths touched and prints no block banner
+PASS: CONTROL a branch that really touches a demo path is still blocked with exit 1
+PASS: CONTROL GITHUB_BASE_REF=develop is still honoured ahead of the default
+PASS: all 4 cells ran
+
+check_no_demo_mutation_base: 5 passed, 0 failed
+
+=== Blockchain/Dev/scripts/__tests__/check_no_demo_mutation_missing_base.test.sh ===
+PASS: an unresolvable default base exits 2 - refused, not read as clean
+PASS: the guard names the unresolvable base and prints no nothing-to-compare line
+PASS: CONTROL the same tree with an explicit resolvable base is blocked with exit 1
+PASS: CONTROL with origin/develop present a demo mutation is still blocked with exit 1
+PASS: all 4 cells ran
+
+check_no_demo_mutation_missing_base: 5 passed, 0 failed
+
+=== Blockchain/Dev/scripts/__tests__/check_no_latest_tags.test.sh ===
+  ok   a complete tree: rc 0, examined 5 of 5, and the OK line
+  ok   a listed input that is MISSING is an ERROR: non-zero rc, the file named, examined 4 of 5, no OK line
+  ok   CONTROL — the examined count VARIES with the tree (5 then 4), so it is measured, not printed
+  ok   CONTROL — a real :latest still reds the gate, and names the file
+  ok   CONTROL — a :latest on a comment line is still ignored
+  ok   CONTROL — deploy-staging.yml is absent from CHECK_FILES (0) and its removal is explained in a comment (4 mention(s))
+  ok   CONTROL — the subject parses under 3.2.57
+
+  7 passed, 0 failed
+
+=== Blockchain/Dev/scripts/__tests__/check_script_portability.test.sh ===
+check_script_portability:
+check_script_portability: 23 passed, 0 failed
+
+=== Blockchain/Dev/scripts/__tests__/check_shared_relink_case.test.sh ===
+check_shared_relink_case:
+  6 passed, 0 failed, 0 skipped
+
+=== Blockchain/Dev/scripts/__tests__/check_shared_relink_tooling_tokens.test.sh ===
+check_shared_relink_tooling_tokens:
+  ok   KS-957 F4 npm: CMD [npm, start] in a final alpine stage is DENIED by the tooling clause (rc=1)
+  ok   KS-957 F4 yarn: CMD [yarn, start] in a final alpine stage is DENIED by the tooling clause (rc=1)
+  ok   KS-957 F4 pnpm: CMD [pnpm, start] in a final alpine stage is DENIED by the tooling clause (rc=1)
+  ok   CONTROL npx: CMD [npx, tsx, ...] is DENIED (round 3's own red-proof, the token T9 kept) (rc=1)
+  ok   CONTROL none: the same stage with CMD [/bin/sh] is EXEMPT (no tooling token anywhere) (rc=0)
+  ok   CONTROL install verb: RUN npm run build is a node_modules write, so clause A judges it, not the exemption (rc=1)
+  6 passed, 0 failed
+
+=== Blockchain/Dev/scripts/__tests__/check_shared_relink.test.sh ===
+check_shared_relink:
+  106 passed, 0 failed, 0 skipped
+
+=== Blockchain/Dev/scripts/__tests__/check_slot_credentials.test.sh ===
+check-slot-credentials.sh — the shared literal must be caught in every shape it is written
+  ok   double-quoted shared literal (=CAUGHT/1)
+  ok   single-quoted shared literal (=CAUGHT/1)
+  ok   shared literal with a trailing space (=CAUGHT/1)
+  ok   double-quoted shared literal (redis) (=CAUGHT/1)
+  ok   CONTROL: a genuinely per-clone value still passes (=CLEAN/0)
+  ok   CONTROL: the bare shared literal is still caught (=CAUGHT/1)
+  ok   CONTROL: an inner space inside quotes is not flattened (=CLEAN/0)
+  ok   CONTROL: blank is still reported as BLANK, not per-clone (=BLANK/1)
+  ok   F-5: inline comment after the shared literal is CAUGHT (=CAUGHT/1)
+  ok   F-5: inline comment, redis side too (=CAUGHT/1)
+  ok   F-5: quoted shared literal WITH an inline comment is CAUGHT (=CAUGHT/1)
+  ok   F-6: export-prefixed per-clone value is CLEAN, not BLANK (=CLEAN/0)
+  ok   F-6: export-prefixed SHARED literal is still CAUGHT (=CAUGHT/1)
+  ok   last assignment wins, across export and bare forms (=CAUGHT/1)
+  ok   F-6: an unreadable .env is UNREADABLE, not BLANK (=UNREADABLE/1)
+  ok   REMEDY: a BLANK diagnosis must NOT print down --volumes (=NO/1)
+  ok   REMEDY: an UNREADABLE .env must NOT print down --volumes (=NO/1)
+  ok   REMEDY: a correctly-rotated clone must NOT print down --volumes (=NO/0)
+  ok   CONTROL: a SHARED literal MUST still print down --volumes (=YES/1)
+  ok   no .env at all is a refusal, not a silent pass (=NO-ENV/1)
+  ok   the skip hatch passes an exposed clone, and says so out loud (=ANNOUNCED/0)
+  ok   --quiet on a healthy clone is silent, so rc is the only signal (=SILENT/0)
+  ok   --quiet still reports a SHARED literal (loud survives --quiet) (=LOUD/1)
+  ok   an unterminated quote is diagnosed as a PARSE failure (=PARSE/1)
+  ok   a file that PARSES but whose last command fails is not called a parse error (=RUNTIME/1)
+  ok   R2-6: our own write failing is INTERNAL, not the .env being blamed (=INTERNAL/1)
+  ok   CONTROL: a genuine parse failure is still PARSE, not INTERNAL (=PARSE/1)
+  ok   CONTROL: a genuine command failure is still RUNTIME, not INTERNAL (=RUNTIME/1)
+  ok   R2-1: no line in the tree denies drift while naming compose (KS-785) (=0)
+  ok   CONTROL: the same sweep without the compose token still finds many (=MANY)
+  ok   R2-3: no arm of the checker ever suggests `set -a; . <file>` (KS-785) (=0)
+  ok   CONTROL: the run log was fed by many invocations, so the 0 above means something (=MANY)
+
+check-slot-credentials: 32 passed, 0 failed
+
+=== Blockchain/Dev/scripts/__tests__/check_stack_safety_hook_env.test.sh ===
+  ok   the guard passes when a hook's GIT_DIR is set
+  ok   no present file is reported missing under GIT_DIR
+  ok   CONTROL the guard passes on this tree without GIT_DIR
+  ok   CONTROL under GIT_DIR git itself answers Blockchain/Dev as the top level
+  ok   CONTROL check-stack-safety.sh parses (bash -n)
+
+  5 passed, 0 failed (of 5 cells)
+
+=== Blockchain/Dev/scripts/__tests__/check_stack_safety_latest_slot_symlink.test.sh ===
+SUBJECT /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/c6ce62ad-66de-4b90-a27a-53acf64beaa3/scratchpad/g74/wt/merged/Blockchain/Dev/scripts/check-stack-safety.sh
+        sha256 6ba553de7390a73bbbcc7bc3b0f8bf812cb128b5cc844b3fcffc9914efa43316
+
+  ok   the probe no longer reads THROUGH the latest-slot symlink (index.html)
+  ok   the probe names the latest-slot symlink ITSELF
+  ok   the gate exits 0 on this tree as found
+  ok   with a latest-slot4 symlink present the gate exits 0 and names no latest-slot error
+  ok   git check-ignore refuses a path beyond a symlink (rc 128) and accepts the symlink itself (rc 0)
+  ok   check-stack-safety.sh parses (bash -n)
+
+  6 passed, 0 failed (of 6 cells)
+
+=== Blockchain/Dev/scripts/__tests__/container_trivy_exit_code_env_keeps_findings.test.sh ===
+  ok   CONTROL - without TRIVY_EXIT_CODE an image with findings is counted: rc 0, no error, CRITICAL=1 HIGH=1
+  ok   CONTROL - TRIVY_EXIT_CODE=1 with an image that has no findings stays clean: rc 0, no error
+  ok   CONTROL - a trivy that exits 1 with no output is still recorded as scan-failed and the job still exits 1
+  ok   🔴 KS-1273 with TRIVY_EXIT_CODE=1 an image WITH findings keeps them: rc 0, no error, CRITICAL=1 HIGH=1
+  ok   🔴 KS-1273 the same run prints CRITICAL=1 HIGH=1 across 1 image(s) and never says could not scan
+  ok   RED KS-1273 a trivy.yaml exit-code: 1 in the job's cwd keeps findings: rc 0, no error, CRITICAL=1 HIGH=1
+
+  6 passed, 0 failed
+
+=== Blockchain/Dev/scripts/__tests__/container_trivy_failed_scan_is_loud.test.sh ===
+  ok   CONTROL - two clean scans: rc 0, 2 images, 0 errors
+  ok   🔴 a trivy that exits 1 with no output is recorded as scan-failed and the job exits 1
+  ok   🔴 a partial-output failure on one of two images is recorded as scan-failed, the other stays clean, and the job exits 1
+
+  3 passed, 0 failed
+
+=== Blockchain/Dev/scripts/__tests__/container_trivy_image_filter.test.sh ===
+SUBJECT /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/c6ce62ad-66de-4b90-a27a-53acf64beaa3/scratchpad/g74/wt/merged/Blockchain/Testing/jobs/04-container-trivy.sh
+        sha256 4ef6430c3d68e2bbbef567d3bbd2c068560b9f6b79c83ef39e53ef7b38a3ae9b
+
+  ok   KS-867 — a digit-bearing dev image (dev-auth2:latest) IS scanned, once, and the artefact names 3 images (rc=0)
+  ok   CONTROL — postgres:15 and dev-old:v1 stay OUT (0 scans each) while the two lowercase dev tags stay IN (1 each)
+  ok   CONTROL — with no dev-*:latest image the job still writes reason=no-images, scans nothing, and exits 1
+  ok   KS-1137 F-2 - the estate's real digit-bearing image (dev-m365-integration:latest) IS scanned, once, and the artefact names it (rc=0)
+  ok   CONTROL — the job talks to the STUB: docker info failing takes the documented docker-unreachable SKIP (rc 0, 0 scans)
+
+  5 passed, 0 failed
+
+=== Blockchain/Dev/scripts/__tests__/docker_build_empty_table.test.sh ===
+SUBJECT /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/c6ce62ad-66de-4b90-a27a-53acf64beaa3/scratchpad/g74/wt/merged/Blockchain/Dev/scripts/docker-build.sh
+        sha256 90565cd4503efbde877b7c417099117d4196b39de16444cdcb7e1f8603c4fdf5
+
+  ok   an EMPTY SERVICES_TABLE (29 rows -> 0) is refused by name — 'no services matched', naming SERVICES_TABLE — with no 'unbound variable', 0 builds, rc=1
+  ok   CONTROL — the intact table with 'auth' prints 'Services:  auth', builds it once (-f services/auth/Dockerfile), BUILD OK, rc 0
+  ok   CONTROL — the intact table with 'all' builds every row (29 stub builds), SUCCEEDED (29), rc 0, no unbound variable
+  ok   the subject has NO bare arithmetic-command post-increment/decrement — ((X++)) exits 1 at 0 and bash >= 4.1 set -e dies on it (control fires: 1)
+  ok   MASK CONTROL — with the auth stub exiting 1, 'all' still runs every row (29 stub builds), SUCCEEDED (28), FAILED (1): auth, rc 1
+
+  5 passed, 0 failed (of 5 cells)
+
+=== Blockchain/Dev/scripts/__tests__/ks1054_deploy_all_rc1_message.test.sh ===
+  ok   N0 deploy-all.sh's migration call site is locatable by marker (1 occurrence)
+  ok   N1 rc 1 reports failed OR could not be verified, so a missing parser is not reported as read migrations
+  ok   N2 CONTROL rc 1 still counts a FAIL, so the wording change did not weaken the check
+  ok   N3 CONTROL rc 2 is still a SKIP and reports no failed value
+
+n1350-7 deploy-all.sh rc-1 message: 4 passed, 0 failed
+
+=== Blockchain/Dev/scripts/__tests__/ks1054_deploy_scripts_read_startup_migrations.test.sh ===
+=== P: the predicate ===
+  ok   P1 failed 0 -> the deploy step PASSES
+  ok   P2 failed 2 -> the deploy step FAILS, although /health is 200 and healthy
+  ok   P3 KEYED ON failed, NOT error: failed 3 with error null still FAILS (gate39 N-G39-2)
+  ok   P4 field ABSENT (an older image) -> PASS-WITH-SKIP (rc 2), so a rollback is not blocked
+  ok   P5 a non-JSON body -> PASS-WITH-SKIP (rc 2), named, and explicitly 'not a pass'
+  ok   P6 failed present but NOT an integer -> refuses to read it as zero
+  ok   P7 an EMPTY body -> PASS-WITH-SKIP (rc 2), named, never a silent pass
+  ok   P8 ran:false with failed 0 -> PASS-WITH-SKIP (rc 2), NOT a clean '0 failed' tick
+  ok   P8b ran:true with failed 0 is still a CLEAN PASS (rc 0) — P8 is not an unconditional skip
+=== P-NOPY: python3 absent must FAIL CLOSED, and name the parser ===
+  ok   P9-FIXTURE python3 is absent under the stub PATH (so the arms below are not vacuous)
+  ok   P9 python3 absent + a failed-2 body -> FAILS CLOSED (rc 1), not read as 'not JSON'
+  ok   P9b python3 absent + a CLEAN body ALSO fails closed: absence of a parser is not evidence
+  ok   P9c CONTROL the failed-2 body with python3 present -> rc 1 naming the migrations, not the parser
+  ok   P9d CONTROL the clean body with python3 present -> rc 0, so the stub PATH is what moved P9b
+=== P-BADPY: python3 present but broken must FAIL CLOSED, and name the parser ===
+  ok   P10-FIXTURE python3 is on the stub PATH and exits non-zero (so the cells below are not vacuous)
+  ok   P10 python3 present but BROKEN + a failed-2 body -> FAILS CLOSED (rc 1), not read as 'not JSON'
+  ok   P10b python3 present but BROKEN + a CLEAN body ALSO fails closed: a parser that cannot run is not evidence
+  ok   P10c CONTROL python3 broken + an EMPTY body -> still rc 2: that branch never needed a parser
+  ok   P9e python3 absent + an EMPTY body -> still rc 2: that branch never needed a parser
+=== C: each deploy script must CALL the predicate ===
+  ok   C1 deploy-all.sh calls the predicate
+  ok   C2 deploy.sh calls the predicate
+  ok   C3 deploy-all.sh fetches the /health BODY, not only the status code
+  ok   C4 the predicate records that /health stays 200 and the DEPLOY is what fails
+=== E: deploy.sh must EXIT NON-ZERO, not merely log (gate44 N-1346-1) ===
+  ok   E0 the summary block is locatable by marker (1 occurrence, so the extraction is unambiguous)
+  ok   E1 deploy.sh's verify summary exits non-zero when it counted issues (rc=1)
+  ok   E2 CONTROL: the same block exits 0 when it counted none, so E1 is not an unconditional failure
+=== R: the CALLERS must render the third state — a SKIP is neither a pass nor a failure ===
+  ok   R0 deploy.sh's migration call site is locatable by marker (1 occurrence, extraction unambiguous)
+  ok   R1 rc 2 counts a SKIP and NOT an error, so an ABSENT field still yields a passing deploy
+  ok   R2 CONTROL rc 1 still counts an ERROR, so the third state did not weaken the real check
+  ok   R3 CONTROL rc 0 counts neither, so R1 is not an unconditional skip
+  ok   R4 ERRORS=0 with SKIPS=1 still PASSES the deploy step (rc 0) — the rollback rule holds
+  ok   R5 ...and it does NOT print 'all checks OK', so it stops claiming a clean run
+  ok   R6 ...and it NAMES the skip, so a check that stopped checking is not silent
+  ok   R7 CONTROL with SKIPS=0 it still prints 'all checks OK', so R5 is not an unconditional gag
+  ok   R8a deploy-all.sh's call site is locatable by marker (1 occurrence, extraction unambiguous)
+  ok   R8 rc 2 increments SKIP and NEITHER PASS nor FAIL, so it is not counted as a passing check
+  ok   R8b CONTROL rc 0 still increments PASS, so R8 is not an unconditional skip
+  ok   R8c CONTROL rc 1 still increments FAIL, so the third state did not weaken the real check
+  ok   R9 (structural) the SMOKE TEST RESULTS line reports the skip count beside pass and fail
+  ok   R10 deploy-all.sh still exits non-zero on FAIL alone, so a SKIP never fails the deploy
+
+ks1054 deploy startupMigrations: 40 passed, 0 failed
+
+=== Blockchain/Dev/scripts/__tests__/ks1054_deploy_sh_rc1_message.test.sh ===
+  ok   M0 deploy.sh's migration call site is locatable by marker (1 occurrence)
+  ok   M1 rc 1 prints FAILED OR could not be verified, so a missing parser is not reported as read migrations
+  ok   M2 CONTROL rc 1 still counts an ERROR, so the wording change did not weaken the check
+  ok   M3 CONTROL rc 2 is still a named SKIP and prints no ERROR line
+
+n1350-7 deploy.sh rc-1 message: 4 passed, 0 failed
+
+=== Blockchain/Dev/scripts/__tests__/ks1136_aggregate_report_unreadable_artefacts.test.sh ===
+SUBJECT /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/c6ce62ad-66de-4b90-a27a-53acf64beaa3/scratchpad/g74/wt/merged/Blockchain/Testing/jobs/09-aggregate-report.sh
+        sha256 e16486471474225b7694977e39abdd17b20fe065d1e13f13bc875f3eb748ee7d
+
+  ok   a truncated 01 artefact emits exactly 01-deps/unreadable-artefact (high) and the run exits 1
+  ok   a truncated 08 artefact emits exactly 08-aiken/unreadable-artefact (high) and the run exits 1
+  ok   seven truncated artefacts (01 02 03 05 06 07 08) emit one <job>/unreadable-artefact HIGH each, and the run exits 1
+  ok   CONTROL seven well-formed empty artefacts yield 0 findings and rc 0
+  ok   CONTROL a well-formed 08 with 2 failing tests still emits exactly tests-failed:2 and exits 1
+  ok   CONTROL a truncated 04 artefact still emits 04-trivy/unreadable-artefact exactly once and exits 1
+
+  6 passed, 0 failed
+
+=== Blockchain/Dev/scripts/__tests__/ks1252_1253_e7_prefix_guard.test.sh ===
+  ok   the probe ran and produced all 41 rows
+  ok   KS-1252 — session_/password_/accesstoken_ + 32 upper and a 60-char prefix all FIRE (4/4)
+  ok   KS-1253 — all 14 probed credential prefixes + v4 FIRE (14/14)
+  ok   CONTROL — all 13 minted record prefixes stay silent (13/13), so cell 2 did not refuse everything
+  ok   CONTROL — the three prefixed values the published spec carries stay silent
+  ok   CONTROL — ks256's len12 and credit rows stay silent (packages/shared asserts both)
+  ok   CONTROL — the probe prints both verdicts (21 FIRES / 20 silent); key_ sk_live_ and a lower-case body still fire; a digest and a bech32 stay benign
+  ok   CONTROL — an unlisted name yields no verdict, so an empty read cannot pass for agreement
+
+  8 passed, 0 failed
+
+=== Blockchain/Dev/scripts/__tests__/ks949_main_seed_idempotence.test.sh ===
+ks949_main_seed_idempotence:
+  postgres: postgres (PostgreSQL) 15.14 (Homebrew)  from /opt/homebrew/opt/postgresql@15/bin
+  statement extracted from product source, sha256 186175afcbdc2ae55bbcbb963d322821ff210c8f1763738afbb0627820f58b64
+  ok   — the statement names exactly 12 user ids (derived from source, not typed here)
+  ok   — postgres is unix-socket only (listen_addresses=[], socket dir is this test's mkdtemp)
+  ok   — CONTROL: a wrong socket dir does not connect (the socket check can fail)
+  deployed shape built: docker/init 01-08 (11 files) + 49 main-DB migrations (template ks949_template)
+  -- GA: gateway-then-auth
+  ok   — GA1: the statement creates NO row on an empty table (count 0)
+  ok   — GA2: auth's seedDemoUsers ran after the statement (rc 0)
+  ok   — GA3: auth created all 12 gateway-named rows (17 rows in total)
+  ok   — GA4: every email of the 12 passes the REAL isEncryptedPii (12/12)
+  ok   — GA5: every email_lookup_hash of the 12 is set (12/12)
+  ok   — GA6: the statement runs on the auth-seeded table without error
+  ok   — GA7: the 12 rows are byte-identical across the statement (email, hash, names, role, status, tenant)
+  -- AG: auth-then-gateway
+  ok   — AG1: auth's seedDemoUsers ran on the empty table (rc 0)
+  ok   — AG2: the statement runs on the seeded table without error
+  ok   — AG3: email + email_lookup_hash byte-identical before/after on all 12 rows
+  ok   — AG4: the planted drift on …060 is re-synced to secuura-co / …099
+  ok   — AG5: names, role and status untouched on all 12 rows
+  ok   — AG6: still exactly 12 gateway-named rows (17 total) — nothing created
+  ok   — ID1: the statement runs a second time without error
+  ok   — ID2: the 12 rows are identical after the second run
+  ok   — ID3: a no-change second run writes nothing — UPDATE 0 and every updated_at byte-identical (the IS DISTINCT FROM guard)
+  -- controls
+  ok   — CONTROL-A: the reverted #928 form on an empty table CREATES 12 rows, 0/12 encrypted, 0 hashes — GA1 would go RED against it
+  ok   — CONTROL-B: the develop ON CONFLICT (email) form fails 42P10 on the deployed shape — the harness reproduces the defect
+  ok   — CONTROL-C: the row-count assertion discriminates (11 does not match 12)
+  -- source
+  ok   — SRC1: the shipped statement is not an INSERT (KS-962's shape)
+  ok   — SRC2: the shipped statement names no PII, role or status column
+  -- loader (real runStartupMigrations)
+  ok   — L1: a failing file migration is reported INCOMPLETE — 1 FAILED at warn (boot rc 0)
+  ok   — L3: a zero-failure run still says complete at info (INCOMPLETE is not unconditional)
+  ok   — L2: a failing re-sync is logged at warn (boot rc 0)
+  27 passed, 0 failed (of 27 cells); wall-clock 5s
+
+=== Blockchain/Dev/scripts/__tests__/no_tracked_credentials_root.test.sh ===
+  ok   CONTROL — the fixture's repository root IS the Blockchain/Dev directory
+  ok   root IS Blockchain/Dev + a planted negation → FAILS and names it (rc 1)
+  ok   the ordinary layout still FAILS on the same plant (rc 1)
+  ok   root IS Blockchain/Dev + a tracked .env → FAILS (rc 1)
+  ok   CONTROL — a clean tree in the odd layout PASSES (rc 0), so the cases above discriminate
+  ok   an inherited GIT_DIR naming ANOTHER repo does not blind the leg (rc 1)
+  ok   CASE 6's precondition holds — no .git at any ancestor of the scratch dir, so exit 0 is the leg's answer and not the tree's
+  ok   CONTROL — a $DEVDIR that is outside any work tree exits 0 and says so (the leg's own answer, not the caller's cwd)
+  ok   CASE 6b — the leg answers identically from /tmp (outside any work tree) and from $HERE (inside this checkout), so its root comes from its own location and not the caller's cwd
+  ok   GIT_CEILING_DIRECTORIES at the repo root does not blind the leg — it still NAMES the negation (rc 1)
+  ok   CASE 7's precondition holds — under that ceiling git itself cannot resolve a toplevel
+  ok   CASE 8's precondition holds — .git is present and git still cannot resolve a root
+  ok   a .git that git cannot use FAILS loudly — it is not read as a clean tree
+  ok   CASE 9's precondition holds — .git IS a symlink and `[ -e ]` cannot see it (the dereference)
+  ok   CASE 9's precondition holds — git itself cannot resolve a root from there
+  ok   a DANGLING .git symlink FAILS loudly — the walk-up asks about the LINK, not its target
+
+  16 passed, 0 failed
+
+=== Blockchain/Dev/scripts/__tests__/orchestrate_jobs.test.sh ===
+SUBJECT /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/c6ce62ad-66de-4b90-a27a-53acf64beaa3/scratchpad/g74/wt/merged/Blockchain/Testing/ci/orchestrate.sh
+        sha256 9e7bc459e00e1c1ca4679b66e9843e9cf575e944f12191ca94b28e4909d4e785
+
+  ok   all 9 tracked job scripts are 100755 in the INDEX (census over every one, not a sample)
+  ok   CONTROL — every job present: the run exits 0 and all 7 fixture jobs RAN
+  ok   SELF and RUN_DIR are BOUND in a child process — exported, not merely set
+  ok   a missing job makes the run REFUSE loudly, BY NAME, and exit non-zero (rc=1)
+  ok   the WORKING path is intact — run-internal-audit.sh still passes RUN_DIR + SELF and runs jobs via bash
+  ok   an ABSENT Stage-2 tool REFUSES by name and exits non-zero, and does NOT claim it exited non-zero (rc=1)
+  ok   a Stage-2 tool tracked 100644 still RUNS — invoked via bash, so the mode bit is not load-bearing
+  ok   the Stage-2 tool RUNS with a nonexistent interpreter in its shebang — it is invoked via bash, not by bare path
+  ok   CONTROL — a Stage-2 tool that RAN and failed DOES report 'exited non-zero' (so CELL 6 discriminates), and does not fail the run
+  ok   an UNREADABLE Stage-2 tool REFUSES by name and exits non-zero, and does NOT claim it exited non-zero (rc=1)
+  ok   an UNREADABLE Stage-1 job REFUSES by name and exits non-zero — the shared guard is DRIVEN on this path, not inferred (rc=1)
+  ok   ORCH_SH set-but-EMPTY is REFUSED (rc=2) instead of silently grading the shipped orchestrator
+  ok   an UNREADABLE post-API job makes the GATE NOT PASS (rc=1), REFUSES by name, and does NOT claim the job ran — the path CELL 11 left inferred is now DRIVEN
+  ok   KS-1134 - with ZERO Stage-1 jobs started the run REACHES the Stage-1 JOIN instead of dying before it (rc=1)
+  ok   KS-922 — with ZERO Stage-1 jobs started the JOIN says nothing about a job exiting non-zero (6 refusals, rc=1)
+  ok   CONTROL — a Stage-1 job that RAN and exited 3 IS reported 'exited non-zero' exactly once (so CELL 14 discriminates), and the run continues (rc=0)
+  ok   an UNREADABLE subject is REFUSED with exit 2 and a FATAL naming readability, and NO SUBJECT line is printed
+  ok   a leaked KS923_SELFTEST_CHILD makes the child print '  15 passed, 0 failed, 3 skipped' — parity with its ok/FAIL/skip lines, none disguised as ok — and exit non-zero (rc=1)
+
+  18 passed, 0 failed, 0 skipped
+
+=== Blockchain/Dev/scripts/__tests__/pre_push_hook_base_fixture_guard.test.sh ===
+  ok   FIXTURE-LASTCMD: a MID-build failure aborts — rc 2, the named line, and 0 cells run
+  ok   FIXTURE-GITENV: an unbuildable root aborts rc 2 and the caller's repo is byte-identical (HEAD+refs+config)
+  ok   CONTROL: untampered, from inside a git repo, the suite is 28/0 and that repo is untouched
+  ok   CONTROL: both tampers are present in their copies (mid-build false=1, unbuildable root=1)
+  ok   CONTROL: the scratch origin is a local bare repo under $WORK and the repo has a real commit
+  ok   CONTROL: a missing hook also exits 2, but says FATAL and never the fixture-abort line — the two exit-2 causes are distinguishable
+
+  6 passed, 0 failed
+
+=== Blockchain/Dev/scripts/__tests__/pre_push_hook_base_leg_comment.test.sh ===
+  ok   the false claim that leg 12 reaches this suite on every gated push is gone
+  ok   the comment names leg 14 as the leg that runs this suite
+  ok   CONTROL the untouched line above the edited run is still there
+  ok   CONTROL pre_push_hook_base.test.sh parses (bash -n)
+
+  4 passed, 0 failed (of 4 cells)
+
+=== Blockchain/Dev/scripts/__tests__/pre_push_hook_base.test.sh ===
+  ok   CONTROL — the fixture is a real fresh clone: local branches [main], develop local=NO remote=YES, feature/x exists=YES with upstream=NONE
+  ok   fresh clone + no upstream + a Blockchain/Dev change → the gate RUNS and says so
+  ok   CASE 1's branch really has no upstream — the precondition is asserted, not assumed
+  ok   …and the preflight was actually invoked, not merely announced
+  ok   a docs-only push still SKIPS the gate — the fix did not become 'always run'
+  ok   no base computable → the hook says so LOUDLY
+  ok   no base computable → the preflight RUNS anyway (fails safe)
+  ok   CASE 4's preconditions hold — local develop contains HEAD, origin/develop does not, branch has no upstream
+  ok   a local develop containing the tip → the gate still RUNS and says so (KS-882)
+  ok   …and the preflight was actually invoked on that push, not merely announced
+  ok   CASE 5's preconditions hold — only local develop resolves, and it contains HEAD
+  ok   every resolvable base equals HEAD → the hook says so LOUDLY
+  ok   every resolvable base equals HEAD → the preflight RUNS anyway (fails safe)
+  ok   CASE 6's precondition holds — local develop contains HEAD on a docs-only push
+  ok   a docs-only push still SKIPS even with a local develop containing the tip
+  ok   CASE 7 — a systemTest-only push INVOKES the formatting gate, with the changed path
+  ok   CASE 7 — ...and still does NOT run the platform preflight
+  ok   CASE 8 — a failing formatting gate REFUSES the push
+  ok   CASE 8 — refused for the RIGHT reason (the gate said so, by name)
+  ok   CASE 9's preconditions hold — both bases informative, and ONLY origin/develop's diff carries a Blockchain/Dev path
+  ok   the loop asks EVERY ref — a second, further base finds the change the first missed (KS-909)
+  ok   …and the preflight was actually invoked on that push, not merely announced
+  ok   CASE 10's preconditions hold — local develop is a strict ancestor of origin/develop, the gap carries a Blockchain/Dev path, the branch does not, and it has no upstream
+  ok   CASE 10 — a stale local develop is IGNORED for base selection, and the hook says so (KS-991)
+  ok   CASE 10 — a docs-only push on a CURRENT base SKIPS the preflight, despite the stale local develop
+  ok   CASE 11's preconditions hold — the same stale local develop, and the branch has no upstream
+  ok   CASE 11 — a real Blockchain/Dev change on the branch still RUNS the preflight with a stale local develop (the fix did not become 'always skip')
+  ok   every case's commit LANDED before its push, so each assertion is on a real change
+
+  28 passed, 0 failed
+
+=== Blockchain/Dev/scripts/__tests__/pre_push_hook_current_develop.test.sh ===
+  ok   preconditions hold - local develop equals origin/develop, the branch is docs only, and it has no upstream
+  ok   the docs-only push reached the bare remote
+  ok   a CURRENT local develop is not called stale - the push prints no KS-991 line
+  ok   the docs-only push skips the preflight
+
+  4 passed, 0 failed
+
+=== Blockchain/Dev/scripts/__tests__/pre_push_stack_legs_comment.test.sh ===
+SUBJECT /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/c6ce62ad-66de-4b90-a27a-53acf64beaa3/scratchpad/g74/wt/merged/.githooks/pre-push
+        sha256 690e924145ff1e4877c129b99858f511053fb596907a8c480021f7b0492e5553
+
+  ok   the stale leg enumeration (3, 4, 7) is gone from pre-push
+  ok   the comment points at the verdict line (KS-1046) instead of enumerating legs
+  ok   the KS-691 rationale comment anchor is still present in pre-push
+  ok   pre-push parses (bash -n)
+
+  4 passed, 0 failed (of 4 cells)
+
+=== Blockchain/Dev/scripts/__tests__/preflight_deps.test.sh ===
+ok   every bare import in scripts/audit/*.mjs is declared in its package.json
+ok   scripts/* is NOT in the root workspaces list
+ok   deps-present.sh self-test passes
+ok   a partial install (root present, nested absent) is refused
+ok   a complete install is accepted
+ok   preflight runs deps-present.sh BEFORE the drift check
+ok   pre-push hook sources slot-target.sh BEFORE running preflight
+ok   hook makes preflight probe slot 1's gateway
+ok   hook makes preflight probe slot 2's gateway
+ok   hook makes preflight probe slot 3's gateway
+ok   hook makes preflight probe slot 4's gateway
+ok   nginx /health block exists (guards against a vacuous pass)
+ok   nginx /health JSON hardcodes no port
+ok   /health advertises at least one route (guards a vacuous pass)
+ok   every route in /health has a location block (KS-641 /demo-api/ class)
+ok   the allocation yielded platform-k ports to check (non-vacuity)
+ok   PORT-REGISTRY.md cites K6_WEB_DASHBOARD_PORT's real base (5665)
+ok   PORT-REGISTRY.md cites CARDANO_MOCK_PORT's real base (6090)
+ok   PORT-REGISTRY.md cites CARDANO_N2N_PORT's real base (6091)
+ok   PORT-REGISTRY.md cites YACI_STORE_PORT's real base (6092)
+ok   PORT-REGISTRY.md cites CARDANO_ADMIN_PORT's real base (6093)
+ok   PORT-REGISTRY.md cites CARDANO_SUBMIT_PORT's real base (6094)
+ok   PORT-REGISTRY.md cites REDIS_EXTERNAL_PORT's real base (6379)
+ok   PORT-REGISTRY.md cites POSTGRES_EXTERNAL_PORT's real base (6432)
+ok   PORT-REGISTRY.md cites PGBOUNCER_PORT's real base (6433)
+ok   PORT-REGISTRY.md cites WEBSITE_PORT's real base (6881)
+ok   PORT-REGISTRY.md cites GATEWAY_PORT's real base (6882)
+ok   PORT-REGISTRY.md cites TOKENOMICS_PORT's real base (8881)
+ok   PORT-REGISTRY.md cites AKTO_MONGO_EXPRESS_PORT's real base (9490)
+ok   PORT-REGISTRY.md cites AKTO_DASHBOARD_PORT's real base (9091)
+ok   PORT-REGISTRY.md cites PW_REPORT_PORT's real base (9324)
+ok   PORT-REGISTRY.md cites OLLAMA_PORT's real base (11434)
+ok   PORT-REGISTRY.md cites AKTO_MONGO_PORT's real base (27017)
+ok   PORT-REGISTRY.md no longer binds mongo-express on host 8081
+ok   preflight installs scripts/audit deps BEFORE audit-locks.mjs
+ok   an un-installable scripts/audit is a SKIP, not a FAIL
+ok   scripts/audit has its own lockfile
+ok   that lock pins semver
+ok   lock root name matches package.json (lock is in sync)
+ok   declared semver range is satisfied by the pinned version
+ok   DEV-PROCESS records the Akto budgets as unbaselined here
+ok   leg 1 FAILS the run when deps-present exits non-zero
+ok   leg 1 lets the run proceed when deps-present exits 0
+ok   leg 14: suites green -> preflight passes
+ok   leg 14: a RED suite fails the push, after de-slotting
+ok   leg 14: an empty de-slot measurement REFUSES rather than running polluted
+ok   F-925-3: a step header whose denominator disagrees with TOTAL_LEGS ABORTS the run, naming the header
+ok   leg 14: the refusal SHORT-CIRCUITS — a red suite present, still not run
+ok   deps-present says it is NOT spec drift
+ok   deps-present names the actual fix (npm ci)
+ok   deps-present names WHERE to run it (Blockchain/Dev)
+ok   KS-469 STALE classifier still present
+ok   real spec drift still has its own FAIL branch
+ok   KS-376 esbuild SKIP branch still present
+ok   precondition precedes the STALE branch
+ok   precondition precedes the drift catch-all
+
+preflight_deps: 56 passed, 0 failed
+
+=== Blockchain/Dev/scripts/__tests__/preflight_failure_verdict_keeps_ratio.test.sh ===
+ok   CONTROL the harness holds preflight's own state, step(), failure verdict and leg total
+ok   CONTROL a run where nothing fails exits 0 and says PREFLIGHT PASSED
+ok   CONTROL a real leg-7 failure is still named and still exits 1
+ok   🔴 a real leg-7 failure prints the ratio of legs that ran
+ok   🔴 a real leg-7 failure with leg 3 skipped counts only the legs that ran
+ok   RED KS-1260 N62-1: a real leg-7 failure with the last leg never driven counts only the legs OBSERVED to run
+ok   RED KS-1260 N62-2a: a leg-1 failure with no install plus a real leg-7 failure also says Leg 1 could not RUN
+ok   RED KS-1260 N62-2b: a clean run with the last leg never driven is INCOMPLETE, says NONE declared a skip, and exits 1
+
+preflight_failure_verdict_keeps_ratio: 8 passed, 0 failed
+
+=== Blockchain/Dev/scripts/__tests__/preflight_leg4_sweep_not_run.test.sh ===
+  ok   RED exit 2 is reported as a sweep that could NOT RUN
+  ok   RED exit 2 does not claim a published path is unroutable
+  ok   CONTROL exit 2 still sets fail=1 (the gate refuses)
+  ok   CONTROL exit 1 reports a published path is unroutable and sets fail=1
+  ok   CONTROL exit 0 reports every path routes and leaves fail=0
+
+  5 passed, 0 failed (of 5 cells)
+
+=== Blockchain/Dev/scripts/__tests__/preflight_ratio_excludes_leg1_no_install.test.sh ===
+ok   CONTROL the harness holds preflight's own state, step(), failure verdict and leg total
+ok   CONTROL a leg-1 failure with no install and nothing else failing keeps the environment verdict and exits 1
+ok   CONTROL a real leg-11 failure with legs 3 4 5 skipped on an installed tree counts twelve legs ran
+ok   CONTROL a real leg-11 failure with legs 3 4 5 skipped and no install still says Leg 1 could not RUN and exits 1
+ok   🔴 KS-1279 a real leg-11 failure with legs 3 4 5 skipped and no install counts leg 1 as NOT run - eleven legs ran
+ok   🔴 KS-1279 the same run no longer prints the ratio that counted leg 1 as run
+
+preflight_ratio_excludes_leg1_no_install: 6 passed, 0 failed
+
+=== Blockchain/Dev/scripts/__tests__/preflight_state_is_initialised.test.sh ===
+ok   CONTROL the harness holds preflight's own state, step() and closing verdict
+ok   CONTROL a clean run with nothing exported exits 0 and says PREFLIGHT PASSED
+ok   CONTROL a real leg-7 failure is still named and still exits 1
+ok   🔴 a clean run with FAILED_LEGS=7 exported still passes and names no leg
+ok   🔴 a clean run with fail_total=abc exported still passes
+
+preflight_state_is_initialised: 5 passed, 0 failed
+
+=== Blockchain/Dev/scripts/__tests__/preflight_verdict_names_real_failures.test.sh ===
+ok   CONTROL the harness holds preflight's own step() and its closing verdict
+ok   CONTROL a run where nothing fails exits 0 and says PREFLIGHT PASSED
+ok   CONTROL leg 1 without an install and NOTHING else failed keeps the environment verdict and exits 1
+ok   🔴 leg 1 without an install plus a real leg-7 failure names leg 7 and does not blame the environment
+
+ok   a REAL leg-1 failure with an install (env_fail=0) is named as leg 1 and does not blame the environment
+preflight_verdict_names_real_failures: 5 passed, 0 failed
+
+=== Blockchain/Dev/scripts/__tests__/prometheus_targets.test.sh ===
+prometheus_targets:
+ok   compose yielded service ports to compare
+ok   prometheus.yml yielded scrape targets to compare
+ok   observability/config/alerting.env.example suggests the gateway's in-network status port
+ok   every scrape target names the port its service listens on
+ok   no scrape target uses the gateway's published host port
+ok   observability/.env.example suggests the gateway's in-network status port
+prometheus_targets: 6 passed, 0 failed
+
+=== Blockchain/Dev/scripts/__tests__/run_code_guards.test.sh ===
+=== CASE 1 — a fully bucketed tree: census OK, guards run green ===
+  ok   census on a clean fixture (=0)
+  ok   run of two green guards (=0)
+  ok   --list (=0)
+=== CASE 2 — RED-PROOF: a tracked guard in NO bucket must fail the census ===
+  ok   census sees the orphan (=1)
+  ok   control: run path unaffected by an unbucketed guard (=0)
+=== CASE 3 — RED-PROOF: a bucket naming a guard NOT in the tree must fail ===
+  ok   census sees the ghost (=1)
+=== CASE 4 — POSITIVE CONTROL: enumerating ZERO guards must FAIL, not pass ===
+  ok   census with 0 tracked guards fails loudly (=1)
+=== CASE 5 — RED-PROOF: a wired guard that FAILS must fail the run ===
+  ok   run reports a red guard (=1)
+  ok   control: census still OK (bucketing unchanged) (=0)
+=== CASE 6 — POSITIVE CONTROL: running ZERO guards must FAIL, not pass ===
+  ok   run with an empty WIRED list fails loudly (=1)
+=== CASE 7 — a wired guard missing from the tree must fail the run ===
+  ok   run reports a missing wired guard (=1)
+=== CASE 8 — the HOOK'S GIT ENV must not reach the guards (KS-926, found by wiring) ===
+  ok   RED-PROOF: the guard alone under GIT_DIR does fail (=1)
+  ok   control: the same guard without GIT_DIR passes (=0)
+  ok   the runner shields guards from the hook env (=0)
+  ok   RED-PROOF: removing the unset brings the failure back (=1)
+=== CASE 9 - ADVISORY SKIP: a tree that is NOT a git checkout skips the census with rc 0 (KS-1153 R-918-A) ===
+  ok   a non-git tree: the census exits 0 (=rc=0)
+  ok   a non-git tree: the census prints the advisory SKIP line (=yes)
+
+run_code_guards.test.sh — 17 passed, 0 failed
+
+=== Blockchain/Dev/scripts/__tests__/run_migrations_failure_exit_code.test.sh ===
+PASS: a run in which 048 failed exits 3, so compose service_completed_successfully cannot be satisfied by it
+PASS: the failure output reports an ERROR and no longer says it is exiting 0 on purpose
+PASS: CONTROL two clean migrations still apply, print applied=2 failed=0, and exit 0
+PASS: CONTROL a missing DATABASE_URL still exits 1 and says so
+PASS: a missing pg_isready exits 4, names the binary, and never says the database did not become ready
+PASS: CONTROL a PRESENT but refusing pg_isready still exits 2 and still names the database - the new guard did not swallow the real case
+PASS: all 6 cells ran
+
+run_migrations_failure_exit_code: 7 passed, 0 failed
+
+=== Blockchain/Dev/scripts/__tests__/run_shell_suites.test.sh ===
+run-shell-suites.sh — the enforcement that had no test of its own
+  ok   CONTROL: every tracked suite inside ROOTS -> rc 0 (=0)
+  ok   CONTROL: and it says so, naming the count (=1)
+  ok   a tracked suite outside ROOTS -> rc 1 (=1)
+  ok   and the unreachable file is NAMED, not merely counted (=1)
+  ok   an UNTRACKED stray outside ROOTS is ignored -> rc 0 (=0)
+  ok   glob reaches 0 while git tracks N -> rc 1 (=1)
+  ok   and it blames ITSELF, not the wiring (=1)
+  ok   a non-git tree SKIPs advisorily -> rc 0 (=0)
+  ok   and it SAYS it skipped, so rc 0 is not read as a measurement (=1)
+  ok   run mode, every suite green -> rc 0 (=0)
+  ok   run mode propagates a RED suite -> rc 1 (=1)
+  ok   and names the suite that failed (=1)
+  ok   run mode with NO suites REFUSES (not crashes, not passes) (=REFUSED/1)
+  ok   check mode with NO suites REFUSES (not crashes, not "OK — all 0") (=REFUSED/1)
+  ok   check mode emits NO discarded runtime error on an empty tree (=0)
+  ok   CONTROL: with a tracked suite in ROOTS, check mode still passes (=0)
+  ok   --list prints the reached suites (=1)
+  ok   --list does not RUN them (=0)
+  ok   an unknown argument is rejected -> rc 2 (=2)
+  ok   CONTROL: the writer suite run DIRECTLY under a worktree GIT_DIR rewrites the shared config (=CHANGED)
+  ok   run mode under an inherited worktree GIT_DIR leaves the shared config byte-identical (=identical)
+  ok   and leaves the shared refs identical (=identical)
+  ok   REACH: the writer suite really ran under the runner (=1)
+  ok   and the runner names GIT_DIR among the variables it cleared (=1)
+  ok   leg 12 path: --check-unreached RUNS no suite (=0)
+  ok   CONTROL: run mode on the same tree does run it (=1)
+  ok   an empty --local-env-vars list REFUSES before any suite runs (verdict/rc/ran) (=REFUSED/1/0)
+  ok   QA-1: GIT_DIR, GIT_WORK_TREE and GIT_CONFIG_PARAMETERS all reach the suite UNSET (=GIT_DIR=unset GIT_WORK_TREE=unset GIT_CONFIG_PARAMETERS=unset)
+  ok   QA-1: and the verdict line names all three as cleared (=3)
+  ok   CONTROL: the CRLF fake git prints every name git lists, each ending in CR (=15/15)
+  ok   QA-2: a CRLF list that parses to no usable name REFUSES before any suite runs (verdict/rc/ran) (=REFUSED/1/0)
+  ok   QA-2: a list that parses but does not name GIT_DIR REFUSES before any suite runs (verdict/rc/ran) (=REFUSED/1/0)
+  ok   QA-8: --list on a tree with no reached suites exits 0 (=0)
+  ok   QA-8: ...and writes ZERO bytes, not a bare newline (measured in bytes, not by a capture) (=0)
+  ok   QA-8 CONTROL: --list with ONE suite still prints exactly one line, so the guard is not a no-op (=1)
+  ok   QA-7: git printed NOTHING -> the headline says git could not be asked (=FAIL — could not ask git which variables are repository-local)
+  ok   QA-7: git printed a list with no GIT_DIR -> the headline says the list is UNUSABLE (=FAIL — git's list of repository-local variables is unusable)
+  ok   QA-7: git ABSENT from PATH -> the headline names git, not the list (=FAIL — git is not on PATH, so its list of repository-local variables cannot be read)
+  ok   QA-7 CONTROL: the SAME minimal PATH with git in it gets past the check, so the cell above is about git and not about a broken PATH (=)
+  ok   KS-1127: the verdict carries a skipped count, and the SILENT exit 0 is still a pass (=1)
+  ok   KS-1127: the skipped suite is NAMED (=1)
+  ok   KS-1127: the failing suite is still named, and separately (=1)
+  ok   KS-1127 CONTROL: a skip does not fail the runner on its own — the rc here is the real FAILURE (=1)
+  ok   KS-1127 CONTROL: a tree with nothing to skip reads 0 skipped (=1)
+  ok   KS-1127 CONTROL: ...and prints no SKIPPED: block (=0)
+  ok   KS-1135: a TMPDIR over 80 chars is NAMED as the cause TWICE — before the run and beside the verdict (=2)
+  ok   KS-1135: ...and the run still reports its real verdict (=1)
+  ok   KS-1135 CONTROL: a SHORT TMPDIR emits no such line, so the note is conditional (=0)
+  ok   KS-1135 CONTROL: the caller TMPDIR is restored, so the runner does not leak its substitute (=184)
+  ok   KS-1302 PRECONDITION: the substitution fired and the runner NAMED the directory it made (=1)
+  ok   KS-1302: after a CLEAN run the substitute TMPDIR is gone (=0)
+  ok   KS-1302 PRECONDITION: the failing run really exited non-zero, so the next cell is about the abort path (=1)
+  ok   KS-1302: after a FAILING run the substitute TMPDIR is gone too (=0)
+  ok   KS-1303: a suite leaving a background child does not hold the runner (under 6 s; `| tee` waited the full 15) (=1)
+  ok   KS-1303 CONTROL: ...and the forking suite still RAN and scored as a pass, so the speed is not a skip (=1)
+  (signal environment: INT installable=no, TERM installable=yes)
+  ok   KS-1302 R2: SIGTERM to the pid interrupts the runner — rc 143 non-zero, 1 suite started, no verdict line, /tmp/rss removed (=OK)
+  ok   KS-1330: SIGTERM to the pid exits 0s after the kill, within 6s (half the fixture's 12s sleep) (=OK)
+  ok   KS-1302 R2: SIGINT to the pid — UNREACHABLE here, measured. RULE 1: SIGINT is IGNORED ON ENTRY to this shell, so bash refuses to install any INT handler (trap -p INT empty). This is the in-hook preflight's own environment. (=UNREACHABLE)
+  ok   KS-1302 R2: SIGINT to the group — UNREACHABLE here, measured. RULE 1: SIGINT is IGNORED ON ENTRY to this shell, so bash refuses to install any INT handler (trap -p INT empty). This is the in-hook preflight's own environment. (=UNREACHABLE)
+
+run_shell_suites: 59 passed, 0 failed
+
+=== Blockchain/Dev/scripts/__tests__/slot_is_local_host_only.test.sh ===
+ok   no non-local surface sets or reads the slot variable (110 files)
+ok   no non-local surface names a slot-N container prefix or compose project
+ok   no non-local surface types a slot-offset port (derived: 36 literals for slots 2..4 from 12 bases)
+ok   every KNOWN_EXCEPTIONS entry names an existing file and a ticket
+
+PASS=4 FAIL=0
+
+=== Blockchain/Dev/scripts/__tests__/smoke_test_degraded_warns.test.sh ===
+  ok   CONTROL - five services up: rc 0, Failed: 0, Warnings: 0
+  ok   RED a degraded service passes the smoke test with one warning naming the service and its status
+  ok   RED the degraded service is COUNTED as passed (Passed: 13, Failed: 0), not as a failure
+  ok   CONTROL - a down service still fails the smoke test (rc 1, Failed: 1, postgres named twice: the line and the FAILURES list)
+  ok   CONTROL - an error service still fails the smoke test (rc 1, Failed: 1)
+
+  5 passed, 0 failed
+
+=== Blockchain/Dev/scripts/__tests__/stack_env.test.sh ===
+ok   slot 1 gateway port unchanged
+ok   slot 1 postgres port unchanged
+ok   slot 1 redis port unchanged
+ok   slot 1 website port unchanged
+ok   slot 1 tokenomics port unchanged
+ok   slot 1 container prefix unchanged
+ok   slot 1 leaves COMPOSE_PROJECT_NAME to Compose
+ok   slot 2 project namespaced
+ok   slot 2 prefix namespaced
+ok   slot 2 gateway offset +100
+ok   slot 2 postgres offset +100
+ok   slot 2 redis offset +100
+ok   slot 3 gateway offset +200
+ok   slot 3 project namespaced
+ok   slot 1 ollama port unchanged
+ok   slot 2 ollama offset +100
+ok   no port collides across slots 1-3
+ok   STACK_STARTED_AT is ISO 8601 UTC
+ok   STACK_BRANCH resolves from git
+ok   STACK_SLOT selects the slot when SECUURA_STACK_SLOT is unset
+ok   slot 4 gateway matches platform-s's table
+ok   slot 5 is refused (ceiling is 4)
+ok   non-numeric slot is rejected (exit 2)
+ok   slot 0 is rejected (exit 2)
+ok   explicit COMPOSE_PROJECT_NAME wins
+
+stack_env: 25 passed, 0 failed
+
+=== Blockchain/Dev/scripts/__tests__/stack_guard.test.sh ===
+ok   clean tree, no stack running -> allowed
+ok   clean tree, stack owned by me -> allowed
+ok   foreign-owned stack -> blocked
+ok   foreign-owned stack -> reports owner, branch, commit and container count
+ok   dirty tree, no stack -> blocked
+ok   dirty tree names the offending file
+ok   foreign-owned stack + override -> allowed
+ok   dirty tree + override -> allowed
+ok   unowned stack (owner=unknown), clean tree -> allowed with a notice
+ok   unowned stack + dirty tree -> still blocked on the tree
+ok   unknown argument -> exit 2
+ok   --help -> exit 0
+ok   two stacks up -> reads OUR project, not the newest
+ok   two stacks up -> blocks on OUR project's owner
+ok   other project's stack is reported but does not block
+ok   our project down, another project up -> allowed
+ok   unlabelled stack with containers -> warns and names the count
+ok   unlabelled stack warning explains it predates KS-666
+ok   unlabelled stack warning does NOT block
+ok   genuinely empty host stays silent — no false alarm
+ok   unlabelled + dirty tree still blocks on the tree
+ok   docker unavailable -> exit 2, not a false all-clear
+ok   one foreign stack with 4 containers is listed ONCE
+ok   three distinct foreign stacks are listed three times
+
+stack_guard: 24 passed, 0 failed
+
+=== Blockchain/Dev/scripts/__tests__/start_secuura_banner.test.sh ===
+SUBJECT /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/c6ce62ad-66de-4b90-a27a-53acf64beaa3/scratchpad/g74/wt/merged/Start_Up/start-secuura.sh
+        sha256 f3b2dba4033079d04e25055872cc845d109b055a60962d7532c066f99da839ee
+
+  ok   the Credentials banner no longer prints the retired admin credential (0 hits)
+  ok   the banner names the provisioning mechanism instead of a value (1 hit)
+  ok   CONTROL - issuer line untouched (demo@secuura.io still authenticates)
+  ok   start-secuura.sh parses (bash -n)
+
+  4 passed, 0 failed (of 4 cells)
+
+=== Blockchain/Dev/scripts/__tests__/start_secuura_expected_services.test.sh ===
+ok   every container_name uses the ${STACK_PREFIX:-secuura}-<svc> form (40 checked)
+ok   no default-profile long-running service is missing from EXPECTED_SUFFIXES (compose has it, script does not wait)
+ok   no EXPECTED_SUFFIXES entry is stale (script waits, compose does not declare it — the KS-321 shape)
+ok   EXPECTED_SUFFIXES count equals the derived set
+ok   every KNOWN_UNWAITED entry is a real default-profile long-running service
+info: KNOWN_UNWAITED = stack-marker demo-service mcp-server pgbouncer tenant-provisioning tokenisation (6); derived wait set = 27; compose named containers = 40 (profiled 5, one-shot 2)
+
+PASS=5 FAIL=0
+
+=== Blockchain/Dev/scripts/__tests__/start_secuura_marker_unknown_warning.test.sh ===
+PASS: the marker guard reads the stack.owner label
+PASS: the guard WARNS by name
+PASS: the guard prints the recreate remedy
+PASS: the guard warns without failing the start
+PASS: CONTROL the KS-666 lease line is intact
+
+PASS=5 FAIL=0
+
+=== Blockchain/Dev/scripts/__tests__/start_secuura_slot_names.test.sh ===
+ok   slot 2: health wait sees all 27 containers (no 120 s timeout)
+ok   slot 2: PostgreSQL probe reports accepting connections
+ok   slot 2: Redis probe reports PONG
+ok   slot 2: pg_isready is exec'd in secuura-s2-postgres
+ok   slot 2: redis-cli is exec'd in secuura-s2-redis
+ok   slot 2: inspects 27 distinct secuura-s2-* names (positive control for the next case)
+ok   slot 2: never inspects a bare slot-1 name
+ok   slot 2: port pre-flight asks lsof about 6532/6479, not 6432/6379
+ok   slot 2: exits 0
+ok   slot 1: health wait sees all 27 containers
+ok   slot 1: pg_isready is exec'd in secuura-postgres
+ok   slot 1: redis-cli is exec'd in secuura-redis
+ok   slot 1: inspects 27 distinct secuura-* names
+ok   slot 1: port pre-flight still asks about 6432/6379
+ok   slot 1 --status: reports 27/27 running, 27 healthy
+ok   slot 1 --status: no container reported as not found
+ok   slot 1 --status: inspects 27 distinct secuura-* names
+ok   slot 3 --status: reports 27/27 running, 27 healthy
+ok   slot 3 --status: no container reported as not found
+ok   slot 3 --status: inspects 27 distinct secuura-s3-* names
+ok   slot 3 --status: never inspects a bare slot-1 name
+ok   slot 3 --status: port pre-flight asks about 6632/6579
+ok   control: slot-2 run against a slot-1-only daemon times out (stub discriminates by prefix)
+
+PASS=23 FAIL=0
+
+=== Blockchain/Dev/scripts/__tests__/stop_secuura.test.sh ===
+ok   the guard actually SEES the running stack (not a no-op pass)
+ok   invokes 'docker compose' (v2), never docker-compose
+ok   targets the ROOT docker-compose.local.yml, not Blockchain/Dev's
+ok   default teardown runs 'down' WITHOUT -v
+ok   --remove-volumes + confirmation runs 'down -v'
+ok   --remove-volumes + refusal destroys NOTHING
+ok   slot 2 resolves the secuura_slot2 project, not the directory default
+ok   foreign-owned stack: refuses and exits non-zero
+ok   foreign-owned stack: tears down NOTHING
+ok   foreign-owned stack + override: proceeds
+ok   unknown argument is rejected without touching the stack
+
+stop_secuura: 11 passed, 0 failed
+
+=== Blockchain/Dev/scripts/__tests__/tenant_isolation_stderr_own_file.test.sh ===
+  ok   CONTROL - a runner with no stderr: rc 0, artefact parses, 3 tested, 0 findings
+  ok   RED the fallback run's artefact is the runner's JSON alone: rc 0, parses, 3 tested, 0 findings
+  ok   RED the fallback run prints tested=3 cross-tenant_findings=0
+  ok   RED the runner's stderr is kept in 06-tenant-isolation.json.stderr
+  ok   RED a leak found on a fallback run stays readable: rc 0, 1 finding, observed tenant-a
+
+  5 passed, 0 failed
+
+=== Blockchain/Dev/scripts/__tests__/validate_lint_errexit.test.sh ===
+SUBJECT /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/c6ce62ad-66de-4b90-a27a-53acf64beaa3/scratchpad/g74/wt/merged/systemTest/schemathesis/validate-lint.sh
+        sha256 e12d7609c442d4f4cd8a04e7b5948c4899f9c630f9121a48d5951a76d232cb7f
+
+  ok   validate-lint.sh has NO bare arithmetic-command post-increment/decrement - ((X++)) exits 1 at 0 and bash >= 4.1 set -e dies on it (control fires: 1)
+  ok   both counters advance by assignment (2 matches)
+  ok   run_check survives bash -e from PASS_COUNT=0 to the second check (survived=2)
+  ok   validate-lint.sh parses (bash -n)
+
+  4 passed, 0 failed (of 4 cells)
+
+=== systemTest/__tests__/bootstrap_login_diagnosis.test.sh ===
+== B2: a refused connection names ECONNREFUSED and the PORT, not 'fetch failed' alone ==
+  ok   an unreachable target is DEGRADED, non-fatal (unchanged)
+  ok   the banner says ECONNREFUSED
+  ok   the banner names the refused port (51758)
+  ok   an unreachable target is NOT blamed on the password
+  ok   the banner points at the slot as the thing to check
+== B1: a 429 from the login limiter is named as the limiter, not as a wrong password ==
+  ok   a 429 leaves the bootstrap admin UNAVAILABLE (nothing created)
+  ok   the banner names the limiter and the 429
+  ok   the banner says the password was NOT checked
+  ok   the banner states the cooldown
+  ok   a 429 is NOT blamed on the password
+== CONTROL: a 401 IS blamed on the password, with the status, and never on the limiter ==
+  ok   a 401 says check the password (HTTP 401)
+  ok   a 401 does not mention the limiter
+  ok   the password value never reaches the banner
+== a 503 and a token-less 200 are gateway health, not credentials ==
+  ok   a 503 names the status and points at the gateway logs
+  ok   a 200 with no token says so
+  ok   a token-less 200 is NOT blamed on the password
+  ok   KS-1201 CONTROL: the listener count FIRES — it reads 1 with a stub deliberately running, so the 0 below is a measurement
+  ok   KS-1201: no login_stub.mjs listener from this run survives stop_stub (counted by the stub's own absolute path, not by name)
+
+bootstrap_login_diagnosis.test.sh: 18 passed, 0 failed
+
+=== systemTest/__tests__/doc_npm_scripts_exist.test.sh ===
+== every npm script a systemTest doc names exists (KS-1386) ==
+  ok   no doc names an npm script its package does not define
+  ok   the scan covers real references (360 'npm run' mentions)
+  ok   CONTROL — defined scripts (own package + Blockchain/Dev) pass
+  ok   PLANT — a missing script is reported with file:line
+  ok   MARKER — doc-script-ok: <reason> exempts its line
+  ok   MARKER — a bare doc-script-ok exempts nothing
+doc_npm_scripts_exist: 6 passed, 0 failed
+
+=== systemTest/__tests__/html_docs_matrix.test.sh ===
+== html_docs_matrix
+  ok   API_Security_Functional_Testing_Architecture_Flow_Diagrams.html has no prose outside a table, sane Mermaid, no placeholders
+  ok   QA_Tool_Cheat_Sheet_Secuura_API_Testing.html has no prose outside a table, sane Mermaid, no placeholders
+  ok   control: a bare paragraph is reported
+  ok   control: a list item is reported
+  ok   control: a note is reported
+  ok   control: a combo row is reported
+  ok   control: long text in a flex ck-item (the screenshot defect) is reported
+  ok   control: a long unwrapped text run is reported
+  ok   control: a placeholder row is reported
+  ok   control: a mermaid block with no diagram type is reported
+  ok   control: a mermaid block with an unbalanced bracket is reported
+  ok   control: a correct page reports nothing
+  12 passed, 0 failed
+
+=== systemTest/__tests__/ks998_format_gate_push_label_is_literal.test.sh ===
+ok   a red src/a.b.ts NOT in the push (push has src/aXb.ts) is labelled inherited
+ok   ...and is NOT labelled as in this push
+ok   a red src/[id].ts IN the push is labelled (in this push)
+ok   CONTROL the dotted run still fails (exit 1)
+ok   CONTROL the bracket run still fails (exit 1)
+ok   CONTROL the bracket run trailer counts one failure
+ok   CONTROL a plain red file IN the push is labelled (in this push)
+ok   CONTROL a plain red file NOT in the push is labelled inherited
+
+ks998_format_gate_push_label_is_literal: 8 passed, 0 failed
+
+=== systemTest/__tests__/manifest_path.test.sh ===
+ok   nothing set -> actors-unslotted.json, never slot 1's
+ok   slot 1 unsourced -> actors-slot1.json
+ok   slot 1 sourced -> actors-slot1.json (both agree)
+ok   slot 2 unsourced -> actors-slot2.json
+ok   slot 2 sourced -> actors-slot2.json (both agree)
+ok   slot 3 unsourced -> actors-slot3.json
+ok   slot 3 sourced -> actors-slot3.json (both agree)
+ok   slot 4 unsourced -> actors-slot4.json
+ok   slot 4 sourced -> actors-slot4.json (both agree)
+ok   malformed slot is refused, not defaulted to slot 1
+ok   a slot above the ceiling is refused
+ok   the pre-KS-971 bare actors.json is never produced
+ok   rejected: nothing set -> actors.rejected-unslotted.json
+ok   rejected: slot 1 -> actors.rejected-slot1.json
+ok   rejected: slot 2 -> actors.rejected-slot2.json
+ok   rejected: slot 3 -> actors.rejected-slot3.json
+ok   rejected: slot 4 -> actors.rejected-slot4.json
+ok   manifest.ts imports without throwing
+ok   rejected manifests differ across slots (actors.rejected-slot2.json vs actors.rejected-slot3.json)
+ok   writeRejectedManifest writes the SLOT-SCOPED path it returns
+
+manifest_path: 20 passed, 0 failed
+
+=== systemTest/__tests__/manifest_quarantine.test.sh ===
+== manifest.ts quarantineManifest ==
+  ok   the stale manifest is gone from the path consumers read
+  ok   a superseded copy exists
+  ok   the superseded copy still carries the stale content (moved, not deleted)
+  ok   the copy is named for the rejecting run AND its (absent) slot: unslotted
+  ok   slot 3's copy carries its slot tag, so the same stamp on two slots cannot collide
+  ok   CONTROL: with no manifest present it reports nothing moved
+  ok   CONTROL: with no manifest present it creates nothing
+  ok   a second quarantine at the same stamp does not clobber the first
+  ok   the first quarantine still holds its own content
+== superseded copy carries its slot (KS-682 x KS-971) ==
+  ok   slot 1: superseded copy is actors.superseded-slot1-<stamp>.json
+  ok   slot 2: superseded copy is actors.superseded-slot2-<stamp>.json
+  ok   slot 3: superseded copy is actors.superseded-slot3-<stamp>.json
+  ok   slot 4: superseded copy is actors.superseded-slot4-<stamp>.json
+  ok   default path resolves at call time: slot set after import quarantines THAT slot's manifest
+
+  14 passed, 0 failed
+
+=== systemTest/__tests__/manifest_readers_agree.test.sh ===
+== every slot names ONE file, on all four sides ==
+ok   unset -> unslotted, never slot 1 -> actors-unslotted.json
+ok   slot 1 -> actors-slot1.json
+ok   slot 1, sourced shell (-slot1) -> actors-slot1.json
+ok   slot 2 -> actors-slot2.json
+ok   slot 2, sourced shell (-slot2) -> actors-slot2.json
+ok   slot 3 -> actors-slot3.json
+ok   slot 3, sourced shell (-slot3) -> actors-slot3.json
+ok   slot 4 -> actors-slot4.json
+ok   slot 4, sourced shell (-slot4) -> actors-slot4.json
+== the platform-s STACK_SLOT alias reaches all four sides, in stack_env.sh:37's order (KS-1016) ==
+ok   alias alone -> slot 2 -> actors-slot2.json
+ok   platform-k name wins over the alias -> actors-slot3.json
+ok   blank platform-k name falls through to the alias -> actors-slot2.json
+ok   malformed alias is refused too -> ERROR
+== a malformed slot is REFUSED on all four sides, never defaulted or interpolated ==
+ok   non-numeric 'two' -> ERROR
+ok   leading zero '01' -> ERROR
+ok   zero -> ERROR
+ok   negative -> ERROR
+ok   fraction -> ERROR
+ok   above the ceiling (5) -> ERROR
+ok   far above the ceiling (44) -> ERROR
+== whitespace is trimmed the same way everywhere ==
+ok   ' 2 ' -> slot 2 -> actors-slot2.json
+ok   '   ' -> unslotted -> actors-unslotted.json
+== CONTROL: the drivers can tell the readers apart (a driver that always printed the same thing would pass everything above) ==
+ok   CONTROL: writer distinguishes slot 2 from slot 3 (actors-slot2.json vs actors-slot3.json)
+ok   CONTROL: schemathesis distinguishes slot 2 from slot 3 (actors-slot2.json vs actors-slot3.json)
+
+manifest_readers_agree: 24 passed, 0 failed
+
+=== systemTest/__tests__/no_hardcoded_slot_literals.test.sh ===
+== the forbidden set is computed, and covers every family for every slot above 1 ==
+ok   forbidden set: 45 patterns = 3 slots x (11 port families + 4 name shapes)
+== the scanned roots hold no slot 2..4 literal ==
+ok   scanned 1206 files under: fixtures __tests__ scripts run-in-slot.sh performance playwright akto schemathesis api-explorer
+FAIL unmarked slot 2..4 values (8 lines) — derive them from support/slot-expect.sh, or mark 'slot-literal-ok: <reason>'
+       schemathesis/config/schemathesis-baseline.json:10:      "pre-merge-ks-1445-2026-10-07T14-01-26Z-slot2",
+       schemathesis/config/schemathesis-baseline.json:11:      "pre-merge-ks-1445-2026-10-07T14-30-16Z-slot2"
+       schemathesis/config/schemathesis-baseline.json:854:      "reason": "Schemathesis 4.29.x tool false positive, not a platform defect: every failing case in every run was counted by the KS-1414 classifier as VALID under the published schema (pool draw overwrote the negative value). Failing cases per run (KS-1445 pre-merge sweeps, slot 2, Schemathesis 4.29.4, 2026-10-07: pre-merge-ks-1445-2026-10-07T14-01-26Z-slot2 / pre-merge-ks-1445-2026-10-07T14-30-16Z-slot2): 1/1, each 1 of 1 classified valid as sent. Added by the KS-1445 follow-up on 2026-10-07. No comment by Kamil on KS-1414 (checked 2026-10-07).",
+       schemathesis/config/schemathesis-baseline.json:859:      "reason": "Schemathesis 4.29.x tool false positive, not a platform defect: every failing case in every run was counted by the KS-1414 classifier as VALID under the published schema (pool draw overwrote the negative value). Failing cases per run (KS-1445 pre-merge sweeps, slot 2, Schemathesis 4.29.4, 2026-10-07: pre-merge-ks-1445-2026-10-07T14-01-26Z-slot2 / pre-merge-ks-1445-2026-10-07T14-30-16Z-slot2): 0/1, the 1 classified valid as sent. Added by the KS-1445 follow-up on 2026-10-07. No comment by Kamil on KS-1414 (checked 2026-10-07).",
+       schemathesis/config/schemathesis-baseline.json:864:      "reason": "response_schema_conformance recurrence (KS-565 section 1 class): the declared 200 schema requires sessionId, status and verified, but the handler (services/kyc/src/routes/microsoft-verification.ts, GET /result/:sessionId) returns no sessionId on either branch, omits verified while in progress, and answers status 'completed', which the enum does not list. Failing cases per run (KS-1445 pre-merge sweeps, slot 2, Schemathesis 4.29.4, 2026-10-07: pre-merge-ks-1445-2026-10-07T14-01-26Z-slot2 / pre-merge-ks-1445-2026-10-07T14-30-16Z-slot2): 1/0. Appended to KS-565 (Backlog) on 2026-10-07. Added by the KS-1445 follow-up on 2026-10-07. Kamil, verbatim: config/baseline_kamil_verbatim.py[\"KS-565\"].",
+       schemathesis/config/schemathesis-baseline.json:869:      "reason": "Raw 500 INTERNAL_ERROR on a fuzzed nonce/walletAddress that passes verifySignatureSchema (services/auth/src/routes/wallet.ts); exact throw site not identified (replay xPmeIe). Sibling of the baselined POST /api/auth/wallet/authenticate pair. Failing cases per run (KS-1445 pre-merge sweeps, slot 2, Schemathesis 4.29.4, 2026-10-07: pre-merge-ks-1445-2026-10-07T14-01-26Z-slot2 / pre-merge-ks-1445-2026-10-07T14-30-16Z-slot2): 0/1. Appended to KS-593 (Backlog) on 2026-10-07. Added by the KS-1445 follow-up on 2026-10-07. Kamil, verbatim: config/baseline_kamil_verbatim.py[\"KS-593\"].",
+       schemathesis/config/schemathesis-baseline.json:874:      "reason": "The spec leaves requestBody.required unset, so a bodyless POST is schema-valid, and the handler answers 400 ('data' Required). KS-591 class, raised as its own ticket because KS-591 is In Progress. Failing cases per run (KS-1445 pre-merge sweeps, slot 2, Schemathesis 4.29.4, 2026-10-07: pre-merge-ks-1445-2026-10-07T14-01-26Z-slot2 / pre-merge-ks-1445-2026-10-07T14-30-16Z-slot2): 0/1. Added by the KS-1445 follow-up on 2026-10-07. No comment by Kamil on KS-1449 (checked 2026-10-07).",
+       schemathesis/config/schemathesis-baseline.json:879:      "reason": "Stateful key collapses every chain: the failing chain was POST /api/notifications then PATCH /api/notifications/{id}/read, answered 404. POST stores the row under a body userId with no self/admin check (services/api-gateway/src/routes/notifications.ts), so the caller's read cannot find it: the notification BOLA, whose former owner KS-486 is closed. KS-188: a stateful count is a sample. Failing cases per run (KS-1445 pre-merge sweeps, slot 2, Schemathesis 4.29.4, 2026-10-07: pre-merge-ks-1445-2026-10-07T14-01-26Z-slot2 / pre-merge-ks-1445-2026-10-07T14-30-16Z-slot2): 1/0. Added by the KS-1445 follow-up on 2026-10-07. No comment by Kamil on KS-1448 (checked 2026-10-07).",
+== POSITIVE CONTROL: a planted literal is found, in every family and shape ==
+ok   CONTROL: all 54 planted literals are reported
+== NEGATIVE CONTROLS: what must NOT be reported ==
+ok   CONTROL: slot 1's base, a port above the ceiling, a longer number, 'slot1'/'unslotted' and a marked line are not reported
+ok   CONTROL: a marker with no reason does not exempt the line
+== GITIGNORED RUN OUTPUT is not source (KS-1386, found overnight 2026-09-29) ==
+ok   CONTROL: a slot value in a GITIGNORED cache file is not reported
+ok   CONTROL: an UNTRACKED (not ignored) file is still scanned
+ok   CONTROL: a directory that is not a git work tree is REFUSED, not scanned some other way
+
+no_hardcoded_slot_literals: 8 passed, 1 failed
+
+=== systemTest/__tests__/no_secret_prefix_echo.test.sh ===
+ok   scanned 38 shell scripts under systemTest/
+ok   no script prints a slice of a secret-named variable
+ok   CONTROL: all 3 planted secret slices are found
+ok   CONTROL: a length, a comment and a non-secret slice are not flagged
+
+no_secret_prefix_echo: 4 passed, 0 failed
+
+=== systemTest/__tests__/observability_discovery.test.sh ===
+ok   network: explicit override wins over discovery
+ok   pg: explicit DSN wins over discovery
+ok   redis: explicit password wins over discovery
+ok   network: discovered from the running gateway
+ok   pg: DSN assembled from the running container
+ok   redis: password read from --requirepass in the command vector
+ok   network: follows whatever the project is called
+ok   pg: platform not running -> empty, so compose's default applies
+ok   redis: platform not running -> empty
+ok   network: nothing discoverable -> the compose default, not an empty string
+ok   pg: a missing password yields empty, not a DSN with a blank password
+ok   redis: no --requirepass -> empty, not the next argument
+ok   redis: dangling --requirepass -> empty, no out-of-range read
+ok   redis: malformed docker output -> empty, not a crash
+
+observability_discovery: 14 passed, 0 failed
+
+=== systemTest/__tests__/package_format_gate.test.sh ===
+ok   discovers a package that declares format:check
+ok   discovers every such package (5 fixtures)
+ok   does NOT discover a package with no format:check
+ok   a path in green selects green
+ok   ...and does not run red
+ok   one package checked, none failed
+ok   no gated path -> exit 0
+ok   no gated path -> says nothing
+ok   systemTest path outside any package -> silent
+ok   a red package -> exit 1
+ok   ...names the offending file
+ok   ...and says how to fix it
+ok   a red file IN the push is labelled so
+ok   a red file NOT in the push is labelled so
+ok   deps missing, nothing else selected -> exit 1 (examined nothing)
+ok   deps missing -> SKIP names the package
+ok   deps missing -> names the remedy
+ok   deps missing -> counted as skipped
+ok   examined nothing -> says NOTHING CHECKED
+ok   examined nothing -> says it is NOT a formatting failure
+ok   one checked + one skipped -> exit 0
+ok   ...trailer counts both
+ok   ...and does NOT claim nothing was checked
+ok   two red packages -> exit 1
+ok   two red packages -> trailer counts BOTH
+ok   mixed run -> trailer counts one failure
+ok   non-zero with no [warn] lines -> exit 1
+ok   ...counted as a failure, not a pass
+ok   ...says prettier named no files
+ok   --all -> exit 1 (fixtures include reds)
+ok   --all checks the untouched green package
+ok   --all checks every deps-present package
+ok   an unknown flag -> exit 2
+
+package_format_gate: 33 passed, 0 failed
+
+=== systemTest/__tests__/pre_suite.test.sh ===
+== KS-1016: a LOCAL target with no slot named is REFUSED, naming the slot command ==
+  ok   no slot + local target: REFUSED, exit 1
+  ok   the refusal shows both forms of the slot command
+  ok   the refusal says the rule is local-only
+  ok   CI is exempt — its local stack is deliberately unslotted (falls through to DEGRADED)
+== pre-suite.ts ==
+  ok   remote target reports REFUSED
+  ok   REFUSED exits non-zero
+  ok   REFUSED stays fatal with the flag set
+  ok   CONTROL: a permitted target is not REFUSED
+  ok   unreachable stack reports DEGRADED
+  ok   DEGRADED is non-fatal by default
+  ok   DEGRADED names the seeded fallback in words
+  ok   SYSTEMTEST_REQUIRE_PROVISIONED=true makes DEGRADED fatal
+== F3: the strict flag does not fail open silently ==
+  ok   strict honours the spelling 'TRUE'
+  ok   strict honours the spelling ' true'
+  ok   strict honours the spelling 'true '
+  ok   an unrecognised value WARNS
+  ok   an unrecognised value stays permissive rather than silently strict
+  ok   CONTROL: 'false' is recognised and does not warn
+  NOT RUN  PROVISIONED arm — No stack slot named. Every LOCAL system-test run must say which Docker stack it targets.
+           SECUURA_STACK_SLOT=<n> bash systemTest/__tests__/pre_suite.test.sh
+           or: systemTest/run-in-slot.sh <n> bash systemTest/__tests__/pre_suite.test.sh
+           This arm CREATES accounts, so it never guesses a target. The three failure arms above ran.
+
+== F2: the four runner choke points are hooked ==
+  ok   playwright/global-setup.ts CALLS the pre-suite step
+  ok   performance/runner/cli.ts CALLS the pre-suite step
+  ok   akto/tests/preSuiteSetup.ts CALLS the pre-suite step
+  ok   schemathesis/scripts/run.py CALLS the pre-suite step
+  ok   CONTROL: manifest.ts does not invoke the step
+== F2: the playwright hook actually EXECUTES, not just exists in source ==
+  NOT RUN  playwright execution check — no stack slot named (globalSetup provisions accounts on the slot, so it runs only on the one you name: SECUURA_STACK_SLOT=N). No stack was contacted.
+== F2: performance hooks BEFORE the manifest is consumed ==
+  ok   provisioning runs before withGeneratedActors (line 182 < 189)
+== F2: no npm script re-introduces a per-script hook (they double-provision) ==
+  ok   no package.json carries a pre* hook
+== F2: schemathesis gates by COMMAND, and integration is NOT exempt ==
+  ok   run.py gates by command set
+  ok   integration is NOT exempt from provisioning
+  ok   CONTROL: report IS exempt, so the set is populated
+
+pre_suite.test.sh: 28 passed, 0 failed
+
+=== systemTest/__tests__/prove_slot_isolation.test.sh ===
+ok   all_slots is 1..SECUURA_MAX_STACK_SLOT, read from stack_env.sh
+ok   slot 1 service name is secuura-originate
+ok   slot 1 gateway name follows the same rule
+ok   slot 1 gateway port is the slot-1 base + 100*(N-1)
+ok   slot 2 service name is secuura-s2-originate
+ok   slot 2 gateway name follows the same rule
+ok   slot 2 gateway port is the slot-1 base + 100*(N-1)
+ok   slot 3 service name is secuura-s3-originate
+ok   slot 3 gateway name follows the same rule
+ok   slot 3 gateway port is the slot-1 base + 100*(N-1)
+ok   slot 4 service name is secuura-s4-originate
+ok   slot 4 gateway name follows the same rule
+ok   slot 4 gateway port is the slot-1 base + 100*(N-1)
+ok   slot 1 service name is BARE (stack_env.sh leaves the prefix off)
+ok   a slot above the ceiling names no container (stack_env.sh refuses it)
+ok   every slot names a different container
+ok   the victim's log is counted as a hit
+ok   a control log with only a threshold line is NOT a hit
+ok   a folder with no k6 log at all is 0, not an error
+ok   a missing folder is 0, not a crash
+ok   two matching lines in one log still counts as one file
+ok   two matching logs count as two
+ok   an unset VICTIM_SLOT is refused with exit 2 and NO docker call
+ok   the refusal names VICTIM_SLOT
+ok   a blank VICTIM_SLOT is refused like an unset one, with NO docker call
+ok   VICTIM_SLOT='0' is refused with exit 2 and NO docker call
+ok   VICTIM_SLOT='01' is refused with exit 2 and NO docker call
+ok   VICTIM_SLOT='abc' is refused with exit 2 and NO docker call
+ok   VICTIM_SLOT='5' is refused with exit 2 and NO docker call
+ok   slot 1: an unknown FAILURE_MODE is rejected (exit 1), not treated as 'pause', with NO docker call
+ok   slot 2: an unknown FAILURE_MODE is rejected (exit 1), not treated as 'pause', with NO docker call
+ok   slot 3: an unknown FAILURE_MODE is rejected (exit 1), not treated as 'pause', with NO docker call
+ok   slot 4: an unknown FAILURE_MODE is rejected (exit 1), not treated as 'pause', with NO docker call
+
+prove_slot_isolation: 33 passed, 0 failed
+
+=== systemTest/__tests__/provision_base_url.test.sh ===
+ok   bare gateway is unchanged (the header's documented form)
+ok   the wrapper's /api form is reduced to the root
+ok   slot 1's /api form
+ok   slot 2's /api form
+ok   slot 3's /api form
+ok   slot 4's /api form
+ok   a trailing slash after /api
+ok   a trailing slash with no /api
+ok   surrounding whitespace is trimmed
+ok   a host containing 'api' is untouched
+ok   an /api segment that is not last is untouched
+ok   register URL is /api/auth/register, not /api/api/auth/register
+ok   slot 1: wrapper exports 'http://localhost:6882/api' -> root 'http://localhost:6882'
+ok   slot 2: wrapper exports 'http://localhost:6982/api' -> root 'http://localhost:6982'
+ok   slot 3: wrapper exports 'http://localhost:7082/api' -> root 'http://localhost:7082'
+ok   slot 4: wrapper exports 'http://localhost:7182/api' -> root 'http://localhost:7182'
+ok   CONTROL: the wrapper does export the /api form, so normalisation is load-bearing
+ok   --base-url beats API_BASE_URL (global-setup's explicit slot wins over an inherited shell)
+ok   API_BASE_URL is used when no --base-url is given (the sourced route still works)
+ok   neither set (CI) announces NO target — nothing is resolved
+ok   --base-url on its own, bare root form
+== precedence chain through the real entry point (KS-971) ==
+ok   SECUURA_GATEWAY_URL (the wrapper's root) beats API_BASE_URL
+ok   SECUURA_GATEWAY_URL with a trailing /api is normalised too
+ok   --base-url still beats SECUURA_GATEWAY_URL
+ok   slot alone derives the slot's gateway (was: slot-1 literal)
+ok   slot 1 alone -> http://localhost:6882, derived not typed
+ok   slot 2 alone -> http://localhost:6982, derived not typed
+ok   slot 3 alone -> http://localhost:7082, derived not typed
+ok   slot 4 alone -> http://localhost:7182, derived not typed
+ok   slot 2 + API_BASE_URL on slot 2's port -> honoured
+== a LOCAL url on ANOTHER slot's port is refused, not obeyed (KS-971) ==
+ok   slot 3 requested, API_BASE_URL on slot 1's port -> refused
+ok   slot 2 requested, SECUURA_GATEWAY_URL on slot 4's port -> refused
+ok   no slot requested (CI) -> a slot-1 url is simply taken as given
+== KS-1016: a LOCAL target with NO slot named is refused, outside CI, for every slot's port ==
+ok   no slot, API_BASE_URL on slot 1's port -> REFUSED (No stack slot named)
+ok   no slot, API_BASE_URL on slot 2's port -> REFUSED (No stack slot named)
+ok   no slot, API_BASE_URL on slot 3's port -> REFUSED (No stack slot named)
+ok   no slot, API_BASE_URL on slot 4's port -> REFUSED (No stack slot named)
+ok   no slot, nothing set -> REFUSED, never the slot-1 default
+ok   no slot, nothing set, CI=true -> REFUSED: no default target
+ok   no slot, REMOTE target -> not this rule's business (refused as remote instead)
+ok   STACK_SLOT alias alone counts as naming the slot
+ok   the refusal shows both forms of the slot command and says local-only
+ok   nothing set: refused, naming the slot variable and the url variables, and no target announced
+ok   CI's 7282 names no slot, so it passes through under any slot
+ok   a remote url passes the slot check and is stopped by the remote-safety guard instead
+ok   --print-target via --base-url http://127.0.0.1:51892: resolved http://127.0.0.1:51892 and opened 0 connections
+ok   --print-target via API_BASE_URL: resolved http://127.0.0.1:51892 and opened 0 connections
+ok   --print-target via SECUURA_GATEWAY_URL: resolved http://127.0.0.1:51892 and opened 0 connections
+ok   --print-target says it sent no request
+ok   CONTROL: a real pass at the listener IS counted (0 -> 1), so 0 above means 0
+ok   slot 1 unsourced: suite gateway and provisioning root agree (http://localhost:6882)
+ok   slot 1 sourced: agree (http://localhost:6882)
+ok   slot 1 with a stale slot-1 API_BASE_URL in the shell: retargeted to slot 1 (http://localhost:6882)
+ok   slot 2 unsourced: suite gateway and provisioning root agree (http://localhost:6982)
+ok   slot 2 sourced: agree (http://localhost:6982)
+ok   slot 2 with a stale slot-1 API_BASE_URL in the shell: retargeted to slot 2 (http://localhost:6982)
+ok   slot 3 unsourced: suite gateway and provisioning root agree (http://localhost:7082)
+ok   slot 3 sourced: agree (http://localhost:7082)
+ok   slot 3 with a stale slot-1 API_BASE_URL in the shell: retargeted to slot 3 (http://localhost:7082)
+ok   slot 4 unsourced: suite gateway and provisioning root agree (http://localhost:7182)
+ok   slot 4 sourced: agree (http://localhost:7182)
+ok   slot 4 with a stale slot-1 API_BASE_URL in the shell: retargeted to slot 4 (http://localhost:7182)
+
+provision_base_url: 62 passed, 0 failed
+
+=== systemTest/__tests__/quarantine_call_sites.test.sh ===
+== quarantine call sites ==
+  ok   harness: pre-suite.ts runs and reaches the DEGRADED arm
+  ok   catch arm: the stale manifest is gone from the consumers' path
+  ok   catch arm: a superseded copy was written
+  ok   catch arm: the banner REPORTS the supersede instead of predicting
+  ok   CONTROL: with no manifest present the catch arm quarantines nothing
+  ok   strict catch arm: still FATAL (rc=1)
+  ok   strict catch arm: the stale manifest was moved aside
+  ok   strict catch arm: the banner NAMES where the manifest was moved
+  ok   strict CONTROL: with no manifest present the banner says none was moved
+  ok   strict catch arm: a manifest that could not be moved is REPORTED, and the run is still FATAL
+  ok   could-not-move advice names the real manifest file (actors-unslotted.json), not the pre-KS-971 actors.json
+  ok   permissive catch arm: could-not-move advice names the real manifest file
+  ok   REFUSED does NOT quarantine — a fatal refusal must not destroy a valid manifest
+  ok   harness: stub server is listening on 127.0.0.1:51920
+  ok   DRIFT arm reached (role collapse), not the catch arm
+  ok   DRIFT call site: provisionActors quarantined the stale manifest
+  ok   CONTROL: with no manifest present the drift arm quarantines nothing
+
+  17 passed, 0 failed
+
+=== systemTest/__tests__/run_in_slot.test.sh ===
+ok   runs the command with the slot exported
+ok   points the suite at that slot
+ok   passes the command's exit code through (success)
+ok   passes the command's exit code through (failure)
+ok   a second suite on the SAME slot is refused
+ok   a suite on a DIFFERENT slot still runs
+ok   the lock is released after a FAILED suite
+ok   no lock directory is left behind
+ok   control: the leftover-lock check can SEE a lock
+ok   control: the two worktrees are at DIFFERENT paths
+ok   control: an uncontended slot from a worktree runs
+ok   a second worktree on the SAME slot is refused
+ok   refused for the RIGHT reason (BLOCKED, not an error)
+ok   a second worktree on a DIFFERENT slot still runs
+ok   no arguments -> exit 2
+ok   slot but no command -> exit 2
+ok   non-numeric slot -> exit 2
+
+run_in_slot: 17 passed, 0 failed
+
+=== systemTest/__tests__/setup_env.test.sh ===
+== a named slot: the default is THAT slot's API root, for every slot ==
+ok   slot 1 named, empty answer -> http://localhost:6882/api
+ok   slot 1: the prompt offers slot 1's root
+ok   slot 2 named, empty answer -> http://localhost:6982/api
+ok   slot 2: the prompt offers slot 2's root
+ok   slot 3 named, empty answer -> http://localhost:7082/api
+ok   slot 3: the prompt offers slot 3's root
+ok   slot 4 named, empty answer -> http://localhost:7182/api
+ok   slot 4: the prompt offers slot 4's root
+ok   platform-s STACK_SLOT alias names the slot
+ok   SECUURA_STACK_SLOT wins over the alias
+ok   an explicit answer still wins over the slot default
+== no slot named: no default, and never slot 1's ==
+ok   no slot, empty answer -> refused (rc 1), nothing exported
+ok   the refusal names the slot variable
+ok   no slot: slot 1's gateway is never offered
+ok   no slot under CI, empty answer -> still no default (rc 1)
+ok   no slot, a LOCAL url typed -> refused outside CI
+ok   no slot, a LOCAL url typed under CI=true -> accepted (CI is exempt)
+ok   CI=false is not CI -> the LOCAL url is refused
+ok   no slot, a REMOTE url typed -> accepted (remote needs no slot)
+== an invalid slot is refused, not defaulted ==
+ok   slot above the ceiling -> refused (rc 1)
+ok   non-numeric slot -> refused (rc 1)
+== the API token: required, and never echoed (KS-1386) ==
+ok   an empty token is a failure (rc 1), not success
+ok   no character of the token is printed
+ok   the token's length is reported instead
+
+setup_env: 24 passed, 0 failed
+
+=== systemTest/__tests__/slot_target.test.sh ===
+ok   schemathesis slot 1
+ok   playwright gateway slot 1
+ok   BASE_URL is not exported (slot 1)
+ok   akto target slot 1
+ok   akto app-url slot 1
+ok   akto dashboard url slot 1
+ok   akto target == gateway root slot 1
+ok   performance slot 1
+ok   schemathesis slot 2
+ok   playwright gateway slot 2
+ok   BASE_URL is not exported (slot 2)
+ok   akto target slot 2
+ok   akto app-url slot 2
+ok   akto dashboard url slot 2
+ok   akto target == gateway root slot 2
+ok   performance slot 2
+ok   schemathesis slot 3
+ok   playwright gateway slot 3
+ok   BASE_URL is not exported (slot 3)
+ok   akto target slot 3
+ok   akto app-url slot 3
+ok   akto dashboard url slot 3
+ok   akto target == gateway root slot 3
+ok   performance slot 3
+ok   schemathesis slot 4
+ok   playwright gateway slot 4
+ok   BASE_URL is not exported (slot 4)
+ok   akto target slot 4
+ok   akto app-url slot 4
+ok   akto dashboard url slot 4
+ok   akto target == gateway root slot 4
+ok   performance slot 4
+ok   slot 1 akto prefix
+ok   slot 1 akto project
+ok   slot 1 akto dashboard port
+ok   slot 1 akto mongo port
+ok   slot 1 akto mongo-express port
+ok   slot 1 akto mongo volume
+ok   slot 1 akto dashboard volume
+ok   slot 2 akto prefix
+ok   slot 2 akto project
+ok   slot 2 akto dashboard port
+ok   slot 2 akto mongo port
+ok   slot 2 akto mongo-express port
+ok   slot 2 akto mongo volume
+ok   slot 2 akto dashboard volume
+ok   slot 3 akto prefix
+ok   slot 3 akto project
+ok   slot 3 akto dashboard port
+ok   slot 3 akto mongo port
+ok   slot 3 akto mongo-express port
+ok   slot 3 akto mongo volume
+ok   slot 3 akto dashboard volume
+ok   slot 4 akto prefix
+ok   slot 4 akto project
+ok   slot 4 akto dashboard port
+ok   slot 4 akto mongo port
+ok   slot 4 akto mongo-express port
+ok   slot 4 akto mongo volume
+ok   slot 4 akto dashboard volume
+ok   akto mongo VOLUMES differ (project scoping alone is not enough)
+ok   akto compose projects differ (no shared mongo)
+ok   COMPOSE_PROJECT_NAME does not leak (slot 1)
+ok   COMPOSE_PROJECT_NAME does not leak (slot 2)
+ok   COMPOSE_PROJECT_NAME does not leak (slot 3)
+ok   COMPOSE_PROJECT_NAME does not leak (slot 4)
+ok   slot 1 artifact tag
+ok   slot 1 names its slot
+ok   slot 1 records its gateway port
+ok   slot 1 website port
+ok   slot 1 tokenomics port
+ok   slot 2 artifact tag
+ok   slot 2 names its slot
+ok   slot 2 records its gateway port
+ok   slot 2 website port
+ok   slot 2 tokenomics port
+ok   slot 3 artifact tag
+ok   slot 3 names its slot
+ok   slot 3 records its gateway port
+ok   slot 3 website port
+ok   slot 3 tokenomics port
+ok   slot 4 artifact tag
+ok   slot 4 names its slot
+ok   slot 4 records its gateway port
+ok   slot 4 website port
+ok   slot 4 tokenomics port
+ok   the ticket is in the label
+ok   all 4 slots have distinct artifact suffixes
+ok   artifacts carry the Linear ticket
+ok   no ticket is invented when the branch has none
+ok   no akto side-stack port collides across slots 1-4
+ok   each slot has a distinct target URL
+ok   platform-s's STACK_SLOT selects the same slot
+ok   SECUURA_STACK_SLOT wins when both are set
+ok   requested slot retargets a preset LOCAL url
+ok   a preset REMOTE url is never retargeted
+ok   with no slot requested, a preset url is left alone
+ok   slot 4 (the ceiling) is supported
+ok   slot 5 is refused (ceiling is 4)
+ok   explicit GATEWAY_URL wins
+ok   explicit AKTO_DASHBOARD_PORT wins
+ok   non-numeric slot rejected (exit 2)
+ok   re-source 1->2 retargets AKTO_PREFIX
+ok   re-source 1->2 retargets AKTO_COMPOSE_PROJECT
+ok   re-source 1->2 retargets AKTO_MONGO_PORT
+ok   re-source 1->2 retargets AKTO_DASHBOARD_PORT
+ok   re-source 1->2 retargets AKTO_MONGO_VOLUME
+ok   re-source 1->2 keeps the URL correct too
+ok   re-source 1->2 retargets OVERRIDE_APP_URL
+ok   re-source 1->2 retargets AKTO_DASHBOARD_URL
+ok   re-source 1->2 retargets SECUURA_ARTIFACT_SUFFIX
+ok   re-source 1->2 drops a pinned SECUURA_ARTIFACT_LABEL
+ok   re-source 2->3 retargets AKTO_PREFIX
+ok   re-source 2->3 retargets AKTO_COMPOSE_PROJECT
+ok   re-source 2->3 retargets AKTO_MONGO_PORT
+ok   re-source 2->3 retargets AKTO_DASHBOARD_PORT
+ok   re-source 2->3 retargets AKTO_MONGO_VOLUME
+ok   re-source 2->3 keeps the URL correct too
+ok   re-source 2->3 retargets OVERRIDE_APP_URL
+ok   re-source 2->3 retargets AKTO_DASHBOARD_URL
+ok   re-source 2->3 retargets SECUURA_ARTIFACT_SUFFIX
+ok   re-source 2->3 drops a pinned SECUURA_ARTIFACT_LABEL
+ok   re-source 3->4 retargets AKTO_PREFIX
+ok   re-source 3->4 retargets AKTO_COMPOSE_PROJECT
+ok   re-source 3->4 retargets AKTO_MONGO_PORT
+ok   re-source 3->4 retargets AKTO_DASHBOARD_PORT
+ok   re-source 3->4 retargets AKTO_MONGO_VOLUME
+ok   re-source 3->4 keeps the URL correct too
+ok   re-source 3->4 retargets OVERRIDE_APP_URL
+ok   re-source 3->4 retargets AKTO_DASHBOARD_URL
+ok   re-source 3->4 retargets SECUURA_ARTIFACT_SUFFIX
+ok   re-source 3->4 drops a pinned SECUURA_ARTIFACT_LABEL
+ok   re-source 4->1 retargets AKTO_PREFIX
+ok   re-source 4->1 retargets AKTO_COMPOSE_PROJECT
+ok   re-source 4->1 retargets AKTO_MONGO_PORT
+ok   re-source 4->1 retargets AKTO_DASHBOARD_PORT
+ok   re-source 4->1 retargets AKTO_MONGO_VOLUME
+ok   re-source 4->1 keeps the URL correct too
+ok   re-source 4->1 retargets OVERRIDE_APP_URL
+ok   re-source 4->1 retargets AKTO_DASHBOARD_URL
+ok   re-source 4->1 retargets SECUURA_ARTIFACT_SUFFIX
+ok   re-source 4->1 drops a pinned SECUURA_ARTIFACT_LABEL
+ok   explicit AKTO_MONGO_PORT override is preserved
+ok   live-slot: no slot named -> no gateway, exit 1 (never slot 1)
+ok   live-slot: no slot named -> live_slot_named exits 1
+ok   live-slot: slot 1 named -> slot 1's base + 100*(1-1)
+ok   live-slot: slot 2 named -> slot 1's base + 100*(2-1)
+ok   live-slot: slot 3 named -> slot 1's base + 100*(3-1)
+ok   live-slot: slot 4 named -> slot 1's base + 100*(4-1)
+ok   live-slot: platform-s STACK_SLOT alias counts as naming the slot
+ok   live-slot: SECUURA_STACK_SLOT wins over the alias
+ok   live-slot: an explicit SYSTEMTEST_BASE_URL is the caller naming a target
+ok   live-slot: a slot stack_env.sh rejects -> no gateway, exit 1
+ok   live-slot: sourcing the wrapper stays inside a subshell (no GATEWAY_URL leak)
+ok   tripwire: no __tests__/*.test.sh defaults a slot or gateway to slot 1
+ok   hermetic-env: measured 46 slot variables (>= 20)
+ok   hermetic-env strips SECUURA_GATEWAY_URL
+ok   hermetic-env strips API_BASE_URL
+ok   hermetic-env strips SECUURA_STACK_SLOT
+ok   hermetic-env strips STACK_SLOT
+ok   hermetic-env strips CI
+ok   hermetic-env strips AKTO_PREFIX
+ok   hermetic-env strips SECUURA_API_URL
+ok   hermetic-env strips SECUURA_ARTIFACT_SUFFIX
+ok   hermetic-env leaves bash's own HOME alone
+ok   hermetic-env leaves bash's own PATH alone
+ok   hermetic-env leaves bash's own PWD alone
+ok   hermetic-env leaves bash's own SHLVL alone
+ok   hermetic-env leaves bash's own _ alone
+ok   hermetic-env leaves bash's own OLDPWD alone
+ok   hermetic_strip_except keeps the named variable and strips the rest
+ok   a wrapper that cannot be measured is FATAL (exit 2), never an empty strip
+ok   CONTROL: without the strip a sourced shell redirects the cell to slot 2's gateway (http://localhost:6982) — the leak is real
+ok   with the strip the cell resolves the closed port it named, not the sourced slot
+
+slot_target: 174 passed, 0 failed
+
+shell suites: 70 passed, 1 failed, 0 skipped (of 71)
+FAILED: systemTest/__tests__/no_hardcoded_slot_literals.test.sh
+shell suites wall-clock: 300s
+
+=== 15/15  Every check-*.sh guard must have a HOME, and the wired ones must pass (KS-926) ===
+OK — all 21 tracked guards accounted for (21 buckets entries).
+OK — no inline event handlers in connector JS.
+OK — all 35 Dockerfile(s) drop root for runtime.
+OK — all resource-group references are in the allowed set.
+OK — no hardcoded *123 password literals.
+check-no-latest-tags: examined 5 of 5 advertised file(s).
+OK — no :latest tags found in production-bound configs.
+OK — no Math.random() in security-relevant paths.
+OK — no PII store file is tracked by git.
+OK — no string-concatenated SQL found.
+OK — no TS-strictness flips found in Dockerfiles or build scripts.
+production-guard coverage: 23 / 23 services
+OK — 7 portability rules hold across 103 shell scripts (KS-666).
+OK — 100 shared-stack safety invariants hold (KS-666).
+[L7] test-wallet.env not present — nothing to check
+OK — 13 code guards passed.
+
+PREFLIGHT FAILED on leg(s) 14 - fix the above before pushing. (12/15 legs ran)
+rc=1

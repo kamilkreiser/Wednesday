@@ -15,6 +15,12 @@ supersede: REPLACED WHOLESALE 2026-10-07 05:3x by the night seat c1dbe0b9 (boote
 1. `inbox_digest.sh --inbound` WHOLE, + `--all` for `[QUESTION]` rows in the last 12 h, each matched to a later ANSWER. Bodies are fetched by message id and saved to `fleet/briefs_staged/`.
 2. **Morning ticket sweep + receipt** (the standing grant). Value first: kintsugi deployed + swept at d75bfe2 (night of 10-06); gate71 GO; the #1404 merge-in built and verified, held by the freeze; the KS-1436 ticket filed.
 
+## 🔴 04:4x 2026-10-08 — gate74 RUNNING — READ THIS FIRST
+- FLOOR: %0 wednesday · **%90 QA/Secuura-gate74** (#1423 KS-1164, tier 2; launched 17:33:48Z; rung 5 verified) · %1 monitor.
+- **NEXT from it:** its VERDICT mail (subject per the kit) → read the report WHOLE, re-hash it, score, close %90. On GO: read `fleet/briefs_staged/2026-10-08_seatR15_merge1423_1422_DRAFT.md` WHOLE (Wednesday has NOT yet), add a send amendment, launch **R 15th** with `brief_and_launch.sh --to "Secuura/Blockchain-R"` (cloud: merge). **#1422 lands first** on Wednesday's tier-3 read; #1423 on the gate's GO. Both are API-only squashes (no merge-in needed, measured), so leg 14 is not in the path. If develop moves and a merge-in becomes necessary, STOP (never `--no-verify`).
+- Kit: `fleet/qa-agent/gatesets/2026-10-08_gate74/` (KIT_REPORT, RULINGS incl. Wednesday's 04:3x block, kit.json comparator = base).
+- The raise backlog and leg-14 block below are unchanged.
+
 ## 🔴 03:1x 2026-10-08 — DEVELOP IS RED ON PRE-PUSH LEG 14 — READ THIS FIRST (supersedes the floor/NEXT lines of the 03:0x block)
 - **Every Secuura push carrying a `Blockchain/Dev/` path is BLOCKED.** `systemTest/__tests__/no_hardcoded_slot_literals.test.sh` fails at develop eae08a3f on 8 `slot2` literals in `systemTest/schemathesis/config/schemathesis-baseline.json` (Peter's 89dff83aa, #1424). Lines :10/:11 are run-id strings in a JSON array that cannot carry the guard's `slot-literal-ok:` marker, so the remedy is PETER's call (guard and baseline are both his). Root: the hook runs the full preflight only on `^Blockchain/Dev/` changes, so systemTest-only merges skip leg 14.
 - **R 14th (%89)** told (ANSWER 16:13Z, `fleet/briefs_staged/2026-10-08_seatR14_ANSWER_leg14.md`): board search → ONE Bug to the board account with one question to Peter (or one comment on an existing ticket) → WRAP COLD. **R2 KS-1274 is BUILT, committed, NOT pushed** (`feature/ks-1274-trivy-bare-object-guard-ra14-1` 32e263890b69). R3+R4 (KS-1410) and R5 (KS-1139) NOT built.

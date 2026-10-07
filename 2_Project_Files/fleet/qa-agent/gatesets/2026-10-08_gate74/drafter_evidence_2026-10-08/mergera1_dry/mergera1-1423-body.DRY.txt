@@ -1,0 +1,86 @@
+KS-1164: assert the k6 status-code breakdown prints locale-grouped counts
+
+Adds the locale-count coverage KS 1164 left behind. Test-only: no product code
+changes, and `systemTest/performance/gate/report.ts` stays blob `ac59af37cbc6`.
+
+`formatStatusCodeBreakdown` prints each k6 Rate counter through `toLocaleString()`,
+so a 5xx count reads `1,234` rather than `1234`. Nothing asserted it — the grouping
+could be deleted and every suite would stay green.
+
+KS 1164's product defect (`writeGateReport` overwriting the input summary when
+`--summary` does not end in `-summary.json`) was already fixed and merged as
+`f3bf8698d628`, PR #1271. This PR does not touch it and does not close the ticket.
+
+Refs KS-1164 — https://linear.app/secuura/issue/KS-1164
+
+## Red-first is a TAMPER here, and why
+
+A test-only payload covers behaviour that is already correct, so it cannot be red at
+the base in the usual way. The red proof is a tamper: drop `.toLocaleString()` from
+both counts at `report.ts:104`, re-run, restore.
+
+  tampered  2 passed, 1 failed (3), rc 1 — failing on
+            "RED KS-1164 F-3: a 5xx count of 1,234 / 56,789"
+  restored  3 passed (3), rc 0
+  report.ts restored byte-identical; git reports the file unmodified afterwards.
+
+Two of the three cells pass in the tampered arm, so the red is a real assertion and
+not a load failure. The discriminator: a load failure reports 0 total AND 0 failed;
+this reports 3 total and 1 failed.
+
+## Test Evidence
+
+Base: develop b280b74ff07b6aa48c0d1f55b4a931842a0e368c, read by ls-remote and
+re-read in the same action as the worktree add and again at the push decision.
+Toolchain read from node_modules: node v24.7.0, npm 11.5.1, vitest 5.0.3.
+vitest 5.0.3 agrees three ways — node_modules/vitest/package.json, package-lock.json,
+and `vitest --version` ("vitest/5.0.3 darwin-arm64 node-v24.7.0").
+
+Touched: 3 paths.
+  systemTest/performance/tests/unit/gate/ks1164-breakdown-counts-are-locale-grouped.test.ts  (new, 102 lines, 4,413 B, mode 100644, sha256/16 8b71c072148e843e)
+  Projects Documents/API_Security_Functional_Testing_Architecture_Flow_Diagrams.html         (flow block 26.)
+  Projects Documents/QA_Tool_Cheat_Sheet_Secuura_API_Testing.html                            (cheat section KS-1164)
+
+Ran (and what they printed):
+  npm run test:unit -- <the new file>            3 passed (3), rc 0
+  npm run test:unit  (whole performance unit)    BASE  249 suites, 1360 passed (1360), rc 0
+                                                 HEAD  251 suites, 1363 passed (1363), rc 0
+                                                 +3 tests, zero failures either side
+  npm run test:unit  (re-run after the doc edits) 251 suites, 1363 passed (1363), rc 0
+  tsc --noEmit -p systemTest/performance         rc 0, 0 lines
+  systemTest/__tests__/html_docs_matrix.test.sh  12 passed, 0 failed, rc 0 (10 of the 12
+                                                 are controls that each fire)
+  docblockra3.py                                 0 failed. Flow tail 31. -> 26., exactly ONE
+                                                 block appended and the other 29 byte-identical;
+                                                 cheat tail KS 591 -> KS-1164, exactly ONE section
+                                                 appended and the other 17 headings byte-identical.
+                                                 Both docs: "THE ONLY difference from the blob at
+                                                 the base IS this fragment, byte for byte", each
+                                                 with a 1-byte-altered control that FAILS the same
+                                                 comparison, so neither read is vacuous.
+
+Doc blocks: §4 binds — this adds a systemTest suite — so both platform docs move in the
+SAME commit. Flow block `26.` was reserved for this ticket; 32.-37. remain free. The
+cheat section is keyed KS-1164 and sits at the tail inside its own `<div class="section">`,
+matching the existing sections (the flow doc has no section wrapper; the cheat doc does).
+
+NOT run:
+  The four platform suites (Schemathesis, Akto, Playwright, Performance/k6) are
+  UNMEASURED — the local stack is not up on http://localhost:6882. The push printed
+  only its SKIP lines, quoted in the raise comment. Never read as a pass.
+  No live run and no deploy: coverage only, no runtime branch moves, so §5f owes nothing.
+
+A RUNNER TRAP WORTH YOUR TIME, because it invalidated my first set of numbers:
+  this package's config is `vitest.unit.config.ts`, which vitest does NOT auto-detect.
+  A bare `node_modules/.bin/vitest run <file>` therefore runs on vitest's defaults —
+  a 5000 ms timeout instead of the config's 15,000, different `include` globs, and no
+  `setupFiles`, so `tests/unit/support/clearSlotEnv.setup.ts` never strips the shell's
+  slot family. Measured on this tree: bare reported 130 files / 456 tests with 1 failure
+  (`unitSuiteSlotIndependence.test.ts` timing out at 5000 ms), while `npm run test:unit`
+  reports 251 suites / 1363 passed, 0 failed. The failure was the harness, not the repo.
+  I withdrew that reading and re-took every figure above through `npm run test:unit`.
+  Recorded in both doc blocks so the next reader does not repeat it.
+
+Migrations + config: none. No dependency, lockfile, manifest, baseline or spec edit.
+
+Merged by Seat R 15th on the authority of HANDOVER-seatR13-2026-10-07.md sha256 aa60c7f322c54e87

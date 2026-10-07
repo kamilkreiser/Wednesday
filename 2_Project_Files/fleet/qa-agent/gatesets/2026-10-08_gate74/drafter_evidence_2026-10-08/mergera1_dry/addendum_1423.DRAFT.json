@@ -1,0 +1,39 @@
+{
+  "base_go": "eae08a3f441c9d9570061df560eefe146ad50d2d",
+  "prs": {
+    "1423": {
+      "body_verbatim": "Adds the locale-count coverage KS 1164 left behind. Test-only: no product code\nchanges, and `systemTest/performance/gate/report.ts` stays blob `ac59af37cbc6`.\n\n`formatStatusCodeBreakdown` prints each k6 Rate counter through `toLocaleString()`,\nso a 5xx count reads `1,234` rather than `1234`. Nothing asserted it \u2014 the grouping\ncould be deleted and every suite would stay green.\n\nKS 1164's product defect (`writeGateReport` overwriting the input summary when\n`--summary` does not end in `-summary.json`) was already fixed and merged as\n`f3bf8698d628`, PR #1271. This PR does not touch it and does not close the ticket.\n\nRefs KS-1164 \u2014 https://linear.app/secuura/issue/KS-1164\n\n## Red-first is a TAMPER here, and why\n\nA test-only payload covers behaviour that is already correct, so it cannot be red at\nthe base in the usual way. The red proof is a tamper: drop `.toLocaleString()` from\nboth counts at `report.ts:104`, re-run, restore.\n\n  tampered  2 passed, 1 failed (3), rc 1 \u2014 failing on\n            \"RED KS-1164 F-3: a 5xx count of 1,234 / 56,789\"\n  restored  3 passed (3), rc 0\n  report.ts restored byte-identical; git reports the file unmodified afterwards.\n\nTwo of the three cells pass in the tampered arm, so the red is a real assertion and\nnot a load failure. The discriminator: a load failure reports 0 total AND 0 failed;\nthis reports 3 total and 1 failed.\n\n## Test Evidence\n\nBase: develop b280b74ff07b6aa48c0d1f55b4a931842a0e368c, read by ls-remote and\nre-read in the same action as the worktree add and again at the push decision.\nToolchain read from node_modules: node v24.7.0, npm 11.5.1, vitest 5.0.3.\nvitest 5.0.3 agrees three ways \u2014 node_modules/vitest/package.json, package-lock.json,\nand `vitest --version` (\"vitest/5.0.3 darwin-arm64 node-v24.7.0\").\n\nTouched: 3 paths.\n  systemTest/performance/tests/unit/gate/ks1164-breakdown-counts-are-locale-grouped.test.ts  (new, 102 lines, 4,413 B, mode 100644, sha256/16 8b71c072148e843e)\n  Projects Documents/API_Security_Functional_Testing_Architecture_Flow_Diagrams.html         (flow block 26.)\n  Projects Documents/QA_Tool_Cheat_Sheet_Secuura_API_Testing.html                            (cheat section KS-1164)\n\nRan (and what they printed):\n  npm run test:unit -- <the new file>            3 passed (3), rc 0\n  npm run test:unit  (whole performance unit)    BASE  249 suites, 1360 passed (1360), rc 0\n                                                 HEAD  251 suites, 1363 passed (1363), rc 0\n                                                 +3 tests, zero failures either side\n  npm run test:unit  (re-run after the doc edits) 251 suites, 1363 passed (1363), rc 0\n  tsc --noEmit -p systemTest/performance         rc 0, 0 lines\n  systemTest/__tests__/html_docs_matrix.test.sh  12 passed, 0 failed, rc 0 (10 of the 12\n                                                 are controls that each fire)\n  docblockra3.py                                 0 failed. Flow tail 31. -> 26., exactly ONE\n                                                 block appended and the other 29 byte-identical;\n                                                 cheat tail KS 591 -> KS-1164, exactly ONE section\n                                                 appended and the other 17 headings byte-identical.\n                                                 Both docs: \"THE ONLY difference from the blob at\n                                                 the base IS this fragment, byte for byte\", each\n                                                 with a 1-byte-altered control that FAILS the same\n                                                 comparison, so neither read is vacuous.\n\nDoc blocks: \u00a74 binds \u2014 this adds a systemTest suite \u2014 so both platform docs move in the\nSAME commit. Flow block `26.` was reserved for this ticket; 32.-37. remain free. The\ncheat section is keyed KS-1164 and sits at the tail inside its own `<div class=\"section\">`,\nmatching the existing sections (the flow doc has no section wrapper; the cheat doc does).\n\nNOT run:\n  The four platform suites (Schemathesis, Akto, Playwright, Performance/k6) are\n  UNMEASURED \u2014 the local stack is not up on http://localhost:6882. The push printed\n  only its SKIP lines, quoted in the raise comment. Never read as a pass.\n  No live run and no deploy: coverage only, no runtime branch moves, so \u00a75f owes nothing.\n\nA RUNNER TRAP WORTH YOUR TIME, because it invalidated my first set of numbers:\n  this package's config is `vitest.unit.config.ts`, which vitest does NOT auto-detect.\n  A bare `node_modules/.bin/vitest run <file>` therefore runs on vitest's defaults \u2014\n  a 5000 ms timeout instead of the config's 15,000, different `include` globs, and no\n  `setupFiles`, so `tests/unit/support/clearSlotEnv.setup.ts` never strips the shell's\n  slot family. Measured on this tree: bare reported 130 files / 456 tests with 1 failure\n  (`unitSuiteSlotIndependence.test.ts` timing out at 5000 ms), while `npm run test:unit`\n  reports 251 suites / 1363 passed, 0 failed. The failure was the harness, not the repo.\n  I withdrew that reading and re-took every figure above through `npm run test:unit`.\n  Recorded in both doc blocks so the next reader does not repeat it.\n\nMigrations + config: none. No dependency, lockfile, manifest, baseline or spec edit.",
+      "expect_develop": "eae08a3f441c9d9570061df560eefe146ad50d2d",
+      "head": "d76b4a7586fb51b3f67823cbfc28d796bd7812c5",
+      "legs": "unused (body_verbatim)",
+      "merge_note": "Merged by Seat R 15th on the authority of HANDOVER-seatR13-2026-10-07.md sha256 aa60c7f322c54e87",
+      "merged_blob_paths": [
+        "Projects Documents/API_Security_Functional_Testing_Architecture_Flow_Diagrams.html",
+        "Projects Documents/QA_Tool_Cheat_Sheet_Secuura_API_Testing.html"
+      ],
+      "merged_tree": "a6227cb3e8e759de15a4aaac4393fbfe2f5ea6b1",
+      "no_trailer": true,
+      "noop_paths": [],
+      "own_keys": [
+        "KS-1164"
+      ],
+      "ships_with": "unused (body_verbatim)",
+      "subject": "KS-1164: assert the k6 status-code breakdown prints locale-grouped counts",
+      "targets": {
+        "Projects Documents/API_Security_Functional_Testing_Architecture_Flow_Diagrams.html": [
+          "3f8f3c0ce95b1afc54792caa2d3a2a3e429ae52c",
+          "100644"
+        ],
+        "Projects Documents/QA_Tool_Cheat_Sheet_Secuura_API_Testing.html": [
+          "e4c8ee75a4bf32622a1a6d57899a8229f880f02b",
+          "100644"
+        ],
+        "systemTest/performance/tests/unit/gate/ks1164-breakdown-counts-are-locale-grouped.test.ts": [
+          "cdc33036cdd3c34f3ec6cbff4c13393962229a64",
+          "100644"
+        ]
+      },
+      "wrap_artefact": "HANDOVER-seatR13-2026-10-07.md"
+    }
+  }
+}

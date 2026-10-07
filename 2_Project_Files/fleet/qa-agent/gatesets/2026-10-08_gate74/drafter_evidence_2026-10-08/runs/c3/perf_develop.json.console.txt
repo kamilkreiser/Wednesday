@@ -1,0 +1,385 @@
+
+> secuura-performance@2.0.0 test:unit
+> vitest run --config vitest.unit.config.ts --reporter=default --reporter=json --outputFile.json=/private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/c6ce62ad-66de-4b90-a27a-53acf64beaa3/scratchpad/g74/ev/c3/perf_develop.json
+
+
+ RUN  v5.0.3 /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/c6ce62ad-66de-4b90-a27a-53acf64beaa3/scratchpad/g74/wt/develop/systemTest/performance
+
+ ✓ tests/unit/utils/slotIsolation.test.ts (10 tests) 2ms
+ ✓ tests/unit/utils/stackSlot.test.ts (122 tests) 11ms
+ ✓ tests/unit/runner/reportHeader.test.ts (21 tests) 10ms
+ ✓ tests/unit/utils/slotRequired.test.ts (71 tests) 10ms
+ ✓ tests/unit/memory/container_meta.test.ts (12 tests) 4ms
+ ✓ tests/unit/fixtures/provisionTarget.test.ts (67 tests) 7ms
+ ✓ tests/unit/fixtures/loginOutcome.test.ts (22 tests) 4ms
+ ✓ tests/unit/utils/baseUrl.test.ts (101 tests) 10ms
+ ✓ tests/unit/fixtures/fixturesSlot.test.ts (81 tests) 7ms
+ ✓ tests/unit/memory/slotFilter.test.ts (82 tests) 10ms
+stdout | tests/unit/runner/k6Docker.test.ts > the published dashboard port is offset per slot > slot 1 publishes base + 100 * (slot - 1) — host side moves, container side never does
+
+[run] docker run --rm --name secuura-perf-k6-smoke-slot1 --label com.docker.compose.project=secuura-performance --label com.docker.compose.service=k6 --label secuura.test_framework=k6 --label secuura.slot=slot1 -p 5665:5665 -v /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/c6ce62ad-66de-4b90-a27a-53acf64beaa3/scratchpad/g74/wt/develop/systemTest/performance:/scripts -e PERF_SUMMARY_PATH=/scripts/reports/performance-reports/smoke-slot1/smoke-slot1-summary.json grafana/k6:2.3.0 run --features freeze-env --log-ns-timestamps --log-output=file=/scripts/reports/performance-reports/smoke-slot1/smoke-slot1-k6.log --tag scenario=smoke --tag environment=local --tag slot=slot1 /scripts/scenarios/smoke.ts
+
+
+stdout | tests/unit/runner/k6Docker.test.ts > the published dashboard port is offset per slot > slot 2 publishes base + 100 * (slot - 1) — host side moves, container side never does
+
+[run] docker run --rm --name secuura-perf-k6-smoke-slot2 --label com.docker.compose.project=secuura-performance --label com.docker.compose.service=k6 --label secuura.test_framework=k6 --label secuura.slot=slot2 -p 5765:5665 -v /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/c6ce62ad-66de-4b90-a27a-53acf64beaa3/scratchpad/g74/wt/develop/systemTest/performance:/scripts -e PERF_SUMMARY_PATH=/scripts/reports/performance-reports/smoke-slot2/smoke-slot2-summary.json grafana/k6:2.3.0 run --features freeze-env --log-ns-timestamps --log-output=file=/scripts/reports/performance-reports/smoke-slot2/smoke-slot2-k6.log --tag scenario=smoke --tag environment=local --tag slot=slot2 /scripts/scenarios/smoke.ts
+
+
+stdout | tests/unit/runner/k6Docker.test.ts > the published dashboard port is offset per slot > slot 3 publishes base + 100 * (slot - 1) — host side moves, container side never does
+
+[run] docker run --rm --name secuura-perf-k6-smoke-slot3 --label com.docker.compose.project=secuura-performance --label com.docker.compose.service=k6 --label secuura.test_framework=k6 --label secuura.slot=slot3 -p 5865:5665 -v /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/c6ce62ad-66de-4b90-a27a-53acf64beaa3/scratchpad/g74/wt/develop/systemTest/performance:/scripts -e PERF_SUMMARY_PATH=/scripts/reports/performance-reports/smoke-slot3/smoke-slot3-summary.json grafana/k6:2.3.0 run --features freeze-env --log-ns-timestamps --log-output=file=/scripts/reports/performance-reports/smoke-slot3/smoke-slot3-k6.log --tag scenario=smoke --tag environment=local --tag slot=slot3 /scripts/scenarios/smoke.ts
+
+
+ ✓ tests/unit/runner/runMetadata.test.ts (36 tests) 39ms
+stdout | tests/unit/runner/k6Docker.test.ts > the published dashboard port is offset per slot > slot 4 publishes base + 100 * (slot - 1) — host side moves, container side never does
+
+[run] docker run --rm --name secuura-perf-k6-smoke-slot4 --label com.docker.compose.project=secuura-performance --label com.docker.compose.service=k6 --label secuura.test_framework=k6 --label secuura.slot=slot4 -p 5965:5665 -v /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/c6ce62ad-66de-4b90-a27a-53acf64beaa3/scratchpad/g74/wt/develop/systemTest/performance:/scripts -e PERF_SUMMARY_PATH=/scripts/reports/performance-reports/smoke-slot4/smoke-slot4-summary.json grafana/k6:2.3.0 run --features freeze-env --log-ns-timestamps --log-output=file=/scripts/reports/performance-reports/smoke-slot4/smoke-slot4-k6.log --tag scenario=smoke --tag environment=local --tag slot=slot4 /scripts/scenarios/smoke.ts
+
+
+stdout | tests/unit/runner/k6Docker.test.ts > the published dashboard port is offset per slot > publishes nothing when observability is off, so a CI run binds no host port at all
+
+[run] docker run --rm --name secuura-perf-k6-smoke --label com.docker.compose.project=secuura-performance --label com.docker.compose.service=k6 --label secuura.test_framework=k6 --label secuura.slot=unslotted -v /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/c6ce62ad-66de-4b90-a27a-53acf64beaa3/scratchpad/g74/wt/develop/systemTest/performance:/scripts -e PERF_SUMMARY_PATH=/scripts/reports/performance-reports/smoke/smoke-summary.json grafana/k6:2.3.0 run --features freeze-env --log-ns-timestamps --log-output=file=/scripts/reports/performance-reports/smoke/smoke-k6.log --tag scenario=smoke --tag environment=local --tag slot=unslotted /scripts/scenarios/smoke.ts
+
+
+stdout | tests/unit/runner/k6Docker.test.ts > the container name carries the slot > slot 1 gets its own container name
+
+[run] docker run --rm --name secuura-perf-k6-smoke-slot1 --label com.docker.compose.project=secuura-performance --label com.docker.compose.service=k6 --label secuura.test_framework=k6 --label secuura.slot=slot1 -p 5665:5665 -v /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/c6ce62ad-66de-4b90-a27a-53acf64beaa3/scratchpad/g74/wt/develop/systemTest/performance:/scripts -e PERF_SUMMARY_PATH=/scripts/reports/performance-reports/smoke-slot1/smoke-slot1-summary.json grafana/k6:2.3.0 run --features freeze-env --log-ns-timestamps --log-output=file=/scripts/reports/performance-reports/smoke-slot1/smoke-slot1-k6.log --tag scenario=smoke --tag environment=local --tag slot=slot1 /scripts/scenarios/smoke.ts
+
+
+stdout | tests/unit/runner/k6Docker.test.ts > the container name carries the slot > slot 2 gets its own container name
+
+[run] docker run --rm --name secuura-perf-k6-smoke-slot2 --label com.docker.compose.project=secuura-performance --label com.docker.compose.service=k6 --label secuura.test_framework=k6 --label secuura.slot=slot2 -p 5765:5665 -v /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/c6ce62ad-66de-4b90-a27a-53acf64beaa3/scratchpad/g74/wt/develop/systemTest/performance:/scripts -e PERF_SUMMARY_PATH=/scripts/reports/performance-reports/smoke-slot2/smoke-slot2-summary.json grafana/k6:2.3.0 run --features freeze-env --log-ns-timestamps --log-output=file=/scripts/reports/performance-reports/smoke-slot2/smoke-slot2-k6.log --tag scenario=smoke --tag environment=local --tag slot=slot2 /scripts/scenarios/smoke.ts
+
+
+stdout | tests/unit/runner/k6Docker.test.ts > the container name carries the slot > slot 3 gets its own container name
+
+[run] docker run --rm --name secuura-perf-k6-smoke-slot3 --label com.docker.compose.project=secuura-performance --label com.docker.compose.service=k6 --label secuura.test_framework=k6 --label secuura.slot=slot3 -p 5865:5665 -v /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/c6ce62ad-66de-4b90-a27a-53acf64beaa3/scratchpad/g74/wt/develop/systemTest/performance:/scripts -e PERF_SUMMARY_PATH=/scripts/reports/performance-reports/smoke-slot3/smoke-slot3-summary.json grafana/k6:2.3.0 run --features freeze-env --log-ns-timestamps --log-output=file=/scripts/reports/performance-reports/smoke-slot3/smoke-slot3-k6.log --tag scenario=smoke --tag environment=local --tag slot=slot3 /scripts/scenarios/smoke.ts
+
+
+stdout | tests/unit/runner/k6Docker.test.ts > the container name carries the slot > slot 4 gets its own container name
+
+[run] docker run --rm --name secuura-perf-k6-smoke-slot4 --label com.docker.compose.project=secuura-performance --label com.docker.compose.service=k6 --label secuura.test_framework=k6 --label secuura.slot=slot4 -p 5965:5665 -v /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/c6ce62ad-66de-4b90-a27a-53acf64beaa3/scratchpad/g74/wt/develop/systemTest/performance:/scripts -e PERF_SUMMARY_PATH=/scripts/reports/performance-reports/smoke-slot4/smoke-slot4-summary.json grafana/k6:2.3.0 run --features freeze-env --log-ns-timestamps --log-output=file=/scripts/reports/performance-reports/smoke-slot4/smoke-slot4-k6.log --tag scenario=smoke --tag environment=local --tag slot=slot4 /scripts/scenarios/smoke.ts
+
+
+stdout | tests/unit/runner/k6Docker.test.ts > the container name carries the slot > gives four concurrent slots four distinct names — docker refuses a duplicate with exit 125
+
+[run] docker run --rm --name secuura-perf-k6-smoke-slot1 --label com.docker.compose.project=secuura-performance --label com.docker.compose.service=k6 --label secuura.test_framework=k6 --label secuura.slot=slot1 -p 5665:5665 -v /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/c6ce62ad-66de-4b90-a27a-53acf64beaa3/scratchpad/g74/wt/develop/systemTest/performance:/scripts -e PERF_SUMMARY_PATH=/scripts/reports/performance-reports/smoke-slot1/smoke-slot1-summary.json grafana/k6:2.3.0 run --features freeze-env --log-ns-timestamps --log-output=file=/scripts/reports/performance-reports/smoke-slot1/smoke-slot1-k6.log --tag scenario=smoke --tag environment=local --tag slot=slot1 /scripts/scenarios/smoke.ts
+
+
+[run] docker run --rm --name secuura-perf-k6-smoke-slot2 --label com.docker.compose.project=secuura-performance --label com.docker.compose.service=k6 --label secuura.test_framework=k6 --label secuura.slot=slot2 -p 5765:5665 -v /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/c6ce62ad-66de-4b90-a27a-53acf64beaa3/scratchpad/g74/wt/develop/systemTest/performance:/scripts -e PERF_SUMMARY_PATH=/scripts/reports/performance-reports/smoke-slot2/smoke-slot2-summary.json grafana/k6:2.3.0 run --features freeze-env --log-ns-timestamps --log-output=file=/scripts/reports/performance-reports/smoke-slot2/smoke-slot2-k6.log --tag scenario=smoke --tag environment=local --tag slot=slot2 /scripts/scenarios/smoke.ts
+
+
+[run] docker run --rm --name secuura-perf-k6-smoke-slot3 --label com.docker.compose.project=secuura-performance --label com.docker.compose.service=k6 --label secuura.test_framework=k6 --label secuura.slot=slot3 -p 5865:5665 -v /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/c6ce62ad-66de-4b90-a27a-53acf64beaa3/scratchpad/g74/wt/develop/systemTest/performance:/scripts -e PERF_SUMMARY_PATH=/scripts/reports/performance-reports/smoke-slot3/smoke-slot3-summary.json grafana/k6:2.3.0 run --features freeze-env --log-ns-timestamps --log-output=file=/scripts/reports/performance-reports/smoke-slot3/smoke-slot3-k6.log --tag scenario=smoke --tag environment=local --tag slot=slot3 /scripts/scenarios/smoke.ts
+
+
+[run] docker run --rm --name secuura-perf-k6-smoke-slot4 --label com.docker.compose.project=secuura-performance --label com.docker.compose.service=k6 --label secuura.test_framework=k6 --label secuura.slot=slot4 -p 5965:5665 -v /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/c6ce62ad-66de-4b90-a27a-53acf64beaa3/scratchpad/g74/wt/develop/systemTest/performance:/scripts -e PERF_SUMMARY_PATH=/scripts/reports/performance-reports/smoke-slot4/smoke-slot4-summary.json grafana/k6:2.3.0 run --features freeze-env --log-ns-timestamps --log-output=file=/scripts/reports/performance-reports/smoke-slot4/smoke-slot4-k6.log --tag scenario=smoke --tag environment=local --tag slot=slot4 /scripts/scenarios/smoke.ts
+
+
+stdout | tests/unit/runner/k6Docker.test.ts > the slot reaches Prometheus and Loki, not just the filesystem > tags every k6 metric with slot 1, so two slots do not share a series identity
+
+[run] docker run --rm --name secuura-perf-k6-smoke-slot1 --label com.docker.compose.project=secuura-performance --label com.docker.compose.service=k6 --label secuura.test_framework=k6 --label secuura.slot=slot1 -p 5665:5665 -v /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/c6ce62ad-66de-4b90-a27a-53acf64beaa3/scratchpad/g74/wt/develop/systemTest/performance:/scripts -e PERF_SUMMARY_PATH=/scripts/reports/performance-reports/smoke-slot1/smoke-slot1-summary.json grafana/k6:2.3.0 run --features freeze-env --log-ns-timestamps --log-output=file=/scripts/reports/performance-reports/smoke-slot1/smoke-slot1-k6.log --tag scenario=smoke --tag environment=local --tag slot=slot1 /scripts/scenarios/smoke.ts
+
+
+stdout | tests/unit/runner/k6Docker.test.ts > the slot reaches Prometheus and Loki, not just the filesystem > tags every k6 metric with slot 2, so two slots do not share a series identity
+
+[run] docker run --rm --name secuura-perf-k6-smoke-slot2 --label com.docker.compose.project=secuura-performance --label com.docker.compose.service=k6 --label secuura.test_framework=k6 --label secuura.slot=slot2 -p 5765:5665 -v /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/c6ce62ad-66de-4b90-a27a-53acf64beaa3/scratchpad/g74/wt/develop/systemTest/performance:/scripts -e PERF_SUMMARY_PATH=/scripts/reports/performance-reports/smoke-slot2/smoke-slot2-summary.json grafana/k6:2.3.0 run --features freeze-env --log-ns-timestamps --log-output=file=/scripts/reports/performance-reports/smoke-slot2/smoke-slot2-k6.log --tag scenario=smoke --tag environment=local --tag slot=slot2 /scripts/scenarios/smoke.ts
+
+
+stdout | tests/unit/runner/k6Docker.test.ts > the slot reaches Prometheus and Loki, not just the filesystem > tags every k6 metric with slot 3, so two slots do not share a series identity
+
+[run] docker run --rm --name secuura-perf-k6-smoke-slot3 --label com.docker.compose.project=secuura-performance --label com.docker.compose.service=k6 --label secuura.test_framework=k6 --label secuura.slot=slot3 -p 5865:5665 -v /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/c6ce62ad-66de-4b90-a27a-53acf64beaa3/scratchpad/g74/wt/develop/systemTest/performance:/scripts -e PERF_SUMMARY_PATH=/scripts/reports/performance-reports/smoke-slot3/smoke-slot3-summary.json grafana/k6:2.3.0 run --features freeze-env --log-ns-timestamps --log-output=file=/scripts/reports/performance-reports/smoke-slot3/smoke-slot3-k6.log --tag scenario=smoke --tag environment=local --tag slot=slot3 /scripts/scenarios/smoke.ts
+
+
+stdout | tests/unit/runner/k6Docker.test.ts > the slot reaches Prometheus and Loki, not just the filesystem > tags every k6 metric with slot 4, so two slots do not share a series identity
+
+[run] docker run --rm --name secuura-perf-k6-smoke-slot4 --label com.docker.compose.project=secuura-performance --label com.docker.compose.service=k6 --label secuura.test_framework=k6 --label secuura.slot=slot4 -p 5965:5665 -v /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/c6ce62ad-66de-4b90-a27a-53acf64beaa3/scratchpad/g74/wt/develop/systemTest/performance:/scripts -e PERF_SUMMARY_PATH=/scripts/reports/performance-reports/smoke-slot4/smoke-slot4-summary.json grafana/k6:2.3.0 run --features freeze-env --log-ns-timestamps --log-output=file=/scripts/reports/performance-reports/smoke-slot4/smoke-slot4-k6.log --tag scenario=smoke --tag environment=local --tag slot=slot4 /scripts/scenarios/smoke.ts
+
+
+stdout | tests/unit/runner/k6Docker.test.ts > the slot reaches Prometheus and Loki, not just the filesystem > labels the container with slot 1, which Alloy relabels into a Loki stream label
+
+[run] docker run --rm --name secuura-perf-k6-smoke-slot1 --label com.docker.compose.project=secuura-performance --label com.docker.compose.service=k6 --label secuura.test_framework=k6 --label secuura.slot=slot1 -p 5665:5665 -v /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/c6ce62ad-66de-4b90-a27a-53acf64beaa3/scratchpad/g74/wt/develop/systemTest/performance:/scripts -e PERF_SUMMARY_PATH=/scripts/reports/performance-reports/smoke-slot1/smoke-slot1-summary.json grafana/k6:2.3.0 run --features freeze-env --log-ns-timestamps --log-output=file=/scripts/reports/performance-reports/smoke-slot1/smoke-slot1-k6.log --tag scenario=smoke --tag environment=local --tag slot=slot1 /scripts/scenarios/smoke.ts
+
+
+stdout | tests/unit/runner/k6Docker.test.ts > the slot reaches Prometheus and Loki, not just the filesystem > labels the container with slot 2, which Alloy relabels into a Loki stream label
+
+[run] docker run --rm --name secuura-perf-k6-smoke-slot2 --label com.docker.compose.project=secuura-performance --label com.docker.compose.service=k6 --label secuura.test_framework=k6 --label secuura.slot=slot2 -p 5765:5665 -v /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/c6ce62ad-66de-4b90-a27a-53acf64beaa3/scratchpad/g74/wt/develop/systemTest/performance:/scripts -e PERF_SUMMARY_PATH=/scripts/reports/performance-reports/smoke-slot2/smoke-slot2-summary.json grafana/k6:2.3.0 run --features freeze-env --log-ns-timestamps --log-output=file=/scripts/reports/performance-reports/smoke-slot2/smoke-slot2-k6.log --tag scenario=smoke --tag environment=local --tag slot=slot2 /scripts/scenarios/smoke.ts
+
+
+stdout | tests/unit/runner/k6Docker.test.ts > the slot reaches Prometheus and Loki, not just the filesystem > labels the container with slot 3, which Alloy relabels into a Loki stream label
+
+[run] docker run --rm --name secuura-perf-k6-smoke-slot3 --label com.docker.compose.project=secuura-performance --label com.docker.compose.service=k6 --label secuura.test_framework=k6 --label secuura.slot=slot3 -p 5865:5665 -v /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/c6ce62ad-66de-4b90-a27a-53acf64beaa3/scratchpad/g74/wt/develop/systemTest/performance:/scripts -e PERF_SUMMARY_PATH=/scripts/reports/performance-reports/smoke-slot3/smoke-slot3-summary.json grafana/k6:2.3.0 run --features freeze-env --log-ns-timestamps --log-output=file=/scripts/reports/performance-reports/smoke-slot3/smoke-slot3-k6.log --tag scenario=smoke --tag environment=local --tag slot=slot3 /scripts/scenarios/smoke.ts
+
+
+stdout | tests/unit/runner/k6Docker.test.ts > the slot reaches Prometheus and Loki, not just the filesystem > labels the container with slot 4, which Alloy relabels into a Loki stream label
+
+[run] docker run --rm --name secuura-perf-k6-smoke-slot4 --label com.docker.compose.project=secuura-performance --label com.docker.compose.service=k6 --label secuura.test_framework=k6 --label secuura.slot=slot4 -p 5965:5665 -v /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/c6ce62ad-66de-4b90-a27a-53acf64beaa3/scratchpad/g74/wt/develop/systemTest/performance:/scripts -e PERF_SUMMARY_PATH=/scripts/reports/performance-reports/smoke-slot4/smoke-slot4-summary.json grafana/k6:2.3.0 run --features freeze-env --log-ns-timestamps --log-output=file=/scripts/reports/performance-reports/smoke-slot4/smoke-slot4-k6.log --tag scenario=smoke --tag environment=local --tag slot=slot4 /scripts/scenarios/smoke.ts
+
+
+stdout | tests/unit/runner/k6Docker.test.ts > an unslotted run is labelled unslotted, never slot1 > tags its metrics and labels its container `unslotted`
+
+[run] docker run --rm --name secuura-perf-k6-smoke --label com.docker.compose.project=secuura-performance --label com.docker.compose.service=k6 --label secuura.test_framework=k6 --label secuura.slot=unslotted -p 5665:5665 -v /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/c6ce62ad-66de-4b90-a27a-53acf64beaa3/scratchpad/g74/wt/develop/systemTest/performance:/scripts -e PERF_SUMMARY_PATH=/scripts/reports/performance-reports/smoke/smoke-summary.json grafana/k6:2.3.0 run --features freeze-env --log-ns-timestamps --log-output=file=/scripts/reports/performance-reports/smoke/smoke-k6.log --tag scenario=smoke --tag environment=local --tag slot=unslotted /scripts/scenarios/smoke.ts
+
+
+stdout | tests/unit/runner/k6Docker.test.ts > an unslotted run is labelled unslotted, never slot1 > keeps the historic bare container name and publishes k6's default dashboard port
+
+[run] docker run --rm --name secuura-perf-k6-smoke --label com.docker.compose.project=secuura-performance --label com.docker.compose.service=k6 --label secuura.test_framework=k6 --label secuura.slot=unslotted -p 5665:5665 -v /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/c6ce62ad-66de-4b90-a27a-53acf64beaa3/scratchpad/g74/wt/develop/systemTest/performance:/scripts -e PERF_SUMMARY_PATH=/scripts/reports/performance-reports/smoke/smoke-summary.json grafana/k6:2.3.0 run --features freeze-env --log-ns-timestamps --log-output=file=/scripts/reports/performance-reports/smoke/smoke-k6.log --tag scenario=smoke --tag environment=local --tag slot=unslotted /scripts/scenarios/smoke.ts
+
+
+stdout | tests/unit/runner/k6Docker.test.ts > k6 writes its own log into this run folder > slot 1: directs k6 output to a file beside the summary, derived from the same name
+
+[run] docker run --rm --name secuura-perf-k6-smoke-slot1 --label com.docker.compose.project=secuura-performance --label com.docker.compose.service=k6 --label secuura.test_framework=k6 --label secuura.slot=slot1 -p 5665:5665 -v /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/c6ce62ad-66de-4b90-a27a-53acf64beaa3/scratchpad/g74/wt/develop/systemTest/performance:/scripts -e PERF_SUMMARY_PATH=/scripts/reports/performance-reports/smoke-slot1/smoke-slot1-summary.json grafana/k6:2.3.0 run --features freeze-env --log-ns-timestamps --log-output=file=/scripts/reports/performance-reports/smoke-slot1/smoke-slot1-k6.log --tag scenario=smoke --tag environment=local --tag slot=slot1 /scripts/scenarios/smoke.ts
+
+
+stdout | tests/unit/runner/k6Docker.test.ts > k6 writes its own log into this run folder > slot 2: directs k6 output to a file beside the summary, derived from the same name
+
+[run] docker run --rm --name secuura-perf-k6-smoke-slot2 --label com.docker.compose.project=secuura-performance --label com.docker.compose.service=k6 --label secuura.test_framework=k6 --label secuura.slot=slot2 -p 5765:5665 -v /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/c6ce62ad-66de-4b90-a27a-53acf64beaa3/scratchpad/g74/wt/develop/systemTest/performance:/scripts -e PERF_SUMMARY_PATH=/scripts/reports/performance-reports/smoke-slot2/smoke-slot2-summary.json grafana/k6:2.3.0 run --features freeze-env --log-ns-timestamps --log-output=file=/scripts/reports/performance-reports/smoke-slot2/smoke-slot2-k6.log --tag scenario=smoke --tag environment=local --tag slot=slot2 /scripts/scenarios/smoke.ts
+
+
+stdout | tests/unit/runner/k6Docker.test.ts > k6 writes its own log into this run folder > slot 3: directs k6 output to a file beside the summary, derived from the same name
+
+[run] docker run --rm --name secuura-perf-k6-smoke-slot3 --label com.docker.compose.project=secuura-performance --label com.docker.compose.service=k6 --label secuura.test_framework=k6 --label secuura.slot=slot3 -p 5865:5665 -v /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/c6ce62ad-66de-4b90-a27a-53acf64beaa3/scratchpad/g74/wt/develop/systemTest/performance:/scripts -e PERF_SUMMARY_PATH=/scripts/reports/performance-reports/smoke-slot3/smoke-slot3-summary.json grafana/k6:2.3.0 run --features freeze-env --log-ns-timestamps --log-output=file=/scripts/reports/performance-reports/smoke-slot3/smoke-slot3-k6.log --tag scenario=smoke --tag environment=local --tag slot=slot3 /scripts/scenarios/smoke.ts
+
+
+stdout | tests/unit/runner/k6Docker.test.ts > k6 writes its own log into this run folder > slot 4: directs k6 output to a file beside the summary, derived from the same name
+
+[run] docker run --rm --name secuura-perf-k6-smoke-slot4 --label com.docker.compose.project=secuura-performance --label com.docker.compose.service=k6 --label secuura.test_framework=k6 --label secuura.slot=slot4 -p 5965:5665 -v /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/c6ce62ad-66de-4b90-a27a-53acf64beaa3/scratchpad/g74/wt/develop/systemTest/performance:/scripts -e PERF_SUMMARY_PATH=/scripts/reports/performance-reports/smoke-slot4/smoke-slot4-summary.json grafana/k6:2.3.0 run --features freeze-env --log-ns-timestamps --log-output=file=/scripts/reports/performance-reports/smoke-slot4/smoke-slot4-k6.log --tag scenario=smoke --tag environment=local --tag slot=slot4 /scripts/scenarios/smoke.ts
+
+
+stdout | tests/unit/runner/k6Docker.test.ts > k6 writes its own log into this run folder > keeps the log name in step with the summary name for every slot
+
+[run] docker run --rm --name secuura-perf-k6-smoke-slot1 --label com.docker.compose.project=secuura-performance --label com.docker.compose.service=k6 --label secuura.test_framework=k6 --label secuura.slot=slot1 -p 5665:5665 -v /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/c6ce62ad-66de-4b90-a27a-53acf64beaa3/scratchpad/g74/wt/develop/systemTest/performance:/scripts -e PERF_SUMMARY_PATH=/scripts/reports/performance-reports/smoke-slot1/smoke-slot1-summary.json grafana/k6:2.3.0 run --features freeze-env --log-ns-timestamps --log-output=file=/scripts/reports/performance-reports/smoke-slot1/smoke-slot1-k6.log --tag scenario=smoke --tag environment=local --tag slot=slot1 /scripts/scenarios/smoke.ts
+
+
+[run] docker run --rm --name secuura-perf-k6-smoke-slot2 --label com.docker.compose.project=secuura-performance --label com.docker.compose.service=k6 --label secuura.test_framework=k6 --label secuura.slot=slot2 -p 5765:5665 -v /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/c6ce62ad-66de-4b90-a27a-53acf64beaa3/scratchpad/g74/wt/develop/systemTest/performance:/scripts -e PERF_SUMMARY_PATH=/scripts/reports/performance-reports/smoke-slot2/smoke-slot2-summary.json grafana/k6:2.3.0 run --features freeze-env --log-ns-timestamps --log-output=file=/scripts/reports/performance-reports/smoke-slot2/smoke-slot2-k6.log --tag scenario=smoke --tag environment=local --tag slot=slot2 /scripts/scenarios/smoke.ts
+
+
+[run] docker run --rm --name secuura-perf-k6-smoke-slot3 --label com.docker.compose.project=secuura-performance --label com.docker.compose.service=k6 --label secuura.test_framework=k6 --label secuura.slot=slot3 -p 5865:5665 -v /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/c6ce62ad-66de-4b90-a27a-53acf64beaa3/scratchpad/g74/wt/develop/systemTest/performance:/scripts -e PERF_SUMMARY_PATH=/scripts/reports/performance-reports/smoke-slot3/smoke-slot3-summary.json grafana/k6:2.3.0 run --features freeze-env --log-ns-timestamps --log-output=file=/scripts/reports/performance-reports/smoke-slot3/smoke-slot3-k6.log --tag scenario=smoke --tag environment=local --tag slot=slot3 /scripts/scenarios/smoke.ts
+
+
+[run] docker run --rm --name secuura-perf-k6-smoke-slot4 --label com.docker.compose.project=secuura-performance --label com.docker.compose.service=k6 --label secuura.test_framework=k6 --label secuura.slot=slot4 -p 5965:5665 -v /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/c6ce62ad-66de-4b90-a27a-53acf64beaa3/scratchpad/g74/wt/develop/systemTest/performance:/scripts -e PERF_SUMMARY_PATH=/scripts/reports/performance-reports/smoke-slot4/smoke-slot4-summary.json grafana/k6:2.3.0 run --features freeze-env --log-ns-timestamps --log-output=file=/scripts/reports/performance-reports/smoke-slot4/smoke-slot4-k6.log --tag scenario=smoke --tag environment=local --tag slot=slot4 /scripts/scenarios/smoke.ts
+
+
+stdout | tests/unit/runner/k6Docker.test.ts > KS-1354: the k6 feature flags and image reach the command > runs the configured image, then `run --features freeze-env`, before any other k6 argument
+
+[run] docker run --rm --name secuura-perf-k6-smoke --label com.docker.compose.project=secuura-performance --label com.docker.compose.service=k6 --label secuura.test_framework=k6 --label secuura.slot=unslotted -p 5665:5665 -v /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/c6ce62ad-66de-4b90-a27a-53acf64beaa3/scratchpad/g74/wt/develop/systemTest/performance:/scripts -e PERF_SUMMARY_PATH=/scripts/reports/performance-reports/smoke/smoke-summary.json grafana/k6:2.3.0 run --features freeze-env --log-ns-timestamps --log-output=file=/scripts/reports/performance-reports/smoke/smoke-k6.log --tag scenario=smoke --tag environment=local --tag slot=unslotted /scripts/scenarios/smoke.ts
+
+
+stdout | tests/unit/runner/k6Docker.test.ts > KS-1354: the k6 feature flags and image reach the command > joins native-histograms into the same single --features list when opted in
+
+[run] docker run --rm --name secuura-perf-k6-smoke --label com.docker.compose.project=secuura-performance --label com.docker.compose.service=k6 --label secuura.test_framework=k6 --label secuura.slot=unslotted -p 5665:5665 -v /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/c6ce62ad-66de-4b90-a27a-53acf64beaa3/scratchpad/g74/wt/develop/systemTest/performance:/scripts -e PERF_SUMMARY_PATH=/scripts/reports/performance-reports/smoke/smoke-summary.json grafana/k6:2.3.0 run --features freeze-env,native-histograms --log-ns-timestamps --log-output=file=/scripts/reports/performance-reports/smoke/smoke-k6.log --tag scenario=smoke --tag environment=local --tag slot=unslotted /scripts/scenarios/smoke.ts
+
+
+stdout | tests/unit/runner/k6Docker.test.ts > KS-1354: the k6 feature flags and image reach the command > puts the feature flags before the script path, where k6 reads them as run options
+
+[run] docker run --rm --name secuura-perf-k6-smoke --label com.docker.compose.project=secuura-performance --label com.docker.compose.service=k6 --label secuura.test_framework=k6 --label secuura.slot=unslotted -p 5665:5665 -v /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/c6ce62ad-66de-4b90-a27a-53acf64beaa3/scratchpad/g74/wt/develop/systemTest/performance:/scripts -e PERF_SUMMARY_PATH=/scripts/reports/performance-reports/smoke/smoke-summary.json grafana/k6:2.3.0 run --features freeze-env --log-ns-timestamps --log-output=file=/scripts/reports/performance-reports/smoke/smoke-k6.log --tag scenario=smoke --tag environment=local --tag slot=unslotted /scripts/scenarios/smoke.ts
+
+
+stdout | tests/unit/runner/k6Docker.test.ts > KS-1354: the k6 feature flags and image reach the command > passes --log-ns-timestamps once, immediately before the --log-output file flag
+
+[run] docker run --rm --name secuura-perf-k6-smoke --label com.docker.compose.project=secuura-performance --label com.docker.compose.service=k6 --label secuura.test_framework=k6 --label secuura.slot=unslotted -p 5665:5665 -v /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/c6ce62ad-66de-4b90-a27a-53acf64beaa3/scratchpad/g74/wt/develop/systemTest/performance:/scripts -e PERF_SUMMARY_PATH=/scripts/reports/performance-reports/smoke/smoke-summary.json grafana/k6:2.3.0 run --features freeze-env --log-ns-timestamps --log-output=file=/scripts/reports/performance-reports/smoke/smoke-k6.log --tag scenario=smoke --tag environment=local --tag slot=unslotted /scripts/scenarios/smoke.ts
+
+
+ ✓ tests/unit/runner/k6Docker.test.ts (30 tests) 9ms
+ ✓ tests/unit/memory/container_names.test.ts (19 tests) 29ms
+ ✓ tests/unit/runner/env_flags.test.ts (55 tests) 11ms
+ ✓ tests/unit/gate/reportFailedGateBreakdown.test.ts (4 tests) 14ms
+ ✓ tests/unit/fixtures/manifestPaths.test.ts (31 tests) 45ms
+stdout | tests/unit/memory/collect.test.ts > memory/collect — stack live > writes memory.json, pushes the leak gauge, and reports collected
+
+  ── Memory (per-container RSS over the run) ──
+   secuura-auth             100.00 MB → 180.00 MB   peak 180.00 MB   +80.00 MB   slope +80.00 MB/h   growth worth reviewing
+  Overall: growth worth reviewing on 1 container(s) (soak)
+
+
+ ✓ tests/unit/runner/k6DockerRedaction.test.ts (26 tests) 31ms
+ ✓ tests/unit/fixtures/slotRequired.test.ts (39 tests) 5ms
+stdout | tests/unit/memory/collect.test.ts > memory/collect — the leak gauge is keyed by slot (KS-971) > slot 1: pushes into a slot-specific group with slot-labelled series
+
+  ── Memory (per-container RSS over the run) ──
+   secuura-auth             100.00 MB → 200.00 MB   peak 200.00 MB   +100.00 MB   slope +100.00 MB/h   growth worth reviewing
+  Overall: growth worth reviewing on 1 container(s) (soak)
+
+
+stdout | tests/unit/memory/collect.test.ts > memory/collect — the leak gauge is keyed by slot (KS-971) > slot 2: pushes into a slot-specific group with slot-labelled series
+
+  ── Memory (per-container RSS over the run) ──
+   secuura-s2-auth          100.00 MB → 200.00 MB   peak 200.00 MB   +100.00 MB   slope +100.00 MB/h   growth worth reviewing
+  Overall: growth worth reviewing on 1 container(s) (soak)
+
+
+stdout | tests/unit/memory/collect.test.ts > memory/collect — the leak gauge is keyed by slot (KS-971) > slot 3: pushes into a slot-specific group with slot-labelled series
+
+  ── Memory (per-container RSS over the run) ──
+   secuura-s3-auth          100.00 MB → 200.00 MB   peak 200.00 MB   +100.00 MB   slope +100.00 MB/h   growth worth reviewing
+  Overall: growth worth reviewing on 1 container(s) (soak)
+
+
+stdout | tests/unit/memory/collect.test.ts > memory/collect — the leak gauge is keyed by slot (KS-971) > slot 4: pushes into a slot-specific group with slot-labelled series
+
+  ── Memory (per-container RSS over the run) ──
+   secuura-s4-auth          100.00 MB → 200.00 MB   peak 200.00 MB   +100.00 MB   slope +100.00 MB/h   growth worth reviewing
+  Overall: growth worth reviewing on 1 container(s) (soak)
+
+
+stdout | tests/unit/memory/collect.test.ts > memory/collect — the leak gauge is keyed by slot (KS-971) > slot 1: a series named for slot 2 is not analysed, so it cannot drive this slot's verdict
+[run] Memory monitoring: no container memory data for this window — skipped.
+
+stdout | tests/unit/memory/collect.test.ts > memory/collect — the leak gauge is keyed by slot (KS-971) > slot 1: a series named for slot 3 is not analysed, so it cannot drive this slot's verdict
+[run] Memory monitoring: no container memory data for this window — skipped.
+
+stdout | tests/unit/memory/collect.test.ts > memory/collect — the leak gauge is keyed by slot (KS-971) > slot 1: a series named for slot 4 is not analysed, so it cannot drive this slot's verdict
+[run] Memory monitoring: no container memory data for this window — skipped.
+
+stdout | tests/unit/memory/collect.test.ts > memory/collect — the leak gauge is keyed by slot (KS-971) > slot 2: a series named for slot 1 is not analysed, so it cannot drive this slot's verdict
+[run] Memory monitoring: no container memory data for this window — skipped.
+
+stdout | tests/unit/memory/collect.test.ts > memory/collect — the leak gauge is keyed by slot (KS-971) > slot 2: a series named for slot 3 is not analysed, so it cannot drive this slot's verdict
+[run] Memory monitoring: no container memory data for this window — skipped.
+
+stdout | tests/unit/memory/collect.test.ts > memory/collect — the leak gauge is keyed by slot (KS-971) > slot 2: a series named for slot 4 is not analysed, so it cannot drive this slot's verdict
+[run] Memory monitoring: no container memory data for this window — skipped.
+
+stdout | tests/unit/memory/collect.test.ts > memory/collect — the leak gauge is keyed by slot (KS-971) > slot 3: a series named for slot 1 is not analysed, so it cannot drive this slot's verdict
+[run] Memory monitoring: no container memory data for this window — skipped.
+
+stdout | tests/unit/memory/collect.test.ts > memory/collect — the leak gauge is keyed by slot (KS-971) > slot 3: a series named for slot 2 is not analysed, so it cannot drive this slot's verdict
+[run] Memory monitoring: no container memory data for this window — skipped.
+
+stdout | tests/unit/memory/collect.test.ts > memory/collect — the leak gauge is keyed by slot (KS-971) > slot 3: a series named for slot 4 is not analysed, so it cannot drive this slot's verdict
+[run] Memory monitoring: no container memory data for this window — skipped.
+
+stdout | tests/unit/memory/collect.test.ts > memory/collect — the leak gauge is keyed by slot (KS-971) > slot 4: a series named for slot 1 is not analysed, so it cannot drive this slot's verdict
+[run] Memory monitoring: no container memory data for this window — skipped.
+
+stdout | tests/unit/memory/collect.test.ts > memory/collect — the leak gauge is keyed by slot (KS-971) > slot 4: a series named for slot 2 is not analysed, so it cannot drive this slot's verdict
+[run] Memory monitoring: no container memory data for this window — skipped.
+
+stdout | tests/unit/memory/collect.test.ts > memory/collect — the leak gauge is keyed by slot (KS-971) > slot 4: a series named for slot 3 is not analysed, so it cannot drive this slot's verdict
+[run] Memory monitoring: no container memory data for this window — skipped.
+
+stdout | tests/unit/memory/collect.test.ts > memory/collect — PERF_MEMORY_QUERY override > passes a PERF_MEMORY_QUERY override through to the Prometheus query
+[run] Memory monitoring: no container memory data for this window — skipped.
+
+stdout | tests/unit/memory/collect.test.ts > memory/collect — an unslotted run is skipped, never analysed as slot 1 (KS-1386) > with no slot and no STACK_PREFIX: status skipped-no-slot, no query, nothing written or pushed
+[run] Memory monitoring: skipped — No stack slot named and no STACK_PREFIX exported — the memory monitor has no stack to describe, so it selects no containers. Name the slot (SECUURA_STACK_SLOT=<n>) or export STACK_PREFIX for the stack to watch.
+
+stdout | tests/unit/memory/collect.test.ts > memory/collect — stack down (the must-not-fail guarantee) > is a silent no-op: never throws, writes nothing, does not push
+[run] Memory monitoring: no container memory data for this window — skipped.
+
+stdout | tests/unit/memory/collect.test.ts > memory/collect — stack down (the must-not-fail guarantee) > skips gracefully when the query returns no samples
+[run] Memory monitoring: no container memory data for this window — skipped.
+
+ ✓ tests/unit/memory/collect.test.ts (21 tests) 35ms
+ ✓ tests/unit/helpers/summary.test.ts (7 tests) 9ms
+ ✓ tests/unit/runner/runLog.test.ts (8 tests) 20ms
+ ✓ tests/unit/runner/run_dir.test.ts (50 tests) 99ms
+ ✓ tests/unit/fixtures/slotSelectionMatrix.test.ts (20 tests) 6ms
+ ✓ tests/unit/fixtures/actors.test.ts (22 tests) 5ms
+ ✓ tests/unit/memory/prometheus_source.test.ts (8 tests) 3ms
+ ✓ tests/unit/package_scripts.test.ts (12 tests) 5ms
+stdout | tests/unit/gate/ks1164-write-gate-report-never-overwrites-its-input.test.ts > writeGateReport input preservation (KS-1164) > RED KS-1164: a summary path that does not end in -summary.json is NOT overwritten and the report lands beside it
+[ci-gate] Gate report written: /tmp/perf-gate-ks1164-VzE7ME/smoke-gate-report.json
+
+stdout | tests/unit/gate/ks1164-write-gate-report-never-overwrites-its-input.test.ts > writeGateReport input preservation (KS-1164) > control: the conforming name still writes smoke-gate-report.json beside the summary and leaves it intact
+[ci-gate] Gate report written: /tmp/perf-gate-ks1164-l1NAka/smoke-gate-report.json
+
+ ✓ tests/unit/fixtures/printTarget.test.ts (12 tests) 5ms
+ ✓ tests/unit/helpers/response.test.ts (21 tests) 3ms
+ ✓ tests/unit/runner/actorManifestPath.test.ts (18 tests) 10ms
+ ✓ tests/unit/fixtures/describeError.test.ts (7 tests) 26ms
+ ✓ tests/unit/utils/noHardcodedSlotLiterals.test.ts (19 tests) 248ms
+stdout | tests/unit/gate/ks1164-write-gate-report-never-overwrites-its-input.test.ts > writeGateReport input preservation (KS-1164) > S3 CONTROL KS-1164 — a genuinely different input still WRITES, so the guard is not "always refuse"
+[ci-gate] Gate report written: /tmp/perf-gate-ks1164-P04XFx/smoke-gate-report.json
+
+stdout | tests/unit/gate/gateMachineShared.test.ts > writeGateReport — machine contention > copies machineShared, stacksRunning and slotsRunning from the run metadata
+[ci-gate] Gate report written: /tmp/perf-gate-shared-BwcZdC/smoke-gate-report.json
+
+ ✓ tests/unit/gate/ks1164-write-gate-report-never-overwrites-its-input.test.ts (5 tests) 25ms
+ ✓ tests/unit/runner/metricsPush.test.ts (13 tests) 5ms
+stdout | tests/unit/gate/gateMachineShared.test.ts > writeGateReport — machine contention > records an uncontended run as machineShared false rather than omitting it
+[ci-gate] Gate report written: /tmp/perf-gate-shared-Z9gWsh/smoke-gate-report.json
+
+ ✓ tests/unit/fixtures/provisionBootstrap.test.ts (9 tests) 3ms
+ ✓ tests/unit/config/k6ImagePinParity.test.ts (5 tests) 16ms
+stdout | tests/unit/gate/gateMachineShared.test.ts > writeGateReport — machine contention > still writes a verdict when the run metadata is absent
+[ci-gate] Gate report written: /tmp/perf-gate-shared-K12URM/smoke-gate-report.json
+
+stdout | tests/unit/gate/gateMachineShared.test.ts > writeGateReport — machine contention > ignores unreadable or malformed run metadata rather than throwing
+[ci-gate] Gate report written: /tmp/perf-gate-shared-LTwCD0/smoke-gate-report.json
+
+ ✓ tests/unit/runner/actorManifest.test.ts (33 tests) 271ms
+stdout | tests/unit/gate/gateMachineShared.test.ts > writeGateReport — machine contention > ignores metadata whose machineShared is not a boolean
+[ci-gate] Gate report written: /tmp/perf-gate-shared-DNLeTt/smoke-gate-report.json
+
+ ✓ tests/unit/gate/gateMachineShared.test.ts (5 tests) 29ms
+ ✓ tests/unit/config/environment.test.ts (7 tests) 17ms
+ ✓ tests/unit/runner/annotations.test.ts (8 tests) 4ms
+ ✓ tests/unit/runner/machineShared.test.ts (10 tests) 3ms
+ ✓ tests/unit/memory/analyze.test.ts (7 tests) 5ms
+ ✓ tests/unit/gate/ks1354-counter-rate-unset.test.ts (4 tests) 14ms
+ ✓ tests/unit/runner/runValidity.test.ts (8 tests) 38ms
+ ✓ tests/unit/runner/ks1337-preSuitePathWithASpace.test.ts (3 tests) 47ms
+ ✓ tests/unit/runner/actor_manifest.test.ts (1 test) 11ms
+ ✓ tests/unit/config/scenario_options.test.ts (6 tests) 3ms
+ ✓ tests/unit/helpers/authRetry.test.ts (9 tests) 2ms
+ ✓ tests/unit/utils/registryPortMatrix.test.ts (9 tests) 8ms
+ ✓ tests/unit/runner/featureLogCheck.test.ts (7 tests) 13ms
+ ✓ tests/unit/helpers/constants.test.ts (1 test) 2ms
+ ✓ tests/unit/helpers/csrf.test.ts (5 tests) 18ms
+ ✓ tests/unit/helpers/summary_text.test.ts (3 tests) 2ms
+ ✓ tests/unit/runner/envFlagsRwLabels.test.ts (3 tests) 2ms
+ ✓ tests/unit/runner/rwLabels.test.ts (17 tests) 3ms
+ ✓ tests/unit/helpers/data.test.ts (11 tests) 10ms
+ ✓ tests/unit/types/k6SummaryShape.test.ts (3 tests) 3ms
+ ✓ tests/unit/runner/features.test.ts (5 tests) 3ms
+ ✓ tests/unit/thresholds/traffic_mix.test.ts (1 test) 2ms
+ ✓ tests/unit/helpers/checks.test.ts (4 tests) 2ms
+ ✓ tests/unit/core/clock.test.ts (2 tests) 3ms
+ ✓ tests/unit/runner/ks1164-k6-log-mount-never-collides.test.ts (3 tests) 3ms
+ ✓ tests/unit/config/endpoints.test.ts (2 tests) 2ms
+ ✓ tests/unit/helpers/shedding.test.ts (5 tests) 2ms
+ ✓ tests/unit/runner/scriptsKeepTheirName.test.ts (20 tests) 3ms
+ ✓ tests/unit/utils/format.test.ts (3 tests) 2ms
+ ✓ tests/unit/thresholds/sla.test.ts (1 test) 2ms
+ ✓ tests/unit/thresholds/think_times.test.ts (1 test) 2ms
+ ✓ tests/unit/fixtures/slotEnvReads.test.ts (2 tests) 353ms
+   ✓ direct reads of SECUURA_STACK_SLOT (2)
+     ✓ happen only inside the modules that define requestedSlotText() 347ms
+ ✓ tests/unit/config/sheddingCeiling.test.ts (9 tests) 828ms
+   ✓ load-shedding scenarios (9)
+     ✓ KS-1300 READYAML-CANARY: the raw parser prints the file, readYaml does not — the standing witness 792ms
+ ✓ tests/unit/utils/yamlRedaction.test.ts (19 tests) 833ms
+   ✓ KS-1099: readYaml throws the location of a parse failure, never the file (8)
+     ✓ end to end: an uncaught parse failure exits non-zero, and what Node prints names the file but no value 793ms
+ ✓ tests/unit/gate/ks1354-gate-reads-real-k6-2.3-summary.test.ts (2 tests) 648ms
+   ✓ KS-1354 — gate verdict on a summary k6 2.3.0 actually wrote (2)
+     ✓ passes, exits 0 and reports the five smoke gates with the values the live run measured 643ms
+ ✓ tests/unit/runner/slotGateEntrypoints.test.ts (4 tests) 2005ms
+   ✓ runner/cli.ts consults the slot rule, as a process (4)
+     ✓ refuses an unslotted LOCAL target with exit 2 and the slot command, before the pre-suite step 873ms
+     ✓ leaves a REMOTE target alone and PROCEEDS — evidenced by the pre-suite step refusing it 723ms
+ ✓ tests/unit/runner/k6Version.test.ts (25 tests) 1932ms
+   ✓ KS-1445 — k6:check-native CLI (fake k6 first on PATH) (3)
+     ✓ exits 1 for v0.48.0 and prints the refusal 1131ms
+     ✓ exits 0 for the pinned version read from config/observability.yml 633ms
+ ✓ tests/unit/gate/ciGate.test.ts (19 tests) 4486ms
+   ✓ ci_gate — golden verdicts (3)
+     ✓ smoke: verdict matches committed golden and exits 0 911ms
+   ✓ ci_gate — the verdict names the slot it describes (16)
+     ✓ two slots judging the SAME scenario produce different, attributable verdicts 373ms
+ ✓ tests/unit/utils/unitSuiteSlotIndependence.test.ts (10 tests) 5848ms
+   ✓ unit-suite slot independence (3)
+     ✓ the slot-sensitive files pass identically from a shell on NO slot and on every slot — the measured regression 5835ms
+ ✓ tests/unit/gate/summaryLoader.test.ts (3 tests) 6251ms
+   ✓ loadSummary (3)
+     ✓ retries and succeeds when the summary file appears mid-poll 2159ms
+     ✓ exits with an error after exhausting retries when the file never appears 4080ms
+
+ Test Files  76 passed (76)
+      Tests  1386 passed (1386)
+   Start at  03:56:44
+   Duration  6.96s (tests 78%, transform 15%, import 3%, worker 3%, setup 2%)
+
+JSON report written to /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/c6ce62ad-66de-4b90-a27a-53acf64beaa3/scratchpad/g74/ev/c3/perf_develop.json
+
+--- stderr ---

@@ -1,0 +1,80 @@
+KS-998, KS-1435, KS-591: add the 5d WHY comments to the three gate73 lines
+
+Adds the secuura-test-discipline 5d WHY + ticket comments that the three gate73
+PRs landed without. Comment-only: no behaviour changes, no generated artefact moves.
+
+5d requires every changed line to carry a comment saying WHY it changed, the Linear
+ticket, and the PRIOR behaviour. The three sites were located BY HUNK against each
+squash's own parent, never by text search -- a text search is ambiguous at two of them.
+
+## What changed
+
+- systemTest/scripts/check-package-format.sh:180 (KS 998) -- the push-label grep.
+  Prior behaviour: `grep -qx` read the path as a PATTERN, so a filename carrying a
+  regex metacharacter could match the wrong line or none, and "(in this push)" was
+  not a literal statement about the push.
+- Blockchain/Dev/services/transfer/src/index.ts:412 (KS 1435) -- rejectTransferSchema.
+  Prior behaviour: the schema omitted `signature` entirely, so a wrong-typed signature
+  passed validation with 200 and the reject still ran.
+- Blockchain/Dev/services/originate/src/originate.openapi.ts:1630 (KS 591) -- the
+  transfer-custody request. Prior behaviour: newHolderId was published as a bare
+  string, so a spec-legal non-uuid was generated, the runtime rejected it, and
+  positive_data_acceptance counted the refusal as a failure.
+
+Tickets: https://linear.app/secuura/issue/KS-998
+         https://linear.app/secuura/issue/KS-1435
+         https://linear.app/secuura/issue/KS-591
+None of them closes here: this PR adds the missing comments, it does not fix anything.
+
+Refs KS-998
+Refs KS-1435
+Refs KS-591
+
+## Why there is no section 4 doc block
+
+Section 4 binds "Every test change ... backend unit, integration, or systemTest".
+This PR changes no test and adds no suite -- it adds three comment lines to three
+product/tooling files. Section 4's own escape ("if a change genuinely does not affect
+either doc, say so") is the right reading, and this says so. Neither platform doc is
+touched, and the flow and cheat tails are unchanged at the base.
+
+## Test Evidence
+
+Base: develop b280b74ff07b6aa48c0d1f55b4a931842a0e368c (read by ls-remote at 14:07:50Z
+and again in the same action as the worktree add; accepted by name before building).
+Toolchain read from node_modules: node v24.7.0, npm 11.5.1, /bin/bash 3.2.57.
+
+Touched: 3 files, 9 insertions, 0 deletions, all 9 added lines comments.
+  Comment-only proved by `git diff -w --ignore-blank-lines` against the base: 0 added
+  lines are non-comments and 0 lines are removed. The predicate was controlled against
+  a planted `+  const x = 1;`, which reads non-comment -- so the 0 discriminates.
+
+Ran (and what they printed):
+  bash -n systemTest/scripts/check-package-format.sh                      rc 0
+  systemTest/__tests__/ks998_format_gate_push_label_is_literal.test.sh    8 passed, 0 failed (rc 0)
+  systemTest/__tests__/package_format_gate.test.sh                        33 passed, 0 failed (rc 0)
+  npm run build --workspace=services/transfer   (tsc)                     rc 0
+  npm run build --workspace=services/originate  (tsc)                     rc 0
+  npm run check:openapi                                                   rc 0
+      "[gen-openapi] CHECK PASS: on-disk YAML matches generated"
+      "[check-spec-examples] docs/openapi/secuura-api.yaml - 406 example blocks
+       OK - every published example resolves to the fixture set."
+  docs/openapi/ tracked-modified after check:openapi: 0 -- the comments did not move
+  the generated spec, which is the one thing a comment in originate.openapi.ts could break.
+
+Installed before pushing (S-1, all four systemTest packages with a package.json at the
+base, never a predicted subset): akto, api-explorer, performance, playwright -- plus
+Blockchain/Dev `npm ci --ignore-scripts` and `npm run build --workspace=packages/shared`
+with packages/shared/dist/index.js asserted present (17,746 B). The installs left 0
+tracked files modified; the only 3 modified paths are this PR's own.
+
+NOT run:
+  The four platform suites (Schemathesis, Akto, Playwright, Performance/k6) are
+  UNMEASURED -- the local stack is not up on http://localhost:6882. The push printed
+  only its SKIP lines, quoted verbatim in the raise comment. Never read as a pass.
+  No live run and no deploy: this PR has no runtime surface (comments only), so
+  section 5f owes nothing.
+
+Migrations + config: none. No dependency, lockfile, manifest, baseline or spec edit.
+
+Merged by Seat R 15th on the authority of HANDOVER-seatR13-2026-10-07.md sha256 aa60c7f322c54e87
