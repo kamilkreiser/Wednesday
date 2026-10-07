@@ -12,6 +12,20 @@ supersede: replace wholesale; previous = NEXT-PICKUP-FRIDAY.md.pre-0925-rotate-s
 
 **The tree is at `/Volumes/Laptop-DEV/FRIDAY` (the drive, since 2026-09-28).** Quote every path (spaces).
 
+## 🔴🔴🔴 ROTATION HANDOVER 2026-10-07 19:32 (Friday, ctx ~80%) — READ FIRST; supersedes every block below where they differ
+**FIRST ACT:** kam_rulings_today.sh + reconcile_rulings.py (newest Kam row at handover: 13:01:57); seat_idle on %101 and read `HPSM-POC/1_Project_Definition/Briefs/2026-10-07_B181_STATUS.md` (and its `.tools/wt-B181-records/` twin). Arm ONE watcher in background mode: seed ONCE (the new seat's seen file), never seed B181's own STATUS. Globs: `HPSM-POC/1_Project_Definition/Briefs/2026-10-07_B18[1-9]*STATUS*.md` and the `.tools/*/…` twin. WATCH_PANES="%101".
+**TONIGHT'S ONE JOB (Kam ~14:1x: "make everything live tonight"):** **%101 HPSM-POC-F B181** is deploying HPSM-POC main **c28343a** (#124 GET retry · #125 30 s downloads · #126 Min Pool Size=10; no migration, no grant, no setting) to hosted. AT HANDOVER: deploy done, settings unchanged, holding to ~19:41 for the pool proof (sessions_count ≥ 10 after 10 idle min + a landing burst with no read over ~500 ms). Friday's own probe 19:3x: health 200 ×3, 547d3ea build id ×0.
+**ON B181 READY:**
+1. Read its STATUS (every `fail:` line in the API start; the pool numbers).
+2. Probe hosted yourself (web `/api/health` ×3; the new build id from B181's read, the old one ×0).
+3. **Make ONE live AI draft on hosted to prove HPSMPOC-221**: generate one executive-summary narrative for a seeded customer as the demo login. Kam was told at 16:4x; he can stop it, and has not. It is a POST, so do it ONCE, no retry, and record the outcome (drafted / timeout) and the time.
+4. Open + merge `records/b181` (its C-number is the next after C-77; check the order and that no credential-named files are in it).
+5. Report to Kam on the panel: what is live, what was measured, and the 221 result.
+6. Close %101.
+**THEN, FOR KAM (cards, each after a measurement):** Q-B180-4 (the B1 plan CPU under bursts: money, his) only if the post-deploy burst still shows 0.5–1 s waits · Composer #239/#245 layout calls · the printer discussion · Paul's feedback (asked 16:4x, bf-a0bc0c3576804; none yet; when it arrives, a seat triages it as a checkpoint table first).
+**MERGED TODAY (all read back):** HPSM-POC #119 #120 #122 #123 #124 #125 #126 (main c28343a) · analysis records #93–#99 (C-72..C-77, main 35e9b6a) · Composer #51 #52 #53 (main b083de6 = demo, C-51). Hosted settings C-77 (Connect Timeout 30, start limit 600).
+**OWED (unchanged):** BACKLOG #237 → Spark · safe_pull race on usage_friday.json (tooling) · deploy-runbook line · tickets F-22 + web-settings/client-content 5 s · Composer Dependabot PR #18 · C-44 before 31 Oct · B93 lanes 3a–3c · B180's local containers stopped, not removed.
+
 ## 🔴🔴🔴 CHECKPOINT 2026-10-07 18:48 (Friday, ctx ~77%) — READ FIRST; supersedes every block below where they differ
 **FIRST ACT:** kam_rulings_today.sh + reconcile_rulings.py; seat_idle + every live STATUS tail; ONE watcher (background; `--seed` only once at boot or for a fresh records worktree's copies, NEVER the seat's own STATUS), WATCH_PANES = live panes.
 **KAM'S STANDING ASK TONIGHT (terminal ~14:1x, verbatim):** *"I've also showcased the HPSM site to Paul today and will be going through it with him in detail tomorrow. Please review the feedback and make everything live tonight."* → B180 found NO written feedback (Admin list, Jira, Playbook: 0, with controls). Kam was asked on the panel for Paul's notes (bf-a0bc0c3576804): none yet. If they arrive, a new B180 addendum triages them as a checkpoint table first.
