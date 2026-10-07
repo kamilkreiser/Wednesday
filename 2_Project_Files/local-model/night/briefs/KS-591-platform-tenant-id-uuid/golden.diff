@@ -1,0 +1,70 @@
+--- a/Blockchain/Dev/services/tenant-provisioning/src/tenant-provisioning.openapi.ts
++++ b/Blockchain/Dev/services/tenant-provisioning/src/tenant-provisioning.openapi.ts
+@@ -454,3 +454,3 @@
+   request: {
+-    params: z.object({ id: z.string().openapi({ example: FX.tenant.id }) }),
++    params: z.object({ id: z.string().uuid().openapi({ example: FX.tenant.id }) }),
+   },
+@@ -481,3 +481,3 @@
+   request: {
+-    params: z.object({ id: z.string().openapi({ example: FX.tenant.id }) }),
++    params: z.object({ id: z.string().uuid().openapi({ example: FX.tenant.id }) }),
+     body: {
+@@ -521,3 +521,3 @@
+   request: {
+-    params: z.object({ id: z.string().openapi({ example: FX.tenant.id }) }),
++    params: z.object({ id: z.string().uuid().openapi({ example: FX.tenant.id }) }),
+     body: {
+--- /dev/null
++++ b/Blockchain/Dev/services/tenant-provisioning/src/__tests__/ks591-platform-tenant-id-path-is-a-uuid.test.ts
+@@ -0,0 +1,50 @@
++// KS-591 / KS-565 (2026-10-06 sweep addendum): PATCH /api/platform/tenants/{id}/status published its {id} path
++// parameter as a bare `type: string`, but the service refuses any non-UUID :id with 400 "Tenant id must be a UUID"
++// (index.ts app.param('id', tenantIdParamGuard), KS-497) - so Schemathesis sent a spec-valid 300-character id and
++// the 400 failed positive_data_acceptance. The same guard covers GET and PATCH /api/platform/tenants/{id}. This
++// file renders the document the generator publishes, from the shared registry the tenant-provisioning module
++// populates on import, and reads each operation's {id} parameter. No server, no database, no network.
++import { describe, it, expect } from 'vitest';
++import { generateOpenApiDocument } from '@secuura/shared';
++import '../tenant-provisioning.openapi';
++
++type AnyObj = Record<string, any>;
++
++const doc = generateOpenApiDocument({ title: 'tenant-provisioning (ks591 id pin)', version: '0.0.0' }) as AnyObj;
++
++const TENANT = '/api/platform/tenants/{id}';
++
++function idParam(path: string, method: string): AnyObj | undefined {
++  const params: AnyObj[] = doc.paths?.[path]?.[method]?.parameters ?? [];
++  return params.find((p) => p.in === 'path' && p.name === 'id');
++}
++
++describe('KS-591: the tenant {id} path parameter is published as a UUID, as the service enforces', () => {
++  it('RED KS-591 TID1: PATCH /api/platform/tenants/{id}/status publishes {id} with format uuid', () => {
++    expect(idParam(TENANT + '/status', 'patch')?.schema?.format).toBe('uuid');
++  });
++
++  it('RED KS-591 TID2: GET /api/platform/tenants/{id} publishes {id} with format uuid', () => {
++    expect(idParam(TENANT, 'get')?.schema?.format).toBe('uuid');
++  });
++
++  it('RED KS-591 TID3: PATCH /api/platform/tenants/{id} publishes {id} with format uuid', () => {
++    expect(idParam(TENANT, 'patch')?.schema?.format).toBe('uuid');
++  });
++
++  it('control KS-591 TIDC1: each {id} stays a required string path parameter with its UUID example', () => {
++    for (const [path, method] of [[TENANT + '/status', 'patch'], [TENANT, 'get'], [TENANT, 'patch']]) {
++      const p = idParam(path, method);
++      expect({ required: p?.required, type: p?.schema?.type }).toEqual({ required: true, type: 'string' });
++      expect(p?.schema?.example ?? p?.example).toBe('00000000-0000-4000-8000-000000000001');
++    }
++  });
++
++  it('control KS-591 TIDC2: the three operations keep bearerAuth and their request bodies', () => {
++    expect(doc.paths?.[TENANT + '/status']?.patch?.security).toEqual([{ bearerAuth: [] }]);
++    expect(doc.paths?.[TENANT]?.get?.security).toEqual([{ bearerAuth: [] }]);
++    expect(doc.paths?.[TENANT]?.patch?.requestBody?.content?.['application/json']?.schema?.$ref).toBe(
++      '#/components/schemas/TenantUpdateRequest',
++    );
++  });
++});

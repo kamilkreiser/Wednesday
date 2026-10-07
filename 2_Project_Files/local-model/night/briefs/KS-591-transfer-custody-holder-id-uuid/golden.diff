@@ -1,0 +1,49 @@
+--- a/Blockchain/Dev/services/originate/src/originate.openapi.ts
++++ b/Blockchain/Dev/services/originate/src/originate.openapi.ts
+@@ -1629,3 +1629,3 @@
+     .object({
+-      newHolderId: z.string().optional().openapi({ description: 'Resolved new rights-holder user id.' }),
++      newHolderId: z.string().uuid().optional().openapi({ description: 'Resolved new rights-holder user id.' }),
+       newHolderEmail: z.string().optional().openapi({
+--- /dev/null
++++ b/Blockchain/Dev/services/originate/src/__tests__/ks591-transfer-custody-new-holder-id-is-a-uuid.test.ts
+@@ -0,0 +1,39 @@
++// KS-591 (2026-10-06 addendum, sweep full-ks-571-2026-10-06T10-09-50Z-slot4): POST /api/documents/{id}/transfer-custody
++// refuses a non-UUID newHolderId with 400 "newHolderId must be a valid UUID" (routes/documents.ts, the KS-697 guard
++// before the ::uuid cast), but the published TransferCustodyRequest declared newHolderId as a bare string - so a
++// spec-valid body was refused (6 positive_data_acceptance cases). The spec now says format: uuid, as the handler
++// enforces. This file renders the document the generator publishes, from the shared registry the originate module
++// populates on import. No server, no database, no network.
++import { generateOpenApiDocument } from '@secuura/shared';
++import '../originate.openapi';
++
++type AnyObj = Record<string, any>;
++
++const doc = generateOpenApiDocument({ title: 'originate (ks591 custody pin)', version: '0.0.0' }) as AnyObj;
++
++const CUSTODY = '/api/documents/{id}/transfer-custody';
++
++function custodySchema(): AnyObj | undefined {
++  return doc.components?.schemas?.TransferCustodyRequest;
++}
++
++describe('KS-591: TransferCustodyRequest publishes newHolderId as a UUID, as the handler enforces', () => {
++  it('RED KS-591 TC1: TransferCustodyRequest.newHolderId carries format uuid', () => {
++    expect(custodySchema()?.properties?.newHolderId?.format).toBe('uuid');
++  });
++
++  it('control KS-591 TCC1: newHolderId stays an optional string, and newHolderEmail is unchanged', () => {
++    const s = custodySchema();
++    expect(s?.properties?.newHolderId?.type).toBe('string');
++    expect(s?.required ?? []).not.toContain('newHolderId');
++    expect(s?.properties?.newHolderEmail?.type).toBe('string');
++    expect(s?.properties?.newHolderEmail?.format).toBeUndefined();
++  });
++
++  it('control KS-591 TCC2: the operation still posts a TransferCustodyRequest and the example still pins only the email', () => {
++    expect(doc.paths?.[CUSTODY]?.post?.requestBody?.content?.['application/json']?.schema?.$ref).toBe(
++      '#/components/schemas/TransferCustodyRequest',
++    );
++    expect(Object.keys(custodySchema()?.example ?? {}).sort()).toEqual(['effectiveAt', 'newHolderEmail', 'reason']);
++  });
++});

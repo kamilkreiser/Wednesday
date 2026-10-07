@@ -1,0 +1,50 @@
+--- a/Blockchain/Dev/services/api-gateway/src/routes/verification.ts
++++ b/Blockchain/Dev/services/api-gateway/src/routes/verification.ts
+@@ -259,3 +259,12 @@
+ }
+-
++
++/**
++ * KS-529 / KS-1432: the POST /api/documents body guard. `JSON.parse` returns whatever the document was (a
++ * literal null, a number, a string, an array); only a non-null, non-array object is an acceptable body.
++ * Exported so the unit test exercises THIS predicate rather than a copy of it.
++ */
++export function isAcceptableDocumentBody(parsed: unknown): boolean {
++  return !(parsed === null || typeof parsed !== 'object' || Array.isArray(parsed));
++}
++
+ /**
+@@ -1151,3 +1160,3 @@
+         // KS-501, which fixed the non-string case but not the non-object one.
+-        if (parsed === null || typeof parsed !== 'object' || Array.isArray(parsed)) {
++        if (!isAcceptableDocumentBody(parsed)) {
+           res.status(400).json({ success: false, error: { code: 'BAD_REQUEST', message: 'Request body must be a JSON object' } });
+--- a/Blockchain/Dev/services/api-gateway/src/__tests__/ks529-non-object-body-guard.test.ts
++++ b/Blockchain/Dev/services/api-gateway/src/__tests__/ks529-non-object-body-guard.test.ts
+@@ -22,6 +22,22 @@
+ import { describe, it, expect } from 'vitest';
+-
+-/** Mirrors the guard in routes/verification.ts POST /api/documents. */
+-function isAcceptableBody(parsed: unknown): boolean {
+-  return !(parsed === null || typeof parsed !== 'object' || Array.isArray(parsed));
++import * as verification from '../routes/verification';
++
++// KS-1432: this file used to define its own COPY of the guard, so deleting the real check left it green.
++// It now calls the predicate routes/verification.ts exports and uses at the POST /api/documents call site.
++const realGuard = (verification as Record<string, unknown>).isAcceptableDocumentBody as
++  | ((parsed: unknown) => boolean)
++  | undefined;
++
++describe('KS-1432 - the guard under test is the one the route uses', () => {
++  it('RED KS-1432 R1: routes/verification.ts exports the guard as isAcceptableDocumentBody', () => {
++    expect(typeof realGuard).toBe('function');
++  });
++
++  it('control KS-1432 C1: the route module still exports createVerificationRoutes', () => {
++    expect(typeof verification.createVerificationRoutes).toBe('function');
++  });
++});
++
++function isAcceptableBody(parsed: unknown): boolean | undefined {
++  return realGuard?.(parsed);
+ }

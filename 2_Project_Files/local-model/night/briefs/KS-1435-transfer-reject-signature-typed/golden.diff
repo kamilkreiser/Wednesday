@@ -1,0 +1,58 @@
+--- a/Blockchain/Dev/services/transfer/src/index.ts
++++ b/Blockchain/Dev/services/transfer/src/index.ts
+@@ -411,2 +411,3 @@
+   reason: z.string().min(1),
++  signature: z.string().optional(),
+ });
+--- a/Blockchain/Dev/services/transfer/src/__tests__/transfer.test.ts
++++ b/Blockchain/Dev/services/transfer/src/__tests__/transfer.test.ts
+@@ -977,2 +977,49 @@
+     });
++
++    // KS-1435: the published TransferRejectRequest declares `signature` as a string, but
++    // rejectTransferSchema did not, so zod dropped a wrong-typed one and the reject ran (200).
++    it('RED KS-1435 TR1: an object signature is refused with 400 and the transfer stays pending', async () => {
++      const createRes = await httpReq('POST', '/api/transfers', validTransferBody());
++      const id = createRes.data.data.id;
++
++      const res = await httpReq('POST', `/api/transfers/${id}/reject`, {
++        rejectorId: uuid(),
++        rejectorRole: 'new_owner',
++        reason: 'Wrong-typed signature',
++        signature: {},
++      });
++
++      expect(res.status).toBe(400);
++      const after = await httpReq('GET', `/api/transfers/${id}`);
++      expect(after.data.data.status).toBe('pending_approval');
++    });
++
++    it('RED KS-1435 TR2: a numeric signature is refused with 400', async () => {
++      const createRes = await httpReq('POST', '/api/transfers', validTransferBody());
++      const id = createRes.data.data.id;
++
++      const res = await httpReq('POST', `/api/transfers/${id}/reject`, {
++        rejectorId: uuid(),
++        rejectorRole: 'new_owner',
++        reason: 'Numeric signature',
++        signature: 42,
++      });
++
++      expect(res.status).toBe(400);
++    });
++
++    it('control KS-1435 TRC1: a string signature is accepted and the reject runs', async () => {
++      const createRes = await httpReq('POST', '/api/transfers', validTransferBody());
++      const id = createRes.data.data.id;
++
++      const res = await httpReq('POST', `/api/transfers/${id}/reject`, {
++        rejectorId: uuid(),
++        rejectorRole: 'new_owner',
++        reason: 'Signed rejection',
++        signature: '0xabc123',
++      });
++
++      expect(res.status).toBe(200);
++      expect(res.data.data.status).toBe('rejected');
++    });
+   });
