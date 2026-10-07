@@ -1,0 +1,98 @@
+QUESTION: qm Q1 insists on the original head (Seat R 11th)
+
+**M2 IS BUILT — 47 gates, 47 passed, 0 failed — and qm is 7 of 8 with Q1 RED for
+exactly the reason your GO anticipated. I have NOT pushed it. I am not touching the
+kit.** Your option-(a) edit works and all five arms are driven, with one of your own
+arms found VACUOUS and replaced.
+
+## qm — 7 PASS, 1 FAIL
+```
+FAIL Q1 M 8b0d48aaf4be parents ['c19520e19294', 'eef784a32a13'] (want EXACTLY [head ce33ec8b3eae, develop eef784a32a13], count 2)
+PASS Q2 tree(M) d9733fd153d1 == predicted d9733fd153d1
+PASS Q3-flow  own 30 x1, LAST True, develop prefix kept True, UNIQUE True, balance (0,0) == develop (0,0)
+PASS Q4-flow  the head block occurs 1 time(s) in M; M minus it == develop BYTE FOR BYTE: True
+PASS Q3-cheat own KS-1435 x1, LAST True, develop prefix kept True, UNIQUE True, balance (0,0) == develop (0,0)
+PASS Q4-cheat the head block occurs 1 time(s) in M; M minus it == develop BYTE FOR BYTE: True
+PASS Q5 code blobs in M == the head's: True []
+PASS Q6 the guard on tree(M): rc 0, (12, 0)
+CHECKED 8 / 1 FAIL (Q1)
+```
+**Q1 is the ONLY failure and it is a PARENT-SHAPE assertion, not a content one.** Every
+content check passed, including the two that settle correctness: Q4 proves M2 minus
+#1408's block equals develop byte for byte in BOTH docs, and Q5 proves the code blobs
+are the gated head's. Q1 wants `parents == [ce33ec8b3eae, D]`; M2's are
+`[c19520e19294 (M), eef784a32a13]` — which is what a SECOND merge-in must have, and
+what your GO itself specifies ("parents(M2) == [M, 5b862461/eef784a3]"). So qm and the
+GO disagree, and qm cannot be satisfied by any correct M2.
+`qm green` is your squash precondition, so **the squash is blocked until you rule.**
+
+## M2
+  M2     = **8b0d48aaf4becd127006bb3dbb7d98340a6c5109**
+  tree   = **d9733fd153d1d0e9ba3f522bb73ee3c9f476e029** == T', exactly
+  parents= [c19520e19294 (M), eef784a32a13 (D)], OURS first
+  0 trailers (1 B) against the NON-EMPTY 55 B control · 0 Co-Authored-By ·
+  subject byte-equal, no `(#` · 0 closing-family word before KS-1435
+  diff OURS..M2 = 29, diff DEV..M2 = 4 (both as I measured off T' in advance)
+  27 non-doc paths checked, 0 deletions carried, 0 differ
+  **NOT PUSHED.** It is a local commit on a detached HEAD; nothing remote moved.
+
+## 🔴 THE PREMISE YOUR GO CALLED UNMEASURED IS NOW MEASURED, AND TRUE
+Without building anything: `git merge-tree --write-tree` on **M + eef784a3** returns
+rc 0 and prints the tree **`d9733fd153d1d0e9ba3f522bb73ee3c9f476e029`** — i.e. T'
+itself, the tree predicted from the ORIGINAL head. So
+tree(merge of M + D) == tree(merge of ce33ec8b + D) is a MEASUREMENT now, not a hope.
+M-4's own tree gate then confirmed it on the real commit.
+
+## THE FIVE ARMS — all driven, rc from a file, no pipe
+1. `0` on the real M + eef784a3: **PASS** — the real build above, 47/47.
+2a. `0` with a WRONG `--flow-blob` (M's own `9fbf93ec26b8`), as you specified:
+    **VACUOUS.** It refuses at the EARLIER pre-gate `both key blobs are IN the
+    predicted tree T`, before the merge ever runs — so it proves that gate works, not
+    mine. Same shape as R 10th's vacuous arm 2.
+2b. **ISOLATED replacement I built so only MY gate can fire:** step-4's tree AND
+    step-4's blobs (`--predicted-tree e9494f50395b --flow-blob cf2e1598894f
+    --cheat-blob 6a8f712f5d1c`). The pre-gate passes because those blobs ARE in that
+    tree; then **my gate REFUSES on both arms**:
+      FAIL AUTO-MERGED flow blob ALREADY == key blob   45fd598e5634 vs cf2e1598894f
+      FAIL AUTO-MERGED cheat blob ALREADY == key blob  cc81d069b88d vs 6a8f712f5d1c
+3. `2` on the real second merge-in: **REFUSES**, all three original gates failing —
+   today's behaviour kept exactly.
+4. `--expect-conflicts` unset / `1` / `yes` / `02` / `''`: **each REFUSES rc 2**,
+   before any merge; the worktree was untouched by all five. (`02` refuses too — the
+   `case 2|0` is exact-match, not numeric.)
+5. **The `2` arm's precondition IS satisfiable**, measured read-only in my clone:
+   `merge-tree` on the FIRST-merge-in shape (ce33ec8b + eef784a3) returns rc 1 with
+   **exactly 2 conflicted paths, both under `Projects Documents/`**. The second shape
+   returns rc 0. **The two differ ONLY in the merge base** — `147ae442074c` vs
+   `eb67b965` — which is the whole mechanism. I could not drive arm 5 through the TOOL
+   because its pre-gate requires origin's branch == `--ours` and origin is M; I used
+   `merge-tree` instead and am naming the instrument rather than claiming the tool ran.
+
+## THE EDIT, as authorised
+`mergeinra11_gate73.sh` **`96ea30dfffcbcaf2` -> `e44cf4faca4fa3bb`**, `bash -n` clean,
+in MY record folder only — no repo code touched. REQUIRED `--expect-conflicts`, no
+default, `case 2|0` else REFUSE. The `0` arm asserts merge rc 0 AND 0 conflicted files
+AND the STAGED blobs == `--flow-blob`/`--cheat-blob` read from the index BEFORE the
+commit; the RESOLVE stage's own staged-blob gates still run after it (both PASSED).
+Gate count went 46 -> 47. Pre-edit copy kept as `.pre-expectconflicts`.
+Recorded in `raise/_COPY_HASHES_ra11.txt`.
+
+## QUESTION
+How do you want Q1 handled? It is YOUR kit, so I am not editing it and not proposing
+an edit to it. Options as I see them: you supersede the `qm green` precondition for
+this step in writing on the strength of Q2/Q4/Q5/Q6; or you amend the kit yourself;
+or I WRAP COLD with M2 built-and-unpushed and hand it to R 12th.
+
+## ALSO: ctx before the push
+Your rule is a reading before the push. Last was 55% at 10:35:10Z and I have since
+done the edit, five arms, M-4 and qm. If it is 65% or more I wrap cold with the edited
+tool hashed and named, per your ceiling.
+
+## STATE
+develop was D `eef784a32a13` at 10:40Z, re-read immediately before M-4. M
+`c19520e19294` on the branch; M2 local only. Worktree HEAD now M2, 0 modified.
+#1245 still my only ticket-side write. Nothing merged to develop.
+
+## WATCHER
+pid 74090, count 1, SINCE `2026-10-07T10:35:33.000Z` = your option-(a) ANSWER.
+
