@@ -15,6 +15,23 @@ supersede: REPLACED WHOLESALE 2026-10-07 05:3x by the night seat c1dbe0b9 (boote
 1. `inbox_digest.sh --inbound` WHOLE, + `--all` for `[QUESTION]` rows in the last 12 h, each matched to a later ANSWER. Bodies are fetched by message id and saved to `fleet/briefs_staged/`.
 2. **Morning ticket sweep + receipt** (the standing grant). Value first: kintsugi deployed + swept at d75bfe2 (night of 10-06); gate71 GO; the #1404 merge-in built and verified, held by the freeze; the KS-1436 ticket filed.
 
+## 🔴 ROTATION HANDOVER — evening seat, 22:46, ctx 82% — READ THIS FIRST (supersedes every block below)
+- FLOOR: %0 wednesday · **%87 Seat R 12th** (`Secuura/Blockchain-R`, launched ~22:46 AEDT; brief verified at destination 11:46:13Z: `fleet/briefs_staged/2026-10-07_seatR12_merge1410_5d_raise.md`, SEND AMENDMENT at its top rules all questions) · %1 monitor. **First act: verify R 12th at rung 5/6** (its pane names the brief / its plan-confirmation mail).
+- **gate73: 3 of 4 LANDED + verified at source** (#1407 7bcc2ed5, #1409 841e4ab1, #1408 2c27ddfeef51). **#1410 is R 12th's** (a FIRST merge-in, `--expect-conflicts 2`, the kit's qm Q1 unchanged). Drafter's prediction on 2c27ddfe: tree e9494f50395b1aa30f1b9bf87b1cbac97786d8b2, flow cf2e1598894f018dd5956116d5a155d1ebf876ef, cheat 6a8f712f5d1c7a3c440abd6749f3b1736ea2458e.
+- **NEXT from R 12th: QUESTION plan confirmation** → read its pane ctx → ANSWER → **GO 1410**:
+  - Re-run `c4_docs_gate73.py chain --develop <real develop> --order 1410 --heads 1410=c976c9f72ba019d76a2a575f2e4ff5c19c7af505` in YOUR OWN scratch clone first (`git clone --shared --no-checkout` the checkout into your scratchpad; fetch by sha from the GitHub URL with `-c core.sshCommand='ssh -i "/Volumes/DevMASTER/!CODING/Secuura/Blockchain/3_Access_Keys/github_deploy_rw" -o IdentitiesOnly=yes -o StrictHostKeyChecking=accept-new'`).
+  - Body shape: `fleet/briefs_staged/2026-10-07_seatR11_GO_1408_v3.md`, but with **PR head = c976c9f7…** (first merge-in) and **merge_note `Merged by Seat R 12th on the authority of HANDOVER-seatE10-2026-10-07.md sha256 e7bb132c8848d3a7`**. Subject `KS-591: declare newHolderId a uuid on the transfer custody request` (66). Body 1410.txt 3925 B sha256 b4eac209c97eda942f5dfab66c916e460fe6690d7e2c4efd1ed4f7d3547c8696.
+  - **Test the GO against R 12th's builder regexes** (its copy `…/2026-10-07_seatR-12th/raise/build_addendumra12_gate73.py:78-89, :103`) and re-read develop seconds before sending.
+  - Then its Actions → ADDENDUM 1410 (shape: `fleet/briefs_staged/2026-10-07_seatR11_ADDENDUM_1408.md`; NO KS-591 comment) → squash → verify AT SOURCE. **gate73 is then 4/4.**
+- After #1410: §5d comment follow-up (tier 3) then raises (KS-1164, KS-1274, KS-1410 one PR), likely by R 13th.
+- **Peter merged 6+ times tonight**: expect develop moves (STOP, re-predict, superseding GO by name). R 12th has the second-merge-in rules (substitute Q1, `--expect-conflicts 0`, `--m-retain` = local ref) under "IF develop MOVES".
+- **OWED (Wednesday):**
+  - gate-kit template: qm second-merge-in mode + mergein `--expect-conflicts` + block extraction against the head's own merge-base;
+  - read the pre-push format gate's package-selection rule from its source (S-1 = install all four systemTest packages until then);
+  - Spark re-screen once gate73 lands;
+  - Kam: no rulings since 13:02. OPEN cards `secuura-demo-disk-too-small-to-rebuild-1007`, `secuura-standing-build-cache-prune-1007`.
+- Tonight's ledger rows: w=12 seat-tool family (GO 1407 labels), brief rule vs the launcher boot pull, routing token w=9. STANDING_LINES: S-1 (install all), S-4 (detached-push refs), boot-pull = project rule. Usage 77%.
+
 ## 🔴 EVENING SEAT — 22:18, ctx 76% — READ THIS FIRST (supersedes every block below)
 - **gate73: 3 of 4 LANDED.** #1407 → 7bcc2ed545e4 · #1409 → 841e4ab136dc · **#1408 → develop 2c27ddfeef519599407682c89a28c275d7bc3559** (tree d9733fd153d1, parent eef784a32a13), all verified at source by Wednesday (this session's scratch clone `…/scratchpad/wclone`; fetch by sha from the GitHub URL with the checkout's deploy key `-c core.sshCommand='ssh -i "…/3_Access_Keys/github_deploy_rw" -o IdentitiesOnly=yes'`).
 - FLOOR (22:32): %0 wednesday · %1 monitor. **R 11th WRAPPED (0.94, pane closed)**; handover `HANDOVER-seatR11-2026-10-07.md` 3de17327fcfb2f8e (170 lines). KS-1435 comment 8f1ab368… posted + read back. No agent live, no question unanswered.
