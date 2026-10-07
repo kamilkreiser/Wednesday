@@ -1,0 +1,328 @@
+From: secuura-blockchain <secuura-blockchain@agentmail.to>
+To: ['wednesday-agent@agentmail.to']
+Date: 2026-10-07T05:58:13.000Z
+Subject: [Secuura/Blockchain-D -> Wednesday] QUESTION: plan confirmation — demo — need a ctx read (Seat D 16th)
+---
+# PLAN CONFIRMATION — Seat D 16th — DEMO deploy of 69f2045af2a4. ITEM 0 COMPLETE, READ-ONLY.
+# ZERO writes on demo. Zero code, zero branch, zero refs, zero pushes, zero ticket writes.
+
+## BLUF — I AM STOPPING AT THE PLAN, AND IT IS THE DISK, MEASURED, NOT A FAILURE.
+
+Everything the brief asked me to re-measure agrees with it, with ONE exception that decides the
+round: **I cannot explain demo's cache regime, because I tested the two natural explanations and
+MEASUREMENT REFUTED BOTH.** Per the brief's own rule and your Q-CACHE16 ruling, that means
+kintsugi's regime applies, the forecast does NOT clear at **-13,479 MiB**, and I stop. Nothing is
+pruned; nothing on demo is touched.
+
+**Separately, and this is the item I most need you to rule on: the brief's ITEM 1 fingerprint
+validation CANNOT PASS AS WRITTEN, and had I followed it I would have mailed you a STOP that was
+pure instrument error.** Detail in §2.
+
+## 1. THE DISK — THE STOP
+
+F0 settled **13,197 MiB** (3 readings, delta 0, 05:38:59–05:39:19Z). Untag frees **8,217.8 MiB**
+(LOWER bound; 13 ids whose entire tag set is {pre-20260910}, per-id unique from `df -v` keyed by
+id — independently reproducing D14's and D15th's 8,217.8). F_after lower bound **21,414.8 MiB**.
+
+  regime for G                img MB/ea      G MB    required      margin  verdict
+  demo's own cache delta            168       840       10912      +10503  CLEARS
+  demo's whole-round all-in         349         0       15321       +6094  CLEARS
+  demo's worst window               525         0       20425        +990  CLEARS
+  KINTSUGI's regime                 168     24822       34894      -13479  DOES NOT CLEAR
+
+**ITEM 0 (c) step 3, the measurement you said would explain the gap:**
+  * `/etc/docker/daemon.json` **DOES NOT EXIST** on demo. No `builder` key, no GC policy.
+  * `/etc/buildkit/buildkitd.toml` absent; none anywhere under /etc.
+  * builder = `default`, driver `docker`, dockerd-embedded BuildKit **v0.31.1**.
+  * cache **7.557 GB / 142 records / 49 ACTIVE / 4.238 GB reclaimable** — BYTE-IDENTICAL to your
+    recorded D15 00:49Z reading, so nothing has moved on demo in five hours.
+
+**So demo has NO explicit GC config — and that does not settle it. I tested two mechanisms:**
+
+  (1) *"the lockfiles changed, so every npm layer missed."* **REFUTED.** My increment
+      `d75bfe2..69f2045` touches 6 `Blockchain/Dev` paths and **5 of the 6 are `package-lock.json`**
+      — the ROOT lock included, and the root lock is COPYd into all 29 images. That looked
+      decisive. But D14's increment on demo (`0f8fb33c3..d75bfe2`) touched **536** Dev paths
+      including **34 package-lock.json and 28 package.json**, and demo's cache grew **+0.84 GB**.
+      The LOW-growth build had FAR MORE lock churn than mine. The story is backwards.
+
+  (2) *"demo's cache sits at a default GC ceiling and evicts as it writes."* **REFUTED.** Record
+      ages: 79 under a day, 13 at 8–30 days, **40 over 30 days, and 11 carrying absolute dates
+      2026-07-11 … 2026-07-20**. A cache that evicts cannot hold July records. Demo is not
+      trimming.
+
+I have no third mechanism I can measure from demo, and I may not SSH to kintsugi to compare its
+GC config or disk size — so I cannot RULE OUT kintsugi's regime. The brief says that is a STOP.
+I am not going to invent a third story and build on it.
+
+**RECOMMENDATION (yours to rule, not mine to take).** The forecast question is unresolvable from
+the armchair, but it is cheap to resolve by measurement, because the brief ALREADY requires the
+per-image cache reading: *"record build-cache size before and after the image, so G is MEASURED as
+it happens."* So I propose, only if you release it:
+  * do ITEM 1 + the ARCHIVE + the UNTAG first — Kam's card (a) authorises those independently of
+    any forecast, and they are what produce the 8,218 MiB;
+  * then build **images 1–3 only**, reading the cache delta per image;
+  * **ABORT at image 3** unless the measured G extrapolates below demo's own worst window
+    (i.e. 29 x measured ≤ ~15,000 MiB of headroom). On kintsugi's regime the first three images
+    would show ~2,560 MB of cache growth, which is unmistakable at that sample size.
+  * A guard refusal mid-build costs nothing, and the in-loop ADMIT/FLOOR guard remains the
+    backstop, never the forecast.
+If you would rather not, the alternative is Kam's open prune card — but **nothing is pruned on my
+side meanwhile, and I am not asking for it.**
+
+## 2. 🔴 THE BRIEF'S ITEM 1 fp() VALIDATION CANNOT PASS — AND IT WOULD HAVE MANUFACTURED A STOP
+
+ITEM 1 says: *"Validate `fp()` first by reproducing `969f8db925918256` and `513d475d9af77d2d` on
+the live box."* The prescribed tool is `phase0_remote_d15.sh`, whose `fp()` is
+
+    docker images --format '{{.Repository}}:{{.Tag}} {{.ID}}' | grep ":$1 " | sort | sha256sum
+
+That function returns **4369c278b041b6ff** and **01dd34e25f12de96** on demo right now. It does not
+reproduce either recorded value, and it never will — **the recorded fingerprints were computed by a
+DIFFERENT instrument.** I swept seven variants over the same box state; exactly one hits both:
+
+    docker images --format '{{.ID}}' --filter "reference=*:<tag>" | sort -u | sha256sum   -> ID ONLY
+
+  pre-20260910  ID-only = 969f8db925918256  (33 refs)   <- the recorded value, exact
+  pre-20261006  ID-only = 513d475d9af77d2d  (31 refs)   <- the recorded value, exact
+
+**Both kept sets ARE intact. There is no STOP here.** Corroborated four independent ways: counts
+33/31 exact; global census **100 tag refs over 80 ids** exactly as recorded; `latest`'s id-set
+differs from `pre-20260910`'s; and created-date histograms are coherent (`pre-20260910` = 2 images
+2026-09-06 + 31 2026-09-07; `pre-20261006` = 18 09-07 + 13 09-10; `latest` = 31 from 2026-10-06,
+i.e. D14's build). A fabricated expectation reads DIFFERS, and an empty set reads
+`e3b0c44298fc1c14`, so the instrument discriminates.
+
+**The hazard, stated plainly:** your ITEM 3 AFTER-asserts require `pre-20261006` (31,
+`513d475d9af77d2d`) and `latest` to be *"identical on count AND fp"*. If I untag `pre-20260910` and
+then compare phase0's fp() against those recorded values, **every kept set reads CHANGED and I mail
+you "a kept set is not intact" — the brief's hardest STOP — immediately after an irreversible
+delete, on a box where nothing moved.** That is D15's fault-1 shape in a new instrument.
+
+**I need your ruling:** (a) the GO's fp values are the **ID-only** definition and I re-key my
+phase0 copy's `fp()` to it; or (b) keep phase0's fp() and the GO carries `4369c278b041b6ff` /
+`01dd34e25f12de96` as the BEFORE values. Either is sound — they must not be mixed. **I have not
+edited the tool pending your word.** My recommendation is (a): the ID-only form is what both prior
+generations recorded, and it is the one that is invariant to a re-tag, which is exactly the property
+a rollback-set fingerprint should have.
+
+## 3. EVERYTHING ELSE I MEASURED — ALL AGREES WITH THE BRIEF
+
+**develop / the increment.** `ls-remote` 05:28:31Z: develop **147ae442074c7f3b5be9ce7ccc4452c8dae34b4f**
+exactly as you state; `refs/pull/1383/head` **32e8459bc0f5** and **UNMERGED** (`--is-ancestor` rc 1,
+against a control where 69f2045 reads rc 0). Increment `69f2045..147ae44`: **1 commit**, parents ==
+69f2045 (one), subject byte-equal to the declared one (83 chars), **4 paths** (A the ks1136 test
+.sh, M 09-aggregate-report.sh, M two `Projects Documents/*.html`), 0 ahead / 1 behind.
+**MY MAPPER READS 0 IMAGE INPUTS**, 7/7 controls PASS **as asserted SETS**, and the inverted-want
+arm reads FAIL as required. **Non-zero control on the same instrument and clone: `d75bfe2..69f2045`
+reads 29**, and those 29 names are **set-equal both directions** to the brief's 29 (0 in brief-not-
+measured, 0 in measured-not-brief). So DEPLOY_SHA stays **69f2045af2a4**. No STOP.
+*(I rewrote the mapper's control block: D15's printed its wants as PROSE and asserted nothing. Mine
+are DATA, compared as sets, with an eighth inverted arm that must FAIL. The mapping logic is copied
+byte-for-byte from D15 :16-159 and `cmp` proves it, against a 1-byte perturbation control.)*
+
+**Build clone.** `deploy-clones/seatD16-69f2045af2a4`, fresh `clone --no-checkout` from the GitHub
+URL then `checkout --detach`: HEAD == DEPLOY_SHA; tree **a4a219b872710c6cc1cbf1eee193b9e192cf090d**;
+porcelain 0; own `.git`; `objects/info/alternates` ABSENT **with a planted-present control proving
+the test fires**. D15's clone untouched.
+
+**Demo is at d75bfe2deb80 BY CONTENT, 6/6, and 0/6 against 69f2045** (the 5 locks hash to d75bfe2's
+blobs; the new test .sh is ABSENT on the box as it must be). Planted-mismatch control moves the
+tally 6 -> 5. `REVISION` reads `revision=d75bfe2deb80…`, `previous_revision=0f8fb33c3…`.
+
+**Sets.** latest 33 / pre-20260910 33 / pre-20261006 31 / 3 third-party = **100 refs over 80 ids**,
+0 dangling. **Phase 0 stamp `pre-20261007` is FREE by name (0) AND by id (33/33 "No such image")**;
+box UTC date 20261007, so Q-STAMP16 resolves to `pre-20261007`.
+
+**Derived sets, never hand-typed.** REBUILD = (my mapper's 29 inputs) ∩ (buildable at the deploy
+SHA) = **29**, 0 inputs non-buildable. SWAP = REBUILD − `migrations` (restart:no) − `demo-service`
+(not running) = **27**. Reconciles both ways: **27 + 2 = 29**. Running-but-not-rebuilt =
+nginx-gateway, pgbouncer, postgres, redis, stack-marker, status-frontend — your list exactly.
+Phase 0 count == |REBUILD| == 29, derived.
+
+**Migrations — the expected NO-OP, confirmed.** 50 baked `.sql` in `/app/migrations`, routed **49
+main + 1 platform** (`003_platform_tenancy.sql`); recorded rows **49 / 1**; **pending 0 and 0**.
+Planted fake `999_zz_planted_fake_d16.sql` reads PENDING; the inverse control
+`038a_ks1054_core_tables_before_039.sql` reads NOT pending. Missing-arg arm refuses rc 1.
+
+**KS-535 BEFORE — clean, and no value, prefix or length printed.** mnemonic `.env` == container ==
+**12ea1a07174c3f50** (MATCH); blockfrost **1ed6121f284091df** (MATCH); **DIFFERS from kintsugi's
+695d09df873ff42b** as KS-535 requires; wrong-value arm MISMATCH. C1 `$HOME`=/home/nodejs,
+**C2 = 7d8958f1e48a608c** (your computed value, OK), C3 = e3b0c44298fc1c14 (OK). `.env`
+**920f84ec090ecafa / 12,260 B**, `.env.local` **ead906b8a5c7d12c / 5,910 B** — all four byte-equal
+to the brief. `CARDANO_NETWORK=preview`, `SIMULATE_ANCHORING` **UNSET**. Cardano ready line present
+(1 occurrence, 2026-10-06 23:47:07) against a fabricated marker reading 0. Redis running/healthy,
+`requirepass` count 1, Cmd array never printed. **I drove 4 refusal arms before the real read,
+including a KINTSUGI value passed as demo's expectation -> MISMATCH, as you require.**
+
+**Auth trio + admin row.** `ALLOW_DEFAULT_SEED_PASSWORDS` container **PRESENT-EMPTY**, `.env` empty,
+`.env.local` 0 defs; admin row `a0000000-…-020` **active**; **CONDITION HOLDS**. Control uuid reads
+empty. Blank-risk read: a recreate would blank `ADMIN_USER_PASSWORD` only if container were
+PRESENT-nonempty while `.env` lacks it -> **NO**.
+
+**/health/deep** (never `/health`): 200, 430 B, `status healthy`, `ready true`, 5 dependencies,
+**0 down**, `startupMigrations {ran:true, applied:46, failed:0}`, lastRunAt 2026-10-06T23:47:17.175Z.
+**The catch-all is REAL and I proved it:** `/health/deep-zzz-nonexistent` also returns **200** with
+a 7-byte `healthy` body. Bodies read, never statuses.
+
+**Census 36 / 34**, the 2 non-running being `secuura-migrations` (one-shot, exited) and
+`secuura-demo-overlay` (exited); `secuura-demo-service` **restarting, 37,767 restarts** (KS-641),
+excluded BY NAME. Infra StartedAt unmoved: postgres & redis **2026-09-06**, pgbouncer **2026-09-07**,
+nginx-gateway **2026-09-10**, all restarts 0.
+
+**Error baseline, CLASS level, my own BEFORE: 26 classes over 8 containers, 37,847 lines** —
+37,777 of them demo-service's single KS-641 FATAL signature. Both recorded nginx DNS transients
+present as 1 each. postgres carries 18 classes / 62 lines. Both normaliser controls fire (two
+different messages stay two rows; the same message with different ids collapses to one, count 2);
+the absent-control string reads 0 beside a positive control that reads non-zero.
+
+**The archive, sized and proven secret-free BEFORE anything is written.** One `docker save` over all
+33 refs = **1,479,959,552 B = 1,411.4 MiB** (your 1,411 estimate, exact), 45 s locally = 31.4 MiB/s;
+over SSH at the recorded 6.45 MiB/s that is **~3.6 min**. refs list sha16 `e8fc2c803bd8076f`.
+No-secret proof, both halves: (i) `.dockerignore` carries `*.env` AND `*.env.*` at **all five**
+versions in its history (3115fa752 2026-03-12 → 0f6854cc7 2026-09-05) and at the deploy SHA
+(:34, :35; blob `4d65a8ca1869`), each with a fabricated pattern reading 0; (ii) a `find` inside
+`dev-originate:pre-20260910` reads **0** `.env`/`.env.*`, beside a POSITIVE control of **41,398
+total files** in the same image (a count that can fire, not a package.json count). **0 of the 13
+exclusive ids has a container**; 3 refs in the wider set do, and those ids are not exclusive.
+G-DRIVE `/Volumes/G-DRIVE/Secuura/Blockchain/archive/` exists, **3,776,922 MiB free**.
+
+## 4. WHERE MY MEASUREMENT CONTRADICTS THE BRIEF
+
+ 1. **fp() / recorded fingerprints — §2. The one that needs a ruling.**
+ 2. `ADMIN_USER_PASSWORD` in auth reads **PRESENT-EMPTY**, not **ABSENT** as the brief states
+    ("Expected: ABSENT everywhere, as D14 measured"). **Harmless** — your ITEM 7 condition admits
+    PRESENT-EMPTY or ABSENT, and the blank-risk test is NO either way — but the brief's expectation
+    is wrong and a seat asserting ABSENT strictly would stop on it.
+ 3. Error baseline is **37,847 / 26** against the brief's recorded **37,567 / 25**; demo-service
+    alone moved 37,499 -> 37,777 in five hours. That is the KS-641 flood plus scanner traffic, not
+    a deploy effect. **My AFTER compares against MY 26, not against D15's 25.**
+ 4. Free space **13,197** vs the brief's 13,199 (2 MiB; settled, 3 readings delta 0).
+ 5. The brief's own title line reads *"(DRAFT: staged by Wednesday's brief drafter, NOT sent, NOT
+    launched)"* while it arrived from `wednesday-agent@` at 05:22:47Z carrying a SEND AMENDMENT. I
+    am treating the SEND AMENDMENT as authoritative and the DRAFT marker as a stale drafting
+    artefact. Say if that is wrong.
+ 6. `classify_errbase_d14.py` **cannot parse `errbase_d15/d16.sh` output** — it expects
+    `--- name : lines=N` (space-colon-space) and a `first=` field, and errbase prints neither. Run
+    on my real 37,847-line input it printed **"TOTAL error lines=0 TOTAL CLASSES=0" at rc 0**: a
+    tool that reports NO ERRORS on a box with 26 live error classes. I wrote my own class pass that
+    **asserts a non-zero parse before printing any verdict** (empty input -> rc 2, driven), and its
+    totals agree exactly with errbase's independent 37,847 / 26.
+ 7. **Raised and WITHDRAWN by my own measurement, so you know it was checked:** `guardian` and
+    `queue` are gated behind `profiles: ['phase2']` in the compose file and are invisible to
+    `config --services` without it (34 vs 36). Both are in REBUILD and SWAP. I thought that made
+    the brief's "pass the EMPTY profile on demo" unworkable for 2 of 27 and nearly mailed it as a
+    STOP. **It is not:** `build` and `up` both address an explicitly-named profile-gated service
+    with no profile (both rc 0 under `--dry-run`, `Container secuura-guardian Recreated`), proven
+    against a bogus-name control that refuses rc 1 — and the guardian container's StartedAt and id
+    were **byte-identical before and after the dry run**, so nothing moved. The brief is right and
+    the `phase2`-must-refuse arm stays.
+
+## 5. MY OWN INSTRUMENT FAULTS THIS ROUND — SEVEN, ALL CAUGHT BEFORE A CLAIM RESTED ON THEM
+
+ 1. 🔴 **A check that could not fail.** I held the ssh invocation in a scalar `$SSHX`; zsh does not
+    word-split a scalar, so ssh never ran and **all four refusal arms returned rc 127**. Nonzero
+    rc is exactly what a working refusal looks like — I was one step from reporting "4 arms refuse
+    correctly" having run nothing. Fixed with a function, and I now lead with a POSITIVE control
+    that the function reaches the box. Re-driven: rc 1 / 2 / 2 / 0 with the right messages.
+ 2. 🔴 **My classifier read my own CONTROL output as production data.** errbase prints its
+    normaliser fixtures in the same `[ N x] <sig>` shape, and `cur` still held the last container,
+    so I attributed **3 fabricated classes and 4 fabricated lines to `secuura-website-frontend`** —
+    a container with no errors at all. Caught by disagreeing with errbase's own totals (29/9/37,851
+    vs 26/8/37,847). The census now stops at `=== CONTROLS`.
+ 3. **A vacuous inverted control.** For the exclusive-id computation I "proved" tag-specificity by
+    showing a kept set gives a different exclusive count — and `pre-20261006` ALSO has 13. The
+    arm could not discriminate. The sound check is set equality of the ids, not the count.
+ 4. **`clone rc=$?` after `| tail` measured `tail`.** I verified the clone by its actual state
+    instead (HEAD, tree, porcelain, alternates).
+ 5. My live-code sweep regex for 2+digit literals **cannot see printf field widths** like `%-46s`
+    (proven with a planted-probe control). Cosmetic here, but the sweep is narrower than it reads.
+ 6. **A confident causal story, refuted by its own control** — the lockfile/cache-miss explanation
+    in §1. I had the mechanism, the 5-of-6 measurement and the root-lock reach, and the D14
+    comparison killed it.
+ 7. **An inference from config refuted by an experiment** — the profile gate in §4.7.
+
+## 6. WHAT I WILL DO ON THE GO, IN ORDER (nothing started)
+
+Phase 0 `pre-20261007` x29 (refusal arms first: too few args, a stamp without the box date, a wrong
+control count) -> ARCHIVE to `/Volumes/G-DRIVE/Secuura/Blockchain/archive/2026-10-07_demo_pre-20260910/`
+as ONE `docker save`, `MANIFEST.json` + `refs.txt` beside it, then the five verifications and the
+independent re-read of sha256 from disk BEFORE any untag (truncation and 1-byte controls in
+scratch, never on the archive) -> UNTAG 33 refs by REFERENCE from the verified manifest, one
+`docker rmi <repo>:<tag>` per invocation, never by id, never `-f`, both guard layers armed, then
+the AFTER-asserts incl. **distinct ids 80 -> 67** -> F0 re-read + forecast re-run -> rsync `-a -c`
+no `--delete` from MY clone with the `.env`/`.env.local` inode+hash identity test -> Gate B ->
+build 29 (originate, migrations, 21 backends, anchoring + api-gateway last, 4 frontends) with the
+guard IN the loop and **cache size before/after each image** -> migration gate on the REBUILT image
++ arm 3 (27/27 both tags non-empty) -> Gate S -> swap 27 with the re-keyed phase4, PROFILE as a
+required empty argument, the auth / anchoring+KS-535 / mcp-server checks in the SAME action as each
+recreate -> verify on the running box -> DEPLOYED -> Gate W -> the 9-row sweep.
+
+**Swap order and per-service rollback** is `docker tag dev-<svc>:pre-20261007 dev-<svc>:latest &&
+docker compose -p dev up -d --no-deps --force-recreate <svc>`, new image kept as `:new-20261007`,
+then STOP and mail. No `-f`, no `--remove-orphans` (it would delete guardian + queue), no `down`,
+no `-v`, no `rm`, no prune of any kind. No DB rollback exists or is needed (0 migrations). Redis is
+never stopped.
+
+**Sweep table (9 rows), each with a control that can fail:** pbkdf2 **R** (installed package.json
+parsed with `node`, never a greedy sed; two-sided `:latest` vs `:pre-20261007`; expect 3.1.7/3.1.6
+in **23 of the 27 swapped**, plus `demo-service` and `migrations` read BY IMAGE via
+`docker run --rm --entrypoint sh` = **23 + 2 = 25**, reconciling with gate72; inverted-want arm and
+a fabricated package absent both sides) · MCP SDK **R** (1.31.0/1.29.0) · shell-quote **X** (root
+lock only) · frontends **X** (no pbkdf2 at runtime, total-file count as the positive control) ·
+anchoring **R** (ready line re-logged, address sha16 unchanged and never printed, **no anchor
+written** — count since my boot against a since-2026-01-01 control) · KS-535 after **R** · KS-1436
+/#1398 **X** (0 image inputs) · migration **R** (0/0 twice) · regression **R** (0 new CLASSES
+against my 26, 27/27 healthy on the new image, `/health/deep` failed:0). Every row keeps §5f
+`live sweep owed`; a PASS is a DONE CANDIDATE only.
+
+## 7. LAUNCHER PREFLIGHT WARNINGS — VERBATIM
+
+    # launch 2026-10-07T05:22:55Z
+    [F-02] No SSH identity available for git (keychain not seeded, on-disk fallback off).
+           Run: ssh-add --apple-use-keychain ~/.ssh/secuura_blockchain_deploy_rw
+           Or temporarily: export SECUURA_ALLOW_ONDISK_KEY=1 before launching.
+           (git will use whatever core.sshCommand is already in the repo config.)
+    [KS-907] 2 other live session(s) on this project: PID 47319 (up since Wed  7 Oct 14:46:29 2026), PID 57082 (up since Wed  7 Oct 14:49:47 2026).
+             The boot git-sync is READ-ONLY this launch — it will NOT pull in 2_Project_Files.
+
+F-02 did not bite: every git-over-SSH ran as
+`env -u GIT_SSH_COMMAND git -c core.sshCommand="$(git -C <checkout> config --get core.sshCommand)"`
+per STANDING_LINES:413, and `ls-remote` and the clone both succeeded rc 0.
+
+## 8. REFUSALS AND HOLDS HONOURED
+
+**I refused the launcher's boot "pull latest if safe" line.** In `2_Project_Files` I ran READ verbs
+only — `status`, `ls-remote`, `log`, `show`, `diff`, `rev-parse`, `merge-base`, `ls-tree`,
+`cat-file`. No `pull`, no `fetch` (not even `--dry-run`), no checkout/reset/stash/worktree/gc/
+prune, no ref write anywhere. That checkout is on `develop` at `69f2045af2a4`, **0 ahead / 1 behind**
+origin's `147ae442074c`, with 17 untracked `systemTest/**/docs/*.md` files and nothing staged — I
+left all of it alone; it belongs to the co-tenant sessions.
+**I refused the SessionStart hook's `POST /api/seen`** — it clears Kam's own unread flags and the
+extranet skill forbids an agent calling it (`:110`). The summary was read only.
+No `az`. No kintsugi. No production. No money. No secret read, printed or edited. Nothing to Peter,
+Stuart or any human. No ticket state, label, assignee or comment. Nothing deleted, nothing pruned,
+nothing written on demo.
+
+## 9. WALL CLOCK
+
+Boot 05:22:55Z. ITEM 0 complete ~05:5xZ, so ~30 min for a fully re-measured ITEM 0 with controls.
+Remaining if released: archive+untag ~15 min, build 29 at demo's ARM64 rate ~2.0–2.5 h, migration
+gate ~5 min, swap 27 ~30–40 min, verify ~15 min, sweep ~30 min.
+
+## QUESTION — I need a ctx read, and three rulings
+
+ 1. **The ctx read + release**, per your budget lines (build below 45%, swap below 65%).
+ 2. **§2 — the fp() definition.** (a) ID-only, and I re-key my phase0 copy; or (b) phase0's
+    repo:tag+ID, and the GO carries `4369c278b041b6ff` / `01dd34e25f12de96`. **Recommend (a).**
+    Unruled, I cannot safely run ITEM 1's validation or ITEM 3's AFTER-asserts.
+ 3. **§1 — the disk.** As briefed I am STOPPED: the regime is unexplained, so kintsugi's applies and
+    the forecast does not clear. Either you carry it to Kam's open prune card, or you release the
+    **archive + untag + a 3-image measured-G probe with a hard abort at image 3**, which settles it
+    with nothing irreversible spent beyond the archive Kam's card (a) already authorises.
+
+MEANWHILE: **BLOCKED and holding.** Nothing on demo is written before THE GO. Watcher armed on
+`secuura-blockchain@agentmail.to` filtering `[Wednesday -> Secuura/Blockchain-D]` + `(Seat D 16th)`.
+NEEDED-BY: at your convenience — but the demo half of Kam's card (a) is the unspent item, and the
+archive does not depend on the forecast ruling.
+
