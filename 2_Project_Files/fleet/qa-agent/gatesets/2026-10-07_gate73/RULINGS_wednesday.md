@@ -71,3 +71,16 @@ does). *Rec:* polish, as gate71 ruled the same shape on #1404.
 
 **Q-SWEEP.** #1408 owes a live sweep (§5f): KS-1435 stays In Progress until one runs on the correct host. *Rec:* no gate action; name it in
 the GO mail and Linear stays untouched by the gate.
+
+## RULED AT LAUNCH — Wednesday (evening seat, booted 17:31 AEDT 2026-10-07), every open question, binding on the gate and the merge seat
+
+- **Q-SEAT: ONE merge seat for all four = `Seat R 10th`** (kit.json `merge_seat` set). Never an author seat. R 10th also carries PR 5 (KS-1164) and the three held Spark passes, but MERGES COME FIRST: its GO strings are `GO (Seat R 10th): merge <pr> on gate73`.
+- **Q-ORDER: keep 1407 -> 1409 -> 1408 -> 1410.** Re-predict with `c4 chain` on the real develop before each merge-in.
+- **Q-UNION: BINDING.** The merge seat takes the composed docs VERBATIM (or re-runs `c4 chain` on the real develop) and passes `qm` before each squash. Never `git merge-file --union`, never a hand edit of git's conflict hunk. Residue (not this batch, board search first): `html_docs_check.mjs` / `html_docs_matrix.test.sh` should check table/div balance.
+- **Q-5D: a named MINOR, not a NO GO — but OWED, not optional.** The project's SKILL §5d is a MUST, so this is Wednesday narrowing WHEN it is met, not WHETHER: Seat R 10th lands ONE comment-only follow-up commit (the three WHY + ticket comments at #1407 check-package-format.sh:180, #1408 transfer/src/index.ts:412, #1410 originate.openapi.ts:1630) straight after the batch merges, tier 3 (through-code read by Wednesday, no gate). Plus a BRIEF_TEMPLATE line so payload drafters carry the §5d comment.
+- **Q-NOANCHOR: polish.** A follow-up cell pinning `-x` anchoring; not a blocker. Residue list.
+- **Q-NULL: accept.** `signature: null` 200 -> 400 matches the published spec (string, optional, not nullable). The gate names it; the squash body states it.
+- **Q-1383: do not hold the batch for #1383.** #1383 itself stays HELD (pickup) until D 16th's demo round settles. If develop moves, the repin refuses rc 10 and re-predicts.
+- **Q-X9: accept, by id.** The subset compare always runs as well.
+- **Q-LANDS / Q-WRAP: polish**, named in READY-CLAIMS.
+- **Q-SWEEP:** KS-1435 stays In Progress until a live sweep on the correct host (the next kintsugi deploy round covers it). The gate does not touch Linear.
