@@ -15,6 +15,24 @@ supersede: REPLACED WHOLESALE 2026-10-07 05:3x by the night seat c1dbe0b9 (boote
 1. `inbox_digest.sh --inbound` WHOLE, + `--all` for `[QUESTION]` rows in the last 12 h, each matched to a later ANSWER. Bodies are fetched by message id and saved to `fleet/briefs_staged/`.
 2. **Morning ticket sweep + receipt** (the standing grant). Value first: kintsugi deployed + swept at d75bfe2 (night of 10-06); gate71 GO; the #1404 merge-in built and verified, held by the freeze; the KS-1436 ticket filed.
 
+## 🔴 EVENING SEAT — 22:18, ctx 76% — READ THIS FIRST (supersedes every block below)
+- **gate73: 3 of 4 LANDED.** #1407 → 7bcc2ed545e4 · #1409 → 841e4ab136dc · **#1408 → develop 2c27ddfeef519599407682c89a28c275d7bc3559** (tree d9733fd153d1, parent eef784a32a13), all verified at source by Wednesday (this session's scratch clone `…/scratchpad/wclone`; fetch by sha from the GitHub URL with the checkout's deploy key `-c core.sshCommand='ssh -i "…/3_Access_Keys/github_deploy_rw" -o IdentitiesOnly=yes'`).
+- FLOOR: %0 wednesday · **%86 R 11th** (ctx ~62%; posting the KS-1435 comment, then WRAP COLD) · %1 monitor. On its WRAP: re-hash `HANDOVER-seatR11-2026-10-07.md`, check the history entry, `pgrep -f inbox_watchra1` == 0, score, `pane_close.sh %86`.
+- **NEXT: brief Seat R 12th** from R 11th's handover + `fleet/briefs_staged/2026-10-07_seatR11_merge1408_1410_5d_raise.md` (its SEND AMENDMENT) + every R 11th mail and Wednesday ANSWER/GO/ADDENDUM in briefs_staged (2026-10-07_seatR11_*). **R 12th = #1410 (step 4), the §5d comment follow-up, then the raises (KS-1164, KS-1274, KS-1410 as one PR).**
+- **#1410 is a FIRST merge-in** (head c976c9f72ba0 unmerged; the kit predicts from the original head). Re-run `c4_docs_gate73.py chain --develop <real develop> --order 1410 --heads 1410=c976c9f72ba019d76a2a575f2e4ff5c19c7af505` in YOUR clone before the GO. Expect `--expect-conflicts 2` (the docs conflict at a first merge-in) and the kit's own qm Q1 unchanged.
+- **Tool changes R 12th inherits from R 11th's raise/ copies** (ruled tonight):
+  - mergeinra11 `--expect-conflicts 2|0` (e44cf4faca4fa3bb);
+  - builder `RA1x_NO_MERGE_IN`;
+  - `--m-retain` = the local branch ref's REAL value (a detached push does not move refs/heads);
+  - the substitute-Q1 ruling for SECOND merge-ins only;
+  - the poller passes the token by env/file, never argv.
+- **Peter merged 6+ times tonight** (#1411-#1416; KS-1440 Akto, KS-1439 Schemathesis, history). Expect develop to move: STOP at M-2/M-7, re-predict, and supersede the GO by name. **Run the builder's REAL regexes against every GO before sending, and re-read develop seconds before.**
+- **OWED (Wednesday):**
+  - gate-kit template: qm second-merge-in mode + mergein `--expect-conflicts` upstream;
+  - read the pre-push format gate's package-selection rule from its SOURCE (S-1 is 'install every systemTest package' until then);
+  - Kam: no rulings since 13:02; OPEN cards `secuura-demo-disk-too-small-to-rebuild-1007`, `secuura-standing-build-cache-prune-1007`;
+  - Spark queue empty with a why-line: re-screen after gate73 lands.
+
 ## 🔴 EVENING SEAT — 21:09 CHECKPOINT, ctx 70% — READ THIS FIRST (supersedes every block below)
 - FLOOR: %0 wednesday · **%86 Seat R 11th** (`Secuura/Blockchain-R`) · %1 monitor.
 - **develop = eb67b965994057a3311efcc299393757d764ed8a** (Peter merged #1411 KS-1440 Akto, #1412 and #1413 history docs tonight, on top of our 841e4ab1 = #1409). Peter is ACTIVE: expect more moves.
