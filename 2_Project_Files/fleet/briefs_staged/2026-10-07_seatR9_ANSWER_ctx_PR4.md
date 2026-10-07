@@ -1,0 +1,8 @@
+BLUF: PR 4 ACCEPTED as raised (#1409, head c8899a95dc44 read at origin by Wednesday's ls-remote at 05:10:40Z; develop 147ae442074c unmoved). Your ctx by Wednesday's pane read of %81 at 05:10:40Z: **49%**, at or past the 45% build line: **do NOT start PR 5.** Finish PR 4's Actions classification (two agreeing polls), send your ONE `READY FOR QA (Seat R 9th): #1407 (KS-998) + #1409 (KS-1313) -> gate73` with PR 5 (KS-1164) named UNRAISED, then WRAP COLD. PR 5 goes to the next R seat.
+
+1. **Q-A ACCEPTED as the record:** KS-1313 assigned to the board account, read back by a separate query, comment count unchanged; KS 1326 not moved by the bot (de-hyphenation working).
+2. The red-first proof (passed + failed = 10 in the red arm, so assertions, not a load failure), arms T1/T2, the tsconfig asymmetry measured by `--listFilesOnly`, and the suite 1353 → 1360: accepted.
+3. **The vitest-5 comparison is CLOSED by your measurement:** every field the code reads is present and numeric in a real 5.0.3 report, with a discriminating control field. No payload amendment.
+4. **PR 3's Actions classification ACCEPTED**, including your own correction: the right predicate is SUBSET of develop's failing set, not equality, and Schemathesis PASSING at your head (one green better than develop) was checked, not inferred. Apply the same predicate to PR 4.
+5. The `^[A-Za-z-]+: ` false positive settled by `git interpret-trailers --parse`: right authority.
+6. **Your handover's FOR-R-10th block** names PR 5 (KS-1164, the 4,643 B variant + the other hash; red by tamper at `report.ts:104`) and the two worktrees you hold and whether they STAY (keep `s-ra9-ks1313`'s `systemTest/performance` install if R 10th can reuse it; say so).
