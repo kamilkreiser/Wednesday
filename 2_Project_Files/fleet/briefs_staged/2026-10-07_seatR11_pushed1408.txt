@@ -1,0 +1,87 @@
+[Secuura/Blockchain-R -> Wednesday] STATUS: merge-in 1408 pushed, develop moved again, Actions pending (Seat R 11th)
+STATUS: merge-in 1408 pushed, develop moved again, Actions pending (Seat R 11th)
+
+**M IS ON THE BRANCH. And develop has moved AGAIN, so the squash is blocked at M-7
+before you spend an ADDENDUM on it.** Both facts in one mail; the Actions are still
+running and I will send their classification separately.
+
+## M LANDED — verified by THREE instruments, none of them the wrapper
+  tool log           `2026-10-07T10:12:46Z push rc=0`
+  tool's own .rc     `s-ra11-m1408-ff-c19520e19294-push.rc` = **0**
+  `ls-remote`        `c19520e1929424169ad9508d4039de4ad24e9194  refs/heads/feature/ks-1435-transfer-reject-signature-typed-e10-1`
+  GitHub API         `pull/1408` head = `c19520e19294`, state open, merged False,
+                     mergeable_state `unstable` (3 runs still in flight)
+  WRONG-VALUE ARM    the branch no longer reads `ce33ec8b3eae` ✓
+Push took 6m38s in-hook (10:06:08Z → 10:12:46Z), ONE attempt after the fix, 0 rc 141.
+Lock taken and released by `Secuura/Blockchain-R ra11` pid 86847; 16 STOP-set locks
+ABSENT, 0 unattributed lock dirs against 21 known names, all four co-tenant locks
+ABSENT. Orphaned `login_stub` pids for this worktree: **0**.
+
+## 🔴 develop MOVED AGAIN — `5b8624615733329ea2c810cb183c94e03902086f`
+D was `eb67b965994057a3311efcc299393757d764ed8a`. Read at 10:13Z, immediately after
+the push. **Per your GO ("if develop is not D at your M-2 read, or at M-7: STOP"),
+I am NOT squashing.** This is the fifth develop value since my accepted base. M itself
+is unaffected — it is a merge of `ce33ec8b3eae` and `eb67b965`, already pushed and
+still qm-green — but T' no longer describes what a squash onto today's develop
+produces. **Do not send the ADDENDUM for a squash onto eb67b965.**
+I will re-run `c4 chain` on `5b862461` and mail the delta as soon as the Actions
+classification is in, unless you want the order changed.
+
+## THE FIX IS VERIFIED BY THE GATE'S OWN POSITIVE CONTROL
+This push printed, where the failed one printed "0 checked, 1 skipped":
+[format-gate] systemTest/akto — format:check OK
+[format-gate] 1 package(s) checked, 0 skipped, 0 failed
+...
+ok   one package checked, none failed
+package_format_gate: 33 passed, 0 failed
+ks998_format_gate_push_label_is_literal: 8 passed, 0 failed
+So the gate RAN rather than being bypassed, and KS-998's own suite passed in the hook.
+
+## LEG 6 (quoted exactly as THIS push printed)
+=== 6/15  npm-audit gate (advisories vs triaged baseline — KS-470) ===
+audit-gate: 9 distinct advisories reported, 24 baselined.
+CLEANUP (advisory): 15 baseline entries are no longer reported — remove:
+OK — no advisories outside the triaged baseline.
+**The CLEANUP block still reads 15 rows** — the carried UNFILED item, untouched by me
+per your board pass. It has now ridden a further seat.
+
+## LEG 7 (quoted exactly)
+=== 7/15  standalone-lock advisories (each service's OWN lock — KS-531) ===
+audit-locks: 43 standalone lockfiles (45 tracked, minus the workspace root, minus 1
+declared out of scope = 45 - 1 - 1 = 43), 1613 distinct packages pinned — 7 advisories
+match, 7 already baselined.
+OK — no standalone-lock advisories outside the triaged baseline.
+
+## html_docs_matrix — and it is NOT a vacuous pass
+=== systemTest/__tests__/html_docs_matrix.test.sh ===
+  ok   API_Security_Functional_Testing_Architecture_Flow_Diagrams.html has no prose outside a table, sane Mermaid, no placeholders
+  ok   QA_Tool_Cheat_Sheet_Secuura_API_Testing.html has no prose outside a table, sane Mermaid, no placeholders
+  12 passed, 0 failed
+**TEN of those twelve are inverted controls that FIRE** — a bare paragraph, a list
+item, a note, a combo row, long text in a flex ck-item, a long unwrapped run, a
+placeholder row, a Mermaid block with no diagram type, one with an unbalanced bracket,
+and "a correct page reports nothing". So both composed docs passing is a measurement,
+not a guard that cannot fail.
+
+## THE PLATFORM SUITES — UNMEASURED, and I quote only the SKIP
+SKIP — local stack not up on http://localhost:6882 (start it to run this leg)   [x3]
+PREFLIGHT INCOMPLETE — 12/15 legs ran, 3 SKIPPED. Nothing failed.
+Never a pass. Other in-hook results: `shell suites: 71 passed, 0 failed, 0 skipped
+(of 71)`, `OK — 13 code guards passed.`, `slot_target: 174 passed, 0 failed`.
+
+## ACTIONS ON M — 6 runs, 3 still in flight at my first read
+  pr                               in_progress
+  PR Security Gates (KS-168)       in_progress
+  Security Scanning                in_progress
+  PR — Lockfiles (path-skip twin)  completed  success
+  pr-premerge-ack                  completed  success
+  Dependabot standalone locks      completed  skipped
+CONTROL: a fabricated `head_sha` returns total_count **0**, so the query
+discriminates. Polling for TWO AGREEING TERMINAL reads before I classify; I will
+classify by SUBSET against develop's failing set, never equality, with a
+fabricated-job-name predicate control, and `##[group]` positive controls on any log
+grep. Classification follows in its own mail.
+
+## WATCHER
+pid 78603, count 1, SINCE `2026-10-07T09:54:20.000Z` = your GO v2.
+

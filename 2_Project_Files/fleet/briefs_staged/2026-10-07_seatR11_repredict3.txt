@@ -1,0 +1,96 @@
+STATUS: re-prediction on 5b862461 (Seat R 11th)
+
+🔴 **YOUR STEP 1 REFUSED, AND THE TOOL WON. `--heads 1408=M` CANNOT WORK WITH THIS
+KIT — not for M, not for any merge-in head, ever.** I stopped, diagnosed it by
+measurement, did not hand-compose, and found a path that the tool accepts. Built
+nothing. M stays on the branch untouched.
+
+## THE REFUSAL, verbatim
+```
+REFUSED: head minus ONE contiguous line block != base (not ONE pure insertion)
+```
+rc 1, from `chain --develop 5b862461 --order 1408,1410 --heads 1408=c19520e19294,…`
+
+## WHY — it is STRUCTURAL, and it is not a defect in M
+`blocks_of()` (`c4_docs_gate73.py:190-193`) extracts a row's block by comparing the
+head's doc against **`BASE`**, which is a MODULE-LEVEL CONSTANT imported at `:34`
+(`lib_gate73.py:27`, `BASE = K['base']` = `147ae442074c`). It is NOT the head's own
+merge-base. `line_block()` (`:66-75`) then requires head == base + exactly ONE
+contiguous insertion.
+**Measured on M's flow doc, with `difflib` opcodes:**
+  vs BASE `147ae442` (what the tool compares): **9 non-equal opcodes — 1 insert,
+                                                  8 REPLACES.** Not one insertion.
+  vs `eb67b965` (M's own merge-base):          **1 opcode, a pure insertion.** ✅
+The 8 replaces are **develop's own doc edits since the gate base** (#1407, #1409,
+#1411, #1412, #1413). Any merge-in commit has develop's doc advance baked in, so a
+merge-in head can NEVER be "BASE + one insertion". M's content is exactly right; the
+extractor simply cannot read a block out of it.
+**Consequence worth carrying: the kit can only extract from an ORIGINAL PR head.**
+A second-merge-in strategy via `--heads <M>` is not available in gate73 as built.
+
+## THE PATH THE TOOL ACCEPTS — the ORIGINAL gated head onto the NEW develop, rc 0
+`chain --develop 5b8624615733329ea2c810cb183c94e03902086f --order 1408,1410
+ --heads 1408=ce33ec8b3eae…,1410=c976c9f72ba0…` → **rc 0, ALL OK**
+  step 3 #1408 `ce33ec8b3eae` onto `5b862461`
+         tree  **aba5efb7b8d7350558d5b6acfa43365cf59321e3**
+         flow  **45fd598e563422940c3dfbcdf36b6579a4abff21**
+         cheat **cc81d069b88d93d2aed4daf9b24032a3a5a60a0f**
+  step 4 #1410 `c976c9f72ba0` onto SIM `297df0b502d5`
+         tree  **232847cfc7bb054359e68e555c74635fceed0066**
+         flow  **cf2e1598894f018dd5956116d5a155d1ebf876ef**
+         cheat **6a8f712f5d1c7a3c440abd6749f3b1736ea2458e**
+  guard: rc 0, **12 passed / 0 failed at BOTH steps**
+  FINAL-flow / FINAL-cheat one-pass compositions == the chain's last blob: True, True
+  FINAL-CODE: every row's code paths == that row's head blob: True
+
+## ⚠ THE OPEN QUESTION THIS LEAVES — and I am NOT deciding it
+That predicted tree is for a merge of **`ce33ec8b3eae` + `5b862461`**. M2 would be a
+merge of **M + `5b862461`**. I expect the trees to be IDENTICAL — both resolve to
+"develop's content, plus #1408's two code blobs, plus the composed docs", and M adds
+nothing else — **but I have not measured it, because measuring it means building M2,
+which you told me not to do.** The `tree(M2) == predicted` gate at M-4 is exactly the
+instrument that settles it. If they differ, M-4 refuses and nothing lands. Your call
+whether that is an acceptable way to find out, or whether you want M2's parents to be
+`[ce33ec8b3eae, 5b862461]` instead — but that would ORPHAN M, which is already pushed
+to the branch, so the branch would need to move backwards. I am not proposing that.
+
+## UNION, per step — hazard reproduced a FOURTH time
+  step 3: flow AGREE, cheat AGREE
+  step 4: flow AGREE, **cheat DIFFERS — union 4042 lines vs composer 4044, balance
+          (1,1) vs (0,0)**
+Never union.
+
+## MERGE-BASES, computed
+  merge-base(M `c19520e19294`, `5b862461`)      = **eb67b965994057a3311efcc299393757d764ed8a**  (== M's own develop parent)
+  merge-base(#1410 `c976c9f72ba0`, `5b862461`)  = **147ae442074c7f3b5be9ce7ccc4452c8dae34b4f**  (unchanged)
+
+## KS-1439's BLOCKS — NO COLLISION, measured on both develops
+**#1414 and #1415 took NO flow number.** The flow `<h2>` number list is BYTE-IDENTICAL
+on `eb67b965` and `5b862461`: `[1..16, 18..25, 27, 28, 29]` — 27 entries both times,
+numbers added: **NONE**.
+  `30.` free ✅  `31.` free ✅  `32.` `33.` `34.` (E's reserved) all free ✅
+What #1414 DID add is exactly **one cheat key, `KS-1439`** (112 → 113 distinct keys);
+0 removed. Doc sizes flow 3473 → 3480, cheat 3917 → 3923.
+Tolerant reader control: split-`<h2>` found (`28`), `<h3>` returns empty.
+
+## develop's 29-path advance vs #1408
+29 files `eb67b965..5b862461`, **both platform docs among them** — which is precisely
+why the squash would have re-opened the conflict, as you said. **Overlap with #1408's
+two code paths: EMPTY.** So the CODE verdict still stands.
+
+## ACTIONS ON M — polling STOPPED on your instruction
+6 runs, 3 were still in flight; I killed the poller and classified nothing. Last read:
+`PR — Lockfiles` success, `pr-premerge-ack` success, `Dependabot standalone locks`
+skipped, and `pr` / `PR Security Gates (KS-168)` / `Security Scanning` in_progress.
+Reporting the raw states only — **no classification, since they decide nothing now.**
+
+## STATE
+M `c19520e1929424169ad9508d4039de4ad24e9194` is on the branch, unreverted, a correct
+ancestor of any M2. Worktree `s-ra11-m1408` still at M, 0 modified, deps installed
+(`Blockchain/Dev`, `systemTest/akto`, `systemTest/performance`). Shared store
+`rev-parse --all` byte-identical before and after the by-SHA fetch of `5b862461`.
+Nothing built. #1245 remains my only ticket-side write.
+
+## WATCHER
+pid 60754, SINCE `2026-10-07T10:17:27.000Z` = your ANSWER.
+
