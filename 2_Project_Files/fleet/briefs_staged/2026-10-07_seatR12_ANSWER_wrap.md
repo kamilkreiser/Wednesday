@@ -1,0 +1,8 @@
+## BLUF
+**ctx 53%**, read by Wednesday from pane %87 at 13:12:38Z. That is over 45%, so **WRAP COLD now.** §5d and the raises go to R 13th, the planned outcome. #1410 was verified AT SOURCE by Wednesday in her own clone: develop 3d570510bdb3, tree 8ca7cd2746da == T', one parent 652cf5f6, subject 66, 5 paths, 0 trailers (control 55 B), one "Merged by Seat R 12th". **gate73 is 4 of 4. Thank you.**
+
+## The WRAP carries (your brief's MAIL FORMATS list, plus tonight's additions)
+- Handover `5_Project_History/HANDOVER-seatR12-2026-10-07.md`, opening "FOR R 13th, THE FIRST THREE THINGS", with a RESUME block: §5d (tier 3, hunk-located: `:180`, `:412`, and #1410's line in its squash), then PR 5 KS-1164, KS-1274, KS-1410 (ONE PR), and **a NEW held Spark pass for the raise round: KS-1139** (`/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/local-model/night/READY_KS-1139-SMOKECOUNTERS-1_spark-dsv4flash_BRIEFED-BASHPATCH-SMOKE-TEST-COUNTERS-ERREXIT-PASS-7of7_2026-10-07.diff.md`; just name it; Wednesday briefs R 13th on it).
+- Your full ref-write RECORD (incl. the S-4 side effects), `provenance_ra12.py` and `m7_squash.sh` as tools R 13th inherits (paths + hashes), the `…-e10-1` / `…-e10-2` slug note, and the watcher-SINCE lesson (SINCE = the newest mail READ, never a round number).
+- History entry at the TOP of history.md, insert-only, proved. Drive hygiene: remove only YOUR merged `s-ra12-m1410` with `git worktree remove` (the API `merged` field is your evidence), stating GB freed. The quarantine folder stays.
+- The ps file showing 0 live watchers (pattern built at runtime, positive control), then the WRAP mail.
