@@ -1,0 +1,84 @@
+QUESTION: the second merge-in does not conflict (Seat R 11th)
+
+**Your m-retain confirmation WORKED — that gate now PASSES. M-4 then stopped at the
+NEXT stage, rc 3, and the reason is a finding, not a fault: at a SECOND merge-in git
+merges both docs CLEANLY, and the tool requires exactly two conflicts.** I measured
+the thing that actually matters before touching anything, then left nothing staged.
+I am NOT editing the gate.
+
+## THE FAILING STAGE, verbatim
+```
+== MERGE develop IN (--no-ff, never rebase, never force) ==
+    Auto-merging Projects Documents/API_Security_Functional_Testing_Architecture_Flow_Diagrams.html
+    Auto-merging Projects Documents/QA_Tool_Cheat_Sheet_Secuura_API_Testing.html
+    Automatic merge went well; stopped before committing as requested
+  FAIL  merge rc 1 (the two doc conflicts are expected)                    rc 0
+  FAIL  exactly TWO conflicted files                                       0
+  FAIL  both under Projects Documents/
+STOP: MERGE: 3 gate(s) failed IN THIS STAGE (cumulative 3)
+```
+Three gates, ONE cause: the stage's precondition is "the docs always conflict".
+
+## 🔴 THE DECISIVE MEASUREMENT — git's AUTO-MERGE **IS** THE COMPOSED BYTES
+I read the staged blobs out of the index before aborting:
+  flow   staged `45fd598e563422940c3dfbcdf36b6579a4abff21`
+         GO's   `45fd598e563422940c3dfbcdf36b6579a4abff21`   **IDENTICAL**
+  cheat  staged `cc81d069b88d93d2aed4daf9b24032a3a5a60a0f`
+         GO's   `cc81d069b88d93d2aed4daf9b24032a3a5a60a0f`   **IDENTICAL**
+  flow 3,589 lines both, 122 `</table>` both · cheat 3,982 lines both, 68 `</table>` both.
+So the outcome the resolve stage exists to force **was already true without it.**
+
+## WHY — and it is structural, like the BASE finding
+At the FIRST merge-in the merge base is the gate base, so develop's side carries
+EVERY doc edit since then and the PR's block lands in the same region: conflict.
+At a SECOND merge-in the base is **M's own develop parent** (`eb67b965`), so:
+  M's side        = base + #1408's block (appended before `</body>`)
+  develop's side  = base + Peter's #1414/#1416 edits (elsewhere in the file)
+**Non-overlapping regions, so diff3 combines them with no conflict — and the
+combination is exactly "develop's doc + #1408's block", which is the composer's own
+definition.** That is why the blobs match rather than merely being close.
+Note this is the OPPOSITE of the UNION HAZARD: `--union` is wrong because it drops a
+closing tag, but an ordinary 3-way auto-merge here is byte-correct. I am not
+generalising it — I measured these two blobs on this merge.
+
+## WHAT I DID WITH THE STATE
+`git merge --abort`, rc 0. Worktree `s-ra11-m1408`: HEAD still M
+`c19520e1929424169ad9508d4039de4ad24e9194`, **no MERGE_HEAD, 0 staged, 0 modified,
+still DETACHED.** Nothing half-done. The merge is deterministic, so aborting cost
+nothing — re-running reproduces the same staged result.
+The NO-FETCH ACCOUNTING stage passed in full before the merge: `.git/config` sha
+UNCHANGED `4f624a213933d54b`, the shared checkout's own develop UNCHANGED at
+`841e4ab136dc`, `refs/remotes/origin/develop` UNCHANGED, my branch ref UNMOVED at
+`ce33ec8b3eae`, **0 `refs/seatra11/*` created**, untracked count UNCHANGED at 17.
+
+## QUESTION — one of these, your call; I am not choosing a gate's fate
+(a) **Authorise the three MERGE-stage gates to accept "0 conflicts" when the staged
+    doc blobs already equal `--flow-blob`/`--cheat-blob`** — i.e. re-point the
+    precondition from "it conflicted" to "the bytes are right", which is the property
+    you actually want. The resolve stage's own gates (`STAGED flow blob == key blob`)
+    then still run and still have to pass. I would make that edit only on your
+    written word, naming the lines.
+(b) You supply a different route to M2 and I run it.
+(c) WRAP COLD here with M pushed, M2 unbuilt, and hand GO v3 plus this finding to
+    R 12th.
+I lean (a) because it strengthens the check rather than skipping it — the gate would
+assert the bytes instead of assuming a conflict produced them — but a gate edit mid-
+merge is exactly what you declined on my predicate proposal, and I am not going to
+argue myself past that on my own.
+
+## ALSO PLEASE: a ctx read
+I have not had one since your 50% at 10:24:56Z, and I have since done M-1, M-2, M-3,
+two M-4 attempts, a chain run on eef784a3 and four mails. The 65% ceiling matters for
+whether (a) is even worth starting.
+
+## STATE
+M `c19520e19294` is on the branch and is the only thing this seat has landed. develop
+was D `eef784a32a13` at 10:31Z. #1245 remains my only ticket-side write. Nothing
+merged to develop.
+
+## WATCHER
+pid **71163**, count 1, SINCE `2026-10-07T10:31:09.000Z` = your m-retain ANSWER, from
+`boot/ps_after_m4b.txt`. Last mail's empty `pid ,` was my own fault: the watcher had
+exited on firing and my extraction returned an empty string, which I printed as if it
+were a value. The reader now REFUSES to print an empty pid and says "0 live" instead.
+

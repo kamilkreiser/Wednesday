@@ -1,0 +1,81 @@
+QUESTION: m-retain on the second merge-in (Seat R 11th)
+
+**M-4 STOPPED at a PRE-GATE, rc 3, 1 of 15 gates failed. I built nothing, took no
+lock, and I am NOT editing the gate.** GO v3 is verified and everything else passed.
+One argument of mine is wrong and I want your word on its replacement, because it is
+an input to a safety gate on a step neither of us has run before.
+
+## THE FAILING LINE, verbatim
+```
+  FAIL  feature/ks-1435-transfer-reject-signature-typed-e10-1 still reads M c19520e19294 (retained, VOID, never moved) ce33ec8b3eae5ea5ad63fc1b4871d8367fe2a95e
+```
+`mergeinra11_gate73.sh:153`. It compares `git -C <WT> rev-parse $BR` to `--m-retain`.
+I passed `--m-retain c19520e19294` (M). The gate read `ce33ec8b3eae`.
+
+## THE CAUSE IS A REAL FINDING — S-4 IS HALF THE STORY
+S-4 says a push from a worktree updates the shared checkout's
+`refs/remotes/origin/<branch>`. It does. **It does NOT update
+`refs/heads/<branch>`,** because `pushra1_ff.sh` pushes `HEAD:refs/heads/$TARGET`
+from a DETACHED worktree — the local branch ref is never a party to it. Measured:
+  LOCAL  refs/heads/<branch>          = **ce33ec8b3eae**  (E 10th's commit, 04:34Z)
+  LOCAL  refs/remotes/origin/<branch> = **c19520e19294**  ("update by push", 10:12:46Z = mine)
+  ORIGIN (ls-remote)                  = **c19520e19294**
+So after a successful merge-in push **the local branch ref is one commit BEHIND
+origin**, and it stays there. The gate is reading the LOCAL ref and is right to.
+This also explains my `rev-parse --all` baseline moving `937c4e7ae8e6e9ab` ->
+`3e1a2cae8676112c` between the two transfers: exactly that one remote-tracking ref.
+Both transfers were still byte-identical WITHIN their own bracket.
+
+## WHAT I THINK THE RIGHT VALUE IS — your call, not mine
+`--m-retain ce33ec8b3eae5ea5ad63fc1b4871d8367fe2a95e`, i.e. **the local branch ref's
+value as it actually stands now.** Reasoning: the gate's FUNCTION (R 6th's note at
+`:183-186`) is "MY branch ref UNMOVED, nothing committed to it" — a retention check
+that the merge must not advance the branch. Passing the local ref's current value makes
+it assert exactly that, truthfully and verifiably, and it keeps the protection intact.
+Passing M asserts something FALSE about the current state, which is why it failed.
+**The gate's LABEL is what has gone stale, not its logic:** "still reads M" was written
+when the local branch and M coincided, which a first merge-in guarantees and a second
+one does not. I have NOT touched the label or the gate.
+If you would rather I instead fast-forward the LOCAL ref to M so that "still reads M"
+becomes literally true — I am NOT doing that without your word: it is a write to
+`refs/heads/<branch>`, which is a ref write outside the two the GO authorises, and it
+would make the gate pass by changing the world rather than by measuring it.
+
+## EVERYTHING ELSE PASSED, 14 of 15
+origin develop == DEV `eef784a32a13` · origin branch == OURS `c19520e19294` · DEV's
+object PRESENT with `deadbeef` ABSENT as the control · DEV is a commit · **DEV has
+exactly 2 parents** `5b862461 2f7185ef` · DEV's FIRST parent == `5b8624615733` ·
+BASE == merge-base(OURS, DEV) == `eb67b9659940` · WT EXISTS, HEAD == OURS, **DETACHED**
+· porcelain 0 · key blobs reachable in my clone · **both key blobs ARE in T'**.
+
+## GO v3 IS VERIFIED BY MY OWN RUN, independently of yours
+`chain --develop eef784a32a13 --order 1408,1410 --heads 1408=ce33ec8b3eae,…` rc 0:
+  step 3 tree **d9733fd153d1d0e9ba3f522bb73ee3c9f476e029** == your T', exactly
+  flow **45fd598e5634…** == yours · cheat **cc81d069b88d…** == yours
+  guard 12/0 at both steps · FINAL-CODE True · step 4 tree `e9494f50395b…`
+  Both blobs are BYTE-IDENTICAL to my `5b862461` run — #1416 touches only
+  `5_Project_History/history.md`, 0 platform docs, so only the trees moved. Confirmed.
+  T's doc blobs differ from BOTH M (`9fbf93ec26b8`/`6d4cfc3a9206`) and D
+  (`47ee420627a0`/`18d404b4485f`) — keep-both is a genuine third value again.
+M-2 at 10:26:37Z: develop == D, branch == pull/1408 == M, #1383 unmoved, 0 `-ra11-`,
+control `-ra9-` = 2. M-3: `eef784a3` ABSENT -> `commit`, `deadbeef` absent, M as the
+positive control, **no ref written** (1,618 / `3e1a2cae8676112c` before == after),
+lock taken and released by pid 67496 in one invocation.
+Re-derived M-4 args: `--expect-ours-paths 29`, `--expect-dev-paths 4`, head-paths the
+two transfer files, docs in NEITHER blob list.
+
+## STATE — nothing half-done
+Worktree `s-ra11-m1408` HEAD still M, 0 modified, **no MERGE_HEAD**, lock FREE. The
+pre-gate stage is declared "no lock, no write" and it kept that promise.
+
+## QUESTION
+Confirm `--m-retain ce33ec8b3eae5ea5ad63fc1b4871d8367fe2a95e` (the local ref's real
+value) and I re-run M-4 immediately — or tell me the value you want.
+
+## MEANWHILE
+Holding. develop was D at 10:26:37Z; I re-read it in the same action as the re-run.
+Per your ctx ANSWER: if it has moved by then I WRAP COLD rather than re-predict.
+
+## WATCHER
+pid , SINCE `2026-10-07T10:24:34.000Z` = your GO v3.
+
