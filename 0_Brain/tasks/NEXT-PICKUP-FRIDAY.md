@@ -12,6 +12,15 @@ supersede: replace wholesale; previous = NEXT-PICKUP-FRIDAY.md.pre-0925-rotate-s
 
 **The tree is at `/Volumes/Laptop-DEV/FRIDAY` (the drive, since 2026-09-28).** Quote every path (spaces).
 
+## 🔴🔴🔴 CHECKPOINT 2026-10-08 09:45 (Friday, ctx 74%) — READ FIRST; supersedes every block below where they differ
+**ALL SEVEN CARDS RULED by Kam 09:39:59–09:40:59 (reconciled + hidden):** paul-signin-emails a (forwarded) · hp-questions-send a (sent to Terry) · m2-po-signoff a (email the pack) · new-words-review b (approve as they are) · e8-sme-reviewers b (Kam and Paul for now) · 245 c (accept) · 239 a (fold on desktop too).
+**DELIVERED:** M2 card → the email to kamil.kreiser@datasec.com.au (msg <010001a118897573…, PDF 243402 B = Friday's cover + M2 stage-gate + v0.3 note; built in scratchpad `m2/` with pandoc → Chrome headless; read back). **Kam's reply = the written PO approval → have the HPSM-POC seat record it VERBATIM as a new C-number and fill the stage-gate's Decision row** (`HPSM-POC-analysis/1_Project_Definition/Governance/stage-gates/M2_solution-ux-baseline.md`). Watch Friday's inbox for his reply (subject "[HPSM-POC] M2 Product Owner sign-off…").
+**OWED deliveries (cards ruled, artefact not yet written):** hp-questions-send → a comment on HPSMPOC-241 ("sent by Kam 2026-10-08 09:40") via the next HPSM-POC seat · paul-signin → HPSMPOC-242 note that Paul has access · the four Composer cards → B99 Part 1 (C-56..C-59 + rows), then `decision_queue.sh --delivered` each.
+**LIVE:**
+- %107 HPSM-POC-A **B186** (HP walkthrough doc; output `HPSM-POC/1_Project_Definition/Deliverables/2026-10-08_HP-walkthrough/`). On READY: Friday reads EVERY page, greps names/emails/ticket/B/C numbers, then emails Kam the docx + PDF (junk-folder note) → one card if any choice is his.
+- %108 Security-Composer-A **B99** (records C-56..C-59 + rows; build #239 fold all widths on `b99/notices-fold-all-widths` from `b083de6`, tier 2). On READY: read the records commit, PR the branch, QA gate (tier 2 rendered), merge via merge_when_green, then a demo deploy under the push-to-demo grant (C-71) with Friday's live check.
+**NEXT (fresh seat after rotation):** Composer lanes: 2 (#248 words) and 3b (#250, tier 1) can start now; 3a (#249) is unblocked with Kam + Paul as interim reviewers (C-57); 3c waits on 3b. HPSM-POC: the hosted deploy freeze stands until after Paul's walkthrough; HPSMPOC-231..236 queue after it.
+
 ## 🔴🔴🔴 CHECKPOINT 2026-10-08 09:2x (Friday, ctx 70%) — READ FIRST; supersedes every block below where they differ
 **Kam today (live):** 08:04:57 (tickets + Paul emails, DONE) · **09:19:34 HP walkthrough document** for HPSM-POC (site structure + 6–8 screenshots + what we propose next, for HP's approval; Word + PDF, Kam reviews before HP) · **09:20:26 CORRECTION: everything Friday needs from Kam goes on a Fleet activity CARD** (ledger 2026-10-08 w=2). Reconcile at boot of the next seat.
 **DONE since 08:19:** HPSM-POC Jira HPSMPOC-231..243 created; closed 221/230/4/7/222/223/145 (114 open of 243, Jira count); records #104 → analysis cbe96ea. Composer B98 rows #248–#255 + stale rows + C-52..C-55 (root c9ac20f). Seats %105 %106 closed.
