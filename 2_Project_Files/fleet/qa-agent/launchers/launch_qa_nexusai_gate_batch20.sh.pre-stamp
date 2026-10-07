@@ -561,7 +561,7 @@ done
 # 31 — READYs, the project brief, builder evidence, prior reports, gate 18/15's instruments, standing references and tools on disk.
 for f in "$READY_A" "$READY_B" "$READY_C" "$READY_D" "$READY_E" "$PBRIEF_A" "$CLAR" "$C133" "$RULINGS19" "$BRIEF18" "$BRIEF19" \
          "$B18_REPORT" "$B16_REPORT" "$B15_REPORT" "$B15_B9" "$B12_REPORT" \
-         "$EV_R/hold-02.log" "$EV_R/hold-01.log" "$EV_R/census-law-clients.md" "$EV_R1/c68-rd761.txt" \
+         "$EV_R/hold-02.log" "$EV_R/hold-01.log" "$EV_R/census-law-clients.md" "$EV_R1/c68-rd761.txt" "$EV_N/rd747-run2.out" "$EV_N/union-rd747.lst" "$EV_N/rd747/linux-union.log" \
          "$EV_P/rd831-hold.log" "$EV_O/rd802-hold.log" "$EV_O/rd802-red.log" "$EV_M/rd795-onepass.log" "$LOCKTOOL" \
          "$B18_INST/HOLD18.sh" "$B18_INST/qa-holdlib18.sh" "$B18_INST/qa-floorlib18.sh" "$B18_INST/qa-floorcount.py" "$B18_INST/qa-to.sh" "$B18_INST/qa-jestwrap.sh" "$B18_INST/qa-jsum.js" \
          "$B18_INST/qa-runj18.sh" "$B18_INST/qa-mut18.py" "$B18_INST/qa-mutlib18.sh" "$B18_INST/qa-merge18.sh" "$B18_INST/qa-build18.sh" "$B18_INST/qa-npm18.sh" "$B18_INST/qa-file18.sh" \
@@ -572,15 +572,17 @@ for f in "$READY_A" "$READY_B" "$READY_C" "$READY_D" "$READY_E" "$PBRIEF_A" "$CL
 done
 grep -qF "${A_HEAD:0:7}" "$READY_A" && grep -qF "${C_HEAD:0:7}" "$READY_C" && grep -qF "${D_HEAD:0:7}" "$READY_D" && grep -qF "${D_BASE:0:7}" "$READY_D" \
   && grep -qF "${E_HEAD:0:7}" "$READY_E" && grep -qF "${A_HEAD:0:7}" "$PBRIEF_A" \
-  && grep -qF 'PRIOR WORK' "$READY_A" && grep -qF 'PRIOR WORK' "$READY_C" && grep -qF 'PRIOR WORK' "$READY_D" && grep -qF 'PRIOR WORK' "$READY_E" \
+  && grep -qF 'PRIOR WORK' "$READY_A" && grep -qiF 'Prior work' "$READY_B" && grep -qF 'PRIOR WORK' "$READY_C" && grep -qF 'PRIOR WORK' "$READY_D" && grep -qF 'PRIOR WORK' "$READY_E" \
   && grep -qF 'PRIOR WORK (C-49)' "$PBRIEF_A" && grep -qF 'ADDENDUM to READY FOR QA: RD-795' "$READY_E" \
   || { echo "REFUSING: a READY does not name its head (or RD-802 its stack base), a PRIOR WORK section is missing, or RD-795's NOT TESTED ADDENDUM is not appended" >&2; exit 31; }
 grep -qF 'VERDICT: PASS — 4394/4394 tests passed across 268 suites (jest exit 0)' "$EV_R/hold-02.log" && grep -qF '=== start fix=35ed72d' "$EV_R/hold-02.log" \
+  && grep -qF 'VERDICT: PASS — 4334/4334 tests passed across 268 suites (jest exit 0)' "$EV_N/rd747-run2.out" && grep -qF '=== EXIT restore d8f86d238f6194b0 (fix d8f86d238f6194b0)' "$EV_N/rd747-run2.out" \
   && grep -qF '=== head 11fae98' "$EV_P/rd831-hold.log" && grep -qF 'VERDICT: PASS — 4323/4323 tests passed across 268 suites (jest exit 0)' "$EV_P/rd831-hold.log" \
   && grep -qF '=== HEAD de16aab' "$EV_O/rd802-hold.log" && grep -qF 'VERDICT: PASS — 4322/4322 tests passed across 267 suites (jest exit 0)' "$EV_O/rd802-hold.log" \
   && grep -qF '=== HEAD 6613113' "$EV_O/rd802-red.log" \
   && grep -qF 'VERDICT: PASS — 4334/4334 tests passed across 269 suites (jest exit 0)' "$EV_M/rd795-onepass.log" && grep -qF 'jest lock acquired by s86m-rd795-onepass-proof after 17220s' "$EV_M/rd795-onepass.log" \
   || { echo "REFUSING: a builder log no longer carries the line the brief quotes (WRONG 8's premise)" >&2; exit 31; }
+[ "$(grep -c . "$EV_N/union-rd747.lst")" = "76" ] || { echo "REFUSING: N's union-rd747.lst is not 76 lines (WRONG 7's premise)" >&2; exit 31; }
 grep -qF 'GO WITH FINDINGS' "$B18_REPORT" && grep -qF 'STATUS: DELIVERED' "$B18_REPORT" && grep -qF 'MBREAKERFIRST' "$B18_REPORT" || { echo "REFUSING: gate 18's report does not read as delivered with F-761-1 (MBREAKERFIRST)" >&2; exit 31; }
 grep -qF "b9 r9a's tear landing was checked after the boot, so it was VOID." "$B15_REPORT" && grep -qF 'D-F1 → RD-747' "$B15_REPORT" || { echo "REFUSING: gate 15's report no longer carries RD-747's origin (D-F1) and the b9 VOID lesson the brief quotes" >&2; exit 31; }
 grep -qF 'F-3' "$B16_REPORT" && grep -qF 'N-2' "$B16_REPORT" || { echo "REFUSING: gate 16's report no longer carries F-3 / N-2 (RD-795's round 1)" >&2; exit 31; }
