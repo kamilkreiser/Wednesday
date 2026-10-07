@@ -14,6 +14,12 @@ supersede: REPLACED WHOLESALE 2026-10-08 05:3x by the overnight seat (booted 02:
 2. **R 15th is LIVE (%91 `Secuura/Blockchain-R`)** — see FLOOR. Its plan confirmation is the first thing owed.
 3. **Morning brief LEADS with (value first):** gate74 GO (#1423), R 15th merging #1422 + #1423, the Spark census (24 unraised passes found, 10 now held), and the BLOCKER: **develop red on pre-push leg 14 → KS-1450** (Peter's #1424) blocks every push touching `Blockchain/Dev/`. Give Kam a 1-2 line WhatsApp text pointing at https://linear.app/secuura/issue/KS-1450 in case Peter has not seen it (Kam sends; nobody else messages Peter).
 
+## 🔴 10:5x — KS-1450 BEING FIXED BY US (read first)
+- **Kam 10:45: KS-1450 = a (fix it now)** + STANDING RULE: we fix our own problems and tickets, Peter only sporadically (`learnings/2026-10-08_fix-our-own-problems-involve-peter-sporadically.md`).
+- **FLOOR: %0 wednesday · %92 Seat R 16th** (brief `fleet/briefs_staged/2026-10-08_seatR16_fix_ks1450_leg14.md`; rung 5 verified) · %1 monitor.
+- **NEXT from R 16th:** plan confirmation → read WHOLE → pane ctx → ANSWER (check its fix design keeps a planted literal in ANOTHER baseline key failing). Then its ctx QUESTION before the push → READY FOR QA with the draft KS-1450 comment → a tier-2 QA gate (batch nothing; it unblocks everything) → merge seat → THEN post the KS-1450 comment (tell Peter, don't ask) → the raise backlog unblocks.
+- **USAGE 94%.** Only raise/gate/merge (≤ 2 deploy) seats may launch, with `WED_USAGE_STOP=100` naming the 09:17 grant. The demo-disk pricing seat is a deploy-class seat: allowed under the same grant, but only one deploy seat at a time.
+
 ## 🔴 09:2x — KAM RULED (read first)
 - **Usage = a:** 100% for raise/gate/merge (≤ 2 deploy) seats until the renewal / account switch → `learnings/2026-10-08_use-to-100pct-raise-gate-merge-seats-only.md`, EXPIRING-GRANTS row. Launch past 90% with `WED_USAGE_STOP=100` naming it.
 - **Demo disk = a (grow)**, after Wednesday answered his G-drive question (measured: Azure VM ~170 ms away; G-DRIVE a USB HDD; not viable). **OWED: brief a D seat** (`Secuura/Blockchain-D`) to READ the demo disk's SKU, current size, a ~128 GiB target and the monthly price in the Secuura subscription, then Wednesday CARDS Kam the exact figure. **No resize before his tap on that price card (money).** Then demo deploy resumes from D 16th's handover (3 images built).

@@ -7,7 +7,7 @@ status: live
 
 # Boot digest BY TIER — W whole, M rules-only, every project case a handle
 
-Generated 2026-10-08 09:22 from 222 lesson files (1,001,059 B). M 36 · MIXED 5 · P-Datasec/HPSM-POC 1 · W 180. 5 project CASE sections inside MIXED files are reduced to one line each: the heading and the path to read it at. W blocks are exactly what the default digest carries; M blocks drop the section index and keep the rules; a P file is a single handle. The CASES behind every rule live only in the lesson files — open one the moment its rule fires.
+Generated 2026-10-08 10:46 from 223 lesson files (1,003,551 B). M 36 · MIXED 5 · P-Datasec/HPSM-POC 1 · W 181. 5 project CASE sections inside MIXED files are reduced to one line each: the heading and the path to read it at. W blocks are exactly what the default digest carries; M blocks drop the section index and keep the rules; a P file is a single handle. The CASES behind every rule live only in the lesson files — open one the moment its rule fires.
 
 ## The T9 SSD is the master — Wednesday must be fully portable
 `2026-07-31_fully-portable-drive.md` · principle · 2026-07-31 · status: superseded — the "T9 is the master" half by [[2026-08-25_one-drive-devmaster-is-master]] (2026-08-25); the portability principle itself still lives · tier: W
@@ -7007,6 +7007,21 @@ sections (open the file for these): RULED 2026-10-05 ~11:1x — Kam (terminal, v
 3. **"Clear after a month or so"** is a review, not an automatic delete: at the monthly check, archives older than ~30 days are listed to Kam (or cleared under his standing word, stated as Wednesday's reading). Never a silent sweep.
 4. **Remote boxes:** for images on a VM (demo, kintsugi), the archive route is `docker save` streamed to G-DRIVE over SSH; measure its size and time before relying on it. A secret never goes into an archive (no `.env`, no keys).
 5. **Briefs carry it:** any disk-freeing brief names the G-DRIVE option and its path before any deletion step.
+
+
+## We fix our own problems and tickets — Peter is involved only sporadically, never as the default blocker
+`2026-10-08_fix-our-own-problems-involve-peter-sporadically.md` · preference · 2026-10-08 · status: live · tier: W
+
+**The operative case, so the headline matches it:** a Secuura problem has turned up (a red gate, a defect in Platform K, a broken guard, a failing check), and Wednesday is about to route it to Peter, wait for his answer, or ask him a question before acting. **Stop. Fix it ourselves:** measure it, choose the remedy, build it through a seat, gate it, merge it, and leave Peter a short ticket note saying what changed so he can reshape it. Involve him only when the decision genuinely needs his knowledge or his authority, and then only now and then.
+
+**How to apply:**
+1. **Default to fixing, not asking.** "It's Peter's code" (his guard, his baseline, his test) is not by itself a reason to wait. Platform K is ours (Kam 2026-09-06). KS-1450 (Peter's guard KS-1386 + his baseline from #1424) is the first case: ruled (a), fixed by us.
+2. **The quality bar does not drop.** Every fix goes through the tiered QA gate and Wednesday's completion check. A fix to someone else's guard is red-proofed so the guard still fails on the thing it exists to catch.
+3. **Peter is TOLD, not ASKED:** one BLUF ticket comment per fix (what changed, why, how to reshape it). That comment is information, not a gate, and it is not a request for review.
+4. **What still goes to Peter (sporadically):** knowledge only he has (why he designed something a certain way, when that changes the remedy); his own ticket assignments (a ticket on Peter stays his, per the 2026-09-06 correction); demo/UAT handovers where his nod is still the rule. Batch these; never one at a time.
+5. **What does NOT change:** the v1.3 signature classes; client-facing communication is ticket comments only, and Kam sends anything else; ticket assignment rules.
+
+**Family:** [[2026-09-02_coo-actionable-tickets-never-wait-for-kam]] (the same stance pointed at Peter instead of Kam) · [[2026-09-11_secuura-we-approve-and-merge-our-own-tested-work]] · [[2026-09-05_tickets-are-the-channel-whatsapp-via-kam-is-the-escalation]] · [[2026-09-01_qa-gate-before-my-verification]].
 
 
 ## Grant: this seat may spend to 100% of the weekly allowance, for raise, gate and merge seats only, until the renewal
