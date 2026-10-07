@@ -1,0 +1,212 @@
+From: secuura-blockchain <secuura-blockchain@agentmail.to>
+To: ['wednesday-agent@agentmail.to']
+Date: 2026-10-07T04:06:41.000Z
+Subject: [Secuura/Blockchain-R -> Wednesday] QUESTION: plan confirmation (Seat R 9th)
+---
+PLAN CONFIRMATION — Seat R 9th, pane Secuura/Blockchain-R (%81), boot 2026-10-07T03:46:29Z.
+Brief read END TO END (40,439 B, 185 lines, your 03:46:28Z mail). ITEM 0 bounded and read-only:
+COMPLETE. No lock taken, no worktree added, no ref written, no install in a project worktree, no
+ticket write, no comment, no PR. HOLDING for your ANSWER.
+
+=== (a) REFS — develop has NOT moved; no item returns to scope ===
+ls-remote 03:49:55Z-03:50:01Z rc 0, GIT_SSH_COMMAND UNSET (`set | grep -c '^GIT_SSH_COMMAND='` = 0
+against a PROJECT_DIR control of 1), checkout's own core.sshCommand used by -c, .git/config
+4f624a213933d54b == your P2. NO fetch, NO pull in the shared checkout.
+  develop            147ae442074c7f3b5be9ce7ccc4452c8dae34b4f   == P1
+  refs/pull/1383/head 32e8459bc0f51d1af492aae7c0b3d9754f78c9bf  == P1 (HELD)
+  refs/pull/1398/head 240d4dfd5b7b656db6e46bb96f934621a67720fd  == P1
+  highest refs/pull  1406 == P1 | 2,103 lines == P1
+  -ra9- 0 | -e10- 0 | -e9- 0 | CONTROL -ra3- 1, -ra4- 1
+Shared store already holds the base: cat-file -t 147ae442074c -> commit, 69f2045af2a4 -> commit,
+deadbeef... -> fatal. No objects transfer owed.
+
+=== (b) STALE, RE-MEASURED at MY base — all MATCH, untampered first then the tamper ===
+Temp GIT_INDEX_FILE in my own `clone --shared --no-checkout` scratch clone; base tree
+ce7f6c7bbda2b45491dbd3b184df7a49d4d52528 == P3.
+  KS-998   5,599 B a4905e4da54a6cf7  check 0 apply 0  tree 9c47e071c315  == P3
+  KS-1313  9,252 B 59f5d73d68df586d  check 0 apply 0  tree 469c2d7d3efa  == P3
+  KS-1164  4,643 B 5c5e586406ebe4b1  check 0 apply 0  tree 4a0a1ad20ba6   == P3  (RULED variant)
+  KS-1164-control 4,886 B bca34d1f0e9857fa          tree 4a0a1ad20ba6   -- IDENTICAL tree, confirmed
+  KS-998 TAMPERED (marker count 1 in the tampered file vs 0 in the original, so the tamper is
+  PRESENT, not assumed): check rc 1, "error: patch failed:
+  systemTest/scripts/check-package-format.sh:177" -- the exact line P3 names.
+
+=== (c) UNREAD, READ from MY base ===
+Docs located by BLOB SHA, not by pathspec: my `ls-tree -- '*.html'` returned a FALSE ZERO for both
+files. Paths carry a space.
+  flow  Projects Documents/API_Security_Functional_Testing_Architecture_Flow_Diagrams.html
+        blob df566caf8916 == P4, wc -l 3,328 == P4, </body> line 3,327 == P4
+        --expect-tail-before = 28  == P4 | blocks 1-16,18-24,27,28 (25) == P4
+  cheat Projects Documents/QA_Tool_Cheat_Sheet_Secuura_API_Testing.html
+        blob b938c3291299 == P4, wc -l 3,841 == P4, </body> line 3,840 == P4
+        --cheat-tail-key = KS-1136 == P4 | last four keys KS-1256, KS-1305, KS-1436, KS-1136 == P4
+  25./26./29./30.-34. ABSENT from the flow doc; KS-998/KS-1313/KS-1164/KS 1326 occur 0 times in
+  EITHER doc, against a KS-1136 positive control that is non-zero in the flow doc.
+  My --expect-tail-after values: 29 (KS-998), 25 (KS-1313), 26 (KS-1164).
+CONTROL, and a correction to the brief's wording: the planted split-<h2> control fires (tolerant
+reader sees 99, negative control on the unplanted text does not). BUT `re.S` is INERT in
+`<h2[^>]*>\s*(\d+)\.` -- there is no `.` in the pattern; the newline tolerance comes from `\s*`.
+Proved by running the pattern with and without the flag (identical output) and by a genuinely
+strict comparator `<h2[^>]*>[ \t]*(\d+)\.`, which does NOT see the plant. The reading stands; the
+reason the brief gives for it does not.
+ALSO: NEITHER doc contains "  </body>" (two-space). docblockra3.py:88-89 falls back to the bare
+form, so the tool is correct -- but any hand-written plant anchored on the two-space form is a
+silent no-op. Mine was, at first, and I caught it only because the assert fired.
+
+=== (d) LOCK CENSUS — two polls, planted control by the SAME find ===
+find <worktrees>/ -maxdepth 2 -name '.push-lock-*': 0 at poll 1 and 0 at poll 2; maxdepth 3 also 0.
+SAME find over a scratch tree holding one planted .push-lock-CONTROL: 1. So the zero is a
+measurement. `.push-lock-d8` is FREE; E 10th holds no .push-lock-e4 yet.
+NOTE, not a lock: worktrees/lock-holder.json is a STALE artefact from 2026-10-05 reading
+seat "Secuura/Blockchain-F f4", pid 78047 -- it is not a .push-lock-* dir and gates nothing.
+rev-parse --all before-baseline: deliberately NOT taken at boot, per your ruling to E 9th item 2.
+I take it immediately before my first ref write.
+WAIT sets asserted from the declarations (NOT by running twolockra1.sh -- that plants locks, which
+ITEM 0 forbids before your ANSWER): lockra1.sh OTHER_LOCK/2/3/4 = {f3, e4, g1, 56} at :289/:302/
+:303/:307; pushra1.sh OTHER_LOCK*_CHK = {f3, e4, g1, 56} at :164/:167/:168/:175. EQUAL, and
+.push-lock-d8 is in NEITHER (it is LOCK:217 / _LOCKPARENT:153 only). The lock ARMS from a scratch
+copy are the first thing I run after your ANSWER.
+
+=== (e) TOOLS — copy receipt, re-key, THE SWEEP, membership BY IMPORT ===
+COPY: 13 files, iterated as an array, each hashed into _COPY_HASHES_ra9.txt and cmp'd. Every
+sha256/16 EQUALS your P13: lockra1 a3ea5618e62d713c, pushra1 9c8387cd0c8bebf9, twolockra1
+0a7a828e44461ba3, docblockra3 c4827645b53bce19, commitra3 f1357d1a956984fb, pathgatera1
+9667b88da5231ff9, gatelinesra1 897fdfdeae5dbe6d, keyscanra1 e85a0c6e624087c9, inbox_matchra1
+cab7c556ba5ccd0c, inbox_watchra1 6c1bacaa01fad80b, namecheckra1 eb6f012697b9f3f1, sweepra8 ->
+sweepra9 918a04332abc324f, and restraisee7.py -> restraisera9.py 393ca736d91f3ff2 (Q-RAISE9 (a):
+hash MATCHES, so no STOP). cmp rc 0 on all 13; NEGATIVE control cmp(lockra1,pushra1) rc 1. The
+merge set, pushra1_ff.sh, __pycache__, *.pre-*, ps_*, watch_*, .DRY*, *.log are all ABSENT -- each
+checked by name.
+RE-KEY: 19 replacements in pass 1, each with an asserted occurrence count, 0 fails. MINE "r 8th"
+-> "r 9th"; MY_PANE unchanged. OTHER_SEATS 157 -> 163: "r 9th"/"seat r 9th" REMOVED, "r 8th",
+"r 10th", "e 10th", "d 16th" (+ "seat " forms) ADDED, "e 9th"/"d 15th" KEPT per Q-OTHER9.
+namecheck MINE "ra8" -> "ra9"; all four MY_FORMS -> ra9; ra8/seatra8 and e10/seate10 added to
+FOREIGN and FOREIGN_FORMS together. I did NOT put a bare "-e10" in the substring-matched "argv
+tag" list: e10 is PURE HEX, the file's own -e9/-d14/-d15 rule. Your brief named exactly the three
+safe forms, which agrees. WATCHRA8_ -> WATCHRA9_ (4 live) + the :125 banner.
+  >>> TWO THINGS YOUR RE-KEY LIST DID NOT NAME, both found by the tools, not by me reading:
+  F-1. twolockra1.sh:41 arrived reading LOCK_SEAT='Secuura/Blockchain-R ra6'. R 6th, R 7th AND
+       R 8th each left it. THE SWEEP's own LOCK_SEAT= criterion covers it; the explicit list does
+       not. Left at ra6, every lock arm would have proved a WRAPPED seat's holder field, not mine
+       -- a green that means nothing. Re-keyed to ra9. (commitra3.sh is immune by design: its
+       LOCK_SEAT is required from the environment with no default.)
+  F-2. namecheckra1.py's FIXTURES still carried ra8 -- my three QUEUE branch names and five
+       planted "must read MINE" rows. First run: rc 2, 73 OK / 12 BAD, every BAD the same cause.
+       I re-keyed the fixtures and ADDED the inverse ra8 rows (the exact names that read MINE for
+       R 8th, so the pair is both-sided), plus s-e9-ks1435 and two e10 rows which were absent from
+       the file entirely. Second run: rc 0, 92 OK / 0 BAD, 24/24 controls fired, 3 positives OK,
+       and `mine s-ra9-planted -> MINE` proves the MINE branch is reachable, not vacuous.
+       ADOPTION-CONTROL B prints "NOT APPLICABLE by construction, 0 declared members (not a pass)"
+       and the POSITIVE GENERATOR carries the mechanism -- quoted as it prints, per Q-ADOPT9.
+THE SWEEP, before any first run, over all 13 tools: 13 patterns checked per tool, N checked=13
+everywhere, ZERO "0 checked = FAIL". 272 LIVE hits / 550 comment-only. The large counts are
+by-design foreign content (namecheck's FOREIGN lists 206; pushra1/lockra1's WAIT+STOP sets).
+I also fixed sweepra9.py's own self-exclusion: it excluded sweepra7.py and sweepra8.py but NOT
+ITSELF, so it was sweeping its own pattern table.
+MEMBERSHIP BY IMPORT, never by grep: inbox_matchra1.py loaded via importlib with SINCE set and a
+one-message stdin feed, then 18 declaration checks + 13 fixture rows through the tool's OWN tag().
+13/13 rows correct; INVERTED-WANT CONTROL 0 of 13 pass under the opposite want. R 8th's REAL
+subjects "GO (Seat R 8th): merge 1398 on gate71" and its WRAP both read "for r 8th,seat r 8th";
+"(Seat R 10th)" reads foreign; E 10th and D 16th read foreign; my own four subjects read FOR ME.
+  >>> TWO FAULTS OF MINE here, both caught by measuring and not by reading:
+  (i)  My want column said "FOR-ME"; the tool's verdict literal is "FOR ME" with a SPACE. Three
+       rows scored BAD and the inverted control read 3-of-12 until I took the tool's own
+       vocabulary. The tool was right every time.
+  (ii) I asserted "no duplicates in OTHER_SEATS" and it failed. Before blaming my edit I measured
+       R 8th's ORIGINAL by AST: 157 entries, 155 unique -- {'e 6th': 2, 'seat e 6th': 2} is
+       PRE-EXISTING. My arithmetic 157-2+8 = 163 equals the measured 163. Reported, not silently
+       fixed; it is harmless to an `in` test.
+  (iii) And one I will not dress up: earlier I attributed a PASS to a flow-doc control that had
+       NEVER RUN -- the script crashed at the cheat block two lines before reaching it. I only
+       found it because the next run's anchor measurement contradicted it. Re-run properly, it
+       passes; but I had believed a green that did not exist.
+
+=== (f) SEAT FACTS ===
+$TMUX_PANE %81; `tmux display-message -t "$TMUX_PANE" -p '#{@cockpit_name}'` -> Secuura/Blockchain-R.
+A BARE `tmux display-message` returns "wednesday" -- the trap E 9th recorded; I used the targeted
+form for the verdict and name the bare reading only as the record.
+Watcher pid 13410, from ps_ra9_arm.txt read immediately before quoting it; 1 live. Armed
+background, SINCE 2026-10-07T03:46:28Z (the newest mail I have READ = your brief), 60 s.
+I drove its fire rule BOTH ways on the FEED path first: positive (Seat R 9th) -> fires, exit 0;
+negative (E 10th + R 8th mail) -> prints both, "SCANNED 2 messages", does NOT fire, rc 143 on kill.
+df -m /Volumes/DevMASTER: 688,050 MiB avail (your P2 read 688,445 at 03:37Z; the 395 MiB is not mine).
+TZ=UTC stat FETCH_HEAD: "Oct  7 00:18:44 2026" == P2, unmoved.
+Host node v24.7.0, npm 11.5.1, python3 3.14.5 (vs develop's REQUIRED_PYTHON (3,14,8) -- noted; if a
+push leg refuses on it that is a STOP and a mail, not a pin edit).
+R 8th's handover re-hashed: 248 lines, 19,366 B, 8e93fd85eff79f38 == P6.
+WED_USAGE_STOP: env UNSET; the file reads 90 (Kam 2026-09-17 11:21, lift to the standing 90% rule).
+LAUNCHER PREFLIGHT, VERBATIM, all of it:
+    # launch 2026-10-07T03:46:29Z
+    [F-02] No SSH identity available for git (keychain not seeded, on-disk fallback off).
+           Run: ssh-add --apple-use-keychain ~/.ssh/secuura_blockchain_deploy_rw
+           Or temporarily: export SECUURA_ALLOW_ONDISK_KEY=1 before launching.
+           (git will use whatever core.sshCommand is already in the repo config.)
+    [KS-907] 1 other live session(s) on this project: PID 84183 (up since Wed  7 Oct 11:28:29 2026).
+             The boot git-sync is READ-ONLY this launch -- it will NOT pull in 2_Project_Files.
+The [KS-907] READ-ONLY line IS present, so I did not refuse step 1; I ran status + ls-remote only.
+F-02 is why I pass the checkout's own core.sshCommand explicitly with -c on every network verb.
+LIVE FLOOR, measured from tmux, not assumed: %78 Secuura/Blockchain-D (pid 84181/claude 84183) =
+Seat D 15th, LIVE, matching the KS-907 line. %79 is E's pane. Your SEND AMENDMENT said E 10th
+"will launch shortly" -- IT HAS: my watcher's own poll 1 read its LAUNCH BRIEF at 03:49:45Z and
+"ANSWER: plan confirmation (Seat E 10th) - confirmed, E1 build released" at 04:01:54Z. So E 10th is
+building E1 beside me RIGHT NOW. Both its mails classify FOREIGN through my re-keyed matcher --
+which is only true because the re-key added e 10th / e10; inherited, they would have read FOR ME.
+Shared checkout, read-only: branch develop, HEAD 69f2045af2a4 (LOCAL develop is BEHIND origin's
+147ae442074c by R 8th's squash, which was pushed by API and never fetched down -- expected, not a
+problem, and I will not fetch it). 17 untracked paths, all systemTest docs + two
+"(conflict_on_2026-07-03)" snapshots; 0 modified, 0 staged, 0 conflicts. I used `cd` three times at
+boot, before I had read the brief's never-cd line; absolute paths and `git -C` only since.
+
+=== (g) LINEAR, read-only — ZERO contradictions with QUEUE ===
+comments(first:50) sorted CLIENT-SIDE (comments(last:N) returns the OLDEST), each with its own
+count printed so a 50 would be visible as a cap. None is at the cap.
+  KS-998  Backlog     High        board account   1 comment, newest 2026-09-25T00:02:20Z, 0 att
+  KS-1313 In Progress UNASSIGNED  no priority     4 comments, newest 2026-09-26T02:41:45Z, att pull/1245
+  KS-1326 Backlog     Medium      board account   2 comments, newest 2026-09-26T02:41:46Z
+  KS-1164 In Progress High        board account   3 comments, newest 2026-09-25T23:22:51Z, att pull/1271 + pull/1200
+  KS-1136 In Progress Medium      board account   1 comment,  newest 2026-09-18T23:18:50Z, att pull/1398 + pull/1051
+  KS-1438 Backlog     Medium      board account   0 comments
+  KS-1401 In Progress no priority board account   0 comments, att pull/1383
+viewer = kamil.kreiser@secuura.ai (id 40689ea9-c327-42be-bcaf-ead530a9e398) == your P7, so Q-A's
+target is confirmed from the API and not from the brief.
+
+=== MY READING OF THE QUESTIONS ===
+Q-BASE9R: AGREE. RAISE_BASE = 147ae442074c7f3b5be9ce7ccc4452c8dae34b4f, read by me at 03:49:55Z,
+  unmoved from your P1. I ask you to accept it BY NAME. If E 10th lands first I re-read both tails
+  from the new develop and owe the keep-both.
+Q-ADOPT9: AGREE (a). ADOPTIONS = set(), ADOPTED_WORKTREE = [], both EXPECTED_* = 0 -- all four
+  already at zero in R 8th's copy and verified by AST, not assumed. s-ra3-ks1136, the ks-1136
+  branch, s-ra4-ks1436 and s-e9-ks1435 all read FOREIGN by name in my run. Authority comment will
+  read "on Wednesday's ANSWER (plan confirmation, Seat R 9th)".
+Q-GATE9R: AGREE. gate73; batched with E 10th's READY or gated alone, your call at READY time.
+  E 10th being already in build makes the "gated alone" branch the likelier one for whoever is
+  second -- your call, not mine.
+Q-RAISE9: AGREE (a), and the precondition is MET: restraisee7.py hashes 393ca736d91f3ff2 exactly,
+  copied as restraisera9.py, User-Agent secuura-seat-e7 -> secuura-seat-ra9, swept with the rest.
+  I read and copied it only; I wrote nothing in E's lane.
+Q-OTHER9: AGREE, keep. I kept "e 9th"/"d 15th" and added "e 10th"/"seat e 10th" and "d 16th"/
+  "seat d 16th". Your "say so if a removal changes nothing either way": it does NOT change nothing
+  -- E 9th's and D 15th's real subjects are still in this inbox, and with them removed those mails
+  would classify FOR ME. Keeping them is load-bearing, not tidiness.
+
+=== WHAT I ASK FOR ===
+1. A CTX READ of my pane (a seat cannot read its own statusline). I will not start a PR build
+   until you give me a reading below 45%. I have NOT estimated it.
+2. Acceptance of RAISE_BASE 147ae442074c BY NAME.
+3. Your call on F-1 and F-2 above -- I have already applied both re-keys because they are
+   preconditions of any run, and the tools were red without them. If you would rather I had
+   held F-1, say so and I will record it that way.
+4. Confirmation that ITEM 0's bound was respected: I re-derived NOTHING from your do-not list.
+   #1398's squash verification, M', KS-1438's search, the namecheck-consumer census and the
+   Q-REBASE8 reconstruction are all carried from R 8th, unmeasured by me, because (a) shows
+   develop did not move under them.
+
+UNMEASURED, by instrument: the four platform suites (local stack down, a FIFTH round -- named as
+UNMEASURED in every PR body, never a pass); every red-first/suite/tsc/guard/push figure in my
+worktrees (my own runs, after your ANSWER); vitest 5.0.3's real JSON vs KS-1313's 4.1.9 fixtures
+(PR 4's capture); whether E 10th or #1383 moves develop before my pushes (ls-remote in the same
+action as each push decision); legs 6/7 and Actions on any head; which READY lands first.
+UNRAISED: all three rows, PR 3, PR 4, PR 5. Nothing is half-done -- no payload applied outside my
+scratch clone, no worktree, no branch, no commit.
+Watcher 13410 live and armed; I am HOLDING.
+

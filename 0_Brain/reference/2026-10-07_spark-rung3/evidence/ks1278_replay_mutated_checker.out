@@ -1,0 +1,22 @@
+mode: code_patch2 (declared: 2 product(s), 2 test(s))
+diff_blocks=1 all_blocks=1 prose_outside_chars=0
+wrote /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/1c489054-92c5-4ad1-a22b-4816938dfcb0/scratchpad/replay1278/mut_out.md.checker/patch.diff lines=225
+PASS A1 output is exactly one fenced ```diff block, nothing outside it
+clone clean at pinned tip 14d40d4455c7da3c31c71d614fc7c4d1d4ffc2fb
+runner: jest
+--- baseline at the untouched tip (whole services/originate suite + tsc)
+baseline suite rc=0 total=1062 passed=1062 failed=0 suites_failed=0 loaded=1 failed_names=[]
+baseline tsc rc=0 (0 lines)
+sections=4 miscounted_sections=0
+section 1 Blockchain/Dev/services/originate/src/repositories/documentRepo.ts: applies (strict)
+section 2 Blockchain/Dev/services/originate/src/routes/documents.ts: applies (strict)
+section 3 Blockchain/Dev/services/originate/src/__tests__/ks1293-originate-suite-is-hermetic.test.ts: applies (strict)
+section 4 Blockchain/Dev/services/originate/src/__tests__/ks1278-revoke-is-one-atomic-transition.test.ts: applies (strict)
+PASS A2 diff applies at the tip (strict git apply --check, every section, hunk headers consistent)
+PASS A3 (code_patch2) touched-file set == the declared set: { Blockchain/Dev/services/originate/src/repositories/documentRepo.ts , Blockchain/Dev/services/originate/src/routes/documents.ts } + { Blockchain/Dev/services/originate/src/__tests__/ks1278-revoke-is-one-atomic-transition.test.ts , Blockchain/Dev/services/originate/src/__tests__/ks1293-originate-suite-is-hermetic.test.ts }
+A3b: no must_change sites in the input — skipped
+PASS A3c every '+' line the brief adds is in the declared sections (16 line(s), multiset), and no tip line is re-added as a '+' in any product (A3d)
+INFO A3i: the brief's edit blocks add no line to ks1278-revoke-is-one-atomic-transition.test.ts — not measured
+A3i: brief '+' lines byte-exact incl. leading whitespace in: documentRepo.ts documents.ts ks1293-originate-suite-is-hermetic.test.ts
+FAIL A3x BYTE IDENTITY — DIFF Blockchain/Dev/services/originate/src/__tests__/ks1278-revoke-is-one-atomic-transition.test.ts brief=157 output=157 '+' line(s); first difference at '+' #135: brief="    expect([r.status, r.code, r.rows]).toEqual([400, 'BAD_REQUEST', 0]);" output="    expect ([r.status, r.code, r.rows]).toEqual· (SUMMARY declared=4 measured=4 ok=3 diff=1 unmeasured=0)
+RESULT: FAIL (1 failed) — stopped at A3x (an added line is not the brief's, byte for byte; the tests are not run)

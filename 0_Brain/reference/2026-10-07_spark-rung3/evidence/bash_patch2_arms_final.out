@@ -1,0 +1,37 @@
+bash_patch2_arms: fixtures in /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/1c489054-92c5-4ad1-a22b-4816938dfcb0/scratchpad/final_bp2
+fixtures written: 10 variants, 5 refusal briefs
+ARM PASS P1-golden-pass :: expected rc=0 'RESULT: PASS (' :: actual rc=0 :: RESULT: PASS (10/10)
+    P1: PASS B0 subject: clone at 33e38c200b39e765b66935a99b032b27d34b6503, scripts/job.sh and scripts/__tests__/ref.test.sh present
+    P1: PASS B1 output is exactly one fenced ```diff block
+    P1: PASS B2 every section applies at the tip (strict)
+    P1: PASS B3 (bash_patch2) touched-file set == the declared set: { scripts/job.sh , scripts/summary.sh } + { scripts/__tests__/job_loud.test.sh , scripts/__tests__/job_stub.test.sh , scripts/__tests__/summ
+    P1: PASS B3b 1 must_change site(s) of job.sh are '-' lines, no stays-site removed; all 3 brief '+' line(s) are in the product sections (multiset); no tip line re-added in any product (A3d)
+    P1: PASS B3x every declared file's '+' lines are byte-identical to the brief's, in order (SUMMARY declared=5 measured=5 ok=5 diff=0 unmeasured=0)
+    P1: PASS B4 RED-FIRST: with every test section and no product section — job_loud.test.sh=RED(rc 1, 1 FAIL) job_stub.test.sh=green-support summary_new.test.sh=RED(rc 1, 1 FAIL)
+    P1: PASS B5a every .sh product parses after the patch (bash -n)
+    P1: PASS B5 GREEN-AFTER: every declared test passes with all 2 product section(s): job_loud.test.sh(3 pass) job_stub.test.sh(1 pass) summary_new.test.sh(2 pass)
+    P1: PASS B6 undeclared sibling suite(s) naming a product: no NEW failure after (2 suite(s): ref.test.sh 1p/0f->1p/0f; sibling.test.sh 1p/0f->1p/0f;)
+    P1: INFO B7 shellcheck not installed (informational)
+    P1: RESULT: PASS (10/10)
+ARM PASS P1b B6 RAN on the 2 undeclared suites naming the stem 'job' (sibling + ref; a B6 that never runs could not fail F6)
+ARM PASS F1-undeclared :: expected rc=1 'touched but UNDECLARED: ['scripts/other.sh']' :: actual rc=1 :: RESULT: FAIL (1 failed) — stopped at B3 (the touched set is not the declared one) :: FAIL B3 (bash_patch2) touched-file set != the declared set: touched but UNDECLARED: ['scripts/other.sh'] — touched: scripts/__tests__/job_loud.test.sh scripts/__tests__/job_stub.test.sh scripts/__tests__/summary_new.test
+ARM PASS F2-untouched :: expected rc=1 'declared but UNTOUCHED: ['scripts/__tests__/job_stub.test.sh']' :: actual rc=1 :: RESULT: FAIL (1 failed) — stopped at B3 (the touched set is not the declared one) :: FAIL B3 (bash_patch2) touched-file set != the declared set: declared but UNTOUCHED: ['scripts/__tests__/job_stub.test.sh'] — touched: scripts/__tests__/job_loud.test.sh scripts/__tests__/summary_new.test.sh scripts/job.s
+ARM PASS F3-red-green-before :: expected rc=1 'job_loud.test.sh: declared RED but NOT red before the product sections' :: actual rc=1 :: RESULT: FAIL (1 failed) — stopped at B4 (the red proves nothing) :: FAIL B4 RED-FIRST: job_loud.test.sh: declared RED but NOT red before the product sections (rc=0, 0 FAIL line(s)) — it does not prove the defect;
+ARM PASS F4-support-red-alone :: expected rc=1 'job_stub.test.sh: declared SUPPORT but NOT green with the test edits alone' :: actual rc=1 :: RESULT: FAIL (1 failed) — stopped at B4 (the red proves nothing) :: FAIL B4 RED-FIRST: job_stub.test.sh: declared SUPPORT but NOT green with the test edits alone (rc=1, 1 FAIL line(s)) — its edit does not stand alone:   FAIL CONTROL a clean report exits 0 (got failed 1);
+ARM PASS F5-still-red-after :: expected rc=1 'FAIL B5 GREEN-AFTER: still red (or empty) after the product sections: summary_new.test.sh' :: actual rc=1 :: RESULT: FAIL (1 failed) :: FAIL B5 GREEN-AFTER: still red (or empty) after the product sections: summary_new.test.sh: rc=1, 1 FAIL, 1 pass, load_error=0:   FAIL 🔴 failed is FAILED;
+ARM PASS F6-sibling-new-red :: expected rc=1 'FAIL B6 NEW failure(s) in undeclared sibling suite(s) after the patch: scripts/__tests__/sibling.test.sh(before=0 after=1)' :: actual rc=1 :: RESULT: FAIL (1 failed) :: FAIL B6 NEW failure(s) in undeclared sibling suite(s) after the patch: scripts/__tests__/sibling.test.sh(before=0 after=1) (counts: ref.test.sh 1p/0f->1p/0f; sibling.test.sh 1p/0f->0p/1f;)
+ARM PASS F7-byte-identity :: expected rc=1 'FAIL B3x BYTE IDENTITY — DIFF scripts/__tests__/job_stub.test.sh' :: actual rc=1 :: RESULT: FAIL (1 failed) — stopped at B3x (an added line is not the brief's, byte for byte; the tests are not run) :: FAIL B3x BYTE IDENTITY — DIFF scripts/__tests__/job_stub.test.sh brief=1 output=1 '+' line(s); first difference at '+' #1: brief='CLEAN=\'{"Results":[]}\'' output='CLEAN=\'{"Results": []}\''· (SUMMARY declared=5 measured
+ARM PASS F8-dropped-addition :: expected rc=1 'FAIL B3b INCOMPLETE (A3c): 1 of 3 brief '+' line(s) ABSENT' :: actual rc=1 :: RESULT: FAIL (1 failed) — stopped at B3b (a dropped addition) :: FAIL B3b INCOMPLETE (A3c): 1 of 3 brief '+' line(s) ABSENT from the product sections: # a report with no Results is not a scan
+ARM PASS F9-stays-removed :: expected rc=1 'FAIL B3c a line the brief says STAYS was removed from job.sh' :: actual rc=1 :: RESULT: FAIL (1 failed) — stopped at B3c (a stays-line removed) :: FAIL B3c a line the brief says STAYS was removed from job.sh (no repair in bash_patch2): REMOVED :3 out="$("${TOOL:-tool}" 2>/dev/null)"·
+ARM PASS R1-no-role :: expected rc=2 'exactly one of RED / SUPPORT' :: actual rc=2 :: build_bash_input2: REFUSED — header test line for scripts/__tests__/job_stub.test.sh must say exactly one of RED / SUPPORT (got: '(MODIFIED)')
+ARM PASS R2-new-support :: expected rc=2 'is NEW but SUPPORT' :: actual rc=2 :: build_bash_input2: REFUSED — scripts/__tests__/summary_new.test.sh is NEW but SUPPORT — a new suite that is green before the fix proves nothing
+ARM PASS R3-test-in-change :: expected rc=2 'which is not a declared product' :: actual rc=2 :: build_bash_input2: REFUSED — `## The exact change` carries a hunk for scripts/__tests__/job_loud.test.sh, which is not a declared product (product hunks go under `## The 
+ARM PASS R4-no-lines :: expected rc=2 'carries no lines for the declared file scripts/__tests__/summary_new.test.sh' :: actual rc=2 :: build_bash_input2: REFUSED — the brief carries no lines for the declared file scripts/__tests__/summary_new.test.sh — every declared file's edit must be spelled out
+ARM PASS R5-new-exists :: expected rc=2 'is declared NEW but is present at the tip' :: actual rc=2 :: build_bash_input2: REFUSED — scripts/__tests__/job_loud.test.sh is declared NEW but is present at the tip 33e38c200b39
+ARM PASS R0 control: the golden brief builds rc 0 with task_type bash_patch2, 2 products, roles red/support/red
+ARM PASS L1 control :: expected rc=0 B_TIER=bash_patch2 :: actual rc=0
+ARM PASS L2 :: expected rc=2 CONTRACT :: actual rc=2 :: REFUSED CONTRACT: the header declares 1 product file(s) ['Blockchain/Testing/jobs/04-container-trivy.sh'] and 3 test file(s) ['Blockchain/Dev/scripts/
+ARM PASS L3 :: expected rc=2 PINS :: actual rc=2 :: REFUSED PINS: bash_patch2 B-mode needs ref=<existing *.test.sh whose shape the model copies> (build_bash_input.sh requir
+ARM PASS T1 make_task.py :: expected rc=0, rule 3 replaced :: actual rc=0
+ARM PASS T2 make_task.py on a task.md with a moved anchor :: expected rc=2 :: actual rc=2
+bash_patch2_arms: 22 pass, 0 fail (fixtures /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/1c489054-92c5-4ad1-a22b-4816938dfcb0/scratchpad/final_bp2)

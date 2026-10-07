@@ -17,9 +17,7 @@
 #                        allow_drift=1 to override)
 #   6. input             night/build_input.sh (code_patch) | tasks/code_patch2/build_input2.sh (code_patch2: the same
 #                        builder for the first product, plus the declared multi-file set) |
-#                        tasks/bash_patch/build_bash_input.sh (bash_patch) |
-#                        tasks/bash_patch2/build_bash_input2.sh (bash_patch2, 2026-10-07: the same bash builder for the
-#                        first product + first RED test, plus the declared multi-file set), with
+#                        tasks/bash_patch/build_bash_input.sh (bash_patch), with
 #                        NIGHT_SOURCE_CHECKOUT=cache/src, NIGHT_BRIEFS_DIR=<brief_dir>; builder rc 2 -> rc 2 REFUSED
 #   7. clone             `git clone --shared --no-checkout cache/src` + `checkout --detach <tip>` under
 #                        spark/cache/work/<run-id>/clone; code_patch: tasks/code_patch/prepare_clone.sh
@@ -28,14 +26,9 @@
 #   9. checker           code_patch: tasks/code_patch/spark_checker.sh (checker.sh + A2a)
 #                        code_patch2: tasks/code_patch2/checker.sh, then A2a as for bash_patch (task.md DERIVED from
 #                        code_patch's by tasks/code_patch2/make_task.py into the run dir)
-#                        bash_patch2: tasks/bash_patch2/checker.sh, then A2a as for bash_patch (task.md DERIVED from
-#                        bash_patch's by tasks/bash_patch2/make_task.py into the run dir)
 #                        bash_patch: tasks/bash_patch/checker.sh, then A2a (code_patch/a2a_anchor.py over
 #                        sections_with_n.json) appended to checker.out with the same PASS/FAIL A2a + SPARK RESULT lines
-#  10. golden            `cmp` of out.md.checker/patch.diff against <brief_dir>/golden.diff when one exists; when the
-#                        bytes differ, both are applied (`git apply --cached`, strict) to a TEMPORARY index of <tip> in the
-#                        per-round clone and the two trees compared: TREE-IDENTICAL = the same files, a differently
-#                        written diff (2026-10-07: KS-1278 r3's "DIFFERS" was a git-form golden, review-measured identical)
+#  10. golden            `cmp` of out.md.checker/patch.diff against <brief_dir>/golden.diff when one exists
 #
 # Run dir: local-model/runs/spark_secuura_<YYYY-MM-DD>_<brief-dir-name>[-rN], the shape the 10-05 rounds left:
 # input.json, out.md(+.meta.json, .raw.json), run.log, checker.out, out.md.checker/, prepare_clone.out (code_patch),
@@ -240,8 +233,6 @@ mkdir -p "$RUN"
 say "run dir: $RUN"
 if [ "$B_TIER" = code_patch2 ]; then
   NIGHT_SOURCE_CHECKOUT="$SRC" NIGHT_BRIEFS_DIR="$BDIR" bash "$LM/tasks/code_patch2/build_input2.sh" "$B_TICKET" "$RUN/input.json" "$B_BRIEF" ${B_PINS_ARR[@]+"${B_PINS_ARR[@]}"} > "$RUN/build_input.out" 2>&1; BRC=$?
-elif [ "$B_TIER" = bash_patch2 ]; then
-  NIGHT_SOURCE_CHECKOUT="$SRC" bash "$LM/tasks/bash_patch2/build_bash_input2.sh" "$B_TICKET" "$RUN/input.json" "$B_BRIEF" ${B_PINS_ARR[@]+"${B_PINS_ARR[@]}"} > "$RUN/build_input.out" 2>&1; BRC=$?
 elif [ "$B_TIER" = code_patch ]; then
   NIGHT_SOURCE_CHECKOUT="$SRC" NIGHT_BRIEFS_DIR="$BDIR" bash "$LM/night/build_input.sh" "$B_TICKET" "$RUN/input.json" ${B_PINS_ARR[@]+"${B_PINS_ARR[@]}"} > "$RUN/build_input.out" 2>&1; BRC=$?
 else
@@ -260,9 +251,9 @@ IN_TIP="$(python3 -c 'import json,sys; d=json.load(open(sys.argv[1])); print(d.g
 SELFTEST="$(python3 -c 'import json,sys; print(1 if json.load(open(sys.argv[1])).get("self_testing") else 0)' "$RUN/input.json")"
 TASK_MD="$LM/tasks/$B_TIER/task.md"
 [ "$B_TIER" = bash_patch ] && [ "$SELFTEST" = 1 ] && TASK_MD="$LM/tasks/bash_patch/task_selftest.md"
-if [ "$B_TIER" = code_patch2 ] || [ "$B_TIER" = bash_patch2 ]; then
+if [ "$B_TIER" = code_patch2 ]; then
   TASK_MD="$RUN/task.md"
-  python3 "$LM/tasks/$B_TIER/make_task.py" "$TASK_MD" > "$RUN/make_task.out" 2>&1 || finish 5 "HARNESS — make_task.py could not derive the $B_TIER task: $(tail -1 "$RUN/make_task.out" | cut -c1-200)" "$RUN"
+  python3 "$LM/tasks/code_patch2/make_task.py" "$TASK_MD" > "$RUN/make_task.out" 2>&1 || finish 5 "HARNESS — make_task.py could not derive the code_patch2 task: $(tail -1 "$RUN/make_task.out" | cut -c1-200)" "$RUN"
 fi
 [ -n "$B_OVERRIDE_NOT_RUNNABLE" ] && say "WARNING the brief's header says NOT RUNNABLE; overridden by pin override_not_runnable=$B_OVERRIDE_NOT_RUNNABLE"
 say "input: $(tail -1 "$RUN/build_input.out" | cut -c1-200)"
@@ -337,19 +328,7 @@ SRESULT="$(grep -m1 '^SPARK RESULT:' "$RUN/checker.out" | cut -c15-)"
 # ------------------------------------------------------------------ 10. golden + record
 GOLD="none"
 if [ -n "$B_GOLDEN" ] && [ -f "$RUN/out.md.checker/patch.diff" ]; then
-  if cmp -s "$RUN/out.md.checker/patch.diff" "$B_GOLDEN"; then GOLD="BYTE-IDENTICAL"
-  else
-    # bytes differ: compare the TREES both produce at the tip (temporary index files in the per-round work dir; the
-    # clone's own index and work tree are not touched). Strict apply only — a patch that needs an accommodation stays DIFFERS.
-    tree_of() { # tree_of <patch> <index file> -> tree sha, or nothing
-      GIT_INDEX_FILE="$2" git -C "$CLONE" read-tree "$TIP" > "$2.out" 2>&1 \
-        && GIT_INDEX_FILE="$2" git -C "$CLONE" apply --cached -p1 "$1" >> "$2.out" 2>&1 \
-        && GIT_INDEX_FILE="$2" git -C "$CLONE" write-tree 2>> "$2.out"
-    }
-    GT="$(tree_of "$B_GOLDEN" "$WORK/golden_cmp.index")"; PT="$(tree_of "$RUN/out.md.checker/patch.diff" "$WORK/patch_cmp.index")"
-    if [ -n "$GT" ] && [ "$GT" = "$PT" ]; then GOLD="TREE-IDENTICAL"; else GOLD="DIFFERS"; fi
-    echo "golden tree ${GT:-not-built} · patch tree ${PT:-not-built} -> $GOLD (logs $WORK/*_cmp.index.out)" > "$RUN/golden_cmp.out"
-  fi
+  if cmp -s "$RUN/out.md.checker/patch.diff" "$B_GOLDEN"; then GOLD="BYTE-IDENTICAL"; else GOLD="DIFFERS"; fi
 elif [ -n "$B_GOLDEN" ]; then GOLD="no-patch"; fi
 if [ "$CRC" -eq 0 ]; then VERDICT=PASS; else VERDICT=FAIL; fi
 [ "$CONTROL" -eq 1 ] && VERDICT="CONTROL-$VERDICT"

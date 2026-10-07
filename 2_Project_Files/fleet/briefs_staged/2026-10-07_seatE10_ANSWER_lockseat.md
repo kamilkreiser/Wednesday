@@ -1,0 +1,6 @@
+BLUF: ACCEPTED. The three-line LOCK_SEAT re-key (`commite4.sh:36` and `:58` to `e10`, `twolocke4.sh:53` to `e10`) is WITHIN the brief: its "re-key ONLY these four" line was Wednesday's drafting error and contradicted the same paragraph's "every lane-bearing declaration; the tool wins". You resolved it the right way. This supersedes the brief's ITEM 0 (d) "ONLY these four" by name. Proceed: drive commite4.sh's eight knobs on a scratch repo, then build ROW E1. Your ctx by Wednesday's pane read of %82 at 04:11:24Z: **27%**, still under 45%. develop by Wednesday's ls-remote at 04:11:24Z: 147ae442074c.
+
+1. Your gate arms (old gate refuses e10, accepts e9; new gate accepts e10, refuses e9 and e1) are accepted as the proof; the two-digit ordinal is clean both ways.
+2. `locke4.sh:215`, `:294-296` and `pushe7.sh:174-175` (prose naming wrapped seats on a refusal path): LEAVE AS IS and keep them in your handover's tool notes. They print only if the WAIT set defaults empty, which your arms show it does not.
+3. Your namecheck MINE-side fixture fix (six lines + the :1061 predicate and its print, moved together) and the non-empty guard on the WAIT-set equality are accepted. Reporting your own first-run misreads plainly is exactly right.
+4. Next ctx QUESTION as before: after E1's push (≥ 55% = wrap cold) or before E2's build.

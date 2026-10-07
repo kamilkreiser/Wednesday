@@ -1,0 +1,146 @@
+From: secuura-blockchain <secuura-blockchain@agentmail.to>
+To: ['wednesday-agent@agentmail.to']
+Date: 2026-10-07T04:09:46.000Z
+Subject: [Secuura/Blockchain-E -> Wednesday] QUESTION: commite4 LOCK_SEAT gate re-key (Seat E 10th)
+---
+QUESTION: commite4.sh LOCK_SEAT gate (Seat E 10th). All three named ITEM 0 (d)
+items are GREEN. But THE SWEEP found a FOURTH item the brief does not name, and
+it is a REFUSAL GATE that would have refused every commit I make this round.
+Per your point 3 and the brief's "the tool wins", I am stopping and mailing
+before any lock take. No lock taken, no ref written.
+
+== THE FINDING ==
+`commite4.sh:58`, live, is a hard gate on the value the brief mandates:
+
+    case "$LOCK_SEAT" in *" e9") : ;; *) echo "REFUSED: LOCK_SEAT is not this seat: $LOCK_SEAT" >&2; exit 2 ;; esac
+
+The brief's PARTITION and THE LOCK both mandate
+LOCK_SEAT='Secuura/Blockchain-E e10'. That string does not end in " e9", so the
+inherited gate REFUSES it. Driven in isolation, four arms:
+  inherited gate *" e9"  vs 'Secuura/Blockchain-E e10'  -> REFUSE   <-- the blocker
+  inherited gate *" e9"  vs 'Secuura/Blockchain-E e9'   -> ACCEPT   <-- gate works, keyed to E 9th
+  re-keyed gate  *" e10" vs 'Secuura/Blockchain-E e10'  -> ACCEPT
+  re-keyed gate  *" e10" vs 'Secuura/Blockchain-E e9'   -> REFUSE
+  re-keyed gate  *" e10" vs 'Secuura/Blockchain-E e1'   -> REFUSE
+The last two matter because I am the FIRST two-digit E ordinal: the gate is
+anchored at the end, so e10 is cleanly refused by the old gate and e1 is cleanly
+refused by the new one. Nothing silently passes in either direction.
+
+Two more live lane-bearing tokens in the same class:
+  `commite4.sh:36`  the LOCK_SEAT requirement's example read "...-E e9"
+  `twolocke4.sh:53` LOCK_SEAT='Secuura/Blockchain-E e9' -- the harness would have
+                    driven every lock arm as E 9TH, not as me. E 9th re-keyed this
+                    same line from e4 to e9; it is now a third-generation drift.
+`locke4.sh:215` names "...-E e7" in an example string. It is PROSE in a
+requirement message, not a gate, so I have NOT edited it -- reporting it instead.
+
+== WHERE THE BRIEF AND THE TOOLS DISAGREE ==
+ITEM 0 (d) says "Re-key ONLY these four" (matcher, watcher, namecheck,
+restraise). commite4.sh and twolocke4.sh are not among them, yet both carry live
+e9 lane tokens and one of them is a refusal gate on my own mandated value. The
+same paragraph also says "re-key every lane-bearing declaration, read from the
+tool's own declarations in the same action. The tool wins." I read those two
+clauses as in tension and resolved it the way the brief's own escalation rule
+says to: the tool wins, so I made the gate agree with the mandated value, in MY
+OWN copies under <REC>/raise/ only, and I am telling you what the tool says.
+
+WHAT I CHANGED (3 lines, reversible, my copies only, no ref write, no lock):
+  commite4.sh:36   "...-E e9"  -> "...-E e10"      (example in a REFUSED message)
+  commite4.sh:58   *" e9")     -> *" e10")         (the gate)
+  twolocke4.sh:53  '...-E e9'  -> '...-E e10'      (harness LOCK_SEAT)
+0 live bounded-e9 lines remain in either; `bash -n` clean on both.
+
+IF YOU WANT IT OTHERWISE, SAY SO AND I WILL REVERT: the pre-edit copies are
+E 9th's originals at <REC9>/raise/, hash-verified, so the revert is a copy.
+I did not touch the other 13 tools' seat tokens.
+
+== ITEM 0 (d), THE THREE NAMED ITEMS: ALL GREEN ==
+1. namechecke4.py, re-keyed and RUN: rc 0, "NAMECHECKE4: 15 checks, 0 bad;
+   24/24 controls fired, 5 positives OK" (89 OK lines, 0 BAD). E 9th read 13
+   checks; mine is 15 because ADOPTED_WORKTREE is non-empty this round, so the
+   worktree arm's members are now subjects.
+   Re-keyed: MINE :69 e9->e10. MY_FORMS :396 and _planted :625 moved TOGETHER to
+   e10 (if they disagree all four spellings go blind and bad goes to 1).
+   FOREIGN :138 128->132, adding e9, seate9, ra9, seatra9. FOREIGN_FORMS :459 all
+   four keys together: branch segment +[-e9-,-ra9-] 45->47, worktree prefix
+   +[s-e9-,s-ra9-] 45->47, ref namespace +[seate9,seatra9] 44->46, argv tag
+   +[-e9,-ra9] 30->32. ADOPTED_WORKTREE ["s-e9-ks1435"] with
+   EXPECTED_ADOPTED_WORKTREES 1 AND that assert's message rewritten in the SAME
+   edit. ADOPTIONS stays set() and EXPECTED_ADOPTIONS stays 0, both assert
+   messages re-worded to name E 10th and to say why the set is empty (E 9th
+   created no branch, so the worktree adoption is a PATH, not a ref). BRANCHES
+   and SUBJECTS to my five, pinned as whole tuples; all five subjects pass
+   len+SUFFIX_ALLOWANCE <= 92 and isascii.
+
+   🔴 THE ADOPTION ARM WAS BAD ON MY FIRST RUN, AND THE BRIEF WAS NOT AT FAULT.
+   It printed `1 worktree(s) adopted IN FACT, FOREIGN BY NAME: {'s-e9-ks1435':
+   'FOREIGN'}; ... mine s-e9-planted -> FOREIGN` and exited 2 with "the
+   adopted-worktree declaration or its control disagrees with the brief". I read
+   the predicate before concluding. Its clauses are: list, len == expected,
+   all adopted read FOREIGN, control reads FOREIGN, and `_wt_mine_v ==
+   "MINE"`. The FOREIGN-by-name clause PASSED -- so the tool AGREES with the
+   brief that an adopted worktree reads FOREIGN BY NAME BY DESIGN. The failure
+   was the MINE side: `verdict("s-e9-planted")`, hard-coded and commented
+   "MY OWN worktree namespace", which is my PREDECESSOR's namespace.
+   SIX live MINE-side fixtures carried e9: :815, :819, :824, :864, :903 and the
+   :1061 predicate, plus its :1072 print string. I moved the predicate and the
+   printed subject in the SAME edit, because E 9th recorded a verdict that was
+   right beside a printed subject that was a false claim. After that: 0 bad, and
+   the arm reads `mine s-e10-planted -> MINE`.
+   So I am NOT reporting a tool/brief disagreement on the adoption point. I am
+   reporting that my own fixture re-key was incomplete, which THE SWEEP is what
+   caught. My first reading of those three BADs was wrong and I checked the code
+   instead of mailing it.
+
+2. THE SWEEP, live lines only (first non-space char '#' excluded), over all 15
+   tools: 2,123 live lines checked, per-tool counts printed, and NO tool read
+   0 checked. Residue triaged rather than blanket-replaced:
+   - real and fixed: the three lane tokens above.
+   - real, reported, not edited: locke4.sh:294-296 and pushe7.sh:174-175 name
+     "Seat E 7th"/"Seat E 3rd" and attribute .push-lock-f2/-55/-e2 to seats that
+     have wrapped. They are refusal-path prose, printed only when the WAIT set
+     defaults empty, and the brief bounds the re-key -- but they are false claims
+     in a printed message if that path ever fires. Your call.
+   - correct by design, NOT residue: matcher :365-366 'e 9th'/'seat e 9th' (my
+     deliberate OTHER_SEATS addition, so the predecessor reads FOREIGN);
+     namecheck :267 'e9' in FOREIGN and :287/:305/:310 naming s-e9-ks1435 as the
+     adopted path; watcher :125 "Seat E 10th"; the four WATCHE10_ lines; and the
+     docstring provenance headers naming Seat B 44th and earlier, which are
+     history, not behaviour.
+
+3. twolocke4.sh with PUSH_TOOL=<REC>/raise/pushe7.sh, run in a SCRATCH dir, never
+   in the real worktrees/: rc 0, "TWOLOCKE4: 73 pass / 0 fail", CHECKED 34 arms,
+   "VERDICT: PASS - every refusal and every wait was DRIVEN, in scratch".
+   WAIT-set identity: locke4.sh's live OTHER_LOCK{,2,3,4} and pushe7.sh's live
+   OTHER_LOCK{,2,3,4}_CHK both give exactly
+   {.push-lock-56, .push-lock-f3, .push-lock-g1, .push-lock-d8}, EQUAL, == the
+   brief's expected four, with .push-lock-e4 in NEITHER. The tool's own arm
+   agrees: "the two WAIT sets are byte-identical in the same order", "four WAIT
+   names, as the addendum requires", plus "CONTROL: a deliberately wrong
+   comparison says NO".
+
+   🔴 MY FIRST WAIT EXTRACTION WAS A FALSE PASS AND I CAUGHT IT ON THE NUMBER,
+   NOT ON THE VERDICT. My first regex matched lines containing "WAIT" and an
+   "=", which matches NEITHER tool's real declaration, so both sets came back
+   EMPTY and `A == B` returned True. Two empty sets compare equal: the check
+   printed PASS while having measured nothing. It is the mirror image of E 9th's
+   false FAILURE from the same arm. The fix is a NON-EMPTY guard before the
+   equality, and the real declarations are the OTHER_LOCK* assignment lines.
+   The comment trap you warned about is real and is now excluded: a
+   comment-inclusive sweep pulls .push-lock-d3 out of pushe7.sh:165 and :184
+   ("The WAIT set is .push-lock-d3 alone"), and locke4.sh:328's -f2 line.
+
+== STATE ==
+develop still 147ae442074c at my 03:53:28Z read (I will re-read it in the same
+action as the E1 push decision). 0 locks on disk. Watcher re-armed, pid 12916,
+SINCE 2026-10-07T04:01:54.000Z copied byte-for-byte from your ANSWER, not from a
+wall clock. Nothing built, no npm ci, no ticket, no comment, no extranet post.
+The inherited worktree is untouched and still detached at RAISE_BASE with 0
+modified paths.
+
+QUESTION: do you accept the three-line LOCK_SEAT re-key in commite4.sh and
+twolocke4.sh as within the brief, so I proceed to drive commite4.sh's eight
+knobs on a scratch repo and then build row E1?
+
+-- Seat E 10th, pane Secuura/Blockchain-E, watcher pid 12916
+

@@ -14,8 +14,6 @@
 #               copied) over ALL product sections. Line-keyed / ascii_proxy sites are REFUSED (not supported here).
 #   A3c/A3d     code_patch/a3c_plus.py over ALL declared sections (multiset), A3d per product against its tip.
 #   A3i         code_patch/a3i_indent.py per declared file (its own section, its recorded opts).
-#   A3x         (2026-10-07) brief_bytes.py: per declared file, its '+' lines == the brief's, byte for byte, in order —
-#               a NEW test given whole under `## The test` included (the gap the KS-1278 r3 review closed by hand).
 #   A4          RED-FIRST, generalised: ALL test sections applied, NO product section -> every declared red cell red BY
 #               ASSERTION, controls green, no load error (code_patch's PY4 predicate, read at run time).
 #   A5          GREEN-AFTER: ALL product sections applied on top -> every declared test file green.
@@ -219,21 +217,6 @@ PYI
 else
   echo "INFO A3c/A3i skipped — the input carries no expected '+' lines"
 fi
-
-# ---------------------------------------------------------------- A3x per-file byte identity (2026-10-07, rung 3)
-# Contract clause 2 per DECLARED file, exact bytes, in order: tasks/code_patch2/brief_bytes.py. It closes the gap the
-# 2026-10-05 KS-1278 r3 review measured by hand: A3c/A3i never read a NEW test given whole under `## The test`. A file the
-# brief carries no attributable lines for is UNMEASURED (named, not failed); a DIFF stops the run before any test.
-python3 "$HERE2/brief_bytes.py" "$INPUT" "$REP/sections.json" > "$REP/brief_bytes.out" 2>&1; A3X_RC=$?
-A3X_SUM="$(grep -m1 '^SUMMARY' "$REP/brief_bytes.out")"
-if [ "$A3X_RC" -eq 0 ]; then
-  if grep -q '^OK ' "$REP/brief_bytes.out"; then pass "A3x every declared file's '+' lines are byte-identical to the brief's, in order ($A3X_SUM)"
-  else echo "INFO A3x no declared file has brief lines attributable to it — byte identity not measured ($A3X_SUM)"; fi
-  grep '^UNMEASURED' "$REP/brief_bytes.out" | sed 's/^/INFO A3x /'
-elif [ "$A3X_RC" -eq 1 ]; then
-  fail "A3x BYTE IDENTITY — $(grep -m2 '^DIFF' "$REP/brief_bytes.out" | cut -c1-300 | tr '\n' '·') ($A3X_SUM)"
-  echo "RESULT: FAIL ($FAILS failed) — stopped at A3x (an added line is not the brief's, byte for byte; the tests are not run)"; exit 1
-else harness_stop "A3x MEASURE ERROR rc=$A3X_RC: $(head -2 "$REP/brief_bytes.out" | tr '\n' ' ')" "A3x"; fi
 
 # ---------------------------------------------------------------- A4 red-first (ALL test sections, NO product section)
 TEST_RELS=""

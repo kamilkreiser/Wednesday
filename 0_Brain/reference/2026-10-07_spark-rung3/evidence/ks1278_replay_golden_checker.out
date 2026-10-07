@@ -1,0 +1,42 @@
+mode: code_patch2 (declared: 2 product(s), 2 test(s))
+diff_blocks=1 all_blocks=1 prose_outside_chars=0
+wrote /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/1c489054-92c5-4ad1-a22b-4816938dfcb0/scratchpad/replay1278/golden_out.md.checker/patch.diff lines=229
+PASS A1 output is exactly one fenced ```diff block, nothing outside it
+clone clean at pinned tip 14d40d4455c7da3c31c71d614fc7c4d1d4ffc2fb
+runner: jest
+--- baseline at the untouched tip (whole services/originate suite + tsc)
+baseline suite rc=0 total=1062 passed=1062 failed=0 suites_failed=0 loaded=1 failed_names=[]
+baseline tsc rc=0 (0 lines)
+sections=4 miscounted_sections=0
+section 1: MISMATCHED HEADER — '--- diff --git a/Blockchain/Dev/services/originate/src/__tests__/ks1278-revoke-is-one-atomic-transition.test.ts b/Blockchain/Dev/services/originate/src/__tests__/ks1278-revoke-is-one-atomic-transition.test.ts' paired with '+++ new file mode 100644' (two files in one section; git reads a rename)
+section 1 Blockchain/Dev/services/originate/src/__tests__/ks1278-revoke-is-one-atomic-transition.test.ts: applies (strict)
+section 2: MISMATCHED HEADER — '--- diff --git a/Blockchain/Dev/services/originate/src/__tests__/ks1293-originate-suite-is-hermetic.test.ts b/Blockchain/Dev/services/originate/src/__tests__/ks1293-originate-suite-is-hermetic.test.ts' paired with '+++ index a689d5f24..97a471eba 100644' (two files in one section; git reads a rename)
+section 2 Blockchain/Dev/services/originate/src/__tests__/ks1293-originate-suite-is-hermetic.test.ts: applies (strict)
+section 3: MISMATCHED HEADER — '--- diff --git a/Blockchain/Dev/services/originate/src/repositories/documentRepo.ts b/Blockchain/Dev/services/originate/src/repositories/documentRepo.ts' paired with '+++ index 6e059d36c..e29ebcdd7 100644' (two files in one section; git reads a rename)
+section 3 Blockchain/Dev/services/originate/src/repositories/documentRepo.ts: applies (strict)
+section 4: MISMATCHED HEADER — '--- diff --git a/Blockchain/Dev/services/originate/src/routes/documents.ts b/Blockchain/Dev/services/originate/src/routes/documents.ts' paired with '+++ index 62da5fa8c..b17a806a6 100644' (two files in one section; git reads a rename)
+section 4 Blockchain/Dev/services/originate/src/routes/documents.ts: applies (strict)
+PASS A2 diff applies at the tip (strict git apply --check, every section, hunk headers consistent)
+PASS A3 (code_patch2) touched-file set == the declared set: { Blockchain/Dev/services/originate/src/repositories/documentRepo.ts , Blockchain/Dev/services/originate/src/routes/documents.ts } + { Blockchain/Dev/services/originate/src/__tests__/ks1278-revoke-is-one-atomic-transition.test.ts , Blockchain/Dev/services/originate/src/__tests__/ks1293-originate-suite-is-hermetic.test.ts }
+A3b: no must_change sites in the input — skipped
+PASS A3c every '+' line the brief adds is in the declared sections (16 line(s), multiset), and no tip line is re-added as a '+' in any product (A3d)
+INFO A3i: the brief's edit blocks add no line to ks1278-revoke-is-one-atomic-transition.test.ts — not measured
+A3i: brief '+' lines byte-exact incl. leading whitespace in: documentRepo.ts documents.ts ks1293-originate-suite-is-hermetic.test.ts
+PASS A3x every declared file's '+' lines are byte-identical to the brief's, in order (SUMMARY declared=4 measured=4 ok=4 diff=0 unmeasured=0)
+tests with ALL test sections, NO product section: rc=1 total=14 passed=12 failed=2 suites_failed=1 loaded=1 failed_names=['KS-1278 /revoke is one atomic transition RED KS-1278 R1: a revoke whose UPDATE changed no row (another revoke won the race) answers 400 and records nothing', 'KS-1278 /revoke is one atomic transition RED KS-1278 R2: the revoke UPDATE itself refuses a row that is already revoked']
+A4 declared red cell(s) (brief ## Red cells, assertion red): RED KS-1278 R1: a revoke whose UPDATE changed no row (anothe | RED KS-1278 R2: the revoke UPDATE itself refuses a row that 
+PASS A4 RED-FIRST: the declared test(s) fail with every test section and no product section (2 failed / 14 run; controls green; assertion reds)
+tests after ALL product sections: rc=0 total=14 passed=14 failed=0 suites_failed=0 loaded=1 failed_names=[]
+PASS A5 GREEN-AFTER: every declared test passes with all 2 product section(s) (14 passed / 14 run)
+INFO control cells: 12 passed BEFORE the product sections, 14 AFTER
+after suite rc=0 total=1066 passed=1066 failed=0 suites_failed=0 loaded=1 failed_names=[]
+baseline: total=1062 failed=0 | after: total=1066 failed=0
+develop's own reds (attributed, not counted): []
+NEW reds: []
+reds fixed by the patch: []
+tests added: 4
+PASS A6 whole services/originate suite: no NEW red vs the untouched tip
+PASS A7 tsc --noEmit for services/originate: rc 0 after the patch (baseline rc=0)
+INFO tsc on src/__tests__/ks1278-revoke-is-one-atomic-transition.test.ts alone (--types node,jest): rc=0 (not gated, as in code_patch)
+SUMMARY files=4 products=2 tests=2 red_first=yes apply_mode=strict
+RESULT: PASS (7/7)

@@ -1,0 +1,9 @@
+BLUF: PLAN CONFIRMED. RAISE_BASE `147ae442074c7f3b5be9ce7ccc4452c8dae34b4f` ACCEPTED BY NAME (develop by Wednesday's ls-remote at 04:07:57Z: 147ae442074c). Your ctx by Wednesday's pane read of %81 at 04:07:57Z: **27%**, under 45%: **PR 3 (KS-998) BUILD RELEASED**, after the lock arms from a scratch copy run green (your stated first act).
+
+1. ITEM 0's bound was respected: you re-derived nothing on the do-not list, and every STALE/UNREAD item was re-measured at your base with controls. Accepted as the record.
+2. **F-1 and F-2: APPLIED CORRECTLY, keep them.** Both are inside the brief's own rule (re-key EVERY lane-bearing declaration; THE SWEEP's `LOCK_SEAT=` criterion; the tool wins). The explicit list missing `twolockra1.sh:41` and namecheck's fixtures was the drafter's and Wednesday's omission, not yours. The sweepra9 self-exclusion fix is accepted.
+3. Q-BASE9R, Q-ADOPT9 (a), Q-GATE9R, Q-RAISE9 (a) (hash matched), Q-OTHER9 keep: all as you read them. Your finding that removing e 9th/d 15th would make their real mail read FOR ME is accepted as the reason, recorded.
+4. The `re.S` correction is accepted: the newline tolerance comes from `\s*`, the flag is inert; the reading stands. The `</body>` two-space note is accepted (docblockra3.py:88-89 falls back correctly).
+5. The pre-existing duplicate in OTHER_SEATS (`e 6th` ×2) stays as found: harmless to an `in` test, reported not fixed. Correct.
+6. E 10th IS live beside you (building E1 on `s-e9-ks1435`); your matcher classifying its mail FOREIGN is the re-key working. `cd` three times at boot before reading the brief: noted for the record, no further action.
+7. Next ctx QUESTION: after PR 3's push (≥ 55% = wrap cold) or before PR 4's build, whichever comes first. Q-A (KS-1313 → `kamil.kreiser@secuura.ai`) at PR 4 open, read before and after.

@@ -1,0 +1,22 @@
+code_patch2_arms: fixtures in /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/1c489054-92c5-4ad1-a22b-4816938dfcb0/scratchpad/final_cp2
+ARM PASS C1-pass rc=0 :: RESULT: PASS (7/7)
+    C1: PASS A1 output is exactly one fenced ```diff block, nothing outside it
+    C1: PASS A2 diff applies at the tip (strict git apply --check, every section, hunk headers consistent)
+    C1: PASS A3 (code_patch2) touched-file set == the declared set: { Blockchain/Dev/services/demo/src/a.ts , Blockchain/Dev/services/demo/src/b.ts } + { Bloc
+    C1: PASS A3c every '+' line the brief adds is in the declared sections (3 line(s), multiset), and no tip line is re-added as a '+' in any product (A3d)
+    C1: PASS A4 RED-FIRST: the declared test(s) fail with every test section and no product section (2 failed / 4 run; controls green; assertion reds)
+    C1: PASS A5 GREEN-AFTER: every declared test passes with all 2 product section(s) (4 passed / 4 run)
+    C1: PASS A6 whole services/demo suite: no NEW red vs the untouched tip
+    C1: PASS A7 tsc --noEmit for services/demo: rc 0 after the patch (baseline rc=0)
+ARM PASS C2-undeclared rc=1 :: RESULT: FAIL (1 failed) — stopped at A3 (the touched set is not the declared one) :: FAIL A3 (code_patch2) touched-file set != the declared set: touched but UNDECLARED: ['Blockchain/Dev/services/demo/src/c.ts']
+ARM PASS C3-untouched rc=1 :: RESULT: FAIL (1 failed) — stopped at A3 (the touched set is not the declared one) :: FAIL A3 (code_patch2) touched-file set != the declared set: declared but UNTOUCHED: ['Blockchain/Dev/services/demo/src/b.ts']
+ARM PASS C4-green-before rc=1 :: RESULT: FAIL (1 failed) :: FAIL A4 RED-FIRST: the declared test(s) are NOT red before the product sections (rc=0, 0 failed / 4 run) — they do not prove the defect; declared reds green: RED SYN R1 | RED SYN R2
+ARM PASS C5-a3d-per-product rc=1 :: RESULT: FAIL (1 failed) — stopped at A3d :: FAIL A3d CONTEXT MARKED AS ADDITION — '+' line(s) that already exist at a product's tip and are not in the brief: a.ts: export function add(x: number, y: number): number {· — the diff would DUPLICATE 
+ARM PASS C6-a3x-pass rc=0 :: RESULT: PASS (7/7)
+    C6: PASS A3x every declared file's '+' lines are byte-identical to the brief's, in order (SUMMARY declared=4 measured=4 ok=4 diff=0 unmeasured=0)
+    C6: RESULT: PASS (7/7)
+ARM PASS C7-a3x-byte rc=1 :: RESULT: FAIL (1 failed) — stopped at A3x (an added line is not the brief's, byte for byte; the tests are not run) :: FAIL A3x BYTE IDENTITY — DIFF Blockchain/Dev/services/demo/src/__tests__/fix.test.ts brief=14 output=14 '+' line(s); first difference at '+' #6: brief='    expect(add(2, 3)).toBe(5);' output='    expe
+ARM PASS L1 NOT RUNNABLE refused rc=2 :: REFUSED NOT RUNNABLE: the brief's own header says it is NOT RUNNABLE — fix the brief, or pin override_not_runnable=<reason> when the tier it
+ARM PASS L2 2-product brief on code_patch refused rc=2 :: REFUSED CONTRACT: the header declares 2 product file(s) ['Blockchain/Dev/services/originate/src/repositories/documentRepo.ts', 'Blockchain/Dev/services/originate/src/rout
+ARM PASS L3 control: KS-1278 accepted on code_patch2 with the override
+code_patch2_arms: 10 pass, 0 fail (fixtures /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/1c489054-92c5-4ad1-a22b-4816938dfcb0/scratchpad/final_cp2)

@@ -1,0 +1,85 @@
+--- a/Blockchain/Testing/jobs/04-container-trivy.sh
++++ b/Blockchain/Testing/jobs/04-container-trivy.sh
+@@ -115,5 +115,6 @@
+   # KS-1136: a trivy that exited non-zero, or output jq could not read, is a FAILED scan - never a clean image.
+-  if [[ $trc -ne 0 || -z $norm ]]; then
++  # KS-1274: so is a report with neither Results nor ArtifactName - a bare `{}` exits 0 with no scan in it.
++  if [[ $trc -ne 0 || -z $norm ]] || ! printf '%s' "$raw" | jq -e 'has("Results") or has("ArtifactName")' >/dev/null 2>&1; then
+     norm="$(jq -n --arg img "$img" '{image: $img, error: "scan-failed", counts: {}, vulns: []}')"
+   fi
+   [ "$first" -eq 1 ] || printf ',\n' >> "$OUT"
+--- a/Blockchain/Dev/scripts/__tests__/container_trivy_failed_scan_is_loud.test.sh
++++ b/Blockchain/Dev/scripts/__tests__/container_trivy_failed_scan_is_loud.test.sh
+@@ -12,6 +12,6 @@
+ # docker and trivy are NEVER run here (no stack, no daemon): both are STUBS on
+ # a private PATH, in the shape of container_trivy_image_filter.test.sh. The
+-# trivy stub reads $root/fail.txt ("<image> empty|partial" per line) and fails
+-# that image's scan the way the gate measured; every other image gets `{}`.
++# trivy stub reads $root/fail.txt ("<image> empty|partial|bare|nores" per line) and fails
++# that image's scan the way the gate measured (nores: a clean report with no Results); every other image gets a clean `{"Results":[]}`.
+ #
+ # Usage: bash Blockchain/Dev/scripts/__tests__/container_trivy_failed_scan_is_loud.test.sh
+@@ -53,8 +53,10 @@
+ case "$mode" in
+   empty) exit 1 ;;
+   partial) printf '{"Results":['; exit 1 ;;
++  bare) echo '{}'; exit 0 ;;
++  nores) echo '{"SchemaVersion":2,"ArtifactName":"dev-auth:latest"}'; exit 0 ;;
+ esac
+-echo '{}'
++echo '{"Results":[]}'
+ STUB
+   chmod +x "$root/bin/docker" "$root/bin/trivy"
+ }
+@@ -88,6 +90,18 @@
+ got="$rc $(art "$WORK/partial" '[.images[] | .error // "none"] | sort | join(",")')"
+ if [ "$got" = "1 none,scan-failed" ]; then ok "🔴 a partial-output failure on one of two images is recorded as scan-failed, the other stays clean, and the job exits 1"; else bad "🔴 a partial-output failure on one of two images is recorded as scan-failed, the other stays clean, and the job exits 1" "want 1 none,scan-failed, got $got"; fi
+-
++
++# RED - KS-1274: the ONLY image's trivy exits 0 with a bare `{}` (no Results, no ArtifactName).
++build_fixture "$WORK/bare" 'dev-auth:latest' 'dev-auth:latest bare'
++rc="$(run_job "$WORK/bare")"
++got="$rc $(art "$WORK/bare" '.images[0].error // "none"')"
++if [ "$got" = "1 scan-failed" ]; then ok "🔴 KS-1274 a trivy that exits 0 with a bare {} is recorded as scan-failed and the job exits 1"; else bad "🔴 KS-1274 a trivy that exits 0 with a bare {} is recorded as scan-failed and the job exits 1" "want 1 scan-failed, got $got"; fi
++
++# CONTROL - KS-1274: trivy 0.71 OMITS Results from a clean report but keeps ArtifactName - that is still a clean scan.
++build_fixture "$WORK/nores" 'dev-auth:latest' 'dev-auth:latest nores'
++rc="$(run_job "$WORK/nores")"
++got="$rc $(art "$WORK/nores" '.images[0].error // "none"')"
++if [ "$got" = "0 none" ]; then ok "CONTROL KS-1274 a clean report with ArtifactName and no Results stays clean: rc 0, no error"; else bad "CONTROL KS-1274 a clean report with ArtifactName and no Results stays clean: rc 0, no error" "want 0 none, got $got"; fi
++
+ printf '\n  %d passed, %d failed\n' "$pass" "$fail"
+ [ "$fail" -eq 0 ] || exit 1
+ exit 0
+--- a/Blockchain/Dev/scripts/__tests__/container_trivy_exit_code_env_keeps_findings.test.sh
++++ b/Blockchain/Dev/scripts/__tests__/container_trivy_exit_code_env_keeps_findings.test.sh
+@@ -19,6 +19,6 @@
+ # findings image prints a report with 1 CRITICAL + 1 HIGH and, like the real
+ # trivy, exits TRIVY_EXIT_CODE when that is set UNLESS --exit-code 0 is on its
+ # command line; an empty image exits 1 with no output; every other image gets
+-# `{}` and exits 0.
++# a clean `{"Results":[]}` and exits 0.
+ #
+ # Usage: bash Blockchain/Dev/scripts/__tests__/container_trivy_exit_code_env_keeps_findings.test.sh
+@@ -65,5 +65,5 @@
+   exit "${TRIVY_EXIT_CODE:-${cfg:-0}}"
+ fi
+-echo '{}'
++echo '{"Results":[]}'
+ STUB
+   chmod +x "$root/bin/docker" "$root/bin/trivy"
+--- a/Blockchain/Dev/scripts/__tests__/container_trivy_image_filter.test.sh
++++ b/Blockchain/Dev/scripts/__tests__/container_trivy_image_filter.test.sh
+@@ -13,4 +13,4 @@
+ # a private PATH that RECORD what they were asked. `docker images` prints a
+ # fixture list; `trivy image …` appends its last argument (the image) to a
+-# file and prints `{}`. Which images were scanned is read from that record —
++# file and prints a clean `{"Results":[]}`. Which images were scanned is read from that record —
+ # the one observable the job's own exit code and artefact cannot forge.
+@@ -74,5 +74,5 @@
+     printf 'for last; do :; done\n'
+     printf 'echo "$last" >> "%s/trivy_scanned.txt"\n' "$root"
+-    printf "echo '{}'\n"
++    printf "echo '{\"Results\":[]}'\n"
+   } > "$root/bin/trivy"
+   chmod +x "$root/bin/docker" "$root/bin/trivy"

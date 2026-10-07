@@ -11,8 +11,6 @@
 #   C3 FAIL      golden minus b.ts (declared, UNTOUCHED)            -> rc 1, A3 ... UNTOUCHED
 #   C4 FAIL      the red cells are GREEN before the product hunks   -> rc 1, A4 ... NOT red before the product sections
 #   C5 FAIL      a.ts re-adds a line its tip already has             -> rc 1, A3d names a.ts (per-product A3d still fires)
-#   C6 PASS      the golden, input carrying a BRIEF (fences + the new test whole) -> rc 0, PASS A3x (2026-10-07)
-#   C7 FAIL      C6 with ONE byte changed in a new-test line (A3c cannot see it)  -> rc 1, A3x BYTE IDENTITY names fix.test.ts
 #   L1 REFUSE    a header saying NOT RUNNABLE                       -> brief_lint rc 2
 #   L2 REFUSE    a 2-product header on tier code_patch              -> brief_lint rc 2, CONTRACT
 #   L3 ACCEPT    KS-1278 with tier=code_patch2 + override_not_runnable (the control for L1/L2)
@@ -84,34 +82,23 @@ m = f"""--- a/{D}/__tests__/existing.test.ts
 +  'fix.test.ts',
  ];
 """
-r1, r2 = ("expect(add(2, 3)).toBe(5);" if v != "mutbyte" else "expect(add(2,3)).toBe(5);", "expect(twice(4)).toBe(8);") if v != "greenbefore" else ("expect(add(2, 0)).toBe(2);", "expect(twice(1)).toBe(2);")
+r1, r2 = ("expect(add(2, 3)).toBe(5);", "expect(twice(4)).toBe(8);") if v != "greenbefore" else ("expect(add(2, 0)).toBe(2);", "expect(twice(1)).toBe(2);")
 body = ["import { add } from '../a';", "import { twice } from '../b';", "", "describe('code_patch2 synthetic', () => {",
         "  it('RED SYN R1: add adds', () => {", "    " + r1, "  });",
         "  it('RED SYN R2: twice doubles', () => {", "    " + r2, "  });",
         "  it('control SYN C1: add of zeros is zero', () => {", "    expect(add(0, 0)).toBe(0);", "  });", "});"]
 n = "--- /dev/null\n+++ b/" + D + "/__tests__/fix.test.ts\n@@ -0,0 +1," + str(len(body)) + " @@\n" + "".join("+" + l + "\n" for l in body)
 a_dup = a.replace("@@ -1,3 +1,3 @@", "@@ -1,3 +1,4 @@").replace("+  return x + y;\n", "+  return x + y;\n+export function add(x: number, y: number): number {\n")
-parts = {"dupctx": [a_dup, b, m, n], "golden": [a, b, m, n], "mutbyte": [a, b, m, n], "undeclared": [a, b, c, m, n], "untouched": [a, m, n], "greenbefore": [a, b, m, n]}[v]
+parts = {"dupctx": [a_dup, b, m, n], "golden": [a, b, m, n], "undeclared": [a, b, c, m, n], "untouched": [a, m, n], "greenbefore": [a, b, m, n]}[v]
 open(out, "w").write("```diff\n" + "".join(parts) + "```\n")
 PY
 }
-mkinput() { # mkinput <input.json> [brief] — with `brief` the description carries the golden's fences + the new test whole
-  python3 - "$1" "$TIP" "$D" "$SYN" "${2:-}" <<'PY'
+mkinput() { # mkinput <input.json>
+  python3 - "$1" "$TIP" "$D" "$SYN" <<'PY'
 import json, sys
-out, tip, D, syn, withbrief = sys.argv[1:6]
+out, tip, D, syn = sys.argv[1:5]
 sub = "Blockchain/Dev"
-desc = "synthetic code_patch2 arm (no brief text: A3i skips)"
-if withbrief:
-    body = ["import { add } from '../a';", "import { twice } from '../b';", "", "describe('code_patch2 synthetic', () => {",
-            "  it('RED SYN R1: add adds', () => {", "    expect(add(2, 3)).toBe(5);", "  });",
-            "  it('RED SYN R2: twice doubles', () => {", "    expect(twice(4)).toBe(8);", "  });",
-            "  it('control SYN C1: add of zeros is zero', () => {", "    expect(add(0, 0)).toBe(0);", "  });", "});"]
-    desc = ("# KS-0 synthetic brief\n\n## The exact change\n\n```diff\n"
-            f"--- a/{D}/a.ts\n+++ b/{D}/a.ts\n@@ -1,3 +1,3 @@\n export function add(x: number, y: number): number {{\n-  return x - y;\n+  return x + y;\n }}\n"
-            f"--- a/{D}/b.ts\n+++ b/{D}/b.ts\n@@ -1,3 +1,3 @@\n export function twice(n: number): number {{\n-  return n + 1;\n+  return n * 2;\n }}\n"
-            f"--- a/{D}/__tests__/existing.test.ts\n+++ b/{D}/__tests__/existing.test.ts\n@@ -1,3 +1,4 @@\n const KNOWN = [\n   'existing.test.ts',\n+  'fix.test.ts',\n ];\n"
-            "```\n\n## The test\n\n" f"File: `{D}/__tests__/fix.test.ts`\n\n```ts\n" + "\n".join(body) + "\n```\n\n## Output\n\none diff\n")
-d = {"ticket": {"identifier": "KS-0", "title": "synthetic", "description": desc},
+d = {"ticket": {"identifier": "KS-0", "title": "synthetic", "description": "synthetic code_patch2 arm (no brief text: A3i skips)"},
      "repo": {"source_checkout": syn, "tip": tip, "branch": "synthetic", "repo_subdir": sub, "service_dir": "services/demo",
               "shared_pkg_dir": "", "shared_pkg_name": "", "test_runner": "jest (npx jest)"},
      "tip": tip, "source_checkout": syn, "repo_subdir": sub, "service_dir": "services/demo", "shared_pkg_dir": "", "shared_pkg_name": "",
@@ -125,11 +112,11 @@ d = {"ticket": {"identifier": "KS-0", "title": "synthetic", "description": desc}
 json.dump(d, open(out, "w"), indent=1)
 PY
 }
-arm() { # arm <name> <variant> <want rc> <substring> [brief]
+arm() { # arm <name> <variant> <want rc> <substring>
   local name="$1" v="$2" want="$3" sub="$4" W="$T/$1"
   mkdir -p "$W"; git clone -q "$SYN" "$W/clone"
   ln -s "$NM" "$W/clone/Blockchain/Dev/node_modules"; echo "/Blockchain/Dev/node_modules" >> "$W/clone/.git/info/exclude"
-  mkinput "$W/input.json" "${5:-}"; mkdiff "$W/out.md" "$v"
+  mkinput "$W/input.json"; mkdiff "$W/out.md" "$v"
   bash "$CHK" "$W/input.json" "$W/out.md" "$W/clone" > "$W/checker.out" 2>&1; local rc=$?
   local res; res="$(grep -m1 '^RESULT:' "$W/checker.out")"
   local why; why="$(grep -E '^FAIL ' "$W/checker.out" | head -1 | cut -c1-200)"
@@ -142,9 +129,6 @@ arm C2-undeclared undeclared 1 "UNDECLARED"
 arm C3-untouched untouched 1 "UNTOUCHED"
 arm C4-green-before greenbefore 1 "NOT red before the product sections"
 arm C5-a3d-per-product dupctx 1 "A3d CONTEXT MARKED AS ADDITION — '+' line(s) that already exist at a product's tip and are not in the brief: a.ts"
-arm C6-a3x-pass golden 0 "PASS A3x every declared file's '+' lines are byte-identical to the brief's" brief
-grep -E '^(PASS|FAIL|INFO) A3x|^RESULT' "$T/C6-a3x-pass/checker.out" | cut -c1-170 | sed 's/^/    C6: /'
-arm C7-a3x-byte mutbyte 1 "FAIL A3x BYTE IDENTITY — DIFF Blockchain/Dev/services/demo/src/__tests__/fix.test.ts" brief
 
 # ---------------------------------------------------------------- lint arms
 BR="$LM/night/briefs/KS-1278-revoke-atomic"

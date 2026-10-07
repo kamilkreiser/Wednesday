@@ -15,7 +15,6 @@ sequences `night/build_input.sh`, `tasks/bash_patch/build_bash_input.sh`, `tasks
 | `brief_lint.py` | the brief gate round.sh runs first |
 | `queue.md` / `done.md` | the queue (format in its header) / the results (`done.md` is created by the first drain) |
 | `tests/arms.sh` | refusal, endpoint-down, dry-run, busy, queue and ONE real round |
-| `tests/code_patch2_arms.sh` · `tests/bash_patch2_arms.sh` | the multi-file tiers (rung 3): red-proof arms, synthetic repos in scratch |
 | `cache/` (gitignored) | `src/` = the durable cache clone of the Secuura repo; `work/<run-id>/clone` = per-round clones |
 | `state/` (gitignored) | `round.lock`, `queue.lock`, `dry/` inputs, `last_round.json`, `queue.log`, `stale_locks/` |
 
@@ -54,7 +53,7 @@ endpoint is down (round.sh rc 4) or free space on the runs volume is under `SPAR
 
 - a brief dir without exactly one `KS-<n>.md`, or missing a required header line / heading;
 - a brief naming a client other than Secuura (`Client:` line, a `!CODING/<other>/` path, another client's name);
-- a tier other than code_patch / code_patch2 / bash_patch / bash_patch2 (test_only has its own builder and is NOT wired here);
+- a tier other than code_patch / bash_patch (test_only has its own builder and is NOT wired here);
 - a STALE brief: a file it names changed between its `Tip:` and today's develop (override `allow_drift=1`);
 - anything the builders refuse (rc 2), and a code_patch input that did not use the brief as the prompt;
 - a round when the endpoint is down, or another round holds the lock.
@@ -78,26 +77,8 @@ before the disk fills.
   code_patch's checker runs unchanged through A2, then A3 = the declared set exactly, A4 = all test sections with no
   product section must red by assertion, A5 = all product sections green, A6/A7 as code_patch; the predicates are read
   out of code_patch/checker.sh at run time, not copied. Arms: tests/code_patch2_arms.sh.
-  Since 2026-10-07 it also has **A3x** (tasks/code_patch2/brief_bytes.py): per declared file, its '+' lines equal the
-  brief's byte for byte, in order — a NEW test given whole under `## The test` included (A3c's stripped multiset and
-  A3i could not see a one-byte change there; the KS-1278 r3 review byte-compared it by hand). Arms C6/C7.
-- `bash_patch2` (2026-10-07, rung 3) — 1-3 scripts + 1-4 `*.test.sh` suites. The brief HEADER declares them: `File:`
-  lines = products; `Test …:` lines each say `NEW|MODIFIED` and `RED|SUPPORT` (RED = fails with the test edits alone,
-  passes after; SUPPORT = an existing suite edited to the new contract, green both ways; >= 1 RED; a NEW suite is RED).
-  Product hunks go under `## The exact change`, test hunks under `## The test`, every fence line attributable by its
-  `+++ b/<path>`. Select with `Tier: \`bash_patch2\`` or `tier=bash_patch2`; `ref=` is still required (any existing suite
-  in the tests' dir; it may be a declared one). Input: tasks/bash_patch2/build_bash_input2.sh (bash_patch's builder
-  unchanged for the first product + first RED test, then the declared set). Task: bash_patch's task.md with the
-  one-script clauses replaced (tasks/bash_patch2/make_task.py, into the run dir). Checker: tasks/bash_patch2/checker.sh —
-  bash_patch's checker unchanged through B2 (a sentinel test stops it at B3 before anything applies), then B3 = the
-  declared set exactly, B3b sites/A3c/A3d over the products, B3x byte identity, B4 every RED red + every SUPPORT green
-  with all test sections and no product, B5 all green with every product, B6 undeclared suites naming a product's STEM no
-  worse (before/after counts), B7 shellcheck info. Arms: tests/bash_patch2_arms.sh (22). First brief: KS-1274.
 - A brief whose header says NOT RUNNABLE is refused unless pinned `override_not_runnable=<reason>` (recorded in
   round.json); a header declaring more files than the tier's contract is refused.
-- `golden` in round.json / done.md: `BYTE-IDENTICAL` (cmp), else `TREE-IDENTICAL` (2026-10-07: both diffs applied
-  strictly to a temporary index of the tip give the same tree — a differently written but equal diff, e.g. a git-form
-  golden), else `DIFFERS`.
 
 ## Base and node_modules
 
