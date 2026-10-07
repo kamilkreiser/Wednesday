@@ -12,6 +12,15 @@ supersede: replace wholesale; previous = NEXT-PICKUP-FRIDAY.md.pre-0925-rotate-s
 
 **The tree is at `/Volumes/Laptop-DEV/FRIDAY` (the drive, since 2026-09-28).** Quote every path (spaces).
 
+## 🔴🔴🔴 STATE 2026-10-08 (Friday, morning) — READ FIRST; supersedes every block below where they differ
+**Kam asked for a two-project summary → published** https://claude.ai/artifact/GVi9oKgMQUHN4jKxLu3km1 (source: `/private/tmp/…/scratchpad/datasec-status/datasec-status.html` — scratchpad, re-derivable from the two census reports summarised there). Panel: bf-861a2f4375651. **Asked of Kam:** sign M2's PO approval TODAY (C-50; M2 due Thu 8 Oct; no sign-off recorded through C-79); Composer Q-7 SME names; send Paul his guide; send the HP/Terry questions.
+**FRIDAY'S STATED DEFAULT (told to Kam): today, ticket every untracked item and close the stale ones**, unless he says otherwise:
+- HPSM-POC Jira (via an HPSM-POC seat; Friday holds no Jira write): Q-B184-1 sign-in time-out after a restart · Q-B184-2/Q-B182-1..3 warm-ups + keep-alive · the bff.ts Server-Timing measurement · Q-B180-4 plan-size (money, evidence only) · flaky F-22 + web-settings/client-content 5 s timeouts · FSS re-test on a supported device · B166 G1/G2 + B167 ASK HP block · Paul's feedback placeholder. Close HPSMPOC-221 (proven live), 230 (test row), 3–7 (settled by C-35). A Jira-vs-code reconciliation pass (merged work still Backlog).
+- Composer BACKLOG (via a Composer seat): rows for B93 lanes 2, 3a, 3b, 3c, 4 (design doc `Architecture/2026-10-06_policy-target-e8-66q_FOR-KAM.md` §d) · Q-7 · Dependabot PR #18 · Kam's review of the new wording. Update #113 #115 #232–#234 (done/deployed), #217 #218 (ruled C-47/C-48). Stop the 8 `pc-b92-*` containers (Up ~35 h) WITHOUT -v.
+- Cards to Kam: Composer #239 and #245 (layout calls, measured, not yet carded).
+**CORRECTION to the OWED lines below:** "C-44 before 31 Oct" is NOT a Composer item: it is HPSM-POC's dated `braces` audit exception, HPSMPOC-218 (Composer's C-44 is a deploy record).
+**TOOLING GAP found:** `fleet/board_count.sh jira` cannot total a Jira board over 100 issues (Jira pages at 100, so `nextPageToken` always trips the guard). Used Jira's `/rest/api/3/search/approximate-count` + a full pagination instead (HPSMPOC 230 = 230). Shared tooling: claim before fixing.
+
 ## 🔴🔴🔴 STATE 2026-10-07 21:55 (Friday, ctx ~57%) — READ FIRST; supersedes every block below where they differ
 **FLOOR EMPTY** (%0 friday + %1 monitor). Newest Kam row 13:01:57; reconcile 0 at 21:19.
 **LIVE ON HOSTED:** HPSM-POC main **d323981** (B184, C-79): c28343a's three fixes + the first-visit read warm-up (#127). Main is now **15178c5** (#128 = the every-table test, tests only; NOT deployed and needs no deploy). Analysis records main **41d7038** (#100 C-78, #101, #102, #103 C-79). Kam told (bf-b7425e25d066c, bf-fc54d20ec62f4).
