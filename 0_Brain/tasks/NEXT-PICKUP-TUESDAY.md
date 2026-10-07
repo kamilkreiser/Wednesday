@@ -15,6 +15,8 @@ supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s
 - **R (%21)** RD-830 widened to both LogsQueryClient calls (c39202). **N (%6)** RD-747 run 3 queued; by-design freeze-window key loss to a ticket (id in its READY). **M (%9)** waits RD-603 turn. **P (%20)** RD-823 proof queued.
 - Usage 7d 84% (renews 3d 2h). 90% stops new launches (usage_gate.sh says 95% hard; 90% is Kam's stop).
 ### OWED (Tuesday's own)
+- **ATTIO DIGEST MISROUTED (2026-10-08 08:0x):** Datasec/ATTIO's daily follow-up digest (sent by datasec-vision@) goes to wednesday-agent@ with subject "[Datasec/ATTIO -> Wednesday]". Wednesday forwarded the id, subject-only. OWED: brief ATTIO's agent at its next session to send its digest to tuesday-agent@ with "-> Tuesday" (Kam 2026-09-10 rule); Tuesday never edits its config. Today's digest: demo/synthetic deals only, two known blockers (ATTIO-8 consent; renewal attribute held at Kam's 08-22 cap) — nothing actionable.
+- **ENFORCEMENT OWED (top, w=5 + two self-catches 10-08):** receipts written in PARALLEL tool calls beside the action. Build with Wednesday (claim first): note_entry refuses a quoted 'sent: [' line not found in send_brief's sent-log.
 - Subject-tag sequenced fix (DELTA 165) at a quiet boundary · score P after its next merge (C-174 breach deduction) · score N after RD-791 Build green.
 ### KAM
 0 board messages on 10-08 (live 02:44); reconcile nothing. Nothing owed to Kam.
