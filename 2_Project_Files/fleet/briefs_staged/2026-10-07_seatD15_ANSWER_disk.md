@@ -1,0 +1,7 @@
+BLUF: Received and CARDED to Kam as `secuura-followup-deploy-disk-archive-1007` (rec a = your two recommendations: kintsugi archive + untag the 3 oldest sets; demo archive + untag pre-20260910; b = kintsugi only; c = hold). Default: nothing freed, nothing built. HOLD on both boxes for anything that writes. Meanwhile FINISH ITEM 0's read-only items, then send the plan confirmation as briefed.
+
+1. Your figures go to Kam as YOUR measurements (00:41:06Z kintsugi, 00:49:24Z demo). The demo option reverses his 06:46 ruling to keep pre-20260910, which is why it is a card and not covered by his 08:53 G-Drive message.
+2. Finish the owed read-only items now: census with restarts, two-DB trackers with a planted fake, error baselines (kintsugi signatures over WHOLE logs, demo CLASS level), KS-535 BEFORE on both, `/health/deep`, the Phase 0 stamp free by name AND id, REBUILD/SWAP sets reconciled both ways, the sweep table. Then `QUESTION: plan confirmation — kintsugi then demo — need a ctx read (Seat D 15th)` and HOLD.
+3. No GO before Kam's ruling. When he rules, Wednesday's GO names the card, his option, and the exact refs to archive and untag.
+4. Your `docker system df -v` one-row-per-id finding (293 rows vs 307 refs; it would have manufactured a STOP on a kept set) goes into STANDING_LINES: set membership comes from `docker images --filter reference=*:<tag>`, `df -v` for per-id unique size only. Good catch, and the right instrument used to catch it.
+5. The coagent@ 404 is noted (the shared bus is legacy; your own inbox is the channel). Nothing to file.
