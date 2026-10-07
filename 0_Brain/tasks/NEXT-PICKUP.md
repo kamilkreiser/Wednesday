@@ -15,7 +15,15 @@ supersede: REPLACED WHOLESALE 2026-10-07 05:3x by the night seat c1dbe0b9 (boote
 1. `inbox_digest.sh --inbound` WHOLE, + `--all` for `[QUESTION]` rows in the last 12 h, each matched to a later ANSWER. Bodies are fetched by message id and saved to `fleet/briefs_staged/`.
 2. **Morning ticket sweep + receipt** (the standing grant). Value first: kintsugi deployed + swept at d75bfe2 (night of 10-06); gate71 GO; the #1404 merge-in built and verified, held by the freeze; the KS-1436 ticket filed.
 
-## 🔴 00:38 2026-10-08 — R 13th LAUNCHED, READ THIS FIRST
+## 🔴 01:15 2026-10-08 — 70% CHECKPOINT, READ THIS FIRST (supersedes the 00:38 block's NEXT line)
+- FLOOR: %0 wednesday · **%88 Seat R 13th** (ctx 34% at 14:13Z) · %1 monitor.
+- R 13th: plan CONFIRMED (13:59:54Z ANSWER) → **RAISE_BASE b280b74ff07b6aa48c0d1f55b4a931842a0e368c ACCEPTED BY NAME** (14:13:20Z ANSWER; objects transferred into the shared store, bracketed) → it is now building §5d on `feature/skill5d-why-comments-gate73-ra13-1`.
+- **NEXT from it:** `READY FOR READ (Seat R 13th): §5d comments #<n> -> tier 3` → Wednesday reads the diff THROUGH-CODE (comment-only: `git diff -w` shows only comment lines; the three sites :180 / :412 / :1630) in her own clone (fetch the PR head by sha) → reply. Then its ctx QUESTION before R1 KS-1164 → pane ctx → ANSWER. Expect R 14th after 1-2 raises.
+- Its mails so far are in `fleet/briefs_staged/2026-10-08_seatR13_*`. Rule (ledger 10-08): read every seat mail through to NEEDED-BY.
+- Reconcile: nothing to rule. Usage 81% (cloud: raise only). Kam: no rulings since 10-07 13:02.
+- OWED (Wednesday, tooling, unchanged): gate-kit builder ADDENDUM provenance check; hold_ready `--model-tag` for bash_patch; qm second-merge-in mode + mergein `--expect-conflicts` in the kit template.
+
+## 🔴 00:38 2026-10-08 — R 13th LAUNCHED
 - FLOOR: %0 wednesday · **%88 Seat R 13th** (`Secuura/Blockchain-R`, brief `fleet/briefs_staged/2026-10-08_seatR13_5d_raise_prs.md` incl. SEND AMENDMENT; verified at destination 13:37:16Z) · %1 monitor. **R 12th WRAPPED, scored 0.96, pane closed.**
 - **First act: verify R 13th at rung 5/6** (its pane names the brief / its plan mail). NEXT from it: `QUESTION: plan confirmation (Seat R 13th)` → read its WHOLE body incl. NEEDED-BY (ledger 10-08) → read pane ctx → ANSWER (accept its RAISE_BASE by name later at `STATUS: raise base`). Then §5d → READY FOR READ (Wednesday reads it through-code) → raises R1 KS-1164 … R5 KS-1139, each READY FOR QA → a gate kit (batch).
 - Its ctx lines: build < 45%; push 45-64% only on Wednesday's per-step word; 65% ceiling → WRAP COLD. Expect §5d + 1-2 raises, then R 14th.
