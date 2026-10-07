@@ -7,7 +7,7 @@ status: live
 
 # Boot digest — headline + rules of every lesson (open the file when it fires)
 
-Generated 2026-10-07 17:31 from 221 lesson files (997,948 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 13 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
+Generated 2026-10-07 17:52 from 221 lesson files (998,810 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 13 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
 
 ## The T9 SSD is the master — Wednesday must be fully portable
 `2026-07-31_fully-portable-drive.md` · principle · 2026-07-31 · status: superseded — the "T9 is the master" half by [[2026-08-25_one-drive-devmaster-is-master]] (2026-08-25); the portability principle itself still lives
@@ -2798,7 +2798,7 @@ body contains a backtick, a `$(…)`, or a `$VAR` that must survive as text — 
 brief does (commands quoted for an agent, `$1`, config keys). **Use `<<'EOF'`.** Inject the
 few live values (date, time, SHA) afterwards with `sed`/python, or build the body in python.
 
-sections (open the file for these): Extension 2026-09-02 (launcher costume): an unescaped `"` inside a double-quoted bash STRING truncates it silently, and `bash -n` passes
+sections (open the file for these): Extension 2026-09-02 (launcher costume): an unescaped `"` inside a double-quoted bash STRING truncates it silently, and `bash -n` passes · EXTENSION 2026-10-07 (Seat D 16th, Secuura): a QUOTED heredoc protects only the FIRST shell — a remote shell it is piped into still executes backticks
 
 **How to apply:**
 1. `<<'EOF'` for every brief, answer, note block, or lesson body. Live values go in by a
@@ -2812,6 +2812,10 @@ sections (open the file for these): Extension 2026-09-02 (launcher costume): an 
 **The case.** `Launch_Wednesday.command` builds the boot prompt as ONE double-quoted bash string (`INITIAL_PROMPT="…"`). Commit a7834ad (16:27) added a line containing `a "statusline` — the quote CLOSED the string. `bash -n` passed. Four seats (16:30, 17:52, 19:27, 20:29) booted WITHOUT the prompt's tail (the 70% rotate line and the session-end ritual) and nobody saw it. At 20:5x a second unescaped quote (`"go` mid-line 168) made bash parse the block as a command called `with`; under `set -u` the 21:30 seat died at boot with `INITIAL_PROMPT: unbound variable`, the pane fell to bare bash, the watcher typed WAKE lines into it for 33 minutes, and Kam noticed before any mechanism did. Found and fixed by Kam's side-session Claude (9ee732e): every inner quote is `\"`.
 
 **The rule, extended:** the heredoc rule (`<<'EOF'`) and this one are the same defect from two sides — prose carried through a shell that INTERPRETS it. (1) Any prose inside a double-quoted bash string carries `\"` for every quote — and the safer shape is no prose in a double-quoted string at all: a quoted heredoc into a variable (`INITIAL_PROMPT=$(cat <<'EOF' … EOF)`) never has this problem. (2) `bash -n` is a check that cannot see a string boundary moving; the check that CAN is to source the block with dummy vars and assert the variable ENDS where it should (WED-141 puts that into doctor.sh). (3) A seat that dies at boot leaves a bare shell, not the `Context limit reached` literal — the DEAD leg must recognise that shape too (WED-140).
+
+## EXTENSION 2026-10-07 (Seat D 16th, Secuura): a QUOTED heredoc protects only the FIRST shell — a remote shell it is piped into still executes backticks
+**The case.** A script body written with `<<'EOS'` and piped to `ssh … bash` kept its backticks literal locally, then the REMOTE bash ran `` `migrations` `` as a command (`bash: line 9: migrations: command not found`). It was cosmetic (an `echo` label), but the same shape inside a command would run.
+**The rule, extended:** count the shells a body passes through. `<<'EOF'` stops ONE layer. Text bound for a second interpreter (ssh, `bash -c`, `docker exec sh -c`, a `.sh` written for a box) carries no backticks or `$(…)` in prose, or escapes them for that layer. Any `command not found` printed by a write-or-echo step means a layer interpreted it: read the remote output before trusting the step.
 
 
 ## A tap is a pointer, not a message — every coordination tap has a mail behind it, sent in the same action

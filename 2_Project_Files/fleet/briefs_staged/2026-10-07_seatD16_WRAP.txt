@@ -1,0 +1,120 @@
+# SESSION WRAP — Seat D 16th, Secuura Platform K (pane `Secuura/Blockchain-D` %83)
+# 05:22:55Z → 06:5xZ. WRAPPED COLD on your ANSWER of 06:42:33Z.
+
+## BLUF
+**Kam's card (a) demo half is SPENT and verified. Demo is NOT deployed, and that is a measurement I
+was sent to take, not a failure.** The 3-image probe returned **2,590.7 MiB/image** of settled-`df`
+disk against the **559.5** threshold — **4.63× over** — so the remaining 26 stayed unreleased.
+**Nothing swapped. Nothing pruned. Nothing deleted beyond the 33 authorised refs.** Demo runs
+`d75bfe2deb80` with its rollback intact and every container on its `:pre-20261007` image, proven
+per service.
+
+## WHAT EXISTS NOW BECAUSE OF THIS SEAT
+* **On G-DRIVE:** `2026-10-07_demo_pre-20260910/` — `pre-20260910.tar` **1,479,959,552 B**, sha256
+  `5910cab10c077d5f60761371c1d5b4de7aee714555ff2c02277f9788f68325ff`, plus `MANIFEST.json`,
+  `refs.txt`, `refs_and_ids.txt`. Restore is one `docker load`. Retention is Kam's "clear after a
+  month or so" — **a review, not an automatic delete.**
+* **On demo:** 29 images re-tagged `pre-20261007` (fp `0f1aa7adf14a692e`); 33 refs of
+  `pre-20260910` gone; the tree at `69f2045af2a4` by content; `REVISION` **state=IN PROGRESS**
+  saying in terms that the containers are on the old images; **3 of 29 images rebuilt and left
+  unswapped** (`313c8dbac577`, `e956a1d47579`, `4676131fd172`) — not lost, a resumed run builds 26.
+* **In the repo tree (no git involvement at all):**
+  `5_Project_History/HANDOVER-seatD16-demo-deploy.md` (**408 lines, sha256/16 `e4d46e2f66ccd623`**),
+  a history entry **at the TOP** of `5_Project_History/history.md`, and
+  `5_Project_History/2026-10-07_seatD-16th/{boot,deploy}/`. Build clone
+  `deploy-clones/seatD16-69f2045af2a4` **STAYS**.
+* **On origin: NOTHING.** 0 commits, 0 branches, 0 pushes, 0 refs written anywhere, 0 ticket
+  writes, 0 comments, nothing to Peter, Stuart or any human.
+
+## `df -m` BEFORE → AFTER, all three volumes
+  volume      at my ITEM 0      at wrap        delta   explanation
+  demo              13,197       13,645     **+448**   +8,229 freed by the untag, −7,772 spent by
+                                                       3 images, −9 drift. Settled at both ends.
+  G-DRIVE        3,776,922    3,775,511      −1,411   **exactly the archive** (1,411.4 MiB)
+  DevMASTER        678,544      677,873        −671   the build clone, which stays
+Demo's intermediate peak: 21,425 MiB after the untag, the highest free this box has had in the
+record. The build spent 7,772 of it in **17 minutes and two and a half images.**
+
+## THE TWO FINDINGS I MOST WANT CARRIED
+1. 🔴 **`fp()` has two definitions and the brief named the wrong one.** The prescribed
+   `phase0_remote_d15.sh` returns `4369c278b041b6ff` / `01dd34e25f12de96`; the record says
+   `969f8db925918256` / `513d475d9af77d2d`. Seven variants swept over one box state; only the
+   **ID-only** form hits both. Comparing the two across the untag would have mailed **"a kept set is
+   not intact"** — the hardest STOP in the brief — **immediately after an irreversible delete, on a
+   box where nothing had moved.** Your ruling is in both my tools, and the handover says in terms
+   that any cross-generation fingerprint claim must name which definition it means.
+2. 🔴 **I refuted both of my own explanations of the disk regime, by measurement, and did not
+   replace them with a third.** Lock churn runs **backwards** (D 14th's 323 MiB/image build changed
+   **34** lockfiles and 28 manifests against my **5** and 1); and a GC ceiling cannot hold **40**
+   cache records older than 30 days, 11 dated 2026-07-11…20, on a box with **no `daemon.json` at
+   all**. The gap between **323** and **2,590** MiB/image on one box is **still open**. The one
+   candidate left — demo's cache was warm for `d75bfe2`'s deps and has never seen `69f2045`'s,
+   because D 15th built that content on kintsugi — **needs a reader allowed on both boxes and I did
+   not adopt it.** That is the most valuable thing this round produced and it is unresolved.
+
+## TWELVE INSTRUMENT FAULTS, ALL MINE, ALL CAUGHT BEFORE A CLAIM RESTED ON THEM
+The three that generalise beyond this round:
+* **A check that could not fail.** ssh in a scalar `$SSHX`; zsh does not word-split one, so ssh
+  never ran and **all four refusal arms returned rc 127** — and nonzero rc is exactly what a working
+  refusal looks like. Every arm block I ran afterwards leads with a **positive control that the
+  invocation reaches the box.**
+* **Control output read as production data, twice.** My error classifier swallowed `errbase`'s own
+  normaliser fixtures and invented 3 classes and 4 lines on a container with **no errors**; and a
+  `grep '\.env'` matched the capture's **header line** and printed a false ".env CHANGED — STOP".
+  Both fixed with anchored patterns **and a parse-count assertion**, which is now how I parse
+  everything.
+* **`pgrep -f` counted its own argv — and the self-match was hiding the real thing.** "2 compose
+  build procs" was the pattern matching its own command line; the one genuine process is an
+  **`exec`, not a build**, and it is **not mine**: a stray unbounded `until` loop (pid 2179589)
+  polling the DB every 5 s for one document's txHash, left by an earlier session. **I reported it
+  and deliberately did not kill it** — not my process, not my authority. It is in the handover and
+  it is worth someone closing.
+Also: `rc=$?` after a pipe measures the pipe (twice); a **vacuous** inverted control
+(`pre-20261006` also has 13 exclusive ids, so "the counts differ" could never discriminate); my
+`tomib()` self-test failed and **the error was my hand-typed want**, not the converter; and **a
+backtick span inside a QUOTED heredoc still executes — on the REMOTE shell** (you accepted this one
+for the standing lesson).
+
+## CORRECTIONS TO THE RECORD, for the next brief
+* **`ADMIN_USER_PASSWORD` reads PRESENT-EMPTY in auth, not `ABSENT`.** Safe either way; the brief's
+  expectation is wrong and a seat asserting ABSENT strictly would stop on it.
+* **Error baseline is 26 classes / 8 containers / 37,847 lines** (mine). D 15th's 25/37,567 was
+  00:49Z; demo-service alone drifted +278 in five hours. Compare AFTER against 26.
+* **`classify_errbase_d14.py` cannot parse `errbase_d15/d16.sh` output** and printed
+  **"TOTAL error lines=0 TOTAL CLASSES=0" at rc 0** on a box with 26 live classes. `classify_d16.py`
+  asserts a non-zero parse first.
+* **Demo's sampler is NOT starved this round:** 181 samples / 728 s = **4.02 s** at a 4 s setting,
+  against D 14th's ~8 s. Do not carry the starvation figure unqualified.
+* **ALL-IN is withdrawn as a forecast** (double-counts via originate/migrations' identical layer
+  sets, and understates because cache totals exclude image-store layers). Use the settled `df` delta.
+* Container names on demo are **`secuura-*`, not `dev-*`**; the front door's 200 catch-all re-proved
+  (`/health/deep-zzz-nonexistent` → 200, 7-byte body).
+
+## HOLDS HONOURED
+Refused the launcher's "pull latest if safe" — in `2_Project_Files` I ran **read verbs only** and
+made **no ref write of any kind** (no fetch, not even `--dry-run`); it is still on `develop` at
+`69f2045af2a4`, 0 ahead / 1 behind, with its 17 untracked files untouched, because it belongs to the
+co-tenant sessions. Refused the SessionStart hook's `POST /api/seen`. No `az`. **Never SSH'd to
+kintsugi.** No production, no money. No secret read, printed, or edited — every KS-535 value is a
+sha256/16 and the redis Cmd array was never printed. No `-f`, no `--remove-orphans`, no `down`, no
+`-v`, no `rm`, **no prune of any kind**.
+
+## WATCHERS: 0 LIVE, PROVEN
+`pgrep -f 'inbox_watchd16.sh' | wc -l` = **0**, beside a **firing control** (`pgrep -f bash` = 14)
+so the zero is a reading and not a dead `pgrep`, and a negative control reading 0. macOS `pgrep` has
+no `-c` and I never wrote `|| echo 0` on a count. The watcher **fired on real events twice** —
+06:16:21Z (poll 2, 46 s) on your Gate B ANSWER and 06:42:59Z (poll 3, 93 s) on your cache-probe
+ANSWER — so it is proven on live mail, not only on synthetic arms. All build pid files hold dead
+pids; buildkit history shows all three builds `Completed`; `results.tsv` has 3 rows and there is no
+REFUSED or FAILED marker.
+
+## OPEN FOR D 17th (full list in the handover's RESUME block)
+**26 images unbuilt and the blocker is CAPACITY — do not start a build before Kam rules.** The
+regime puzzle is open and its two obvious explanations are refuted, so do not re-run them blind.
+`pre-20261006` is authorised by nothing. A prune is counterproductive here. phase4's arm-3 defect
+is unfixed and unfiled by instruction and **phase4 never ran** this round. The SAME-ID branch is
+unexercised a **fifth** round. **Every §5f row stays `live sweep owed` — no sweep ran, because
+nothing was deployed to sweep.**
+
+Mail this seat: **6 sent, 4 received**, counted from the API.
+
