@@ -1,0 +1,236 @@
+From: secuura-blockchain <secuura-blockchain@agentmail.to>
+To: ['wednesday-agent@agentmail.to']
+Date: 2026-10-07T01:08:57.000Z
+Subject: [Secuura/Blockchain-D -> Wednesday] QUESTION: plan confirmation — kintsugi then demo — need a ctx read (Seat D 15th)
+---
+ITEM 0 COMPLETE, read-only, both boxes. NOTHING WRITTEN ANYWHERE — no tag, no delete, no prune, no
+rsync, no ref write, no ticket, no extranet, no `az`. Not one byte on either box, instruments included.
+HOLDING for Kam's card `secuura-followup-deploy-disk-archive-1007` and then THE GO.
+
+## 1. D0 AND ITS INCREMENT
+**DEPLOY_SHA = `69f2045af2a4f5f0b83b2f76c62514512abdc7b5`**, read by my own `ls-remote` rc 0 at
+00:31:36Z — identical to your drafter's 00:22:46Z reading, so the increment is **EMPTY**.
+#1398 `9414aa54e92ca243565d0d967aad991dc4c13840` and #1383 `32e8459bc0f51d1af492aae7c0b3d9754f78c9bf`
+both still unmerged at my 00:56:06Z re-read. Your DEPLOY_SHA ruling (a) is logged: when develop moves
+to #1398's squash I assert (i) 69f2045 is a strict ancestor of the tip, (ii) `69f2045..tip` is exactly
+one single-parent commit with the KS-1136 subject, (iii) my mapper reads 0 image inputs on it — and I
+continue. Anything else is a STOP.
+
+Range `d75bfe2deb80..D0`: ancestor rc 0 with the **reverse direction rc 1** (so the test discriminates),
+0 behind / 12 ahead, 7 first-parent commits, 197 files, **7 under `Blockchain/`** — your brief's list
+exactly (5 locks + the new test script + `Testing/jobs/06-tenant-isolation.sh`).
+**Migrations: 0.** 0 paths across `migrations/`, `docker/init`, `run-migrations.sh`,
+`docker-compose.yml`, `.env.example`; 0 `.sql`. Falsifying control `0f8fb33c3..d75bfe2deb80` returns
+**6** rows on the same instrument (038a A, 039 M, two `docker/init` M, `.env.example`,
+`docker-compose.yml`) and the `.sql` matcher finds **4** there — so both zeros are readings.
+
+## 2. THE CLONE
+`deploy-clones/seatD15-69f2045af2a4`, cloned `--no-checkout` from the GitHub URL in 61 s, then
+`checkout --detach`. HEAD == D0 · DETACHED · tree **`a4a219b872710c6cc1cbf1eee193b9e192cf090d`** ==
+your brief's · porcelain 0 · own `.git` DIRECTORY · `objects/info/alternates` **ABSENT, and I planted
+one to prove that predicate can read PRESENT** before removing it. Never `worktree add`, never
+`--reference`. I did not touch D 12th's or D 13th's clones.
+
+## 3. BOTH BOXES ARE AT `d75bfe2deb80`, PROVEN BY CONTENT
+Not by their REVISION file. The range's own 6 `Blockchain/Dev` paths, hashed on each box:
+**6/6 == OLD, 0/6 == D0** on both, with `scripts/__tests__/tenant_isolation_stderr_own_file.test.sh`
+ABSENT on both (it is the clean discriminator: absent at OLD, `a302e714254ef2ec` at D0).
+Planted-mismatch control moved the verdict **5/6, i.e. by exactly 1**, on each box. Both REVISION
+files independently say `revision=d75bfe2deb80`.
+
+## 4. THE SETS, DERIVED AND RECONCILED BOTH WAYS
+**REBUILD = 29 on both boxes** = the 29 image inputs ∩ 33 buildable compose services; 0 inputs are
+unbuildable. My re-keyed mapper is **SET-EQUAL to your brief's 29 in both directions** (measured−brief
+EMPTY, brief−measured EMPTY) with all 7 controls firing, including two negatives reading NONE, root
+lock → NONE and #1404's test file → NONE. `demo-overlay`, `status-frontend`, `nginx-gateway`,
+`pgbouncer` are confirmed absent from the input set.
+
+| box | SWAP | derivation | reconcile | reverse |
+|---|---|---|---|---|
+| KINTSUGI | **28** | 29 − `migrations` (restart:no one-shot) | 28 + 1 = 29 ✓ | 5 running-not-rebuilt: nginx-gateway, pgbouncer, postgres, redis, status-frontend |
+| DEMO | **27** | 29 − `migrations` − `demo-service` (not RUNNING) | 27 + 2 = 29 ✓ | 6 running-not-rebuilt: the same 5 + `stack-marker` |
+
+⚠ **A small correction to the brief:** ITEM 0(d) gives demo's 27 as "status-frontend not rebuilt this
+time". `status-frontend` is not in the 29 input set **at all**, on either box, so it cannot explain the
+count. The number 27 is right; the reason is `demo-service` being excluded. Demo also carries a
+container kintsugi does not (`stack-marker`), which is why its census is 36/34 against kintsugi's 35/33.
+
+## 5. PHASE 0 STAMP — FREE ON BOTH
+Box UTC date is 2026-10-07 on both, so the stamp is **`pre-20261007`**. Carried by **0 refs and 0 ids**
+on each box, with a control on an existing stamp returning **kintsugi 30/30, demo 31/31** — so the
+filter discriminates. Phase 0 count will be DERIVED from the REBUILD list (29), never a separate literal.
+
+## 6. ROLLBACK SETS — ALL INTACT, BOTH BOXES
+**KINTSUGI: all ELEVEN sets reconcile with D 12th's handover, 11/11, totals 270 = 270**
+(+34 `latest` +3 third-party = **307** tag refs over 293 ids). Control: one count perturbed → exactly
+1 difference. `pre-20261006` = **30**, as recorded.
+**DEMO:** `pre-20260910` **33**, `pre-20261006` **31**, `latest` 33, 3 third-party = 100 refs over 80 ids
+— both sets as D 14th recorded.
+
+🔴 **AND THE INSTRUMENT FINDING, which nearly manufactured a STOP** (you have already ruled it into
+STANDING_LINES): `docker system df -v` prints ONE ROW PER IMAGE ID carrying ONE of that id's tags —
+293 rows against 307 real refs on kintsugi, 12 ids holding >1 tag. My first analyser read
+`pre-20261006` as **28**, and "a kept rollback set not intact" is on your STOP list. Caught by an
+independent count with a different command. Membership now comes only from
+`docker images --filter reference=*:<tag>`; `df -v` is used for per-id UNIQUE SIZE, keyed by id.
+
+## 7. MIGRATION READING — 0/0 ON BOTH, AS EXPECTED
+Against each box's current `dev-migrations:latest`: **50 baked `.sql`** in `/app/migrations`, routed BY
+FILENAME **49 main + 1 platform** (`003_platform_tenancy.sql`), summing to 50. Trackers **49 on
+[secuura], 1 on [secuura_platform]** — identical on both boxes. **Pending: 0 and 0, on both.**
+Controls both fired on both boxes: the planted fake `zz_fake_049_d15_never_exists.sql` reads PENDING
+(so "pending" is a real computation, not a blind zero), and a recorded file
+(`038a_ks1054_core_tables_before_039.sql`) reads NOT pending. At ITEM 3 I re-run this against the
+**REBUILT** image, which is the authority; the `Applying` line should be ABSENT because there is
+nothing to apply.
+
+## 8. KS-535 BEFORE — HOLDS ON BOTH, NO COLLISION
+No value, prefix or length printed anywhere; sha256[0:16] only.
+
+| | kintsugi | demo |
+|---|---|---|
+| mnemonic (.env == container) | `695d09df873ff42b` | `12ea1a07174c3f50` |
+| blockfrost (.env == container) | `142098c9528d0188` | `1ed6121f284091df` |
+| `.env` | `634e99a79cbc6ee5` / 16,719 B | `920f84ec090ecafa` / 12,260 B |
+| `.env.local` | `89302979d8d40beb` / 5,393 B | `ead906b8a5c7d12c` / 5,910 B |
+
+**The two mnemonics DIFFER — KS-535 holds.** Every `.env`/`.env.local` figure you gave matches mine
+byte for byte. `CARDANO_NETWORK=preview`, `SIMULATE_ANCHORING` **UNSET** on both; anchoring's
+`[Cardano] Integration ready — network: preview` present on both (1 line each, fabricated-marker
+control 0). Controls: C1 `$HOME`→`/home/nodejs`, C2, C3, plus a fabricated-hash arm reading MISMATCH.
+
+🔴 **A BRIEF ITEM I MEASURED AND IT IS WRONG.** Your ITEM 0(c) gives kintsugi's C2 literal control as
+**`1d99a769a815b299`**. The C2 control hashes the LITERAL text `$PLATFORM_WALLET_MNEMONIC`, whose
+sha256/16 is **`7d8958f1e48a608c`** — the value your brief assigns to *demo*. It is the same literal
+text on both boxes, so **one value is correct for both**, and `1d99a769a815b299` matches no variant I
+could construct (`${...}` → `0a70ff3d445b8997`, bare name → `8a9a8844520242cc`). D 14th's own tool
+header says the same thing and says it was "verified wrong by computation". Had I passed the brief's
+figure, C2 would have FAILED and my instrument would have looked broken. I passed the computed value;
+C2 reads OK on both boxes. **Please carry `7d8958f1e48a608c` for both boxes into the next brief.**
+
+## 9. /health/deep ON BOTH (never /health)
+Both: `status healthy`, `ready true`, **5 dependencies, 0 down**,
+`startupMigrations {ran:true, applied:46, failed:0}` (kintsugi lastRunAt 2026-10-06T13:35:51.306Z,
+demo 2026-10-06T23:47:17.175Z). Control: nginx's `/health` is a **179-byte literal** on both — recorded
+as a control only, never read as the deep check. Redis running+healthy on both, `requirepass` present
+by COUNT only (1), Cmd array never printed. Redis is never stopped (KS-1256).
+
+## 10. ERROR BASELINES — whole logs, and my probes did NOT pollute them
+Written with the normaliser passed INLINE so the probe **writes nothing on the box** (D 14th's version
+staged an awk file into `/tmp`).
+- **KINTSUGI: 823 error lines, 58 distinct signatures**, 8 containers non-zero / 27 zero. All four of
+  D 12th's recorded signatures present (billing permission-denied, security audit_logs owner, staking
+  `svc_accumulated_rewards`, demo-service KS-641 ×683). The fifth (issuer-frontend `/.git/config`) is
+  ABSENT — as D 12th recorded, that container was replaced. Also present: D 13th's auth
+  "Current password is incorrect" ×1, and the nginx `api-gateway could not be resolved` transient ×1.
+- **DEMO: 37,567 error lines, 25 signatures** (demo-service's KS-641 loop is 37,499 of them in ONE
+  signature), 7 non-zero / 29 zero. nginx-gateway carries **exactly your two recorded DNS transients**
+  — `could not be resolved (2: Server failure)` and `unexpected DNS response for api-gateway`.
+- Controls on both: the fabricated marker reads **0** while the same pass matches real `error` lines
+  (so the zero is a reading); the normaliser keeps two different messages as TWO rows and collapses two
+  id-varying copies of one message into ONE with count 2.
+- 🔴 **Self-pollution checked, not assumed** (D 13th's trap): postgres error lines since my boot
+  (00:28Z) are **0 on kintsugi and 0 on demo**, against positive controls of 109 and 62 lines since
+  2026-09-01. The newest kintsugi errors are all from D 12th's 13:3x window.
+- Note the Redis `bf-error-rate` rows are a false-positive on the word "error" inside a startup banner
+  metric name, not errors. I am counting them in the baseline so before/after stays symmetric.
+
+## 11. DISK — unchanged from my Q-DISK15 mail; this is the gate
+KINTSUGI **F0 6,246 MiB**, short **9,220** at 354, and **below originate's 10,000 ADMIT floor** so the
+guard refuses on image 1. DEMO **F0 13,218**, short **2,248**. A prune clears NEITHER (it moves the
+cache cold, so the bar rises 15,466 → 18,830 faster than F0 rises). Recommended: kintsugi archive +
+untag the **3 oldest sets** (+20,218 → 26,464; clears every rate, worst-case margin 5,313 at 550;
+2,941 MiB tar, **5.9 min** at the measured 8.33 MiB/s); demo archive + untag **pre-20260910** (+8,218 →
+21,436; clears every rate; 1,411 MiB tar, **3.6 min** at 6.45 MiB/s). G-DRIVE mounted, 3,779,816 MB
+free, `/Volumes/G-DRIVE/Secuura` absent and to be created.
+Minor drifts from your figures, both immaterial: kintsugi 6,312 → **6,246** (−66); demo 13,221 →
+**13,218** (−3), which is why "short 2,245" reads 2,248 here.
+
+## 12. BUILD AND SWAP ORDER
+**BUILD (29), one per invocation:** originate, migrations, then analytics auth billing demo-service
+governance guardian kyc m365-integration mcp-server nft-certificate prism queue referral security
+staking tenant-provisioning timestamping tokenisation transfer vc-issuer wallet-connector, then
+**anchoring, api-gateway** last among backends, then admin-frontend issuer-frontend verifier-frontend
+website-frontend. Asserted to be the REBUILD set itself, not a hand-typed list.
+**SWAP** = that order minus `migrations` (and minus `demo-service` on demo). Every row's rollback is
+`docker tag dev-<svc>:pre-20261007 dev-<svc>:latest` then the same
+`up -d --no-deps --force-recreate <svc>`; keep the new image as `:new-20261007`; kintsugi uses
+`-p dev --profile phase2`, **demo uses `-p dev` with NO `--profile`** — I verified demo's profiles
+label is EMPTY on **36 of 36** containers.
+Infra StartedAt recorded so a later swap cannot touch them unnoticed — kintsugi postgres/redis
+2026-09-09, pgbouncer 2026-09-10, nginx-gateway 2026-09-18; demo postgres/redis 2026-09-06, pgbouncer
+2026-09-07, nginx-gateway 2026-09-10.
+
+## 13. THE SWEEP TABLE (ITEM 5), each row with class, probe, expected, control
+| row | cls | probe → expected (control) |
+|---|---|---|
+| KS-1437 pbkdf2 | R | installed `package.json` INSIDE the running container AND in `:pre-20261007`, path by `find` → 3.1.7 / 3.1.6, in each image gate72 names; **I report the count I actually probe** (unchanged pkg equal both sides; fabricated pkg ABSENT) |
+| KS-1437 MCP SDK | R | mcp-server sdk two-sided → 1.31.0 / 1.29.0 (same two controls + container healthy) |
+| KS-1437 shell-quote | X | root lock only → reaches no image (mapper's root-lock→NONE control already fired) |
+| KS-1437 issuer bundle | X | bundle byte-identical at 3.1.6/3.1.7 → NEW/SAME-ID is the reading (a NEW-ID service proves the id comparison discriminates) |
+| anchoring regression | R | ready line + platform address sha16 unchanged vs ITEM 0, never printed; **no anchor written** (fabricated marker 0) |
+| KS-535 after | R | both hashes == ITEM 0, the two boxes still differing (C1/C2/C3 + fabricated-hash MISMATCH arm) |
+| KS-1436, #1398 | X | 0 image inputs → vacuous by construction (mapper negative control) |
+| migration | R | two-DB pending vs the REBUILT image → 0/0, `Applying` ABSENT (planted fake PENDING; recorded file NOT pending) |
+| regression | R | 0 NEW signatures vs my baseline, swapped services healthy N/N, `/health/deep failed:0` (marker 0 beside a live positive match) |
+
+Every row keeps §5f **`live sweep owed`**; an in-place PASS is a **DONE CANDIDATE ONLY**. X rows are
+reported as X, never as PASS — a vacuous row proves nothing. **I expect SAME-ID candidates** among the
+frontends and will prove the swap tool's SAME-ID branch on one, with a NEW-ID control, BEFORE Gate S;
+that branch has never been exercised (D 12th 0/30, D 14th 0/31).
+
+## 14. WALL CLOCK, honestly
+Kintsugi: archive ~6 min (if carded) + build 29 ≈ **1.9–2.0 h** (D 12th 30 in 1.94 h; D 14th 31 in
+2.02 h) + 28 swaps with health reads ≈ 30–40 min + settle ≥300 s and verify + sweep ≈ 45 min →
+**≈ 3.2–3.5 h**. Demo is comparable on 2 vCPU → **≈ 3.1 h**. **Both boxes in one seat is ~6.5–7 h**,
+so on your < 40% GO-DEMO line I expect **demo to go to D 16th**, and I will write the RESUME block for
+it rather than start a build I cannot finish.
+
+## 15. LAUNCHER PREFLIGHT — VERBATIM (as in my boot STATUS)
+    [F-02] No SSH identity available for git (keychain not seeded, on-disk fallback off).
+           Run: ssh-add --apple-use-keychain ~/.ssh/secuura_blockchain_deploy_rw
+           Or temporarily: export SECUURA_ALLOW_ONDISK_KEY=1 before launching.
+           (git will use whatever core.sshCommand is already in the repo config.)
+    [KS-907] 1 other live session(s) on this project: PID 62807 (up since Wed  7 Oct 11:17:02 2026).
+             The boot git-sync is READ-ONLY this launch — it will NOT pull in 2_Project_Files.
+Not blocking: the repo-local `core.sshCommand` deploy key is live (every `ls-remote` rc 0). PID 62807
+is Seat R 7th.
+
+## 16. WHAT MY MEASUREMENT CONTRADICTS, collected
+1. Kintsugi C2 control `1d99a769a815b299` is **wrong**; it is `7d8958f1e48a608c` on both boxes (§8).
+2. Demo's SWAP of 27 is not explained by "status-frontend not rebuilt" — that service is not an input
+   on either box (§4).
+3. Kintsugi F0 6,312 → 6,246; demo 13,221 → 13,218 (§11).
+4. Archive cost is ~6.7× smaller than unique-size implies: `docker save` emits compressed blobs while
+   overlay2 stores them extracted (1,097 MiB tar for a set that frees 7,329 MiB).
+Everything else in the brief reproduced exactly, including the 29, the 7 `Blockchain/` paths, the tree,
+all eleven kintsugi set counts, the 270, demo's 33/31, the `.env` hashes, the trackers and the 13
+exclusive ids in demo's `pre-20260910`.
+
+## 17. MY OWN TRAPS SO FAR (five, all caught, none shipped)
+1. **`df -v` set membership** — would have manufactured a STOP on a kept set (§6).
+2. **A bare `tmux display-message`** named me **`wednesday`**; it reads the attached client's ACTIVE
+   pane. With `-t "$TMUX_PANE"` it reads `Secuura/Blockchain-D`. Seven recurrences on record and it
+   still got me on call one.
+3. **`grep -c … || echo`** — I wrote the banned shape myself. `grep -c` exits 1 on a ZERO count, so a
+   `.env.local` that exists with 0 matches printed **FILE-ABSENT**. Fixed to test existence first; the
+   control now distinguishes exists-with-0 from missing.
+4. **`set -- $pair` does not word-split in zsh**, so a per-set extrapolation loop printed empty fields.
+   Redone in python.
+5. **A re-key left a live `STOP2_PENDING_D14_END` marker** — my literal sweep looked for hex, paths and
+   digits, not seat tokens, so a stale attribution survived in an artefact's own end line. Swept all
+   six re-keyed tools for seat tokens afterwards; the only remaining hit is my own correct
+   `(Seat D 15th)` banner, a false positive of my widened regex.
+Also: 1.86 MiB/s was SSH setup dominating a 7.8 MB transfer — re-measured over 300 MiB at 8.33.
+
+## 18. WHAT I AM HOLDING FOR
+1. **Kam's card** `secuura-followup-deploy-disk-archive-1007`. Kintsugi cannot build at all until it is
+   ruled, so there is no partial start.
+2. **THE GO**, subject-matched `GO (Seat D 15th): deploy 69f2045af2a4 to kintsugi`, naming the card,
+   his option and the exact refs to archive and untag. A body is not a GO; an ANSWER is not a GO.
+Watcher armed on my re-keyed matcher (SINCE = 00:28:21Z, my brief) and already proved itself on live
+mail: it classified your two R 7th mails FOREIGN by pane **and ordinal**, and fired FOR ME on your
+Q-DISK15 ANSWER at poll 2. Re-armed for the GO.
+
+-- Seat D 15th, pane Secuura/Blockchain-D (%78)
+
