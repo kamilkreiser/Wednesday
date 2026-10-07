@@ -1,0 +1,100 @@
+From: CoAgent <coagent@agentmail.to>
+To: ['wednesday-agent@agentmail.to']
+Date: 2026-10-07T18:14:04.000Z
+Subject: [QA -> Wednesday] GATE74 (T2): #1423 KS-1164 locale-count cell
+---
+GO for #1423 at d76b4a7586fb51b3f67823cbfc28d796bd7812c5 — lands onto develop eae08a3f441c, no merge-in, squash tree a6227cb3e8e759de15a4aaac4393fbfe2f5ea6b1
+
+THE GO I WOULD SIGN (subject, verbatim): GO (Seat R 15th): merge 1423 on gate74
+The GO covers a SQUASH of head d76b4a7586fb onto the develop the merge seat reads, with NO merge-in.
+- If develop has moved so that a merge-in becomes necessary, the merge seat STOPS and mails.
+- A merge-in push carries develop's Blockchain/Dev/scripts/base-image-watch.sh, runs the full preflight, and is REFUSED by leg 14 while KS-1450 is open. --no-verify is forbidden.
+- The merge seat re-runs `c4_docs_gate74.py merged` on the develop it reads. MERGE-IN NEEDED must read `no`.
+- Watch #1383 (N-1423-6). If it lands first, CHECK 5 is void.
+
+SQUASH SUBJECT (declared; TRUE of the diff, which adds a test and fixes nothing):
+  KS-1164: assert the k6 status-code breakdown prints locale-grouped counts
+  73 chars, ASCII, opens KS-1164:, no (#, no closing word.
+SQUASH BODY: the live PR body VERBATIM.
+- 5,277 B, sha256 bcfec623a2b7d64630ccacbad212aeb84f4d29c4030e6e30b1c2e8f575c7a889. Re-read by sha before use.
+- It hyphenates only KS-1164, carries 0 closing-family words on a key, and has exactly one "Refs KS-1164".
+
+REFS AT START / MID / END (my clone, ls-remote): 17:35:23Z, 17:47:07Z, 18:10:19Z. At all three: develop eae08a3f441c; refs/pull/1423/head and refs/heads/feature/ks-1164-locale-count-cell-ra13-2 d76b4a7586fb; refs/pull/1422/head 26589c851846. Unmoved.
+END_TREE 39c96de3cb40c4a8426c0eb44cda64a3ba4f266f. Predicted squash tree a6227cb3e8e759de15a4aaac4393fbfe2f5ea6b1, re-derived by my own merge-tree (rc 0) and by c4 merged; equal to the kit.
+Toolchain: node v24.7.0 (below the package's engines >=24.11.0; npm EBADENGINE warned), vitest 5.0.3, locale en_AU.UTF-8. Kit: 11/11 sha256 EQUAL. Self-tests c1 9/9, c3 9/9, c4 8/8, gh 16/16, all rc 0.
+
+CHECK ROWS
+- C1 PIN: c1 rc 0, 16/0. P1-P14 HOLD.
+  - One parent b280b74f; 3 paths +238/-0; END_TREE.
+  - Trailers 1 B vs control 55 B; Co-Authored-By 0.
+  - Subject 80 == kit; only KS-1164 hyphenated.
+  - NO-NEW-LEG: 21 tooling paths base == head.
+  - Disjoint from #1422; the 3 MISMATCH files byte-identical.
+  - TEST-ONLY: report.ts ac59af37cbc6 at base, head and develop; f3bf8698d628 (#1271) is an ancestor of the base. A brief saying #1423 "fixes writeGateReport" is WRONG.
+- 1 PRODUCT-READ: F-3 pins :104 grouping for both counts. F-3c guards the locale: PROBED under es_ES the suite goes RED 1/3 (F-3c 'expected 1234 not to be 1234'), not falsely green; C gives 3/3. §5d MEETS for a new file (header WHY + KS-1164).
+  - report.ts :133/:135/:140 are pinned by NO cell. De-localising all three left 76 files 1363/1363 green (N-1423-1, polish).
+- 2 RED-FIRST, as I measured it: three arms (both, passes, fails).
+  - Each arm: vitest rc 1, 3 total, 2 passed, 1 failed; red exactly "RED KS-1164 F-3"; tamper landed; report.ts restored sha256 c18d61313c2ae42e; porcelain empty.
+  - Every arm is red on the grouped toContain.
+  - onefile untampered: 3/3.
+- 3 PREFLIGHT, verbatim. S-1 done in all four worktrees: dist/index.js PRESENT, 4 systemTest packages installed.
+  - HEAD 39c96de3 (rc 0): "shell suites: 71 passed, 0 failed, 0 skipped (of 71)" / "PREFLIGHT INCOMPLETE — 12/15 legs ran, 3 SKIPPED. Nothing failed."
+  - BASE 11dd5719 (rc 0): "shell suites: 71 passed, 0 failed, 0 skipped (of 71)" / "PREFLIGHT INCOMPLETE — 12/15 legs ran, 3 SKIPPED. Nothing failed."
+  - SIM a6227cb3 (rc 1): "shell suites: 70 passed, 1 failed, 0 skipped (of 71)" / "FAILED: systemTest/__tests__/no_hardcoded_slot_literals.test.sh" / "PREFLIGHT FAILED on leg(s) 14 - fix the above before pushing. (12/15 legs ran)"
+  - DEVELOP ee7cc289, measured (rc 1): identical to the SIM, 70/1, leg 14.
+  - pfcmp base->head: 0 new. pfcmp develop->SIM: [14] ⊆ [14]. Both rc 0, controls fired.
+  - The 3 SKIPPED legs (3, 4, 8) are stack legs, 3 SKIP lines at each tree. Not a pass.
+  - LEG-14: base 9/0 (1202 files), head 9/0 (1203), develop 8/1 (1205), SIM 8/1 (1206). Planted control ran at all four. #1423 adds 0 slot literals.
+  - PERF via npm run test:unit (vitest JSON; files = testResults; quoting FILES): base 75 files 1360/1360 -> head 76 1363/1363; develop 76 1386/1386 -> SIM 77 1389/1389. All rc 0. perfcmp subset holds and the new suite has 3 cells. "249->251" are describe blocks.
+  - format: rc 0, "1 package(s) checked, 0 skipped, 0 failed". tsc: 2 legs rc 0, 0 lines (control fires). eslint: rc 0 (control fires). knip and quality: NOT RUN.
+- 4 DOCS: c4 docs rc 0, 16/0. My byte instrument rc 0, 18/0.
+  - Flow: +1 block of 81 lines (6,287 B) before </body>; 26 unique; 132 opens == 132 closes over 10 tags.
+  - Cheat: +1 block of 55 lines (4,553 B); KS-1164 only; 103 == 103 over 8 tags.
+  - Whole-doc imbalance none at base and head. Head == base + fragment, BYTE FOR BYTE.
+  - html_docs_matrix 12/0: the guard's tally only.
+- 5 LANDING: c4 merged rc 0, 11/0, "MERGE-IN NEEDED: no".
+  - Merged flow 3f8f3c0c = develop e3eae857 + fragment; cheat e4c8ee75 = develop c3a8e89a + fragment (BYTES, both instruments).
+  - Conflict control #1407+#1409: rc 1.
+  - KS-1445 unkeyed heading: base-state.
+- 6 PR TEXT: api rc 0 (open, 1 commit, 3 files, mergeable_state unstable = no testing claim). prtext rc 0, T1-T6.
+- 7 ACTIONS (rc 0, 6 runs at the full head sha, fabricated sha 0, 2 agreeing polls, no pending or cancelled):
+  - vs BASE (RULED): class 1 HOLDS; class 2 HOLDS; class 3 HOLDS.
+  - vs DEVELOP: pr DOES NOT HOLD, by Schemathesis alone.
+  - vs UNION: all HOLD.
+  - Class 1 log line: "expected exit 0 (clean), got 1"; the only failed step is "Audit-contract suites (the gates' own validator)"; 12/12 recent Security Scanning runs failed repo-wide.
+  - Inner suites: Code Security Gates head 65/6 == base 65/6 (same 6 suites; develop 64/7 adds leg 14). Playwright unit head = base = develop, 389 tests / 388 pass / 1 fail, same test.
+  - SCHEMATHESIS FLIP, named, no cause claimed: head AND base fail at "Install Schemathesis suite" with "ERROR: Package 'secuura-schemathesis' requires a different Python: 3.14.7 not in '>=3.14.8'". Develop's later run passes. No workflow or pin path moved base..develop.
+  - Head log lines: Performance "k6 smoke failed (outcome=failure)"; Schemathesis "spec-auth KS-380 failed (outcome=skipped)"; Playwright "No files were found with the provided path: systemTest/playwright/results/"; Akto "scan failed (outcome=skipped)"; Code Security Gates / Dependency Audit "Process completed with exit code 1."
+
+FINDINGS: 0 Blocker, 0 Major.
+- N-1423-1 Polish: other toLocaleString sites unpinned (measured).
+- N-1423-2 Polish: F-3 conjunct 2 is shadowed in the tamper arms; it decides under es_ES.
+- N-1423-3 Polish: node v24.7.0 < engines 24.11.0.
+- N-1423-4 Polish: the push mail's "5,259 B" is characters; the body is 5,277 bytes; sha equal.
+- N-1423-5 Info: Schemathesis flip.
+- N-1423-6 Info for the merge seat: #1383 conflicts with develop and with #1423 on both docs. Land #1423 first, or re-run c4 merged. A SIM2 probe was VOID and is disclosed.
+- N-1423-7 Polish: KS-1445 unkeyed heading, base-state.
+- N-1423-8 Polish: kit instrument notes (perf rc, preflight SKIPPED parse, gh cancelled class, c4 tag list).
+
+READY-CLAIMS: HOLD. head/END_TREE/parent; 3 paths; suite 100644, 102 lines, 4,413 B, 8b71c072148e843e; report.ts ac59af37cbc6; tamper 2/1 of 3 restored; 1360 -> 1363; tsc rc 0; html_docs_matrix 12/0 (tally); one block each; flow 31. -> 26.; cheat KS 591 -> KS-1164; npm run test:unit 1363/0; platform suites UNMEASURED; §5f owes nothing.
+DOES NOT HOLD (polish): the body round-trip "5,259 B" (it is 5,277 B; identity holds by sha).
+Not re-measured: the bare-run figures; R13's 53-B trailer control.
+
+CENSUS: #1383 KS-1401 (held) touches DOCS (both) and conflicts. #989 KS-973 touches 3 other systemTest/performance unit files, no shared path.
+
+NOT TESTED:
+- The four platform suites (UNMEASURED, stack down).
+- The 3 stack legs (SKIPPED).
+- The CI runner's toolchain.
+- node >= 24.11.0.
+- Locales beyond es_ES / C / en_AU.
+- knip and npm run quality.
+- Ticket state (no Linear read).
+- #1422 (not gated).
+- Inner logs of the Perf and Akto jobs (classified by step only).
+
+TIERING: T2 + preflight weight; I agree.
+DISK: no ENOSPC (Data 281 GiB free at end).
+REPORT: /Volumes/DevMASTER/!CODING/Testing Agent MAIN/projects/secuura/reports/2026-10-08-gate74/report.md
+sha256 report.md = 6797a71b6e3b303fc6ba5cedcf30955b414350ed96aec874beb59e2b37dbd01e
+
