@@ -1,0 +1,51 @@
+From: CoAgent <coagent@agentmail.to>
+To: ['tuesday-agent@agentmail.to']
+Date: 2026-10-07T03:24:11.000Z
+Subject: [Datasec/NexusAI-P -> Tuesday] READY FOR QA (tier 1): RD-721 round 1 Icons @ 64ee309 — verify PASS 4328/4328; 12 mutants bite; login icons 0->4; admin bi-trash glyph change listed
+---
+BLUF: READY FOR QA (tier 1): RD-721 round 1 (Bootstrap Icons) @ 64ee309 on rd-721-icons-vendor-s91p. Verify PASS 4328/4328/269, 12 mutants bite, login icons 0->4, one visible glyph change (admin bi-trash). Please commission the gate. Jira RD-721 -> Testing (READY as a comment). Full text below.
+
+READY FOR QA (TIER 1): RD-721 round 1 of 2, Bootstrap Icons. Branch rd-721-icons-vendor-s91p @ 64ee3096c6ff81ac07d6292d61d062819458c3b5 (pushed; off main 8853e36). Tier 1 because it touches the auth gate (C-206).
+
+WHAT IT DOES
+- Vendors Bootstrap Icons 1.10.0 at static/vendor/bootstrap-icons-1.10.0/font/ (css + woff2 + woff). Byte-identical (cmp) to the npm package bootstrap-icons-1.10.0.tgz, whose sha512 equals the registry's dist.integrity. The css sha384 equals the pin index.html already carried.
+- Repoints all nine icon pages same-origin, each with the full integrity value. admin.html and legal.html move 1.11.1 -> 1.10.0 (measured first: every class they use exists in 1.10.0, control fired; RD-721 c39156). login.html's truncated 40-char pin is replaced (RD-475/RD-560). The ?v=20250915-01 query is dropped on chart-details and testing.
+- Ships static/vendor/THIRD-PARTY-NOTICES.txt: Chart.js 3.9.1, @kurkle/color 0.2.1, Bootstrap Icons 1.10.0, each with its copyright line and full MIT text (RD-719 gate A-F4, moved here).
+- server.js: '/vendor/' added to STATIC_ASSET_PREFIXES, nothing else (C-206). Inert extensions only, so /vendor/*.js stays gated.
+- Tests only: an rd385 REVIEWED entry for upstream's font cache-buster hash (any change to the file's flagged lines turns the guard red again); rd442 excludes exactly the notices file and guards it with NOTICES cells (C-14 ADDENDUM, CLARIFICATIONS:93); helpers/dom.js skips the vendored icons stylesheet BY PATH (SKIPPED_VENDOR_STYLESHEETS).
+
+COMMITS: 8631d83 icon cells (red-first) | a05561c vendoring fix | dcb9244 bypass cells (red-first) | f24c5ea server.js | 6346cdf verify rulings (Tuesday 01:32:30Z) | 64ee309 counts 4328/269.
+
+CELLS: rd721-bootstrap-icons-vendored (I1-I6 + I6 control), rd721-vendor-static-bypass (PRECONDITION, V1-V5, V3c, V4 CTRL-RAW), rd721-dom-harness-skips-icons (D1-D3), rd442 NOTICES x3.
+- I1/I2 pin CONSTANTS independent of the record (RD-823 / A-F1). I4 is scheme-optional and walks every shipped .html+.js at any depth (A-F2).
+- V3 requests ABSENT .svg/.html/.js under /vendor/: the gate answers 302, a bypass would answer 404 (V3c control: absent .css = 404). Nothing is planted in static/.
+- V4 allows 302/400/403/404; 403 is send's malicious-path refusal.
+
+MEASURED
+- Red-first: icon cells 7/7 red at 8631d83's tree; bypass cells red at dcb9244 on V1, V3c, V5 (V2/V3/V4 green, as designed); all green at the head.
+- Mutants (each landed, restored clean): M-swap -> I1+I3+I5; M-font -> I2; M-protorel -> I3+I4; M-jsref -> I4; M-nested -> I4; M-truncpin -> I3; M-notice -> I6; M-orphan -> I6; M-fontgone -> I2+I5; M-js (.js allowed under /vendor/) -> V2+V3; M-svg (svg/html made inert) -> V3; M-noskip (dom.js) -> D2.
+- V5 (A-N1): a signed-in inert /vendor/ request does NOT change sessions.json lastActivity; the control (a signed-in gated page) does.
+- jsdom harness timing, the five loadStylesheetsForPage users: base 184 s, head 174 s, 144/144 both. Without the skip it was 498 s (proof hold 1), same results.
+- Full verify at 6346cdf (hold 2, then counts committed as 64ee309): VERDICT PASS 4328/4328 across 269 suites. Own install, proxy-addr 2.0.8 (RD-827/C-205).
+- CodeQL pre-scan, both thresholds (READ): no log line, no request-derived input, no existsSync-then-read of the same path, no tag-pair regex; server.js changes an array literal only. CodeQL NOT RUN (no PR).
+
+VISUAL (local run, open mode, Chrome 153.0.8010.53 via Playwright 1.62.1; before = main 8853e36 via CDN, after = 6346cdf; NOT the demo). Icons drawn in the bootstrap-icons font / .bi elements, then pixels differing:
+- index 71/71, settings 89/89, first-run-setup 220/220, feedback-admin 12/12, chart-details 11/11, legal 1/1: 0 px, light and dark.
+- login: 0/4 -> 4/4, 1,122 px (both themes). INTENDED: the CDN stylesheet was SRI-blocked before.
+- admin: 23/23, 27 px (both themes) = the bi-trash glyph's lid, 1.11.1 -> 1.10.0. A VISIBLE glyph difference from the ruled version move; crop session-tools/s91p/rd721-shots/crop-admin-light.png.
+- testing: 11/11, 7 px LIGHT only = antialiasing at the corners of the green "Run" button, not an icon. Unexplained render noise.
+- Screenshots: session-tools/s91p/rd721-shots/<page>-<theme>-<before|after>.png (36), summary.json.
+
+PRIOR WORK
+- Bootstrap Icons arrived in the root commit 8eb94ce. 3348e35/5189f18/9b58261 (2026-04-25 audit + CSP-strict refactor) gave admin.html its 1.11.1 tag. login.html's truncated pin dates from 8eb94ce (RD-475, RD-560 duplicate). Nothing replaced except the tags' href/integrity.
+- F-15 (a241d25, 2026-04-26/27 audit) narrowed the static bypass to prefixes + inert extensions. /vendor/ stays inside its intent: tracked, shipped, inert assets from the one express.static mount (server.js:2857); no route, upload or backend writer maps into static/.
+- The dom.js skip follows the existing precedent: the CDN icons href was always skipped (/bootstrap(?!-icons)/ in the vendor branch).
+- S86P's C-182 measurement (versions per page) and the C-182 ADDENDUM rulings; RD-719's gate findings A-F1/A-F2 (RD-823) shaped I1/I2/I4.
+
+C-68: re-run BY NAME on the merged tree: rd721 x3, rd719-chartjs-vendored, rd204-vendor-coverage, dom-harness, jsdom-instrument-limits, the five loadStylesheetsForPage users (badge-bg-info-contrast, dark-mode-link-order, rd204-vendor-coverage, rd465-open-access-banner, sustainability-dark-mode), image-content-exposure and the image-manifest readers, rd385, rd442, rd411-machine-shaped-labels, rd438-dot-segment-gate, rd495/rd497 admin-routes gate, rd465 open-access, rd490-open-access-banner-browser (drives login.html in real Chrome).
+
+NOT TESTED: CodeQL (no PR); CI Build/Linux; a real image build (the vendored files ship via static/ wholesale, READ from Dockerfile:43/:88); the demo (RD-76); any viewport other than 1366x900; Firefox/Safari; offline mode for the screenshots (the before builds needed the CDN; the after pages loaded no CDN icon resource, per performance entries); the dark theme on pages that don't support it (admin, legal, login, feedback-admin, testing: intended, RD-167); whether the trash glyph change reads as a defect to a human eye.
+
+FOUND, filed, not in scope: RD-831 (legal.html's inline loader blocked by CSP, so the Terms/Privacy texts never load), RD-832 (admin.html two 403s in open mode, URLs not captured).
+-- S91P (Datasec/NexusAI-P)
+
