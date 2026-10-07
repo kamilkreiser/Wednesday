@@ -15,7 +15,14 @@ supersede: REPLACED WHOLESALE 2026-10-07 05:3x by the night seat c1dbe0b9 (boote
 1. `inbox_digest.sh --inbound` WHOLE, + `--all` for `[QUESTION]` rows in the last 12 h, each matched to a later ANSWER. Bodies are fetched by message id and saved to `fleet/briefs_staged/`.
 2. **Morning ticket sweep + receipt** (the standing grant). Value first: kintsugi deployed + swept at d75bfe2 (night of 10-06); gate71 GO; the #1404 merge-in built and verified, held by the freeze; the KS-1436 ticket filed.
 
-## 🔴 01:15 2026-10-08 — 70% CHECKPOINT, READ THIS FIRST (supersedes the 00:38 block's NEXT line)
+## 🔴 02:0x 2026-10-08 — R 13th WRAPPED; R 14th brief DRAFTING — READ THIS FIRST
+- FLOOR: %0 wednesday · %1 monitor. **No agent live.** R 13th scored 0.95 (handover `HANDOVER-seatR13-2026-10-07.md` aa60c7f322c54e87, opens "FOR R 14th").
+- **Raised tonight, OPEN:** **#1422** §5d comment-only (tier 3; Wednesday's through-code read: 0 non-comment lines of 9; Actions 6/6, 0 new; **owes a MERGE**: route it to a merge seat with a tier-3 GO; the gate73 builder cannot parse a tier-3 GO, so the merge seat needs a tier-3-shaped GO/addendum or tool). **#1423** KS-1164 (tier 2; **NO pre-push preflight ran**, because the hook is path-gated to `Blockchain/Dev`; Actions were 3/6 at the wrap) → needs a QA gate, batched with R 14th's raises.
+- **R 14th brief drafter RUNNING** (commissioned 02:0x) → `fleet/briefs_staged/2026-10-08_seatR14_raise_r2_r5.md` + `0_Brain/reference/2026-10-08_seatR14-brief/DRAFTER_REPORT.md`. R 14th = raise R2 KS-1274 (`35.`), R3+R4 KS-1410 (`36.`), R5 KS-1139 (`37.`, Q-5D1139 (a)); NO merge, NO §5d. On its return: read the brief WHOLE, rule its questions in a send amendment, then `brief_and_launch.sh --to "Secuura/Blockchain-R" --subject "LAUNCH BRIEF (Seat R 14th): …" --body-file …` (cloud: raise). **A rotation kills the drafter: re-commission from the 02:0x note line.**
+- After R 14th's READY: one batched QA gate kit (#1423 + R 14th's PRs; tiers per the ruled questions) → merges on Wednesday's GO, #1422 in the same merge round.
+- Usage 83%. Kam: no rulings since 10-07 13:02.
+
+## 🔴 01:15 2026-10-08 — 70% CHECKPOINT (superseded by the 02:0x block)
 - FLOOR: %0 wednesday · **%88 Seat R 13th** (ctx 34% at 14:13Z) · %1 monitor.
 - R 13th: plan CONFIRMED (13:59:54Z ANSWER) → **RAISE_BASE b280b74ff07b6aa48c0d1f55b4a931842a0e368c ACCEPTED BY NAME** (14:13:20Z ANSWER; objects transferred into the shared store, bracketed) → it is now building §5d on `feature/skill5d-why-comments-gate73-ra13-1`.
 - **NEXT from it:** `READY FOR READ (Seat R 13th): §5d comments #<n> -> tier 3` → Wednesday reads the diff THROUGH-CODE (comment-only: `git diff -w` shows only comment lines; the three sites :180 / :412 / :1630) in her own clone (fetch the PR head by sha) → reply. Then its ctx QUESTION before R1 KS-1164 → pane ctx → ANSWER. Expect R 14th after 1-2 raises.
