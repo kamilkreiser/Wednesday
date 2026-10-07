@@ -20,8 +20,8 @@ supersede: REPLACED WHOLESALE 2026-10-08 05:3x by the overnight seat (booted 02:
 ## R 15th — what Wednesday owes it, in order
 1. ~~plan confirmation~~ **DONE 05:3x** (ANSWER 18:34Z: confirmed, ctx 23%, no pull; c4 to be re-run with `--expect-tree`). **NEXT from it: `QUESTION: ctx read (Seat R 15th)`** after its step 1 (builder + m7_squash + m1_go_complete + provenance_ra15, all arms), carrying the c4 11/0 + wrong-tree numbers → pane ctx → ANSWER → GO 1422.
 2. ~~GO 1422~~ **SENT 05:50** (`fleet/briefs_staged/2026-10-08_seatR15_GO_1422.md` + `…_ADDENDUM_1422.md`, 0 new failures; 13/13 builder parsers; values verified in Wednesday's clone). R 15th ctx 32% at 18:49Z.
-3. After its `STATUS: merged 1422`: **verify AT SOURCE in your own scratch clone** (tree == T', one parent == D, subject 74, 3 paths, 0 trailers, the PR's `merged` field).
-4. **GO 1423** (`GO (Seat R 15th): merge 1423 on gate74`): T' = the squash tree on the NEW develop (gate74 kit: `d6ee60d91e2f…` if #1422 landed on eae08a3f); flow/cheat = the MERGED blobs re-read on the real D; subject `KS-1164: assert the k6 status-code breakdown prints locale-grouped counts` (73); body `merge_inputs/1423.squash_body.DRAFT.txt` (5,277 B, bcfec623…, re-hash). ADDENDUM: Actions vs **base** (Q-SCHEMA74); name the develop-only Schemathesis flip without a cause. Verify at source.
+3. ~~#1422~~ **MERGED → develop 4afefcbfb06445f0f9a8a7c1f3e29e414b2909d3, verified at source by Wednesday (06:0x).**
+4. ~~GO 1423~~ **SENT 06:09** (`…_seatR15_GO_1423.md` + `…_ADDENDUM_1423.md`; T' d6ee60d9 on 4afefcbf; Actions vs base 0 new). **NEXT: its `STATUS: merged 1423` → verify AT SOURCE** (tree == d6ee60d91e2f, one parent == 4afefcbfb064, subject 73, 3 paths, 0 trailers, PR `merged` field) → its WRAP → score, `pane_close.sh %91`.
 5. R 15th then wraps; its handover carries R 16th's traps.
 
 ## 🔴 THE BLOCKER — develop red on pre-push leg 14 (KS-1450)
