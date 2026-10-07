@@ -3694,5 +3694,12 @@
   "project": "Friday",
   "ts": "2026-10-07T19:53:48.858646+11:00",
   "text": "Datasec / HPSM-POC: everything is live tonight. No action needed.\n\nWhat went live: the three fixes for this morning's 'narrative could not be loaded' error, on the hosted site since 19:24. Reads retry once on a timeout, file downloads get 30 seconds, and the database keeps warm connections.\n\nWhat I measured: the warm connections held through a 13-minute idle, where before they fell away within 5 minutes. Reads after the idle took a third of a second at most at the server. I checked the site myself: healthy, new version served, old one gone.\n\nThe AI draft: one executive summary on the Banksia sample, first press, no retry. It came back in 20 seconds, inside the 25-second limit, and replaced the old 'took too long' message. It is waiting for review on that page.\n\nStill slower than it should be: in the browser those same reads take up to about a second. The extra time is in the web app on the small shared hosting plan. Before I ask you about a bigger plan, which costs money, I will have it measured properly. Separately, the very first visit after a restart is slow; a warm-up fix for that is next.\n\nReady for Paul tomorrow."
+ },
+ {
+  "role": "wednesday",
+  "seat": "Kamils-MacBook-Pro.local",
+  "project": "Friday",
+  "ts": "2026-10-07T21:54:53.195176+11:00",
+  "text": "Datasec / HPSM-POC: one more fix is live on the hosted site, ready for Paul. No action needed.\n\nWhat changed: after a restart, the site now warms up the home page and narrative page reads before anyone arrives. The first visit after tonight's restart had no time-outs and no 'could not be loaded'. The summary took 0.4 seconds, where before it timed out at 10, and the narratives 0.4 seconds, where before they took 4. Only the very first customer list was still slow, at 2.4 seconds, once.\n\nOne thing to know: the first sign-in attempt in the 2 minutes after a restart failed with 'Sign-in did not complete' while the server was busy starting up. Trying again worked. The site is not restarting before your session, and I am not deploying anything else until after Paul's walkthrough, so you should not see it. If you ever do, just sign in again.\n\nThe proper fix for that sign-in timeout is queued for after the walkthrough. I checked the site live myself: healthy, new version served."
  }
 ]
