@@ -1,8 +1,8 @@
-# Ornith candidates — derived 2026-10-07 22:32 from 275 KS Backlog/Todo tickets (read-only, unpaginated)
+# Ornith candidates — derived 2026-10-08 06:34 from 279 KS Backlog/Todo tickets (read-only, unpaginated)
 
 A CENSUS for the coordinator to brief from, easy → hard (Kam 2026-09-15 16:40 / 18:19). A ticket here is a candidate, not a task: read it, read the file at the tip, write `night/briefs/<id>.md`, then queue it. Auth-shaped titles are excluded (LAST); Peter/Stuart tickets and PR-attached tickets are excluded outright.
 
-## T1 services (vitest, one file) — 12
+## T1 services (vitest, one file) — 13
 - KS-683 (P2) Anchor-status standoff: a consumer repolls anchors K reports as terminally faile — `services/anchoring/src/index.ts`
 - KS-1168 (P3) userRepo.ts: ILIKE search on encrypted PII columns can never match — :1017 and : — `services/auth/src/repositories/userRepo.ts`
 - KS-1190 (P3) api-gateway meetsVerificationLevel fails open on an unknown REQUIRED level: an o — `services/api-gateway/src/services/enforcement.ts`
@@ -15,6 +15,7 @@ A CENSUS for the coordinator to brief from, easy → hard (Kam 2026-09-15 16:40 
 - KS-746 (P3) Security events carry no tenant at all — KS-743 had to gate them platform-only,  — `services/security/src/index.ts`
 - KS-915 (P3) A clean stack has no supported way to obtain its first privileged account — `services/auth/src/routes/auth.ts`
 - KS-1145 (P4) ks949 suite coverage (KS-950 / KS-962, #973): ID3's capture half has no size ass — `services/api-gateway/src/startup-migrations.ts`
+- KS-1448 (P0) Security: POST /api/notifications still creates a notification for ANY userId (B — `services/api-gateway/src/routes/notifications.ts`
 
 ## T2 tooling (systemTest/*, one file) — 1
 - KS-1393 (P4) Repo hygiene: 31 spec files under Blockchain/Dev/tests that no Playwright config — `systemTest/playwright/playwright.config.ts`
@@ -125,7 +126,7 @@ A CENSUS for the coordinator to brief from, easy → hard (Kam 2026-09-15 16:40 
 - KS-770 — not a doc edit — the body is a review-stream test pass for Peter; the docs/ path came from a MENTION, not an edit target (updated 2026-09-28)
 - KS-889 — a measurement/ruling ticket, not a patch (updated 2026-09-06)
 
-## EXCLUDED by predicate — 194
+## EXCLUDED by predicate — 197
 - KS-1000 — has a PR attached
 - KS-1003 — auth-shaped title (LAST, Kam 16:40)
 - KS-101 — on Peter/Stuart
@@ -204,7 +205,6 @@ A CENSUS for the coordinator to brief from, easy → hard (Kam 2026-09-15 16:40 
 - KS-1357 — auth-shaped title (LAST, Kam 16:40)
 - KS-1358 — auth-shaped title (LAST, Kam 16:40)
 - KS-1366 — on Peter/Stuart
-- KS-1367 — on Peter/Stuart
 - KS-1372 — auth-shaped title (LAST, Kam 16:40)
 - KS-1377 — names no product file (after basename/docs/route resolution)
 - KS-1379 — names no product file (after basename/docs/route resolution)
@@ -236,6 +236,10 @@ A CENSUS for the coordinator to brief from, easy → hard (Kam 2026-09-15 16:40 
 - KS-1441 — names no product file (after basename/docs/route resolution)
 - KS-1442 — on Peter/Stuart
 - KS-1443 — names no product file (after basename/docs/route resolution)
+- KS-1446 — on Peter/Stuart
+- KS-1447 — names no product file (after basename/docs/route resolution)
+- KS-1449 — names no product file (after basename/docs/route resolution)
+- KS-1450 — names no product file (after basename/docs/route resolution)
 - KS-188 — on Peter/Stuart
 - KS-239 — on Peter/Stuart
 - KS-263 — names no product file (after basename/docs/route resolution)
