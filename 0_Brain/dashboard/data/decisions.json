@@ -28166,5 +28166,40 @@
    "CARD secuura-ks888-validate-usage-write-failure",
    "CARD secuura-ks723-whose-to-raise-1005"
   ]
+ },
+ {
+  "id": "nexusai-rd774-free-form-sql-1008",
+  "client_project": "Datasec/NexusAI",
+  "title": "RD-774: NexusAI runs SQL text sent by the browser — choose what happens to it",
+  "bluf": "I need you to pick one option below. A High CodeQL alert (#70, SQL injection) cannot close while NexusAI runs SQL that arrives in a request. Seat R measured two ways in (read-only, main 41c5a47): (1) POST /api/test-custom-query, from the unlinked testing.html page, admin-only when sign-in is enforced but open to anyone in open mode; (2) POST /api/risk-conditions stores client-sent SQL with NO role check, so any signed-in viewer (or anyone in open mode) can store a query the server runs later. Not measured: whether any live customer depends on stored SQL (KQL is the primary path).",
+  "default_action": "If you do not rule: nothing in the product changes, #70 stays open, and seat R files the missing role check on POST /api/risk-conditions as its own ticket (board searched first). Tuesday re-raises this card at the next morning summary.",
+  "options": [
+   {
+    "key": "b",
+    "label": "Server builds the SQL itself (templates)",
+    "detail": "The server derives SQL from the condition text with its existing template generator and never accepts SQL from a request. Closes both paths and #70; risk alerts keep working. One tier-1 build round."
+   },
+   {
+    "key": "a",
+    "label": "Remove request-supplied SQL entirely",
+    "detail": "Drops testing.html's custom-SQL box and stored-SQL execution; KQL only. Closes #70; removes a feature."
+   },
+   {
+    "key": "c",
+    "label": "Keep it, harden it",
+    "detail": "Admin-only role check on both writers in every mode, read-only DB connection. #70 stays open (dismissing it is yours alone)."
+   }
+  ],
+  "recommended": "b",
+  "ts": "2026-10-08T08:53:41.580568+11:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "CARD attio-pro-vs-free",
+   "CARD secuura-erasure-door-absolute-form-bypass",
+   "CARD nexusai-rd521-legal-text-free-offer",
+   "CARD nexusai-rd430-settings-response-form"
+  ]
  }
 ]
