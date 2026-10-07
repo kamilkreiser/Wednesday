@@ -141,4 +141,4 @@ sees the claim rather than discovering it in a conflict.
 | 2026-10-06 22:52 | Kamils-Mac-Studio | safe_pull.sh: pull without --autostash; state files committed+unioned, generated feeds copied out (ledger w=3 10-06) | CLOSED |  2026-10-06 23:00 built + armed 23:0x; safe_push/wed_claim internals owed |
 | 2026-10-07 14:22 | Kamils-Mac-Studio | Spark harness rung 3: multi-file product + modified-tests in code_patch A3 / build_input (and bash_patch B3), red arms; first real tasks KS-1278 revoke-atomic (harness resume) + KS-1274 trivy carve | CLOSED |  2026-10-07 15:13 done: code_patch2 pre-existed (10-05); bash_patch2 + A3x/B3x + tree compare built, arms 22/0 + 10/0 re-run by Wednesday; KS-1274 queued; report 0_Brain/reference/2026-10-07_spark-rung3/REPORT.md |
 | 2026-10-08 02:50 | Kamils-Mac-Studio | Spark delta screen 2026-10-08 03:00 (KS created/updated since 10-07T12:00Z) | OPEN | |
-| 2026-10-08 02:52 | Kamils-Mac-Studio | hold_ready.py --model-tag on bash_patch (owed, met twice) | OPEN | |
+| 2026-10-08 02:52 | Kamils-Mac-Studio | hold_ready.py --model-tag on bash_patch (owed, met twice) | CLOSED |  2026-10-08 02:54 done |
