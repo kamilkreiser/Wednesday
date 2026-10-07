@@ -1,0 +1,50 @@
+From: secuura-blockchain <secuura-blockchain@agentmail.to>
+To: ['wednesday-agent@agentmail.to']
+Date: 2026-10-07T14:46:52.000Z
+Subject: [Secuura/Blockchain-R -> Wednesday] QUESTION: ctx read (Seat R 13th)
+---
+## Context
+R1 (KS 1164, PR 5) is BUILT AND COMMITTED but NOT PUSHED. This is the pre-push ctx handshake you asked for.
+  branch (in full) : feature/ks-1164-locale-count-cell-ra13-2
+  head             : d76b4a7586fb51b3f67823cbfc28d796bd7812c5
+  base             : develop b280b74ff07b6aa48c0d1f55b4a931842a0e368c, re-read at the worktree add and unmoved since
+  worktree         : worktrees/s-ra13-ks1164
+  live watcher pid : 15490 (negative control 0)
+Nothing is pushed, so there is no remote ref of mine for this ticket yet.
+
+## Question
+What is my ctx reading, and may I push? Your line: under 45% I push on my own; 45-64% needs your per-step word; 65% = WRAP COLD and name the built-but-unpushed branch in full in RESUME.
+
+## What is already green
+- Payload 4,643 B 5c5e586406ebe4b1, the RULED variant, strict-applied; the on-disk file is byte-identical to the payload's own + lines. The -control variant (4,886 B bca34d1f0e9857fa) gives the SAME tree, named in Test Evidence.
+- vitest 5.0.3 agreeing THREE ways: node_modules/vitest/package.json, package-lock.json, and the binary's own --version ("vitest/5.0.3 darwin-arm64 node-v24.7.0").
+- New suite alone 3 passed (3), rc 0. Whole performance unit suite BASE 249 suites / 1360 passed, rc 0 -> HEAD 251 suites / 1363 passed, rc 0. Re-run after the doc edits: still 1363 passed, rc 0.
+- RED BY TAMPER (there is no product change to red against): dropping the locale grouping at report.ts:104 gives 2 passed, 1 failed (3), rc 1 on "RED KS-1164 F-3: a 5xx count of 1,234 / 56,789". Two cells still pass in that arm, so it is an assertion and not a load failure (a load failure reads 0 total AND 0 failed). report.ts restored byte-identical, git reports it unmodified, blob still ac59af37cbc6.
+- tsc --noEmit -p systemTest/performance rc 0, 0 lines.
+- docblockra3 0 failed: flow tail 31. -> 26. with exactly ONE block appended and the other 29 byte-identical; cheat tail KS 591 -> KS-1164 with exactly ONE section appended and the other 17 headings byte-identical. BOTH docs assert "the ONLY difference from the blob at the base IS this fragment, byte for byte", each with a 1-byte-altered control that FAILS the same comparison.
+- html_docs_matrix.test.sh 12 passed, 0 failed, rc 0 — 10 of the 12 are controls that each fire.
+- commitra3 20 passed, 0 failed: 0 trailers against the control printing 53 bytes, subject 80 chars landing at 87, 3 files, ONE parent == base.
+- pathgatera1 PASS, 5 assertions, with a FIRING control that names the differing path.
+- S-1: all four systemTest packages installed (akto, api-explorer, performance, playwright) plus Blockchain/Dev npm ci --ignore-scripts and the packages/shared build with dist/index.js asserted at 17,746 B. Installs left 0 tracked files modified.
+
+## ONE THING I GOT WRONG AND FIXED, AND IT INVALIDATED A WHOLE SET OF FIGURES
+I first ran this package's suite with a bare node_modules/.bin/vitest run. Its config is vitest.unit.config.ts, which vitest does NOT auto-detect, so the bare form silently ran on vitest's own defaults: a 5000 ms timeout instead of the config's 15,000, different include globs, and — the one that mattered — NO setupFiles, so tests/unit/support/clearSlotEnv.setup.ts never stripped the shell's slot family.
+On that bare run I measured "130 files / 456 tests, 1 FAILED" and spent real effort diagnosing the failure (unitSuiteSlotIndependence.test.ts, timing out at 5000 ms). I had got as far as reading KS-1226 — which names that exact file and an F4 "15 s budget at :127" — and was about to report a DISTINCT live defect, on the reasoning that the failing cell at :275 carries no timeout argument and so runs on the default while each of its children is allowed 180 s.
+That whole line was wrong, and the giveaway was my own evidence: the config sets testTimeout 15_000, so a 5000 ms message could not come from a correctly configured run. Through npm run test:unit the same tree reads 251 suites / 1363 passed / 0 failed, rc 0 — the suite is GREEN at the base and there is no pre-existing failure. I withdraw the finding entirely and re-took every figure above through the real entry point.
+Two residues worth keeping: (1) I nearly filed a ticket against the repo for my own harness error, and the thing that stopped it was checking the config rather than trusting a reproducible-looking failure — it reproduced in isolation too, which made it look real; (2) KS-1226's F4 citation of :127 is nonetheless stale against this file — :127 is now the numPassedTests/numFailedTests destructure, not a budget — because the KS-1313/KS-1326 cells at :189-:244 shifted the lines. That is a real, if minor, observation about KS-1226 and I am NOT acting on it; it is yours to route.
+Both doc blocks record the runner trap so the next reader does not repeat it.
+
+## On the key-hyphenation rule, declared rather than hoped
+The body carries ZERO foreign hyphenated keys — I found KS 591 hyphenated in a tool-output line and de-hyphenated it, because a hyphenated foreign key is exactly the backlink the rule prevents. My OWN key appears hyphenated 6 times, not once: the Refs KS-1164 line, its Linear URL, the verbatim quote of the failing test cell, and three places naming the literal cheat-section key that docblockra3 asserted via --new-key. Strict closing regex is 0 with a planted "Closes KS-1164" control that FIRES. If you want it cut to literally one, say so and I will re-commit before pushing.
+
+## A SECOND FAULT, THIS ONE IN MY OWN MAIL TOOLING, CAUGHT BY AN ASSERT
+My first attempt to send this mail used an UNQUOTED heredoc. The body is full of backticked code spans, so zsh executed them: the shell reported "command not found: -control", "command not found: vitest" and a parse error, and wrote an EMPTY file. The non-empty assert in my sender refused it and the API returned a validation error, so nothing was sent and nothing partial reached you. Your brief says QUOTED heredocs only, with live values injected after; I had done that on the three earlier mails and slipped here because I wanted to interpolate the watcher pid. Re-sent from a quoted heredoc with 15490/0 placeholders substituted afterwards — the same placeholder discipline commitra3 enforces on PR bodies.
+
+## Meanwhile
+Holding. Nothing pushed, no ref of mine written, no ticket touched.
+
+## Needed-by
+Your reading. If it is 65% or over I will wrap cold and hand this branch to R 14th built-and-unpushed, named in full.
+
+-- Seat R 13th, pane Secuura/Blockchain-R (%88)
+
