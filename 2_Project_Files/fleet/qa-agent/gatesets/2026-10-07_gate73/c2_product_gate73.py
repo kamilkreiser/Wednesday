@@ -328,8 +328,37 @@ def compare1435(bdir, hdir):
     return t.end()
 
 
+def selftest(repo):
+    res = []
+    def rep(c, m): res.append(bool(c)); print('%s %s' % ('PASS' if c else 'FAIL', m))
+    h = ROWS['1408']['head_expected']; p = 'Blockchain/Dev/services/transfer/src/index.ts'; ht = git_bytes(repo, h, p).decode()
+    n = changed_line_nos(repo, BASE, h, p); txt = line_no(ht, 'signature: z.string().optional(),')
+    rep(n == [412] and txt == [403, 412], 'changed_line_nos reads the hunk (:412); a TEXT search finds :403 first (the trap): %s vs %s' % (n, txt))
+    L = ht.split('\n'); planted = '\n'.join(L[:411] + ['  // KS-1435: planted WHY comment'] + L[411:])
+    rep(why_near(planted, 413, 'KS-1435') and not why_near(ht, 412, 'KS-1435'), 'PLANTED a KS-1435 comment above the line: the §5d reader HITS; on the real head it MISSES')
+    rep(len(CELLS) == 10 and gen_block().count('GATE73_CELLS') == 2 and "describe('GATE73 KS-1435 reject signature drive'" in gen_block(), 'drive generator: 10 cells, one GATE73 describe')
+    import tempfile
+    d = tempfile.mkdtemp(prefix='g73c2st.', dir=os.environ.get('G73_SCRATCH') or None)
+    for lab in ('base', 'head'):
+        os.makedirs(os.path.join(d, lab)); open(os.path.join(d, lab, 'drive_%s.jsonl' % lab), 'w').write(
+            ''.join(json.dumps({'id': c[0], 'status': c[3] if lab == 'head' else c[4], 'after': ('pending_approval' if (c[3] if lab == 'head' else c[4]) == 400 else 'rejected'),
+                                'paths': ['signature'] if (lab == 'head' and c[3] == 400) else []}) + '\n' for c in CELLS))
+    import io, contextlib
+    def q(bd, hd):
+        buf = io.StringIO()
+        with contextlib.redirect_stdout(buf): rc = compare1435(bd, hd)
+        return rc
+    rep(q(os.path.join(d, 'base'), os.path.join(d, 'head')) == 0, 'compare1435 GREEN on the designed base / head fixture')
+    os.makedirs(os.path.join(d, 'base2')); open(os.path.join(d, 'base2', 'drive_base.jsonl'), 'w').write(open(os.path.join(d, 'head', 'drive_head.jsonl')).read())
+    rep(q(os.path.join(d, 'base2'), os.path.join(d, 'head')) == 1, 'PLANTED: the head\'s observations fed as the base (no change at all): compare1435 FAILS')
+    open(os.path.join(d, 'base2', 'drive_base.jsonl'), 'w').write('')
+    rep(q(os.path.join(d, 'base2'), os.path.join(d, 'head')) == 1, 'PLANTED: 0 cells recorded at the base (a LOAD FAILURE): compare1435 FAILS')
+    print('SELFTEST %d/%d' % (sum(res), len(res))); return 0 if all(res) else 1
+
+
 def main():
     A = sys.argv[1:]; mode = A[0] if A else ''
+    if '--selftest' in A: return selftest(opt(A, '--repo'))
     if mode == 'compare1435': return compare1435(opt(A, '--base-dir'), opt(A, '--head-dir'))
     if mode == 'drive1435':
         wt, lab, out = opt(A, '--wt'), opt(A, '--label'), opt(A, '--out')

@@ -48,7 +48,7 @@ done
 [ -s "$FILES_DIR/composed_2026-10-07/MANIFEST.txt" ] || { echo "REFUSING: composed_2026-10-07/MANIFEST.txt is MISSING (the merge seat's verbatim docs)" >&2; exit 30; }
 
 # --- the merge seat must be RULED (Q-SEAT) ---
-[ -n "$SEAT" ] || { echo "REFUSING: RULING NEEDED — kit.json merge_seat is null (RULINGS Q-SEAT). Wednesday rules the merge seat, writes it into kit.json, re-pins and re-renders." >&2; exit 8; }
+[ -n "$SEAT" ] || { echo "REFUSING: RULING NEEDED — kit.json merge_seat is null (RULINGS Q-SEAT). Wednesday rules the merge seat, writes it into kit.json (not a pinned file) and re-runs the repin script, which re-renders." >&2; exit 8; }
 printf '%s' "$SEAT" | grep -qE '^Seat [A-Z] [0-9]+(st|nd|rd|th)$' || { echo "REFUSING: merge_seat '$SEAT' is not of the form 'Seat <L> <Nth>'" >&2; exit 8; }
 case "$SEAT" in "Seat R 9th"|"Seat E 10th") echo "REFUSING: the merge seat may not be an AUTHOR seat ($SEAT)" >&2; exit 8;; esac
 

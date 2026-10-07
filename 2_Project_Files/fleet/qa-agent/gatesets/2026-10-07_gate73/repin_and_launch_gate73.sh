@@ -123,17 +123,19 @@ for _r in $ROWS; do
   echo "  c1 #$_r rc=$rc1 | $(grep -E '^(CHECKED|[0-9]+ FAIL)' "$OUTP.c1_$_r.out" | tr '\n' ' ')"; grep -E '^FAIL' "$OUTP.c1_$_r.out" | sed 's/^/    /' | cut -c1-240
   [ "$rc1" -eq 0 ] || { echo "REFUSING TO LAUNCH: C1 FAILED for #$_r at its head (a pin moved: re-draft)"; exit 13; }
 done
-mkdir -p "$OUTP.chain"
-python3 "$GS/c4_docs_gate73.py" chain --repo "$CL" --order "$ORD" --develop "$CUR_DEV" --heads "$OTH" --out "$OUTP.chain" > "$OUTP.c4chain.out" 2> "$OUTP.c4chain.err"; rc4=$?
+# the chain's composed docs + materialised guard trees (~9 MB) go under the gitignored _scratch/, never beside the kit files
+CHD="$GS/_scratch/$(basename "$OUTP").chain"; mkdir -p "$CHD"
+python3 "$GS/c4_docs_gate73.py" chain --repo "$CL" --order "$ORD" --develop "$CUR_DEV" --heads "$OTH" --out "$CHD" > "$OUTP.c4chain.out" 2> "$OUTP.c4chain.err"; rc4=$?
+cp "$CHD/chain.json" "$OUTP.chain.json" 2>/dev/null; cp "$CHD/MANIFEST.txt" "$OUTP.chain_MANIFEST.txt" 2>/dev/null
 grep -E '^(STEP|FINAL|CHAIN|REFUSED)' "$OUTP.c4chain.out" | sed 's/^/    /' | cut -c1-240; echo "  c4 chain rc=$rc4"
 [ "$rc4" -eq 0 ] || { echo "REFUSING TO LAUNCH: the docs merge-in chain does not predict cleanly on develop $CUR_DEV for order $ORD (read $OUTP.c4chain.out)"; exit 13; }
-PRED="$(python3 -c 'import json,sys; print(" | ".join("%s %s" % (s["pr"], s["tree"]) for s in json.load(open(sys.argv[1]))["steps"]))' "$OUTP.chain/chain.json")"
+PRED="$(python3 -c 'import json,sys; print(" | ".join("%s %s" % (s["pr"], s["tree"]) for s in json.load(open(sys.argv[1]))["steps"]))' "$CHD/chain.json")"
 if [ "$DEV_MOVED" = 0 ] && [ "$ORD" = "$(KJ merge_order_default | tr ' ' ',')" ]; then
   KPRED="$(python3 -c 'import json,sys; print(" | ".join("%s %s" % (s["pr"], s["tree"]) for s in json.load(open(sys.argv[1]))["predicted_chain"]["steps"]))' "$KITJSON")"
   [ "$PRED" = "$KPRED" ] || { echo "REFUSING TO LAUNCH: the chain read now ($PRED) != kit.json predicted_chain ($KPRED): the composed docs in the kit are not what the gate will measure"; exit 13; }
   echo "  the chain read now == kit.json predicted_chain (the composed_2026-10-07/ docs apply VERBATIM)"
 else
-  echo "  NOTE: develop moved or a non-default order: the kit's composed_2026-10-07/ docs do NOT apply; the merge seat composes from $OUTP.chain/ (or re-runs c4 chain on the real develop)"
+  echo "  NOTE: develop moved or a non-default order: the kit's composed_2026-10-07/ docs do NOT apply; the merge seat composes from $CHD/ (or re-runs c4 chain on the real develop)"
 fi
 if [ "$DEV_MOVED" = 1 ]; then
   if [ -z "$REPIN" ]; then echo "REFUSING TO LAUNCH: develop moved (c1 P12 says it touched none of the rows' paths / tooling; the chain is RE-PREDICTED above). To re-pin and launch over it, re-run with:  --repin-develop $CUR_DEV"; exit 10

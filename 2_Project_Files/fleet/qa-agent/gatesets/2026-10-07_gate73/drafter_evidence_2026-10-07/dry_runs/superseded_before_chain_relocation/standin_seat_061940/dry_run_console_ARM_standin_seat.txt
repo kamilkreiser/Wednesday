@@ -1,0 +1,49 @@
+--- V. required arguments, each well-formed and == the kit's pin (a wrong value refuses BY NAME)
+  order 1407,1409,1408,1410 + 4 heads + develop present, well-formed and == kit.json
+LAUNCH ACTION gate73 (DRY RUN) 2026-10-07 17:19:40 AEDT / 2026-10-07T06:19:40Z | order 1407,1409,1408,1410 | develop 147ae442074c7f3b5be9ce7ccc4452c8dae34b4f | repin-develop none | pane QA/Secuura-gate73
+--- A. each head must be the one its READY names
+  #1407 2026-10-07_seatR9_READY.txt (sha256/16 436ff0109d4527da): lines naming the head in full 2 | naming #1407 5 | CONTROL lines naming 'READY' 5
+  #1409 2026-10-07_seatR9_READY.txt (sha256/16 436ff0109d4527da): lines naming the head in full 2 | naming #1409 4 | CONTROL lines naming 'READY' 5
+  #1408 2026-10-07_seatE10_READY.txt (sha256/16 1dbee0f1b77a61ab): lines naming the head in full 1 | naming #1408 6 | CONTROL lines naming 'READY' 2
+  #1410 2026-10-07_seatE10_READY.txt (sha256/16 1dbee0f1b77a61ab): lines naming the head in full 1 | naming #1410 4 | CONTROL lines naming 'READY' 2
+--- 2. ONE ls-remote (read verb) from the checkout, GIT_SSH_COMMAND unset, the checkout's own core.sshCommand
+  ls-remote rc=0 at 06:19:46Z | develop 147ae442074c7f3b5be9ce7ccc4452c8dae34b4f
+  #1407 pull/head 3be1a5317735c11b377b89fa98e1ac5595f84ef0 | branch 3be1a5317735c11b377b89fa98e1ac5595f84ef0
+  #1409 pull/head c8899a95dc445fd3ac87ec3db33835f5acb1e155 | branch c8899a95dc445fd3ac87ec3db33835f5acb1e155
+  #1408 pull/head ce33ec8b3eae5ea5ad63fc1b4871d8367fe2a95e | branch ce33ec8b3eae5ea5ad63fc1b4871d8367fe2a95e
+  #1410 pull/head c976c9f72ba019d76a2a575f2e4ff5c19c7af505 | branch c976c9f72ba019d76a2a575f2e4ff5c19c7af505
+--- 1. PULLS API x4 + census
+  SKIPPED BY NAME (--no-api, dry run only): the API state and the census are NOT read here
+--- 3b. develop: origin 147ae442074c7f3b5be9ce7ccc4452c8dae34b4f | --develop 147ae442074c7f3b5be9ce7ccc4452c8dae34b4f
+  UNMOVED (== the batch's base: the first lander's squash tree is its END_TREE; the kit's predicted chain applies).
+--- 3c. the kit's own clone: fetch by sha if absent, C1 x4 on the develop read now, the chain prediction
+  c1 #1407 rc=0 | CHECKED 15 0 FAIL 
+  c1 #1409 rc=0 | CHECKED 15 0 FAIL 
+  c1 #1408 rc=0 | CHECKED 15 0 FAIL 
+  c1 #1410 rc=0 | CHECKED 15 0 FAIL 
+    STEP 1 #1407 head 3be1a5317735 onto 147ae442074c -> tree e1d3f4a6424bb21c8d55d2ac3c0a42bc1dc9b14e  (== END_TREE, no merge-in)
+    STEP 2 #1409 head c8899a95dc44 onto cbf8d08aee6f -> tree 2a0a720361391a6cd736e7fb12264f0170d82967  (docs-only keep-both merge-in)
+    STEP 3 #1408 head ce33ec8b3eae onto 3615fef9cc7f -> tree 640d33ddd73e3f9eb3e568d21dfb50b668a397a1  (docs-only keep-both merge-in)
+    STEP 4 #1410 head c976c9f72ba0 onto ff0d410fef31 -> tree 54c2c6ddb653a33513a81c4b063de340a8826dfe  (docs-only keep-both merge-in)
+    FINAL-flow one-pass composition (develop 147ae442074c + every block in landing order) == the chain's last blob: True; sequence == develop + landing order: True (tail [28, 29, 25, 30, 31])
+    FINAL-cheat one-pass composition (develop 147ae442074c + every block in landing order) == the chain's last blob: True; sequence == develop + landing order: True (tail ['KS-1136', 'KS-998', 'KS-1313', 'KS-1435', 'KS-591'])
+    FINAL-CODE every row's code paths in the last tree == that row's head blob: True
+    CHAIN written: /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/gatesets/2026-10-07_gate73/dry_061940.chain (chain.json, MANIFEST.txt, composed docs per step) — ALL OK
+  c4 chain rc=0
+  the chain read now == kit.json predicted_chain (the composed_2026-10-07/ docs apply VERBATIM)
+--- S. the merge seat must be RULED (RULINGS Q-SEAT)
+  merge seat: Seat R 10th
+--- R. render the prompt (four heads, develop 147ae442074c7f3b5be9ce7ccc4452c8dae34b4f, order 1407,1409,1408,1410, merge seat Seat R 10th)
+  rendered -> /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/gatesets/2026-10-07_gate73/prompt_gate73.rendered.txt (30823 bytes); head file /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/gatesets/2026-10-07_gate73/head_at_launch.txt (P x4 / B / D / O / S)
+--- 0. routing: the pane must be in inbox_routing.conf
+  /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/inbox_routing.conf — exact line present: 0 (grep rc=1; want 1 / rc 0). CONTROL: agentmail lines in the file = 168
+  (DRY RUN: reported, not refused — the real run refuses rc 1; ROUTING_LINE.txt)
+--- 6 (dry). the launcher's own --check
+    all guards pass:
+      #1407 #1409 #1408 #1410 at pull/head AND branch | base 147ae442074c x1 | origin develop 147ae442074c == rendered (descends from 147ae442074c) | order 1407,1409,1408,1410 | merge seat Seat R 10th | 10 pins EQUAL | prompt sha256 2849df9636e5ebbf
+      QA project, kit at its home, kit.json, 10 pinned kit files hashing to their pins, KIT_REPORT.md, the composed MANIFEST, rendered prompt, head file (4 P + B + D + O + S == kit), repo; thinking directive; 9 kit files named; report dir; no fill token; the four GO strings from the ruled seat; four heads + develop in full
+      the prompt carries the measurement rules, 43 by-name keywords (as tokens), the holds + named exceptions, the addendum + REPORT-HASH-LAST rules, the verdict subject + sender
+      (a G73_* TEST OVERRIDE is set)
+      a launch (not --check) will refuse unless stdin is a TTY (exit 21)
+  launcher --check rc=0
+DRY RUN COMPLETE 2026-10-07T06:20:02Z — order 1407,1409,1408,1410, develop 147ae442074c7f3b5be9ce7ccc4452c8dae34b4f; the real run continues with the override check, the usage gate, --check and cockpit.sh add

@@ -1,0 +1,57 @@
+--- V. required arguments, each well-formed and == the kit's pin (a wrong value refuses BY NAME)
+  order 1407,1409,1408,1410 + 4 heads + develop present, well-formed and == kit.json
+LAUNCH ACTION gate73 (DRY RUN) 2026-10-07 17:24:13 AEDT / 2026-10-07T06:24:13Z | order 1407,1409,1408,1410 | develop 147ae442074c7f3b5be9ce7ccc4452c8dae34b4f | repin-develop none | pane QA/Secuura-gate73
+--- A. each head must be the one its READY names
+  #1407 2026-10-07_seatR9_READY.txt (sha256/16 436ff0109d4527da): lines naming the head in full 2 | naming #1407 5 | CONTROL lines naming 'READY' 5
+  #1409 2026-10-07_seatR9_READY.txt (sha256/16 436ff0109d4527da): lines naming the head in full 2 | naming #1409 4 | CONTROL lines naming 'READY' 5
+  #1408 2026-10-07_seatE10_READY.txt (sha256/16 1dbee0f1b77a61ab): lines naming the head in full 1 | naming #1408 6 | CONTROL lines naming 'READY' 2
+  #1410 2026-10-07_seatE10_READY.txt (sha256/16 1dbee0f1b77a61ab): lines naming the head in full 1 | naming #1410 4 | CONTROL lines naming 'READY' 2
+--- 2. ONE ls-remote (read verb) from the checkout, GIT_SSH_COMMAND unset, the checkout's own core.sshCommand
+  ls-remote rc=0 at 06:24:19Z | develop 147ae442074c7f3b5be9ce7ccc4452c8dae34b4f
+  #1407 pull/head 3be1a5317735c11b377b89fa98e1ac5595f84ef0 | branch 3be1a5317735c11b377b89fa98e1ac5595f84ef0
+  #1409 pull/head c8899a95dc445fd3ac87ec3db33835f5acb1e155 | branch c8899a95dc445fd3ac87ec3db33835f5acb1e155
+  #1408 pull/head ce33ec8b3eae5ea5ad63fc1b4871d8367fe2a95e | branch ce33ec8b3eae5ea5ad63fc1b4871d8367fe2a95e
+  #1410 pull/head c976c9f72ba019d76a2a575f2e4ff5c19c7af505 | branch c976c9f72ba019d76a2a575f2e4ff5c19c7af505
+--- 1. PULLS API x4 + census
+  api #1407 rc=0 | CHECKED 4 0 FAIL 
+    INFO A5 mergeable True mergeable_state unstable (NO testing claim either way) | body 7291 B sha256/16 1b6c85f1539e2902 | base.sha 147ae442074c
+  api #1409 rc=0 | CHECKED 4 0 FAIL 
+    INFO A5 mergeable True mergeable_state unstable (NO testing claim either way) | body 8117 B sha256/16 ca6ed51ece8a9234 | base.sha 147ae442074c
+  api #1408 rc=0 | CHECKED 4 0 FAIL 
+    INFO A5 mergeable True mergeable_state unstable (NO testing claim either way) | body 7832 B sha256/16 35560d283f8f1f00 | base.sha 147ae442074c
+  api #1410 rc=0 | CHECKED 4 0 FAIL 
+    INFO A5 mergeable True mergeable_state unstable (NO testing claim either way) | body 7422 B sha256/16 dc05407f32d87bc0 | base.sha 147ae442074c
+       #1383 KS-1401: migration 049 restores tenant isolation where 039 i OVERLAP [] DOCS ['API_Security_Functional_Testing_Architecture_Flow_Diagrams.html', 'QA_Tool_Cheat_Sheet_Secuura_API_Testing.html'] TITLE-KEYS []
+    PASS C0 open PRs read 26 (CONTROL: >= the 4 batch PRs themselves)
+    INFO C1 1 other open PR(s) collide (REPORT only; a DOCS collision forces a keep-both merge-in on whichever lands later)
+    CHECKED 1
+    0 FAIL
+  census rc=0 (REPORTED, not refused)
+--- 3b. develop: origin 147ae442074c7f3b5be9ce7ccc4452c8dae34b4f | --develop 147ae442074c7f3b5be9ce7ccc4452c8dae34b4f
+  UNMOVED (== the batch's base: the first lander's squash tree is its END_TREE; the kit's predicted chain applies).
+--- 3c. the kit's own clone: fetch by sha if absent, C1 x4 on the develop read now, the chain prediction
+  c1 #1407 rc=0 | CHECKED 15 0 FAIL 
+  c1 #1409 rc=0 | CHECKED 15 0 FAIL 
+  c1 #1408 rc=0 | CHECKED 15 0 FAIL 
+  c1 #1410 rc=0 | CHECKED 15 0 FAIL 
+    STEP 1 #1407 head 3be1a5317735 onto 147ae442074c -> tree e1d3f4a6424bb21c8d55d2ac3c0a42bc1dc9b14e  (== END_TREE, no merge-in)
+    STEP 2 #1409 head c8899a95dc44 onto cbf8d08aee6f -> tree 2a0a720361391a6cd736e7fb12264f0170d82967  (docs-only keep-both merge-in)
+    STEP 3 #1408 head ce33ec8b3eae onto 3615fef9cc7f -> tree 640d33ddd73e3f9eb3e568d21dfb50b668a397a1  (docs-only keep-both merge-in)
+    STEP 4 #1410 head c976c9f72ba0 onto ff0d410fef31 -> tree 54c2c6ddb653a33513a81c4b063de340a8826dfe  (docs-only keep-both merge-in)
+    FINAL-flow one-pass composition (develop 147ae442074c + every block in landing order) == the chain's last blob: True; sequence == develop + landing order: True (tail [28, 29, 25, 30, 31])
+    FINAL-cheat one-pass composition (develop 147ae442074c + every block in landing order) == the chain's last blob: True; sequence == develop + landing order: True (tail ['KS-1136', 'KS-998', 'KS-1313', 'KS-1435', 'KS-591'])
+    FINAL-CODE every row's code paths in the last tree == that row's head blob: True
+    CHAIN written: /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/gatesets/2026-10-07_gate73/_scratch/dry_062413.chain (chain.json, MANIFEST.txt, composed docs per step) — ALL OK
+  c4 chain rc=0
+  the chain read now == kit.json predicted_chain (the composed_2026-10-07/ docs apply VERBATIM)
+--- S. the merge seat must be RULED (RULINGS Q-SEAT)
+  (DRY RUN: REPORTED, not refused — kit.json merge_seat is null; a real run refuses rc 8 and the launcher refuses rc 8)
+--- R. render the prompt (four heads, develop 147ae442074c7f3b5be9ce7ccc4452c8dae34b4f, order 1407,1409,1408,1410, merge seat Seat UNRULED)
+  rendered -> /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/gatesets/2026-10-07_gate73/prompt_gate73.rendered.txt (30828 bytes); head file /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/gatesets/2026-10-07_gate73/head_at_launch.txt (P x4 / B / D / O / S)
+--- 0. routing: the pane must be in inbox_routing.conf
+  /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/inbox_routing.conf — exact line present: 0 (grep rc=1; want 1 / rc 0). CONTROL: agentmail lines in the file = 168
+  (DRY RUN: reported, not refused — the real run refuses rc 1; ROUTING_LINE.txt)
+--- 6 (dry). the launcher's own --check
+    REFUSING: RULING NEEDED — kit.json merge_seat is null (RULINGS Q-SEAT). Wednesday rules the merge seat, writes it into kit.json (not a pinned file) and re-runs the repin script, which re-renders.
+  launcher --check rc=8
+DRY RUN: the launcher refused under --check (rc 8)

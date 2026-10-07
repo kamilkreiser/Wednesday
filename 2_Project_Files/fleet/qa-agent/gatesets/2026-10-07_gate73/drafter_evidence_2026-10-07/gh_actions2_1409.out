@@ -1,0 +1,18 @@
+PASS X0 runs at the FULL head sha 6 | CONTROL a fabricated sha reads 0 | polls 1
+INFO LOG PR Security Gates (KS-168) / Code Security Gates: {'bytes': 152364, 'groups': 24, 'fabricated_needle': 0, 'needles1': {'expected exit 0 (clean), got 1': 0}}
+INFO LOG Security Scanning / Dependency Audit: {'bytes': 45527, 'groups': 19, 'fabricated_needle': 0, 'needles1': {'expected exit 0 (clean), got 1': 1}, 'failed_steps': ["Audit-contract suites (the gates' own validator)"]}
+INFO LOG pr / Schemathesis suite: {'bytes': 472995, 'groups': 28, 'fabricated_needle': 0, 'needles1': {'expected exit 0 (clean), got 1': 0}}
+INFO LOG pr / Playwright suite: {'bytes': 80011, 'groups': 21, 'fabricated_needle': 0, 'needles1': {'expected exit 0 (clean), got 1': 0}}
+INFO LOG pr / Performance suite (k6 smoke): {'bytes': 567343, 'groups': 30, 'fabricated_needle': 0, 'needles1': {'expected exit 0 (clean), got 1': 0}}
+INFO LOG pr / Akto suite (PR): {'bytes': 730734, 'groups': 31, 'fabricated_needle': 0, 'needles1': {'expected exit 0 (clean), got 1': 0}}
+   Dependabot standalone locks        skipped
+   PR Security Gates (KS-168)         class (2) HOLDS: head failing ['Code Security Gates'] SUBSET of develop's ['Code Security Gates']: True
+   PR — Lockfiles (path-skip twin)    success
+   Security Scanning                  class (1) advisory-freeze HOLDS: failing ['Dependency Audit'] SUBSET of {Dependency Audit} True; the ONLY failed step is the audit-contract step AND its log says `expected exit 0 (clean), got 1`: True; history 12 of the last 12 completed Security Scanning runs repo-wide FAILED across 12 branches
+   pr                                 class (3) HOLDS: head failing ['Akto suite (PR)', 'Performance suite (k6 smoke)', 'Playwright suite', 'Schemathesis suite'] SUBSET of develop's ['Akto suite (PR)', 'Performance suite (k6 smoke)', 'Playwright suite', 'Schemathesis suite']: True
+   pr-premerge-ack                    success
+PASS X1 reds OUTSIDE the three classes (or a class that does not hold): none
+PASS X2 PENDING (never a pass): none
+INFO X3 develop 147ae442074c comparator: {'PR Security Gates (KS-168)': ('failure', ['Code Security Gates']), 'pr': ('failure', ['Akto suite (PR)', 'Performance suite (k6 smoke)', 'Playwright suite', 'Schemathesis suite'])}
+CHECKED 3
+0 FAIL
