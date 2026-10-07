@@ -1,0 +1,107 @@
+DEMO SWEPT. 0 FAIL. Every §5f row stays `live sweep owed` and every demo PASS below is a DONE
+CANDIDATE ONLY. All verdicts are two-sided against :pre-20261006, read from bodies and compiled
+bytes, with controls bracketing the whole set.
+
+TALLY: PASS 26 / FAIL 0 / UNMEASURED 1 / X 5  of 32 rows.
+
+== D 7th's 15 MARKER ROWS (dist-bytes, two-sided) ==
+  DEPLOYED (two-sided), running=1 pre=0 each:
+    KS-1404 timestamping dist/tsa/rfc3161-verify.js
+    KS-1402 auth         dist/middleware/authenticate.js
+    KS-1371 vc-issuer    dist/routes/status.js
+    KS-1370 security     dist/index.js
+    KS-1352 vc-issuer    dist/services/revocationResolvers.js
+    KS-1348 originate    dist/utils/logger.js
+    KS-1341 originate    dist/routes/webhooks.js
+    KS-1215 api-gateway  dist/middleware/auth.js
+    KS-1187 api-gateway  dist/routes/proxy.js
+    KS-1028 originate    dist/services/gdprService.js
+    KS-974  security     dist/requestRefusal.js
+    KS-962  api-gateway  dist/startup-migrations.js
+    KS-730  originate    dist/routes/adminConfig.js
+  = 13 PASS.
+
+🔴 TWO CORRECTIONS TO INHERITED DATA, both measured, both in your brief as well as the table.
+  **KS-1404 and KS-1402 are carried as `marker-present=NO`. That flag is STALE and I am not passing
+  it on.** Both measure a genuine two-sided split: dist running=1 / pre=0, and on the SOURCE side at
+  DEPLOY_SHA the marker counts 1 while at demo's old base 0f8fb33c3 it counts 0 (KS-1402) or the file
+  does not exist at all (KS-1404). So both are DEPLOYED, not unprovable. markers_live.tsv is
+  cmp-identical across D 12th and D 13th (sha16 30b1067420470be3), so the flag has been carried
+  unchanged for at least three seats while the fixes landed underneath it.
+
+  **KS-1195: UNMEASURED by dist-bytes, and the reason is structural, not a missing fix.**
+  dist reads running=0 / pre=0. The fix IS in the deployed source: the marker counts 1 at DEPLOY_SHA
+  and 0 at demo's old base. My first explanation was "tsc strips comments" and MY OWN CONTROL
+  DISPROVED IT: the compiled auth.js carries 87 `//` lines, and KS-1215's marker is also a comment in
+  the same file and reads 1. The actual cause is narrower: KS-1195's comment sits at source line 48
+  INSIDE A TYPESCRIPT INTERFACE (`rateLimit?: number; rateLimitWindow?: number;`). Type declarations
+  are ERASED at compile time and their comments go with them, while KS-1215's comment is inside a
+  runtime `if` at line 291 and survives. **A marker in a comment attached to an erased type
+  declaration can never be proved by dist-bytes.** That row needs a different instrument, and a
+  successor should not re-run it expecting a different answer.
+  = 1 UNMEASURED.
+
+  **KS-999: X, the control is vacuous for this row BY CONSTRUCTION.** dist 1/1 and source 1/1 — the
+  fix was already inside demo's 10 Sep build, so this deploy changed nothing to prove. Not a FAIL.
+  This is D 7th's :pre-20261005 problem, and it bites exactly 1 of my 15 rather than 29 of 32,
+  because :pre-20261006 was tagged from demo's genuine pre-swap images.
+  = 1 X.
+
+== D 12th's 8 ROWS (dist-bytes, two-sided) — 8 PASS ==
+  KS-723 anchoring dist/anchoring.openapi.js `/api/anchors/tx/{txHash}` running=2 pre=0 — this also
+    completes the declaration check you asked me to finish.
+  KS-1256 api-gateway dist/routes/verification.js `isRedisAvailable` 1/0
+  KS-1005 auth dist/routes/users.js 2/0 · KS-1210 auth dist/routes/oauth.js 2/0
+  KS-938 auth dist/routes/mfa.js 2/0 · KS-1278 originate dist/repositories/documentRepo.js 3/0
+  KS-1305 originate dist/db.js 1/0
+  KS-1345 originate dist/routes/webhooks.js INVERTED: running=0 pre=1 -> DEPLOYED (deletion proof)
+  SCOPE NOTE: these are the R-class dist-bytes rows your table lists by name. The L-class probes
+  (KS-1005, KS-1210) and W-class probes (KS-938, KS-1278) are NOT RUN, per the brief and your Gate W.
+
+== THE NAMED NON-MARKER ROWS — 5 PASS ==
+  KS-1404 trust anchors: TSA_TRUST_ANCHORS_PEM ABSENT -> PRESENT-nonempty; /app/config absent ->
+    README.md + tsa-trust-anchors-dtrust.crt + tsa-trust-anchors.crt; anchors sha16 3258799538648a96
+    == the expected clone value; readable by uid 1001; fabricated-path control ABSENT both sides.
+  KS-723 served spec: md5 0b82a6f5703329925abedd24b7bd6ca6 == the clone's; bind-mount container inode
+    now 1315242 == host (it was 1311745 BEFORE the recreate — D 12th's stale-inode trap, live).
+  KS-1054: 038a recorded once on [secuura]; four tables exist 17/11/17/12 cols; RLS unchanged from
+    ITEM 0 (rowsecurity=t force=t, tenant_isolation policies); net schema change ZERO.
+  KS-1041 step 2: originate's boot line reads `[gateway-provenance] DISABLED — GATEWAY_VOUCH_SECRET
+    is unset`, exactly once, matching the variable having no usable value. Impossible-marker control 0.
+  KS-1256 runtime: Redis running/healthy, requirepass configured (count only, Cmd array never
+    printed), gateway carries REDIS_HOST/PASSWORD/PORT/URL. Redis was never stopped.
+  🔴 NAMING IT AS YOU ASKED: **a Redis outage on demo now stops Platform-S connector document
+  creates (KS-1256).** Redis is a hard dependency of that path on this build.
+
+== X, NOT RUN — 4 ==
+  L rows KS-1005, KS-1210: NOT RUN (no ANSWER named them).
+  W rows KS-938, KS-1278: NOT RUN under card secuura-uuid-revokes-never-wrote-status-history-1006 = c.
+  (KS-1425, KS-1330/1388/1408/1411 carry no image input in this range; demo-service carries no row.)
+
+== CONTROLS BRACKETING EVERY VERDICT ==
+  impossible marker `zzz-impossible-d14-zzz`: 0 running / 0 pre on both probe sets -> never DEPLOYED.
+  ubiquitous `exports`: 16/16 in the 15-row set and 6/2 in the 8-row set -> never DEPLOYED.
+  inverted sense against an always-present string -> never DEPLOYED.
+  `.d.ts` guard: every probed path asserted to be a `.js`, so no row rests on a type surface.
+  @secuura/shared dist present as a DIRECTORY at /app/node_modules/@secuura/shared/dist, so a shared
+  fix probed under /app/dist would have read a FALSE absent — none of my rows does that.
+
+== THE THREE ACCEPTED ERROR CLASSES, NAMED IN STATUS AS YOU DIRECTED ==
+  1-2. nginx `api-gateway could not be resolved` / `unexpected DNS response for api-gateway`: TWO
+  lines total, 22:47:43Z (under build load) and 23:47:13Z (coincident with api-gateway's own
+  recreate). 0 in the minutes after; `getent hosts api-gateway` resolves to 172.18.0.23;
+  /health/deep ready:true inside and through the front door. **Recurrence on the next deploy becomes
+  a finding** — recorded here so the next seat can tell a repeat from a first sighting.
+  3. postgres `column " @ " does not exist`: ONE line, 23:34:18Z, MY OWN probe's malformed SQL
+  (double quotes read as an identifier). Probe-written, beside D 13th's wrong-password FATAL at
+  2026-10-06T14:23:48Z. Neither is the stack's.
+
+== INSTRUMENT RULE FOR WHOEVER SWEEPS THIS BOX NEXT ==
+  Front-door STATUS CODES ARE USELESS on demo. Six paths returned 200 and so did my control
+  `/zz-no-such-path-d14` — it serves a catch-all. Worse, `/` returns the ISSUER PORTAL title for a
+  bogus path too, so a `/` title match proves nothing either. Only /verify/ and /admin/ have
+  discriminating titles (`Secuura - Verify Document`, `Secuura Admin Dashboard`). Read bodies, and
+  pick a path whose body differs from the fallback.
+
+Demo at d75bfe2deb80, serving, 34 running, startupMigrations ran:true failed:0, KS-535 PASS.
+develop 69f2045af2a4 recorded. Handover, history and WRAP follow.

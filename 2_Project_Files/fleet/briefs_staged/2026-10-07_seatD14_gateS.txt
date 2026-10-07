@@ -1,0 +1,115 @@
+TWO THINGS IN ONE MAIL: a STOP (develop moved, with image inputs) and the Gate S request behind it.
+The build is COMPLETE and STOP 2-demo is APPLIED AND VERIFIED. No service has been swapped. I am
+holding before the first swap, which is exactly the re-read point where the move surfaced.
+
+== THE STOP: develop moved to fa24bddedf3b9af0cc198ea72848902971f16639, and it is NOT image-input-free ==
+Read 23:35:04Z, immediately before the first swap. D0 was b39051390ff6.
+  d75bfe2deb80..fa24bddedf3b : status ahead, ahead_by 11, behind_by 0,
+  merge_base == d75bfe2deb80 -> DEPLOY_SHA is STILL A STRICT ANCESTOR. So the move is ADDITIVE.
+  BUT: 5 of 195 paths are under `Blockchain/`, and all five are image inputs:
+    Blockchain/Dev/package-lock.json                      -> maps to NONE
+    Blockchain/Dev/packages/shared/package-lock.json      -> 29 services
+    Blockchain/Dev/frontend/issuer/package-lock.json      -> issuer-frontend
+    Blockchain/Dev/services/anchoring/package-lock.json   -> anchoring
+    Blockchain/Dev/services/mcp-server/package-lock.json  -> mcp-server
+  DISTINCT services flagged = 29. All 29 are inside my rebuild set of 31; 27 are in my swap set of 28
+  (the 2 outside it are demo-service and migrations, both rebuilt-not-recreated). The 2 rebuilt
+  services NOT flagged are demo-overlay and status-frontend.
+  Controls still fire on the same mapping: services/kyc/src/index.ts -> kyc only;
+  docs/VOCABULARY.md -> NONE. Root systemTest/BACKLOG collisions = 170, so the `Blockchain/` filter
+  is exact, not vacuous.
+  The commit is `fa24bddedf3b KS-1437: in-range lock refresh clears shell-quote, MCP SDK and pbkdf2
+  advisories` — Seat G 3rd's work, exactly the seat your send amendment 5 told me might launch beside me.
+
+== WHAT I THINK, AND WHY IT IS STILL YOUR CALL ==
+My reading is that this does NOT invalidate the round: DEPLOY_SHA is fixed, the brief says in terms
+that I do not chase develop, and Kam's merge-order card says the d75bfe2deb80 build goes to kintsugi,
+gets swept, then goes to demo. The move being a strict ancestor means nothing in my build was removed
+or rewritten. On that reading the swap proceeds and the lock refresh reaches demo on a LATER deploy.
+🔴 BUT THERE IS A CONSEQUENCE I WILL NOT BURY, because demo is customer-facing. The thing
+fa24bddedf3b fixes is the advisory freeze: a CRITICAL `shell-quote`, a HIGH `@modelcontextprotocol/sdk`
+and a MODERATE `pbkdf2`. Those sit in the dependency trees of 29 of the 31 images I just built, and my
+images PREDATE the fix. So swapping now puts 29 freshly-built-but-pre-fix images onto the public demo
+box, when a fix for a critical advisory is already on develop and one rebuild away.
+I am not the right seat to trade that off: it is a security posture call against a deploy-window call,
+and both are Kam's. I am naming it, measuring it, and holding.
+  The options as I see them, for you to rule:
+  (a) swap d75bfe2deb80 as ruled; the lock refresh lands on a later deploy. Fastest, and it is what
+      the card literally says. Demo carries the three advisories until then (as it does right now —
+      it has carried them since 2026-09-10, so this is not a REGRESSION, just a missed chance to fix).
+  (b) swap now, then immediately rebuild only the 29 flagged images at the new develop and swap again.
+      Costs a second ~2 h build and a second swap window on a 2-vCPU box.
+  (c) do not swap; re-point at fa24bddedf3b and rebuild. That changes DEPLOY_SHA, which the brief
+      forbids without Kam, and throws away a build that kintsugi has already swept clean.
+  My recommendation is (a), because demo's exposure is UNCHANGED by it and (c) discards a swept build.
+
+== BUILD: 31 of 31 COMPLETE, 0 failures, 0 guard refusals, 0 kills ==
+  total 7,255 s = 2.02 h, mean 234 s, median 233 s. Slowest: originate 732, api-gateway 394,
+  issuer-frontend 385, anchoring 382, nft-certificate 324. Fastest: status-frontend 6, migrations 6.
+  minfree EVER seen by the in-loop sampler 11,271 MiB vs ADMIT 5,200 and FLOOR 2,500. Swap peaked
+  1,434 of 6,143. No OOM, no RAM pressure.
+  PROJECTION: 2.02 h actual against the 2.15 h I projected from the measured mean — and 3.18 h from
+  the brief's first-two basis, a 32% move, under the 50% threshold, so no mail was owed on it.
+  🔴 ALL 31 READ NEW-ID. ZERO SAME-ID. I predicted demo might finally exercise phase4's SAME-ID
+  branch and IT DID NOT — even the two services whose only changed input is a lockfile produced a new
+  id, because packages/shared changed and flags 29 services. **phase4's SAME-ID branch is STILL
+  UNEXERCISED** and the next seat should not assume demo will provide it.
+  Rollback set INTACT after the build: pre-20261006 31 at 513d475d9af77d2d, pre-20260910 33 at
+  969f8db925918256, latest 33, distinct ids 49 -> 80, dangling 0. All 31 rebuilt services have
+  :latest != :pre-20261006; the 2 not rebuilt (nginx-gateway, pgbouncer) carry NO stamp tag at all.
+  29 running containers still on their OLD images: nothing is swapped.
+
+== STOP 2-demo: APPLIED, ONE RUN, AND VERIFIED ==
+  Precondition re-read against the REBUILT image and it held EXACTLY: the rebuilt dev-migrations
+  bakes 50 .sql (the old one baked 49), routed BY FILENAME 49 main + 1 platform; pending read
+  {038a_ks1054_core_tables_before_039.sql} on [secuura] and {} on [secuura_platform]. Planted fake
+  read PENDING; inverse control (a recorded file) read NOT pending.
+  THE RUN: ran on image f0051e4363e1 = dev-migrations:latest, NOT the old f17868b14fd1. Exit 0.
+  THE LINE YOU REQUIRED IS PRESENT: `[main] Applying 038a_ks1054_core_tables_before_039.sql...`
+  ⚠ and I will not let the banner stand in for it: the runner printed `Summary: applied=50 failed=0`,
+  where 50 is files PROCESSED (49 main + 1 platform), not newly applied. That banner is exactly the one
+  that reads identical when a STALE image ran. The `Applying` line is the discriminating evidence.
+  AFTER: tracker main 48 -> 49, platform 1 -> 1. The new row is
+  `038a_ks1054_core_tables_before_039.sql @ 2026-10-06 23:33:47.858544+00`, 038a rows == 1,
+  impossible-filename control 0. Platform still holds only 003_platform_tenancy.sql from 2026-07-08.
+  NET SCHEMA CHANGE ZERO: the four tables' full column shape (57 column lines), their RLS flags and
+  their policy names are BYTE-IDENTICAL before and after (snapshot sha16 ed92a086698e6271 both sides),
+  and a control proves the diff catches a tampered RLS flag. 038a is four CREATE TABLE IF NOT EXISTS
+  and all four tables already existed, so it recorded itself and changed nothing — as pre-ruled.
+  Pending now reads {} / {} on both DBs.
+
+== THE SWAP PLAN, READY (28 services, each with its rollback) ==
+  Derived, proven a permutation of the measured swap set. auth FIRST, then 20 middle backends, then
+  anchoring and api-gateway LAST among backends, then the 5 frontends:
+  auth, originate, analytics, billing, governance, guardian, kyc, m365-integration, mcp-server,
+  nft-certificate, prism, queue, referral, security, staking, tenant-provisioning, timestamping,
+  tokenisation, transfer, vc-issuer, wallet-connector, anchoring, api-gateway, admin-frontend,
+  issuer-frontend, status-frontend, verifier-frontend, website-frontend.
+  Per service: `docker compose -p dev up -d --no-deps --force-recreate <svc>` (NO --profile), a health
+  read between swaps. EXCLUDED and named in DEPLOYED: migrations, demo-overlay, demo-service.
+  Rollback for any one: `docker tag dev-<svc>:pre-20261006 dev-<svc>:latest && docker compose -p dev
+  up -d --no-deps --force-recreate <svc>`, keeping the new image as :new-20261006.
+  auth's in-same-action condition and api-gateway's 0/0 + yaml inode/md5 checks are written and ready.
+
+== MY OWN SLIPS THIS LEG, BOTH CAUGHT BEFORE THEY REACHED A CLAIM ==
+1. My move-mapper overwrote `sys.argv` before reading argv[2], so the paths-file argument became a
+   SHA and it died on FileNotFoundError. Fixed by capturing both args first; the no-paths arm now refuses.
+2. My first flagged-service count read 32. The mapper returns (service, reason) TUPLES, so I had
+   counted distinct PAIRS, not services. The true distinct count is 29. That is D 12th's trap 8 shape
+   (a list that summed to the wrong number) and I am reporting the 32 as wrong rather than quietly
+   publishing the 29.
+3. Earlier, named again for the record: my build poller's liveness check used
+   `pgrep -fc 'build_d14.sh build'`, which MATCHES THE SHELL RUNNING IT, so the driver count never
+   reached 0 and the poller ran 36 minutes past a build that finished at 22:52:10Z. The bracket-split
+   pattern did not help either, because the one-shot shell's command line contains the plain pattern
+   from the line above it. `ps -eo args | grep -c` reads 0, and the completion marker BUILD_D14_END
+   plus built=31 were in my own heartbeat all along. The fix is to stop using the process table for
+   liveness when a definitive completion marker exists.
+
+== WHAT I NEED ==
+  1. A ctx read. A swap starts only below 65%, and a swap once started is finished.
+  2. Your ruling on the develop move: (a), (b) or (c) above.
+If you rule (a) and ctx allows, I swap 28 one at a time and go straight to the DEPLOYED mail and Gate W.
+If ctx is at or over 65%, I write RESUME into the handover (built ids, rollback tag, the exact swap
+command, the STOP 2-demo reading) and WRAP COLD — the built images are not lost.
+Holding. Watcher armed. Nothing swapped.

@@ -1,0 +1,118 @@
+Refs KS-1136
+https://linear.app/secuura/issue/KS-1136
+
+`09-aggregate-report.sh` reads each job's artefact with `jq -r ... 2>/dev/null` (08 with a bare
+`jq`), so an artefact that **exists** but does not **parse** -- a job that aborted mid-write --
+yielded zero findings and **rc 0**. That is indistinguishable from a clean scan. KS 878 had
+already guarded 04's artefact; every other job's block was silent. Each present, unparseable
+artefact across the seven other jobs (01 02 03 05 06 07 08) now emits its own HIGH finding,
+exactly as 04's does.
+
+This is **item 2 (R-3) only**. Item 1 merged as #1051. The other items on the ticket are
+untouched and **the ticket does not move to Done**.
+
+## What changed
+
+A **pure insertion** of 14 lines (`numstat 14 0`) after `is_baselined()` and **before**
+`ALL_FINDINGS` reads `$TMP`, so the new findings are inside the aggregate rather than appended
+after it. It loops the seven unguarded jobs and calls the file's existing `emit`. 04 is untouched:
+its KS 878 guard already fires and a second finding would double-count. No threshold, baseline,
+exit-code path or report writer is touched, and the finding text carries a filename only -- no
+artefact contents, no environment.
+
+**A named side effect:** `jq -e .` takes its exit status from the output **value**, not only from
+parseability, so a valid JSON `null` or `false` also reads as unreadable. That is the chosen
+behaviour, stated here rather than discovered later.
+
+## Test Evidence
+
+**Touched**
+- `Blockchain/Testing/jobs/09-aggregate-report.sh` (100755 -> 100755, +14/-0)
+- `Blockchain/Dev/scripts/__tests__/ks1136_aggregate_report_unreadable_artefacts.test.sh` (NEW, 100644, +164)
+- both platform HTML docs (Section 4): flow block `28.` (authored `23.`), cheat section keyed KS-1136
+
+**Ran** -- all on macOS 27.0.1 arm64, bash 3.2.57(1)-release, jq-1.7.1-apple, 2026-10-06 UTC
+- the new suite alone: **6 passed, 0 failed, rc 0** -- 1.332 s
+- **red-first**, product file reverted to its blob at the base (`739ebab`): **rc 1, 3 failed** --
+  cells 1, 2 and 3, each reporting `rc 0, findings=0, ids=[]`, which the test names as "the
+  clean-result silence". All three CONTROL cells stay green in that arm, so the red is the guard
+  and not a broken harness. Product restored and proved **sha256-identical**, exec bit re-asserted.
+- **one red arm per conjunct** of the two-term guard, each with `bash -n` rc 0 first so neither red
+  is a load failure:
+  - A -- drop `[ -f "$_f" ] &&` (the artefact EXISTS): **2 passed, 4 failed**. A *missing* artefact
+    is reported unreadable, which breaks both main cells and both well-formed controls.
+  - B -- drop `! jq -e .` (it does NOT parse): **4 passed, 2 failed**. Every *present* artefact is
+    reported unreadable, so the two well-formed controls red.
+- **suite discovery**: `run-shell-suites.sh --list` goes **67 -> 68**, the new suite listed 1 time
+  after and 0 before. Measured by moving the file aside and back, restored sha256-identical.
+- siblings: `aggregate_report_trivy_artefact.test.sh` 0.842 s, `orchestrate_jobs.test.sh` 3.965 s
+- whole shell-suite set: **68 passed, 0 failed, 0 skipped (of 68)** in **342 s** (11:40:22Z to 11:46:04Z), rc 0 -- so all 68 are green LOCALLY and the six the CI runner reds are runner-only
+- `bash -n` rc 0 on both changed files
+- staged tree **`074705eebd81`** -- byte-equal to the tree predicted from the payload at the base
+  before any worktree existed
+
+**NOT run**
+- No real security scanner ran and no real mid-write abort was induced: the cells drive the job
+  through a **fixture tree with stubbed artefacts**.
+- The aggregate's HTML and JSON report writers were not asserted beyond the finding ids.
+- **MEASURED after the raise, on
+  this exact head: the runner's `Code Security Gates` job log attributes a summary to every one
+  of 60 suite headers, and mine reads `ks1136_aggregate_report_unreadable_artefacts: 6 passed,
+  0 failed` -- GREEN on the runner.** The aggregate moved `61 passed, 6 failed, 0 skipped (of
+  67)` -> `62 passed, 6 failed, 0 skipped (of 68)`: the denominator and the pass count each rose
+  by exactly one, and the FAILING SET is byte-identical to the six known runner-only suites
+  (`bootstrap_login_diagnosis`, `ks949_main_seed_idempotence`, `manifest_readers_agree`,
+  `run_migrations_failure_exit_code`, `run_shell_suites`, `smoke_test_degraded_warns`) -- set
+  comparison TRUE, seventh-red set EMPTY. So there is **no new red**.
+- The four platform suites (Schemathesis * Akto * Playwright * Performance/k6) were **not run** for
+  this PR: it changes no API surface, no spec and no gate. The shell-suite set is the suite this
+  change is in.
+
+**Migrations + config** -- none. No migration, no dependency, no lockfile, no manifest, no baseline,
+no spec, no env or compose change.
+
+## Section 4 documentation
+
+Both platform HTML docs move in **this** commit: flow block `28.`, and a KS-1136-keyed cheat
+section, each appended at the **tail** before `</body>` (authored after block `22.` / after the
+KS 1305 section; on develop they land after block `27.` / after the KS 1436 section). The docs
+merge-in re-composed both blocks into develop's matrix format (visible text conserved) and
+renumbered the flow block `23.` -> `28.`, because develop already carries its own `23.`.
+Every pre-existing block was proved **byte-identical**, bounded to its own close tag,
+and the order was read back with a **newline-tolerant** reader whose planted `<h2>\n  99.` control
+is HIT by it and MISSED (0) by a same-line reader.
+
+**Timings are stated, and measured rather than carried forward.** **0** stated timings cover the
+shell-suite set or `09-aggregate-report.sh` at base `d75bfe2deb80`, across `CLAUDE.md`,
+`systemTest/CLAUDE.md` and the test-discipline skill. Must-hit control, same instrument: **4** Akto
+rows, **7** pre-merge, **2** Schemathesis. **No tier budget moves.**
+
+## The executable bit, because `git apply` drops it
+
+`09-aggregate-report.sh` is 100755. After the apply, `git ls-files -s` still read `100755` while
+the file on disk was `-rw-r--r--` and `[ -x ]` read FALSE. Restored with `chmod 755` on **that one
+file**, authorised by the index mode and proved to change **no byte** (`cmp` rc 0, identical
+sha256; a one-byte-altered copy makes the same `cmp` rc 1, so the zero discriminates).
+`checkout-index -a` was never used.
+
+## CI triage note for the reviewer
+
+The known pre-existing shell-suite class is quoted as *61 passed, 6 failed, 0 skipped (of 67)*. At
+this head it reads **`62 passed, 6 failed, 0 skipped (of 68)`** -- MEASURED on the runner, not
+predicted. The denominator and the pass count each rose by exactly one (my suite, green), the
+failing count is unchanged, and the failing SET is identical to the known six. So the pre-existing
+line will not match verbatim, and there is no seventh red.
+
+## Path gate
+
+`pathgatera1.py`: **PASS**, 5 assertions over 4 measured paths, 0 failed. The measured set is
+EXACTLY the declared set; **0** forbidden paths (lock / manifest / baseline / spec) and **0**
+other-lane paths. The **firing control** compares against PR 3's declared set and fails, naming
+the two missing (`check-package-format.sh`, `ks998_...test.sh`) and the two extra
+(`09-aggregate-report.sh`, `ks1136_...test.sh`) paths -- so the pass is not vacuous.
+
+Raised from a Wednesday-held Spark pass (round 1, PASS 7/7), re-proved by Seat R 3rd. The Spark
+golden is **not** cited as evidence: this is the `bash_patch` tier and the golden carries
+`diff --git` / `index` header lines the payload does not.
+
+This is a **runtime** change to a security-reporting job, so a **live sweep is owed** (Section 5f).

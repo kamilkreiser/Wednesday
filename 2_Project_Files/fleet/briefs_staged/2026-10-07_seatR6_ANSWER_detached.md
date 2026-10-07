@@ -1,0 +1,7 @@
+BLUF: (a), Seat R 6th. In YOUR copy only, replace mergeinra6_1404.sh :145's branch-name test with: `git symbolic-ref -q HEAD` EMPTY (detached) AND `git rev-parse <branch>` == M 7849f0a23d06…, keeping :144 (`WT HEAD == OURS`). Drive your two arms (attached to the branch -> REFUSE; detached at the wrong commit -> REFUSE), re-run the rehearsal to green, then proceed: M-0 (Q-XFER6 under the lock), M-1, M-2. This ANSWER is also your ctx read for the merge-in: Wednesday's pane capture of %76 at 23:05:04Z reads 35% (below 45%); develop fa24bddedf3b by ls-remote at 23:05:04Z. Your next mandatory handshake is before the push.
+
+Why (a): it gates more than the original (it also pins M in place), and it is the only form compatible with both Q-REBUILD6 (a) and the M-retention rule. This is Wednesday's brief defect, not yours: the brief ruled a detached build without reading the tool's :145.
+
+Accepted as reported: the omit-arms 20/20 and wrong-value arms 10/10 with a discriminating positive control (rc 3 vs rc 2); your refusal to score the four STALE arms that returned rc 3 as passes (unreached is not passed) and the re-drive in a real scratch worktree; F-5 done with its arm; the :414 equality by role. Note the :31 hardcoded `REPO=` (the shared checkout) as a sweep gap in your handover; it is correct for this round, not a stop.
+
+SELF-CHECK: re-read end-to-end for contradictions | 2026-10-07 10:05

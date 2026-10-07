@@ -1,0 +1,86 @@
+Gate W request, and it carries ONE STOP ITEM: three NEW error classes. Demo is deployed and serving;
+the sweep does not start until you rule on them and give me a ctx read.
+
+== THE STOP: 3 NEW ERROR CLASSES, all singletons, none a live fault — but all three are NEW ==
+My BEFORE was 42,991 lines / 122 classes. AFTER reads 37,497 lines / 23 classes. Each new class is
+ONE line, and I verified all three against the RAW before-text rather than my own parse (BEFORE=0,
+AFTER=1 for each), because my regex parse only captured 73 of the 122 BEFORE classes and would have
+over-reported newness on its own.
+
+1. `secuura-nginx-gateway: [error] <WORKER>: api-gateway could not be resolved (<N>: Server failure)`
+2. `secuura-nginx-gateway: [error] <WORKER>: unexpected DNS response for api-gateway`
+   TWO LINES TOTAL across the whole log, at 22:47:43Z and 23:47:13Z. The second is coincident with
+   api-gateway's own recreate (it was swap 23 of 28, ~23:47), when the container name briefly leaves
+   Docker's embedded DNS. The first lands mid-BUILD, under 2-vCPU load, which is the other way that
+   DNS times out on this box. **0 such lines in the last 3 minutes**, and `getent hosts api-gateway`
+   from inside nginx resolves to 172.18.0.23 right now. The gateway path works end to end: internal
+   and front-door /health/deep both return ready:true with 5/5 dependencies up.
+   My reading: a transient of the swap itself, self-cleared. Your call whether it is accepted.
+3. `secuura-postgres: ERROR: column " @ " does not exist at character <N>`
+   🔴 **THAT ONE IS MINE.** One line, 23:34:18Z. It is my own malformed SQL: I used double quotes for
+   string concatenation in a psql query and Postgres read `" @ "` as an IDENTIFIER. Same shape as
+   D 13th's wrong-password FATAL — a read-only probe writing into the very log it is measuring.
+   Named and attributed so a successor does not chase it. The query was re-run correctly afterwards.
+
+== DEVELOP MOVED AGAIN, AND I MEASURED IT THE WAY THAT ANSWERS THE QUESTION ==
+  Now 69f2045af2a4f5f0b83b2f76c62514512abdc7b5 (Seat R 6th's #1404 squash, KS-1436). 1383 head still
+  32e8459bc0f5, unmerged.
+  CUMULATIVE from DEPLOY_SHA: ahead 12, behind 0, merge_base d75bfe2deb80, 7 paths under Blockchain/,
+  and a naive read of that says `migrations` IS flagged -> looks like your STOP condition.
+  IT IS NOT, and the cumulative figure is the wrong instrument. `migrations` is flagged ONLY by
+  packages/shared/package-lock.json, which was already inside fa24bddedf3b — the move you had already
+  ruled on and accepted as D0. Measuring the INCREMENT since that D0:
+    fa24bddedf3b...69f2045af2a4 : ahead 1, behind 0, 4 files.
+    Only ONE is under Blockchain/Dev/: scripts/__tests__/tenant_isolation_stderr_own_file.test.sh,
+    and it maps to NONE. The other three are Blockchain/Testing/jobs/06-tenant-isolation.sh and two
+    Projects Documents HTML files, none of them an image input.
+    DISTINCT SERVICES FLAGGED = 0. MIGRATIONS-IMAGE INPUTS = 0.
+    Controls on the same mapping still fire (services/kyc -> kyc only; docs/VOCABULARY.md -> NONE),
+    so that 0 is a measured zero, not a vacuous one.
+  So under your pre-ruling this is RECORDED, not a STOP: additive, DEPLOY_SHA still a strict ancestor,
+  no migrations input. New D0 for the record: 69f2045af2a4.
+
+== DEMO'S STATE RIGHT NOW ==
+  Deployed at d75bfe2deb80, 28 swapped, all healthy, 0 rollbacks. Settled census at 23:53:26Z:
+  34 running / 36, ZERO containers with RestartCount > 0 except demo-service (excluded BY NAME),
+  postgres/redis/pgbouncer/nginx-gateway never restarted. free 13,221 MB, swap 467 MB of 6,143.
+  startupMigrations ran:true failed:0; check-startup-migrations.sh rc 0 after its seven controls.
+  KS-535 PASS, .env byte-identical. Final REVISION names DEPLOY_SHA; s169's is preserved.
+  Full detail is in the DEPLOYED mail sent just before this one.
+
+== THE ANSWER TO THE MAIL YOU SAID NEEDED NO REPLY ==
+  Your 22:38:17Z warning about machine-generated ghost text at my prompt offering build->swap
+  permission: **no such line ever appeared.** I held at that exact boundary on my own — build ended
+  22:52:10Z, I ran STOP 2-demo, then mailed Gate S and waited for your ANSWER. Nothing I acted on came
+  from anywhere but your DKIM-passing mail, read out of the inbox and verified by subject each time.
+  I also note that your 22:38 mail sat unread for an hour because no tap arrived for it; my watcher
+  found it the moment I armed it, which is the argument for arming it regardless of taps.
+
+== THE SWEEP I WOULD RUN (ITEM 7), if you release Gate W ==
+  Every row keeps §5f `live sweep owed`; a demo PASS is a DONE CANDIDATE ONLY.
+  D 7th's markers_live.tsv 15 rows (cmp-identical across D 12th and D 13th, sha16 30b1067420470be3)
+  + D 12th's 8 rows, dist-bytes two-sided against :pre-20261006, KS-1345 INVERTED, controls bracketing
+  every verdict (impossible marker 0/0, ubiquitous token N/N).
+  ALREADY MEASURED, two-sided, during the swap and reportable now:
+    KS-1404 -> PASS. TSA_TRUST_ANCHORS_PEM ABSENT before / PRESENT-nonempty after; /app/config absent
+    before / holds README.md + tsa-trust-anchors-dtrust.crt + tsa-trust-anchors.crt after; anchors
+    sha16 3258799538648a96 == the expected clone value; readable by uid 1001; fabricated-path control
+    ABSENT both sides.
+    KS-723 -> the served yaml md5 is 0b82a6f5703329925abedd24b7bd6ca6 == the clone's, and the bind
+    mount's container inode now equals the host's (it did NOT before the recreate: 1311745 vs 1315242).
+    I still owe the `GET /api/anchors/tx/{txHash}` declaration check with its fabricated-path control.
+    KS-1054 -> 038a recorded on [secuura], four tables exist, RLS unchanged from ITEM 0.
+    KS-1041 step 2 -> originate's boot line reads `[gateway-provenance] DISABLED`, exactly once,
+    matching GATEWAY_VOUCH_SECRET having no usable value.
+  L rows (KS-1005, KS-1210) NOT RUN unless you name them; W rows (KS-938, KS-1278) NOT RUN under
+  card -1006 = c.
+  ⚠ One instrument rule I will carry into it: front-door STATUS CODES are useless on this host. Six
+  paths all returned 200 and so did my control `/zz-no-such-path-d14` — it serves a catch-all. Only
+  response BODIES are evidence, and any row I report will have been read from a body.
+
+== WHAT I NEED ==
+  1. A ctx read. Sweep only under 80%; otherwise I WRAP COLD with the sweep handed on, and the
+     DEPLOYED mail has already gone so nothing is owed on that front.
+  2. Your ruling on the three new classes: accepted (I believe 1 and 2 are swap transients and 3 is
+     mine), or a STOP that needs something more from me before the sweep.
+Holding. Watcher armed. Demo is serving and untouched since the last swap.

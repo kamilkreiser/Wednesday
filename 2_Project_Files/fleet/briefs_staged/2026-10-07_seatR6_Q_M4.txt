@@ -1,0 +1,109 @@
+BLUF
+M-3 IS DONE: M' 6ea65f64e6392d805fd407b6f03e408d38a6b957 is AT ORIGIN, push rc 0 in ONE attempt,
+371 s, no rc 141. Actions on M' are complete and ALL THREE reds are PROVEN pre-existing, by log,
+with a comparator and a live control for each. ZERO new failures.
+M-4 IS BLOCKED, and not on the merge: build_addendumra6_1404.py carries TWO MORE assertions of the
+same inherited class as :145 and :180, and one of them is the guard that stops a seat INVENTING an
+Actions verdict. I will not rewrite that one on my own reading. It is your call.
+
+THE PUSH, measured off the tool's own artefacts
+pushra1_ff.sh BARE under `env -u GIT_SSH_COMMAND` (asserted `<unset>` first). FF_DRYPROOF=1 ran
+immediately before and passed every guard: origin head c117c0160684 == EXPECT, FAST-FORWARD
+confirmed, "not pushing". Real push 23:22:49Z -> 23:29:00Z = 371 s, ONE attempt. rc 0 from the
+tool's OWN `.rc` file (s-ra4-ks1436-ff-6ea65f64e639-push.rc), never through a pipe.
+FULL push.out is 1,632 lines. Read at position, not from a summary:
+  :1628  PREFLIGHT INCOMPLETE — 12/15 legs ran, 3 SKIPPED. Nothing failed.
+  :1607  shell suites: 69 passed, 0 failed, 0 skipped (of 69)   <- 69 = develop's 68 + #1404's own
+  :1626  OK — 13 code guards passed.
+  :1029+ html_docs_matrix: 12 passed, 0 failed  (GREEN IN-HOOK)
+  :66    audit-gate: 9 distinct advisories reported, 24 baselined.
+  :88    audit-locks: … 7 advisories match, 7 already baselined.
+The 3 SKIPPED legs are all `SKIP — local stack not up on http://localhost:6882` (:57, :60, :93).
+0 `PREFLIGHT FAILED`, 0 `rc 141`, 0 `FIXTURE BUILD FAILED`, 0 `MISMATCH`, against a POSITIVE
+CONTROL of 1,097 `ok` lines in the same file — so those zeros are measurements.
+Legs 6 and 7 agreed with my pre-push DRY read exactly, which I ran after `npm ci --ignore-scripts`
+(rc 0) + `npm run build --workspace=packages/shared` (rc 0, dist/index.js 17,746 B) IN the pushing
+worktree, outside the lock.
+AT ORIGIN NOW: refs/heads/feature/ks-1436-…-ra4-6 AND refs/pull/1404/head both read
+6ea65f64e639. develop still fa24bddedf3b. LOCAL branch ref still reads M 7849f0a23d06 — retained,
+VOID, never moved. Worktree porcelain 0, 0 locks, shared checkout's develop still c56dd7c32edf.
+
+THE FORMAT GATE — I nearly reported a vacuous pass
+My first run fed it the pre-push hook's REF LINE on stdin and it printed NOTHING at rc 0. My
+"control" repeated the same wrong input and was equally silent, so it proved nothing. The script
+says at :43 that stdin takes repo-relative PATHS. Re-run with the real 195-path range:
+`4 package(s) checked, 0 skipped, 0 failed` — akto, api-explorer, performance, playwright all
+`format:check OK`. ZERO `SKIP — … deps not installed`, so nothing was owed an install. `--all`
+gives the same four, which is the control that the gate is live.
+
+ACTIONS ON M': 6 runs, two agreeing COMPLETED polls. 3 success/skipped, 3 failure, 0 NEW
+(Worth noting against the GO: the GO expected "1 run (Dependabot standalone locks, SKIPPED)". M'
+drew SIX. Same observation G 3rd recorded on #1406 — Actions do run, which the repo CLAUDE.md's
+"Actions is retired" note would not predict.)
+  success  PR — Lockfiles (path-skip twin) · pr-premerge-ack      skipped  Dependabot standalone locks
+  CLASS 1 — Security Scanning / job 'Dependency Audit' / step "Audit-contract suites (the gates'
+    own validator)". MY log: `expected exit 3 (refused), got` x1, `KS-788` x6, ##[group] x19.
+    COMPARATOR run 37538969633, branch dependabot/…/vite-8.2.2, head 3d901a8820b0: the SAME failing
+    step, `expected exit 3 (refused), got` x1, `KS-788` x6, ##[group] x19 — identical counts.
+    BREADTH: 10 of 10 recent completed Security Scanning runs are FAILURE; 9 of 9 excluding my own
+    head, across 6 unrelated branches INCLUDING feature/ks-1437-advisory-lock-refresh-g3-1, the
+    branch whose merge is my own D. ⚠ There are 0 completed Security Scanning runs on the develop
+    BRANCH, so this class has NO develop-branch comparator — I used unrelated branches plus the
+    g3 branch, and I am naming that limitation rather than claiming a develop-side line.
+  CLASS 2 — PR Security Gates (KS-168) / job 'Code Security Gates' / step 'All shell test suites
+    (KS-666 / KS-731 — globbed, not listed)'. MY log: `packages/shared is not built` x1, ##[group]
+    x24. COMPARATOR: the newest develop-BRANCH failure, run 37538612736, head fa24bddedf3b — which
+    is literally MY D — same line x1, ##[group] x24. BREADTH: 46 of 46 completed develop-branch
+    runs of this workflow are FAILURE. This one is proven on a develop-side head exactly as the
+    rule requires.
+  CLASS 3 — pr / four jobs, all stack-slot suites: 'Playwright suite' (Quality gate — unit suite),
+    'Schemathesis suite' (Install + Enforce), 'Performance suite (k6 smoke)' (Enforce + Upload),
+    'Akto suite (PR)' (Boot Akto stack + Enforce). BREADTH: 15 of 19 recent completed `pr` runs are
+    FAILURE and 4 cancelled — ZERO success; 14 of 18 excluding my head, and the failing branches
+    INCLUDE `develop` itself.
+Nothing outside classes 1-3. Nothing red that is not red on a develop-side or sibling head.
+
+🔴 M-4 BLOCKER: TWO MORE SUPERSEDED ASSERTIONS, ONE OF WHICH I REFUSE TO TOUCH MYSELF
+build_addendumra6_1404.py (my copy of R 5th's builder; RA5_ -> RA6_ 44 sites, 'Seat R 5th' -> 6th
+2 sites, 0 residual, AST OK). You warned it was "written NARROW to R 5th's GO". It is worse than
+narrow in two places.
+(1) :78-80 — THE ACTIONS-VERDICT GUARD. It requires MY GO to contain the literal clauses
+    `"0 failing"` and `"nothing to classify"`, and refuses with "refusing to GUESS it" otherwise.
+    YOUR GO states neither, deliberately: it says Actions on M' are classified "by your brief's
+    pre-existing-failure rule (classes 1-3), PENDING waited to two agreeing polls" — i.e. it
+    DELEGATES the verdict to me. So the guard is doing exactly its job: it is stopping me from
+    supplying an Actions verdict that the GO did not. I WILL NOT re-point this one on my own
+    reading — rewriting the guard that exists to stop me inventing an Actions verdict, using my
+    own Actions verdict as the justification, is circular. It needs your words.
+(2) :86 — `assert len(SUBJECT + f" (#{PR})") == SUBJ_LANDS`. This encodes the DEAD SUFFIX
+    ARITHMETIC that MG-11 removed. It demands landed == bare + len(" (#1404)") = 66 + 8 = 74.
+    Your GO declares `66 chars, LANDS 66`, and my brief says a GO saying "lands 74" carries the
+    dead arithmetic. So this assert cannot pass under the current rule for any correct GO.
+EVIDENCE THAT THE ARMS BEHIND THIS ARE SOUND NOW, AND WERE NOT BEFORE
+  12 of 12 omit-arms REFUSE (every one of RA6_REC, _WT, _SEAT, _WRAP, _GO, _BODY, _PR, _OWN_KEY,
+  _EXPECT_PATHS, _MODE_CENSUS, _WRAP_DIGEST, _BODY_DIGEST).
+  🔴 But my FIRST pass at the 9 wrong-value arms reported "9 refused, 0 did not" while the POSITIVE
+  control ALSO failed — the tool was refusing EVERYTHING, including correct input, on the very
+  first regex. Those 9 PASSes were worthless and I did not keep them. I re-pointed 6 patterns at
+  your GO's actual phrasing (`^- develop D:`, `^- PR head:`, `^- Target tree T':`,
+  `Declared squash subject:`, `LANDS` not `lands`, each still via one() so a pattern matching zero
+  OR twice still refuses — re-aimed, not loosened), and I will re-drive all the arms, including
+  R 5th's REAL GO (saved from the inbox, 4,660 B, 16:20:45Z, naming Seat R 5th, D b39051390ff6,
+  T d717255d5376) as an input that must REFUSE, only once the positive control SUCCEEDS.
+
+WHAT I RECOMMEND
+(2) is mechanical: re-express as `SUBJ_LANDS == len(SUBJECT)` and keep the `(#` refusal, with an
+arm proving a GO declaring "lands 74" REFUSES. I can do that on your word.
+(1) is yours to word. The honest form is a clause set that asserts what your GO DOES state about
+Actions — e.g. requiring the literal "pre-existing-failure rule" and "two agreeing polls" — and a
+flag driven by MY measured classification, which I would then have to state in the addendum as a
+measurement with its comparators, not as a GO quote. Tell me the clauses you want and I will use
+them verbatim.
+
+QUESTION
+How do I re-point build_addendumra6_1404.py's :78-80 clause set and :86 landed-length assert?
+Nothing else blocks M-4: the squash subject, body file, merge_note and gate verdict line are all
+re-hashed and match your GO. 0 locks held, nothing merged, KS-1436 untouched, watcher alive
+pid 45345.
+
+-- Seat R 6th

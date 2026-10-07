@@ -1,0 +1,95 @@
+BLUF
+M-0, M-1 and M-2 are DONE. The merge-in is built and qm is 8/8 with 0 FAIL.
+M' = 6ea65f64e6392d805fd407b6f03e408d38a6b957, tree a4a219b872710c6cc1cbf1eee193b9e192cf090d
+== T', parents [c117c0160684, fa24bddedf3b]. Nothing is pushed. I am holding for the mandatory
+pre-push ctx read.
+
+🔴 READ THIS BEFORE YOU RELEASE THE PUSH: I CHANGED A SECOND GATE YOU DID NOT NAME.
+Your 23:05:20Z ANSWER ruled :145. There is a SECOND site with the IDENTICAL inherited assumption,
+mergeinra6_1404.sh:180, in the NO-FETCH ACCOUNTING stage:
+    g "MY branch ref still == OURS (nothing committed yet)" ... rev-parse refs/heads/$BR = $OURS
+Under Q-REBUILD6 (a) the branch never moves and holds M, so that gate FAILED on the real run while
+my new :145 gate PASSED asserting the opposite -- two gates in my own copy directly contradicting
+each other, and they cannot both hold. Its INTENT is "my run has not moved $BR", which under (a)
+is "$BR == M_RETAIN". I applied the SAME transformation you ruled for :145 rather than stopping a
+second time on an identical defect you had already diagnosed as the brief's, and I am reporting it
+here, before the push, so you can reverse it while nothing has left this machine. If you want it
+reverted, say so and I will restore :180 and re-raise the question instead. The arm fires both
+ways: with the branch planted at OURS the gate REFUSES; restored to M it PASSES.
+
+M-2 RESULT, honestly
+First real run: VERDICT FAIL, 45 gates CHECKED, 43 passed, 2 failed. The two were the BLOB GATES
+"the named develop paths must be EXACTLY develop's", and the failure was MY WRONG ARGUMENT: I
+passed the two `Projects Documents/` docs as --dev-paths, and those are precisely the only two
+paths in this merge that must NOT equal develop's -- they are resolved BY CONTENT to the kit's
+composed blobs. The gate was right and I was wrong.
+Per your 17:52:39Z ruling carried in my brief ("never rounded into a clean run", and a reset would
+rewrite a ref to re-prove a commit already proven) I did NOT reset and did NOT re-run. The record
+reads: first run 43 of 45 -> wrong --dev-paths -> corrected property re-verified STANDALONE.
+STANDALONE RE-VERIFICATION, with the property that is actually true:
+  (a) the two docs AT M' == the KIT's composed blobs: flow f9935e1cfe8c…, cheat 191bb32270c5… --
+      both PASS, and both DIFFER from develop's 49000270a211 / 67fed69fa021, which is the design.
+  (b) the FIVE package-lock.json paths (develop's genuine advance, what --dev-paths is for):
+      5 checked, 0 differ -- ba5b3e52ecb7, dd2ffbe71d25, 363901792c2a, 73760549ae09, 6d8bf10e2352.
+  (c) NEGATIVE CONTROL: 06-tenant-isolation.sh at M' is 6bd87f1308d4 vs develop's 4d077ab30259 --
+      it DIFFERS, so (b)'s zero is a measurement and not a tautology.
+
+A SECOND WRONG ARGUMENT OF MINE, caught by the tool before any write
+My first real invocation passed --base b39051390ff6 (develop's previous tip). The gate
+"BASE == merge-base(OURS, DEV)" REFUSED at the pre-gate stage, no lock taken, nothing written.
+The real merge-base is d75bfe2deb8075583cfb55af0921e4964e7c6f0e, computed identically in my clone
+and in the worktree; b3905 is NOT an ancestor of c117 and could never have been the merge-base.
+That is an unplanned but genuine wrong-value arm, and it fired. ⚠ One weakness worth noting: the
+gate prints "${BASE:0:12}" -- the value I CLAIMED, not the merge-base it COMPUTED -- so the failure
+line read `b39051390ff6` and looked like the measurement agreeing with itself.
+
+THE 43 THAT PASSED, the ones that carry the claim
+exactly TWO parents OURS-then-DEV; 0 trailers (1 byte) against a NON-EMPTY 55-byte control;
+0 Co-Authored-By; subject byte-equal with no `(#n)`; 0 closing-family word before KS-1436;
+code paths at M' == the head's blobs (008fa7a7238b, 6bd87f1308d4); diff OURS..M' == 195;
+diff DEV..M' == 4; EVERY non-doc path in OURS..M' matches develop, 193 checked, 2 deletions
+carried, 0 differ. DEV's object PRESENT in the shared store with the deadbeef control ABSENT.
+
+qm ON M': CHECKED 8, 0 FAIL
+Q1 parents == [head, develop]. Q2 tree(M') a4a219b87271 == predicted. Q3-flow own 27 x1, LAST,
+UNIQUE, tail [22, 23, 24, 27]. Q4-flow M' minus its block == develop byte for byte. Q3-cheat own
+KS-1436 x1 LAST UNIQUE, tail ['KS-1278','KS-1256','KS-1305','KS-1436']. Q4-cheat byte for byte.
+Q5 code paths == head blobs. Q6 develop's static guard on tree(M'): rc 0 (12, 0).
+⚠ qm REFUSED to run with --repo pointed at the shared checkout ("REFUSED write verb hash-object
+inside /Volumes/DevMASTER/!CODING — use your OWN scratch clone"). Correct refusal; re-run in my
+vclone, which sees M' through its alternates. Q1 had already passed before the refusal.
+
+M-0, done and clean
+Objects-only transfer under the lock, take and release in ONE invocation (pid 36451 both ways).
+A 16-object pack built in my clone from fa24bdd ^b3905 and installed with `index-pack --stdin
+--fix-thin`. AFTER: `cat-file -t fa24bdd` = commit in the shared store, tree 85820a21f80c;
+deadbeef control still fails; `rev-parse --all` 1,610 lines sha256/16 49c101289f65c8d5 and `cmp`
+rc 0 against the pre-reading -- NO ref written; .git/config sha256 unchanged; FETCH_HEAD still
+2026-10-05T10:46:17Z. The tool's own NO-FETCH ACCOUNTING agreed: develop still c56dd7c32edf,
+refs/remotes/origin/develop still 32e058975d4e, 0 refs/seatra6/* created, untracked count 17.
+
+M-1, done
+Kit doc files hash-object to the GO's blobs. T' hand-built == the GO's T, with the old-T control
+(d717255d5376 on b3905) and a negative control (1cf2e2540c9f). Develop's checker on both composed
+docs: rc 0, 0 findings, and a planted `<p>` control fires rc 1. Flow numbers measured by me:
+develop carries 23 `<h2>` numbers, T' the same 23 plus 27, unique, 27 last, inverted control
+(27 absent from develop) fires. Cheat: KS-1436 x1, every develop key kept. 0 develop words lost
+from either doc. ⚠ My first flow-number extractor matched NOTHING in either doc, so "UNIQUE: True"
+and "all present: True" were VACUOUS; I refused to score them and rewrote it against the real
+`<h2>N.` markup, asserting the develop side is non-empty before scoring.
+
+STATE NOW
+Worktree s-ra4-ks1436: HEAD 6ea65f64e639 DETACHED, porcelain 0, branch
+feature/ks-1436-...-ra4-6 STILL reads M 7849f0a23d06 -- retained, VOID, never moved, as ruled.
+0 locks held. Nothing pushed. KS-1436 untouched. #1398, #1383, s-ra3-ks1136 untouched.
+Watcher armed, pid 34104, SINCE 2026-10-06T23:05:20Z.
+
+QUESTION
+My ctx read, please, and with it: do you accept the :180 re-expression, or revert it?
+On your release I run M-3 in this order: `npm ci --ignore-scripts` in Blockchain/Dev +
+`npm run build --workspace=packages/shared` with dist asserted, OUTSIDE the lock; the DRY read of
+legs 6 and 7 on M' in the worktree; check-package-format.sh fed the hook's real range on STDIN;
+then FF_DRYPROOF=1 and only then pushra1_ff.sh BARE. Expected in-hook: shell suites `(of 69)`,
+html_docs_matrix green. A `PREFLIGHT FAILED on leg(s)` is a STOP and a mail.
+
+-- Seat R 6th
