@@ -15,6 +15,12 @@ supersede: REPLACED WHOLESALE 2026-10-07 05:3x by the night seat c1dbe0b9 (boote
 1. `inbox_digest.sh --inbound` WHOLE, + `--all` for `[QUESTION]` rows in the last 12 h, each matched to a later ANSWER. Bodies are fetched by message id and saved to `fleet/briefs_staged/`.
 2. **Morning ticket sweep + receipt** (the standing grant). Value first: kintsugi deployed + swept at d75bfe2 (night of 10-06); gate71 GO; the #1404 merge-in built and verified, held by the freeze; the KS-1436 ticket filed.
 
+## 🔴 LATE-EVENING SEAT (booted 22:47 2026-10-07) — 22:55 CHECKPOINT, ctx 48% — READ THIS FIRST
+- FLOOR: %0 wednesday · **%87 Seat R 12th** (VERIFIED rung 5 at 22:50: its pane names and reads the launch brief; ctx 14% → 18%, still in ITEM 0) · %1 monitor.
+- **#1410 re-predicted independently by Wednesday** (this session's clone `…/eb699e68…/scratchpad/wclone`; develop 2c27ddfeef51 unmoved at 22:5x): tree e9494f50…, flow cf2e1598…, cheat 6a8f712f… == the drafter's. **GO DRAFTED + parser-tested, NOT SENT:** `fleet/briefs_staged/2026-10-07_seatR12_GO_1410_DRAFT.md` (11/11 builder parsers exactly once; fill `@LSR@` with the ls-remote time; re-read develop seconds before sending; send it as its OWN mail AFTER the plan-confirmation ANSWER, subject `GO (Seat R 12th): merge 1410 on gate73`).
+- **Spark delta screen sub-agent RUNNING** (commissioned 22:54) → `0_Brain/reference/2026-10-07_spark-screen/SCREEN_2300.md` + brief dirs under `local-model/night/briefs/`. On return: read the report WHOLE and every brief whole, then queue via `local-model/spark/queue.md`. A rotation kills it: re-commission from the 22:54 note line.
+- Everything in the 22:46 block below still stands (OWED list, open cards, Peter's merges).
+
 ## 🔴 ROTATION HANDOVER — evening seat, 22:46, ctx 82% — READ THIS FIRST (supersedes every block below)
 - FLOOR: %0 wednesday · **%87 Seat R 12th** (`Secuura/Blockchain-R`, launched ~22:46 AEDT; brief verified at destination 11:46:13Z: `fleet/briefs_staged/2026-10-07_seatR12_merge1410_5d_raise.md`, SEND AMENDMENT at its top rules all questions) · %1 monitor. **First act: verify R 12th at rung 5/6** (its pane names the brief / its plan-confirmation mail).
 - **gate73: 3 of 4 LANDED + verified at source** (#1407 7bcc2ed5, #1409 841e4ab1, #1408 2c27ddfeef51). **#1410 is R 12th's** (a FIRST merge-in, `--expect-conflicts 2`, the kit's qm Q1 unchanged). Drafter's prediction on 2c27ddfe: tree e9494f50395b1aa30f1b9bf87b1cbac97786d8b2, flow cf2e1598894f018dd5956116d5a155d1ebf876ef, cheat 6a8f712f5d1c7a3c440abd6749f3b1736ea2458e.
