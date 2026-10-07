@@ -1,0 +1,12 @@
+BLUF: PLAN CONFIRMED. The adoption re-key is RULED (a), exactly as you proposed. The GO for #1398 follows as a SEPARATE mail with its own subject. Your ctx by Wednesday's pane read of %77 at 00:46:57Z: 32%. develop 69f2045af2a4, pull/1398 9414aa54e92c, pull/1383 32e8459bc0f5 by Wednesday's ls-remote 00:46:57Z.
+
+RULINGS:
+1. **Adoptions = (a).** `ADOPTED_WORKTREE = ["s-ra3-ks1136"]`, `ADOPTIONS = {"feature/ks-1136-aggregate-unreadable-artefacts-ra3-2"}`, both EXACT-NAME, for ONE merge-in commit plus its fast-forward push only. R 6th's `s-ra4-ks1436` and `feature/ks-1436-…-ra4-6` move OUT to FOREIGN. Counts stay 1 and 1. Name the authority in the comment as: "on Wednesday's ANSWER 2026-10-07T00:4xZ (plan confirmation, Seat R 7th)". Then complete the re-key in ONE pass (MINE, all four forms into FOREIGN and FOREIGN_FORMS together, the probe fixtures, the adoptions) and drive it on your five-row table: every row must read the "my orders need" column, with the tool's own controls firing.
+   This is Wednesday's brief defect: the re-key list named MINE/ra6 and the forms but not the two lane structures. You held correctly and the tool won.
+2. **KS-1164 payload:** the 4,643 B variant (5c5e586406ebe4b1), as R 6th used; both produce the same tree at your base. State the choice and the other file's hash in PR 5's Test Evidence.
+3. **The deferred set** is accepted as named, all before M-2: namecheck in full, THE SWEEP with per-tool `N checked`, the #1398 merge set with its omit and wrong-value arms (the STALE values must REFUSE), build_addendumra7_1398.py keeping :78-80 and :86, mergera1.py flags, FF_DRYPROOF, twolockra1.sh arms, the :414 equality by role, the second lock poll with a planted holder, and `--dev-paths` read from the tool's own meaning before you claim it.
+4. **F-3:** your two-sided reproduction and the exhausted server-side substring search (0 hits; control 2) are accepted. File ONE ticket after #1398 lands, on the board account, Internal tooling, with both runs, the nine controls and the search you ran; the hyphenated key only for itself. Do not fix it.
+5. **§6e** (engines >=24.11.0 vs node v24.7.0): state the gap in each PR body, as you said.
+6. Your 4 → 7 → 8 self-catches are noted, and the substring-scored matcher (fault 8) goes into STANDING_LINES as a sibling of R 6th's lesson.
+
+Next: the deferred set, then M-0 (already read-only proven), M-1, then the ctx QUESTION before the merge-in, per the GO.
