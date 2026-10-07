@@ -7,7 +7,7 @@ status: live
 
 # Boot digest — headline + rules of every lesson (open the file when it fires)
 
-Generated 2026-10-08 08:03 from 221 lesson files (998,810 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 13 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
+Generated 2026-10-08 09:22 from 222 lesson files (1,000,849 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 13 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
 
 ## The T9 SSD is the master — Wednesday must be fully portable
 `2026-07-31_fully-portable-drive.md` · principle · 2026-07-31 · status: superseded — the "T9 is the master" half by [[2026-08-25_one-drive-devmaster-is-master]] (2026-08-25); the portability principle itself still lives
@@ -7081,4 +7081,18 @@ sections (open the file for these): RULED 2026-10-05 ~11:1x — Kam (terminal, v
 3. **"Clear after a month or so"** is a review, not an automatic delete: at the monthly check, archives older than ~30 days are listed to Kam (or cleared under his standing word, stated as Wednesday's reading). Never a silent sweep.
 4. **Remote boxes:** for images on a VM (demo, kintsugi), the archive route is `docker save` streamed to G-DRIVE over SSH; measure its size and time before relying on it. A secret never goes into an archive (no `.env`, no keys).
 5. **Briefs carry it:** any disk-freeing brief names the G-DRIVE option and its path before any deletion step.
+
+
+## Grant: this seat may spend to 100% of the weekly allowance, for raise, gate and merge seats only, until the renewal
+`2026-10-08_use-to-100pct-raise-gate-merge-seats-only.md` · grant · 2026-10-08 · status: live
+
+**The operative case, so the headline matches it:** the weekly gauge is between 90% and 100% and Wednesday is about to launch a Secuura seat. **If it raises, QA-gates or merges PRs (or deploys, at most two at once, per the card's option text), launch it with `WED_USAGE_STOP=100` and name this file and the EXPIRING-GRANTS row as the authority.** Any other kind of Claude seat still stops at 90%.
+
+**How to apply:**
+1. Every launch past 90% names this file, the card id, and which clause it falls under (raise / gate / merge / deploy).
+2. The Spark takes every ticket it can be briefed for; Claude seats only raise, gate, merge or deploy (≤ 2 deploy seats).
+3. **Expiry is an EVENT:** the weekly allowance renews (~Sun 11 Oct, statusline `renews`) or Kam switches accounts or says stop. Do not renew by inference.
+4. Unchanged: the v1.3 signature classes, the QA gate before every merge, KS-535, Phase 0, one client per Spark task, and leg 14 (KS-1450) still refuses any push touching `Blockchain/Dev/`, so this grant does not by itself unblock the raise backlog.
+
+**Family:** [[2026-10-06_use-to-100pct-spark-all-tickets-one-or-two-deployers]] (the same shape, expired at the 10-07 /login) · [[2026-09-14_at-90pct-weekly-usage-no-new-agents-wednesday-plus-local-model]] · [[2026-09-06_a-scoped-override-carries-its-own-expiry]] · [[2026-08-03_go-slow-earn-autonomy]] (rule 5).
 

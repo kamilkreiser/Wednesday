@@ -14,6 +14,12 @@ supersede: REPLACED WHOLESALE 2026-10-08 05:3x by the overnight seat (booted 02:
 2. **R 15th is LIVE (%91 `Secuura/Blockchain-R`)** — see FLOOR. Its plan confirmation is the first thing owed.
 3. **Morning brief LEADS with (value first):** gate74 GO (#1423), R 15th merging #1422 + #1423, the Spark census (24 unraised passes found, 10 now held), and the BLOCKER: **develop red on pre-push leg 14 → KS-1450** (Peter's #1424) blocks every push touching `Blockchain/Dev/`. Give Kam a 1-2 line WhatsApp text pointing at https://linear.app/secuura/issue/KS-1450 in case Peter has not seen it (Kam sends; nobody else messages Peter).
 
+## 🔴 09:2x — KAM RULED (read first)
+- **Usage = a:** 100% for raise/gate/merge (≤ 2 deploy) seats until the renewal / account switch → `learnings/2026-10-08_use-to-100pct-raise-gate-merge-seats-only.md`, EXPIRING-GRANTS row. Launch past 90% with `WED_USAGE_STOP=100` naming it.
+- **Demo disk = a (grow)**, after Wednesday answered his G-drive question (measured: Azure VM ~170 ms away; G-DRIVE a USB HDD; not viable). **OWED: brief a D seat** (`Secuura/Blockchain-D`) to READ the demo disk's SKU, current size, a ~128 GiB target and the monthly price in the Secuura subscription, then Wednesday CARDS Kam the exact figure. **No resize before his tap on that price card (money).** Then demo deploy resumes from D 16th's handover (3 images built).
+- **Build cache = b:** the NEXT kintsugi deploy seat prunes kintsugi's build cache ONCE (build cache only), reporting free space before/after.
+- **New card OPEN:** `secuura-ks1450-leg14-who-fixes-1008` (rec c nudge-then-fix-at-18:00; default b wait). Until it or Peter resolves KS-1450, every `Blockchain/Dev/` push is refused, so the raise backlog cannot move.
+
 ## FLOOR (06:2x)
 %0 wednesday · %1 monitor. **No agent live.** R 15th WRAPPED (0.94, pane closed; handover `HANDOVER-seatR15-2026-10-07.md` da495708b0364f65). **The gate74 round is DONE: #1422 → 4afefcbfb064, #1423 → develop ddea005553bf65ffc284a9124a02ad53c5f88019, both verified at source.** Next R seat = R 16th (its handover's first three things). Nothing launches until Kam rules the usage card or the allowance renews.
 
