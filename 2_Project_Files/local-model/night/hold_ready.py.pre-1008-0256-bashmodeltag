@@ -70,8 +70,6 @@ if '--seat' in args:
     i = args.index('--seat'); seat = args[i+1]; del args[i:i+2]
 # 2026-09-25 (the Spark backend, local_model_task.sh LM_BACKEND=spark): the READY's filename token and heading name the
 # model that WROTE the diff. Default = the Ornith values, byte-identical to before. code_patch path only (refused elsewhere).
-# 2026-10-08 02:5x (Wednesday): bash_patch too — the Spark writes bash_patch runs (KS-1139, 10-07), and without the tag the
-# READY named a Spark diff `ornith35b-q4`, a false label; KS-1139 had to be held by hand. --brief stays code_patch-only.
 model_tag = 'ornith35b-q4'; model_label = 'Ornith'
 if '--model-tag' in args:
     i = args.index('--model-tag')
@@ -176,10 +174,8 @@ def _detect_doc_patch():
     return is_doc
 IS_DOC_PATCH = (not IS_BASH_PATCH) and _detect_doc_patch()
 IS_CODE_PATCH = (not IS_BASH_PATCH) and (not IS_DOC_PATCH) and ('test_file' not in inp and 'product_file' in inp and 'suggested_test_file' in inp)
-if brief_given is not None and not IS_CODE_PATCH:
-    die("--brief is supported on the code_patch path only (2026-09-25); this run is not code_patch")
-if model_tag != 'ornith35b-q4' and not (IS_CODE_PATCH or IS_BASH_PATCH):
-    die("--model-tag is supported on the code_patch and bash_patch paths only (2026-10-08); this run is neither")
+if (model_tag != 'ornith35b-q4' or brief_given is not None) and not IS_CODE_PATCH:
+    die("--model-tag / --brief are supported on the code_patch path only (2026-09-25); this run is not code_patch")
 if not IS_BASH_PATCH and not IS_DOC_PATCH and not IS_CODE_PATCH and 'test_file' not in inp:
     die(f"input.json is neither test_only (test_file) nor code_patch (product_file + suggested_test_file), and the run's artefacts name neither bash_patch nor doc_patch: keys {sorted(inp)}")
 
@@ -644,7 +640,7 @@ def hold_bash_patch():
 
     now = datetime.datetime.now()
     stamp = now.strftime('%H:%M %Y-%m-%d'); day = now.strftime('%Y-%m-%d')
-    fname = f"READY_{ticket}-{rowid}_{model_tag}_BRIEFED-BASHPATCH-{title}-PASS-{passed}of{total}_{day}.diff.md"
+    fname = f"READY_{ticket}-{rowid}_ornith35b-q4_BRIEFED-BASHPATCH-{title}-PASS-{passed}of{total}_{day}.diff.md"
     out = os.path.join(NIGHT_DIR, fname)
     if os.path.exists(out) and not dry: die(f"READY already exists: {out}")
 
@@ -666,7 +662,7 @@ def hold_bash_patch():
                       + ('; the checker REWROTE ' + ', '.join(f'section_{k}.diff' for k, _, _ in rewritten) if rewritten else '')
                       + '; patch.diff is the model\'s AS-WRITTEN block, the SECTION FILES are the applied units and the canonical for the raise')
     extra_fences = ''.join(f"\n**APPLIED `section_{k}.diff` ({kinds}) — byte for byte:**\n```diff\n{open(sf, errors='replace').read().rstrip()}\n```\n" for k, sf, kinds in rewritten)
-    body = f"""# READY — {ticket}-{rowid} ({model_label}, briefed, bash_patch, bash) — PASS {passed}/{total} — HELD for QA
+    body = f"""# READY — {ticket}-{rowid} (Ornith, briefed, bash_patch, bash) — PASS {passed}/{total} — HELD for QA
 
 > ⚠ **CANONICAL PATCH = `{patch_path}`** (from `ls` at {stamp}; sha256[:16] {patch_sha}, {patch_bytes} B — a BYTE count; {canon_note}: {', '.join('`' + r[2] + '`' for r in sec_rows)}). Checker B2 (verbatim from checker.out): `{b2_line}`{strict_note}; {golden_clause}.
 
