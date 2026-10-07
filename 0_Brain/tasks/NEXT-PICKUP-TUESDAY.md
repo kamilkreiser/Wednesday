@@ -6,6 +6,18 @@ status: live
 supersedes: the 2026-09-14 pickup, kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s1-wholesale
 ---
 
+## 🟢 DELTA 168 — 2026-10-07 15:0x (s101, ctx 66% light checkpoint; band 80-90). **READ THIS FIRST, THEN 167 (its OWED/KAM lines stand; its TURN and GATE lines are superseded below).**
+### STATE (each line read at source this seat)
+- **MAIN = 8b7ae54.** RD-736 (O) and RD-697 (N) LANDED and CLOSED today (push Builds green, verified by gh run view; alerts 246 unchanged). **TURN = M: RD-735 @ 7e2cc9f** (TURN 03:49Z; M's forward merge 6fe693c CLEAN; merge ticket queued). **M MAILS A PRE-PUSH DIFF FIRST: GO only if it is the cap hunk (main's text), the budget hunk (fixed text), the cell hunks and counts.** Then P RD-430 -> O RD-709 -> N RD-791 -> M RD-603 -> P RD-694 item 4 -> O RD-737 -> M RD-756 -> O RD-708/690/675. Verify every MERGED at source (ls-remote, gh run list --commit: demo SKIPPED, npm-audit, Build inside C-185, alerts count).
+- **GATE 19 LIVE (pane %22, Opus 5.5; switch to Opus 4.8 per-session ONLY if the safeguards flag it, never "Switch automatically").** Members A RD-640 b214f6f, B RD-794 cd171f9, C RD-819 fdd07af, D RD-807 9b15a99, E RD-801+822 6613113, F RD-821 r2 (tool fd223bd2), G RD-721 Icons 64ee309; slots EMPTY. Stamped brief fleet/qa-agent/briefs/2026-10-07_nexusai-gate-batch19.md; launcher launchers/launch_qa_nexusai_gate_batch19.sh; report dir Testing Agent MAIN/projects/nexusai/reports/2026-10-07-gate-batch19/. On its verdict: read WHOLE, score, check the lock, pane_close.sh, then one RELEASE mail per the merge order A, D, E, G, B, C.
+- **GATE 20 FORMING (next commission):** RD-761 fix round (R, TIER 1 — superseding the 23:03Z "tier 2"; fix 0f36695 after the synthetic-feed deviation, proof hold 02 queued; READY must carry the product-tree subclass census + the PR #58 CodeQL run id closing #256-#259) · RD-802 (O, tier 2, stacked on RD-801 6613113; proof queued) · RD-831 (P, tier 1 + browser, legal.html loader to js/legal.js; built 256eacc/11fae98) · RD-747 (N, tier 1, clear recorded in the backup chain as plain {}, with a security cell; confirmed 04:03Z). Template: the gate-19 brief + launcher.
+- **R = S92R (pane %21)**, healthy. **O (%7) is past ~85% by its pane hint:** HANDOVER-S87O.md refreshed 13:42 with a SUCCESSOR block; launch O's successor when O wraps. **M (%9)** ~69% by hint. **P (%20)** ctx 47%. **N (%6)** on RD-747.
+- **RD-721:** when it reaches a demo deploy, the screenshots go to Kam FIRST (the bi-trash glyph changes, 1.11.1 -> 1.10.0).
+### KAM
+0 board messages on 10-07 (live read 15:06). Nothing owed to Kam. Usage 64% (was 51% at 10:08): past 70% the routine minimises cloud agents (Wednesday's routine; Tuesday's seat has no Spark rule; 90% is the hard stop).
+### FLOOR
+%0 tuesday · %6 N · %7 O · %9 M · %20 P · %21 R · %22 gate 19 · %1 monitor.
+
 ## 🟢 DELTA 167 — 2026-10-07 10:0x (s101, ctx 51% CHECKPOINT; band 80-90). **READ THIS FIRST, THEN 166 (its TURN ORDER and GATE 19 member list are superseded below where they differ).**
 ### STATE (each line read at source this seat)
 - **MAIN = 8853e36** (ls-remote 10:0x). **TURN = O: RD-736 @ 61e20ad** (TURN mailed 23:03Z, tap delivered; O's 23:04Z STATUS: forward merge 773f935, own install 2.0.8; s87o-merge-rd736 FIRST in queue-jest). On O's MERGED: verify at source (ref API/ls-remote, push runs, demo SKIPPED, npm-audit, Build inside C-185, alerts), then TURN -> N RD-697, then M RD-735 (pre-push diff rule), P RD-430, O RD-709, N RD-791, M RD-603, P RD-694, O RD-737, M RD-756, O RD-708/690/675.
