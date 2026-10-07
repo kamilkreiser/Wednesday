@@ -54,7 +54,7 @@ if [ "${NOTE_ALLOW_UNLOGGED_SENT:-0}" != 1 ]; then
   MISSING="$(python3 - "$TEXT" "$SENT_LOG" <<'PYSENT'
 import re, sys, os
 text, log = sys.argv[1], sys.argv[2]
-quotes = re.findall(r'sent: (\[[^\]]+\][^"\n]*)', text)
+quotes = re.findall(r'sent: (\[[^\]"\n]*->[^\]"\n]*\][^"\n]*)', text)  # a real route "[Who -> Whom]"; prose mentioning "sent: [" is not a quote
 if not quotes: sys.exit(0)
 body = open(log, encoding='utf-8', errors='replace').read() if os.path.exists(log) else ''
 for q in quotes:

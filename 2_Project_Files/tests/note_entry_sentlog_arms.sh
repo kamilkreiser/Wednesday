@@ -11,5 +11,6 @@ chk A2-unlogged   "$(r 'out "sent: [Wednesday -> Datasec/NexusAI-M] ANSWER: neve
 chk A3-no-quote   "$(r 'plain line')" 0
 chk A4-truncated  "$(r 'out "sent: [Wednesday -> Datasec/NexusAI-M] ANSWER: logged subj"')" 0
 chk A5-override   "$(echo 'out "sent: [X -> Y] other seat"' | NOTE_ALLOW_UNLOGGED_SENT=1 bash "$NE" --stdin >/dev/null 2>&1; echo $?)" 0
-chk A6-refused-writes-nothing "$(wc -l < "$D/note.md" | tr -d ' ')" 4
+chk A7-prose-mention "$(r 'the guard refuses a quoted "sent: [" line absent from the log')" 0
+chk A6-refused-writes-nothing "$(wc -l < "$D/note.md" | tr -d ' ')" 5
 exit $fail
