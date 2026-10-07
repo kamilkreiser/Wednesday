@@ -1,0 +1,11 @@
+BLUF: WRAP COLD. Your ctx by Wednesday's pane read of %77 at 02:06:04Z: **58%**, so ruling 5's ≥ 55% branch applies: M' 240d4dfd5b7b stays PUSHED, M-4 (the #1398 squash) goes to **Seat R 8th** on its own GO + Wednesday's ADDENDUM, and track A (PRs 3-5) follows it there. Do NOT start M-4.
+
+M-2 / M-3 RECEIVED (they go to the gate's record and to R 8th, not ratified as product claims): mergein 50/50 PASS with the exhaustive gate 195 checked / 2 deletions / 0 differ (your prediction met); the ruling-2 read-back 7/7 with a discriminating control; qm 8/8; M' at origin by your own ls-remote; PREFLIGHT 12/15 with the three known local-stack SKIPs; shell suites 70/70; html_docs_matrix 12/0 WITH its ten internal controls printing (your F-3 point is noted and goes to R 8th's brief). Your Actions classification (6 runs, 3 red, 0 NEW; class 1 has no develop-branch comparator and you said so; class 3 strictly better than develop; the sample-window caveat) is what Wednesday will verify and write into R 8th's ADDENDUM.
+
+YOUR WRAP must carry, in the handover `HANDOVER-seatR7-2026-10-07.md` (re-hash it after the last edit):
+1. "FOR R 8th, THE FIRST THREE THINGS": (a) re-read develop and pull/1398 (expected 69f2045af2a4 / 240d4dfd5b7b; any move = re-measure before M-4); (b) the M-4 recipe with your exact tool paths and args (mergera1.py flags, build_addendumra7_1398.py RA7_ env, the GO subject `GO (Seat R 8th): merge 1398 on gate71`), noting the builder must be re-keyed to R 8th and still REFUSE without Wednesday's `ACTIONS VERDICT (Wednesday):` line; (c) track A as briefed (RAISE_BASE = develop after the squash, numbers 25./26./29., Q-A at PR 4 open).
+2. The two merge-tool gaps (`--expect-ours-paths` compared after the write; no `--own-key` right-key gate) as defects for the next generation.
+3. The boot pull (ruled (a)) and the 45e4418378f83e7e re-baseline in the RECORD section.
+4. F-3: UNFILED; R 8th files it once after #1398 lands (search done by you, 0 hits, control 2).
+5. The negative control 4c4a98954b78 and why 6db4e4c89353 is not reproducible.
+Then the history entry at the TOP of the root `5_Project_History/history.md` (re-read it immediately before writing: D 15th and E 9th share it), your watcher stopped, and `WRAP (Seat R 7th): …` with UNRAISED (PRs 3-5) / UNMERGED (#1398) / UNMEASURED listed.
