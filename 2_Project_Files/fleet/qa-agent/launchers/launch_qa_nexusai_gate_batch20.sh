@@ -1,0 +1,975 @@
+#!/bin/bash
+# launch_qa_nexusai_gate_batch20.sh — cross-project QA agent, ONE batched gate on Datasec/NexusAI ("batch 20"), FIVE members (+ TWO ADDENDUM SLOTS),
+# one verdict per ticket, ONE report (drafted 2026-10-08 ~00:55–~01:50 AEDT by a read-only drafting agent for Tuesday; NOT run by the drafter, not even --check).
+# A FRESH gate (not a resume): M0 is origin main as the gate reads it at its own start.
+#   A — RD-761 fix round (TIER 1, Log Analytics sink; CodeQL #256-#259) rd-761-law-endpoint-policy-s89r @ 7f1881e (= refs/pull/58/head): SEVEN commits on 72ca5d3.
+#       azureLogAnalytics bd0a382 -> cfd0024; lawEndpointPolicy beaa819 -> 99730a6; syntheticFeed 884cc39 -> 604dff3. No server.js in the fix round. 4394/268. merge-base(A, M0) 8853e36.
+#   B — RD-747 (TIER 1, the backup chain; security condition on the sign-in keys) rd-747-clear-generation-s87n @ e36529f: ONE commit on 8b7ae54. jsonStorage 2abb5cf -> 9cbfc45. 4334/268.
+#   C — RD-831 (TIER 1, C-14) rd-831-legal-loader-s91p @ e9eeceb: THREE commits on 8b7ae54. legal.html 9567a81 -> 8e6c1a6; NEW static/js/legal.js b56a9ae. 4323/268. ONE browser leg (c3).
+#   D — RD-802 (TIER 2, through code, STACKED on RD-801 6613113 — gate 19's E, NOT on main) rd-802-provisioning-log-injection-s87o @ a103c8e: TWO commits on 6613113. 4322/267. Old lock e9063d4.
+#   E — RD-795 round 2 of 2 (TIER 2, test-only; CAP) rd-795-cap-line-truth-r8-widen-s86m @ c14be9d: 1660a8c on 90b2556 + a forward merge of main f960035. rd618 e60dceb -> 10d3a6b. 4334/269.
+#   THE CROSSES (C-68): server.js COMBINED on every merged tree carrying A (main's RD-735 103de89 x RD-761 round 1 c806ceb); C x RD-721 (gate 19's G) on static/legal.html; D on RD-801.
+#   SLOTS — S1 (RD-777 + RD-776) and S2 (RD-823) join ONLY by the brief's JOINS lines (guard 89). EMPTY.
+#   Main at drafting 0f128cb (RD-709 after RD-735, RD-430; counts 4352/271; lock d6d3b6e). Predicted MTF 4480/278 (with RD-801 as a NON-MEMBER step).
+#
+# LAUNCHED ONLY VIA: cockpit.sh add 'QA/NexusAI-batch20' "bash '/Volumes/KK_T9_External_HDD/TUESDAY/2_Project_Files/fleet/qa-agent/launchers/launch_qa_nexusai_gate_batch20.sh'"
+#   (i.e. /Volumes/KK_T9_External_HDD/TUESDAY/2_Project_Files/fleet/cockpit/cockpit.sh). A tmux pane, NEVER nohup, never run it bare from a seat's shell.
+#
+# AUTHORITY: Tuesday's gate-20 drafting commission (2026-10-08 00:51). READY mails copied in briefs/. THE MODEL RULE: Kam, live board 2026-09-30 09:07,
+# card nexusai-gate11-opus55-safeguard-model-switch, option (b) — QA gates may switch to Opus 4.8 when flagged, PER SESSION.
+# Carried rulings: sqlite3 cached prebuild (2026-10-05_qa_b14_sqlite3_ANSWER.md); full verifies UNBELTED with 4 conditions (2026-10-05_qa_b14_belt_ANSWER.md);
+# npm_config_update_notifier=false on EVERY npm call (2026-10-05_qa_gate16_notifier_ANSWER.md); ruling (b) — lock-starved full verifies NAMED NOT RUN
+# (2026-10-06_nexusai_g18_ruling_b_deliver_now.md); the browser driver (2026-10-04_qa_batch13_browser_driver_answer.md); C-190 + its ADDENDUM: BOTH CodeQL thresholds
+# and the Datasec CodeQL org policy (scanned on a PR before main; fixed in code, never dismissed); C-141 ADDENDA 6/7: --replace for re-files, only a merge HOLD's tag says "merge"
+# (gate tags are qa-b20-*); gate 19 is LIVE and a PEER on the same jest lock (its consolidation shape carried: grouped holds, deadlines, overrun = split).
+# This gate is FINDINGS-ONLY: it NEVER merges (outside its own scratch clones), NEVER pushes, NEVER opens/comments/approves/updates a PR, never
+# dismisses an alert; no fix, no deploy, nothing to Partner Center/demo/prod, no az, no docker, NO npm registry (node_modules offline only, H-31).
+#
+# PATTERN: launch_qa_nexusai_gate_batch19.sh (prompt EMBEDDED, --check mode, pin guards with the C-192 retry, THE MODEL RULE, floor, H-rules, the LIVE
+# negative-control seat derivation 38R, the ADDENDUM-SLOT JOINS parser 89, route-line and stamp guards last). CHANGES, each deliberate:
+#   - FIVE members on FIVE merge-bases; D is STACKED on a NON-MEMBER (RD-801, gate 19) — guard 18c reads rd-801's branch (moved off 6613113 and not on main = REFUSE).
+#   - 93 A, 94 B, 95 C, 96 D, 97 E: each member's premises at source (incl. WRONG 1, 6, 9, 10, 12, 16). No RD-821 member: the lock tool's sha256 is a NOTE (90n), not a pin.
+#   - 18b: main moving and touching server.js / static/legal.html / RD-801's files is a NOTE; a member-ONLY path moving REFUSES; a member already on main REFUSES.
+#   - 98: TWO locks (d6d3b6e at M0, A, B, C, E and their bases; e9063d4 at D, 6613113, d97039f).
+#   - 89: TWO slots (S1 RD-777 on rd-777-776-validators-s92r; S2 RD-823 on rd-823-rd719-cells-s91p).
+#   - 38R: QA/NexusAI-batch19 is expected LIVE (a peer gate); it is added as a negative control when live.
+#
+# Identity: exports NexusAI's OWN az/gh dirs (az unused, gh READ-ONLY for §8); CLAUDE_CONFIG_DIR pinned to Tuesday's store.
+# --check is READ-ONLY in NexusAI: git read verbs (cat-file, log, merge-base, diff, show, rev-parse, ls-remote, grep, rev-list, ls-tree) plus the
+# three-argument merge-tree (stdout only); python/shasum over `git show` output and over session-tools files; grep, ls, ps, tmux, test -e. It writes nothing and starts no claude.
+# ABSOLUTE PATHS ON PURPOSE. Contains a legitimate `cd` (into the QA project, at exec).
+# Usage: launch_qa_nexusai_gate_batch20.sh [--check]
+# Exit: 0 launched (or guards passed under --check) · 2..99 a guard refused
+set -u
+CHECK=0
+for a in "$@"; do
+  case "$a" in
+    --check) CHECK=1 ;;
+    *) echo "unknown argument: $a" >&2; exit 2 ;;
+  esac
+done
+
+PH_STAMP='@STA''MP@'
+
+QA_DIR='/Volumes/KK_T9_External_HDD/!CODING/Testing Agent MAIN'
+TUE='/Volumes/KK_T9_External_HDD/TUESDAY'
+BRIEFS="$TUE/2_Project_Files/fleet/qa-agent/briefs"
+STAGED="$TUE/2_Project_Files/fleet/briefs_staged"
+BRIEF="$BRIEFS/2026-10-08_nexusai-gate-batch20.md"
+BRIEF19="$BRIEFS/2026-10-07_nexusai-gate-batch19.md"
+BRIEF18="$BRIEFS/2026-10-06_nexusai-gate-batch18.md"
+RULINGS19="$STAGED/2026-10-07_gate19_drafter_report_and_rulings.md"
+READY_A="$BRIEFS/2026-10-07_nexusai-rd761-fixround-READY-mail.txt"
+READY_B="$BRIEFS/2026-10-08_nexusai-rd747-READY-mail.txt"
+READY_C="$BRIEFS/2026-10-07_nexusai-rd831-READY-mail.txt"
+READY_D="$BRIEFS/2026-10-07_nexusai-rd802-READY-mail.txt"
+READY_E="$BRIEFS/2026-10-07_nexusai-rd795-READY-mail.txt"
+SQLITE_RULING="$STAGED/2026-10-05_qa_b14_sqlite3_ANSWER.md"
+BELT_ANS="$STAGED/2026-10-05_qa_b14_belt_ANSWER.md"
+NOTIFIER_ANS="$STAGED/2026-10-05_qa_gate16_notifier_ANSWER.md"
+RULING_B="$STAGED/2026-10-06_nexusai_g18_ruling_b_deliver_now.md"
+BROWSER_ANS="$STAGED/2026-10-04_qa_batch13_browser_driver_answer.md"
+ROUTING="$TUE/2_Project_Files/fleet/inbox_routing.conf"
+NX='/Volumes/KK_T9_External_HDD/!CODING/Datasec/NexusAI'
+REPO="$NX/2_Project_Files"
+PBRIEF_A="$NX/qa-briefs/2026-10-07_nexusai-rd761-fixround-tier1-gate.md"
+ST="$NX/session-tools"
+EV_N="$ST/s87n"
+EV_R1="$ST/s89r"
+EV_R="$ST/s92r"
+EV_O="$ST/s87o"
+EV_P="$ST/s91p"
+EV_M="$ST/s86m"
+LOCKQ="$ST/locks/queue-jest"
+LOCKTOOL="$ST/nexusai-lock.sh"
+LOCK_SHA_SEEN='fd223bd2a72d38143d0466fcbcc6762f9bc7f82815084d1a3c53422acc2d7700'   # RD-821 round 2 as gate 19 pinned it — a NOTE here, not a pin
+CLAR="$NX/1_Project_Definition/CLARIFICATIONS.md"
+C133="$ST/s78g/c133-accounting.py"
+C133_SHA='6f938bfcf2557d9f986894734e4b79390dfb90fbc7c62d63b989fbe58f6f972f'
+RPTS="$QA_DIR/projects/nexusai/reports"
+B18_DIR="$RPTS/2026-10-06-gate-batch18"
+B18_REPORT="$B18_DIR/report.md"
+B18_INST="$B18_DIR/evidence/inst"
+B16_REPORT="$RPTS/2026-10-05-gate-batch16/report.md"
+B15_REPORT="$RPTS/2026-10-05-gate-batch15/report.md"
+B15_B9="$RPTS/2026-10-05-gate-batch15/evidence/inst/qa-b9.js"
+B12_REPORT="$RPTS/2026-09-30-gate-batch12/report.md"
+PREV_FLOORLIB="$B18_INST/qa-floorlib18.sh"
+G7R1_FLOOR="$RPTS/2026-09-22-gate7-rd645/evidence/qa-floorcount.py"
+REPORT="$RPTS/2026-10-08-gate-batch20/report.md"
+ID_ROOT="${QA_IDENTITY_ROOT_OVERRIDE:-$NX/4_Credentials}"
+ROUTE_NAME='QA/NexusAI-batch20'
+NPM_CACHE="${HOME}/.npm/_cacache"
+PREBUILD="${HOME}/.npm/_prebuilds/0068db-sqlite3-v5.1.7-napi-v6-darwin-arm64.tar.gz"
+PREBUILD_SHA='84a34404b12ff212adbca70eff76c2e4dd83b91245eed0b4569438f928567afc'
+CHROME_APP='/Applications/Google Chrome.app'
+
+MAIN_SHA='0f128cbba2c0ca8f733e414ea1e6cfc25b0f9a90'      # origin main at drafting (00:54:04 AEDT; RD-709 after RD-735, RD-430)
+A_BASE='72ca5d3993fd1aeb1e18e75ac6ad1278ae2edd2e'        # A's gate-range base: RD-761 round 1 forward-merged onto 8853e36 (gate 18 RELEASE head)
+MB_A='8853e3628382d3ec7fcc653cb7be7bbf210a3eda'          # merge-base(A, M0) — RD-719's landing
+A_R1='141d7ea77242f7d56fa4b8596d4fc2ce1bb75bd3'          # RD-761 round 1 (gate 18, GO WITH FINDINGS)
+A_9E='9e378bcc1de377044ef14c348b29b35b3fea399d'          # the fix round's first fix (wrapper check; SUPERSEDED; a0's third arm)
+MB_BC='8b7ae5451a53b85ea2805b5d98ed9f2964669d54'         # B's and C's base = merge-base with M0
+D_BASE='661311351166ea80006e088356c179f125a3ebec'        # RD-801/822 head (gate 19's E) — D is stacked on it
+MB_D='d97039fe33b2f3b63899b27d591f3317e7eaa8a0'          # merge-base(D, M0)
+MB_E='f9600355eee85b28e4a989ca377c65c070bfe7bd'          # merge-base(E, M0) — RD-735 landed
+E_R1='1660a8c990635a372389f48b73f5aa3d36e957c7'          # RD-795's own commit (on 90b2556)
+B90='90b255682d00a17c203ab1a2395953cdb9a682ab'           # RD-816 (proxy-addr 2.0.8 lock)
+G19='64ee3096c6ff81ac07d6292d61d062819458c3b5'           # RD-721 (gate 19's G) — C's cross
+A_BRANCH='rd-761-law-endpoint-policy-s89r'
+A_HEAD="${QA_A_HEAD_OVERRIDE:-7f1881eae1e816381f0f36f1c415bba7589cdb1a}"
+B_BRANCH='rd-747-clear-generation-s87n'
+B_HEAD="${QA_B_HEAD_OVERRIDE:-e36529f06bc6142016011b1419a1397329ea45f4}"
+C_BRANCH='rd-831-legal-loader-s91p'
+C_HEAD="${QA_C_HEAD_OVERRIDE:-e9eecebb7461a52a95e3c45d1f0ba1ae15480347}"
+D_BRANCH='rd-802-provisioning-log-injection-s87o'
+D_HEAD="${QA_D_HEAD_OVERRIDE:-a103c8e8c8a97fdd4ccd563d9555f0abb3db94a0}"
+E_BRANCH='rd-795-cap-line-truth-r8-widen-s86m'
+E_HEAD="${QA_E_HEAD_OVERRIDE:-c14be9dd38c7af7a4ec859f2ed38d06ce2f5661f}"
+RD801_BRANCH='rd-801-feedback-log-injection-s87o'
+PR58_REF='refs/pull/58/head'
+S1_BRANCH='rd-777-776-validators-s92r'
+S2_BRANCH='rd-823-rd719-cells-s91p'
+
+COUNTS_FILE='scripts/verify-expected-counts.json'
+PKG='package.json'
+LOCK='package-lock.json'
+SV='backend/server.js'
+ALA='backend/azureLogAnalytics.js'
+LEP='backend/services/lawEndpointPolicy.js'
+SYN='backend/syntheticFeed.js'
+JS='backend/jsonStorage.js'
+LHT='static/legal.html'
+LJS='static/js/legal.js'
+ENT='backend/routes/entraProvisioning.js'
+SCIM='backend/services/scimProvisioning.js'
+LS='backend/logSafe.js'
+FB='backend/routes/feedback.js'
+T761='__tests__/rd761-law-endpoint-policy.test.js'
+T761W='__tests__/rd761-law-writers.test.js'
+T761P='__tests__/helpers/rd761-law-intercept-preload.js'
+TBOOT='__tests__/boot-probe-log-redaction.test.js'
+TDISC='__tests__/discover-tables-tenant-mask.test.js'
+TSYN='__tests__/synthetic-feed.test.js'
+T747='__tests__/rd747-clearing-write-survives-restart.test.js'
+T831='__tests__/rd831-legal-page-loads-under-csp.test.js'
+T802='__tests__/rd802-provisioning-log-injection.test.js'
+T801='__tests__/rd801-feedback-log-injection.test.js'
+T822='__tests__/rd822-coordinator-reason-validator.test.js'
+T618='__tests__/rd618-csp-intake-residue.test.js'
+TS='__tests__/helpers/test-server.js'
+TSH='__tests__/test-server-helper.test.js'
+R465='__tests__/rd465-first-run-open-window.test.js'
+R549='__tests__/rd549-ai-config-inert-until-confirmed.test.js'
+DKF='Dockerfile'
+DIG='.dockerignore'
+
+ALA_A1_BLOB='bd0a38208280b9ccf85ff434d1c1ce87e9dd6c1b'   # 72ca5d3
+ALA_A_BLOB='cfd0024a24ec017dc1177e392bf765e18d9e407e'
+ALA_M_BLOB='595e71f7cfa7281869fe28f7331006860933ad13'    # 8853e36, M0
+LEP_A1_BLOB='beaa81970286ff0128306ff03552904ad0e790ed'
+LEP_A_BLOB='99730a6c09dd4c69c094a531fa9c2dc18e81dcd9'
+SYN_A1_BLOB='884cc392505c8180cdc22a8fdced5c861c52a772'   # 72ca5d3, 8853e36, M0
+SYN_A_BLOB='604dff3cb8eb5732a4543f09268c9f4066f4ca0f'
+SV_A_BLOB='c806ceb417fec85ee034318e5c58db88a90e148c'     # 72ca5d3 = 7f1881e (RD-761 round 1)
+SV_M_BLOB='103de899fba2ad68c181c07d95d949badbfb440d'     # M0 = f960035 = c14be9d (RD-735)
+SV_MT_BLOB='10698580ffe3360cea8ed9f523027ecfc882baec'    # M0 + A, combined (drafter's scratch clone)
+T761_BLOB='909c449cadff574110eec36829a283be617fd3cd'
+JS_M_BLOB='2abb5cf487d75f2ce1730a028ade1b39cde31fd2'     # 8b7ae54, M0
+JS_B_BLOB='9cbfc45cda145db6c773bed8449384b92c9f0488'
+T747_BLOB='e7d34510aaf08e79a7275402acfcf63ae2368bde'
+LHT_M_BLOB='9567a8162c698d0c18c05f56d51a41f19d7c3a41'    # 8b7ae54, M0
+LHT_C_BLOB='8e6c1a608bf94101352399fceae31853d54babaf'
+LHT_X_BLOB='3c0779d5b6b2ef5d76a4854e11fe321a70e9f297'    # C x RD-721, combined (drafter's scratch clone)
+LJS_C_BLOB='b56a9ae894a9a09673c1e24950df408a5f656e4b'
+T831_BLOB='284feae16a57b89b0714d4779245825e409e62ee'
+ENT_M_BLOB='ba1dcfe8a254142df9010de6bfeda7140875d807'    # 6613113, M0
+ENT_D_BLOB='bffd5749d21e0daf13d5b0d5f6f6f94627019ee9'
+SCIM_M_BLOB='2dec10c1dca78b732d57a1a51130078c2fe976a7'
+SCIM_D_BLOB='dcd90fadf870899757408265644814ebd09d207b'
+T802_BLOB='13f427c3c47bbd48a5a77bc1ce9ac953e72f859c'
+LS_E19_BLOB='196ab46a8a333a6e3ccd8489ce7bc371e6f77dae'   # RD-801's logSafe.js
+T618_M_BLOB='e60dceb4b822b6576973498b8515dd182732e324'   # f960035, M0
+T618_E_BLOB='10d3a6be78fdcd647200761c4ec49f0003f10d6f'
+LOCK_OLD='e9063d44757007324b8c55fa58c03c03dfe552ae'        # d97039f, 6613113, D (proxy-addr 2.0.7)
+LOCK_NEW='d6d3b6e42aa604320f3b70f8e9048bfac044f277'        # M0, 8853e36, 8b7ae54, 90b2556, f960035, A, B, C, E (proxy-addr 2.0.8)
+PKG_BLOB='cdb1168783a92179afe20be67b37976203b904f8'
+TS_BLOB='cff1e54099bb3aa88f11d16f22599f32006f4095'
+TSH_BLOB='f612fb4815aaa358795acc977d59a0a9cba09670'
+DKF_BLOB='12aab559a9a48dad8228d7faad5e4f8f9fab7c1e'
+DIG_BLOB='3e45ec511803b02014fc376245656cf830c90df4'
+R549_BLOB='4a3564265683f936c99e69789049e3dd5dff9b3b'
+R465_BLOB='f16b811756f70ddcd37ec43197383c5434cff6e4'
+
+A_EXPECTED_FILES="$T761
+$ALA
+$LEP
+$SYN
+$COUNTS_FILE"
+A_MB_EXPECTED_FILES="$TBOOT
+$TDISC
+$T761P
+$T761
+$T761W
+$ALA
+$SV
+$LEP
+$SYN
+$COUNTS_FILE"
+B_EXPECTED_FILES="$T747
+$JS
+$COUNTS_FILE"
+C_EXPECTED_FILES="$T831
+$COUNTS_FILE
+$LJS
+$LHT"
+D_EXPECTED_FILES="$T802
+$ENT
+$SCIM
+$COUNTS_FILE"
+E_EXPECTED_FILES="$T618"
+NEG_SEATS=''   # 38R: DERIVED at launch from the live cockpit panes — never stamped by hand
+
+SUBJECT='[QA/Datasec-NexusAI -> Tuesday] GATE VERDICT — batch 20'
+QUESTION_SUBJ='[QA/Datasec-NexusAI -> Tuesday] QUESTION: <topic>'
+STATUS_SUBJ='[QA/Datasec-NexusAI -> Tuesday] STATUS: flagged — requesting the Opus 4.8 switch'
+PARK_LINE='PARKED: flagged — awaiting the Opus 4.8 switch'
+ANSWER_PREFIX='[Tuesday -> QA/NexusAI-batch20] ANSWER'
+NOTTESTED_LINE="Not tested by this gate: Linux or CI Build at any member head without a pull_request Build (RD-761's included unless the gate's read finds one on 7f1881e), CodeQL at any head without a PR, a real Log Analytics or Azure Monitor endpoint, a real Microsoft sign-in host, a real Entra tenant, token or SCIM client, real Azure, a real Docker image build (the shipped-blob leg is a manifest evaluation), the demo (behind RD-76 SSO) and its synthetic feed as deployed, any deployed environment, headed Chrome, Firefox, Safari and the Claude-in-Chrome driver (the browser leg is Chrome headless via Playwright, local only, CDN requests aborted), a real crash or power loss (tears are planted), a real customer volume (network mounts, other filesystems), main's CodeQL alerts #23-#26 (read only after merge), Partner Center, docker, the npm registry (node_modules from an offline cache copy with install scripts skipped and the update notifier off; sqlite3's binding from its cached prebuild), and Windows."
+SAFE_PRINTER='if [ -n "${SESSION_SECRET+x}" ]; then echo "SESSION_SECRET SET (length ${#SESSION_SECRET})"; else echo "SESSION_SECRET UNSET"; fi'
+
+g() { git --no-optional-locks -C "$REPO" "$@"; }
+sorted() { printf '%s\n' "$1" | sed '/^$/d' | sort; }
+counts_at() { g show "${1}:${COUNTS_FILE}" 2>/dev/null | python3 -c 'import json,sys; d=json.load(sys.stdin); print(d["tests"], d["suites"])' 2>/dev/null; }
+blob() { g rev-parse --verify -q "${1}:${2}" 2>/dev/null; }
+cnt() { g show "${1}:${2}" 2>/dev/null | grep -cF -- "$3"; }
+ntests() { g ls-tree -r -z --name-only "$1" -- __tests__ 2>/dev/null | tr '\0' '\n' | grep -c .; }
+titles() { g show "${1}:${2}" 2>/dev/null | grep -E '^[[:space:]]*(test|it)(\.each\(.*\))?\(' | sed -E 's/^[[:space:]]+//'; }
+fsha() { shasum -a 256 "$1" 2>/dev/null | cut -d' ' -f1; }
+lockver() { g cat-file -p "$1" 2>/dev/null | grep -A1 "\"node_modules/$2\": {" | grep -o '"version": "[^"]*"' | head -1 | cut -d'"' -f4; }
+# C-192: ls-remote retried up to 5 x ~10 s on a publickey denial; sets LSR_OUT on success (no subshell, so LSR_ATTEMPTS counts), returns 1 (UNKNOWN) otherwise.
+LSR_ATTEMPTS=0
+LSR_OUT=''
+lsr() { local out rc i
+  LSR_OUT=''
+  for i in 1 2 3 4 5; do
+    LSR_ATTEMPTS=$((LSR_ATTEMPTS + 1))
+    out="$(g ls-remote origin "$@" 2>&1)"; rc=$?
+    if [ "$rc" = "0" ]; then LSR_OUT="$out"; return 0; fi
+    printf '%s\n' "$out" | grep -qi 'publickey' || { printf '%s\n' "$out" >&2; return 1; }
+    [ "$i" = "5" ] || sleep 10
+  done
+  printf '%s\n' "$out" >&2; return 1; }
+# read-only merge prediction: the three-argument merge-tree writes NO objects; prints the paths carrying conflict markers.
+conflicts() { local b; b="$(g merge-base "$1" "$2" 2>/dev/null)" || return 1
+  g merge-tree "$b" "$1" "$2" 2>/dev/null | awk '/^  (base|our|their) /{f=$4} /^\+<<<<<<</{c[f]=1} END{for(k in c) print k}' | sort; }
+
+# ---------------------------------------------------------------- THE PROMPT (embedded; guarded below like a prompt file)
+PROMPT=''
+read -r -d '' PROMPT <<'PROMPT_EOF' || true
+ultrathink
+
+You are the fleet QA/testing agent running ONE batched gate on Datasec/NexusAI, "batch 20", with FIVE members and TWO ADDENDUM SLOTS, one verdict per ticket and ONE report. It is a FRESH gate. The members: RD-761 fix round (TIER 1, NexusAI-R S92R: a Log Analytics workspace id is GUID-checked at the TWO SINKS ONLY — discoverTables and _executeQueryDirect — before any token or URL, then encodeURIComponent'd; the refusal LAW_WORKSPACE_ID_INVALID is kept out of the circuit breaker, and SyntheticLogAnalytics keeps its pre-fix discoverTables answer through its own override; C-207; it is PR #58's head, whose CodeQL condition is part of its verdict), RD-747 (TIER 1, NexusAI-N S87N: a clearing write survives a restart because the clear is recorded IN the backup chain as its newest generation and mirrored into the emergency copy; a recorded clear may win only over an empty or unreadable live store, never over one holding the sign-in keys — the SECURITY condition), RD-831 (TIER 1, NexusAI-P S91P: legal.html's inline loader moved verbatim into static/js/legal.js so the Privacy policy and the Terms of Service load under the default CSP; C-14: the Terms are NexusAI's licence; it carries the ONE local browser leg), RD-802 (TIER 2 through code, NexusAI-O: three provisioning log lines written through RD-801's logSafe; STACKED on RD-801 at 661311351166ea80006e088356c179f125a3ebec, which is gate 19's member and NOT on main; it merges only after RD-801), and RD-795 round 2 (TIER 2, TEST-ONLY, ROUND 2 OF 2, NexusAI-M S86M: rd618's R8 reads the capped request's report lines as a whole so the cap line can carry no request-derived number; CAP: a NO GO ships the closed instances and tickets the residue). The server entry point is NOT edited by RD-761's fix round, but main moved it (RD-735) since RD-761's merge-base, so a COMBINED blob is predicted on every merged tree carrying RD-761; RD-831 combines with RD-721 (gate 19's member) on legal.html; RD-802 sits on RD-801: this gate carries THE CROSSES (C-68). The SLOTS (S1: RD-777 + RD-776; S2: RD-823) are members ONLY if the brief carries their JOINS lines — the launcher tells you below. Each ticket gets its own verdict — GO, GO WITH FINDINGS or NO GO — about its head AND the merged tree. FINDINGS-ONLY: you NEVER merge anything the fleet can see, NEVER push, and NEVER open, comment on, approve or merge a pull request, and never dismiss an alert; no fixes, no deploys, nothing to Partner Center, the demo or production, no az, no docker, no image build, no npm registry, and no browser except the ONE local browser leg the brief names (c3).
+
+READ YOUR COMMISSION FIRST, whole: /Volumes/KK_T9_External_HDD/TUESDAY/2_Project_Files/fleet/qa-agent/briefs/2026-10-08_nexusai-gate-batch20.md
+It opens with the drafter's WRONG OR UNVERIFIED list (every place a READY, a project brief or the commission contradicts the source, each marked MEASURED or READ-ONLY-INFERRED), then TUESDAY'S RULINGS (T1-T10 as Tuesday stamped them, and the carried rulings (a) to (r)) and THE MODEL RULE: apply them, do not re-rule them. Then the charter it names, then the five READY mails it names (read each WHOLE; RD-795's NOT TESTED ADDENDUM is appended at the end of its file), R's project brief for the RD-761 fix round (read WHOLE), the clarifications the brief names at source (C-207 first), the gate-18 report (RD-761's prior round and the structural template), the gate-15 report (RD-747's origin, D-F1) and the gate-16 report (RD-795's round 1). Every builder statement is a CLAIM — RELAYED, never evidence. The brief's LEGITIMATE SHAPES tables (section 2a) are required measurements, row by row, base and head in the same window; adversarial rows are written as the property, the input shape and the expected result — you write your own drivers.
+
+THE MODEL RULE (Kam, live board 2026-09-30 09:07, card (b)): QA gates may switch to Opus 4.8 when flagged by Opus 5.5's safeguards, PER SESSION. You start on Opus 5.5. You run the FULL rows, including the planted ones — every one is an authorised, findings-only measurement of Datasec's own product in your own trees, your own loopback servers and your own mktemp dirs; no row contacts a non-loopback address and no row touches the live jest queue except your own holds through the tool. If one of your responses is stopped by the safeguards: that step is NOT RUN (never re-worded to slip past); write ONE line to evidence/classifier-stops.txt; let any running jest step finish and let the hold exit so you never sit holding the jest lock (H-28); mail tuesday-agent@agentmail.to with the subject exactly "[QA/Datasec-NexusAI -> Tuesday] STATUS: flagged — requesting the Opus 4.8 switch"; then end your turn with the line "PARKED: flagged — awaiting the Opus 4.8 switch" and wait. Tuesday switches THIS pane's model and taps you by mail. You never answer the model dialog yourself, and nobody ever chooses "Switch automatically". After the switch, resume at the stopped row. The report states which rows ran on which model, with the switch time, and quotes classifier-stops.txt whole.
+
+THE TARGETS. RD-761 fix round: rd-761-law-endpoint-policy-s89r at 7f1881eae1e816381f0f36f1c415bba7589cdb1a (= refs/pull/58/head; gate range 72ca5d3993fd1aeb1e18e75ac6ad1278ae2edd2e..7f1881e, SEVEN commits; merge-base with main 8853e3628382d3ec7fcc653cb7be7bbf210a3eda; counts 4394/268). RD-747: rd-747-clear-generation-s87n at e36529f06bc6142016011b1419a1397329ea45f4 (ONE commit on 8b7ae5451a53b85ea2805b5d98ed9f2964669d54; counts 4334/268). RD-831: rd-831-legal-loader-s91p at e9eecebb7461a52a95e3c45d1f0ba1ae15480347 (THREE commits on 8b7ae54; counts 4323/268). RD-802: rd-802-provisioning-log-injection-s87o at a103c8e8c8a97fdd4ccd563d9555f0abb3db94a0 (TWO commits on RD-801's 661311351166ea80006e088356c179f125a3ebec, itself THREE commits on d97039fe33b2f3b63899b27d591f3317e7eaa8a0; counts 4322/267; the OLD lock e9063d4). RD-795: rd-795-cap-line-truth-r8-widen-s86m at c14be9dd38c7af7a4ec859f2ed38d06ce2f5661f (its own commit on 90b2556 plus a forward merge of main f9600355eee85b28e4a989ca377c65c070bfe7bd; counts 4334/269, equal to its base's). No member has a builder full verify OF ITS HEAD (brief WRONG 8): yours decides. A Tuesday ADDENDUM mailed from tuesday-agent@ during the gate supersedes the closing lines.
+
+MAIN WILL MOVE BEFORE AND DURING YOUR GATE (ruling b): RD-791 was in its merge hold at drafting, RD-603/RD-756 and RD-737 are named next, and RD-801/822 and other gate-19 members land after gate 19's RELEASE. Take M0 = origin main AT YOUR OWN START by git ls-remote, say so, and RE-BASE EVERY PREDICTION on it: counts (the brief's proposed order MT-E 4352/271, MT-B 4366/272, MT-C 4369/273, MT-A 4456/275, MT-801 4475/277 only if RD-801 is not on your M0, MTF 4480/278; predicted at M0 = 0f128cbba2c0ca8f733e414ea1e6cfc25b0f9a90, 4352/271), the tests census (325 at MTF), new ids 128 and missing 0 for every member, and the combined server-entry-point blob (10698580ffe3360cea8ed9f523027ecfc882baec at that M0). If a member is in your M0, mail a QUESTION; if RD-801 or a gate-19 member landed, name it and re-derive every C-68 set on it (y8). Members are merged forward onto M0 in YOUR OWN trees, never in a builder's worktree. Never re-base mid-gate; at your END measure each member onto the main you find by merge-tree. GitHub SSH intermittently denies auth (C-192): retry every ls-remote up to 5 times about 10 s apart; a FAILED ls-remote is UNKNOWN, never a value.
+
+C-190 + its ADDENDUM — BOTH thresholds block: every merge to main goes through a pull request that adds no new high-or-higher CodeQL alert in changed code (test code included), AND any new alert whose RULE severity is error blocks whatever its security severity. The Datasec CodeQL org policy: a commit reaches main only after CodeQL scanned it on a PR, and alerts are fixed in code, never dismissed. RD-761's PR #58 exists: read it with gh READ ONLY (the repo is datasecau/Reporting_Dashboard_Au) — its alerts on refs/pull/58/head by state, where state=fixed must return EXACTLY #256-#259 (THE CONTROL: the ref now has 0 OPEN alerts, so an OPEN read there can no longer fire as a control), then state=open 0 and state=dismissed 0, and any NEW alert at either threshold; whether a pull_request Build ran on 7f1881e (if not, Linux is NOT RUN, never passed). Every other READY says no PR exists until the merge turn: CodeQL is NOT RUN and the CI Build is NOT RUN at those heads — say so. A red npm-audit at RD-802's head (on the pre-RD-816 lock) is proxy-addr GHSA-jqcg-44mw-7w3h only — name it. C-185 on M0 (ruling h): the known-failing set is {rd549 O4, rd549 C2/C10 — each only when envReached alone differs}; ANY rd465 O-1 failure on M0, a head or a merged tree is a STOP; a known-set failure is named and classified, never waved; no re-run is a clearance.
+
+THE ROWS (brief section 2a), POSITIVE CONTROL FIRST in every target. RD-761: a0 RED-AT-PARENT first (round 1's product reddens the shape cells; no override reddens only the synthetic cell; 9e378bc's wrapper check reddens the synthetic feed); a2 THE WORKSPACE ROW — non-GUID workspace ids, as primary and fallback, through queries, table discovery and a boot on a real local server, with the tree's own intercept preload as the ledger: zero token requests, zero outbound, the value never logged, the base arm building the request as the control; a3 the synthetic feed; a4 the breaker; a5 a GUID workspace unchanged; a6 the builder's five mutants re-derived plus your own; a7 the two LogsQueryClient calls outside the two sinks (brief WRONG 1, T3); a8 the writers (RD-830); a9 C-68; a10 the log lines (RD-800 named); a11 THE CODEQL CONDITION; a12 manifest evaluation, NO image built; a13 prior work. RD-747: b0 RED-AT-PARENT; b2 THE CLEAR ROW — a clear then a restart, a tear checked before the boot, a delete and unparseable bytes, a new process per boot, the base arm bringing the key back as the control; b3 THE SECURITY ROW — the sign-in keys under a recorded clear with a readable live store, a torn live store, and the freeze-window shape of brief WRONG 6 (T4), plus RD-407's refusal; b4 shapes that are NOT a clear; b5 the readers; b6 the builder's seven mutants plus your own; b7 C-68; b8 CodeQL READ ONLY. RD-831: c0 RED-AT-PARENT; c2 THE VERBATIM ROW; c3 THE BROWSER LEG — open mode and auth ENFORCED by a seeded store, signed in and anonymous, each pane's text against the served text, CSP violations, the M0 arm staying "Loading…" as the control; c4 the anonymous surface; c5 mutants; c6 which browser the cell launched (WRONG 9); c7 the cross with RD-721. RD-802: d0 RED-AT-PARENT; d2 THE ONE-LINE ROW — control characters and long values in the SCIM user name, the group id and the Entra version on the real routers, the base arm logging a raw newline as the control; d3 the other interpolated lines; d4 mutants; d5 C-68; d6 THE STACK (T5). RD-795: e0 RED-AT-PARENT (the six shapes redden R8; the gate-16 survivors stay green at the base); e2 the whole-set bite; e3 THE ARM'S EDGES — your own shapes that still carry the request's count, including one on a line carrying the phrase CSP violation report (brief WRONG 16); e4 F-1 through rd735 R9; e5 C-68. THE CROSSES: y1 the server entry point combined; y2 RD-831 x RD-721; y3 RD-802 x RD-801; y4 RD-761 x gate 19's server members (informational); y5 both orders; y6 the locks; y7 C-185; y8 main moved; y9 the shipped set.
+
+PRIOR WORK (ruling r): verify each READY's PRIOR WORK section claim by claim against history for anything it says was replaced or removed (C-49) — VERIFIED, FALSE or UNVERIFIED with its evidence class.
+
+THE MERGED TREE — part of every verdict (brief section 7). In YOUR OWN scratch clone (git clone --shared --no-checkout into your own project dir; origin removed; local user config; gc.auto 0; hooks off; merges and commits in the clone ONLY): M0, then merge --no-ff in Tuesday's ruled order (T1; the proposal: RD-795 MT-E, RD-747 MT-B, RD-831 MT-C, RD-761 MT-A, then RD-801 as a NAMED NON-MEMBER step MT-801 ONLY if it is not on your M0, then RD-802 MTF; S2 right after RD-795 and S1 right after RD-831 if they join). Re-measure every pair by merge-tree --write-tree in a SCRATCH object dir first (GIT_OBJECT_DIRECTORY your own, NexusAI's objects only as GIT_ALTERNATE_OBJECT_DIRECTORIES). Predict each merge before it; anything other than the counts file conflicting STOPS (C-57). C-104: resolve and stage before any census or run. Counts by REGENERATION once on MTF on node_modules proven for M0's lock d6d3b6e with proxy-addr 2.0.8 read from the tree's own path (RD-827, C-205): predicted 4480/278, re-based on YOUR M0; the measurement decides. A second clone in the reverse order, root trees identical apart from the counts file (the drafter measured a270069373782c857a982c9b132a54ec5591a3a0 for both with a placeholder counts file). The id-superset control LIKE WITH LIKE, all K1, both controls (a planted missing id STOPS; a superset passes); the shared C-57 tool's "failed" count reads the install, not the tree (RD-827) — the id-superset verdict is the property. C-68 unions by name, in holds per H-28. C-89 on your clone. Count the NexusAI object files before and after and account for any delta by full-date mtime. Nothing leaves your clone; never push.
+
+NODE_MODULES WITHOUT THE REGISTRY (ruling m, H-31). No member changes package.json or the lock. TWO locks (T2): d6d3b6e (proxy-addr 2.0.8) at M0, RD-761, RD-747, RD-831, RD-795 and every merged tree; e9063d4 (proxy-addr 2.0.7) at RD-802 and RD-801's head. EACH TREE USES ITS OWN INSTALL, RESOLVED FROM ITS OWN LOCK (RD-827). There is NO npm registry exception in this gate. ONCE PER LOCK: npm ci --offline --ignore-scripts --no-audit --no-fund with --cache pointing at an APFS clone of the local npm cache under your own mktemp dir, in your own tree, under a deadline — and EVERY npm invocation, the first one included, carries npm_config_update_notifier=false; prove the cache copy's _update-notifier-last-checked marker absent or unchanged. An ENOTCACHED is NOT RUN (name it, mail a QUESTION) — never go online, never npm install, never npm audit, never npx playwright install. sqlite3's binding: the offline unpack of sqlite3's CACHED prebuild from an APFS clone of ~/.npm/_prebuilds, inside the strict belt, IS PART OF H-31 — under three conditions: (1) the sha256 of the cached tarball and of the unpacked node_sqlite3.node in your tree; (2) say that CI builds the binding by its own install step (Linux, a different binary), so a local green on it is not evidence about CI's; (3) every row that boots the server or opens the DB names the binding source once ("sqlite3 binding: cached prebuild, offline"). Every other tree clones node_modules from your proven tree of the same lock; never from another gate's trees.
+
+THE BROWSER LEG (ruling q, H-32): Playwright 1.62.1 from YOUR OWN tree's node_modules, channel chrome (the local Google Chrome), HEADLESS, NO browser download — prove ~/Library/Caches/ms-playwright unchanged before and after; only http://127.0.0.1:<port> of a server YOU booted from YOUR tree, open mode and auth ENFORCED by a seeded store (T6), SESSION_SECRET UNSET; every non-127.0.0.1 request aborted by the page route AND the belt (legal.html's Bootstrap CSS and JS and its CDN icons will not load, so the Terms tab cannot be clicked open — name it, never a finding against RD-831; measure each pane's text, not pixels); every caption "local run of <sha> — NOT the demo; Chrome headless via Playwright 1.62.1". If Chrome or Playwright cannot launch, c3 is NOT RUN, named — never replaced by a jsdom render. The ONE kind of preload you may load into a server you boot is RD-761's own TEST-ONLY intercept preload from your tree (it reads outbound requests), by -r in argv, with its landing control.
+
+FULL VERIFY of each head and of MTF through the lock, UNBELTED by Tuesday's 2026-10-05 answer to gate 14 (ruling n: every other jest run stays belted — cells, mutants, C-68 unions, drivers, servers, the browser), with its four conditions: the test-server-helper control pair (belted red, quote it; unbelted green; same tree, same window); any belted verify kept as evidence; each unbelted verify says "verify UNBELTED by Tuesday's 2026-10-05 answer; matches CI"; any other failure read on its merits, never blamed on the belt without a belted/unbelted pair. SESSION_SECRET UNSET, npm_config_update_notifier=false npm run verify -- --maxWorkers=2 --forceExit (prove the flag reached jest or say it did not), K1 trees only. Predicted 7f1881e 4394/268, e36529f 4334/268, e9eeceb 4323/268, a103c8e 4322/267, c14be9d 4334/269, MTF 4480/278. RULING (b) (Tuesday to gate 18, carried as ruling (o)): if ONLY the full verifies or the counts regeneration remain lock-starved about 2 h after filing, deliver with them NAMED NOT RUN — never "skipped" — and say in the NOT TESTED section that each member's merge hold full verify plus its PR's CI Build are the gate's NOT-RUN full verify, and any red there outside C-185's known set at merge is a STOP, not a re-run. Every failure by NAME. Re-run-until-green is not an acceptance gate. A RED ARM COUNTS ONLY IF THE MUTANT STILL PARSES AND LANDED: node --check every mutated JS file and quote the exit code, assert each anchor matched once and the exact mutated text is present; a red from a mutant that does not parse, or a green from one that never landed, is a VOID arm.
+
+THE INSTRUMENT RULES H-1 TO H-33 (brief section 3a). H-1: the ONLY SESSION_SECRET printer is the one the brief quotes; self-test it with a throwaway, scan every hold's logs for it, and let the scan's control plant a DIFFERENT marker; mask GUIDs. H-2: seed BEFORE; every boot is a NEW process — declare it per row. H-3: a LANDING CONTROL for every stored value, torn file, planted generation, listener, preload, browser observer and mutant. H-4: the HEARTBEAT is a separate child of the hold wrapper, aborted if absent 90 s after the grant, max gap per hold reported (at most 120 s). H-9: byte plants by Buffer, checked with xxd; request bodies and raw paths byte-exact from a file. H-15: preloads with -r in argv; the ONE kind allowed is RD-761's read-only intercept preload. H-16: every plant checked to be what the product will treat it as. H-17: your own censuses use pgrep, never ps. H-20: EVERY jest invocation carries --forceExit AND a per-step hard deadline (qa-to.sh). H-21: every file you mutate is restored by a trap on EXIT (also INT and TERM) installed BEFORE the first mutation, hash-compared to its pinned blob after every hold. H-22: never nest sandbox-exec (it exits 71). H-24: jest array options after the test paths. H-25: the comment-aware compare with its IGNORED control. H-26: C-192 retries. H-27: THE MODEL RULE. H-28 (gate 12's wrap, gate 13's stamped reading, gate 19's consolidation): ONE focused hold at a time, at most about 40 minutes of planned jest, rows GROUPED into as few holds as fit and a hold whose plan would overrun SPLIT, never stretched; every part file written and bash -n checked before the hold is filed; you stay in the FOREGROUND for the whole hold — a hold that must outlive one foreground tool call runs as a TRACKED child of your session (never nohup) with its own timeout at the 2-hour maximum while you poll its output; each hold carries a wait deadline, and BEFORE it fires you file --replace on your own still-waiting ticket under the SAME tag. H-29: other gates' evidence is method only; gate 19 is LIVE and its dirs are read only. H-31: offline node_modules per lock, the notifier off, and the cached sqlite3 prebuild. H-32: NO image built (the shipped-blob rows are a manifest evaluation); ONE local browser leg. H-33: stored values, torn files, listeners and children counted and reaped or quarantined, never rm. The rest as the brief states them.
+
+TREES AND WRITES. Build every tree INSIDE YOUR OWN PROJECT (fresh mktemp dirs under projects/nexusai/qa-trees/batch20.*), status-checked before use. Each tree is EXCLUSIVE to this gate and to one purpose; other gates' trees and report dirs are never touched (gate 19's LIVE batch19 ones included); copy instruments BY COPY from gate 18's evidence/inst (its HOLD18.sh hard-codes its own evidence dir and its qa-floorlib18.sh carries stale ROOT and NEG defaults: re-point and correct your copies; its qa-file18.sh predates RD-821, so your re-file instrument is your own, built on --replace) and gate 15's qa-b9.js for RD-747; gate 19's instruments only if its report reads DELIVERED at your start. In the NexusAI repo use ONLY read verbs (show, diff, log, ls-tree, cat-file, grep, ls-remote, rev-parse, merge-base, rev-list; count-objects for the object accounting); NEVER fetch, pull, push, checkout, worktree, commit, stash, gc, merge, and merge-tree --write-tree ONLY with your own scratch object directory; never work in its 2_Project_Files checkout or any builder worktree. Never write into the builders' session-tools: copy, then hash at start and end; never run their hold, probe, measure, screen, mutate or census scripts in place. Findings-only: never push, no commits outside your clones, no tickets, no PRs, no edits in NexusAI. No Azure (no az at all), no Microsoft or Log Analytics host, no login host, no Entra tenant, no SCIM client, no CDN, no demo, no docker, no image build, no Partner Center, no ARM deployment, no npm registry. No mail to any human. Never rm: quarantine.
+
+FLOOR DISCIPLINE — section 9 of the brief exactly. MERGES GO FIRST: the jest lock (session-tools/nexusai-lock.sh, queue session-tools/locks/queue-jest) is shared with the builder seats AND with gate 19, which is LIVE (QA/NexusAI-batch19, tickets qa-b19-*: a PEER gate — FIFO, never touched); merges go one at a time in the C-186 ADDENDUM's turns. Do ALL lock-free work first (pins, reads, merge-trees in scratch objects, the offline npm ci, plain-node, server and browser rows, census greps); then file your holds tagged qa-b20-, one at a time; no tag of yours contains the word "merge" (C-141 ADDENDUM 7: only a merge HOLD's tag does). If a MERGE ticket is queued ahead of you, wait behind it; if one files BEFORE your grant, re-file your ticket behind it (stop your OWN unstarted waiter by pid from your own ancestry, then re-queue with --after that merge ticket's tag) under your UNCHANGED tag (C-141 ADDENDUM 5: builders yield once per gate TAG). AT A WAIT DEADLINE, first in line or not: use --replace on your own still-waiting ticket BEFORE its deadline fires (C-141 ADDENDUM 6: a SAME-PLACE handover; it is refused once the old waiter has left, so a late re-file lands at the tail) and confirm from the queue listing that the old ticket went to released/ as ticket-left-* and your place is unchanged; never two live holds; a duplicate-tag refusal takes a -r<N> suffix, said in the report; you never move ahead of anything that was ahead of you; one report line per re-file with the queue place before and after FROM THE QUEUE LISTING. Once granted, carry on. QUEUE, NEVER TAKE OVER: never signal, move or edit another seat's process, lock or ticket. Count foreign servers the C-125 way anchored on YOUR OWN claude pid, with the negative-control seats the launcher derived (listed at the end of this prompt) classifying foreign in the same run; record the foreign count beside every result, including every server you boot outside a hold; count every child you start and prove none left; a hold with no live negative control aborts. A zero is reportable only beside a control that fired in the same window. DEADLINE AND HEARTBEAT: every npm call, node driver, server, browser arm and jest run has a per-step DEADLINE, every child is killed in a finally by pid from your own ancestry (C-174, never by pattern), a HEARTBEAT line at least every 2 minutes during a hold, and a step with no heartbeat for 5 minutes is aborted and reported.
+
+RE-PIN at start, mid and end: the five member branches, refs/pull/58/head, RD-801's branch rd-801-feedback-log-injection-s87o and main (and each SLOT's branch if it joins) — three timestamped readings with the branch name and attempt count beside each sha. A TICKET head that disagrees with the brief is a FINDING and a reason to stop, never a typo to fix. Call main at your start M0 and say so; it must be 0f128cb or a descendant; if main moves again, your verdict names M0 and says what moved (C-68); never re-base mid-gate.
+
+QUESTIONS: your routing name is QA/NexusAI-batch20. If you must ask, mail tuesday-agent@agentmail.to with subject "[QA/Datasec-NexusAI -> Tuesday] QUESTION: <topic>" and PROCEED ON THE SAFEST READING without waiting (the one exception is a safeguards stop, which PARKS you under THE MODEL RULE); Tuesday's answer arrives in tuesday-agent@agentmail.to with a subject beginning "[Tuesday -> QA/NexusAI-batch20] ANSWER". Approval-class items are NOT RUN and named, never done on a safe reading. Record every question, reading and answer in the report.
+
+Write your ONE report to: /Volumes/KK_T9_External_HDD/!CODING/Testing Agent MAIN/projects/nexusai/reports/2026-10-08-gate-batch20/report.md
+
+MAIL YOUR VERDICT to tuesday-agent@agentmail.to with the subject exactly:
+[QA/Datasec-NexusAI -> Tuesday] GATE VERDICT — batch 20
+Lead the body with one line per ticket, in the forms the brief's section 11 gives (RD-761 @ 7f1881e with its CodeQL condition, RD-747 @ e36529f, RD-831 @ e9eeceb with the browser leg, RD-802 @ a103c8e, RD-795 @ c14be9d; a SLOT's line only if it joined), then one line naming M0, your recommended merge order, the merged counts you measured in both orders, the C-57 and C-133 result, the combined server-entry-point blob id, THE CROSSES, which rows ran on Opus 4.8 (or none), which full verifies ran and which are NAMED NOT RUN under ruling (b), and "CodeQL NOT RUN (no PR) for RD-747, RD-831, RD-802, RD-795; PR #58 read for RD-761". Never wednesday-agent@. You have no inbox that wakes you, so a verdict you do not mail is lost.
+
+The AgentMail key is AGENTMAIL_API_KEY in /Volumes/KK_T9_External_HDD/TUESDAY/4_Credentials/.env. It is an absolute path because the QA project has no 4_Credentials directory of its own. Never put the key, a token, a session value or any secret in a mail or the report.
+
+Run long commands in the FOREGROUND. Never end a turn waiting on a background notice — the only turn you end while waiting is the PARKED line of THE MODEL RULE.
+
+Rule 2 stands: what you did NOT test is first-class output — a NOT TESTED section carrying every builder's stated limits as the brief quotes them, every declared limit L-A1 to L-A11, L-B1 to L-B7, L-C1 to L-C9, L-D1 to L-D6, L-E1 to L-E8 and L-Y1 discharged with a measurement or left standing and named (C-112), Prior work checked for each ticket (C-49), every finding naming its instrument, and every action recommendation labelled MEASURED AT RUNTIME, PROBED or READ ONLY. Severity is yours; priority is Tuesday's. The tester never fixes. C-207, C-203, C-164 with its ADDENDA, C-14 with its ADDENDUM, C-199 with its ADDENDUM, C-141 with ADDENDA 5, 6 and 7, C-206, C-205, C-185 with its ADDENDA, C-190 with its ADDENDUM and C-192 are the clarifications this batch leans on; C-15, C-41, C-49, C-57, C-68, C-76, C-89, C-97, C-98, C-102, C-104, C-112, C-115, C-125, C-130, C-133, C-174 and C-186 are carried. That section must carry this line verbatim:
+Not tested by this gate: Linux or CI Build at any member head without a pull_request Build (RD-761's included unless the gate's read finds one on 7f1881e), CodeQL at any head without a PR, a real Log Analytics or Azure Monitor endpoint, a real Microsoft sign-in host, a real Entra tenant, token or SCIM client, real Azure, a real Docker image build (the shipped-blob leg is a manifest evaluation), the demo (behind RD-76 SSO) and its synthetic feed as deployed, any deployed environment, headed Chrome, Firefox, Safari and the Claude-in-Chrome driver (the browser leg is Chrome headless via Playwright, local only, CDN requests aborted), a real crash or power loss (tears are planted), a real customer volume (network mounts, other filesystems), main's CodeQL alerts #23-#26 (read only after merge), Partner Center, docker, the npm registry (node_modules from an offline cache copy with install scripts skipped and the update notifier off; sqlite3's binding from its cached prebuild), and Windows.
+PROMPT_EOF
+
+# ---------------------------------------------------------------- GUARDS
+[ -d "$QA_DIR" ]  || { echo "QA project missing: $QA_DIR" >&2; exit 2; }
+[ -s "$BRIEF" ]   || { echo "brief missing or empty: $BRIEF" >&2; exit 3; }
+[ -n "$PROMPT" ]  || { echo "embedded prompt is empty" >&2; exit 4; }
+[ -d "$REPO/.git" ] || [ -f "$REPO/.git" ] || { echo "repo under test missing: $REPO" >&2; exit 5; }
+for S in "$A_HEAD" "$B_HEAD" "$C_HEAD" "$D_HEAD" "$E_HEAD"; do
+  [[ "$S" =~ ^[0-9a-f]{40}$ ]] || { echo "REFUSING: head '$S' is not a full 40-hex sha" >&2; exit 9; }
+done
+
+# 6 — every pinned sha is a commit in the object store (this launcher never fetches).
+for S in "$MAIN_SHA" "$A_BASE" "$MB_A" "$A_R1" "$A_9E" "$MB_BC" "$D_BASE" "$MB_D" "$MB_E" "$E_R1" "$B90" "$G19" "$A_HEAD" "$B_HEAD" "$C_HEAD" "$D_HEAD" "$E_HEAD"; do
+  T="$(g cat-file -t "$S" 2>&1)"
+  [ "$T" = "commit" ] || { echo "REFUSING: $S is not a commit in $REPO (got '$T') — this launcher never fetches" >&2; exit 6; }
+done
+
+# 7 — merge-bases with main and the stacks.
+mb_is() { [ "$(g merge-base "$1" "$2" 2>/dev/null)" = "$3" ]; }
+mb_is "$A_HEAD" "$MAIN_SHA" "$MB_A"  || { echo "REFUSING: merge-base(RD-761, 0f128cb) is not 8853e36 — re-brief" >&2; exit 7; }
+mb_is "$B_HEAD" "$MAIN_SHA" "$MB_BC" || { echo "REFUSING: merge-base(RD-747, 0f128cb) is not 8b7ae54 — re-brief" >&2; exit 7; }
+mb_is "$C_HEAD" "$MAIN_SHA" "$MB_BC" || { echo "REFUSING: merge-base(RD-831, 0f128cb) is not 8b7ae54 — re-brief" >&2; exit 7; }
+mb_is "$D_HEAD" "$MAIN_SHA" "$MB_D"  || { echo "REFUSING: merge-base(RD-802, 0f128cb) is not d97039f — re-brief (has RD-801 landed? then step 5n drops)" >&2; exit 7; }
+mb_is "$E_HEAD" "$MAIN_SHA" "$MB_E"  || { echo "REFUSING: merge-base(RD-795, 0f128cb) is not f960035 — re-brief" >&2; exit 7; }
+for PAIR in "$A_BASE $A_HEAD" "$A_R1 $A_HEAD" "$A_9E $A_HEAD" "$D_BASE $D_HEAD" "$E_R1 $E_HEAD" "$B90 $E_R1" "$MB_A $MAIN_SHA" "$MB_BC $MAIN_SHA" "$MB_E $MAIN_SHA" "$MB_D $D_BASE"; do
+  X="${PAIR% *}"; Y="${PAIR#* }"
+  g merge-base --is-ancestor "$X" "$Y" 2>/dev/null || { echo "REFUSING: ${X:0:7} is not an ancestor of ${Y:0:7} — a stack or base moved; re-brief" >&2; exit 7; }
+done
+if g merge-base --is-ancestor "$D_BASE" "$MAIN_SHA" 2>/dev/null; then echo "REFUSING: RD-801 6613113 is already on 0f128cb — the brief's step 5n premise is stale; re-brief" >&2; exit 7; fi
+
+# 8 — chains exact: A 7 on 72ca5d3 (17 with 1 merge on 8853e36); B 1; C 3; D 2 on 6613113 (5 on d97039f); E 2 with 1 merge on f960035; RD-795's own commit 1 on 90b2556.
+chain_ok() { local base="$1" head="$2" n="$3" mg="$4" got m
+  got="$(g rev-list --count "${base}..${head}" 2>/dev/null)"; m="$(g rev-list --merges --count "${base}..${head}" 2>/dev/null)"
+  [ "$got" = "$n" ] && [ "$m" = "$mg" ] && g merge-base --is-ancestor "$base" "$head" 2>/dev/null; }
+chain_ok "$A_BASE" "$A_HEAD" 7 0  || { echo "REFUSING: RD-761's fix round is not SEVEN non-merge commits on 72ca5d3" >&2; exit 8; }
+chain_ok "$MB_A" "$A_HEAD" 17 1   || { echo "REFUSING: RD-761 is not 17 commits (one merge) on 8853e36" >&2; exit 8; }
+chain_ok "$MB_BC" "$B_HEAD" 1 0   || { echo "REFUSING: RD-747 is not ONE commit on 8b7ae54" >&2; exit 8; }
+chain_ok "$MB_BC" "$C_HEAD" 3 0   || { echo "REFUSING: RD-831 is not THREE non-merge commits on 8b7ae54" >&2; exit 8; }
+chain_ok "$D_BASE" "$D_HEAD" 2 0  || { echo "REFUSING: RD-802 is not TWO non-merge commits on RD-801 6613113" >&2; exit 8; }
+chain_ok "$MB_D" "$D_HEAD" 5 0    || { echo "REFUSING: RD-802 + RD-801/822 are not FIVE non-merge commits on d97039f" >&2; exit 8; }
+chain_ok "$MB_E" "$E_HEAD" 2 1    || { echo "REFUSING: RD-795 is not 2 commits (one forward merge) over f960035" >&2; exit 8; }
+chain_ok "$B90" "$E_R1" 1 0       || { echo "REFUSING: RD-795's own commit 1660a8c is not ONE commit on 90b2556" >&2; exit 8; }
+
+# 18 — RE-PIN NOW by ls-remote (C-192 retries): the five member branches + PR #58's head exactly the pins (REFUSE); main and RD-801's branch read.
+lsr refs/heads/main "refs/heads/$A_BRANCH" "refs/heads/$B_BRANCH" "refs/heads/$C_BRANCH" "refs/heads/$D_BRANCH" "refs/heads/$E_BRANCH" "refs/heads/$RD801_BRANCH" "$PR58_REF" || {
+  echo "REFUSING: git ls-remote origin failed after $LSR_ATTEMPTS attempt(s) — UNKNOWN, not a value (C-192); relaunch later" >&2; exit 18; }
+LSR_ALL="$LSR_OUT"
+for PAIR in "refs/heads/$A_BRANCH $A_HEAD" "$PR58_REF $A_HEAD" "refs/heads/$B_BRANCH $B_HEAD" "refs/heads/$C_BRANCH $C_HEAD" "refs/heads/$D_BRANCH $D_HEAD" "refs/heads/$E_BRANCH $E_HEAD"; do
+  RF="${PAIR%% *}"; H="${PAIR#* }"
+  printf '%s\n' "$LSR_ALL" | grep -q "^${H}[[:space:]]${RF}\$" || {
+    echo "REFUSING: origin $RF is not $H — moved or never pushed; re-brief. ls-remote said:" >&2; printf '%s\n' "${LSR_ALL:-<nothing>}" >&2; exit 18; }
+done
+ref_now() { printf '%s\n' "$LSR_ALL" | awk -v r="refs/heads/$1" '$2==r{print $1}'; }
+# 18b — main MAY move (ruling b). It must be 0f128cb or a descendant IN THE OBJECT STORE; a member already on it REFUSES; a member-ONLY path moved REFUSES.
+M_ORIGIN="$(ref_now main)"
+[[ "$M_ORIGIN" =~ ^[0-9a-f]{40}$ ]] || { echo "REFUSING: could not read origin main by ls-remote (got '${M_ORIGIN:-nothing}') — UNKNOWN (C-192)" >&2; exit 18; }
+[ "$(g cat-file -t "$M_ORIGIN" 2>&1)" = "commit" ] || { echo "REFUSING: origin main $M_ORIGIN is not in the object store — this launcher never fetches; wait for a seat's fetch or re-brief" >&2; exit 18; }
+g merge-base --is-ancestor "$MAIN_SHA" "$M_ORIGIN" 2>/dev/null || { echo "REFUSING: origin main $M_ORIGIN does not descend from 0f128cb — main was rewritten; re-brief" >&2; exit 18; }
+for H in "$A_HEAD" "$B_HEAD" "$C_HEAD" "$D_HEAD" "$E_HEAD"; do
+  if g merge-base --is-ancestor "$H" "$M_ORIGIN" 2>/dev/null; then echo "REFUSING: ${H:0:7} is already an ancestor of origin main ${M_ORIGIN:0:7} — merged before its gate; re-brief" >&2; exit 18; fi
+done
+MOVED="$(g diff --name-only "$MAIN_SHA" "$M_ORIGIN" 2>/dev/null | sort -u)"
+ONLY_PATHS="$(printf '%s\n' "$ALA" "$LEP" "$SYN" "$JS" "$LJS" "$ENT" "$SCIM" "$T618" "$T761" "$T761W" "$T761P" "$TBOOT" "$TDISC" "$T747" "$T831" "$T802" "$PKG" | sort -u)"
+HIT="$(comm -12 <(printf '%s\n' "$ONLY_PATHS") <(printf '%s\n' "$MOVED" | sed '/^$/d'))"
+[ -z "$HIT" ] || { echo "REFUSING: main moved 0f128cb..${M_ORIGIN:0:7} and touched a member-only path: $HIT — re-brief" >&2; exit 18; }
+HITB="$(comm -12 <(printf '%s\n' "$SV" "$LHT" "$LOCK" "$TS" "$TSH" "$R465" "$R549" "$DKF" "$DIG" "$LS" "$FB" "$T801" "$T822" "$TSYN" | sort -u) <(printf '%s\n' "$MOVED" | sed '/^$/d') | tr '\n' ' ')"
+[ -z "$HITB" ] || echo "NOTE: main's movement touches ${HITB}— combined paths / RD-801's files / C-68 sets / node_modules proofs run on M0's blobs (brief ruling b, y8)" >&2
+[ "$M_ORIGIN" = "$MAIN_SHA" ] || echo "NOTE: origin main is now ${M_ORIGIN:0:7} (moved from 0f128cb) — the gate re-pins M0 itself and re-bases every prediction" >&2
+if g merge-base --is-ancestor "$G19" "$M_ORIGIN" 2>/dev/null; then echo "NOTE: RD-721 (64ee309) is on origin main — RD-831's legal.html combines on M0 itself (y2: MT-C carries it; c7's cross tree is not needed)" >&2; fi
+[ "$(blob "$M_ORIGIN" "$TS")" = "$TS_BLOB" ] || echo "NOTE: origin main ${M_ORIGIN:0:7}'s test-server is not cff1e54 — RD-591 landed? H-23 applies whole" >&2
+# 18c — RD-801 (D's NON-MEMBER base, gate 19's E): its branch at 6613113 (not landed), or landed (6613113 on main) — anything else is a fix round RD-802 must be re-stacked on.
+R801_NOW="$(ref_now "$RD801_BRANCH")"
+if g merge-base --is-ancestor "$D_BASE" "$M_ORIGIN" 2>/dev/null; then
+  echo "NOTE: RD-801 6613113 is on origin main ${M_ORIGIN:0:7} — step 5n (the NON-MEMBER merge) drops; MTF = M0 + the four + RD-802 (T5)" >&2
+elif [ "$R801_NOW" != "$D_BASE" ]; then
+  echo "REFUSING: origin $RD801_BRANCH is '${R801_NOW:-absent}', not 6613113, and 6613113 is not on main — RD-801 moved (a fix round?); RD-802 must be re-stacked on it before its gate (T5, C-199); re-brief" >&2; exit 18
+fi
+PIN_TS="$(date '+%Y-%m-%d %H:%M:%S %Z')"
+
+# 22 — each delta is EXACTLY the commissioned file set; numstats as briefed; no package change; product paths as commissioned.
+chk_delta() { local from="$1" to="$2" want="$3" label="$4" got
+  got="$(g diff --name-only "$from" "$to" 2>/dev/null | sort)"
+  [ "$got" = "$(sorted "$want")" ] || { echo "REFUSING: $label delta is not the commissioned set. Got:" >&2; printf '%s\n' "$got" >&2; exit 22; }; }
+chk_delta "$A_BASE" "$A_HEAD" "$A_EXPECTED_FILES" "RD-761 fix round (72ca5d3..7f1881e)"
+chk_delta "$MB_A" "$A_HEAD" "$A_MB_EXPECTED_FILES" "RD-761 (8853e36..7f1881e)"
+chk_delta "$MB_BC" "$B_HEAD" "$B_EXPECTED_FILES" "RD-747 (8b7ae54..e36529f)"
+chk_delta "$MB_BC" "$C_HEAD" "$C_EXPECTED_FILES" "RD-831 (8b7ae54..e9eeceb)"
+chk_delta "$D_BASE" "$D_HEAD" "$D_EXPECTED_FILES" "RD-802 (6613113..a103c8e)"
+chk_delta "$MB_E" "$E_HEAD" "$E_EXPECTED_FILES" "RD-795 (f960035..c14be9d)"
+ns() { g diff --numstat "$1" "$2" -- "$3" 2>/dev/null | cut -f1,2 | tr '\t' ' '; }
+[ "$(ns "$A_BASE" "$A_HEAD" "$ALA")" = "39 4" ] && [ "$(ns "$A_BASE" "$A_HEAD" "$LEP")" = "25 0" ] && [ "$(ns "$A_BASE" "$A_HEAD" "$SYN")" = "26 7" ] && [ "$(ns "$A_BASE" "$A_HEAD" "$T761")" = "114 0" ] \
+  || { echo "REFUSING: RD-761 fix round's numstats are not azureLogAnalytics +39/-4, lawEndpointPolicy +25, syntheticFeed +26/-7, rd761 +114 (§1)" >&2; exit 22; }
+[ "$(ns "$MB_BC" "$B_HEAD" "$JS")" = "66 8" ] && [ "$(ns "$MB_BC" "$B_HEAD" "$T747")" = "227 0" ] || { echo "REFUSING: RD-747's numstats are not jsonStorage +66/-8, rd747 +227" >&2; exit 22; }
+[ "$(ns "$MB_BC" "$C_HEAD" "$LHT")" = "1 13" ] && [ "$(ns "$MB_BC" "$C_HEAD" "$LJS")" = "16 0" ] && [ "$(ns "$MB_BC" "$C_HEAD" "$T831")" = "117 0" ] \
+  || { echo "REFUSING: RD-831's numstats are not legal.html +1/-13, legal.js +16, rd831 +117" >&2; exit 22; }
+[ "$(ns "$D_BASE" "$D_HEAD" "$ENT")" = "2 1" ] && [ "$(ns "$D_BASE" "$D_HEAD" "$SCIM")" = "3 2" ] && [ "$(ns "$D_BASE" "$D_HEAD" "$T802")" = "120 0" ] \
+  || { echo "REFUSING: RD-802's numstats are not entra +2/-1, scim +3/-2, rd802 +120" >&2; exit 22; }
+[ "$(ns "$MB_E" "$E_HEAD" "$T618")" = "29 3" ] || { echo "REFUSING: RD-795's numstat is not rd618 +29/-3" >&2; exit 22; }
+for PAIR in "$A_HEAD $MB_A" "$B_HEAD $MB_BC" "$C_HEAD $MB_BC" "$D_HEAD $MB_D" "$E_HEAD $MB_E"; do
+  H="${PAIR%% *}"; Bz="${PAIR#* }"
+  [ -z "$(g diff --name-only "$Bz" "$H" -- "$LOCK" "$PKG" 2>/dev/null)" ] || { echo "REFUSING: ${H:0:7} changes package-lock.json/package.json over its base — ruling (m) assumed no member does; re-brief" >&2; exit 22; }
+done
+prod() { g diff --name-only "$1" "$2" -- backend static docs Dockerfile .dockerignore .github model-config.js 2>/dev/null | sort; }
+[ "$(prod "$A_BASE" "$A_HEAD")" = "$(sorted "$ALA
+$LEP
+$SYN")" ] || { echo "REFUSING: RD-761's fix round touches a product path beyond azureLogAnalytics / lawEndpointPolicy / syntheticFeed (no server entry point by WRONG 3's premise)" >&2; exit 22; }
+[ "$(prod "$MB_BC" "$B_HEAD")" = "$JS" ] || { echo "REFUSING: RD-747 touches a product path beyond $JS" >&2; exit 22; }
+[ "$(prod "$MB_BC" "$C_HEAD")" = "$(sorted "$LJS
+$LHT")" ] || { echo "REFUSING: RD-831 touches a product path beyond legal.html and js/legal.js" >&2; exit 22; }
+[ "$(prod "$D_BASE" "$D_HEAD")" = "$(sorted "$ENT
+$SCIM")" ] || { echo "REFUSING: RD-802 touches a product path beyond the two provisioning modules" >&2; exit 22; }
+[ -z "$(prod "$MB_E" "$E_HEAD")" ] || { echo "REFUSING: RD-795 touches a product path — it is commissioned TEST-ONLY" >&2; exit 22; }
+
+# 93 — RD-761's premises at source (incl. WRONG 1-3).
+[ "$(blob "$A_BASE" "$ALA")" = "$ALA_A1_BLOB" ] && [ "$(blob "$A_HEAD" "$ALA")" = "$ALA_A_BLOB" ] && [ "$(blob "$MAIN_SHA" "$ALA")" = "$ALA_M_BLOB" ] && [ "$(blob "$MB_A" "$ALA")" = "$ALA_M_BLOB" ] \
+  && [ "$(blob "$A_BASE" "$LEP")" = "$LEP_A1_BLOB" ] && [ "$(blob "$A_HEAD" "$LEP")" = "$LEP_A_BLOB" ] && [ -z "$(blob "$MAIN_SHA" "$LEP")" ] \
+  && [ "$(blob "$A_BASE" "$SYN")" = "$SYN_A1_BLOB" ] && [ "$(blob "$A_HEAD" "$SYN")" = "$SYN_A_BLOB" ] && [ "$(blob "$MAIN_SHA" "$SYN")" = "$SYN_A1_BLOB" ] \
+  && [ "$(blob "$A_BASE" "$SV")" = "$SV_A_BLOB" ] && [ "$(blob "$A_HEAD" "$SV")" = "$SV_A_BLOB" ] && [ "$(blob "$MAIN_SHA" "$SV")" = "$SV_M_BLOB" ] && [ "$(blob "$A_HEAD" "$T761")" = "$T761_BLOB" ] \
+  || { echo "REFUSING: RD-761's blobs are not as briefed (azureLogAnalytics bd0a382 -> cfd0024, M0 595e71f; lawEndpointPolicy beaa819 -> 99730a6; syntheticFeed 884cc39 -> 604dff3; server.js c806ceb at A, 103de89 at M0)" >&2; exit 93; }
+[ "$(cnt "$A_HEAD" "$LEP" 'const isLawGuid = isTenantGuid;')" = "1" ] && [ "$(cnt "$A_HEAD" "$LEP" "const LAW_WORKSPACE_ID_INVALID = 'LAW_WORKSPACE_ID_INVALID';")" = "1" ] \
+  && [ "$(cnt "$A_HEAD" "$LEP" 'const TENANT_GUID = /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/;')" = "1" ] \
+  || { echo "REFUSING: lawEndpointPolicy.js at 7f1881e lacks the isLawGuid alias / the refusal name / the anchored TENANT_GUID (a2's premise, C-207)" >&2; exit 93; }
+[ "$(cnt "$A_HEAD" "$ALA" 'if (!isLawGuid(workspaceId)) throw this._lawWorkspaceRefused();')" = "2" ] && [ "$(cnt "$A_HEAD" "$ALA" 'encodeURIComponent(workspaceId)')" = "2" ] \
+  && [ "$(cnt "$A_HEAD" "$ALA" 'if (primaryRes.err && primaryRes.err.code === LAW_WORKSPACE_ID_INVALID) {')" = "1" ] && [ "$(cnt "$A_BASE" "$ALA" 'isLawGuid')" = "0" ] \
+  || { echo "REFUSING: azureLogAnalytics.js at 7f1881e is not two sink guards + two encodes + the breaker exemption (a2/a4's premise)" >&2; exit 93; }
+[ "$(cnt "$A_HEAD" "$SYN" 'async discoverTables() {')" = "1" ] && [ "$(cnt "$A_BASE" "$SYN" 'async discoverTables() {')" = "0" ] \
+  && [ "$(cnt "$A_HEAD" "$SYN" "const SYNTHETIC_WORKSPACE_ID = 'synthetic-demo-0000-0000-000000000000';")" = "1" ] \
+  || { echo "REFUSING: syntheticFeed.js's discoverTables override / non-GUID placeholder are not as briefed (a3's premise)" >&2; exit 93; }
+[ "$(cnt "$A_HEAD" "$SV" 'logsClient.queryWorkspace(')" = "2" ] || { echo "REFUSING: the server entry point at 7f1881e does not hold exactly two LogsQueryClient.queryWorkspace calls (WRONG 1 / a7's premise)" >&2; exit 93; }
+[ "$(cnt "$A_HEAD" "$T761" 'test.each(BAD_WS)(')" = "2" ] && [ "$(titles "$A_HEAD" "$T761" | wc -l | tr -d ' ')" = "30" ] && [ "$(titles "$A_BASE" "$T761" | wc -l | tr -d ' ')" = "22" ] \
+  || { echo "REFUSING: rd761 is not 30 test lines (22 at 72ca5d3) with two test.each(BAD_WS) (the 14 fix-round ids)" >&2; exit 93; }
+for F in "$TBOOT" "$TDISC"; do
+  [ -z "$(comm -23 <(titles "$MB_A" "$F" | sort) <(titles "$A_HEAD" "$F" | sort))" ] || { echo "REFUSING: $F loses a test title across RD-761 — the 'missing 0' prediction is stale (ruling e)" >&2; exit 93; }
+  [ "$(blob "$MAIN_SHA" "$F")" = "$(blob "$MB_A" "$F")" ] || { echo "REFUSING: $F moved on main since 8853e36 (C-133 premise)" >&2; exit 93; }
+done
+
+# 94 — RD-747's premises at source (incl. WRONG 5-6).
+[ "$(blob "$MB_BC" "$JS")" = "$JS_M_BLOB" ] && [ "$(blob "$MAIN_SHA" "$JS")" = "$JS_M_BLOB" ] && [ "$(blob "$B_HEAD" "$JS")" = "$JS_B_BLOB" ] && [ "$(blob "$B_HEAD" "$T747")" = "$T747_BLOB" ] \
+  || { echo "REFUSING: RD-747's blobs are not jsonStorage 2abb5cf -> 9cbfc45 / rd747 e7d3451" >&2; exit 94; }
+for T in 'function bytesAreRecordedClear(bytes) {' 'backupFile(filePath, { recordClear = false } = {}) {' 'const recoverySource = (filePath) => {' 'this.backupFile(filePath, { recordClear: replacedContent });' 'const replacedContent = this.hasUserContent(filePath);'; do
+  [ "$(cnt "$B_HEAD" "$JS" "$T")" = "1" ] || { echo "REFUSING: jsonStorage.js at e36529f lacks '$T' exactly once (b2/b3's premise)" >&2; exit 94; }
+done
+[ "$(cnt "$MB_BC" "$JS" 'bytesAreRecordedClear')" = "0" ] && [ "$(cnt "$MB_BC" "$JS" '    backupFile(filePath) {')" = "1" ] \
+  || { echo "REFUSING: 8b7ae54's jsonStorage.js already knows a recorded clear, or backupFile's old signature is gone (b0's premise)" >&2; exit 94; }
+[ "$(g show "${B_HEAD}:${T747}" 2>/dev/null | grep -cE '^[[:space:]]+test\(')" = "14" ] || { echo "REFUSING: rd747 is not 14 test() cells" >&2; exit 94; }
+for T in "test('S1 " "test('I1 " "test('K5 " "test('E2 " "test('r9a "; do
+  [ "$(cnt "$B_HEAD" "$T747" "$T")" = "1" ] || { echo "REFUSING: rd747 lacks the cell '$T' exactly once" >&2; exit 94; }
+done
+
+# 95 — RD-831's premises at source (incl. WRONG 9-11).
+[ "$(blob "$MB_BC" "$LHT")" = "$LHT_M_BLOB" ] && [ "$(blob "$MAIN_SHA" "$LHT")" = "$LHT_M_BLOB" ] && [ "$(blob "$C_HEAD" "$LHT")" = "$LHT_C_BLOB" ] \
+  && [ "$(blob "$C_HEAD" "$LJS")" = "$LJS_C_BLOB" ] && [ -z "$(blob "$MAIN_SHA" "$LJS")" ] && [ "$(blob "$C_HEAD" "$T831")" = "$T831_BLOB" ] \
+  || { echo "REFUSING: RD-831's blobs are not legal.html 9567a81 -> 8e6c1a6 / legal.js b56a9ae (new) / rd831 284feae" >&2; exit 95; }
+[ "$(cnt "$C_HEAD" "$LHT" '<script src="js/legal.js"></script>')" = "1" ] && [ "$(cnt "$C_HEAD" "$LHT" "loadLegal('/legal/privacy', 'privacy-content');")" = "0" ] \
+  && [ "$(cnt "$MB_BC" "$LHT" "loadLegal('/legal/privacy', 'privacy-content');")" = "1" ] && [ "$(cnt "$C_HEAD" "$LJS" "loadLegal('/legal/terms', 'terms-content');")" = "1" ] \
+  || { echo "REFUSING: the loader move is not as briefed (inline at 8b7ae54, js/legal.js at the head) (c2's premise)" >&2; exit 95; }
+[ "$(cnt "$C_HEAD" "$T831" "for (const opts of [{ channel: 'chrome' }, {}]) {")" = "1" ] || echo "NOTE: rd831's launch() no longer falls back to Playwright's default Chromium — brief WRONG 9 / c6 may be stale" >&2
+[ "$(cnt "$C_HEAD" "$LHT" 'cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js')" = "1" ] || echo "NOTE: legal.html at e9eeceb no longer loads Bootstrap's JS from the CDN — brief WRONG 10 / T6 may be stale" >&2
+[ "$(g show "${C_HEAD}:${T831}" 2>/dev/null | grep -cE '^test\(')" = "3" ] || { echo "REFUSING: rd831 is not 3 test() cells (L0, L1, L2)" >&2; exit 95; }
+[ "$(cnt "$MAIN_SHA" "$SV" "if (req.path.match(/\\.js\$/) && (req.path.startsWith('/js/') || req.path.startsWith('/static/'))) {")" = "1" ] \
+  || { echo "REFUSING: the auth gate's '.js under /js/' static bypass is not at 0f128cb as briefed (c4's premise)" >&2; exit 95; }
+
+# 96 — RD-802's premises at source (incl. WRONG 12-14).
+[ "$(blob "$D_BASE" "$ENT")" = "$ENT_M_BLOB" ] && [ "$(blob "$MAIN_SHA" "$ENT")" = "$ENT_M_BLOB" ] && [ "$(blob "$D_HEAD" "$ENT")" = "$ENT_D_BLOB" ] \
+  && [ "$(blob "$D_BASE" "$SCIM")" = "$SCIM_M_BLOB" ] && [ "$(blob "$MAIN_SHA" "$SCIM")" = "$SCIM_M_BLOB" ] && [ "$(blob "$D_HEAD" "$SCIM")" = "$SCIM_D_BLOB" ] \
+  && [ "$(blob "$D_HEAD" "$T802")" = "$T802_BLOB" ] && [ "$(blob "$D_HEAD" "$LS")" = "$LS_E19_BLOB" ] && [ -z "$(blob "$MAIN_SHA" "$LS")" ] \
+  || { echo "REFUSING: RD-802's blobs are not entra ba1dcfe -> bffd574 / scim 2dec10c -> dcd90fa / rd802 13f427c / logSafe 196ab46 (RD-801's, not on M0)" >&2; exit 96; }
+for PAIR in "$SCIM|logSafe(userName)" "$SCIM|logSafe(req.params.id)" "$ENT|logSafe(body.version)"; do
+  P="${PAIR%%|*}"; T="${PAIR#*|}"
+  [ "$(cnt "$D_HEAD" "$P" "$T")" = "1" ] && [ "$(cnt "$D_BASE" "$P" "$T")" = "0" ] || { echo "REFUSING: '$T' is not 0 -> 1 across RD-802 in $P (d2's premise)" >&2; exit 96; }
+done
+[ "$(cnt "$D_HEAD" "$ENT" 'if (!Number.isInteger(body.version) || body.version < 0) {')" = "1" ] || { echo "REFUSING: RD-388's integer refusal before the version line is not as briefed (WRONG 12)" >&2; exit 96; }
+[ "$(g show "${D_HEAD}:${T802}" 2>/dev/null | grep -cE '^[[:space:]]+test\(')" = "5" ] || { echo "REFUSING: rd802 is not 5 test() cells" >&2; exit 96; }
+
+# 97 — RD-795's premises at source (incl. WRONG 15-16).
+[ "$(blob "$MB_E" "$T618")" = "$T618_M_BLOB" ] && [ "$(blob "$MAIN_SHA" "$T618")" = "$T618_M_BLOB" ] && [ "$(blob "$E_HEAD" "$T618")" = "$T618_E_BLOB" ] \
+  && [ "$(blob "$E_HEAD" "$SV")" = "$SV_M_BLOB" ] && [ "$(blob "$E_HEAD" "$COUNTS_FILE")" = "$(blob "$MB_E" "$COUNTS_FILE")" ] \
+  || { echo "REFUSING: RD-795's blobs are not rd618 e60dceb -> 10d3a6b with the server entry point = M0's 103de89 and the counts file = f960035's" >&2; exit 97; }
+[ "$(titles "$MB_E" "$T618")" = "$(titles "$E_HEAD" "$T618")" ] || { echo "REFUSING: rd618's test titles changed across RD-795 — the 'ids unchanged' prediction is stale (WRONG 15)" >&2; exit 97; }
+[ "$(cnt "$E_HEAD" "$T618" "const reportLines = (log) => log.split('\\n').filter((l) => /CSP report/.test(l) && !/CSP violation report/.test(l));")" = "1" ] \
+  || { echo "REFUSING: R8's reportLines filter is not as briefed (WRONG 16 / e3's premise)" >&2; exit 97; }
+
+# 98 — shared blobs; the TWO locks as briefed; proxy-addr per lock (RD-827).
+for S in "$MAIN_SHA" "$MB_A" "$MB_BC" "$B90" "$MB_E" "$A_HEAD" "$B_HEAD" "$C_HEAD" "$E_HEAD"; do
+  [ "$(blob "$S" "$LOCK")" = "$LOCK_NEW" ] && [ "$(blob "$S" "$PKG")" = "$PKG_BLOB" ] || { echo "REFUSING: lock / package.json at ${S:0:7} are not d6d3b6e / cdb1168 (T2)" >&2; exit 98; }
+done
+for S in "$MB_D" "$D_BASE" "$D_HEAD"; do
+  [ "$(blob "$S" "$LOCK")" = "$LOCK_OLD" ] && [ "$(blob "$S" "$PKG")" = "$PKG_BLOB" ] || { echo "REFUSING: lock / package.json at ${S:0:7} are not e9063d4 / cdb1168 (T2)" >&2; exit 98; }
+done
+for S in "$MAIN_SHA" "$A_HEAD" "$B_HEAD" "$C_HEAD" "$D_HEAD" "$E_HEAD"; do
+  [ "$(blob "$S" "$TS")" = "$TS_BLOB" ] && [ "$(blob "$S" "$TSH")" = "$TSH_BLOB" ] && [ "$(blob "$S" "$DKF")" = "$DKF_BLOB" ] && [ "$(blob "$S" "$DIG")" = "$DIG_BLOB" ] \
+    && [ "$(blob "$S" "$R549")" = "$R549_BLOB" ] && [ "$(blob "$S" "$R465")" = "$R465_BLOB" ] \
+    || { echo "REFUSING: test-server / helper / Dockerfile / .dockerignore / rd549 / rd465 at ${S:0:7} are not as briefed (cff1e54 …)" >&2; exit 98; }
+done
+[ "$(lockver "$LOCK_OLD" proxy-addr)" = "2.0.7" ] && [ "$(lockver "$LOCK_NEW" proxy-addr)" = "2.0.8" ] \
+  && [ "$(lockver "$LOCK_OLD" playwright)" = "1.62.1" ] && [ "$(lockver "$LOCK_NEW" playwright)" = "1.62.1" ] \
+  || { echo "REFUSING: proxy-addr is not 2.0.7 (e9063d4) / 2.0.8 (d6d3b6e), or playwright is not 1.62.1 in both (T2, ruling q)" >&2; exit 98; }
+
+# 23 — EXPECTED OVERLAPS (beyond the counts file): main since A's base meets A at the server entry point only; nobody else meets main; no member pair shares a path.
+own() { g diff --name-only "$(g merge-base "$1" "$MAIN_SHA")" "$1" 2>/dev/null | grep -vxF "$COUNTS_FILE" | sort; }
+mside() { g diff --name-only "$(g merge-base "$1" "$MAIN_SHA")" "$MAIN_SHA" 2>/dev/null | grep -vxF "$COUNTS_FILE" | sort; }
+OV="$(comm -12 <(own "$A_HEAD") <(mside "$A_HEAD"))"; [ "$OV" = "$SV" ] || { echo "REFUSING: main since 8853e36 and RD-761 share '$OV', not exactly the server entry point" >&2; exit 23; }
+for X in "$B_HEAD" "$C_HEAD" "$D_HEAD" "$E_HEAD"; do
+  OV="$(comm -12 <(own "$X") <(mside "$X"))"; [ -z "$OV" ] || { echo "REFUSING: main since ${X:0:7}'s base changed a path it changes: $OV — a COMBINED blob the brief does not predict" >&2; exit 23; }
+done
+L5="A:$A_HEAD B:$B_HEAD C:$C_HEAD D:$D_HEAD E:$E_HEAD"
+for x in $L5; do for y in $L5; do
+  a="${x%%:*}"; b="${y%%:*}"; [[ "$a" < "$b" ]] || continue
+  OV="$(comm -12 <(own "${x#*:}") <(own "${y#*:}") | tr '\n' ' ' | sed 's/ $//')"
+  [ -z "$OV" ] || { echo "REFUSING: $a x $b share '$OV' beyond the counts file — the brief predicts none" >&2; exit 23; }
+done; done
+
+# 35 — counts at every pinned sha; __tests__ census.
+for PAIR in "$MB_A 4307 266" "$A_BASE 4380 268" "$MB_BC 4320 267" "$MB_D 4298 264" "$D_BASE 4317 266" "$B90 4303 265" "$MB_E 4334 269" "$MAIN_SHA 4352 271" \
+            "$A_HEAD 4394 268" "$B_HEAD 4334 268" "$C_HEAD 4323 268" "$D_HEAD 4322 267" "$E_HEAD 4334 269"; do
+  S="${PAIR%% *}"; WANT="${PAIR#* }"
+  CT="$(counts_at "$S")"
+  [ "$CT" = "$WANT" ] || { echo "REFUSING: $COUNTS_FILE at ${S:0:7} reads '${CT:-unreadable}', not '$WANT'" >&2; exit 35; }
+done
+CENSUS="$(for S in "$MB_A" "$A_BASE" "$MB_BC" "$MB_D" "$D_BASE" "$B90" "$MB_E" "$MAIN_SHA" "$A_HEAD" "$B_HEAD" "$C_HEAD" "$D_HEAD" "$E_HEAD"; do printf '%s ' "$(ntests "$S")"; done)"
+[ "$CENSUS" = "312 315 313 309 311 310 315 317 315 314 314 312 315 " ] || { echo "REFUSING: the __tests__ census (8853e36 72ca5d3 8b7ae54 d97039f 6613113 90b2556 f960035 M0 A B C D E) is '$CENSUS', not '312 315 313 309 311 310 315 317 315 314 314 312 315'" >&2; exit 35; }
+
+# 70 — the lock on origin main; the npm cache, the sqlite3 prebuild, Chrome, and the carried rulings (NOTEs where the gate decides, REFUSALs where a ruling is missing).
+[ "$(blob "$M_ORIGIN" "$LOCK")" = "$LOCK_NEW" ] || echo "NOTE: package-lock on origin main ${M_ORIGIN:0:7} is not d6d3b6e — another lock is in play; prove node_modules before any run (H-31)" >&2
+if [ -d "$NPM_CACHE/index-v5" ]; then
+  for T in proxy-addr/-/proxy-addr-2.0.7.tgz proxy-addr/-/proxy-addr-2.0.8.tgz sqlite3/-/sqlite3-5.1.7.tgz playwright/-/playwright-1.62.1.tgz; do
+    grep -r -l -F -m1 -- "$T" "$NPM_CACHE/index-v5" >/dev/null 2>&1 || echo "NOTE: the local npm cache index has no '$T' — the offline npm ci (H-31) may ENOTCACHE" >&2
+  done
+else
+  echo "NOTE: no local npm cache at $NPM_CACHE — H-31's offline install has no source; the gate will mail a QUESTION" >&2
+fi
+PB_NOW="$(fsha "$PREBUILD")"
+[ "$PB_NOW" = "$PREBUILD_SHA" ] || echo "NOTE: the cached sqlite3 prebuild is '${PB_NOW:-absent}', not 84a34404…7afc — ruling (m)'s condition 1 records what the gate finds" >&2
+[ -d "$CHROME_APP" ] || echo "NOTE: $CHROME_APP is absent — c3 (the browser leg) will be NOT RUN, named (ruling q), and rd831/rd490 cells cannot launch" >&2
+[ -s "$SQLITE_RULING" ] && grep -qF 'The offline unpack of sqlite3' "$SQLITE_RULING" || { echo "REFUSING: Tuesday's sqlite3 prebuild ruling (ruling m) is not at $SQLITE_RULING" >&2; exit 70; }
+[ -s "$BELT_ANS" ] && grep -qF 'run UNBELTED. Every other jest run stays belted: cells, mutants, C-68 unions, drivers and servers.' "$BELT_ANS" \
+  || { echo "REFUSING: Tuesday's belt answer (ruling n) is not at $BELT_ANS as quoted" >&2; exit 70; }
+[ -s "$NOTIFIER_ANS" ] && grep -qF 'Every later npm invocation in this gate carries npm_config_update_notifier=false' "$NOTIFIER_ANS" \
+  || { echo "REFUSING: Tuesday's notifier answer (ruling m) is not at $NOTIFIER_ANS as quoted" >&2; exit 70; }
+[ -s "$RULING_B" ] && grep -qF 'Deliver the verdict NOW.' "$RULING_B" && grep -qF 'merge hold full verify + PR Build are the gate' "$RULING_B" \
+  || { echo "REFUSING: Tuesday's ruling (b) (lock-starved full verifies NAMED NOT RUN) is not at $RULING_B as quoted" >&2; exit 70; }
+[ -s "$BROWSER_ANS" ] && grep -qF 'Playwright 1.62.1 from YOUR tree' "$BROWSER_ANS" && grep -qF "headless (channel 'chrome'), no download" "$BROWSER_ANS" \
+  || { echo "REFUSING: Tuesday's browser-driver ruling (ruling q) is not at $BROWSER_ANS as quoted" >&2; exit 70; }
+# 90n — the jest-lock tool (not a member here): its sha256 as gate 19 pinned it, or a NOTE (C-141 ADDENDUM 6 may have moved).
+LT_NOW="$(fsha "$LOCKTOOL")"
+[ -n "$LT_NOW" ] || { echo "REFUSING: the jest-lock tool $LOCKTOOL is absent — the gate's holds have no instrument" >&2; exit 70; }
+[ "$LT_NOW" = "$LOCK_SHA_SEEN" ] || echo "NOTE: the jest-lock tool's sha256 is '$LT_NOW', not fd223bd2… (RD-821 round 2 as gate 19 pinned it) — read C-141's latest ADDENDUM before filing; --replace / merge-first may have changed" >&2
+grep -qF -- '--replace' "$LOCKTOOL" || { echo "REFUSING: the installed jest-lock tool has no --replace — ruling (i)'s re-file instrument is missing" >&2; exit 70; }
+
+# 80 — the merge premise by the READ-ONLY three-argument merge-tree (no objects written anywhere): each pair counts-only or clean.
+MT_PAIRS=0
+for PAIR in "$M_ORIGIN $A_HEAD" "$M_ORIGIN $B_HEAD" "$M_ORIGIN $C_HEAD" "$M_ORIGIN $D_HEAD" "$M_ORIGIN $E_HEAD" \
+            "$A_HEAD $B_HEAD" "$A_HEAD $C_HEAD" "$A_HEAD $D_HEAD" "$A_HEAD $E_HEAD" "$B_HEAD $C_HEAD" "$B_HEAD $D_HEAD" "$B_HEAD $E_HEAD" \
+            "$C_HEAD $D_HEAD" "$C_HEAD $E_HEAD" "$D_HEAD $E_HEAD" "$C_HEAD $G19" "$D_HEAD $D_BASE"; do
+  X="${PAIR% *}"; Y="${PAIR#* }"
+  CONF="$(conflicts "$X" "$Y" | tr '\n' ' ' | sed 's/ $//')"
+  MT_PAIRS=$((MT_PAIRS + 1))
+  [ -z "$CONF" ] || [ "$CONF" = "$COUNTS_FILE" ] || { echo "REFUSING: merge-tree ${X:0:7} x ${Y:0:7} carries conflict markers in '${CONF}' — not counts-only (80)" >&2; exit 80; }
+done
+
+# 31 — READYs, the project brief, builder evidence, prior reports, gate 18/15's instruments, standing references and tools on disk.
+for f in "$READY_A" "$READY_B" "$READY_C" "$READY_D" "$READY_E" "$PBRIEF_A" "$CLAR" "$C133" "$RULINGS19" "$BRIEF18" "$BRIEF19" \
+         "$B18_REPORT" "$B16_REPORT" "$B15_REPORT" "$B15_B9" "$B12_REPORT" \
+         "$EV_R/hold-02.log" "$EV_R/hold-01.log" "$EV_R/census-law-clients.md" "$EV_R1/c68-rd761.txt" "$EV_N/rd747-run2.out" "$EV_N/union-rd747.lst" "$EV_N/rd747/linux-union.log" \
+         "$EV_P/rd831-hold.log" "$EV_O/rd802-hold.log" "$EV_O/rd802-red.log" "$EV_M/rd795-onepass.log" "$LOCKTOOL" \
+         "$B18_INST/HOLD18.sh" "$B18_INST/qa-holdlib18.sh" "$B18_INST/qa-floorlib18.sh" "$B18_INST/qa-floorcount.py" "$B18_INST/qa-to.sh" "$B18_INST/qa-jestwrap.sh" "$B18_INST/qa-jsum.js" \
+         "$B18_INST/qa-runj18.sh" "$B18_INST/qa-mut18.py" "$B18_INST/qa-mutlib18.sh" "$B18_INST/qa-merge18.sh" "$B18_INST/qa-build18.sh" "$B18_INST/qa-npm18.sh" "$B18_INST/qa-file18.sh" \
+         "$B18_INST/qa-wait18.py" "$B18_INST/qa-verify18.sh" "$B18_INST/qa-h1-selftest18.sh" "$B18_INST/qa-h1-scan.py" "$B18_INST/qa-mail.py" "$B18_INST/qa-mailread.py" "$B18_INST/qa-lockcheck.py" \
+         "$B18_INST/qa-ssprint.sh" "$B18_INST/qa-netbelt.sb" "$B18_INST/qa-netbelt-nodns.sb" "$B18_INST/qa-netbelt-ctl.js" "$B18_INST/qa-c57-id-superset.sh" "$B18_INST/qa-census18.py" \
+         "$B18_INST/qa-cov-setup.js" "$B18_INST/qa-srv18.js" "$G7R1_FLOOR" "$TUE/2_Project_Files/fleet/qa-agent/QA_AGENT_CHARTER.md"; do
+  [ -s "$f" ] || { echo "REFUSING: evidence or tool absent: $f" >&2; exit 31; }
+done
+grep -qF "${A_HEAD:0:7}" "$READY_A" && grep -qF "${B_HEAD:0:7}" "$READY_B" && grep -qF "${C_HEAD:0:7}" "$READY_C" && grep -qF "${D_HEAD:0:7}" "$READY_D" && grep -qF "${D_BASE:0:7}" "$READY_D" \
+  && grep -qF "${E_HEAD:0:7}" "$READY_E" && grep -qF "${A_HEAD:0:7}" "$PBRIEF_A" \
+  && grep -qF 'PRIOR WORK' "$READY_A" && grep -qiF 'Prior work' "$READY_B" && grep -qF 'PRIOR WORK' "$READY_C" && grep -qF 'PRIOR WORK' "$READY_D" && grep -qF 'PRIOR WORK' "$READY_E" \
+  && grep -qF 'PRIOR WORK (C-49)' "$PBRIEF_A" && grep -qF 'ADDENDUM to READY FOR QA: RD-795' "$READY_E" \
+  || { echo "REFUSING: a READY does not name its head (or RD-802 its stack base), a PRIOR WORK section is missing, or RD-795's NOT TESTED ADDENDUM is not appended" >&2; exit 31; }
+grep -qF 'VERDICT: PASS — 4394/4394 tests passed across 268 suites (jest exit 0)' "$EV_R/hold-02.log" && grep -qF '=== start fix=35ed72d' "$EV_R/hold-02.log" \
+  && grep -qF 'VERDICT: PASS — 4334/4334 tests passed across 268 suites (jest exit 0)' "$EV_N/rd747-run2.out" && grep -qF '=== EXIT restore d8f86d238f6194b0 (fix d8f86d238f6194b0)' "$EV_N/rd747-run2.out" \
+  && grep -qF '=== head 11fae98' "$EV_P/rd831-hold.log" && grep -qF 'VERDICT: PASS — 4323/4323 tests passed across 268 suites (jest exit 0)' "$EV_P/rd831-hold.log" \
+  && grep -qF '=== HEAD de16aab' "$EV_O/rd802-hold.log" && grep -qF 'VERDICT: PASS — 4322/4322 tests passed across 267 suites (jest exit 0)' "$EV_O/rd802-hold.log" \
+  && grep -qF '=== HEAD 6613113' "$EV_O/rd802-red.log" \
+  && grep -qF 'VERDICT: PASS — 4334/4334 tests passed across 269 suites (jest exit 0)' "$EV_M/rd795-onepass.log" && grep -qF 'jest lock acquired by s86m-rd795-onepass-proof after 17220s' "$EV_M/rd795-onepass.log" \
+  || { echo "REFUSING: a builder log no longer carries the line the brief quotes (WRONG 8's premise)" >&2; exit 31; }
+[ "$(grep -c . "$EV_N/union-rd747.lst")" = "76" ] || { echo "REFUSING: N's union-rd747.lst is not 76 lines (WRONG 7's premise)" >&2; exit 31; }
+grep -qF 'GO WITH FINDINGS' "$B18_REPORT" && grep -qF 'STATUS: DELIVERED' "$B18_REPORT" && grep -qF 'MBREAKERFIRST' "$B18_REPORT" || { echo "REFUSING: gate 18's report does not read as delivered with F-761-1 (MBREAKERFIRST)" >&2; exit 31; }
+grep -qF "b9 r9a's tear landing was checked after the boot, so it was VOID." "$B15_REPORT" && grep -qF 'D-F1 → RD-747' "$B15_REPORT" || { echo "REFUSING: gate 15's report no longer carries RD-747's origin (D-F1) and the b9 VOID lesson the brief quotes" >&2; exit 31; }
+grep -qF 'F-3' "$B16_REPORT" && grep -qF 'N-2' "$B16_REPORT" || { echo "REFUSING: gate 16's report no longer carries F-3 / N-2 (RD-795's round 1)" >&2; exit 31; }
+grep -qF 'RESUME METHOD NOTE' "$B12_REPORT" || { echo "REFUSING: gate 12's report no longer carries the RESUME METHOD NOTE (ruling j)" >&2; exit 31; }
+grep -qE '^ROOT=\$\{ROOT:-64937\}' "$B18_INST/qa-floorlib18.sh" || echo "NOTE: gate 18's qa-floorlib18.sh ROOT default is no longer 64937 — the brief's 'STALE defaults' line names the old value" >&2
+grep -q '^SELF-CHECK: re-read end-to-end for contradictions | Tuesday' "$BRIEF18" || echo "NOTE: gate 18's brief does not read as stamped by Tuesday" >&2
+grep -q '^SELF-CHECK: re-read end-to-end for contradictions | 20' "$BRIEF19" || echo "NOTE: gate 19's brief does not read as stamped — the template reference may be stale" >&2
+
+# 83 — the C-133 script is the RD-658 version the brief names (ruling l / H-30).
+C133_NOW="$(fsha "$C133")"
+[ "$C133_NOW" = "$C133_SHA" ] || echo "NOTE: session-tools/s78g/c133-accounting.py sha256 is '${C133_NOW:-unreadable}', not 6f938bfc…f972f — the gate names the version it used (H-30)" >&2
+
+# 39 — the floor instruments are named in the brief.
+for f in "$PREV_FLOORLIB" "$G7R1_FLOOR"; do
+  grep -qF "$f" "$BRIEF" || { echo "REFUSING: brief does not name the floor instrument $f" >&2; exit 39; }
+done
+
+# 10 / 17 — report path named in both; no stale report; brief names every source it cites.
+grep -qF "$REPORT" "$BRIEF" || { echo "REFUSING: brief does not name the report path $REPORT" >&2; exit 10; }
+case "$PROMPT" in *"$REPORT"*) ;; *) echo "REFUSING: prompt does not name the report path" >&2; exit 10 ;; esac
+[ ! -e "$REPORT" ] || { echo "REFUSING: $REPORT already exists — a stale report would read as this gate's" >&2; exit 17; }
+for P in "$B18_REPORT" "$B16_REPORT" "$B15_REPORT" "$BRIEF18" "$PBRIEF_A" "$B18_INST/" \
+         "2026-10-07_nexusai-rd761-fixround-READY-mail.txt" "2026-10-08_nexusai-rd747-READY-mail.txt" "2026-10-07_nexusai-rd831-READY-mail.txt" \
+         "2026-10-07_nexusai-rd802-READY-mail.txt" "2026-10-07_nexusai-rd795-READY-mail.txt" "2026-10-07_nexusai-gate-batch19.md" \
+         "2026-10-06_nexusai_g18_ruling_b_deliver_now.md" "2026-10-07_gate19_drafter_report_and_rulings.md" "qa-b9.js"; do
+  grep -qF "$P" "$BRIEF" || { echo "REFUSING: brief must name $P" >&2; exit 10; }
+done
+
+# 11 — identity: NexusAI's OWN dirs.
+[ -d "$ID_ROOT/.azure" ] && [ -d "$ID_ROOT/.gh-config" ] || {
+  echo "REFUSING: NexusAI identity dirs missing under $ID_ROOT (.azure / .gh-config) — would inherit the caller's" >&2; exit 11; }
+export AZURE_CONFIG_DIR="$ID_ROOT/.azure"
+export GH_CONFIG_DIR="$ID_ROOT/.gh-config"
+export CLAUDE_CONFIG_DIR="$TUE/4_Credentials/.claude"
+
+# 12 / 13 / 14 / 15 / 20 — tiers, directive, brief path, pins, verdict route, key path, question route.
+for T in '**RD-761 fix round is TIER 1**' '**RD-747 is TIER 1**' '**RD-831 is TIER 1**' '**RD-802 is TIER 2, THROUGH CODE, STACKED on RD-801.**' '**RD-795 is TIER 2, TEST-ONLY, ROUND 2 OF 2' \
+         'One verdict PER ticket' 'No priority member' 'NO NPM REGISTRY EXCEPTION' 'IS PART OF H-31' 'FULL VERIFIES UNBELTED' \
+         'THE BROWSER DRIVER' 'npm_config_update_notifier=false' 'BOTH thresholds block' 'RULING (b)' 'NAMED NOT RUN' 'THE CROSSES' '--replace' 'qa-b20-' 'NON-MEMBER'; do
+  grep -qF -- "$T" "$BRIEF" || { echo "REFUSING: brief does not declare '$T'" >&2; exit 12; }
+done
+for T in 'RD-761 fix round (TIER 1' 'RD-747 (TIER 1' 'RD-831 (TIER 1' 'RD-802 (TIER 2 through code' 'RD-795 round 2 (TIER 2, TEST-ONLY, ROUND 2 OF 2' \
+         'one verdict per ticket' 'THE CROSSES' 'manifest evaluation' 'NO image built' 'UNBELTED' 'npm_config_update_notifier=false' 'BOTH thresholds block' \
+         'Playwright 1.62.1' 'channel chrome' 'RULING (b)' 'NAMED NOT RUN' '--replace' 'qa-b20-' 'NON-MEMBER'; do
+  case "$PROMPT" in *"$T"*) ;; *) echo "REFUSING: prompt does not declare '$T'" >&2; exit 12 ;; esac
+done
+[ "$(printf '%s\n' "$PROMPT" | head -1)" = "ultrathink" ] || { echo "REFUSING: prompt does not open with the thinking directive" >&2; exit 13; }
+case "$PROMPT" in *"$BRIEF"*) ;; *) echo "REFUSING: prompt must name the brief path" >&2; exit 14 ;; esac
+for S in "$A_HEAD" "$B_HEAD" "$C_HEAD" "$D_HEAD" "$E_HEAD" "$MAIN_SHA" "$A_BASE" "$MB_A" "$MB_BC" "$D_BASE" "$MB_D" "$MB_E" "$SV_MT_BLOB"; do
+  grep -qF -- "$S" "$BRIEF" || { echo "REFUSING: brief must name $S in full" >&2; exit 14; }
+  case "$PROMPT" in *"$S"*) ;; *) echo "REFUSING: prompt must name $S" >&2; exit 14 ;; esac
+done
+for S in "$ALA_A1_BLOB" "$ALA_A_BLOB" "$LEP_A1_BLOB" "$LEP_A_BLOB" "$SYN_A1_BLOB" "$SYN_A_BLOB" "$SV_A_BLOB" "$SV_M_BLOB" "$T761_BLOB" "$JS_M_BLOB" "$JS_B_BLOB" "$T747_BLOB" \
+         "$LHT_M_BLOB" "$LHT_C_BLOB" "$LJS_C_BLOB" "$T831_BLOB" "$ENT_M_BLOB" "$ENT_D_BLOB" "$SCIM_M_BLOB" "$SCIM_D_BLOB" "$T802_BLOB" "$T618_M_BLOB" "$T618_E_BLOB" \
+         "$LOCK_OLD" "$LOCK_NEW" "$PKG_BLOB" "$A_R1" "$A_9E" "$E_R1" "$B90" "$G19"; do
+  grep -qF -- "${S:0:7}" "$BRIEF" || { echo "REFUSING: brief must name ${S:0:7}" >&2; exit 14; }
+done
+for S in "$LHT_X_BLOB" "$C133_SHA" "$PREBUILD_SHA"; do grep -qF -- "$S" "$BRIEF" || { echo "REFUSING: brief must name $S" >&2; exit 14; }; done
+if printf '%s\n' "$PROMPT" | LC_ALL=C grep -q '@[A-Z_0-9]*@'; then echo "REFUSING: the prompt carries a placeholder" >&2; exit 14; fi
+case "$PROMPT" in *"MAIL YOUR VERDICT"*"tuesday-agent@agentmail.to"*) ;; *) echo "REFUSING: prompt must say MAIL YOUR VERDICT to tuesday-agent@agentmail.to" >&2; exit 15 ;; esac
+grep -qF "$SUBJECT" "$BRIEF" || { echo "REFUSING: brief must carry the subject exactly: $SUBJECT" >&2; exit 15; }
+case "$PROMPT" in *"$SUBJECT"*) ;; *) echo "REFUSING: prompt must carry the subject exactly: $SUBJECT" >&2; exit 15 ;; esac
+if grep -qF 'EARLY VERDICT — batch 20' "$BRIEF" || printf '%s\n' "$PROMPT" | grep -qF 'EARLY VERDICT'; then echo "REFUSING: an EARLY VERDICT route is carried — batch 20 has no priority member" >&2; exit 15; fi
+case "$PROMPT" in *"/Volumes/KK_T9_External_HDD/TUESDAY/4_Credentials/.env"*) ;; *) echo "REFUSING: prompt must name the AgentMail key by ABSOLUTE path" >&2; exit 20 ;; esac
+for T in "$QUESTION_SUBJ" "$ANSWER_PREFIX" "$ROUTE_NAME"; do
+  grep -qF -- "$T" "$BRIEF" || { echo "REFUSING: brief lacks the question route: $T" >&2; exit 20; }
+  case "$PROMPT" in *"$T"*) ;; *) echo "REFUSING: prompt lacks the question route: $T" >&2; exit 20 ;; esac
+done
+if printf '%s\n' "$PROMPT" | grep -qi 'wednesday-agent@' && ! printf '%s\n' "$PROMPT" | grep -q 'Never wednesday-agent@'; then
+  echo "REFUSING: the prompt routes to wednesday-agent@ — Datasec's coordinator is Tuesday" >&2; exit 15; fi
+# the gate's own tags must never read as a merge ticket (C-141 ADDENDUM 7): no 'qa-b20-…merge…' tag suggested anywhere.
+[ "$(grep -oE 'qa-b20-[A-Za-z0-9_-]*merge[A-Za-z0-9_-]*' "$BRIEF" | grep -c .)" = "0" ] || { echo "REFUSING: the brief suggests a qa-b20- tag containing 'merge' (C-141 ADDENDUM 7)" >&2; exit 15; }
+[ "$(printf '%s\n' "$PROMPT" | grep -oE 'qa-b20-[A-Za-z0-9_-]*merge' | grep -c .)" = "0" ] || { echo "REFUSING: the prompt suggests a qa-b20- tag containing 'merge'" >&2; exit 15; }
+
+# 82 — THE MODEL RULE (Kam 2026-09-30 09:07, card (b)) is carried in the brief and the prompt, per session, never "Switch automatically".
+for T in "$STATUS_SUBJ" "$PARK_LINE" 'classifier-stops.txt' 'Switch automatically' 'Opus 4.8' 'PER SESSION' 'which rows ran on which model' 'Opus 5.5'; do
+  grep -qiF -- "$T" "$BRIEF" || { echo "REFUSING: brief lacks THE MODEL RULE fragment '$T'" >&2; exit 82; }
+  case "$(printf '%s' "$PROMPT" | tr '[:upper:]' '[:lower:]')" in *"$(printf '%s' "$T" | tr '[:upper:]' '[:lower:]')"*) ;; *) echo "REFUSING: prompt lacks THE MODEL RULE fragment '$T'" >&2; exit 82 ;; esac
+done
+grep -qF '## THE MODEL RULE' "$BRIEF" && grep -qF 'H-27' "$BRIEF" && grep -qF 'H-28 (AMENDED' "$BRIEF" && grep -qF 'H-31 (RE-BASED' "$BRIEF" && grep -qF 'H-32 (RE-BASED' "$BRIEF" && grep -qF 'H-33 (RE-BASED' "$BRIEF" \
+  || { echo "REFUSING: brief lacks THE MODEL RULE section or H-27/H-28 (amended)/H-31..H-33 (re-based)" >&2; exit 82; }
+
+# 19 — the words the prompt must carry (% is a space); the brief's sections; limits; rows; READY lines verbatim; clarification quotes.
+WORDS="RD-761 RD-747 RD-831 RD-802 RD-801 RD-795 RD-721 RD-777 RD-776 RD-823 RD-735 RD-791 RD-603 RD-830 RD-827 RD-816 RD-800 C-207 C-203 C-164 C-14 C-199 C-141 C-206 C-205 C-185 C-190 C-192
+C-15 C-41 C-49 C-57 C-68 C-76 C-89 C-97 C-98 C-102 C-104 C-112 C-115 C-125 C-130 C-133 C-174 C-186 ADDENDA%5,%6%and%7 RED-AT-PARENT
+a0 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 b0 b2 b3 b4 b5 b6 b7 b8 c0 c2 c3 c4 c5 c6 c7 d0 d2 d3 d4 d5 d6 e0 e2 e3 e4 e5 y1 y2 y3 y4 y5 y6 y7 y8 y9
+MT-E MT-B MT-C MT-A MT-801 MTF M0 S1 S2 WORKSPACE%ROW CODEQL%CONDITION CLEAR%ROW SECURITY%ROW VERBATIM%ROW BROWSER%LEG ONE-LINE%ROW ARM'S%EDGES
+LAW_WORKSPACE_ID_INVALID SyntheticLogAnalytics discoverTables _executeQueryDirect encodeURIComponent LogsQueryClient refs/pull/58/head state=fixed #256-#259 PR%#58
+static/js/legal.js logSafe CSP%violation%report sign-in%keys emergency%copy WRONG%1 WRONG%6 WRONG%8 WRONG%9 WRONG%16
+4480/278 4352/271 4366/272 4369/273 4456/275 4475/277 4394/268 4334/268 4323/268 4322/267 4334/269 new%ids%128 missing%0 e9063d4 d6d3b6e 2.0.7 2.0.8 proxy-addr
+L-A1 L-A11 L-B1 L-B7 L-C1 L-C9 L-D1 L-D6 L-E1 L-E8 L-Y1 H-1 H-2 H-3 H-4 H-9 H-15 H-16 H-17 H-20 H-21 H-22 H-24 H-25 H-26 H-27 H-28 H-29 H-31 H-32 H-33 --forceExit trap%on%EXIT deadline LANDING%CONTROL
+_prebuilds node_sqlite3.node sqlite3%binding:%cached%prebuild,%offline _update-notifier-last-checked exits%71 SCRATCH%object%dir git%clone%--shared REGENERATION ms-playwright
+id-superset pull%request STOP JOINS SLOTS POSITIVE%CONTROL%FIRST node%--check VOID EXCLUSIVE qa-b20- MERGES%GO%FIRST QUEUE,%NEVER%TAKE%OVER --after --replace UNCHANGED%tag DEADLINE HEARTBEAT 2%minutes 5%minutes finally
+SESSION_SECRET%UNSET NOT%TESTED MEASURED%AT%RUNTIME READ%ONLY PROBED RELAYED CodeQL%is%NOT%RUN UNKNOWN about%40%minutes 2-hour%maximum TRACKED%child Prior%work PRIOR%WORK FOREGROUND never%push NEVER%merge Partner%Center
+npm%install --offline ENOTCACHED HOLD18.sh qa-floorlib18.sh qa-file18.sh qa-b9.js Never%rm datasecau/Reporting_Dashboard_Au ticket-left-* -r<N> GHSA-jqcg-44mw-7w3h seeded%store auth%ENFORCED instrument never%fixes
+QA/NexusAI-batch19 PEER%gate GROUPED SPLIT never%dismissed NON-MEMBER"
+for w in $WORDS; do
+  w="${w//%/ }"
+  case "$PROMPT" in *"$w"*) ;; *) echo "REFUSING: prompt must carry '$w'" >&2; exit 19 ;; esac
+done
+for H in '^## WRONG OR UNVERIFIED' "^## TUESDAY'S RULINGS" '^## THE MODEL RULE' '^## Charter' '^## THE CLARIFICATIONS THAT BIND THIS GATE' '^## PRIOR ROUND' '^## 1. Targets' '^## 2. Why these tiers' '^## 2a. LEGITIMATE SHAPES' \
+         '^## 3. THE QUESTIONS' '^## 3a. INSTRUMENT RULES' '^## 3b. THE NEGATIVE-ASSERTION SWEEP' '^## 4. TARGET A' '^## 4b. TARGET B' '^## 4c. TARGET C' '^## 4d. TARGET D' '^## 4e. TARGET E' \
+         '^## 6. THE CROSSES' '^## 7. THE MERGED TREE' '^## 8. CI' '^## 9. Floor discipline' '^## 10. HELD' '^## 11. Output' '^## ADDENDUM SLOTS' '^## PROVENANCE' '^### MERGE ORDER' \
+         '^### TARGET A' '^### TARGET B' '^### TARGET C' '^### TARGET D' '^### TARGET E' '^### File overlap' '^### How to build your trees' '^## FILL AT STAMP'; do
+  grep -q "$H" "$BRIEF" || { echo "REFUSING: brief lacks section '$H'" >&2; exit 19; }
+done
+# the WRONG list sits ABOVE the rulings (the commission's order), and every WRONG item is marked MEASURED or READ-ONLY-INFERRED somewhere in its line.
+[ "$(grep -n '^## WRONG OR UNVERIFIED' "$BRIEF" | cut -d: -f1)" -lt "$(grep -n "^## TUESDAY'S RULINGS" "$BRIEF" | cut -d: -f1)" ] || { echo "REFUSING: the WRONG OR UNVERIFIED section is not above TUESDAY'S RULINGS" >&2; exit 19; }
+WSTART="$(grep -n '^## WRONG OR UNVERIFIED' "$BRIEF" | cut -d: -f1)"; WEND="$(grep -n "^## TUESDAY'S RULINGS" "$BRIEF" | cut -d: -f1)"
+WUNMARKED="$(sed -n "${WSTART},${WEND}p" "$BRIEF" | grep -E '^[0-9]+\. ' | grep -vE 'MEASURED|READ-ONLY-INFERRED|superseded|Counts and census' | cut -c1-60)"
+[ -z "$WUNMARKED" ] || { echo "REFUSING: WRONG items not marked MEASURED / READ-ONLY-INFERRED: $WUNMARKED" >&2; exit 19; }
+for L in L-A1 L-A2 L-A3 L-A4 L-A5 L-A6 L-A7 L-A8 L-A9 L-A10 L-A11 L-B1 L-B2 L-B3 L-B4 L-B5 L-B6 L-B7 L-C1 L-C2 L-C3 L-C4 L-C5 L-C6 L-C7 L-C8 L-C9 \
+         L-D1 L-D2 L-D3 L-D4 L-D5 L-D6 L-E1 L-E2 L-E3 L-E4 L-E5 L-E6 L-E7 L-E8 L-Y1; do
+  grep -qF "$L" "$BRIEF" || { echo "REFUSING: brief lacks declared limit $L (C-112)" >&2; exit 19; }
+done
+for R in a0 a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 b0 b1 b2 b3 b4 b5 b6 b7 b8 b9 b10 c0 c1 c2 c3 c4 c5 c6 c7 c8 c9 c10 \
+         d0 d1 d2 d3 d4 d5 d6 d7 d8 e0 e1 e2 e3 e4 e5 e6 e7 e8 y1 y2 y3 y4 y5 y6 y7 y8 y9; do
+  grep -qF "| $R |" "$BRIEF" || { echo "REFUSING: brief lacks row $R" >&2; exit 19; }
+done
+for R in s1-0 s1-1 s1-2 s1-3 s1-4 s1-5 s2-0 s2-1 s2-2 s2-3 s2-4; do
+  grep -qF "**$R " "$BRIEF" || { echo "REFUSING: brief lacks the SLOT row $R" >&2; exit 19; }
+done
+# every builder's stated scope / limits / interpretation lines carried verbatim (each line checked in the READY AND the brief).
+while IFS= read -r PAIR; do
+  [ -n "$PAIR" ] || continue
+  case "${PAIR%%|*}" in A) F="$READY_A" ;; B) F="$READY_B" ;; C) F="$READY_C" ;; D) F="$READY_D" ;; E) F="$READY_E" ;; *) echo "REFUSING: bad verbatim-table row" >&2; exit 19 ;; esac
+  T="${PAIR#*|}"
+  grep -qF -- "$T" "$F" || { echo "REFUSING: '$T' is no longer in $F — the READY changed; re-brief" >&2; exit 19; }
+  grep -qF -- "$T" "$BRIEF" || { echo "REFUSING: brief does not carry the READY line '$T' verbatim" >&2; exit 19; }
+done <<'VERBATIM_EOF'
+A|encodeURIComponent can't be proven by a cell behind a GUID guard; CodeQL is its instrument.
+A|An already-open circuit gives the generic message (nothing sent). Accepted by you.
+A|Writers still store a non-GUID (RD-830).
+A|Why no pull_request Build fired is UNMEASURED; treat Linux as not run.
+B|A RECORDED CLEAR IS FINAL until the next content write: an operator restoring by hand must put a content generation back, not delete the {} backup.
+B|A store cleared WHILE an erasure is unfinished records nothing (K5, the freeze); on the next boot after the erasure finishes, the purge has removed the generations anyway.
+B|NOT RUN: CodeQL (no PR until the merge turn).
+C|NOT TESTED: CodeQL (no PR); CI Build/Linux; signed-in mode (legal.html is gated; the cells ran in open mode, where the gate does not apply); CSP_STRICT=false (inline would already have run there); the demo (RD-76); browsers other than Chrome; the Terms pane in a screenshot (the Privacy tab is the default; the Terms text is proven by L1's equality, not by a picture).
+C|Behaviour change beyond "it now runs": NONE known.
+D|NOT TESTED: CodeQL (no PR yet; whether CodeQL accepts logSafe THROUGH the call is the PR run's to show, the same open question as RD-801); a real Entra tenant or SCIM client; multi-line Entra config (the version path only).
+D|It merges AFTER RD-801, never alone or in the same push.
+E|If rd735 R9 were removed or weakened, nothing in RD-795 would notice F-1 coming back.
+E|Whether any OTHER cell also notices each mutant is not measured.
+E|It does NOT catch a request count placed BEFORE the fixed text, without the word "kept" and as a number other than 150/140
+VERBATIM_EOF
+# the rulings the brief rests on are quoted from source and still say so
+while IFS= read -r Q; do
+  [ -n "$Q" ] || continue
+  grep -qF -- "$Q" "$CLAR" || { echo "REFUSING: CLARIFICATIONS no longer carries '$Q' — the brief's quotes are stale; re-brief" >&2; exit 19; }
+  grep -qF -- "$Q" "$BRIEF" || { echo "REFUSING: brief does not quote '$Q'" >&2; exit 19; }
+done <<'CLAR_EOF'
+a Log Analytics workspaceId is GUID-checked at the TWO SINKS ONLY (discoverTables, _executeQueryDirect), before any token or URL, then encodeURIComponent'd.
+The executeQuery WRAPPER does NOT check it: the circuit breaker instead never counts that refusal.
+SyntheticLogAnalytics keeps its pre-fix discoverTables answer through its own override.
+writeFile ALSO backs up AFTER a successful write, so the newest backup is the newest write.
+The R-1 freeze (condition 1) covers ONLY the stores, and their recovery copies, named in the erasure's FAILED ledger.
+C-14 is about NexusAI's OWN licence
+THIRD-PARTY NOTICES ARE OUTSIDE C-14.
+If RD-736's gate returns a fix round, RD-709 forward-merges RD-736's new head (never a rebase) and re-runs its cells.
+Merge order is fixed: RD-794 first, RD-819 on top in a LATER turn, never in the same push.
+is a SAME-PLACE handover.
+Gate (`qa-*`) tickets are never moved; the holder is never touched.
+TAG CONVENTION — only a merge HOLD's tag contains the word `merge`.
+A merge hold runs on a node_modules that matches the merged tree's package-lock.json.
+A merge conflict confined to `scripts/verify-expected-counts.json` is resolved by regeneration, with an id-superset control.
+A missing id is ACCOUNTED, not a STOP, only when BOTH of these hold for its file
+a clean merge-tree and a changed measured surface are not in tension
+Every merge to NexusAI main goes through a PULL REQUEST, and a PR must add NO NEW high-or-higher CodeQL alert in the code it changes. Test code is included.
+`alerts_threshold = errors`, so ANY new alert whose RULE severity is `error` blocks, whatever its security severity.
+a FAILED ls-remote is UNKNOWN, never a value.
+absence of a port clash is NOT evidence of a quiet floor.
+every existing test that relied on a LATER return in that function is a candidate for silent disarmament
+counts as known ONLY when the received object differs from the expected in `envReached` alone
+Both O-1 cells LEAVE the set when RD-733 merges.
+A declared limit is where the evidence stops — not a place it is cleared.
+NEVER KILL BY PATTERN.
+No re-run is used as a clearance
+THE TURN PASSES
+Addendum 2's "once PER WAITING GATE TICKET" means once per gate TAG.
+An explanation of why a fix works is a CLAIM: it gets a red proof, or it is marked UNVERIFIED in the artefact that carries it.
+When a fix reddens an older test, the FIXTURE changes, never the policy
+A cell that fails for a known, ticketed reason is PARKED outside the suite, never `test.skip`ped inside it.
+Its id-superset verdict is unaffected, but its "failed" count now reads the install, not the tree
+CLAR_EOF
+
+# 24 — the prompt must DESCRIBE the server entry point, never carry its literal path (RD-591 c.37901).
+if printf '%s\n' "$PROMPT" | grep -qi 'backend/server\.js'; then
+  echo "REFUSING: the prompt contains the server entry point's literal path (RD-591 c.37901). Describe it; do not name it." >&2; exit 24; fi
+
+# 53 / 71 — standing rules in the brief; the NOT TESTED line verbatim in both.
+for w in 'DEADLINE' 'HEARTBEAT' '2 minutes' '5 minutes' 'finally' 'qa-b20-' 'node --check' 'VOID' 'EXCLUSIVE' 'POSITIVE CONTROL FIRST' \
+         'QUEUE, NEVER TAKE OVER' 'LANDING CONTROL' 'C-104' 'Main is MOVING' '--after' '--replace' 'never push' 'C-174' '--forceExit' 'trap … EXIT' 'MERGES GO FIRST' \
+         'session-tools/locks/queue-jest/' 'carry on' 'never idles holding the jest lock' 'ONE focused hold at a time' 'FOREGROUND' '5600' '8995' '10310' '17220' 'UNCHANGED tag' \
+         'ticket-left-*' 'never two live holds' '-r<N>' 'Every finding names its instrument' 'NOT TESTED' 'The tester never fixes' 'SPLIT a hold' 'qa-b19-H34'; do
+  grep -qiF -- "$w" "$BRIEF" || { echo "REFUSING: brief lacks the standing rule '$w'" >&2; exit 53; }
+done
+grep -qF "$NOTTESTED_LINE" "$BRIEF" || { echo "REFUSING: brief must carry the NOT TESTED line verbatim" >&2; exit 71; }
+case "$PROMPT" in *"$NOTTESTED_LINE"*) ;; *) echo "REFUSING: prompt must carry the NOT TESTED line verbatim" >&2; exit 71 ;; esac
+
+# 76 — the brief carries the ONE safe SESSION_SECRET printer verbatim and names the forbidden idioms (H-1).
+grep -qF "$SAFE_PRINTER" "$BRIEF" || { echo "REFUSING: brief must carry the safe SESSION_SECRET printer verbatim (H-1)" >&2; exit 76; }
+for w in '${SESSION_SECRET-…}' '${SESSION_SECRET+$SESSION_SECRET}' 'printenv' '${envs[*]}'; do
+  grep -qF "$w" "$BRIEF" || { echo "REFUSING: brief must name the forbidden idiom $w (H-1)" >&2; exit 76; }
+done
+
+# 77 — the heartbeat is a separate child, aborted if absent at 90 s, max gap reported (H-4).
+for w in 'separate child' 'within 90 s' 'max gap'; do
+  grep -qiF "$w" "$BRIEF" || { echo "REFUSING: brief lacks the heartbeat rule fragment '$w' (H-4)" >&2; exit 77; }
+done
+
+# 78 — byte-level plants via Buffer, verified with xxd (H-9).
+for w in 'H-9' 'Buffer' 'xxd -l 16' 'JSON.stringify' 'readlink'; do
+  grep -qF "$w" "$BRIEF" || { echo "REFUSING: brief lacks the byte-plant rule fragment '$w' (H-9)" >&2; exit 78; }
+done
+
+# 79 — quoted mutant tool with a negative control; insertion-aware landing rule (H-7, H-8).
+for w in 'H-7' 'H-8' 'negative control' 'original text is absent once the new text is removed'; do
+  grep -qF "$w" "$BRIEF" || { echo "REFUSING: brief lacks the mutant-landing rule fragment '$w' (H-7/H-8)" >&2; exit 79; }
+done
+
+# 81 — this batch's own premises (and the carried lessons) are in the brief.
+for w in 'RED-AT-PARENT' 'C-190' 'NEVER opens, comments on, approves or merges a PR' '4480/278' 'RE-BASE EVERY PREDICTION' 'H-20' 'H-21' 'H-22' 'H-23' 'H-24' 'H-25' 'H-26' \
+         'NEVER merges and never pushes' 'CodeQL is NOT RUN at any member head' 'Blocker' 'setuid' 'pgrep' '`END ok`' 'exits 71' 'ARRAY option' '=====' 'UNKNOWN, never a value' \
+         'e9063d4' 'd6d3b6e' 'proxy-addr' 'RD-827' 'npm ci --offline --ignore-scripts' 'ENOTCACHED' '_cacache' '_prebuilds' '84a34404' 'sqlite3 binding: cached prebuild, offline' 'manifest evaluation' 'NO image built' \
+         'LAW_WORKSPACE_ID_INVALID' 'isLawGuid' 'encodeURIComponent' 'SyntheticLogAnalytics' 'LogsQueryClient' 'refs/pull/58/head' 'state=fixed' '#256-#259' 'bytesAreRecordedClear' 'recoverySource' \
+         'liveHasContent' 'sign-in keys' 'js/legal.js' 'securitypolicyviolation' 'logSafe' 'CSP violation report' 'Playwright 1.62.1' "channel: 'chrome'" 'ms-playwright' 'GHSA-jqcg-44mw-7w3h' \
+         'ANY rd465 O-1 failure' 'ADDENDUM SLOTS' 'S1 SLOT' 'S2 SLOT' 'WRONG 1' 'WRONG 6' 'WRONG 13' 'WRONG 16' 'MEASURED' 'READ-ONLY-INFERRED' 'qa-floorlib18.sh' 'HOLD18.sh' 'qa-file18.sh' \
+         'ADDENDUM 7' 'datasecau/Reporting_Dashboard_Au' 'IS PART OF H-31' 'NON-MEMBER' 'QA/NexusAI-batch19' 'never dismissed' 'GATE 19 IS LIVE'; do
+  grep -qiF -- "$w" "$BRIEF" || { echo "REFUSING: brief lacks this batch's premise '$w'" >&2; exit 81; }
+done
+
+# 89 — the ADDENDUM SLOTS: each EMPTY (not a member) or exactly one JOINS line, re-pinned by ls-remote, its READY on disk naming the head, every premise re-checked.
+SLOT_STATE=''
+SLOT_DESC=''
+slot() {   # $1 = S1|S2, $2 = ticket, $3 = branch (must equal), $4 = the product paths it may touch ('' = none)
+  local id="$1" tk="$2" want="$3" allow="$4" J E sha br tier rdy now base PP
+  J="$(grep -E "^ADDENDUM $id $tk JOINS @ [0-9a-f]{40} ON [A-Za-z0-9._/-]+ TIER [12] \\| READY /" "$BRIEF" 2>/dev/null)"
+  E="$(grep -c "^$id SLOT: EMPTY\$" "$BRIEF" 2>/dev/null)"
+  if [ -z "$J" ]; then
+    [ "$E" = "1" ] || { echo "REFUSING: the $id ($tk) slot is neither EMPTY nor one well-formed JOINS line (89)" >&2; exit 89; }
+    SLOT_STATE="$SLOT_STATE $tk ($id) is NOT a member of this gate (its slot is EMPTY): do not gate it; say so in the report."
+    SLOT_DESC="$SLOT_DESC $id EMPTY;"; return 0
+  fi
+  [ "$(printf '%s\n' "$J" | grep -c .)" = "1" ] && [ "$E" = "0" ] || { echo "REFUSING: the $id slot has more than one JOINS line, or JOINS and EMPTY both (89)" >&2; exit 89; }
+  sha="$(printf '%s\n' "$J" | sed -E 's/^.* JOINS @ ([0-9a-f]{40}) .*/\1/')"
+  br="$(printf '%s\n' "$J" | sed -E 's/^.* ON ([A-Za-z0-9._/-]+) TIER .*/\1/')"
+  tier="$(printf '%s\n' "$J" | sed -E 's/^.* TIER ([12]) .*/\1/')"
+  rdy="$(printf '%s\n' "$J" | sed -E 's/^.* \| READY (\/.*)$/\1/')"
+  [ "$br" = "$want" ] || { echo "REFUSING: the $id branch '$br' is not $want (89)" >&2; exit 89; }
+  lsr "refs/heads/$br" || { echo "REFUSING: ls-remote of the $id branch failed after $LSR_ATTEMPTS attempt(s) — UNKNOWN (C-192) (89)" >&2; exit 89; }
+  now="$(printf '%s\n' "$LSR_OUT" | awk -v r="refs/heads/$br" '$2==r{print $1}')"
+  [ "$now" = "$sha" ] || { echo "REFUSING: the $id ADDENDUM names $sha but origin $br is '${now:-absent}' (89)" >&2; exit 89; }
+  [ "$(g cat-file -t "$sha" 2>&1)" = "commit" ] || { echo "REFUSING: $tk $sha is not in the object store (89)" >&2; exit 89; }
+  [ -s "$rdy" ] && grep -qF "${sha:0:7}" "$rdy" || { echo "REFUSING: $tk's READY '$rdy' is absent or does not name ${sha:0:7} (89)" >&2; exit 89; }
+  if g merge-base --is-ancestor "$sha" "$M_ORIGIN" 2>/dev/null; then echo "REFUSING: $tk ${sha:0:7} is already on main (89)" >&2; exit 89; fi
+  base="$(g merge-base "$sha" "$M_ORIGIN")"
+  [ -z "$(g diff --name-only "$base" "$sha" -- "$PKG" "$LOCK" 2>/dev/null)" ] || { echo "REFUSING: $tk changes package.json or the lock over its base (89)" >&2; exit 89; }
+  PP="$(g diff --name-only "$base" "$sha" 2>/dev/null | grep -v '^__tests__/' | grep -vxF "$COUNTS_FILE" | tr '\n' ' ' | sed 's/ $//')"
+  [ "$PP" = "$allow" ] || echo "NOTE: $tk touches '${PP:-no product path}' beyond its commissioned '${allow:-test-only}' scope — the brief's slot rows do not predict it; the gate names it" >&2
+  for X in "$M_ORIGIN" "$A_HEAD" "$B_HEAD" "$C_HEAD" "$D_HEAD" "$E_HEAD"; do
+    RC="$(conflicts "$X" "$sha" | tr '\n' ' ' | sed 's/ $//')"
+    [ -z "$RC" ] || [ "$RC" = "$COUNTS_FILE" ] || { echo "REFUSING: merge-tree ${X:0:7} x $tk conflicts beyond the counts file: '$RC' (89)" >&2; exit 89; }
+    MT_PAIRS=$((MT_PAIRS + 1))
+  done
+  SLOT_STATE="$SLOT_STATE $tk JOINS this gate per the brief's ADDENDUM SLOTS ($id), at $sha (origin $br, re-pinned by the launcher), TIER $tier as Tuesday wrote it, READY $rdy — gate it by the brief's $id rows and merge it where T1 puts it."
+  SLOT_DESC="$SLOT_DESC $id JOINS @ ${sha:0:7} ($br, tier $tier);"
+}
+slot S1 RD-777 "$S1_BRANCH" 'backend/validators.js'
+slot S2 RD-823 "$S2_BRANCH" ''
+
+# 41 — the jest queue as the launch finds it (MERGES GO FIRST): a NOTE for every merge-tagged / peer-gate ticket (read-only ls/grep).
+if [ -d "$LOCKQ" ]; then
+  MQ="$(grep -lE '^tag=.*(^|[-_=])merge([0-9]+[a-z]?)?([-_]|$)' "$LOCKQ"/* 2>/dev/null | wc -l | tr -d ' ')"
+  [ "${MQ:-0}" = "0" ] || echo "NOTE: $MQ merge-tagged ticket(s) in the jest queue now — the gate files behind them (brief §9 clause 1)" >&2
+  BQ="$(grep -l '^tag=qa-b19' "$LOCKQ"/* 2>/dev/null | wc -l | tr -d ' ')"
+  [ "${BQ:-0}" = "0" ] || echo "NOTE: $BQ gate-19 (qa-b19*) ticket(s) in the jest queue now — a PEER gate: FIFO, never touched" >&2
+else
+  echo "NOTE: jest queue dir $LOCKQ not found — the gate reads the lock tool's own layout at start" >&2
+fi
+
+# 38R — the negative-control seats are DERIVED now from the live cockpit panes: the claude descendant of each pane pid.
+# ps, not pgrep: macOS pgrep hides the caller's own ancestors, so Tuesday's own claude would vanish when --check runs from her shell.
+command -v tmux >/dev/null 2>&1 || { echo "REFUSING: tmux not found — cannot derive the negative-control seats" >&2; exit 38; }
+PANES="$(tmux list-panes -a -F '#{pane_pid} #{@cockpit_name}' 2>/dev/null)"
+[ -n "$PANES" ] || { echo "REFUSING: tmux list-panes returned nothing — cannot derive the negative-control seats" >&2; exit 38; }
+PSTAB="$(ps -axo pid=,ppid=,comm= 2>/dev/null)"
+[ -n "$PSTAB" ] || { echo "REFUSING: ps returned nothing" >&2; exit 38; }
+claude_under() {   # prints the claude pids among the descendants (depth <= 5) of pane pid $1
+  printf '%s\n' "$PSTAB" | awk -v root="$1" '
+    { pid[NR]=$1; pp[NR]=$2; c=$3; sub(/^.*\//,"",c); cm[NR]=c }
+    END { lvl[root]=0; for (d=1; d<=5; d++) for (i=1;i<=NR;i++) if ((pp[i] in lvl) && !(pid[i] in lvl) && lvl[pp[i]]==d-1) lvl[pid[i]]=d;
+          for (i=1;i<=NR;i++) if ((pid[i] in lvl) && pid[i]!=root && cm[i]=="claude") print pid[i] }'; }
+pane_pid_of() { printf '%s\n' "$PANES" | awk -v n="$1" '{p=$1; $1=""; sub(/^ /,""); if ($0==n) print p}'; }
+NEG_SEATS=''; NEG_DESC=''; NEG_BUILDERS=0
+for NAME in Datasec/NexusAI-M Datasec/NexusAI-N Datasec/NexusAI-O Datasec/NexusAI-P Datasec/NexusAI-R tuesday; do
+  PP="$(pane_pid_of "$NAME")"
+  NP="$(printf '%s\n' "$PP" | sed '/^$/d' | wc -l | tr -d ' ')"
+  if [ "$NP" = "0" ]; then
+    [ "$NAME" = "tuesday" ] && { echo "REFUSING: no tmux pane named 'tuesday' — the coordinator's negative control is required" >&2; exit 38; }
+    echo "NOTE: no tmux pane named '$NAME' — that builder seat is not a negative control this launch" >&2; continue
+  fi
+  [ "$NP" = "1" ] || { echo "REFUSING: more than one tmux pane named '$NAME': '$PP' — cannot derive its negative-control seat" >&2; exit 38; }
+  CP="$(claude_under "$PP")"
+  [ "$(printf '%s\n' "$CP" | sed '/^$/d' | wc -l | tr -d ' ')" = "1" ] || { echo "REFUSING: pane '$NAME' (pid $PP) has '${CP:-no}' claude descendant(s), not exactly one — a seat is missing or ambiguous" >&2; exit 38; }
+  NEG_SEATS="$NEG_SEATS $CP"; NEG_DESC="$NEG_DESC \`$CP\` ($NAME);"
+  [ "$NAME" = "tuesday" ] || NEG_BUILDERS=$((NEG_BUILDERS + 1))
+done
+NEG_SEATS="${NEG_SEATS# }"
+[ "$NEG_BUILDERS" -ge 3 ] || { echo "REFUSING: only $NEG_BUILDERS live builder seat(s) among M/N/O/P/R — at least three negative controls are required" >&2; exit 38; }
+NCOUNT="$(printf '%s\n' $NEG_SEATS | sed '/^$/d' | wc -l | tr -d ' ')"
+[ "$(printf '%s\n' $NEG_SEATS | sort -u | wc -l | tr -d ' ')" = "$NCOUNT" ] || { echo "REFUSING: the derived seat pids are not distinct: $NEG_SEATS" >&2; exit 38; }
+for PEER in 'QA/NexusAI-batch15' 'QA/NexusAI-batch16' 'QA/NexusAI-batch17' 'QA/NexusAI-batch18' 'QA/NexusAI-batch19'; do
+  GP="$(pane_pid_of "$PEER")"; GC=''
+  [ -n "$GP" ] && [ "$(printf '%s\n' "$GP" | sed '/^$/d' | wc -l | tr -d ' ')" = "1" ] && GC="$(claude_under "$GP")"
+  if [ -n "$GC" ] && [ "$(printf '%s\n' "$GC" | sed '/^$/d' | wc -l | tr -d ' ')" = "1" ]; then
+    NEG_SEATS="$NEG_SEATS $GC"; NEG_DESC="$NEG_DESC \`$GC\` ($PEER, a live peer gate);"
+    echo "NOTE: $PEER has a live claude — a PEER gate: FIFO, never touched; added as a negative control" >&2
+  fi
+done
+
+# 86 — no live gate-20 session already exists.
+for P in $(pane_pid_of "$ROUTE_NAME"); do
+  if [ -n "$(claude_under "$P")" ]; then echo "REFUSING: a pane named $ROUTE_NAME (pid $P) already runs a claude — gate 20 is live; do not start a second session" >&2; exit 86; fi
+  [ "$CHECK" = "1" ] || echo "NOTE: a pane named $ROUTE_NAME (pid $P) exists with no claude under it — the cockpit's own add decides" >&2
+done
+
+# 32 / 40 — LAST: the coordinator's stamp (SELF-CHECK line + note, no placeholder) and the answer route (Tuesday adds it, never this launcher).
+STAMP_OK=1
+if grep -qF "$PH_STAMP" "$BRIEF" || ! grep -q '^SELF-CHECK: re-read end-to-end for contradictions | ' "$BRIEF" || ! grep -q '^Self-check note: ' "$BRIEF"; then STAMP_OK=0; fi
+ROUTE_OK=1
+grep -q "^${ROUTE_NAME}|tuesday-agent@agentmail.to|" "$ROUTING" || ROUTE_OK=0
+if [ "$STAMP_OK" = "0" ] || [ "$ROUTE_OK" = "0" ]; then
+  echo "guards pass (9 6 7 8 18 18b 18c 22 93 94 95 96 97 98 23 35 70 90n 80 31 83 39 10 17 11 12 13 14 15 20 82 19 24 53 71 76 77 78 79 81 89 41 38R 86); stamp and/or route NOT complete." >&2
+  echo "  ls-remote attempts this run: $LSR_ATTEMPTS (C-192); three-argument merge-trees checked: $MT_PAIRS; origin main ${M_ORIGIN:0:7}; rd-801 ${R801_NOW:0:7}" >&2
+  echo "  member pins (origin, re-read now): RD-761 $A_HEAD (= $PR58_REF) · RD-747 $B_HEAD · RD-831 $C_HEAD · RD-802 $D_HEAD · RD-795 $E_HEAD · SLOTS:$SLOT_DESC" >&2
+  echo "  NEG seats (38R, derived live):$NEG_DESC" >&2
+  [ "$STAMP_OK" = "1" ] || echo "REFUSING (32): a stamp placeholder remains in the brief (the SELF-CHECK line / Self-check note) — the coordinator re-reads end-to-end and stamps them before launch" >&2
+  if [ "$ROUTE_OK" = "0" ]; then
+    echo "REFUSING (40): no '${ROUTE_NAME}|tuesday-agent@agentmail.to|no' line in $ROUTING — answers to the gate would have no route; Tuesday adds it at stamp (this launcher never writes it)" >&2; exit 40
+  fi
+  exit 32
+fi
+
+if [ "$CHECK" = "1" ]; then
+  echo "all guards pass:"
+  echo "  origin: 5 member branches + $PR58_REF at their pins at $PIN_TS (18; $LSR_ATTEMPTS ls-remote attempt(s), C-192); rd-801 ${R801_NOW:0:7} (18c)"
+  echo "  main ${M_ORIGIN:0:7} (0f128cb or a descendant; no member-only path moved; no member on it) (18b)"
+  echo "  merge-bases + stacks (7); chains (8); deltas + no package change + product paths (22); premises (93 94 95 96 97); locks + proxy-addr (98)"
+  echo "  overlaps (23); counts + census (35); npm cache + sqlite3 prebuild + Chrome + the carried rulings + the lock tool (70, 90n); $MT_PAIRS three-argument merge-trees counts-only or clean (80, 89); evidence (31); C-133 script (83)"
+  echo "  H-1 (76); H-4 (77); H-9 (78); H-7/H-8 (79); premises (81); MODEL RULE (82); SLOTS:$SLOT_DESC (89); queue (41); route $ROUTE_NAME (40); report absent (17)"
+  echo "  NEG seats (38R, derived live):$NEG_DESC"
+  echo "  model: claude-opus-5-5 at exec"
+  echo "  SUBJECT: $SUBJECT"
+  echo "  AZURE_CONFIG_DIR=$AZURE_CONFIG_DIR  GH_CONFIG_DIR=$GH_CONFIG_DIR  CLAUDE_CONFIG_DIR=$CLAUDE_CONFIG_DIR"
+  echo "  --check started no claude; nothing written."
+  exit 0
+fi
+
+PROMPT="$PROMPT
+
+VERIFIED BY THE LAUNCHER AT $PIN_TS (git ls-remote origin, read-only, $LSR_ATTEMPTS attempt(s) under C-192): refs/heads/$A_BRANCH = $A_HEAD (= $PR58_REF); refs/heads/$B_BRANCH = $B_HEAD; refs/heads/$C_BRANCH = $C_HEAD; refs/heads/$D_BRANCH = $D_HEAD; refs/heads/$E_BRANCH = $E_HEAD; refs/heads/$RD801_BRANCH = ${R801_NOW:-absent}; refs/heads/main = $M_ORIGIN (0f128cb or a descendant; no member-only path moved since 0f128cb; no member on it). $MT_PAIRS three-argument merge-trees (read-only, no objects written) were counts-only or clean across main and every member pair, RD-831 x RD-721 and RD-802 x RD-801. These are the start-of-gate pins; take your own three readings anyway, and re-pin M0 yourself.
+THE ADDENDUM SLOTS:$SLOT_STATE
+NEGATIVE-CONTROL SEATS, derived live by the launcher from the cockpit panes at $PIN_TS:$NEG_DESC Re-read them at the start of every hold."
+
+# rd579-rd639 S-1 belt: the gate session inherits NO SESSION_SECRET. The line prints the NAME and a state only, never a value.
+if [ -n "${SESSION_SECRET+x}" ]; then echo "SESSION_SECRET SET in the launcher's environment (length ${#SESSION_SECRET}) — unsetting before exec"; else echo "SESSION_SECRET UNSET"; fi
+unset SESSION_SECRET
+# ruling (m): the gate's own npm calls inherit the notifier switch (the gate still passes it explicitly on every call).
+export npm_config_update_notifier=false
+
+cd "$QA_DIR" || { echo "cannot enter $QA_DIR" >&2; exit 16; }
+exec claude --dangerously-skip-permissions --model claude-opus-5-5 "$PROMPT"
