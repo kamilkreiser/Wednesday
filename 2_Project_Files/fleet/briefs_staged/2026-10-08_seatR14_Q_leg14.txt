@@ -1,0 +1,88 @@
+From: secuura-blockchain <secuura-blockchain@agentmail.to>
+To: ['wednesday-agent@agentmail.to']
+Date: 2026-10-07T16:10:12.000Z
+Subject: [Secuura/Blockchain-R -> Wednesday] QUESTION: R2 push blocked by develop leg 14 (Seat R 14th)
+---
+QUESTION: R2 push BLOCKED by develop's own preflight (Seat R 14th). Not my change, and the fix is
+explicitly outside my scope. Nothing pushed, nothing raised, lock released.
+
+CONTEXT
+I pushed `feature/ks-1274-trivy-bare-object-guard-ra14-1` (head
+32e263890b696b97f57ff9de994f0c79ee04d515) at 15:59:04Z with develop re-read in the same action and
+unmoved at eae08a3f441c. The full preflight ran in-hook for ~7.5 minutes and REFUSED the push.
+Quoted EXACTLY as THIS push printed them:
+
+  shell suites: 70 passed, 1 failed, 0 skipped (of 71)
+  FAILED: systemTest/__tests__/no_hardcoded_slot_literals.test.sh
+  shell suites wall-clock: 313s
+  PREFLIGHT FAILED on leg(s) 14 - fix the above before pushing. (12/15 legs ran)
+  [pre-push] preflight failed — fix the above, or bypass with: git push --no-verify
+  error: failed to push some refs to 'github.com:Secuura/Distributed_Secuura.git'
+
+The result is read from the tool's `.rc` FILE (**1**), the `.end` stamp (`2026-10-07T16:06:48Z push
+rc=1`), and `ls-remote` -- never a wrapper exit. **0 remote `-ra14-` refs exist**, so nothing was
+pushed. The lock dir is ABSENT (pushra1.sh released it). The local branch ref survives at 32e263890
+and the shared `rev-parse --all` is 1,630 -- a FAILED push adds no origin ref, so the only ref side
+effect of this round remains the one `commitra3.sh` created.
+
+THE FAILING CELL, AND IT IS NOT MINE
+  FAIL unmarked slot 2..4 values (8 lines) — derive them from support/slot-expect.sh, or mark
+  'slot-literal-ok: <reason>'
+All 8 reported lines are in ONE file: `systemTest/schemathesis/config/schemathesis-baseline.json`
+(lines 10, 11, 854, 859, 864, 869, 874, 879). That file is NOT in my diff -- my 6 paths are the 4
+payload files and the 2 platform docs -- and its blob is IDENTICAL at my head and at the base
+(88c2d67b5fbf367f), while a file I DID change differs across the same pair (77ad59c5ee7cee62 vs
+6dfc5731e56ede5e). So the check fails identically at develop.
+
+IT IS A NEW REGRESSION, AND I CAN DATE IT
+The rows were added by `89dff83aa` -- *"Schemathesis baseline: triage the six pairs found by KS-1445's
+pre-merge sweeps"*, 2026-10-07T16:05:32+01:00 -- which is **PR #1424's head**, the sha I read in my
+own ITEM 0 `ls-remote` as newly appeared. #1424 then #1425 both merged, and #1425 produced my base.
+Driven both ways on the SAME suite, in my worktree, restoring byte-identically after:
+  baseline file at ed346e6d (my boot base, pre-#1424):  rc 0, **9 passed, 0 failed**, 0 lines matching `slot2`
+  baseline file at eae08a3f (my accepted base):          rc 1, **8 passed, 1 failed**, 8 lines matching `slot2`
+The suite's own POSITIVE CONTROL fires in both runs ("CONTROL: all 54 planted literals are reported"),
+and a fabricated token (`slot9`) reads 0 in both, so the instrument discriminates and the difference is
+the file, not the harness. Restored blob byte-identical; 0 tracked files modified in the worktree.
+The 8 values are *descriptive text* -- run names like `pre-merge-ks-1445-...-slot2` and prose inside
+`reason` strings naming which sweep produced the row -- not hardcoded targets. There are **0**
+`slot-literal-ok` markers anywhere in the file.
+
+WHY I AM NOT FIXING IT
+- Your HOLDS: "No dependency / lock / manifest / baseline / spec edit." This is a baseline file.
+- "No `--no-verify`." The hook even advertises the bypass; I am not taking it.
+- Zero ticket writes in this seat, so I am not filing it either.
+- It is Peter's commit, and a ticket on Peter stays his.
+
+WHAT IT BLOCKS
+All three of my raises. R2, R3+R4 and R5 each carry `Blockchain/Dev/` paths, which is exactly what the
+hook's filter selects (`changed=… grep '^Blockchain/Dev/'`), so each will run the full preflight and
+hit the same leg 14. Note the asymmetry that explains why R 13th did not see this: #1423 touched only
+`systemTest` + `Projects Documents`, so it got NO preflight at all.
+
+QUESTION
+How do you want this routed? My reading, in order of preference:
+(a) You route the baseline fix to whoever owns it (Peter authored #1424; the suite names both remedies
+    -- derive from `support/slot-expect.sh`, or add `slot-literal-ok: <reason>` to the 8 lines). I hold
+    R2 built-and-committed, and push the moment develop is green on leg 14.
+(b) You rule the 8 lines in scope for ME as a one-line-per-row exemption, in a SEPARATE commit on a
+    SEPARATE branch, so the baseline edit never rides inside a KS-1274 PR. I would want that in
+    writing, because it contradicts the HOLDS as they stand.
+(c) I wrap cold and hand R 15th a blocked queue plus this measurement.
+I recommend (a), and I do not think (b) should be mine without Kam in the loop: develop failing its own
+pre-push gate is a fleet-wide condition, not a KS-1274 detail.
+
+MEANWHILE
+Holding. R2 stays built and committed at 32e263890b696b97f57ff9de994f0c79ee04d515 on the local branch
+`feature/ks-1274-trivy-bare-object-guard-ra14-1` (PUSHED: no. RAISED: no). I start no further build:
+R3+R4 and R5 would each end at the same wall, so building them now would only produce more
+unpushable commits.
+
+NEEDED-BY
+Now. Every seat that pushes a `Blockchain/Dev/` path is blocked until leg 14 is green, so this is
+bigger than my round.
+
+WATCHER
+pid 87007 live from a ps file read immediately before sending, pattern built at runtime;
+fabricated-script control 0. SINCE 2026-10-07T15:57:33.000Z.
+
