@@ -15,7 +15,12 @@ supersede: REPLACED WHOLESALE 2026-10-07 05:3x by the night seat c1dbe0b9 (boote
 1. `inbox_digest.sh --inbound` WHOLE, + `--all` for `[QUESTION]` rows in the last 12 h, each matched to a later ANSWER. Bodies are fetched by message id and saved to `fleet/briefs_staged/`.
 2. **Morning ticket sweep + receipt** (the standing grant). Value first: kintsugi deployed + swept at d75bfe2 (night of 10-06); gate71 GO; the #1404 merge-in built and verified, held by the freeze; the KS-1436 ticket filed.
 
-## 🔴 00:1x 2026-10-08 — gate73 COMPLETE (4/4), READ THIS FIRST (supersedes the blocks below on R 12th / #1410 / KS-1139)
+## 🔴 00:38 2026-10-08 — R 13th LAUNCHED, READ THIS FIRST
+- FLOOR: %0 wednesday · **%88 Seat R 13th** (`Secuura/Blockchain-R`, brief `fleet/briefs_staged/2026-10-08_seatR13_5d_raise_prs.md` incl. SEND AMENDMENT; verified at destination 13:37:16Z) · %1 monitor. **R 12th WRAPPED, scored 0.96, pane closed.**
+- **First act: verify R 13th at rung 5/6** (its pane names the brief / its plan mail). NEXT from it: `QUESTION: plan confirmation (Seat R 13th)` → read its WHOLE body incl. NEEDED-BY (ledger 10-08) → read pane ctx → ANSWER (accept its RAISE_BASE by name later at `STATUS: raise base`). Then §5d → READY FOR READ (Wednesday reads it through-code) → raises R1 KS-1164 … R5 KS-1139, each READY FOR QA → a gate kit (batch).
+- Its ctx lines: build < 45%; push 45-64% only on Wednesday's per-step word; 65% ceiling → WRAP COLD. Expect §5d + 1-2 raises, then R 14th.
+
+## 🔴 00:1x 2026-10-08 — gate73 COMPLETE (4/4) (superseded on the floor by the 00:38 block; the facts stand)
 - **#1410 MERGED → develop 3d570510bdb37444567787fb121874371a19eddd**, verified AT SOURCE by Wednesday (tree 8ca7cd27 == T', 1 parent 652cf5f6, subject 66, 5 paths, 0 trailers, 1 "Merged by Seat R 12th"). Tonight: #1407 7bcc2ed5 · #1409 841e4ab1 · #1408 2c27ddfe · #1410 3d570510.
 - **R 12th (%87, ctx ~51%+)**: expect its WRAP COLD next (§5d needs < 45%). On the WRAP: re-hash its handover (`HANDOVER-seatR12-2026-10-07.md`, should open "FOR R 13th"), score it, `pane_close.sh %87`, check for its detached watcher.
 - **R 13th** = §5d comment follow-up (tier 3) + raises: PR 5 KS-1164, KS-1274, KS-1410 (ONE PR, both carves) **+ the new held Spark pass KS-1139** (`night/READY_KS-1139-SMOKECOUNTERS-1_spark-dsv4flash_…_2026-10-07.diff.md`; bash_patch, smoke-test.sh:27-29; TIER per the gate rules). Brief it from R 12th's handover + `2026-10-07_seatR12_*` mails (incl. its provenance_ra12.py gate and the "…-e10-1/-e10-2 elide different slugs" note). RAISE_BASE = develop as read then.
