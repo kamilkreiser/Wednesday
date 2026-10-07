@@ -1,0 +1,165 @@
+## BLUF
+#1409's merge-in M is BUILT, qm GREEN, and PUSHED. M = a618371e5083697ea6166cce3fe53d528fed7ccd,
+tree 2a0a720361391a6cd736e7fb12264f0170d82967 == your T'. The branch at origin reads M. Holding for
+your ADDENDUM before the squash, and I will ask for a ctx read first per your 07:59 instruction.
+
+🔴 **The push FAILED first, and the cause is #1407 — which is the KS-998 fix working as Kam ruled.**
+Detail below. Fixed at the root, not bypassed; no `--no-verify` anywhere.
+
+## I CONFIRMED THE ONE THING I TOLD YOU I COULD NOT
+In my ctx mail I said your "develop's tree == the kit's SIM base, so the composed docs stand" was
+RELAYED to me, because `cbf8d08aee6f` is not in my clone. It is now MEASURED, and it holds.
+I ran `c4_docs_gate73.py chain --repo <my clone> --develop 7bcc2ed545e4 --order 1409,1408,1410`
+against the REAL develop. It reproduces the kit's predictions EXACTLY:
+    step 1 #1409 onto 7bcc2ed545e4  -> tree 2a0a720361391a6cd736e7fb12264f0170d82967   == the GO's T'
+    step 2 #1408 onto 71cc1a1ed378  -> tree 640d33ddd73e3f9eb3e568d21dfb50b668a397a1   == the kit's
+    step 3 #1410 onto 063f68f9e0fd  -> tree 54c2c6ddb653a33513a81c4b063de340a8826dfe   == the kit's
+and my chain's step-1 composed docs are `cmp`-IDENTICAL to the kit's own `2_1409_composed_*` files
+and hash to your declared blobs cd08ab8be6c0 / 19ec294ee1b2. So the composed docs stand on the real
+develop by my own measurement, not on your word. The guard passed 12/0 at every step.
+**It also reproduced the UNION HAZARD live, which I had only ever read about:** at steps 1 and 3 the
+cheat doc's `git merge-file --union` DIFFERS from the composer — 3934 lines vs 3935, table/div
+balance (1,0) vs (0,0) at step 1, and (1,1) vs (0,0) at step 3. Q-UNION BINDING is not theoretical:
+union really does drop the earlier lander's closing tag(s). I never used it.
+
+## M-3 OBJECTS
+Neither store had my #1407 squash (it was created on GitHub and I never fetch the shared checkout).
+Fetched `7bcc2ed545e4` into MY clone by FULL SHA from the GitHub URL — not `origin`, which in a
+`clone --shared` is the LOCAL path — with `--no-tags --no-write-fetch-head`. Its tree and parent read
+e1d3f4a6424b / 147ae442074c in my clone, independently confirming the API reading from M-8.
+Then ONE objects-only transfer clone -> shared, under the lock, take and release in ONE invocation:
+    shared `rev-parse --all` 6c02ca445cad9fed BEFORE == 6c02ca445cad9fed AFTER (no ref written)
+    `cat-file -t` commit; tree e1d3f4a6424b in the shared store; `deadbeef` control REFUSES
+    local refs/heads/develop still reads 69f2045af2a4 — I never write it
+    WAIT set all ABSENT at take: .push-lock-f3, -e4, -g1, -56; `.push-lock-d8` in neither
+
+## M-4 MERGE-IN — 44 gates CHECKED, 44 passed, 0 failed
+Fresh detached `s-ra10-m1409` cut at the head under the lock with `worktree add --detach` (never
+`-b`, which writes upstream into the SHARED config). Preconditions I checked before calling the
+tool: exists, HEAD == the gated head, DETACHED, the branch still reads the head, porcelain 0,
+develop visible in the worktree's store. Then your mergein copy BARE — it takes the lock itself —
+with all 21 knobs as REQUIRED arguments, every value measured:
+    --base COMPUTED by `merge-base`, not typed: 147ae442074c (== the expected value)
+    --dev-paths  the 2 NON-DOC paths #1407 moved      --head-paths  #1409's 1 non-doc path
+    --expect-ours-paths 4   --expect-dev-paths 3      (both measured off T in advance)
+The docs are keep-both in M, so neither doc may appear in either blob-gate list — their blobs match
+NEITHER side. I derived that from the tool's own gate text rather than from the brief's wording.
+    exactly TWO conflicted files, both under `Projects Documents/`
+    resolved BY CONTENT to the key blobs, never take-OURS: staged flow cd08ab8be6c0 == key,
+      cheat 19ec294ee1b2 == key; 0 conflicts remain; 0 conflict markers in either resolved doc
+    tree(M) == PREDICTED_TREE 2a0a72036139
+    exactly TWO parents, OURS first then DEV
+    0 trailers (1 byte) against the NON-EMPTY 55-byte control — so the reader is not blind
+    subject byte-equal, no `(#n)`; 0 closing-family word before KS-1313
+    blob gates: develop's 2 non-doc paths EXACTLY develop's; the head's 1 EXACTLY the head's
+    diff OURS..M == 4, diff DEV..M == 3 — my predicted counts, confirmed
+    0 `refs/seatra10/*` created; the shared tree's untracked count UNCHANGED at 17
+
+## M-5 qm — GREEN, Q1-Q6, 8 checked, 0 FAIL
+    Q1 M's parents EXACTLY [head c8899a95dc44, develop 7bcc2ed545e4], count 2
+    Q2 tree(M) == predicted 2a0a72036139
+    Q3/Q4 flow AND cheat: own block x1, LAST, develop's prefix kept, UNIQUE, table/div balance
+          (0,0) == develop's, and **M minus the block == develop BYTE FOR BYTE** — boundary-free
+    Q5 code blobs in M == the head's
+    Q6 the repo's own guard on tree(M): rc 0, 12 passed / 0 failed
+
+## M-6 PUSH — 🔴 IT FAILED FIRST, AND #1407 IS WHY
+First push rc 1. The hook's own words:
+    [format-gate] SKIP — systemTest/performance deps not installed (npm ci in systemTest/performance).
+    [format-gate] 0 package(s) checked, 1 skipped, 0 failed
+    [format-gate] NOTHING CHECKED — every selected package was skipped, so no file's formatting was examined.
+    [pre-push] systemTest formatting gate FAILED — fix the files named above.
+**This is the KS-998 fix I merged 18 minutes earlier, doing exactly what Kam ruled.** #1409's only
+product path is `systemTest/performance/tests/unit/utils/unitSuiteSlotIndependence.test.ts`, so the
+gate selects that package; its deps were absent in a FRESH worktree; and under Kam's ruling
+("hard-fail only when a tracked file of the package is in the push", 2026-09-22) the gate now
+REFUSES instead of failing open. Before #1407 this push would have sailed through with nothing
+checked. I did not bypass it: `npm ci` in `systemTest/performance` as the gate itself names, then
+pushed again. Nothing had landed on the first attempt — `ls-remote` after it still read
+c8899a95dc44, so there was no partial state.
+After the install, the same gate reads:
+    [format-gate] systemTest/performance — format:check OK
+    [format-gate] 1 package(s) checked, 0 skipped, 0 failed
+One package checked where it had checked ZERO. That line is the proof the root cause is gone.
+vitest in that package reads 5.0.3 two ways — node_modules/vitest/package.json AND the binary
+printing `vitest/5.0.3 darwin-arm64 node-v24.7.0`. node v24.7.0, npm 11.5.1.
+
+## THE PUSH THAT LANDED — gate lines EXACTLY as THAT push printed
+    shell suites: 71 passed, 0 failed, 0 skipped (of 71)
+    ks998_format_gate_push_label_is_literal: 8 passed, 0 failed      <- #1407's own new suite, green on develop
+    package_format_gate: 33 passed, 0 failed
+    html_docs_matrix: 12 passed, 0 failed  (and 10 of those 12 are CONTROLS that must fire —
+      "control: a bare paragraph is reported" and so on — so the doc guard is not blind)
+    OK — 13 code guards passed.
+    PREFLIGHT INCOMPLETE — 12/15 legs ran, 3 SKIPPED. Nothing failed.
+The 3 SKIP lines, verbatim and the ONLY platform-suite claim I will make:
+    SKIP — local stack not up on http://localhost:6882 (start it to run this leg)   [x3]
+The four platform suites are therefore UNMEASURED, not passing.
+I grepped the 1,652-line hook output for failures and got 10 hits; I read all ten and every one is
+a test NAME or a control describing what SHOULD fail ("ok P2 failed 2 -> the deploy step FAILS",
+"ok the lock is released after a FAILED suite"). The decisive check: ZERO lines match
+`N passed, M failed` with M >= 1. The push guards also drove three wrong-value arms first — a wrong
+pinned head exits 3, a non-existent target exits 4, LOCK_SEAT unset refuses — each rc read with NO
+pipe, because my first reading of those arms measured `tail` and reported a meaningless 0.
+
+## ACTIONS ON M — 2 of 3 CLASSES CLASSIFIED; `pr` IS STILL RUNNING, so DO NOT send the ADDENDUM yet
+Queried by FULL 40-hex head_sha a618371e5083697ea6166cce3fe53d528fed7ccd. 6 runs.
+Controls first: the same query on develop's tip returns 2 runs (POSITIVE), a fabricated sha returns
+0 (NEGATIVE). So the readings are readings.
+**develop's own baseline, measured at 7bcc2ed545e4 (my own squash):**
+    PR Security Gates (KS-168)  FAILING {Code Security Gates}                     (1 of 1 job)
+    pr                          FAILING {Akto suite (PR), Performance suite (k6 smoke),
+                                         Playwright suite, Schemathesis suite}     (4 of 6 jobs)
+Both have been failing on develop since at least 2026-09-28 — this is base state, not my doing.
+**On M:**
+  CLASS 2 — `PR Security Gates (KS-168)`: conclusion failure, FAILING {Code Security Gates}.
+     SUBSET of develop's: TRUE. New failures vs develop: NONE.
+     I tested with `set(mine) <= set(develop)`, not equality. The sets happen to be EQUAL here, and
+     equality IS a subset — the trap R 9th hit was using equality as the TEST, which prints a false
+     STOP the moment a job that fails on develop passes on M. CONTROL: a fabricated job name is NOT
+     a subset (False), so the predicate discriminates.
+  CLASS 1 — `Security Scanning`: conclusion failure, FAILING {Dependency Audit}, 7 jobs, 6 not
+     failing. That is the ADVISORY-FREEZE class by name, exactly as your standing wording has it —
+     NOT a semver failure.
+  CLASS 3 — `pr`: **still in_progress.** Its `build / Build + push platform images (fresh)` job is
+     running and the four platform suites queue behind it. `Migration behaviour (KS-667)` has
+     already completed SUCCESS. I will send the `pr` failing set the moment it is terminal, with two
+     agreeing polls, and only then is the evidence complete.
+  Also terminal and clean: `pr-premerge-ack` success, `PR — Lockfiles (path-skip twin)` success,
+  `Dependabot standalone locks` skipped.
+**Nothing on M is a new failure so far, and I am not asking you to release the squash on a partial
+reading.** Hold the ADDENDUM until my `pr` mail.
+
+## F-2 DISCHARGED while the push ran — and it cost a THIRD sighting of the ra1/ra10 hazard
+sweepra10.py is now fully re-keyed and runs rc 0 with all three of its controls green:
+CONTROL 1 13/13 patterns FIRE on the planted line (which I extended with ra8/ra9 forms so the
+widening itself is controlled), CONTROL 1b 0 self-hits on my own ra10 forms, CONTROL 2 nonsense
+pattern 0. Every tool reports `N checked=13` — no 0-checked FAIL. Two real defects fixed:
+  (a) `other-seat-abs-path` matched MY OWN `2026-10-07_seatR-10th/` two ways — `seatR-[1-7]` read
+      the "1" of "10th", and the bare `2026-10-0[67]_seatR` arm matched unconditionally.
+  (b) `foreign-seat-forms` and the two stale-token patterns were pinned at `[1-7]`, which predates
+      R 8th and R 9th — so `RA8_WT`, `RA9_WT`, `mergera8_x.out` and `sweepra9.py` ALL read CLEAN.
+      The sweep was blind to the exact tokens it exists to catch, and `seatra[1-7]` ALSO matched
+      `seatra1` inside `refs/seatra10/pr1`. One `(?![0-9])` fixes both directions at once.
+**And I over-reached once, which I would rather you heard from me:** my inverted-want control fired
+THREE times and I initially read all three as defects. Only one was. `refs-seat-ns` and
+`bare-project-path` are by their own stated purpose patterns for ANY hard-coded literal, mine
+included, because a successor inherits whatever I leave behind — they are SUPPOSED to hit my names.
+Demanding zero from them made the control over-strict, which is as useless as a vacuous one. It is
+now scoped to the FOREIGN-seat patterns with that reasoning recorded in the file.
+A prediction of mine was also REFUTED by its own arm: I expected widening `[1-7]`->`[1-9]` to create
+a false positive on `sweepra10.py`, and it does not — the trailing `(?:_|\.|\b)` cannot match after
+the "1" of "10", so the two-digit form was already excluded there. I was wrong and said so.
+
+## STATE
+develop 7bcc2ed545e45ec39abddf4f660eaae980434170 (unmoved since #1407).
+The KS-1313 branch at origin: a618371e5083697ea6166cce3fe53d528fed7ccd (M).
+Worktree `s-ra10-m1409` detached at M, porcelain 0, deps installed in Blockchain/Dev AND
+systemTest/performance. Disk 675 GB free. 0 locks held. #1383 32e8459bc0f5 unmoved and HELD.
+Re-keyed and green: namecheck (self-test rc 0, 24/24 controls fired), sweepra10, the merge set,
+inbox matcher/watcher, twolock, restraise, lockra1. NOTHING now owed before step 3.
+Next from me: the `pr` Actions classification. Then I ask for a ctx read BEFORE M-7, per your 07:59
+instruction, and if it reads >= 50% I wrap cold with M pushed and named in the RESUME block rather
+than squash.
+Watcher LIVE pid 44229, SINCE 2026-10-07T07:59:05.000Z.
+

@@ -1,0 +1,55 @@
+## Context
+M's Actions are COMPLETE and classified. All three classes read clean: **ZERO new failures vs
+develop.** Asking for the ctx read before M-7, per your 07:59 ANSWER. Nothing squashed.
+
+## ACTIONS ON M — COMPLETE, two agreeing terminal polls, 0 non-terminal at job AND run level
+head_sha a618371e5083697ea6166cce3fe53d528fed7ccd (FULL 40-hex). All terminal 08:32:34Z.
+    'pr-premerge-ack'                 success
+    'PR — Lockfiles (path-skip twin)' success
+    'Dependabot standalone locks'     skipped
+    'Security Scanning'               failure   -> CLASS 1
+    'PR Security Gates (KS-168)'      failure   -> CLASS 2
+    'pr'                              failure   -> CLASS 3
+**CLASS 1 — Security Scanning.** FAILING {Dependency Audit}; 7 jobs, 6 not failing. The
+ADVISORY-FREEZE class by name, exactly your standing wording. NOT semver.
+**CLASS 2 — PR Security Gates (KS-168).** FAILING {Code Security Gates}.
+    develop's set at 7bcc2ed545e4: {Code Security Gates}
+    SUBSET: TRUE. New failures: NONE.
+**CLASS 3 — pr.** FAILING {Akto suite (PR), Performance suite (k6 smoke), Playwright suite,
+Schemathesis suite}, 4 of 6 jobs; 'Migration behaviour (KS-667)' SUCCESS and the build job success.
+    develop's set at 7bcc2ed545e4: the SAME four.
+    SUBSET: TRUE. New failures: NONE.
+🔴 **ONE DIFFERENCE FROM YOUR #1407 ADDENDUM, and I want it on the record rather than glossed.**
+Your #1407 verdict said `pr` failed {Akto, Performance (k6 smoke), Playwright} — "a strict subset of
+develop's four, **with Schemathesis passing here**". On M, Schemathesis FAILS as well, so M's set
+EQUALS develop's four and the subset is NOT strict. It is still a subset with zero new failures,
+because Schemathesis is already in develop's failing set — but M and #1407 do NOT read identically
+and I am not going to present them as if they did. If you want the Schemathesis delta looked into
+before the squash, say so and I hold; my own reading is that it is base state (the four platform
+suites need the local stack, which is down, and all four fail on develop today).
+**Method, so the TRUE is a reading:** I tested `set(mine) <= set(develop)`, never equality — the trap
+R 9th hit. CONTROLS: the same head_sha query on develop's tip returns 2 runs (POSITIVE) and on a
+fabricated sha returns 0 (NEGATIVE); a fabricated job name is NOT a subset of develop's set (False),
+so the predicate discriminates rather than returning True for anything.
+develop's two failing workflows are base state since at least 2026-09-28, measured across its last
+three runs — not my doing.
+
+## REFS, re-read in the same action as this mail
+    develop                7bcc2ed545e45ec39abddf4f660eaae980434170   unmoved since #1407
+    the KS-1313 branch     a618371e5083697ea6166cce3fe53d528fed7ccd   == M
+    refs/pull/1383/head    32e8459bc0f51d1af492aae7c0b3d9754f78c9bf   unmoved, HELD
+
+## QUESTION (one)
+What is my ctx reading, and do I squash #1409 now? If it is at or above 50% I do NOT squash: I wrap
+cold with M pushed and named in the RESUME block, and you send the ADDENDUM to whoever holds the
+squash. M is pushed and verified either way, so a wrap here costs the round nothing but the squash.
+
+## READY THE MOMENT YOU RELEASE IT
+Everything M-7 needs is built and checked: the addendum builder re-keyed and armed (its new
+sha256/16 e30c4d76bb6e2789 is in `_COPY_HASHES_ra10.txt`), `RA10_NO_MERGE_IN=0` for this step
+because #1409 IS a real merge-in, the squash body 1409.txt at sha256
+d2f3c35c1f131d3d85336812e0bc690a63dc9fb385adbb52fbe817dccd3d8208 == your GO's, the declared subject
+81 chars == its landed length, and the merge pinned to M. Nothing is owed before step 3 either:
+every tool is re-keyed and green, including sweepra10 (F-2 discharged, all three controls pass).
+Watcher LIVE pid 44229, SINCE 2026-10-07T07:59:05.000Z.
+

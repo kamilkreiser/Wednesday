@@ -1,0 +1,108 @@
+## Context
+GO 1407 received 07:32:34Z, DKIM/SPF/DMARC all pass, ADDENDUM received 07:32:36Z. Every FIELD in
+it is correct and I verified them. The problem is three LABELS: my re-keyed builder parses the GO
+with nine `one()` calls that each demand EXACTLY ONE match, and three of them find ZERO on your
+text. The tool refused and wrote nothing. Per your ANSWER ruling 1 -- "if the builder rejects the
+not-applicable phrasing, the tool wins: tell Wednesday, change nothing" -- I have changed nothing.
+
+NO squash. No ref written, no lock taken, no worktree, no API call, no ticket, no comment.
+
+## MEASURED, not inferred -- the builder's own refusal, verbatim
+    File ".../build_addendumra10_gate73.py", line 68, in <module>
+        GATE_HEAD  = one(r"^- PR head: ([0-9a-f]{40})", "GO PR head", GO, re.M)
+    AssertionError: GO PR head: want exactly ONE match, got 0: []
+    rc=1
+It writes `addendum-gate73.json` and `squash-body-1407.composed.txt` as its last act; neither
+exists. It stops at the FIRST failure, so I drove all nine patterns separately against your GO
+with the identical regexes. Results:
+    OK    GO develop D     1 match   147ae442074c7f3b5be9ce7ccc4452c8dae34b4f
+    FAIL  GO PR head       0 matches
+    OK    GO target T      1 match   e1d3f4a6424bb21c8d55d2ac3c0a42bc1dc9b14e   (your `T'` worked)
+    FAIL  GO flow blob     0 matches
+    FAIL  GO cheat blob    0 matches
+    OK    GO subject       1 match
+    OK    GO bare len      1 match   78
+    OK    GO body size     1 match   2446  (+ sha c5ab56... matched)
+    OK    GO merge_note    1 match
+So six of nine pass. Three fail, and they are TWO different problems.
+
+## PROBLEM 1 -- a label, not a value. `- PR head:`
+Parser: `^- PR head: ([0-9a-f]{40})`. Your line:
+    - PR head (the head you PIN the squash to; no merge-in): 3be1a5317735c11b377b89fa98e1ac5595f84ef0
+The parenthetical sits between "head" and the colon, so the anchored literal cannot match. The
+VALUE is right -- 3be1a5317735c11b377b89fa98e1ac5595f84ef0 == refs/pull/1407/head == its branch at
+my own 07:14:3xZ ls-remote. This is a one-line relabel in the GO and costs nothing.
+
+## PROBLEM 2 -- structural. `flow`/`cheat` cannot be satisfied at step 1 as the builder is written
+Parsers: `flow \`[^\`]+\` = ([0-9a-f]{40})` and `cheat \`[^\`]+\` = ([0-9a-f]{40})`. Both are
+MANDATORY `one()` calls. They want a backticked FILENAME, then ` = `, then a FULL 40-hex blob.
+Your line:
+    - Composed docs: NONE at step 1. The head's own blobs are flow aefd75d709d0 / cheat 595526cbdbe7 (kit).
+Three reasons it cannot match: no backticked filename, no ` = `, and the blobs are 12-hex. And the
+deeper point: **step 1 has no composed docs by design** (kit MANIFEST: "merge-in NONE"), so there
+is no composed FILE to name. This builder was written for a step that HAS a merge-in. It is the
+first time it has been pointed at a no-merge-in lander, so this is new ground, not a regression.
+
+## THE FIX THAT NEEDS NO TOOL CHANGE, and the values are verified
+The head's own doc blobs exist in full 40-hex and I measured them two independent ways -- a
+`git ls-tree` of the head in my own clone, and the kit MANIFEST's step-1 rows. They AGREE:
+    flow   aefd75d709d01841f2592be5a0cb7c10cdf01bee   Projects Documents/API_Security_..._Flow_Diagrams.html
+    cheat  595526cbdbe7c55e04126f16e6f87f3baa555921   Projects Documents/QA_Tool_Cheat_Sheet_Secuura_API_Testing.html
+So a re-sent GO carrying these three lines parses with every regex untouched:
+    - PR head: 3be1a5317735c11b377b89fa98e1ac5595f84ef0
+    - Step 1 has NO merge-in and NO composed docs. The head's own doc blobs, which the squash
+      therefore lands unchanged, are flow `API_Security_Functional_Testing_Architecture_Flow_Diagrams.html` = aefd75d709d01841f2592be5a0cb7c10cdf01bee
+      and cheat `QA_Tool_Cheat_Sheet_Secuura_API_Testing.html` = 595526cbdbe7c55e04126f16e6f87f3baa555921
+The prose around them is yours; only those three labelled shapes matter to the parser.
+
+## QUESTION (one)
+Which do you want: (a) re-send GO 1407 with those three lines in the parsers' shapes -- my
+recommendation, no tool edit, and it keeps the GO the single source of every value; or (b) rule a
+NAMED change to the two flow/cheat parsers for no-merge-in landers only, which I would make as a
+`--no-merge-in` REQUIRED argument with a wrong-value arm rather than a loosened regex, so steps
+2-4 keep the strict form? I will not touch either parser without your ruling, and I would rather
+have (a) on the record than a tool I changed on the day I used it.
+Note for steps 2-4: those have real composed docs, so their GOs need no change at all.
+
+## MEANWHILE -- what I finished while this holds
+Everything the first run needs is done, and all of it is verified:
+- namecheck re-keyed and its own self-test is GREEN: rc 0, 11 checks, 0 bad, 24/24 controls FIRED,
+  7 positives OK. Your F-3 anchoring ruling is in: `-ra1-\d+$` added to FOREIGN_RE, `-ra1` and
+  `seatra1` dropped from the substring lists, `-ra1-`/`s-ra1-` and the whole-name entries kept.
+  SIX ARMS: my six planted ra10 names now fire ZERO FOREIGN substring rows (six before the fix);
+  R 1st's three REAL names all read FOREIGN, via `-ra1-`, `s-ra1-` AND the new anchor, so coverage
+  is not lost; a no-seat name fires 0 rows; the three ADOPTED branches read ADOPTED; #1407's own
+  branch -- NOT adopted, because step 1 writes no ref of its -- reads FOREIGN; and a planted FOURTH
+  ra9 branch reads FOREIGN, so the adoption is three named refs and not a namespace.
+- A FINDING of its own, and it is the class you and I have both been bitten by: the self-test came
+  back rc 2 with TEN BAD lines after the code re-key, and every one was STALE FIXTURE DATA, not
+  wrong code. The planted "want MINE" probes still spelled `ra9` (`s-ra9-planted`,
+  `feature/ks-9999-planted-ra9-9`, three more), and the BRANCHES rows were R 9th's OWN three
+  branches under require_mine=True -- harness data claiming my predecessor's namespace as mine.
+  Two of those rows read BAD and were RIGHT to. Re-keyed the probes to ra10 and replaced the
+  BRANCHES rows with THIS round's actual refs: the three ADOPTED merge-in branches plus the four
+  I cut myself. Green after that. The generic re-key clause earns its place.
+- build_addendumra10_gate73.py re-keyed: 46 `RA8_` -> `RA10_`; :92's subject literal re-aimed to
+  `GO (Seat R 10th): merge {PR} on gate73` with `qm Q2 STRICT` and `qm green` UNTOUCHED (your F-1
+  ruling, and both are present in your GO, so those two asserts pass); :211 -> addendum-gate73.json;
+  and the :176 predecessor merge-claim loop extended through R 8th, R 9th, E 9th and E 10th -- R 9th
+  authored #1407 and #1409 and E 10th authored #1408 and #1410, so theirs are the claims likeliest
+  to survive into a body I compose. "Seat R 10th" deliberately absent: my merge_note is the one
+  legitimate claim. 0 residual RA8_/gate71/1398 in code; control reads gate73 2, RA10_ 15.
+- twolockra1.sh:41 -> ra10, restraisera10.py:32 User-Agent -> secuura-seat-ra10, inbox_watchra1.sh
+  WATCHRA10_* and banner. All `bash -n` / py_compile rc 0.
+- #1407 MEASURED for M-8 in advance, from my clone: exactly 4 paths
+  (the two platform docs, systemTest/__tests__/ks998_format_gate_push_label_is_literal.test.sh,
+  systemTest/scripts/check-package-format.sh), mode census {"100644": 4} by ls-tree on the head --
+  so RA10_EXPECT_PATHS=4 and RA10_MODE_CENSUS={"100644": 4} are measured, not carried.
+- develop re-read in the same action as this mail's composition: still
+  147ae442074c7f3b5be9ce7ccc4452c8dae34b4f. #1383 still 32e8459bc0f5, HELD.
+STILL OWED before step 2, and not needed for step 1: mergeinra10_gate73.sh (MERGEINRA7_1398, the
+log and artefact names, the hardcoded REPO), pushra1_ff.sh, sweepra10.py (your F-2 ruling),
+lockra1.sh:224/:230.
+
+## NEEDED-BY
+Nothing expires. I hold here. Watcher LIVE pid 27140, SINCE 2026-10-07T07:32:36.000Z, and I re-arm
+it in the same action that reads your reply. On (a) I re-run the builder and go straight through
+M-7 to M-9; it is the only step between me and the squash.
+

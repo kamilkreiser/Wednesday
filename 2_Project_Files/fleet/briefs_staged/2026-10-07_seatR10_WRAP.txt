@@ -1,0 +1,87 @@
+## BLUF
+**WRAP COLD (Seat R 10th).** Two of gate73's four PRs are LANDED and verified at source: #1407
+(KS-998) as `7bcc2ed545e4` and #1409 (KS-1313) as `841e4ab136dc`. develop ==
+`841e4ab136dc1cf22956b4b2902d551987be2de8`. Nothing is half-done, no lock is held, 0 watchers live.
+#1408, #1410, the §5d follow-up and the raises go to R 11th with their inputs built and accepted.
+This seat = **1 Claude launch, clause cloud: merge + raise (carrying 0 Spark tasks — I raised none).**
+
+## 0 WATCHERS LIVE, proved from a ps FILE with a positive control
+`boot/ps_watchers_zero.txt` (1,000 lines): `inbox_watchra1.sh` instances **0**. POSITIVE CONTROL:
+the same grep over the same file finds 2 lines for the `ps` command itself, so the file and the
+pattern both work and the zero is a reading. pid 30527 was signalled and exited 144 (SIGTERM).
+🔴 One honest correction inside my own proof: a broader grep for my tool names and for
+`login_stub` each returned 1 — and **both were the SAME process: my own Bash-tool shell**, whose
+command line contained those literal strings as grep arguments. The ps snapshot caught itself. Same
+shape as "pgrep counts your own command". Real counts: **0 tool processes, 0 leaked login_stubs**
+(the push script reaped its own and reported 0).
+
+## HANDOVER
+`5_Project_History/HANDOVER-seatR10-2026-10-07.md` — **193 lines, 15,318 B, sha256/16
+`50a449cfd769b2a1`**. Opens "FOR R 11th, THE FIRST THREE THINGS". Carries the RESUME block, every
+ref write with from/to, UNMERGED / UNRAISED / UNMEASURED / UNFILED, the one authorised tool change,
+the ra1/ra10 hazard across three tools, the stale-fixture lesson, and the findings that outlive me.
+
+## HISTORY
+Entry written at the TOP of `5_Project_History/history.md`, with the anchor re-read immediately
+before writing (it is a shared file). **INSERT-ONLY PROVED, not asserted:** 18 lines at 24..41;
+stripping exactly those lines returns the original whole-file sha256/16 `cd1d75dfb7d795e2`, so
+every other byte is untouched. Seat D 16th's entry moved 24 -> 42, unedited. +8,941 B.
+(My first attempt at that proof printed a prefix hash only AFTER the insert, which proves nothing —
+I replaced it with the strip-and-compare above.)
+
+## RESUME — the next step, exactly
+**GO 1408.** develop == `841e4ab136dc1cf22956b4b2902d551987be2de8`, re-read at source 08:4xZ.
+    #1408  head ce33ec8b3eae5ea5ad63fc1b4871d8367fe2a95e  OPEN, merged=False (API)
+    #1410  head c976c9f72ba019d76a2a575f2e4ff5c19c7af505  OPEN, merged=False (API)
+    #1383  head 32e8459bc0f51d1af492aae7c0b3d9754f78c9bf  HELD, unmoved all round
+**#1408's and #1410's squash bodies are BUILT, HASHED AND READ BY YOU — R 11th must not rebuild them:**
+    1408.txt 3,431 B sha256 145bb932d84d0506d2b4e9d709fbe72c3f5b1190b47382fcddbac4a9e99089fe
+    1410.txt 3,925 B sha256 b4eac209c97eda942f5dfab66c916e460fe6690d7e2c4efd1ed4f7d3547c8696
+**The step-3/4 trees I reproduced, with the caveat that matters:** `c4 chain` on `7bcc2ed545e4` gave
+#1408 -> `640d33ddd73e3f9eb3e568d21dfb50b668a397a1` and #1410 -> `54c2c6ddb653a33513a81c4b063de340a8826dfe`,
+both equal to the kit. **But those SIM bases chained from `7bcc2ed545e4`, not from today's
+`841e4ab136dc`.** My #1409 squash has tree `2a0a72036139`, which IS the chain's step-1 tree, so the
+lineage is right — I still told R 11th to **re-run `c4 chain --develop 841e4ab136dc --order 1408,1410`
+and confirm before building.** Taking my trees on trust is the exact thing I declined to do to you.
+**The #1245 pointer comment is now DUE** — #1409 has squashed. Q-1245: you supply the text. I wrote
+nothing on #1245, and nothing on any ticket.
+**PR 5 (KS-1164), KS-1274, KS-1410 and the §5d follow-up: UNRAISED, none started.** The §5d sites
+must be re-located BY HUNK on the post-squash develop, never by text search — #1408's `index.ts` has
+TWO lines matching `signature: z.string().optional(),` and only `:412` is the change.
+
+## PUSHED-BUT-UNRAISED BRANCHES
+**NONE.** I raised no PR. One remote branch write all round, the merge-in M, and it is merged.
+
+## REF WRITES — the complete record
+REMOTE, 3, all mine, each on its own GO:
+  1. refs/heads/develop  147ae442074c -> 7bcc2ed545e4   (#1407 squash)
+  2. the KS-1313 branch  c8899a95dc44 -> a618371e5083   (merge-in M, fast-forward, adopted by name)
+  3. refs/heads/develop  7bcc2ed545e4 -> 841e4ab136dc   (#1409 squash)
+LOCAL: **ZERO** in the shared checkout. `rev-parse --all` read `6c02ca445cad9fed` before AND after
+every objects transfer. Local `refs/heads/develop` still reads `69f2045af2a4` by design; I never
+wrote it or `refs/remotes/origin/develop`. One worktree HEAD created and removed.
+
+## DRIVE HYGIENE
+`df -m /Volumes/DevMASTER` avail: **675,490 MiB before -> 682,544 MiB after = 7,054 MiB / 6.88 GB
+freed.** Removed the 3 worktrees whose PRs the API confirms MERGED — `s-ra10-m1409` (mine),
+`s-ra9-ks1313`, `s-ra9-ks998` — with `git worktree remove`, never `rm`. **KEPT `s-e9-ks1435` and
+`s-e10-ks591c`: their PRs are OPEN and they are the E lane's.** 0 `s-ra9-*`/`s-ra10-*` remain;
+worktree count 504 -> 502.
+🔴 **And the finding that made me re-do this step:** `merge-base --is-ancestor <PR head> <develop>`
+is VACUOUS as a hygiene predicate. A squash means the PR head is NEVER an ancestor, so **all five**
+batch worktrees read "NOT merged" — including the two whose PRs had demonstrably just landed. My
+control (#1408 reads NOT merged) fired but discriminated nothing. The PR's own `merged` field is the
+instrument, and that is what I used.
+
+## MAIL, COUNTED BY PANE TAG
+18 messages name `(Seat R 10th)`: **8 sent / 10 received**, counted over the inbox by
+subject tag, not from memory.
+
+## WHAT I LEFT UNDONE, PLAINLY
+Two of four squashes. The §5d follow-up (tier 3, OWED), the #1245 comment, and all four raises are
+R 11th's. The four platform suites stay UNMEASURED — local stack down, and both pushes printed only
+`SKIP — local stack not up` ×3 with `PREFLIGHT INCOMPLETE — 12/15 legs ran, 3 SKIPPED. Nothing
+failed.` The kit's `trailer_control_raw_bytes: 55` stays UNRECONCILED. The leg-6 CLEANUP 15 rows
+stay UNFILED. Demo is still NOT deployed on a CAPACITY blocker that is Kam's to rule, not mine.
+Zero code, zero branches of my own, zero raises, zero ticket writes, nothing to any human.
+

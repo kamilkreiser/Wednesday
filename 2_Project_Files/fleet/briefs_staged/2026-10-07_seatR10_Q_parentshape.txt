@@ -1,0 +1,83 @@
+## Context
+The relabelled GO (07:42:00Z, supersedes 07:32:34Z) parses CLEAN: all NINE `one()` parsers now
+return exactly one match, including the two that could not match before. Option (a) worked and cost
+no tool change. The ADDENDUM of 07:32:36Z satisfies :94 unchanged.
+
+The builder now stops at ONE assert, :121, and it is the last thing between me and the squash.
+NO squash. No ref written, no lock, no worktree, no API call, no ticket, no comment.
+
+## TWO ERRORS OF MINE FIRST, both caught by the tool, both disclosed
+1. I set RA10_WT to my scratch clone, whose HEAD was still 69f2045af2a4 from the clone --
+   tree a4a219b872710c6cc1cbf1eee193b9e192cf090d. The :120 TREE assert caught it and named both
+   values. My fault, not the GO's. HEAD now points at 3be1a5317735 in the clone (scratchpad only;
+   the shared store re-hashes 6c02ca445cad9fed, unchanged).
+2. RA10_WRAP must be a BASENAME: :145 builds HPATH as "<5_Project_History>/" + WRAP, so an
+   absolute path doubled the prefix. Corrected to HANDOVER-seatR9-2026-10-07.md.
+Neither is a GO defect. I mention them because the first one is exactly the class of mistake the
+change I am about to propose would catch BY NAME.
+
+## THE BLOCKER, MEASURED
+    File ".../build_addendumra10_gate73.py", line 121
+        assert PARENTS == [GATE_HEAD, GO_DEVELOP], f"parents {PARENTS} != [gated head, develop]"
+    AssertionError: parents ['147ae442074c7f3b5be9ce7ccc4452c8dae34b4f'] != [gated head, develop]
+This assert is MERGE-IN SHAPED. It verifies a merge-in commit M, which by construction has parents
+[head, develop]. At step 1 there IS no M. Measured in my clone:
+    #1407 head 3be1a5317735 has exactly ONE parent, and it IS develop D, 147ae442074c
+    its tree is e1d3f4a6424bb21c8d55d2ac3c0a42bc1dc9b14e == your T' == END_TREE
+That one-parent-is-develop fact is PRECISELY why this PR needs no merge-in and why "tree == END_TREE"
+is a meaningful check for it. The assert is not wrong; it is written for the other three steps.
+
+## I PROVED IT IS THE ONLY ONE, rather than reading the file and guessing
+A PROBE COPY in my scratchpad (/private/tmp/.../PROBE_ONLY_builder.py), with ONLY :121 replaced by
+the step-1 shape `PARENTS == [GO_DEVELOP] and HEAD == GATE_HEAD`, runs rc 0 and writes the
+addendum. So every other gate passes on the real values:
+    tree == T' e1d3f4a6424b          | commit-ness OK          | 0 trailers on the commit
+    4 paths vs develop               | mode census {"100644": 4}
+    flow blob  aefd75d709d0 == the GO's   | cheat blob 595526cbdbe7 == the GO's
+    wrap artefact digest ff849038744e45ba, RE-MEASURED in that call
+    body FILE sha256 c5ab56bf...3973b2 == the GO's | 2446 B as declared | "Merged by" count 0
+    composed body 2543 B, exactly ONE "Merged by" and it names Seat R 10th
+    closing regex 0 findings, and its OWN control "Closes KS-998" FIRES
+    hyphenated keys == {KS-998} exactly
+    subject 78 bare / 78 as it lands, no (#n)
+    COMPOSED sha256 28904c1684e66551a71dcfc2bb06567aff1405bf21bc04771bb93c43cc42fe87
+THE REAL TOOL IS UNTOUCHED: sha256/16 3b021a77551cf28a, and a grep for the :121 line still reads 1.
+The probe authorises nothing; it exists only so this mail names one assert instead of three.
+
+## QUESTION (one)
+Do you authorise a NAMED change to :121, scoped to no-merge-in landers? My proposal, shaped the way
+the brief wants knobs shaped -- a REQUIRED argument with a wrong-value arm, never a loosened gate:
+
+    RA10_NO_MERGE_IN  -- REQUIRED, NO DEFAULT, must be exactly "0" or "1" (anything else REFUSES).
+      "1": :121 asserts  PARENTS == [GO_DEVELOP]  AND  HEAD == GATE_HEAD
+      "0": :121 unchanged, PARENTS == [GATE_HEAD, GO_DEVELOP]
+
+Three reasons I think "1" is the right shape rather than a skip:
+  (a) It is STRICTLY STRONGER than the merge-in form for this case, not weaker. It pins the single
+      parent to develop AND pins the commit under test to the gated head. The merge-in form never
+      checks HEAD == GATE_HEAD at all, because for an M they differ by construction.
+  (b) It would have caught my own RA10_WT error BY NAME. That error was caught only by the tree
+      comparison, which told me a tree was wrong, not that I was verifying the wrong commit.
+  (c) Steps 2-4 pass "0" and keep the strict two-parent form, so nothing is loosened for them.
+Say the word and I make exactly that change, re-run, and go straight through M-7 to M-9. If you
+would rather I touch no tool at all, the alternative is that you rule the ADDENDUM not required for
+#1407 and I squash with mergera1.py alone -- but Q-ADD73 says one ADDENDUM per GO including #1407,
+so I have assumed you want the builder to run and have not acted on that reading.
+
+## MEANWHILE
+- mergeinra10_gate73.sh re-keyed: log, start banner, the merge artefact (x2) and the summary print
+  all off ra7/1398. 0 residual 1398/ra7/RA7 in code, control reads gate73 4, bash -n rc 0. Its
+  hardcoded REPO= is the shared checkout and I VERIFIED it is correct for this project, so it stays.
+- lockra1.sh: its two flagged lines were stale MESSAGE TEXT, not gates -- the lock-name gate and the
+  no-default LOCK_SEAT refusal are both correct and I re-grepped them unchanged after editing. Prints
+  corrected to ra10 anyway, bash -n rc 0.
+- pushra1_ff.sh audited: 0 lane literals in 46 code lines, LOCK_SEAT is `:?`-required with no default.
+- STILL OWED, not needed for any merge: sweepra10.py's full re-key (your F-2 ruling). It is a
+  raise-track tool and runs first in QUEUE R.
+- develop re-read in the same action as this mail: 147ae442074c7f3b5be9ce7ccc4452c8dae34b4f,
+  #1407 head 3be1a5317735c11b377b89fa98e1ac5595f84ef0. Both unmoved.
+
+## NEEDED-BY
+Nothing expires. Watcher LIVE pid 32896, SINCE 2026-10-07T07:42:00.000Z, re-armed in the same action that read your
+re-sent GO. I re-arm it again when I read your reply.
+
