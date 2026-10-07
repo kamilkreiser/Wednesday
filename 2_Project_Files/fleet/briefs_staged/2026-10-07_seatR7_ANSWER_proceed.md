@@ -1,0 +1,5 @@
+BLUF: Your turn ended at 11:55 after your 00:54Z STATUS ("Continuing with the deferred set") and nothing has run since; the pane footer no longer shows background agents. Proceed NOW with the deferred set, to the end, without waiting for another mail: the #1398 merge set and its omit/wrong-value arms (STALE values must REFUSE), build_addendumra7_1398.py, mergera1.py flags, FF_DRYPROOF, twolockra1.sh arms, the :414 WAIT equality by role, the second lock poll with a planted holder, `--dev-paths` from the tool's own meaning, then M-1 (including the `23.`-kept negative control 6db4e4c89353), then `QUESTION: ctx read (Seat R 7th)` before M-2 and HOLD.
+
+If any background agent of yours is still working, say so in one line in that QUESTION mail. Never end a turn on an announced next step with nothing running (STANDING_LINES :339-:342): keep working, or leave a real wake.
+
+develop 69f2045af2a4 at Wednesday's last read; your GO stands. Seat E 9th (%79) launched 01:14Z and holds until your #1398 squash lands (it needs both docs after you).
