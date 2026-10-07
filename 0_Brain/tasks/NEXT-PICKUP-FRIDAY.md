@@ -12,6 +12,14 @@ supersede: replace wholesale; previous = NEXT-PICKUP-FRIDAY.md.pre-0925-rotate-s
 
 **The tree is at `/Volumes/Laptop-DEV/FRIDAY` (the drive, since 2026-09-28).** Quote every path (spaces).
 
+## 🔴🔴🔴 CHECKPOINT 2026-10-08 08:19 (Friday, ctx 65%) — READ FIRST; supersedes every block below where they differ
+**Kam today (live):** 08:04:57 = write HPSM-POC tickets + forwardable Paul emails for HPSM-POC and the Composer + "do the same" for the Composer (read as backlog rows; told him, correctable). Reconcile 0 at 08:18.
+**DONE:** two mails to kamil.kreiser@datasec.com.au (HPSM-POC msg <010001a118310831…: link + demo user + password + TOTP key; Composer msg <010001a118310a82…: link + Paul's user + password), read back with every value present, compared without printing them; Paul's Composer login 200 live. Kam told (bf-3279529762b21). Composer B98: BACKLOG #248–#255 + 7 stale rows updated; pc-b92-* stopped (kept); ADDENDUM-1 → #215/#225 + C-52..C-55 (root records 437c14d).
+**LIVE:**
+- %105 HPSM-POC-A **B185** (Jira: 13 new tickets, closes 221/230/3–7 after reading, 207 comment, a reconciliation LIST with no transitions). STATUS `HPSM-POC/1_Project_Definition/Briefs/2026-10-08_B185_STATUS.md`. On READY: read back the created keys from Jira (approximate-count before/after), merge records/b185, tell Kam.
+- %106 Security-Composer-A **B98 ADDENDUM-2** (C-53..C-55 get Kam's taps from `decisions.json`: e8-level a 20:41:45 "Yes, it can be changed"; 66-no-changes a 20:41:42 "No, keep C-11"; unanswered-warn a 20:40:45 "Yes, a warning"; guided-view c 19:29:30). On READY: read the commit back, close %106, tell Kam the Composer side is done.
+**OWED:** Composer Dependabot #18/#54/#55 need a gh login that can read datasecau/Datasec-Security-Composer (Friday's own datasec gh could not see it per the census — re-measure) · the deploy freeze for hosted HPSM-POC until Paul's walkthrough stands · the 21:55 queue below.
+
 ## 🔴🔴🔴 STATE 2026-10-08 (Friday, morning) — READ FIRST; supersedes every block below where they differ
 **Kam asked for a two-project summary → published** https://claude.ai/artifact/GVi9oKgMQUHN4jKxLu3km1 (source: `/private/tmp/…/scratchpad/datasec-status/datasec-status.html` — scratchpad, re-derivable from the two census reports summarised there). Panel: bf-861a2f4375651. **Asked of Kam:** sign M2's PO approval TODAY (C-50; M2 due Thu 8 Oct; no sign-off recorded through C-79); Composer Q-7 SME names; send Paul his guide; send the HP/Terry questions.
 **FRIDAY'S STATED DEFAULT (told to Kam): today, ticket every untracked item and close the stale ones**, unless he says otherwise:
