@@ -14,8 +14,8 @@ supersede: REPLACED WHOLESALE 2026-10-08 05:3x by the overnight seat (booted 02:
 2. **R 15th is LIVE (%91 `Secuura/Blockchain-R`)** — see FLOOR. Its plan confirmation is the first thing owed.
 3. **Morning brief LEADS with (value first):** gate74 GO (#1423), R 15th merging #1422 + #1423, the Spark census (24 unraised passes found, 10 now held), and the BLOCKER: **develop red on pre-push leg 14 → KS-1450** (Peter's #1424) blocks every push touching `Blockchain/Dev/`. Give Kam a 1-2 line WhatsApp text pointing at https://linear.app/secuura/issue/KS-1450 in case Peter has not seen it (Kam sends; nobody else messages Peter).
 
-## FLOOR (05:3x)
-%0 wednesday · **%91 Seat R 15th** (launched 05:18, brief `fleet/briefs_staged/2026-10-08_seatR15_merge1423_1422.md` with SEND AMENDMENT; rung 5 verified) · %1 monitor.
+## FLOOR (06:2x)
+%0 wednesday · %1 monitor. **No agent live.** R 15th WRAPPED (0.94, pane closed; handover `HANDOVER-seatR15-2026-10-07.md` da495708b0364f65). **The gate74 round is DONE: #1422 → 4afefcbfb064, #1423 → develop ddea005553bf65ffc284a9124a02ad53c5f88019, both verified at source.** Next R seat = R 16th (its handover's first three things). Nothing launches until Kam rules the usage card or the allowance renews.
 
 ## R 15th — what Wednesday owes it, in order
 1. ~~plan confirmation~~ **DONE 05:3x** (ANSWER 18:34Z: confirmed, ctx 23%, no pull; c4 to be re-run with `--expect-tree`). **NEXT from it: `QUESTION: ctx read (Seat R 15th)`** after its step 1 (builder + m7_squash + m1_go_complete + provenance_ra15, all arms), carrying the c4 11/0 + wrong-tree numbers → pane ctx → ANSWER → GO 1422.
