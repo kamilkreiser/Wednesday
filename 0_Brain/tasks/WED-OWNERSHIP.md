@@ -149,4 +149,4 @@ sees the claim rather than discovering it in a conflict.
 | 2026-10-08 16:13 | Kamils-Mac-Studio | oMLX + Flash Next local-model study for Kam (video GEO8nnkC5uY), tonight's test plan | OPEN | |
 | 2026-10-08 17:31 | Kamils-Mac-Studio | Ornith 1.5 vs 1.0 A/B on recent graded night items (oMLX on 47780, guarded) | CLOSED |  2026-10-08 18:06 done 18:0x: tie 17/20; report ORNITH15_AB.md |
 | 2026-10-08 17:37 | Kamils-Mac-Studio | send_brief.sh undelivered-ruling gate: map Secuura/Blockchain-G and -R (registry gap) | CLOSED |  2026-10-08 17:38 done 17:4x: -G/-R mapped, exercised, commit 9343d6ce0 |
-| 2026-10-08 18:14 | Kamils-Mac-Studio | Ornith 1.5 replaces 1.0 in the night runner (oMLX 47780), keep 1.0 fallback; then harder-task ladder | OPEN | |
+| 2026-10-08 18:14 | Kamils-Mac-Studio | Ornith 1.5 replaces 1.0 in the night runner (oMLX 47780), keep 1.0 fallback; then harder-task ladder | CLOSED |  2026-10-08 18:39 done 18:4x: commit c0c36f7e8; harder-task ladder next |
