@@ -14,6 +14,16 @@ supersede: REPLACED WHOLESALE 2026-10-08 05:3x by the overnight seat (booted 02:
 2. **R 15th is LIVE (%91 `Secuura/Blockchain-R`)** — see FLOOR. Its plan confirmation is the first thing owed.
 3. **Morning brief LEADS with (value first):** gate74 GO (#1423), R 15th merging #1422 + #1423, the Spark census (24 unraised passes found, 10 now held), and the BLOCKER: **develop red on pre-push leg 14 → KS-1450** (Peter's #1424) blocks every push touching `Blockchain/Dev/`. Give Kam a 1-2 line WhatsApp text pointing at https://linear.app/secuura/issue/KS-1450 in case Peter has not seen it (Kam sends; nobody else messages Peter).
 
+## 🔴 18:2x 2026-10-08 — LIVE STATE (supersedes 18:0x; ctx 66% at writing)
+**Floor:** %0 wednesday · %96 G 4th · %97 E 11th · %98 F 5th · **%99 R 19th** · %1 monitor. R 18th CLOSED (0.96).
+- **R 19th:** launched 07:22Z. NEXT from it: plan confirmation (check its COMMIT TOOL FIX + Q-LOCK56 reconcile arms).
+- **G 4th:** G-A pushing on Wednesday's 07:03Z word → `STATUS pushed` → READY → WRAP → brief + launch **G 5th** for KS-1171 (first re-key: `pathgateg1.py` PR0 range; add `ra19` to its foreign set).
+- **E 11th:** building E-A KS-1449 (resumed after a lost queued tap). **F 5th:** building F-A KS-1328.
+- **GATE:** one batched gate for #1427 + G-A (+ any E-A/F-A that land), gate75 kit as template.
+- **Ornith 1.5 DEPLOY builder RUNNING** (background; report `0_Brain/reference/2026-10-08_ornith15-deploy/REPORT.md`; told to leave the oMLX server STOPPED). Verify its work at source, then commit.
+- **Qwen 122B (Kam 18:19: test it; one OR the other with the Spark):** download running (pid 17148, pinned e9c67b08); waiter armed. On completion: verify sizes against the HF API → ask Kam to quit his apps (just-in-time) → stop Ornith → the 20-task A/B with the guard (reuse `ab_ornith15` set + client) → report 1.0 / 1.5 / 122B side by side.
+- **ctx instrument:** `seat_ctx.py` (panes too short to render statuslines).
+
 ## 🔴 18:0x 2026-10-08 — LIVE STATE (supersedes 17:4x)
 - **#1427 (KS-1274) READY FOR QA** (R 18th, head 2b6da5f561b0). **R 18th WRAPPING** → on its WRAP: re-hash the handover, score, `pane_close.sh %95`, then brief + launch **R 19th** for R3+R4 (KS-1410) + R5 (KS-1139) from R 18th's handover (payloads already verified there).
 - **G 4th:** G-A diff APPROVED + push word 07:03Z (ctx ~48%) → expect `STATUS: pushed … raised #<n>` then READY then WRAP → **G 5th** takes G-B (KS-1171); first re-key = `pathgateg1.py`'s PR0 range.
