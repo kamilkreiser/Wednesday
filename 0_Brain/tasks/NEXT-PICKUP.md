@@ -22,7 +22,7 @@ supersede: REPLACED WHOLESALE 2026-10-08 05:3x by the overnight seat (booted 02:
 3. **E 12th** (`…_seatE12_raise_ks591_ks1364.md`; read it WHOLE first; drafter recommends E-C cut independently from the same base).
 4. **gate77 kit** for #1429 #1430 #1431 #1432 #1433 #1434 (gate76 kit as template; all on develop 0a6177ea, now one behind: re-predict on 1e7f90e2 + #1427's squash). Polish item: #1430/#1431 bodies say "unnamed" legs (false).
 5. #1428 docs follow-up (N-1428-1/2/6, docs + the `documents.ts:2212` comment), one PR, tier 2.
-**Local overnight:** Spark KS-1438 round (check `spark/done.md`); Ornith 1.5 KS-937 queued, runs at the first `ornith-loop` tick after %102 closes (G2 gate). Read every result at source in the morning (PASS = hold_ready, not merge).
+**Local results (in at wrap):** Ornith 1.5 **KS-937 PASS 7/7** (night/done.md 21:24) → read the diff at source, `hold_ready.py`, raise later (a widened push guard: the gate proves it still refuses its targets). Spark **KS-1438 round 1 FAIL at B3x** (spark/done.md 20:08:30, an added line not the brief's byte for byte) → classify, IMPROVEMENTS row, ONE rebrief.
 **OWED tooling:** `Launch_Wednesday.command` boot step 5 prints the NOTE's own path where the seat-note resolver (`tools/seat_note.sh`) belongs, so a seat that runs it executes the note (harmless today: stopped at line 4); c4 selftest scratch reuse (arms 8/11 read 13/15); `commitg1.sh:68` blind to untracked; commit tools miss duplicate `Refs`; send_brief REFUSE an unknown `Blockchain-*` tag; `wed_claim.sh`/`safe_push.sh` autostash; gatelines want derived from the tree; project CLAUDE.md "Actions retired" correction.
 
 ## 🔴 20:3x 2026-10-08 — 70% CHECKPOINT HANDOVER (statusline ctx 70%; supersedes the 20:1x block)
