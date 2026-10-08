@@ -174,7 +174,7 @@ All paths are drive-local. `T=/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/tools
 1. Go for the 106 GB download and the drive-local install now?
 2. Can the fleet go quiet during the test: Ornith loops paused, browsers closed?
 3. DevMASTER only, or an A/B copy on the internal SSD as well?
-4. Is a study of replacing DeepSeek on the Spark worth doing?
+4. ~~Is a study of replacing DeepSeek on the Spark worth doing?~~ **ANSWERED by Kam 16:55:29: "Keep the spark as is."**
 5. Client code on this model, given the licence is unread?
 
 ## UNMEASURED
