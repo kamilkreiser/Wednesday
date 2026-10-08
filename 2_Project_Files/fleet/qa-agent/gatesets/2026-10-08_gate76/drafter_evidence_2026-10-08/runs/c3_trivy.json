@@ -1,0 +1,160 @@
+{
+ "green": {
+  "Blockchain/Dev/scripts/__tests__/container_trivy_exit_code_env_keeps_findings.test.sh": {
+   "rc": 0,
+   "tally": [
+    6,
+    0
+   ]
+  },
+  "Blockchain/Dev/scripts/__tests__/container_trivy_failed_scan_is_loud.test.sh": {
+   "rc": 0,
+   "tally": [
+    5,
+    0
+   ]
+  },
+  "Blockchain/Dev/scripts/__tests__/container_trivy_image_filter.test.sh": {
+   "rc": 0,
+   "tally": [
+    5,
+    0
+   ]
+  }
+ },
+ "red": {
+  "failed_scan": {
+   "rc": 1,
+   "tally": [
+    4,
+    1
+   ],
+   "failing": [
+    "\ud83d\udd34 KS-1274 a trivy that exits 0 with a bare {} is recorded as scan-failed and the job exits 1"
+   ],
+   "control": [
+    "ok"
+   ]
+  },
+  "Blockchain/Dev/scripts/__tests__/container_trivy_exit_code_env_keeps_findings.test.sh": {
+   "rc": 0,
+   "tally": [
+    6,
+    0
+   ]
+  },
+  "Blockchain/Dev/scripts/__tests__/container_trivy_image_filter.test.sh": {
+   "rc": 0,
+   "tally": [
+    5,
+    0
+   ]
+  }
+ },
+ "arms": [
+  {
+   "id": "T0",
+   "want": "CLEAN",
+   "what": "a clean report with an empty Results array (CONTROL)",
+   "head": [
+    0,
+    "none"
+   ],
+   "base": [
+    0,
+    "none"
+   ]
+  },
+  {
+   "id": "T1",
+   "want": "FAILED",
+   "what": "THE DEFECT: a bare {} exit 0",
+   "head": [
+    1,
+    "scan-failed"
+   ],
+   "base": [
+    0,
+    "none"
+   ]
+  },
+  {
+   "id": "T2",
+   "want": "CLEAN",
+   "what": "trivy 0.71 clean shape: ArtifactName, no Results (CONTROL)",
+   "head": [
+    0,
+    "none"
+   ],
+   "base": [
+    0,
+    "none"
+   ]
+  },
+  {
+   "id": "T3",
+   "want": "FAILED",
+   "what": "JSON null exit 0 (has() on null errors -> scan-failed)",
+   "head": [
+    1,
+    "scan-failed"
+   ],
+   "base": [
+    0,
+    "none"
+   ]
+  },
+  {
+   "id": "T4",
+   "want": "FAILED",
+   "what": "a JSON array exit 0 (has() on an array errors -> scan-failed)",
+   "head": [
+    1,
+    "scan-failed"
+   ],
+   "base": [
+    1,
+    "scan-failed"
+   ]
+  },
+  {
+   "id": "T5",
+   "want": "CLEAN-GAP",
+   "what": "Results present but null: has(\"Results\") is TRUE -> reads CLEAN (a NAMED edge, not the ticket's shape)",
+   "head": [
+    0,
+    "none"
+   ],
+   "base": [
+    0,
+    "none"
+   ]
+  },
+  {
+   "id": "T6",
+   "want": "FAILED",
+   "what": "a non-JSON line exit 0 (KS-1136 path: jq cannot read it)",
+   "head": [
+    1,
+    "scan-failed"
+   ],
+   "base": [
+    1,
+    "scan-failed"
+   ]
+  },
+  {
+   "id": "T7",
+   "want": "FAILED",
+   "what": "trivy exit 1 with no output (KS-1136 CONTROL)",
+   "head": [
+    1,
+    "scan-failed"
+   ],
+   "base": [
+    1,
+    "scan-failed"
+   ]
+  }
+ ]
+}

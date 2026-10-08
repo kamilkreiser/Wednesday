@@ -1,0 +1,70 @@
+# ---------------- self-test ----------------
+def selftest(repo, heads):
+    """Planted arms on the REAL gate76 heads. The default order is #1428 first, #1427 second (RULINGS Q-ORDER76)."""
+    res = []
+    def rep(c, m): res.append(bool(c)); print('%s %s' % ('PASS' if c else 'FAIL', m))
+    out = tempfile.mkdtemp(prefix='g76c4st.', dir=os.environ.get('G76_SCRATCH') or None)
+    A, B = '1428', '1427'
+    RA, RB = ROWS[A], ROWS[B]; hA, hB = heads[A], heads[B]
+    # 1 boundary-free control
+    bb, hb = git_bytes(repo, BASE, D['flow']), git_bytes(repo, hB, D['flow'])
+    frag, ok, n = boundary_free(hb, bb); alt = bytearray(frag); alt[len(alt) // 2] ^= 1
+    rep(ok and n == 1 and hb.replace(bytes(alt), b'', 1) != bb, 'D1: #1427\'s real flow fragment reproduces base, a 1-byte-altered one does NOT')
+    # 2 a head that ALSO edits a pre-existing block is not ONE pure insertion
+    bt = bb.decode(); ht = hb.decode().replace('<h2', '<h2 ', 1)
+    try: line_block(ht, bt); rep(False, 'PLANTED edit of a pre-existing heading: line_block should REFUSE')
+    except (Refused, ValueError): rep(True, 'PLANTED edit of a pre-existing heading: line_block REFUSES (not ONE pure insertion)')
+    # 3 calibration identity: each row alone onto base == END_TREE
+    for r in ROWS:
+        tr, _, _ = predict(repo, heads[r], BASE, ROWS[r]); rep(tr == ROWS[r]['end_tree'], 'calibration #%s alone on base == END_TREE %s' % (r, ROWS[r]['end_tree'][:12]))
+    # 4 keep-both read-back: the second lander lands AFTER the first; a WRONG-side insert (before the first lander) fails read-back
+    simA = commit_sim(repo, RA['end_tree'], BASE, 'selftest SIM #%s' % A)
+    try:
+        tr2, tx2, _ = predict(repo, hB, simA, RB)
+        s = flow_nums(tx2['flow']); k = cheat_keys(tx2['cheat'])
+        rep(s[-2:] == [RA['flow_num'], RB['flow_num']] and k[-2:] == [RA['cheat_key'], RB['cheat_key']],
+            'keep-both: #%s onto develop+#%s -> flow tail %s, cheat tail %s (%d then %d: NOT ascending, BY DESIGN)' % (B, A, s[-3:], k[-3:], RA['flow_num'], RB['flow_num']))
+    except Refused as x:
+        rep(False, 'keep-both: #%s onto develop+#%s REFUSED: %s' % (B, A, x))
+    dt = git_bytes(repo, simA, D['flow']).decode(); L = dt.split('\n'); fp = [ln for kk, ln in flow_num_pos(dt) if kk == RA['flow_num']][0]
+    wrong = '\n'.join(L[:fp] + blocks_of(repo, hB)['flow'] + L[fp:])
+    rep(not readback('flow', wrong, dt, RB['flow_num'])[0], 'PLANTED wrong-side insert (#%s BEFORE #%s\'s block): read-back FAILS' % (B, A))
+    # 5 duplicate number: #1428 onto a develop that already holds #1428's docs -> read-back fails (own twice)
+    docs_only = build_tree(repo, BASE, {p: ('100644', obj_at(repo, hA, p)) for p in DOCS.values()})
+    sim_d = commit_sim(repo, docs_only, BASE, 'selftest SIM: base + #%s docs only' % A)
+    try:
+        predict(repo, hA, sim_d, RA); rep(False, 'PLANTED double landing of #%s: should REFUSE' % A)
+    except Refused as x: rep('read-back FAILED' in str(x), 'PLANTED double landing of #%s: REFUSED (%s)' % (A, str(x)[:80]))
+    # 6 a develop that moved a row code path refuses (the docs-only merge-in no longer holds: RE-GATE)
+    blob = hash_blob(repo, b'planted\n')
+    t6 = build_tree(repo, BASE, {'Blockchain/Dev/services/originate/src/routes/documents.ts': ('100644', blob)})
+    sim6 = commit_sim(repo, t6, BASE, 'selftest SIM touching #1428 code')
+    try: predict(repo, hA, sim6, RA); rep(False, 'PLANTED develop touching #1428 code: should REFUSE')
+    except Refused as x: rep('moved a CODE path' in str(x), 'PLANTED develop touching #1428 documents.ts: REFUSED')
+    # 7 a develop that does not descend from the base refuses
+    parent = git(repo, 'rev-parse', BASE + '^1').strip()
+    try: predict(repo, hA, parent, RA); rep(False, 'PLANTED ancestor develop: should REFUSE')
+    except Refused as x: rep('does not descend' in str(x), 'PLANTED ancestor develop (%s): REFUSED' % parent[:12])
+    # 8 the guard fires on a planted prose-outside-a-table block (POSITIVE CONTROL of the guard itself)
+    bad = insert_before_close(git_bytes(repo, BASE, D['flow']).decode(), ['<h2>99. planted (KS-9999)</h2>', '<p>Planted prose outside any table.</p>'])
+    tb = build_tree(repo, BASE, {D['flow']: ('100644', hash_blob(repo, bad.encode()))})
+    rc, ratio, _ = run_guard(repo, tb, out, 'ctl_bad'); rc0, ratio0, _ = run_guard(repo, RA['end_tree'], out, 'ctl_good')
+    rep(rc != 0 and rc0 == 0 and ratio0 is not None and ratio0[1] == 0, 'guard POSITIVE CONTROL: planted prose block rc %d %s vs #%s END_TREE rc %d %s' % (rc, ratio, A, rc0, ratio0))
+    # 9 cheat reader widened: both rows write U+2014; the pinned &mdash;-only reader is BLIND to them
+    ct = git_bytes(repo, hA, D['cheat']).decode()
+    rep(RA['cheat_key'] in cheat_keys(ct) and RA['cheat_key'] not in cheat_keys_pinned(ct), 'cheat: widened reader reads %s (U+2014); the pinned &mdash;-only reader is BLIND to it' % RA['cheat_key'])
+    # 10 keyed(): a flow block whose h2 lacks its ticket is NOT keyed
+    rep(not keyed('flow', ['<h2>35. no key here</h2>'], RB) and keyed('flow', blocks_of(repo, hB)['flow'], RB), 'KEYED: an unkeyed h2 FAILS, the real #1427 block PASSES')
+    # 11 TAG BALANCE: a composed cheat with ONE `</table>` dropped from the second lander's block -> read-back REFUSES on balance, while the
+    #    repo's own guard PASSES it (it is blind to tag balance: STANDING_LINES :439, named, not fixed)
+    tx = tx2['cheat']; cut = tx.rfind('</table>'); broken = tx[:cut] + tx[cut + len('</table>'):]
+    rb = readback('cheat', broken, git_bytes(repo, simA, D['cheat']).decode(), RB['cheat_key'])
+    tu = build_tree(repo, simA, {D['cheat']: ('100644', hash_blob(repo, broken.encode()))})
+    rcu, ratu, _ = run_guard(repo, tu, out, 'dropped_table')
+    rep(not rb[0] and 'balance' in rb[1] and rcu == 0, 'TAG BALANCE: a composed cheat missing ONE `</table>` -> read-back REFUSES (%s) while the repo guard reads rc %d %s (BLIND)' % (
+        rb[1][rb[1].find('tag balance'):rb[1].find(', tail')], rcu, ratu))
+    # 12 attribute-aware: `<code class="x">` counts as an open; a literal `<code>` count would call it unbalanced
+    frag = '<p><code class="x">a</code> <code>b</code></p>'
+    rep(balance(frag) == () and frag.count('<code>') != frag.count('</code>'), 'balance() is attribute-aware: %r balanced, literal `<code>` count %d vs `</code>` %d (the naive instrument lies)' % (
+        frag, frag.count('<code>'), frag.count('</code>')))
+    print('SELFTEST %d/%d (scratch %s)' % (sum(res), len(res), out)); return 0 if all(res) else 1

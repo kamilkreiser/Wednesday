@@ -1,0 +1,70 @@
+Refs KS-1274 — https://linear.app/secuura/issue/KS-1274/job-04-a-trivy-that-exits-0-with-a-bare-still-reads-as-a-clean-image
+
+Raised from a Wednesday-held Spark pass, re-proved by Seat R 18th on develop `0a6177ea5482`.
+
+## What this changes
+
+A trivy that exits **0** and prints a bare `{}` was recorded as a **clean image**. KS 1136 already
+covered a non-zero exit and output `jq` could not read; it did not cover a well-formed *empty*
+object — the one shape where "no vulnerabilities" and "no scan happened" are indistinguishable from
+the artefact.
+
+`Blockchain/Testing/jobs/04-container-trivy.sh:115-120` now records `scan-failed` when trivy's
+stdout carries **neither** `Results` **nor** `ArtifactName`.
+
+**Both keys must be absent, and that is deliberate.** The ticket's own suggested fix — fail on a
+missing `Results` — over-fires: a genuinely clean image can report `ArtifactName` with no `Results`
+array, and failing it would turn every clean scan into an error. So the ticket's suggestion is *not*
+what landed. The suite pins the distinction with a control cell that is green in the patched state
+and in the reverted state alike.
+
+The three trivy suites stubbed a clean image as `{}`, which under the new guard is precisely the
+failure case. The stub moves to `{"Results":[]}` **in this same commit**, and `fail.txt` gains the
+`bare` and `nores` vocabulary so each shape can be produced deliberately.
+
+Both platform-k HTML docs are updated in this same commit per SKILL §4: flow block `35.`, cheat
+section keyed to this ticket.
+
+## Test Evidence
+
+**Touched**
+- `Blockchain/Testing/jobs/04-container-trivy.sh` (product; mode `100755` preserved — verified by
+  `ls-tree` on the commit, and `diff --raw` base→head reads `:100755 100755`)
+- `Blockchain/Dev/scripts/__tests__/container_trivy_failed_scan_is_loud.test.sh`
+- `Blockchain/Dev/scripts/__tests__/container_trivy_exit_code_env_keeps_findings.test.sh`
+- `Blockchain/Dev/scripts/__tests__/container_trivy_image_filter.test.sh`
+- `Projects Documents/API_Security_Functional_Testing_Architecture_Flow_Diagrams.html`
+- `Projects Documents/QA_Tool_Cheat_Sheet_Secuura_API_Testing.html`
+
+**Ran** (host: macOS arm64, node v24.7.0, npm 11.5.1, bash **3.2.57**, typescript 5.9.3)
+- `container_trivy_failed_scan_is_loud.test.sh` → **5 passed, 0 failed**
+- `container_trivy_exit_code_env_keeps_findings.test.sh` → **6 passed, 0 failed**
+- `container_trivy_image_filter.test.sh` → **5 passed, 0 failed**
+- **RED proof** — product reverted to the base blob with the suites kept patched:
+  **4 passed, 1 failed, rc 1**. The single failure is the new cell
+  `🔴 KS-1274 a trivy that exits 0 with a bare {} is recorded as scan-failed and the job exits 1`.
+  The `ArtifactName and no Results stays clean` control passed in **both** states, so the tamper is
+  specific rather than a blanket break. Product restored byte-identical
+  (sha256/16 `b0a19e77c940633c`).
+- S-1 installs: `npm ci --ignore-scripts` in `Blockchain/Dev` (1937 packages, rc 0);
+  `npm run build --workspace=packages/shared` rc 0 with `dist/index.js` asserted present
+  (17,746 B); `npm ci` in all four `systemTest/*` (akto 255, api-explorer 219, performance 145,
+  playwright 124 packages). **0 tracked files modified after S-1.**
+
+**NOT run**
+- **A live scan. This is the material gap.** This host has no docker daemon and no trivy binary, so
+  every cell runs against stubs on a private `PATH`. The real scanner's bare-`{}` behaviour is
+  **UNMEASURED here** — the guard is proved against the stub's reproduction of it, not against
+  trivy itself. **A live run is owed and this ticket does not move to Done.**
+- The four platform suites (Schemathesis, Akto, Playwright, Performance/k6) — no local stack, so
+  they were not run and no result is claimed for them.
+- `bash >= 4.1` behaviour: this host is **3.2.57**, so nothing here exercises a 4.x/5.x errexit path.
+- Runner versions read from `node_modules`: vitest 5.0.3 (akto, api-explorer, performance),
+  @playwright/test 1.63.0. **Engines gap, wider than previously recorded:** `akto`,
+  `performance` **and** `playwright` each declare `engines.node >= 24.11.0` while this host runs
+  **v24.7.0**, so all three installed below their declared floor and emitted `EBADENGINE`.
+  `api-explorer` declares no engines. Nothing in this PR depends on those four packages.
+
+**Migrations + config**
+- **None.** No migration, no dependency, lockfile, manifest, baseline or spec-version edit. No
+  `.env` touched. No per-slot literal introduced.

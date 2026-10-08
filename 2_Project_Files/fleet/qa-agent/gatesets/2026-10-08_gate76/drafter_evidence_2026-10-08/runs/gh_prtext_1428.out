@@ -1,0 +1,35 @@
+PASS T1 `Refs KS-n` set ['KS-593'] carries the own key KS-593 | kit default own keys ['KS-593'] | EXTRA Refs none (Q-KEYS75: mergera1 requires own_keys == this set)
+PASS T2 closing-family words on a key 0 [] | CONTROL planted `Fixes KS-1` 1
+INFO T3 hyphenated keys in title+body ['KS-593'] | foreign (attach, STANDING_LINES :278) [] | de-hyphenated ['KS 1015', 'KS 1293', 'KS 565']
+INFO T4 title 82 chars, ASCII True, `(#` False (the title is NOT the squash subject)
+PASS T5 body has a NOT RUN section True naming ['live run', 'PostgreSQL', 'Schemathesis'] of ['live run', 'PostgreSQL', 'Schemathesis']
+INFO T6 attribution lines in the body: `Generated with` 0, `Co-Authored-By` 0 (the SQUASH body carries 0 of each: Q-ATTR76; landed fleet squashes carry 0)
+INFO T7 26 sentences carry a number; dumped for the gate to read against its OWN measurement
+   T7| Refs KS-593 — https://linear.app/secuura/issue/KS-593/not-a-server-error-recurs-17-raw-5xx-across-8-ops-ks-431-ks-449-ks-497
+   T7| Raised from Wednesday-held Spark passes (run dirs `spark_secuura_2026-10-05_KS-593-adminconfig-negative-offset-r2`, `spark_secuura_2026-10-05_KS-593-share-null-recipient-cp2`, `spark_secuura_2026-10-06_KS-593-signatories
+   T7| Three passes in `Blockchain/Dev/services/originate`, one per route, each turning a malformed input that previously reached a raw `500 INTERNAL_ERROR` into the route's **existing** `400` refusal.
+   T7| | Pass | File | Input that used to 500 |
+   T7| | negative offset | `routes/adminConfig.ts` | `?offset=-1` on two admin list routes |
+   T7| **NARROWING — KS-593 stays OPEN and must not be moved to Done by this PR.** It covers 2 of the 6 negative-offset sites in KS 565 section 2 (the auth `users.ts` and tenant-provisioning sites are deliberately outside this 
+   T7| KS 1015 finding 1 describes the same class of unowned check and operation pairs; that ticket is untouched here.
+   T7| An array recipient (`typeof [] === 'object'`) still falls through to the email/userId check, which answers 400.
+   T7| **Touched:** `services/originate/src/routes/{adminConfig,documents,signatories}.ts`; `services/originate/src/__tests__/ks1293-originate-suite-is-hermetic.test.ts` (SUBJECTS entry only); 3 new `services/originate/src/__te
+   T7| 9 paths, +336/-4.
+   T7| **Ran** (by me, on this worktree, at base `0a6177ea5482`; jest 29.7.0, ts-jest 29.4.11, typescript 5.9.3, node v24.7.0, npm 11.5.1 — versions read from `node_modules`):
+   T7| | adminconfig | 2 failed, 3 passed (5), rc 1 | 5 passed (5), rc 0 |
+   T7| | share | 2 failed, 13 passed (15), rc 1 | 15 passed (15), rc 0 |
+   T7| | signatories | 3 failed, 3 passed (6), rc 1 | 6 passed (6), rc 0 |
+   T7| Whole `services/originate` suite through its own `npm test`: **93 suites / 1077 tests / 0 failed** at the base, **96 suites / 1093 tests / 0 failed** with all three passes.
+   T7| rc 0, zero `FAIL` lines, no new reds.
+   T7| The staged tree is `b8ff928e2b63`, equal to the stacked-tree value measured independently before the build.
+   T7| **Hermetic manifest.** The share pass adds its own new file to KS 1293's `SUBJECTS`; the other two new files are deliberately **not** listed.
+   T7| `MANIFEST-DRIFT` requires a `SUBJECT` only for a test file whose content mentions `ANCHORING_SERVICE_URL` — counted: share 1, adminconfig 0, signatories 0.
+   T7| Control: planting one such mention into the unlisted adminconfig file turns `MANIFEST-DRIFT` red (1 failed / 9 passed, `missing` non-empty); restoring it byte-identical returns 10 passed.
+   T7| - **No live run.** There is no local stack, so none of the three 500s was reproduced against a real PostgreSQL.
+   T7| The adminconfig 500 is KS-593's 2026-08-28 live measurement of the list route; `/check`'s 500 is reasoned from the identical `::uuid` cast.
+   T7| - The four platform suites (Schemathesis, Akto, Playwright, Performance/k6) — unmeasured, no stack.
+   T7| No migration, no env var, no spec change — the OpenAPI documents no 400 for these inputs, and adding one would be a separate change.
+   T7| Three of the four Spark passes behind this seat carry a HOLD REVIEW but **no READY artefact**; only `signatories-non-uuid-id` has one (`READY_KS-593-SIGNATORIES-NON-UUID-ID-1_…_2026-10-06`).
+   T7| Per the ruling on Q-HOLD18 these were raised from the REVIEW + `checker.out` + `patch.diff` instead, and that gap is recorded here rather than left implicit.
+CHECKED 3
+0 FAIL

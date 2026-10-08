@@ -1,0 +1,34 @@
+r"""c4_docs_gate76.py — the two platform docs for the TWO gate76 rows (#1427 KS-1274, #1428 KS-593), and the KEEP-BOTH DOCS MERGE-IN
+PREDICTION for either landing order. Carried from c4_docs_gate73.py (gate73's four-row stacked chain) and re-keyed by the gate76 drafter
+(drafter_evidence_2026-10-08/helpers/rekey_c4.py): rows, selftest arms, the calibration lineage (gate75's predicted squash tree, not
+gate71's MANIFEST), 2 orders not 24. NEW at gate76: balance() counts EVERY non-void tag, attribute-aware (`<code class=..>` is an open:
+gate75 / R 16th lesson 5), not only table/div.
+
+THE COMPOSER (gate71's pattern, carried): a row's doc change is ONE pure line-block insertion immediately before `</body>`; its docs merge-in
+onto a develop that already holds the other lander is that SAME block, byte-identical, inserted immediately before develop's `</body>` — i.e.
+AFTER the earlier lander's block (keep-both, earlier first). Both rows were written on the SAME base (develop 0a6177ea5482) in the SAME
+matrix format, so no re-composition is needed; `calibrate` proves the identity composer reproduces each row's own END_TREE byte for byte.
+
+MODES (every mode: --repo <YOUR clone>; every PR-specific value is an ARGUMENT, never a default)
+  docs      --pr R --head H        D1 BOUNDARY-FREE (head minus ONE byte span == base; CONTROL a 1-byte-altered span FALSE);
+                                   D2 the line block is LAST before `</body>` and head minus block == base line for line;
+                                   D3 flow == base + [own num], UNIQUE, own block KEYED `(KS-n)`; cheat == base + [own key]; split-h2 CONTROL;
+                                   D4 only the row's key hyphenated inside the block (CONTROL planted KS-9999 found);
+                                   D5 `<h2` openings == keyed h2s; per-tag balance of the WHOLE doc == base's and the block alone balanced
+                                   (every non-void tag, attribute-aware);  D6 INFO the cheat block's `<div class="section">` wrapper.
+  calibrate --heads 1427=H,1428=H  each row composed ALONE onto the base == its head doc blobs byte for byte AND its tree == END_TREE;
+                                   develop's tree == gate75's predicted squash tree (the lineage's last prediction landed).
+  chain     --order a[,b] --develop D --heads 1427=H,1428=H --out DIR [--no-guard]
+                                   step i: develop_i = D (i=0) or SIM_{i-1} (objects-only commit-tree in YOUR clone); predicted tree_i;
+                                   read-back (own once, LAST, develop_i's sequence the prefix, UNIQUE, tag balance == develop_i's); THE GUARD
+                                   ITSELF on tree_i (`bash systemTest/__tests__/html_docs_matrix.test.sh` materialised from tree_i — NOT
+                                   tag-balance evidence); git merge-tree as a CROSS-CHECK that is printed and NEVER PICKED; `git merge-file
+                                   --union` as an INDEPENDENT instrument (DIFFERS = the union hazard, never the target). INDEPENDENT FINAL
+                                   CHECK: the last tree's docs rebuilt in ONE pass and its code paths == each head's blobs. Writes DIR/chain.json,
+                                   the composed docs per step (the merge seat takes them VERBATIM) and DIR/MANIFEST.txt.
+  orders    --develop D --heads ... --out DIR       both orders: the tree at each step (no guard), to DIR/orders.json.
+  qm        --pr R --head H --merge-in-head M --develop-after D --predicted-tree T --out DIR
+                                   Q1 M's parents == [H, D] exactly (count AND order); Q2 tree(M) == T; Q3 read-back + UNIQUE; Q4 M's docs minus
+                                   the row's block == D's docs byte for byte; Q5 code blobs == H's; Q6 the guard on tree(M).
+  --selftest --heads 1427=H,1428=H                 planted arms that MUST fail (see selftest()).
+rc 0 PASS / 1 FAIL / 2 refused by name."""

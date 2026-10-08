@@ -1,0 +1,20 @@
+BOUND: /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/5c67a967-4985-4193-9494-a0a9360264b6/scratchpad/g76/wtA HEAD^{tree} == 9b6c3dfef865, porcelain clean (untracked included)
+PASS G-container_trivy_exit_code_env_keeps_findings at the head: rc 0, 6 passed / 0 failed
+PASS G-container_trivy_failed_scan_is_loud at the head: rc 0, 5 passed / 0 failed
+PASS G-container_trivy_image_filter at the head: rc 0, 5 passed / 0 failed
+TAMPER Blockchain/Testing/jobs/04-container-trivy.sh: saved 6530 B (== HEAD blob 77ad59c5ee7c), wrote the BASE blob 6dfc5731e56e, landed True
+PASS R1 job REVERTED to the base blob, suites kept patched: rc 1, 4 passed / 1 failed; failing cell(s) ['🔴 KS-1274 a trivy that exits 0 with a bare {} is recorded as scan-failed and the job exits 1']; CONTROL cell ['ok'] (want rc 1, 4/1, ONLY the KS-1274 RED cell, CONTROL ok)
+INFO R2-container_trivy_exit_code_env_keeps_findings under the revert: rc 0, 6 passed / 0 failed (REPORTED; the clean stub reads clean under either job)
+INFO R2-container_trivy_image_filter under the revert: rc 0, 5 passed / 0 failed (REPORTED; the clean stub reads clean under either job)
+RESTORE 1 path(s) from SAVED BYTES: hash-object == HEAD blob for all True | porcelain ''
+PASS A-T0 a clean report with an empty Results array (CONTROL) | head CLEAN (0, 'none') (want CLEAN) | base CLEAN (0, 'none')
+PASS A-T1 THE DEFECT: a bare {} exit 0 | head FAILED (1, 'scan-failed') (want FAILED) | base CLEAN (0, 'none') | THE FIX CHANGES THIS ARM
+PASS A-T2 trivy 0.71 clean shape: ArtifactName, no Results (CONTROL) | head CLEAN (0, 'none') (want CLEAN) | base CLEAN (0, 'none')
+PASS A-T3 JSON null exit 0 (has() on null errors -> scan-failed) | head FAILED (1, 'scan-failed') (want FAILED) | base CLEAN (0, 'none') | THE FIX CHANGES THIS ARM
+PASS A-T4 a JSON array exit 0 (has() on an array errors -> scan-failed) | head FAILED (1, 'scan-failed') (want FAILED) | base FAILED (1, 'scan-failed')
+PASS A-T5 Results present but null: has("Results") is TRUE -> reads CLEAN (a NAMED edge, not the ticket's shape) | head CLEAN (0, 'none') (want CLEAN-GAP) | base CLEAN (0, 'none')
+PASS A-T6 a non-JSON line exit 0 (KS-1136 path: jq cannot read it) | head FAILED (1, 'scan-failed') (want FAILED) | base FAILED (1, 'scan-failed')
+PASS A-T7 trivy exit 1 with no output (KS-1136 CONTROL) | head FAILED (1, 'scan-failed') (want FAILED) | base FAILED (1, 'scan-failed')
+PASS A-CTL NON-VACUITY: the harness reproduces the DEFECT at the base (bare {} reads CLEAN) and the fix at the head (FAILED)
+CHECKED 13
+0 FAIL

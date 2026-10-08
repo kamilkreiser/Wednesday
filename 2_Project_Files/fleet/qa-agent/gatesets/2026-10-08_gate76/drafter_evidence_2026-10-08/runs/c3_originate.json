@@ -1,0 +1,98 @@
+{
+ "green": {
+  "adminconfig": {
+   "rc": 0,
+   "tests": [
+    0,
+    5,
+    5
+   ]
+  },
+  "share": {
+   "rc": 0,
+   "tests": [
+    0,
+    5,
+    5
+   ]
+  },
+  "signatories": {
+   "rc": 0,
+   "tests": [
+    0,
+    6,
+    6
+   ]
+  },
+  "hermetic": {
+   "rc": 0,
+   "tests": [
+    0,
+    10,
+    10
+   ]
+  }
+ },
+ "red": {
+  "adminconfig": {
+   "rc": 1,
+   "tests": [
+    2,
+    3,
+    5
+   ],
+   "failed_names": [
+    "RED KS-593 AO1: GET /audit-logs?offset=-1 answers 400 BAD_REQUEST and runs no query",
+    "RED KS-593 AO2: GET /rights-holders?offset=-1 answers 400 BAD_REQUEST and runs no query"
+   ],
+   "files": [
+    "src/__tests__/ks593-adminconfig-list-refuses-negative-offset.test.ts"
+   ]
+  },
+  "share": {
+   "rc": 1,
+   "tests": [
+    2,
+    13,
+    15
+   ],
+   "failed_names": [
+    "RED KS-593 SN1: recipients [null] answers 400 VALIDATION_ERROR and writes no share",
+    "RED KS-593 SN2: a null after a valid recipient answers 400 and writes no share (validated up-front)"
+   ],
+   "files": [
+    "src/__tests__/ks593-share-refuses-non-object-recipient.test.ts",
+    "src/__tests__/ks1293-originate-suite-is-hermetic.test.ts"
+   ]
+  },
+  "signatories": {
+   "rc": 1,
+   "tests": [
+    3,
+    3,
+    6
+   ],
+   "failed_names": [
+    "RED KS-593 SG1: GET /api/signatories?organizationId=abc answers 400 and runs no query",
+    "RED KS-593 SG2: GET /api/signatories/check with a non-UUID organizationId answers 400 and runs no query",
+    "RED KS-593 SG3: GET /api/signatories/check with a non-UUID userId answers 400 and runs no query"
+   ],
+   "files": [
+    "src/__tests__/ks593-signatories-refuses-a-non-uuid-id.test.ts"
+   ]
+  }
+ },
+ "full": {
+  "rc": 0,
+  "tests": [
+   0,
+   1093,
+   1093
+  ],
+  "suites": [
+   0,
+   96,
+   96
+  ]
+ }
+}

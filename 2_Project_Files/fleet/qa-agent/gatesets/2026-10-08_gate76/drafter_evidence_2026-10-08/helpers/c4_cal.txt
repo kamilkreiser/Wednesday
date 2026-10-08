@@ -1,0 +1,7 @@
+    g75 = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '2026-10-08_gate75', 'kit.json')
+    try:
+        pt = json.load(open(g75))['predicted_squash']['tree']; bt = git(repo, 'rev-parse', BASE + '^{tree}').strip()
+        t.check('CAL-gate75', bt == pt, 'base %s tree %s == gate75\'s predicted_squash.tree %s: the lineage\'s last prediction LANDED byte for byte' % (
+            BASE[:12], bt[:12], pt[:12]))
+    except (OSError, KeyError, ValueError) as x:
+        t.info('CAL-gate75', 'gate75 kit.json unreadable here (%s): lineage check NOT RUN' % x)

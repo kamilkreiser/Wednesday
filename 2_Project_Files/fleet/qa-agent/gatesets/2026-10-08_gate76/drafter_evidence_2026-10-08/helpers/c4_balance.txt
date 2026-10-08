@@ -1,0 +1,15 @@
+TAG = re.compile(r'<(/?)([a-zA-Z][a-zA-Z0-9]*)(\s[^>]*)?>')
+VOID = {'br', 'hr', 'img', 'meta', 'link', 'input', 'wbr', 'col', 'source', 'area', 'base', 'param', 'track', 'embed'}
+
+
+def balance(text):
+    """() when every non-void tag opens as often as it closes, else a sorted tuple of (tag, opens, closes) for each tag that does not.
+    Attribute-aware (`<code class="x">` is an open; a literal `<code>` count lies: gate75 measured D2's base at 602 opens vs 759 closes).
+    The html_docs_matrix guard does NOT check tag balance (STANDING_LINES :439; gate73: a keep-both resolution that dropped one `</table>`
+    read 12 passed / 0 failed), so the kit checks it itself. A WHOLE doc may carry a pre-existing imbalance: compare it with develop's."""
+    c = collections.Counter()
+    for m in TAG.finditer(text):
+        n = m.group(2).lower()
+        if n in VOID: continue
+        c[(n, 'close' if m.group(1) else 'open')] += 1
+    return tuple(sorted((n, c[(n, 'open')], c[(n, 'close')]) for n in {k[0] for k in c} if c[(n, 'open')] != c[(n, 'close')]))
