@@ -2617,3 +2617,7 @@ INCLUDED until he says otherwise.
 > all sub agents are starting as opus 5.  if you use opus for sub agents (after the next model review phase this should be a deliberate choice) use the best version of opus.  for now, use Opus 5.5 for all sub agnets
 
 *Note:* Receipted; both live seats switched to Opus 5.5 by /model + addendum mails; Sonnet grant marked superseded
+## 2026-10-09 09:34 — Kam (terminal, verbatim)
+> Please look at any feedback tickets from the playbook or from the security composer and work on these projects as a priority. If there's any work that needs to be done or can be done, please continue this. Also, start some agents on the MPS commercial calculator and progress this tool to a point where I can start showcasing it early next week for feedback and refinement.
+
+*Note:* Friday: feedback census for HPSM-POC + Composer first; MPS restarted toward an early-next-week showcase

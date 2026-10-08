@@ -12,6 +12,17 @@ supersede: replace wholesale; previous = NEXT-PICKUP-FRIDAY.md.pre-0925-rotate-s
 
 **The tree is at `/Volumes/Laptop-DEV/FRIDAY` (the drive, since 2026-09-28).** Quote every path (spaces).
 
+## 🔴🔴🔴 CHECKPOINT 2026-10-09 09:45 (Friday, ctx 50%) — READ FIRST; supersedes every block below where they differ
+**Kam today (terminal ~09:3x, prompt-logged):** feedback tickets from the Playbook (HPSM-POC) and the Security Composer FIRST; continue doable work; start agents on the MPS Commercial Calculator to a showcase early next week. No panel rows today; reconcile 0 at the checkpoint.
+**LIVE SEATS (each verified at rung 5 by its pane showing the brief):**
+- %2 Datasec/Security-Composer-B **B103** lane 3b (#250 + #238, tier 1) — Friday's ruling in the brief: Seat B owns packages/**, apps/api/** + exactly 4 web files (schema.d.ts regen, types.test.ts:298, catalogue.ts one entry, catalogue.test.ts count). On READY FOR GATE: PR, tier-1 gate (authz matrix, contract byte-pin 0.30.0, down-recipe, RLS).
+- %3 Datasec/HPSM-POC-A **B187** sign-in warm-ups + Server-Timing (origin main 15178c5). Partition note appended: B188 (feedback module) is Seat B; HPSMPOC-226 N-8 waits for B187.
+- %4/%5/%6 Datasec/MPS-Calculator-B/A/C = **B09** API additions · **B08** web UI · **B10** demo harness (origin main a261cd8; audience = C-05 internal pricing team, hosting C-06a not built; Monday = local screen-share). Then gate B11, PRs through CodeQL.
+**DRAFTING (subagent, scratchpad/briefs):** HPSM-POC **B188 SEAT-B** (feedback: HPSMPOC-98 + 226 N-4..N-7) · Composer **B104 SEAT-C** (Kam's 7 Oct in-app "Home width 100%" + #75/#76(c) CSS) · **B102 SEAT-A amended** (lane 2 + Kam's 7 Oct in-app "no HPSM — check all screens" + the global rename to "Datasec Policy Designer / Policy Designer" in apps/web; C-61 + #256 records). Review at source, place, launch Composer-A, Composer-C, HPSM-POC-B.
+**FEEDBACK CENSUS:** `/private/tmp/…/scratchpad/feedback/feedback-census.md` (scratchpad: re-derivable). Composer: 5 untriaged in-app items 2026-10-06T22:43–22:52Z (verified by Friday from the raw JSON). Playbook: hp-feedback 5/5 Done; only HPSMPOC-242 (Paul's placeholder) open.
+**CARDS OWED (Kam's):** Composer dynamic version/edition lookup (needs a content release → engagements read-only) · Paul's showcase points for HPSMPOC-242 · rename scope beyond the app (User Guide follows; repo/domain unchanged by default). Posted: hpsmpoc-printer-route-1009 (open). NOT posted: mpscalc audience (gate showed C-05 already rules it).
+**Watchers (background, this seat's scratchpad seen files):** Composer `seen` (%2) · HPSM-POC `seen_hp` (%3) · MPS `seen_mps` (%4 %5 %6). Re-arm on the existing seen file after each fire; never --seed again.
+
 ## 🔴🔴🔴 WRAP 2026-10-08 12:23 (Friday; Kam: "Wrap up when its safe to do so") — READ FIRST; supersedes every block below where they differ
 **FLOOR EMPTY** (%0 friday + %1 monitor). Newest Kam row 12:18:42 (+ a terminal ask ~12:2x, done: HP walkthrough PDF + Word emailed, read back). Reconcile 0 to rule after 12:19.
 **Done today (this seat):** HP walkthrough doc final (Figure 3 = Engagements) in drawer + emailed · C-80 (M2 PO approval) merged (analysis main a00a481) · HPSMPOC-241/242 notes + cards delivered · Composer #239 fold merged (a32f9ce) + LIVE on demo (C-60) · Mac 1280 gap accepted by Kam.
