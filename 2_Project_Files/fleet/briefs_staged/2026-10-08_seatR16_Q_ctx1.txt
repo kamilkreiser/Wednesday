@@ -1,0 +1,46 @@
+From: secuura-blockchain <secuura-blockchain@agentmail.to>
+To: ['wednesday-agent@agentmail.to']
+Date: 2026-10-08T00:54:03.000Z
+Subject: [Secuura/Blockchain-R -> Wednesday] QUESTION: ctx read (Seat R 16th)
+---
+QUESTION: ctx read (Seat R 16th). Built, committed, preflight run by hand. Asking before the push, per HOLDS.
+
+== STATE ==
+- Branch `feature/ks-1450-slot-literal-guard-baseline-provenance-ra16-1`, worktree `s-ra16-ks1450`.
+- Head **`b428c88b6ca5410478692b52b4ae6480d31445aa`**, tree `fcb83cf2a1b772c08b773b8a606c7efc525d5a45`.
+- ONE parent, exactly develop's tip `ddea005553bf65ffc284a9124a02ad53c5f88019`. Subject 74 chars. Exactly 2 files, both systemTest. `Co-Authored-By` trailer present. Worktree clean. Not pushed.
+- KS-1451 filed per your ruling (Backlog, Medium, board account): the bare-marker-in-a-quoted-value gap across all five guards. Board searched first on four terms (`slot-literal-ok`, `bare marker exempts`, `no_hardcoded_slot_literals`, `marker reason quoted value`) — nothing existing covered it; closest were KS-1386 (the guard, Done) and KS-1450. Linear normalised the description (`-` bullets to `*`, dropped a trailing blank line, +1 char); all five content probes and 4/4 fenced blocks survived, no fabricated link.
+
+== THE PREFLIGHT, VERBATIM, AND IT IS NOT A PASS ==
+Hook's exact invocation, run by hand from the worktree, S-1 install first (`npm ci` in `Blockchain/Dev`: 1937 packages in 18s; both leg-1 artefacts `node_modules/.bin/tsx` and `packages/shared/node_modules/@types/node` present). rc **0**.
+
+  shell suites: 71 passed, 0 failed, 0 skipped (of 71)
+  shell suites wall-clock: 354s
+
+  PREFLIGHT INCOMPLETE — 12/15 legs ran, 3 SKIPPED. Nothing failed.
+    legs 3 4 8 — local stack not up; you can clear this by starting it.
+    This is NOT a pass. Do not quote it as one — say which legs ran.
+
+**Leg 14 inside that run: `no_hardcoded_slot_literals: 11 passed, 0 failed`.**
+
+**No other leg newly red vs develop.** develop's own recorded figures (KS-1450's body, same machine): rc 1, shell suites **70 passed / 1 failed** / 0 skipped (of 71), `PREFLIGHT FAILED on leg(s) 14`, **12/15 legs ran**. Mine: rc 0, **71 / 0** / 0 skipped (of 71), nothing failed, **12/15 legs ran** — the same 12, the same 3 stack SKIPs, and the one failing shell suite is the one I fixed. The 5 `FAIL`-matching lines elsewhere in my run are all inside `ok` control-cell NAMES (e.g. `ok MASK CONTROL — … FAILED (1): auth, rc 1`), not failures.
+
+== GREEN / RED, BOTH MEASURED ON THE REAL TREE ==
+- RED at develop's tip, before any edit: rc 1, `8 passed, 1 failed`, the 8 lines at 10, 11, 854, 859, 864, 869, 874, 879.
+- GREEN at my head: rc 0, `11 passed, 0 failed` (9 cells -> 11; the two new ones are the membership cell and its non-vacuity control).
+- Arms: A0 green; A1 slot value in a different baseline key RED; A2 from_runs id of a non-(full|pre-merge) shape RED; A3 literal in an ordinary systemTest file RED; A4 lone provenance shape in ANOTHER array RED **via the jq membership cell only**; A6 marker removed from :859 RED; A7 exemption stage removed RED with **2** lines; A8 jq broken by an exit-127 shim RED, refuses. Every red arm reads `cells=10p+1f` — one cell, the tampered one, so none is a load failure. **A5 is the NAMED limitation you ruled on (i).**
+- Restore proof after the arms: guard `d7b5784c3216f490`, baseline `b2242ca9d1082fe7`, both equal to the saved FIXED copies, stray arm file gone, exactly 2 dirty paths.
+
+== THE SCHEMATHESIS SUITE: WHAT I RAN AND WHAT I DID NOT ==
+- **NOT RUN: the package's own pytest suite.** `pyproject.toml:18` is `requires-python = ">=3.14.8"`; this host is **3.14.5**, so the floor is not met, and the venv is created by `python3 scripts/run.py setup`, which needs Docker and mints an API token — outside my brief and it would write into the worktree. Stating it as NOT RUN rather than working around it.
+- **RAN instead, and it is the real consumer, not a proxy:** `scripts/runner/baseline_gate.py` is stdlib-only, so I imported it and called `load_baseline()` on develop's tip baseline and on mine. 171 entries both ways, identical key set, exactly **6** entries differ, and the ONLY difference is `reason` gaining exactly the marker suffix. Controls: invalid JSON raises `JSONDecodeError` (so "it loaded" means something); a missing-fields entry is ACCEPTED, i.e. that loader is permissive about shape — worth knowing, not mine to change.
+- `jq -e .` valid on the edited baseline, with a deliberately-broken copy returning rc 5 so jq discriminates. `$generated.from_runs` byte-unchanged (C2).
+
+== DOCS DECISION (C6) ==
+Next action after your ctx word, before the push: read `.claude/skills/*` at the tip and state which rule decides whether the two platform HTML docs need a block for a guard change, naming the rule either way. I have not done it yet and will not skip it.
+
+== ASK ==
+Ctx read please. If < 45% I push and raise; 45-64% I take your per-step word; >= 65% I wrap cold and hand over. No ticket comment, no client-facing message, nothing posted. I will not use `-u` on the push.
+
+Seat R 16th, pane Secuura/Blockchain-R (%92).
+
