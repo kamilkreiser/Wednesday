@@ -7,7 +7,7 @@ status: live
 
 # Boot digest BY TIER — W whole, M rules-only, every project case a handle
 
-Generated 2026-10-09 09:26 from 226 lesson files (1,013,362 B). M 36 · MIXED 5 · P-Datasec/HPSM-POC 1 · W 184. 5 project CASE sections inside MIXED files are reduced to one line each: the heading and the path to read it at. W blocks are exactly what the default digest carries; M blocks drop the section index and keep the rules; a P file is a single handle. The CASES behind every rule live only in the lesson files — open one the moment its rule fires.
+Generated 2026-10-09 09:29 from 227 lesson files (1,015,454 B). M 36 · MIXED 5 · P-Datasec/HPSM-POC 1 · W 185. 5 project CASE sections inside MIXED files are reduced to one line each: the heading and the path to read it at. W blocks are exactly what the default digest carries; M blocks drop the section index and keep the rules; a P file is a single handle. The CASES behind every rule live only in the lesson files — open one the moment its rule fires.
 
 ## The T9 SSD is the master — Wednesday must be fully portable
 `2026-07-31_fully-portable-drive.md` · principle · 2026-07-31 · status: superseded — the "T9 is the master" half by [[2026-08-25_one-drive-devmaster-is-master]] (2026-08-25); the portability principle itself still lives · tier: W
@@ -7079,4 +7079,14 @@ sections (open the file for these): RULED 2026-10-05 ~11:1x — Kam (terminal, v
 4. Unchanged: the v1.3 signature classes, the QA gate before every merge, KS-535, Phase 0, one client per Spark task, and leg 14 (KS-1450) still refuses any push touching `Blockchain/Dev/`, so this grant does not by itself unblock the raise backlog.
 
 **Family:** [[2026-10-06_use-to-100pct-spark-all-tickets-one-or-two-deployers]] (the same shape, expired at the 10-07 /login) · [[2026-09-14_at-90pct-weekly-usage-no-new-agents-wednesday-plus-local-model]] · [[2026-09-06_a-scoped-override-carries-its-own-expiry]] · [[2026-08-03_go-slow-earn-autonomy]] (rule 5).
+
+
+## Until Monday, the work runs on the Spark, Ornith and SONNET seats — no new Opus seats, gates or drafters
+`2026-10-09_spark-ornith-sonnet-only-until-monday.md` · grant · 2026-10-09 · status: live · tier: W
+
+**His words, verbatim (terminal, after pasting Stuart's message):** *"other than any actions relating to this message, focus on Spark, Onrith and Sonnet agents until monday when I will sign you into your own account"*
+
+**How to apply:** every launch receipt names the model; the Sonnet trial table (WED-153, [[2026-10-08_sonnet-trials-and-a-shared-model-routing-definition]]) gets every seat as a data point, not just trial #1. Unchanged: the QA gate before every merge, the signature classes, the 90% stop, one client per local-model task.
+
+**Family:** [[2026-10-08_sonnet-trials-and-a-shared-model-routing-definition]] · [[2026-09-25_three-tier-routing-ornith-spark-cloud-always-on]] · [[2026-09-06_a-scoped-override-carries-its-own-expiry]] · [[2026-08-03_go-slow-earn-autonomy]] (rule 5).
 

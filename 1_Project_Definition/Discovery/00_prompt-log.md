@@ -2607,3 +2607,8 @@ INCLUDED until he says otherwise.
 > Ok, thank you for the analysis.  In that case I agree.  lets run the normal set up along with the spark and Ornith 1.5.   In addition to this, I have been thinking about the following - We currently launch every agent with Opus 5.5.  Can you experiment in launching some agents using the latest version of Sonet.   1)to compare how it performs against the Spark 2)determine where its limits lie.  that way we can use the local models for some tasks, sonnet for others and Opus for the rest.  Sonnet looks like it 8x of time wo the weekly limits would stretch much further.  As you do this work, I would like you to create a definition that can be used by you and shared with the Tuesday and Friday agents so they too can decide when to use Sonnet based on the complexity of the task ahead
 
 *Note:* receipted on the panel; grant filed learnings/2026-10-08_sonnet-trials-and-a-shared-model-routing-definition.md; trials after the ~09:00 Fri renewal
+
+## 2026-10-09 09:27 — Kam (terminal, verbatim)
+> Please look at a message from Stuart - [Stuart's message pasted: KS-1402, KS-1195, KS-1385/KS-1384, KS-695 ask 3, KS-723, housekeeping close KS-1387; KS-1172/1173/577/1175/1195 read In Review/In Progress although merged] . other than any actions relating to this message, focus on Spark, Onrith and Sonnet agents until monday when I will sign you into your own account
+
+*Note:* Receipted on the panel; Stuart list measured by a Sonnet drafter; Opus seats stop until Mon 12 Oct; grant file + EXPIRING-GRANTS row
