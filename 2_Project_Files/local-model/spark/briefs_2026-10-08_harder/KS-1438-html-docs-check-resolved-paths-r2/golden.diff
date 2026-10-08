@@ -1,0 +1,66 @@
+--- a/systemTest/__tests__/support/html_docs_check.mjs
++++ b/systemTest/__tests__/support/html_docs_check.mjs
+@@ -18,4 +18,5 @@
+ // =============================================================================
+-import { readFileSync } from 'node:fs';
+-
++import { readFileSync, realpathSync } from 'node:fs';
++import { fileURLToPath } from 'node:url';
++
+ const VOID = new Set(['br', 'img', 'hr', 'meta', 'link', 'input', 'wbr', 'col', 'source', 'area', 'base']);
+@@ -117,6 +118,9 @@
+     return out;
+ }
+-
+-if (import.meta.url === `file://${process.argv[1]}`) {
++
++// KS-1438: compare RESOLVED paths on both sides. import.meta.url is the module's real path as a file URL, so a
++// percent-encoded one; process.argv[1] is the path as typed. A symlinked spelling, or a directory whose name has a
++// space, never matched, and the checker exited 0 having checked nothing.
++if (process.argv[1] && fileURLToPath(import.meta.url) === realpathSync(process.argv[1])) {
+     let bad = 0;
+     for (const file of process.argv.slice(2)) {
+--- a/systemTest/__tests__/html_docs_matrix.test.sh
++++ b/systemTest/__tests__/html_docs_matrix.test.sh
+@@ -19,3 +19,7 @@
+ # Positive controls plant each defect in a scratch page and require a finding, so a checker
+ # that stopped looking cannot pass.
++#
++# KS-1438: the checker must also report when it is reached through another SPELLING of its own path.
++# Section 4 runs it through a symlink and from a directory whose name has a space, the two spellings its
++# old main-module guard failed to match: it exited 0 having checked nothing, so a broken page read as clean.
+ # =============================================================================
+@@ -95,5 +99,32 @@
+     bad "control: a correct page was flagged: $out"
+ fi
+-
++
++# 4. KS-1438: the checker reports through ANY spelling of its own path. The scratch dir is resolved
++# physically first, so the symlink cell and the space cell each exercise ONE spelling difference.
++printf '<html><body><div class="mermaid">graph TD\n A[Start --> B[End]</div></body></html>\n' >"$SCRATCH/broken.html"
++REAL_SCRATCH="$(cd -P "$SCRATCH" && pwd)"
++ln -s "$CHECK" "$REAL_SCRATCH/linked_check.mjs"
++mkdir -p "$REAL_SCRATCH/dir with space"
++cp "$CHECK" "$REAL_SCRATCH/dir with space/html_docs_check.mjs"
++# expect_reported <label> <checker path>: the broken page must exit 1 AND name the unbalanced bracket.
++expect_reported() {
++    local label="$1" checker="$2" out rc
++    out="$(node "$checker" "$SCRATCH/broken.html" 2>&1)"
++    rc=$?
++    if [[ $rc -eq 1 ]] && grep -q -- 'unbalanced \[\]' <<<"$out"; then
++        ok "KS-1438: $label reports the broken page"
++    else
++        bad "KS-1438: $label did NOT report the broken page (rc=$rc, got: ${out:-nothing})"
++    fi
++}
++expect_reported "the checker at its real path (control)" "$CHECK"
++expect_reported "the checker through a symlinked spelling" "$REAL_SCRATCH/linked_check.mjs"
++expect_reported "a copy of the checker in a directory whose name has a space" "$REAL_SCRATCH/dir with space/html_docs_check.mjs"
++if out="$(node "$REAL_SCRATCH/linked_check.mjs" "$SCRATCH/clean.html" 2>&1)" && [[ -z $out ]]; then
++    ok "control: KS-1438: a correct page through the symlinked spelling still reports nothing"
++else
++    bad "control: KS-1438: a correct page through the symlinked spelling was flagged: $out"
++fi
++
+ echo "  $pass passed, $fail failed"
+ [[ $fail -eq 0 ]]
