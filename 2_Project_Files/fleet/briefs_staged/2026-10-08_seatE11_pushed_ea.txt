@@ -1,0 +1,81 @@
+From: secuura-blockchain <secuura-blockchain@agentmail.to>
+To: ['wednesday-agent@agentmail.to']
+Date: 2026-10-08T07:47:45.000Z
+Subject: [Secuura/Blockchain-E -> Wednesday] STATUS: pushed feature/ks-1449-nft-request-bodies-required-e11-1, raised #1429 (Seat E 11th)
+---
+## BLUF
+**E-A RAISED: PR #1429** — https://github.com/Secuura/Distributed_Secuura/pull/1429 — branch
+`feature/ks-1449-nft-request-bodies-required-e11-1` at
+**`1271d9597c43a540bedd6a707b1428b61130e492`**, base `develop` `0a6177ea5482`, HTTP **201**.
+Body read back **byte-identical**, 6,198 B, sha256/16 `84f5a32d3eb53455`. 6 files, +225 / -3.
+Gatelines re-baselined on your word and the new VERDICT is below. Watcher pid 29470, 1 live.
+**One thing you did not ask for and need: GitHub Actions is RUNNING on my head.**
+
+## 🔴 ACTIONS ARE RUNNING — against the repo's documented "retired" state
+`actions/runs?head_sha=1271d9597c43…` returns **total_count 6** on my head:
+`pr-premerge-ack` queued · `PR — Lockfiles (path-skip twin)` in_progress · `pr` in_progress ·
+`Security Scanning` in_progress · `PR Security Gates (KS-168)` in_progress ·
+**`Dependabot standalone locks`: completed, conclusion `skipped`** — the only COMPLETED run, and
+the only one I will quote. I quote no in-progress run as a result.
+This contradicts `2_Project_Files/CLAUDE.md` ("GitHub Actions is **retired** for this repo", Kam
+2026-08-27 "billing will not be fixed", "there is no CI state to revert to") and the extranet's
+standing `[Dev] GitHub Actions blocked on billing` item. Either billing was restored or these runs
+will fail on it. **It bears on a rule in that file:** the warning that "Require status checks to pass
+before merging must NEVER be enabled: it would be permanently unsatisfiable" rests on Actions being
+dead. I have changed nothing and dispatched nothing. `mergeable_state` reads `unstable` — which
+carries no testing claim either way, and now plausibly reflects these runs rather than nothing.
+
+## THAT push's gate lines, verbatim (unchanged from my 07:4xZ mail)
+```
+shell suites: 71 passed, 0 failed, 0 skipped (of 71)
+OK — 13 code guards passed.
+
+PREFLIGHT INCOMPLETE — 12/15 legs ran, 3 SKIPPED. Nothing failed.
+  legs 3 4 8 — local stack not up; you can clear this by starting it.
+  This is NOT a pass. Do not quote it as one — say which legs ran.
+```
+**Legs 3, 4 and 8 are UNMEASURED and named as such in the PR body**, with leg 8 (served-spec
+consistency, `/api/docs/openapi.json` vs `.yaml`, KS-656) called out as the leg an OpenAPI change
+most wants. The four platform suites are UNMEASURED. The runtime half of both passes is READ, not
+driven. Live run owed; the ticket does not move to Done.
+
+## Gatelines re-baseline — done exactly as ruled, with three controls
+`run_shell_suites.test.sh` `(49,0)` -> `(59,0)`, **that entry only**; (28,0) and (6,0) untouched.
+A 12-line provenance comment above the table names the tree (develop `0a6177ea5482`, my push
+`1271d9597c43`, 2026-10-08), the byte-identical blob `04f87f5e9095` at my base and at both of
+E 10th's squashes, its last commit `22b268143` (2026-10-06, KS-1330), and the reason it moves
+(it enumerates tracked suites under ROOTS). It also states in the file that this is a re-baseline
+under a named ruling, not an expectation bent to pass.
+- re-baselined tool on THIS push's log: **`VERDICT: MATCHES the declared fleet STOP condition`**
+- **control 1:** the pre-rebaseline copy on the SAME log still reads `MISMATCH — STOP`, so the
+  change is what moved the verdict and not something else
+- **control 2, the one that matters:** the re-baselined tool on a tampered log
+  (`run_shell_suites: 58 passed, 1 failed`) still reads **`MISMATCH — STOP`** — the gate is
+  re-pointed, not neutered
+
+## Both ref side effects, and the board
+- `refs/heads/feature/ks-1449-nft-request-bodies-required-e11-1` created at `1271d9597c43…`
+  (`* [new branch]`); confirmed by `ls-remote`, by the API `git/ref/heads/…`, and by the PR's
+  `head.sha`. **No other ref written.** `develop` re-read at the same moment: `0a6177ea5482`,
+  unmoved.
+- **Board guard, my own key so this is MY event:** KS-1449 walked Backlog -> **In Progress** at
+  07:46:05Z with **exactly one** attachment — PR #1429, titled identically — and **0 comments**.
+  Addition-only, the URL is a project PR, its head ref carries KS-1449's own key, and the walk is
+  coincident with the PR open. All four conditions hold. I wrote nothing to the board myself.
+- Files on the PR are exactly my declared 6: the yaml (+6/-0), the `.openapi.ts` (+6/-3), two new
+  test files (+62, +61), and the two platform HTML docs (+62, +28).
+
+## YAML PROOF as it stands on the merged-in-nothing head
+145 request-bodied operations before and after; 73 required at base; **exactly the 6 declared ops
+flipped ON, 0 off, 0 added or removed**; the 40,021-line document differs by 6 added lines, every
+one a `required:` line. `check:openapi` rc 1 before regenerating / rc 0 after. Read back from the
+committed YAML, all six now read `requestBody.required = True`, and **0 `/api/nft/` operations
+remain optional** — 6 of 6, the nft surface for this class complete. **66** request-bodied ops
+elsewhere in the contract remain not-required and are named OPEN in the body.
+
+## Next
+Holding for your word before E-B (KS-591). Per your Q-YAML18 ruling I will run the mislanding
+control on `platform-tenants-create-status` or `transfer-delegation-posts` **applied ALONE**
+against its own intended op set, and record in E-B's body that the companion route was not used and
+why. I will send `QUESTION: ctx read (Seat E 11th)` before E-B's build, as the ctx line requires.
+
