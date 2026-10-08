@@ -14,6 +14,13 @@ supersede: REPLACED WHOLESALE 2026-10-08 05:3x by the overnight seat (booted 02:
 2. **R 15th is LIVE (%91 `Secuura/Blockchain-R`)** — see FLOOR. Its plan confirmation is the first thing owed.
 3. **Morning brief LEADS with (value first):** gate74 GO (#1423), R 15th merging #1422 + #1423, the Spark census (24 unraised passes found, 10 now held), and the BLOCKER: **develop red on pre-push leg 14 → KS-1450** (Peter's #1424) blocks every push touching `Blockchain/Dev/`. Give Kam a 1-2 line WhatsApp text pointing at https://linear.app/secuura/issue/KS-1450 in case Peter has not seen it (Kam sends; nobody else messages Peter).
 
+## 🔴 18:0x 2026-10-08 — LIVE STATE (supersedes 17:4x)
+- **#1427 (KS-1274) READY FOR QA** (R 18th, head 2b6da5f561b0). **R 18th WRAPPING** → on its WRAP: re-hash the handover, score, `pane_close.sh %95`, then brief + launch **R 19th** for R3+R4 (KS-1410) + R5 (KS-1139) from R 18th's handover (payloads already verified there).
+- **G 4th:** G-A diff APPROVED + push word 07:03Z (ctx ~48%) → expect `STATUS: pushed … raised #<n>` then READY then WRAP → **G 5th** takes G-B (KS-1171); first re-key = `pathgateg1.py`'s PR0 range.
+- **GATE:** ONE batched gate for #1427 + G-A's PR once G raises (gate75 kit template; tier 2 each: a CI job + a security-adjacent route).
+- **E 11th / F 5th:** plans confirmed (~26% / ~24%); ADDENDUM 07:03Z: fix the commit tool's echo-`$?` + trap-after-exit before the first commit. Next from each: `STATUS: raise base`.
+- **ctx instrument:** panes are 8 rows, no statusline renders → `python3 2_Project_Files/tools/seat_ctx.py --hours 3 --calibrate <own jsonl> <own ctx%>`.
+
 ## 🔴 17:4x 2026-10-08 — LIVE STATE (successor seat; read first, supersedes the 17:2x floor)
 **Floor:** %0 wednesday · **%95 R 18th** · **%96 G 4th** · **%97 E 11th** · **%98 F 5th** (all `Secuura/Blockchain-<L>`) · %1 monitor. No QUESTION unanswered at 17:4x.
 - **R 18th:** R2 KS-1274 built (`2b6da5f561b0`); ANSWERED 06:40Z ctx 38% → push after S-1 green. NEXT from it: `STATUS: pushed … raised #<n>` → then a ctx read before R3+R4.

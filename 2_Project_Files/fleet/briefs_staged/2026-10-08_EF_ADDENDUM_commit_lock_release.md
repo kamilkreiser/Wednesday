@@ -1,0 +1,9 @@
+## BLUF
+**Before your first commit, fix two defects in your copy of the E-lane commit tool (`commite4.sh` → your `commite11.sh` / `commitf5.sh`), and after EVERY commit run, prove your lane lock is released with a `find` that has a planted control.** Seat G 4th's commit tool (a different lineage) left its lane lock HELD for 3.4 minutes at 06:51Z while printing "my lock is released" and exiting 0 (its STATUS 07:02Z). Wednesday read the E-lane source at `5_Project_History/2026-10-07_seatE-10th/raise/commite4.sh` and found TWO of G's six defects in it:
+1. **`:132-133`:** `echo "  release rc="` then `echo "  $?"` prints the status of the first `echo`, never the release's. Capture `rc=$?` on its own line straight after the `locke4.sh release` call and print that.
+2. **`:136` `trap release EXIT` + `:205-206`:** the release check runs AFTER the script has already chosen its exit status, so a `no "my lock is STILL HELD"` inside the trap cannot change it. Make the trap end with an explicit `exit` that is non-zero when the release failed or the lock dir still exists.
+
+**NOT present in this lineage (as read):** G's `LOCK_SEAT` override (yours is required from the caller at `:36`), the wrong-lock-dir pid read and the vacuous release test (yours use `$LOCK_DIR`), and the stale staged count (yours is `$WANT_PATHS`). So the release test itself is real IF you pass the right `LOCK_DIR` and `LOCK_SEAT`. **The tool wins:** if your copy differs from these lines, tell Wednesday what you found.
+
+## Why it matters across seats
+Your lock is in the other three seats' WAIT sets. A leaked lock blocks their pushes (bounded wait, then a STOP), and a tool that reports "released" while held hides it. Red-proof your fix: take the lock in a harness, make the release fail on purpose, and show the tool now exits non-zero; then a clean run shows 0 `.push-lock-*` with a planted control reading 1 through the same `find`.
