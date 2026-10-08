@@ -14,6 +14,11 @@ supersede: REPLACED WHOLESALE 2026-10-08 05:3x by the overnight seat (booted 02:
 2. **R 15th is LIVE (%91 `Secuura/Blockchain-R`)** — see FLOOR. Its plan confirmation is the first thing owed.
 3. **Morning brief LEADS with (value first):** gate74 GO (#1423), R 15th merging #1422 + #1423, the Spark census (24 unraised passes found, 10 now held), and the BLOCKER: **develop red on pre-push leg 14 → KS-1450** (Peter's #1424) blocks every push touching `Blockchain/Dev/`. Give Kam a 1-2 line WhatsApp text pointing at https://linear.app/secuura/issue/KS-1450 in case Peter has not seen it (Kam sends; nobody else messages Peter).
 
+## 🔴 12:3x 2026-10-08 — MIDDAY SEAT STATE (read first)
+- **R 16th WRAPPED + scored 0.96, pane closed.** No agent live. #1426 head dd31aa0c998c / develop ddea005553bf (Wednesday's `git -C <Secuura checkout> ls-remote origin`, 12:2x).
+- **gate75 kit drafter RUNNING** (background sub-agent) → `fleet/qa-agent/gatesets/2026-10-08_gate75/` + `fleet/briefs_staged/2026-10-08_seatR17_merge1426_DRAFT.md`. A rotation kills it: re-commission from the 12:27 note line. NEXT: read KIT_REPORT whole → rule its questions in `RULINGS_wednesday.md` → dry run → launch with `WED_USAGE_STOP=100` (Kam 09:17 grant, gate class) → verdict → R 17th merge → KS-1450 comment → raise backlog.
+- Usage 95%: Spark re-screen (a drafter) waits for the renewal; everything held is blocked behind #1426 anyway.
+
 ## 🔴 12:0x 2026-10-08 — ROTATION HANDOVER (morning seat, ctx ~79%) — READ THIS FIRST
 - **#1426 = the KS-1450 fix, READY FOR QA** (R 16th, `fleet/briefs_staged/2026-10-08_seatR16_READY.txt`, 99 lines): https://github.com/Secuura/Distributed_Secuura/pull/1426 · head **dd31aa0c998ca43291c975dccb906a42e55c73c2** (Wednesday's `ls-remote` 12:0x) on develop ddea005553bf. Guard 8/1 at develop → 11/0 at head; arms A1-A4 RED (A4 caught only by the jq membership cell), A5 = the ruled named limitation; full preflight 71/0, 12/15 legs (3 stack legs SKIPPED), in-hook on the push too. Both docs carry one parity clause (D1 :1268, D2 :2169). KS-1451 filed (five-guard bare-marker gap). The DRAFT KS-1450 comment is in its READY mail, NOT posted.
 - **FIRST ACTS for the successor:**
