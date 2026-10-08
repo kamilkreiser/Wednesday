@@ -146,3 +146,4 @@ sees the claim rather than discovering it in a conflict.
 | 2026-10-08 09:04 | Kamils-Mac-mini | receipt guard v2: send_brief sent-log + note_entry refuses an unlogged quoted 'sent: [' line (Tuesday ledger w=6, parallel-call costume) | CLOSED |  2026-10-08 09:06 built, arms 7/7, pushed; Wednesday told by mail 22:06Z |
 | 2026-10-08 12:26 | Kamils-Mac-Studio | gate75 kit for #1426 (KS-1450 fix, tier 2) + R 17th merge brief draft — 12:3x rotation seat | CLOSED |  2026-10-08 16:08 done |
 | 2026-10-08 16:08 | Kamils-Mac-Studio | Secuura raise round after KS-1450 (R 18th + parallel lanes), 14:3x seat | OPEN | |
+| 2026-10-08 16:13 | Kamils-Mac-Studio | oMLX + Flash Next local-model study for Kam (video GEO8nnkC5uY), tonight's test plan | OPEN | |
