@@ -74,3 +74,100 @@ status: live
 - github.com/jundot/omlx (releases; PR #3865; issue #3574)
 - github.com/antirez/ds4 (docs/MODELS.md, SSD_STREAMING.md, PERFORMANCE.md)
 - evanwtf/local-llm issue #321
+
+---
+
+# Part 2 — Ornith identified, every route ranked (agent's text, saved by Wednesday 17:2x)
+
+## Recommendation (agent)
+**Ornith‑1.5‑35B‑A3B at 8‑bit (~37 GB) for the Mac.**
+- It is the newer version of the same family we run.
+- It fits the measured 60–65 GB budget with the fleet up.
+- It has the fastest published speeds on an identical Mac.
+- The publisher reports it is well above 1.0.
+
+**First test:** an A/B on the night queue against Qwen3.8‑27B 8‑bit (~30 GB), one at a time. They can't both be resident.
+
+**Flash Next:** fleet-quiet windows only; never the daily driver.
+
+## Ornith identified (manifests + GGUF headers)
+- `ornith:35b` (Q4_K_M, 21.17 GB) and `ornith:35b-q8_0` (36.90 GB) = **Ornith‑1.0‑35B**, deepreinforce‑ai, MIT.
+  - 256 experts, 8 active (~3B active).
+  - 262,144 context; `qwen35moe` architecture (Qwen3.5‑35B‑A3B base).
+- The Ollama library holds only 1.0. **Ornith 1.5 is on Hugging Face:** 9B; **35B‑A3B** (GGUF Q4 21.7 / Q8 37.8 GB; MLX 4‑bit 19.5 / 8‑bit 36.8 GB); 397B (~17B active; Q4 244 GB). The 397B fits on nothing we have, the Mac and Spark together included (217 GB).
+
+**Publisher scores, 1.0‑35B → 1.5‑35B‑A3B → 1.5‑397B:**
+
+| Benchmark | 1.0‑35B | 1.5‑35B‑A3B | 1.5‑397B |
+|---|---|---|---|
+| SWE‑V | 75.6 | **79** | 86 |
+| SWE‑Pro | 50.4 | **59.6** | 65.1 |
+| TB2.1 | 64.2 | **67.8** | 86.1 |
+| DeepSWE | 0 | **22** | 56 |
+| NL2Repo | 34.6 | **46.2** | 59.5 |
+
+The 1.5 scores use OpenHands for SWE and Claude Code for DeepSWE, averaged over 5 runs.
+
+## Our own records (counted)
+**Ornith 1.0** (`night/done.md`):
+- 470 graded runs: 337 PASS / 133 FAIL (71.7%).
+- **From 09‑17 on: 255 PASS / 42 FAIL (85.9%).**
+- 148 of 164 queue items passed at least once.
+- Median turn: 12,945 tokens in, 989 out, 26 s wall (~43 output tok/s, Ollama).
+
+**Spark, DeepSeek V4 Flash** (`spark/done.md`):
+- 46 rows: 42 PASS, 3 FAIL, 1 REFUSED (10‑05 to 10‑07).
+- A different, later task set, so not a head‑to‑head with Ornith.
+
+## Ranked for this Mac (fits = within 60–65 GB with the fleet up)
+Speeds are oMLX community rows on an M3U/60c/96GB, prefill / decode tok/s.
+
+1. **Ornith‑1.5‑35B‑A3B**, MIT, 8‑bit 36.8 GB.
+   - Speed: 8‑bit at 16K 1,933 / 158.2 [4iguebdl]; 4‑bit at 32K 1,753 / 126.5 [8ue0u0sx].
+   - Est. ~26 s for a 25K‑in, 1.5K‑out turn.
+   - SWE‑V 79, SWE‑Pro 59.6, TB2.1 67.8, DeepSWE 22.
+2. **Qwen3.8‑27B**, Apache, oQ8e 30 GB.
+   - Speed at 32K: 291–391 / 63–66.
+   - Est. ~90–110 s per turn.
+   - SWE‑Pro 61.7, TB2.1 73.0, DeepSWE 42.2. Better scores, but prefill is 4–6× slower.
+3. Flash Next. Does NOT fit with the fleet (measured); quiet windows only.
+4. Qwen3‑Coder‑Next (on disk). Speed 1,342 / 65.3. SWE‑V 70.6, SWE‑Pro 44.3.
+5. gpt‑oss‑120b (on disk). 63.4 GB, borderline.
+6. Not on the live budget:
+   - Qwen3.5‑122B (72.9 GB).
+   - GLM‑5.3‑Flash and DeepSeek‑V4.1‑Flash (streaming only, unmeasured at 96 GB).
+
+## Routes
+- **Mac:** Ornith 1.5 > Qwen3.8‑27B > Flash Next (quiet only) > Coder‑Next > gpt‑oss.
+- **Spark:** unchanged, the medium tier (stronger by vendor scores than anything on the Mac's live budget; 93% PASS on ours).
+- **Both:** no route pools memory for one model. The practical form is a checker‑gated cascade: Mac Ornith 1.5 → Spark → cloud. This is the agent's design inference, unmeasured.
+- **Cloud (Opus 5.5):** the top tier. Its figures are second‑hand; there is no cloud baseline on our harness.
+
+## Gaps
+- No speed here was measured on our machine.
+- Vendor harnesses differ, by up to 8 points for the same model.
+- Ornith 1.5 has never run on our harness, and its chat template/parser under Ollama is unknown. oMLX runs the MLX build directly.
+- No 4‑bit vs 8‑bit coding‑quality data.
+
+## Next step
+Download `ornith-ai/Ornith-1.5-35B-A3B-MLX-8bit` (36.8 GB). Re‑run the 20 most recent night‑queue items Ornith 1.0 already graded, then A/B it against Qwen3.8‑27B on the same items.
+
+**Licence (Flash Next):** internal use is free. A separate licence is needed only to sell inference or an AI coding/office product.
+
+## Sources (agent)
+**Model cards:**
+- deepreinforce-ai/Ornith-1.0-35B
+- ornith-ai/Ornith-1.5-35B-A3B (‑GGUF, ‑MLX-8bit, ‑MLX-4bit) and Ornith-1.5-397B
+- ollama.com/library/ornith/tags
+- Qwen/Qwen3.8-27B (Jundot oQ4e/oQ8e)
+- Qwen3.8-Flash-Next (+ LICENSE)
+- Qwen3-Coder-Next
+- gpt-oss-120b
+- GLM-5.3-Flash
+- DeepSeek-V4.1-Flash and V4-Flash-0731
+
+**oMLX:** rows 4iguebdl, 1h5tnslo, 8ue0u0sx, e8xc8oci, bopebjcc, 4vwvolmh, 5qfskq4q, rjljbjnf, si6ti9o5, m5lpwu1b, 8gd5zkr2, myr8non8, r8zj8266, 4odzn4sz, tdw6tx8i; PR #3865; issue #3574.
+
+**ds4:** docs MODELS/SSD_STREAMING/PERFORMANCE; evanwtf/local-llm #321.
+
+**Cloud (second‑hand):** llm-stats.com and benchlm.ai Opus 5.5 pages.

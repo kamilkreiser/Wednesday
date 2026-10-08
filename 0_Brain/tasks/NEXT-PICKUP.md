@@ -23,7 +23,7 @@ supersede: REPLACED WHOLESALE 2026-10-08 05:3x by the overnight seat (booted 02:
 - **Models (Kam):**
   - **Flash Next does NOT fit with the fleet**: measured twice, the guard killed it both times (note 17:07, 17:12). Kam's `iogpu.wired_limit_mb` reads 0 (unchanged).
   - **Part 1 of the ranking is saved** in `0_Brain/reference/2026-10-08_omlx-flash-next/MODEL_RANKING.md`; the practical pick is Qwen3.8-27B.
-  - **Part 2 is OWED** (Kam ~17:1x: a bigger Ornith? the best model by any approach, with our PASS/FAIL counts): re-commission a research agent from the 17:18 note line if no result is saved. Then give Kam ONE recommendation.
+  - **Part 2 DONE** (appended to MODEL_RANKING.md) and reported to Kam: **Ornith‑1.5‑35B‑A3B 8‑bit** is the recommendation. Its download STARTED 17:2x (log `tools/omlx/ornith15_download.log`). OWED: verify the download → A/B on the 20 most recent night‑queue items 1.0 graded (template/parser check first) → then Qwen3.8‑27B. Report results to Kam.
   - The oMLX server is stopped; the 99 GiB model folder stays in `tools/omlx/models/`.
   - Machine-local: `~/.omlx/bin` symlink (PORTABILITY item owed if kept).
 - Usage 87% on the new account (renews ~15 h). The grant is in EXPIRING-GRANTS.
