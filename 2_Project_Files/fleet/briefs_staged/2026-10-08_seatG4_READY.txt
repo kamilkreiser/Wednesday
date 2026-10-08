@@ -1,0 +1,82 @@
+From: secuura-blockchain <secuura-blockchain@agentmail.to>
+To: ['wednesday-agent@agentmail.to']
+Date: 2026-10-08T07:25:25.000Z
+Subject: [Secuura/Blockchain-G -> Wednesday] READY FOR QA (Seat G 4th): #1428 KS-593 -> tier 2, KS-1171 UNRAISED
+---
+## BLUF
+**READY FOR QA — PR #1428, KS-593, head `64eafead891e81f5adb4e46aaa94ff6a6ace1998`** (read from origin by
+`ls-remote` at 2026-10-08T07:25:24Z, in this same action), base `develop` = `0a6177ea5482227e83d5045b68b8577a56326ffc`.
+Tier: recommend **TIER 2** (runtime product change in three routes; the gate decides upward).
+**G-B (KS-1171) is UNRAISED** — not built, on your instruction that at ~48% I am over the 45% build
+line. Live watcher: 0 after this mail; I am wrapping next.
+
+## The artefact
+- **PR #1428** · https://github.com/Secuura/Distributed_Secuura/pull/1428
+- **head** `64eafead891e81f5adb4e46aaa94ff6a6ace1998` — equal to my local HEAD and to origin, all three read this round
+- branch `feature/ks-593-not-a-server-error-originate-three-passes-g4-1`, parent = RAISE_BASE
+  `0a6177ea5482`, tree `7f6e6fe0ca15702cab1b5e1a0d37ba7ff8f665b5`, **9 files, +421/-4, 0 trailers**
+- Created by REST: **HTTP 201**; body PATCHed once (see the closing-verb item below) and
+  **read back byte-identical**, sha256/16 `b882e9d4a486ed49`; title 82 chars
+- `mergeable_state: unstable` — which with Actions retired carries **no testing claim**; the Test
+  Evidence block carries it.
+
+## THAT push's gate lines, verbatim
+```
+shell suites: 71 passed, 0 failed, 0 skipped (of 71)
+OK — 13 code guards passed.
+PREFLIGHT INCOMPLETE — 12/15 legs ran, 3 SKIPPED. Nothing failed.
+```
+**Quoted as INCOMPLETE, never as a pass** — its own closing line says so. 3 legs SKIPPED (the local
+stack is down), **0 `^FAIL` lines** in the whole push log. `push rc=0`, and I verified the landing by
+`ls-remote` rather than the tool's rc, because that wrapper's rc is not the push's.
+
+### A `VERDICT: MISMATCH — STOP` line appears in the log and is NOT a failure
+I chased it rather than quote around it. The string exists in **no** script in the tree; it is emitted
+by a **fixture preflight** that `scripts/__tests__/preflight_deps.test.sh` deliberately tampers, whose
+cell is `expect "F-925-3: a step header whose denominator disagrees with TOTAL_LEGS ABORTS the run,
+naming the header" "HEADER-MISMATCH/1"`. It is a control arm firing correctly. Consistent with
+`71 passed, 0 failed` and the push landing.
+
+## Test Evidence (mine, on my worktree, at base `0a6177ea5482`)
+jest 29.7.0 · ts-jest 29.4.11 · typescript 5.9.3 · node v24.7.0 · npm 11.5.1 (read from `node_modules`).
+S-1: `npm ci --ignore-scripts` rc 0 (1937 pkgs); `packages/shared` built with `dist/index.js`
+**absent before / 17,746 B after** (`b1fd7f64af0db912`); `npm ci` rc 0 in all four
+`systemTest/{akto,api-explorer,performance,playwright}`; **0 tracked modified, 0 untracked**.
+Red at base -> green after, per pass: adminconfig **2f/3p (5) -> 5p** · share **2f/13p (15) -> 15p** ·
+signatories **3f/3p (6) -> 6p**. Whole originate suite: **93 suites / 1077 tests / 0 failed** at base
+-> **96 / 1093 / 0** with all three. Staged tree `b8ff928e2b63` equalled the ITEM-0 stack value.
+docblockra3 **21 PASS / 0 failed** (byte-for-byte read-back + both 1-byte controls); pathgate
+**6 assertions / 0 failed** with a firing control; commitg1 **14 passed / 0 failed**.
+
+## 🔴 ONE RESIDUE I CANNOT FIX, and it needs your call before the merge
+**The commit message contains `does not close KS-593`** — a negation, but the adjacency
+`close KS-593` is what a closing-keyword parser matches, and negation handling is not something I
+would assume. I caught the same text in the PR body on read-back (my first, narrower check missed it)
+and **PATCHed the body**: the live body now has **0** closing-verb-plus-key matches under the broad
+pattern `(clos(e|es|ed)|fix(es|ed)?|resolv(e|es|ed))\s+KS-\d+`.
+**The commit message is already pushed and Secuura never force-pushes, so it stands.**
+Measured mitigation, not a hope: Linear currently records the PR with
+**`linkKind = 'contributes'`, `status = 'open'`** — not a close link. But the integration re-parses,
+so **whoever merges should confirm KS-593 does not walk to Done**, or squash with a subject-only
+message. Flagging it rather than letting the merge discover it.
+
+## Board guard, driven on my own event rather than asserted
+KS-593 walked **Backlog -> In Progress** at the PR open. Through the four conditions:
+URL is a project PR ✓ · head ref is `feature/ks-593-…` ✓ · author is the board login this round ✓ ·
+addition-only, the one attachment added and the walk coincident with the PR open ✓.
+**Attributable to me, not a foreign write.** No comment or ticket edit was made by this seat:
+item 3, the ticket comment naming the PR, is **yours** under Q-NOTIFY12.
+
+## UNRAISED / UNMEASURED / NOT DONE
+- **G-B — KS-1171, flow `40.`, TIER 1, test-only boundary pin — is UNRAISED and UNBUILT.** Its
+  payload is verified (4,524 B, `11844b4b45cfdff2`, 1 section, tree `29c2837b0c74`, strict forward
+  rc 0 / reverse rc 1) and its REVIEW is read. Branch name reserved and keyed into my tools:
+  `feature/ks-1171-b1-absent-boundary-is-inclusive-g4-2`.
+- **A live run is owed on KS-593** — no local stack, so none of the three 500s was reproduced against
+  a real PostgreSQL. **KS-593 stays OPEN.**
+- The four platform suites are **UNMEASURED**; I quote only the SKIP lines my own push printed.
+- Three of four Spark passes have a HOLD REVIEW but **no READY artefact** (Q-HOLD18) — named in the PR body.
+- `pathgateg1.py` still pins **B 56th's** PR0 range; it PASSED for G-A with its controls firing and my
+  9 paths disjoint from those 4, but it becomes load-bearing for G-B. **First thing G 5th re-keys.**
+- No merge, no gate, no deploy, no `az`, no extranet, no board write beyond my own PR.
+
