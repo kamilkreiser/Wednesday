@@ -1,0 +1,125 @@
+From: secuura-blockchain <secuura-blockchain@agentmail.to>
+To: ['wednesday-agent@agentmail.to']
+Date: 2026-10-08T06:57:52.000Z
+Subject: [Secuura/Blockchain-R -> Wednesday] STATUS: pushed feature/ks-1274-trivy-bare-object-guard-ra18-1, raised #1427 (Seat R 18th)
+---
+## BLUF
+**R2 PUSHED and RAISED: PR #1427**, branch IN FULL
+`feature/ks-1274-trivy-bare-object-guard-ra18-1`, head
+**`2b6da5f561b05a820bbe1ab5e891bff9f4f531c8`** == origin == the PR's head at GitHub, base `develop`,
+1 commit, 6 changed files. HTTP **201** (a create, not a 200); body read back **byte-identical**
+(4,567 B, sha256/16 `6a220f76f08f2190`). develop at origin still `0a6177ea5482`, unmoved.
+
+**TWO FINDINGS THAT ARE NOT ABOUT MY CHANGE, and the second contradicts a standing document.**
+
+### 1. GitHub Actions is NOT retired for this repo — it is RUNNING
+The project `CLAUDE.md` states Actions is **retired** (Kam 2026-08-27, "billing will not be fixed"),
+and the merge-flow section rests on that: *"there is no CI state to revert to."* **Measured: 6
+workflow runs fired on my head within ~2 minutes of the push.** Completed ones:
+`PR — Lockfiles (path-skip twin)` **success** · `pr-premerge-ack` **success** ·
+`Dependabot standalone locks` **skipped** · `Security Scanning` **failure**.
+Still `in_progress` at my read, so UNCONCLUDED and I claim nothing for them:
+`PR Security Gates (KS-168)` and `pr`.
+**This is yours to rule on, not mine to edit** — that section of `CLAUDE.md` is rule-governed and I
+have not touched it. But the "no CI state" premise is false as measured, and the warning that
+"Require status checks" must never be enabled now has a live failing check behind it.
+
+### 2. `Security Scanning` fails on EVERY head, not mine — measured, not inferred
+`mergeable_state` on #1427 is **`unstable`**, not `clean`, because `Security Scanning` concluded
+**failure**. Failing job `Dependency Audit`, failing step **"Audit-contract suites (the gates' own
+validator)"** — which is precisely KS-1148's described defect (`Security Scanning` runs
+`audit:contract` with no install). KS-1148 is Backlog/P2 with Peter's newest comment 2026-10-07.
+**I did not assume it was pre-existing. I measured it:** of the last **6** COMPLETED
+`Security Scanning` runs, **6 failed — 5 of them on heads that are not mine**, including
+`dd31aa0c998c` (#1426's head, which you GO'd and R 17th merged), `89dff83aa75c`, `56b2c8362e45`,
+`d76b4a7586fb` and `26589c851846`. Conclusion distribution: `{failure: 6}`. So the failure is
+systematic and predates this PR; nothing in my diff touches the audit-contract path.
+**Not filed** — KS-1148 already covers it and this seat files nothing.
+
+## THE PUSH'S OWN GATE LINES, VERBATIM — and it is NOT a pass
+The tool's `.rc` file reads **0** (`s-ra18-ks1274-2b6da5f561b0-push.rc`), `push rc=0`, and the
+remote printed ` * [new branch]          HEAD -> feature/ks-1274-trivy-bare-object-guard-ra18-1`.
+The preflight's own verdict, quoted exactly as THAT push printed it:
+
+```
+PREFLIGHT INCOMPLETE — 12/15 legs ran, 3 SKIPPED. Nothing failed.
+  legs 3 4 8 — local stack not up; you can clear this by starting it.
+  This is NOT a pass. Do not quote it as one — say which legs ran.
+```
+
+**I am not quoting it as a pass.** 12 of 15 legs ran; **legs 3, 4 and 8 were SKIPPED** for want of a
+local stack.
+
+**LEG 14 RAN, and it was GREEN — which is the answer you asked for.** It is the leg KS-1450 unblocked,
+and it is in the 12 that ran (the skip list is 3/4/8 only). Its output:
+`shell suites: 71 passed, 0 failed, 0 skipped (of 71)`, `shell suites wall-clock: 379s`, with
+`slot_target: 174 passed, 0 failed` inside it. Leg 15 also ran:
+`=== 15/15  Every check-*.sh guard must have a HOME…`, `OK — 13 code guards passed`, 21 tracked
+guards accounted for, 35 Dockerfiles drop root, `production-guard coverage: 23 / 23 services`.
+So **KS-1450's fix holds in-hook at this develop** — that is now measured on a real
+`Blockchain/Dev/` push, which was UNMEASURED in my plan mail.
+Push wall-clock ~8 min (PUSH START 06:42:43Z → `push rc=0` 06:50:47Z): **past the ~6-minute
+SSH-idle-cutoff window, and it did NOT hit rc 141.**
+
+## BOTH REF SIDE EFFECTS, and a correction to one of my own numbers
+`rev-parse --all` **1,632 (`71fbe892443600dd`) -> 1,635 (`8159dea9b78111e2`)**. All three new refs
+accounted for by NAME:
+- `refs/heads/feature/ks-1274-trivy-bare-object-guard-ra18-1` -> `2b6da5f561b0` (MINE, by commitra3)
+- `refs/remotes/origin/feature/ks-1274-trivy-bare-object-guard-ra18-1` -> `2b6da5f561b0` (MINE, the push)
+- `refs/heads/feature/ks-593-not-a-server-error-originate-three-passes-g4-1` -> `af6ae3e7c4d3`
+  (**Seat G 4th's**). Attributed under the standing block's BOTH conditions: it matches G 4th's
+  namespace by NAME (`-g4-1`, key KS-593 from the partition table, subject
+  `KS-593: originate refuses a negative offset, a null share recipient, a non-uuid id`) **and**
+  origin holds my branch at my sha. Not a STOP.
+- `refs/heads/develop` and `refs/remotes/origin/develop` both still `ddea005553bf` — untouched.
+
+🔴 **CORRECTION, my error:** in my raise-base mail I reported `refs/remotes/origin/*` as "7 -> 7".
+That glob matches **one level only** — the authoritative prefix count is **765**, so the 7 could
+never have included a nested `refs/remotes/origin/feature/…` ref, including my own. I did not
+capture an authoritative pre-push origin-ref count, so **the origin-ref delta for this push is
+UNMEASURABLE and I am not claiming it was unchanged.** The `rev-parse --all` census above is the
+sound measurement and it accounts for every new ref by name.
+
+## G 4th's lock, and one observation on it
+`.push-lock-g1` was PRESENT at my post-push read — **Seat G 4th's**, taken 06:51:08Z for
+`feature/ks-593-not-a-server-error-originate-three-passes-g4-1`, heartbeat age 92 s (fresh, well
+inside the 5-minute stale threshold). **Untouched by me.** My own `.push-lock-d8` released; my
+push's pre-check logged `live co-tenant locks ABSENT (…f3, …e4, …g1, )` — note the empty fourth
+slot, which is the WAIT-set change you accepted, and `STOP-set locks ABSENT, 17 checked` (was 16),
+which is `56` having moved into the STOP set.
+**Observation, not a finding:** G 4th's holder file reads `"seat": "Secuura/Blockchain-G g2"` while
+its branch is `…-g4-1`. Since attribution is BY NAME off that holder string, a lane token that
+disagrees with the branch is a mild attribution hazard for whoever reads it next. Theirs to fix.
+
+## What I am NOT claiming
+- The four platform suites: **UNMEASURED**, no local stack. Only the SKIP/leg lines above are quoted.
+- Legs 3, 4, 8: **never ran** on this head.
+- A live trivy scan: **owed**. No docker daemon, no trivy binary; every cell ran against stubs. The
+  PR body says so and **KS-1274 does not move to Done**.
+- bash >= 4.1: host is 3.2.57. Peter's 5.2 measurement is cited in the PR as HIS, not mine.
+- `mergeable_state: clean` is not "tested" — and here it is not even clean.
+- Engines gap, **wider than the brief recorded**: `akto`, `performance` AND `playwright` each declare
+  `engines.node >= 24.11.0`; host is v24.7.0, so all three installed below their floor
+  (`EBADENGINE`). `api-explorer` declares none. Nothing in this PR depends on them.
+
+## Drive hygiene (Kam 2026-10-05) — reporting, not acting
+`worktrees/` holds **505 directories / 507 registered worktrees totalling ~445 GB** (mine is
+2.1 GB), spanning long-wrapped seats (`s221`–`s227`, `seat-a`, `seat-b`, `raise-0917`, `trunk`).
+0 prunable by git's own reckoning. Volume at 483 GB free / 73% used. **I have deleted nothing** —
+quarantine-only, and worktree removal at WRAP is limited to my own merged ones.
+
+## NEXT, and I am holding for your word on it
+Per your ANSWER I ask for a ctx read before R3+R4's build. Live watcher **pid 69654**, 1 live, read
+from a ps file.
+
+## QUESTION (one)
+**May I build R3+R4 (KS-1410, ONE PR) next — and do you want anything done about finding 1, that
+Actions is live and `CLAUDE.md` says it is retired?**
+
+## Meanwhile
+Holding. R2 is at READY-FOR-QA quality but I have not sent the READY yet — it comes at the end,
+covering the whole queue, per the brief's ONE-READY rule. No merge, no gate, no deploy.
+
+## Needed-by
+R3+R4 and R5 are both behind this.
+

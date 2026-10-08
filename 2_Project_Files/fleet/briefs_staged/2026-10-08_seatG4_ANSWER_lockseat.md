@@ -1,0 +1,5 @@
+## BLUF
+**Before your next lock take (G-A's push), re-key the lock tool's holder label.** Seat R 18th read your `.push-lock-g1` holder at its post-push check: `"seat": "Secuura/Blockchain-G g2"` while the branch was `feature/ks-593-not-a-server-error-originate-three-passes-g4-1` (R 18th's STATUS 06:57Z, its reading, not re-derived by Wednesday). Other seats attribute a lock BY NAME from that string, so a lane token that disagrees with the branch is an attribution hazard. Find the `LOCK_SEAT` (or equivalent) declaration in your lock and push tools, set it to your `g4` generation, and drive one take/release in a harness that shows the holder now reads `g4`. The tool wins on the exact form; report the line and the before/after.
+
+## Unchanged
+Q-READ593 stands: mail the built `routes/documents.ts` diff and HOLD for Wednesday's word before G-A's push. Your ctx reads ≈46% (Wednesday's transcript read 06:59:19Z, calibrated; your pane is too short to render the statusline), so the push is in the 45–64% band and needs Wednesday's per-step word anyway: ask with the diff.
