@@ -14,6 +14,16 @@ supersede: REPLACED WHOLESALE 2026-10-08 05:3x by the overnight seat (booted 02:
 2. **R 15th is LIVE (%91 `Secuura/Blockchain-R`)** — see FLOOR. Its plan confirmation is the first thing owed.
 3. **Morning brief LEADS with (value first):** gate74 GO (#1423), R 15th merging #1422 + #1423, the Spark census (24 unraised passes found, 10 now held), and the BLOCKER: **develop red on pre-push leg 14 → KS-1450** (Peter's #1424) blocks every push touching `Blockchain/Dev/`. Give Kam a 1-2 line WhatsApp text pointing at https://linear.app/secuura/issue/KS-1450 in case Peter has not seen it (Kam sends; nobody else messages Peter).
 
+## 🔴 18:3x 2026-10-08 — 70% CHECKPOINT HANDOVER (read first; supersedes 18:2x)
+**Floor:** %0 wednesday · %96 G 4th (wrapping) · %97 E 11th · %98 F 5th · %99 R 19th · %1 monitor. **No QUESTION unanswered** (every 10-08 QUESTION is matched by a later ANSWER, checked 18:34).
+- **READY FOR QA:** #1427 (KS-1274, head `2b6da5f561b0`) · #1428 (KS-593, head `64eafead891e`; RESIDUE: the pushed commit message says "does not close KS-593", so squash without it and confirm KS-593 does not walk to Done).
+- **gate76 kit drafter RUNNING** (background) → `fleet/qa-agent/gatesets/2026-10-08_gate76/` + `fleet/briefs_staged/2026-10-08_mergeseat_gate76_DRAFT.md`. On return: read KIT_REPORT whole → rule its questions → dry run → launch with `WED_USAGE_STOP=100` (new-account grant, clause GATE).
+- **G 4th:** READY sent; WRAP expected → verify the handover → score → `pane_close.sh %96` → brief **G 5th** (KS-1171; first re-key `pathgateg1.py`'s PR0 range; add `ra19`).
+- **E 11th:** PUSH E-A approved 07:30Z (ctx ~41%). NEXT: `STATUS pushed … raised #`, then a ctx read before E-B. Ruled: the YAML mislanding control runs per companion ALONE.
+- **F 5th:** PUSH F-A approved 07:30Z (ctx ~36%). NEXT: `STATUS pushed … raised #`, then a ctx read before F-B. New rule: no control plants in the shared `worktrees/` (STANDING_LINES).
+- **R 19th:** booting (ctx ~18%). NEXT: plan confirmation (check its COMMIT TOOL FIX + Q-LOCK56 reconcile arms).
+- **Ornith 1.5 DEPLOY builder RUNNING** (told to leave oMLX STOPPED). **Qwen 122B downloaded + verified** (26/26, 69,620,619,709 B at e9c67b08). On the builder's return: verify at source + commit → ask Kam to quit his apps → the 122B test (the 20 tasks + Spark-tier hard tasks vs the Spark) → report 1.0 / 1.5 / 122B / Spark side by side.
+
 ## 🔴 18:2x 2026-10-08 — LIVE STATE (supersedes 18:0x; ctx 66% at writing)
 **Floor:** %0 wednesday · %96 G 4th · %97 E 11th · %98 F 5th · **%99 R 19th** · %1 monitor. R 18th CLOSED (0.96).
 - **R 19th:** launched 07:22Z. NEXT from it: plan confirmation (check its COMMIT TOOL FIX + Q-LOCK56 reconcile arms).
