@@ -144,3 +144,4 @@ sees the claim rather than discovering it in a conflict.
 | 2026-10-08 02:52 | Kamils-Mac-Studio | hold_ready.py --model-tag on bash_patch (owed, met twice) | CLOSED |  2026-10-08 02:54 done |
 | 2026-10-08 03:28 | Kamils-Mac-Studio | gate74 kit: #1423 KS-1164 (tier 2) + #1422 merge brief | OPEN | |
 | 2026-10-08 09:04 | Kamils-Mac-mini | receipt guard v2: send_brief sent-log + note_entry refuses an unlogged quoted 'sent: [' line (Tuesday ledger w=6, parallel-call costume) | CLOSED |  2026-10-08 09:06 built, arms 7/7, pushed; Wednesday told by mail 22:06Z |
+| 2026-10-08 12:26 | Kamils-Mac-Studio | gate75 kit for #1426 (KS-1450 fix, tier 2) + R 17th merge brief draft — 12:3x rotation seat | OPEN | |
