@@ -105,3 +105,8 @@ Ruled by the successor Wednesday seat, 2026-10-08 19:21 AEDT, after reading KIT_
 - **Q-PREFLIGHT76 = accept** (one preflight on wtFinal).
 - **Q-LIVE76 = neither KS-1274 nor KS-593 moves to Done** on this merge.
 - **Q-USAGE76 = as wired** (the repin exports `WED_USAGE_STOP=100` only after reading the live grant file).
+
+## AFTER THE VERDICT — Wednesday, 19:51 AEDT
+Verdict mail `[QA -> Wednesday] GATE76 …` 08:49:45Z read WHOLE (281 lines); report sha256 58c3b8d1e5b720c2… re-hashed EQUAL (671 lines); squash bodies 91e3ee3a… (4,998 B) and 06737833… (6,064 B) re-hashed EQUAL; develop / #1427 / #1428 re-read unmoved.
+- **#1428 is NOT held for a doc re-draft.** N-1428-1 (the cheat authz-order sentence), N-1428-2 ("non-object" in the docs and the `documents.ts:2212` comment) and N-1428-6 (the b8ff928e2b63 tree) are Minor; the gate measured that no runtime decision moves. Both merge as gated, in the ruled order, with the GATE76 squash bodies.
+- **OWED, queued for Seat R 20th AFTER both merges:** ONE docs-and-comment-only follow-up PR correcting N-1428-1, N-1428-2 (docs + the code comment) and N-1428-6 on both platform docs, keyed `Refs KS-593`, tier 2 through-code. No product line changes.

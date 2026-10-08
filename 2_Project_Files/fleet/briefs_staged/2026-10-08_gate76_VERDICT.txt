@@ -1,0 +1,281 @@
+From: CoAgent <coagent@agentmail.to>
+To: ['wednesday-agent@agentmail.to']
+Date: 2026-10-08T08:49:45.726Z
+Subject: [QA -> Wednesday] GATE76 (T2 x2): #1427 KS-1274 trivy bare-object guard + #1428 KS-593 originate 500->400
+---
+GO for #1427 at 2b6da5f561b05a820bbe1ab5e891bff9f4f531c8 — assumes develop 0a6177ea5482; step 2 onto develop+#1428, docs-only keep-both merge-in, M tree 57c9b5eaec95ddc86a7d139f9f2d957015a3fd97 (composed docs VERBATIM, IDENTICAL to the kit's).
+GO for #1428 at 64eafead891e81f5adb4e46aaa94ff6a6ace1998 — assumes develop 0a6177ea5482; step 1 onto develop 0a6177ea5482, no merge-in, squash tree 7f6e6fe0ca15702cab1b5e1a0d37ba7ff8f665b5.
+
+GO STRINGS I WOULD SIGN, IN THE RULED LANDING ORDER (send one at a time):
+1. GO (Seat R 20th): merge 1428 on gate76
+   This covers a SQUASH with NO merge-in onto the develop the merge seat reads: tree == END_TREE 7f6e6fe0ca15.
+2. GO (Seat R 20th): merge 1427 on gate76
+   This covers ONE docs-only keep-both merge-in commit M, then its squash.
+   - Parents EXACTLY [2b6da5f561b0, develop-after-#1428].
+   - Doc blobs = the kit's composed_2026-10-08/2_1427_* VERBATIM (flow b2bd07dbae40, cheat f4503e99d43e), or a `chain` re-run on the real develop.
+   - Tree 57c9b5eaec95 at develop 0a6177ea5482.
+   - qm-green, then pushed BARE through the hook. The push delta OURS..M is 9 paths +421/-4, 7 under Blockchain/Dev, so the full preflight runs in-hook.
+   - A PREFLIGHT FAILED or a refused push is a STOP. --no-verify is forbidden. Never `git merge-file --union`: on the flow doc it drops #1428's closing </td></tr></table> while html_docs_matrix still reads 12/0.
+STOP FOR THE MERGE SEAT:
+- If develop has moved before either step, re-run c4 `chain` on the real develop.
+- If develop moved a CODE path of either row, STOP and mail (RE-GATE).
+- #1383, #1429, #1430, #1431 and #1432 all edit both docs: any of them landing first voids every predicted tree.
+
+PER ROW: SQUASH SUBJECT AND BODY
+#1427
+- Subject: "KS-1274: job 04 fails a scan when trivy reports neither Results nor ArtifactName" — 80 chars, ASCII, opens with the own key, no "(#", TRUE of the diff.
+  - The PR title and head subject "KS 1274:" cannot be used as written.
+- Body: evidence/1427.squash_body.GATE76.txt, 4998 B, sha256 91e3ee3adae71f8099808e5b269e449df62e600c9a88bb4b86524039a4f7f252.
+  - Own key KS-1274 is the only hyphenated key (KS 1136 de-hyphenated).
+  - Closing 0 under the kit regex and the builder's broad regex. Controls: Fixes KS-1 = 1; residue = 1.
+  - Attribution 0 (the 🤖 line is dropped). NO TRAILER (interpret-trailers 0 B, control 23 B).
+  - Edits over the DRAFT:
+    - :115-120 -> :115-119;
+    - names the null -> scan-failed change and the present-but-null/wrong-type gap;
+    - marks the ArtifactName-only clean shape as stubbed, not measured live.
+#1428
+- Subject: "KS-593: originate refuses a negative offset, a null share recipient, a non-uuid id" — 82 chars, ASCII, opens with the own key, no "(#", TRUE.
+- Body: evidence/1428.squash_body.GATE76.txt, 6064 B, sha256 06737833c39802a22aa7bfe7d68858e34cc4594293b59ef475adbbcabea97c03.
+  - Own key KS-593 is the only hyphenated key (KS 565, KS 1015, KS 1293 de-hyphenated).
+  - Closing 0 under both regexes. Attribution 0. NO TRAILER.
+  - Edits over the DRAFT:
+    - "non-object" -> "null" in the table (array/string/number/boolean recipients were already 400 at base: measured);
+    - the authz sentence rewritten per route, as measured;
+    - a new "Edges" paragraph: tenant-less 400, isUUID widening, limit unguarded;
+    - the share row marked as a two-file sum;
+    - the b8ff928e2b63 sentence corrected: it is the code-only tree (7 paths +336/-4), and the head tree is 7f6e6fe0ca15.
+
+KS-593 CLOSE-RESIDUE (Q-CLOSE593)
+- The pushed #1428 commit message carries "does not close KS-593", and both regexes match it. The branch message does NOT land.
+- The merge seat:
+  1. squashes ONLY with the ratified body (0 matches; never GitHub's default concatenation);
+  2. reads KS-593 in Linear before AND after;
+  3. STOPS and mails if it walked to Done, changing no ticket state.
+- G 4th's "linkKind contributes, status open" is UNMEASURED here (no Linear read).
+
+CHECK ROWS
+C1 PIN — c1 rc 0, 16/0 for each row; self-test 12/12.
+- Heads, END_TREEs and ONE parent 0a6177ea5482 all EQUAL.
+- 0 trailers: 1 B vs the 55-B control.
+- P8: #1428 ['close KS-593'] (negated), #1427 [].
+- P10: #1428 changes only the declared KS-1293 manifest.
+- P13: the 3 run_shell_suites files are byte-identical base == head == develop.
+- P14: file-disjoint except the docs.
+- P15:
+  - share 401 :2169 < documents:share :2172 < NOT_FOUND :2207 < guard :2213;
+  - offset guards :1106 and :1276 after router auth :38;
+  - isUUID x3 after router auth :22.
+- Script sha256: 12/12 EQUAL to kit.json. Self-tests: c1 12/12, c3_redgreen 7/7, c3_preflight 6/6, c4 15/15, gh 18/18.
+- Refs, read 3 times (08:25:48Z, 08:36:07Z, 08:44:13Z): develop 0a6177ea5482; pull/1427/head == branch == 2b6da5f561b0; pull/1428/head == branch == 64eafead891e. Unmoved.
+CHECK 1 — THROUGH-CODE / AUTHZ-ORDER
+- Share order, from the head blob: router authenticate :158 -> 401 :2169 -> documents:share 403 :2172 -> validationResult :2179 -> checkOnBehalfOf :2191 -> tenant getDocument 404 :2207 -> guard :2213 -> first write :2268.
+  - In-process at HEAD and BASE: [null] by a principal without the scope = 403 / 403; on an absent doc = 404 / 404; with no user = 401 / 401; a valid email = 201 with 1 write in both.
+  - No new oracle, and nothing that succeeded at base is refused.
+- adminConfig and signatories guards sit BEFORE any read. Signatories has NO role gate. So the PR body's "after the role/scope gate and the tenant-scoped read" holds for share only.
+- The guard before !tenantId: a tenant-less ORG_ADMIN's /rights-holders?offset=-1 went 200 [] -> 400 (measured). Info.
+- isUUID() (validator 13.15.35, 'all') now 400s hyphenless, braced and non-RFC-nibble uuids that reached the query at base. UPPER case and nil still pass.
+  - Corpus: 220 uuid literals in Blockchain/Dev, 0 non-RFC in seeds/migrations, 1 outside tests (an e2e fake).
+- #1427: no consumer feeds the real job 04 a bare {}. orchestrate_jobs stubs job 04; the aggregate suites write its artefact directly. Leg-14 on wtFinal: 5/0, 6/0, 18/0.
+- The ArtifactName escape rests on the stubbed trivy 0.71 shape. The live scanner is UNMEASURED.
+CHECK 2 — RED-PROOF, re-run by me
+#1427: c3 trivy rc 0, 13/0.
+- G: exit_code 6/0, failed_scan 5/0, image_filter 5/0.
+- R: job tampered to its base blob (saved == HEAD 77ad59c5ee7c, landed True) -> rc 1, 4 passed / 1 failed. Only the KS-1274 RED cell fails; CONTROL ok. The other two suites under the revert read 6/0 and 5/0. Restore == HEAD, porcelain ''.
+- Arms 8/8 as wanted:
+
+  | Arm | head | base | |
+  |---|---|---|---|
+  | T0 | CLEAN | CLEAN | |
+  | T1 | FAILED | CLEAN | changed by the fix |
+  | T2 | CLEAN | CLEAN | |
+  | T3 | FAILED | CLEAN | changed by the fix |
+  | T4 | FAILED | FAILED | |
+  | T5 | CLEAN | CLEAN | GAP |
+  | T6 | FAILED | FAILED | |
+  | T7 | FAILED | FAILED | |
+
+- OWN-ARM, through c3's harness and parser (plants landed, wtA untouched):
+
+  | Arm | Shape | head | base | |
+  |---|---|---|---|---|
+  | O1 | {} then {"Results":[]} | INVALID artefact, job rc 0 | INVALID artefact, job rc 0 | pre-existing; 09 flags unreadable-artefact |
+  | O2 | {"Results":[]} then {} | FAILED | INVALID artefact | |
+  | O3 | {"results":[]} | FAILED | CLEAN | |
+  | O4 | {"ArtifactName":null} | CLEAN | CLEAN | GAP |
+  | O5 | {"Results":"x"} | CLEAN | CLEAN | GAP |
+  | O6 | 0 | FAILED | FAILED | |
+  | O7 | empty | FAILED | FAILED | |
+  | O8 | one HIGH | HIGH:1 kept | HIGH:1 kept | |
+
+  NULL-RESULTS-GAP is a presence-not-type gap. Minor, a named limitation, rides with the owed live run.
+#1428: S-1 in wtB done (npm ci rc 0, 1937 packages; shared dist 17,746 B). c3 originate --full rc 0, 8/0.
+- G: 5/5, 5/5, 6/6, hermetic 10/10.
+- R: 3 routes tampered to base (saved == HEAD, landed True):
+  - adminconfig 2f/3p: AO1, AO2;
+  - share + hermetic 2f/13p: SN1, SN2. That is TWO files: the share file 2f/3p, hermetic 10/10. The PR body's table does not say this; the cheat doc's gotcha does;
+  - signatories 3f/3p: SG1, SG2, SG3.
+  - Restore == HEAD, porcelain ''.
+- F: 96 suites / 1093 tests / 0 failed, rc 0.
+- OWN-ARM: 3 probe suites (real routers, db mocked) at head and at the base routes, then quarantined; porcelain '' at the end.
+  - Share [[]], ["a@b.test"], [0], [true]: 400 at BOTH. Only [null] changed.
+  - ?limit=-1 binds LIMIT -1 at both (unguarded, out of scope per Q-LIMIT593).
+  - ?offset=-1.5: 200 binding -1 at base -> 400 at head.
+  - Disclosed: run 1 of my probe had a TS6133 LOADFAIL and a stale mock read. Not counted; fixed; re-run.
+CHECK 3 — PREFLIGHT on wtFinal = SIM f6e26bbcfde9 (tree 57c9b5eaec95; never pushed)
+- S-1 done: Dev, shared, and all 4 systemTest packages.
+- c3_preflight rc 0, 08:33:14Z-08:39:36Z. Verbatim:
+  shell suites: 71 passed, 0 failed, 0 skipped (of 71)
+  slot_target: 174 passed, 0 failed
+  production-guard coverage: 23 / 23 services
+  OK — 13 code guards passed.
+  PREFLIGHT INCOMPLETE — 12/15 legs ran, 3 SKIPPED. Nothing failed.
+  legs 3 4 8 — local stack not up; you can clear this by starting it.
+  This is NOT a pass. Do not quote it as one — say which legs ran.
+- Legs 3, 4, 8 SKIPPED: NOT a pass. Shell wall-clock 327s. ^ok 670, ^FAIL 0, VERDICT: MISMATCH 0.
+- FORMAT-GATE: 0 package(s) checked for each row (not formatting evidence; the control path checks 1).
+- PREEXISTING-MISMATCH: G 4th's trace is NOT CONFIRMED.
+  - The literal "VERDICT: MISMATCH" is in no tracked file. Control: HEADER-MISMATCH found at preflight_deps.test.sh:416.
+  - The F-925-3 cell is ok on wtFinal with 0 such lines.
+  - The line's source is UNMEASURED. Info.
+CHECK 4 — DOCS
+- docs: 11/0 for each row.
+  - Flow ..30 31 26 -> 35 / 39. Cheat ..KS-591 KS-1164 -> KS-1274 / KS-593.
+  - Per-heading cheat reader: 19 keys for 19 headings. The lazy reader reads 18 (it straddles the KS-1445 heading).
+  - D6: #1428's cheat block is not a section card (polish).
+- calibrate 3/0 (develop tree 5f456a0128fe == gate75's prediction).
+- chain 1428,1427 ALL OK.
+  - Step 1 7f6e6fe0ca15 == END_TREE.
+  - Step 2 57c9b5eaec95ddc86a7d139f9f2d957015a3fd97: read-back own once, LAST, prefix kept, UNIQUE, balance == develop.
+  - Guard 12/0 at each step. merge-tree cross-check rc 1, never picked.
+  - The final one-pass composition == the chain. Code paths == each head.
+- orders: 1427,1428 -> 9b6c3dfef865 then 0f08bed03b8000c4f9f3c5208c423b586ab8be0e.
+- Composed docs IDENTICAL to the kit's: 4/4 cmp rc 0, control rc 1.
+- UNION-HAZARD: on flow, 3862 vs 3863 lines; table 146/145, td 956/955, tr 584/583 (#1428's closing row dropped). Cheat agrees.
+- My own html.parser count:
+  - final flow: table 146/146, tr 584/584, td 956/956, div 51/51, h2 32/32, code 1250/1250;
+  - final cheat: table 80/80, tr 553/553, td 1044/1044, div 143/143, h2 21/21, code 806/806;
+  - every block is balanced; the control fires.
+- html_docs_matrix on the final tree: 12 passed, 0 failed. This is NOT tag-balance evidence.
+- Blocks vs code (#1428, these land VERBATIM):
+  - the cheat says "every guard sits after authentication, the role/scope gate and the tenant-scoped read". False for adminConfig and signatories (N-1428-1, Minor).
+  - Flow and cheat say a "non-object" recipient 500'd. Only null did (N-1428-2, Minor).
+  - Flow 39.2 says "staged tree b8ff928e2b63", which is the code-only tree (N-1428-6, Minor).
+  - Ruled non-blocking: no runtime decision moves (measured). A doc correction is owed on the next platform-k doc touch. Wednesday may instead choose to hold #1428 for a re-draft; that call is hers.
+CHECK 5 — MERGE-IN-NEED
+- Order 1428,1427: #1427 needs M. OURS..M 9 paths +421/-4 (7 under Blockchain/Dev -> full in-hook preflight); DEV..M 6 paths +94/-8.
+- Reverse order: #1428 needs M on G 4th's branch, tree 0f08bed03b80. OURS..M 6 paths +94/-8; DEV..M 9 paths +421/-4.
+CHECK 6 — C5-PR-TEXT
+- api 3/0 for each row: 6 files +94/-8 and 9 files +421/-4. Body sha256/16 6a220f76f08f2190 and b882e9d4a486ed49 (== drafter).
+- prtext 3/0 for each row: Refs == own key; closing 0; NOT RUN present; "Generated with" #1427 1, #1428 0.
+- Platform suites are UNMEASURED and never counted as passing.
+CHECK 7 — ACTIONS (base == develop == 0a6177ea5482, so ONE comparator sha)
+- Both rows: X0, X1 and X2 pass. 0 PENDING. Runs at the head: 6 and 7. A fabricated sha reads 0.
+- Class (1) ADVISORY-FREEZE HOLDS: Dependency Audit only; the failed step is "Audit-contract suites (the gates' own validator)"; needle 1. History: 12 of the last 12 failed, across 11 branches.
+- Class (2) HOLDS: {Code Security Gates} ⊆ {Code Security Gates}.
+- Class (3) HOLDS: the head fails {Akto, Performance, Playwright}; develop fails those plus Schemathesis. Each head PASSES Schemathesis; no cause is claimed.
+- CI shell step at develop and at both heads: "shell suites: 65 passed, 6 failed, 0 skipped (of 71)". The 6 FAILED lines are identical.
+  - ks949 at develop reads "FAIL — packages/shared is not built … 0 passed, 1 failed (of 27 cells) — aborted". BASE-STATE; it is 27/0 on wtFinal.
+- Trivy suites in CI: #1427 head 6/0, 5/0, 5/0 vs develop 6/0, 3/0, 5/0.
+- Originate jest is not in that step; I read no CI corroboration for it.
+
+READY-CLAIMS
+Seat R 18th:
+
+| Claim | Ruling |
+|---|---|
+| Head / tree / parent | HOLD |
+| changed_files 6 | HOLDS |
+| Body "4,567 B" | DOES NOT HOLD as bytes: 4,567 chars, 4,598 bytes. Polish |
+| Suites 5/0, 6/0, 5/0 (failed_scan, exit_code, image_filter) | HOLD |
+| Red 4/1 with the control green both ways | HOLDS |
+| Restored b0a19e77c940633c | HOLDS |
+| 0 trailers | HOLDS |
+| In-hook preflight lines | NOT MEASURED; the same lines reproduce on the final tree |
+| Security Scanning pre-existing | CONSISTENT |
+| Handover 1081ef422c811c0d | HOLDS |
+
+Seat G 4th:
+
+| Claim | Ruling |
+|---|---|
+| 9 files +421/-4, 0 trailers | HOLD |
+| Per-pass reds | HOLD (the share ratio is two files) |
+| 96/1093/0 | HOLDS |
+| 93/1077 at base | NOT RE-RUN |
+| Body +336/-4 | DOES NOT HOLD: it is the code-only tree. Minor |
+| MISMATCH trace | DOES NOT HOLD as stated. Info |
+| Closing-verb PATCH of the live body | HOLDS (0 under both regexes) |
+| linkKind | UNMEASURED |
+| Handover d1e6b9e0f75235cf | HOLDS |
+
+Wednesday's share-diff read: HOLDS. Re-measured at head and base.
+
+COLLISION-CENSUS
+- 28 open PRs. The doc-only collisions are #1383 (KS-1401, held), #1429 (KS-1449), #1430 (KS 1328), #1431 (KS 1355) and #1432 (KS-1410).
+- #1431 and #1432 are new since the drafter's read. No other PR touches either row's code. REPORT only.
+
+TIERING
+- T2 per row holds. For #1428's share route I would not go up: the authz order was measured in-process at head and base.
+
+FINDINGS (none blocks)
+#1427:
+
+| ID | Severity | Finding |
+|---|---|---|
+| N-1427-1 | Minor | has() tests presence, not type: T5, O4 and O5 read CLEAN |
+| N-1427-2 | Info | null and lowercase "results" now FAILED |
+| N-1427-3 | Info, pre-existing | multi-document stdout gives an invalid artefact with job rc 0 at head and base |
+| N-1427-4..8 | Polish | KS 1274 title / subject; 🤖 line; :115-120; "genuinely clean" stated unmeasured; §5d stub lines unkeyed; 4,567 chars |
+
+#1428:
+
+| ID | Severity | Finding |
+|---|---|---|
+| N-1428-1 | Minor | the landed cheat doc's authz-order overclaim |
+| N-1428-2 | Minor | "non-object" 500 overclaim in the docs and the documents.ts:2212 comment |
+| N-1428-3 | Minor | isUUID widening |
+| N-1428-4 | Info | tenant-less 400 |
+| N-1428-5 | Info, out of scope | limit=-1 |
+| N-1428-6 | Minor | +336 / b8ff928e2b63 code-only figures |
+| N-1428-7..8 | Polish | not a section card; signatories.ts lines unkeyed (§5d) |
+| N-1428-9 | Info, binds the merge seat | close residue |
+
+Batch:
+
+| ID | Finding |
+|---|---|
+| N-BATCH-1 | MISMATCH trace unconfirmed |
+| N-BATCH-2 | 5 doc collisions |
+| N-BATCH-3 | builder merge-in mode dead (Q-BUILDER76; the new copy is untested) |
+| N-BATCH-4 | Security Scanning history 12/12 |
+| N-BATCH-5 | my own instrument defects, disclosed |
+
+SKILL-MUSTS / LIVE-SWEEP
+- §4: both docs updated in the same commit, but #1428's blocks state more than the code (above).
+- §5b: MEASURED.
+- §5c: governs systemTest/ only, so NOT APPLICABLE. Measured anyway: 65, 74, 111 and 73 code lines, all under 400.
+- §5d: polish gaps.
+- LIVE-SWEEP OWED for both rows. Neither KS-1274 nor KS-593 moves to Done, and neither verdict claims otherwise.
+
+NOT TESTED
+- The live trivy scan.
+- A live originate run on PostgreSQL (PG's ::uuid acceptance is READ, not run).
+- The 4 platform suites.
+- Preflight legs 3, 4, 8.
+- bash >= 4.1 (the host is 3.2.57).
+- Whole-service eslint / prettier.
+- The other signatory routes and the other KS 565 offset sites.
+- Linear state.
+- The base whole-suite count.
+- pfcmp, and the seats' push logs.
+- A real squash, M, qm, push or Actions on M.
+- The new builder copy.
+- The MISMATCH line's source.
+- The guard and union in the reverse order.
+- CI corroboration of originate jest.
+
+DISK: no ENOSPC. 378 -> 375 GiB on DevMASTER; scratch 5.1 GB.
+
+REPORT: /Volumes/DevMASTER/!CODING/Testing Agent MAIN/projects/secuura/reports/2026-10-08-gate76/report.md (evidence/ beside it; NOT-TESTED.written-first.md written 08:25:29Z, before any check)
+sha256 report.md = 58c3b8d1e5b720c232d45908908bfb6e136f574c752b4c211c06ef2f7b6e9599
+
