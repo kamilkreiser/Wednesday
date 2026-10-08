@@ -12,6 +12,15 @@ supersede: replace wholesale; previous = NEXT-PICKUP-FRIDAY.md.pre-0925-rotate-s
 
 **The tree is at `/Volumes/Laptop-DEV/FRIDAY` (the drive, since 2026-09-28).** Quote every path (spaces).
 
+## 🔴🔴🔴 CHECKPOINT 2026-10-09 10:54 (Friday, ctx 65%) — READ FIRST; supersedes every block below where they differ
+**Kam's rulings today (all reconciled, cards hidden):** paul-showcase-feedback = a (his note on HPSMPOC-242 as comment 39278, delivered) · composer-version-edition-lookup = a (E8 with the policy-target lanes; other four in the next content release) · composer-designer-rename-scope = a (screens, PDFs, footers, short form, User Guide; repo/domain unchanged) · printer = withdrawn "delay until monday" → **re-raise Mon 12 Oct**. HP reviews the Playbook structure/layout Tue 13 Oct → Playbook = fixes only. OPEN card: **mpscalc-codeql-javascript-web-1009** (rec a: Kam enables JS/TS CodeQL; default c: merge #6/#8 after gate, #7 waits; Monday showcase from a local merge).
+**LIVE SEATS (each rung-5 verified from its TRANSCRIPT; pane scrollback is unreliable):**
+- Composer: %2 B (B103 lane 3b) READY → **PR datasecau/Datasec-Security-Composer#57** @ 176c696 (+27/−0 verified); **%10 D = gate B105 (tier 1)** on it. %8 A = B102 lane 2 + rename (+ ADDENDUM-1: footers/short form, C-62 rename, C-63 lookup, tab-title script line granted); %9 C = B104 Home width/radius (+ ADDENDUM-1 User Guide rename). **Deploy HOLD: no renamed screens to the demo until the PDFs are renamed too** (PDF rename = a follow-up round in packages/** after #57 merges).
+- Playbook (HPSM-POC): %3 A = B187 sign-in warm-ups (busy); %7 B = B188 READY → **PR datasecau/HPSM-POC#129** @ 3ef9328 (HPSMPOC-98 NOT closable: filter not built). Gate: batch B187 + B188 (tier 1) when B187 is READY. N-6/N-8 follow B187.
+- MPS: %4 B (B09) → **PR #6** @ 3a20224; %5 A (B08) → **PR #7** @ 118e79e; %6 C (B10) → **PR #8** @ 9ed587f, fixing 3 CodeQL py/overly-permissive-file alerts (ADDENDUM-1, head will move); **%11 D = batched gate B11** (#6/#7 first; #8 after B10 re-READY). Merge order #6 → #7 → #8 via merge_when_green.sh after GO + green CodeQL (web/ unscanned — see the card).
+**Post-gate records owed:** MPS BACKLOG rows from B09 (persistence write-failure, local tamper evidence) + README "No UI" line; Composer BACKLOG n1–n7 from B103; Composer C-61 (Kam's 10-08 Mac accept) + #256 via B102.
+**Watchers:** Composer `seen` (%8 %9 %10) · HPSM `seen_hp` (%3) · MPS `seen_mps` (%6 %11). Re-arm on the existing seen file; never --seed again.
+
 ## 🔴🔴🔴 CHECKPOINT 2026-10-09 09:45 (Friday, ctx 50%) — READ FIRST; supersedes every block below where they differ
 **Kam today (terminal ~09:3x, prompt-logged):** feedback tickets from the Playbook (HPSM-POC) and the Security Composer FIRST; continue doable work; start agents on the MPS Commercial Calculator to a showcase early next week. No panel rows today; reconcile 0 at the checkpoint.
 **LIVE SEATS (each verified at rung 5 by its pane showing the brief):**

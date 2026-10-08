@@ -29054,5 +29054,52 @@
    "CARD composer-version-edition-lookup-1009",
    "CARD hpsmpoc-paul-showcase-feedback-1009"
   ]
+ },
+ {
+  "id": "mpscalc-codeql-javascript-web-1009",
+  "client_project": "Datasec/MPS-Calculator",
+  "title": "MPS Calculator: turn on CodeQL for the new web screens (TypeScript) before they merge",
+  "bluf": "I need you (or Datasec IT) to add JavaScript/TypeScript to the CodeQL setup of the MPS repo. Open https://github.com/datasecau/MPS-Commercial-Calculator/settings/security_analysis → Code scanning → CodeQL default setup → Edit → tick JavaScript/TypeScript → Save. Why: today's web screens (PR #7, 58 files under web/) are TypeScript, and the repo's CodeQL scans only C# and Python (measured on PRs #6 and #7 at 10:4x: Analyze (csharp) and Analyze (python) only). Datasec policy is that only CodeQL-scanned commits reach main, and in C-08 the setting was 'controlled by organization administrators', so Friday's login cannot change it. Monday's showcase does NOT depend on this: Friday can run the demo from the three branches merged locally.",
+  "default_action": "If you do not rule: (c) — PR #6 (API) and #8 (demo) merge after the QA gate; PR #7 (web) waits unmerged; Monday's showcase runs from a local merge of the three branches; Friday re-raises this on Monday morning.",
+  "options": [
+   {
+    "key": "a",
+    "label": "I'll enable JavaScript/TypeScript scanning (steps above)",
+    "detail": "Friday re-runs the scan on PR #7 and merges #6 → #7 → #8 after the QA gate and green CodeQL."
+   },
+   {
+    "key": "b",
+    "label": "Merge PR #7 once without the web scan, enable later",
+    "detail": "A one-time exception like C-08's; #6 (C#) and #8 are scanned as usual."
+   },
+   {
+    "key": "c",
+    "label": "Hold PR #7 until scanning is on",
+    "detail": "#6 and #8 merge after the gate; the web screens wait; the showcase runs from a local merge."
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-10-09T10:49:24.617429+11:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "seat": "friday",
+  "prior_rulings_overridden": [
+   "CARD nexusai-codeql-ruleset-main-pushes",
+   "CARD mpscalc-release1-users",
+   "CARD mpscalc-hosting-and-signin",
+   "CARD mpscalc-codeql-scan-csharp",
+   "CARD mpscalc-hosting-tenant-confirm",
+   "CARD mpscalc-pricebook-validity",
+   "CARD mpscalc-software-margin-review",
+   "CARD mpscalc-cost-rounding",
+   "CARD secuura-fuse-1009-measured-1001",
+   "CARD nexusai-codeql-medium-alerts-ticketing",
+   "CARD secuura-ks1195-s-key-ceiling-1009",
+   "CARD secuura-ks1384-anchor-per-event-1009",
+   "CARD composer-designer-rename-scope-1009",
+   "CARD composer-version-edition-lookup-1009",
+   "CARD hpsmpoc-paul-showcase-feedback-1009"
+  ]
  }
 ]
