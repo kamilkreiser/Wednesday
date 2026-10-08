@@ -2,10 +2,12 @@
 date: 2026-10-09
 type: grant
 source: Kam, terminal 2026-10-09 ~09:3x AEDT
-status: live
+status: superseded in its MODEL half (2026-10-09 ~09:4x) — see the top block
 tier: W
 expires: EVENT — Kam signs Wednesday into its own account on Monday 2026-10-12 (date -j: Monday), or his word
 ---
+
+> ⚠ **SUPERSEDED IN ITS MODEL HALF ~15 min later, by Kam (terminal, verbatim):** *"all sub agents are starting as opus 5.  if you use opus for sub agents (after the next model review phase this should be a deliberate choice) use the best version of opus.  for now, use Opus 5.5 for all sub agnets"*. **Operative now: every agent Wednesday starts (pane seats AND in-session sub-agents) runs on Opus 5.5** (`/model claude-opus-5-5` in a seat's pane after launch, told by mail, because project launchers pin Opus 5; Agent-tool drafters inherit this seat's Opus 5.5 — omit `model`, never `sonnet`). The Sonnet trial (WED-153) is PAUSED until the model-review phase makes the choice deliberate. The Spark and Ornith still go first. The text below is the superseded reading, kept.
 
 # Until Monday, the work runs on the Spark, Ornith and SONNET seats — no new Opus seats, gates or drafters
 

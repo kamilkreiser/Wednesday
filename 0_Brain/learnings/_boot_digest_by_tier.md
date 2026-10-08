@@ -7,7 +7,7 @@ status: live
 
 # Boot digest BY TIER — W whole, M rules-only, every project case a handle
 
-Generated 2026-10-09 09:29 from 227 lesson files (1,015,454 B). M 36 · MIXED 5 · P-Datasec/HPSM-POC 1 · W 185. 5 project CASE sections inside MIXED files are reduced to one line each: the heading and the path to read it at. W blocks are exactly what the default digest carries; M blocks drop the section index and keep the rules; a P file is a single handle. The CASES behind every rule live only in the lesson files — open one the moment its rule fires.
+Generated 2026-10-09 09:39 from 227 lesson files (1,016,300 B). M 36 · MIXED 5 · P-Datasec/HPSM-POC 1 · W 185. 5 project CASE sections inside MIXED files are reduced to one line each: the heading and the path to read it at. W blocks are exactly what the default digest carries; M blocks drop the section index and keep the rules; a P file is a single handle. The CASES behind every rule live only in the lesson files — open one the moment its rule fires.
 
 ## The T9 SSD is the master — Wednesday must be fully portable
 `2026-07-31_fully-portable-drive.md` · principle · 2026-07-31 · status: superseded — the "T9 is the master" half by [[2026-08-25_one-drive-devmaster-is-master]] (2026-08-25); the portability principle itself still lives · tier: W
@@ -7082,7 +7082,7 @@ sections (open the file for these): RULED 2026-10-05 ~11:1x — Kam (terminal, v
 
 
 ## Until Monday, the work runs on the Spark, Ornith and SONNET seats — no new Opus seats, gates or drafters
-`2026-10-09_spark-ornith-sonnet-only-until-monday.md` · grant · 2026-10-09 · status: live · tier: W
+`2026-10-09_spark-ornith-sonnet-only-until-monday.md` · grant · 2026-10-09 · status: superseded in its MODEL half (2026-10-09 ~09:4x) — see the top block · tier: W
 
 **His words, verbatim (terminal, after pasting Stuart's message):** *"other than any actions relating to this message, focus on Spark, Onrith and Sonnet agents until monday when I will sign you into your own account"*
 

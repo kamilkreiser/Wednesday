@@ -1,4 +1,4 @@
-# Ornith candidates — derived 2026-10-08 06:34 from 279 KS Backlog/Todo tickets (read-only, unpaginated)
+# Ornith candidates — derived 2026-10-09 08:38 from 272 KS Backlog/Todo tickets (read-only, unpaginated)
 
 A CENSUS for the coordinator to brief from, easy → hard (Kam 2026-09-15 16:40 / 18:19). A ticket here is a candidate, not a task: read it, read the file at the tip, write `night/briefs/<id>.md`, then queue it. Auth-shaped titles are excluded (LAST); Peter/Stuart tickets and PR-attached tickets are excluded outright.
 
@@ -92,17 +92,12 @@ A CENSUS for the coordinator to brief from, easy → hard (Kam 2026-09-15 16:40 
 - KS-966 — named in READY_KS-972_ornith35b-q4_BASHPATCH-REANCHORED-PASS-7of7_2026-09-16.diff.md, READY_KS-972_ornith35b-q4_BASHPATCH-REANCHORED-PASS-7of7_2026-09-16.diff.md.pre-0951-superseded
 - KS-999 — named in READY_KS-1186_ornith35b-q4_AUTH-5SITE-LINEKEYED-PASS-7of7_2026-09-17.diff.md
 
-## HELD (READY_* or done.md PASS) — 14
+## HELD (READY_* or done.md PASS) — 9
 - KS-1009 Security: GET /api/auth/wallet/status returns userId + role to ANY anonymous cal
 - KS-1186 userRepo.ts: five sibling reads still return fromRow unawaited inside try, so a 
 - KS-1219 OAuth /authorize answers 500 server_error for an array-valued scope (repeated qu
 - KS-1250 O-2: RUNBOOK §2.2 documents SMOKE_BASE_URL, but scripts/smoke-test.sh ignores it
-- KS-1274 Job 04: a trivy that exits 0 with a bare `{}` still reads as a clean image
-- KS-1328 services/kyc db.retry.test.ts exceeds vitest's 5 s default under fleet load — 11
-- KS-1355 Stack tooling is not slot-derived end to end: stack_guard lists a project twice 
-- KS-1410 28 unguarded err.message values land in 500 response bodies across six services 
 - KS-1432 api-gateway's KS-529 guard test tests a copy of the guard, not the guard — delet
-- KS-593 not_a_server_error recurs — 17 raw 5xx across 8 ops (KS-431 / KS-449 / KS-497 re
 - KS-623 Test-token env guard is asymmetric: the gateway fails closed on an unset NODE_EN
 - KS-866 Merge protocol: the server-side `sha=` pin protects the PR head, not the base — 
 - KS-884 pre-push resolves the bare name `develop`, so a TAG named develop beats the bran
@@ -126,7 +121,7 @@ A CENSUS for the coordinator to brief from, easy → hard (Kam 2026-09-15 16:40 
 - KS-770 — not a doc edit — the body is a review-stream test pass for Peter; the docs/ path came from a MENTION, not an edit target (updated 2026-09-28)
 - KS-889 — a measurement/ruling ticket, not a patch (updated 2026-09-06)
 
-## EXCLUDED by predicate — 197
+## EXCLUDED by predicate — 195
 - KS-1000 — has a PR attached
 - KS-1003 — auth-shaped title (LAST, Kam 16:40)
 - KS-101 — on Peter/Stuart
@@ -238,8 +233,6 @@ A CENSUS for the coordinator to brief from, easy → hard (Kam 2026-09-15 16:40 
 - KS-1443 — names no product file (after basename/docs/route resolution)
 - KS-1446 — on Peter/Stuart
 - KS-1447 — names no product file (after basename/docs/route resolution)
-- KS-1449 — names no product file (after basename/docs/route resolution)
-- KS-1450 — names no product file (after basename/docs/route resolution)
 - KS-188 — on Peter/Stuart
 - KS-239 — on Peter/Stuart
 - KS-263 — names no product file (after basename/docs/route resolution)

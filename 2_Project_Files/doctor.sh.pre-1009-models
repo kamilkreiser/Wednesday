@@ -1181,29 +1181,6 @@ else
   fi
 fi
 
-
-# --- Latest Claude models (Kam, 2026-10-09: "always choose the best model at its level") ---
-# models_latest.json is written by tools/latest_models.sh (live source, never typed). Warn when it is
-# missing or >24 h old, and list launcher pins that are not the newest at their level.
-# DOCTOR_MODELS_JSON points the check at a scratch copy (how it is exercised without aging the real file).
-MJ="${DOCTOR_MODELS_JSON:-$PROJECT_DIR/0_Brain/dashboard/data/models_latest.json}"
-if [ ! -f "$MJ" ]; then
-  warn "models_latest.json missing" "bash 2_Project_Files/tools/latest_models.sh — newest Claude model per level (no key needed)"
-elif [ -n "$(find "$MJ" -mmin +1440 2>/dev/null)" ]; then
-  warn "models_latest.json older than 24 h" "bash 2_Project_Files/tools/latest_models.sh — model choices must come from a fresh list, not memory"
-else
-  ok "models_latest.json fresh ($(python3 -I -c "import json,sys;d=json.load(open(sys.argv[1]))['levels'];print(' '.join(k+'='+v['model_id'] for k,v in d.items()))" "$MJ" 2>/dev/null || echo unreadable))"
-fi
-if [ -f "$MJ" ]; then
-  MJ_STALE="$(python3 -I -c "
-import json,sys
-for s in json.load(open(sys.argv[1])).get('stale_pins',[]):
-    print('%s pins %s (newest %s)' % (s['launcher'].replace('!CODING/','').replace('/Launch_Claude.command',''), s['pin'], s['newest']))" "$MJ" 2>&1 | sort -u)"
-  if [ -n "$MJ_STALE" ]; then
-    warn "launcher model pins not newest at level" "per models_latest.json (project launchers are the project's files; switch a seat with /model <id>):"
-    printf '%s\n' "$MJ_STALE" | sed 's/^/        /'
-  fi
-fi
 echo
 if [ "$HARD_FAIL" = "1" ]; then
 

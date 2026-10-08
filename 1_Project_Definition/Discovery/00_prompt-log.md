@@ -2612,3 +2612,8 @@ INCLUDED until he says otherwise.
 > Please look at a message from Stuart - [Stuart's message pasted: KS-1402, KS-1195, KS-1385/KS-1384, KS-695 ask 3, KS-723, housekeeping close KS-1387; KS-1172/1173/577/1175/1195 read In Review/In Progress although merged] . other than any actions relating to this message, focus on Spark, Onrith and Sonnet agents until monday when I will sign you into your own account
 
 *Note:* Receipted on the panel; Stuart list measured by a Sonnet drafter; Opus seats stop until Mon 12 Oct; grant file + EXPIRING-GRANTS row
+
+## 2026-10-09 09:36 — Kam (terminal, verbatim)
+> all sub agents are starting as opus 5.  if you use opus for sub agents (after the next model review phase this should be a deliberate choice) use the best version of opus.  for now, use Opus 5.5 for all sub agnets
+
+*Note:* Receipted; both live seats switched to Opus 5.5 by /model + addendum mails; Sonnet grant marked superseded

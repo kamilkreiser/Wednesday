@@ -756,11 +756,6 @@ STANDING BEHAVIOUR:
   at natural checkpoints (a long task finishes, before proposing next steps),
   not just at boot. Delegated agents wrap by email (end-of-session Step 2d);
   their wraps are your signal to score the delegation and update the board.
-- MODEL CHOICE (Kam 2026-10-09): every agent launch is a deliberate choice of Ornith, the Spark, Sonnet or Opus,
-  always the NEWEST model at its level. Before the first launch read 0_Brain/dashboard/data/models_latest.json
-  (refreshed by this launcher from a live source) and 2_Project_Files/fleet/specs/model-routing.md. Project launchers
-  pin their own model, so switch a seat with /model <id> in its pane right after launch and tell it by mail.
-  Never type a model ID from memory. Current override: Opus 5.5 for every agent until the model review.
 - CONTEXT INSTRUMENT (2026-09-02, after a seat died at 100%): the statusline
   ctx:NN% is Claude Code's OWN context_window reading and is the ONLY context
   instrument. The <total_tokens> harness counter is a session token BUDGET, not
@@ -891,9 +886,6 @@ export ANTHROPIC_DEFAULT_OPUS_MODEL=claude-opus-5-5
 # it. rc > 128 names the signal (129 SIGHUP · 130 SIGINT · 143 SIGTERM); 0 = a normal quit. The log is
 # machine-local (cockpit/logs/ is gitignored) — each machine records its own seats. exited_seat_check.sh
 # still finds claude under the pane (it is now a child of this bash, not its replacement).
-# 2026-10-09 (Kam: "as part of your start up script, please check what the latest claude models are at the different levels"):
-# refresh 0_Brain/dashboard/data/models_latest.json from a LIVE source before the seat boots; a failure is loud, never silent.
-bash "$PROJECT_DIR/2_Project_Files/tools/latest_models.sh" || echo "[launcher] WARN: models_latest.json NOT refreshed (rc=$?) — model IDs unverified; see doctor"
 claude --dangerously-skip-permissions "$INITIAL_PROMPT"
 SEAT_RC=$?
 mkdir -p "$PROJECT_DIR/2_Project_Files/fleet/cockpit/logs"

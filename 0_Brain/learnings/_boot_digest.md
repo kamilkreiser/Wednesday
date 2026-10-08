@@ -7,7 +7,7 @@ status: live
 
 # Boot digest — headline + rules of every lesson (open the file when it fires)
 
-Generated 2026-10-09 09:29 from 227 lesson files (1,015,244 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 13 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
+Generated 2026-10-09 09:39 from 227 lesson files (1,016,090 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 13 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
 
 ## The T9 SSD is the master — Wednesday must be fully portable
 `2026-07-31_fully-portable-drive.md` · principle · 2026-07-31 · status: superseded — the "T9 is the master" half by [[2026-08-25_one-drive-devmaster-is-master]] (2026-08-25); the portability principle itself still lives
@@ -7156,7 +7156,7 @@ sections (open the file for these): RULED 2026-10-05 ~11:1x — Kam (terminal, v
 
 
 ## Until Monday, the work runs on the Spark, Ornith and SONNET seats — no new Opus seats, gates or drafters
-`2026-10-09_spark-ornith-sonnet-only-until-monday.md` · grant · 2026-10-09 · status: live
+`2026-10-09_spark-ornith-sonnet-only-until-monday.md` · grant · 2026-10-09 · status: superseded in its MODEL half (2026-10-09 ~09:4x) — see the top block
 
 **His words, verbatim (terminal, after pasting Stuart's message):** *"other than any actions relating to this message, focus on Spark, Onrith and Sonnet agents until monday when I will sign you into your own account"*
 
