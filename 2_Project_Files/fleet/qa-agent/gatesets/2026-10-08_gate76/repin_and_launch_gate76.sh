@@ -135,7 +135,7 @@ HE="1427=$H1427,1428=$H1428"
 python3 "$GS/c4_docs_gate76.py" calibrate --repo "$CL" --heads "$HE" > "$OUTP.c4cal.out" 2> "$OUTP.c4cal.err"; rcc=$?
 echo "  c4 calibrate rc=$rcc | $(grep -E '^(CHECKED|[0-9]+ FAIL)' "$OUTP.c4cal.out" | tr '\n' ' ')"
 [ "$rcc" -eq 0 ] || { echo "REFUSING TO LAUNCH: c4 calibrate FAILED (read $OUTP.c4cal.out)"; exit 13; }
-rm -rf "$OUTP.chain" 2>/dev/null; mkdir -p "$OUTP.chain"
+mkdir -p "$OUTP.chain"   # a fresh timestamped dir; nothing is ever deleted (Kam 2026-08-26: quarantine, never delete)
 python3 "$GS/c4_docs_gate76.py" chain --repo "$CL" --order "$ORDER" --develop "$CUR_DEV" --heads "$HE" --out "$OUTP.chain" > "$OUTP.c4chain.out" 2> "$OUTP.c4chain.err"; rcq=$?
 grep -E '^(STEP|   guard|FINAL|CHAIN|REFUSED)' "$OUTP.c4chain.out" | sed 's/^/    /' | cut -c1-240; echo "  c4 chain rc=$rcq"
 [ "$rcq" -eq 0 ] || { echo "REFUSING TO LAUNCH: the chain onto develop $CUR_DEV is NOT predicted (read $OUTP.c4chain.out). A moved CODE path is a RE-GATE; never --no-verify."; exit 13; }
