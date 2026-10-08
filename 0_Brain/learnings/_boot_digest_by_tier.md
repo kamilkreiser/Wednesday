@@ -7,7 +7,7 @@ status: live
 
 # Boot digest BY TIER — W whole, M rules-only, every project case a handle
 
-Generated 2026-10-08 17:25 from 224 lesson files (1,005,797 B). M 36 · MIXED 5 · P-Datasec/HPSM-POC 1 · W 182. 5 project CASE sections inside MIXED files are reduced to one line each: the heading and the path to read it at. W blocks are exactly what the default digest carries; M blocks drop the section index and keep the rules; a P file is a single handle. The CASES behind every rule live only in the lesson files — open one the moment its rule fires.
+Generated 2026-10-08 18:14 from 225 lesson files (1,008,787 B). M 36 · MIXED 5 · P-Datasec/HPSM-POC 1 · W 183. 5 project CASE sections inside MIXED files are reduced to one line each: the heading and the path to read it at. W blocks are exactly what the default digest carries; M blocks drop the section index and keep the rules; a P file is a single handle. The CASES behind every rule live only in the lesson files — open one the moment its rule fires.
 
 ## The T9 SSD is the master — Wednesday must be fully portable
 `2026-07-31_fully-portable-drive.md` · principle · 2026-07-31 · status: superseded — the "T9 is the master" half by [[2026-08-25_one-drive-devmaster-is-master]] (2026-08-25); the portability principle itself still lives · tier: W
@@ -7035,6 +7035,21 @@ sections (open the file for these): RULED 2026-10-05 ~11:1x — Kam (terminal, v
 3. **Expiry is an EVENT:** the renewal, an account switch, or his word. Do not renew it by inference.
 
 **Family:** [[2026-10-08_use-to-100pct-raise-gate-merge-seats-only]] · [[2026-09-16_new-account-spin-up-agents-to-test-approve-merge]] (the same shape on 09-16 and 09-20) · [[2026-09-06_a-scoped-override-carries-its-own-expiry]] · [[2026-08-03_go-slow-earn-autonomy]] (rule 5).
+
+
+## Ornith 1.5 replaces Ornith 1.0 — push it to harder tasks, and run it AND the Spark as much as possible
+`2026-10-08_ornith-15-replaces-10-push-it-harder.md` · grant · 2026-10-08 · status: live · tier: W
+
+**The operative case, so the headline matches it:** Wednesday is about to route a task to the local Studio model, or to brief one. **The Studio model is now Ornith‑1.5‑35B‑A3B (MLX 8‑bit, served by oMLX on 47780), not Ornith 1.0 on Ollama.** Give it harder tasks than 1.0 got, measured rung by rung, and keep both it and the Spark busy.
+
+**How to apply:**
+1. **Swap, don't delete.** 1.5 becomes the night runner's default model; 1.0 (Ollama `ornith:35b`) stays installed as a named fallback. Nothing is removed.
+2. **The serving path is a mechanism, so it is armed AND checked:** a scripted oMLX start on 47780 with the `balanced` memory tier untouched, a memory guard while seats are live, a `doctor.sh` check, and a PORTABILITY item for the off-drive `~/.omlx/bin` symlink.
+3. **Harder tasks = a ladder, measured** (the 2026-09-25 Spark calibration shape): multi-hunk, then multi-file, then looser briefs. Record each rung's PASS/FAIL and its cause (model / harness / brief). The counter stands: original brief + ONE rebrief, then a Claude seat.
+4. **Known 1.5 defect, from the A/B:** it rewrites a bare identifier `+` line among quoted strings as a quoted string (`gap,` → `'gap',`). The checker's A3c catches it. Briefs carrying such a line name it explicitly.
+5. **Both local tiers as much as possible:** Spark-first for medium work, 1.5 for what it can be briefed for, Claude seats only to raise, gate and merge. Client scope is unchanged (one client per task; Ornith is the Studio's and is not Datasec's).
+
+**Family:** [[2026-09-16_local-model-is-long-term-and-claude-takes-what-it-cannot-do]] · [[2026-09-25_three-tier-routing-ornith-spark-cloud-always-on]] · [[2026-09-25_spark-calibrate-like-ornith-start-high-oversight]] · [[2026-09-18_ornith-works-constantly-standing-rule]] · [[2026-08-21_challenge-me-when-you-think-im-wrong]] (a recommendation overruled is recorded, and the ruling is executed fully) · [[2026-08-03_go-slow-earn-autonomy]] (rule 5: every grant recorded).
 
 
 ## Grant: this seat may spend to 100% of the weekly allowance, for raise, gate and merge seats only, until the renewal
