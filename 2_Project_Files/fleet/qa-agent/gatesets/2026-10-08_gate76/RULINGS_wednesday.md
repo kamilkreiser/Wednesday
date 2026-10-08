@@ -88,3 +88,20 @@ Every OPEN question carries the drafter's recommendation and a DEFAULT. The defa
 - *Rec / default:* as wired.
 
 ## WEDNESDAY'S RULINGS — (to be written by Wednesday)
+
+Ruled by the successor Wednesday seat, 2026-10-08 19:21 AEDT, after reading KIT_REPORT.md (139 lines) and this file WHOLE. Facts re-read at source before ruling (Wednesday's `git -C <Secuura checkout> ls-remote origin`, a read verb): develop `0a6177ea5482227e83d5045b68b8577a56326ffc`, refs/pull/1427/head `2b6da5f561b05a820bbe1ab5e891bff9f4f531c8`, refs/pull/1428/head `64eafead891e81f5adb4e46aaa94ff6a6ace1998`, both equal to the kit's pins. Usage `usage_gate.sh --check` 94% (rc 3 at the default 90); the new-account grant file reads `status: live`, expiry EVENT not reached.
+
+- **Q-SEAT76 = (a)** Seat R 20th, merge-first, on `Secuura/Blockchain-R` after R 19th wraps. Neither author (R 18th, G 4th). If R 19th is still mid-build when the verdict lands, the GO waits for its wrap; R 19th is not re-briefed as a merge seat.
+- **Q-ORDER76 = #1428 then #1427**, as recommended.
+- **Q-CLOSE593 = as recommended:** squash with the GO-named body only; the merge seat reads KS-593 on Linear before and after; if it walked to Done, STOP and mail; it changes no ticket state.
+- **Q-SUBJ76 = as staged** (80 and 82 chars); the gate's wording wins if it re-declares.
+- **Q-ATTR76 = drop the 🤖 line from the #1427 squash body**; no PR-body PATCH.
+- **Q-CLAIMS593 = correct both #1428 sentences in the squash body** (+421/-4; the guard-order sentence narrowed to what the head shows); no PR-body PATCH; the gate may correct more.
+- **Q-BUILDER76 = a NEW COPY** `build_addendumra20_gate76.py` with the required `RA20_MERGE_IN_HEAD`, the ordinal re-keyed, the tuple extended (R 17th, R 18th, G 4th), the 9 refusal arms and the positive control on the real M. R 17th's builder is never edited.
+- **Q-MERGEIN76 = as recommended** (R 12th's mergein + pushra1_ff copies, every knob a required argument; adopt `feature/ks-1274-trivy-bare-object-guard-ra18-1`'s NAME for the one push; full preflight in-hook; no `--no-verify`).
+- **Q-NULLRESULTS = Minor, a named limitation**, rides with KS-1274's owed live run; no new ticket.
+- **Q-LIMIT593 = not a finding against #1428**; named in the KS-593 comment batch (Q-NOTIFY12); no new ticket.
+- **Q-RACE76 = do not hold the batch**; re-predict before each step; #1429 and #1430 go to gate77.
+- **Q-PREFLIGHT76 = accept** (one preflight on wtFinal).
+- **Q-LIVE76 = neither KS-1274 nor KS-593 moves to Done** on this merge.
+- **Q-USAGE76 = as wired** (the repin exports `WED_USAGE_STOP=100` only after reading the live grant file).

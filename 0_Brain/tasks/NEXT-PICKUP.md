@@ -14,6 +14,15 @@ supersede: REPLACED WHOLESALE 2026-10-08 05:3x by the overnight seat (booted 02:
 2. **R 15th is LIVE (%91 `Secuura/Blockchain-R`)** — see FLOOR. Its plan confirmation is the first thing owed.
 3. **Morning brief LEADS with (value first):** gate74 GO (#1423), R 15th merging #1422 + #1423, the Spark census (24 unraised passes found, 10 now held), and the BLOCKER: **develop red on pre-push leg 14 → KS-1450** (Peter's #1424) blocks every push touching `Blockchain/Dev/`. Give Kam a 1-2 line WhatsApp text pointing at https://linear.app/secuura/issue/KS-1450 in case Peter has not seen it (Kam sends; nobody else messages Peter).
 
+## 🔴 19:3x 2026-10-08 — LIVE STATE (successor seat booted 19:1x at ctx 34%; supersedes the 18:5x block)
+**Floor:** %0 wednesday · %99 R 19th · %100 G 5th · **%101 QA/Secuura-gate76** · %1 monitor. E 11th (0.95) and F 5th (0.96) WRAPPED, scored, panes %97/%98 CLOSED. No QUESTION unanswered at 19:3x.
+- **gate76 LAUNCHED 08:24:50Z** on develop 0a6177ea5482 (rulings appended to the kit's `RULINGS_wednesday.md`, every Q as recommended; routing line `inbox_routing.conf:206`). Rung 5 verified from its transcript. NEXT: its verdict mail `[QA -> Wednesday] GATE76 …` → read WHOLE, re-hash the report → if GO, **Seat R 20th** (merge-first, after R 19th wraps) lands #1428 then #1427 with the NEW builder copy (Q-BUILDER76).
+- **READY for gate77:** #1429 (KS-1449, 1271d9597c43), #1430 (KS-1328, d9928f4a8a4d), #1431 (KS-1355, d715e5dfbbf2), + R 19th's KS-1410 PR once raised. Commission the gate77 kit from the gate76 kit.
+- **R 19th:** told 08:23Z ctx ~39% → PUSH R3+R4 (KS-1410, commit c4e6f50654fa). NEXT from it: `STATUS: pushed … raised #<n>`, then a ctx read before R5 (KS-1139).
+- **G 5th:** booting/plan; its plan confirmation is owed when it lands.
+- **Drafters RUNNING (background; a rotation kills them, re-commission from the 19:2x note lines):** F 6th brief (KS-808, Q-READ808) → `fleet/briefs_staged/2026-10-08_seatF6_raise_ks808.md`; E 12th brief (KS-591 + KS-1364) → `…_seatE12_raise_ks591_ks1364.md`; harder-task screen for the Spark + Ornith 1.5 → `0_Brain/reference/2026-10-08_harder-screen/SCREEN.md` (briefs dry-run only; Wednesday queues; lift `night/PAUSE_QUEUE` when an Ornith brief is queued). On return: read each WHOLE, rule its Qs, generate the 64-card section, launch with `WED_USAGE_STOP=100` (usage 94%, new-account grant, clause RAISE).
+- OWED unchanged from the 18:5x block, plus: KS-1328 unassigned (rule-7 batch); E 9th/E 10th worktrees for drive hygiene (386 GB free).
+
 ## 🔴 18:5x 2026-10-08 — ROTATION HANDOVER (ctx ~80%) — READ THIS FIRST
 **Floor:** %0 wednesday · %97 E 11th · %98 F 5th · %99 R 19th · **%100 G 5th** · %1 monitor. **No QUESTION unanswered** at 18:5x (every 10-08 QUESTION matched by a later ANSWER).
 - **READY FOR QA / raised:** #1427 (KS-1274, `2b6da5f561b0`) · #1428 (KS-593, `64eafead891e`; commit-message residue "does not close KS-593": squash without it, confirm KS-593 stays open) · #1429 (KS-1449, `1271d9597c43`; leg 8 served-spec unrun) · #1430 (KS-1328, `d9928f4a8a4d`).
