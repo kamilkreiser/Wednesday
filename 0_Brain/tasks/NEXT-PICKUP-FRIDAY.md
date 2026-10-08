@@ -12,6 +12,11 @@ supersede: replace wholesale; previous = NEXT-PICKUP-FRIDAY.md.pre-0925-rotate-s
 
 **The tree is at `/Volumes/Laptop-DEV/FRIDAY` (the drive, since 2026-09-28).** Quote every path (spaces).
 
+## 🔴🔴🔴 CHECKPOINT 2026-10-08 11:39 (Friday, ctx 52%) — READ FIRST; supersedes every block below where they differ
+**DONE since 10:3x:** Figure 6 → Engagements (now Figure 3), docx+PDF in Kam's drawer (f-ed2db29bc7, f-d5bd5820c3); HPSM-POC records #106 + #108 merged (analysis main a00a481): C-80 = Kam's M2 PO approval verbatim ("I approve M2 as Product Owner.", 10:44:20, dkim pass); HPMSPOC-241 comment 39246, 242 comment 39247 (owed deliveries DONE; cards hpsmpoc-hp-questions-send-1008 + paul-signin-1008 still need `--delivered` naming those ids). %107 closed. Composer #239: PR #56 merged → main **a32f9ce** (gate B100 NO GO on F1 only, accepted by Friday; card **composer-239-mac-1280-17px-1008** open, rec a). #107 closed (superseded by #108).
+**LIVE:** %108 Security-Composer-A = **B99 ADDENDUM-2: demo deploy of a32f9ce** (`Briefs/2026-10-08_B99_ADDENDUM-2_demo-vm-a32f9ce.md`). On READY: read its STATUS, check the live marker + logins + the screenshots yourself, report to Kam (with the Mac caveat), `--delivered` composer-239-first-item-below-fold-1008 naming the C-number, close %108.
+**HELD (Friday's):** Composer lanes 2 (#248) and 3b (#250) until the allowance renews (85%, renews ~21 h from 11:39).
+
 ## 🔴🔴🔴 STATE 2026-10-08 10:38 (Friday successor, ctx ~39%) — READ FIRST; supersedes every block below where they differ
 **B99 (%108):** STATUS says STOPPED: NEEDS FRIDAY on a 2.2 px miss (released + in-review at 1280). Friday ruled **(b) the 8 px trim**, keep the box acceptance: `Datasec Security Composer/1_Project_Definition/Briefs/2026-10-08_B99_ADDENDUM-1_spacing-8px-ruling.md` (written 10:36, NOT YET TAPPED: %108 was BUSY on the full e2e ON run). Tap it the moment %108 is idle: `cockpit.sh say %108 'New file from Friday: <that path>'`. Watcher: seen file in the old seat's scratchpad (re-seed once if rotating). Then the 09:5x block's on-READY steps (PR, tier-2 rendered gate, merge_when_green, demo deploy under push-to-demo).
 **HELD by Friday (not Kam's):** Composer lanes 2 (#248) and 3b (#250) until B99 is merged or the allowance renews (84%, renews ~22 h from 10:3x; load 18 on 12 cores). Both are Claude-shaped, not Spark.
