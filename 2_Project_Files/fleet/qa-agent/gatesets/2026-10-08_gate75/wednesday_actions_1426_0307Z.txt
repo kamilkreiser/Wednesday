@@ -1,0 +1,37 @@
+PASS X0 runs at the FULL head sha 6 | CONTROL a fabricated sha reads 0 | polls 1
+INFO LOG head PR Security Gates (KS-168) / Code Security Gates: {'bytes': 153731, 'groups': 24, 'fabricated_needle': 0, 'failed_steps': ['All shell test suites (KS-666 / KS-731 — globbed, not listed)'], 'needles1': {'expected exit 0 (clean), got 1': 0}, 'shell_suites': ['shell suites: 65 passed, 6 failed, 0 skipped (of 71)'], 'FAILED': ['Blockchain/Dev/scripts/__tests__/ks949_main_seed_idempotence.test.sh', 'Blockchain/Dev/scripts/__tests__/run_migrations_failure_exit_code.test.sh', 'Blockchain/Dev/scripts/__tests__/run_shell_suites.test.sh', 'Blockchain/Dev/scripts/__tests__/smoke_test_degraded_warns.test.sh', 'systemTest/__tests__/bootstrap_login_diagnosis.test.sh', 'systemTest/__tests__/manifest_readers_agree.test.sh'], 'leg14': ['no_hardcoded_slot_literals: 11 passed, 0 failed']}
+INFO LOG head Security Scanning / Dependency Audit: {'bytes': 43891, 'groups': 19, 'fabricated_needle': 0, 'failed_steps': ["Audit-contract suites (the gates' own validator)"], 'needles1': {'expected exit 0 (clean), got 1': 1}, 'shell_suites': [], 'FAILED': [], 'leg14': []}
+INFO LOG head pr / Akto suite (PR): {'bytes': 561803, 'groups': 31, 'fabricated_needle': 0, 'failed_steps': ['Boot Akto stack + import spec + load templates', 'Enforce Akto PR result (block on any failure)'], 'needles1': {'expected exit 0 (clean), got 1': 0}, 'shell_suites': [], 'FAILED': [], 'leg14': []}
+INFO LOG head pr / Performance suite (k6 smoke): {'bytes': 500530, 'groups': 30, 'fabricated_needle': 0, 'failed_steps': ['Enforce Performance result (block on any failure)', 'Upload performance reports'], 'needles1': {'expected exit 0 (clean), got 1': 0}, 'shell_suites': [], 'FAILED': [], 'leg14': []}
+INFO LOG head pr / Playwright suite: {'bytes': 80100, 'groups': 21, 'fabricated_needle': 0, 'failed_steps': ['Quality gate — unit suite (test:unit)', 'Upload Playwright report'], 'needles1': {'expected exit 0 (clean), got 1': 0}, 'shell_suites': [], 'FAILED': [], 'leg14': []}
+INFO LOG develop PR Security Gates (KS-168) / Code Security Gates: {'bytes': 157083, 'groups': 24, 'fabricated_needle': 0, 'failed_steps': ['All shell test suites (KS-666 / KS-731 — globbed, not listed)'], 'needles1': {'expected exit 0 (clean), got 1': 0}, 'shell_suites': ['shell suites: 64 passed, 7 failed, 0 skipped (of 71)'], 'FAILED': ['Blockchain/Dev/scripts/__tests__/ks949_main_seed_idempotence.test.sh', 'Blockchain/Dev/scripts/__tests__/run_migrations_failure_exit_code.test.sh', 'Blockchain/Dev/scripts/__tests__/run_shell_suites.test.sh', 'Blockchain/Dev/scripts/__tests__/smoke_test_degraded_warns.test.sh', 'systemTest/__tests__/bootstrap_login_diagnosis.test.sh', 'systemTest/__tests__/manifest_readers_agree.test.sh', 'systemTest/__tests__/no_hardcoded_slot_literals.test.sh'], 'leg14': ['no_hardcoded_slot_literals: 8 passed, 1 failed']}
+INFO LOG develop pr / Akto suite (PR): {'bytes': 584091, 'groups': 31, 'fabricated_needle': 0, 'failed_steps': ['Boot Akto stack + import spec + load templates', 'Enforce Akto PR result (block on any failure)'], 'needles1': {'expected exit 0 (clean), got 1': 0}, 'shell_suites': [], 'FAILED': [], 'leg14': []}
+INFO LOG develop pr / Performance suite (k6 smoke): {'bytes': 564681, 'groups': 30, 'fabricated_needle': 0, 'failed_steps': ['Enforce Performance result (block on any failure)', 'Upload performance reports'], 'needles1': {'expected exit 0 (clean), got 1': 0}, 'shell_suites': [], 'FAILED': [], 'leg14': []}
+INFO LOG develop pr / Schemathesis suite: {'bytes': 549130, 'groups': 28, 'fabricated_needle': 0, 'failed_steps': ['Install Schemathesis suite', 'Enforce Schemathesis result (block on any failure)'], 'needles1': {'expected exit 0 (clean), got 1': 0}, 'shell_suites': [], 'FAILED': [], 'leg14': []}
+INFO LOG develop pr / Playwright suite: {'bytes': 79353, 'groups': 21, 'fabricated_needle': 0, 'failed_steps': ['Quality gate — unit suite (test:unit)', 'Upload Playwright report'], 'needles1': {'expected exit 0 (clean), got 1': 0}, 'shell_suites': [], 'FAILED': [], 'leg14': []}
+  -- against develop: OUTSIDE none
+     Dependabot standalone locks        skipped
+     PR Security Gates (KS-168)         class (2) HOLDS: head failing ['Code Security Gates'] SUBSET of the comparator's ['Code Security Gates']: True
+     PR — Lockfiles (path-skip twin)    success
+     Security Scanning                  class (1) advisory-freeze HOLDS: failing ['Dependency Audit'] SUBSET of {Dependency Audit} True; audit-contract step + log needle: True; history 12 of the last 12 completed Security Scanning runs repo-wide FAILED across 9 branches
+     pr                                 class (3) HOLDS: head failing ['Akto suite (PR)', 'Performance suite (k6 smoke)', 'Playwright suite'] SUBSET of the comparator's ['Akto suite (PR)', 'Performance suite (k6 smoke)', 'Playwright suite', 'Schemathesis suite']: True; the comparator fails, head PASSES: ['Schemathesis suite'] (named, no cause claimed)
+     pr-premerge-ack                    success
+  -- against base (THE RULED COMPARATOR): OUTSIDE none
+     Dependabot standalone locks        skipped
+     PR Security Gates (KS-168)         class (2) HOLDS: head failing ['Code Security Gates'] SUBSET of the comparator's ['Code Security Gates']: True
+     PR — Lockfiles (path-skip twin)    success
+     Security Scanning                  class (1) advisory-freeze HOLDS: failing ['Dependency Audit'] SUBSET of {Dependency Audit} True; audit-contract step + log needle: True; history 12 of the last 12 completed Security Scanning runs repo-wide FAILED across 9 branches
+     pr                                 class (3) HOLDS: head failing ['Akto suite (PR)', 'Performance suite (k6 smoke)', 'Playwright suite'] SUBSET of the comparator's ['Akto suite (PR)', 'Performance suite (k6 smoke)', 'Playwright suite', 'Schemathesis suite']: True; the comparator fails, head PASSES: ['Schemathesis suite'] (named, no cause claimed)
+     pr-premerge-ack                    success
+  -- against union: OUTSIDE none
+     Dependabot standalone locks        skipped
+     PR Security Gates (KS-168)         class (2) HOLDS: head failing ['Code Security Gates'] SUBSET of the comparator's ['Code Security Gates']: True
+     PR — Lockfiles (path-skip twin)    success
+     Security Scanning                  class (1) advisory-freeze HOLDS: failing ['Dependency Audit'] SUBSET of {Dependency Audit} True; audit-contract step + log needle: True; history 12 of the last 12 completed Security Scanning runs repo-wide FAILED across 9 branches
+     pr                                 class (3) HOLDS: head failing ['Akto suite (PR)', 'Performance suite (k6 smoke)', 'Playwright suite'] SUBSET of the comparator's ['Akto suite (PR)', 'Performance suite (k6 smoke)', 'Playwright suite', 'Schemathesis suite']: True; the comparator fails, head PASSES: ['Schemathesis suite'] (named, no cause claimed)
+     pr-premerge-ack                    success
+PASS X1 reds OUTSIDE the three classes (or a class that does not hold): none
+PASS X2 PENDING (never a pass): none
+INFO X3 develop ddea005553bf: {'PR Security Gates (KS-168)': ('failure', ['Code Security Gates']), 'pr': ('failure', ['Akto suite (PR)', 'Performance suite (k6 smoke)', 'Playwright suite', 'Schemathesis suite'])} | base ddea005553bf (== develop)
+CHECKED 3
+0 FAIL
