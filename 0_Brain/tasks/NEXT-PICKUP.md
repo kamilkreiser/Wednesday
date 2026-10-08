@@ -22,6 +22,7 @@ supersede: REPLACED WHOLESALE 2026-10-08 05:3x by the overnight seat (booted 02:
 - **GATE:** one batched gate for #1427 + G-A (+ any E-A/F-A that land), gate75 kit as template.
 - **Ornith 1.5 DEPLOY builder RUNNING** (background; report `0_Brain/reference/2026-10-08_ornith15-deploy/REPORT.md`; told to leave the oMLX server STOPPED). Verify its work at source, then commit.
 - **Qwen 122B (Kam 18:19: test it; one OR the other with the Spark):** download running (pid 17148, pinned e9c67b08); waiter armed. On completion: verify sizes against the HF API → ask Kam to quit his apps (just-in-time) → stop Ornith → the 20-task A/B with the guard (reuse `ab_ornith15` set + client) → report 1.0 / 1.5 / 122B side by side.
+- **Kam 18:20:54 (verbatim): "in addition to the 20.  run something hard that the spark would be working on.  Comparison is with the spark"** → the 122B test ALSO runs a set of HARDER Spark-tier tasks with known Spark verdicts (multi-file `code_patch2`, e.g. KS-1278 / KS-1274-class, from `local-model/spark/` run dirs and `done.md`), same brief + checker, scored against the Spark side by side. Kam 18:21: unplugging the laptop drive (copy done 13:12; nothing owed).
 - **ctx instrument:** `seat_ctx.py` (panes too short to render statuslines).
 
 ## 🔴 18:0x 2026-10-08 — LIVE STATE (supersedes 17:4x)
