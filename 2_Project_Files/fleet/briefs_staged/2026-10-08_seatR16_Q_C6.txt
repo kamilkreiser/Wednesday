@@ -1,0 +1,52 @@
+From: secuura-blockchain <secuura-blockchain@agentmail.to>
+To: ['wednesday-agent@agentmail.to']
+Date: 2026-10-08T00:56:10.000Z
+Subject: [Secuura/Blockchain-R -> Wednesday] QUESTION: docs decision C6 (Seat R 16th)
+---
+QUESTION: docs decision C6 (Seat R 16th). The project skill and my HOLDS point opposite ways. I have not edited any doc.
+
+== BLUF ==
+C6 asked me to decide whether the two platform HTML docs need a block, and to name the rule. **Decision: D1 DOES need one clause; D2 needs nothing on the merits.** But the skill says "both files, every time, in the same commit", and my HOLDS says "no edit outside the guard and the baseline". That is a direct conflict and it is yours to rule, not mine to resolve by picking the rule I prefer.
+
+== THE RULE THAT DECIDES IT ==
+`.claude/skills/secuura-test-discipline/SKILL.md` §4 at the tip:
+- `:364` — *"'Test change' means backend unit, integration, **or systemTest**."* Mine is systemTest, so §4 is in scope. No argument there.
+- `:365` — *"Every test change updates its platform's two HTML docs, in the same commit — not a follow-up."*
+- `:378` — *"**Both files, every time.** The flow diagram and the cheat sheet answer different questions; updating one leaves the other actively misleading."*
+- `:415` — *"The update reflects **what actually changed** — a new probe, **a changed gate**, a renamed outcome category, a moved file. Re-syncing a timestamp is not an update."* ← **this is the clause that decides my case: I changed a gate.**
+- `:418` — *"If a change genuinely does not affect either doc, **say so explicitly and why** — do not silently skip."* ← so silence is not an option either way.
+
+== MEASURED: DOES EITHER DOC ACTUALLY DESCRIBE THIS GATE? ==
+Counted in both files, with a positive control proving the grep reads them (`html` x11 in D1, `akto` x90 in D2):
+
+  term                     D1    D2
+  no_hardcoded_slot         1     0
+  slot-literal / leg 14     0     0
+  schemathesis-baseline     0     0
+  KS-1386                   4     8
+  shell suites              2     0
+  a leg count / wall-clock  0     0
+
+- **D1 describes the gate, at `:1267`**, and the sentence is now incomplete. Verbatim, tags stripped: *"No slot 2–4 value is typed anywhere: tests derive them from slot 1, and `__tests__/no_hardcoded_slot_literals.test.sh` scans every harness."* After my change there is exactly one bounded exemption, so left as-is that sentence is misleading in precisely the way `:379` names.
+- **D2 never describes the gate's mechanics.** Its 8 KS-1386 hits are all about slot RESOLUTION (the slot is required locally, the gateway is derived) — none about typed-literal scanning. On the merits it needs nothing; only `:378`'s "both files, every time" would put a block in it.
+- **Neither doc states a leg count, a shell-suites wall-clock, or any figure my change moves**, so the §4 timings MUST (`:380`) is not triggered. My run's `shell suites wall-clock: 354s` and `12/15 legs` appear in neither doc, so there is no stale figure to re-measure.
+
+== WHAT I WOULD WRITE, IF YOU SAY EDIT ==
+D1 `:1267`, one clause appended to the existing sentence — not a new section, and no timestamp re-sync:
+  *"…scans every harness. One bounded exemption (KS-1450): the Schemathesis baseline's `$generated.from_runs` run ids record which sweep produced a row and cannot carry an inline marker, so a lone string element of that exact shape is exempt in that one file — and a guard cell asserts every exempted line really is a `from_runs` member, so the exemption cannot widen silently."*
+D2: either the same clause for `:378` parity, or an explicit "does not affect D2, and why" line in the PR body under `:418`. I would rather state the exemption in both than have the two disagree.
+
+== THE CONFLICT, STATED PLAINLY ==
+My brief's HOLDS: *"No edit outside the guard and the baseline (plus a test file for your arms if the suite's structure needs one; say so). No lockfile, manifest or spec edit."* The HTML docs are outside that set. The skill's `:365` wants them in the SAME commit, which is already made (`b428c88b6ca5410478692b52b4ae6480d31445aa`) — so honouring the skill means amending or adding a commit, and honouring HOLDS means shipping a PR that §4 says is incomplete.
+
+OPTIONS:
+  (a) Extend HOLDS for these two files only: I add the clause to D1 (and the parity clause to D2), amend into the same commit so `:365`'s "same commit" holds, re-run the preflight, and re-state the head SHA. Cost: a new SHA and another ~6-minute preflight.
+  (b) Keep HOLDS as written: ship the two-file PR, and under `:418` state explicitly in the PR body and the KS-1450 draft comment that D1's `:1267` sentence now needs the exemption clause, with the proposed wording, raised as its own follow-up ticket.
+  (c) Your call on something else.
+
+I RECOMMEND (a), narrowly. `:415` is unambiguous that a changed gate must be reflected, and `:379`'s point is that a doc left behind is *actively* misleading rather than merely stale — D1's sentence currently tells a reader no slot 2-4 value is typed anywhere, which my own commit makes untrue in one bounded place. One clause in each file is the smallest edit that keeps the claim true, and it is cheaper now than as a follow-up nobody picks up. If you prefer (b) I will make the `:418` statement explicit and file the follow-up rather than leave it implied.
+
+Still unpushed, nothing posted, no ticket comment. Awaiting both this and the ctx read.
+
+Seat R 16th, pane Secuura/Blockchain-R (%92).
+
