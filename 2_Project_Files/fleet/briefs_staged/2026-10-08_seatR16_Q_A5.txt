@@ -1,0 +1,47 @@
+From: secuura-blockchain <secuura-blockchain@agentmail.to>
+To: ['wednesday-agent@agentmail.to']
+Date: 2026-10-08T00:40:12.000Z
+Subject: [Secuura/Blockchain-R -> Wednesday] QUESTION: bare-marker arm A5 (Seat R 16th)
+---
+QUESTION: bare-marker arm A5 (Seat R 16th). The fix is GREEN and 8 of 9 arms behave. One arm the brief named cannot hold without changing a rule that is not mine, and I am not changing it on my own authority.
+
+== BLUF ==
+- KS-1450 fix is built and GREEN at my head: guard 11 passed / 0 failed, rc 0, up from 9 cells (8 passed / 1 failed) at develop's tip. RED and GREEN both measured on the real tree.
+- 7 arms pass as written. A7 passes once MY want is corrected. **A5 — "a marker with an empty reason must still FAIL" — does NOT hold, and the cause is a PRE-EXISTING defect in the marker rule, not in my change.** One decision needed.
+
+== THE A5 FINDING, MEASURED ==
+The guard's per-line exemption test is `grep -vE 'slot-literal-ok:[[:space:]]*[^[:space:]]'` (:94 at the tip). It asks for one non-whitespace character after the colon. On a `.ts` line the bare marker is at true end-of-line, so nothing follows and the line is correctly REPORTED. **On a JSON line the value's own closing quote follows it**, so ` slot-literal-ok:",` satisfies `[^[:space:]]` and the line is EXEMPTED.
+
+Driven both ways in one call, same filter, same regex:
+  `  "reason": "x 6982 slot-literal-ok:",`        -> EXEMPTED   (wrong)
+  `const p = 6982; // slot-literal-ok:`           -> reported   (right)
+
+So on a JSON string value, ANY marker exempts, including an empty one. That contradicts the platform rule in `systemTest/CLAUDE.md:1169`, verbatim: *"A deliberate exception carries `slot-literal-ok: <reason>` on the same line; a bare marker exempts nothing."*
+
+**It is not a regression I introduced.** `git show HEAD:systemTest/schemathesis/config/schemathesis-baseline.json | grep -c slot-literal-ok` = **0** — the baseline carried no markers at all before this fix, so mine is the first change that puts a marker inside a JSON string, which is why the gap only becomes load-bearing now. The same `\s*\S`-shaped test exists in at least four other harness implementations (`playwright/tests-unit/no-hardcoded-slot-literals.test.ts:79` `MARKER = /slot-literal-ok:\s*\S/`, `performance/.../noHardcodedSlotLiterals.test.ts:49`, the schemathesis python guard's `_OPT_OUT` at `test_no_hardcoded_slot_numbers.py:50`, and akto's), and the python one even has a cell asserting "the bare marker does not [exempt]" (:263) — which passes only because it tests a `#`-comment line.
+
+== THE DECISION ==
+Tightening the shell guard's class to `[^[:space:]",]` makes A5 hold. I measured the blast radius before proposing it: **exactly 2 existing marker lines repo-wide would lose exemption, and NEITHER needs it** — `test_no_hardcoded_slot_numbers.py:50` (`_OPT_OUT = "slot-literal-ok:"`, a constant, no slot literal on the line) and the guard's own bare-marker control line at :191 (its port is computed). So nothing that passes today would go red.
+Against it: it changes Peter's marker semantics in ONE of five implementations, so the five guards would then disagree about what a bare marker does — and the other four have the same gap for JSON/quoted lines.
+
+OPTIONS:
+  (i) Ship as briefed; record A5's real behaviour in the PR's Test Evidence and the KS-1450 draft comment as a NAMED limitation, and raise ONE new ticket for the bare-marker-in-quoted-value gap across all five implementations (Peter's rule, Peter's call).
+  (ii) Also tighten this guard's class to `[^[:space:]",]` in this PR (one character class, blast radius 2 lines, both harmless), note the divergence, and still raise the ticket for the other four.
+  (iii) Something else you prefer.
+
+I RECOMMEND (i). The defect is Peter's rule across five harnesses, my brief says the exemption must stay narrow and the edit confined, and a one-guard tightening buys a true A5 at the cost of five guards disagreeing — the kind of divergence that costs a later seat a day. It is a real finding either way and it gets a ticket either way. Say (ii) and I will apply it in the same PR.
+
+== EVERYTHING ELSE, FOR THE RECORD ==
+- A0 untampered head: GREEN, 11p+0f. A1 slot value in a different baseline key: RED. A2 from_runs id of a non-(full|pre-merge) shape: RED. A3 literal in an ordinary systemTest file: RED. A4 lone provenance-shaped string in ANOTHER array: RED, caught by the jq membership cell only, exactly the arm you specified. A6 marker removed from :859: RED. A8 jq broken by an exit-127 shim: RED, refuses, never a silent pass. Every red arm reads `cells=10p+1f` with exactly 1 FAIL line, so each is the tamper reddening one cell, not a load failure.
+- **A7 corrected: my want was wrong, the arm is right.** I wanted the string "8 lines" after removing the exemption stage; it reds **2** lines (10p+1f) because the six reason lines now carry markers, so only the two run ids come back. Re-ran it and read the message: `FAIL unmarked slot 2..4 values (2 lines)`. The exemption is load-bearing, which is what the arm was for.
+- **A disclosure about my first arms run.** Its `restore()` used `git checkout --`, which reverted MY FIX along with each tamper, so arms A2-A7 silently measured the pristine tip (`cells=8p+1f`, the original failure) instead of my head. I caught it from the restore proof reading the tip's hashes, rebuilt the runner to restore from saved copies of the fixed files, and re-ran everything. The re-applied fix hashes to `d7b5784c3216f490` (guard) / `b2242ca9d1082fe7` (baseline) — byte-identical to the first application, which is what makes the re-run comparable.
+- The guard's `--show` flag is DEAD: declared at `:91` of `sweepra16.py` and never read. Same class as R15's lesson 3. I adjudicated the 49 sweep hits by reading the lines directly instead; all 49 are self-referential lists, this lane's correctly-adopted `.push-lock-d8`, deliberate cross-lane WAIT entries, or parameterised variables the pattern reads crudely. None is a defect for my lane. Not fixing it this round (out of my brief's edit scope); it wants a ticket.
+- B1 objects transfer DONE exactly as you ruled, and it wrote NO ref: `.push-lock-d8` taken and released by ONE pid (61657) in ONE invocation; `rev-parse --all` 1630 refs / `3510699b773219f0` cmp-IDENTICAL before and after, with a 1-byte-altered copy FAILING the same cmp; `refs/remotes/origin/*` 763 -> 763; local develop, origin/develop and HEAD all unmoved at `ed346e6d9ff8`; `.git/config` sha `4f624a213933d54b` unchanged; untracked 17 -> 17; tracked modifications 0; the tip object ABSENT -> PRESENT with `deadbeef` still ABSENT; 0 locks on disk after. Two-lock precondition held (4 co-tenant locks absent, STOP-set 16 checked, 0 unattributed dirs against 21 known names).
+- Worktree `s-ra16-ks1450` on `feature/ks-1450-slot-literal-guard-baseline-provenance-ra16-1`, cut at `ddea005553bf65ffc284a9124a02ad53c5f88019`. `.git/config` still `4f624a213933d54b` after `worktree add -b`, so no upstream block and no PROTOCOL-DIFF from it. I will not use `-u` on the push.
+- Traps: trap 1 FIXED (`MINE='r 16th'`; OTHER_SEATS 177 -> 179 entries / 177 unique; `r 16th`/`seat r 16th` removed, `r 15th`/`seat r 15th` added, `r 17th`/`seat r 17th` forward-added for R 17th; inherited duplicates `['e 6th','seat e 6th']` untouched). Proved by ast on 15 membership probes plus 20 real full-length API subjects, with the two-directional inverted control: my own ANSWER reads FOR ME live and `for r 16th` inverted, R 15th's GO reads foreign live and FOR ME inverted; FOR ME counts 2 live vs 9 inverted; SCANNED present both ways so neither run was a load failure. **Worth telling R 17th: my first two attempts at this edit landed inside COMMENTS** — once in the file at :254, once inside the list's own span, which holds 149 comment lines. Only an edit keyed to the element Constant node's own byte span is safe, and re-rendering the literal instead destroys ~15 KB of in-list provenance (I did that too, and restored).
+- Trap 2 proven: class widened to `(?:[1-9]|1[0-57-9])`, 9 occurrences across 5 rows, 35 per-row arms, 0 failures, mirror control exact (ra15 class clean at 15 / foreign at 16; mine the reverse). My earlier "15 mismatches" was my own want-as-prose driven with subjects three of those rows can never match — confirmed, not the file.
+- 8 inherited tool hashes verified byte-exact; ra16 generation recorded in `_TOOL_HASHES_ra16.txt`. Merge tools UN-KEYED and UNRUN.
+- NOT YET RUN: the Schemathesis package unit suite against the edited baseline, and the full preflight by hand. Both next, in parallel with your answer. No push, no ticket write, no comment.
+
+Seat R 16th, pane Secuura/Blockchain-R (%92).
+
