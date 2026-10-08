@@ -14,6 +14,18 @@ supersede: REPLACED WHOLESALE 2026-10-08 05:3x by the overnight seat (booted 02:
 2. **R 15th is LIVE (%91 `Secuura/Blockchain-R`)** — see FLOOR. Its plan confirmation is the first thing owed.
 3. **Morning brief LEADS with (value first):** gate74 GO (#1423), R 15th merging #1422 + #1423, the Spark census (24 unraised passes found, 10 now held), and the BLOCKER: **develop red on pre-push leg 14 → KS-1450** (Peter's #1424) blocks every push touching `Blockchain/Dev/`. Give Kam a 1-2 line WhatsApp text pointing at https://linear.app/secuura/issue/KS-1450 in case Peter has not seen it (Kam sends; nobody else messages Peter).
 
+## 🔴 18:5x 2026-10-08 — ROTATION HANDOVER (ctx ~80%) — READ THIS FIRST
+**Floor:** %0 wednesday · %97 E 11th · %98 F 5th · %99 R 19th · **%100 G 5th** · %1 monitor. **No QUESTION unanswered** at 18:5x (every 10-08 QUESTION matched by a later ANSWER).
+- **READY FOR QA / raised:** #1427 (KS-1274, `2b6da5f561b0`) · #1428 (KS-593, `64eafead891e`; commit-message residue "does not close KS-593": squash without it, confirm KS-593 stays open) · #1429 (KS-1449, `1271d9597c43`; leg 8 served-spec unrun) · #1430 (KS-1328, `d9928f4a8a4d`).
+- **gate76 kit drafter RUNNING** (#1427 + #1428) → `fleet/qa-agent/gatesets/2026-10-08_gate76/` + `fleet/briefs_staged/2026-10-08_mergeseat_gate76_DRAFT.md`. On return: read KIT_REPORT whole → rule → dry run → launch with `WED_USAGE_STOP=100` (clause GATE). **#1429 + #1430 → gate77** (batch with the next READYs).
+- **E 11th:** next = ctx read before E-B (KS-591). Rulings: the YAML mislanding control runs per companion ALONE; gatelines (59, 0) re-baselined.
+- **F 5th:** building F-B (KS-1355) at ~43%; its push needs a ctx word (45-64% band). Ruled: repoint its own `pushf3.sh:251` at its own re-baselined gatelines.
+- **R 19th (%99):** next = plan confirmation (COMMIT TOOL FIX + Q-LOCK56 reconcile arms).
+- **G 5th (%100):** launched 18:5x; next = plan confirmation (the three tool fixes: commitg1, pathgate per the drafter's spec, lock WAIT set).
+- **Qwen 122B test RUNNING** (background agent → `QWEN122_AB.md`). On return: verify headline numbers at source, report 1.0 / 1.5 / 122B / Spark to Kam on the panel. If no report lands after the rotation, re-commission from the 18:5x note line.
+- **OWED (Wednesday tooling):** `hold_ready.py` model tag + `retry_when_load_allows.sh` LM_BACKEND (still 1.0-shaped); the `run_shell_suites` want derived from the tree in every lane's gatelines; project `CLAUDE.md` "Actions retired" correction (needs a seat or Kam); a delivery sweep of the 64 undelivered secuura- cards; send_brief should REFUSE an unknown `Secuura/Blockchain-*` tag; the queued-tap re-check in `cockpit.sh say`.
+- **ctx instrument for seats:** `python3 2_Project_Files/tools/seat_ctx.py --hours 3 --calibrate <own jsonl> <own ctx%>` (panes too short for statuslines).
+
 ## 🔴 18:3x 2026-10-08 — 70% CHECKPOINT HANDOVER (read first; supersedes 18:2x)
 **Floor:** %0 wednesday · %97 E 11th · %98 F 5th · %99 R 19th · %1 monitor. **No QUESTION unanswered** (every 10-08 QUESTION is matched by a later ANSWER, checked 18:34).
 - **READY FOR QA:** #1427 (KS-1274, head `2b6da5f561b0`) · #1428 (KS-593, head `64eafead891e`; RESIDUE: the pushed commit message says "does not close KS-593", so squash without it and confirm KS-593 does not walk to Done).
