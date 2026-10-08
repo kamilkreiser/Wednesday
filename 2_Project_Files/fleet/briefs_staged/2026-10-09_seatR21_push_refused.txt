@@ -1,0 +1,75 @@
+From: secuura-blockchain <secuura-blockchain@agentmail.to>
+To: ['wednesday-agent@agentmail.to']
+Date: 2026-10-08T23:33:09.000Z
+Subject: [Secuura/Blockchain-R -> Wednesday] STATUS: push of M REFUSED at preflight legs 6 7, three new handlebars advisories (Seat R 21st)
+---
+STATUS: push of M REFUSED at preflight legs 6 7 -- three new handlebars advisories (Seat R 21st)
+
+MODEL: claude-opus-5-5.
+
+BLUF: STOPPED, as the brief rules for a PREFLIGHT FAILED. Nothing reached GitHub; nothing of mine moved.
+The cause is NOT M: three handlebars advisories published 2026-10-08T17:52Z (two CRITICAL) are not in the
+triaged baseline, so legs 6 and 7 refuse EVERY Secuura push that carries a Blockchain/Dev change. F 6th's
+KS-808 branch is also absent from origin, consistent with the same refusal (not read from F 6th's own
+records). A patch exists: handlebars 4.7.10 (npm latest). Fixing it is a lock/baseline edit, outside this
+seat. I need a ruling on how #1427 proceeds; recommendation at the end.
+
+THE GATE LINES, VERBATIM (hook output: tools/s-ra21-m1427-ff-dedc861c04a5-push.out, 1,673 lines, rc 1):
+  shell suites: 71 passed, 0 failed, 0 skipped (of 71)
+  OK — 13 code guards passed.
+  PREFLIGHT FAILED on leg(s) 6 7 - fix the above before pushing. (12/15 legs ran)
+  error: failed to push some refs to 'github.com:Secuura/Distributed_Secuura.git'
+  pushra1_ff.sh tool rc 1. ls-remote after: refs/heads/feature/ks-1274-trivy-bare-object-guard-ra18-1
+  == 2b6da5f561b05a820bbe1ab5e891bff9f4f531c8 (UNMOVED). Not the rc-141 KS-1149 class: no retry, no loop.
+  The other 3 of 15 legs not run: 3, 4, 8 (no local stack), as gate76's SIM predicted.
+
+LEG 6 (npm-audit gate, KS-470): "audit-gate: 12 distinct advisories reported, 24 baselined." then
+  "FAIL — 3 NEW advisories not in the baseline":
+   GHSA-xw65-4hp5-5hc7 [moderate] handlebars: JavaScript Injection via Unsafe Inline Embedding of Precompiled Templates
+   GHSA-8r5x-fm3f-whwj [critical] handlebars: JavaScript Injection via AST Type Confusion in compile (bypass of CVE-2026-33937)
+   GHSA-p8wg-vrv2-v86f [critical] handlebars: JavaScript Injection via Own Property Check Bypass
+  It ALSO lists 15 baseline entries no longer reported (13 undici, ip-address, @hono/node-server) as
+  "CLEANUP (advisory)" -- informational, not the failure.
+LEG 7 (standalone-lock advisories, KS-531): the same 3, "pinned: 4.7.9", "in 4 lock(s): services/governance,
+  services/originate, services/referral, services/vc-issuer".
+GitHub advisory API, read now: all three published 2026-10-08T17:52:26-37Z; vulnerable '>= 4.0.0, <= 4.7.9';
+  first_patched_version 4.7.10 for all three. `npm view handlebars version` = 4.7.10.
+
+NOTHING MOVED, measured after the refusal:
+  origin develop 1e7f90e26137 (unmoved) · origin #1427 branch 2b6da5f561b0 (unmoved), one ls-remote 23:32:06Z.
+  local branch AND refs/remotes/origin/...-ra18-1 both still 2b6da5f561b0 (a refused push writes no
+  tracking ref). 0 locks in worktrees/ (my take/release: 23:24:04Z -> 23:30:48Z, pid 94394).
+  KS-1086 (leg 14 ran 71 suites from MY worktree): all five indicators IDENTICAL pre/post -- core.bare
+  false, filemode false, identity Kam Kreiser / kamil.kreiser@secuura.ai, origin/develop and develop
+  ddea005553bf, feature/y and feature/w PRESENT before and after (old fixture branches, baseline);
+  main-checkout status rc 0; .git/config BYTE-IDENTICAL to the pre-push snapshot (4f624a213933d54b);
+  for-each-ref delta 0 lines (1,651 refs).
+
+WHAT I HAVE IN HAND: M = dedc861c04a548cffb708ac88e7cd3c17208cdb7, referenced ONLY by the detached HEAD of
+worktrees/s-ra21-m1427 (porcelain 0; node_modules + packages/shared/dist built). No ref names it. The
+shared checkout was never written. That is a clean state, not a half-done one: no merge in progress, no
+lock, no staged index. But M is built on develop 1e7f90e26137, which carries handlebars 4.7.9, so M can
+NEVER pass legs 6/7 as it stands -- a fix on develop changes develop, and M must be rebuilt on it.
+
+QUESTION -- how does #1427 proceed? Options as I see them:
+ (a) RECOMMENDED: a separate seat lands an IN-RANGE lock refresh, handlebars 4.7.9 -> 4.7.10, in the
+     workspace root lock and the 4 standalone locks, on develop. That matches Kam's 2026-09-09 ruling
+     ('bump rather than accept') and 2026-10-06 ('five new advisories freeze every push' => a), and
+     these are CRITICAL, which argues against a baseline entry. Then I (or R 22nd) re-run M-1 on the
+     new develop D2, rebuild M' with mergeinra21_gate76.sh against D2, re-qm, and push. The moved
+     paths would be lock files, none of #1427's 6 paths or #1428's 7 -- but whether that is a re-predict
+     or a RE-GATE is yours: the brief says a refusal naming a moved CODE path is a re-gate.
+ (b) A reasoned baseline entry (reason + ticket + expires) on develop -- same rebuild consequence; not
+     my recommendation for two criticals.
+ (c) Never: --no-verify, a baseline edit inside #1427, or a lock edit from this seat (the brief forbids it).
+And for THIS seat: if the fix is not imminent, I propose to WRAP COLD from this clean state rather than
+wait idle, handing R 22nd M's SHA (for the record only -- it is superseded the moment develop moves),
+the worktree (keep it until the successor rebuilds; it is mine to remove at handover if you prefer), and
+the re-keyed, re-proved tool set. Please carry my ctx figure in the ANSWER; I expect I am above 50%.
+
+ALSO FOR YOU (no action from me): the CLEANUP list says 15 baseline entries no longer fire; whoever
+does the lock refresh can drop them in the same PR.
+
+MEANWHILE: STOPPED. Watcher armed for your ANSWER.
+NEEDED-BY: now -- every Secuura push is frozen until (a) or (b) lands.
+
