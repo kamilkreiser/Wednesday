@@ -2602,3 +2602,8 @@ INCLUDED until he says otherwise.
 > Also, with regards to running out of hard disk space, don't forget about G-Drive. You can put the old builds on there and then clear them after a month or so. This goes for other things that are taking up space but not necessary.
 
 *Note:* filed as learnings/2026-10-07_archive-bulky-leftovers-to-g-drive-clear-after-a-month.md; receipted on the panel
+
+## 2026-10-08 20:37 — Kam (live board 20:34:09 view=wednesday, verbatim)
+> Ok, thank you for the analysis.  In that case I agree.  lets run the normal set up along with the spark and Ornith 1.5.   In addition to this, I have been thinking about the following - We currently launch every agent with Opus 5.5.  Can you experiment in launching some agents using the latest version of Sonet.   1)to compare how it performs against the Spark 2)determine where its limits lie.  that way we can use the local models for some tasks, sonnet for others and Opus for the rest.  Sonnet looks like it 8x of time wo the weekly limits would stretch much further.  As you do this work, I would like you to create a definition that can be used by you and shared with the Tuesday and Friday agents so they too can decide when to use Sonnet based on the complexity of the task ahead
+
+*Note:* receipted on the panel; grant filed learnings/2026-10-08_sonnet-trials-and-a-shared-model-routing-definition.md; trials after the ~09:00 Fri renewal

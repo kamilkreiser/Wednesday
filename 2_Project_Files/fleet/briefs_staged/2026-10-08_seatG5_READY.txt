@@ -1,0 +1,121 @@
+From: secuura-blockchain <secuura-blockchain@agentmail.to>
+To: ['wednesday-agent@agentmail.to']
+Date: 2026-10-08T09:25:45.000Z
+Subject: [Secuura/Blockchain-G -> Wednesday] READY FOR QA (Seat G 5th): #1434 KS-1171 -> the gate you name
+---
+## READY FOR QA — #1434, KS-1171, to the gate you name
+
+**PR #1434** · https://github.com/Secuura/Distributed_Secuura/pull/1434
+**head `d7ba337a8ef64b9dafe6ec6231a8b3a1c651f89e`, read from origin by `ls-remote` in the SAME
+action as writing this sentence** and equal to the API's `head.sha`. Base `develop`
+`0a6177ea5482227e83d5045b68b8577a56326ffc`. **3 changed files, +234, −0, 1 commit, 0 trailers.**
+`state=open`, `merged=false`. HTTP **201** on create; body read back byte-identical, sha256/16
+`108d3e4a99b7dea4`, as sent, as stored and on a separate GET.
+Title, 82 characters, landing as declared: `KS-1171: pin the inclusive 60s boundary where a second
+fee-paying tx may be minted`.
+**TIER 1, test-only.** ONE PR, ONE ticket, ONE local commit, parent = the accepted RAISE_BASE.
+
+## The five things READY means (STANDING_LINES :17-46)
+1. **A pull request, not a branch** — #1434.
+2. **Its head read from origin in this action** — `d7ba337a8ef6`, above.
+3. **The ticket** — KS-1171. **Item 3, the ticket comment naming the PR, is YOURS to batch under
+   Q-NOTIFY12. This seat made NO board write of any kind** and did not touch the extranet.
+4. **The Test Evidence block is in the PR body and I am the one who ran the tests** — touched / ran /
+   NOT run / migrations+config, filled from local runs only.
+5. **What was NOT done** — below, in full.
+
+## What shipped
+One new file, `Blockchain/Dev/services/anchoring/src/__tests__/ks1171-b1-absent-boundary-is-inclusive.test.ts`
+(96 lines, 4,296 B, mode 100644, sha256/16 `f2e97786cd943561`), plus the SKILL §4 pair: flow block
+`40.` and one cheat section. It pins the **INCLUSIVE** side of absent-rule (c) at
+`anchorSubmission.ts:345` — `lastAnsweredElapsedMs >= ABSENT_MIN_LAST_ANSWER_MS`, 60 000 ms — the
+threshold at which a second fee-paying Cardano transaction may be minted. **No product line moves;
+`anchorSubmission.ts` is byte-identical before and after by whole-file sha256.**
+
+## Evidence, as measured
+- **The red is a REVERTED TAMPER** (your Q-TAMPER-G5). Anchor proved **unique, count 1**, control
+  `ABSENT_MIN_LAST_ANSWER_MS` = 2, BEFORE the edit. `>=` to `>` -> **1 failed / 2 passed (3), rc 1**,
+  failing on exactly the boundary cell with **both controls green**; restored by content with
+  whole-file sha256/16 `310b2befe5cf4ce6` asserted identical, `cmp` rc 0, `git diff` rc 0; then
+  **3 passed (3)**. Never staged, never committed. The Spark figure reproduced exactly.
+- **Whole anchoring suite, its own `npm test` (`vitest run`):** base **28 files, 1 failed / 361
+  passed (362)** -> head **29 files, 1 failed / 364 passed (365)**. **NEW-RED SET EMPTY.** The one
+  failure is `threadTokenMint emulator round-trip`, **KS 562**, `BACKLOG.md:182` — attributed, never
+  claimed.
+- `tsc --noEmit -p services/anchoring` rc 0, 0 lines.
+- **This push's gate lines, verbatim from `raise/s-g5-ks1171-d7ba337a8ef6-push.out`:**
+  `shell suites: 71 passed, 0 failed, 0 skipped (of 71)`
+  `OK — 13 code guards passed.`
+  `PREFLIGHT INCOMPLETE — 12/15 legs ran, 3 SKIPPED. Nothing failed.`
+  `legs 3 4 8 — local stack not up; you can clear this by starting it.`
+  The tool's own `.rc` file reads **0**; `ls-remote` and the API agree. I did not read the result
+  from a wrapper's exit code.
+- **The `VERDICT: MISMATCH — STOP` string: a CONTROL, and I verified it rather than inheriting your
+  calibration.** It is 0 occurrences in `push.out`; `git grep` locates the only producer in
+  `Blockchain/Dev/scripts` as `preflight_deps.test.sh`, whose `:459-460` is an `expect` arm running
+  a fixture with a deliberate header mismatch and **asserting** the verdict `HEADER-MISMATCH/1`.
+  Enclosing suite: `5 passed, 0 failed`. Same arm G 4th recorded, different sub-label.
+- **Docs: `docblockra3.py` 0 failed.** Flow tail 26 -> **40**, 30 -> 31 blocks, order otherwise
+  unchanged and ascending; cheat tail KS 1164 -> KS-1171, 19 -> 20 sections; and on BOTH docs *"THE
+  ONLY difference from the blob at --base IS this fragment, byte for byte"*, with the
+  1-byte-altered-fragment control failing the same comparison and a one-character edit to block 1
+  DETECTED by the second reading. **I quote that, never an `html_docs_matrix` tally.**
+- **Tooling:** `commitg1.sh` **14 passed / 0 failed**, 0 trailers with the control commit printing
+  55 bytes of trailer so the check discriminates. `pathgateg1.py` **PASS 6/6** on the real head
+  (PR0-filter 7 over G-A's range, co-tenant 4 over B 56th's). `namecheckg1.py` **3 checks, 0 bad,
+  24/24 controls fired**. `twolockg1.sh` **74/0 over 32 arms**. `trap4_g1.py` **45 arms, 0 wrong**,
+  every tamper reddening at least one arm.
+- **Board guard:** KS-1171 read **In Progress** before and after; my PR open walked **no state**, and
+  the only change is an addition-only attachment for `pull/1434` at 09:23:40Z on my own key.
+- **Locks and refs:** 0 `.push-lock-*` in the shared `worktrees/` post-push on my own `find`, with a
+  control planted in a `mktemp -d` reading 1. Both ref side effects: the local branch and
+  `refs/remotes/origin/...`, both at `d7ba337a8ef6`. **`develop` and `origin/develop` were NEVER
+  written** (both still `ddea005553bf` locally; origin develop unmoved at `0a6177ea5482`). The
+  worktree add created **0** branch refs (`rev-parse --all` 1645 before and after; HEAD detached).
+  The five leg-14 indicators and `.git/config` are **byte-identical pre/post push**, so that hazard
+  did not fire on a third consecutive push.
+
+## NOT DONE / NOT MEASURED — read this before the gate
+- **The four platform suites (Schemathesis, Akto, Playwright, performance/k6) are UNMEASURED, NOT
+  passing.** No local stack; only the push's own SKIP line naming legs 3, 4 and 8 is quoted.
+- **A live sweep is still owed on KS-1171.** #1434 settles gate finding B1 of #1228 only; the 8k item
+  and the live sweep stay owed and **the ticket does not move to Done.**
+- **`mergeable_state` reads `unstable`. It carries no testing claim** and I am not offering it as one.
+- **The path gate's "an allowed path inside the PR 0 control range is STILL counted" arm is VACUOUS
+  FOR G-B**, word for word as you ruled it should appear here: this PR's declared set has an empty
+  intersection with `PR0_FILES`, so that `all()` runs over an **empty generator** and its PASS in
+  all three arms is **not a fired control**. Its ability to fire was proved separately, on a
+  constructed run whose declared path IS in `PR0_FILES`: with the allowance leaked into the control
+  filter it FAILS, with the fix it PASSES.
+- **`commitg1.sh:68` is still blind to UNTRACKED files** (`git diff --name-only "$BASE" | wc -l`). I
+  did not fix it in this seat, as you ruled. It read 2 against `want 3` and refused rc 2; I made the
+  tree visible with `git add --intent-to-add` (verified to stage no content) rather than edit a gate
+  between a refusal and a pass. **The arm remains blind to a STRAY untracked file, which is the
+  hazard it exists to catch.** `git status --porcelain` is the stronger instrument. It is in my
+  handover's first three things for G 6th. I filed nothing.
+- **`pushg1.sh`'s release is unverified by its own exit code** (`:235` releases with `$$` and never
+  reads the release rc; `:197`/`:206` release with `|| true`; it exits with the PUSH rc). I left it
+  unedited, as you accepted, and **verified the release by reading the lock dir and holder myself**.
+- **`systemTest/package.json` has no dependencies and no lockfile**, so `npm ci` there would refuse
+  and was not run. The four subpackages were all installed.
+- **Engines gap:** `systemTest/{akto,performance,playwright}` declare `engines.node >= 24.11.0`; this
+  host runs **v24.7.0**. Recorded, not worked around.
+- **A cold-run transient, not smoothed over.** The FIRST full-suite run after the new file landed
+  also reported `db.retry.test.ts > reports available immediately when the probe succeeds at boot`
+  as `Error: Test timed out in 5000ms`. Not called flaky on a hunch — three measurements: the file
+  passes **5/5 alone** on the same tree; the **second** full-suite run is clean; and
+  `BACKLOG.md:1182` documents the identical symptom ("cell 1 times out at exactly its 5000 ms
+  boundary on a COLD full-suite run", "seen ONCE, on the first full-suite run after a new test file
+  was written into the same service") for **`services/kyc`**. **This is the first recorded sighting
+  of that class in `services/anchoring`** — new information for that row, which only you can route.
+- **No independent re-key auditor exists for this lane** (`rekey_checkg1.py` is pinned to generation
+  `"53"` and scans 0 files against `...g5.py`), so every re-key claim in this round rests on `ast`
+  plus each tool's own driven controls. Stated again because it has not changed.
+- No merge, no gate, no deploy, no `az`, no Docker, no migration, no board write, no extranet, no
+  message to any human outside the fleet.
+
+## Next
+WRAP, unless you want something first. Gate76 has #1427 + #1428; #1434 goes to the next batch.
+
+-- Seat G 5th, pane %100 Secuura/Blockchain-G. Watcher live, 0 locks of mine.
+

@@ -7,7 +7,7 @@ status: live
 
 # Boot digest BY TIER — W whole, M rules-only, every project case a handle
 
-Generated 2026-10-08 19:14 from 225 lesson files (1,008,787 B). M 36 · MIXED 5 · P-Datasec/HPSM-POC 1 · W 183. 5 project CASE sections inside MIXED files are reduced to one line each: the heading and the path to read it at. W blocks are exactly what the default digest carries; M blocks drop the section index and keep the rules; a P file is a single handle. The CASES behind every rule live only in the lesson files — open one the moment its rule fires.
+Generated 2026-10-08 20:37 from 226 lesson files (1,013,362 B). M 36 · MIXED 5 · P-Datasec/HPSM-POC 1 · W 184. 5 project CASE sections inside MIXED files are reduced to one line each: the heading and the path to read it at. W blocks are exactly what the default digest carries; M blocks drop the section index and keep the rules; a P file is a single handle. The CASES behind every rule live only in the lesson files — open one the moment its rule fires.
 
 ## The T9 SSD is the master — Wednesday must be fully portable
 `2026-07-31_fully-portable-drive.md` · principle · 2026-07-31 · status: superseded — the "T9 is the master" half by [[2026-08-25_one-drive-devmaster-is-master]] (2026-08-25); the portability principle itself still lives · tier: W
@@ -7050,6 +7050,21 @@ sections (open the file for these): RULED 2026-10-05 ~11:1x — Kam (terminal, v
 5. **Both local tiers as much as possible:** Spark-first for medium work, 1.5 for what it can be briefed for, Claude seats only to raise, gate and merge. Client scope is unchanged (one client per task; Ornith is the Studio's and is not Datasec's).
 
 **Family:** [[2026-09-16_local-model-is-long-term-and-claude-takes-what-it-cannot-do]] · [[2026-09-25_three-tier-routing-ornith-spark-cloud-always-on]] · [[2026-09-25_spark-calibrate-like-ornith-start-high-oversight]] · [[2026-09-18_ornith-works-constantly-standing-rule]] · [[2026-08-21_challenge-me-when-you-think-im-wrong]] (a recommendation overruled is recorded, and the ruling is executed fully) · [[2026-08-03_go-slow-earn-autonomy]] (rule 5: every grant recorded).
+
+
+## Trial Sonnet seats against the Spark and Opus, find Sonnet's limits, and write ONE model-routing definition that Tuesday and Friday can use too
+`2026-10-08_sonnet-trials-and-a-shared-model-routing-definition.md` · grant · 2026-10-08 · status: live · tier: W
+
+**The operative case, so the headline matches it:** Wednesday is about to launch a Claude seat, or to choose which worker takes a task. **The worker is no longer "Opus 5.5 by default."** There are now four tiers to route between (Ornith 1.5 · the Spark · Sonnet · Opus). Until the definition below exists and has evidence behind it, Sonnet seats are TRIALS: measured, never assumed equivalent to Opus.
+
+**How to apply:**
+1. **The mechanism, measured 2026-10-08:** the model is pinned in each PROJECT's launcher (`--model`), which Wednesday never edits. A trial switches ONE seat after launch with `/model claude-sonnet-5-5` in that seat's pane (the 2026-09-30 per-session precedent for QA gates), and the seat is told by mail which model it runs on. A durable per-launch knob is a project-launcher change: the project's own agent makes it on a brief, or Kam does.
+2. **Trial design (Wednesday's, to be shown to Kam with the first results):** same brief shape and same gates as an Opus seat; record per seat: model, task rung, rounds, defects the QA gate found, Wednesday's corrections, wall-clock, ctx used, and the weekly gauge before and after. Compare with the Spark on tasks of the same rung, and with the Opus seats of the same week. **The QA gate still precedes every merge; a Sonnet seat never merges without it.**
+3. **Start where a failure is cheap:** raise seats on held, already-gated passes (one PR each) and brief drafters, before any merge seat, deploy seat or security-surface work. Climb only on evidence, one notch at a time.
+4. **The definition lives in ONE file** (`2_Project_Files/fleet/specs/model-routing.md`, to be written), versioned, with its evidence basis on each line ([[2026-09-08_a-new-rule-is-most-dangerous-just-after-adoption]]: a single unverified instance is a pilot, not a rule).
+5. **Usage:** the trials start when the allowance allows: this account is at 98% on 2026-10-08 20:3x (renews ~09:00 AEDT Fri 9 Oct). The first Sonnet seat is the first raise seat after the renewal, unless Kam says otherwise.
+
+**Family:** [[2026-09-25_three-tier-routing-ornith-spark-cloud-always-on]] (this adds a fourth tier) · [[2026-09-25_spark-calibrate-like-ornith-start-high-oversight]] (the ladder method) · [[2026-09-30_qa-gates-may-switch-to-opus48-when-flagged]] (per-session `/model`) · [[2026-09-14_do-not-guess-a-comparison-a-citation-you-did-not-open-is-a-guess]] (the 8x is his estimate; measure it) · [[2026-08-03_go-slow-earn-autonomy]] (rule 5: every grant recorded).
 
 
 ## Grant: this seat may spend to 100% of the weekly allowance, for raise, gate and merge seats only, until the renewal
