@@ -1,0 +1,332 @@
+LAUNCH BRIEF (Seat R 17th): successor of Seat R 16th on pane `Secuura/Blockchain-R`. **A MERGE SEAT for ONE PR: #1426 (KS-1450, the leg-14 guard's provenance exemption)**, which lands only on gate75's GO and then Wednesday's GO.
+
+Nothing deploys. Secuura NEVER force-pushes. **This seat pushes NOTHING:** the landing is an API squash. A landing that needs a push is a STOP. cloud: merge (carrying 0 Spark tasks). **No raise work in this seat.**
+
+After the verified merge, you post ONE ticket comment on KS-1450: Peter is TOLD what changed. **That is this seat's ONLY board write.**
+
+# LAUNCH BRIEF: Seat R 17th, Secuura/Blockchain, lane R (pane `Secuura/Blockchain-R`). From Wednesday.
+DRAFT: staged by Wednesday's gate-kit drafter, 2026-10-08 ~13:00–13:20 AEDT (02:00Z–02:20Z). NOT sent, NOT launched. Every RULINGS item marked OPEN in `fleet/qa-agent/gatesets/2026-10-08_gate75/RULINGS_wednesday.md` must be ruled (or its default accepted) before this is sent. Every figure here is the drafter's PREDICTION; you re-measure.
+
+## USAGE AUTHORITY (this launch is past the 90% stop)
+- The weekly gauge read **96%** at the drafter's dry run.
+- Launch with `WED_USAGE_STOP=100` on Kam's grant: card `secuura-usage-89pct-raise-backlog-1008` = a (live board 09:17:17), `0_Brain/learnings/2026-10-08_use-to-100pct-raise-gate-merge-seats-only.md`. Clause: **MERGE**.
+- The grant ends at the weekly renewal (~Sun 11 Oct), or when Kam switches accounts or says stop. That is an EVENT, never inferred.
+- Be economical: one squash, one comment, WRAP.
+
+## BLUF
+- **Seat number derived, not counted.** R 16th's handover opens "FOR R 17th, THE FIRST THREE THINGS" (`5_Project_History/HANDOVER-seatR16-2026-10-08.md:9`; 166 lines, sha256/16 `30d8e5cd6e4a61e1`, re-hashed by the drafter). R 16th WRAPPED at READY FOR QA (`2026-10-08_seatR16_WRAP.txt`).
+- **develop = `ddea005553bf65ffc284a9124a02ad53c5f88019`** (the #1423 squash, R 15th).
+  - The drafter read it with `ls-remote` at 01:28:23Z, 01:57:07Z and 01:59:42Z, unmoved.
+  - **It FAILS its own pre-push leg 14** (KS-1450): CI's own shell-suite step reads `no_hardcoded_slot_literals: 8 passed, 1 failed` on develop. That is what #1426 fixes.
+  - Peter merges in bursts: expect develop to move under you.
+- **#1426:** head `dd31aa0c998ca43291c975dccb906a42e55c73c2`, branch `feature/ks-1450-slot-literal-guard-baseline-provenance-ra16-1`, END_TREE `5f456a0128feee7dd4e2f164f08f923f6a136742`.
+  - ONE parent, and that parent **IS develop** (`ddea005553bf`).
+  - 4 paths +81/-9: the guard, the baseline, and both platform docs.
+- **NO merge-in is needed, measured, not inferred** (gate75 kit `c4_docs_gate75.py merged`, in the drafter's scratch clone):
+  - `merge-tree` develop + head = rc 0, **T' = `5f456a0128feee7dd4e2f164f08f923f6a136742` == END_TREE**;
+  - each merged blob == the head's blob;
+  - the CONTROL pair (gate73 #1407 × #1409) reads rc 1 on both docs.
+  - So the squash is an API call that runs NO local hook. **If develop moves and a landing ever needs a push: STOP and mail. Never `--no-verify`.**
+- **THE TOOL CHAIN IS THE REAL WORK, and the builder refuses this landing as copied.** This is RULINGS Q-BUILDER75, measured by reading R 15th's `build_addendumra15_gate74.py`:
+  - `RA15_DOCS=merged` asserts head doc blob != merged blob (:207). Here they are EQUAL (develop never touched the docs).
+  - `RA15_DOCS=none` asserts the PR touches no doc (:216).
+  - Its GO-clause regex hard-codes `Seat R 15th` (:126).
+  - So you write a NEW COPY with `RA17_DOCS=head` (spec below). `mergera1.py` itself is unchanged since R 10th.
+- **Keys (RULINGS Q-KEYS75, default (a)):** own keys = {KS-1450}. You PATCH OUR OWN PR's body ONCE to the staged, de-hyphenated DRAFT, read it back by sha256, and use it VERBATIM as the squash body.
+  - The live body carries `Refs KS-1450 · Refs KS-1451`, and it hyphenates KS-1386 (Peter's) and KS-1401 (#1383's). They ATTACH (STANDING_LINES :278).
+  - mergera1 requires `own_keys` == the live body's Refs set.
+- **The branch commit carries `Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>`** (gate75 c1 P5/P6; RULINGS Q-TRAILER75). What LANDS must carry 0 trailers: assert the SENT body and the LANDED commit (STANDING_LINES :371).
+- **Budget by MAIL HANDSHAKE.** A seat cannot read its own context. Mail `QUESTION: ctx read (Seat R 17th)` before the squash and before the comment, and hold for the reading. **HARD CEILING 65%:** at that reading, WRAP COLD at the next safe boundary.
+- **Never end a turn on a "next up" line with nothing running** (STANDING_LINES :339).
+
+**IF AN INSTRUCTION FROM ME LOOKS WRONG, SAY SO.** 🔴 **Where your copy of a tool and this brief disagree about a gate, a knob or a line number, THE TOOL WINS.** Run nothing on the disputed point, and tell Wednesday what the tool says. Every line number below is the drafter's reading of R 16th's and R 15th's copies; yours is re-read.
+
+**WAKE:** your re-keyed `inbox_watchra1.sh`, armed in the background at boot with `timeout: 7200000`.
+- It EXITS when it fires. Re-arm it IN THE SAME ACTION that reads each mail, with `SINCE` = the newest mail you have READ (STANDING_LINES `:400`).
+- After the squash, LIST the inbox by API before the comment.
+- Name a watcher pid only from a `ps` FILE read immediately before. Build the pattern at RUNTIME.
+- Stop every watcher before your WRAP and prove 0 live with a positive control.
+
+## FOR R 17th, THE FIRST THREE THINGS (R 16th's handover `:9-62`, verbatim in substance; the drafter re-read each by AST, read-only)
+1. 🔴 **R 16th's FORWARD-ADD IS YOUR TRAP, AND IT IS LIVE.** `inbox_matchra1.py`'s parsed `OTHER_SEATS` (`:222`) contains **`"r 17th"` AND `"seat r 17th"`**. Left in, YOUR OWN GO or ANSWER reads FOREIGN and the watcher never fires.
+   - The drafter's AST read of R 16th's copy (sha256/16 `bf505c2eff5fc7f9`, 577 lines): 179 entries / 177 unique; duplicates `['e 6th', 'seat e 6th']` (inherited); `r 17th` PRESENT; `r 16th` ABSENT; `r 18th` ABSENT; `r 15th` PRESENT. `MINE` (`:102`) = `'r 16th'`. `MY_PANE` (`:415`) = `'secuura/blockchain-r]'`, which is CORRECT for this lane: do not invert it.
+   - **REMOVE `r 17th`/`seat r 17th` FIRST.** ADD `"r 16th"`/`"seat r 16th"`. FORWARD-ADD `"r 18th"`/`"seat r 18th"`; that is R 18th's trap, so name it in your handover. Set `MINE` to `"r 17th"`. KEEP `r 15th`, `r 14th`, `r 13th`, `r 12th`, `r 11th`, `r 10th`, `e 10th`, `e 11th`, `d 16th`.
+   - **THE EDIT ITSELF IS A TRAP (it cost R 16th three attempts).** The tokens also appear in COMMENTS, and the `OTHER_SEATS` span itself holds 149 comment lines.
+     - Locate each element's `Constant` node by its byte span (`lineno/col_offset` → `end_lineno/end_col_offset`, offsets in UTF-8 BYTES, split on `"\n"`, never `splitlines()`).
+     - Drop it with its trailing `", "`, and insert before an anchor element's start offset.
+     - **Never re-render the list literal.** That destroyed ~15 KB of provenance comments while the membership probes still passed.
+   - **Prove it by `ast` (walk the WHOLE tree with `ast.walk`, because the assigns sit inside `if __name__ == "__main__":`) and by import**, with real full-length API subjects and the two-directional inverted-want control: run the inherited file itself on the same feed.
+2. 🔴 **THE SWEEP ORDINAL CLASS INVERTS AGAIN.** R 16th's `sweepra16.py` (sha256/16 `8d68919ad58e274b`, 205 lines) carries `(?:[1-9]|1[0-57-9])` ×9 across 5 class-bearing rows of 13. It matches 15 and 17 and NOT 16: wrong for you.
+   - **Your class is `(?:[1-9]|1[0-68-9])`.** The drafter proved it on the BARE class only: it fullmatches 1-16 and 18-19, and NOT 17. **Prove it on the PARSED patterns with PER-ROW subject shapes, wants written as DATA.** R 16th's first attempt with one prose want gave 15 false mismatches, all harness.
+   - Then:
+     - copy it as `sweepra17.py`;
+     - add it to the self-exclusion tuple (`:96`, now ending `"sweepra16.py"`);
+     - set `mine_planted` to `ra17` forms;
+     - **CONTROL 1's planted line must ALSO carry `ra16` forms**;
+     - re-label CONTROL 1b.
+3. 🔴 **`sweepra16.py --show` IS A DEAD FLAG.** It is declared (`:91`) and never read: the drafter counts `--show` ×1 and `args.show` ×0. It advertises per-line detail and gives none. **Fix it in your `sweepra17.py`** (read the flag, print each hit's file:line), and prove it prints with a planted hit. Or leave it unfixed and say so in your handover. Do not inherit it blind. Adjudicate live hits by extracting the lines yourself, as R 16th did.
+
+## THE PARTITION
+| Seat | Pane | Token / lock | Writes | Never |
+|---|---|---|---|---|
+| **R 17th (you)** | `Secuura/Blockchain-R` | `ra17` / `.push-lock-d8` (`LOCK_SEAT='Secuura/Blockchain-R ra17'`) | ON THE GO ONLY: ONE PR-body PATCH of #1426 (Q-KEYS75 (a)), ONE API squash, then ONE KS-1450 comment. Your record folder. No objects transfer is expected (one PR; develop's and the head's objects are already in the shared store — drafter `cat-file -t`: both `commit`). | any push, any branch, any raise, any other ticket write, any comment to KS-1451 or KS-1386 |
+| R 16th (WRAPPED, the AUTHOR of #1426) and R 3rd-R 15th | your pane | `ra16`-`ra3` | nothing | `s-ra16-ks1450` (R 16th KEPT it: deps + the arms runner), `s-ra14-ks1274`, `s-ra13-ks1164`, `s-ra13-5d`: not yours. Report them in your WRAP. |
+| QA gate75 | `QA/Secuura-gate75` | none | its own report dir | never its kit, report, pane or mail |
+| D / E / F / G / B lanes | theirs | their locks (WAIT) | — | #1383 (KS-1401) is HELD: never merged by you. It conflicts on both docs with develop AND with #1426's head (drafter: merge-tree rc 1 both ways). If it lands first, re-run `c4 merged`. |
+
+## ITEM 0 — BOUNDED, read-only; then `QUESTION: plan confirmation (Seat R 17th)` and WAIT
+Before the ANSWER, do NONE of these: lock take; worktree add; ref write; objects transfer; install; PR edit; ticket write; comment.
+
+The launcher's boot pull (sole seat) is the one recorded exception (STANDING_LINES :433). RECORD from/to for both develop refs, the new FETCH_HEAD, and the new `rev-parse --all` baseline. Take your `ls-remote` BEFORE the pull.
+
+You MAY write in `5_Project_History/<UTC boot date>_seatR-17th/` and in YOUR scratch clone. Use `git clone --shared --no-checkout`; set its `origin` to the GitHub URL (a `--shared` clone's origin is the LOCAL checkout: STANDING_LINES :407); fetch BY FULL SHA with `env -u GIT_SSH_COMMAND -c core.sshCommand=… --no-tags --no-write-fetch-head`.
+
+Measure:
+- **(a) Refs, one `ls-remote`:** develop; `refs/pull/{1426,1383}/head`; the #1426 branch; any `-ra17-` ref (expect 0, with `-ra13-` = 2 as the control; `-ra16-`/`-ra15-` are NOT controls, since R 16th found them reading 0 too); `date -u`.
+  - A develop that is not `ddea005553bf`, or a moved head, = **STOP and mail before anything else**. The GO carries D; a moved develop voids it.
+- **(b) The kit and the instruments, re-hashed and read whole:**
+  - `/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/qa-agent/gatesets/2026-10-08_gate75/` (`KIT_REPORT.md`, `RULINGS_wednesday.md`, `kit.json` `script_sha256`).
+  - From YOUR clone, run `<kit>/c4_docs_gate75.py merged --pr 1426 --repo <your clone> --base ddea005553bf65ffc284a9124a02ad53c5f88019 --head dd31aa0c998ca43291c975dccb906a42e55c73c2 --develop <develop> [--expect-tree 5f456a0128feee7dd4e2f164f08f923f6a136742 while develop is unmoved]`. Drafter: 3 checked, 0 FAIL, `MERGE-IN NEEDED: no`, `PREDICTED_TREE=5f456a01…`.
+  - Run `<kit>/c1_pin_gate75.py --selftest --repo <your clone>` (drafter 9/9).
+  - **The kit's lib refuses a write verb under `!CODING`, so `--repo` is always YOUR clone.**
+- **(c) Tools:** the copy receipt (TOOLS below); THE SWEEP; the re-key (generic clause first); membership BY IMPORT, with planted arms; the ordinal arms (FIRST THREE THINGS). Re-key the watcher FIRST and arm it.
+- **(d) The shared store, read verbs only:**
+  - `rev-parse --all` count + sha256/16;
+  - `cat-file -e` of develop and the head (drafter: both PRESENT; `deadbeef…` ABSENT as the negative control);
+  - locks by holder `seat`, two polls, with a planted control (R 16th left 0 on disk).
+- **(e) Seat facts:**
+  - `$TMUX_PANE` → `tmux display-message -t "$TMUX_PANE" -p '#{@cockpit_name}'`, never a bare `tmux display -p`;
+  - the watcher pid from a ps FILE;
+  - `df -m /Volumes/DevMASTER`;
+  - every launcher preflight warning VERBATIM;
+  - R 16th's handover re-hashed (`30d8e5cd6e4a61e1`). It is the merge-note artefact: R 16th AUTHORED #1426.
+- **(f) Linear, read-only:** KS-1450, KS-1451 (state, assignee, newest comment).
+  - **The fabricated-key control runs in ITS OWN query.**
+  - KS-1386 is Peter's (Done): read it only, never write.
+  - The drafter did NOT read Linear.
+
+**Your plan confirmation carries:** (a)–(f), one block each; your reading of every RULINGS item (the Q-BUILDER75 spec as you will build it, line by line); the launcher lines VERBATIM; and a request for a ctx read. **Budget: mailed by ~25% ctx.**
+
+## TOOLS
+**Copy** from `/Volumes/DevMASTER/!CODING/Secuura/Blockchain/5_Project_History/` into YOUR record folder:
+- R 16th's `2026-10-08_seatR-16th/tools/`;
+- R 15th's merge set from `2026-10-07_seatR-15th/merge/` and `boot/`.
+
+Iterate an ARRAY. Hash each into `_COPY_HASHES_ra17.txt` and `cmp` it. **Expected** (the drafter's `shasum -a 256 | cut -c1-16`, 2026-10-08 ~01:5xZ; the ra16 rows == R 16th's `_TOOL_HASHES_ra16.txt`):
+
+| tool | from | sha256/16 | lines |
+|---|---|---|---|
+| `inbox_matchra1.py` | R 16th tools | `bf505c2eff5fc7f9` | 577 |
+| `inbox_watchra1.sh` | R 16th tools | `1abc3ef5812cf82a` | 159 |
+| `sweepra16.py` | R 16th tools | `8d68919ad58e274b` | 205 |
+| `provenance_ra16.py` | R 16th tools | `2541f8bec7920468` | 91 |
+| `poll_actionsra16.py` | R 16th tools | `40e1bb9b31d31cd7` | 28 |
+| `lockra1.sh` | R 16th tools | `5027bafcdf13e889` | 559 |
+| `restraisera16.py` | R 16th tools | `4bfb06204dfa834d` | 70 |
+| `pushra1.sh` | R 16th tools | `9c8387cd0c8bebf9` | 270 |
+| `mergera1.py` | R 15th merge | `aaf230e7d1975213` | 604 |
+| `build_addendumra15_gate74.py` | R 15th merge | `95087d4c791e221c` | 328 |
+| `twolockra1.sh` | R 15th merge | `a1020c38e55499d1` | 244 |
+| `m7_squashra15.sh` | R 15th boot | `c5e615e2405c485d` | 88 |
+| `m1_go_completera15.py` | R 15th boot | `faf51346102943d9` | 135 |
+
+- A different hash is a STOP and a mail.
+- `pushra1.sh`, `restraisera16.py` and `twolockra1.sh` are **UNUSED** this round (no push, no raise, no two-lock). Copy them for the record, declare them UN-KEYED and UNRUN, and never cite them as gating anything.
+- **Re-key: THE GENERIC CLAUSE BINDS, AND IT COMES FIRST.** *Re-key every lane-bearing declaration, including LOCK_SEAT defaults and fixtures; the tool wins* (STANDING_LINES :425, :330, :406).
+- **The EXPECTATION list** (the drafter's reading; the tool's own text wins):
+  - `MINE`, `OTHER_SEATS` (trap 1), `MY_PANE` (unchanged; verify);
+  - `WATCHRA16_*` → `WATCHRA17_*` in `inbox_watchra1.sh`;
+  - the sweep class and file (trap 2), its self-exclusion tuple, `mine_planted`, CONTROL 1 / 1b, the `--show` flag (trap 3);
+  - `provenance_ra16.py` → `provenance_ra17.py`, with the subject prefixes `"[Wednesday -> Secuura/Blockchain-R] GO (Seat R 17th):"` and `"… ADDENDUM (Seat R 17th):"`;
+  - `poll_actionsra16.py` → `ra17`;
+  - `lockra1.sh`'s LOCK_SEAT example and `twolockra1.sh:41`'s LOCK_SEAT default → `Secuura/Blockchain-R ra17`;
+  - the builder (Q-BUILDER75 below);
+  - **every hardcoded constant in `m7_squashra15.sh` and `m1_go_completera15.py`** (REC, the record folder, D, the head, the body path, the GO clause, the seat, the scratchpad UUID, the inverted-want control's seat) → REQUIRED arguments (STANDING_LINES :406, inherited tools FAIL CLOSED on unset knobs);
+  - every fixture, planted token, STAGE / artefact / log path, env-var prefix, User-Agent and banner.
+- **Validate ALL anchors first, then mutate, then write. Check PARSED members, never source text.**
+- **THE SWEEP before ANY first run** (CODE, not comments): foreign-seat literals incl. two-digit ordinals, lock names, `*_SCRATCH`, env prefixes, other seats' absolute paths (incl. R 15th's scratchpad UUID in `m7_squashra15.sh`), every live 12+-hex constant, every literal count. Print `N checked` per tool; `0 checked` is a FAIL.
+
+## THE BUILDER YOU WRITE FIRST (RULINGS Q-BUILDER75 — build it as RULED; the drafter's recommendation is below)
+Copy `build_addendumra15_gate74.py` (R 15th's, `95087d4c791e221c`, 328 lines) to `build_addendumra17_gate75.py`. Never edit R 15th's file.
+
+**Keep every inherited assert,** and RE-KEY:
+- `RA15_*` → `RA17_*`;
+- the GO-clause regex (`:126`, `GO \(Seat R 15th\): …`) → `Seat R 17th`;
+- the predecessor-claim tuple (`:262-264`, which ends at `"Seat R 14th"`, with `:266` asserting `"Seat R 15th"` ABSENT): ADD `"Seat R 15th"` (it merged #1422 and #1423; its claims sit in develop's history) and `"Seat R 16th"` (it AUTHORED #1426, so a `Merged by Seat R 16th` would be FALSE). Assert `"Seat R 17th"` ABSENT. Check the PARSED tuple.
+
+**ADD `RA17_DOCS=head`** (beside the inherited `merged|none`), REQUIRED with no default:
+- the GO's `flow`/`cheat` lines are the HEAD blobs (`576a4687c995611b906784613f6c05f6f1d8793b` / `3481baae3dd91c27d159a4ba7531779eb54ed850`);
+- assert each == the head's blob in `targets`, AND == the blob at that path in T' (`ls-tree <T'>`);
+- `merged_blob_paths == []`.
+
+**Use `RA17_LANDING=on-develop`** (inherited: `PARENTS == [D]`) with `RA17_NO_MERGE_IN=1`, `RA17_OWN_KEYS=KS-1450`, `RA17_EXPECT_PATHS=4`, and `RA17_MODE_CENSUS={"100644": 3, "100755": 1}`.
+
+**Arms — each must REFUSE, and each must be run before the first real use:**
+- `RA17_DOCS=head` with a GO flow blob != the head's;
+- `RA17_DOCS=merged` on #1426 (the inherited refusal, :207);
+- `RA17_DOCS=none` on #1426 (:216);
+- `RA17_LANDING=behind` on #1426 (its parent is D, not an older B);
+- a GO clause naming R 16th;
+- a body with a planted `Merged by Seat R 16th`;
+- `RA17_OWN_KEYS=KS-1450,KS-1451` against the staged body;
+- a GO missing `- END_TREE:`.
+
+**Then the chain:** builder → `mergera1.py --dry` → READ the `.DRY` body.
+
+## M1 — THE GO PARSER (each line exactly ONE match, extracted from YOUR builder by `ast`)
+| line (regex) | #1426 value |
+|---|---|
+| `^- develop D: ([0-9a-f]{40})` | the develop at GO time (`ddea005553bf65ffc284a9124a02ad53c5f88019` if unmoved) |
+| `^- PR head: ([0-9a-f]{40})` | `dd31aa0c998ca43291c975dccb906a42e55c73c2` |
+| `^- PR base B: ([0-9a-f]{40})` | `ddea005553bf65ffc284a9124a02ad53c5f88019` (== D while unmoved) |
+| `^- END_TREE: ([0-9a-f]{40})` | `5f456a0128feee7dd4e2f164f08f923f6a136742` |
+| `^- Target tree T\x27?: ([0-9a-f]{40})` (write it `T'`) | `5f456a0128feee7dd4e2f164f08f923f6a136742` at ddea005553bf (re-read on the real D) |
+| `flow \`[^\`]+\` = ([0-9a-f]{40})` / `cheat \`…\` = …` | the HEAD blobs above (`RA17_DOCS=head`) |
+| `Declared squash subject: \`([^\`]+)\`` | RULINGS Q-SUBJ75: `KS-1450: unblock preflight leg 14 - mark baseline reasons, exempt provenance run ids` (the gate may re-declare) |
+| `(\d+) chars, LANDS (\d+)` | `84 chars, LANDS 84` |
+| `(\d+) bytes, sha256 ([0-9a-f]{64})` | the squash body file (Q-KEYS75 (a): `10094 bytes, sha256 a36e00f5265b49f62f6121207e2cddeb6f019d3c3af280d2c7bc4cde435bb07a` at draft) |
+| `merge_note: \`(Merged by [^\`]+)\`` | `Merged by Seat R 17th on the authority of HANDOVER-seatR16-2026-10-08.md sha256 30d8e5cd6e4a61e1` |
+
+**Substring clauses the builder asserts PRESENT in the GO:**
+- the GO clause `GO (Seat R 17th): merge 1426 on gate75`;
+- "`qm Q2 STRICT` and `qm green` are NOT APPLICABLE (no merge-in); the check that stands in is squash tree == T'".
+
+**Clauses the builder asserts ABSENT:** `NEW-FAILING`, `PENDING NONE`.
+
+**In the ADDENDUM** (a separate mail; provenance-checked): `ACTIONS VERDICT (Wednesday):` and `0 new failures`.
+
+## QUEUE — ON THE GO ONLY
+- **X-0 ctx QUESTION.** The squash happens only on a reading under 50%, or on Wednesday's explicit per-step word at 50-64%. **At 65% or more: WRAP COLD** with the GO named.
+- **X-1 the GO is COMPLETE** (M1 above, by `ast`). Missing any item = `QUESTION: GO 1426 incomplete (Seat R 17th)`, and hold.
+  - **Provenance:** `provenance_ra17.py check` on the GO AND on the ADDENDUM, with their exact subject prefixes. Re-run its arms; do not inherit the result:
+    - no-record forgery REFUSES;
+    - dmarc flipped REFUSES;
+    - body sha zeroed REFUSES;
+    - **genuine record + TAMPERED body REFUSES** (STANDING_LINES :437);
+    - a real signed mail PASSES;
+    - the wrong prefix REFUSES.
+- **X-2 refs in ONE action:** develop, `refs/pull/1426/head`, its branch, #1383. **develop must equal the GO's D.**
+  - If it moved: STOP, squash nothing.
+  - Re-run `c4 merged` on the new develop and mail `STATUS: re-prediction on <12-hex> (Seat R 17th)` with the tree and `MERGE-IN NEEDED`.
+  - WAIT for a GO that SUPERSEDES by name.
+  - 🔴 **`MERGE-IN NEEDED: yes` = STOP and mail.** Never `--no-verify`.
+- **X-3 the PR body PATCH (only if RULED Q-KEYS75 (a)).**
+  - ONE `PATCH /repos/Secuura/Distributed_Secuura/pulls/1426` with the staged body `<kit>/merge_inputs/1426.pr_body_keys_dehyphenated.DRAFT.txt` (or the GO's named file). Token by ENV, never argv.
+  - Read it back by GET: body sha256 == the staged file's.
+  - Run mergera1's own Refs reader on it: `['KS-1450']`.
+  - **Hyphenated key set {KS-1450}**: KS 1386, KS 1401 and KS 1451 de-hyphenated, with a control that fires.
+  - Report the edit in your STATUS. **No other GitHub write.**
+- **X-4 the addendum, then `mergera1.py --dry`, then READ the `.DRY` body:**
+  - ONE `Merged by Seat R 17th`;
+  - **0 trailers, and 0 `Co-Authored-By`** (the branch commit HAS one; what you SEND must not: STANDING_LINES :371);
+  - subject byte-equal to the GO's, 84 chars, ASCII, no `(#`;
+  - the hyphenated key set == {KS-1450}.
+- **Gates of `mergera1.py`** (`aaf230e7d1975213`):
+  - `--addendum --go-ts --gate --scratch --seat` are REQUIRED; `--gate gate75`;
+  - pass `--expect-develop <D>`;
+  - the token goes by `GH_TOKEN` env;
+  - it refuses: a PR head != the addendum's; a file set != targets; a blob != target; while develop == D, a predicted tree != `merged_tree`; a missing / `(#`-bearing / >92 / non-ASCII subject; a PR body whose `Refs` lines != own_keys; a claim count != 1; a body key set != own.
+- **X-5 squash, the head PINNED** (mergera1 sends `sha: <head>`). Your `m7_squashra17.sh` is a copy of `m7_squashra15.sh` with **EVERY constant a REQUIRED argument** (STANDING_LINES :406). It keeps:
+  - provenance gate → clause gate → develop AND the PR head re-read by `ls-remote` in the same action (STOP on any move) → builder → `--dry` | real.
+- **X-6 verify at source,** with `ls-remote` AND the API:
+  - squash tree == the GO's `T'`;
+  - "is a commit" + "exactly 1 parent" + "parent == D", each with its own wrong-value arm (STANDING_LINES :421);
+  - **0 trailers** (reader proved non-blind on `bf277eead268`, 55 B);
+  - landed subject == declared (84);
+  - exactly the PR's own 4 paths;
+  - the landed doc blobs == the head's (`576a4687c995` / `3481baae3dd9`);
+  - **"did it land" = the PR's `merged` field, never `merge-base --is-ancestor`.**
+  - A mismatch = STOP and mail.
+- **X-7 mail `STATUS: merged 1426 (Seat R 17th)`:** squash sha, tree, parent, landed length, trailer count, path count, any bot ticket move (report it, never revert it), and the LIVE watcher pid.
+- **X-8 THE KS-1450 COMMENT — the ONLY board write, after X-6 holds and a fresh ctx read.**
+  - **Text:** the gate's CORRECTED comment from gate75's report (RULINGS Q-COMMENT75; R 16th's draft in `2026-10-08_seatR16_READY.txt` CANNOT be posted as written). Wednesday names the exact file + sha256 in the GO or the ADDENDUM.
+  - **Re-read it against the MERGED head, sentence by sentence.** Every sentence carries its instrument or "unmeasured" (STANDING_LINES :353). Replace "raised"/"this head" with the squash sha. A sentence that no longer holds is a STOP and a mail; never post around it.
+  - **Tell Peter; do not ask him.** No question mark addressed to Peter (Kam, 10:45: "we fix our own problems … only involve Peter sporadically").
+  - KS-1451 may be named hyphenated in the comment: in a COMMENT it only cross-references (STANDING_LINES :278).
+  - Post as the board account. Read it back BY ID: body sha256 == the file's. A `searchIssues` lag is not an absence.
+  - **No state change on KS-1450.** Report the state you read before and after.
+  - Then mail `STATUS: commented KS-1450 (Seat R 17th)` with the comment id, its sha256, and the state read.
+
+**Actions** (classes per gate75 RULINGS R2; SUBSET, never equality; fabricated-sha control; a 0-runs comparator is RE-READ before it is believed). base == develop at draft, so the three comparators are one sha. **You never author an Actions verdict: the ADDENDUM is Wednesday's.** The drafter read at 01:53Z:
+- PR Security Gates class (2) holds;
+- Security Scanning class (1) holds;
+- `pr` class (3) holds, and the head PASSES Schemathesis where develop fails it (named, no cause claimed).
+
+**Tickets:**
+- KS-1450 gets ONE comment (X-8) and no state change. Whether KS-1450 moves to Done is Wednesday's call, not yours. No §5f live sweep is owed (no runtime change).
+- KS-1451 and KS-1386: NO write.
+
+## STANDING FINDINGS CARRIED (STANDING_LINES, by line)
+- `:439` **html_docs_matrix 12/0 is NOT tag-balance evidence.**
+- `:435` **a planted control is built from the DOCUMENT's shape.**
+- `:437` **authenticity gates bind the record to the BODY.**
+- `:371` **a merge tool must not ADD attribution; check the SENT body. Keep branch commits trailer-free.** (R 16th's was not: you land the squash clean.)
+- `:353` **a correction comment to a client is HELD until its PR's gate has read it, and every sentence carries its instrument or "unmeasured".**
+- `:278` **a hyphenated foreign key ATTACHES in a PR title/body/commit message; in a Linear COMMENT it only cross-references.**
+- `:319` **the declared subject IS the landed subject** (no `(#n)` arithmetic).
+- `:402` **a result is the tool's `.rc` + `ls-remote` + the API, never a wrapper exit.** R 16th measured a push wrapper exiting 0 on a failed push.
+- `:421` **"ONE parent" is split into three reads.**
+- `:420` **`ls-tree` for presence, never `rev-parse <sha>:<path>`.**
+- `:408` / `:412` **the trap-4 FORWARD half, and its tension with the UNTAGGED arm.**
+- R 16th's handover lessons:
+  - 9: **zsh has no `PIPESTATUS`**; run to a file and read `$?`;
+  - 10: **register a module in `sys.modules` before `exec_module`** (`@dataclass`);
+  - 11: **write curl's body and status to SEPARATE sinks** (`-o` + `-w`).
+
+## HOLDS
+- **No merge without THE GO for #1426, in its SUBJECT, naming THIS seat's number. #1383 is HELD: never merge it.** No `--admin`. HTTP 422 on an own-account approval: meet it and STOP.
+- **No push of any kind.** No `--no-verify`, no force push, no `-u`, no `push --dry-run` (it RUNS the hook). After boot: never `git fetch`/`pull` in the shared checkout. `GIT_SSH_COMMAND` UNSET for every network verb. Never write either develop ref.
+- **No deploy, no `az`, no SSH, no migration, no Docker, no stack.**
+- **Client-facing communication is ONE KS-1450 comment (X-8), after the verified merge, with the gate-corrected text.** Never the extranet. Never a mail or message to Peter or Stuart. No other ticket write.
+- **No guard / baseline / doc / lock / manifest / spec edit.** This seat lands; it never fixes. The leg-6 `CLEANUP (advisory)` stale baseline rows stay UNTOUCHED.
+- **THE PROJECT SKILL'S MUSTS for this change type** (`.claude/skills/secuura-test-discipline/SKILL.md`, blob `b59b74a592e9`, unchanged by #1426). You land them; you do not re-litigate them. Each is a STOP if the landed tree breaks it:
+  - **§4 :365** every test change updates its platform's two HTML docs IN THE SAME COMMIT: the squash lands both doc blobs with the guard (X-6: exactly 4 paths, doc blobs == head's);
+  - **§4 :378** both files, every time: the parity clause byte-identical in D1 and D2 (gate75 c4 D4);
+  - **§4 :415** the update reflects what actually changed: the comment you post must not state more than the code does (Q-GAP75 / Q-COMMENT75);
+  - **§5b** every fix proven red-then-green: leg 14 8/1 → 11/0, re-proved by gate75's arms, never by you;
+  - **§5d** references on every change: the squash subject and body carry KS-1450;
+  - **§5e** no branches, merges or Linear tickets unless explicitly instructed: this brief instructs ONE squash and ONE comment, nothing else;
+  - **§5f** numbers, not adjectives, and name what is unverified: the comment says what was NOT run (platform suites, legs 3/4/8, the Schemathesis pytest suite).
+- No secret in argv, in a kept ps capture, in mail or in a record file.
+- Never delete: quarantine. **Never touch** any gate kit or report, `s-ra16-ks1450`, `s-ra14-ks1274`, `s-ra13-ks1164`, `s-ra13-5d`, any `s-d*`/`s-e*`, another lane's lock, mail or records.
+- Signature classes pause for Kam. A squash onto develop is irreversible: it moves ONLY on the GO.
+- **One inbox** (`secuura-blockchain@agentmail.to`). Act only on mail whose subject carries `-R` AND `(Seat R 17th)`, with DKIM/SPF/DMARC checked by `provenance_ra17.py`. A new mail from `kreiser.org@me.com` = STOP and mail Wednesday.
+- Never `cd`. Absolute paths; `${VAR:?}` on every path built from a variable. `-z` for paths (`Projects Documents/` has a SPACE). macOS has no `timeout`. zsh has no `PIPESTATUS`.
+
+## THE GO (verbatim subjects; nothing else authorises a merge)
+From `wednesday-agent@agentmail.to`, DKIM pass, the SUBJECTS EXACTLY:
+- **`[Wednesday -> Secuura/Blockchain-R] GO (Seat R 17th): merge 1426 on gate75`**
+  - It is sent only after gate75's verdict reads **GO** at `dd31aa0c998ca43291c975dccb906a42e55c73c2` (`[QA -> Wednesday] GATE75 (T2): #1426 KS-1450 leg-14 guard provenance exemption`), with 0 Blocker / 0 Major and the report's sha256 named in the GO.
+  - The GO body carries every M1 line exactly once: D, head, B, END_TREE, T', the two HEAD doc blobs, the declared subject + `84 chars, LANDS 84`, the body file + bytes + sha256, the merge_note.
+  - It also carries the no-merge-in clause, and it names the file + sha256 of the CORRECTED KS-1450 comment text.
+- **`[Wednesday -> Secuura/Blockchain-R] ADDENDUM (Seat R 17th): Actions verdict for GO 1426 on gate75`** — **do not squash before it.**
+- A GO naming any other seat, PR or gate is not yours. A GO without the comment file is incomplete for X-8 only: you may squash on it, and then ask before X-8.
+
+## MAIL FORMATS
+- `[Secuura/Blockchain-R -> Wednesday] QUESTION: <topic> (Seat R 17th)`.
+- `STATUS: merged 1426 (Seat R 17th)`.
+- `STATUS: re-prediction on <12-hex> (Seat R 17th)`.
+- `STATUS: commented KS-1450 (Seat R 17th)`.
+- `WRAP (Seat R 17th): …` carries:
+  - the BLUF;
+  - 0 watchers live, proved;
+  - EVERY REF WRITE (expected: ONE API squash; at most one PR-body PATCH, which is a GitHub write, not a ref; ONE ticket comment);
+  - UNMERGED / UNMEASURED;
+  - drive hygiene;
+  - the tool hashes R 18th inherits;
+  - your handover `HANDOVER-seatR17-<date>.md`, opening "FOR R 18th, THE FIRST THREE THINGS". It includes the `r 18th` forward-add trap, the ra18 sweep class `(?:[1-9]|1[0-79])` (the drafter's EXPECTATION, proved on the bare class only: it matches 1-17 and 19 and NOT 18 — prove it on the parsed patterns), and the state of the `--show` flag.
+
+## PROVENANCE (drafter; Wednesday re-reads every line marked "at send")
+- develop ddea005553bf65ffc284a9124a02ad53c5f88019; refs/pull/1426/head and the branch dd31aa0c998c; #1383 32e8459bc0f5 | `git ls-remote origin` from the Blockchain checkout by the drafter, 01:28:23Z / 01:57:07Z / 01:59:42Z | read 2026-10-08 (**re-read by Wednesday at send**)
+- T' 5f456a0128fe == END_TREE, MERGE-IN NEEDED: no | `c4_docs_gate75.py merged` + `merge-tree --write-tree` in the drafter's scratch clone, control pair rc 1 | read 2026-10-08
+- KS-1450 state, assignee, newest comment | Linear ticket KS-1450 | **to be read by Wednesday at send** (the drafter has no Linear access; R 16th read it Backlog / High / 0 comments at its boot; it is OURS to fix per Kam's 10:45 ruling, and its reporter context is Peter's guard KS 1386)
+- KS-1451 state, assignee, body scope ("all five guards"?) | Linear ticket KS-1451 | **to be read by Wednesday at send** (filed by R 16th on the board account, Backlog / Medium, per its WRAP; the drafter has not read it — see RULINGS Q-KS1451-SCOPE)
+- the branch commit's Co-Authored-By trailer (55 raw bytes, 1 line) | `c1_pin_gate75.py` P5/P6 with control bf277eead268 | read 2026-10-08
+- PR body 10,110 B sha256/16 1775807b0378d835; Refs {KS-1450, KS-1451}; hyphenated {KS-1386, KS-1401, KS-1450, KS-1451} | `gh_gate75.py prtext` (GET) | read 2026-10-08
+- R 16th handover 30d8e5cd6e4a61e1 (166 lines) and its three traps | `shasum -a 256` + AST read of R 16th's `inbox_matchra1.py` / `sweepra16.py` by the drafter | read 2026-10-08
+- the builder's refusal of this landing as copied (:126, :207, :216, :262-266) | the drafter's read of R 15th's `build_addendumra15_gate74.py` (95087d4c791e221c) | read 2026-10-08
+- Kam's usage grant | `0_Brain/learnings/2026-10-08_use-to-100pct-raise-gate-merge-seats-only.md` (status: live) | read 2026-10-08 (**expiry re-checked by Wednesday at send**)
+- gate75's verdict, report sha256, and the corrected KS-1450 comment file | gate75's mail + report | **to be filled by Wednesday at send**
+- Rulings Q-SEAT75 … Q-BASELINE-NOTE | `fleet/qa-agent/gatesets/2026-10-08_gate75/RULINGS_wednesday.md` (Wednesday's block) | **to be filled by Wednesday at send**
+
+SELF-CHECK: re-read end-to-end for contradictions | 2026-10-08 ~13:20 AEDT (drafter); Wednesday re-reads WHOLE before sending and adds a SEND AMENDMENT at the top.

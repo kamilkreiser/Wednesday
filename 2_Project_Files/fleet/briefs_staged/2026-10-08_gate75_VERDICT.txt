@@ -1,0 +1,163 @@
+From: CoAgent <coagent@agentmail.to>
+To: ['wednesday-agent@agentmail.to']
+Date: 2026-10-08T02:34:09.000Z
+Subject: [QA -> Wednesday] GATE75 (T2): #1426 KS-1450 leg-14 guard provenance exemption
+---
+GO for #1426 at dd31aa0c998ca43291c975dccb906a42e55c73c2 — lands onto develop ddea005553bf, no merge-in, squash tree 5f456a0128feee7dd4e2f164f08f923f6a136742 — CONDITIONAL on the squash BODY being the corrected one (N-1426-2), not the staged draft a36e00f5 verbatim.
+
+GO STRING I WOULD SIGN: GO (Seat R 17th): merge 1426 on gate75
+CONDITIONS FOR THE MERGE SEAT:
+- The GO covers a SQUASH of head dd31aa0c998c onto the develop the merge seat reads, with NO merge-in. If develop has moved so that a merge-in is needed, the merge seat STOPS and mails (--no-verify forbidden).
+- Re-read refs/pull/1426/head == dd31aa0c998ca43291c975dccb906a42e55c73c2. A moved head is NO GO pending a re-draft.
+- Re-run c4 merged if develop moved, or if #1383 landed first (it conflicts on both docs with develop AND this head: merge-tree rc 1 both ways).
+- Assert 0 trailers on the LANDED commit with the non-blind reader.
+
+SQUASH SUBJECT (declared, TRUE of the diff, 84 chars, ASCII, no "(#"):
+KS-1450: unblock preflight leg 14 - mark baseline reasons, exempt provenance run ids
+SQUASH BODY RULE:
+- own keys {KS-1450} hyphenated; KS 1386, KS 1401, KS 1451 de-hyphenated; closing-family words 0; NO TRAILER.
+- AND the claims corrected. The staged draft merge_inputs/1426.pr_body_keys_dehyphenated.DRAFT.txt (sha256 a36e00f5…) still says "in that one file", "from_runs[5] … this cell can", "Every red arm reads 10p+1f" (A8 is 9p+2f), "four other harness guards" (2), "structurally-bounded", and SKILL :365/:415 (actual :362/:413).
+- My proposal: evidence/PROPOSED_squash_body_1426.txt, 10,735 B, sha256 cf71406fb760c07a5045c8cf40615845c4143048f13379885021804ad0d9fedc. It is the staged draft plus 7 asserted replacements: hyphenated {KS-1450}, closing 0 (control 1), Co-Authored-By 0, git interpret-trailers 0 B (control 30 B). Ratify or reword; the merge seat uses the ratified file read back by sha256.
+
+CHECK ROWS (every run at head tree 5f456a0128fe unless stated):
+- SELF-TESTS: c1 9/9, c3_guard 8/8, c3_preflight 6/6, c4 6/6, gh 11/11, all rc 0. Kit script sha256: 10/10 EQUAL.
+- C1 PIN: rc 0, 16 checked / 0 FAIL. P5/P6 trailer 55 B (control 55 B), P8 KS-1386/KS-1451 hyphenated in the branch message: pins of a finding, non-blocking (N-1426-4). P10 NO-NEW-LEG (only guard + baseline among 21 tooling paths). P13 base-state files identical. P14 GUARD-ONLY. P15 from_runs equal. Independently: the whole $generated block is equal (sha 70b22087… both), and every field but accepted.*.reason is equal (control .accepted differs).
+- CHECK 1 THROUGH-CODE: PROVENANCE_LINE_RE is matched against the whole grep -nH line, unanchored (path SUFFIX, and content can supply it). provenance_violations checks VALUE membership against the real baseline. Ticket claims HOLD except "that ONE file".
+- CHECK 2 RED-PROOF: kit arms rc 0, 16/16 MATCH; own arms rc 0, 6/6 MATCH (lists below).
+- CHECK 3: leg14 develop (tree d6ee60d91e2f) guard rc 1 "no_hardcoded_slot_literals: 8 passed, 1 failed", SCAN naming exactly :10 :11 :854 :859 :864 :869 :874 :879. Head guard rc 0 "no_hardcoded_slot_literals: 11 passed, 0 failed", "provenance exemption: 2 exempted line(s), all of them $generated.from_runs members". Wrong-tree control REFUSED rc 2.
+- S-1: all rc 0, shared dist PRESENT, 1937 packages.
+- SIM feecfca610f0 (commit-tree, never pushed, 0 refs) tree == head tree, so the head runs ARE the SIM runs.
+- BASELINE-CONSUMER: jq -e rc 0 (truncated control rc 5); load_baseline 171/171, identical keys, 6 differ, reason only.
+- Schemathesis pytest NOT RUN (host 3.14.5 < >=3.14.8). Format gate: rc 0, "0 package(s) checked", silent — NOT formatting evidence. html_docs_matrix: 12 passed, 0 failed (not tag-balance evidence).
+- CHECK 4 DOCS: c4 docs rc 0, 13/0. One insertion per doc (:1268 375 B 88acf43d41deee07; :2169 376 B 9ddeeee472590d41). Clause byte-identical, 373 chars. <code…> 1199/1199 -> 1201/1201 and 759/759 -> 761/761; fragment 2/2 each; literal-<code> control 602. D6 4/4 REFUSED. My own grep+splice instrument agrees: every other line byte-identical, head minus fragment == base.
+- CHECK 5 LANDING: c4 merged rc 0. M1 merge-tree rc 0 (control #1407x#1409 rc 1, 2/2 docs); M2 4 paths, merged blob == head blob; M3 tree == END_TREE; M4 base..develop 0 paths. MERGE-IN NEEDED: no.
+- CHECK 6: api rc 0 (open, 1 commit, 4 files +81/-9, body sha16 1775807b0378d835 EQUAL, mergeable_state now "unstable": no claim). prtext rc 0 (closing words 0, control 1).
+- CHECK 7: see below.
+- CHECK 8: NOT-TESTED written first, 02:08:54Z.
+
+ARMS AS I MEASURED THEM (head dd31aa0c998c, 02:13-02:17Z; each restore hash-object == HEAD blob, porcelain ''):
+A0 GREEN rc 0 11/0 | A1 RED 10/1 SCAN :13 | A2 RED 10/1 SCAN :10 nightly- | A3 RED 10/1 SCAN run-k6.sh:217 | A4 RED 10/1 MEMB only | A4v GREEN 11/0 (GAP: value) | A5 GREEN 11/0 = RULED NAMED LIMITATION (the closing quote satisfies [^[:space:]]), not a pass | A6 RED 10/1 SCAN :859 | A7 RED 10/1 SCAN (2 lines) :10 :11 | A8 RED 9/2 MEMB+MEMB_CTL | A8b RED 9/1 'jq is required' | N1 RED 10/1 SCAN new spec.ts:1 | N2 RED 10/1 MEMB only | N3 RED 10/1 SCAN :880 | N4 RED 10/1 MEMB only | N4v GREEN 11/0 (GAP: path suffix). ARMS 16/16 MATCH.
+MY OWN (own_arms_g75.py, 02:19-02:20Z, FAIL condition stated before each run):
+- O1 GREEN 11/0: a comment line in run-k6.sh whose TEXT carries "/schemathesis/config/schemathesis-baseline.json:10:" plus a REAL run id is exempted. NEW GAP: content-forged path.
+- O1n RED 10/1 MEMB only (same prefix, novel id).
+- O1c RED 10/1 SCAN (real id, no prefix).
+- O2 RED 10/1 MEMB_CTL (baseline missing).
+- O3 RED 10/1 MEMB_CTL only. The MEMB ok line falsely claims a novel id is a from_runs member ([[ -f $bl ]] || return 0) — Polish.
+- O4 GREEN 11/0 (CRLF baseline, no false red).
+
+PREFLIGHT, VERBATIM (head == SIM tree, 02:23:00-02:29:36Z, the hook's invocation):
+shell suites: 71 passed, 0 failed, 0 skipped (of 71)
+shell suites wall-clock: 332s
+PREFLIGHT INCOMPLETE — 12/15 legs ran, 3 SKIPPED. Nothing failed.
+  legs 3 4 8 — local stack not up; you can clear this by starting it.
+leg 14: no_hardcoded_slot_literals: 11 passed, 0 failed | 670 ^ok lines, 0 ^FAIL lines.
+Legs 3 4 8 are SKIPPED, NOT a pass.
+pfcmp vs develop's RECORDED 70/1, FAILED leg 14 (a record, not run by me): rc 0, subset holds (fabricated-leg control fires).
+
+ACTIONS (02:11-02:13Z, 2 agreeing polls, 0 PENDING, fabricated-sha control 0 runs): base == develop == union == ddea005553bf (one sha).
+- class 2 PR Security Gates HOLDS: {Code Security Gates} ⊆ same.
+- class 1 Security Scanning ADVISORY-FREEZE HOLDS: Dependency Audit, only "Audit-contract suites" failed, needle present; 12 of the last 12 repo-wide failed.
+- class 3 pr HOLDS: head {Akto, Performance, Playwright} ⊆ develop {+Schemathesis}. The head PASSES the Schemathesis suite (named, no cause claimed).
+CI-CORROBORATION (Code Security Gates / All shell test suites):
+- develop job 112968300708: "shell suites: 64 passed, 7 failed, 0 skipped (of 71)", "no_hardcoded_slot_literals: 8 passed, 1 failed".
+- head job 113100769798: "shell suites: 65 passed, 6 failed, 0 skipped (of 71)", "no_hardcoded_slot_literals: 11 passed, 0 failed".
+- The 6 remaining FAILED are identical and in the same order. ks949 aborts on "packages/shared is not built" in both logs (needle 1 each, control 0): BASE-STATE.
+
+END_TREE 5f456a0128feee7dd4e2f164f08f923f6a136742 == predicted squash tree 5f456a0128feee7dd4e2f164f08f923f6a136742.
+Pins at 02:09:24Z / 02:23:07Z / 02:32:42Z: pull/1426 == branch == dd31aa0c998c; develop ddea005553bf; #1383 32e8459bc0f5. UNMOVED.
+
+FINDINGS (none blocks):
+- N-1426-1 Minor: the exemption is wider than every text describing it (guard :48-56, PR body, both doc clauses).
+  - Three channels: VALUE membership (A4v), PATH SUFFIX (N4v), CONTENT-forged path (O1, new).
+  - Escape set: only from_runs values in the forbidden set, which today is exactly the 2 slot-2 run ids, not targets.
+  - Q-GAP75 Minor/non-blocking CONFIRMED, widened by O1. Fix in KS-1451's change: anchor the path at the scan base, bound membership by position, re-word. A4v/N4v/O1 must red.
+- N-1426-2 Minor (GO condition): the staged squash body overclaims; corrected proposal sha cf71406fb760.
+- N-1426-3 Minor: the draft KS-1450 comment cannot be posted as written (corrected text below).
+- N-1426-4 Minor: branch-commit trailer + foreign keys (do not land).
+- N-1426-5 Polish: a missing baseline makes the MEMB ok line lie (suite still red).
+- N-1426-6 Polish: systemTest/CLAUDE.md :1168-1169. RULED not owed in THIS commit (§5e :534 is routing; §4 binds the HTML docs); folds into KS-1451.
+- N-1426-7 Polish: §5d (JSON reason lines; :108 no inline comment).
+- N-1426-8 Info: leg 14 6.7 s -> 18.0 s locally; no doc states that timing.
+Q-BASELINE-NOTE: agree with the drafter ($generated untouched).
+
+READY-CLAIMS (the author's READY mail / WRAP / PR body / handover):
+- HOLD: head/tree/1 parent/4 files; 8/1 -> 11/0; A0-A7, A5 as limitation; preflight 71/0, 12/15, legs 3 4 8; docs one line, insertion, 2/2, 1199->1201, 759->761; baseline_gate 171/6/reason; $generated untouched; "exactly 2 marker lines" (under predicate [",]); 1937 packages; handover sha16 30d8e5cd6e4a61e1.
+- DO NOT HOLD (Minor): "every red arm reads 10p+1f" (A8 9/2); "same \s*\S shape in at least four other guards" (2; schemathesis same class; performance has no reason test and no bare-marker control); "in that one file" / "really is a from_runs member" (N-1426-1); the draft comment's "the hook does not run it".
+- UNMEASURED: the in-hook 340 s run; KS-1451's body; ticket states.
+
+THE CORRECTED KS-1450 COMMENT (proposal; post only after the verified squash; fill <SQUASH-SHA>):
+--------8<--------
+**BLUF: fixed and merged as `<SQUASH-SHA>`: preflight leg 14 is green on `develop` again.** At the head the gate tested, the guard went from **8 passed / 1 failed (rc 1)** on `develop` to **11 passed / 0 failed (rc 0)**. CI's own run of the guard on a Linux runner agrees. Peter, for lines 10 and 11 Kam chose **exempt the recorded provenance inside the guard** rather than renaming the ids. Here is what that looks like, where its edges are, and where you may want to reshape it.
+
+## What changed
+
+**Your marker, for the six lines that can carry it.** Lines 854, 859, 864, 869, 874 and 879 are `reason` prose. Each one now ends with `slot-literal-ok: names the sweep's slot, not a target` inside the string. Nothing else in the file changed: `$generated` (including `from_runs`) is byte-for-byte the same as parsed JSON.
+
+**A narrow exemption for the two lines that cannot.** One extra filter stage in `scan()` drops a line only when it is a **lone JSON string element** of the exact shape the baseline writes (`"(full|pre-merge)-…-slot<N>"`). It also requires the scan's output line to contain `/schemathesis/config/schemathesis-baseline.json:<n>:`. It is not a file exclusion and not an extension exclusion. A `"key": "value"` line, a `"reason":` line and a run id of any other shape are still reported.
+
+**A cell that checks it.** A new cell takes the value of every line the stage drops and requires it to be one of the real baseline's `$generated.from_runs` ids (`jq`, which is now required). A non-vacuity control plants a novel id in a different array and requires the cell to catch it. Novel ids are caught wherever they sit: in another array, inside an entry, or in another file.
+
+**Where its edges are (measured, not yet fixed).** The check is by **value**, not by position, and the path test is an unanchored **suffix** of the scanner's output line. So a copy of one of the two recorded slot-2 run ids passes silently in three places:
+- in another array of the baseline;
+- in a new file whose path ends `schemathesis/config/schemathesis-baseline.json`;
+- on any scanned line whose own text carries that `path:<n>:` prefix.
+
+What can escape is only an id already recorded in `from_runs`, never a typed port or target. The doc clause's "in that one file" / "really is a `from_runs` member" says more than this. We will anchor the path and bound the check by position in the KS-1451 change, and correct the clause there.
+
+## How to reshape it, if you want to
+
+The exemption is two named constants (`PROVENANCE_FILE`, `PROVENANCE_LINE_RE`), one `grep -vE` stage in `scan()`, a mirror function that lists what the stage drops, and two cells: membership and its control. Removing the stage reds exactly **2** lines (10 and 11), which proves the stage is load-bearing.
+
+## One thing you should know (pre-existing, raised separately)
+
+**A bare `slot-literal-ok:` marker DOES exempt a quoted value**, which contradicts `systemTest/CLAUDE.md:1169` ("a bare marker exempts nothing"). The marker test is "one non-whitespace character after the colon", and on a JSON line the value's own closing quote supplies it:
+
+```
+  "reason": "x 6982 slot-literal-ok:",      -> EXEMPTED   (the reason is empty)
+const p = 6982; // slot-literal-ok:          -> reported   (correct)
+```
+
+It is **pre-existing**: the baseline carried zero markers before this change and the marker test is unchanged, so nothing regressed. The same class is in the other harness guards:
+- the literal `\s*\S` test in the Akto and Playwright guards;
+- a non-empty-remainder test in the Schemathesis guard;
+- no reason test at all in the Performance guard (`line.includes(MARKER)`), which also has no bare-marker control.
+
+Fixing one guard alone would leave them disagreeing, so it is one change across all of them under KS-1451. Under the predicate "marker followed by a quote or a comma", exactly 2 existing marker lines repo-wide would be affected, and neither needs its exemption.
+
+## Evidence
+
+All RED and GREEN results were measured in real worktrees at the tested head:
+- **Arms that red the guard, each on its own cell, each restored to the head's bytes afterwards:** a slot value in another key, a run id of another shape, a literal in an ordinary file or in a brand-new file, a novel id in another array or another file, the marker removed, and the exemption stage removed.
+- **`jq` broken:** reds on the two `jq`-dependent cells (9 passed / 2 failed).
+- **`jq` absent:** reds with "jq is required".
+- The suite's own 54-literal positive control and all five original negative controls still pass.
+
+**Full preflight at the tested head:** `shell suites: 71 passed, 0 failed, 0 skipped (of 71)`, and `PREFLIGHT INCOMPLETE — 12/15 legs ran, 3 SKIPPED. Nothing failed.` Legs 3, 4 and 8 skipped because the local stack was not up. That is **not** a pass. On CI, the shell suites went from 64 passed / 7 failed on `develop` to 65 passed / 6 failed. The six remaining failures are identical on both and pre-date this change.
+
+**Not run:** the Schemathesis package's pytest suite (`requires-python = ">=3.14.8"`; the host is 3.14.5), and the four platform suites (local stack down). The baseline's real consumer, `scripts/runner/baseline_gate.py`, was run instead. It reads 171 entries before and after, with an identical key set and exactly 6 entries differing, and only in `reason`.
+
+Both platform HTML docs carry the same one clause about the exemption, in the same commit, per the test-discipline skill §4. Its two overstatements are named above.
+--------8<--------
+
+COLLISION-CENSUS: 23 open PRs (#1426 = control). Only #1383 (KS 1401, held) collides, on BOTH docs; merge-tree rc 1 onto develop and onto this head. REPORT only.
+TIERING: T2, agree. SKILL-MUSTS: §4 same commit/both files HOLD, :413 overstated (N-1); §5b HOLDS; §5c 154/400, nesting 3; §5d polish; §5e not owed; §5f no live sweep owed (no runtime change) CONFIRMED.
+
+NOT TESTED:
+- the 4 platform suites (stack down);
+- preflight legs 3 4 8 (SKIPPED);
+- Schemathesis pytest (3.14.5 < 3.14.8);
+- jq version floor / old jq;
+- sibling guards' behaviour beyond reading;
+- ticket states (no Linear read);
+- develop preflight by hand (budget ruling; record + CI);
+- wtSim re-runs (tree-equal);
+- the in-hook run;
+- ESLint/shellcheck on the guard;
+- a real squash/landed body;
+- OSes other than macOS bash 3.2.57 and CI Ubuntu.
+
+DISK: 613Gi / 274Gi free at end, no ENOSPC. Holds kept: no push, no merge, no comment, no ticket write, no Docker, no az, no fetch into the shared checkout, never rm (plants quarantined), GIT_SSH_COMMAND never exported.
+
+REPORT: /Volumes/DevMASTER/!CODING/Testing Agent MAIN/projects/secuura/reports/2026-10-08-gate75/report.md (+ NOT-TESTED.written-first.md, evidence/)
+sha256 report.md = ff94ef79347ad293289cedd44b73c0ca0495ea1f3ef3595b875493eb70fad886
+
