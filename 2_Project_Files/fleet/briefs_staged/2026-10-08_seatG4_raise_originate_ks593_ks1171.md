@@ -1,7 +1,13 @@
 LAUNCH BRIEF (Seat G 4th): successor of Seat G 3rd on pane `Secuura/Blockchain-G`. **A RAISE SEAT, ONE OF FOUR PARALLEL SEATS (R 18th, E 11th, G 4th, F 5th) on ONE checkout and ONE inbox.** In order: (1) ITEM 0, bounded, then a plan confirmation and WAIT; (2) a FRESH RAISE_BASE accepted by Wednesday BY NAME; (3) RAISE KS-593 (ONE PR, three passes in `services/originate`), then KS-1171 (ONE PR, a test-only boundary pin in `services/anchoring`), each to READY FOR QA. No merge, no gate, no deploy. Secuura NEVER force-pushes. Usage: Kam's new-account grant, clause RAISE, `WED_USAGE_STOP=100`.
 
-## SEND AMENDMENT (Wednesday fills at send: pane ids for all four seats, rulings on the QUESTIONS at the foot, ticket reads in PROVENANCE)
-- @@FILL@@
+## SEND AMENDMENT (Wednesday, at send) — this block WINS where it differs from the text below
+- **Read WHOLE by Wednesday before send.** develop re-read just before this send is in the launch mail's timestamp window; the brief's `0a6177ea5482` was re-read at 05:40:32Z, unmoved.
+- **LIVE SEATS AT SEND:** **R 18th on `%95` (`Secuura/Blockchain-R`)**, launched 05:41Z. E 11th and F 5th are NOT launched yet; they follow, and their pane ids reach you by mail. The partition table binds regardless. You will NOT be the sole live session, so expect the launcher's boot pull to be READ-ONLY: RECORD which it did.
+- **Rulings, all as recommended:** Q-PRSHAPE18 (one PR per ticket); Q-READ593 (mail the built `routes/documents.ts` diff before G-A's push and hold for Wednesday's word); Q-HOLD18 (raise from the REVIEW + `checker.out` + `patch.diff`, naming the missing READY in the body); Q-NUM18 (`39.` KS-593, `40.` KS-1171); Q-SCOPE18.
+- **Linear, read by Wednesday 05:40Z (Secuura board, read-only; control KS-99999 = "Entity not found"):**
+  - KS-593: Backlog, P2, board account, 26 comments, newest 2026-10-07T14:53Z by **Peter**. Read Peter's newest comments at ITEM 0 (g) and say in the plan mail whether they change G-A.
+  - KS-1171: In Progress, P3, board account, 3 comments (newest 2026-09-25, board account). **No live seat holds it**: the only live seat is R 18th, whose queue does not include it.
+  - KS-565: Backlog, board account. KS-1015: In Progress, board account. KS-562: Backlog, board account. All three are named de-hyphenated only.
 
 # LAUNCH BRIEF: Seat G 4th, Secuura/Blockchain, lane G (pane `Secuura/Blockchain-G`). From Wednesday (DRAFT: staged by Wednesday's brief drafter 2026-10-08 ~16:3x AEDT, NOT sent, NOT launched)
 
@@ -19,7 +25,7 @@ LAUNCH BRIEF (Seat G 4th): successor of Seat G 3rd on pane `Secuura/Blockchain-G
 ## FOR G 4th, THE FIRST THREE THINGS (G 3rd's handover `:45-90`, the tool items; the tool wins)
 1. 🔴 **Your matcher's forward-add is LIVE.** PARSED (`raise/inbox_matchg1.py`, drafter `ast`, P7): `MINE` `'g 3rd'` (`:102`); `OTHER_SEATS` (`:212`, 119 entries) contains `g 4th` and `f 4th`, and NONE of `r 17th`, `r 18th`, `e 10th`, `e 11th`, `f 5th`. REMOVE `g 4th`/`seat g 4th`; ADD `g 3rd`/`seat g 3rd`; FORWARD-ADD `g 5th`/`seat g 5th`; set `MINE` to `g 4th` (quote char preserved); ADD `r 17th`, `r 18th`, `e 10th`, `e 11th`, `f 5th` (+ `seat …`). **Keep the untagged arm `(Seat G 9th)`** (in neither list) and add no `g 9th`. Drive the real tagger: your own `[Wednesday -> Secuura/Blockchain-G] ANSWER: plan (Seat G 4th)` -> FOR ME; `… -R] GO (Seat R 18th): …`, `… -E] ANSWER: plan (Seat E 11th)`, `… -F] ANSWER: plan (Seat F 5th)`, the UNSUFFIXED `[Wednesday -> Secuura/Blockchain] ANSWER: plan (Seat E 11th)` -> FOREIGN; G 3rd's real `GO (Seat G 4th): merge 1406 on gate72` is a predecessor-era string addressed to YOUR ordinal for a merge you will never do: drive it and REPORT what it reads (a merge GO in a raise seat = mail the mismatch, whatever the tagger says). Prove by `ast` AND import.
 2. 🔴 **The `ra` lane is only PARTLY foreign in your namecheck.** G 3rd added `ra1`..`ra6` (`:72-75`); `s-ra13-*`, `s-ra14-ks1274`, `s-ra16-ks1450` and the coming `s-ra18-*` read NEITHER mine nor foreign until you add `ra7`..`ra18` (and `e11`, `f5`) by ANCHORED forms. **Both foreignness computations now call ONE `foreign_of`** (`:68-71`): extend that function only. **`MINE` drives branch, worktree AND lock ownership from one knob** (`:60-67`): `_MINE_LOCK` is pinned to the LITERAL `.push-lock-g1`; do not make a bare `g1`/`g4` token foreign (`.push-lock-g1` segments to `['.push','lock','g1']`).
-3. 🔴 **The row tables carry the predecessor's queue** (`:86-88`): `BRANCHES` and `SUBJECTS` hold G 3rd's ONE row (`ks-1437-advisory-lock-refresh-g3-1`): REPLACE them with yours, do not re-key them. A `@@KS@@` placeholder row is GATED (namecheck exits 2 until substituted). **`rekey_checkg1.py` keys on a TWO-DIGIT generation, so a lettered/one-digit seat has NO independent re-key auditor** (`:82-85`): say so in any mail that rests on it (STANDING_LINES `:392`). **Stale scratch knobs** (`armsg1.py:65`, `mergeg1.py:120`, `mergeing2.sh:7`): grep every module-level literal for a 36-char UUID and `/private/tmp/` before the first run. zsh: `${PIPESTATUS[0]}` is EMPTY; rc on its own line.
+3. 🔴 **The row tables carry the predecessor's queue** (`:86-88`): `BRANCHES` and `SUBJECTS` hold G 3rd's ONE row (`ks-1437-advisory-lock-refresh-g3-1`): REPLACE them with yours, do not re-key them. A KS placeholder row (the at-at-KS-at-at token) is GATED (namecheck exits 2 until substituted). **`rekey_checkg1.py` keys on a TWO-DIGIT generation, so a lettered/one-digit seat has NO independent re-key auditor** (`:82-85`): say so in any mail that rests on it (STANDING_LINES `:392`). **Stale scratch knobs** (`armsg1.py:65`, `mergeg1.py:120`, `mergeing2.sh:7`): grep every module-level literal for a 36-char UUID and `/private/tmp/` before the first run. zsh: `${PIPESTATUS[0]}` is EMPTY; rc on its own line.
 
 ## THE PARTITION, FROM BOTH SIDES (raise round after KS-1450; drafter's measurement at develop `0a6177ea5482`, P3-P5)
 **Four seats launch in parallel on ONE checkout and ONE inbox (`secuura-blockchain@agentmail.to`).** Pane ids are assigned at launch: Wednesday writes each `%id` into the SEND AMENDMENT. A mail whose subject names another seat is NOT yours, even on your own pane tag.
@@ -136,9 +142,10 @@ Q-N5; Q-BUNDLE (one PR per ticket; no two `Refs`); Q-1410 precedent (several pas
 - **Q-SCOPE18:** copy, hash and sweep every tool you RUN; lock-regeneration and merge tools not run. **Default:** as recommended.
 
 PROVENANCE:
-- KS-593 (state, assignee, newest comment) | to be read by Wednesday at send | —
-- KS-1171 (state, assignee; "Wednesday confirms that no seat holds KS-1171", REVIEW) | to be read by Wednesday at send | —
-- KS-565, KS-1015, KS-562 (named de-hyphenated only) | to be read by Wednesday at send | —
+- KS-1164 In Progress, board account (named ONLY as the cheat doc's current tail key, not queued work) | Linear GraphQL issue(id) by Wednesday | read 2026-10-08
+- KS-593 Backlog, P2, board account, 26 comments, newest Peter 2026-10-07T14:53Z | Linear GraphQL issue(id) by Wednesday, Secuura key | read 2026-10-08
+- KS-1171 In Progress, P3, board account, 3 comments; no live seat holds it (tmux: only R 18th live) | Linear GraphQL issue(id) by Wednesday + `tmux list-panes` | read 2026-10-08
+- KS-565 Backlog / KS-1015 In Progress / KS-562 Backlog, all board account | Linear GraphQL issue(id) by Wednesday | read 2026-10-08
 - P1 develop `0a6177ea5482227e83d5045b68b8577a56326ffc` at 05:12:22Z and 05:26:15Z, 0 `-g4-`/`-ra18-`/`-e11-`/`-f5-` | `ls-remote` as in R 18th's P1 (`raise18/lsr1.out`, `lsr2.out`) | read 2026-10-08
 - P3 doc tails and key counts | `raise18/bin/tails.py`, `grep -o | wc -l` | read 2026-10-08
 - P4 per-section strict + whole + re-apply control (table); KS-593 stack `b8ff928e2b63`, all four `6700b92fb4c2`, both orders; share-cp2 `git apply -v` offsets; Spark-tip -> develop blob drift | `raise18/bin/measure.py`, `stack.py`, `drift.py` | read 2026-10-08
@@ -147,4 +154,4 @@ PROVENANCE:
 - P7 G-lane tool hashes; matcher by `ast`: `MINE` `'g 3rd'` `:102`, `OTHER_SEATS` `:212` 119 entries (`g 4th` True, `f 4th` True; `r 17th`/`r 18th`/`e 10th`/`e 11th`/`f 5th` False) | `raise18/bin/lanetools.py` | read 2026-10-08
 - P8 G 3rd handover read (148 lines, `b82a55502b63a3ac`); the four REVIEW.md "For the raise" sections | `sed -n` | read 2026-10-08
 - P9 weekly usage 86% | `usage_gate.sh --check` rc 0 | read 2026-10-08 16:2x AEDT
-SELF-CHECK: re-read end-to-end for contradictions | @FILL@
+SELF-CHECK: re-read end-to-end for contradictions | 2026-10-08 16:44
