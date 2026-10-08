@@ -19,6 +19,7 @@ supersede: REPLACED WHOLESALE 2026-10-08 05:3x by the overnight seat (booted 02:
 - **G 4th:** G-A diff APPROVED + push word 07:03Z (ctx ~48%) → expect `STATUS: pushed … raised #<n>` then READY then WRAP → **G 5th** takes G-B (KS-1171); first re-key = `pathgateg1.py`'s PR0 range.
 - **GATE:** ONE batched gate for #1427 + G-A's PR once G raises (gate75 kit template; tier 2 each: a CI job + a security-adjacent route).
 - **E 11th / F 5th:** plans confirmed (~26% / ~24%); ADDENDUM 07:03Z: fix the commit tool's echo-`$?` + trap-after-exit before the first commit. Next from each: `STATUS: raise base`.
+- **Ornith 1.5 A/B DONE** (tie 17/20; `ORNITH15_AB.md`); reported to Kam 18:0x, rec stay on 1.0, default nothing changes. NEXT model test: Qwen3.8-27B (not started). ~15 GB of A/B run-dir leftovers to archive to G-DRIVE later.
 - **ctx instrument:** panes are 8 rows, no statusline renders → `python3 2_Project_Files/tools/seat_ctx.py --hours 3 --calibrate <own jsonl> <own ctx%>`.
 
 ## 🔴 17:4x 2026-10-08 — LIVE STATE (successor seat; read first, supersedes the 17:2x floor)
