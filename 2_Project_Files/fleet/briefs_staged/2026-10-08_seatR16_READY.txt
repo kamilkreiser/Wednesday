@@ -1,0 +1,99 @@
+From: secuura-blockchain <secuura-blockchain@agentmail.to>
+To: ['wednesday-agent@agentmail.to']
+Date: 2026-10-08T01:19:52.000Z
+Subject: [Secuura/Blockchain-R -> Wednesday] READY FOR QA (Seat R 16th): KS-1450 fixed, #1426 raised
+---
+READY FOR QA (Seat R 16th). KS-1450 fixed and raised as **#1426**. Ends here: no merge, no deploy, nothing posted to any ticket.
+
+== BLUF ==
+- **PR #1426** https://github.com/Secuura/Distributed_Secuura/pull/1426 · branch `feature/ks-1450-slot-literal-guard-baseline-provenance-ra16-1` · head **`dd31aa0c998ca43291c975dccb906a42e55c73c2`** · tree `5f456a0128feee7dd4e2f164f08f923f6a136742` · base `develop` at `ddea005553bf65ffc284a9124a02ad53c5f88019` (unmoved throughout) · ONE parent · 4 files · raise HTTP **201**, body round-trip sha256 `1775807b0378d835` IDENTICAL, head at GitHub == local == origin.
+- **Leg 14: 8 passed / 1 failed (rc 1) at develop's tip -> 11 passed / 0 failed (rc 0) at the head.** develop is unblocked.
+- **KS-1451** filed for the pre-existing bare-marker-in-a-quoted-value gap across all five guards (Backlog, Medium, board account), after a four-term board search.
+- `mergeable_state: clean` is reported by the API and I am NOT offering it as evidence of anything — with no checks running it carries no testing claim.
+
+== THE PREFLIGHT, VERBATIM — AND IT IS NOT A PASS ==
+This head went through the full preflight **three times** with the same verdict: twice by hand (the second after the doc amend) and once **in-hook on the push**.
+
+  [format-gate] systemTest/performance — format:check OK
+  [format-gate] 1 package(s) checked, 0 skipped, 0 failed
+  shell suites: 71 passed, 0 failed, 0 skipped (of 71)
+  shell suites wall-clock: 340s          (by-hand runs: 354s, 346s)
+  PREFLIGHT INCOMPLETE — 12/15 legs ran, 3 SKIPPED. Nothing failed.
+    legs 3 4 8 — local stack not up; you can clear this by starting it.
+    This is NOT a pass. Do not quote it as one — say which legs ran.
+
+Leg 14 in each: `no_hardcoded_slot_literals: 11 passed, 0 failed`. Zero `^FAIL` lines in the run.
+**No other leg newly red vs develop:** develop's recorded figures (KS-1450's body, same machine) are rc 1, shell suites **70 passed / 1 failed** / 0 skipped (of 71), `PREFLIGHT FAILED on leg(s) 14`, **12/15 legs ran** — the same 12 legs, the same 3 stack SKIPs, and the single failing shell suite is the one this PR fixes.
+
+== TWO THINGS THAT WENT WRONG ON THE PUSH, BOTH DISCLOSED IN THE PR ==
+1. **The first push attempt was REFUSED and the refusal was correct.** `[format-gate] NOTHING CHECKED — every selected package was skipped` / `SKIP — systemTest/performance deps not installed`. The gate declined to pass vacuously. Fixed with `npm ci` in `systemTest/performance` (270 packages), pushed again, `1 package(s) checked, 0 skipped, 0 failed`. **`--no-verify` was advertised by the hook and NOT taken.** Note for the next seat: "S-1 installs first" needs `systemTest/performance` too, not only `Blockchain/Dev`.
+2. **The push wrapper exited 0 while the push itself failed rc 1.** Had I read the wrapper's exit code I would have reported a push that never happened — `ls-remote` after it printed nothing. The decision read is `ls-remote`, never the wrapper banner.
+3. **An assumption of mine was wrong and the PR says so.** I expected the hook to skip the preflight (the commit carries 0 `^Blockchain/Dev/` paths). It ran it anyway: a first push of a new branch has no computable base, so the hook fails safe (`:104-108`) and printed `Blockchain/Dev changes detected`. Good for coverage; my claim was wrong and is corrected in the PR body.
+
+== ARMS ==
+| arm | want | got |
+| A0 untampered head | green | rc 0, 11p+0f |
+| A1 slot value in a DIFFERENT KEY of the baseline | red | rc 1, 10p+1f, names it |
+| A2 from_runs id of a non-(full\|pre-merge) shape | red | rc 1, 10p+1f, names it |
+| A3 literal in an ordinary systemTest file | red | rc 1, 10p+1f, names it |
+| A4 lone provenance shape in ANOTHER array | red | rc 1, 10p+1f — caught by the jq membership cell ONLY |
+| A5 marker with an EMPTY reason | red | **GREEN — the named limitation you ruled (i) on** |
+| A6 marker removed from :859 | red | rc 1, 10p+1f, names :859 |
+| A7 the exemption stage itself removed | red | rc 1, 10p+1f, **2** lines (not 8 — the six reasons carry markers now) |
+| A8 jq broken by an exit-127 shim | red | rc 1, refuses, never a silent pass |
+Every red arm reads 10p+1f — one cell, the tampered one, so none is a load failure rather than a tamper. The suite's own 54-literal positive control and all five original negative controls still pass.
+
+== DOCS (C6), per your ruling (a) ==
+Both docs carry the SAME one clause, amended into the SAME commit. D1 `:1268` bounded "No slot 2-4 value is typed anywhere"; D2 `:2169` bounded "never typed". Evidence: exactly ONE differing line per file, insertion only, every other line byte-identical to base; my inserted fragment `<code...>`/`</code>` **2/2** in each; base and head both balanced (1199/1199 -> 1201/1201 and 759/759 -> 761/761) once attribute forms are counted. **A caution for the next seat: a literal `<code>` count reads D2 as UNBALANCED (602/759) because D2 uses `<code class="cm">`** — count `<code(\s[^>]*)?>`, or the instrument lies. `html_docs_matrix.test.sh` 12 passed / 0 failed, and as you said it is not tag-balance evidence — it checks prose-outside-table, Mermaid and placeholders.
+
+== NOT RUN ==
+- **The Schemathesis package pytest suite.** `pyproject.toml:18` `requires-python = ">=3.14.8"`, host is **3.14.5**; the venv is built by `scripts/run.py setup`, which needs Docker and mints an API token. Ran the baseline's REAL consumer instead: `scripts/runner/baseline_gate.py` (stdlib-only) — `load_baseline()` on tip vs head gives 171 entries both ways, identical key set, exactly **6** differing, and the only change is `reason` gaining exactly the marker suffix. Controls: invalid JSON raises `JSONDecodeError`; a missing-fields entry is ACCEPTED, so that loader is permissive about shape (not mine to change).
+- Preflight legs 3, 4, 8 — local stack down, named by the preflight itself.
+- `jq` version floor — presence asserted, version not probed.
+
+== DRAFT COMMENT FOR KS-1450 — NOT POSTED, ZERO TICKET WRITES THIS SEAT ==
+Post only after the QA gate. Verbatim below the line.
+
+--------8<-------- DRAFT KS-1450 COMMENT --------8<--------
+**BLUF: fixed and raised — leg 14 is green, and `develop` is unblocked.** The guard went from **8 passed / 1 failed (rc 1)** at `develop`'s tip to **11 passed / 0 failed (rc 0)**. Peter — you asked which remedy for lines 10 and 11, and Kam picked **exempt recorded provenance inside the guard** rather than renaming the ids. Here is what that looks like, and where you may want to reshape it.
+
+## What changed
+
+**Your marker, for the six that can carry it.** Lines 854, 859, 864, 869, 874 and 879 are `reason` prose, and each now carries `slot-literal-ok: names the sweep's slot, not a target` inside the string. `$generated.from_runs` is untouched.
+
+**A narrow exemption for the two that cannot.** One extra filter stage in `scan()` matches only a **lone JSON string element** of the exact shape the baseline writes — `"(full|pre-merge)-…-slot<N>"` — and only in `schemathesis/config/schemathesis-baseline.json`. Deliberately **not** a file exclusion and **not** an extension exclusion: a `"key": "value"` line, a `"reason":` line, a run id of any other shape, and every other file still scan exactly as before.
+
+**And a cell that bounds it, because a line filter cannot.** A line-based grep cannot tell `$generated.from_runs[5]` from a lone string of the same shape sitting in some other array of the same file. So there is a new cell asserting that **every line the exemption drops really is a `from_runs` member** (`jq`), plus a non-vacuity control that plants that exact shape in a *different* array and requires the cell to catch it. `jq` is required rather than optional — a membership check that skips silently would unbound the exemption precisely when nobody is watching. That is what takes the exemption's scope from a comment to a check.
+
+## How to reshape it, if you want to
+
+The whole exemption is two named constants (`PROVENANCE_FILE`, `PROVENANCE_LINE_RE`) plus one `grep -vE` stage and one cell. Tighten the shape, restrict the file, or drop the stage entirely and the cell will tell you immediately what stopped being covered — removing the stage reds exactly 2 lines, which is the arm that proves it is load-bearing.
+
+## One thing you should know, and it is yours to rule on
+
+**A bare `slot-literal-ok:` marker DOES exempt a quoted value**, which contradicts `systemTest/CLAUDE.md:1169` ("a bare marker exempts nothing"). The test is "one non-whitespace character after the colon", and on a JSON line the value's own closing quote supplies it:
+
+```
+  "reason": "x 6982 slot-literal-ok:",      -> EXEMPTED   (the reason is empty)
+const p = 6982; // slot-literal-ok:          -> reported   (correct)
+```
+
+It is **pre-existing** — the baseline carried zero markers before this change, so nothing regressed — and the same `\s*\S` shape is in at least four other harness guards, whose own bare-marker controls pass only because each plants into a comment at end-of-line rather than into a quoted value. Raised as **KS-1451** rather than patched here, because fixing one guard would leave the five disagreeing. Measured blast radius of the eventual one-character fix: exactly 2 existing marker lines repo-wide, neither of which needs its exemption.
+
+## Evidence
+
+RED and GREEN both measured on the real tree. Arms: a slot value in a different key of the baseline, a run id of a different shape, a literal in an ordinary systemTest file, a lone provenance shape in another array (caught by the membership cell only), a marker removed, the exemption stage removed, and `jq` broken — all red with their own reason, each reading one failed cell so none is a load failure. The suite's own 54-literal positive control and all five original negative controls still pass.
+
+Full preflight run **by hand** (this push is systemTest + docs only, so the hook does not run it): `shell suites: 71 passed, 0 failed, 0 skipped (of 71)`, and `PREFLIGHT INCOMPLETE — 12/15 legs ran, 3 SKIPPED. Nothing failed.` — legs 3, 4 and 8 skipped because the local stack was not up. That is **not** a pass and is not quoted as one. develop's own recorded figures were 70 passed / 1 failed with leg 14 red, so no other leg is newly red.
+
+**Not run:** the Schemathesis package's pytest suite — `requires-python = ">=3.14.8"` and this host is 3.14.5, with the venv needing Docker. The baseline's real consumer, `scripts/runner/baseline_gate.py`, was run instead: 171 entries before and after, identical key set, exactly 6 entries differing, and the only difference is `reason` gaining the marker.
+
+Both platform HTML docs carry the same one clause stating the exemption's scope, in the same commit, per the test-discipline skill §4.
+--------8<-------- END DRAFT --------8<--------
+
+== LEDGER ==
+REF WRITES, in full: **three** — the X-3 objects fetch (NO ref written), `worktree add -b` creating my own branch ref, and the branch push. Neither develop ref was ever written: local `develop` and `origin/develop` are still at R 15th's boot value `ed346e6d9ff8`, and `.git/config` sha `4f624a213933d54b` is unchanged from before `worktree add`, so no upstream block and no PROTOCOL-DIFF from it. No `-u`, no force, no `--no-verify`, no fetch or pull of the shared checkout beyond the one you ruled. Locks: 2 takes, both released by the holder pid in the same invocation; 0 on disk now; 0 orphaned `login_stub` pids. Ticket writes: ONE issue created (KS-1451, which you authorised); zero comments; nothing client-facing; no extranet, no `/api/seen`.
+#1383 (KS-1401) is named in the PR as a known doc-conflict neighbour; untouched.
+
+Seat R 16th, pane Secuura/Blockchain-R (%92).
+
