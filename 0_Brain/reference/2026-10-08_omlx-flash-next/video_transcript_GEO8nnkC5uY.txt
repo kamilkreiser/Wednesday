@@ -1,0 +1,394 @@
+[0:00] If you buy Apple's $5,499 Mac Studio with the 
+base M5 Ultra chip and 96 GB of unified memory,
+[0:09] your AI models do not actually get 96 GB. By 
+default, Mac OS lets the graphics side where
+[0:16] the model runs use only about 3/4 of that memory 
+or a little more on the newest Mac OS while the
+[0:23] rest stays with Mac OS and your ordinary apps. 
+Inside that real budget, dense models up to
+[0:29] about 30 billion parameters run comfortably, 
+while classic dense 70 billion models fit but
+[0:35] run slowly. Mixture of experts models around 120 
+billion are the largest that run well in their
+[0:41] smaller 4-bit downloads. Most models around 200 
+billion parameters do not fit at all, however hard
+[0:47] you squeeze them. But one new model, Quen 3.8 8 
+flash. Next squeezes in by leaving part of itself
+[0:54] on the max SSD. In fact, on the base model's 64 
+core graphics chip, the larger file actually runs
+[1:01] laps around the smaller one. In a run someone 
+submitted to OMLX's public benchmark list,
+[1:07] OpenAI's GPT OSS 12B wrote at 104 tokens a second, 
+while a dense 70 billion llama crawled at 24.5.
+[1:17] Tokens are just the word pieces a model writes. 
+So the model with the heavier download wrote
+[1:22] about four times faster because writing speed 
+follows the slice of the model each token uses,
+[1:28] not the whole file sitting in memory. None of the 
+big reviews actually tested this base model since
+[1:34] reviewers received 256 GB monster configurations. 
+So, the speeds in this video come from those
+[1:40] published reviews and from runs people submitted 
+to OMLX's public benchmark list, some on matching
+[1:46] 64 core chips. We will go through how much memory 
+a model really gets. Cover each size band from 27
+[1:53] billion parameters up to the ones that cannot fit 
+and look at the one model that cheats its way in
+[1:59] with timestamps marked below. That starts with 
+looking at what that graphics budget actually
+[2:04] does when you try to load a model. On a 96 GB Mac, 
+apps that run models print that budget right in
+[2:10] their logs. And one owner's log showed 77,39 MGB. 
+Apple's own developer documentation describes that
+[2:19] figure as how much memory the graphics side can 
+use without affecting its runtime performance.
+[2:24] That makes it a performance recommendation rather 
+than a hard wall, which is why different apps
+[2:29] treat it differently. In binary units, that is 72 
+GB, which works out to about 77 GB in the decimal
+[2:37] numbers you see on HuggingFace download pages 
+because computing still insists on two different
+[2:42] ways to count a gigabyte just to keep everyone 
+on their toes. So, out of 96 GB on the box,
+[2:49] your local model gets roughly 3/4 by default, 
+leaving the rest for Mac OS, your browser tabs,
+[2:55] and whatever else is quietly running in 
+the background. On newer Mac OS releases,
+[3:00] that default share appears to creep upward. 
+One recent 96 GB Mac Studio log showed 83,494
+[3:08] megabytes or about 83 download page gigabytes. 
+Now, what actually happens if you try to squeeze
+[3:15] a model right up against that boundary? One tester 
+on a 96 GB machine loaded an 8-bit copy of an open
+[3:22] 70 billion parameter model using Olama. Olama ran 
+its pre-flight check, decided the model would fit
+[3:29] using 72.0 out of 72.0 GB, and began loading. It 
+passed the check, but on the very first reply,
+[3:37] the model crashed with an out of memory error. A 
+six-bit copy of the same model, which was a little
+[3:42] smaller, ran fine. Different software handles 
+this line in its own way. Olama can crash, as it
+[3:49] just did. Apple's MLX framework lets a model run 
+past the line, but warns that it can be slow. And
+[3:55] LM Studio estimates total memory, including the 
+chat length you choose, and warns before loading.
+[4:01] You can raise this limit with a oneline terminal 
+setting that gives the graphics side more memory
+[4:06] until you restart. That setting resets every time 
+you reboot your Mac. And the advice in Llama.cpp's
+[4:12] own discussions is never to hand over all of it 
+because Mac OS needs memory, too. So, without
+[4:19] changing any settings, plan on about 77 GB or 
+around 83 on an up-to-date system and check your
+[4:26] own figure first because LM Studio has shown this 
+budget as your max VM. So, that is the place to
+[4:32] look. If you want a setup that just works without 
+living dangerously on the edge of a memory panic,
+[4:38] dense models up to around 30 billion parameters 
+are the comfortable choice. Take Quen 3.827B,
+[4:44] 827b, which logged over 4 million downloads 
+last month for LM Studios 4-bit package alone.
+[4:51] That 4-bit copy takes 16.1 GB, while the 8-bit 
+version weighs in at 29.5 GB. Even against the
+[5:00] default 77 GB budget, 29.5 GB leaves nearly 50 GB 
+of untouched breathing room. That spare headroom
+[5:09] is not just idle luxury because running a model 
+requires memory for two distinct jobs. Storing
+[5:15] the weights file and keeping notes on every token 
+in the active conversation. In technical docs,
+[5:22] this note-taking workspace gets called the key 
+value cache, and its footprint expands as your
+[5:27] chat gets longer. Based on arithmetic from the 
+published model card, 27B keeps about 64 kilobytes
+[5:34] per token, which works out to about 8.6 6 GB for 
+a massive 128,000 token transcript. Add that to
+[5:42] the 16 GB model file and you are still floating 
+comfortably under 25 GB total, leaving Mac OS to
+[5:50] sip its tea in peace. Now, do the speeds reported 
+in high-profile reviews actually translate to
+[5:57] the base $5,499 Mac Studio? The major reviews 
+from Tom's Hardware and BGR evaluated top tier
+[6:05] machines with 36 core CPUs, 80 core GPUs, and 256 
+GB of memory, starting well north of $10,000. But
+[6:15] writing speed rides on memory bandwidth, and the 
+base machine 64 core chip shares the exact same
+[6:22] 1.2 TB a second as the luxury tier. Reading a huge 
+prompt, however, leans directly on graphics cores,
+[6:29] where the base model has 16 fewer. On the previous 
+generation's cutdown chip, llama.cpp's public
+[6:36] benchmark table showed prompt ingestion was about 
+27% slower on the smaller core count, while output
+[6:42] writing was only about 4% slower. that matches 
+real world findings. In a user submission on the
+[6:49] public OMLX benchmark list running the actual 
+96 GB 64 core base M5 Ultra, 4bit 27B wrote at
+[6:58] 53.7 tokens a second. That sits right beside BGR's 
+review report of closer to 55 tokens a second on
+[7:05] the top tier machine. If you step up to the 8-bit 
+version, which keeps more of the original model's
+[7:11] precision, physics steps in. A file twice as big 
+takes twice as much bandwidth to read per word. So
+[7:19] an OMLX base unit run clocked it at 32.7 tokens a 
+second or roughly 40% slower. And as conversations
+[7:28] stretch out, token throughput naturally tapers. 
+Tests by Federico Vitici at Max Stories on his
+[7:35] 256 GB review machine showed writing drop from 48 
+tokens a second on a modest prompt down to 32.4
+[7:43] four after 128,000 tokens. Still, even a very 
+long chat keeps this tier well inside the budget
+[7:51] and still writing at a usable pace. That makes 
+a 30 billion class model the easiest zero drama
+[7:58] starting recommendation on this hardware. If 
+this breakdown helps make sense of the specs,
+[8:03] subscribe to the channel, hit the like button, 
+and leave a comment telling me what you want me
+[8:08] to make a video on next. These small actions go a 
+long way in supporting the channel. With the safe
+[8:14] baseline established, the next question is whether 
+stepping up to the classic 70 billion parameter
+[8:20] tier makes practical sense. On paper, stepping up 
+to a 4bit 70 billion model seems like the obvious
+[8:27] reward for owning a 96 GB machine. Meta's Llama 
+3.370B in its 4-bit MLX download takes 39.7 GB,
+[8:37] leaving plenty of room below the default line. 
+But in practice, this classic tier is usually the
+[8:43] wrong pick. The reason comes down to how a dense 
+model works. Unlike an architecture that routes
+[8:49] requests to smaller internal slices, a dense model 
+reads its entire file out of unified memory for
+[8:56] every single token it writes. Even with the M5 
+Ultra's massive memory bandwidth of 1.2 terabytes
+[9:02] a second, dividing that bandwidth by a 40 gigabyte 
+weight file sets a hard mathematical ceiling of
+[9:08] about 30 tokens a second. Real world benchmark 
+runs show the actual tax. On an M5 Ultra using the
+[9:15] same 64 core graphics chip found in the 5499 base 
+machine, a user run submitted to the public OMLX
+[9:22] benchmark list measured 4-bit Llama 70B writing at 
+24.5 tokens a second with a short prompt. That is
+[9:30] under half the writing speed of the 27B model we 
+just looked at. If you run an older 96 GB machine,
+[9:37] the penalty gets even steeper. The identical 
+4-bit 70B file fits in memory just the same, but
+[9:44] speed tracks memory bandwidth directly. In user 
+submitted runs on OMLX, that same model dropped
+[9:50] to 16.2 tokens a second on a 96 GB M3 Ultra and 
+crawled at 8.6 tokens a second on a 96 GB M2 Max,
+[10:00] about a third of the M5 Ultra's speed. Then there 
+is the conversation memory. Llama 70B was designed
+[10:07] with 80 attention layers and every single layer 
+keeps notes on every token in your chat. That
+[10:13] works out to about 320 kilobytes per token from 
+its published design or roughly five times what
+[10:19] Quen 27B demands. In that same 64 core M5 Ultra 
+benchmark session, total memory jumped from 37.8
+[10:28] GB at a short context to 47.8 GB at 32,000 
+tokens. Push the conversation out to 64,000
+[10:36] tokens and the wheels really come off. Peak memory 
+climbs to 57.9 GB. Writing speed slows down to
+[10:44] 14.8 tokens a second. And the time to first token 
+stretches to a staggering 175 seconds. You submit
+[10:52] a prompt and you have almost three full minutes 
+to reconsider your life choices before the model
+[10:58] types a single character. And if you were hoping 
+to grab the 8-bit version for extra precision,
+[11:03] that is the copy that crashed in the log we 
+saw earlier. At roughly 74 GB of weights alone,
+[11:10] it sits right against the default line with 
+almost nothing left for the conversation. So,
+[11:15] while a 4-bit 70B model fits, it writes at under 
+half the 27B's speed, eats conversation memory
+[11:22] fast, and makes you wait minutes on long prompts. 
+So, it is rarely the right pick on this Mac. That
+[11:28] naturally brings us to the biggest models that fit 
+a 96 GB Mac normally. Mixture of experts designs
+[11:35] around 120 billion parameters. If you just watch 
+the dense 70b struggle to hit 25 tokens a second,
+[11:43] expecting a 120 billion parameter beast to run 
+well sounds like asking for a slideshow. But in a
+[11:50] run submitted to the OMLX public benchmark list on 
+the 64 core M5 Ultra, OpenAI's GPT OSS120B wrote
+[11:59] at a blistering 104.3 tokens a second. That is 
+over four times faster than the 70B running a file
+[12:08] that is almost 24 GB larger. It pulls off this 
+trick because of how a mixture of experts model
+[12:14] works. Instead of dragging every single parameter 
+through memory for every word like a dense model
+[12:20] does, the network splits into specialized 
+blocks and each token routes through only a
+[12:25] few of them. For GPT OSS 12B, that means out of 
+117 billion total parameters, it only activates
+[12:34] 5.1 billion parameters per token. Writing speed 
+follows the small slice it reads per token,
+[12:40] while memory capacity follows the whole 63.4 
+4 GB file sitting in unified memory. Even on
+[12:46] an older 96 GB M3 Ultra, an anonymous submission 
+shows GPT OSS120B writing at 77 tokens a second,
+[12:55] where the dense 70B scraped along at 16. On older 
+machines with slower memory bandwidth, picking an
+[13:02] architecture that reads less per token matters 
+even more. Long conversations still take a toll,
+[13:08] though. In that same 64 core M5 Ultra test at a 
+64,000 token prompt, writing speed slowed to 62
+[13:16] tokens a second and waiting time for the first 
+token stretched to 24 seconds. That is still
+[13:22] vastly better than waiting three full minutes for 
+the dense 70b and peak memory grew by only about 2
+[13:28] GB across that entire chat. The other headline 
+option in this weight class is Quen 3.5122B,
+[13:36] which activates 10 billion parameters per token. 
+In BGR's tests on a topsp spec 256 GB M5 Ultra
+[13:44] with 80 graphics cores, it hit closer to 80 tokens 
+a second. The cheaper 64 core machine shares that
+[13:52] same 1.2 TB a second memory bus, so writing speed 
+should land reasonably close, even if reading
+[13:58] prompts takes longer. Its design also keeps per 
+token notes in only 12 of its 48 layers. So,
+[14:05] our arithmetic from the model card puts its 
+conversation memory at only about 3.2 GB for
+[14:12] a massive 128,000 token chat. On an actual 96 GB 
+M3 Ultra, a user ran the 4-bit model all the way
+[14:21] to 64,000 tokens, peaking at 74.2 GB of memory. 
+The catch with Quen is which download you grab.
+[14:30] The model comes in several common 4-bit downloads, 
+an MLX copy at 69.6 GB and two GGUF files at 71.7
+[14:40] and 76.5 GB. Against the long-standing default 
+graphics budget of about 77 GB, the 69.6 6 GB
+[14:50] file leaves about 8 GB for your chat and the 71.7 
+GB file leaves around six. Both fit with a few
+[14:58] gigabytes left for the conversation. But the 76.5 
+GB file leaves under one single GB of headroom,
+[15:06] bringing you right back to that razor thin margin 
+where apps start throwing out of memory errors.
+[15:11] If your Mac runs a newer Mac OS release, giving 
+you closer to 83 GB, or if you raise the limit
+[15:17] with that terminal setting from earlier, that 
+largest file suddenly has about 7 GB to breathe.
+[15:24] But unless you know your exact budget, picking the 
+69.6 or 71.7 GB download is the safe choice. That
+[15:32] brings us to the one model that looks completely 
+impossible on paper. Quen 3.8 Flash Next. If you
+[15:40] look up its 4-bit downloads on HuggingFace, you 
+will find files that sit between 106 and 112 GB.
+[15:48] That is not just over your graphics budget. That 
+is bigger than all the memory in the machine.
+[15:53] Normally, trying to load a model bigger than 
+your max memory is a great way to watch an app
+[15:58] instantly fall over. Yet, people are running 
+this model right now on 96 GB max and getting
+[16:05] genuinely impressive speeds. The reason this works 
+comes down to how the model was built. Inside that
+[16:11] huge download is a core 125 billion parameter 
+mixture of experts model, but tacked onto it is
+[16:19] a 51 billion parameter lookup table. Think of this 
+table like a massive dictionary index. Instead of
+[16:26] running complex math across that entire chunk 
+for every single token, the model simply looks
+[16:32] up a few specific rows when it needs them. Quen 
+noted on their model card that this lookup table
+[16:37] is more amendable to offloading than the expert 
+layers. And in an app called OMLX, someone wrote
+[16:43] the code to actually take advantage of that. 
+Roughly 30 GB of that lookup table can simply
+[16:49] stay parked on your fast internal drive. Leaving 
+more than a quarter of your model on the solid
+[16:54] state drive sounds like a terrible compromise, but 
+the numbers tell a different story. In a detailed
+[17:00] report submitted to the OMLX project on a 96 GB 
+M3 Ultramac, the model fit only with that table
+[17:08] offload switched on. When it answered brand new 
+prompts, where it constantly had to read fresh
+[17:13] rows off the drive, it wrote at about 62 to 65 
+tokens a second. When it handled repeat requests,
+[17:20] where those rows were already cached, it jumped 
+up to around 80 tokens a second. The author found
+[17:25] the slowdown closely tracked reads from the drive. 
+On the newer base M5 Ultra with 64 graphics cores,
+[17:32] an anonymous benchmark run using a modified 
+copy pushed those numbers even higher. On a
+[17:38] short conversation, it wrote at roughly 93 tokens 
+a second, even stretched out to a massive 128,000
+[17:46] token chat, it held on to about 82 tokens a second 
+with total memory peaking at 75 GB. that is faster
+[17:54] than the Classic 70B could ever dream of running 
+while staying under the memory budget. Before you
+[18:00] rush off to download it, there is a very important 
+catch. So far, the reports of this working come
+[18:06] from OMLX. If you try running the standard 
+GGUF files in software built on llama.cpp,
+[18:13] an open mapping bug causes the app to count that 
+27 GB drive table against your graphics memory
+[18:19] anyway. So in those apps, your 96 GB machine can 
+run out of memory before it writes a word. So if
+[18:27] you are willing to use OMLX, Flash Next gives you 
+the biggest model in this video on a 96 GB Mac at
+[18:34] the cost of slower answers to fresh prompts. Just 
+keep in mind that while smart architectural tricks
+[18:39] can squeeze an oversized file onto your desk, 
+they cannot bend the laws of physics for every
+[18:45] model. That brings us to the hard ceiling. 
+What simply will not fit on a 96 GB Mac,
+[18:51] no matter how aggressively you squeeze the file? 
+The short answer is the 200 billion parameter
+[18:57] class led by models like DeepSseek V4 Flash. In 
+its 4-bit download, Deepseek V4 Flash weighs in
+[19:04] at around 155 GB. Remember, the entire machine 
+only has about 103 GB in download page terms,
+[19:13] and Mac OS still needs to keep the lights on. 
+You might wonder if you can just squeeze each
+[19:18] number in the model down to one or two bits to 
+sneak under the wire. But take GLM 5.3 Flash,
+[19:25] a 320 billion parameter mixture of experts model. 
+Even crushed down to its absolute smallest 1-bit
+[19:32] download, the file still lands at 93.1 GB. That 
+is well beyond even the newer 83 GB budget.
+[19:41] Meaning even at one bit per parameter, it will 
+not fit into memory. Nor can the lookup table
+[19:47] offloading trick from flash. Next rescue these 
+models. In these models, their bulk is the expert
+[19:53] layers themselves, the parts each token actually 
+computes with, not a lookup table. As Quen's
+[19:59] own card pointed out, a lookup table is 
+more amendable to offloading than expert
+[20:03] layers. And these models simply have no such table 
+to park on the drive. Raising the limit with that
+[20:08] terminal setting cannot help either. Deepseek's 
+file is bigger than the entire machine and GLM's
+[20:15] one-bit file would leave Mac OS almost nothing. 
+If you genuinely need to run models in this 200
+[20:21] billion parameter weight class locally, you have 
+reached the edge of what 96 GB can deliver. The
+[20:27] next step is a Mac with more memory. On the 
+Mac Studio, going from 96 to 256 GB costs
+[20:35] $4,000 more. For this class of models, it is 
+a hardware decision, not a settings one. So,
+[20:41] which model size should you actually run on a 96 
+GB Mac? Your default pick is a mixture of experts
+[20:47] model around 120 billion parameters in its smaller 
+4-bit download. That means GPTO SS120B at 63.4
+[20:56] 4 GB or Quen 3.5122B in its 69.6 or 71.7 GB 
+files. Generation speed follows the small slice
+[21:07] each token activates, while memory holds the whole 
+file plus your chat. These models give you brisk
+[21:14] generation and still leave headroom under the 
+max graphics budget. If you run OMLX, Quen 3.8
+[21:20] 8 flash. Next is your stretch option, squeezing 
+in by parking its 30 GB lookup table on the SSD as
+[21:27] long as you can tolerate slower fresh prompts. On 
+an older 96 GB machine like an M3 Ultra or M2 Max,
+[21:35] the same files fit, but the slower memory 
+makes choosing a mixture of experts even
+[21:40] more critical. The exception is if you want 
+8-bit precision, where only dense models around
+[21:46] 30 billion parameters fit comfortably like Quen 
+3.82 827B at 29.5 GB. That tier is also the safe
+[21:54] pick if you want miles of headroom and never 
+want to think about the budget. Either way,
+[22:00] skip the dense 70 billion tier. And remember that 
+200 billion parameter heavyweights will simply
+[22:05] require paying Apple for a bigger machine. Before 
+downloading anything, check your machine's exact
+[22:11] budget in your runner, which LM Studio has shown 
+as VR AM. Pick the download that leaves honest
+[22:17] room for your conversation rather than just 
+the file on disk. Anyways, that's all folks.

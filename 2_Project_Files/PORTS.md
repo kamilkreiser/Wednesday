@@ -15,7 +15,8 @@ out dynamically.
 |---|---|---|
 | 47787 | Day Dashboard — `dashboard/serve.sh` → `server.py` (static site + WED-only write API) | 2026-08-05 |
 | 47788 | Spark tunnel — `ssh -f -N -L 47788:127.0.0.1:8888 Spark` (keepalive flags) → DeepSeek V4 Flash on the box; `local_model_task.sh` LM_BACKEND=spark default `SPARK_URL` | 2026-09-25 |
-| 47780–47786, 47789 | unassigned — claim here BEFORE binding | |
+| 47780 | oMLX server (test) — `tools/omlx/` Qwen3.8-Flash-Next, `omlx serve --port 47780`, 127.0.0.1 only; report `0_Brain/reference/2026-10-08_omlx-flash-next/REPORT.md` | 2026-10-08 |
+| 47781–47786, 47789 | unassigned — claim here BEFORE binding | |
 
 Rules:
 1. Any new Wednesday service takes its port from this block and registers it
