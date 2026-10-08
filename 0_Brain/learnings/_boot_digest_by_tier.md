@@ -7,7 +7,7 @@ status: live
 
 # Boot digest BY TIER — W whole, M rules-only, every project case a handle
 
-Generated 2026-10-08 14:55 from 223 lesson files (1,003,551 B). M 36 · MIXED 5 · P-Datasec/HPSM-POC 1 · W 181. 5 project CASE sections inside MIXED files are reduced to one line each: the heading and the path to read it at. W blocks are exactly what the default digest carries; M blocks drop the section index and keep the rules; a P file is a single handle. The CASES behind every rule live only in the lesson files — open one the moment its rule fires.
+Generated 2026-10-08 16:10 from 224 lesson files (1,005,797 B). M 36 · MIXED 5 · P-Datasec/HPSM-POC 1 · W 182. 5 project CASE sections inside MIXED files are reduced to one line each: the heading and the path to read it at. W blocks are exactly what the default digest carries; M blocks drop the section index and keep the rules; a P file is a single handle. The CASES behind every rule live only in the lesson files — open one the moment its rule fires.
 
 ## The T9 SSD is the master — Wednesday must be fully portable
 `2026-07-31_fully-portable-drive.md` · principle · 2026-07-31 · status: superseded — the "T9 is the master" half by [[2026-08-25_one-drive-devmaster-is-master]] (2026-08-25); the portability principle itself still lives · tier: W
@@ -7022,6 +7022,19 @@ sections (open the file for these): RULED 2026-10-05 ~11:1x — Kam (terminal, v
 5. **What does NOT change:** the v1.3 signature classes; client-facing communication is ticket comments only, and Kam sends anything else; ticket assignment rules.
 
 **Family:** [[2026-09-02_coo-actionable-tickets-never-wait-for-kam]] (the same stance pointed at Peter instead of Kam) · [[2026-09-11_secuura-we-approve-and-merge-our-own-tested-work]] · [[2026-09-05_tickets-are-the-channel-whatsapp-via-kam-is-the-escalation]] · [[2026-09-01_qa-gate-before-my-verification]].
+
+
+## Grant: new account — use as much as you like; push and merge what you can, test as much as possible
+`2026-10-08_new-account-push-merge-test-as-much-as-possible.md` · grant · 2026-10-08 · status: live · tier: W
+
+**The operative case, so the headline matches it:** the Wednesday seat is on the account Kam signed in at ~14:3x on 2026-10-08, and is deciding whether to launch a Secuura raise, gate or merge seat. **Launch it.** The account's allowance is his to spend down before it resets; the shape is unchanged: file-partitioned seats, every change gated, every merge on Wednesday's GO, verified at source.
+
+**How to apply:**
+1. Every launch names this file and its clause (raise / gate / merge).
+2. As many seats as the code partition allows ([[2026-09-13_as-many-agents-as-possible-partitioned-by-code]]); Spark-first for anything briefable.
+3. **Expiry is an EVENT:** the renewal, an account switch, or his word. Do not renew it by inference.
+
+**Family:** [[2026-10-08_use-to-100pct-raise-gate-merge-seats-only]] · [[2026-09-16_new-account-spin-up-agents-to-test-approve-merge]] (the same shape on 09-16 and 09-20) · [[2026-09-06_a-scoped-override-carries-its-own-expiry]] · [[2026-08-03_go-slow-earn-autonomy]] (rule 5).
 
 
 ## Grant: this seat may spend to 100% of the weekly allowance, for raise, gate and merge seats only, until the renewal
