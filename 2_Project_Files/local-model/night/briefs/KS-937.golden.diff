@@ -1,0 +1,98 @@
+--- a/Blockchain/Dev/scripts/check-shared-relink.sh
++++ b/Blockchain/Dev/scripts/check-shared-relink.sh
+@@ -415,6 +415,8 @@
+         # on clause A, which blocks today, so it was live friction on any author
+         # who writes `-sf`. Accept any short-flag cluster containing `s`, and any
+         # destination path ENDING at node_modules/@secuura/shared.
+-        if (L ~ /ln[ \t]+-[A-Za-z]*s[A-Za-z]*[ \t]+\/shared[ \t]+(\/[^ \t]*\/)?node_modules\/@secuura\/shared([ \t]|$)/) relink[stage] = ord
++        # KS-937 F-C: a RELATIVE prefix ends there too (./node_modules/..., app/node_modules/...), so the
++        # prefix group no longer requires a leading slash.
++        if (L ~ /ln[ \t]+-[A-Za-z]*s[A-Za-z]*[ \t]+\/shared[ \t]+([^ \t]*\/)?node_modules\/@secuura\/shared([ \t]|$)/) relink[stage] = ord
+         return
+       }
+@@ -432,6 +434,8 @@
+         nuser[stage]++
+         user_ord[stage, nuser[stage]] = ord
+         u = L
+-        sub(/^USER[ \t]+/, "", u); sub(/[ \t].*$/, "", u)
++        # KS-937 F-E: USER root:root and USER 0:0 name root too. Only the user part decides, so the
++        # :group part is dropped before effective_user_is_unprivileged compares the value.
++        sub(/^USER[ \t]+/, "", u); sub(/[ \t].*$/, "", u); sub(/:.*$/, "", u)
+         user_val[stage, nuser[stage]] = u
+       }
+--- a/Blockchain/Dev/scripts/__tests__/check_shared_relink.test.sh
++++ b/Blockchain/Dev/scripts/__tests__/check_shared_relink.test.sh
+@@ -218,7 +218,72 @@
+ COPY --from=shared-builder /shared /shared
+ RUN ln -s /shared node_modules/@secuura/other
+ USER secuura' "final stage has NO"
+-
++
++# KS-937 F-C. F-4 accepts any destination ENDING at node_modules/@secuura/shared, but the prefix
++# group required a LEADING slash, so a relative prefix was a false BLOCK whose message ("final stage
++# has NO re-link") is false about the file: the link is there and identical.
++expect "F-C: a ./node_modules re-link destination is the same symlink and passes" 0 'FROM node:24-alpine AS shared-builder
++RUN npm ci --ignore-scripts
++FROM node:24-alpine AS builder
++COPY --from=shared-builder /shared /shared
++RUN npm ci --ignore-scripts
++FROM node:24-alpine
++RUN npm ci --ignore-scripts --omit=dev
++COPY --from=shared-builder /shared /shared
++RUN mkdir -p node_modules/@secuura && ln -s /shared ./node_modules/@secuura/shared
++USER secuura' "1 Dockerfile"
++
++expect "F-C: an app/node_modules re-link destination under WORKDIR / is the same symlink and passes" 0 'FROM node:24-alpine AS shared-builder
++RUN npm ci --ignore-scripts
++FROM node:24-alpine AS builder
++COPY --from=shared-builder /shared /shared
++RUN npm ci --ignore-scripts
++FROM node:24-alpine
++WORKDIR /
++RUN npm ci --prefix app --ignore-scripts --omit=dev
++COPY --from=shared-builder /shared /shared
++RUN mkdir -p app/node_modules/@secuura && ln -s /shared app/node_modules/@secuura/shared
++USER secuura' "1 Dockerfile"
++
++# KS-937 F-E. USER root:root and USER 0:0 are root, so the link IS created with privileges; the
++# value was compared whole, so both read as a non-root user and false-blocked the F-2 shape.
++expect "F-E: USER root:root -> re-link -> drop privileges passes" 0 'FROM node:24-alpine AS shared-builder
++RUN npm ci --ignore-scripts
++FROM node:24-alpine AS builder
++COPY --from=shared-builder /shared /shared
++RUN npm ci --ignore-scripts
++FROM node:24-alpine
++USER root:root
++RUN npm ci --ignore-scripts --omit=dev
++COPY --from=shared-builder /shared /shared
++RUN mkdir -p node_modules/@secuura && ln -s /shared node_modules/@secuura/shared
++USER secuura' "1 Dockerfile"
++
++expect "F-E: USER 0:0 -> re-link -> drop privileges passes" 0 'FROM node:24-alpine AS shared-builder
++RUN npm ci --ignore-scripts
++FROM node:24-alpine AS builder
++COPY --from=shared-builder /shared /shared
++RUN npm ci --ignore-scripts
++FROM node:24-alpine
++USER 0:0
++RUN npm ci --ignore-scripts --omit=dev
++COPY --from=shared-builder /shared /shared
++RUN mkdir -p node_modules/@secuura && ln -s /shared node_modules/@secuura/shared
++USER secuura' "1 Dockerfile"
++
++# The control for F-E: only the USER part decides. A non-root user with the root GROUP is still a
++# non-root user, so a re-link after it still fails, on the privilege rule.
++expect "F-E control: USER secuura:root is not root, and a re-link after it still fails" 1 'FROM node:24-alpine AS shared-builder
++RUN npm ci --ignore-scripts
++FROM node:24-alpine AS builder
++COPY --from=shared-builder /shared /shared
++RUN npm ci --ignore-scripts
++FROM node:24-alpine
++RUN npm ci --ignore-scripts --omit=dev
++COPY --from=shared-builder /shared /shared
++USER secuura:root
++RUN mkdir -p node_modules/@secuura && ln -s /shared node_modules/@secuura/shared' "runs after a non-root"
++
+ # KS-921 F-5. Docker resolves stage names case-insensitively; keying the prune on
+ # the literal made `AS Builder` + `--from=builder` a false B warning today, and a
+ # false BLOCK the moment STRICT becomes the default.
