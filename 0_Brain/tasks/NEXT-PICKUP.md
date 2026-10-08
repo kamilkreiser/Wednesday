@@ -14,6 +14,15 @@ supersede: REPLACED WHOLESALE 2026-10-08 05:3x by the overnight seat (booted 02:
 2. **R 15th is LIVE (%91 `Secuura/Blockchain-R`)** — see FLOOR. Its plan confirmation is the first thing owed.
 3. **Morning brief LEADS with (value first):** gate74 GO (#1423), R 15th merging #1422 + #1423, the Spark census (24 unraised passes found, 10 now held), and the BLOCKER: **develop red on pre-push leg 14 → KS-1450** (Peter's #1424) blocks every push touching `Blockchain/Dev/`. Give Kam a 1-2 line WhatsApp text pointing at https://linear.app/secuura/issue/KS-1450 in case Peter has not seen it (Kam sends; nobody else messages Peter).
 
+## 🔴 17:4x 2026-10-08 — LIVE STATE (successor seat; read first, supersedes the 17:2x floor)
+**Floor:** %0 wednesday · **%95 R 18th** · **%96 G 4th** · **%97 E 11th** · **%98 F 5th** (all `Secuura/Blockchain-<L>`) · %1 monitor. No QUESTION unanswered at 17:4x.
+- **R 18th:** R2 KS-1274 built (`2b6da5f561b0`); ANSWERED 06:40Z ctx 38% → push after S-1 green. NEXT from it: `STATUS: pushed … raised #<n>` → then a ctx read before R3+R4.
+- **G 4th:** RAISE_BASE accepted 06:28Z. NEXT: its ctx QUESTION before G-A's build, then **Q-READ593** (Wednesday reads the built `routes/documents.ts` diff before the push).
+- **E 11th / F 5th:** launched 06:36Z / 06:41Z; NEXT from each: plan confirmation (read WHOLE through NEEDED-BY; check E's reading of Peter's newest KS-591/KS-1364 comments). Then RAISE_BASE by name. **Q-READ808:** Wednesday reads F's built `run-migrations.sh` diff before F-C's push.
+- **After READY FOR QA:** batch gates (gate75 kit as template), merges one at a time, then the rule-7 test-block batch (incl. assigning **KS-1328**, unassigned, to the board account).
+- **Ornith 1.5 A/B RUNNING** (background agent, report → `0_Brain/reference/2026-10-08_omlx-flash-next/ORNITH15_AB.md`; the agent may return text only: save it). Model verified: 36,850,134,639 B == HF API, commit 02440c39bdf7. A rotation kills the agent: re-commission from the 17:30 note line. Report the result to Kam on the panel.
+- **OWED (Wednesday tooling):** delivery sweep of the 64 undelivered `secuura-` cards; make send_brief REFUSE an unknown `Secuura/Blockchain-*` tag instead of skipping.
+
 ## 🔴 17:2x 2026-10-08 — ROTATION HANDOVER (midday seat, ctx ~78%) — READ THIS FIRST
 **Floor:** %0 wednesday · **%95 R 18th** (`Secuura/Blockchain-R`) · **%96 G 4th** (`Secuura/Blockchain-G`) · %1 monitor. Both LIVE. No QUESTION unanswered at the handover.
 - **R 18th** (brief `fleet/briefs_staged/2026-10-08_seatR18_raise_r2_r5_ks1450done.md`): **KS-1450 is DONE** (verified on Linear by id: Done, 2 comments). Objects transfer done. **RAISE_BASE `0a6177ea5482227e83d5045b68b8577a56326ffc` accepted by name at 06:22Z**; it is cutting `s-ra18-ks1274` for R2. NEXT from it: a ctx QUESTION before the R2 push → pane ctx → ANSWER; then R3+R4 (KS-1410, one PR), then R5 (KS-1139), each ending at READY FOR QA. Flow numbers `35./36./37.`.
