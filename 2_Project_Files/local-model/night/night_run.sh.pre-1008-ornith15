@@ -18,23 +18,10 @@
 #        needs it when another seat is launching gates on the same Mac; never set it in
 #        the plist)
 #     G4 1-min load < NIGHT_MAX_LOAD (8)
-#     G5 the BACKEND serves the model (2026-10-08, see BACKEND below):
-#        omlx   (default) — oMLX on 127.0.0.1:47780 answers /health and /v1/models lists NIGHT_MODEL;
-#               when it is down the runner STARTS it via local-model/omlx_serve.sh (NIGHT_OMLX_AUTOSTART=1,
-#               default) — only when a ticket is pending — or REFUSES with the reason (rc 3, G5-omlx)
-#        ollama — Ollama answers /api/tags and lists the model (self-heal via start_ollama.sh, as before)
-#   BACKEND (2026-10-08, Kam 18:12 verbatim: "go with Ornith 1.5 and deploy it. use this instead of the old
-#     model. Keep pushing it and see how far it can go."):
-#       NIGHT_BACKEND=omlx  (default) NIGHT_MODEL default Ornith-1.5-35B-A3B-MLX-8bit (MLX 8-bit, ~35 GB resident)
-#       NIGHT_BACKEND=ollama          NIGHT_MODEL default ornith:35b — Ornith 1.0, the named FALLBACK
-#     The runner NEVER switches backend or model by itself: a backend that cannot serve REFUSES (rc 3) with the
-#     reason. Every log START line, night_meta.json, last_run.json and done.md row records backend + model.
-#     The oMLX server is left LOADED after a run (Kam wants it used); its own memory guard (omlx_serve.sh)
-#     kills it on swap growth > 256 MB or free < 10 %.
+#     G5 Ollama answers /api/tags and lists the model
 #   MEMORY (before EVERY ticket): unload every loaded model except ours
-#     (`POST /api/generate {"model":m,"keep_alive":0}` for each /api/ps entry — on the omlx backend that is
-#     EVERY Ollama model, so 1.0 and 1.5 are never both resident), then
-#     measure `memory_pressure` + `vm_stat` and assert >= NIGHT_MIN_FREE_GB (30 ollama / 35 omlx) available,
+#     (`POST /api/generate {"model":m,"keep_alive":0}` for each /api/ps entry), then
+#     measure `memory_pressure` + `vm_stat` and assert >= NIGHT_MIN_FREE_GB (30) available,
 #     else skip the ticket with the reason. `sudo purge` is NOT attempted (needs admin —
 #     see the rule's honest-limit line).
 #   QUEUE  night/queue.md: one ticket per line, `# comments`, optional `k=v` pins after
@@ -67,22 +54,14 @@ LM_DIR="$(cd -P "$SELF_DIR/.." && pwd)"                 # 2_Project_Files/local-
 PF_DIR="$(cd -P "$LM_DIR/.." && pwd)"                   # 2_Project_Files
 TASK_DIR="$LM_DIR/tasks/code_patch"
 
-# BACKEND + MODEL (2026-10-08, Kam 18:12 — Ornith 1.5 on oMLX is the default, Ornith 1.0 on Ollama the fallback).
-NIGHT_BACKEND="${NIGHT_BACKEND:-omlx}"
-case "$NIGHT_BACKEND" in
-  omlx)   NIGHT_MODEL="${NIGHT_MODEL:-Ornith-1.5-35B-A3B-MLX-8bit}"; _min_free_default=35 ;;   # ~35 GB resident (A/B: 34.91 GB)
-  ollama) NIGHT_MODEL="${NIGHT_MODEL:-ornith:35b}"; _min_free_default=30 ;;
-  *) echo "night_run: NIGHT_BACKEND='$NIGHT_BACKEND' is not omlx | ollama — REFUSED (rc 2)" >&2; exit 2 ;;
-esac
-NIGHT_OMLX_AUTOSTART="${NIGHT_OMLX_AUTOSTART:-1}"
-OMLX_URL="${OMLX_URL:-http://127.0.0.1:47780}"
+NIGHT_MODEL="${NIGHT_MODEL:-ornith:35b}"
 NIGHT_THINK="${NIGHT_THINK:-0}"   # 2026-09-15 10:4x: think=0 again — WITH a Wednesday brief the brief is the reasoning (KS-1087 round 3 produced the correct fix at think=0); think=1 + brief over-thought into the context wall twice (47K and 78K chars). Set NIGHT_THINK=1 only for a ticket with no brief.
 NIGHT_NUM_CTX="${NIGHT_NUM_CTX:-32768}"
 NIGHT_MAX_TICKETS="${NIGHT_MAX_TICKETS:-4}"
 # 2026-09-15 20:2x: macOS mediaanalysisd (560% CPU, days) keeps the 1-min load ~9 with NO seat live; G2 (the pane census)
 # is the seat gate, G4 only protects the checker from a busy box — 14 lets the loop run under that daemon.
 NIGHT_MAX_LOAD="${NIGHT_MAX_LOAD:-14}"
-NIGHT_MIN_FREE_GB="${NIGHT_MIN_FREE_GB:-$_min_free_default}"
+NIGHT_MIN_FREE_GB="${NIGHT_MIN_FREE_GB:-30}"
 NIGHT_QUEUE="${NIGHT_QUEUE:-$SELF_DIR/queue.md}"
 NIGHT_DONE="${NIGHT_DONE:-$(dirname "$NIGHT_QUEUE")/done.md}"
 NIGHT_RUNS_DIR="${NIGHT_RUNS_DIR:-$LM_DIR/runs}"
@@ -185,12 +164,12 @@ _g7_foreign_pane() {
 TICKETS_RUN=0; TICKETS_ATTEMPTED=0; VERDICTS=""
 write_state() {
   # write_state <exit> <reason>
-  python3 - "$STATE" "$1" "$2" "$RUN_START" "$TICKETS_ATTEMPTED" "$TICKETS_RUN" "$VERDICTS" "$NIGHT_MODEL" "$NIGHT_DRY_RUN" "$NIGHT_BACKEND" <<'PYEOF'
+  python3 - "$STATE" "$1" "$2" "$RUN_START" "$TICKETS_ATTEMPTED" "$TICKETS_RUN" "$VERDICTS" "$NIGHT_MODEL" "$NIGHT_DRY_RUN" <<'PYEOF'
 import json, sys, time
-p, rc, reason, start, att, ran, verdicts, model, dry, backend = sys.argv[1:11]
+p, rc, reason, start, att, ran, verdicts, model, dry = sys.argv[1:10]
 json.dump({"exit": int(rc), "reason": reason, "started": start, "ended": time.strftime("%Y-%m-%d %H:%M:%S"),
            "tickets_attempted": int(att), "tickets_run": int(ran), "verdicts": [v for v in verdicts.split(";") if v],
-           "model": model, "backend": backend, "dry_run": dry == "1"}, open(p, "w"), indent=1)
+           "model": model, "dry_run": dry == "1"}, open(p, "w"), indent=1)
 PYEOF
 }
 finish() { write_state "$1" "$2"; log "END rc=$1 $2 (attempted=$TICKETS_ATTEMPTED run=$TICKETS_RUN)"; exit "$1"; }
@@ -209,7 +188,7 @@ if ! mkdir "$LOCKDIR" 2>/dev/null; then
 fi
 echo $$ > "$LOCKDIR/pid"
 trap 'rmdir "$LOCKDIR" 2>/dev/null || { rm -f "$LOCKDIR/pid" 2>/dev/null; rmdir "$LOCKDIR" 2>/dev/null; }' EXIT
-log "START night_run backend=$NIGHT_BACKEND model=$NIGHT_MODEL think=$NIGHT_THINK num_ctx=$NIGHT_NUM_CTX max=$NIGHT_MAX_TICKETS dry=$NIGHT_DRY_RUN queue=$NIGHT_QUEUE socket=${NIGHT_TMUX_SOCKET:-default} store=$OLLAMA_MODELS min_free=${NIGHT_MIN_FREE_GB}GB"
+log "START night_run model=$NIGHT_MODEL think=$NIGHT_THINK num_ctx=$NIGHT_NUM_CTX max=$NIGHT_MAX_TICKETS dry=$NIGHT_DRY_RUN queue=$NIGHT_QUEUE socket=${NIGHT_TMUX_SOCKET:-default} store=$OLLAMA_MODELS"
 
 # ---------------------------------------------------------------- gates
 GATE_FAIL=""
@@ -278,29 +257,6 @@ gates() {
   # server already holding the port — so a foreign listener still reaches the refusal below, which is
   # the case that genuinely needs a human.
   local tags rc
-  # G5 on the omlx backend (2026-10-08). Never falls back to Ollama: the model Kam chose is served or the gate refuses.
-  if [ "$NIGHT_BACKEND" = "omlx" ]; then
-    local mods hrc why
-    mods="$(curl -sS -m 10 "$OMLX_URL/v1/models" 2>&1)"; hrc=$?
-    if [ "$hrc" -eq 0 ] && echo "$mods" | /usr/bin/grep -q "\"$NIGHT_MODEL\""; then
-      log "GATE G5 omlx: $OMLX_URL/v1/models lists $NIGHT_MODEL — pass"; return 0
-    fi
-    if [ "$hrc" -eq 0 ]; then
-      log "GATE G5 omlx: $OMLX_URL answers but does NOT list $NIGHT_MODEL ($(echo "$mods" | head -c 200)) — REFUSE (no silent switch; an Ollama tag needs NIGHT_BACKEND=ollama)"; GATE_FAIL="G5-omlx-model"; return 1
-    fi
-    if [ "$NIGHT_OMLX_AUTOSTART" != "1" ]; then
-      log "GATE G5 omlx: oMLX is DOWN at $OMLX_URL (curl rc=$hrc) and NIGHT_OMLX_AUTOSTART=$NIGHT_OMLX_AUTOSTART — REFUSE. The runner does NOT fall back to Ornith 1.0: start it with \`bash 2_Project_Files/local-model/omlx_serve.sh start\`, or run the fallback deliberately with NIGHT_BACKEND=ollama"; GATE_FAIL="G5-omlx-down"; return 1
-    fi
-    if [ -z "$(next_ticket)" ]; then
-      log "GATE G5 omlx: oMLX is down (curl rc=$hrc) and the queue is empty — NOT starting a 35 GB model for nothing (it starts on the first pending ticket) — pass"; return 0
-    fi
-    why="$(bash "$LM_DIR/omlx_serve.sh" start 2>&1)"; rc=$?
-    echo "$why" >> "$LOG"
-    if [ "$rc" -eq 0 ] && curl -sS -m 10 "$OMLX_URL/v1/models" 2>/dev/null | /usr/bin/grep -q "\"$NIGHT_MODEL\""; then
-      log "GATE G5 omlx: was down — omlx_serve.sh start brought it up serving $NIGHT_MODEL — pass (AUTO-STARTED)"; return 0
-    fi
-    log "GATE G5 omlx: oMLX is DOWN and omlx_serve.sh start FAILED rc=$rc: $(echo "$why" | tail -1 | head -c 300) — REFUSE (no fallback to Ornith 1.0)"; GATE_FAIL="G5-omlx-start"; return 1
-  fi
   # Store first (2026-10-05): no store with the ornith manifest = nothing to serve; refuse, never guess.
   if [ -n "$OLLAMA_STORE_ERR" ]; then
     log "GATE G5 ollama: $OLLAMA_STORE_ERR — REFUSE"; GATE_FAIL="G5-store"; return 1
@@ -328,12 +284,6 @@ try:
     for x in json.load(sys.stdin).get("models",[]): print(x["name"], round(x.get("size",0)/2**30,1))
 except Exception as e: pass')"
   if [ -z "$loaded" ]; then log "MEMORY: /api/ps lists no loaded model"; fi
-  # 2026-10-08: say what oMLX holds (informational on both backends; on omlx it is OUR model, kept loaded).
-  local _om; _om="$(curl -sS -m 5 "$OMLX_URL/v1/models/status" 2>/dev/null | python3 -c 'import json,sys
-try: print(" ".join(x["id"] for x in json.load(sys.stdin).get("models",[]) if x.get("loaded")) or "none")
-except Exception: print("server down")' 2>&1)"
-  log "MEMORY: oMLX ($OMLX_URL) loaded: $_om$( [ "$NIGHT_BACKEND" = omlx ] && echo " — ours, kept" )"
-
   echo "$loaded" | while read -r m sz; do
     [ -z "$m" ] && continue
     if [ "$m" = "$NIGHT_MODEL" ]; then log "MEMORY: $m (${sz} GB) is ours — kept"; continue; fi
@@ -378,9 +328,9 @@ next_ticket() {
 }
 move_done() {
   # move_done <queue line> <verdict> <run dir>  — the line leaves queue.md and lands in done.md
-  python3 - "$NIGHT_QUEUE" "$NIGHT_DONE" "$1" "$2" "$3" "$NIGHT_BACKEND" "$NIGHT_MODEL" <<'PYEOF'
+  python3 - "$NIGHT_QUEUE" "$NIGHT_DONE" "$1" "$2" "$3" <<'PYEOF'
 import sys, time, os
-q, d, line, verdict, run, backend, model = sys.argv[1:8]
+q, d, line, verdict, run = sys.argv[1:6]
 lines = open(q, encoding="utf-8").read().split("\n")
 try:
     i = lines.index(line)
@@ -393,8 +343,7 @@ hdr = not os.path.exists(d) or os.path.getsize(d) == 0
 with open(d, "a", encoding="utf-8") as f:
     if hdr:
         f.write("# night/done.md — queue lines moved here by night_run.sh (newest at the bottom)\n# <queue line> | done <when> | verdict <verdict> | run <dir>\n")
-    # 2026-10-08: `| backend <b> model <m>` appended LAST so 1.0 and 1.5 rows can be counted apart.
-    f.write(f"{line} | done {time.strftime('%Y-%m-%d %H:%M')} | verdict {verdict} | run {run} | backend {backend} model {model}\n")
+    f.write(f"{line} | done {time.strftime('%Y-%m-%d %H:%M')} | verdict {verdict} | run {run}\n")
 PYEOF
   log "QUEUE: moved '$1' → done.md (verdict $2)"
 }
@@ -432,7 +381,6 @@ if ! gates; then
   if [ "$_mins" -ge "${NIGHT_GATE_ALERT_MIN:-30}" ] && [ ! -f "$_gate_alerted" ]; then
     : > "$_gate_alerted"
     _remedy="read night/log/$(basename "$LOG") for the refusal line"
-    case "$GATE_FAIL" in G5-omlx*) _remedy="bash 2_Project_Files/local-model/omlx_serve.sh status, then start (a recorded guard trip needs clear-trip by a human); or run Ornith 1.0 deliberately with NIGHT_BACKEND=ollama";; esac
     [ "$GATE_FAIL" = "G5-ollama" ] && _remedy="bash 2_Project_Files/local-model/start_ollama.sh (the self-heal already failed — something else holds port 11434)"
     log "G8 GATE ALERT: $GATE_FAIL has refused for ${_mins} min — posting to the panel"
     [ "${NIGHT_GATE_ALERT_DRY:-0}" = 1 ] || bash "$SELF_DIR/../../tools/chat_reply.sh" \
@@ -511,17 +459,14 @@ while [ "$TICKETS_RUN" -lt "$NIGHT_MAX_TICKETS" ] && [ "$ITER" -lt $((NIGHT_MAX_
   [ -z "$LINE" ] && { log "QUEUE: empty — nothing more to take"; break; }
   TICKET="$(echo "$LINE" | awk '{print $1}')"
   TICKETS_ATTEMPTED=$((TICKETS_ATTEMPTED + 1))
-  # run-dir model tag: ornith:35b stays `ornith35b` (unchanged); an oMLX id is lower-cased with the backend prefixed,
-  # e.g. omlx-ornith-1.5-35b-a3b-mlx-8bit (2026-10-08)
-  _mtag="$(echo "$NIGHT_MODEL" | tr -d ':')"; [ "$NIGHT_BACKEND" = omlx ] && _mtag="omlx-$(echo "$NIGHT_MODEL" | tr 'A-Z' 'a-z' | tr -cd 'a-z0-9.-')"
-  RUN="$NIGHT_RUNS_DIR/${DATE}_$(echo "$TICKET" | tr 'A-Z' 'a-z' | tr -d '-')-${_mtag}-night"
+  RUN="$NIGHT_RUNS_DIR/${DATE}_$(echo "$TICKET" | tr 'A-Z' 'a-z' | tr -d '-')-$(echo "$NIGHT_MODEL" | tr -d ':')-night"
   k=1; while [ -d "$RUN" ]; do k=$((k+1)); RUN="${RUN%-night*}-night$k"; done
   mkdir -p "$RUN"
   RLOG="$RUN/run.log"
   log "TICKET $TICKET take: '$LINE' → $RUN"
   # G7: a taken ticket ends the drought — clear the empty-queue markers (default queue only).
   [ "$NIGHT_QUEUE" = "${NIGHT_IDLE_DEFAULT_QUEUE:-$SELF_DIR/queue.md}" ] && { _idle_dir="${NIGHT_IDLE_MARKER_DIR:-$SELF_DIR/log}"; mkdir -p "$_idle_dir/_quarantine_g7" 2>/dev/null; for _m in "$_idle_dir/.queue_empty_since" "$_idle_dir/.queue_empty_alerted" "$_idle_dir/.queue_empty_tapped"; do [ -f "$_m" ] && mv "$_m" "$_idle_dir/_quarantine_g7/$(basename "$_m").$(date +%s)"; done; :; }
-  echo "== $(date '+%F %T') night_run $TICKET line='$LINE' backend=$NIGHT_BACKEND model=$NIGHT_MODEL think=$NIGHT_THINK" >> "$RLOG"
+  echo "== $(date '+%F %T') night_run $TICKET line='$LINE' model=$NIGHT_MODEL think=$NIGHT_THINK" >> "$RLOG"
 
   # build input (or take a pre-built one — the FIRE test uses a hand-made tiny input)
   INPUT="$RUN/input.json"
@@ -569,14 +514,14 @@ while [ "$TICKETS_RUN" -lt "$NIGHT_MAX_TICKETS" ] && [ "$ITER" -lt $((NIGHT_MAX_
   echo "memory: $MEM_NOTE" >> "$RLOG"
 
   if [ "$NIGHT_DRY_RUN" = "1" ]; then
-    log "TICKET $TICKET DRY_RUN — model call and checker skipped (would run: LM_BACKEND=$NIGHT_BACKEND LM_MODEL=$NIGHT_MODEL LM_THINK=$NIGHT_THINK LM_NUM_CTX=$CTX task=$TASK)"
+    log "TICKET $TICKET DRY_RUN — model call and checker skipped (would run: LM_MODEL=$NIGHT_MODEL LM_THINK=$NIGHT_THINK LM_NUM_CTX=$CTX task=$TASK)"
     echo "DRY_RUN: no model call, no checker" >> "$RLOG"
     VERDICTS="$VERDICTS;$TICKET=DRY_RUN"
     TICKETS_RUN=$((TICKETS_RUN + 1))
     move_done "$LINE" "DRY_RUN" "$RUN"
-    python3 - "$RUN/night_meta.json" "$TICKET" "$NIGHT_MODEL" "$CTX" "$MEM_NOTE" "DRY_RUN" "$NIGHT_BACKEND" <<'PYEOF'
-import json,sys,time; p,t,m,c,mem,v,b=sys.argv[1:8]
-json.dump({"ticket":t,"backend":b,"model":m,"num_ctx":int(c),"memory":mem,"verdict":v,"when":time.strftime("%F %T")},open(p,"w"),indent=1)
+    python3 - "$RUN/night_meta.json" "$TICKET" "$NIGHT_MODEL" "$CTX" "$MEM_NOTE" "DRY_RUN" <<'PYEOF'
+import json,sys,time; p,t,m,c,mem,v=sys.argv[1:7]
+json.dump({"ticket":t,"model":m,"num_ctx":int(c),"memory":mem,"verdict":v,"when":time.strftime("%F %T")},open(p,"w"),indent=1)
 PYEOF
     if ! gates; then log "STOP after $TICKET: gate $GATE_FAIL failed (a seat may have launched)"; finish 0 "ran; stopped by gate $GATE_FAIL"; fi
     continue
@@ -589,7 +534,6 @@ PYEOF
     cp "$PREOUT" "$RUN/out.md"; hrc=$?; echo "out.md: PRE-MADE from $PREOUT (test only, no model call)" >> "$RLOG"
     log "TICKET $TICKET out.md pre-made (TEST): $PREOUT"
   else
-    LM_BACKEND="$NIGHT_BACKEND" OMLX_URL="$OMLX_URL" \
     LM_MODEL="$NIGHT_MODEL" LM_THINK="$NIGHT_THINK" LM_NUM_CTX="$CTX" LM_MAX_LOAD="$NIGHT_MAX_LOAD" OLLAMA_URL="$OLLAMA_URL" \
       bash "$LM_DIR/local_model_task.sh" "$TASK" "$INPUT" "$RUN/out.md" >> "$RLOG" 2>&1
     hrc=$?
@@ -601,12 +545,10 @@ PYEOF
     log "TICKET $TICKET harness rc=$hrc after $((T1 - T0))s — $(tail -1 "$RLOG" | head -c 200)"
     VERDICTS="$VERDICTS;$TICKET=HARNESS_FAIL"
     move_done "$LINE" "HARNESS_FAIL rc=$hrc" "$RUN"
-    # 2026-10-08: rc 5 = oMLX HTTP 507 (its memory ceiling) — the machine is short of memory; STOP, never take the next ticket.
-    if [ "$hrc" -eq 5 ]; then log "STOP after $TICKET: oMLX HTTP 507 (memory ceiling) — no further tickets this run"; GATE_FAIL="omlx-507"; break; fi
     if ! gates; then log "STOP after $TICKET: gate $GATE_FAIL failed"; finish 0 "ran; stopped by gate $GATE_FAIL"; fi
     continue
   fi
-  log "TICKET $TICKET model done in $((T1 - T0))s: $(/usr/bin/grep -m1 -E '(lm|omlx)_call: ok' "$RLOG" | head -c 260)"
+  log "TICKET $TICKET model done in $((T1 - T0))s: $(/usr/bin/grep -m1 'lm_call: ok' "$RLOG" | head -c 220)"
 
   # checker in a --shared clone at the pinned tip (night scratch only)
   VERDICT="HARNESS_ONLY"
@@ -752,7 +694,6 @@ print(f"retry input: {len(missed)} missed site(s) carried; verdict={verdict[:120
 PYR
     log "TICKET $TICKET RETRY-ONCE on '$FIRST_VERDICT' — $(tail -1 "$RLOG" 2>/dev/null | head -c 0)same model, input + retry_feedback → $RUN/retry/"
     TR0="$(date +%s)"
-    LM_BACKEND="$NIGHT_BACKEND" OMLX_URL="$OMLX_URL" \
     LM_MODEL="$NIGHT_MODEL" LM_THINK="$NIGHT_THINK" LM_NUM_CTX="$CTX" LM_MAX_LOAD="$NIGHT_MAX_LOAD" OLLAMA_URL="$OLLAMA_URL" \
       bash "$LM_DIR/local_model_task.sh" "$TASK" "$RUN/retry/input.json" "$RUN/retry/out.md" >> "$RLOG" 2>&1
     rrc=$?; TR1="$(date +%s)"
@@ -772,9 +713,9 @@ PYR
   RETRY_DONE=""
   log "TICKET $TICKET verdict: $VERDICT"
   VERDICTS="$VERDICTS;$TICKET=$(echo "$VERDICT" | tr ' ;' '_,')"
-  python3 - "$RUN/night_meta.json" "$TICKET" "$NIGHT_MODEL" "$CTX" "$MEM_NOTE" "$VERDICT" "$((T1 - T0))" "$LINE" "$NIGHT_BACKEND" <<'PYEOF'
-import json,sys,time; p,t,m,c,mem,v,w,line,b=sys.argv[1:10]
-json.dump({"ticket":t,"queue_line":line,"backend":b,"model":m,"num_ctx":int(c),"memory_before":mem,"verdict":v,"model_wall_s":int(w),"when":time.strftime("%F %T")},open(p,"w"),indent=1)
+  python3 - "$RUN/night_meta.json" "$TICKET" "$NIGHT_MODEL" "$CTX" "$MEM_NOTE" "$VERDICT" "$((T1 - T0))" "$LINE" <<'PYEOF'
+import json,sys,time; p,t,m,c,mem,v,w,line=sys.argv[1:9]
+json.dump({"ticket":t,"queue_line":line,"model":m,"num_ctx":int(c),"memory_before":mem,"verdict":v,"model_wall_s":int(w),"when":time.strftime("%F %T")},open(p,"w"),indent=1)
 PYEOF
   move_done "$LINE" "$VERDICT" "$RUN"
   echo "== $(date '+%F %T') end $TICKET verdict=$VERDICT" >> "$RLOG"
@@ -790,10 +731,6 @@ PYEOF
 done
 
 # leave the memory clean for the morning
-if [ "$NIGHT_BACKEND" = omlx ]; then
-  log "MEMORY: oMLX keeps $NIGHT_MODEL loaded after the run (Kam 2026-10-08 18:12: use it; omlx_serve.sh's guard watches swap/free) — stop it with omlx_serve.sh stop"
-else
 curl -sS -m 60 -X POST "$OLLAMA_URL/api/generate" -d "{\"model\":\"$NIGHT_MODEL\",\"keep_alive\":0}" > /dev/null 2>&1 && log "MEMORY: $NIGHT_MODEL unloaded at end"
-fi
 if [ "$TICKETS_ATTEMPTED" -eq 0 ]; then finish 4 "queue empty"; fi
 finish 0 "ran${GATE_FAIL:+; stopped by gate $GATE_FAIL}"

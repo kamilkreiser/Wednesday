@@ -228,36 +228,10 @@ else
     if [ $? -eq 0 ] && echo "$NIGHT_TAGS" | grep -q '"ornith:35b"'; then
       ok "ornith:35b on the drive and served (/api/tags)"
     else
-      # 2026-10-08: with omlx the default backend, 1.0 on Ollama is the named FALLBACK — not served is normal (G5 self-heals it when NIGHT_BACKEND=ollama is chosen).
-      if grep -q '^NIGHT_BACKEND="${NIGHT_BACKEND:-omlx}"' "$NIGHT_DIR/night_run.sh" 2>/dev/null; then
-        ok "ornith:35b (1.0, the FALLBACK since 2026-10-08) on the drive; Ollama not serving it — normal, started on demand by NIGHT_BACKEND=ollama"
-      else
-        warn "ornith:35b on the drive but Ollama not serving it" "bash 2_Project_Files/local-model/start_ollama.sh (PORTABILITY 14/15) — it uses the drive-local binary + OLLAMA_MODELS, the two things a hand-start gets wrong; night_run's G5 also calls it itself now (2026-09-16)"
-      fi
+      warn "ornith:35b on the drive but Ollama not serving it" "bash 2_Project_Files/local-model/start_ollama.sh (PORTABILITY 14/15) — it uses the drive-local binary + OLLAMA_MODELS, the two things a hand-start gets wrong; night_run's G5 also calls it itself now (2026-09-16)"
     fi
   else
     warn "ornith:35b manifest missing in every candidate store (SYSTEM, in-tree)" "OLLAMA_MODELS=/Volumes/DevMASTER/SYSTEM/ollama/models ollama pull ornith:35b (~20 GB; PORTABILITY 15) — or restore the 2026-10-05 copy from G-DRIVE Scratch Files (MOVED.txt there)"
-  fi
-  # --- Ornith 1.5 on oMLX = the night runner's DEFAULT backend (Kam, 2026-10-08 18:12: "go with Ornith 1.5 and
-  # deploy it. use this instead of the old model."). Three facts: the 1.5 model folder is on the drive, the tracked
-  # server script exists, night_run.sh's backend default is omlx. A DOWN server is a WARN, not a fail: night_run
-  # starts it itself when a ticket is pending (omlx_serve.sh start), and refuses loudly if it cannot.
-  OMLX_MODEL_DIR="$PROJECT_DIR/2_Project_Files/tools/omlx/models/Ornith-1.5-35B-A3B-MLX-8bit"
-  OMLX_SERVE="$PROJECT_DIR/2_Project_Files/local-model/omlx_serve.sh"
-  NIGHT_BACKEND_DEFAULT=$(sed -n 's/^NIGHT_BACKEND="\${NIGHT_BACKEND:-\([a-z]*\)}".*/\1/p' "$NIGHT_DIR/night_run.sh" 2>/dev/null | head -1)
-  if [ ! -f "$OMLX_MODEL_DIR/config.json" ]; then
-    warn "Ornith 1.5 model folder missing" "$OMLX_MODEL_DIR (MLX 8-bit, HF commit 02440c39bdf7; PORTABILITY 23) — night_run's default backend cannot serve; NIGHT_BACKEND=ollama runs Ornith 1.0"
-  elif [ ! -f "$OMLX_SERVE" ]; then
-    warn "oMLX server script missing" "2_Project_Files/local-model/omlx_serve.sh is gone — the 1.5 backend has no start/stop/guard (PORTABILITY 23)"
-  elif [ "$NIGHT_BACKEND_DEFAULT" != "omlx" ]; then
-    warn "night_run backend default is '${NIGHT_BACKEND_DEFAULT:-unset}'" "expected omlx (Kam 2026-10-08 18:12: Ornith 1.5 replaces 1.0) — read night_run.sh's BACKEND block"
-  else
-    OMLX_ST=$(OMLX_PORT=47780 bash "$OMLX_SERVE" status 2>&1 | head -1)
-    if curl -sS -m 4 http://127.0.0.1:47780/health >/dev/null 2>&1; then
-      ok "ornith 1.5 (night default, backend omlx): $OMLX_ST"
-    else
-      warn "ornith 1.5 oMLX server DOWN (47780)" "night_run starts it on the next pending ticket; by hand: bash 2_Project_Files/local-model/omlx_serve.sh start (PORTABILITY 23). Model + script + default backend present."
-    fi
   fi
   NIGHT_Q=$(grep -v -E '^[[:space:]]*(#|$)' "$NIGHT_DIR/queue.md" 2>/dev/null | wc -l | tr -d ' ')
   if [ "${NIGHT_Q:-0}" -gt 0 ]; then

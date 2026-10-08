@@ -29,16 +29,9 @@
 #                http://127.0.0.1:47788 = the PORTS.md tunnel to the box's :8888),
 #                SPARK_MODEL (deepseek-v4-flash-0731), SPARK_MAX_TOKENS (16384),
 #                SPARK_THINK (0). Any other LM_BACKEND value refuses rc 2.
-#                `omlx` (2026-10-08, Kam 18:12 "go with Ornith 1.5 and deploy it") = Ornith 1.5
-#                (MLX 8-bit) served by oMLX on 127.0.0.1:47780 (local-model/omlx_serve.sh) via
-#                lib/omlx_call.py: same prompt/sampler as lm_call.py, OpenAI chat API, streaming,
-#                thinking per LM_THINK. The Studio load rule APPLIES (the model runs here). LM_MODEL is
-#                the oMLX model id; OMLX_URL (default http://127.0.0.1:47780). LM_NUM_PREDICT (32768) is
-#                the max_tokens; LM_NUM_CTX is recorded only (the server's max_context_window is 65536).
-#                An HTTP 507 (oMLX's memory ceiling) exits 5 so the caller can stop, not retry.
 #
-# Exit codes: 0 ok, 2 usage/missing-input/ollama-unreachable (or oMLX unreachable),
-# 3 load rule refused, 4 HTTP/JSON failure from the model call, 5 oMLX HTTP 507.
+# Exit codes: 0 ok, 2 usage/missing-input/ollama-unreachable, 3 load rule
+# refused, 4 HTTP/JSON failure from the model call.
 #
 # bash 3.2 compatible (macOS ships 3.2: no `declare -A`, no `timeout` —
 # the HTTP call's timeout is handled inside lib/lm_call.py). stderr is
@@ -77,7 +70,6 @@ fi
 # (ollama reachability, the load rule, lm_call.py) runs exactly as before when LM_BACKEND is unset.
 case "${LM_BACKEND:-ollama}" in
   ollama) ;;
-  omlx) ;;   # 2026-10-08: handled below, AFTER the load rule (it runs on this Mac, like ollama)
   spark)
     SPARK_URL="${SPARK_URL:-http://127.0.0.1:47788}"
     SPARK_MODEL="${SPARK_MODEL:-deepseek-v4-flash-0731}"
@@ -105,26 +97,17 @@ case "${LM_BACKEND:-ollama}" in
     exit 0
     ;;
   *)
-    echo "local_model_task: unknown LM_BACKEND '${LM_BACKEND}' (ollama | spark | omlx)" >&2
+    echo "local_model_task: unknown LM_BACKEND '${LM_BACKEND}' (ollama | spark)" >&2
     exit 2
     ;;
 esac
 
-# --- server reachability (ollama, or oMLX for LM_BACKEND=omlx) ---
-OMLX_URL="${OMLX_URL:-http://127.0.0.1:47780}"
-if [ "${LM_BACKEND:-ollama}" = "omlx" ]; then
-  H_OUT="$(curl -sS -m 10 -o /dev/null -w '%{http_code}' "$OMLX_URL/health" 2>&1)"; H_RC=$?
-  if [ "$H_RC" -ne 0 ] || [ "$H_OUT" != "200" ]; then
-    echo "local_model_task: oMLX not answering $OMLX_URL/health (rc=$H_RC http=$H_OUT) — start it: bash $SCRIPT_DIR/omlx_serve.sh start" >&2
-    exit 2
-  fi
-else
+# --- ollama reachability ---
 TAGS_OUT="$(curl -sS -m 10 "$OLLAMA_URL/api/tags" 2>&1)"
 TAGS_RC=$?
 if [ "$TAGS_RC" -ne 0 ]; then
   echo "local_model_task: ollama not answering $OLLAMA_URL/api/tags (rc=$TAGS_RC): $TAGS_OUT" >&2
   exit 2
-fi
 fi
 
 # --- load rule: the model counts as a seat ---
@@ -148,27 +131,17 @@ mkdir -p "$SCRIPT_DIR/logs"
 RUN_LOG="$SCRIPT_DIR/logs/runs.log"
 START_TS="$(date '+%Y-%m-%d %H:%M:%S')"
 
-if [ "${LM_BACKEND:-ollama}" = "omlx" ]; then
-  OUT_TMP=$(python3 "$SCRIPT_DIR/lib/omlx_call.py" "$TASK_FILE" "$INPUT_FILE" "$OUT_FILE" "$META_FILE" "$LM_MODEL" "${LM_NUM_PREDICT:-32768}" "$OMLX_URL" "$LM_THINK" 2>&1 > /dev/null)
-  CALL_RC=$?
-  if [ "$CALL_RC" -eq 5 ]; then
-    echo "local_model_task: oMLX HTTP 507 (memory ceiling) — STOP, do not retry: $OUT_TMP" >&2
-    echo "$START_TS | task=$(basename "$(dirname "$TASK_FILE")") backend=omlx model=$LM_MODEL rc=5 load=$LOAD1 err=$OUT_TMP" >> "$RUN_LOG"
-    exit 5
-  fi
-else
 OUT_TMP=$(python3 "$SCRIPT_DIR/lib/lm_call.py" "$TASK_FILE" "$INPUT_FILE" "$OUT_FILE" "$META_FILE" "$LM_MODEL" "$LM_NUM_CTX" "$OLLAMA_URL" "$LM_THINK" 2>&1 > /dev/null)
 CALL_RC=$?
-fi
 # lib/lm_call.py writes its one-line status to stderr; capture it for the log
 # without ever discarding stderr (we re-ran nothing — this captures the same
 # stream the caller would see, then also prints it).
 if [ "$CALL_RC" -ne 0 ]; then
   echo "local_model_task: model call failed (rc=$CALL_RC): $OUT_TMP" >&2
-  echo "$START_TS | task=$(basename "$(dirname "$TASK_FILE")") backend=${LM_BACKEND:-ollama} model=$LM_MODEL rc=$CALL_RC load=$LOAD1 err=$OUT_TMP" >> "$RUN_LOG"
+  echo "$START_TS | task=$(basename "$(dirname "$TASK_FILE")") model=$LM_MODEL rc=$CALL_RC load=$LOAD1 err=$OUT_TMP" >> "$RUN_LOG"
   exit 4
 fi
 
 echo "$OUT_TMP" >&2
-echo "$START_TS | task=$(basename "$(dirname "$TASK_FILE")") backend=${LM_BACKEND:-ollama} model=$LM_MODEL think=$LM_THINK rc=0 load=$LOAD1 out=$OUT_FILE $OUT_TMP" >> "$RUN_LOG"
+echo "$START_TS | task=$(basename "$(dirname "$TASK_FILE")") model=$LM_MODEL think=$LM_THINK rc=0 load=$LOAD1 out=$OUT_FILE $OUT_TMP" >> "$RUN_LOG"
 exit 0
