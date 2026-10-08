@@ -1,0 +1,31 @@
+KS-1450: unblock preflight leg 14 — mark baseline reasons, exempt run ids
+
+develop has failed its own pre-push preflight on leg 14 since 89dff83aa (#1424), so every push
+carrying a Blockchain/Dev path was refused. The KS-1386 guard reported 8 unmarked slot-2 literals,
+all in systemTest/schemathesis/config/schemathesis-baseline.json.
+
+Six are prose inside "reason" strings and now carry the guard's own marker. The other two are
+run-id string elements in $generated.from_runs, which cannot carry an inline marker and must not
+be renamed — a run id records which sweep produced a row. They get a NARROW exemption in the
+guard, bounded by a structural check rather than by prose.
+
+- baseline: the six "reason" lines (854, 859, 864, 869, 874, 879) carry
+  `slot-literal-ok: names the sweep's slot, not a target`. $generated.from_runs is UNCHANGED.
+- guard: one extra filter stage in scan(), matching only a LONE JSON string element of the exact
+  shape the baseline writes, in that ONE file. No file exclusion, no extension exclusion.
+- guard: a new cell asserts every line the exemption drops is a $generated.from_runs member (jq),
+  plus a non-vacuity control that plants the same shape in a DIFFERENT array and must catch it.
+  jq is required, not optional: a membership check that skips silently would unbound the exemption.
+
+Leg 14 goes from 8 passed / 1 failed (rc 1) to 11 passed / 0 failed (rc 0).
+
+- docs: both platform HTML docs gain the SAME one clause stating the exemption's scope, in this
+  commit, per .claude/skills/secuura-test-discipline/SKILL.md §4 (:365 same commit, :378 both files,
+  :415 a changed gate must be reflected). D1 :1268 bounded "No slot 2-4 value is typed anywhere";
+  D2 :2169 bounded "never typed". One line changed per file, insertion only, tags balanced 2/2.
+
+Refs KS-1450
+Refs KS-1451
+
+Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>
+

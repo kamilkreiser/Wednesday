@@ -1,0 +1,60 @@
+PASS T1 `Refs KS-n` set ['KS-1450', 'KS-1451'] carries the own key KS-1450 | kit default own keys ['KS-1450'] | EXTRA Refs ['KS-1451'] (Q-KEYS75: mergera1 requires own_keys == this set)
+PASS T2 closing-family words on a key 0 [] | CONTROL planted `Fixes KS-1` 1
+INFO T3 hyphenated keys in title+body ['KS-1386', 'KS-1401', 'KS-1450', 'KS-1451'] | foreign (attach, STANDING_LINES :278) ['KS-1386', 'KS-1401', 'KS-1451'] | de-hyphenated []
+INFO T4 title 101 chars, ASCII False, `(#` False (the title is NOT the squash subject)
+PASS T5 body has a NOT RUN section True naming ['pytest', 'legs 3, 4 and 8', 'jq']
+INFO T7 52 sentences carry a number; dumped for the gate to read against its OWN measurement
+   T7| **BLUF:** `develop` has failed its own pre-push preflight on **leg 14** since `89dff83aa` (#1424), so every push carrying a `Blockchain/Dev/` path was refused.
+   T7| Leg 14 goes from **8 passed / 1 failed (rc 1)** at develop's tip to **11 passed / 0 failed (rc 0)** at this head.
+   T7| Refs KS-1450 · Refs KS-1451
+   T7| The KS-1386 guard reported **8** unmarked slot-2 literals, all in `systemTest/schemathesis/config/schemathesis-baseline.json`, at lines **10, 11, 854, 859, 864, 869, 874, 879**.
+   T7| Reproduced by rebuilding the guard's forbidden set from `support/slot-expect.sh` (45 patterns = the guard's own want of 45, `SE_MAX_SLOT` 4 × (11 port families + 4 name shapes)).
+   T7| A line-based filter cannot tell `from_runs[5]` from a lone string in some other array; this cell can, so the exemption's scope is a **check, not a comment**.
+   T7| **Both platform HTML docs** gain the **same one clause** naming the exemption's scope, in this commit, per `.claude/skills/secuura-test-discipline/SKILL.md` §4 (`:365` same commit · `:378` both files, every time · `:415`
+   T7| D1 `:1268` bounded "No slot 2–4 value is typed anywhere"; D2 `:2169` bounded "never typed".
+   T7| Left alone, D1's sentence would be actively misleading, which is what `:379` is about.
+   T7| | leg-14 guard at develop's tip, before any edit (RED) | rc 1 — `8 passed, 1 failed`, the 8 lines above |
+   T7| | leg-14 guard at this head (GREEN) | rc 0 — `11 passed, 0 failed` (9 cells → 11) |
+   T7| | `html_docs_matrix.test.sh` | rc 0 — 12 passed, 0 failed (10 of them its own controls) |
+   T7| | HTML tag balance, measured separately | base and head both balanced (`<code…>`/`</code>` 1199/1199→1201/1201 and 759/759→761/761); my inserted fragment 2/2 in each; exactly **one** differing line per file; every other 
+   T7| | `jq -e .` on the edited baseline | rc 0, with a deliberately-broken copy returning rc 5 so `jq` discriminates |
+   T7| | `baseline_gate.load_baseline()` on tip vs head | 171 entries both ways, identical key set, exactly **6** differ, and the only change is `reason` gaining exactly the marker suffix |
+   T7| | A0 untampered head | green | rc 0, `11p+0f` |
+   T7| | A1 slot value in a **different key** of the baseline | red | rc 1, `10p+1f`, names `ks1450_arm_note` |
+   T7| | A2 `from_runs` id of a **non-`(full\|pre-merge)`** shape | red | rc 1, `10p+1f`, names the planted id |
+   T7| | A3 literal in an **ordinary systemTest file** | red | rc 1, `10p+1f`, names the probe file |
+   T7| | A4 lone provenance shape in **another array** | red | rc 1, `10p+1f` — caught by the **jq membership cell only** |
+   T7| | A5 marker with an **empty reason** | red | **GREEN — see the named limitation below** |
+   T7| | A6 marker removed from `:859` | red | rc 1, `10p+1f`, names `:859` |
+   T7| | A7 the **exemption stage itself** removed | red | rc 1, `10p+1f`, **2** lines (not 8 — the six reasons now carry markers), so the exemption is load-bearing |
+   T7| | A8 `jq` broken by an exit-127 shim | red | rc 1, refuses, never a silent pass |
+   T7| Every red arm reads `10p+1f`: one cell, the tampered one, so none is a load failure rather than a tamper.
+   T7| **NAMED LIMITATION — A5, and it is pre-existing, not introduced here.** The guard's marker test is `grep -vE 'slot-literal-ok:[[:space:]]*[^[:space:]]'`, i.e.
+   T7| "reason": "x 6982 slot-literal-ok:",      -> EXEMPTED   (wrong: the reason is empty)
+   T7| const p = 6982; // slot-literal-ok:          -> reported   (right)
+   T7| That contradicts `systemTest/CLAUDE.md:1169` ("a bare marker exempts nothing").
+   T7| It is **not** a regression from this PR: the baseline carried **zero** markers before it (`git show HEAD~1:…baseline.json | grep -c slot-literal-ok` = 0), so this is the first change to put a marker inside a JSON string 
+   T7| **Filed as KS-1451** rather than fixed here, because a one-guard tightening would make the five guards disagree about what a bare marker means.
+   T7| Measured blast radius of the eventual fix: exactly 2 existing marker lines repo-wide, neither of which needs its exemption.
+   T7| - **The Schemathesis package's own pytest suite.** `pyproject.toml:18` is `requires-python = ">=3.14.8"`; this host is **3.14.5**, so the floor is not met, and the venv is built by `python3 scripts/run.py setup`, which n
+   T7| - **Preflight legs 3, 4 and 8** — the local Docker stack was not up.
+   T7| shell suites: 71 passed, 0 failed, 0 skipped (of 71)
+   T7| shell suites wall-clock: 346s
+   T7| PREFLIGHT INCOMPLETE — 12/15 legs ran, 3 SKIPPED.
+   T7| legs 3 4 8 — local stack not up; you can clear this by starting it.
+   T7| Leg 14 inside that run: `no_hardcoded_slot_literals: 11 passed, 0 failed`.
+   T7| **No other leg newly red vs develop:** develop's own recorded figures (KS-1450's body, same machine) are rc 1, shell suites **70 passed / 1 failed** / 0 skipped (of 71), `PREFLIGHT FAILED on leg(s) 14`, **12/15 legs ran*
+   T7| S-1 install first: `npm ci` in `Blockchain/Dev`, 1937 packages, both leg-1 artefacts present.
+   T7| On a first push of a new branch there is no computable base, and the hook fails *safe* rather than open (its own `:104-108`), so it printed `[pre-push] Blockchain/Dev changes detected → running preflight gate` and ran th
+   T7| [format-gate] 1 package(s) checked, 0 skipped, 0 failed
+   T7| shell suites: 71 passed, 0 failed, 0 skipped (of 71)
+   T7| shell suites wall-clock: 340s
+   T7| PREFLIGHT INCOMPLETE — 12/15 legs ran, 3 SKIPPED.
+   T7| legs 3 4 8 — local stack not up; you can clear this by starting it.
+   T7| Leg 14 in the hook's own run: `no_hardcoded_slot_literals: 11 passed, 0 failed`.
+   T7| Fixed by `npm ci` in `systemTest/performance` (270 packages) and pushed again — **not** bypassed with `--no-verify`.
+   T7| Second attempt: `1 package(s) checked, 0 skipped, 0 failed`.
+   T7| **#1383 (KS-1401) is held and also edits both platform HTML docs**, so it is a known doc-conflict neighbour of this PR.
+   T7| Its conflict with develop pre-dates this round (measured by a previous seat: `merge-tree` rc 1 against the current develop, the pre-#1423 develop, and #1423's own base alike).
+CHECKED 3
+0 FAIL

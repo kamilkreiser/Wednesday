@@ -1,0 +1,21 @@
+== the forbidden set is computed, and covers every family for every slot above 1 ==
+ok   forbidden set: 45 patterns = 3 slots x (11 port families + 4 name shapes)
+== the scanned roots hold no slot 2..4 literal ==
+ok   scanned 1206 files under: fixtures __tests__ scripts run-in-slot.sh performance playwright akto schemathesis api-explorer
+FAIL unmarked slot 2..4 values (2 lines) — derive them from support/slot-expect.sh, or mark 'slot-literal-ok: <reason>'
+       schemathesis/config/schemathesis-baseline.json:10:      "pre-merge-ks-1445-2026-10-07T14-01-26Z-slot2",
+       schemathesis/config/schemathesis-baseline.json:11:      "pre-merge-ks-1445-2026-10-07T14-30-16Z-slot2"
+== POSITIVE CONTROL: a planted literal is found, in every family and shape ==
+ok   CONTROL: all 54 planted literals are reported
+== NEGATIVE CONTROLS: what must NOT be reported ==
+ok   CONTROL: slot 1's base, a port above the ceiling, a longer number, 'slot1'/'unslotted' and a marked line are not reported
+ok   CONTROL: a marker with no reason does not exempt the line
+== GITIGNORED RUN OUTPUT is not source (KS-1386, found overnight 2026-09-29) ==
+ok   CONTROL: a slot value in a GITIGNORED cache file is not reported
+ok   CONTROL: an UNTRACKED (not ignored) file is still scanned
+ok   CONTROL: a directory that is not a git work tree is REFUSED, not scanned some other way
+== KS-1450: the provenance exemption drops ONLY $generated.from_runs members ==
+ok   provenance exemption: 2 exempted line(s), all of them $generated.from_runs members
+ok   CONTROL: a lone provenance-shaped string in ANOTHER array is exempted by the line filter (3) and CAUGHT by the membership check (1)
+
+no_hardcoded_slot_literals: 10 passed, 1 failed
