@@ -12,6 +12,12 @@ supersede: replace wholesale; previous = NEXT-PICKUP-FRIDAY.md.pre-0925-rotate-s
 
 **The tree is at `/Volumes/Laptop-DEV/FRIDAY` (the drive, since 2026-09-28).** Quote every path (spaces).
 
+## 🔴🔴🔴 WRAP 2026-10-08 12:23 (Friday; Kam: "Wrap up when its safe to do so") — READ FIRST; supersedes every block below where they differ
+**FLOOR EMPTY** (%0 friday + %1 monitor). Newest Kam row 12:18:42 (+ a terminal ask ~12:2x, done: HP walkthrough PDF + Word emailed, read back). Reconcile 0 to rule after 12:19.
+**Done today (this seat):** HP walkthrough doc final (Figure 3 = Engagements) in drawer + emailed · C-80 (M2 PO approval) merged (analysis main a00a481) · HPSMPOC-241/242 notes + cards delivered · Composer #239 fold merged (a32f9ce) + LIVE on demo (C-60) · Mac 1280 gap accepted by Kam.
+**OWED next session:** (1) Composer: record Kam's 12:18:42 accept on BACKLOG #256 + a C-number, then `--delivered composer-239-mac-1280-17px-1008` (fold into the next Composer brief). (2) Composer lanes 2 (#248) and 3b (#250) once the weekly allowance renews (~Fri 9 Oct mid-morning by the 11:40 reading "renews 21h 20m"; re-read the statusline). (3) The 2026-10-06 printer discussion with Kam (still owed). (4) HPSM-POC hosted deploy freeze lifts after Paul's walkthrough; then the queued Q-B184/Q-B182 items (10-07 21:55 block). (5) Composer root records commits (B99/B101) are local — check for a remote.
+**Seat-shape line (from today's retro):** a deploy step goes to a deploy seat launched by `friday/brief_seat.sh` (the B91/B97/B101 shape), never as an addendum to a builder pane: builder seats' launch rules forbid az/deploys.
+
 ## 🔴🔴🔴 STATE 2026-10-08 12:19 (Friday) — READ FIRST; supersedes every block below where they differ
 **FLOOR EMPTY.** Composer a32f9ce LIVE on the demo (B101, C-60; Friday's live check done; card composer-239-first-item-below-fold-1008 delivered). Kam ruled **composer-239-mac-1280-17px-1008 = a** (12:18:42, "Accept it as it is") — reconciled. **OWED delivery:** the next Composer seat appends a C-number quoting that tap and marks BACKLOG #256 ACCEPTED (C-…), then `decision_queue.sh --delivered composer-239-mac-1280-17px-1008 <C-number>`. Fold that into the next Composer brief (lane 2 or 3b) rather than spending a seat on it. Composer root records commits from B99/B101 are LOCAL (no remote push by those seats): check whether the root records repo has a remote before the next brief.
 **HELD (Friday's):** Composer lanes 2 (#248) and 3b (#250) until the weekly allowance renews (~21 h from 11:40; usage 85%).
