@@ -7,7 +7,7 @@ status: live
 
 # Boot digest — headline + rules of every lesson (open the file when it fires)
 
-Generated 2026-10-09 13:58 from 227 lesson files (1,016,090 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 13 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
+Generated 2026-10-09 13:59 from 228 lesson files (1,018,344 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 13 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
 
 ## The T9 SSD is the master — Wednesday must be fully portable
 `2026-07-31_fully-portable-drive.md` · principle · 2026-07-31 · status: superseded — the "T9 is the master" half by [[2026-08-25_one-drive-devmaster-is-master]] (2026-08-25); the portability principle itself still lives
@@ -7153,6 +7153,19 @@ sections (open the file for these): RULED 2026-10-05 ~11:1x — Kam (terminal, v
 4. Unchanged: the v1.3 signature classes, the QA gate before every merge, KS-535, Phase 0, one client per Spark task, and leg 14 (KS-1450) still refuses any push touching `Blockchain/Dev/`, so this grant does not by itself unblock the raise backlog.
 
 **Family:** [[2026-10-06_use-to-100pct-spark-all-tickets-one-or-two-deployers]] (the same shape, expired at the 10-07 /login) · [[2026-09-14_at-90pct-weekly-usage-no-new-agents-wednesday-plus-local-model]] · [[2026-09-06_a-scoped-override-carries-its-own-expiry]] · [[2026-08-03_go-slow-earn-autonomy]] (rule 5).
+
+
+## Use the Spark as much as possible; after the Sonnet analysis, Wednesday chooses between the three models — and Ornith's idle time needs no report or apology
+`2026-10-09_spark-first-model-choice-is-wednesdays-after-sonnet-analysis.md` · grant · 2026-10-09 · status: live
+
+**His words, verbatim (three messages, the second and third correcting the first's dictation):**
+> 13:55:34 *"I need to report or apologize on the usage of Ornith.  It's now up to you to use the Spark as much as possible. And once we finish the analysis of Sonnet, you can decide between the three models available."*
+> 13:55:51 *"sorry.  No need to report or apologise"*
+> 13:56:03 *"inaccurate transcribing"*
+
+**How to apply:** route by the spec, Spark-first; do not message Kam about Ornith idling; when WED-153's analysis lands, write the model choice into `fleet/specs/model-routing.md` with the measurements, tell Kam in one line as a receipt, not a request.
+
+**Family:** [[2026-10-05_spark-target-50-tasks-a-day]] · [[2026-10-08_sonnet-trials-and-a-shared-model-routing-definition]] · [[2026-10-09_spark-ornith-sonnet-only-until-monday]] · [[2026-09-18_ornith-works-constantly-standing-rule]] (its 09-25 extension: an idle Ornith with a written reason is accepted) · [[2026-08-03_go-slow-earn-autonomy]] (rule 5: every grant recorded).
 
 
 ## Until Monday, the work runs on the Spark, Ornith and SONNET seats — no new Opus seats, gates or drafters
